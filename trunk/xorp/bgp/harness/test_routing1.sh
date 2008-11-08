@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_routing1.sh,v 1.25 2007/12/07 20:42:04 atanu Exp $
+# $XORP: xorp/bgp/harness/test_routing1.sh,v 1.26 2007/12/10 23:26:33 mjh Exp $
 #
 
 #
@@ -942,6 +942,7 @@ TESTS='test1 test1_ipv6 test2 test2_ipv6 test3 test4 test5 test6 test7 test8'
 # Include command line
 . ${srcdir}/args.sh
 
+#START_PROGRAMS="no"
 if [ $START_PROGRAMS = "yes" ]
 then
     CXRL="$CALLXRL -r 10"

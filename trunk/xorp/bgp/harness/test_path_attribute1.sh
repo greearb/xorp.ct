@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_path_attribute1.sh,v 1.10 2007/12/10 23:26:32 mjh Exp $
+# $XORP: xorp/bgp/harness/test_path_attribute1.sh,v 1.11 2007/12/11 01:21:43 mjh Exp $
 #
 
 #
@@ -129,11 +129,15 @@ test1()
     ASPATH="$PEER1_AS,1,2,[3,4,5],6,[7,8],9"
     NEXTHOP="20.20.20.20"
 
+    # note 19 in these tests is reserved for unknown test attributes
+    # (see path_attribute.hh), but should be changed if 19 is ever
+    # really allocated.
+
     PACKET1="packet update
 	origin 2
 	aspath $ASPATH
 	nexthop $NEXTHOP
-	pathattr 0x80,0xff,1,1
+	pathattr 0x80,19,1,1
 	nlri 10.10.10.0/24
 	nlri 20.20.20.20/24"
 
@@ -191,11 +195,15 @@ test2()
     ASPATH="$PEER1_AS,1,2,[3,4,5],6,[7,8],9"
     NEXTHOP="20.20.20.20"
 
+    # note 19 in these tests is reserved for unknown test attributes
+    # (see path_attribute.hh), but should be changed if 19 is ever
+    # really allocated.
+
     PACKET1="packet update
 	origin 2
 	aspath $ASPATH
 	nexthop $NEXTHOP
-	pathattr 0xc0,0xff,1,1
+	pathattr 0xc0,19,1,1
 	nlri 10.10.10.0/24
 	nlri 20.20.20.20/24"
 
@@ -204,7 +212,7 @@ test2()
 	aspath $ASPATH
 	nexthop $NEXTHOP
 	localpref 100
-	pathattr 0xe0,0xff,1,1
+	pathattr 0xe0,19,1,1
 	nlri 10.10.10.0/24
 	nlri 20.20.20.20/24"
 
@@ -213,7 +221,7 @@ test2()
 	aspath $AS,$ASPATH
 	nexthop $NEXT_HOP
 	med 1
-	pathattr 0xe0,0xff,1,1
+	pathattr 0xe0,19,1,1
 	nlri 10.10.10.0/24
 	nlri 20.20.20.20/24"
 
@@ -257,12 +265,16 @@ test3()
     ASPATH="$PEER1_AS,1,2,[3,4,5],6,[7,8],9"
     NEXTHOP="20.20.20.20"
 
+    # note 19 in these tests is reserved for unknown test attributes
+    # (see path_attribute.hh), but should be changed if 19 is ever
+    # really allocated.
+
     PACKET1="packet update
 	origin 2
 	aspath $ASPATH
 	nexthop $NEXTHOP
-	pathattr 0xc0,0xff,1,1
-	pathattr 0x80,0xfe,1,1
+	pathattr 0xc0,19,1,1
+	pathattr 0x80,20,1,1
 	nlri 10.10.10.0/24
 	nlri 20.20.20.20/24"
 
@@ -271,7 +283,7 @@ test3()
 	aspath $ASPATH
 	nexthop $NEXTHOP
 	localpref 100
-	pathattr 0xe0,0xff,1,1
+	pathattr 0xe0,19,1,1
 	nlri 10.10.10.0/24
 	nlri 20.20.20.20/24"
 
@@ -280,7 +292,7 @@ test3()
 	aspath $AS,$ASPATH
 	nexthop $NEXT_HOP
 	med 1
-	pathattr 0xe0,0xff,1,1
+	pathattr 0xe0,19,1,1
 	nlri 10.10.10.0/24
 	nlri 20.20.20.20/24"
 
@@ -439,6 +451,7 @@ TESTS='test1 test2 test3 test4 test5'
 # Include command line
 . ${srcdir}/args.sh
 
+#START_PROGRAMS="no"
 if [ $START_PROGRAMS = "yes" ]
 then
     CXRL="$CALLXRL -r 10"

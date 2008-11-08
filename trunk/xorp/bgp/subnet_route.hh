@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/bgp/subnet_route.hh,v 1.26 2008/07/23 05:09:38 pavlin Exp $
+// $XORP: xorp/bgp/subnet_route.hh,v 1.27 2008/10/02 21:56:21 bms Exp $
 
 #ifndef __BGP_SUBNET_ROUTE_HH__
 #define __BGP_SUBNET_ROUTE_HH__
@@ -56,6 +56,268 @@ template<class A>
 class SubnetRouteRef;
 template<class A>
 class SubnetRouteConstRef;
+
+class RouteMetaData {
+public:
+    RouteMetaData(const RouteMetaData& metadata);
+
+    RouteMetaData();
+
+    ~RouteMetaData() {
+	// prevent accidental reuse after deletion
+	_flags = 0xffffffff;
+    }
+
+    /**
+     * @return whether or not this route is in use.  "in use" here
+     * does not mean the route won the decision process, but rather
+     * that it was at least a contender for decision, and was not
+     * filtered in the incoming filter bank.
+     */
+    inline bool in_use() const {return (_flags & SRF_IN_USE) != 0;}
+
+    /**
+     * Record whether or not this route is in use.  "in use" here
+     * does not mean the route won the decision process, but rather
+     * that it was at least a contender for decision, and was not
+     * filtered in the incoming filter bank.
+     *
+     * @param used true if the route is "in use".
+     */
+    void set_in_use(bool used) {
+	if (used) {
+	    _flags |= SRF_IN_USE;
+	} else {
+	    _flags &= ~SRF_IN_USE;
+	}
+    }
+
+    /**
+     * returns true if the route was chosen by the routing decision
+     * process as the winning route for this subnet.
+     *
+     * is_winner should NOT be called by anything other than the
+     * DecisionTable because caching means that it may not return the
+     * right answer anywhere else
+     */
+    inline bool is_winner() const {return (_flags & SRF_WINNER) != 0;}
+
+    /**
+     * when a route is chosen by the routing decision process as the
+     * winning route for this subnet, set_is_winner should be called
+     * to record this fact and to record the igp_metric at the time
+     * the route was chosen.
+     *
+     * set_is_winner should NOT be called by anything other than the
+     * DecisionTable because caching means that it may not return the
+     * right answer anywhere else
+     */
+    void set_is_winner(uint32_t igp_metric) {
+	_flags |= SRF_WINNER;
+	_igp_metric = igp_metric;
+    }
+
+    /**
+     * when a route fails to be chosen by the routing decision process as the
+     * winning route for this subnet, set_is_not_winner should be called
+     * to record this fact.
+     */
+    inline void set_is_not_winner() {
+	_flags &= ~SRF_WINNER;
+    }
+
+    /**
+     * record whether or not a route's nexthop resolved
+     */
+    void set_nexthop_resolved(bool resolvable) {
+	if (resolvable) {
+	    _flags |= SRF_NH_RESOLVED;
+	} else {
+	    _flags &= ~SRF_NH_RESOLVED;
+	}
+    }
+
+    /**
+     * did the route's nexthop resolve when it was passed through the
+     * NextHop resolver table.
+     */
+    inline bool nexthop_resolved() const {
+	return (_flags & SRF_NH_RESOLVED) != 0;
+    }
+
+    /**
+     * is_filtered returns true if the route was filtered out by the
+     * incoming filter bank, false otherwise.  As such it only makes
+     * sense calling this on routes that are stored in the RibIn.
+     */
+    inline bool is_filtered() const {return (_flags & SRF_FILTERED) != 0;}
+
+    /**
+     * set_filtered record whether or not the route was filtered out
+     * by the incoming filter bank.  As such it only
+     * makes sense calling this on routes that are stored in the
+     * RibIn.
+     *
+     * @param filtered true if the route was filtered, false otherwise.
+     */
+    void set_filtered(bool filtered) {
+	if (filtered) {
+	    _flags |= SRF_FILTERED;
+	} else {
+	    _flags &= ~SRF_FILTERED;
+	}
+    }
+
+    /**
+     * is_deleted returns true if the route has already been deleted
+     * (but the class instance representing it has not been because
+     * it's reference count is non-zero) 
+     */
+    inline bool is_deleted() const {return (_flags & SRF_DELETED) != 0;}
+
+    inline void set_deleted() {_flags |= SRF_DELETED;}
+
+    /**
+     * @returns the IGP routing protocol metric that applied when the
+     * route won the decision process.  If the route has not won, this
+     * value is undefined.
+     */
+    inline uint32_t igp_metric() const {return _igp_metric;}
+
+    inline void set_igp_metric(uint32_t igp_metric) {
+	_igp_metric = igp_metric;
+    }
+
+    inline void dont_aggregate() {
+	_flags |= SRF_AGGR_PREFLEN_MASK;
+    }
+
+    inline uint16_t refcount() const { 
+	return (_flags & SRF_REFCOUNT) >> 16; 
+    }
+
+    //set our reference count to one (our own self-reference)
+    //and clear the deleted flag
+    inline void reset_flags() {
+	_flags ^= (_flags & (SRF_REFCOUNT | SRF_DELETED));
+    }
+
+    /**
+     * @return policy tags associated with route.
+     */
+    inline const PolicyTags& policytags() const {
+	return _policytags;
+    }
+
+    /**
+     * Replaced policy tags of route.
+     *
+     * @param tags new policy tags for route.
+     */
+    inline void set_policytags(const PolicyTags& tags) {
+	_policytags = tags;
+    }
+
+    inline const RefPf& policyfilter(uint32_t i) const {
+	return _pfilter[i];
+    }
+
+    inline void set_policyfilter(uint32_t i, const RefPf& pf) {
+	_pfilter[i] = pf;
+    }
+    
+    /**
+     * Set the "brief" mode flag on an candidate for aggregation.
+     */
+    void set_aggr_brief_mode() {
+	_flags |= SRF_AGGR_BRIEF_MODE;
+    }
+
+    /**
+     * Clear the "brief" mode flag on an candidate for aggregation.
+     */
+    void clear_aggr_brief_mode() {
+	_flags &= ~SRF_AGGR_BRIEF_MODE;
+    }
+
+    /**
+     * Read the "brief" aggregation mode flag.
+     */
+    bool aggr_brief_mode() const {
+	return (_flags & SRF_AGGR_BRIEF_MODE);
+    }
+
+    /**
+     * Set the target prefix length on an candidate for aggregation.
+     * The field is also used for storing aggregation markers. 
+     *
+     * @param preflen prefix length of the requested aggregate route.
+     */
+    void set_aggr_prefix_len(uint32_t preflen) {
+	_flags = (_flags & ~SRF_AGGR_PREFLEN_MASK) | 
+		 ((preflen << 8) & SRF_AGGR_PREFLEN_MASK);
+    }
+
+    /**
+     * Read the aggregation prefix length marker.
+     * The field is also used for storing aggregation markers.
+     */
+    uint32_t aggr_prefix_len() const {
+	return (_flags & SRF_AGGR_PREFLEN_MASK) >> 8;
+    }
+
+    bool bump_refcount(int delta) {
+	XLOG_ASSERT(delta == 1 || delta == -1);
+	uint16_t refs = refcount();
+	if (delta == 1) {
+	    XLOG_ASSERT(refs < 0xffff);
+	} else {
+	    XLOG_ASSERT(refs > 0);
+	}
+	refs += delta;
+
+	//re-insert the new ref count
+	_flags = (_flags ^ (_flags&SRF_REFCOUNT)) | (refs << 16);
+
+	//handle delayed deletion
+	if ((refs==0) && ((_flags & SRF_DELETED) != 0)) {
+	    return true;
+	}
+	return false;
+    }
+
+private:
+    /**
+     * Flag definitions: 
+     *
+     * SRF_IN_USE indicates whether this route is currently
+     * used for anything.  The route might not be used if it wasn't
+     * chosen by the BGP decision mechanism, or if a downstream filter
+     * caused a modified version of this route to be installed in a
+     * cache table 
+     *
+     * SRF_WINNER indicates that the route won the decision process.  
+     *
+     * SRF_FILTERED indicates that the route was filtered downstream.
+     * Currently this is only used for RIB-IN routes that are filtered
+     * in the inbound filter bank
+     *
+     * SRF_REFCOUNT (16 bits) maintains a reference count of the number
+     * of objects depending on this SubnetRoute instance.  Deletion
+     * will be delayed until the reference count reaches zero
+     */
+    uint32_t _flags;
+
+    /**
+     * If the route is a winner (SRF_WINNER is set), then
+     * DecisionTable will fill in the IGP metric that was used in
+     * deciding the route was a winner 
+     */
+    uint32_t _igp_metric;
+
+    PolicyTags _policytags;
+    RefPf _pfilter[3];
+};
 
 /**
  * @short SubnetRoute holds a BGP routing table entry.
@@ -102,7 +364,7 @@ public:
      * before the derived route.
      */
     SubnetRoute(const IPNet<A> &net, 
-		const PathAttributeList<A> *attributes,
+		PAListRef<A> attributes,
 		const SubnetRoute<A>* parent_route);
 
     /**
@@ -120,7 +382,7 @@ public:
      * nexthop obtained from the RIB.
      */
     SubnetRoute(const IPNet<A> &net, 
-		const PathAttributeList<A> *attributes,
+		PAListRef<A> attributes,
 		const SubnetRoute<A>* parent_route,
 		uint32_t igp_metric);
 
@@ -140,15 +402,20 @@ public:
      */
     const IPNet<A>& net() const {return _net;}
 
+#if 0
     /**
      * @return the address of the nexthop for this route.
      */
-    const A& nexthop() const {return _attributes->nexthop();}
+    // remove this because we shouldn't be pulling attributes directly
+    // out of the stored version - use a FastPathAttributeList
+    // instead.
+    const A& nexthop() const {return _attributes.nexthop();}
+#endif
 
     /**
      * @return a pointer to the path attribute list for this route.
      */
-    const PathAttributeList<A> *attributes() const {return _attributes;}
+    PAListRef<A> attributes() const {return _attributes;}
 
     /**
      * @return whether or not this route is in use.  "in use" here
@@ -156,7 +423,7 @@ public:
      * that it was at least a contender for decision, and was not
      * filtered in the incoming filter bank.
      */
-    bool in_use() const {return (_flags & SRF_IN_USE) != 0;}
+    bool in_use() const {return _metadata.in_use();}
 
     /**
      * Record whether or not this route is in use.  "in use" here
@@ -176,7 +443,7 @@ public:
      * DecisionTable because caching means that it may not return the
      * right answer anywhere else
      */
-    bool is_winner() const {return (_flags & SRF_WINNER) != 0;}
+    bool is_winner() const {return _metadata.is_winner();}
 
     /**
      * when a route is chosen by the routing decision process as the
@@ -206,14 +473,14 @@ public:
      * did the route's nexthop resolve when it was passed through the
      * NextHop resolver table.
      */
-    bool nexthop_resolved() const {return (_flags & SRF_NH_RESOLVED) != 0;}
+    bool nexthop_resolved() const {return _metadata.nexthop_resolved();}
 
     /**
      * is_filtered returns true if the route was filtered out by the
      * incoming filter bank, false otherwise.  As such it only makes
      * sense calling this on routes that are stored in the RibIn.
      */
-    bool is_filtered() const {return (_flags & SRF_FILTERED) != 0;}
+    bool is_filtered() const {return _metadata.is_filtered();}
 
     /**
      * set_filtered record whether or not the route was filtered out
@@ -230,26 +497,20 @@ public:
      * (but the class instance representing it has not been because
      * it's reference count is non-zero) 
      */
-    bool is_deleted() const {return (_flags & SRF_DELETED) != 0;}
+    bool is_deleted() const {return _metadata.is_deleted();}
 
     /**
      * @returns a string representation of the route for debugging purposes
      */
     string str() const;
 
-    /**
-     * DEBUGGING ONLY
-     */
-    int number_of_managed_atts() const {
-	return _att_mgr.number_of_managed_atts();
-    }
 
     /**
      * @returns the IGP routing protocol metric that applied when the
      * route won the decision process.  If the route has not won, this
      * value is undefined.
      */
-    uint32_t igp_metric() const {return _igp_metric;}
+    uint32_t igp_metric() const {return _metadata.igp_metric();}
 
     /** 
      * @returns the original version of this route, before any filters
@@ -288,13 +549,13 @@ public:
      */
     void unref() const;
 
-    uint16_t refcount() const { return (_flags & SRF_REFCOUNT) >> 16; }
+    uint16_t refcount() const { return _metadata.refcount(); }
 
     /**
      * @return policy tags associated with route.
      */
     const PolicyTags& policytags() const {
-	return _policytags;
+	return _metadata.policytags();
     }
 
     /**
@@ -302,8 +563,8 @@ public:
      *
      * @param tags new policy tags for route.
      */
-    void set_policytags(const PolicyTags& tags) {
-	_policytags = tags;
+    void set_policytags(const PolicyTags& tags) const {
+	_metadata.set_policytags(tags);
     }
 
     const RefPf& policyfilter(uint32_t i) const;
@@ -312,22 +573,22 @@ public:
     /**
      * Set the "brief" mode flag on an candidate for aggregation.
      */
-    void set_aggr_brief_mode() {
-	_flags |= SRF_AGGR_BRIEF_MODE;
+    void set_aggr_brief_mode() const {
+	_metadata.set_aggr_brief_mode();
     }
 
     /**
      * Clear the "brief" mode flag on an candidate for aggregation.
      */
-    void clear_aggr_brief_mode() {
-	_flags &= ~SRF_AGGR_BRIEF_MODE;
+    void clear_aggr_brief_mode() const {
+	_metadata.clear_aggr_brief_mode();
     }
 
     /**
      * Read the "brief" aggregation mode flag.
      */
     bool aggr_brief_mode() const {
-	return (_flags & SRF_AGGR_BRIEF_MODE);
+	return _metadata.aggr_brief_mode();
     }
 
     /**
@@ -337,8 +598,7 @@ public:
      * @param preflen prefix length of the requested aggregate route.
      */
     void set_aggr_prefix_len(uint32_t preflen) {
-	_flags = (_flags & ~SRF_AGGR_PREFLEN_MASK) | 
-		 ((preflen << 8) & SRF_AGGR_PREFLEN_MASK);
+	_metadata.set_aggr_prefix_len(preflen);
     }
 
     /**
@@ -346,7 +606,7 @@ public:
      * The field is also used for storing aggregation markers.
      */
     uint32_t aggr_prefix_len() const {
-	return (_flags & SRF_AGGR_PREFLEN_MASK) >> 8;
+	return _metadata.aggr_prefix_len();
     }
 
 protected:
@@ -362,33 +622,12 @@ protected:
 private:
 
     void bump_refcount(int delta) const {
-	XLOG_ASSERT(delta == 1 || delta == -1);
-	uint16_t refs = refcount();
-	if (delta == 1) {
-	    XLOG_ASSERT(refs < 0xffff);
-	} else {
-	    XLOG_ASSERT(refs > 0);
-	}
-	refs += delta;
-
-	//re-insert the new ref count
-	_flags = (_flags ^ (_flags&SRF_REFCOUNT)) | (refs << 16);
-
-	//handle delayed deletion
-	if ((refs==0) && ((_flags & SRF_DELETED) != 0)) {
+	if (_metadata.bump_refcount(delta))
 	    delete this;
-	}
     }
     //prevent accidental use of default assignment operator
     const SubnetRoute<A>& operator=(const SubnetRoute<A>&);
 
-    /**
-     * static attribute manager shared by all SubnetRoutes.  This is
-     * used to ensure that we only need to store each path attribute
-     * list once, because we often have multiple subnet routes with
-     * the same path attribute list.
-     */
-    static AttributeManager<A> _att_mgr;
 
     /**
      * _net is the subnet (address and prefix) for this route.
@@ -400,7 +639,7 @@ private:
      * route.  The actual data storage for the path attribute list is
      * handled inside the attribute manager
      */
-    const PathAttributeList<A> *_attributes;
+    PAListRef<A> _attributes;
 
     /**
      * _parent_route is a pointer to the original version of this
@@ -409,36 +648,7 @@ private:
      */
     const SubnetRoute<A> *_parent_route;
 
-    /**
-     * Flag definitions: 
-     *
-     * SRF_IN_USE indicates whether this route is currently
-     * used for anything.  The route might not be used if it wasn't
-     * chosen by the BGP decision mechanism, or if a downstream filter
-     * caused a modified version of this route to be installed in a
-     * cache table 
-     *
-     * SRF_WINNER indicates that the route won the decision process.  
-     *
-     * SRF_FILTERED indicates that the route was filtered downstream.
-     * Currently this is only used for RIB-IN routes that are filtered
-     * in the inbound filter bank
-     *
-     * SRF_REFCOUNT (16 bits) maintains a reference count of the number
-     * of objects depending on this SubnetRoute instance.  Deletion
-     * will be delayed until the reference count reaches zero
-     */
-    mutable uint32_t _flags;
-
-    /**
-     * If the route is a winner (SRF_WINNER is set), then
-     * DecisionTable will fill in the IGP metric that was used in
-     * deciding the route was a winner 
-     */
-    mutable uint32_t _igp_metric;
-
-    PolicyTags _policytags;
-    mutable RefPf _pfilter[3];
+    mutable RouteMetaData _metadata;
 };
 
 

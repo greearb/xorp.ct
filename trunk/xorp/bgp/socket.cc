@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/socket.cc,v 1.57 2008/10/02 21:56:21 bms Exp $"
+#ident "$XORP: xorp/bgp/socket.cc,v 1.58 2008/11/08 00:46:45 atanu Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME 
@@ -572,7 +572,7 @@ SocketClient::async_add(XorpFd sock)
     // to avoid being overloaded by high volume data from the peers.
     //
     _async_reader = new AsyncFileReader(eventloop(), sock,
-					XorpTask::PRIORITY_LOWEST);
+					XorpTask::PRIORITY_BACKGROUND);
 
     async_read_start();
 }

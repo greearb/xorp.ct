@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/bgp/route_table_base.hh,v 1.19 2008/07/23 05:09:35 pavlin Exp $
+// $XORP: xorp/bgp/route_table_base.hh,v 1.20 2008/10/02 21:56:18 bms Exp $
 
 #ifndef __BGP_ROUTE_TABLE_BASE_HH__
 #define __BGP_ROUTE_TABLE_BASE_HH__
@@ -77,21 +77,22 @@ class BGPRouteTable {
 public:
     BGPRouteTable(string tablename, Safi safi);
     virtual ~BGPRouteTable();
-    virtual int add_route(const InternalMessage<A> &rtmsg, 
+    virtual int add_route(InternalMessage<A> &rtmsg, 
 			  BGPRouteTable<A> *caller) = 0;
-    virtual int replace_route(const InternalMessage<A> &old_rtmsg, 
-			      const InternalMessage<A> &new_rtmsg, 
+    virtual int replace_route(InternalMessage<A> &old_rtmsg, 
+			      InternalMessage<A> &new_rtmsg, 
 			      BGPRouteTable<A> *caller) = 0;
-    virtual int delete_route(const InternalMessage<A> &rtmsg, 
+    virtual int delete_route(InternalMessage<A> &rtmsg, 
 			     BGPRouteTable<A> *caller) = 0;
-    virtual int route_dump(const InternalMessage<A> &rtmsg, 
+    virtual int route_dump(InternalMessage<A> &rtmsg, 
 			   BGPRouteTable<A> *caller,
 			   const PeerHandler *dump_peer);
     virtual int push(BGPRouteTable<A> *caller) = 0;
 
     virtual const 
     SubnetRoute<A> *lookup_route(const IPNet<A> &net,
-				 uint32_t& genid) const = 0;
+				 uint32_t& genid,
+				 FPAListRef& pa_list) const = 0;
 
     virtual void route_used(const SubnetRoute<A>* /*route*/, 
 			    bool /*in_use*/){

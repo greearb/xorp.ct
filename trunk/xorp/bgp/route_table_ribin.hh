@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/bgp/route_table_ribin.hh,v 1.29 2008/07/23 05:09:38 pavlin Exp $
+// $XORP: xorp/bgp/route_table_ribin.hh,v 1.30 2008/10/02 21:56:21 bms Exp $
 
 #ifndef __BGP_ROUTE_TABLE_RIBIN_HH__
 #define __BGP_ROUTE_TABLE_RIBIN_HH__
@@ -58,25 +58,36 @@ public:
      * Remove all the stored routes. Used to flush static routes only.
      */
     void flush();
-    int add_route(const InternalMessage<A> &rtmsg,
-		  BGPRouteTable<A> *caller);
+
+    /* this version is deprecated  - we only use messages between stages */
+    int add_route(InternalMessage<A>& /*rtmsg*/,
+		  BGPRouteTable<A>* /*caller*/) { abort(); return 0; }
+
+    int add_route(const IPNet<A> &net,
+		  FPAListRef& pa_list,
+		  const PolicyTags& policy_tags);
 
     void ribin_peering_went_down();
     void ribin_peering_came_up();
 
     /*replace_route doesn't make sense for a RibIn because it's the
       RibIn that decides whether this is an add or a replace*/
-    int replace_route(const InternalMessage<A> & /*old_rtmsg*/,
-		      const InternalMessage<A> & /*new_rtmsg*/,
+    int replace_route(InternalMessage<A> & /*old_rtmsg*/,
+		      InternalMessage<A> & /*new_rtmsg*/,
 		      BGPRouteTable<A> * /*caller*/ ) { abort(); return 0; }
 
-    int delete_route(const InternalMessage<A> &rtmsg,
-		     BGPRouteTable<A> *caller);
+    /* this version is deprecated  - we only use messages between stages */
+    int delete_route(InternalMessage<A>& /*rtmsg*/,
+		     BGPRouteTable<A>* /*caller*/) { abort(); return 0; }
+
+    int delete_route(const IPNet<A> &net);
+    
 
     int push(BGPRouteTable<A> *caller);
     int delete_add_routes();
     const SubnetRoute<A> *lookup_route(const IPNet<A> &net, 
-				       uint32_t& genid) const;
+				       uint32_t& genid,
+				       FPAListRef& pa_list) const;
     void route_used(const SubnetRoute<A>* route, bool in_use);
 
     BGPRouteTable<A> *parent() { return NULL; }

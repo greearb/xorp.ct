@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_route_reflection1.sh,v 1.6 2006/08/16 22:10:14 atanu Exp $
+# $XORP: xorp/bgp/harness/test_route_reflection1.sh,v 1.7 2007/12/10 23:26:33 mjh Exp $
 #
 
 #
@@ -265,16 +265,16 @@ test4()
 
     config_peers_ipv4
 
-    PACKET="packet update
+    BASE_PACKET="packet update
 	origin 2
 	aspath 1
 	nexthop $NEXT_HOP
 	nlri 10.10.10.0/24
-	localpref 10
-	clusterlist 1.2.3.4
-	originatorid $ID"
+	localpref 10"
 
-    RR_PACKET="$PACKET originatorid $ID clusterlist $CLUSTER_ID"
+    PACKET="$BASE_PACKET originatorid $ID clusterlist 1.2.3.4"
+
+    RR_PACKET="$BASE_PACKET originatorid $ID clusterlist $CLUSTER_ID"
 
     coord peer1 expect $RR_PACKET	
     coord peer2 expect $RR_PACKET	
@@ -309,7 +309,7 @@ test5()
 	localpref 10
 	clusterlist $CLUSTER_ID"
 
-    RR_PACKET="$PACKET originatorid $ID clusterlist $CLUSTER_ID"
+    RR_PACKET="$PACKET originatorid $ID"
 
     coord peer1 expect $RR_PACKET	
     coord peer2 expect $RR_PACKET	
@@ -334,6 +334,7 @@ TESTS='test1 test2 test3 test4 test5'
 # Include command line
 . ${srcdir}/args.sh
 
+#START_PROGRAMS="no"
 if [ $START_PROGRAMS = "yes" ]
 then
     CXRL="$CALLXRL -r 10"

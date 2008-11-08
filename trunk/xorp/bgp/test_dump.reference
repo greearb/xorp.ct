@@ -4,7 +4,6 @@
 [comment] SENDING FROM PEER 1
 [** TABLE DebugTable-D2 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -14,7 +13,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -25,7 +23,6 @@ SubnetRoute:
 [separator]-------------------------------------
 [** TABLE DebugTable-D2 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -35,7 +32,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -55,7 +51,6 @@ SubnetRoute:
 [comment] SENDING FROM PEER 1
 [** TABLE DebugTable-D2 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -67,7 +62,6 @@ SubnetRoute:
 [comment] SENDING FROM PEER 2
 [** TABLE DebugTable-D1 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -81,7 +75,6 @@ SubnetRoute:
 [comment] LET EVENT QUEUE DRAIN
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -93,7 +86,6 @@ SubnetRoute:
 [PUSH]
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -107,7 +99,6 @@ SubnetRoute:
 [comment] DELETING FROM PEER 1
 [** TABLE DebugTable-D2 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -117,7 +108,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -129,7 +119,6 @@ SubnetRoute:
 [comment] DELETING FROM PEER 2
 [** TABLE DebugTable-D1 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -139,7 +128,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -159,7 +147,6 @@ SubnetRoute:
 [comment] SENDING FROM PEER 1
 [** TABLE DebugTable-D2 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -171,7 +158,6 @@ SubnetRoute:
 [comment] SENDING FROM PEER 1
 [** TABLE DebugTable-D2 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
@@ -183,7 +169,6 @@ SubnetRoute:
 [comment] SENDING FROM PEER 2
 [** TABLE DebugTable-D1 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -195,7 +180,6 @@ SubnetRoute:
 [comment] SENDING FROM PEER 2
 [** TABLE DebugTable-D1 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.4.0/24
   PAList: 
@@ -209,7 +193,6 @@ SubnetRoute:
 [comment] LET EVENT QUEUE DRAIN
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -221,7 +204,6 @@ SubnetRoute:
 [PUSH]
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
@@ -233,7 +215,6 @@ SubnetRoute:
 [PUSH]
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -245,7 +226,6 @@ SubnetRoute:
 [PUSH]
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.4.0/24
   PAList: 
@@ -259,7 +239,6 @@ SubnetRoute:
 [comment] DELETING FROM PEER 1
 [** TABLE DebugTable-D2 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -269,7 +248,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -281,7 +259,6 @@ SubnetRoute:
 [comment] DELETING FROM PEER 1
 [** TABLE DebugTable-D2 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
@@ -291,7 +268,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
@@ -303,7 +279,6 @@ SubnetRoute:
 [comment] DELETING FROM PEER 2
 [** TABLE DebugTable-D1 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -313,7 +288,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -325,7 +299,6 @@ SubnetRoute:
 [comment] DELETING FROM PEER 2
 [** TABLE DebugTable-D1 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.4.0/24
   PAList: 
@@ -335,7 +308,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.4.0/24
   PAList: 
@@ -355,7 +327,6 @@ SubnetRoute:
 [comment] SENDING FROM PEER 1
 [** TABLE DebugTable-D2 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -367,7 +338,6 @@ SubnetRoute:
 [comment] SENDING FROM PEER 1
 [** TABLE DebugTable-D2 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
@@ -379,7 +349,6 @@ SubnetRoute:
 [comment] SENDING FROM PEER 2
 [** TABLE DebugTable-D1 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -391,7 +360,6 @@ SubnetRoute:
 [comment] SENDING FROM PEER 2
 [** TABLE DebugTable-D1 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.4.0/24
   PAList: 
@@ -412,7 +380,6 @@ SubnetRoute:
 [comment] LET EVENT QUEUE DRAIN
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -424,7 +391,6 @@ SubnetRoute:
 [PUSH]
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
@@ -460,7 +426,6 @@ SubnetRoute:
 [comment] DELETING FROM PEER 1
 [** TABLE DebugTable-D3 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -472,7 +437,6 @@ SubnetRoute:
 [comment] DELETING FROM PEER 1
 [** TABLE DebugTable-D3 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
@@ -495,7 +459,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 2
 [** TABLE DebugTable-D2 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -508,7 +471,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 1
 [** TABLE DebugTable-D1 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -521,7 +483,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 1
 [** TABLE DebugTable-D1 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
@@ -537,7 +498,6 @@ SubnetRoute:
 [comment] EXPECT ADD 1.0.2.0/24 RECEIVED BY PEER 3
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -549,7 +509,6 @@ SubnetRoute:
 [PUSH]
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -561,7 +520,6 @@ SubnetRoute:
 [PUSH]
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
@@ -631,7 +589,6 @@ SubnetRoute:
 [comment] EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 3
 [** TABLE DebugTable-D3 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -655,7 +612,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 2
 [** TABLE DebugTable-D2 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -668,7 +624,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 1
 [** TABLE DebugTable-D1 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -692,7 +647,6 @@ SubnetRoute:
 [comment] EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 2
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -720,7 +674,6 @@ SubnetRoute:
 [comment] EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 3
 [** TABLE DebugTable-D3 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -744,7 +697,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 2
 [** TABLE DebugTable-D2 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -757,7 +709,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 1
 [** TABLE DebugTable-D1 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -770,7 +721,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 1
 [** TABLE DebugTable-D1 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
@@ -785,7 +735,6 @@ SubnetRoute:
 [comment] EXPECT ADD 1.0.1.0/24 RECEIVED BY PEER 3
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -797,7 +746,6 @@ SubnetRoute:
 [PUSH]
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -809,7 +757,6 @@ SubnetRoute:
 [PUSH]
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
@@ -878,7 +825,6 @@ SubnetRoute:
 [comment] EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 3
 [** TABLE DebugTable-D3 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -902,7 +848,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 2
 [** TABLE DebugTable-D2 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -915,7 +860,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 1
 [** TABLE DebugTable-D1 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -928,7 +872,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 1
 [** TABLE DebugTable-D1 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
@@ -951,7 +894,6 @@ SubnetRoute:
 [comment] EXPECT DEL 1.0.3.0/24 RECEIVED BY PEER 1
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -992,7 +934,6 @@ SubnetRoute:
 [comment] EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 3
 [** TABLE DebugTable-D3 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1016,7 +957,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 2
 [** TABLE DebugTable-D2 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1029,7 +969,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 1
 [** TABLE DebugTable-D1 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -1042,7 +981,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 1
 [** TABLE DebugTable-D1 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
@@ -1090,7 +1028,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 2
 [** TABLE DebugTable-D2 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1103,7 +1040,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 1
 [** TABLE DebugTable-D1 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
@@ -1116,7 +1052,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 1
 [** TABLE DebugTable-D1 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.4.0/24
   PAList: 
@@ -1131,7 +1066,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 2
 [** TABLE DebugTable-D2 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -1146,7 +1080,6 @@ SubnetRoute:
 [comment] EXPECT ADD 1.0.3.0/24 RECEIVED BY PEER 3
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1158,7 +1091,6 @@ SubnetRoute:
 [PUSH]
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -1170,7 +1102,6 @@ SubnetRoute:
 [PUSH]
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
@@ -1182,7 +1113,6 @@ SubnetRoute:
 [PUSH]
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.4.0/24
   PAList: 
@@ -1198,7 +1128,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 3 WHEN EVENTLOOP RUNS
 [** TABLE DebugTable-D1 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.0.0/24
   PAList: 
@@ -1208,7 +1137,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.0.0/24
   PAList: 
@@ -1221,7 +1149,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 1
 [** TABLE DebugTable-D1 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.5.0/24
   PAList: 
@@ -1231,7 +1158,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.5.0/24
   PAList: 
@@ -1249,7 +1175,6 @@ SubnetRoute:
 [comment] EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 3
 [** TABLE DebugTable-D2 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1259,7 +1184,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1273,7 +1197,6 @@ SubnetRoute:
 [comment] EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 3
 [** TABLE DebugTable-D2 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -1283,7 +1206,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -1297,7 +1219,6 @@ SubnetRoute:
 [comment] EXPECT DEL 1.0.3.0/24 RECEIVED BY PEER 3
 [** TABLE DebugTable-D1 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
@@ -1307,7 +1228,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
@@ -1321,7 +1241,6 @@ SubnetRoute:
 [comment] EXPECT DEL 1.0.4.0/24 RECEIVED BY PEER 3
 [** TABLE DebugTable-D1 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.4.0/24
   PAList: 
@@ -1331,7 +1250,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.4.0/24
   PAList: 
@@ -1345,7 +1263,6 @@ SubnetRoute:
 [comment] EXPECT DEL 1.0.0.0/24 RECEIVED BY PEER 3
 [** TABLE DebugTable-D1 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.0.0/24
   PAList: 
@@ -1355,7 +1272,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.0.0/24
   PAList: 
@@ -1369,7 +1285,6 @@ SubnetRoute:
 [comment] EXPECT DEL 1.0.5.0/24 RECEIVED BY PEER 3
 [** TABLE DebugTable-D1 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.5.0/24
   PAList: 
@@ -1379,7 +1294,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.5.0/24
   PAList: 
@@ -1400,7 +1314,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 2
 [** TABLE DebugTable-D2 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1413,7 +1326,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 1
 [** TABLE DebugTable-D1 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
@@ -1426,7 +1338,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 1
 [** TABLE DebugTable-D1 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.4.0/24
   PAList: 
@@ -1448,7 +1359,6 @@ SubnetRoute:
 	Origin Path Attribute - IGP
 	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1462,7 +1372,6 @@ SubnetRoute:
 [comment] EXPECT ADD 1.0.3.0/24 RECEIVED BY PEER 3
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1474,7 +1383,6 @@ SubnetRoute:
 [PUSH]
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
@@ -1486,7 +1394,6 @@ SubnetRoute:
 [PUSH]
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.4.0/24
   PAList: 
@@ -1509,7 +1416,6 @@ SubnetRoute:
 	Origin Path Attribute - IGP
 	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
@@ -1526,7 +1432,6 @@ SubnetRoute:
 	Origin Path Attribute - IGP
 	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
@@ -1546,7 +1451,6 @@ SubnetRoute:
 	Origin Path Attribute - IGP
 	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.4.0/24
   PAList: 
@@ -1563,7 +1467,6 @@ SubnetRoute:
 	Origin Path Attribute - IGP
 	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.4.0/24
   PAList: 
@@ -1581,7 +1484,6 @@ SubnetRoute:
 [comment] EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 3
 [** TABLE DebugTable-D2 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1591,7 +1493,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1605,7 +1506,6 @@ SubnetRoute:
 [comment] EXPECT DEL 1.0.3.0/24 RECEIVED BY PEER 3
 [** TABLE DebugTable-D1 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
@@ -1615,7 +1515,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
@@ -1629,7 +1528,6 @@ SubnetRoute:
 [comment] EXPECT DEL 1.0.4.0/24 RECEIVED BY PEER 3
 [** TABLE DebugTable-D1 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.4.0/24
   PAList: 
@@ -1639,7 +1537,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.4.0/24
   PAList: 
@@ -1660,7 +1557,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 2
 [** TABLE DebugTable-D2 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1673,7 +1569,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 2
 [** TABLE DebugTable-D2 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -1686,7 +1581,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 1
 [** TABLE DebugTable-D1 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
@@ -1707,7 +1601,6 @@ SubnetRoute:
 [comment] EXPECT ADD 1.0.3.0/24 RECEIVED BY PEER 3
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
@@ -1749,7 +1642,6 @@ SubnetRoute:
 [comment] EXPECT DEL 1.0.3.0/24 RECEIVED BY PEER 3
 [** TABLE DebugTable-D3 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
@@ -1773,7 +1665,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 2
 [** TABLE DebugTable-D2 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1786,7 +1677,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 1
 [** TABLE DebugTable-D1 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -1802,7 +1692,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 1 BUT NOT PEER 3
 [** TABLE DebugTable-D1 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
@@ -1817,7 +1706,6 @@ SubnetRoute:
 [comment] EXPECT ADD 1.0.3.0/24 RECEIVED BY PEER 3
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1829,7 +1717,6 @@ SubnetRoute:
 [PUSH]
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -1841,7 +1728,6 @@ SubnetRoute:
 [PUSH]
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
@@ -1858,7 +1744,6 @@ SubnetRoute:
 [comment] EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 1 & 3
 [** TABLE DebugTable-D1 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -1868,7 +1753,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -1881,7 +1765,6 @@ SubnetRoute:
 [comment] EXPECT DEL 1.0.3.0/24 RECEIVED BY PEER 2 & 3
 [** TABLE DebugTable-D1 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
@@ -1891,7 +1774,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
@@ -1904,7 +1786,6 @@ SubnetRoute:
 [comment] EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 2 & 3
 [** TABLE DebugTable-D2 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1914,7 +1795,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1937,7 +1817,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 2
 [** TABLE DebugTable-D2 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1950,7 +1829,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 2
 [** TABLE DebugTable-D2 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
@@ -1963,7 +1841,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 1
 [** TABLE DebugTable-D1 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -1989,7 +1866,6 @@ SubnetRoute:
 [comment] EXPECT NOT RECEIVED BY PEER 2 - PEER NOT YET DUMPED
 [** TABLE DebugTable-D2 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.4.0/24
   PAList: 
@@ -2006,7 +1882,6 @@ SubnetRoute:
 [comment] EXPECT ADD 1.0.4.0/24 RECEIVED BY PEER 3
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.4.0/24
   PAList: 
@@ -2018,7 +1893,6 @@ SubnetRoute:
 [PUSH]
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -2064,7 +1938,6 @@ SubnetRoute:
 [comment] EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 1 & 3
 [** TABLE DebugTable-D1 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -2074,7 +1947,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -2087,7 +1959,6 @@ SubnetRoute:
 [comment] EXPECT DEL 1.0.4.0/24 RECEIVED BY PEER 2 & 3
 [** TABLE DebugTable-D2 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.4.0/24
   PAList: 
@@ -2097,7 +1968,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.4.0/24
   PAList: 
@@ -2118,7 +1988,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 2
 [** TABLE DebugTable-D2 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -2131,7 +2000,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 1
 [** TABLE DebugTable-D1 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -2148,7 +2016,6 @@ SubnetRoute:
 [comment] EXPECT (MOVES TO DUMPING NEXT PEER)
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -2160,7 +2027,6 @@ SubnetRoute:
 [PUSH]
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -2176,7 +2042,6 @@ SubnetRoute:
 [comment] EXPECT NOT RECEIVED BY PEER 3 YET
 [** TABLE DebugTable-D2 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
@@ -2186,7 +2051,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
@@ -2203,7 +2067,6 @@ SubnetRoute:
 [comment] EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 2 & 3
 [** TABLE DebugTable-D2 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -2213,7 +2076,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -2226,7 +2088,6 @@ SubnetRoute:
 [comment] EXPECT DEL 1.0.3.0/24 RECEIVED BY PEER 2 & 3
 [** TABLE DebugTable-D2 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
@@ -2236,7 +2097,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
@@ -2249,7 +2109,6 @@ SubnetRoute:
 [comment] EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 1 & 3
 [** TABLE DebugTable-D1 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -2259,7 +2118,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -2280,7 +2138,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 1
 [** TABLE DebugTable-D1 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -2296,7 +2153,6 @@ SubnetRoute:
 [comment] NO ROUTES IN 1st PEER (MOVES TO DUMPING NEXT PEER)
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -2312,7 +2168,6 @@ SubnetRoute:
 [comment] EXPECT NOT RECEIVED BY PEER 3 YET
 [** TABLE DebugTable-D2 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
@@ -2322,7 +2177,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
@@ -2339,7 +2193,6 @@ SubnetRoute:
 [comment] EXPECT DEL 1.0.3.0/24 RECEIVED BY PEER 2 & 3
 [** TABLE DebugTable-D2 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
@@ -2349,7 +2202,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
@@ -2362,7 +2214,6 @@ SubnetRoute:
 [comment] EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 1 & 3
 [** TABLE DebugTable-D1 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -2372,7 +2223,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -2405,7 +2255,6 @@ SubnetRoute:
 [comment] EXPECT NOT RECEIVED BY PEER 3 YET
 [** TABLE DebugTable-D2 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -2415,7 +2264,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -2429,7 +2277,6 @@ SubnetRoute:
 [comment] EXPECT ADD 1.0.2.0/24 RECEIVED BY PEER 3
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -2444,7 +2291,6 @@ SubnetRoute:
 [comment] EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 2 & 3
 [** TABLE DebugTable-D2 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -2454,7 +2300,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -2467,7 +2312,6 @@ SubnetRoute:
 [comment] EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 1 & 3
 [** TABLE DebugTable-D1 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -2477,7 +2321,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -2499,7 +2342,6 @@ SubnetRoute:
 [comment] EXPECT NOT RECEIVED BY PEER 3 YET
 [** TABLE DebugTable-D2 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -2512,7 +2354,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY NOONE
 [** TABLE DebugTable-D1 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -2538,7 +2379,6 @@ SubnetRoute:
 [comment] EXPECT ADD 1.0.2.0/24 RECEIVED BY PEER 3
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -2568,7 +2408,6 @@ SubnetRoute:
 [comment] EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 1 & 3
 [** TABLE DebugTable-D1 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -2578,7 +2417,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -2599,7 +2437,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 2
 [** TABLE DebugTable-D2 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -2612,7 +2449,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 2
 [** TABLE DebugTable-D2 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
@@ -2625,7 +2461,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 1
 [** TABLE DebugTable-D1 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -2653,7 +2488,6 @@ SubnetRoute:
 [comment] EXPECT ADD 1.0.2.0/24 RECEIVED BY PEER 3
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -2698,7 +2532,6 @@ SubnetRoute:
 [comment] EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 1 & 3
 [** TABLE DebugTable-D1 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -2708,7 +2541,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -2729,7 +2561,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 2
 [** TABLE DebugTable-D2 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -2742,7 +2573,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 2
 [** TABLE DebugTable-D2 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
@@ -2755,7 +2585,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 2
 [** TABLE DebugTable-D2 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.4.0/24
   PAList: 
@@ -2768,7 +2597,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 1
 [** TABLE DebugTable-D1 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -2789,7 +2617,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 2
 [** TABLE DebugTable-D2 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.5.0/24
   PAList: 
@@ -2812,7 +2639,6 @@ SubnetRoute:
 [comment] EXPECT ADD 1.0.5.0/24 RECEIVED BY PEER 3
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.5.0/24
   PAList: 
@@ -2824,7 +2650,6 @@ SubnetRoute:
 [PUSH]
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -2884,7 +2709,6 @@ SubnetRoute:
 [comment] EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 1 & 3
 [** TABLE DebugTable-D1 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -2894,7 +2718,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -2907,7 +2730,6 @@ SubnetRoute:
 [comment] EXPECT DEL 1.0.5.0/24 RECEIVED BY PEER 2 & 3
 [** TABLE DebugTable-D2 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.5.0/24
   PAList: 
@@ -2917,7 +2739,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.5.0/24
   PAList: 
@@ -2938,7 +2759,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 2
 [** TABLE DebugTable-D2 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -2951,7 +2771,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 2
 [** TABLE DebugTable-D2 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
@@ -2964,7 +2783,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 1
 [** TABLE DebugTable-D1 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -2980,7 +2798,6 @@ SubnetRoute:
 [comment] EXPECT ADD 1.0.1.0/24 RECEIVED BY PEER 3
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -2992,7 +2809,6 @@ SubnetRoute:
 [PUSH]
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.3.0/24
   PAList: 
@@ -3004,7 +2820,6 @@ SubnetRoute:
 [PUSH]
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -3029,7 +2844,6 @@ SubnetRoute:
 [comment] EXPECT ADD 1.0.5.0/24 RECEIVED BY PEER 2
 [** TABLE DebugTable-D2 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.5.0/24
   PAList: 
@@ -3039,7 +2853,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.5.0/24
   PAList: 
@@ -3106,7 +2919,6 @@ SubnetRoute:
 [comment] EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 1 & 3
 [** TABLE DebugTable-D1 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -3116,7 +2928,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.2.0/24
   PAList: 
@@ -3129,7 +2940,6 @@ SubnetRoute:
 [comment] EXPECT DEL 1.0.5.0/24 RECEIVED BY PEER 2 & 3
 [** TABLE DebugTable-D2 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.5.0/24
   PAList: 
@@ -3139,7 +2949,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.5.0/24
   PAList: 
@@ -3160,7 +2969,6 @@ SubnetRoute:
 [comment] EXPECT RECEIVED BY PEER 2
 [** TABLE DebugTable-D2 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -3177,7 +2985,6 @@ SubnetRoute:
 [comment] **ONLY ONE COPY**
 [** TABLE DebugTable-D3 **]
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -3239,7 +3046,6 @@ SubnetRoute:
 [comment] EXPECT DEL 1.0.1.0/24 RECEIVED BY P1 & 3
 [** TABLE DebugTable-D1 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -3249,7 +3055,6 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 

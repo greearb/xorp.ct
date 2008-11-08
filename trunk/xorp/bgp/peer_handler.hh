@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/bgp/peer_handler.hh,v 1.29 2008/07/23 05:09:34 pavlin Exp $
+// $XORP: xorp/bgp/peer_handler.hh,v 1.30 2008/10/02 21:56:17 bms Exp $
 
 #ifndef __BGP_PEER_HANDLER_HH__
 #define __BGP_PEER_HANDLER_HH__
@@ -53,7 +53,7 @@ public:
      * process_update_packet is called when an update packet has been
      * received by this peer
      */
-    int process_update_packet(const UpdatePacket *p);
+    int process_update_packet(UpdatePacket *p);
     
     /**
      * Given an update packet find all the NLRIs with <AFI,SAFI>
@@ -64,8 +64,11 @@ public:
      *
      * @return true if an <AFI,SAFI> was found.
      */
-    template <typename A> bool add(const UpdatePacket *p,
-				   PathAttributeList<A>& pa_list,Safi safi);
+    template <typename A> 
+    bool add(const UpdatePacket *p,
+	     ref_ptr<FastPathAttributeList<IPv4> >& original_pa_list,
+	     ref_ptr<FastPathAttributeList<A> >& pa_list,
+	     Safi safi);
     /**
      * Given an update packet find all the WITHDRAWs with <AFI,SAFI>
      * specified and inject one by on into the plumbing.
@@ -75,7 +78,10 @@ public:
      *
      * @return true if an <AFI,SAFI> was found.
      */
-    template <typename A> bool withdraw(const UpdatePacket *p, Safi safi);
+    template <typename A> 
+    bool withdraw(const UpdatePacket *p, 
+		  ref_ptr<FastPathAttributeList<IPv4> >& original_pa_list,
+		  Safi safi);
 
     template <typename A> bool multiprotocol(Safi safi, 
 					     BGPPeerData::Direction d) const;
@@ -87,18 +93,26 @@ public:
      */
     virtual int start_packet();
 
-    virtual int add_route(const SubnetRoute<IPv4> &rt, bool ibgp, Safi safi);
-    virtual int add_route(const SubnetRoute<IPv6> &rt, bool ibgp, Safi safi);
+    virtual int add_route(const SubnetRoute<IPv4> &rt, 
+			  FPAList4Ref& pa_list,
+			  bool ibgp, Safi safi);
+    virtual int add_route(const SubnetRoute<IPv6> &rt, 
+			  FPAList6Ref& pa_list,
+			  bool ibgp, Safi safi);
     virtual int replace_route(const SubnetRoute<IPv4> &old_rt, bool old_ibgp,
 			      const SubnetRoute<IPv4> &new_rt, bool new_ibgp,
+			      FPAList4Ref& pa_list,
 			      Safi safi);
     virtual int replace_route(const SubnetRoute<IPv6> &old_rt, bool old_ibgp,
 			      const SubnetRoute<IPv6> &new_rt, bool new_ibgp,
+			      FPAList6Ref& pa_list,
 			      Safi safi);
     virtual int delete_route(const SubnetRoute<IPv4> &rt,  
+			     FPAList4Ref& pa_list,
 			     bool new_ibgp,
 			     Safi safi);
     virtual int delete_route(const SubnetRoute<IPv6> &rt,  
+			     FPAList6Ref& pa_list,
 			     bool new_ibgp,
 			     Safi safi);
     virtual PeerOutputState push_packet();

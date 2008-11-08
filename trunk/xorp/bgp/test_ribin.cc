@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/test_ribin.cc,v 1.41 2008/07/23 05:09:39 pavlin Exp $"
+#ident "$XORP: xorp/bgp/test_ribin.cc,v 1.42 2008/10/02 21:56:22 bms Exp $"
 
 #include "bgp_module.h"
 
@@ -75,6 +75,7 @@ test_ribin_dump(TestInfo& /*info*/)
 	= new DebugTable<IPv4>("D1", (BGPRouteTable<IPv4>*)ribin);
     ribin->set_next_table(debug_table);
     debug_table->set_output_file(filename);
+    debug_table->set_is_winner(true);
 
     IPNet<IPv4> net1("10.0.0.0/8");
     IPNet<IPv4> net2("30.0.0.0/8");
@@ -85,29 +86,14 @@ test_ribin_dump(TestInfo& /*info*/)
     OriginAttribute igp_origin_att(IGP);
     ASPath aspath1("3,2,1");
     ASPathAttribute aspathatt1(aspath1);
-    PathAttributeList<IPv4>* palist1 =
-	new PathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
-
-    SubnetRoute<IPv4> *sr1, *sr2, *sr3;
+    FPAList4Ref palist1 =
+	new FastPathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
+    PolicyTags policytags;
 
     debug_table->write_comment("TEST 1");
-
-    InternalMessage<IPv4>* msg;
-
-    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
-    //routes will only be dumped if they won
-    sr1->set_is_winner(1);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
-    ribin->add_route(*msg, NULL);
-    delete msg;
-    sr1->unref();
-
-    sr2 = new SubnetRoute<IPv4>(net2, palist1, NULL);
-    sr2->set_is_winner(1);
-    msg = new InternalMessage<IPv4>(sr2, &handler1, 0);
-    ribin->add_route(*msg, NULL);
-    delete msg;
-    sr2->unref();
+    
+    ribin->add_route(net1, palist1, policytags);
+    ribin->add_route(net2, palist1, policytags);
 
     list <const PeerTableInfo<IPv4>*> peers_to_dump;
     PeerTableInfo<IPv4>* pti = new PeerTableInfo<IPv4>(NULL, &handler1, 
@@ -122,12 +108,7 @@ test_ribin_dump(TestInfo& /*info*/)
 			       " it should appear once we start "
 			       "dumping again");
 
-    sr3 = new SubnetRoute<IPv4>(net3, palist1, NULL);
-    sr3->set_is_winner(1);
-    msg = new InternalMessage<IPv4>(sr3, &handler1, 0);
-    ribin->add_route(*msg, NULL);
-    delete msg;
-    sr3->unref();
+    ribin->add_route(net3, palist1, policytags);
 
     while (ribin->dump_next_route(*dump_iter)) {
 	while (bgpmain.eventloop().events_pending()) {
@@ -155,28 +136,9 @@ test_ribin_dump(TestInfo& /*info*/)
     debug_table->write_comment("Delete all the routes from the RIB-IN "
 			       "so the memory can be free'd");
 
-    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
-    sr1->set_is_winner(1);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
-    ribin->delete_route(*msg, NULL);
-    delete msg;
-    sr1->unref();
-
-    sr2 = new SubnetRoute<IPv4>(net2, palist1, NULL);
-    sr2->set_is_winner(1);
-    msg = new InternalMessage<IPv4>(sr2, &handler1, 0);
-    ribin->delete_route(*msg, NULL);
-    delete msg;
-    sr2->unref();
-
-    sr3 = new SubnetRoute<IPv4>(net3, palist1, NULL);
-    sr3->set_is_winner(1);
-    msg = new InternalMessage<IPv4>(sr3, &handler1, 0);
-    ribin->delete_route(*msg, NULL);
-    delete msg;
-    sr3->unref();
-
-    delete palist1;
+    ribin->delete_route(net1);
+    ribin->delete_route(net2);
+    ribin->delete_route(net3);
 
     delete ribin;
     delete debug_table;
@@ -223,6 +185,7 @@ test_ribin(TestInfo& /*info*/)
     ribin->set_next_table(debug_table);
     debug_table->set_output_file(filename);
     debug_table->set_canned_response(ADD_USED);
+    debug_table->set_is_winner(true);
 
     //create a load of attributes 
     IPNet<IPv4> net1("1.0.1.0/24");
@@ -250,28 +213,29 @@ test_ribin(TestInfo& /*info*/)
     aspath2.prepend_as(AsNum(5));
     ASPathAttribute aspathatt2(aspath2);
 
-    PathAttributeList<IPv4>* palist1 =
-	new PathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
+    FPAList4Ref palist1 =
+	new FastPathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
 
-    PathAttributeList<IPv4>* palist2 =
-	new PathAttributeList<IPv4>(nhatt2, aspathatt1, igp_origin_att);
+    FPAList4Ref palist2 =
+	new FastPathAttributeList<IPv4>(nhatt2, aspathatt1, igp_origin_att);
 
-    PathAttributeList<IPv4>* palist3, *palist4;
+    FPAList4Ref palist3, palist4;
 
-    //create a subnet route
-    SubnetRoute<IPv4> *sr1, *sr2, *sr3, *sr4;
-    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    PAListRef<IPv4> dummy_palist;
+    dummy_palist.create_attribute_manager();
+
+    PolicyTags policytags;
+
 
     //================================================================
     //Test1: trivial add and delete
     //================================================================
     //add a route
     debug_table->write_comment("TEST 1");
-    InternalMessage<IPv4>* msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
-    ribin->add_route(*msg, NULL);
+    ribin->add_route(net1, palist1, policytags);
 
     //check we only ended up with one copy of the PA list
-    assert(sr1->number_of_managed_atts() == 1);
+    assert(dummy_palist.number_of_managed_atts() == 1);
 
     //check there's one route in the RIB-IN
     assert(ribin->route_count() == 1);
@@ -279,51 +243,40 @@ test_ribin(TestInfo& /*info*/)
     debug_table->write_separator();
 
     //delete the route
-    ribin->delete_route(*msg, NULL);
+    ribin->delete_route(net1);
 
     //check there's still one copy of the PA list
-    assert(sr1->number_of_managed_atts() == 1);
+    //XXX now there is no copy list - think this is better
+    assert(dummy_palist.number_of_managed_atts() == 0);
 
     //check there are no routes in the RIB-IN
     assert(ribin->route_count() == 0);
 
     debug_table->write_separator();
-    delete msg;
-
     //================================================================
     //Test2: trivial add , replace and delete
     //================================================================
     //add a route
     debug_table->write_comment("TEST 2");
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     debug_table->write_comment("ADD FIRST ROUTE");
-    ribin->add_route(*msg, NULL);
-    delete msg;
-    delete palist1;
+    ribin->add_route(net1, palist1, policytags);
+    palist1 = 0;
 
     //check there's still one route in the RIB-IN
     assert(ribin->route_count() == 1);
 
     //check we only ended up with one copy of the PA list
-    assert(sr1->number_of_managed_atts() == 1);
-    sr1->unref();
+    assert(dummy_palist.number_of_managed_atts() == 1);
 
     debug_table->write_separator();
 
-    //create a subnet route
-    sr2 = new SubnetRoute<IPv4>(net1, palist2, NULL);
-
-    //temporarily, we should have two managed palists
-    assert(sr2->number_of_managed_atts() == 2);
-
     //add the same route again - should be treated as an update, and
     //trigger a replace operation
-    msg = new InternalMessage<IPv4>(sr2, &handler1, 0);
     debug_table->write_comment("ADD MODIFIED FIRST ROUTE");
-    ribin->add_route(*msg, NULL);
+    ribin->add_route(net1, palist2, policytags);
 
     //check we only ended up with one copy of the PA list
-    assert(sr2->number_of_managed_atts() == 1);
+    assert(dummy_palist.number_of_managed_atts() == 1);
 
     //check there's still one route in the RIB-IN
     assert(ribin->route_count() == 1);
@@ -332,19 +285,18 @@ test_ribin(TestInfo& /*info*/)
 
     //delete the route
     debug_table->write_comment("DELETE ROUTE");
-    ribin->delete_route(*msg, NULL);
+    ribin->delete_route(net1);
 
     //check there's still one copy of the PA list
-    assert(sr2->number_of_managed_atts() == 1);
+    //XXX now zero
+    assert(dummy_palist.number_of_managed_atts() == 0);
 
     //check there are no routes in the RIB-IN
     assert(ribin->route_count() == 0);
 
     debug_table->write_separator();
 
-    delete msg;
-    sr2->unref();
-    delete palist2;
+    palist2 = 0;
     
     //================================================================
     //Test3: trivial add two routes, then drop peering
@@ -352,33 +304,24 @@ test_ribin(TestInfo& /*info*/)
     //add a route
     debug_table->write_comment("TEST 3");
     palist1 =
-	new PathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
+	new FastPathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
 
     palist2 =
-	new PathAttributeList<IPv4>(nhatt2, aspathatt1, igp_origin_att);
+	new FastPathAttributeList<IPv4>(nhatt2, aspathatt1, igp_origin_att);
 
-    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
-    sr2 = new SubnetRoute<IPv4>(net2, palist2, NULL);
-
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     debug_table->write_comment("ADD FIRST ROUTE");
-    ribin->add_route(*msg, NULL);
-    delete msg;
-    delete palist1;
+    ribin->add_route(net1, palist1, policytags);
+    palist1 = 0;
 
-    msg = new InternalMessage<IPv4>(sr2, &handler1, 0);
     debug_table->write_comment("ADD SECOND ROUTE");
-    ribin->add_route(*msg, NULL);
-    delete msg;
-    delete palist2;
-    sr2->unref();
+    ribin->add_route(net2, palist2, policytags);
+    palist2 = 0;
 
     //check there are two routes in the RIB-IN
     assert(ribin->route_count() == 2);
 
     //check we only ended up with two PA lists
-    assert(sr1->number_of_managed_atts() == 2);
-    sr1->unref();
+    assert(dummy_palist.number_of_managed_atts() == 2);
 
     debug_table->write_separator();
 
@@ -398,37 +341,25 @@ test_ribin(TestInfo& /*info*/)
     //add a route
     debug_table->write_comment("TEST 4");
     palist1 =
-	new PathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
+	new FastPathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
 
     palist2 =
-	new PathAttributeList<IPv4>(nhatt2, aspathatt1, igp_origin_att);
+	new FastPathAttributeList<IPv4>(nhatt2, aspathatt1, igp_origin_att);
 
-    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     //routes will only be dumped if they won at decision
-    sr1->set_is_winner(1);
-
-    sr2 = new SubnetRoute<IPv4>(net2, palist2, NULL);
-    sr2->set_is_winner(1);
-
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     debug_table->write_comment("ADD FIRST ROUTE");
-    ribin->add_route(*msg, NULL);
-    delete msg;
+    ribin->add_route(net1, palist1, policytags);
 
-    msg = new InternalMessage<IPv4>(sr2, &handler1, 0);
     debug_table->write_comment("ADD SECOND ROUTE");
-    ribin->add_route(*msg, NULL);
-    delete msg;
-    sr2->unref();
-    delete palist1;
+    ribin->add_route(net2, palist2, policytags);
+    palist1 = 0;
 
     //check there are two routes in the RIB-IN
     assert(ribin->route_count() == 2);
 
     //check we only ended up with two PA lists
-    assert(sr1->number_of_managed_atts() == 2);
-    sr1->unref();
-    delete palist2;
+    assert(dummy_palist.number_of_managed_atts() == 2);
+    palist2 = 0;
 
     debug_table->write_separator();
 
@@ -452,25 +383,8 @@ test_ribin(TestInfo& /*info*/)
 
     debug_table->write_comment("DELETE THE ROUTES AND CLEAN UP");
 
-    palist1 =
-	new PathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
-
-    palist2 =
-	new PathAttributeList<IPv4>(nhatt2, aspathatt1, igp_origin_att);
-
-    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
-    ribin->delete_route(*msg, NULL);
-    delete msg;
-    sr1->unref();
-    delete palist1;
-
-    sr2 = new SubnetRoute<IPv4>(net2, palist2, NULL);
-    msg = new InternalMessage<IPv4>(sr2, &handler1, 0);
-    ribin->delete_route(*msg, NULL);
-    delete msg;
-    sr2->unref();
-    delete palist2;
+    ribin->delete_route(net1);
+    ribin->delete_route(net2);
 
 
     debug_table->write_separator();
@@ -481,27 +395,18 @@ test_ribin(TestInfo& /*info*/)
     debug_table->write_comment("TEST 5");
     debug_table->write_comment("IGP NEXTHOP CHANGES");
     palist1 =
-	new PathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
+	new FastPathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
 
     palist2 =
-	new PathAttributeList<IPv4>(nhatt2, aspathatt1, igp_origin_att);
+	new FastPathAttributeList<IPv4>(nhatt2, aspathatt1, igp_origin_att);
 
-    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
-    sr2 = new SubnetRoute<IPv4>(net2, palist2, NULL);
-
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     debug_table->write_comment("ADD FIRST ROUTE");
-    ribin->add_route(*msg, NULL);
-    delete msg;
-    delete palist1;
-    sr1->unref();
+    ribin->add_route(net1, palist1, policytags);
+    palist1 = 0;
 
-    msg = new InternalMessage<IPv4>(sr2, &handler1, 0);
     debug_table->write_comment("ADD SECOND ROUTE");
-    ribin->add_route(*msg, NULL);
-    delete msg;
-    delete palist2;
-    sr2->unref();
+    ribin->add_route(net2, palist2, policytags);
+    palist2 = 0;
 
     //check there are two routes in the RIB-IN
     assert(ribin->route_count() == 2);
@@ -513,7 +418,6 @@ test_ribin(TestInfo& /*info*/)
     while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
-
     debug_table->write_separator();
     debug_table->write_comment("NEXTHOP 2.0.0.1 CHANGES");
     //this should trigger a replace
@@ -548,30 +452,22 @@ test_ribin(TestInfo& /*info*/)
     IPNet<IPv4> net4("1.0.4.0/24");
     //palist1 has the same palist as the route for net1
     palist3 =
-	new PathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
+	new FastPathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
 
     //palist1 has the same nexthop, but different palist as the route for net1
     palist4 =
-	new PathAttributeList<IPv4>(nhatt1, aspathatt2, igp_origin_att);
-    sr3 = new SubnetRoute<IPv4>(net3, palist3, NULL);
-    sr4 = new SubnetRoute<IPv4>(net4, palist4, NULL);
+	new FastPathAttributeList<IPv4>(nhatt1, aspathatt2, igp_origin_att);
 
-    msg = new InternalMessage<IPv4>(sr3, &handler1, 0);
     debug_table->write_comment("ADD THIRD ROUTE");
-    ribin->add_route(*msg, NULL);
-    delete msg;
-    delete palist3;
-    sr3->unref();
+    ribin->add_route(net3, palist3, policytags);
+    palist3 = 0;
 
     //check there are 3 routes in the RIB-IN
     assert(ribin->route_count() == 3);
 
-    msg = new InternalMessage<IPv4>(sr4, &handler1, 0);
     debug_table->write_comment("ADD FOURTH ROUTE");
-    ribin->add_route(*msg, NULL);
-    delete msg;
-    delete palist4;
-    sr4->unref();
+    ribin->add_route(net4, palist4, policytags);
+    palist4 = 0;
 
     //check there are 4 routes in the RIB-IN
     assert(ribin->route_count() == 4);
@@ -588,45 +484,10 @@ test_ribin(TestInfo& /*info*/)
     debug_table->write_separator();
     debug_table->write_comment("DELETE THE ROUTES AND CLEAN UP");
 
-    palist1 =
-	new PathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
-
-    palist2 =
-	new PathAttributeList<IPv4>(nhatt2, aspathatt1, igp_origin_att);
-
-    palist3 =
-	new PathAttributeList<IPv4>(nhatt1, aspathatt2, igp_origin_att);
-
-    palist4 =
-	new PathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
-
-    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
-    ribin->delete_route(*msg, NULL);
-    delete msg;
-    delete palist1;
-    sr1->unref();
-
-    sr2 = new SubnetRoute<IPv4>(net2, palist2, NULL);
-    msg = new InternalMessage<IPv4>(sr2, &handler1, 0);
-    ribin->delete_route(*msg, NULL);
-    delete msg;
-    delete palist2;
-    sr2->unref();
-
-    sr3 = new SubnetRoute<IPv4>(net3, palist3, NULL);
-    msg = new InternalMessage<IPv4>(sr3, &handler1, 0);
-    ribin->delete_route(*msg, NULL);
-    delete msg;
-    delete palist3;
-    sr3->unref();
-
-    sr4 = new SubnetRoute<IPv4>(net4, palist4, NULL);
-    msg = new InternalMessage<IPv4>(sr4, &handler1, 0);
-    ribin->delete_route(*msg, NULL);
-    delete msg;
-    delete palist4;
-    sr4->unref();
+    ribin->delete_route(net1);
+    ribin->delete_route(net2);
+    ribin->delete_route(net3);
+    ribin->delete_route(net4);
 
     debug_table->write_separator();
 

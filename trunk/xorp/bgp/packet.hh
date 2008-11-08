@@ -1,3 +1,4 @@
+
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
 // Copyright (c) 2001-2008 XORP, Inc.
@@ -17,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/bgp/packet.hh,v 1.46 2008/07/23 05:09:33 pavlin Exp $
+// $XORP: xorp/bgp/packet.hh,v 1.47 2008/10/02 21:56:16 bms Exp $
 
 #ifndef __BGP_PACKET_HH__
 #define __BGP_PACKET_HH__
@@ -26,6 +27,8 @@
 #include "libxorp/debug.h"
 #include "libxorp/ipv4net.hh"
 #include "libxorp/ipv4.hh"
+
+#include "path_attribute.hh"
 
 #ifdef HAVE_SYS_UIO_H
 #include <sys/uio.h>
@@ -44,7 +47,7 @@
 #include "path_attribute.hh"
 #include "update_attrib.hh"
 
-class BGPPeerData;
+class BGPPeer;
 
 enum BgpPacketType {
     MESSAGETYPEOPEN =		1,
@@ -204,21 +207,25 @@ private:
 class UpdatePacket : public BGPPacket {
 public:
     UpdatePacket();
-    UpdatePacket(const uint8_t *d, uint16_t l, const BGPPeerData *peerdata)
+    UpdatePacket(const uint8_t *d, uint16_t l, const BGPPeerData *peerdata,
+		 BGPMain* mainprocess, bool do_checks)
 	throw(CorruptMessage);
 
     ~UpdatePacket();
 
     void add_withdrawn(const BGPUpdateAttrib& wdr);
+    void replace_pathattribute_list(FPAList4Ref& pa_list);
+
     void add_pathatt(const PathAttribute& pa);
     void add_pathatt(PathAttribute *pa);
+
     void add_nlri(const BGPUpdateAttrib& nlri);
     const BGPUpdateAttribList& wr_list() const		{ return _wr_list; }
-    const PathAttributeList<IPv4>& pa_list() const	{ return _pa_list; }
+    FPAList4Ref& pa_list() 	                        { return  _pa_list; }
     const BGPUpdateAttribList& nlri_list() const	{ return _nlri_list; }
 
-    template <typename A> MPReachNLRIAttribute<A> *mpreach(Safi) const;
-    template <typename A> MPUNReachNLRIAttribute<A> *mpunreach(Safi) const;
+    template <typename A> const MPReachNLRIAttribute<A> *mpreach(Safi) const;
+    template <typename A> const MPUNReachNLRIAttribute<A> *mpunreach(Safi) const;
 
     bool encode(uint8_t *buf, size_t& len, const BGPPeerData *peerdata) const;
 
@@ -233,45 +240,30 @@ private:
     UpdatePacket(const UpdatePacket& UpdatePacket);
 
     BGPUpdateAttribList		_wr_list;
-    PathAttributeList<IPv4>	_pa_list;
+    FPAList4Ref	                _pa_list;
     BGPUpdateAttribList		_nlri_list;
 };
 
 template <typename A> 
-MPReachNLRIAttribute<A> *
+const MPReachNLRIAttribute<A> *
 UpdatePacket::mpreach(Safi safi) const
 {
     XLOG_ASSERT(!(A::ip_version() == 4 && SAFI_UNICAST == safi));
-
-    typename PathAttributeList<A>::const_iterator i;
-    for( i = _pa_list.begin(); i != _pa_list.end(); i++) {
-	MPReachNLRIAttribute<A> *mpreach = 
-	    dynamic_cast<MPReachNLRIAttribute<A> *>((*i));
-	if (mpreach && mpreach->safi() == safi) {
-	    return mpreach;
-	}
-    }
-
-    return 0;
+    FastPathAttributeList<IPv4>& fpalist = *_pa_list;
+    MPReachNLRIAttribute<A>* mpreach = fpalist.mpreach<A>(safi);
+    return mpreach;
 }
 
 template <typename A> 
-MPUNReachNLRIAttribute<A> *
+const MPUNReachNLRIAttribute<A> *
 UpdatePacket::mpunreach(Safi safi) const
 {
     XLOG_ASSERT(!(A::ip_version() == 4 && SAFI_UNICAST == safi));
-
-    typename PathAttributeList<A>::const_iterator i;
-    for( i = _pa_list.begin(); i != _pa_list.end(); i++) {
-	MPUNReachNLRIAttribute<A> *mpunreach = 
-	    dynamic_cast<MPUNReachNLRIAttribute<A> *>((*i));
-	if (mpunreach && mpunreach->safi() == safi) {
-	    return mpunreach;
-	}
-    }
-
-    return 0;
+    FastPathAttributeList<IPv4>& fpalist = *_pa_list;
+    MPUNReachNLRIAttribute<A>* mpunreach = fpalist.mpunreach<A>(safi);
+    return mpunreach;
 }
+
 
 /* **************** BGPNotificationPacket *********************** */
 

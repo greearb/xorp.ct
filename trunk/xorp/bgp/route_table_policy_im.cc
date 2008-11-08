@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/route_table_policy_im.cc,v 1.19 2008/08/06 08:26:12 abittau Exp $"
+#ident "$XORP: xorp/bgp/route_table_policy_im.cc,v 1.20 2008/10/02 21:56:20 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -45,9 +45,9 @@ PolicyTableImport<A>::PolicyTableImport(const string& tablename,
 
 template <class A>
 int
-PolicyTableImport<A>::route_dump(const InternalMessage<A>& rtmsg,
-				      BGPRouteTable<A>* caller,
-				      const PeerHandler* dump_peer)
+PolicyTableImport<A>::route_dump(InternalMessage<A>& rtmsg,
+				 BGPRouteTable<A>* caller,
+				 const PeerHandler* dump_peer)
 {
     // XXX: policy route dumping IS A HACK!
 
@@ -60,8 +60,9 @@ PolicyTableImport<A>::route_dump(const InternalMessage<A>& rtmsg,
     
     debug_msg("[BGP] Policy route dump: %s\n\n", rtmsg.str().c_str());
 
+#if 0
     // "old" filter...
-    const InternalMessage<A>* fmsg = do_filtering(rtmsg, false);
+    InternalMessage<A>* fmsg = do_filtering(rtmsg, false);
     bool was_filtered = (fmsg == NULL);
     if (fmsg != NULL) {
 	if (fmsg->route() == rtmsg.route()) {
@@ -102,11 +103,43 @@ PolicyTableImport<A>::route_dump(const InternalMessage<A>& rtmsg,
     rtmsg.route()->set_policyfilter(0, RefPf());
 
     // filter new message
-    const InternalMessage<A>* new_msg = do_filtering(rtmsg, false);
+    InternalMessage<A>* new_msg = do_filtering(rtmsg, false);
     
     bool accepted = (new_msg != NULL);
 
-    debug_msg("[BGP] Policy route dump accepted: %d\n", accepted);
+#endif
+
+    // clone the PA list, so we don't process it twice
+    FPAListRef old_fpa_list = new FastPathAttributeList<A>(*rtmsg.attributes());
+    SubnetRoute<A>* copy_old_route = new SubnetRoute<A>(*rtmsg.route());
+    copy_old_route->set_parent_route(NULL);
+    InternalMessage<A> *old_rtmsg = new InternalMessage<A>(copy_old_route,
+							   old_fpa_list,
+							   rtmsg.origin_peer(),
+							   rtmsg.genid());
+    old_rtmsg->set_copied();
+
+    // we want current filter
+    rtmsg.route()->set_policyfilter(0, RefPf());
+
+    bool old_accepted = do_filtering(*old_rtmsg, false);
+    bool new_accepted = do_filtering(rtmsg, false);
+
+    InternalMessage<A> *new_rtmsg = 0;
+    SubnetRoute<A>* copy_new_route = 0;
+    if (new_accepted) {
+	// we don't want anyone downstream to mess with the metadata
+	// on the route in RibIn
+	//	copy_new_route = new SubnetRoute<A>(*rtmsg.route());
+	//	copy_new_route->set_parent_route(NULL);
+	//	new_rtmsg = new InternalMessage<A>(copy_new_route,
+	new_rtmsg = new InternalMessage<A>(rtmsg.route(),
+					   rtmsg.attributes(),
+					   rtmsg.origin_peer(),
+					   rtmsg.genid());
+    }
+    
+    debug_msg("[BGP] Policy route dump accepted: %d\n", new_accepted);
 
     BGPRouteTable<A>* next = this->_next_table;
 
@@ -114,55 +147,33 @@ PolicyTableImport<A>::route_dump(const InternalMessage<A>& rtmsg,
 
     int res = XORP_OK;
 
-    if (accepted) {
-	if (was_filtered) {
+    if (new_accepted) {
+	if (!old_accepted) {
 	    debug_msg("[BGP] Policy add_route [accepted, was filtered]");
-	    res = next->add_route(*new_msg, this);
+	    res = next->add_route(*new_rtmsg, this);
 	} else {
-	    XLOG_ASSERT(fmsg != NULL);
 	    debug_msg("[BGP] Policy replace_route old=(%s) new=(%s)\n",
-		      fmsg->str().c_str(), new_msg->str().c_str());
+		      old_rtmsg->str().c_str(), new_rtmsg->str().c_str());
 
-	    XLOG_ASSERT(fmsg->route() != new_msg->route());
-#if 0
-	    // we will delete and add the same subnetroute!
-	    // make new internal message to preserve route.
-	    if (rtmsg.changed() && fmsg->route() == new_msg->route()) {
-		SubnetRoute<A>* copy_rt = new SubnetRoute<A>(*new_msg->route());
-		InternalMessage<A>* copy_msg = 
-		    new InternalMessage<A>(copy_rt, new_msg->origin_peer(),
-					   new_msg->genid());
-		
-		XLOG_ASSERT(new_msg->changed());
-		
-		if (new_msg->changed())
-		    copy_msg->set_changed();
-	
-		if (new_msg->push())
-		    copy_msg->set_push();
-
-		if (new_msg->from_previous_peering())
-		    copy_msg->set_from_previous_peering();
-
-		if (new_msg != &rtmsg)
-		    delete new_msg;
-
-		new_msg = copy_msg;
-	    
-		XLOG_ASSERT(fmsg != new_msg);
+	    if (new_rtmsg->attributes() == old_rtmsg->attributes()) {
+		// no change.
+		copy_new_route->unref();
+		delete new_rtmsg;
+		copy_old_route->unref();
+		delete old_rtmsg;
+		return ADD_USED;
 	    }
-#endif
 
 	    // XXX don't check return of deleteroute!
-	    res = next->delete_route(*fmsg, this);
+	    res = next->delete_route(*old_rtmsg, this);
 
-	    XLOG_ASSERT(new_msg->route());
+	    XLOG_ASSERT(new_rtmsg->route());
 
 	    // current filters
 	    for (int i = 1; i < 3; i++)
-		new_msg->route()->set_policyfilter(i, RefPf());
+		new_rtmsg->route()->set_policyfilter(i, RefPf());
 	
-	    res = next->add_route(*new_msg, this);
+	    res = next->add_route(*new_rtmsg, this);
 
 	    // XXX this won't work.  We need to keep original filter pointers on
 	    // old route and null pointers on new route.  If we clone the old
@@ -174,9 +185,8 @@ PolicyTableImport<A>::route_dump(const InternalMessage<A>& rtmsg,
 	}
     } else {
 	// not accepted
-	if (was_filtered) {
+	if (!old_accepted) {
 	} else {
-	    XLOG_ASSERT(fmsg != NULL);
 	    //
 	    // XXX: A hack propagating the "not-winner route" flag back to
 	    // the original route.
@@ -184,29 +194,15 @@ PolicyTableImport<A>::route_dump(const InternalMessage<A>& rtmsg,
 	    // hack where the fmsg parent was modified to be NULL.
 	    //
 	    rtmsg.route()->set_is_not_winner();
-	    next->delete_route(*fmsg, this);
+	    next->delete_route(*old_rtmsg, this);
 	}
 	res = ADD_FILTERED;
     }
 
-    //
-    // Check if route was modified by our filters.  If it was, and it was
-    // modified by the static filters, then we need to free the new subnet
-    // route allocated by static filters.
-    //
-    if (rtmsg.changed() && fmsg != &rtmsg && new_msg != &rtmsg) {
-	rtmsg.route()->unref();
-    }
-
-    if (fmsg != &rtmsg) {
-	if (fmsg != NULL)
-	    delete fmsg;
-    }
-
-    if (new_msg != &rtmsg) {
-	if (new_msg != NULL)
-	    delete new_msg;
-    }
+    if (old_rtmsg)
+	delete old_rtmsg;
+    if (new_rtmsg)
+	delete new_rtmsg;
 
     return res;
 }

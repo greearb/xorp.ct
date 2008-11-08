@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.48 2008/07/23 05:09:34 pavlin Exp $"
+#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.49 2008/10/02 21:56:17 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -108,20 +108,22 @@ PeerHandler::peering_came_up()
 template <>
 bool
 PeerHandler::add<IPv4>(const UpdatePacket *p,
-		       PathAttributeList<IPv4>& pa_list,
+		       ref_ptr<FastPathAttributeList<IPv4> >& original_pa_list,
+		       ref_ptr<FastPathAttributeList<IPv4> >& pa_list,
 		       Safi safi)
 {
+    UNUSED(original_pa_list);
+    XLOG_ASSERT(!pa_list->is_locked());
     switch(safi) {
     case SAFI_UNICAST: {
 	if (p->nlri_list().empty())
 	    return false;
 
-	pa_list.rehash();
-	XLOG_ASSERT(pa_list.complete());
-	debug_msg("Built path attribute list: %s\n", pa_list.str().c_str());
+	XLOG_ASSERT(pa_list->complete());
 
 	BGPUpdateAttribList::const_iterator ni4;
 	ni4 = p->nlri_list().begin();
+	int count = 0;
 	while (ni4 != p->nlri_list().end()) {
 	    if (!ni4->net().is_unicast()) {
 		XLOG_ERROR("NLRI <%s> is not semantically correct ignoring.%s",
@@ -129,24 +131,32 @@ PeerHandler::add<IPv4>(const UpdatePacket *p,
 		++ni4;
 		continue;
 	    }
-	    SubnetRoute<IPv4>* msg_route 
-		= new SubnetRoute<IPv4>(ni4->net(), &pa_list, NULL);
-	    InternalMessage<IPv4> msg(msg_route, this, GENID_UNKNOWN);
-	    _plumbing_unicast->add_route(msg, this);
-	    msg_route->unref();
+	    PolicyTags policy_tags;
+	    FPAList4Ref fpalist;
+	    if (count == 0) {
+		// no need to copy the first one
+		fpalist = pa_list;
+	    } else {
+		// need to copy the others, or each one's changes will affect the rest
+		fpalist = new FastPathAttributeList<IPv4>(*pa_list);
+	    }
+	    XLOG_ASSERT(!fpalist->is_locked());
+	    _plumbing_unicast->add_route(ni4->net(), fpalist, 
+					 policy_tags, this);
 	    ++ni4;
+	    count++;
 	}
     }
 	break;
     case SAFI_MULTICAST: {
-	MPReachNLRIAttribute<IPv4> *mpreach = p->mpreach<IPv4>(safi);
+	const MPReachNLRIAttribute<IPv4> *mpreach = pa_list->mpreach<IPv4>(safi);
 	if(!mpreach)
 	    return false;
 
-	pa_list.rehash();
-	XLOG_ASSERT(pa_list.complete());
+	XLOG_ASSERT(pa_list->complete());
 
 	list<IPNet<IPv4> >::const_iterator ni;
+	int count = 0;
 	ni = mpreach->nlri_list().begin();
 	while (ni != mpreach->nlri_list().end()) {
 	    if (!ni->is_unicast()) {
@@ -155,12 +165,22 @@ PeerHandler::add<IPv4>(const UpdatePacket *p,
 		++ni;
 		continue;
 	    }
-	    SubnetRoute<IPv4>* msg_route =
-		new SubnetRoute<IPv4>(*ni, &pa_list, NULL);
-	    InternalMessage<IPv4> msg(msg_route, this, GENID_UNKNOWN);
-	    _plumbing_multicast->add_route(msg, this);
-	    msg_route->unref();
+	    PolicyTags policy_tags;
+	    FPAList4Ref fpalist;
+	    if (mpreach->nlri_list().size() == 1) {
+		// no need to copy
+		fpalist = pa_list;
+	    } else {
+		// need to copy the others, or each one's changes will
+		// affect the rest
+		fpalist = new FastPathAttributeList<IPv4>(*pa_list);
+	    }
+	    // we're done with this attribute now.
+	    fpalist->remove_attribute_by_type(MP_REACH_NLRI);
+	    _plumbing_multicast->add_route(*ni, fpalist, 
+					   policy_tags, this);
 	    ++ni;
+	    count++;
 	}
     }
 	break;
@@ -171,7 +191,9 @@ PeerHandler::add<IPv4>(const UpdatePacket *p,
 
 template <>
 bool
-PeerHandler::withdraw<IPv4>(const UpdatePacket *p, Safi safi)
+PeerHandler::withdraw<IPv4>(const UpdatePacket *p, 
+			    ref_ptr<FastPathAttributeList<IPv4> >& original_pa_list,
+			    Safi safi)
 {
     switch(safi) {
     case SAFI_UNICAST: {
@@ -187,7 +209,8 @@ PeerHandler::withdraw<IPv4>(const UpdatePacket *p, Safi safi)
     }
 	break;
     case SAFI_MULTICAST: {
-	MPUNReachNLRIAttribute<IPv4> *mpunreach = p->mpunreach<IPv4>(safi);
+	const MPUNReachNLRIAttribute<IPv4> *mpunreach 
+	    = original_pa_list->mpunreach<IPv4>(safi);
 	if (!mpunreach)
 	    return false;
     
@@ -207,39 +230,53 @@ PeerHandler::withdraw<IPv4>(const UpdatePacket *p, Safi safi)
 template <>
 bool
 PeerHandler::add<IPv6>(const UpdatePacket *p,
-		       PathAttributeList<IPv6>& pa_list,
+		       ref_ptr<FastPathAttributeList<IPv4> >& original_pa_list,
+		       ref_ptr<FastPathAttributeList<IPv6> >& pa_list,
 		       Safi safi)
 {
-    MPReachNLRIAttribute<IPv6> *mpreach = p->mpreach<IPv6>(safi);
+    UNUSED(original_pa_list);
+    const MPReachNLRIAttribute<IPv6> *mpreach = pa_list->mpreach<IPv6>(safi);
     if(!mpreach)
 	return false;
 
-    pa_list.rehash();
-    XLOG_ASSERT(pa_list.complete());
+    XLOG_ASSERT(pa_list->complete());
 
     list<IPNet<IPv6> >::const_iterator ni;
+    int nlris_remaining = mpreach->nlri_list().size();
     ni = mpreach->nlri_list().begin();
-    while (ni != mpreach->nlri_list().end()) {
-	if (!ni->is_unicast()) {
+    while (nlris_remaining > 0) {
+	IPNet<IPv6> n = *ni;
+	if (!n.is_unicast()) {
 	    XLOG_ERROR("NLRI <%s> is not semantically correct ignoring.%s",
 		       cstring(*ni), cstring(*p));
 	    ++ni;
 	    continue;
 	}
-	SubnetRoute<IPv6>* msg_route =
-	    new SubnetRoute<IPv6>(*ni, &pa_list, NULL);
-	InternalMessage<IPv6> msg(msg_route, this, GENID_UNKNOWN);
-
+	PolicyTags policy_tags;
+	FPAList6Ref fpalist;
+	if (mpreach->nlri_list().size() == 1) {
+	    // no need to copy
+	    fpalist = pa_list;
+	} else {
+	    // need to copy the others, or each one's changes will affect the rest
+	    fpalist = new FastPathAttributeList<IPv6>(*pa_list);
+	}
+	// we're done with this attribute now.
+	fpalist->remove_attribute_by_type(MP_REACH_NLRI);
 	switch(safi) {
 	case SAFI_UNICAST:
-	    _plumbing_unicast->add_route(msg, this);
+	    _plumbing_unicast->add_route(n, fpalist, policy_tags, this);
 	    break;
 	case SAFI_MULTICAST:
-	    _plumbing_multicast->add_route(msg, this);
+	    _plumbing_multicast->add_route(n, fpalist, policy_tags, this);
 	    break;
 	}
-	msg_route->unref();
-	++ni;
+	nlris_remaining--;
+	if (nlris_remaining > 0) {
+	    // only do this if there are more nlris, because otherwise
+	    // the iterator will be invalid
+	    ++ni;
+	}
     }
 
     return true;
@@ -247,9 +284,13 @@ PeerHandler::add<IPv6>(const UpdatePacket *p,
 
 template <>
 bool
-PeerHandler::withdraw<IPv6>(const UpdatePacket *p, Safi safi)
+PeerHandler::withdraw<IPv6>(const UpdatePacket *p, 
+			    ref_ptr<FastPathAttributeList<IPv4> >& original_pa_list,
+			    Safi safi)
 {
-    MPUNReachNLRIAttribute<IPv6> *mpunreach = p->mpunreach<IPv6>(safi);
+    UNUSED(p);
+    const MPUNReachNLRIAttribute<IPv6> *mpunreach 
+	= original_pa_list->mpunreach<IPv6>(safi);
     if (!mpunreach)
 	return false;
     
@@ -286,147 +327,177 @@ set_if_true(bool& orig, bool now)
  */
 
 int
-PeerHandler::process_update_packet(const UpdatePacket *p)
+PeerHandler::process_update_packet(UpdatePacket *p)
 {
     debug_msg("Processing packet\n %s\n", p->str().c_str());
 
-    PathAttributeList<IPv4> pa_ipv4_unicast;
-    PathAttributeList<IPv4> pa_ipv4_multicast;
-    PathAttributeList<IPv6> pa_ipv6_unicast;
-    PathAttributeList<IPv6> pa_ipv6_multicast;
+    FPAList4Ref pa_list = p->pa_list();
 
+    FPAList4Ref pa_ipv4_unicast = new FastPathAttributeList<IPv4>();
+    FPAList4Ref pa_ipv4_multicast = new FastPathAttributeList<IPv4>();
+    FPAList6Ref pa_ipv6_unicast	= new FastPathAttributeList<IPv6>();
+    FPAList6Ref pa_ipv6_multicast = new FastPathAttributeList<IPv6>();
+    XLOG_ASSERT(!pa_ipv4_unicast->is_locked());
     bool ipv4_unicast = false;
     bool ipv4_multicast = false;
     bool ipv6_unicast = false;
     bool ipv6_multicast = false;
+    
+    const PathAttribute* pa;
 
-    ASPath* as_path = NULL;  
+    // Store a reference to the ASPath here temporarily, as we may
+    // need to mess with it before passing it to the final PA lists.
+    // It's safe to mess with the ASPath in place, as we won't need
+    // the original after this.
+    ASPath* as_path = 0;
+    if (!pa_list->is_empty()) {
+	if (pa_list->aspath_att())
+	    as_path = const_cast<ASPath*>(&(pa_list->aspath()));
 
-    list <PathAttribute*>::const_iterator pai;
-    for (pai = p->pa_list().begin(); pai != p->pa_list().end(); pai++) {
-	const PathAttribute* pa;
-	pa = *pai;
+	for (int i = 0; i < pa_list->max_att(); i++) {
+	    pa = pa_list->find_attribute_by_type((PathAttType)i);
+	    if (pa) {
+		switch((PathAttType)i) {
+		case AS_PATH:
+		    // add this later.
+		    continue;
+		case AS4_PATH:
+		    if (_peer->use_4byte_asnums()) {
+			// we got an AS4_PATH from a peer that shouldn't send
+			// us one because it speaks native 4-byte AS numbers.
+			// The spec says to silently discard the attribute.
+			continue;
+		    } else if (_peer->localdata()->use_4byte_asnums()) {
+			// We got an AS4_PATH, but we're configured to use
+			// 4-byte AS numbers.  We need to merge this into the
+			// AS_PATH we've already decoded, then discard the
+			// AS4_PATH as we don't need both.
+			const AS4PathAttribute* as4attr = 
+			    (const AS4PathAttribute*)(pa_list->as4path_att());
+			XLOG_ASSERT(as_path);
+			as_path->merge_as4_path(as4attr->as4_path());
 
-	if (dynamic_cast<ASPathAttribute*>(*pai)) {
-	    // store the ASPath here temporarily, as we may
-	    // need to mess with it before passing it to the final PA
-	    // lists
-	    as_path = &(((ASPathAttribute*)(*pai))->as_path());
-	    continue;
-	}
+			/* don't store the AS4path in the PA list */
+			continue;
+		    } else {
+			// We got an AS4_PATH, but we're not configured to use
+			// 4-byte AS numbers.  We just propagate this
+			// unchanged, so fall through and add it to the
+			// pa_list in the normal way.
+		    }
+		    break;
 
-	if (dynamic_cast<AS4PathAttribute*>(*pai)) {
-	    if (_peer->use_4byte_asnums()) {
-		// we got an AS4_PATH from a peer that shouldn't send
-		// us one because it speaks native 4-byte AS numbers.
-		// The spec says to silently discard the attribute.
-		continue;
-	    } else if (_peer->localdata()->use_4byte_asnums()) {
-		// We got an AS4_PATH, but we're configured to use
-		// 4-byte AS numbers.  We need to merge this into the
-		// AS_PATH we've already decoded, then discard the
-		// AS4_PATH as we don't need both.
-		const AS4PathAttribute* as4attr = (const AS4PathAttribute*)pa;
-		XLOG_ASSERT(as_path);
-		as_path->merge_as4_path(as4attr->as4_path());
-		continue;
-	    } else {
-		// We got an AS4_PATH, but we're not configured to use
-		// 4-byte AS numbers.  We just propagate this
-		// unchanged, so fall through and add it to the
-		// pa_list in the normal way.
-	    }
-	}
-	
-	if (dynamic_cast<MPReachNLRIAttribute<IPv6>*>(*pai)) {
-  	    MPReachNLRIAttribute<IPv6>* mpreach =
-		dynamic_cast<MPReachNLRIAttribute<IPv6>*>(*pai);
-	    switch(mpreach->safi()) {
-	    case SAFI_UNICAST: {
-		IPv6NextHopAttribute nha(mpreach->nexthop());
-		pa_ipv6_unicast.add_path_attribute(nha);
-		break;
-	    }
-	    case SAFI_MULTICAST: {
-		IPv6NextHopAttribute nha(mpreach->nexthop());
-		pa_ipv6_multicast.add_path_attribute(nha);
-		break;
-	    }
-	    }
-	    continue;
-	}
-	
-	if (dynamic_cast<MPUNReachNLRIAttribute<IPv6>*>(*pai)) {
-	    continue;
-	}
+		case MP_REACH_NLRI:
+		    // we've got a multiprotocol NLRI to split out
+		    if (dynamic_cast<const MPReachNLRIAttribute<IPv6>*>(pa)) {
+			// it's IPv6
+			const MPReachNLRIAttribute<IPv6>* mpreach =
+			    dynamic_cast<const MPReachNLRIAttribute<IPv6>*>(pa);
+			switch(mpreach->safi()) {
+			case SAFI_UNICAST: {
+			    IPv6NextHopAttribute nha(mpreach->nexthop());
+			    pa_ipv6_unicast->add_path_attribute(nha);
+			    pa_ipv6_unicast->add_path_attribute(*pa);
+			    break;
+			}
+			case SAFI_MULTICAST: {
+			    IPv6NextHopAttribute nha(mpreach->nexthop());
+			    pa_ipv6_multicast->add_path_attribute(nha);
+			    pa_ipv6_multicast->add_path_attribute(*pa);
+			    break;
+			}
+			}
+		    }
 
-	if (dynamic_cast<MPReachNLRIAttribute<IPv4>*>(*pai)) {
-  	    MPReachNLRIAttribute<IPv4>* mpreach =
-		dynamic_cast<MPReachNLRIAttribute<IPv4>*>(*pai);
-	    switch(mpreach->safi()) {
-	    case SAFI_UNICAST:
-		XLOG_FATAL("AFI == IPv4 && SAFI == UNICAST???");
-// 		pa_ipv4_unicast.
-// 		  add_path_attribute(IPv4NextHopAttribute(mpreach->nexthop()));
-	    break;
-	    case SAFI_MULTICAST: {
-		IPv4NextHopAttribute nha(mpreach->nexthop());
-		pa_ipv4_multicast.add_path_attribute(nha);
-		break;
-	    }
-	    }
-	    continue;
-	}
+		    if (dynamic_cast<const MPReachNLRIAttribute<IPv4>*>(pa)) {
+			// it's IPv4
+			const MPReachNLRIAttribute<IPv4>* mpreach =
+			    dynamic_cast<const MPReachNLRIAttribute<IPv4>*>(pa);
+			switch(mpreach->safi()) {
+			case SAFI_UNICAST:
+			    // XXXX what should we do here?
+			    XLOG_WARNING("AFI == IPv4 && SAFI == UNICAST???");
+			    //pa_ipv4_unicast.
+			    //add_path_attribute(IPv4NextHopAttribute(mpreach->nexthop()));
+			    break;
+			case SAFI_MULTICAST: {
+			    IPv4NextHopAttribute nha(mpreach->nexthop());
+			    pa_ipv4_multicast->add_path_attribute(nha);
+			    pa_ipv4_multicast->add_path_attribute(*pa);
+			    break;
+			}
+			}
+		    }
+		    continue;
 
-	if (dynamic_cast<MPUNReachNLRIAttribute<IPv4>*>(*pai)) {
-	    continue;
-	}
+		case MP_UNREACH_NLRI:
+		    if (dynamic_cast<const MPUNReachNLRIAttribute<IPv6>*>(pa)) {
+			/* don't store this in the PA list */
+			continue;
+		    }
 
-	pa_ipv4_unicast.add_path_attribute(*pa);
 
-	/*
-	** The nexthop path attribute applies only to IPv4 Unicast case.
-	*/
-	if (NEXT_HOP != pa->type()) {
-	    pa_ipv4_multicast.add_path_attribute(*pa);
-	    pa_ipv6_unicast.add_path_attribute(*pa);
-	    pa_ipv6_multicast.add_path_attribute(*pa);
-	}
-    }
+		    if (dynamic_cast<const MPUNReachNLRIAttribute<IPv4>*>(pa)) {
+			/* don't store this in the PA list */
+			continue;
+		    }
+		default:
+		    /* the remaining attributes are handled normally below */
+		    {}
+		} /* end of switch */
+
+		pa_ipv4_unicast->add_path_attribute(*pa);
+
+		/*
+		** The nexthop path attribute applies only to IPv4 Unicast case.
+		*/
+		if (NEXT_HOP != pa->type()) {
+		    pa_ipv4_multicast->add_path_attribute(*pa);
+		    pa_ipv6_unicast->add_path_attribute(*pa);
+		    pa_ipv6_multicast->add_path_attribute(*pa);
+		}
+	    } /* end of if */
+	} /* end of for loop */
+    } /* end of if pa_list */
 
     /* finally store the ASPath attribute, now we know we're done messing with it */
     if (as_path) {
 	ASPathAttribute as_path_attr(*as_path);
-	pa_ipv4_unicast.add_path_attribute(as_path_attr);
-	pa_ipv4_multicast.add_path_attribute(as_path_attr);
-	pa_ipv6_unicast.add_path_attribute(as_path_attr);
-	pa_ipv6_multicast.add_path_attribute(as_path_attr);
+	pa_ipv4_unicast->add_path_attribute(as_path_attr);
+	pa_ipv4_multicast->add_path_attribute(as_path_attr);
+	pa_ipv6_unicast->add_path_attribute(as_path_attr);
+	pa_ipv6_multicast->add_path_attribute(as_path_attr);
     }
 
 
     // IPv4 Unicast Withdraws
-    set_if_true(ipv4_unicast, withdraw<IPv4>(p, SAFI_UNICAST));
+    set_if_true(ipv4_unicast, withdraw<IPv4>(p, pa_list, SAFI_UNICAST));
 
     // IPv4 Multicast Withdraws
-    set_if_true(ipv4_multicast, withdraw<IPv4>(p, SAFI_MULTICAST));
+    set_if_true(ipv4_multicast, withdraw<IPv4>(p, pa_list, SAFI_MULTICAST));
 
     // IPv6 Unicast Withdraws
-    set_if_true(ipv6_unicast, withdraw<IPv6>(p, SAFI_UNICAST));
+    set_if_true(ipv6_unicast, withdraw<IPv6>(p, pa_list, SAFI_UNICAST));
 
     // IPv6 Multicast Withdraws
-    set_if_true(ipv6_multicast, withdraw<IPv6>(p, SAFI_MULTICAST));
+    set_if_true(ipv6_multicast, withdraw<IPv6>(p, pa_list, SAFI_MULTICAST));
 
     // IPv4 Unicast Route add.
-    set_if_true(ipv4_unicast, add<IPv4>(p, pa_ipv4_unicast, SAFI_UNICAST));
+    XLOG_ASSERT(!pa_ipv4_unicast->is_locked());
+    set_if_true(ipv4_unicast, add<IPv4>(p, pa_list, 
+					pa_ipv4_unicast, SAFI_UNICAST));
 
     // IPv4 Multicast Route add.
-    set_if_true(ipv4_multicast, add<IPv4>(p,pa_ipv4_multicast,SAFI_MULTICAST));
+    set_if_true(ipv4_multicast, add<IPv4>(p, pa_list, 
+					  pa_ipv4_multicast,SAFI_MULTICAST));
 
     // IPv6 Unicast Route add.
-    set_if_true(ipv6_unicast, add<IPv6>(p, pa_ipv6_unicast, SAFI_UNICAST));
+    set_if_true(ipv6_unicast, add<IPv6>(p, pa_list,
+					pa_ipv6_unicast, SAFI_UNICAST));
 
     // IPv6 Multicast Route add.
-    set_if_true(ipv6_multicast, add<IPv6>(p,pa_ipv6_multicast,SAFI_MULTICAST));
+    set_if_true(ipv6_multicast, add<IPv6>(p, pa_list,
+					  pa_ipv6_multicast,SAFI_MULTICAST));
 
     if (ipv4_unicast)
 	_plumbing_unicast->push<IPv4>(this);
@@ -462,7 +533,9 @@ PeerHandler::start_packet()
 }
 
 int
-PeerHandler::add_route(const SubnetRoute<IPv4> &rt, bool /*ibgp*/, Safi safi)
+PeerHandler::add_route(const SubnetRoute<IPv4> &rt, 
+		       ref_ptr<FastPathAttributeList<IPv4> >& pa_list,
+		       bool /*ibgp*/, Safi safi)
 {
     debug_msg("PeerHandler::add_route(IPv4) %p\n", &rt);
     XLOG_ASSERT(_packet != NULL);
@@ -481,10 +554,12 @@ PeerHandler::add_route(const SubnetRoute<IPv4> &rt, bool /*ibgp*/, Safi safi)
     }
 
     // did we already add the packet attribute list?
-    if (_packet->pa_list().empty()) {
+    if (_packet->pa_list()->is_empty()) {
 	debug_msg("First add on this packet\n");
 	debug_msg("SubnetRoute is %s\n", rt.str().c_str());
 	// no, so add all the path attributes
+	_packet->replace_pathattribute_list(pa_list);
+#if 0
 	PathAttributeList<IPv4>::const_iterator pai;
 	pai = rt.attributes()->begin();
 	while (pai != rt.attributes()->end()) {
@@ -493,12 +568,16 @@ PeerHandler::add_route(const SubnetRoute<IPv4> &rt, bool /*ibgp*/, Safi safi)
 	    ** Don't put a multicast nexthop in the parameter list.
 	    */
 	    if (!(NEXT_HOP == (*pai)->type() && safi == SAFI_MULTICAST))
-		_packet->add_pathatt(**pai);
+		_packet.add_pathatt(**pai);
 	    ++pai;
 	}
+#endif
 	if (SAFI_MULTICAST == safi) {
+	    // Multicast SAFI packets don't have a regular nexthop,
+	    // but have on in the MultiProtocol attribute instead.
+	    _packet->pa_list()->remove_attribute_by_type(NEXT_HOP);
 	    MPReachNLRIAttribute<IPv4> mp(safi);
-	    mp.set_nexthop(rt.nexthop());
+	    mp.set_nexthop(pa_list->nexthop());
 	    _packet->add_pathatt(mp);
 	}
     }
@@ -507,15 +586,18 @@ PeerHandler::add_route(const SubnetRoute<IPv4> &rt, bool /*ibgp*/, Safi safi)
     switch(safi) {
     case SAFI_UNICAST: {
 	BGPUpdateAttrib nlri(rt.net());
- 	XLOG_ASSERT(_packet->pa_list().nexthop() == rt.nexthop());
+ 	XLOG_ASSERT(_packet->pa_list()->nexthop() == pa_list->nexthop());
 	_packet->add_nlri(nlri);
     }
 	break;
     case SAFI_MULTICAST: {
-	XLOG_ASSERT(_packet->mpreach<IPv4>(SAFI_MULTICAST));
-	XLOG_ASSERT(_packet->mpreach<IPv4>(SAFI_MULTICAST)->nexthop() == 
-		    rt.nexthop());
-	_packet->mpreach<IPv4>(SAFI_MULTICAST)->add_nlri(rt.net());
+	XLOG_ASSERT(pa_list->mpreach<IPv4>(SAFI_MULTICAST));
+	XLOG_ASSERT(pa_list->mpreach<IPv4>(SAFI_MULTICAST)->nexthop() == 
+		    pa_list->nexthop());
+	MPReachNLRIAttribute<IPv4>* mpreach_att =
+	    _packet->pa_list()->mpreach<IPv4>(SAFI_MULTICAST);
+	XLOG_ASSERT(mpreach_att);
+	mpreach_att->add_nlri(rt.net());
     }
 	break;
     }
@@ -524,7 +606,9 @@ PeerHandler::add_route(const SubnetRoute<IPv4> &rt, bool /*ibgp*/, Safi safi)
 }
 
 int
-PeerHandler::add_route(const SubnetRoute<IPv6> &rt, bool /*ibgp*/, Safi safi)
+PeerHandler::add_route(const SubnetRoute<IPv6> &rt, 
+		       ref_ptr<FastPathAttributeList<IPv6> >& pa_list,
+		       bool /*ibgp*/, Safi safi)
 {
     debug_msg("PeerHandler::add_route(IPv6) %p\n", &rt);
     XLOG_ASSERT(_packet != NULL);
@@ -543,29 +627,28 @@ PeerHandler::add_route(const SubnetRoute<IPv6> &rt, bool /*ibgp*/, Safi safi)
     }
 
     // did we already add the packet attribute list?
-    if (_packet->pa_list().empty()) {
-	debug_msg("First add on this packet\n");
-	debug_msg("SubnetRoute is %s\n", rt.str().c_str());
+    if (_packet->pa_list()->is_empty() && !pa_list->is_empty()) {
 	// no, so add all the path attributes
-	PathAttributeList<IPv6>::const_iterator pai;
-	pai = rt.attributes()->begin();
-	while (pai != rt.attributes()->end()) {
-	    debug_msg("Adding attribute\n");
-	    /*
-	    ** Don't put an IPv6 next hop in the IPv4 path attribute list.
-	    */
-	    if (NEXT_HOP != (*pai)->type())
-		_packet->add_pathatt(**pai);
-	    ++pai;
+	for (int i = 0; i < MAX_ATTRIBUTE; i++) {
+	    const PathAttribute* pa;
+	    pa = pa_list->find_attribute_by_type((PathAttType)i);
+	    if (pa && i != NEXT_HOP) {
+		/*
+		** Don't put an IPv6 next hop in the IPv4 path attribute list.
+		*/
+		_packet->add_pathatt(*pa);
+	    }
 	}
 	MPReachNLRIAttribute<IPv6> mp(safi);
-	mp.set_nexthop(rt.nexthop());
+	mp.set_nexthop(pa_list->nexthop());
 	_packet->add_pathatt(mp);
     }
 
-    XLOG_ASSERT(_packet->mpreach<IPv6>(safi));
-    XLOG_ASSERT(_packet->mpreach<IPv6>(safi)->nexthop() == rt.nexthop());
-    _packet->mpreach<IPv6>(safi)->add_nlri(rt.net());
+    MPReachNLRIAttribute<IPv6>* mpreach_att =
+	_packet->pa_list()->mpreach<IPv6>(safi);
+    XLOG_ASSERT(mpreach_att);
+    XLOG_ASSERT(mpreach_att->nexthop() == pa_list->nexthop());
+    mpreach_att->add_nlri(rt.net());
 
     return 0;
 }
@@ -574,30 +657,34 @@ int
 PeerHandler::replace_route(const SubnetRoute<IPv4> &old_rt,
 			   bool /*old_ibgp*/, 
 			   const SubnetRoute<IPv4> &new_rt, 
-			   bool new_ibgp, Safi safi)
+			   bool new_ibgp, 
+			   FPAList4Ref& pa_list, Safi safi)
 {
     // in the basic PeerHandler, we can ignore the old route, because
     // to change a route, the BGP protocol just sends the new
     // replacement route
     UNUSED(old_rt);
-    return add_route(new_rt, new_ibgp, safi);
+    return add_route(new_rt, pa_list, new_ibgp, safi);
 }
 
 int
 PeerHandler::replace_route(const SubnetRoute<IPv6> &old_rt,
 			   bool /*old_ibgp*/, 
 			   const SubnetRoute<IPv6> &new_rt, 
-			   bool new_ibgp, Safi safi)
+			   bool new_ibgp, 
+			   FPAList6Ref& pa_list, Safi safi)
 {
     // in the basic PeerHandler, we can ignore the old route, because
     // to change a route, the BGP protocol just sends the new
     // replacement route
     UNUSED(old_rt);
-    return add_route(new_rt, new_ibgp, safi);
+    return add_route(new_rt, pa_list, new_ibgp, safi);
 }
 
 int
-PeerHandler::delete_route(const SubnetRoute<IPv4> &rt, bool /*ibgp*/, 
+PeerHandler::delete_route(const SubnetRoute<IPv4> &rt, 
+			  FPAList4Ref& /*pa_list*/,
+			  bool /*ibgp*/, 
 			  Safi safi)
 {
     debug_msg("PeerHandler::delete_route(IPv4) %p\n", &rt);
@@ -612,9 +699,9 @@ PeerHandler::delete_route(const SubnetRoute<IPv4> &rt, bool /*ibgp*/,
 	start_packet();
     }
 
-    if (SAFI_MULTICAST == safi && 0 == _packet->mpunreach<IPv4>(safi)) {
-	MPUNReachNLRIAttribute<IPv4> mp(safi);
-	_packet->add_pathatt(mp);
+    if (SAFI_MULTICAST == safi && 0 == _packet->pa_list()->mpunreach<IPv4>(safi)) {
+	MPUNReachNLRIAttribute<IPv4>* mp = new MPUNReachNLRIAttribute<IPv4>(safi);
+	_packet->pa_list()->add_path_attribute(mp);
     }
     
     switch(safi) {
@@ -624,8 +711,8 @@ PeerHandler::delete_route(const SubnetRoute<IPv4> &rt, bool /*ibgp*/,
     }
 	break;
     case SAFI_MULTICAST: {
-	XLOG_ASSERT(_packet->mpunreach<IPv4>(SAFI_MULTICAST));
-	_packet->mpunreach<IPv4>(SAFI_MULTICAST)->add_withdrawn(rt.net());
+	XLOG_ASSERT(_packet->pa_list()->mpunreach<IPv4>(SAFI_MULTICAST));
+	_packet->pa_list()->mpunreach<IPv4>(SAFI_MULTICAST)->add_withdrawn(rt.net());
     }
 	break;
     }
@@ -634,7 +721,9 @@ PeerHandler::delete_route(const SubnetRoute<IPv4> &rt, bool /*ibgp*/,
 }
 
 int
-PeerHandler::delete_route(const SubnetRoute<IPv6>& rt, bool /*ibgp*/, 
+PeerHandler::delete_route(const SubnetRoute<IPv6>& rt, 
+			  FPAList6Ref& /*pa_list*/,
+			  bool /*ibgp*/, 
 			  Safi safi)
 {
     debug_msg("PeerHandler::delete_route(IPv6) %p\n", &rt);
@@ -649,13 +738,13 @@ PeerHandler::delete_route(const SubnetRoute<IPv6>& rt, bool /*ibgp*/,
 	start_packet();
     }
 
-    if (0 == _packet->mpunreach<IPv6>(safi)) {
-	MPUNReachNLRIAttribute<IPv6> mp(safi);
-	_packet->add_pathatt(mp);
+    if (0 == _packet->pa_list()->mpunreach<IPv6>(safi)) {
+	MPUNReachNLRIAttribute<IPv6>* mp = new MPUNReachNLRIAttribute<IPv6>(safi);
+	_packet->pa_list()->add_path_attribute(mp);
     }
 
-    XLOG_ASSERT(_packet->mpunreach<IPv6>(safi));
-    _packet->mpunreach<IPv6>(safi)->add_withdrawn(rt.net());
+    XLOG_ASSERT(_packet->pa_list()->mpunreach<IPv6>(safi));
+    _packet->pa_list()->mpunreach<IPv6>(safi)->add_withdrawn(rt.net());
 
     return 0;
 }
@@ -670,22 +759,21 @@ PeerHandler::push_packet()
     XLOG_ASSERT(_packet);
     int wdr = _packet->wr_list().size();
     int nlri = _packet->nlri_list().size();
-    int pa = _packet->pa_list().size();
 
-    if(_packet->mpreach<IPv4>(SAFI_MULTICAST))
-	nlri += _packet->mpreach<IPv4>(SAFI_MULTICAST)->nlri_list().size();
-    if(_packet->mpunreach<IPv4>(SAFI_MULTICAST))
-	wdr += _packet->mpunreach<IPv4>(SAFI_MULTICAST)->wr_list().size();
+    if(_packet->pa_list()->mpreach<IPv4>(SAFI_MULTICAST))
+	nlri += _packet->pa_list()->mpreach<IPv4>(SAFI_MULTICAST)->nlri_list().size();
+    if(_packet->pa_list()->mpunreach<IPv4>(SAFI_MULTICAST))
+	wdr += _packet->pa_list()->mpunreach<IPv4>(SAFI_MULTICAST)->wr_list().size();
 
     // Account for IPv6
-    if(_packet->mpreach<IPv6>(SAFI_UNICAST))
-	nlri += _packet->mpreach<IPv6>(SAFI_UNICAST)->nlri_list().size();
-    if(_packet->mpunreach<IPv6>(SAFI_UNICAST))
-	wdr += _packet->mpunreach<IPv6>(SAFI_UNICAST)->wr_list().size();
-    if(_packet->mpreach<IPv6>(SAFI_MULTICAST))
-	nlri += _packet->mpreach<IPv6>(SAFI_MULTICAST)->nlri_list().size();
-    if(_packet->mpunreach<IPv6>(SAFI_MULTICAST))
-	wdr += _packet->mpunreach<IPv6>(SAFI_MULTICAST)->wr_list().size();
+    if(_packet->pa_list()->mpreach<IPv6>(SAFI_UNICAST))
+	nlri += _packet->pa_list()->mpreach<IPv6>(SAFI_UNICAST)->nlri_list().size();
+    if(_packet->pa_list()->mpunreach<IPv6>(SAFI_UNICAST))
+	wdr += _packet->pa_list()->mpunreach<IPv6>(SAFI_UNICAST)->wr_list().size();
+    if(_packet->pa_list()->mpreach<IPv6>(SAFI_MULTICAST))
+	nlri += _packet->pa_list()->mpreach<IPv6>(SAFI_MULTICAST)->nlri_list().size();
+    if(_packet->pa_list()->mpunreach<IPv6>(SAFI_MULTICAST))
+	wdr += _packet->pa_list()->mpunreach<IPv6>(SAFI_MULTICAST)->wr_list().size();
 
 //     XLOG_ASSERT( (wdr+nlri) > 0);
     // If we get here and wdr+nlri equals zero then we were trying to
@@ -698,7 +786,7 @@ PeerHandler::push_packet()
     }
     
     if (nlri > 0)
-	XLOG_ASSERT(pa > 0);
+	XLOG_ASSERT(!_packet->pa_list()->is_empty());
 
     _nlri_total += nlri;
     _packets++;

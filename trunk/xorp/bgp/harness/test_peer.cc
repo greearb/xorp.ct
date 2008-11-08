@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.53 2008/10/02 21:56:26 bms Exp $"
+#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.54 2008/11/02 20:14:59 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -280,7 +280,10 @@ TestPeer::TestPeer(EventLoop& eventloop, XrlRouter& xrlrouter,
      _bgp_bytes(0)
 {
     _localdata = new LocalData(eventloop);
+    _localdata->set_as(AsNum(0));
     _peerdata = new BGPPeerData(*_localdata, Iptuple(), AsNum(0), IPv4(), 0);
+    // we force IBGP, as this does fewer tests
+    _peerdata->compute_peer_type();
 }
 
 TestPeer::~TestPeer()

@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.88 2008/10/02 21:56:26 bms Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.89 2008/10/11 01:37:14 paulz Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -76,7 +76,11 @@ Peer::Peer(EventLoop    *eventloop,
     Iptuple iptuple;
     _localdata = new LocalData(*eventloop);
     _localdata->set_use_4byte_asnums(false);
+    _localdata->set_as(AsNum(0));
     _peerdata = new BGPPeerData(*_localdata, iptuple, AsNum(0), IPv4(),0);
+    _peerdata->compute_peer_type();
+    _peerdata->set_multiprotocol<IPv6>(SAFI_UNICAST, BGPPeerData::NEGOTIATED);
+    _peerdata->set_multiprotocol<IPv6>(SAFI_UNICAST, BGPPeerData::SENT); 
 }
 
 Peer::Peer(const Peer& rhs)
@@ -498,8 +502,8 @@ Peer::send_packet(const string& line, const vector<string>& words)
     uint8_t buf[BGPPacket::MAXPACKETSIZE];
 
     XLOG_ASSERT(pkt->encode(buf, len, _peerdata));
+    printf("packet: %s\n", pkt->str().c_str());
     delete pkt;
-
     if (!_corrupt.empty()) {
 	list<Corrupt>::const_iterator i;
 	for (i = _corrupt.begin(); i != _corrupt.end(); i++) {
@@ -862,16 +866,13 @@ Peer::trie(const string& line, const vector<string>& words)
 	    /*
 	    ** Search for the AS Path in the update packet.
 	    */
-	    const list<PathAttribute*>& palist = bgpupdate->pa_list();
+	    FPAList4Ref palist = const_cast<UpdatePacket*>(bgpupdate)->pa_list();
 
 	    list<PathAttribute*>::const_iterator pai;
 	    const ASPath *aspath = 0;
-	    for(pai = palist.begin(); pai != palist.end(); pai++) {
-		if(AS_PATH == (*pai)->type())
-		    aspath = &((static_cast<ASPathAttribute *>(*pai))->
-			       as_path());
-	    }
-	    if(0 == aspath)
+	    if (palist->aspath_att())
+		aspath = &(palist->aspath());
+	    else
 		xorp_throw(InvalidString, 
 			   c_format("NO AS Path associated with route\n[%s]",
 				    line.c_str())); 
@@ -1023,8 +1024,9 @@ mrtd_routview_dump(const  UpdatePacket* p, const IPNet<A>& net,
     /*
     ** Figure out the total length of the attributes.
     */
+    size_t pa_len = BGPPacket::MAXPACKETSIZE;
     uint16_t length = 0;
-    
+#if 0    
     list <PathAttribute*>::const_iterator pai;
     for (pai = p->pa_list().begin(); pai != p->pa_list().end(); pai++) {
 	const PathAttribute* pa;
@@ -1034,6 +1036,10 @@ mrtd_routview_dump(const  UpdatePacket* p, const IPNet<A>& net,
 	XLOG_ASSERT(pa->encode(buf, pa_len, peerdata));
 	length += pa_len;
     }
+#endif
+    uint8_t buf[BGPPacket::MAXPACKETSIZE];
+    p->encode(buf, pa_len, peerdata);
+    length = pa_len;
 
     /*
     ** Due to alignment problems I can't use a structure overlay.
@@ -1099,6 +1105,7 @@ mrtd_routview_dump(const  UpdatePacket* p, const IPNet<A>& net,
     if(fwrite(&viewbuf[0], sizeof(viewbuf), 1, fp) != 1)
 	XLOG_FATAL("fwrite of %s failed: %s", fname.c_str(), strerror(errno));
 
+#if 0
     for (pai = p->pa_list().begin(); pai != p->pa_list().end(); pai++) {
 	const PathAttribute* pa;
 	pa = *pai;
@@ -1111,6 +1118,12 @@ mrtd_routview_dump(const  UpdatePacket* p, const IPNet<A>& net,
 	    XLOG_FATAL("fwrite of %s failed: %s", fname.c_str(),
 		       strerror(errno));
     }
+#endif
+    if(fwrite(buf, pa_len, 1, fp) != 1)
+	XLOG_FATAL("fwrite of %s failed: %s", fname.c_str(),
+		   strerror(errno));
+    
+
 
     fclose(fp);
 }
@@ -1436,7 +1449,7 @@ Peer::check_expect(BGPPacket *rec)
 	    break;
 	case MESSAGETYPEUPDATE:
 	    {
-	    UpdatePacket *pac = new UpdatePacket(rec_buf, rec_len, _peerdata);
+	    UpdatePacket *pac = new UpdatePacket(rec_buf, rec_len, _peerdata, 0, false);
 	    _expect._bad = pac;
 	    }
 	    break;
@@ -1570,7 +1583,7 @@ Peer::datain(const bool& status, const TimeVal& tv,
 	    break;
 	case MESSAGETYPEUPDATE: {
 	    debug_msg("UPDATE Packet RECEIVED\n");
-	    UpdatePacket pac(buf, length, _peerdata);
+	    UpdatePacket pac(buf, length, _peerdata, 0, false);
 	    debug_msg("%s", pac.str().c_str());
 	    /*
 	    ** Save the update message in the receive trie.
@@ -1716,6 +1729,7 @@ public:
 	} else {
 	    _wire_size = 3 + _size;
 	}
+	_type = _data[1];
     };
     
     PathAttribute *clone() const { 
@@ -1757,7 +1771,7 @@ Peer::path_attribute(const char *)
     uint16_t max_len = sizeof(path);
     size_t actual_length;
 
-    return PathAttribute::create(&path[0], max_len, actual_length, _peerdata);
+    return PathAttribute::create(&path[0], max_len, actual_length, _peerdata, 4);
 }
 
 /**

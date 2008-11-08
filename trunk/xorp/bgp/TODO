@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/bgp/TODO,v 1.19 2007/03/20 21:57:08 atanu Exp $
+# $XORP: xorp/bgp/TODO,v 1.20 2007/03/20 21:58:36 atanu Exp $
 #
 
 ------------------------------ TODO -----------------------------
@@ -46,9 +46,23 @@ will no longer be required.
 
 -- added 2005-09-23 by AG
 
-37) The header file timer_const.hh is not used, it should be used or deleted.
+38) The way we create ChainedSubnetRoutes is inefficient - we create a
+subnet route, then clone it into a chained subnet route.  Should add a
+new constructor for chained subnet route to avoid this extra copy.
 
--- added 2005-09-23 by AG
+-- added 2008-07-04 by mjh
+
+39) The changed flag on an InternalMessage seems to be superfluous,
+except for the isolation tests.  Once everything is stable again, it
+should be removed.  The same may be true of the copied flag, though
+this is more important for memory management.
+
+-- added 2008-07-16 by mjh
+
+40) OriginateRouteFilter is broken (always passes).  Figure out what
+it is for and fix it or remove it.
+
+-- added 2008-08-13 by mjh
 
 ------------------------------ TESTING --------------------------
 

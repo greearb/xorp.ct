@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/route_table_policy_ex.cc,v 1.8 2008/08/06 08:26:12 abittau Exp $"
+#ident "$XORP: xorp/bgp/route_table_policy_ex.cc,v 1.9 2008/10/02 21:56:20 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -53,6 +53,8 @@ template <class A>
 void
 PolicyTableExport<A>::init_varrw()
 {
+    if (this->_varrw)
+	delete this->_varrw;
     this->_varrw = new BGPVarRWExport<A>(
                         filter::filter2str(PolicyTable<A>::_filter_type),
                         _neighbor);

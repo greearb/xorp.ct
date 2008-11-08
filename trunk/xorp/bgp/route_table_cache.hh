@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/bgp/route_table_cache.hh,v 1.30 2008/07/23 05:09:36 pavlin Exp $
+// $XORP: xorp/bgp/route_table_cache.hh,v 1.31 2008/10/02 21:56:19 bms Exp $
 
 #ifndef __BGP_ROUTE_TABLE_CACHE_HH__
 #define __BGP_ROUTE_TABLE_CACHE_HH__
@@ -87,21 +87,22 @@ public:
     CacheTable(string tablename, Safi safi, BGPRouteTable<A> *parent,
 	       const PeerHandler *peer);
     ~CacheTable();
-    int add_route(const InternalMessage<A> &rtmsg,
+    int add_route(InternalMessage<A> &rtmsg,
 		  BGPRouteTable<A> *caller);
-    int replace_route(const InternalMessage<A> &old_rtmsg,
-		      const InternalMessage<A> &new_rtmsg,
+    int replace_route(InternalMessage<A> &old_rtmsg,
+		      InternalMessage<A> &new_rtmsg,
 		      BGPRouteTable<A> *caller);
-    int delete_route(const InternalMessage<A> &rtmsg, 
+    int delete_route(InternalMessage<A> &rtmsg, 
 		     BGPRouteTable<A> *caller);
     int push(BGPRouteTable<A> *caller);
-    int route_dump(const InternalMessage<A> &rtmsg,
+    int route_dump(InternalMessage<A> &rtmsg,
 		   BGPRouteTable<A> *caller,
 		   const PeerHandler *dump_peer);
 
     void flush_cache();
     const SubnetRoute<A> *lookup_route(const IPNet<A> &net,
-				       uint32_t& genid) const;
+				       uint32_t& genid,
+				       FPAListRef& pa_list) const;
     void route_used(const SubnetRoute<A>* route, bool in_use);
 
     RouteTableType type() const {return CACHE_TABLE;}
@@ -165,6 +166,8 @@ public:
 	for(int i = 0; i < _deletions_per_call; i++) {
 	    // In theory if current is invalid then it will move to a
 	    // valid entry. Unlike the STL, which this isn't.
+	    PAListRef<A> old_pa_list = current.payload().route()->attributes();
+	    old_pa_list.deregister_with_attmgr();
 	    route_table->erase(current);
 	    if (current == route_table->end()) {
 		_route_tables.pop();

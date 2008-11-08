@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/bgp/route_table_ribout.hh,v 1.19 2008/07/23 05:09:38 pavlin Exp $
+// $XORP: xorp/bgp/route_table_ribout.hh,v 1.20 2008/10/02 21:56:21 bms Exp $
 
 #ifndef __BGP_ROUTE_TABLE_RIBOUT_HH__
 #define __BGP_ROUTE_TABLE_RIBOUT_HH__
@@ -42,17 +42,18 @@ public:
 		PeerHandler *peer);
     ~RibOutTable();
     void print_queue(const list<const RouteQueueEntry<A> *>& queue) const;
-    int add_route(const InternalMessage<A> &rtmsg,
+    int add_route(InternalMessage<A> &rtmsg,
 		  BGPRouteTable<A> *caller);
-    int replace_route(const InternalMessage<A> &old_rtmsg,
-		      const InternalMessage<A> &new_rtmsg,
+    int replace_route(InternalMessage<A> &old_rtmsg,
+		      InternalMessage<A> &new_rtmsg,
 		      BGPRouteTable<A> *caller);
-    int delete_route(const InternalMessage<A> &rtmsg, 
+    int delete_route(InternalMessage<A> &rtmsg, 
 		     BGPRouteTable<A> *caller);
 
     int push(BGPRouteTable<A> *caller);
     const SubnetRoute<A> *lookup_route(const IPNet<A> &net,
-				       uint32_t& genid) const;
+				       uint32_t& genid,
+				       FPAListRef& pa_list) const;
 
     RouteTableType type() const {return RIB_OUT_TABLE;}
     string str() const;

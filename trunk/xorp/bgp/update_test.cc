@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/update_test.cc,v 1.20 2008/07/23 05:09:40 pavlin Exp $"
+#ident "$XORP: xorp/bgp/update_test.cc,v 1.21 2008/10/02 21:56:23 bms Exp $"
 
 #include "bgp_module.h"
 
@@ -26,6 +26,9 @@
 #include "libxorp/xlog.h"
 
 #include "packet.hh"
+#include "peer.hh"
+#include "bgp.hh"
+
 
 
 /*
@@ -90,10 +93,14 @@ main(int, char **argv)
     EventLoop eventloop;
     LocalData localdata(eventloop);
     Iptuple iptuple;
-    BGPPeerData pd(localdata, iptuple, AsNum(0), IPv4(),0);
+    BGPPeerData* pd = new BGPPeerData(localdata, iptuple, AsNum(0), IPv4(),0);
+    pd->compute_peer_type();
+    BGPMain main(eventloop);
+    BGPPeer peer(&localdata, pd, NULL, &main);
+
 
     try {
- 	UpdatePacket pac(&buffer[0], sizeof(buffer), &pd);
+ 	UpdatePacket pac(&buffer[0], sizeof(buffer), pd, &main, true);
 	
 	for(int i = 0; i < 2048; i++)
 	    test1(i);

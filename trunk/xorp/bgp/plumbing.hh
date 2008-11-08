@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/bgp/plumbing.hh,v 1.44 2008/07/23 05:09:35 pavlin Exp $
+// $XORP: xorp/bgp/plumbing.hh,v 1.45 2008/10/02 21:56:18 bms Exp $
 
 #ifndef __BGP_PLUMBING_HH__
 #define __BGP_PLUMBING_HH__
@@ -44,6 +44,7 @@
 #include "next_hop_resolver.hh"
 #include "parameter.hh"
 #include "policy/backend/policy_filters.hh"
+#include "path_attribute.hh"
 
 class BGPPlumbing;
 
@@ -63,9 +64,11 @@ public:
     int delete_peering(PeerHandler* peer_handler);
 
     void flush(PeerHandler* peer_handler);
-    int add_route(const InternalMessage<A> &rtmsg, 
+    int add_route(const IPNet<A>& net, 
+		  FPAListRef& pa_list,
+		  const PolicyTags& policytags,
 		  PeerHandler* peer_handler);
-    int delete_route(const InternalMessage<A> &rtmsg, 
+    int delete_route(InternalMessage<A> &rtmsg, 
 		     PeerHandler* peer_handler);
     int delete_route(const IPNet<A> &net, 
 		     PeerHandler* peer_handler);
@@ -175,13 +178,17 @@ public:
     int delete_peering(PeerHandler* peer_handler);
 
     void flush(PeerHandler* peer_handler);
-    int add_route(const InternalMessage<IPv4> &rtmsg,
+    int add_route(const IPv4Net& net, 
+		  FPAList4Ref& pa_list,
+		  const PolicyTags& policytags,
 		  PeerHandler* peer_handler);
-    int add_route(const InternalMessage<IPv6> &rtmsg, 
+    int add_route(const IPv6Net& net, 
+		  FPAList6Ref& pa_list,
+		  const PolicyTags& policytags,
 		  PeerHandler* peer_handler);
-    int delete_route(const InternalMessage<IPv4> &rtmsg, 
+    int delete_route(InternalMessage<IPv4> &rtmsg, 
 		     PeerHandler* peer_handler);
-    int delete_route(const InternalMessage<IPv6> &rtmsg, 
+    int delete_route(InternalMessage<IPv6> &rtmsg, 
 		     PeerHandler* peer_handler);
     int delete_route(const IPNet<IPv4> &net, 
 		     PeerHandler* peer_handler);

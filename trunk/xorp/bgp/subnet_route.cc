@@ -18,17 +18,32 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/subnet_route.cc,v 1.25 2008/07/23 05:09:38 pavlin Exp $"
+#ident "$XORP: xorp/bgp/subnet_route.cc,v 1.26 2008/10/02 21:56:21 bms Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/xlog.h"
 #include "subnet_route.hh"
 
+RouteMetaData::RouteMetaData(const RouteMetaData& metadata)
+{
+    _flags = metadata._flags;  // leave the ref count - this will be
+			      // fixed by the container class
+    _igp_metric = metadata._igp_metric;
+    _policytags = metadata._policytags;
+    for (int i = 0; i < 3; i++)
+	_pfilter[i] = metadata._pfilter[i];
+}
 
-template<class A> AttributeManager<A> SubnetRoute<A>::_att_mgr;
+RouteMetaData::RouteMetaData()
+    :_flags(0), _igp_metric(0xffffffff)
+{
+}
+
 
 template<class A>
 SubnetRoute<A>::SubnetRoute(const SubnetRoute<A>& route_to_clone) 
+    : _attributes(route_to_clone._attributes), 
+      _metadata(route_to_clone._metadata)
 {
     debug_msg("SubnetRoute constructor1 giving %p\n", this);
     //note that we need an explicit constructor here, rather than
@@ -38,87 +53,68 @@ SubnetRoute<A>::SubnetRoute(const SubnetRoute<A>& route_to_clone)
     _net = route_to_clone._net;
     _parent_route = route_to_clone._parent_route;
 
-    const PathAttributeList<A>* atts;
-    atts = route_to_clone.attributes();
-    //the attribute manager handles memory management, and ensuring
-    //that only one copy of each attribute list is ever stored
-    _attributes = _att_mgr.add_attribute_list(atts);
-
-    _flags = route_to_clone._flags;
     //set our reference count to one (our own self-reference)
     //and clear the deleted flag
-    _flags ^= (_flags & (SRF_REFCOUNT | SRF_DELETED));
+    _metadata.reset_flags();
 
     //update parent refcount
     if (_parent_route)
 	_parent_route->bump_refcount(1);
-    _igp_metric = route_to_clone._igp_metric;
-
-    _policytags = route_to_clone._policytags;
-
-    for (int i = 0; i < 3; i++)
-	_pfilter[i] = route_to_clone._pfilter[i];
 }
 
 template<class A>
 SubnetRoute<A>::SubnetRoute(const IPNet<A> &n, 
-			       const PathAttributeList<A>* atts,
-			       const SubnetRoute<A>* parent_route)
-    : _net(n), _parent_route(parent_route) {
+			    PAListRef<A> atts,
+			    const SubnetRoute<A>* parent_route)
+    : _net(n), _attributes(atts), _parent_route(parent_route) {
     debug_msg("SubnetRoute constructor2 giving %p\n", this);
     //the attribute manager handles memory management, and ensuring
     //that only one copy of each attribute list is ever stored
-    _attributes = _att_mgr.add_attribute_list(atts);
 
-    _flags = 0;
+    _metadata.reset_flags();
     //the in_use flag is set to false so reduce the work we have to
     //re-do when we have to touch all the routes in a route_table.  It
     //should default to true if we don't know for sure that a route is
     //not used as this is always safe, if somewhat inefficient.
-    _flags |= SRF_IN_USE;
+    _metadata.set_in_use(true);
 
     // we must set the aggregate_prefix_len to SR_AGGRLEN_IGNORE to
     // indicate that the route has not been (yet) marked for aggregation
     // the statement bellow is equivalent to
     // this->set_aggr_prefix_len(SR_AGGRLEN_IGNORE)
-    _flags |= SRF_AGGR_PREFLEN_MASK;
+    _metadata.dont_aggregate();
 
     if (_parent_route) {
 	_parent_route->bump_refcount(1);
     }
-
-    _igp_metric = 0xffffffff;
 }
 
 template<class A>
 SubnetRoute<A>::SubnetRoute(const IPNet<A> &n, 
-			       const PathAttributeList<A>* atts,
-			       const SubnetRoute<A>* parent_route,
-			       uint32_t igp_metric)
-    : _net(n), _parent_route(parent_route) {
+			    PAListRef<A> atts,
+			    const SubnetRoute<A>* parent_route,
+			    uint32_t igp_metric)
+    : _net(n), _attributes(atts), _parent_route(parent_route) {
     debug_msg("SubnetRoute constructor3 giving %p\n", this);
-    //the attribute manager handles memory management, and ensuring
-    //that only one copy of each attribute list is ever stored
-    _attributes = _att_mgr.add_attribute_list(atts);
 
-    _flags = 0;
+    _metadata.reset_flags();
     //the in_use flag is set to false so reduce the work we have to
     //re-do when we have to touch all the routes in a route_table.  It
     //should default to true if we don't know for sure that a route is
     //not used as this is always safe, if somewhat inefficient.
-    _flags |= SRF_IN_USE;
+    _metadata.set_in_use(true);
 
     // we must set the aggregate_prefix_len to SR_AGGRLEN_IGNORE to
     // indicate that the route has not been (yet) marked for aggregation
     // the statement bellow is equivalent to
     // this->set_aggr_prefix_len(SR_AGGRLEN_IGNORE)
-    _flags |= SRF_AGGR_PREFLEN_MASK;
+    _metadata.dont_aggregate();
 
     if (parent_route) {
 	_parent_route->bump_refcount(1);
     }
 
-    _igp_metric = igp_metric;
+    _metadata.set_igp_metric(igp_metric);
 }
 
 template<class A>
@@ -127,7 +123,7 @@ SubnetRoute<A>::operator==(const SubnetRoute<A>& them) const {
     //only compare net and attributes, not flags
     if (!(_net == them._net))
 	return false;
-    if (!(*_attributes == *(them._attributes)))
+    if (!(_attributes == (them._attributes)))
 	return false;
     return true;
 }
@@ -135,7 +131,6 @@ SubnetRoute<A>::operator==(const SubnetRoute<A>& them) const {
 template<class A>
 SubnetRoute<A>::~SubnetRoute() {
     debug_msg("SubnetRoute destructor called for %p\n", this);
-    _att_mgr.delete_attribute_list(_attributes);
 
     assert(refcount() == 0);
     if (_parent_route)
@@ -144,21 +139,20 @@ SubnetRoute<A>::~SubnetRoute() {
     //prevent accidental reuse after deletion.
     _net = IPNet<A>();
     _parent_route = (const SubnetRoute<A>*)0xbad;
-    _attributes = (const PathAttributeList<A>*)0xbad;
-    _flags = 0xffffffff;
 }
 
 template<class A>
 void 
 SubnetRoute<A>::unref() const {
-    if ((_flags & SRF_DELETED) != 0) {
+
+    if (_metadata.is_deleted()) {
 	XLOG_FATAL("SubnetRoute %p: multiple unref's\n", this);
     }
     
     if (refcount() == 0) 
 	delete this;
     else {
-	_flags |= SRF_DELETED;
+	_metadata.set_deleted();
     }
 }
 
@@ -177,8 +171,7 @@ SubnetRoute<A>::set_parent_route(const SubnetRoute<A> *parent)
 template<class A>
 void 
 SubnetRoute<A>::set_is_winner(uint32_t igp_metric) const {
-    _flags |= SRF_WINNER;
-    _igp_metric = igp_metric;
+    _metadata.set_is_winner(igp_metric);
     if (_parent_route) {
 	_parent_route->set_is_winner(igp_metric);
     }
@@ -187,7 +180,7 @@ SubnetRoute<A>::set_is_winner(uint32_t igp_metric) const {
 template<class A>
 void 
 SubnetRoute<A>::set_is_not_winner() const {
-    _flags &= ~SRF_WINNER;
+    _metadata.set_is_not_winner();
     if (_parent_route) {
 	_parent_route->set_is_not_winner();
     }
@@ -196,11 +189,7 @@ SubnetRoute<A>::set_is_not_winner() const {
 template<class A>
 void 
 SubnetRoute<A>::set_in_use(bool used) const {
-    if (used) {
-	_flags |= SRF_IN_USE;
-    } else {
-	_flags &= ~SRF_IN_USE;
-    }
+    _metadata.set_in_use(used);
     if (_parent_route) {
 	_parent_route->set_in_use(used);
     }
@@ -214,11 +203,7 @@ SubnetRoute<A>::set_in_use(bool used) const {
 template<class A>
 void 
 SubnetRoute<A>::set_nexthop_resolved(bool resolvable) const {
-    if (resolvable) {
-	_flags |= SRF_NH_RESOLVED;
-    } else {
-	_flags &= ~SRF_NH_RESOLVED;
-    }
+    _metadata.set_nexthop_resolved(resolvable);
     if (_parent_route) {
 	_parent_route->set_nexthop_resolved(resolvable);
     }
@@ -232,12 +217,7 @@ SubnetRoute<A>::set_nexthop_resolved(bool resolvable) const {
 template<class A>
 void 
 SubnetRoute<A>::set_filtered(bool filtered) const {
-    if (filtered) {
-	_flags |= SRF_FILTERED;
-    } else {
-	_flags &= ~SRF_FILTERED;
-    }
-
+    _metadata.set_filtered(filtered);
 #ifdef DEBUG_FLAGS
     printf("set_filtered: %p = %s", this, bool_c_str(filtered));
     printf("\n%s\n", str().c_str());
@@ -284,7 +264,7 @@ SubnetRoute<A>::policyfilter(uint32_t i) const
 {
     if (_parent_route)
 	return _parent_route->policyfilter(i);
-    return _pfilter[i];
+    return _metadata.policyfilter(i);
 }
 
 template<class A>
@@ -294,7 +274,7 @@ SubnetRoute<A>::set_policyfilter(uint32_t i, const RefPf& f) const
     if (_parent_route) {
 	_parent_route->set_policyfilter(i, f);
     }
-    _pfilter[i] = f;
+    _metadata.set_policyfilter(i, f);
 }
 
 template class SubnetRoute<IPv4>;

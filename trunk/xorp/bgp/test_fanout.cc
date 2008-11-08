@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/test_fanout.cc,v 1.38 2008/07/23 05:09:38 pavlin Exp $"
+#ident "$XORP: xorp/bgp/test_fanout.cc,v 1.39 2008/10/02 21:56:22 bms Exp $"
 
 #include "bgp_module.h"
 
@@ -130,14 +130,17 @@ test_fanout(TestInfo& /*info*/)
     aspath3.prepend_as(AsNum(9));
     ASPathAttribute aspathatt3(aspath3);
 
-    PathAttributeList<IPv4>* palist1 =
-	new PathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
+    FPAList4Ref fpalist1 =
+	new FastPathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
+    PAListRef<IPv4> palist1 = new PathAttributeList<IPv4>(fpalist1);
 
-    PathAttributeList<IPv4>* palist2 =
-	new PathAttributeList<IPv4>(nhatt2, aspathatt2, igp_origin_att);
+    FPAList4Ref fpalist2 =
+	new FastPathAttributeList<IPv4>(nhatt2, aspathatt2, igp_origin_att);
+    PAListRef<IPv4> palist2 = new PathAttributeList<IPv4>(fpalist2);
 
-    PathAttributeList<IPv4>* palist3 =
-	new PathAttributeList<IPv4>(nhatt3, aspathatt3, igp_origin_att);
+    FPAList4Ref fpalist3 =
+	new FastPathAttributeList<IPv4>(nhatt3, aspathatt3, igp_origin_att);
+    PAListRef<IPv4> palist3 = new PathAttributeList<IPv4>(fpalist3);
 
     //create a subnet route
     SubnetRoute<IPv4> *sr1, *sr2;
@@ -269,6 +272,8 @@ test_fanout(TestInfo& /*info*/)
     sr1->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     fanout_table->add_route(*msg, NULL);
+    delete msg;
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     fanout_table->delete_route(*msg, NULL);
     delete msg;
 
@@ -278,6 +283,8 @@ test_fanout(TestInfo& /*info*/)
     sr2->set_nexthop_resolved(true);
     msg = new InternalMessage<IPv4>(sr2, &handler2, 0);
     fanout_table->add_route(*msg, NULL);
+    delete msg;
+    msg = new InternalMessage<IPv4>(sr2, &handler2, 0);
     fanout_table->delete_route(*msg, NULL);
     delete msg;
 
@@ -664,9 +671,12 @@ test_fanout(TestInfo& /*info*/)
     delete debug_table1;
     delete debug_table2;
     delete debug_table3;
-    delete palist1;
-    delete palist2;
-    delete palist3;
+    palist1.release();
+    palist2.release();
+    palist3.release();
+    fpalist1 = 0;
+    fpalist2 = 0;
+    fpalist3 = 0;
 
     FILE *file = fopen(filename.c_str(), "r");
     if (file == NULL) {

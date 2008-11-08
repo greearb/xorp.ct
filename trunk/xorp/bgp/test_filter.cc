@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/test_filter.cc,v 1.44 2008/07/23 05:09:38 pavlin Exp $"
+#ident "$XORP: xorp/bgp/test_filter.cc,v 1.45 2008/10/02 21:56:22 bms Exp $"
 
 #include "bgp_module.h"
 
@@ -119,19 +119,24 @@ test_filter(TestInfo& /*info*/)
     aspath3.prepend_as(AsNum(9));
     ASPathAttribute aspathatt3(aspath3);
 
-    PathAttributeList<IPv4>* palist1 =
-	new PathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
+    FPAList4Ref fpalist1 =
+	new FastPathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
+    PAListRef<IPv4> palist1 = new PathAttributeList<IPv4>(fpalist1);
 
-    PathAttributeList<IPv4>* palist2 =
-	new PathAttributeList<IPv4>(nhatt2, aspathatt2, igp_origin_att);
+    FPAList4Ref fpalist2 =
+	new FastPathAttributeList<IPv4>(nhatt2, aspathatt2, igp_origin_att);
+    PAListRef<IPv4> palist2 = new PathAttributeList<IPv4>(fpalist2);
 
-    PathAttributeList<IPv4>* palist3 =
-	new PathAttributeList<IPv4>(nhatt3, aspathatt3, igp_origin_att);
+    FPAList4Ref fpalist3 =
+	new FastPathAttributeList<IPv4>(nhatt3, aspathatt3, igp_origin_att);
+    PAListRef<IPv4> palist3 = new PathAttributeList<IPv4>(fpalist3);
 
     // create a subnet route
     SubnetRoute<IPv4> *sr1, *sr2;
 
     InternalMessage<IPv4>* msg;
+
+    PolicyTags pt;
 
     // ================================================================
     // Test1: trivial add and delete
@@ -288,30 +293,28 @@ test_filter(TestInfo& /*info*/)
     // add a route
     debug_table->write_comment("TEST 4");
     debug_table->write_comment("ADD, LOOKUP AND DELETE UNFILTERED");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 1);
-    ribin_table->add_route(*msg, NULL);
-    sr1->unref();
-    delete msg;
+    ribin_table->add_route(net1, fpalist1, pt);
 
     debug_table->write_separator();
     debug_table->write_comment("LOOKUP ROUTE");
     const SubnetRoute<IPv4> *found_route;
     uint32_t genid = 0xffff;
-    found_route = filter_table->lookup_route(net1, genid);
+    FPAList4Ref found_fpalist;
+    found_route = filter_table->lookup_route(net1, genid, found_fpalist);
     assert(found_route != NULL);
     assert(found_route->net() == net1);
-    assert(*(found_route->attributes()) == *palist1);
+#if 0
+    printf("orig attributes: \n%s\n", palist1->str().c_str());
+    printf("found attributes1: \n%s\n", found_route->attributes()->str().c_str());
+    printf("found attributes2: \n%s\n", found_fpalist->str().c_str());
+#endif
+    assert(found_route->attributes() == palist1);
 
     debug_table->write_comment("TEST SUCCESSFUL");
     debug_table->write_separator();
 
     // delete the route
-    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 1);
-    ribin_table->delete_route(*msg, NULL);
-    sr1->unref();
-    delete msg;
+    ribin_table->delete_route(net1);
     debug_table->write_separator();
 
     // ================================================================
@@ -320,16 +323,12 @@ test_filter(TestInfo& /*info*/)
     // add a route
     debug_table->write_comment("TEST 4a");
     debug_table->write_comment("ADD, LOOKUP AND DELETE FILTERED");
-    sr1 = new SubnetRoute<IPv4>(net1, palist2, NULL);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 1);
     debug_table->write_comment("ADD, SHOULD BE FILTERED");
-    ribin_table->add_route(*msg, NULL);
-    sr1->unref();
-    delete msg;
+    ribin_table->add_route(net1, fpalist2, pt);
 
     debug_table->write_separator();
     debug_table->write_comment("LOOKUP ROUTE");
-    found_route = filter_table->lookup_route(net1, genid);
+    found_route = filter_table->lookup_route(net1, genid, found_fpalist);
     // route should not be found because it was filtered
     assert(found_route == NULL);
 
@@ -337,12 +336,8 @@ test_filter(TestInfo& /*info*/)
     debug_table->write_separator();
 
     // delete the route
-    sr1 = new SubnetRoute<IPv4>(net1, palist2, NULL);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 1);
     debug_table->write_comment("DELETE, SHOULD BE FILTERED");
-    ribin_table->delete_route(*msg, NULL);
-    sr1->unref();
-    delete msg;
+    ribin_table->delete_route(net1);
 
     debug_table->write_separator();
 
@@ -356,12 +351,15 @@ test_filter(TestInfo& /*info*/)
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 1);
     filter_table->add_route(*msg, ribin_table);
+    sr1->unref();
+    delete msg;
 
     debug_table->write_separator();
 
     // delete the route
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 1);
     filter_table->delete_route(*msg, ribin_table);
-
     debug_table->write_separator();
     sr1->unref();
     delete msg;
@@ -419,12 +417,13 @@ test_filter(TestInfo& /*info*/)
     debug_table->write_comment("ADD AND DELETE");
     debug_table->write_comment("EXPECT CHANGE NOT TO PROPAGATE");
 
-    PathAttributeList<IPv4>* palist4 =
-	new PathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
+    FPAList4Ref fpalist4 =
+	new FastPathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
     CommunityAttribute comm_att;
     comm_att.add_community(CommunityAttribute::NO_EXPORT);
     assert(comm_att.contains(CommunityAttribute::NO_EXPORT));
-    palist4->add_path_attribute(comm_att);
+    fpalist4->add_path_attribute(comm_att);
+    PAListRef<IPv4> palist4 = new PathAttributeList<IPv4>(fpalist4);
 
     sr1 = new SubnetRoute<IPv4>(net1, palist4, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 1);
@@ -493,9 +492,14 @@ test_filter(TestInfo& /*info*/)
     delete ribin_table;
     delete filter_table;
     delete debug_table;
-    delete palist1;
-    delete palist2;
-    delete palist3;
+    palist1.release();
+    palist2.release();
+    palist3.release();
+    palist4.release();
+    fpalist1 = 0;
+    fpalist2 = 0;
+    fpalist3 = 0;
+    fpalist4 = 0;
 
     FILE *file = fopen(filename.c_str(), "r");
     if (file == NULL) {

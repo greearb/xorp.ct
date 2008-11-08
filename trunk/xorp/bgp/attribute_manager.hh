@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/bgp/attribute_manager.hh,v 1.10 2008/07/23 05:09:31 pavlin Exp $
+// $XORP: xorp/bgp/attribute_manager.hh,v 1.11 2008/10/02 21:56:14 bms Exp $
 
 #ifndef __BGP_ATTRIBUTE_MANAGER_HH__
 #define __BGP_ATTRIBUTE_MANAGER_HH__
@@ -25,6 +25,10 @@
 #include <set>
 #include "path_attribute.hh"
 
+template <class A>
+class PathAttributeList;
+
+#if 0
 template <class A>
 class StoredAttributeList {
 public:
@@ -53,6 +57,8 @@ private:
     int _references;
 };
 
+#endif
+
 /**
  * Att_Ptr_Cmp is needed because we want BGPAttributeManager to use a
  * set of pointers, but when we check to see if something's in the set,
@@ -62,8 +68,7 @@ private:
 template <class A>
 class Att_Ptr_Cmp {
 public:
-    bool operator() (StoredAttributeList<A> *a,
-		     StoredAttributeList<A> *b) const {
+    bool operator() (const PAListRef<A>& a, const PAListRef<A>& b) const {
 /*	printf("Att_Ptr_Cmp [%s] < [%s] ?\n", a->attribute()->str().c_str(),
 	b->attribute()->str().c_str());*/
 #ifdef OLDWAY
@@ -75,7 +80,7 @@ public:
 	    return false;
 	}
 #else
-	return *a < *b;
+	return a < b;
 #endif
     }
 };
@@ -92,15 +97,14 @@ template <class A>
 class AttributeManager {
 public:
     AttributeManager();
-    const PathAttributeList<A> *
-       add_attribute_list(const PathAttributeList<A> *attribute_list);
-    void delete_attribute_list(const PathAttributeList<A> *attribute_list);
+    PAListRef<A> add_attribute_list(PAListRef<A>& attribute_list);
+    void delete_attribute_list(PAListRef<A>& attribute_list);
     int number_of_managed_atts() const {
 	return _attribute_lists.size();
     }
 private:
     // set above for explanation of Att_Ptr_Cmp
-    set <StoredAttributeList<A>*, Att_Ptr_Cmp<A> > _attribute_lists;
+    set <PAListRef<A>, Att_Ptr_Cmp<A> > _attribute_lists;
     int _total_references;
 };
 

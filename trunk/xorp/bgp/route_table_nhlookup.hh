@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/bgp/route_table_nhlookup.hh,v 1.18 2008/07/23 05:09:37 pavlin Exp $
+// $XORP: xorp/bgp/route_table_nhlookup.hh,v 1.19 2008/10/02 21:56:20 bms Exp $
 
 #ifndef __BGP_ROUTE_TABLE_NHLOOKUP_HH__
 #define __BGP_ROUTE_TABLE_NHLOOKUP_HH__
@@ -29,8 +29,8 @@
 template<class A>
 class MessageQueueEntry {
 public:
-    MessageQueueEntry(const InternalMessage<A>* add_msg,
-		      const InternalMessage<A>* delete_msg);
+    MessageQueueEntry(InternalMessage<A>* add_msg,
+		      InternalMessage<A>* delete_msg);
     MessageQueueEntry(const MessageQueueEntry& original);
     ~MessageQueueEntry();
     typedef enum op {
@@ -42,16 +42,18 @@ public:
 	if (_add_msg!=NULL && _delete_msg!=NULL) return REPLACE;
 	abort();
     }
-    const InternalMessage<A>* add_msg() const {return _add_msg;}
+    InternalMessage<A>* add_msg() const {return _add_msg;}
     const SubnetRoute<A>* added_route() const {return _add_msg->route();}
+    FPAListRef& added_attributes() const {return _add_msg->attributes();}
 
-    const InternalMessage<A>* delete_msg() const {return _delete_msg;}
+    InternalMessage<A>* delete_msg() const {return _delete_msg;}
     const SubnetRoute<A>* deleted_route() const {return _delete_msg->route();}
+    FPAListRef& deleted_attributes() const {return _delete_msg->attributes();}
     const IPNet<A>& net() const {return _add_msg->route()->net();}
     string str() const;
 private:
-    void copy_in(const InternalMessage<A>* add_msg,
-		 const InternalMessage<A>* delete_msg);
+    void copy_in(InternalMessage<A>* add_msg,
+		 InternalMessage<A>* delete_msg);
 
     InternalMessage<A>* _add_msg;
     InternalMessage<A>* _delete_msg;
@@ -70,16 +72,17 @@ public:
 		  Safi safi,
 		  NextHopResolver<A> *nexthop_resolver,
 		  BGPRouteTable<A> *parent);
-    int add_route(const InternalMessage<A> &rtmsg,
+    int add_route(InternalMessage<A> &rtmsg,
 		  BGPRouteTable<A> *caller);
-    int replace_route(const InternalMessage<A> &old_rtmsg,
-		      const InternalMessage<A> &new_rtmsg,
+    int replace_route(InternalMessage<A> &old_rtmsg,
+		      InternalMessage<A> &new_rtmsg,
 		      BGPRouteTable<A> *caller);
-    int delete_route(const InternalMessage<A> &rtmsg, 
+    int delete_route(InternalMessage<A> &rtmsg, 
 		     BGPRouteTable<A> *caller);
     int push(BGPRouteTable<A> *caller);
     const SubnetRoute<A> *lookup_route(const IPNet<A> &net,
-				       uint32_t& genid) const;
+				       uint32_t& genid,
+				       FPAListRef& pa_list) const;
     void route_used(const SubnetRoute<A>* route, bool in_use);
     
     virtual void RIB_lookup_done(const A& nexthop, 
@@ -90,9 +93,9 @@ public:
     string str() const;
 private:
     //access the message queue by subnet or an address on the subnet
-    RefTrie<A, const MessageQueueEntry<A> > _queue_by_net;
+    RefTrie<A, MessageQueueEntry<A> > _queue_by_net;
     //access the message queue by nexthop
-    multimap <A, const MessageQueueEntry<A>*> _queue_by_nexthop;
+    multimap <A, MessageQueueEntry<A>*> _queue_by_nexthop;
 
     NextHopResolver<A>* _next_hop_resolver;
 
@@ -100,7 +103,8 @@ private:
      * Add the message queue entry to both queues.
      */
     void add_to_queue(const A& nexthop, const IPNet<A>& net,
-		      const MessageQueueEntry<A> &mqe);
+		      InternalMessage<A>* new_msg,
+		      InternalMessage<A>* old_msg);
 
     /**
      * Lookup subnet in the _queue_by_net.
@@ -109,7 +113,7 @@ private:
      * @param net to lookup.
      * @return a message queue entry if found else zero.
      */
-    const MessageQueueEntry<A> *
+    MessageQueueEntry<A> *
     lookup_in_queue(const A& nexthop, const IPNet<A>& net) const;
 
     /**

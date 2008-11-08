@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.42 2008/07/23 05:09:36 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.43 2008/10/02 21:56:19 bms Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -65,7 +65,7 @@ DumpTable<A>::DumpTable(string table_name,
 
 template<class A>
 int
-DumpTable<A>::add_route(const InternalMessage<A> &rtmsg,
+DumpTable<A>::add_route(InternalMessage<A> &rtmsg,
 			BGPRouteTable<A> *caller) 
 {
     debug_msg("\n         %s\n caller: %s\n"
@@ -93,7 +93,7 @@ DumpTable<A>::add_route(const InternalMessage<A> &rtmsg,
 			   rtmsg.net().str().c_str()));
 #endif
 	return this->_next_table->add_route(rtmsg,
-				      static_cast<BGPRouteTable<A>*>(this));
+					   static_cast<BGPRouteTable<A>*>(this));
     } else {
 	cp(3);
 #ifdef AUDIT_ENABLE
@@ -113,8 +113,8 @@ DumpTable<A>::add_route(const InternalMessage<A> &rtmsg,
 
 template<class A>
 int
-DumpTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
-			    const InternalMessage<A> &new_rtmsg,
+DumpTable<A>::replace_route(InternalMessage<A> &old_rtmsg,
+			    InternalMessage<A> &new_rtmsg,
 			    BGPRouteTable<A> *caller) 
 {
     debug_msg("%s::replace_route %p -> %p\n",
@@ -168,7 +168,7 @@ DumpTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 
 template<class A>
 int
-DumpTable<A>::route_dump(const InternalMessage<A> &rtmsg,
+DumpTable<A>::route_dump(InternalMessage<A> &rtmsg,
 			 BGPRouteTable<A> *caller,
 			 const PeerHandler* dump_peer) 
 {
@@ -201,7 +201,7 @@ DumpTable<A>::route_dump(const InternalMessage<A> &rtmsg,
 
 template<class A>
 int
-DumpTable<A>::delete_route(const InternalMessage<A> &rtmsg,
+DumpTable<A>::delete_route(InternalMessage<A> &rtmsg,
 			   BGPRouteTable<A> *caller) 
 {
     debug_msg("%s::delete_route %p\n",
@@ -246,10 +246,11 @@ DumpTable<A>::push(BGPRouteTable<A> *caller)
 
 template<class A>
 const SubnetRoute<A>*
-DumpTable<A>::lookup_route(const IPNet<A> &net, uint32_t& genid) const 
+DumpTable<A>::lookup_route(const IPNet<A> &net, uint32_t& genid,
+			   FPAListRef& pa_list) const 
 {
     cp(13);
-    return this->_parent->lookup_route(net, genid);
+    return this->_parent->lookup_route(net, genid, pa_list);
 }
 
 template<class A>

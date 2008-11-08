@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/policy/test/Makefile.am,v 1.6 2008/08/06 08:04:51 abittau Exp $
+## $XORP: xorp/policy/test/Makefile.am,v 1.7 2008/08/06 08:11:45 abittau Exp $
 ##
 
 # -- Test Programs
@@ -9,7 +9,7 @@ TESTS            = dummy_test.sh
 # -- No-install Programs
 noinst_PROGRAMS  = compilepolicy
 noinst_PROGRAMS += execpolicy
-noinst_PROGRAMS += policybench
+#noinst_PROGRAMS += policybench
 
 # compilepolicy
 compilepolicy_SOURCES		 = compilepolicy.cc
@@ -39,23 +39,23 @@ execpolicy_LDADD		+= $(top_builddir)/libxipc/libxipc.la
 execpolicy_LDADD		+= $(top_builddir)/libxorp/libxorp.la
 
 # policybench
-policybench_SOURCES		 = policybench.cc
-policybench_SOURCES		+= file_varrw.cc
+# policybench_SOURCES		 = policybench.cc
+# policybench_SOURCES		+= file_varrw.cc
 
-policybench_LDADD		 = $(top_builddir)/bgp/libbgp.la
-policybench_LDADD               += $(top_builddir)/xrl/targets/libbgpbase.la
-policybench_LDADD        	+= $(top_builddir)/policy/backend/libpolicybackend.la
-policybench_LDADD               += $(top_builddir)/libfeaclient/libfeaclient.la
-policybench_LDADD               += $(top_builddir)/xrl/interfaces/libribxif.la
-policybench_LDADD               += $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la
-policybench_LDADD               += $(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.la
-policybench_LDADD               += $(top_builddir)/xrl/interfaces/libprofileclientxif.la
-policybench_LDADD               += $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la
-policybench_LDADD               += $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la
-policybench_LDADD               += $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la
-policybench_LDADD               += $(top_builddir)/libxipc/libxipc.la
-policybench_LDADD               += $(top_builddir)/libcomm/libcomm.la
-policybench_LDADD               += $(top_builddir)/libxorp/libxorp.la
+# policybench_LDADD		 = $(top_builddir)/bgp/libbgp.la
+# policybench_LDADD               += $(top_builddir)/xrl/targets/libbgpbase.la
+# policybench_LDADD        	+= $(top_builddir)/policy/backend/libpolicybackend.la
+# policybench_LDADD               += $(top_builddir)/libfeaclient/libfeaclient.la
+# policybench_LDADD               += $(top_builddir)/xrl/interfaces/libribxif.la
+# policybench_LDADD               += $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la
+# policybench_LDADD               += $(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.la
+# policybench_LDADD               += $(top_builddir)/xrl/interfaces/libprofileclientxif.la
+# policybench_LDADD               += $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la
+# policybench_LDADD               += $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la
+# policybench_LDADD               += $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la
+# policybench_LDADD               += $(top_builddir)/libxipc/libxipc.la
+# policybench_LDADD               += $(top_builddir)/libcomm/libcomm.la
+# policybench_LDADD               += $(top_builddir)/libxorp/libxorp.la
 
 ################################################################
 ##

@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/bgp/bgp_varrw.hh,v 1.24 2008/08/06 08:26:12 abittau Exp $
+// $XORP: xorp/bgp/bgp_varrw.hh,v 1.25 2008/10/02 21:56:14 bms Exp $
 
 #ifndef __BGP_BGP_VARRW_HH__
 #define __BGP_BGP_VARRW_HH__
@@ -80,7 +80,8 @@ public:
      * @param rtmsg the message to filter and possibly modify.
      * @param no_modify if true, the route will not be modified.
      */
-    void attach_route(const InternalMessage<A>& rtmsg, bool no_modify);
+    void attach_route(InternalMessage<A>& rtmsg, bool no_modify);
+    void detach_route(InternalMessage<A>& rtmsg);
 
     /**
      * Caller owns the message [responsible for delete].
@@ -124,40 +125,50 @@ public:
      * @return the neighbor variable.
      */
     Element* read_neighbor_base_cb()	{ return read_neighbor(); }
+
     Element* read_policytags();
     Element* read_filter_im();
     Element* read_filter_sm();
     Element* read_filter_ex();
+
     Element* read_network4();
     Element* read_network6();
+
     Element* read_nexthop4();
     Element* read_nexthop6();
     Element* read_aspath();
     Element* read_origin();
+
     Element* read_localpref();
     Element* read_community();
     Element* read_med();
     Element* read_med_remove();
+
     Element* read_aggregate_prefix_len();
     Element* read_aggregate_brief_mode();
     Element* read_was_aggregated();
+
     Element* read_tag();
 
     void write_filter_im(const Element& e);
     void write_filter_sm(const Element& e);
     void write_filter_ex(const Element& e);
     void write_policytags(const Element& e);
+
     void write_nexthop4(const Element& e);
     void write_nexthop6(const Element& e);
     void write_aspath(const Element& e);
     void write_origin(const Element& e);
+
     void write_aggregate_prefix_len(const Element& e);
     void write_aggregate_brief_mode(const Element& e);
     void write_was_aggregated(const Element& e);
+
     void write_localpref(const Element& e);
     void write_community(const Element& e);
     void write_med(const Element& e);
     void write_med_remove(const Element& e);
+
     void write_tag(const Element& e);
 
 protected:
@@ -165,16 +176,14 @@ protected:
     string			_name;
 
 private:
-    void clone_palist();
     void cleanup();
     void write_nexthop(const Element& e);
 
-    const InternalMessage<A>*	_orig_rtmsg;
-    InternalMessage<A>*		_filtered_rtmsg;
+    InternalMessage<A>*	        _rtmsg;
     bool			_got_fmsg;
     PolicyTags*			_ptags;
     bool			_wrote_ptags;
-    PathAttributeList<A>*	_palist;
+    FPAListRef	                _palist;
     bool			_no_modify;
     bool			_modified;
     RefPf			_pfilter[3];

@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.52 2008/07/23 05:09:37 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.53 2008/10/02 21:56:21 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -124,27 +124,22 @@ RibInTable<A>::ribin_peering_came_up()
 
 template<class A>
 int
-RibInTable<A>::add_route(const InternalMessage<A> &rtmsg,
-			 BGPRouteTable<A> *caller)
+RibInTable<A>::add_route(const IPNet<A>& net, 
+			 FPAListRef& fpa_list,
+			 const PolicyTags& policy_tags)
 {
-    debug_msg("\n         %s\n rtmsg: %p route: %p\n%s\n",
-	      this->tablename().c_str(),
-	      &rtmsg,
-	      rtmsg.route(),
-	      rtmsg.str().c_str());
     const ChainedSubnetRoute<A> *new_route;
     const SubnetRoute<A> *existing_route;
-    XLOG_ASSERT(caller == NULL);
-    XLOG_ASSERT(rtmsg.origin_peer() == _peer);
     XLOG_ASSERT(_peer_is_up);
     XLOG_ASSERT(this->_next_table != NULL);
-    log("add route: " + rtmsg.net().str());
+    XLOG_ASSERT(!fpa_list->is_locked());
+    log("add route: " + net.str());
 
-    uint32_t dummy;
-    existing_route = lookup_route(rtmsg.net(), dummy);
     int response;
-    if (existing_route != NULL) {
-	XLOG_ASSERT(existing_route->net() == rtmsg.net());
+    typename BgpTrie<A>::iterator iter = _route_table->lookup_node(net);
+    if (iter != _route_table->end()) {
+	existing_route = &(iter.payload());
+	XLOG_ASSERT(existing_route->net() == net);
 #if 0
 	if (rtmsg.route()->attributes() == existing_route->attributes()) {
 	    // this route is the same as before.
@@ -158,32 +153,51 @@ RibInTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	SubnetRouteConstRef<A> route_reference(existing_route);
 	deletion_nexthop_check(existing_route);
 
+	PAListRef<A> old_pa_list = existing_route->attributes();   
+	FPAListRef old_fpa_list = new FastPathAttributeList<A>(old_pa_list);
+
 	// delete from the Trie
-	_route_table->erase(rtmsg.net());
+	_route_table->erase(net);
 	_table_version++;
 
-	InternalMessage<A> old_rt_msg(existing_route, _peer, _genid);
+	old_pa_list.deregister_with_attmgr();
+
+	InternalMessage<A> old_rt_msg(existing_route, old_fpa_list, 
+				      _peer, _genid);
+
+	// Create the concise format PA list.
+	fpa_list->canonicalize();
+	PAListRef<A> pa_list = new PathAttributeList<A>(fpa_list);
+	pa_list.register_with_attmgr();
 
 	// Store it locally.  The BgpTrie will copy it into a ChainedSubnetRoute
+	SubnetRoute<A>* tmp_route = new SubnetRoute<A>(net, pa_list, NULL);
+	tmp_route->set_policytags(policy_tags);
+	A nexthop = fpa_list->nexthop_att()->nexthop();
 	typename BgpTrie<A>::iterator iter =
-	    _route_table->insert(rtmsg.net(), *(rtmsg.route()));
+	    _route_table->insert(net, *tmp_route);
+	tmp_route->unref();
 	new_route = &(iter.payload());
 
 	// propagate downstream
-	InternalMessage<A> new_rt_msg(new_route, _peer, _genid);
-	if (rtmsg.push()) new_rt_msg.set_push();
-
+	InternalMessage<A> new_rt_msg(new_route, fpa_list, _peer, _genid);
 	response = this->_next_table->replace_route(old_rt_msg, new_rt_msg,
 					      (BGPRouteTable<A>*)this);
     } else {
-	// Store it locally.  The BgpTrie will copy it into a ChainedSubnetRoute
+	// Create the concise format PA list.
+	fpa_list->canonicalize();
+	PAListRef<A> pa_list = new PathAttributeList<A>(fpa_list);
+	pa_list.register_with_attmgr();
+
+	SubnetRoute<A>* tmp_route = new SubnetRoute<A>(net, pa_list, NULL);
+	tmp_route->set_policytags(policy_tags);
 	typename BgpTrie<A>::iterator iter =
-	    _route_table->insert(rtmsg.net(), *(rtmsg.route()));
+	    _route_table->insert(net, *tmp_route);
+	tmp_route->unref();
 	new_route = &(iter.payload());
 
 	// progogate downstream
-	InternalMessage<A> new_rt_msg(new_route, _peer, _genid);
-	if (rtmsg.push()) new_rt_msg.set_push();
+	InternalMessage<A> new_rt_msg(new_route, fpa_list, _peer, _genid);
 	response = this->_next_table->add_route(new_rt_msg, (BGPRouteTable<A>*)this);
     }
 
@@ -210,38 +224,33 @@ RibInTable<A>::add_route(const InternalMessage<A> &rtmsg,
 
 template<class A>
 int
-RibInTable<A>::delete_route(const InternalMessage<A> &rtmsg,
-			    BGPRouteTable<A> *caller)
+RibInTable<A>::delete_route(const IPNet<A> &net)
 {
-    debug_msg("\n         %s\n rtmsg: %p route: %p\n%s\n",
-	      this->tablename().c_str(),
-	      &rtmsg,
-	      rtmsg.route(),
-	      rtmsg.str().c_str());
-
-    XLOG_ASSERT(caller == NULL);
-    XLOG_ASSERT(rtmsg.origin_peer() == _peer);
     XLOG_ASSERT(_peer_is_up);
-    log("delete route: " + rtmsg.net().str());
+    log("delete route: " + net.str());
 
-    const SubnetRoute<A> *existing_route;
-    uint32_t dummy;
-    existing_route = lookup_route(rtmsg.net(), dummy);
 
-    if (existing_route != NULL) {
+    typename BgpTrie<A>::iterator iter = _route_table->lookup_node(net);
+    if (iter != _route_table->end()) {
+	const SubnetRoute<A> *existing_route = &(iter.payload());
+
 	// Preserve the route.  Taking a reference will prevent the
 	// route being deleted when it's erased from the Trie.
 	// Deletion will occur when the reference goes out of scope.
 	SubnetRouteConstRef<A> route_reference(existing_route);
 	deletion_nexthop_check(existing_route);
 
+	PAListRef<A> old_pa_list = iter.payload().attributes();   
+	FPAListRef old_fpa_list = new FastPathAttributeList<A>(old_pa_list);
+
 	// remove from the Trie
-	_route_table->erase(rtmsg.net());
+	_route_table->erase(net);
 	_table_version++;
 
+	old_pa_list.deregister_with_attmgr();
+
 	// propogate downstream
-	InternalMessage<A> old_rt_msg(existing_route, _peer, _genid);
-	if (rtmsg.push()) old_rt_msg.set_push();
+	InternalMessage<A> old_rt_msg(existing_route, old_fpa_list, _peer, _genid);
 	if (this->_next_table != NULL)
 	    this->_next_table->delete_route(old_rt_msg, (BGPRouteTable<A>*)this);
     } else {
@@ -252,7 +261,7 @@ RibInTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	// silently ignore it.  Currently (Sept 2002) we do still hold
 	// filtered routes in the RIB-In, so this should be an error.
 	// But we'll just ignore this error, and log a warning.
-	string s = "Attempt to delete route for net " + rtmsg.net().str()
+	string s = "Attempt to delete route for net " + net.str()
 	    + " that wasn't in RIB-In\n";
 	XLOG_WARNING("%s", s.c_str());
 	return -1;
@@ -274,7 +283,8 @@ RibInTable<A>::push(BGPRouteTable<A> *caller)
 
 template<class A>
 const SubnetRoute<A>*
-RibInTable<A>::lookup_route(const IPNet<A> &net, uint32_t& genid) const
+RibInTable<A>::lookup_route(const IPNet<A> &net, uint32_t& genid,
+			    FPAListRef& fpa_list_ref) const
 {
     if (_peer_is_up == false)
 	return NULL;
@@ -283,8 +293,13 @@ RibInTable<A>::lookup_route(const IPNet<A> &net, uint32_t& genid) const
     if (iter != _route_table->end()) {
 	// assert(iter.payload().net() == net);
 	genid = _genid;
+	PAListRef<A> pa_list = iter.payload().attributes();   
+	FastPathAttributeList<A>* fpa_list =
+	    new FastPathAttributeList<A>(pa_list);
+	fpa_list_ref = fpa_list;
 	return &(iter.payload());
     } else
+	fpa_list_ref = NULL;
 	return NULL;
 }
 
@@ -298,11 +313,9 @@ RibInTable<A>::route_used(const SubnetRoute<A>* used_route, bool in_use)
     // here in the RibIn
     if (_peer_is_up == false)
 	return;
-    const SubnetRoute<A> *rt;
-    uint32_t dummy;
-    rt = lookup_route(used_route->net(), dummy);
-    XLOG_ASSERT(rt != NULL);
-    rt->set_in_use(in_use);
+    typename BgpTrie<A>::iterator iter = _route_table->lookup_node(used_route->net());
+    XLOG_ASSERT(iter != _route_table->end());
+    iter.payload().set_in_use(in_use);
 }
 
 template<class A>
@@ -355,16 +368,15 @@ RibInTable<A>::dump_next_route(DumpIterator<A>& dump_iter)
 
 	if (chained_rt->is_winner() || dump_iter.peer_to_dump_to() == NULL) {
 	    InternalMessage<A> rt_msg(chained_rt, _peer, _genid);
-	    rt_msg.set_push();
 	   
 	    log("dump route: " + rt_msg.net().str());
 	    int res = this->_next_table->route_dump(rt_msg, (BGPRouteTable<A>*)this,
 				    dump_iter.peer_to_dump_to());
-
 	    if(res == ADD_FILTERED) 
 		chained_rt->set_filtered(true);
 	    else
 		chained_rt->set_filtered(false);
+	    
 	    break;
 	}
     }
@@ -399,26 +411,28 @@ RibInTable<A>::igp_nexthop_changed(const A& bgp_nexthop)
 	_changed_nexthops.insert(bgp_nexthop);
     } else {
 	debug_msg("push was inactive, activating\n");
-	PathAttributeList<A> dummy_pa_list;
-	NextHopAttribute<A> nh_att(bgp_nexthop);
-	dummy_pa_list.add_path_attribute(nh_att);
-	dummy_pa_list.rehash();
-	typename BgpTrie<A>::PathmapType::const_iterator pmi;
-#ifdef NOTDEF
-	pmi = _route_table->pathmap().begin();
-	while (pmi != _route_table->pathmap().end()) {
-	    debug_msg("Route: %s\n", pmi->second->str().c_str());
-	    pmi++;
-	}
-#endif
 
-	pmi = _route_table->pathmap().lower_bound(&dummy_pa_list);
+	// this is more work than it should be - we need to create a
+	// canonicalized path attribute list containing only the
+	// nexthop.  When we call lower bound, this will find the
+	// first pathmap chain containing this nexthop.
+
+	FPAListRef dummy_fpa_list = new FastPathAttributeList<A>();
+	NextHopAttribute<A> nh_att(bgp_nexthop);
+	dummy_fpa_list->add_path_attribute(nh_att);
+	dummy_fpa_list->canonicalize();
+	PAListRef<A> dummy_pa_list = new PathAttributeList<A>(dummy_fpa_list);
+
+	typename BgpTrie<A>::PathmapType::const_iterator pmi;
+	pmi = _route_table->pathmap().lower_bound(dummy_pa_list);
 	if (pmi == _route_table->pathmap().end()) {
 	    // no route in this trie has this Nexthop
 	    debug_msg("no matching routes - do nothing\n");
 	    return;
 	}
-	if (pmi->second->nexthop() != bgp_nexthop) {
+	PAListRef<A> pa_list = pmi->first;
+	FPAListRef fpa_list = new FastPathAttributeList<A>(pa_list);
+	if (fpa_list->nexthop() != bgp_nexthop) {
 	    debug_msg("no matching routes (2)- do nothing\n");
 	    return;
 	}
@@ -511,10 +525,14 @@ void
 RibInTable<A>::next_chain()
 {
     _current_chain++;
-    if (_current_chain != _route_table->pathmap().end()
-	&& _current_chain->first->nexthop() == _current_changed_nexthop) {
-	// there's another chain with the same nexthop
-	return;
+    if (_current_chain != _route_table->pathmap().end()) {
+	PAListRef<A> pa_list =_current_chain->first;
+	FPAListRef fpa_list = new FastPathAttributeList<A>(pa_list);
+	XLOG_ASSERT(fpa_list->nexthop_att() );
+	if (fpa_list->nexthop() == _current_changed_nexthop) {
+	    // there's another chain with the same nexthop
+	    return;
+	}
     }
 
     while (1) {
@@ -529,18 +547,22 @@ RibInTable<A>::next_chain()
 	_current_changed_nexthop = *i;
 	_changed_nexthops.erase(i);
 
-	PathAttributeList<A> dummy_pa_list;
+	FPAListRef dummy_fpa_list = new FastPathAttributeList<A>();
 	NextHopAttribute<A> nh_att(_current_changed_nexthop);
-	dummy_pa_list.add_path_attribute(nh_att);
-	dummy_pa_list.rehash();
+	dummy_fpa_list->add_path_attribute(nh_att);
+	dummy_fpa_list->canonicalize();
+	PAListRef<A> dummy_pa_list = new PathAttributeList<A>(dummy_fpa_list);
+
 	typename BgpTrie<A>::PathmapType::const_iterator pmi;
 
-	pmi = _route_table->pathmap().lower_bound(&dummy_pa_list);
+	pmi = _route_table->pathmap().lower_bound(dummy_pa_list);
 	if (pmi == _route_table->pathmap().end()) {
 	    // no route in this trie has this Nexthop, try the next nexthop
 	    continue;
 	}
-	if (pmi->second->nexthop() != _current_changed_nexthop) {
+	PAListRef<A> pa_list = pmi->first;
+	FPAListRef fpa_list = new FastPathAttributeList<A>(pa_list);
+	if (fpa_list->nexthop() != _current_changed_nexthop) {
 	    // no route in this trie has this Nexthop, try the next nexthop
 	    continue;
 	}

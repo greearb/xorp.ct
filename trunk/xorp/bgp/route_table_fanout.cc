@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.64 2008/07/23 05:09:36 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.65 2008/10/02 21:56:19 bms Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -213,7 +213,7 @@ FanoutTable<A>::replace_next_table(BGPRouteTable<A> *old_next_table,
 
 template<class A>
 int
-FanoutTable<A>::add_route(const InternalMessage<A> &rtmsg,
+FanoutTable<A>::add_route(InternalMessage<A> &rtmsg,
 			  BGPRouteTable<A> *caller) 
 {
     debug_msg("\n         %s\n caller: %s\n rtmsg: %p route: %p\n%s\n",
@@ -225,6 +225,7 @@ FanoutTable<A>::add_route(const InternalMessage<A> &rtmsg,
 
     XLOG_ASSERT(caller == this->_parent);
     XLOG_ASSERT(rtmsg.route()->nexthop_resolved());
+    XLOG_ASSERT(!rtmsg.attributes()->is_locked());
 
     const PeerHandler *origin_peer = rtmsg.origin_peer();
 
@@ -275,8 +276,8 @@ FanoutTable<A>::add_route(const InternalMessage<A> &rtmsg,
 
 template<class A>
 int
-FanoutTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
-			      const InternalMessage<A> &new_rtmsg,
+FanoutTable<A>::replace_route(InternalMessage<A> &old_rtmsg,
+			      InternalMessage<A> &new_rtmsg,
 			      BGPRouteTable<A> *caller) 
 {
     debug_msg("\n         %s\n"
@@ -332,7 +333,7 @@ FanoutTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 
 template<class A>
 int
-FanoutTable<A>::delete_route(const InternalMessage<A> &rtmsg,
+FanoutTable<A>::delete_route(InternalMessage<A> &rtmsg,
 			     BGPRouteTable<A> *caller) 
 {
     debug_msg("\n         %s\n caller: %s\n rtmsg: %p route: %p\n%s\n",
@@ -344,6 +345,7 @@ FanoutTable<A>::delete_route(const InternalMessage<A> &rtmsg,
     
     XLOG_ASSERT(caller == this->_parent);
     XLOG_ASSERT(rtmsg.route()->nexthop_resolved());
+    XLOG_ASSERT(!rtmsg.attributes()->is_locked());
 
     const PeerHandler *origin_peer = rtmsg.origin_peer();
 
@@ -383,7 +385,7 @@ FanoutTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 
 template<class A>
 int
-FanoutTable<A>::route_dump(const InternalMessage<A> &rtmsg,
+FanoutTable<A>::route_dump(InternalMessage<A> &rtmsg,
 			   BGPRouteTable<A> *caller,
 			   const PeerHandler *dump_peer) 
 {
@@ -452,9 +454,10 @@ FanoutTable<A>::wakeup_downstream(list <PeerTableInfo<A>*>& queued_peers)
 
 template<class A>
 const SubnetRoute<A>*
-FanoutTable<A>::lookup_route(const IPNet<A> &net, uint32_t& genid) const 
+FanoutTable<A>::lookup_route(const IPNet<A> &net, uint32_t& genid,
+			     FPAListRef& pa_list) const 
 {
-    return this->_parent->lookup_route(net, genid);
+    return this->_parent->lookup_route(net, genid, pa_list);
 }
 
 template<class A>
@@ -549,13 +552,15 @@ FanoutTable<A>::dump_entire_table(BGPRouteTable<A> *child_to_dump_to,
 template<class A>
 void
 FanoutTable<A>::add_to_queue(RouteQueueOp operation,
-			     const InternalMessage<A> &rtmsg,
+			     InternalMessage<A> &rtmsg,
 			     const list<PeerTableInfo<A>*>& queued_peers) 
 {
     debug_msg("FanoutTable<A>::add_to_queue, op=%d, net=%s\n", 
 	      operation, rtmsg.net().str().c_str());
     RouteQueueEntry<A> *queue_entry;
-    queue_entry = new RouteQueueEntry<A>(rtmsg.route(), operation);
+    rtmsg.attributes()->lock();
+    queue_entry = new RouteQueueEntry<A>(rtmsg.route(), rtmsg.attributes(),
+					 operation);
     queue_entry->set_origin_peer(rtmsg.origin_peer());
     queue_entry->set_genid(rtmsg.genid());
     _output_queue.push_back(queue_entry);
@@ -565,14 +570,14 @@ FanoutTable<A>::add_to_queue(RouteQueueOp operation,
 	queue_entry->set_push(true);
 
     // we are the end stop for this rtmsg so unref the route if needed
-    if (rtmsg.changed())
+    if (rtmsg.copied())
 	rtmsg.inactivate();
 }
 
 template<class A>
 void
-FanoutTable<A>::add_replace_to_queue(const InternalMessage<A> &old_rtmsg,
-				     const InternalMessage<A> &new_rtmsg,
+FanoutTable<A>::add_replace_to_queue(InternalMessage<A> &old_rtmsg,
+				     InternalMessage<A> &new_rtmsg,
 				     const list<PeerTableInfo<A>*>&
 				     queued_peers) 
 {
@@ -580,7 +585,9 @@ FanoutTable<A>::add_replace_to_queue(const InternalMessage<A> &old_rtmsg,
     // replace entails two queue entries, but they're always paired up
     // in the order OLD then NEW
     RouteQueueEntry<A> *queue_entry;
+    old_rtmsg.attributes()->lock();
     queue_entry = new RouteQueueEntry<A>(old_rtmsg.route(),
+					 old_rtmsg.attributes(),
 					 RTQUEUE_OP_REPLACE_OLD);
     queue_entry->set_origin_peer(old_rtmsg.origin_peer());
     queue_entry->set_genid(old_rtmsg.genid());
@@ -589,7 +596,9 @@ FanoutTable<A>::add_replace_to_queue(const InternalMessage<A> &old_rtmsg,
     // set queue positions now, before we add the second queue entry
     set_queue_positions(queued_peers);
 
+    new_rtmsg.attributes()->lock();
     queue_entry = new RouteQueueEntry<A>(new_rtmsg.route(),
+					 new_rtmsg.attributes(),
 					 RTQUEUE_OP_REPLACE_NEW);
     queue_entry->set_origin_peer(new_rtmsg.origin_peer());
     queue_entry->set_genid(new_rtmsg.genid());
@@ -668,17 +677,29 @@ FanoutTable<A>::get_next_message(BGPRouteTable<A> *next_table)
     case RTQUEUE_OP_ADD: {
 	debug_msg("OP_ADD, net=%s\n", 
 		  (*queue_ptr)->route()->net().str().c_str());
+	// Need to clone the PA list or we'll modify the same version
+	// multiple times in different ways downstream.
+	FPAListRef fpa_list 
+	    = new FastPathAttributeList<A>(*(*queue_ptr)->attributes());
+	assert(!fpa_list->is_locked());
 	InternalMessage<A> rtmsg((*queue_ptr)->route(),
+				 fpa_list,
 				 (*queue_ptr)->origin_peer(),
 				 (*queue_ptr)->genid());
 	if ((*queue_ptr)->push()) rtmsg.set_push();
 	log("sending add_route: " + (*queue_ptr)->route()->net().str());
+	assert(!fpa_list->is_locked());
 	next_table->add_route(rtmsg, (BGPRouteTable<A>*)this);
 	break;
     }
     case RTQUEUE_OP_DELETE: {
 	debug_msg("OP_DELETE\n");
+	// Need to clone the PA list or we'll modify the same version
+	// multiple times in different ways downstream.
+	FPAListRef fpa_list 
+	    = new FastPathAttributeList<A>(*(*queue_ptr)->attributes());
 	InternalMessage<A> rtmsg((*queue_ptr)->route(),
+				 fpa_list,
 				 (*queue_ptr)->origin_peer(),
 				 (*queue_ptr)->genid());
 	if ((*queue_ptr)->push()) rtmsg.set_push();
@@ -688,14 +709,24 @@ FanoutTable<A>::get_next_message(BGPRouteTable<A> *next_table)
     }
     case RTQUEUE_OP_REPLACE_OLD: {
 	debug_msg("OP_REPLACE_OLD\n");
+	// Need to clone the PA list or we'll modify the same version
+	// multiple times in different ways downstream.
+	FPAListRef old_fpa_list 
+	    = new FastPathAttributeList<A>(*(*queue_ptr)->attributes());
 	InternalMessage<A> old_rtmsg((*queue_ptr)->route(),
+				     old_fpa_list,
 				     (*queue_ptr)->origin_peer(),
 				     (*queue_ptr)->genid());
 	if (queue_ptr == _output_queue.begin())
 	    discard_possible = true;
 	queue_ptr++;
 	XLOG_ASSERT(queue_ptr != _output_queue.end());
+	// Need to clone the PA list or we'll modify the same version
+	// multiple times in different ways downstream.
+	FPAListRef new_fpa_list 
+	    = new FastPathAttributeList<A>(*(*queue_ptr)->attributes());
 	InternalMessage<A> new_rtmsg((*queue_ptr)->route(),
+				     new_fpa_list,
 				     (*queue_ptr)->origin_peer(),
 				     (*queue_ptr)->genid());
 	if ((*queue_ptr)->push()) new_rtmsg.set_push();
@@ -791,6 +822,8 @@ FanoutTable<A>::get_next_message(BGPRouteTable<A> *next_table)
 	    if (_output_queue.front()->op() == RTQUEUE_OP_REPLACE_OLD)
 		delete_two = true;
 
+	    if (_output_queue.front()->op() != RTQUEUE_OP_PUSH)
+		_output_queue.front()->attributes()->unlock();
 	    delete _output_queue.front();
 	    _output_queue.pop_front();
 
@@ -798,6 +831,7 @@ FanoutTable<A>::get_next_message(BGPRouteTable<A> *next_table)
 		XLOG_ASSERT(_output_queue.front()->op() 
 			    == RTQUEUE_OP_REPLACE_NEW);
 		XLOG_ASSERT(!_output_queue.empty());
+		_output_queue.front()->attributes()->unlock();
 		delete _output_queue.front();
 		_output_queue.pop_front();
 	    }
@@ -891,13 +925,16 @@ FanoutTable<A>::skip_entire_queue(BGPRouteTable<A> *next_table)
 		bool delete_two = false;
 		if (_output_queue.front()->op() == RTQUEUE_OP_REPLACE_OLD)
 		    delete_two = true;
-
+		
+		if (_output_queue.front()->op() != RTQUEUE_OP_PUSH)
+		    _output_queue.front()->attributes()->unlock();
 		delete _output_queue.front();
 		_output_queue.pop_front();
 		if (delete_two) {
 		    XLOG_ASSERT(_output_queue.front()->op() 
 				== RTQUEUE_OP_REPLACE_NEW);
 		    XLOG_ASSERT(!_output_queue.empty());
+		    _output_queue.front()->attributes()->unlock();
 		    delete _output_queue.front();
 		    _output_queue.pop_front();
 		}

@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/harness/trie.cc,v 1.23 2008/07/23 05:09:43 pavlin Exp $"
+#ident "$XORP: xorp/bgp/harness/trie.cc,v 1.24 2008/10/02 21:56:27 bms Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME 
@@ -95,7 +95,8 @@ Trie::lookup(const IPv6Net& n) const
     /*
     ** Look for a multiprotocol path attribute.
     */
-    MPReachNLRIAttribute<IPv6> *mpreach = 0;
+    const MPReachNLRIAttribute<IPv6> *mpreach = 0;
+#if 0
     list <PathAttribute*>::const_iterator pai;
     for (pai = update->pa_list().begin(); pai != update->pa_list().end();
 	 pai++) {
@@ -107,6 +108,10 @@ Trie::lookup(const IPv6Net& n) const
 	    break;
 	}
     }
+#endif
+    mpreach = update->mpreach<IPv6>(SAFI_UNICAST);
+    if (mpreach == 0)
+	mpreach = update->mpreach<IPv6>(SAFI_MULTICAST);
 
     if(0 == mpreach)
 	XLOG_FATAL("If we found the packet in the trie"
@@ -139,11 +144,12 @@ Trie::process_update_packet(const TimeVal& tv, const uint8_t *buf, size_t len,
     TriePayload payload(tv, buf, len, peerdata, _first, _last);
     const UpdatePacket *p = payload.get();
 
-    debug_msg("%s\n", p->str().c_str());
+    debug_msg("process update packet:\n%s\n", p->str().c_str());
 
-    MPReachNLRIAttribute<IPv6> *mpreach = 0;
-    MPUNReachNLRIAttribute<IPv6> *mpunreach = 0;
-    
+    const MPReachNLRIAttribute<IPv6> *mpreach = 0;
+    const MPUNReachNLRIAttribute<IPv6> *mpunreach = 0;
+
+#if 0    
     list <PathAttribute*>::const_iterator pai;
     for (pai = p->pa_list().begin(); pai != p->pa_list().end(); pai++) {
 	const PathAttribute* pa;
@@ -159,6 +165,13 @@ Trie::process_update_packet(const TimeVal& tv, const uint8_t *buf, size_t len,
 	    continue;
 	}
     }
+#endif
+    mpreach = p->mpreach<IPv6>(SAFI_UNICAST);
+    if (!mpreach)
+	mpreach = p->mpreach<IPv6>(SAFI_MULTICAST);
+    mpunreach = p->mpunreach<IPv6>(SAFI_UNICAST);
+    if (!mpunreach)
+	mpunreach = p->mpunreach<IPv6>(SAFI_MULTICAST);
 
     /*
     ** IPv4 Withdraws

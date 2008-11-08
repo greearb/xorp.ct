@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/bgp/route_queue.hh,v 1.16 2008/07/23 05:09:35 pavlin Exp $
+// $XORP: xorp/bgp/route_queue.hh,v 1.17 2008/10/02 21:56:18 bms Exp $
 
 #ifndef __BGP_ROUTE_QUEUE_HH__
 #define __BGP_ROUTE_QUEUE_HH__
@@ -37,9 +37,12 @@ typedef enum ribout_queue_op {
 template<class A>
 class RouteQueueEntry {
 public:
-    RouteQueueEntry(const SubnetRoute<A>* rt, RouteQueueOp op) :
-	_route_ref(rt)
+    RouteQueueEntry(const SubnetRoute<A>* rt, FPAListRef& pa_list,
+		    RouteQueueOp op) :
+	_route_ref(rt), _pa_list(pa_list)
     {
+	// mandate that we lock the pa_list before storing it here.
+	XLOG_ASSERT(pa_list->is_locked());
 	_op = op;
 	_origin_peer = 0;
 	_push = false;
@@ -68,9 +71,12 @@ public:
 	return _route_ref.route()->net();	
     }
 
-    const PathAttributeList<A> *attributes() const 
+    FPAListRef attributes() const 
     {
-	return _route_ref.route()->attributes();
+	// mandate that the attributes are still locked.
+	if (!_pa_list.is_empty())
+	    XLOG_ASSERT(_pa_list->is_locked());
+	return _pa_list;
     }
     RouteQueueOp op() const			{ return _op;		}
 
@@ -86,6 +92,7 @@ private:
     RouteQueueOp _op;
 
     SubnetRouteConstRef<A> _route_ref;
+    FPAListRef _pa_list;
     const PeerHandler *_origin_peer;
     uint32_t _genid;
     bool _push;

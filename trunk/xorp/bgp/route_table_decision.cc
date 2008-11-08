@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.49 2008/07/23 05:09:36 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.50 2008/10/02 21:56:19 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -100,7 +100,7 @@ DecisionTable<A>::remove_parent(BGPRouteTable<A> *ex_parent) {
 
 template<class A>
 int
-DecisionTable<A>::add_route(const InternalMessage<A> &rtmsg, 
+DecisionTable<A>::add_route(InternalMessage<A> &rtmsg, 
 			    BGPRouteTable<A> *caller) {
 
     PARANOID_ASSERT(_parents.find(caller) != _parents.end());
@@ -110,8 +110,8 @@ DecisionTable<A>::add_route(const InternalMessage<A> &rtmsg,
     //if the nexthop isn't resolvable, don't even consider the route
     debug_msg("testing resolvability\n");
     XLOG_ASSERT(rtmsg.route()->nexthop_resolved() ==
-		resolvable(rtmsg.route()->nexthop()));
-    if (!resolvable(rtmsg.route()->nexthop())) {
+		resolvable(rtmsg.nexthop()));
+    if (!resolvable(rtmsg.nexthop())) {
 	debug_msg("route not resolvable\n");
     	return ADD_UNUSED;
     }
@@ -122,6 +122,8 @@ DecisionTable<A>::add_route(const InternalMessage<A> &rtmsg,
     list<RouteData<A> > alternatives;
     old_winner = find_alternative_routes(caller, rtmsg.net(), alternatives);
 
+    debug_msg("there are %d alternatives\n", (int)alternatives.size());
+
     //preserve old_winner because the original may be deleted by the
     //decision process
     if (old_winner != NULL) {
@@ -129,7 +131,7 @@ DecisionTable<A>::add_route(const InternalMessage<A> &rtmsg,
     }
     
     RouteData<A> *new_winner = NULL;
-    RouteData<A> new_route(rtmsg.route(), caller, 
+    RouteData<A> new_route(rtmsg.route(), rtmsg.attributes(), caller, 
 			   rtmsg.origin_peer(), rtmsg.genid());
     if (!alternatives.empty()) {
 	//add the new route to the pool of possible winners.
@@ -151,6 +153,7 @@ DecisionTable<A>::add_route(const InternalMessage<A> &rtmsg,
 
 	//the winner did change, so send a delete for the old winner
 	InternalMessage<A> old_rt_msg(old_winner_clone->route(), 
+				      old_winner_clone->attributes(),
 				      old_winner_clone->peer_handler(), 
 				      old_winner_clone->genid());
 	this->_next_table->delete_route(old_rt_msg, (BGPRouteTable<A>*)this);
@@ -164,12 +167,13 @@ DecisionTable<A>::add_route(const InternalMessage<A> &rtmsg,
 
     //send an add for the new winner
     new_winner->route()->set_is_winner(
-        igp_distance(new_winner->route()->nexthop()));
+		       igp_distance(new_winner->attributes()->nexthop()));
     int result;
     if (new_winner->route() != rtmsg.route()) {
 	//we have a new winner, but it isn't the route that was just added.
 	//this can happen due to MED wierdness.
 	InternalMessage<A> new_rt_msg(new_winner->route(), 
+				      new_winner->attributes(),
 				      new_winner->peer_handler(), 
 				      new_winner->genid());
 	if (rtmsg.push())
@@ -191,8 +195,8 @@ DecisionTable<A>::add_route(const InternalMessage<A> &rtmsg,
 
 template<class A>
 int
-DecisionTable<A>::replace_route(const InternalMessage<A> &old_rtmsg, 
-				const InternalMessage<A> &new_rtmsg, 
+DecisionTable<A>::replace_route(InternalMessage<A> &old_rtmsg, 
+				InternalMessage<A> &new_rtmsg, 
 				BGPRouteTable<A> *caller) {
     PARANOID_ASSERT(_parents.find(caller)!=_parents.end());
     XLOG_ASSERT(old_rtmsg.net()==new_rtmsg.net());
@@ -209,7 +213,9 @@ DecisionTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 
     } else if (old_rtmsg.route()->is_winner()) {
 	//the route being deleted was the old winner
-	old_winner_clone = new RouteData<A>(old_rtmsg.route(), caller,
+	old_winner_clone = new RouteData<A>(old_rtmsg.route(), 
+					    old_rtmsg.attributes(),
+					    caller,
 					    old_rtmsg.origin_peer(),
 					    old_rtmsg.genid());
     }
@@ -221,13 +227,14 @@ DecisionTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
     }
 
     RouteData<A> *new_winner = NULL;
-    RouteData<A> new_route(new_rtmsg.route(), caller, new_rtmsg.origin_peer(),
+    RouteData<A> new_route(new_rtmsg.route(), new_rtmsg.attributes(),
+			   caller, new_rtmsg.origin_peer(),
 			   new_rtmsg.genid());
     if (!alternatives.empty()) {
 	//add the new route to the pool of possible winners.
 	alternatives.push_back(new_route);
 	new_winner = find_winner(alternatives);
-    } else if (resolvable(new_rtmsg.route()->nexthop())) {
+    } else if (resolvable(new_rtmsg.nexthop())) {
 	//the new route wins by default if it's resolvable.
 	new_winner = &new_route;
     }
@@ -249,14 +256,15 @@ DecisionTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
     }
 
     //create the deletion part of the message
-    const InternalMessage<A> *old_rtmsg_p, *new_rtmsg_p;
+    InternalMessage<A> *old_rtmsg_p, *new_rtmsg_p;
     if (old_winner_clone->route() == old_rtmsg.route()) {
-	old_rtmsg.force_clear_push();
+	old_rtmsg.clear_push();
 	// FIXME: hack to enable policy route pushing.
 //	old_rtmsg.route()->set_is_not_winner();
 	old_rtmsg_p = &old_rtmsg;
     } else {
 	old_rtmsg_p = new InternalMessage<A>(old_winner_clone->route(), 
+					     old_winner_clone->attributes(),
 					     old_winner_clone->peer_handler(), 
 					     old_winner_clone->genid());
 	old_winner_clone->set_is_not_winner();
@@ -264,12 +272,13 @@ DecisionTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 
     //create the addition part of the message
     new_winner->route()->set_is_winner(
-                         igp_distance(new_winner->route()->nexthop()));
+                         igp_distance(new_winner->attributes()->nexthop()));
     int result;
     if (new_winner->route() == new_rtmsg.route()) {
 	new_rtmsg_p = &new_rtmsg;
     } else {
 	new_rtmsg_p = new InternalMessage<A>(new_winner->route(), 
+					     new_winner->attributes(),
 					     new_winner->peer_handler(), 
 					     new_winner->genid());
 	if (new_rtmsg.push())
@@ -301,7 +310,7 @@ DecisionTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 
 template<class A>
 int
-DecisionTable<A>::delete_route(const InternalMessage<A> &rtmsg, 
+DecisionTable<A>::delete_route(InternalMessage<A> &rtmsg, 
 			       BGPRouteTable<A> *caller) {
 
     debug_msg("delete route: %s\n",
@@ -322,7 +331,9 @@ DecisionTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 		  old_winner->route()->str().c_str());
     } else if (rtmsg.route()->is_winner()) {
 	//the route being deleted was the old winner
-	old_winner_clone = new RouteData<A>(rtmsg.route(), caller,
+	old_winner_clone = new RouteData<A>(rtmsg.route(), 
+					    rtmsg.attributes(),
+					    caller,
 					    rtmsg.origin_peer(), 
 					    rtmsg.genid());
     }
@@ -351,6 +362,7 @@ DecisionTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	//delete for the old winner
 	if (old_winner_clone->route() != rtmsg.route()) {
 	    InternalMessage<A> old_rt_msg(old_winner_clone->route(), 
+					  old_winner_clone->attributes(),
 					  old_winner_clone->peer_handler(), 
 					  old_winner_clone->genid());
 	    if (rtmsg.push() && new_winner == NULL)
@@ -359,7 +371,7 @@ DecisionTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	    old_winner_clone->set_is_not_winner();
 	} else {
 	    if (new_winner != NULL)
-		rtmsg.force_clear_push();
+		rtmsg.clear_push();
 	    this->_next_table->delete_route(rtmsg, (BGPRouteTable<A>*)this);
 	    rtmsg.route()->set_is_not_winner();
 	}
@@ -371,9 +383,10 @@ DecisionTable<A>::delete_route(const InternalMessage<A> &rtmsg,
     if (new_winner != NULL) {
 	//send an add for the new winner
 	new_winner->route()->set_is_winner(
-		   igp_distance(new_winner->route()->nexthop()));
+		   igp_distance(new_winner->attributes()->nexthop()));
 	int result;
 	InternalMessage<A> new_rt_msg(new_winner->route(), 
+				      new_winner->attributes(),
 				      new_winner->peer_handler(), 
 				      new_winner->genid());
 	//	if (rtmsg.push())
@@ -430,7 +443,8 @@ DecisionTable<A>::lookup_route(const BGPRouteTable<A>* ignore_parent,
 template<class A>
 const SubnetRoute<A>*
 DecisionTable<A>::lookup_route(const IPNet<A> &net,
-			       uint32_t& genid) const
+			       uint32_t& genid,
+			       FPAListRef& pa_list) const
 {
     list <RouteData<A> > alternatives;
     RouteData<A>* winner = find_alternative_routes(NULL, net, alternatives);
@@ -438,6 +452,7 @@ DecisionTable<A>::lookup_route(const IPNet<A> &net,
 	return NULL;
     else {
 	genid = winner->genid();
+	pa_list = winner->attributes();
 	return winner->route();
     }
     XLOG_UNREACHABLE();
@@ -461,10 +476,13 @@ DecisionTable<A>::find_alternative_routes(
 	//from the same parent we'd see it as a replace, not an add
  	if (i->first != caller) {
 	    uint32_t found_genid;
-	    found_route = i->first->lookup_route(net, found_genid);
+	    FPAListRef found_attributes;
+	    found_route = i->first->lookup_route(net, found_genid, 
+						 found_attributes);
 	    if (found_route != NULL) {
 		PeerTableInfo<A> *pti = i->second;
 		alternatives.push_back(RouteData<A>(found_route, 
+						    found_attributes,
 						    pti->route_table(),
 						    pti->peer_handler(),
 						    found_genid));
@@ -480,8 +498,7 @@ DecisionTable<A>::find_alternative_routes(
 
 template<class A>
 uint32_t
-DecisionTable<A>::local_pref(const SubnetRoute<A> *route,
-			     const PeerHandler *peer) const
+DecisionTable<A>::local_pref(const FPAListRef& pa_list) const
 {
     /*
      * Local Pref should be present on all routes.  If the route comes
@@ -489,31 +506,22 @@ DecisionTable<A>::local_pref(const SubnetRoute<A> *route,
      * the route comes from IBGP, it should have been present on the
      * incoming route.  
      */
-    const PathAttributeList<A> *attrlist = route->attributes();
-    list<PathAttribute*>::const_iterator i;
-    for(i = attrlist->begin(); i != attrlist->end(); i++) {
-	if(LOCAL_PREF == (*i)->type()) {
-	    return (dynamic_cast<const LocalPrefAttribute *>(*i))->localpref();
-	}
+    const LocalPrefAttribute* localpref_att = pa_list->local_pref_att();
+    if (localpref_att) {
+	return localpref_att->localpref();
     }
-    XLOG_WARNING("No LOCAL_PREF present %s", peer->peername().c_str());
-
     return 0;
 }
 
 template<class A>
 uint32_t
-DecisionTable<A>::med(const SubnetRoute<A> *route) const
+DecisionTable<A>::med(const FPAListRef& pa_list) const
 {
-    const PathAttributeList<A> *attrlist = route->attributes();
-    list<PathAttribute*>::const_iterator i;
-    for(i = attrlist->begin(); i != attrlist->end(); i++) {
-	if(MED == (*i)->type()) {
-	    return (dynamic_cast<const MEDAttribute *>(*i))->
-		med();
-	}
+    const MEDAttribute* med_attribute = pa_list->med_att();
+    if (med_attribute) {
+	return med_attribute->med();
     }
-
+    
     return 0;
 }
 
@@ -569,6 +577,7 @@ template<class A>
 RouteData<A>*
 DecisionTable<A>::find_winner(list<RouteData<A> >& alternatives) const
 {
+    debug_msg("find_winner: there are %d alternatices\n", (int)alternatives.size());
     typename list<RouteData<A> >::iterator i;
 
     /* The spec seems pretty odd.  In our architecture, it seems
@@ -590,9 +599,11 @@ DecisionTable<A>::find_winner(list<RouteData<A> >& alternatives) const
     
     /* If there are no resolvable alternatives, no-one wins */
     if (alternatives.empty()) {
+	debug_msg("no resolvable routes\n");
 	return NULL;
     }
     if (alternatives.size()==1) {
+	debug_msg("one one resolvable route\n");
 	return &(alternatives.front());
     }
 
@@ -601,11 +612,10 @@ DecisionTable<A>::find_winner(list<RouteData<A> >& alternatives) const
     /* 
     ** Phase 1: Calculation of degree of preference.
     */
-    int test_pref = local_pref(alternatives.front().route(), 
-			       alternatives.front().peer_handler());
+    int test_pref = local_pref(alternatives.front().attributes());
     i = alternatives.begin(); i++;
     while(i!=alternatives.end()) {
-	int lp = local_pref(i->route(), i->peer_handler());
+	int lp = local_pref(i->attributes());
 	XLOG_ASSERT(lp >= 0);
 	//prefer higher preference
 	if (lp < test_pref) {
@@ -620,6 +630,7 @@ DecisionTable<A>::find_winner(list<RouteData<A> >& alternatives) const
     }
 
     if (alternatives.size()==1) {
+	debug_msg("decided on localpref\n");
 	return &(alternatives.front());
     }
 	  
@@ -637,12 +648,12 @@ DecisionTable<A>::find_winner(list<RouteData<A> >& alternatives) const
     /*
     ** Shortest AS path length.
     */
-    int test_aspath_length = alternatives.front().route()->attributes()->
+    int test_aspath_length = alternatives.front().attributes()->
 	aspath().path_length();
 
     i = alternatives.begin(); i++;
     while(i!=alternatives.end()) {
-	int len = i->route()->attributes()->aspath().path_length();
+	int len = i->attributes()->aspath().path_length();
 	XLOG_ASSERT(len >= 0);
 	//prefer shortest path
 	if (len > test_aspath_length) {
@@ -664,10 +675,10 @@ DecisionTable<A>::find_winner(list<RouteData<A> >& alternatives) const
     /*
     ** Lowest origin value.
     */
-    int test_origin = alternatives.front().route()->attributes()->origin();
+    int test_origin = alternatives.front().attributes()->origin();
     i = alternatives.begin(); i++;
     while(i!=alternatives.end()) {
-	int origin = i->route()->attributes()->origin();
+	int origin = i->attributes()->origin();
 	//prefer lower origin
 	if (origin > test_origin) {
 	    i = alternatives.erase(i);
@@ -690,18 +701,18 @@ DecisionTable<A>::find_winner(list<RouteData<A> >& alternatives) const
     */
     typename list <RouteData<A> >::iterator j;
     for (i=alternatives.begin(); i!=alternatives.end();) {
-	ASPath aspath1 = i->route()->attributes()->aspath();
+	ASPath aspath1 = i->attributes()->aspath();
  	AsNum asnum1 = (0 == aspath1.path_length()) ? 
  	    AsNum(AsNum::AS_INVALID) : aspath1.first_asnum();
-	int med1 = med(i->route());
+	int med1 = med(i->attributes());
 	bool del_i = false;
 	for (j=alternatives.begin(); j!=alternatives.end();) {
 	    bool del_j = false;
 	    if (i != j) {
-		ASPath aspath2 = j->route()->attributes()->aspath();
+		ASPath aspath2 = j->attributes()->aspath();
 		AsNum asnum2 = (0 == aspath2.path_length()) ? 
 		    AsNum(AsNum::AS_INVALID) : aspath2.first_asnum();
-		int med2 = med(j->route());
+		int med2 = med(j->attributes());
 		if (asnum1 == asnum2) {
 		    if (med1 > med2) {
 			i = alternatives.erase(i);
@@ -759,10 +770,10 @@ DecisionTable<A>::find_winner(list<RouteData<A> >& alternatives) const
     /*
     ** Compare IGP distances.
     */
-    int test_igp_distance = igp_distance(alternatives.front().route()->nexthop());
+    int test_igp_distance = igp_distance(alternatives.front().attributes()->nexthop());
     i = alternatives.begin(); i++;
     while(i!=alternatives.end()) {
-	int igp_dist = igp_distance(i->route()->nexthop());
+	int igp_dist = igp_distance(i->attributes()->nexthop());
 	//prefer lower IGP distance
 	if (test_igp_distance < igp_dist) {
 	    i = alternatives.erase(i);
@@ -848,7 +859,7 @@ DecisionTable<A>::dump_next_route(DumpIterator<A>& dump_iter) {
 
 template<class A>
 int
-DecisionTable<A>::route_dump(const InternalMessage<A> &rtmsg, 
+DecisionTable<A>::route_dump(InternalMessage<A> &rtmsg, 
 			     BGPRouteTable<A> */*caller*/,
 			     const PeerHandler *peer) {
     XLOG_ASSERT(this->_next_table != NULL);

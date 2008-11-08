@@ -3,22 +3,17 @@
 
 // Copyright (c) 2001-2008 XORP, Inc.
 //
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License, Version 2, June
-// 1991 as published by the Free Software Foundation. Redistribution
-// and/or modification of this program under the terms of any other
-// version of the GNU General Public License is not permitted.
-// 
-// This program is distributed in the hope that it will be useful, but
-// WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
-// see the GNU General Public License, Version 2, a copy of which can be
-// found in the XORP LICENSE.gpl file.
-// 
-// XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
-// http://xorp.net
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the "Software")
+// to deal in the Software without restriction, subject to the conditions
+// listed in the XORP LICENSE file. These conditions include: you must
+// preserve this copyright notice, and you cannot mention the copyright
+// holders in advertising related to the Software without their permission.
+// The Software is provided WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED. This
+// notice is a summary of the XORP LICENSE file; the license in that file is
+// legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.107 2008/08/06 08:26:12 abittau Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.103 2008/07/23 05:09:34 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -121,29 +116,35 @@ BGPPlumbing::flush(PeerHandler* peer_handler)
 }
 
 int 
-BGPPlumbing::add_route(const InternalMessage<IPv4> &rtmsg, 
+BGPPlumbing::add_route(const IPv4Net& net,
+		       FPAList4Ref& pa_list,
+		       const PolicyTags& policy_tags,
 		       PeerHandler* peer_handler) 
 {
     debug_msg("BGPPlumbing::add_route IPv4\n");
     if (main().profile().enabled(profile_route_ribin))
 	main().profile().log(profile_route_ribin, 
-			     c_format("add %s", rtmsg.net().str().c_str()));
-    return plumbing_ipv4().add_route(rtmsg, peer_handler);
+			     c_format("add %s", net.str().c_str()));
+    XLOG_ASSERT(!pa_list->is_locked());
+    return plumbing_ipv4().add_route(net, pa_list, policy_tags, peer_handler);
 }
 
 int 
-BGPPlumbing::add_route(const InternalMessage<IPv6> &rtmsg, 
+BGPPlumbing::add_route(const IPv6Net& net,
+		       FPAList6Ref& pa_list,
+		       const PolicyTags& policy_tags,
 		       PeerHandler* peer_handler)  
 {
     debug_msg("BGPPlumbing::add_route IPv6\n");
     if (main().profile().enabled(profile_route_ribin))
 	main().profile().log(profile_route_ribin,
-			     c_format("add %s", rtmsg.net().str().c_str()));
-    return plumbing_ipv6().add_route(rtmsg, peer_handler);
+			     c_format("add %s", net.str().c_str()));
+    XLOG_ASSERT(!pa_list->is_locked());
+    return plumbing_ipv6().add_route(net, pa_list, policy_tags, peer_handler);
 }
 
 int 
-BGPPlumbing::delete_route(const InternalMessage<IPv4> &rtmsg, 
+BGPPlumbing::delete_route(InternalMessage<IPv4> &rtmsg, 
 			  PeerHandler* peer_handler) 
 {
     if (main().profile().enabled(profile_route_ribin))
@@ -153,7 +154,7 @@ BGPPlumbing::delete_route(const InternalMessage<IPv4> &rtmsg,
 }
 
 int 
-BGPPlumbing::delete_route(const InternalMessage<IPv6> &rtmsg, 
+BGPPlumbing::delete_route(InternalMessage<IPv6> &rtmsg, 
 			  PeerHandler* peer_handler) 
 {
     if (main().profile().enabled(profile_route_ribin))
@@ -298,7 +299,7 @@ BGPPlumbingAF<A>::BGPPlumbingAF(const string& ribname,
     /*
      * Initial plumbing is:
      *
-     *     DecisionTable -> FanoutTable -> FilterTable -> CacheTable ->..
+     *     DecisionTable -> FanoutTable -> FilterTable -> ..
      *        ..-> RibOutTable -> RibIpcHandler
      *
      * This is the path taken by routes that we propagate to the
@@ -364,7 +365,7 @@ BGPPlumbingAF<A>::BGPPlumbingAF(const string& ribname,
 			   _next_hop_resolver);
     filter_in->do_versioning();
     _ipc_rib_in_table->set_next_table(filter_in);
-
+    
     PolicyTableImport<A>* policy_filter_in =
 	new PolicyTableImport<A>(_ribname + "IpcChannelInputPolicyFilter",
 				 _master.safi(),
@@ -414,11 +415,15 @@ BGPPlumbingAF<A>::BGPPlumbingAF(const string& ribname,
 
     XLOG_ASSERT(_master.rib_handler());
 
-    // No policy export filters on routes destined to the RIB.
+    // No policy export filters on routes destined to the RIB
 
     // Drop in an aggregation filter - beheave like an IBGP peering
     filter_out->add_aggregation_filter(true);
 
+#if 0
+    //
+    // outgoing caches are obsolete
+    //
     CacheTable<A> *cache_out =
 	new CacheTable<A>(ribname + "IpcChannelOutputCache",
 			  _master.safi(),
@@ -426,14 +431,15 @@ BGPPlumbingAF<A>::BGPPlumbingAF(const string& ribname,
 			  _master.rib_handler());
     filter_out->set_next_table(cache_out);
     _tables.insert(cache_out);
+#endif
 
     _ipc_rib_out_table =
 	new RibOutTable<A>(ribname + "IpcRibOutTable",
 			   _master.safi(),
-			   cache_out,
+			   filter_out,
 			   _master.rib_handler());
     _out_map[_master.rib_handler()] = _ipc_rib_out_table;
-    cache_out->set_next_table(_ipc_rib_out_table);
+    filter_out->set_next_table(_ipc_rib_out_table);
 
     _fanout_table->add_next_table(filter_out, _master.rib_handler(),
 				  _ipc_rib_in_table->genid());
@@ -691,7 +697,7 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler)
 
     A peer_addr;
     peer_handler->get_peer_addr(peer_addr);
-
+    
     // XXX add get methods
     // XXX what do we do with IPv6?
     A self_addr;
@@ -699,7 +705,7 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler)
 	self_addr = A(peer_handler->get_local_addr().c_str()); 
     } catch (...) {
     }
-
+    
     PolicyTableImport<A>* policy_filter_in =
 	new PolicyTableImport<A>(_ribname + "PeerInputPolicyFilter" + peername,
 				 _master.safi(),
@@ -707,7 +713,7 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler)
 				 _master.policy_filters(),
 				 peer_addr,
 				 self_addr);
-    filter_in->set_next_table(policy_filter_in);
+    filter_in->set_next_table(policy_filter_in);			   
 
     CacheTable<A>* cache_in = 
 	new CacheTable<A>(_ribname + "PeerInputCache" + peername,
@@ -761,25 +767,29 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler)
 				 self_addr);
     filter_out->set_next_table(policy_filter_out);
 
+#if 0   
+    //
+    // outbound cache tables are obsolete
+    //
     CacheTable<A>* cache_out = 
 	new CacheTable<A>(_ribname + "PeerOutputCache" + peername,
 			  _master.safi(),
 			  policy_filter_out,
 			  peer_handler);
     policy_filter_out->set_next_table(cache_out);
+#endif
 
     RibOutTable<A>* rib_out =
 	new RibOutTable<A>(_ribname + "RibOut" + peername,
 			   _master.safi(),
-			   cache_out,
+			   policy_filter_out,
 			   peer_handler);
-    cache_out->set_next_table(rib_out);
+    policy_filter_out->set_next_table(rib_out);
     _out_map[peer_handler] = rib_out;
     _reverse_out_map[rib_out] = peer_handler;
 
     _tables.insert(filter_out);
     _tables.insert(policy_filter_out);
-    _tables.insert(cache_out);
     _tables.insert(rib_out);
 
     /*
@@ -1067,7 +1077,9 @@ BGPPlumbingAF<A>::flush(PeerHandler* peer_handler)
 
 template <class A>
 int
-BGPPlumbingAF<A>::add_route(const InternalMessage<A> &rtmsg, 
+BGPPlumbingAF<A>::add_route(const IPNet<A>& net,
+			    FPAListRef& pa_list,
+			    const PolicyTags& policy_tags,
 			    PeerHandler* peer_handler) 
 {
     debug_msg("BGPPlumbingAF<IPv%u:%s>::add_route\n",
@@ -1086,23 +1098,20 @@ BGPPlumbingAF<A>::add_route(const InternalMessage<A> &rtmsg,
 		   pretty_string_safi(_master.safi()));
 
     rib_in = iter->second;
+    result = rib_in->add_route(net, pa_list, policy_tags);
 
-    result = rib_in->add_route(rtmsg, NULL);
-
-    if (rtmsg.push() == false) {
-	if (result == ADD_USED || result == ADD_UNUSED) {
-	    _awaits_push = true;
-	} else {
-	    //XXX the add_route returned an error.
-	    //Do we want to proactively send a push now?
-	}
+    if (result == ADD_USED || result == ADD_UNUSED) {
+	_awaits_push = true;
+    } else {
+	//XXX the add_route returned an error.
+	//Do we want to proactively send a push now?
     }
     return result;
 }
 
 template <class A>
 int 
-BGPPlumbingAF<A>::delete_route(const InternalMessage<A> &rtmsg, 
+BGPPlumbingAF<A>::delete_route(InternalMessage<A> &rtmsg, 
 			    PeerHandler* peer_handler) 
 {
     int result = 0;
@@ -1142,16 +1151,21 @@ BGPPlumbingAF<A>::delete_route(const IPNet<A>& net,
 PeerHandler that has no associated RibIn");
 
     rib_in = iter->second;
-
+#if 0
+    // no need to go to all the effort to create a full message here,
+    // as we'll do the lookup in ribin anyway
     uint32_t genid;
-    const SubnetRoute<A> *found_route = rib_in->lookup_route(net, genid);
+    FPAListRef pa_list;
+    const SubnetRoute<A> *found_route = rib_in->lookup_route(net, genid, pa_list);
     if (found_route == NULL) {
 	XLOG_WARNING("Attempt to delete non existent route %s",
 		     net.str().c_str());
 	return result;
     }
-    InternalMessage<A> rtmsg(found_route, peer_handler, GENID_UNKNOWN);
+    InternalMessage<A> rtmsg(found_route, pa_list, peer_handler, GENID_UNKNOWN);
     result = rib_in->delete_route(rtmsg, NULL);
+#endif
+    result = rib_in->delete_route(net);
     return result;
 }
 
@@ -1202,7 +1216,8 @@ BGPPlumbingAF<A>::lookup_route(const IPNet<A> &net) const
     //It's possible this differs from the route we tell a peer,
     //because of output filters that may modify attributes.
     uint32_t genid;
-    return _ipc_rib_out_table->lookup_route(net, genid);
+    FPAListRef pa_list;
+    return _ipc_rib_out_table->lookup_route(net, genid, pa_list);
 }
 
 template <class A>

@@ -17,13 +17,15 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/bgp/internal_message.hh,v 1.12 2008/07/23 05:09:33 pavlin Exp $
+// $XORP: xorp/bgp/internal_message.hh,v 1.13 2008/10/02 21:56:15 bms Exp $
 
 #ifndef __BGP_INTERNAL_MESSAGES_HH__
 #define __BGP_INTERNAL_MESSAGES_HH__
 
 #include "libxorp/xorp.h"
+#include "libxorp/ref_ptr.hh"
 #include "subnet_route.hh"
+#include "path_attribute.hh"
 class PeerHandler;
 
 #define GENID_UNKNOWN 0
@@ -49,15 +51,25 @@ public:
     InternalMessage(const SubnetRoute<A> *route,
 		    const PeerHandler *origin_peer,
 		    uint32_t genid);
+    InternalMessage(const SubnetRoute<A> *route,
+		    FPAListRef pa_list,
+		    const PeerHandler *origin_peer,
+		    uint32_t genid);
     ~InternalMessage();
     const IPNet<A>& net() const;
     const SubnetRoute<A> *route() const { return _subnet_route; }
     const PeerHandler* origin_peer() const { return _origin_peer; }
-    const A& nexthop() const { return _subnet_route->nexthop(); }
+    const A& nexthop() const { return _attributes->nexthop(); }
+    FPAListRef& attributes() {return _attributes;}
+    const FPAListRef& const_attributes() const {return _attributes;}
 
     bool changed() const { return _changed; }
     void set_changed() { _changed = true; }
     void clear_changed() const { _changed = false; }
+
+    bool copied() const { return _copied; }
+    void set_copied() { _copied = true; }
+    void clear_copied() const { _copied = false; }
 
     bool push() const { return _push; }
     void set_push() { _push = true; }
@@ -68,13 +80,19 @@ public:
 
     uint32_t genid() const { return _genid; }
 
+#if 0
     // This is a hack to override const in DecisionTable.
     void force_clear_push() const { _push = false; }
+#endif
 
+    // this should only be called if the msg had been copied
     void inactivate() const {
-	_subnet_route->unref();
-	_subnet_route = NULL;
+	if (_copied) {
+	    _subnet_route->unref();
+	    _subnet_route = NULL;
+	}
     }
+
     string str() const;
 protected:
 private:
@@ -82,6 +100,13 @@ private:
      * the actual route data.
      */
     mutable const SubnetRoute<A> *_subnet_route;
+
+    /**
+     * the path attribute list we use for fast accesses.  This is
+     * reference counted so we don't need to worry about freeing it
+     * when we copy it from message to message.
+     */
+    FPAListRef _attributes;
 
     /**
      * we need origin_peer to make sure we don't send a route back to
@@ -95,6 +120,12 @@ private:
      * CacheTable).
      */
     mutable bool _changed;
+
+    /**
+     * copied indicates that the subnet route data has been copied since
+     * the route was last stored (and so needs freeing by the final recipient)
+     */
+    mutable bool _copied;
 
     /**
      * genid is the generation ID from the RibIn, if known, or zero if

@@ -17,18 +17,20 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/attribute_manager.cc,v 1.16 2008/07/23 05:09:31 pavlin Exp $"
+#ident "$XORP: xorp/bgp/attribute_manager.cc,v 1.17 2008/10/02 21:56:14 bms Exp $"
 
 //#define DEBUG_LOGGING
 #include "bgp_module.h"
 #include "attribute_manager.hh"
 
+#if 0
 template <class A>
 bool
 StoredAttributeList<A>::operator<(const StoredAttributeList<A>& them) const
 {
     return (memcmp(hash(), them.hash(), 16) < 0);
 }
+#endif
 
 template <class A>
 AttributeManager<A>::AttributeManager()
@@ -37,53 +39,50 @@ AttributeManager<A>::AttributeManager()
 }
 
 template <class A>
-const PathAttributeList<A> *
-AttributeManager<A>::add_attribute_list(
-    const PathAttributeList<A> *attribute_list)
+PAListRef<A> 
+AttributeManager<A>::add_attribute_list(PAListRef<A>& palist)
 {
     debug_msg("AttributeManager<A>::add_attribute_list\n");
-    StoredAttributeList<A> *new_att =
-	new StoredAttributeList<A>(attribute_list);
-    typedef typename set<StoredAttributeList<A>*, Att_Ptr_Cmp<A> >::iterator Iter;
-    Iter i = _attribute_lists.find(new_att);
+    typedef typename set<PAListRef<A>, Att_Ptr_Cmp<A> >::iterator Iter;
+    Iter i = _attribute_lists.find(palist);
 
     if (i == _attribute_lists.end()) {
-	new_att->clone_data();
-	_attribute_lists.insert(new_att);
-	return new_att->attribute();
+	_attribute_lists.insert(palist);
+	palist->incr_refcount(65535);
+	debug_msg("** new att list\n");
+	debug_msg("** (+) ref count for %p now %d\n",
+		  palist.attributes(), palist->references());
+	return palist;
     }
 
-    (*i)->increase();
-    delete new_att;
+    (*i)->incr_refcount(65535);
+    debug_msg("** old att list\n");
     debug_msg("** (+) ref count for %p now %d\n",
-	      (*i)->attribute(), (*i)->references());
+	      (*i).attributes(), (*i)->references());
     debug_msg("done\n");
 
-    return (*i)->attribute();
+    return *i;
 }
 
 template <class A>
 void
-AttributeManager<A>::delete_attribute_list(
-    const PathAttributeList<A> *attribute_list)
+AttributeManager<A>::delete_attribute_list(PAListRef<A>& palist)
 {
-    StoredAttributeList<A> *del_att =
-	new StoredAttributeList<A>(attribute_list);
     debug_msg("AttributeManager<A>::delete_attribute_list %p\n",
-	      del_att->attribute());
-    typedef typename set<StoredAttributeList<A>*, Att_Ptr_Cmp<A> >::iterator Iter;
-    Iter i = _attribute_lists.find(del_att);
+	      palist.attributes());
+    typedef typename set<PAListRef<A>, Att_Ptr_Cmp<A> >::iterator Iter;
+    Iter i = _attribute_lists.find(palist);
     assert(i != _attribute_lists.end());
-    delete del_att;
-    (*i)->decrease();
-    debug_msg("** (-) ref count for %p now %d\n",
-	      (*i)->attribute(), (*i)->references());
-    if ((*i)->references() == 0) {
-	del_att = (*i);
-	_attribute_lists.erase(i);
-	delete del_att;
-    }
 
+    XLOG_ASSERT((*i)->references()>=65535);
+    (*i)->decr_refcount(65535);
+
+    debug_msg("** (-) ref count for %p now %d\n",
+	      (*i).attributes(), (*i)->references());
+
+    if ((*i)->references() < 65535) {
+	_attribute_lists.erase(i);
+    }
 }
 
 template class AttributeManager<IPv4>;

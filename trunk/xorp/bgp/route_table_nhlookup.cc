@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/route_table_nhlookup.cc,v 1.30 2008/07/23 05:09:37 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_nhlookup.cc,v 1.31 2008/10/02 21:56:20 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -26,8 +26,8 @@
 #include "route_table_nhlookup.hh"
 
 template <class A>
-MessageQueueEntry<A>::MessageQueueEntry(const InternalMessage<A>* add_msg,
-					const InternalMessage<A>* delete_msg) :
+MessageQueueEntry<A>::MessageQueueEntry(InternalMessage<A>* add_msg,
+					InternalMessage<A>* delete_msg) :
     _added_route_ref(add_msg->route()), 
     _deleted_route_ref(delete_msg ? delete_msg->route() : NULL)
 {
@@ -44,8 +44,8 @@ MessageQueueEntry<A>::MessageQueueEntry(const MessageQueueEntry<A>& them) :
 
 template <class A>
 void
-MessageQueueEntry<A>::copy_in(const InternalMessage<A>* add_msg,
-			      const InternalMessage<A>* delete_msg) 
+MessageQueueEntry<A>::copy_in(InternalMessage<A>* add_msg,
+			      InternalMessage<A>* delete_msg) 
 {
     /* Note: this all depends on _added_route_ref and
        _deleted_route_ref, whose pupose is to maintain the reference
@@ -57,16 +57,18 @@ MessageQueueEntry<A>::copy_in(const InternalMessage<A>* add_msg,
 
     // Copy the add_msg.  We can't assume it will still be around.
     _add_msg = new InternalMessage<A>(add_msg->route(),
+				      add_msg->attributes(),
 				      add_msg->origin_peer(),
 				      add_msg->genid());
     // changed must be false - we don't store new routes here, so the
     // plumbing has to ensure that there's a cache upstream.
-    XLOG_ASSERT(add_msg->changed() == false);
+    XLOG_ASSERT(add_msg->copied() == false);
 
     if (delete_msg == NULL) {
 	_delete_msg = NULL;
     } else {
 	_delete_msg = new InternalMessage<A>(delete_msg->route(),
+					     delete_msg->attributes(),
 					     delete_msg->origin_peer(),
 					     delete_msg->genid());
     }
@@ -104,7 +106,7 @@ NhLookupTable<A>::NhLookupTable(string tablename,
 
 template <class A>
 int
-NhLookupTable<A>::add_route(const InternalMessage<A> &rtmsg,
+NhLookupTable<A>::add_route(InternalMessage<A> &rtmsg,
 			    BGPRouteTable<A> *caller) 
 {
     debug_msg("\n         %s\n caller: %s\n rtmsg: %p route: %p\n%s\n",
@@ -128,8 +130,7 @@ NhLookupTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	return this->_next_table->add_route(rtmsg, this);
     }
 
-    add_to_queue(rtmsg.nexthop(), rtmsg.net(), 
-		 MessageQueueEntry<A>(&rtmsg, NULL));
+    add_to_queue(rtmsg.nexthop(), rtmsg.net(), &rtmsg, NULL);
 
     // we don't know if it will ultimately be used, so err on the safe
     // side
@@ -138,8 +139,8 @@ NhLookupTable<A>::add_route(const InternalMessage<A> &rtmsg,
 
 template <class A>
 int
-NhLookupTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
-				const InternalMessage<A> &new_rtmsg,
+NhLookupTable<A>::replace_route(InternalMessage<A> &old_rtmsg,
+				InternalMessage<A> &new_rtmsg,
 				BGPRouteTable<A> *caller) 
 {
     debug_msg("\n         %s\n"
@@ -164,7 +165,7 @@ NhLookupTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 
     // Are we still waiting for the old_rtmsg to resolve?
     bool old_msg_is_queued;
-    const MessageQueueEntry<A>* mqe =
+    MessageQueueEntry<A>* mqe =
 	lookup_in_queue(old_rtmsg.nexthop(), net);
     old_msg_is_queued = 0 != mqe;
 
@@ -201,21 +202,27 @@ NhLookupTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 
     debug_msg("need queuing %s\n", bool_c_str(new_msg_needs_queuing));
 
-    const InternalMessage<A>* real_old_msg = &old_rtmsg;
+    InternalMessage<A>* real_old_msg = &old_rtmsg;
+    SubnetRoute<A>* preserve_route;
     bool propagate_as_add = false;
     if (old_msg_is_queued) {
 	// there was an entry for this net in our queue awaiting
 	// resolution of it's nexthop
 	if (mqe->type() == MessageQueueEntry<A>::REPLACE) {
 	    // preserve the old delete message and route
-	    SubnetRoute<A>* preserve_route
-		= new SubnetRoute<A>(*(mqe->deleted_route()));
+	    preserve_route = new SubnetRoute<A>(*(mqe->deleted_route()));
 	    InternalMessage<A>* preserve_msg
 		= new InternalMessage<A>(preserve_route,
+					 mqe->delete_msg()->attributes(),
 					 mqe->delete_msg()->origin_peer(),
 					 mqe->delete_msg()->genid());
+#if 0
+	    // re-enable me!
 	    if (mqe->delete_msg()->changed())
 	    	preserve_msg->set_changed();
+#endif
+	    if (mqe->delete_msg()->copied())
+	    	preserve_msg->set_copied();
 	    real_old_msg = preserve_msg;
 	} else if (mqe->type() == MessageQueueEntry<A>::ADD) {
 	    // there was an ADD queued.  No-one downstream heard this
@@ -225,22 +232,21 @@ NhLookupTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 
 	// we can now remove the old queue entry, because it's no longer
 	// needed
-	remove_from_queue(mqe->added_route()->nexthop(), net);
+	remove_from_queue(mqe->add_msg()->nexthop(), net);
     }
 
     bool deregister = true;
     int retval;
     if (new_msg_needs_queuing) {
 	if (propagate_as_add) {
-	    add_to_queue(new_rtmsg.nexthop(), net,
-			 MessageQueueEntry<A>(&new_rtmsg, NULL));
+	    add_to_queue(new_rtmsg.nexthop(), net, &new_rtmsg, NULL);
 	} else {
-	    add_to_queue(new_rtmsg.nexthop(), net,
-			 MessageQueueEntry<A>(&new_rtmsg, real_old_msg));
+	    add_to_queue(new_rtmsg.nexthop(), net, &new_rtmsg, real_old_msg);
 	    deregister = false;
 	}
 	if (real_old_msg != &old_rtmsg) {
 	    delete real_old_msg;
+	    preserve_route->unref();
 	}
 	retval = ADD_USED;
     } else {
@@ -253,6 +259,7 @@ NhLookupTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	}
 	if (real_old_msg != &old_rtmsg) {
 	    delete real_old_msg;
+	    preserve_route->unref();
 	}
 	retval = success;
     }
@@ -271,7 +278,7 @@ NhLookupTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 
 template <class A>
 int
-NhLookupTable<A>::delete_route(const InternalMessage<A> &rtmsg,
+NhLookupTable<A>::delete_route(InternalMessage<A> &rtmsg,
 			       BGPRouteTable<A> *caller) 
 {
     debug_msg("\n         %s\n caller: %s\n rtmsg: %p route: %p\n%s\n",
@@ -286,14 +293,14 @@ NhLookupTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 
     // Are we still waiting for the old_rtmsg to resolve?
     bool msg_is_queued;
-    const MessageQueueEntry<A>* mqe = lookup_in_queue(rtmsg.nexthop(), net);
+    MessageQueueEntry<A>* mqe = lookup_in_queue(rtmsg.nexthop(), net);
     msg_is_queued = 0 != mqe;
 
     debug_msg("deregister_nexthop %s %s\n", cstring(rtmsg.nexthop()),
 	      cstring(rtmsg.net()));
     _next_hop_resolver->deregister_nexthop(rtmsg.nexthop(), rtmsg.net(), this);
 
-    const InternalMessage<A>* real_msg = &rtmsg;
+    InternalMessage<A>* real_msg = &rtmsg;
     if (msg_is_queued == true) {
 	// there was an entry for this net in our queue awaiting
 	// resolution of it's nexthop
@@ -304,10 +311,15 @@ NhLookupTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	    // preserve the old delete message
 	    InternalMessage<A>* preserve_msg
 		= new InternalMessage<A>(mqe->delete_msg()->route(),
+					 mqe->delete_msg()->attributes(),
 					 mqe->delete_msg()->origin_peer(),
 					 mqe->delete_msg()->genid());
+#if 0
 	    if (mqe->delete_msg()->changed())
 		preserve_msg->set_changed();
+#endif
+	    if (mqe->delete_msg()->copied())
+		preserve_msg->set_copied();
 	    real_msg = preserve_msg;
 	    dont_send_delete = false;
 	    break;
@@ -321,7 +333,7 @@ NhLookupTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	if (dont_send_delete) {
 	    // we can now remove the old queue entry, because it's no longer
 	    // needed
-	    remove_from_queue(mqe->added_route()->nexthop(), net);
+	    remove_from_queue(mqe->add_msg()->nexthop(), net);
 	    // there was an ADD in the queue - we just dequeued it, and
 	    // don't need to propagate the delete further
 	    return 0;
@@ -333,7 +345,7 @@ NhLookupTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	delete real_msg;
 	// we can now remove the old queue entry, because it's no longer
 	// needed
-	remove_from_queue(mqe->added_route()->nexthop(), net);
+	remove_from_queue(mqe->add_msg()->nexthop(), net);
     }
     return success;
 }
@@ -351,14 +363,15 @@ NhLookupTable<A>::push(BGPRouteTable<A> *caller)
 
 template <class A>
 const SubnetRoute<A> *
-NhLookupTable<A>::lookup_route(const IPNet<A> &net, uint32_t& genid) const 
+NhLookupTable<A>::lookup_route(const IPNet<A> &net, uint32_t& genid,
+			       FPAListRef& pa_list) const 
 {
     debug_msg("net: %s\n", cstring(net));
 
     // Are we still waiting for the old_rtmsg to resolve?
     const MessageQueueEntry<A>* mqe = lookup_in_queue(A::ZERO(), net);
     if (0 == mqe)
-	return this->_parent->lookup_route(net, genid);
+	return this->_parent->lookup_route(net, genid, pa_list);
 
     switch (mqe->type()) {
     case MessageQueueEntry<A>::ADD:
@@ -372,6 +385,7 @@ NhLookupTable<A>::lookup_route(const IPNet<A> &net, uint32_t& genid) const
 	// although there is a route, we don't know the true nexthop
 	// for it yet, so we act as though we only know the old answer.
 	genid = mqe->delete_msg()->genid();
+	pa_list = mqe->delete_msg()->attributes();
 	return mqe->deleted_route();
     }
     XLOG_UNREACHABLE();
@@ -397,21 +411,22 @@ NhLookupTable<A>::RIB_lookup_done(const A& nexthop,
 	XLOG_ASSERT(0 != mqe);
 
 	switch (mqe->type()) {
-	case MessageQueueEntry<A>::ADD:
+	case MessageQueueEntry<A>::ADD: {
 	    mqe->add_msg()->route()->set_nexthop_resolved(lookup_succeeded);
 	    this->_next_table->add_route(*(mqe->add_msg()), this);
 	    break;
+	}
 	case MessageQueueEntry<A>::REPLACE:
-	    mqe->add_msg()->route()->set_nexthop_resolved(lookup_succeeded);
+            mqe->add_msg()->route()->set_nexthop_resolved(lookup_succeeded);
 	    this->_next_table->replace_route(*(mqe->delete_msg()),
 				       *(mqe->add_msg()), this);
 	    // Perform the deferred deregistration.
 	    debug_msg("Performing deferred deregistration\n");
 	    debug_msg("deregister_nexthop %s %s\n",
-		      cstring(mqe->delete_msg()->route()->nexthop()),
+		      cstring(mqe->deleted_attributes()->nexthop()),
 		      cstring(mqe->delete_msg()->net()));
 	    _next_hop_resolver->
-		deregister_nexthop(mqe->delete_msg()->route()->nexthop(),
+		deregister_nexthop(mqe->deleted_attributes()->nexthop(),
 				   mqe->delete_msg()->net(), this);
 	    break;
 	}
@@ -429,25 +444,26 @@ NhLookupTable<A>::RIB_lookup_done(const A& nexthop,
 template <class A>
 void
 NhLookupTable<A>::add_to_queue(const A& nexthop, const IPNet<A>& net,
-			       const MessageQueueEntry<A> &mqe)
+			       InternalMessage<A>* new_msg,
+			       InternalMessage<A>* old_msg)
 {
-    typename RefTrie<A, const MessageQueueEntry<A> >::iterator inserted;
-    inserted = _queue_by_net.insert(net, mqe);
-    const MessageQueueEntry<A>* mqep = &(inserted.payload());
+    typename RefTrie<A, MessageQueueEntry<A> >::iterator inserted;
+    inserted = _queue_by_net.insert(net, MessageQueueEntry<A>(new_msg, old_msg));
+    MessageQueueEntry<A>* mqep = &(inserted.payload());
     _queue_by_nexthop.insert(make_pair(nexthop, mqep));
 }
 
 template <class A>
-const MessageQueueEntry<A> *
+MessageQueueEntry<A> *
 NhLookupTable<A>::lookup_in_queue(const A& nexthop, const IPNet<A>& net) const
 {
-    const MessageQueueEntry<A>* mqe = NULL;
-    typename RefTrie<A, const MessageQueueEntry<A> >::iterator i;
+    MessageQueueEntry<A>* mqe = NULL;
+    typename RefTrie<A, MessageQueueEntry<A> >::iterator i;
     i = _queue_by_net.lookup_node(net);
     if (i != _queue_by_net.end()) {
 	mqe = &(i.payload());
 	if (A::ZERO() != nexthop)
-	    XLOG_ASSERT(mqe->added_route()->nexthop() == nexthop);
+	    XLOG_ASSERT(mqe->added_attributes()->nexthop() == nexthop);
     }
 
     return mqe;
@@ -458,14 +474,14 @@ void
 NhLookupTable<A>::remove_from_queue(const A& nexthop, const IPNet<A>& net)
 {
     // Find the queue entry in the queue by net
-    const MessageQueueEntry<A>* mqe;
-    typename RefTrie<A, const MessageQueueEntry<A> >::iterator net_iter;
+    MessageQueueEntry<A>* mqe;
+    typename RefTrie<A, MessageQueueEntry<A> >::iterator net_iter;
     net_iter = _queue_by_net.lookup_node(net);
     XLOG_ASSERT(net_iter != _queue_by_net.end());
     mqe = &(net_iter.payload());
 
     // Find the queue entry in the queue by nexthop
-    typename multimap <A, const MessageQueueEntry<A>*>::iterator nh_iter
+    typename multimap <A, MessageQueueEntry<A>*>::iterator nh_iter
 	= _queue_by_nexthop.find(nexthop);
     for (; nh_iter != _queue_by_nexthop.end(); nh_iter++)
 	if (nh_iter->second->net() == net)

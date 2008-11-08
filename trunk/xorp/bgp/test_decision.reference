@@ -40,7 +40,6 @@ SubnetRoute:
 [comment] PEER1 HAS LOWEST NEIGHBOR ADDRESS
 [comment] SENDING FROM PEER 1
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -68,11 +67,9 @@ SubnetRoute:
 	Origin Path Attribute - IGP
 	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
-[PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 2
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -87,7 +84,6 @@ SubnetRoute:
 [comment] PEER1 HAS LOWEST NEIGHBOR ADDRESS
 [comment] SENDING FROM PEER 2
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -106,7 +102,6 @@ SubnetRoute:
 	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -119,7 +114,6 @@ SubnetRoute:
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -135,7 +129,6 @@ SubnetRoute:
 [comment] PEER2 HAS LOWEST BGP ID
 [comment] SENDING FROM PEER 1
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -154,7 +147,6 @@ SubnetRoute:
 	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -167,7 +159,6 @@ SubnetRoute:
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 2
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -183,7 +174,6 @@ SubnetRoute:
 [comment] PEER2 HAS LOWEST BGP ID
 [comment] SENDING FROM PEER 2
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -211,11 +201,9 @@ SubnetRoute:
 	Origin Path Attribute - IGP
 	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
-[PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -229,7 +217,6 @@ SubnetRoute:
 [comment] TEST OF DIFFERENT AS PATH LENGTHS
 [comment] SENDING FROM PEER 1
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -257,11 +244,9 @@ SubnetRoute:
 	Origin Path Attribute - IGP
 	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
-[PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 2
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -275,7 +260,6 @@ SubnetRoute:
 [comment] TEST OF DIFFERENT AS PATH LENGTHS
 [comment] SENDING FROM PEER 1
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -294,7 +278,6 @@ SubnetRoute:
 	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -307,7 +290,6 @@ SubnetRoute:
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 2
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -322,7 +304,6 @@ SubnetRoute:
 [comment] HIGHEST LOCALPREF WINS
 [comment] SENDING FROM PEER 1
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -341,7 +322,6 @@ SubnetRoute:
 	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -354,7 +334,6 @@ SubnetRoute:
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 2
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -369,7 +348,6 @@ SubnetRoute:
 [comment] HIGHEST LOCALPREF WINS
 [comment] SENDING FROM PEER 1
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -397,11 +375,9 @@ SubnetRoute:
 	Origin Path Attribute - IGP
 	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
-[PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 2
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -416,7 +392,6 @@ SubnetRoute:
 [comment] HIGHEST LOCALPREF WINS
 [comment] SENDING FROM PEER 1
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -435,7 +410,6 @@ SubnetRoute:
 	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -454,7 +428,6 @@ SubnetRoute:
 	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -469,7 +442,6 @@ SubnetRoute:
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 3
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -484,7 +456,6 @@ SubnetRoute:
 [comment] LOWEST MED WINS
 [comment] SENDING FROM PEER 1
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -515,11 +486,9 @@ SubnetRoute:
 	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Multiple Exit Descriminator Attribute: MED=200
 	Local Preference Attribute - 100
-[PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 2
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -535,7 +504,6 @@ SubnetRoute:
 [comment] LOWEST MED WINS
 [comment] SENDING FROM PEER 1
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -556,7 +524,6 @@ SubnetRoute:
 	Multiple Exit Descriminator Attribute: MED=200
 	Local Preference Attribute - 100
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -570,7 +537,6 @@ SubnetRoute:
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 2
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -586,7 +552,6 @@ SubnetRoute:
 [comment] ROUTE WITHOUT MED WINS
 [comment] SENDING FROM PEER 1
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -607,7 +572,6 @@ SubnetRoute:
 	Multiple Exit Descriminator Attribute: MED=100
 	Local Preference Attribute - 100
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -620,7 +584,6 @@ SubnetRoute:
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 2
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -635,7 +598,6 @@ SubnetRoute:
 [comment] ROUTE WITHOUT MED WINS
 [comment] SENDING FROM PEER 1
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -664,11 +626,9 @@ SubnetRoute:
 	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Multiple Exit Descriminator Attribute: MED=100
 	Local Preference Attribute - 100
-[PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 2
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -684,7 +644,6 @@ SubnetRoute:
 [comment] 
 [comment] SENDING FROM PEER 1
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -705,7 +664,6 @@ SubnetRoute:
 	Multiple Exit Descriminator Attribute: MED=100
 	Local Preference Attribute - 100
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -719,7 +677,6 @@ SubnetRoute:
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 2
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -735,7 +692,6 @@ SubnetRoute:
 [comment] 
 [comment] SENDING FROM PEER 1
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -757,7 +713,6 @@ SubnetRoute:
 	Multiple Exit Descriminator Attribute: MED=100
 	Local Preference Attribute - 100
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -779,7 +734,6 @@ SubnetRoute:
 	Multiple Exit Descriminator Attribute: MED=200
 	Local Preference Attribute - 100
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -809,7 +763,6 @@ SubnetRoute:
 	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Multiple Exit Descriminator Attribute: MED=200
 	Local Preference Attribute - 100
-[PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 2
 [comment] ROUTE 1 TAKES OVER
@@ -831,11 +784,9 @@ SubnetRoute:
 	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Multiple Exit Descriminator Attribute: MED=100
 	Local Preference Attribute - 100
-[PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -852,7 +803,6 @@ SubnetRoute:
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 3
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -874,7 +824,6 @@ SubnetRoute:
 	Multiple Exit Descriminator Attribute: MED=50
 	Local Preference Attribute - 100
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -910,11 +859,9 @@ SubnetRoute:
 	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Multiple Exit Descriminator Attribute: MED=50
 	Local Preference Attribute - 100
-[PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 3
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -931,7 +878,6 @@ SubnetRoute:
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -956,7 +902,6 @@ SubnetRoute:
 	Multiple Exit Descriminator Attribute: MED=200
 	Local Preference Attribute - 100
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -986,14 +931,12 @@ SubnetRoute:
 	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Multiple Exit Descriminator Attribute: MED=200
 	Local Preference Attribute - 100
-[PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
 [comment] NO CHANGE
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 2
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1010,7 +953,6 @@ SubnetRoute:
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 1
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1034,7 +976,6 @@ SubnetRoute:
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1050,7 +991,6 @@ SubnetRoute:
 [comment] 
 [comment] SENDING FROM PEER 2
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1072,7 +1012,6 @@ SubnetRoute:
 	Multiple Exit Descriminator Attribute: MED=200
 	Local Preference Attribute - 100
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1094,7 +1033,6 @@ SubnetRoute:
 	Multiple Exit Descriminator Attribute: MED=50
 	Local Preference Attribute - 100
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1124,7 +1062,6 @@ SubnetRoute:
 	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Multiple Exit Descriminator Attribute: MED=50
 	Local Preference Attribute - 100
-[PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 3
 [comment] ROUTE 2 TAKES OVER
@@ -1146,11 +1083,9 @@ SubnetRoute:
 	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Multiple Exit Descriminator Attribute: MED=200
 	Local Preference Attribute - 100
-[PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 2
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1167,7 +1102,6 @@ SubnetRoute:
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 3
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1192,7 +1126,6 @@ SubnetRoute:
 	Multiple Exit Descriminator Attribute: MED=50
 	Local Preference Attribute - 100
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1222,14 +1155,12 @@ SubnetRoute:
 	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Multiple Exit Descriminator Attribute: MED=50
 	Local Preference Attribute - 100
-[PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 2
 [comment] NO CHANGE
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 3
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1246,7 +1177,6 @@ SubnetRoute:
 [comment] SENDING FROM PEER 1
 [comment] EXPECT: WINS BY DEFAULT
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1276,7 +1206,6 @@ SubnetRoute:
 	Origin Path Attribute - EGP
 	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
-[PUSH]
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 1
 [comment] EXPECT: LOSES
@@ -1299,11 +1228,9 @@ SubnetRoute:
 	Origin Path Attribute - INCOMPLETE
 	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
-[PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1320,7 +1247,6 @@ SubnetRoute:
 [comment] SENDING FROM PEER 2
 [comment] EXPECT: WINS BY DEFAULT
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1340,7 +1266,6 @@ SubnetRoute:
 	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1363,7 +1288,6 @@ SubnetRoute:
 	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1389,11 +1313,9 @@ SubnetRoute:
 	Origin Path Attribute - EGP
 	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
-[PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1408,7 +1330,6 @@ SubnetRoute:
 [comment] SENDING FROM PEER 1
 [comment] PEER 1 HAS BETTER IGP DISTANCE
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1436,11 +1357,9 @@ SubnetRoute:
 	Origin Path Attribute - IGP
 	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
-[PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 2
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1455,7 +1374,6 @@ SubnetRoute:
 [comment] SENDING FROM PEER 1
 [comment] PEER 2 HAS BETTER IGP DISTANCE
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1474,7 +1392,6 @@ SubnetRoute:
 	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1487,7 +1404,6 @@ SubnetRoute:
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 2
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1503,7 +1419,6 @@ SubnetRoute:
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 1
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1516,7 +1431,6 @@ SubnetRoute:
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1536,7 +1450,6 @@ SubnetRoute:
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1549,7 +1462,6 @@ SubnetRoute:
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 2
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1578,7 +1490,6 @@ SubnetRoute:
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 1
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1596,7 +1507,6 @@ SubnetRoute:
 	Origin Path Attribute - IGP
 	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1607,7 +1517,6 @@ SubnetRoute:
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1625,7 +1534,6 @@ SubnetRoute:
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 1
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1636,7 +1544,6 @@ SubnetRoute:
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1652,7 +1559,6 @@ SubnetRoute:
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 1
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1670,7 +1576,6 @@ SubnetRoute:
 	Origin Path Attribute - IGP
 	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
-[PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
 [separator]-------------------------------------
@@ -1692,7 +1597,6 @@ SubnetRoute:
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 1
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1713,7 +1617,6 @@ SubnetRoute:
 	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 200
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1739,11 +1642,9 @@ SubnetRoute:
 	Origin Path Attribute - IGP
 	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 200
-[PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1759,7 +1660,6 @@ SubnetRoute:
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1778,7 +1678,6 @@ SubnetRoute:
 	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1797,7 +1696,6 @@ SubnetRoute:
 	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 200
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1823,11 +1721,9 @@ SubnetRoute:
 	Origin Path Attribute - IGP
 	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 200
-[PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1843,7 +1739,6 @@ SubnetRoute:
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 1
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1860,7 +1755,6 @@ SubnetRoute:
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1876,7 +1770,6 @@ SubnetRoute:
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 1
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1895,7 +1788,6 @@ SubnetRoute:
 	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1913,7 +1805,6 @@ SubnetRoute:
 	Origin Path Attribute - IGP
 	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 300
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1939,11 +1830,9 @@ SubnetRoute:
 	Origin Path Attribute - IGP
 	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
-[PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1959,7 +1848,6 @@ SubnetRoute:
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 1
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1978,7 +1866,6 @@ SubnetRoute:
 	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 200
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -1997,7 +1884,6 @@ SubnetRoute:
 	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 300
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -2023,11 +1909,9 @@ SubnetRoute:
 	Origin Path Attribute - IGP
 	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
-[PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 2
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -2043,7 +1927,6 @@ SubnetRoute:
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 1
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -2062,7 +1945,6 @@ SubnetRoute:
 	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 200
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -2092,7 +1974,6 @@ SubnetRoute:
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -2110,7 +1991,6 @@ SubnetRoute:
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 1
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -2129,7 +2009,6 @@ SubnetRoute:
 	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 200
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -2143,7 +2022,6 @@ SubnetRoute:
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 2
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -2161,7 +2039,6 @@ SubnetRoute:
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 1
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -2208,11 +2085,9 @@ SubnetRoute:
 	Origin Path Attribute - IGP
 	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 200
-[PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -2245,7 +2120,6 @@ SubnetRoute:
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -2308,11 +2182,9 @@ SubnetRoute:
 	Origin Path Attribute - IGP
 	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 200
-[PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -2328,7 +2200,6 @@ SubnetRoute:
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 1
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -2347,7 +2218,6 @@ SubnetRoute:
 	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 200
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -2378,7 +2248,6 @@ SubnetRoute:
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 1
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -2397,7 +2266,6 @@ SubnetRoute:
 	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -2416,7 +2284,6 @@ SubnetRoute:
 	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 200
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -2442,7 +2309,6 @@ SubnetRoute:
 	Origin Path Attribute - IGP
 	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 200
-[PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 2
 [DELETE]
@@ -2461,11 +2327,9 @@ SubnetRoute:
 	Origin Path Attribute - IGP
 	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
-[PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -2481,7 +2345,6 @@ SubnetRoute:
 [comment] PEER 1 HAS BETTER IGP DISTANCE
 [comment] PEER 2 IS EBGP
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -2501,7 +2364,6 @@ SubnetRoute:
 	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -2514,7 +2376,6 @@ SubnetRoute:
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 2
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -2532,7 +2393,6 @@ SubnetRoute:
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
 [ADD]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -2561,11 +2421,9 @@ SubnetRoute:
 	Origin Path Attribute - IGP
 	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
-[PUSH]
 [separator]-------------------------------------
 [comment] DELETION FROM PEER 1
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 

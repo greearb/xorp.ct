@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.49 2008/07/23 05:09:35 pavlin Exp $
+// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.50 2008/10/02 21:56:18 bms Exp $
 
 #ifndef __BGP_RIB_IPC_HANDLER_HH__
 #define __BGP_RIB_IPC_HANDLER_HH__
@@ -124,16 +124,26 @@ public:
     int start_packet();
     /* add_route and delete_route are called to propagate a route *to*
        the RIB. */
-    int add_route(const SubnetRoute<IPv4> &rt, bool ibgp, Safi safi);
-    int add_route(const SubnetRoute<IPv6> &rt, bool ibgp, Safi safi);
+    int add_route(const SubnetRoute<IPv4> &rt, 
+		  FPAList4Ref& pa_list,   
+		  bool ibgp, Safi safi);
+    int add_route(const SubnetRoute<IPv6> &rt, 
+		  FPAList6Ref& pa_list,   
+		  bool ibgp, Safi safi);
     int replace_route(const SubnetRoute<IPv4> &old_rt, bool old_ibgp, 
 		      const SubnetRoute<IPv4> &new_rt, bool new_ibgp, 
+		      FPAList4Ref& pa_list,   
 		      Safi safi);
     int replace_route(const SubnetRoute<IPv6> &old_rt, bool old_ibgp, 
 		      const SubnetRoute<IPv6> &new_rt, bool new_ibgp, 
+		      FPAList6Ref& pa_list,   
 		      Safi safi);
-    int delete_route(const SubnetRoute<IPv4> &rt, bool ibgp, Safi safi);
-    int delete_route(const SubnetRoute<IPv6> &rt, bool ibgp, Safi safi);
+    int delete_route(const SubnetRoute<IPv4> &rt, 
+		     FPAList4Ref& pa_list,   
+		     bool ibgp, Safi safi);
+    int delete_route(const SubnetRoute<IPv6> &rt, 
+		     FPAList6Ref& pa_list,   
+		     bool ibgp, Safi safi);
     void rib_command_done(const XrlError& error, const char *comment);
     PeerOutputState push_packet();
 

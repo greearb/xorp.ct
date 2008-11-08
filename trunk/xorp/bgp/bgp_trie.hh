@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/bgp/bgp_trie.hh,v 1.20 2008/07/23 05:09:31 pavlin Exp $
+// $XORP: xorp/bgp/bgp_trie.hh,v 1.21 2008/10/02 21:56:14 bms Exp $
 
 #ifndef __BGP_BGP_TRIE_HH__
 #define __BGP_BGP_TRIE_HH__
@@ -29,9 +29,9 @@
 template <class A>
 class Path_Att_Ptr_Cmp {
 public:
-    bool operator() (const PathAttributeList<A> *a,
-		     const PathAttributeList<A> *b) const {
-	return *a < *b;
+    bool operator() (const PAListRef<A> a,
+		     const PAListRef<A> b) const {
+	return a < b;
     }
 };
 
@@ -39,7 +39,7 @@ template<class A>
 class ChainedSubnetRoute : public SubnetRoute<A> {
 public:
     ChainedSubnetRoute(const IPNet<A> &net,
-		       const PathAttributeList<A> *attributes) :
+		       const PAListRef<A> attributes) :
 	SubnetRoute<A>(net, attributes), _prev(0), _next(0) {}
 
     ChainedSubnetRoute(const SubnetRoute<A>& route,
@@ -102,14 +102,21 @@ RefTrieNode<IPv6, const ChainedSubnetRoute<IPv6> >::delete_payload(const Chained
  * path attribute pointer are linked together into a chain (a circular
  * doubly-linked list).  The BgpTrie holds a pointer to any one of
  * those nodes.
+ * 
+ * XXX mjh: I've changed the pathmap to be a nexthop map.  This will still
+ * allow the code to find the next route when the igp distance failed,
+ * but is much faster.  The downside is we may not dump routes with
+ * the same PA list together.  Hopefully this can be remedied when we
+ * change to a pull-based model.
  */
 template<class A>
 class BgpTrie : public RefTrie<A, const ChainedSubnetRoute<A> > {
 public:
     typedef ::IPNet<A> IPNet;
     typedef ::ChainedSubnetRoute<A> ChainedSubnetRoute;
-    typedef map<const PathAttributeList<A> *,
-	const ChainedSubnetRoute*, Path_Att_Ptr_Cmp<A> > PathmapType;
+    typedef map<const PAListRef<A>,
+		const ChainedSubnetRoute*,
+		Path_Att_Ptr_Cmp<A> > PathmapType;
     typedef RefTrie<A, const ChainedSubnetRoute> RouteTrie;
     typedef typename RouteTrie::iterator iterator;
 

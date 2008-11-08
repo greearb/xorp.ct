@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/bgp/bgp.hh,v 1.71 2008/07/23 05:09:31 pavlin Exp $
+// $XORP: xorp/bgp/bgp.hh,v 1.72 2008/10/02 21:56:14 bms Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -936,7 +936,7 @@ private:
 
     template <typename A>
     void extract_attributes(// Input values, 
-			    const PathAttributeList<A>& attributes, 
+			    PAListRef<A> attributes, 
 			    // Output values, 
 			    uint32_t& origin, 
 			    vector<uint8_t>& aspath, 
@@ -1082,7 +1082,7 @@ BGPMain::get_route_list_start(uint32_t& token,
 template <typename A>
 void
 BGPMain::extract_attributes(// Input values,
-			    const PathAttributeList<A>& attributes,
+			    PAListRef<A> attributes,
 			    // Output values,
 			    uint32_t& origin,
 			    vector<uint8_t>& aspath,
@@ -1094,11 +1094,12 @@ BGPMain::extract_attributes(// Input values,
 			    int32_t& calc_localpref,
 			    vector<uint8_t>& attr_unknown)
 {
-    origin = attributes.origin();
-    attributes.aspath().encode_for_mib(aspath);
-    nexthop = attributes.nexthop();
+    FastPathAttributeList<A> fpa_list(attributes);
+    origin = fpa_list.origin();
+    fpa_list.aspath().encode_for_mib(aspath);
+    nexthop = fpa_list.nexthop();
 
-    const MEDAttribute* med_att = attributes.med_att();
+    const MEDAttribute* med_att = fpa_list.med_att();
     if (med_att) {
 	med = (int32_t)med_att->med();
 	if (med < 0) {
@@ -1112,7 +1113,7 @@ BGPMain::extract_attributes(// Input values,
     }
 
     const LocalPrefAttribute* local_pref_att
-	= attributes.local_pref_att();
+	= fpa_list.local_pref_att();
     if (local_pref_att) {
 	localpref = (int32_t)local_pref_att->localpref();
 	if (localpref < 0) {
@@ -1125,13 +1126,13 @@ BGPMain::extract_attributes(// Input values,
 	localpref = -1;
     }
 
-    if (attributes.atomic_aggregate_att())
+    if (fpa_list.atomic_aggregate_att())
 	atomic_agg = 2;
     else
 	atomic_agg = 1;
 
     const AggregatorAttribute* agg_att
-	= attributes.aggregator_att();
+	= fpa_list.aggregator_att();
     if (agg_att) {
 	aggregator.resize(6);
 	agg_att->route_aggregator().copy_out(&aggregator[0]);
@@ -1179,7 +1180,7 @@ BGPMain::get_route_list_next(
 	if (_plumbing_unicast->read_next_route(internal_token, route,
 					       peer_id)) {
 	    net = route->net();
-	    extract_attributes(*route->attributes(),
+	    extract_attributes(route->attributes(),
 			       origin, aspath, nexthop, med, localpref,
 			       atomic_agg, aggregator, calc_localpref,
 			       attr_unknown);
@@ -1205,7 +1206,7 @@ BGPMain::get_route_list_next(
 	if (_plumbing_multicast->read_next_route(internal_token, route,
 						 peer_id)) {
 	    net = route->net();
-	    extract_attributes(*route->attributes(),
+	    extract_attributes(route->attributes(),
 			       origin, aspath, nexthop, med, localpref,
 			       atomic_agg, aggregator, calc_localpref,
 			       attr_unknown);

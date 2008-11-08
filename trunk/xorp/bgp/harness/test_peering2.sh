@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.63 2008/10/08 14:55:37 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.64 2008/10/16 02:42:09 atanu Exp $
 #
 
 #
@@ -833,6 +833,7 @@ test15()
     # Check all the sent packets and verify that they arrived at peer3
     XRLS=${TMPDIR}/xrls.$EXT
     echo "Building lookup list in $XRLS"
+    cat $SENT > sentdata
     cat $SENT | $PYTHON $srcdir/lookup.py --peer peer3 \
 					 --trie recv \
 					 --add 65008 > $XRLS
@@ -842,6 +843,7 @@ test15()
     # Check all the received packets and verify that they were sent by peer1
     XRLS=${TMPDIR}/xrls.$EXT
     echo "Building lookup list in $XRLS"
+    cat $RECV > recvdata
     cat $RECV | $PYTHON $srcdir/lookup.py --peer peer1 \
 					 --trie sent \
 					 --remove 65008 > $XRLS

@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/bgp/exceptions.hh,v 1.14 2008/07/23 05:09:32 pavlin Exp $
+// $XORP: xorp/bgp/exceptions.hh,v 1.15 2008/10/02 21:56:15 bms Exp $
 
 #ifndef __BGP_EXCEPTIONS_HH__
 #define __BGP_EXCEPTIONS_HH__
@@ -39,16 +39,17 @@
  */
 class CorruptMessage : public XorpReasonedException {
 public:
+    static const size_t MAXPACKETSIZE = 4096;
     CorruptMessage(const char* file, size_t line, const string init_why = "")
  	: XorpReasonedException("CorruptMessage", file, line, init_why),
-	  _error(0), _subcode(0), _data(0), _len(0)
+	  _error(0), _subcode(0), _len(0)
     {}
 
     CorruptMessage(const char* file, size_t line,
 		   const string init_why,
 		   const int error, const int subcode)
  	: XorpReasonedException("CorruptMessage", file, line, init_why),
-	  _error(error), _subcode(subcode), _data(0), _len(0)
+	  _error(error), _subcode(subcode), _len(0)
     {}
 
     CorruptMessage(const char* file, size_t line,
@@ -56,8 +57,8 @@ public:
 		   const int error, const int subcode,
 		   const uint8_t *data, const size_t len)
  	: XorpReasonedException("CorruptMessage", file, line, init_why),
-	  _error(error), _subcode(subcode), _data(data), _len(len)
-    {}
+	  _error(error), _subcode(subcode), _len(len)
+    {assert(_len < MAXPACKETSIZE); memcpy(_data, data, _len);}
 
     int error() const				{ return _error; }
     int subcode() const				{ return _subcode; }
@@ -67,8 +68,24 @@ public:
 private:
     const int		_error;
     const int		_subcode;
-    const uint8_t *	_data;
+    // this can't reference external data, as that may go out of
+    // scope, so have a large enough buffer here to store anything we
+    // need to return
+    uint8_t	        _data[MAXPACKETSIZE];
     const size_t	_len;
+};
+
+/**
+ * This exception is thrown when an update message is received, and we
+ * find it unusable, but not so bad that we want to send a
+ * Notification and terminate the connection.
+ */
+class UnusableMessage : public XorpReasonedException {
+public:
+    UnusableMessage(const char* file, size_t line,
+		    const string init_why)
+	: XorpReasonedException("CorruptMessage", file, line, init_why)
+    {}
 };
 
 class NoFinder : public XorpReasonedException {

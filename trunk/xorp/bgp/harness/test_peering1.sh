@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.65 2006/08/16 22:10:14 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.66 2007/12/10 23:26:33 mjh Exp $
 #
 
 #
@@ -863,6 +863,9 @@ test25()
 
 test26()
 {
+# this test is broken - we cannot generate path atribute lists with
+# duplicate entries now, because we store it as an array indexed by
+# type.
     echo "TEST26"
     echo "	1) Establish an EBGP IPV6 peering"
     echo "	2) Send an IPv4 and IPv6 update packet repeat both nexthops"
@@ -1276,7 +1279,8 @@ test38()
     # 
     # Hit the check in AsPath::decode()
     # 
-    coord peer1 send packet corrupt 38 0 \
+#    coord peer1 send packet corrupt 38 0 
+    coord peer1 send packet corrupt 32 0 \
 	update \
 	origin 2 \
 	aspath "[$PEER2_AS],[$PEER2_AS]" \
@@ -1803,7 +1807,8 @@ test54()
 
     coord peer1 establish AS $PEER2_AS holdtime 0 id 192.150.187.100
 
-    coord peer1 expect packet notify $UPDATEMSGERR $UNRECOGWATTR 0 255 1 0
+    # 19 in this test is the test unknown path attribute - see path_attribute.hh
+    coord peer1 expect packet notify $UPDATEMSGERR $UNRECOGWATTR 0 19 1 0
 
     coord peer1 send packet \
 	update \
@@ -1811,7 +1816,7 @@ test54()
 	aspath "[$PEER2_AS],[$PEER2_AS]" \
 	nexthop 20.20.20.20 \
 	nlri 10.10.10.0/24 \
-	pathattr 0,255,1,0
+	pathattr 0,19,1,0
 
     sleep 2
 
@@ -1985,11 +1990,11 @@ test58()
     coord peer1 assert idle
 }
 
-TESTS_NOT_FIXED=''
+TESTS_NOT_FIXED='test26'
 TESTS='test1 test2 test3 test4 test5 test6 test7 test8 test8_ipv6
     test9 test10 test11 test12 test12_ipv6 test13 test14 test15 test16
     test17 test18 test19 test20 test20_ipv6 test21 test22 test23 test24
-    test25 test26 test27 test27_ipv6 test28 test28_ipv6 test29 test30 test31
+    test25 test27 test27_ipv6 test28 test28_ipv6 test29 test30 test31
     test32 test33 test34 test35 test36 test37 test38 test39 test40 test41
     test42 test43 test44 test45 test46 test47 test48 test49 test50 test51
     test52 test53 test54 test55 test56 test56_ipv6 test57 test58'
@@ -1997,6 +2002,7 @@ TESTS='test1 test2 test3 test4 test5 test6 test7 test8 test8_ipv6
 # Include command line
 . ${srcdir}/args.sh
 
+#START_PROGRAMS='no'
 if [ $START_PROGRAMS = "yes" ]
 then
     CXRL="$CALLXRL -r 10"

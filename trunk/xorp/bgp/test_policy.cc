@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/test_policy.cc,v 1.12 2008/08/06 12:20:33 abittau Exp $"
+#ident "$XORP: xorp/bgp/test_policy.cc,v 1.13 2008/10/02 21:56:22 bms Exp $"
 
 #include "bgp_module.h"
 
@@ -119,14 +119,17 @@ test_policy_export(TestInfo& /*info*/)
     aspath3.prepend_as(AsNum(9));
     ASPathAttribute aspathatt3(aspath3);
 
-    PathAttributeList<IPv4>* palist1 =
-	new PathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
+    FPAList4Ref fpalist1 =
+	new FastPathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
+    PAListRef<IPv4> palist1 = new PathAttributeList<IPv4>(fpalist1);
 
-    PathAttributeList<IPv4>* palist2 =
-	new PathAttributeList<IPv4>(nhatt2, aspathatt2, igp_origin_att);
+    FPAList4Ref fpalist2 =
+	new FastPathAttributeList<IPv4>(nhatt2, aspathatt2, igp_origin_att);
+    PAListRef<IPv4> palist2 = new PathAttributeList<IPv4>(fpalist2);
 
-    PathAttributeList<IPv4>* palist3 =
-	new PathAttributeList<IPv4>(nhatt3, aspathatt3, igp_origin_att);
+    FPAList4Ref fpalist3 =
+	new FastPathAttributeList<IPv4>(nhatt3, aspathatt3, igp_origin_att);
+    PAListRef<IPv4> palist3 = new PathAttributeList<IPv4>(fpalist3);
 
     // create a subnet route
     SubnetRoute<IPv4> *sr1, *sr2;
@@ -208,9 +211,12 @@ POLICY_END\n";
     delete ribin_table;
     delete policy_table;
     delete debug_table;
-    delete palist1;
-    delete palist2;
-    delete palist3;
+    palist1.release();
+    palist2.release();
+    palist3.release();
+    fpalist1 = 0;
+    fpalist2 = 0;
+    fpalist3 = 0;
 
     FILE *file = fopen(filename.c_str(), "r");
     if (file == NULL) {
@@ -365,14 +371,17 @@ test_policy(TestInfo& /*info*/)
     aspath3.prepend_as(AsNum(9));
     ASPathAttribute aspathatt3(aspath3);
 
-    PathAttributeList<IPv4>* palist1 =
-	new PathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
+    FPAList4Ref fpalist1 =
+	new FastPathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
+    PAListRef<IPv4> palist1 = new PathAttributeList<IPv4>(fpalist1);
 
-    PathAttributeList<IPv4>* palist2 =
-	new PathAttributeList<IPv4>(nhatt2, aspathatt2, igp_origin_att);
+    FPAList4Ref fpalist2 =
+	new FastPathAttributeList<IPv4>(nhatt2, aspathatt2, igp_origin_att);
+    PAListRef<IPv4> palist2 = new PathAttributeList<IPv4>(fpalist2);
 
-    PathAttributeList<IPv4>* palist3 =
-	new PathAttributeList<IPv4>(nhatt3, aspathatt3, igp_origin_att);
+    FPAList4Ref fpalist3 =
+	new FastPathAttributeList<IPv4>(nhatt3, aspathatt3, igp_origin_att);
+    PAListRef<IPv4> palist3 = new PathAttributeList<IPv4>(fpalist3);
 
     // create a subnet route
     SubnetRoute<IPv4> *sr1, *sr2;
@@ -388,16 +397,22 @@ test_policy(TestInfo& /*info*/)
     debug_table->write_comment("ADD AND DELETE UNFILTERED");
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     sr1->set_nexthop_resolved(true);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 1);
+    //fpalist1->set_nexthop_resolved(true);
+    msg = new InternalMessage<IPv4>(sr1, fpalist1, &handler1, 1);
     policy_table_import->add_route(*msg, ribin_table);
     fanout_table->get_next_message(policy_table_export);
+    fpalist1 = 0;
+    delete msg;
 
 
     // delete the route
+    fpalist1 = new FastPathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
+    msg = new InternalMessage<IPv4>(sr1, fpalist1, &handler1, 1);
     policy_table_import->delete_route(*msg, ribin_table);
     fanout_table->get_next_message(policy_table_export);
 
     debug_table->write_separator();
+    fpalist1 = 0;
     sr1->unref();
     delete msg;
 
@@ -407,11 +422,14 @@ test_policy(TestInfo& /*info*/)
     // add a route
     debug_table->write_comment("TEST 2");
     debug_table->write_comment("ADD, CONFIG, DELETE");
+    fpalist1 = new FastPathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     sr1->set_nexthop_resolved(true);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 1);
+    msg = new InternalMessage<IPv4>(sr1, fpalist1, &handler1, 1);
     policy_table_import->add_route(*msg, ribin_table);
     fanout_table->get_next_message(policy_table_export);
+    fpalist1 = 0;
+    delete msg;
 
     debug_table->write_comment("CONFIGURE EXPORT FILTER");
 
@@ -441,21 +459,27 @@ POLICY_END\n";
     debug_table->write_comment("DO DUMP");
     debug_table->write_comment("EXPECT DELETE TO *NOT* HAVE LOCALPREF");
     debug_table->write_comment("EXPECT ADD TO HAVE LOCALPREF OF 200");
+    fpalist1 = new FastPathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
+    msg = new InternalMessage<IPv4>(sr1, fpalist1, &handler1, 1);
     policy_table_import->route_dump(*msg, ribin_table, NULL);
     fanout_table->get_next_message(policy_table_export);
     fanout_table->get_next_message(policy_table_export);
+    fpalist1 = 0;
+    delete msg;
 
     // delete the route
     debug_table->write_comment("EXPECT DELETE TO HAVE LOCALPREF OF 200");
+    fpalist1 = new FastPathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
+    msg = new InternalMessage<IPv4>(sr1, fpalist1, &handler1, 1);
     policy_table_import->delete_route(*msg, ribin_table);
     fanout_table->get_next_message(policy_table_export);
 
     debug_table->write_separator();
+    fpalist1 = 0;
     sr1->unref();
     delete msg;
-
     // ================================================================
-    // Test2: add and delete with configured policy
+    // Test3: add and delete with configured policy
     // ================================================================
     // add a route
     debug_table->write_comment("TEST 3");
@@ -463,8 +487,8 @@ POLICY_END\n";
     debug_table->write_comment("EXPECT ROUTES TO HAVE LOCALPREF");
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
     sr1->set_nexthop_resolved(true);
-
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 1);
+    fpalist1 = new FastPathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
+    msg = new InternalMessage<IPv4>(sr1, fpalist1, &handler1, 1);
     policy_table_import->add_route(*msg, ribin_table);
     fanout_table->get_next_message(policy_table_export);
 
@@ -485,9 +509,12 @@ POLICY_END\n";
     delete fanout_table;
     delete policy_table_export;
     delete debug_table;
-    delete palist1;
-    delete palist2;
-    delete palist3;
+    palist1.release();
+    palist2.release();
+    palist3.release();
+    fpalist1 = 0;
+    fpalist2 = 0;
+    fpalist3 = 0;
 
     FILE *file = fopen(filename.c_str(), "r");
     if (file == NULL) {
@@ -679,20 +706,19 @@ test_policy_dump(TestInfo& /*info*/)
     aspath3.prepend_as(AsNum(9));
     ASPathAttribute aspathatt3(aspath3);
 
-    PathAttributeList<IPv4>* palist1 =
-	new PathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
+    FPAList4Ref fpalist1 =
+	new FastPathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
+    PAListRef<IPv4> palist1 = new PathAttributeList<IPv4>(fpalist1);
 
-    PathAttributeList<IPv4>* palist2 =
-	new PathAttributeList<IPv4>(nhatt2, aspathatt2, igp_origin_att);
+    FPAList4Ref fpalist2 =
+	new FastPathAttributeList<IPv4>(nhatt2, aspathatt2, igp_origin_att);
+    PAListRef<IPv4> palist2 = new PathAttributeList<IPv4>(fpalist2);
 
-    PathAttributeList<IPv4>* palist3 =
-	new PathAttributeList<IPv4>(nhatt3, aspathatt3, igp_origin_att);
+    FPAList4Ref fpalist3 =
+	new FastPathAttributeList<IPv4>(nhatt3, aspathatt3, igp_origin_att);
+    PAListRef<IPv4> palist3 = new PathAttributeList<IPv4>(fpalist3);
 
-    // create a subnet route
-    SubnetRoute<IPv4> *sr1, *sr2;
-    UNUSED(sr2);
-
-    InternalMessage<IPv4>* msg;
+    PolicyTags pt;
 
     // ================================================================
     // Test: trivial add then configure then dump
@@ -700,12 +726,8 @@ test_policy_dump(TestInfo& /*info*/)
     // add a route
     debug_table->write_comment("TEST 1");
     debug_table->write_comment("ADD, CONFIG, DELETE");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
-    sr1->set_nexthop_resolved(true);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 1);
-    ribin_table->add_route(*msg, NULL);
-    sr1->unref();
-    delete msg;
+    //sr1->set_nexthop_resolved(true);
+    ribin_table->add_route(net1, fpalist1, pt);
     fanout_table->get_next_message(policy_table_export);
 
     debug_table->write_comment("CONFIGURE EXPORT FILTER");
@@ -757,6 +779,7 @@ POLICY_END\n";
     peer_list.push_back(new PeerTableInfo<IPv4>(NULL, &handler1, 
 						ribin_table->genid()));
     policy_table_sm->push_routes(peer_list);
+    delete peer_list.front();
 
     // dump the route
     debug_table->write_comment("RUN EVENT LOOP TO COMPLETION");
@@ -774,10 +797,7 @@ POLICY_END\n";
 
     // delete the route
     debug_table->write_comment("EXPECT DELETE TO HAVE LOCALPREF OF 200");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
-    sr1->set_nexthop_resolved(true);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 1);
-    ribin_table->delete_route(*msg, NULL);
+    ribin_table->delete_route(net1);
     while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
@@ -785,8 +805,6 @@ POLICY_END\n";
     fanout_table->get_next_message(policy_table_export);
 
     debug_table->write_separator();
-    sr1->unref();
-    delete msg;
 
     // ================================================================
 
@@ -801,9 +819,12 @@ POLICY_END\n";
     delete fanout_table;
     delete policy_table_export;
     delete debug_table;
-    delete palist1;
-    delete palist2;
-    delete palist3;
+    palist1.release();
+    palist2.release();
+    palist3.release();
+    fpalist1 = 0;
+    fpalist2 = 0;
+    fpalist3 = 0;
 
     FILE *file = fopen(filename.c_str(), "r");
     if (file == NULL) {

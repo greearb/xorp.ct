@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/bgp/path_attribute.hh,v 1.51 2008/07/23 05:09:34 pavlin Exp $
+// $XORP: xorp/bgp/path_attribute.hh,v 1.52 2008/10/02 21:56:17 bms Exp $
 
 #ifndef __BGP_PATH_ATTRIBUTE_HH__
 #define __BGP_PATH_ATTRIBUTE_HH__
@@ -26,10 +26,12 @@
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
 #include "libxorp/ipnet.hh"
+#include "libxorp/ref_ptr.hh"
 
 #include <list>
 #include <string>
 #include <set>
+#include <vector>
 
 #include <openssl/md5.h>
 
@@ -37,6 +39,11 @@
 #include "aspath.hh"
 #include "parameter.hh"
 class BGPPeerData;
+class BGPPeer;
+class BGPMain;
+
+template <class A>
+class AttributeManager;
 
 
 
@@ -80,7 +87,14 @@ enum PathAttType {
     MP_UNREACH_NLRI = 15,
     AS4_PATH = 17,
     AS4_AGGREGATOR = 18,
+    UNKNOWN_TESTING1 = 19, // reserved for testing only - should be one
+                           // more than the highest known attribute.
+    UNKNOWN_TESTING2 = 20  // reserved for testing only - should be two
+                           // more than the highest known attribute.
 };
+
+// MAX_ATTRIBUTE must contain the largest attribute number from the enum above
+#define MAX_ATTRIBUTE 20
 
 class PathAttribute {
 public:
@@ -102,7 +116,8 @@ public:
      */
     static PathAttribute *create(const uint8_t* d, uint16_t max_len,
 				 size_t& actual_length, 
-				 const BGPPeerData* peerdata) 
+				 const BGPPeerData* peerdata,
+				 uint32_t ip_version) 
 	throw(CorruptMessage);
 
     /**
@@ -345,7 +360,7 @@ public:
 	return "Next Hop Attribute " + _next_hop.str();
     }
 
-    const A& nexthop() const			{ return _next_hop; }
+    A& nexthop() 			{ return _next_hop; }
     // This method is for use in MPReachNLRIAttribute only.
     void set_nexthop(const A& n) 		{ _next_hop = n; }
 
@@ -561,7 +576,7 @@ public:
 
     // SNPA - Don't deal. (ATM, FRAME RELAY, SMDS)
 
-    Safi safi()				{ return _safi; }
+    Safi safi() const			{ return _safi; }
 
     bool encode(uint8_t* buf, size_t &wire_size, 
 		const BGPPeerData* peerdata) const;
@@ -597,7 +612,7 @@ public:
     void add_withdrawn(const IPNet<A>& nlri) {_withdrawn.push_back(nlri);}
     const list<IPNet<A> >& wr_list() const { return _withdrawn;}
 
-    Safi safi()				{ return _safi; }
+    Safi safi()	const			{ return _safi; }
 
     bool encode(uint8_t* buf, size_t &wire_size, 
 		const BGPPeerData* peerdata) const;
@@ -631,6 +646,14 @@ private:
     uint8_t *	_data;	// wire representation
 };
 
+/* it ought to be possible to typedef this, but I don't know how */
+#define FPAListRef ref_ptr<FastPathAttributeList<A> >
+#define FPAList4Ref ref_ptr<FastPathAttributeList<IPv4> >
+#define FPAList6Ref ref_ptr<FastPathAttributeList<IPv6> >
+
+template<class A>
+class FastPathAttributeList;
+
 /**
  * PathAttributeList is used to handle efficiently path attribute lists.
  *
@@ -641,54 +664,211 @@ private:
  * class member (e.g. _aspath_att ...) for ease of use.
  */
 template<class A>
-class PathAttributeList : public list <PathAttribute*> {
+class PathAttributeList {
 public:
     typedef list<PathAttribute*>::const_iterator const_iterator;
     typedef list<PathAttribute*>::iterator iterator;
 
     PathAttributeList();
-    PathAttributeList(const NextHopAttribute<A> &nexthop,
-			 const ASPathAttribute &aspath,
-			 const OriginAttribute &origin);
     PathAttributeList(const PathAttributeList<A>& palist);
-    ~PathAttributeList();
+    PathAttributeList(FPAListRef& fpa_list);
+    virtual ~PathAttributeList();
+
+
+    // complete() is true when all the mandatory attributes are present
+    // normally call this on a FastPathAttributeList
+    //virtual bool complete() const;
+
+
+
+    string str() const;
+
+    /* operator< is used to store and search for PathAttributeLists in
+       STL containers.  In principle, it doesn't matter what the order
+       is, so long as there is a strict monotonicity to the ordering */
+    /* In practice, the ordering is important - we want
+       PathAttributesLists to be ordered first in order of NextHop, as
+       this makes the RIB-In's task much easier when a nexthop changes */
+    bool operator< (const PathAttributeList<A> &them) const;
+
+    bool operator== (const PathAttributeList<A> &them) const;
+
+    const uint8_t* canonical_data() const {return _canonical_data;}
+    size_t canonical_length() const {return _canonical_length;}
+
+    void incr_refcount(uint32_t change) const {
+	_refcount += change;
+	//	printf("incr_refcount for %p: now %u\n", this, _refcount);
+    }
+
+    void decr_refcount(uint32_t change) const {
+	XLOG_ASSERT(_refcount >= change);
+	_refcount -= change;
+	//	printf("decr_refcount for %p: now %u\n", this, _refcount);
+	if (_refcount == 0) {
+	    delete this;
+	}
+    }
+    
+    uint32_t references() const { return _refcount; }
+
+protected:
+    // Canonical data is the path attribute list stored in BGP wire
+    // format in the most canonical form we know.  For example, AS
+    // numbers are always 4-byte.  Note that as we speak IPv6, there
+    // should be no IPv6 NLRI path attributes in here.  They're in the
+    // prefix instead.  When we send to a particular peer, we will
+    // typically re-encode a path attribute for that peer, so this
+    // should not be sent directly - it's only for internal storage.
+    uint8_t* _canonical_data;
+    uint16_t _canonical_length;
+
+private:
+    //    void assert_rehash() const;
+    //    const PathAttribute* find_attribute_by_type(PathAttType type) const;
+
+    // ref count is the number of FastPathAttributeList objects
+    // currently referencing this PathAttributeList.  It's used to
+    // avoid premature deletion, and to keep track if we've asked for
+    // this to be deleted.
+    mutable uint32_t _refcount;
+
+    //    uint8_t			_hash[16];	// used for fast comparisons
+};
+
+template<class A>
+class PAListRef {
+public:
+    PAListRef(const PathAttributeList<A>* _palist);
+    PAListRef(const PAListRef& palistref);
+    PAListRef() : _palist(0) {}
+    ~PAListRef();
+    PAListRef& operator=(const PAListRef& palistref);
+    PAListRef& operator=(FPAListRef& fpalistref);
+    bool operator==(const PAListRef& palistref) const;
+    bool operator<(const PAListRef& palistref) const;
+    const PathAttributeList<A>* operator->() const {
+	return _palist;
+    }
+    const PathAttributeList<A>* operator*() const {
+	return _palist;
+    }
+
+    void register_with_attmgr();
+    void deregister_with_attmgr();
+
+    inline bool is_empty() const {return _palist == 0;}
+    void release();
+    const PathAttributeList<A>* attributes() const {return _palist;}
+    void create_attribute_manager() {
+	_att_mgr = new AttributeManager<A>();
+    };
+
+   /**
+     * DEBUGGING ONLY
+     */
+    int number_of_managed_atts() const {
+	return _att_mgr->number_of_managed_atts();
+    }
+
+private:
+    // this ought not be a pointer, but the the two classes would
+    // mutually self-reference, and you can't do that.
+    static AttributeManager<A> *_att_mgr;
+
+    const PathAttributeList<A>* _palist;
+};
+
+
+/* FastPathAttributeList is an subclass of a PathAttributeList that is
+   used to quickly access the path attributes.  It takes a slave
+   PathAttributeList if it is constructed from one, rather than using
+   its own storage, because it is intended to be transient and the
+   slave is intended to be more permanent, so we typically want the
+   slave to persist when this is deleted */
+
+template<class A>
+class FastPathAttributeList /*: public PathAttributeList<A>*/ {
+public:
+    FastPathAttributeList(PAListRef<A>& palist);
+    FastPathAttributeList(FastPathAttributeList<A>& fpalist);
+    FastPathAttributeList(const NextHopAttribute<A> &nexthop,
+			  const ASPathAttribute &aspath,
+			  const OriginAttribute &origin);
+    FastPathAttributeList();
+    virtual ~FastPathAttributeList();
+
+    /**
+     *  Load the raw path attribute data from an update message.  This
+     * data will not yet be in canonical form.  Call canonicalize() to
+     * put the data in canonical form.
+     */
+    void load_raw_data(const uint8_t *data, size_t size, 
+		       const BGPPeerData* peer, bool have_nlri,
+		       BGPMain *mainprocess,
+		       bool do_checks);
+
+
+    /* see commemt on _locked variable */
+    void lock() const { 
+	XLOG_ASSERT(_locked == false);
+	_locked = true;
+    }
+    void unlock() const { 
+	XLOG_ASSERT(_locked == true);
+	_locked = false;
+    }
+
+    bool is_locked() const {return _locked;}
+
+    // All known attributes need accessor methods here
+    NextHopAttribute<A>* nexthop_att();
+    ASPathAttribute* aspath_att();
+    AS4PathAttribute* as4path_att();
+    OriginAttribute* origin_att();
+    MEDAttribute* med_att();
+    LocalPrefAttribute* local_pref_att();
+    AtomicAggAttribute* atomic_aggregate_att();
+    AggregatorAttribute* aggregator_att();
+    CommunityAttribute* community_att();
+    OriginatorIDAttribute* originator_id();
+    ClusterListAttribute* cluster_list();
+    template <typename A2> MPReachNLRIAttribute<A2> *mpreach(Safi) ;
+    template <typename A2> MPUNReachNLRIAttribute<A2> *mpunreach(Safi);
+
+
+
+    // short cuts
+    A& nexthop();
+    ASPath& aspath();
+    OriginType origin();
+
+    // complete() is true when all the mandatory attributes are present
+    virtual bool complete() const			{
+	return ((_att_bytes[NEXT_HOP] || _att[NEXT_HOP]) &&
+		(_att_bytes[AS_PATH] || _att[AS_PATH]) && 
+		(_att_bytes[ORIGIN] || _att[ORIGIN]));
+    }
+
     /**
      * Add this path attribute to the list after making a local copy.
      */
     void add_path_attribute(const PathAttribute &att);
+
     /**
      * Add this path attribute to the list don't make a local copy.
      */
     void add_path_attribute(PathAttribute *att);
-    const A& nexthop() const		{ return _nexthop_att->nexthop(); }
-    const ASPath& aspath() const	{ return _aspath_att->as_path(); }
-    uint8_t origin() const		{ return _origin_att->origin(); }
 
-    const MEDAttribute* med_att() const;
-    const LocalPrefAttribute* local_pref_att() const;
-    const AtomicAggAttribute* atomic_aggregate_att() const;
-    const AggregatorAttribute* aggregator_att() const;
-    const CommunityAttribute* community_att() const;
-    const OriginatorIDAttribute* originator_id() const;
-    const ClusterListAttribute* cluster_list() const;
+    /**
+     * return the relevant path attribute, given the PA type.
+     */
+    PathAttribute* find_attribute_by_type(PathAttType type);
 
-    void rehash();
-    const uint8_t* hash() const			{
-	assert_rehash();
-	return _hash;
-    }
-
-    // complete() is true when all the mandatory attributes are present
-    bool complete() const			{
-	return ((_nexthop_att != NULL) &&
-		(_aspath_att != NULL) && (_origin_att != NULL));
-    }
-
-    void replace_nexthop(const A& nexthop);
-    void replace_AS_path(const ASPath& as_path);
-    void replace_origin(const OriginType& origin);
-    void remove_attribute_by_type(PathAttType type);
-    void remove_attribute_by_pointer(PathAttribute*);
+    /**
+     * return the highest attribute type.
+     */
+    int max_att() const {return _att.size();}
 
     /**
      * For unknown attributes:
@@ -697,6 +877,12 @@ public:
      */
     void process_unknown_attributes();
 
+    void replace_nexthop(const A& nexthop);
+    void replace_AS_path(const ASPath& as_path);
+    void replace_origin(const OriginType& origin);
+    void remove_attribute_by_type(PathAttType type);
+    void remove_attribute_by_pointer(PathAttribute*);
+  
     /**
      * Encode the PA List for transmission to the specified peer.
      * Note that as Some peers speak 4-byte AS numbers and some don't,
@@ -719,27 +905,135 @@ public:
 
     string str() const;
 
-    /* operator< is used to store and search for PathAttributeLists in
-       STL containers.  In principle, it doesn't matter what the order
-       is, so long as there is a strict monotonicity to the ordering */
-    /* In practice, the ordering is important - we want
-       PathAttributesLists to be ordered first in order of NextHop, as
-       this makes the RIB-In's task much easier when a nexthop changes */
-    bool operator< (const PathAttributeList<A> &them) const;
+    void canonicalize() const;
+    const uint8_t* canonical_data() const {return _canonical_data;}
+    size_t canonical_length() const {return _canonical_length;}
+    bool canonicalized() const {return _canonicalized;}
 
-    /* operator== is a direct comparison of MD5 hashes */
-    bool operator== (const PathAttributeList<A> &them) const;
-protected:
+    bool operator==(const FastPathAttributeList<A>& him) const;
+
+    bool is_empty() const {
+	return _attribute_count == 0;
+    }
+
+    int attribute_count() const {return _attribute_count;}
+
 private:
+    void quick_decode(const uint8_t *canonical_data, uint16_t canonical_length);
     void replace_attribute(PathAttribute *att);
-    void assert_rehash() const;
-    const PathAttribute* find_attribute_by_type(PathAttType type) const;
 
-    NextHopAttribute<A> *	_nexthop_att;
-    ASPathAttribute *		_aspath_att;
-    OriginAttribute *		_origin_att;
+    uint32_t att_order(uint32_t index) const {
+	switch(index) {
+	case 1:
+	    return (uint32_t)NEXT_HOP;
+	case 2:
+	    return (uint32_t)ORIGIN;
+	case 3:
+	    return (uint32_t)AS_PATH;
+	default:
+	    return index;
+	}
+    }
 
-    uint8_t			_hash[16];	// used for fast comparisons
+    void count_attributes() {
+	_attribute_count = 0;
+	for (uint32_t i = 0; i < _att.size(); i++) {
+	    if (_att[i]) {
+		_attribute_count++;
+		continue;
+	    }
+	    if (i <= MAX_ATTRIBUTE && _att_bytes[i])
+		_attribute_count++;
+	}
+    }
+
+
+    /**
+     * We need to encode an attribute to send to a peer.  However we only
+     * have the canonically encoded byte stream data for it.  Sometimes
+     * that is fine, and we should just send that; sometimes we need to
+     * decode and re-encode for this specific peer.
+     */
+    bool encode_and_decode_attribute(const uint8_t* att_data,
+				     const size_t& att_len,
+				     uint8_t *buf,
+				     size_t& wire_size ,
+				     const BGPPeerData* peerdata) const;
+
+    const PAListRef<A> _slave_pa_list;
+
+    // Break out of the path attribute list by type for quick access.
+    // bytes and lengths include the header so we preserve the flags.
+    // _att is only filled out on demand.  These can be arrays because
+    // we don't fill them out unless they're attributes we know about,
+    // so the maximum size is bounded.
+    const uint8_t* _att_bytes[MAX_ATTRIBUTE+1];
+    size_t _att_lengths[MAX_ATTRIBUTE+1];
+
+    // This is mutable because the nominal content of the class
+    // doesn't change, but we cache the result we calculate in const
+    // methods.  
+    // We use a vector here because we want to be able to
+    // resize it if we see an unknown path attribute that is greater
+    // than MAX_ATTRIBUTE.
+    mutable vector<PathAttribute*> _att;
+
+    /**
+     * A count of the number of attributes in this attribute list.
+     */
+    int _attribute_count;
+
+    /**
+     * We pass around ref_ptrs to FastPathAttributeLists for
+     * efficiency reasons, and this greatly simplifies memory
+     * management.  However, it makes it easy to store one temporarily
+     * in one place and the while it's stored, modify it via a
+     * reference somewhere else.  This would be a bug, but it's hard to
+     * catch.  We add the ability to lock the contents to detect such
+     * a condition and aid debugging. 
+     */
+    mutable bool _locked;
+
+    // Canonical data is the path attribute list stored in BGP wire
+    // format in the most canonical form we know.  For example, AS
+    // numbers are always 4-byte.  Note that as we speak IPv6, there
+    // should be no IPv6 NLRI path attributes in here.  They're in the
+    // prefix instead.  When we send to a particular peer, we will
+    // typically re-encode a path attribute for that peer, so this
+    // should not be sent directly - it's only for internal storage.
+    mutable uint8_t* _canonical_data;
+    mutable uint16_t _canonical_length;
+    mutable bool _canonicalized; // is the canonical data up-to-date?
 };
+
+template<class A>
+template<class A2>
+MPReachNLRIAttribute<A2>*
+FastPathAttributeList<A>::mpreach(Safi safi)
+{
+    debug_msg("%p\n", this);
+    PathAttribute* att = find_attribute_by_type(MP_REACH_NLRI);
+    MPReachNLRIAttribute<A2>* mp_att 
+	= dynamic_cast<MPReachNLRIAttribute<A2>*>(att);
+    if (mp_att && safi == mp_att->safi())
+	return mp_att;
+    return 0;
+}
+
+template<class A>
+template<class A2>
+MPUNReachNLRIAttribute<A2>*
+FastPathAttributeList<A>::mpunreach(Safi safi)
+{
+    debug_msg("%p\n", this);
+    PathAttribute* att = find_attribute_by_type(MP_UNREACH_NLRI);
+    MPUNReachNLRIAttribute<A2>* mp_att 
+	= dynamic_cast<MPUNReachNLRIAttribute<A2>*>(att);
+    if (mp_att && safi == mp_att->safi())
+	return mp_att;
+    return 0;
+}
+
+
 
 #endif // __BGP_PATH_ATTRIBUTE_HH__

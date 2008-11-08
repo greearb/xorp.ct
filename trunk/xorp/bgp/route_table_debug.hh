@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/bgp/route_table_debug.hh,v 1.14 2008/07/23 05:09:36 pavlin Exp $
+// $XORP: xorp/bgp/route_table_debug.hh,v 1.15 2008/10/02 21:56:19 bms Exp $
 
 #ifndef __BGP_ROUTE_TABLE_DEBUG_HH__
 #define __BGP_ROUTE_TABLE_DEBUG_HH__
@@ -30,19 +30,20 @@ class DebugTable : public BGPRouteTable<A>  {
 public:
     DebugTable(string tablename, BGPRouteTable<A> *parent);
     ~DebugTable();
-    int add_route(const InternalMessage<A> &rtmsg,
+    int add_route(InternalMessage<A> &rtmsg,
 		  BGPRouteTable<A> *caller);
-    int replace_route(const InternalMessage<A> &old_rtmsg,
-		      const InternalMessage<A> &new_rtmsg,
+    int replace_route(InternalMessage<A> &old_rtmsg,
+		      InternalMessage<A> &new_rtmsg,
 		      BGPRouteTable<A> *caller);
-    int delete_route(const InternalMessage<A> &rtmsg, 
+    int delete_route(InternalMessage<A> &rtmsg, 
 		     BGPRouteTable<A> *caller);
     int push(BGPRouteTable<A> *caller);
-    int route_dump(const InternalMessage<A> &rtmsg, 
+    int route_dump(InternalMessage<A> &rtmsg, 
 		   BGPRouteTable<A> *caller,
 		   const PeerHandler *peer);
     const SubnetRoute<A> *lookup_route(const IPNet<A> &net,
-				       uint32_t& genid) const;
+				       uint32_t& genid,
+				       FPAListRef& pa_list) const;
     void wakeup();
     void route_used(const SubnetRoute<A>* route, bool in_use);
 
@@ -73,13 +74,16 @@ public:
     void write_separator() const;
     void write_comment(const string& s) const;
     void enable_tablename_printing() {_print_tablename = true;}
+    void set_is_winner(bool value) {_set_is_winner = value;}
 private:
+    void print_route(const SubnetRoute<A>& route, FPAListRef palist) const;
     int _canned_response;
     int _msgs;
     FILE *_ofile;
     bool _close_on_delete;
     bool _print_tablename;
     bool _get_on_wakeup;
+    bool _set_is_winner;
 };
 
 #endif // __BGP_ROUTE_TABLE_DEBUG_HH__

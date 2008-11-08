@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_path_attribute1.sh,v 1.9 2007/07/03 20:36:13 atanu Exp $
+# $XORP: xorp/bgp/harness/test_path_attribute2.sh,v 1.1 2007/12/10 23:26:33 mjh Exp $
 #
 
 #
@@ -135,7 +135,7 @@ test1()
 	origin 2
 	aspath $ASPATH
 	nexthop $NEXTHOP
-	pathattr 0x80,0xff,1,1
+	pathattr 0x80,19,1,1
 	nlri 10.10.10.0/24
 	nlri 20.20.20.20/24"
 

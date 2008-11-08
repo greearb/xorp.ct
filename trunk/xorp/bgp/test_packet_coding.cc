@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/test_packet_coding.cc,v 1.22 2008/07/23 05:09:39 pavlin Exp $"
+#ident "$XORP: xorp/bgp/test_packet_coding.cc,v 1.23 2008/10/02 21:56:22 bms Exp $"
 
 #include "bgp_module.h"
 
@@ -346,7 +346,7 @@ test_notification_packets(TestInfo& info, const uint8_t *d, uint8_t ec,
 }
 
 bool
-test_withdraw_packet(TestInfo& info, BGPPeerData* peerdata)
+test_withdraw_packet(TestInfo& info, BGPPeer* peer)
 {
     /* In this test we create an Update Packet, pretend to send it,
        pretend to receive it, and check that what we sent is what we
@@ -364,7 +364,7 @@ test_withdraw_packet(TestInfo& info, BGPPeerData* peerdata)
     
     uint8_t buf[BGPPacket::MAXPACKETSIZE];
     size_t len = BGPPacket::MAXPACKETSIZE;
-    assert(updatepacket.encode(buf, len, peerdata));
+    assert(updatepacket.encode(buf, len, peer->peerdata()));
 
     //update packets with have a minumum length of 23 bytes, plus all
     //the routing information
@@ -379,7 +379,7 @@ test_withdraw_packet(TestInfo& info, BGPPeerData* peerdata)
     assert(type == MESSAGETYPEUPDATE);
     skip++;
 
-    UpdatePacket receivedpacket(buf, plen, peerdata);
+    UpdatePacket receivedpacket(buf, plen, peer->peerdata(), peer->main(), true);
     assert(receivedpacket.type()==MESSAGETYPEUPDATE);
     BGPUpdateAttribList::const_iterator iter;
     iter = receivedpacket.wr_list().begin();
@@ -399,7 +399,7 @@ test_withdraw_packet(TestInfo& info, BGPPeerData* peerdata)
     //encoded packet as when we encoded the constructed packet
     uint8_t buf2[BGPPacket::MAXPACKETSIZE];
     size_t len2 = BGPPacket::MAXPACKETSIZE;
-    assert(receivedpacket.encode(buf2, len2, peerdata));
+    assert(receivedpacket.encode(buf2, len2, peer->peerdata()));
 
     assert(len == len2);
     assert(memcmp(buf, buf2, len2) == 0);
@@ -408,7 +408,7 @@ test_withdraw_packet(TestInfo& info, BGPPeerData* peerdata)
 }
 
 bool
-test_announce_packet1(TestInfo& info, BGPPeerData* peerdata)
+test_announce_packet1(TestInfo& info, BGPPeer* peer)
 {
     /* In this test we create an Update Packet, pretend to send it,
        pretend to receive it, and check that what we sent is what we
@@ -417,6 +417,7 @@ test_announce_packet1(TestInfo& info, BGPPeerData* peerdata)
     /* Here we'll create an update packet that only contains announce
        routes */
     UpdatePacket updatepacket;
+    FPAList4Ref fpa_list = updatepacket.pa_list();
     IPv4Net n1("1.2.3.0/24");
     IPv4Net n2("1.2.4.0/24");
     BGPUpdateAttrib r1(n1);
@@ -425,6 +426,7 @@ test_announce_packet1(TestInfo& info, BGPPeerData* peerdata)
     updatepacket.add_nlri(r2);
 
     NextHopAttribute<IPv4> nexthop_att(IPv4("10.0.0.1"));
+    fpa_list->add_path_attribute(nexthop_att);
 
     AsNum *as[13];
     int i;
@@ -451,30 +453,30 @@ test_announce_packet1(TestInfo& info, BGPPeerData* peerdata)
     aspath.add_segment(set1);
     aspath.add_segment(seq2);
     ASPathAttribute aspath_att(aspath);
+    fpa_list->add_path_attribute(aspath_att);
 
     OriginAttribute origin_att(IGP);
-
-    PathAttributeList<IPv4> palist(nexthop_att, aspath_att, origin_att);
+    fpa_list->add_path_attribute(origin_att);
 
     LocalPrefAttribute local_pref_att(237);
-    palist.add_path_attribute(local_pref_att);
+    fpa_list->add_path_attribute(local_pref_att);
     
     MEDAttribute med_att(515);
-    palist.add_path_attribute(med_att);
+    fpa_list->add_path_attribute(med_att);
 
     AtomicAggAttribute atomic_agg_att;
-    palist.add_path_attribute(atomic_agg_att);
+    fpa_list->add_path_attribute(atomic_agg_att);
 
     AggregatorAttribute agg_att(IPv4("20.20.20.2"), AsNum(701));
-    palist.add_path_attribute(agg_att);
+    fpa_list->add_path_attribute(agg_att);
 
     CommunityAttribute com_att;
     com_att.add_community(57);
     com_att.add_community(58);
     com_att.add_community(59);
-    palist.add_path_attribute(com_att);
-    palist.rehash();
+    fpa_list->add_path_attribute(com_att);
 
+#if 0
     const PathAttribute *pa;
     PathAttributeList<IPv4>::const_iterator iter;
     iter = palist.begin();
@@ -483,10 +485,11 @@ test_announce_packet1(TestInfo& info, BGPPeerData* peerdata)
 	updatepacket.add_pathatt(*pa);
 	++iter;
     }
+#endif
     
     uint8_t buf[BGPPacket::MAXPACKETSIZE];
     size_t len = BGPPacket::MAXPACKETSIZE;
-    assert(updatepacket.encode(buf, len, peerdata));
+    assert(updatepacket.encode(buf, len, peer->peerdata()));
 
     //update packets with have a minumum length of 23 bytes, plus all
     //the routing information
@@ -512,7 +515,7 @@ test_announce_packet1(TestInfo& info, BGPPeerData* peerdata)
     assert(type == MESSAGETYPEUPDATE);
     skip++;
 
-    UpdatePacket receivedpacket(buf, plen, peerdata);
+    UpdatePacket receivedpacket(buf, plen, peer->peerdata(), peer->main(), true);
     assert(receivedpacket.type()==MESSAGETYPEUPDATE);
 
     //check there are no withdrawn routes
@@ -530,42 +533,42 @@ test_announce_packet1(TestInfo& info, BGPPeerData* peerdata)
     assert(ni == receivedpacket.nlri_list().end());
 
     //check the path attributes
-    assert(receivedpacket.pa_list().size() == 8);
-    list <PathAttribute*>::const_iterator pai;
-    pai = receivedpacket.pa_list().begin();
-    while (pai != receivedpacket.pa_list().end()) {
-	pa = *pai;
+    for (int i = 0; i < MAX_ATTRIBUTE; i++) {
+	PathAttribute* pa = 
+	    receivedpacket.pa_list()->find_attribute_by_type((PathAttType)i);
+	if (pa == 0)
+	    continue;
 	switch (pa->type()) {
 	case ORIGIN: {
-	    const OriginAttribute *oa = (const OriginAttribute *)pa;
+	    OriginAttribute *oa = (OriginAttribute *)pa;
 	    assert(oa->origin() == IGP);
 	    DOUT(info) << pa->str().c_str() << endl;
 	    break;
 	}
 	case AS_PATH: {
-	    const ASPathAttribute *asa = (const ASPathAttribute *)pa;
+	    ASPathAttribute *asa = (ASPathAttribute *)pa;
 	    for (int i=1; i<=9; i++)
 		assert(asa->as_path().contains(*as[i]));
 	    DOUT(info) << pa->str().c_str() << endl;
 	    break;
 	}
 	case NEXT_HOP: {
-	    const NextHopAttribute<IPv4> *nha 
-		= (const NextHopAttribute<IPv4> *)pa;
+	    NextHopAttribute<IPv4> *nha 
+		= (NextHopAttribute<IPv4> *)pa;
 	    assert(nha->nexthop() == IPv4("10.0.0.1"));
 	    DOUT(info) << pa->str().c_str() << endl;
 	    break;
 	}
 	case LOCAL_PREF: {
-	    const LocalPrefAttribute *lpa = 
-		(const LocalPrefAttribute *)pa;
+	    LocalPrefAttribute *lpa = 
+		(LocalPrefAttribute *)pa;
 	    assert(lpa->localpref() == 237);
 	    DOUT(info) << pa->str().c_str() << endl;
 	    break;
 	}
 	case MED: {
-	    const MEDAttribute *meda = 
-		(const MEDAttribute *)pa;
+	    MEDAttribute *meda = 
+		(MEDAttribute *)pa;
 	    assert(meda->med() == 515);
 	    DOUT(info) << pa->str().c_str() << endl;
 	    break;
@@ -575,16 +578,16 @@ test_announce_packet1(TestInfo& info, BGPPeerData* peerdata)
 	    break;
 	}
 	case AGGREGATOR: {
-	    const AggregatorAttribute *aa = 
-		(const AggregatorAttribute *)pa;
+	    AggregatorAttribute *aa = 
+		(AggregatorAttribute *)pa;
 	    assert(aa->route_aggregator() == IPv4("20.20.20.2"));
 	    assert(aa->aggregator_as() == AsNum(701));
 	    DOUT(info) << pa->str().c_str() << endl;
 	    break;
 	}
 	case COMMUNITY: {
-	    const CommunityAttribute *ca =
-		(const CommunityAttribute*)pa;
+	    CommunityAttribute *ca =
+		(CommunityAttribute*)pa;
 	    set <uint32_t>::const_iterator iter;
 	    iter = ca->community_set().begin();
 	    assert(*iter == 57);
@@ -600,14 +603,14 @@ test_announce_packet1(TestInfo& info, BGPPeerData* peerdata)
 	default:
 	    XLOG_FATAL("Received PathAttribute type: %d\n", pa->type());
 	}
-	++pai;
     }
 
     //try encoding the received packet, and check we get the same
     //encoded packet as when we encoded the constructed packet
     uint8_t buf2[BGPPacket::MAXPACKETSIZE];
     size_t len2 = BGPPacket::MAXPACKETSIZE;
-    assert(receivedpacket.encode(buf2, len2, peerdata));
+    assert(receivedpacket.pa_list()->attribute_count() == 8);
+    assert(receivedpacket.encode(buf2, len2, peer->peerdata()));
 
     assert(len == len2);
     assert(memcmp(buf, buf2, len2) == 0);
@@ -620,7 +623,7 @@ test_announce_packet1(TestInfo& info, BGPPeerData* peerdata)
 }
 
 bool
-test_announce_packet2(TestInfo& info, BGPPeerData* peerdata)
+test_announce_packet2(TestInfo& info, BGPPeer* peer)
 {
     /* In this test we create an Update Packet, pretend to send it,
        pretend to receive it, and check that what we sent is what we
@@ -629,6 +632,7 @@ test_announce_packet2(TestInfo& info, BGPPeerData* peerdata)
     /* Here we'll create an update packet that only contains announce
        routes */
     UpdatePacket updatepacket;
+    FPAList4Ref fpa_list = updatepacket.pa_list();
     IPv4Net n1("1.2.3.0/24");
     IPv4Net n2("0.0.0.0/0");	/* This used to trigger a bug in the decoder */
     BGPUpdateAttrib r1(n1);
@@ -637,6 +641,7 @@ test_announce_packet2(TestInfo& info, BGPPeerData* peerdata)
     updatepacket.add_nlri(r2);
 
     NextHopAttribute<IPv4> nexthop_att(IPv4("10.0.0.1"));
+    fpa_list->add_path_attribute(nexthop_att);
 
     AsNum *as[13];
     int i;
@@ -663,30 +668,30 @@ test_announce_packet2(TestInfo& info, BGPPeerData* peerdata)
     aspath.add_segment(set1);
     aspath.add_segment(seq2);
     ASPathAttribute aspath_att(aspath);
+    fpa_list->add_path_attribute(aspath_att);
 
     OriginAttribute origin_att(IGP);
-
-    PathAttributeList<IPv4> palist(nexthop_att, aspath_att, origin_att);
+    fpa_list->add_path_attribute(origin_att);
 
     LocalPrefAttribute local_pref_att(237);
-    palist.add_path_attribute(local_pref_att);
+    fpa_list->add_path_attribute(local_pref_att);
     
     MEDAttribute med_att(515);
-    palist.add_path_attribute(med_att);
+    fpa_list->add_path_attribute(med_att);
 
     AtomicAggAttribute atomic_agg_att;
-    palist.add_path_attribute(atomic_agg_att);
+    fpa_list->add_path_attribute(atomic_agg_att);
 
     AggregatorAttribute agg_att(IPv4("20.20.20.2"), AsNum(701));
-    palist.add_path_attribute(agg_att);
+    fpa_list->add_path_attribute(agg_att);
 
     CommunityAttribute com_att;
     com_att.add_community(57);
     com_att.add_community(58);
     com_att.add_community(59);
-    palist.add_path_attribute(com_att);
-    palist.rehash();
+    fpa_list->add_path_attribute(com_att);
 
+#if 0
     const PathAttribute *pa;
     PathAttributeList<IPv4>::const_iterator iter;
     iter = palist.begin();
@@ -695,10 +700,11 @@ test_announce_packet2(TestInfo& info, BGPPeerData* peerdata)
 	updatepacket.add_pathatt(*pa);
 	++iter;
     }
+#endif
     
     uint8_t buf[BGPPacket::MAXPACKETSIZE];
     size_t len = BGPPacket::MAXPACKETSIZE;
-    assert(updatepacket.encode(buf, len, peerdata));
+    assert(updatepacket.encode(buf, len, peer->peerdata()));
 
     //update packets with have a minumum length of 23 bytes, plus all
     //the routing information
@@ -724,7 +730,7 @@ test_announce_packet2(TestInfo& info, BGPPeerData* peerdata)
     assert(type == MESSAGETYPEUPDATE);
     skip++;
 
-    UpdatePacket receivedpacket(buf, plen, peerdata);
+    UpdatePacket receivedpacket(buf, plen, peer->peerdata(), peer->main(), true);
     assert(receivedpacket.type()==MESSAGETYPEUPDATE);
 
     //check there are no withdrawn routes
@@ -742,42 +748,43 @@ test_announce_packet2(TestInfo& info, BGPPeerData* peerdata)
     assert(ni == receivedpacket.nlri_list().end());
 
     //check the path attributes
-    assert(receivedpacket.pa_list().size() == 8);
-    list <PathAttribute*>::const_iterator pai;
-    pai = receivedpacket.pa_list().begin();
-    while (pai != receivedpacket.pa_list().end()) {
-	pa = *pai;
+    //check the path attributes
+    for (int i = 0; i < MAX_ATTRIBUTE; i++) {
+	PathAttribute* pa = 
+	    receivedpacket.pa_list()->find_attribute_by_type((PathAttType)i);
+	if (pa == 0)
+	    continue;
 	switch (pa->type()) {
 	case ORIGIN: {
-	    const OriginAttribute *oa = (const OriginAttribute *)pa;
+	    OriginAttribute *oa = (OriginAttribute *)pa;
 	    assert(oa->origin() == IGP);
 	    DOUT(info) << pa->str().c_str() << endl;
 	    break;
 	}
 	case AS_PATH: {
-	    const ASPathAttribute *asa = (const ASPathAttribute *)pa;
+	    ASPathAttribute *asa = (ASPathAttribute *)pa;
 	    for (int i=1; i<=9; i++)
 		assert(asa->as_path().contains(*as[i]));
 	    DOUT(info) << pa->str().c_str() << endl;
 	    break;
 	}
 	case NEXT_HOP: {
-	    const NextHopAttribute<IPv4> *nha 
-		= (const NextHopAttribute<IPv4> *)pa;
+	    NextHopAttribute<IPv4> *nha 
+		= (NextHopAttribute<IPv4> *)pa;
 	    assert(nha->nexthop() == IPv4("10.0.0.1"));
 	    DOUT(info) << pa->str().c_str() << endl;
 	    break;
 	}
 	case LOCAL_PREF: {
-	    const LocalPrefAttribute *lpa = 
-		(const LocalPrefAttribute *)pa;
+	    LocalPrefAttribute *lpa = 
+		(LocalPrefAttribute *)pa;
 	    assert(lpa->localpref() == 237);
 	    DOUT(info) << pa->str().c_str() << endl;
 	    break;
 	}
 	case MED: {
-	    const MEDAttribute *meda = 
-		(const MEDAttribute *)pa;
+	    MEDAttribute *meda = 
+		(MEDAttribute *)pa;
 	    assert(meda->med() == 515);
 	    DOUT(info) << pa->str().c_str() << endl;
 	    break;
@@ -787,16 +794,16 @@ test_announce_packet2(TestInfo& info, BGPPeerData* peerdata)
 	    break;
 	}
 	case AGGREGATOR: {
-	    const AggregatorAttribute *aa = 
-		(const AggregatorAttribute *)pa;
+	    AggregatorAttribute *aa = 
+		(AggregatorAttribute *)pa;
 	    assert(aa->route_aggregator() == IPv4("20.20.20.2"));
 	    assert(aa->aggregator_as() == AsNum(701));
 	    DOUT(info) << pa->str().c_str() << endl;
 	    break;
 	}
 	case COMMUNITY: {
-	    const CommunityAttribute *ca =
-		(const CommunityAttribute*)pa;
+	    CommunityAttribute *ca =
+		(CommunityAttribute*)pa;
 	    set <uint32_t>::const_iterator iter;
 	    iter = ca->community_set().begin();
 	    assert(*iter == 57);
@@ -812,14 +819,14 @@ test_announce_packet2(TestInfo& info, BGPPeerData* peerdata)
 	default:
 	    XLOG_FATAL("Received PathAttribute type: %d\n", pa->type());
 	}
-	++pai;
     }
 
     //try encoding the received packet, and check we get the same
     //encoded packet as when we encoded the constructed packet
     uint8_t buf2[BGPPacket::MAXPACKETSIZE];
     size_t len2 = BGPPacket::MAXPACKETSIZE;
-    assert(receivedpacket.encode(buf2, len2, peerdata));
+    assert(receivedpacket.pa_list()->attribute_count() == 8);
+    assert(receivedpacket.encode(buf2, len2, peer->peerdata()));
     assert(len == len2);
     assert(memcmp(buf, buf2, len2) == 0);
 
@@ -844,8 +851,13 @@ main(int argc, char** argv)
 
     EventLoop eventloop;
     LocalData localdata(eventloop);
+    localdata.set_as(AsNum(0)); // IBGP
+
     Iptuple iptuple;
-    BGPPeerData pd(localdata, iptuple, AsNum(0), IPv4(),0);
+    BGPPeerData *pd = new BGPPeerData(localdata, iptuple, AsNum(0), IPv4(),0);
+    pd->compute_peer_type();
+    BGPMain main(eventloop);
+    BGPPeer peer(&localdata, pd, NULL, &main);
 
     string test_name =
 	t.get_optional_args("-t", "--test", "run only the specified test");
@@ -860,38 +872,38 @@ main(int argc, char** argv)
 	    string test_name;
 	    XorpCallback1<bool, TestInfo&>::RefPtr cb;
 	} tests[] = {
-	    {"multiprotocol", callback(test_multprotocol, &pd)},
+	    {"multiprotocol", callback(test_multprotocol, pd)},
 	    {"multiprotocol_reach_ipv4",
-	     callback(test_multiprotocol_reach_ipv4, &pd)},
-	    {"multiprotocol_unreach", callback(test_multiprotocol_unreach, &pd)},
-	    {"refresh", callback(test_refresh, &pd)},
-	    {"simple_open_packet", callback(test_simple_open_packet, &pd)},
-	    {"open_packet", callback(test_open_packet_with_capabilities, &pd)},
-	    {"keepalive_packet", callback(test_keepalive_packet, &pd)},
+	     callback(test_multiprotocol_reach_ipv4, pd)},
+	    {"multiprotocol_unreach", callback(test_multiprotocol_unreach, pd)},
+	    {"refresh", callback(test_refresh, pd)},
+	    {"simple_open_packet", callback(test_simple_open_packet, pd)},
+	    {"open_packet", callback(test_open_packet_with_capabilities, pd)},
+	    {"keepalive_packet", callback(test_keepalive_packet, pd)},
 	    {"notification_packets1",
 	     callback(test_notification_packets,
 		      reinterpret_cast<const uint8_t *>(0),
  		      static_cast<uint8_t>(CEASE),
 		      static_cast<uint8_t>(0),
 		      static_cast<uint16_t>(0),
-		      &pd)},
+		      pd)},
 	    {"notification_packets2",
 	     callback(test_notification_packets,
 		      reinterpret_cast<const uint8_t *>(0),
  		      static_cast<uint8_t>(CEASE),
 		      static_cast<uint8_t>(1),
 		      static_cast<uint16_t>(0),
-		      &pd)},
+		      pd)},
  	    {"notification_packets3",
  	     callback(test_notification_packets,
 		      reinterpret_cast<const uint8_t *>(edata),
  		      static_cast<uint8_t>(MSGHEADERERR),
 		      static_cast<uint8_t>(2),
 		      static_cast<uint16_t>(2),
-		      &pd)},
-	    {"withdraw_packet", callback(test_withdraw_packet, &pd)},
-	    {"announce_packet1", callback(test_announce_packet1, &pd)},
-	    {"announce_packet2", callback(test_announce_packet2, &pd)},
+		      pd)},
+	    {"withdraw_packet", callback(test_withdraw_packet, &peer)},
+	    {"announce_packet1", callback(test_announce_packet1, &peer)},
+	    {"announce_packet2", callback(test_announce_packet2, &peer)},
 	};
 
 	if("" == test_name) {

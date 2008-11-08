@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/internal_message.cc,v 1.15 2008/07/23 05:09:32 pavlin Exp $"
+#ident "$XORP: xorp/bgp/internal_message.cc,v 1.16 2008/10/02 21:56:15 bms Exp $"
 
 #include "bgp_module.h"
 
@@ -30,18 +30,40 @@
 
 template<class A>
 InternalMessage<A>::InternalMessage(const SubnetRoute<A> *rte,
-				       const PeerHandler *origin,
-				       uint32_t genid)
+				    const PeerHandler *origin,
+				    uint32_t genid)
 {
     XLOG_ASSERT(rte);
 
     _subnet_route = rte;
     _origin_peer = origin;
     _changed = false;
+    _copied = false;
     _push = false;
     _from_previous_peering = false;
     _genid = genid;
+    PAListRef<A> pal = rte->attributes();
+    _attributes = new FastPathAttributeList<A>(pal);
 }
+
+template<class A>
+InternalMessage<A>::InternalMessage(const SubnetRoute<A> *rte,
+				    FPAListRef pa_list,
+				    const PeerHandler *origin,
+				    uint32_t genid)
+{
+    XLOG_ASSERT(rte);
+
+    _subnet_route = rte;
+    _origin_peer = origin;
+    _changed = false;
+    _copied = false;
+    _push = false;
+    _from_previous_peering = false;
+    _genid = genid;
+    _attributes = pa_list;
+}
+
 
 template<class A>
 InternalMessage<A>::~InternalMessage()

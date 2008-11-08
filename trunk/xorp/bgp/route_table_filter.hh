@@ -1,4 +1,3 @@
-
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
@@ -19,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/bgp/route_table_filter.hh,v 1.31 2008/07/23 05:09:37 pavlin Exp $
+// $XORP: xorp/bgp/route_table_filter.hh,v 1.32 2008/10/02 21:56:20 bms Exp $
 
 #ifndef __BGP_ROUTE_TABLE_FILTER_HH__
 #define __BGP_ROUTE_TABLE_FILTER_HH__
@@ -50,18 +49,18 @@ public:
        filterbank has modified it, and then modifies it again, then we
        should free the rtmsg.  Otherwise it's the responsibility of
        whoever created the rtmsg*/
-    virtual const InternalMessage<A>* 
-       filter(const InternalMessage<A> *rtmsg, 
-	      bool &modified) const = 0;
+    virtual bool
+       filter(InternalMessage<A>& rtmsg) const = 0;
 protected:
+#if 0
     void propagate_flags(const InternalMessage<A> *rtmsg,
 			 InternalMessage<A> *new_rtmsg) const;
 
     void propagate_flags(const SubnetRoute<A>& route,
 			 SubnetRoute<A>& new_route) const;
-
     virtual void drop_message(const InternalMessage<A> *rtmsg, 
 			      bool &modified) const ;
+#endif
 private:
 };
 
@@ -75,9 +74,7 @@ template<class A>
 class AggregationFilter : public BGPRouteFilter<A> {
 public:
     AggregationFilter(bool is_ibgp);
-    const InternalMessage<A>* 
-       filter(const InternalMessage<A> *rtmsg, 
-	      bool &modified) const ;
+    bool filter(InternalMessage<A>& rtmsg) const ;
 private:
     bool _is_ibgp;
 };
@@ -99,9 +96,7 @@ template<class A>
 class SimpleASFilter : public BGPRouteFilter<A> {
 public:
     SimpleASFilter(const AsNum &as_num);
-    const InternalMessage<A>* 
-       filter(const InternalMessage<A> *rtmsg, 
-	      bool &modified) const ;
+    bool filter(InternalMessage<A>& rtmsg) const ;
 private:
     AsNum _as_num;
 };
@@ -121,9 +116,7 @@ template<class A>
 class RRInputFilter : public BGPRouteFilter<A> {
 public:
     RRInputFilter(IPv4 bgp_id, IPv4 cluster_id);
-    const InternalMessage<A>* 
-       filter(const InternalMessage<A> *rtmsg, 
-	      bool &modified) const ;
+    bool filter(InternalMessage<A>& rtmsg) const ;
 private:
     IPv4 _bgp_id;
     IPv4 _cluster_id;
@@ -144,9 +137,7 @@ template<class A>
 class ASPrependFilter : public BGPRouteFilter<A> {
 public:
     ASPrependFilter(const AsNum &as_num, bool is_confederation_peer);
-    const InternalMessage<A>* 
-       filter(const InternalMessage<A> *rtmsg, 
-	      bool &modified) const;
+    bool filter(InternalMessage<A>& rtmsg) const;
 private:
     AsNum _as_num;
     bool _is_confederation_peer; 
@@ -170,9 +161,7 @@ class NexthopRewriteFilter : public BGPRouteFilter<A> {
 public:
     NexthopRewriteFilter(const A &local_nexthop, bool directly_connected,
 			 const IPNet<A> &subnet);
-    const InternalMessage<A>* 
-       filter(const InternalMessage<A> *rtmsg, 
-	      bool &modified) const ;
+    bool filter(InternalMessage<A>& rtmsg) const ;
 private:
     A _local_nexthop;
     bool _directly_connected;
@@ -194,9 +183,7 @@ template<class A>
 class NexthopPeerCheckFilter : public BGPRouteFilter<A> {
 public:
     NexthopPeerCheckFilter(const A &local_nexthop, const A &peer_address);
-    const InternalMessage<A>* 
-       filter(const InternalMessage<A> *rtmsg, 
-	      bool &modified) const ;
+    bool filter(InternalMessage<A>& rtmsg) const ;
 private:
     A _local_nexthop;
     A _peer_address;
@@ -216,9 +203,7 @@ template<class A>
 class IBGPLoopFilter : public BGPRouteFilter<A> {
 public:
     IBGPLoopFilter();
-    const InternalMessage<A>* 
-       filter(const InternalMessage<A> *rtmsg, 
-	      bool &modified) const ;
+    bool filter(InternalMessage<A>& rtmsg) const ;
 private:
 };
 
@@ -239,9 +224,7 @@ template<class A>
 class RRIBGPLoopFilter : public BGPRouteFilter<A> {
 public:
     RRIBGPLoopFilter(bool rr_client, IPv4 bgp_id, IPv4 cluster_id);
-    const InternalMessage<A>* 
-       filter(const InternalMessage<A> *rtmsg, 
-	      bool &modified) const ;
+    bool filter(InternalMessage<A>& rtmsg) const ;
 private:
     bool _rr_client;
     IPv4 _bgp_id;
@@ -260,9 +243,7 @@ template<class A>
 class RRPurgeFilter : public BGPRouteFilter<A> {
 public:
     RRPurgeFilter();
-    const InternalMessage<A>* 
-       filter(const InternalMessage<A> *rtmsg, 
-	      bool &modified) const ;
+    bool filter(InternalMessage<A>& rtmsg) const ;
 private:
 };
 
@@ -278,8 +259,7 @@ template<class A>
 class LocalPrefInsertionFilter : public BGPRouteFilter<A> {
 public:
     LocalPrefInsertionFilter(uint32_t default_local_pref);
-    const InternalMessage<A>* filter(const InternalMessage<A> *rtmsg, 
-				     bool &modified) const ;
+    bool filter(InternalMessage<A>& rtmsg) const ;
 private:
     uint32_t _default_local_pref;
 };
@@ -298,8 +278,7 @@ template<class A>
 class LocalPrefRemovalFilter : public BGPRouteFilter<A> {
 public:
     LocalPrefRemovalFilter();
-    const InternalMessage<A>* filter(const InternalMessage<A> *rtmsg, 
-				     bool &modified) const ;
+    bool filter(InternalMessage<A>& rtmsg) const ;
 private:
 };
 
@@ -316,8 +295,7 @@ template<class A>
 class MEDInsertionFilter : public BGPRouteFilter<A> {
 public:
     MEDInsertionFilter(NextHopResolver<A>& next_hop_resolver);
-    const InternalMessage<A>* filter(const InternalMessage<A> *rtmsg, 
-				     bool &modified) const ;
+    bool filter(InternalMessage<A>& rtmsg) const ;
 private:
     NextHopResolver<A>& _next_hop_resolver;
 };
@@ -334,8 +312,7 @@ template<class A>
 class MEDRemovalFilter : public BGPRouteFilter<A> {
 public:
     MEDRemovalFilter();
-    const InternalMessage<A>* filter(const InternalMessage<A> *rtmsg, 
-				     bool &modified) const ;
+    bool filter(InternalMessage<A>& rtmsg) const ;
 private:
 };
 
@@ -350,8 +327,7 @@ template<class A>
 class KnownCommunityFilter : public BGPRouteFilter<A> {
 public:
     KnownCommunityFilter(PeerType peer_type);
-    const InternalMessage<A>* filter(const InternalMessage<A> *rtmsg, 
-				     bool &modified) const ;
+    bool filter(InternalMessage<A>& rtmsg) const ;
 private:
     PeerType _peer_type;
 };
@@ -370,8 +346,7 @@ template<class A>
 class UnknownFilter : public BGPRouteFilter<A> {
 public:
     UnknownFilter();
-    const InternalMessage<A>* filter(const InternalMessage<A> *rtmsg, 
-				     bool &modified) const ;
+    bool filter(InternalMessage<A>& rtmsg) const ;
 private:
 };
 
@@ -390,8 +365,7 @@ template<class A>
 class OriginateRouteFilter : public BGPRouteFilter<A> {
 public:
     OriginateRouteFilter(const AsNum &as_num, PeerType peer_type);
-    const InternalMessage<A>* filter(const InternalMessage<A> *rtmsg, 
-				     bool &modified) const ;
+    bool filter(InternalMessage<A>& rtmsg) const ;
 private:
     AsNum _as_num;
     PeerType _peer_type;
@@ -434,8 +408,7 @@ public:
     int add_known_community_filter(PeerType peer_type);
     int add_unknown_filter();
     int add_originate_route_filter(const AsNum &asn, PeerType peer_type);
-    const InternalMessage<A> *
-        apply_filters(const InternalMessage<A> *rtmsg, int ref_change);
+    bool apply_filters(InternalMessage<A>& rtmsg, int ref_change);
     int ref_count() const {return _ref_count;}
     uint32_t genid() const {return _genid;}
     bool used() const {return _used;}
@@ -484,19 +457,20 @@ public:
     ~FilterTable();
     void reconfigure_filter();
 
-    int add_route(const InternalMessage<A> &rtmsg,
+    int add_route(InternalMessage<A> &rtmsg,
 		  BGPRouteTable<A> *caller);
-    int replace_route(const InternalMessage<A> &old_rtmsg,
-		      const InternalMessage<A> &new_rtmsg,
+    int replace_route(InternalMessage<A> &old_rtmsg,
+		      InternalMessage<A> &new_rtmsg,
 		      BGPRouteTable<A> *caller);
-    int delete_route(const InternalMessage<A> &rtmsg, 
+    int delete_route(InternalMessage<A> &rtmsg, 
 		     BGPRouteTable<A> *caller);
-    int route_dump(const InternalMessage<A> &rtmsg,
+    int route_dump(InternalMessage<A> &rtmsg,
 		   BGPRouteTable<A> *caller,
 		   const PeerHandler *dump_peer);
     int push(BGPRouteTable<A> *caller);
     const SubnetRoute<A> *lookup_route(const IPNet<A> &net,
-				       uint32_t& genid) const;
+				       uint32_t& genid,
+				       FPAListRef& pa_list) const;
     void route_used(const SubnetRoute<A>* route, bool in_use);
 
     RouteTableType type() const {return FILTER_TABLE;}
@@ -529,10 +503,9 @@ public:
     void do_versioning() {_do_versioning = true;}
 
 private:
-    const InternalMessage<A> *
-        apply_filters(const InternalMessage<A> *rtmsg, int ref_change);
-    const InternalMessage<A> *
-        apply_filters(const InternalMessage<A> *rtmsg) const;
+    bool apply_filters(InternalMessage<A>& rtmsg, int ref_change);
+    bool apply_filters(InternalMessage<A>& rtmsg) const;
+    void drop_message(const InternalMessage<A> *rtmsg) const ;
     map <uint32_t, FilterVersion<A>* > _filter_versions;
     set <uint32_t> _deleted_filters;  /* kept as a sanity check */
     FilterVersion<A>* _current_filter;

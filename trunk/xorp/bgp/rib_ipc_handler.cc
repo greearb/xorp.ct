@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.78 2008/07/23 05:09:35 pavlin Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.79 2008/10/02 21:56:18 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -187,7 +187,9 @@ RibIpcHandler::start_packet()
 }
 
 int 
-RibIpcHandler::add_route(const SubnetRoute<IPv4> &rt, bool ibgp, Safi safi)
+RibIpcHandler::add_route(const SubnetRoute<IPv4> &rt, 
+			 FPAList4Ref& pa_list,
+			 bool ibgp, Safi safi)
 {
     debug_msg("RibIpcHandler::add_route(IPv4) %p\n", &rt);
 
@@ -195,20 +197,23 @@ RibIpcHandler::add_route(const SubnetRoute<IPv4> &rt, bool ibgp, Safi safi)
 	return 0;
 
     _v4_queue.queue_add_route(_ribname, ibgp, safi, rt.net(),
-			      rt.nexthop(), rt.policytags());
+			      pa_list->nexthop(), rt.policytags());
 
     return 0;
 }
 
 int 
-RibIpcHandler::add_route(const SubnetRoute<IPv6>& rt, bool ibgp, Safi safi)
+RibIpcHandler::add_route(const SubnetRoute<IPv6>& rt, 
+			 FPAList6Ref& pa_list,
+			 bool ibgp, Safi safi)
 {
     debug_msg("RibIpcHandler::add_route(IPv6) %p\n", &rt);
 
     if (_ribname.empty())
 	return 0;
 
-    _v6_queue.queue_add_route(_ribname, ibgp, safi, rt.net(), rt.nexthop(),
+    _v6_queue.queue_add_route(_ribname, ibgp, safi, rt.net(), 
+			      pa_list->nexthop(),
 			      rt.policytags());
 
     return 0;
@@ -219,11 +224,12 @@ RibIpcHandler::replace_route(const SubnetRoute<IPv4> &old_rt,
 			     bool old_ibgp, 
 			     const SubnetRoute<IPv4> &new_rt,
 			     bool new_ibgp, 
+			     FPAList4Ref& pa_list,
 			     Safi safi)
 {
     debug_msg("RibIpcHandler::replace_route(IPv4) %p %p\n", &old_rt, &new_rt);
-    delete_route(old_rt, old_ibgp, safi);
-    add_route(new_rt, new_ibgp, safi);
+    delete_route(old_rt, pa_list, old_ibgp, safi);
+    add_route(new_rt, pa_list, new_ibgp, safi);
     return 0;
 }
 
@@ -232,16 +238,18 @@ RibIpcHandler::replace_route(const SubnetRoute<IPv6> &old_rt,
 			     bool old_ibgp, 
 			     const SubnetRoute<IPv6> &new_rt,
 			     bool new_ibgp, 
+			     FPAList6Ref& pa_list,
 			     Safi safi)
 {
     debug_msg("RibIpcHandler::replace_route(IPv6) %p %p\n", &old_rt, &new_rt);
-    delete_route(old_rt, old_ibgp, safi);
-    add_route(new_rt, new_ibgp, safi);
+    delete_route(old_rt, pa_list, old_ibgp, safi);
+    add_route(new_rt, pa_list, new_ibgp, safi);
     return 0;
 }
 
 int 
 RibIpcHandler::delete_route(const SubnetRoute<IPv4> &rt, 
+			    FPAList4Ref& /*pa_list*/,
 			    bool ibgp, Safi safi)
 {
     debug_msg("RibIpcHandler::delete_route(IPv4) %p\n", &rt);
@@ -256,6 +264,7 @@ RibIpcHandler::delete_route(const SubnetRoute<IPv4> &rt,
 
 int 
 RibIpcHandler::delete_route(const SubnetRoute<IPv6>& rt, 
+			    FPAList6Ref& /*pa_list*/,
 			    bool ibgp, Safi safi)
 {
     debug_msg("RibIpcHandler::delete_route(IPv6) %p\n", &rt);
@@ -298,7 +307,7 @@ bool
 RibIpcHandler::originate_route(const OriginType origin, const ASPath& aspath,
 			       const IPv4Net& nlri, const IPv4& next_hop,
 			       const bool& unicast, const bool& multicast, 
-			       const PolicyTags& policytags)
+			       const PolicyTags& policy_tags)
 {
     debug_msg("origin %d aspath %s nlri %s next hop %s unicast %d"
 	      " multicast %d\n",
@@ -308,41 +317,27 @@ RibIpcHandler::originate_route(const OriginType origin, const ASPath& aspath,
     /*
     ** Construct the path attribute list.
     */
-    PathAttributeList<IPv4> pa_list(next_hop, aspath, origin);
+    FPAList4Ref pa_list = 
+	new FastPathAttributeList<IPv4>(next_hop, aspath, origin);
 
     /*
     ** Add a local pref for I-BGP peers.
     */
     LocalPrefAttribute local_pref_att(LocalPrefAttribute::default_value());
-    pa_list.add_path_attribute(local_pref_att);
-    pa_list.rehash();
-
-    /*
-    ** Create a subnet route
-    */
-    SubnetRoute<IPv4>* msg_route 
-	= new SubnetRoute<IPv4>(nlri, &pa_list, NULL);
-    msg_route->set_policytags(policytags);
-   
-    /*
-    ** Make an internal message.
-    */
-    InternalMessage<IPv4> msg(msg_route, this, GENID_UNKNOWN);
+    pa_list->add_path_attribute(local_pref_att);
 
     /*
     ** Inject the message into the plumbing.
     */
     if (unicast) {
-	_plumbing_unicast->add_route(msg, this);
+	_plumbing_unicast->add_route(nlri, pa_list, policy_tags, this);
 	_plumbing_unicast->push<IPv4>(this);
     }
 
     if (multicast) {
-	_plumbing_multicast->add_route(msg, this);
+	_plumbing_multicast->add_route(nlri, pa_list, policy_tags, this);
 	_plumbing_multicast->push<IPv4>(this);
     }
-
-    msg_route->unref();
 
     return true;
 }
@@ -351,7 +346,7 @@ bool
 RibIpcHandler::originate_route(const OriginType origin, const ASPath& aspath,
 			       const IPv6Net& nlri, const IPv6& next_hop,
 			       const bool& unicast, const bool& multicast,
-			       const PolicyTags& policytags)
+			       const PolicyTags& policy_tags)
 {
     debug_msg("origin %d aspath %s nlri %s next hop %s unicast %d"
 	      " multicast %d\n",
@@ -361,41 +356,27 @@ RibIpcHandler::originate_route(const OriginType origin, const ASPath& aspath,
     /*
     ** Construct the path attribute list.
     */
-    PathAttributeList<IPv6> pa_list(next_hop, aspath, origin);
+    FPAList6Ref pa_list = 
+	new FastPathAttributeList<IPv6>(next_hop, aspath, origin);
 
     /*
     ** Add a local pref for I-BGP peers.
     */
     LocalPrefAttribute local_pref_att(LocalPrefAttribute::default_value());
-    pa_list.add_path_attribute(local_pref_att);
-    pa_list.rehash();
-
-    /*
-    ** Create a subnet route
-    */
-    SubnetRoute<IPv6>* msg_route 
-	= new SubnetRoute<IPv6>(nlri, &pa_list, NULL);
-    msg_route->set_policytags(policytags);
-    
-    /*
-    ** Make an internal message.
-    */
-    InternalMessage<IPv6> msg(msg_route, this, GENID_UNKNOWN);
+    pa_list->add_path_attribute(local_pref_att);
 
     /*
     ** Inject the message into the plumbing.
     */
     if (unicast) {
-	_plumbing_unicast->add_route(msg, this);
+	_plumbing_unicast->add_route(nlri, pa_list, policy_tags, this);
 	_plumbing_unicast->push<IPv6>(this);
     }
 
     if (multicast) {
-	_plumbing_multicast->add_route(msg, this);
+	_plumbing_multicast->add_route(nlri, pa_list, policy_tags, this);
 	_plumbing_multicast->push<IPv6>(this);
     }
-
-    msg_route->unref();
 
     return true;
 }

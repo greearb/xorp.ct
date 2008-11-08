@@ -13,7 +13,6 @@ SubnetRoute:
 [comment] EXPECT DELETE TO *NOT* HAVE LOCALPREF
 [comment] EXPECT ADD TO HAVE LOCALPREF OF 200
 [DELETE]
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
@@ -22,7 +21,6 @@ SubnetRoute:
 	AS Path Attribute ASPath: [AS/1000, AS/3, AS/2, AS/1]
 [ADD]
 CHANGED flag is set
-PUSH flag is set
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 

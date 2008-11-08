@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/bgp/harness/trie_payload.hh,v 1.13 2008/07/23 05:09:44 pavlin Exp $
+// $XORP: xorp/bgp/harness/trie_payload.hh,v 1.14 2008/10/02 21:56:27 bms Exp $
 
 #ifndef __BGP_HARNESS_TRIE_PAYLOAD_HH__
 #define __BGP_HARNESS_TRIE_PAYLOAD_HH__
@@ -35,7 +35,7 @@ public:
 	     TrieData* &first, TrieData* &last) : _tv(tv),
 						  _first(first),
 						  _last(last) {
-	_packet = new UpdatePacket(buf, len, peerdata);
+	_packet = new UpdatePacket(buf, len, peerdata, 0, false);
 	_refcnt = 1;
 
 	_next = 0;

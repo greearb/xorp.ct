@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/bgp/route_table_policy.hh,v 1.13 2008/08/06 08:26:12 abittau Exp $
+// $XORP: xorp/bgp/route_table_policy.hh,v 1.11 2008/07/23 05:09:37 pavlin Exp $
 
 #ifndef __BGP_ROUTE_TABLE_POLICY_HH__
 #define __BGP_ROUTE_TABLE_POLICY_HH__
@@ -53,14 +53,14 @@ public:
 
     virtual ~PolicyTable();
 
-    int add_route(const InternalMessage<A> &rtmsg,
+    int add_route(InternalMessage<A> &rtmsg,
                   BGPRouteTable<A> *caller);
-    int replace_route(const InternalMessage<A> &old_rtmsg,
-                      const InternalMessage<A> &new_rtmsg,
+    int replace_route(InternalMessage<A> &old_rtmsg,
+                      InternalMessage<A> &new_rtmsg,
                       BGPRouteTable<A> *caller);
-    int delete_route(const InternalMessage<A> &rtmsg,
+    int delete_route(InternalMessage<A> &rtmsg,
                      BGPRouteTable<A> *caller);
-    virtual int route_dump(const InternalMessage<A> &rtmsg,
+    virtual int route_dump(InternalMessage<A> &rtmsg,
                    BGPRouteTable<A> *caller,
                    const PeerHandler *dump_peer);
     int push(BGPRouteTable<A> *caller);
@@ -69,7 +69,8 @@ public:
     bool get_next_message(BGPRouteTable<A> *next_table);
 
     const SubnetRoute<A> *lookup_route(const IPNet<A> &net,
-				       uint32_t& genid) const;
+				       uint32_t& genid,
+				       FPAListRef& pa_list) const;
 
     // XXX: keep one table type for now
     RouteTableType type() const { return POLICY_TABLE; }
@@ -79,21 +80,17 @@ public:
     /**
      * Performs policy filtering on a route.
      *
-     * If null is returned, then the route is rejected.
-     * The pointer to the same route may be returned if the route is accepted
-     * but not modified.
-     * A pointer to a different route will be returned in the case of an
-     * accepted and modified route. The old route will be deleted.
+     * If false is returned, then the route is rejected, otherwise it
+     * was accepted and may have been modified.
      *
      * @param rtmsg the route message to filter.
      * @param no_modify if true, the filter will not modify the route.
-     * @return the possibly modified message, Null if rejected by filter.
+     * @return whether the route was accepted by the filter.
      */
-    const InternalMessage<A>* do_filtering(const InternalMessage<A>& rtmsg, 
-					   bool no_modify) const;
+    bool do_filtering(InternalMessage<A>& rtmsg, 
+		      bool no_modify) const;
 
     void enable_filtering(bool on);
-
 protected:
     virtual void init_varrw();
 
@@ -102,7 +99,7 @@ protected:
 
 private:
     PolicyFilters&		_policy_filters;
-    bool			_enable_filtering;
+    bool _enable_filtering;
 };
 
 #endif // __BGP_ROUTE_TABLE_POLICY_HH__

@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.148 2008/07/23 05:09:34 pavlin Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.149 2008/10/02 21:56:17 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -278,7 +278,7 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	    debug_msg("UPDATE Packet RECEIVED\n");
 	    _in_updates++;
 	    _mainprocess->eventloop().current_time(_in_update_time);
-	    UpdatePacket pac(buf, length, peerdata());
+	    UpdatePacket pac(buf, length, _peerdata, _mainprocess, /*do checks*/true);
 
 	    XLOG_TRACE(main()->profile().enabled(trace_message_in),
 		       "Peer %s: Receive: %s",
@@ -286,6 +286,7 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 		       cstring(pac));
 	    // All decode errors should throw a CorruptMessage.
 	    debug_msg("%s", pac.str().c_str());
+
 	    event_recvupdate(pac);
 	    TIMESPENT_CHECK();
 	    if (TIMESPENT_OVERLIMIT()) {
@@ -331,6 +332,12 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 // 	event_tranfatal();
 	TIMESPENT_CHECK();
 	return false;
+    } catch (UnusableMessage& um) {
+	// the packet wasn't usable for some reason, but also
+	// wasn't so corrupt we need to send a notification -
+	// this is a "silent" error.
+	XLOG_WARNING("%s %s %s", this->str().c_str(), um.where().c_str(),
+		     um.why().c_str());
     }
 
     TIMESPENT_CHECK();
@@ -1070,7 +1077,7 @@ BGPPeer::event_keepmess()			// EVENTRECKEEPALIVEMESS
  * We received an update message.
  */
 void
-BGPPeer::event_recvupdate(const UpdatePacket& p) // EVENTRECUPDATEMESS
+BGPPeer::event_recvupdate(UpdatePacket& p) // EVENTRECUPDATEMESS
 { 
     TIMESPENT();
 
@@ -1099,20 +1106,7 @@ BGPPeer::event_recvupdate(const UpdatePacket& p) // EVENTRECUPDATEMESS
 	break;
     }
     case STATEESTABLISHED: {
-	bool good_nexthop;
-	NotificationPacket *notification =
-	    check_update_packet(&p, good_nexthop);
-	if ( notification != 0 ) {	// bad message
-	    // Send Notification Message
-	    send_notification(*notification);
-	    delete notification;
-	    set_state(STATESTOPPED);
-	    break;
-	}
 	restart_hold_timer();
-	if (!good_nexthop)
-	    return;
-	// ok the packet is correct.
 
 	// Check that the prefix limit if set will not be exceeded.
 	ConfigVar<uint32_t> &prefix_limit =
@@ -1133,15 +1127,9 @@ BGPPeer::event_recvupdate(const UpdatePacket& p) // EVENTRECUPDATEMESS
 	// XXX - Temporary hack until we get programmable filters.
 	const IPv4 next_hop = peerdata()->get_next_hop_rewrite();
 	if (!next_hop.is_zero()) {
-	    PathAttributeList<IPv4>& l = const_cast<
-		PathAttributeList<IPv4>&>(p.pa_list());
-	    PathAttributeList<IPv4>::iterator i;
-	    for (i = l.begin(); i != l.end(); i++) {
-		if (NEXT_HOP == (*i)->type()) {
- 		    delete (*i);
-		    (*i) = new NextHopAttribute<IPv4>(next_hop);
-		    break;
-		}
+	    FPAList4Ref l = p.pa_list();
+	    if (l->nexthop_att()) {
+		l->replace_nexthop(next_hop);
 	    }
 	}
 	_handler->process_update_packet(&p);
@@ -1371,6 +1359,7 @@ check_multiprotocol_nlri(const UpdatePacket *, const BGPUpdateAttribList& pa,
     return true;
 }
 
+#if 0
 inline
 bool
 check_multiprotocol_nlri(const UpdatePacket *p, PathAttribute *pa, bool neg)
@@ -1389,10 +1378,13 @@ check_multiprotocol_nlri(const UpdatePacket *p, PathAttribute *pa, bool neg)
 
     return true;
 }
+#endif
 
 NotificationPacket *
 BGPPeer::check_update_packet(const UpdatePacket *p, bool& good_nexthop)
 {
+    UNUSED(p);
+    UNUSED(good_nexthop);
     // return codes
     // 1 - Malformed Attribute List
     // 2 - Unrecognized Well-known Attribute
@@ -1412,6 +1404,7 @@ BGPPeer::check_update_packet(const UpdatePacket *p, bool& good_nexthop)
     ** exceeded.
     */
 
+#if 0
     /*
     ** Check for multiprotocol parameters that haven't been "negotiated".
     **
@@ -1475,9 +1468,11 @@ BGPPeer::check_update_packet(const UpdatePacket *p, bool& good_nexthop)
 	return new NotificationPacket(UPDATEMSGERR, OPTATTR);
 #endif
 
+#endif
     // if the path attributes list is empty then no network
     // layer reachability information should be present.
 
+#if 0
     if ( p->pa_list().empty() ) {
 	if ( p->nlri_list().empty() == false )	{
 	    debug_msg("Empty path attribute list and "
@@ -1677,7 +1672,6 @@ BGPPeer::check_update_packet(const UpdatePacket *p, bool& good_nexthop)
 	// implementations) then we need to make sure that the
 	// provided nexthop falls into a common subnet.
 	
-#if	0
 	if (ibgp() && !local_pref)
 	    XLOG_WARNING("%s Update packet from ibgp with no LOCAL_PREF",
 			 this->str().c_str());
@@ -1685,7 +1679,6 @@ BGPPeer::check_update_packet(const UpdatePacket *p, bool& good_nexthop)
 	if (!ibgp() && local_pref)
 	    XLOG_WARNING("%s Update packet from ebgp with LOCAL_PREF",
 			 this->str().c_str());
-#endif
 	// A semantically incorrect NLRI generates an error message
 	// for the log and is ignored, it does *not* generate a
 	// notification message and drop the peering. The semantic
@@ -1693,6 +1686,7 @@ BGPPeer::check_update_packet(const UpdatePacket *p, bool& good_nexthop)
 	// update packet is being turned into individual messages
 	// where the offending NLRIs can be dropped.
     }
+#endif
 
     // XXX Check withdrawn routes are correct.
 
@@ -2646,7 +2640,8 @@ AcceptSession::get_message_accept(BGPPacket::Status status,
 	    debug_msg("UPDATE Packet RECEIVED\n");
 // 	    _in_updates++;
 // 	    main()->eventloop().current_time(_in_update_time);
-	    UpdatePacket pac(buf, length, peerdata());
+	    UpdatePacket pac(buf, length, _peer.peerdata(), 
+			     _peer.main(), /*do checks*/true);
  	    XLOG_TRACE(main()->profile().enabled(trace_message_in),
 		       "Peer %s: Receive: %s",
 		       peerdata()->iptuple().str().c_str(),
@@ -2700,6 +2695,12 @@ AcceptSession::get_message_accept(BGPPacket::Status status,
 	TIMESPENT_CHECK();
 	debug_msg("Returning false\n");
 	return false;
+    } catch (UnusableMessage& um) {
+	// the packet wasn't usable for some reason, but also
+	// wasn't so corrupt we need to send a notification -
+	// this is a "silent" error.
+	XLOG_WARNING("%s %s %s", this->str().c_str(), um.where().c_str(),
+		     um.why().c_str());
     }
 
     TIMESPENT_CHECK();

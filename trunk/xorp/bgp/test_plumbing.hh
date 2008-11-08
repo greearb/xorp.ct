@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/bgp/test_plumbing.hh,v 1.11 2008/07/23 05:09:39 pavlin Exp $
+// $XORP: xorp/bgp/test_plumbing.hh,v 1.12 2008/10/02 21:56:22 bms Exp $
 
 #ifndef __BGP_TEST_PLUMBING_HH__
 #define __BGP_TEST_PLUMBING_HH__
@@ -45,9 +45,9 @@ public:
 		 NextHopResolver<IPv6>& nhr_ipv6,
 		 PolicyFilters& pfs,
 		 BGPMain& bgp);
-    bool run_tests();
-    bool test1();
-    bool test2();
+    bool run_tests(BGPMain& bgpmain);
+    bool test1(BGPMain& bgpmain);
+    bool test2(BGPMain& bgpmain);
 };
 
 #endif // __BGP_TEST_PLUMBING_HH__

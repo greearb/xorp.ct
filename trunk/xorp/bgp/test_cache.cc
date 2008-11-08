@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/test_cache.cc,v 1.36 2008/07/23 05:09:38 pavlin Exp $"
+#ident "$XORP: xorp/bgp/test_cache.cc,v 1.37 2008/10/02 21:56:21 bms Exp $"
 
 #include "bgp_module.h"
 
@@ -65,6 +65,11 @@ test_cache(TestInfo& /*info*/)
     BGPPeer peer2(&localdata, pd2, NULL, &bgpmain);
     PeerHandler handler2("test2", &peer2, NULL, NULL);
 
+#if 0
+    PAListRef<IPv4> dummy_palist;
+    dummy_palist.create_attribute_manager();   
+#endif
+
     // trivial plumbing
     CacheTable<IPv4> *cache_table
 	= new CacheTable<IPv4>("CACHE", SAFI_UNICAST, NULL, &handler1);
@@ -109,18 +114,21 @@ test_cache(TestInfo& /*info*/)
     aspath3.prepend_as(AsNum(9));
     ASPathAttribute aspathatt3(aspath3);
 
-    PathAttributeList<IPv4>* palist1 =
-	new PathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
+    FPAList4Ref fpalist1 =
+	new FastPathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
+    PAListRef<IPv4> palist1 = new PathAttributeList<IPv4>(fpalist1);
 
-    PathAttributeList<IPv4>* palist2 =
-	new PathAttributeList<IPv4>(nhatt2, aspathatt2, igp_origin_att);
+    FPAList4Ref fpalist2 =
+	new FastPathAttributeList<IPv4>(nhatt2, aspathatt2, igp_origin_att);
+    PAListRef<IPv4> palist2 = new PathAttributeList<IPv4>(fpalist2);
 
-    PathAttributeList<IPv4>* palist3 =
-	new PathAttributeList<IPv4>(nhatt3, aspathatt3, igp_origin_att);
+    FPAList4Ref fpalist3 =
+	new FastPathAttributeList<IPv4>(nhatt3, aspathatt3, igp_origin_att);
+    PAListRef<IPv4> palist3 = new PathAttributeList<IPv4>(fpalist3);
 
     // create a subnet route
     SubnetRoute<IPv4> *sr1, *sr2;
-    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    InternalMessage<IPv4>* msg, *msg2;
 
     // ================================================================
     // Test1: trivial add and delete
@@ -128,12 +136,13 @@ test_cache(TestInfo& /*info*/)
     // add a route
     debug_table->write_comment("TEST 1");
     debug_table->write_comment("ADD AND DELETE, UNCACHED");
-    InternalMessage<IPv4>* msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_push();
     cache_table->add_route(*msg, NULL);
 
-    // route shouldn't have been cached.
-    assert(cache_table->route_count() == 0);
+    // we even cache unchanged routes now
+    assert(cache_table->route_count() == 1);
 
     debug_table->write_separator();
 
@@ -161,6 +170,7 @@ test_cache(TestInfo& /*info*/)
     // note that as the route has changed, the cache table is
     // responsible for deleting the route in the message
     delete msg;
+    sr1->unref();
 
     // verify that this route was now cached
     assert(cache_table->route_count() == 1);
@@ -184,6 +194,8 @@ test_cache(TestInfo& /*info*/)
 
     debug_table->write_separator();
 
+#if 0
+Test no longer makes sense now we cache all data
     // ================================================================
     // Test2: trivial replace
     // ================================================================
@@ -194,7 +206,7 @@ test_cache(TestInfo& /*info*/)
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
 
     sr2 = new SubnetRoute<IPv4>(net1, palist3, NULL);
-    InternalMessage<IPv4>* msg2 = new InternalMessage<IPv4>(sr2, &handler1, 0);
+    msg2 = new InternalMessage<IPv4>(sr2, &handler1, 0);
     msg2->set_push();
     cache_table->replace_route(*msg, *msg2, NULL);
     assert(cache_table->route_count() == 0);
@@ -205,7 +217,6 @@ test_cache(TestInfo& /*info*/)
     delete msg2;
     sr1->unref();
     sr2->unref();
-
     // ================================================================
     // Test2a: trivial replace, original route cacheed
     // ================================================================
@@ -270,6 +281,7 @@ test_cache(TestInfo& /*info*/)
     delete msg;
     assert(cache_table->route_count() == 0);
     debug_table->write_separator();
+#endif
 
     // ================================================================
     // Test2c: trivial replace, both routes cacheed
@@ -282,7 +294,8 @@ test_cache(TestInfo& /*info*/)
     msg->set_changed();
     debug_table->write_comment("ADD ROUTE TO CACHE");
     cache_table->add_route(*msg, NULL);
-    assert(msg->route() == NULL);
+    //    assert(msg->route() == NULL);
+    sr1->unref();
     delete msg;
 
     assert(cache_table->route_count() == 1);
@@ -302,8 +315,10 @@ test_cache(TestInfo& /*info*/)
 
     debug_table->write_separator();
 
-    assert(msg->route() == NULL);
-    assert(msg2->route() == NULL);
+    //    assert(msg->route() == NULL);
+    //    assert(msg2->route() == NULL);
+    sr1->unref();
+    sr2->unref();
     delete msg;
     delete msg2;
 
@@ -315,6 +330,7 @@ test_cache(TestInfo& /*info*/)
     debug_table->write_comment("DELETE ROUTE FROM CACHE");
     cache_table->delete_route(*msg, NULL);
     delete msg;
+    sr2->unref();
     assert(cache_table->route_count() == 0);
     debug_table->write_separator();
 
@@ -329,14 +345,16 @@ test_cache(TestInfo& /*info*/)
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_changed();
     cache_table->add_route(*msg, NULL);
-    assert(msg->route() == NULL);
+    //    assert(msg->route() == NULL);
+    sr1->unref();
     delete msg;
 
     sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     msg->set_changed();
     cache_table->add_route(*msg, NULL);
-    assert(msg->route() == NULL);
+    //    assert(msg->route() == NULL);
+    sr1->unref();
     delete msg;
 
     assert(cache_table->route_count() == 2);
@@ -346,7 +364,6 @@ test_cache(TestInfo& /*info*/)
     }
     assert(cache_table->route_count() == 0);
 
-
     // ================================================================
     // Check debug output against reference
     // ================================================================
@@ -355,9 +372,12 @@ test_cache(TestInfo& /*info*/)
     debug_table->write_comment("SHUTDOWN AND CLEAN UP");
     delete cache_table;
     delete debug_table;
-    delete palist1;
-    delete palist2;
-    delete palist3;
+    palist1.release();
+    palist2.release();
+    palist3.release();
+    fpalist1 = 0;
+    fpalist2 = 0;
+    fpalist3 = 0;
 
     FILE *file = fopen(filename.c_str(), "r");
     if (file == NULL) {

@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/route_table_deletion.cc,v 1.28 2008/07/23 05:09:36 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_deletion.cc,v 1.29 2008/10/02 21:56:19 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -51,7 +51,7 @@ DeletionTable<A>::~DeletionTable()
 
 template<class A>
 int
-DeletionTable<A>::add_route(const InternalMessage<A> &rtmsg,
+DeletionTable<A>::add_route(InternalMessage<A> &rtmsg,
 			    BGPRouteTable<A> *caller)
 {
     debug_msg("DeletionTable<A>::add_route %p on %s\n",
@@ -88,7 +88,10 @@ DeletionTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	_route_table->erase(rtmsg.net());
 
 	// propogate downstream
-	InternalMessage<A> old_rt_msg(existing_route, _peer, _genid);
+	PAListRef<A> pa_list= existing_route->attributes();
+	FPAListRef fpa_list = new FastPathAttributeList<A>(pa_list);
+	pa_list.deregister_with_attmgr();
+	InternalMessage<A> old_rt_msg(existing_route, fpa_list, _peer, _genid);
 	old_rt_msg.set_from_previous_peering();
 	return this->_next_table->replace_route(old_rt_msg, rtmsg,
 					  (BGPRouteTable<A>*)this);
@@ -98,8 +101,8 @@ DeletionTable<A>::add_route(const InternalMessage<A> &rtmsg,
 
 template<class A>
 int
-DeletionTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
-				const InternalMessage<A> &new_rtmsg,
+DeletionTable<A>::replace_route(InternalMessage<A> &old_rtmsg,
+				InternalMessage<A> &new_rtmsg,
 				BGPRouteTable<A> *caller)
 {
     debug_msg("DeletionTable<A>::replace_route %p -> %p on %s\n",
@@ -117,7 +120,7 @@ DeletionTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 
 template<class A>
 int
-DeletionTable<A>::route_dump(const InternalMessage<A> &rtmsg,
+DeletionTable<A>::route_dump(InternalMessage<A> &rtmsg,
 			     BGPRouteTable<A> *caller,
 			     const PeerHandler *dump_peer)
 {
@@ -136,7 +139,7 @@ DeletionTable<A>::route_dump(const InternalMessage<A> &rtmsg,
 
 template<class A>
 int
-DeletionTable<A>::delete_route(const InternalMessage<A> &rtmsg,
+DeletionTable<A>::delete_route(InternalMessage<A> &rtmsg,
 			       BGPRouteTable<A> *caller)
 {
     debug_msg("DeletionTable<A>::delete_route %p on %s\n",
@@ -161,7 +164,8 @@ DeletionTable<A>::push(BGPRouteTable<A> *caller)
 template<class A>
 const SubnetRoute<A>*
 DeletionTable<A>::lookup_route(const IPNet<A> &net, 
-			       uint32_t& genid) const
+			       uint32_t& genid,
+			       FPAListRef& fpa_list) const
 {
     // Even though the peering has gone down, we still need to answer
     // lookup requests.  This is because we need to be internally
@@ -170,9 +174,12 @@ DeletionTable<A>::lookup_route(const IPNet<A> &net,
     typename BgpTrie<A>::iterator iter = _route_table->lookup_node(net);
     if (iter != _route_table->end()) {
 	genid = _genid;
-	return &(iter.payload());
+	const SubnetRoute<A> *route = &(iter.payload());
+	PAListRef<A> pa_list = route->attributes();
+	fpa_list = new FastPathAttributeList<A>(pa_list);
+	return route;
     } else
-	return this->_parent->lookup_route(net, genid);
+	return this->_parent->lookup_route(net, genid, fpa_list);
 }
 
 template<class A>
@@ -253,6 +260,7 @@ DeletionTable<A>::delete_next_chain()
 	rt_msg.set_from_previous_peering();
 	if (this->_next_table != NULL)
 	    this->_next_table->delete_route(rt_msg, (BGPRouteTable<A>*)this);
+	chained_rt->attributes().deregister_with_attmgr();
 	_deleted++;
 	if (chained_rt == first_rt) {
 	    debug_msg("end of chain\n");

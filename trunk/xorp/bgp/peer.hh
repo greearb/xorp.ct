@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/bgp/peer.hh,v 1.51 2008/08/22 15:56:11 atanu Exp $
+// $XORP: xorp/bgp/peer.hh,v 1.52 2008/10/02 21:56:17 bms Exp $
 
 #ifndef __BGP_PEER_HH__
 #define __BGP_PEER_HH__
@@ -173,7 +173,7 @@ public:
     void event_idle_hold_exp();		// Event 13: IdleHoldTimer_Expires
     void event_openmess(const OpenPacket& p);	// EVENTRECOPENMESS
     void event_keepmess();			// EVENTRECKEEPALIVEMESS
-    void event_recvupdate(const UpdatePacket& p); 	// EVENTRECUPDATEMESS
+    void event_recvupdate(UpdatePacket& p); 	// EVENTRECUPDATEMESS
     void event_recvnotify(const NotificationPacket& p); // EVENTRECNOTMESS
 
     void generate_open_message(OpenPacket& open);
@@ -226,7 +226,7 @@ public:
     bool still_reading() const		{ return _SocketClient->still_reading(); }
     LocalData* localdata()              { return _localdata; }
     IPv4 id() const		        { return _localdata->get_id(); }
-    BGPMain* main()			{ return _mainprocess; }
+    BGPMain* main() const		{ return _mainprocess; }
     const BGPPeerData* peerdata() const	{ return _peerdata; }
     bool ibgp() const			{ return peerdata()->ibgp(); }
     bool use_4byte_asnums() const { 

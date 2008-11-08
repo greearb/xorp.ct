@@ -46,7 +46,7 @@ DampingTable<A>::~DampingTable()
 
 template<class A>
 int
-DampingTable<A>::add_route(const InternalMessage<A> &rtmsg,
+DampingTable<A>::add_route(InternalMessage<A> &rtmsg,
 			   BGPRouteTable<A> *caller)
 {
     debug_msg("\n         %s\n caller: %s\n rtmsg: %p route: %p\n%s\n",
@@ -58,6 +58,7 @@ DampingTable<A>::add_route(const InternalMessage<A> &rtmsg,
 
     XLOG_ASSERT(caller == this->_parent);
     XLOG_ASSERT(this->_next_table != NULL);
+    XLOG_ASSERT(!rtmsg.attributes()->is_locked());
 
     if (!damping())
 	return this->_next_table->
@@ -87,8 +88,8 @@ DampingTable<A>::add_route(const InternalMessage<A> &rtmsg,
 
 template<class A>
 int
-DampingTable<A>::replace_route(const InternalMessage<A> &old_rtmsg, 
-			       const InternalMessage<A> &new_rtmsg, 
+DampingTable<A>::replace_route(InternalMessage<A> &old_rtmsg, 
+			       InternalMessage<A> &new_rtmsg, 
 			       BGPRouteTable<A> *caller)
 {
     debug_msg("\n         %s\n"
@@ -169,8 +170,8 @@ DampingTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 
 template<class A>
 int
-DampingTable<A>::delete_route(const InternalMessage<A> &rtmsg, 
-			    BGPRouteTable<A> *caller)
+DampingTable<A>::delete_route(InternalMessage<A> &rtmsg, 
+			      BGPRouteTable<A> *caller)
 {
     debug_msg("\n         %s\n caller: %s\n rtmsg: %p route: %p\n%s\n",
 	      this->tablename().c_str(),
@@ -224,7 +225,7 @@ DampingTable<A>::push(BGPRouteTable<A> *caller)
 
 template<class A>
 int 
-DampingTable<A>::route_dump(const InternalMessage<A> &rtmsg,
+DampingTable<A>::route_dump(InternalMessage<A> &rtmsg,
 			    BGPRouteTable<A> *caller,
 			    const PeerHandler *dump_peer)
 {
@@ -244,15 +245,16 @@ DampingTable<A>::route_dump(const InternalMessage<A> &rtmsg,
 template<class A>
 const SubnetRoute<A>*
 DampingTable<A>::lookup_route(const IPNet<A> &net,
-			      uint32_t& genid) const
+			      uint32_t& genid,
+			      FPAListRef& pa_list) const
 {
     if (!damping())
-	return this->_parent->lookup_route(net, genid);
+	return this->_parent->lookup_route(net, genid, pa_list);
 
     if (is_this_route_damped(net))
 	return 0;
 
-    return this->_parent->lookup_route(net, genid);
+    return this->_parent->lookup_route(net, genid, pa_list);
 }
 
 template<class A>

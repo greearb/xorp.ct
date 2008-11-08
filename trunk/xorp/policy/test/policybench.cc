@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/policy/test/policybench.cc,v 1.10 2008/09/23 19:57:03 abittau Exp $"
+#ident "$XORP: xorp/policy/test/policybench.cc,v 1.11 2008/10/02 21:58:09 bms Exp $"
 
 #include "policy/policy_module.h"
 #include "policy/common/policy_utils.hh"
@@ -48,7 +48,7 @@ struct bgp_routes {
 
     InternalMessage<A>*	    bgp_message;
     SubnetRoute<A>*	    bgp_route;
-    PathAttributeList<A>*   bgp_attributes;
+    PAListRef<A>            bgp_attributes;
 };
 
 template<class A>
@@ -60,8 +60,9 @@ bgp_routes<A>::bgp_routes()
     ASPath path("7865");
     OriginType origin = EGP;
 
-    bgp_attributes = new PathAttributeList<A>(nexthop, path, origin);
-    bgp_attributes->rehash();
+    FPAList4Ref fpalist1 =
+	new FastPathAttributeList<A>(nexthop, path, origin);
+    bgp_attributes = new PathAttributeList<IPv4>(fpalist1);
 
     bgp_route   = new SubnetRoute<A>(net, bgp_attributes, NULL);
     bgp_message = new InternalMessage<A>(bgp_route, NULL, 1);

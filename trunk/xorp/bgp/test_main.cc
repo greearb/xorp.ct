@@ -1,3 +1,4 @@
+
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
 // Copyright (c) 2001-2008 XORP, Inc.
@@ -17,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/test_main.cc,v 1.25 2008/07/23 05:09:39 pavlin Exp $"
+#ident "$XORP: xorp/bgp/test_main.cc,v 1.26 2008/10/02 21:56:22 bms Exp $"
 
 #include "bgp_module.h"
 

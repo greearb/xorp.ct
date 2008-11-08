@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/bgp/route_table_decision.hh,v 1.27 2008/07/23 05:09:36 pavlin Exp $
+// $XORP: xorp/bgp/route_table_decision.hh,v 1.28 2008/10/02 21:56:19 bms Exp $
 
 #ifndef __BGP_ROUTE_TABLE_DECISION_HH__
 #define __BGP_ROUTE_TABLE_DECISION_HH__
@@ -38,11 +38,22 @@ template<class A>
 class RouteData {
 public:
     RouteData(const SubnetRoute<A>* route, 
+	      FPAListRef pa_list,
 	      BGPRouteTable<A>* parent_table,
 	      const PeerHandler* peer_handler,
 	      uint32_t genid) 
-	: _route(route), _parent_table(parent_table), 
+	: _route(route), _pa_list(pa_list), _parent_table(parent_table), 
 	  _peer_handler(peer_handler), _genid(genid) {}
+
+    /* main reason for defining operator= is to keep the refcount
+       correct on _pa_list */
+    RouteData<A>& operator=(const RouteData<A>& him) {
+	_route = him._route;
+	_pa_list = him._pa_list;
+	_parent_table = him._parent_table;
+	_peer_handler = him.peer_handler;
+	_genid = him._genid;
+    }
 
     void set_is_not_winner() {
 	_parent_table->route_used(_route, false);
@@ -53,11 +64,13 @@ public:
 	_route->set_is_winner(igp_distance);
     }
     const SubnetRoute<A>* route() const { return _route; }
+    const FPAListRef& attributes() const { return _pa_list; }
     const PeerHandler* peer_handler() const { return _peer_handler; }
     BGPRouteTable<A>* parent_table() const { return _parent_table; }
     uint32_t genid() const { return _genid; }
 private:
     const SubnetRoute<A>* _route;
+    FPAListRef _pa_list;
     BGPRouteTable<A>* _parent_table;
     const PeerHandler* _peer_handler;
     uint32_t _genid;
@@ -98,19 +111,20 @@ public:
 		   uint32_t genid);
     int remove_parent(BGPRouteTable<A> *parent);
 
-    int add_route(const InternalMessage<A> &rtmsg,
+    int add_route(InternalMessage<A> &rtmsg,
 		  BGPRouteTable<A> *caller);
-    int replace_route(const InternalMessage<A> &old_rtmsg,
-		      const InternalMessage<A> &new_rtmsg,
+    int replace_route(InternalMessage<A> &old_rtmsg,
+		      InternalMessage<A> &new_rtmsg,
 		      BGPRouteTable<A> *caller);
-    int delete_route(const InternalMessage<A> &rtmsg, 
+    int delete_route(InternalMessage<A> &rtmsg, 
 		     BGPRouteTable<A> *caller);
-    int route_dump(const InternalMessage<A> &rtmsg,
+    int route_dump(InternalMessage<A> &rtmsg,
 		   BGPRouteTable<A> *caller,
 		   const PeerHandler *peer);
     int push(BGPRouteTable<A> *caller);
     const SubnetRoute<A> *lookup_route(const IPNet<A> &net,
-				       uint32_t& genid) const;
+				       uint32_t& genid,
+				       FPAListRef& pa_list) const;
 
     //don't call this on a DecisionTable - it's meaningless
     BGPRouteTable<A> *parent() { abort(); return NULL; }
@@ -149,9 +163,8 @@ private:
         find_alternative_routes(const BGPRouteTable<A> *caller,
 				const IPNet<A>& net,
 				list <RouteData<A> >& alternatives) const;
-    uint32_t local_pref(const SubnetRoute<A> *route, const PeerHandler *peer)
-	const;
-    uint32_t med(const SubnetRoute<A> *route) const;
+    uint32_t local_pref(const FPAListRef& pa_list) const;
+    uint32_t med(const FPAListRef& pa_list) const;
     bool resolvable(const A) const;
     uint32_t igp_distance(const A) const;
     RouteData<A>* find_winner(list<RouteData<A> >& alternatives) const;

@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/route_table_policy.cc,v 1.27 2008/08/06 08:14:50 abittau Exp $"
+#ident "$XORP: xorp/bgp/route_table_policy.cc,v 1.25 2008/07/23 05:09:37 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -61,15 +61,16 @@ void
 PolicyTable<A>::enable_filtering(bool on)
 {
     _enable_filtering = on;
-}
+}                                                         
 
 template <class A>
-const InternalMessage<A>*
-PolicyTable<A>::do_filtering(const InternalMessage<A>& rtmsg, 
+bool
+PolicyTable<A>::do_filtering(InternalMessage<A>& rtmsg, 
 			     bool no_modify) const
 {
-    if (!_enable_filtering)
+    if (!_enable_filtering) {
 	return &rtmsg;
+    }
 
     _varrw->attach_route(rtmsg, no_modify);
 
@@ -105,27 +106,13 @@ PolicyTable<A>::do_filtering(const InternalMessage<A>& rtmsg,
 	if (!no_modify) {
 	    XLOG_ASSERT(pf);
 	}
+	_varrw->detach_route(rtmsg);
 
 	if (!accepted) {
-	    return NULL;
+	    return false;
 	}
+	return true;
 
-	// we only want to check if filter accepted / rejecd route
-	// [for route lookups]
-	if (no_modify) {
-	    return &rtmsg;
-	}    
-
-	if (!_varrw->modified()) {
-	    return &rtmsg;
-	}    
-
-
-	InternalMessage<A>* fmsg = _varrw->filtered_message();
-
-	debug_msg("[BGP] filter modified message: %s\n", fmsg->str().c_str());
-
-	return fmsg;
     } catch(const PolicyException& e) {
 	XLOG_FATAL("Policy filter error %s", e.str().c_str());
 	XLOG_UNFINISHED();
@@ -134,7 +121,7 @@ PolicyTable<A>::do_filtering(const InternalMessage<A>& rtmsg,
 
 template <class A>
 int
-PolicyTable<A>::add_route(const InternalMessage<A> &rtmsg,
+PolicyTable<A>::add_route(InternalMessage<A> &rtmsg,
 			  BGPRouteTable<A> *caller)
 {
     XLOG_ASSERT(caller == this->_parent);
@@ -146,6 +133,7 @@ PolicyTable<A>::add_route(const InternalMessage<A> &rtmsg,
     debug_msg("[BGP] PolicyTable %s add_route: %s\n",
 	      filter::filter2str(_filter_type).c_str(),
 	      rtmsg.str().c_str());
+    debug_msg("atts before: %s\n", rtmsg.attributes()->str().c_str());
 
 #if 0
     // if we are getting an add_route, it must? be a new route... Thus the
@@ -166,28 +154,28 @@ PolicyTable<A>::add_route(const InternalMessage<A> &rtmsg,
     }
 #endif
 
-    const InternalMessage<A>* fmsg = do_filtering(rtmsg, false);
+    bool accepted = do_filtering(rtmsg, false);
 
+#if 0
     if (rtmsg.changed() && fmsg != &rtmsg) {
 	debug_msg("[BGP] PolicyTable got modified route, deleting previous\n");
 	rtmsg.route()->unref();
-    }	
+    }
+#endif	
     
-    if (!fmsg)
+    if (!accepted)
 	return ADD_FILTERED;
 
-    int res = next->add_route(*fmsg, this);
-
-    if (fmsg != &rtmsg)
-	delete fmsg;
+    debug_msg("atts after: %s\n", rtmsg.attributes()->str().c_str());
+    int res = next->add_route(rtmsg, this);
 
     return res;
 }
 
 template <class A>
 int
-PolicyTable<A>::replace_route(const InternalMessage<A>& old_rtmsg,
-			      const InternalMessage<A>& new_rtmsg,
+PolicyTable<A>::replace_route(InternalMessage<A>& old_rtmsg,
+			      InternalMessage<A>& new_rtmsg,
 			      BGPRouteTable<A>* caller)
 {
     XLOG_ASSERT(caller == this->_parent);
@@ -202,74 +190,34 @@ PolicyTable<A>::replace_route(const InternalMessage<A>& old_rtmsg,
 	      old_rtmsg.str().c_str(),
 	      new_rtmsg.str().c_str());
 
-#if 0
-    // the old one should really be old?
-    switch (_filter_type) {
-	case filter::IMPORT:
-	   XLOG_ASSERT(!old_rtmsg.route()->policyfilter(0).is_empty());
-	   break;
 
-	case filter::EXPORT_SOURCEMATCH:
-	   XLOG_ASSERT(!old_rtmsg.route()->policyfilter(1).is_empty());
-	   break;
-
-	case filter::EXPORT:
-	   XLOG_ASSERT(!old_rtmsg.route()->policyfilter(2).is_empty());
-	   break;
-    }
-    
-    // the new route should really be new?
-    switch (_filter_type) {
-	case filter::IMPORT:
-	   XLOG_ASSERT(new_rtmsg.route()->policyfilter(0).is_empty());
-	   break;
-
-	case filter::EXPORT_SOURCEMATCH:
-	   XLOG_ASSERT(new_rtmsg.route()->policyfilter(1).is_empty());
-	   break;
-
-	case filter::EXPORT:
-	   XLOG_ASSERT(new_rtmsg.route()->policyfilter(2).is_empty());
-	   break;
-    }
-#endif
-
-    const InternalMessage<A>* fold = do_filtering(old_rtmsg, false);
-    if (old_rtmsg.changed() && fold != &old_rtmsg)
-	old_rtmsg.route()->unref();
-    const InternalMessage<A>* fnew = do_filtering(new_rtmsg, false);
-    if (new_rtmsg.changed() && fnew != &new_rtmsg)
-	new_rtmsg.route()->unref();
+    bool old_accepted = do_filtering(old_rtmsg, false);
+    bool new_accepted = do_filtering(new_rtmsg, false);
 
     // XXX: We can probably use the is_filtered flag...
     int res;
 
     // we didn't pass the old one, we don't want the new one
-    if (fold == NULL && fnew == NULL) {
+    if (!old_accepted  && !new_accepted) {
 	return ADD_FILTERED;
     // we passed the old one, but we filtered the new one...
-    } else if (fold != NULL && fnew == NULL) {
-	next->delete_route(*fold, this);
+    } else if (old_accepted && !new_accepted) {
+	next->delete_route(old_rtmsg, this);
 	res = ADD_FILTERED;
     // we didn't pass the old one, we like the new one
-    } else if (fold == NULL && fnew != NULL) {
-	res = next->add_route(*fnew, this);
+    } else if (!old_accepted && new_accepted) {
+	res = next->add_route(new_rtmsg, this);
     // we passed tthe old one, we like the new one
     } else {
-	res = next->replace_route(*fold, *fnew, this);
+	res = next->replace_route(old_rtmsg, new_rtmsg, this);
     }
 
-    if (fold != &old_rtmsg)
-	delete fold;
-    if (fnew != &new_rtmsg)
-	delete fnew;
-   
     return res;
 }
 
 template <class A>
 int
-PolicyTable<A>::delete_route(const InternalMessage<A>& rtmsg,
+PolicyTable<A>::delete_route(InternalMessage<A>& rtmsg,
 			     BGPRouteTable<A>* caller)
 {
     XLOG_ASSERT(caller == this->_parent);
@@ -281,6 +229,7 @@ PolicyTable<A>::delete_route(const InternalMessage<A>& rtmsg,
     debug_msg("[BGP] PolicyTable %s delete_route: %s\n",
 	      filter::filter2str(_filter_type).c_str(),
 	      rtmsg.str().c_str());
+    debug_msg("atts before: %s\n", rtmsg.attributes()->str().c_str());
 
 #if 0
     // it must be an existing route...
@@ -299,24 +248,20 @@ PolicyTable<A>::delete_route(const InternalMessage<A>& rtmsg,
     }
 #endif
 
-    const InternalMessage<A>* fmsg = do_filtering(rtmsg, false);
-    if (rtmsg.changed() && fmsg != &rtmsg)
-	rtmsg.route()->unref();
+    bool accepted = do_filtering(rtmsg, false);
 
-    if (fmsg == NULL)
+    if (!accepted)
 	return 0;
     
-    int res = next->delete_route(*fmsg, this);
-
-    if (fmsg != &rtmsg)
-	delete fmsg;
+    debug_msg("atts after: %s\n", rtmsg.attributes()->str().c_str());
+    int res = next->delete_route(rtmsg, this);
 
     return res;
 }			     
 
 template <class A>
 int
-PolicyTable<A>::route_dump(const InternalMessage<A>& rtmsg,
+PolicyTable<A>::route_dump(InternalMessage<A>& rtmsg,
 			   BGPRouteTable<A>* caller,
 			   const PeerHandler* dump_peer)
 {
@@ -347,17 +292,12 @@ PolicyTable<A>::route_dump(const InternalMessage<A>& rtmsg,
     }
 #endif
 
-    const InternalMessage<A>* fmsg = do_filtering(rtmsg, false);
-    if (rtmsg.changed() && &rtmsg != fmsg)
-	rtmsg.route()->unref();
+    bool accepted = do_filtering(rtmsg, false);
     
-    if (fmsg == NULL)
+    if (!accepted)
 	return ADD_FILTERED;
 
-    int res = next->route_dump(*fmsg, this, dump_peer);
-
-    if (fmsg != &rtmsg)
-	delete fmsg;
+    int res = next->route_dump(rtmsg, this, dump_peer);
 
     return res;
 }			   
@@ -378,13 +318,14 @@ PolicyTable<A>::push(BGPRouteTable<A>* caller)
 template <class A>
 const SubnetRoute<A>*
 PolicyTable<A>::lookup_route(const IPNet<A> &net, 
-			     uint32_t& genid) const
+			     uint32_t& genid,
+			     FPAListRef& pa_list) const
 {
     BGPRouteTable<A>* parent = this->_parent;
 
     XLOG_ASSERT(parent);
 
-    const SubnetRoute<A>* found = parent->lookup_route(net, genid);
+    const SubnetRoute<A>* found = parent->lookup_route(net, genid, pa_list);
 
     if (!found)
 	return NULL;
@@ -402,7 +343,7 @@ PolicyTable<A>::lookup_route(const IPNet<A> &net,
     RibInTable<A>* ribin = dynamic_cast<RibInTable<A>* >(root);
     XLOG_ASSERT(ribin);
 
-    InternalMessage<A> rtmsg(found, ribin->peer_handler(), genid);
+    InternalMessage<A> rtmsg(found, pa_list, ribin->peer_handler(), genid);
 
     debug_msg("[BGP] PolicyTable %s lookup_route: %s\n",
 	      filter::filter2str(_filter_type).c_str(),
@@ -425,22 +366,12 @@ PolicyTable<A>::lookup_route(const IPNet<A> &net,
     }
 #endif 
 
-    const InternalMessage<A>* fmsg = do_filtering(rtmsg, false);
+    bool accepted = do_filtering(rtmsg, false);
     
     
-    if (!fmsg) {
-	// consider static filters changing the message and we drop it.
-	// that subnet route will leak!!!!
-	// XXX unstable/lame/wrong way of detecting if route changed
-	if (found->parent_route())
-	    found->unref();
+    if (!accepted) {
 	return NULL;
     }
-  
-    // static filters didn't change it
-    XLOG_ASSERT(found->parent_route() == NULL);
-    // we didn't change it
-    XLOG_ASSERT(fmsg == &rtmsg);
   
     return found;
 }

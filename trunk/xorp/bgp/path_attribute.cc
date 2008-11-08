@@ -1,4 +1,4 @@
- // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2008 XORP, Inc.
@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.96 2008/08/06 08:14:00 abittau Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.93 2008/07/23 05:09:34 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -40,7 +40,10 @@
 #include "peer_data.hh"
 #include "path_attribute.hh"
 #include "packet.hh"
+#include "peer.hh"
+#include "bgp.hh"
 
+template<class A> AttributeManager<A>* PAListRef<A>::_att_mgr = 0;
 
 #ifdef DEBUG_LOGGING
 inline static void
@@ -294,7 +297,7 @@ template <class A>
 PathAttribute *
 NextHopAttribute<A>::clone() const
 {
-    return new NextHopAttribute(nexthop());
+    return new NextHopAttribute(_next_hop);
 }
 
 template <class A>
@@ -306,9 +309,12 @@ NextHopAttribute<A>::NextHopAttribute(const uint8_t* d)
 	xorp_throw(CorruptMessage,
 		   c_format("Bad Flags in NextHop attribute %#x", flags()),
 		   UPDATEMSGERR, ATTRFLAGS, d, total_tlv_length(d));
-    if (length(d) != A::addr_bytelen())
-	xorp_throw(CorruptMessage, "Bad size in NextHop address",
+    if (length(d) != A::addr_bytelen()) {
+	xorp_throw(CorruptMessage, 
+		   c_format("Bad size in NextHop address, was %u, should be %u",
+			    (uint32_t)length(d), (uint32_t)A::addr_bytelen()),
 		   UPDATEMSGERR, ATTRLEN);
+    }
 
     _next_hop = A(payload(d));
 
@@ -1672,7 +1678,8 @@ UnknownAttribute::encode(uint8_t *buf, size_t &wire_size,
 
 PathAttribute *
 PathAttribute::create(const uint8_t* d, uint16_t max_len,
-		size_t& l /* actual length */, const BGPPeerData* peerdata)
+		      size_t& l /* actual length */, const BGPPeerData* peerdata,
+		      uint32_t ip_version)
 	throw(CorruptMessage)
 {
     PathAttribute *pa;
@@ -1701,7 +1708,11 @@ PathAttribute::create(const uint8_t* d, uint16_t max_len,
     // now we are sure that the data block is large enough.
     debug_msg("++ create type %d max_len %d actual_len %u\n",
 	      d[1], max_len, XORP_UINT_CAST(l));
-    bool use_4byte_asnums = peerdata->use_4byte_asnums();
+
+    bool use_4byte_asnums = true;
+    if (peerdata) 
+	use_4byte_asnums = peerdata->use_4byte_asnums();
+
     switch (d[1]) {	// depending on type, do the right thing.
     case ORIGIN:
 	pa = new OriginAttribute(d);
@@ -1716,9 +1727,17 @@ PathAttribute::create(const uint8_t* d, uint16_t max_len,
 	break;  
      
     case NEXT_HOP:
-	pa = new IPv4NextHopAttribute(d);
+	switch (ip_version) {
+	    case 4:
+		pa = new IPv4NextHopAttribute(d);
+		break;
+	    case 6:
+		pa = new IPv6NextHopAttribute(d);
+		break;
+	    default:
+		XLOG_UNREACHABLE();
+        }
 	break;
-
     case MED:
 	pa = new MEDAttribute(d);
 	break;
@@ -1773,6 +1792,14 @@ PathAttribute::create(const uint8_t* d, uint16_t max_len,
     }
     return pa;
 }
+
+
+/**
+ * We need to encode an attribute to send to a peer.  However we only
+ * have the canonically encoded byte stream data for it.  Sometimes
+ * that is fine, and we should just send that; sometimes we need to
+ * decode and re-encode for this specific peer.
+ */
 
 string
 PathAttribute::str() const
@@ -1847,6 +1874,9 @@ PathAttribute::str() const
  * function for this.  But we store so many path attributes that we
  * can't afford the overhead of a virtual function table for them, so
  * we have to do this the hard way 
+ *
+ * XXX THE ABOVE IS NO LONGER THE CASE.  WE SHOULD REWRITE THIS TO USE
+ * VIRTUAL FUNCTIONS
  */
 
 bool
@@ -1913,6 +1943,10 @@ PathAttribute::encode(uint8_t* buf, size_t &wire_size,
 		->encode(buf, wire_size, peerdata);
 	}
 
+    case UNKNOWN_TESTING1:
+    case UNKNOWN_TESTING2:
+	// This is only for the test harness
+	return true;
     }
     return true;
 }
@@ -2193,222 +2227,108 @@ PathAttribute::set_header(uint8_t *data, size_t payload_size, size_t &wire_size)
 
 template<class A>
 PathAttributeList<A>::PathAttributeList() 
-    : _nexthop_att(0), _aspath_att(0), _origin_att(0)
+    : _refcount(0)
 {
     debug_msg("%p\n", this);
-
-    memset(_hash, 0, sizeof(_hash));
-}
-
-template<class A>
-PathAttributeList<A>::
-  PathAttributeList(const NextHopAttribute<A> &nexthop_att,
-		    const ASPathAttribute &aspath_att,
-		    const OriginAttribute &origin_att)
-{
-    debug_msg("%p\n", this);
-
-    // no need to clear the *_att pointers, will be done by these 3 adds.
-    add_path_attribute(origin_att);
-    add_path_attribute(nexthop_att);
-    add_path_attribute(aspath_att);
-    rehash();
+    _canonical_data = 0;
+    _canonical_length = 0;
 }
 
 template<class A>
 PathAttributeList<A>::PathAttributeList(const PathAttributeList<A>& palist)
-	:  list <PathAttribute *>(),
-	   _nexthop_att(0), _aspath_att(0), _origin_att(0)
+    : _refcount(0)
 {
     debug_msg("%p\n", this);
 
-    for (const_iterator i = palist.begin(); i != palist.end() ; ++i) {
-	PathAttribute *a = (**i).clone();
-    
-	switch (a->type()) {
-	default:
-	    break;
-
-	case ORIGIN:
-	    _origin_att = dynamic_cast<OriginAttribute *>(a);
-	    break;
-
-	case AS_PATH:
-	    _aspath_att = dynamic_cast<ASPathAttribute *>(a);
-	    break;
-
-	case NEXT_HOP:
-	    _nexthop_att = dynamic_cast<NextHopAttribute<A> *>(a);
-	    break;
-	}
-
-	push_back(a);
-    }
-
-    // hash must be the same---we're coping all attributes.
-    // If hash wasn't computed though, compute it here.  This improves
-    // compatibility (e.g., test_filter.cc Test 7b invalidates the hash and
-    // constructs a new palist via subnetroute constructor).
-    bool zero = true;
-    const uint8_t *hashp = palist._hash;
-
-    for (unsigned i = 0; i < sizeof(_hash); i++) {
-	_hash[i] = *hashp++;
-
-	if (_hash[i])
-	    zero = false;
-    }
-
-    if (zero)
-	rehash();
+    _canonical_length = palist._canonical_length;
+    _canonical_data = new uint8_t[_canonical_length];
+    memcpy(_canonical_data, palist._canonical_data, _canonical_length);
 }
 
+template<class A>
+PathAttributeList<A>::PathAttributeList(FPAListRef& fpa_list)
+    : _refcount(0)
+{
+    fpa_list->canonicalize();
+    _canonical_length = fpa_list->canonical_length();
+    _canonical_data = new uint8_t[_canonical_length];
+    memcpy(_canonical_data, fpa_list->canonical_data(), _canonical_length);
+}
+    
 template<class A>
 PathAttributeList<A>::~PathAttributeList()
 {
-    debug_msg("%p %s\n", this, str().c_str());
-    for (const_iterator i = begin(); i != end() ; ++i)
-	delete (*i);
-}
-
-template<class A>
-void
-PathAttributeList<A>::add_path_attribute(const PathAttribute &att)
-{
-    debug_msg("%p %s\n", this, att.str().c_str());
-
-    PathAttribute *a = att.clone();
-    add_path_attribute(a);
-}
-
-template<class A>
-void
-PathAttributeList<A>::add_path_attribute(PathAttribute *a)
-{
-    debug_msg("%p %s\n", this, a->str().c_str());
-
-    // store a reference to the mandatory attributes, ignore others
-    switch (a->type()) {
-    default:
-	break;
-
-    case ORIGIN:
-	_origin_att = dynamic_cast<OriginAttribute *>(a);
-	break;
-
-    case AS_PATH:
-	_aspath_att = dynamic_cast<ASPathAttribute *>(a);
-	break;
-
-    case NEXT_HOP:
-	_nexthop_att = dynamic_cast<NextHopAttribute<A> *>(a);
-	/* If a nexthop of the wrong address family sneaks through nail it */
-	XLOG_ASSERT(0 != _nexthop_att);
-	break;
-    }
-    // Keep the list sorted
-    debug_msg("++ add_path_attribute %s\n", a->str().c_str());
-    if (!empty()) {
-	iterator i;
-	for (i = begin(); i != end(); i++)
-	    if ( *(*i) > *a) {
-		insert(i, a);
-		memset(_hash, 0, sizeof(_hash));
-		return;
-	    }
-    }
-    // list empty, or tail insertion:
-    push_back(a);
-    memset(_hash, 0, sizeof(_hash));
+    //debug_msg("%p %s\n", this, str().c_str());
+    XLOG_ASSERT(_refcount == 0);
+    if (_canonical_data)
+	delete[] _canonical_data;
 }
 
 template<class A>
 string
 PathAttributeList<A>::str() const
 {
-    // Don't change this formatting or the isolation tests will fail.
-    string s;
-    for (const_iterator i = begin(); i != end() ; ++i)
-	s += "\n\t" + (*i)->str();
-    return s;
+    // this isn't very efficient - better not to call this unless you really need it.
+    PAListRef<A> pal(this);
+    FastPathAttributeList<A> fast_pa_list(pal);
+    return fast_pa_list.str();
 }
 
-template<class A>
-void
-PathAttributeList<A>::rehash()
-{
-    MD5_CTX context;
-    MD5_Init(&context);
-    for (const_iterator i = begin(); i != end(); i++) {
-	(*i)->add_hash(&context);
-    }
-    MD5_Final(_hash, &context);
-}
 
-template<class A>
+template<>
 bool
-PathAttributeList<A>::
-operator< (const PathAttributeList<A> &him) const
+PathAttributeList<IPv4>::
+operator< (const PathAttributeList<IPv4> &him) const
 {
-    assert_rehash();
-    him.assert_rehash();
-    debug_msg("PathAttributeList operator< %p %p\n", this, &him);
-
-    if ((*_nexthop_att) < (*(him._nexthop_att)))
-        return true;
-    if ((*(him._nexthop_att)) < (*_nexthop_att))
-        return false;
-    if (size() < him.size())
-        return true;
-    if (him.size() < size())
-        return false;
-
-    //    return (memcmp(_hash, him.hash(), sizeof(_hash)) < 0);
-    const_iterator my_i = begin();
-    const_iterator his_i = him.begin();
-    for (;;) {
-	// are they equal.
-	if ((my_i == end()) && (his_i == him.end())) {
-	    return false;
-	}
-	if (my_i == end()) {
-	    return true;
-	}
-	if (his_i == him.end()) {
-	    return false;
-	}
-	if ((**my_i) < (**his_i)) {
-	    return true;
-	}
-	if ((**his_i) < (**my_i)) {
-	    return false;
-	}
-	my_i++;
-	his_i++;
-    }
-    XLOG_UNREACHABLE();
-}
-
-template<class A>
-bool
-PathAttributeList<A>::
-operator == (const PathAttributeList<A> &him) const
-{
-    debug_msg("PathAttributeList operator== %p %p\n", this, &him);
-    assert_rehash();
-    him.assert_rehash();
-    if (memcmp(_hash, him.hash(), sizeof(_hash)) != 0) {
-	return false;
-    } else if (*this < him) {
-	return false;
-    } else if (him < *this) {
-	return false;
-    } else {
+    // first we compare on nexthop
+    int result;
+    result = memcmp(_canonical_data, him.canonical_data(), 7);
+    if (result < 0)
 	return true;
-    }
-    XLOG_UNREACHABLE();
+    else if (result > 0)
+	return false;
+
+    if (_canonical_length < him.canonical_length())
+	return true;
+    if (_canonical_length > him.canonical_length())
+	return false;
+    return (memcmp(_canonical_data+7, him.canonical_data()+7, _canonical_length-7) < 0);
 }
 
+template<>
+bool
+PathAttributeList<IPv6>::
+operator< (const PathAttributeList<IPv6> &him) const
+{
+    // first we compare on nexthop
+    int result;
+    result = memcmp(_canonical_data, him.canonical_data(), 19);
+    if (result < 0)
+	return true;
+    else if (result > 0)
+	return false;
+
+
+    if (_canonical_length < him.canonical_length())
+	return true;
+    if (_canonical_length > him.canonical_length())
+	return false;
+    XLOG_ASSERT(_canonical_length >= 19);
+    return (memcmp(_canonical_data+19, him.canonical_data()+19, _canonical_length-19) < 0);
+}
+
+
+template<class A>
+bool
+PathAttributeList<A>::
+operator== (const PathAttributeList<A> &him) const
+{
+    if (_canonical_length != him.canonical_length())
+	return false;
+    return (memcmp(_canonical_data, him.canonical_data(), _canonical_length) == 0);
+}
+
+#if 0
 template<class A>
 void
 PathAttributeList<A>::replace_attribute(PathAttribute* new_att)
@@ -2448,10 +2368,777 @@ PathAttributeList<A>::replace_attribute(PathAttribute* new_att)
 	}
     XLOG_UNREACHABLE();
 }
+#endif
+
+
+#if 0
+/*
+ * Are all the mandatory attributes there?
+ */
+template<class A>
+bool
+PathAttributeList<A>::complete() const {
+    FastPathAttributeList<A> fast_pa_list(const_cast<PathAttributeList<A>>(*this));
+    return fast_pa_list.complete();
+}
+#endif
+
+
+/**************************************************************************
+ **** 
+ **** PAListRef
+ **** 
+ **************************************************************************/ 
+
+template<class A>
+PAListRef<A>::PAListRef(const PathAttributeList<A>* palist)
+{
+    _palist = palist;
+    if (palist) {
+	palist->incr_refcount(1);
+    }
+}
+
+template<class A>
+PAListRef<A>::PAListRef(const PAListRef& palistref)
+{
+    _palist = palistref.attributes();
+    if (_palist) {
+	_palist->incr_refcount(1);
+    }
+}
+
+template<class A>
+PAListRef<A>::~PAListRef() 
+{
+    if (_palist) {
+	_palist->decr_refcount(1);
+	_palist = 0;
+    }
+}
+
+template<class A>
+PAListRef<A>& 
+PAListRef<A>::operator=(const PAListRef& palistref) 
+{
+    if (_palist) {
+	// we're not empty
+	if (_palist != palistref.attributes()) {
+	    // it's not a no-op
+	    _palist->decr_refcount(1);
+	    _palist = palistref.attributes();
+	    _palist->incr_refcount(1);
+	}
+    } else {
+	// we were previously empty
+	_palist = palistref.attributes();
+	if (_palist) {
+	    _palist->incr_refcount(1);
+	}
+    }
+    return *this;
+}
+
+template<class A>
+bool 
+PAListRef<A>::operator==(const PAListRef& palistref) const
+{
+    if (_palist == palistref.attributes()) {
+	// identical pointers
+	return true;
+    }
+    if (_palist && palistref.attributes()) {
+	// compare the content.
+	return *_palist == *(palistref.attributes());
+    }
+    // if we got here, one or the other pointer is null, but not both.
+    return false;
+}
+
+
+template<class A>
+bool 
+PAListRef<A>::operator<(const PAListRef& palistref) const 
+{
+    debug_msg("PAListRef::operator< %p vs %p\n",
+	      _palist, palistref.attributes());
+    if (_palist == palistref.attributes()) {
+	// identical pointers
+	debug_msg("identical ptrs -> false\n");
+	return false;
+    }
+    if (_palist && palistref.attributes()) {
+	// compare the content.
+	debug_msg("comparing content\n");
+	bool result = (*_palist) < (*(palistref.attributes()));
+#if 0
+	printf("first: %s\n", _palist->str().c_str());
+	printf("second: %s\n", palistref.attributes()->str().c_str());
+	if (result)
+	    printf("true\n");
+	else
+	    printf("false\n");
+#endif
+	return result;
+    }
+
+    // if we got here, one or the other pointer is null, but not both.
+    // This is an odd case - the order is arbitrary
+    debug_msg("one is null\n");
+    if (_palist) {
+	return true;
+    } else {
+	return false;
+    }
+}
+
+template<class A>
+void 
+PAListRef<A>::register_with_attmgr()
+{
+    XLOG_ASSERT(_palist);
+
+    PAListRef<A> found_palist = _att_mgr->add_attribute_list(*this);
+    if (_palist == found_palist.attributes()) {
+	// we already held a copy of the stored version
+	return;
+    } else {
+	// there's already a copy stored and it's not our one
+	_palist->decr_refcount(1);
+	_palist = found_palist.attributes();
+	_palist->incr_refcount(1);
+    }
+}
+
+template<class A>
+void 
+PAListRef<A>::deregister_with_attmgr()
+{
+    XLOG_ASSERT(_palist);
+    _att_mgr->delete_attribute_list(*this);
+}
+
+template<class A>
+void 
+PAListRef<A>::release()
+{
+    if (_palist) {
+	_palist->decr_refcount(1);
+	_palist = 0;
+    }
+}
+
+/**************************************************************************
+ **** 
+ **** FastPathAttributeList
+ **** 
+ **************************************************************************/ 
+
+template<class A>
+FastPathAttributeList<A>::FastPathAttributeList()
+    :  	 _slave_pa_list(0),
+	 _attribute_count(0),
+	 _locked(false),
+	 _canonical_data(0),
+	 _canonical_length(0),
+	 _canonicalized(false)
+{
+    _att.resize(MAX_ATTRIBUTE+1);
+    for (int i = 0; i <= MAX_ATTRIBUTE; i++) {
+	_att_bytes[i] = 0;
+	_att_lengths[i] = 0;
+	_att[i] = 0;
+    }
+}
+
+template<class A>
+FastPathAttributeList<A>::FastPathAttributeList(PAListRef<A>& palistref)
+    :   _slave_pa_list(palistref), 
+	_attribute_count(0),
+	_locked(false),
+	_canonical_data(0),
+	_canonical_length(0),
+	_canonicalized(false)
+{
+    _att.resize(MAX_ATTRIBUTE+1);
+    for (int i = 0; i <= MAX_ATTRIBUTE; i++) {
+	_att_bytes[i] = 0;
+	_att_lengths[i] = 0;
+	_att[i] = 0;
+    }
+    quick_decode(_slave_pa_list->canonical_data(), _slave_pa_list->canonical_length());
+    count_attributes();
+}
+
+template<class A>
+FastPathAttributeList<A>::FastPathAttributeList(FastPathAttributeList<A>& him)
+    :   _slave_pa_list(him._slave_pa_list), 
+	_locked(false),
+	_canonical_data(0),
+	_canonical_length(0),
+	_canonicalized(false)
+{
+    _att.resize(MAX_ATTRIBUTE+1);
+    for (int i = 0; i <= MAX_ATTRIBUTE; i++) {
+	_att_bytes[i] = him._att_bytes[i];
+	_att_lengths[i] = him._att_lengths[i];
+	if (him._att[i]) {
+	    _att[i] = him._att[i]->clone();
+	}
+    }
+    count_attributes();
+}
+
+template<class A>
+FastPathAttributeList<A>::
+  FastPathAttributeList(const NextHopAttribute<A> &nexthop_att,
+			const ASPathAttribute &aspath_att,
+			const OriginAttribute &origin_att)
+      : _slave_pa_list(),
+	_attribute_count(0),
+	_locked(false),
+	_canonical_data(0),
+	_canonical_length(0),
+	_canonicalized(false)
+{
+    debug_msg("%p\n", this);
+    _att.resize(MAX_ATTRIBUTE+1);
+    for (int i = 0; i <= MAX_ATTRIBUTE; i++) {
+	_att_bytes[i] = 0;
+	_att_lengths[i] = 0;
+	_att[i] = 0;
+    }
+
+    add_path_attribute(origin_att);
+    add_path_attribute(nexthop_att);
+    add_path_attribute(aspath_att);
+}
+
+template<class A>
+FastPathAttributeList<A>::~FastPathAttributeList()
+{
+    XLOG_ASSERT(!_locked);
+    if (_canonical_data)
+	delete[] _canonical_data;
+    for (int i = 0; i <= MAX_ATTRIBUTE; i++) {
+	if (_att[i])
+	    delete _att[i];
+    }
+}
+
+template<class A>
+bool
+FastPathAttributeList<A>::operator==(const FastPathAttributeList<A>& him) const
+{
+    canonicalize();
+    him.canonicalize();
+    if (_canonical_length != him.canonical_length())
+	return false;
+    if (memcmp(_canonical_data, him.canonical_data(), _canonical_length)==0)
+	return true;
+    return false;
+}
 
 template<class A>
 void
-PathAttributeList<A>::replace_AS_path(const ASPath& new_as_path)
+FastPathAttributeList<A>::quick_decode(const uint8_t* data, uint16_t length)
+{
+    XLOG_ASSERT(!_locked);
+    _canonicalized = false;
+    size_t remaining_length = length;
+    size_t att_length;
+    size_t tlv_att_length;
+    while (remaining_length > 0) {
+	size_t hdr_len;
+	// compute length, which is 1 or 2 bytes depending on flags d[0]
+	if ( (data[0] & PathAttribute::Extended) && remaining_length < 4) {
+        xorp_throw(CorruptMessage,
+                   c_format("PathAttribute (extended) too short %u bytes",
+                            XORP_UINT_CAST(remaining_length)),
+                   UPDATEMSGERR, ATTRLEN, data, remaining_length);
+	}
+
+	if (data[0] & PathAttribute::Extended) {
+	    att_length = (data[2]<<8) + data[3];
+	    hdr_len = 4;
+	} else {
+	    att_length = data[2];
+	    hdr_len = 3;
+        }
+	tlv_att_length = att_length + hdr_len;
+
+	if (remaining_length < tlv_att_length) {
+	    xorp_throw(CorruptMessage,
+		       c_format("PathAttribute too short %u bytes need %u",
+				XORP_UINT_CAST(remaining_length), 
+				XORP_UINT_CAST(tlv_att_length)),
+		       UPDATEMSGERR, ATTRLEN, data, remaining_length);
+	}
+
+	uint8_t att_type = data[1];
+	if (att_type <= MAX_ATTRIBUTE) {
+	    _att_bytes[att_type] = data;
+	    _att_lengths[att_type] = tlv_att_length;
+	}
+
+        data += tlv_att_length;
+        remaining_length -= tlv_att_length;
+    }
+}
+
+template<class A>
+NextHopAttribute<A>*
+FastPathAttributeList<A>::nexthop_att() {
+    return (NextHopAttribute<A>*)find_attribute_by_type(NEXT_HOP);
+}
+
+template<class A>
+A&
+FastPathAttributeList<A>::nexthop() {
+    NextHopAttribute<A>* nha = nexthop_att();
+    return nha->nexthop();
+}
+
+template<class A>
+OriginAttribute*
+FastPathAttributeList<A>::origin_att() {
+    return (OriginAttribute*)find_attribute_by_type(ORIGIN);
+}
+
+template<class A>
+OriginType
+FastPathAttributeList<A>::origin() {
+    const OriginAttribute* oa = origin_att();
+    return oa->origin();
+}
+
+template<class A>
+ASPathAttribute*
+FastPathAttributeList<A>::aspath_att() {
+    return (ASPathAttribute*)find_attribute_by_type(AS_PATH);
+}
+
+template<class A>
+AS4PathAttribute*
+FastPathAttributeList<A>::as4path_att() {
+    return (AS4PathAttribute*)find_attribute_by_type(AS4_PATH);
+}
+
+template<class A>
+ASPath&
+FastPathAttributeList<A>::aspath() {
+    ASPathAttribute* aspa = aspath_att();
+    return aspa->as_path();
+}
+
+
+
+template<class A>
+void
+FastPathAttributeList<A>::load_raw_data(const uint8_t *data, 
+					size_t size, 
+					const BGPPeerData* peerdata,
+					bool have_nlri,
+					BGPMain *mainprocess,
+					bool do_checks)
+{
+    debug_msg("FastPathAttributeList::load_raw_data\n");
+    XLOG_ASSERT(!_locked);
+    _canonicalized = false;
+    bool have_ipv4_nlri = have_nlri;
+
+    // We need to decode the data into a set of path attributes, then
+    // store the canonical form.
+
+    int pa_count = 0;
+    size_t pa_len = size;
+    while (pa_len > 0) {
+        size_t used = 0;
+        PathAttribute *pa = PathAttribute::create(data, pa_len, used, peerdata, 
+						  A::ip_version());
+        debug_msg("attribute size %u\n", XORP_UINT_CAST(used));
+        if (used == 0) {
+	    xorp_throw(CorruptMessage,"Attribute Size", UPDATEMSGERR, ATTRLEN);
+        }
+	debug_msg("Decoded Attribute: %s\n", pa->str().c_str());
+	
+	pa_count++;
+	uint32_t type = pa->type();
+	XLOG_ASSERT(type <= 255);
+	if (type > _att.size()) {
+	    // hopefully this shouldn't happen often, and only when
+	    // new Path Attributes are standardized
+	    _att.resize(type+1, 0);
+	}
+	
+	// check it's not a duplicate
+	if (_att[type] != 0) {
+	    // we've got a duplicate!
+	    debug_msg("duplicate PA list entry, type: %d\n", (int)type);
+	    xorp_throw(CorruptMessage,"Duplicate PA list entry", UPDATEMSGERR, MALATTRLIST);
+	}
+
+	// seeing as we've decoded to a PathAttribute, store it for now.
+	_att[type] = pa;
+
+	// Check it's not an unknown well-known attribute
+	if ((dynamic_cast<UnknownAttribute*>(_att[type]) != 0) &&
+	    _att[type]->well_known()) {
+	    uint8_t buf[8192];
+	    size_t wire_size = 8192;
+	    pa->encode(buf, wire_size, peerdata);
+	    xorp_throw(CorruptMessage,"Unknown well-known attribute", 
+		       UPDATEMSGERR, UNRECOGWATTR,
+		       buf, wire_size);
+	}
+
+	if (type <= MAX_ATTRIBUTE) {
+	    // we don't yet have a canonical form stored, so these
+	    // accessor shortcuts are not yet usable
+	    _att_bytes[type] = 0;
+	    _att_lengths[type] = 0;
+	}
+
+        data += used;
+        pa_len -= used;
+    }
+
+    /*
+    ** Check for multiprotocol parameters that haven't been "negotiated".
+    **
+    ** There are two questions that seem to ambiguous in the BGP specs.
+    **
+    ** 1) How do we deal with a multiprotocol attribute that hasn't
+    **    been "negotiated".
+    **    a) Strip out the offending attribute.
+    **    b) Send a notify and drop the peering.
+    ** 2) In order to accept a multiprotol attribute. I.E to consider
+    **    it to have been "negotiated", what is the criteria.
+    **    a) Is it sufficient for this speaker to have announced the
+    **    capability.
+    **    b) Do both speakers in a session need to announce a capability.
+    **
+    ** For the time being we are going with 1) (a) and 2 (a).
+    */
+
+    //     BGPPeerData::Direction dir = BGPPeerData::NEGOTIATED;
+    BGPPeerData::Direction dir = BGPPeerData::SENT;  
+    // Check the multiprotocol NLRI info.
+    if (_att[MP_REACH_NLRI]) {
+	// XXXX this duplicates the behaviour of older code, but I'm
+	// not convinced it's correct.  It assumes there's only one
+	// AFI/SAFI in the attribute.
+	MPReachNLRIAttribute<IPv4>* mp4_reach_att =
+	    dynamic_cast<MPReachNLRIAttribute<IPv4>*>(_att[MP_REACH_NLRI]);
+	if (mp4_reach_att) {
+	    Safi safi = mp4_reach_att->safi();
+	    // if we didn't negotiate the SAFI, remove the attribute
+	    if (!peerdata->multiprotocol<IPv4>(safi, dir)) {
+		delete _att[MP_REACH_NLRI];
+		_att[MP_REACH_NLRI] = 0;
+	    } else {
+		have_nlri = true;
+		// if there's an NLRI, there must be a non-zero nexthop
+		if (do_checks && mp4_reach_att->nexthop() == IPv4::ZERO()) {
+		    uint8_t data = NEXT_HOP;
+		    xorp_throw(CorruptMessage,"Illegal nexthop", UPDATEMSGERR, 
+			       MISSWATTR, &data, 1);
+		}
+		if (mainprocess && 
+		    mainprocess->interface_address4(mp4_reach_att->nexthop())) {
+		    XLOG_ERROR("Nexthop in update belongs to this router:\n %s",
+			       cstring(*this));
+		    xorp_throw(UnusableMessage, "Nexthop belongs to this router");
+		}
+	    }
+	}
+	MPReachNLRIAttribute<IPv6>* mp6_reach_att =
+	    dynamic_cast<MPReachNLRIAttribute<IPv6>*>(_att[MP_REACH_NLRI]);
+	if (mp6_reach_att) {
+	    Safi safi = mp6_reach_att->safi();
+	    // if we didn't negotiate the SAFI, remove the attribute
+	    if (!peerdata->multiprotocol<IPv6>(safi, dir)) {
+		delete _att[MP_REACH_NLRI];
+		_att[MP_REACH_NLRI] = 0;
+	    } else {
+		have_nlri = true;
+		if (do_checks && mp6_reach_att->nexthop() == IPv6::ZERO()) {
+		    uint8_t data = NEXT_HOP;
+		    // if there's an NLRI, there must be a non-zero nexthop
+		    xorp_throw(CorruptMessage,"Illegal nexthop", UPDATEMSGERR, 
+			       MISSWATTR, &data, 1);
+		}
+		if (do_checks && mainprocess &&
+		    mainprocess->interface_address6(mp6_reach_att->nexthop())) {
+		    XLOG_ERROR("Nexthop in update belongs to this router:\n %s",
+			       cstring(*this));
+		    xorp_throw(UnusableMessage, "Nexthop6 belongs to this router");
+		}
+	    }
+	}
+	MPUNReachNLRIAttribute<IPv4>* mp4_unreach_att =
+	    dynamic_cast<MPUNReachNLRIAttribute<IPv4>*>(_att[MP_UNREACH_NLRI]);
+	if (mp4_unreach_att) {
+	    Safi safi = mp4_unreach_att->safi();
+	    // if we didn't negotiate the SAFI, remove the attribute
+	    if (!peerdata->multiprotocol<IPv4>(safi, dir)) {
+		delete _att[MP_UNREACH_NLRI];
+		_att[MP_UNREACH_NLRI] = 0;
+	    }
+	}
+	MPUNReachNLRIAttribute<IPv6>* mp6_unreach_att =
+	    dynamic_cast<MPUNReachNLRIAttribute<IPv6>*>(_att[MP_UNREACH_NLRI]);
+	if (mp6_unreach_att) {
+	    Safi safi = mp6_unreach_att->safi();
+	    // if we didn't negotiate the SAFI, remove the attribute
+	    if (!peerdata->multiprotocol<IPv6>(safi, dir)) {
+		delete _att[MP_UNREACH_NLRI];
+		_att[MP_UNREACH_NLRI] = 0;
+	    }
+	}
+    }
+
+    // If we have NLRI entries, the PA list must be non-empty.  If we
+    // don't have NLRI entries, we don't need PA list entries (in
+    // which case we won't keep this instance) unless we have
+    // Multiprotocol Attribute entries which serve the role of NLRI
+    // entries.
+    if (pa_count == 0 && have_nlri) {
+	debug_msg("Empty path attribute list and "
+		  "non-empty NLRI list\n");
+	xorp_throw(CorruptMessage,"Illegal nexthop", UPDATEMSGERR, MALATTRLIST);
+    }
+
+
+    /*
+    ** If a NLRI attribute is present check for the following
+    ** mandatory fields:
+    ** ORIGIN
+    ** AS_PATH
+    ** NEXT_HOP
+    */ 
+    if (do_checks && have_nlri) {
+	if (_att[ORIGIN] == NULL) {
+	    debug_msg("Missing ORIGIN\n");
+	    uint8_t data = ORIGIN;
+	    xorp_throw(CorruptMessage,"Missing Origin",
+		       UPDATEMSGERR, MISSWATTR, &data, 1);
+	}
+
+	// The AS Path attribute is mandatory
+	if (_att[AS_PATH] == NULL) {
+	    debug_msg("Missing AS_PATH\n");
+	    uint8_t data = AS_PATH;
+	    xorp_throw(CorruptMessage,"Missing AS Path",
+		       UPDATEMSGERR, MISSWATTR, &data, 1);
+	}
+
+	// The NEXT_HOP attribute is mandatory for IPv4 unicast.  For
+	// multiprotocol NLRI its in the path attribute - we checked
+	// this above.
+	if (have_ipv4_nlri && _att[NEXT_HOP] == NULL) {                
+	    debug_msg("Missing NEXT_HOP\n");
+	    uint8_t data = NEXT_HOP;
+	    xorp_throw(CorruptMessage,"Missing Next Hop",
+		       UPDATEMSGERR, MISSWATTR, &data, 1);
+	}
+    }
+
+    // If we got this far and as_path_attr is not set this is a
+    // multiprotocol withdraw.
+    if (_att[AS_PATH] != NULL) {
+	if (!peerdata->ibgp()) {
+	    // If this is an EBGP peering, the AS Path MUST NOT be empty
+	    if (((ASPathAttribute*)_att[AS_PATH])->as_path().path_length() == 0)
+		xorp_throw(CorruptMessage,"Empty AS Path",
+			   UPDATEMSGERR, MALASPATH);
+
+	    // If this is an EBGP peering, the AS Path MUST start
+	    // with the AS number of the peer.
+	    AsNum my_asnum(peerdata->as());
+	    if (((ASPathAttribute*)_att[AS_PATH])->as_path().first_asnum() != my_asnum)
+		xorp_throw(CorruptMessage,"AS path must list peer",
+			   UPDATEMSGERR, MALASPATH);
+
+	    // If this is an EBGP peering and a route reflector
+	    // attribute has been received then generate an error.
+	    if (_att[CLUSTER_LIST] || _att[ORIGINATOR_ID])
+		xorp_throw(CorruptMessage,"RR on EBGP peering",
+			   UPDATEMSGERR, MALATTRLIST);
+	}
+	// Receiving confederation path segments when the router
+	// is not configured for confederations is an error. 
+	if (!peerdata->confederation() &&
+	    ((ASPathAttribute*)_att[AS_PATH])->as_path().contains_confed_segments())
+	    xorp_throw(CorruptMessage,"Unexpected confederation",
+		       UPDATEMSGERR, MALASPATH);
+    }
+
+    // If an update message is received that contains a nexthop
+    // that belongs to this router then discard the update, don't
+    // send a notification.
+
+    if (_att[NEXT_HOP] != NULL) {
+	if (mainprocess && 
+	    mainprocess->interface_address4(((NextHopAttribute<IPv4>*)_att[NEXT_HOP])->nexthop())) {
+	    XLOG_ERROR("Nexthop in update belongs to this router:\n %s",
+		       cstring(((NextHopAttribute<IPv4>*)_att[NEXT_HOP])->nexthop()));
+	    xorp_throw(UnusableMessage, "Nexthop belongs to this router");
+	}
+    }
+
+    count_attributes();
+}
+
+template<class A>
+void
+FastPathAttributeList<A>::canonicalize() const { 
+    if (_canonicalized)
+	return;
+
+    // allocate some extra space because canonical form can be a little longer than wire form.
+    size_t remaining_space = 2 * BGPPacket::MAXPACKETSIZE;
+    size_t size_so_far = 0;
+    uint8_t buf[remaining_space];
+    uint8_t *p = buf;
+    for (uint32_t i = 0; i < _att.size(); i++) {
+
+	// reorder so nexthop is first, so we can find nexthops when
+	// IGP distance changes
+	uint32_t type = att_order(i);
+
+	// make sure we really have decoded this before canonicalizing it
+	if (_att_bytes[type] && !_att[type]) {
+	    // we're got data for an attribute, but not decoded it yet
+	    // this must have come from a canonicalize PA list in the
+	    // first place, because if we received it from a peer,
+	    // we'd have decoded everything
+	    size_t length = _att_lengths[type];
+	    memcpy(p, _att_bytes[type], length);
+	    p += length;
+	    XLOG_ASSERT(remaining_space >= length);
+	    remaining_space -= length;
+	    size_so_far += length;
+	} else {
+
+	    // encode each attribute
+	    if (_att[type]) {
+		size_t length = remaining_space;
+		// encode the most general peer-independent version
+		if (!(_att[type]->encode(p, length, NULL))) {
+		    // we ran out of space to encode; this can't happen 
+		    XLOG_UNREACHABLE();
+		}
+		p += length;
+		XLOG_ASSERT(remaining_space >= length);
+		remaining_space -= length;
+		size_so_far += length;
+	    }
+	}
+    }
+    
+    bool alloc_space = true;
+    if (_canonical_data) {
+	if (_canonical_length >= size_so_far) {
+	// we've got enough space already
+	    alloc_space = false;
+	} else {
+	    delete[] _canonical_data;
+	}
+    } 
+
+    if (alloc_space)
+	this->_canonical_data = new uint8_t[size_so_far];
+
+    memcpy(this->_canonical_data, buf, size_so_far);
+    this->_canonical_length = size_so_far;
+    _canonicalized = true;
+}
+
+
+
+
+template<class A>
+void
+FastPathAttributeList<A>::add_path_attribute(const PathAttribute &att)
+{
+    debug_msg("%p %s\n", this, att.str().c_str());
+
+    PathAttribute *a = att.clone();
+    add_path_attribute(a);
+}
+
+template<class A>
+void
+FastPathAttributeList<A>::add_path_attribute(PathAttribute *a)
+{
+    uint8_t type = a->type();
+    _canonicalized = false;
+    debug_msg("%p %s\n", this, a->str().c_str());
+    XLOG_ASSERT(!_locked);
+
+#if 0
+    // we shouldn't need this code
+    if (_att.size() <= type) {
+	size_t old_size = _att.size();
+	_att.resize(type + 1);
+	printf("adding att of type %u, old size was %u, new size is %u\n",
+	       (uint32_t)type, (uint32_t)old_size, (uint32_t)_att.size());
+	for (size_t i = old_size; i < _att.size(); i++) {
+	    _att[i] = 0;
+	}
+    }
+#endif
+
+    XLOG_ASSERT(_att[type] == 0);
+    _att[type] = a;
+    _attribute_count++;
+}
+
+template<class A>
+PathAttribute*
+FastPathAttributeList<A>::find_attribute_by_type(PathAttType type)
+{
+    if (_att[type]) {
+	return _att[type];
+    }
+    if (_att_bytes[type] == 0)
+	return 0;
+
+    // we're got data for an attribute, but not decoded it yet
+    size_t used = _att_lengths[type];
+    PathAttribute *pa = PathAttribute::create(_att_bytes[type], 
+					      _att_lengths[type], used, NULL,
+					      A::ip_version());
+    _att[type] = pa;
+    return pa;
+}
+
+template<class A>
+void
+FastPathAttributeList<A>::replace_attribute(PathAttribute* new_att)
+{
+    debug_msg("%p\n", this);
+    XLOG_ASSERT(!_locked);
+    XLOG_ASSERT(new_att);
+    _canonicalized = false;
+
+    XLOG_ASSERT(_att[new_att->type()] != 0 || _att_bytes[new_att->type()] != 0);
+    if (_att[new_att->type()]) {
+	// remove the old decoded version
+	delete _att[new_att->type()];
+    } else {
+	// we hadn't yet decoded it; now we never will
+	_att_bytes[new_att->type()] = 0;
+	_att_lengths[new_att->type()] = 0;
+    }
+    _att[new_att->type()] = new_att;
+
+}
+
+template<class A>
+void
+FastPathAttributeList<A>::replace_AS_path(const ASPath& new_as_path)
 {
     debug_msg("%p\n", this);
 
@@ -2460,7 +3147,7 @@ PathAttributeList<A>::replace_AS_path(const ASPath& new_as_path)
 
 template<class A>
 void
-PathAttributeList<A>::replace_nexthop(const A& new_nexthop)
+FastPathAttributeList<A>::replace_nexthop(const A& new_nexthop)
 {
     debug_msg("%p\n", this);
 
@@ -2469,7 +3156,7 @@ PathAttributeList<A>::replace_nexthop(const A& new_nexthop)
 
 template<class A>
 void
-PathAttributeList<A>::replace_origin(const OriginType& new_origin)
+FastPathAttributeList<A>::replace_origin(const OriginType& new_origin)
 {
     debug_msg("%p\n", this);
 
@@ -2478,198 +3165,168 @@ PathAttributeList<A>::replace_origin(const OriginType& new_origin)
 
 template<class A>
 void
-PathAttributeList<A>::remove_attribute_by_type(PathAttType type)
+FastPathAttributeList<A>::remove_attribute_by_type(PathAttType type)
 {
     debug_msg("%p\n", this);
-
-    // we only remove the first instance of an attribute with matching type
-    iterator i;
-    for (i = begin(); i != end(); i++) {
-	if ((*i)->type() == type) {
-	    delete *i;
-	    erase(i);
-	    memset(_hash, 0, sizeof(_hash));
-	    return;
-	}
+    XLOG_ASSERT(!_locked);
+    _canonicalized = false;
+    bool old_existed = false;
+    if (_att[type]) {
+	delete _att[type];
+	_att[type] = 0;
+	old_existed = true;
     }
+    if (_att_bytes[type]) {
+	_att_bytes[type] = 0;
+	_att_lengths[type] = 0;
+	old_existed = true;
+    }
+    if (old_existed)
+	_attribute_count--;
 }
 
 template<class A>
 void
-PathAttributeList<A>::remove_attribute_by_pointer(PathAttribute *p)
+FastPathAttributeList<A>::remove_attribute_by_pointer(PathAttribute *p)
 {
     debug_msg("%p\n", this);
+    XLOG_ASSERT(!_locked);
 
-    iterator i;
-    for (i = begin(); i != end(); i++) {
-	if ((*i) == p) {
-	    delete *i;
-	    erase(i);
-	    memset(_hash, 0, sizeof(_hash));
-	    return;
-	}
-    }
-
-    XLOG_UNREACHABLE();
+    remove_attribute_by_type(p->type());
 }
 
 template<class A>
+MEDAttribute* 
+FastPathAttributeList<A>::med_att()
+{
+    debug_msg("%p\n", this);
+
+    return (MEDAttribute*)find_attribute_by_type(MED);
+}
+
+template<class A>
+LocalPrefAttribute*
+FastPathAttributeList<A>::local_pref_att()
+{
+    debug_msg("%p\n", this);
+
+    return (LocalPrefAttribute*)find_attribute_by_type(LOCAL_PREF);
+}
+
+template<class A>
+AtomicAggAttribute*
+FastPathAttributeList<A>::atomic_aggregate_att()
+{
+    debug_msg("%p\n", this);
+
+    return (AtomicAggAttribute*)find_attribute_by_type(ATOMIC_AGGREGATE);
+}
+
+template<class A>
+AggregatorAttribute*
+FastPathAttributeList<A>::aggregator_att()
+{
+    debug_msg("%p\n", this);
+
+    return (AggregatorAttribute*)find_attribute_by_type(AGGREGATOR);
+}
+
+template<class A>
+CommunityAttribute*
+FastPathAttributeList<A>::community_att()
+{
+    debug_msg("%p\n", this);
+
+    return (CommunityAttribute*)find_attribute_by_type(COMMUNITY);
+}
+
+template<class A>
+OriginatorIDAttribute*
+FastPathAttributeList<A>::originator_id()
+{
+    debug_msg("%p\n", this);
+
+    return (OriginatorIDAttribute*)find_attribute_by_type(ORIGINATOR_ID);
+}
+
+template<class A>
+ClusterListAttribute*
+FastPathAttributeList<A>::cluster_list()
+{
+    debug_msg("%p\n", this);
+
+    return (ClusterListAttribute*)find_attribute_by_type(CLUSTER_LIST);
+}
+
+
+template<class A>
 void
-PathAttributeList<A>::process_unknown_attributes()
+FastPathAttributeList<A>::process_unknown_attributes()
 {
     debug_msg("%p\n", this);
     debug_msg("process_unknown_attributes\n");
-    iterator i;
-    for (i = begin(); i != end();) {
-	iterator tmp = i++;
-	if (dynamic_cast<UnknownAttribute *>(*tmp)) {
-	    if ((*tmp)->transitive()) {
-		(*tmp)->set_partial();
+    for (uint32_t i = 0; i < _att.size(); i++) {
+	if (_att[i] && dynamic_cast<UnknownAttribute *>(_att[i])) {
+	    if (_att[i]->transitive()) {
+		_att[i]->set_partial();
 	    } else {
-		delete *tmp;
-		erase(tmp);
+		delete _att[i];
+		_att[i] = 0;
 	    }
-	    memset(_hash, 0, sizeof(_hash));
 	}
     }
 }
-
-template<class A>
-const PathAttribute*
-PathAttributeList<A>::find_attribute_by_type(PathAttType type) const
-{
-    debug_msg("%p\n", this);
-
-    const_iterator i;
-    for (i = begin(); i != end(); i++)
-	if ((*i)->type() == type)
-	    return *i;
-    return NULL;
-}
-
-template<class A>
-const MEDAttribute* 
-PathAttributeList<A>::med_att() const 
-{
-    debug_msg("%p\n", this);
-
-    return dynamic_cast<const MEDAttribute*>(find_attribute_by_type(MED));
-}
-
-template<class A>
-const LocalPrefAttribute*
-PathAttributeList<A>::local_pref_att() const 
-{
-    debug_msg("%p\n", this);
-
-    return dynamic_cast<const LocalPrefAttribute*>(
-		find_attribute_by_type(LOCAL_PREF));
-}
-
-template<class A>
-const AtomicAggAttribute*
-PathAttributeList<A>::atomic_aggregate_att() const 
-{
-    debug_msg("%p\n", this);
-
-    return dynamic_cast<const AtomicAggAttribute*>(
-	find_attribute_by_type(ATOMIC_AGGREGATE));
-}
-
-template<class A>
-const AggregatorAttribute*
-PathAttributeList<A>::aggregator_att() const 
-{
-    debug_msg("%p\n", this);
-
-    return dynamic_cast<const AggregatorAttribute*>(
-	find_attribute_by_type(AGGREGATOR));
-}
-
-template<class A>
-const CommunityAttribute*
-PathAttributeList<A>::community_att() const 
-{
-    debug_msg("%p\n", this);
-
-    return dynamic_cast<const CommunityAttribute*>(
-	find_attribute_by_type(COMMUNITY));
-}
-
-template<class A>
-const OriginatorIDAttribute*
-PathAttributeList<A>::originator_id() const 
-{
-    debug_msg("%p\n", this);
-
-    return dynamic_cast<const OriginatorIDAttribute*>(
-	find_attribute_by_type(ORIGINATOR_ID));
-}
-
-template<class A>
-const ClusterListAttribute*
-PathAttributeList<A>::cluster_list() const 
-{
-    debug_msg("%p\n", this);
-
-    return dynamic_cast<const ClusterListAttribute*>(
-	find_attribute_by_type(CLUSTER_LIST));
-}
-
-/*
- * check whether the class has been properly rehashed.
- * A _hash of all 0's means with high probability that we forgot to
- * recompute it.
- */
-template<class A>
-void
-PathAttributeList<A>::assert_rehash() const
-{
-#ifdef PARANOID
-    size_t i;
-    for (i = 0; i < sizeof(_hash); i++) {
-	if (_hash[i])
-	    return;
-    }
-    XLOG_FATAL("Missing rehash - attempted to use modified PathAttributeList "
-	       "without first calling rehash()");
-#endif
-}
-
 
 /*
  * encode the PA list for transmission to this specific peer.
  */
 template<class A>
 bool
-PathAttributeList<A>::encode(uint8_t* buf, size_t &wire_size,
-			     const BGPPeerData* peerdata) const
+FastPathAttributeList<A>::encode(uint8_t* buf, size_t &wire_size,
+				 const BGPPeerData* peerdata) const
 {
-    list <PathAttribute*>::const_iterator pai;
     size_t len_so_far = 0;
     size_t attr_len;
 
     // fill path attribute list
-    for (pai = begin() ; pai != end(); ++pai) {
+    for (uint32_t i = 0; i < _att.size(); i++) {
+	uint32_t type = i;
 	attr_len = wire_size - len_so_far;
-	if ((*pai)->encode(buf + len_so_far, attr_len, peerdata) ) {
-	    len_so_far += attr_len;
-	    XLOG_ASSERT(len_so_far <= wire_size);
-	} else {
-	    // not enough space to encode the PA list.
-	    return false;
+	if (_att[type]) {
+	    if (_att[type]->encode(buf + len_so_far, attr_len, peerdata) ) {
+		len_so_far += attr_len;
+		XLOG_ASSERT(len_so_far <= wire_size);
+	    } else {
+		// not enough space to encode the PA list.
+		return false;
+	    }
+	} else if (_att_bytes[type]) {
+	    // We've got an attribute that hasn't yet been decoded,
+	    // which means it can't have changed.  Often we can
+	    // shortcut the encoding process and just use the
+	    // previously encoded version.
+
+	    if (encode_and_decode_attribute(_att_bytes[type], _att_lengths[type],
+					    buf + len_so_far, attr_len, 
+					    peerdata)) {
+		len_so_far += attr_len;
+		XLOG_ASSERT(len_so_far <= wire_size);
+	    } else {
+		// not enough space to encode the PA list.
+		return false;
+	    }
 	}
     }
     if (peerdata->we_use_4byte_asnums() && !peerdata->use_4byte_asnums()) {
 
 	// we're using 4byte AS nums, but our peer isn't so we need to
 	// add an AS4Path attribute
-
-	if (!_aspath_att->as_path().two_byte_compatible()) {
+	XLOG_ASSERT(_att[AS_PATH]);  // surely we've decoded this by now?
+	if (!((ASPathAttribute*)_att[AS_PATH])->as_path().two_byte_compatible()) {
 	    // only add the AS4Path if we can't code the ASPath without losing information
 
 	    attr_len = wire_size - len_so_far;
-	    AS4PathAttribute as4path_att(_aspath_att->as4_path());
+	    AS4PathAttribute as4path_att(((ASPathAttribute*)_att[AS_PATH])->as4_path());
 	    if (as4path_att.encode(buf + len_so_far, attr_len, peerdata) ) {
 		len_so_far += attr_len;
 		XLOG_ASSERT(len_so_far <= wire_size);
@@ -2687,7 +3344,85 @@ PathAttributeList<A>::encode(uint8_t* buf, size_t &wire_size,
     return true;
 }
 
+template<class A>
+bool
+FastPathAttributeList<A>::encode_and_decode_attribute(const uint8_t* att_data,
+						      const size_t& att_len, 
+						      uint8_t *buf,
+						      size_t& wire_size ,
+						      const BGPPeerData* peerdata) const
+{
+    PathAttribute *pa;
+    bool use_4byte_asnums = peerdata->use_4byte_asnums();
+    switch (att_data[1]) {	// depending on type, do the right thing.
 
+    case AS_PATH: 
+    case AGGREGATOR:
+	// AS Path and Aggregator can be encoded differently for each
+	// peer, so we need to decode and re-encode if we are not
+	// using 4-byte AS nums.
+	if (use_4byte_asnums) {
+	    if (wire_size < att_len) 
+		return false;
+	    memcpy(buf, att_data, att_len);
+	    wire_size = att_len;
+	    return true;
+	} else {
+	    if (att_data[1] == AS_PATH) {
+		ASPathAttribute as_path_att(att_data, use_4byte_asnums);
+		return as_path_att.encode(buf, wire_size, peerdata);
+	    } else {
+		AggregatorAttribute agg_att(att_data, use_4byte_asnums);
+		return agg_att.encode(buf, wire_size, peerdata);
+	    }
+	}
+     
+    case AS4_PATH:
+    case AS4_AGGREGATOR:
+    case MP_REACH_NLRI:
+    case MP_UNREACH_NLRI:
+	// these can't exist in the canonical version, because we use
+	// 4-byte AS nums internally and speak MP
+	XLOG_UNREACHABLE();
+     
+    default:
+	// all the remainder encode identically for all peers
+	if (wire_size < att_len) 
+	    return false;
+	memcpy(buf, att_data, att_len);
+	wire_size = att_len;
+	return true;
+    }
+    return pa;
+}
+
+template<class A>
+string
+FastPathAttributeList<A>::str() const
+{
+    // Don't change this formatting or the isolation tests will fail.
+    string s;
+    for (uint32_t i = 0; i < _att.size(); i++) {
+	uint32_t type = att_order(i);
+	if (_att[type]) {
+	    s += "\n\t" + _att[type]->str();
+	} else if(_att_lengths[type]>0) {
+	    // we're got data for an attribute, but not decoded it yet
+	    size_t used = _att_lengths[type];
+	    PathAttribute *pa = PathAttribute::create(_att_bytes[type], 
+						      _att_lengths[type], 
+						      used, NULL, A::ip_version());
+	    _att[type] = pa;
+	    s += "\n\t" + _att[type]->str();
+	}
+    }
+    return s;
+}
+
+
+template class FastPathAttributeList<IPv4>;
+template class FastPathAttributeList<IPv6>;
 template class PathAttributeList<IPv4>;
 template class PathAttributeList<IPv6>;
-
+template class PAListRef<IPv4>;
+template class PAListRef<IPv6>;

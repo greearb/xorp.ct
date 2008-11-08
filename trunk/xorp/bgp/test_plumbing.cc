@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/test_plumbing.cc,v 1.26 2008/07/23 05:09:39 pavlin Exp $"
+#ident "$XORP: xorp/bgp/test_plumbing.cc,v 1.27 2008/10/02 21:56:22 bms Exp $"
 #include "bgp_module.h"
 
 #include "libxorp/debug.h"
@@ -35,29 +35,29 @@ PlumbingTest::PlumbingTest(NextHopResolver<IPv4>& nhr_ipv4,
 }
 
 bool
-PlumbingTest::run_tests()
+PlumbingTest::run_tests(BGPMain& bgpmain)
 {
-    typedef bool (PlumbingTest::*test)();
+    typedef bool (PlumbingTest::*test)(BGPMain&);
 
     test tests[] = {&PlumbingTest::test1,
 		    &PlumbingTest::test2};
 
     for(unsigned int i = 0; i < sizeof(tests)/sizeof(test); i++)
-	if(!(this->*tests[i])())
+	if(!(this->*tests[i])(bgpmain))
 	    return false;
 
     return true;
 }
 
 bool
-PlumbingTest::test1() 
+PlumbingTest::test1(BGPMain& bgpmain) 
 {
     Iptuple iptuple1("127.0.0.1", 179, "1.0.0.1", 179);
     Iptuple iptuple2("127.0.0.1", 179, "1.0.0.2", 179);
     IPv4 nh;
 
-    EventLoop eventloop;
-    LocalData local_data(eventloop);
+    //    EventLoop eventloop;
+    LocalData local_data(bgpmain.eventloop());
     local_data.set_as(AsNum(1));
 
     BGPPeerData *peer_data1 = new BGPPeerData(local_data, iptuple1, AsNum(666),
@@ -84,6 +84,7 @@ PlumbingTest::test1()
     //add_peering(&dummy_peerhandler2);
     printf("Peering Added.\n");
 
+    PolicyTags pt;
     printf("------------------------------------------------------\n");
     printf("ADD A ROUTE\n");
     IPv4 nhaddr("20.20.20.1");
@@ -96,16 +97,16 @@ PlumbingTest::test1()
     ASPathAttribute aspathatt(as_path);
     printf("****>%s<****\n", aspathatt.str().c_str());
     OriginAttribute origin(EGP);
-    PathAttributeList<IPv4> pathattr1(nexthop, aspathatt, origin);
+    FPAList4Ref fpalist1 
+	= new FastPathAttributeList<IPv4>(nexthop, aspathatt, origin);
+    PAListRef<IPv4> pathattr1 = new PathAttributeList<IPv4>(fpalist1);
     IPv4 rtaddr1("10.10.10.0");
+    IPv4Net net1(rtaddr1, 24);
     SubnetRoute<IPv4> *route1;
-    route1 = new SubnetRoute<IPv4>(IPv4Net(rtaddr1, 24),
-				      &pathattr1, NULL);
 
     InternalMessage<IPv4> *rtm1;
-    rtm1 = new InternalMessage<IPv4>(route1, &dummy_peerhandler1, GENID_UNKNOWN);
     printf("Adding Route 1 from peerhandler %p\n", &dummy_peerhandler1);
-    add_route(*rtm1, &dummy_peerhandler1);
+    add_route(net1, fpalist1, pt, &dummy_peerhandler1);
     printf("4 ****>%s<****\n", aspathatt.str().c_str());
     printf("Add done\n");
 
@@ -118,6 +119,8 @@ PlumbingTest::test1()
     printf("------------------------------------------------------\n");
     printf("DELETE THE ROUTE\n");
     printf("Deleting Route 1\n");
+    route1 = new SubnetRoute<IPv4>(net1, pathattr1, NULL);
+    rtm1 = new InternalMessage<IPv4>(route1, &dummy_peerhandler1, GENID_UNKNOWN);
     rtm1->set_push();
     delete_route(*rtm1, &dummy_peerhandler1);
     printf("Delete done\n");
@@ -127,26 +130,17 @@ PlumbingTest::test1()
 
     printf("------------------------------------------------------\n");
     IPv4 rtaddr2("10.10.20.0");
+    IPv4Net net2(rtaddr2, 24);
     SubnetRoute<IPv4> *route2;
 
     printf("Adding Route 1\n");
-    route1 = new SubnetRoute<IPv4>(IPv4Net(rtaddr1, 24),
-				   &pathattr1, NULL);
-    rtm1 = new InternalMessage<IPv4>(route1, &dummy_peerhandler1, GENID_UNKNOWN);
-    add_route(*rtm1, &dummy_peerhandler1);
+    add_route(net1, fpalist1, pt, &dummy_peerhandler1);
     printf("Add done\n");
-    delete rtm1;
-    route1->unref();
 
     InternalMessage<IPv4> *rtm2;
     printf("Adding Route 2\n");
-    route2 = new SubnetRoute<IPv4>(IPv4Net(rtaddr2, 24),
-				   &pathattr1, NULL);
-    rtm2 = new InternalMessage<IPv4>(route2, &dummy_peerhandler1, GENID_UNKNOWN);
-    add_route(*rtm2, &dummy_peerhandler1);
+    add_route(net2, fpalist1, pt, &dummy_peerhandler1);
     printf("Add done\n");
-    delete rtm2;
-    route2->unref();
 
     printf("Pushing Routes\n");
     push<IPv4>(&dummy_peerhandler1);
@@ -154,8 +148,8 @@ PlumbingTest::test1()
 
     printf("------------------------------------------------------\n");
     printf("Deleting Route 2\n");
-    route2 = new SubnetRoute<IPv4>(IPv4Net(rtaddr2, 24),
-				   &pathattr1, NULL);
+    route2 = new SubnetRoute<IPv4>(net2,
+				   pathattr1, NULL);
     rtm2 = new InternalMessage<IPv4>(route2, &dummy_peerhandler1, GENID_UNKNOWN);
     rtm2->set_push();
     delete_route(*rtm2, &dummy_peerhandler1);
@@ -164,8 +158,8 @@ PlumbingTest::test1()
     printf("Delete done\n");
     printf("------------------------------------------------------\n");
     printf("Deleting Route 1\n");
-    route1 = new SubnetRoute<IPv4>(IPv4Net(rtaddr1, 24),
-				   &pathattr1, NULL);
+    route1 = new SubnetRoute<IPv4>(net1,
+				   pathattr1, NULL);
     rtm1 = new InternalMessage<IPv4>(route1, &dummy_peerhandler1, GENID_UNKNOWN);
     rtm1->set_push();
     delete_route(*rtm1, &dummy_peerhandler1);
@@ -175,13 +169,8 @@ PlumbingTest::test1()
     printf("------------------------------------------------------\n");
     printf("Test1 of decision\n");
     printf("Adding Route 1\n");
-    route1 = new SubnetRoute<IPv4>(IPv4Net(rtaddr1, 24),
-				      &pathattr1, NULL);
-    rtm1 = new InternalMessage<IPv4>(route1, &dummy_peerhandler1, GENID_UNKNOWN);
-    add_route(*rtm1, &dummy_peerhandler1);
+    add_route(net1, fpalist1, pt, &dummy_peerhandler1);
     printf("Add done\n");
-    delete rtm1;
-    route1->unref();
 
     printf("Pushing Routes\n");
     push<IPv4>(&dummy_peerhandler1);
@@ -189,15 +178,12 @@ PlumbingTest::test1()
 
     IPv4 nhaddr2("20.20.20.2");
     NextHopAttribute<IPv4> nexthop2(nhaddr2);
-    PathAttributeList<IPv4> pathattr2(nexthop2, aspathatt, origin);
+    FPAList4Ref fpalist2 
+	= new FastPathAttributeList<IPv4>(nexthop2, aspathatt, origin);
+    PAListRef<IPv4> pathattr2 = new PathAttributeList<IPv4>(fpalist2);
     printf("\n\nAdding Route 2 - this should lose to route 1\n");
-    route2 = new SubnetRoute<IPv4>(IPv4Net(rtaddr1, 24),
-				   &pathattr2, NULL);
-    rtm2 = new InternalMessage<IPv4>(route2, &dummy_peerhandler2, GENID_UNKNOWN);
-    add_route(*rtm2, &dummy_peerhandler2);
+    add_route(net1, fpalist2, pt, &dummy_peerhandler2);
     printf("Add done\n");
-    delete rtm2;
-    route2->unref();
 
     printf("Pushing Routes\n");
     push<IPv4>(&dummy_peerhandler2);
@@ -205,7 +191,7 @@ PlumbingTest::test1()
 
     printf("\n\nDeleting Route 2 - shouldn't affect RibOut\n");
     route2 = new SubnetRoute<IPv4>(IPv4Net(rtaddr1, 24),
-				   &pathattr2, NULL);
+				   pathattr2, NULL);
     rtm2 = new InternalMessage<IPv4>(route2, &dummy_peerhandler2, GENID_UNKNOWN);
     delete_route(*rtm2, &dummy_peerhandler2);
     printf("Delete done\n");
@@ -218,14 +204,13 @@ PlumbingTest::test1()
 
     IPv4 nhaddr3("20.20.19.1");
     NextHopAttribute<IPv4> nexthop3(nhaddr3);
-    PathAttributeList<IPv4> pathattr3(nexthop3, aspathatt, origin);
+    FPAList4Ref fpalist3
+	= new FastPathAttributeList<IPv4>(nexthop3, aspathatt, origin);
+    PAListRef<IPv4> pathattr3 
+	= new PathAttributeList<IPv4>(fpalist3);
     printf("\n\nAdding Route 3 - this should beat route 1\n");
-    route2 = new SubnetRoute<IPv4>(IPv4Net(rtaddr1, 24),
-				   &pathattr3, NULL);
-    rtm2 = new InternalMessage<IPv4>(route2, &dummy_peerhandler2, GENID_UNKNOWN);
-    add_route(*rtm2, &dummy_peerhandler2);
+    add_route(net1, fpalist3, pt, &dummy_peerhandler2);
     printf("Add done\n");
-    delete rtm2;
 
     printf("Pushing Routes\n");
     push<IPv4>(&dummy_peerhandler2);
@@ -251,7 +236,7 @@ PlumbingTest::test1()
 }
 
 bool
-PlumbingTest::test2()
+PlumbingTest::test2(BGPMain& bgpmain)
 {
     /*
     ** 1. Create a single peer (peer1).
@@ -267,8 +252,8 @@ PlumbingTest::test2()
     Iptuple iptuple2("127.0.0.1", 179, "1.0.0.2", 179);
     IPv4 nh;
 
-    EventLoop eventloop;
-    LocalData local_data(eventloop);
+    //    EventLoop eventloop;
+    LocalData local_data(bgpmain.eventloop());
     local_data.set_as(AsNum(1));
 
     BGPPeerData *peer_data1 = new BGPPeerData(local_data, iptuple1, AsNum(666),
@@ -298,18 +283,15 @@ PlumbingTest::test2()
     ASPathAttribute aspathatt(as_path);
     printf("****>%s<****\n", aspathatt.str().c_str());
     OriginAttribute origin(EGP);
-    PathAttributeList<IPv4> pathattr1(nexthop, aspathatt, origin);
+    FPAList4Ref fpalist1 
+	= new FastPathAttributeList<IPv4>(nexthop, aspathatt, origin);
+    //    PAListRef<IPv4> pathattr1 = new PathAttributeList<IPv4>(fpalist1);
     IPv4 rtaddr1("10.10.10.0");
-    SubnetRoute<IPv4> *route1;
-    route1 = new SubnetRoute<IPv4>(IPv4Net(rtaddr1, 24),
-				   &pathattr1, NULL);
+    IPv4Net net1(rtaddr1, 24);
+    PolicyTags pt;
 
-    InternalMessage<IPv4> *rtm1;
-    rtm1 = new InternalMessage<IPv4>(route1, &dummy_peerhandler1, GENID_UNKNOWN);
     printf("Adding Route 1 from peerhandler %p\n", &dummy_peerhandler1);
-    add_route(*rtm1, &dummy_peerhandler1);
-    delete rtm1;
-    route1->unref();
+    add_route(net1, fpalist1, pt, &dummy_peerhandler1);
     printf("4 ****>%s<****\n", aspathatt.str().c_str());
     printf("Add done\n");
 
@@ -404,7 +386,7 @@ int main(int /* argc */, char *argv[])
 
 	PlumbingTest *tester;
  	tester = (PlumbingTest*)(bgpm.plumbing_unicast());
-	if (!tester->run_tests()) {
+	if (!tester->run_tests(bgpm)) {
 	    fprintf(stderr, "Test failed\n");
 	    exit(1);
 	}

@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/bgp_trie.cc,v 1.24 2008/07/23 05:09:31 pavlin Exp $"
+#ident "$XORP: xorp/bgp/bgp_trie.cc,v 1.25 2008/10/02 21:56:14 bms Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -84,9 +84,6 @@ BgpTrie<A>::insert(const IPNet& net, const SubnetRoute<A>& route)
     ChainedSubnetRoute* chained_rt 
 	= new ChainedSubnetRoute(route, found);
 
-    debug_msg("storing route for %s with attributes %p", net.str().c_str(),
-	   route.attributes());
-
     // The trie will copy chained_rt.  The copy constructor will insert
     // the copy into the chain after chained_rt.
     iterator iter = ((RouteTrie*)this)->insert(net, *chained_rt);
@@ -112,16 +109,14 @@ BgpTrie<A>::erase(const IPNet& net)
     XLOG_ASSERT(iter.key() == net);
     XLOG_ASSERT(found->net() == net);
 
-    debug_msg("deleting route for %s with attributes %p", net.str().c_str(),
-	   found->attributes());
     typename PathmapType::iterator pmi = _pathmap.find(found->attributes());
     if (pmi == _pathmap.end()) {
-	XLOG_ERROR("Error deleting route for %s with attributes %p %s", 
-		   net.str().c_str(), found->attributes(), 
+	XLOG_ERROR("Error deleting route for %s with attributes %s", 
+		   net.str().c_str(),
 		   found->attributes()->str().c_str());
 	XLOG_INFO("Pathmap dump follows: \n");
 	for (pmi == _pathmap.begin(); pmi != _pathmap.end(); pmi++) {
-	    XLOG_INFO("%p %s\n\n", pmi->first, pmi->second->str().c_str());
+	    XLOG_INFO("%s\n\n", pmi->second->str().c_str());
 	}
 	XLOG_FATAL("Exiting\n");
     }

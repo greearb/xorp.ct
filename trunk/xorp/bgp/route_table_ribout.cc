@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.36 2008/07/23 05:09:38 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.37 2008/10/02 21:56:21 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -81,6 +81,7 @@ RibOutTable<A>::print_queue(const list<const RouteQueueEntry<A>*>& queue)
 		  s.c_str());
 	++i;
     }
+    debug_msg("<<<<<< end of queue\n");
 #else
     UNUSED(queue);
 #endif
@@ -88,7 +89,7 @@ RibOutTable<A>::print_queue(const list<const RouteQueueEntry<A>*>& queue)
 
 template<class A>
 int
-RibOutTable<A>::add_route(const InternalMessage<A> &rtmsg,
+RibOutTable<A>::add_route(InternalMessage<A> &rtmsg,
 			  BGPRouteTable<A> *caller) 
 {
     debug_msg("\n         %s\n caller: %s\n rtmsg: %p route: %p\n%s\n",
@@ -117,18 +118,25 @@ RibOutTable<A>::add_route(const InternalMessage<A> &rtmsg,
     RouteQueueEntry<A>* entry;
     if (queued_entry == NULL) {
 	// just add the route to the queue.
-	entry = new RouteQueueEntry<A>(rtmsg.route(), RTQUEUE_OP_ADD);
+	rtmsg.attributes()->lock();
+	entry = new RouteQueueEntry<A>(rtmsg.route(), rtmsg.attributes(),
+				       RTQUEUE_OP_ADD);
 	entry->set_origin_peer(rtmsg.origin_peer());
 	_queue.push_back(entry);
     } else if (queued_entry->op() == RTQUEUE_OP_DELETE) {
 	// There was a delete in the queue.  The delete must become a replace.
 	debug_msg("removing delete entry from output queue to become replace\n");
+	
 	_queue.erase(i);
+	FPAListRef old_fpa_list = queued_entry->attributes();
 	entry = new RouteQueueEntry<A>(queued_entry->route(),
-				       RTQUEUE_OP_REPLACE_OLD);
+				       old_fpa_list,
+				       (RouteQueueOp)RTQUEUE_OP_REPLACE_OLD);
 	entry->set_origin_peer(queued_entry->origin_peer());
 	_queue.push_back(entry);
+	rtmsg.attributes()->lock();
 	entry = new RouteQueueEntry<A>(rtmsg.route(), 
+				       rtmsg.attributes(),
 				       RTQUEUE_OP_REPLACE_NEW);
 	entry->set_origin_peer(rtmsg.origin_peer());
 	_queue.push_back(entry);
@@ -136,10 +144,13 @@ RibOutTable<A>::add_route(const InternalMessage<A> &rtmsg,
     } else if (queued_entry->op() == RTQUEUE_OP_REPLACE_OLD) {
 	// There was a replace in the queue.  The new part of the
 	// replace must be updated.
+	queued_entry->attributes()->unlock();
 	i++;
 	queued_entry = *i;
 	XLOG_ASSERT(queued_entry->op() == RTQUEUE_OP_REPLACE_NEW);
+	rtmsg.attributes()->lock();
 	entry = new RouteQueueEntry<A>(rtmsg.route(), 
+				       rtmsg.attributes(),
 				       RTQUEUE_OP_REPLACE_NEW);
 	entry->set_origin_peer(rtmsg.origin_peer());
 	_queue.insert(i, entry);
@@ -160,8 +171,8 @@ RibOutTable<A>::add_route(const InternalMessage<A> &rtmsg,
 
 template<class A>
 int
-RibOutTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
-			      const InternalMessage<A> &new_rtmsg,
+RibOutTable<A>::replace_route(InternalMessage<A> &old_rtmsg,
+			      InternalMessage<A> &new_rtmsg,
 			      BGPRouteTable<A> *caller) 
 {
     debug_msg("%s::replace_route %p %p\n", this->tablename().c_str(),
@@ -174,7 +185,7 @@ RibOutTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 
 template<class A>
 int
-RibOutTable<A>::delete_route(const InternalMessage<A> &rtmsg,
+RibOutTable<A>::delete_route(InternalMessage<A> &rtmsg,
 			     BGPRouteTable<A> *caller) 
 {
     debug_msg("\n         %s\n caller: %s\n rtmsg: %p route: %p\n%s\n",
@@ -201,7 +212,10 @@ RibOutTable<A>::delete_route(const InternalMessage<A> &rtmsg,
     RouteQueueEntry<A>* entry;
     if (queued_entry == NULL) {
 	// add the route delete operation to the queue.
-	entry = new RouteQueueEntry<A>(rtmsg.route(), RTQUEUE_OP_DELETE);
+	rtmsg.attributes()->lock();
+	entry = new RouteQueueEntry<A>(rtmsg.route(), 
+				       rtmsg.attributes(),
+				       RTQUEUE_OP_DELETE);
 	entry->set_origin_peer(rtmsg.origin_peer());
 	_queue.push_back(entry);
     } else if (queued_entry->op() == RTQUEUE_OP_ADD) {
@@ -217,6 +231,7 @@ RibOutTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	//					delete<B>
 	
 	_queue.erase(i);
+	queued_entry->attributes()->unlock();
 	delete queued_entry;
     } else if (queued_entry->op() == RTQUEUE_OP_DELETE) {
 	// This should not happen.
@@ -226,14 +241,20 @@ RibOutTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	// introduced on two peers and the resolvability changes.
 
 	i = _queue.erase(i);
-	XLOG_ASSERT((*i)->op() == RTQUEUE_OP_REPLACE_NEW);
-	delete *i;
+	const RouteQueueEntry<A>* new_queued_entry = *i;
+	XLOG_ASSERT(new_queued_entry->op() == RTQUEUE_OP_REPLACE_NEW);
+	new_queued_entry->attributes()->unlock();
+	delete new_queued_entry;
 	_queue.erase(i);
-
+	FPAListRef old_pa_list = queued_entry->attributes();
 	entry = new RouteQueueEntry<A>(queued_entry->route(),
+				       old_pa_list,
 				       RTQUEUE_OP_DELETE);
 	entry->set_origin_peer(queued_entry->origin_peer());
 	_queue.push_back(entry);
+	
+	//these are the same attributes we just enqueued, so don't unlock them.
+	//queued_entry->attributes()->unlock();
 	delete queued_entry;
     }
 
@@ -247,7 +268,7 @@ template<class A>
 int
 RibOutTable<A>::push(BGPRouteTable<A> *caller) 
 {
-    debug_msg("%s\n", this->tablename().c_str());
+    debug_msg("%s PUSH\n", this->tablename().c_str());
     XLOG_ASSERT(caller == this->_parent);
 
     // In push, we need to collect together all the SubnetRoutes that
@@ -261,7 +282,7 @@ RibOutTable<A>::push(BGPRouteTable<A> *caller)
 	// tmp_queue
 
 	list <const RouteQueueEntry<A>*> tmp_queue;
-	const PathAttributeList<A> *attributes = NULL;
+	FPAListRef attributes = NULL;
 	int ctr = 1;
 	typedef typename list<const RouteQueueEntry<A>*>::iterator Iter;
 	Iter i = _queue.begin();
@@ -290,7 +311,7 @@ RibOutTable<A>::push(BGPRouteTable<A> *caller)
 	    } else {
 		if (attributes == NULL)
 		    attributes = (*i)->attributes();
-		if ((*i)->attributes() == attributes) {
+		if (*((*i)->attributes()) == *attributes) {
 		    tmp_queue.push_back((*i));
 		    i = _queue.erase(i);
 		    ctr++;
@@ -299,8 +320,6 @@ RibOutTable<A>::push(BGPRouteTable<A> *caller)
 		}
 	    }
 	}
-	debug_msg("%d elements with attr %p moved to tmp queue\n", ctr,
-		  attributes);
 	print_queue(tmp_queue);
 
 	// at this point we pass the tmp_queue to the output BGP
@@ -313,15 +332,21 @@ RibOutTable<A>::push(BGPRouteTable<A> *caller)
 	while (i != tmp_queue.end()) {
 	    debug_msg("* Subnet: %s\n", (*i)->net().str().c_str());
 	    if ((*i)->op() == RTQUEUE_OP_ADD ) {
-		debug_msg("* Announce\n");
+		debug_msg("* Announce %s\n", (*i)->route()->net().str().c_str());
 		// the sanity checking was done in add_route...
+		FPAListRef pa_list = (*i)->attributes();
+		pa_list->unlock();
 		_peer->add_route(*((*i)->route()), 
+				 pa_list,
 				 (*i)->origin_peer()->ibgp(), this->safi());
 		delete (*i);
 	    } else if ((*i)->op() == RTQUEUE_OP_DELETE ) {
 		// the sanity checking was done in delete_route...
 		debug_msg("* Withdraw\n");
+		FPAListRef pa_list = (*i)->attributes();
+		pa_list->unlock();
 		_peer->delete_route(*((*i)->route()), 
+				    pa_list,
 				    (*i)->origin_peer()->ibgp(), this->safi());
 		delete (*i);
 	    } else if ((*i)->op() == RTQUEUE_OP_REPLACE_OLD ) {
@@ -334,8 +359,12 @@ RibOutTable<A>::push(BGPRouteTable<A> *caller)
 		XLOG_ASSERT((*i)->op() == RTQUEUE_OP_REPLACE_NEW);
 		const SubnetRoute<A> *new_route = (*i)->route();
 		bool new_ibgp = (*i)->origin_peer()->ibgp();
+		FPAListRef pa_list = (*i)->attributes();
+		pa_list->unlock();
+		old_queue_entry->attributes()->unlock();
 		_peer->replace_route(*old_route, old_ibgp,
 				     *new_route, new_ibgp,
+				     pa_list,
 				     this->safi());
 		delete old_queue_entry;
 		delete (*i);
@@ -432,9 +461,10 @@ RibOutTable<A>::reschedule_self()
 
 template<class A>
 const SubnetRoute<A>*
-RibOutTable<A>::lookup_route(const IPNet<A> &net, uint32_t& genid) const 
+RibOutTable<A>::lookup_route(const IPNet<A> &net, uint32_t& genid, 
+			     FPAListRef& pa_list) const 
 {
-    return this->_parent->lookup_route(net, genid);
+    return this->_parent->lookup_route(net, genid, pa_list);
 }
 
 template<class A>

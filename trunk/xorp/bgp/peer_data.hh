@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/bgp/peer_data.hh,v 1.26 2008/07/23 05:09:34 pavlin Exp $
+// $XORP: xorp/bgp/peer_data.hh,v 1.27 2008/10/02 21:56:17 bms Exp $
 
 #ifndef __BGP_PEER_DATA_HH__
 #define __BGP_PEER_DATA_HH__
@@ -265,6 +265,48 @@ public:
 	XLOG_UNREACHABLE();
 	return false;
     }
+
+    /*
+     * this is for debugging only
+     */
+    template <class A> void set_multiprotocol(Safi safi,
+					  Direction d = NEGOTIATED) {
+	XLOG_ASSERT(static_cast<size_t>(d) < sizeof(_ipv4_unicast));
+	XLOG_ASSERT(static_cast<size_t>(d) < sizeof(_ipv4_multicast));
+	XLOG_ASSERT(static_cast<size_t>(d) < sizeof(_ipv6_unicast));
+	XLOG_ASSERT(static_cast<size_t>(d) < sizeof(_ipv6_multicast));
+
+	switch(A::ip_version()) {
+	case 4:
+	    switch(safi) {
+	    case SAFI_UNICAST:
+		_ipv4_unicast[d] = true;
+		return;
+	    case SAFI_MULTICAST:
+		_ipv4_multicast[d] = true;
+		return;
+	    }
+	    break;
+	case 6:
+	    switch(safi) {
+	    case SAFI_UNICAST:
+		_ipv6_unicast[d] = true;
+		return;
+	    case SAFI_MULTICAST:
+		_ipv6_multicast[d] = true;
+		return;
+	    }
+	    break;
+	default:
+	    XLOG_FATAL("Unknown IP version %u",
+		       XORP_UINT_CAST(A::ip_version()));
+	    break;
+	}
+	XLOG_UNREACHABLE();
+	return;
+    }
+
+    
 
 #if	0
     bool ipv4_unicast(Direction d = NEGOTIATED) const {

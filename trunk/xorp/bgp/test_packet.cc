@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/test_packet.cc,v 1.18 2008/07/23 05:09:39 pavlin Exp $"
+#ident "$XORP: xorp/bgp/test_packet.cc,v 1.19 2008/10/02 21:56:22 bms Exp $"
 
 //#define DEBUG_LOGGING
 #include "bgp_module.h"
@@ -185,8 +185,13 @@ bool BGPTestPacket::test_update()
     // dummy stuff, because encode needs a peer
     EventLoop eventloop;
     LocalData localdata(eventloop);
+    localdata.set_as(AsNum(0)); // IBGP
     Iptuple iptuple;
-    BGPPeerData pd(localdata, iptuple, AsNum(0), IPv4(),0);
+    BGPPeerData* pd = new BGPPeerData(localdata, iptuple, AsNum(0), IPv4(),0);
+    pd->compute_peer_type();
+    BGPMain main(eventloop);
+    BGPPeer peer(&localdata, pd, NULL, &main);
+    
 
     
     debug_msg("Starting test of UpdatePacket\n\n");
@@ -195,15 +200,16 @@ bool BGPTestPacket::test_update()
     UpdatePacket *up = create_update();
     size_t len = BGPPacket::MAXPACKETSIZE;
     uint8_t buf[BGPPacket::MAXPACKETSIZE];
-    assert(up->encode(buf, len, &pd));
+    assert(up->encode(buf, len, pd));
     
     debug_msg("Decoding UpdatePacket\n\n");
     
     UpdatePacket *updatepacket;
     try {
-	updatepacket = new UpdatePacket(buf,len, &pd);
+	updatepacket = new UpdatePacket(buf,len, pd, &main, true);
     } catch (CorruptMessage &err) {
-	debug_msg("Construction of UpdatePacket from buffer failed\n");
+	debug_msg("Construction of UpdatePacket from buffer failed: %s\n",
+		  err.why().c_str());
 	delete up;
 	return false;
     }
@@ -227,8 +233,12 @@ bool BGPTestPacket::test_update_ipv6()
     // dummy stuff, because encode needs a peer
     EventLoop eventloop;
     LocalData localdata(eventloop);
+    localdata.set_as(AsNum(0)); // IBGP
     Iptuple iptuple;
-    BGPPeerData pd(localdata, iptuple, AsNum(0), IPv4(),0);
+    BGPPeerData *pd = new BGPPeerData(localdata, iptuple, AsNum(0), IPv4(),0);
+    pd->compute_peer_type();
+    BGPMain main(eventloop);
+    BGPPeer peer(&localdata, pd, NULL, &main);
 
     
     debug_msg("Starting test of UpdatePacket IPv6\n\n");
@@ -237,13 +247,13 @@ bool BGPTestPacket::test_update_ipv6()
     UpdatePacket *up = create_update_ipv6();
     size_t len = BGPPacket::MAXPACKETSIZE;
     uint8_t buf[BGPPacket::MAXPACKETSIZE];
-    assert(up->encode(buf, len, &pd));
+    assert(up->encode(buf, len, pd));
     
     debug_msg("Decoding UpdatePacket IPv6\n\n");
     
     UpdatePacket *updatepacket;
     try {
-	updatepacket = new UpdatePacket(buf,len, &pd);
+	updatepacket = new UpdatePacket(buf,len, pd, &main, true);
     } catch (CorruptMessage &err) {
 	debug_msg("Construction of UpdatePacket IPv6 from buffer failed\n");
 	delete up;
@@ -335,6 +345,7 @@ UpdatePacket* BGPTestPacket::create_update()
     // wdr.dump();
     OriginAttribute origin_att(IGP);
     ASPathAttribute path_att(p);
+    NextHopAttribute<IPv4> nh_att(IPv4("1.2.3.4"));
     OriginatorIDAttribute originator_id(IPv4("1.2.3.4"));
     ClusterListAttribute cluster_list;
     cluster_list.prepend_cluster_id(IPv4("4.3.2.1"));
@@ -343,6 +354,7 @@ UpdatePacket* BGPTestPacket::create_update()
     bup->add_withdrawn(wdr);
     bup->add_pathatt(origin_att);
     bup->add_pathatt(path_att);
+    bup->add_pathatt(nh_att);
     bup->add_pathatt(originator_id);
     bup->add_nlri(nlr_0);
     bup->add_nlri(nlr_1);
@@ -357,6 +369,7 @@ UpdatePacket* BGPTestPacket::create_update_ipv6()
     net[2] = IPv4Net("1.2.3.4/32");
     BGPUpdateAttrib wdr(net[2]);
 	
+    OriginAttribute origin_att(IGP);
     ASSegment as_seq;
     as_seq.set_type(AS_SEQUENCE);
     debug_msg("sequence length : %u\n", XORP_UINT_CAST(as_seq.as_size()));
@@ -374,9 +387,12 @@ UpdatePacket* BGPTestPacket::create_update_ipv6()
     // nlr_1.dump();
     // wdr.dump();
     ASPathAttribute path_att(p);
+    NextHopAttribute<IPv4> nh_att(IPv4("8.7.6.5"));
     UpdatePacket *bup = new UpdatePacket();
     bup->add_withdrawn(wdr);
+    bup->add_pathatt(origin_att);
     bup->add_pathatt(path_att);
+    bup->add_pathatt(nh_att);
     bup->add_nlri(nlr_0);
     bup->add_nlri(nlr_1);
 

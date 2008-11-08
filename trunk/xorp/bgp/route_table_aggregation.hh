@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/bgp/route_table_aggregation.hh,v 1.17 2008/07/23 05:09:35 pavlin Exp $
+// $XORP: xorp/bgp/route_table_aggregation.hh,v 1.18 2008/10/02 21:56:18 bms Exp $
 
 #ifndef __BGP_ROUTE_TABLE_AGGREGATION_HH__
 #define __BGP_ROUTE_TABLE_AGGREGATION_HH__
@@ -117,21 +117,24 @@ public:
 		   IPv4 bgp_id,
 		   AsNum asnum)
         : _net(net), _brief_mode(brief_mode),
-	  _was_announced(0), _is_suppressed(0) {
-	    NextHopAttribute<A> nhatt(A::ZERO());
-	    ASPath aspath;
-	    OriginAttribute igp_origin_att(IGP);
-	_pa_list = new PathAttributeList<A>(nhatt, aspath, igp_origin_att);
-	_pa_list->rehash();
+	  _was_announced(0), _is_suppressed(0) 
+    {
+	OriginAttribute origin_att(IGP);
+	FPAListRef fpa_list = new FastPathAttributeList<A>(A::ZERO(), 
+							   ASPath(), 
+							   origin_att);
+	_pa_list = new PathAttributeList<A>(fpa_list);
+	
 	_aggregator_attribute = new AggregatorAttribute(bgp_id, asnum);
     }
-    ~AggregateRoute() {
+
+    ~AggregateRoute() 
+    {
 	if (_components_table.begin() != _components_table.end())
 	    XLOG_WARNING("ComponentsTable trie was not empty on deletion\n");
-	delete _pa_list;
 	delete _aggregator_attribute;
     }
-    const PathAttributeList<A> *pa_list() const { return _pa_list; }
+    PAListRef<A> pa_list() const        { return _pa_list; }
     const IPNet<A> net() const		{ return _net; }
     bool was_announced() const		{ return _was_announced; }
     bool is_suppressed() const		{ return _is_suppressed; }
@@ -150,7 +153,7 @@ private:
     AggregatorAttribute *_aggregator_attribute;
 
     RefTrie<A, const ComponentRoute<A> > _components_table;
-    PathAttributeList<A> *_pa_list;
+    PAListRef<A> _pa_list;
     bool _was_announced;
     bool _is_suppressed;
 };
@@ -163,22 +166,23 @@ public:
 		     BGPPlumbing& master,
 		     BGPRouteTable<A> *parent);
     ~AggregationTable();
-    int add_route(const InternalMessage<A> &rtmsg,
+    int add_route(InternalMessage<A> &rtmsg,
                   BGPRouteTable<A> *caller);
-    int replace_route(const InternalMessage<A> &old_rtmsg,
-                      const InternalMessage<A> &new_rtmsg,
+    int replace_route(InternalMessage<A> &old_rtmsg,
+                      InternalMessage<A> &new_rtmsg,
                       BGPRouteTable<A> *caller);
-    int delete_route(const InternalMessage<A> &rtmsg,
+    int delete_route(InternalMessage<A> &rtmsg,
                      BGPRouteTable<A> *caller);
     int push(BGPRouteTable<A> *caller);
 
     bool dump_next_route(DumpIterator<A>& dump_iter);
-    int route_dump(const InternalMessage<A> &rtmsg,
+    int route_dump(InternalMessage<A> &rtmsg,
 		   BGPRouteTable<A> *caller,
 		   const PeerHandler *dump_peer);
 
     const SubnetRoute<A> *lookup_route(const IPNet<A> &net,
-                                       uint32_t& genid) const;
+                                       uint32_t& genid,
+				       FPAListRef& pa_list) const;
     void route_used(const SubnetRoute<A>* route, bool in_use);
 
     RouteTableType type() const {return AGGREGATION_TABLE;}

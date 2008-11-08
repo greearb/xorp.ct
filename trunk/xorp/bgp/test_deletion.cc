@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/test_deletion.cc,v 1.35 2008/07/23 05:09:38 pavlin Exp $"
+#ident "$XORP: xorp/bgp/test_deletion.cc,v 1.36 2008/10/02 21:56:21 bms Exp $"
 
 #include "bgp_module.h"
 
@@ -110,19 +110,19 @@ test_deletion(TestInfo& /*info*/)
     aspath3.prepend_as(AsNum(8));
     ASPathAttribute aspathatt3(aspath3);
 
-    PathAttributeList<IPv4>* palist1 =
-	new PathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
+    FPAList4Ref fpalist1 =
+	new FastPathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
+    PAListRef<IPv4> palist1 = new PathAttributeList<IPv4>(fpalist1);
 
-    PathAttributeList<IPv4>* palist2 =
-	new PathAttributeList<IPv4>(nhatt2, aspathatt2, igp_origin_att);
+    FPAList4Ref fpalist2 =
+	new FastPathAttributeList<IPv4>(nhatt2, aspathatt2, igp_origin_att);
+    PAListRef<IPv4> palist2 = new PathAttributeList<IPv4>(fpalist2);
 
-    PathAttributeList<IPv4>* palist3 =
-	new PathAttributeList<IPv4>(nhatt3, aspathatt3, igp_origin_att);
+    FPAList4Ref fpalist3 =
+	new FastPathAttributeList<IPv4>(nhatt3, aspathatt3, igp_origin_att);
+    PAListRef<IPv4> palist3 = new PathAttributeList<IPv4>(fpalist3);
 
-    //create a subnet route
-    SubnetRoute<IPv4> *sr1;
-
-    InternalMessage<IPv4>* msg;
+    PolicyTags pt;
 
     //================================================================
     //Test1: trivial add and peering goes down
@@ -134,11 +134,7 @@ test_deletion(TestInfo& /*info*/)
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
-    ribin->add_route(*msg, NULL);
-    sr1->unref();
-    delete msg;
+    ribin->add_route(net1, fpalist1, pt);
 
     debug_table->write_separator();
     debug_table->write_comment("PEERING GOES DOWN");
@@ -165,27 +161,15 @@ test_deletion(TestInfo& /*info*/)
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
-    ribin->add_route(*msg, NULL);
-    sr1->unref();
-    delete msg;
+    ribin->add_route(net1, fpalist1, pt);
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net2, palist1, NULL);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
-    ribin->add_route(*msg, NULL);
-    sr1->unref();
-    delete msg;
+    ribin->add_route(net2, fpalist1, pt);
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net3, palist1, NULL);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
-    ribin->add_route(*msg, NULL);
-    sr1->unref();
-    delete msg;
+    ribin->add_route(net3, fpalist1, pt);
 
     debug_table->write_separator();
     debug_table->write_comment("PEERING GOES DOWN");
@@ -212,27 +196,15 @@ test_deletion(TestInfo& /*info*/)
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
-    ribin->add_route(*msg, NULL);
-    sr1->unref();
-    delete msg;
+    ribin->add_route(net1, fpalist1, pt);
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
-    ribin->add_route(*msg, NULL);
-    sr1->unref();
-    delete msg;
+    ribin->add_route(net2, fpalist2, pt);
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
-    ribin->add_route(*msg, NULL);
-    sr1->unref();
-    delete msg;
+    ribin->add_route(net3, fpalist3, pt);
 
     debug_table->write_separator();
     debug_table->write_comment("PEERING GOES DOWN");
@@ -259,35 +231,19 @@ test_deletion(TestInfo& /*info*/)
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
-    ribin->add_route(*msg, NULL);
-    sr1->unref();
-    delete msg;
+    ribin->add_route(net1, fpalist1, pt);
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
-    ribin->add_route(*msg, NULL);
-    sr1->unref();
-    delete msg;
+    ribin->add_route(net2, fpalist2, pt);
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net3, palist1, NULL);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
-    ribin->add_route(*msg, NULL);
-    sr1->unref();
-    delete msg;
+    ribin->add_route(net3, fpalist1, pt);
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net4, palist2, NULL);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
-    ribin->add_route(*msg, NULL);
-    sr1->unref();
-    delete msg;
+    ribin->add_route(net4, fpalist2, pt);
 
     debug_table->write_separator();
     debug_table->write_comment("PEERING GOES DOWN");
@@ -344,35 +300,19 @@ test_deletion(TestInfo& /*info*/)
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
-    ribin->add_route(*msg, NULL);
-    sr1->unref();
-    delete msg;
+    ribin->add_route(net1, fpalist1, pt);
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
-    ribin->add_route(*msg, NULL);
-    sr1->unref();
-    delete msg;
+    ribin->add_route(net2, fpalist2, pt);
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net3, palist1, NULL);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
-    ribin->add_route(*msg, NULL);
-    sr1->unref();
-    delete msg;
+    ribin->add_route(net3, fpalist1, pt);
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net4, palist2, NULL);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
-    ribin->add_route(*msg, NULL);
-    sr1->unref();
-    delete msg;
+    ribin->add_route(net4, fpalist2, pt);
 
     debug_table->write_separator();
     debug_table->write_comment("PEERING GOES DOWN");
@@ -384,19 +324,11 @@ test_deletion(TestInfo& /*info*/)
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
-    ribin->add_route(*msg, NULL);
-    sr1->unref();
-    delete msg;
+    ribin->add_route(net1, fpalist1, pt);
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net4, palist2, NULL);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
-    ribin->add_route(*msg, NULL);
-    sr1->unref();
-    delete msg;
+    ribin->add_route(net4, fpalist2, pt);
 
     debug_table->write_separator();
     debug_table->write_comment("LET EVENT QUEUE DRAIN");
@@ -434,35 +366,19 @@ test_deletion(TestInfo& /*info*/)
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
-    ribin->add_route(*msg, NULL);
-    sr1->unref();
-    delete msg;
+    ribin->add_route(net1, fpalist1, pt);
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
-    ribin->add_route(*msg, NULL);
-    sr1->unref();
-    delete msg;
+    ribin->add_route(net2, fpalist2, pt);
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net3, palist1, NULL);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
-    ribin->add_route(*msg, NULL);
-    sr1->unref();
-    delete msg;
+    ribin->add_route(net3, fpalist1, pt);
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net4, palist2, NULL);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
-    ribin->add_route(*msg, NULL);
-    sr1->unref();
-    delete msg;
+    ribin->add_route(net4, fpalist2, pt);
 
     debug_table->write_separator();
     debug_table->write_comment("PEERING GOES DOWN");
@@ -474,19 +390,11 @@ test_deletion(TestInfo& /*info*/)
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net1, palist2, NULL);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
-    ribin->add_route(*msg, NULL);
-    sr1->unref();
-    delete msg;
+    ribin->add_route(net1, fpalist2, pt);
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net4, palist3, NULL);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
-    ribin->add_route(*msg, NULL);
-    sr1->unref();
-    delete msg;
+    ribin->add_route(net4, fpalist3, pt);
 
     debug_table->write_separator();
     debug_table->write_comment("LET EVENT QUEUE DRAIN");
@@ -524,35 +432,19 @@ test_deletion(TestInfo& /*info*/)
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
-    ribin->add_route(*msg, NULL);
-    sr1->unref();
-    delete msg;
+    ribin->add_route(net1, fpalist1, pt);
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
-    ribin->add_route(*msg, NULL);
-    sr1->unref();
-    delete msg;
+    ribin->add_route(net2, fpalist2, pt);
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net3, palist1, NULL);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
-    ribin->add_route(*msg, NULL);
-    sr1->unref();
-    delete msg;
+    ribin->add_route(net3, fpalist1, pt);
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net4, palist2, NULL);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
-    ribin->add_route(*msg, NULL);
-    sr1->unref();
-    delete msg;
+    ribin->add_route(net4, fpalist2, pt);
 
     debug_table->write_separator();
     debug_table->write_comment("PEERING GOES DOWN");
@@ -564,19 +456,11 @@ test_deletion(TestInfo& /*info*/)
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net1, palist3, NULL);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
-    ribin->add_route(*msg, NULL);
-    sr1->unref();
-    delete msg;
+    ribin->add_route(net1, fpalist3, pt);
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net3, palist3, NULL);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
-    ribin->add_route(*msg, NULL);
-    sr1->unref();
-    delete msg;
+    ribin->add_route(net3, fpalist3, pt);
 
     debug_table->write_separator();
     debug_table->write_comment("LET EVENT QUEUE DRAIN");
@@ -614,19 +498,11 @@ test_deletion(TestInfo& /*info*/)
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
-    ribin->add_route(*msg, NULL);
-    sr1->unref();
-    delete msg;
+    ribin->add_route(net1, fpalist1, pt);
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
-    ribin->add_route(*msg, NULL);
-    sr1->unref();
-    delete msg;
+    ribin->add_route(net2, fpalist2, pt);
 
     debug_table->write_separator();
     debug_table->write_comment("PEERING GOES DOWN");
@@ -638,19 +514,11 @@ test_deletion(TestInfo& /*info*/)
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
-    ribin->add_route(*msg, NULL);
-    sr1->unref();
-    delete msg;
+    ribin->add_route(net1, fpalist1, pt);
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
-    ribin->add_route(*msg, NULL);
-    sr1->unref();
-    delete msg;
+    ribin->add_route(net2, fpalist2, pt);
 
     debug_table->write_separator();
     debug_table->write_comment("LET EVENT QUEUE DRAIN");
@@ -686,11 +554,7 @@ test_deletion(TestInfo& /*info*/)
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
-    ribin->add_route(*msg, NULL);
-    sr1->unref();
-    delete msg;
+    ribin->add_route(net1, fpalist1, pt);
 
     debug_table->write_separator();
     debug_table->write_comment("PEERING GOES DOWN");
@@ -702,11 +566,7 @@ test_deletion(TestInfo& /*info*/)
 
     debug_table->write_separator();
     debug_table->write_comment("ADD A ROUTE");
-    sr1 = new SubnetRoute<IPv4>(net2, palist2, NULL);
-    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
-    ribin->add_route(*msg, NULL);
-    sr1->unref();
-    delete msg;
+    ribin->add_route(net2, fpalist2, pt);
 
     debug_table->write_separator();
     debug_table->write_comment("PEERING GOES DOWN");
@@ -731,9 +591,12 @@ test_deletion(TestInfo& /*info*/)
     debug_table->write_comment("SHUTDOWN AND CLEAN UP");
     delete ribin;
     delete debug_table;
-    delete palist1;
-    delete palist2;
-    delete palist3;
+    palist1.release();
+    palist2.release();
+    palist3.release();
+    fpalist1 = 0;
+    fpalist2 = 0;
+    fpalist3 = 0;
 
     FILE *file = fopen(filename.c_str(), "r");
     if (file == NULL) {

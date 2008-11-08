@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/harness/test_trie.cc,v 1.27 2008/07/23 05:09:43 pavlin Exp $"
+#ident "$XORP: xorp/bgp/harness/test_trie.cc,v 1.28 2008/10/02 21:56:27 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -168,6 +168,7 @@ add_nlri<IPv6>(UpdatePacket *p, IPNet<IPv6> net)
     */
  top:
     MPReachNLRIAttribute<IPv6> *mpreach = 0;
+#if 0
     list <PathAttribute*>::const_iterator pai;
     for (pai = p->pa_list().begin(); pai != p->pa_list().end(); pai++) {
 	const PathAttribute* pa;
@@ -182,11 +183,15 @@ add_nlri<IPv6>(UpdatePacket *p, IPNet<IPv6> net)
 	    return;
 	}
     }
+#endif
+    mpreach = p->pa_list()->mpreach<IPv6>(SAFI_UNICAST);
 
     if(0 == mpreach) {
 	MPReachNLRIAttribute<IPv6> mp(SAFI_UNICAST);
 	p->add_pathatt(mp);
 	goto top;
+    } else {
+	mpreach->add_nlri(net);
     }
 }
 
@@ -204,6 +209,7 @@ withdraw_nlri<IPv6>(UpdatePacket *p, IPNet<IPv6> net)
     */
  top:
     MPUNReachNLRIAttribute<IPv6> *mpunreach = 0;
+#if 0
     list <PathAttribute*>::const_iterator pai;
     for (pai = p->pa_list().begin(); pai != p->pa_list().end(); pai++) {
 	const PathAttribute* pa;
@@ -218,11 +224,19 @@ withdraw_nlri<IPv6>(UpdatePacket *p, IPNet<IPv6> net)
 	    return;
 	}
     }
+#endif
+    if (!p->pa_list().is_empty())
+	mpunreach = p->pa_list()->mpunreach<IPv6>(SAFI_UNICAST);
+    else {
+	XLOG_UNREACHABLE();
+    }
 
     if(0 == mpunreach) {
 	MPUNReachNLRIAttribute<IPv6> mp(SAFI_UNICAST);
 	p->add_pathatt(mp);
 	goto top;
+    } else {
+	mpunreach->add_withdrawn(net);
     }
 }
 
@@ -238,6 +252,7 @@ add_nexthop<IPv6>(UpdatePacket *p, IPv6 nexthop)
     */
  top:
     MPReachNLRIAttribute<IPv6> *mpreach = 0;
+#if 0
     list <PathAttribute*>::const_iterator pai;
     for (pai = p->pa_list().begin(); pai != p->pa_list().end(); pai++) {
 	const PathAttribute* pa;
@@ -252,11 +267,16 @@ add_nexthop<IPv6>(UpdatePacket *p, IPv6 nexthop)
 	    return;
 	}
     }
+#endif
+
+    mpreach = p->pa_list()->mpreach<IPv6>(SAFI_UNICAST);
 
     if(0 == mpreach) {
 	MPReachNLRIAttribute<IPv6> mp(SAFI_UNICAST);
 	p->add_pathatt(mp);
 	goto top;
+    } else {
+	mpreach->set_nexthop(nexthop);
     }
 }
 
@@ -272,8 +292,14 @@ test_single_update(TestInfo& info, A nexthop, IPNet<A> net)
     EventLoop eventloop;
     Iptuple iptuple;
     LocalData localdata(eventloop);
+    localdata.set_as(AsNum(0)); 
     localdata.set_use_4byte_asnums(false);
     BGPPeerData peerdata(localdata, iptuple, AsNum(0), IPv4(),0);
+    // we force IBGP, as this does fewer tests  
+    peerdata.compute_peer_type(); 
+    // force negotiated, or our parser will strip out the v6 attributes
+    peerdata.set_multiprotocol<IPv6>(SAFI_UNICAST, BGPPeerData::NEGOTIATED);
+    peerdata.set_multiprotocol<IPv6>(SAFI_UNICAST, BGPPeerData::SENT);
 
     /*
     ** Verify that the trie is empty.
@@ -385,7 +411,10 @@ test_replay(TestInfo& info, A nexthop, IPNet<A> net)
     Iptuple iptuple;
     LocalData localdata(eventloop);
     localdata.set_use_4byte_asnums(false);
-    BGPPeerData peerdata(localdata, iptuple, AsNum(0), IPv4(),0);
+    localdata.set_as(AsNum(0));                                                                   BGPPeerData peerdata(localdata, iptuple, AsNum(0), IPv4(),0);                                 // we force IBGP, as this does fewer tests                                               
+    peerdata.compute_peer_type();                                                              
+    // force negotiated, or our parser will strip out the v6 attributes
+    peerdata.set_multiprotocol<IPv6>(SAFI_UNICAST, BGPPeerData::NEGOTIATED);                      peerdata.set_multiprotocol<IPv6>(SAFI_UNICAST, BGPPeerData::SENT);   
 
     /*
     ** Verify that the trie is empty.

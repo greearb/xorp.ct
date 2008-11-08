@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/bgp/route_table_policy_im.hh,v 1.8 2008/08/06 08:26:12 abittau Exp $
+// $XORP: xorp/bgp/route_table_policy_im.hh,v 1.9 2008/10/02 21:56:20 bms Exp $
 
 #ifndef __BGP_ROUTE_TABLE_POLICY_IM_HH__
 #define __BGP_ROUTE_TABLE_POLICY_IM_HH__
@@ -58,7 +58,7 @@ public:
      * it will be NULL.
      * @return ADD_FILTERED if route is rejected. XORP_OK otherwise.
      */
-    int route_dump(const InternalMessage<A> &rtmsg,
+    int route_dump(InternalMessage<A> &rtmsg,
                    BGPRouteTable<A> *caller,
                    const PeerHandler *dump_peer);
 };

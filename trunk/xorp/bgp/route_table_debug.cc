@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/route_table_debug.cc,v 1.17 2008/07/23 05:09:36 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_debug.cc,v 1.18 2008/10/02 21:56:19 bms Exp $"
 
 //#define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -36,6 +36,7 @@ DebugTable<A>::DebugTable(string table_name,
     _msgs = 0;
     _ofile = NULL;
     _get_on_wakeup = false;
+    _set_is_winner = false;
 }
 
 template<class A>
@@ -45,8 +46,21 @@ DebugTable<A>::~DebugTable() {
 }
 
 template<class A>
+void
+DebugTable<A>::print_route(const SubnetRoute<A>& route, FPAListRef palist) const
+{
+    palist->canonicalize();
+    string s;
+    s = "SubnetRoute:\n";
+    s += "  Net: " + route.net().str() + "\n";
+    s += "  PAList: " + palist->str() + "\n";
+    fprintf(_ofile, s.c_str());
+}
+
+
+template<class A>
 int
-DebugTable<A>::add_route(const InternalMessage<A> &rtmsg, 
+DebugTable<A>::add_route(InternalMessage<A> &rtmsg, 
 			 BGPRouteTable<A> *caller) {
     assert(caller == this->_parent);
     if (_print_tablename)
@@ -56,10 +70,13 @@ DebugTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	fprintf(_ofile, "CHANGED flag is set\n");
     if (rtmsg.push())
 	fprintf(_ofile, "PUSH flag is set\n");
-    fprintf(_ofile, "%s\n", rtmsg.route()->str().c_str());
+    //    fprintf(_ofile, "%s\n", rtmsg.route()->str().c_str());
+    print_route(*(rtmsg.route()), rtmsg.attributes());
     fflush(_ofile);
+    if (_set_is_winner)
+	rtmsg.route()->set_is_winner(1);
 
-    if (rtmsg.changed()) {
+    if (rtmsg.copied()) {
 	rtmsg.inactivate();
     }
     return _canned_response;
@@ -67,8 +84,8 @@ DebugTable<A>::add_route(const InternalMessage<A> &rtmsg,
 
 template<class A>
 int
-DebugTable<A>::replace_route(const InternalMessage<A> &old_rtmsg, 
-			     const InternalMessage<A> &new_rtmsg, 
+DebugTable<A>::replace_route(InternalMessage<A> &old_rtmsg, 
+			     InternalMessage<A> &new_rtmsg, 
 			     BGPRouteTable<A> *caller) {
     assert(caller == this->_parent);
     if (_print_tablename)
@@ -78,18 +95,20 @@ DebugTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	fprintf(_ofile, "CHANGED flag is set\n");
     if (old_rtmsg.push())
 	fprintf(_ofile, "PUSH flag is set\n");
-    fprintf(_ofile, "%s\n", old_rtmsg.route()->str().c_str());
+    print_route(*(old_rtmsg.route()), old_rtmsg.attributes());
     if (new_rtmsg.changed())
 	fprintf(_ofile, "CHANGED flag is set\n");
     if (new_rtmsg.push())
 	fprintf(_ofile, "PUSH flag is set\n");
-    fprintf(_ofile, "%s\n", new_rtmsg.route()->str().c_str());
+    print_route(*(new_rtmsg.route()), new_rtmsg.attributes());
     fflush(_ofile);
+    if (_set_is_winner)
+	new_rtmsg.route()->set_is_winner(1);
 
-    if (new_rtmsg.changed()) {
+    if (new_rtmsg.copied()) {
 	new_rtmsg.inactivate();
     }
-    if (old_rtmsg.changed()) {
+    if (old_rtmsg.copied()) {
 	old_rtmsg.inactivate();
     }
     return _canned_response;
@@ -97,7 +116,7 @@ DebugTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 
 template<class A>
 int
-DebugTable<A>::delete_route(const InternalMessage<A> &rtmsg, 
+DebugTable<A>::delete_route(InternalMessage<A> &rtmsg, 
 			    BGPRouteTable<A> *caller) {
     assert(caller == this->_parent);
     if (_print_tablename)
@@ -107,10 +126,10 @@ DebugTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	fprintf(_ofile, "CHANGED flag is set\n");
     if (rtmsg.push())
 	fprintf(_ofile, "PUSH flag is set\n");
-    fprintf(_ofile, "%s\n", rtmsg.route()->str().c_str());
+    print_route(*(rtmsg.route()), rtmsg.attributes());
     fflush(_ofile);
 
-    if (rtmsg.changed()) {
+    if (rtmsg.copied()) {
 	rtmsg.inactivate();
     }
     return 0;
@@ -128,7 +147,7 @@ DebugTable<A>::push(BGPRouteTable<A> *caller) {
 
 template<class A>
 int
-DebugTable<A>::route_dump(const InternalMessage<A> &rtmsg, 
+DebugTable<A>::route_dump(InternalMessage<A> &rtmsg, 
 			  BGPRouteTable<A> *caller,
 			  const PeerHandler */*peer*/) {
     assert(caller == this->_parent);
@@ -137,7 +156,7 @@ DebugTable<A>::route_dump(const InternalMessage<A> &rtmsg,
     fprintf(_ofile, "[DUMP]\n");
     fprintf(_ofile, "%s\n", rtmsg.route()->str().c_str());
     fflush(_ofile);
-    if (rtmsg.changed()) {
+    if (rtmsg.copied()) {
 	rtmsg.inactivate();
     }
     return 0;
@@ -145,8 +164,9 @@ DebugTable<A>::route_dump(const InternalMessage<A> &rtmsg,
 
 template<class A>
 const SubnetRoute<A>*
-DebugTable<A>::lookup_route(const IPNet<A> &net, uint32_t& genid) const {
-    return this->_parent->lookup_route(net, genid);
+DebugTable<A>::lookup_route(const IPNet<A> &net, uint32_t& genid,
+			    FPAListRef& pa_list) const {
+    return this->_parent->lookup_route(net, genid, pa_list);
 }
 
 template<class A>

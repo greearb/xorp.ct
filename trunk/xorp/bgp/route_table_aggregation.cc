@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/route_table_aggregation.cc,v 1.27 2008/07/23 05:09:35 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_aggregation.cc,v 1.28 2008/10/02 21:56:18 bms Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -52,8 +52,8 @@ AggregationTable<A>::~AggregationTable()
 
 template<class A>
 int
-AggregationTable<A>::add_route(const InternalMessage<A> &rtmsg,
-			     BGPRouteTable<A> *caller)
+AggregationTable<A>::add_route(InternalMessage<A> &rtmsg,
+			       BGPRouteTable<A> *caller)
 {
     debug_msg("\n         %s\n caller: %s\n rtmsg: %p route: %p\n%s\n",
 	      this->tablename().c_str(),
@@ -66,6 +66,7 @@ AggregationTable<A>::add_route(const InternalMessage<A> &rtmsg,
     XLOG_ASSERT(caller == this->_parent);
     XLOG_ASSERT(this->_next_table != NULL);
     XLOG_ASSERT(orig_route->nexthop_resolved());
+    XLOG_ASSERT(!rtmsg.attributes()->is_locked());
     bool must_push = false;
 
     /*
@@ -88,7 +89,10 @@ AggregationTable<A>::add_route(const InternalMessage<A> &rtmsg,
     const IPNet<A> aggr_net = IPNet<A>(orig_net.masked_addr(),
 				       aggr_prefix_len);
     SubnetRoute<A> *ibgp_r = new SubnetRoute<A>(*orig_route);
-    InternalMessage<A> ibgp_msg(ibgp_r, rtmsg.origin_peer(), rtmsg.genid());
+    InternalMessage<A> ibgp_msg(ibgp_r, 
+				rtmsg.attributes(),
+				rtmsg.origin_peer(),
+				rtmsg.genid());
 
     // propagate internal message flags
     if (rtmsg.push())
@@ -125,6 +129,10 @@ AggregationTable<A>::add_route(const InternalMessage<A> &rtmsg,
 
     // Check we don't already have the original route stored
     XLOG_ASSERT(aggr_route->components_table()->lookup_node(orig_net) == aggr_route->components_table()->end());
+
+    // We make the assumption here that nothing has modified the path
+    // attribute list since the last time it was canonicalized, or
+    // this will fail to store the chances.
     aggr_route->components_table()->insert(orig_net, ComponentRoute<A>(
 						rtmsg.route(),
 						rtmsg.origin_peer(),
@@ -137,7 +145,8 @@ AggregationTable<A>::add_route(const InternalMessage<A> &rtmsg,
      */
     if (aggr_route->net() != orig_net || aggr_route->is_suppressed()) {
 	SubnetRoute<A> *ebgp_r = new SubnetRoute<A>(*orig_route);
-	InternalMessage<A> ebgp_msg(ebgp_r, rtmsg.origin_peer(), rtmsg.genid());
+	InternalMessage<A> ebgp_msg(ebgp_r, rtmsg.attributes(),
+				    rtmsg.origin_peer(), rtmsg.genid());
 
 	// propagate internal message flags
 	if (rtmsg.from_previous_peering())
@@ -174,7 +183,7 @@ AggregationTable<A>::add_route(const InternalMessage<A> &rtmsg,
 
 template<class A>
 int
-AggregationTable<A>::delete_route(const InternalMessage<A> &rtmsg,
+AggregationTable<A>::delete_route(InternalMessage<A> &rtmsg,
 				  BGPRouteTable<A> *caller)
 {
     debug_msg("\n         %s\n caller: %s\n rtmsg: %p route: %p\n%s\n",
@@ -295,11 +304,17 @@ AggregateRoute<A>::reevaluate(AggregationTable<A> *parent)
     bool old_was_suppressed = _is_suppressed;
     bool old_was_announced = _was_announced;
     _is_suppressed = false;
-    const PathAttributeList<A> *old_pa_list = _pa_list;
+
+    PAListRef<A> old_pa_list = _pa_list;
+    // create an FPAList so we can access the elements, and perhaps
+    // pass it downstream for deletion
+    FPAListRef old_fpa_list = new FastPathAttributeList<A>(old_pa_list);
+
     NextHopAttribute<A> nhatt(A::ZERO());
     ASPath aspath;
     OriginAttribute igp_origin_att(IGP);
-    _pa_list = new PathAttributeList<A>(nhatt, aspath, igp_origin_att);
+    FPAListRef fpa_list 
+	= new FastPathAttributeList<A>(nhatt, aspath, igp_origin_att);
 
     /*
      * PHASE 1:
@@ -311,29 +326,29 @@ AggregateRoute<A>::reevaluate(AggregationTable<A> *parent)
     debug_msg("PHASE 1\n");
     for (comp_iter = _components_table.begin();
          comp_iter != _components_table.end(); comp_iter++) {
-	const PathAttributeList<A>
-		*comp_pa_list(comp_iter.payload().route()->attributes());
+	const SubnetRoute<A>* comp_route = comp_iter.payload().route();
+	PAListRef<A> comp_pa_list = comp_route->attributes();
+	FastPathAttributeList<A> comp_fpa_list(comp_pa_list);
 	debug_msg("comp_route: %s\n    %s\n",
-		  comp_iter.payload().route()->net().str().c_str(),
-		  comp_pa_list->aspath().str().c_str());
+		  comp_route->net().str().c_str(),
+		  comp_fpa_list.aspath().str().c_str());
 
 	if (comp_iter == _components_table.begin()) {
-	    if (comp_pa_list->med_att()) {
-		med = comp_pa_list->med_att()->med();
+	    if (comp_fpa_list.med_att()) {
+		med = comp_fpa_list.med_att()->med();
 	    }
-	    _pa_list->replace_AS_path(comp_pa_list->aspath());
-	    _pa_list->replace_origin((OriginType)comp_pa_list->origin());
-	    _pa_list->rehash();
+	    fpa_list->replace_AS_path(comp_fpa_list.aspath());
+	    fpa_list->replace_origin((OriginType)comp_fpa_list.origin());
 	} else {
-	    if (comp_pa_list->med_att() &&
-		med != comp_pa_list->med_att()->med()) {
+	    if (comp_fpa_list.med_att() &&
+		med != comp_fpa_list.med_att()->med()) {
 		_is_suppressed = true;
 		break;
 	    }
 
 	    // Origin attr: INCOMPLETE overrides EGP which overrides IGP
-	    if (comp_pa_list->origin() > _pa_list->origin())
-		_pa_list->replace_origin((OriginType)comp_pa_list->origin());
+	    if (comp_fpa_list.origin() > old_fpa_list->origin())
+		fpa_list->replace_origin((OriginType)comp_fpa_list.origin());
 
 	    // Update the aggregate AS path using this component route.
 	    if (this->brief_mode()) {
@@ -341,9 +356,8 @@ AggregateRoute<A>::reevaluate(AggregationTable<A> *parent)
 		 * The agggregate will have an empty AS path, in which
 		 * case we also must set the ATOMIC AGGREGATE attribute.
 		 */
-		if (_pa_list->aspath() != comp_pa_list->aspath()) {
-		    _pa_list->replace_AS_path(ASPath());
-		    _pa_list->rehash();
+		if (fpa_list->aspath() != comp_fpa_list.aspath()) {
+		    fpa_list->replace_AS_path(ASPath());
 		    must_set_atomic_aggr = true;
 		}
 	    } else {
@@ -351,35 +365,38 @@ AggregateRoute<A>::reevaluate(AggregationTable<A> *parent)
 		 * Merge the current AS path with the component route's one
 		 * by creating an AS SET for non-matching ASNs.
 		 */
-		_pa_list->replace_AS_path(ASPath(_pa_list->aspath(),
-						 comp_pa_list->aspath()));
-		_pa_list->rehash();
+		fpa_list->replace_AS_path(ASPath(old_fpa_list->aspath(),
+						comp_fpa_list.aspath()));
 	    }
 	}
 
 	// Propagate the ATOMIC AGGREGATE attribute
-	if (comp_pa_list->atomic_aggregate_att())
+	if (comp_fpa_list.atomic_aggregate_att())
 	    must_set_atomic_aggr = true;
     }
 
     // Add a MED attr if needed and allowed to
     if (med &&
-	!(_pa_list->aspath().num_segments() &&
-	  _pa_list->aspath().segment(0).type() == AS_SET)) {
+	!(fpa_list->aspath().num_segments() &&
+	  fpa_list->aspath().segment(0).type() == AS_SET)) {
 	MEDAttribute med_attr(med);
-	_pa_list->add_path_attribute(med_attr);
+	fpa_list->add_path_attribute(med_attr);
     }
 
     if (must_set_atomic_aggr) {
 	AtomicAggAttribute aa_attr;
-	_pa_list->add_path_attribute(aa_attr);
+	fpa_list->add_path_attribute(aa_attr);
     }
 
-    _pa_list->add_path_attribute(*_aggregator_attribute);
-    _pa_list->rehash();
+    fpa_list->add_path_attribute(*_aggregator_attribute);
 
-    debug_msg("OLD ATTRIBUTES:%s\n", old_pa_list->str().c_str());
-    debug_msg("NEW ATTRIBUTES:%s\n", _pa_list->str().c_str());
+    fpa_list->canonicalize();
+    _pa_list = new PathAttributeList<A>(fpa_list);
+
+    debug_msg("OLD ATTRIBUTES:%s\n", old_fpa_list->str().c_str());
+    debug_msg("NEW ATTRIBUTES:%s\n", fpa_list->str().c_str());
+
+    
 
     /*
      * Phase 2:
@@ -389,7 +406,7 @@ AggregateRoute<A>::reevaluate(AggregationTable<A> *parent)
      * version.
      */
     debug_msg("PHASE 2\n");
-    if (_was_announced && (_is_suppressed || *old_pa_list != *_pa_list)) {
+    if (_was_announced && (_is_suppressed || !(*old_fpa_list == *fpa_list))) {
 	/*
 	 * We need to send a delete request for the old aggregate
 	 * before proceeding any further.  Construct a temporary
@@ -402,6 +419,7 @@ AggregateRoute<A>::reevaluate(AggregationTable<A> *parent)
 	tmp_route->set_nexthop_resolved(true);	// Cheating
 	tmp_route->set_aggr_prefix_len(SR_AGGR_EBGP_AGGREGATE);
 	InternalMessage<A> tmp_rtmsg(tmp_route,
+				     old_fpa_list,
 				     parent->_master_plumbing.rib_handler(),
 				     GENID_UNKNOWN);
 	parent->_next_table->delete_route(tmp_rtmsg, parent);
@@ -475,7 +493,7 @@ AggregateRoute<A>::reevaluate(AggregationTable<A> *parent)
     if (!_was_announced &&
 	!_is_suppressed &&
 	_components_table.route_count() != 0 &&
-	(old_was_suppressed || *old_pa_list != *_pa_list)) {
+	(old_was_suppressed || !(*old_fpa_list == *fpa_list))) {
 	SubnetRoute<A>* tmp_route = new SubnetRoute<A>(_net,
 						       _pa_list,
 						       NULL,
@@ -483,21 +501,20 @@ AggregateRoute<A>::reevaluate(AggregationTable<A> *parent)
 	tmp_route->set_nexthop_resolved(true);	// Cheating
 	tmp_route->set_aggr_prefix_len(SR_AGGR_EBGP_AGGREGATE);
 	InternalMessage<A> tmp_rtmsg(tmp_route,
+				     fpa_list,
 				     parent->_master_plumbing.rib_handler(),
 				     GENID_UNKNOWN);
 	parent->_next_table->add_route(tmp_rtmsg, parent);
 	tmp_route->unref();
 	_was_announced = true;
     }
-
-    delete old_pa_list;
 }
 
 
 template<class A>
 int
-AggregationTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
-				   const InternalMessage<A> &new_rtmsg,
+AggregationTable<A>::replace_route(InternalMessage<A> &old_rtmsg,
+				   InternalMessage<A> &new_rtmsg,
 				   BGPRouteTable<A> *caller)
 {
     debug_msg("\n         %s\n"
@@ -592,7 +609,10 @@ AggregationTable<A>::dump_next_route(DumpIterator<A>& dump_iter) {
 						           0);
 	    tmp_route->set_nexthop_resolved(true);	// Cheating
 	    tmp_route->set_aggr_prefix_len(SR_AGGR_EBGP_AGGREGATE);
-	    InternalMessage<A> rt_msg(tmp_route, peer, GENID_UNKNOWN);
+	    PAListRef<A> pa_list = aggr_rt->pa_list();
+	    FPAListRef fpa_list = 
+		new FastPathAttributeList<A>(pa_list);
+	    InternalMessage<A> rt_msg(tmp_route, fpa_list, peer, GENID_UNKNOWN);
 	   
 	    this->_next_table->route_dump(rt_msg,
 					  (BGPRouteTable<A>*)this,
@@ -613,7 +633,7 @@ AggregationTable<A>::dump_next_route(DumpIterator<A>& dump_iter) {
 
 template<class A>
 int
-AggregationTable<A>::route_dump(const InternalMessage<A> &rtmsg,
+AggregationTable<A>::route_dump(InternalMessage<A> &rtmsg,
 				BGPRouteTable<A> *caller,
 				const PeerHandler *dump_peer)
 {
@@ -704,11 +724,13 @@ AggregationTable<A>::route_dump(const InternalMessage<A> &rtmsg,
 
 template<class A>
 const SubnetRoute<A>*
-AggregationTable<A>::lookup_route(const IPNet<A> &net, uint32_t& genid) const
+AggregationTable<A>::lookup_route(const IPNet<A> &net,
+				  uint32_t& genid, 
+				  FPAListRef& pa_list) const
 {
     debug_msg("Lookup_route\n");
     // XXX Can this ever be called?  REVISIT!!!
-    return this->_parent->lookup_route(net, genid);
+    return this->_parent->lookup_route(net, genid, pa_list);
 }
 
 

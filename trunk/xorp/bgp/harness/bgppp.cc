@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/harness/bgppp.cc,v 1.17 2008/07/23 05:09:42 pavlin Exp $"
+#ident "$XORP: xorp/bgp/harness/bgppp.cc,v 1.18 2008/10/02 21:56:26 bms Exp $"
 
 /*
 ** BGP Pretty Print
@@ -30,6 +30,7 @@
 #include "libxorp/xlog.h"
 
 #include "bgp/packet.hh"
+#include "bgp/peer.hh"
 #include "bgppp.hh"
 
 string
@@ -51,7 +52,7 @@ bgppp(const uint8_t *buf, const size_t len, const BGPPeerData *peerdata)
 	}
 	    break;
 	case MESSAGETYPEUPDATE: {
-	    UpdatePacket pac(buf, len, peerdata);
+	    UpdatePacket pac(buf, len, peerdata, 0, false);
 	    result = pac.str().c_str();
 	}
 	    break;

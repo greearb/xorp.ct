@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/bgp/route_table_fanout.hh,v 1.25 2008/07/23 05:09:36 pavlin Exp $
+// $XORP: xorp/bgp/route_table_fanout.hh,v 1.26 2008/10/02 21:56:19 bms Exp $
 
 #ifndef __BGP_ROUTE_TABLE_FANOUT_HH__
 #define __BGP_ROUTE_TABLE_FANOUT_HH__
@@ -88,19 +88,20 @@ public:
     int remove_next_table(BGPRouteTable<A> *next_table);
     int replace_next_table(BGPRouteTable<A> *old_next_table,
 			   BGPRouteTable<A> *new_next_table);
-    int add_route(const InternalMessage<A> &rtmsg,
+    int add_route(InternalMessage<A> &rtmsg,
 		  BGPRouteTable<A> *caller);
-    int replace_route(const InternalMessage<A> &old_rtmsg,
-		      const InternalMessage<A> &new_rtmsg,
+    int replace_route(InternalMessage<A> &old_rtmsg,
+		      InternalMessage<A> &new_rtmsg,
 		      BGPRouteTable<A> *caller);
-    int delete_route(const InternalMessage<A> &rtmsg, 
+    int delete_route(InternalMessage<A> &rtmsg, 
 		     BGPRouteTable<A> *caller);
-    int route_dump(const InternalMessage<A> &rtmsg,
+    int route_dump(InternalMessage<A> &rtmsg,
 		   BGPRouteTable<A> *caller,
 		   const PeerHandler *dump_peer);
     int push(BGPRouteTable<A> *caller);
     const SubnetRoute<A> *lookup_route(const IPNet<A> &net,
-				       uint32_t& genid) const;
+				       uint32_t& genid,
+				       FPAListRef& pa_list) const;
 
     RouteTableType type() const {return FANOUT_TABLE;}
     string str() const;
@@ -127,10 +128,10 @@ public:
     void print_queue();
 private:
     void add_to_queue(RouteQueueOp operation,
-		      const InternalMessage<A> &rtmsg,
+		      InternalMessage<A> &rtmsg,
 		      const list<PeerTableInfo<A>*>& queued_peers);
-    void add_replace_to_queue(const InternalMessage<A> &old_rtmsg,
-			      const InternalMessage<A> &new_rtmsg,
+    void add_replace_to_queue(InternalMessage<A> &old_rtmsg,
+			      InternalMessage<A> &new_rtmsg,
 			      const list<PeerTableInfo<A>*>& queued_peers);
     void add_push_to_queue(const list<PeerTableInfo<A>*>& queued_peers,
 			   const PeerHandler *origin_peer);

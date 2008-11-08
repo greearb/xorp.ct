@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.93 2008/07/23 05:09:31 pavlin Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.94 2008/10/02 21:56:14 bms Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -76,6 +76,16 @@ BGPMain::BGPMain(EventLoop& eventloop)
     _next_hop_resolver_ipv6 = new NextHopResolver<IPv6>(_xrl_router,
 							_eventloop,
 							*this);
+
+    // start up the attribute managers
+    PAListRef<IPv4>* palist4 =  new PAListRef<IPv4>(0);
+    palist4->create_attribute_manager();
+    delete palist4;
+
+    PAListRef<IPv6>* palist6 =  new PAListRef<IPv6>(0);
+    palist6->create_attribute_manager();
+    delete palist6;
+
     _plumbing_unicast = new BGPPlumbing(SAFI_UNICAST,
 					_rib_ipc_handler,
 					_aggregation_handler,

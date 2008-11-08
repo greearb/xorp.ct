@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/test_subnet_route.cc,v 1.12 2008/07/23 05:09:39 pavlin Exp $"
+#ident "$XORP: xorp/bgp/test_subnet_route.cc,v 1.13 2008/10/02 21:56:23 bms Exp $"
 
 #include "bgp_module.h"
 
@@ -61,17 +61,17 @@ test_subnet_route1(TestInfo& info, IPNet<A> net)
 {
     DOUT(info) << info.test_name() << endl;
 
-    PathAttributeList<A> pa;
+    FPAListRef fpa = new FastPathAttributeList<A>();
     A nexthop;
     NextHopAttribute<A> nha(nexthop);
-    pa.add_path_attribute(nha);
+    fpa->add_path_attribute(nha);
     ASPathAttribute aspa(ASPath("1,2,3"));
-    pa.add_path_attribute(aspa);
+    fpa->add_path_attribute(aspa);
+    PAListRef<A> pa = new PathAttributeList<A>(fpa);
     RefTrie<A, const SubnetRoute<A> > route_table;
 
     for(int i = 0; i < routes; i++) {
-	pa.rehash();
-	SubnetRoute<A> *route = new SubnetRoute<A>(net, &pa, 0);
+	SubnetRoute<A> *route = new SubnetRoute<A>(net, pa, 0);
 	route_table.insert(net, *route);
 	route->unref();
 	++net;
@@ -100,19 +100,21 @@ test_subnet_route2(TestInfo& info, IPNet<A> net)
 {
     DOUT(info) << info.test_name() << endl;
 
-    PathAttributeList<A> pa;
+    FPAListRef fpa = new FastPathAttributeList<A>();
     A nexthop;
     NextHopAttribute<A> nha(nexthop);
-    pa.add_path_attribute(nha);
+    fpa->add_path_attribute(nha);
     ASPathAttribute aspa(ASPath("1,2,3"));
-    pa.add_path_attribute(aspa);
+    fpa->add_path_attribute(aspa);
+    PAListRef<A> pa = new PathAttributeList<A>(fpa);
     RefTrie<A, const SubnetRoute<A> > route_table;
 
     for(int i = 0; i < routes; i++) {
  	++nexthop;
- 	pa.replace_nexthop(nexthop);
-	pa.rehash();
-	SubnetRoute<A> *route = new SubnetRoute<A>(net, &pa, 0);
+ 	fpa->replace_nexthop(nexthop);
+	pa.release();
+	pa = new PathAttributeList<A>(fpa);
+	SubnetRoute<A> *route = new SubnetRoute<A>(net, pa, 0);
 	route_table.insert(net, *route);
 	route->unref();
 	++net;
