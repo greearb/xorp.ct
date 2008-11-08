@@ -19,15 +19,23 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxorp/test_sched.cc,v 1.3 2008/11/07 21:49:31 abittau Exp $"
+#ident "$XORP: xorp/libxorp/test_sched.cc,v 1.4 2008/11/07 21:49:50 abittau Exp $"
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/eventloop.hh"
 #include "libxorp/exceptions.hh"
-#include "libcomm/comm_api.h"
 #include "libxorp/asyncio.hh"
+
+// XXX we can't depend on libcomm because make check will compile and perform
+// testing together, so when we're testing libxorp, libcomm won't be built yet.
+namespace Libcomm {
+
+#include "libcomm/comm_user.c"
+#include "libcomm/comm_sock.c"
+
+} // namespace Libcomm
 
 // 
 // Test the scheduling of file descriptor handling, tasks and timers, checking
@@ -112,7 +120,7 @@ Socket::Socket(const xsock_t& s)
       _did_read(false),
       _did_write(false)
 {
-    if (comm_sock_set_blocking(_s, 0) != XORP_OK)
+    if (Libcomm::comm_sock_set_blocking(_s, 0) != XORP_OK)
 	    xorp_throw(TestException, "comm_sock_set_blocking()");
 
     create_ops(XorpTask::PRIORITY_DEFAULT);
@@ -123,7 +131,7 @@ Socket::~Socket()
     delete _reader;
     delete _writer;
 
-    if (comm_sock_close(_s) != XORP_OK)
+    if (Libcomm::comm_sock_close(_s) != XORP_OK)
 	xorp_throw(TestException, "comm_sock_close()");
 
     for (BUFFERS::iterator i = _buffers.begin(); i != _buffers.end(); ++i)
@@ -270,7 +278,7 @@ SocketPair::SocketPair()
 
     memset(_s, 0, sizeof(_s));
 
-    if (comm_sock_pair(AF_UNIX, SOCK_STREAM, 0, s) != XORP_OK)
+    if (Libcomm::comm_sock_pair(AF_UNIX, SOCK_STREAM, 0, s) != XORP_OK)
 	xorp_throw(TestException, "comm_sock_pair()");
 
     for (unsigned i = 0; i < 2; i++)
@@ -549,7 +557,7 @@ main(int argc, char *argv[])
 	}
     }
 
-    if (comm_init() != XORP_OK)
+    if (Libcomm::comm_init() != XORP_OK)
 	XLOG_FATAL("comm_init()");
 
     try {
@@ -564,7 +572,7 @@ main(int argc, char *argv[])
     else
 	xprintf("=(\n");
 
-    comm_exit();
+    Libcomm::comm_exit();
 
     xlog_stop();
     xlog_exit();

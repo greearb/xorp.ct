@@ -142,8 +142,8 @@ test_run_command_LDADD = $(LDADD)
 test_run_command_DEPENDENCIES = $(noinst_LTLIBRARIES)
 am_test_sched_OBJECTS = test_sched.$(OBJEXT)
 test_sched_OBJECTS = $(am_test_sched_OBJECTS)
-test_sched_DEPENDENCIES = $(top_builddir)/libcomm/libcomm.la \
-	$(top_builddir)/libxorp/libxorp.la
+test_sched_LDADD = $(LDADD)
+test_sched_DEPENDENCIES = $(noinst_LTLIBRARIES)
 am_test_service_OBJECTS = test_service.$(OBJEXT)
 test_service_OBJECTS = $(am_test_service_OBJECTS)
 test_service_LDADD = $(LDADD)
@@ -420,10 +420,6 @@ test_trie_SOURCES = test_trie.cc
 test_types_SOURCES = test_types.cc
 test_utils_SOURCES = test_utils.cc
 test_vif_SOURCES = test_vif.cc
-
-# -- Test programs extra libraries
-test_sched_LDADD = $(top_builddir)/libcomm/libcomm.la \
-	$(top_builddir)/libxorp/libxorp.la
 
 # -- Library Sources
 libxorp_la_SOURCES = libxorp_module.h daemon.h debug.h ether_compat.h \

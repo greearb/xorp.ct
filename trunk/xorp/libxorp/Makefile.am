@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libxorp/Makefile.am,v 1.55 2008/10/03 03:15:37 pavlin Exp $
+## $XORP: xorp/libxorp/Makefile.am,v 1.56 2008/11/07 21:44:50 abittau Exp $
 ##
 
 # -- Real Programs
@@ -104,10 +104,6 @@ test_trie_SOURCES	= test_trie.cc
 test_types_SOURCES	= test_types.cc
 test_utils_SOURCES	= test_utils.cc
 test_vif_SOURCES	= test_vif.cc
-
-# -- Test programs extra libraries
-test_sched_LDADD	= $(top_builddir)/libcomm/libcomm.la
-test_sched_LDADD       += $(top_builddir)/libxorp/libxorp.la
 
 # -- Library Sources
 libxorp_la_SOURCES  = libxorp_module.h
