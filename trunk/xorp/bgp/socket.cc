@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/socket.cc,v 1.56 2008/07/23 05:09:38 pavlin Exp $"
+#ident "$XORP: xorp/bgp/socket.cc,v 1.57 2008/10/02 21:56:21 bms Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME 
@@ -180,7 +180,9 @@ SocketClient::disconnect()
     **
     ** Look at "BGPPeer::send_notification_complete".
     */
-    XLOG_ASSERT(!_disconnecting);
+    if (_disconnecting)
+	return;
+//     XLOG_ASSERT(!_disconnecting);
 
     _disconnecting = true;
     async_remove();
