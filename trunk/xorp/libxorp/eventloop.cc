@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxorp/eventloop.cc,v 1.47 2008/10/22 00:26:47 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/eventloop.cc,v 1.48 2008/11/02 05:15:01 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -47,6 +47,11 @@ EventLoop::EventLoop()
     XLOG_ASSERT(eventloop_instance_count == 0);
     XLOG_ASSERT(_last_ev_run == 0);
     eventloop_instance_count++;
+
+    // Totally unnecessary initialization should stop complaints from
+    // clever tools.
+    for (int i = 0; i < XorpTask::PRIORITY_INFINITY; i++)
+	_last_ev_type[i] = true;
 
     //
     // XXX: Ignore SIGPIPE, because we always check the return code.
@@ -148,7 +153,7 @@ EventLoop::do_work(bool can_block)
 	_timer_list.run();
 
     } else if ( (selector_priority != XorpTask::PRIORITY_INFINITY)
-		&& (selector_priority <= task_priority) ) {
+		&& (selector_priority < task_priority) ) {
 
 	// the most important thing to run next is a selector
 #ifdef HOST_OS_WINDOWS
@@ -157,11 +162,32 @@ EventLoop::do_work(bool can_block)
 	_selector_list.wait_and_dispatch(t);
 #endif
 
-    } else if (task_priority != XorpTask::PRIORITY_INFINITY) {
-
+    } else if ( (task_priority != XorpTask::PRIORITY_INFINITY)	
+		 && (task_priority < selector_priority) ) {
+		     
 	// the most important thing to run next is a task
 	_task_list.run();
 
+    } else if ( (selector_priority != XorpTask::PRIORITY_INFINITY)
+		&& (task_priority != XorpTask::PRIORITY_INFINITY) ) {
+		    XLOG_ASSERT(selector_priority == task_priority);
+		    XLOG_ASSERT(task_priority < XorpTask::PRIORITY_INFINITY);
+
+		    // There is a task and selector event of the same
+		    // priority to guard against starvation flip
+		    // between the two.
+
+		    if (_last_ev_type[task_priority]) {
+			_task_list.run();
+			_last_ev_type[task_priority] = false;
+		    } else {
+#ifdef HOST_OS_WINDOWS
+			_win_dispatcher.wait_and_dispatch(t);
+#else
+			_selector_list.wait_and_dispatch(t);
+#endif
+			_last_ev_type[task_priority] = true;
+		    }
     } else {
 	if (!can_block)
 	    return false;

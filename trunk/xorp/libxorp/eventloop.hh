@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxorp/eventloop.hh,v 1.39 2008/11/02 05:15:01 pavlin Exp $
+// $XORP: xorp/libxorp/eventloop.hh,v 1.40 2008/11/04 12:58:40 bms Exp $
 
 #ifndef __LIBXORP_EVENTLOOP_HH__
 #define __LIBXORP_EVENTLOOP_HH__
@@ -362,6 +362,8 @@ private:
     time_t 		_last_ev_run;	// 0 - Means run not called yet.
     time_t 		_last_warned;
     bool		_is_debug;	// If true, debug enabled
+    // Was the last event at this priority a selector or a task.
+    bool		_last_ev_type[XorpTask::PRIORITY_INFINITY]; 
 #ifdef HOST_OS_WINDOWS
     WinDispatcher	_win_dispatcher;
 #else
