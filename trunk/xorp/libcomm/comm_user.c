@@ -31,7 +31,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_user.c,v 1.38 2008/09/27 16:13:13 pavlin Exp $"
+#ident "$XORP: xorp/libcomm/comm_user.c,v 1.39 2008/11/09 08:17:29 abittau Exp $"
 
 /*
  * COMM socket library higher `sock' level implementation.
@@ -305,7 +305,7 @@ comm_bind_tcp(const struct sockaddr *sock, int is_blocking)
 
     XLOG_UNREACHABLE();
 
-    return (xsock_t) XORP_ERROR;
+    return (XORP_BAD_SOCKET);
 }
 
 xsock_t
