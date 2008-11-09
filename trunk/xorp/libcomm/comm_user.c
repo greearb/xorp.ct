@@ -31,7 +31,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_user.c,v 1.37 2008/09/25 15:38:40 atanu Exp $"
+#ident "$XORP: xorp/libcomm/comm_user.c,v 1.38 2008/09/27 16:13:13 pavlin Exp $"
 
 /*
  * COMM socket library higher `sock' level implementation.
@@ -300,12 +300,12 @@ comm_bind_tcp(const struct sockaddr *sock, int is_blocking)
 #endif /* HAVE_IPV6 */
     default:
 	XLOG_FATAL("Error comm_bind_tcp invalid family = %d", sock->sa_family);
-	return (XORP_ERROR);
+	break;
     }
 
     XLOG_UNREACHABLE();
 
-    return XORP_ERROR;
+    return (xsock_t) XORP_ERROR;
 }
 
 xsock_t

@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxorp/test_sched.cc,v 1.4 2008/11/07 21:49:50 abittau Exp $"
+#ident "$XORP: xorp/libxorp/test_sched.cc,v 1.5 2008/11/08 00:41:03 abittau Exp $"
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"
@@ -27,6 +27,10 @@
 #include "libxorp/eventloop.hh"
 #include "libxorp/exceptions.hh"
 #include "libxorp/asyncio.hh"
+
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
 
 // XXX we can't depend on libcomm because make check will compile and perform
 // testing together, so when we're testing libxorp, libcomm won't be built yet.
