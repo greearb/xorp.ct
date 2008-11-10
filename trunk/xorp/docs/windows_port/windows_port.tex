@@ -1,5 +1,5 @@
 %
-% $XORP$
+% $XORP: xorp/docs/windows_port/windows_port.tex,v 1.1 2008/11/09 20:47:57 bms Exp $
 %
 
 \documentclass[11pt]{article}
@@ -12,6 +12,7 @@
 \usepackage{times}
 \usepackage{latexsym}
 \usepackage{epsfig}
+\usepackage{ifpdf}
 \usepackage{graphicx}
 \usepackage{xspace}
 \usepackage{color}
@@ -27,6 +28,15 @@
 %\usepackage[dvipdf]{graphics}
 %\usepackage[dvips]{graphicx}
 %\usepackage{xorp}
+
+% The following is needed in order to make the code compatible
+% with both latex/dvips and pdflatex.
+%\ifx\pdftexversion\undefined
+%\usepackage[dvips]{graphicx}
+%\else
+%\usepackage{graphicx}
+%\DeclareGraphicsRule{*}{mps}{*}{}
+%\fi
 
 \definecolor{gray}{rgb}{0.5,0.5,0.5}
 \newcommand{\etc}{\emph{etc.}\xspace}
@@ -87,7 +97,7 @@ challenge which was met successfully.
 A XORP router  was
 demonstrated in July 2005, at Microsoft Research in Redmond.
 It was hosted on commodity PC hardware, running Windows Server 2003,
-and succesfully handled a full eBGP feed of around 120,000 IPv4 route prefixes.
+and successfully handled a full eBGP feed of around 120,000 IPv4 route prefixes.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{The initial port}
@@ -306,10 +316,12 @@ The interface is independent of the underlying operating system.
 Each I/O class interacts with {\tt EventLoop} to register notifications
 of pending I/O events.
 
-%\begin{center}
-%\includegraphics[bb=0 0 778 570]{figs/windispatcher}
-% windispatcher.svg: 778x570 pixel, 72dpi, 27.45x20.11 cm, bb=0 0 778 570
-%\end{center}
+\begin{figure}
+ \centering
+ \includegraphics[width=12cm]{figs/windispatcher.pdf}
+ % windispatcher.pdf: 622x456 pixel, 72dpi, 21.94x16.09 cm, bb=0 0 622 456
+ \caption{UML class diagram of portable I/O facilities}
+\end{figure}
 
 Historically, XORP only supported UNIX-like systems. Therefore,
 the design of the I/O facilities is layered on top of
@@ -1063,7 +1075,7 @@ to those where the XORP process's primary
 Windows thread is already asleep.
 
 {\em Note:} This API can only wait on up to 64 object handles at any time.
-As described earlier, this is due to the multi-threadeded design
+As described earlier, this is due to the multi-threaded design
 of the Windows kernel.
 To date, it has been possible to run a full XORP router
 despite this limitation.
