@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/route_table_nhlookup.cc,v 1.31 2008/10/02 21:56:20 bms Exp $"
+#ident "$XORP: xorp/bgp/route_table_nhlookup.cc,v 1.32 2008/11/08 06:14:39 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -203,7 +203,7 @@ NhLookupTable<A>::replace_route(InternalMessage<A> &old_rtmsg,
     debug_msg("need queuing %s\n", bool_c_str(new_msg_needs_queuing));
 
     InternalMessage<A>* real_old_msg = &old_rtmsg;
-    SubnetRoute<A>* preserve_route;
+    SubnetRoute<A>* preserve_route = NULL;
     bool propagate_as_add = false;
     if (old_msg_is_queued) {
 	// there was an entry for this net in our queue awaiting
