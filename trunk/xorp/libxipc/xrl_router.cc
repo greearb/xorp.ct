@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.69 2008/10/02 21:57:25 bms Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.70 2008/11/02 18:35:58 atanu Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -479,8 +479,14 @@ XrlRouter::get_sender(const Xrl& xrl, FinderDBEntry* dbe)
     _senders.push_back(s);
     _senders2[xrl.target()] = s;
 
+    // Don't do this here as it is set in the Xrl that is stored with
+    // the finder client, so is not used. But if the connection needs
+    // to be re-established then it will be used and the state will be
+    // bad.
+#if	0
     xrl.set_resolved(true);
     xrl.set_resolved_sender(s);
+#endif
 
     return s;
 }
