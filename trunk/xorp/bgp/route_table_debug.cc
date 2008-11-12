@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/route_table_debug.cc,v 1.18 2008/10/02 21:56:19 bms Exp $"
+#ident "$XORP: xorp/bgp/route_table_debug.cc,v 1.19 2008/11/08 06:14:38 mjh Exp $"
 
 //#define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -54,7 +54,7 @@ DebugTable<A>::print_route(const SubnetRoute<A>& route, FPAListRef palist) const
     s = "SubnetRoute:\n";
     s += "  Net: " + route.net().str() + "\n";
     s += "  PAList: " + palist->str() + "\n";
-    fprintf(_ofile, s.c_str());
+    fputs(s.c_str(), _ofile);
 }
 
 
