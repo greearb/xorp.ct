@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/bgp/packet.hh,v 1.47 2008/10/02 21:56:16 bms Exp $
+// $XORP: xorp/bgp/packet.hh,v 1.48 2008/11/08 06:14:36 mjh Exp $
 
 #ifndef __BGP_PACKET_HH__
 #define __BGP_PACKET_HH__
@@ -250,7 +250,7 @@ UpdatePacket::mpreach(Safi safi) const
 {
     XLOG_ASSERT(!(A::ip_version() == 4 && SAFI_UNICAST == safi));
     FastPathAttributeList<IPv4>& fpalist = *_pa_list;
-    MPReachNLRIAttribute<A>* mpreach = fpalist.mpreach<A>(safi);
+    MPReachNLRIAttribute<A>* mpreach = fpalist.template mpreach<A>(safi);
     return mpreach;
 }
 
@@ -260,7 +260,7 @@ UpdatePacket::mpunreach(Safi safi) const
 {
     XLOG_ASSERT(!(A::ip_version() == 4 && SAFI_UNICAST == safi));
     FastPathAttributeList<IPv4>& fpalist = *_pa_list;
-    MPUNReachNLRIAttribute<A>* mpunreach = fpalist.mpunreach<A>(safi);
+    MPUNReachNLRIAttribute<A>* mpunreach = fpalist.template mpunreach<A>(safi);
     return mpunreach;
 }
 

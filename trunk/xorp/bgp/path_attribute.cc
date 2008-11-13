@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.93 2008/07/23 05:09:34 pavlin Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.98 2008/11/08 06:14:36 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -2833,7 +2833,7 @@ FastPathAttributeList<A>::load_raw_data(const uint8_t *data,
 	if (mp4_reach_att) {
 	    Safi safi = mp4_reach_att->safi();
 	    // if we didn't negotiate the SAFI, remove the attribute
-	    if (!peerdata->multiprotocol<IPv4>(safi, dir)) {
+	    if (!peerdata->template multiprotocol<IPv4>(safi, dir)) {
 		delete _att[MP_REACH_NLRI];
 		_att[MP_REACH_NLRI] = 0;
 	    } else {
@@ -2857,7 +2857,7 @@ FastPathAttributeList<A>::load_raw_data(const uint8_t *data,
 	if (mp6_reach_att) {
 	    Safi safi = mp6_reach_att->safi();
 	    // if we didn't negotiate the SAFI, remove the attribute
-	    if (!peerdata->multiprotocol<IPv6>(safi, dir)) {
+	    if (!peerdata->template multiprotocol<IPv6>(safi, dir)) {
 		delete _att[MP_REACH_NLRI];
 		_att[MP_REACH_NLRI] = 0;
 	    } else {
@@ -2881,7 +2881,7 @@ FastPathAttributeList<A>::load_raw_data(const uint8_t *data,
 	if (mp4_unreach_att) {
 	    Safi safi = mp4_unreach_att->safi();
 	    // if we didn't negotiate the SAFI, remove the attribute
-	    if (!peerdata->multiprotocol<IPv4>(safi, dir)) {
+	    if (!peerdata->template multiprotocol<IPv4>(safi, dir)) {
 		delete _att[MP_UNREACH_NLRI];
 		_att[MP_UNREACH_NLRI] = 0;
 	    }
@@ -2891,7 +2891,7 @@ FastPathAttributeList<A>::load_raw_data(const uint8_t *data,
 	if (mp6_unreach_att) {
 	    Safi safi = mp6_unreach_att->safi();
 	    // if we didn't negotiate the SAFI, remove the attribute
-	    if (!peerdata->multiprotocol<IPv6>(safi, dir)) {
+	    if (!peerdata->template multiprotocol<IPv6>(safi, dir)) {
 		delete _att[MP_UNREACH_NLRI];
 		_att[MP_UNREACH_NLRI] = 0;
 	    }
