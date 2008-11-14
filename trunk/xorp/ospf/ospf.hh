@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/ospf/ospf.hh,v 1.113 2008/07/23 05:11:08 pavlin Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.114 2008/10/02 21:57:48 bms Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -468,7 +468,7 @@ class Ospf {
      * Used to send traffic on the IO interface.
      */
     bool transmit(const string& interface, const string& vif,
-		  A dst, A src, uint8_t* data, uint32_t len);
+		  A dst, A src, int ttl, uint8_t* data, uint32_t len);
     
     /**
      * The callback method that is called when data arrives on the IO

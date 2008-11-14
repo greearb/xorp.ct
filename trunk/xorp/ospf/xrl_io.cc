@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.51 2008/10/02 21:57:50 bms Exp $"
+#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.52 2008/10/03 22:52:03 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -88,7 +88,7 @@ template <>
 bool
 XrlIO<IPv4>::send(const string& interface, const string& vif,
 		  IPv4 dst, IPv4 src,
-		  uint8_t* data, uint32_t len)
+		  int ttl, uint8_t* data, uint32_t len)
 {
     bool success;
 
@@ -110,8 +110,8 @@ XrlIO<IPv4>::send(const string& interface, const string& vif,
 	src,
 	dst,
 	get_ip_protocol_number(),
-	-1,		// XXX: let the FEA set it
-	-1,		// XXX: let the FEA set it
+	ttl,
+	-1,		// XXX: let the FEA set TOS
 	get_ip_router_alert(),
 	true,		// ip_internet_control
 	payload,
@@ -124,7 +124,7 @@ template <>
 bool
 XrlIO<IPv6>::send(const string& interface, const string& vif,
 		  IPv6 dst, IPv6 src,
-		  uint8_t* data, uint32_t len)
+		  int ttl, uint8_t* data, uint32_t len)
 {
     bool success;
 
@@ -147,8 +147,8 @@ XrlIO<IPv6>::send(const string& interface, const string& vif,
 	src,
 	dst,
 	get_ip_protocol_number(),
-	dst.is_multicast() ? 1 : -1,		// XXX: let the FEA set it
-	-1,					// XXX: let the FEA set it
+	dst.is_multicast() ? 1 : ttl,
+	-1,					// XXX: let the FEA set TOS
 	get_ip_router_alert(),
 	true,					// ip_internet_control
 	ext_headers_type,

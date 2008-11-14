@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/ospf/xrl_io.hh,v 1.33 2008/07/23 05:11:11 pavlin Exp $
+// $XORP: xorp/ospf/xrl_io.hh,v 1.34 2008/10/02 21:57:50 bms Exp $
 
 #ifndef __OSPF_XRL_IO_HH__
 #define __OSPF_XRL_IO_HH__
@@ -226,7 +226,7 @@ class XrlIO : public IO<A>,
      */
     bool send(const string& interface, const string& vif, 
 	      A dst, A src,
-	      uint8_t* data, uint32_t len);
+	      int ttl, uint8_t* data, uint32_t len);
 
     /**
      * Enable the interface/vif to receive frames.

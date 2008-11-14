@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/ospf/ospf.cc,v 1.99 2008/07/23 05:11:08 pavlin Exp $"
+#ident "$XORP: xorp/ospf/ospf.cc,v 1.100 2008/10/02 21:57:48 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -296,12 +296,13 @@ template <typename A>
 bool
 Ospf<A>::transmit(const string& interface, const string& vif,
 		  A dst, A src,
-		  uint8_t* data, uint32_t len)
+		  int ttl, uint8_t* data, uint32_t len)
 {
-    XLOG_TRACE(trace()._packets, "Interface %s Vif %s data %p len %u\n",
-	      interface.c_str(), vif.c_str(), data, len);
-    debug_msg("Interface %s Vif %s data %p len %u\n",
-	      interface.c_str(), vif.c_str(), data, len);
+    XLOG_TRACE(trace()._packets,
+              "Interface %s Vif %s ttl %d data %p len %u\n",
+	      interface.c_str(), vif.c_str(), ttl, data, len);
+    debug_msg("Interface %s Vif %s ttl %d data %p len %u\n",
+	      interface.c_str(), vif.c_str(), ttl, data, len);
 
     // If the transport is IPv6 then the checksum has to include the
     // pseudo header. In the IPv4 case this function is a noop.
@@ -330,7 +331,7 @@ Ospf<A>::transmit(const string& interface, const string& vif,
     }
 #endif
 
-    return _io->send(interface, vif, dst, src, data, len);
+    return _io->send(interface, vif, dst, src, ttl, data, len);
 }
 
 template <typename A>

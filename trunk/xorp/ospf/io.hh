@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/ospf/io.hh,v 1.29 2008/07/23 05:11:08 pavlin Exp $
+// $XORP: xorp/ospf/io.hh,v 1.30 2008/10/02 21:57:47 bms Exp $
 
 #ifndef __OSPF_IO_HH__
 #define __OSPF_IO_HH__
@@ -48,7 +48,7 @@ class IO : public ServiceBase {
      */
     virtual bool send(const string& interface, const string& vif,
 		      A dst, A src,
-		      uint8_t* data, uint32_t len) = 0;
+		      int ttl, uint8_t* data, uint32_t len) = 0;
 
     /**
      * Send router alerts in IP packets?

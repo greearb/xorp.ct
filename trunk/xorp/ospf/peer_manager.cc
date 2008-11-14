@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.158 2008/07/23 05:11:09 pavlin Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.159 2008/10/02 21:57:48 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -52,6 +52,9 @@
 #include "peer.hh"
 #include "peer_manager.hh"
 
+#ifndef VLINK_DEF_TTL
+#define VLINK_DEF_TTL 64    // Default TTL for virtual link packets.
+#endif
 
 template <typename A>
 PeerManager<A>::~PeerManager()
@@ -874,11 +877,12 @@ PeerManager<A>::transmit(const string& interface, const string& vif,
 	string interface;
 	string vif;
 	if (_vlink.get_physical_interface_vif(src, dst, interface, vif))
-	    return _ospf.transmit(interface, vif, dst, src, data, len);
+	    return _ospf.transmit(interface, vif, dst, src,
+                                  VLINK_DEF_TTL, data, len);
 	// We didn't find a match fall through.
     }
 
-    return _ospf.transmit(interface, vif, dst, src, data, len);
+    return _ospf.transmit(interface, vif, dst, src, -1, data, len);
 }
 
 template <typename A>

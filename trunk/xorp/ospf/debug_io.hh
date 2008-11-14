@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/ospf/debug_io.hh,v 1.28 2008/07/23 05:11:07 pavlin Exp $
+// $XORP: xorp/ospf/debug_io.hh,v 1.29 2008/10/02 21:57:47 bms Exp $
 
 #ifndef __OSPF_DEBUG_IO_HH__
 #define __OSPF_DEBUG_IO_HH__
@@ -79,7 +79,7 @@ class DebugIO : public IO<A> {
      */
     bool send(const string& interface, const string& vif, 
 	      A dst, A src,
-	      uint8_t* data, uint32_t len)
+	      int ttl, uint8_t* data, uint32_t len)
     {
 	pp("SEND", 0, interface, vif, dst, src, data, len);
 
@@ -89,6 +89,7 @@ class DebugIO : public IO<A> {
 	if (!_forward_cb.is_empty())
 	    _forward_cb->dispatch(interface, vif, dst, src, data, len);
 	return true;
+	UNUSED(ttl);
     }
 
     /**
