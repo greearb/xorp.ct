@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/test_fea_rawlink.cc,v 1.5 2008/09/26 21:41:02 pavlin Exp $"
+#ident "$XORP: xorp/fea/test_fea_rawlink.cc,v 1.6 2008/10/02 21:56:50 bms Exp $"
 
 #include "fea_module.h"
 
@@ -492,6 +492,12 @@ test_main(IPv4 finder_host, uint16_t finder_port,
     vector<XorpTimer> ev;	// Vector for timed events
     bool eflag(false);		// Error flag set by timed events
     Mac mac;
+
+#ifndef HAVE_PCAP
+    fprintf(stdout, "Test Skipped: No L2 I/O mechanism found: "
+	    "HAVE_PCAP is not defined.\n");
+    return 0;
+#endif
 
     //
     // Wait for FEA bringup and pull the IfTree.
