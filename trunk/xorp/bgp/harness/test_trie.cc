@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/harness/test_trie.cc,v 1.28 2008/10/02 21:56:27 bms Exp $"
+#ident "$XORP: xorp/bgp/harness/test_trie.cc,v 1.29 2008/11/08 06:14:45 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -298,8 +298,8 @@ test_single_update(TestInfo& info, A nexthop, IPNet<A> net)
     // we force IBGP, as this does fewer tests  
     peerdata.compute_peer_type(); 
     // force negotiated, or our parser will strip out the v6 attributes
-    peerdata.set_multiprotocol<IPv6>(SAFI_UNICAST, BGPPeerData::NEGOTIATED);
-    peerdata.set_multiprotocol<IPv6>(SAFI_UNICAST, BGPPeerData::SENT);
+    peerdata.template set_multiprotocol<IPv6>(SAFI_UNICAST, BGPPeerData::NEGOTIATED);
+    peerdata.template set_multiprotocol<IPv6>(SAFI_UNICAST, BGPPeerData::SENT);
 
     /*
     ** Verify that the trie is empty.
@@ -414,7 +414,7 @@ test_replay(TestInfo& info, A nexthop, IPNet<A> net)
     localdata.set_as(AsNum(0));                                                                   BGPPeerData peerdata(localdata, iptuple, AsNum(0), IPv4(),0);                                 // we force IBGP, as this does fewer tests                                               
     peerdata.compute_peer_type();                                                              
     // force negotiated, or our parser will strip out the v6 attributes
-    peerdata.set_multiprotocol<IPv6>(SAFI_UNICAST, BGPPeerData::NEGOTIATED);                      peerdata.set_multiprotocol<IPv6>(SAFI_UNICAST, BGPPeerData::SENT);   
+    peerdata.template set_multiprotocol<IPv6>(SAFI_UNICAST, BGPPeerData::NEGOTIATED);                      peerdata.set_multiprotocol<IPv6>(SAFI_UNICAST, BGPPeerData::SENT);   
 
     /*
     ** Verify that the trie is empty.
