@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/examples/usermgr/Makefile.am,v 1.1 2008/10/18 02:41:50 paulz Exp $
+## $XORP: xorp/examples/usermgr/Makefile.am,v 1.2 2008/10/29 22:24:14 paulz Exp $
 ##
 
 # Redefine the bin installation directory
@@ -27,16 +27,16 @@ LDADD		+= $(top_builddir)/libxorp/libxorp.la
 xorp_usermgr_SOURCES		 = xorp_usermgr.cc
 
 # test_usermgr sources
-test_usermgr_SOURCES = test_usermgr.cc
+test_usermgr_SOURCES 		 = test_usermgr.cc
 
 # USERMGR library
-libusermgr_la_SOURCES		= usermgr.cc
-				  xrl_target.cc
+libusermgr_la_SOURCES		 = usermgr.cc
+libusermgr_la_SOURCES		+=  xrl_target.cc
 
 libusermgr_la_SOURCES		+= usermgr.hh
-				   usermgr_exception.hh
+libusermgr_la_SOURCES		+= usermgr_exception.hh
 libusermgr_la_SOURCES		+= usermgr_module.h
-				   xrl_target.hh
+libusermgr_la_SOURCES		+= xrl_target.hh
 
 ################################################################
 ##
