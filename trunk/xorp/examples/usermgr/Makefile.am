@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/examples/usermgr/Makefile.am,v 1.2 2008/10/29 22:24:14 paulz Exp $
+## $XORP: xorp/examples/usermgr/Makefile.am,v 1.3 2008/11/18 18:14:46 atanu Exp $
 ##
 
 # Redefine the bin installation directory
@@ -10,7 +10,9 @@ bindir = $(prefix)/$(subdir)
 bin_PROGRAMS     = xorp_usermgr
 
 # -- No-install programs
-check_PROGRAMS = test_usermgr
+check_PROGRAMS 	 = test_usermgr
+
+TESTS		 = test_usermgr$(EXEEXT)
 
 # -- No-install Libraries
 noinst_LTLIBRARIES = libusermgr.la
