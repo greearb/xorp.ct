@@ -18,14 +18,14 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/examples/usermgr/usermgr.cc,v 1.2 2008/10/29 22:24:14 paulz Exp $"
+#ident "$XORP: xorp/examples/usermgr/usermgr.cc,v 1.3 2008/11/18 19:15:09 atanu Exp $"
 
 #include "libxorp/xorp.h"
 #include "usermgr_module.h"
 #include "usermgr.hh"
 
 int
-Users::add_user(const string username, uint32_t userid)
+Users::add_user(const string& username, uint32_t userid)
 {
     User * tmp = new User(username, userid);
     _users.push_front(tmp);
@@ -33,7 +33,7 @@ Users::add_user(const string username, uint32_t userid)
 }
 
 int
-Users::del_user(const string username) 
+Users::del_user(const string& username) 
 {
     User * tmp = NULL;
     list<User*>::iterator pos = _users.begin();
@@ -53,11 +53,11 @@ Users::del_user(const string username)
 }
 
 string
-Users::str(void)
+Users::str(void) const
 {
     string result;
 
-    list<User*>::iterator pos = _users.begin();
+    list<User*>::const_iterator pos = _users.begin();
     result = "\nUsers\n";
     result += "Name	        ID\n";
     result += "-----------     -------\n";
@@ -69,18 +69,18 @@ Users::str(void)
 }
 
 vector<string>
-Users::list_users(void)
+Users::list_users(void) const
 {
-    list<User*>::iterator pos = _users.begin();
+    list<User*>::const_iterator pos = _users.begin();
     vector<string> result;
     for (; pos != _users.end(); ++pos) {
-	result.push_back(((User*)*pos)->name());
+	result.push_back((*pos)->name());
     }
     return result;
 }
 
 int
-Groups::add_group(const string groupname, uint32_t groupid)
+Groups::add_group(const string& groupname, uint32_t groupid)
 {
     Group * tmp = new Group(groupname, groupid);
     _groups.push_front(tmp);
@@ -88,7 +88,7 @@ Groups::add_group(const string groupname, uint32_t groupid)
 }
 
 int
-Groups::del_group(const string groupname )
+Groups::del_group(const string& groupname )
 {
     Group * tmp = NULL;
     list<Group*>::iterator pos = _groups.begin();
@@ -108,11 +108,11 @@ Groups::del_group(const string groupname )
 }
 
 string
-Groups::str()
+Groups::str() const
 {
     string result;
 
-    list<Group*>::iterator pos = _groups.begin();
+    list<Group*>::const_iterator pos = _groups.begin();
     result = "\nGroups\n";
     result += "Name	        ID\n";
     result += "-----------     -------\n";

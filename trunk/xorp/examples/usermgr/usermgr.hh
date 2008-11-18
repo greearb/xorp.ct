@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/examples/usermgr/usermgr.hh,v 1.2 2008/10/29 22:24:14 paulz Exp $
+// $XORP: xorp/examples/usermgr/usermgr.hh,v 1.3 2008/11/18 19:15:09 atanu Exp $
 
 #ifndef __USERMGR_USERMGR_HH__
 #define __USERMGR_USERMGR_HH__
@@ -34,38 +34,38 @@
 
 class User {
 public:
-    User(const string username, uint32_t userid)
+    User(const string& username, uint32_t userid)
 	: _name(username),
 	  _id(userid)
     {}
 
 //     ~User() { return; }
 
-    void set_name(const string name) { _name = name; }
+    void set_name(const string& name) { _name = name; }
 
-    void set_description(const string description) { 
+    void set_description(const string& description) { 
 	_description = description;
     }
 
-    void set_password(const string password) {
+    void set_password(const string& password) {
 	_password = password;
     }
 
     void set_id(const uint32_t id) { _id = id; }
 
-    string name() { return _name; }
+    string name() const { return _name; }
 
-    string description() { return _description; }
+    string description() const { return _description; }
 
-    string password() { return _password; }
+    string password() const { return _password; }
 
-    uint32_t id() { return _id; }
+    uint32_t id() const { return _id; }
 
     void set_next(User * next) { _next = next; }
 
     User *next() { return _next; }
 
-    string str() {
+    string str() const {
 	return c_format("%11s     %d\n", _name.c_str(), _id);
     }
 
@@ -79,12 +79,16 @@ private:
 
 class Users {
 public:
-    Users() { };
-    ~Users() { return; };
-    int add_user(const string username, uint32_t userid);
-    int del_user(const string username );
-    string str();
-    vector<string> list_users();
+//     Users() { }
+//     ~Users() { return; }
+
+    int add_user(const string& username, uint32_t userid);
+
+    int del_user(const string& username );
+
+    vector<string> list_users() const;
+
+    string str() const;
 
 private:
     list<User*>	_users;
@@ -92,13 +96,11 @@ private:
 
 class Group {
 public:
-    Group(const string groupname, uint32_t groupid)
-	{
-	_name=groupname;
-	_id=groupid;
-	};
+    Group(const string& groupname, uint32_t groupid)
+	: _name(groupname), _id(groupid)
+    {}
 
-    ~Group() { } ;
+//     ~Group() { }
 
     void set_name(const string name) { _name = name; }
 
@@ -110,15 +112,15 @@ public:
 
     void set_next(Group * next) { _next = next; }
 
-    string name() { return _name; }
+    string name() const { return _name; }
 
-    string description() { return _description; }
+    string description() const { return _description; }
 
-    uint32_t id() { return _id; }
+    uint32_t id() const { return _id; }
 
-    Group *next() { return _next; }
+    Group *next() const { return _next; }
 
-    string str() {
+    string str() const {
 	return c_format("%11s     %d\n", _name.c_str(), _id);
     }
 
@@ -131,12 +133,17 @@ private:
 
 class Groups {
 public:
-//     Groups() {};
-//     ~Groups() { return; };
-    int add_group(const string groupname, uint32_t groupid);
-    int del_group(const string groupname);
-    string str();
+//     Groups() {}
+//     ~Groups() { return; }
+
+    int add_group(const string& groupname, uint32_t groupid);
+
+    int del_group(const string& groupname);
+
     vector<string> list_groups();
+
+    string str() const;
+
 private:
     list<Group*>	_groups;
 };
@@ -162,21 +169,21 @@ public:
 	return _groups.del_group(groupname);
     }
 
-    string str() {
-	string result;
-	
-	result = _users.str();
-	result += _groups.str();
-
-	return result;
-    }
-
     vector<string> list_groups() {
 	return _groups.list_groups();
     }
 
     vector<string> list_users() {
 	return _users.list_users();
+    }
+
+    string str() const {
+	string result;
+	
+	result = _users.str();
+	result += _groups.str();
+
+	return result;
     }
 
 private:
