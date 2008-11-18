@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/examples/usermgr/xorp_usermgr.cc,v 1.1 2008/10/18 02:41:51 paulz Exp $"
+#ident "$XORP: xorp/examples/usermgr/xorp_usermgr.cc,v 1.2 2008/10/29 22:24:15 paulz Exp $"
 
 #include <stdio.h>
 
@@ -38,8 +38,7 @@ start_service (void)
     EventLoop e;
     UserDB userdb;
 
-    XrlStdRouter rtr(e, "usermgr",
-                     FinderConstants::FINDER_DEFAULT_HOST().str().c_str());
+    XrlStdRouter rtr(e, "usermgr");
 
     UserMgrTarget usermgr(rtr, userdb);
 
