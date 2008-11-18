@@ -1,4 +1,4 @@
-/* $XORP$ */
+/* $XORP: xorp/examples/usermgr/usermgr.tp,v 1.2 2008/10/29 22:24:14 paulz Exp $ */
 /* Data model */
     userdb {
         targetname: txt = "usermgr";
@@ -27,7 +27,7 @@
         %help: long  "Create and manage users and user groups";
 	%modinfo:	provides	usermgr;
 	%modinfo:	depends		rtrmgr;
-	%modinfo:	path		"usermgr/xorp_usermgr";
+	%modinfo:	path		"examples/usermgr/xorp_usermgr";
 	%modinfo:	default_targetname	"usermgr";
 	%modinfo:	status_method	xrl "$(userdb.targetname)/common/0.1/get_status->status:u32&reason:txt";
 	%modinfo:	shutdown_method	xrl "$(userdb.targetname)/common/0.1/shutdown";
