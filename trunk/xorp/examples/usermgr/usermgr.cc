@@ -18,21 +18,22 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/examples/usermgr/usermgr.cc,v 1.1 2008/10/18 02:41:50 paulz Exp $"
+#ident "$XORP: xorp/examples/usermgr/usermgr.cc,v 1.2 2008/10/29 22:24:14 paulz Exp $"
 
 #include "libxorp/xorp.h"
 #include "usermgr_module.h"
 #include "usermgr.hh"
 
 int
-Users::add_user(const string username, uint32_t userid) {
+Users::add_user(const string username, uint32_t userid)
+{
     User * tmp = new User(username, userid);
     _users.push_front(tmp);
     return 0;
 }
 
 int
-Users::del_user(const string username ) 
+Users::del_user(const string username) 
 {
     User * tmp = NULL;
     list<User*>::iterator pos = _users.begin();
@@ -51,19 +52,25 @@ Users::del_user(const string username )
     }
 }
 
-void
-Users::describe(void) {
+string
+Users::str(void)
+{
+    string result;
+
     list<User*>::iterator pos = _users.begin();
-    printf("\nUsers\n");
-    printf("Name	        ID\n");
-    printf("-----------     -------\n");
+    result = "\nUsers\n";
+    result += "Name	        ID\n";
+    result += "-----------     -------\n";
     for (; pos != _users.end(); ++pos) {
-	((User*)*pos)->describe();
+	result += (*pos)->str();
     }
+
+    return result;
 }
 
 vector<string>
-Users::list_users(void) {
+Users::list_users(void)
+{
     list<User*>::iterator pos = _users.begin();
     vector<string> result;
     for (; pos != _users.end(); ++pos) {
@@ -73,14 +80,16 @@ Users::list_users(void) {
 }
 
 int
-Groups::add_group(const string groupname, uint32_t groupid) {
+Groups::add_group(const string groupname, uint32_t groupid)
+{
     Group * tmp = new Group(groupname, groupid);
     _groups.push_front(tmp);
     return 0;
 }
 
 int
-Groups::del_group(const string groupname ) {
+Groups::del_group(const string groupname )
+{
     Group * tmp = NULL;
     list<Group*>::iterator pos = _groups.begin();
     for (; pos != _groups.end(); ++pos) {
@@ -98,19 +107,25 @@ Groups::del_group(const string groupname ) {
     }
 }
 
-void
-Groups::describe(void) {
+string
+Groups::str()
+{
+    string result;
+
     list<Group*>::iterator pos = _groups.begin();
-    printf("\nGroups\n");
-    printf("Name	        ID\n");
-    printf("-----------     -------\n");
+    result = "\nGroups\n";
+    result += "Name	        ID\n";
+    result += "-----------     -------\n";
     for (; pos != _groups.end(); ++pos) {
-	((Group*)*pos)->describe();
+	result += (*pos)->str();
     }
+
+    return result;
 }
 
 vector<string>
-Groups::list_groups(void) {
+Groups::list_groups(void)
+{
     list<Group*>::iterator pos = _groups.begin();
     vector<string> result;
     for (; pos != _groups.end(); ++pos) {

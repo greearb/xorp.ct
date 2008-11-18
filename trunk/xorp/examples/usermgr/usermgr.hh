@@ -18,17 +18,17 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/examples/usermgr/usermgr.hh,v 1.1 2008/10/18 02:41:50 paulz Exp $
+// $XORP: xorp/examples/usermgr/usermgr.hh,v 1.2 2008/10/29 22:24:14 paulz Exp $
 
 #ifndef __USERMGR_USERMGR_HH__
 #define __USERMGR_USERMGR_HH__
-
 
 /*
  * operational code to maintain an in core user database.
  */
 #include "usermgr_module.h"
 #include "libxorp/xorp.h"
+#include "libxorp/c_format.hh"
 #include <list>
 #include <vector>
 
@@ -37,37 +37,38 @@ public:
     User(const string username, uint32_t userid)
 	: _name(username),
 	  _id(userid)
-	{
-	};
+    {}
 
-    ~User(void) { return; };
+//     ~User() { return; }
 
-    void	set_name(const string name)
-		 { _name = name; };
-    void	set_description(const string description)
-		 { _description = description; };
-    void	set_password(const string password)
-		 { _password = password; };
-    void	set_id(const uint32_t id)
-		 { _id = id; };
+    void set_name(const string name) { _name = name; }
 
-    string	name(void)
-		 { return _name; };
-    string	description(void)
-		 { return _description; };
-    string	password(void)
-		 { return _password; };
-    uint32_t	id(void)
-		 { return _id; };
+    void set_description(const string description) { 
+	_description = description;
+    }
 
-    void	set_next(User * next)
-		{ _next = next; };
-    User * 	next(void)
-		 { return _next; };
+    void set_password(const string password) {
+	_password = password;
+    }
 
-    void describe(void) {
-	printf ("%11s     %d\n", _name.c_str(), _id);
-    };
+    void set_id(const uint32_t id) { _id = id; }
+
+    string name() { return _name; }
+
+    string description() { return _description; }
+
+    string password() { return _password; }
+
+    uint32_t id() { return _id; }
+
+    void set_next(User * next) { _next = next; }
+
+    User *next() { return _next; }
+
+    string str() {
+	return c_format("%11s     %d\n", _name.c_str(), _id);
+    }
+
 private:
     string	_name;
     string	_description;
@@ -78,12 +79,12 @@ private:
 
 class Users {
 public:
-    Users(void) { };
-    ~Users(void) { return; };
+    Users() { };
+    ~Users() { return; };
     int add_user(const string username, uint32_t userid);
-    int del_user(const string username ) ;
-    void describe(void);
-    vector<string> list_users(void) ;
+    int del_user(const string username );
+    string str();
+    vector<string> list_users();
 
 private:
     list<User*>	_users;
@@ -97,29 +98,30 @@ public:
 	_id=groupid;
 	};
 
-    ~Group(void) { } ;
+    ~Group() { } ;
 
-    void	set_name(const string name)
-		{ _name = name; };
-    void	set_description(const string description)
-		{ _description = description; };
-    void	set_id(const uint32_t id)
-		{ _id = id; };
-    void	set_next(Group * next)
-		{ _next = next; };
+    void set_name(const string name) { _name = name; }
 
-    string	name(void)
-		{ return _name; };
-    string	description(void)
-		{ return _description; };
-    uint32_t	id(void)
-		{ return _id; };
-    Group *	next(void)
-		{ return _next; };
+    void set_description(const string description) {
+	_description = description;
+    }
 
-    void describe(void) {
-	printf ("%11s     %d\n", _name.c_str(), _id);
-    };
+    void set_id(const uint32_t id) { _id = id; }
+
+    void set_next(Group * next) { _next = next; }
+
+    string name() { return _name; }
+
+    string description() { return _description; }
+
+    uint32_t id() { return _id; }
+
+    Group *next() { return _next; }
+
+    string str() {
+	return c_format("%11s     %d\n", _name.c_str(), _id);
+    }
+
 private:
     string	_name;
     string	_description;
@@ -129,39 +131,54 @@ private:
 
 class Groups {
 public:
-    Groups(void) { };
-    ~Groups(void) { return; };
+//     Groups() {};
+//     ~Groups() { return; };
     int add_group(const string groupname, uint32_t groupid);
-    int del_group(const string groupname );
-    void describe(void);
-    vector<string> list_groups(void);
-
+    int del_group(const string groupname);
+    string str();
+    vector<string> list_groups();
 private:
     list<Group*>	_groups;
 };
 
 class UserDB {
 public:
-    UserDB(void) { };
-    ~UserDB(void) { return; } ;
-    int add_user(const string username, uint32_t userid)
-	{ return _users.add_user(username, userid); } ;
-    int del_user(const string username)
-	{ return _users.del_user(username); } ;
-    int add_group(const string groupname, uint32_t groupid)
-	{ return _groups.add_group(groupname, groupid); } ;
-    int del_group(const string groupname)
-	{ return _groups.del_group(groupname); } ;
-    void describe(void) {
-	_users.describe();
-	_groups.describe();
-    };
+//     UserDB() { }
+//     ~UserDB() { return; }
+
+    int add_user(const string username, uint32_t userid) {
+	return _users.add_user(username, userid);
+    }
+
+    int del_user(const string username)	{
+	return _users.del_user(username);
+    }
+    
+    int add_group(const string groupname, uint32_t groupid) {
+	return _groups.add_group(groupname, groupid);
+    }
+    
+    int del_group(const string groupname) {
+	return _groups.del_group(groupname);
+    }
+
+    string str() {
+	string result;
+	
+	result = _users.str();
+	result += _groups.str();
+
+	return result;
+    }
+
     vector<string> list_groups() {
 	return _groups.list_groups();
     }
+
     vector<string> list_users() {
 	return _users.list_users();
     }
+
 private:
     Users _users;
     Groups _groups;
