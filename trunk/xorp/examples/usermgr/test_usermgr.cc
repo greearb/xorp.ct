@@ -18,21 +18,29 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/examples/usermgr/test_usermgr.cc,v 1.1 2008/10/18 02:41:50 paulz Exp $"
+#ident "$XORP: xorp/examples/usermgr/test_usermgr.cc,v 1.2 2008/10/29 22:24:14 paulz Exp $"
 
 /*
  * Test the UserDB implementation.
  */
 
-#include "libxorp/xorp.h"
+#define DEBUG_LOGGING
+#define DEBUG_PRINT_FUNCTION_NAME
+
 #include "usermgr_module.h"
+
+#include "libxorp/xorp.h"
+#include "libxorp/test_main.hh"
+#include "libxorp/debug.h"
+#include "libxorp/xlog.h"
+#include "libxorp/callback.hh"
+#include "libxorp/exceptions.hh"
+
 #include "usermgr.hh"
 
-int
-main (int argc, char ** argv )
+bool
+test1(TestInfo& info)
 {
-    UNUSED(argc);
-    UNUSED(argv);
     UserDB theone;
 
     /*
@@ -51,9 +59,8 @@ main (int argc, char ** argv )
     theone.add_group("vinieski", 666);
     theone.add_user("ocupine", 166);
 
-    theone.describe();
+    DOUT(info) << theone.str();
 
-    
     /*
      * delete some of the users and groups.
      */
@@ -62,7 +69,52 @@ main (int argc, char ** argv )
     theone.del_user("george");
     theone.del_user("ocupine");
 
-    theone.describe();
+    DOUT(info) << theone.str();
 
-    return 0;
+    return true;
+}
+
+int
+main(int argc, char **argv)
+{
+    XorpUnexpectedHandler x(xorp_unexpected_handler);
+
+    xlog_init(argv[0], NULL);
+    xlog_set_verbose(XLOG_VERBOSE_HIGH);
+    xlog_add_default_output();
+    xlog_start();
+
+    TestMain t(argc, argv);
+    
+    string test =
+	t.get_optional_args("-t", "--test", "run only the specified test");
+    t.complete_args_parsing();
+
+    struct test {
+	string test_name;
+	XorpCallback1<bool, TestInfo&>::RefPtr cb;
+    } tests[] = {
+	{"test1", callback(test1)},
+    };
+
+    try {
+	if (test.empty()) {
+	    for (size_t i = 0; i < sizeof(tests) / sizeof(struct test); i++)
+		t.run(tests[i].test_name, tests[i].cb);
+	} else {
+	    for (size_t i = 0; i < sizeof(tests) / sizeof(struct test); i++)
+		if (test == tests[i].test_name) {
+		    t.run(tests[i].test_name, tests[i].cb);
+		    return t.exit();
+		}
+	    t.failed("No test with name " + test + " found\n");
+	}
+    } catch(...) {
+	xorp_catch_standard_exceptions();
+    }
+
+    xlog_stop();
+    xlog_exit();
+
+    return t.exit();
 }
