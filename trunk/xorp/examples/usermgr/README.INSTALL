@@ -1,5 +1,5 @@
 #
-# $XORP$
+# $XORP: xorp/examples/usermgr/README.INSTALL,v 1.2 2008/10/29 22:24:14 paulz Exp $
 #
 
 How to install this example into the XORP build:
@@ -7,7 +7,7 @@ How to install this example into the XORP build:
 1. Edit top level (../../) Makefile.am to include the line
 ----------------------------------------------------------
 
-SUBDIRS += usermgr
+SUBDIRS += examples/usermgr
 
 <PATCH>
 Index: Makefile.am
@@ -24,7 +24,7 @@ diff -c -r1.23 Makefile.am
   SUBDIRS += @MIBS@
   
 + # --- Example process
-+ SUBDIRS += usermgr
++ SUBDIRS += examples/usermgr
 + 
   ################################################################
   ##
@@ -34,7 +34,7 @@ diff -c -r1.23 Makefile.am
 2. Edit the top level configure.in file to include the line
 -----------------------------------------------------------
 
-    usermgr/Makefile
+    examples/usermgr/Makefile
 
    in the AC_CONFIG_FILES array, (starts about line 1153).
 
@@ -52,7 +52,7 @@ diff -c -r1.229 configure.in
       xrl/interfaces/Makefile
       xrl/targets/Makefile
       xrl/tests/Makefile
-+     usermgr/Makefile
++     examples/usermgr/Makefile
   ])
   
   
