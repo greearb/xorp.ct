@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.220 2008/11/04 17:38:12 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.221 2008/11/06 21:27:54 strinh Exp $
 #
 
 		XORP RELEASE NOTES
@@ -16,7 +16,27 @@ Release 1.6-WIP (2008/??/??)
       first one to support IPv6 multicast routing.
 
   CONFIGURATION:
-    - 
+    - If a PIM-SM router is suppose to receive and process the PIM-SM
+      Bootstrap messages, the configuration must have the "bootstrap {}"
+      block included (even if it is empty):
+
+      protocols {
+          pimsm4 {
+              bootstrap {
+              }
+          }
+      }
+
+      protocols {
+          pimsm6 {
+              bootstrap {
+              }
+          }
+      }
+
+      Previously, the Bootstrap messages were unconditionally processed
+      even if the "bootstrap {}" block contained "disable: true"
+      statement.
 
   LIBXORP:
     - Class EtherMac is removed and is replaced/superseded by the
