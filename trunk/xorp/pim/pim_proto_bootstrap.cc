@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/pim/pim_proto_bootstrap.cc,v 1.26 2008/07/23 05:11:15 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_bootstrap.cc,v 1.27 2008/10/02 21:57:54 bms Exp $"
 
 
 //
@@ -85,7 +85,13 @@ PimVif::pim_bootstrap_recv(PimNbr *pim_nbr, const IPvX& src,
     string	error_msg;
     string	dummy_error_msg;
     int		ret_value = XORP_ERROR;
-    
+
+    //
+    // XXX: Don't accept Bootstrap-related messages if the BSR is not running
+    //
+    if (! pim_node().pim_bsr().is_up())
+	return (XORP_ERROR);
+
     //
     // Parse the head of the message
     //
@@ -357,6 +363,12 @@ PimVif::pim_bootstrap_send(const IPvX& dst_addr, const BsrZone& bsr_zone,
 {
     size_t avail_buffer_size = 0;
     IPvX src_addr = primary_addr();
+
+    //
+    // XXX: Don't transmit Bootstrap-related messages if the BSR is not running
+    //
+    if (! pim_node().pim_bsr().is_up())
+	return (XORP_ERROR);
 
     if (is_pim_register()) {
 	error_msg = c_format("Cannot send PIM Bootstrap message on "

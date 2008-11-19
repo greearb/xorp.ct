@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/pim/pim_proto_cand_rp_adv.cc,v 1.23 2008/07/23 05:11:15 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_cand_rp_adv.cc,v 1.24 2008/10/02 21:57:54 bms Exp $"
 
 
 //
@@ -88,6 +88,12 @@ PimVif::pim_cand_rp_adv_recv(PimNbr *pim_nbr,
     BsrRp	*bsr_rp;
     string	error_msg = "";
     bool	bool_add_rps_to_rp_table = false;
+
+    //
+    // XXX: Don't accept Bootstrap-related messages if the BSR is not running
+    //
+    if (! pim_node().pim_bsr().is_up())
+	return (XORP_ERROR);
     
     //
     // Parse the message
@@ -295,6 +301,12 @@ PimVif::pim_cand_rp_adv_send(const IPvX& bsr_addr, const BsrZone& bsr_zone)
 {
     IPvX src_addr = domain_wide_addr();
     string dummy_error_msg;
+
+    //
+    // XXX: Don't transmit Bootstrap-related messages if the BSR is not running
+    //
+    if (! pim_node().pim_bsr().is_up())
+	return (XORP_ERROR);
 
     // TODO: add a check whether I am a Cand-RP for that zone.
     // XXX: for now there is no simple check for that, so add a flag to BsrZone
