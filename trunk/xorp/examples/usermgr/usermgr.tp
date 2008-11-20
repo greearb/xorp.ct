@@ -1,4 +1,4 @@
-/* $XORP: xorp/examples/usermgr/usermgr.tp,v 1.2 2008/10/29 22:24:14 paulz Exp $ */
+/* $XORP: xorp/examples/usermgr/usermgr.tp,v 1.3 2008/11/18 19:08:13 atanu Exp $ */
 /* Data model */
     userdb {
         targetname: txt = "usermgr";
@@ -44,6 +44,7 @@
             %help: long  "Create and manage user groups";
             %create:    xrl "$(userdb.targetname)/usermgr/0.1/create_group?group:txt=$(@)&groupid:u32=$(@.groupid)";
             %delete:    xrl "$(userdb.targetname)/usermgr/0.1/delete_group?group:txt=$(@)";
+		/* %list is not currently implemented 2008-11-20 */
             %list:      xrl "$(userdb.targetname)/usermgr/0.1/get_groups->groupname:list";
 
         }
@@ -52,6 +53,7 @@
             %help: long  "Create and manage users";
             %create:    xrl "$(userdb.targetname)/usermgr/0.1/create_user?user:txt=$(@)&userid:u32=$(@.userid)";
             %delete:    xrl "$(userdb.targetname)/usermgr/0.1/delete_user?user:txt=$(@)";
+		/* %list is not currently implemented 2008-11-20 */
             %list:      xrl "$(userdb.targetname)/usermgr/0.1/get_users->username:list";
 
         }
