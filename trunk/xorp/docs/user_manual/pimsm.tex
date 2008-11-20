@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/pimsm.tex,v 1.32 2008/07/18 16:43:53 pavlin Exp $
+% $XORP: xorp/docs/user_manual/pimsm.tex,v 1.33 2008/07/18 18:40:36 pavlin Exp $
 %
 
 \chapter{PIM Sparse-Mode}
@@ -955,6 +955,11 @@ protocols \{\\
   integer in the interval [0, 65535] and its default value is 150 seconds.
 \end{description}
 \end{description}
+  Note that a PIM-SM router that participates in the Bootstrap mechanism,
+  but is not a Candidate BSR or a Candidate RP must have an explicit
+  {\stt bootstrap} block to enable the Bootstrap mechanism (this block
+  could be empty).
+
 \item{\tt switch-to-spt-threshold}: this directive permits the
   specification of a bitrate threshold at a last-hop router or RP
   for switching from the RP Tree to the Shortest-Path Tree.  The
