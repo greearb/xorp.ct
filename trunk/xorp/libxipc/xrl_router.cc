@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.70 2008/11/02 18:35:58 atanu Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.71 2008/11/11 22:39:23 atanu Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -502,7 +502,10 @@ XrlRouter::resolve_callback(const XrlError&	 	e,
     _dsl.erase(i);
 
     if (e == XrlError::OKAY()) {
-	if (send_resolved(ds->xrl(), dbe, ds->cb(), false) == false) {
+	const Xrl& xrl = ds->xrl();
+	xrl.set_resolved(false);
+	xrl.set_resolved_sender(NULL);
+	if (send_resolved(xrl, dbe, ds->cb(), false) == false) {
 	    // We tried to force sender to send xrl and it declined the
 	    // opportunity.  This should only happen when it's out of buffer
 	    // space
