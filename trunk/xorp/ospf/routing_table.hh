@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/ospf/routing_table.hh,v 1.47 2008/08/21 03:16:58 atanu Exp $
+// $XORP: xorp/ospf/routing_table.hh,v 1.48 2008/10/02 21:57:49 bms Exp $
 
 #ifndef __OSPF_ROUTING_TABLE_HH__
 #define __OSPF_ROUTING_TABLE_HH__
@@ -404,6 +404,13 @@ class RoutingTable {
     RoutingTable(Ospf<A> &ospf)
 	: _ospf(ospf), _in_transaction(false), _current(0), _previous(0)
     {}
+
+    ~RoutingTable() {
+	delete _current;
+	delete _previous;
+
+	_current = _previous = 0;
+    }
 
     /**
      * Before [add|replace|delete]_entry can be called, this method
