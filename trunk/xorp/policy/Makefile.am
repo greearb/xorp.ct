@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/policy/Makefile.am,v 1.15 2008/08/06 08:27:10 abittau Exp $
+## $XORP: xorp/policy/Makefile.am,v 1.16 2008/08/06 08:28:00 abittau Exp $
 ##
 
 # -- Subdirectories
@@ -93,11 +93,24 @@ libpolicy_la_SOURCES		+= visitor_semantic.cc
 libpolicy_la_SOURCES		+= visitor_test.cc
 libpolicy_la_SOURCES		+= xrl_target.cc
 
-
 libpolicy_la_SOURCES		+= yacc.yy_policy_parser.h
 libpolicy_la_SOURCES		+= yacc.yy_policy_parser.cc
 libpolicy_la_SOURCES		+= lex.yy_policy_parser.cc
 
+yacc:	.yacc_generated_files
+
+.yacc_generated_files: $(srcdir)/policy.y
+	( cd $(srcdir);							\
+	yacc -d -p yy_policy_parser -o yacc.yy_policy_parser.cc policy.y; \
+	$(top_srcdir)/utils/rcsid2ident.sh yacc.yy_policy_parser.cc;	\
+	touch .yacc_generated_files )
+
+lex:	.lex_generated_files
+
+.lex_generated_files: $(srcdir)/policy.l
+	( cd $(srcdir);							\
+	flex -olex.yy_policy_parser.cc policy.l;			\
+	touch .lex_generated_files )
 
 ################################################################
 ##

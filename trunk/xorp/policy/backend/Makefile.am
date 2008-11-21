@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/policy/backend/Makefile.am,v 1.7 2008/08/06 08:05:45 abittau Exp $
+## $XORP: xorp/policy/backend/Makefile.am,v 1.8 2008/08/06 08:10:17 abittau Exp $
 ##
 
 # -- No-install Libraries
@@ -55,6 +55,20 @@ libpolicybackend_la_LIBADD		+= ../common/register_elements.lo
 libpolicybackend_la_LIBADD		+= ../common/register_operations.lo
 libpolicybackend_la_LIBADD		+= ../common/varrw.lo
 
+yacc:	.yacc_generated_files
+
+.yacc_generated_files: $(srcdir)/backend.y
+	( cd $(srcdir);							\
+	yacc -d -p yy_policy_backend_parser -o yacc.yy_policy_backend_parser.cc backend.y; \
+	$(top_srcdir)/utils/rcsid2ident.sh yacc.yy_policy_backend_parser.cc;	\
+	touch .yacc_generated_files )
+
+lex:	.lex_generated_files
+
+.lex_generated_files: $(srcdir)/backend.l
+	( cd $(srcdir);							\
+	flex -olex.yy_policy_backend_parser.cc backend.l;		\
+	touch .lex_generated_files )
 
 ################################################################
 ##

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/policy/test/Makefile.am,v 1.7 2008/08/06 08:11:45 abittau Exp $
+## $XORP: xorp/policy/test/Makefile.am,v 1.8 2008/11/08 06:15:07 mjh Exp $
 ##
 
 # -- Test Programs
@@ -56,6 +56,21 @@ execpolicy_LDADD		+= $(top_builddir)/libxorp/libxorp.la
 # policybench_LDADD               += $(top_builddir)/libxipc/libxipc.la
 # policybench_LDADD               += $(top_builddir)/libcomm/libcomm.la
 # policybench_LDADD               += $(top_builddir)/libxorp/libxorp.la
+
+yacc:	.yacc_generated_files
+
+.yacc_generated_files: $(srcdir)/compilepolicy.y
+	( cd $(srcdir);							\
+	yacc -d -p yy_compile_policy -o yacc.yy_compile_policy.cc compilepolicy.y; \
+	$(top_srcdir)/utils/rcsid2ident.sh yacc.yy_compile_policy.cc;	\
+	touch .yacc_generated_files )
+
+lex:	.lex_generated_files
+
+.lex_generated_files: $(srcdir)/compilepolicy.l
+	( cd $(srcdir);							\
+	flex -olex.yy_compile_policy.cc compilepolicy.l;		\
+	touch .lex_generated_files )
 
 ################################################################
 ##
