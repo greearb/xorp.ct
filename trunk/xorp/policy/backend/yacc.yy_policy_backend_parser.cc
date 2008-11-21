@@ -1,10 +1,6 @@
 #include <stdlib.h>
 #ifndef lint
-#ifdef __unused
-__unused
-#endif
-static char const 
-yyrcsid[] = "$FreeBSD: src/usr.bin/yacc/skeleton.c,v 1.37 2003/02/12 18:03:55 davidc Exp $";
+#ident "$FreeBSD: src/usr.bin/yacc/skeleton.c,v 1.37 2003/02/12 18:03:55 davidc Exp $"
 #endif
 #define YYBYACC 1
 #define YYMAJOR 1
