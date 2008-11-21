@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/ospf/auth.hh,v 1.14 2008/07/23 05:11:07 pavlin Exp $
+// $XORP: xorp/ospf/auth.hh,v 1.15 2008/10/02 21:57:47 bms Exp $
 
 #ifndef __OSPF_AUTH_HH__
 #define __OSPF_AUTH_HH__
@@ -553,6 +553,13 @@ class Auth {
     Auth(EventLoop& eventloop) : _eventloop(eventloop), _auth_handler(NULL)
     {
 	set_method("none");
+    }
+
+    ~Auth() {
+	if (_auth_handler != NULL) {
+	    delete _auth_handler;
+	    _auth_handler = NULL;
+	}
     }
 
     bool set_method(const string& method) {
