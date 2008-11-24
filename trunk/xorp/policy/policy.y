@@ -6,9 +6,6 @@
  * example. This will give more run time flexibility
  *
  * yacc -d -p yy_policy_parser -o yacc.yy_policy_parser.cc policy.y
- *
- * XXX: with my version of yacc i need to move the #include <stdlib.h> under the
- * yyrcsid
  */
 
 #include <vector>
