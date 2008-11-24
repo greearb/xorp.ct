@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP$
+# $XORP: xorp/utils/rcsid2ident.sh,v 1.1 2005/04/29 21:43:04 pavlin Exp $
 #
 
 #
@@ -17,10 +17,8 @@ if [ $# -ne 1 ] ; then
 fi
 
 ed $1 <<EOF
-/static char const/
-d
-/yyrcsid/
-s/yyrcsid\[\] =/#ident/
-s/;//
+/#ifdef __unused/,/#endif/d
+/static char const/d
+s/yyrcsid\[\] = \(".*"\);/#ident \1/
 wq
 EOF
