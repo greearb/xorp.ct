@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.109 2008/10/06 23:26:49 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.110 2008/11/04 17:38:12 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -310,6 +310,16 @@ gmake check
       - ncurses (e.g., ncurses-5.3-4.i386.rpm)
     - The code compiles, and the internal tests appear to succeed.
 
+  * Linux Red Hat Enterprise Linux Server release 5 (Tikanga)
+    (kernel 2.6.18-8.el5)
+    - 
+    - Optionally install the following packages:
+      - libpcap-devel (e.g., libpcap-devel.x86_64)
+        This package is needed for sending/receiving link layer data frames.
+    - The code compiles, and the internal tests appear to succeed.
+    - gcc (GCC) 4.1.1 20070105 (Red Hat 4.1.1-52)
+    - Tested on the following architectures: x86_64 (amd64)
+
   * Linux Fedora Core2 (kernel 2.6.5-1.358):
     - The code compiles, but some of the internal tests may fail.
 
@@ -344,6 +354,13 @@ gmake check
     - The code compiles, and the internal tests appear to succeed
       except test33 in "bgp/harness/test_peering1.sh"
     - gcc (GCC) 4.3.0 20080428 (Red Hat 4.3.0-8)
+
+  * Linux Fedora 10 (2.6.27.5-117.fc10.i686):
+    - Optionally install the following packages:
+      - libpcap-devel
+        This package is needed for sending/receiving link layer data frames.
+    - The code compiles, and the internal tests appear to succeed.
+    - gcc (GCC) 4.3.2 20081105 (Red Hat 4.3.2-7)
 
   * Linux CentOS 5.2 (2.6.18-92.el5):
     - You must install the following packages:
