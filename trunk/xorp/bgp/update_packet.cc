@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/update_packet.cc,v 1.48 2008/10/02 21:56:23 bms Exp $"
+#ident "$XORP: xorp/bgp/update_packet.cc,v 1.49 2008/11/08 06:14:42 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -188,7 +188,7 @@ UpdatePacket::encode(uint8_t *d, size_t &len, const BGPPeerData *peerdata) const
 UpdatePacket::UpdatePacket(const uint8_t *d, uint16_t l, 
 			   const BGPPeerData* peerdata,
 			   BGPMain *mainprocess,
-			   bool do_checks) throw(CorruptMessage)
+			   bool do_checks) throw(CorruptMessage,UnusableMessage)
 {
     debug_msg("UpdatePacket constructor called\n");
     _Type = MESSAGETYPEUPDATE;

@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/bgp/packet.hh,v 1.48 2008/11/08 06:14:36 mjh Exp $
+// $XORP: xorp/bgp/packet.hh,v 1.49 2008/11/13 19:24:34 bms Exp $
 
 #ifndef __BGP_PACKET_HH__
 #define __BGP_PACKET_HH__
@@ -209,7 +209,7 @@ public:
     UpdatePacket();
     UpdatePacket(const uint8_t *d, uint16_t l, const BGPPeerData *peerdata,
 		 BGPMain* mainprocess, bool do_checks)
-	throw(CorruptMessage);
+	throw(CorruptMessage,UnusableMessage);
 
     ~UpdatePacket();
 
