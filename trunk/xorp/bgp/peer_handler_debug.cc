@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/peer_handler_debug.cc,v 1.15 2008/10/02 21:56:17 bms Exp $"
+#ident "$XORP: xorp/bgp/peer_handler_debug.cc,v 1.16 2008/11/08 06:14:37 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #include "bgp_module.h"
@@ -42,7 +42,7 @@ DebugPeerHandler::print_route(const SubnetRoute<IPv4>& route, FPAList4Ref palist
     s = "SubnetRoute:\n";
     s += "  Net: " + route.net().str() + "\n";
     s += "  PAList: " + palist->str() + "\n";
-    fprintf(_ofile, s.c_str());
+    fprintf(_ofile, "%s", s.c_str());
 }
 
 void
@@ -53,7 +53,7 @@ DebugPeerHandler::print_route(const SubnetRoute<IPv6>& route, FPAList6Ref palist
     s = "SubnetRoute:\n";
     s += "  Net: " + route.net().str() + "\n";
     s += "  PAList: " + palist->str() + "\n";
-    fprintf(_ofile, s.c_str());
+    fprintf(_ofile, "%s", s.c_str());
 }
 
 int 
