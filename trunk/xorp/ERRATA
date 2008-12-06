@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ERRATA,v 1.45 2008/10/10 08:06:33 abittau Exp $
+# $XORP: xorp/ERRATA,v 1.46 2008/10/10 18:37:17 pavlin Exp $
 #
 
 		XORP ERRATA
@@ -360,3 +360,25 @@ gmake[1]: *** [libnetsnmpxorp.la] Error 1
        ./configure --with-snmp --enable-shared
        gmake clean
        gmake
+
+    - There might be a compilation error when running "gmake check"
+      in the mibs directory on some systems (e.g., Ubuntu Linux):
+
+g++ -DNETSNMP_NO_INLINE -g -Werror -W -Wall -Wwrite-strings -Wcast-qual
+-Wpointer-arith -Wcast-align -Woverloaded-virtual -ftemplate-depth-25 -pipe -o
+.libs/test_xorpevents test_xorpevents.o -Wl,-Bsymbolic-functions -Wl,-E 
+../libxipc/.libs/libfinder.a ./.libs/libnetsnmpxorp.so -lpcap -lrt -L/usr/lib
+-L/usr/local/lib -L/usr/lib/perl/5.8/CORE /usr/lib/libnetsnmpmibs.so -lsensors
+/usr/lib/libnetsnmphelpers.so /usr/lib/libnetsnmpagent.so -lwrap -lperl -ldl
+-lm -lpthread -lc -lcrypt /usr/lib/libnetsnmp.so -lcrypto -Wl,--rpath
+-Wl,/home/nithya/bug765/xorp/mibs/.libs -Wl,--rpath -Wl,/usr/local/xorp/mibs/.
+/usr/local/bin/ld: cannot find -lperl
+collect2: ld returned 1 exit status
+make[2]: *** [test_xorpevents] Error 1
+
+      A possible work around is to link /usr/lib/libperl to
+      /usr/lib/libperl.so.5.10 :
+
+        su
+        cd /usr/lib
+        ln -s libperl.so.5.10 libperl.so
