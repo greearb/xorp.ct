@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.110 2008/11/04 17:38:12 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.111 2008/11/27 06:36:38 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -291,7 +291,7 @@ gmake check
 3.5. Linux
 ==========
 
-  * Linux RedHat-7.2 (kernel 2.4.18):
+  * Linux Red Hat-7.2 (kernel 2.4.18):
     - The code compiles, but some of the internal tests fail dumping core.
       The problem is attributable to exception handler failures caused by
       the default compiler/binutils combination.  More information is
@@ -299,12 +299,12 @@ gmake check
 	http://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=54724
     - IGMP and PIM-SM appear to work.
 
-  * Linux RedHat-7.3 (kernel 2.4-20):
+  * Linux Red Hat-7.3 (kernel 2.4-20):
     - No known issues.
     - The code should compile with the following versions of the
       gcc/g++ compiler: 2.96 (default).
 
-  * Linux RedHat-9.2 (kernel 2.4.20-8smp):
+  * Linux Red Hat-9.2 (kernel 2.4.20-8smp):
     - You must install the following RPMs (and all other RPMs they depend on):
       - openssl-devel (e.g., openssl-devel-0.9.7a-5.i386.rpm)
       - ncurses (e.g., ncurses-5.3-4.i386.rpm)
@@ -312,10 +312,11 @@ gmake check
 
   * Linux Red Hat Enterprise Linux Server release 5 (Tikanga)
     (kernel 2.6.18-8.el5)
-    - 
     - Optionally install the following packages:
       - libpcap-devel (e.g., libpcap-devel.x86_64)
         This package is needed for sending/receiving link layer data frames.
+      - net-snmp, net-snmp-utils, net-snmp-devel, net-snmp-perl
+        Those packages are needed for SNMP support.
     - The code compiles, and the internal tests appear to succeed.
     - gcc (GCC) 4.1.1 20070105 (Red Hat 4.1.1-52)
     - Tested on the following architectures: x86_64 (amd64)
