@@ -20518,8 +20518,11 @@ _ACEOF
 
     fi
 elif test "${net_snmp_found}" = "false"; then
-    { echo "$as_me:$LINENO: WARNING: Net-SNMP not found! MIB modules will not be built" >&5
-echo "$as_me: WARNING: Net-SNMP not found! MIB modules will not be built" >&2;}
+    # XXX: If the user explicitly specified to build SNMP, it is a critical
+    # error if SNMP is not found.
+    { { echo "$as_me:$LINENO: error: Net-SNMP not found! MIB modules will not be built" >&5
+echo "$as_me: error: Net-SNMP not found! MIB modules will not be built" >&2;}
+   { (exit 1); exit 1; }; }
     snmpd="skip_check"
 fi
 
@@ -21151,8 +21154,11 @@ CPPFLAGS=${oldCPPFLAGS}
 if test "${snmpd_valid}" = "yes" ; then
     MIBS="mibs"
 else
-    { echo "$as_me:$LINENO: WARNING: XORP MIBs will not be built" >&5
-echo "$as_me: WARNING: XORP MIBs will not be built" >&2;}
+    # XXX: If the user explicitly specified to build SNMP, it is a critical
+    # error if SNMP is not found.
+    { { echo "$as_me:$LINENO: error: XORP MIBs will not be built" >&5
+echo "$as_me: error: XORP MIBs will not be built" >&2;}
+   { (exit 1); exit 1; }; }
     MIBS=""
 fi
 

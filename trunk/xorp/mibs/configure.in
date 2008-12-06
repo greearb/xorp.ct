@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/mibs/configure.in,v 1.32 2008/07/23 15:20:18 bms Exp $
+dnl $XORP: xorp/mibs/configure.in,v 1.33 2008/08/12 12:24:16 bms Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -13,7 +13,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT
 AC_PREREQ(2.61)
-AC_REVISION([$XORP: xorp/mibs/configure.in,v 1.32 2008/07/23 15:20:18 bms Exp $])
+AC_REVISION([$XORP: xorp/mibs/configure.in,v 1.33 2008/08/12 12:24:16 bms Exp $])
 AC_CONFIG_AUX_DIR(../config)
 AC_CANONICAL_TARGET
 
@@ -265,7 +265,9 @@ if test "${net_snmp_found}" = "true";  then
 	AC_DEFINE(HAVE_NETSNMP_ASN_IPADDRESS_IN_HOST_ORDER)
     fi
 elif test "${net_snmp_found}" = "false"; then
-    AC_MSG_WARN(Net-SNMP not found! MIB modules will not be built)
+    # XXX: If the user explicitly specified to build SNMP, it is a critical
+    # error if SNMP is not found.
+    AC_MSG_ERROR(Net-SNMP not found! MIB modules will not be built)
     snmpd="skip_check"
 fi
 
@@ -416,7 +418,9 @@ CPPFLAGS=${oldCPPFLAGS}
 if test "${snmpd_valid}" = "yes" ; then
     MIBS="mibs"
 else
-    AC_MSG_WARN(XORP MIBs will not be built)
+    # XXX: If the user explicitly specified to build SNMP, it is a critical
+    # error if SNMP is not found.
+    AC_MSG_ERROR(XORP MIBs will not be built)
     MIBS=""
 fi
 
