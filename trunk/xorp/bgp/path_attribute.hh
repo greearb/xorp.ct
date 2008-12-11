@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/bgp/path_attribute.hh,v 1.52 2008/10/02 21:56:17 bms Exp $
+// $XORP: xorp/bgp/path_attribute.hh,v 1.53 2008/11/08 06:14:37 mjh Exp $
 
 #ifndef __BGP_PATH_ATTRIBUTE_HH__
 #define __BGP_PATH_ATTRIBUTE_HH__
@@ -697,6 +697,7 @@ public:
     size_t canonical_length() const {return _canonical_length;}
 
     void incr_refcount(uint32_t change) const {
+	XLOG_ASSERT(0xffffffff - change > _refcount);
 	_refcount += change;
 	//	printf("incr_refcount for %p: now %u\n", this, _refcount);
     }
@@ -705,12 +706,30 @@ public:
 	XLOG_ASSERT(_refcount >= change);
 	_refcount -= change;
 	//	printf("decr_refcount for %p: now %u\n", this, _refcount);
-	if (_refcount == 0) {
+	if (_refcount == 0 && _managed_refcount == 0) {
 	    delete this;
 	}
     }
     
     uint32_t references() const { return _refcount; }
+
+
+    void incr_managed_refcount(uint32_t change) const {
+	XLOG_ASSERT(0xffffffff - change > _managed_refcount);
+	_managed_refcount += change;
+	//	printf("incr_managed_refcount for %p: now %u\n", this, _managed_refcount);
+    }
+
+    void decr_managed_refcount(uint32_t change) const {
+	XLOG_ASSERT(_refcount >= change);
+	_managed_refcount -= change;
+	//	printf("decr_managed_refcount for %p: now %u\n", this, _managed_refcount);
+	if (_refcount == 0 && _managed_refcount == 0) {
+	    delete this;
+	}
+    }
+    
+    uint32_t managed_references() const { return _managed_refcount; }
 
 protected:
     // Canonical data is the path attribute list stored in BGP wire
@@ -732,6 +751,10 @@ private:
     // avoid premature deletion, and to keep track if we've asked for
     // this to be deleted.
     mutable uint32_t _refcount;
+
+    // managed refcount is the number of routes referencing this PA
+    // list when this PA list is stored in the attribute manager.
+    mutable uint32_t _managed_refcount;
 
     //    uint8_t			_hash[16];	// used for fast comparisons
 };

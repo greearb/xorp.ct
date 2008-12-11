@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/attribute_manager.cc,v 1.17 2008/10/02 21:56:14 bms Exp $"
+#ident "$XORP: xorp/bgp/attribute_manager.cc,v 1.18 2008/11/08 06:14:35 mjh Exp $"
 
 //#define DEBUG_LOGGING
 #include "bgp_module.h"
@@ -48,17 +48,17 @@ AttributeManager<A>::add_attribute_list(PAListRef<A>& palist)
 
     if (i == _attribute_lists.end()) {
 	_attribute_lists.insert(palist);
-	palist->incr_refcount(65535);
+	palist->incr_managed_refcount(1);
 	debug_msg("** new att list\n");
-	debug_msg("** (+) ref count for %p now %d\n",
-		  palist.attributes(), palist->references());
+	debug_msg("** (+) ref count for %p now %u\n",
+		  palist.attributes(), palist->managed_references());
 	return palist;
     }
 
-    (*i)->incr_refcount(65535);
+    (*i)->incr_managed_refcount(1);
     debug_msg("** old att list\n");
-    debug_msg("** (+) ref count for %p now %d\n",
-	      (*i).attributes(), (*i)->references());
+    debug_msg("** (+) ref count for %p now %u\n",
+	      (*i).attributes(), (*i)->managed_references());
     debug_msg("done\n");
 
     return *i;
@@ -74,13 +74,13 @@ AttributeManager<A>::delete_attribute_list(PAListRef<A>& palist)
     Iter i = _attribute_lists.find(palist);
     assert(i != _attribute_lists.end());
 
-    XLOG_ASSERT((*i)->references()>=65535);
-    (*i)->decr_refcount(65535);
+    XLOG_ASSERT((*i)->managed_references()>=1);
+    (*i)->decr_managed_refcount(1);
 
-    debug_msg("** (-) ref count for %p now %d\n",
-	      (*i).attributes(), (*i)->references());
+    debug_msg("** (-) ref count for %p now %u\n",
+	      (*i).attributes(), (*i)->managed_references());
 
-    if ((*i)->references() < 65535) {
+    if ((*i)->managed_references() < 1) {
 	_attribute_lists.erase(i);
     }
 }

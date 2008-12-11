@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.98 2008/11/08 06:14:36 mjh Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.99 2008/11/13 19:28:35 bms Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -2227,7 +2227,7 @@ PathAttribute::set_header(uint8_t *data, size_t payload_size, size_t &wire_size)
 
 template<class A>
 PathAttributeList<A>::PathAttributeList() 
-    : _refcount(0)
+    : _refcount(0), _managed_refcount(0)
 {
     debug_msg("%p\n", this);
     _canonical_data = 0;
@@ -2236,7 +2236,7 @@ PathAttributeList<A>::PathAttributeList()
 
 template<class A>
 PathAttributeList<A>::PathAttributeList(const PathAttributeList<A>& palist)
-    : _refcount(0)
+    : _refcount(0), _managed_refcount(0)
 {
     debug_msg("%p\n", this);
 
@@ -2247,7 +2247,7 @@ PathAttributeList<A>::PathAttributeList(const PathAttributeList<A>& palist)
 
 template<class A>
 PathAttributeList<A>::PathAttributeList(FPAListRef& fpa_list)
-    : _refcount(0)
+    : _refcount(0), _managed_refcount(0)
 {
     fpa_list->canonicalize();
     _canonical_length = fpa_list->canonical_length();
