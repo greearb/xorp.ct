@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.299 2008/10/02 21:57:46 bms Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.300 2008/10/13 15:40:22 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2480,6 +2480,16 @@ AreaRouter<A>::receive_lsas(OspfTypes::PeerID peerid,
 		    delayed_ack.push_back(lsah);
 		    continue;
 		}
+#ifndef	MAX_AGE_IN_DATABASE
+		// MaxAge LSA's are not being placed in the database.
+		// If we go any further this LSA will be published and
+		// placed in the LSA database which will cause an ASSERT.
+		// While any of the neighbours are in state exchange
+		// or loading without this continue MaxAge LSAs will
+		// be responded to by MaxAge LSAs, causing a war if
+		// MaxAge LSAs.
+ 		continue;
+#endif
 	    }
 	}
 
@@ -2829,6 +2839,9 @@ AreaRouter<A>::add_lsa(Lsa::LsaRef lsar)
     size_t index;
     XLOG_ASSERT(!find_lsa(lsar, index));
     XLOG_ASSERT(lsar->valid());
+#ifndef	MAX_AGE_IN_DATABASE
+    XLOG_ASSERT(!lsar->maxage());
+#endif
 
     // If there are no readers we can put this LSA into an empty slot.
     if (0 == _readers && !_empty_slots.empty()) {
