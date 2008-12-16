@@ -18,10 +18,10 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.301 2008/12/16 02:59:40 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.302 2008/12/16 18:20:55 atanu Exp $"
 
-#define DEBUG_LOGGING
-#define DEBUG_PRINT_FUNCTION_NAME
+// #define DEBUG_LOGGING
+// #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "ospf_module.h"
 
