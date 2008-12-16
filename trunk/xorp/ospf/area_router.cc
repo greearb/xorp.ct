@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.302 2008/12/16 18:20:55 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.303 2008/12/16 18:22:22 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2481,13 +2481,21 @@ AreaRouter<A>::receive_lsas(OspfTypes::PeerID peerid,
 		    continue;
 		}
 #ifndef	MAX_AGE_IN_DATABASE
-		// MaxAge LSA's are not being placed in the database.
-		// If we go any further this LSA will be published and
-		// placed in the LSA database which will cause an ASSERT.
-		// While any of the neighbours are in state exchange
-		// or loading without this continue MaxAge LSAs will
-		// be responded to by MaxAge LSAs, causing a war of
-		// MaxAge LSAs.
+		// The continue is here to stop this incoming MaxAge LSA
+		// being flooded back to the sender while in state
+		// EXCHANGE or LOADING, otherwise neighbours in this
+		// condition will respond to MaxAge LSAs with MaxAge LSAs.
+		// The first time we see a MaxAge LSA we *should*
+		// store the LSA in the database and add to
+		// retransmission lists, when the LSA is ACK'd and no
+		// longer appears on the retransmission lists it
+		// should be removed.
+		// In this code path we don't store the MaxAge LSA in
+		// the database so we can't flood.
+		// We are *probably* saved by the fact that if a
+		// router had an LSA that was responded to by a MaxAge
+		// LSA then the MaxAge LSA will already be on the
+		// retransmission lists.
  		continue;
 #endif
 	    }
