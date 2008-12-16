@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.28 2008/07/23 03:32:05 pavlin Exp $
+# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.29 2008/10/03 03:15:34 pavlin Exp $
 #
 
 #
@@ -628,6 +628,21 @@ kdoc_static_routes()
 }
 
 #
+# vrrp
+#
+kdoc_vrrp()
+{
+    lib="vrrp"
+    desc="VRRP daemon"
+    html_start_page="index.html"
+    files="vrrp/*.h vrrp/*.hh"
+    excludes=""
+    xref="libxorp libxorp-callback libxipc xrl-interfaces xrl-targets libfeaclient libpolicybackend"
+    kdocify
+}
+
+
+#
 # contrib directories
 #
 
@@ -648,7 +663,7 @@ kdoc_contrib_olsr()
 KDOC_ALL_TGTS="libxorp callback libcomm libxipc libproto xrl_interfaces \
 	       xrl_targets mrt cli libfeaclient fea mld6igmp pim policycommon \
 	       libpolicybackend policy bgp fib2mrib mibs ospf rib rip rtrmgr \
-	       static_routes \
+	       static_routes vrrp \
 	       contrib_olsr"
 : ${KDOC_TGTS:=${KDOC_ALL_TGTS}}
 for i in ${KDOC_TGTS} ; do
