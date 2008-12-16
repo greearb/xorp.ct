@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_routing1.sh,v 1.26 2007/12/10 23:26:33 mjh Exp $
+# $XORP: xorp/bgp/harness/test_routing1.sh,v 1.27 2008/11/08 06:14:44 mjh Exp $
 #
 
 #
@@ -782,7 +782,7 @@ test6()
 
     coord peer1 expect $(packet $PEER1_AS $LOCAL_NH) med $MED
     coord peer2 expect $(packet $AS,$PEER1_AS $NEXT_HOP) med 0
-    coord peer3 expect $(packet $PEER1_AS $LOCAL_NH) localpref 100
+    coord peer3 expect $(packet $PEER1_AS $LOCAL_NH) med $MED localpref 100
 
     coord peer1 send $(packet $PEER1_AS $LOCAL_NH) med $MED localpref 17
 

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.103 2008/07/23 05:09:34 pavlin Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.109 2008/11/08 06:14:37 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -325,19 +325,11 @@ BGPPlumbingAF<A>::BGPPlumbingAF(const string& ribname,
 				      _master.main().eventloop());
     _decision_table->set_next_table(_policy_sourcematch_table);
 
-    CacheTable<A>* cache_decision = 
-	new CacheTable<A>(_ribname + "IpcChannelDecisionCache",
-			  _master.safi(),
-			  _policy_sourcematch_table,
-			  _master.rib_handler());
-    _policy_sourcematch_table->set_next_table(cache_decision);
-    _tables.insert(cache_decision);
-
     _aggregation_table =
 	new AggregationTable<A>(ribname + "AggregationTable",
 				_master,
-				cache_decision);
-    cache_decision->set_next_table(_aggregation_table);
+				_policy_sourcematch_table);
+    _policy_sourcematch_table->set_next_table(_aggregation_table);
 
     _fanout_table =
 	new FanoutTable<A>(ribname + "FanoutTable",
@@ -522,8 +514,18 @@ BGPPlumbingAF<A>::configure_outbound_filter(PeerHandler* peer_handler,
     /* 3. Configure MED filter.
 	  Remove old MED and add new one on transmission to EBGP peers. */
     /* Note: this MUST come before the nexthop rewriter */
-    filter_out->add_med_removal_filter();
+    if (peer_type != PEER_TYPE_IBGP 
+	&& peer_type != PEER_TYPE_IBGP_CLIENT) {
+	/* By default, we remove the old MED unless we're sending to
+	   an IBGP neighbour */
+	/* RFC 3065 says we can legally send MED to EBGP_CONFED
+	   neighbours, but it's not clear that this is a good default.
+	   We choose not to do so - this is safe . */
+	filter_out->add_med_removal_filter();
+    }
     if (peer_type == PEER_TYPE_EBGP) {
+	/* we only add MED when sending to an EBGP peer (not an EBGP
+	   confed peer - that doesn't seem to be legal). */
 	filter_out->add_med_insertion_filter();
     }
 
