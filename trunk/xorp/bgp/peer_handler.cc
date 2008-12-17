@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.49 2008/10/02 21:56:17 bms Exp $"
+#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.50 2008/11/08 06:14:37 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -123,7 +123,7 @@ PeerHandler::add<IPv4>(const UpdatePacket *p,
 
 	BGPUpdateAttribList::const_iterator ni4;
 	ni4 = p->nlri_list().begin();
-	int count = 0;
+	int count = p->nlri_list().size();
 	while (ni4 != p->nlri_list().end()) {
 	    if (!ni4->net().is_unicast()) {
 		XLOG_ERROR("NLRI <%s> is not semantically correct ignoring.%s",
@@ -133,8 +133,8 @@ PeerHandler::add<IPv4>(const UpdatePacket *p,
 	    }
 	    PolicyTags policy_tags;
 	    FPAList4Ref fpalist;
-	    if (count == 0) {
-		// no need to copy the first one
+	    if (count == 1) {
+		// no need to copy if there's only one
 		fpalist = pa_list;
 	    } else {
 		// need to copy the others, or each one's changes will affect the rest
@@ -144,7 +144,6 @@ PeerHandler::add<IPv4>(const UpdatePacket *p,
 	    _plumbing_unicast->add_route(ni4->net(), fpalist, 
 					 policy_tags, this);
 	    ++ni4;
-	    count++;
 	}
     }
 	break;
@@ -156,7 +155,7 @@ PeerHandler::add<IPv4>(const UpdatePacket *p,
 	XLOG_ASSERT(pa_list->complete());
 
 	list<IPNet<IPv4> >::const_iterator ni;
-	int count = 0;
+	int count = mpreach->nlri_list().size();
 	ni = mpreach->nlri_list().begin();
 	while (ni != mpreach->nlri_list().end()) {
 	    if (!ni->is_unicast()) {
@@ -167,7 +166,7 @@ PeerHandler::add<IPv4>(const UpdatePacket *p,
 	    }
 	    PolicyTags policy_tags;
 	    FPAList4Ref fpalist;
-	    if (mpreach->nlri_list().size() == 1) {
+	    if (count == 1) {
 		// no need to copy
 		fpalist = pa_list;
 	    } else {
@@ -180,7 +179,6 @@ PeerHandler::add<IPv4>(const UpdatePacket *p,
 	    _plumbing_multicast->add_route(*ni, fpalist, 
 					   policy_tags, this);
 	    ++ni;
-	    count++;
 	}
     }
 	break;
