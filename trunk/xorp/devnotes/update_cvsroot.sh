@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/devnotes/update_cvsroot.sh,v 1.3 2008/01/11 05:57:19 pavlin Exp $
+# $XORP: xorp/devnotes/update_cvsroot.sh,v 1.4 2008/04/29 01:53:44 pavlin Exp $
 #
 
 #
@@ -17,7 +17,7 @@
 # XXX: MODIFY THIS AS APPROPRIATE!
 #
 ANON_CVS_ROOT=":pserver:xorpcvs@anoncvs.xorp.org:/cvs"
-DEVEL_CVS_ROOT="cvs.xorp.org:/usr/local/www/data/cvs"
+DEVEL_CVS_ROOT="cvs.xorp.org:/cvsroot"
 
 #
 # Local variables
