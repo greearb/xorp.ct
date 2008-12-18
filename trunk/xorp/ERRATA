@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ERRATA,v 1.46 2008/10/10 18:37:17 pavlin Exp $
+# $XORP: xorp/ERRATA,v 1.47 2008/12/06 06:01:34 pavlin Exp $
 #
 
 		XORP ERRATA
@@ -210,6 +210,15 @@
       LSAs with link-local scope could be flooded to links where they
       shouldn't be sent. We believe this shouldn't affect the routing
       computation, but it does introduce more LSAs than necessary.
+
+      If multiple interfaces on a host have the either the same IP
+      address or have addresses in the same subnet then OSPF will not
+      function correctly. Error messages of this form have been seen
+      when this misconfiguration occurs:
+
+	[ 2008/12/18 15:42:11 WARNING xorp_fea FEA ] proto_socket_read() 
+        failed: RX packet from 10.100.10.2 to 224.0.0.5 pif_index 2: 
+        no vif found
 
     - There are several other known issues, but none of them is
       considered critical. The list of known issues is available from:
