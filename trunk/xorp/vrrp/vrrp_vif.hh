@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/vrrp/vrrp_vif.hh,v 1.7 2008/10/09 18:03:50 abittau Exp $
+// $XORP: xorp/vrrp/vrrp_vif.hh,v 1.8 2008/10/09 18:04:13 abittau Exp $
 
 #ifndef __VRRP_VRRP_VIF_HH__
 #define __VRRP_VRRP_VIF_HH__
@@ -28,6 +28,8 @@
 
 #include "libxorp/ipv4.hh"
 #include "libfeaclient/ifmgr_atoms.hh"
+#include "libxipc/xrl_error.hh"
+
 #include "vrrp.hh"
 #include "vrrp_interface.hh"
 
@@ -58,6 +60,13 @@ public:
     void	    stop_arps();
     void	    recv_arp(const Mac& src, const PAYLOAD& payload);
     void	    get_vrids(VRIDS& vrids);
+
+    /**
+     * Callback on XRL error caused by this interface.
+     *
+     * @param xrl_error the error (if any).
+     */
+    void	    xrl_cb(const XrlError& xrl_error);
 
 private:
     typedef set<IPv4>		    IPS;

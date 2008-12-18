@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/vrrp/vrrp_target.cc,v 1.13 2008/10/10 02:43:36 pavlin Exp $"
+#ident "$XORP: xorp/vrrp/vrrp_target.cc,v 1.14 2008/10/16 22:40:36 pavlin Exp $"
 
 #include <sstream>
 
@@ -97,7 +97,7 @@ VrrpTarget::start()
 bool
 VrrpTarget::running() const
 {
-    return _running || _xrls_pending > 0;
+    return _running || _rtr.pending() || _xrls_pending > 0;
 }
 
 void
@@ -235,14 +235,15 @@ void
 VrrpTarget::send(const string& ifname, const string& vifname, const Mac& src,
 		 const Mac& dest, uint32_t ether, const PAYLOAD& payload)
 {
+    VrrpVif* vif = find_vif(ifname, vifname);
+    XLOG_ASSERT(vif);
+
     bool rc = _rawlink.send_send(fea_target_name.c_str(),
 				 ifname, vifname, src, dest, ether, payload,
-				 callback(this, &VrrpTarget::xrl_cb));
+				 callback(vif, &VrrpVif::xrl_cb));
 
     if (!rc)
 	XLOG_FATAL("Cannot send raw data");
-
-    _xrls_pending++;
 }
 
 void

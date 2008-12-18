@@ -18,11 +18,12 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/vrrp/vrrp_vif.cc,v 1.9 2008/10/09 18:04:12 abittau Exp $"
+#ident "$XORP: xorp/vrrp/vrrp_vif.cc,v 1.10 2008/10/10 02:43:36 pavlin Exp $"
 
 #include "vrrp_module.h"
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
+#include "libxipc/xrl_error.hh"
 
 #include "vrrp_vif.hh"
 #include "vrrp_target.hh"
@@ -287,4 +288,16 @@ VrrpVif::get_vrids(VRIDS& vrids)
 {
     for (VRRPS::iterator i = _vrrps.begin(); i != _vrrps.end(); ++i)
 	vrids.insert(i->first);
+}
+
+void
+VrrpVif::xrl_cb(const XrlError& xrl_error)
+{
+    if (xrl_error == XrlError::OKAY())
+	return;
+
+    XLOG_WARNING("Error on interface %s:%s - %s\n",
+		 _ifname.c_str(), _vifname.c_str(), xrl_error.str().c_str());
+
+    set_ready(false);
 }
