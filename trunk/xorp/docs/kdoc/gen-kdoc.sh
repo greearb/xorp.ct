@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.29 2008/10/03 03:15:34 pavlin Exp $
+# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.30 2008/12/16 19:09:25 jtc Exp $
 #
 
 #
@@ -637,10 +637,9 @@ kdoc_vrrp()
     html_start_page="index.html"
     files="vrrp/*.h vrrp/*.hh"
     excludes=""
-    xref="libxorp libxorp-callback libxipc xrl-interfaces xrl-targets libfeaclient libpolicybackend"
+    xref="libxorp libxorp-callback libcomm libxipc xrl-interfaces xrl-targets libfeaclient libproto"
     kdocify
 }
-
 
 #
 # contrib directories

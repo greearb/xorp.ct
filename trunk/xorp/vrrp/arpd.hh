@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/vrrp/arpd.hh,v 1.3 2008/10/09 18:03:49 abittau Exp $
+// $XORP: xorp/vrrp/arpd.hh,v 1.4 2008/10/09 18:04:12 abittau Exp $
 
 #ifndef __VRRP_ARPD_HH__
 #define __VRRP_ARPD_HH__
@@ -29,23 +29,78 @@
 #include "vrrp_packet.hh"
 #include "vrrp_interface.hh"
 
+/**
+ * @short an ARP daemon.
+ *
+ * This daemon can be configured to "own" several IPs for which it will send out
+ * ARP replies when receiving ARP requests.
+ */
 class ARPd {
 public:
+    /**
+     * @param vif the VRRP interface on which the daemon runs.
+     */
     ARPd(VrrpInterface& vif);
     ~ARPd();
 
+    /**
+     * Remove all configured IPs.
+     */
     void clear();
+
+    /**
+     * Add an IP for which ARP replies should be sent.
+     *
+     * @param ip the IP to add.
+     */
     void insert(const IPv4& ip);
+
+    /**
+     * Stop the daemon.
+     */
     void stop();
+
+    /**
+     * Start the daemon.
+     */
     void start();
+
+    /**
+     * Using this method the caller notifies ARPd that it has finished
+     * manipulating the IP addresses.  This way one can clear and add IPs one by
+     * one without causing ARPd to stop (if IPs are cleared) and resume if IPs
+     * are added.
+     */
     void ips_updated();
+
+    /**
+     * This method notifies the reception of an ARP packet.
+     *
+     * @param mac the source MAC address of the packet.
+     * @param payload the ARP header and data.
+     */
     void recv(const Mac& src, const PAYLOAD& payload);
+
+    /**
+     * Sets the MAC address of the ARP daemon, used when generating replies.
+     *
+     * @param mac the MAC address.
+     */
     void set_mac(const Mac& mac);
 
 private:
     typedef set<IPv4>	IPS;
 
+    /**
+     * Use this to notify the interface that we no longer need to receive
+     * packets.  This can be used for example when no IPs are configured or when
+     * the ARPd has been stopped.
+     */
     void start_receiving();
+
+    /**
+     * Notify the interface that we desire to receive ARP packets.
+     */
     void stop_receiving();
 
     VrrpInterface&  _vif;
