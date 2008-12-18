@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2008 XORP, Inc.
 //
@@ -17,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_netlink_socket.cc,v 1.23 2008/10/02 21:57:08 bms Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_netlink_socket.cc,v 1.24 2008/10/11 04:20:18 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -228,6 +229,12 @@ IfConfigSetNetlinkSocket::config_interface_begin(
 
  done:
     if (was_disabled) {
+	// We need to "hide" the Linux quirk of toggling the interface down / up
+	// and make sure that our configuration is up to date.  Otherwise we'll
+	// later be notified (by the observer) that the interface went down
+	// unexpectedly and things may break, when instead it is only a
+	// transient state.
+        wait_interface_status(pulled_ifp, false);
 	if (set_interface_status(config_iface.ifname(),
 				 config_iface.pif_index(),
 				 config_iface.interface_flags(),
@@ -236,6 +243,7 @@ IfConfigSetNetlinkSocket::config_interface_begin(
 	    != XORP_OK) {
 	    return (XORP_ERROR);
 	}
+        wait_interface_status(pulled_ifp, true);
     }
 
     return (ret_value);
@@ -625,6 +633,26 @@ IfConfigSetNetlinkSocket::set_interface_status(const string& ifname,
     return (XORP_OK);
 
 #endif // HAVE_NETLINK_SOCKETS_SET_FLAGS_IS_BROKEN
+}
+
+void
+IfConfigSetNetlinkSocket::wait_interface_status(const IfTreeInterface* ifp,
+						bool is_enabled)
+{
+    NetlinkSocket* ns = dynamic_cast<NetlinkSocket*>(fea_data_plane_manager()
+						     .ifconfig_observer());
+    string error_msg;
+
+    // This is supposed to run only on Linux.  I could enforce this more, but
+    // I'll leave the code flexible in case other platforms need such a
+    // mechanism.
+    if (!ns)
+	return;
+
+    while (ifp->enabled() != is_enabled) {
+	if (ns->force_recvmsg(0, true, error_msg) != XORP_OK)
+	    XLOG_ERROR("Netlink force_recvmsg(): %s", error_msg.c_str());
+    }
 }
 
 int

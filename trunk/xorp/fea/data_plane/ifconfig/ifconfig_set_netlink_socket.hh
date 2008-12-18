@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2008 XORP, Inc.
 //
@@ -17,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_netlink_socket.hh,v 1.12 2008/07/23 05:10:30 pavlin Exp $
+// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_netlink_socket.hh,v 1.13 2008/10/02 21:57:08 bms Exp $
 
 #ifndef __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_SET_NETLINK_SOCKET_HH__
 #define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_SET_NETLINK_SOCKET_HH__
@@ -287,6 +288,14 @@ private:
 			     uint32_t interface_flags,
 			     bool is_enabled,
 			     string& error_msg);
+
+    /**
+     * Busy waits until the interface status changes.
+     *
+     * @param ifp the interface to check.
+     * @param is_enabled if true, will wait for interface to become enabled.
+     */
+    void wait_interface_status(const IfTreeInterface* ifp, bool is_enabled);
 
     /**
      * Set the interface MAC address.
