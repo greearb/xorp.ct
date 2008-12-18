@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libproto/packet.hh,v 1.20 2008/10/10 01:46:48 pavlin Exp $
+// $XORP: xorp/libproto/packet.hh,v 1.21 2008/10/16 22:38:37 pavlin Exp $
 
 
 #ifndef __LIBPROTO_PACKET_HH__
@@ -902,12 +902,18 @@ private:
     uint8_t* _ip_dst;		// Destination address
 };
 
+/**
+ * @short Exception thrown when parsing malformed packets.
+ */
 class BadPacketException : public XorpReasonedException {
 public:
     BadPacketException(const char* file, size_t line, const string& why = "")
         : XorpReasonedException("BadPacketException", file, line, why) {}
 };
 
+/**
+ * @short an ARP packet.
+ */
 struct ArpHeader {
     typedef vector<uint8_t> PAYLOAD;
 
@@ -919,16 +925,85 @@ struct ArpHeader {
 	HW_ETHER = 1
     };
 
+    /**
+     * Create an ARP packet.  The caller must allocate memory and ensure enough
+     * space (sizeof(ArpHeader) + (2 hw addresses) + (2 network addresses)).
+     *
+     * @return the ARP header.
+     * @param data pointer where data should be stored.
+     */
     static ArpHeader&	    assign(uint8_t* data);
+
+    /**
+     * Parse an ARP packet.
+     *
+     * @return the ARP header.
+     * @param payload the ARP header and data.
+     */
     static const ArpHeader& assign(const PAYLOAD& payload);
+
+    /**
+     * Create a gratuitous ARP.  I.e., an ARP request for my own IP address -
+     * the one used in the source section of the ARP packet.
+     *
+     * @param output data (output argument).
+     * @param MAC address of IP.
+     * @param ip IP address to create request for.
+     */
     static void		    make_gratuitous(PAYLOAD& payload, const Mac& mac,
 					    const IPv4& ip);
+
+    /**
+     * Set the sender information in the ARP packet.
+     *
+     * @param mac source MAC address.
+     * @param ip source IP address.
+     */
     void		    set_sender(const Mac& mac, const IPv4& ip);
+
+    /**
+     * Create an ARP request for an IP address.
+     *
+     * @param ip IP address to ask request for.
+     */
     void		    set_request(const IPv4& ip);
+
+    /**
+     * Create an ARP reply.
+     *
+     * @param mac MAC address of requested IP address.
+     * @param ip IP address requested in the ARP request.
+     */
     void		    set_reply(const Mac& mac, const IPv4& ip);
+
+    /**
+     * The size of the ARP packet (ARP header + data).
+     *
+     * @return the size of the ARP packet.
+     */
     uint32_t		    size() const;
+
+    /**
+     * Determine whether it is an ARP request.  This (usually) implies whether
+     * or not it is an ARP reply.
+     *
+     * @return true if it is an ARP request.
+     */
     bool		    is_request() const;
+
+    /**
+     * If an ARP request, return the IP address that is being asked for.
+     *
+     * @return the IP address being asked for.
+     */
     IPv4		    get_request() const;
+
+    /**
+     * If this is an ARP request, create an ARP reply with the give MAC address.
+     *
+     * @param out the ARP reply data (output parameter).
+     * @param mac the MAC address of the requested IP address.
+     */
     void		    make_reply(PAYLOAD& out, const Mac& mac) const;
 
     uint16_t	ah_hw_fmt;
