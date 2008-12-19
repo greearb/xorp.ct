@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ERRATA,v 1.48 2008/12/18 23:44:57 atanu Exp $
+# $XORP: xorp/ERRATA,v 1.49 2008/12/19 00:35:26 abittau Exp $
 #
 
 		XORP ERRATA
@@ -159,7 +159,7 @@
         <linux/netfilter_ipv6/ip6_tables.h>
       This prevents the compilation of the Linux Netfilter-based
       firewall support. See the following Bugzilla entry for details:
-        https://bugzilla.netfilter.org/cgi-bin/bugzilla/show_bug.cgi?id=536
+        http://bugzilla.netfilter.org/show_bug.cgi?id=536
 
       To enable the Linux firewall compilation
       the following patches need should be applied to the above
