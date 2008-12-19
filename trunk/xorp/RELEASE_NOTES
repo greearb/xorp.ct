@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.223 2008/11/27 06:36:37 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.224 2008/12/01 20:22:15 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -111,6 +111,18 @@ Release 1.6-WIP (2008/??/??)
 
   VRRP:
     - Initial implementation of VRRP version 2 as described in RFC 3768.
+
+    - Supports running more than one VRRP interfaces on the same box although
+      they need to be on different interfaces and different LANs for correct
+      behavior (see ERRATA).
+
+    - The following master failure modes have been tested and are known to work
+      (i.e., backup becomes master): bringing the master's interface down,
+      rebooting / crashing the master, physically removing the network cable.
+      Note that in the latter case the master may fail to resume operations when
+      the cable is restored (see ERRATA).
+
+    - Successfully interoperates with vrrpd.
 
 Release 1.5 (2008/07/22)
 ========================
