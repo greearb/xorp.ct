@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ERRATA,v 1.47 2008/12/06 06:01:34 pavlin Exp $
+# $XORP: xorp/ERRATA,v 1.48 2008/12/18 23:44:57 atanu Exp $
 #
 
 		XORP ERRATA
@@ -336,6 +336,27 @@
 
   FIB2MRIB:
     - No known issues.
+
+  VRRP:
+   - Cannot run more than one VRRP instance on a physical interface.  Each
+     instance requires a different MAC address, and only one MAC address can be
+     set per interface.
+
+   - Incorrect behavior when running more than one VRRP instance on the same
+     LAN and host.  VRRP uses raw sockets to listen for advertisements and
+     locally generated packets are not sent to them.  So if two VRRP instances
+     on the same host share the same LAN, they will not see each other's
+     advertisements and may result in both becoming masters.
+
+   - Need to manually (or via XORP configuration) reset an interface's MAC
+     address if VRRP crashes.  VRRP may alter the MAC address of an interface
+     and restore it only upon exit.  If VRRP crashes, the MAC address may remain
+     altered and will need to be fixed manually before restarting VRRP as the
+     daemon will otherwise complain.
+
+   - On some combinations of Linux kernels and network cards, if the link beat
+     goes down, when it comes back up, packets are no longer received by the OS,
+     causing VRRP to fail.
 
   CLI:
     - No known issues.
