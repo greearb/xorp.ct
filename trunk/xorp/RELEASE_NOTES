@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.224 2008/12/01 20:22:15 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.225 2008/12/19 00:45:02 abittau Exp $
 #
 
 		XORP RELEASE NOTES
@@ -112,7 +112,7 @@ Release 1.6-WIP (2008/??/??)
   VRRP:
     - Initial implementation of VRRP version 2 as described in RFC 3768.
 
-    - Supports running more than one VRRP interfaces on the same box although
+    - Supports running more than one VRRP instances on the same box although
       they need to be on different interfaces and different LANs for correct
       behavior (see ERRATA).
 
