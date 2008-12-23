@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.226 2008/12/20 08:41:38 abittau Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.227 2008/12/23 18:28:31 atanu Exp $
 #
 
 		XORP RELEASE NOTES
@@ -39,22 +39,47 @@ Release 1.6-WIP (2008/??/??)
       even if the "bootstrap {}" block contained "disable: true"
       statement.
 
+    - The following CLI operational command prefix has been renamed:
+      OLD: "show route admin distances"
+      NEW: "show route admin distance"
+
+    - Addition of run-time configuration trace options for RIP/RIPng:
+
+      protocols {
+          rip {
+              traceoptions {
+                  disable: false
+              }
+          }
+      }
+
   LIBXORP:
     - Class EtherMac is removed and is replaced/superseded by the
       existing class Mac.
 
+    - Performance improvements and various bug fixes in the EventLoop
+      and SelectorList implementation.
+
   LIBXIPC:
+    - Bugzilla URL: http://bugzilla.xorp.org/bugzilla/show_bug.cgi?id=808
+      XRL performance enhancements. The improvement is 250%.
+
     - Critical bug fix that might be triggered on certains systems.
       Currently the only known affected system is OpenBSD-4.3.
 
+    - Bug fixes for issues that might be triggered under heavy system
+      load:
+      http://bugzilla.xorp.org/show_bug.cgi?id=799
+      http://bugzilla.xorp.org/show_bug.cgi?id=800
+
   LIBFEACLIENT:
-    - 
+    - No significant changes.
 
   XRL:
-    - 
+    - No significant changes.
 
   RTRMGR:
-    - 
+    - No significant changes.
 
   XORPSH:
     - Bug fix in the error messages when a top-level CLI command is
@@ -64,7 +89,7 @@ Release 1.6-WIP (2008/??/??)
     - 
 
   FEA/MFEA:
-    - Bug fix OpenBSD sendmsg() problem when transmitting IGMP packets.
+    - Bug fix for OpenBSD when transmitting IGMP packets.
 
   RIB:
     - Bug fix in the CLI command to consolidate the administrative distance 
@@ -74,7 +99,7 @@ Release 1.6-WIP (2008/??/??)
       'show route admin distances'. The latter CLI command no longer exist. 
 
   RIP/RIPng:
-    - 
+    - No significant changes.
 
   OLSR:
     - 
@@ -90,7 +115,7 @@ Release 1.6-WIP (2008/??/??)
     - 
 
   STATIC_ROUTES:
-    - 
+    - No significant changes.
 
   MLD/IGMP:
     - Bug fix when checking the source address of IGMP packet if the
@@ -105,10 +130,11 @@ Release 1.6-WIP (2008/??/??)
       Bootstrap configuration via xorpsh.
 
   FIB2MRIB:
-    - 
+    - No significant changes.
 
   CLI:
-    - 
+    - Bug fix in handling the user input: now the priority of processing
+      it is the highest.
 
   SNMP:
     - 
