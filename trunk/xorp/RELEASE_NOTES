@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.225 2008/12/19 00:45:02 abittau Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.226 2008/12/20 08:41:38 abittau Exp $
 #
 
 		XORP RELEASE NOTES
@@ -80,8 +80,12 @@ Release 1.6-WIP (2008/??/??)
     - 
 
   OSPF:
-    - 
-
+    - Bugzilla URL: http://bugzilla.xorp.org/bugzilla/show_bug.cgi?id=785
+      When the designated router was restarted the MaxAge LSAs that it
+      generated when reflected back would be responded to with a MaxAge LSA,
+      this process could continue indefinitely, leaving the neighbor state in
+      EXCHANGE.
+	
   BGP:
     - 
 
