@@ -1,12 +1,12 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.228 2008/12/23 22:18:08 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.229 2008/12/24 02:04:40 syedk Exp $
 #
 
 		XORP RELEASE NOTES
 
 This file contains XORP release notes (most recent releases first).
 
-Release 1.6-WIP (2008/??/??)
+Release 1.6-WIP (12/24/2008)
 ============================
   ALL:
     - XORP now builds on Linux CentOS 5.2, Linux openSUSE-11.0,
@@ -40,9 +40,11 @@ Release 1.6-WIP (2008/??/??)
       even if the "bootstrap {}" block contained "disable: true"
       statement.
 
-    - The following CLI operational command prefix has been renamed:
+    - The following CLI operational command prefix has been changed:
       OLD: "show route admin distances"
       NEW: "show route admin distance"
+     
+    - The CLI "show version" command is supported
 
     - Addition of run-time configuration trace options for RIP/RIPng:
 
@@ -62,58 +64,56 @@ Release 1.6-WIP (2008/??/??)
       and SelectorList implementation.
 
   LIBXIPC:
-    - Bugzilla URL: http://bugzilla.xorp.org/bugzilla/show_bug.cgi?id=808
-      XRL performance enhancements. The improvement is 250%.
+    - XRL performance enhancements. (Bug 808)
 
-    - Critical bug fix that might be triggered on certains systems.
-      Currently the only known affected system is OpenBSD-4.3.
-
-    - Bug fixes for issues that might be triggered under heavy system
-      load:
-      http://bugzilla.xorp.org/show_bug.cgi?id=799
-      http://bugzilla.xorp.org/show_bug.cgi?id=800
+    - Issues that might be triggered under heavy system load have been fixed
+      (Bug 800)
 
   LIBFEACLIENT:
     - No significant changes.
 
   XRL:
-    - No significant changes.
+    - See LIBXIPC
 
   RTRMGR:
     - No significant changes.
 
   XORPSH:
-    - Bug fix in the error messages when a top-level CLI command is
-      executed with incorrect extra arguments.
+    - Incorrect help "show bgp peers detail" command  (Bug 280)
+
+    - Xorpsh exiting immediately on error doesn't work  (Bug 763)
+
+    - "Show version" CLI supported  (Bug 789)
+
+    -  Show route admin distance not working (Bug 812)
 
   POLICY:
-    - 
+    - Tag per route is not reset in case the policies are removed (Bug 567)
+
+    - Implement per-peer BGP import/export policies  (Bug 667)
+
+    - Enhance policy network-lists to included prefix length (Bug 674)
 
   FEA/MFEA:
     - Bug fix for OpenBSD when transmitting IGMP packets.
 
   RIB:
-    - Bug fix in the CLI command to consolidate the administrative distance 
-      keyword to just be 'distance'. There were 2 administrative distance 
-      keywords used; they were 'distance' and 'distances'. CLI commands to 
-      show the administrative distance were 'show route admin distance' and 
-      'show route admin distances'. The latter CLI command no longer exist. 
+    - No significant changes
 
   RIP/RIPng:
-    - No significant changes.
+    - Added traceoption support 
 
   OLSR:
     - 
 
   OSPF:
-    - Bugzilla URL: http://bugzilla.xorp.org/bugzilla/show_bug.cgi?id=785
       When the designated router was restarted the MaxAge LSAs that it
       generated when reflected back would be responded to with a MaxAge LSA,
       this process could continue indefinitely, leaving the neighbor state in
-      EXCHANGE.
+      EXCHANGE. (Bug 785)
 	
   BGP:
-    - 
+     Support for Red Hat Linux (Bug 793)
 
   STATIC_ROUTES:
     - No significant changes.
@@ -127,15 +127,12 @@ Release 1.6-WIP (2008/??/??)
       source address is allowed to be 0.0.0.0.
 
   PIM-SM:
-    - Critical bug fix related to runtime creating or updating the PIM
-      Bootstrap configuration via xorpsh.
+      Ability to add candidate BSR after inserting Cand-RP with same group
+      (Bug 803)
 
   FIB2MRIB:
     - No significant changes.
 
-  CLI:
-    - Bug fix in handling the user input: now the priority of processing
-      it is the highest.
 
   SNMP:
     - 
