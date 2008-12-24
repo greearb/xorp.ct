@@ -1,5 +1,5 @@
 #
-# $XORP: CVSROOT/access.core,v 1.7 2008/11/06 19:45:03 atanu Exp $
+# $XORP: CVSROOT/access.core,v 1.8 2008/11/06 22:04:25 pavlin Exp $
 #
 # Please try to keep the list of core developers
 # (www/html_src/people.html) in in sync with this.
@@ -35,4 +35,5 @@ rchua		roy.chua@xorp.net
 rizzo		rizzo@iet.unipi.it
 schooley	t.schooley@cs.ucl.ac.uk
 strinh		susan.trinh@xorp.net
+syedk		syed.khalid@xorp.net
 zec		zec@tel.fer.hr
