@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/data_plane/control_socket/routing_socket_utilities.cc,v 1.18 2008/07/23 05:10:15 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/control_socket/routing_socket_utilities.cc,v 1.19 2008/10/02 21:56:54 bms Exp $"
 
 #include "fea/fea_module.h"
 
@@ -408,6 +408,7 @@ RtmUtils::rtm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 	    is_family_match = true;
 	}
     }
+#ifdef RTF_LLINFO
     if ((rtm->rtm_flags & RTF_LLINFO)
 	&& (nexthop_addr == IPvX::ZERO(family))) {
 	// Link-local entry (could be the broadcast address as well)
@@ -419,6 +420,7 @@ RtmUtils::rtm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 	if (not_bcast_addr)
 	    nexthop_addr = dst_addr;
     }
+#endif /* RTF_LLINFO */
     if (! is_family_match)
 	return (XORP_ERROR);
     
