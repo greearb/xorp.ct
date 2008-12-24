@@ -1,9 +1,9 @@
 #
-# $XORP: CVSROOT/config,v 1.8 2004/08/02 07:06:53 pavlin Exp $
+# $XORP: CVSROOT/config,v 1.9 2008/12/18 20:29:17 jtc Exp $
 #
 
 # Set this to "no" if pserver shouldn't check system users/passwords
-SystemAuth=no
+SystemAuth=yes
 
 # Put CVS lock files in this directory rather than directly in the repository.
 #LockDir=/var/lock/cvs
