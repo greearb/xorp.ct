@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.227 2008/12/23 18:28:31 atanu Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.228 2008/12/23 22:18:08 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -13,6 +13,7 @@ Release 1.6-WIP (2008/??/??)
       Linux Debian-5.0 (lenny, unreleased), Linux Ubuntu 8.10,
       Linux Red Hat Enterprise Linux Server release 5 (Tikanga),
       Linux Fedora 10, and OpenBSD-4.4.
+
     - XORP now builds on Linux systems with kernel 2.6.26 which is the
       first one to support IPv6 multicast routing.
 
