@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.229 2008/12/24 02:04:40 syedk Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.230 2008/12/24 19:55:24 syedk Exp $
 #
 
 		XORP RELEASE NOTES
@@ -107,13 +107,13 @@ Release 1.6-WIP (12/24/2008)
     - 
 
   OSPF:
-      When the designated router was restarted the MaxAge LSAs that it
+    - When the designated router was restarted the MaxAge LSAs that it
       generated when reflected back would be responded to with a MaxAge LSA,
       this process could continue indefinitely, leaving the neighbor state in
       EXCHANGE. (Bug 785)
 	
   BGP:
-     Support for Red Hat Linux (Bug 793)
+    - Support for Red Hat Linux (Bug 793)
 
   STATIC_ROUTES:
     - No significant changes.
@@ -147,8 +147,8 @@ Release 1.6-WIP (12/24/2008)
     - The following master failure modes have been tested and are known to work
       (i.e., backup becomes master): bringing the master's interface down,
       rebooting / crashing the master, physically removing the network cable.
-      Note that in the latter case the master may fail to resume operations when
-      the cable is restored (see ERRATA).
+      Note that in the latter case the master may fail to resume operations
+      when the cable is restored (see ERRATA).
 
     - Successfully interoperates with vrrpd.
 
