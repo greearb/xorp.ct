@@ -1,5 +1,5 @@
 #
-# $XORP$
+# $XORP: other/LiveCD/tools/tools/nanobsd/liveusb.nano,v 1.1 2008/09/22 20:10:34 bms Exp $
 #
 
 NANO_NAME=liveusb
@@ -9,7 +9,7 @@ NANO_NAME=liveusb
 NANO_SRC="/home/bms/cvs/RELENG_7/src"
 NANO_KERNEL=LIVEUSB
 NANO_IMAGES=1
-NANO_IMGNAME='XORP-1.5-LiveUSB.img'
+NANO_IMGNAME='XORP-1.6-RC-LiveUSB.img'
 
 # XXX Does da0 stay the same if we booted from it?
 NANO_DRIVE=da0
