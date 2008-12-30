@@ -12,15 +12,13 @@ Other components such as downloads and bugzilla live in their
 directories on the web server and the web server configuration makes
 them appear under the www.xorp.org url space.  The directories are:
 
-WWWHOME=/usr/local/www/data/
-
-XORP_BUGZILLA=${WWWHOME}/xorp-bugzilla	  # bug reporting system
+WWWHOME=/var/www/xorp.org
 
 XORP_RELEASES=${WWWHOME}/xorp-releases    # hand crafted release material
 
-XORP_HTML=${WWWHOME}/xorp		  # script generated html pages
+XORP_HTML=${WWWHOME}/www.xorp.org	  # script generated html pages
 
-XORP_TEST=${WWWHOME}/xorp-test		  # directory for testing script
+XORP_TEST=${WWWHOME}/test.xorp.org	  # directory for testing script
 					  # generated html pages
 
 This README is part of the web site core - it accompanies the script
@@ -31,11 +29,11 @@ be edited.
 
 You probably want to try out changes first on a side system.  The host
 test.xorp.org serves this purpose.  test.xorp.org is a virtual host on
-the web server that looks in /usr/local/www/data/xorp-test for
+the web server that looks in /var/www/xorp.org/test.xorp.org for
 content.  If you check out a copy of xorp there using:
 
-  $ cd /usr/local/www/data
-  $ cvs -d :ext:xorpc.icir.org:/usr/local/www/data/cvs co -d xorp-test www
+  $ cd /var/www/xorp.org
+  $ cvs -d :ext:cvs.xorp.org:/cvsroot co -d test.xorp.org www
 
 You can then make you changes to html_src and rebuild the pages with
 gmake (and validate them with 'gmake check').  Later in this document
@@ -43,10 +41,11 @@ is more info on tools for validating www pages and cascading style
 sheets.
 
 Once you are happy with your changes you can simply move the old
-'xorp' directory out of the way and move 'xorp-test' to 'xorp'.
+'www.xorp.org' directory out of the way and move 'test.xorp.org' to 
+'www.xorp.org'.
 
-NB Because bugzilla and release material are housed elsewhere nothing
-needs to be done there.
+NB Because release material is housed elsewhere nothing needs to be 
+done there.
 
 Page Layout overview
 ====================
