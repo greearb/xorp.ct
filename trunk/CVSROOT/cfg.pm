@@ -1,5 +1,5 @@
 #
-# $XORP: CVSROOT/cfg.pm,v 1.3 2004/07/31 00:59:49 pavlin Exp $
+# $XORP: CVSROOT/cfg.pm,v 1.1 2004/08/02 07:06:53 pavlin Exp $
 # $FreeBSD: CVSROOT-src/cfg.pm,v 1.51 2004/05/25 08:55:57 des Exp $
 #
 
@@ -53,7 +53,7 @@ $FILE_PREFIX = "#cvs.files.$PID";
 # when processing a multi-directory commit.
 $LAST_FILE = "$TMPDIR/$FILE_PREFIX.lastdir";
 # System tools.
-$PROG_CVS =	'/usr/bin/cvs';		# cvs(1)
+$PROG_CVS =	'/usr/local/bin/cvs';	# cvs(1)
 $PROG_MV =	'/bin/mv';		# mv(1)
 
 # The username of the committer.
