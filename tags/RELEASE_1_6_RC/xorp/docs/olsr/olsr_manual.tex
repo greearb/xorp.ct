@@ -1,0 +1,108 @@
+%
+% $XORP: xorp/docs/olsr/olsr_manual.tex,v 1.4 2008/12/24 22:06:46 jtc Exp $
+%
+
+\documentclass[11pt]{book}
+
+%\usepackage[dvips]{changebar}
+
+\usepackage{subfigure}
+\usepackage{fullpage}
+\usepackage{setspace}
+\usepackage{times}
+\usepackage{latexsym}
+\usepackage{epsfig}
+\usepackage{graphicx}
+\usepackage{xspace}
+\usepackage{color}
+\usepackage{amsmath}
+\usepackage{rotating}
+\usepackage{moreverb}
+\usepackage{listings}
+\usepackage{alltt}
+\usepackage{stmaryrd}
+%\usepackage[dvipdf]{graphics}
+%\usepackage[dvips]{graphicx}
+%\usepackage{xorp}
+
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\newcommand{\etc}{\emph{etc.}\xspace}
+\newcommand{\ie}{\emph{i.e.,}\xspace}
+\newcommand{\eg}{\emph{e.g.,}\xspace}
+%\newcommand{\comment}[1]{{\color{gray}[\textsf{#1}]}}
+%\newcommand{\comment}[1]{}
+
+% Changebar stuff
+% \newenvironment{colorcode}{\color{blue}}{}
+% \renewcommand{\cbstart}{\begin{colorcode}}
+% \renewcommand{\cbend}{\end{colorcode}}
+
+% \pagestyle{empty}
+
+\topmargin=0.0in
+\textheight=9.0in
+%\textwidth=7.0in
+
+%
+% Set style to not indent paragraphs, and to have a blank line between
+% paragraphs.  While this style is not as elegant for prose as the
+% defaults, it's more appropriate for manuals where there are lots of
+% single line paragraphs.
+%
+\setlength{\parindent}{0pt} 
+\setlength{\parskip}{0.5\baselineskip}
+\setlength{\topsep}{0pt}
+\setlength{\itemsep}{0pt}
+
+%% Control the fonts and formatting used in the table of contents.
+\usepackage[titles]{xorp_toc}
+%% Aesthetic spacing redefines to cancel the effects of parskip
+\setlength{\cftbeforechapskip}{2ex}
+\setlength{\cftbeforesecskip}{-1.5ex}
+\setlength{\cftbeforesubsecskip}{-1.5ex}
+%% Use Helvetica-Narrow Bold for Chapter entries
+\renewcommand{\cftchapfont}{%
+  \fontsize{11}{13}\usefont{OT1}{phv}{bc}{n}\selectfont
+}
+
+\begin{document}
+
+\title{{\Huge XORP/OLSR User Manual}\\
+\vspace{1ex}
+Version 1.6-RC}
+\author{ XORP, Inc.					\\
+         {\it http://www.xorp.org/}			\\
+	 {\it feedback@xorp.org}
+}
+\date{December 24, 2008}
+
+\maketitle
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Local definitions
+%
+%\newcommand{\xorpsh}{\textsc{xorpsh}}
+\newcommand{\xorp}{{\small XORP}\xspace}
+\newcommand{\xorpsh}{{\sf\small xorpsh}\xspace}
+\newcommand{\rtrmgr}{{\sf\small xorp\_rtrmgr}\xspace}
+\newcommand{\stt}{\tt\small}
+\newcommand{\ssf}{\sf\small}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\input{preface}
+\tableofcontents
+\input{olsr}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     BIBLIOGRAPHY
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%bibliography{../tex/xorp}
+%bibliographystyle{plain}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\end{document}

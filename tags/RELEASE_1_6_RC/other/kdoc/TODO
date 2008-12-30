@@ -1,0 +1,69 @@
+Bugs
+----
+
+compound typedefs
+functions
+	operators are not properly quoted
+	operators not always correctly parsed
+
+Preprocessor screws up line numbers.
+
+check "@params ... */"
+check namespaces
+
+General
+-------
+Running kdoc in-place
+
+parser
+------
+documentation in source
+CODE etc
+templates
+Q_PROPERTY
+Unknown classes don't have Refs.
+Public/Private seem to get mixed up...
+
+IDL specific: 
+	parse "raises"
+
+Doc specific
+------------
+	pre should be allowed inline.
+	exceptions:
+		@exception <exception>	Reason
+		exception is a class
+
+Ast
+---
+Allow cross-referencing between languages. I don't know how to do this,
+other than by reading every language into the same syntax tree.
+
+postprocessor
+------------
+referenced text use namespaces
+	searchspaces:
+		upward-searching (this and parents)
+		enclosed (namespaces)
+
+DocBook
+-------
+Don't use deref, we need a textref function instead.
+	deref is for @refs etc.
+visibility and flags in member docs.
+Globals.
+group indices.
+Index.
+
+HTML
+----
+group indices.
+cross-referenced headers?
+CSS support
+
+Libs
+----
+
+Other
+-----
+lxr

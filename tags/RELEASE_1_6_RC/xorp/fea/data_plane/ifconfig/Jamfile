@@ -1,0 +1,50 @@
+#
+# $XORP: xorp/fea/data_plane/ifconfig/Jamfile,v 1.4 2007/09/26 01:40:41 pavlin Exp $
+#
+
+SubDir TOP fea data_plane ifconfig ;
+SubIncludeOnce TOP libxorp ;
+SubIncludeOnce TOP libcomm ;
+SubIncludeOnce TOP xrl interfaces ;
+SubIncludeOnce TOP xrl targets ;
+SubIncludeOnce TOP libxipc ;
+SubIncludeOnce TOP libproto ;
+SubIncludeOnce TOP fea ;
+SubDir TOP fea data_plane ifconfig ;
+
+Library libxorp_ifconfig : 
+	ifconfig_get_click.cc
+	ifconfig_get_dummy.cc
+	ifconfig_get_getifaddrs.cc
+	ifconfig_get_ioctl.cc
+	ifconfig_get_iphelper.cc
+	ifconfig_get_netlink_socket.cc
+	ifconfig_get_proc_linux.cc
+	ifconfig_get_sysctl.cc
+	ifconfig_media.cc
+	ifconfig_observer_dummy.cc
+	ifconfig_observer_iphelper.cc
+	ifconfig_observer_netlink_socket.cc
+	ifconfig_observer_routing_socket.cc
+	ifconfig_parse_getifaddrs.cc
+	ifconfig_parse_ioctl.cc
+	ifconfig_parse_netlink_socket.cc
+	ifconfig_parse_routing_socket.cc
+	ifconfig_property_bsd.cc
+	ifconfig_property_dummy.cc
+	ifconfig_property_linux.cc
+	ifconfig_property_solaris.cc
+	ifconfig_property_windows.cc
+	ifconfig_set.cc
+	ifconfig_set_click.cc
+	ifconfig_set_dummy.cc
+	ifconfig_set_ioctl.cc
+	ifconfig_set_iphelper.cc
+	ifconfig_set_netlink_socket.cc
+	ifconfig_vlan_get_bsd.cc
+	ifconfig_vlan_get_dummy.cc
+	ifconfig_vlan_get_linux.cc
+	ifconfig_vlan_set_bsd.cc
+	ifconfig_vlan_set_dummy.cc
+	ifconfig_vlan_set_linux.cc
+	;

@@ -1,0 +1,349 @@
+/* $XORP: xorp/etc/templates/rip.tp,v 1.52 2008/10/29 21:59:38 andrewma Exp $ */
+
+/*
+ * RIP attribute descriptions
+ */
+
+protocols {
+    rip {
+	targetname: txt = "rip";
+	traceoptions {
+	    flag {
+		all {
+		    disable:		toggle = false;
+		}
+	    }
+	}
+	interface @: txt {
+	    vif @: txt {
+		address @: ipv4 {
+		    metric:			u32	=   1;
+		    horizon:			txt	= "split-horizon-poison-reverse";
+		    disable:			toggle	= false;
+		    enabled:			bool;	/* %deprecated */
+		    passive:			bool	= false;
+		    accept-non-rip-requests:	bool	= true;
+		    accept-default-route:	bool	= true;
+		    advertise-default-route:	bool	= true;
+		    route-timeout:		u32	= 180;
+		    route-expiry-secs:		u32;	/* %deprecated */
+		    deletion-delay:		u32	= 120;
+		    route-deletion-secs:	u32;	/* %deprecated */
+		    triggered-delay:		u32	=   3;
+		    triggered-jitter:		u32	=  66;
+		    update-interval:		u32	=  30;
+		    update-jitter:		u32	=  16;
+		    request-interval:		u32	=  30;
+		    table-request-secs:		u32;	/* %deprecated */
+		    interpacket-delay:		u32	=  50;
+		    interpacket-delay-msecs:	u32;	/* %deprecated */
+		    authentication {
+			type:			txt;	/* %deprecated */
+			password:		txt;	/* %deprecated */
+			simple-password:	txt	= "";
+
+			md5 @: u32 {
+			    password:		txt	= "";
+			    start-time:		txt	= "";
+			    end-time:		txt	= "";
+			}
+		    }
+		}
+	    }
+	}
+
+	import: txt;
+	export: txt;
+    }
+}
+
+policy {
+    policy-statement @: txt {
+	term @: txt {
+	    from {
+		metric: u32range;
+	    }
+	    to {
+		metric: u32range;
+	    }
+	    then {
+		metric: u32;
+	    }
+	}
+    }
+}
+
+/*
+ * RIP attribute manipulation.
+ */
+protocols {
+    rip {
+	%modinfo:	provides		rip;
+	%modinfo:	depends			rib;
+	%modinfo:	depends			policy;
+	%modinfo:	path			"rip/xorp_rip";
+	%modinfo:	default_targetname	"rip";
+	%modinfo:	status_method xrl	"$(rip.targetname)/common/0.1/get_status->status:u32&reason:txt";
+	%modinfo:	shutdown_method xrl	"$(rip.targetname)/common/0.1/shutdown";
+	%help:		short "RIP configuration";
+
+	%mandatory:	$(@.targetname);
+
+	targetname {
+	    %user-hidden: "XRL target name";
+	    %help:	short "XRL target name";
+	    %set:;
+	}
+
+	traceoptions {
+	    %help:	short "Configure the tracing options";
+	    flag {
+		%help:	short "Configure the tracing operation to perform";
+		all {
+		    %help:	short	"Configure all tracing operations";
+
+		    disable {
+			%help:	short	"Disable all tracing operations";
+			%set:	xrl "$(rip.targetname)/rip/0.1/trace?tvar:txt=all&enable:bool=`~$(@)`";
+			%delete: xrl "$(rip.targetname)/rip/0.1/trace?tvar:txt=all&enable:bool=$(DEFAULT)";
+		    }
+		}
+	    }
+	}
+
+	interface @ {
+	    %help:	short "Interface in RIP domain";
+	    vif @ {
+		%help:	short "Vif in RIP domain";
+		address @ {
+		    %help: short "Address on vif used for RIP";
+		    %create: xrl "$(rip.targetname)/rip/0.1/add_rip_address?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)";
+		    %delete: xrl "$(rip.targetname)/rip/0.1/remove_rip_address?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)";
+		    %activate: xrl "$(rip.targetname)/rip/0.1/set_rip_address_enabled?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&enabled:bool=`~$(@.disable)`";
+
+		    disable {
+			%help: short "Disable RIP on address";
+			%create:;
+			%set: xrl "$(rip.targetname)/rip/0.1/set_rip_address_enabled?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&enabled:bool=`~$(@)`";
+		    }
+
+		    enabled {
+			%deprecated: "Statement 'enabled: true/false' is replaced with 'disable: false/true'";
+			%set: xrl "$(rip.targetname)/rip/0.1/set_rip_address_enabled?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&enabled:bool=$(@)";
+			%get: xrl "$(rip.targetname)/rip/0.1/rip_address_enabled?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)->enabled:bool";
+			%help: short "Enable RIP on address";
+		    }
+
+		    metric {
+			%allow-range: $(@) "0" "16" %help: "Cost metric added to routes received on address";
+			%set: xrl "$(rip.targetname)/rip/0.1/set_cost?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&cost:u32=$(@)";
+			%get: xrl "$(rip.targetname)/rip/0.1/cost?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)->cost:u32";
+			%help: short "Cost metric added to routes received on address";
+		    }
+
+		    horizon {
+			%allow: $(@) "none" %help: "No horizon type";
+			%allow: $(@) "split-horizon" %help: "Split horizon";
+			%allow: $(@) "split-horizon-poison-reverse" %help: "Split horizon with poisoned reverse";
+			%set: xrl "$(rip.targetname)/rip/0.1/set_horizon?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&horizon:txt=$(@)";
+			%get: xrl "$(rip.targetname)/rip/0.1/horizon?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)->horizon:txt";
+			%help: short "Horizon type applied to announced routes";
+		    }
+
+		    passive {
+			%set: xrl "$(rip.targetname)/rip/0.1/set_passive?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&passive:bool=$(@)";
+			%get: xrl "$(rip.targetname)/rip/0.1/passive?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)->passive:bool";
+			%help: short "Do not transmit RIP packets";
+		    }
+
+		    accept-non-rip-requests {
+			%set: xrl "$(rip.targetname)/rip/0.1/set_accept_non_rip_requests?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&accept:bool=$(@)";
+			%get: xrl "$(rip.targetname)/rip/0.1/accept_non_rip_requests?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)->accept:bool";
+			%help: short "Accept RIP requests from non-RIP port";
+		    }
+
+		    accept-default-route {
+			%set: xrl "$(rip.targetname)/rip/0.1/set_accept_default_route?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&accept:bool=$(@)";
+			%get: xrl "$(rip.targetname)/rip/0.1/accept_default_route?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)->accept:bool";
+			%help: short "Accept default route from RIP neighbor";
+		    }
+
+		    advertise-default-route {
+			%set: xrl "$(rip.targetname)/rip/0.1/set_advertise_default_route?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&advertise:bool=$(@)";
+			%get: xrl "$(rip.targetname)/rip/0.1/advertise_default_route?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)->advertise:bool";
+			%help: short "Advertise default route to RIP neighbors";
+		    }
+
+		    route-timeout {
+			%set: xrl "$(rip.targetname)/rip/0.1/set_route_timeout?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&t_secs:u32=$(@)";
+			%get: xrl "$(rip.targetname)/rip/0.1/route_timeout?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)->t_secs:u32";
+			%help: short "Route expiration time (sec)";
+		    }
+
+		    route-expiry-secs {
+			%deprecated: "Statement 'route-expiry-secs' is replaced with 'route-timeout'";
+			%set: xrl "$(rip.targetname)/rip/0.1/set_route_timeout?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&t_secs:u32=$(@)";
+			%get: xrl "$(rip.targetname)/rip/0.1/route_timeout?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)->t_secs:u32";
+			%help: short "Route expiration interval in the absence of updates";
+		    }
+
+		    deletion-delay {
+			%set: xrl "$(rip.targetname)/rip/0.1/set_deletion_delay?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&t_secs:u32=$(@)";
+			%get: xrl "$(rip.targetname)/rip/0.1/deletion_delay?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)->t_secs:u32";
+			%help: short "Delay before expired routes are deleted (sec)";
+		    }
+
+		    route-deletion-secs {
+			%deprecated: "Statement 'route-deletion-secs' is replaced with 'deletion-delay'";
+			%set: xrl "$(rip.targetname)/rip/0.1/set_deletion_delay?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&t_secs:u32=$(@)";
+			%get: xrl "$(rip.targetname)/rip/0.1/deletion_delay?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)->t_secs:u32";
+			%help: short "Route deletion interval after advertised as unreachable";
+		    }
+
+		    triggered-delay {
+			%set: xrl "$(rip.targetname)/rip/0.1/set_triggered_update_delay?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&t_secs:u32=$(@)";
+			%get: xrl "$(rip.targetname)/rip/0.1/triggered_update_delay?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)->t_secs:u32";
+			%help: short "Delay before sending repeated triggered update (sec)";
+		    }
+
+		    triggered-jitter {
+			%allow-range: $(@) "0" "100" %help: "Jitter as percents of 'triggered-delay'";
+			%set: xrl "$(rip.targetname)/rip/0.1/set_triggered_update_jitter?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&t_jitter:u32=$(@)";
+			%get: xrl "$(rip.targetname)/rip/0.1/triggered_update_jitter?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)->t_jitter:u32";
+			%help: short "Jitter of repeated triggered update delay (percents)";
+		    }
+
+		    update-interval {
+			%set: xrl "$(rip.targetname)/rip/0.1/set_update_interval?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&t_secs:u32=$(@)";
+			%get: xrl "$(rip.targetname)/rip/0.1/update_interval?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)->t_secs:u32";
+			%help: short "Interval between regular route updates (sec)";
+		    }
+
+		    update-jitter {
+			%allow-range: $(@) "0" "100" %help: "Jitter as percents of 'update-interval'";
+			%set: xrl "$(rip.targetname)/rip/0.1/set_update_jitter?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&t_jitter:u32=$(@)";
+			%get: xrl "$(rip.targetname)/rip/0.1/update_jitter?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)->t_jitter:u32";
+			%help: short "Jitter of regular route update interval (percents)";
+		    }
+
+		    request-interval {
+			%allow-range: $(@) "1" "10000" %help: "RIP request interval when no known neighbors (sec)";
+			%allow-range: $(@) "0" "0" %help: "Disable periodic RIP requests";
+			%set: xrl "$(rip.targetname)/rip/0.1/set_request_interval?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&t_secs:u32=$(@)";
+			%get: xrl "$(rip.targetname)/rip/0.1/request_interval?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)->t_secs:u32";
+			%help: short "RIP request interval when no known neighbors (sec)";
+		    }
+
+		    table-request-secs {
+			%deprecated: "Statement 'table-request-secs' is replaced with 'request-interval'";
+			%allow-range: $(@) "1" "10000" %help: "RIP request interval when no known neighbors";
+			%allow-range: $(@) "0" "0" %help: "Disable periodic RIP request packets when no known neighbors";
+			%set: xrl "$(rip.targetname)/rip/0.1/set_request_interval?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&t_secs:u32=$(@)";
+			%get: xrl "$(rip.targetname)/rip/0.1/request_interval?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)->t_secs:u32";
+			%help: short "RIP request interval when no known neighbors";
+		    }
+
+		    interpacket-delay {
+			%set: xrl "$(rip.targetname)/rip/0.1/set_interpacket_delay?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&t_msecs:u32=$(@)";
+			%get: xrl "$(rip.targetname)/rip/0.1/interpacket_delay?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)->t_msecs:u32";
+			%help: short "Minimum delay between outbound RIP packets (msec)";
+		    }
+
+		    interpacket-delay-msecs {
+			%deprecated: "Statement 'interpacket-delay-msecs' is replaced with 'interpacket-delay'";
+			%set: xrl "$(rip.targetname)/rip/0.1/set_interpacket_delay?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&t_msecs:u32=$(@)";
+			%get: xrl "$(rip.targetname)/rip/0.1/interpacket_delay?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)->t_msecs:u32";
+			%help: short "Minimum delay between outbound RIP packets";
+		    }
+
+		    authentication {
+			%help: short "RIP packet authentication";
+
+			type {
+			    %deprecated: "Statement 'type' is obsoleted by 'simple-password' and 'md5'";
+			    %help: short "Authentication type";
+			    %allow: $(@) "none" %help: "No authentication";
+			    %allow: $(@) "simple" %help: "Simple password authentication";
+			    %allow: $(@) "md5" %help: "MD5 authentication";
+			}
+
+			password {
+			    %deprecated: "Statement 'password' is replaced with 'simple-password'";
+			    %help: short "Authentication password";
+			}
+
+			simple-password {
+			    %help: short "Simple password authentication key";
+			    %create: xrl "$(rip.targetname)/rip/0.1/set_simple_authentication_key?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&password:txt=$(@)";
+			    %set: xrl "$(rip.targetname)/rip/0.1/set_simple_authentication_key?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&password:txt=$(@)";
+			    %delete: xrl "$(rip.targetname)/rip/0.1/delete_simple_authentication_key?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)";
+			}
+
+			md5 @ {
+			    %help: short "MD5 authentication key";
+			    %allow-range: $(@) "0" "255" %help: "MD5 authentication key ID";
+			    %activate: xrl "$(rip.targetname)/rip/0.1/set_md5_authentication_key?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&key_id:u32=$(@)&password:txt=$(@.password)&start_time:txt=$(@.start-time)&end_time:txt=$(@.end-time)";
+			    %update: xrl "$(rip.targetname)/rip/0.1/set_md5_authentication_key?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&key_id:u32=$(@)&password:txt=$(@.password)&start_time:txt=$(@.start-time)&end_time:txt=$(@.end-time)";
+			    %delete: xrl "$(rip.targetname)/rip/0.1/delete_md5_authentication_key?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&key_id:u32=$(@)";
+			    password {
+				%help: short "Authentication password";
+			    }
+			    start-time {
+				%help: short "Authentication start time (YYYY-MM-DD.HH:MM)";
+			    }
+			    end-time {
+				%help: short "Authentication end time (YYYY-MM-DD.HH:MM)";
+			    }
+			}
+		    }
+		}
+	    }
+	}
+
+	import {
+	    %help: short "Import policy name(s)";
+	    %delete: xrl "policy/policy/0.1/import?protocol:txt=$(rip.targetname)&policies:txt=&modifier:txt=";
+	    %set: xrl "policy/policy/0.1/import?protocol:txt=$(rip.targetname)&policies:txt=$(@)&modifier:txt=";
+	}
+	export {
+	    %help: short "Export policy name(s)";
+	    %delete: xrl "policy/policy/0.1/export?protocol:txt=$(rip.targetname)&policies:txt=&modifier:txt=";
+	    %set: xrl "policy/policy/0.1/export?protocol:txt=$(rip.targetname)&policies:txt=$(@)&modifier:txt=";
+	}
+    }
+}
+
+policy {
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=rip&variable:txt=network4&type:txt=ipv4net&access:txt=r&id:u32=10";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=rip&variable:txt=nexthop4&type:txt=ipv4nexthop&access:txt=rw&id:u32=11";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=rip&variable:txt=metric&type:txt=u32&access:txt=rw&id:u32=14";
+
+    policy-statement @: txt {
+	term @: txt {
+	    from {
+		metric {
+		    %help: short "Metric value";
+		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=metric $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
+		}
+	    }
+	    to {
+		metric {
+		    %help: short "Metric value";
+		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=metric $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
+		}
+	    }
+	    then {
+		metric {
+		    %help: short "Set the metric value";
+		    %allow-operator: ":" "=" "sub" "add";
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=metric $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
+		}
+	    }
+	}
+    }
+}

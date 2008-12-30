@@ -1,0 +1,145 @@
+#
+# $XORP: xorp/rip/Jamfile,v 1.2 2007/04/20 07:17:47 pavlin Exp $
+#
+
+SubDir TOP rip ;
+SubIncludeOnce TOP libxorp ;
+SubIncludeOnce TOP libcomm ;
+SubIncludeOnce TOP xrl interfaces ;
+SubIncludeOnce TOP xrl targets ;
+SubIncludeOnce TOP libxipc ;
+SubIncludeOnce TOP libfeaclient ;
+SubIncludeOnce TOP policy backend ;
+SubIncludeOnce TOP policy common ;
+SubDir TOP rip ;
+
+LIBRIP_COMMON_SOURCES =
+	output_table.cc
+	output_updates.cc
+	packet_queue.cc
+	peer.cc
+	port.cc
+	redist.cc
+	rib_notifier_base.cc
+	rip_varrw.cc
+	route_db.cc
+	route_entry.cc
+	update_queue.cc
+	;
+
+LIBRIPXRL_COMMON_SOURCES = 
+	xrl_config.cc
+	xrl_port_manager.cc
+	xrl_port_io.cc
+	xrl_process_spy.cc
+	xrl_rib_notifier.cc
+	xrl_redist_manager.cc
+	;
+
+#
+# In order to build IPv4/IPv6 versions of xorp_rip/xorp_ripng in Jam,
+# we need to split out the library builds.
+# The rule XorpSplitLibrary (defined in $(TOP)/Jamrules) is used for this.
+#
+
+# IPv4 RIP implementation
+XorpSplitLibrary librip : INSTANTIATE_IPV4 : ipv4 :
+	auth.cc
+	$(LIBRIP_COMMON_SOURCES)
+	;
+XorpSplitLibrary libripxrl : INSTANTIATE_IPV4 : ipv4 :
+	$(LIBRIPXRL_COMMON_SOURCES)
+	;
+
+# IPv6 RIP implementation
+XorpSplitLibrary libripng : INSTANTIATE_IPV6 : ipv6 :
+	$(LIBRIP_COMMON_SOURCES)
+	;
+XorpSplitLibrary libripngxrl : INSTANTIATE_IPV6 : ipv6 :
+	$(LIBRIPXRL_COMMON_SOURCES)
+	;
+
+LINKLIBS_XORP_RIP_COMMON =
+	libribxif
+	libfindereventnotifierxif
+	libfeaclient
+	libfeaifmgrmirrorxif
+	libfeaifmgrreplicatorxif
+	libfeaifmgrmirrorbase
+	;
+
+LINKLIBS_XORP_RIP_COMMON_2 =
+	libpolicybackend
+	libpolicycommon
+	libxipc
+	libcomm
+	libxorp
+	;
+
+MainFromObjects xorp_rip :
+	<rip>xorp_rip_main-ipv4$(SUFOBJ) <rip>xrl_target_rip$(SUFOBJ) ;
+Object <rip>xorp_rip_main-ipv4$(SUFOBJ) : xorp_rip_main.cc ;
+Object <rip>xrl_target_rip$(SUFOBJ) : xrl_target_rip.cc ;
+C++FLAGS on <rip>xorp_rip_main-ipv4$(SUFOBJ) += -DINSTANTIATE_IPV4 ;
+LinkLibraries xorp_rip :
+	libripxrl 
+	librip
+	libripbase
+	$(LINKLIBS_XORP_RIP_COMMON)
+	libsocket4xif
+	$(LINKLIBS_XORP_RIP_COMMON_2)
+	;
+
+MainFromObjects xorp_ripng :
+	<rip>xorp_rip_main-ipv6$(SUFOBJ) <rip>xrl_target_ripng$(SUFOBJ) ;
+Object <rip>xorp_rip_main-ipv6$(SUFOBJ) : xorp_rip_main.cc ;
+Object <rip>xrl_target_ripng$(SUFOBJ) : xrl_target_ripng.cc ;
+C++FLAGS on <rip>xorp_rip_main-ipv6$(SUFOBJ) += -DINSTANTIATE_IPV6 ;
+LinkLibraries xorp_ripng :
+	libripngxrl
+	libripng
+	libripngbase
+	$(LINKLIBS_XORP_RIP_COMMON)
+	libsocket6xif
+	$(LINKLIBS_XORP_RIP_COMMON_2)
+	;
+
+if $(MAKE_CHECK) {
+
+ Main test_auth : test_auth.cc ;
+ LinkLibraries test_auth : librip libcomm libxorp ;
+
+ Main test_packets : test_packets.cc ;
+ LinkLibraries test_packets : librip libcomm libxorp ;
+
+ LINKLIBS_RIP_REGRESSION_COMMON = 
+	librip
+	libripng
+	libpolicybackend
+	libpolicycommon
+	libfeaclient
+	libxipc
+	libcomm
+	libxorp
+	;
+
+ Main test_request : test_request.cc ;
+ LinkLibraries test_request : $(LINKLIBS_RIP_REGRESSION_COMMON) ;
+
+ Main test_route_walk : test_route_walk.cc ;
+ LinkLibraries test_route_walk : $(LINKLIBS_RIP_REGRESSION_COMMON) ;
+
+ Main test_timers : test_timers.cc ;
+ LinkLibraries test_timers : $(LINKLIBS_RIP_REGRESSION_COMMON) ;
+
+ Main test_update_queue : test_update_queue.cc ;
+ LinkLibraries test_update_queue : $(LINKLIBS_RIP_REGRESSION_COMMON) ;
+
+ Main test_outputs : test_outputs.cc ;
+ LinkLibraries test_outputs : $(LINKLIBS_RIP_REGRESSION_COMMON) ;
+
+} # MAKE_CHECK
+
+InstallBin $(PREFIX)/rip : xorp_rip xorp_ripng ;
+
+SubIncludeOnce TOP rip tools ;

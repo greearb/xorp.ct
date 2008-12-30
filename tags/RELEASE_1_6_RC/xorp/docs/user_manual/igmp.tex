@@ -1,0 +1,415 @@
+%
+% $XORP: xorp/docs/user_manual/igmp.tex,v 1.20 2006/07/05 03:06:28 pavlin Exp $
+%
+
+\chapter{IGMP and MLD}
+\label{igmp}
+
+\section{Terminology and Concepts}
+
+When a receiver joins a multicast group, the multicast routers serving
+that receiver's subnet need to know that the receiver has joined so
+that they can arrange for multicast traffic destined for that group to
+reach this subnet.  The Internet Group Management Protocol (IGMP) is
+a link-local protocol for IPv4 that communicates this information
+between receivers and routers.  The same role for IPv6 is performed by
+the Multicast Listener Discovery protocol (MLD).
+
+The basic IGMP mechanism works as follows.  When a multicast receiver
+joins a multicast group it multicasts an IGMP Join message onto the
+subnet on which it is joining.  The local routers receive this join,
+and cause multicast traffic destined for the group to reach this
+subnet.  Periodically one of the local routers sends a IGMP Query
+message onto the subnet.  If there are multiple multicast routers on
+the subnet, then one of them is elected as the sole querier for that
+subnet.  In response to an IGMP query, receivers respond by refreshing
+their IGMP Join.  If the join is not refreshed in response to queries,
+then the state is removed, and multicast traffic for this group ceases
+to reach this subnet.
+
+There are three different versions of IGMP:
+\begin{itemize}
+\item IGMP version 1 functions as described above.
+\item IGMP version 2 adds support for IGMP Leave messages to allow
+  fast leave from a multicast group.
+\item IGMP version 3 adds support for source include and exclude
+  lists, to allow a receiver in indicate that it only wants to hear
+  traffic from certain sources, or not receive traffic from certain
+  sources.
+\end{itemize}
+
+XORP supports IGMPv1, IGMPv2, and IGMPv3.
+
+MLD for IPv6 functions in basically the same way as IGMP.  The
+functionality of MLDv1 corresponds with that of IGMPv2, and the
+functionality of MLDv2 corresponds with that of IGMPv3.  
+
+XORP supports MLDv1 and MLDv2.
+
+\vfill\eject
+\section{Standards}
+XORP complies with the following standards for multicast group membership:
+
+\begin{description}
+  \item{\bf RFC 2236}: Internet Group Management Protocol, Version 2
+  \item{\bf RFC 3376}: Internet Group Management Protocol, Version 3
+  \item{\bf RFC 2710}: Multicast Listener Discovery (MLD) for IPv6
+  \item{\bf RFC 3810}: Multicast Listener Discovery Version 2 (MLDv2) for IPv6
+\end{description}
+
+\section{Configuring IGMP and MLD}
+
+IGMP and MLD only require the interfaces/vifs to be configured that
+are intended to have multicast listeners.
+
+\subsection{Configuration Syntax}
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+protocols \{\\
+\>igmp \{\\
+\>\>targetname: {\it text}\\
+\>\>disable: {\it bool}\\
+\>\>interface {\it text} \{\\
+\>\>\>vif {\it text} \{\\
+\>\>\>\>disable: {\it bool}\\
+\>\>\>\>version: {\it uint(1..3)}\\
+\>\>\>\>enable-ip-router-alert-option-check: {\it bool}\\
+\>\>\>\>query-interval: {\it uint(1..1024)}\\
+\>\>\>\>query-last-member-interval: {\it uint(1..1024)}\\
+\>\>\>\>query-response-interval: {\it uint(1..1024)}\\
+\>\>\>\>robust-count: {\it uint(2..10)}\\
+\>\>\>\}\\
+\>\>\}\\
+\>\>traceoptions \{\\
+\>\>\>flag all \{\\
+\>\>\>\>disable: {\it bool}\\
+\>\>\>\}\\
+\>\>\}\\
+\>\}\\
+\}\\
+\\
+\\
+{\rm continued overleaf....}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\newpage
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+protocols \{\\
+\>mld \{\\
+\>\>targetname: {\it text}\\
+\>\>disable: {\it bool}\\
+\>\>interface {\it text} \{\\
+\>\>\>vif {\it text} \{\\
+\>\>\>\>disable: {\it bool}\\
+\>\>\>\>version: {\it uint(1..2)}\\
+\>\>\>\>enable-ip-router-alert-option-check: {\it bool}\\
+\>\>\>\>query-interval: {\it uint(1..1024)}\\
+\>\>\>\>query-last-member-interval: {\it uint(1..1024)}\\
+\>\>\>\>query-response-interval: {\it uint(1..1024)}\\
+\>\>\>\>robust-count: {\it uint(2..10)}\\
+\>\>\>\}\\
+\>\>\}\\
+\>\>traceoptions \{\\
+\>\>\>flag all \{\\
+\>\>\>\>disable: {\it bool}\\
+\>\>\>\}\\
+\>\>\}\\
+\>\}\\
+\}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+\begin{description}
+\item{\tt protocols}: this delimits the configuration for all routing
+  protocols in the XORP router configuration.  It is mandatory that
+  IGMP configuration is under the {\stt protocols} node in the
+  configuration.
+\item{\tt igmp}: this delimits the IGMP configuration part of the XORP
+  router configuration.
+\item{\tt targetname}: this is the name for this instance of IGMP.  It
+  defaults to ``{\stt IGMP}'', and it is not recommended that this
+  default is overridden under normal usage scenarios.
+\item{\stt disable}: this takes the value {\stt true} or {\stt false},
+  and determines whether IGMP as a whole is enabled on this
+  router~\footnote{Note
+  that prior to XORP Release-1.1, the {\tt enable} flag was used instead of
+  {\tt disable}.}.
+  The default value is {\stt false}.
+\item{\stt interface}: this specifies an interface to be monitored by
+  IGMP for the presence of multicast receivers.  Each interface to be
+  monitored by IGMP needs to be explicitly listed. The value is the
+  name of an interface that has been configured in the {\stt
+  interfaces} section of the router configuration (see Chapter
+  \ref{interfaces}).
+
+  For each interface, one or more VIFs must be specified:
+\begin{description}
+\item{\stt vif}: this specifies a vif to be monitored by IGMP for the
+  presence of multicast receivers.  Each vif to be monitored by IGMP
+  needs to be explicitly listed.  The value is the name of a vif that
+  has been configured in the {\stt interfaces} section of the router
+  configuration (see Chapter \ref{interfaces}).
+ 
+  Each vif takes the following optional parameter:
+\begin{description}
+\item{\stt disable}: this takes the value {\stt true} or {\stt false},
+  and determines whether IGMP is disabled on this vif~\footnote{Note
+  that prior to XORP Release-1.1, the {\tt enable} flag was used instead of
+  {\tt disable}.}.
+  The default value is {\stt false}.
+\item{\tt version}: this directive specifies the protocol version for this
+  interface/vif~\footnote{Note that the {\tt version} statement appeared after
+  XORP Release-1.1.}. In case of IGMP it takes a non-negative integer in the
+  interval [1..3] with default value of {\stt 2}.  In case of MLD the value
+  must be in the interval [1..2] with default value of {\stt 1}.
+\item{\tt enable-ip-router-alert-option-check}: this directive specifies
+  whether the router should check that the link-local protocol packets
+  received on this interface/vif have the IP Router Alert option (see
+  RFC-2213) in them~\footnote{Note that the {\tt
+  enable-ip-router-alert-option-check} statement appeared after XORP
+  Release-1.1.}. If it is enabled, all link-local protocol packets that
+  do not contain the IP Router Alert option will be dropped.
+
+\item{\tt query-interval}: this directive specifies the interval (in seconds)
+  between general queries sent by the querier on this
+  interface/vif~\footnote{Note that the {\tt query-interval} statement
+  appeared after XORP Release-1.1.}.
+  The default value is {\stt 125} seconds.
+
+\item {\tt query-last-member-interval}: this directive specifies the maximum
+  response time (in seconds) inserted into group-specific queries sent in
+  response to leave group messages on this interface/vif. It is also the
+  interval between group-specific query messages~\footnote{Note that the {\tt
+  query-last-member-interval} statement appeared after XORP Release-1.1.}.
+  The default value is {\stt 1} second.
+
+\item {\tt query-response-interval}: this directive specifies the maximum
+  response time (in seconds) inserted into the periodic general queries on
+  this interface/vif~\footnote{Note that the {\tt query-response-interval}
+  statement appeared after XORP Release-1.1.}.
+  It must be less than the {\tt query-interval}.
+  The default value is {\stt 10} seconds.
+
+\item {\tt robust-count}: this directive specifies the robustness
+  variable count that allows tuning for the expected packet loss on a
+  subnet for this interface/vif~\footnote{Note that the {\tt robust-count}
+  statement appeared after XORP Release-1.1.}.
+  The {\tt robust-count} specifies the startup query count, and the last
+  member query count.
+  It is also used in the computation of the group membership interval and the
+  other querier present interval.
+  The IGMP/MLD protocol is robust to {\tt robust-count} packet losses.
+  The default value is {\stt 2}.
+
+\end{description}
+\end{description}
+\item{\stt traceoptions}: this directive delimits the configuration of
+  debugging and tracing options for IGMP.
+\begin{description}
+\item{\stt flag}: this directive is used to specify which tracing
+  options are enabled.  Possible parameters are:
+\begin{description}
+\item{\stt all}: this directive specifies that all tracing
+  options should be enabled.  Possible parameters are:
+\begin{description}
+\item{\stt disable}: this takes the value {\stt true} or {\stt false},
+  and disables or enables tracing~\footnote{Note
+  that prior to XORP Release-1.1, the {\tt enable} flag was used instead of
+  {\tt disable}.}. The default is {\stt false}.
+\end{description}
+\end{description}
+\end{description}
+\end{description}
+
+Note that in case of IGMP each enabled interface must have a valid IPv4
+address.
+
+The configuration for MLD is identical to IGMP, except for the
+following:
+\begin{itemize}
+  \item The {\stt mld} directive is used in place of the {\stt igmp}
+  directive.
+  \item The default value of {\stt targetname} is {\stt ``MLD''}
+  instead of {\stt ``IGMP''}.
+  \item Each enabled interface must have a valid link-local IPv6
+  address.
+\end{itemize}
+
+
+\vfill\eject
+\subsection{Example Configurations}
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+protocols \{\\
+\>igmp \{\\
+\>\>interface dc0 \{\\
+\>\>\>vif dc0 \{\\
+\>\>\>\>/* version: 2 */\\
+\>\>\>\>/* enable-ip-router-alert-option-check: false */\\
+\>\>\>\>/* query-interval: 125 */\\
+\>\>\>\>/* query-last-member-interval: 1 */\\
+\>\>\>\>/* query-response-interval: 10 */\\
+\>\>\>\>/* robust-count: 2 */\\
+\>\>\}\\
+\>\}\\
+\}\\
+\\
+protocols \{\\
+\>mld \{\\
+\>\>disable: false\\
+\>\>interface dc0 \{\\
+\>\>\>vif dc0 \{\\
+\>\>\>\>disable: false\\
+\>\>\>\>/* version: 1 */\\
+\>\>\>\>/* enable-ip-router-alert-option-check: false */\\
+\>\>\>\>/* query-interval: 125 */\\
+\>\>\>\>/* query-last-member-interval: 1 */\\
+\>\>\>\>/* query-response-interval: 10 */\\
+\>\>\>\>/* robust-count: 2 */\\
+\>\>\>\}\\
+\>\>\}\\
+\>\>traceoptions \{\\
+\>\>\>flag all \{\\
+\>\>\>\>disable: false\\
+\>\>\>\}\\
+\>\>\}\\
+\>\}\\
+\}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+
+\vspace{0.1in} In the example configuration above, IGMP is enabled on
+two vifs on two different interfaces ({\stt dc0/dc0} and {\stt
+dc1/dc1}).  In addition, MLD is enabled on interface/vif {\stt
+dc0/dc0}, and all MLD tracing functionality is enabled for diagnostic
+purposes.
+
+\newpage
+\section{Monitoring IGMP}
+
+The {\stt show igmp group} command can be used to display
+information about IGMP group membership:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xxxxxxxxxxxxx\=xxxxxxxxxxxxxxxx\=xxxxxxxxxxxxxxxx\=xxxxxxxxxxxxx\=xxxx\=xx\=xx\=xx\=xxxx\=xxxx\=\kill
+user@hostname> \textbf{show igmp group}\\
+Interface  \>Group       \>Source     \>LastReported \>Timeout\>\>\>V \>State\\
+dc0        \>224.0.0.2   \>0.0.0.0    \>10.4.0.1     \>  \>161  \>\>3 \>  \>E\\
+dc0        \>224.0.0.13  \>0.0.0.0    \>10.4.0.1     \>  \>159  \>\>3 \>  \>E\\
+dc0        \>224.0.0.22  \>0.0.0.0    \>10.4.0.1     \>  \>159  \>\>3 \>  \>E\\
+dc0        \>224.0.1.15  \>0.0.0.0    \>10.4.0.3     \>  \>160  \>\>2 \>  \>E\\
+dc0        \>224.0.1.20  \>0.0.0.0    \>10.4.0.2     \>  \>\>0    \>3 \>  \>I\\
+dc0        \>224.0.1.20  \>1.2.3.4    \>10.4.0.2     \>  \>\>0    \>3 \>  \>F\\
+dc2        \>224.0.0.2   \>0.0.0.0    \>10.3.0.2     \>  \>155  \>\>3 \>  \>E\\
+dc2        \>224.0.0.13  \>0.0.0.0    \>10.3.0.1     \>  \>157  \>\>3 \>  \>E\\
+dc2        \>224.0.0.22  \>0.0.0.0    \>10.3.0.1     \>  \>156  \>\>3 \>  \>E
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+In the above example, {\stt Source} refers to the multicast source
+address in the case of source-specific IGMP join entries, or it is set
+to {\stt 0.0.0.0} in case of any-source IGMP join entries.  The {\stt
+LastReported} field contains the address of the most recent receiver
+that responded to an IGMP Join message.  The {\stt Timeout} field
+shows the number of seconds until it is next time to query for host
+members (\ie to send an IGMP Query message for this particular entry).
+The {\stt V} field shows the IGMP protocol version.
+The {\stt State} field shows the state of the entry:
+
+\begin{itemize}
+  \item {\bf I} = INCLUDE (for group entry)
+  \item {\bf E} = EXCLUDE (for group entry)
+  \item {\bf F} = Forward (for source entry)
+  \item {\bf D} = Don't forward (for source entry)
+\end{itemize}
+
+\vspace{0.1in}
+The {\stt show igmp interface} command can be used to display
+information about IGMP interfaces:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xxxxxxxxxxxxx\=xxxxxxxxx\=xxxxxxxxxxxxxxxx\=xxx\=x\=xxxx\=xxxxxx\=xx\=xxxxx\=x\=\kill
+user@hostname> \textbf{show igmp interface}\\
+Interface  \>State  \>Querier       \>Timeout\>\>\>Version\>\>Groups\\
+dc0        \>UP     \>10.4.0.1       \>\>None \>\>\>3          \>\>5\\
+dc2        \>UP     \>10.3.0.1      \>\>\>136   \>\>3          \>\>3\\
+register\_vif\>DISABLED\>0.0.0.0      \>\>None \>\>\>3          \>\>0
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+The information indicates whether IGMP is enabled on the
+interface and the IP address of the IGMP querier.  If this router is
+the querier, then the time until the next query message is shown.
+Finally the number of multicast groups with receivers on this subnet
+is shown.
+
+Note that in the above example it is normal for the interface named
+{\stt register\_vif} to be {\stt DISABLED}. This interface has special
+purpose and is used only by PIM-SM.
+
+\vspace{0.1in}
+The {\stt show igmp interface address} command can be used to display
+information about addresses of IGMP interfaces:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xxxxxxxxxxxxx\=xxxxxxxxxxxxxxxx\=xxxxxxxxxxxxx\=\kill
+user@hostname> \textbf{show igmp interface address}\\
+Interface  \>PrimaryAddr   \>SecondaryAddr\\
+dc0        \>10.4.0.1\\
+dc2        \>10.3.0.2\\
+register\_vif\>10.4.0.1
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+As shown above, the {\stt PrimaryAddr} per interface is the address
+used to originate IGMP messages, and all other alias addresses on that
+interface are listed as {\stt SecondaryAddr}, with one address per
+line.
+
+The equivalent commands for MLD are:
+\begin{itemize}
+\item {\stt show mld group}
+\item {\stt show mld interface}
+\item {\stt show mld interface address}
+\end{itemize}

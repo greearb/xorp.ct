@@ -1,0 +1,215 @@
+/* $XORP: xorp/xrl/interfaces/fea_ifmgr.xif,v 1.27 2008/06/15 00:19:55 pavlin Exp $ */
+
+/*
+ * Forwarding Engine Abstraction Interface Management XRL interface.
+ */
+
+interface ifmgr/0.1 {
+	set_restore_original_config_on_shutdown ? enable:bool
+
+	get_configured_interface_names -> ifnames:list
+
+	get_configured_vif_names ? ifname:txt -> vifs:list
+
+	get_configured_vif_flags ? ifname:txt				\
+				& vif:txt				\
+				-> enabled:bool				\
+				& broadcast:bool			\
+				& loopback:bool				\
+				& point_to_point:bool			\
+				& multicast:bool
+
+	get_configured_vif_pif_index	? ifname:txt			\
+					& vif:txt			\
+					-> pif_index:u32
+
+	get_configured_vif_addresses4 ? ifname:txt & vif:txt -> addresses:list
+
+	get_configured_vif_addresses6 ? ifname:txt & vif:txt -> addresses:list
+
+	get_configured_address_flags4	? ifname:txt			\
+					& vif:txt			\
+					& address:ipv4			\
+					-> enabled:bool			\
+					& broadcast:bool		\
+					& loopback:bool			\
+					& point_to_point:bool		\
+					& multicast:bool
+
+	get_configured_address_flags6	? ifname:txt			\
+					& vif:txt			\
+					& address:ipv6			\
+					-> enabled:bool			\
+					& loopback:bool			\
+					& point_to_point:bool		\
+					& multicast:bool
+
+	get_configured_interface_enabled ? ifname:txt -> enabled:bool
+
+	get_configured_interface_discard ? ifname:txt -> discard:bool
+
+	get_configured_interface_unreachable ? ifname:txt -> unreachable:bool
+
+	get_configured_interface_management ? ifname:txt -> management:bool
+
+	get_configured_mac ? ifname:txt -> mac:mac
+
+	get_configured_mtu ? ifname:txt -> mtu:u32
+
+	get_configured_no_carrier ? ifname:txt -> no_carrier:bool
+
+	get_configured_baudrate ? ifname:txt -> baudrate:u64
+
+	get_configured_vif_enabled ? ifname:txt & vif:txt -> enabled:bool
+
+
+	get_configured_prefix4 ? ifname:txt & vif:txt & address:ipv4	\
+			-> prefix_len:u32
+
+	get_configured_broadcast4 ? ifname:txt & vif:txt & address:ipv4	\
+			-> broadcast:ipv4
+
+	get_configured_endpoint4 ? ifname:txt & vif:txt & address:ipv4	\
+			-> endpoint:ipv4
+
+	get_configured_prefix6 ? ifname:txt & vif:txt & address:ipv6	\
+			-> prefix_len:u32
+
+	get_configured_endpoint6 ? ifname:txt & vif:txt & address:ipv6	\
+			-> endpoint:ipv6
+
+	start_transaction -> tid:u32
+
+	commit_transaction ? tid:u32
+
+	abort_transaction ? tid:u32
+
+	create_interface ? tid:u32 & ifname:txt
+
+	delete_interface ? tid:u32 & ifname:txt
+
+	/**
+	 * Implicitly configure all interfaces within the FEA by using
+	 * information from the underlying system.
+	 *
+	 * @param tid the transaction ID.
+	 * @param enable if true, then enable the implicit configuration,
+	 * otherwise disable it.
+	 */
+	configure_all_interfaces_from_system ? tid:u32 & enable:bool
+
+	/**
+	 * Implicitly configure an interface within the FEA by using
+	 * information from the underlying system.
+	 *
+	 * @param tid the transaction ID.
+	 * @param ifname the name of the interface to configure.
+	 * @param enable if true, then enable the implicit configuration,
+	 * otherwise disable it.
+	 */
+	configure_interface_from_system ? tid:u32 & ifname:txt & enable:bool
+
+	set_interface_enabled ? tid:u32 & ifname:txt & enabled:bool
+
+	set_interface_discard ? tid:u32 & ifname:txt & discard:bool
+
+	set_interface_unreachable ? tid:u32 & ifname:txt & unreachable:bool
+
+	set_interface_management ? tid:u32 & ifname:txt & management:bool
+
+	set_mac ? tid:u32 & ifname:txt & mac:mac
+
+	create_mac ? ifname:txt & mac:mac
+
+	delete_mac ? ifname:txt & mac:mac
+
+	restore_original_mac ? tid:u32 & ifname:txt
+
+	set_mtu ? tid:u32 & ifname:txt & mtu:u32
+
+	restore_original_mtu ? tid:u32 & ifname:txt
+
+	/**
+	 * Create a vif.
+	 *
+	 * @param ifname the name of the physical interface associated with
+	 *               the new vif.
+	 * @param vif name for new vif, must be unique across all the
+	 *               vifs in the system.
+	 */
+	create_vif ? tid:u32 & ifname:txt & vif:txt
+
+	delete_vif ? tid:u32 & ifname:txt & vif:txt
+
+	set_vif_enabled ? tid:u32 & ifname:txt & vif:txt & enabled:bool
+
+	/**
+	 * Set VLAN vif.
+	 *
+	 * @param ifname the name of the physical interface associated with
+	 *               the VLAN.
+	 * @param vif the name of the VLAN.
+	 * @param vlan_id the VLAN ID. It must be in the range 0 through 4095.
+	 */
+	set_vif_vlan ? tid:u32 & ifname:txt & vif:txt & vlan_id:u32
+
+	create_address4 ? tid:u32 & ifname:txt & vif:txt & address:ipv4
+
+	delete_address4 ? tid:u32 & ifname:txt & vif:txt & address:ipv4
+
+	set_address_enabled4	? tid:u32				\
+				& ifname:txt				\
+				& vif:txt				\
+				& address:ipv4				\
+				& enabled:bool
+
+	get_configured_address_enabled4	? ifname:txt			\
+					& vif:txt			\
+					& address:ipv4			\
+					-> enabled:bool
+
+	set_prefix4		? tid:u32				\
+				& ifname:txt				\
+				& vif:txt				\
+				& address:ipv4				\
+				& prefix_len:u32
+
+	set_broadcast4		? tid:u32				\
+				& ifname:txt				\
+				& vif:txt				\
+				& address:ipv4				\
+				& broadcast:ipv4
+
+	set_endpoint4		? tid:u32				\
+				& ifname:txt				\
+				& vif:txt				\
+				& address:ipv4				\
+				& endpoint:ipv4
+
+	create_address6 ? tid:u32 & ifname:txt & vif:txt & address:ipv6
+
+	delete_address6 ? tid:u32 & ifname:txt & vif:txt & address:ipv6
+
+	set_address_enabled6	? tid:u32				\
+				& ifname:txt				\
+				& vif:txt				\
+				& address:ipv6				\
+				& enabled:bool
+
+	get_configured_address_enabled6	? ifname:txt			\
+					& vif:txt			\
+					& address:ipv6			\
+					-> enabled:bool
+
+	set_prefix6		? tid:u32				\
+				& ifname:txt				\
+				& vif:txt				\
+				& address:ipv6				\
+				& prefix_len:u32
+
+	set_endpoint6		? tid:u32				\
+				& ifname:txt				\
+				& vif:txt				\
+				& address:ipv6				\
+				& endpoint:ipv6
+}

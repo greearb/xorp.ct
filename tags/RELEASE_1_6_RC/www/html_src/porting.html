@@ -1,0 +1,25 @@
+<h1>Porting Guide</h1>
+
+<p> XORP is a large application, but it is intended to be portable.
+We've tried as far as possible to keep the C++ code close to revision
+3 of the C++ standard (ISO14882).  The only compilers tested to date
+have been different versions of GNU g++.  The code compiles on all
+versions we've tested from 2.95 upwards.
+
+<P>
+A design goal for XORP is placing all system dependencies in the
+Forwarding Engine Abstraction (FEA) process.  To make XORP run on a
+new platform the FEA must be modified to support it.  The bottom end
+of the FEA talks to the operating system to install routes and use raw
+sockets.  In most cases, it is this bottom end that needs writing or
+modifying to support a new platform.
+
+<P>
+Before work on porting the FEA can begin, it will almost certainly be
+necessary to change the autoconf and automake files to support the new
+platform and to make compilation fixes for any differences for the new
+platform that are not already covered.  It would be preferable for
+these changes be orthogonal to existing platforms so the changes can
+be integrated into the source tree with minimal work (assuming the
+porter wants to contribute the changes back.
+

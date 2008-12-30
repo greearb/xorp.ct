@@ -1,0 +1,153 @@
+%
+% $XORP: xorp/docs/user_manual/vrrp.tex,v 1.1 2008/10/09 18:05:00 abittau Exp $
+%
+
+\chapter{\label{vrrp}VRRP}
+
+\section{VRRP Terminology and Concepts}
+XORP supports Virtual Router Redundancy Protocol (VRRP) version 2 as described
+in RFC 3768.  VRRP increases the robustness of networks where a default gateway
+is defined.  Rather than having a single point of failure (the default gateway),
+VRRP allows multiple routers to act as the default gateway.  Routers
+participating in VRRP will elect one master that will act as the default
+gateway, and the other routers will act as a backup.  When the master fails, a
+backup router is elected as the new master.  When the original master returns to
+life, it will obtain its role as master again.  
+
+To detect the failure of a master, backup routers listen to advertisements that
+are sent out by the master at a periodic interval.  To elect a new master, each
+router is assigned a priority which will indicate the router's preference in
+becoming a master.  A preemption mode is available that will force a backup
+router to become master if another backup router with lower priority is
+currently acting as a master.  Note that the router that owns the IP addresses
+of the VRRP group will always preempt a backup router, regardless of the
+preemption setting.
+
+\section{Configuration of VRRP}
+The configuration syntax for XORP VRRP is given below.
+
+\vspace{0.1in}                              
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+protocols \{\\
+\>vrrp \{\\
+\>\>interface: {\it text} \{\\
+\>\>\>vif: {\it text} \{\\
+\>\>\>\>vrid: {\it int(0..255)} \{\\
+\>\>\>\>\>priority: {\it int(1..254)} \\
+\>\>\>\>\>interval: {\it int(1..255)} \\
+\>\>\>\>\>preempt: {\it bool} \\
+\>\>\>\>\>ip {\it IPv4} \{\}\\
+\>\>\>\>\>disable: {\it bool} \\
+\>\>\>\>\}\\
+\>\>\>\}\\
+\>\>\}\\
+\>\}\\
+\}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+\noindent
+The parameters are used as follows:
+\begin{description}
+\item[interface, vif] The interface on which to run a VRRP instance.
+
+\item[vrid] The ID of the VRRP instance.  Must be unique per interface.
+
+\item[priority] The priority of the router.  The higher the priority, the more
+likely this router will become a master when acting as a backup.  Priority 255
+is reserved for the router that owns the IP addresses of the VRRP group.
+Priority 0 is reserved as it is used to indicate when a master leaves a VRRP
+group.  The default priority is 100.
+
+\item[interval]  The interval in seconds between VRRP advertisements.  The
+default is 1 second.
+
+\item[preempt]  Whether preemption is used.  If preempt is true, when a backup
+router has higher priority than the current master, it will preempt the master
+in order to become the new master.  Preemption is false by default.  Note that a
+router that owns the IP addresses will preempt a backup router regardless of the
+setting of this flag.
+
+\item[ip]  The IP addresses associated with this VRRP group.  These are the IP
+addresses that client machines will use as their default gateway.
+
+\item[disable]  A flag that can be used to disable or enable this VRRP instance.
+\end{description}
+
+\section{Monitoring VRRP}
+One can inspect VRRP's state with the following command:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xxxxxxxxxxxxxxxxxxxxx\=\kill
+user@hostname> \textbf{show vrrp}\\
+\>Interface\>dummy0\\
+\>Vif\>dummy0\\
+\>VRID\>1\\
+\>State\>master\\
+\>Master IP\>9.9.9.9\\
+\\
+\>Interface\>tap3\\
+\>Vif\>tap3\\
+\>VRID\>1\\
+\>State\>initialize\\
+\>Master IP\>0.0.0.0
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+The command will show all configured VRRP instances, printing their physical
+interface, logical interface (Vif), the VRID the state and the master's IP
+address.  The state can be one of three values: initialize, master or backup.
+The initialize state means that VRRP is not running.  Reasons for this include
+the VRRP instance being disabled with the {\tt disable} configuration option,
+the physical interface being disabled, or no IP addresses configured on the
+interface in which VRRP is supposed to run.  When in the initialize state, the
+master's IP address is undefined.  In the backup state, it represents the
+address of the master according to the last advertisement received.  In the
+master state it is the router's own IP address.
+
+Rather than viewing all configured VRRP instances, one can display the instances
+configured on a particular instance by supplying a physical and logical interface
+name, or view a particular instance by additionally supplying the VRID.
+
+\section{Limitations}
+The current implementation has the following known limitations:
+\begin{itemize}
+\item {\bf Not RFC compliant when a backup router owns only some of the IP
+addresses.}  When acting as a backup router, the router must not accept any
+traffic directed to the IP addresses configured in VRRP.  XORP's implementation
+though will accept data arriving to any of the router's configured IP addresses.
+If any of these are IP addresses configured in VRRP, their traffic will be
+accepted rather than dropped.  Note that if the router owns all IP addresses it
+will never act as a backup router (by definition).  Hence this case occurs only
+when a backup router owns only some of the IP addresses configured in VRRP.
+
+\item {\bf Only one VRRP instance per interface.}  Acting as a VRRP router
+requires listening to a special virtual router MAC address.  One of these is
+defined for each VRID.  Running multiple VRRP instances on a single interface
+implies multiple VRIDs and hence the ability to listen on multiple unicast MAC
+addresses.  We do not support this since only one unicast MAC address can be
+assigned to a physical network card.  An alternative would be putting the
+interface into promiscuous mode, a solution which we are considering to
+implement.
+
+One thing we currently do though is to add additional MAC addresses as multicast
+addresses.  With some hardware, this allows the kernel to receive packets for
+these destinations.  It is possible that some kernels will accept this data and
+hence multiple VRRP instances on one interface actually work with the current
+implementation.  Modern Linux kernels though drop these packets, so we are
+rather pessimistic on this hack working---use it at your own risk.
+\end{itemize}

@@ -1,0 +1,385 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
+
+// Copyright (c) 2001-2008 XORP, Inc.
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License, Version 2, June
+// 1991 as published by the Free Software Foundation. Redistribution
+// and/or modification of this program under the terms of any other
+// version of the GNU General Public License is not permitted.
+// 
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
+// see the GNU General Public License, Version 2, a copy of which can be
+// found in the XORP LICENSE.gpl file.
+// 
+// XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+// http://xorp.net
+
+#ident "$XORP: xorp/rip/test_route_walk.cc,v 1.22 2008/07/23 05:11:37 pavlin Exp $"
+
+#include <set>
+
+#include "rip_module.h"
+
+#include "libxorp/xlog.h"
+
+#include "libxorp/c_format.hh"
+#include "libxorp/eventloop.hh"
+#include "libxorp/ipv4.hh"
+#include "libxorp/ipv4net.hh"
+
+#include "port.hh"
+#include "peer.hh"
+#include "route_db.hh"
+#include "system.hh"
+
+#include "test_utils.hh"
+
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// Constants
+//
+
+static const char *program_name         = "test_route_walk";
+static const char *program_description  = "Test RIP route walking";
+static const char *program_version_id   = "0.1";
+static const char *program_date         = "July, 2003";
+static const char *program_copyright    = "See file LICENSE";
+static const char *program_return_value = "0 on success, 1 if test error, 2 if internal error";
+
+
+// ----------------------------------------------------------------------------
+// Spoof Port that supports just a single Peer
+//
+
+template <typename A>
+class SpoofPort : public Port<A> {
+public:
+    SpoofPort(PortManagerBase<A>& pm, A addr) : Port<A>(pm)
+    {
+	this->_peers.push_back(new Peer<A>(*this, addr));
+	verbose_log("Constructing SpoofPort instance\n");
+    }
+    ~SpoofPort()
+    {
+	verbose_log("Destructing SpoofPort instance\n");
+	while (this->_peers.empty() == false) {
+	    delete this->_peers.front();
+	    this->_peers.pop_front();
+	}
+    }
+};
+
+
+// ----------------------------------------------------------------------------
+// Type specific helpers
+
+template <typename A>
+struct DefaultPeer {
+    static A get();
+};
+
+template <>
+IPv4 DefaultPeer<IPv4>::get() { return IPv4("10.0.0.1"); }
+
+template <>
+IPv6 DefaultPeer<IPv6>::get() { return IPv6("10::1"); }
+
+// ----------------------------------------------------------------------------
+// Spoof Port Manager instance support a single Spoof Port which in turn
+// contains a single Peer.
+//
+
+template <typename A>
+class SpoofPortManager : public PortManagerBase<A> {
+public:
+    SpoofPortManager(System<A>& s, const IfMgrIfTree& iftree)
+	: PortManagerBase<A>(s, iftree)
+    {
+	this->_ports.push_back(new SpoofPort<A>(*this, DefaultPeer<A>::get()));
+    }
+
+    ~SpoofPortManager()
+    {
+	while (!this->_ports.empty()) {
+	    delete this->_ports.front();
+	    this->_ports.pop_front();
+	}
+    }
+
+    Port<A>* the_port()
+    {
+	XLOG_ASSERT(this->_ports.size() == 1);
+	return this->_ports.front();
+    }
+
+    Peer<A>* the_peer()
+    {
+	XLOG_ASSERT(this->_ports.size() == 1);
+	XLOG_ASSERT(this->_ports.front()->peers().size() == 1);
+	return this->_ports.front()->peers().front();
+    }
+};
+
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// Walk tester class
+//
+
+static const IfMgrIfTree ift_dummy = IfMgrIfTree();
+
+template <typename A>
+class RouteWalkTester
+{
+public:
+    RouteWalkTester()
+	: _e(), _rip_system(_e), _pm(_rip_system, ift_dummy)
+    {
+	_pm.the_port()->constants().set_expiry_secs(3);
+	_pm.the_port()->constants().set_deletion_secs(2);
+    }
+
+    ~RouteWalkTester()
+    {
+	RouteDB<A>& rdb = _rip_system.route_db();
+	rdb.flush_routes();
+    }
+
+    bool
+    walk_routes(RouteWalker<A>* rw,
+		bool wait_on_expiring,
+		uint32_t* done,
+		uint32_t todo)
+    {
+	TimeVal now;
+	_e.current_time(now);
+
+	TimeVal ten_ms(0, 10000);
+
+	verbose_log("walked routes = %u\n", XORP_UINT_CAST(*done));
+	rw->resume();
+	while (todo != 0) {
+	    if (rw->current_route() == 0) {
+		verbose_log("Halting with %u routes done.\n",
+			    XORP_UINT_CAST(*done));
+		return false;
+	    }
+	    if (wait_on_expiring) {
+		TimeVal delta = rw->current_route()->timer().expiry() - now;
+		if (delta < ten_ms) {
+		    verbose_log("Pausing on route about to be expired "
+				"or deleted (expiry in %d.%06d secs).\n",
+				XORP_INT_CAST(delta.sec()),
+				XORP_INT_CAST(delta.usec()));
+		    break;
+		}
+	    }
+	    rw->next_route();
+	    *done = *done + 1;
+	    todo--;
+	}
+	rw->pause(1);
+	return true;
+    }
+
+    int
+    run_test()
+    {
+	string ifname, vifname;		// XXX: not set, because not needed
+	const uint32_t n_routes = 20000;
+
+	verbose_log("Creating routes for nets\n");
+	RouteDB<A>& rdb = _rip_system.route_db();
+
+	set<IPNet<A> > nets;
+	make_nets(nets, n_routes);
+
+	TimeVal tv_add_start;
+	_e.current_time(tv_add_start);
+
+	for_each(nets.begin(), nets.end(),
+		 RouteInjector<A>(rdb, A::ZERO(), ifname, vifname, 5,
+				  _pm.the_peer()));
+
+	TimeVal tv_add_end;
+	_e.current_time(tv_add_end);
+	tv_add_end -= tv_add_start;
+	verbose_log("Adding routes took %d.%06d secs\n",
+		    XORP_INT_CAST(tv_add_end.sec()),
+		    XORP_INT_CAST(tv_add_end.usec()));
+
+	// Walk routes on 1ms timer
+	// We make 2 passes over routes with 97 routes read per 1ms
+	// Total time taken 2 * 20000 / 97 * 0.001 = 407ms
+	uint32_t routes_done = 0;
+	RouteWalker<A> rw(rdb);
+	XorpTimer t;
+	for (int i = 0; i < 2; i++) {
+	    verbose_log("Starting full route walk %d\n", i);
+	    t = _e.new_periodic_ms(1,
+				   callback(this,
+					    &RouteWalkTester<A>::walk_routes,
+					    &rw, false,
+					    &routes_done,
+					    static_cast<uint32_t>(97u)));
+	    while (t.scheduled()) {
+		_e.run();
+		if (routes_done > n_routes) {
+		    verbose_log("Walked more routes than exist!\n");
+		    return 1;
+		}
+	    }
+	    if (routes_done != n_routes) {
+		verbose_log("Read %u routes, expected to read %u\n",
+			    XORP_UINT_CAST(routes_done),
+			    XORP_UINT_CAST(n_routes));
+		return 1;
+	    }
+	    routes_done = 0;
+	    rw.reset();
+	}
+
+	// Routes start being deleted after 5 seconds so if we walk
+	// slowly we have a reasonable chance of standing on a route as
+	// it gets deleted.
+	//
+	// Read 10 routes every 30ms.
+	// 20000 routes -> 20000 / 10 * 0.030 = 60 seconds
+	//
+	// Except it doesn't run that long as the routes are collapsing
+	//
+	verbose_log("Starting walk as routes are deleted.\n");
+	rw.reset();
+	routes_done = 0;
+	t = _e.new_periodic_ms(30,
+			       callback(this,
+					&RouteWalkTester<A>::walk_routes,
+					&rw, true,
+					&routes_done,
+					static_cast<uint32_t>(10u)));
+	while (t.scheduled()) {
+	    _e.run();
+	    if (routes_done > n_routes) {
+		verbose_log("Walked more routes than exist!\n");
+		return 1;
+	    }
+	}
+	verbose_log("Read %u routes, %u available at end.\n",
+		    XORP_UINT_CAST(routes_done),
+		    XORP_UINT_CAST(rdb.route_count()));
+
+	rdb.flush_routes();
+	if (rdb.route_count() != 0) {
+	    verbose_log("Had routes left when none expected.\n");
+	    return 1;
+	}
+	return 0;
+    }
+
+protected:
+    EventLoop		_e;
+    System<A>		_rip_system;
+    SpoofPortManager<A> _pm;
+};
+
+
+/**
+ * Print program info to output stream.
+ *
+ * @param stream the output stream the print the program info to.
+ */
+static void
+print_program_info(FILE *stream)
+{
+    fprintf(stream, "Name:          %s\n", program_name);
+    fprintf(stream, "Description:   %s\n", program_description);
+    fprintf(stream, "Version:       %s\n", program_version_id);
+    fprintf(stream, "Date:          %s\n", program_date);
+    fprintf(stream, "Copyright:     %s\n", program_copyright);
+    fprintf(stream, "Return:        %s\n", program_return_value);
+}
+
+/*
+ * Print program usage information to the stderr.
+ *
+ * @param progname the name of the program.
+ */
+static void
+usage(const char* progname)
+{
+    print_program_info(stderr);
+    fprintf(stderr, "usage: %s [-v] [-h]\n", progname);
+    fprintf(stderr, "       -h          : usage (this message)\n");
+    fprintf(stderr, "       -v          : verbose output\n");
+}
+
+int
+main(int argc, char* const argv[])
+{
+    //
+    // Initialize and start xlog
+    //
+    xlog_init(argv[0], NULL);
+    xlog_set_verbose(XLOG_VERBOSE_LOW);         // Least verbose messages
+    // XXX: verbosity of the error messages temporary increased
+    xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
+    xlog_add_default_output();
+    xlog_start();
+
+    int ch;
+    while ((ch = getopt(argc, argv, "hv")) != -1) {
+        switch (ch) {
+        case 'v':
+            set_verbose(true);
+            break;
+        case 'h':
+        case '?':
+        default:
+            usage(argv[0]);
+            xlog_stop();
+            xlog_exit();
+            if (ch == 'h')
+                return (0);
+            else
+                return (1);
+        }
+    }
+    argc -= optind;
+    argv += optind;
+
+    int rval = 0;
+    XorpUnexpectedHandler x(xorp_unexpected_handler);
+    try {
+	{
+	    RouteWalkTester<IPv4> rwt4;
+	    rval = rwt4.run_test();
+	}
+	{
+	    RouteWalkTester<IPv6> rwt6;
+	    rval |= rwt6.run_test();
+	}
+    } catch (...) {
+        // Internal error
+        xorp_print_standard_exceptions();
+        rval = 2;
+    }
+
+    //
+    // Gracefully stop and exit xlog
+    //
+    xlog_stop();
+    xlog_exit();
+
+    return rval;
+}
+
+
+

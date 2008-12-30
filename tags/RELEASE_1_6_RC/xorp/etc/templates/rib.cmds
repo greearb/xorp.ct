@@ -1,0 +1,875 @@
+
+/* $XORP: xorp/etc/templates/rib.cmds,v 1.12 2008/04/24 15:20:18 bms Exp $ */
+
+/*
+ * At the time this file was written, route redistribution from the
+ * rib only occurs from IGP tables and the ribout.  Redistribution from
+ * ribout can be filtered to match a particular protocol.
+ *
+ */
+
+show route {
+     %command: "" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show routes";
+}
+
+show route admin {
+     %command: "" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show RIB administrative information";
+}
+
+show route table {
+     %command: "" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show routes from a RIB table";
+}
+
+show route table ipv4 {
+     %command: "" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 routes";
+}
+
+show route table ipv6 {
+     %command: "" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 routes";
+}
+
+show route table ipv4 unicast {
+     %command: "" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 unicast routes";
+}
+
+show route table ipv6 unicast {
+     %command: "" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 unicast routes";
+}
+
+show route table ipv4 multicast {
+     %command: "" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 MRIB routes";
+}
+
+show route table ipv6 multicast {
+     %command: "" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 MRIB routes";
+}
+
+
+
+/*
+ * Administrative distance commands
+ */
+show route admin distance {
+     %command: "" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show RIB administrative distances";
+}
+
+show route admin distance ipv4 {
+     %command: "" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 administrative distances";
+}
+
+show route admin distance ipv6 {
+     %command: "" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 administrative distances";
+}
+
+show route admin distance ipv4 unicast {
+     %command: "rib/tools/show_distances ribin $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 unicast protocol administrative distances";
+}
+
+show route admin distance ipv6 unicast {
+     %command: "rib/tools/show_distances ribin $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 unicast protocol administrative distances";
+}
+
+show route admin distance ipv4 multicast {
+     %command: "rib/tools/show_distances ribin $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 multicast protocol administrative distances";
+}
+
+show route admin distance ipv6 multicast {
+     %command: "rib/tools/show_distances ribin $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 multicast protocol administrative distances";
+}
+
+
+/*
+ * Connected show route table commands
+ */
+show route table ipv4 unicast connected {
+     %command: "rib/tools/show_routes ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 routes from connected interfaces";
+}
+
+show route table ipv6 unicast connected {
+     %command: "rib/tools/show_routes ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 routes from connected interfaces";
+}
+
+show route table ipv4 unicast connected brief {
+     %command: "rib/tools/show_routes -b ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 routes from connected interfaces (brief format)";
+}
+
+show route table ipv6 unicast connected brief {
+     %command: "rib/tools/show_routes -b ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 routes from connected interfaces (brief format)";
+}
+
+show route table ipv4 unicast connected detail {
+     %command: "rib/tools/show_routes -d ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 routes from connected interfaces (detailed format)";
+}
+
+show route table ipv6 unicast connected detail {
+     %command: "rib/tools/show_routes -d ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 routes from connected interfaces (detailed format)";
+}
+
+show route table ipv4 unicast connected terse {
+     %command: "rib/tools/show_routes -t ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 routes from connected interfaces (terse format)";
+}
+
+show route table ipv6 unicast connected terse {
+     %command: "rib/tools/show_routes -t ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 routes from connected interfaces (terse format)";
+}
+
+
+
+/*
+ * Static show route table commands
+ */
+show route table ipv4 unicast static {
+     %command: "rib/tools/show_routes ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 static routes";
+}
+
+show route table ipv6 unicast static {
+     %command: "rib/tools/show_routes ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 static routes";
+}
+
+show route table ipv4 multicast static {
+     %command: "rib/tools/show_routes ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 MRIB static routes";
+}
+
+show route table ipv6 multicast static {
+     %command: "rib/tools/show_routes ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 MRIB static routes";
+}
+
+show route table ipv4 unicast static brief {
+     %command: "rib/tools/show_routes -b ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 static routes (brief format)";
+}
+
+show route table ipv6 unicast static brief {
+     %command: "rib/tools/show_routes -b ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 static routes (brief format)";
+}
+
+show route table ipv4 multicast static brief {
+     %command: "rib/tools/show_routes -b ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 MRIB static routes (brief format)";
+}
+
+show route table ipv6 multicast static brief {
+     %command: "rib/tools/show_routes -b ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 MRIB static routes (brief format)";
+}
+
+show route table ipv4 unicast static detail {
+     %command: "rib/tools/show_routes -d ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 static routes (detailed format)";
+}
+
+show route table ipv6 unicast static detail {
+     %command: "rib/tools/show_routes -d ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 static routes (detailed format)";
+}
+
+show route table ipv4 multicast static detail {
+     %command: "rib/tools/show_routes -d ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 MRIB static routes (detailed format)";
+}
+
+show route table ipv6 multicast static detail {
+     %command: "rib/tools/show_routes -d ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 MRIB static routes (detailed format)";
+}
+
+show route table ipv4 unicast static terse {
+     %command: "rib/tools/show_routes -t ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 static routes (terse format)";
+}
+
+show route table ipv6 unicast static terse {
+     %command: "rib/tools/show_routes -t ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 static routes (terse format)";
+}
+
+show route table ipv4 multicast static terse {
+     %command: "rib/tools/show_routes -t ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 MRIB static routes (terse format)";
+}
+
+show route table ipv6 multicast static terse {
+     %command: "rib/tools/show_routes -t ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 MRIB static routes (terse format)";
+}
+
+
+
+/*
+ * fib2mrib
+ */
+show route table ipv4 multicast fib2mrib {
+     %command: "rib/tools/show_routes ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 unicast routes for multicast extracted from kernel";
+}
+
+show route table ipv6 multicast fib2mrib {
+     %command: "rib/tools/show_routes ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 unicast routes for multicast extracted from kernel";
+}
+
+show route table ipv4 multicast fib2mrib brief {
+     %command: "rib/tools/show_routes -b ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 unicast routes for multicast extracted from kernel (brief format)";
+}
+
+show route table ipv6 multicast fib2mrib brief {
+     %command: "rib/tools/show_routes -b ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 unicast routes for multicast extracted from kernel (brief format)";
+}
+
+show route table ipv4 multicast fib2mrib detail {
+     %command: "rib/tools/show_routes -d ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 unicast routes for multicast extracted from kernel (detailed format)";
+}
+
+show route table ipv6 multicast fib2mrib detail {
+     %command: "rib/tools/show_routes -d ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 unicast routes for multicast extracted from kernel (detailed format)";
+}
+
+show route table ipv4 multicast fib2mrib terse {
+     %command: "rib/tools/show_routes -t ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 unicast routes for multicast extracted from kernel (terse format)";
+}
+
+show route table ipv6 multicast fib2mrib terse {
+     %command: "rib/tools/show_routes -t ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 unicast routes for multicast extracted from kernel (terse format)";
+}
+
+
+
+/*
+ * BGP
+ */
+show route table ipv4 unicast ibgp {
+     %command: "rib/tools/show_routes ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 iBGP routes";
+}
+
+show route table ipv4 unicast ebgp {
+     %command: "rib/tools/show_routes ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 eBGP routes";
+}
+
+show route table ipv4 multicast ibgp {
+     %command: "rib/tools/show_routes ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 iBGP MBGP routes";
+}
+
+show route table ipv4 multicast ebgp {
+     %command: "rib/tools/show_routes ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 eBGP MBGP routes";
+}
+
+show route table ipv6 unicast ibgp {
+     %command: "rib/tools/show_routes ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 iBGP routes";
+}
+
+show route table ipv6 unicast ebgp {
+     %command: "rib/tools/show_routes ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 eBGP routes";
+}
+
+show route table ipv6 multicast ibgp {
+     %command: "rib/tools/show_routes ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 iBGP MBGP routes";
+}
+
+show route table ipv6 multicast ebgp {
+     %command: "rib/tools/show_routes ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 eBGP MBGP routes";
+}
+
+show route table ipv4 unicast ibgp brief {
+     %command: "rib/tools/show_routes -b ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 iBGP routes (brief format)";
+}
+
+show route table ipv4 unicast ebgp brief {
+     %command: "rib/tools/show_routes -b ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 eBGP routes (brief format)";
+}
+
+show route table ipv4 multicast ibgp brief {
+     %command: "rib/tools/show_routes -b ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 iBGP MBGP routes (brief format)";
+}
+
+show route table ipv4 multicast ebgp brief {
+     %command: "rib/tools/show_routes -b ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 eBGP MBGP routes (brief format)";
+}
+
+show route table ipv6 unicast ibgp brief {
+     %command: "rib/tools/show_routes -b ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 iBGP routes (brief format)";
+}
+
+show route table ipv6 unicast ebgp brief {
+     %command: "rib/tools/show_routes -b ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 eBGP routes (brief format)";
+}
+
+show route table ipv6 multicast ibgp brief {
+     %command: "rib/tools/show_routes -b ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 iBGP MBGP routes (brief format)";
+}
+
+show route table ipv6 multicast ebgp brief {
+     %command: "rib/tools/show_routes -b ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 eBGP MBGP routes (brief format)";
+}
+
+show route table ipv4 unicast ibgp detail {
+     %command: "rib/tools/show_routes -d ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 iBGP routes (detailed format)";
+}
+
+show route table ipv4 unicast ebgp detail {
+     %command: "rib/tools/show_routes -d ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 eBGP routes (detailed format)";
+}
+
+show route table ipv4 multicast ibgp detail {
+     %command: "rib/tools/show_routes -d ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 iBGP MBGP routes (detailed format)";
+}
+
+show route table ipv4 multicast ebgp detail {
+     %command: "rib/tools/show_routes -d ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 eBGP MBGP routes (detailed format)";
+}
+
+show route table ipv6 unicast ibgp detail {
+     %command: "rib/tools/show_routes -d ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 iBGP routes (detailed format)";
+}
+
+show route table ipv6 unicast ebgp detail {
+     %command: "rib/tools/show_routes -d ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 eBGP routes (detailed format)";
+}
+
+show route table ipv6 multicast ibgp detail {
+     %command: "rib/tools/show_routes -d ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 iBGP MBGP routes (detailed format)";
+}
+
+show route table ipv6 multicast ebgp detail {
+     %command: "rib/tools/show_routes -d ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 eBGP MBGP routes (detailed format)";
+}
+
+show route table ipv4 unicast ibgp terse {
+     %command: "rib/tools/show_routes -t ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 iBGP routes (terse format)";
+}
+
+show route table ipv4 unicast ebgp terse {
+     %command: "rib/tools/show_routes -t ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 eBGP routes (terse format)";
+}
+
+show route table ipv4 multicast ibgp terse {
+     %command: "rib/tools/show_routes -t ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 iBGP MBGP routes (terse format)";
+}
+
+show route table ipv4 multicast ebgp terse {
+     %command: "rib/tools/show_routes -t ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 eBGP MBGP routes (terse format)";
+}
+
+show route table ipv6 unicast ibgp terse {
+     %command: "rib/tools/show_routes -t ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 iBGP routes (terse format)";
+}
+
+show route table ipv6 unicast ebgp terse {
+     %command: "rib/tools/show_routes -t ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 eBGP routes (terse format)";
+}
+
+show route table ipv6 multicast ibgp terse {
+     %command: "rib/tools/show_routes -t ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 iBGP MBGP routes (terse format)";
+}
+
+show route table ipv6 multicast ebgp terse {
+     %command: "rib/tools/show_routes -t ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 eBGP MBGP routes (terse format)";
+}
+
+
+
+/*
+ * RIP show route commands
+ */
+show route table ipv4 unicast rip {
+     %command: "rib/tools/show_routes ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show routes from RIP";
+}
+
+show route table ipv4 unicast rip winners {
+     %command: "rib/tools/show_routes ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show RIP that reach forwarding engine";
+}
+
+show route table ipv4 unicast rip brief {
+     %command: "rib/tools/show_routes -b ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show routes from RIP (brief format)";
+}
+
+show route table ipv4 unicast rip winners brief {
+     %command: "rib/tools/show_routes -b ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show RIP that reach forwarding engine (brief format)";
+}
+
+show route table ipv4 unicast rip detail {
+     %command: "rib/tools/show_routes -d ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show routes from RIP (detailed format)";
+}
+
+show route table ipv4 unicast rip winners detail {
+     %command: "rib/tools/show_routes -d ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show RIP that reach forwarding engine (detailed format)";
+}
+
+show route table ipv4 unicast rip terse {
+     %command: "rib/tools/show_routes -t ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show routes from RIP (terse format)";
+}
+
+show route table ipv4 unicast rip winners terse {
+     %command: "rib/tools/show_routes -t ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show RIP that reach forwarding engine (terse format)";
+}
+
+
+
+/*
+ * RIPng show route commands
+ */
+show route table ipv6 unicast ripng {
+     %command: "rib/tools/show_routes ribin $4 $5 rip" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show routes from RIPng";
+}
+
+show route table ipv6 unicast ripng winners {
+     %command: "rib/tools/show_routes ribout $4 $5 rip" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show RIPng that reach forwarding engine";
+}
+
+show route table ipv6 unicast ripng brief {
+     %command: "rib/tools/show_routes -b ribin $4 $5 rip" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show routes from RIPng (brief format)";
+}
+
+show route table ipv6 unicast ripng winners brief {
+     %command: "rib/tools/show_routes -b ribout $4 $5 rip" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show RIPng that reach forwarding engine (brief format)";
+}
+
+show route table ipv6 unicast ripng detail {
+     %command: "rib/tools/show_routes -d ribin $4 $5 rip" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show routes from RIPng (detailed format)";
+}
+
+show route table ipv6 unicast ripng winners detail {
+     %command: "rib/tools/show_routes -d ribout $4 $5 rip" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show RIPng that reach forwarding engine (detailed format)";
+}
+
+show route table ipv6 unicast ripng terse {
+     %command: "rib/tools/show_routes -t ribin $4 $5 rip" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show routes from RIPng (terse format)";
+}
+
+show route table ipv6 unicast ripng winners terse {
+     %command: "rib/tools/show_routes -t ribout $4 $5 rip" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show RIPng that reach forwarding engine (terse format)";
+}
+
+
+
+/*
+ * OSPFv2 show route commands
+ */
+show route table ipv4 unicast ospf {
+     %command: "rib/tools/show_routes ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show routes from OSPFv2";
+}
+
+show route table ipv4 unicast ospf winners {
+     %command: "rib/tools/show_routes ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show OSPFv2 that reach forwarding engine";
+}
+
+show route table ipv4 unicast ospf brief {
+     %command: "rib/tools/show_routes -b ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show routes from OSPFv2 (brief format)";
+}
+
+show route table ipv4 unicast ospf winners brief {
+     %command: "rib/tools/show_routes -b ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show OSPFv2 that reach forwarding engine (brief format)";
+}
+
+show route table ipv4 unicast ospf detail {
+     %command: "rib/tools/show_routes -d ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show routes from OSPFv2 (detailed format)";
+}
+
+show route table ipv4 unicast ospf winners detail {
+     %command: "rib/tools/show_routes -d ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show OSPFv2 that reach forwarding engine (detailed format)";
+}
+
+show route table ipv4 unicast ospf terse {
+     %command: "rib/tools/show_routes -t ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show routes from OSPFv2 (terse format)";
+}
+
+show route table ipv4 unicast ospf winners terse {
+     %command: "rib/tools/show_routes -t ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show OSPFv2 that reach forwarding engine (terse format)";
+}
+
+/*
+ * OSPFv3 show route commands
+ */
+show route table ipv6 unicast ospf {
+     %command: "rib/tools/show_routes ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show routes from OSPFv3";
+}
+
+show route table ipv6 unicast ospf winners {
+     %command: "rib/tools/show_routes ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show OSPFv3 that reach forwarding engine";
+}
+
+show route table ipv6 unicast ospf brief {
+     %command: "rib/tools/show_routes -b ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show routes from OSPFv3 (brief format)";
+}
+
+show route table ipv6 unicast ospf winners brief {
+     %command: "rib/tools/show_routes -b ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show OSPFv3 that reach forwarding engine (brief format)";
+}
+
+show route table ipv6 unicast ospf detail {
+     %command: "rib/tools/show_routes -d ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show routes from OSPFv3 (detailed format)";
+}
+
+show route table ipv6 unicast ospf winners detail {
+     %command: "rib/tools/show_routes -d ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show OSPFv3 that reach forwarding engine (detailed format)";
+}
+
+show route table ipv6 unicast ospf terse {
+     %command: "rib/tools/show_routes -t ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show routes from OSPFv3 (terse format)";
+}
+
+show route table ipv6 unicast ospf winners terse {
+     %command: "rib/tools/show_routes -t ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show OSPFv3 that reach forwarding engine (terse format)";
+}
+
+
+/*
+ * OLSRv1 IPv4 show route commands
+ */
+show route table ipv4 unicast olsr {
+     %command: "rib/tools/show_routes ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show routes from OLSRv1";
+}
+
+show route table ipv4 unicast olsr winners {
+     %command: "rib/tools/show_routes ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show OLSRv1 that reach forwarding engine";
+}
+
+show route table ipv4 unicast olsr brief {
+     %command: "rib/tools/show_routes -b ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show routes from OLSRv1 (brief format)";
+}
+
+show route table ipv4 unicast olsr winners brief {
+     %command: "rib/tools/show_routes -b ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show OLSRv1 that reach forwarding engine (brief format)";
+}
+
+show route table ipv4 unicast olsr detail {
+     %command: "rib/tools/show_routes -d ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show routes from OLSRv1 (detailed format)";
+}
+
+show route table ipv4 unicast olsr winners detail {
+     %command: "rib/tools/show_routes -d ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show OLSRv1 that reach forwarding engine (detailed format)";
+}
+
+show route table ipv4 unicast olsr terse {
+     %command: "rib/tools/show_routes -t ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show routes from OLSRv1 (terse format)";
+}
+
+show route table ipv4 unicast olsr winners terse {
+     %command: "rib/tools/show_routes -t ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show OLSRv1 that reach forwarding engine (terse format)";
+}
+
+
+/*
+ * Show winning routes (unfiltered output from "all" routing table).
+ */
+show route table ipv4 unicast final {
+     %command: "rib/tools/show_routes ribout $4 $5 all" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 winning routes";
+}
+
+show route table ipv6 unicast final {
+     %command: "rib/tools/show_routes ribin $4 $5 all" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 winning routes";
+}
+
+show route table ipv4 multicast final {
+     %command: "rib/tools/show_routes ribin $4 $5 all" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 MRIB winning routes";
+}
+
+show route table ipv6 multicast final {
+     %command: "rib/tools/show_routes ribin $4 $5 all" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 MRIB winning routes";
+}
+
+show route table ipv4 unicast final brief {
+     %command: "rib/tools/show_routes -b ribout $4 $5 all" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 winning routes (brief format)";
+}
+
+show route table ipv6 unicast final brief {
+     %command: "rib/tools/show_routes -b ribout $4 $5 all" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 winning routes (brief format)";
+}
+
+show route table ipv4 multicast final brief {
+     %command: "rib/tools/show_routes -b ribin $4 $5 all" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 MRIB winning routes (brief format)";
+}
+
+show route table ipv6 multicast final brief {
+     %command: "rib/tools/show_routes -b ribin $4 $5 all" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 MRIB winning routes (brief format)";
+}
+
+show route table ipv4 unicast final detail {
+     %command: "rib/tools/show_routes -d ribout $4 $5 all" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 winning routes (detailed format)";
+}
+
+show route table ipv6 unicast final detail {
+     %command: "rib/tools/show_routes -d ribout $4 $5 all" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 winning routes (detailed format)";
+}
+
+show route table ipv4 multicast final detail {
+     %command: "rib/tools/show_routes -d ribin $4 $5 all" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 MRIB winning routes (detailed format)";
+}
+
+show route table ipv6 multicast final detail {
+     %command: "rib/tools/show_routes -d ribin $4 $5 all" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 MRIB winning routes (detailed format)";
+}
+
+show route table ipv4 unicast final terse {
+     %command: "rib/tools/show_routes -t ribout $4 $5 all" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 winning routes (terse format)";
+}
+
+show route table ipv6 unicast final terse {
+     %command: "rib/tools/show_routes -t ribout $4 $5 all" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 winning routes (terse format)";
+}
+
+show route table ipv4 multicast final terse {
+     %command: "rib/tools/show_routes -t ribin $4 $5 all" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 MRIB winning routes (terse format)";
+}
+
+show route table ipv6 multicast final terse {
+     %command: "rib/tools/show_routes -t ribin $4 $5 all" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 MRIB winning routes (terse format)";
+}

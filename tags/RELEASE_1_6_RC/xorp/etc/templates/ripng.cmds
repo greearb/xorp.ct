@@ -1,0 +1,43 @@
+/* $XORP$ */
+
+show ripng {
+     %command: "" %help: HELP;
+     %module: ripng;
+     %tag: HELP "Display information about RIPng";
+}
+
+show ripng peer statistics $(protocols.ripng.interface.*) $(protocols.ripng.interface.*.vif.*) $(protocols.ripng.interface.*.vif.*.address.*) {
+     %command: "rip/tools/show_peer_stats $2 $5 $6 $7" %help: HELP;
+     %module: ripng;
+     %tag: HELP "Show RIPng statistics for peers on specified address";
+}
+
+show ripng peer statistics all {
+     %command: "rip/tools/show_peer_stats $2" %help: HELP;
+     %module: ripng;
+     %tag: HELP "Show RIPng statistics for all peers";
+}
+
+show ripng statistics $(protocols.ripng.interface.*) $(protocols.ripng.interface.*.vif.*) $(protocols.ripng.interface.*.vif.*.address.*) {
+     %command: "rip/tools/show_stats $2 $4 $5 $6" %help: HELP;
+     %module: ripng;
+     %tag: HELP "Show RIPng statistics on specified address";
+}
+
+show ripng statistics all {
+     %command: "rip/tools/show_stats $2" %help: HELP;
+     %module: ripng;
+     %tag: HELP "Show RIPng statistics for all addresses";
+}
+
+show ripng status $(protocols.ripng.interface.*) $(protocols.ripng.interface.*.vif.*) $(protocols.ripng.interface.*.vif.*.address.*) {
+     %command: "rip/tools/show_stats -b $2 $4 $5 $6" %help: HELP;
+     %module: ripng;
+     %tag: HELP "Show RIPng status on specified address";
+}
+
+show ripng status all {
+     %command: "rip/tools/show_stats -b $2" %help: HELP;
+     %module: ripng;
+     %tag: HELP "Show RIPng status for all addresses";
+}

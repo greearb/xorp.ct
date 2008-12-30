@@ -1,0 +1,19 @@
+#
+# $XORP$
+#
+
+This directory contains XORP-related startup information for various
+OS distributions:
+
+* debian: Debian GNU/Linux (http://www.debian.org/):
+  - The debian/xorp script should be added to the /etc/init.d/
+    directory. However, future distributions of Debian will include
+    that script, therefore the script needs to be added only if it is
+    not there.
+  - The script uses the "daemon" program (http://www.libslack.org/daemon/),
+    which can be used to send stdout/stderr to a logfile or syslog.
+    It also takes care of running the process in background, generate
+    its pidfile, chroot() the daemon, close file descriptors, set umask, 
+    respawn if it dies, etc.
+    The "daemon" program is fairly portable, therefore a similar
+    solution can be used for other OS distributions.

@@ -1,0 +1,188 @@
+%
+% $XORP: xorp/docs/user_manual/unicast_routing.tex,v 1.13 2008/07/18 18:40:36 pavlin Exp $
+%
+
+\chapter{Unicast Routing}
+
+\section{An Overview of Unicast Routing}
+
+To forward packets, a router maintains a forwarding table which holds
+routes indicating which neighboring router a packet for a particular
+destination should be forwarded to.  At the minimum, a route then
+consists of a destination {\it subnet} and a {\it nexthop}.  The destination
+subnet is usually represented as a base IP address and a prefix-length
+in bits.  For example, the subnet {\stt 128.16.64.0/24} has a prefix
+length of 24 bits, indicating that the first 24 bits of this address
+identify the network in question, and the last 8 bits identify hosts
+on this subnet.  Thus a route for this subnet would be used to forward
+packets for addresses 128.16.64.0 to 128.16.64.255 inclusive.  The
+nexthop can be the IP address of a neighboring router, or it might
+indicate that the route is for a subnet that is directly connected to
+this router.
+
+IP routers perform {\it longest prefix match} forwarding.  This means
+that a router might have more than one route that matches a
+destination address, and under such circumstances, it will use the
+route that has the longest prefix.   For example, if a router has two routes:
+\begin{itemize}
+\item Subnet: {\ssf 128.16.0.0/16}, nexthop: {\ssf 10.0.0.1}
+\item Subnet: {\ssf 128.16.64.0/24}, nexthop: {\ssf 10.0.0.2}
+\end{itemize}
+\noindent A packet destined for {\ssf 128.16.0.1} would match the first
+route only, and so would be forwarded to {\ssf 10.0.0.1}.  However a
+packet destined for {\ssf 128.16.64.1} would match both routes, and so
+would be forwarded to {\ssf 10.0.0.2} because the second route has a
+longer prefix (24 is longer than 16).
+
+To be useful, a router needs to populate its forwarding table.  It
+does this in three ways:
+\begin{itemize}
+\item Routes for directly connected subnets are automatically entered into
+the forwarding table.
+\item Routes may be configured via the router's configuration file or
+command line interface.  Such routes are known as {\it static
+routes}. Static routes will be discussed in Chapter \ref{static_routes}.
+\item Routes may be learned from another router via a routing
+protocol.  Such routes are known as {\it dynamic routes}.
+\end{itemize}
+
+\subsection{Dynamic Routing}
+
+Many different routing protocols can supply dynamic routes.  The dynamic
+routing protocols that are in most common use are:
+\begin{itemize}
+\item {\bf Routing Information Protocol (RIP)}.  This is probably the
+simplest intra-domain routing protocol, and is often used on small
+networks.
+\item {\bf Open Shortest Path First (OSPF)}.  Used for intra-domain routing,
+often on large ISP networks.
+\item {\bf Integrated IS-IS}.  Used for intra-domain routing, often
+on large ISP networks.  Similar to OSPF.
+\item {\bf IGRP}: Used for intra-domain routing, typically in small to
+medium sized networks.  Cisco-proprietary.
+\item {\bf Border Gateway Protocol (BGP)}.  This is used for
+inter-domain routing.
+\end{itemize}
+Currently (July 2008), XORP supports RIP, OSPF and BGP.
+The RIP, OSPF and BGP implementations are discussed in Chapter \ref{rip},
+Chapter \ref{ospf} and Chapter \ref{bgp} respectively.
+In the future we plan to implement IS-IS as well.
+In addition, there are also multicast routing protocols, which we will
+discuss in Chapter \ref{multicast}.
+
+\subsection{Administrative Distance}
+
+A router can run multiple routing protocols simultaneously.  For
+example, we may use RIP to distribute routes within our network, and
+BGP to learn external routes.  In some situations this can lead to a
+router learning the same route from more than one routing protocol.
+For example, we might learn the two routes:
+\begin{itemize}
+\item Subnet: {\ssf 128.16.64.0/24}, nexthop: {\ssf 192.150.187.1},
+learned from BGP via an external peering. AS Path: {\tt 123 567 987}.
+\item Subnet: {\ssf 128.16.64.0/24}, nexthop: {\ssf 10.0.0.2}, learned
+from RIP with metric 13
+\end{itemize}
+The longest prefix match rule doesn't help us because the prefix
+lengths are the same, and the metric used for RIP is not directly
+comparable against the AS path length or any other attribute attached
+to a BGP route.  How then do we decide which route to take?
+
+A XORP router uses the concept of {\it administrative distance} to
+determine which route wins.  This concept is the same as that used by
+Cisco routers.  Basically each routing protocol has a configured
+``distance'', and if a route is heard from two protocols, then the
+version with the smallest distance wins.
+
+The built-in table of administative distances XORP uses is:
+\begin{tabbing}
+xxx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
+\>Directly connected subnets: \>0\\
+\>Static routes:\>1\\
+\>BGP, heard from external peer:\>20\\
+\>OSPF:\>110\\
+\>IS-IS (when implemented):\>115\\
+\>RIP:\>120\\
+\>BGP, heard from internal peer:\>200\\
+\>FIB2MRIB routes (XORP-specific, in MRIB only):\>254
+\end{tabbing}
+Hence, in the example above, the route learned from BGP will be prefered.
+
+Currently (July 2008), there is no way to modify these default
+administrative distances, but this capability will be added in the future.
+
+The administrative distances can be monitored using the operational mode 
+command {\stt show route admin distance ipv4 unicast}: \\
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xxxxxxxxxxxxxxxxx\=\kill
+user@hostname> {\bf show route admin distance ipv4 unicast}\\
+Protocol \>Administrative distance\\
+connected \>0\\
+static \>1\\
+eigrp-summary \>5\\
+ebgp \>20\\
+eigrp-internal \>90\\
+igrp \>100\\
+ospf \>110\\
+is-is \>115\\
+rip \>120\\
+eigrp-external \>170\\
+ibgp \>200\\
+fib2mrib \>254\\
+unknown \>255\\
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+
+The operational command for monitoring the IPv6 unicast administrative 
+distances is {\stt show route admin distance ipv6 unicast}.
+The operational commands for monitoring the multicast administrative 
+distances are {\stt show route admin distance ipv4 multicast}
+and {\stt show route admin distance ipv6 multicast}
+for IPv4 and IPv6 respectively.
+
+\subsection{Route Redistribution}
+
+A common requirement is to redistribute routes between routing
+protocols.  Some examples might be:
+
+\begin{itemize}
+\item When interconnecting some subnets that are statically routed
+  with some subnets use RIP for dynamic routing.  Rather
+  that configure the static routes and additionally tell RIP to
+  originate route advertisements for the same subnets, it is simpler
+  and less error prone to configure the router to simply redistribute
+  all the static routes into RIP.
+\item When a network uses RIP internally, and also uses BGP to
+  peer with the rest of the Internet.  One solution would be to
+  configure BGP at the border routes to originate route advertisements
+  for the internal subnets, but if a new subnet is added internally,
+  then the border routers also need to be correctly modified.  Instead
+  we can simply configure the border routers to redistribute RIP
+  routes into BGP.  
+\end{itemize}
+
+XORP is capable of performing such route redistribution.  This is
+generally configured using the {\stt import} and {\stt export}
+configuration statements.  These terms are relative to the router's
+routing table, so if the directive {\stt export static} is added to the
+RIP configuration, then this indicates that RIP should export all the
+static routes to its neighbors via the RIP protocol.
+
+While route redistribution is a powerful tool, it needs to be used
+carefully.  For example, redistributing BGP routes into RIP at one
+router, and redistributing RIP routes into BGP at another router,
+would cause all the BGP routes to lose their original AS paths, and
+hence for much of the Internet to believe your AS is the best way to
+everywhere.  In any event, it is rarely a good idea to distribute a
+large number of BGP routes into an IGP because most IGPs simply do not
+cope well with large routing tables.
+
+In XORP route redistribution is implemented as part of the routing
+policy framework (see Chapter \ref{policy} for details).

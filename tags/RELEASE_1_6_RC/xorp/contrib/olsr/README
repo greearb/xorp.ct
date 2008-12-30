@@ -1,0 +1,37 @@
+#
+# $XORP: xorp/contrib/olsr/README,v 1.2 2008/05/09 16:09:38 bms Exp $
+#
+
+Optimized Link State Routing (OLSR) Implementation
+==================================================
+
+This directory contains the XORP implementation of the OLSR protocol,
+version 1, as specified in RFC 3626.
+
+This work was generously funded by CenGen, Inc.
+
+Documentation
+=============
+
+Full user documentation is available in TeX format, in the
+xorp/docs/olsr directory. This may be used to produce PDF format files.
+
+Building
+========
+
+OLSR for XORP should now be built as part of a main XORP build. To
+enable the build and installation of OLSR, pass the "--with-olsr"
+option when running "configure".
+
+Testing
+=======
+
+To build and run regression tests, use "gmake check".
+
+Status
+======
+
+September 2007: Initial development.
+December 2007: Interim code drop of RFC-compliant OLSR with no XRL support.
+January 2008: Preliminary release of RFC-compliant OLSR for IPv4.
+April 2008: Merge to XORP mainline CVS repository.

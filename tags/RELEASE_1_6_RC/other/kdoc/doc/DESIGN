@@ -1,0 +1,126 @@
+
+Some of the functions are documented with perlpod, so you can create an HTML
+file with
+
+	pod2html *.pm kdoc > kdocfunc.html
+
+If only pod was as usable as javadoc. maybe kdoc could... naah, 2 languages are
+enough for now. ;)
+
+Ast
+---
+
+AST nodes used by kdoc are very flexible. You can assign as many
+properties as you like, and each property can be a scalar or list (perhaps
+other nodes).
+
+this list may not be complete, but all important properties should be here.
+
+-> properties of all nodes:
+astNodeName	string name of node, ie class, function, method name etc.
+NodeType	string describing node type.
+
+-> properties of all syntax nodes:
+Forward		Only Forward declaration yet.
+Compound	can contain other nodes (see: KidHash)
+ExtSource	came from a library
+Parent		Parent node	(root nodes have no parent)
+Access		Visibility from parent (public, private, etc.)
+DocNode		Documentation node, if it exists
+Deprecated
+Internal
+
+-> properties of compound nodes:
+Kids		List of all kids
+KidHash		hash of all kids by name
+KidAccess	Access that should be set for new children
+Ancestors	List of ancestors as parsed (See "ancestor nodes" )
+InList		list of ancestor nodes.
+InBy		list of derived nodes.
+Pure		Contains pure virtuals
+ImpNames	Namespaces imported with "using.."
+ExtNames	Links to imported namespace nodes
+
+-> ancestor nodes
+astNodeName	Ancestor name as parsed
+Type		Type of derivation (eg "virtual protected");
+Node		A reference to the ancestor. Created by makeInherit.
+TmplType	The inherited template args, if present.
+
+-> properties of DocNode as attached to syntax nodes: (kdocDocParse.pm)
+
+These currently hold 3 kinds of documentation. See the exact property
+names in kdocParseDoc::newDocNode().
+
+TextProperties		Nodes, stored sequentially in Text
+	This is normal text, parabreaks, params, and @li (list items)
+
+doc and list Props	Nodes, stored in 1 property per type
+	This is stuff that is not regular text, ie short name, returns etc.
+
+code props 		Properties of the node to which we will be attached
+	Currently this is just deprecated and internal.
+	NOTE: now all code props are lists, to allow for stuff like
+	groups.
+
+
+Parser (kdoc)
+------
+
+The parser assumes that a single declaration is a bunch of non-comment
+text uptil a ";" or "{"
+
+When identifyDecl is called with such a decl, all blank lines, comments 
+and newlines are removed. This makes the regexp matching in identifyDecl 
+much easier.
+
+If identifyDecl returns true and the decl finished with a {, the parser
+will skip all text till the matching } (ie nested {} is handled). 
+
+Of course, in the case of compound decls (structs, classes etc), this means 
+that we should return false since we want to parse everything in the class
+as well.
+
+The current node is stored in $cNode. A stack is maintained for parsed
+nodes, so everytime we enter a new compound node we push the current
+node onto the stack. the node will be popped once an compound end "};"
+is reached.
+
+Languages
+---------
+
+One root node is maintained per language. The correct node is selected
+depending on the file extension, using the getRoot sub.
+
+Libraries (kdocLib.pm)
+---------
+
+Libraries are now read directly into the parse tree and treated like syntax
+elements, except that their ExtSource property is set. The old library format
+is still supported, but the new one stores slightly more information, including
+the class hierarchy.
+
+
+AST routines (kdocAstUtil.pm)
+------------
+
+These are general routines that are used for all languages and output formats.
+They include generation of the hierarchy, finding of syntax nodes by identifier.
+Fully qualified and unqualified identifiers are supported.
+
+Output
+------
+
+Just like the old kdoc, the correct output module is loaded and called
+once all parsing is done and the tree has been post-processed as much
+as possible (hierarchy etc).
+
+Options
+-------
+
+The options have changed but are better, IMHO. Also, I now use Getopt::Long
+which makes option processing much easier and very robust.
+
+Thanks for reading this far.
+
+Sirtaj <taj@kde.org>

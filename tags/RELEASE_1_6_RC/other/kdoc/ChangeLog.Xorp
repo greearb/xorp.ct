@@ -1,0 +1,15 @@
+Changes made for XORP documentation purposes:
+
+October 18, 2002
+
+ o Enable quoting of HTML special characters in kdoc generated HTML.  Code
+   was present, but disabled.  Needed for pre-formatted code containing 
+   <>& characters.
+
+October 17, 2002
+
+ o Start from kdoc-2.0a53, patch sources upto kdoc-2.0a54 from kde site.
+ 
+ o Add support for member function method pointer parsing.
+
+ o Add XORP to version string.

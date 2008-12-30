@@ -1,0 +1,23 @@
+Below is a list of routing references that may be useful to the
+XORP developers.
+
+ * The Complete IS-IS Routing Protocol, Hannes Gredler and Walter Goralski,
+   Springer, ISBN 1852338229.
+
+     It not only describes the IS-IS itself, but describes also the
+     Cisco IOS and Juniper JunOS IS-IS implementations.
+     [See http://www.xorp.org/bugzilla/show_bug.cgi?id=158 for a longer review]
+
+ * OSPF and IS-IS: Choosing an IGP for Large-Scale Networks,
+   Jeff Doyle, Addison-Wesley, ISBN 0321168798.
+
+     This books compares OSPF and IS-IS, and includes examples for both
+     Cisco IOS and Juniper JunOS.
+
+ * Routing TCP/IP, Volume 1 (2nd Edition), Jeff Doyle and Jennifer Carroll,
+   Cisco Press, ISBN 1587052024.
+   Routing TCP/IP, Volume II (CCIE Professional Development), Jeff Doyle and
+   Jennifer DeHaven Carroll, Cisco Press, ISBN 1578700892.
+
+     From the configuration side they are Cisco specific but they
+     give a good view into most routing protocols.

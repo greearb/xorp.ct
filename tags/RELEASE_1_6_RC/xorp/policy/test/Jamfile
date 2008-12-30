@@ -1,0 +1,54 @@
+#
+# $XORP: xorp/policy/test/Jamfile,v 1.3 2008/08/06 08:04:51 abittau Exp $
+#
+
+SubDir TOP policy test ;
+
+SubIncludeOnce TOP libxorp ;
+SubIncludeOnce TOP libcomm ;
+SubIncludeOnce TOP xrl interfaces ;
+SubIncludeOnce TOP xrl targets ;
+SubIncludeOnce TOP libxipc ;
+
+SubDir TOP policy test ;
+
+Main compilepolicy :
+	compilepolicy.cc filter_manager_fake.cc process_watch_fake.cc
+	lex.yy_compile_policy.cc yacc.yy_compile_policy.cc
+	;
+LinkLibraries compilepolicy :
+	libpolicy
+	libpolicycommon
+	libxipc
+	libcomm
+	libxorp
+	;
+
+Main execpolicy : execpolicy.cc file_varrw.cc ;
+LinkLibraries execpolicy :
+	libpolicy
+	libpolicybackend
+	libpolicycommon
+	libxipc
+	libcomm
+	libxorp
+	;
+
+Main policybench : policybench.cc file_varrw.cc ;
+LinkLibraries policybench :
+	libbgp
+	libbgpbase
+	libpolicybackend
+	libpolicycommon
+	libfeaclient
+	libribxif
+	libfindereventnotifierxif
+	libbgpmibtrapsxif
+	libprofileclientxif
+	libfeaifmgrmirrorxif
+	libfeaifmgrreplicatorxif
+	libfeaifmgrmirrorbase
+	libxipc
+	libcomm
+	libxorp
+	;

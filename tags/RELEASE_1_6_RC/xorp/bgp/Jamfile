@@ -1,0 +1,135 @@
+#
+# $XORP: xorp/bgp/Jamfile,v 1.2 2007/04/20 07:17:40 pavlin Exp $
+#
+
+SubDir TOP bgp ;
+SubIncludeOnce TOP libxorp ;
+SubIncludeOnce TOP libcomm ;
+SubIncludeOnce TOP xrl interfaces ;
+SubIncludeOnce TOP xrl targets ;
+SubIncludeOnce TOP libxipc ;
+SubIncludeOnce TOP libfeaclient ;
+SubIncludeOnce TOP policy backend ;
+SubIncludeOnce TOP policy common ;
+SubDir TOP bgp ;
+
+Library libbgp :
+	aspath.cc
+	attribute_manager.cc
+	bgp_trie.cc
+	bgp_varrw.cc
+	bgp_varrw_export.cc
+	crash_dump.cc
+	damping.cc
+	dump_iterators.cc
+	internal_message.cc
+	iptuple.cc
+	local_data.cc
+	next_hop_resolver.cc
+	notification_packet.cc
+	open_packet.cc
+	packet.cc
+	parameter.cc
+	path_attribute.cc
+	peer.cc
+	peer_data.cc
+	peer_handler.cc
+	peer_list.cc
+	plumbing.cc
+	process_watch.cc
+	profile_vars.cc
+	rib_ipc_handler.cc
+	route_queue.cc
+	route_table_aggregation.cc
+	route_table_base.cc
+	route_table_cache.cc
+	route_table_damping.cc
+	route_table_decision.cc
+	route_table_deletion.cc
+	route_table_dump.cc
+	route_table_fanout.cc
+	route_table_filter.cc
+	route_table_nhlookup.cc
+	route_table_policy.cc
+	route_table_policy_ex.cc
+	route_table_policy_im.cc
+	route_table_policy_sm.cc
+	route_table_ribin.cc
+	route_table_ribout.cc
+	route_table_reader.cc
+	socket.cc
+	subnet_route.cc
+	update_attrib.cc
+	update_packet.cc
+	xrl_target.cc
+	;
+
+LINKLIBS_BGP_COMMON = 
+	libbgp
+	libbgpbase
+	libpolicybackend
+	libpolicycommon
+	libfeaclient
+	libribxif
+	libfindereventnotifierxif
+	libbgpmibtrapsxif
+	libprofileclientxif
+	libfeaifmgrmirrorxif
+	libfeaifmgrreplicatorxif
+	libfeaifmgrmirrorbase
+	libxipc
+	libcomm
+	libxorp
+	;
+
+Main xorp_bgp : bgp.cc main.cc ;
+LinkLibraries xorp_bgp :
+	$(LINKLIBS_BGP_COMMON)
+	;
+
+if $(MAKE_CHECK) {
+
+ Main aspath_test : aspath_test.cc ;
+ Main test_packet :
+	test_packet.cc
+	dummy_main.cc
+	;
+ Main test_packet_coding :
+	test_packet_coding.cc
+	dummy_main.cc
+	;
+ Main test_peer_data : test_peer_data.cc ;
+ Main test_plumbing : test_plumbing.cc bgp.cc ;
+ Main update_test : update_test.cc ;
+
+ Main isolation_tests :
+	test_main.cc
+	test_ribin.cc
+	test_deletion.cc
+	test_filter.cc
+	test_policy.cc
+	test_cache.cc
+	test_nhlookup.cc
+	test_decision.cc
+	test_fanout.cc
+	test_dump.cc
+	test_ribout.cc
+	test_next_hop_resolver.cc
+	route_table_debug.cc
+	dummy_main.cc
+	dummy_next_hop_resolver.cc
+	peer_handler_debug.cc
+	test_subnet_route.cc
+	;
+
+ LinkLibraries	aspath_test test_packet test_packet_coding test_peer_data
+		test_plumbing update_test isolation_tests :
+		$(LINKLIBS_BGP_COMMON)
+		;
+
+} # MAKE_CHECK
+
+InstallBin $(PREFIX)/bgp : xorp_bgp ;
+
+SubIncludeOnce TOP bgp tools ;
+SubIncludeOnce TOP bgp harness ;

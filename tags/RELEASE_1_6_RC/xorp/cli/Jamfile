@@ -1,0 +1,36 @@
+#
+# $XORP: xorp/cli/Jamfile,v 1.1 2007/01/11 22:30:45 bms Exp $
+#
+
+SubDir TOP cli ;
+SubIncludeOnce TOP libxorp ;
+SubIncludeOnce TOP libcomm ;
+SubIncludeOnce TOP xrl interfaces ;
+SubIncludeOnce TOP xrl targets ;
+SubIncludeOnce TOP libxipc ;
+SubIncludeOnce TOP libproto ;
+SubIncludeOnce TOP cli libtecla ;	# We depend on libtecla for tests.
+SubDir TOP cli ;
+
+Library libcli : 
+	cli_client.cc cli_command.cc cli_command_pipe.cc
+	cli_node.cc cli_node_internal_commands.cc
+	cli_node_net.cc xrl_cli_node.cc
+	;
+
+if $(MAKE_CHECK) {
+ Main test_cli : test_cli.cc ;
+ LinkLibraries test_cli :
+        libcli
+	libtecla
+        libcliprocessorxif
+        libclibase
+	libproto
+        libfinder
+        libxipc
+        libcomm
+        libxorp
+        ;
+}
+
+SubIncludeOnce TOP cli tools ;

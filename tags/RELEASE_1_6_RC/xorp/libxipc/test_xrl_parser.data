@@ -1,0 +1,78 @@
+/* 
+ * Simple test of xrl-parser (which itself needs re-writing).
+ *
+ * Prepend tests that are expect to fail with a FAIL comment so the shell
+ * script that drives the test can count the expected failures.
+ */
+
+finder://printer/dequeue ?						      \
+	file:txt = " foo12.ps " &					      \
+	printer:txt							      \
+->									      \
+	retval1:i32=$abc
+
+finder://printer/print ? file : txt =  foo.ps	/* End of line comment */
+
+finder://printer/print?file:txt=foo.ps&printer:txt=$val
+
+finder://printer/print?file:txt=foo.ps	/* End of line comment */
+
+finder://printer/print ? \
+	file:txt = "foo8.ps" & \
+	printer:txt = 'lp3'
+
+finder://printer/dequeue ?						      \
+	file:txt = " foo12.ps " &					      \
+	printer:txt							      \
+->									      \
+	retval1:i32=$abc
+
+
+/* Specify return values from XRL - error here because value name is named */
+
+finder://printer/dequeue ?						      \
+/* here we are */							      \
+	file:txt = "foo22.ps" & /* here we are again */			      \
+	printer:txt 							      \
+->									      \
+	retval1:i32=$abc & retval2:txt=$abc
+
+
+finder://printer/dequeue ?						      \
+/* here we are */							      \
+	file:txt = "foo30.ps" & /* here we are again*/			      \
+	printer:txt							      \
+->									      \
+	rep_ret_val:i32=$abc&rep_ret_val:txt=$123
+
+finder://printer/printit ? file:txt="foo34.ps" & file:txt=lp6
+
+finder://printer/print ? 						      \
+/* here we are */							      \
+	file:txt = "foo.ps" &						      \
+	printer:txt = 'spacey jake!&"' &				      \
+	site:ipv5 = 128.16.5.1
+
+/* FAIL: Duplicate atom name */
+finder://printer/print?file:txt=foo.ps&printer:txt=lp3
+
+finder://printer/print?file:txt=foo.ps&printer:txt=lp3
+
+finder://printer/print
+
+finder://printer/print
+
+finder://printer/print
+
+finder://printer/print 						              \
+	file:txt = "foo.ps"		       /* comment here */
+
+/* This last one should be okay... */
+finder://printer/print ? 	file:txt = "foo67.ps"		       
+
+
+/* FAIL: This last one should be okay... */
+finder://printer/print ?{
+	file:txt = "foo.ps"		       
+}
+

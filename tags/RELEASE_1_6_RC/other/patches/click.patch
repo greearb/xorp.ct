@@ -1,0 +1,1952 @@
+Index: bsdmodule/module.cc
+===================================================================
+RCS file: /cvs/release/one/bsdmodule/module.cc,v
+retrieving revision 1.4
+diff -u -r1.4 module.cc
+--- module.cc	2001/12/04 03:05:20	1.4
++++ module.cc	2001/12/11 13:33:39
+@@ -252,6 +252,9 @@
+ extern "C" void click_ether_input(struct ifnet *, struct mbuf **, struct ether_header *);
+ extern "C" void (*ng_ether_input_p)(struct ifnet *, struct mbuf **, struct ether_header *);
+ 
++extern "C" void click_ether_output(struct ifnet *, struct mbuf **);
++extern "C" void (*ng_ether_output_p)(struct ifnet *, struct mbuf **);
++
+ extern "C" int
+ init_module()
+ {
+@@ -273,6 +276,7 @@
+   
+   current_router = 0;
+   ng_ether_input_p = click_ether_input;
++  ng_ether_output_p = click_ether_output;
+ 
+   return 0;
+ }
+@@ -287,6 +291,7 @@
+   extern int click_outstanding_news; /* glue.cc */
+ 
+   ng_ether_input_p = 0;
++  ng_ether_output_p = 0;
+   
+   kill_current_router();
+ 
+Index: elements/bsdmodule/anydevice.cc
+===================================================================
+RCS file: /cvs/release/one/elements/bsdmodule/anydevice.cc,v
+retrieving revision 1.1
+diff -u -r1.1 anydevice.cc
+--- anydevice.cc	2001/08/03 15:49:18	1.1
++++ anydevice.cc	2001/12/11 13:33:46
+@@ -29,37 +29,33 @@
+ #include <click/cxxunprotect.h>
+ 
+ AnyDevice::AnyDevice()
+-  : _dev(0), _task(this), _idles(0), _next(0)
++  : _dev(0), _task(this), _idles(0), _next(0), _need_wakeup(false)
+ {
+-/* Not in BSD
+-  MOD_INC_USE_COUNT;
+-*/
++    // MOD_INC_USE_COUNT;	// XXX Not in BSD
+ }
+ 
+ AnyDevice::~AnyDevice()
+ {
+-/* Not in BSD
+-  MOD_DEC_USE_COUNT;
+-*/
++    // MOD_DEC_USE_COUNT;	// XXX Not in BSD
+ }
+ 
+ static void
+ lock_kernel()
+ {
+-  /* XXX not yet in BSD */
++    // XXX not yet in BSD
+ }
+ 
+ static void
+ unlock_kernel()
+ {
+-  /* XXX not yet in BSD */
++    // XXX not yet in BSD
+ }
+ 
+ int
+ AnyDevice::find_device(bool allow_nonexistent, ErrorHandler *errh)
+ {
+     _dev = ifunit((char *) _devname.cc());
+-    if (!_dev) {
++    if (!_dev) {	// XXX move this test later.
+ 	errh->warning("Unable to load device\n");
+ 	return 0;
+     }
+Index: elements/bsdmodule/anydevice.hh
+===================================================================
+RCS file: /cvs/release/one/elements/bsdmodule/anydevice.hh,v
+retrieving revision 1.3
+diff -u -r1.3 anydevice.hh
+--- anydevice.hh	2001/10/15 21:07:26	1.3
++++ anydevice.hh	2001/12/11 13:33:46
+@@ -12,59 +12,15 @@
+ CLICK_CXX_UNPROTECT
+ #include <click/cxxunprotect.h>
+ 
+-// #define CLICK_DEVICE_CYCLES 1
+-// #define CLICK_DEVICE_PRFCTR 1
+-// #define CLICK_DEVICE_THESIS_STATS 1
+-// #define _DEV_OVRN_STATS_ 1
+ #define CLICK_CYCLE_COMPENSATION 0
+ 
+ #ifndef RR_SCHED
+ # define CLICK_DEVICE_ADJUST_TICKETS 1
+ #endif
+ 
+-#if CLICK_DEVICE_PRFCTR
+-
+-#define CLICK_DEVICE_STATS 1
+-#define SET_STATS(p0mark, p1mark, time_mark) \
+-  { \
+-    p0mark = rdpmc(0); \
+-    p1mark = rdpmc(1); \
+-    time_mark = click_get_cycles(); \
+-  }
+-#define GET_STATS_RESET(p0mark, p1mark, time_mark, pctr0, pctr1, tctr) \
+-  { \
+-    unsigned low01, low11; \
+-    tctr += click_get_cycles() - time_mark - CLICK_CYCLE_COMPENSATION; \
+-    low01 = rdpmc(0); \
+-    low11 = rdpmc(1); \
+-    pctr0 += (low01 >= p0mark) ? low01-p0mark : (UINT_MAX-p0mark+low01); \
+-    pctr1 += (low11 >= p1mark) ? low11-p1mark : (UINT_MAX-p1mark+low11); \
+-    p0mark = rdpmc(0); \
+-    p1mark = rdpmc(1); \
+-    time_mark = click_get_cycles(); \
+-  }
+-
+-#elif CLICK_DEVICE_CYCLES
+-
+-#define CLICK_DEVICE_STATS 1
+-#define SET_STATS(p0mark, p1mark, time_mark) \
+-  { \
+-    time_mark = click_get_cycles(); \
+-  }
+-#define GET_STATS_RESET(p0mark, p1mark, time_mark, pctr0, pctr1, tctr) \
+-  { \
+-    unsigned long long __now = click_get_cycles(); \
+-    tctr += __now - time_mark - CLICK_CYCLE_COMPENSATION; \
+-    time_mark = __now; \
+-  }
+-
+-#else
+-
+ #define GET_STATS_RESET(a,b,c,d,e,f)	/* nothing */
+ #define SET_STATS(a,b,c)		/* nothing */
+ 
+-#endif
+-
+ class AnyDevice : public Element { public:
+ 
+     enum { CONFIGURE_PHASE_FROMOS = CONFIGURE_PHASE_DEFAULT,
+@@ -78,55 +34,65 @@
+     int ifindex() const			{ return _dev ? _dev->if_index : -1; }
+     AnyDevice *next() const		{ return _next; }
+     void set_next(AnyDevice *d)		{ _next = d; }
++    void set_max_tickets(int t)		{ _max_tickets = t; }
++    int wakeup();
++    void set_need_wakeup()		{ _need_wakeup = true; }
++    void clear_need_wakeup()		{ _need_wakeup = false; }
+ 
+     int find_device(bool, ErrorHandler *);
+     void adjust_tickets(int work);
+ 
+-#if HAVE_BSD_POLLING
+-    // Does this device support polling?
+-    bool polling() const	{ return _dev && _dev->if_poll_intren != 0; }
+-#else
+-    boll polling() const		{ return false; }
+-#endif
+-
+   protected:
+ 
+     String _devname;
+-    struct ifnet *_dev;
+-
+     Task _task;
++
++  private:
++
++    bool _need_wakeup;
+     int _max_tickets;
+     int _idles;
+-
+     AnyDevice *_next;
+-
++    struct ifnet *_dev;
+ };
+ 
++inline int
++AnyDevice::wakeup()
++{
++    if (_need_wakeup) {
++	_need_wakeup = false;
++	_task.wakeup();
++	return 1;
++    } else
++	return 0;
++}
+ 
+ inline void
+ AnyDevice::adjust_tickets(int work)
+ {
+ #if CLICK_DEVICE_ADJUST_TICKETS
+-  int tix = _task.tickets();
+-  
+-  // simple additive increase damped multiplicative decrease scheme
+-  if (work > 2) {
+-    tix += work;
+-    if (tix > _max_tickets)
+-      tix = _max_tickets;
+-    _idles = 0;
+-  } else if (work == 0) {
+-    _idles++;
+-    if (_idles >= 64) {
+-      if (tix > 64)
+-	tix -= (tix >> 5);
+-      else
+-	tix -= 2;
+-      if (tix < 1)
+-	tix = 1;
+-      _idles = 0;
++    int tix = _task.tickets();
++    int old_tix = tix;
++
++    // simple additive increase damped multiplicative decrease scheme
++    if (work > 2) {
++	tix += work;
++	if (tix > _max_tickets)
++	    tix = _max_tickets;
++	_idles = 0;
++    } else if (work == 0) {
++	_idles++;
++	if (_idles >= 64) {
++	    if (tix > 64)
++		tix -= (tix >> 5);
++	    else
++		tix -= 2;
++	    if (tix < 1)
++		tix = 1;
++	    _idles = 0;
++	}
+     }
+-  }
++    // click_chatter(" tickets from %d to %d", old_tix, tix);
+ 
+   _task.set_tickets(tix);
+ #endif
+Index: elements/bsdmodule/fastudpsrc.cc
+===================================================================
+RCS file: /cvs/release/one/elements/bsdmodule/fastudpsrc.cc,v
+retrieving revision 1.2
+diff -u -r1.2 fastudpsrc.cc
+--- fastudpsrc.cc	2001/10/15 21:07:26	1.2
++++ fastudpsrc.cc	2001/12/11 13:33:46
+@@ -27,317 +27,286 @@
+ FastUDPSource::FastUDPSource()
+   : _m(0)
+ {
+-  _rate_limited = true;
+-  _first = _last = 0;
+-  _count = 0;
+-  add_output();
++    _rate_limited = true;
++    _first = _last = 0;
++    _count = 0;
++    add_output();
+ }
+ 
+ FastUDPSource::~FastUDPSource()
+ {
+-  uninitialize();
++    uninitialize();
+ }
+ 
+ int
+ FastUDPSource::configure(const Vector<String> &conf, ErrorHandler *errh)
+ {
+-  _cksum = true;
+-  _active = true;
+-  _interval = 0;
+-  unsigned sp, dp;
+-  unsigned rate;
+-  int limit;
+-  if (cp_va_parse(conf, this, errh,
+-		  cpUnsigned, "send rate", &rate,
+-		  cpInteger, "limit", &limit,
+-	      	  cpUnsigned, "packet length", &_len,
+-		  cpEthernetAddress, "src eth address", &_ethh.ether_shost,
+-		  cpIPAddress, "src ip address", &_sipaddr,
+-		  cpUnsigned, "src port", &sp,
+-		  cpEthernetAddress, "dst eth address", &_ethh.ether_dhost,
+-		  cpIPAddress, "dst ip address", &_dipaddr,
+-		  cpUnsigned, "dst port", &dp,
+-		  cpOptional,
+-		  cpBool, "do UDP checksum?", &_cksum,
+-		  cpUnsigned, "interval", &_interval,
+-		  cpBool, "active?", &_active,
+-		  0) < 0)
+-    return -1;
+-  if (sp >= 0x10000 || dp >= 0x10000)
+-    return errh->error("source or destination port too large");
+-  if (_len < 60) {
+-    click_chatter("warning: packet length < 60, defaulting to 60");
+-    _len = 60;
+-  }
+-  _ethh.ether_type = htons(0x0800);
+-  _sport = sp;
+-  _dport = dp;
+-  if(rate != 0){
+-    _rate_limited = true;
+-    _rate.set_rate(rate, errh);
+-  } else {
+-    _rate_limited = false;
+-  }
+-  _limit = (limit >= 0 ? limit : NO_LIMIT);
+-  return 0;
++    _cksum = true;
++    _active = true;
++    _interval = 0;
++    unsigned sp, dp;
++    unsigned rate;
++    int limit;
++    if (cp_va_parse(conf, this, errh,
++		    cpUnsigned, "send rate", &rate,
++		    cpInteger, "limit", &limit,
++		    cpUnsigned, "packet length", &_len,
++		    cpEthernetAddress, "src eth address", &_ethh.ether_shost,
++		    cpIPAddress, "src ip address", &_sipaddr,
++		    cpUnsigned, "src port", &sp,
++		    cpEthernetAddress, "dst eth address", &_ethh.ether_dhost,
++		    cpIPAddress, "dst ip address", &_dipaddr,
++		    cpUnsigned, "dst port", &dp,
++		    cpOptional,
++		    cpBool, "do UDP checksum?", &_cksum,
++		    cpUnsigned, "interval", &_interval,
++		    cpBool, "active?", &_active,
++		    cpEnd) < 0)
++	return -1;
++    if (sp >= 0x10000 || dp >= 0x10000)
++	return errh->error("source or destination port too large");
++    if (_len < 60) {
++	click_chatter("warning: packet length < 60, defaulting to 60");
++	_len = 60;
++    }
++    _ethh.ether_type = htons(0x0800);
++    _sport = sp;
++    _dport = dp;
++    if (rate != 0){
++	_rate_limited = true;
++	_rate.set_rate(rate, errh);
++    } else
++	_rate_limited = false;
++    _limit = (limit >= 0 ? limit : NO_LIMIT);
++    return 0;
+ }
+ 
+ void
+ FastUDPSource::incr_ports()
+ {
+-  click_ip *ip = reinterpret_cast<click_ip *>(_m->m_data+14);
+-  click_udp *udp = reinterpret_cast<click_udp *>(ip + 1);
+-  _incr++;
+-  udp->uh_sport = htons(_sport+_incr);
+-  udp->uh_dport = htons(_dport+_incr);
+-  udp->uh_sum = 0;
+-  unsigned short len = _len-14-sizeof(click_ip);
+-  if (_cksum) {
+-    unsigned csum = ~click_in_cksum((unsigned char *)udp, len) & 0xFFFF;
+-    const uint16_t *words = (unsigned short *) &_sipaddr;
+-    csum += words[0];
+-    csum += words[1];
+-    csum += words[2];
+-    csum += words[3];
+-    csum += htons(IP_PROTO_UDP);
+-    csum += htons(len);
+-    while (csum >> 16)
+-      csum = (csum & 0xFFFF) + (csum >> 16);
+-    udp->uh_sum = ~csum & 0xFFFF;
+-  } else
+-    udp->uh_sum = 0;
++    click_ip *ip = reinterpret_cast<click_ip *>(_m->m_data+14);
++    click_udp *udp = reinterpret_cast<click_udp *>(ip + 1);
++    _incr++;
++    udp->uh_sport = htons(_sport+_incr);
++    udp->uh_dport = htons(_dport+_incr);
++    make_checksum(udp);
+ }
+ 
+ int 
+ FastUDPSource::initialize(ErrorHandler *)
+ {
+-  // Create an mbuf with an mbuf cluster so copies are quick
+-  // (we just add a reference to the cluster rather than doing
+-  // a memory copy).
+-  MGETHDR(_m, M_WAIT, MT_DATA);
+-  if (_m == NULL) {
+-    click_chatter("unable to get mbuf for FastUDPSource");
+-    return -1;
+-  }
+-  MCLGET(_m, M_WAIT);
+-  if ((_m->m_flags & M_EXT) == 0) {
+-    click_chatter("unable to get mbuf cluster for FastUDPSource");
+-    return -1;
+-  }
+-  _m->m_len = _m->m_pkthdr.len = _len;
+-
+-  _count = 0;
+-  _incr = 0;
+-  memcpy(_m->m_data, &_ethh, 14);
+-  click_ip *ip = reinterpret_cast<click_ip *>(_m->m_data+14);
+-  click_udp *udp = reinterpret_cast<click_udp *>(ip + 1);
+- 
+-  // set up IP header
+-  ip->ip_v = 4;
+-  ip->ip_hl = sizeof(click_ip) >> 2;
+-  ip->ip_len = htons(_len-14);
+-  ip->ip_id = 0;
+-  ip->ip_p = IP_PROTO_UDP;
+-  ip->ip_src = _sipaddr;
+-  ip->ip_dst = _dipaddr;
+-  ip->ip_tos = 0;
+-  ip->ip_off = 0;
+-  ip->ip_ttl = 250;
+-  ip->ip_sum = 0;
+-  ip->ip_sum = click_in_cksum((unsigned char *)ip, sizeof(click_ip));
+-
+-  // set up UDP header
+-  udp->uh_sport = htons(_sport);
+-  udp->uh_dport = htons(_dport);
+-  udp->uh_sum = 0;
+-  unsigned short len = _len-14-sizeof(click_ip);
+-  udp->uh_ulen = htons(len);
+-  if (_cksum) {
+-    unsigned csum = ~click_in_cksum((unsigned char *)udp, len) & 0xFFFF;
+-    const uint16_t *words = (unsigned short *) &_sipaddr;
+-    csum += words[0];
+-    csum += words[1];
+-    csum += words[2];
+-    csum += words[3];
+-    csum += htons(IP_PROTO_UDP);
+-    csum += htons(len);
+-    while (csum >> 16)
+-      csum = (csum & 0xFFFF) + (csum >> 16);
+-    udp->uh_sum = ~csum & 0xFFFF;
+-  } else
+-    udp->uh_sum = 0;
++    // Create an mbuf with an mbuf cluster so copies are quick
++    // (we just add a reference to the cluster rather than doing
++    // a memory copy).
++    MGETHDR(_m, M_WAIT, MT_DATA);
++    if (_m == NULL) {
++	click_chatter("unable to get mbuf for FastUDPSource");
++	return -1;
++    }
++    MCLGET(_m, M_WAIT);
++    if ((_m->m_flags & M_EXT) == 0) {
++	m_freem(_m);
++	click_chatter("unable to get mbuf cluster for FastUDPSource");
++	return -1;
++    }
++    _m->m_len = _m->m_pkthdr.len = _len;
+ 
+-  return 0;
++    _count = 0;
++    _incr = 0;
++    memcpy(_m->m_data, &_ethh, 14);
++    click_ip *ip = reinterpret_cast<click_ip *>(_m->m_data+14);
++    click_udp *udp = reinterpret_cast<click_udp *>(ip + 1);
++
++    // set up IP header
++    ip->ip_v = 4;
++    ip->ip_hl = sizeof(click_ip) >> 2;
++    ip->ip_len = htons(_len-14);
++    ip->ip_id = 0;
++    ip->ip_p = IP_PROTO_UDP;
++    ip->ip_src = _sipaddr;
++    ip->ip_dst = _dipaddr;
++    ip->ip_tos = 0;
++    ip->ip_off = 0;
++    ip->ip_ttl = 250;
++    ip->ip_sum = 0;
++    ip->ip_sum = click_in_cksum((unsigned char *)ip, sizeof(click_ip));
++
++    // set up UDP header
++    udp->uh_sport = htons(_sport);
++    udp->uh_dport = htons(_dport);
++    make_checksum(udp);
++    return 0;
+ }
+ 
+ void
+ FastUDPSource::uninitialize()
+ {
+-  if (_m) {
+-    m_freem(_m);
+-    _m = 0;
+-  }
++    if (_m) {
++	m_freem(_m);
++	_m = 0;
++    }
+ }
+ 
+ Packet *
+ FastUDPSource::pull(int)
+ {
+-  Packet *p = 0;
+-  struct mbuf *m;
++    Packet *p = 0;
++    struct mbuf *m;
+ 
+-  if (!_active || (_limit != NO_LIMIT && _count >= _limit)) return 0;
++    if (!_active || (_limit != NO_LIMIT && _count >= _limit))
++	return 0;
+ 
+-  /*
+-   * Ensure we can safely m_copypacket(_m) without
+-   * overflowing the 8-bit refcount.
+-   */
+-  if ((_m->m_flags & M_EXT) == 0) {
+-    static char _mcl_lost = 0;
+-    if (!_mcl_lost) {
+-      click_chatter("mbuf lost cluster!\n");
+-      _mcl_lost = 1;
++    // Ensure we can safely m_copypacket(_m) without overflowing
++    // the 8-bit refcount.
++    if ((_m->m_flags & M_EXT) == 0) {
++	static char _mcl_lost = 0;	// XXX should be in object ?
++	if (!_mcl_lost) {
++	    click_chatter("mbuf lost cluster!\n");
++	    _mcl_lost = 1;
++	}
++	return 0;
+     }
+-    return 0;
+-  }
+ 
+-  if (mclrefcnt[mtocl(_m->m_ext.ext_buf)] >= SCHAR_MAX) {
+-    caddr_t mcl, mcl0;
+-    MCLALLOC(mcl, M_WAIT);
+-    if (!mcl) {
+-      click_chatter("failure to allocate new mbuf cluster\n");
+-      return 0;
++    if (mclrefcnt[mtocl(_m->m_ext.ext_buf)] >= SCHAR_MAX) {
++	caddr_t mcl, mcl0;
++	MCLALLOC(mcl, M_WAIT);
++	if (!mcl) {
++	    click_chatter("failure to allocate new mbuf cluster\n");
++	    return 0;
++	}
++
++	bcopy(_m->m_data, mcl, _m->m_len);
++	mcl0 = _m->m_ext.ext_buf;
++	_m->m_data = mcl;
++	_m->m_ext.ext_buf = mcl;
++	MCLFREE(mcl0);
+     }
+ 
+-    bcopy(_m->m_data, mcl, _m->m_len);
+-    mcl0 = _m->m_ext.ext_buf;
+-    _m->m_data = mcl;
+-    _m->m_ext.ext_buf = mcl;
+-    MCLFREE(mcl0);
+-  }
+-
+-  if(_rate_limited){
+-    struct timeval now;
+-    click_gettimeofday(&now);
+-    if (_rate.need_update(now)) {
+-      _rate.update();
+-      m = m_copypacket(_m, M_WAIT);
+-      if (m)
+-	p = Packet::make(m);
+-      else
++    bool need_packet = false;
++    if (_rate_limited) {
++	struct timeval now;
++	click_gettimeofday(&now);
++	if (_rate.need_update(now)) {
++	    _rate.update();
++	    need_packet = true;
++	}
++    } else
++	need_packet = true;
++    if (!need_packet)
++	return 0;	// nothing to pull
++
++    m = m_copypacket(_m, M_WAIT);
++    if (!m) {
+ 	click_chatter("unable to m_copypacket\n");
++	return 0;	// bad luck.
+     }
+-  } else {
+-    m = m_copypacket(_m, M_WAIT);
+-    if (m)
+-      p = Packet::make(m);
+-    else
+-      click_chatter("unable to m_copypacket\n");
+-  }
+-
+-  if(p) {
++    p = Packet::make(m);
++    if (!p) {
++	click_chatter("unable to make packet\n");
++	return 0;	// bad luck.
++    }
+     _count++;
+-    if(_count == 1)
+-      _first = click_jiffies();
+-    if(_limit != NO_LIMIT && _count >= _limit)
+-      _last = click_jiffies();
+-    if(_interval>0 && !(_count%_interval))
+-      incr_ports();
+-  }
++    if (_count == 1)
++	_first = click_jiffies();
++    if (_limit != NO_LIMIT && _count >= _limit)
++	_last = click_jiffies();
++    if (_interval>0 && !(_count % _interval))
++	incr_ports();
+ 
+-  return(p);
++    return(p);
+ }
+ 
+ void
+ FastUDPSource::reset()
+ {
+-  _count = 0;
+-  _first = 0;
+-  _last = 0;
+-  _incr = 0;
++    _count = 0;
++    _first = 0;
++    _last = 0;
++    _incr = 0;
+ }
+ 
+ static String
+ FastUDPSource_read_count_handler(Element *e, void *)
+ {
+-  FastUDPSource *c = (FastUDPSource *)e;
+-  return String(c->count()) + "\n";
++    FastUDPSource *c = (FastUDPSource *)e;
++    return String(c->count()) + "\n";
+ }
+ 
+ static String
+ FastUDPSource_read_rate_handler(Element *e, void *)
+ {
+-  FastUDPSource *c = (FastUDPSource *)e;
+-  if(c->last() != 0){
+-    int d = c->last() - c->first();
+-    if (d < 1) d = 1;
+-    int rate = c->count() * CLICK_HZ / d;
+-    return String(rate) + "\n";
+-  } else {
+-    return String("0\n");
+-  }
++    FastUDPSource *c = (FastUDPSource *)e;
++    if (c->last() != 0) {
++	int d = c->last() - c->first();
++	if (d < 1)
++	    d = 1;
++	int rate = c->count() * CLICK_HZ / d;
++	return String(rate) + "\n";
++    } else
++	return String("0\n");
+ }
+ 
+ static int
+ FastUDPSource_reset_write_handler
+ (const String &, Element *e, void *, ErrorHandler *)
+ {
+-  FastUDPSource *c = (FastUDPSource *)e;
+-  c->reset();
+-  return 0;
++    FastUDPSource *c = (FastUDPSource *)e;
++    c->reset();
++    return 0;
+ }
+ 
+ static int
+ FastUDPSource_limit_write_handler
+ (const String &in_s, Element *e, void *, ErrorHandler *errh)
+ {
+-  FastUDPSource *c = (FastUDPSource *)e;
+-  String s = cp_uncomment(in_s);
+-  unsigned limit;
+-  if (!cp_unsigned(s, &limit))
+-    return errh->error("limit parameter must be integer >= 0");
+-  c->_limit = (limit >= 0 ? limit : c->NO_LIMIT);
+-  return 0;
++    FastUDPSource *c = (FastUDPSource *)e;
++    String s = cp_uncomment(in_s);
++    unsigned limit;
++    if (!cp_unsigned(s, &limit))
++	return errh->error("limit parameter must be integer >= 0");
++    c->_limit = (limit >= 0 ? limit : c->NO_LIMIT);
++    return 0;
+ }
+ 
+ static int
+ FastUDPSource_rate_write_handler
+ (const String &in_s, Element *e, void *, ErrorHandler *errh)
+ {
+-  FastUDPSource *c = (FastUDPSource *)e;
+-  String s = cp_uncomment(in_s);
+-  unsigned rate;
+-  if (!cp_unsigned(s, &rate))
+-    return errh->error("rate parameter must be integer >= 0");
+-  if (rate > GapRate::MAX_RATE)
+-    // report error rather than pin to max
+-    return errh->error("rate too large; max is %u", GapRate::MAX_RATE);
+-  c->_rate.set_rate(rate);
+-  return 0;
++    FastUDPSource *c = (FastUDPSource *)e;
++    String s = cp_uncomment(in_s);
++    unsigned rate;
++    if (!cp_unsigned(s, &rate))
++	return errh->error("rate parameter must be integer >= 0");
++    if (rate > GapRate::MAX_RATE) // report error rather than pin to max
++	return errh->error("rate too large; max is %u", GapRate::MAX_RATE);
++    c->_rate.set_rate(rate);
++    return 0;
+ }
+ 
+ static int
+ FastUDPSource_active_write_handler
+ (const String &in_s, Element *e, void *, ErrorHandler *errh)
+ {
+-  FastUDPSource *c = (FastUDPSource *)e;
+-  String s = cp_uncomment(in_s);
+-  bool active;
+-  if (!cp_bool(s, &active)) 
+-    return errh->error("active parameter must be boolean");
+-  c->_active = active;
+-  if (active) c->reset();
+-  return 0;
++    FastUDPSource *c = (FastUDPSource *)e;
++    String s = cp_uncomment(in_s);
++    bool active;
++    if (!cp_bool(s, &active)) 
++	return errh->error("active parameter must be boolean");
++    c->_active = active;
++    if (active)
++	c->reset();
++    return 0;
+ }
+ 
+ void
+ FastUDPSource::add_handlers()
+ {
+-  add_read_handler("count", FastUDPSource_read_count_handler, 0);
+-  add_read_handler("rate", FastUDPSource_read_rate_handler, 0);
+-  add_write_handler("rate", FastUDPSource_rate_write_handler, 0);
+-  add_write_handler("reset", FastUDPSource_reset_write_handler, 0);
+-  add_write_handler("active", FastUDPSource_active_write_handler, 0);
+-  add_write_handler("limit", FastUDPSource_limit_write_handler, 0);
++    add_read_handler("count", FastUDPSource_read_count_handler, 0);
++    add_read_handler("rate", FastUDPSource_read_rate_handler, 0);
++    add_write_handler("rate", FastUDPSource_rate_write_handler, 0);
++    add_write_handler("reset", FastUDPSource_reset_write_handler, 0);
++    add_write_handler("active", FastUDPSource_active_write_handler, 0);
++    add_write_handler("limit", FastUDPSource_limit_write_handler, 0);
+ }
+ 
+ ELEMENT_REQUIRES(bsdmodule)
+Index: elements/bsdmodule/fastudpsrc.hh
+===================================================================
+RCS file: /cvs/release/one/elements/bsdmodule/fastudpsrc.hh,v
+retrieving revision 1.3
+diff -u -r1.3 fastudpsrc.hh
+--- fastudpsrc.hh	2001/10/15 21:07:26	1.3
++++ fastudpsrc.hh	2001/12/11 13:33:47
+@@ -98,6 +98,7 @@
+   void uninitialize();
+   Packet *pull(int);
+ 
++  void make_checksum(click_udp *udp);
+   void add_handlers();
+   void reset();
+   unsigned count() { return _count; }
+@@ -114,4 +115,21 @@
+ #endif
+ };
+ 
++inline
++void
++FastUDPSource::make_checksum(click_udp *udp)
++{
++    udp->uh_sum = 0;
++    unsigned short len = _len-14-sizeof(click_ip);
++    if (_cksum) {
++        unsigned csum = ~click_in_cksum((unsigned char *)udp, len) & 0xFFFF;
++        const uint16_t *words = (unsigned short *) &_sipaddr;
++        csum += words[0] + words[1] + words[2] + words[3] + words[4] +
++                htons(IP_PROTO_UDP) + htons(len);
++        while (csum >> 16)
++            csum = (csum & 0xFFFF) + (csum >> 16);
++        udp->uh_sum = ~csum & 0xFFFF;
++    } else
++        udp->uh_sum = 0;
++}
+ #endif
+Index: elements/bsdmodule/fromdevice.cc
+===================================================================
+RCS file: /cvs/release/one/elements/bsdmodule/fromdevice.cc,v
+retrieving revision 1.7
+diff -u -r1.7 fromdevice.cc
+--- fromdevice.cc	2001/12/04 03:05:20	1.7
++++ fromdevice.cc	2001/12/11 13:33:47
+@@ -5,7 +5,7 @@
+  * Robert Morris
+  * Eddie Kohler: AnyDevice, other changes
+  * Benjie Chen: scheduling, internal queue
+- * Nickolai Zeldovich: BSD
++ * Nickolai Zeldovich, Luigi Rizzo: BSD
+  *
+  * Copyright (c) 1999-2000 Massachusetts Institute of Technology
+  * Copyright (c) 2000 Mazu Networks, Inc.
+@@ -34,109 +34,95 @@
+ static int registered_readers;
+ static int from_device_count;
+ 
+-#ifdef HAVE_CLICK_BSD_KERNEL
+ #include <net/if_var.h>
+ #include <net/ethernet.h>
+ 
+ /*
+- * process incoming packets using the ng_ether_input_p hook
++ * Process incoming packets using the ng_ether_input_p hook.
++ * If if_poll_recv == NULL, no FromDevice element is registered on this
++ * interface, so return to pass the packet back to FreeBSD.
++ * Otherwise, if_poll_recv points to the element, which in turn contains
++ * a queue. Append the packet there, clear *mp to grab the pkt from FreeBSD.
++ * call wakeup() to poentially wake up the element.
++ *
++ * Special case: m->m_pkthdr.rcvif == NULL means the packet is coming
++ * from click and directed to this interface on the host.
++ * We are already running at splimp() so we need no further protection.
+  */
+ extern "C"
+ void
+-click_ether_input(struct ifnet *ifp,
+-                struct mbuf **mp, struct ether_header *eh)
++click_ether_input(struct ifnet *ifp, struct mbuf **mp, struct ether_header *eh)
+ {
+-    struct ifqueue *inq;
++    if (ifp->if_poll_recv == NULL)	// not for click.
++	return ;
+     struct mbuf *m = *mp;
++    if (m->m_pkthdr.rcvif == NULL) {	// Special case: from click to FreeBSD
++	m->m_pkthdr.rcvif = ifp;	// Reset rcvif to correct value, and
++	return;				// let FreeBSD continue processing.
++    }
+ 
+-    inq = ifp->if_poll_slowq;
+-    if (inq == NULL)	/* not for click... */
+-	return ;
+-    /* we want to make a full packet in the mbuf */
++    *mp = NULL;		// tell ether_input no further processing needed.
++
++    FromDevice *me = (FromDevice *)(ifp->if_poll_recv);
++
++    // put the ethernet header back into the mbuf.
+     M_PREPEND(m, sizeof(*eh), M_WAIT);
+     bcopy(eh, mtod(m, struct ether_header *), sizeof(*eh));
+-    if (IF_QFULL(inq)) {
+-	IF_DROP(inq);
++
++    if (IF_QFULL(me->_inq)) {
++	IF_DROP(me->_inq);
+ 	m_freem(m);
+     } else
+-	IF_ENQUEUE(inq, m);
+-    *mp = NULL;	// tell ether_input no further processing needed
++	IF_ENQUEUE(me->_inq, m);
++    me->wakeup();
+ }
+ 
+ /*
+- * Attach ourselves to the current device's packet-receive hook.
++ * Process outgoing packets using the ng_ether_output_p hook.
++ * If if_poll_xmit == NULL, no FromHost element is registered on this
++ * interface, so return 0 to pass the packet back to FreeBSD.
++ * Otherwise, if_poll_xmit points to the element, which in turn contains
++ * a queue. Append the packet there, clear *mp to grab the pkt from FreeBSD,
++ * and possibly wakeup the element.
++ *
++ * We _need_ splimp()/splx() to avoid races.
+  */
+-static int
+-register_rx(FromDevice *me, struct ifnet *d, int qSize)
++extern "C"
++int
++click_ether_output(struct ifnet *ifp, struct mbuf **mp)
+ {
+-    assert(d);
+     int s = splimp();
+-    if (d->if_poll_slowq == NULL) {
+-	struct ifqueue *inq;
+-
+-	if (me->_readers != 0)
+-	    printf("Warning, _readers mismatch (%d should be 0)\n",
+-		   me->_readers);
+-	inq = (struct ifqueue *)
+-	    malloc(sizeof (struct ifqueue), M_DEVBUF, M_NOWAIT);
+-	assert(inq);
+-	memset(inq, 0, sizeof (struct ifqueue));
+-	inq->ifq_maxlen = qSize;
+-	d->if_poll_slowq = inq;
+-    } else {
+-	if (me->_readers == 0)
+-	    printf("Warning, _readers mismatch (should not be 0)\n");
++    if (ifp->if_poll_xmit == NULL) { // not for click...
++	splx(s);
++	return 0;
+     }
+-    me->_readers++;
+-    registered_readers++;
+-    splx(s);
+-}
++    struct mbuf *m = *mp;
++    *mp = NULL; // tell ether_output no further processing needed
+ 
+-/*
+- * Detach from device's packet-receive hook.
+- */
+-static int
+-unregister_rx(FromDevice *me, struct ifnet *d)
+-{
+-    assert(d);
+-    int s = splimp();
+-    registered_readers--;
+-    me->_readers--;
+-    if (me->_readers == 0) {
+-	/*
+-	 * Flush the receive queue.
+-	 */
+-	int i, max = d->if_poll_slowq->ifq_maxlen ;
+-	for (i = 0; i < max; i++) {
+-	    struct mbuf *m;
+-	    IF_DEQUEUE(d->if_poll_slowq, m);
+-	    if (!m)
+-		break;
+-	    m_freem(m);
+-	}
+-	free(d->if_poll_slowq, M_DEVBUF);
+-	d->if_poll_slowq = NULL ;
+-    }
++    FromHost *me = (FromHost *)(ifp->if_poll_xmit);
++    if (IF_QFULL(me->_inq)) {
++        IF_DROP(me->_inq);
++        m_freem(m);
++    } else
++        IF_ENQUEUE(me->_inq, m);
++    me->wakeup();
+     splx(s);
++    return 0;
+ }
+-#endif
+ 
+ static void
+ fromdev_static_initialize()
+ {
+-    if (++from_device_count == 1) {
++    if (++from_device_count == 1)
+ 	from_device_map.initialize();
+-    }
+ }
+ 
+ static void
+ fromdev_static_cleanup()
+ {
+     if (--from_device_count <= 0) {
+-#ifdef HAVE_CLICK_BSD_KERNEL
+ 	if (registered_readers)
+ 	    printf("Warning: registered reader count mismatch!\n");
+-#endif
+     }
+ }
+ 
+@@ -169,6 +155,7 @@
+ FromDevice::configure(const Vector<String> &conf, ErrorHandler *errh)
+ {
+     _promisc = false;
++    _inq = NULL;
+     bool allow_nonexistent = false;
+     _burst = 8;
+     if (cp_va_parse(conf, this, errh, 
+@@ -196,12 +183,12 @@
+ int
+ FromDevice::initialize(ErrorHandler *errh)
+ {
+-    // check for duplicates; FromDevice <-> PollDevice conflicts checked by
+-    // PollDevice
++    // check for duplicates
+     if (ifindex() >= 0)
+ 	for (int fi = 0; fi < router()->nelements(); fi++) {
+ 	    Element *e = router()->element(fi);
+-	    if (e == this) continue;
++	    if (e == this)
++		continue;
+ 	    if (FromDevice *fd = (FromDevice *)(e->cast("FromDevice"))) {
+ 		if (fd->ifindex() == ifindex())
+ 		    return errh->error("duplicate FromDevice for `%s'",
+@@ -210,19 +197,32 @@
+ 	}
+ 
+     from_device_map.insert(this);
+-    if (_promisc && _dev)
+-	ifpromisc(_dev, 1);
++    if (_promisc && device())
++	ifpromisc(device(), 1);
+     
+-#ifdef HAVE_CLICK_BSD_KERNEL
+-    register_rx(this, _dev, QSIZE);
+-#else
+-    errh->warning("can't get packets: not compiled for a Click kernel");
+-#endif
++    assert(_dev);
++    int s = splimp();
++    if (_inq == NULL) {
++	if (_readers != 0)
++	    printf("Warning, _readers mismatch (%d should be 0)\n",
++		   _readers);
++	_inq = (struct ifqueue *)
++	    malloc(sizeof (struct ifqueue), M_DEVBUF, M_NOWAIT|M_ZERO);
++	assert(inq);
++	_inq->ifq_maxlen = QSIZE;
++	(FromDevice *)(device()->if_poll_recv) = this;
++    } else {
++	if (_readers == 0)
++	    printf("Warning, _readers mismatch (should not be 0)\n");
++    }
++    _readers++;
++    registered_readers++;
++    splx(s);
+ 
+-    ScheduleInfo::initialize_task(this, &_task, _dev != 0, errh);
++    ScheduleInfo::initialize_task(this, &_task, device() != 0, errh);
+ #ifdef HAVE_STRIDE_SCHED
+     // start out with default number of tickets, inflate up to max
+-    _max_tickets = _task.tickets();
++    set_max_tickets( _task.tickets() );
+     _task.set_tickets(Task::DEFAULT_TICKETS);
+ #endif
+ 
+@@ -244,13 +244,32 @@
+ void
+ FromDevice::uninitialize()
+ {
+-#ifdef HAVE_CLICK_BSD_KERNEL
+-    unregister_rx(this, _dev);
+-#endif
++    assert(_dev);
++    struct ifqueue *q = NULL;
++    int s = splimp();
++    registered_readers--;
++    _readers--;
++    if (_readers == 0) {	// flush queue
++	q = _inq ;
++	_inq = NULL ;
++	device()->if_poll_recv = NULL ;
++    }
++    splx(s);
++    if (q) {		// we do not mutex for this.
++	int i, max = q->ifq_maxlen ;
++	for (i = 0; i < max; i++) {
++	    struct mbuf *m;
++	    IF_DEQUEUE(q, m);
++	    if (!m)
++		break;
++	    m_freem(m);
++	}
++	free(q, M_DEVBUF);
++    }
+     
+     from_device_map.remove(this);
+-    if (_promisc && _dev)
+-	ifpromisc(_dev, 0);
++    if (_promisc && device())
++	ifpromisc(device(), 0);
+ }
+ 
+ void
+@@ -264,33 +283,25 @@
+ FromDevice::run_scheduled()
+ {
+     int npq = 0;
++    // click_chatter("FromDevice::run_scheduled().");
+     while (npq < _burst) {
+-#if CLICK_DEVICE_STATS
+-	unsigned low0, low1;
+-	unsigned long long time_now;
+-#endif
+-
+-	/*
+-	 * Try to dequeue a packet from the interrupt input queue.
+-	 */
+-	SET_STATS(low0, low1, time_now);
++	struct mbuf *m = 0;
+ 
+-	struct mbuf *m;
++	// Try to dequeue a packet from the interrupt input queue.
+ 	int s = splimp();
+-	IF_DEQUEUE(_dev->if_poll_slowq, m);
++	IF_DEQUEUE(_inq, m);
++	if (m == NULL) {
++	    set_need_wakeup();
++	    splx(s);
++	    adjust_tickets(npq);
++	    return;
++	}
+ 	splx(s);
+-	if (NULL == m) break;
+ 
+-	/*
+-	 * Got a packet, which includes the MAC header. Make it a real Packet.
+-	 */
++	// Got a packet, which includes the MAC header. Make it a real Packet.
+ 
+ 	Packet *p = Packet::make(m);
+-	GET_STATS_RESET(low0, low1, time_now,
+-			_perfcnt1_read, _perfcnt2_read, _time_read);
+ 	output(0).push(p);
+-	GET_STATS_RESET(low0, low1, time_now,
+-			_perfcnt1_push, _perfcnt2_push, _time_push);
+ 	npq++;
+ 	_npackets++;
+     }
+@@ -303,7 +314,7 @@
+ int
+ FromDevice::get_inq_drops()
+ {
+-    return _dev->if_poll_slowq->ifq_drops;
++    return device()->if_poll_slowq->ifq_drops;
+ }
+ 
+ static String
+@@ -331,5 +342,160 @@
+     add_task_handlers(&_task);
+ }
+ 
++//----------- implementation of ToHost(DEVNAME) ------------------------
++
++/*
++ToHost(DEVNAME)
++
++
++    ToHost();
++    ~ToHost();
++    const char *class_name() const      { return "ToHost"; }
++    const char *processing() const      { return PUSH; }
++    ToHost *clone() const               { return new ToHost; }
++
++    int configure(const Vector<String> &, ErrorHandler *);
++    int initialize(ErrorHandler *);
++    void uninitialize();
++
++*/
++
++ToHost::ToHost()
++{
++    MOD_INC_USE_COUNT;
++    add_input();
++}
++
++ToHost::~ToHost()
++{
++    MOD_DEC_USE_COUNT;
++}
++
++int
++ToHost::configure(const Vector<String> &conf, ErrorHandler *errh)
++{
++    if (cp_va_parse(conf, this, errh,
++		    cpString, "interface name", &_devname,
++		    cpEnd) < 0 )
++	return -1;
++    if (find_device(false, errh) < 0)
++        return -1;
++    return 0;
++}
++
++void
++ToHost::push(int, Packet *p)
++{
++    struct mbuf *m = p->steal_m();
++    struct ether_header *eh = mtod(m, struct ether_header *);
++    if (m == NULL) {
++	click_chatter("ToHost: steal_m failed");
++	return ;
++    }
++    m->m_pkthdr.rcvif = NULL; // tell click-ether-input to ignore this
++    m_adj(m, ETHER_HDR_LEN);
++    ether_input(device(), eh, m) ;
++}
++
++//----------- implementation of FromHost(DEVNAME) ----------------------
++
++FromHost::FromHost()
++{
++    MOD_INC_USE_COUNT;
++    add_output();
++}
++
++FromHost::~FromHost()
++{
++    MOD_DEC_USE_COUNT;
++}
++
++int
++FromHost::configure(const Vector<String> &conf, ErrorHandler *errh)
++{
++    _burst = 8;	// same as in FromDevice
++    clear_need_wakeup();
++    _inq = NULL;
++
++    if (cp_va_parse(conf, this, errh,
++                    cpString, "interface name", &_devname,
++                    cpEnd) < 0 )
++        return -1;
++    if (find_device(false, errh) < 0)
++        return -1;
++    return 0;
++}
++
++int
++FromHost::initialize(ErrorHandler *errh)
++{
++    // create queue
++    int s = splimp();
++    if (device()->if_poll_xmit != NULL) {
++	splx(s);
++	click_chatter("FromHost: %s%d already in use",
++		device()->if_name, device()->if_unit);
++	return -1;
++    }
++    (FromHost *)(device()->if_poll_xmit) = this;
++    _inq = (struct ifqueue *)
++            malloc(sizeof (struct ifqueue), M_DEVBUF, M_NOWAIT|M_ZERO);
++    assert(_inq);
++    _inq->ifq_maxlen = QSIZE;
++    clear_need_wakeup();
++    ScheduleInfo::initialize_task(this, &_task, true, errh);
++    splx(s);
++    return 0;
++}
++
++void
++FromHost::uninitialize()
++{
++    // Flush the receive queue.
++    int s = splimp();
++    struct ifqueue *q = _inq ;
++    _inq = NULL;
++    clear_need_wakeup();
++    device()->if_poll_xmit = NULL;
++    splx(s);
++
++    int i, max = q->ifq_maxlen ;
++    for (i = 0; i < max; i++) {
++	struct mbuf *m;
++	IF_DEQUEUE(q, m);
++	if (!m)
++	    break;
++	m_freem(m);
++    }
++    free(q, M_DEVBUF);
++}
++
++void
++FromHost::run_scheduled()
++{
++    int npq = 0;
++    // click_chatter("FromHost::run_scheduled().");
++    while (npq < _burst) {
++	struct mbuf *m = 0;
++        int s = splimp();
++        IF_DEQUEUE(_inq, m);
++        if (m == NULL) {
++            set_need_wakeup();
++            splx(s);
++	    return ;
++	}
++	splx(s);
++    
++        // Got an mbuf, including the MAC header. Make it a real Packet.
++        Packet *p = Packet::make(m);
++        output(0).push(p);
++        npq++;
++    }
++#if CLICK_DEVICE_ADJUST_TICKETS 
++    adjust_tickets(npq);
++#endif
++    _task.fast_reschedule();
++}
++
+ ELEMENT_REQUIRES(AnyDevice Storage bsdmodule)
+-EXPORT_ELEMENT(FromDevice)
++EXPORT_ELEMENT(FromDevice ToHost FromHost)
+Index: elements/bsdmodule/fromdevice.hh
+===================================================================
+RCS file: /cvs/release/one/elements/bsdmodule/fromdevice.hh,v
+retrieving revision 1.5
+diff -u -r1.5 fromdevice.hh
+--- fromdevice.hh	2001/10/15 21:07:26	1.5
++++ fromdevice.hh	2001/12/11 13:33:47
+@@ -60,11 +60,12 @@
+ ToBSD.
+ 
+ FromDevice accesses packets the same way BSD does: through interrupts.
+-This is bad for performance. If you care about performance and have a
+-polling-capable device, use PollDevice instead.
++Performance is system-dependent (FreeBSD has a native polling mode
++which can be used for better performance and stability).
+ 
+-=a PollDevice, ToDevice, FromBSD, ToBSD, FromDevice.u */
++=a ToDevice, FromHost, ToHost, FromDevice.u */
+ 
++#include <click/element.hh>
+ #include "elements/bsdmodule/anydevice.hh"
+ #include "elements/standard/queue.hh"
+ 
+@@ -86,12 +87,8 @@
+ 
+     void change_device(struct if_net *);
+     
+-    /* process a packet. return 0 if not wanted after all. */
+-    int got_m(struct mbuf *);
++    int get_inq_drops();	// get some performance stats
+ 
+-    /* get some performance stats */
+-    int get_inq_drops();
+-
+     void run_scheduled();
+ 
+     int _npackets;
+@@ -103,6 +100,7 @@
+ 
+     unsigned _readers;		// how many readers registered for this?
+ 
++    struct ifqueue *_inq;
+   private:
+ 
+     bool _promisc;
+@@ -112,4 +110,36 @@
+ 
+ };
+ 
++class ToHost : public AnyDevice {
++
++  public:
++    ToHost();
++    ~ToHost();
++    const char *class_name() const      { return "ToHost"; }
++    const char *processing() const      { return PUSH; }
++    ToHost *clone() const		{ return new ToHost; }
++
++    int configure(const Vector<String> &, ErrorHandler *);
++    void push(int, Packet *);
++};
++
++class FromHost : public AnyDevice {
++
++  public:
++    FromHost();
++    ~FromHost();
++    const char *class_name() const      { return "FromHost"; }
++    const char *processing() const      { return PUSH; }
++    FromHost *clone() const		{ return new FromHost; }
++
++    int configure(const Vector<String> &, ErrorHandler *);
++    int initialize(ErrorHandler *);
++    void uninitialize();
++    void run_scheduled();
++    struct ifqueue *_inq;
++
++  private:
++    static const int QSIZE = 511;
++    unsigned _burst;
++};
+ #endif
+Index: elements/bsdmodule/todevice.cc
+===================================================================
+RCS file: /cvs/release/one/elements/bsdmodule/todevice.cc,v
+retrieving revision 1.3
+diff -u -r1.3 todevice.cc
+--- todevice.cc	2001/11/23 21:34:51	1.3
++++ todevice.cc	2001/12/11 13:33:47
+@@ -2,8 +2,7 @@
+  * todevice.{cc,hh} -- element sends packets to BSD devices.
+  * Robert Morris
+  * Eddie Kohler: register once per configuration
+- * Benjie Chen: polling
+- * Nickolai Zeldovich: BSD
++ * Nickolai Zeldovich, Luigi Rizzo: BSD
+  *
+  * Copyright (c) 1999-2001 Massachusetts Institute of Technology
+  * Copyright (c) 2000 Mazu Networks, Inc.
+@@ -22,9 +21,6 @@
+ 
+ #include <click/config.h>
+ #include <click/glue.hh>
+-#if 0
+-#include "polldevice.hh"
+-#endif
+ #include "todevice.hh"
+ #include <click/error.hh>
+ #include <click/etheraddress.hh>
+@@ -73,7 +69,6 @@
+ }
+ 
+ ToDevice::ToDevice()
+-  : _dev_idle(0), _rejected(0), _hard_start(0)
+ {
+     // no MOD_INC_USE_COUNT; rely on AnyDevice
+     add_input();
+@@ -90,48 +85,33 @@
+ int
+ ToDevice::configure(const Vector<String> &conf, ErrorHandler *errh)
+ {
+-  _burst = 16;
+-  bool allow_nonexistent = false;
+-  if (cp_va_parse(conf, this, errh,
+-		  cpString, "interface name", &_devname,
+-		  cpOptional,
+-		  cpUnsigned, "burst size", &_burst,
+-		  cpKeywords,
+-		  "BURST", cpUnsigned, "burst size", &_burst,
+-		  "ALLOW_NONEXISTENT", cpBool, "allow nonexistent interface?", &allow_nonexistent,
+-		  cpEnd) < 0)
+-    return -1;
++    _burst = 16;
++    bool allow_nonexistent = false;
++    if (cp_va_parse(conf, this, errh,
++		    cpString, "interface name", &_devname,
++		    cpOptional,
++		    cpUnsigned, "burst size", &_burst,
++		    cpKeywords,
++		    "BURST", cpUnsigned, "burst size", &_burst,
++		    "ALLOW_NONEXISTENT", cpBool, "allow nonexistent interface?", &allow_nonexistent,
++		    cpEnd) < 0)
++	return -1;
+ 
+-  if (find_device(allow_nonexistent, errh) < 0)
+-      return -1;
+-  return 0;
++    if (find_device(allow_nonexistent, errh) < 0)
++	return -1;
++    return 0;
+ }
+ 
+ int
+ ToDevice::initialize(ErrorHandler *errh)
+ {
+-#if 0 /* XXX no polling in bsd yet */
+-  // see if a PollDevice with the same device exists: if so, use polling
+-  // extensions. Also look for duplicate ToDevices; but beware: ToDevice may
+-  // not have been initialized
+-  if (_dev)
+-      for (int ei = 0; ei < router()->nelements(); ei++) {
+-	  Element *e = router()->element(ei);
+-	  if (e == this) continue;
+-	  if (ToDevice *td = (ToDevice *)(e->cast("ToDevice"))) {
+-	      if (td->ifindex() == ifindex())
+-		  return errh->error("duplicate ToDevice for `%s'", _devname.cc());
+-	  }
+-      }
+-#endif
+-
+-  to_device_map.insert(this);
++    to_device_map.insert(this);
+   
+-  ScheduleInfo::initialize_task(this, &_task, _dev != 0, errh);
++    ScheduleInfo::initialize_task(this, &_task, device() != 0, errh);
+ #ifdef HAVE_STRIDE_SCHED
+-  /* start out with max number of tickets */
+-  _max_tickets = _task.tickets();
+-  _task.set_tickets(Task::DEFAULT_TICKETS);
++    // start out with max number of tickets
++    set_max_tickets( _task.tickets() );
++    _task.set_tickets(Task::DEFAULT_TICKETS);
+ #endif
+ 
+   reset_counts();
+@@ -141,235 +121,51 @@
+ void
+ ToDevice::reset_counts()
+ {
+-  _npackets = 0;
+-  
+-  _busy_returns = 0; 
+-#if CLICK_DEVICE_STATS
+-  _activations = 0;
+-  _time_clean = 0;
+-  _time_freeskb = 0;
+-  _time_queue = 0;
+-  _perfcnt1_pull = 0;
+-  _perfcnt1_clean = 0;
+-  _perfcnt1_freeskb = 0;
+-  _perfcnt1_queue = 0;
+-  _perfcnt2_pull = 0;
+-  _perfcnt2_clean = 0;
+-  _perfcnt2_freeskb = 0;
+-  _perfcnt2_queue = 0;
+-#endif
+-#if CLICK_DEVICE_THESIS_STATS || CLICK_DEVICE_STATS
+-  _pull_cycles = 0;
+-#endif
++    _npackets = 0;
++    _busy_returns = 0; 
+ }
+ 
+ void
+ ToDevice::uninitialize()
+ {
+-  to_device_map.remove(this);
++    to_device_map.remove(this);
+ }
+ 
+ void
+ ToDevice::run_scheduled()
+ {
+-  int busy;
+-  int sent = 0;
++    int busy;
++    int sent = 0;
+ 
+-#if CLICK_DEVICE_STATS
+-  unsigned low00, low10;
+-  unsigned long long time_now;
+-#endif
++    while (sent < _burst && (busy = IF_QFULL(&device()->if_snd)) == 0) {
+ 
+-  SET_STATS(low00, low10, time_now);
+- 
+-#if HAVE_TX_POLLING
+-  bool is_polling = (_dev->polling > 0);
+-  if (is_polling) {
+-    struct sk_buff *skbs = _dev->tx_clean(_dev);
+-
+-#if CLICK_DEVICE_STATS
+-    if (_activations > 0 && skbs) {
+-      GET_STATS_RESET(low00, low10, time_now, 
+-		      _perfcnt1_clean, _perfcnt2_clean, _time_clean);
++	Packet *p = input(0).pull();
++	if (!p)
++	    break;
++	_npackets++;
++	struct mbuf *m = p->steal_m();
++	if (ether_output_frame(device(), m) != 0)
++	    break;
++	sent++;
+     }
+-#endif
+ 
+-    if (skbs)
+-      skbmgr_recycle_skbs(skbs, 1);
+-    
+-#if CLICK_DEVICE_STATS
+-    if (_activations > 0 && skbs) {
+-      GET_STATS_RESET(low00, low10, time_now, 
+-		      _perfcnt1_freeskb, _perfcnt2_freeskb, _time_freeskb);
+-    }
+-#endif
+-  }
+-#endif	/* HAVE_TX_POLLING */
+-  
+-  SET_STATS(low00, low10, time_now);
+-
+-  /* try to send from click */
+-  while (sent < _burst && (busy = IF_QFULL(&_dev->if_snd)) == 0) {
+-
+-#if CLICK_DEVICE_THESIS_STATS && !CLICK_DEVICE_STATS
+-    unsigned long long before_pull_cycles = click_get_cycles();
+-#endif
+-
+-    Packet *p = input(0).pull();
+-    if (!p)
+-      break;
+-    
+-    _npackets++;
+-#if CLICK_DEVICE_THESIS_STATS && !CLICK_DEVICE_STATS
+-    _pull_cycles += click_get_cycles() - before_pull_cycles - CLICK_CYCLE_COMPENSATION;
+-#endif
+-    
+-    GET_STATS_RESET(low00, low10, time_now, 
+-		    _perfcnt1_pull, _perfcnt2_pull, _pull_cycles);
+-    
+-    int r = queue_packet(p);
+-    
+-    GET_STATS_RESET(low00, low10, time_now, 
+-		    _perfcnt1_queue, _perfcnt2_queue, _time_queue);
+-
+-    if (r < 0) break;
+-    sent++;
+-  }
+-
+-#if HAVE_TX_POLLING
+-  if (is_polling && sent > 0)
+-    _dev->tx_eob(_dev);
+-
+-  // If Linux tried to send a packet, but saw tbusy, it will
+-  // have left it on the queue. It'll just sit there forever
+-  // (or until Linux sends another packet) unless we poke
+-  // net_bh(), which calls qdisc_restart(). We are not allowed
+-  // to call qdisc_restart() ourselves, outside of net_bh().
+-  if (is_polling && !busy && _dev->qdisc->q.qlen) {
+-    _dev->tx_eob(_dev);
+-    netif_wake_queue(_dev);
+-  }
+-#endif	/* HAVE_TX_POLLING */
+-
+-#if CLICK_DEVICE_STATS
+-  if (sent > 0) _activations++;
+-#endif
+-
+-  if (busy) _busy_returns++;
+-
+-#if HAVE_TX_POLLING
+-  if (is_polling) {
+-    if (busy && sent == 0) {
+-      _dev_idle++;
+-      if (_dev_idle==1024) {
+-        /* device didn't send anything, ping it */
+-        _dev->tx_start(_dev);
+-        _dev_idle=0;
+-        _hard_start++;
+-      }
+-    } else
+-      _dev_idle = 0;
+-  }
+-#endif	/* HAVE_TX_POLLING */
++    if (busy)
++	_busy_returns++;
+ 
+-  adjust_tickets(sent);
+-  _task.fast_reschedule();
+-}
+-
+-int
+-ToDevice::queue_packet(Packet *p)
+-{
+-  struct mbuf *m = p->steal_m();
+-  int ret;
+-
+-#if HAVE_TX_POLLING
+-  if (_dev->polling > 0)
+-    ret = _dev->tx_queue(_dev, skb1);
+-  else 
+-#endif	/* HAVE_TX_POLLING */
+-  {
+-    ret = ether_output_frame(_dev, m);
+-    _hard_start++;
+-  }
+-  if(ret != 0){
+-    if(_rejected == 0)
+-      printf("ToDevice %s rejected a packet!\n", _dev->if_name);
+-    m_freem(m);
+-    _rejected++;
+-  }
+-  return ret;
+-}
+-
+-#if 0 /* XXX no device monitoring in BSD yet */
+-void
+-ToDevice::change_device(struct if_net *dev)
+-{
+-    _task.unschedule();
+-    
+-    if (!_dev && dev)
+-	click_chatter("%s: device `%s' came up", declaration().cc(), _devname.cc());
+-    else if (_dev && !dev)
+-	click_chatter("%s: device `%s' went down", declaration().cc(), _devname.cc());
+-    
+-    to_device_map.remove(this);
+-#if LINUX_VERSION_CODE >= 0x020400
+-    if (_dev)
+-	dev_put(_dev);
+-#endif
+-    _dev = dev;
+-#if LINUX_VERSION_CODE >= 0x020400
+-    if (_dev)
+-	dev_hold(_dev);
++#if 0
++    adjust_tickets(sent);
+ #endif
+-    to_device_map.insert(this);
+-
+-    if (_dev)
+-	_task.reschedule();
++    _task.fast_reschedule();
+ }
+ 
+-extern "C" {
+-static int
+-device_notifier_hook(struct notifier_block *nb, unsigned long flags, void *v)
+-{
+-    struct if_net *dev = (struct if_net *)v;
+-    if (flags == NETDEV_UP) {
+-	if (ToDevice *td = (ToDevice *)to_device_map.lookup_unknown(dev))
+-	    td->change_device(dev);
+-    } else if (flags == NETDEV_DOWN) {
+-	if (ToDevice *td = (ToDevice *)to_device_map.lookup(dev))
+-	    td->change_device(0);
+-    }
+-    return 0;
+-}
+-}
+-#endif
+-
+ static String
+ ToDevice_read_calls(Element *f, void *)
+ {
+   ToDevice *td = (ToDevice *)f;
+   return
+-    String(td->_rejected) + " packets rejected\n" +
+-    String(td->_hard_start) + " hard start xmit\n" +
+     String(td->_busy_returns) + " device busy returns\n" +
+     String(td->_npackets) + " packets sent\n" +
+-#if CLICK_DEVICE_STATS
+-    String(td->_pull_cycles) + " cycles pull\n" +
+-    String(td->_time_clean) + " cycles clean\n" +
+-    String(td->_time_freeskb) + " cycles freeskb\n" +
+-    String(td->_time_queue) + " cycles queue\n" +
+-    String(td->_perfcnt1_pull) + " perfctr1 pull\n" +
+-    String(td->_perfcnt1_clean) + " perfctr1 clean\n" +
+-    String(td->_perfcnt1_freeskb) + " perfctr1 freeskb\n" +
+-    String(td->_perfcnt1_queue) + " perfctr1 queue\n" +
+-    String(td->_perfcnt2_pull) + " perfctr2 pull\n" +
+-    String(td->_perfcnt2_clean) + " perfctr2 clean\n" +
+-    String(td->_perfcnt2_freeskb) + " perfctr2 freeskb\n" +
+-    String(td->_perfcnt2_queue) + " perfctr2 queue\n" +
+-    String(td->_activations) + " transmit activations\n";
+-#else
+     String();
+-#endif
+ }
+ 
+ static String
+@@ -380,16 +176,6 @@
+   switch (which) {
+    case 0:
+     return String(td->_npackets) + "\n";
+-#if CLICK_DEVICE_THESIS_STATS || CLICK_DEVICE_STATS
+-   case 1:
+-    return String(td->_pull_cycles) + "\n";
+-#endif
+-#if CLICK_DEVICE_STATS
+-   case 2:
+-    return String(td->_time_queue) + "\n";
+-   case 3:
+-    return String(td->_time_clean) + "\n";
+-#endif
+    default:
+     return String();
+   }
+@@ -408,13 +194,6 @@
+ {
+   add_read_handler("calls", ToDevice_read_calls, 0);
+   add_read_handler("packets", ToDevice_read_stats, 0);
+-#if CLICK_DEVICE_THESIS_STATS || CLICK_DEVICE_STATS
+-  add_read_handler("pull_cycles", ToDevice_read_stats, (void *)1);
+-#endif
+-#if CLICK_DEVICE_STATS
+-  add_read_handler("enqueue_cycles", ToDevice_read_stats, (void *)2);
+-  add_read_handler("clean_dma_cycles", ToDevice_read_stats, (void *)3);
+-#endif
+   add_write_handler("reset_counts", ToDevice_write_stats, 0);
+   add_task_handlers(&_task);
+ }
+Index: elements/bsdmodule/todevice.hh
+===================================================================
+RCS file: /cvs/release/one/elements/bsdmodule/todevice.hh,v
+retrieving revision 1.4
+diff -u -r1.4 todevice.hh
+--- todevice.hh	2001/10/15 21:07:26	1.4
++++ todevice.hh	2001/12/11 13:33:47
+@@ -14,10 +14,10 @@
+ 
+ =d
+ 
+-This manual page describes the Linux kernel module version of the ToDevice
++This manual page describes the FreeBSD kernel module version of the ToDevice
+ element. For the user-level element, read the ToDevice.u manual page.
+ 
+-Pulls packets from its single input and sends them out the Linux network
++Pulls packets from its single input and sends them out the FreeBSD network
+ interface named DEVNAME. DEVNAME may also be an Ethernet address, in which
+ case ToDevice searches for a device with that address.
+ 
+@@ -47,15 +47,12 @@
+ 
+ =n
+ 
+-The Linux networking code may also send packets out the device. Click won't
+-see those packets. Worse, Linux may cause the device to be busy when a
++The FreeBSD networking code may also send packets out the device. Click won't
++see those packets. Worse, FreeBSD may cause the device to be busy when a
+ ToDevice wants to send a packet. Click is not clever enough to re-queue
+ such packets, and discards them. 
+ 
+-ToDevice interacts with Linux in two ways: when Click is running in polling
+-mode, or when Click is running in interrupt mode. In both of these cases,
+-we depend on the net driver's send operation for synchronization (e.g.
+-tulip send operation uses a bit lock).
++ToDevice's depend on the net driver's send operation for synchronization
+ 
+ =h packets read-only
+ 
+@@ -65,12 +62,9 @@
+ 
+ Resets C<packets> counter to zero when written.
+ 
+-=a FromDevice, PollDevice, FromLinux, ToLinux, ToDevice.u */
++=a FromDevice, FromHost, ToHost, ToDevice.u */
+ 
+ #include "elements/bsdmodule/anydevice.hh"
+-#if 0
+-#include "elements/linuxmodule/fromlinux.hh"
+-#endif
+ 
+ class ToDevice : public AnyDevice {
+   
+@@ -92,38 +86,13 @@
+   void run_scheduled();
+ 
+   void reset_counts();
+-  void change_device(struct ifnet *);
+-  bool tx_intr();
+ 
+-#if CLICK_DEVICE_STATS
+-  // Statistics.
+-  unsigned long long _time_clean;
+-  unsigned long long _time_freeskb;
+-  unsigned long long _time_queue;
+-  unsigned long long _perfcnt1_pull;
+-  unsigned long long _perfcnt1_clean;
+-  unsigned long long _perfcnt1_freeskb;
+-  unsigned long long _perfcnt1_queue;
+-  unsigned long long _perfcnt2_pull;
+-  unsigned long long _perfcnt2_clean;
+-  unsigned long long _perfcnt2_freeskb;
+-  unsigned long long _perfcnt2_queue;
+-  unsigned long _activations; 
+-#endif
+   unsigned _npackets;
+-#if CLICK_DEVICE_THESIS_STATS || CLICK_DEVICE_STATS
+-  unsigned long long _pull_cycles;
+-#endif
+-  unsigned long _rejected;
+-  unsigned long _hard_start;
+   unsigned long _busy_returns;
+ 
+  private:
+ 
+   unsigned _burst;
+-  int _dev_idle;
+-  
+-  int queue_packet(Packet *p);
+   
+ };
+ 
+Index: include/click/routerthread.hh
+===================================================================
+RCS file: /cvs/release/one/include/click/routerthread.hh,v
+retrieving revision 1.8
+diff -u -r1.8 routerthread.hh
+--- routerthread.hh	2001/12/02 19:37:16	1.8
++++ routerthread.hh	2001/12/11 13:33:50
+@@ -41,6 +41,9 @@
+ 
+   void set_thread_id(int i)		{ _id = i; }
+ 
++  // XXX FreeBSD
++  Task *_wakeup_list;
++
+   // task request IDs
+   static const unsigned SCHEDULE_TASK = 1;
+   static const unsigned UNSCHEDULE_TASK = 2;
+Index: include/click/task.hh
+===================================================================
+RCS file: /cvs/release/one/include/click/task.hh,v
+retrieving revision 1.14
+diff -u -r1.14 task.hh
+--- task.hh	2001/12/02 19:37:17	1.14
++++ task.hh	2001/12/11 13:33:50
+@@ -60,6 +60,7 @@
+   void fast_reschedule();
+   int fast_unschedule();
+ 
++  void wakeup();	//	tasks to wake up
+   void call_hook();
+ 
+ #if __MTCLICK__
+@@ -255,6 +256,18 @@
+ }
+ 
+ #endif /* HAVE_STRIDE_SCHED */
++
++// XXX FreeBSD specific
++// put tasks on the list of tasks to wakeup.
++inline void
++Task::wakeup()
++{
++    assert(_list && !_prev);
++    int s = splimp();
++    _next = _list->_wakeup_list;
++    _list->_wakeup_list = this;
++    splx(s);
++}
+ 
+ inline void
+ Task::call_hook()
+Index: lib/routerthread.cc
+===================================================================
+RCS file: /cvs/release/one/lib/routerthread.cc,v
+retrieving revision 1.20
+diff -u -r1.20 routerthread.cc
+--- routerthread.cc	2001/12/02 19:37:20	1.20
++++ routerthread.cc	2001/12/11 13:33:50
+@@ -46,6 +46,9 @@
+   : Task(Task::error_hook, 0), _router(r)
+ {
+   _prev = _next = _list = this;
++#ifdef CLICK_BSDMODULE
++  _wakeup_list = 0;
++#endif
+   router()->add_thread(this);
+   // add_thread() will call this->set_thread_id()
+ }
+@@ -178,6 +181,17 @@
+ 	c--;
+       }
+ 
++#ifdef CLICK_BSDMODULE
++      if (_wakeup_list) {
++	int s = splimp();
++	Task *t;
++	while ( (t = _wakeup_list) != 0) {
++	    _wakeup_list = t->_next;
++	    t->reschedule();
++	}
++	splx(s);
++      }
++#endif
+       // check _driver_runcount
+       if (*runcount <= 0)
+ 	break;

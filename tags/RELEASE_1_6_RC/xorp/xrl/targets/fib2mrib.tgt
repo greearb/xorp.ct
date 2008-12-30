@@ -1,0 +1,13 @@
+/* $XORP: xorp/xrl/targets/fib2mrib.tgt,v 1.5 2007/05/31 19:02:26 pavlin Exp $ */
+
+#include "common.xif"
+#include "finder_event_observer.xif"
+#include "fea_fib_client.xif"
+#include "policy_backend.xif"
+#include "fib2mrib.xif"
+
+target fib2mrib implements	common/0.1,				\
+				finder_event_observer/0.1,		\
+				fea_fib_client/0.1,			\
+				policy_backend/0.1,			\
+				fib2mrib/0.1

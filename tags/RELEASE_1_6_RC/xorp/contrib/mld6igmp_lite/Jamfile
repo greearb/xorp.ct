@@ -1,0 +1,56 @@
+#
+# $XORP: xorp/contrib/mld6igmp_lite/Jamfile,v 1.6 2007/10/04 20:46:15 pavlin Exp $
+#
+
+SubDir TOP contrib mld6igmp_lite ;
+SubIncludeOnce TOP libxorp ;
+SubIncludeOnce TOP libcomm ;
+SubIncludeOnce TOP xrl interfaces ;
+SubIncludeOnce TOP xrl targets ;
+SubIncludeOnce TOP libxipc ;
+SubIncludeOnce TOP libproto ;
+SubIncludeOnce TOP libfeaclient ;
+SubIncludeOnce TOP mrt ;
+SubDir TOP mld6igmp ;
+
+Library libmld6igmp :
+	mld6igmp_config.cc mld6igmp_group_record.cc
+	mld6igmp_node.cc mld6igmp_node_cli.cc
+	mld6igmp_proto.cc mld6igmp_source_record.cc
+	mld6igmp_vif.cc xrl_mld6igmp_node.cc
+	;
+
+MLD6IGMP_LINKLIBS_COMMON = 
+	libmld6igmp
+	libfeaclient
+	libmld6igmpclientxif
+	libfearawpkt4xif
+	libfearawpkt6xif
+	libfeaifmgrmirrorxif
+	libfeaifmgrreplicatorxif
+	libclimanagerxif
+	libfindereventnotifierxif
+	libfeaifmgrmirrorbase
+	libmld6igmpbase
+	libmrt
+	libproto
+	libxipc
+	libcomm
+	libxorp
+	;
+
+Main xorp_igmp : xorp_igmp.cc ;
+LinkLibraries xorp_igmp :
+	$(MLD6IGMP_LINKLIBS_COMMON)
+	;
+
+Main xorp_mld : xorp_mld.cc ;
+LinkLibraries xorp_mld :
+	$(MLD6IGMP_LINKLIBS_COMMON)
+	;
+
+if $(MAKE_CHECK) {
+
+}
+
+InstallBin $(PREFIX)/mld6igmp : xorp_igmp xorp_mld ;

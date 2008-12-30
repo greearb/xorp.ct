@@ -1,0 +1,42 @@
+#
+# $XORP: xorp/policy/Jamfile,v 1.6 2008/08/06 08:27:10 abittau Exp $
+#
+
+SubDir TOP policy ;
+SubIncludeOnce TOP libxorp ;
+SubIncludeOnce TOP libcomm ;
+SubIncludeOnce TOP xrl interfaces ;
+SubIncludeOnce TOP xrl targets ;
+SubIncludeOnce TOP libxipc ;
+SubDir TOP policy ;
+
+Library libpolicy : 
+	code.cc code_generator.cc code_list.cc configuration.cc
+	dependency.cc export_code_generator.cc filter_manager.cc parser.cc
+	policy_list.cc policy_map.cc policy_statement.cc
+	process_watch.cc protocol_map.cc semantic_varrw.cc
+	set_map.cc source_match_code_generator.cc term.cc test_varrw.cc
+	var_map.cc visitor_dep.cc visitor_printer.cc visitor_semantic.cc
+	visitor_test.cc xrl_target.cc
+	yacc.yy_policy_parser.cc
+	lex.yy_policy_parser.cc
+	;
+
+Main xorp_policy : xorp_policy.cc policy_target.cc ;
+LinkLibraries xorp_policy : 
+	libpolicy
+	libpolicybackend
+	libpolicycommon
+	libpolicybase
+	libpolicybackendxif
+	libfindereventnotifierxif
+	libribxif
+	libxipc
+	libcomm
+	libxorp
+	;
+
+InstallBin $(PREFIX)/policy : xorp_policy ;
+
+SubIncludeOnce TOP policy common ;
+SubIncludeOnce TOP policy backend ;

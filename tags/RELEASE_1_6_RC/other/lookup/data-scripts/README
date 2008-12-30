@@ -1,0 +1,18 @@
+The script get-prefixes uses zebra-dump-parser.pl to generate an ascii
+MRT RIB file from where route prefixes are extracted.  It appears that
+each RIB file from archives.routeviews.org contains a single pass over
+the RIB.
+
+You may notice in the generated text file that there is a timestamp
+file, as far as I can discern this is just a second timer and varies
+because the dump takes so long to do.  There's also a view field, but
+that always appears to be zero.
+
+NB zebra-route-parser.pl didnt run out of the box on the versions of
+perl installed locally (5.6 and 5.005).  The gripe appears to be in
+the unpacking of attributes so the offending portion of code is
+commented out.  It does not have any material impact AFAIK.
+
+The data in the directory ../data are taken from dumps available at
+http://archive.routeviews.org/bgpdata/.
+
