@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2007-2008 XORP, Inc.
+// Copyright (c) 2007-2009 XORP, Inc.
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License, Version 2, June
@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/fea/data_plane/io/io_link_dummy.hh,v 1.5 2008/10/02 21:57:11 bms Exp $
+// $XORP: xorp/fea/data_plane/io/io_link_dummy.hh,v 1.6 2008/10/11 04:20:19 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_IO_IO_LINK_DUMMY_HH__
 #define __FEA_DATA_PLANE_IO_IO_LINK_DUMMY_HH__

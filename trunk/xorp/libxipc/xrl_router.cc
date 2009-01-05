@@ -1,7 +1,7 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
-// Copyright (c) 2001-2008 XORP, Inc.
+// Copyright (c) 2001-2009 XORP, Inc.
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License, Version
@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.71 2008/11/11 22:39:23 atanu Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.72 2008/11/21 21:57:18 atanu Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"

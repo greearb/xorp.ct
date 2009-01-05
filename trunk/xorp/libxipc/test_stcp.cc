@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2008 XORP, Inc.
+// Copyright (c) 2001-2009 XORP, Inc.
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License, Version
@@ -18,7 +18,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxipc/test_stcp.cc,v 1.25 2008/10/13 02:06:57 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/test_stcp.cc,v 1.26 2008/10/31 17:11:33 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 

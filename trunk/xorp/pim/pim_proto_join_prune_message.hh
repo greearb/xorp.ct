@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2008 XORP, Inc.
+// Copyright (c) 2001-2009 XORP, Inc.
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License, Version 2, June
@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/pim/pim_proto_join_prune_message.hh,v 1.13 2008/07/23 05:11:15 pavlin Exp $
+// $XORP: xorp/pim/pim_proto_join_prune_message.hh,v 1.14 2008/10/02 21:57:55 bms Exp $
 
 
 #ifndef __PIM_PIM_PROTO_JOIN_PRUNE_MESSAGE_HH__

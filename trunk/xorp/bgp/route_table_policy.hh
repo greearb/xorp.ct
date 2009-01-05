@@ -1,7 +1,7 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
-// Copyright (c) 2001-2008 XORP, Inc.
+// Copyright (c) 2001-2009 XORP, Inc.
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License, Version 2, June
@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/bgp/route_table_policy.hh,v 1.11 2008/07/23 05:09:37 pavlin Exp $
+// $XORP: xorp/bgp/route_table_policy.hh,v 1.15 2008/11/08 06:14:39 mjh Exp $
 
 #ifndef __BGP_ROUTE_TABLE_POLICY_HH__
 #define __BGP_ROUTE_TABLE_POLICY_HH__

@@ -1,10 +1,10 @@
 #!/bin/sh -
 
 #
-# $XORP: other/LiveCD/tools/tools/nanobsd/Files/usr/local/etc/xorp-makeconfig.sh,v 1.3 2008/09/22 20:10:35 bms Exp $
+# $XORP: other/LiveCD/tools/tools/nanobsd/Files/usr/local/etc/xorp-makeconfig.sh,v 1.4 2008/10/02 21:32:16 bms Exp $
 #
 
-# Copyright (c) 2004-2008 XORP, Inc.
+# Copyright (c) 2004-2009 XORP, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License, Version 2, June

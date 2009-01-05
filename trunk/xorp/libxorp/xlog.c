@@ -2,7 +2,7 @@
 /* vim:set sts=4 ts=8: */
 
 /*
- * Copyright (c) 2001-2008 XORP, Inc.
+ * Copyright (c) 2001-2009 XORP, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License, Version
@@ -21,7 +21,7 @@
  * http://xorp.net
  */
 
-#ident "$XORP: xorp/libxorp/xlog.c,v 1.30 2008/10/02 21:57:37 bms Exp $"
+#ident "$XORP: xorp/libxorp/xlog.c,v 1.31 2008/10/17 00:53:44 pavlin Exp $"
 
 /*
  * Message logging utility.

@@ -1,7 +1,7 @@
 /* -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*- */
 
 /*
- * Copyright (c) 2001-2008 XORP, Inc.
+ * Copyright (c) 2001-2009 XORP, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License, Version
@@ -21,7 +21,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/ether_compat.h,v 1.19 2008/10/02 21:57:30 bms Exp $
+ * $XORP: xorp/libxorp/ether_compat.h,v 1.20 2008/10/28 14:08:18 bms Exp $
  */
 
 /* Ethernet manipulation compatibility functions */

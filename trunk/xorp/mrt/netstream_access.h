@@ -1,7 +1,7 @@
 /* -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*- */
 
 /*
- * Copyright (c) 2001-2008 XORP, Inc.
+ * Copyright (c) 2001-2009 XORP, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License, Version 2, June
@@ -20,7 +20,7 @@
  */
 
 /*
- * $XORP: xorp/mrt/netstream_access.h,v 1.9 2008/07/23 05:11:06 pavlin Exp $
+ * $XORP: xorp/mrt/netstream_access.h,v 1.10 2008/10/02 21:57:45 bms Exp $
  */
 
 

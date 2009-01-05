@@ -1,7 +1,7 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8 sw=4:
 
-// Copyright (c) 2001-2008 XORP, Inc.
+// Copyright (c) 2001-2009 XORP, Inc.
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License, Version 2, June
@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/contrib/olsr/trace.hh,v 1.2 2008/07/23 05:09:53 pavlin Exp $
+// $XORP: xorp/contrib/olsr/trace.hh,v 1.3 2008/10/02 21:56:36 bms Exp $
 
 #ifndef __OLSR_TRACE_HH__
 #define __OLSR_TRACE_HH__

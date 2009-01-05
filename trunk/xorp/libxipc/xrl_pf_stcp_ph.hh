@@ -1,7 +1,7 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
-// Copyright (c) 2001-2008 XORP, Inc.
+// Copyright (c) 2001-2009 XORP, Inc.
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License, Version
@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxipc/xrl_pf_stcp_ph.hh,v 1.18 2008/09/23 19:57:55 abittau Exp $
+// $XORP: xorp/libxipc/xrl_pf_stcp_ph.hh,v 1.19 2008/10/02 21:57:25 bms Exp $
 
 #ifndef __LIBXIPC_XRL_PF_STCP_PH_HH__
 #define __LIBXIPC_XRL_PF_STCP_PH_HH__

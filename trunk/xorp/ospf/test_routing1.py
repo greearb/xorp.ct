@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (c) 2001-2008 XORP, Inc.
+# Copyright (c) 2001-2009 XORP, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License, Version 2, June
@@ -17,7 +17,7 @@
 # XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 # http://xorp.net
 
-# $XORP: xorp/ospf/test_routing1.py,v 1.31 2008/08/21 03:33:59 atanu Exp $
+# $XORP: xorp/ospf/test_routing1.py,v 1.32 2008/10/02 21:57:49 bms Exp $
 
 import getopt
 import sys

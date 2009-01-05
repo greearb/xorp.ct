@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2008 XORP, Inc.
+// Copyright (c) 2001-2009 XORP, Inc.
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License, Version
@@ -18,7 +18,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxorp/buffered_asyncio.hh,v 1.10 2008/10/02 21:57:28 bms Exp $
+// $XORP: xorp/libxorp/buffered_asyncio.hh,v 1.11 2008/11/02 05:17:33 pavlin Exp $
 
 #ifndef __LIBXORP_BUFFERED_ASYNCIO_HH__
 #define __LIBXORP_BUFFERED_ASYNCIO_HH__

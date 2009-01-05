@@ -1,7 +1,7 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
-// Copyright (c) 2008 XORP, Inc.
+// Copyright (c) 2008-2009 XORP, Inc.
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License, Version 2, June
@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/vrrp/vrrp_exception.hh,v 1.3 2008/10/09 18:04:12 abittau Exp $
+// $XORP: xorp/examples/usermgr/usermgr_exception.hh,v 1.1 2008/10/18 02:41:51 paulz Exp $
 
 #ifndef __USERMGR_USERMGR_EXCEPTION_HH__
 #define __USERMGR_USERMGR_EXCEPTION_HH__

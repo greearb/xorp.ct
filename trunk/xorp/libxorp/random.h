@@ -2,7 +2,7 @@
 /* vim:set sts=4 ts=8: */
 
 /*
- * Copyright (c) 2001-2008 XORP, Inc.
+ * Copyright (c) 2001-2009 XORP, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License, Version
@@ -22,7 +22,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/random.h,v 1.9 2008/10/01 22:17:51 pavlin Exp $
+ * $XORP: xorp/libxorp/random.h,v 1.10 2008/10/02 21:57:32 bms Exp $
  */
 
 #ifndef __LIBXORP_RANDOM_H__

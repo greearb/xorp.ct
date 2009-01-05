@@ -2,7 +2,7 @@
 /* vim:set sts=4 ts=8 sw=4: */
 
 /*
- * Copyright (c) 2001-2008 XORP, Inc.
+ * Copyright (c) 2001-2009 XORP, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License, Version 2, June
@@ -21,7 +21,7 @@
  */
 
 /*
- * $XORP: xorp/contrib/olsr/olsr_module.h,v 1.3 2008/10/02 02:20:09 pavlin Exp $
+ * $XORP: xorp/contrib/olsr/olsr_module.h,v 1.4 2008/10/02 21:56:35 bms Exp $
  */
 
 /*

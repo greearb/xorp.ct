@@ -2,7 +2,7 @@
 /* vim:set sts=4 ts=8: */
 
 /*
- * Copyright (c) 2001-2008 XORP, Inc.
+ * Copyright (c) 2001-2009 XORP, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License, Version 2, June
@@ -20,7 +20,7 @@
  * http://xorp.net
  */
 
-#ident "$XORP: xorp/contrib/win32/xorprtm/print_rtmsg.c,v 1.7 2008/10/02 02:37:42 pavlin Exp $"
+#ident "$XORP: xorp/contrib/win32/xorprtm/print_rtmsg.c,v 1.8 2008/10/02 21:56:40 bms Exp $"
 
 /*
  * Copyright (c) 1983, 1989, 1991, 1993

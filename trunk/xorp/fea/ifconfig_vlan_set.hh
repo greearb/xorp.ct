@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2007-2008 XORP, Inc.
+// Copyright (c) 2007-2009 XORP, Inc.
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License, Version 2, June
@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/fea/ifconfig_vlan_set.hh,v 1.10 2008/07/23 05:10:09 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_vlan_set.hh,v 1.11 2008/10/02 21:56:47 bms Exp $
 
 #ifndef __FEA_IFCONFIG_VLAN_SET_HH__
 #define __FEA_IFCONFIG_VLAN_SET_HH__

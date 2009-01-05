@@ -1,7 +1,7 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
-// Copyright (c) 2008 XORP, Inc.
+// Copyright (c) 2008-2009 XORP, Inc.
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License, Version 2, June
@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/vrrp/vrrp_interface.hh,v 1.3 2008/10/09 18:04:12 abittau Exp $
+// $XORP: xorp/vrrp/vrrp_interface.hh,v 1.4 2008/12/18 11:34:51 abittau Exp $
 
 #ifndef __VRRP_VRRP_INTERFACE_HH__
 #define __VRRP_VRRP_INTERFACE_HH__

@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2008 XORP, Inc.
+// Copyright (c) 2001-2009 XORP, Inc.
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License, Version
@@ -21,7 +21,7 @@
 // Portions of this code originally derived from:
 // 	FreeBSD dummynet code, (C) 2001 Luigi Rizzo.
 
-#ident "$XORP: xorp/libxorp/heap.cc,v 1.22 2008/07/23 05:10:51 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/heap.cc,v 1.23 2008/10/02 21:57:30 bms Exp $"
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"

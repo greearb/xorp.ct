@@ -1,7 +1,7 @@
 /* -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*- */
 
 /*
- * Copyright (c) 2001-2008 XORP, Inc.
+ * Copyright (c) 2001-2009 XORP, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License, Version 2, June
@@ -20,7 +20,7 @@
  */
 
 /*
- * $XORP: xorp/contrib/mld6igmp_lite/mld6_proto.h,v 1.2 2008/07/23 05:09:48 pavlin Exp $
+ * $XORP: xorp/contrib/mld6igmp_lite/mld6_proto.h,v 1.3 2008/10/02 21:56:31 bms Exp $
  */
 
 #ifndef __MLD6IGMP_MLD6_PROTO_H__

@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2008 XORP, Inc.
+// Copyright (c) 2001-2009 XORP, Inc.
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License, Version 2, June
@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_click.hh,v 1.12 2008/07/23 05:10:29 pavlin Exp $
+// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_click.hh,v 1.13 2008/10/02 21:57:07 bms Exp $
 
 #ifndef __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_SET_CLICK_HH__
 #define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_SET_CLICK_HH__

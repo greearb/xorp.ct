@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2007-2008 XORP, Inc.
+// Copyright (c) 2007-2009 XORP, Inc.
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License, Version 2, June
@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/fea/xrl_fea_node.hh,v 1.14 2008/07/23 05:10:12 pavlin Exp $
+// $XORP: xorp/fea/xrl_fea_node.hh,v 1.15 2008/10/02 21:56:50 bms Exp $
 
 
 #ifndef __FEA_XRL_FEA_NODE_HH__

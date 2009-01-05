@@ -1,7 +1,7 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
-// Copyright (c) 2001-2008 XORP, Inc.
+// Copyright (c) 2001-2009 XORP, Inc.
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License, Version
@@ -21,7 +21,7 @@
 
 //#define DEBUG_LOGGING
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.71 2008/10/02 21:57:25 bms Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.72 2008/10/13 02:06:57 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 

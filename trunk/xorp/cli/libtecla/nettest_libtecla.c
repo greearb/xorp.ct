@@ -1,7 +1,7 @@
 /* -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*- */
 
 /*
- * Copyright (c) 2001-2008 XORP, Inc.
+ * Copyright (c) 2001-2009 XORP, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License, Version 2, June
@@ -19,7 +19,7 @@
  * http://xorp.net
  */
 
-#ident "$XORP: xorp/cli/libtecla/nettest_libtecla.c,v 1.10 2008/10/01 21:25:45 pavlin Exp $"
+#ident "$XORP: xorp/cli/libtecla/nettest_libtecla.c,v 1.11 2008/10/02 21:56:30 bms Exp $"
 
 
 /*

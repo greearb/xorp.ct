@@ -2,7 +2,7 @@
 /* vim:set sts=4 ts=8: */
 
 /*
- * Copyright (c) 2008 XORP, Inc.
+ * Copyright (c) 2008-2009 XORP, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License, Version 2, June
@@ -21,7 +21,7 @@
  */
 
 /*
- * $XORP: xorp/vrrp/vrrp_module.h,v 1.1 2008/10/09 17:40:58 abittau Exp $
+ * $XORP: xorp/vrrp/vrrp_module.h,v 1.2 2008/10/09 18:03:49 abittau Exp $
  */
 
 #ifndef __VRRP_VRRP_MODULE_H__

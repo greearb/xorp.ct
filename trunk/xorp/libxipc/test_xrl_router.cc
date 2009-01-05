@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2008 XORP, Inc.
+// Copyright (c) 2001-2009 XORP, Inc.
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License, Version
@@ -18,7 +18,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxipc/test_xrl_router.cc,v 1.20 2008/07/23 05:10:44 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/test_xrl_router.cc,v 1.21 2008/10/02 21:57:23 bms Exp $"
 
 #include <stdlib.h>
 

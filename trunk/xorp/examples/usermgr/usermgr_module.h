@@ -2,7 +2,7 @@
 /* vim:set sts=4 ts=8: */
 
 /* 
- * Copyright (c) 2008 XORP, Inc.
+ * Copyright (c) 2008-2009 XORP, Inc.
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License, Version 2, June
@@ -21,7 +21,7 @@
  */
 
 /*
- * $XORP: xorp/devnotes/template_gpl.h,v 1.1 2008/10/02 21:56:43 bms Exp $
+ * $XORP: xorp/examples/usermgr/usermgr_module.h,v 1.1 2008/10/18 02:41:51 paulz Exp $
  */
 
 #ifndef __USERMGR_USERMGR_MODULE_H__

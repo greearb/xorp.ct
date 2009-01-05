@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (c) 2001-2008 XORP, Inc.
+# Copyright (c) 2001-2009 XORP, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License, Version 2, June
@@ -17,7 +17,7 @@
 # XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 # http://xorp.net
 
-# $XORP: xorp/tests/bgp/test_unh1.py,v 1.25 2008/07/23 05:11:51 pavlin Exp $
+# $XORP: xorp/tests/bgp/test_unh1.py,v 1.26 2008/10/02 21:58:31 bms Exp $
 
 #
 # The tests in this file are based on the:

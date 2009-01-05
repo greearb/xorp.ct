@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2008 XORP, Inc.
+// Copyright (c) 2001-2009 XORP, Inc.
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License, Version
@@ -18,7 +18,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxipc/permits.hh,v 1.8 2008/07/23 05:10:43 pavlin Exp $
+// $XORP: xorp/libxipc/permits.hh,v 1.9 2008/10/02 21:57:21 bms Exp $
 
 #ifndef __LIBXIPC_PERMITS_HH__
 #define __LIBXIPC_PERMITS_HH__

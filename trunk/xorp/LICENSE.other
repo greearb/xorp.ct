@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/LICENSE.other,v 1.5 2008/07/23 05:09:30 pavlin Exp $
+# $XORP: xorp/LICENSE.other,v 1.6 2008/07/25 21:59:16 pavlin Exp $
 #
 
 Portions of this software are derived from other sources.
@@ -537,7 +537,7 @@ docs/snmp/talks/PPRfyma.sty :
 ========================================================================
 docs/user_manual/ :
 
-Copyright (c) 2004-2008 XORP, Inc.
+Copyright (c) 2004-2009 XORP, Inc.
 Copyright (c) 2004-2005 University College London
 
 Permission is hereby granted, free of charge, to any person obtaining a

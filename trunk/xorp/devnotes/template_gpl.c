@@ -2,7 +2,7 @@
 /* vim:set sts=4 ts=8: */
 
 /*
- * Copyright (c) 2008 XORP, Inc.
+ * Copyright (c) 2008-2009 XORP, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License, Version 2, June
@@ -20,4 +20,4 @@
  * http://xorp.net
  */
 
-#ident "$XORP: xorp/devnotes/template.c,v 1.10 2008/07/23 05:09:59 pavlin Exp $"
+#ident "$XORP: xorp/devnotes/template_gpl.c,v 1.1 2008/10/02 21:56:43 bms Exp $"

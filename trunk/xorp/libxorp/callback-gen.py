@@ -114,7 +114,7 @@ def output_header(args, dbg):
     from time import time, localtime, strftime
     print \
 """/*
- * Copyright (c) 2001-2008 XORP, Inc.
+ * Copyright (c) 2001-2009 XORP, Inc.
  * See the XORP LICENSE.lgpl file for licensing, conditions, and warranties
  * on use.
  *

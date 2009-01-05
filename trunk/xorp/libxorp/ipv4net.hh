@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2008 XORP, Inc.
+// Copyright (c) 2001-2009 XORP, Inc.
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License, Version
@@ -18,7 +18,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxorp/ipv4net.hh,v 1.9 2008/10/01 22:38:17 pavlin Exp $
+// $XORP: xorp/libxorp/ipv4net.hh,v 1.10 2008/10/02 21:57:31 bms Exp $
 
 #ifndef __LIBXORP_IPV4NET_HH__
 #define __LIBXORP_IPV4NET_HH__

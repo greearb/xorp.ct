@@ -1,7 +1,7 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
-// Copyright (c) 2001-2008 XORP, Inc.
+// Copyright (c) 2001-2009 XORP, Inc.
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License, Version
@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxorp/test_sched.cc,v 1.5 2008/11/08 00:41:03 abittau Exp $"
+#ident "$XORP: xorp/libxorp/test_sched.cc,v 1.6 2008/11/09 08:17:29 abittau Exp $"
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"

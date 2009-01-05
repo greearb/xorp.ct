@@ -1,7 +1,7 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
-// Copyright (c) 2001-2008 XORP, Inc.
+// Copyright (c) 2001-2009 XORP, Inc.
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License, Version 2, June
@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/static_routes/static_routes_varrw.hh,v 1.10 2008/07/23 05:11:48 pavlin Exp $
+// $XORP: xorp/static_routes/static_routes_varrw.hh,v 1.11 2008/10/02 21:58:29 bms Exp $
 
 #ifndef __STATIC_ROUTES_STATIC_ROUTES_VARRW_HH__
 #define __STATIC_ROUTES_STATIC_ROUTES_VARRW_HH__

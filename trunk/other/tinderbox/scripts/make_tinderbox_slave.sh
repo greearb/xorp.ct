@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Copyright (c) 2001-2008 XORP, Inc.
+# Copyright (c) 2001-2009 XORP, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License, Version 2, June
@@ -17,7 +17,7 @@
 # XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 # http://xorp.net
 
-# $XORP: other/tinderbox/scripts/make_tinderbox_slave.sh,v 1.4 2008/07/23 04:42:54 pavlin Exp $
+# $XORP: other/tinderbox/scripts/make_tinderbox_slave.sh,v 1.5 2008/10/02 21:32:17 bms Exp $
 
 #
 # Script to create the tinderbox directories on a host which is to act as

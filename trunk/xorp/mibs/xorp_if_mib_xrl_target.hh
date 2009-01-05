@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2008 XORP, Inc.
+// Copyright (c) 2001-2009 XORP, Inc.
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License, Version 2, June
@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/mibs/xorp_if_mib_xrl_target.hh,v 1.9 2008/07/23 05:11:02 pavlin Exp $
+// $XORP: xorp/mibs/xorp_if_mib_xrl_target.hh,v 1.10 2008/10/02 21:57:42 bms Exp $
 
 #ifndef __MIBS_XORP_IF_MIB_XRL_TARGET_HH__
 #define __MIBS_XORP_IF_MIB_XRL_TARGET_HH___
