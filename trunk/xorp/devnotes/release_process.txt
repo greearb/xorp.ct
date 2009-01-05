@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.72 2008/07/23 05:09:58 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.73 2008/10/13 23:23:47 paulz Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -97,10 +97,10 @@ the login shell is csh or tcsh):
  # Check-out a new copy of all files
  mkdir xorp.tmp
  cd xorp.tmp
- cvs -d xorpc.icir.org:/usr/local/share/doc/apache/cvs co data
- cvs -d xorpc.icir.org:/usr/local/share/doc/apache/cvs co other
- cvs -d xorpc.icir.org:/usr/local/share/doc/apache/cvs co www
- cvs -d xorpc.icir.org:/usr/local/share/doc/apache/cvs co xorp
+ cvs -d cvs.xorp.org:/cvsroot co data
+ cvs -d cvs.xorp.org:/cvsroot co other
+ cvs -d cvs.xorp.org:/cvsroot co www
+ cvs -d cvs.xorp.org:/cvsroot co xorp
 
  # Run the xorp/devnotes/update_copyright.sh script using the old year
  # as an argument. It should be run inside each of the checked-out
@@ -248,7 +248,7 @@ the login shell is csh or tcsh):
 	WHEN: 1 day before the release date
 	COMMANDS:
  ssh test.xorp.org
- cd /usr/local/www/apache22/data/xorp-test
+ cd /var/www/xorp.org/test.orp.org
  cvs update -d -P
 
 ========================================================================
@@ -311,8 +311,8 @@ the login shell is csh or tcsh):
 	WHEN: Release time
 	COMMANDS:
  # On each supported platform:
- cvs -d xorpc.icir.org:/usr/local/share/doc/apache/cvs co xorp
- cvs -d xorpc.icir.org:/usr/local/share/doc/apache/cvs co data
+ cvs -d cvs.xorp.org:/cvsroot co xorp
+ cvs -d cvs.xorp.org:/cvsroot co data
  cd xorp
  script
  ./configure
@@ -341,13 +341,13 @@ the login shell is csh or tcsh):
  #   after "rtag".
  mkdir xorp_release.tmp
  cd xorp_release.tmp
- cvs -d xorpc.icir.org:/usr/local/share/doc/apache/cvs co xorp/VERSION
+ cvs -d cvs.xorp.org:/cvsroot co xorp/VERSION
  setenv ReleaseTag RELEASE_`cat xorp/VERSION | sed 'y/./_/' | sed 'y/-/_/'`
  echo $ReleaseTag
- cvs -d xorpc.icir.org:/usr/local/share/doc/apache/cvs rtag $ReleaseTag xorp
- cvs -d xorpc.icir.org:/usr/local/share/doc/apache/cvs rtag $ReleaseTag other
- cvs -d xorpc.icir.org:/usr/local/share/doc/apache/cvs rtag $ReleaseTag www
- cvs -d xorpc.icir.org:/usr/local/share/doc/apache/cvs rtag $ReleaseTag data
+ cvs -d cvs.xorp.org:/cvsroot rtag $ReleaseTag xorp
+ cvs -d cvs.xorp.org:/cvsroot rtag $ReleaseTag other
+ cvs -d cvs.xorp.org:/cvsroot rtag $ReleaseTag www
+ cvs -d cvs.xorp.org:/cvsroot rtag $ReleaseTag data
 
 ========================================================================
 2400.	TASK: Prepare sofware and documentation tarballs for distribution
@@ -364,7 +364,7 @@ the login shell is csh or tcsh):
  echo $ReleaseVersion
  mkdir tmp
  cd tmp
- cvs -d xorpc.icir.org:/usr/local/share/doc/apache/cvs export -r $ReleaseTag xorp
+ cvs -d cvs.xorp.org:/cvsroot export -r $ReleaseTag xorp
  mv xorp xorp-$ReleaseVersion
  tar zcvf xorp-$ReleaseVersion.tar.gz xorp-$ReleaseVersion
  mv xorp-$ReleaseVersion xorp
@@ -434,7 +434,7 @@ the login shell is csh or tcsh):
  setenv ReleaseVersion `cat _XORP_VERSION`
  echo $ReleaseVersion
  rm _XORP_VERSION
- cd /usr/local/www/apache22/data/xorp-releases
+ cd /var/www/xorp.org/xorp-releases
  mkdir $ReleaseVersion
  cd $ReleaseVersion
  mv ~/xorp-$ReleaseVersion.tar.gz .
@@ -458,9 +458,9 @@ the login shell is csh or tcsh):
 	WHEN: Release time
 	COMMANDS:
  # Commands continue from the previous task
- md5 LiveCD.iso.gz
- md5 xorp-$ReleaseVersion.tar.gz
- md5 xorp-$ReleaseVersion-setup.exe
+ md5sum LiveCD.iso.gz
+ md5sum xorp-$ReleaseVersion.tar.gz
+ md5sum xorp-$ReleaseVersion-setup.exe
  ls -lAFgh LiveCD.iso.gz
 
 ========================================================================
@@ -504,7 +504,7 @@ the login shell is csh or tcsh):
 	WHEN: Right after the release
 	COMMANDS:
  ssh www.xorp.org
- cd /usr/local/www/apache22/data/xorp-www
+ cd /var/www/xorp.org/www.xorp.org
  cvs update -d -P
 
 ========================================================================
@@ -674,7 +674,7 @@ the login shell is csh or tcsh):
 	MISC: Should be omitted for a release candidate.
 	COMMANDS:
  ssh www.xorp.org
- cd /usr/local/www/apache22/data/xorp-releases
+ cd /var/www/xorp.org/xorp-releases
  # Remove the Release Candidate directory (e.g., 1.4-RC)
 
 ========================================================================
