@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.231 2008/12/24 21:21:07 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.232 2008/12/24 22:06:41 jtc Exp $
 #
 
 		XORP RELEASE NOTES
@@ -111,6 +111,8 @@ Release 1.6-RC (12/24/2008)
       generated when reflected back would be responded to with a MaxAge LSA,
       this process could continue indefinitely, leaving the neighbor state in
       EXCHANGE. (Bug 785)
+
+    - OSPF virtual links support broken in the 1.5 and 1.6 release
 	
   BGP:
     - Support for Red Hat Linux (Bug 793)
