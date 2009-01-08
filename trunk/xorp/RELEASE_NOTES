@@ -1,12 +1,12 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.232 2008/12/24 22:06:41 jtc Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.233 2009/01/07 19:34:46 syedk Exp $
 #
 
 		XORP RELEASE NOTES
 
 This file contains XORP release notes (most recent releases first).
 
-Release 1.6-RC (12/24/2008)
+Release 1.6 (1/07/2009)
 ============================
   ALL:
     - XORP now builds on Linux CentOS 5.2, Linux openSUSE-11.0,
@@ -112,7 +112,7 @@ Release 1.6-RC (12/24/2008)
       this process could continue indefinitely, leaving the neighbor state in
       EXCHANGE. (Bug 785)
 
-    - OSPF virtual links support broken in the 1.5 and 1.6 release
+    - OSPF virtual links support broken in the 1.5 and 1.6 releases
 	
   BGP:
     - Support for Red Hat Linux (Bug 793)
