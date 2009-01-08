@@ -1,5 +1,5 @@
 #
-# $XORP: other/LiveCD/tools/tools/nanobsd/livecd.nano,v 1.3 2008/09/22 20:10:34 bms Exp $
+# $XORP: other/LiveCD/tools/tools/nanobsd/livecd.nano,v 1.4 2008/12/30 00:41:12 jtc Exp $
 #
 
 # Notes:
@@ -10,14 +10,12 @@
 #  It would really be useful to have a network coredump facility.
 
 NANO_NAME=livecd
-NANO_VOLID='XORP LiveCD 1.6-RC'
-NANO_IMGNAME='XORP-1.6-RC-LiveCD.iso'
+NANO_VOLID='XORP LiveCD 1.6'
+NANO_IMGNAME='XORP-1.6-LiveCD.iso'
 
 # Use our own FreeBSD 7.0-RELEASE checkout, as we need to apply
 # a patch to /etc/rc.initdiskless.
-#NANO_SRC=${NANO_SRC:-"/home/bms/cvs/RELENG_7_0/src"}
-#NANO_SRC="/home/bms/cvs/RELENG_7_0/src"
-NANO_SRC="/home/bms/cvs/RELENG_7/src"
+NANO_SRC=${NANO_SRC:-"/usr/src"}
 NANO_KERNEL=LIVECD
 NANO_IMAGES=1
 
@@ -32,11 +30,8 @@ NANO_CONF_FSOPTS=longnames
 NANO_CONF_SUBDIR='xorp.cfg'
 
 # Path to precompiled packages.
-#XORP_PACKAGES_DIR=${XORP_PACKAGES_DIR:-"/usr/ports/packages/All"}
-#XORP_PACKAGES=${XORP_PACKAGES:-"xorp-1.4_1.tbz"}
-
-XORP_PACKAGES_DIR="/usr/ports/packages/All"
-XORP_PACKAGES="xorp-1.5.tbz"
+XORP_PACKAGES_DIR=${XORP_PACKAGES_DIR:-"/usr/ports/packages/All"}
+XORP_PACKAGES=${XORP_PACKAGES:-"xorp-1.6.tbz"}
 
 #
 # World options.

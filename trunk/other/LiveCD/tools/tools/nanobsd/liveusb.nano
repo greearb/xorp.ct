@@ -1,15 +1,15 @@
 #
-# $XORP: other/LiveCD/tools/tools/nanobsd/liveusb.nano,v 1.1 2008/09/22 20:10:34 bms Exp $
+# $XORP: other/LiveCD/tools/tools/nanobsd/liveusb.nano,v 1.2 2008/12/30 00:41:12 jtc Exp $
 #
 
 NANO_NAME=liveusb
 
 # Use our own FreeBSD 7.1-PRERELEASE checkout, as we need to apply
 # a patch to /etc/rc.initdiskless.
-NANO_SRC="/home/bms/cvs/RELENG_7/src"
+NANO_SRC=${NANO_SRC:-"/usr/src"}
 NANO_KERNEL=LIVEUSB
 NANO_IMAGES=1
-NANO_IMGNAME='XORP-1.6-RC-LiveUSB.img'
+NANO_IMGNAME='XORP-1.6-LiveUSB.img'
 
 # XXX Does da0 stay the same if we booted from it?
 NANO_DRIVE=da0
@@ -33,8 +33,8 @@ NANO_BOOT0CFG="-o packet,noupdate,setdrv -s 1 -m 3 -t 54"
 NANO_BOOTLOADER="boot/boot0"
 
 # Path to precompiled packages.
-XORP_PACKAGES_DIR="/usr/ports/packages/All"
-XORP_PACKAGES="xorp-1.5.tbz"
+XORP_PACKAGES_DIR=${XORP_PACKAGES_DIR:-"/usr/ports/packages/All"}
+XORP_PACKAGES=${XORP_PACKAGES:-"xorp-1.6.tbz"}
 
 #
 # World options.
