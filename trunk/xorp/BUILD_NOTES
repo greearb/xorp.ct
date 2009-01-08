@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.113 2009/01/08 00:17:50 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.114 2009/01/08 01:08:53 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -53,11 +53,12 @@ documentation directly from the source files.
     make install
 
   * Ubuntu Linux
-  apt-get install texlive
-  apt-get install texlive-latex-extra
-  apt-get install texlive-math-extra
+    apt-get install texlive
+    apt-get install texlive-latex-extra
+    apt-get install texlive-math-extra
 
 1.2.2. Compile the documentation.
+
 # Note that this must be done directly in the XORP directory with the
 # original source files.
 cd /path/to/xorp
