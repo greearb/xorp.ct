@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/README,v 1.62 2008/12/24 22:06:41 jtc Exp $
+# $XORP: xorp/README,v 1.63 2009/01/08 01:16:15 pavlin Exp $
 #
 
 		XORP: eXtensible Open Router Platform
@@ -9,11 +9,17 @@
 1. Overview
 ===========
 
-XORP is an open router platform being developed at the ICSI Center for
-Open Networking (ICON) at the International Computer Science Institute
-in Berkeley, California, USA. XORP primary goal is to be both a research
-tool and a stable deployment platform that can be used to close the gap
-between network research and real world.
+XORP is an open networking platform being developed by a core team of
+developers from XORP, Inc., and members of the XORP.org community.
+It started life as a project at the ICSI Center for Open Networking (ICON)
+at the International Computer Science Institute in Berkeley, California,
+USA, and is now owned and shepherded by the team at XORP, Inc.
+
+XORP's primary goal is to be an open platform for networking protocol
+implementations and an alternative to proprietary and closed networking
+products in the marketplace today. XORP hopes to drive innovation in
+the networking field by making available an enterprise-grade open
+networking platform to the development community.
 
 XORP design philosophy is:
   * modularity
