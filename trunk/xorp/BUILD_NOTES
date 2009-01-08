@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.111 2008/11/27 06:36:38 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.112 2008/12/06 06:33:37 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -512,6 +512,11 @@ gmake check
         Those packages are needed for SNMP support.
       - iptables-dev
         This package is needed for configuring firewall rules using XORP.
+    - Optionally install the following packages if you want to compile
+      the user documentation from sources:
+      - texlive
+      - texlive-latex-extra
+      - texlive-math-extra
     - The code compiles, and the internal tests appear to succeed.
     - gcc (GCC) 4.3.2 (Ubuntu 4.3.2-1ubuntu11)
     - Tested on the following architectures: i386
