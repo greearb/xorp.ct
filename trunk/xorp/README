@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/README,v 1.61 2008/09/04 19:28:26 atanu Exp $
+# $XORP: xorp/README,v 1.62 2008/12/24 22:06:41 jtc Exp $
 #
 
 		XORP: eXtensible Open Router Platform
@@ -49,7 +49,7 @@ paper available from http://www.xorp.org/ :
 2. Status
 =========
 
-This is XORP Release-1.6-RC.
+This is XORP Release-1.6.
 It is reasonably stable and can be used for routing, but there are known
 issues.
 
@@ -124,6 +124,9 @@ Currently, XORP implements the following protocols:
   * MLD v1 and v2:
     - RFC 2710 (Multicast Listener Discovery (MLD) for IPv6)
     - RFC 3810 (Multicast Listener Discovery Version 2 (MLDv2) for IPv6)
+
+  * VRRP v2:
+    - RFC 3768 (Virtual Router Redundancy Protocol (VRRP))
 
 For description of the changes in each release, see ${XORP}/RELEASE_NOTES.
 
@@ -243,6 +246,8 @@ The content of each of the directories is the following:
 
   * static_routes : Static routes management.
     It is used to configure static routes.
+
+  * vrrp : Virtual Router Redundancy Protocol implementation.
 
   * xrl : XRL (XORP Resource Locator) interface.
 
