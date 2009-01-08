@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.112 2008/12/06 06:33:37 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.113 2009/01/08 00:17:50 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -38,20 +38,26 @@ compiler respectively).
 ============================
 
 The documentation for each XORP release is available from the XORP Web
-site. The following procedure (for FreeBSD) can be used to generate the
+site. The following procedure can be used to generate the
 documentation directly from the source files.
 
-# Install TeX and LaTeX:
-cd /usr/ports/print/teTeX
-make
-make install
+1.2.1. Install TeX and LaTeX
 
-# Optionally install the Prosper LaTeX class:
-cd /usr/ports/textproc/prosper
-make
-make install
+  * FreeBSD
+    cd /usr/ports/print/teTeX
+    make
+    make install
+    # Optionally install the Prosper LaTeX class:
+    cd /usr/ports/textproc/prosper
+    make
+    make install
 
-# Compile the documentation.
+  * Ubuntu Linux
+  apt-get install texlive
+  apt-get install texlive-latex-extra
+  apt-get install texlive-math-extra
+
+1.2.2. Compile the documentation.
 # Note that this must be done directly in the XORP directory with the
 # original source files.
 cd /path/to/xorp
@@ -78,10 +84,10 @@ gmake check
 
 
 3. OS-specific notes
-======================
+====================
 
 3.1. DragonFlyBSD
-============
+=================
 
   * DragonFlyBSD-1.4
     - The code compiles with the default compiler, and the internal tests
@@ -512,11 +518,6 @@ gmake check
         Those packages are needed for SNMP support.
       - iptables-dev
         This package is needed for configuring firewall rules using XORP.
-    - Optionally install the following packages if you want to compile
-      the user documentation from sources:
-      - texlive
-      - texlive-latex-extra
-      - texlive-math-extra
     - The code compiles, and the internal tests appear to succeed.
     - gcc (GCC) 4.3.2 (Ubuntu 4.3.2-1ubuntu11)
     - Tested on the following architectures: i386
