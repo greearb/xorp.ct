@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/rip.tex,v 1.19 2006/07/12 07:25:47 pavlin Exp $
+% $XORP: xorp/docs/user_manual/rip.tex,v 1.20 2006/07/19 00:43:38 pavlin Exp $
 %
 
 \chapter{RIP and RIPng}
@@ -94,8 +94,8 @@ see Chapter \ref{policy} for additional detais.
 xx\=xx\=xx\=xx\=xx\=xx\=xx\=\kill
 protocols \{\\
 \>rip \{\\
-\>\>targetname {\it text}\\
-\>\>export {\it text}\\
+\>\>targetname: {\it text}\\
+\>\>export: {\it text}\\
 \>\>interface {\it text} \{\\
 \>\>\>vif {\it text} \{\\
 \>\>\>\>address {\it IPv4} \{\\
@@ -121,6 +121,14 @@ protocols \{\\
 \>\>\>\>\>\>\>end-time: {\it text(``YYYY-MM-DD.HH:MM'')}\\
 \>\>\>\>\>\>\}\\
 \>\>\>\>\>\}\\
+\>\>\>\>\}\\
+\>\>\>\}\\
+\>\>\}\\
+\\
+\>\>traceoptions \{\\
+\>\>\>flag \{\\
+\>\>\>\>all \{\\
+\>\>\>\>\>disable: {\it bool}\\
 \>\>\>\>\}\\
 \>\>\>\}\\
 \>\>\}\\
@@ -286,6 +294,21 @@ mutually-exclusive statements:
 If there are multiple configured keys, the messages are transmitted
 using each of the keys that are valid for message generation.
 
+\item{\tt traceoptions}: this directive delimits the configuration of
+  debugging and tracing options for RIP.
+\begin{description}
+\item{\tt flag}: this directive is used to specify which tracing
+  options are enabled.  Possible parameters are:
+\begin{description}
+\item{\tt all}: this directive specifies that all tracing
+  options should be enabled.  Possible parameters are:
+\begin{description}
+\item{\tt disable}: this takes the value {\stt true} or {\stt false},
+  and disables or enables tracing. The default is {\stt false}.
+\end{description}
+\end{description}
+\end{description}
+
 \end{description}
 
 Note that prior to XORP Release-1.2, the authentication configuration
@@ -311,6 +334,7 @@ exceptions:
   because RFC 2081 does not specify authentication for RIPng.
 \end{itemize}
 
+\newpage
 \subsection{Example Configurations}
 
 \vspace{0.1in}
