@@ -1,0 +1,8 @@
+#
+# $XORP: xorp/contrib/packages/README,v 1.1 2006/06/23 22:48:39 pavlin Exp $
+#
+
+This directory contains XORP-related package information for various
+OS distributions:
+
+* debian: Debian GNU/Linux (http://www.debian.org/)

@@ -1,0 +1,90 @@
+% -*- mode: latex; tex-main-file: "pospaper.tex" -*-
+
+\section{Architecture and Requirements}
+
+We've hopefully convinced you that Internet research would be better
+off if changes and extensions could be provisionally deployed.
+No simulation or testing environment can provide similarly useful lessons---or
+convince conservative router vendors that extensions work well
+enough to deserve real-world deployment.
+We want a routing infrastructure that is at least partially open to
+research extensions.
+The infrastructure must, further, meet Internet robustness standards
+to merit deployment even on research networks like Abilene.
+But how can we make this happen?
+There are several possibilities:
+
+\begin{itemize}
+
+\item Individual researchers could convince big router vendors to implement
+their extensions. To put it succinctly, this seems unlikely.
+
+\item Vendors could open their internal APIs for experimental use. This
+also seems unlikely---vendors probably consider their APIs to be trade
+secrets, and don't want to facilitate an open market in routing software.
+Furthermore, legacy code inside most routers isn't particularly easy
+to extend.
+
+% \item Researchers could deploy currently available open-source routers for
+% conventional PCs and operating systems, then extend those routers.
+% Conventional PCs have enough power to support edge routing. However,
+% deploying a set of routing PCs would take a huge effort investment. It
+% seems foolish to build such an infrastructure without planning ahead for
+% future uses, such as simultaneous deployment of multiple extensions by
+% independent research groups. Furthermore, currently available open-source
+% routers aren't known for their robustness, and don't scale cleanly to
+% faster architectures, such as PC clusters.
+
+\item Researchers could deploy currently available routing daemons
+such as Zebra~\cite{zebra}, MRTd~\cite{mrt} or GateD~\cite{gated}, on a conventional PC running an operating
+system such as Linux or FreeBSD.  The principle problems here are
+extensibility, performance, and robustness.  The forwarding paths on
+these operating systems are not optimally designed for performance
+under heavy load, or for extensibility.  The routing daemons are not as
+robust as we would like, and not generally designed with extensibility
+as a high priority.  Finally, they don't present an {\it integrated}
+router user interface to the network operator, which reduces the
+likelihood of acceptance.
+
+\item Researchers could develop a new open-source router, designed from the
+ground up for extensibility, robustness, and performance.
+It would take time to build such a router, and then to convince the network
+operator community that it met stringent robustness standards, but
+the resulting router would make a more useful research platform than any of
+the other choices.
+
+\end{itemize}
+
+We have chosen this last path, which we call the Extensible Open Router
+Platform, or XORP.
+Our design addresses the four major challenges in building an open-source
+router: traditional router features,
+extensibility, performance,  and robustness.
+
+\begin{description}
+\item[\textbf{Features.}] Real-world routers must support a long feature
+list, including routing protocols, management interfaces, queue management,
+and multicast.
+
+\item[\textbf{Extensibility.}] Every aspect of the router should be
+extensible, from routing protocols down to details of packet forwarding.
+The router must support multiple simulatenous extensions as long as those
+extensions don't conflict. APIs between router components should be both
+open and easy to use.
+
+\item[\textbf{Performance.}] XORP isn't designed for core routers, at least
+not initially. However, forwarding performance is still important: that
+is the purpose of a router.  Scalability in the face of routing table
+size or number of peers is also critical.
+
+\item[\textbf{Robustness.}] Real-world routers must not crash or misroute
+packets. A fragile router faces an extremely difficult deployment path.
+Extensibility makes robustness even more difficult to achieve: extensions
+are inherently experimental, yet their use should not compromise the
+router's robustness (except perhaps for a subset of packets intended for
+the extension).
+
+\end{description}
+
+The next sections present XORP in general and describe how we're achieving
+each of these goals.

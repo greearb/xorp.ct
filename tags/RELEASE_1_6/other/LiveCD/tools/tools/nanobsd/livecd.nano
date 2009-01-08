@@ -1,0 +1,363 @@
+#
+# $XORP: other/LiveCD/tools/tools/nanobsd/livecd.nano,v 1.4 2008/12/30 00:41:12 jtc Exp $
+#
+
+# Notes:
+#  NO_TOOLCHAIN allegedly broken in 7.x+; and cannot be specified as it
+#  disables the installation of libstdc++.
+#  With the full XORP package, the live cd weighs in around ~150MB,
+#  without shared libraries.
+#  It would really be useful to have a network coredump facility.
+
+NANO_NAME=livecd
+NANO_VOLID='XORP LiveCD 1.6'
+NANO_IMGNAME='XORP-1.6-LiveCD.iso'
+
+# Use our own FreeBSD 7.0-RELEASE checkout, as we need to apply
+# a patch to /etc/rc.initdiskless.
+NANO_SRC=${NANO_SRC:-"/usr/src"}
+NANO_KERNEL=LIVECD
+NANO_IMAGES=1
+
+# / is always mounted from cd0, so we can deal with USB and SCSI too.
+NANO_DRIVE=cd0
+
+# Pull config from USB key on boot if it's available.
+NANO_CONF_DRIVE=da0s1
+NANO_CONF_OPTIONAL=true
+NANO_CONF_FSTYPE=msdosfs
+NANO_CONF_FSOPTS=longnames
+NANO_CONF_SUBDIR='xorp.cfg'
+
+# Path to precompiled packages.
+XORP_PACKAGES_DIR=${XORP_PACKAGES_DIR:-"/usr/ports/packages/All"}
+XORP_PACKAGES=${XORP_PACKAGES:-"xorp-1.6.tbz"}
+
+#
+# World options.
+#
+
+CONF_WORLD='
+#WITHOUT_ACPI=YES
+WITHOUT_ATM=YES
+WITHOUT_AUDIT=YES
+WITHOUT_AUTHPF=YES
+WITHOUT_BIND=YES
+WITHOUT_BLUETOOTH=YES
+WITHOUT_CALENDAR=YES
+WITHOUT_CVS=YES
+#WITHOUT_CXX=YES
+WITHOUT_DICT=YES
+WITHOUT_EXAMPLES=YES
+WITHOUT_FORTRAN=YES
+WITHOUT_GAMES=YES
+WITHOUT_GCOV=YES
+#WITHOUT_GDB=YES			# Include GDB for backtraces
+WITHOUT_GPIB=YES
+WITHOUT_GROFF=YES			# XXX
+WITHOUT_HTML=YES
+WITHOUT_I4B=YES
+WITHOUT_INFO=YES
+WITHOUT_IPFILTER=YES
+WITHOUT_IPX=YES
+WITHOUT_KERBEROS=YES
+WITHOUT_KLDLOAD=YES
+WITHOUT_LIB32=YES			# no need to emulate on 64-bit arch
+WITHOUT_LOCALES=YES
+WITHOUT_LPR=YES
+WITHOUT_MAILWRAPPER=YES
+WITHOUT_MAN=YES
+WITHOUT_NCP=YES
+WITHOUT_NETGRAPH=YES
+WITHOUT_NIS=YES
+WITHOUT_OBJC=YES
+WITHOUT_PAM=YES
+WITHOUT_PF=YES
+WITHOUT_PROFILE=YES
+WITHOUT_RCMDS=YES
+WITHOUT_RCS=YES
+WITHOUT_RESCUE=YES
+WITHOUT_SENDMAIL=YES
+WITHOUT_SHAREDOCS=YES
+#WITHOUT_SYSCONS=YES
+#WITHOUT_TOOLCHAIN=YES		# XXX we need the TOOLCHAIN for C++ libraries
+#WITHOUT_USB=YES		# XXX we need to mount usb keys
+WITHOUT_ZFS=YES
+#
+# XXX
+#
+NO_CLEAN=YES
+NO_CLEANDIR=YES
+NO_KERNELCLEAN=YES
+#
+'
+
+# Try to keep the image size down during testing.
+CdromDevice CD 200
+
+#
+# Customization rules. Please keep sorted alphabetically.
+#
+
+# Add a serial terminal, but keep the system console on ttyv0.
+# Set up for a null-modem cable without extra signalling.
+cust_add_serial_console() (
+    sed -i "" -e /ttyd0/s/off/on/ ${NANO_WORLDDIR}/etc/ttys
+    sed -i "" -e /ttyd0/s/std/3wire/ ${NANO_WORLDDIR}/etc/ttys
+)
+
+# Configure the automounter if desired.
+# The USB key will be mounted on /cfg; the auto-mountpoint is /auto/usb.
+cust_automounter() (
+    mkdir -p ${NANO_WORLDDIR}/.amd_mnt ${NANO_WORLDDIR}/auto
+
+    echo "nfsclient_load=\"YES\"" >> ${NANO_WORLDDIR}/boot/loader.conf
+
+    echo "rpcbind_enable=\"YES\"" >> ${NANO_WORLDDIR}/etc/defaults/rc.conf
+    echo "rpcbind_flags=\"-h 127.0.0.1\"" >> ${NANO_WORLDDIR}/etc/defaults/rc.conf
+    echo "nfs_client_enable=\"YES\"" >> ${NANO_WORLDDIR}/etc/defaults/rc.conf
+    echo "amd_enable=\"YES\"" >> ${NANO_WORLDDIR}/etc/defaults/rc.conf
+    echo "amd_flags=\"-c 10 -w 10 -a /.amd_mnt -l syslog /auto /etc/amd.map\"" >> ${NANO_WORLDDIR}/etc/defaults/rc.conf
+
+    cat > ${NANO_WORLDDIR}/etc/amd.map <<__EOF__
+/defaults       type:=host;fs:=${autodir}/${rhost}/host;rhost:=${key}
+*               opts:=rw,grpid,resvport,vers=3,proto=udp,nosuid,nodev
+usb             type:=program;fs:=/cfg;\
+                mount:="/sbin/mount mount -t ${NANO_CONF_FSTYPE} -o sync /dev/${NANO_CONF_DRIVE} /cfg";\
+                unmount:="/sbin/umount umount /cfg"
+__EOF__
+)
+
+#
+# Enable telnet for debugging purposes (defaults to off).
+#
+cust_enable_telnet() (
+    sed -i "" -e /telnet/s/^#// ${NANO_WORLDDIR}/etc/inetd.conf
+    echo "inetd_enable=\"YES\"" >> ${NANO_WORLDDIR}/etc/rc.conf
+)
+
+#
+# Enable the XORP LiveCD boot menu (loader) -- defaults to off.
+#
+cust_enable_bootmenu() (
+    set -x
+
+    # comment any beastie lines out
+    sed -i "" -e '/beastie/s/^/\\ /' ${NANO_WORLDDIR}/boot/loader.rc
+    cat >> ${NANO_WORLDDIR}/boot/loader.rc <<__EOF__
+
+\ Load the XORP LiveCD boot menu
+include /boot/xorpmenu.4th
+
+\ Start the XORP LiveCD boot menu
+xorpmenu-start
+__EOF__
+
+    # Now enable the XORP menu 
+    touch ${NANO_WORLDDIR}/boot/loader.conf
+    echo "xorpmenu_disable=\"NO\"" >> ${NANO_WORLDDIR}/boot/loader.conf
+    echo "autoboot_delay=\"10\"" >> ${NANO_WORLDDIR}/boot/loader.conf
+)
+
+#
+# Some newer systems have problems with the AT keyboard driver -- they
+# present emulation shims which go nowhere. This SHOULD go into a
+# Beastie-style menu, see above.
+#
+cust_disable_atkbd() (
+    touch ${NANO_WORLDDIR}/boot/device.hints
+    echo "hint.atkbd.0.disabled=\"1\"" >> ${NANO_WORLDDIR}/boot/device.hints
+    echo "hint.atkbdc.0.disabled=\"1\"" >> ${NANO_WORLDDIR}/boot/device.hints
+    echo "hint.psm.0.disabled=\"1\"" >> ${NANO_WORLDDIR}/boot/device.hints
+)
+
+#
+# Hook to disable ISA serial ports by default.
+#
+cust_disable_isa_sio() (
+    touch ${NANO_WORLDDIR}/boot/device.hints
+    echo "hint.sio.0.disabled=\"1\"" >> ${NANO_WORLDDIR}/boot/device.hints
+    echo "hint.sio.1.disabled=\"1\"" >> ${NANO_WORLDDIR}/boot/device.hints
+)
+
+# Disable cron completely.
+cust_disable_cron() (
+    echo "cron_enable=\"NO\"" >> ${NANO_WORLDDIR}/etc/rc.conf
+)
+
+# Disable sendmail completely.
+cust_disable_sendmail() (
+    echo "sendmail_enable=\"NONE\"" >> ${NANO_WORLDDIR}/etc/rc.conf
+    echo "sendmail_outbound_enable=\"NO\"" >> ${NANO_WORLDDIR}/etc/rc.conf
+    echo "sendmail_submit_enable=\"NO\"" >> ${NANO_WORLDDIR}/etc/rc.conf
+    echo "sendmail_msp_queue_enable=\"NO\"" >> ${NANO_WORLDDIR}/etc/rc.conf
+)
+
+# Disable savecore.
+cust_disable_savecore() (
+    echo "dumpdev=\"NO\"" >> ${NANO_WORLDDIR}/etc/rc.conf
+    echo "dumpdir=\"NO\"" >> ${NANO_WORLDDIR}/etc/rc.conf
+)
+
+# Boot kernel as quickly as possible.
+cust_fastloader() (
+    touch ${NANO_WORLDDIR}/boot/loader.conf
+    echo "autoboot_delay=\"1\"" >> ${NANO_WORLDDIR}/boot/loader.conf
+)
+
+# Set hostname to something meaningful by default.
+cust_hostname() (
+    echo "hostname=\"xorpcd.local\"" >> ${NANO_WORLDDIR}/etc/defaults/rc.conf
+)
+
+# XXX Currently FreeBSD has no tool to load kernel modules automatically
+# based on what it probes on buses, so we load the most commonly expected
+# wired network drivers here.
+cust_load_nic_drivers() (
+    NICS="if_bce if_bfe if_bge if_dc if_de if_ed if_em if_fxp if_ixgb if_ixgbe if_lge if_msk if_my if_nfe if_nge if_nve if_re if_sf if_sis if_sk if_ste if_stge if_ti if_tl if_tx if_txp if_vge if_vr if_vx if_wb if_xl"
+    for i in $NICS
+    do
+	echo "${i}_load=\"YES\"" >> ${NANO_WORLDDIR}/boot/loader.conf
+    done
+)
+
+# Load the USB modules, so /conf can live on a USB key.
+# cam is statically compiled to support boot from USB and SCSI CDROM drives;
+# if it is taken out, should load here, though dependencies will kick in.
+cust_load_usb_drivers() (
+    touch ${NANO_WORLDDIR}/boot/loader.conf
+    echo "usb_load=\"YES\"" >> ${NANO_WORLDDIR}/boot/loader.conf
+    echo "ukbd_load=\"YES\"" >> ${NANO_WORLDDIR}/boot/loader.conf
+    echo "umass_load=\"YES\"" >> ${NANO_WORLDDIR}/boot/loader.conf
+    echo "msdosfs_load=\"YES\"" >> ${NANO_WORLDDIR}/boot/loader.conf
+)
+
+# Display a custom message-of-the-day.
+cust_motd() (
+    motd=${NANO_WORLDDIR}/etc/motd
+    osver=$(head -1 $motd)
+    rm -f $motd
+    echo > $motd $osver
+    echo >> $motd ""
+    echo >> $motd "Welcome to the XORP LiveCD!"
+    echo >> $motd "Build date: $(date)"
+    echo >> $motd ""
+    echo >> $motd 'Use the "xorpsh" command to enter the XORP shell.'
+    echo >> $motd ""
+    echo >> $motd 'Once inside xorpsh, after configuring the router'
+    echo >> $motd 'using "configure", use "save /etc/local/xorp.conf"'
+    echo >> $motd 'to save the configuration, and "usb save" to back'
+    echo >> $motd 'up all configuration to a preformatted USB key.'
+    echo >> $motd ""
+    echo >> $motd 'Backing up may also be done from this shell, using'
+    echo >> $motd '"usb_save". Do not unplug the key during a backup.'
+)
+
+# Don't show the Beastie.
+cust_disable_beastie() (
+    touch ${NANO_WORLDDIR}/boot/loader.conf
+    echo "beastie_disable=\"YES\"" >> ${NANO_WORLDDIR}/boot/loader.conf
+)
+
+#
+# Remove NIS references.
+#
+cust_nsswitch_conf() (
+    mv ${NANO_WORLDDIR}/etc/nsswitch.conf ${NANO_WORLDDIR}/etc/nsswitch.conf.bak
+    touch ${NANO_WORLDDIR}/etc/nsswitch.conf
+    cat >> ${NANO_WORLDDIR}/etc/nsswitch.conf <<__EOF__
+group: files
+hosts: files dns
+networks: files
+passwd: files
+shells: files
+services: files
+protocols: files
+rpc: files
+__EOF__
+)
+
+# Prefer USB keyboard if no AT keyboard plugged in.
+cust_prefer_usb_keyboard() (
+    touch ${NANO_WORLDDIR}/boot/device.hints
+    echo "hint.atkbd.0.flags=\"0x01\"" >> ${NANO_WORLDDIR}/boot/device.hints
+)
+
+# Strip toolchain. NO_TOOLCHAIN cannot be specified without blowing
+# away the system's shared libstdc++, which XORP needs.
+cust_prune_toolchain() (
+    STRIP_USR_BIN="CC ar byacc c++ c89 c99 cc g++ flex flex++ gcc lex lex++ objcopy objdump nm ranlib readelf size strings strip"
+    cd ${NANO_WORLDDIR}/usr/bin && rm -f ${STRIP_USR_BIN}
+    cd ${NANO_WORLDDIR}/usr/libexec && rm -rf cc1 cc1plus
+    cd ${NANO_WORLDDIR}/usr && rm -rf libdata
+)
+
+# Install XORP in the system image and enable it to run during boot.
+cust_pkg_add_xorp () (
+    mkdir -p ${NANO_WORLDDIR}/packages
+    cd ${XORP_PACKAGES_DIR} && cp ${XORP_PACKAGES} ${NANO_WORLDDIR}/packages
+    chroot ${NANO_WORLDDIR} sh -c "cd /packages ; pkg_add -F -v ${XORP_PACKAGES}"
+    rm -rf ${NANO_WORLDDIR}/packages
+
+    echo "xorp_enable=\"YES\"" >> ${NANO_WORLDDIR}/etc/defaults/rc.conf
+    echo "xorp_config_boot=\"/usr/local/etc/xorp.conf\"" >> ${NANO_WORLDDIR}/etc/defaults/rc.conf
+    echo "xorp_flags=\"\"" >> ${NANO_WORLDDIR}/etc/defaults/rc.conf
+)
+
+# Enable sshd by default and lockdown syslogd.
+cust_rc_misc() (
+    echo "sshd_enable=\"YES\"" >> ${NANO_WORLDDIR}/etc/rc.conf
+    echo "sshd_flags=\"-4 -u 0\"" >> ${NANO_WORLDDIR}/etc/rc.conf
+    echo "syslogd_flags=\"-s -s\"" >> ${NANO_WORLDDIR}/etc/rc.conf
+)
+
+# squelch the a.out warning by creating a temporary directory
+cust_squelch_aout_warning() (
+    mkdir -p ${NANO_WORLDDIR}/usr/lib/aout
+    touch ${NANO_WORLDDIR}/usr/lib/aout/.keepme
+)
+
+# Add root user to xorp group.
+# Modify the installed misc.cmds template file to
+# teach the Router Manager about 'usb_save'.
+cust_xorp_conf() (
+	pw -V ${NANO_WORLDDIR}/etc groupmod xorp -M root 
+
+	misc=${NANO_WORLDDIR}/usr/local/etc/templates/misc.cmds
+	echo >>$misc 'usb save {'
+	echo >>$misc '	%command: "usb_save" %help: "Save configuration to USB disk";'
+	echo >>$misc '	%nomore_mode;'
+	echo >>$misc '}'
+)
+
+#
+# Commands.
+#
+
+#customize_cmd cust_fastloader		# mut.excl w/bootmenu
+customize_cmd cust_prefer_usb_keyboard
+#customize_cmd cust_disable_atkbd	    # XXX For debugging only.
+customize_cmd cust_disable_beastie
+customize_cmd cust_enable_bootmenu
+#customize_cmd cust_load_usb_drivers	    # -> static kernel
+#customize_cmd cust_load_nic_drivers	    # -> static kernel
+
+customize_cmd cust_disable_isa_sio	   # force sioX default disable
+
+customize_cmd cust_add_serial_console
+customize_cmd cust_allow_ssh_root
+customize_cmd cust_disable_cron
+customize_cmd cust_disable_sendmail
+customize_cmd cust_disable_savecore
+customize_cmd cust_motd
+customize_cmd cust_hostname
+#customize_cmd cust_automounter		    # not needed
+customize_cmd cust_rc_misc
+customize_cmd cust_nsswitch_conf
+
+customize_cmd cust_prune_toolchain
+customize_cmd cust_pkg_add_xorp
+customize_cmd cust_install_files	# after package install (overwrite rc)
+customize_cmd cust_xorp_conf
+#customize_cmd cust_enable_telnet	# XXX For debugging only.
+customize_cmd cust_squelch_aout_warning

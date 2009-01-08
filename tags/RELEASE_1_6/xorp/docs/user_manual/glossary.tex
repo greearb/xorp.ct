@@ -1,0 +1,97 @@
+%
+% $XORP: xorp/docs/user_manual/glossary.tex,v 1.6 2008/07/22 22:24:18 pavlin Exp $
+%
+
+\chapter*{Glossary}
+\begin{description}
+
+  \item{\bf AS}: see Autonomous System.
+
+  \item{\bf Autonomous System}: a routing domain that is under one
+  administrative authority, and which implements its own routing
+  policies.  Key concept in BGP.
+
+  \item{\bf BGP}: Border Gateway Protocol.  See Chapter \ref{bgp}.
+
+  \item{\bf Bootstrap Router}: A PIM-SM router that chooses the RPs for
+  a domain from amongst a set of candidate RPs.
+
+  \item{\bf BSR}: See Bootstrap Router.
+
+  \item{\bf Candidate RP}: A PIM-SM router that is configured to be a
+  candidate to be an RP.  The Bootstrap Router will then choose the
+  RPs from the set of candidates.
+
+  \item{\bf Dynamic Route}: A route learned from another router via a
+  routing protocol such as RIP or BGP.
+
+  \item{\bf EGP}: see Exterior Gateway Protocol.
+
+  \item{\bf Exterior Gateway Protocol}\footnote{Should not be confused by the
+  now historic routing protocol with the same name that was specified in RFC
+  904, and that has been replaced by BGP.}: a routing protocol used to route
+  between Autonomous Systems.  The main example is BGP.
+
+  \item{\bf IGMP}: Internet Group Management Protocol.  See Chapter
+  \ref{igmp}.
+
+  \item{\bf IGP}: see Interior Gateway Protocol.
+
+  \item{\bf Interior Gateway Protocol}: a routing protocol used to route
+  within an Autonomous System.  Examples include RIP, OSPF and IS-IS.
+
+  \item{\bf Live CD}: A CD-ROM that is bootable.  In the context of
+  \xorp, the Live CD can be used to produce a low-cost router without
+  needing to install any software.
+
+  \item{\bf MLD}: Multicast Listener Discovery protocols.  See Chapter
+  \ref{igmp}.
+
+  \item{\bf MRIB}: See Multicast RIB.
+
+  \item{\bf Multicast RIB}: the part of the RIB that holds multicast routes.
+  These are not directly used for forwarding, but instead are used by
+  multicast routing protocols such as PIM-SM to perform RPF checks
+  when building the multicast distibution tree.
+
+  \item{\bf OSPF}: See Open Shortest Path First.
+
+  \item{\bf Open Shortest Path First}: an IGP routing protocol based on
+  a link-state algorithm.  Used to route within medium to large
+  networks. See Chapter \ref{ospf}.
+
+  \item{\bf PIM-SM}: Protocol Independent Multicast, Sparse Mode. See
+  Chapter \ref{pimsm}.
+
+  \item{\bf Rendezvous Point}: A router used in PIM-SM as part of the
+  rendezvous process by which new senders are grafted on to the
+  multicast tree.
+
+  \item{\bf Reverse Path Forwarding}: many multicast routing protocols
+  such as PIM-SM build a multicast distribution tree based on the best
+  route back from each receiver to the source, hence multicast packets
+  will be forwarded along the reverse of the path to the source.
+
+  \item{\bf RIB}: See Routing Information Base.
+
+  \item{\bf RIP}: Routing Information Protocol.  See Chapter \ref{rip}.
+
+  \item{\bf Routing Information Base}: the collection of routes learned
+  from all the dynamic routing protocols running on the router.
+  Subdivided into a Unicast RIB for unicast routes and a Multicast RIB.
+
+  \item{\bf RP}: See Rendezvous Point.
+
+  \item{\bf RPF}: See Reverse Path Forwarding.
+
+  \item{\bf Static Route}: A route that has been manually configured on
+  the router.
+
+  \item{\bf VRRP}: Virtual Router Redundancy Protocol.  See Chapter \ref{vrrp}.
+
+  \item{\bf xorpsh}: \xorp command shell.  See Chapter \ref{xorpsh}.
+
+  \item{\bf xorp\_rtrmgr}: \xorp router manager process.  See Chapter
+  \ref{xorpsh}.
+
+\end{description}

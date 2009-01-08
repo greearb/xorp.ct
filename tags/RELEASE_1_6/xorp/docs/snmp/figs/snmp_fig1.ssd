@@ -1,0 +1,689 @@
+Storage 
+{
+	{ Format 1.33 }
+	{ GeneratedFrom TSSD-version-2.20 }
+	{ WrittenBy jcardona }
+	{ WrittenOn "" }
+}
+
+Document 
+{
+	{ Type "Static Structure Diagram" }
+	{ Name snmp_fig1.ssd }
+	{ Author jcardona }
+	{ CreatedOn "" }
+	{ Annotation "" }
+	{ Hierarchy False }
+}
+
+Page 
+{
+	{ PageOrientation Portrait }
+	{ PageSize A4 }
+	{ ShowHeaders False }
+	{ ShowFooters False }
+	{ ShowNumbers False }
+}
+
+Scale 
+{
+	{ ScaleValue 1 }
+}
+
+# GRAPH NODES
+
+SSDClassNode 1
+{
+	{ Name "MIB" }
+	{ Annotation "" }
+	{ Parent 0 }
+	{ Index "" }
+	{ Attributes 0 }
+	{ Operations 0 }
+	{ Stereotype "<< - >>" }
+	{ Properties "{ - }" }
+}
+
+SSDClassNode 2
+{
+	{ Name "SNMP agent" }
+	{ Annotation "" }
+	{ Parent 0 }
+	{ Index "" }
+	{ Attributes 0 }
+	{ Operations 0 }
+	{ Stereotype "<< - >>" }
+	{ Properties "{ - }" }
+}
+
+SSDClassNode 3
+{
+	{ Name "MIB module" }
+	{ Annotation "" }
+	{ Parent 0 }
+	{ Index "" }
+	{ Attributes 0 }
+	{ Operations 0 }
+	{ Stereotype "<< - >>" }
+	{ Properties "{ - }" }
+}
+
+SSDClassNode 4
+{
+	{ Name "router manager" }
+	{ Annotation "" }
+	{ Parent 0 }
+	{ Index "" }
+	{ Attributes 0 }
+	{ Operations 0 }
+	{ Stereotype "<< - >>" }
+	{ Properties "{ - }" }
+}
+
+SSDClassNode 5
+{
+	{ Name "XRL Interface" }
+	{ Annotation "" }
+	{ Parent 0 }
+	{ Index "" }
+	{ Attributes 0 }
+	{ Operations 0 }
+	{ Stereotype "<< - >>" }
+	{ Properties "{ - }" }
+}
+
+SSDClassNode 6
+{
+	{ Name "XRL target" }
+	{ Annotation "" }
+	{ Parent 0 }
+	{ Index "" }
+	{ Attributes 0 }
+	{ Operations 0 }
+	{ Stereotype "<< - >>" }
+	{ Properties "{ - }" }
+}
+
+SSDClassNode 9
+{
+	{ Name "XORP configuration" }
+	{ Annotation "" }
+	{ Parent 0 }
+	{ Index "" }
+	{ Attributes 0 }
+	{ Operations 0 }
+	{ Stereotype "<< - >>" }
+	{ Properties "{ - }" }
+}
+
+SSDClassNode 10
+{
+	{ Name "other processes" }
+	{ Annotation "" }
+	{ Parent 0 }
+	{ Index "" }
+	{ Attributes 0 }
+	{ Operations 0 }
+	{ Stereotype "<< - >>" }
+	{ Properties "{ - }" }
+}
+
+# GRAPH EDGES
+
+SSDCompositionEdge 23
+{
+	{ Name "" }
+	{ Annotation "" }
+	{ Parent 0 }
+	{ Subject1 3 }
+	{ Subject2 1 }
+	{ Constraint1 "*" }
+	{ Constraint2 "1" }
+	{ RoleName1 "" }
+	{ RoleName2 "" }
+}
+
+SSDGeneralizationEdge 24
+{
+	{ Name "" }
+	{ Annotation "" }
+	{ Parent 0 }
+	{ Subject1 3 }
+	{ Subject2 5 }
+}
+
+SSDGeneralizationEdge 25
+{
+	{ Name "" }
+	{ Annotation "" }
+	{ Parent 0 }
+	{ Subject1 4 }
+	{ Subject2 6 }
+}
+
+SSDCompositionEdge 30
+{
+	{ Name "maintains up to date" }
+	{ Annotation "" }
+	{ Parent 0 }
+	{ Subject1 9 }
+	{ Subject2 4 }
+	{ Constraint1 "" }
+	{ Constraint2 "" }
+	{ RoleName1 "" }
+	{ RoleName2 "" }
+}
+
+SSDBinaryAssociationEdge 31
+{
+	{ Name "" }
+	{ Annotation "" }
+	{ Parent 0 }
+	{ Subject1 1 }
+	{ Subject2 2 }
+	{ Constraint1 "1" }
+	{ Constraint2 "1\r" }
+	{ RoleName1 "" }
+	{ RoleName2 "" }
+}
+
+SSDBinaryAssociationEdge 32
+{
+	{ Name "" }
+	{ Annotation "" }
+	{ Parent 0 }
+	{ Subject1 6 }
+	{ Subject2 5 }
+	{ Constraint1 "1" }
+	{ Constraint2 "*" }
+	{ RoleName1 "" }
+	{ RoleName2 "" }
+}
+
+SSDBinaryAssociationEdge 33
+{
+	{ Name "" }
+	{ Annotation "" }
+	{ Parent 0 }
+	{ Subject1 3 }
+	{ Subject2 4 }
+	{ Constraint1 "" }
+	{ Constraint2 "" }
+	{ RoleName1 "request cfg changes" }
+	{ RoleName2 "" }
+}
+
+SSDBinaryAssociationEdge 34
+{
+	{ Name "read configuration" }
+	{ Annotation "" }
+	{ Parent 0 }
+	{ Subject1 3 }
+	{ Subject2 10 }
+	{ Constraint1 "" }
+	{ Constraint2 "" }
+	{ RoleName1 "" }
+	{ RoleName2 "" }
+}
+
+SSDGeneralizationEdge 40
+{
+	{ Name "" }
+	{ Annotation "" }
+	{ Parent 0 }
+	{ Subject1 10 }
+	{ Subject2 6 }
+}
+
+SSDBinaryAssociationEdge 41
+{
+	{ Name "changes\r configuration" }
+	{ Annotation "" }
+	{ Parent 0 }
+	{ Subject1 4 }
+	{ Subject2 10 }
+	{ Constraint1 "" }
+	{ Constraint2 "" }
+	{ RoleName1 "" }
+	{ RoleName2 "" }
+}
+
+# VIEWS AND GRAPHICAL SHAPES
+
+View 11
+{
+	{ Index "0" }
+	{ Parent 0 }
+}
+
+SSDSingleClassBox 12
+{
+	{ View 11 }
+	{ Subject 1 }
+	{ Position 150 230 }
+	{ Size 34 39 }
+	{ Color "black" }
+	{ LineWidth 1 }
+	{ LineStyle Solid }
+	{ FillStyle Unfilled }
+	{ FillColor "white" }
+	{ FixedName False }
+	{ Font "-*-helvetica-medium-r-normal--10*" }
+	{ TextAlignment Center }
+	{ TextColor "black" }
+	{ NameUnderlined False }
+	{ ShowStereotype False }
+	{ ShowProperties False }
+}
+
+SSDSingleClassBox 13
+{
+	{ View 11 }
+	{ Subject 2 }
+	{ Position 60 230 }
+	{ Size 80 39 }
+	{ Color "black" }
+	{ LineWidth 1 }
+	{ LineStyle Solid }
+	{ FillStyle Unfilled }
+	{ FillColor "white" }
+	{ FixedName False }
+	{ Font "-*-helvetica-medium-r-normal--10*" }
+	{ TextAlignment Center }
+	{ TextColor "black" }
+	{ NameUnderlined False }
+	{ ShowStereotype False }
+	{ ShowProperties False }
+}
+
+SSDSingleClassBox 14
+{
+	{ View 11 }
+	{ Subject 3 }
+	{ Position 250 230 }
+	{ Size 80 39 }
+	{ Color "black" }
+	{ LineWidth 1 }
+	{ LineStyle Solid }
+	{ FillStyle Unfilled }
+	{ FillColor "white" }
+	{ FixedName False }
+	{ Font "-*-helvetica-medium-r-normal--10*" }
+	{ TextAlignment Center }
+	{ TextColor "black" }
+	{ NameUnderlined False }
+	{ ShowStereotype False }
+	{ ShowProperties False }
+}
+
+SSDSingleClassBox 15
+{
+	{ View 11 }
+	{ Subject 4 }
+	{ Position 510 230 }
+	{ Size 80 39 }
+	{ Color "black" }
+	{ LineWidth 1 }
+	{ LineStyle Solid }
+	{ FillStyle Unfilled }
+	{ FillColor "white" }
+	{ FixedName False }
+	{ Font "-*-helvetica-medium-r-normal--10*" }
+	{ TextAlignment Center }
+	{ TextColor "black" }
+	{ NameUnderlined False }
+	{ ShowStereotype False }
+	{ ShowProperties False }
+}
+
+SSDSingleClassBox 16
+{
+	{ View 11 }
+	{ Subject 5 }
+	{ Position 250 150 }
+	{ Size 80 39 }
+	{ Color "black" }
+	{ LineWidth 1 }
+	{ LineStyle Solid }
+	{ FillStyle Unfilled }
+	{ FillColor "white" }
+	{ FixedName False }
+	{ Font "-*-helvetica-medium-r-normal--10*" }
+	{ TextAlignment Center }
+	{ TextColor "black" }
+	{ NameUnderlined False }
+	{ ShowStereotype False }
+	{ ShowProperties False }
+}
+
+SSDSingleClassBox 17
+{
+	{ View 11 }
+	{ Subject 6 }
+	{ Position 510 150 }
+	{ Size 80 39 }
+	{ Color "black" }
+	{ LineWidth 1 }
+	{ LineStyle Solid }
+	{ FillStyle Unfilled }
+	{ FillColor "white" }
+	{ FixedName False }
+	{ Font "-*-helvetica-medium-r-normal--10*" }
+	{ TextAlignment Center }
+	{ TextColor "black" }
+	{ NameUnderlined False }
+	{ ShowStereotype False }
+	{ ShowProperties False }
+}
+
+SSDSingleClassBox 20
+{
+	{ View 11 }
+	{ Subject 9 }
+	{ Position 510 310 }
+	{ Size 103 39 }
+	{ Color "black" }
+	{ LineWidth 1 }
+	{ LineStyle Solid }
+	{ FillStyle Unfilled }
+	{ FillColor "white" }
+	{ FixedName False }
+	{ Font "-*-helvetica-medium-r-normal--10*" }
+	{ TextAlignment Center }
+	{ TextColor "black" }
+	{ NameUnderlined False }
+	{ ShowStereotype False }
+	{ ShowProperties False }
+}
+
+SSDSingleClassBox 21
+{
+	{ View 11 }
+	{ Subject 10 }
+	{ Position 510 400 }
+	{ Size 80 39 }
+	{ Color "black" }
+	{ LineWidth 1 }
+	{ LineStyle Solid }
+	{ FillStyle Unfilled }
+	{ FillColor "white" }
+	{ FixedName False }
+	{ Font "-*-helvetica-medium-r-normal--10*" }
+	{ TextAlignment Center }
+	{ TextColor "black" }
+	{ NameUnderlined False }
+	{ ShowStereotype False }
+	{ ShowProperties False }
+}
+
+C2R2Line 27
+{
+	{ View 11 }
+	{ Subject 23 }
+	{ FromShape 14 }
+	{ ToShape 12 }
+	{ Curved False }
+	{ End1 Empty }
+	{ End2 BlackDiamond }
+	{ Points 2 }
+	{ Point 210 230 }
+	{ Point 167 230 }
+	{ NamePosition 188 220 }
+	{ Color "black" }
+	{ LineWidth 1 }
+	{ LineStyle Solid }
+	{ FixedName True }
+	{ Font "-*-helvetica-medium-r-normal--10*" }
+	{ TextAlignment Center }
+	{ TextColor "black" }
+	{ NameUnderlined False }
+	{ T1Position 200 240 }
+	{ T2Position 177 240 }
+	{ T3Position 200 220 }
+	{ T4Position 177 220 }
+	{ NameDirection None }
+}
+
+Line 28
+{
+	{ View 11 }
+	{ Subject 24 }
+	{ FromShape 14 }
+	{ ToShape 16 }
+	{ Curved False }
+	{ End1 Empty }
+	{ End2 WhiteTriangle }
+	{ Points 2 }
+	{ Point 250 211 }
+	{ Point 250 170 }
+	{ NamePosition 236 190 }
+	{ Color "black" }
+	{ LineWidth 1 }
+	{ LineStyle Solid }
+	{ FixedName False }
+	{ Font "-*-helvetica-medium-r-normal--10*" }
+	{ TextAlignment Center }
+	{ TextColor "black" }
+	{ NameUnderlined False }
+}
+
+Line 29
+{
+	{ View 11 }
+	{ Subject 25 }
+	{ FromShape 15 }
+	{ ToShape 17 }
+	{ Curved False }
+	{ End1 Empty }
+	{ End2 WhiteTriangle }
+	{ Points 2 }
+	{ Point 510 211 }
+	{ Point 510 170 }
+	{ NamePosition 496 190 }
+	{ Color "black" }
+	{ LineWidth 1 }
+	{ LineStyle Solid }
+	{ FixedName False }
+	{ Font "-*-helvetica-medium-r-normal--10*" }
+	{ TextAlignment Center }
+	{ TextColor "black" }
+	{ NameUnderlined False }
+}
+
+C2R2Line 35
+{
+	{ View 11 }
+	{ Subject 30 }
+	{ FromShape 20 }
+	{ ToShape 15 }
+	{ Curved False }
+	{ End1 Empty }
+	{ End2 BlackDiamond }
+	{ Points 2 }
+	{ Point 510 291 }
+	{ Point 510 250 }
+	{ NamePosition 458 277 }
+	{ Color "black" }
+	{ LineWidth 1 }
+	{ LineStyle Solid }
+	{ FixedName True }
+	{ Font "-*-helvetica-medium-r-normal--10*" }
+	{ TextAlignment Center }
+	{ TextColor "black" }
+	{ NameUnderlined False }
+	{ T1Position 524 281 }
+	{ T2Position 524 260 }
+	{ T3Position 496 281 }
+	{ T4Position 496 260 }
+	{ NameDirection None }
+}
+
+C2R2Line 36
+{
+	{ View 11 }
+	{ Subject 31 }
+	{ FromShape 12 }
+	{ ToShape 13 }
+	{ Curved False }
+	{ End1 Empty }
+	{ End2 Empty }
+	{ Points 2 }
+	{ Point 133 230 }
+	{ Point 100 230 }
+	{ NamePosition 116 220 }
+	{ Color "black" }
+	{ LineWidth 1 }
+	{ LineStyle Solid }
+	{ FixedName False }
+	{ Font "-*-helvetica-medium-r-normal--10*" }
+	{ TextAlignment Center }
+	{ TextColor "black" }
+	{ NameUnderlined False }
+	{ T1Position 123 240 }
+	{ T2Position 110 240 }
+	{ T3Position 123 220 }
+	{ T4Position 110 220 }
+	{ NameDirection None }
+}
+
+C2R2Line 37
+{
+	{ View 11 }
+	{ Subject 32 }
+	{ FromShape 17 }
+	{ ToShape 16 }
+	{ Curved False }
+	{ End1 Empty }
+	{ End2 Empty }
+	{ Points 2 }
+	{ Point 470 150 }
+	{ Point 290 150 }
+	{ NamePosition 380 140 }
+	{ Color "black" }
+	{ LineWidth 1 }
+	{ LineStyle Solid }
+	{ FixedName False }
+	{ Font "-*-helvetica-medium-r-normal--10*" }
+	{ TextAlignment Center }
+	{ TextColor "black" }
+	{ NameUnderlined False }
+	{ T1Position 448 160 }
+	{ T2Position 312 160 }
+	{ T3Position 448 140 }
+	{ T4Position 312 140 }
+	{ NameDirection None }
+}
+
+C2R2Line 38
+{
+	{ View 11 }
+	{ Subject 33 }
+	{ FromShape 14 }
+	{ ToShape 15 }
+	{ Curved False }
+	{ End1 Empty }
+	{ End2 Empty }
+	{ Points 2 }
+	{ Point 290 230 }
+	{ Point 470 230 }
+	{ NamePosition 380 220 }
+	{ Color "black" }
+	{ LineWidth 1 }
+	{ LineStyle Solid }
+	{ FixedName False }
+	{ Font "-*-helvetica-medium-r-normal--10*" }
+	{ TextAlignment Center }
+	{ TextColor "black" }
+	{ NameUnderlined False }
+	{ T1Position 312 240 }
+	{ T2Position 448 240 }
+	{ T3Position 340 218 }
+	{ T4Position 448 220 }
+	{ NameDirection None }
+}
+
+C2R2Line 39
+{
+	{ View 11 }
+	{ Subject 34 }
+	{ FromShape 14 }
+	{ ToShape 21 }
+	{ Curved False }
+	{ End1 Empty }
+	{ End2 Empty }
+	{ Points 3 }
+	{ Point 250 250 }
+	{ Point 250 400 }
+	{ Point 470 400 }
+	{ NamePosition 297 263 }
+	{ Color "black" }
+	{ LineWidth 1 }
+	{ LineStyle Solid }
+	{ FixedName False }
+	{ Font "-*-helvetica-medium-r-normal--10*" }
+	{ TextAlignment Center }
+	{ TextColor "black" }
+	{ NameUnderlined False }
+	{ T1Position 264 268 }
+	{ T2Position 443 410 }
+	{ T3Position 236 268 }
+	{ T4Position 443 390 }
+	{ NameDirection None }
+}
+
+Line 42
+{
+	{ View 11 }
+	{ Subject 40 }
+	{ FromShape 21 }
+	{ ToShape 17 }
+	{ Curved False }
+	{ End1 Empty }
+	{ End2 WhiteTriangle }
+	{ Points 4 }
+	{ Point 550 400 }
+	{ Point 630 400 }
+	{ Point 630 150 }
+	{ Point 550 150 }
+	{ NamePosition 616 275 }
+	{ Color "black" }
+	{ LineWidth 1 }
+	{ LineStyle Solid }
+	{ FixedName False }
+	{ Font "-*-helvetica-medium-r-normal--10*" }
+	{ TextAlignment Center }
+	{ TextColor "black" }
+	{ NameUnderlined False }
+}
+
+C2R2Line 43
+{
+	{ View 11 }
+	{ Subject 41 }
+	{ FromShape 15 }
+	{ ToShape 21 }
+	{ Curved False }
+	{ End1 Empty }
+	{ End2 Empty }
+	{ Points 5 }
+	{ Point 550 230 }
+	{ Point 620 230 }
+	{ Point 620 360 }
+	{ Point 510 360 }
+	{ Point 510 381 }
+	{ NamePosition 586 213 }
+	{ Color "black" }
+	{ LineWidth 1 }
+	{ LineStyle Solid }
+	{ FixedName False }
+	{ Font "-*-helvetica-medium-r-normal--10*" }
+	{ TextAlignment Center }
+	{ TextColor "black" }
+	{ NameUnderlined False }
+	{ T1Position 560 240 }
+	{ T2Position 524 371 }
+	{ T3Position 560 220 }
+	{ T4Position 496 371 }
+	{ NameDirection None }
+}
+

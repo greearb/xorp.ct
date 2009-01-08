@@ -1,0 +1,929 @@
+%
+% $XORP: xorp/docs/user_manual/cli_intro.tex,v 1.20 2007/11/29 01:52:35 pavlin Exp $
+%
+
+\chapter{Command Structure}
+\label{xorpsh}
+
+\section{Introduction}
+To interact with a \xorp router using the command line interface (CLI),
+the user runs the \xorp command shell ``\xorpsh''.  This allows
+configuration of the router and monitoring of the router state.
+
+In this chapter we describe how to interact with \xorpsh.  In later
+chapters we describe the details of how to configure BGP, PIM, SNMP and
+other processes.
+
+The user interface style is loosely modelled on that of a Juniper
+router.  This manual and the \xorpsh itself are works in progress, and
+so may change significantly in the future.
+
+\section{Running xorpsh}
+The \xorpsh command provides an interactive command shell to a \xorp user,
+similar in many ways to the role played by a Unix shell.  In a production
+router or on the \xorp LiveCD, \xorpsh might be set up as an user's
+login shell - they would login to the router via ssh and be directly
+in the \xorpsh environment.  However, for research and development
+purposes, it makes more sense to login normally to the machine running
+the \xorp processes, and to run \xorpsh directly from the Unix command
+line.
+
+\xorpsh should normally be run as a regular user; it is neither
+necessary or desirable to run it as root.  If an user is to be
+permitted to make changes to the running router configuration, that user
+needs to be in the Unix group {\tt xorp}.  The choice of GID for group
+{\tt xorp} is not important.
+
+\xorpsh needs to be able to communicate with the \xorp router
+management process \rtrmgr using the local file system.  If
+the \rtrmgr cannot write files in /tmp that \xorpsh can read, then
+\xorpsh will not be able to authenticate the user to the \rtrmgr.
+
+Multiple users can run \xorpsh simultaneously.  There is some degree of
+configuration locking to prevent simultaneous changes to the router
+configuration, but currently this is fairly primitive.
+
+To facilitate automated \xorp router configuration, it is possible to use
+\xorpsh in non-interactive mode (\eg as part of a shell script).
+This is described in details in Section~\ref{xorpsh:non-interactive-mode}.
+
+\newpage
+\section{Basic Commands}
+
+On starting \xorpsh, you will be presented with a command line prompt:
+\vspace{0.1in}
+
+\noindent\framebox[\textwidth][l]{
+\begin{minipage}{\textwidth}
+\begin{alltt}
+user@hostname>
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+\noindent
+You can exit \xorpsh at any time by trying Control-d.
+
+\noindent
+Typing ``?'' at the prompt will list the commands currently available to
+you:
+\vspace{0.1in}
+
+\noindent\framebox[\textwidth][l]{
+\begin{minipage}[l]{\textwidth}
+\begin{alltt}
+\begin{tabbing}
+user@hostname> \textbf{?}\\
+Po\=ssible completions:   \=\\
+\>configure       \>Switch to configuration mode\\
+\>exit            \>Exit this command session\\
+\>help            \>Provide help with commands\\
+\>quit            \>Quit this command session\\
+\>show            \>Display information about the system
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+\noindent
+If you type the first letter or letters of a command, and hit
+{\tt <Tab>}, then command completion will occur.
+
+\noindent
+At any time you can type ``?'' again to see further 
+command completions.  For
+example:
+\vspace{0.1in}
+
+\noindent\framebox[\textwidth][l]{
+\begin{minipage}{\textwidth}
+\begin{alltt}
+\begin{tabbing}
+user@hostname> \textbf{config?}\\
+Po\=ssible completions:   \=\\
+\>configure\>Switch to configuration mode\\
+user@hostname> \textbf{config}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+\noindent
+If the cursor is after the command, typing ``?'' will list the possible
+parameters for the command:
+\vspace{0.1in}
+
+\noindent\framebox[\textwidth][l]{
+\begin{minipage}{4in}
+\begin{alltt}
+\begin{tabbing}
+user@hostname> \textbf{configure ?}\\
+Po\=ssible completions:   \=\\
+\><[Enter]>       \>Execute this command\\
+\>exclusive       \>Switch to configuration mode, locking out other users\\
+user@hostname> \textbf{configure}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+
+\newpage
+\subsection{Command History and Command Line Editing}
+
+\xorpsh supports emacs-style command history and editing of the text
+on the command line.  The most important commands are:
+\begin{itemize}
+\item The {\bf up-arrow} or {\bf control-p} moves to the previous
+command in the history.
+\item The {\bf down-arrow} or {\bf control-n} moves to the next
+command in the history.
+\item The {\bf left-arrow} or {\bf control-b} moves back along the
+command line.
+\item The {\bf right-arrow} or {\bf control-f} move forward along the
+command line.
+\item {\bf control-a} moves to the beginning of the command line.
+\item {\bf control-e} moves to the end of the command line.
+\item {\bf control-d} deletes the character directly under the cursor.
+\item {\bf control-t} toggles (swaps) the character under the cursor with
+the character immediately preceding it.
+\item {\bf control-space} marks the current cursor position.
+\item {\bf control-w} deletes the text between the mark and the current
+cursor position, copying the deleted text to the cut buffer.
+\item {\bf control-k} kills (deletes) from the cursor to the end of the
+command line, copying the deleted text to the cut buffer.
+\item {\bf control-y} yanks (pastes) the text from the cut buffer,
+inserting it at the
+current cursor location.
+\end{itemize}
+
+\newpage
+\subsection{Command Output Displaying}
+
+The \xorpsh command output is displayed on the screen that is running
+\xorpsh. If the command output can fit within the screen, it is printed
+followed by the XORP prompt so the user can input new commands.
+
+If the command output is too large to fit, the \xorpsh uses
+the UNIX {\bf more}-like interface to display it one screen at a time.
+In that case the bottom of the display shows a {\bf --More--} prompt.
+If the screen displays the end of the output, the prompt
+is {\bf --More-- (END)}.
+Typing 'h' at the {\bf --More--} prompt can be used to display help
+information about available commands:
+
+\begin{verbatim}
+                   SUMMARY OF MORE COMMANDS
+
+    -- Get Help --
+  h                 *  Display this help.
+
+    -- Scroll Down --
+  Enter   Return  j *  Scroll down one line.
+  ^M  ^N  DownArrow
+  Tab d   ^D  ^X    *  Scroll down one-half screen.
+  Space   ^F        *  Scroll down one whole screen.
+  ^E  G             *  Scroll down to the bottom of the output.
+  N                 *  Display the output all at once instead of one
+                       screen at a time. (Same as specifying the
+                       | no-more command.)
+
+    -- Scroll Up --
+  k   ^H  ^P        *  Display the previous line of output.
+  UpArrow
+  u   ^U            *  Scroll up one-half screen.
+  b   ^B            *  Scroll up one whole screen.
+  ^A  g             *  Scroll up to the top of the output.
+
+    -- Misc Commands --
+  ^L                *  Redraw the output on the screen.
+  q   Q   ^C  ^K    *  Interrupt the display of output.
+
+
+
+ --More-- (END)
+\end{verbatim}
+
+
+\newpage
+\subsection{Command Output Filtering}
+
+The output of a \xorpsh command can be filtered or modified by applying
+various filter commands. If a \xorpsh command allows its output to be
+filtered, then displaying help about such command will list the
+UNIX-like pipe command '$\mid$' as one of the options:
+
+\vspace{0.1in}
+
+\noindent\framebox[\textwidth][l]{
+\begin{minipage}[l]{\textwidth}
+\begin{alltt}
+\begin{tabbing}
+user@hostname> \textbf{show host date | ?}\\
+Po\=ssible completions:   \=\\
+\>count           \>Count occurrences\\
+\>except          \>Show only text that does not match a pattern\\
+\>find            \>Search for the first occurrence of a pattern\\
+\>hold            \>Hold text without exiting the --More-- prompt\\
+\>match           \>Show only text that matches a pattern\\
+\>no-more         \>Don't paginate output\\
+\>resolve         \>Resolve IP addresses (NOT IMPLEMENTED YET)\\
+\>save            \>Save output text to a file (NOT IMPLEMENTED YET)\\
+\>trim            \>Trip specified number of columns from the start line\\
+\>                \>(NOT IMPLEMENTED YET)
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+%%
+%% TODO: add detailed description for each pipe command
+%%
+
+\newpage
+\section{Command Modes}
+
+\xorpsh has two command modes:
+\begin{description}
+\item{\bf Operational Mode,}  which allows interaction with the router
+to monitor its operation and status.
+\item{\bf Configuration Mode,} which allows the user to view the
+configuration of the router, to change that configuration, and to
+load and save configurations to file.
+\end{description}
+Generally speaking, operational mode is considered to give
+non-privileged access; there should be nothing an user can type that
+would seriously impact the operation of the router.  In contrast,
+configuration mode allows all aspects of router operation to be
+modified.
+
+In the long run, \xorpsh and the \rtrmgr will probably come to support
+fine-grained access control, so that some users can be given
+permission to change only subsets of the router configuration.  At the
+present time though, there is no fine-grained access control.
+
+An user can only enter configuration mode if that user is in the {\tt xorp}
+Unix group.
+
+\section{Operational Mode}
+\noindent\framebox[\textwidth][l]{
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+user@hostname> \textbf{?}\\
+Po\=ssible completions:   \=\\
+\>configure       \>Switch to configuration mode\\
+\>exit            \>Exit this command session\\
+\>help            \>Provide help with commands\\
+\>quit            \>Quit this command session\\
+\>show            \>Display information about the system
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+The main commands in operational mode are:
+\begin{description}
+\item{\bf configure}: switches from operational mode to configuration
+mode.
+\item{\bf exit}: exit from \xorpsh.
+\item{\bf help}: provides online help.
+\item{\bf quit}: quit from \xorpsh. It is equivalent to the {\bf exit}
+command.
+\item{\bf show}: displays many aspects of the running state of the
+router.
+\end{description}
+
+\newpage
+\subsection{Show Command}
+\noindent\framebox[\textwidth][l]{
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+user@hostname> \textbf{show ?}\\
+Po\=ssible completions:   \=\\
+\>  bgp             \>Display information about BGP\\
+\>  host            \>Display information about the host\\
+\>  igmp            \>Display information about IGMP\\
+\>  interfaces      \>Show network interface information\\
+\>  mfea            \>Display information about IPv4 MFEA\\
+\>  mfea6           \>Display information about IPv6 MFEA\\
+\>  mld             \>Display information about MLD\\
+\>  pim             \>Display information about IPv4 PIM\\
+\>  pim6            \>Display information about IPv6 PIM\\
+\>  rip             \>Display information about RIP\\
+\>  route           \>Show route table\\
+\>  version	    \>Display system version\\
+user@hostname> \textbf{show}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+\noindent
+The \emph{show} command is used to display many aspects of the running state
+of the router.  We don't describe the sub-commands here, because they
+depend on the running state of the router.  For example, only a router
+that is running BGP should provide {\tt show bgp} commands.
+
+As an example, we show the peers of a BGP router:
+\vspace{0.1in}
+
+\noindent\framebox[\textwidth][l]{
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+user@hostname> \textbf{show bgp peers detail}\\
+OK\\
+Pe\=er 1: local 192.150.187.108/179 remote 192.150.187.109/179\\
+\>  Peer ID: 192.150.187.109\\
+\>  Peer State: ESTABLISHED\\
+\>  Admin State: START\\
+\>  Negotiated BGP Version: 4\\
+\>  Peer AS Number: 65000\\
+\>  Updates Received: 5157,  Updates Sent: 0\\
+\>  Messages Received: 5159,  Messages Sent: 1\\
+\>  Time since last received update: 4 seconds\\
+\>  Number of transitions to ESTABLISHED: 1\\
+\>  Time since last entering ESTABLISHED state: 47 seconds\\
+\>  Retry Interval: 120 seconds\\
+\>  Hold Time: 90 seconds,  Keep Alive Time: 30 seconds\\
+\>  Configured Hold Time: 90 seconds,  Configured Keep Alive Time: 30 seconds\\
+\>  Minimum AS Origination Interval: 0 seconds\\
+\>  Minimum Route Advertisement Interval: 0 seconds\\
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+\newpage
+\section{Configuration Mode}
+\noindent\framebox[\textwidth][l]{
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+user@hostname> \textbf{configure}\\
+Entering configuration mode.\\
+There are no other users in configuration mode.\\
+\noindent[edit]\\
+user@hostname\#
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+\noindent
+When in configuration mode, the command prompt changes from
+\verb=user@hostname>= to \verb=user@hostname#=.
+The command prompt is also usually preceded by a line indicating which
+part of the configuration tree is currently being edited.
+\vspace{0.1in}
+
+\noindent\framebox[\textwidth][l]{
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+[edit]\\
+user@hostname\# \textbf{?}\\
+Po\=ssible completions:   \=\\
+\>  commit          \>Commit the current set of changes\\
+\>  create          \>Alias for the ``set'' command (obsoleted)\\
+\>  delete          \>Delete a configuration element\\
+\>  edit            \>Edit a sub-element\\
+\>  exit            \>Exit from this configuration level\\
+\>  help            \>Provide help with commands\\
+\>  load            \>Load configuration from a file\\
+\>  quit            \>Quit from this level\\
+\>  run             \>Run an operational-mode command\\
+\>  save            \>Save configuration to a file\\
+\>  set             \>Set the value of a parameter or create a new element\\
+\>  show            \>Show the configuration (default values may be suppressed)\\
+\>  top             \>Exit to top level of configuration\\
+\>  up              \>Exit one level of configuration\\
+user@hostname\# 
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+\newpage
+\noindent
+The router configuration has a tree form similar to the directory
+structure on a Unix filesystem.  The current configuration or parts of
+the configuration can be
+shown with the \emph{show} command:
+\vspace{0.1in}
+
+\noindent\framebox[\textwidth][l]{
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+[edit]\\
+user@hostname\# \textbf{show interfaces}\\
+\>interface rl0 \{\\
+\>\>description: "control interface"\\
+\>\>vif rl0 \{\\
+\>\>\>address 192.150.187.108 \{\\
+\>\>\>\>prefix-length: 25\\
+\>\>\>\>broadcast: 192.150.187.255\\
+\>\>\>\}\\
+\>\>\}\\
+\>\}\\
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+Note that the \emph{show} command suppresses parameters that have default
+values (as specified in the corresponding router manager template files). Use
+command \emph{show -all} to show the complete configuration including the
+parameters with default values:
+
+\noindent\framebox[\textwidth][l]{
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+[edit]\\
+user@hostname\# \textbf{show -all interfaces}\\
+\>interface rl0 \{\\
+\>\>description: "control interface"\\
+\>\>vif rl0 \{\\
+\>\>\>address 192.150.187.108 \{\\
+\>\>\>\>prefix-length: 25\\
+\>\>\>\>broadcast: 192.150.187.255\\
+\>\>\>\>disable: false\\
+\>\>\>\}\\
+\>\>\>disable: false\\
+\>\>\}\\
+\>\>disable: false\\
+\>\>discard: false\\
+\>\>unreachable: false\\
+\>\>management: false\\
+\>\}\\
+\>targetname: "fea"\\
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+
+\newpage
+\subsection{Moving around the Configuration Tree}
+You can change the current location in the configuration tree using
+the \emph{edit}, \emph{exit}, \emph{quit}, \emph{top} and \emph{up} commands.
+\begin{itemize}
+\item \textbf{edit $<$\textit{element name}$>$}:       Edit a sub-element
+\item \textbf{exit}:       Exit from this configuration level, or if
+at top level, exit configuration mode.
+\item \textbf{quit}:       Quit from this level
+\item \textbf{top}:        Exit to top level of configuration
+\item \textbf{up}:         Exit one level of configuration
+\end{itemize}
+
+\noindent
+For example:
+\vspace{0.1in}
+
+\noindent\framebox[\textwidth][l]{
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+[edit]\\
+user@hostname\# \textbf{edit interfaces interface rl0 vif rl0}\\
+\noindent[edit interfaces interface rl0 vif rl0]\\
+user@hostname\# \textbf{show}\\
+\>address 192.150.187.108 \{\\
+\>\>prefix-length: 25\\
+\>\>broadcast: 192.150.187.255\\
+\>\}\\
+\\
+\noindent[edit interfaces interface rl0 vif rl0]\\
+user@hostname\# \textbf{up}\\
+\noindent[edit interfaces interface rl0]\\
+user@hostname\# \textbf{top}\\
+\noindent[edit]\\
+user@hostname\#
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+
+\subsection{Loading and Saving Configurations}
+
+On startup, the \rtrmgr will read a configuration file.  It will then
+start up and configure the various router components as specified in
+the configuration file.
+
+The configuration file can be created externally, using a normal text
+editor, or it can be saved from the running router configuration.  A
+configuration file can also be loaded into a running router, causing
+the previous running configuration to be discarded.  The commands for
+this are:
+\begin{itemize}
+\item \textbf{save $<$\textit{filename}$>$}: save the current
+configuration in the specified file.
+\item \textbf{load $<$\textit{filename}$>$}: load the specified file,
+discarding the currently running configuration.
+\end{itemize}
+
+The $<$\textit{filename}$>$ argument may be a path to a disk file,
+or an Uniform Resource Identifier (URI) with a scheme of \emph{file},
+\emph{ftp}, \emph{http}, or \emph{tftp}.
+The \rtrmgr does not know how
+to deal with these schemes on its own; external commands are invoked
+to perform the actual save or load operation. If an URI is used to save
+or load the router configuration, then the appropriate variables must be
+set in the \emph{rtrmgr} block to point to these commands.
+Commands are invoked with the following arguments:
+\begin{itemize}
+\item Any options specified in the \emph{args} variable for the command,
+(\eg \emph{save-tftp-command-args}).
+\item The full path name of a temporary file where the running XORP
+configuration has been saved.
+\item The URI specified to the \emph{save} command in the \xorpsh.
+\end{itemize}
+Note that currently no commands or scripts to perform these operations
+are shipped with XORP.
+
+For example:
+\vspace{0.1in}
+
+\noindent\framebox[\textwidth][l]{
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+\>rtrmgr \{\\
+\>\>load-tftp-command: "/usr/local/sbin/xorp-tftp-get.sh"\\
+\>\>load-tftp-command-args: "-o"\\
+\>\>save-tftp-command: "/usr/local/sbin/xorp-tftp-put.sh"\\
+\>\>save-tftp-command-args: "-i"\\
+\>\}\\
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+
+Then, if the user uses \xorpsh command
+\textbf{load \textit{tftp://hostname/path/to/config.boot}}
+to load the configuration, internally the \rtrmgr will use the following
+command:
+
+\textbf{/usr/local/sbin/xorp-tftp-get.sh -o $<$\textit{tmp-filename}$>$
+\textit{tftp://hostname/path/to/config.boot}}
+
+This command will download the configuration file to a temporary file (chosen
+internally by the \rtrmgr) on the local filesystem and then the \rtrmgr will
+load the configuration from that temporary file before deleting it.
+
+Similarly, if the user uses \xorpsh command
+\textbf{save \textit{tftp://hostname/path/to/config.boot}}
+to save the configuration, internally the \rtrmgr will use the following
+command:
+
+\textbf{/usr/local/sbin/xorp-tftp-put.sh -i $<$\textit{tmp-filename}$>$
+\textit{tftp://hostname/path/to/config.boot}}
+
+First, the \rtrmgr will save the configuration to a temporary file (chosen
+internally by the \rtrmgr) on the local filesystem. Then the
+\textbf{/usr/local/sbin/xorp-tftp-put.sh} command will be used to upload that
+file. Finally, the \rtrmgr will delete the temporary file.
+
+\newpage
+\subsection{Setting Configuration Values}
+
+\begin{itemize}
+\item \textbf{set $<$\textit{path to config}$>$
+$<$\textit{value}$>$}: set the value of the specified configuration
+node.
+\end{itemize}
+The \emph{set} command can be used to set or change the value of a
+configuration option.  The change does not actually take effect
+immediately - the 
+\emph{commit} command must be used to apply this and any other uncommitted
+changes.
+
+In the example below, the prefix length (netmask) of address
+192.150.187.108 on vif rl0 is changed, but not yet committed.  The
+``{\tt >}'' indicates parts of the configuration that has been added
+or modified but not yet been committed.
+\vspace{0.1in}
+
+\noindent\framebox[\textwidth][l]{
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+\noindent[edit interfaces interface rl0]\\
+user@hostname\# \textbf{show}\\
+\>description: "control interface"\\
+\>vif rl0 \{\\
+\>\>address 192.150.187.108 \{\\
+\>\>\>prefix-length: 25\\
+\>\>\>broadcast: 192.150.187.255\\
+\>\>\}\\
+\>\}\\
+\\
+\noindent[edit interfaces interface rl0]\\
+user@hostname\# \textbf{set vif rl0 address 192.150.187.108 prefix-length 24}\\
+OK\\
+\\
+\noindent[edit interfaces interface rl0]\\
+user@hostname\# \textbf{show}\\
+\>description: "control interface"\\
+\>vif rl0 \{\\
+\>\>address 192.150.187.108 \{\\
+>\>\>\>prefix-length: 24\\
+\>\>\>broadcast: 192.150.187.255\\
+\>\>\}\\
+\>\}\\
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+
+\newpage
+\subsection{Adding New Configuration}
+\begin{itemize}
+
+\item \textbf{set $<$\textit{path to new config node}$>$}
+: create new configuration node.
+\item \textbf{set $<$\textit{path to new config node}$>$ \{}
+: create new configuration node and start editing it.
+
+\end{itemize}
+
+New configuration can be added by the \emph{set} command.~\footnote{Note that
+prior to the XORP Release-1.3, the \textbf{create} command was used instead to
+add new configuration nodes.}
+If we type \emph{set} followed by the path to a new configuration node,
+the node will be created. All parameters within that node will be assigned
+their default values (if exist). After that the node can be edited with the
+\emph{edit} command.
+If we type \emph{\{} after the path to the new configuration node,
+the node will be created, the default values will be assigned, and we can
+directly start editing that node.
+The user interface for this is currently rather
+primitive and doesn't permit the more free-form configuration allowed
+in configuration files.
+
+\newpage
+For example, to configure a second address on interface/vif rl0:
+\vspace{0.1in}
+
+\noindent\framebox[\textwidth][l]{
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+\noindent[edit interfaces interface rl0 vif rl0]\\
+user@hostname\# \textbf{show}\\
+\>address 192.150.187.108 \{\\
+\>\>prefix-length: 24\\
+\>\>broadcast: 192.150.187.255\\
+\>\}\\
+\\
+\noindent[edit interfaces interface rl0 vif rl0]\\
+user@hostname\# \textbf{set address 10.0.0.1 \{}\\
+\>>\>\> \textbf{prefix-length 16}\\
+\>>\>\> \textbf{broadcast 10.0.255.255}\\
+\>>\>\> \textbf{\}}\\
+\noindent[edit interfaces interface rl0 vif rl0]\\
+user@hostname\# \textbf{show}\\
+\>address 192.150.187.108 \{\\
+\>\>prefix-length: 24\\
+\>\>broadcast: 192.150.187.255\\
+\>\}\\
+>\> address 10.0.0.1 \{\\
+>\>\> prefix-length: 16\\
+>\>\> broadcast: 10.0.255.255\\
+>\>\}\\
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+
+\subsection{Deleting Parts of the Configuration}
+
+The \emph{delete} command can be used to delete subtrees from the
+configuration.  The deletion will be visible in the results of the
+\emph{show} command, but will not actually take place until the changes are
+committed. The ``{\tt -}'' indicates parts of the configuration that has
+been deleted but not yet been committed.
+\vspace{0.1in}
+
+\noindent\framebox[\textwidth][l]{
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+user@hostname\# \textbf{show interfaces interface rl0 vif rl0}\\
+\>address 192.150.187.108 \{\\
+\>\>prefix-length: 24\\
+\>\>broadcast: 192.150.187.255\\
+\>\}\\
+\>address 10.0.0.1 \{\\
+\>\>prefix-length: 16\\
+\>\>broadcast: 10.0.255.255\\
+\>\}\\
+\\
+\noindent[edit]\\
+user@hostname\# \textbf{delete interfaces interface rl0 vif rl0 address 10.0.0.1}\\
+Deleting:\\
+\>address 10.0.0.1 \{\\
+\>\>prefix-length: 16\\
+\>\>broadcast: 10.0.255.255\\
+\>\}\\
+\\
+OK\\
+\noindent[edit]\\
+user@hostname\# \textbf{show interfaces interface rl0 vif rl0}\\
+\>address 192.150.187.108 \{\\
+\>\>prefix-length: 24\\
+\>\>broadcast: 192.150.187.255\\
+\>\}\\
+-\> address 10.0.0.1 \{\\
+-\>\> prefix-length: 16\\
+-\>\> broadcast: 10.0.255.255\\
+-\>\}\\
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+
+\newpage
+\subsection{Committing Changes}
+
+\noindent\framebox[\textwidth][l]{
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+\noindent[edit interfaces interface rl0]\\
+user@hostname\# \textbf{commit}\\
+OK
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+The \emph{commit} command commits all the current configuration changes.
+This can take a number of seconds before the response is given.
+
+{\it If \xorpsh was built with debugging enabled, the response can be
+considerably more verbose than shown above!}
+
+If two or more users are logged in using configuration mode, and one
+of them changes the configuration, the others will receive a warning:
+\vspace{0.1in}
+
+\noindent\framebox[\textwidth][l]{
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+\noindent[edit]\\
+user@hostname\# \\
+The configuration had been changed by user mjh\\
+user@hostname\#
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+
+\subsection{Discarding Changes}
+
+The user can discard a batch of changes by editing them back to their
+original configuration, or by using the \emph{exit} command to leave
+configuration mode:
+\vspace{0.1in}
+
+\noindent\framebox[\textwidth][l]{
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+\noindent[edit]\\
+user@hostname\# \textbf{exit}\\
+ERROR: There are uncommitted changes\\
+Use "commit" to commit the changes, or "exit discard" to discard them\\
+user@hostname\# \textbf{exit discard}\\
+user@hostname>
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+\section{Configuring xorpsh Behavior}
+\label{xorpsh:configuring-xorpsh-behavior}
+
+Currently there is very limited support for configuring the \xorpsh
+behavior. In the future there will be a more advanced configuration
+mechanism with a richer set of configuration options.
+
+\subsection{Configuring the xorpsh Prompt}
+
+The default operational and configuration mode prompts are
+\verb=user@hostname>= and \verb=user@hostname#= respectively.
+
+The operational and configuration mode prompts can be modified by the
+following environmental variables respectively:
+{\textbf XORP\_PROMPT\_OPERATIONAL} and
+{\textbf XORP\_PROMPT\_CONFIGURATION}. For example:
+
+\begin{verbatim}
+user@hostname[10] env XORP_PROMPT_OPERATIONAL="foo " 
+                      XORP_PROMPT_CONFIGURATION="bar " ./xorpsh
+Welcome to XORP on hostname
+foo configure
+Entering configuration mode.
+There are no other users in configuration mode.
+[edit]
+bar 
+\end{verbatim}
+
+\section{Running xorpsh in Non-Interactive Mode}
+\label{xorpsh:non-interactive-mode}
+
+Typically \xorpsh would be used as an interactive command shell.
+However, it is possible to use \xorpsh in non-interactive mode
+(\eg as part of a shell script). This could be useful for automated
+XORP router configuration such as adding new network interfaces
+to the XORP configuration for new PPP dial-up clients.
+
+The following non-interactive modes are supported.
+Note that the {\it xorpsh} binary has to be in the execution path.
+Alternatively, {\it xorpsh} should be replaced with
+{\it /path/to/xorpsh}.
+
+\begin{itemize}
+
+  \item Running \xorpsh as part of UNIX command-line pipes:
+
+\begin{verbatim}
+echo "show host os" | xorpsh
+cat filename | xorpsh
+xorpsh < filename
+\end{verbatim}
+
+  \item Running \xorpsh as part of a shell script:
+
+\begin{verbatim}
+#!/bin/sh
+
+xorpsh <<!
+show host os
+!
+\end{verbatim}
+
+  \item Running commands that are supplied by the ``-c'' \xorpsh
+   command-line option:
+
+\begin{verbatim}
+xorpsh -c "show host os"
+\end{verbatim}
+
+  The ``-c'' option can be used more than once to execute multiple commands.
+
+  \item Running \xorpsh as part of an ``expect'' script:
+
+\begin{verbatim}
+#!/usr/bin/env python
+import time
+import sys
+import pexpect
+
+child=pexpect.spawn ('xorpsh')
+child.expect('user@hostname> ')
+child.sendline('show host os | no-more')
+child.sendeof()
+while 1:
+        line = child.readline()
+        if not line:
+                break
+        print line,
+child.close()
+\end{verbatim}
+
+Note that if \xorpsh is run in non-interactive more as part of an ``expect''
+script where there is a TTY associated with the \xorpsh process, then
+\xorpsh may use the internal pager if the output from a command is very long.
+In that case, it is advisable that the internal pager is explicitly disabled
+by using the ``no-more'' pipe as in the above example.
+
+\end{itemize}
+

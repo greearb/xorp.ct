@@ -1,0 +1,21 @@
+// $XORP$
+
+// Well-formed OLSR packet with a single HNA message and a single
+// IPv4 network address/mask pair.
+
+/* Packet Header */
+/* Packet Length (24 bytes) */			0x00, 0x18,
+/* Packet Sequence Number (58449) */		0xe4, 0x51,
+
+/* Message Header */
+/* Message Type (HNA) */			0x04,
+/* Validity Time (256s) */			0x0c,
+/* Message Size (20 bytes) */			0x00, 0x14,
+/* Originator Address (192.168.124.1) */	0xc0, 0xa8, 0x7c, 0x01,
+/* Time to Live (255) */			0xff,
+/* Hop Count (0) */				0x00,
+/* Message Sequence Number (38018) */		0x94, 0x82,
+
+/* HNA Message Body */
+/* Network Address (192.168.123.0) */		0xc0, 0xa8, 0x7b, 0x00,
+/* Network Mask (255.255.255.0) */		0xff, 0xff, 0xff, 0x00

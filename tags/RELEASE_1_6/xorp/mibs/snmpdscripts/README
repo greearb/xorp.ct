@@ -1,0 +1,63 @@
+#
+# $XORP$
+#
+
+How to configure your Net-SNMP agent to run with XORP
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+- You need Net-SNMP version 5.0.6 or greater
+- You must make libnetsnmpxorp.so accessible to your runtime loader.  Depending
+  on your system, that requires one of the following:  
+	* Copying libnetsnmpxorp.so to your library directory (typically
+	  /usr/local/lib)
+		    OR
+	* Setting a linker environment variable (typically LD_LIBRARY_PATH) to
+	  point to the directory where the library is.
+
+- To avoid opening security holes, we recommend allowing only SNMPv3
+  authenticated requests.  If you want to create a secure user, execute the 
+  command net-snmp-config --create-snmpv3-user.  These are the settings that
+  match the provided snmp.conf file (see next section):
+
+    user           pass-phrase         sec level
+    --------------------------------------------
+    privuser      I am priv user       auth+priv
+ 
+  You must create at least one user if you want to be able to access the SNMP 
+  agent.
+ 
+- snmpd can only respond to Xrls after xorp_if_mib_module has been loaded.
+  Adding the following line to the file snmpd.conf (by default located in 
+  /usr/local/share/snmp) will preload this module when snmpd is started.  
+
+  dlmod xorp_if_mib_module <absolute path full filename>
+
+  for instance...
+
+  dlmod xorp_if_mib_module /home/panther/u0/jcardona/mibs/xorp_if_mib_module.so
+
+
+To run the client-side scripts in this directory 
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+- The scripts in this directory use the client-side Net-SNMP tools to
+  communicate with the agent.  They rely on file snmp.conf to provide valid 
+  default values for the SNMP version to use, the user, community and 
+  security level.  If your agent was configured with the default security user
+  suggested in the previous section, you should copy the snmp.conf found in
+  this directory to ~/.snmp/snmp.conf.  Otherwise you'll have to create your
+  own snmp.conf so it matches your settings.  
+  
+
+- You must make XORP textual mib files ($XORP/mibs/textual/*.txt) accessible to
+  the Net-SNMP command line tools.  Either set the MIBDIRS (man snmpcmd(1)) 
+  environment variable to point to that directory or copy those files to your
+  mibs directory (default is /usr/local/share/snmp/mibs).  For instance:
+
+  export MIBDIRS=+/home/jsmith/xorp/mibs/textual
+
+- And finally, you must tell Net-SNMP about specific MIB modules that you will
+  be using.  The MIBS environment variable can be used for that purpose. For
+  BGP4-MIB you would do:
+
+  export MIBS=+BGP4-MIB

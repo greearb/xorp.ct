@@ -1,0 +1,23 @@
+#
+# $XORP: xorp/policy/common/Jamfile,v 1.2 2007/04/20 07:17:46 pavlin Exp $
+#
+
+SubDir TOP policy common ;
+
+SubIncludeOnce TOP libxorp ;
+SubIncludeOnce TOP libcomm ;
+SubIncludeOnce TOP xrl interfaces ;
+SubIncludeOnce TOP xrl targets ;
+SubIncludeOnce TOP policy ;
+
+SubDir TOP policy common ;
+
+Library libpolicycommon : 
+	dispatcher.cc elem_set.cc element.cc element_base.cc element_factory.cc
+	filter.cc operator.cc policy_utils.cc register_elements.cc
+	register_operations.cc varrw.cc
+	;
+# Deal with bgp aspath policy tags.
+LibraryFromObjects libpolicycommon$(SUFLIB) : aspath$(SUFOBJ) ;
+SEARCH_SOURCE = $(TOP)/bgp ;
+Objects aspath.cc ;

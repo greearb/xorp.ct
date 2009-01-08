@@ -1,0 +1,28 @@
+#
+# $XORP: xorp/libxipc/README,v 1.8 2006/08/02 08:14:52 pavlin Exp $
+#
+
+	LIBXIPC: XRL Inter-Process Communication Library
+
+The libxipc library provides inter-process communication for XORP
+processes.
+
+Documentation
+=============
+
+Overview material is present in:
+	${XORP}/docs/libxipc 
+
+and programming documentation in:
+	${XORP}/devnotes/html/libxipc
+
+Testing
+=======
+
+The libxipc directory Makefile supports the check target that runs
+through the tests.
+
+Status
+======
+
+This code is functional and widely used in the project.

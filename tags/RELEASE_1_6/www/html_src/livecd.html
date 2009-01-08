@@ -1,0 +1,252 @@
+<h1>XORP Live CD</h1>
+
+<p>
+The XORP Live CD is a bootable CD for x86 PCs.
+</p>
+
+<p>
+The Live CD serves a number of purposes:
+</p>
+<ul>
+<li> It's an easy way to try out XORP without needing to
+compile anything or reformat the disk on your PC.
+<li> It's a quick way to get a relatively secure router on demand.
+<li> It's a great tool for a student lab session, requiring no installation.
+</ul>
+
+As of release 1.5, the XORP Live CD no longer supports floppy disks. Instead,
+USB disks are used for configuration storage. The Live CD is now based on
+FreeBSD 7.0.
+
+<!--
+<P>FreeBSD boots off the CD, and then starts up XORP directly.
+If there is a USB disk connected, the XORP configuration file can be
+taken from the USB device and used for the router configuration.
+If the PC has a hard disk, that disk will not be modified by running
+the Live CD.
+-->
+
+<p>
+This page provides the following information about the XORP Live CD:
+<ul>
+<li><a href="#getting">Getting the Live CD</a>
+<li><a href="#running">Running the Live CD</a>
+<li><a href="#firsttime">Starting the Live CD the First Time</a>
+<li><a href="#quirks">Live CD Quirks</a>
+</ul>
+
+<a name="getting"></a><h2>Getting the Live CD</h2>
+
+<!-- Release Candidate section BEGIN -->
+<!--
+<P>
+XORP version: Release-2.0-RC (Release Candidate)
+<br>
+Download 
+(<a href="releases/2.0-RC/XORP-2.0-RC-LiveCD.iso.gz">http</a>,
+<a href="http://releases.xorp.org.s3.amazonaws.com/2.0-RC/XORP-2.0-RC-LiveCD.iso.gz?torrent">bittorrent</a>)
+the Live CD ISO compressed image (42 MB).
+<br>
+Or try the nearest <a href="mirrors.html">mirror site</a>.
+<br>
+MD5 (XORP-2.0-RC-LiveCD.iso.gz) = xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+-->
+<!-- Release Candidate section END -->
+
+<p>
+XORP version: Release-1.5
+<br>
+Download 
+(<a href="releases/1.5/XORP-1.5-LiveCD.iso.gz">http</a>,
+<a href="http://releases.xorp.org.s3.amazonaws.com/1.5/XORP-1.5-LiveCD.iso.gz?torrent">bittorrent</a>)
+the Live CD ISO compressed image (42 MB).
+<br>
+Or try the nearest <a href="mirrors.html">mirror site</a>.
+<br>
+MD5 (XORP-1.5-LiveCD.iso.gz) = bfe8e5c4fcb83c02a9c008fa3c82eb45
+
+<p>
+Once you've downloaded the CD image, you will need to burn it using a
+CD-R or CD-RW drive.  Some instructions on how to burn CD images
+are available:
+<ul>
+<li><a
+href="http://docs.info.apple.com/article.html?artnum=93006">Instructions for
+Mac OS X</a>.
+<li><a href="http://users.owt.com/kstewart/freebsd/iso-images.html">Instructions for Windows</a>.
+<li><a href="http://www-128.ibm.com/developerworks/linux/library/l-cdburn.html">Instructions for Linux</a> using <a href="http://freshmeat.net/projects/cdrecord/">cdrecord</a> (aka cdrtools). cdrtools also works on FreeBSD and can be installed from ports.
+<li><a href="http://www.redantigua.com/burncd.html">Instructions for FreeBSD</a> using burncd.  The <tt>burncd</tt> program comes with FreeBSD and to burn a CD in an an ATAPI CD drive, you can simply run:
+<br>
+<pre>
+
+burncd -f /dev/acd0c -e data XORP-1.5-LiveCD.iso fixate
+
+</pre>
+</ul>
+
+<a name="running"></a><h2>Running the Live CD</h2>
+
+<p>To boot from the Live CD, your PC needs to have the CD-ROM device
+set as the primary boot device.  If this is not already the case, you will need to modify the settings in the BIOS.  The boot order should along the lines of:
+
+<ol>
+<li>CD drive.
+<li>Floppy Disk.
+<li>Hard Disk.
+</ol>
+The order of the floppy and hard disk are unimportant, just so
+long as they're after the CD drive in the boot order.  This is usually
+pretty easy to change in the BIOS - you might want to make a note of
+the original boot order in case you want to switch it back afterwards.
+Typically to change BIOS settings, you hold down Delete or F2
+(depending on your PC) just after you restart your PC.
+<p>
+If you want the router to store any configuration changes you have made
+when it is rebooted, you'll also need a USB disk, but you can try
+the Live CD without this.
+<p>
+Then reboot the PC.  The PC should boot from the CD.  Normally it will
+display the FreeBSD boot-time console for 30 seconds to a minute while
+booting completes.  Sorry - there's no progress bar to let you know
+anything is happening.
+<p>
+If you've got a USB disk connected to the machine, and you've done this
+before, then the XORP configuration will be copied into the memory
+filesystem, along with passwords, sshd keys, etc.  Then the XORP
+routing protocols will be started.
+<p>
+If there's no USB disk connected, or it doesn't have the files on it
+that XORP expects, then a simple interactive script will run to allow
+you to configure passwords and decide which network interfaces you
+want XORP to use.
+
+<a name="firsttime"></a><h2>Starting XORP the First Time</h2>
+<p>
+The startup script that runs the first time you run XORP is quite
+simple. If there's no USB disk connected, or it's not DOS-formatted,
+you'll be presented with a warning similar to this one:
+<p>
+<img width="540" src="images/livecd/cd1.gif" alt="screenshot1">
+</p>
+<p>
+Hit enter, and you'll be given the following choices:
+<P>
+<img width="540" src="images/livecd/cd2.gif" alt="screenshot2">
+</p>
+<p>
+Use the cursor keys to move up and down to choose an option, and hit enter.
+<p>
+If no USB disk is connected, you can add one now, and select 1.
+<p>
+If your USB disk is not DOS formatted, you can reformat it (erasing all the
+data on it) by selecting 3.
+<p>
+If you don't have a USB disk to hand, you can continue by selecting 2;
+but you won't be able to preserve any configuration changes you make
+later, unless you later connect a USB disk and use the <b>usb_save</b> command.
+
+<p>
+If you now have a writable, DOS formatted USB device connected,
+hit Enter, and you will be prompted to enter the root password for the
+FreeBSD system.  This will allow you to login to the machine as the
+superuser to diagnose any problems, or to see how XORP works behind
+the scenes.
+<p>
+Next you will be prompted to enter the password for the "xorp" user
+account.  On a normal XORP router, you might have many user accounts
+for the different router administrators, but on the Live CD we just
+create one user called "xorp".  Please do enter a reasonable password,
+as this user will be able to login over the network using the ssh
+secure shell and this password.
+
+<p>
+Finally you will be prompted as to which network interfaces you wish
+XORP to manage.  These interfaces will show up in the default XORP
+configuration file, ready to have IP addresses assigned.  The menu
+looks like:
+<p>
+<img width="540" src="images/livecd/cd4.gif" alt="screenshot4">
+</p>
+<p>
+Typically you will only want XORP to manage Ethernet interfaces and
+the loopback interface from the Live CD at this stage, because currently
+XORP has no built-in support for dial-up links.  Move up and down using the
+cursor keys, and hit space to select or unselect an option (an "X"
+implies the option is selected).  When you are finished, hit Tab, to
+select the "OK" button, and hit Enter.
+<p>
+That's it.  XORP will now finish booting.
+<p>
+Once XORP has finished booting, you will be presented with a login
+prompt, and you can login to XORP as the "xorp" user with the password
+you have chosen, and interact with the XORP command line interface to
+complete the configuration, assign IP addresses, etc.
+
+<a name="quirks"></a><h2>Live CD quirks</h2>
+<h3>Saving Config</h3>
+<p>
+The location of the router configuration file used by XORP can be set
+using command line parameters, so different XORP systems might choose
+to use a different location for this file.  On the Live CD, the
+configuration file is stored in <b>/etc/local/xorp.conf</b>
+<p>
+If you change the router configuration using the XORP shell, and want
+to save it, you need to enter the following in configuration mode:
+<p>
+xorp@LiveCD# <b>save /etc/local/xorp.conf</b>
+<p>
+If you want to preserve the configuration on a USB disk, either
+use the <b>usb_save</b> command from the UNIX shell, or use the following
+command in the XORP shell's operational mode:
+<p>
+xorp@LiveCD&gt; <b>usb save</b>
+<p>
+
+<!---
+XXX: text commented-out because currently the automatic saving to
+     a floppy doesn't work (the rtrmgr doesn't support the -s flag anymore).
+
+If you save to any other location, the file will still be preserved on
+the USB disk, but will not be loaded automatically the next time XORP reboots.
+-->
+
+
+<!--
+XXX: Debugging text commented-out because since Release-1.2 the size of
+the LiveCD ISO image is too large to fit in a CD, hence the
+XORP binaries had to be stripped.
+
+<P>
+<H3>Debugging</H3>
+<P>
+The Live CD includes two versions of the XORP system binaries.  The
+normal version is mounted in a memory filesystem in
+<B>/usr/local/xorp</B>.  This version has had the debugging systems
+stripped so that the binaries are small enough to reside in a memory
+filesystem.  This allows them to load quickly, and to run on a PC with
+less memory.
+<P>
+If you need a debugging version, you can <B>umount
+/usr/local/xorp</B>.  A second copy of /usr/local/xorp with debugging
+binaries resides on the CD, and is revealed when the memory filesystem
+is unmounted.  These binaries are rather large, and load slowly, so
+don't use them unless you really need them.  Using them rather assumes
+you know how XORP works internally, so is beyond the scope of this
+tutorial.
+-->
+
+<p>
+<h3>Interface Naming</h3>
+<p>
+If you're used to Linux, you may be surprised that FreeBSD names it's
+Ethernet interfaces with names like <b>fxp0</b>, <b>fxp1</b>,
+<b>dc0</b> and <b>xl3</b>, rather than <b>eth0</b>, <b>eth1</b>, etc.
+The advantage is that you can tell exactly what the device driver is
+that's being used, and that if you know you have one Intel 10/100 and one
+DEC Tulip in the machine, you know they'll be called <b>fxp0</b> and
+<b>dc0</b>, no matter which PCI slot they're in.  The disadvantage is
+that it's more confusing for beginners who don't want to know this detail.
+<p>
+Some people get religious about such things.  We don't - this just
+reflects the underlying operating system's naming convention.  If you
+ran XORP on Linux, you'd see eth0, etc.

@@ -1,0 +1,926 @@
+%
+% $XORP: xorp/docs/user_manual/config_overview.tex,v 1.25 2008/07/18 23:12:40 pavlin Exp $
+%
+
+\chapter{Configuration Overview}
+\section{Introduction}
+
+A XORP router must be configured to perform the desired operations.
+The configuration information can be provided in one of the two ways:
+
+\begin{itemize}
+\item
+  Use a configuration file when the \rtrmgr is started.
+  By default, the \rtrmgr will load the configuration from file
+  ``config.boot'' in the XORP installation directory.
+  This file can be specified by the ``-b~~$<$filename$>$'' command line
+  option:
+\begin{verbatim}
+    xorp_rtrmgr -b my_config.boot
+\end{verbatim}
+
+    See ``rtrmgr/config/*.boot'' for a set of sample
+    configuration files (note that those files MUST be modified
+    before using them).
+
+\item
+  Use the \xorpsh command line interface after the \rtrmgr is started.
+  It should be noted that command line completion in the \xorpsh
+  does greatly simplify configuration.
+\end{itemize}
+
+\noindent
+A mixture of both methods is permissible. For example,
+a configuration file can also be loaded from within the \xorpsh.
+
+At very minimum, a router's interfaces must be configured (see
+Section~\ref{sec:network_interfaces}). Typically, the FEA needs to be
+configured (\eg to enable unicast forwarding); the FEA configuration is
+described in Section~\ref{sec:fea}. All protocol configuration is
+described in Section~\ref{sec:protocols}.
+
+\section{Network Interfaces}
+\label{sec:network_interfaces}
+
+A XORP router will only use interfaces that it has been explicitly
+configured to use. Even for protocols such as BGP that are agnostic to
+interfaces, if the next-hop router for a routing entry is not through
+a configured interface the route will not be installed. For protocols
+that are explicitly aware of interfaces only configured interfaces
+will be used.
+
+Every physical network device in the system is considered to be an
+``interface''. Every interface can contain a number of virtual
+interfaces (``vif''s). In the majority of cases the interface name and
+vif name will be identical and will map to the name given to the
+interface by the operating system. A virtual interface is configured
+with the address or addresses that should be used. At each level in
+the configuration hierarchy ({\tt interface}, {\tt vif} and
+{\tt address}) it is necessary to enable this part of the
+configuration.
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+interfaces \{\\
+\>restore-original-config-on-shutdown: false\\
+\>interface dc0 \{\\
+\>\>description: "data interface"\\
+\>\>disable: false\\
+\>\>/* default-system-config */\\
+\>\>vif dc0 \{\\
+\>\>\>disable: false\\
+\>\>\>address 10.10.10.10 \{\\
+\>\>\>\>prefix-length: 24\\
+\>\>\>\>broadcast: 10.10.10.255\\
+\>\>\>\>disable: false\\
+\>\>\>\}\\
+\>\>\>/*\\
+\>\>\>address 2001:DB8:10:10:10:10:10:10 \{\\
+\>\>\>\>prefix-length: 64\\
+\>\>\>\>disable: false\\
+\>\>\>\}\\
+\>\>\>*/\\
+\>\>\}\\
+\>\}\\
+\}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+We recommend that you select the interfaces that you want to use on
+your system and configure them as above. If you are configuring an
+interface that is currently being used by the the system make sure
+that there is no mismatch in the {\tt address}, {\tt prefix-length} and
+{\tt broadcast} arguments.
+If the \linebreak
+{\tt default-system-config} statement is used, it
+instructs the FEA that the interface should be configured by using
+the existing interface information from the underlying system.
+In that case, the {\tt vif} and {\tt address} sections must not be
+configured.
+
+\section{Firewall}
+\label{sec:firewall}
+
+Firewall rules are configured by using numbered entries~\footnote{Currently
+(July 2008) XORP has only preliminary support to configure firewall rules.}:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+firewall \{\\
+\>rule4 100 \{\\
+\>\>action: "drop"\\
+\>\>protocol: 6 /* TCP */\\
+\>\>source \{\\
+\>\>\>interface: "fxp0"\\
+\>\>\>vif: "fxp0"\\
+\>\>\>network: 0.0.0.0/0\\
+\>\>\>port-begin: 0\\
+\>\>\>port-end: 65535\\
+\>\>\}\\
+\>\>destination \{\\
+\>\>\>network: 10.10.0.0/24\\
+\>\>\>port-begin: 0\\
+\>\>\>port-end: 1024\\
+\>\>\}\\
+\>\}\\
+\}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+Rules with smaller numbers are applied earlier.
+The rules allow matching based on protocol number, incoming interface
+and vif, source and destination network prefixes, and source and
+destination port ranges (for TCP and UDP only). The action can be one of
+the following:
+
+\begin{itemize}
+  \item {\tt none}: No action. Continue the evaluation with the next rule.
+  \item {\tt pass}: Pass matching packets
+  \item {\tt drop}: Drop matching packets
+  \item {\tt reject}: Reject matching packets
+\end{itemize}
+
+Currently (July 2008), firewall configuration is supported only for
+*BSD and Linux~\footnote{See file ERRATA from the XORP distribution for
+additional information how to compile XORP on Linux with firewall
+support enabled.}.
+
+\section{Forwarding Engine Abstraction}
+\label{sec:fea}
+
+It is a requirement to explicitly enable forwarding for each
+protocol family.
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+fea \{\\
+\>unicast-forwarding4 \{\\
+\>\>disable: false\\
+\>\}\\
+/*\\
+\>unicast-forwarding6 \{\\
+\>\>disable: false\\
+\>\}\\
+*/\\
+\}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+If IPv4 forwarding is required you will require the configuration
+above. If the system supports IPv6 and IPv6 forwarding is required,
+then the {\tt unicast-forwarding6} statement must be used to enable
+it~\footnote{Note that prior to XORP Release-1.1, the
+{\tt enable-unicast-forwarding4} and {\tt enable-unicast-forwarding6}
+flags were used instead to enable or disable the IPv4 and IPv6 forwarding.}.
+
+\newpage
+\section{Protocols}
+\label{sec:protocols}
+
+A unicast router typically will be configured with one or more
+of the following protocols:
+StaticRoutes (Section~\ref{sec:protocols:static_routes}),
+RIP (Section~\ref{sec:protocols:rip})
+or BGP (Section~\ref{sec:protocols:bgp}).
+
+A multicast router must have the MFEA configured
+(Section~\ref{sec:protocols:mfea}). Typically, a multicast router should
+have IGMP/MLD configured (Section~\ref{sec:protocols:mld6igmp}).
+Currently, PIM-SM is the only multicast routing protocol implemented
+(Section~\ref{sec:protocols:pim}). If some multicast-specific static
+routes need to be installed in the MRIB (for computing the reverse-path
+forwarding information), those can be specified in the StaticRoutes
+configuration (Section~\ref{sec:protocols:static_routes}).
+If there are no
+unicast routing protocols configured, the FIB2MRIB module may
+need to be configured as well (Section~\ref{sec:protocols:fib2mrib}).
+
+\subsection{Static Routes}
+\label{sec:protocols:static_routes}
+
+This is the simplest routing protocol in XORP. It allows the
+installation of unicast or multicast static routes (either IPv4 or
+IPv6).  Note that in case of multicast the routes are installed only
+in the user-level Multicast Routing Information Base and are used for
+multicast-specific reverse-path forwarding information by multicast routing
+protocols such as PIM-SM.
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+protocols \{\\
+\>static \{\\
+\>\>route 10.20.0.0/16 \{\\
+\>\>\>nexthop: 10.10.10.20\\
+\>\>\>metric: 1\\
+\>\>\}\\
+\>\>mrib-route 10.20.0.0/16 \{\\
+\>\>\>nexthop: 10.10.10.30\\
+\>\>\>metric: 1\\
+\>\>\}\\
+\>\>/*\\
+\>\>route 2001:DB8:AAAA:20::/64 \{\\
+\>\>\>nexthop: 2001:DB8:10:10:10:10:10:20\\
+\>\>\>metric: 1\\
+\>\>\}\\
+\>\>mrib-route 2001:DB8:AAAA:20::/64 \{\\
+\>\>\>nexthop: 2001:DB8:10:10:10:10:10:30\\
+\>\>\>metric: 1\\
+\>\>\}\\
+\>\>*/\\
+\>\}\\
+\}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+\newpage
+\subsection{Routing Information Protocol}
+\label{sec:protocols:rip}
+
+In order to run RIP it is sufficient to specify the set of interfaces,
+vifs and addresses ({\tt interface}, {\tt vif} and {\tt address}) on
+which RIP is enabled~\footnote{Note that prior to XORP Release-1.1,
+the {\tt enable} flag was used instead of {\tt disable} to enable
+or disable each part of the configuration.}.
+
+If you wish to announce routes then it is necessary to
+the routes that are to be announced. For example, {\tt connected} and 
+{\tt static}~\footnote{Starting with XORP Release-1.2 policy is used to
+export routes into RIP with the {\tt export} statement.  Prior to XORP
+Release-1.2 the {\tt export} statement was used with a different syntax.}.
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+policy \{\\
+\>/* Describe connected routes for redistribution */\\
+\>policy-statement connected \{\\
+\>\>term export \{\\
+\>\>\>from \{\\
+\>\>\>\>protocol: "connected"\\
+\>\>\>\}\\
+\>\>\}\\
+\>\}\\
+\}\\
+policy \{\\
+\>/* Describe static routes for redistribution */\\
+\>policy-statement static \{\\
+\>\>term export \{\\
+\>\>\>from \{\\
+\>\>\>\>protocol: "static"\\
+\>\>\>\}\\
+\>\>\}\\
+\>\}\\
+\}\\
+protocols \{\\
+\>rip \{\\
+/* Redistribute routes for connected interfaces */\\
+/*\\
+\>\>export: "connected"\\
+*/\\
+/* Redistribute static routes */\\
+/*\\
+\>\>export: "static"\\
+*/\\
+/* Redistribute connected and static routes */\\
+/*\\
+\>\>export: "connected,static"\\
+*/\\
+/* Run on specified network interface addresses */\\
+\>\>interface dc0 \{\\
+\>\>\>vif dc0 \{\\
+\>\>\>\>address 10.10.10.10 \{\\
+\>\>\>\>\>disable: false\\
+\>\>\>\>\}\\
+\>\>\>\}\\
+\>\>\}\\
+\>\}\\
+\}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+
+\newpage
+\subsection{Open Shortest Path First}
+\label{sec:protocols:ospf}
+
+In order to run OSPF Version 2 the {\tt router-id} must be specified,
+the numerically smallest IP address of an interface belonging to the
+router is a good choice.
+
+OSPF splits networks into areas so an {\tt area} must be configured.
+
+Configure one or more of the routers configured interface/vif/address
+in this area.
+
+{\bf The {\stt 4} in {\stt ospf4} refers to the IPv4 address family.}
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+protocols \{\\
+\>ospf4 \{\\
+\>\>router-id: 10.10.10.10\\
+\\
+\>\>area 0.0.0.0 \{\\
+\>\>\>interface dc0 \{\\
+\>\>\>\>vif dc0 \{\\
+\>\>\>\>\>address 10.10.10.10 \{\\
+\>\>\>\>\>\}\\
+\>\>\>\>\}\\
+\>\>\>\}\\
+\>\>\}\\
+\>\}\\
+\}\\
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+
+\newpage
+\subsection{Border Gateway Protocol}
+\label{sec:protocols:bgp}
+
+In order to run BGP the {\tt bgp-id} (BGP Identifier) and {\tt local-as}
+(Autonomous System number) must be specified.
+
+The {\tt peer} statement specifies a peering. The argument to the peer
+statement is the IP address of the peer. The {\tt local-ip} is the IP
+address that TCP should use. The {\tt as} is the Autonomous System Number
+of the peer.
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+protocols \{\\
+\>bgp \{\\
+\>\>bgp-id: 10.10.10.10\\
+\>\>local-as: 65002\\
+\\
+\>\>peer 10.30.30.30 \{\\
+\>\>\>local-ip: 10.10.10.10\\
+\>\>\>as: 65000\\
+\>\>\>next-hop: 10.10.10.20\\
+\>\>\>/*\\
+\>\>\>local-port: 179\\
+\>\>\>peer-port: 179\\
+\>\>\>*/\\
+\>\>\>/* holdtime: 120 */\\
+\>\>\>/* disable: false */\\
+\\
+\>\>\>/* IPv4 unicast is enabled by default */\\
+\>\>\>/* ipv4-unicast: true */\\
+\\
+\>\>\>/* Optionally enable other AFI/SAFI combinations */\\
+\>\>\>/* ipv4-multicast: true */\\
+\>\>\>/* ipv6-unicast: true */\\
+\>\>\>/* ipv6-multicast: true */\\
+\>\>\}\\
+\>\}\\
+\}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+\newpage
+\subsection{Multicast Forwarding Engine Abstraction}
+\label{sec:protocols:mfea}
+
+The MFEA must be configured if the XORP router is to be used for multicast
+routing. The MFEA for IPv4 and IPv6 are configured separately.
+
+In the configuration we must explicitly configure the entity itself, and
+each {\tt vif}. The {\tt traceoptions} section is used to explicitly enable
+log information that can be used for debugging purpose~\footnote{Note that
+prior to XORP Release-1.1, the {\tt enable} flag was used instead of
+{\tt disable} to enable or disable each part of the configuration.}.
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+plumbing \{\\
+\>mfea4 \{\\
+\>\>disable: false\\
+\>\>interface dc0 \{\\
+\>\>\>vif dc0 \{\\
+\>\>\>\>disable: false\\
+\>\>\>\}\\
+\>\>\}\\
+\>\>interface register\_vif \{\\
+\>\>\>vif register\_vif \{\\
+\>\>\>\>/* Note: this vif should be always enabled */\\
+\>\>\>\>disable: true\\
+\>\>\>\}\\
+\>\>\}\\
+\>\>traceoptions \{\\
+\>\>\>flag all \{\\
+\>\>\>\>disable: true\\
+\>\>\>\}\\
+\>\>\}\\
+\>\}\\
+\}\\
+\\
+plumbing \{\\
+\>mfea6 \{\\
+\>\>disable: true\\
+\>\>interface dc0 \{\\
+\>\>\>vif dc0 \{\\
+\>\>\>\>disable: true\\
+\>\>\>\}\\
+\>\>\}\\
+\>\>interface register\_vif \{\\
+\>\>\>vif register\_vif \{\\
+\>\>\>\>/* Note: this vif should be always enabled */\\
+\>\>\>\>disable: true\\
+\>\>\>\}\\
+\>\>\}\\
+\>\>traceoptions \{\\
+\>\>\>flag all \{\\
+\>\>\>\>disable: true\\
+\>\>\>\}\\
+\>\>\}\\
+\>\}\\
+\}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+Note that the interface/vif named {\tt register\_vif} is special.
+If PIM-SM is configured, then 
+\linebreak
+{\tt register\_vif} must be enabled
+in the MFEA.
+
+\newpage
+\subsection{Internet Group Management Protocol/Multicast Listener Discovery}
+\label{sec:protocols:mld6igmp}
+
+IGMP/MLD should be configured if the XORP router is to be used for multicast
+routing and if we want to track multicast group membership for directly
+connected subnets. Typically this is the case for a multicast router,
+therefore it should be enabled. IGMP and MLD are configured separately:
+IGMP is used for tracking IPv4 multicast members; MLD is used for tracking
+IPv6 multicast members.
+
+In the configuration we must explicitly configure each entity and
+each {\tt vif}. The {\tt traceoptions} section is used to explicitly
+enable log information that can be used for debugging purpose~\footnote{Note
+that prior to XORP Release-1.1, the {\tt enable} flag was used instead of
+{\tt disable} to enable or disable each part of the configuration.}.
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+protocols \{\\
+\>igmp \{\\
+\>\>disable: false\\
+\>\>interface dc0 \{\\
+\>\>\>vif dc0 \{\\
+\>\>\>\>disable: false\\
+\>\>\>\>/* version: 2 */\\
+\>\>\>\>/* enable-ip-router-alert-option-check: false */\\
+\>\>\>\>/* query-interval: 125 */\\
+\>\>\>\>/* query-last-member-interval: 1 */\\
+\>\>\>\>/* query-response-interval: 10 */\\
+\>\>\>\>/* robust-count: 2 */\\
+\>\>\>\}\\
+\>\>\}\\
+\>\>traceoptions \{\\
+\>\>\>flag all \{\\
+\>\>\>\>disable: false\\
+\>\>\>\}\\
+\>\>\}\\
+\>\}\\
+\}\\
+\\
+protocols \{\\
+\>mld \{\\
+\>\>disable: false\\
+\>\>interface dc0 \{\\
+\>\>\>vif dc0 \{\\
+\>\>\>\>disable: false\\
+\>\>\>\>/* version: 1 */\\
+\>\>\>\>/* enable-ip-router-alert-option-check: false */\\
+\>\>\>\>/* query-interval: 125 */\\
+\>\>\>\>/* query-last-member-interval: 1 */\\
+\>\>\>\>/* query-response-interval: 10 */\\
+\>\>\>\>/* robust-count: 2 */\\
+\>\>\>\}\\
+\>\>\}\\
+\>\>traceoptions \{\\
+\>\>\>flag all \{\\
+\>\>\>\>disable: false\\
+\>\>\>\}\\
+\>\>\}\\
+\>\}\\
+\}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+A number of parameters have default values, therefore
+they don't have to be configured (those parameters are commented-out
+in the above sample configuration).
+
+The {\tt version} parameter is used to configure the MLD/IGMP protocol
+version per virtual interface~\footnote{Note that the {\tt version}
+statement appeared after XORP Release-1.1.}.
+
+The {\tt enable-ip-router-alert-option-check} parameter is used to
+enable the IP Router Alert option check per virtual interface~\footnote{Note
+that the {\tt enable-ip-router-alert-option-check} statement appeared after
+XORP Release-1.1.}.
+
+The {\tt query-interval} parameter is used to configure (per virtual
+interface) the interval (in seconds) between general queries sent by the
+querier~\footnote{Note that the {\tt query-interval} statement appeared
+after XORP Release-1.1.}.
+
+The {\tt query-last-member-interval} parameter is used to configure (per
+virtual interface) the maximum response time (in seconds) inserted into
+group-specific queries sent in response to leave group messages. It is
+also the interval between group-specific query messages~\footnote{Note
+that the {\tt query-last-member-interval} statement appeared after XORP
+Release-1.1.}.
+
+The {\tt query-response-interval} parameter is used to configure (per
+virtual interface) the maximum response time (in seconds) inserted into
+the periodic general queries~\footnote{Note that the {\tt
+query-response-interval} statement appeared after XORP Release-1.1.}.
+
+The {\tt robust-count} parameter is used to configure the robustness
+variable count that allows tuning for the expected packet loss on a
+subnet~\footnote{Note that the {\tt robust-count} statement appeared
+after XORP Release-1.1.}.
+
+Note that in case of IGMP each enabled interface must have a valid IPv4
+address. In case of MLD each enabled interface must have a valid
+link-local IPv6 address.
+
+\newpage
+\subsection{Protocol Independent Multicast - Sparse Mode}
+\label{sec:protocols:pim}
+
+PIM-SM should be configured if the XORP router is to be used for
+multicast routing in PIM-SM domain. PIM-SM for IPv4 and IPv6 are
+configured separately. At minimum, the entity itself and the
+virtual interfaces should be enabled, and the mechanism for obtaining
+the Candidate-RP set (either the Bootstrap mechanism, or a static-RP
+set)~\footnote{Note that prior to XORP Release-1.1, the {\tt enable} flag
+was used instead of {\tt disable} to enable or disable each part of the
+configuration.}.
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{4.5in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+protocols \{\\
+\>pimsm4 \{\\
+\>\>disable: false\\
+\>\>interface dc0 \{\\
+\>\>\>vif dc0 \{\\
+\>\>\>\>disable: false\\
+\>\>\>\>/* enable-ip-router-alert-option-check: false */\\
+\>\>\>\>/* dr-priority: 1 */\\
+\>\>\>\>/* hello-period: 30 */\\
+\>\>\>\>/* hello-triggered-delay: 5 */\\
+\>\>\>\>/* alternative-subnet 10.40.0.0/16 */\\
+\>\>\>\}\\
+\>\>\}\\
+\>\>interface register\_vif \{\\
+\>\>\>vif register\_vif \{\\
+\>\>\>\>/* Note: this vif should be always enabled */\\
+\>\>\>\>disable: false\\
+\>\>\>\}\\
+\>\>\}\\
+\\
+\>\>static-rps \{\\
+\>\>\>rp 10.60.0.1 \{\\
+\>\>\>\>group-prefix 224.0.0.0/4 \{\\
+\>\>\>\>\>/* rp-priority: 192 */\\
+\>\>\>\>\>/* hash-mask-len: 30 */\\
+\>\>\>\>\}\\
+\>\>\>\}\\
+\>\>\}\\
+\\
+\>\>bootstrap \{\\
+\>\>\>disable: false\\
+\>\>\>cand-bsr \{\\
+\>\>\>\>scope-zone 224.0.0.0/4 \{\\
+\>\>\>\>\>/* is-scope-zone: false */\\
+\>\>\>\>\>cand-bsr-by-vif-name: "dc0"\\
+\>\>\>\>\>/* cand-bsr-by-vif-addr: 10.10.10.10 */\\
+\>\>\>\>\>/* bsr-priority: 1 */\\
+\>\>\>\>\>/* hash-mask-len: 30 */\\
+\>\>\>\>\}\\
+\>\>\>\}\\
+\\
+\>\>\>cand-rp \{\\
+\>\>\>\>group-prefix 224.0.0.0/4 \{\\
+\>\>\>\>\>/* is-scope-zone: false */\\
+\>\>\>\>\>cand-rp-by-vif-name: "dc0"\\
+\>\>\>\>\>/* cand-rp-by-vif-addr: 10.10.10.10 */\\
+\>\>\>\>\>/* rp-priority: 192 */\\
+\>\>\>\>\>/* rp-holdtime: 150 */\\
+\>\>\>\>\}\\
+\>\>\>\}\\
+\>\>\}\\
+\\
+{\rm continued overleaf....}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\newpage
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{4.5in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+\>\>switch-to-spt-threshold \{\\
+\>\>\>/* approx. 1K bytes/s (10Kbps) threshold */\\
+\>\>\>disable: false\\
+\>\>\>interval: 100\\
+\>\>\>bytes: 102400\\
+\>\>\}\\
+\\
+\>\>traceoptions \{\\
+\>\>\>flag all \{\\
+\>\>\>\>disable: false\\
+\>\>\>\}\\
+\>\>\}\\
+\>\}\\
+\}
+\\
+\\
+protocols \{\\
+\>pimsm6 \{\\
+\>\>disable: false\\
+\>\>interface dc0 \{\\
+\>\>\>vif dc0 \{\\
+\>\>\>\>disable: false\\
+\>\>\>\>/* enable-ip-router-alert-option-check: false */\\
+\>\>\>\>/* dr-priority: 1 */\\
+\>\>\>\>/* hello-period: 30 */\\
+\>\>\>\>/* hello-triggered-delay: 5 */\\
+\>\>\>\>/* alternative-subnet 2001:DB8:40:40::/64 */\\
+\>\>\>\}\\
+\>\>\}\\
+\>\>interface register\_vif \{\\
+\>\>\>vif register\_vif \{\\
+\>\>\>\>/* Note: this vif should be always enabled */\\
+\>\>\>\>disable: false\\
+\>\>\>\}\\
+\>\>\}\\
+\\
+\>\>static-rps \{\\
+\>\>\>rp 2001:DB8:50:50:50:50:50:50 \{\\
+\>\>\>\>group-prefix ff00::/8 \{\\
+\>\>\>\>\>/* rp-priority: 192 */\\
+\>\>\>\>\>/* hash-mask-len: 126 */\\
+\>\>\>\>\}\\
+\>\>\>\}\\
+\>\>\}\\
+\\
+\>\>bootstrap \{\\
+\>\>\>disable: false\\
+\>\>\>cand-bsr \{\\
+\>\>\>\>scope-zone ff00::/8 \{\\
+\>\>\>\>\>/* is-scope-zone: false */\\
+\>\>\>\>\>cand-bsr-by-vif-name: "dc0"\\
+\>\>\>\>\>/* cand-bsr-by-vif-addr: 2001:DB8:10:10:10:10:10:10 */\\
+\>\>\>\>\>/* bsr-priority: 1 */\\
+\>\>\>\>\>/* hash-mask-len: 126 */\\
+\>\>\>\>\}\\
+\>\>\>\}\\
+\\
+\>\>\>cand-rp \{\\
+\>\>\>\>group-prefix ff00::/8 \{\\
+\>\>\>\>\>/* is-scope-zone: false */\\
+\>\>\>\>\>cand-rp-by-vif-name: "dc0"\\
+\>\>\>\>\>/* cand-rp-by-vif-addr: 2001:DB8:10:10:10:10:10:10 */\\
+\>\>\>\>\>/* rp-priority: 192 */\\
+\>\>\>\>\>/* rp-holdtime: 150 */\\
+\>\>\>\>\}\\
+\>\>\>\}\\
+\>\>\}\\
+\\
+{\rm continued overleaf....}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\newpage
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{4.5in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+\>\>switch-to-spt-threshold \{\\
+\>\>\>/* approx. 1K bytes/s (10Kbps) threshold */\\
+\>\>\>disable: false\\
+\>\>\>interval: 100\\
+\>\>\>bytes: 102400\\
+\>\>\}\\
+\\
+\>\>traceoptions \{\\
+\>\>\>flag all \{\\
+\>\>\>\>disable: false\\
+\>\>\>\}\\
+\>\>\}\\
+\>\}\\
+\}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+A number of parameters have default values, therefore
+they don't have to be configured (those parameters are commented-out
+in the above sample configuration).
+
+Note that the interface/vif named {\tt register\_vif} is special.
+If PIM-SM is configured, then {\tt register\_vif} must be enabled.
+
+The {\tt enable-ip-router-alert-option-check} parameter is used to
+enable the IP Router Alert option check per virtual interface~\footnote{Note
+that the {\tt enable-ip-router-alert-option-check} statement appeared after
+XORP Release-1.1.}.
+
+The {\tt dr-priority} parameter is used to configure the Designated Router
+priority per virtual interface (note that in case of {\tt register\_vif}
+it is not used).
+
+The {\tt hello-period} parameter is used to configure the PIM Hello
+messages period (in seconds) per virtual interface~\footnote{Note that the
+{\tt hello-period} statement appeared after XORP Release-1.1.}. It must
+be an integer between 1 and 18724.
+
+The {\tt hello-triggered-delay} parameter is used to configure the
+randomized triggered delay of the PIM Hello messages (in
+seconds) per virtual interface~\footnote{Note that the
+{\tt hello-triggered-delay} statement appeared after XORP
+Release-1.1.}. It must be an integer between 1 and 255.
+
+The {\tt alternative-subnet} statement is used to associate additional
+subnets with a network interface. For example, if you want to make
+incoming traffic with a non-local source address appear as it is
+coming from a local subnet, then {\tt alternative-subnet} can be
+used. Typically, this is needed as a work-around solution when we use
+uni-directional interfaces for receiving traffic (e.g., satellite
+links).  Note: use {\tt alternative-subnet} with extreme care, only if
+you know what you are really doing!
+
+If PIM-SM uses static RPs, those can be configured within the
+{\tt static-rps} section. For each RP, an {\tt rp} section is needed, and each
+section should contain the multicast prefix address the static RP is
+configured with. The RP priority can be modified with the {\tt rp-priority}
+parameter.
+
+If PIM-SM uses the Bootstrap mechanism to obtain the Candidate-RP set,
+this can be configured in the {\tt bootstrap} section.
+If the XORP router is to be used as a Candidate-BSR, this should be
+specified in the {\tt cand-bsr} section.
+For a router to be a Candidate-BSR it must advertise for
+each zone (scoped or non-scoped) the associated multicast prefix address.
+The {\tt cand-bsr} section should contain {\tt scope-zone} statements for each
+multicast prefix address.
+The vif name with the address that is to be used as the Candidate-BSR
+is specified by the {\tt cand-bsr-by-vif-name} statement.
+The particular vif's address can be specified by the
+{\tt cand-bsr-by-vif-addr} statement. If the
+{\tt cand-bsr-by-vif-addr} statement is omitted, a domain-wide
+address (if exists) that belongs to that interface is chosen by the router
+itself~\footnote{Note that the {\tt cand-bsr-by-vif-addr} statement
+appeared after XORP Release-1.1.}.
+The Candidate-BSR priority can be modified with the {\tt bsr-priority}
+parameter.
+
+If the XORP router is to be a Candidate-RP, this should be specified
+in the {\tt cand-rp} section.
+For a router to be a Candidate-RP it must advertise for
+each zone (scoped or non-scoped) the associated multicast prefix address.
+The {\tt cand-rp} section should contain {\tt group-prefix} statements
+for each multicast prefix address.
+The vif name with the address that is to be used as the Candidate-RP
+is specified by the {\tt cand-rp-by-vif-name} statement.
+The particular vif's address can be specified by the
+{\tt cand-rp-by-vif-addr} statement. If the
+{\tt cand-rp-by-vif-addr} statement is omitted, a domain-wide
+address (if exists) that belongs to that interface is chosen by the router
+itself~\footnote{Note that the {\tt cand-rp-by-vif-addr} statement
+appeared after XORP Release-1.1.}.
+The Candidate-RP priority can be modified with the
+{\tt rp-priority} parameter; the Candidate-RP holdtime can be modified
+with the {\tt rp-holdtime} parameter.
+
+The {\tt is-scope-zone} parameter is used to specify whether a
+Candidate-BSR {\tt scope-zone} or a Candidate-RP {\tt group-prefix} is
+scoped. Currently, 
+scoped zones are not well tested, hence it is recommended {\tt scope-zone}
+is always set to {\tt false}.
+Note that typically the {\tt hash-mask-len} should not be modified; if you
+don't know what {\tt hash-mask-len} is used for, don't modify it!
+
+The {\tt switch-to-spt-threshold} section can be used to specify the
+multicast data bandwidth threshold used by the last-hop PIM-SM routers
+and the RPs to initiate shortest-path switch toward the multicast source.
+Parameter {\tt interval} is used to specify the periodic measurement
+interval~\footnote{Note that prior to XORP Release-1.3, the
+{\tt interval-sec} statement was used instead of {\tt interval}.};
+parameter {\tt bytes} is used to specify the threshold in number of bytes
+within the measurement interval. It is recommended that the measurement
+interval is not too small, and should be on the order of tens of seconds.
+
+The {\tt traceoptions} section is used to explicitly enable log information
+that can be used for debugging purpose.
+
+Note that in case of PIM-SM for IPv4 each enabled interface must have a
+valid IPv4 address. In case of PIM-SM for IPv6 each enabled interface
+must have a valid link-local and a valid domain-wide IPv6 addresses.
+
+\newpage
+\subsection{FIB2MRIB}
+\label{sec:protocols:fib2mrib}
+
+The FIB2MRIB module is used to obtain the Forwarding Information Base
+information from the underlying system (via the FEA), and to propagate
+it to the MRIB, so it can be used by multicast routing protocols
+such as PIM-SM. Typically, it is needed only if the unicast routing
+protocols (if any) on that router do not inject routes into the
+MRIB~\footnote{Note that prior to XORP Release-1.1, the {\tt enable} flag
+was used instead of {\tt disable} to enable or disable each part of the
+configuration.}.
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+protocols \{\\
+\>fib2mrib \{\\
+\>\>disable: false\\
+\>\}\\
+\}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+

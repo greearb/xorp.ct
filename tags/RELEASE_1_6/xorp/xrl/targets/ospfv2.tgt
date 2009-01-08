@@ -1,0 +1,14 @@
+/* $XORP: xorp/xrl/targets/ospfv2.tgt,v 1.5 2007/05/31 19:02:26 pavlin Exp $ */
+
+#include "common.xif"
+#include "fea_rawpkt4_client.xif"
+#include "policy_backend.xif"
+#include "policy_redist4.xif"
+#include "ospfv2.xif"
+
+target ospfv2 implements	common/0.1,				\
+				raw_packet4_client/0.1,			\
+				policy_backend/0.1,			\
+				policy_redist4/0.1,			\
+				ospfv2/0.1
+

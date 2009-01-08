@@ -1,0 +1,435 @@
+%
+% $XORP: xorp/docs/user_manual/rip.tex,v 1.20 2006/07/19 00:43:38 pavlin Exp $
+%
+
+\chapter{RIP and RIPng}
+\label{rip}
+\section{Terminology and Concepts}
+
+The Routing Information Protocol (RIP) is the simplest unicast routing
+protocol in widespread use today.  RIP is very simple, both in
+configuration and protocol design, so it is widely used in simple
+topologies.  However, RIP does not scale well to larger networks,
+where OSPF or IS-IS might be more appropriate.
+
+There have been two versions of the RIP protocol.  RIP version 1 dates
+back to the early days of the Internet.  It is now historic, primarily
+because it does not support classless addressing which is necessary in
+today's Internet.  XORP does not support RIPv1.  
+
+RIP version 2 introduces a subnet mask, which allows classless
+addressing.  XORP completely supports RIPv2, as specified in RFC 2453.
+
+RIPng introduces IPv6 support.  It is very similar to RIPv2, but for
+IPv6 instead of IPv4.
+
+RIP is a distance vector protocol, which means that when a router
+receives a route from a neighbor, that route comes with a distance
+metric indicating the cost associated with reaching the destination
+via that neighbor.  The router adds its metric for the link on which
+the route was received to the metric in the received route, and then
+compares the route against its current best path to that destination.
+If the metric is lower, or if there is no current route to the
+destination, then the new route wins, and is installed in the router's
+routing table.  If the route is simply an update of the previous best
+route, then the stored metric is updated, and the route's deletion
+timer is restarted.  Otherwise the route is ignored.  Periodically,
+the router's routing table is sent to each of it's neighbors.
+Additionally, if a route changes, then the new route is sent to each
+neighbor.
+
+On reason why RIP is not good for large networks is that in complex
+topologies it is rather slow to conclude that a route is no longer
+usable.  This is because routers in a loop will learn a route from
+each other all the way around the loop, and so when a destination
+becomes unreachable, the routing change will have to propagate around
+the loop multiple times, increasing the metric each time until the
+metric reaches infinity, when the route is finally removed.  RIP uses
+a low value of 15 as infinity to reduce the time it takes to remove
+old information.
+
+A simple case of such a loop is two routers talking to each other.
+After a destination becomes unreachable, two routers may each believe
+the other has the best route.  {\it Split horizon} is a scheme for
+avoiding problems caused by including routes in updates sent to the
+router from which they were learned.  The {\it simple split horizon}
+scheme omits routes learned from one neighbor in updates sent to that
+neighbor.  {\it Split horizon with poisoned reverse} includes such
+routes in updates, but sets their metrics to infinity.  In general, it
+is advisable to use split-horizon with poisoned reverse when using
+RIP, as this significantly speeds convergence in many scenarios.
+
+\subsection{Standards Supported}
+
+XORP RIP complies with the following standards:
+\begin{description}
+\item{\bf RFC 2453}: RIP version 2.
+\item{\bf RFC 2082}: RIP-2 MD5 Authentication.
+\item{\bf RFC 2080}: RIPng for IPv6.
+\end{description} 
+
+\newpage
+\section{Configuring RIP}
+
+To run RIP it is sufficient to specify the set of interfaces, vifs and
+addresses ({\stt interface}, {\stt vif} and {\stt address}) on which
+RIP is enabled.  Each {\stt address} to be used by RIP must be
+explicitly configured, and typically a metric will also be configured.
+
+In addition, to originate routes via RIP, it is necessary to use the
+{\stt export} command to export routes from the router's routing table
+via RIP~\footnote{Starting with XORP Release-1.2 policy is used to
+export routes into RIP with the {\tt export} statement.  Prior to XORP
+Release-1.2 the {\tt export} statement was used with a different syntax.}.
+The {\stt export} commands arguments are policy statements;
+see Chapter \ref{policy} for additional detais.
+
+\subsection{Configuration Syntax}
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=xx\=xx\=\kill
+protocols \{\\
+\>rip \{\\
+\>\>targetname: {\it text}\\
+\>\>export: {\it text}\\
+\>\>interface {\it text} \{\\
+\>\>\>vif {\it text} \{\\
+\>\>\>\>address {\it IPv4} \{\\
+\>\>\>\>\>metric: {\it uint}\\
+\>\>\>\>\>horizon: {\it text}\\
+\>\>\>\>\>disable: {\it bool}\\
+\>\>\>\>\>passive: {\it bool}\\
+\>\>\>\>\>accept-non-rip-requests: {\it bool}\\
+\>\>\>\>\>accept-default-route: {\it bool}\\
+\>\>\>\>\>route-timeout: {\it uint}\\
+\>\>\>\>\>deletion-delay: {\it uint}\\
+\>\>\>\>\>triggered-delay: {\it uint}\\
+\>\>\>\>\>triggered-jitter: {\it uint(0..100)}\\
+\>\>\>\>\>update-interval: {\it uint}\\
+\>\>\>\>\>update-jitter: {\it uint(0..100)}\\
+\>\>\>\>\>request-interval: {\it uint}\\
+\>\>\>\>\>interpacket-delay: {\it uint}\\
+\>\>\>\>\>authentication \{\\
+\>\>\>\>\>\>simple-password: {\it text}\\
+\>\>\>\>\>\>md5 {\it uint(0..255)} \{\\
+\>\>\>\>\>\>\>password: {\it text}\\
+\>\>\>\>\>\>\>start-time: {\it text(``YYYY-MM-DD.HH:MM'')}\\
+\>\>\>\>\>\>\>end-time: {\it text(``YYYY-MM-DD.HH:MM'')}\\
+\>\>\>\>\>\>\}\\
+\>\>\>\>\>\}\\
+\>\>\>\>\}\\
+\>\>\>\}\\
+\>\>\}\\
+\\
+\>\>traceoptions \{\\
+\>\>\>flag \{\\
+\>\>\>\>all \{\\
+\>\>\>\>\>disable: {\it bool}\\
+\>\>\>\>\}\\
+\>\>\>\}\\
+\>\>\}\\
+\>\}\\
+\}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+
+\begin{description}
+\item{\tt protocols}: this delimits the configuration for all routing
+  protocols in the XORP router configuration.  It is mandatory that
+  RIP configuration is under the {\stt protocols} node in the
+  configuration.
+\item{\tt rip}: this delimits the RIP configuration part of the XORP
+  router configuration.
+\item{\tt targetname}: this is the name for this instance of RIP.  It
+  defaults to ``{\stt rip}'', and it is not recommended that this
+  default is overridden under normal usage scenarios.
+\item{\tt export}: this directive specifies an export policy statement
+(see Chapter \ref{policy}).
+\item{\tt interface}: this specifies a network interface that should
+  be used by RIP for routing.  See Chapter \ref{interfaces} for
+  details of interfaces.  The interface must be configured
+  in the {\stt interfaces} part of the router configuration.
+
+  Each interface can have multiple vifs configured:
+\item{\tt vif}: this specifies a vif that should be used by RIP for routing.
+  See Chapter \ref{interfaces} for details of vifs.
+\item{\tt address}: this specifies an IPv4 address that should be used
+  by RIP for routing.  RIP will peer with other routers on this {\stt
+  interface/vif} using this {\stt address}.  The address must be a
+  valid configured address for this vif.
+
+  The parameters that can be specified for each address are:
+\begin{description}
+\item{\tt metric}: this specifies the metric or cost associated with
+  routes received on this vif/address.  The metric is added to the
+  cost in routes received before deciding between best routes to the
+  same destination subnet.  {\stt metric} should be an integer between
+  1 and 15.  Note that 15 is regarded as infinity as far as RIP is
+  concerned.  The sum of all the metrics across the entire RIP domain
+  should be less than 15.
+\item{\tt horizon}: this specifies how RIP deals with eliminating
+  routes quickly after a path has failed.  Possible values are ``{\stt
+  split-horizon-poison-reverse}'', ``{\stt split-horizon}'', and ``{\stt
+  none}''.  The default is {\stt split-horizon-poison-reverse} and under
+  normal circumstances should be left unchanged.
+\item{\tt disable}: this takes the value {\stt true} or {\stt false},
+  and determines whether RIP will exchange routes via this
+  vif/address~\footnote{Note
+  that prior to XORP Release-1.1, the {\tt enable} flag was used instead of
+  {\tt disable}.}.
+  Setting this to {\stt true} allows routes received
+  via an address to be temporarily removed without deleting the
+  configuration.  The default is {\stt false}.
+\item{\tt passive}: this takes the value {\stt true} or {\stt false},
+  and determines whether RIP runs in passive mode on this address.  In
+  passive mode, RIP will accept routes received on this address, but
+  will not advertise any routes to neighbors via this address.  The
+  default is {\stt false}.
+\item{\tt accept-non-rip-requests}: this takes the value {\stt true}
+  or {\stt false}.  Normal RIPv2 requests for routing updates are
+  multicast to all neighbors and sourced from the RIP port.  However
+  for monitoring purposes RIP also allows requests to be unicast, and
+  then they can be sourced from non-RIP ports.  When this option is
+  {\stt true}, RIP will accept RIP requests from any UDP port.  The
+  default is {\stt true}.
+\item{\tt accept-default-route}: this takes the value {\stt true} or
+  {\stt false}, and indicates whether RIP should accept a default
+  route if it receives one from a RIP neighbor.  The default is {\stt
+  false}.
+\item{\tt route-timeout}: If no periodic or triggered update of a
+  route from this neighbor has been received for this time interval,
+  the route is considered to have expired~\footnote{Note that prior
+  to XORP Release-1.3, the {\tt route-expiry-secs} statement was used
+  instead of {\tt route-timeout}.}.  The default is 180 seconds,
+  and should not normally need to be changed.
+\item{\tt deletion-delay}: After a route has expired (the
+  route has an infinite metric), a router must keep a copy of it for a
+  certain time so it can have a reasonably confidence that it has told
+  its neighbors that the route has expired~\footnote{Note that prior
+  to XORP Release-1.3, the {\tt route-deletion-secs} statement was used
+  instead of {\tt deletion-delay}.}.  This time interval
+  determines how long the router maintains expired routes after their
+  metric has reached infinity. The default is 120 seconds, and should
+  not normally need to be changed.  
+\item{\tt triggered-delay}: When a router receives a
+  modified route from a neighbor, it does not have to wait until the
+  next periodic update to tell the other neighbors, but instead sends
+  a triggered update~\footnote{Note that prior
+  to XORP Release-1.3, the {\tt triggered-update-min-secs} and
+  {\tt triggered-update-max-secs} statements were used
+  instead of {\tt triggered-delay} and {\tt triggered-jitter}.}.
+  After a triggered update is sent, a timer is
+  set for a random interval between
+  {\stt (triggered-delay - triggered-delay * triggered-jitter / 100)} and
+  {\stt (triggered-delay + triggered-delay * triggered-jitter / 100)}.
+  If other changes occur that
+  would trigger updates before the timer expires, a single update is
+  triggered when the timer expires.  The default value of {\stt
+  triggered-delay} is 3 second, and should not normally need
+  to be changed.
+\item{\tt triggered-jitter}: See {\stt
+  triggered-delay} for details.  The default is 66 percents
+  (\ie {\stt triggered-delay} would be in the interval [1..5] seconds),
+  and should not normally need to be changed.
+\item{\tt update-interval}: A RIP router will typically tell
+  its neighbors its entire routing table every 30 seconds~\footnote{Note that
+  prior to XORP Release-1.3, the {\tt table-announce-min-secs} and
+  {\tt table-announce-max-secs} statements were used
+  instead of {\tt update-interval} and {\tt update-jitter}.}.  To avoid
+  self-synchronization of routing updates, the precise time interval
+  between telling each neighbor about routing updates is randomly
+  jittered, with the delay chosen uniformly at random between
+  {\stt (update-interval - update-interval * update-jitter / 100)} and
+  {\stt (update-interval + update-interval * update-jitter / 100)}.  The
+  default for {\stt update-interval} is 30 seconds, and should
+  not normally need to be changed.
+\item{\tt update-jitter}: See {\stt update-interval}
+  for details.  The default is 16 percents,
+  (\ie {\stt update-jitter} would be in the interval [25..35] seconds),
+  and should not normally need to be changed.
+\item{\tt request-interval}: When a RIP router has no neighbors on a
+  vif/address, it may periodically send a request for a route update
+  in case a neighbor appears~\footnote{Note that prior to XORP
+  Release-1.3, the {\tt table-request-secs} statement was used instead
+  of {\tt request-interval}.}.  This timer determines how often such a
+  request is re-sent. The default value is 30 seconds.
+  If the timer's value is 0, then the periodic requests are not sent.
+\item{\tt interpacket-delay}: This specifies the default delay
+  between back-to-back RIP packets when an update is sent that
+  requires multiple packets to be sent~\footnote{Note that prior to
+  XORP Release-1.3, the {\tt interpacket-delay-msecs} statement was
+  used instead of {\tt interpacket-delay}.}.  The default is 50
+  milliseconds, and should not normally need to be changed.
+\item{\tt authentication}: This directive specifies the authentication
+mechanism used to authorise RIP updates sent and received via this
+vif/address.  
+
+The authentication is configured by using one of the following
+mutually-exclusive statements:
+
+\begin{description}
+\item{\tt simple-password}: this specifies the password used for
+  plaintext authentication on this vif/address.
+\item{\tt md5}: this specifies an MD5 authentication key. The parameter
+  is the key ID and must be in the interval [0, 255].
+  The MD5 authentication is configured by using the following
+  statements:
+\begin{description}
+  \item{\tt password}: this specifies the MD5 password for the specific
+  key.
+  \item{\tt start-time}: this specifies the start time when the key
+  becomes active. The format is ``YYYY-MM-DD.HH:MM''. If it is empty,
+  then the key should become active immediately.
+  \item{\tt end-time}: this specifies the end time when the key becomes
+  inactive. The format is ``YYYY-MM-DD.HH:MM''. If it is empty,
+  then the key should never expire.
+\end{description}
+
+If there are multiple configured keys, the messages are transmitted
+using each of the keys that are valid for message generation.
+
+\item{\tt traceoptions}: this directive delimits the configuration of
+  debugging and tracing options for RIP.
+\begin{description}
+\item{\tt flag}: this directive is used to specify which tracing
+  options are enabled.  Possible parameters are:
+\begin{description}
+\item{\tt all}: this directive specifies that all tracing
+  options should be enabled.  Possible parameters are:
+\begin{description}
+\item{\tt disable}: this takes the value {\stt true} or {\stt false},
+  and disables or enables tracing. The default is {\stt false}.
+\end{description}
+\end{description}
+\end{description}
+
+\end{description}
+
+Note that prior to XORP Release-1.2, the authentication configuration
+statement used a different format:
+\begin{verbatim}
+authentication {
+    type: text
+    password: text
+}
+\end{verbatim}
+
+\end{description}
+\end{description}
+
+\section{Configuring RIPng}
+
+The configuration for RIPng is basically the same as for RIP, with two
+exceptions:
+\begin{itemize}
+\item The addresses are IPv6 addresses with RIPng whereas they are IPv4
+  addresses with RIPv2.
+\item The {\stt authentication} directive is not available in RIPng,
+  because RFC 2081 does not specify authentication for RIPng.
+\end{itemize}
+
+\newpage
+\subsection{Example Configurations}
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+policy \{\\
+\>policy-statement connected-to-rip \{\\
+\>\>term export \{\\
+\>\>\>from \{\\
+\>\>\>\>protocol: "connected"\\
+\>\>\>\}\\
+\>\>\>then \{\\
+\>\>\>\>metric: 0\\
+\>\>\>\}\\
+\>\>\}\\
+\>\}\\
+\}\\
+\\
+policy \{\\
+\>policy-statement static-to-rip \{\\
+\>\>term export \{\\
+\>\>\>from \{\\
+\>\>\>\>protocol: "static"\\
+\>\>\>\}\\
+\>\>\>then \{\\
+\>\>\>\>metric: 1\\
+\>\>\>\}\\
+\>\>\}\\
+\>\}\\
+\}\\
+\\
+protocols \{\\
+\>rip \{\\
+\>\>/* Redistribute connected and static routes */\\
+\>\>export: "connected-to-rip,static-to-rip"\\
+\>\>/* Run on specified network interface addresses */\\
+\>\>interface fxp0 \{\\
+\>\>\>vif fxp0 \{\\
+\>\>\>\>address 69.110.224.158 \{\\
+\>\>\>\>\}\\
+\>\>\>\}\\
+\>\>\}\\
+\>\}\\
+\}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+
+In the above configuration, RIP is configured to export routes for
+directly connected subnets and for routes that are statically
+configured.  The RIP metric advertised is configured to be 0 for
+connected subnets and 1 for static routes.
+
+RIP is configured on only one interface/vif ({\stt dc0/dc0}), with
+address 10.10.10.10.  This router will send and receive routes from
+any RIP neighbors that it discovers on that vif/address.
+
+\newpage
+\section{Monitoring RIP}
+
+RIP routes can be monitored using the operational mode command: \\
+{\stt show route table ipv4 unicast rip}.  \\
+For each subnet, the nexthop
+router, the RIP metric, and the interface/vif to reach the nexthop
+route are shown.
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xxxxxxxxxxxxxxxx\=\kill
+user@hostname> {\bf show route table ipv4 unicast rip}\\
+172.16.0.0/24 \>[rip(120)/1]\\
+               \>> to 172.16.0.1 via dc0/dc0\\
+172.16.1.0/24 \>[rip(120)/1]\\
+               \>> to 172.16.1.1 via dc1/dc1\\
+172.16.2.0/24 \>[rip(120)/1]\\
+               \>> to 172.16.2.1 via dc2/dc2\\
+172.16.3.0/24 \>[rip(120)/1]\\
+               \>> to 172.16.3.1 via dc3/dc3\\
+192.150.187.0/25 \>[rip(120)/1]\\
+               \>> to 192.150.187.112 via fxp0/fxp0
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+
+The operational command for monitoring the IPv6 unicast routes
+is {\stt show route table ipv6 unicast rip}.
+The operational commands for monitoring the MRIB routes
+are {\stt show route table ipv4 multicast rip}
+and {\stt show route table ipv6 multicast rip}
+for IPv4 and IPv6 respectively.

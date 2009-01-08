@@ -1,0 +1,142 @@
+#
+# $XORP: xorp/xrl/interfaces/Jamfile,v 1.7 2008/04/26 00:59:49 pavlin Exp $
+#
+
+#
+# Targets need to be declared manually because there is no algorithmic 1:M
+# mapping between the library names and the xif files. We'd need to
+# rename files to do that.
+# Jam can't substitute out the underscores.
+# We also need to explicitly declare each target which may be referenced from
+# outside of xrl/interfaces as a dependency.  The libxipc code does this.
+#
+# Use incantations like this:
+#XorpXrlXif <xrl!interfaces>foo_xif.cc : foo.xif ;
+#Library libfooxif : foo_xif.cc ;
+#
+
+SubDir TOP xrl interfaces ;
+
+Library libbgpxif : bgp_xif.cc ;
+Library libbgpmibtrapsxif : bgp_mib_traps_xif.cc ;
+Library libclimanagerxif : cli_manager_xif.cc ;
+Library libcliprocessorxif : cli_processor_xif.cc ;
+Library libcommonxif : common_xif.cc ;
+Library libcoordxif : coord_xif.cc ;
+Library libdatainxif : datain_xif.cc ;
+Library libfeaclickxif : fea_click_xif.cc ;
+Library libfeafibxif : fea_fib_xif.cc ;
+Library libfeafibclientxif : fea_fib_client_xif.cc ;
+Library libfeafirewalllxif : fea_firewall_xif.cc ;
+Library libfeaifmgrxif : fea_ifmgr_xif.cc ;
+Library libfeaifmgrmirrorxif : fea_ifmgr_mirror_xif.cc ;
+Library libfeaifmgrreplicatorxif : fea_ifmgr_replicator_xif.cc ;
+Library libfearawlinkxif : fea_rawlink_xif.cc ;
+Library libfearawlinkclientxif : fea_rawlink_client_xif.cc ;
+Library libfearawpkt4xif : fea_rawpkt4_xif.cc ;
+Library libfearawpkt4clientxif : fea_rawpkt4_client_xif.cc ;
+Library libfearawpkt6xif : fea_rawpkt6_xif.cc ;
+Library libfearawpkt6clientxif : fea_rawpkt6_client_xif.cc ;
+Library libfib2mribxif : fib2mrib_xif.cc ;
+Library libfinderxif : finder_xif.cc ;
+Library libfinderclientxif : finder_client_xif.cc ;
+Library libfindereventnotifierxif : finder_event_notifier_xif.cc ;
+Library libfindereventobserverxif : finder_event_observer_xif.cc ;
+Library libftixif : fti_xif.cc ;
+#Library libisisxif : isis_xif.cc ;
+Library libmfeaxif : mfea_xif.cc ;
+Library libmfeaclientxif : mfea_client_xif.cc ;
+Library libmld6igmpxif : mld6igmp_xif.cc ;
+Library libmld6igmpclientxif : mld6igmp_client_xif.cc ;
+Library libolsr4xif : olsr4_xif.cc ;
+Library libospfv2xif : ospfv2_xif.cc ;
+Library libospfv3xif : ospfv3_xif.cc ;
+Library libpimxif : pim_xif.cc ;
+Library libpolicyxif : policy_xif.cc ;
+Library libpolicybackendxif : policy_backend_xif.cc ;
+Library libpolicyredist4xif : policy_redist4_xif.cc ;
+Library libpolicyredist6xif : policy_redist6_xif.cc ;
+Library libprofilexif : profile_xif.cc ;
+Library libprofileclientxif : profile_client_xif.cc ;
+Library libredist4xif : redist4_xif.cc ;
+Library libredist6xif : redist6_xif.cc ;
+Library libredisttransaction4xif : redist_transaction4_xif.cc ;
+Library libredisttransaction6xif : redist_transaction6_xif.cc ;
+Library libribxif : rib_xif.cc ;
+Library libribclientxif : rib_client_xif.cc ;
+Library libripxif : rip_xif.cc ;
+Library libripngxif : ripng_xif.cc ;
+Library librtrmgrxif : rtrmgr_xif.cc ;
+Library librtrmgr_clientxif : rtrmgr_client_xif.cc ;
+Library libsocket4xif : socket4_xif.cc ;
+Library libsocket4userxif : socket4_user_xif.cc ;
+Library libsocket6xif : socket6_xif.cc ;
+Library libsocket6userxif : socket6_user_xif.cc ;
+Library libstaticroutesxif : static_routes_xif.cc ;
+Library libtestxif : test_xif.cc ;
+Library libtestpeerxif : test_peer_xif.cc ;
+Library libtestxrlsxif : test_xrls_xif.cc ;
+Library libvrrpxif : vrrp_xif.cc ;
+Library libxorpifmibxif : xorp_if_mib_xif.cc ;
+
+XorpXrlXif <xrl!interfaces>bgp_xif.cc <xrl!interfaces>bgp_xif.hh : bgp.xif ;
+XorpXrlXif <xrl!interfaces>bgp_mib_traps_xif.cc <xrl!interfaces>bgp_mib_traps_xif.hh : bgp_mib_traps.xif ;
+XorpXrlXif <xrl!interfaces>cli_manager_xif.cc <xrl!interfaces>cli_manager_xif.hh : cli_manager.xif ;
+XorpXrlXif <xrl!interfaces>cli_processor_xif.cc <xrl!interfaces>cli_processor_xif.hh : cli_processor.xif ;
+XorpXrlXif <xrl!interfaces>common_xif.cc <xrl!interfaces>common_xif.hh : common.xif ;
+XorpXrlXif <xrl!interfaces>coord_xif.cc <xrl!interfaces>coord_xif.hh : coord.xif ;
+XorpXrlXif <xrl!interfaces>datain_xif.cc <xrl!interfaces>datain_xif.hh : datain.xif ;
+XorpXrlXif <xrl!interfaces>fea_click_xif.cc <xrl!interfaces>fea_click_xif.hh : fea_click.xif ;
+XorpXrlXif <xrl!interfaces>fea_fib_xif.cc <xrl!interfaces>fea_fib_xif.hh : fea_fib.xif ;
+XorpXrlXif <xrl!interfaces>fea_fib_client_xif.cc <xrl!interfaces>fea_fib_client_xif.hh : fea_fib_client.xif ;
+XorpXrlXif <xrl!interfaces>fea_firewall_xif.cc <xrl!interfaces>fea_firewall_xif.hh : fea_firewall.xif ;
+XorpXrlXif <xrl!interfaces>fea_ifmgr_xif.cc <xrl!interfaces>fea_ifmgr_xif.hh : fea_ifmgr.xif ;
+XorpXrlXif <xrl!interfaces>fea_ifmgr_mirror_xif.cc <xrl!interfaces>fea_ifmgr_mirror_xif.hh : fea_ifmgr_mirror.xif ;
+XorpXrlXif <xrl!interfaces>fea_ifmgr_replicator_xif.cc <xrl!interfaces>fea_ifmgr_replicator_xif.hh : fea_ifmgr_replicator.xif ;
+XorpXrlXif <xrl!interfaces>fea_rawlink_xif.cc <xrl!interfaces>fea_rawlink_xif.hh : fea_rawlink.xif ;
+XorpXrlXif <xrl!interfaces>fea_rawlink_client_xif.cc <xrl!interfaces>fea_rawlink_client_xif.hh : fea_rawlink_client.xif ;
+XorpXrlXif <xrl!interfaces>fea_rawpkt4_xif.cc <xrl!interfaces>fea_rawpkt4_xif.hh : fea_rawpkt4.xif ;
+XorpXrlXif <xrl!interfaces>fea_rawpkt4_client_xif.cc <xrl!interfaces>fea_rawpkt4_client_xif.hh : fea_rawpkt4_client.xif ;
+XorpXrlXif <xrl!interfaces>fea_rawpkt6_xif.cc <xrl!interfaces>fea_rawpkt6_xif.hh : fea_rawpkt6.xif ;
+XorpXrlXif <xrl!interfaces>fea_rawpkt6_client_xif.cc <xrl!interfaces>fea_rawpkt6_client_xif.hh : fea_rawpkt6_client.xif ;
+XorpXrlXif <xrl!interfaces>fib2mrib_xif.cc <xrl!interfaces>fib2mrib_xif.hh : fib2mrib.xif ;
+XorpXrlXif <xrl!interfaces>finder_xif.cc <xrl!interfaces>finder_xif.hh : finder.xif ;
+XorpXrlXif <xrl!interfaces>finder_client_xif.cc <xrl!interfaces>finder_client_xif.hh : finder_client.xif ;
+XorpXrlXif <xrl!interfaces>finder_event_notifier_xif.cc <xrl!interfaces>finder_event_notifier_xif.hh : finder_event_notifier.xif ;
+XorpXrlXif <xrl!interfaces>finder_event_observer_xif.cc <xrl!interfaces>finder_event_observer_xif.hh : finder_event_observer.xif ;
+XorpXrlXif <xrl!interfaces>fti_xif.cc <xrl!interfaces>fti_xif.hh : fti.xif ;
+#XorpXrlXif <xrl!interfaces>isis_xif.cc <xrl!interfaces>isis_xif.hh : isis.xif ;
+XorpXrlXif <xrl!interfaces>mfea_xif.cc <xrl!interfaces>mfea_xif.hh : mfea.xif ;
+XorpXrlXif <xrl!interfaces>mfea_client_xif.cc <xrl!interfaces>mfea_client_xif.hh : mfea_client.xif ;
+XorpXrlXif <xrl!interfaces>mld6igmp_xif.cc <xrl!interfaces>mld6igmp_xif.hh : mld6igmp.xif ;
+XorpXrlXif <xrl!interfaces>mld6igmp_client_xif.cc <xrl!interfaces>mld6igmp_client_xif.hh : mld6igmp_client.xif ;
+XorpXrlXif <xrl!interfaces>olsr4_xif.cc <xrl!interfaces>olsr4_xif.hh : olsr4.xif ;
+XorpXrlXif <xrl!interfaces>ospfv2_xif.cc <xrl!interfaces>ospfv2_xif.hh : ospfv2.xif ;
+XorpXrlXif <xrl!interfaces>ospfv3_xif.cc <xrl!interfaces>ospfv3_xif.hh : ospfv3.xif ;
+XorpXrlXif <xrl!interfaces>pim_xif.cc <xrl!interfaces>pim_xif.hh : pim.xif ;
+XorpXrlXif <xrl!interfaces>policy_xif.cc <xrl!interfaces>policy_xif.hh : policy.xif ;
+XorpXrlXif <xrl!interfaces>policy_backend_xif.cc <xrl!interfaces>policy_backend_xif.hh : policy_backend.xif ;
+XorpXrlXif <xrl!interfaces>policy_redist4_xif.cc <xrl!interfaces>policy_redist4_xif.hh : policy_redist4.xif ;
+XorpXrlXif <xrl!interfaces>policy_redist6_xif.cc <xrl!interfaces>policy_redist6_xif.hh : policy_redist6.xif ;
+XorpXrlXif <xrl!interfaces>profile_xif.cc <xrl!interfaces>profile_xif.hh : profile.xif ;
+XorpXrlXif <xrl!interfaces>profile_client_xif.cc <xrl!interfaces>profile_client_xif.hh : profile_client.xif ;
+XorpXrlXif <xrl!interfaces>redist4_xif.cc <xrl!interfaces>redist4_xif.hh : redist4.xif ;
+XorpXrlXif <xrl!interfaces>redist6_xif.cc <xrl!interfaces>redist6_xif.hh : redist6.xif ;
+XorpXrlXif <xrl!interfaces>redist_transaction4_xif.cc <xrl!interfaces>redist_transaction4_xif.hh : redist_transaction4.xif ;
+XorpXrlXif <xrl!interfaces>redist_transaction6_xif.cc <xrl!interfaces>redist_transaction6_xif.hh : redist_transaction6.xif ;
+XorpXrlXif <xrl!interfaces>rib_xif.cc <xrl!interfaces>rib_xif.hh : rib.xif ;
+XorpXrlXif <xrl!interfaces>rib_client_xif.cc <xrl!interfaces>rib_client_xif.hh : rib_client.xif ;
+XorpXrlXif <xrl!interfaces>rip_xif.cc <xrl!interfaces>rip_xif.hh : rip.xif ;
+XorpXrlXif <xrl!interfaces>ripng_xif.cc <xrl!interfaces>ripng_xif.hh : ripng.xif ;
+XorpXrlXif <xrl!interfaces>rtrmgr_xif.cc <xrl!interfaces>rtrmgr_xif.hh : rtrmgr.xif ;
+XorpXrlXif <xrl!interfaces>rtrmgr_client_xif.cc <xrl!interfaces>rtrmgr_client_xif.hh : rtrmgr_client.xif ;
+XorpXrlXif <xrl!interfaces>socket4_xif.cc <xrl!interfaces>socket4_xif.hh : socket4.xif ;
+XorpXrlXif <xrl!interfaces>socket4_user_xif.cc <xrl!interfaces>socket4_user_xif.hh : socket4_user.xif ;
+XorpXrlXif <xrl!interfaces>socket6_xif.cc <xrl!interfaces>socket6_xif.hh : socket6.xif ;
+XorpXrlXif <xrl!interfaces>socket6_user_xif.cc <xrl!interfaces>socket6_user_xif.hh : socket6_user.xif ;
+XorpXrlXif <xrl!interfaces>static_routes_xif.cc <xrl!interfaces>static_routes_xif.hh : static_routes.xif ;
+XorpXrlXif <xrl!interfaces>test_xif.cc <xrl!interfaces>test_xif.hh : test.xif ;
+XorpXrlXif <xrl!interfaces>test_peer_xif.cc <xrl!interfaces>test_peer_xif.hh : test_peer.xif ;
+XorpXrlXif <xrl!interfaces>test_xrls_xif.cc <xrl!interfaces>test_xrls_xif.hh : test_xrls.xif ;
+XorpXrlXif <xrl!interfaces>vrrp_xif.cc <xrl!interfaces>vrrp_xif.hh : vrrp.xif ;
+XorpXrlXif <xrl!interfaces>xorp_if_mib_xif.cc <xrl!interfaces>xorp_if_mib_xif.hh : xorp_if_mib.xif ;

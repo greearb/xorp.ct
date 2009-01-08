@@ -1,0 +1,1779 @@
+%
+% $XORP: xorp/docs/user_manual/pimsm.tex,v 1.33 2008/07/18 18:40:36 pavlin Exp $
+%
+
+\chapter{PIM Sparse-Mode}
+\label{pimsm}
+
+\section{Terminology and Concepts}
+
+PIM stands for {\it Protocol Independent Multicast}, and denotes a
+class of multicast routing protocols.  The term {\it protocol
+independent} comes from the fact that PIM does not have its own
+topology discovery protocol, but instead relies on routing information
+supplied by protocols such as RIP and BGP.  What PIM does do is to
+build multicast trees from senders to receivers based on paths
+determined by this external topology information.  
+
+There are two PIM protocols:
+\begin{itemize}
+\item PIM Sparse-Mode (PIM-SM) is the most commonly used multicast
+  routing protocol, and explicitly builds distribution trees from the
+  receivers back towards senders.
+\item PIM Dense-Mode (PIM-DM) is less commonly used, and builds trees
+  by flooding multicast traffic domain-wide, and then pruning off
+  branches from the tree where there are no receivers.  
+\end{itemize}
+At the present time, XORP only implements PIM Sparse Mode.
+
+\subsection{PIM-SM Protocol Overview}
+
+{\it The following description is adapted from the PIM-SM
+  specification.  }
+
+PIM-SM relies on an underlying topology-gathering protocol to populate a
+routing table with routes.  This routing table is called the {\it MRIB} or
+{\it Multicast Routing Information Base}.  The routes in this table may be
+taken directly from the unicast routing table, or it may be
+different and provided by a separate routing protocol such as
+Multi-protocol BGP.
+
+Regardless of how it is created, the primary role of the MRIB in the
+PIM-SM protocol
+is to provide the next-hop router along a multicast-capable
+path to each destination subnet.
+The MRIB is used to determine the next-hop neighbor to which any PIM
+Join/Prune message is sent.
+Data flows along the reverse path of the Join messages.
+Thus, in contrast to the unicast RIB which specifies the
+next-hop that a data packet would take to get {\it to} some subnet,
+the MRIB gives reverse-path information, and indicates the path that
+a multicast data packet would take {\it from} 
+its origin subnet to the router that has the MRIB.  
+
+Like all multicast routing protocols that implement the ASM service model,
+PIM-SM must be able to route data packets from sources to receivers
+without either the sources or receivers knowing a-priori of the
+existence of the others.  This is essentially done in three phases,
+although as senders and receivers may come and go at any time, all
+three phases may be occur simultaneously.
+
+\subsubsection*{Phase One: RP Tree}
+
+In phase one, a multicast receiver expresses its interest in receiving
+traffic destined for a multicast group.  Typically it does this using
+IGMP or MLD.  One of the receiver's local PIM routers is elected as the
+Designated Router (DR) for that subnet.  On receiving the receiver's
+expression of interest, the DR then sends a PIM Join message towards
+the Rendezvous Point (RP) for that multicast group.  The RP is a
+PIM-SM router that has been configured to serve a bootstrapping role
+for certain multicast groups.  This Join message is known as a (*,G)
+Join because it joins group G for all sources to that group.  The
+(*,G) Join travels hop-by-hop towards the RP for the group, and in
+each router it passes through, multicast tree state for group G is
+instantiated.  Eventually the (*,G) Join either reaches the RP, or
+reaches a router that already has (*,G) Join state for that group.
+When many receivers join the group, their Join messages converge on
+the RP, and form a distribution tree for group G that is rooted at the
+RP.  This is known as the RP Tree (RPT), and is also known as the
+shared tree because it is shared by all sources sending to that group.
+Join messages are resent periodically so long as the receiver remains
+in the group.  When all receivers on a leaf-network leave the group,
+the DR will send a PIM (*,G) Prune message towards the RP for that
+multicast group. However if the Prune message is not sent for any
+reason, the state will eventually time out.
+
+A multicast data sender just starts sending data destined for a
+multicast group.  The sender's local router (DR) takes those data
+packets, unicast-encapsulates them, and sends them directly to the RP.
+The RP receives these encapsulated data packets, decapsulates them,
+and forwards them onto the shared tree.  The packets then follow the
+(*,G) multicast tree state in the routers on the RP Tree, being
+replicated wherever the RP Tree branches, and eventually reaching all
+the receivers for that multicast group.  The process of encapsulating
+data packets to the RP is called {\it registering}, and the encapsulation
+packets are known as PIM Register packets.  
+
+At the end of phase one, multicast traffic is flowing encapsulated to
+the RP, and then natively over the RP tree to the multicast receivers.
+
+\subsubsection*{Phase Two: Register-Stop}
+
+Register-encapsulation of data packets is inefficient for two reasons:
+\begin{itemize}
+\item Encapsulation and decapsulation may be relatively expensive
+operations for a router to perform, depending on whether or not the
+router has appropriate hardware for these tasks.
+
+\item Traveling all the way to the RP, and then back down the shared
+tree may entail the packets traveling a relatively long distance to
+reach receivers that are close to the sender.  For some applications,
+this increased latency is undesirable.
+\end{itemize}
+Although Register-encapsulation may continue indefinitely, for the
+reasons above, the RP will normally choose to switch to native forwarding.
+To do this, when the RP receives a register-encapsulated data packet
+from source S on group G, it will normally initiate an (S,G)
+source-specific Join towards S.  This Join message travels hop-by-hop
+towards S, instantiating (S,G) multicast tree state in the routers
+along the path.  (S,G) multicast tree state is used only to forward
+packets for group G if those packets come from source S.  Eventually
+the Join message reaches S's subnet or a router that already has (S,G)
+multicast tree state, and then packets from S start to flow following
+the (S,G) tree state towards the RP.  These data packets may also
+reach routers with (*,G) state along the path towards the RP - if so,
+they can short-cut onto the RP tree at this point.
+
+While the RP is in the process of joining the source-specific tree for
+S, the data packets will continue being encapsulated to the RP.
+When packets from S also start to arrive natively at the the RP, the
+RP will be receiving two copies of each of these packets.  At this
+point, the RP starts to discard the encapsulated copy of these
+packets, and it sends a {\it Register-Stop} message back to S's DR to
+prevent the DR unnecessarily encapsulating the packets.
+
+At the end of phase 2, traffic will be flowing natively from S along a
+source-specific tree to the RP, and from there along the shared tree
+to the receivers.  Where the two trees intersect, traffic may transfer
+from the source-specific tree to the RP tree, and so avoid taking a
+long detour via the RP.
+
+It should be noted that a sender may start sending before or after a
+receiver joins the group, and thus phase two may happen before the
+shared tree to the receiver is built.
+
+\subsubsection*{Phase 3: Shortest-Path Tree}
+
+Although having the RP join back towards the source removes the
+encapsulation overhead, it does not completely optimize the forwarding
+paths.  For many receivers the route via the RP may involve a
+significant detour when compared with the shortest path from the
+source to the receiver.  
+
+To obtain lower latencies, a router on the receiver's LAN, typically
+the DR, may optionally initiate a transfer from the shared tree to a
+source-specific shortest-path tree (SPT).  To do this, it issues an
+(S,G) Join towards S.  This instantiates state in the routers along
+the path to S.  Eventually this join either reaches S's subnet, or
+reaches a router that already has (S,G) state.  When this happens,
+data packets from S start to flow following the (S,G) state until they
+reach the receiver.
+
+At this point the receiver (or a router upstream of the receiver) will
+be receiving two copies of the data - one from the SPT and one from
+the RPT.  When the first traffic starts to arrive from the SPT, the DR
+or upstream router starts to drop the packets for G from S that arrive
+via the RP tree.  In addition, it sends an (S,G) Prune message towards
+the RP.  This is known as an (S,G,rpt) Prune.  The Prune message
+travels hop-by-hop, instantiating state along the path towards the RP
+indicating that traffic from S for G should NOT be forwarded in this
+direction.  The prune is propagated until it reaches the RP or a
+router that still needs the traffic from S for other receivers.
+
+By now, the receiver will be receiving traffic from S along the
+shortest-path tree between the receiver and S.  In addition, the RP is
+receiving the traffic from S, but this traffic is no longer reaching
+the receiver along the RP tree.  As far as the receiver is concerned,
+this is the final distribution tree.
+
+\subsubsection{Multi-access Transit LANs}
+
+The overview so far has concerned itself with point-to-point links.
+However, using multi-access LANs such as Ethernet for transit is not
+uncommon.  This can cause complications for three reasons:
+\begin{itemize}
+\item Two or more routers on the LAN may issue (*,G) Joins to different
+upstream routers on the LAN because they have inconsistent MRIB
+entries regarding how to reach the RP.  Both paths on the RP tree will
+be set up, causing two copies of all the shared tree traffic to appear
+on the LAN.
+\item Two or more routers on the LAN may issue (S,G) Joins to different
+upstream routers on the LAN because they have inconsistent MRIB
+entries regarding how to reach source S.  Both paths on the
+source-specific tree will be set up, causing two copies of all the
+traffic from S to appear on the LAN.
+\item A router on the LAN may issue a (*,G) Join to one upstream router on
+the LAN, and another router on the LAN may issue an (S,G) Join to a
+different upstream router on the same LAN.  Traffic from S may reach
+the LAN over both the RPT and the SPT.  If the receiver behind the
+downstream (*,G) router doesn't issue an (S,G,rpt) prune, then this
+condition would persist.
+\end{itemize}
+All of these problems are caused by there being more than one upstream
+router with join state for the group or source-group pair.  PIM-SM does
+not prevent such duplicate joins from occurring - instead when
+duplicate data packets appear on the LAN from different routers, these
+routers notice this, and then elect a single forwarder.  This election
+is performed using PIM {\it Assert} messages, which resolve the problem in
+favor of the upstream router which has (S,G) state, or if neither or
+both router has (S,G) state, then in favor of the router with the best
+metric to the RP for RP trees, or the best metric to the source to
+source-specific trees.
+
+These Assert messages are also received by the downstream routers on
+the LAN, and these cause subsequent Join messages to be sent to the
+upstream router that won the Assert.
+
+\subsection*{RP Discovery}
+
+PIM-SM routers need to know the address of the RP for each group for
+which they have (*,G) state.  This address is obtained either through
+a bootstrap mechanism or through static configuration.
+
+One dynamic way to do this is to use the {\it Bootstrap Router} (BSR)
+mechanism. 
+One router in each PIM-SM domain is elected the Bootstrap Router through
+a simple election process.  All the routers in the domain that are
+configured to be candidates to be RPs periodically unicast their
+candidacy to the BSR.  From the candidates, the BSR picks an RP-set,
+and periodically announces this set in a Bootstrap message.  Bootstrap
+messages are flooded hop-by-hop throughout the domain until all
+routers in the domain know the RP-Set.
+
+To map a group to an RP, a router hashes the group address into the
+RP-set using an order-preserving hash function (one that minimizes
+changes if the RP-Set changes).  The resulting RP is the one that it
+uses as the RP for that group.
+
+\section{Standards}
+
+XORP is compliant with the following PIM-SM specification:
+\begin{description}
+\item{\bf draft-ietf-pim-sm-v2-new-11}.  Protocol Independent
+  Multicast - Sparse Mode (PIM-SM): Protocol Specification (Revised).
+\item{\bf draft-ietf-pim-sm-bsr-03}.  Bootstrap Router (BSR) Mechanism
+  for PIM Sparse Mode.
+\end{description}
+
+\section{Configuring PIM-SM}
+
+\subsection{Configuring Multicast Routing on UNIX Systems}
+
+If XORP is to be run on a UNIX-based system, the following steps
+must be taken to enable the system for PIM-SM multicast routing
+before starting XORP:
+
+\begin{itemize}
+
+  \item Make sure that the underlying system supports multicast routing and
+  has PIM-SM kernel support. Unfortunately, there is no trivial guideline how
+  to check this, but the following OS-specific information can be useful:
+
+  \begin{itemize}
+
+    \item {\tt DragonFlyBSD}: DragonFlyBSD-1.0 and later.
+
+    \item {\tt FreeBSD}: IPv4 (FreeBSD-4.9 and later, FreeBSD-5.2 and later),
+    IPv6 (FreeBSD-4.x and later).
+
+    \item {\tt Linux}: IPv4 (Linux-2.2.11 and later, Linux-2.3.6 and later),
+    IPv6 (only with the IPv6 USAGI toolkit after 2005/02/14:
+    http://www.linux-ipv6.org/).
+
+    \item {\tt MacOS X}: No multicast routing support (as of MacOS X 10.4.x).
+
+    \item {\tt NetBSD}: IPv4 (NetBSD-3.0 and later), IPv6 (NetBSD-1.5
+    and later).
+
+    \item {\tt OpenBSD}: IPv4 (OpenBSD-3.7 and later), IPv6 (OpenBSD-2.7 and
+    later).
+
+  \end{itemize}
+
+  \item If necessary, configure the kernel to enable multicast routing and
+  PIM-SM:
+
+  \begin{itemize}
+
+    \item {\tt DragonFlyBSD}:
+
+    IPv4: enable the following options in the kernel:
+
+\begin{verbatim}
+options         MROUTING                # Multicast routing
+options         PIM                     # PIM multicast routing
+\end{verbatim}
+
+    IPv6: no kernel options are required.
+
+    \item {\tt FreeBSD}:
+
+    IPv4: enable the following option in the kernel:
+
+\begin{verbatim}
+options         MROUTING                # Multicast routing
+\end{verbatim}
+
+    For releases older than FreeBSD-7.0, the following option is needed
+    as well:
+
+\begin{verbatim}
+options         PIM                     # PIM multicast routing
+\end{verbatim}
+
+    IPv6: no kernel options are required.
+
+    \item {\tt Linux}:
+
+    IPv4: enable the following options in the kernel:
+
+\begin{verbatim}
+CONFIG_IP_MULTICAST=y
+CONFIG_IP_MROUTE=y
+CONFIG_IP_PIMSM_V2=y
+\end{verbatim}
+
+    IPv6: Enable the following options in the kernel:
+
+\begin{verbatim}
+CONFIG_IPV6_MROUTE=y
+CONFIG_IPV6_PIMSM_V2=y
+\end{verbatim}
+
+    \item {\tt NetBSD}:
+
+    IPv4: enable the following options in the kernel:
+
+\begin{verbatim}
+options         MROUTING        # IP multicast routing
+options         PIM             # Protocol Independent Multicast
+\end{verbatim}
+
+    IPv6: no kernel options are required.
+
+    \item {\tt OpenBSD}:
+
+    IPv4: enable the following options in the kernel:
+
+\begin{verbatim}
+option          MROUTING        # Multicast router
+option          PIM             # Protocol Independent Multicast
+\end{verbatim}
+
+    IPv6: no kernel options are required.
+
+  \end{itemize}
+
+  \item Apply additional system configuration (if necessary):
+
+  \begin{itemize}
+
+    \item {\tt DragonFlyBSD}:
+
+    IPv4: Enable IPv4 unicast forwarding:
+
+\begin{verbatim}
+sysctl net.inet.ip.forwarding=1
+\end{verbatim}
+
+    IPv6: Enable IPv6 unicast forwarding:
+
+\begin{verbatim}
+sysctl net.inet6.ip6.forwarding=1
+\end{verbatim}
+
+See sysctl.conf(5) for information how to add the sysctl configuration
+permanently.
+
+    \item {\tt FreeBSD}:
+
+    IPv4: Enable IPv4 unicast forwarding:
+
+\begin{verbatim}
+sysctl net.inet.ip.forwarding=1
+\end{verbatim}
+
+    IPv6: Enable IPv6 unicast forwarding:
+
+\begin{verbatim}
+sysctl net.inet6.ip6.forwarding=1
+\end{verbatim}
+
+See sysctl.conf(5) for information how to add the sysctl configuration
+permanently.
+
+    \item {\tt Linux}:
+
+    IPv4: Enable IPv4 unicast forwarding:
+
+\begin{verbatim}
+echo 1 > /proc/sys/net/ipv4/ip_forward
+\end{verbatim}
+
+    If the unicast Reverse Path Forwarding information is different from the
+    multicast Reverse Path Forwarding information, the Return Path Filtering
+    should be disabled:
+
+\begin{verbatim}
+echo 0 > /proc/sys/net/ipv4/conf/all/rp_filter
+\end{verbatim}
+    OR
+\begin{verbatim}
+echo 0 > /proc/sys/net/ipv4/conf/eth0/rp_filter
+echo 0 > /proc/sys/net/ipv4/conf/eth1/rp_filter
+...
+\end{verbatim}
+
+    IPv6: unknown
+
+    \item {\tt NetBSD}: none.
+
+    \item {\tt OpenBSD}:
+
+     Enable multicast routing by adding the following lines to
+     {\stt /etc/rc.conf.local} and reboot:
+
+\begin{verbatim}
+# Enable multicast routing (see netstart(8) for details).
+multicast_host=NO
+multicast_router=YES
+\end{verbatim}
+
+    IPv4: Enable IPv4 multicast forwarding (for OpenBSD-3.9 and later):
+
+\begin{verbatim}
+sysctl net.inet.ip.mforwarding=1
+\end{verbatim}
+
+    IPv6: Enable IPv6 multicast forwarding (for OpenBSD-4.0 and later):
+
+\begin{verbatim}
+sysctl net.inet6.ip6.mforwarding=1
+\end{verbatim}
+
+See sysctl.conf(5) for information how to add the sysctl configuration
+permanently.
+
+Note that XORP itself automatically enables the above {\it sysctl}
+multicast forwarding flags, hence it is not really necessary to set
+them manually.
+The flags are described for completness and in case someone needs
+better control over multicast forwarding.
+
+  \end{itemize}
+
+\end{itemize}
+
+\subsection{Configuring Multicast Tunnels on UNIX Systems}
+
+All PIM routers need to be directly connected so they can exchange
+control messages. Occasionally this might not be possible (\eg if
+someone wants to forward multicast traffic to a remote host, and the
+routers in the middle are not running PIM).
+
+In that case a tunnel between two remote routers can be used to create
+an artificial adjacency.
+
+\begin{itemize}
+
+  \item Creating a GRE tunnel.
+
+  The GRE (Generic Routing Encapsulation) mechanism is described in RFC
+  1701 and RFC 1702. It is implemented on a variety of systems and is
+  widely used for routing tunnels.
+
+  Below is an example how to configure a GRE tunnel between two Linux
+  systems.
+
+\begin{verbatim}
+# GRE tunnel between two machines (host 11.11.11.11 and 33.33.33.33)
+#
+# Physical interfaces:    [11.11.11.11]         [33.33.33.33]
+# GRE tunnel:              22.22.22.11<--------->22.22.22.33
+#
+
+# ==== host 11.11.11.11 (GRE interface 22.22.22.11)
+ip link set gre1 down
+ip tunnel del gre1
+ip tunnel add gre1 mode gre remote 33.33.33.33 local 11.11.11.11 ttl 127
+ip addr add 22.22.22.11/24 peer 22.22.22.33/24 dev gre1
+ip link set gre1 up multicast on
+
+# ==== host 33.33.33.33 (GRE interface 22.22.22.33)
+ip link set gre1 down
+ip tunnel del gre1
+ip tunnel add gre1 mode gre remote 11.11.11.11 local 33.33.33.33 ttl 127
+ip addr add 22.22.22.33/24 peer 22.22.22.11/24 dev gre1
+ip link set gre1 up multicast on
+\end{verbatim}
+
+
+  \item Creating an OpenVPN tunnel.
+
+  OpenVPN (http://openvpn.net/) is free software to create a VPN tunnel.
+  It is very popular and works on a variety of systems.
+  One of the advantages of OpenVPN is that it is over TCP or UDP,
+  hence unlike GRE it does not require special support from NAT devices
+  that might be in the middle.
+
+  Below is an example how to configure an OpenVPN tunnel.
+
+\begin{verbatim}
+# OpenVPN tunnel between two machines (host 11.11.11.11 and 33.33.33.33)
+#
+# Physical interfaces:    [11.11.11.11]         [33.33.33.33]
+# OpenVPN tunnel:          22.22.22.11<--------->22.22.22.33
+#
+
+# ==== host 11.11.11.11 (OpenVPN interface 22.22.22.11)
+openvpn --local 11.11.11.11 --remote 33.33.33.33 --ifconfig 22.22.22.11
+    22.22.22.33 --dev tun0
+
+# ==== host 33.33.33.33 (OpenVPN interface 22.22.22.33)
+openvpn --local 33.33.33.33 --remote 11.11.11.11 --ifconfig 22.22.22.33
+    22.22.22.11 --dev tun0
+\end{verbatim}
+
+  \item Reverse Path Forwarding (RPF) information setup.
+
+  It is important that the Reverse Path Forwarding (RPF) information
+  is set to consider the tunnel for PIM-SM to operate properly.
+
+  On Linux systems the following UNIX command needs to be used to
+  disable the Return Path filtering:
+
+\begin{verbatim}
+echo 0 > /proc/sys/net/ipv4/conf/all/rp_filter
+\end{verbatim}
+
+  In addition, the RPF information must be set appropriately for all
+  systems that are suppose to be reached via the tunnel (\eg RPs and
+  remote sources). This can be achieved by adding MRIB-specific static
+  routing entries in the XORP configuration. For example, if the IP
+  address of the other side of the tunnel is 22.22.22.33, then the
+  following XORP configuration can be used to specify that the tunnel is
+  the default route for all destinations:
+
+\begin{verbatim}
+protocols {
+    static {
+        mrib-route 0.0.0.0/0 {
+            next-hop 22.22.22.33
+        }
+    }
+}
+\end{verbatim}
+
+\end{itemize}
+
+\newpage
+\subsection{Configuration Syntax}
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{4.5in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+protocols \{\\
+\>pimsm4 \{\\
+\>\>targetname: {\it text}\\
+\>\>disable: {\it bool}\\
+\>\>interface {\it text} \{\\
+\>\>\>vif {\it text} \{\\
+\>\>\>\>disable: {\it bool}\\
+\>\>\>\>dr-priority: {\it uint}\\
+\>\>\>\>hello-period: {\it uint(1..18724)}\\
+\>\>\>\>hello-triggered-delay: {\it uint(1..255)}\\
+\>\>\>\>alternative-subnet {\it IPv4}/{\it int(0..32)}\\
+\>\>\>\}\\
+\>\>\}\\
+\>\>interface register\_vif \{\\
+\>\>\>vif register\_vif \{\\
+\>\>\>\>disable: {\it bool}\\
+\>\>\>\}\\
+\>\>\}\\
+\\
+\>\>static-rps \{\\
+\>\>\>rp {\it IPv4} \{\\
+\>\>\>\>group-prefix {\it IPv4Mcast}/{\it int(4..32)} \{\\
+\>\>\>\>\>rp-priority: {\it uint(0..255)}\\
+\>\>\>\>\>hash-mask-len: {\it uint(4..32)}\\
+\>\>\>\>\}\\
+\>\>\>\}\\
+\>\>\}\\
+\\
+\>\>bootstrap \{\\
+\>\>\>disable: {\it bool}\\
+\>\>\>cand-bsr \{\\
+\>\>\>\>scope-zone  {\it IPv4Mcast}/{\it int(4..32)} \{\\
+\>\>\>\>\>is-scope-zone: {\it bool}\\
+\>\>\>\>\>cand-bsr-by-vif-name: {\it text}\\
+\>\>\>\>\>cand-bsr-by-vif-addr: {\it IPv4}\\
+\>\>\>\>\>bsr-priority: {\it uint(0..255)}\\
+\>\>\>\>\>hash-mask-len: {\it uint(4..32)}\\
+\>\>\>\>\}\\
+\>\>\>\}\\
+\\
+\>\>\>cand-rp \{\\
+\>\>\>\>group-prefix  {\it IPv4Mcast}/{\it int(4..32)} \{\\
+\>\>\>\>\>is-scope-zone: {\it bool}\\
+\>\>\>\>\>cand-rp-by-vif-name: {\it text}\\
+\>\>\>\>\>cand-rp-by-vif-addr: {\it IPv4}\\
+\>\>\>\>\>rp-priority: {\it uint(0..255)}\\
+\>\>\>\>\>rp-holdtime: {\it uint(0..65535)}\\
+\>\>\>\>\}\\
+\>\>\>\}\\
+\>\>\}\\
+\\
+\>\>switch-to-spt-threshold \{\\
+\>\>\>disable: {\it bool}\\
+\>\>\>interval: {\it uint(3..2147483647)}\\
+\>\>\>bytes: {\it uint}\\
+\>\>\}\\
+\\
+{\rm continued overleaf....}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\newpage
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{4.5in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+\>\>traceoptions \{\\
+\>\>\>flag all \{\\
+\>\>\>\>disable: {\it bool}\\
+\>\>\>\}\\
+\>\>\}\\
+\>\}\\
+\}
+\\
+\\
+protocols \{\\
+\>pimsm6 \{\\
+\>\>disable: {\it bool}\\
+\>\>interface {\it text} \{\\
+\>\>\>vif {\it text} \{\\
+\>\>\>\>disable: {\it bool}\\
+\>\>\>\>dr-priority: {\it uint}\\
+\>\>\>\>hello-period: {\it uint(1..18724)}\\
+\>\>\>\>hello-triggered-delay: {\it uint(1..255)}\\
+\>\>\>\>alternative-subnet  {\it IPv6}/{\it int(0..128)}\\
+\>\>\>\}\\
+\>\>\}\\
+\>\>interface register\_vif \{\\
+\>\>\>vif register\_vif \{\\
+\>\>\>\>disable: {\it bool}\\
+\>\>\>\}\\
+\>\>\}\\
+\\
+\>\>static-rps \{\\
+\>\>\>rp {\it IPv6} \{\\
+\>\>\>\>group-prefix  {\it IPv6Mcast}/{\it int(8..128)} \{\\
+\>\>\>\>\>rp-priority: {\it uint(0..255)}\\
+\>\>\>\>\>hash-mask-len: {\it uint(8..128)}\\
+\>\>\>\>\}\\
+\>\>\>\}\\
+\>\>\}\\
+\\
+\>\>bootstrap \{\\
+\>\>\>disable: {\it bool}\\
+\>\>\>cand-bsr \{\\
+\>\>\>\>scope-zone {\it IPv6Mcast}/{\it int(8..128)} \{\\
+\>\>\>\>\>is-scope-zone: {\it bool}\\
+\>\>\>\>\>cand-bsr-by-vif-name: {\it text}\\
+\>\>\>\>\>cand-bsr-by-vif-addr: {\it IPv6}\\
+\>\>\>\>\>bsr-priority: {\it uint(0..255)}\\
+\>\>\>\>\>hash-mask-len: {\it uint(8..128)}\\
+\>\>\>\>\}\\
+\>\>\>\}\\
+\\
+\>\>\>cand-rp \{\\
+\>\>\>\>group-prefix {\it IPv6Mcast}/{\it int(8..128)} \{\\
+\>\>\>\>\>is-scope-zone: {\it bool}\\
+\>\>\>\>\>cand-rp-by-vif-name: {\it text}\\
+\>\>\>\>\>cand-rp-by-vif-addr: {\it IPv6}\\
+\>\>\>\>\>rp-priority: {\it uint(0..255)}\\
+\>\>\>\>\>rp-holdtime: {\it uint(0..65535)}\\
+\>\>\>\>\}\\
+\>\>\>\}\\
+\>\>\}\\
+\\
+\>\>switch-to-spt-threshold \{\\
+\>\>\>disable: {\it bool}\\
+\>\>\>interval: {\it uint(3..2147483647)}\\
+\>\>\>bytes: {\it uint}\\
+\>\>\}\\
+\\
+\>\>traceoptions \{\\
+\>\>\>flag all \{\\
+\>\>\>\>disable: {\it bool}\\
+\>\>\>\}\\
+\>\>\}\\
+\>\}\\
+\}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+\begin{description}
+\item{\tt protocols}: this delimits the configuration for all routing
+  protocols in the XORP router configuration.  It is mandatory that
+  PIM-SM configuration is under the {\stt protocols} node in the
+  configuration.
+\item{\tt pimsm4}: this delimits the PIM-SM configuration part of the XORP
+  router configuration related to IPv4 multicast.
+\item{\tt targetname}: this is the name for this instance of PIM-SM for
+  IPv4.  It defaults to ``{\stt PIMSM\_4}'', and it is not recommended
+  that this default is overridden under normal usage scenarios.
+\item{\tt disable}: this takes the value {\stt true} or {\stt false},
+  and indicates whether PIM-SM IPv4 multicast routing is currently
+  disabled~\footnote{Note
+  that prior to XORP Release-1.1, the {\tt enable} flag was used instead of
+  {\tt disable}.}.
+  This allows multicast to be taken down temporarily without
+  removing the configuration.
+\item{\tt interface}: this directive specifies that this {\stt
+  interface} is to be used for PIM-SM IPv4 multicast routing.  The
+  parameter value must be the name of an interface that has been
+  configured in the {\stt interfaces} section of the router
+  configuration.
+\item{\tt vif}: this directive specifies that this {\stt vif}
+  on the specified {\stt interface} is to be used for PIM-SM IPv4
+  multicast routing.  The parameter value must be the name of a vif
+  that has been configured in the {\stt interfaces} section of the
+  router configuration.
+
+  A special logical interface called {\stt register\_vif} with a
+  special vif called {\stt register\_vif} must be configured if a
+  PIM-SM router is to be able to send Register messages to the RP.  In
+  general this should {\it always} be configured if the router is to
+  support the ASM multicast service model.
+
+  Each {\stt vif} can take the following optional parameters:
+\begin{description}
+\item{\tt disable}: this takes the value {\stt true} or {\stt false},
+  and indicates whether PIM-SM IPv4 multicast routing is currently
+  disabled on this interface/vif~\footnote{Note
+  that prior to XORP Release-1.1, the {\tt enable} flag was used instead of
+  {\tt disable}.}.
+\item{\tt dr-priority}: this directive takes a non-negative integer as
+  its parameter giving this router's Designated Router (DR) priority
+  for this interface/vif.  The default is 1.  The PIM router on this
+  subnet with the highest value of DR priority will become the DR for
+  the subnet.
+\item{\tt hello-period}: this directive specifies the PIM Hello period
+  (in seconds) for this interface/vif~\footnote{Note that the {\tt
+  hello-period} statement appeared after XORP Release-1.1.}. It takes a
+  non-negative integer in the interval [1..18724].  The default is 30.
+  Every {\stt hello-period} seconds the PIM router will transmit a PIM
+  Hello message on the interface/vif. If the receivers of the PIM Hello
+  message do not receive another Hello message for 3.5 * {\stt
+  hello-period} seconds, they will timeout the neighbor state for this
+  router.
+\item{\tt hello-triggered-delay}: this directive specifies the randomized
+  triggered delay of the PIM Hello messages (in seconds) for this
+  interface/vif~\footnote{Note that the {\tt hello-triggered-delay} statement
+  appeared after XORP Release-1.1.}. It takes a non-negative integer in the
+  interval [1..255].  The default is 5. When PIM is enabled on an interface
+  or a router first starts, the Hello Timer of that interface is set to a
+  random value between 0 and {\tt hello-triggered-delay}.  This prevents
+  synchronization of Hello messages if multiple routers are powered on
+  simultaneously.
+\item{\tt alternative-subnet}: this directive is used to associate
+  additional IP subnets with a network interface. The parameter value
+  is an IPv4 subnet address in the {\it address/prefix-length} format.
+
+  One use of this directive is to make incoming traffic with a
+  non-local source address appear as it is coming from a local
+  subnet. Typically, this is needed as a work-around solution when
+  uni-directional interfaces such as satellite links are used for
+  receiving traffic.  The {\stt alternative-subnet} directive should be
+  used with extreme care, because it is possible to create forwarding
+  loops.
+\item{\tt enable-ip-router-alert-option-check}: this directive has been
+  deprecated as of XORP Release-1.5.
+\end{description}
+\item{\tt static-rps}: this delimits the part of the PIM-SM
+  configuration used to manually configure PIM RP router information.
+  A PIM-SM router must either have some RPs configured as static RPs,
+  or it must run the PIM-SM bootstrap mechanism (see the {\stt
+  bootstrap} directive).  
+
+  Under the {\stt static-rps} part of the configuration, one or more
+  RPs can be configured.  It is important that all routers in a PIM
+  domain make the same choice of RP for the same multicast group, so
+  generally they should be configured with the same RP information.
+\begin{description}
+\item{\tt rp}: this specifies the IPv4 address of a router to be a
+  static RP.  
+
+  For each RP, the following parameters can be configured:
+\begin{description}
+\item{\tt group-prefix}: this specifies the range of multicast
+  addresses for which the specified router is willing to be the RP.
+  The value is in the form of an IP address and prefix-length in the
+  {\it address/prefix-length} format.
+\begin{description}
+\item{\tt rp-priority}: this specifies the priority of the specified
+  RP router.  It takes the form of a non-negative integer in the
+  interval [0, 255]. Smaller value means higher priority.
+
+  If multiple RP routers are known for a particular multicast group,
+  then the one with the most specific {\stt group-prefix} will be
+  used.  If more than one router has the same most specific {\stt
+  group-prefix}, then the one with the highest {\stt rp-priority} is
+  used.  See also {\stt hash-mask-len}.
+
+  The default value is 192.
+\item{\tt hash-mask-len}: If multiple routers have the most specific
+  {\stt group-prefix} and the same highest {\stt rp-priority}, then to
+  balance load, a hash function is used to choose the RP.  However, it
+  is usually desirable for closely associated multicast groups to use
+  the same RP.  Thus the hash function is only applied to the first
+  $n$ bits of the group IP address, ensuring that if two groups have
+  the same first $n$ bits, they will hash to the same RP address.  The
+  {\stt hash-mask-len} parameter specifies the value of $n$.
+  For IPv4 it must be in the interval [4, 32], and defaults to 30 bits.
+  Typically its value shouldn't be changed.
+  If it is modified then all PIM-SM routers must be configured with the
+  same value.
+\end{description}
+\end{description}
+\end{description}
+\item{\tt bootstrap}: this delimits the part of the PIM-SM
+  configuration used to configure the automatic bootstrap of PIM RP
+  router information using the PIM {\it BootStrap Router} mechanism.  A
+  PIM-SM router must either run the PIM-SM bootstrap mechanism, or
+  have some RPs configured as static RPs (see the {\stt static-rps}
+  directive).
+
+  Under the {\stt bootstrap} directive, the following additional
+  information can be configured.
+\begin{description}
+\item{\tt disable}: this takes the value {\stt true} or {\stt false},
+  and determines whether or not the router will run the {\stt
+  bootstrap} mechanism~\footnote{Note
+  that prior to XORP Release-1.1, the {\tt enable} flag was used instead of
+  {\tt disable}.}.  The default is {\stt false}.
+\item{\tt cand-bsr}: this directive specifies that this router is to
+  be a candidate to be the BootStrap Router (BSR) for this PIM-SM domain.
+  It will become the BSR only if it wins the BSR election process.
+
+  One or more {\stt scope-zone}s must be specified for a candidate BSR
+  router:
+\begin{description}
+\item{\tt scope-zone}: this directive specifies one multicast group
+  prefix for which this router is willing to be BSR. 
+ 
+  For each scope zone, the following information can be specified: 
+\begin{description}
+\item{\tt is-scope-zone}: this directive takes the value {\stt true}
+  or {\stt false}.  When the value is {\stt true}, this indicates that
+  this multicast group prefix defines a multicast scope zone.  When
+  the value is {\stt false}, this indicates that the group prefix in
+  the {\stt scope-zone} directive merely represents a range of
+  multicast groups for which this router is willing to be BSR.  The
+  default is {\stt false}.
+\item{\tt cand-bsr-by-vif-name}: this specifies the name of the {\stt
+  vif} whose IP address will be used in the PIM bootstrap messages.  It
+  is a mandatory parameter.
+\item{\tt cand-bsr-by-vif-addr}: this specifies the address that will be used
+  in the PIM bootstrap messages. This address must belong to the vif
+  specified by {\tt cand-bsr-by-vif-name}. If it is omitted, a domain-wide
+  address (if exists) that belongs to that interface is chosen by the router
+  itself~\footnote{Note that the {\tt cand-bsr-by-vif-addr} statement
+  appeared after XORP Release-1.1.}.
+\item{\tt bsr-priority}: this specifies the BSR priority for this
+  router.  It takes a positive integer value in the interval [0, 255],
+  which is used in the PIM-SM BSR election process. Larger value means higher
+  priority. For each {\stt scope-zone}, the
+  candidate bootstrap router with the highest BSR priority will be
+  chosen to be BSR. Its default value is 1.
+\item{\tt hash-mask-len}: The BSR mechanism announces a list of
+  candidate RPs (C-RPs) for each scope zone to the other routers in
+  the scope zone.  To balance load, those routers then use a hash
+  function to choose the RP for each multicast group from amongst the
+  C-RPs.  However, it is usually desirable for closely associated
+  multicast groups to use the same RP.  Thus the hash function is only
+  applied to the first $n$ bits of the group IP address, ensuring that
+  if two groups have the same first $n$ bits, they will hash to the
+  same RP address.  Should this router become the BSR for this
+  scope-zone, the {\stt hash-mask-len} parameter gives the value of
+  $n$ that this router will inform other routers they must use.
+  For IPv4 it must be in the interval [4, 32], and defaults to 30 bits.
+  Typically its value shouldn't be changed.
+  If it is modified then all PIM-SM routers must be configured with the
+  same value.
+\end{description}
+\end{description}
+\end{description}
+\item{\tt cand-rp}: this directive specifies that this router is to be
+  a candidate to be an RP for this PIM-SM domain.  It will become an
+  RP only if the BSR chooses it to be.  
+
+  One or more group-prefixes must be specified for this router
+  to function as an RP:
+\begin{description}
+\item{\tt group-prefix}: this specifies the range of multicast
+  addresses for which the specified router is willing to be the RP.
+  The value is in the form of an IP address and prefix length in the
+  {\it address/prefix-length} format.  
+
+  For each {\stt group-prefix}, the following parameters can be
+  specified:
+\begin{description}
+\item{\tt is-scope-zone}: this directive takes the value {\stt true}
+  or {\stt false}.  When the value is {\stt true}, this indicates that
+  this multicast group prefix defines a multicast scope zone.  When
+  the value is {\stt false}, this indicates that the group prefix in
+  the {\stt scope-zone} directive merely represents a range of
+  multicast groups for which this router is willing to be RP.  The
+  default is {\stt false}.
+\item{\tt cand-rp-by-vif-name}: this specifies the name of the {\stt
+  vif} whose IP address will be used as the RP address if this router
+  becomes an RP.  It is a mandatory parameter.
+\item{\tt cand-rp-by-vif-addr}: this specifies the address that will be used
+  as the RP address if this router becomes an RP.
+  This address must belong to the vif
+  specified by {\tt cand-rp-by-vif-name}. If it is omitted, a domain-wide
+  address (if exists) that belongs to that interface is chosen by the router
+  itself~\footnote{Note that the {\tt cand-rp-by-vif-addr} statement
+  appeared after XORP Release-1.1.}.
+\item{\tt rp-priority}: this specifies the RP priority of this router
+  for this {\stt group-prefix}.  It takes the form of a non-negative
+  integer in the interval [0, 255].
+
+  If multiple RP routers are known for a particular multicast group,
+  then the one with the most specific {\stt group-prefix} will be
+  used.  If more than one router has the same most specific {\stt
+  group-prefix}, then the one with the highest {\stt rp-priority} is
+  used.  See also {\stt hash-mask-len}.
+
+  The default value for {\stt rp-priority} is 1.
+\item{\tt rp-holdtime}: this specifies the holdtime that this router
+  will advertise when talking to the BSR.  If the BSR has not heard a
+  Candidate RP Advertisement from this router for {\stt rp-holdtime}
+  seconds, then the BSR will conclude it is dead, and will remove it
+  from the set of possible RPs.  It takes the form of a non-negative
+  integer in the interval [0, 65535] and its default value is 150 seconds.
+\end{description}
+\end{description}
+  Note that a PIM-SM router that participates in the Bootstrap mechanism,
+  but is not a Candidate BSR or a Candidate RP must have an explicit
+  {\stt bootstrap} block to enable the Bootstrap mechanism (this block
+  could be empty).
+
+\item{\tt switch-to-spt-threshold}: this directive permits the
+  specification of a bitrate threshold at a last-hop router or RP
+  for switching from the RP Tree to the Shortest-Path Tree.  The
+  following parameters can be specified:
+\begin{description}
+\item{\tt disable}: this takes the value {\stt true} or {\stt false},
+  and determines whether bitrate-based switching to the shortest
+  path tree is disabled~\footnote{Note
+  that prior to XORP Release-1.1, the {\tt enable} flag was used instead of
+  {\tt disable}.}.  The default is false.
+\item{\tt interval}: this specifies the measurement interval in
+  seconds for measuring the bitrate of traffic from a  multicast
+  sender~\footnote{Note that prior to XORP Release-1.3, the
+  {\tt interval-sec} statement was used instead of {\tt interval}.}.
+  The measurement interval should normally not be set too
+  small - values greater than ten seconds are recommended.
+  It takes the form of a non-negative integer in the interval
+  [3, 2147483647] and its default value is 100 seconds.
+\item{\tt bytes}: this specifies the maximum number of bytes from a
+  multicast sender that can be received in {\stt interval}
+  seconds.  If this threshold is exceeded, the router will attempt to
+  switch to the shortest-path tree from that multicast sender.
+  If the shortest-path switch should happen right after the first packet
+  is forwarded, then {\stt bytes} should be set to 0.
+\end{description}
+\item{\tt traceoptions}: this directive delimits the configuration of
+  debugging and tracing options for PIM-SM.
+\begin{description}
+\item{\tt flag}: this directive is used to specify which tracing
+  options are enabled.  Possible parameters are:
+\begin{description}
+\item{\tt all}: this directive specifies that all tracing
+  options should be enabled.  Possible parameters are:
+\begin{description}
+\item{\tt disable}: this takes the value {\stt true} or {\stt false},
+  and disables or enables tracing~\footnote{Note
+  that prior to XORP Release-1.1, the {\tt enable} flag was used instead of
+  {\tt disable}.}. The default is {\stt false}.
+\end{description}
+\end{description}
+\end{description}
+\end{description}
+
+Note that in case of PIM-SM for IPv4 each enabled interface must have a
+valid IPv4 address.
+
+The configuration for PIM-SM for IPv6 is identical to PIM-SM for IPv4,
+except for the following:
+\begin{itemize}
+\item The {\stt pimsm6} directive is used in place of the
+  {\stt pimsm4} directive.
+\item The default value of {\stt targetname} is {\stt ``PIMSM\_6''}
+  instead of {\stt ``PIMSM\_4''}.
+\item All IP addresses used in the configuration are IPv6 addresses
+  instead of IPv4 addresses.
+\item The {\stt hash-mask-len} value must be in the interval [8, 128],
+  and defaults to 126.
+\item Each enabled interface must have a valid link-local and a valid
+  domain-wide IPv6 addresses.
+\end{itemize}
+
+\newpage
+\subsection{Example Configurations}
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{4.5in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+protocols \{\\
+\>pimsm4 \{\\
+\>\>disable: false\\
+\>\>interface dc0 \{\\
+\>\>\>vif dc0 \{\\
+\>\>\>\>disable: false\\
+\>\>\>\>/* dr-priority: 1 */\\
+\>\>\>\>/* hello-period: 30 */\\
+\>\>\>\>/* alternative-subnet 10.40.0.0/16 */\\
+\>\>\>\}\\
+\>\>\}\\
+\>\>interface register\_vif \{\\
+\>\>\>vif register\_vif \{\\
+\>\>\>\>/* Note: this vif should be always enabled */\\
+\>\>\>\>disable: false\\
+\>\>\>\}\\
+\>\>\}\\
+\\
+\>\>static-rps \{\\
+\>\>\>rp 10.60.0.1 \{\\
+\>\>\>\>group-prefix 224.0.0.0/4 \{\\
+\>\>\>\>\>/* rp-priority: 192 */\\
+\>\>\>\>\>/* hash-mask-len: 30 */\\
+\>\>\>\>\}\\
+\>\>\>\}\\
+\>\>\}\\
+\\
+\>\>bootstrap \{\\
+\>\>\>disable: false\\
+\>\>\>cand-bsr \{\\
+\>\>\>\>scope-zone 224.0.0.0/4 \{\\
+\>\>\>\>\>/* is-scope-zone: false */\\
+\>\>\>\>\>cand-bsr-by-vif-name: "dc0"\\
+\>\>\>\>\>/* cand-bsr-by-vif-addr: 10.10.10.10 */\\
+\>\>\>\>\>/* bsr-priority: 1 */\\
+\>\>\>\>\>/* hash-mask-len: 30 */\\
+\>\>\>\>\}\\
+\>\>\>\}\\
+\\
+\>\>\>cand-rp \{\\
+\>\>\>\>group-prefix 224.0.0.0/4 \{\\
+\>\>\>\>\>/* is-scope-zone: false */\\
+\>\>\>\>\>cand-rp-by-vif-name: "dc0"\\
+\>\>\>\>\>/* cand-rp-by-vif-addr: 10.10.10.10 */\\
+\>\>\>\>\>/* rp-priority: 192 */\\
+\>\>\>\>\>/* rp-holdtime: 150 */\\
+\>\>\>\>\}\\
+\>\>\>\}\\
+\>\>\}\\
+\\
+\>\>switch-to-spt-threshold \{\\
+\>\>\>/* approx. 1K bytes/s (10Kbps) threshold */\\
+\>\>\>disable: false\\
+\>\>\>interval: 100\\
+\>\>\>bytes: 102400\\
+\>\>\}\\
+\\
+{\rm continued overleaf....}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\newpage
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{4.5in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+\>\>traceoptions \{\\
+\>\>\>flag all \{\\
+\>\>\>\>disable: false\\
+\>\>\>\}\\
+\>\>\}\\
+\>\}\\
+\}
+\\
+\\
+protocols \{\\
+\>pimsm6 \{\\
+\>\>disable: false\\
+\>\>interface dc0 \{\\
+\>\>\>vif dc0 \{\\
+\>\>\>\>disable: false\\
+\>\>\>\>/* dr-priority: 1 */\\
+\>\>\>\>/* hello-period: 30 */\\
+\>\>\>\>/* alternative-subnet 2001:DB8:40:40::/64 */\\
+\>\>\>\}\\
+\>\>\}\\
+\>\>interface register\_vif \{\\
+\>\>\>vif register\_vif \{\\
+\>\>\>\>/* Note: this vif should be always enabled */\\
+\>\>\>\>disable: false\\
+\>\>\>\}\\
+\>\>\}\\
+\\
+\>\>static-rps \{\\
+\>\>\>rp 2001:DB8:50:50:50:50:50:50 \{\\
+\>\>\>\>group-prefix ff00::/8 \{\\
+\>\>\>\>\>/* rp-priority: 192 */\\
+\>\>\>\>\>/* hash-mask-len: 126 */\\
+\>\>\>\>\}\\
+\>\>\>\}\\
+\>\>\}\\
+\\
+\>\>bootstrap \{\\
+\>\>\>disable: false\\
+\>\>\>cand-bsr \{\\
+\>\>\>\>scope-zone ff00::/8 \{\\
+\>\>\>\>\>/* is-scope-zone: false */\\
+\>\>\>\>\>cand-bsr-by-vif-name: "dc0"\\
+\>\>\>\>\>/* cand-bsr-by-vif-addr: 2001:DB8:10:10:10:10:10:10 */\\
+\>\>\>\>\>/* bsr-priority: 1 */\\
+\>\>\>\>\>/* hash-mask-len: 126 */\\
+\>\>\>\>\}\\
+\>\>\>\}\\
+\\
+\>\>\>cand-rp \{\\
+\>\>\>\>group-prefix ff00::/8 \{\\
+\>\>\>\>\>/* is-scope-zone: false */\\
+\>\>\>\>\>cand-rp-by-vif-name: "dc0"\\
+\>\>\>\>\>/* cand-rp-by-vif-addr: 2001:DB8:10:10:10:10:10:10 */\\
+\>\>\>\>\>/* rp-priority: 192 */\\
+\>\>\>\>\>/* rp-holdtime: 150 */\\
+\>\>\>\>\}\\
+\>\>\>\}\\
+\>\>\}\\
+\\
+\>\>switch-to-spt-threshold \{\\
+\>\>\>/* approx. 1K bytes/s (10Kbps) threshold */\\
+\>\>\>disable: false\\
+\>\>\>interval: 100\\
+\>\>\>bytes: 102400\\
+\>\>\}\\
+\\
+\>\>traceoptions \{\\
+\>\>\>flag all \{\\
+\>\>\>\>disable: false\\
+\>\>\>\}\\
+\>\>\}\\
+\>\}\\
+\}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+\section{Monitoring PIM-SM}
+
+All operational commands for monitoring PIM-SM for IPv4 begin with
+{\tt show pim}. This section describes those commands in details. All
+operational commands for monitoring PIM-SM for IPv6 are similar except that
+they begin with {\tt show pim6}.
+
+\subsection{Monitoring PIM-SM Bootstrap Information}
+
+The {\stt show pim bootstrap} command can be used to display
+information about PIM bootstrap routers:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xxxxxxxxxxxxxxx\=xx\=xx\=xxxxxxxxxxxxxxxxxx\=xx\=xx\=xxxxxxxxxxxx\=xxxxx\=xxx\=xxxxxxx\=\kill
+user@hostname> \textbf{show pim bootstrap}\\
+Active zones:\\
+BSR             \>Pri\>\>LocalAddress    \>Pri\>\>State           \>Timeout\>\>SZTimeout\\
+10.4.0.1        \>\>1\>10.2.0.2          \>\>1\>Candidate          \>\>75
+  \>\>-1\\
+Expiring zones:\\
+BSR             \>Pri\>\>LocalAddress    \>Pri\>\>State           \>Timeout\>\>SZTimeout\\
+Configured zones:\\
+BSR             \>Pri\>\>LocalAddress    \>Pri\>\>State           \>Timeout\>\>SZTimeout\\
+10.2.0.2        \>\>1\>10.2.0.2          \>\>1\>Init               \>\>-1        \>\>-1
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+The bootstrap information is separated in three sections:
+\begin{itemize}
+
+  \item {\tt Active zones:} This section contains the bootstrap zones that are
+  currently in use.
+
+  \item {\tt Expiring zones:} If new bootstrap information is received and it
+  replaces the old bootstrap information, the old information is deleted.
+  However, if some of the old bootstrap information was not replaced,
+  that information is moved to the {\tt Expiring zones} section until
+  it times out.
+
+  \item {\tt Configured zones:} This section contains the bootstrap zones that
+  are configured on the router.
+
+\end{itemize}
+
+The fields for each entry (in order of appearance) are:
+\begin{itemize}
+
+  \item {\tt BSR:} The address of the Bootstrap router for the zone.
+
+  \item {\tt Pri:} The priority of the Bootstrap router.
+
+  \item {\tt LocalAddress:} The local Candidate-BSR address for the zone
+  (if the router is configured as a Candidate-BSR).
+
+  \item {\tt Pri:} The local Candidate-BSR priority for the zone
+  (if the router is configured as a Candidate-BSR).
+
+  \item {\tt State:} The state of the per-scope-zone state machine.
+  In the above example, the router is configured as a Candidate-BSR, 
+  but it is not the elected BSR, hence its state is {\tt Candidate}.
+
+  \item {\tt Timeout:} The number of seconds until the BSR times-out.
+  If it is -1, it will never timeout.
+
+  \item {\tt SZTimeout:} The number of seconds until the scoped zone
+  times-out. If it is -1, it will never timeout.
+
+\end{itemize}
+
+The {\stt show pim bootstrap rps} command can be used to display
+information about Candidate RP information received by the Bootstrap
+mechanism:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xxxxxxxxxxxxxxxx\=xxxx\=xxxx\=x\=xxx\=xxxxxxxxxxxx\=xxxxxxxxxxx\=xxxxxxxxxxxxxx\=\kill
+user@hostname> \textbf{show pim bootstrap rps}\\
+Active RPs:\\
+RP              \>Pri \>Timeout \>\>\>GroupPrefix        \>BSR             \>CandRpAdvTimeout\\
+10.4.0.1        \>192     \>\>148 \>\>224.0.0.0/4        \>10.4.0.1
+    \>\>-1\\
+10.2.0.2        \>192     \>\>148 \>\>224.0.0.0/4        \>10.4.0.1                  \>\>-1\\
+Expiring RPs:\\
+RP              \>Pri \>Timeout \>\>\>GroupPrefix        \>BSR             \>CandRpAdvTimeout\\
+Configured RPs:\\
+RP              \>Pri \>Timeout \>\>\>GroupPrefix        \>BSR             \>CandRpAdvTimeout\\
+10.2.0.2        \>192      \>\>\>-1 \>224.0.0.0/4        \>10.2.0.2                      \>\>58
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+The Candidate RPs information is separated in three sections:
+\begin{itemize}
+
+  \item {\tt Active RPs:} This section contains the Candidate RPs that are
+  currently in use.
+
+  \item {\tt Expiring RPs:} If new bootstrap information is received and it
+  replaces the old bootstrap information, the old information is deleted.
+  However, if some of the old bootstrap information was not replaced,
+  the Candidate RPs contained in that information are moved to the {\tt
+  Expiring RPs} section until they time-out.
+
+  \item {\tt Configured RPs:} This section contains the Candidate RP
+  information that is configured on the router.
+\end{itemize}
+
+The fields for each entry (in order of appearance) are:
+\begin{itemize}
+  \item {\tt RP:} The address of the Candidate RP for the entry.
+
+  \item {\tt Pri:} The priority of the Candidate RP.
+
+  \item {\tt Timeout:} The number of seconds until the Candidate RP times-out.
+  If it is -1, it will never timeout.
+
+  \item {\tt GroupPrefix:} The multicast group prefix address the Candidate RP
+  is advertising.
+
+  \item {\tt BSR:} The address of the BSR that advertised this Candidate RP.
+
+  \item {\tt CandRpAdvTimeout:} The number of seconds until the Candidate RP
+  is advertised to the BSR. This applies only for the Candidate-RPs
+  configured in this router.
+  If it is -1, the Candidate RP is not advertised to the BSR.
+
+\end{itemize}
+
+\subsection{Monitoring PIM-SM Interface Information}
+
+The {\stt show pim interface} command can be used to display
+information about PIM network interfaces:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xxxxxxxxxxxxx\=xxxxxxxxx\=xxxxxxx\=xx\=xxxxxxxxx\=xxxxxxx\=xx\=xxxxxxxxxxxxxxx\=xxxxxxxx\=\kill
+user@hostname> \textbf{show pim interface}\\
+Interface    \>State    \>Mode   \>V \>PIMstate \>Priority \>\>DRaddr          \>Neighbors\\
+dc1          \>UP       \>Sparse \>2 \>NotDR           \>\>1 \>10.3.0.2                \>\>1\\
+dc2          \>UP       \>Sparse \>2 \>DR              \>\>1 \>10.2.0.2                \>\>0\\
+register\_vif \>UP       \>Sparse \>2 \>DR              \>\>1 \>10.3.0.1                \>\>0
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+The fields for each entry (in order of appearance) are:
+\begin{itemize}
+
+  \item {\tt Interface:} The name of the interface.
+
+  \item {\tt State:} The state of the interface. E.g. {\tt UP}, {\tt DOWN},
+  {\tt DISABLED}, etc.
+
+  \item {\tt Mode:} The PIM mode of the interface. E.g. {\tt Sparse} means
+  PIM-SM.
+
+  \item {\tt V:} The protocol version.
+
+  \item {\tt PIMstate:} The protocol state on that interface. E.g., {\tt DR}
+  means the router is the Designated Router on that interface.
+
+  \item {\tt Priority:} The configured Designated Router priority on that
+  interface.
+
+  \item {\tt DRaddr:} The address of the elected Designated Router on the
+  subnet connected to that interface.
+
+  \item {\tt Neighbors:} The number of PIM neighbor routers on that interface.
+
+\end{itemize}
+
+The {\stt show pim interface address} command can be used to display
+address information about PIM network interfaces:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xxxxxxxxxxxxx\=xxxxxxxxxxxxxxxx\=xxxxxxxxxxxxxxxx\=\kill
+user@hostname> \textbf{show pim interface address}\\
+Interface    \>PrimaryAddr     \>DomainWideAddr  \>SecondaryAddr  \\
+dc1          \>10.3.0.1        \>10.3.0.1                       \\
+dc2          \>10.2.0.2        \>10.2.0.2                       \\
+register\_vif\>10.3.0.1        \>10.3.0.1                       \\
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+The fields for each entry (in order of appearance) are:
+\begin{itemize}
+
+  \item {\tt Interface:} The name of the interface.
+
+  \item {\tt PrimaryAddr:} The primary address on the interface.
+
+  \item {\tt DomainWideAddr:} The domain-wide address on the interface.
+
+  \item {\tt SecondaryAddr:} The first secondary address on the interface
+  (if any). If there is more than one secondary address on the interface,
+  they are printed one per new line (in the same column).
+
+\end{itemize}
+
+\newpage
+\subsection{Monitoring PIM-SM Multicast Routing State Information}
+
+The {\stt show pim join} command can be used to display
+information about PIM multicast routing state:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xxxx\=xxxxxxxxxxxx\=xxxxxxxxxxxxxxx\=x\=xxxxxxxxxxxxxx\=\kill
+user@hostname> \textbf{show pim join}\\
+Group           \>\>Source          \>\>RP              \>Flags\\
+224.0.1.20      \>\>0.0.0.0         \>\>10.2.0.2        \>WC   \\
+    \>Upstream interface (RP):   \>\>register\_vif\\
+    \>Upstream MRIB next hop (RP): UNKNOWN\\
+    \>Upstream RPF'(*,G):        \>\>UNKNOWN\\
+    \>Upstream state:            \>\>Joined \\
+    \>Join timer:                \>\>21\\
+    \>Local receiver include WC: \>\>.O.\\
+    \>Joins RP:                  \>\>...\\
+    \>Joins WC:                  \>\>...\\
+    \>Join state:                \>\>...\\
+    \>Prune state:               \>\>...\\
+    \>Prune pending state:       \>\>...\\
+    \>I am assert winner state:  \>\>...\\
+    \>I am assert loser state:   \>\>...\\
+    \>Assert winner WC:          \>\>...\\
+    \>Assert lost WC:            \>\>...\\
+    \>Assert tracking WC:        \>\>.OO\\
+    \>Could assert WC:           \>\>.O.\\
+    \>I am DR:                   \>\>.OO\\
+    \>Immediate olist RP:        \>\>...\\
+    \>Immediate olist WC:        \>\>.O.\\
+    \>Inherited olist SG:        \>\>.O.\\
+    \>Inherited olist SG\_RPT:   \>\>.O.\\
+    \>PIM include WC:            \>\>.O.
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+The fields for each entry (in order of appearance) are:
+\begin{itemize}
+
+  \item {\tt Group:} The group address.
+
+  \item {\tt Source:} The source address.
+
+  \item {\tt RP:} The address of the RP for this entry.
+
+  \item {\tt Flags:} The set of flags for this entry. For example:
+
+  \begin{itemize}
+
+    \item {\tt RP:} (*,*,RP) routing entry.
+
+    \item {\tt WC:} (*,G) routing entry.
+
+    \item {\tt SG:} (S,G) routing entry.
+
+    \item {\tt SG\_RPT:} (S,G,rpt) routing entry.
+
+    \item {\tt SPT:} The routing entry has the Shortest-Path Tree flag set.
+
+    \item {\tt DirectlyConnectedS:} The routing entry is for a
+    directly-connected source.
+
+  \end{itemize}
+
+\end{itemize}
+
+The remaining lines per entry display various additional information for that
+entry. Some of the information below contains a set of network interfaces:
+there is either ``.'' or ``O'' per interface (starting with the first
+interface according to the {\tt show pim interface} command), and if an
+interface is included, it is marked with ``O''.
+
+\begin{itemize}
+
+  \item {\tt Upstream interface (RP):} The name of the upstream interface
+  toward the RP.
+
+  \item {\tt Upstream MRIB next hop (RP):} The address of the next-hop router
+  (according to the MRIB) toward the RP. In the above example the router
+  itself is the RP, hence there is no next-hop router.
+
+  \item {\tt Upstream RPF'(*,G):} The address of the next-hop router
+  (according to PIM) toward the RP. Note that this address may be different,
+  because it may be affected by PIM-specific events such as PIM Assert
+  messages on the upstream interface. In the above example the router
+  itself is the RP, hence there is no next-hop router.
+
+  \item {\tt Upstream state:} The upstream state of this entry.
+
+  \item {\tt Join timer:} The number of seconds until the upstream Join
+  timer timeout.
+
+  \item {\tt Local receiver include WC:} The set of interfaces that
+  have local (*,G) receivers according to the MLD/IGMP module.
+
+  \item {\tt Joins RP:} The set of interfaces that have received (*,*,RP)
+  Join.
+
+  \item {\tt Joins WC:} The set of interfaces that have received (*,G) Join.
+
+  \item {\tt Join state:} The set of interfaces that are in Join state.
+
+  \item {\tt Prune state:} The set of interfaces that are in Prune state.
+
+  \item {\tt Prune pending state:} The set of interfaces that are in
+  Prune-Pending state.
+
+  \item {\tt I am assert winner state:} The set of interfaces that are in
+  Assert Winner state.
+
+  \item {\tt I am assert loser state:} The set of interfaces that are in
+  Assert Loser state.
+
+  \item {\tt Assert winner WC:} The set of interfaces for which the
+  corresponding (*,G) entry is in Assert Winner state.
+
+  \item {\tt Assert lost WC:} The set of interfaces for which the
+  corresponding (*,G) entry has lost the PIM Assert.
+
+  \item {\tt Assert tracking WC:} The set of interfaces for which the
+  corresponding (*,G) entry desires to track the PIM Asserts.
+
+  \item {\tt Could assert WC:} The set of interfaces for which the
+  corresponding (*,G) entry could trigger a PIM Assert.
+
+  \item {\tt I am DR:} The set of interfaces for which this is the Designated
+  Router.
+
+  \item {\tt Immediate olist RP:} The set of interfaces that are included
+  in the immediate outgoing interfaces for the corresponding (*,*,RP) entry.
+
+  \item {\tt Immediate olist WC:} The set of interfaces that are included
+  in the immediate outgoing interfaces for the corresponding (*,RP) entry.
+
+  \item {\tt Inherited olist SG:} The set of interfaces that are included
+  in the outgoing interface list for packets forwarded on (S,G) state taking
+  into account (*,*,RP) state, (*,G) state, asserts, etc.
+
+  \item {\tt Inherited olist SG\_RPT:} The set of interfaces that are included
+  in the outgoing interface list for packets forwarded
+  on (*,*,RP) or (*,G) state taking into account (S,G,rpt) prune state,
+  and asserts, etc.
+
+  \item {\tt PIM include WC:} The set of interfaces to which traffic might be
+    forwarded because of hosts that are local members on that interface.
+
+\end{itemize}
+
+The {\stt show pim join all} command can be used to display
+information about all PIM multicast routing entries including those that may
+be created internally by the PIM implementation. Typically, those are the
+(*,*,RP) entries that are created per RP for implementation-specific reasons
+even though there is no requirement to do so. Currently, this command is
+used only for debugging purpose.
+
+\subsection{Monitoring PIM-SM Multicast Routing State Information}
+
+The {\stt show pim mfc} command can be used to display
+information about PIM multicast forwarding entries that are installed
+in the multicast forwarding engine:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xxxx\=xxxxxxxxxxxx\=xxxxxxxxxxxxxxx\=x\=xxxxxxxxxxxxxx\=\kill
+user@hostname> \textbf{show pim mfc}\\
+Group           \>\>Source          \>\>RP\\
+224.0.1.20      \>\>10.4.0.2        \>\>10.2.0.2\\
+    \>Incoming interface :   \>\>register\_vif\\
+    \>Outgoing interfaces:    \>\>.O.
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+The fields for each entry (in order of appearance) are:
+\begin{itemize}
+
+  \item {\tt Group:} The group address.
+
+  \item {\tt Source:} The source address.
+
+  \item {\tt RP:} The address of the RP for this entry.
+
+\end{itemize}
+
+The remaining lines per entry display various additional information for that
+entry. Some of the information below contains a set of network interfaces:
+there is either ``.'' or ``O'' per interface (starting with the first
+interface according to the {\tt show pim interface} command), and if an
+interface is included, it is marked with ``O''.
+
+\begin{itemize}
+
+  \item {\tt Incoming interface:} The name of the incoming interface.
+
+  \item {\tt Outgoing interfaces:} The set of outgoing interfaces.
+
+\end{itemize}
+
+\subsection{Monitoring PIM-SM Multicast Routing Information Base}
+
+The {\stt show pim mrib} command can be used to display
+information about the Multicast Routing Information Base (MRIB) that is used
+by PIM:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xxxxxxxxxxxxxxxxxxx\=xxxxxxxxxxxxxxx\=xxxxxxxx\=xxxxxxxxx\=xxxxxxx\=xx\=xx\=x\=xxxx\=\kill
+user@hostname> \textbf{show pim mrib}\\
+DestPrefix         \>NextHopRouter   \>VifName \>VifIndex \>MetricPref \>\>\>Metric\\
+10.2.0.0/24        \>10.2.0.2        \>dc2     \>1                 \>\>\>0      \>\>\>0\\
+10.3.0.0/24        \>10.3.0.1        \>dc1     \>0                 \>\>\>0      \>\>\>0\\
+10.4.0.0/24        \>10.3.0.2        \>dc1     \>0               \>\>254  \>\>\>65535\\
+10.5.0.0/24        \>10.2.0.4        \>dc2     \>1               \>\>254  \>\>\>65535\\
+10.6.0.0/24        \>10.2.0.1        \>dc2     \>1               \>\>254  \>\>\>65535
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+The fields for each entry (in order of appearance) are:
+\begin{itemize}
+
+  \item {\tt DestPrefix:} The destination prefix address.
+
+  \item {\tt NextHopRouter:} The address of the next-hop router toward the
+  destination.
+
+  \item {\tt VifName:} The name of the virtual interface toward the
+  destination.
+
+  \item {\tt VifIndex:} The virtual interface index of the virtual interface
+  toward the destination.
+
+  \item {\tt MetricPref:} The metric preference of the entry.
+
+  \item {\tt Metric:} The routing metric of the entry.
+
+\end{itemize}
+
+
+\subsection{Monitoring PIM-SM Multicast Routing Information Base}
+
+The {\stt show pim neighbors} command can be used to display
+information about the PIM neighbor routers:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xxxxxxxxxxxxx\=xxxxxxxxx\=xx\=xxxxxxxxxxxxxxxx\=xx\=xxxxxxx\=xxxxx\=xxxx\=xxxxx\=\kill
+user@hostname> \textbf{show pim neighbors}\\
+Interface    \>DRpriority \>\>NeighborAddr    \>V \>Mode   \>Holdtime \>\>Timeout\\
+dc1                   \>\>1 \>10.3.0.2        \>2 \>Sparse      \>\>105      \>\>97
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+The fields for each entry (in order of appearance) are:
+\begin{itemize}
+
+  \item {\tt Interface:} The name of the interface toward the neighbor:
+
+  \item {\tt DRpriority:} The DR priority of the neighbor.
+
+  \item {\tt NeighborAddr:} The primary address of the neighbor.
+
+  \item {\tt V:} The PIM protocol version used by the neighbor.
+
+  \item {\tt Mode:} The PIM mode of the neighbor. E.g. {\tt Sparse} means
+  PIM-SM.
+
+  \item {\tt Holdtime:} The PIM Hello holdtime of the neighbor (in seconds).
+
+  \item {\tt Timeout:} The number of seconds until the neighbor timeout (in
+  case no more PIM Hello messages are received from it).
+
+\end{itemize}
+
+
+\subsection{Monitoring PIM-SM Candidate RP Set Information}
+
+The {\stt show pim rps} command can be used to display
+information about the Candidate RP Set:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xxxxxxxxxxxxxxxx\=xxxxxxxxxx\=xxxx\=xxxxx\=xxxx\=xxxx\=xxxx\=xxxxxxxxxxx\=xx\=\kill
+user@hostname> \textbf{show pim rps}\\
+RP              \>Type      \>Pri \>Holdtime \>\>Timeout \>\>ActiveGroups \>\>GroupPrefix\\
+10.4.0.1        \>bootstrap \>192      \>\>150     \>\>134            \>\>0 \>224.0.0.0/4\\
+10.2.0.2        \>bootstrap \>192      \>\>150     \>\>134            \>\>1 \>224.0.0.0/4
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+The fields for each entry (in order of appearance) are:
+\begin{itemize}
+
+  \item {\tt RP:} The address of the Candidate RP.
+
+  \item {\tt Type:} The type of the mechanism that provided the Candidate RP.
+
+  \item {\tt Pri:} The priority of the Candidate RP.
+
+  \item {\tt Holdtime:} The holdtime (in number of seconds) of the Candidate
+  RP.
+
+  \item {\tt Timeout:} The number of seconds until the Candidate RP timeout.
+  If it is -1, the Candidate RP will never timeout.
+
+  \item {\tt ActiveGroups:} The number of groups that use this Candidate RP.
+
+  \item {\tt GroupPrefix:} The multicast group prefix address for this
+  Candidate RP.
+
+\end{itemize}
+
+
+\subsection{Monitoring PIM-SM Scope Zone Information}
+
+The {\stt show pim scope} command can be used to display
+information about the PIM scope zones:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
+user@hostname> \textbf{show pim scope}\\
+GroupPrefix                                 \>Interface\\
+225.1.2.0/24                                \>dc1
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+The fields for each entry (in order of appearance) are:
+\begin{itemize}
+
+  \item {\tt GroupPrefix:} The multicast group prefix address of the scoped
+  zone.
+
+  \item {\tt Interface:} The name of the interface that is the boundary
+  of the scoped zone.
+
+\end{itemize}
+
+Note that currently (July 2008), configuring multicast scoped zones is not
+supported. This feature should be added in the future.

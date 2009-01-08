@@ -1,0 +1,560 @@
+%
+% $XORP: xorp/docs/user_manual/forwarding.tex,v 1.13 2007/08/09 07:08:39 pavlin Exp $
+%
+
+\chapter{Forwarding Engine}
+
+\section{Terminology and Concepts}
+
+The forwarding engine is that part of a router that receives packets
+and forwards them from one interface to another.  In the case of XORP,
+the forwarding engine may be the kernel forwarding path on UNIX,
+the Click forwarding path~\cite{CLICK-PROJECT}, or it may reside in
+external forwarding hardware.
+
+On any particular router, it might be desirable to enable or disable
+different parts of the forwarding functionality.  For example, a
+router might only be intended to forward IPv6 packets but not IPv4
+packets, or it might be intended to forward unicast packets but not
+multicast packets.  Thus XORP provides the ability to enable and
+configure various forwarding functionality.
+
+In XORP, the term ``{\stt fea}'' refers to {\it Forwarding Engine
+Abstraction} and the term ``{\stt mfea}'' refers to {\it Multicast
+Forwarding Engine Abstraction}.  The term ``abstraction'' here refers to
+a high-level configuration interface that should be the same
+irrespective of whether the forwarding engine is provided in software
+in the operating system kernel or in external forwarding hardware.
+
+\newpage
+\section{Configuration of the Forwarding Engine}
+
+On a XORP router, forwarding functionality must be explicitly enabled
+or no packets will be forwarded.  Forwarding can be separately enabled
+for unicast and multicast, and for IPv4 and IPv6.  In addition,
+multicast interfaces/vifs need to be explicitly enabled individually,
+and certain special-purpose forwarding functionality can also be
+enabled for multicast.
+
+\subsection{Configuration Syntax}
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+fea \{\\
+\>targetname: {\it txt}\\
+\>unicast-forwarding4 \{\\
+\>\>disable: {\it bool}\\
+\>\>table-id: {\it u32}\\
+\>\>forwarding-entries \{\\
+\>\>\>retain-on-startup: {\it bool}\\
+\>\>\>retain-on-shutdown: {\it bool}\\
+\>\>\}\\
+\>\}\\
+\>unicast-forwarding6 \{\\
+\>\>disable: {\it bool}\\
+\>\>table-id: {\it u32}\\
+\>\>forwarding-entries \{\\
+\>\>\>retain-on-startup: {\it bool}\\
+\>\>\>retain-on-shutdown: {\it bool}\\
+\>\>\}\\
+\>\}\\
+\>click \{\\
+\>\>disable: {\it bool}\\
+\>\>duplicate-routes-to-kernel: {\it bool}\\
+\\
+\>\>kernel-click \{\\
+\>\>\>disable: {\it bool}\\
+\>\>\>install-on-startup: {\it bool}\\
+\>\>\>kernel-click-modules: {\it text}\\
+\>\>\>mount-directory: {\it text}\\
+\>\>\>kernel-click-config-generator-file: {\it text}\\
+\>\>\}\\
+\\
+\>\>user-click \{\\
+\>\>\>disable: {\it bool}\\
+\>\>\>command-file: {\it text}\\
+\>\>\>command-extra-arguments: {\it text}\\
+\>\>\>command-execute-on-startup: {\it bool}\\
+\>\>\>control-address: {\it IPv4-addr}\\
+\>\>\>control-socket-port: {\it uint(1..65535)}\\
+\>\>\>startup-config-file: {\it text}\\
+\>\>\>user-click-config-generator-file: {\it text}\\
+\>\>\}\\
+\>\}\\
+\}
+\\
+{\rm continued overleaf....}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\newpage
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+plumbing \{\\
+\>mfea4 \{\\
+\>\>disable: {\it bool}\\
+\>\>interface {\it text} \{\\
+\>\>\>vif {\it text} \{\\
+\>\>\>\>disable: {\it bool}\\
+\>\>\>\}\\
+\>\>\}\\
+\>\>interface register\_vif \{\\
+\>\>\>vif register\_vif \{\\
+\>\>\>\>disable: {\it bool}\\
+\>\>\>\}\\
+\>\>\}\\
+\>\>traceoptions \{\\
+\>\>\>flag all \{\\
+\>\>\>\>disable: {\it bool}\\
+\>\>\>\}\\
+\>\>\}\\
+\>\}\\
+\\
+\>mfea6 \{\\
+\>\>disable: {\it bool}\\
+\>\>interface {\it text} \{\\
+\>\>\>vif {\it text} \{\\
+\>\>\>\>disable: {\it bool}\\
+\>\>\>\}\\
+\>\>\}\\
+\>\>interface register\_vif \{\\
+\>\>\>vif register\_vif \{\\
+\>\>\>\>disable: {\it bool}\\
+\>\>\>\}\\
+\>\>\}\\
+\>\>traceoptions \{\\
+\>\>\>flag \{\\
+\>\>\>\>all \{\\
+\>\>\>\>\>disable: {\it bool}\\
+\>\>\>\>\}\\
+\>\>\>\}\\
+\>\>\}\\
+\>\}\\
+\}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+\begin{description}
+\item{\tt fea}: this delimits the configuration for the unicast
+  forwarding engine functionality. 
+  The following unicast forwarding engine parameters can be configured:
+\begin{description}
+\item{\tt targetname}: this is the name for this instance of the
+  forwarding engine abstraction.  It defaults to ``{\stt fea}'', and
+  it is strongly recommended that this default is {\it not} overridden
+  under normal usage scenarios.
+\end{description}
+
+\item{\tt unicast-forwarding4}: this directive is used to configure the IPv4
+  forwarding~\footnote{Note that prior to XORP Release-1.1, the
+  {\tt enable-unicast-forwarding4} flag was used instead to enable or disable
+  the IPv4 forwarding.}.
+\begin{description}
+\item{\tt disable}: this takes the value {\stt true} or {\stt false},
+  and disables or enables all IPv4 unicast forwarding on the router.
+  The default is {\stt false}.
+\item{\tt table-id}: this specifies the IPv4 unicast forwarding table ID.
+  If it is not configured, the FEA will use the default table ID for the
+  system. Note that not all systems support multiple forwarding tables.
+  Currently, they exist only on Linux (among all systems supported by XORP).
+
+\item{\tt forwarding-entries}: this directive is used to configure the
+  properties of the IPv4 forwarding entries.
+\begin{description}
+\item{\tt retain-on-startup}: this takes the value {\stt true} or
+  {\stt false}, and is used to control whether the XORP IPv4 unicast
+  forwarding entries (if there are any left from a previous execution)
+  are removed on startup by the FEA itself. The default is {\stt false}.
+\item{\tt retain-on-shutdown}: this takes the value {\stt true} or
+  {\stt false}, and is used to control whether the XORP IPv4 unicast
+  forwarding entries are removed on shutdown by the FEA itself.
+  The default is {\stt false}.
+\end{description}
+   Note that the {\tt retain-on-startup} and {\tt retain-on-shutdown}
+   statements prevent the FEA itself from deleting the forwarding
+   entries and does not prevent the RIB or any of the unicast routing
+   protocols from deleting the entries on shutdown.
+\end{description}
+
+\item{\tt unicast-forwarding6}: this directive is used to configure the IPv6
+  forwarding~\footnote{Note that prior to XORP Release-1.1, the
+  {\tt enable-unicast-forwarding6} flag was used instead to enable or disable
+  the IPv6 forwarding.}.
+\begin{description}
+\item{\tt disable}: this takes the value {\stt true} or {\stt false},
+  and disables or enables all IPv6 unicast forwarding on the router.
+  The default is {\stt false}.
+\item{\tt table-id}: this specifies the IPv4 unicast forwarding table ID.
+  If it is not configured, the FEA will use the default table ID for the
+  system. Note that not all systems support multiple forwarding tables.
+  Currently, they exist only on Linux (among all systems supported by XORP).
+
+\item{\tt forwarding-entries}: this directive is used to configure the
+  properties of the IPv6 forwarding entries.
+\begin{description}
+\item{\tt retain-on-startup}: this takes the value {\stt true} or
+  {\stt false}, and is used to control whether the XORP IPv6 unicast
+  forwarding entries (if there are any left from a previous execution)
+  are removed on startup by the FEA itself. The default is {\stt false}.
+\item{\tt retain-on-shutdown}: this takes the value {\stt true} or
+  {\stt false}, and is used to control whether the XORP IPv6 unicast
+  forwarding entries are removed on shutdown by the FEA itself.
+  The default is {\stt false}.
+\end{description}
+   Note that the {\tt retain-on-startup} and {\tt retain-on-shutdown}
+   statements prevent the FEA itself from deleting the forwarding
+   entries and does not prevent the RIB or any of the unicast routing
+   protocols from deleting the entries on shutdown.
+\end{description}
+
+\item{\tt click}: this directive is used to configure the Click
+  forwarding path.
+\begin{description}
+\item{\tt disable}: this takes the value {\stt true} or {\stt false},
+  and disables or enables the Click forwarding path on the router. The
+  default is {\stt false}.
+\item{\tt duplicate-routes-to-kernel}: this takes the value {\stt true}
+  or {\stt false}, and is used to control whether the XORP routes added
+  to Click should be added to the system kernel as well. The default is
+  {\stt false}.
+
+\item{\tt kernel-click}: this directive is used to configure
+  kernel-level Click.
+\begin{description}
+\item{\tt disable}: this takes the value {\stt true} or {\stt false},
+  and disables or enables the kernel-level Click forwarding path on the
+  router. The default is {\stt false}.
+\item{\tt install-on-startup}: this takes the value {\stt true} or {\stt
+  false}, and is used to specify whether the kernel-level Click should
+  be installed on startup. The default is {\stt false}.
+\item{\tt kernel-click-modules}: this specifies the list of Click
+  modules (separated by ':') that should be loaded into the kernel.
+  The default is the list of modules needed by Linux:
+  ``/usr/local/click/linuxmodule/proclikefs.o:/usr/local/click/linuxmodule/click.o''
+  For FreeBSD, the only module that is needed is ``click.ko'' so the
+  list should be like: ``/path/to/click.ko''.
+\item{\tt mount-directory}: this specifies the name of the directory to
+  mount the Click file system on. The default is: ``/click''.
+\item{\tt kernel-click-config-generator-file}: this specifies the name
+  of the program to execute that would generate the kernel-level Click
+  configuration from the XORP configuration. The default is:
+  ``/usr/local/xorp/fea/xorp\_fea\_click\_config\_generator''.
+\end{description}
+
+\item{\tt user-click}: this directive is used to configure user-level
+  Click.
+\begin{description}
+\item{\tt disable}: this takes the value {\stt true} or {\stt false},
+  and disables or enables the user-level Click forwarding path on the
+  router. The default is {\stt false}.
+\item{\tt command-file}: this specifies the name of the user-level
+  Click binary program to execute. The default is
+  ``/usr/local/bin/click''.
+\item{\tt command-extra-arguments}: this specifies the extra arguments
+  that should be supplied to the user-level Click binary program when
+  executing it. The default is ``-R''. Note that it should not contain
+  ``\verb=-p <port>='', because it will be in conflict with the FEA's
+  addition of the same argument.
+\item{\tt command-execute-on-startup}: this takes the value {\stt true}
+  or {\stt false}, and is used to specify whether the user-level Click
+  binary program should be executed on startup. The default is {\stt
+  false}.
+\item{\tt control-address}: this takes an IPv4 address and is used to
+  specify the address that the user-level Click binary program would be
+  listening on for incoming connections (to control and reconfigure
+  Click). The default is 127.0.0.1.
+\item{\tt control-socket-port}: this takes an integer in the interval
+  [1..65535] and is used to specify the TCP port number the user-level
+  Click binary program would be listening on for incoming connections
+  (to control and reconfigure Click). The default is 13000.
+\item{\tt startup-config-file}: this specifies the name of the initial
+  Click configuration file that would loaded on startup. The default is
+  ``/dev/null''.
+\item{\tt user-click-config-generator-file}: this specifies the name
+  of the program to execute that would generate the user-level Click
+  configuration from the XORP configuration. The default is
+  ``/usr/local/xorp/fea/xorp\_fea\_click\_config\_generator''.
+\end{description}
+
+Note that it is possible to configure and run both kernel-level and
+user-level Click. In that case, typically
+{\stt kernel-click-config-generator-file} and
+{\stt user-click-config-generator-file} would point to different
+generators. Otherwise, a single common generator wouldn't know whether
+to generate configuration for kernel-level Click or for user-level
+Click.
+
+\end{description}
+
+\item{\tt plumbing}: this delimits a part of the router configuration
+  used for the plumbing together of packet forwarding functionality.
+  Multicast forwarding configuration must be part of this grouping.
+\item{\tt mfea4}: this delimits the part of the router configuration
+  related to multicast forwarding of IPv4 packets.
+
+  The following multicast forwarding parameters can be configured:
+\begin{description}
+\item{\tt disable}: this takes the value {\stt true} or {\stt false},
+  and disables or enables all IPv4 multicast forwarding on the
+  router~\footnote{Note that prior to XORP Release-1.1, the {\tt enable}
+  flag was used instead of {\tt disable}.}.
+  The default is {\stt false}.
+\item{\tt interface}: this specifies an interface to be used for
+  multicast IPv4 forwarding.  Each interface to be used for multicast
+  forwarding needs to be explicitly listed.
+
+  In addition to the normal network interfaces, a special-purpose
+  interface called {\stt register\_vif} needs to be configured for
+  PIM-SM (see Chapter \ref{pimsm}) to be able to send
+  register-encapsulated packets to the PIM Rendezvous Point.  PIM-SM
+  will not work correctly unless this is configured.  The {\stt
+  register\_vif} interface must be configured with a vif also called
+  {\stt register\_vif}.
+\item{\tt vif}: this specifies a vif to be used for multicast IPv4
+  forwarding.  Each vif to be used for multicast forwarding needs to
+  be explicitly listed.
+
+  Each vif can take the following parameter:
+\begin{description}
+\item{\tt disable}: this takes the value {\stt true} or {\stt false},
+  and disables or enables multicast forwarding on this vif~\footnote{Note
+  that prior to XORP Release-1.1, the {\tt enable} flag was used instead of
+  {\tt disable}.}.
+  The default is {\stt false}.
+\end{description}
+\end{description}
+\item{\tt traceoptions}: this directive delimits the configuration of
+  debugging and tracing options for multicast forwarding.
+\begin{description}
+\item{\tt flag}: this directive is used to specify which tracing
+  options are enabled.  Possible parameters are:
+\begin{description}
+\item{\tt all}: this directive specifies that all tracing
+  options should be enabled.  Possible parameters are:
+\begin{description}
+\item{\tt disable}: this takes the value {\stt true} or {\stt false},
+  and disables or enables tracing~\footnote{Note
+  that prior to XORP Release-1.1, the {\tt enable} flag was used instead of
+  {\tt disable}.}. The default is {\stt false}.
+\end{description}
+\end{description}
+\end{description}
+\item{\tt mfea6}: this delimits the part of the router configuration
+  related to multicast forwarding of IPv6 packets.  The possible
+  parameters are the same as for {\stt mfea4}, but affect IPv6
+  multicast forwarding rather than IPv4.
+\end{description}
+
+\newpage
+
+\subsection{Example Configurations}
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+fea \{\\
+\>unicast-forwarding4 \{\\
+\>\>disable: false\\
+\>\}\\
+\>unicast-forwarding6 \{\\
+\>\>disable: true\\
+\>\}\\
+\}\\
+plumbing \{\\
+\>mfea4 \{\\
+\>\>disable: false\\
+\>\>interface dc0 \{\\
+\>\>\>vif dc0 \{\\
+\>\>\>\>disable: false\\
+\>\>\>\}\\
+\>\>\}\\
+\>\>interface register\_vif \{\\
+\>\>\>vif register\_vif \{\\
+\>\>\>\>/* Note: this vif should be always enabled */\\
+\>\>\>\>disable: false\\
+\>\>\>\}\\
+\>\>\}\\
+\>\>traceoptions \{\\
+\>\>\>flag all \{\\
+\>\>\>\>disable: false\\
+\>\>\>\}\\
+\>\>\}\\
+\>\}\\
+\\
+\>mfea6 \{\\
+\>\>disable: false\\
+\>\>interface dc0 \{\\
+\>\>\>vif dc0 \{\\
+\>\>\>\>disable: false\\
+\>\>\>\}\\
+\>\>\}\\
+\>\>interface register\_vif \{\\
+\>\>\>vif register\_vif \{\\
+\>\>\>\>/* Note: this vif should be always enabled */\\
+\>\>\>\>disable: false\\
+\>\>\>\}\\
+\>\>\}\\
+\>\}\\
+\}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+
+\vspace{0.1in}
+The configuration above enables unicast IPv4 forwarding, but disables
+IPv6 unicast forwarding.
+
+In addition, it enables multicast forwarding for IPv4 and IPv6 on
+interface/vif {\stt dc0/dc0}, and enables the register vif for use by
+PIM-SM multicast routing.
+
+\newpage
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=xx\=xx\=\kill
+interfaces \{\\
+\>interface eth0 \{\\
+\>\>description: "control interface"\\
+\>\>vif eth0 \{\\
+\>\>\>address 10.10.10.10 \{\\
+\>\>\>\>prefix-length: 24\\
+\>\>\>\>broadcast: 10.10.10.255\\
+\>\>\>\}\\
+\>\>\}\\
+\>\>mac: aa:bb:cc:dd:ee:ff\\
+\>\>mtu: 1500\\
+\>\}\\
+\}\\
+\\
+fea \{\\
+\>unicast-forwarding4 \{\\
+\>\>disable: false\\
+\>\}\\
+\\
+\>click \{\\
+\>\>disable: false\\
+\>\>duplicate-routes-to-kernel: false\\
+\\
+\>\>kernel-click \{\\
+\>\>\>disable: true\\
+\>\>\>install-on-startup: true\\
+\>\>\>kernel-click-modules: "/path/to/proclikefs.o:/path/to/click.o";\\
+\>\>\>mount-directory: "/click"\\
+\>\>\>kernel-click-config-generator-file: "/path/to/kernel\_click\_config\_generator"\\
+\>\>\}\\
+\\
+\>\>user-click \{\\
+\>\>\>disable: false\\
+\>\>\>command-file: "/path/to/click"\\
+\>\>\>command-extra-arguments: "-R"\\
+\>\>\>command-execute-on-startup: true\\
+\>\>\>control-address: 127.0.0.1\\
+\>\>\>control-socket-port: 13000\\
+\>\>\>startup-config-file: "/dev/null"\\
+\>\>\>user-click-config-generator-file: "/path/to\_user\_click\_config\_generator"\\
+\>\>\}\\
+\>\}\\
+\}\\
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+
+\vspace{0.1in}
+The configuration above enables configures both kernel-level and
+user-level Click (eventually on Linux given that it contains two kernel
+Click modules), but enables only user-level Click.
+
+
+\section{Monitoring the Forwarding Engine}
+
+The {\stt show mfea dataflow} command can be used to display
+information about MFEA IPv4 dataflow filters:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=xxxxx\=xx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=xx\=\kill
+user@hostname> \textbf{show mfea dataflow}\\
+Group                              \>\>\>\>Source\\
+224.0.1.20                         \>\>\>\>10.2.0.1\\
+\>Measured(Start|Packets|Bytes)\>Type\>Thresh(Interval|Packets|Bytes)\>\>Remain\\
+\>1091667269.982158|0|?        \><= \>\>210.0|0|?                \>\>202.434319\\
+\>1091667269.984406|?|0        \>>= \>\>100.0|?|102400           \>\>92.436567
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+Note that the above information is shown only if the filters are kept at
+user-space. If the filters are kept at kernel-space (\eg in case of UNIX
+system with advanced multicast API support), then currently \xorpsh
+cannot be used to show the information. In that case, the appropriate system
+command should be used instead (e.g., the UNIX {\stt netstat -gn} command).
+
+The {\stt show mfea interface} command can be used to display
+information about MFEA IPv4 interfaces:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xxxxxxxxxxxxx\=xxxxxxxxx\=xxxxxxxxxxxxx\=xxxxxxxxxxxxxxxx\=xxxxx\=\kill
+user@hostname> \textbf{show mfea interface}\\
+Interface \>State  \>Vif/PifIndex \>Addr       \>Flags\\
+dc0       \>UP     \>0/6          \>10.4.0.1   \>MULTICAST BROADCAST KERN\_UP\\
+dc2       \>UP     \>1/8          \>10.3.0.2   \>MULTICAST BROADCAST KERN\_UP\\
+register\_vif \>UP \>2/6          \>10.4.0.1   \>PIM\_REGISTER KERN\_UP
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+The {\stt show mfea interface address} command can be used to display
+information about MFEA IPv4 interface addresses:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xxxxxxxxxxxxx\=xxxxxxxxxxxxxxxx\=xxxxxxxxxxxxxxxxxxx\=xxxxxxxxxxxxxxxx\=xxxxxxx\kill
+user@hostname> \textbf{show mfea interface address}\\
+Interface  \>Addr          \>Subnet           \>Broadcast     \>P2Paddr\\
+dc0        \>10.4.0.1      \>10.4.0.0/24      \>10.4.0.255    \>0.0.0.0\\
+dc2        \>10.3.0.2      \>10.3.0.0/24      \>10.3.0.255    \>0.0.0.0\\
+register\_vif \>10.4.0.1   \>10.4.0.1/32      \>10.4.0.1      \>0.0.0.0
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+
+The equivalent commands for IPv6 multicast forwarding are:
+\begin{description}
+\item{\stt show mfea6 dataflow}
+\item{\stt show mfea6 interface}
+\item{\stt show mfea6 interface address}
+\end{description}
+\vspace{0.1in}

@@ -1,0 +1,118 @@
+#!/bin/sh
+#
+# $FreeBSD: ports/net/xorp/files/xorp.in,v 1.3 2008/01/03 12:25:40 bms Exp $
+#
+# A sample XORP startup script.
+#
+
+# PROVIDE: xorp
+# REQUIRE: netif routing mountcritlocal
+# BEFORE:  NETWORKING
+
+# Add the following lines to /etc/rc.conf to enable xorp:
+#
+#xorp_enable="YES"
+#xorp_config_boot="/usr/local/etc/xorp.conf.sample"
+#
+
+. /etc/rc.subr
+
+name="xorp"
+rcvar=`set_rcvar`
+
+load_rc_config $name
+
+: ${xorp_enable="NO"}
+: ${xorp_config_boot="/usr/local/etc/xorp.conf"}
+: ${xorp_flags=""}
+: ${xorp_prefault="YES"}
+: ${xorp_rtrmgr_pidfile="/var/run/xorp_rtrmgr.pid"}
+: ${xorp_rtrmgr_logfile="/var/log/xorp_rtrmgr.log"}
+: ${xorp_rtrmgr_poll_enable=true}
+: ${xorp_rtrmgr_poll_timeout=90}
+: ${xorp_hardkill_enable=false}
+
+required_files=${xorp_config_boot}
+command=/usr/local/bin/xorp_rtrmgr
+command_args="-b ${xorp_config_boot}"
+pidfile=${xorp_rtrmgr_pidfile}
+sig_stop=INT
+
+start_precmd="xorp_prestart"
+start_cmd="xorp_start"
+stop_postcmd="xorp_poststop"
+
+xorp_prefault_binaries="bin/call_xrl bin/xorp_rtrmgr bin/xorpsh bgp/xorp_bgp bgp/tools/xorpsh_print_peers bgp/tools/xorpsh_print_routes cli/tools/send_cli_processor_xrl fea/xorp_fea fea/tools/show_interfaces fib2mrib/xorp_fib2mrib libxipc/xorp_finder mld6igmp/xorp_igmp mld6igmp/xorp_mld ospf/xorp_ospfv2 ospf/xorp_ospfv3 ospf/tools/print_lsas ospf/tools/print_neighbours pim/xorp_pimsm4 pim/xorp_pimsm6 policy/xorp_policy rib/xorp_rib rib/tools/show_routes rip/xorp_rip rip/xorp_ripng rip/tools/show_peer_stats rip/tools/show_stats static_routes/xorp_static_routes"
+
+xorp_prestart()
+{
+	touch ${xorp_rtrmgr_logfile}
+	return 0
+}
+
+xorp_start() 
+{
+	pidfile=${xorp_rtrmgr_pidfile}
+
+	if checkyesno xorp_prefault ; then
+		#echo -n 'Preloading XORP router processes into memory:'
+		echo -n 'Preloading XORP router processes into memory...'
+		( cd /usr/local && \
+		  cat ${xorp_prefault_binaries} | \
+		  dd if=/dev/stdin of=/dev/zero >/dev/null 2>&1 )
+		echo 'done.'
+		#echo '.'
+	fi
+
+	echo -n 'Starting XORP router processes:'
+
+	echo -n ' xorp_rtrmgr'
+	if ! daemon </dev/null >>${xorp_rtrmgr_logfile} 2>&1 -c -p ${pidfile} \
+	     ${command} ${command_args} ; then
+		warn 'could not bring up xorp_rtrmgr.'
+		return 1
+	fi
+
+	${xorp_rtrmgr_poll_enable} || return 0
+
+	# If startup polling is enabled, then poll xorp_rtrmgr every
+	# second to see if it died, or if it logged successful bringup.
+	# XXX This may be racy on very fast machines, but without
+	# daemonizing support from xorp_rtrmgr it's difficult not to race.
+
+	pid=$(cat ${xorp_rtrmgr_pidfile})
+	timeout=${xorp_rtrmgr_poll_timeout}
+	tick=0
+	fail=true
+
+	until [ $tick = $timeout ];
+	do
+		sleep 1 ; kill -0 ${pid} || break
+		if ( tail -5 ${xorp_rtrmgr_logfile} | \
+		    grep 'No more tasks to run' > /dev/null 2>&1 ) ; then
+			fail=false
+			break
+		fi
+		tick=$((tick + 1))
+	done
+
+	if $fail ; then
+		warn 'xorp_rtrmgr failed to start'
+		return 1
+	fi
+
+	echo '.'
+	return 0
+}
+
+xorp_poststop()
+{
+	rm -f ${xorp_rtrmgr_pidfile} >/dev/null 2>&1 || true
+
+	${xorp_hardkill_enable} || return 0
+	killall -9 -m xorp_\* || true
+
+	return 0
+}
+
+run_rc_command "$1"

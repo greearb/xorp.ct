@@ -1,0 +1,31 @@
+#!/bin/sh
+#
+# $FreeBSD$
+#
+# Kick off XORP configurator.
+#
+
+# PROVIDE: xorp_configurator
+# REQUIRE: netif routing mountcritlocal
+# BEFORE:  xorp
+
+. /etc/rc.subr
+
+name="xorp"
+rcvar=`set_rcvar`
+
+load_rc_config $name
+
+: ${xorp_config_boot="/usr/local/etc/xorp.conf"}
+
+start_cmd="xorp_configurator_start"
+
+xorp_configurator_start()
+{
+	echo 'Entering manual configuration for XORP:'
+	/bin/sh /usr/local/etc/xorp-makeconfig.sh
+	echo '.'
+	return 0
+}
+
+run_rc_command "$1"

@@ -1,0 +1,185 @@
+<!doctype refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN" [
+
+  <!-- Fill in your name for FIRSTNAME and SURNAME. -->
+  <!ENTITY dhfirstname "<firstname>Javier</firstname>">
+  <!ENTITY dhsurname   "<surname>Fernandez-Sanguino</surname>">
+  <!-- Please adjust the date whenever revising the manpage. -->
+  <!ENTITY dhdate      "<date>August 24th, 2007</date>">
+  <!ENTITY dhsection   "<manvolnum>1</manvolnum>">
+  <!ENTITY dhemail     "<email>jfs@debian.org</email>">
+  <!ENTITY dhusername  "Javier Fernandez-Sanguino">
+  <!ENTITY dhucpackage "<refentrytitle>xorp</refentrytitle>">
+  <!ENTITY dhpackage   "xorp">
+  <!ENTITY dhcmd       "xorpsh">
+
+  <!ENTITY debian      "<productname>Debian</productname>">
+  <!ENTITY gnu         "<acronym>GNU</acronym>">
+  <!ENTITY gpl         "&gnu; <acronym>GPL</acronym>">
+]>
+
+<refentry>
+  <refentryinfo>
+    <address>
+      &dhemail;
+    </address>
+    <author>
+      &dhfirstname;
+      &dhsurname;
+    </author>
+    <copyright>
+      <year>2007</year>
+      <holder>&dhusername;</holder>
+    </copyright>
+    &dhdate;
+  </refentryinfo>
+  <refmeta>
+    &dhucpackage;
+
+    &dhsection;
+  </refmeta>
+  <refnamediv>
+    <refname>&dhcmd;</refname>
+
+    <refpurpose>XORP Command Shell</refpurpose>
+  </refnamediv>
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>&dhcmd;</command>
+
+
+      <arg><option>-c <replaceable>command</replaceable></option></arg>
+
+      <arg><option>-t <replaceable>directory</replaceable></option></arg>
+
+      <arg><option>-x <replaceable>directory</replaceable></option></arg>
+
+      <arg><option>-h</option></arg>
+
+      <arg><option>-v</option></arg>
+
+    </cmdsynopsis>
+  </refsynopsisdiv>
+  <refsect1>
+    <title>DESCRIPTION</title>
+
+    <para>This manual page documents briefly the
+      <command>&dhcmd;</command> command.</para>
+
+    <para>This manual page was written for the &debian; distribution
+      because the original program does not have a manual page.</para>
+
+    <para><command>&dhcmd;</command> is the command used to 
+    interact with a eXtensible Open Router Platform (XORP) router. This command
+    starts up a command line interface (CLI), that allows the configuration of
+    the router and monitoring of the router state.
+    </para>
+
+    <para>The <command>&dhcmd;</command> command provides an interactive
+    command shell to a XORP user, similar in many ways to the role played by a
+    Unix shell.  In a production router <command>&dhcmd;</command> might be set
+    up as an user's login shell - they would login to the router via ssh and be
+    directly in the <command>&dhcmd;</command>. It can also be run
+    directly from the Unix command line.
+    </para>
+
+    <para><command>&dhcmd;</command> should normally be run as a regular user;
+    it is neither necessary or desirable to run it as root.  If an user is to
+    be permitted to make changes to the running router configuration, that user
+    needs to be in the Unix group <command>xorp</command>.</para>
+
+    <para>The Debian package installation automaticall sets up both a xorp user
+    and a xorp group to which this user belongs. However, any user can run the
+    <command>&dhcmd;</command> command unless locally restricted by the
+    administrator.</para>
+
+  </refsect1>
+  <refsect1>
+    <title>OPTIONS</title>
+
+    <para><command>&dhcmd;</command> allows the following options:</para>
+
+    <variablelist>
+      <varlistentry>
+        <term><option>-h</option>
+        </term>
+        <listitem>
+          <para>Show summary of options.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>-v</option>
+        </term>
+        <listitem>
+          <para>Print verbose information.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>-c <replaceable>command</replaceable></option>
+        </term>
+        <listitem>
+          <para>Specify command(s) to execute.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>-t <replaceable>directory</replaceable></option>
+        </term>
+        <listitem>
+          <para>Specify templates directory.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>-x <replaceable>directory</replaceable></option>
+        </term>
+        <listitem>
+          <para>Specify Xrl targets directory.</para>
+        </listitem>
+      </varlistentry>
+
+    </variablelist>
+
+  </refsect1>
+  <refsect1>
+    <title>SEE ALSO</title>
+
+    <para>xorp_rtrmgr (8)</para>
+
+    <para>This program is documented fully in the <citetitle>Xorp User
+    Manual</citetitle>, chapter <citetitle>Command Structure</citetitle>,
+    available at <filename>/usr/share/doc/xorp-doc/</filename> in Debian
+    systems when the xorp-doc package is installed.</para>
+  </refsect1>
+  <refsect1>
+    <title>AUTHOR</title>
+
+    <para>XORP is Copyright (c) 2001-2009 XORP, Inc.</para>
+
+    <para>This manual page was written by &dhusername; &dhemail; for
+      the &debian; system (but may be used by others). For licensing details
+      please see <filename>/usr/share/doc/xorp/copyright</filename>.
+    </para>
+
+  </refsect1>
+</refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:2
+sgml-indent-data:t
+sgml-parent-document:nil
+sgml-default-dtd-file:nil
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+-->
+
+

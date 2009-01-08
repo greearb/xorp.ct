@@ -1,0 +1,228 @@
+%
+% $XORP: xorp/docs/user_manual/snmp.tex,v 1.8 2007/03/14 01:07:01 pavlin Exp $
+%
+
+\chapter{SNMP}
+\label{snmp}
+
+\section{Terminology and Concepts}
+
+SNMP (Simple Network Management Protocol) is a mechanism for managing
+network and computer devices.
+SNMP uses a manager/agent model for managing the devices. The agent
+resides in the device, and provides the interface to the physical device being
+managed. The manager resides on the management system and provides the
+interface between the user and the SNMP agent.
+The interface between the SNMP manager and the SNMP agent uses a Management
+Information Base (MIB) and a small set of commands to exchange information.
+
+The MIB contains the set of variables/objects that are managed (\eg MTU on a
+network interface). Those objects are organized in a tree structure where
+each object is a leaf node. Each object has its unique Object IDentifier
+(OID). There are two types of objects: {\tt scalar} and {\tt tabular}.
+A scalar object defines a single object instance. A tabular object defines
+multiple related object instances that are grouped in MIB tables.
+For example, the uptime on a device is a scalar object, but the routing table
+in a router is a tabular object.
+
+The set of commands used in SNMP are: GET, GET-NEXT, GET-RESPONSE, SET, and
+TRAP. GET and GET-NEXT are used by the manager to request information about
+an  object. SET is used by the manager to change the value of a specific
+object. GET-RESPONSE is used by the SNMP agent to return the requested
+information by GET or GET-NEXT, or the the status of the SET operation.
+The TRAP command is used by the agent to inform asynchronously the manager
+about the occurrence of some events that are important to the manager.
+
+Currently there are three versions of SNMP:
+
+\begin{itemize}
+
+  \item {\tt SNMPv1:} This is the first version of the protocol. It is
+  described in RFC 1157.
+
+  \item {\tt SNMPv2:} This is an evolution of the first version, and it adds a
+  number of improvements to SNMPv1.
+
+  \item {\tt SNMPv3:} This version improves the security model in SNMPv2, and
+  adds support for proxies.
+
+\end{itemize}
+
+\newpage
+\section{Configuring SNMP}
+
+Before configuring SNMP on XORP, you must make sure that SNMP support is
+compiled. For example, when running {\stt ./configure} in the top-level XORP
+directory, you have to supply the {\stt --with-snmp} flag:
+
+{\tt ./configure --with-snmp}
+
+\subsection{Configuring Net-SNMP}
+\label{snmp:configuring_netsnmp}
+
+XORP itself does not implement the SNMP protocol and requires an external
+SNMP implementation for that. Currently, XORP supports only Net-SNMP (see
+{\stt http://www.net-snmp.org}) as such implementation.
+Before configuring SNMP in XORP, you must take the following steps to
+configure your Net-SNMP agent to run with XORP:
+
+\begin{itemize}
+
+  \item You need Net-SNMP version 5.0.6 or greater.
+
+  \item You must make {\stt libnetsnmpxorp.so} accessible to your runtime
+  loader. Depending on your system, that requires one of the following:
+
+  \begin{itemize}
+
+    \item Copy {\stt libnetsnmpxorp.so} to your library directory (typically
+    {\stt /usr/local/lib}).
+
+    \item Set a linker environment variable (typically
+    {\stt LD\_LIBRARY\_PATH}) to point to the directory where the library is.
+
+  \end{itemize}
+
+  \item To avoid opening security holes, we recommend allowing only SNMPv3
+  authenticated requests.  If you want to create a secure user, execute the
+  command {\stt net-snmp-config --create-snmpv3-user}.  These are the settings
+  that  match the provided {\stt snmp.conf} file inside the
+  {\stt \$\{XORP\}/mibs/snmpdscripts/} directory:
+
+\begin{table*}[h]
+\begin{center}
+\begin{tabular}{|l|l|l|} \hline
+User & Pass phrase & Security level \\
+\hline\hline
+privuser &  I am priv user & authPriv \\ \hline
+\end{tabular}
+\end{center}
+\end{table*}
+
+  You must create at least one user if you want to be able to access the SNMP 
+  agent.
+
+  \item {\stt snmpd} can only respond to XRLs after
+  {\stt xorp\_if\_mib\_module} has been loaded.
+  Adding the following line to the file {\stt snmpd.conf} (by default located
+  in {\stt /usr/local/share/snmp}) will preload this module when {\stt snmpd}
+  is started:
+
+  {\tt dlmod xorp\_if\_mib\_module <absolute path full filename>}
+
+  For example:
+
+  {\tt dlmod xorp\_if\_mib\_module /usr/local/xorp/mibs/xorp\_if\_mib\_module.so}
+\end{itemize}
+
+\subsection{Configuration Syntax}
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+protocols \{\\
+\>snmp \{\\
+\>\>targetname: {\it text}\\
+\>\>mib-module {\it text} \{\\
+\>\>\>abs-path: {\it text}\\
+\>\>\>mib-index: {\it uint}\\
+\>\>\}\\
+\>\}\\
+\}\\
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+\begin{description}
+
+  \item {\tt protocols}: this delimits the configuration for all routing
+   protocols in the XORP router configuration.  It is mandatory that
+   SNMP configuration is under the {\stt protocols} node in the
+   configuration.
+
+  \item {\tt snmp}: this delimits the SNMP configuration part of the XORP
+   router configuration.
+
+  \item {\tt targetname}: this is the name for this instance of SNMP.
+   It defaults to ``{\stt xorp\_if\_mib}'', and it is not recommended
+   that this default is overridden under normal usage scenarios.
+
+  \item {\tt mib-module}: this specifies the MIB module to configure. It
+  should be set to the MIB module file name (without the file name extension).
+
+  For each MIB, the following parameters can be configured:
+
+  \begin{description}
+
+    \item {\tt abs-path}: this is the absolute path to the module file with
+    the MIB to load.
+
+    \item {\tt mib-index}: this is the MIB index. It is set internally by
+    XORP when a MIB module is loaded, and should not be set in the XORP
+    configuration.
+
+  \end{description}
+
+\end{description}
+
+Below is a sample SNMP configuration that configures a BGP MIB:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+protocols \{\\
+\>snmp \{\\
+\>\>mib-module bgp4\_mib\_1657 \{\\
+\>\>\>abs-path: "/usr/local/xorp/mibs/bgp4\_mib\_1657.so"\\
+\>\>\}\\
+\>\}\\
+\}\\
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+\section{Using SNMP to Monitor a Router}
+
+Currently (July 2008) XORP does not provide SNMP-related operational
+commands.
+
+However, there are few client-side scripts that can be used to experiment
+with the SNMP agent:
+
+\begin{itemize}
+  \item The scripts are in the
+  {\stt \$\{XORP\}/mibs/snmpdscripts/} directory, and they use the client-side
+  Net-SNMP tools to communicate with the agent.  They rely on file
+  {\stt snmp.conf} in the same directory to provide valid default values for
+  the SNMP version to use, the user, community and security level. If your
+  agent was configured with the default security user suggested in
+  Section~\ref{snmp:configuring_netsnmp}, you should copy the
+  {\stt \$\{XORP\}/mibs/snmpdscripts/snmp.conf} file to
+  {\stt \$\{HOME\}/.snmp/snmp.conf}. Otherwise, you'll have to create your
+  own {\stt snmp.conf} so it matches your settings.
+
+  \item You must make XORP textual MIB files
+  ({\stt \$\{XORP\}/mibs/textual/*.txt}) accessible to the Net-SNMP command
+  line tools.  Either set the {\stt MIBDIRS} environment variable
+  ({\stt man snmpcmd(1)}) to point to that directory or copy those files to
+  your MIBS directory (default is {\stt /usr/local/share/snmp/mibs}).  For
+  instance (if {\stt sh} is the login shell):
+
+  {\tt export MIBDIRS=+/usr/local/xorp/mibs/textual}
+
+  \item You must tell Net-SNMP about specific MIB modules that you will
+  be using.  The {\stt MIBS} environment variable can be used for that
+  purpose. For BGP4-MIB you would do (if {\stt sh} is the login shell):
+
+  {\tt export MIBS=+BGP4-MIB}
+
+\end{itemize}

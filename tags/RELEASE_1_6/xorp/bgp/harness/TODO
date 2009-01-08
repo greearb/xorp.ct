@@ -1,0 +1,25 @@
+#
+# $XORP: xorp/bgp/harness/TODO,v 1.2 2003/10/28 19:53:02 atanu Exp $
+#
+
+------------------------------ TODO -----------------------------
+
+1) The script test_peering1.sh does not actually check that the bgp
+process has terminated. When the test was written calling the
+terminate/shutdown XRL used to cause the bgp process to core dump.
+
+2) More decision table tests involving MEDs in test_routing2.sh, to
+test that deleting and replacing routes involving meds also work
+correctly.
+
+3) Send a message that exceeds the 4K limit.
+
+4) Send update messages with multiprotocol nlri but don't include
+mandatory attributes. Tests already exist for IPv4 unicast.
+
+5) Test that we don't send multiprotocol nlri to peers with whom we
+didn't negotiate such an option.
+
+6) The test harness needs to deal with SAFI multicast.
+
+------------------------------ DONE -----------------------------

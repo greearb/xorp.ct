@@ -1,0 +1,11 @@
+/* $XORP: xorp/xrl/targets/policy.tgt,v 1.4 2007/07/12 21:39:28 pavlin Exp $ */
+
+#include "common.xif"
+#include "finder_event_observer.xif"
+#include "policy.xif"
+#include "cli_processor.xif"
+
+target policy implements	common/0.1,				\
+				finder_event_observer/0.1,		\
+				policy/0.1,				\
+				cli_processor/0.1

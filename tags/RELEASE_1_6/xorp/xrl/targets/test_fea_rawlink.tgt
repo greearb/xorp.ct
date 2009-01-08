@@ -1,0 +1,5 @@
+#include "common.xif"
+#include "fea_rawlink_client.xif"
+
+target test_fea_rawlink implements	common/0.1,			\
+					raw_link_client/0.1

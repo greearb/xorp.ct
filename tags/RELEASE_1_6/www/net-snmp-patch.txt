@@ -1,0 +1,12 @@
+--- /usr/local/include/net-snmp/agent/all_helpers.h.orig        2004-03-27
+18:07:17.000000000 +0100
++++ /usr/local/include/net-snmp/agent/all_helpers.h     2004-03-22
+10:36:51.000000000 +0100
+@@ -26,7 +26,6 @@
+ #include <net-snmp/agent/table_data.h>
+ #include <net-snmp/agent/table_dataset.h>
+ #include <net-snmp/agent/table_iterator.h>
+-#include <net-snmp/agent/table_mfd.h>
+ /*
+  * #include <net-snmp/agent/table_array.h>
+  */

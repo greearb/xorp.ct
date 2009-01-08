@@ -1,0 +1,145 @@
+/* $XORP: xorp/etc/templates/bgp.cmds,v 1.12 2004/06/11 03:48:18 atanu Exp $ */
+
+show bgp {
+    %command: "" %help: HELP;
+    %module: bgp;
+    %tag: HELP "Display information about BGP";
+}
+
+show bgp peers {
+    %command: "bgp/tools/xorpsh_print_peers $0" %help: HELP;
+    %module: bgp;
+    %tag: HELP "Show BGP peers info";
+}
+
+show bgp peers detail {
+    %command: "bgp/tools/xorpsh_print_peers $0" %help: HELP;
+    %module: bgp;
+    %tag: HELP "Show detailed BGP peers info";
+}
+
+show bgp routes {
+    %command: "bgp/tools/xorpsh_print_routes $0" %help: HELP;
+    %module: bgp;
+    %tag: HELP "Print BGP routes";
+}
+
+show bgp routes detail {
+    %command: "bgp/tools/xorpsh_print_routes $0" %help: HELP;
+    %module: bgp;
+    %tag: HELP "Print detailed BGP routes";
+}
+
+show bgp routes summary {
+    %command: "bgp/tools/xorpsh_print_routes $0" %help: HELP;
+    %module: bgp;
+    %tag: HELP "Print summary of BGP routes";
+}
+
+show bgp routes ipv4 {
+    %command: "bgp/tools/xorpsh_print_routes $0" %help: HELP;
+    %module: bgp;
+    %tag: HELP "Print BGP IPv4 routes";
+}
+
+show bgp routes ipv4 detail {
+    %command: "bgp/tools/xorpsh_print_routes $0" %help: HELP;
+    %module: bgp;
+    %tag: HELP "Print detailed BGP IPv4 routes";
+}
+
+show bgp routes ipv4 summary {
+    %command: "bgp/tools/xorpsh_print_routes $0" %help: HELP;
+    %module: bgp;
+    %tag: HELP "Print summary of BGP IPv4 routes";
+}
+
+show bgp routes ipv4 unicast {
+    %command: "bgp/tools/xorpsh_print_routes $0" %help: HELP;
+    %module: bgp;
+    %tag: HELP "Print BGP IPv4 unicast routes";
+}
+
+show bgp routes ipv4 unicast detail {
+    %command: "bgp/tools/xorpsh_print_routes $0" %help: HELP;
+    %module: bgp;
+    %tag: HELP "Print detailed BGP IPv4 unicast routes";
+}
+
+show bgp routes ipv4 unicast summary {
+    %command: "bgp/tools/xorpsh_print_routes $0" %help: HELP;
+    %module: bgp;
+    %tag: HELP "Print summary of BGP IPv4 unicast routes";
+}
+
+show bgp routes ipv4 multicast {
+    %command: "bgp/tools/xorpsh_print_routes $0" %help: HELP;
+    %module: bgp;
+    %tag: HELP "Print BGP IPv4 multicast routes";
+}
+
+show bgp routes ipv4 multicast detail {
+    %command: "bgp/tools/xorpsh_print_routes $0" %help: HELP;
+    %module: bgp;
+    %tag: HELP "Print detailed BGP IPv4 multicast routes";
+}
+
+show bgp routes ipv4 multicast summary {
+    %command: "bgp/tools/xorpsh_print_routes $0" %help: HELP;
+    %module: bgp;
+    %tag: HELP "Print summary of BGP IPv4 multicast routes";
+}
+
+show bgp routes ipv6 {
+    %command: "bgp/tools/xorpsh_print_routes $0" %help: HELP;
+    %module: bgp;
+    %tag: HELP "Print BGP IPv6 routes";
+}
+
+show bgp routes ipv6 detail {
+    %command: "bgp/tools/xorpsh_print_routes $0" %help: HELP;
+    %module: bgp;
+    %tag: HELP "Print detailed BGP IPv6 routes";
+}
+
+show bgp routes ipv6 summary {
+    %command: "bgp/tools/xorpsh_print_routes $0" %help: HELP;
+    %module: bgp;
+    %tag: HELP "Print summary of BGP IPv6 routes";
+}
+
+show bgp routes ipv6 unicast {
+    %command: "bgp/tools/xorpsh_print_routes $0" %help: HELP;
+    %module: bgp;
+    %tag: HELP "Print BGP IPv6 unicast routes";
+}
+
+show bgp routes ipv6 unicast detail {
+    %command: "bgp/tools/xorpsh_print_routes $0" %help: HELP;
+    %module: bgp;
+    %tag: HELP "Print detailed BGP IPv6 unicast routes";
+}
+
+show bgp routes ipv6 unicast summary {
+    %command: "bgp/tools/xorpsh_print_routes $0" %help: HELP;
+    %module: bgp;
+    %tag: HELP "Print summary of BGP IPv6 unicast routes";
+}
+
+show bgp routes ipv6 multicast {
+    %command: "bgp/tools/xorpsh_print_routes $0" %help: HELP;
+    %module: bgp;
+    %tag: HELP "Print BGP IPv6 multicast routes";
+}
+
+show bgp routes ipv6 multicast detail {
+    %command: "bgp/tools/xorpsh_print_routes $0" %help: HELP;
+    %module: bgp;
+    %tag: HELP "Print detailed BGP IPv6 multicast routes";
+}
+
+show bgp routes ipv6 multicast summary {
+    %command: "bgp/tools/xorpsh_print_routes $0" %help: HELP;
+    %module: bgp;
+    %tag: HELP "Print summary of BGP IPv6 multicast routes";
+}
