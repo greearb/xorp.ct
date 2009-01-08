@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.114 2009/01/08 01:08:53 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.115 2009/01/08 01:10:01 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -1063,7 +1063,57 @@ Intel PentiumPro CPU optimizations:
 Other flags that can be set on the command line are CPPFLAGS (the C/C++
 pre-processor flags), and LDFLAGS (the linker flags).
 
-5. Known problems
+5. Setting-up Ubuntu for XORP Installation
+=====================================
+
+1)Install Ubuntu from Live CD – all default values hold good.
+2)Add your login name to the sudoers file
+3)Edit interfaces file
+a.sudo vim /etc/network/interfaces
+b.Edit the config for eth0 and other required interfaces, remove dhcp configuration.
+Example eth0 configuration
+
+Remove the following eth0 config, if present
+auto eth0
+iface eth0 inet dhcp
+Key-in the following config.
+auto eth0
+iface eth0 inet static
+	address 10.10.10.50 ---  specify interface ip address
+	netmask 255.255.255.0 --- specify subnet mask
+	network 10.10.10.0  --- specify network
+	broadcast 10.10.10.255 --- specify broadcast address
+	gateway 10.10.10.1 ---  specify default gateway
+		Repeat for the other interfaces if necessary.
+4)sudo /etc/init.d/networking restart
+5)Create a group called “xorp” – Mandatory to run xorp.
+addgroup xorp
+
+6)Add yourself to the group “xorp” – Mandatory to run xorpsh.
+adduser  <username> xorp
+7)Relogin/Reboot the system to take these permission changes into effect.
+8)sudo apt-get update
+9)sudo apt-get remove dhcp-client
+10)sudo apt-get install openssh-server openssh-client
+11)sudo apt-get install make
+12)sudo apt-get install gcc
+13)sudo apt-get install g++
+14)sudo apt-get install openssl
+15)sudo apt-get install cvs – To access xorpcvs
+16)sudo apt-get install traceroute – To get rid of the warning when xorpsh is installed.
+17)sudo apt-get install libssl-dev
+18)sudo apt-get install libpcap0.8-dev [optional]
+19)sudo apt-get install snmpd [optional, but necessary if snmp compilation is enabled via configure script]
+20)sudo apt-get install libsnmp-dev [optional, but necessary if snmp compilation is enabled via configure script]
+21)sudo apt-get install iptables-dev
+22)sudo apt-get install tcpdump [optional – to help in debugging]
+23)sudo apt-get install wireshart [optional – to help in debugging]
+24)sudo apt-get install tclsh [optional – to enable TCL scripting]
+25)sudo apt-get install expect [optional]
+
+
+
+6. Known problems
 =================
 
 See file ${XORP}/ERRATA.
