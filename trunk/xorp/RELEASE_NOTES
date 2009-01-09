@@ -1,12 +1,56 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.233 2009/01/07 19:34:46 syedk Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.234 2009/01/08 00:32:17 syedk Exp $
 #
 
 		XORP RELEASE NOTES
 
 This file contains XORP release notes (most recent releases first).
 
-Release 1.6 (1/07/2009)
+Release 2.0 (2010/??/??)
+============================
+  ALL:
+
+  CONFIGURATION:
+
+  LIBXORP:
+
+  LIBXIPC:
+
+  LIBFEACLIENT:
+
+  XRL:
+
+  RTRMGR:
+
+  XORPSH:
+
+  POLICY:
+
+  FEA/MFEA:
+
+  RIB:
+
+  RIP/RIPng:
+
+  OLSR:
+
+  OSPF:
+	
+  BGP:
+
+  STATIC_ROUTES:
+
+  MLD/IGMP:
+
+  MLD/IGMP-Lite:
+
+  PIM-SM:
+
+  SNMP:
+
+  VRRP:
+
+Release 1.6 (2009/01/07)
 ============================
   ALL:
     - XORP now builds on Linux CentOS 5.2, Linux openSUSE-11.0,

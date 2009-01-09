@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.74 2009/01/05 18:24:54 jtc Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.75 2009/01/08 03:21:35 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -149,8 +149,7 @@ the login shell is csh or tcsh):
  # Edit xorp/README
  # Edit xorp/RELEASE_NOTES
  # Edit xorp/VERSION
- # Edit all relevant configure.in (the second argument to AC_INIT() if
- # exists, and the second argument to AM_INIT_AUTOMAKE()):
+ # Edit all relevant configure.in (the second argument to AC_INIT())
         xorp/configure.in
         xorp/mibs/configure.in
  # Edit xorp/contrib/win32/installer/xorp.nsi and update PRODUCT_VERSION
@@ -648,11 +647,11 @@ the login shell is csh or tcsh):
  # Edit xorp/README
  # Edit xorp/RELEASE_NOTES (or verify that it contains the right version)
  # Edit xorp/VERSION
- # Edit all relevant configure.in (the second argument to AC_INIT() if
- # exists, and the second argument to AM_INIT_AUTOMAKE()):
+ # Edit all relevant configure.in (the second argument to AC_INIT())
         xorp/configure.in
         xorp/mibs/configure.in
  # Edit xorp/contrib/win32/installer/xorp.nsi and update PRODUCT_VERSION
+ # Edit xorp/etc/templates/xorpsh.cmds and update "show version" output.
 
  cd xorp
  ./bootstrap
