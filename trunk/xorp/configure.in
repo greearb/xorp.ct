@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.231 2009/01/06 00:54:15 jtc Exp $
+dnl $XORP: xorp/configure.in,v 1.232 2009/01/09 19:20:59 jtc Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT([xorp], [2.0-WIP], [feedback@xorp.org])
 AC_PREREQ(2.61)
-AC_REVISION([$XORP: xorp/configure.in,v 1.231 2009/01/06 00:54:15 jtc Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.232 2009/01/09 19:20:59 jtc Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -307,16 +307,18 @@ dnl -----------------------------------------
 builtin(include, config/acopenssl.m4)
 
 dnl -----------------------------------------
-dnl --with-snmp
+dnl --with-snmp (default no)
 dnl -----------------------------------------
 AC_ARG_WITH([snmp],
 	    AC_HELP_STRING([--with-snmp],
 			   [build XORP MIBs for Net-SNMP]),
-	    [snmp="yes";
-	     MIBS="mibs";
-	     AC_CONFIG_SUBDIRS(mibs)],
+	    [snmp=${withval};],
 	    [snmp="no";
 	     MIBS="";]
+)
+AS_IF([test "x$snmp" != xno],
+	[MIBS="mibs";
+	AC_CONFIG_SUBDIRS(mibs)]
 )
 AC_SUBST(MIBS)
 
