@@ -21,14 +21,14 @@
  */
 
 /*
- * $XORP: xorp/libxorp/xorp.h,v 1.19 2008/10/02 21:57:37 bms Exp $
+ * $XORP: xorp/libxorp/xorp.h,v 1.20 2009/01/05 18:30:58 jtc Exp $
  */
 
 
 #ifndef __LIBXORP_XORP_H__
 #define __LIBXORP_XORP_H__
 
-#include "config.h"
+#include "xorp_config.h"
 
 #ifdef HAVE_STDINT_H
 #include <stdint.h>

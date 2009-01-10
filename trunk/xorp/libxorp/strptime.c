@@ -21,7 +21,7 @@
  * http://xorp.net
  */
 
-#ident "$XORP: xorp/libxorp/strptime.c,v 1.19 2008/10/02 21:57:33 bms Exp $"
+#ident "$XORP: xorp/libxorp/strptime.c,v 1.20 2009/01/05 18:30:58 jtc Exp $"
 
 
 /*
@@ -51,7 +51,7 @@
  *	  with "unsigned int".
  */
 
-#include "config.h"
+#include "xorp_config.h"
 
 /*
  * XXX: Linux's glibc2 and NetBSD need to define _XOPEN_SOURCE for strptime(3).
