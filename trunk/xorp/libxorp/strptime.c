@@ -21,7 +21,7 @@
  * http://xorp.net
  */
 
-#ident "$XORP: xorp/libxorp/strptime.c,v 1.20 2009/01/05 18:30:58 jtc Exp $"
+#ident "$XORP: xorp/libxorp/strptime.c,v 1.21 2009/01/10 07:49:45 pavlin Exp $"
 
 
 /*
@@ -74,7 +74,7 @@
  * XXX: don't include "libxorp/xorp.h", because it cannot be compiled
  * on Solaris 10 if _XOPEN_SOURCE is defined: _XOPEN_SOURCE itself
  * controls the definition of some other symbols.
- * Instead, include "config.h" and all other header files that may
+ * Instead, include "xorp_config.h" and all other header files that may
  * be needed.
  */
 /* #include "libxorp/xorp.h" */

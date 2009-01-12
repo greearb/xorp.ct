@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/coding-style.txt,v 1.5 2006/10/11 18:52:42 pavlin Exp $
+# $XORP: xorp/devnotes/coding-style.txt,v 1.6 2007/05/23 12:12:33 pavlin Exp $
 #
 
 	Provisional XORP C++ coding style
@@ -191,7 +191,7 @@ from our default coding styles that all are equally peturbed.
 
 - USE OF AUTOCONF
 
-  We will use GNU autoconf to improve portability. The "config.h"
+  We will use GNU autoconf to improve portability. The "xorp_config.h"
   header file will define symbols specifying system properties that
   may differ between reasonable Unices. This file is included by
   "libxorp/xorp.h" which itself includes and defines a number of other
