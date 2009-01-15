@@ -2,7 +2,24 @@
 
 test {
     %command: "" %help: HELP;
+    /*
+     * TODO: XXX: Remove the "policy" dependency if the "test" node is
+     * needed by some other module.
+     */
+    %module: policy;
     %tag: HELP "Test operation";
+}
+
+test policy {
+    %command: "" %help: HELP;
+    %module: policy;
+    %tag: HELP "Test routing policies";
+}
+
+test policy $(policy.policy-statement.*) {
+    %command: "" %help: HELP;
+    %module: policy;
+    %tag: HELP "Test a routing policy";
 }
 
 test policy $(policy.policy-statement.*) <prefix> {
