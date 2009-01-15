@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/tools/print_routes.cc,v 1.24 2008/10/02 21:56:28 bms Exp $"
+#ident "$XORP: xorp/bgp/tools/print_routes.cc,v 1.25 2009/01/05 18:30:45 jtc Exp $"
 
 #include "print_routes.hh"
 
@@ -99,6 +99,9 @@ PrintRoutes<A>::PrintRoutes(detail_t verbose, int interval, IPNet<A> net,
 		break;
 	    }
 	}
+	// Infinite loop by design.
+	// The command will be repeated every interval seconds until
+	// interrupted by the user.
 	if (interval <= 0)
 	    break;
 
