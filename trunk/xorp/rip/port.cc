@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/rip/port.cc,v 1.74 2008/10/02 21:58:16 bms Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.75 2009/01/05 18:31:08 jtc Exp $"
 
 #include "rip_module.h"
 
@@ -1091,6 +1091,7 @@ Port<IPv4>::parse_response(const Addr&				src_addr,
 	    const IfMgrIPv4Atom* ifa = iftree.find_addr(_pio->ifname(),
 							_pio->vifname(),
 							_pio->address());
+	    XLOG_ASSERT(ifa != NULL);
 	    if (IPv4Net(nh, ifa->prefix_len())
 		!= IPv4Net(ifa->addr(), ifa->prefix_len())) {
 		nh = src_addr;
