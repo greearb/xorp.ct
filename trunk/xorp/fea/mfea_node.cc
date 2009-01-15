@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.92 2008/10/02 21:56:49 bms Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.93 2009/01/05 18:30:49 jtc Exp $"
 
 //
 // MFEA (Multicast Forwarding Engine Abstraction) implementation.
@@ -1030,7 +1030,7 @@ MfeaNode::add_pim_register_vif()
 
 	mfea_ifp->add_vif(register_vif.name());
 	mfea_vifp = mfea_ifp->find_vif(register_vif.name());
-	XLOG_ASSERT(mfea_vif != NULL);
+	XLOG_ASSERT(mfea_vifp != NULL);
 	mfea_vifp->set_pif_index(0);		// XXX: invalid pif_index
 	mfea_vifp->set_vif_index(register_vif.vif_index());
 	mfea_vifp->set_enabled(register_vif.is_underlying_vif_up());
