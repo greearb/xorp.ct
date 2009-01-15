@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.74 2008/10/02 21:58:11 bms Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.75 2009/01/05 18:31:07 jtc Exp $"
 
 #include "rib_module.h"
 
@@ -1265,6 +1265,8 @@ RIB<A>::add_origin_table(const string& tablename,
     }
 
     OriginTable<A>* new_table = static_cast<OriginTable<A>* >(find_table(tablename));
+    // XXX: the table was created by new_origin_table() above, so it must exist
+    XLOG_ASSERT(new_table != NULL);
     if (_final_table == new_table) {
 	//
 	// This is the first table, so no need to plumb anything.
