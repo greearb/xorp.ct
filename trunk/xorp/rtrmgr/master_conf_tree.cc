@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.83 2008/10/30 23:48:42 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.84 2009/01/05 18:31:10 jtc Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -436,9 +436,9 @@ MasterConfigTree::order_module_list(const set<string>& module_set,
 	if (mc == NULL) {
 	    debug_msg("%s has no info\n", (*mod_iter).c_str());
 	    additional_done.insert(*mod_iter);
-	    additional_modules.erase(mod_iter);
 	    ordered_modules.push_back(*mod_iter);
 	    satisfied.insert(*mod_iter);
+	    additional_modules.erase(mod_iter);
 	    continue;
 	}
 	if (mc->depends().empty()) {
