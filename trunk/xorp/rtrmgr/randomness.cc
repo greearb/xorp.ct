@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/rtrmgr/randomness.cc,v 1.24 2008/10/02 21:58:24 bms Exp $"
+#ident "$XORP: xorp/rtrmgr/randomness.cc,v 1.25 2009/01/05 18:31:10 jtc Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -377,6 +377,7 @@ RandomGen::get_random_bytes(size_t len, uint8_t* buf)
 		fclose(file);
 		return;
 	    }
+	    fclose(file);
 	    // else fall through
 	}
     }
