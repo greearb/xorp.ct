@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/tools/print_peer.cc,v 1.23 2008/10/02 21:56:27 bms Exp $"
+#ident "$XORP: xorp/bgp/tools/print_peer.cc,v 1.24 2009/01/05 18:30:45 jtc Exp $"
 
 #include "print_peer.hh"
 #include "libxorp/asnum.hh"
@@ -50,6 +50,9 @@ PrintPeers::PrintPeers(bool verbose, int interval)
 	while (_done == false) {
 	    _eventloop.run();
 	}
+	// Infinite loop by design.
+	// The command will be repeated every interval seconds until
+	// interrupted by the user.
 	if (interval <= 0)
 	    break;
 	TimerList::system_sleep(TimeVal(interval, 0));
