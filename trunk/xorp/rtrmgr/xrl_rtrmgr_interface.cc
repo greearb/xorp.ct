@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.57 2008/10/02 21:58:27 bms Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.58 2009/01/05 18:31:10 jtc Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -168,6 +168,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_register_client(
 
     user = _userdb.find_user_by_user_id(user_id);
     if (user == NULL) {
+	fclose(file);
 #ifdef HOST_OS_WINDOWS
 	DeleteFileA(filename.c_str());
 #else
@@ -193,6 +194,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_register_client(
     //
     if (fprintf(file, "%s", newuser->authtoken().c_str()) 
 	< (int)(newuser->authtoken().size())) {
+	fclose(file);
 #ifdef HOST_OS_WINDOWS
 	DeleteFileA(filename.c_str());
 #else
@@ -205,6 +207,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_register_client(
 
 #ifndef HOST_OS_WINDOWS
     if (fchown(fileno(file), user_id, (gid_t)-1) != 0) {
+	fclose(file);
 	unlink(filename.c_str());
 	error_msg = c_format("Failed to chown temporary file %s to user_id %u",
 			     filename.c_str(), XORP_UINT_CAST(user_id));
