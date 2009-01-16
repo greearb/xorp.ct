@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/ospf/ospf.hh,v 1.115 2008/11/14 12:44:19 bms Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.116 2009/01/05 18:31:01 jtc Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -222,18 +222,18 @@ struct OspfTypes {
 /**
  * Interface name of a virtual link endpoint.
  */
-static const char VLINK[] = "vlink";
+#define VLINK "vlink"
 
 /**
  * MTU of a virtual link.
  */
-static const uint32_t VLINK_MTU = 576;
+#define VLINK_MTU 576
 
 /**
  * XRL target name.
  */
-static const char TARGET_OSPFv2[] = "ospfv2";
-static const char TARGET_OSPFv3[] = "ospfv3";
+#define TARGET_OSPFv2	"ospfv2"
+#define TARGET_OSPFv3	"ospfv3"
 
 /**
  * Get the XRL target name.
