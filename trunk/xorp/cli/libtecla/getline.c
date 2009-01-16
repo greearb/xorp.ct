@@ -8611,10 +8611,7 @@ char *gl_get_line_net(GetLine *gl, const char *prompt,
 		      const char *start_line, int start_pos, int val)
 {
   int waserr = 0;    /* True if an error occurs */
-  gl->is_net = 1;    /* TODO: assume it is indeed a network connection */
-  gl->net_may_block = 0; /* reset every time we call gl_get_line_net() */
-  gl->net_read_attempt = 0;
-  gl->user_event_value = 0;
+
 /*
  * Check the arguments.
  */
@@ -8622,6 +8619,12 @@ char *gl_get_line_net(GetLine *gl, const char *prompt,
     fprintf(stderr, "gl_get_line: NULL argument(s).\n");
     return NULL;
   };
+
+  gl->is_net = 1;    /* TODO: assume it is indeed a network connection */
+  gl->net_may_block = 0; /* reset every time we call gl_get_line_net() */
+  gl->net_read_attempt = 0;
+  gl->user_event_value = 0;
+
 /*
  * If this is the first call to this function since new_GetLine(),
  * complete any postponed configuration.
