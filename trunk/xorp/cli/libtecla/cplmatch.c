@@ -467,11 +467,12 @@ CplMatches *cpl_complete_word(WordCompletion *cpl, const char *line,
 				int word_end, void *data, 
 				CplMatchFn *match_fn)
 {
-  int line_len;   /* The total length of the input line */
+  int line_len = 0;   /* The total length of the input line */
 /*
  * How long is the input line?
  */
-  line_len = strlen(line);
+  if (line != NULL)
+    line_len = strlen(line);
 /*
  * Check the arguments.
  */
