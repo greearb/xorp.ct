@@ -327,8 +327,8 @@ int _hd_scan_user_home_dirs(HomeDir *home, void *data, HOME_DIR_FN(*callback_fn)
  */
   if(!home || !callback_fn) {
     if(home)
-      strcpy(home->errmsg,
-	     "_hd_scan_user_home_dirs: Missing callback function");
+      strncpy(home->errmsg,
+	     "_hd_scan_user_home_dirs: Missing callback function", sizeof(home->errmsg));
     return 1;
   };
 /*

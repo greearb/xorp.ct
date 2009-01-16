@@ -512,7 +512,7 @@ static HashNode *_new_HashNode(HashTable *hash, const char *name, int code,
  * name to lower case while copying it.
  */
   if(hash->case_sensitive) {
-    strcpy(node->symbol.name, name);
+    strncpy(node->symbol.name, name, strlen(name) + 1);
   } else {
     const char *src = name;
     char *dst = node->symbol.name;

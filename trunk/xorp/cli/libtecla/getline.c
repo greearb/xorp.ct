@@ -3334,7 +3334,7 @@ static KT_KEY_FN(gl_delete_line)
 /*
  * Copy the contents of the line to the cut buffer.
  */
-  strcpy(gl->cutbuf, gl->line);
+  strncpy(gl->cutbuf, gl->line, gl->linelen+2);
 /*
  * Clear the buffer.
  */
@@ -3367,7 +3367,7 @@ static KT_KEY_FN(gl_kill_line)
 /*
  * Copy the part of the line that is about to be deleted to the cut buffer.
  */
-  strcpy(gl->cutbuf, gl->line + gl->buff_curpos);
+  strncpy(gl->cutbuf, gl->line + gl->buff_curpos, gl->linelen+2);
 /*
  * Terminate the buffered line at the current cursor position.
  */
@@ -4977,7 +4977,7 @@ int gl_change_terminal(GetLine *gl, FILE *input_fp, FILE *output_fp,
     if(term) {
       gl->term = (char *) malloc(strlen(term)+1);
       if(gl->term)
-	strcpy(gl->term, term);
+	strncpy(gl->term, term, strlen(term)+1);
     };
   };
 /*
@@ -6721,7 +6721,7 @@ int gl_place_cursor(GetLine *gl, int buff_curpos)
 static void gl_save_for_undo(GetLine *gl)
 {
   if(gl->vi.command && !gl->vi.undo.saved) {
-    strcpy(gl->vi.undo.line, gl->line);
+    strncpy(gl->vi.undo.line, gl->line, gl->linelen + 2);
     gl->vi.undo.buff_curpos = gl->buff_curpos;
     gl->vi.undo.ntotal = gl->ntotal;
     gl->vi.undo.saved = 1;
@@ -6760,10 +6760,10 @@ static KT_KEY_FN(gl_vi_undo)
  * Copy the rest directly.
  */
   if(gl->ntotal > gl->vi.undo.ntotal) {
-    strcpy(undo_ptr, line_ptr);
+    strncpy(undo_ptr, line_ptr, gl->linelen + 2);
     *line_ptr = '\0';
   } else {
-    strcpy(line_ptr, undo_ptr);
+    strncpy(line_ptr, undo_ptr, gl->linelen + 2);
     *undo_ptr = '\0';
   };
 /*
@@ -7375,7 +7375,7 @@ static int gl_record_string(char **sptr, const char *string)
 /*
  * Copy the string.
  */
-    strcpy(*sptr, string);
+    strncpy(*sptr, string, strlen(string) + 1);
   };
   return 0;
 }

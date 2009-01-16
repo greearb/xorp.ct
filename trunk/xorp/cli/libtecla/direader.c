@@ -191,7 +191,7 @@ int _dr_open_dir(DirReader *dr, const char *path, char **errmsg)
 #endif
     if(name_max < 0) {
       if(errmsg) {
-	strcpy(dr->errmsg, "Unable to deduce readdir() buffer size.");
+	strncpy(dr->errmsg, "Unable to deduce readdir() buffer size.", sizeof(dr->errmsg));
 	*errmsg = dr->errmsg;
       };
       closedir(dir);
@@ -210,7 +210,7 @@ int _dr_open_dir(DirReader *dr, const char *path, char **errmsg)
 						 malloc(size));
       if(!buffer) {
 	if(errmsg) {
-	  strcpy(dr->errmsg, "Insufficient memory for readdir() buffer.");
+	  strncpy(dr->errmsg, "Insufficient memory for readdir() buffer.", sizeof(dr->errmsg));
 	  *errmsg = dr->errmsg;
 	};
 	closedir(dir);

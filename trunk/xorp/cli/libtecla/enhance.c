@@ -223,7 +223,7 @@ static int pty_open_master(const char *prog, int *cntrl, char *slave_name)
 	fprintf(stderr, "%s: Slave pty filename too long.\n", prog);
 	return 1;
       };
-      strcpy(slave_name, name);
+      strncpy(slave_name, name, PTY_MAX_NAME);
 /*
  * If unable to get the slave name, discard the controller file descriptor,
  * ready to try a search instead.
@@ -262,18 +262,14 @@ static int pty_open_master(const char *prog, int *cntrl, char *slave_name)
 /*
  * Attempt to open the control file.
  */
-	strcpy(master_name, PTY_DEV_DIR);
-	strcat(master_name, PTY_CNTRL);
-	strcat(master_name, ext);
+	snprintf(master_name, sizeof(master_name), "%s%s%s", PTY_DEV_DIR, PTY_CNTRL, ext);
 	*cntrl = open(master_name, O_RDWR);
 	if(*cntrl < 0)
 	  continue;
 /*
  * Attempt to open the matching slave file.
  */
-	strcpy(slave_name, PTY_DEV_DIR);
-	strcat(slave_name, PTY_SLAVE);
-	strcat(slave_name, ext);
+	snprintf(slave_name, PTY_MAX_NAME, "%s%s%s", PTY_DEV_DIR, PTY_SLAVE, ext);
       };
     };
     closedir(dir);

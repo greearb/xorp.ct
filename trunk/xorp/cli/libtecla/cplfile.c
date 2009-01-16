@@ -232,7 +232,7 @@ int _cf_complete_file(WordCompletion *cpl, CompleteFile *cf,
  */
   if(!cpl || !cf || !line || word_end < word_start) {
     if(cf)
-      strcpy(cf->errmsg, "_cf_complete_file: Invalid arguments");
+      strncpy(cf->errmsg, "_cf_complete_file: Invalid arguments", sizeof(cf->errmsg));
     return 1;
   };
 /*
@@ -326,7 +326,7 @@ int _cf_complete_file(WordCompletion *cpl, CompleteFile *cf,
  * backslash-escapes where needed.
  */
     if(_pn_append_to_path(cf->path, lptr, seglen, escaped) == NULL) {
-      strcpy(cf->errmsg, "Insufficient memory to complete filename");
+      strncpy(cf->errmsg, "Insufficient memory to complete filename", sizeof(cf->errmsg));
       return 1;
     };
     lptr += seglen;
@@ -388,7 +388,7 @@ int _cf_complete_file(WordCompletion *cpl, CompleteFile *cf,
  * Append the value of the environment variable to the output path.
  */
 	if(_pn_append_to_path(cf->path, value, strlen(value), escaped)==NULL) {
-	  strcpy(cf->errmsg, "Insufficient memory to complete filename");
+	  strncpy(cf->errmsg, "Insufficient memory to complete filename", sizeof(cf->errmsg));
 	  return 1;
 	};
 /*
@@ -481,7 +481,7 @@ static int cf_expand_home_dir(CompleteFile *cf, const char *user)
  * Append the home directory to the pathname string.
  */
   if(_pn_append_to_path(cf->path, home_dir, -1, 0) == NULL) {
-    strcpy(cf->errmsg, "Insufficient memory for home directory expansion");
+    strncpy(cf->errmsg, "Insufficient memory for home directory expansion", sizeof(cf->errmsg));
     return 1;
   };
   return 0;
@@ -713,7 +713,7 @@ static int cf_complete_entry(CompleteFile *cf, WordCompletion *cpl,
 	  const char *type_suffix = "";  /* The suffix to add when listing */
 	  if(_pn_append_to_path(cf->path, file_name + prefix_len,
 				-1, escaped) == NULL) {
-	    strcpy(cf->errmsg, "Insufficient memory to complete filename.");
+	    strncpy(cf->errmsg, "Insufficient memory to complete filename.", sizeof(cf->errmsg));
 	    return 1;
 	  };
 /*
@@ -846,7 +846,7 @@ static int cf_prepare_suffix(CompleteFile *cf, const char *suffix,
  * both the suffix and any backslashes that have to be inserted.
  */
   if(_pn_resize_path(cf->buff, suffix_len + nbsl) == NULL) {
-    strcpy(cf->errmsg, "Insufficient memory to complete filename");
+    strncpy(cf->errmsg, "Insufficient memory to complete filename", sizeof(cf->errmsg));
     return 1;
   };
 /*
@@ -854,7 +854,7 @@ static int cf_prepare_suffix(CompleteFile *cf, const char *suffix,
  * work buffer.
  */
   if(nbsl==0) {
-    strcpy(cf->buff->name, suffix);
+    strncpy(cf->buff->name, suffix, cf->buff->dim);
   } else {
 /*
  * Make a copy with special characters escaped?

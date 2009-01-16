@@ -255,7 +255,7 @@ int cpl_add_completion(WordCompletion *cpl, const char *line,
     CplMatch *matches = (CplMatch *) realloc(cpl->result.matches,
 			    sizeof(cpl->result.matches[0]) * needed);
     if(!matches) {
-      strcpy(cpl->errmsg, "Insufficient memory to extend array of matches.");
+      strncpy(cpl->errmsg, "Insufficient memory to extend array of matches.", sizeof(cpl->errmsg));
       return 1;
     };
     cpl->result.matches = matches;
@@ -267,14 +267,14 @@ int cpl_add_completion(WordCompletion *cpl, const char *line,
  */
   string = _sg_alloc_string(cpl->sg, word_end-word_start + strlen(suffix));
   if(!string) {
-    strcpy(cpl->errmsg, "Insufficient memory to extend array of matches.");
+    strncpy(cpl->errmsg, "Insufficient memory to extend array of matches.", sizeof(cpl->errmsg));
     return 1;
   };
 /*
  * Compose the string.
  */
   strncpy(string, line + word_start, word_end - word_start);
-  strcpy(string + word_end - word_start, suffix);
+  strncpy(string + word_end - word_start, suffix, strlen(suffix)+1);
 /*
  * Record the new match.
  */
@@ -402,8 +402,8 @@ static int cpl_common_suffix(WordCompletion *cpl)
  */
   result->suffix = _sg_alloc_string(cpl->sg, length);
   if(!result->suffix) {
-    strcpy(cpl->errmsg,
-	   "Insufficient memory to record common completion suffix.");
+    strncpy(cpl->errmsg,
+	   "Insufficient memory to record common completion suffix.", sizeof(cpl->errmsg));
     return 1;
   };
 /*
@@ -478,7 +478,7 @@ CplMatches *cpl_complete_word(WordCompletion *cpl, const char *line,
  */
   if(!cpl || !line || !match_fn || word_end < 0 || word_end > line_len) {
     if(cpl)
-      strcpy(cpl->errmsg, "cpl_complete_word: Invalid arguments.");
+      strncpy(cpl->errmsg, "cpl_complete_word: Invalid arguments.", sizeof(cpl->errmsg));
     return NULL;
   };
 /*
@@ -491,7 +491,7 @@ CplMatches *cpl_complete_word(WordCompletion *cpl, const char *line,
  */
   if(match_fn(cpl, data, line, word_end)) {
     if(cpl->errmsg[0] == '\0')
-      strcpy(cpl->errmsg, "Error completing word.");
+      strncpy(cpl->errmsg, "Error completing word.", sizeof(cpl->errmsg));
     return NULL;
   };
 /*
@@ -693,7 +693,7 @@ CPL_MATCH_FN(cpl_file_completions)
   if(!cpl)
     return 1;
   if(!line || word_end < 0) {
-    strcpy(cpl->errmsg, "cpl_file_completions: Invalid arguments.");
+    strncpy(cpl->errmsg, "cpl_file_completions: Invalid arguments.", sizeof(cpl->errmsg));
     return 1;
   };
 /*
@@ -728,7 +728,7 @@ CPL_MATCH_FN(cpl_file_completions)
   if(conf->file_start < 0) {
     start_path = _pu_start_of_path(line, word_end);
     if(!start_path) {
-      strcpy(cpl->errmsg, "Unable to find the start of the filename.");
+      strncpy(cpl->errmsg, "Unable to find the start of the filename.", sizeof(cpl->errmsg));
       return 1;
     };
   } else {

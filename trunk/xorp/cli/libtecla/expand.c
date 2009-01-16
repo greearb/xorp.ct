@@ -313,7 +313,7 @@ FileExpansion *ef_expand_file(ExpandFile *ef, const char *path, int pathlen)
  */
   if(!ef || !path) {
     if(ef)
-      strcpy(ef->errmsg, "ef_expand_file: NULL path argument");
+      strncpy(ef->errmsg, "ef_expand_file: NULL path argument", sizeof(ef->errmsg));
     else
       fprintf(stderr, "ef_expand_file: NULL argument(s).\n");
     return NULL;
@@ -388,7 +388,7 @@ FileExpansion *ef_expand_file(ExpandFile *ef, const char *path, int pathlen)
       if(strncmp(path, FS_ROOT_DIR, FS_ROOT_DIR_LEN) == 0) {
 	dirname = FS_ROOT_DIR;
 	if(!_pn_append_to_path(ef->path, FS_ROOT_DIR, -1, 0)) {
-	  strcpy(ef->errmsg, "Insufficient memory to record path");
+	  strncpy(ef->errmsg, "Insufficient memory to record path", sizeof(ef->errmsg));
 	  return NULL;
 	};
 	path += FS_ROOT_DIR_LEN;
@@ -417,7 +417,7 @@ FileExpansion *ef_expand_file(ExpandFile *ef, const char *path, int pathlen)
  * No files matched?
  */
     if(ef->result.nfile < 1) {
-      strcpy(ef->errmsg, "No files match");
+      strncpy(ef->errmsg, "No files match", sizeof(ef->errmsg));
       return NULL;
     };
 /*
@@ -487,7 +487,7 @@ static int ef_match_relative_pathname(ExpandFile *ef, DirReader *dr,
  */
       if((separate && _pn_append_to_path(ef->path, FS_DIR_SEP, -1, 0)==NULL) ||
 	 _pn_append_to_path(ef->path, file, -1, 0)==NULL) {
-	strcpy(ef->errmsg, "Insufficient memory to record path");
+	strncpy(ef->errmsg, "Insufficient memory to record path", sizeof(ef->errmsg));
 	return 1;
       };
 /*
@@ -601,7 +601,7 @@ static char *ef_cache_pathname(ExpandFile *ef, const char *pathname,
 {
   char *copy = _sg_store_string(ef->sg, pathname, remove_escapes);
   if(!copy)
-    strcpy(ef->errmsg, "Insufficient memory to store pathname");
+    strncpy(ef->errmsg, "Insufficient memory to store pathname", sizeof(ef->errmsg));
   return copy;
 }
 
@@ -1024,7 +1024,7 @@ static char *ef_expand_special(ExpandFile *ef, const char *path, int pathlen)
  */
       if(spos < ppos && _pn_append_to_path(ef->path, path + spos, ppos-spos, 0)
 	 == NULL) {
-	strcpy(ef->errmsg, "Insufficient memory to expand path");
+	strncpy(ef->errmsg, "Insufficient memory to expand path", sizeof(ef->errmsg));
 	return NULL;
       };
 /*
@@ -1045,7 +1045,7 @@ static char *ef_expand_special(ExpandFile *ef, const char *path, int pathlen)
  * whereas our ENV_LEN is much bigger than that.
  */
       if(envlen >= ENV_LEN) {
-	strcpy(ef->errmsg, "Environment variable name too long");
+	strncpy(ef->errmsg, "Environment variable name too long", sizeof(ef->errmsg));
 	return NULL;
       };
 /*
@@ -1066,7 +1066,7 @@ static char *ef_expand_special(ExpandFile *ef, const char *path, int pathlen)
  * Copy the value of the environment variable into the output pathname.
  */
       if(_pn_append_to_path(ef->path, value, -1, 0) == NULL) {
-	strcpy(ef->errmsg, "Insufficient memory to expand path");
+	strncpy(ef->errmsg, "Insufficient memory to expand path", sizeof(ef->errmsg));
 	return NULL;
       };
 /*
@@ -1080,7 +1080,7 @@ static char *ef_expand_special(ExpandFile *ef, const char *path, int pathlen)
  */
   if(spos < ppos && _pn_append_to_path(ef->path, path + spos, ppos-spos, 0)
      == NULL) {
-    strcpy(ef->errmsg, "Insufficient memory to expand path");
+    strncpy(ef->errmsg, "Insufficient memory to expand path", sizeof(ef->errmsg));
     return NULL;
   };
 /*
@@ -1114,7 +1114,7 @@ static char *ef_expand_special(ExpandFile *ef, const char *path, int pathlen)
  * whereas our USR_LEN is much bigger than that.
  */
     if(usrlen >= USR_LEN) {
-      strcpy(ef->errmsg, "Username too long");
+      strncpy(ef->errmsg, "Username too long", sizeof(ef->errmsg));
       return NULL;
     };
 /*
@@ -1148,7 +1148,7 @@ static char *ef_expand_special(ExpandFile *ef, const char *path, int pathlen)
  * Note that pptr may not be valid after this call.
  */
     if(_pn_resize_path(ef->path, plen - usrlen - 1 - skip + homelen)==NULL) {
-      strcpy(ef->errmsg, "Insufficient memory to expand filename");
+      strncpy(ef->errmsg, "Insufficient memory to expand filename", sizeof(ef->errmsg));
       return NULL;
     };
 /*

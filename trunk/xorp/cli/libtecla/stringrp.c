@@ -195,7 +195,7 @@ char *_sg_store_string(StringGroup *sg, const char *string, int remove_escapes)
  * into the cache.
  */
     } else {
-      strcpy(copy, string);
+      strncpy(copy, string, strlen(string));
     };
   };
 /*

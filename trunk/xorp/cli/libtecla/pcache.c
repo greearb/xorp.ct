@@ -591,7 +591,7 @@ static int pca_extract_dir(PathCache *pc, const char *path, const char **nextp)
  * Append the rest of the directory path to the pathname buffer.
  */
   if(_pn_append_to_path(pc->path, sptr, pptr - sptr, 1) == NULL) {
-    strcpy(pc->errmsg, "Insufficient memory to record directory name");
+    strncpy(pc->errmsg, "Insufficient memory to record directory name", sizeof(pc->errmsg));
     return 1;
   };
 /*
@@ -605,7 +605,7 @@ static int pca_extract_dir(PathCache *pc, const char *path, const char **nextp)
        strncmp(pc->path->name + dirlen - FS_DIR_SEP_LEN, FS_DIR_SEP,
 	       FS_DIR_SEP_LEN) != 0) {
       if(_pn_append_to_path(pc->path, FS_DIR_SEP, FS_DIR_SEP_LEN, 0) == NULL) {
-	strcpy(pc->errmsg, "Insufficient memory to record directory name");
+	strncpy(pc->errmsg, "Insufficient memory to record directory name", sizeof(pc->errmsg));
 	return 1;
       };
     };
@@ -672,7 +672,7 @@ static int pca_read_username(PathCache *pc, const char *string, int slen,
  * Did the username overflow the buffer?
  */
   if(usrlen >= USR_LEN) {
-    strcpy(pc->errmsg, "Username too long");
+    strncpy(pc->errmsg, "Username too long", sizeof(pc->errmsg));
     return 1;
   };
 /*
@@ -825,7 +825,7 @@ static int add_PathNode(PathCache *pc, const char *dirname)
  */
   node->dir = _sg_store_string(pc->abs_mem->sg, dirname, 0);
   if(!node->dir) {
-    strcpy(pc->errmsg, "Insufficient memory to store directory name.");
+    strncpy(pc->errmsg, "Insufficient memory to store directory name.", sizeof(pc->errmsg));
     return 1;
   };
 /*
@@ -888,7 +888,7 @@ static int pca_scan_dir(PathCache *pc, const char *dirname, CacheMem *mem)
     _pn_clear_path(pc->path);
     if(_pn_append_to_path(pc->path, " ", 1, 0) == NULL ||
        _pn_append_to_path(pc->path, filename, -1, 1) == NULL) {
-      strcpy(pc->errmsg, "Insufficient memory to record filename");
+      strncpy(pc->errmsg, "Insufficient memory to record filename", sizeof(pc->errmsg));
       return -1;
     };
 /*
@@ -896,7 +896,7 @@ static int pca_scan_dir(PathCache *pc, const char *dirname, CacheMem *mem)
  */
     copy = _sg_store_string(mem->sg, pc->path->name, 0);
     if(!copy) {
-      strcpy(pc->errmsg, "Insufficient memory to cache file name.");
+      strncpy(pc->errmsg, "Insufficient memory to cache file name.", sizeof(pc->errmsg));
       return -1;
     };
 /*
@@ -910,7 +910,7 @@ static int pca_scan_dir(PathCache *pc, const char *dirname, CacheMem *mem)
       int needed = mem->files_dim + FILES_BLK_FACT;
       char **files = (char **) realloc(mem->files, sizeof(*mem->files)*needed);
       if(!files) {
-	strcpy(pc->errmsg, "Insufficient memory to extend filename cache.");
+	strncpy(pc->errmsg, "Insufficient memory to extend filename cache.", sizeof(pc->errmsg));
 	return 1;
       };
       mem->files = files;
@@ -1123,7 +1123,7 @@ PcaPathConf *new_PcaPathConf(PathCache *pc)
  */
   ppc = (PcaPathConf *)malloc(sizeof(PcaPathConf));
   if(!ppc) {
-    strcpy(pc->errmsg, "Insufficient memory.");
+    strncpy(pc->errmsg, "Insufficient memory.", sizeof(pc->errmsg));
     return NULL;
   };
 /*
@@ -1330,7 +1330,7 @@ CPL_MATCH_FN(pca_path_completions)
 	_pn_clear_path(pc->path);
 	if(_pn_append_to_path(pc->path, node->dir, -1, 0) == NULL ||
 	   _pn_append_to_path(pc->path, match+1, -1, 0) == NULL) {
-	  strcpy(pc->errmsg, "Insufficient memory to complete file name");
+	  strncpy(pc->errmsg, "Insufficient memory to complete file name", sizeof(pc->errmsg));
 	  return 1;
 	};
 /*
@@ -1448,7 +1448,7 @@ static int pca_prepare_suffix(PathCache *pc, const char *suffix,
  * both the suffix and any backslashes that have to be inserted.
  */
   if(_pn_resize_path(pc->path, suffix_len + nbsl) == NULL) {
-    strcpy(pc->errmsg, "Insufficient memory to complete file name");
+    strncpy(pc->errmsg, "Insufficient memory to complete file name", sizeof(pc->errmsg));
     return 1;
   };
 /*
@@ -1456,7 +1456,7 @@ static int pca_prepare_suffix(PathCache *pc, const char *suffix,
  * work buffer.
  */
   if(nbsl==0) {
-    strcpy(pc->path->name, suffix);
+    strncpy(pc->path->name, suffix, pc->path->dim);
   } else {
 /*
  * Make a copy with special characters escaped?
@@ -1543,7 +1543,7 @@ static const char *pca_prepare_prefix(PathCache *pc, const char *prefix,
   if(escaped) {
     _pn_clear_path(pc->path);
     if(_pn_append_to_path(pc->path, prefix, prefix_len, 1) == NULL) {
-      strcpy(pc->errmsg, "Insufficient memory to complete filename");
+      strncpy(pc->errmsg, "Insufficient memory to complete filename", sizeof(pc->errmsg));
       return NULL;
     };
     return pc->path->name;
@@ -1641,7 +1641,7 @@ static int pca_expand_tilde(PathCache *pc, const char *path, int pathlen,
  * Append the home directory to the pathname string.
  */
     if(_pn_append_to_path(pc->path, homedir, -1, 0) == NULL) {
-      strcpy(pc->errmsg, "Insufficient memory for home directory expansion");
+      strncpy(pc->errmsg, "Insufficient memory for home directory expansion", sizeof(pc->errmsg));
       return 1;
     };
   };
