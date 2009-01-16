@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.93 2009/01/05 18:30:49 jtc Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.94 2009/01/15 01:13:16 pavlin Exp $"
 
 //
 // MFEA (Multicast Forwarding Engine Abstraction) implementation.
@@ -810,6 +810,7 @@ MfeaNode::vifaddr6_update(const string&	ifname,
 	XLOG_WARNING("Got update for address for vif that is not in the MFEA tree: "
 		     "%s/%s/%s",
 		     ifname.c_str(), vifname.c_str(), addr.str().c_str());
+	return;
     }
     mfea_ap->copy_state(*ap);
     _mfea_iftree_update_replicator.vifaddr6_update(ifname, vifname, addr,
