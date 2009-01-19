@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/ospf/policy_varrw.cc,v 1.19 2008/10/02 21:57:48 bms Exp $"
+#ident "$XORP: xorp/ospf/policy_varrw.cc,v 1.20 2009/01/05 18:31:01 jtc Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -87,11 +87,12 @@ OspfVarRW<A>::start_read_common()
 				    c_format("%u", _e_bit ? 2 : 1).c_str()));
 
     // XXX which tag wins?
-    ElemU32* e = dynamic_cast<ElemU32*>(_policytags.element_tag());
+    Element* element = _route.policytags().element_tag();
+    ElemU32* e = dynamic_cast<ElemU32*>(element);
     if (e->val())
 	_tag = e->val();
 
-    delete e;
+    delete element;
 
     initialize(VAR_TAG, _ef.create(ElemU32::id,
 				   c_format("%u", _tag).c_str()));
