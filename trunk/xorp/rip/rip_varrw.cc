@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/rip/rip_varrw.cc,v 1.15 2008/10/02 21:58:17 bms Exp $"
+#ident "$XORP: xorp/rip/rip_varrw.cc,v 1.16 2009/01/05 18:31:08 jtc Exp $"
 
 #include "rip_module.h"
 #include "libxorp/xorp.h"
@@ -43,11 +43,12 @@ RIPVarRW<A>::start_read()
     initialize(VAR_METRIC, new ElemU32(_route.cost()));
 
     // XXX which tag wins?
-    ElemU32* e = dynamic_cast<ElemU32*>(_route.policytags().element_tag());
+    Element* element = _route.policytags().element_tag();
+    ElemU32* e = dynamic_cast<ElemU32*>(element);
     if (e->val())
 	_route.set_tag(e->val());
 
-    delete e;
+    delete element;
 
     initialize(VAR_TAG, new ElemU32(_route.tag()));
 }
