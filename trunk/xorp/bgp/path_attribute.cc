@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.100 2008/12/11 21:05:59 mjh Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.101 2009/01/05 18:30:43 jtc Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -1022,11 +1022,11 @@ MPReachNLRIAttribute<IPv4>::encode(uint8_t *buf, size_t &wire_size,
 	    break;
 
 	debug_msg("encode %s bytes = %d\n", i->str().c_str(), bytes);
-	uint8_t buf[IPv4::addr_bytelen()];
-	i->masked_addr().copy_out(buf);
+	uint8_t buf_local[IPv4::addr_bytelen()];
+	i->masked_addr().copy_out(buf_local);
 
 	*d++ = i->prefix_len();
-	memcpy(d, buf, bytes);
+	memcpy(d, buf_local, bytes);
 	d += bytes;
     }
     return true;
