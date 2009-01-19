@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/policy/set_map.cc,v 1.16 2008/10/02 21:58:00 bms Exp $"
+#ident "$XORP: xorp/policy/set_map.cc,v 1.17 2009/01/05 18:31:03 jtc Exp $"
 
 #include "policy_module.h"
 #include "libxorp/xorp.h"
@@ -102,6 +102,7 @@ SetMap::delete_from_set(const string& type, const string& name,
 	string error_msg = c_format("Can't delete from set %s: not found",
 				    name.c_str());
 	xorp_throw(SetMapError, error_msg);
+	return;
     }
 
     // Check the element type
@@ -112,12 +113,17 @@ SetMap::delete_from_set(const string& type, const string& name,
 				    type.c_str(),
 				    e->type());
 	xorp_throw(SetMapError, error_msg);
+	return;
     }
 
     // Delete element
-    ElemSet* del = dynamic_cast<ElemSet*>(_ef.create(type, element.c_str()));
-    dynamic_cast<ElemSet*>(e)->erase(*del);
-    delete del;
+    Element* base = _ef.create(type, element.c_str());
+    ElemSet* del = dynamic_cast<ElemSet*>(base);
+    ElemSet* eset = dynamic_cast<ElemSet*>(e);
+    if (eset != NULL && del != NULL) {
+	eset->erase(*del);
+    }
+    delete base;
 
     // sort out dependencies
     _deps.get_deps(name, modified);
