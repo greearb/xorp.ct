@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/Makefile.am,v 1.22 2008/08/06 08:12:50 abittau Exp $
+## $XORP: xorp/Makefile.am,v 1.23 2008/10/09 17:40:57 abittau Exp $
 ##
 
 # --- Options
@@ -24,6 +24,8 @@ SUBDIRS += etc contrib
 
 # --- Conditional applications
 SUBDIRS += @MIBS@
+
+ACLOCAL_AMFLAGS = -I config
 
 ################################################################
 ##

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/mibs/Makefile.am,v 1.36 2005/08/18 21:23:08 pavlin Exp $
+## $XORP: xorp/mibs/Makefile.am,v 1.37 2007/04/17 21:40:48 pavlin Exp $
 ##
 
 # All of the following shared objects will be installed in
@@ -114,6 +114,8 @@ xorp_if_mib_module_la_SOURCES	 = xorp_if_mib_module.hh
 xorp_if_mib_module_la_SOURCES	+= xorp_if_mib_module.cc
 xorp_if_mib_module_la_SOURCES	+= xorp_if_mib_xrl_target.cc
 xorp_if_mib_module_la_SOURCES	+= xorp_if_mib_xrl_target.hh
+
+ACLOCAL_AMFLAGS = -I ../config
 
 ################################################################
 ##

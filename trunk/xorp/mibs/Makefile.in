@@ -345,6 +345,7 @@ ospf_mib_1850_la_SOURCES = ospf_mib_1850.hh ospf_mib_1850.cc
 xorp_if_mib_module_la_SOURCES = xorp_if_mib_module.hh \
 	xorp_if_mib_module.cc xorp_if_mib_xrl_target.cc \
 	xorp_if_mib_xrl_target.hh
+ACLOCAL_AMFLAGS = -I ../config
 
 ################################################################
 INCLUDES = -I$(top_srcdir)/.. -I$(top_builddir)/..

@@ -222,6 +222,7 @@ ETAGS_ARGS = --c++
 SUBDIRS = libxorp libcomm libxipc libproto mrt xrl libfeaclient cli \
 	policy utils fea rib bgp fib2mrib mld6igmp ospf pim rip rtrmgr \
 	static_routes vrrp policy/test etc contrib @MIBS@
+ACLOCAL_AMFLAGS = -I config
 all: xorp_config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
