@@ -14,6 +14,7 @@ AC_CANONICAL_SYSTEM
 
 dnl configure automake
 AM_INIT_AUTOMAKE([foreign])
+AM_MAINTAINER_MODE
 
 dnl configure libtool
 AC_DISABLE_SHARED
@@ -244,16 +245,10 @@ case $target in
   ;;
 esac
 
-dnl The following directive must always be the last line of any
-dnl autoconf script. It causes autoconf to create the configure
-dnl script, which for each argument of AC_OUTPUT, will look for a
-dnl filename formed by appending ".in" to the argument, preprocess
-dnl that file, replacing @VAR@ directives with the corresponding value
-dnl of the specified shell variable VAR, as set above in this file,
-dnl and write the resulting output to the filename given in the
-dnl argument. Note that only shell variables that were exported above
-dnl with the AC_SUBST() directive will be substituted in @VAR@
-dnl directives (some macros like AC_PROG_CC also call AC_SUBST for you
-dnl for the variables that they output).
+dnl Add files to under-go substitution here
 
-AC_OUTPUT(Makefile)
+AC_CONFIG_FILES([Makefile])
+
+dnl Perform substitutions
+
+AC_OUTPUT
