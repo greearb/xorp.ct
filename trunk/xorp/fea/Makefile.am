@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.107 2008/10/09 17:49:12 abittau Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.108 2008/10/10 01:23:52 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -56,7 +56,7 @@ LDADD		+= $(top_builddir)/xrl/targets/libmfeabase.la
 LDADD		+= $(top_builddir)/mrt/libmrt.la
 ### CLI libraries
 LDADD		+= $(top_builddir)/cli/libcli.la
-LDADD		+= $(top_builddir)/cli/libtecla/libtecla.a
+LDADD		+= $(top_builddir)/cli/libtecla/libtecla.la
 LDADD		+= @CLI_CURSES_LIB@
 LDADD		+= $(top_builddir)/xrl/interfaces/libcliprocessorxif.la
 LDADD		+= $(top_builddir)/xrl/targets/libclibase.la

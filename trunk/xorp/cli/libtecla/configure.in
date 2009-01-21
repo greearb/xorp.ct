@@ -7,7 +7,19 @@ dnl single argument as the name of an arbitrary file, which it uses to
 dnl ensure that it is being run correctly from the directory which
 dnl contains the libtecla source code.
 
-AC_INIT(getline.c)
+AC_INIT([xorp-libtecla], [2.0-WIP], [feedback@xorp.org])
+AC_CONFIG_AUX_DIR(../../config)
+AC_CONFIG_MACRO_DIR(../../config)
+AC_CANONICAL_SYSTEM
+
+dnl configure automake
+AM_INIT_AUTOMAKE([foreign])
+
+dnl configure libtool
+AC_DISABLE_SHARED
+AC_DISABLE_FAST_INSTALL
+AC_LIBTOOL_WIN32_DLL
+AC_PROG_LIBTOOL 
 
 dnl Here we set the major version number of the tecla library.
 dnl Incrementing this number implies that a change has been made to
@@ -74,13 +86,6 @@ dnl The following macro searches for the best implementation of awk
 dnl on the host system, and records it in the AWK shell variable.
 
 AC_PROG_AWK
-
-dnl The following directive tells autoconf to figure out the target
-dnl system type and assign a canonical name for this to the $target
-dnl shell variable. This is used below in the target-specific case
-dnl statement.
-
-AC_CANONICAL_SYSTEM
 
 dnl In early versions of Solaris, some libraries are in /usr/ccs/lib,
 dnl where gcc doesn't look. The tests below for the curses library
@@ -230,154 +235,14 @@ if test $tecla_cv_sysv_pty = yes; then
   AC_DEFINE(HAVE_SYSV_PTY)
 fi
 
-dnl The following variable contains the extension to append to
-dnl "libtecla" and "libtecla_r" when creating shared libraries on the
-dnl target platform.  This is system dependent and is ignored if
-dnl LINK_SHARED remains an empty string. On most platforms that
-dnl support shared libaries, this will be .so.$MAJOR_VER, where
-dnl MAJOR_VER is the major version number described above, which on
-dnl some systems, tells the run-time loader if the program being
-dnl loaded is binary compatible with a given version of the library
-dnl (see the discussion of MAJOR_VER near the top of this file).
-dnl The following empty default can be overriden on a system by system
-dnl basis later in this file.
-
-AC_SUBST(SHARED_EXT)
-SHARED_EXT=""
-
-dnl When a shared library is installed with the extension $SHARED_EXT,
-dnl you can optionally produce other copies of this library with
-dnl different extensions. This is done using symbolic or hard links,
-dnl depending on what is available on the current filesystem, and the
-dnl extensions to use for these links are listed in the following
-dnl variable, separated by spaces. The following empty default can be
-dnl overriden on a system by system basis later in this file.
-
-AC_SUBST(SHARED_ALT)
-SHARED_ALT=""
-
-dnl The following variable lists extra compilation flags needed to
-dnl create object files that can be included in shared libraries.
-dnl Normally one would include a flag to tell the C compiler to
-dnl compile position-independent code. This option commonly includes
-dnl the acronym 'pic'.
-
-AC_SUBST(SHARED_CFLAGS)
-SHARED_CFLAGS=""
-
-dnl On systems that support shared libraries, the following variable
-dnl provides the command needed to make a shared library. In this
-dnl variable, $$@ will be replaced with the name of the shared
-dnl library, $$(LIB_OBJECTS) will be replaced with a space separated
-dnl list of the object files that are to be included in the library,
-dnl and libtecla$$(SUFFIX) will be the name of the library being
-dnl built, minus the system-specific extension (eg. libtecla or
-dnl libtecla_r).  If LINK_SHARED is left as an empty string, shared
-dnl library creation will not attempted. If your system supports
-dnl shared library creation, you should override the default value of
-dnl this variable in the target-specific case statement later in this
-dnl file.
-
-AC_SUBST(LINK_SHARED)
-LINK_SHARED=""
-
 dnl The following bourne shell case statement is where system
-dnl dependencies can be added.  In particular, if your system supports
-dnl shared library creation, the following switch is the place to
-dnl configure it. To do so you will first need to find out what target
-dnl type was just assigned by the AC_CANONICAL_SYSTEM macro executed
-dnl previously.  The target type of your current system can be
-dnl determined by cd'ing to the top level directory of the tecla
-dnl distribution, and typing the command "sh config.guess". This will
-dnl report what autoconf thinks the system type is. Note that this
-dnl will be very specific, so if you know that the configuration
-dnl parameters that you are about to provide apply to different
-dnl versions of the current system type, you can express this in the
-dnl case statement by using a wild-card in place of the version
-dnl number, or by using an | alternation to list one or more version
-dnl names. Beware that autoconf uses [] as quote characters, so if you
-dnl want to use a regexp character range like [a-z], you should write
-dnl this as [[a-z]].
+dnl dependencies can be added. 
 
 case $target in
-*solaris*)
-  AC_DEFINE(__EXTENSIONS__)
-  SHARED_EXT=".so.${MAJOR_VER}"
-  SHARED_ALT=".so"
-  LINK_SHARED='$${LD} -G -M $$(srcdir)/libtecla.map -o $$@ -h $$(@F) -z defs -i $$(LIB_OBJECTS) $$(LIBS) -lc'
-  SHARED_CFLAGS="-Kpic"
-  case $CC in
-  */cc|cc) SHARED_CFLAGS="$SHARED_CFLAGS -xstrconst" ;;
-  gcc) CFLAGS="-I/usr/include $CFLAGS" ;;
-  esac
-  case $target in
-  *sparc*) SHARED_CFLAGS="$SHARED_CFLAGS -xregs=no%appl"
-  esac
-  ;;
-*linux*)
-  SHARED_EXT=".so.${MAJOR_VER}.${MINOR_VER}.${MICRO_VER}"
-  SHARED_ALT=".so .so.${MAJOR_VER}"
-
-dnl See if the installed version of Gnu ld accepts version scripts.
-
-  AC_CACHE_CHECK([for --version-script in GNU ld], tecla_cv_gnu_ld_script, [
-    if (echo 'void dummy(void) {return;}' > dummy.c; $CC -c -fPIC dummy.c; \
-         $LD -o dummy.so dummy.o -shared --version-script=$srcdir/libtecla.map) 1>&2 2>/dev/null; then
-      tecla_cv_gnu_ld_script=yes
-    else
-      tecla_cv_gnu_ld_script=no
-    fi
-    rm -f dummy.c dummy.o dummy.so
-  ])
-  if test $tecla_cv_gnu_ld_script = yes; then
-    VERSION_OPT='--version-script=$$(srcdir)/libtecla.map'
-  else
-    VERSION_OPT=''
-  fi
-
-  LINK_SHARED='$${LD} -o $$@ -soname libtecla$$(SUFFIX).so.'${MAJOR_VER}' -shared '$VERSION_OPT' $$(LIB_OBJECTS) $$(LIBS) -lc'
-  SHARED_CFLAGS="-fPIC"
-  ;;
-*hpux*)
-  SHARED_EXT=".${MAJOR_VER}"
-  SHARED_ALT=".sl"
-  LINK_SHARED='$${LD} -b +h $$(@F) +k +vshlibunsats -o $$@ -c libtecla.map.opt $$(LIB_OBJECTS) $$(LIBS) -lc'
-  SHARED_CFLAGS="+z"
-  ;;
 *dec-osf*)
   AC_DEFINE(_OSF_SOURCE)
   ;;
 esac
-
-dnl The following statement checks to see if the GNU C compiler has
-dnl been chosen instead of the normal compiler of the host operating
-dnl system. If it has, and shared library creation has been
-dnl configured, it replaces the shared-library-specific C compilation
-dnl flags with those supported by gcc. Also append the gcc run-time
-dnl library to the shared library link line.
-
-if test "$GCC"_ = "yes"_ && test "$LINK_SHARED"_ != "_" ; then
-  SHARED_CFLAGS="-fPIC"
-  case $target_os in
-  sparc*solaris*) SHARED_CFLAGS="$SHARED_CFLAGS -mno-app-regs"
-  esac
-  LINK_SHARED="$LINK_SHARED `$CC -print-libgcc-file-name`"
-fi
-
-dnl The following variable will list which types of libraries,
-dnl "static", and possibly "shared", are to be created and installed.
-
-AC_SUBST(TARGET_LIBS)
-
-dnl If shared library creation has been configured, add shared
-dnl libraries to the list of libraries to be built.
-
-if test "$LINK_SHARED"_ != "_"; then
-  TARGET_LIBS="static shared"
-else
-  TARGET_LIBS="static"
-  LINK_SHARED="@:"
-fi
 
 dnl The following directive must always be the last line of any
 dnl autoconf script. It causes autoconf to create the configure

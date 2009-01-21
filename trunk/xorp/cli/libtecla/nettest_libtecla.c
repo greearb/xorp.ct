@@ -19,7 +19,7 @@
  * http://xorp.net
  */
 
-#ident "$XORP: xorp/cli/libtecla/nettest_libtecla.c,v 1.11 2008/10/02 21:56:30 bms Exp $"
+#ident "$XORP: xorp/cli/libtecla/nettest_libtecla.c,v 1.12 2009/01/05 18:30:46 jtc Exp $"
 
 
 /*
@@ -49,6 +49,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/time.h>
 #include <unistd.h>

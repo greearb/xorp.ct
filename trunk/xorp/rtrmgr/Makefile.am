@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rtrmgr/Makefile.am,v 1.57 2005/08/18 15:54:26 bms Exp $
+## $XORP: xorp/rtrmgr/Makefile.am,v 1.58 2007/09/14 01:56:55 pavlin Exp $
 ##
 
 # -- Subdirectories
@@ -154,7 +154,7 @@ xorpsh_SOURCES	+= y.tplt_tab.cc
 
 xorpsh_LDADD	 = $(top_builddir)/cli/libcli.la
 xorpsh_LDADD	+= $(top_builddir)/libproto/libproto.la
-xorpsh_LDADD	+= $(top_builddir)/cli/libtecla/libtecla.a
+xorpsh_LDADD	+= $(top_builddir)/cli/libtecla/libtecla.la
 xorpsh_LDADD	+= @CLI_CURSES_LIB@
 xorpsh_LDADD	+= $(top_builddir)/xrl/interfaces/librtrmgrxif.la
 xorpsh_LDADD	+= $(top_builddir)/xrl/targets/libxorpshbase.la

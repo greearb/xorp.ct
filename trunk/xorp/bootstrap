@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/bootstrap,v 1.30 2007/09/09 01:18:41 pavlin Exp $
+# $XORP: xorp/bootstrap,v 1.31 2008/04/30 19:31:36 pavlin Exp $
 #
 #
 # A script of autoconf/automake/libtool commands to bring the system
@@ -146,6 +146,23 @@ run rm -f mibs/config.cache
 run rm -f mibs/aclocal.m4
 
 #
+# XXX: we don't use flag --force because with it libtoolize always
+# overwrites our config.guess and config.sub files, even though our
+# version is probably newer.
+#
+run ${LIBTOOLIZE} --automake --copy
+
+# XXX: does mibs need its own libtool?
+run cd mibs
+run ${LIBTOOLIZE} --automake --copy
+run cd ..
+
+# XXX: does libtecla need its own libtool?
+run cd cli/libtecla
+run ${LIBTOOLIZE} --automake --copy
+run cd ../..
+
+#
 # If necessary, use "-I DIR" again to add more directories to search list
 # for .m4 files.
 #
@@ -160,17 +177,10 @@ run cd mibs
 run ${ACLOCAL} -I ../config
 run cd ..
 
-#
-# XXX: we don't use flag --force because with it libtoolize always
-# overwrites our config.guess and config.sub files, even though our
-# version is probably newer.
-#
-run ${LIBTOOLIZE} --automake --copy
-
-# XXX: does mibs need its own libtool?
-run cd mibs
-run ${LIBTOOLIZE} --automake --copy
-run cd ..
+# XXX: does libtecla need its own aclocal?
+run cd cli/libtecla
+run ${ACLOCAL} -I ../../config
+run cd ../..
 
 #
 # If we are using newer version of autoconf/autoheader (e.g., autoconf-2.5*),

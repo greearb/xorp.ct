@@ -129,7 +129,7 @@ xorp_fea_DEPENDENCIES = libfea.la \
 	$(top_builddir)/xrl/interfaces/libmfeaclientxif.la \
 	$(top_builddir)/xrl/targets/libmfeabase.la \
 	$(top_builddir)/mrt/libmrt.la $(top_builddir)/cli/libcli.la \
-	$(top_builddir)/cli/libtecla/libtecla.a \
+	$(top_builddir)/cli/libtecla/libtecla.la \
 	$(top_builddir)/xrl/interfaces/libcliprocessorxif.la \
 	$(top_builddir)/xrl/targets/libclibase.la \
 	$(top_builddir)/libfeaclient/libfeaclient.la \
@@ -162,7 +162,7 @@ xorp_fea_dummy_DEPENDENCIES = libfea.la \
 	$(top_builddir)/xrl/interfaces/libmfeaclientxif.la \
 	$(top_builddir)/xrl/targets/libmfeabase.la \
 	$(top_builddir)/mrt/libmrt.la $(top_builddir)/cli/libcli.la \
-	$(top_builddir)/cli/libtecla/libtecla.a \
+	$(top_builddir)/cli/libtecla/libtecla.la \
 	$(top_builddir)/xrl/interfaces/libcliprocessorxif.la \
 	$(top_builddir)/xrl/targets/libclibase.la \
 	$(top_builddir)/libfeaclient/libfeaclient.la \
@@ -394,7 +394,7 @@ LDADD = libfea.la \
 	$(top_builddir)/xrl/interfaces/libmfeaclientxif.la \
 	$(top_builddir)/xrl/targets/libmfeabase.la \
 	$(top_builddir)/mrt/libmrt.la $(top_builddir)/cli/libcli.la \
-	$(top_builddir)/cli/libtecla/libtecla.a @CLI_CURSES_LIB@ \
+	$(top_builddir)/cli/libtecla/libtecla.la @CLI_CURSES_LIB@ \
 	$(top_builddir)/xrl/interfaces/libcliprocessorxif.la \
 	$(top_builddir)/xrl/targets/libclibase.la \
 	$(top_builddir)/libfeaclient/libfeaclient.la \

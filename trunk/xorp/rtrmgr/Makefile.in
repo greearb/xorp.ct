@@ -126,7 +126,7 @@ am_xorpsh_OBJECTS = glob_win32.$(OBJEXT) cli.$(OBJEXT) \
 xorpsh_OBJECTS = $(am_xorpsh_OBJECTS)
 xorpsh_DEPENDENCIES = $(top_builddir)/cli/libcli.la \
 	$(top_builddir)/libproto/libproto.la \
-	$(top_builddir)/cli/libtecla/libtecla.a \
+	$(top_builddir)/cli/libtecla/libtecla.la \
 	$(top_builddir)/xrl/interfaces/librtrmgrxif.la \
 	$(top_builddir)/xrl/targets/libxorpshbase.la $(LDADD)
 DEFAULT_INCLUDES = -I. -I$(top_builddir)@am__isrc@
@@ -366,7 +366,7 @@ xorpsh_SOURCES = rtrmgr_module.h y.boot_tab.h y.opcmd_tab.h \
 	y.opcmd_tab.cc y.tplt_tab.cc
 xorpsh_LDADD = $(top_builddir)/cli/libcli.la \
 	$(top_builddir)/libproto/libproto.la \
-	$(top_builddir)/cli/libtecla/libtecla.a @CLI_CURSES_LIB@ \
+	$(top_builddir)/cli/libtecla/libtecla.la @CLI_CURSES_LIB@ \
 	$(top_builddir)/xrl/interfaces/librtrmgrxif.la \
 	$(top_builddir)/xrl/targets/libxorpshbase.la $(LDADD)
 
