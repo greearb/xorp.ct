@@ -56,7 +56,7 @@ test_cli_OBJECTS = $(am_test_cli_OBJECTS)
 am__DEPENDENCIES_1 = $(noinst_LTLIBRARIES) \
 	$(top_builddir)/xrl/interfaces/libcliprocessorxif.la \
 	$(top_builddir)/xrl/targets/libclibase.la \
-	$(top_builddir)/cli/libtecla/libtecla.a \
+	$(top_builddir)/cli/libtecla/libtecla.la \
 	$(top_builddir)/libproto/libproto.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
@@ -243,7 +243,7 @@ noinst_LTLIBRARIES = libcli.la
 LDADD = $(noinst_LTLIBRARIES) \
 	$(top_builddir)/xrl/interfaces/libcliprocessorxif.la \
 	$(top_builddir)/xrl/targets/libclibase.la \
-	$(top_builddir)/cli/libtecla/libtecla.a @CLI_CURSES_LIB@ \
+	$(top_builddir)/cli/libtecla/libtecla.la @CLI_CURSES_LIB@ \
 	$(top_builddir)/libproto/libproto.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
