@@ -21,7 +21,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/xlog.h,v 1.23 2008/10/24 00:58:58 pavlin Exp $
+ * $XORP: xorp/libxorp/xlog.h,v 1.24 2009/01/05 18:30:58 jtc Exp $
  */
 
 
@@ -109,10 +109,7 @@ typedef int (*xlog_output_func_t)(void *obj, xlog_level_t level,
 #endif
 #define XLOG_FN(fn, fmt...)						\
 do {									\
-	char xlog_where_buf[8000];					\
-	snprintf(xlog_where_buf, sizeof(xlog_where_buf), "+%d %s %s",	\
-		 __LINE__, __FILE__, __FUNCTION__);			\
-	fn(_XLOG_MODULE_NAME, xlog_where_buf, fmt);			\
+	fn(_XLOG_MODULE_NAME, __LINE__, __FILE__, __FUNCTION__, fmt);	\
 } while (0)
 
 /**
@@ -295,8 +292,11 @@ int	xlog_remove_default_output(void);
  * Note that a trailing newline is added if none is present.
  * @param ... the arguments for @ref format.
  */
-void	xlog_fatal(const char *module_name, const char *where,
-		   const char *format, ...) __printflike(3,4);
+void	xlog_fatal(const char *module_name, 
+		   int line,
+		   const char *file,
+		   const char *function,
+		   const char *format, ...) __printflike(5,6);
 #define XLOG_FATAL(fmt...)	XLOG_FN(xlog_fatal, fmt)
 
 /**
@@ -307,8 +307,11 @@ void	xlog_fatal(const char *module_name, const char *where,
  * Note that a trailing newline is added if none is present.
  * @param ... the arguments for @ref format.
  */
-void	xlog_error(const char *module_name, const char *where,
-		   const char *format, ...) __printflike(3,4);
+void	xlog_error(const char *module_name,
+		   int line,
+		   const char *file,
+		   const char *function, 
+		   const char *format, ...) __printflike(5,6);
 #define XLOG_ERROR(fmt...)	XLOG_FN(xlog_error, fmt)
 
 /**
@@ -319,8 +322,11 @@ void	xlog_error(const char *module_name, const char *where,
  * Note that a trailing newline is added if none is present.
  * @param ... the arguments for @ref format.
  */
-void	xlog_warning(const char *module_name, const char *where,
-		     const char *format, ...) __printflike(3,4);
+void	xlog_warning(const char *module_name, 
+		     int line,
+		     const char *file,
+		     const char *function, 
+		     const char *format, ...) __printflike(5,6);
 #define XLOG_WARNING(fmt...)	XLOG_FN(xlog_warning, fmt)
 
 /**
@@ -331,8 +337,11 @@ void	xlog_warning(const char *module_name, const char *where,
  * Note that a trailing newline is added if none is present.
  * @param ... the arguments for @ref format.
  */
-void	xlog_info(const char *module_name, const char *where,
-		  const char *format, ...) __printflike(3,4);
+void	xlog_info(const char *module_name, 
+		  int line,
+		  const char *file,
+		  const char *function, 
+		  const char *format, ...) __printflike(5,6);
 #define XLOG_INFO(fmt...)	XLOG_FN(xlog_info, fmt)
 
 /**
@@ -346,8 +355,10 @@ void	xlog_info(const char *module_name, const char *where,
  * @param ... the arguments for @ref format.
  */
 void	xlog_rtrmgr_only_no_preamble(const char *module_name,
-				     const char *where,
-				     const char *format, ...) __printflike(3,4);
+				     int line,
+				     const char *file,
+				     const char *function,
+				     const char *format, ...) __printflike(5,6);
 #define XLOG_RTRMGR_ONLY_NO_PREAMBLE(fmt...)	XLOG_FN(xlog_rtrmgr_only_no_preamble, fmt)
 
 /**

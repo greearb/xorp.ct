@@ -21,7 +21,7 @@
  * http://xorp.net
  */
 
-#ident "$XORP: xorp/libxorp/xlog.c,v 1.31 2008/10/17 00:53:44 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/xlog.c,v 1.32 2009/01/05 18:30:58 jtc Exp $"
 
 /*
  * Message logging utility.
@@ -431,11 +431,14 @@ xlog_level_set_verbose(xlog_level_t log_level, xlog_verbose_t verbose_level)
  */
 #define xlog_fn(fn, log_level)					\
 void								\
-xlog_##fn (const char *module_name, const char *where, const char *fmt, ...) \
+xlog_##fn (const char *module_name, int line, const char *file, const char *function, const char *fmt, ...) \
 {									\
     va_list ap;								\
+    char where_buf[8000];						\
+    snprintf(where_buf, sizeof(where_buf), "+%d %s %s",			\
+		 line, file, (function) ? function : "(unknown_func)");	\
     va_start(ap, fmt);							\
-    xlog_record_va(log_level, module_name, where, fmt, ap);		\
+    xlog_record_va(log_level, module_name, where_buf, fmt, ap);		\
     va_end(ap);								\
 }
 
@@ -446,11 +449,14 @@ xlog_##fn (const char *module_name, const char *where, const char *fmt, ...) \
  */
 #define xlog_fn_abort(fn, log_level)					\
 void									\
-xlog_##fn (const char *module_name, const char *where, const char *fmt, ...) \
+xlog_##fn (const char *module_name, int line, const char *file, const char *function, const char *fmt, ...) \
 {									\
     va_list ap;								\
+    char where_buf[8000];						\
+    snprintf(where_buf, sizeof(where_buf), "+%d %s %s",			\
+		 line, file, (function) ? function : "(unknown_func)");	\
     va_start(ap, fmt);							\
-    xlog_record_va(log_level, module_name, where, fmt, ap);		\
+    xlog_record_va(log_level, module_name, where_buf, fmt, ap);		\
     va_end(ap);								\
     abort();								\
 }
