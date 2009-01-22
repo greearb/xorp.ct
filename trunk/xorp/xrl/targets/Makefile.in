@@ -1103,7 +1103,7 @@ $(srcdir)/test_base.hh $(srcdir)/test_base.cc:				\
 
 # If this code is commented out, please upgrade to python2.0 or above.
 
-@PYTHON_BUILD@$(srcdir)/%_base.hh $(srcdir)/%_base.cc %_base.hh %_base.cc    \
+@PYTHON_BUILD@$(srcdir)/%_base.hh $(srcdir)/%_base.cc \
 @PYTHON_BUILD@$(srcdir)/%.xrls: $(srcdir)/%.tgt $(TGTGEN_PY)
 @PYTHON_BUILD@	$(PYTHON) $(TGTGEN_PY) -I$(INTERFACES_DIR) $<
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

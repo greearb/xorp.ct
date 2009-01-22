@@ -1,7 +1,7 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.72 2008/04/30 20:53:38 bms Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.73 2008/10/09 17:41:00 abittau Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
@@ -420,7 +420,7 @@ TGTGEN_PY=$(SCRIPT_DIR)/tgt-gen
 
 # If this code is commented out, please upgrade to python2.0 or above.
 
-@PYTHON_BUILD@$(srcdir)/%_base.hh $(srcdir)/%_base.cc %_base.hh %_base.cc    \
+@PYTHON_BUILD@$(srcdir)/%_base.hh $(srcdir)/%_base.cc \
 @PYTHON_BUILD@$(srcdir)/%.xrls: $(srcdir)/%.tgt $(TGTGEN_PY)
 @PYTHON_BUILD@	$(PYTHON) $(TGTGEN_PY) -I$(INTERFACES_DIR) $<
 
