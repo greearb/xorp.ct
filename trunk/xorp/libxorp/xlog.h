@@ -21,7 +21,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/xlog.h,v 1.24 2009/01/05 18:30:58 jtc Exp $
+ * $XORP: xorp/libxorp/xlog.h,v 1.25 2009/01/22 18:03:00 jtc Exp $
  */
 
 
@@ -288,6 +288,9 @@ int	xlog_remove_default_output(void);
  * Note that FATAL messages cannot be disabled by @ref xlog_disable().
  *
  * @param module_name the name of the module this message applies to.
+ * @param line the line number in the file this message applies to.
+ * @param file the file name this message applies to.
+ * @param function the function name this message applies to.
  * @param format the printf()-style format of the message to write.
  * Note that a trailing newline is added if none is present.
  * @param ... the arguments for @ref format.
@@ -303,6 +306,9 @@ void	xlog_fatal(const char *module_name,
  * Write an ERROR message to the xlog output streams.
  *
  * @param module_name the name of the module this message applies to.
+ * @param line the line number in the file this message applies to.
+ * @param file the file name this message applies to.
+ * @param function the function name this message applies to.
  * @param format the printf()-style format of the message to write.
  * Note that a trailing newline is added if none is present.
  * @param ... the arguments for @ref format.
@@ -318,6 +324,9 @@ void	xlog_error(const char *module_name,
  * Write a WARNING message to the xlog output streams.
  *
  * @param module_name the name of the module this message applies to.
+ * @param line the line number in the file this message applies to.
+ * @param file the file name this message applies to.
+ * @param function the function name this message applies to.
  * @param format the printf()-style format of the message to write.
  * Note that a trailing newline is added if none is present.
  * @param ... the arguments for @ref format.
@@ -333,6 +342,9 @@ void	xlog_warning(const char *module_name,
  * Write an INFO message to the xlog output streams.
  *
  * @param module_name the name of the module this message applies to.
+ * @param line the line number in the file this message applies to.
+ * @param file the file name this message applies to.
+ * @param function the function name this message applies to.
  * @param format the printf()-style format of the message to write.
  * Note that a trailing newline is added if none is present.
  * @param ... the arguments for @ref format.
@@ -350,6 +362,9 @@ void	xlog_info(const char *module_name,
  * (see Bugzilla entry 795) and should not be used elsewhere.
  *
  * @param module_name the name of the module this message applies to.
+ * @param line the line number in the file this message applies to.
+ * @param file the file name this message applies to.
+ * @param function the function name this message applies to.
  * @param format the printf()-style format of the message to write.
  * Note that a trailing newline is added if none is present.
  * @param ... the arguments for @ref format.
