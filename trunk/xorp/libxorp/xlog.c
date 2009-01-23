@@ -21,7 +21,7 @@
  * http://xorp.net
  */
 
-#ident "$XORP: xorp/libxorp/xlog.c,v 1.32 2009/01/05 18:30:58 jtc Exp $"
+#ident "$XORP: xorp/libxorp/xlog.c,v 1.33 2009/01/22 18:03:00 jtc Exp $"
 
 /*
  * Message logging utility.
@@ -470,6 +470,13 @@ xlog_fn(warning,	XLOG_LEVEL_WARNING)
 xlog_fn(info, 		XLOG_LEVEL_INFO)
 /* XXX: temp, to be removed; see Bugzilla entry 795 */
 xlog_fn(rtrmgr_only_no_preamble,	XLOG_LEVEL_RTRMGR_ONLY_NO_PREAMBLE)
+
+void
+xlog_assert(const char *module_name, int line, const char *file, const char *function, const char *failedexpr)
+{
+    xlog_fatal(module_name, line, file, function, 
+	       "Assertion (%s) failed", failedexpr);
+}
 
 
 /*

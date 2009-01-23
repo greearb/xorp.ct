@@ -21,7 +21,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/xlog.h,v 1.25 2009/01/22 18:03:00 jtc Exp $
+ * $XORP: xorp/libxorp/xlog.h,v 1.26 2009/01/23 06:22:39 pavlin Exp $
  */
 
 
@@ -377,18 +377,37 @@ void	xlog_rtrmgr_only_no_preamble(const char *module_name,
 #define XLOG_RTRMGR_ONLY_NO_PREAMBLE(fmt...)	XLOG_FN(xlog_rtrmgr_only_no_preamble, fmt)
 
 /**
+ * Write a FATAL message to the xlog output streams and aborts the program.
+ *
+ * @param module_name the name of the module this message applies to.
+ * @param line the line number in the file this message applies to.
+ * @param file the file name this message applies to.
+ * @param function the function name this message applies to.
+ * @param failedexpr string containing failed expression.
+ */
+void	xlog_assert(const char *module_name,
+		    int line, 
+		    const char *file, 
+		    const char *function,
+		    const char *failedexpr);
+/**
  * XORP replacement for assert(3).
  *
  * Note that it cannot be conditionally disabled and logs error through
  * the standard XLOG mechanism.
- * Calls XLOG_FATAL if assertion fails.
+ * Calls xlog_assert if assertion fails.
  *
  * @param assertion the assertion condition.
  */
 #define XLOG_ASSERT(assertion)						\
 do {									\
-	if (!(assertion))						\
-		XLOG_FATAL("Assertion (%s) failed", #assertion);	\
+	if (!(assertion)) {						\
+		xlog_assert(_XLOG_MODULE_NAME,				\
+			    __LINE__, 					\
+			    __FILE__, 					\
+			    __FUNCTION__,				\
+			    #assertion);				\
+	}								\
 } while (0)
 
 /**
