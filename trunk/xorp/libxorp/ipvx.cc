@@ -18,7 +18,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.37 2009/01/05 18:30:58 jtc Exp $"
+#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.38 2009/01/24 04:09:40 atanu Exp $"
 
 #include "xorp.h"
 #include "ipvx.hh"
@@ -89,7 +89,6 @@ IPvX::IPvX(const IPv6& ipv6)
 
 IPvX::IPvX(const in_addr& from_in_addr)
 {
-    memset(_addr, 0, sizeof(_addr));
     copy_in(AF_INET, reinterpret_cast<const uint8_t *>(&from_in_addr));
 }
 
@@ -100,19 +99,16 @@ IPvX::IPvX(const in6_addr& from_in6_addr)
 
 IPvX::IPvX(const sockaddr& from_sockaddr) throw (InvalidFamily)
 {
-    memset(_addr, 0, sizeof(_addr));
     copy_in(from_sockaddr);
 }
 
 IPvX::IPvX(const sockaddr_storage& from_sockaddr_storage) throw (InvalidFamily)
 {
-    memset(_addr, 0, sizeof(_addr));
     copy_in(from_sockaddr_storage);
 }
 
 IPvX::IPvX(const sockaddr_in& from_sockaddr_in) throw (InvalidFamily)
 {
-    memset(_addr, 0, sizeof(_addr));
     copy_in(from_sockaddr_in);
 }
 
@@ -439,6 +435,7 @@ IPvX::copy_in(int family, const uint8_t *from_uint8) throw (InvalidFamily)
 
     switch (_af) {
     case AF_INET:
+	memset(_addr, 0, sizeof(_addr));
 	// FALLTHROUGH
     case AF_INET6:
 	memcpy(_addr, from_uint8, addr_bytelen());
