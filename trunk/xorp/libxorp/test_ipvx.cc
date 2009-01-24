@@ -18,7 +18,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxorp/test_ipvx.cc,v 1.34 2008/10/02 21:57:34 bms Exp $"
+#ident "$XORP: xorp/libxorp/test_ipvx.cc,v 1.35 2009/01/05 18:30:58 jtc Exp $"
 
 #include "libxorp_module.h"
 
@@ -895,6 +895,8 @@ test_ipvx_operators()
     IPvX ip6_a_or_b("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff");
     IPvX ip6_a_and_b("::ffff");
     IPvX ip6_a_xor_b("ffff:ffff:ffff:ffff:ffff:ffff:ffff:0000");
+    IPvX ip4_local_a("127.0.0.1");
+    IPvX ip4_local_b("127.0.0.1");
 
     //
     // Equality Operator
@@ -920,6 +922,12 @@ test_ipvx_operators()
     verbose_assert(ip4_a < ip4_b, "operator<");
 
     verbose_assert(ip6_a < ip6_b, "operator<");
+
+    //
+    // Greater-Than or Equal
+    // 
+    verbose_assert(ip4_local_a >= ip4_local_b, "operator>=");
+    verbose_assert(ip4_local_b >= ip4_local_a, "operator>=");
 
     //
     // Bitwise-Negation Operator

@@ -18,7 +18,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.36 2008/10/02 21:57:31 bms Exp $"
+#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.37 2009/01/05 18:30:58 jtc Exp $"
 
 #include "xorp.h"
 #include "ipvx.hh"
@@ -89,6 +89,7 @@ IPvX::IPvX(const IPv6& ipv6)
 
 IPvX::IPvX(const in_addr& from_in_addr)
 {
+    memset(_addr, 0, sizeof(_addr));
     copy_in(AF_INET, reinterpret_cast<const uint8_t *>(&from_in_addr));
 }
 
@@ -99,16 +100,19 @@ IPvX::IPvX(const in6_addr& from_in6_addr)
 
 IPvX::IPvX(const sockaddr& from_sockaddr) throw (InvalidFamily)
 {
+    memset(_addr, 0, sizeof(_addr));
     copy_in(from_sockaddr);
 }
 
 IPvX::IPvX(const sockaddr_storage& from_sockaddr_storage) throw (InvalidFamily)
 {
+    memset(_addr, 0, sizeof(_addr));
     copy_in(from_sockaddr_storage);
 }
 
 IPvX::IPvX(const sockaddr_in& from_sockaddr_in) throw (InvalidFamily)
 {
+    memset(_addr, 0, sizeof(_addr));
     copy_in(from_sockaddr_in);
 }
 
@@ -119,6 +123,7 @@ IPvX::IPvX(const sockaddr_in6& from_sockaddr_in6) throw (InvalidFamily)
 
 IPvX::IPvX(char const *from_cstring) throw (InvalidString)
 {
+    memset(_addr, 0, sizeof(_addr));
     if (from_cstring == NULL) {
 	xorp_throw(InvalidString, "Null value");
     } else if (inet_pton(AF_INET, from_cstring, _addr) > 0) {
