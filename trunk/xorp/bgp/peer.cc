@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.150 2008/11/08 06:14:37 mjh Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.151 2009/01/05 18:30:43 jtc Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2188,8 +2188,9 @@ BGPPeer::get_msg_stats(uint32_t& in_updates,
 bool 
 BGPPeer::remote_ip_ge_than(const BGPPeer& peer)
 {
-    string this_remote_ip = peerdata()->iptuple().get_peer_addr();
-    string other_remote_ip = peer.peerdata()->iptuple().get_peer_addr();
+    IPvX this_remote_ip(peerdata()->iptuple().get_peer_addr().c_str());
+    IPvX other_remote_ip(peer.peerdata()->iptuple().get_peer_addr().c_str());
+
     return (this_remote_ip >= other_remote_ip);     
 }
 
