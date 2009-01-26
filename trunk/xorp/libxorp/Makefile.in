@@ -66,7 +66,7 @@ am_libxorp_la_OBJECTS = daemon.lo debug.lo ether_compat.lo \
 	eventloop.lo exceptions.lo heap.lo ipnet.lo ipv4.lo ipv6.lo \
 	ipvx.lo mac.lo nexthop.lo popen.lo profile.lo ref_ptr.lo \
 	round_robin.lo run_command.lo safe_callback_obj.lo selector.lo \
-	service.lo task.lo time_slice.lo timer.lo token.lo \
+	service.lo task.lo time_slice.lo timer.lo timeval.lo token.lo \
 	transaction.lo utils.lo vif.lo win_dispatcher.lo
 libxorp_la_OBJECTS = $(am_libxorp_la_OBJECTS)
 am__installdirs = "$(DESTDIR)$(bindir)"
@@ -439,8 +439,9 @@ libxorp_la_SOURCES = libxorp_module.h daemon.h debug.h ether_compat.h \
 	clock.cc eventloop.cc exceptions.cc heap.cc ipnet.cc ipv4.cc \
 	ipv6.cc ipvx.cc mac.cc nexthop.cc popen.cc profile.cc \
 	ref_ptr.cc round_robin.cc run_command.cc safe_callback_obj.cc \
-	selector.cc service.cc task.cc time_slice.cc timer.cc token.cc \
-	transaction.cc utils.cc vif.cc win_dispatcher.cc
+	selector.cc service.cc task.cc time_slice.cc timer.cc \
+	timeval.cc token.cc transaction.cc utils.cc vif.cc \
+	win_dispatcher.cc
 BUILT_SOURCES = callback_nodebug.hh callback_debug.hh
 
 # -- Extra files and directories to add to the distribution
@@ -682,6 +683,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_vif.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/time_slice.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/timer.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/timeval.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/token.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/transaction.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/utility.Plo@am__quote@

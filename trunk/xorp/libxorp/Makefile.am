@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libxorp/Makefile.am,v 1.56 2008/11/07 21:44:50 abittau Exp $
+## $XORP: xorp/libxorp/Makefile.am,v 1.57 2008/11/08 00:41:03 abittau Exp $
 ##
 
 # -- Real Programs
@@ -201,6 +201,7 @@ libxorp_la_SOURCES += service.cc
 libxorp_la_SOURCES += task.cc
 libxorp_la_SOURCES += time_slice.cc
 libxorp_la_SOURCES += timer.cc
+libxorp_la_SOURCES += timeval.cc
 libxorp_la_SOURCES += token.cc
 libxorp_la_SOURCES += transaction.cc
 libxorp_la_SOURCES += utils.cc

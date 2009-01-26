@@ -18,7 +18,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxorp/timeval.hh,v 1.39 2008/10/03 03:32:38 pavlin Exp $
+// $XORP: xorp/libxorp/timeval.hh,v 1.40 2009/01/05 18:30:58 jtc Exp $
 
 #ifndef __LIBXORP_TIMEVAL_HH__
 #define __LIBXORP_TIMEVAL_HH__
@@ -31,8 +31,6 @@
 #endif
 
 #include <math.h>
-
-#include "c_format.hh"
 
 /**
  * @short TimeVal class
@@ -127,19 +125,14 @@ public:
     /**
      * @return seconds and microseconds as a string.
      */
-    string str() const { return c_format("%d.%06d", XORP_INT_CAST(_sec),
-					 XORP_INT_CAST(_usec)); }
-
+    string str() const;
 
     /**
      * Pretty print the time
      *
      * @return the time as formated by ctime(3) without the newline.
      */
-    string pretty_print() const {
-	time_t t = static_cast<time_t>(_sec);
-	return c_format("%.24s", asctime(localtime(&t)));
-    }
+    string pretty_print() const;
 
     /**
      * Get zero value.
