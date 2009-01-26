@@ -18,7 +18,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxorp/ipnet.hh,v 1.37 2008/10/02 21:57:31 bms Exp $
+// $XORP: xorp/libxorp/ipnet.hh,v 1.38 2009/01/05 18:30:57 jtc Exp $
 
 #ifndef __LIBXORP_IPNET_HH__
 #define __LIBXORP_IPNET_HH__
@@ -210,10 +210,7 @@ public:
      * @return C++ string with the human-readable ASCII representation
      * of the address.
      */
-    string str() const {
-	return _masked_addr.str() + c_format("/%u",
-					     XORP_UINT_CAST(_prefix_len));
-    }
+    string str() const;
 
     /**
      * Test if the object contains a real (non-default) value.
@@ -518,6 +515,12 @@ IPNet<A>::operator<(const IPNet& other) const
     }
     return (false);
 #endif
+}
+
+template <class A> string
+IPNet<A>::str() const
+{
+    return _masked_addr.str() + c_format("/%u", XORP_UINT_CAST(_prefix_len));
 }
 
 template <class A> bool
