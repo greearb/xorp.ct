@@ -18,7 +18,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxorp/exceptions.cc,v 1.10 2008/10/02 21:57:30 bms Exp $"
+#ident "$XORP: xorp/libxorp/exceptions.cc,v 1.11 2009/01/05 18:30:57 jtc Exp $"
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -28,6 +28,120 @@
 #include <iostream>
 
 #include "exceptions.hh"
+
+XorpException::XorpException(const char* init_what, 
+			     const char* file, 
+			     size_t line) 
+    : _what(init_what), _file(file), _line(line) 
+{
+}
+
+XorpException::~XorpException() 
+{
+}
+
+const string 
+XorpException::where() const 
+{ 
+    return c_format("line %u of %s", XORP_UINT_CAST(_line), _file); 
+}
+
+const string 
+XorpException::why() const 
+{ 
+    return "Not specified"; 
+}
+
+string 
+XorpException::str() const 
+{
+    return what() + " from " + where() + ": " + why();
+}
+
+XorpReasonedException::XorpReasonedException(const char* init_what,
+					     const char* file, 
+					     size_t line, 
+					     const string& init_why) 
+    : XorpException(init_what, file, line), _why(init_why) 
+{
+}
+
+const string
+XorpReasonedException::why() const
+{
+    return ( _why.size() != 0 ) ? _why : string("Not specified"); 
+}
+
+InvalidString::InvalidString(const char* file, 
+			     size_t line, 
+			     const string& init_why)
+    : XorpReasonedException("InvalidString", file, line, init_why) 
+{
+}
+
+InvalidAddress::InvalidAddress(const char* file, 
+			       size_t line, 
+			       const string& init_why)
+    : XorpReasonedException("InvalidAddress", file, line, init_why) 
+{
+}
+
+InvalidPort::InvalidPort(const char* file, 
+			 size_t line, 
+			 const string& init_why)
+    : XorpReasonedException("InvalidPort", file, line, init_why) 
+{
+}
+
+InvalidCast::InvalidCast(const char* file,
+			 size_t line, 
+			 const string& init_why) 
+    : XorpReasonedException("XorpCast", file, line, init_why) 
+{
+}
+
+InvalidBufferOffset::InvalidBufferOffset(const char* file, 
+					 size_t line,
+					 const string& init_why)
+    : XorpReasonedException("XorpInvalidBufferOffset", file, line, init_why) 
+{
+}
+
+InvalidFamily::InvalidFamily(const char* file, 
+			     size_t line, 
+			     int af) 
+    : XorpException("XorpInvalidFamily", file, line), _af(af) 
+{
+} 
+
+const string 
+InvalidFamily::why() const 
+{ 
+    return c_format("Unknown IP family - %d", _af);
+}
+
+InvalidPacket::InvalidPacket(const char* file,
+			     size_t line,
+			     const string& init_why)
+    : XorpReasonedException("XorpInvalidPacket", file, line, init_why) 
+{
+}
+
+
+InvalidNetmaskLength::InvalidNetmaskLength(const char* file, 
+					   size_t line, 
+					   int netmask_length) 
+    : XorpException("XorpInvalidNetmaskLength", file, line), 
+      _netmask_length (netmask_length) 
+{
+} 
+
+const string 
+InvalidNetmaskLength::why() const 
+{ 
+    return c_format("Invalid netmask length - %d", _netmask_length);
+}
+
 
 // ----------------------------------------------------------------------------
 // Handlers

@@ -18,7 +18,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxorp/exceptions.hh,v 1.11 2008/10/02 21:57:30 bms Exp $
+// $XORP: xorp/libxorp/exceptions.hh,v 1.12 2009/01/05 18:30:57 jtc Exp $
 
 
 #ifndef __LIBXORP_EXCEPTIONS_HH__
@@ -52,13 +52,12 @@ public:
      * @param file the file name where the exception was thrown.
      * @param line the line in @ref file where the exception was thrown.
      */
-    XorpException(const char* init_what, const char* file, size_t line) 
-	: _what(init_what), _file(file), _line(line) {}
+    XorpException(const char* init_what, const char* file, size_t line);
 
     /**
      * Destructor
      */
-    virtual ~XorpException() {}
+    virtual ~XorpException();
 
     /**
      * Get the type of this exception.
@@ -73,16 +72,14 @@ public:
      * @return the string with the location (file name and file line number)
      * for throwing an exception.
      */
-    const string where() const { 
-	return c_format("line %u of %s", XORP_UINT_CAST(_line), _file); 
-    }
+    const string where() const;
 
     /**
      * Get the reason for throwing an exception.
      * 
      * @return the string with the reason for throwing an exception.
      */
-    virtual const string why() const { return "Not specified"; }
+    virtual const string why() const;
 
     /**
      * Convert this exception from binary form to presentation format.
@@ -90,9 +87,7 @@ public:
      * @return C++ string with the human-readable ASCII representation
      * of the exception.
      */
-    string str() const {
-	return what() + " from " + where() + ": " + why();
-    }
+    string str() const;
 
 protected:
     string	_what;		// The type of exception
@@ -115,17 +110,14 @@ public:
      * @param init_why the reason for the exception that was thrown.
      */
     XorpReasonedException(const char* init_what, const char* file, 
-			  size_t line, const string& init_why) 
-	: XorpException(init_what, file, line), _why(init_why) {}
+			  size_t line, const string& init_why);
 
     /**
      * Get the reason for throwing an exception.
      * 
      * @return the string with the reason for throwing an exception.
      */
-    const string why() const { 
-	return ( _why.size() != 0 ) ? _why : string("Not specified"); 
-    }
+    const string why() const;
 
 protected:
     string _why;		// The reason for the exception
@@ -139,8 +131,7 @@ protected:
  */
 class InvalidString : public XorpReasonedException {
 public:
-    InvalidString(const char* file, size_t line, const string& init_why = "") 
-	: XorpReasonedException("InvalidString", file, line, init_why) {}
+    InvalidString(const char* file, size_t line, const string& init_why = "");
 };
 
 /**
@@ -148,8 +139,7 @@ public:
  */
 class InvalidAddress : public XorpReasonedException {
 public:
-    InvalidAddress(const char* file, size_t line, const string& init_why = "")
-	: XorpReasonedException("InvalidAddress", file, line, init_why) {}
+    InvalidAddress(const char* file, size_t line, const string& init_why = "");
 };
 
 /**
@@ -157,8 +147,7 @@ public:
  */
 class InvalidPort : public XorpReasonedException {
 public:
-    InvalidPort(const char* file, size_t line, const string& init_why = "")
-	: XorpReasonedException("InvalidPort", file, line, init_why) {}
+    InvalidPort(const char* file, size_t line, const string& init_why = "");
 };
 
 /**
@@ -166,8 +155,7 @@ public:
  */
 class InvalidCast : public XorpReasonedException {
 public:
-    InvalidCast(const char* file, size_t line, const string& init_why = "") 
-	: XorpReasonedException("XorpCast", file, line, init_why) {}
+    InvalidCast(const char* file, size_t line, const string& init_why = "");
 };
 
 /**
@@ -177,9 +165,7 @@ public:
 class InvalidBufferOffset : public XorpReasonedException {
 public:
     InvalidBufferOffset(const char* file, size_t line,
-			const string& init_why = "")
-	: XorpReasonedException("XorpInvalidBufferOffset", file, line,
-				init_why) {}
+			const string& init_why = "");
 };
 
 /**
@@ -188,12 +174,8 @@ public:
  */
 class InvalidFamily : public XorpException {
 public:
-    InvalidFamily(const char* file, size_t line, int af) : 
-	XorpException("XorpInvalidFamily", file, line), _af(af) {} 
-
-    const string why() const { 
-	    return c_format("Unknown IP family - %d", _af);
-    }
+    InvalidFamily(const char* file, size_t line, int af);
+    const string why() const;
 
 protected:
     int _af;
@@ -204,8 +186,7 @@ protected:
  */
 class InvalidPacket : public XorpReasonedException {
 public:
-    InvalidPacket(const char* file, size_t line, const string& init_why = "")
-	: XorpReasonedException("XorpInvalidPacket", file, line, init_why) {}
+    InvalidPacket(const char* file, size_t line, const string& init_why = "");
 };
 
 /**
@@ -214,13 +195,8 @@ public:
  */
 class InvalidNetmaskLength : public XorpException {
 public:
-    InvalidNetmaskLength(const char* file, size_t line, int netmask_length) : 
-	XorpException("XorpInvalidNetmaskLength", file, line), _netmask_length
-(netmask_length) {} 
-
-    const string why() const { 
-	    return c_format("Invalid netmask length - %d", _netmask_length);
-    }
+    InvalidNetmaskLength(const char* file, size_t line, int netmask_length);
+    const string why() const;
 
 protected:
     int _netmask_length;
