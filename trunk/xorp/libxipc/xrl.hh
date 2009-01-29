@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxipc/xrl.hh,v 1.33 2008/11/02 18:35:58 atanu Exp $
+// $XORP: xorp/libxipc/xrl.hh,v 1.34 2009/01/05 18:30:56 jtc Exp $
 
 #ifndef __LIBXIPC_XRL_HH__
 #define __LIBXIPC_XRL_HH__
@@ -44,51 +44,35 @@ public:
     Xrl(const string&	protocol,
 	const string&	protocol_target,
 	const string&	command,
-	const XrlArgs&	args)
-	: _protocol(protocol), _target(protocol_target), _command(command),
-	  _args(args), _sna_atom(NULL), _packed_bytes(0), _argp(&_args),
-	  _to_finder(-1), _resolved(false), _resolved_sender(NULL)
-    {}
+	const XrlArgs&	args);
 
     /**
      * Construct an Xrl (with implicit finder protocol).
      */
     Xrl(const string&	target,
 	const string&	command,
-	const XrlArgs&	args)
-	: _protocol(_finder_protocol), _target(target), _command(command),
-	  _args(args), _sna_atom(NULL), _packed_bytes(0), _argp(&_args),
-	  _to_finder(-1), _resolved(false), _resolved_sender(NULL)
-    {}
+	const XrlArgs&	args);
 
     /**
      * Construct an Xrl that does not have an argument list.
      */
     Xrl(const string& protocol,
 	const string& protocol_target,
-	const string& command)
-	: _protocol(protocol), _target(protocol_target), _command(command),
-	  _sna_atom(NULL), _packed_bytes(0), _argp(&_args), _to_finder(-1),
-	  _resolved(false), _resolved_sender(NULL)
-    {}
+	const string& command);
 
     /**
      * Construct an Xrl that does not have an argument list.
      */
     Xrl(const string& target,
-	const string& command)
-	: _protocol(_finder_protocol), _target(target), _command(command),
-	  _sna_atom(NULL), _packed_bytes(0), _argp(&_args), _to_finder(-1),
-	  _resolved(false), _resolved_sender(NULL)
-    {}
+	const string& command);
 
     /**
      * Construct an Xrl object from the string representation of Xrl.
      */
     Xrl(const char* xrl_c_str) throw (InvalidString);
 
-    Xrl() : _sna_atom(0), _packed_bytes(0), _argp(&_args), _to_finder(-1),
-            _resolved(false), _resolved_sender(NULL) {}
+    Xrl();
+
     ~Xrl();
 
     Xrl(const Xrl& xrl);

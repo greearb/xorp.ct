@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxipc/xrl.cc,v 1.31 2008/11/02 18:35:58 atanu Exp $"
+#ident "$XORP: xorp/libxipc/xrl.cc,v 1.32 2009/01/05 18:30:56 jtc Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -70,6 +70,43 @@ Xrl::parse_xrl_path(const char* c_str)
     return start;
 }
 
+Xrl::Xrl(const string&	protocol,
+	 const string&	protocol_target,
+	 const string&	command,
+	 const XrlArgs&	args)
+    : _protocol(protocol), _target(protocol_target), _command(command),
+      _args(args), _sna_atom(NULL), _packed_bytes(0), _argp(&_args),
+      _to_finder(-1), _resolved(false), _resolved_sender(NULL)
+{
+}
+
+Xrl::Xrl(const string&	target,
+	 const string&	command,
+	 const XrlArgs&	args)
+    : _protocol(_finder_protocol), _target(target), _command(command),
+      _args(args), _sna_atom(NULL), _packed_bytes(0), _argp(&_args),
+      _to_finder(-1), _resolved(false), _resolved_sender(NULL)
+{
+}
+
+Xrl::Xrl(const string& protocol,
+	 const string& protocol_target,
+	 const string& command)
+    : _protocol(protocol), _target(protocol_target), _command(command),
+      _sna_atom(NULL), _packed_bytes(0), _argp(&_args), _to_finder(-1),
+      _resolved(false), _resolved_sender(NULL)
+{
+}
+
+
+Xrl::Xrl(const string& target,
+	 const string& command)
+    : _protocol(_finder_protocol), _target(target), _command(command),
+      _sna_atom(NULL), _packed_bytes(0), _argp(&_args), _to_finder(-1),
+      _resolved(false), _resolved_sender(NULL)
+{
+}
+
 Xrl::Xrl(const char* c_str) throw (InvalidString) 
 		: _sna_atom(NULL), _packed_bytes(0), _argp(&_args),
 		  _to_finder(-1), _resolved(false), _resolved_sender(NULL)
@@ -88,6 +125,12 @@ Xrl::Xrl(const char* c_str) throw (InvalidString)
 	    throw is;
 	}
     }
+}
+
+Xrl::Xrl() 
+    : _sna_atom(0), _packed_bytes(0), _argp(&_args), _to_finder(-1),
+      _resolved(false), _resolved_sender(NULL) 
+{
 }
 
 Xrl::Xrl(const Xrl& x)
