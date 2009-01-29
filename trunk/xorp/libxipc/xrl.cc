@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxipc/xrl.cc,v 1.32 2009/01/05 18:30:56 jtc Exp $"
+#ident "$XORP: xorp/libxipc/xrl.cc,v 1.33 2009/01/29 00:18:01 jtc Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -98,7 +98,6 @@ Xrl::Xrl(const string& protocol,
 {
 }
 
-
 Xrl::Xrl(const string& target,
 	 const string& command)
     : _protocol(_finder_protocol), _target(target), _command(command),
@@ -107,9 +106,17 @@ Xrl::Xrl(const string& target,
 {
 }
 
+Xrl::Xrl(const char* target,
+	 const char* command)
+	: _protocol(_finder_protocol), _target(target), _command(command),
+	  _sna_atom(NULL), _packed_bytes(0), _argp(&_args), _to_finder(-1),
+	  _resolved(false), _resolved_sender(NULL)
+{
+}
+
 Xrl::Xrl(const char* c_str) throw (InvalidString) 
-		: _sna_atom(NULL), _packed_bytes(0), _argp(&_args),
-		  _to_finder(-1), _resolved(false), _resolved_sender(NULL)
+        : _sna_atom(NULL), _packed_bytes(0), _argp(&_args),
+	  _to_finder(-1), _resolved(false), _resolved_sender(NULL)
 {
     if (0 == c_str)
 	xorp_throw0(InvalidString);

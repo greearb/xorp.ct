@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxipc/xrl.hh,v 1.34 2009/01/05 18:30:56 jtc Exp $
+// $XORP: xorp/libxipc/xrl.hh,v 1.35 2009/01/29 00:18:01 jtc Exp $
 
 #ifndef __LIBXIPC_XRL_HH__
 #define __LIBXIPC_XRL_HH__
@@ -65,6 +65,12 @@ public:
      */
     Xrl(const string& target,
 	const string& command);
+
+    /**
+     * Construct an Xrl that does not have an argument list.
+     */
+    Xrl(const char* target,
+        const char* command);
 
     /**
      * Construct an Xrl object from the string representation of Xrl.
