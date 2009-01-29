@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/examples/usermgr/Makefile.am,v 1.3 2008/11/18 18:14:46 atanu Exp $
+## $XORP: xorp/examples/usermgr/Makefile.am,v 1.4 2008/11/18 19:26:11 atanu Exp $
 ##
 
 # Redefine the bin installation directory
@@ -14,11 +14,11 @@ check_PROGRAMS 	 = test_usermgr
 
 TESTS		 = test_usermgr$(EXEEXT)
 
-# -- No-install Libraries
-noinst_LTLIBRARIES = libusermgr.la
+# -- Libraries
+lib_LTLIBRARIES = libusermgr.la
 
 # -- Libraries and library flags to link the binary programs
-LDADD            = $(noinst_LTLIBRARIES)
+LDADD            = $(lib_LTLIBRARIES)
 LDADD		+= $(top_builddir)/xrl/targets/libusermgrbase.la
 LDADD		+= $(top_builddir)/libxipc/libxipc.la
 LDADD		+= $(top_builddir)/libproto/libproto.la

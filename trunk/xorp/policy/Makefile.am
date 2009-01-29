@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
-##
-## $XORP: xorp/policy/Makefile.am,v 1.16 2008/08/06 08:28:00 abittau Exp $
+#
+## $XORP: xorp/policy/Makefile.am,v 1.17 2008/11/21 23:00:23 jtc Exp $
 ##
 
 # -- Subdirectories
@@ -12,11 +12,11 @@ bindir = $(prefix)/$(subdir)
 # -- Real Programs
 bin_PROGRAMS     = xorp_policy
 
-# -- No-install Libraries
-noinst_LTLIBRARIES = libpolicy.la
+# -- Libraries
+lib_LTLIBRARIES = libpolicy.la
 
 # -- Libraries and library flags to link the binary programs
-LDADD            = $(noinst_LTLIBRARIES)
+LDADD            = $(lib_LTLIBRARIES)
 LDADD           += ./backend/libpolicybackend.la
 LDADD           += ./common/libpolicycommon.la
 LDADD           += $(top_builddir)/xrl/targets/libpolicybase.la
@@ -96,6 +96,16 @@ libpolicy_la_SOURCES		+= xrl_target.cc
 libpolicy_la_SOURCES		+= yacc.yy_policy_parser.h
 libpolicy_la_SOURCES		+= yacc.yy_policy_parser.cc
 libpolicy_la_SOURCES		+= lex.yy_policy_parser.cc
+
+libpolicy_la_LIBADD		 = $(top_builddir)/policy/backend/libpolicybackend.la
+libpolicy_la_LIBADD		+= $(top_builddir)/policy/common/libpolicycommon.la
+libpolicy_la_LIBADD		+= $(top_builddir)/xrl/targets/libpolicybase.la
+libpolicy_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libpolicybackendxif.la
+libpolicy_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la
+libpolicy_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libribxif.la
+libpolicy_la_LIBADD             += $(top_builddir)/libxipc/libxipc.la
+libpolicy_la_LIBADD             += $(top_builddir)/libcomm/libcomm.la
+libpolicy_la_LIBADD             += $(top_builddir)/libxorp/libxorp.la
 
 yacc:	.yacc_generated_files
 

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/ospf/Makefile.am,v 1.28 2007/11/14 03:01:24 atanu Exp $
+## $XORP: xorp/ospf/Makefile.am,v 1.29 2008/10/30 00:24:30 pavlin Exp $
 ##
 
 # -- Subdirectories
@@ -30,7 +30,7 @@ TESTS		+= test_routing_table$(EXEEXT)
 TESTS		+= test_routing1.py
 
 # -- No-install Libtool Libraries
-noinst_LTLIBRARIES	 = libospf.la
+lib_LTLIBRARIES	 = libospf.la
 
 # -- Libraries and library flags to link the binary programs
 LDADD		 = libospf.la

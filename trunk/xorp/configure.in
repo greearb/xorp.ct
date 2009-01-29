@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.234 2009/01/10 07:49:39 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.235 2009/01/19 18:23:10 jtc Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT([xorp], [2.0-WIP], [feedback@xorp.org])
 AC_PREREQ(2.61)
-AC_REVISION([$XORP: xorp/configure.in,v 1.234 2009/01/10 07:49:39 pavlin Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.235 2009/01/19 18:23:10 jtc Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CONFIG_MACRO_DIR(config)
 AC_CANONICAL_TARGET
@@ -170,7 +170,7 @@ dnl ---------------------------------------------------------------------------
 dnl libtool options
 dnl ---------------------------------------------------------------------------
 
-AC_DISABLE_SHARED
+AC_DISABLE_STATIC
 AC_DISABLE_FAST_INSTALL
 AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL

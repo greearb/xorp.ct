@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libproto/Makefile.am,v 1.18 2006/10/03 23:51:55 pavlin Exp $
+## $XORP: xorp/libproto/Makefile.am,v 1.19 2007/05/19 01:52:43 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -18,11 +18,11 @@ TESTS		+= test_config_node_id$(EXEEXT)
 TESTS		+= test_packet$(EXEEXT)
 TESTS		+= test_spt$(EXEEXT)
 
-# -- No-install Libraries
-noinst_LTLIBRARIES = libproto.la
+# -- Libraries
+lib_LTLIBRARIES = libproto.la
 
 # -- Libraries and library flags to link the binary programs
-LDADD		 = $(noinst_LTLIBRARIES)
+LDADD		 = $(lib_LTLIBRARIES)
 LDADD		+= $(top_builddir)/libxorp/libxorp.la
 
 # -- Program Sources
@@ -50,6 +50,8 @@ libproto_la_SOURCES	+= proto_node_cli.cc
 libproto_la_SOURCES	+= proto_state.cc
 libproto_la_SOURCES	+= proto_unit.cc
 libproto_la_SOURCES	+= spt.cc
+
+libproto_la_LIBADD       = $(top_builddir)/libxorp/libxorp.la
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST		 = spt_graph1

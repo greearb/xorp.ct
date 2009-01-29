@@ -48,8 +48,15 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/xorp_config.h
 CONFIG_CLEAN_FILES =
-LTLIBRARIES = $(noinst_LTLIBRARIES)
-am__installdirs = "$(DESTDIR)$(bindir)"
+am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+am__vpath_adj = case $$p in \
+    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+    *) f=$$p;; \
+  esac;
+am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
+am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)"
+libLTLIBRARIES_INSTALL = $(INSTALL)
+LTLIBRARIES = $(lib_LTLIBRARIES)
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 am_print_peers_OBJECTS = print_peer.$(OBJEXT) print_peers.$(OBJEXT)
@@ -61,16 +68,16 @@ print_peers_DEPENDENCIES = $(am__DEPENDENCIES_1) \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la \
 	$(top_builddir)/xrl/interfaces/libbgpxif.la
-am_print_routes_OBJECTS = print_routes.$(OBJEXT) \
-	print_routes_main.$(OBJEXT)
+am_print_routes_OBJECTS = print_routes-print_routes.$(OBJEXT) \
+	print_routes-print_routes_main.$(OBJEXT) \
+	print_routes-aspath.$(OBJEXT)
 print_routes_OBJECTS = $(am_print_routes_OBJECTS)
 am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1) \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la \
 	$(top_builddir)/xrl/interfaces/libbgpxif.la
-print_routes_DEPENDENCIES = $(am__DEPENDENCIES_2) \
-	$(top_builddir)/bgp/libbgp.la
+print_routes_DEPENDENCIES = $(am__DEPENDENCIES_2)
 am_xorpsh_print_peers_OBJECTS = print_peer.$(OBJEXT) \
 	xorpsh_print_peers.$(OBJEXT)
 xorpsh_print_peers_OBJECTS = $(am_xorpsh_print_peers_OBJECTS)
@@ -80,11 +87,12 @@ xorpsh_print_peers_DEPENDENCIES = $(am__DEPENDENCIES_1) \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la \
 	$(top_builddir)/xrl/interfaces/libbgpxif.la
-am_xorpsh_print_routes_OBJECTS = print_routes.$(OBJEXT) \
-	xorpsh_print_routes.$(OBJEXT)
+am_xorpsh_print_routes_OBJECTS =  \
+	xorpsh_print_routes-print_routes.$(OBJEXT) \
+	xorpsh_print_routes-xorpsh_print_routes.$(OBJEXT) \
+	xorpsh_print_routes-aspath.$(OBJEXT)
 xorpsh_print_routes_OBJECTS = $(am_xorpsh_print_routes_OBJECTS)
-xorpsh_print_routes_DEPENDENCIES = $(am__DEPENDENCIES_2) \
-	$(top_builddir)/bgp/libbgp.la
+xorpsh_print_routes_DEPENDENCIES = $(am__DEPENDENCIES_2)
 DEFAULT_INCLUDES = -I. -I$(top_builddir)@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
@@ -247,10 +255,10 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 
 # -- No-install Libtool Libraries
-noinst_LTLIBRARIES = 
+lib_LTLIBRARIES = 
 
 # -- Libraries and library flags to link the binary programs
-LDADD = $(noinst_LTLIBRARIES) $(top_builddir)/libxipc/libxipc.la \
+LDADD = $(lib_LTLIBRARIES) $(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la \
 	$(top_builddir)/xrl/interfaces/libbgpxif.la
@@ -259,12 +267,16 @@ LDADD = $(noinst_LTLIBRARIES) $(top_builddir)/libxipc/libxipc.la \
 print_peers_SOURCES = print_peer.cc print_peer.hh print_peers.cc
 xorpsh_print_peers_SOURCES = print_peer.cc print_peer.hh \
 	xorpsh_print_peers.cc
+print_routes_CPPFLAGS = -I$(srcdir)/..
 print_routes_SOURCES = print_routes.cc print_routes.hh \
-	print_routes_main.cc
-print_routes_LDADD = $(LDADD) $(top_builddir)/bgp/libbgp.la
+	print_routes_main.cc $(srcdir)/../aspath.cc
+print_routes_LDADD = $(LDADD)
+#print_routes_LDADD += $(top_builddir)/bgp/libbgp.la
+xorpsh_print_routes_CPPFLAGS = -I$(srcdir)/..
 xorpsh_print_routes_SOURCES = print_routes.cc print_routes.hh \
-	xorpsh_print_routes.cc
-xorpsh_print_routes_LDADD = $(LDADD) $(top_builddir)/bgp/libbgp.la
+	xorpsh_print_routes.cc $(srcdir)/../aspath.cc
+xorpsh_print_routes_LDADD = $(LDADD)
+#xorpsh_print_routes_LDADD += $(top_builddir)/bgp/libbgp.la
 
 ################################################################
 INCLUDES = -I$(top_srcdir)
@@ -301,10 +313,28 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
+install-libLTLIBRARIES: $(lib_LTLIBRARIES)
+	@$(NORMAL_INSTALL)
+	test -z "$(libdir)" || $(MKDIR_P) "$(DESTDIR)$(libdir)"
+	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    f=$(am__strip_dir) \
+	    echo " $(LIBTOOL) --mode=install $(libLTLIBRARIES_INSTALL) $(INSTALL_STRIP_FLAG) '$$p' '$(DESTDIR)$(libdir)/$$f'"; \
+	    $(LIBTOOL) --mode=install $(libLTLIBRARIES_INSTALL) $(INSTALL_STRIP_FLAG) "$$p" "$(DESTDIR)$(libdir)/$$f"; \
+	  else :; fi; \
+	done
 
-clean-noinstLTLIBRARIES:
-	-test -z "$(noinst_LTLIBRARIES)" || rm -f $(noinst_LTLIBRARIES)
-	@list='$(noinst_LTLIBRARIES)'; for p in $$list; do \
+uninstall-libLTLIBRARIES:
+	@$(NORMAL_UNINSTALL)
+	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
+	  p=$(am__strip_dir) \
+	  echo " $(LIBTOOL) --mode=uninstall rm -f '$(DESTDIR)$(libdir)/$$p'"; \
+	  $(LIBTOOL) --mode=uninstall rm -f "$(DESTDIR)$(libdir)/$$p"; \
+	done
+
+clean-libLTLIBRARIES:
+	-test -z "$(lib_LTLIBRARIES)" || rm -f $(lib_LTLIBRARIES)
+	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
 	  dir="`echo $$p | sed -e 's|/[^/]*$$||'`"; \
 	  test "$$dir" != "$$p" || dir=.; \
 	  echo "rm -f \"$${dir}/so_locations\""; \
@@ -366,10 +396,13 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/print_peer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/print_peers.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/print_routes.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/print_routes_main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/print_routes-aspath.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/print_routes-print_routes.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/print_routes-print_routes_main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xorpsh_print_peers.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xorpsh_print_routes.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xorpsh_print_routes-aspath.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xorpsh_print_routes-print_routes.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xorpsh_print_routes-xorpsh_print_routes.Po@am__quote@
 
 .cc.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -391,6 +424,90 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
+
+print_routes-print_routes.o: print_routes.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(print_routes_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT print_routes-print_routes.o -MD -MP -MF $(DEPDIR)/print_routes-print_routes.Tpo -c -o print_routes-print_routes.o `test -f 'print_routes.cc' || echo '$(srcdir)/'`print_routes.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/print_routes-print_routes.Tpo $(DEPDIR)/print_routes-print_routes.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='print_routes.cc' object='print_routes-print_routes.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(print_routes_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o print_routes-print_routes.o `test -f 'print_routes.cc' || echo '$(srcdir)/'`print_routes.cc
+
+print_routes-print_routes.obj: print_routes.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(print_routes_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT print_routes-print_routes.obj -MD -MP -MF $(DEPDIR)/print_routes-print_routes.Tpo -c -o print_routes-print_routes.obj `if test -f 'print_routes.cc'; then $(CYGPATH_W) 'print_routes.cc'; else $(CYGPATH_W) '$(srcdir)/print_routes.cc'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/print_routes-print_routes.Tpo $(DEPDIR)/print_routes-print_routes.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='print_routes.cc' object='print_routes-print_routes.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(print_routes_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o print_routes-print_routes.obj `if test -f 'print_routes.cc'; then $(CYGPATH_W) 'print_routes.cc'; else $(CYGPATH_W) '$(srcdir)/print_routes.cc'; fi`
+
+print_routes-print_routes_main.o: print_routes_main.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(print_routes_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT print_routes-print_routes_main.o -MD -MP -MF $(DEPDIR)/print_routes-print_routes_main.Tpo -c -o print_routes-print_routes_main.o `test -f 'print_routes_main.cc' || echo '$(srcdir)/'`print_routes_main.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/print_routes-print_routes_main.Tpo $(DEPDIR)/print_routes-print_routes_main.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='print_routes_main.cc' object='print_routes-print_routes_main.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(print_routes_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o print_routes-print_routes_main.o `test -f 'print_routes_main.cc' || echo '$(srcdir)/'`print_routes_main.cc
+
+print_routes-print_routes_main.obj: print_routes_main.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(print_routes_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT print_routes-print_routes_main.obj -MD -MP -MF $(DEPDIR)/print_routes-print_routes_main.Tpo -c -o print_routes-print_routes_main.obj `if test -f 'print_routes_main.cc'; then $(CYGPATH_W) 'print_routes_main.cc'; else $(CYGPATH_W) '$(srcdir)/print_routes_main.cc'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/print_routes-print_routes_main.Tpo $(DEPDIR)/print_routes-print_routes_main.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='print_routes_main.cc' object='print_routes-print_routes_main.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(print_routes_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o print_routes-print_routes_main.obj `if test -f 'print_routes_main.cc'; then $(CYGPATH_W) 'print_routes_main.cc'; else $(CYGPATH_W) '$(srcdir)/print_routes_main.cc'; fi`
+
+print_routes-aspath.o: $(srcdir)/../aspath.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(print_routes_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT print_routes-aspath.o -MD -MP -MF $(DEPDIR)/print_routes-aspath.Tpo -c -o print_routes-aspath.o `test -f '$(srcdir)/../aspath.cc' || echo '$(srcdir)/'`$(srcdir)/../aspath.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/print_routes-aspath.Tpo $(DEPDIR)/print_routes-aspath.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(srcdir)/../aspath.cc' object='print_routes-aspath.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(print_routes_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o print_routes-aspath.o `test -f '$(srcdir)/../aspath.cc' || echo '$(srcdir)/'`$(srcdir)/../aspath.cc
+
+print_routes-aspath.obj: $(srcdir)/../aspath.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(print_routes_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT print_routes-aspath.obj -MD -MP -MF $(DEPDIR)/print_routes-aspath.Tpo -c -o print_routes-aspath.obj `if test -f '$(srcdir)/../aspath.cc'; then $(CYGPATH_W) '$(srcdir)/../aspath.cc'; else $(CYGPATH_W) '$(srcdir)/$(srcdir)/../aspath.cc'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/print_routes-aspath.Tpo $(DEPDIR)/print_routes-aspath.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(srcdir)/../aspath.cc' object='print_routes-aspath.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(print_routes_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o print_routes-aspath.obj `if test -f '$(srcdir)/../aspath.cc'; then $(CYGPATH_W) '$(srcdir)/../aspath.cc'; else $(CYGPATH_W) '$(srcdir)/$(srcdir)/../aspath.cc'; fi`
+
+xorpsh_print_routes-print_routes.o: print_routes.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xorpsh_print_routes_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT xorpsh_print_routes-print_routes.o -MD -MP -MF $(DEPDIR)/xorpsh_print_routes-print_routes.Tpo -c -o xorpsh_print_routes-print_routes.o `test -f 'print_routes.cc' || echo '$(srcdir)/'`print_routes.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/xorpsh_print_routes-print_routes.Tpo $(DEPDIR)/xorpsh_print_routes-print_routes.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='print_routes.cc' object='xorpsh_print_routes-print_routes.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xorpsh_print_routes_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xorpsh_print_routes-print_routes.o `test -f 'print_routes.cc' || echo '$(srcdir)/'`print_routes.cc
+
+xorpsh_print_routes-print_routes.obj: print_routes.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xorpsh_print_routes_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT xorpsh_print_routes-print_routes.obj -MD -MP -MF $(DEPDIR)/xorpsh_print_routes-print_routes.Tpo -c -o xorpsh_print_routes-print_routes.obj `if test -f 'print_routes.cc'; then $(CYGPATH_W) 'print_routes.cc'; else $(CYGPATH_W) '$(srcdir)/print_routes.cc'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/xorpsh_print_routes-print_routes.Tpo $(DEPDIR)/xorpsh_print_routes-print_routes.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='print_routes.cc' object='xorpsh_print_routes-print_routes.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xorpsh_print_routes_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xorpsh_print_routes-print_routes.obj `if test -f 'print_routes.cc'; then $(CYGPATH_W) 'print_routes.cc'; else $(CYGPATH_W) '$(srcdir)/print_routes.cc'; fi`
+
+xorpsh_print_routes-xorpsh_print_routes.o: xorpsh_print_routes.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xorpsh_print_routes_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT xorpsh_print_routes-xorpsh_print_routes.o -MD -MP -MF $(DEPDIR)/xorpsh_print_routes-xorpsh_print_routes.Tpo -c -o xorpsh_print_routes-xorpsh_print_routes.o `test -f 'xorpsh_print_routes.cc' || echo '$(srcdir)/'`xorpsh_print_routes.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/xorpsh_print_routes-xorpsh_print_routes.Tpo $(DEPDIR)/xorpsh_print_routes-xorpsh_print_routes.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='xorpsh_print_routes.cc' object='xorpsh_print_routes-xorpsh_print_routes.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xorpsh_print_routes_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xorpsh_print_routes-xorpsh_print_routes.o `test -f 'xorpsh_print_routes.cc' || echo '$(srcdir)/'`xorpsh_print_routes.cc
+
+xorpsh_print_routes-xorpsh_print_routes.obj: xorpsh_print_routes.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xorpsh_print_routes_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT xorpsh_print_routes-xorpsh_print_routes.obj -MD -MP -MF $(DEPDIR)/xorpsh_print_routes-xorpsh_print_routes.Tpo -c -o xorpsh_print_routes-xorpsh_print_routes.obj `if test -f 'xorpsh_print_routes.cc'; then $(CYGPATH_W) 'xorpsh_print_routes.cc'; else $(CYGPATH_W) '$(srcdir)/xorpsh_print_routes.cc'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/xorpsh_print_routes-xorpsh_print_routes.Tpo $(DEPDIR)/xorpsh_print_routes-xorpsh_print_routes.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='xorpsh_print_routes.cc' object='xorpsh_print_routes-xorpsh_print_routes.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xorpsh_print_routes_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xorpsh_print_routes-xorpsh_print_routes.obj `if test -f 'xorpsh_print_routes.cc'; then $(CYGPATH_W) 'xorpsh_print_routes.cc'; else $(CYGPATH_W) '$(srcdir)/xorpsh_print_routes.cc'; fi`
+
+xorpsh_print_routes-aspath.o: $(srcdir)/../aspath.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xorpsh_print_routes_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT xorpsh_print_routes-aspath.o -MD -MP -MF $(DEPDIR)/xorpsh_print_routes-aspath.Tpo -c -o xorpsh_print_routes-aspath.o `test -f '$(srcdir)/../aspath.cc' || echo '$(srcdir)/'`$(srcdir)/../aspath.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/xorpsh_print_routes-aspath.Tpo $(DEPDIR)/xorpsh_print_routes-aspath.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(srcdir)/../aspath.cc' object='xorpsh_print_routes-aspath.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xorpsh_print_routes_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xorpsh_print_routes-aspath.o `test -f '$(srcdir)/../aspath.cc' || echo '$(srcdir)/'`$(srcdir)/../aspath.cc
+
+xorpsh_print_routes-aspath.obj: $(srcdir)/../aspath.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xorpsh_print_routes_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT xorpsh_print_routes-aspath.obj -MD -MP -MF $(DEPDIR)/xorpsh_print_routes-aspath.Tpo -c -o xorpsh_print_routes-aspath.obj `if test -f '$(srcdir)/../aspath.cc'; then $(CYGPATH_W) '$(srcdir)/../aspath.cc'; else $(CYGPATH_W) '$(srcdir)/$(srcdir)/../aspath.cc'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/xorpsh_print_routes-aspath.Tpo $(DEPDIR)/xorpsh_print_routes-aspath.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(srcdir)/../aspath.cc' object='xorpsh_print_routes-aspath.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(xorpsh_print_routes_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xorpsh_print_routes-aspath.obj `if test -f '$(srcdir)/../aspath.cc'; then $(CYGPATH_W) '$(srcdir)/../aspath.cc'; else $(CYGPATH_W) '$(srcdir)/$(srcdir)/../aspath.cc'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -549,8 +666,10 @@ check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
 all-am: Makefile $(LTLIBRARIES) $(PROGRAMS)
+install-binPROGRAMS: install-libLTLIBRARIES
+
 installdirs:
-	for dir in "$(DESTDIR)$(bindir)"; do \
+	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -579,8 +698,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-binPROGRAMS clean-generic clean-libtool \
-	clean-noinstLTLIBRARIES clean-noinstPROGRAMS mostlyclean-am
+clean-am: clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
+	clean-libtool clean-noinstPROGRAMS mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -602,7 +721,7 @@ install-data-am:
 
 install-dvi: install-dvi-am
 
-install-exec-am: install-binPROGRAMS
+install-exec-am: install-binPROGRAMS install-libLTLIBRARIES
 
 install-html: install-html-am
 
@@ -634,24 +753,25 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-binPROGRAMS
+uninstall-am: uninstall-binPROGRAMS uninstall-libLTLIBRARIES
 
 .MAKE: install-am install-strip
 
 .PHONY: CTAGS GTAGS all all-am check check-TESTS check-am clean \
-	clean-binPROGRAMS clean-generic clean-libtool \
-	clean-noinstLTLIBRARIES clean-noinstPROGRAMS ctags distclean \
+	clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
+	clean-libtool clean-noinstPROGRAMS ctags distclean \
 	distclean-compile distclean-generic distclean-libtool \
 	distclean-tags distdir dvi dvi-am html html-am info info-am \
 	install install-am install-binPROGRAMS install-data \
 	install-data-am install-dvi install-dvi-am install-exec \
 	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
+	install-info-am install-libLTLIBRARIES install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags uninstall uninstall-am uninstall-binPROGRAMS
+	tags uninstall uninstall-am uninstall-binPROGRAMS \
+	uninstall-libLTLIBRARIES
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

@@ -1,13 +1,13 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/data_plane/fibconfig/Makefile.am,v 1.2 2007/06/07 01:28:35 pavlin Exp $
+## $XORP: xorp/fea/data_plane/fibconfig/Makefile.am,v 1.3 2007/07/17 22:53:55 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
 bindir = $(prefix)/$(subdir)
 
-# -- No-install Libraries
-noinst_LTLIBRARIES = libxorp_fibconfig.la
+# -- Libraries
+lib_LTLIBRARIES = libxorp_fibconfig.la
 
 # -- Library Sources
 libxorp_fibconfig_la_SOURCES	 = fibconfig_entry_get_click.hh

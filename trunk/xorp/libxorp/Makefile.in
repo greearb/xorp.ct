@@ -57,7 +57,15 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/xorp_config.h
 CONFIG_CLEAN_FILES =
-LTLIBRARIES = $(noinst_LTLIBRARIES)
+am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+am__vpath_adj = case $$p in \
+    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+    *) f=$$p;; \
+  esac;
+am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
+am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)"
+libLTLIBRARIES_INSTALL = $(INSTALL)
+LTLIBRARIES = $(lib_LTLIBRARIES)
 libxorp_la_LIBADD =
 am_libxorp_la_OBJECTS = daemon.lo debug.lo ether_compat.lo \
 	gai_strerror.lo getopt.lo inet_ntop.lo inet_pton.lo random.lo \
@@ -69,121 +77,120 @@ am_libxorp_la_OBJECTS = daemon.lo debug.lo ether_compat.lo \
 	service.lo task.lo time_slice.lo timer.lo timeval.lo token.lo \
 	transaction.lo utils.lo vif.lo win_dispatcher.lo
 libxorp_la_OBJECTS = $(am_libxorp_la_OBJECTS)
-am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
 am_test_asyncio_OBJECTS = test_asyncio.$(OBJEXT)
 test_asyncio_OBJECTS = $(am_test_asyncio_OBJECTS)
 test_asyncio_LDADD = $(LDADD)
-test_asyncio_DEPENDENCIES = $(noinst_LTLIBRARIES)
+test_asyncio_DEPENDENCIES = $(lib_LTLIBRARIES)
 am_test_callback_OBJECTS = test_callback.$(OBJEXT)
 test_callback_OBJECTS = $(am_test_callback_OBJECTS)
 test_callback_LDADD = $(LDADD)
-test_callback_DEPENDENCIES = $(noinst_LTLIBRARIES)
+test_callback_DEPENDENCIES = $(lib_LTLIBRARIES)
 am_test_config_param_OBJECTS = test_config_param.$(OBJEXT)
 test_config_param_OBJECTS = $(am_test_config_param_OBJECTS)
 test_config_param_LDADD = $(LDADD)
-test_config_param_DEPENDENCIES = $(noinst_LTLIBRARIES)
+test_config_param_DEPENDENCIES = $(lib_LTLIBRARIES)
 am_test_heap_OBJECTS = test_heap.$(OBJEXT)
 test_heap_OBJECTS = $(am_test_heap_OBJECTS)
 test_heap_LDADD = $(LDADD)
-test_heap_DEPENDENCIES = $(noinst_LTLIBRARIES)
+test_heap_DEPENDENCIES = $(lib_LTLIBRARIES)
 am_test_ipnet_OBJECTS = test_ipnet.$(OBJEXT)
 test_ipnet_OBJECTS = $(am_test_ipnet_OBJECTS)
 test_ipnet_LDADD = $(LDADD)
-test_ipnet_DEPENDENCIES = $(noinst_LTLIBRARIES)
+test_ipnet_DEPENDENCIES = $(lib_LTLIBRARIES)
 am_test_ipv4_OBJECTS = test_ipv4.$(OBJEXT)
 test_ipv4_OBJECTS = $(am_test_ipv4_OBJECTS)
 test_ipv4_LDADD = $(LDADD)
-test_ipv4_DEPENDENCIES = $(noinst_LTLIBRARIES)
+test_ipv4_DEPENDENCIES = $(lib_LTLIBRARIES)
 am_test_ipv4net_OBJECTS = test_ipv4net.$(OBJEXT)
 test_ipv4net_OBJECTS = $(am_test_ipv4net_OBJECTS)
 test_ipv4net_LDADD = $(LDADD)
-test_ipv4net_DEPENDENCIES = $(noinst_LTLIBRARIES)
+test_ipv4net_DEPENDENCIES = $(lib_LTLIBRARIES)
 am_test_ipv6_OBJECTS = test_ipv6.$(OBJEXT)
 test_ipv6_OBJECTS = $(am_test_ipv6_OBJECTS)
 test_ipv6_LDADD = $(LDADD)
-test_ipv6_DEPENDENCIES = $(noinst_LTLIBRARIES)
+test_ipv6_DEPENDENCIES = $(lib_LTLIBRARIES)
 am_test_ipv6net_OBJECTS = test_ipv6net.$(OBJEXT)
 test_ipv6net_OBJECTS = $(am_test_ipv6net_OBJECTS)
 test_ipv6net_LDADD = $(LDADD)
-test_ipv6net_DEPENDENCIES = $(noinst_LTLIBRARIES)
+test_ipv6net_DEPENDENCIES = $(lib_LTLIBRARIES)
 am_test_ipvx_OBJECTS = test_ipvx.$(OBJEXT)
 test_ipvx_OBJECTS = $(am_test_ipvx_OBJECTS)
 test_ipvx_LDADD = $(LDADD)
-test_ipvx_DEPENDENCIES = $(noinst_LTLIBRARIES)
+test_ipvx_DEPENDENCIES = $(lib_LTLIBRARIES)
 am_test_ipvxnet_OBJECTS = test_ipvxnet.$(OBJEXT)
 test_ipvxnet_OBJECTS = $(am_test_ipvxnet_OBJECTS)
 test_ipvxnet_LDADD = $(LDADD)
-test_ipvxnet_DEPENDENCIES = $(noinst_LTLIBRARIES)
+test_ipvxnet_DEPENDENCIES = $(lib_LTLIBRARIES)
 am_test_mac_OBJECTS = test_mac.$(OBJEXT)
 test_mac_OBJECTS = $(am_test_mac_OBJECTS)
 test_mac_LDADD = $(LDADD)
-test_mac_DEPENDENCIES = $(noinst_LTLIBRARIES)
+test_mac_DEPENDENCIES = $(lib_LTLIBRARIES)
 am_test_observers_OBJECTS = test_observers.$(OBJEXT)
 test_observers_OBJECTS = $(am_test_observers_OBJECTS)
 test_observers_LDADD = $(LDADD)
-test_observers_DEPENDENCIES = $(noinst_LTLIBRARIES)
+test_observers_DEPENDENCIES = $(lib_LTLIBRARIES)
 am_test_profile_OBJECTS = test_profile.$(OBJEXT)
 test_profile_OBJECTS = $(am_test_profile_OBJECTS)
 test_profile_LDADD = $(LDADD)
-test_profile_DEPENDENCIES = $(noinst_LTLIBRARIES)
+test_profile_DEPENDENCIES = $(lib_LTLIBRARIES)
 am_test_ref_ptr_OBJECTS = test_ref_ptr.$(OBJEXT)
 test_ref_ptr_OBJECTS = $(am_test_ref_ptr_OBJECTS)
 test_ref_ptr_LDADD = $(LDADD)
-test_ref_ptr_DEPENDENCIES = $(noinst_LTLIBRARIES)
+test_ref_ptr_DEPENDENCIES = $(lib_LTLIBRARIES)
 am_test_ref_trie_OBJECTS = test_ref_trie.$(OBJEXT)
 test_ref_trie_OBJECTS = $(am_test_ref_trie_OBJECTS)
 test_ref_trie_LDADD = $(LDADD)
-test_ref_trie_DEPENDENCIES = $(noinst_LTLIBRARIES)
+test_ref_trie_DEPENDENCIES = $(lib_LTLIBRARIES)
 am_test_run_command_OBJECTS = test_run_command.$(OBJEXT)
 test_run_command_OBJECTS = $(am_test_run_command_OBJECTS)
 test_run_command_LDADD = $(LDADD)
-test_run_command_DEPENDENCIES = $(noinst_LTLIBRARIES)
+test_run_command_DEPENDENCIES = $(lib_LTLIBRARIES)
 am_test_sched_OBJECTS = test_sched.$(OBJEXT)
 test_sched_OBJECTS = $(am_test_sched_OBJECTS)
 test_sched_LDADD = $(LDADD)
-test_sched_DEPENDENCIES = $(noinst_LTLIBRARIES)
+test_sched_DEPENDENCIES = $(lib_LTLIBRARIES)
 am_test_service_OBJECTS = test_service.$(OBJEXT)
 test_service_OBJECTS = $(am_test_service_OBJECTS)
 test_service_LDADD = $(LDADD)
-test_service_DEPENDENCIES = $(noinst_LTLIBRARIES)
+test_service_DEPENDENCIES = $(lib_LTLIBRARIES)
 am_test_task_OBJECTS = test_task.$(OBJEXT)
 test_task_OBJECTS = $(am_test_task_OBJECTS)
 test_task_LDADD = $(LDADD)
-test_task_DEPENDENCIES = $(noinst_LTLIBRARIES)
+test_task_DEPENDENCIES = $(lib_LTLIBRARIES)
 am_test_test_main_OBJECTS = test_test_main.$(OBJEXT)
 test_test_main_OBJECTS = $(am_test_test_main_OBJECTS)
 test_test_main_LDADD = $(LDADD)
-test_test_main_DEPENDENCIES = $(noinst_LTLIBRARIES)
+test_test_main_DEPENDENCIES = $(lib_LTLIBRARIES)
 am_test_time_slice_OBJECTS = test_time_slice.$(OBJEXT)
 test_time_slice_OBJECTS = $(am_test_time_slice_OBJECTS)
 test_time_slice_LDADD = $(LDADD)
-test_time_slice_DEPENDENCIES = $(noinst_LTLIBRARIES)
+test_time_slice_DEPENDENCIES = $(lib_LTLIBRARIES)
 am_test_timer_OBJECTS = test_timer.$(OBJEXT)
 test_timer_OBJECTS = $(am_test_timer_OBJECTS)
 test_timer_LDADD = $(LDADD)
-test_timer_DEPENDENCIES = $(noinst_LTLIBRARIES)
+test_timer_DEPENDENCIES = $(lib_LTLIBRARIES)
 am_test_timeval_OBJECTS = test_timeval.$(OBJEXT)
 test_timeval_OBJECTS = $(am_test_timeval_OBJECTS)
 test_timeval_LDADD = $(LDADD)
-test_timeval_DEPENDENCIES = $(noinst_LTLIBRARIES)
+test_timeval_DEPENDENCIES = $(lib_LTLIBRARIES)
 am_test_trie_OBJECTS = test_trie.$(OBJEXT)
 test_trie_OBJECTS = $(am_test_trie_OBJECTS)
 test_trie_LDADD = $(LDADD)
-test_trie_DEPENDENCIES = $(noinst_LTLIBRARIES)
+test_trie_DEPENDENCIES = $(lib_LTLIBRARIES)
 am_test_types_OBJECTS = test_types.$(OBJEXT)
 test_types_OBJECTS = $(am_test_types_OBJECTS)
 test_types_LDADD = $(LDADD)
-test_types_DEPENDENCIES = $(noinst_LTLIBRARIES)
+test_types_DEPENDENCIES = $(lib_LTLIBRARIES)
 am_test_utils_OBJECTS = test_utils.$(OBJEXT)
 test_utils_OBJECTS = $(am_test_utils_OBJECTS)
 test_utils_LDADD = $(LDADD)
-test_utils_DEPENDENCIES = $(noinst_LTLIBRARIES)
+test_utils_DEPENDENCIES = $(lib_LTLIBRARIES)
 am_test_vif_OBJECTS = test_vif.$(OBJEXT)
 test_vif_OBJECTS = $(am_test_vif_OBJECTS)
 test_vif_LDADD = $(LDADD)
-test_vif_DEPENDENCIES = $(noinst_LTLIBRARIES)
+test_vif_DEPENDENCIES = $(lib_LTLIBRARIES)
 DEFAULT_INCLUDES = -I. -I$(top_builddir)@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
@@ -384,11 +391,11 @@ TESTS = test_asyncio$(EXEEXT) test_callback$(EXEEXT) \
 	test_timeval$(EXEEXT) test_trie$(EXEEXT) test_types$(EXEEXT) \
 	test_utils$(EXEEXT) test_vif$(EXEEXT)
 
-# -- No-install Libraries
-noinst_LTLIBRARIES = libxorp.la
+# -- Libraries
+lib_LTLIBRARIES = libxorp.la
 
 # -- Libraries and library flags to link the binary programs
-LDADD = $(noinst_LTLIBRARIES)
+LDADD = $(lib_LTLIBRARIES)
 
 # -- Program Sources
 test_asyncio_SOURCES = test_asyncio.cc
@@ -483,17 +490,35 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
+install-libLTLIBRARIES: $(lib_LTLIBRARIES)
+	@$(NORMAL_INSTALL)
+	test -z "$(libdir)" || $(MKDIR_P) "$(DESTDIR)$(libdir)"
+	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    f=$(am__strip_dir) \
+	    echo " $(LIBTOOL) --mode=install $(libLTLIBRARIES_INSTALL) $(INSTALL_STRIP_FLAG) '$$p' '$(DESTDIR)$(libdir)/$$f'"; \
+	    $(LIBTOOL) --mode=install $(libLTLIBRARIES_INSTALL) $(INSTALL_STRIP_FLAG) "$$p" "$(DESTDIR)$(libdir)/$$f"; \
+	  else :; fi; \
+	done
 
-clean-noinstLTLIBRARIES:
-	-test -z "$(noinst_LTLIBRARIES)" || rm -f $(noinst_LTLIBRARIES)
-	@list='$(noinst_LTLIBRARIES)'; for p in $$list; do \
+uninstall-libLTLIBRARIES:
+	@$(NORMAL_UNINSTALL)
+	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
+	  p=$(am__strip_dir) \
+	  echo " $(LIBTOOL) --mode=uninstall rm -f '$(DESTDIR)$(libdir)/$$p'"; \
+	  $(LIBTOOL) --mode=uninstall rm -f "$(DESTDIR)$(libdir)/$$p"; \
+	done
+
+clean-libLTLIBRARIES:
+	-test -z "$(lib_LTLIBRARIES)" || rm -f $(lib_LTLIBRARIES)
+	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
 	  dir="`echo $$p | sed -e 's|/[^/]*$$||'`"; \
 	  test "$$dir" != "$$p" || dir=.; \
 	  echo "rm -f \"$${dir}/so_locations\""; \
 	  rm -f "$${dir}/so_locations"; \
 	done
 libxorp.la: $(libxorp_la_OBJECTS) $(libxorp_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libxorp_la_OBJECTS) $(libxorp_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libxorp_la_OBJECTS) $(libxorp_la_LIBADD) $(LIBS)
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	test -z "$(bindir)" || $(MKDIR_P) "$(DESTDIR)$(bindir)"
@@ -894,8 +919,10 @@ check-am: all-am
 check: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) check-am
 all-am: Makefile $(LTLIBRARIES) $(PROGRAMS)
+install-binPROGRAMS: install-libLTLIBRARIES
+
 installdirs:
-	for dir in "$(DESTDIR)$(bindir)"; do \
+	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: $(BUILT_SOURCES)
@@ -927,7 +954,7 @@ maintainer-clean-generic:
 clean: clean-am
 
 clean-am: clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
-	clean-libtool clean-noinstLTLIBRARIES mostlyclean-am
+	clean-libLTLIBRARIES clean-libtool mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -949,7 +976,7 @@ install-data-am:
 
 install-dvi: install-dvi-am
 
-install-exec-am: install-binPROGRAMS
+install-exec-am: install-binPROGRAMS install-libLTLIBRARIES
 
 install-html: install-html-am
 
@@ -981,24 +1008,25 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-binPROGRAMS
+uninstall-am: uninstall-binPROGRAMS uninstall-libLTLIBRARIES
 
 .MAKE: install-am install-strip
 
 .PHONY: CTAGS GTAGS all all-am check check-TESTS check-am clean \
 	clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
-	clean-libtool clean-noinstLTLIBRARIES ctags distclean \
+	clean-libLTLIBRARIES clean-libtool ctags distclean \
 	distclean-compile distclean-generic distclean-libtool \
 	distclean-tags distdir dvi dvi-am html html-am info info-am \
 	install install-am install-binPROGRAMS install-data \
 	install-data-am install-dvi install-dvi-am install-exec \
 	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
+	install-info-am install-libLTLIBRARIES install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags uninstall uninstall-am uninstall-binPROGRAMS
+	tags uninstall uninstall-am uninstall-binPROGRAMS \
+	uninstall-libLTLIBRARIES
 
 
 # If this code is commented out, please upgrade to python2.0 or above.

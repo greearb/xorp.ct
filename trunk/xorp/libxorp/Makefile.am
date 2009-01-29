@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libxorp/Makefile.am,v 1.57 2008/11/08 00:41:03 abittau Exp $
+## $XORP: xorp/libxorp/Makefile.am,v 1.58 2009/01/26 23:20:11 jtc Exp $
 ##
 
 # -- Real Programs
@@ -68,11 +68,11 @@ TESTS	+= test_types$(EXEEXT)
 TESTS	+= test_utils$(EXEEXT)
 TESTS	+= test_vif$(EXEEXT)
 
-# -- No-install Libraries
-noinst_LTLIBRARIES = libxorp.la
+# -- Libraries
+lib_LTLIBRARIES = libxorp.la
 
 # -- Libraries and library flags to link the binary programs
-LDADD			 = $(noinst_LTLIBRARIES)
+LDADD			 = $(lib_LTLIBRARIES)
 
 # -- Program Sources
 test_asyncio_SOURCES	= test_asyncio.cc

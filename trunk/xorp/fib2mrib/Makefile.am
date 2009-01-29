@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fib2mrib/Makefile.am,v 1.6 2004/11/12 02:44:41 bms Exp $
+## $XORP: xorp/fib2mrib/Makefile.am,v 1.7 2005/02/11 04:21:39 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -18,12 +18,12 @@ test_scripts	 = test_add_route.sh
 noinst_PROGRAMS  = 
 noinst_SCRIPTS	 = $(test_scripts)
 
-# -- No-install Libraries
-noinst_LTLIBRARIES = libfib2mrib.la
+# -- Libraries
+lib_LTLIBRARIES = libfib2mrib.la
 
 # -- Libraries and library flags to link the binary programs
 LDFLAGS		 = 
-LDADD		 = $(noinst_LTLIBRARIES)
+LDADD		 = $(lib_LTLIBRARIES)
 ### XRL libraries
 LDADD		+= $(top_builddir)/xrl/targets/libfib2mribbase.la
 ### XORP misc libraries

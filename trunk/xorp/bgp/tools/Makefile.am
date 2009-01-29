@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/tools/Makefile.am,v 1.9 2003/07/30 23:43:27 pavlin Exp $
+## $XORP: xorp/bgp/tools/Makefile.am,v 1.10 2004/11/12 02:44:29 bms Exp $
 ##
 
 # Redefine the bin installation directory
@@ -16,10 +16,10 @@ TESTS		 =
 noinst_PROGRAMS  = print_peers print_routes
 
 # -- No-install Libtool Libraries
-noinst_LTLIBRARIES =
+lib_LTLIBRARIES =
 
 # -- Libraries and library flags to link the binary programs
-LDADD		 = $(noinst_LTLIBRARIES)
+LDADD		 = $(lib_LTLIBRARIES)
 LDADD		+= $(top_builddir)/libxipc/libxipc.la
 LDADD		+= $(top_builddir)/libcomm/libcomm.la
 LDADD		+= $(top_builddir)/libxorp/libxorp.la
@@ -34,17 +34,21 @@ xorpsh_print_peers_SOURCES  = print_peer.cc
 xorpsh_print_peers_SOURCES += print_peer.hh
 xorpsh_print_peers_SOURCES += xorpsh_print_peers.cc
 
+print_routes_CPPFLAGS = -I$(srcdir)/..
 print_routes_SOURCES  = print_routes.cc 
 print_routes_SOURCES += print_routes.hh 
 print_routes_SOURCES += print_routes_main.cc 
+print_routes_SOURCES += $(srcdir)/../aspath.cc
 print_routes_LDADD = $(LDADD)
-print_routes_LDADD += $(top_builddir)/bgp/libbgp.la
+#print_routes_LDADD += $(top_builddir)/bgp/libbgp.la
 
+xorpsh_print_routes_CPPFLAGS = -I$(srcdir)/..
 xorpsh_print_routes_SOURCES  = print_routes.cc
 xorpsh_print_routes_SOURCES += print_routes.hh
 xorpsh_print_routes_SOURCES += xorpsh_print_routes.cc
+xorpsh_print_routes_SOURCES += $(srcdir)/../aspath.cc
 xorpsh_print_routes_LDADD = $(LDADD)
-xorpsh_print_routes_LDADD += $(top_builddir)/bgp/libbgp.la
+#xorpsh_print_routes_LDADD += $(top_builddir)/bgp/libbgp.la
 
 ################################################################
 ##

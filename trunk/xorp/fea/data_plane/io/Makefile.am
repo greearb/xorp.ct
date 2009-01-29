@@ -1,13 +1,13 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/data_plane/io/Makefile.am,v 1.3 2007/07/26 01:18:40 pavlin Exp $
+## $XORP: xorp/fea/data_plane/io/Makefile.am,v 1.4 2007/08/09 00:47:00 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
 bindir = $(prefix)/$(subdir)
 
-# -- No-install Libraries
-noinst_LTLIBRARIES = libxorp_io.la
+# -- Libraries
+lib_LTLIBRARIES = libxorp_io.la
 
 # -- Library Sources
 libxorp_io_la_SOURCES		 = io_ip_dummy.hh

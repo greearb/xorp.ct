@@ -45,15 +45,30 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/xorp_config.h
 CONFIG_CLEAN_FILES =
-LTLIBRARIES = $(noinst_LTLIBRARIES)
-libcli_la_LIBADD =
+am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+am__vpath_adj = case $$p in \
+    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+    *) f=$$p;; \
+  esac;
+am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
+am__installdirs = "$(DESTDIR)$(libdir)"
+libLTLIBRARIES_INSTALL = $(INSTALL)
+LTLIBRARIES = $(lib_LTLIBRARIES)
+libcli_la_DEPENDENCIES =  \
+	$(top_builddir)/xrl/interfaces/libcliprocessorxif.la \
+	$(top_builddir)/xrl/targets/libclibase.la \
+	$(top_builddir)/cli/libtecla/libtecla.la \
+	$(top_builddir)/libproto/libproto.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libcli_la_OBJECTS = cli_client.lo cli_command.lo \
 	cli_command_pipe.lo cli_node.lo cli_node_internal_commands.lo \
 	cli_node_net.lo xrl_cli_node.lo
 libcli_la_OBJECTS = $(am_libcli_la_OBJECTS)
 am_test_cli_OBJECTS = test_cli.$(OBJEXT)
 test_cli_OBJECTS = $(am_test_cli_OBJECTS)
-am__DEPENDENCIES_1 = $(noinst_LTLIBRARIES) \
+am__DEPENDENCIES_1 = $(lib_LTLIBRARIES) \
 	$(top_builddir)/xrl/interfaces/libcliprocessorxif.la \
 	$(top_builddir)/xrl/targets/libclibase.la \
 	$(top_builddir)/cli/libtecla/libtecla.la \
@@ -233,14 +248,14 @@ top_srcdir = @top_srcdir@
 # -- Subdirectories (directory ordering is important)
 SUBDIRS = libtecla . tools
 
-# -- No-install Libraries
-noinst_LTLIBRARIES = libcli.la
+# -- Libraries
+lib_LTLIBRARIES = libcli.la
 
 # -- Libraries and library flags to link the binary programs
 ### XRL libraries
 ### CLI libraries
 ### XORP misc libraries
-LDADD = $(noinst_LTLIBRARIES) \
+LDADD = $(lib_LTLIBRARIES) \
 	$(top_builddir)/xrl/interfaces/libcliprocessorxif.la \
 	$(top_builddir)/xrl/targets/libclibase.la \
 	$(top_builddir)/cli/libtecla/libtecla.la @CLI_CURSES_LIB@ \
@@ -258,6 +273,14 @@ libcli_la_SOURCES = cli_module.h cli_client.hh cli_command.hh \
 	cli_command_pipe.hh cli_node.hh cli_private.hh xrl_cli_node.hh \
 	cli_client.cc cli_command.cc cli_command_pipe.cc cli_node.cc \
 	cli_node_internal_commands.cc cli_node_net.cc xrl_cli_node.cc
+libcli_la_LIBADD =  \
+	$(top_builddir)/xrl/interfaces/libcliprocessorxif.la \
+	$(top_builddir)/xrl/targets/libclibase.la \
+	$(top_builddir)/cli/libtecla/libtecla.la @CLI_CURSES_LIB@ \
+	$(top_builddir)/libproto/libproto.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST = libtecla xrl_cli_shell_funcs.sh
@@ -297,17 +320,35 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
+install-libLTLIBRARIES: $(lib_LTLIBRARIES)
+	@$(NORMAL_INSTALL)
+	test -z "$(libdir)" || $(MKDIR_P) "$(DESTDIR)$(libdir)"
+	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    f=$(am__strip_dir) \
+	    echo " $(LIBTOOL) --mode=install $(libLTLIBRARIES_INSTALL) $(INSTALL_STRIP_FLAG) '$$p' '$(DESTDIR)$(libdir)/$$f'"; \
+	    $(LIBTOOL) --mode=install $(libLTLIBRARIES_INSTALL) $(INSTALL_STRIP_FLAG) "$$p" "$(DESTDIR)$(libdir)/$$f"; \
+	  else :; fi; \
+	done
 
-clean-noinstLTLIBRARIES:
-	-test -z "$(noinst_LTLIBRARIES)" || rm -f $(noinst_LTLIBRARIES)
-	@list='$(noinst_LTLIBRARIES)'; for p in $$list; do \
+uninstall-libLTLIBRARIES:
+	@$(NORMAL_UNINSTALL)
+	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
+	  p=$(am__strip_dir) \
+	  echo " $(LIBTOOL) --mode=uninstall rm -f '$(DESTDIR)$(libdir)/$$p'"; \
+	  $(LIBTOOL) --mode=uninstall rm -f "$(DESTDIR)$(libdir)/$$p"; \
+	done
+
+clean-libLTLIBRARIES:
+	-test -z "$(lib_LTLIBRARIES)" || rm -f $(lib_LTLIBRARIES)
+	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
 	  dir="`echo $$p | sed -e 's|/[^/]*$$||'`"; \
 	  test "$$dir" != "$$p" || dir=.; \
 	  echo "rm -f \"$${dir}/so_locations\""; \
 	  rm -f "$${dir}/so_locations"; \
 	done
 libcli.la: $(libcli_la_OBJECTS) $(libcli_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libcli_la_OBJECTS) $(libcli_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libcli_la_OBJECTS) $(libcli_la_LIBADD) $(LIBS)
 
 clean-checkPROGRAMS:
 	@list='$(check_PROGRAMS)'; for p in $$list; do \
@@ -615,6 +656,9 @@ check: check-recursive
 all-am: Makefile $(LTLIBRARIES)
 installdirs: installdirs-recursive
 installdirs-am:
+	for dir in "$(DESTDIR)$(libdir)"; do \
+	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
+	done
 install: install-recursive
 install-exec: install-exec-recursive
 install-data: install-data-recursive
@@ -641,8 +685,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-recursive
 
-clean-am: clean-checkPROGRAMS clean-generic clean-libtool \
-	clean-noinstLTLIBRARIES mostlyclean-am
+clean-am: clean-checkPROGRAMS clean-generic clean-libLTLIBRARIES \
+	clean-libtool mostlyclean-am
 
 distclean: distclean-recursive
 	-rm -rf ./$(DEPDIR)
@@ -664,7 +708,7 @@ install-data-am:
 
 install-dvi: install-dvi-recursive
 
-install-exec-am:
+install-exec-am: install-libLTLIBRARIES
 
 install-html: install-html-recursive
 
@@ -696,26 +740,27 @@ ps: ps-recursive
 
 ps-am:
 
-uninstall-am:
+uninstall-am: uninstall-libLTLIBRARIES
 
 .MAKE: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) install-am \
 	install-strip
 
 .PHONY: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) CTAGS GTAGS \
 	all all-am check check-TESTS check-am clean \
-	clean-checkPROGRAMS clean-generic clean-libtool \
-	clean-noinstLTLIBRARIES ctags ctags-recursive distclean \
+	clean-checkPROGRAMS clean-generic clean-libLTLIBRARIES \
+	clean-libtool ctags ctags-recursive distclean \
 	distclean-compile distclean-generic distclean-libtool \
 	distclean-tags distdir dvi dvi-am html html-am info info-am \
 	install install-am install-data install-data-am install-dvi \
 	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am install-man \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-strip installcheck installcheck-am installdirs \
-	installdirs-am maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-compile mostlyclean-generic \
-	mostlyclean-libtool pdf pdf-am ps ps-am tags tags-recursive \
-	uninstall uninstall-am
+	install-html-am install-info install-info-am \
+	install-libLTLIBRARIES install-man install-pdf install-pdf-am \
+	install-ps install-ps-am install-strip installcheck \
+	installcheck-am installdirs installdirs-am maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	tags tags-recursive uninstall uninstall-am \
+	uninstall-libLTLIBRARIES
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

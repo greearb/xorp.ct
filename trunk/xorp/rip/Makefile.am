@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rip/Makefile.am,v 1.39 2007/08/09 00:47:02 pavlin Exp $
+## $XORP: xorp/rip/Makefile.am,v 1.40 2008/10/30 00:24:30 pavlin Exp $
 ##
 
 SUBDIRS 			 = . tools
@@ -26,10 +26,10 @@ check_PROGRAMS			 = $(test_programs)
 TESTS				 = $(addsuffix $(EXEEXT),$(test_programs))
 
 # -- No-install Libtool Libraries
-noinst_LTLIBRARIES		 = librip.la
-noinst_LTLIBRARIES		+= libripng.la
-noinst_LTLIBRARIES		+= libripxrl.la
-noinst_LTLIBRARIES		+= libripngxrl.la
+lib_LTLIBRARIES		 = librip.la
+lib_LTLIBRARIES		+= libripng.la
+lib_LTLIBRARIES		+= libripxrl.la
+lib_LTLIBRARIES		+= libripngxrl.la
 
 # -- Libraries and library flags to link the binary programs
 LDFLAGS				 =
@@ -156,6 +156,22 @@ librip_la_SOURCES		+= route_db.cc
 librip_la_SOURCES		+= route_entry.cc
 librip_la_SOURCES		+= update_queue.cc
 
+librip_la_LIBADD		 =
+#librip_la_LIBADD		+= $(top_builddir)/xrl/targets/libripbase.la
+#librip_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libribxif.la
+#librip_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la
+librip_la_LIBADD		+= $(top_builddir)/libfeaclient/libfeaclient.la
+#librip_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la
+#librip_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la
+#librip_la_LIBADD		+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la
+#librip_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libsocket4xif.la
+librip_la_LIBADD		+= $(top_builddir)/policy/backend/libpolicybackend.la
+librip_la_LIBADD		+= $(top_builddir)/policy/common/libpolicycommon.la
+#librip_la_LIBADD		+= $(top_builddir)/libxipc/libxipc.la
+#librip_la_LIBADD		+= $(top_builddir)/libcomm/libcomm.la
+librip_la_LIBADD		+= $(top_builddir)/libxorp/libxorp.la
+
+
 # -- RIP NG Core Library Sources
 libripng_la_CXXFLAGS		 = -DINSTANTIATE_IPV6
 libripng_la_SOURCES		 = rip_module.h
@@ -193,6 +209,22 @@ libripng_la_SOURCES		+= route_db.cc
 libripng_la_SOURCES		+= route_entry.cc
 libripng_la_SOURCES		+= update_queue.cc
 
+libripng_la_LIBADD		 =
+#libripng_la_LIBADD		+= $(top_builddir)/xrl/targets/libripbase.la
+#libripng_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libribxif.la
+#libripng_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la
+libripng_la_LIBADD		+= $(top_builddir)/libfeaclient/libfeaclient.la
+#libripng_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la
+#libripng_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la
+#libripng_la_LIBADD		+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la
+#libripng_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libsocket4xif.la
+libripng_la_LIBADD		+= $(top_builddir)/policy/backend/libpolicybackend.la
+libripng_la_LIBADD		+= $(top_builddir)/policy/common/libpolicycommon.la
+#libripng_la_LIBADD		+= $(top_builddir)/libxipc/libxipc.la
+#libripng_la_LIBADD		+= $(top_builddir)/libcomm/libcomm.la
+libripng_la_LIBADD		+= $(top_builddir)/libxorp/libxorp.la
+
+
 # -- RIP XRL library sources
 libripxrl_la_CXXFLAGS		 = -DINSTANTIATE_IPV4
 libripxrl_la_SOURCES		 = xrl_config.hh
@@ -209,6 +241,23 @@ libripxrl_la_SOURCES		+= xrl_process_spy.cc
 libripxrl_la_SOURCES		+= xrl_redist_manager.cc
 libripxrl_la_SOURCES		+= xrl_rib_notifier.cc
 
+
+libripxrl_la_LIBADD		 = librip.la
+#libripxrl_la_LIBADD		+= $(top_builddir)/xrl/targets/libripbase.la
+libripxrl_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libribxif.la
+libripxrl_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la
+libripxrl_la_LIBADD		+= $(top_builddir)/libfeaclient/libfeaclient.la
+#libripxrl_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la
+#libripxrl_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la
+#libripxrl_la_LIBADD		+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la
+libripxrl_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libsocket4xif.la
+#libripxrl_la_LIBADD		+= $(top_builddir)/policy/backend/libpolicybackend.la
+#libripxrl_la_LIBADD		+= $(top_builddir)/policy/common/libpolicycommon.la
+libripxrl_la_LIBADD		+= $(top_builddir)/libxipc/libxipc.la
+libripxrl_la_LIBADD		+= $(top_builddir)/libcomm/libcomm.la
+libripxrl_la_LIBADD		+= $(top_builddir)/libxorp/libxorp.la
+
+
 # -- RIP NG Xrl library sources
 libripngxrl_la_CXXFLAGS		 = -DINSTANTIATE_IPV6
 libripngxrl_la_SOURCES		 = xrl_config.hh
@@ -224,6 +273,21 @@ libripngxrl_la_SOURCES		+= xrl_port_io.cc
 libripngxrl_la_SOURCES		+= xrl_process_spy.cc
 libripngxrl_la_SOURCES		+= xrl_rib_notifier.cc
 libripngxrl_la_SOURCES		+= xrl_redist_manager.cc
+
+libripngxrl_la_LIBADD		 = libripng.la
+#libripngxrl_la_LIBADD		+= $(top_builddir)/xrl/targets/libripbase.la
+libripngxrl_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libribxif.la
+libripngxrl_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la
+libripngxrl_la_LIBADD		+= $(top_builddir)/libfeaclient/libfeaclient.la
+#libripngxrl_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la
+#libripngxrl_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la
+#libripngxrl_la_LIBADD		+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la
+libripngxrl_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libsocket6xif.la
+#libripngxrl_la_LIBADD		+= $(top_builddir)/policy/backend/libpolicybackend.la
+#libripngxrl_la_LIBADD		+= $(top_builddir)/policy/common/libpolicycommon.la
+libripngxrl_la_LIBADD		+= $(top_builddir)/libxipc/libxipc.la
+libripngxrl_la_LIBADD		+= $(top_builddir)/libcomm/libcomm.la
+libripngxrl_la_LIBADD		+= $(top_builddir)/libxorp/libxorp.la
 
 ################################################################
 ##

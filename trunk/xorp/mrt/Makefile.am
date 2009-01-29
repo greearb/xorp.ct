@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/mrt/Makefile.am,v 1.9 2006/08/15 02:36:54 pavlin Exp $
+## $XORP: xorp/mrt/Makefile.am,v 1.10 2007/04/14 08:59:51 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -13,11 +13,11 @@ TESTS		 =
 check_PROGRAMS  = test_mrt
 check_PROGRAMS	+= test_mrib
 
-# -- No-install Libraries
-noinst_LTLIBRARIES = libmrt.la
+# -- Libraries
+lib_LTLIBRARIES = libmrt.la
 
 # -- Libraries and library flags to link the binary programs
-LDADD		 = $(noinst_LTLIBRARIES)
+LDADD		 = $(lib_LTLIBRARIES)
 LDADD		+= $(top_builddir)/libxorp/libxorp.la
 
 # -- Program Sources
@@ -39,6 +39,8 @@ libmrt_la_SOURCES += buffer.c
 
 libmrt_la_SOURCES += mifset.cc
 libmrt_la_SOURCES += mrib_table.cc
+
+libmrt_la_LIBADD   = $(top_builddir)/libxorp/libxorp.la
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST	  = include

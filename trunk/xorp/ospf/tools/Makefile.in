@@ -48,8 +48,15 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/xorp_config.h
 CONFIG_CLEAN_FILES =
-LTLIBRARIES = $(noinst_LTLIBRARIES)
-am__installdirs = "$(DESTDIR)$(bindir)"
+am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+am__vpath_adj = case $$p in \
+    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+    *) f=$$p;; \
+  esac;
+am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
+am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)"
+libLTLIBRARIES_INSTALL = $(INSTALL)
+LTLIBRARIES = $(lib_LTLIBRARIES)
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 am_clear_database_OBJECTS = clear_database.$(OBJEXT)
@@ -61,16 +68,15 @@ am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1) \
 	$(top_builddir)/libxorp/libxorp.la \
 	$(top_builddir)/xrl/interfaces/libospfv2xif.la \
 	$(top_builddir)/xrl/interfaces/libospfv3xif.la
-clear_database_DEPENDENCIES = $(am__DEPENDENCIES_2) \
-	$(top_builddir)/ospf/libospf.la
-am_print_lsas_OBJECTS = print_lsas.$(OBJEXT)
+clear_database_DEPENDENCIES = $(am__DEPENDENCIES_2)
+am_print_lsas_OBJECTS = print_lsas-print_lsas.$(OBJEXT) \
+	print_lsas-lsa.$(OBJEXT) \
+	print_lsas-fletcher_checksum.$(OBJEXT)
 print_lsas_OBJECTS = $(am_print_lsas_OBJECTS)
-print_lsas_DEPENDENCIES = $(am__DEPENDENCIES_2) \
-	$(top_builddir)/ospf/libospf.la
+print_lsas_DEPENDENCIES = $(am__DEPENDENCIES_2)
 am_print_neighbours_OBJECTS = print_neighbours.$(OBJEXT)
 print_neighbours_OBJECTS = $(am_print_neighbours_OBJECTS)
-print_neighbours_DEPENDENCIES = $(am__DEPENDENCIES_2) \
-	$(top_builddir)/ospf/libospf.la
+print_neighbours_DEPENDENCIES = $(am__DEPENDENCIES_2)
 DEFAULT_INCLUDES = -I. -I$(top_builddir)@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
@@ -224,10 +230,10 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 
 # -- No-install Libtool Libraries
-noinst_LTLIBRARIES = 
+lib_LTLIBRARIES = 
 
 # -- Libraries and library flags to link the binary programs
-LDADD = $(noinst_LTLIBRARIES) $(top_builddir)/libxipc/libxipc.la \
+LDADD = $(lib_LTLIBRARIES) $(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la \
 	$(top_builddir)/xrl/interfaces/libospfv2xif.la \
@@ -235,11 +241,16 @@ LDADD = $(noinst_LTLIBRARIES) $(top_builddir)/libxipc/libxipc.la \
 
 # -- Program Sources
 clear_database_SOURCES = clear_database.cc
-clear_database_LDADD = $(LDADD) $(top_builddir)/ospf/libospf.la
-print_lsas_SOURCES = print_lsas.cc
-print_lsas_LDADD = $(LDADD) $(top_builddir)/ospf/libospf.la
+clear_database_LDADD = $(LDADD)
+#clear_database_LDADD += $(top_builddir)/ospf/libospf.la
+print_lsas_CPPFLAGS = -I$(srcdir)/..
+print_lsas_SOURCES = print_lsas.cc $(srcdir)/../lsa.cc \
+	$(srcdir)/../fletcher_checksum.cc
+print_lsas_LDADD = $(LDADD)
+#print_lsas_LDADD += $(top_builddir)/ospf/libospf.la
 print_neighbours_SOURCES = print_neighbours.cc
-print_neighbours_LDADD = $(LDADD) $(top_builddir)/ospf/libospf.la
+print_neighbours_LDADD = $(LDADD)
+#print_neighbours_LDADD += $(top_builddir)/ospf/libospf.la
 
 ################################################################
 INCLUDES = -I$(top_srcdir)
@@ -276,10 +287,28 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
+install-libLTLIBRARIES: $(lib_LTLIBRARIES)
+	@$(NORMAL_INSTALL)
+	test -z "$(libdir)" || $(MKDIR_P) "$(DESTDIR)$(libdir)"
+	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    f=$(am__strip_dir) \
+	    echo " $(LIBTOOL) --mode=install $(libLTLIBRARIES_INSTALL) $(INSTALL_STRIP_FLAG) '$$p' '$(DESTDIR)$(libdir)/$$f'"; \
+	    $(LIBTOOL) --mode=install $(libLTLIBRARIES_INSTALL) $(INSTALL_STRIP_FLAG) "$$p" "$(DESTDIR)$(libdir)/$$f"; \
+	  else :; fi; \
+	done
 
-clean-noinstLTLIBRARIES:
-	-test -z "$(noinst_LTLIBRARIES)" || rm -f $(noinst_LTLIBRARIES)
-	@list='$(noinst_LTLIBRARIES)'; for p in $$list; do \
+uninstall-libLTLIBRARIES:
+	@$(NORMAL_UNINSTALL)
+	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
+	  p=$(am__strip_dir) \
+	  echo " $(LIBTOOL) --mode=uninstall rm -f '$(DESTDIR)$(libdir)/$$p'"; \
+	  $(LIBTOOL) --mode=uninstall rm -f "$(DESTDIR)$(libdir)/$$p"; \
+	done
+
+clean-libLTLIBRARIES:
+	-test -z "$(lib_LTLIBRARIES)" || rm -f $(lib_LTLIBRARIES)
+	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
 	  dir="`echo $$p | sed -e 's|/[^/]*$$||'`"; \
 	  test "$$dir" != "$$p" || dir=.; \
 	  echo "rm -f \"$${dir}/so_locations\""; \
@@ -337,7 +366,9 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/clear_database.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/print_lsas.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/print_lsas-fletcher_checksum.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/print_lsas-lsa.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/print_lsas-print_lsas.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/print_neighbours.Po@am__quote@
 
 .cc.o:
@@ -360,6 +391,48 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
+
+print_lsas-print_lsas.o: print_lsas.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(print_lsas_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT print_lsas-print_lsas.o -MD -MP -MF $(DEPDIR)/print_lsas-print_lsas.Tpo -c -o print_lsas-print_lsas.o `test -f 'print_lsas.cc' || echo '$(srcdir)/'`print_lsas.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/print_lsas-print_lsas.Tpo $(DEPDIR)/print_lsas-print_lsas.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='print_lsas.cc' object='print_lsas-print_lsas.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(print_lsas_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o print_lsas-print_lsas.o `test -f 'print_lsas.cc' || echo '$(srcdir)/'`print_lsas.cc
+
+print_lsas-print_lsas.obj: print_lsas.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(print_lsas_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT print_lsas-print_lsas.obj -MD -MP -MF $(DEPDIR)/print_lsas-print_lsas.Tpo -c -o print_lsas-print_lsas.obj `if test -f 'print_lsas.cc'; then $(CYGPATH_W) 'print_lsas.cc'; else $(CYGPATH_W) '$(srcdir)/print_lsas.cc'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/print_lsas-print_lsas.Tpo $(DEPDIR)/print_lsas-print_lsas.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='print_lsas.cc' object='print_lsas-print_lsas.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(print_lsas_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o print_lsas-print_lsas.obj `if test -f 'print_lsas.cc'; then $(CYGPATH_W) 'print_lsas.cc'; else $(CYGPATH_W) '$(srcdir)/print_lsas.cc'; fi`
+
+print_lsas-lsa.o: $(srcdir)/../lsa.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(print_lsas_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT print_lsas-lsa.o -MD -MP -MF $(DEPDIR)/print_lsas-lsa.Tpo -c -o print_lsas-lsa.o `test -f '$(srcdir)/../lsa.cc' || echo '$(srcdir)/'`$(srcdir)/../lsa.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/print_lsas-lsa.Tpo $(DEPDIR)/print_lsas-lsa.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(srcdir)/../lsa.cc' object='print_lsas-lsa.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(print_lsas_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o print_lsas-lsa.o `test -f '$(srcdir)/../lsa.cc' || echo '$(srcdir)/'`$(srcdir)/../lsa.cc
+
+print_lsas-lsa.obj: $(srcdir)/../lsa.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(print_lsas_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT print_lsas-lsa.obj -MD -MP -MF $(DEPDIR)/print_lsas-lsa.Tpo -c -o print_lsas-lsa.obj `if test -f '$(srcdir)/../lsa.cc'; then $(CYGPATH_W) '$(srcdir)/../lsa.cc'; else $(CYGPATH_W) '$(srcdir)/$(srcdir)/../lsa.cc'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/print_lsas-lsa.Tpo $(DEPDIR)/print_lsas-lsa.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(srcdir)/../lsa.cc' object='print_lsas-lsa.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(print_lsas_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o print_lsas-lsa.obj `if test -f '$(srcdir)/../lsa.cc'; then $(CYGPATH_W) '$(srcdir)/../lsa.cc'; else $(CYGPATH_W) '$(srcdir)/$(srcdir)/../lsa.cc'; fi`
+
+print_lsas-fletcher_checksum.o: $(srcdir)/../fletcher_checksum.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(print_lsas_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT print_lsas-fletcher_checksum.o -MD -MP -MF $(DEPDIR)/print_lsas-fletcher_checksum.Tpo -c -o print_lsas-fletcher_checksum.o `test -f '$(srcdir)/../fletcher_checksum.cc' || echo '$(srcdir)/'`$(srcdir)/../fletcher_checksum.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/print_lsas-fletcher_checksum.Tpo $(DEPDIR)/print_lsas-fletcher_checksum.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(srcdir)/../fletcher_checksum.cc' object='print_lsas-fletcher_checksum.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(print_lsas_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o print_lsas-fletcher_checksum.o `test -f '$(srcdir)/../fletcher_checksum.cc' || echo '$(srcdir)/'`$(srcdir)/../fletcher_checksum.cc
+
+print_lsas-fletcher_checksum.obj: $(srcdir)/../fletcher_checksum.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(print_lsas_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT print_lsas-fletcher_checksum.obj -MD -MP -MF $(DEPDIR)/print_lsas-fletcher_checksum.Tpo -c -o print_lsas-fletcher_checksum.obj `if test -f '$(srcdir)/../fletcher_checksum.cc'; then $(CYGPATH_W) '$(srcdir)/../fletcher_checksum.cc'; else $(CYGPATH_W) '$(srcdir)/$(srcdir)/../fletcher_checksum.cc'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/print_lsas-fletcher_checksum.Tpo $(DEPDIR)/print_lsas-fletcher_checksum.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(srcdir)/../fletcher_checksum.cc' object='print_lsas-fletcher_checksum.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(print_lsas_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o print_lsas-fletcher_checksum.obj `if test -f '$(srcdir)/../fletcher_checksum.cc'; then $(CYGPATH_W) '$(srcdir)/../fletcher_checksum.cc'; else $(CYGPATH_W) '$(srcdir)/$(srcdir)/../fletcher_checksum.cc'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -518,8 +591,10 @@ check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
 all-am: Makefile $(LTLIBRARIES) $(PROGRAMS)
+install-binPROGRAMS: install-libLTLIBRARIES
+
 installdirs:
-	for dir in "$(DESTDIR)$(bindir)"; do \
+	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -548,8 +623,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-binPROGRAMS clean-generic clean-libtool \
-	clean-noinstLTLIBRARIES clean-noinstPROGRAMS mostlyclean-am
+clean-am: clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
+	clean-libtool clean-noinstPROGRAMS mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -571,7 +646,7 @@ install-data-am:
 
 install-dvi: install-dvi-am
 
-install-exec-am: install-binPROGRAMS
+install-exec-am: install-binPROGRAMS install-libLTLIBRARIES
 
 install-html: install-html-am
 
@@ -603,24 +678,25 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-binPROGRAMS
+uninstall-am: uninstall-binPROGRAMS uninstall-libLTLIBRARIES
 
 .MAKE: install-am install-strip
 
 .PHONY: CTAGS GTAGS all all-am check check-TESTS check-am clean \
-	clean-binPROGRAMS clean-generic clean-libtool \
-	clean-noinstLTLIBRARIES clean-noinstPROGRAMS ctags distclean \
+	clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
+	clean-libtool clean-noinstPROGRAMS ctags distclean \
 	distclean-compile distclean-generic distclean-libtool \
 	distclean-tags distdir dvi dvi-am html html-am info info-am \
 	install install-am install-binPROGRAMS install-data \
 	install-data-am install-dvi install-dvi-am install-exec \
 	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
+	install-info-am install-libLTLIBRARIES install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags uninstall uninstall-am uninstall-binPROGRAMS
+	tags uninstall uninstall-am uninstall-binPROGRAMS \
+	uninstall-libLTLIBRARIES
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

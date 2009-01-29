@@ -1,10 +1,10 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/policy/backend/Makefile.am,v 1.8 2008/08/06 08:10:17 abittau Exp $
+## $XORP: xorp/policy/backend/Makefile.am,v 1.9 2008/11/21 23:00:24 jtc Exp $
 ##
 
-# -- No-install Libraries
-noinst_LTLIBRARIES = libpolicybackend.la
+# -- Libraries
+lib_LTLIBRARIES = libpolicybackend.la
 
 # Backend policy library
 libpolicybackend_la_SOURCES		 = filter_base.hh
@@ -42,18 +42,22 @@ libpolicybackend_la_SOURCES		+= yacc.yy_policy_backend_parser.cc
 libpolicybackend_la_SOURCES		+= yacc.yy_policy_backend_parser.h
 
 # XXX find a way to link libpolicycommon
-libpolicybackend_la_LIBADD               = ../common/aspath.lo
-libpolicybackend_la_LIBADD		+= ../common/dispatcher.lo
-libpolicybackend_la_LIBADD		+= ../common/elem_set.lo
-libpolicybackend_la_LIBADD		+= ../common/element.lo
-libpolicybackend_la_LIBADD		+= ../common/element_base.lo
-libpolicybackend_la_LIBADD		+= ../common/element_factory.lo
-libpolicybackend_la_LIBADD		+= ../common/filter.lo
-libpolicybackend_la_LIBADD		+= ../common/operator.lo
-libpolicybackend_la_LIBADD		+= ../common/policy_utils.lo
-libpolicybackend_la_LIBADD		+= ../common/register_elements.lo
-libpolicybackend_la_LIBADD		+= ../common/register_operations.lo
-libpolicybackend_la_LIBADD		+= ../common/varrw.lo
+#libpolicybackend_la_LIBADD               = ../common/aspath.lo
+#libpolicybackend_la_LIBADD		+= ../common/dispatcher.lo
+#libpolicybackend_la_LIBADD		+= ../common/elem_set.lo
+#libpolicybackend_la_LIBADD		+= ../common/element.lo
+#libpolicybackend_la_LIBADD		+= ../common/element_base.lo
+#libpolicybackend_la_LIBADD		+= ../common/element_factory.lo
+#libpolicybackend_la_LIBADD		+= ../common/filter.lo
+#libpolicybackend_la_LIBADD		+= ../common/operator.lo
+#libpolicybackend_la_LIBADD		+= ../common/policy_utils.lo
+#libpolicybackend_la_LIBADD		+= ../common/register_elements.lo
+#libpolicybackend_la_LIBADD		+= ../common/register_operations.lo
+#libpolicybackend_la_LIBADD		+= ../common/varrw.lo
+
+libpolicybackend_la_LIBADD		 = $(top_builddir)/policy/common/libpolicycommon.la
+libpolicybackend_la_LIBADD		+= $(top_builddir)/libxipc/libxipc.la
+libpolicybackend_la_LIBADD		+= $(top_builddir)/libxorp/libxorp.la
 
 yacc:	.yacc_generated_files
 

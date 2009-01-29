@@ -1,13 +1,13 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libfeaclient/Makefile.am,v 1.10 2005/08/18 15:34:24 bms Exp $
+## $XORP: xorp/libfeaclient/Makefile.am,v 1.11 2005/12/21 09:42:55 bms Exp $
 ##
 
 # -- Real Programs
 bin_PROGRAMS		 =
 
-# -- No-install Libraries
-noinst_LTLIBRARIES	 = libfeaclient.la
+# -- Libraries
+lib_LTLIBRARIES	 = libfeaclient.la
 
 # -- Library Sources
 libfeaclient_la_SOURCES	 = libfeaclient_module.h
@@ -24,6 +24,13 @@ libfeaclient_la_SOURCES	+= ifmgr_cmds.cc
 libfeaclient_la_SOURCES	+= ifmgr_cmd_queue.cc
 libfeaclient_la_SOURCES	+= ifmgr_xrl_replicator.cc
 libfeaclient_la_SOURCES	+= ifmgr_xrl_mirror.cc
+
+libfeaclient_la_LIBADD	= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la
+libfeaclient_la_LIBADD += $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la
+libfeaclient_la_LIBADD += $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la
+libfeaclient_la_LIBADD += $(top_builddir)/libxipc/libxipc.la
+libfeaclient_la_LIBADD += $(top_builddir)/libcomm/libcomm.la
+libfeaclient_la_LIBADD += $(top_builddir)/libxorp/libxorp.la
 
 # -- No-install Programs
 check_PROGRAMS		 = test_local_copy

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## # $XORP: xorp/libxipc/Makefile.am,v 1.49 2008/09/23 19:43:10 abittau Exp $
+## # $XORP: xorp/libxipc/Makefile.am,v 1.50 2008/09/23 19:58:19 abittau Exp $
 ##
 
 # Redefine the bin installation directory
@@ -16,7 +16,7 @@ bin_PROGRAMS	= xorp_finder
 sbin_PROGRAMS	= call_xrl
 
 # -- No-install Libtool Libraries
-noinst_LTLIBRARIES = libxipc.la libfinder.la
+lib_LTLIBRARIES = libxipc.la libfinder.la
 
 # -- Test Programs and scripts (order of increasing complexity)
 test_programs	 = test_xrl_error test_xrl
@@ -183,6 +183,9 @@ libxipc_la_SOURCES += $(top_srcdir)/xrl/targets/finder_client_base.cc
 libxipc_la_SOURCES += $(top_srcdir)/xrl/interfaces/finder_xif.hh
 libxipc_la_SOURCES += $(top_srcdir)/xrl/interfaces/finder_xif.cc
 
+libxipc_la_LIBADD   = $(top_builddir)/libcomm/libcomm.la 
+libxipc_la_LIBADD  += $(top_builddir)/libxorp/libxorp.la
+
 # -- Library Sources (libfinder)
 libfinder_la_SOURCES  = finder.hh
 libfinder_la_SOURCES += finder_constants.hh
@@ -202,6 +205,10 @@ libfinder_la_SOURCES += $(top_srcdir)/xrl/interfaces/finder_client_xif.hh
 libfinder_la_SOURCES += $(top_srcdir)/xrl/interfaces/finder_client_xif.cc
 libfinder_la_SOURCES += $(top_srcdir)/xrl/interfaces/finder_event_observer_xif.hh
 libfinder_la_SOURCES += $(top_srcdir)/xrl/interfaces/finder_event_observer_xif.cc
+
+libfinder_la_LIBADD   = $(top_builddir)/libxipc/libxipc.la
+libfinder_la_LIBADD  += $(top_builddir)/libcomm/libcomm.la
+libfinder_la_LIBADD  += $(top_builddir)/libxorp/libxorp.la
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST	 = bench_ipc.awk

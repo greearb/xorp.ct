@@ -1,13 +1,13 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP$
+## $XORP: xorp/fea/data_plane/firewall/Makefile.am,v 1.1 2008/04/26 00:59:46 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
 bindir = $(prefix)/$(subdir)
 
-# -- No-install Libraries
-noinst_LTLIBRARIES = libxorp_firewall.la
+# -- Libraries
+lib_LTLIBRARIES = libxorp_firewall.la
 
 # -- Library Sources
 libxorp_firewall_la_SOURCES	 = firewall_get_dummy.hh

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/contrib/mld6igmp_lite/Makefile.am,v 1.38 2008/07/02 20:46:15 BinLi $
+## $XORP: xorp/contrib/mld6igmp_lite/Makefile.am,v 1.1 2008/07/10 11:06:33 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -15,11 +15,11 @@ TESTS		 =
 # -- No-install Programs
 check_PROGRAMS	 = 
 
-# -- No-install Libraries
-noinst_LTLIBRARIES = libmld6igmp.la
+# -- Libraries
+lib_LTLIBRARIES = libmld6igmp.la
 
 # -- Libraries and library flags to link the binary programs
-LDADD		 = $(noinst_LTLIBRARIES)
+LDADD		 = $(lib_LTLIBRARIES)
 LDADD		+= $(top_builddir)/libfeaclient/libfeaclient.la
 ### XRL libraries
 LDADD		+= $(top_builddir)/xrl/interfaces/libmld6igmpclientxif.la

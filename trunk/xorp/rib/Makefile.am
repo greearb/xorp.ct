@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rib/Makefile.am,v 1.41 2007/04/17 21:40:50 pavlin Exp $
+## $XORP: xorp/rib/Makefile.am,v 1.42 2007/10/03 00:05:47 pavlin Exp $
 ##
 
 SUBDIRS = . tools
@@ -31,11 +31,11 @@ TESTS		+= test_redist$(EXEEXT)
 TESTS		+= test_register$(EXEEXT)
 TESTS		+= test_deletion$(EXEEXT)
 
-# -- No-install Libraries
-noinst_LTLIBRARIES	 = librib.la libribxrl.la
+# -- Libraries
+lib_LTLIBRARIES	 = librib.la libribxrl.la
 
 # -- Libraries and library flags to link the binary programs
-LDADD		 = $(noinst_LTLIBRARIES)
+LDADD		 = $(lib_LTLIBRARIES)
 LDADD		+= $(top_builddir)/libfeaclient/libfeaclient.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la

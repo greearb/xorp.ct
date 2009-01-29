@@ -46,7 +46,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
-LTLIBRARIES = $(noinst_LTLIBRARIES)
+LTLIBRARIES = $(lib_LTLIBRARIES)
 libusermgr_la_LIBADD =
 am_libusermgr_la_OBJECTS = usermgr.lo xrl_target.lo
 libusermgr_la_OBJECTS = $(am_libusermgr_la_OBJECTS)
@@ -56,7 +56,7 @@ PROGRAMS = $(bin_PROGRAMS)
 am_test_usermgr_OBJECTS = test_usermgr.$(OBJEXT)
 test_usermgr_OBJECTS = $(am_test_usermgr_OBJECTS)
 test_usermgr_LDADD = $(LDADD)
-test_usermgr_DEPENDENCIES = $(noinst_LTLIBRARIES) \
+test_usermgr_DEPENDENCIES = $(lib_LTLIBRARIES) \
 	$(top_builddir)/xrl/targets/libusermgrbase.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libproto/libproto.la \
@@ -65,7 +65,7 @@ test_usermgr_DEPENDENCIES = $(noinst_LTLIBRARIES) \
 am_xorp_usermgr_OBJECTS = xorp_usermgr.$(OBJEXT)
 xorp_usermgr_OBJECTS = $(am_xorp_usermgr_OBJECTS)
 xorp_usermgr_LDADD = $(LDADD)
-xorp_usermgr_DEPENDENCIES = $(noinst_LTLIBRARIES) \
+xorp_usermgr_DEPENDENCIES = $(lib_LTLIBRARIES) \
 	$(top_builddir)/xrl/targets/libusermgrbase.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libproto/libproto.la \
@@ -236,10 +236,10 @@ top_srcdir = @top_srcdir@
 TESTS = test_usermgr$(EXEEXT)
 
 # -- No-install Libraries
-noinst_LTLIBRARIES = libusermgr.la
+lib_LTLIBRARIES = libusermgr.la
 
 # -- Libraries and library flags to link the binary programs
-LDADD = $(noinst_LTLIBRARIES) \
+LDADD = $(lib_LTLIBRARIES) \
 	$(top_builddir)/xrl/targets/libusermgrbase.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libproto/libproto.la \
@@ -293,8 +293,8 @@ $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 
 clean-noinstLTLIBRARIES:
-	-test -z "$(noinst_LTLIBRARIES)" || rm -f $(noinst_LTLIBRARIES)
-	@list='$(noinst_LTLIBRARIES)'; for p in $$list; do \
+	-test -z "$(lib_LTLIBRARIES)" || rm -f $(noinst_LTLIBRARIES)
+	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
 	  dir="`echo $$p | sed -e 's|/[^/]*$$||'`"; \
 	  test "$$dir" != "$$p" || dir=.; \
 	  echo "rm -f \"$${dir}/so_locations\""; \

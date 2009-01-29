@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/contrib/olsr/tools/Makefile.am,v 1.1 2008/04/24 15:20:02 bms Exp $
+## $XORP: xorp/contrib/olsr/tools/Makefile.am,v 1.2 2008/04/28 22:37:48 bms Exp $
 ##
 
 # Redefine the bin installation directory
@@ -19,10 +19,10 @@ TESTS		 =
 noinst_PROGRAMS  =
 
 # -- No-install Libtool Libraries
-noinst_LTLIBRARIES =
+lib_LTLIBRARIES =
 
 # -- Libraries and library flags to link the binary programs
-LDADD		 = $(noinst_LTLIBRARIES)
+LDADD		 = $(lib_LTLIBRARIES)
 LDADD		+= $(top_builddir)/libxipc/libxipc.la
 LDADD		+= $(top_builddir)/libcomm/libcomm.la
 LDADD		+= $(top_builddir)/libxorp/libxorp.la

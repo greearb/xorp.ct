@@ -1,13 +1,13 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP$
+## $XORP: xorp/fea/data_plane/managers/Makefile.am,v 1.1 2007/07/11 22:18:17 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
 bindir = $(prefix)/$(subdir)
 
-# -- No-install Libraries
-noinst_LTLIBRARIES = libxorp_data_plane_managers.la
+# -- Libraries
+lib_LTLIBRARIES = libxorp_data_plane_managers.la
 
 # -- Library Sources
 libxorp_data_plane_managers_la_SOURCES	 = fea_data_plane_manager_bsd.hh

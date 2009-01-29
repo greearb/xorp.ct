@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/harness/Makefile.am,v 1.23 2008/11/08 06:14:44 mjh Exp $
+## $XORP: xorp/bgp/harness/Makefile.am,v 1.24 2008/12/09 23:39:01 atanu Exp $
 ##
 
 # -- Real Programs
@@ -28,11 +28,11 @@ check_SCRIPTS	+= test_terminate.sh
 
 TESTS		 = $(check_SCRIPTS) test_trie$(EXEEXT)
 
-# -- No-install Libraries
-noinst_LTLIBRARIES =
+# -- Libraries
+lib_LTLIBRARIES =
 
 # -- Libraries and library flags to link the binary programs
-LDADD		 = $(noinst_LTLIBRARIES)
+LDADD		 = $(lib_LTLIBRARIES)
 LDADD		+= $(top_builddir)/bgp/libbgp.la
 LDADD		+= $(top_builddir)/xrl/targets/libtestpeerbase.la
 LDADD		+= $(top_builddir)/xrl/targets/libcoordbase.la

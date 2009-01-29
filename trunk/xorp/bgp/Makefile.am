@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/Makefile.am,v 1.47 2007/12/10 23:26:24 mjh Exp $
+## $XORP: xorp/bgp/Makefile.am,v 1.48 2008/11/08 06:14:35 mjh Exp $
 ##
 
 # -- Subdirectories
@@ -31,7 +31,7 @@ TESTS		+= isolation_tests$(EXEEXT)
 TESTS		+= test_peer_data$(EXEEXT)
 
 # -- No-install Libtool Libraries
-noinst_LTLIBRARIES	 = libbgp.la
+lib_LTLIBRARIES	 = libbgp.la
 
 # -- Libraries and library flags to link the binary programs
 LDADD		 = libbgp.la
@@ -190,6 +190,23 @@ libbgp_la_SOURCES += subnet_route.cc
 libbgp_la_SOURCES += update_attrib.cc
 libbgp_la_SOURCES += update_packet.cc
 libbgp_la_SOURCES += xrl_target.cc
+
+libbgp_la_LIBADD   = $(top_builddir)/policy/backend/libpolicybackend.la
+libbgp_la_LIBADD  += $(top_builddir)/policy/common/libpolicycommon.la
+libbgp_la_LIBADD  += $(top_builddir)/libfeaclient/libfeaclient.la
+libbgp_la_LIBADD  += $(top_builddir)/xrl/targets/libbgpbase.la
+libbgp_la_LIBADD  += $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la
+libbgp_la_LIBADD  += $(top_builddir)/xrl/interfaces/libribxif.la
+libbgp_la_LIBADD  += $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la
+libbgp_la_LIBADD  += $(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.la
+libbgp_la_LIBADD  += $(top_builddir)/xrl/interfaces/libprofileclientxif.la
+libbgp_la_LIBADD  += $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la
+libbgp_la_LIBADD  += $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la
+libbgp_la_LIBADD  += $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la
+libbgp_la_LIBADD  += $(top_builddir)/libxipc/libxipc.la
+libbgp_la_LIBADD  += $(top_builddir)/libxipc/libxipc.la
+libbgp_la_LIBADD  += $(top_builddir)/libcomm/libcomm.la
+libbgp_la_LIBADD  += $(top_builddir)/libxorp/libxorp.la
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST	 = BUGS

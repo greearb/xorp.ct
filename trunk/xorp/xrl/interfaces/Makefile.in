@@ -47,197 +47,348 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/xorp_config.h
 CONFIG_CLEAN_FILES =
-LTLIBRARIES = $(noinst_LTLIBRARIES)
-libbgpmibtrapsxif_la_LIBADD =
+am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+am__vpath_adj = case $$p in \
+    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+    *) f=$$p;; \
+  esac;
+am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
+am__installdirs = "$(DESTDIR)$(libdir)"
+libLTLIBRARIES_INSTALL = $(INSTALL)
+LTLIBRARIES = $(lib_LTLIBRARIES)
+libbgpmibtrapsxif_la_DEPENDENCIES =  \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libbgpmibtrapsxif_la_OBJECTS = bgp_mib_traps_xif.lo
 libbgpmibtrapsxif_la_OBJECTS = $(am_libbgpmibtrapsxif_la_OBJECTS)
-libbgpxif_la_LIBADD =
+libbgpxif_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libbgpxif_la_OBJECTS = bgp_xif.lo
 libbgpxif_la_OBJECTS = $(am_libbgpxif_la_OBJECTS)
-libclimanagerxif_la_LIBADD =
+libclimanagerxif_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libclimanagerxif_la_OBJECTS = cli_manager_xif.lo
 libclimanagerxif_la_OBJECTS = $(am_libclimanagerxif_la_OBJECTS)
-libcliprocessorxif_la_LIBADD =
+libcliprocessorxif_la_DEPENDENCIES =  \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libcliprocessorxif_la_OBJECTS = cli_processor_xif.lo
 libcliprocessorxif_la_OBJECTS = $(am_libcliprocessorxif_la_OBJECTS)
-libcommonxif_la_LIBADD =
+libcommonxif_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libcommonxif_la_OBJECTS = common_xif.lo
 libcommonxif_la_OBJECTS = $(am_libcommonxif_la_OBJECTS)
-libcoordxif_la_LIBADD =
+libcoordxif_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libcoordxif_la_OBJECTS = coord_xif.lo
 libcoordxif_la_OBJECTS = $(am_libcoordxif_la_OBJECTS)
-libdatainxif_la_LIBADD =
+libdatainxif_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libdatainxif_la_OBJECTS = datain_xif.lo
 libdatainxif_la_OBJECTS = $(am_libdatainxif_la_OBJECTS)
-libfeaclickxif_la_LIBADD =
+libfeaclickxif_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libfeaclickxif_la_OBJECTS = fea_click_xif.lo
 libfeaclickxif_la_OBJECTS = $(am_libfeaclickxif_la_OBJECTS)
-libfeafibclientxif_la_LIBADD =
+libfeafibclientxif_la_DEPENDENCIES =  \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libfeafibclientxif_la_OBJECTS = fea_fib_client_xif.lo
 libfeafibclientxif_la_OBJECTS = $(am_libfeafibclientxif_la_OBJECTS)
-libfeafibxif_la_LIBADD =
+libfeafibxif_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libfeafibxif_la_OBJECTS = fea_fib_xif.lo
 libfeafibxif_la_OBJECTS = $(am_libfeafibxif_la_OBJECTS)
-libfeafirewallxif_la_LIBADD =
+libfeafirewallxif_la_DEPENDENCIES =  \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libfeafirewallxif_la_OBJECTS = fea_firewall_xif.lo
 libfeafirewallxif_la_OBJECTS = $(am_libfeafirewallxif_la_OBJECTS)
-libfeaifmgrmirrorxif_la_LIBADD =
+libfeaifmgrmirrorxif_la_DEPENDENCIES =  \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libfeaifmgrmirrorxif_la_OBJECTS = fea_ifmgr_mirror_xif.lo
 libfeaifmgrmirrorxif_la_OBJECTS =  \
 	$(am_libfeaifmgrmirrorxif_la_OBJECTS)
-libfeaifmgrreplicatorxif_la_LIBADD =
+libfeaifmgrreplicatorxif_la_DEPENDENCIES =  \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libfeaifmgrreplicatorxif_la_OBJECTS = fea_ifmgr_replicator_xif.lo
 libfeaifmgrreplicatorxif_la_OBJECTS =  \
 	$(am_libfeaifmgrreplicatorxif_la_OBJECTS)
-libfeaifmgrxif_la_LIBADD =
+libfeaifmgrxif_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libfeaifmgrxif_la_OBJECTS = fea_ifmgr_xif.lo
 libfeaifmgrxif_la_OBJECTS = $(am_libfeaifmgrxif_la_OBJECTS)
-libfearawlinkclientxif_la_LIBADD =
+libfearawlinkclientxif_la_DEPENDENCIES =  \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libfearawlinkclientxif_la_OBJECTS = fea_rawlink_client_xif.lo
 libfearawlinkclientxif_la_OBJECTS =  \
 	$(am_libfearawlinkclientxif_la_OBJECTS)
-libfearawlinkxif_la_LIBADD =
+libfearawlinkxif_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libfearawlinkxif_la_OBJECTS = fea_rawlink_xif.lo
 libfearawlinkxif_la_OBJECTS = $(am_libfearawlinkxif_la_OBJECTS)
-libfearawpkt4clientxif_la_LIBADD =
+libfearawpkt4clientxif_la_DEPENDENCIES =  \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libfearawpkt4clientxif_la_OBJECTS = fea_rawpkt4_client_xif.lo
 libfearawpkt4clientxif_la_OBJECTS =  \
 	$(am_libfearawpkt4clientxif_la_OBJECTS)
-libfearawpkt4xif_la_LIBADD =
+libfearawpkt4xif_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libfearawpkt4xif_la_OBJECTS = fea_rawpkt4_xif.lo
 libfearawpkt4xif_la_OBJECTS = $(am_libfearawpkt4xif_la_OBJECTS)
-libfearawpkt6clientxif_la_LIBADD =
+libfearawpkt6clientxif_la_DEPENDENCIES =  \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libfearawpkt6clientxif_la_OBJECTS = fea_rawpkt6_client_xif.lo
 libfearawpkt6clientxif_la_OBJECTS =  \
 	$(am_libfearawpkt6clientxif_la_OBJECTS)
-libfearawpkt6xif_la_LIBADD =
+libfearawpkt6xif_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libfearawpkt6xif_la_OBJECTS = fea_rawpkt6_xif.lo
 libfearawpkt6xif_la_OBJECTS = $(am_libfearawpkt6xif_la_OBJECTS)
-libfib2mribxif_la_LIBADD =
+libfib2mribxif_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libfib2mribxif_la_OBJECTS = fib2mrib_xif.lo
 libfib2mribxif_la_OBJECTS = $(am_libfib2mribxif_la_OBJECTS)
-libfinderclientxif_la_LIBADD =
+libfinderclientxif_la_DEPENDENCIES =  \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libfinderclientxif_la_OBJECTS = finder_client_xif.lo
 libfinderclientxif_la_OBJECTS = $(am_libfinderclientxif_la_OBJECTS)
-libfindereventnotifierxif_la_LIBADD =
+libfindereventnotifierxif_la_DEPENDENCIES =  \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libfindereventnotifierxif_la_OBJECTS =  \
 	finder_event_notifier_xif.lo
 libfindereventnotifierxif_la_OBJECTS =  \
 	$(am_libfindereventnotifierxif_la_OBJECTS)
-libfindereventobserverxif_la_LIBADD =
+libfindereventobserverxif_la_DEPENDENCIES =  \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libfindereventobserverxif_la_OBJECTS =  \
 	finder_event_observer_xif.lo
 libfindereventobserverxif_la_OBJECTS =  \
 	$(am_libfindereventobserverxif_la_OBJECTS)
-libfinderxif_la_LIBADD =
+libfinderxif_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libfinderxif_la_OBJECTS = finder_xif.lo
 libfinderxif_la_OBJECTS = $(am_libfinderxif_la_OBJECTS)
-libftixif_la_LIBADD =
+libftixif_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libftixif_la_OBJECTS = fti_xif.lo
 libftixif_la_OBJECTS = $(am_libftixif_la_OBJECTS)
-libmfeaclientxif_la_LIBADD =
+libmfeaclientxif_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libmfeaclientxif_la_OBJECTS = mfea_client_xif.lo
 libmfeaclientxif_la_OBJECTS = $(am_libmfeaclientxif_la_OBJECTS)
-libmfeaxif_la_LIBADD =
+libmfeaxif_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libmfeaxif_la_OBJECTS = mfea_xif.lo
 libmfeaxif_la_OBJECTS = $(am_libmfeaxif_la_OBJECTS)
-libmld6igmpclientxif_la_LIBADD =
+libmld6igmpclientxif_la_DEPENDENCIES =  \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libmld6igmpclientxif_la_OBJECTS = mld6igmp_client_xif.lo
 libmld6igmpclientxif_la_OBJECTS =  \
 	$(am_libmld6igmpclientxif_la_OBJECTS)
-libmld6igmpxif_la_LIBADD =
+libmld6igmpxif_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libmld6igmpxif_la_OBJECTS = mld6igmp_xif.lo
 libmld6igmpxif_la_OBJECTS = $(am_libmld6igmpxif_la_OBJECTS)
-libolsr4xif_la_LIBADD =
+libolsr4xif_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libolsr4xif_la_OBJECTS = olsr4_xif.lo
 libolsr4xif_la_OBJECTS = $(am_libolsr4xif_la_OBJECTS)
-libospfv2xif_la_LIBADD =
+libospfv2xif_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libospfv2xif_la_OBJECTS = ospfv2_xif.lo
 libospfv2xif_la_OBJECTS = $(am_libospfv2xif_la_OBJECTS)
-libospfv3xif_la_LIBADD =
+libospfv3xif_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libospfv3xif_la_OBJECTS = ospfv3_xif.lo
 libospfv3xif_la_OBJECTS = $(am_libospfv3xif_la_OBJECTS)
-libpimxif_la_LIBADD =
+libpimxif_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libpimxif_la_OBJECTS = pim_xif.lo
 libpimxif_la_OBJECTS = $(am_libpimxif_la_OBJECTS)
-libpolicybackendxif_la_LIBADD =
+libpolicybackendxif_la_DEPENDENCIES =  \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libpolicybackendxif_la_OBJECTS = policy_backend_xif.lo
 libpolicybackendxif_la_OBJECTS = $(am_libpolicybackendxif_la_OBJECTS)
-libpolicyredist4xif_la_LIBADD =
+libpolicyredist4xif_la_DEPENDENCIES =  \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libpolicyredist4xif_la_OBJECTS = policy_redist4_xif.lo
 libpolicyredist4xif_la_OBJECTS = $(am_libpolicyredist4xif_la_OBJECTS)
-libpolicyredist6xif_la_LIBADD =
+libpolicyredist6xif_la_DEPENDENCIES =  \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libpolicyredist6xif_la_OBJECTS = policy_redist6_xif.lo
 libpolicyredist6xif_la_OBJECTS = $(am_libpolicyredist6xif_la_OBJECTS)
-libpolicyxif_la_LIBADD =
+libpolicyxif_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libpolicyxif_la_OBJECTS = policy_xif.lo
 libpolicyxif_la_OBJECTS = $(am_libpolicyxif_la_OBJECTS)
-libprofileclientxif_la_LIBADD =
+libprofileclientxif_la_DEPENDENCIES =  \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libprofileclientxif_la_OBJECTS = profile_client_xif.lo
 libprofileclientxif_la_OBJECTS = $(am_libprofileclientxif_la_OBJECTS)
-libprofilexif_la_LIBADD =
+libprofilexif_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libprofilexif_la_OBJECTS = profile_xif.lo
 libprofilexif_la_OBJECTS = $(am_libprofilexif_la_OBJECTS)
-libredist4xif_la_LIBADD =
+libredist4xif_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libredist4xif_la_OBJECTS = redist4_xif.lo
 libredist4xif_la_OBJECTS = $(am_libredist4xif_la_OBJECTS)
-libredist6xif_la_LIBADD =
+libredist6xif_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libredist6xif_la_OBJECTS = redist6_xif.lo
 libredist6xif_la_OBJECTS = $(am_libredist6xif_la_OBJECTS)
-libredisttransaction4xif_la_LIBADD =
+libredisttransaction4xif_la_DEPENDENCIES =  \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libredisttransaction4xif_la_OBJECTS = redist_transaction4_xif.lo
 libredisttransaction4xif_la_OBJECTS =  \
 	$(am_libredisttransaction4xif_la_OBJECTS)
-libredisttransaction6xif_la_LIBADD =
+libredisttransaction6xif_la_DEPENDENCIES =  \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libredisttransaction6xif_la_OBJECTS = redist_transaction6_xif.lo
 libredisttransaction6xif_la_OBJECTS =  \
 	$(am_libredisttransaction6xif_la_OBJECTS)
-libribclientxif_la_LIBADD =
+libribclientxif_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libribclientxif_la_OBJECTS = rib_client_xif.lo
 libribclientxif_la_OBJECTS = $(am_libribclientxif_la_OBJECTS)
-libribxif_la_LIBADD =
+libribxif_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libribxif_la_OBJECTS = rib_xif.lo
 libribxif_la_OBJECTS = $(am_libribxif_la_OBJECTS)
-libripngxif_la_LIBADD =
+libripngxif_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libripngxif_la_OBJECTS = ripng_xif.lo
 libripngxif_la_OBJECTS = $(am_libripngxif_la_OBJECTS)
-libripxif_la_LIBADD =
+libripxif_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libripxif_la_OBJECTS = rip_xif.lo
 libripxif_la_OBJECTS = $(am_libripxif_la_OBJECTS)
-librtrmgr_clientxif_la_LIBADD =
+librtrmgr_clientxif_la_DEPENDENCIES =  \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_librtrmgr_clientxif_la_OBJECTS = rtrmgr_client_xif.lo
 librtrmgr_clientxif_la_OBJECTS = $(am_librtrmgr_clientxif_la_OBJECTS)
-librtrmgrxif_la_LIBADD =
+librtrmgrxif_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_librtrmgrxif_la_OBJECTS = rtrmgr_xif.lo
 librtrmgrxif_la_OBJECTS = $(am_librtrmgrxif_la_OBJECTS)
-libsocket4userxif_la_LIBADD =
+libsocket4userxif_la_DEPENDENCIES =  \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libsocket4userxif_la_OBJECTS = socket4_user_xif.lo
 libsocket4userxif_la_OBJECTS = $(am_libsocket4userxif_la_OBJECTS)
-libsocket4xif_la_LIBADD =
+libsocket4xif_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libsocket4xif_la_OBJECTS = socket4_xif.lo
 libsocket4xif_la_OBJECTS = $(am_libsocket4xif_la_OBJECTS)
-libsocket6userxif_la_LIBADD =
+libsocket6userxif_la_DEPENDENCIES =  \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libsocket6userxif_la_OBJECTS = socket6_user_xif.lo
 libsocket6userxif_la_OBJECTS = $(am_libsocket6userxif_la_OBJECTS)
-libsocket6xif_la_LIBADD =
+libsocket6xif_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libsocket6xif_la_OBJECTS = socket6_xif.lo
 libsocket6xif_la_OBJECTS = $(am_libsocket6xif_la_OBJECTS)
-libstaticroutesxif_la_LIBADD =
+libstaticroutesxif_la_DEPENDENCIES =  \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libstaticroutesxif_la_OBJECTS = static_routes_xif.lo
 libstaticroutesxif_la_OBJECTS = $(am_libstaticroutesxif_la_OBJECTS)
-libtestpeerxif_la_LIBADD =
+libtestpeerxif_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libtestpeerxif_la_OBJECTS = test_peer_xif.lo
 libtestpeerxif_la_OBJECTS = $(am_libtestpeerxif_la_OBJECTS)
-libtestxif_la_LIBADD =
+libtestxif_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libtestxif_la_OBJECTS = test_xif.lo
 libtestxif_la_OBJECTS = $(am_libtestxif_la_OBJECTS)
-libtestxrlsxif_la_LIBADD =
+libtestxrlsxif_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libtestxrlsxif_la_OBJECTS = test_xrls_xif.lo
 libtestxrlsxif_la_OBJECTS = $(am_libtestxrlsxif_la_OBJECTS)
-libvrrpxif_la_LIBADD =
+libvrrpxif_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libvrrpxif_la_OBJECTS = vrrp_xif.lo
 libvrrpxif_la_OBJECTS = $(am_libvrrpxif_la_OBJECTS)
-libxorpifmibxif_la_LIBADD =
+libxorpifmibxif_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libxorpifmibxif_la_OBJECTS = xorp_if_mib_xif.lo
 libxorpifmibxif_la_OBJECTS = $(am_libxorpifmibxif_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(top_builddir)@am__isrc@
@@ -588,7 +739,7 @@ top_srcdir = @top_srcdir@
 #
 # Sample Test Client Interface
 #
-noinst_LTLIBRARIES = libbgpmibtrapsxif.la libbgpxif.la \
+lib_LTLIBRARIES = libbgpmibtrapsxif.la libbgpxif.la \
 	libclimanagerxif.la libcliprocessorxif.la libcommonxif.la \
 	libcoordxif.la libdatainxif.la libfeaclickxif.la \
 	libfeaifmgrxif.la libfeafibxif.la libfeafibclientxif.la \
@@ -611,74 +762,259 @@ noinst_LTLIBRARIES = libbgpmibtrapsxif.la libbgpxif.la \
 	libtestpeerxif.la libtestxrlsxif.la libvrrpxif.la \
 	libxorpifmibxif.la libtestxif.la
 libbgpmibtrapsxif_la_SOURCES = bgp_mib_traps_xif.hh bgp_mib_traps_xif.cc
+libbgpmibtrapsxif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libbgpxif_la_SOURCES = bgp_xif.hh bgp_xif.cc
+libbgpxif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libclimanagerxif_la_SOURCES = cli_manager_xif.hh cli_manager_xif.cc
+libclimanagerxif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libcliprocessorxif_la_SOURCES = cli_processor_xif.hh cli_processor_xif.cc
+libcliprocessorxif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libcommonxif_la_SOURCES = common_xif.hh common_xif.cc
+libcommonxif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libcoordxif_la_SOURCES = coord_xif.hh coord_xif.cc
+libcoordxif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libdatainxif_la_SOURCES = datain_xif.hh datain_xif.cc
+libdatainxif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libfeaclickxif_la_SOURCES = fea_click_xif.hh fea_click_xif.cc
+libfeaclickxif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libfeaifmgrxif_la_SOURCES = fea_ifmgr_xif.hh fea_ifmgr_xif.cc
+libfeaifmgrxif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libfeafibxif_la_SOURCES = fea_fib_xif.hh fea_fib_xif.cc
+libfeafibxif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libfeafibclientxif_la_SOURCES = fea_fib_client_xif.hh fea_fib_client_xif.cc
+libfeafibclientxif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libfeafirewallxif_la_SOURCES = fea_firewall_xif.hh fea_firewall_xif.cc
+libfeafirewallxif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libfeaifmgrmirrorxif_la_SOURCES = fea_ifmgr_mirror_xif.hh \
 	fea_ifmgr_mirror_xif.cc
+libfeaifmgrmirrorxif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libfeaifmgrreplicatorxif_la_SOURCES = fea_ifmgr_replicator_xif.hh \
 	fea_ifmgr_replicator_xif.cc
+libfeaifmgrreplicatorxif_la_LIBADD =  \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libfib2mribxif_la_SOURCES = fib2mrib_xif.hh fib2mrib_xif.cc
+libfib2mribxif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libftixif_la_SOURCES = fti_xif.hh fti_xif.cc
+libftixif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libfearawlinkxif_la_SOURCES = fea_rawlink_xif.hh fea_rawlink_xif.cc
+libfearawlinkxif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libfearawlinkclientxif_la_SOURCES = fea_rawlink_client_xif.hh \
 	fea_rawlink_client_xif.cc
+libfearawlinkclientxif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libfearawpkt4xif_la_SOURCES = fea_rawpkt4_xif.hh fea_rawpkt4_xif.cc
+libfearawpkt4xif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libfearawpkt4clientxif_la_SOURCES = fea_rawpkt4_client_xif.hh \
 	fea_rawpkt4_client_xif.cc
+libfearawpkt4clientxif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libfearawpkt6xif_la_SOURCES = fea_rawpkt6_xif.hh fea_rawpkt6_xif.cc
+libfearawpkt6xif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libfearawpkt6clientxif_la_SOURCES = fea_rawpkt6_client_xif.hh \
 	fea_rawpkt6_client_xif.cc
+libfearawpkt6clientxif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libfinderxif_la_SOURCES = finder_xif.hh finder_xif.cc
+libfinderxif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libfindereventnotifierxif_la_SOURCES = finder_event_notifier_xif.hh \
 	finder_event_notifier_xif.cc
+libfindereventnotifierxif_la_LIBADD =  \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libfindereventobserverxif_la_SOURCES = finder_event_observer_xif.hh \
 	finder_event_observer_xif.cc
+libfindereventobserverxif_la_LIBADD =  \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libfinderclientxif_la_SOURCES = finder_client_xif.hh finder_client_xif.cc
+libfinderclientxif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libmfeaxif_la_SOURCES = mfea_xif.hh mfea_xif.cc
+libmfeaxif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libmfeaclientxif_la_SOURCES = mfea_client_xif.hh mfea_client_xif.cc
+libmfeaclientxif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libmld6igmpxif_la_SOURCES = mld6igmp_xif.hh mld6igmp_xif.cc
+libmld6igmpxif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libmld6igmpclientxif_la_SOURCES = mld6igmp_client_xif.hh mld6igmp_client_xif.cc
+libmld6igmpclientxif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libolsr4xif_la_SOURCES = olsr4_xif.hh olsr4_xif.cc
+libolsr4xif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libospfv2xif_la_SOURCES = ospfv2_xif.hh ospfv2_xif.cc
+libospfv2xif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libospfv3xif_la_SOURCES = ospfv3_xif.hh ospfv3_xif.cc
+libospfv3xif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libpimxif_la_SOURCES = pim_xif.hh pim_xif.cc
+libpimxif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libpolicyxif_la_SOURCES = policy_xif.hh policy_xif.cc
+libpolicyxif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libpolicybackendxif_la_SOURCES = policy_backend_xif.hh policy_backend_xif.cc
+libpolicybackendxif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libpolicyredist4xif_la_SOURCES = policy_redist4_xif.hh policy_redist4_xif.cc
+libpolicyredist4xif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libpolicyredist6xif_la_SOURCES = policy_redist6_xif.hh policy_redist6_xif.cc
+libpolicyredist6xif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libprofilexif_la_SOURCES = profile_xif.hh profile_xif.cc
+libprofilexif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libprofileclientxif_la_SOURCES = profile_client_xif.hh profile_client_xif.cc
+libprofileclientxif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libredist4xif_la_SOURCES = redist4_xif.hh redist4_xif.cc
+libredist4xif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libredist6xif_la_SOURCES = redist6_xif.hh redist6_xif.cc
+libredist6xif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libredisttransaction4xif_la_SOURCES = redist_transaction4_xif.hh \
 	redist_transaction4_xif.cc
+libredisttransaction4xif_la_LIBADD =  \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libredisttransaction6xif_la_SOURCES = redist_transaction6_xif.hh \
 	redist_transaction6_xif.cc
+libredisttransaction6xif_la_LIBADD =  \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libribxif_la_SOURCES = rib_xif.hh rib_xif.cc
+libribxif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libribclientxif_la_SOURCES = rib_client_xif.hh rib_client_xif.cc
+libribclientxif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libripxif_la_SOURCES = rip_xif.hh rip_xif.cc
+libripxif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libripngxif_la_SOURCES = ripng_xif.hh ripng_xif.cc
+libripngxif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 librtrmgrxif_la_SOURCES = rtrmgr_xif.hh rtrmgr_xif.cc
+librtrmgrxif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 librtrmgr_clientxif_la_SOURCES = rtrmgr_client_xif.hh rtrmgr_client_xif.cc
+librtrmgr_clientxif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libsocket4xif_la_SOURCES = socket4_xif.hh socket4_xif.cc
+libsocket4xif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libsocket4userxif_la_SOURCES = socket4_user_xif.hh socket4_user_xif.cc
+libsocket4userxif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libsocket6xif_la_SOURCES = socket6_xif.hh socket6_xif.cc
+libsocket6xif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libsocket6userxif_la_SOURCES = socket6_user_xif.hh socket6_user_xif.cc
+libsocket6userxif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libstaticroutesxif_la_SOURCES = static_routes_xif.hh static_routes_xif.cc
+libstaticroutesxif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libtestpeerxif_la_SOURCES = test_peer_xif.hh test_peer_xif.cc
+libtestpeerxif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libtestxrlsxif_la_SOURCES = test_xrls_xif.hh test_xrls_xif.cc
+libtestxrlsxif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libvrrpxif_la_SOURCES = vrrp_xif.hh vrrp_xif.cc
+libvrrpxif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libxorpifmibxif_la_SOURCES = xorp_if_mib_xif.hh xorp_if_mib_xif.cc
+libxorpifmibxif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libtestxif_la_SOURCES = test_xif.hh test_xif.cc
+libtestxif_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 ################################################################
 INCLUDES = -I$(top_srcdir)
@@ -721,135 +1057,153 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
+install-libLTLIBRARIES: $(lib_LTLIBRARIES)
+	@$(NORMAL_INSTALL)
+	test -z "$(libdir)" || $(MKDIR_P) "$(DESTDIR)$(libdir)"
+	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    f=$(am__strip_dir) \
+	    echo " $(LIBTOOL) --mode=install $(libLTLIBRARIES_INSTALL) $(INSTALL_STRIP_FLAG) '$$p' '$(DESTDIR)$(libdir)/$$f'"; \
+	    $(LIBTOOL) --mode=install $(libLTLIBRARIES_INSTALL) $(INSTALL_STRIP_FLAG) "$$p" "$(DESTDIR)$(libdir)/$$f"; \
+	  else :; fi; \
+	done
 
-clean-noinstLTLIBRARIES:
-	-test -z "$(noinst_LTLIBRARIES)" || rm -f $(noinst_LTLIBRARIES)
-	@list='$(noinst_LTLIBRARIES)'; for p in $$list; do \
+uninstall-libLTLIBRARIES:
+	@$(NORMAL_UNINSTALL)
+	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
+	  p=$(am__strip_dir) \
+	  echo " $(LIBTOOL) --mode=uninstall rm -f '$(DESTDIR)$(libdir)/$$p'"; \
+	  $(LIBTOOL) --mode=uninstall rm -f "$(DESTDIR)$(libdir)/$$p"; \
+	done
+
+clean-libLTLIBRARIES:
+	-test -z "$(lib_LTLIBRARIES)" || rm -f $(lib_LTLIBRARIES)
+	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
 	  dir="`echo $$p | sed -e 's|/[^/]*$$||'`"; \
 	  test "$$dir" != "$$p" || dir=.; \
 	  echo "rm -f \"$${dir}/so_locations\""; \
 	  rm -f "$${dir}/so_locations"; \
 	done
 libbgpmibtrapsxif.la: $(libbgpmibtrapsxif_la_OBJECTS) $(libbgpmibtrapsxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libbgpmibtrapsxif_la_OBJECTS) $(libbgpmibtrapsxif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libbgpmibtrapsxif_la_OBJECTS) $(libbgpmibtrapsxif_la_LIBADD) $(LIBS)
 libbgpxif.la: $(libbgpxif_la_OBJECTS) $(libbgpxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libbgpxif_la_OBJECTS) $(libbgpxif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libbgpxif_la_OBJECTS) $(libbgpxif_la_LIBADD) $(LIBS)
 libclimanagerxif.la: $(libclimanagerxif_la_OBJECTS) $(libclimanagerxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libclimanagerxif_la_OBJECTS) $(libclimanagerxif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libclimanagerxif_la_OBJECTS) $(libclimanagerxif_la_LIBADD) $(LIBS)
 libcliprocessorxif.la: $(libcliprocessorxif_la_OBJECTS) $(libcliprocessorxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libcliprocessorxif_la_OBJECTS) $(libcliprocessorxif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libcliprocessorxif_la_OBJECTS) $(libcliprocessorxif_la_LIBADD) $(LIBS)
 libcommonxif.la: $(libcommonxif_la_OBJECTS) $(libcommonxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libcommonxif_la_OBJECTS) $(libcommonxif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libcommonxif_la_OBJECTS) $(libcommonxif_la_LIBADD) $(LIBS)
 libcoordxif.la: $(libcoordxif_la_OBJECTS) $(libcoordxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libcoordxif_la_OBJECTS) $(libcoordxif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libcoordxif_la_OBJECTS) $(libcoordxif_la_LIBADD) $(LIBS)
 libdatainxif.la: $(libdatainxif_la_OBJECTS) $(libdatainxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libdatainxif_la_OBJECTS) $(libdatainxif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libdatainxif_la_OBJECTS) $(libdatainxif_la_LIBADD) $(LIBS)
 libfeaclickxif.la: $(libfeaclickxif_la_OBJECTS) $(libfeaclickxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libfeaclickxif_la_OBJECTS) $(libfeaclickxif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libfeaclickxif_la_OBJECTS) $(libfeaclickxif_la_LIBADD) $(LIBS)
 libfeafibclientxif.la: $(libfeafibclientxif_la_OBJECTS) $(libfeafibclientxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libfeafibclientxif_la_OBJECTS) $(libfeafibclientxif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libfeafibclientxif_la_OBJECTS) $(libfeafibclientxif_la_LIBADD) $(LIBS)
 libfeafibxif.la: $(libfeafibxif_la_OBJECTS) $(libfeafibxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libfeafibxif_la_OBJECTS) $(libfeafibxif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libfeafibxif_la_OBJECTS) $(libfeafibxif_la_LIBADD) $(LIBS)
 libfeafirewallxif.la: $(libfeafirewallxif_la_OBJECTS) $(libfeafirewallxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libfeafirewallxif_la_OBJECTS) $(libfeafirewallxif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libfeafirewallxif_la_OBJECTS) $(libfeafirewallxif_la_LIBADD) $(LIBS)
 libfeaifmgrmirrorxif.la: $(libfeaifmgrmirrorxif_la_OBJECTS) $(libfeaifmgrmirrorxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libfeaifmgrmirrorxif_la_OBJECTS) $(libfeaifmgrmirrorxif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libfeaifmgrmirrorxif_la_OBJECTS) $(libfeaifmgrmirrorxif_la_LIBADD) $(LIBS)
 libfeaifmgrreplicatorxif.la: $(libfeaifmgrreplicatorxif_la_OBJECTS) $(libfeaifmgrreplicatorxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libfeaifmgrreplicatorxif_la_OBJECTS) $(libfeaifmgrreplicatorxif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libfeaifmgrreplicatorxif_la_OBJECTS) $(libfeaifmgrreplicatorxif_la_LIBADD) $(LIBS)
 libfeaifmgrxif.la: $(libfeaifmgrxif_la_OBJECTS) $(libfeaifmgrxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libfeaifmgrxif_la_OBJECTS) $(libfeaifmgrxif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libfeaifmgrxif_la_OBJECTS) $(libfeaifmgrxif_la_LIBADD) $(LIBS)
 libfearawlinkclientxif.la: $(libfearawlinkclientxif_la_OBJECTS) $(libfearawlinkclientxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libfearawlinkclientxif_la_OBJECTS) $(libfearawlinkclientxif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libfearawlinkclientxif_la_OBJECTS) $(libfearawlinkclientxif_la_LIBADD) $(LIBS)
 libfearawlinkxif.la: $(libfearawlinkxif_la_OBJECTS) $(libfearawlinkxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libfearawlinkxif_la_OBJECTS) $(libfearawlinkxif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libfearawlinkxif_la_OBJECTS) $(libfearawlinkxif_la_LIBADD) $(LIBS)
 libfearawpkt4clientxif.la: $(libfearawpkt4clientxif_la_OBJECTS) $(libfearawpkt4clientxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libfearawpkt4clientxif_la_OBJECTS) $(libfearawpkt4clientxif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libfearawpkt4clientxif_la_OBJECTS) $(libfearawpkt4clientxif_la_LIBADD) $(LIBS)
 libfearawpkt4xif.la: $(libfearawpkt4xif_la_OBJECTS) $(libfearawpkt4xif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libfearawpkt4xif_la_OBJECTS) $(libfearawpkt4xif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libfearawpkt4xif_la_OBJECTS) $(libfearawpkt4xif_la_LIBADD) $(LIBS)
 libfearawpkt6clientxif.la: $(libfearawpkt6clientxif_la_OBJECTS) $(libfearawpkt6clientxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libfearawpkt6clientxif_la_OBJECTS) $(libfearawpkt6clientxif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libfearawpkt6clientxif_la_OBJECTS) $(libfearawpkt6clientxif_la_LIBADD) $(LIBS)
 libfearawpkt6xif.la: $(libfearawpkt6xif_la_OBJECTS) $(libfearawpkt6xif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libfearawpkt6xif_la_OBJECTS) $(libfearawpkt6xif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libfearawpkt6xif_la_OBJECTS) $(libfearawpkt6xif_la_LIBADD) $(LIBS)
 libfib2mribxif.la: $(libfib2mribxif_la_OBJECTS) $(libfib2mribxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libfib2mribxif_la_OBJECTS) $(libfib2mribxif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libfib2mribxif_la_OBJECTS) $(libfib2mribxif_la_LIBADD) $(LIBS)
 libfinderclientxif.la: $(libfinderclientxif_la_OBJECTS) $(libfinderclientxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libfinderclientxif_la_OBJECTS) $(libfinderclientxif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libfinderclientxif_la_OBJECTS) $(libfinderclientxif_la_LIBADD) $(LIBS)
 libfindereventnotifierxif.la: $(libfindereventnotifierxif_la_OBJECTS) $(libfindereventnotifierxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libfindereventnotifierxif_la_OBJECTS) $(libfindereventnotifierxif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libfindereventnotifierxif_la_OBJECTS) $(libfindereventnotifierxif_la_LIBADD) $(LIBS)
 libfindereventobserverxif.la: $(libfindereventobserverxif_la_OBJECTS) $(libfindereventobserverxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libfindereventobserverxif_la_OBJECTS) $(libfindereventobserverxif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libfindereventobserverxif_la_OBJECTS) $(libfindereventobserverxif_la_LIBADD) $(LIBS)
 libfinderxif.la: $(libfinderxif_la_OBJECTS) $(libfinderxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libfinderxif_la_OBJECTS) $(libfinderxif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libfinderxif_la_OBJECTS) $(libfinderxif_la_LIBADD) $(LIBS)
 libftixif.la: $(libftixif_la_OBJECTS) $(libftixif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libftixif_la_OBJECTS) $(libftixif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libftixif_la_OBJECTS) $(libftixif_la_LIBADD) $(LIBS)
 libmfeaclientxif.la: $(libmfeaclientxif_la_OBJECTS) $(libmfeaclientxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libmfeaclientxif_la_OBJECTS) $(libmfeaclientxif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libmfeaclientxif_la_OBJECTS) $(libmfeaclientxif_la_LIBADD) $(LIBS)
 libmfeaxif.la: $(libmfeaxif_la_OBJECTS) $(libmfeaxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libmfeaxif_la_OBJECTS) $(libmfeaxif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libmfeaxif_la_OBJECTS) $(libmfeaxif_la_LIBADD) $(LIBS)
 libmld6igmpclientxif.la: $(libmld6igmpclientxif_la_OBJECTS) $(libmld6igmpclientxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libmld6igmpclientxif_la_OBJECTS) $(libmld6igmpclientxif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libmld6igmpclientxif_la_OBJECTS) $(libmld6igmpclientxif_la_LIBADD) $(LIBS)
 libmld6igmpxif.la: $(libmld6igmpxif_la_OBJECTS) $(libmld6igmpxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libmld6igmpxif_la_OBJECTS) $(libmld6igmpxif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libmld6igmpxif_la_OBJECTS) $(libmld6igmpxif_la_LIBADD) $(LIBS)
 libolsr4xif.la: $(libolsr4xif_la_OBJECTS) $(libolsr4xif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libolsr4xif_la_OBJECTS) $(libolsr4xif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libolsr4xif_la_OBJECTS) $(libolsr4xif_la_LIBADD) $(LIBS)
 libospfv2xif.la: $(libospfv2xif_la_OBJECTS) $(libospfv2xif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libospfv2xif_la_OBJECTS) $(libospfv2xif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libospfv2xif_la_OBJECTS) $(libospfv2xif_la_LIBADD) $(LIBS)
 libospfv3xif.la: $(libospfv3xif_la_OBJECTS) $(libospfv3xif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libospfv3xif_la_OBJECTS) $(libospfv3xif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libospfv3xif_la_OBJECTS) $(libospfv3xif_la_LIBADD) $(LIBS)
 libpimxif.la: $(libpimxif_la_OBJECTS) $(libpimxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libpimxif_la_OBJECTS) $(libpimxif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libpimxif_la_OBJECTS) $(libpimxif_la_LIBADD) $(LIBS)
 libpolicybackendxif.la: $(libpolicybackendxif_la_OBJECTS) $(libpolicybackendxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libpolicybackendxif_la_OBJECTS) $(libpolicybackendxif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libpolicybackendxif_la_OBJECTS) $(libpolicybackendxif_la_LIBADD) $(LIBS)
 libpolicyredist4xif.la: $(libpolicyredist4xif_la_OBJECTS) $(libpolicyredist4xif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libpolicyredist4xif_la_OBJECTS) $(libpolicyredist4xif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libpolicyredist4xif_la_OBJECTS) $(libpolicyredist4xif_la_LIBADD) $(LIBS)
 libpolicyredist6xif.la: $(libpolicyredist6xif_la_OBJECTS) $(libpolicyredist6xif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libpolicyredist6xif_la_OBJECTS) $(libpolicyredist6xif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libpolicyredist6xif_la_OBJECTS) $(libpolicyredist6xif_la_LIBADD) $(LIBS)
 libpolicyxif.la: $(libpolicyxif_la_OBJECTS) $(libpolicyxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libpolicyxif_la_OBJECTS) $(libpolicyxif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libpolicyxif_la_OBJECTS) $(libpolicyxif_la_LIBADD) $(LIBS)
 libprofileclientxif.la: $(libprofileclientxif_la_OBJECTS) $(libprofileclientxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libprofileclientxif_la_OBJECTS) $(libprofileclientxif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libprofileclientxif_la_OBJECTS) $(libprofileclientxif_la_LIBADD) $(LIBS)
 libprofilexif.la: $(libprofilexif_la_OBJECTS) $(libprofilexif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libprofilexif_la_OBJECTS) $(libprofilexif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libprofilexif_la_OBJECTS) $(libprofilexif_la_LIBADD) $(LIBS)
 libredist4xif.la: $(libredist4xif_la_OBJECTS) $(libredist4xif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libredist4xif_la_OBJECTS) $(libredist4xif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libredist4xif_la_OBJECTS) $(libredist4xif_la_LIBADD) $(LIBS)
 libredist6xif.la: $(libredist6xif_la_OBJECTS) $(libredist6xif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libredist6xif_la_OBJECTS) $(libredist6xif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libredist6xif_la_OBJECTS) $(libredist6xif_la_LIBADD) $(LIBS)
 libredisttransaction4xif.la: $(libredisttransaction4xif_la_OBJECTS) $(libredisttransaction4xif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libredisttransaction4xif_la_OBJECTS) $(libredisttransaction4xif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libredisttransaction4xif_la_OBJECTS) $(libredisttransaction4xif_la_LIBADD) $(LIBS)
 libredisttransaction6xif.la: $(libredisttransaction6xif_la_OBJECTS) $(libredisttransaction6xif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libredisttransaction6xif_la_OBJECTS) $(libredisttransaction6xif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libredisttransaction6xif_la_OBJECTS) $(libredisttransaction6xif_la_LIBADD) $(LIBS)
 libribclientxif.la: $(libribclientxif_la_OBJECTS) $(libribclientxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libribclientxif_la_OBJECTS) $(libribclientxif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libribclientxif_la_OBJECTS) $(libribclientxif_la_LIBADD) $(LIBS)
 libribxif.la: $(libribxif_la_OBJECTS) $(libribxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libribxif_la_OBJECTS) $(libribxif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libribxif_la_OBJECTS) $(libribxif_la_LIBADD) $(LIBS)
 libripngxif.la: $(libripngxif_la_OBJECTS) $(libripngxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libripngxif_la_OBJECTS) $(libripngxif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libripngxif_la_OBJECTS) $(libripngxif_la_LIBADD) $(LIBS)
 libripxif.la: $(libripxif_la_OBJECTS) $(libripxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libripxif_la_OBJECTS) $(libripxif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libripxif_la_OBJECTS) $(libripxif_la_LIBADD) $(LIBS)
 librtrmgr_clientxif.la: $(librtrmgr_clientxif_la_OBJECTS) $(librtrmgr_clientxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(librtrmgr_clientxif_la_OBJECTS) $(librtrmgr_clientxif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(librtrmgr_clientxif_la_OBJECTS) $(librtrmgr_clientxif_la_LIBADD) $(LIBS)
 librtrmgrxif.la: $(librtrmgrxif_la_OBJECTS) $(librtrmgrxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(librtrmgrxif_la_OBJECTS) $(librtrmgrxif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(librtrmgrxif_la_OBJECTS) $(librtrmgrxif_la_LIBADD) $(LIBS)
 libsocket4userxif.la: $(libsocket4userxif_la_OBJECTS) $(libsocket4userxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libsocket4userxif_la_OBJECTS) $(libsocket4userxif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libsocket4userxif_la_OBJECTS) $(libsocket4userxif_la_LIBADD) $(LIBS)
 libsocket4xif.la: $(libsocket4xif_la_OBJECTS) $(libsocket4xif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libsocket4xif_la_OBJECTS) $(libsocket4xif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libsocket4xif_la_OBJECTS) $(libsocket4xif_la_LIBADD) $(LIBS)
 libsocket6userxif.la: $(libsocket6userxif_la_OBJECTS) $(libsocket6userxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libsocket6userxif_la_OBJECTS) $(libsocket6userxif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libsocket6userxif_la_OBJECTS) $(libsocket6userxif_la_LIBADD) $(LIBS)
 libsocket6xif.la: $(libsocket6xif_la_OBJECTS) $(libsocket6xif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libsocket6xif_la_OBJECTS) $(libsocket6xif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libsocket6xif_la_OBJECTS) $(libsocket6xif_la_LIBADD) $(LIBS)
 libstaticroutesxif.la: $(libstaticroutesxif_la_OBJECTS) $(libstaticroutesxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libstaticroutesxif_la_OBJECTS) $(libstaticroutesxif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libstaticroutesxif_la_OBJECTS) $(libstaticroutesxif_la_LIBADD) $(LIBS)
 libtestpeerxif.la: $(libtestpeerxif_la_OBJECTS) $(libtestpeerxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libtestpeerxif_la_OBJECTS) $(libtestpeerxif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libtestpeerxif_la_OBJECTS) $(libtestpeerxif_la_LIBADD) $(LIBS)
 libtestxif.la: $(libtestxif_la_OBJECTS) $(libtestxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libtestxif_la_OBJECTS) $(libtestxif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libtestxif_la_OBJECTS) $(libtestxif_la_LIBADD) $(LIBS)
 libtestxrlsxif.la: $(libtestxrlsxif_la_OBJECTS) $(libtestxrlsxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libtestxrlsxif_la_OBJECTS) $(libtestxrlsxif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libtestxrlsxif_la_OBJECTS) $(libtestxrlsxif_la_LIBADD) $(LIBS)
 libvrrpxif.la: $(libvrrpxif_la_OBJECTS) $(libvrrpxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libvrrpxif_la_OBJECTS) $(libvrrpxif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libvrrpxif_la_OBJECTS) $(libvrrpxif_la_LIBADD) $(LIBS)
 libxorpifmibxif.la: $(libxorpifmibxif_la_OBJECTS) $(libxorpifmibxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libxorpifmibxif_la_OBJECTS) $(libxorpifmibxif_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libxorpifmibxif_la_OBJECTS) $(libxorpifmibxif_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -1023,6 +1377,9 @@ check-am: all-am
 check: check-am
 all-am: Makefile $(LTLIBRARIES)
 installdirs:
+	for dir in "$(DESTDIR)$(libdir)"; do \
+	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
+	done
 install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
@@ -1049,7 +1406,7 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-generic clean-libtool clean-noinstLTLIBRARIES \
+clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
 	mostlyclean-am
 
 distclean: distclean-am
@@ -1072,7 +1429,7 @@ install-data-am:
 
 install-dvi: install-dvi-am
 
-install-exec-am:
+install-exec-am: install-libLTLIBRARIES
 
 install-html: install-html-am
 
@@ -1104,22 +1461,23 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am:
+uninstall-am: uninstall-libLTLIBRARIES
 
 .MAKE: install-am install-strip
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
-	clean-libtool clean-noinstLTLIBRARIES ctags distclean \
+	clean-libLTLIBRARIES clean-libtool ctags distclean \
 	distclean-compile distclean-generic distclean-libtool \
 	distclean-tags distdir dvi dvi-am html html-am info info-am \
 	install install-am install-data install-data-am install-dvi \
 	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am install-man \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
-	pdf pdf-am ps ps-am tags uninstall uninstall-am
+	install-html-am install-info install-info-am \
+	install-libLTLIBRARIES install-man install-pdf install-pdf-am \
+	install-ps install-ps-am install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	tags uninstall uninstall-am uninstall-libLTLIBRARIES
 
 
 @PYTHON_BUILD@$(srcdir)/%_xif.hh $(srcdir)/%_xif.cc: $(srcdir)/%.xif $(CLNTGEN_PY)

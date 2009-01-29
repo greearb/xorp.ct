@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/ospf/tools/Makefile.am,v 1.2 2005/11/05 05:12:38 atanu Exp $
+## $XORP: xorp/ospf/tools/Makefile.am,v 1.3 2007/08/16 00:49:25 atanu Exp $
 ##
 
 # Redefine the bin installation directory
@@ -16,10 +16,10 @@ TESTS		 =
 noinst_PROGRAMS  =
 
 # -- No-install Libtool Libraries
-noinst_LTLIBRARIES =
+lib_LTLIBRARIES =
 
 # -- Libraries and library flags to link the binary programs
-LDADD		 = $(noinst_LTLIBRARIES)
+LDADD		 = $(lib_LTLIBRARIES)
 LDADD		+= $(top_builddir)/libxipc/libxipc.la
 LDADD		+= $(top_builddir)/libcomm/libcomm.la
 LDADD		+= $(top_builddir)/libxorp/libxorp.la
@@ -29,15 +29,18 @@ LDADD		+= $(top_builddir)/xrl/interfaces/libospfv3xif.la
 # -- Program Sources
 clear_database_SOURCES  = clear_database.cc
 clear_database_LDADD = $(LDADD)
-clear_database_LDADD += $(top_builddir)/ospf/libospf.la
+#clear_database_LDADD += $(top_builddir)/ospf/libospf.la
 
+print_lsas_CPPFLAGS = -I$(srcdir)/..
 print_lsas_SOURCES  = print_lsas.cc
+print_lsas_SOURCES += $(srcdir)/../lsa.cc
+print_lsas_SOURCES += $(srcdir)/../fletcher_checksum.cc
 print_lsas_LDADD = $(LDADD)
-print_lsas_LDADD += $(top_builddir)/ospf/libospf.la
+#print_lsas_LDADD += $(top_builddir)/ospf/libospf.la
 
 print_neighbours_SOURCES  = print_neighbours.cc
 print_neighbours_LDADD = $(LDADD)
-print_neighbours_LDADD += $(top_builddir)/ospf/libospf.la
+#print_neighbours_LDADD += $(top_builddir)/ospf/libospf.la
 
 ################################################################
 ##

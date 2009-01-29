@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.108 2008/10/10 01:23:52 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.109 2009/01/21 15:58:09 jtc Exp $
 ##
 
 # Redefine the bin installation directory
@@ -26,8 +26,8 @@ TESTS		 = test_xrl_sockets4_tcp.sh
 TESTS		+= test_xrl_sockets4_udp.sh
 TESTS		+= test_fea_rawlink.sh
 
-# -- No-install Libraries
-noinst_LTLIBRARIES = libfea.la libfea_data_plane_base.la
+# -- Libraries
+lib_LTLIBRARIES = libfea.la libfea_data_plane_base.la
 
 # -- Libraries and library flags to link the binary programs
 LDADD		 = libfea.la
@@ -174,7 +174,7 @@ libfea_la_SOURCES	+= xrl_mfea_node.cc
 
 # -- Sources and Linkage for test_xrl_sockets4_tcp
 test_xrl_sockets4_tcp_SOURCES	 = test_xrl_sockets4_tcp.cc
-test_xrl_sockets4_tcp_LDADD	 = $(noinst_LTLIBRARIES)
+test_xrl_sockets4_tcp_LDADD	 = $(lib_LTLIBRARIES)
 test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket4userxif.la
 test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket4xif.la
 test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket6userxif.la
@@ -186,7 +186,7 @@ test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/libxorp/libxorp.la
 
 # -- Sources and Linkage for test_xrl_sockets4_udp
 test_xrl_sockets4_udp_SOURCES	 = test_xrl_sockets4_udp.cc
-test_xrl_sockets4_udp_LDADD	 = $(noinst_LTLIBRARIES)
+test_xrl_sockets4_udp_LDADD	 = $(lib_LTLIBRARIES)
 test_xrl_sockets4_udp_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket4userxif.la
 test_xrl_sockets4_udp_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket4xif.la
 test_xrl_sockets4_udp_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket6userxif.la
@@ -198,7 +198,7 @@ test_xrl_sockets4_udp_LDADD	+= $(top_builddir)/libxorp/libxorp.la
 
 # -- Sources and Linkage for test_fea_rawlink
 test_fea_rawlink_SOURCES	 = test_fea_rawlink.cc
-test_fea_rawlink_LDADD		 = $(noinst_LTLIBRARIES)
+test_fea_rawlink_LDADD		 = $(lib_LTLIBRARIES)
 test_fea_rawlink_LDADD		+= $(top_builddir)/libfeaclient/libfeaclient.la
 test_fea_rawlink_LDADD		+= $(top_builddir)/xrl/interfaces/libfearawlinkxif.la
 test_fea_rawlink_LDADD		+= $(top_builddir)/xrl/interfaces/libfearawlinkclientxif.la

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/tests/Makefile.am,v 1.8 2004/11/23 22:43:49 bms Exp $
+## $XORP: xorp/xrl/tests/Makefile.am,v 1.9 2005/07/29 17:52:40 bms Exp $
 ##
 
 # -- Real Programs
@@ -12,8 +12,8 @@ check_PROGRAMS	 = test_generated
 # -- Test Programs
 TESTS		 = test_generated$(EXEEXT)
 
-# -- No-install Libraries
-noinst_LTLIBRARIES =
+# -- Libraries
+lib_LTLIBRARIES =
 
 test_generated_SOURCES  = test_generated.cc
 test_generated_SOURCES += test_tgt.hh test_tgt.cc

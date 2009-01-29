@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/tools/Makefile.am,v 1.1 2004/05/21 08:08:03 pavlin Exp $
+## $XORP: xorp/fea/tools/Makefile.am,v 1.2 2004/11/12 02:44:40 bms Exp $
 ##
 
 # Redefine the bin installation directory
@@ -15,8 +15,8 @@ TESTS		 =
 # -- No-install Programs
 noinst_PROGRAMS  = 
 
-# -- No-install Libraries
-noinst_LTLIBRARIES = 
+# -- Libraries
+lib_LTLIBRARIES = 
 
 # -- Libraries and library flags to link the binary programs
 LDADD		 = $(top_builddir)/libxipc/libxipc.la

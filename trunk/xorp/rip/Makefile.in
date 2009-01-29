@@ -46,8 +46,19 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/xorp_config.h
 CONFIG_CLEAN_FILES =
-LTLIBRARIES = $(noinst_LTLIBRARIES)
-librip_la_LIBADD =
+am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+am__vpath_adj = case $$p in \
+    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+    *) f=$$p;; \
+  esac;
+am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
+am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)"
+libLTLIBRARIES_INSTALL = $(INSTALL)
+LTLIBRARIES = $(lib_LTLIBRARIES)
+librip_la_DEPENDENCIES = $(top_builddir)/libfeaclient/libfeaclient.la \
+	$(top_builddir)/policy/backend/libpolicybackend.la \
+	$(top_builddir)/policy/common/libpolicycommon.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_librip_la_OBJECTS = librip_la-auth.lo librip_la-output_table.lo \
 	librip_la-output_updates.lo librip_la-packet_queue.lo \
 	librip_la-peer.lo librip_la-port.lo librip_la-redist.lo \
@@ -58,7 +69,11 @@ librip_la_OBJECTS = $(am_librip_la_OBJECTS)
 librip_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(librip_la_CXXFLAGS) \
 	$(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-libripng_la_LIBADD =
+libripng_la_DEPENDENCIES =  \
+	$(top_builddir)/libfeaclient/libfeaclient.la \
+	$(top_builddir)/policy/backend/libpolicybackend.la \
+	$(top_builddir)/policy/common/libpolicycommon.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libripng_la_OBJECTS = libripng_la-output_table.lo \
 	libripng_la-output_updates.lo libripng_la-packet_queue.lo \
 	libripng_la-peer.lo libripng_la-port.lo libripng_la-redist.lo \
@@ -69,7 +84,14 @@ libripng_la_OBJECTS = $(am_libripng_la_OBJECTS)
 libripng_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(libripng_la_CXXFLAGS) \
 	$(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-libripngxrl_la_LIBADD =
+libripngxrl_la_DEPENDENCIES = libripng.la \
+	$(top_builddir)/xrl/interfaces/libribxif.la \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
+	$(top_builddir)/libfeaclient/libfeaclient.la \
+	$(top_builddir)/xrl/interfaces/libsocket6xif.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libripngxrl_la_OBJECTS = libripngxrl_la-xrl_config.lo \
 	libripngxrl_la-xrl_port_manager.lo \
 	libripngxrl_la-xrl_port_io.lo \
@@ -81,7 +103,14 @@ libripngxrl_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) \
 	$(libripngxrl_la_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-libripxrl_la_LIBADD =
+libripxrl_la_DEPENDENCIES = librip.la \
+	$(top_builddir)/xrl/interfaces/libribxif.la \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
+	$(top_builddir)/libfeaclient/libfeaclient.la \
+	$(top_builddir)/xrl/interfaces/libsocket4xif.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libripxrl_la_OBJECTS = libripxrl_la-xrl_config.lo \
 	libripxrl_la-xrl_port_manager.lo libripxrl_la-xrl_port_io.lo \
 	libripxrl_la-xrl_process_spy.lo \
@@ -91,7 +120,6 @@ libripxrl_la_OBJECTS = $(am_libripxrl_la_OBJECTS)
 libripxrl_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(libripxrl_la_CXXFLAGS) \
 	$(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 am__EXEEXT_1 = test_auth$(EXEEXT) test_packets$(EXEEXT) \
 	test_request$(EXEEXT) test_route_walk$(EXEEXT) \
@@ -364,7 +392,7 @@ test_programs = test_auth test_packets test_request test_route_walk \
 TESTS = $(addsuffix $(EXEEXT),$(test_programs))
 
 # -- No-install Libtool Libraries
-noinst_LTLIBRARIES = librip.la libripng.la libripxrl.la libripngxrl.la
+lib_LTLIBRARIES = librip.la libripng.la libripxrl.la libripngxrl.la
 LDADD = $(top_builddir)/libxorp/libxorp.la
 
 # -- Real Program Sources
@@ -442,6 +470,19 @@ librip_la_SOURCES = rip_module.h auth.hh constants.hh output.hh \
 	update_queue.hh auth.cc output_table.cc output_updates.cc \
 	packet_queue.cc peer.cc port.cc redist.cc rib_notifier_base.cc \
 	rip_varrw.cc route_db.cc route_entry.cc update_queue.cc
+#librip_la_LIBADD		+= $(top_builddir)/xrl/targets/libripbase.la
+#librip_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libribxif.la
+#librip_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la
+#librip_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la
+#librip_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la
+#librip_la_LIBADD		+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la
+#librip_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libsocket4xif.la
+#librip_la_LIBADD		+= $(top_builddir)/libxipc/libxipc.la
+#librip_la_LIBADD		+= $(top_builddir)/libcomm/libcomm.la
+librip_la_LIBADD = $(top_builddir)/libfeaclient/libfeaclient.la \
+	$(top_builddir)/policy/backend/libpolicybackend.la \
+	$(top_builddir)/policy/common/libpolicycommon.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 # -- RIP NG Core Library Sources
 libripng_la_CXXFLAGS = -DINSTANTIATE_IPV6
@@ -453,6 +494,19 @@ libripng_la_SOURCES = rip_module.h constants.hh output.hh \
 	update_queue.hh output_table.cc output_updates.cc \
 	packet_queue.cc peer.cc port.cc redist.cc rib_notifier_base.cc \
 	rip_varrw.cc route_db.cc route_entry.cc update_queue.cc
+#libripng_la_LIBADD		+= $(top_builddir)/xrl/targets/libripbase.la
+#libripng_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libribxif.la
+#libripng_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la
+#libripng_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la
+#libripng_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la
+#libripng_la_LIBADD		+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la
+#libripng_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libsocket4xif.la
+#libripng_la_LIBADD		+= $(top_builddir)/libxipc/libxipc.la
+#libripng_la_LIBADD		+= $(top_builddir)/libcomm/libcomm.la
+libripng_la_LIBADD = $(top_builddir)/libfeaclient/libfeaclient.la \
+	$(top_builddir)/policy/backend/libpolicybackend.la \
+	$(top_builddir)/policy/common/libpolicycommon.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 # -- RIP XRL library sources
 libripxrl_la_CXXFLAGS = -DINSTANTIATE_IPV4
@@ -461,6 +515,20 @@ libripxrl_la_SOURCES = xrl_config.hh xrl_port_manager.hh \
 	xrl_rib_notifier.hh xrl_config.cc xrl_port_manager.cc \
 	xrl_port_io.cc xrl_process_spy.cc xrl_redist_manager.cc \
 	xrl_rib_notifier.cc
+#libripxrl_la_LIBADD		+= $(top_builddir)/xrl/targets/libripbase.la
+#libripxrl_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la
+#libripxrl_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la
+#libripxrl_la_LIBADD		+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la
+#libripxrl_la_LIBADD		+= $(top_builddir)/policy/backend/libpolicybackend.la
+#libripxrl_la_LIBADD		+= $(top_builddir)/policy/common/libpolicycommon.la
+libripxrl_la_LIBADD = librip.la \
+	$(top_builddir)/xrl/interfaces/libribxif.la \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
+	$(top_builddir)/libfeaclient/libfeaclient.la \
+	$(top_builddir)/xrl/interfaces/libsocket4xif.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 # -- RIP NG Xrl library sources
 libripngxrl_la_CXXFLAGS = -DINSTANTIATE_IPV6
@@ -469,6 +537,20 @@ libripngxrl_la_SOURCES = xrl_config.hh xrl_port_manager.hh \
 	xrl_rib_notifier.hh xrl_config.cc xrl_port_manager.cc \
 	xrl_port_io.cc xrl_process_spy.cc xrl_rib_notifier.cc \
 	xrl_redist_manager.cc
+#libripngxrl_la_LIBADD		+= $(top_builddir)/xrl/targets/libripbase.la
+#libripngxrl_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la
+#libripngxrl_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la
+#libripngxrl_la_LIBADD		+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la
+#libripngxrl_la_LIBADD		+= $(top_builddir)/policy/backend/libpolicybackend.la
+#libripngxrl_la_LIBADD		+= $(top_builddir)/policy/common/libpolicycommon.la
+libripngxrl_la_LIBADD = libripng.la \
+	$(top_builddir)/xrl/interfaces/libribxif.la \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
+	$(top_builddir)/libfeaclient/libfeaclient.la \
+	$(top_builddir)/xrl/interfaces/libsocket6xif.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 ################################################################
 INCLUDES = -I$(top_srcdir)
@@ -505,23 +587,41 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
+install-libLTLIBRARIES: $(lib_LTLIBRARIES)
+	@$(NORMAL_INSTALL)
+	test -z "$(libdir)" || $(MKDIR_P) "$(DESTDIR)$(libdir)"
+	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    f=$(am__strip_dir) \
+	    echo " $(LIBTOOL) --mode=install $(libLTLIBRARIES_INSTALL) $(INSTALL_STRIP_FLAG) '$$p' '$(DESTDIR)$(libdir)/$$f'"; \
+	    $(LIBTOOL) --mode=install $(libLTLIBRARIES_INSTALL) $(INSTALL_STRIP_FLAG) "$$p" "$(DESTDIR)$(libdir)/$$f"; \
+	  else :; fi; \
+	done
 
-clean-noinstLTLIBRARIES:
-	-test -z "$(noinst_LTLIBRARIES)" || rm -f $(noinst_LTLIBRARIES)
-	@list='$(noinst_LTLIBRARIES)'; for p in $$list; do \
+uninstall-libLTLIBRARIES:
+	@$(NORMAL_UNINSTALL)
+	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
+	  p=$(am__strip_dir) \
+	  echo " $(LIBTOOL) --mode=uninstall rm -f '$(DESTDIR)$(libdir)/$$p'"; \
+	  $(LIBTOOL) --mode=uninstall rm -f "$(DESTDIR)$(libdir)/$$p"; \
+	done
+
+clean-libLTLIBRARIES:
+	-test -z "$(lib_LTLIBRARIES)" || rm -f $(lib_LTLIBRARIES)
+	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
 	  dir="`echo $$p | sed -e 's|/[^/]*$$||'`"; \
 	  test "$$dir" != "$$p" || dir=.; \
 	  echo "rm -f \"$${dir}/so_locations\""; \
 	  rm -f "$${dir}/so_locations"; \
 	done
 librip.la: $(librip_la_OBJECTS) $(librip_la_DEPENDENCIES) 
-	$(librip_la_LINK)  $(librip_la_OBJECTS) $(librip_la_LIBADD) $(LIBS)
+	$(librip_la_LINK) -rpath $(libdir) $(librip_la_OBJECTS) $(librip_la_LIBADD) $(LIBS)
 libripng.la: $(libripng_la_OBJECTS) $(libripng_la_DEPENDENCIES) 
-	$(libripng_la_LINK)  $(libripng_la_OBJECTS) $(libripng_la_LIBADD) $(LIBS)
+	$(libripng_la_LINK) -rpath $(libdir) $(libripng_la_OBJECTS) $(libripng_la_LIBADD) $(LIBS)
 libripngxrl.la: $(libripngxrl_la_OBJECTS) $(libripngxrl_la_DEPENDENCIES) 
-	$(libripngxrl_la_LINK)  $(libripngxrl_la_OBJECTS) $(libripngxrl_la_LIBADD) $(LIBS)
+	$(libripngxrl_la_LINK) -rpath $(libdir) $(libripngxrl_la_OBJECTS) $(libripngxrl_la_LIBADD) $(LIBS)
 libripxrl.la: $(libripxrl_la_OBJECTS) $(libripxrl_la_DEPENDENCIES) 
-	$(libripxrl_la_LINK)  $(libripxrl_la_OBJECTS) $(libripxrl_la_LIBADD) $(LIBS)
+	$(libripxrl_la_LINK) -rpath $(libdir) $(libripxrl_la_OBJECTS) $(libripxrl_la_LIBADD) $(LIBS)
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	test -z "$(bindir)" || $(MKDIR_P) "$(DESTDIR)$(bindir)"
@@ -1218,9 +1318,11 @@ check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-recursive
 all-am: Makefile $(LTLIBRARIES) $(PROGRAMS)
+install-binPROGRAMS: install-libLTLIBRARIES
+
 installdirs: installdirs-recursive
 installdirs-am:
-	for dir in "$(DESTDIR)$(bindir)"; do \
+	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-recursive
@@ -1250,7 +1352,7 @@ maintainer-clean-generic:
 clean: clean-recursive
 
 clean-am: clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
-	clean-libtool clean-noinstLTLIBRARIES mostlyclean-am
+	clean-libLTLIBRARIES clean-libtool mostlyclean-am
 
 distclean: distclean-recursive
 	-rm -rf ./$(DEPDIR)
@@ -1272,7 +1374,7 @@ install-data-am:
 
 install-dvi: install-dvi-recursive
 
-install-exec-am: install-binPROGRAMS
+install-exec-am: install-binPROGRAMS install-libLTLIBRARIES
 
 install-html: install-html-recursive
 
@@ -1304,27 +1406,27 @@ ps: ps-recursive
 
 ps-am:
 
-uninstall-am: uninstall-binPROGRAMS
+uninstall-am: uninstall-binPROGRAMS uninstall-libLTLIBRARIES
 
 .MAKE: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) install-am \
 	install-strip
 
 .PHONY: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) CTAGS GTAGS \
 	all all-am check check-TESTS check-am clean clean-binPROGRAMS \
-	clean-checkPROGRAMS clean-generic clean-libtool \
-	clean-noinstLTLIBRARIES ctags ctags-recursive distclean \
+	clean-checkPROGRAMS clean-generic clean-libLTLIBRARIES \
+	clean-libtool ctags ctags-recursive distclean \
 	distclean-compile distclean-generic distclean-libtool \
 	distclean-tags distdir dvi dvi-am html html-am info info-am \
 	install install-am install-binPROGRAMS install-data \
 	install-data-am install-dvi install-dvi-am install-exec \
 	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs installdirs-am maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags tags-recursive uninstall uninstall-am \
-	uninstall-binPROGRAMS
+	install-info-am install-libLTLIBRARIES install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs installdirs-am \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
+	pdf pdf-am ps ps-am tags tags-recursive uninstall uninstall-am \
+	uninstall-binPROGRAMS uninstall-libLTLIBRARIES
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

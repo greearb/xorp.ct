@@ -1,10 +1,10 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/policy/common/Makefile.am,v 1.5 2005/10/02 22:21:54 abittau Exp $
+## $XORP: xorp/policy/common/Makefile.am,v 1.6 2008/08/06 08:10:17 abittau Exp $
 ##
 
-# -- No-install Libraries
-noinst_LTLIBRARIES = libpolicycommon.la
+# -- Libraries
+lib_LTLIBRARIES = libpolicycommon.la
 
 # Common policy library
 libpolicycommon_la_SOURCES              = ../../bgp/aspath.hh
@@ -37,6 +37,8 @@ libpolicycommon_la_SOURCES             += policy_utils.cc
 libpolicycommon_la_SOURCES             += register_elements.cc
 libpolicycommon_la_SOURCES             += register_operations.cc
 libpolicycommon_la_SOURCES             += varrw.cc
+
+libpolicycommon_la_LIBADD = $(top_builddir)/libxorp/libxorp.la
 
 ################################################################
 ##

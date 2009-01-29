@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/static_routes/Makefile.am,v 1.9 2005/01/29 07:14:32 bms Exp $
+## $XORP: xorp/static_routes/Makefile.am,v 1.10 2005/02/10 20:25:25 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -18,12 +18,12 @@ test_scripts	 = test_add_route.sh
 noinst_PROGRAMS  = 
 noinst_SCRIPTS	 = $(test_scripts)
 
-# -- No-install Libraries
-noinst_LTLIBRARIES = libstaticroutes.la
+# -- Libraries
+lib_LTLIBRARIES = libstaticroutes.la
 
 # -- Libraries and library flags to link the binary programs
 LDFLAGS		 = 
-LDADD		 = $(noinst_LTLIBRARIES)
+LDADD		 = $(lib_LTLIBRARIES)
 ### XRL libraries
 LDADD		+= $(top_builddir)/xrl/targets/libstaticroutesbase.la
 ### XORP misc libraries
@@ -50,6 +50,20 @@ libstaticroutes_la_SOURCES	+= xrl_static_routes_node.hh
 libstaticroutes_la_SOURCES	+= static_routes_node.cc
 libstaticroutes_la_SOURCES	+= static_routes_varrw.cc
 libstaticroutes_la_SOURCES	+= xrl_static_routes_node.cc
+
+libstaticroutes_la_LIBADD	 = $(top_builddir)/xrl/targets/libstaticroutesbase.la
+libstaticroutes_la_LIBADD	+= $(top_builddir)/policy/backend/libpolicybackend.la
+libstaticroutes_la_LIBADD	+= $(top_builddir)/policy/common/libpolicycommon.la
+libstaticroutes_la_LIBADD	+= $(top_builddir)/libfeaclient/libfeaclient.la
+libstaticroutes_la_LIBADD	+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la
+#libstaticroutes_la_LIBADD	+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la
+#libstaticroutes_la_LIBADD	+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la
+libstaticroutes_la_LIBADD	+= $(top_builddir)/xrl/interfaces/libribxif.la
+#libstaticroutes_la_LIBADD	+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la
+libstaticroutes_la_LIBADD	+= $(top_builddir)/libxipc/libxipc.la
+libstaticroutes_la_LIBADD	+= $(top_builddir)/libcomm/libcomm.la
+libstaticroutes_la_LIBADD	+= $(top_builddir)/libxorp/libxorp.la
+
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST	  = command_static_routes

@@ -1,13 +1,13 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/data_plane/ifconfig/Makefile.am,v 1.5 2007/09/26 01:40:41 pavlin Exp $
+## $XORP: xorp/fea/data_plane/ifconfig/Makefile.am,v 1.6 2007/12/28 05:12:37 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
 bindir = $(prefix)/$(subdir)
 
-# -- No-install Libraries
-noinst_LTLIBRARIES = libxorp_ifconfig.la
+# -- Libraries
+lib_LTLIBRARIES = libxorp_ifconfig.la
 
 # -- Library Sources
 libxorp_ifconfig_la_SOURCES	 = ifconfig_get_click.hh

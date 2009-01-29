@@ -33,7 +33,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-noinst_PROGRAMS = compilepolicy$(EXEEXT) execpolicy$(EXEEXT)
+noinst_PROGRAMS = execpolicy$(EXEEXT)
 subdir = policy/test
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -45,21 +45,12 @@ mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/xorp_config.h
 CONFIG_CLEAN_FILES =
 PROGRAMS = $(noinst_PROGRAMS)
-am_compilepolicy_OBJECTS = compilepolicy.$(OBJEXT) \
-	filter_manager_fake.$(OBJEXT) process_watch_fake.$(OBJEXT) \
-	lex.yy_compile_policy.$(OBJEXT) \
-	yacc.yy_compile_policy.$(OBJEXT)
-compilepolicy_OBJECTS = $(am_compilepolicy_OBJECTS)
-compilepolicy_DEPENDENCIES = ../libpolicy.la \
-	../common/libpolicycommon.la \
-	$(top_builddir)/libxipc/libxipc.la \
-	$(top_builddir)/libcomm/libcomm.la \
-	$(top_builddir)/libxorp/libxorp.la
 am_execpolicy_OBJECTS = execpolicy.$(OBJEXT) file_varrw.$(OBJEXT)
 execpolicy_OBJECTS = $(am_execpolicy_OBJECTS)
 execpolicy_DEPENDENCIES = ../backend/libpolicybackend.la \
 	../common/libpolicycommon.la \
 	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la
 DEFAULT_INCLUDES = -I. -I$(top_builddir)@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
@@ -82,8 +73,8 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(compilepolicy_SOURCES) $(execpolicy_SOURCES)
-DIST_SOURCES = $(compilepolicy_SOURCES) $(execpolicy_SOURCES)
+SOURCES = $(execpolicy_SOURCES)
+DIST_SOURCES = $(execpolicy_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -220,23 +211,11 @@ top_srcdir = @top_srcdir@
 
 # -- Test Programs
 TESTS = dummy_test.sh
-#noinst_PROGRAMS += policybench
-
-# compilepolicy
-compilepolicy_SOURCES = compilepolicy.cc filter_manager_fake.hh \
-	process_watch_fake.hh compilepolicy.hh filter_manager_fake.cc \
-	process_watch_fake.cc lex.yy_compile_policy.cc \
-	yacc.yy_compile_policy.cc yacc.yy_compile_policy.cc.h
-compilepolicy_LDADD = ../libpolicy.la ../common/libpolicycommon.la \
-	$(top_builddir)/libxipc/libxipc.la \
-	$(top_builddir)/libcomm/libcomm.la \
-	$(top_builddir)/libxorp/libxorp.la
-
-# execpolicy
 execpolicy_SOURCES = execpolicy.cc file_varrw.hh file_varrw.cc
 execpolicy_LDADD = ../backend/libpolicybackend.la \
 	../common/libpolicycommon.la \
 	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la
 
 ################################################################
@@ -281,9 +260,6 @@ clean-noinstPROGRAMS:
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
 	done
-compilepolicy$(EXEEXT): $(compilepolicy_OBJECTS) $(compilepolicy_DEPENDENCIES) 
-	@rm -f compilepolicy$(EXEEXT)
-	$(CXXLINK) $(compilepolicy_OBJECTS) $(compilepolicy_LDADD) $(LIBS)
 execpolicy$(EXEEXT): $(execpolicy_OBJECTS) $(execpolicy_DEPENDENCIES) 
 	@rm -f execpolicy$(EXEEXT)
 	$(CXXLINK) $(execpolicy_OBJECTS) $(execpolicy_LDADD) $(LIBS)
@@ -294,13 +270,8 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/compilepolicy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/execpolicy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/file_varrw.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/filter_manager_fake.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lex.yy_compile_policy.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/process_watch_fake.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/yacc.yy_compile_policy.Po@am__quote@
 
 .cc.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -582,6 +553,7 @@ uninstall-am:
 
 
 # policybench
+# noinst_PROGRAMS += policybench
 # policybench_SOURCES		 = policybench.cc
 # policybench_SOURCES		+= file_varrw.cc
 

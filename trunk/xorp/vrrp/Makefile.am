@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/vrrp/Makefile.am,v 1.5 2008/10/09 17:49:57 abittau Exp $
+## $XORP: xorp/vrrp/Makefile.am,v 1.6 2008/10/09 17:55:51 abittau Exp $
 ##
 
 SUBDIRS = . test
@@ -11,11 +11,11 @@ bindir = $(prefix)/$(subdir)
 # -- Real Programs
 bin_PROGRAMS     = xorp_vrrp
 
-# -- No-install Libraries
-noinst_LTLIBRARIES = libvrrp.la
+# -- Libraries
+lib_LTLIBRARIES = libvrrp.la
 
 # -- Libraries and library flags to link the binary programs
-LDADD            = $(noinst_LTLIBRARIES)
+LDADD            = $(lib_LTLIBRARIES)
 LDADD		+= $(top_builddir)/xrl/targets/libvrrpbase.la
 LDADD		+= $(top_builddir)/libfeaclient/libfeaclient.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrxif.la
@@ -47,6 +47,20 @@ libvrrp_la_SOURCES		+= vrrp_module.h
 libvrrp_la_SOURCES		+= vrrp_packet.hh
 libvrrp_la_SOURCES		+= vrrp_target.hh
 libvrrp_la_SOURCES		+= vrrp_vif.hh
+
+libvrrp_la_LIBADD		 = $(top_builddir)/xrl/targets/libvrrpbase.la
+libvrrp_la_LIBADD		+= $(top_builddir)/libfeaclient/libfeaclient.la
+libvrrp_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrxif.la
+#libvrrp_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la
+#libvrrp_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la
+libvrrp_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libfearawlinkxif.la
+libvrrp_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libfearawpkt4xif.la
+#libvrrp_la_LIBADD		+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la
+libvrrp_la_LIBADD		+= $(top_builddir)/libproto/libproto.la
+libvrrp_la_LIBADD		+= $(top_builddir)/libxipc/libxipc.la
+libvrrp_la_LIBADD		+= $(top_builddir)/libcomm/libcomm.la
+libvrrp_la_LIBADD		+= $(top_builddir)/libxorp/libxorp.la
+
 
 ################################################################
 ##

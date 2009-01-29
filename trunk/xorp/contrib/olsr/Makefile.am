@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/contrib/olsr/Makefile.am,v 1.1 2008/04/24 15:19:50 bms Exp $
+## $XORP: xorp/contrib/olsr/Makefile.am,v 1.2 2008/04/28 22:37:47 bms Exp $
 ##
 
 # -- Subdirectories
@@ -27,9 +27,9 @@ TESTS		+= test_faces$(EXEEXT)
 TESTS		+= test_routing1.py
 
 # -- No-install Libtool Libraries
-noinst_LTLIBRARIES	 = libolsr.la
-noinst_LTLIBRARIES	+= libolsrtest.la
-noinst_LTLIBRARIES	+= libolsrxrl.la
+lib_LTLIBRARIES	 = libolsr.la
+lib_LTLIBRARIES	+= libolsrtest.la
+lib_LTLIBRARIES	+= libolsrxrl.la
 
 # -- Libraries and library flags to link the binary programs
 LDADD		 = libolsr.la

@@ -47,13 +47,25 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/xorp_config.h
 CONFIG_CLEAN_FILES =
-LTLIBRARIES = $(noinst_LTLIBRARIES)
-libfinder_la_LIBADD =
+am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+am__vpath_adj = case $$p in \
+    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+    *) f=$$p;; \
+  esac;
+am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
+am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" \
+	"$(DESTDIR)$(sbindir)"
+libLTLIBRARIES_INSTALL = $(INSTALL)
+LTLIBRARIES = $(lib_LTLIBRARIES)
+libfinder_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libfinder_la_OBJECTS = finder.lo finder_server.lo \
 	finder_xrl_queue.lo finder_xrl_target.lo finder_base.lo \
 	finder_client_xif.lo finder_event_observer_xif.lo
 libfinder_la_OBJECTS = $(am_libfinder_la_OBJECTS)
-libxipc_la_LIBADD =
+libxipc_la_DEPENDENCIES = $(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libxipc_la_OBJECTS = hmac_md5.lo finder_client.lo \
 	finder_client_observer.lo finder_client_xrl_target.lo \
 	finder_messenger.lo finder_msgs.lo finder_tcp.lo \
@@ -67,7 +79,6 @@ am_libxipc_la_OBJECTS = hmac_md5.lo finder_client.lo \
 	xrl_std_router.lo xrl_tokens.lo xuid.lo common_xif.lo \
 	finder_client_base.lo finder_xif.lo
 libxipc_la_OBJECTS = $(am_libxipc_la_OBJECTS)
-am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(sbindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 am__EXEEXT_1 = test_xrl_error$(EXEEXT) test_xrl$(EXEEXT) \
 	test_xrl_atom$(EXEEXT) test_xrl_args$(EXEEXT) \
@@ -390,7 +401,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 
 # -- No-install Libtool Libraries
-noinst_LTLIBRARIES = libxipc.la libfinder.la
+lib_LTLIBRARIES = libxipc.la libfinder.la
 
 # -- Test Programs and scripts (order of increasing complexity)
 test_programs = test_xrl_error test_xrl test_xrl_atom test_xrl_args \
@@ -481,6 +492,8 @@ libxipc_la_SOURCES = finder_module.h hmac_md5.h ipc_module.h \
 	$(top_srcdir)/xrl/targets/finder_client_base.cc \
 	$(top_srcdir)/xrl/interfaces/finder_xif.hh \
 	$(top_srcdir)/xrl/interfaces/finder_xif.cc
+libxipc_la_LIBADD = $(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 # -- Library Sources (libfinder)
 
@@ -494,6 +507,9 @@ libfinder_la_SOURCES = finder.hh finder_constants.hh finder_server.hh \
 	$(top_srcdir)/xrl/interfaces/finder_client_xif.cc \
 	$(top_srcdir)/xrl/interfaces/finder_event_observer_xif.hh \
 	$(top_srcdir)/xrl/interfaces/finder_event_observer_xif.cc
+libfinder_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST = bench_ipc.awk bench_ipc.sh bench_ipc_gnuplot.sh
@@ -533,19 +549,37 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
+install-libLTLIBRARIES: $(lib_LTLIBRARIES)
+	@$(NORMAL_INSTALL)
+	test -z "$(libdir)" || $(MKDIR_P) "$(DESTDIR)$(libdir)"
+	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    f=$(am__strip_dir) \
+	    echo " $(LIBTOOL) --mode=install $(libLTLIBRARIES_INSTALL) $(INSTALL_STRIP_FLAG) '$$p' '$(DESTDIR)$(libdir)/$$f'"; \
+	    $(LIBTOOL) --mode=install $(libLTLIBRARIES_INSTALL) $(INSTALL_STRIP_FLAG) "$$p" "$(DESTDIR)$(libdir)/$$f"; \
+	  else :; fi; \
+	done
 
-clean-noinstLTLIBRARIES:
-	-test -z "$(noinst_LTLIBRARIES)" || rm -f $(noinst_LTLIBRARIES)
-	@list='$(noinst_LTLIBRARIES)'; for p in $$list; do \
+uninstall-libLTLIBRARIES:
+	@$(NORMAL_UNINSTALL)
+	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
+	  p=$(am__strip_dir) \
+	  echo " $(LIBTOOL) --mode=uninstall rm -f '$(DESTDIR)$(libdir)/$$p'"; \
+	  $(LIBTOOL) --mode=uninstall rm -f "$(DESTDIR)$(libdir)/$$p"; \
+	done
+
+clean-libLTLIBRARIES:
+	-test -z "$(lib_LTLIBRARIES)" || rm -f $(lib_LTLIBRARIES)
+	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
 	  dir="`echo $$p | sed -e 's|/[^/]*$$||'`"; \
 	  test "$$dir" != "$$p" || dir=.; \
 	  echo "rm -f \"$${dir}/so_locations\""; \
 	  rm -f "$${dir}/so_locations"; \
 	done
 libfinder.la: $(libfinder_la_OBJECTS) $(libfinder_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libfinder_la_OBJECTS) $(libfinder_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libfinder_la_OBJECTS) $(libfinder_la_LIBADD) $(LIBS)
 libxipc.la: $(libxipc_la_OBJECTS) $(libxipc_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libxipc_la_OBJECTS) $(libxipc_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libxipc_la_OBJECTS) $(libxipc_la_LIBADD) $(LIBS)
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	test -z "$(bindir)" || $(MKDIR_P) "$(DESTDIR)$(bindir)"
@@ -1052,8 +1086,10 @@ check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
 all-am: Makefile $(LTLIBRARIES) $(PROGRAMS)
+install-binPROGRAMS: install-libLTLIBRARIES
+
 installdirs:
-	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(sbindir)"; do \
+	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(sbindir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -1083,7 +1119,7 @@ maintainer-clean-generic:
 clean: clean-am
 
 clean-am: clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
-	clean-libtool clean-noinstLTLIBRARIES clean-sbinPROGRAMS \
+	clean-libLTLIBRARIES clean-libtool clean-sbinPROGRAMS \
 	mostlyclean-am
 
 distclean: distclean-am
@@ -1106,7 +1142,8 @@ install-data-am:
 
 install-dvi: install-dvi-am
 
-install-exec-am: install-binPROGRAMS install-sbinPROGRAMS
+install-exec-am: install-binPROGRAMS install-libLTLIBRARIES \
+	install-sbinPROGRAMS
 
 install-html: install-html-am
 
@@ -1138,25 +1175,27 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-binPROGRAMS uninstall-sbinPROGRAMS
+uninstall-am: uninstall-binPROGRAMS uninstall-libLTLIBRARIES \
+	uninstall-sbinPROGRAMS
 
 .MAKE: install-am install-strip
 
 .PHONY: CTAGS GTAGS all all-am check check-TESTS check-am clean \
 	clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
-	clean-libtool clean-noinstLTLIBRARIES clean-sbinPROGRAMS ctags \
+	clean-libLTLIBRARIES clean-libtool clean-sbinPROGRAMS ctags \
 	distclean distclean-compile distclean-generic \
 	distclean-libtool distclean-tags distdir dvi dvi-am html \
 	html-am info info-am install install-am install-binPROGRAMS \
 	install-data install-data-am install-dvi install-dvi-am \
 	install-exec install-exec-am install-html install-html-am \
-	install-info install-info-am install-man install-pdf \
-	install-pdf-am install-ps install-ps-am install-sbinPROGRAMS \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
-	pdf pdf-am ps ps-am tags uninstall uninstall-am \
-	uninstall-binPROGRAMS uninstall-sbinPROGRAMS
+	install-info install-info-am install-libLTLIBRARIES \
+	install-man install-pdf install-pdf-am install-ps \
+	install-ps-am install-sbinPROGRAMS install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	tags uninstall uninstall-am uninstall-binPROGRAMS \
+	uninstall-libLTLIBRARIES uninstall-sbinPROGRAMS
 
 
 ###############################################################################

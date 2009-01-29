@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/cli/Makefile.am,v 1.11 2007/04/18 00:37:03 pavlin Exp $
+## $XORP: xorp/cli/Makefile.am,v 1.12 2009/01/21 16:05:36 jtc Exp $
 ##
 
 # -- Subdirectories (directory ordering is important)
@@ -12,11 +12,11 @@ TESTS		 =
 # -- No-install Programs
 check_PROGRAMS	 = test_cli
 
-# -- No-install Libraries
-noinst_LTLIBRARIES = libcli.la
+# -- Libraries
+lib_LTLIBRARIES = libcli.la
 
 # -- Libraries and library flags to link the binary programs
-LDADD		 = $(noinst_LTLIBRARIES)
+LDADD		 = $(lib_LTLIBRARIES)
 ### XRL libraries
 LDADD		+= $(top_builddir)/xrl/interfaces/libcliprocessorxif.la
 LDADD		+= $(top_builddir)/xrl/targets/libclibase.la
@@ -51,6 +51,15 @@ libcli_la_SOURCES += cli_node.cc
 libcli_la_SOURCES += cli_node_internal_commands.cc
 libcli_la_SOURCES += cli_node_net.cc
 libcli_la_SOURCES += xrl_cli_node.cc
+
+libcli_la_LIBADD  = $(top_builddir)/xrl/interfaces/libcliprocessorxif.la
+libcli_la_LIBADD += $(top_builddir)/xrl/targets/libclibase.la
+libcli_la_LIBADD += $(top_builddir)/cli/libtecla/libtecla.la
+libcli_la_LIBADD += @CLI_CURSES_LIB@
+libcli_la_LIBADD += $(top_builddir)/libproto/libproto.la
+libcli_la_LIBADD += $(top_builddir)/libxipc/libxipc.la
+libcli_la_LIBADD += $(top_builddir)/libcomm/libcomm.la
+libcli_la_LIBADD += $(top_builddir)/libxorp/libxorp.la
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST	 = libtecla

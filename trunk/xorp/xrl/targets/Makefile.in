@@ -44,119 +44,208 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/xorp_config.h
 CONFIG_CLEAN_FILES =
-LTLIBRARIES = $(noinst_LTLIBRARIES)
-libbgp4mibbase_la_LIBADD =
+am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+am__vpath_adj = case $$p in \
+    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+    *) f=$$p;; \
+  esac;
+am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
+am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(datadir)"
+libLTLIBRARIES_INSTALL = $(INSTALL)
+LTLIBRARIES = $(lib_LTLIBRARIES)
+libbgp4mibbase_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libbgp4mibbase_la_OBJECTS = bgp4_mib_base.lo
 libbgp4mibbase_la_OBJECTS = $(am_libbgp4mibbase_la_OBJECTS)
-libbgpbase_la_LIBADD =
+libbgpbase_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libbgpbase_la_OBJECTS = bgp_base.lo
 libbgpbase_la_OBJECTS = $(am_libbgpbase_la_OBJECTS)
-libclibase_la_LIBADD =
+libclibase_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libclibase_la_OBJECTS = cli_base.lo
 libclibase_la_OBJECTS = $(am_libclibase_la_OBJECTS)
-libcoordbase_la_LIBADD =
+libcoordbase_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libcoordbase_la_OBJECTS = coord_base.lo
 libcoordbase_la_OBJECTS = $(am_libcoordbase_la_OBJECTS)
-libfeabase_la_LIBADD =
+libfeabase_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libfeabase_la_OBJECTS = fea_base.lo
 libfeabase_la_OBJECTS = $(am_libfeabase_la_OBJECTS)
-libfeaifmgrmirrorbase_la_LIBADD =
+libfeaifmgrmirrorbase_la_DEPENDENCIES =  \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libfeaifmgrmirrorbase_la_OBJECTS = fea_ifmgr_mirror_base.lo
 libfeaifmgrmirrorbase_la_OBJECTS =  \
 	$(am_libfeaifmgrmirrorbase_la_OBJECTS)
-libfib2mribbase_la_LIBADD =
+libfib2mribbase_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libfib2mribbase_la_OBJECTS = fib2mrib_base.lo
 libfib2mribbase_la_OBJECTS = $(am_libfib2mribbase_la_OBJECTS)
-libfinderbase_la_LIBADD =
+libfinderbase_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libfinderbase_la_OBJECTS = finder_base.lo
 libfinderbase_la_OBJECTS = $(am_libfinderbase_la_OBJECTS)
-libfinderclientbase_la_LIBADD =
+libfinderclientbase_la_DEPENDENCIES =  \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libfinderclientbase_la_OBJECTS = finder_client_base.lo
 libfinderclientbase_la_OBJECTS = $(am_libfinderclientbase_la_OBJECTS)
-libmfeabase_la_LIBADD =
+libmfeabase_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libmfeabase_la_OBJECTS = mfea_base.lo
 libmfeabase_la_OBJECTS = $(am_libmfeabase_la_OBJECTS)
-libmld6igmpbase_la_LIBADD =
+libmld6igmpbase_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libmld6igmpbase_la_OBJECTS = mld6igmp_base.lo
 libmld6igmpbase_la_OBJECTS = $(am_libmld6igmpbase_la_OBJECTS)
-libolsr4base_la_LIBADD =
+libolsr4base_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libolsr4base_la_OBJECTS = olsr4_base.lo
 libolsr4base_la_OBJECTS = $(am_libolsr4base_la_OBJECTS)
-libospfv2base_la_LIBADD =
+libospfv2base_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libospfv2base_la_OBJECTS = ospfv2_base.lo
 libospfv2base_la_OBJECTS = $(am_libospfv2base_la_OBJECTS)
-libospfv3base_la_LIBADD =
+libospfv3base_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libospfv3base_la_OBJECTS = ospfv3_base.lo
 libospfv3base_la_OBJECTS = $(am_libospfv3base_la_OBJECTS)
-libpimbase_la_LIBADD =
+libpimbase_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libpimbase_la_OBJECTS = pim_base.lo
 libpimbase_la_OBJECTS = $(am_libpimbase_la_OBJECTS)
-libpolicybase_la_LIBADD =
+libpolicybase_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libpolicybase_la_OBJECTS = policy_base.lo
 libpolicybase_la_OBJECTS = $(am_libpolicybase_la_OBJECTS)
-libprofileclientbase_la_LIBADD =
+libprofileclientbase_la_DEPENDENCIES =  \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libprofileclientbase_la_OBJECTS = profiler_base.lo
 libprofileclientbase_la_OBJECTS =  \
 	$(am_libprofileclientbase_la_OBJECTS)
-libribbase_la_LIBADD =
+libribbase_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libribbase_la_OBJECTS = rib_base.lo
 libribbase_la_OBJECTS = $(am_libribbase_la_OBJECTS)
-libribclientbase_la_LIBADD =
+libribclientbase_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libribclientbase_la_OBJECTS = ribclient_base.lo
 libribclientbase_la_OBJECTS = $(am_libribclientbase_la_OBJECTS)
-libripbase_la_LIBADD =
+libripbase_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libripbase_la_OBJECTS = rip_base.lo
 libripbase_la_OBJECTS = $(am_libripbase_la_OBJECTS)
-libripngbase_la_LIBADD =
+libripngbase_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libripngbase_la_OBJECTS = ripng_base.lo
 libripngbase_la_OBJECTS = $(am_libripngbase_la_OBJECTS)
-librtrmgrbase_la_LIBADD =
+librtrmgrbase_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_librtrmgrbase_la_OBJECTS = rtrmgr_base.lo
 librtrmgrbase_la_OBJECTS = $(am_librtrmgrbase_la_OBJECTS)
-libshowdistancesbase_la_LIBADD =
+libshowdistancesbase_la_DEPENDENCIES =  \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libshowdistancesbase_la_OBJECTS = show_distances_base.lo
 libshowdistancesbase_la_OBJECTS =  \
 	$(am_libshowdistancesbase_la_OBJECTS)
-libshowroutesbase_la_LIBADD =
+libshowroutesbase_la_DEPENDENCIES =  \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libshowroutesbase_la_OBJECTS = show_routes_base.lo
 libshowroutesbase_la_OBJECTS = $(am_libshowroutesbase_la_OBJECTS)
-libstaticroutesbase_la_LIBADD =
+libstaticroutesbase_la_DEPENDENCIES =  \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libstaticroutesbase_la_OBJECTS = static_routes_base.lo
 libstaticroutesbase_la_OBJECTS = $(am_libstaticroutesbase_la_OBJECTS)
-libtestbase_la_LIBADD =
+libtestbase_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libtestbase_la_OBJECTS = test_base.lo
 libtestbase_la_OBJECTS = $(am_libtestbase_la_OBJECTS)
-libtestfeaifmgrmirrorbase_la_LIBADD =
+libtestfeaifmgrmirrorbase_la_DEPENDENCIES =  \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libtestfeaifmgrmirrorbase_la_OBJECTS =  \
 	test_fea_ifmgr_mirror_base.lo
 libtestfeaifmgrmirrorbase_la_OBJECTS =  \
 	$(am_libtestfeaifmgrmirrorbase_la_OBJECTS)
-libtestfearawlink_la_LIBADD =
+libtestfearawlink_la_DEPENDENCIES =  \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libtestfearawlink_la_OBJECTS = test_fea_rawlink_base.lo
 libtestfearawlink_la_OBJECTS = $(am_libtestfearawlink_la_OBJECTS)
-libtestfindereventsbase_la_LIBADD =
+libtestfindereventsbase_la_DEPENDENCIES =  \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libtestfindereventsbase_la_OBJECTS = test_finder_events_base.lo
 libtestfindereventsbase_la_OBJECTS =  \
 	$(am_libtestfindereventsbase_la_OBJECTS)
-libtestpeerbase_la_LIBADD =
+libtestpeerbase_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libtestpeerbase_la_OBJECTS = test_peer_base.lo
 libtestpeerbase_la_OBJECTS = $(am_libtestpeerbase_la_OBJECTS)
-libtestsocket4_la_LIBADD =
+libtestsocket4_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libtestsocket4_la_OBJECTS = test_socket4_base.lo
 libtestsocket4_la_OBJECTS = $(am_libtestsocket4_la_OBJECTS)
-libtestsocket6_la_LIBADD =
+libtestsocket6_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libtestsocket6_la_OBJECTS = test_socket6_base.lo
 libtestsocket6_la_OBJECTS = $(am_libtestsocket6_la_OBJECTS)
-libtestxrlsbase_la_LIBADD =
+libtestxrlsbase_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libtestxrlsbase_la_OBJECTS = test_xrls_base.lo
 libtestxrlsbase_la_OBJECTS = $(am_libtestxrlsbase_la_OBJECTS)
-libvrrpbase_la_LIBADD =
+libvrrpbase_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libvrrpbase_la_OBJECTS = vrrp_base.lo
 libvrrpbase_la_OBJECTS = $(am_libvrrpbase_la_OBJECTS)
-libxorpifmibbase_la_LIBADD =
+libxorpifmibbase_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libxorpifmibbase_la_OBJECTS = xorp_if_mib_base.lo
 libxorpifmibbase_la_OBJECTS = $(am_libxorpifmibbase_la_OBJECTS)
-libxorpshbase_la_LIBADD =
+libxorpshbase_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libxorpshbase_la_OBJECTS = xorpsh_base.lo
 libxorpshbase_la_OBJECTS = $(am_libxorpshbase_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(top_builddir)@am__isrc@
@@ -222,13 +311,6 @@ DIST_SOURCES = $(libbgp4mibbase_la_SOURCES) $(libbgpbase_la_SOURCES) \
 	$(libtestsocket6_la_SOURCES) $(libtestxrlsbase_la_SOURCES) \
 	$(libvrrpbase_la_SOURCES) $(libxorpifmibbase_la_SOURCES) \
 	$(libxorpshbase_la_SOURCES)
-am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
-am__vpath_adj = case $$p in \
-    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
-    *) f=$$p;; \
-  esac;
-am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
-am__installdirs = "$(DESTDIR)$(datadir)"
 dataDATA_INSTALL = $(INSTALL_DATA)
 DATA = $(data_DATA)
 ETAGS = etags
@@ -391,7 +473,7 @@ xrls_files = $(tgt_files:%.tgt=%.xrls)
 data_DATA = $(xrls_files)
 
 # Add your target's library here
-noinst_LTLIBRARIES = libbgpbase.la libbgp4mibbase.la libclibase.la \
+lib_LTLIBRARIES = libbgpbase.la libbgp4mibbase.la libclibase.la \
 	libcoordbase.la libfeabase.la libfeaifmgrmirrorbase.la \
 	libfib2mribbase.la libfinderbase.la libfinderclientbase.la \
 	libmfeabase.la libmld6igmpbase.la libolsr4base.la \
@@ -407,26 +489,47 @@ noinst_LTLIBRARIES = libbgpbase.la libbgp4mibbase.la libclibase.la \
 
 # BGP
 libbgpbase_la_SOURCES = bgp_base.hh bgp_base.cc
+libbgpbase_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 # BGP4MIB
 libbgp4mibbase_la_SOURCES = bgp4_mib_base.hh bgp4_mib_base.cc
+libbgp4mibbase_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 # CLI
 libclibase_la_SOURCES = cli_base.hh cli_base.cc
+libclibase_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 # COORD
 libcoordbase_la_SOURCES = coord_base.hh coord_base.cc
+libcoordbase_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 # FEA
 libfeabase_la_SOURCES = fea_base.hh fea_base.cc
+libfeabase_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 # FEA IfMgr Mirror
 libfeaifmgrmirrorbase_la_SOURCES = fea_ifmgr_mirror_base.hh		\
 				  fea_ifmgr_mirror_base.cc
 
+libfeaifmgrmirrorbase_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 # Fib2mrib
 libfib2mribbase_la_SOURCES = fib2mrib_base.hh fib2mrib_base.cc
+libfib2mribbase_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 #
 # FINDER
@@ -435,6 +538,9 @@ libfib2mribbase_la_SOURCES = fib2mrib_base.hh fib2mrib_base.cc
 # too.
 #
 libfinderbase_la_SOURCES = finder_base.hh finder_base.cc
+libfinderbase_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 #
 # FINDER CLIENT
@@ -443,54 +549,109 @@ libfinderbase_la_SOURCES = finder_base.hh finder_base.cc
 # too.
 #
 libfinderclientbase_la_SOURCES = finder_client_base.hh finder_client_base.cc
+libfinderclientbase_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 # MFEA
 libmfeabase_la_SOURCES = mfea_base.hh mfea_base.cc
+libmfeabase_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 # MLD6IGMP
 libmld6igmpbase_la_SOURCES = mld6igmp_base.hh mld6igmp_base.cc
+libmld6igmpbase_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 # OLSR V1 IPv4
 libolsr4base_la_SOURCES = olsr4_base.hh olsr4_base.cc
+libolsr4base_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 # OSPF V2
 libospfv2base_la_SOURCES = ospfv2_base.hh ospfv2_base.cc
+libospfv2base_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 # OSPF V3
 libospfv3base_la_SOURCES = ospfv3_base.hh ospfv3_base.cc
+libospfv3base_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 # PIM
 libpimbase_la_SOURCES = pim_base.hh pim_base.cc
+libpimbase_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 # Policy manager
 libpolicybase_la_SOURCES = policy_base.hh policy_base.cc
+libpolicybase_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 # Profiler
 libprofileclientbase_la_SOURCES = profiler_base.hh profiler_base.cc
+libprofileclientbase_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 # RIB
 libribbase_la_SOURCES = rib_base.hh rib_base.cc
+libribbase_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 # RIB client
 libribclientbase_la_SOURCES = ribclient_base.hh ribclient_base.cc
+libribclientbase_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 # RIP
 libripbase_la_SOURCES = rip_base.hh rip_base.cc
+libripbase_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 # RIPng
 libripngbase_la_SOURCES = ripng_base.hh ripng_base.cc
+libripngbase_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 # RTRMGR
 librtrmgrbase_la_SOURCES = rtrmgr_base.hh rtrmgr_base.cc
+librtrmgrbase_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libshowdistancesbase_la_SOURCES = show_distances_base.hh show_distances_base.cc
+libshowdistancesbase_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libshowroutesbase_la_SOURCES = show_routes_base.hh show_routes_base.cc
+libshowroutesbase_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 # StaticRoutes
 libstaticroutesbase_la_SOURCES = static_routes_base.hh static_routes_base.cc
+libstaticroutesbase_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 # TEST FEA IFMGR MIRROR
 libtestfeaifmgrmirrorbase_la_SOURCES = test_fea_ifmgr_mirror_base.hh \
 	test_fea_ifmgr_mirror_base.cc
+libtestfeaifmgrmirrorbase_la_LIBADD =  \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 #
 # TEST FINDER EVENTS
@@ -500,37 +661,68 @@ libtestfeaifmgrmirrorbase_la_SOURCES = test_fea_ifmgr_mirror_base.hh \
 #
 libtestfindereventsbase_la_SOURCES = test_finder_events_base.hh \
 	test_finder_events_base.cc
+libtestfindereventsbase_la_LIBADD =  \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 # TEST PEER
 libtestpeerbase_la_SOURCES = test_peer_base.hh test_peer_base.cc
+libtestpeerbase_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 # TEST RAWLINK
 libtestfearawlink_la_SOURCES = test_fea_rawlink_base.hh \
 	test_fea_rawlink_base.cc
+libtestfearawlink_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 # TEST SOCKET4
 libtestsocket4_la_SOURCES = test_socket4_base.hh test_socket4_base.cc
+libtestsocket4_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 # TEST SOCKET6
 libtestsocket6_la_SOURCES = test_socket6_base.hh test_socket6_base.cc
+libtestsocket6_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 #
 # TEST XRLS
 #
 libtestxrlsbase_la_SOURCES = test_xrls_base.hh test_xrls_base.cc
+libtestxrlsbase_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 # VRRP
 libvrrpbase_la_SOURCES = vrrp_base.hh vrrp_base.cc
+libvrrpbase_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 # XORP IF MIB
 libxorpifmibbase_la_SOURCES = xorp_if_mib_base.hh xorp_if_mib_base.cc
+libxorpifmibbase_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 # XORPSH
 libxorpshbase_la_SOURCES = xorpsh_base.hh xorpsh_base.cc
+libxorpshbase_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 # Add your target's library sources like this:
 # Test target
 libtestbase_la_SOURCES = test_base.hh test_base.cc
+libtestbase_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST = $(tgt_files) $(xrls_files)
@@ -576,87 +768,105 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
+install-libLTLIBRARIES: $(lib_LTLIBRARIES)
+	@$(NORMAL_INSTALL)
+	test -z "$(libdir)" || $(MKDIR_P) "$(DESTDIR)$(libdir)"
+	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    f=$(am__strip_dir) \
+	    echo " $(LIBTOOL) --mode=install $(libLTLIBRARIES_INSTALL) $(INSTALL_STRIP_FLAG) '$$p' '$(DESTDIR)$(libdir)/$$f'"; \
+	    $(LIBTOOL) --mode=install $(libLTLIBRARIES_INSTALL) $(INSTALL_STRIP_FLAG) "$$p" "$(DESTDIR)$(libdir)/$$f"; \
+	  else :; fi; \
+	done
 
-clean-noinstLTLIBRARIES:
-	-test -z "$(noinst_LTLIBRARIES)" || rm -f $(noinst_LTLIBRARIES)
-	@list='$(noinst_LTLIBRARIES)'; for p in $$list; do \
+uninstall-libLTLIBRARIES:
+	@$(NORMAL_UNINSTALL)
+	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
+	  p=$(am__strip_dir) \
+	  echo " $(LIBTOOL) --mode=uninstall rm -f '$(DESTDIR)$(libdir)/$$p'"; \
+	  $(LIBTOOL) --mode=uninstall rm -f "$(DESTDIR)$(libdir)/$$p"; \
+	done
+
+clean-libLTLIBRARIES:
+	-test -z "$(lib_LTLIBRARIES)" || rm -f $(lib_LTLIBRARIES)
+	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
 	  dir="`echo $$p | sed -e 's|/[^/]*$$||'`"; \
 	  test "$$dir" != "$$p" || dir=.; \
 	  echo "rm -f \"$${dir}/so_locations\""; \
 	  rm -f "$${dir}/so_locations"; \
 	done
 libbgp4mibbase.la: $(libbgp4mibbase_la_OBJECTS) $(libbgp4mibbase_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libbgp4mibbase_la_OBJECTS) $(libbgp4mibbase_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libbgp4mibbase_la_OBJECTS) $(libbgp4mibbase_la_LIBADD) $(LIBS)
 libbgpbase.la: $(libbgpbase_la_OBJECTS) $(libbgpbase_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libbgpbase_la_OBJECTS) $(libbgpbase_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libbgpbase_la_OBJECTS) $(libbgpbase_la_LIBADD) $(LIBS)
 libclibase.la: $(libclibase_la_OBJECTS) $(libclibase_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libclibase_la_OBJECTS) $(libclibase_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libclibase_la_OBJECTS) $(libclibase_la_LIBADD) $(LIBS)
 libcoordbase.la: $(libcoordbase_la_OBJECTS) $(libcoordbase_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libcoordbase_la_OBJECTS) $(libcoordbase_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libcoordbase_la_OBJECTS) $(libcoordbase_la_LIBADD) $(LIBS)
 libfeabase.la: $(libfeabase_la_OBJECTS) $(libfeabase_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libfeabase_la_OBJECTS) $(libfeabase_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libfeabase_la_OBJECTS) $(libfeabase_la_LIBADD) $(LIBS)
 libfeaifmgrmirrorbase.la: $(libfeaifmgrmirrorbase_la_OBJECTS) $(libfeaifmgrmirrorbase_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libfeaifmgrmirrorbase_la_OBJECTS) $(libfeaifmgrmirrorbase_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libfeaifmgrmirrorbase_la_OBJECTS) $(libfeaifmgrmirrorbase_la_LIBADD) $(LIBS)
 libfib2mribbase.la: $(libfib2mribbase_la_OBJECTS) $(libfib2mribbase_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libfib2mribbase_la_OBJECTS) $(libfib2mribbase_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libfib2mribbase_la_OBJECTS) $(libfib2mribbase_la_LIBADD) $(LIBS)
 libfinderbase.la: $(libfinderbase_la_OBJECTS) $(libfinderbase_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libfinderbase_la_OBJECTS) $(libfinderbase_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libfinderbase_la_OBJECTS) $(libfinderbase_la_LIBADD) $(LIBS)
 libfinderclientbase.la: $(libfinderclientbase_la_OBJECTS) $(libfinderclientbase_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libfinderclientbase_la_OBJECTS) $(libfinderclientbase_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libfinderclientbase_la_OBJECTS) $(libfinderclientbase_la_LIBADD) $(LIBS)
 libmfeabase.la: $(libmfeabase_la_OBJECTS) $(libmfeabase_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libmfeabase_la_OBJECTS) $(libmfeabase_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libmfeabase_la_OBJECTS) $(libmfeabase_la_LIBADD) $(LIBS)
 libmld6igmpbase.la: $(libmld6igmpbase_la_OBJECTS) $(libmld6igmpbase_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libmld6igmpbase_la_OBJECTS) $(libmld6igmpbase_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libmld6igmpbase_la_OBJECTS) $(libmld6igmpbase_la_LIBADD) $(LIBS)
 libolsr4base.la: $(libolsr4base_la_OBJECTS) $(libolsr4base_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libolsr4base_la_OBJECTS) $(libolsr4base_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libolsr4base_la_OBJECTS) $(libolsr4base_la_LIBADD) $(LIBS)
 libospfv2base.la: $(libospfv2base_la_OBJECTS) $(libospfv2base_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libospfv2base_la_OBJECTS) $(libospfv2base_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libospfv2base_la_OBJECTS) $(libospfv2base_la_LIBADD) $(LIBS)
 libospfv3base.la: $(libospfv3base_la_OBJECTS) $(libospfv3base_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libospfv3base_la_OBJECTS) $(libospfv3base_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libospfv3base_la_OBJECTS) $(libospfv3base_la_LIBADD) $(LIBS)
 libpimbase.la: $(libpimbase_la_OBJECTS) $(libpimbase_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libpimbase_la_OBJECTS) $(libpimbase_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libpimbase_la_OBJECTS) $(libpimbase_la_LIBADD) $(LIBS)
 libpolicybase.la: $(libpolicybase_la_OBJECTS) $(libpolicybase_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libpolicybase_la_OBJECTS) $(libpolicybase_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libpolicybase_la_OBJECTS) $(libpolicybase_la_LIBADD) $(LIBS)
 libprofileclientbase.la: $(libprofileclientbase_la_OBJECTS) $(libprofileclientbase_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libprofileclientbase_la_OBJECTS) $(libprofileclientbase_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libprofileclientbase_la_OBJECTS) $(libprofileclientbase_la_LIBADD) $(LIBS)
 libribbase.la: $(libribbase_la_OBJECTS) $(libribbase_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libribbase_la_OBJECTS) $(libribbase_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libribbase_la_OBJECTS) $(libribbase_la_LIBADD) $(LIBS)
 libribclientbase.la: $(libribclientbase_la_OBJECTS) $(libribclientbase_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libribclientbase_la_OBJECTS) $(libribclientbase_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libribclientbase_la_OBJECTS) $(libribclientbase_la_LIBADD) $(LIBS)
 libripbase.la: $(libripbase_la_OBJECTS) $(libripbase_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libripbase_la_OBJECTS) $(libripbase_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libripbase_la_OBJECTS) $(libripbase_la_LIBADD) $(LIBS)
 libripngbase.la: $(libripngbase_la_OBJECTS) $(libripngbase_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libripngbase_la_OBJECTS) $(libripngbase_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libripngbase_la_OBJECTS) $(libripngbase_la_LIBADD) $(LIBS)
 librtrmgrbase.la: $(librtrmgrbase_la_OBJECTS) $(librtrmgrbase_la_DEPENDENCIES) 
-	$(CXXLINK)  $(librtrmgrbase_la_OBJECTS) $(librtrmgrbase_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(librtrmgrbase_la_OBJECTS) $(librtrmgrbase_la_LIBADD) $(LIBS)
 libshowdistancesbase.la: $(libshowdistancesbase_la_OBJECTS) $(libshowdistancesbase_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libshowdistancesbase_la_OBJECTS) $(libshowdistancesbase_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libshowdistancesbase_la_OBJECTS) $(libshowdistancesbase_la_LIBADD) $(LIBS)
 libshowroutesbase.la: $(libshowroutesbase_la_OBJECTS) $(libshowroutesbase_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libshowroutesbase_la_OBJECTS) $(libshowroutesbase_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libshowroutesbase_la_OBJECTS) $(libshowroutesbase_la_LIBADD) $(LIBS)
 libstaticroutesbase.la: $(libstaticroutesbase_la_OBJECTS) $(libstaticroutesbase_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libstaticroutesbase_la_OBJECTS) $(libstaticroutesbase_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libstaticroutesbase_la_OBJECTS) $(libstaticroutesbase_la_LIBADD) $(LIBS)
 libtestbase.la: $(libtestbase_la_OBJECTS) $(libtestbase_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libtestbase_la_OBJECTS) $(libtestbase_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libtestbase_la_OBJECTS) $(libtestbase_la_LIBADD) $(LIBS)
 libtestfeaifmgrmirrorbase.la: $(libtestfeaifmgrmirrorbase_la_OBJECTS) $(libtestfeaifmgrmirrorbase_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libtestfeaifmgrmirrorbase_la_OBJECTS) $(libtestfeaifmgrmirrorbase_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libtestfeaifmgrmirrorbase_la_OBJECTS) $(libtestfeaifmgrmirrorbase_la_LIBADD) $(LIBS)
 libtestfearawlink.la: $(libtestfearawlink_la_OBJECTS) $(libtestfearawlink_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libtestfearawlink_la_OBJECTS) $(libtestfearawlink_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libtestfearawlink_la_OBJECTS) $(libtestfearawlink_la_LIBADD) $(LIBS)
 libtestfindereventsbase.la: $(libtestfindereventsbase_la_OBJECTS) $(libtestfindereventsbase_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libtestfindereventsbase_la_OBJECTS) $(libtestfindereventsbase_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libtestfindereventsbase_la_OBJECTS) $(libtestfindereventsbase_la_LIBADD) $(LIBS)
 libtestpeerbase.la: $(libtestpeerbase_la_OBJECTS) $(libtestpeerbase_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libtestpeerbase_la_OBJECTS) $(libtestpeerbase_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libtestpeerbase_la_OBJECTS) $(libtestpeerbase_la_LIBADD) $(LIBS)
 libtestsocket4.la: $(libtestsocket4_la_OBJECTS) $(libtestsocket4_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libtestsocket4_la_OBJECTS) $(libtestsocket4_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libtestsocket4_la_OBJECTS) $(libtestsocket4_la_LIBADD) $(LIBS)
 libtestsocket6.la: $(libtestsocket6_la_OBJECTS) $(libtestsocket6_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libtestsocket6_la_OBJECTS) $(libtestsocket6_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libtestsocket6_la_OBJECTS) $(libtestsocket6_la_LIBADD) $(LIBS)
 libtestxrlsbase.la: $(libtestxrlsbase_la_OBJECTS) $(libtestxrlsbase_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libtestxrlsbase_la_OBJECTS) $(libtestxrlsbase_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libtestxrlsbase_la_OBJECTS) $(libtestxrlsbase_la_LIBADD) $(LIBS)
 libvrrpbase.la: $(libvrrpbase_la_OBJECTS) $(libvrrpbase_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libvrrpbase_la_OBJECTS) $(libvrrpbase_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libvrrpbase_la_OBJECTS) $(libvrrpbase_la_LIBADD) $(LIBS)
 libxorpifmibbase.la: $(libxorpifmibbase_la_OBJECTS) $(libxorpifmibbase_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libxorpifmibbase_la_OBJECTS) $(libxorpifmibbase_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libxorpifmibbase_la_OBJECTS) $(libxorpifmibbase_la_LIBADD) $(LIBS)
 libxorpshbase.la: $(libxorpshbase_la_OBJECTS) $(libxorpshbase_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libxorpshbase_la_OBJECTS) $(libxorpshbase_la_LIBADD) $(LIBS)
+	$(CXXLINK) -rpath $(libdir) $(libxorpshbase_la_OBJECTS) $(libxorpshbase_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -823,7 +1033,7 @@ check-am: all-am
 check: check-am
 all-am: Makefile $(LTLIBRARIES) $(DATA)
 installdirs:
-	for dir in "$(DESTDIR)$(datadir)"; do \
+	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(datadir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -852,7 +1062,7 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-generic clean-libtool clean-noinstLTLIBRARIES \
+clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
 	mostlyclean-am
 
 distclean: distclean-am
@@ -875,7 +1085,7 @@ install-data-am: install-dataDATA
 
 install-dvi: install-dvi-am
 
-install-exec-am:
+install-exec-am: install-libLTLIBRARIES
 
 install-html: install-html-am
 
@@ -907,23 +1117,24 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-dataDATA
+uninstall-am: uninstall-dataDATA uninstall-libLTLIBRARIES
 
 .MAKE: install-am install-strip
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
-	clean-libtool clean-noinstLTLIBRARIES ctags distclean \
+	clean-libLTLIBRARIES clean-libtool ctags distclean \
 	distclean-compile distclean-generic distclean-libtool \
 	distclean-tags distdir dvi dvi-am html html-am info info-am \
 	install install-am install-data install-data-am \
 	install-dataDATA install-dvi install-dvi-am install-exec \
 	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
+	install-info-am install-libLTLIBRARIES install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags uninstall uninstall-am uninstall-dataDATA
+	tags uninstall uninstall-am uninstall-dataDATA \
+	uninstall-libLTLIBRARIES
 
 $(srcdir)/bgp_base.hh $(srcdir)/bgp_base.cc:				\
 		$(INTERFACES_DIR)/common.xif				\

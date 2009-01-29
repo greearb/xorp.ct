@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libcomm/Makefile.am,v 1.10 2005/12/22 11:43:32 pavlin Exp $
+## $XORP: xorp/libcomm/Makefile.am,v 1.11 2007/09/13 22:39:12 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -13,11 +13,11 @@ TESTS		 =
 check_PROGRAMS  = test_comm
 check_PROGRAMS += test_connect
 
-# -- No-install Libraries
-noinst_LTLIBRARIES = libcomm.la
+# -- Libraries
+lib_LTLIBRARIES = libcomm.la
 
 # -- Libraries and library flags to link the binary programs
-LDADD		 = $(noinst_LTLIBRARIES)
+LDADD		 = $(lib_LTLIBRARIES)
 LDADD		+= $(top_builddir)/libxorp/libxorp.la
 
 # -- Program Sources
@@ -35,6 +35,8 @@ libcomm_la_SOURCES += comm_private.h
 
 libcomm_la_SOURCES += comm_sock.c
 libcomm_la_SOURCES += comm_user.c
+
+libcomm_la_LIBADD = $(top_builddir)/libxorp/libxorp.la
 
 
 ################################################################

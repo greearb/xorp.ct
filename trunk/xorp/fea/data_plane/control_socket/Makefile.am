@@ -1,13 +1,13 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/forwarding_plane/control_socket/Makefile.am,v 1.1 2007/05/01 02:33:32 pavlin Exp $
+## $XORP: xorp/fea/data_plane/control_socket/Makefile.am,v 1.2 2007/05/01 08:21:56 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
 bindir = $(prefix)/$(subdir)
 
-# -- No-install Libraries
-noinst_LTLIBRARIES = libxorp_control_socket.la
+# -- Libraries
+lib_LTLIBRARIES = libxorp_control_socket.la
 
 # -- Library Sources
 libxorp_control_socket_la_SOURCES	 = windows_routing_socket.h
