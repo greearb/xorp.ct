@@ -178,6 +178,40 @@ libfea_la_SOURCES	+= xrl_io_tcpudp_manager.cc
 libfea_la_SOURCES	+= xrl_mfea_node.cc
 
 libfea_la_LIBADD	 =
+### Data plane libraries
+libfea_la_LIBADD	+= $(top_builddir)/fea/data_plane/managers/libxorp_data_plane_managers.la
+libfea_la_LIBADD	+= $(top_builddir)/fea/data_plane/fibconfig/libxorp_fibconfig.la
+libfea_la_LIBADD	+= $(top_builddir)/fea/data_plane/firewall/libxorp_firewall.la
+libfea_la_LIBADD	+= $(top_builddir)/fea/data_plane/ifconfig/libxorp_ifconfig.la
+libfea_la_LIBADD	+= $(top_builddir)/fea/data_plane/io/libxorp_io.la
+libfea_la_LIBADD	+= $(top_builddir)/fea/data_plane/control_socket/libxorp_control_socket.la
+#LDADD		+= libfea_data_plane_base.la
+### XRL libraries
+libfea_la_LIBADD	+= $(top_builddir)/xrl/interfaces/libfeafibclientxif.la
+libfea_la_LIBADD	+= $(top_builddir)/xrl/interfaces/libfearawlinkclientxif.la
+libfea_la_LIBADD	+= $(top_builddir)/xrl/interfaces/libfearawpkt4clientxif.la
+libfea_la_LIBADD	+= $(top_builddir)/xrl/interfaces/libfearawpkt6clientxif.la
+libfea_la_LIBADD	+= $(top_builddir)/xrl/interfaces/libsocket4userxif.la
+libfea_la_LIBADD	+= $(top_builddir)/xrl/interfaces/libsocket6userxif.la
+libfea_la_LIBADD	+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la
+libfea_la_LIBADD	+= $(top_builddir)/xrl/targets/libfeabase.la
+### MFEA XRL libraries
+libfea_la_LIBADD	+= $(top_builddir)/xrl/interfaces/libclimanagerxif.la
+libfea_la_LIBADD	+= $(top_builddir)/xrl/interfaces/libmfeaclientxif.la
+libfea_la_LIBADD	+= $(top_builddir)/xrl/targets/libmfeabase.la
+### MRT libraries
+libfea_la_LIBADD	+= $(top_builddir)/mrt/libmrt.la
+### CLI libraries
+libfea_la_LIBADD	+= $(top_builddir)/cli/libcli.la
+libfea_la_LIBADD	+= $(top_builddir)/cli/libtecla/libtecla.la
+libfea_la_LIBADD	+= @CLI_CURSES_LIB@
+libfea_la_LIBADD	+= $(top_builddir)/xrl/interfaces/libcliprocessorxif.la
+### XRL client for Profile
+libfea_la_LIBADD	+= $(top_builddir)/xrl/interfaces/libprofileclientxif.la
+### libfeaclient libraries
+libfea_la_LIBADD	+= $(top_builddir)/libfeaclient/libfeaclient.la
+### XORP misc libraries
+libfea_la_LIBADD	+= $(top_builddir)/libproto/libproto.la
 libfea_la_LIBADD	+= $(top_builddir)/libxipc/libxipc.la
 libfea_la_LIBADD	+= $(top_builddir)/libcomm/libcomm.la
 libfea_la_LIBADD	+= $(top_builddir)/libxorp/libxorp.la

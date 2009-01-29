@@ -58,7 +58,30 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" \
 	"$(DESTDIR)$(bindir)"
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
-libfea_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+libfea_la_DEPENDENCIES = $(top_builddir)/fea/data_plane/managers/libxorp_data_plane_managers.la \
+	$(top_builddir)/fea/data_plane/fibconfig/libxorp_fibconfig.la \
+	$(top_builddir)/fea/data_plane/firewall/libxorp_firewall.la \
+	$(top_builddir)/fea/data_plane/ifconfig/libxorp_ifconfig.la \
+	$(top_builddir)/fea/data_plane/io/libxorp_io.la \
+	$(top_builddir)/fea/data_plane/control_socket/libxorp_control_socket.la \
+	$(top_builddir)/xrl/interfaces/libfeafibclientxif.la \
+	$(top_builddir)/xrl/interfaces/libfearawlinkclientxif.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt4clientxif.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt6clientxif.la \
+	$(top_builddir)/xrl/interfaces/libsocket4userxif.la \
+	$(top_builddir)/xrl/interfaces/libsocket6userxif.la \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
+	$(top_builddir)/xrl/targets/libfeabase.la \
+	$(top_builddir)/xrl/interfaces/libclimanagerxif.la \
+	$(top_builddir)/xrl/interfaces/libmfeaclientxif.la \
+	$(top_builddir)/xrl/targets/libmfeabase.la \
+	$(top_builddir)/mrt/libmrt.la $(top_builddir)/cli/libcli.la \
+	$(top_builddir)/cli/libtecla/libtecla.la \
+	$(top_builddir)/xrl/interfaces/libcliprocessorxif.la \
+	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
+	$(top_builddir)/libfeaclient/libfeaclient.la \
+	$(top_builddir)/libproto/libproto.la \
+	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la
 am_libfea_la_OBJECTS = fea_io.lo fea_node.lo fibconfig.lo \
@@ -464,7 +487,39 @@ libfea_la_SOURCES = fea_module.h mfea_module.h fea_io.hh fea_node.hh \
 	xrl_fib_client_manager.cc xrl_io_ip_manager.cc \
 	xrl_io_link_manager.cc xrl_io_tcpudp_manager.cc \
 	xrl_mfea_node.cc
-libfea_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+### Data plane libraries
+#LDADD		+= libfea_data_plane_base.la
+### XRL libraries
+### MFEA XRL libraries
+### MRT libraries
+### CLI libraries
+### XRL client for Profile
+### libfeaclient libraries
+### XORP misc libraries
+libfea_la_LIBADD = $(top_builddir)/fea/data_plane/managers/libxorp_data_plane_managers.la \
+	$(top_builddir)/fea/data_plane/fibconfig/libxorp_fibconfig.la \
+	$(top_builddir)/fea/data_plane/firewall/libxorp_firewall.la \
+	$(top_builddir)/fea/data_plane/ifconfig/libxorp_ifconfig.la \
+	$(top_builddir)/fea/data_plane/io/libxorp_io.la \
+	$(top_builddir)/fea/data_plane/control_socket/libxorp_control_socket.la \
+	$(top_builddir)/xrl/interfaces/libfeafibclientxif.la \
+	$(top_builddir)/xrl/interfaces/libfearawlinkclientxif.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt4clientxif.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt6clientxif.la \
+	$(top_builddir)/xrl/interfaces/libsocket4userxif.la \
+	$(top_builddir)/xrl/interfaces/libsocket6userxif.la \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
+	$(top_builddir)/xrl/targets/libfeabase.la \
+	$(top_builddir)/xrl/interfaces/libclimanagerxif.la \
+	$(top_builddir)/xrl/interfaces/libmfeaclientxif.la \
+	$(top_builddir)/xrl/targets/libmfeabase.la \
+	$(top_builddir)/mrt/libmrt.la $(top_builddir)/cli/libcli.la \
+	$(top_builddir)/cli/libtecla/libtecla.la @CLI_CURSES_LIB@ \
+	$(top_builddir)/xrl/interfaces/libcliprocessorxif.la \
+	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
+	$(top_builddir)/libfeaclient/libfeaclient.la \
+	$(top_builddir)/libproto/libproto.la \
+	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la
 
