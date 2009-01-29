@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.109 2009/01/21 15:58:09 jtc Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.110 2009/01/29 18:57:00 jtc Exp $
 ##
 
 # Redefine the bin installation directory
@@ -91,6 +91,11 @@ libfea_data_plane_base_la_SOURCES	+= io_ip.cc
 libfea_data_plane_base_la_SOURCES	+= io_link.cc
 libfea_data_plane_base_la_SOURCES	+= io_tcpudp.cc
 
+libfea_data_plane_base_la_LIBADD	 =
+libfea_data_plane_base_la_LIBADD	+= $(top_builddir)/libxipc/libxipc.la
+libfea_data_plane_base_la_LIBADD	+= $(top_builddir)/libcomm/libcomm.la
+libfea_data_plane_base_la_LIBADD	+= $(top_builddir)/libxorp/libxorp.la
+
 libfea_la_SOURCES	 = fea_module.h
 libfea_la_SOURCES	+= mfea_module.h
 libfea_la_SOURCES	+= fea_io.hh
@@ -172,14 +177,22 @@ libfea_la_SOURCES	+= xrl_io_link_manager.cc
 libfea_la_SOURCES	+= xrl_io_tcpudp_manager.cc
 libfea_la_SOURCES	+= xrl_mfea_node.cc
 
+libfea_la_LIBADD	 =
+libfea_la_LIBADD	+= $(top_builddir)/libxipc/libxipc.la
+libfea_la_LIBADD	+= $(top_builddir)/libcomm/libcomm.la
+libfea_la_LIBADD	+= $(top_builddir)/libxorp/libxorp.la
+
+
 # -- Sources and Linkage for test_xrl_sockets4_tcp
 test_xrl_sockets4_tcp_SOURCES	 = test_xrl_sockets4_tcp.cc
 test_xrl_sockets4_tcp_LDADD	 = $(lib_LTLIBRARIES)
+test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/libfeaclient/libfeaclient.la
 test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket4userxif.la
 test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket4xif.la
 test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket6userxif.la
 test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket6xif.la
 test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/xrl/targets/libtestsocket4.la
+test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/libproto/libproto.la
 test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/libxipc/libxipc.la
 test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/libcomm/libcomm.la
 test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/libxorp/libxorp.la
@@ -187,10 +200,12 @@ test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/libxorp/libxorp.la
 # -- Sources and Linkage for test_xrl_sockets4_udp
 test_xrl_sockets4_udp_SOURCES	 = test_xrl_sockets4_udp.cc
 test_xrl_sockets4_udp_LDADD	 = $(lib_LTLIBRARIES)
+test_xrl_sockets4_udp_LDADD	+= $(top_builddir)/libfeaclient/libfeaclient.la
 test_xrl_sockets4_udp_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket4userxif.la
 test_xrl_sockets4_udp_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket4xif.la
 test_xrl_sockets4_udp_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket6userxif.la
 test_xrl_sockets4_udp_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket6xif.la
+test_xrl_sockets4_udp_LDADD	+= $(top_builddir)/libproto/libproto.la
 test_xrl_sockets4_udp_LDADD	+= $(top_builddir)/xrl/targets/libtestsocket4.la
 test_xrl_sockets4_udp_LDADD	+= $(top_builddir)/libxipc/libxipc.la
 test_xrl_sockets4_udp_LDADD	+= $(top_builddir)/libcomm/libcomm.la
@@ -205,7 +220,8 @@ test_fea_rawlink_LDADD		+= $(top_builddir)/xrl/interfaces/libfearawlinkclientxif
 test_fea_rawlink_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la
 test_fea_rawlink_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la
 test_fea_rawlink_LDADD		+= $(top_builddir)/xrl/targets/libtestfearawlink.la
-test_fea_rawlink_LDADD		+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la
+#test_fea_rawlink_LDADD		+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la
+test_fea_rawlink_LDADD		+= $(top_builddir)/libproto/libproto.la
 test_fea_rawlink_LDADD		+= $(top_builddir)/libxipc/libxipc.la
 test_fea_rawlink_LDADD		+= $(top_builddir)/libcomm/libcomm.la
 test_fea_rawlink_LDADD		+= $(top_builddir)/libxorp/libxorp.la

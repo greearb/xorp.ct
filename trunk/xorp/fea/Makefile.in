@@ -58,7 +58,9 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" \
 	"$(DESTDIR)$(bindir)"
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
-libfea_la_LIBADD =
+libfea_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libfea_la_OBJECTS = fea_io.lo fea_node.lo fibconfig.lo \
 	fibconfig_transaction.lo firewall_entry.lo firewall_manager.lo \
 	firewall_transaction.lo ifconfig.lo ifconfig_reporter.lo \
@@ -71,7 +73,10 @@ am_libfea_la_OBJECTS = fea_io.lo fea_node.lo fibconfig.lo \
 	xrl_io_ip_manager.lo xrl_io_link_manager.lo \
 	xrl_io_tcpudp_manager.lo xrl_mfea_node.lo
 libfea_la_OBJECTS = $(am_libfea_la_OBJECTS)
-libfea_data_plane_base_la_LIBADD =
+libfea_data_plane_base_la_DEPENDENCIES =  \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libfea_data_plane_base_la_OBJECTS = fea_data_plane_manager.lo \
 	fibconfig_forwarding.lo ifconfig_property.lo io_ip.lo \
 	io_link.lo io_tcpudp.lo
@@ -88,28 +93,32 @@ test_fea_rawlink_DEPENDENCIES = $(lib_LTLIBRARIES) \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
 	$(top_builddir)/xrl/targets/libtestfearawlink.la \
-	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
+	$(top_builddir)/libproto/libproto.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la
 am_test_xrl_sockets4_tcp_OBJECTS = test_xrl_sockets4_tcp.$(OBJEXT)
 test_xrl_sockets4_tcp_OBJECTS = $(am_test_xrl_sockets4_tcp_OBJECTS)
 test_xrl_sockets4_tcp_DEPENDENCIES = $(lib_LTLIBRARIES) \
+	$(top_builddir)/libfeaclient/libfeaclient.la \
 	$(top_builddir)/xrl/interfaces/libsocket4userxif.la \
 	$(top_builddir)/xrl/interfaces/libsocket4xif.la \
 	$(top_builddir)/xrl/interfaces/libsocket6userxif.la \
 	$(top_builddir)/xrl/interfaces/libsocket6xif.la \
 	$(top_builddir)/xrl/targets/libtestsocket4.la \
+	$(top_builddir)/libproto/libproto.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la
 am_test_xrl_sockets4_udp_OBJECTS = test_xrl_sockets4_udp.$(OBJEXT)
 test_xrl_sockets4_udp_OBJECTS = $(am_test_xrl_sockets4_udp_OBJECTS)
 test_xrl_sockets4_udp_DEPENDENCIES = $(lib_LTLIBRARIES) \
+	$(top_builddir)/libfeaclient/libfeaclient.la \
 	$(top_builddir)/xrl/interfaces/libsocket4userxif.la \
 	$(top_builddir)/xrl/interfaces/libsocket4xif.la \
 	$(top_builddir)/xrl/interfaces/libsocket6userxif.la \
 	$(top_builddir)/xrl/interfaces/libsocket6xif.la \
+	$(top_builddir)/libproto/libproto.la \
 	$(top_builddir)/xrl/targets/libtestsocket4.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
@@ -424,6 +433,9 @@ libfea_data_plane_base_la_SOURCES = fea_data_plane_manager.hh \
 	io_link.hh io_tcpudp.hh fea_data_plane_manager.cc \
 	fibconfig_forwarding.cc ifconfig_property.cc io_ip.cc \
 	io_link.cc io_tcpudp.cc
+libfea_data_plane_base_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libfea_la_SOURCES = fea_module.h mfea_module.h fea_io.hh fea_node.hh \
 	fibconfig.hh fibconfig_entry_get.hh \
 	fibconfig_entry_observer.hh fibconfig_entry_set.hh \
@@ -452,15 +464,20 @@ libfea_la_SOURCES = fea_module.h mfea_module.h fea_io.hh fea_node.hh \
 	xrl_fib_client_manager.cc xrl_io_ip_manager.cc \
 	xrl_io_link_manager.cc xrl_io_tcpudp_manager.cc \
 	xrl_mfea_node.cc
+libfea_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 # -- Sources and Linkage for test_xrl_sockets4_tcp
 test_xrl_sockets4_tcp_SOURCES = test_xrl_sockets4_tcp.cc
 test_xrl_sockets4_tcp_LDADD = $(lib_LTLIBRARIES) \
+	$(top_builddir)/libfeaclient/libfeaclient.la \
 	$(top_builddir)/xrl/interfaces/libsocket4userxif.la \
 	$(top_builddir)/xrl/interfaces/libsocket4xif.la \
 	$(top_builddir)/xrl/interfaces/libsocket6userxif.la \
 	$(top_builddir)/xrl/interfaces/libsocket6xif.la \
 	$(top_builddir)/xrl/targets/libtestsocket4.la \
+	$(top_builddir)/libproto/libproto.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la
@@ -468,10 +485,12 @@ test_xrl_sockets4_tcp_LDADD = $(lib_LTLIBRARIES) \
 # -- Sources and Linkage for test_xrl_sockets4_udp
 test_xrl_sockets4_udp_SOURCES = test_xrl_sockets4_udp.cc
 test_xrl_sockets4_udp_LDADD = $(lib_LTLIBRARIES) \
+	$(top_builddir)/libfeaclient/libfeaclient.la \
 	$(top_builddir)/xrl/interfaces/libsocket4userxif.la \
 	$(top_builddir)/xrl/interfaces/libsocket4xif.la \
 	$(top_builddir)/xrl/interfaces/libsocket6userxif.la \
 	$(top_builddir)/xrl/interfaces/libsocket6xif.la \
+	$(top_builddir)/libproto/libproto.la \
 	$(top_builddir)/xrl/targets/libtestsocket4.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
@@ -479,6 +498,7 @@ test_xrl_sockets4_udp_LDADD = $(lib_LTLIBRARIES) \
 
 # -- Sources and Linkage for test_fea_rawlink
 test_fea_rawlink_SOURCES = test_fea_rawlink.cc
+#test_fea_rawlink_LDADD		+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la
 test_fea_rawlink_LDADD = $(lib_LTLIBRARIES) \
 	$(top_builddir)/libfeaclient/libfeaclient.la \
 	$(top_builddir)/xrl/interfaces/libfearawlinkxif.la \
@@ -486,7 +506,7 @@ test_fea_rawlink_LDADD = $(lib_LTLIBRARIES) \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
 	$(top_builddir)/xrl/targets/libtestfearawlink.la \
-	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
+	$(top_builddir)/libproto/libproto.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la
