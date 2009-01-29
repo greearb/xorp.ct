@@ -57,7 +57,7 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" \
 	"$(DESTDIR)$(sbindir)"
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
-libfinder_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+libfinder_la_DEPENDENCIES = ./libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la
 am_libfinder_la_OBJECTS = finder.lo finder_server.lo \
@@ -507,8 +507,7 @@ libfinder_la_SOURCES = finder.hh finder_constants.hh finder_server.hh \
 	$(top_srcdir)/xrl/interfaces/finder_client_xif.cc \
 	$(top_srcdir)/xrl/interfaces/finder_event_observer_xif.hh \
 	$(top_srcdir)/xrl/interfaces/finder_event_observer_xif.cc
-libfinder_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
-	$(top_builddir)/libcomm/libcomm.la \
+libfinder_la_LIBADD = ./libxipc.la $(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la
 
 # -- Extra files and directories to add to the distribution

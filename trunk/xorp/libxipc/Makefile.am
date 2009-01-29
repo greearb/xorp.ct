@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## # $XORP: xorp/libxipc/Makefile.am,v 1.50 2008/09/23 19:58:19 abittau Exp $
+## # $XORP: xorp/libxipc/Makefile.am,v 1.51 2009/01/29 18:57:02 jtc Exp $
 ##
 
 # Redefine the bin installation directory
@@ -206,7 +206,7 @@ libfinder_la_SOURCES += $(top_srcdir)/xrl/interfaces/finder_client_xif.cc
 libfinder_la_SOURCES += $(top_srcdir)/xrl/interfaces/finder_event_observer_xif.hh
 libfinder_la_SOURCES += $(top_srcdir)/xrl/interfaces/finder_event_observer_xif.cc
 
-libfinder_la_LIBADD   = $(top_builddir)/libxipc/libxipc.la
+libfinder_la_LIBADD   = ./libxipc.la
 libfinder_la_LIBADD  += $(top_builddir)/libcomm/libcomm.la
 libfinder_la_LIBADD  += $(top_builddir)/libxorp/libxorp.la
 
