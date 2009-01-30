@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rib/Makefile.am,v 1.42 2007/10/03 00:05:47 pavlin Exp $
+## $XORP: xorp/rib/Makefile.am,v 1.43 2009/01/29 18:57:03 jtc Exp $
 ##
 
 SUBDIRS = . tools
@@ -236,8 +236,32 @@ librib_la_SOURCES		+= rt_tab_register.cc
 librib_la_SOURCES		+= vifmanager.cc
 librib_la_SOURCES		+= xrl_target.cc
 
+librib_la_LIBADD		=
+librib_la_LIBADD		+= ./libribxrl.la
+librib_la_LIBADD		+= $(top_builddir)/libfeaclient/libfeaclient.la
+librib_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libribclientxif.la
+librib_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la
+librib_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libredist4xif.la
+librib_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libredist6xif.la
+librib_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libredisttransaction4xif.la
+librib_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libredisttransaction6xif.la
+librib_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libpolicyredist4xif.la
+librib_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libpolicyredist6xif.la
+librib_la_LIBADD		+= $(top_builddir)/xrl/interfaces/libprofileclientxif.la
+librib_la_LIBADD		+= $(top_builddir)/xrl/targets/libribbase.la
+librib_la_LIBADD		+= $(top_builddir)/policy/backend/libpolicybackend.la
+librib_la_LIBADD		+= $(top_builddir)/libproto/libproto.la
+librib_la_LIBADD		+= $(top_builddir)/libxipc/libxipc.la
+librib_la_LIBADD		+= $(top_builddir)/libcomm/libcomm.la
+librib_la_LIBADD		+= $(top_builddir)/libxorp/libxorp.la
+
 libribxrl_la_SOURCES		 = redist_xrl.hh
 libribxrl_la_SOURCES		+= redist_xrl.cc
+
+libribxrl_la_LIBADD		=
+libribxrl_la_LIBADD		+= $(top_builddir)/libxipc/libxipc.la
+libribxrl_la_LIBADD		+= $(top_builddir)/libcomm/libcomm.la
+libribxrl_la_LIBADD		+= $(top_builddir)/libxorp/libxorp.la
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST	 = commands

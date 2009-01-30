@@ -58,7 +58,23 @@ am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)"
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
-librib_la_LIBADD =
+librib_la_DEPENDENCIES = ./libribxrl.la \
+	$(top_builddir)/libfeaclient/libfeaclient.la \
+	$(top_builddir)/xrl/interfaces/libribclientxif.la \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
+	$(top_builddir)/xrl/interfaces/libredist4xif.la \
+	$(top_builddir)/xrl/interfaces/libredist6xif.la \
+	$(top_builddir)/xrl/interfaces/libredisttransaction4xif.la \
+	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.la \
+	$(top_builddir)/xrl/interfaces/libpolicyredist4xif.la \
+	$(top_builddir)/xrl/interfaces/libpolicyredist6xif.la \
+	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
+	$(top_builddir)/xrl/targets/libribbase.la \
+	$(top_builddir)/policy/backend/libpolicybackend.la \
+	$(top_builddir)/libproto/libproto.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_librib_la_OBJECTS = profile_vars.lo protocol.lo register_server.lo \
 	rib.lo rib_manager.lo rib_varrw.lo route.lo rt_tab_base.lo \
 	rt_tab_deletion.lo rt_tab_extint.lo rt_tab_log.lo \
@@ -66,7 +82,9 @@ am_librib_la_OBJECTS = profile_vars.lo protocol.lo register_server.lo \
 	rt_tab_pol_redist.lo rt_tab_redist.lo rt_tab_register.lo \
 	vifmanager.lo xrl_target.lo
 librib_la_OBJECTS = $(am_librib_la_OBJECTS)
-libribxrl_la_LIBADD =
+libribxrl_la_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_libribxrl_la_OBJECTS = redist_xrl.lo
 libribxrl_la_OBJECTS = $(am_libribxrl_la_OBJECTS)
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
@@ -388,7 +406,27 @@ librib_la_SOURCES = rib_module.h protocol.hh register_server.hh rib.hh \
 	rt_tab_origin.cc rt_tab_pol_conn.cc rt_tab_pol_redist.cc \
 	rt_tab_redist.cc rt_tab_register.cc vifmanager.cc \
 	xrl_target.cc
+librib_la_LIBADD = ./libribxrl.la \
+	$(top_builddir)/libfeaclient/libfeaclient.la \
+	$(top_builddir)/xrl/interfaces/libribclientxif.la \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
+	$(top_builddir)/xrl/interfaces/libredist4xif.la \
+	$(top_builddir)/xrl/interfaces/libredist6xif.la \
+	$(top_builddir)/xrl/interfaces/libredisttransaction4xif.la \
+	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.la \
+	$(top_builddir)/xrl/interfaces/libpolicyredist4xif.la \
+	$(top_builddir)/xrl/interfaces/libpolicyredist6xif.la \
+	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
+	$(top_builddir)/xrl/targets/libribbase.la \
+	$(top_builddir)/policy/backend/libpolicybackend.la \
+	$(top_builddir)/libproto/libproto.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 libribxrl_la_SOURCES = redist_xrl.hh redist_xrl.cc
+libribxrl_la_LIBADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST = commands test_rib_direct.sh.in test_rib_xrls.sh.in \
