@@ -35,10 +35,6 @@ build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
 bin_PROGRAMS = xorp_bgp$(EXEEXT)
-check_PROGRAMS = test_packet$(EXEEXT) aspath_test$(EXEEXT) \
-	test_packet_coding$(EXEEXT) isolation_tests$(EXEEXT) \
-	test_peer_data$(EXEEXT) test_plumbing$(EXEEXT) \
-	update_test$(EXEEXT)
 subdir = bgp
 DIST_COMMON = README $(srcdir)/Makefile.am $(srcdir)/Makefile.in TODO
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -95,120 +91,6 @@ am_libbgp_la_OBJECTS = aspath.lo attribute_manager.lo bgp_trie.lo \
 libbgp_la_OBJECTS = $(am_libbgp_la_OBJECTS)
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
-am_aspath_test_OBJECTS = aspath_test.$(OBJEXT)
-aspath_test_OBJECTS = $(am_aspath_test_OBJECTS)
-aspath_test_LDADD = $(LDADD)
-aspath_test_DEPENDENCIES = libbgp.la \
-	$(top_builddir)/xrl/targets/libbgpbase.la \
-	$(top_builddir)/policy/backend/libpolicybackend.la \
-	$(top_builddir)/libfeaclient/libfeaclient.la \
-	$(top_builddir)/xrl/interfaces/libribxif.la \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
-	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.la \
-	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
-	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
-	$(top_builddir)/libxipc/libxipc.la \
-	$(top_builddir)/libcomm/libcomm.la \
-	$(top_builddir)/libxorp/libxorp.la
-am_isolation_tests_OBJECTS = test_main.$(OBJEXT) test_ribin.$(OBJEXT) \
-	test_deletion.$(OBJEXT) test_filter.$(OBJEXT) \
-	test_policy.$(OBJEXT) test_cache.$(OBJEXT) \
-	test_nhlookup.$(OBJEXT) test_decision.$(OBJEXT) \
-	test_fanout.$(OBJEXT) test_dump.$(OBJEXT) \
-	test_ribout.$(OBJEXT) test_next_hop_resolver.$(OBJEXT) \
-	route_table_debug.$(OBJEXT) dummy_main.$(OBJEXT) \
-	dummy_next_hop_resolver.$(OBJEXT) peer_handler_debug.$(OBJEXT) \
-	test_subnet_route.$(OBJEXT)
-isolation_tests_OBJECTS = $(am_isolation_tests_OBJECTS)
-isolation_tests_LDADD = $(LDADD)
-isolation_tests_DEPENDENCIES = libbgp.la \
-	$(top_builddir)/xrl/targets/libbgpbase.la \
-	$(top_builddir)/policy/backend/libpolicybackend.la \
-	$(top_builddir)/libfeaclient/libfeaclient.la \
-	$(top_builddir)/xrl/interfaces/libribxif.la \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
-	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.la \
-	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
-	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
-	$(top_builddir)/libxipc/libxipc.la \
-	$(top_builddir)/libcomm/libcomm.la \
-	$(top_builddir)/libxorp/libxorp.la
-am_test_packet_OBJECTS = test_packet.$(OBJEXT) dummy_main.$(OBJEXT)
-test_packet_OBJECTS = $(am_test_packet_OBJECTS)
-test_packet_LDADD = $(LDADD)
-test_packet_DEPENDENCIES = libbgp.la \
-	$(top_builddir)/xrl/targets/libbgpbase.la \
-	$(top_builddir)/policy/backend/libpolicybackend.la \
-	$(top_builddir)/libfeaclient/libfeaclient.la \
-	$(top_builddir)/xrl/interfaces/libribxif.la \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
-	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.la \
-	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
-	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
-	$(top_builddir)/libxipc/libxipc.la \
-	$(top_builddir)/libcomm/libcomm.la \
-	$(top_builddir)/libxorp/libxorp.la
-am_test_packet_coding_OBJECTS = test_packet_coding.$(OBJEXT) \
-	dummy_main.$(OBJEXT)
-test_packet_coding_OBJECTS = $(am_test_packet_coding_OBJECTS)
-test_packet_coding_LDADD = $(LDADD)
-test_packet_coding_DEPENDENCIES = libbgp.la \
-	$(top_builddir)/xrl/targets/libbgpbase.la \
-	$(top_builddir)/policy/backend/libpolicybackend.la \
-	$(top_builddir)/libfeaclient/libfeaclient.la \
-	$(top_builddir)/xrl/interfaces/libribxif.la \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
-	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.la \
-	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
-	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
-	$(top_builddir)/libxipc/libxipc.la \
-	$(top_builddir)/libcomm/libcomm.la \
-	$(top_builddir)/libxorp/libxorp.la
-am_test_peer_data_OBJECTS = test_peer_data.$(OBJEXT)
-test_peer_data_OBJECTS = $(am_test_peer_data_OBJECTS)
-test_peer_data_LDADD = $(LDADD)
-test_peer_data_DEPENDENCIES = libbgp.la \
-	$(top_builddir)/xrl/targets/libbgpbase.la \
-	$(top_builddir)/policy/backend/libpolicybackend.la \
-	$(top_builddir)/libfeaclient/libfeaclient.la \
-	$(top_builddir)/xrl/interfaces/libribxif.la \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
-	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.la \
-	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
-	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
-	$(top_builddir)/libxipc/libxipc.la \
-	$(top_builddir)/libcomm/libcomm.la \
-	$(top_builddir)/libxorp/libxorp.la
-am_test_plumbing_OBJECTS = test_plumbing.$(OBJEXT) bgp.$(OBJEXT)
-test_plumbing_OBJECTS = $(am_test_plumbing_OBJECTS)
-test_plumbing_LDADD = $(LDADD)
-am_update_test_OBJECTS = update_test.$(OBJEXT) bgp.$(OBJEXT)
-update_test_OBJECTS = $(am_update_test_OBJECTS)
-update_test_LDADD = $(LDADD)
-update_test_DEPENDENCIES = libbgp.la \
-	$(top_builddir)/xrl/targets/libbgpbase.la \
-	$(top_builddir)/policy/backend/libpolicybackend.la \
-	$(top_builddir)/libfeaclient/libfeaclient.la \
-	$(top_builddir)/xrl/interfaces/libribxif.la \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
-	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.la \
-	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
-	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
-	$(top_builddir)/libxipc/libxipc.la \
-	$(top_builddir)/libcomm/libcomm.la \
-	$(top_builddir)/libxorp/libxorp.la
 am_xorp_bgp_OBJECTS = bgp.$(OBJEXT) main.$(OBJEXT)
 xorp_bgp_OBJECTS = $(am_xorp_bgp_OBJECTS)
 xorp_bgp_LDADD = $(LDADD)
@@ -247,16 +129,8 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(libbgp_la_SOURCES) $(aspath_test_SOURCES) \
-	$(isolation_tests_SOURCES) $(test_packet_SOURCES) \
-	$(test_packet_coding_SOURCES) $(test_peer_data_SOURCES) \
-	$(test_plumbing_SOURCES) $(update_test_SOURCES) \
-	$(xorp_bgp_SOURCES)
-DIST_SOURCES = $(libbgp_la_SOURCES) $(aspath_test_SOURCES) \
-	$(isolation_tests_SOURCES) $(test_packet_SOURCES) \
-	$(test_packet_coding_SOURCES) $(test_peer_data_SOURCES) \
-	$(test_plumbing_SOURCES) $(update_test_SOURCES) \
-	$(xorp_bgp_SOURCES)
+SOURCES = $(libbgp_la_SOURCES) $(xorp_bgp_SOURCES)
+DIST_SOURCES = $(libbgp_la_SOURCES) $(xorp_bgp_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-dvi-recursive install-exec-recursive \
@@ -405,12 +279,24 @@ top_srcdir = @top_srcdir@
 
 # -- Subdirectories
 SUBDIRS = . tools harness
-check_SCRIPTS = test_leaks.sh
+
+# -- No-install Programs
+#check_PROGRAMS	 = test_packet
+#check_PROGRAMS	+= aspath_test
+#check_PROGRAMS	+= test_packet_coding
+#check_PROGRAMS	+= isolation_tests
+#check_PROGRAMS	+= test_peer_data
+#check_PROGRAMS	+= test_plumbing
+#check_PROGRAMS	+= update_test
+
+#check_SCRIPTS	 = test_leaks.sh
 
 # -- Regression tests
-TESTS = $(check_SCRIPTS) aspath_test$(EXEEXT) \
-	test_packet_coding$(EXEEXT) isolation_tests$(EXEEXT) \
-	test_peer_data$(EXEEXT)
+#TESTS		 = $(check_SCRIPTS)
+#TESTS		+= aspath_test$(EXEEXT)
+#TESTS		+= test_packet_coding$(EXEEXT)
+#TESTS		+= isolation_tests$(EXEEXT)
+#TESTS		+= test_peer_data$(EXEEXT)
 
 # -- No-install Libtool Libraries
 lib_LTLIBRARIES = libbgp.la
@@ -432,21 +318,43 @@ LDADD = libbgp.la $(top_builddir)/xrl/targets/libbgpbase.la \
 
 # -- Program Sources
 xorp_bgp_SOURCES = bgp.cc bgp.hh main.cc
-test_packet_SOURCES = test_test.hh test_packet.cc dummy_main.cc
-test_plumbing_SOURCES = test_plumbing.hh test_plumbing.cc bgp.hh \
-	bgp.cc
-test_plumbing_DEPENDENCIES = libbgp.la
-aspath_test_SOURCES = aspath_test.cc
-test_packet_coding_SOURCES = test_packet_coding.cc dummy_main.cc
-update_test_SOURCES = update_test.cc bgp.cc
-isolation_tests_SOURCES = test_main.cc test_ribin.cc test_deletion.cc \
-	test_filter.cc test_policy.cc test_cache.cc test_nhlookup.cc \
-	test_decision.cc test_fanout.cc test_dump.cc test_ribout.cc \
-	test_next_hop_resolver.cc route_table_debug.hh \
-	route_table_debug.cc dummy_main.cc dummy_next_hop_resolver.cc \
-	dummy_next_hop_resolver.hh peer_handler_debug.hh \
-	peer_handler_debug.cc test_subnet_route.cc
-test_peer_data_SOURCES = test_peer_data.cc
+
+#test_packet_SOURCES		 = test_test.hh
+#test_packet_SOURCES		+= test_packet.cc
+#test_packet_SOURCES		+= dummy_main.cc
+
+#test_plumbing_SOURCES		 = test_plumbing.hh
+#test_plumbing_SOURCES		+= test_plumbing.cc
+#test_plumbing_SOURCES		+= bgp.hh
+#test_plumbing_SOURCES		+= bgp.cc
+
+#aspath_test_SOURCES		 = aspath_test.cc
+#test_packet_coding_SOURCES	 = test_packet_coding.cc
+#test_packet_coding_SOURCES	+= dummy_main.cc
+#update_test_SOURCES		 = update_test.cc bgp.cc
+
+#isolation_tests_SOURCES		= test_main.cc
+#isolation_tests_SOURCES		+= test_ribin.cc
+#isolation_tests_SOURCES		+= test_deletion.cc
+#isolation_tests_SOURCES		+= test_filter.cc
+#isolation_tests_SOURCES		+= test_policy.cc
+#isolation_tests_SOURCES		+= test_cache.cc
+#isolation_tests_SOURCES		+= test_nhlookup.cc
+#isolation_tests_SOURCES		+= test_decision.cc
+#isolation_tests_SOURCES		+= test_fanout.cc
+#isolation_tests_SOURCES		+= test_dump.cc
+#isolation_tests_SOURCES		+= test_ribout.cc
+#isolation_tests_SOURCES		+= test_next_hop_resolver.cc
+#isolation_tests_SOURCES		+= route_table_debug.hh
+#isolation_tests_SOURCES		+= route_table_debug.cc
+#isolation_tests_SOURCES		+= dummy_main.cc
+#isolation_tests_SOURCES		+= dummy_next_hop_resolver.cc
+#isolation_tests_SOURCES		+= dummy_next_hop_resolver.hh
+#isolation_tests_SOURCES		+= peer_handler_debug.hh
+#isolation_tests_SOURCES		+= peer_handler_debug.cc
+#isolation_tests_SOURCES		+= test_subnet_route.cc
+
+#test_peer_data_SOURCES		= test_peer_data.cc
 
 # -- Library Sources
 libbgp_la_SOURCES = bgp_module.h aspath.hh attribute_manager.hh \
@@ -599,34 +507,6 @@ clean-binPROGRAMS:
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
 	done
-
-clean-checkPROGRAMS:
-	@list='$(check_PROGRAMS)'; for p in $$list; do \
-	  f=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
-	  echo " rm -f $$p $$f"; \
-	  rm -f $$p $$f ; \
-	done
-aspath_test$(EXEEXT): $(aspath_test_OBJECTS) $(aspath_test_DEPENDENCIES) 
-	@rm -f aspath_test$(EXEEXT)
-	$(CXXLINK) $(aspath_test_OBJECTS) $(aspath_test_LDADD) $(LIBS)
-isolation_tests$(EXEEXT): $(isolation_tests_OBJECTS) $(isolation_tests_DEPENDENCIES) 
-	@rm -f isolation_tests$(EXEEXT)
-	$(CXXLINK) $(isolation_tests_OBJECTS) $(isolation_tests_LDADD) $(LIBS)
-test_packet$(EXEEXT): $(test_packet_OBJECTS) $(test_packet_DEPENDENCIES) 
-	@rm -f test_packet$(EXEEXT)
-	$(CXXLINK) $(test_packet_OBJECTS) $(test_packet_LDADD) $(LIBS)
-test_packet_coding$(EXEEXT): $(test_packet_coding_OBJECTS) $(test_packet_coding_DEPENDENCIES) 
-	@rm -f test_packet_coding$(EXEEXT)
-	$(CXXLINK) $(test_packet_coding_OBJECTS) $(test_packet_coding_LDADD) $(LIBS)
-test_peer_data$(EXEEXT): $(test_peer_data_OBJECTS) $(test_peer_data_DEPENDENCIES) 
-	@rm -f test_peer_data$(EXEEXT)
-	$(CXXLINK) $(test_peer_data_OBJECTS) $(test_peer_data_LDADD) $(LIBS)
-test_plumbing$(EXEEXT): $(test_plumbing_OBJECTS) $(test_plumbing_DEPENDENCIES) 
-	@rm -f test_plumbing$(EXEEXT)
-	$(CXXLINK) $(test_plumbing_OBJECTS) $(test_plumbing_LDADD) $(LIBS)
-update_test$(EXEEXT): $(update_test_OBJECTS) $(update_test_DEPENDENCIES) 
-	@rm -f update_test$(EXEEXT)
-	$(CXXLINK) $(update_test_OBJECTS) $(update_test_LDADD) $(LIBS)
 xorp_bgp$(EXEEXT): $(xorp_bgp_OBJECTS) $(xorp_bgp_DEPENDENCIES) 
 	@rm -f xorp_bgp$(EXEEXT)
 	$(CXXLINK) $(xorp_bgp_OBJECTS) $(xorp_bgp_LDADD) $(LIBS)
@@ -638,7 +518,6 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/aspath.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/aspath_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/attribute_manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bgp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bgp_trie.Plo@am__quote@
@@ -646,8 +525,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bgp_varrw_export.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/crash_dump.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/damping.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dummy_main.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dummy_next_hop_resolver.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dump_iterators.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/internal_message.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/iptuple.Plo@am__quote@
@@ -662,7 +539,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/peer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/peer_data.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/peer_handler.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/peer_handler_debug.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/peer_list.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plumbing.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/process_watch.Plo@am__quote@
@@ -673,7 +549,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/route_table_base.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/route_table_cache.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/route_table_damping.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/route_table_debug.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/route_table_decision.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/route_table_deletion.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/route_table_dump.Plo@am__quote@
@@ -689,26 +564,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/route_table_ribout.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/socket.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/subnet_route.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_cache.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_decision.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_deletion.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_dump.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_fanout.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_filter.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_main.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_next_hop_resolver.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_nhlookup.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_packet.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_packet_coding.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_peer_data.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_plumbing.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_policy.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_ribin.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_ribout.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_subnet_route.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/update_attrib.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/update_packet.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/update_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xrl_target.Plo@am__quote@
 
 .cc.o:
@@ -869,79 +726,6 @@ GTAGS:
 distclean-tags:
 	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 
-check-TESTS: $(TESTS)
-	@failed=0; all=0; xfail=0; xpass=0; skip=0; ws='[	 ]'; \
-	srcdir=$(srcdir); export srcdir; \
-	list=' $(TESTS) '; \
-	if test -n "$$list"; then \
-	  for tst in $$list; do \
-	    if test -f ./$$tst; then dir=./; \
-	    elif test -f $$tst; then dir=; \
-	    else dir="$(srcdir)/"; fi; \
-	    if $(TESTS_ENVIRONMENT) $${dir}$$tst; then \
-	      all=`expr $$all + 1`; \
-	      case " $(XFAIL_TESTS) " in \
-	      *$$ws$$tst$$ws*) \
-		xpass=`expr $$xpass + 1`; \
-		failed=`expr $$failed + 1`; \
-		echo "XPASS: $$tst"; \
-	      ;; \
-	      *) \
-		echo "PASS: $$tst"; \
-	      ;; \
-	      esac; \
-	    elif test $$? -ne 77; then \
-	      all=`expr $$all + 1`; \
-	      case " $(XFAIL_TESTS) " in \
-	      *$$ws$$tst$$ws*) \
-		xfail=`expr $$xfail + 1`; \
-		echo "XFAIL: $$tst"; \
-	      ;; \
-	      *) \
-		failed=`expr $$failed + 1`; \
-		echo "FAIL: $$tst"; \
-	      ;; \
-	      esac; \
-	    else \
-	      skip=`expr $$skip + 1`; \
-	      echo "SKIP: $$tst"; \
-	    fi; \
-	  done; \
-	  if test "$$failed" -eq 0; then \
-	    if test "$$xfail" -eq 0; then \
-	      banner="All $$all tests passed"; \
-	    else \
-	      banner="All $$all tests behaved as expected ($$xfail expected failures)"; \
-	    fi; \
-	  else \
-	    if test "$$xpass" -eq 0; then \
-	      banner="$$failed of $$all tests failed"; \
-	    else \
-	      banner="$$failed of $$all tests did not behave as expected ($$xpass unexpected passes)"; \
-	    fi; \
-	  fi; \
-	  dashes="$$banner"; \
-	  skipped=""; \
-	  if test "$$skip" -ne 0; then \
-	    skipped="($$skip tests were not run)"; \
-	    test `echo "$$skipped" | wc -c` -le `echo "$$banner" | wc -c` || \
-	      dashes="$$skipped"; \
-	  fi; \
-	  report=""; \
-	  if test "$$failed" -ne 0 && test -n "$(PACKAGE_BUGREPORT)"; then \
-	    report="Please report to $(PACKAGE_BUGREPORT)"; \
-	    test `echo "$$report" | wc -c` -le `echo "$$banner" | wc -c` || \
-	      dashes="$$report"; \
-	  fi; \
-	  dashes=`echo "$$dashes" | sed s/./=/g`; \
-	  echo "$$dashes"; \
-	  echo "$$banner"; \
-	  test -z "$$skipped" || echo "$$skipped"; \
-	  test -z "$$report" || echo "$$report"; \
-	  echo "$$dashes"; \
-	  test "$$failed" -eq 0; \
-	else :; fi
-
 distdir: $(DISTFILES)
 	@srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*]/\\\\&/g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's/[].[^$$\\*]/\\\\&/g'`; \
@@ -986,8 +770,6 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
-	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS) $(check_SCRIPTS)
-	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-recursive
 all-am: Makefile $(LTLIBRARIES) $(PROGRAMS)
 install-binPROGRAMS: install-libLTLIBRARIES
@@ -1023,8 +805,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-recursive
 
-clean-am: clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
-	clean-libLTLIBRARIES clean-libtool mostlyclean-am
+clean-am: clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
+	clean-libtool mostlyclean-am
 
 distclean: distclean-recursive
 	-rm -rf ./$(DEPDIR)
@@ -1084,20 +866,20 @@ uninstall-am: uninstall-binPROGRAMS uninstall-libLTLIBRARIES
 	install-strip
 
 .PHONY: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) CTAGS GTAGS \
-	all all-am check check-TESTS check-am clean clean-binPROGRAMS \
-	clean-checkPROGRAMS clean-generic clean-libLTLIBRARIES \
-	clean-libtool ctags ctags-recursive distclean \
-	distclean-compile distclean-generic distclean-libtool \
-	distclean-tags distdir dvi dvi-am html html-am info info-am \
-	install install-am install-binPROGRAMS install-data \
-	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-libLTLIBRARIES install-man install-pdf \
-	install-pdf-am install-ps install-ps-am install-strip \
-	installcheck installcheck-am installdirs installdirs-am \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
-	pdf pdf-am ps ps-am tags tags-recursive uninstall uninstall-am \
+	all all-am check check-am clean clean-binPROGRAMS \
+	clean-generic clean-libLTLIBRARIES clean-libtool ctags \
+	ctags-recursive distclean distclean-compile distclean-generic \
+	distclean-libtool distclean-tags distdir dvi dvi-am html \
+	html-am info info-am install install-am install-binPROGRAMS \
+	install-data install-data-am install-dvi install-dvi-am \
+	install-exec install-exec-am install-html install-html-am \
+	install-info install-info-am install-libLTLIBRARIES \
+	install-man install-pdf install-pdf-am install-ps \
+	install-ps-am install-strip installcheck installcheck-am \
+	installdirs installdirs-am maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	tags tags-recursive uninstall uninstall-am \
 	uninstall-binPROGRAMS uninstall-libLTLIBRARIES
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

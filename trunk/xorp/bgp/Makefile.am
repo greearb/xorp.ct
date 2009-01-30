@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/Makefile.am,v 1.48 2008/11/08 06:14:35 mjh Exp $
+## $XORP: xorp/bgp/Makefile.am,v 1.49 2009/01/29 18:56:59 jtc Exp $
 ##
 
 # -- Subdirectories
@@ -13,22 +13,22 @@ bindir = $(prefix)/$(subdir)
 bin_PROGRAMS	 = xorp_bgp
 
 # -- No-install Programs
-check_PROGRAMS	 = test_packet
-check_PROGRAMS	+= aspath_test
-check_PROGRAMS	+= test_packet_coding
-check_PROGRAMS	+= isolation_tests
-check_PROGRAMS	+= test_peer_data
-check_PROGRAMS	+= test_plumbing
-check_PROGRAMS	+= update_test
+#check_PROGRAMS	 = test_packet
+#check_PROGRAMS	+= aspath_test
+#check_PROGRAMS	+= test_packet_coding
+#check_PROGRAMS	+= isolation_tests
+#check_PROGRAMS	+= test_peer_data
+#check_PROGRAMS	+= test_plumbing
+#check_PROGRAMS	+= update_test
 
-check_SCRIPTS	 = test_leaks.sh
+#check_SCRIPTS	 = test_leaks.sh
 
 # -- Regression tests
-TESTS		 = $(check_SCRIPTS)
-TESTS		+= aspath_test$(EXEEXT)
-TESTS		+= test_packet_coding$(EXEEXT)
-TESTS		+= isolation_tests$(EXEEXT)
-TESTS		+= test_peer_data$(EXEEXT)
+#TESTS		 = $(check_SCRIPTS)
+#TESTS		+= aspath_test$(EXEEXT)
+#TESTS		+= test_packet_coding$(EXEEXT)
+#TESTS		+= isolation_tests$(EXEEXT)
+#TESTS		+= test_peer_data$(EXEEXT)
 
 # -- No-install Libtool Libraries
 lib_LTLIBRARIES	 = libbgp.la
@@ -54,43 +54,43 @@ xorp_bgp_SOURCES		 = bgp.cc
 xorp_bgp_SOURCES		+= bgp.hh
 xorp_bgp_SOURCES		+= main.cc
 
-test_packet_SOURCES		 = test_test.hh
-test_packet_SOURCES		+= test_packet.cc
-test_packet_SOURCES		+= dummy_main.cc
+#test_packet_SOURCES		 = test_test.hh
+#test_packet_SOURCES		+= test_packet.cc
+#test_packet_SOURCES		+= dummy_main.cc
 
-test_plumbing_SOURCES		 = test_plumbing.hh
-test_plumbing_SOURCES		+= test_plumbing.cc
-test_plumbing_SOURCES		+= bgp.hh
-test_plumbing_SOURCES		+= bgp.cc
-test_plumbing_DEPENDENCIES	 = libbgp.la
+#test_plumbing_SOURCES		 = test_plumbing.hh
+#test_plumbing_SOURCES		+= test_plumbing.cc
+#test_plumbing_SOURCES		+= bgp.hh
+#test_plumbing_SOURCES		+= bgp.cc
+##test_plumbing_DEPENDENCIES	 = libbgp.la
 
-aspath_test_SOURCES		 = aspath_test.cc
-test_packet_coding_SOURCES	 = test_packet_coding.cc
-test_packet_coding_SOURCES	+= dummy_main.cc
-update_test_SOURCES		 = update_test.cc bgp.cc
+#aspath_test_SOURCES		 = aspath_test.cc
+#test_packet_coding_SOURCES	 = test_packet_coding.cc
+#test_packet_coding_SOURCES	+= dummy_main.cc
+#update_test_SOURCES		 = update_test.cc bgp.cc
 
-isolation_tests_SOURCES		= test_main.cc
-isolation_tests_SOURCES		+= test_ribin.cc
-isolation_tests_SOURCES		+= test_deletion.cc
-isolation_tests_SOURCES		+= test_filter.cc
-isolation_tests_SOURCES		+= test_policy.cc
-isolation_tests_SOURCES		+= test_cache.cc
-isolation_tests_SOURCES		+= test_nhlookup.cc
-isolation_tests_SOURCES		+= test_decision.cc
-isolation_tests_SOURCES		+= test_fanout.cc
-isolation_tests_SOURCES		+= test_dump.cc
-isolation_tests_SOURCES		+= test_ribout.cc
-isolation_tests_SOURCES		+= test_next_hop_resolver.cc
-isolation_tests_SOURCES		+= route_table_debug.hh
-isolation_tests_SOURCES		+= route_table_debug.cc
-isolation_tests_SOURCES		+= dummy_main.cc
-isolation_tests_SOURCES		+= dummy_next_hop_resolver.cc
-isolation_tests_SOURCES		+= dummy_next_hop_resolver.hh
-isolation_tests_SOURCES		+= peer_handler_debug.hh
-isolation_tests_SOURCES		+= peer_handler_debug.cc
-isolation_tests_SOURCES		+= test_subnet_route.cc
+#isolation_tests_SOURCES		= test_main.cc
+#isolation_tests_SOURCES		+= test_ribin.cc
+#isolation_tests_SOURCES		+= test_deletion.cc
+#isolation_tests_SOURCES		+= test_filter.cc
+#isolation_tests_SOURCES		+= test_policy.cc
+#isolation_tests_SOURCES		+= test_cache.cc
+#isolation_tests_SOURCES		+= test_nhlookup.cc
+#isolation_tests_SOURCES		+= test_decision.cc
+#isolation_tests_SOURCES		+= test_fanout.cc
+#isolation_tests_SOURCES		+= test_dump.cc
+#isolation_tests_SOURCES		+= test_ribout.cc
+#isolation_tests_SOURCES		+= test_next_hop_resolver.cc
+#isolation_tests_SOURCES		+= route_table_debug.hh
+#isolation_tests_SOURCES		+= route_table_debug.cc
+#isolation_tests_SOURCES		+= dummy_main.cc
+#isolation_tests_SOURCES		+= dummy_next_hop_resolver.cc
+#isolation_tests_SOURCES		+= dummy_next_hop_resolver.hh
+#isolation_tests_SOURCES		+= peer_handler_debug.hh
+#isolation_tests_SOURCES		+= peer_handler_debug.cc
+#isolation_tests_SOURCES		+= test_subnet_route.cc
 
-test_peer_data_SOURCES		= test_peer_data.cc
+#test_peer_data_SOURCES		= test_peer_data.cc
 
 # -- Library Sources
 libbgp_la_SOURCES  = bgp_module.h
