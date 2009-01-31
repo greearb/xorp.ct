@@ -1,32 +1,32 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/harness/Makefile.am,v 1.24 2008/12/09 23:39:01 atanu Exp $
+## $XORP: xorp/bgp/harness/Makefile.am,v 1.25 2009/01/29 18:56:59 jtc Exp $
 ##
 
 # -- Real Programs
 bin_PROGRAMS	 =
 
 # -- No-install Programs
-check_PROGRAMS	 = coord
-check_PROGRAMS	+= test_peer
-check_PROGRAMS	+= test_trie
+#check_PROGRAMS	 = coord
+#check_PROGRAMS	+= test_peer
+#check_PROGRAMS	+= test_trie
 
-check_SCRIPTS	 = test_peering1.sh
-check_SCRIPTS	+= test_peering2.sh
-check_SCRIPTS	+= test_peering3.sh
-check_SCRIPTS	+= test_routing1.sh
-check_SCRIPTS	+= test_routing2.sh
-check_SCRIPTS	+= test_rib1.sh
-check_SCRIPTS	+= test_rib_fea1.sh
-check_SCRIPTS	+= test_path_attribute1.sh
-check_SCRIPTS	+= test_path_attribute2.sh
-check_SCRIPTS	+= test_path_attribute3.sh
-check_SCRIPTS	+= test_route_reflection1.sh
-check_SCRIPTS	+= test_route_reflection2.sh
-check_SCRIPTS	+= test_route_flap_damping1.sh
-check_SCRIPTS	+= test_terminate.sh
+#check_SCRIPTS	 = test_peering1.sh
+#check_SCRIPTS	+= test_peering2.sh
+#check_SCRIPTS	+= test_peering3.sh
+#check_SCRIPTS	+= test_routing1.sh
+#check_SCRIPTS	+= test_routing2.sh
+#check_SCRIPTS	+= test_rib1.sh
+#check_SCRIPTS	+= test_rib_fea1.sh
+#check_SCRIPTS	+= test_path_attribute1.sh
+#check_SCRIPTS	+= test_path_attribute2.sh
+#check_SCRIPTS	+= test_path_attribute3.sh
+#check_SCRIPTS	+= test_route_reflection1.sh
+#check_SCRIPTS	+= test_route_reflection2.sh
+#check_SCRIPTS	+= test_route_flap_damping1.sh
+#check_SCRIPTS	+= test_terminate.sh
 
-TESTS		 = $(check_SCRIPTS) test_trie$(EXEEXT)
+#TESTS		 = $(check_SCRIPTS) test_trie$(EXEEXT)
 
 # -- Libraries
 lib_LTLIBRARIES =
@@ -61,27 +61,27 @@ LDADD		+= $(top_builddir)/libxorp/libxorp.la
 # LDADD		+= $(top_builddir)/libxorp/libxorp.la
 
 # -- Program Sources
-test_peer_SOURCES = bgppp.hh test_peer.hh bgppp.cc ../dummy_main.cc test_peer.cc
-coord_SOURCES	 = bgppp.hh
-coord_SOURCES	+= command.hh
-coord_SOURCES	+= coord.hh
-coord_SOURCES	+= peer.hh
-coord_SOURCES	+= trie.hh
-coord_SOURCES	+= bgppp.cc
-coord_SOURCES	+= command.cc
-coord_SOURCES	+= coord.cc
-coord_SOURCES	+= peer.cc
-coord_SOURCES	+= trie.cc
-coord_SOURCES	+= real_trie.hh
-coord_SOURCES	+= trie_payload.hh
-coord_SOURCES	+= ../bgp.hh
-coord_SOURCES	+= ../dummy_main.cc
-test_trie_SOURCES =  test_trie.cc 
-test_trie_SOURCES += trie.cc 
-test_trie_SOURCES += trie.hh 
-test_trie_SOURCES += real_trie.hh 
-test_trie_SOURCES += trie_payload.hh
-test_trie_SOURCES += ../dummy_main.cc
+#test_peer_SOURCES = bgppp.hh test_peer.hh bgppp.cc ../dummy_main.cc test_peer.cc
+#coord_SOURCES	 = bgppp.hh
+#coord_SOURCES	+= command.hh
+#coord_SOURCES	+= coord.hh
+#coord_SOURCES	+= peer.hh
+#coord_SOURCES	+= trie.hh
+#coord_SOURCES	+= bgppp.cc
+#coord_SOURCES	+= command.cc
+#coord_SOURCES	+= coord.cc
+#coord_SOURCES	+= peer.cc
+#coord_SOURCES	+= trie.cc
+#coord_SOURCES	+= real_trie.hh
+#coord_SOURCES	+= trie_payload.hh
+#coord_SOURCES	+= ../bgp.hh
+#coord_SOURCES	+= ../dummy_main.cc
+#test_trie_SOURCES =  test_trie.cc 
+#test_trie_SOURCES += trie.cc 
+#test_trie_SOURCES += trie.hh 
+#test_trie_SOURCES += real_trie.hh 
+#test_trie_SOURCES += trie_payload.hh
+#test_trie_SOURCES += ../dummy_main.cc
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST	 = $(TESTS)

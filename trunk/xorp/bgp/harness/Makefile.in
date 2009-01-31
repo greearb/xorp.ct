@@ -35,7 +35,6 @@ build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
 bin_PROGRAMS =
-check_PROGRAMS = coord$(EXEEXT) test_peer$(EXEEXT) test_trie$(EXEEXT)
 subdir = bgp/harness
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in TODO
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -57,87 +56,8 @@ libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
-am_coord_OBJECTS = bgppp.$(OBJEXT) command.$(OBJEXT) coord.$(OBJEXT) \
-	peer.$(OBJEXT) trie.$(OBJEXT) dummy_main.$(OBJEXT)
-coord_OBJECTS = $(am_coord_OBJECTS)
-coord_LDADD = $(LDADD)
-am__DEPENDENCIES_1 =
-coord_DEPENDENCIES = $(am__DEPENDENCIES_1) \
-	$(top_builddir)/bgp/libbgp.la \
-	$(top_builddir)/xrl/targets/libtestpeerbase.la \
-	$(top_builddir)/xrl/targets/libcoordbase.la \
-	$(top_builddir)/xrl/interfaces/libtestpeerxif.la \
-	$(top_builddir)/xrl/interfaces/libdatainxif.la \
-	$(top_builddir)/policy/backend/libpolicybackend.la \
-	$(top_builddir)/libfeaclient/libfeaclient.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
-	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
-	$(top_builddir)/libxipc/libxipc.la \
-	$(top_builddir)/libcomm/libcomm.la \
-	$(top_builddir)/libxorp/libxorp.la
-am_test_peer_OBJECTS = bgppp.$(OBJEXT) dummy_main.$(OBJEXT) \
-	test_peer.$(OBJEXT)
-test_peer_OBJECTS = $(am_test_peer_OBJECTS)
-test_peer_LDADD = $(LDADD)
-test_peer_DEPENDENCIES = $(am__DEPENDENCIES_1) \
-	$(top_builddir)/bgp/libbgp.la \
-	$(top_builddir)/xrl/targets/libtestpeerbase.la \
-	$(top_builddir)/xrl/targets/libcoordbase.la \
-	$(top_builddir)/xrl/interfaces/libtestpeerxif.la \
-	$(top_builddir)/xrl/interfaces/libdatainxif.la \
-	$(top_builddir)/policy/backend/libpolicybackend.la \
-	$(top_builddir)/libfeaclient/libfeaclient.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
-	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
-	$(top_builddir)/libxipc/libxipc.la \
-	$(top_builddir)/libcomm/libcomm.la \
-	$(top_builddir)/libxorp/libxorp.la
-am_test_trie_OBJECTS = test_trie.$(OBJEXT) trie.$(OBJEXT) \
-	dummy_main.$(OBJEXT)
-test_trie_OBJECTS = $(am_test_trie_OBJECTS)
-test_trie_LDADD = $(LDADD)
-test_trie_DEPENDENCIES = $(am__DEPENDENCIES_1) \
-	$(top_builddir)/bgp/libbgp.la \
-	$(top_builddir)/xrl/targets/libtestpeerbase.la \
-	$(top_builddir)/xrl/targets/libcoordbase.la \
-	$(top_builddir)/xrl/interfaces/libtestpeerxif.la \
-	$(top_builddir)/xrl/interfaces/libdatainxif.la \
-	$(top_builddir)/policy/backend/libpolicybackend.la \
-	$(top_builddir)/libfeaclient/libfeaclient.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
-	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
-	$(top_builddir)/libxipc/libxipc.la \
-	$(top_builddir)/libcomm/libcomm.la \
-	$(top_builddir)/libxorp/libxorp.la
-DEFAULT_INCLUDES = -I. -I$(top_builddir)@am__isrc@
-depcomp = $(SHELL) $(top_srcdir)/config/depcomp
-am__depfiles_maybe = depfiles
-CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
-	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
-LTCXXCOMPILE = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
-	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
-CXXLD = $(CXX)
-CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
-	$(LDFLAGS) -o $@
-COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
-	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
-LTCOMPILE = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
-	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
-CCLD = $(CC)
-LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
-	$(LDFLAGS) -o $@
-SOURCES = $(coord_SOURCES) $(test_peer_SOURCES) $(test_trie_SOURCES)
-DIST_SOURCES = $(coord_SOURCES) $(test_peer_SOURCES) \
-	$(test_trie_SOURCES)
-ETAGS = etags
-CTAGS = ctags
+SOURCES =
+DIST_SOURCES =
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
@@ -269,13 +189,28 @@ target_os = @target_os@
 target_vendor = @target_vendor@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-check_SCRIPTS = test_peering1.sh test_peering2.sh test_peering3.sh \
-	test_routing1.sh test_routing2.sh test_rib1.sh \
-	test_rib_fea1.sh test_path_attribute1.sh \
-	test_path_attribute2.sh test_path_attribute3.sh \
-	test_route_reflection1.sh test_route_reflection2.sh \
-	test_route_flap_damping1.sh test_terminate.sh
-TESTS = $(check_SCRIPTS) test_trie$(EXEEXT)
+
+# -- No-install Programs
+#check_PROGRAMS	 = coord
+#check_PROGRAMS	+= test_peer
+#check_PROGRAMS	+= test_trie
+
+#check_SCRIPTS	 = test_peering1.sh
+#check_SCRIPTS	+= test_peering2.sh
+#check_SCRIPTS	+= test_peering3.sh
+#check_SCRIPTS	+= test_routing1.sh
+#check_SCRIPTS	+= test_routing2.sh
+#check_SCRIPTS	+= test_rib1.sh
+#check_SCRIPTS	+= test_rib_fea1.sh
+#check_SCRIPTS	+= test_path_attribute1.sh
+#check_SCRIPTS	+= test_path_attribute2.sh
+#check_SCRIPTS	+= test_path_attribute3.sh
+#check_SCRIPTS	+= test_route_reflection1.sh
+#check_SCRIPTS	+= test_route_reflection2.sh
+#check_SCRIPTS	+= test_route_flap_damping1.sh
+#check_SCRIPTS	+= test_terminate.sh
+
+#TESTS		 = $(check_SCRIPTS) test_trie$(EXEEXT)
 
 # -- Libraries
 lib_LTLIBRARIES = 
@@ -309,12 +244,27 @@ LDADD = $(lib_LTLIBRARIES) $(top_builddir)/bgp/libbgp.la \
 # LDADD		+= $(top_builddir)/libxorp/libxorp.la
 
 # -- Program Sources
-test_peer_SOURCES = bgppp.hh test_peer.hh bgppp.cc ../dummy_main.cc test_peer.cc
-coord_SOURCES = bgppp.hh command.hh coord.hh peer.hh trie.hh bgppp.cc \
-	command.cc coord.cc peer.cc trie.cc real_trie.hh \
-	trie_payload.hh ../bgp.hh ../dummy_main.cc
-test_trie_SOURCES = test_trie.cc trie.cc trie.hh real_trie.hh \
-	trie_payload.hh ../dummy_main.cc
+#test_peer_SOURCES = bgppp.hh test_peer.hh bgppp.cc ../dummy_main.cc test_peer.cc
+#coord_SOURCES	 = bgppp.hh
+#coord_SOURCES	+= command.hh
+#coord_SOURCES	+= coord.hh
+#coord_SOURCES	+= peer.hh
+#coord_SOURCES	+= trie.hh
+#coord_SOURCES	+= bgppp.cc
+#coord_SOURCES	+= command.cc
+#coord_SOURCES	+= coord.cc
+#coord_SOURCES	+= peer.cc
+#coord_SOURCES	+= trie.cc
+#coord_SOURCES	+= real_trie.hh
+#coord_SOURCES	+= trie_payload.hh
+#coord_SOURCES	+= ../bgp.hh
+#coord_SOURCES	+= ../dummy_main.cc
+#test_trie_SOURCES =  test_trie.cc 
+#test_trie_SOURCES += trie.cc 
+#test_trie_SOURCES += trie.hh 
+#test_trie_SOURCES += real_trie.hh 
+#test_trie_SOURCES += trie_payload.hh
+#test_trie_SOURCES += ../dummy_main.cc
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST = $(TESTS) NOTES args.sh soak.sh test1.sh test2.sh \
@@ -325,7 +275,6 @@ INCLUDES = -I$(top_srcdir)
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .cc .lo .o .obj
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -411,198 +360,17 @@ clean-binPROGRAMS:
 	  rm -f $$p $$f ; \
 	done
 
-clean-checkPROGRAMS:
-	@list='$(check_PROGRAMS)'; for p in $$list; do \
-	  f=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
-	  echo " rm -f $$p $$f"; \
-	  rm -f $$p $$f ; \
-	done
-coord$(EXEEXT): $(coord_OBJECTS) $(coord_DEPENDENCIES) 
-	@rm -f coord$(EXEEXT)
-	$(CXXLINK) $(coord_OBJECTS) $(coord_LDADD) $(LIBS)
-test_peer$(EXEEXT): $(test_peer_OBJECTS) $(test_peer_DEPENDENCIES) 
-	@rm -f test_peer$(EXEEXT)
-	$(CXXLINK) $(test_peer_OBJECTS) $(test_peer_LDADD) $(LIBS)
-test_trie$(EXEEXT): $(test_trie_OBJECTS) $(test_trie_DEPENDENCIES) 
-	@rm -f test_trie$(EXEEXT)
-	$(CXXLINK) $(test_trie_OBJECTS) $(test_trie_LDADD) $(LIBS)
-
-mostlyclean-compile:
-	-rm -f *.$(OBJEXT)
-
-distclean-compile:
-	-rm -f *.tab.c
-
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bgppp.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/command.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/coord.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dummy_main.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/peer.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_peer.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_trie.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/trie.Po@am__quote@
-
-.cc.o:
-@am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ $<
-
-.cc.obj:
-@am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
-@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
-
-.cc.lo:
-@am__fastdepCXX_TRUE@	$(LTCXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
-
-dummy_main.o: ../dummy_main.cc
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT dummy_main.o -MD -MP -MF $(DEPDIR)/dummy_main.Tpo -c -o dummy_main.o `test -f '../dummy_main.cc' || echo '$(srcdir)/'`../dummy_main.cc
-@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/dummy_main.Tpo $(DEPDIR)/dummy_main.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='../dummy_main.cc' object='dummy_main.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o dummy_main.o `test -f '../dummy_main.cc' || echo '$(srcdir)/'`../dummy_main.cc
-
-dummy_main.obj: ../dummy_main.cc
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT dummy_main.obj -MD -MP -MF $(DEPDIR)/dummy_main.Tpo -c -o dummy_main.obj `if test -f '../dummy_main.cc'; then $(CYGPATH_W) '../dummy_main.cc'; else $(CYGPATH_W) '$(srcdir)/../dummy_main.cc'; fi`
-@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/dummy_main.Tpo $(DEPDIR)/dummy_main.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='../dummy_main.cc' object='dummy_main.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o dummy_main.obj `if test -f '../dummy_main.cc'; then $(CYGPATH_W) '../dummy_main.cc'; else $(CYGPATH_W) '$(srcdir)/../dummy_main.cc'; fi`
-
 mostlyclean-libtool:
 	-rm -f *.lo
 
 clean-libtool:
 	-rm -rf .libs _libs
-
-ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
-	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
-	unique=`for i in $$list; do \
-	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
-	  done | \
-	  $(AWK) '    { files[$$0] = 1; } \
-	       END { for (i in files) print i; }'`; \
-	mkid -fID $$unique
 tags: TAGS
+TAGS:
 
-TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
-		$(TAGS_FILES) $(LISP)
-	tags=; \
-	here=`pwd`; \
-	list='$(SOURCES) $(HEADERS)  $(LISP) $(TAGS_FILES)'; \
-	unique=`for i in $$list; do \
-	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
-	  done | \
-	  $(AWK) '    { files[$$0] = 1; } \
-	       END { for (i in files) print i; }'`; \
-	if test -z "$(ETAGS_ARGS)$$tags$$unique"; then :; else \
-	  test -n "$$unique" || unique=$$empty_fix; \
-	  $(ETAGS) $(ETAGSFLAGS) $(AM_ETAGSFLAGS) $(ETAGS_ARGS) \
-	    $$tags $$unique; \
-	fi
 ctags: CTAGS
-CTAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
-		$(TAGS_FILES) $(LISP)
-	tags=; \
-	here=`pwd`; \
-	list='$(SOURCES) $(HEADERS)  $(LISP) $(TAGS_FILES)'; \
-	unique=`for i in $$list; do \
-	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
-	  done | \
-	  $(AWK) '    { files[$$0] = 1; } \
-	       END { for (i in files) print i; }'`; \
-	test -z "$(CTAGS_ARGS)$$tags$$unique" \
-	  || $(CTAGS) $(CTAGSFLAGS) $(AM_CTAGSFLAGS) $(CTAGS_ARGS) \
-	     $$tags $$unique
+CTAGS:
 
-GTAGS:
-	here=`$(am__cd) $(top_builddir) && pwd` \
-	  && cd $(top_srcdir) \
-	  && gtags -i $(GTAGS_ARGS) $$here
-
-distclean-tags:
-	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
-
-check-TESTS: $(TESTS)
-	@failed=0; all=0; xfail=0; xpass=0; skip=0; ws='[	 ]'; \
-	srcdir=$(srcdir); export srcdir; \
-	list=' $(TESTS) '; \
-	if test -n "$$list"; then \
-	  for tst in $$list; do \
-	    if test -f ./$$tst; then dir=./; \
-	    elif test -f $$tst; then dir=; \
-	    else dir="$(srcdir)/"; fi; \
-	    if $(TESTS_ENVIRONMENT) $${dir}$$tst; then \
-	      all=`expr $$all + 1`; \
-	      case " $(XFAIL_TESTS) " in \
-	      *$$ws$$tst$$ws*) \
-		xpass=`expr $$xpass + 1`; \
-		failed=`expr $$failed + 1`; \
-		echo "XPASS: $$tst"; \
-	      ;; \
-	      *) \
-		echo "PASS: $$tst"; \
-	      ;; \
-	      esac; \
-	    elif test $$? -ne 77; then \
-	      all=`expr $$all + 1`; \
-	      case " $(XFAIL_TESTS) " in \
-	      *$$ws$$tst$$ws*) \
-		xfail=`expr $$xfail + 1`; \
-		echo "XFAIL: $$tst"; \
-	      ;; \
-	      *) \
-		failed=`expr $$failed + 1`; \
-		echo "FAIL: $$tst"; \
-	      ;; \
-	      esac; \
-	    else \
-	      skip=`expr $$skip + 1`; \
-	      echo "SKIP: $$tst"; \
-	    fi; \
-	  done; \
-	  if test "$$failed" -eq 0; then \
-	    if test "$$xfail" -eq 0; then \
-	      banner="All $$all tests passed"; \
-	    else \
-	      banner="All $$all tests behaved as expected ($$xfail expected failures)"; \
-	    fi; \
-	  else \
-	    if test "$$xpass" -eq 0; then \
-	      banner="$$failed of $$all tests failed"; \
-	    else \
-	      banner="$$failed of $$all tests did not behave as expected ($$xpass unexpected passes)"; \
-	    fi; \
-	  fi; \
-	  dashes="$$banner"; \
-	  skipped=""; \
-	  if test "$$skip" -ne 0; then \
-	    skipped="($$skip tests were not run)"; \
-	    test `echo "$$skipped" | wc -c` -le `echo "$$banner" | wc -c` || \
-	      dashes="$$skipped"; \
-	  fi; \
-	  report=""; \
-	  if test "$$failed" -ne 0 && test -n "$(PACKAGE_BUGREPORT)"; then \
-	    report="Please report to $(PACKAGE_BUGREPORT)"; \
-	    test `echo "$$report" | wc -c` -le `echo "$$banner" | wc -c` || \
-	      dashes="$$report"; \
-	  fi; \
-	  dashes=`echo "$$dashes" | sed s/./=/g`; \
-	  echo "$$dashes"; \
-	  echo "$$banner"; \
-	  test -z "$$skipped" || echo "$$skipped"; \
-	  test -z "$$report" || echo "$$report"; \
-	  echo "$$dashes"; \
-	  test "$$failed" -eq 0; \
-	else :; fi
 
 distdir: $(DISTFILES)
 	@srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*]/\\\\&/g'`; \
@@ -631,8 +399,6 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
-	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS) $(check_SCRIPTS)
-	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
 all-am: Makefile $(LTLIBRARIES) $(PROGRAMS)
 install-binPROGRAMS: install-libLTLIBRARIES
@@ -667,14 +433,12 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
-	clean-libLTLIBRARIES clean-libtool mostlyclean-am
+clean-am: clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
+	clean-libtool mostlyclean-am
 
 distclean: distclean-am
-	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
-distclean-am: clean-am distclean-compile distclean-generic \
-	distclean-tags
+distclean-am: clean-am distclean-generic
 
 dvi: dvi-am
 
@@ -705,14 +469,12 @@ install-ps: install-ps-am
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
 mostlyclean: mostlyclean-am
 
-mostlyclean-am: mostlyclean-compile mostlyclean-generic \
-	mostlyclean-libtool
+mostlyclean-am: mostlyclean-generic mostlyclean-libtool
 
 pdf: pdf-am
 
@@ -726,20 +488,18 @@ uninstall-am: uninstall-binPROGRAMS uninstall-libLTLIBRARIES
 
 .MAKE: install-am install-strip
 
-.PHONY: CTAGS GTAGS all all-am check check-TESTS check-am clean \
-	clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
-	clean-libLTLIBRARIES clean-libtool ctags distclean \
-	distclean-compile distclean-generic distclean-libtool \
-	distclean-tags distdir dvi dvi-am html html-am info info-am \
-	install install-am install-binPROGRAMS install-data \
-	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-libLTLIBRARIES install-man install-pdf \
-	install-pdf-am install-ps install-ps-am install-strip \
-	installcheck installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags uninstall uninstall-am uninstall-binPROGRAMS \
+.PHONY: all all-am check check-am clean clean-binPROGRAMS \
+	clean-generic clean-libLTLIBRARIES clean-libtool distclean \
+	distclean-generic distclean-libtool distdir dvi dvi-am html \
+	html-am info info-am install install-am install-binPROGRAMS \
+	install-data install-data-am install-dvi install-dvi-am \
+	install-exec install-exec-am install-html install-html-am \
+	install-info install-info-am install-libLTLIBRARIES \
+	install-man install-pdf install-pdf-am install-ps \
+	install-ps-am install-strip installcheck installcheck-am \
+	installdirs maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-generic mostlyclean-libtool pdf pdf-am \
+	ps ps-am uninstall uninstall-am uninstall-binPROGRAMS \
 	uninstall-libLTLIBRARIES
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
