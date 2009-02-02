@@ -1,16 +1,16 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/policy/test/Makefile.am,v 1.11 2009/02/02 18:14:03 jtc Exp $
+## $XORP: xorp/policy/test/Makefile.am,v 1.12 2009/02/02 20:06:13 jtc Exp $
 ##
 
 # -- Test Programs
 TESTS            = dummy_test.sh
 
 # -- No-install Programs
-noinst_PROGRAMS  = 
+check_PROGRAMS  = 
 
 # compilepolicy
-noinst_PROGRAMS += compilepolicy
+check_PROGRAMS += compilepolicy
 compilepolicy_SOURCES		 = compilepolicy.cc
 compilepolicy_SOURCES		+= filter_manager_fake.hh
 compilepolicy_SOURCES		+= process_watch_fake.hh
@@ -28,7 +28,7 @@ compilepolicy_LDADD		+= $(top_builddir)/libcomm/libcomm.la
 compilepolicy_LDADD		+= $(top_builddir)/libxorp/libxorp.la
 
 # execpolicy
-noinst_PROGRAMS += execpolicy
+check_PROGRAMS += execpolicy
 execpolicy_SOURCES		 = execpolicy.cc
 execpolicy_SOURCES		+= file_varrw.hh
 execpolicy_SOURCES		+= file_varrw.cc
@@ -40,7 +40,7 @@ execpolicy_LDADD		+= $(top_builddir)/libcomm/libcomm.la
 execpolicy_LDADD		+= $(top_builddir)/libxorp/libxorp.la
 
 # policybench
-# noinst_PROGRAMS += policybench
+# check_PROGRAMS += policybench
 # policybench_SOURCES		 = policybench.cc
 # policybench_SOURCES		+= file_varrw.cc
 
