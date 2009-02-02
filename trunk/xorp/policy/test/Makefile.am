@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/policy/test/Makefile.am,v 1.10 2009/01/29 18:57:03 jtc Exp $
+## $XORP: xorp/policy/test/Makefile.am,v 1.11 2009/02/02 18:14:03 jtc Exp $
 ##
 
 # -- Test Programs
@@ -20,9 +20,6 @@ compilepolicy_SOURCES		+= process_watch_fake.cc
 compilepolicy_SOURCES		+= lex.yy_compile_policy.cc
 compilepolicy_SOURCES		+= yacc.yy_compile_policy.cc
 compilepolicy_SOURCES		+= yacc.yy_compile_policy.cc.h
-
-compilepolicy_SOURCES		+= $(srcdir)/../policy_target.cc
-compilepolicy_SOURCES		+= $(srcdir)/../policy_target.hh
 
 compilepolicy_LDADD		 = ../libpolicy.la
 compilepolicy_LDADD		+= ../common/libpolicycommon.la

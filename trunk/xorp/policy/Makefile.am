@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 #
-## $XORP: xorp/policy/Makefile.am,v 1.17 2008/11/21 23:00:23 jtc Exp $
+## $XORP: xorp/policy/Makefile.am,v 1.18 2009/01/29 18:57:03 jtc Exp $
 ##
 
 # -- Subdirectories
@@ -32,7 +32,8 @@ LDADD           += $(top_builddir)/libxorp/libxorp.la
 xorp_policy_SOURCES		 = xorp_policy.cc
 xorp_policy_SOURCES		+= policy_target.hh
 xorp_policy_SOURCES		+= policy_target.cc
-
+xorp_policy_SOURCES		+= xrl_target.hh
+xorp_policy_SOURCES		+= xrl_target.cc
 
 # Policy library
 libpolicy_la_SOURCES		 = policy_module.h
@@ -66,7 +67,6 @@ libpolicy_la_SOURCES		+= visitor_dep.hh
 libpolicy_la_SOURCES		+= visitor_printer.hh
 libpolicy_la_SOURCES		+= visitor_semantic.hh
 libpolicy_la_SOURCES		+= visitor_test.hh
-libpolicy_la_SOURCES		+= xrl_target.hh
 
 libpolicy_la_SOURCES		+= code.cc
 libpolicy_la_SOURCES		+= code_generator.cc
@@ -91,7 +91,6 @@ libpolicy_la_SOURCES		+= visitor_dep.cc
 libpolicy_la_SOURCES		+= visitor_printer.cc
 libpolicy_la_SOURCES		+= visitor_semantic.cc
 libpolicy_la_SOURCES		+= visitor_test.cc
-libpolicy_la_SOURCES		+= xrl_target.cc
 
 libpolicy_la_SOURCES		+= yacc.yy_policy_parser.h
 libpolicy_la_SOURCES		+= yacc.yy_policy_parser.cc

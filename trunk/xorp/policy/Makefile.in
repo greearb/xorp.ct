@@ -73,11 +73,12 @@ am_libpolicy_la_OBJECTS = code.lo code_generator.lo code_list.lo \
 	semantic_varrw.lo set_map.lo source_match_code_generator.lo \
 	term.lo test_varrw.lo var_map.lo visitor_dep.lo \
 	visitor_printer.lo visitor_semantic.lo visitor_test.lo \
-	xrl_target.lo yacc.yy_policy_parser.lo lex.yy_policy_parser.lo
+	yacc.yy_policy_parser.lo lex.yy_policy_parser.lo
 libpolicy_la_OBJECTS = $(am_libpolicy_la_OBJECTS)
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
-am_xorp_policy_OBJECTS = xorp_policy.$(OBJEXT) policy_target.$(OBJEXT)
+am_xorp_policy_OBJECTS = xorp_policy.$(OBJEXT) policy_target.$(OBJEXT) \
+	xrl_target.$(OBJEXT)
 xorp_policy_OBJECTS = $(am_xorp_policy_OBJECTS)
 xorp_policy_LDADD = $(LDADD)
 xorp_policy_DEPENDENCIES = $(lib_LTLIBRARIES) \
@@ -276,7 +277,8 @@ LDADD = $(lib_LTLIBRARIES) ./backend/libpolicybackend.la \
 	$(top_builddir)/libxorp/libxorp.la
 
 # XORP Policy process
-xorp_policy_SOURCES = xorp_policy.cc policy_target.hh policy_target.cc
+xorp_policy_SOURCES = xorp_policy.cc policy_target.hh policy_target.cc \
+	xrl_target.hh xrl_target.cc
 
 # Policy library
 libpolicy_la_SOURCES = policy_module.h code.hh code_generator.hh \
@@ -288,16 +290,15 @@ libpolicy_la_SOURCES = policy_module.h code.hh code_generator.hh \
 	protocol_map.hh pw_notifier.hh semantic_varrw.hh set_map.hh \
 	source_match_code_generator.hh term.hh test_varrw.hh \
 	var_map.hh visitor.hh visitor_dep.hh visitor_printer.hh \
-	visitor_semantic.hh visitor_test.hh xrl_target.hh code.cc \
-	code_generator.cc code_list.cc configuration.cc dependency.cc \
+	visitor_semantic.hh visitor_test.hh code.cc code_generator.cc \
+	code_list.cc configuration.cc dependency.cc \
 	export_code_generator.cc filter_manager.cc parser.cc \
 	policy_list.cc policy_map.cc policy_statement.cc \
 	process_watch.cc protocol_map.cc semantic_varrw.cc set_map.cc \
 	source_match_code_generator.cc term.cc test_varrw.cc \
 	var_map.cc visitor_dep.cc visitor_printer.cc \
-	visitor_semantic.cc visitor_test.cc xrl_target.cc \
-	yacc.yy_policy_parser.h yacc.yy_policy_parser.cc \
-	lex.yy_policy_parser.cc
+	visitor_semantic.cc visitor_test.cc yacc.yy_policy_parser.h \
+	yacc.yy_policy_parser.cc lex.yy_policy_parser.cc
 libpolicy_la_LIBADD =  \
 	$(top_builddir)/policy/backend/libpolicybackend.la \
 	$(top_builddir)/policy/common/libpolicycommon.la \
@@ -437,7 +438,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/visitor_semantic.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/visitor_test.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xorp_policy.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xrl_target.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xrl_target.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/yacc.yy_policy_parser.Plo@am__quote@
 
 .cc.o:
