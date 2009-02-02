@@ -33,7 +33,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-noinst_PROGRAMS = execpolicy$(EXEEXT)
+noinst_PROGRAMS = compilepolicy$(EXEEXT) execpolicy$(EXEEXT)
 subdir = policy/test
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -45,6 +45,16 @@ mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/xorp_config.h
 CONFIG_CLEAN_FILES =
 PROGRAMS = $(noinst_PROGRAMS)
+am_compilepolicy_OBJECTS = compilepolicy.$(OBJEXT) \
+	filter_manager_fake.$(OBJEXT) process_watch_fake.$(OBJEXT) \
+	lex.yy_compile_policy.$(OBJEXT) \
+	yacc.yy_compile_policy.$(OBJEXT) policy_target.$(OBJEXT)
+compilepolicy_OBJECTS = $(am_compilepolicy_OBJECTS)
+compilepolicy_DEPENDENCIES = ../libpolicy.la \
+	../common/libpolicycommon.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_execpolicy_OBJECTS = execpolicy.$(OBJEXT) file_varrw.$(OBJEXT)
 execpolicy_OBJECTS = $(am_execpolicy_OBJECTS)
 execpolicy_DEPENDENCIES = ../backend/libpolicybackend.la \
@@ -73,8 +83,8 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(execpolicy_SOURCES)
-DIST_SOURCES = $(execpolicy_SOURCES)
+SOURCES = $(compilepolicy_SOURCES) $(execpolicy_SOURCES)
+DIST_SOURCES = $(compilepolicy_SOURCES) $(execpolicy_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -211,6 +221,15 @@ top_srcdir = @top_srcdir@
 
 # -- Test Programs
 TESTS = dummy_test.sh
+compilepolicy_SOURCES = compilepolicy.cc filter_manager_fake.hh \
+	process_watch_fake.hh compilepolicy.hh filter_manager_fake.cc \
+	process_watch_fake.cc lex.yy_compile_policy.cc \
+	yacc.yy_compile_policy.cc yacc.yy_compile_policy.cc.h \
+	$(srcdir)/../policy_target.cc $(srcdir)/../policy_target.hh
+compilepolicy_LDADD = ../libpolicy.la ../common/libpolicycommon.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 execpolicy_SOURCES = execpolicy.cc file_varrw.hh file_varrw.cc
 execpolicy_LDADD = ../backend/libpolicybackend.la \
 	../common/libpolicycommon.la \
@@ -260,6 +279,9 @@ clean-noinstPROGRAMS:
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
 	done
+compilepolicy$(EXEEXT): $(compilepolicy_OBJECTS) $(compilepolicy_DEPENDENCIES) 
+	@rm -f compilepolicy$(EXEEXT)
+	$(CXXLINK) $(compilepolicy_OBJECTS) $(compilepolicy_LDADD) $(LIBS)
 execpolicy$(EXEEXT): $(execpolicy_OBJECTS) $(execpolicy_DEPENDENCIES) 
 	@rm -f execpolicy$(EXEEXT)
 	$(CXXLINK) $(execpolicy_OBJECTS) $(execpolicy_LDADD) $(LIBS)
@@ -270,8 +292,14 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/compilepolicy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/execpolicy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/file_varrw.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/filter_manager_fake.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lex.yy_compile_policy.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/policy_target.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/process_watch_fake.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/yacc.yy_compile_policy.Po@am__quote@
 
 .cc.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -293,6 +321,20 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
+
+policy_target.o: $(srcdir)/../policy_target.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT policy_target.o -MD -MP -MF $(DEPDIR)/policy_target.Tpo -c -o policy_target.o `test -f '$(srcdir)/../policy_target.cc' || echo '$(srcdir)/'`$(srcdir)/../policy_target.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/policy_target.Tpo $(DEPDIR)/policy_target.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(srcdir)/../policy_target.cc' object='policy_target.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o policy_target.o `test -f '$(srcdir)/../policy_target.cc' || echo '$(srcdir)/'`$(srcdir)/../policy_target.cc
+
+policy_target.obj: $(srcdir)/../policy_target.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT policy_target.obj -MD -MP -MF $(DEPDIR)/policy_target.Tpo -c -o policy_target.obj `if test -f '$(srcdir)/../policy_target.cc'; then $(CYGPATH_W) '$(srcdir)/../policy_target.cc'; else $(CYGPATH_W) '$(srcdir)/$(srcdir)/../policy_target.cc'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/policy_target.Tpo $(DEPDIR)/policy_target.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(srcdir)/../policy_target.cc' object='policy_target.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o policy_target.obj `if test -f '$(srcdir)/../policy_target.cc'; then $(CYGPATH_W) '$(srcdir)/../policy_target.cc'; else $(CYGPATH_W) '$(srcdir)/$(srcdir)/../policy_target.cc'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
