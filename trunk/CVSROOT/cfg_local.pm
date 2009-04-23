@@ -1,5 +1,5 @@
 #
-# $XORP: CVSROOT/cfg_local.pm,v 1.6 2008/03/11 00:34:56 pavlin Exp $
+# $XORP: CVSROOT/cfg_local.pm,v 1.7 2008/12/30 23:06:01 jtc Exp $
 # $FreeBSD: CVSROOT-src/cfg_local.pm,v 1.27 2004/06/05 10:47:00 des Exp $
 #
 
@@ -85,7 +85,7 @@ if ($hostname =~ /^svn\.xorp\.org$/i) {
 	$MAILADDRS='xorp-cvs@xorp.org';
 	$MAILADDRS = 'cvs-test@xorp.org' if $DEBUG;
 
-	@COMMIT_HOSTS = qw(svn.xorp.org);
+	@COMMIT_HOSTS = qw(cvs.xorp.org);
 }
 
 

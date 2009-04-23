@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# $XORP: CVSROOT/commitcheck,v 1.4 2008/12/30 23:22:49 jtc Exp $
+# $XORP: CVSROOT/commitcheck,v 1.5 2009/02/02 22:07:02 jtc Exp $
 # $FreeBSD: CVSROOT-src/commitcheck,v 1.26 2002/10/13 23:25:06 peter Exp $
 #
 
@@ -14,8 +14,6 @@ use strict;
 use lib $ENV{CVSROOT};
 use CVSROOT::cfg;
 my $CVSROOT = $ENV{CVSROOT} || die "Can't determine CVSROOT (commitcheck)!\n";
-
-die "Commits disabled while migrating CVS to SVN\n";
 
 # Check that the user is committing on the right machine.
 #
