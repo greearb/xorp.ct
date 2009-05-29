@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/mibs/configure.in,v 1.37 2009/01/09 19:21:02 jtc Exp $
+dnl $XORP: xorp/mibs/configure.in,v 1.38 2009/01/19 18:23:11 jtc Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -11,9 +11,9 @@ dnl ---------------------------------------------------------------------------
 dnl Boilerplate
 dnl ---------------------------------------------------------------------------
 
-AC_INIT([xorp], [2.0-WIP], [feedback@xorp.org])
+AC_INIT([xorp], [1.7-WIP], [feedback@xorp.org])
 AC_PREREQ(2.61)
-AC_REVISION([$XORP: xorp/mibs/configure.in,v 1.37 2009/01/09 19:21:02 jtc Exp $])
+AC_REVISION([$XORP: xorp/mibs/configure.in,v 1.38 2009/01/19 18:23:11 jtc Exp $])
 AC_CONFIG_AUX_DIR(../config)
 AC_CONFIG_MACRO_DIR(../config)
 AC_CANONICAL_TARGET

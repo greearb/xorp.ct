@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/xorpsh.cmds,v 1.3 2008/10/13 22:56:17 paulz Exp $ */
+/* $XORP: xorp/etc/templates/xorpsh.cmds,v 1.4 2009/01/09 19:21:02 jtc Exp $ */
 
 show {
     %command: "" %help: HELP;
@@ -6,6 +6,6 @@ show {
 }
 
 show version {
-    %command: "echo Version 2.0-WIP" %help: HELP;
+    %command: "echo Version 1.7-WIP" %help: HELP;
     %tag: HELP "Display system version";
 }
