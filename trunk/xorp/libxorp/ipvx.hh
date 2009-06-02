@@ -18,7 +18,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxorp/ipvx.hh,v 1.34 2008/10/02 21:57:31 bms Exp $
+// $XORP: xorp/libxorp/ipvx.hh,v 1.35 2009/01/05 18:30:58 jtc Exp $
 
 #ifndef __LIBXORP_IPVX_HH__
 #define __LIBXORP_IPVX_HH__
@@ -116,6 +116,9 @@ public:
      * Constructor from sockaddr_in structure.
      *
      * @param from_sockaddr_in the storage to copy the address from.
+     *
+     * @exception InvalidFamily thrown if @a from_sockaddr_in is not a
+     * AF_INET sockaddr.
      */
     IPvX(const sockaddr_in& from_sockaddr_in) throw (InvalidFamily);
 
@@ -123,6 +126,9 @@ public:
      * Constructor from sockaddr_in6 structure.
      *
      * @param from_sockaddr_in6 the storage to copy the address from.
+     *
+     * @exception InvalidFamily thrown if @a from_sockaddr_in6 is not a
+     * AF_INET6 sockaddr.
      */
     IPvX(const sockaddr_in6& from_sockaddr_in6) throw (InvalidFamily);
 
@@ -192,10 +198,11 @@ public:
     /**
      * Copy the IPvX raw address to a sockaddr_in structure.
      *
-     * Copy the raw address held within an IPvX instance to an sockaddr_in
-     * structure and assign appropriately and set fields within sockaddr_in
-     * appropriately. The underlying address representation may be either
-     * IPv4 or IPv6.
+     * Copy the raw address held within an IPvX instance to an
+     * sockaddr_in structure and assign appropriately and set fields
+     * within @a to_sockaddr_in appropriately.
+     *
+     * Note that this address must be of AF_INET family.
      *
      * @param to_sockaddr_in the storage to copy the address to.
      * @return the number of copied octets.
@@ -205,10 +212,11 @@ public:
     /**
      * Copy the IPvX raw address to a sockaddr_in6 structure.
      *
-     * Copy the raw address held within an IPvX instance to a sockaddr_in6
-     * structure and assign appropriately and set fields within sockaddr_in
-     * appropriately. The underlying address representation may be either
-     * IPv4 or IPv6.
+     * Copy the raw address held within an IPvX instance to a
+     * sockaddr_in6 structure and assign appropriately and set fields
+     * within @a to_sockaddr_in6 appropriately.
+     *
+     * Note that this address must be of AF_INET6 family.
      *
      * @param to_sockaddr_in6 the storage to copy the address to.
      * @return the number of copied octets.
@@ -274,6 +282,9 @@ public:
      *
      * @param from_sockaddr_in the storage to copy the address from.
      * @return the number of copied octets.
+     *
+     * @exception InvalidFamily thrown if @a from_sockaddr_in is not a 
+     * AF_INET sockaddr.
      */
     size_t copy_in(const sockaddr_in& from_sockaddr_in) throw (InvalidFamily);
 
@@ -285,6 +296,9 @@ public:
      *
      * @param from_sockaddr_in6 the storage to copy the address from.
      * @return the number of copied octets.
+     *
+     * @exception InvalidFamily thrown if @a from_sockaddr_in6 is not a 
+     * AF_INET6 sockaddr.
      */
     size_t copy_in(const sockaddr_in6& from_sockaddr_in6)
 	throw (InvalidFamily);

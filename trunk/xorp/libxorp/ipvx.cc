@@ -18,7 +18,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.38 2009/01/24 04:09:40 atanu Exp $"
+#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.39 2009/01/24 09:09:38 pavlin Exp $"
 
 #include "xorp.h"
 #include "ipvx.hh"
@@ -334,7 +334,20 @@ IPvX::copy_out(struct in6_addr& to_in6_addr) const throw (InvalidFamily)
 size_t
 IPvX::copy_out(struct sockaddr& to_sockaddr) const throw (InvalidFamily)
 {
-    return (copy_out(*sockaddr2sockaddr_in(&to_sockaddr)));
+    struct sockaddr *sa = &to_sockaddr;
+
+    switch (_af) {
+    case AF_INET:
+        return (copy_out(*sockaddr2sockaddr_in(sa)));
+
+    case AF_INET6:
+        return (copy_out(*sockaddr2sockaddr_in6(sa)));
+
+    default:
+	xorp_throw(InvalidFamily, _af);
+    }
+
+    return ((size_t)-1);
 }
 
 /**
@@ -346,7 +359,20 @@ size_t
 IPvX::copy_out(struct sockaddr_storage& to_sockaddr_storage)
     const throw (InvalidFamily)
 {
-    return (copy_out(*sockaddr_storage2sockaddr(&to_sockaddr_storage)));
+    struct sockaddr *sa = sockaddr_storage2sockaddr(&to_sockaddr_storage);
+
+    switch (_af) {
+    case AF_INET:
+        return (copy_out(*sockaddr2sockaddr_in(sa)));
+
+    case AF_INET6:
+        return (copy_out(*sockaddr2sockaddr_in6(sa)));
+
+    default:
+	xorp_throw(InvalidFamily, _af);
+    }
+
+    return ((size_t)-1);
 }
 
 /**
@@ -367,9 +393,6 @@ IPvX::copy_out(struct sockaddr_in& to_sockaddr_in) const throw (InvalidFamily)
 	to_sockaddr_in.sin_port = 0;			// XXX: not used
 	return (copy_out(to_sockaddr_in.sin_addr));
 
-    case AF_INET6:
-	return (copy_out(reinterpret_cast<sockaddr_in6&>(to_sockaddr_in)));
-
     default:
 	xorp_throw(InvalidFamily, _af);
     }
@@ -387,9 +410,6 @@ IPvX::copy_out(struct sockaddr_in6& to_sockaddr_in6) const
     throw (InvalidFamily)
 {
     switch (_af) {
-    case AF_INET:
-	return (copy_out(reinterpret_cast<sockaddr_in&>(to_sockaddr_in6)));
-
     case AF_INET6:
 	memset(&to_sockaddr_in6, 0, sizeof(to_sockaddr_in6));
 #ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_LEN
@@ -473,7 +493,19 @@ IPvX::copy_in(const in6_addr& from_in6_addr)
 size_t
 IPvX::copy_in(const sockaddr& from_sockaddr) throw (InvalidFamily)
 {
-    return (copy_in(*sockaddr2sockaddr_in(&from_sockaddr)));
+
+    const struct sockaddr *sa = &from_sockaddr;
+
+    switch (sa->sa_family) {
+    case AF_INET:
+        return (copy_in(*sockaddr2sockaddr_in(sa)));
+    case AF_INET6:
+        return (copy_in(*sockaddr2sockaddr_in6(sa)));
+    default:
+	xorp_throw(InvalidFamily, sa->sa_family);
+    }
+
+    return ((size_t)-1);
 }
 
 /**
@@ -484,7 +516,18 @@ size_t
 IPvX::copy_in(const sockaddr_storage& from_sockaddr_storage)
     throw (InvalidFamily)
 {
-    return (copy_in(*sockaddr_storage2sockaddr(&from_sockaddr_storage)));
+    const struct sockaddr *sa = sockaddr_storage2sockaddr(&from_sockaddr_storage);
+
+    switch (sa->sa_family) {
+    case AF_INET:
+        return (copy_in(*sockaddr2sockaddr_in(sa)));
+    case AF_INET6:
+        return (copy_in(*sockaddr2sockaddr_in6(sa)));
+    default:
+	xorp_throw(InvalidFamily, sa->sa_family);
+    }
+    
+    return ((size_t)-1);
 }
 
 /**
@@ -499,8 +542,6 @@ IPvX::copy_in(const sockaddr_in& from_sockaddr_in) throw (InvalidFamily)
     switch (_af) {
     case AF_INET:
 	return (copy_in(from_sockaddr_in.sin_addr));
-    case AF_INET6:
-	return (copy_in(reinterpret_cast<const sockaddr_in6&>(from_sockaddr_in)));
     default:
 	xorp_throw(InvalidFamily, _af);
     }
@@ -517,8 +558,6 @@ IPvX::copy_in(const sockaddr_in6& from_sockaddr_in6) throw (InvalidFamily)
     _af = from_sockaddr_in6.sin6_family;
 
     switch (_af) {
-    case AF_INET:
-	return (copy_in(reinterpret_cast<const sockaddr_in&>(from_sockaddr_in6)));
     case AF_INET6:
 	return (copy_in(from_sockaddr_in6.sin6_addr));
     default:

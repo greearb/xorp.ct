@@ -18,7 +18,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxorp/test_ipvx.cc,v 1.35 2009/01/05 18:30:58 jtc Exp $"
+#ident "$XORP: xorp/libxorp/test_ipvx.cc,v 1.36 2009/01/24 04:09:40 atanu Exp $"
 
 #include "libxorp_module.h"
 
@@ -301,20 +301,6 @@ test_ipvx_valid_constructors()
     verbose_match(ip16.str(), addr_string4);
 
     //
-    // Constructor from sockaddr_in structure: IPv6
-    //
-    struct sockaddr_in *ip17_sockaddr_in_p = (struct sockaddr_in *)&sin6;
-    IPvX ip17(*ip17_sockaddr_in_p);
-    verbose_match(ip17.str(), addr_string6);
-
-    //
-    // Constructor from sockaddr_in6 structure: IPv4
-    //
-    struct sockaddr_in6 *ip18_sockaddr_in6_p = (struct sockaddr_in6 *)&sin;
-    IPvX ip18(*ip18_sockaddr_in6_p);
-    verbose_match(ip18.str(), addr_string4);
-
-    //
     // Constructor from sockaddr_in6 structure: IPv6
     //
     IPvX ip19(sin6);
@@ -464,6 +450,54 @@ test_ipvx_invalid_constructors()
 	// The problem was caught
 	verbose_log("%s : OK\n", e.str().c_str());
     }
+
+    //
+    // Constructor from sockaddr_in structure: IPv6
+    //
+    try {
+	struct in6_addr in6_addr = { { { 0x12, 0x34, 0x56, 0x78,
+					 0x9a, 0xbc, 0xde, 0xf0,
+					 0x0f, 0xed, 0xcb, 0xa9,
+					 0x87, 0x65, 0x43, 0x21 } } };
+	struct sockaddr_in6 sin6;
+	memset(&sin6, 0, sizeof(sin6));
+#ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_LEN
+	sin6.sin6_len = sizeof(sin6);
+#endif
+	sin6.sin6_family = AF_INET6;
+	sin6.sin6_addr = in6_addr;
+
+        IPvX ip( *((struct sockaddr_in *) &sin6));
+	verbose_log("Cannot catch sockaddr_in6 passed as sockaddr_in : FAIL");
+	incr_failures();
+	UNUSED(ip);
+    } catch (const InvalidFamily& e) {
+	// The problem was caught
+	verbose_log("%s : OK\n", e.str().c_str());
+    }
+
+    //
+    // Constructor from sockaddr_in6 structure: IPv4
+    //
+    try {
+        uint32_t ui = htonl((12 << 24) | (34 << 16) | (56 << 8) | 78);
+
+	struct sockaddr_in sin;
+	memset(&sin, 0, sizeof(sin));
+#ifdef HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
+	sin.sin_len = sizeof(sin);
+#endif
+	sin.sin_family = AF_INET;
+	sin.sin_addr.s_addr = ui;
+
+	IPvX ip( *((struct sockaddr_in6 *) &sin));
+	verbose_log("Cannot catch sockaddr_in passed as sockaddr_in6 : FAIL");
+	incr_failures();
+	UNUSED(ip);
+    } catch (const InvalidFamily& e) {
+	// The problem was caught
+	verbose_log("%s : OK\n", e.str().c_str());
+    }
 }
 
 /**
@@ -602,28 +636,6 @@ test_ipvx_valid_copy_in_out()
 		   "compare copy_out(sockaddr_in&) for IPv4 address");
 
     //
-    // Copy the IPvX raw address to a sockaddr_in structure: IPv6.
-    //
-    IPvX ip8(addr_string6);
-    struct sockaddr_in6 ip8_sockaddr_in6;
-    struct sockaddr_in *ip8_sockaddr_in_p = (struct sockaddr_in *)&ip8_sockaddr_in6;
-    verbose_assert(ip8.copy_out(*ip8_sockaddr_in_p) == 16,
-		   "copy_out(sockaddr_in&) for IPv6 address");
-    verbose_assert(memcmp(&sin6, &ip8_sockaddr_in6, sizeof(sin6)) == 0,
-		   "compare copy_out(sockaddr_in&) for IPv6 address");
-
-    //
-    // Copy the IPvX raw address to a sockaddr_in6 structure: IPv4.
-    //
-    IPvX ip9(addr_string4);
-    struct sockaddr_in ip9_sockaddr_in;
-    struct sockaddr_in6 *ip9_sockaddr_in6_p = (struct sockaddr_in6 *)&ip9_sockaddr_in;
-    verbose_assert(ip9.copy_out(*ip9_sockaddr_in6_p) == 4,
-		   "copy_out(sockaddr_in6&) for IPv4 address");
-    verbose_assert(memcmp(&sin, &ip9_sockaddr_in, sizeof(sin)) == 0,
-		   "compare copy_out(sockaddr_in6&) for IPv4 address");
-
-    //
     // Copy the IPvX raw address to a sockaddr_in6 structure: IPv6.
     //
     IPvX ip10(addr_string6);
@@ -712,24 +724,6 @@ test_ipvx_valid_copy_in_out()
     verbose_match(ip17.str(), addr_string4);
 
     //
-    // Copy a raw address from a sockaddr_in structure into IPvX structure: IPv6.
-    //
-    IPvX ip18(AF_INET6);
-    struct sockaddr_in *ip18_sockaddr_in_p = (struct sockaddr_in *)&sin6;
-    verbose_assert(ip18.copy_in(*ip18_sockaddr_in_p) == 16,
-		   "copy_in(sockaddr_in&) for IPv6 address");
-    verbose_match(ip18.str(), addr_string6);
-
-    //
-    // Copy a raw address from a sockaddr_in6 structure into IPvX structure: IPv4.
-    //
-    IPvX ip19(AF_INET);
-    struct sockaddr_in6 *ip19_sockaddr_in6_p = (struct sockaddr_in6 *)&sin;
-    verbose_assert(ip19.copy_in(*ip19_sockaddr_in6_p) == 4,
-		   "copy_in(sockaddr_in6&) for IPv4 address");
-    verbose_match(ip19.str(), addr_string4);
-
-    //
     // Copy a raw address from a sockaddr_in6 structure into IPvX structure: IPv6.
     //
     IPvX ip20(AF_INET6);
@@ -803,6 +797,34 @@ test_ipvx_invalid_copy_in_out()
 	verbose_log("%s : OK\n", e.str().c_str());
     }
 
+    //
+    // Mismatch copy-out: copy-out IPv6 address to sockaddr_in structure.
+    //
+    try {
+        IPvX ip(addr_string6);
+        struct sockaddr_in sockaddr_in;
+        ip.copy_out(sockaddr_in);
+        verbose_log("Cannot catch mismatch copy-out : FAIL\n");
+        incr_failures();
+    } catch (const InvalidFamily& e) {
+	// The problem was caught
+	verbose_log("%s : OK\n", e.str().c_str());
+    }
+
+    //
+    // Mismatch copy-out: copy-out IPv4 address to sockaddr_in6 structure.
+    //
+    try {
+        IPvX ip(addr_string4);
+        struct sockaddr_in6 sockaddr_in6;
+        ip.copy_out(sockaddr_in6);
+        verbose_log("Cannot catch mismatch copy-out : FAIL\n");
+        incr_failures();
+    } catch (const InvalidFamily& e) {
+	// The problem was caught
+	verbose_log("%s : OK\n", e.str().c_str());
+    }
+
     // XXX: we should test for copy_out() to sockaddr, sockaddr_storage,
     // sockaddr_in, sockaddr_in6 structures that throw InvalidFamily.
     // To do so we must creast first IPvX with invalid address family.
@@ -869,6 +891,51 @@ test_ipvx_invalid_copy_in_out()
 	IPvX ip(AF_INET6);
 	ip.copy_in(sin6);
 	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
+	incr_failures();
+    } catch (const InvalidFamily& e) {
+	// The problem was caught
+	verbose_log("%s : OK\n", e.str().c_str());
+    }
+
+    //
+    // Copy-in from a sockaddr_in structure for IPv6
+    //
+    try {
+	struct in6_addr in6_addr = { { { 0x12, 0x34, 0x56, 0x78,
+					 0x9a, 0xbc, 0xde, 0xf0,
+					 0x0f, 0xed, 0xcb, 0xa9,
+					 0x87, 0x65, 0x43, 0x21 } } };
+	struct sockaddr_in6 sin6;
+	memset(&sin6, 0, sizeof(sin6));
+#ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_LEN
+	sin6.sin6_len = sizeof(sin6);
+#endif
+	sin6.sin6_family = AF_INET6;
+	sin6.sin6_addr = in6_addr;
+
+        IPvX ip(AF_INET6);
+        ip.copy_in( *((struct sockaddr_in *) &sin6));
+	verbose_log("Cannot catch invalid IP address family AF_INET6 : FAIL\n");
+	incr_failures();
+    } catch (const InvalidFamily& e) {
+	// The problem was caught
+	verbose_log("%s : OK\n", e.str().c_str());
+    }
+
+    try {
+        uint32_t ui = htonl((12 << 24) | (34 << 16) | (56 << 8) | 78);
+
+	struct sockaddr_in sin;
+	memset(&sin, 0, sizeof(sin));
+#ifdef HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
+	sin.sin_len = sizeof(sin);
+#endif
+	sin.sin_family = AF_INET;
+	sin.sin_addr.s_addr = ui;
+
+	IPvX ip(AF_INET);
+	ip.copy_in( *((struct sockaddr_in6*) &sin) );
+	verbose_log("Cannot catch invalid IP address family AF_INET : FAIL\n");
 	incr_failures();
     } catch (const InvalidFamily& e) {
 	// The problem was caught
