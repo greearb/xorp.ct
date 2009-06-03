@@ -64,6 +64,34 @@ def kdoc_comment(method, indent_chars, preamble = ""):
 
     return kdt.output_kdoc(indent_chars, params, preamble)
 
+def target_declare_handler_table(cls):
+    s = """
+    struct handler_table {
+        const char *name;
+        const XrlCmdError (%s::*method)(const XrlArgs&, XrlArgs*);
+    };
+
+    static const struct handler_table handlers[];
+    static const size_t num_handlers;
+""" % cls
+    return s
+
+
+def target_define_handler_table(cls, methods):
+    s = """
+const struct %s::handler_table %s::handlers[] = {
+""" % (cls, cls)
+
+    for m in methods:
+        s += "    { \"%s\",\n      &%s::handle_%s },\n" % (m.name(), cls, cpp_name(m.name()))
+
+    s += """};
+
+const size_t %s::num_handlers = (sizeof(%s::handlers) / sizeof(%s::handlers[0]));
+
+""" % (cls, cls, cls)
+    return s
+
 def target_virtual_fns(methods):
     r = ""
     for x in methods:
@@ -108,20 +136,21 @@ def target_declare_handler_hooks():
     s = "    void add_handlers(); \n    void remove_handlers();\n"
     return s
 
-def target_handler_hooks(cls, name, methods):
-    s = "void\n%s::add_handlers()\n{\n" % cls
-    for m in methods:
-        s += "\tif (_cmds->add_handler(\"%s\", " % m.name()
-        s += "\n%scallback(this, &%s::handle_%s)) == false) {\n" % \
-             (xorp_indent(3), cls, cpp_name(m.name()))
-        s += "\t    XLOG_ERROR(\"Failed to xrl handler finder://%%s/%%s\", \"%s\", \"%s\");\n\t}\n" % \
-              (name, m.name())
-    s += "\t_cmds->finalize();\n"
+def target_handler_hooks(cls, name):
+    s =  "void\n%s::add_handlers()\n{\n" % cls
+    s += "    for (size_t i = 0; i < num_handlers; ++i) {\n"
+    s += "        if (!_cmds->add_handler(handlers[i].name,\n"
+    s += "                                callback(this, handlers[i].method))) {\n"
+    s += "            XLOG_ERROR(\"Failed to register xrl handler finder://%%s/%%s\", \"%s\", handlers[i].name);\n" % name
+    s += "        }\n"
+    s += "    }\n"
+    s += "    _cmds->finalize();\n"
     s += "}\n\n"
-
+    
     s += "void\n%s::remove_handlers()\n{\n" %cls
-    for m in methods:
-        s += "\t_cmds->remove_handler(\"%s\");\n" % m.name()
+    s += "     for (size_t i = 0; i < num_handlers; ++i) {\n"
+    s += "         _cmds->remove_handler(handlers[i].name);\n"
+    s += "     }\n"
     s += "}\n"
 
     return s;
@@ -272,6 +301,7 @@ protected:
     s += "private:\n"
     s += target_declare_handlers(methods)
     s += target_declare_handler_hooks()
+    s += target_declare_handler_table(cls)
 
     s += "};\n"
 
@@ -287,7 +317,8 @@ def prepare_target_cc(target_hh, target_cc):
     return s
 
 def output_target_cc(cls, tgt_name, methods):
-    s = """
+    s = target_define_handler_table(cls, methods)
+    s += """
 %s::%s(XrlCmdMap* cmds)
     : _cmds(cmds)
 {
@@ -319,7 +350,7 @@ bool
 
 """ % (cls, cls, cls, cls, cls)
     s += target_handler_methods(cls, tgt_name, methods)
-    s += target_handler_hooks(cls, tgt_name, methods)
+    s += target_handler_hooks(cls, tgt_name)
 
     return s
 
