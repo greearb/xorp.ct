@@ -37,7 +37,7 @@ build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
 subdir = .
-DIST_COMMON = README $(am__configure_deps) $(srcdir)/Jamrules.in \
+DIST_COMMON = README $(am__configure_deps) \
 	$(srcdir)/MakefileRootCheck.am $(srcdir)/MakefileRootCheck.in \
 	$(srcdir)/xorp_config.h.in $(top_srcdir)/configure TODO \
 	config/compile config/config.guess config/config.sub \
@@ -52,7 +52,7 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = xorp_config.h
-CONFIG_CLEAN_FILES = Jamrules
+CONFIG_CLEAN_FILES =
 SOURCES =
 DIST_SOURCES =
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
@@ -277,8 +277,6 @@ $(srcdir)/xorp_config.h.in: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 
 distclean-hdr:
 	-rm -f xorp_config.h stamp-h1
-Jamrules: $(top_builddir)/config.status $(srcdir)/Jamrules.in
-	cd $(top_builddir) && $(SHELL) ./config.status $@
 
 mostlyclean-libtool:
 	-rm -f *.lo
