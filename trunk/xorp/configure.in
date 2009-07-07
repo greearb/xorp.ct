@@ -307,22 +307,6 @@ dnl -----------------------------------------
 builtin(include, config/acopenssl.m4)
 
 dnl -----------------------------------------
-dnl --with-snmp (default no)
-dnl -----------------------------------------
-AC_ARG_WITH([snmp],
-	    AC_HELP_STRING([--with-snmp],
-			   [build XORP MIBs for Net-SNMP]),
-	    [snmp=${withval};],
-	    [snmp="no";
-	     MIBS="";]
-)
-AS_IF([test "x$snmp" != xno],
-	[MIBS="mibs";
-	AC_CONFIG_SUBDIRS(mibs)]
-)
-AC_SUBST(MIBS)
-
-dnl -----------------------------------------
 dnl --with-mld6igmp_lite (default no)
 dnl -----------------------------------------
 AC_ARG_WITH([mld6igmp_lite],
@@ -362,28 +346,6 @@ AC_ARG_WITH([olsr],
 	    [olsr=$withval;],
 	    [olsr="yes";
 	     CONTRIB_SUBDIRS="$CONTRIB_SUBDIRS olsr";]
-)
-
-dnl -----------------------------------------
-dnl --with-path-to-snmpd
-dnl -----------------------------------------
-AC_ARG_WITH([path-to-snmpd],
-	    AC_HELP_STRING([--with-path-to-snmpd=DIR],
-			   [specify path to the snmpd executable]),
-	    [snmpd=${withval}/snmpd;],
-	    [snmpd="not_found";]
-)
-
-dnl -----------------------------------------
-dnl --with-path-to-net-snmp-config
-dnl -----------------------------------------
-AC_ARG_WITH([path-to-net-snmp-config],
-	    AC_HELP_STRING([--with-path-to-net-snmp-config=DIR],
-			   [specify path to the net-snmp-config executable]),
-	    [net_snmp_config_dir=${withval};
-	     net_snmp_config=${net_snmp_config_dir}/net-snmp-config;],
-	    [net_snmp_config_dir="";
-	     net_snmp_config="net-snmp-config";]
 )
 
 dnl ---------------------------------------------------------------------------

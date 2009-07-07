@@ -142,8 +142,6 @@ check_necessary $0
 run rm -f config.cache
 run rm -f aclocal.m4
 run rm -f config/aclocal.m4
-run rm -f mibs/config.cache
-run rm -f mibs/aclocal.m4
 run rm -f cli/libtecla/config.cache
 run rm -f cli/libtecla/aclocal.m4
 
@@ -153,11 +151,6 @@ run rm -f cli/libtecla/aclocal.m4
 # version is probably newer.
 #
 run ${LIBTOOLIZE} --automake --copy
-
-# XXX: does mibs need its own libtool?
-run cd mibs
-run ${LIBTOOLIZE} --automake --copy
-run cd ..
 
 # XXX: does libtecla need its own libtool?
 run cd cli/libtecla
@@ -174,11 +167,6 @@ run cd ../..
 #
 run ${ACLOCAL} -I config
 
-# XXX: does mibs need its own aclocal?
-run cd mibs
-run ${ACLOCAL} -I ../config
-run cd ..
-
 # XXX: does libtecla need its own aclocal?
 run cd cli/libtecla
 run ${ACLOCAL} -I ../../config
@@ -191,20 +179,12 @@ run cd ../..
 autoheader_options=`program_flags ${AUTOHEADER} 2.50 "--include=config" ""`
 run ${AUTOHEADER} ${autoheader_options}
 
-# XXX: mibs does not need its own autoheader run.
-#run cd mibs
-#run ${AUTOHEADER} ${autoheader_options}
-#run cd ..
-
 #
 # XXX: in case of non-GNU 'make', we must use flag "-i".
 # XXX: we may have to use "-i" before distributing the source code (?)
 # run ${AUTOMAKE} -i --add-missing --copy
 #
 run ${AUTOMAKE} --add-missing --copy --foreign 
-run cd mibs
-run ${AUTOMAKE} --add-missing --copy --foreign
-run cd ..
 run cd cli/libtecla
 run ${AUTOMAKE} --add-missing --copy --foreign
 run cd ../..
@@ -224,11 +204,6 @@ autoconf_options=`program_flags ${AUTOCONF} 2.50 "--include=../../config" "-l ..
 run ${AUTOCONF} ${autoconf_options}
 run cd ../..
 
-run cd mibs
-autoconf_options=`program_flags ${AUTOCONF} 2.50 "--include=../config" "-l ../config"`
-run ${AUTOCONF} ${autoconf_options}
-run cd ..
-
 #
 # Cleanup autom4te.cache directories
 #
@@ -240,7 +215,7 @@ for dir in ${AUTOM4TE_DIRS} ; do
     autom4te_cache_dirs="${autom4te_cache_dirs}${dir}.cache"
 done
 echo "Removing ${autom4te_cache_dirs} cache directories..."
-remove_prefix_dirs=". cli/libtecla mibs"
+remove_prefix_dirs=". cli/libtecla"
 for prefix_dir in ${remove_prefix_dirs} ; do
     for suffix_dir in ${autom4te_cache_dirs} ; do
 	dir="${prefix_dir}/${suffix_dir}"
@@ -256,7 +231,6 @@ done
 echo "Removing auto-generated aclocal.m4 files..."
 run rm -f aclocal.m4
 run rm -f config/aclocal.m4
-run rm -f mibs/aclocal.m4
 run rm -f cli/libtecla/aclocal.m4
 
 exit 0

@@ -224,11 +224,6 @@ The content of each of the directories is the following:
   * libxorp : XORP library that contains various basic
     functionalities such as IP addresses, IP subnets, etc.
 
-  * mibs : XORP MIB modules.
-    XORP uses the Net-SNMP package (http://www.net-snmp.org/) as an SNMP
-    agent, and implements only the necessary MIB modules.
-    The documentation is in ${XORP}/docs/snmp/.
-
   * mld6igmp : Multicast Listen Discovery/Internet Group Management
     Protocol (MLD/IGMP) implementation.
 
