@@ -1153,7 +1153,6 @@ dnl Generate makefiles for core XORP components.
 dnl -------------------------------------------------------------
 
 AC_CONFIG_FILES([
-    Jamrules
     Makefile
     MakefileRootCheck
     bgp/Makefile
