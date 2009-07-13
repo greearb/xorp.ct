@@ -272,7 +272,7 @@ FeaNode::load_data_plane_managers(string& error_msg)
     } else {
 #if defined(HOST_OS_MACOSX) || defined(HOST_OS_DRAGONFLYBSD) || defined(HOST_OS_FREEBSD) || defined(HOST_OS_NETBSD) || defined(HOST_OS_OPENBSD)
 	fea_data_plane_manager = new FeaDataPlaneManagerBsd(*this);
-#elif(HOST_OS_LINUX)
+#elif defined(HOST_OS_LINUX)
 	fea_data_plane_manager = new FeaDataPlaneManagerLinux(*this);
 #elif defined(HOST_OS_WINDOWS)
 	fea_data_plane_manager = new FeaDataPlaneManagerWindows(*this);
