@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/policy/set_map.cc,v 1.17 2009/01/05 18:31:03 jtc Exp $"
+
 
 #include "policy_module.h"
 #include "libxorp/xorp.h"

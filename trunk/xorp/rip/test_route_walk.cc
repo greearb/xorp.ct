@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/rip/test_route_walk.cc,v 1.23 2008/10/02 21:58:18 bms Exp $"
+
 
 #include <set>
 

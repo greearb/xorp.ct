@@ -64,7 +64,7 @@
  * $FreeBSD: src/lib/libc/gen/popen.c,v 1.14 2000/01/27 23:06:19 jasone Exp $
  */
 
-#ident "$XORP: xorp/libxorp/popen.cc,v 1.24 2008/10/02 21:57:32 bms Exp $"
+
 
 #include "libxorp_module.h"
 

@@ -20,4 +20,4 @@
  * http://xorp.net
  */
 
-#ident "$XORP: xorp/devnotes/template_gpl.c,v 1.1 2008/10/02 21:56:43 bms Exp $"
+

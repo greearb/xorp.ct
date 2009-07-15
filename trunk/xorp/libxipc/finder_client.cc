@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxipc/finder_client.cc,v 1.42 2008/10/02 21:57:19 bms Exp $"
+
 
 #include <functional>
 #include <algorithm>

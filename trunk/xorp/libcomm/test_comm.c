@@ -21,7 +21,7 @@
  * http://xorp.net
  */
 
-#ident "$XORP: xorp/libcomm/test_comm.c,v 1.20 2008/10/02 21:57:15 bms Exp $"
+
 
 
 /*

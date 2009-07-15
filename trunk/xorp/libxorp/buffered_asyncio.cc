@@ -18,7 +18,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxorp/buffered_asyncio.cc,v 1.17 2008/11/02 05:17:33 pavlin Exp $"
+
 
 #include "libxorp_module.h"
 #include "xorp.h"

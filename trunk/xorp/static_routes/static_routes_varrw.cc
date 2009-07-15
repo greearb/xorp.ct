@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/static_routes/static_routes_varrw.cc,v 1.14 2008/10/02 21:58:29 bms Exp $"
+
 
 #include "static_routes_module.h"
 #include "libxorp/xorp.h"

@@ -18,7 +18,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxorp/test_utils.cc,v 1.10 2008/10/02 21:57:35 bms Exp $"
+
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"

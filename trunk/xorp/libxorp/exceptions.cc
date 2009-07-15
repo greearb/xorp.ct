@@ -18,7 +18,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxorp/exceptions.cc,v 1.11 2009/01/05 18:30:57 jtc Exp $"
+
 
 #include <stdarg.h>
 #include <stdio.h>

@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/rip/rip_varrw.cc,v 1.17 2009/01/19 18:54:59 atanu Exp $"
+
 
 #include "rip_module.h"
 #include "libxorp/xorp.h"

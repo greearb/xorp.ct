@@ -23,7 +23,7 @@
 // Copyright (c) 2008 Huawei Technologies Co. Ltd
 //
 
-#ident "$XORP: xorp/contrib/mld6igmp_lite/mld6igmp_group_record.cc,v 1.6 2008/10/02 21:56:32 bms Exp $"
+
 
 //
 // Multicast group record information used by

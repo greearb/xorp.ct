@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxorp/test_task.cc,v 1.12 2008/10/02 21:57:35 bms Exp $"
+
 
 //
 // Demo program to test tasks and event loops.

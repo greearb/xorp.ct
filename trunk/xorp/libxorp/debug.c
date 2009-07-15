@@ -20,7 +20,7 @@
  * http://xorp.net
  */
 
-#ident "$XORP: xorp/libxorp/debug.c,v 1.15 2008/10/02 21:57:30 bms Exp $"
+
 
 #include "libxorp/xorp.h"
 #include "libxorp/debug.h"

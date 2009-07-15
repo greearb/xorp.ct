@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/rtrmgr/template_base_command.cc,v 1.26 2008/10/02 21:58:25 bms Exp $"
+
 
 #include "rtrmgr_module.h"
 

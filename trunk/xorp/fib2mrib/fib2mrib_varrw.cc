@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fib2mrib/fib2mrib_varrw.cc,v 1.13 2008/10/02 21:57:14 bms Exp $"
+
 
 #include "fib2mrib_module.h"
 

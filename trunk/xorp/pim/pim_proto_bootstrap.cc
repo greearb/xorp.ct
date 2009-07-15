@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/pim/pim_proto_bootstrap.cc,v 1.28 2008/11/19 23:07:28 pavlin Exp $"
+
 
 
 //

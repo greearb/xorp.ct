@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_click.cc,v 1.15 2008/10/11 04:20:15 pavlin Exp $"
+
 
 #include "fea/fea_module.h"
 

@@ -18,7 +18,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxorp/test_timer.cc,v 1.19 2008/10/02 21:57:35 bms Exp $"
+
 
 //
 // demo program to test timers and event loops (and show

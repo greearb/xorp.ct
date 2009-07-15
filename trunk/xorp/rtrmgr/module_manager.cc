@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.68 2008/10/17 00:53:44 pavlin Exp $"
+
 
 #include "rtrmgr_module.h"
 

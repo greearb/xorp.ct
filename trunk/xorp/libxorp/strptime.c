@@ -21,7 +21,7 @@
  * http://xorp.net
  */
 
-#ident "$XORP: xorp/libxorp/strptime.c,v 1.21 2009/01/10 07:49:45 pavlin Exp $"
+
 
 
 /*

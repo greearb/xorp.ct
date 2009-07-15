@@ -21,7 +21,7 @@
  * http://xorp.net
  */
 
-#ident "$XORP: xorp/libxorp/xlog.c,v 1.33 2009/01/22 18:03:00 jtc Exp $"
+
 
 /*
  * Message logging utility.

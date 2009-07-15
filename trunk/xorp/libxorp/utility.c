@@ -20,7 +20,7 @@
  * http://xorp.net
  */
 
-#ident "$XORP: xorp/libxorp/utility.c,v 1.13 2008/10/02 21:57:36 bms Exp $"
+
 
 
 /*

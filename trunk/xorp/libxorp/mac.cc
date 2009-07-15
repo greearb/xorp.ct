@@ -18,7 +18,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxorp/mac.cc,v 1.31 2008/10/10 00:38:20 pavlin Exp $"
+
 
 #include "libxorp/xorp.h"
 #include "libxorp/ether_compat.h" 

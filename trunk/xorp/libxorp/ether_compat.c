@@ -21,7 +21,7 @@
  * http://xorp.net
  */
 
-#ident "$XORP: xorp/libxorp/ether_compat.c,v 1.15 2008/10/02 21:57:30 bms Exp $"
+
 
 /*
  * Part of this software is derived from the following file(s):

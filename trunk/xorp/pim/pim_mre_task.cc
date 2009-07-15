@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/pim/pim_mre_task.cc,v 1.20 2008/10/02 21:57:53 bms Exp $"
+
 
 //
 // PIM Multicast Routing Entry task

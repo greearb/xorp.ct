@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_source_record.cc,v 1.15 2008/10/02 21:57:43 bms Exp $"
+
 
 //
 // Multicast source record information used by IGMPv3 (RFC 3376) and

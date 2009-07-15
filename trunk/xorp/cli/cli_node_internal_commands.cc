@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/cli/cli_node_internal_commands.cc,v 1.20 2008/10/02 21:56:29 bms Exp $"
+
 
 
 //

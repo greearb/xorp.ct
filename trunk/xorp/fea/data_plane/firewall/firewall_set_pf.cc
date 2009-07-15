@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/data_plane/firewall/firewall_set_pf.cc,v 1.5 2008/10/02 21:57:03 bms Exp $"
+
 
 #include "fea/fea_module.h"
 

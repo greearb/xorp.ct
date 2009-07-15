@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.94 2009/01/15 01:13:16 pavlin Exp $"
+
 
 //
 // MFEA (Multicast Forwarding Engine Abstraction) implementation.

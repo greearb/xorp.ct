@@ -16,7 +16,7 @@
  * SOFTWARE.
  */
 
-#ident "$XORP: xorp/libxorp/inet_ntop.c,v 1.6 2008/10/01 21:49:32 pavlin Exp $"
+
 
 #include "libxorp/xorp.h"
 

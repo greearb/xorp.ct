@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/rib/main_routemap.cc,v 1.12 2008/10/02 21:58:10 bms Exp $"
+
 
 #include "rib_module.h"
 

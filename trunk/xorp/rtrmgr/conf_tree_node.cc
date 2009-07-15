@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.118 2008/10/02 21:58:22 bms Exp $"
+
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"

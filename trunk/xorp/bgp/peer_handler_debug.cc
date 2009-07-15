@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/peer_handler_debug.cc,v 1.17 2008/12/05 22:23:59 paulz Exp $"
+
 
 //#define DEBUG_LOGGING
 #include "bgp_module.h"

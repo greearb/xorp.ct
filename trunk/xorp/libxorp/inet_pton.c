@@ -16,7 +16,7 @@
  * SOFTWARE.
  */
 
-#ident "$XORP$"
+
 
 #include "libxorp/xorp.h"
 

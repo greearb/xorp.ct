@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/attribute_manager.cc,v 1.19 2008/12/11 21:05:59 mjh Exp $"
+
 
 //#define DEBUG_LOGGING
 #include "bgp_module.h"

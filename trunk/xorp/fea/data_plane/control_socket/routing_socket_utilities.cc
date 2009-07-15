@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/data_plane/control_socket/routing_socket_utilities.cc,v 1.20 2008/12/24 14:20:41 bms Exp $"
+
 
 #include "fea/fea_module.h"
 

@@ -21,7 +21,7 @@
 // Portions of this code originally derived from:
 // 	FreeBSD dummynet code, (C) 2001 Luigi Rizzo.
 
-#ident "$XORP: xorp/libxorp/heap.cc,v 1.23 2008/10/02 21:57:30 bms Exp $"
+
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"

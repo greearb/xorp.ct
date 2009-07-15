@@ -21,7 +21,7 @@
  * http://xorp.net
  */
 
-#ident "$XORP: xorp/libxorp/random.c,v 1.20 2008/10/02 21:57:32 bms Exp $"
+
 
 #include "libxorp/xorp.h"
 

@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/mfea_dataflow.cc,v 1.11 2008/10/02 21:56:49 bms Exp $"
+
 
 //
 // MFEA (Multicast Forwarding Engine Abstraction) dataflow implementation.

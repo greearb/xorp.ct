@@ -20,7 +20,7 @@
  * http://xorp.net
  */
 
-#ident "$XORP: xorp/libproto/checksum.c,v 1.5 2008/10/02 21:57:17 bms Exp $"
+
 
 
 /*

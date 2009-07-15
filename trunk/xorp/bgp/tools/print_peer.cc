@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/tools/print_peer.cc,v 1.24 2009/01/05 18:30:45 jtc Exp $"
+
 
 #include "print_peer.hh"
 #include "libxorp/asnum.hh"

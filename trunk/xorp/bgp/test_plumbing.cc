@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/test_plumbing.cc,v 1.28 2008/11/08 06:14:41 mjh Exp $"
+
 #include "bgp_module.h"
 
 #include "libxorp/debug.h"

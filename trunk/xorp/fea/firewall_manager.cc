@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/firewall_manager.cc,v 1.8 2008/10/09 07:33:17 pavlin Exp $"
+
 
 #include "fea_module.h"
 

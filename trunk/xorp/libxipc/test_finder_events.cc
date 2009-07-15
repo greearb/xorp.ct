@@ -18,7 +18,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxipc/test_finder_events.cc,v 1.32 2008/11/04 02:12:30 pavlin Exp $"
+
 
 #include "finder_module.h"
 

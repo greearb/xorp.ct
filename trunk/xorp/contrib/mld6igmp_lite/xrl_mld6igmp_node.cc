@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/contrib/mld6igmp_lite/xrl_mld6igmp_node.cc,v 1.3 2008/10/02 21:56:33 bms Exp $"
+
 
 #include "mld6igmp_module.h"
 

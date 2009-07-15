@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_mirror.cc,v 1.35 2008/10/10 01:13:06 pavlin Exp $"
+
 
 #include "libxorp/status_codes.h"
 #include "libxorp/eventloop.hh"

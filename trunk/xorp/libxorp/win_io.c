@@ -21,7 +21,7 @@
  * http://xorp.net
  */
 
-#ident "$XORP: xorp/libxorp/win_io.c,v 1.13 2008/10/02 21:57:37 bms Exp $"
+
 
 #include "libxorp/xorp.h"
 

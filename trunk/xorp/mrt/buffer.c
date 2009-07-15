@@ -19,7 +19,7 @@
  * http://xorp.net
  */
 
-#ident "$XORP: xorp/mrt/buffer.c,v 1.9 2008/10/02 21:57:45 bms Exp $"
+
 
 
 /*

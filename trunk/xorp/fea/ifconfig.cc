@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.85 2008/10/02 21:56:47 bms Exp $"
+
 
 #include "fea_module.h"
 

@@ -18,7 +18,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxipc/call_xrl.cc,v 1.40 2008/10/02 21:57:19 bms Exp $"
+
 
 #include "xrl_module.h"
 

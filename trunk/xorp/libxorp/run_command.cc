@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxorp/run_command.cc,v 1.37 2008/11/04 22:56:28 atanu Exp $"
+
 
 #include "libxorp_module.h"
 

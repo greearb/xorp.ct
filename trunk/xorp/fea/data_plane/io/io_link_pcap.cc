@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/data_plane/io/io_link_pcap.cc,v 1.20 2008/10/27 05:10:05 pavlin Exp $"
+
 
 //
 // I/O link raw communication support.

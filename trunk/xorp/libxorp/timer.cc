@@ -25,7 +25,7 @@
 //
 // Copyright (c) 1999-2000 Massachusetts Institute of Technology
 
-#ident "$XORP: xorp/libxorp/timer.cc,v 1.51 2008/10/13 00:45:58 pavlin Exp $"
+
 
 
 #include "libxorp_module.h"

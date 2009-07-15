@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/notification_packet.cc,v 1.36 2008/10/02 21:56:16 bms Exp $"
+
 
 #include "bgp_module.h"
 

@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/rip/test_auth.cc,v 1.30 2008/10/02 21:58:18 bms Exp $"
+
 
 #include "rip_module.h"
 

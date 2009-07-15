@@ -19,7 +19,7 @@
  * http://xorp.net
  */
 
-#ident "$XORP: xorp/cli/libtecla/nettest_libtecla.c,v 1.12 2009/01/05 18:30:46 jtc Exp $"
+
 
 
 /*

@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.54 2008/10/10 01:23:53 pavlin Exp $"
+
 
 
 //

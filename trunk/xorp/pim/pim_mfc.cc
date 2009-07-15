@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.38 2008/10/02 21:57:52 bms Exp $"
+
 
 //
 // PIM Multicast Forwarding Cache handling

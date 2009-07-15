@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/policy/code_list.cc,v 1.14 2008/10/02 21:57:57 bms Exp $"
+
 
 #include "policy_module.h"
 

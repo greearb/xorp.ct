@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/data_plane/io/io_ip_socket.cc,v 1.28 2008/10/07 16:18:32 pavlin Exp $"
+
 
 //
 // I/O IP raw communication support.

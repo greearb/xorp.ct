@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/rip/update_queue.cc,v 1.20 2008/10/02 21:58:18 bms Exp $"
+
 
 #include <vector>
 #include <list>

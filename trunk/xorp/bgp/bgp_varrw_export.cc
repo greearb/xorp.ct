@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/bgp_varrw_export.cc,v 1.11 2008/12/16 23:55:41 mjh Exp $"
+
 
 #include "bgp_module.h"
 

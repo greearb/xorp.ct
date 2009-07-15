@@ -18,7 +18,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libproto/test_config_node_id.cc,v 1.12 2008/10/02 21:57:18 bms Exp $"
+
 
 #include "libproto_module.h"
 

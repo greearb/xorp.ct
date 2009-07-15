@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/examples/usermgr/usermgr.cc,v 1.4 2008/11/18 22:57:08 atanu Exp $"
+
 
 #include "libxorp/xorp.h"
 #include "usermgr_module.h"

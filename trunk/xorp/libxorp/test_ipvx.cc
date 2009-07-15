@@ -18,7 +18,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxorp/test_ipvx.cc,v 1.36 2009/01/24 04:09:40 atanu Exp $"
+
 
 #include "libxorp_module.h"
 
