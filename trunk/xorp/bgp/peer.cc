@@ -45,7 +45,10 @@
 #define DEBUG_BGPPeer
 
 uint32_t BGPPeer::_unique_id_allocator = UNIQUE_ID_START;
+
+#if 0
 inline void trap_callback(const XrlError& error, const char *comment);
+#endif
 
 BGPPeer::BGPPeer(LocalData *ld, BGPPeerData *pd, SocketClient *sock,
 		 BGPMain *m) 
@@ -2104,6 +2107,7 @@ BGPPeer::set_state(FSMState s, bool restart, bool automatic)
 	break;
     }
 
+#if 0
     /*
     ** If there is a BGP MIB target running send it traps when a state
     ** transition takes place.
@@ -2127,8 +2131,10 @@ BGPPeer::set_state(FSMState s, bool restart, bool automatic)
 							    "backward"));
 	}
     }
+#endif
 }
 
+#if 0
 inline
 void
 trap_callback(const XrlError& error, const char *comment)
@@ -2138,6 +2144,7 @@ trap_callback(const XrlError& error, const char *comment)
 	XLOG_WARNING("trap_callback: %s %s", comment, error.str().c_str());
     }
 }
+#endif
 
 PeerOutputState
 BGPPeer::send_update_message(const UpdatePacket& p)
