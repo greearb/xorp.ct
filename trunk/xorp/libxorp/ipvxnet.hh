@@ -54,7 +54,7 @@ inline void
 IPNet<IPvX>::initialize_from_string(const char *cp)
     throw (InvalidString, InvalidNetmaskLength)
 {
-    char *slash = strrchr(cp, '/');
+    char *slash = strrchr(const_cast<char*>(cp), '/');
     if (slash == 0) xorp_throw(InvalidString, "Missing slash");
 
     if (*(slash + 1) == 0)

@@ -89,7 +89,7 @@ ElemCom32::ElemCom32(const char* c_str) : Element(_hash) {
     }
 
     int len = strlen(c_str);
-    char *colon = strstr(c_str, ":");
+    char *colon = strstr(const_cast<char*>(c_str), ":");
 
     if(len > 0 && colon != NULL) {
 	uint32_t msw, lsw;

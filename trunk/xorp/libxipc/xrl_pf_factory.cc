@@ -69,7 +69,7 @@ XrlPFSender*
 XrlPFSenderFactory::create_sender(EventLoop& eventloop,
 				  const char* protocol_colon_address)
 {
-    char *colon = strstr(protocol_colon_address, ":");
+    char *colon = strstr(const_cast<char*>(protocol_colon_address), ":");
     if (colon == 0) {
 	debug_msg("No colon in supposedly colon separated <protocol><address>"
 		  "combination\n\t\"%s\".\n", protocol_colon_address);

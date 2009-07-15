@@ -228,8 +228,8 @@ ParsedFinderXrlResponse::ParsedFinderXrlResponse(const char* data)
     : ParsedFinderMessageBase(data, FinderXrlResponse::c_type), _xrl_args(0)
 {
     data += bytes_parsed();
-    char* p0 = strstr(data, "/");
-    char* p1 = strstr(data, "\n");
+    char* p0 = strstr(const_cast<char*>(data), "/");
+    char* p1 = strstr(const_cast<char*>(data), "\n");
     if (p0 == 0 || p1 == 0) {
 	xorp_throw(BadFinderMessageFormat, "XrlError not present");
     }
