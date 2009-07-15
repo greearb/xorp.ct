@@ -150,8 +150,8 @@ def standard_preamble(is_header, filename):
         s += " *\n * %s\n" % xorp_cvs_id
 
     s += " */\n\n"
-    if is_header == 0:
-        s += "#ident \"%s\"\n\n" % xorp_cvs_id
+    #if is_header == 0:
+    #    s += "#ident \"%s\"\n\n" % xorp_cvs_id
 
     return s;
 
