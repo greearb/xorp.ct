@@ -502,3 +502,7 @@ def DoAllConfig(env, conf, host_os):
     has_pcap_h = conf.CheckHeader('pcap.h')
     has_libpcap = conf.CheckLib('pcap')
     has_pcap_sendpacket = conf.CheckFunc('pcap_sendpacket')
+
+    ##########
+    # curses for cli/libtecla
+    has_libcurses = conf.CheckLib('curses')
