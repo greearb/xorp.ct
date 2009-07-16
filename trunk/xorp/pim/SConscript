@@ -22,6 +22,8 @@ Import('env')
 
 env = env.Clone()
 
+is_shared = env.has_key('SHAREDLIBS')
+
 env.AppendUnique(CPPPATH = [
     '#',
     '$BUILDDIR',
@@ -97,8 +99,12 @@ libpimsrcs = [
 	     'xrl_pim_node.cc'
              ]
 
-libpim = env.SharedLibrary(target = 'libpim', source = libpimsrcs, LIBS = '')
-
+if is_shared:
+    libpim = env.SharedLibrary(target = 'libpim', source = libpimsrcs, LIBS = '')
+    env.Alias('install',
+              env.InstallLibrary('$libdir', libpim))
+else:
+    libpim = env.StaticLibrary(target = 'libpim', source = libpimsrcs, LIBS = '')
 
 pim4srcs = [
           'xorp_pimsm4.cc',
@@ -120,8 +126,5 @@ env.Alias('install',
 
 env.Alias('install',
           env.InstallProgram(pimpath, pim6))
-
-env.Alias('install',
-          env.InstallLibrary('$libdir', libpim))
 
 Default(pim4, pim6)

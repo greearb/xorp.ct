@@ -22,6 +22,8 @@ Import("env")
 
 env = env.Clone()
 
+is_shared = env.has_key('SHAREDLIBS')
+
 env.AppendUnique(CPPPATH = [
     '#',
     '$BUILDDIR',
@@ -65,9 +67,13 @@ sources = [
 	'ifconfig_vlan_set_linux.cc',
 	]
 
-libxifc = env.SharedLibrary(target = 'libxorp_ifconfig', source = sources)
+if is_shared:
+    libxifc = env.SharedLibrary(target = 'libxorp_ifconfig', source = sources)
+else:
+    libxifc = env.StaticLibrary(target = 'libxorp_ifconfig', source = sources)
 
-env.Alias('install',
-    env.InstallLibrary('$libdir', libxifc))
+if is_shared:
+    env.Alias('install',
+        env.InstallLibrary('$libdir', libxifc))
 
 Default(libxifc)

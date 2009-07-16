@@ -21,6 +21,7 @@ import os
 Import('env')
 
 env = env.Clone()
+is_shared = env.has_key('SHAREDLIBS')
 
 env.AppendUnique(CPPPATH = [
     '#',
@@ -61,7 +62,10 @@ libvrrpsources = ['arpd.cc',
 	       'vrrp_vif.cc'
 	       ]
 
-libvrrp = env.SharedLibrary(LIBS = '', target = 'libvrrp', source = libvrrpsources)
+if is_shared:
+    libvrrp = env.SharedLibrary(LIBS = '', target = 'libvrrp', source = libvrrpsources)
+else:
+    libvrrp = env.StaticLibrary(LIBS = '', target = 'libvrrp', source = libvrrpsources)
 
 vrrpsources = [ 'xorp_vrrp.cc' ]
 
@@ -74,7 +78,8 @@ vrrppath = '$exec_prefix' + '/' + 'vrrp'
 env.Alias('install',
           env.InstallProgram(vrrppath, xorp_vrrp))
 
-env.Alias('install',
-          env.InstallLibrary('$libdir', libvrrp))
+if is_shared:
+    env.Alias('install',
+              env.InstallLibrary('$libdir', libvrrp))
 
 Default(xorp_vrrp)

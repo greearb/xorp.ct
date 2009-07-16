@@ -24,6 +24,8 @@ Import("env")
 
 env = env.Clone()
 
+is_shared = env.has_key('SHAREDLIBS')
+
 env.AppendUnique(CPPPATH = [ "#" ])
 env.AppendUnique(LIBPATH = [ '$BUILDDIR/libxipc',
 			     '$BUILDDIR/libcomm',
@@ -85,15 +87,18 @@ for tgt in tgts:
 
     env.TGTGEN(tgt)
 
-    # XXX should build static stubs too
-    lib = env.SharedLibrary(target, source)
+    if is_shared:
+        lib = env.SharedLibrary(target, source)
+    else:
+        lib = env.StaticLibrary(target, source)
+
     all_tgt_libs.append(lib)
 
-    # XXX os.sep-ify
     xrls = '$BUILDDIR/xrl/targets/' + base + '.xrls'
 
     if base[:4] != "test":
-        env.Alias('install', env.InstallLibrary('$libdir', lib))
+        if is_shared:
+            env.Alias('install', env.InstallLibrary('$libdir', lib))
         env.Alias('install', env.InstallData(xrlspath, xrls))
 
 Default(all_tgt_libs)

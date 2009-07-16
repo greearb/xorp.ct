@@ -22,6 +22,8 @@ Import('env')
 
 env = env.Clone()
 
+is_shared = env.has_key('SHAREDLIBS')
+
 env.AppendUnique(CPPPATH = [ '#' ])
 
 try:
@@ -46,22 +48,30 @@ env['CPPDEFINES'] = {
     'HAVE_TERMINFO_H': 1,
     }
 
-libtecla_xorp = env.SharedLibrary('libtecla_xorp', ['cplfile.c',
-	                 'cplmatch.c',
-	                 'direader.c',
-	                 'expand.c',
-	                 'freelist.c',
-	                 'getline.c',
-	                 'hash.c',
-	                 'history.c',
-	                 'homedir.c',
-	                 'keytab.c',
-	                 'pathutil.c',
-	                 'pcache.c',
-	                 'stringrp.c',
-	                 'strngmem.c',
-	                 'version.c'])
+libtecla_srcs = [
+    'cplfile.c',
+    'cplmatch.c',
+    'direader.c',
+    'expand.c',
+    'freelist.c',
+    'getline.c',
+    'hash.c',
+    'history.c',
+    'homedir.c',
+    'keytab.c',
+    'pathutil.c',
+    'pcache.c',
+    'stringrp.c',
+    'strngmem.c',
+    'version.c'
+    ]
 
-env.Alias('install',
-          env.InstallLibrary('$libdir', libtecla_xorp))
 
+if is_shared:
+    libtecla_xorp = env.SharedLibrary('libtecla_xorp', libtecla_srcs)
+    env.Alias('install',
+              env.InstallLibrary('$libdir', libtecla_xorp))
+else:
+    libtecla_xorp = env.StaticLibrary('libtecla_xorp', libtecla_srcs)
+
+Default(libtecla_xorp)

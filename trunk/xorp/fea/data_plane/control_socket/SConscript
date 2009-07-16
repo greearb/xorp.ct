@@ -27,6 +27,8 @@ env.AppendUnique(CPPPATH = [
     '$BUILDDIR',
     ])
 
+is_shared = env.has_key('SHAREDLIBS')
+
 sources = [
 	# C++ files
 	'click_socket.cc',
@@ -38,9 +40,11 @@ sources = [
 	'windows_rtm_pipe.cc'
 	]
 
-libxcs = env.SharedLibrary(target = 'libxorp_control_socket', source = sources)
-
-env.Alias('install',
-    env.InstallLibrary('$libdir', libxcs))
+if is_shared:
+    libxcs = env.SharedLibrary(target = 'libxorp_control_socket', source = sources)
+    env.Alias('install',
+        env.InstallLibrary('$libdir', libxcs))
+else:
+    libxcs = env.StaticLibrary(target = 'libxorp_control_socket', source = sources)
 
 Default(libxcs)

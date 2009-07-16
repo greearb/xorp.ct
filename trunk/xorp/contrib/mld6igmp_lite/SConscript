@@ -22,6 +22,8 @@ Import('env')
 
 env = env.Clone()
 
+is_shared = env.has_key('SHAREDLIBS')
+
 env.AppendUnique(CPPPATH = [
     '#',
     '$BUILDDIR',
@@ -71,7 +73,14 @@ libmld6igmplitesrcs = [
 	'xrl_mld6igmp_node.cc',
              ]
 
-libmld6igmplite = env.SharedLibrary(target = 'libmld6igmplite', source = libmld6igmplitesrcs, LIBS = '')
+# XXX needs fixing for new world order
+
+if is_shared:
+    libmld6igmplite = env.SharedLibrary(target = 'libmld6igmplite', source = libmld6igmplitesrcs, LIBS = '')
+    env.Alias('install',
+              env.InstallLibrary('$libdir', libmld6igmplite))
+else:
+    libmld6igmplite = env.StaticLibrary(target = 'libmld6igmplite', source = libmld6igmplitesrcs, LIBS = '')
 
 
 igmplitesrcs = [
@@ -86,15 +95,11 @@ mldlitesrcs = [
 
 mldlite = env.Program(target = 'xorp_mld_lite', source = mldlitesrcs)
 
-# XXX Not ready for prime time
-
 env.Alias('install',
           env.InstallProgram('$bindir', igmplite))
 
 env.Alias('install',
           env.InstallProgram('$bindir', mldlite))
 
-env.Alias('install',
-          env.InstallLibrary('$libdir', libmld6igmplite))
 
 Default(libmld6igmplite, igmplite, mldlite)

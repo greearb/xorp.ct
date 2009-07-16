@@ -22,6 +22,8 @@ Import('env')
 
 env = env.Clone()
 
+is_shared = env.has_key('SHAREDLIBS')
+
 subdirs = ['libtecla', 'tools']
 
 SConscript(dirs = subdirs, exports = 'env')
@@ -62,9 +64,11 @@ libclisrcs = [
     ]
 
 
-libcli = env.SharedLibrary(target = 'libcli', source = libclisrcs)
-
-env.Alias('install',
-          env.InstallLibrary('$libdir', libcli))
+if is_shared:
+    libcli = env.SharedLibrary(target = 'libcli', source = libclisrcs)
+    env.Alias('install',
+              env.InstallLibrary('$libdir', libcli))
+else:
+    libcli = env.StaticLibrary(target = 'libcli', source = libclisrcs)
 
 Default(libcli)

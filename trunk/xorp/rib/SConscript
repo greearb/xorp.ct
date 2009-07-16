@@ -22,6 +22,8 @@ Import('env')
 
 env = env.Clone()
 
+is_shared = env.has_key('SHAREDLIBS')
+
 subdirs = ['tools']
 
 SConscript(dirs = subdirs, exports = 'env')
@@ -93,7 +95,10 @@ libribsrcs = [
 	     'xrl_target.cc'
              ]
 
-librib = env.SharedLibrary(target = 'librib', source = libribsrcs, LIBS = '')
+if is_shared:
+    librib = env.SharedLibrary(target = 'librib', source = libribsrcs, LIBS = '')
+else:
+    librib = env.StaticLibrary(target = 'librib', source = libribsrcs, LIBS = '')
 
 ribsrcs = [
           'main_rib.cc',
@@ -107,7 +112,8 @@ ribpath = '$exec_prefix/rib'
 env.Alias('install',
           env.InstallProgram(ribpath, rib))
 
-env.Alias('install',
-          env.InstallLibrary('$libdir', librib))
+if is_shared:
+    env.Alias('install',
+              env.InstallLibrary('$libdir', librib))
 
 Default(rib)

@@ -22,6 +22,8 @@ Import("env")
 
 env = env.Clone()
 
+is_shared = env.has_key('SHAREDLIBS')
+
 env.AppendUnique(CPPPATH = [ "#" ])
 env.AppendUnique(LIBPATH = [ '$BUILDDIR/libxorp'] )
 env.AppendUnique(LIBS = ['libxorp', 'crypto'])
@@ -35,9 +37,13 @@ sources = [
 	'spt.cc',
 	]
 
-libproto = env.SharedLibrary(target = 'libproto', source = sources)
+if is_shared:
+    libproto = env.SharedLibrary(target = 'libproto', source = sources)
+else:
+    libproto = env.StaticLibrary(target = 'libproto', source = sources)
 
-env.Alias("install",
-    env.InstallLibrary('$libdir', libproto))
+if is_shared:
+    env.Alias("install",
+        env.InstallLibrary('$libdir', libproto))
 
 Default(libproto)

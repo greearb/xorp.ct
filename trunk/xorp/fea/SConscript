@@ -29,6 +29,8 @@ SConscript(dirs = subdirs, exports='env')
 
 env = env.Clone()
 
+is_shared = env.has_key('SHAREDLIBS')
+
 env.AppendUnique(CPPPATH = [
     '#',
     '$BUILDDIR',
@@ -88,9 +90,10 @@ env.AppendUnique(LIBS = [
     'xorp'
 ])
 
-env.AppendUnique(LINKFLAGS = [
-    '-Wl,-z,defs',
-])
+if is_shared:
+    env.AppendUnique(LINKFLAGS = [
+        '-Wl,-z,defs',
+    ])
 
 libfeasrcs = [
 	     'fea_data_plane_manager.cc',
@@ -132,10 +135,14 @@ libfeasrcs = [
 	     'xrl_mfea_node.cc'
              ]
 
-libfea = env.SharedLibrary(target = 'libfea', source = libfeasrcs)
+if is_shared:
+    libfea = env.SharedLibrary(target = 'libfea', source = libfeasrcs)
+else:
+    libfea = env.StaticLibrary(target = 'libfea', source = libfeasrcs)
 
-env.Alias('install',
-          env.InstallLibrary('$libdir', libfea))
+if is_shared:
+    env.Alias('install',
+              env.InstallLibrary('$libdir', libfea))
 
 #######################
 

@@ -22,6 +22,8 @@ Import('env')
 
 env = env.Clone()
 
+is_shared = env.has_key('SHAREDLIBS')
+
 env.AppendUnique(CPPPATH = [
     '#',
     '$BUILDDIR',
@@ -52,9 +54,16 @@ cleardbsrcs = [
 
 printlsassrcs = [
 	'print_lsas.cc',
-	'../lsa.cc',
-	'../fletcher_checksum.cc'
     ]
+
+# deal with shared code
+if is_shared:
+    printlsassrcs += [ '../lsa.cc', '../fletcher_checksum.cc' ]
+else:
+    obj_fletcher = env.StaticObject(target='tools_fletcher',
+                                    source='../fletcher_checksum.cc')
+    obj_lsa = env.StaticObject(target='tools_lsa', source='../lsa.cc')
+    printlsassrcs += [ obj_fletcher, obj_lsa ]
 
 printneighborssrcs = [
         'print_neighbours.cc'

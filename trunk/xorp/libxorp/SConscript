@@ -21,6 +21,9 @@ import os
 Import("env")
 
 env = env.Clone()
+
+is_shared = env.has_key('SHAREDLIBS')
+
 env.AppendUnique(CPPPATH = [ '#' ])
 
 sources = [
@@ -73,9 +76,13 @@ sources = [
 	'win_dispatcher.cc',
 	]
 
-libxorp = env.SharedLibrary(target = 'libxorp', source = sources)
+if is_shared:
+    libxorp = env.SharedLibrary(target = 'libxorp', source = sources)
+else:
+    libxorp = env.StaticLibrary(target = 'libxorp', source = sources)
 
-env.Alias('install',
-    env.InstallLibrary('$libdir', libxorp))
+if is_shared:
+    env.Alias('install',
+        env.InstallLibrary('$libdir', libxorp))
 
 Default(libxorp)

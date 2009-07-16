@@ -22,6 +22,8 @@ Import('env')
 
 e = env.Clone()
 
+is_shared = env.has_key('SHAREDLIBS')
+
 # XXX
 #rippath = '$bindir'
 rippath = '$exec_prefix/rip'
@@ -185,15 +187,18 @@ e.AppendUnique(LIBS = [
 ])
 
 
-libripng = e.SharedLibrary(target = 'libripng', source = libripsrcs, LIBS = '')
-
-libripngxrl = e.SharedLibrary(target = 'libripngxrl', source = libripxrlsrc, LIBS = '')
+if is_shared:
+    libripng = e.SharedLibrary(target = 'libripng', source = libripsrcs, LIBS = '')
+    libripngxrl = e.SharedLibrary(target = 'libripngxrl', source = libripxrlsrc, LIBS = '')
+    e.Alias('install',
+                [ e.InstallLibrary('$libdir', libripng),
+                  e.InstallLibrary('$libdir', libripngxrl) ])
+else:
+    libripng = e.StaticLibrary(target = 'libripng', source = libripsrcs, LIBS = '')
+    libripngxrl = e.StaticLibrary(target = 'libripngxrl', source = libripxrlsrc, LIBS = '')
 
 ripng = e.Program(target = 'xorp_ripng', source = ripngsrcs)
 
-e.Alias('install',
-          [ e.InstallProgram(rippath, ripng),
-            e.InstallLibrary('$libdir', libripng),
-            e.InstallLibrary('$libdir', libripngxrl) ])
+e.Alias('install', e.InstallProgram(rippath, ripng))
 
 Default(rip, ripng)

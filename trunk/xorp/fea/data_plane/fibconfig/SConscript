@@ -27,6 +27,8 @@ env.AppendUnique(CPPPATH = [
     '$BUILDDIR',
     ])
 
+is_shared = env.has_key('SHAREDLIBS')
+
 sources = [
 	# C++ files
 	'fibconfig_entry_get_click.cc',
@@ -73,9 +75,11 @@ sources = [
 	'fibconfig_table_set_rtmv2.cc',
 	]
 
-libxfc = env.SharedLibrary(target = 'libxorp_fibconfig', source = sources)
-
-env.Alias('install',
-    env.InstallLibrary('$libdir', libxfc))
+if is_shared:
+    libxfc = env.SharedLibrary(target = 'libxorp_fibconfig', source = sources)
+    env.Alias('install',
+        env.InstallLibrary('$libdir', libxfc))
+else:
+    libxfc = env.StaticLibrary(target = 'libxorp_fibconfig', source = sources)
 
 Default(libxfc)

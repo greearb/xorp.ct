@@ -22,6 +22,8 @@ Import('env')
 
 env = env.Clone()
 
+is_shared = env.has_key('SHAREDLIBS')
+
 env.AppendUnique(CPPPATH = [
     '#',
     '$BUILDDIR',
@@ -70,7 +72,10 @@ srsources = [
     'xorp_static_routes.cc'
     ]
 
-libsr = env.SharedLibrary(LIBS = '', target = 'libstaticroutes', source = libsrsources)
+if is_shared:
+    libsr = env.SharedLibrary(LIBS = '', target = 'libstaticroutes', source = libsrsources)
+else:
+    libsr = env.StaticLibrary(LIBS = '', target = 'libstaticroutes', source = libsrsources)
 
 xorp_static_routes = env.Program(target = 'xorp_static_routes', source = srsources)
 
@@ -80,7 +85,8 @@ srpath = '$exec_prefix/static_routes'
 env.Alias('install',
           env.InstallProgram(srpath, xorp_static_routes))
 
-env.Alias('install',
-          env.InstallLibrary('$libdir', libsr))
+if is_shared:
+    env.Alias('install',
+              env.InstallLibrary('$libdir', libsr))
 
 Default(xorp_static_routes)

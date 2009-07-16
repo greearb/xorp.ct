@@ -21,6 +21,9 @@ import os
 Import("env")
 
 env = env.Clone()
+
+is_shared = env.has_key('SHAREDLIBS')
+
 env.AppendUnique(CPPPATH = [ '#' ])
 
 sources = [
@@ -29,9 +32,13 @@ sources = [
 	'mrib_table.cc'
 	]
 
-libmrt = env.SharedLibrary(target = 'libmrt', source = sources)
+if is_shared:
+    libmrt = env.SharedLibrary(target = 'libmrt', source = sources)
+else:
+    libmrt = env.StaticLibrary(target = 'libmrt', source = sources)
 
-env.Alias('install',
-    env.InstallLibrary('$libdir', libmrt))
+if is_shared:
+    env.Alias('install',
+        env.InstallLibrary('$libdir', libmrt))
 
 Default(libmrt)

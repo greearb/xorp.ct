@@ -22,6 +22,8 @@ Import('env')
 
 env = env.Clone()
 
+is_shared = env.has_key('SHAREDLIBS')
+
 env.AppendUnique(CPPPATH = [ '#' ])
 
 libpbesrcs = [
@@ -39,7 +41,11 @@ libpbesrcs = [
     'yacc.yy_policy_backend_parser.cc'
     ]
 
-libpbe = env.SharedLibrary(target = 'libpolicybackend', source = libpbesrcs)
+if is_shared:
+    libpbe = env.SharedLibrary(target = 'libpolicybackend', source = libpbesrcs)
+    env.Alias('install',
+        env.InstallLibrary('$libdir', libpbe))
+else:
+    libpbe = env.StaticLibrary(target = 'libpolicybackend', source = libpbesrcs)
 
-env.Alias('install',
-    env.InstallLibrary('$libdir', libpbe))
+Default(libpbe)

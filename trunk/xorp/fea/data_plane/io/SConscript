@@ -27,6 +27,8 @@ env.AppendUnique(CPPPATH = [
     '$BUILDDIR',
     ])
 
+is_shared = env.has_key('SHAREDLIBS')
+
 sources = [
 	# C++ files
 	'io_ip_dummy.cc',
@@ -37,9 +39,11 @@ sources = [
 	'io_tcpudp_socket.cc',
 	]
 
-libxio = env.SharedLibrary(target = 'libxorp_io', source = sources)
-
-env.Alias('install',
-    env.InstallLibrary('$libdir', libxio))
+if is_shared:
+    libxio = env.SharedLibrary(target = 'libxorp_io', source = sources)
+    env.Alias('install',
+        env.InstallLibrary('$libdir', libxio))
+else:
+    libxio = env.StaticLibrary(target = 'libxorp_io', source = sources)
 
 Default(libxio)

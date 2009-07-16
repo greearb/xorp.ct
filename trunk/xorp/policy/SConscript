@@ -25,6 +25,8 @@ SConscript(['common/SConscript'], exports='env')
 
 env = env.Clone()
 
+is_shared = env.has_key('SHAREDLIBS')
+
 env.AppendUnique(CPPPATH = [
     '#',
     '$BUILDDIR',
@@ -87,8 +89,12 @@ libpolicysrcs = [
 	     'lex.yy_policy_parser.cc'
              ]
 
-libpolicy = env.SharedLibrary(target = 'libpolicy', source = libpolicysrcs, LIBS = '')
-
+if is_shared:
+    libpolicy = env.SharedLibrary(target = 'libpolicy', source = libpolicysrcs, LIBS = '')
+    env.Alias('install',
+              env.InstallLibrary('$libdir', libpolicy))
+else:
+    libpolicy = env.StaticLibrary(target = 'libpolicy', source = libpolicysrcs, LIBS = '')
 
 policysrcs = [
           'xorp_policy.cc',
@@ -101,8 +107,5 @@ pcpath = '$exec_prefix/policy'
 
 env.Alias('install',
           env.InstallProgram(pcpath, policy))
-
-env.Alias('install',
-          env.InstallLibrary('$libdir', libpolicy))
 
 Default(libpolicy, policy)

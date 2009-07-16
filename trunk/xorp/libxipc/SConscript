@@ -20,6 +20,7 @@
 import os
 Import("env")
 
+is_shared = env.has_key('SHAREDLIBS')
 
 #
 # XIPC Library
@@ -76,18 +77,33 @@ libxipc_sources = [
     'xrl_std_router.cc',
     'xrl_tokens.cc',
     'xuid.cc',
-
-    '$BUILDDIR/xrl/targets/finder_client_base$SHOBJSUFFIX',
-    '$BUILDDIR/xrl/interfaces/finder_xif$SHOBJSUFFIX',
-    '$BUILDDIR/xrl/interfaces/common_xif$SHOBJSUFFIX',
     ]
 
-libxipc = libxipc_env.SharedLibrary(target = 'libxipc',
-                                    source = libxipc_sources)
+# deal with shared objects
+if is_shared:
+    libxipc_sources += [
+        '$BUILDDIR/xrl/targets/finder_client_base$SHOBJSUFFIX',
+        '$BUILDDIR/xrl/interfaces/finder_xif$SHOBJSUFFIX',
+        '$BUILDDIR/xrl/interfaces/common_xif$SHOBJSUFFIX',
+    ]
+else:
+    obj_fcb = libxipc_env.StaticObject(target = 'libxipc_finder_client_base',
+                                       source = '$BUILDDIR/xrl/targets/finder_client_base.cc')
+    obj_fxif = libxipc_env.StaticObject(target = 'libxipc_finder_xif',
+                                        source = '$BUILDDIR/xrl/interfaces/finder_xif.cc')
+    obj_cxif = libxipc_env.StaticObject(target = 'libxipc_common_xif',
+                                        source = '$BUILDDIR/xrl/interfaces/common_xif.cc')
+    libxipc_sources += [ obj_fcb, obj_fxif, obj_cxif ]
 
-env.Alias('install',
-          env.InstallLibrary('$libdir', libxipc))
-
+# actual library target
+if is_shared:
+    libxipc = libxipc_env.SharedLibrary(target = 'libxipc',
+                                        source = libxipc_sources)
+    env.Alias('install',
+              env.InstallLibrary('$libdir', libxipc))
+else:
+    libxipc = libxipc_env.StaticLibrary(target = 'libxipc',
+                                        source = libxipc_sources)
 
 #
 # Finder library
@@ -116,17 +132,33 @@ libfinder_sources = [
     'finder_server.cc',
     'finder_xrl_queue.cc',
     'finder_xrl_target.cc',
-
-    '$BUILDDIR/xrl/targets/finder_base$SHOBJSUFFIX',
-    '$BUILDDIR/xrl/interfaces/finder_client_xif$SHOBJSUFFIX',
-    '$BUILDDIR/xrl/interfaces/finder_event_observer_xif$SHOBJSUFFIX',
     ]
 
-libfinder = libfinder_env.SharedLibrary(target = 'libfinder',
-                                        source = libfinder_sources)
+# deal with shared/non-shared source/objects
+if is_shared:
+    libfinder_sources += [
+        '$BUILDDIR/xrl/targets/finder_base$SHOBJSUFFIX',
+        '$BUILDDIR/xrl/interfaces/finder_client_xif$SHOBJSUFFIX',
+        '$BUILDDIR/xrl/interfaces/finder_event_observer_xif$SHOBJSUFFIX',
+    ]
+else:
+    obj_f_base = libfinder_env.StaticObject(target = 'libfinder_finder_client_base',
+                                       source = '$BUILDDIR/xrl/targets/finder_base.cc')
+    obj_f_cxif = libfinder_env.StaticObject(target = 'libfinder_finder_client_xif',
+                                        source = '$BUILDDIR/xrl/interfaces/finder_client_xif.cc')
+    obj_f_eoxif = libfinder_env.StaticObject(target = 'libfinder_finder_event_observer_xif',
+                                        source = '$BUILDDIR/xrl/interfaces/finder_event_observer_xif.cc')
+    libfinder_sources += [ obj_f_base, obj_f_cxif, obj_f_eoxif ]
 
-env.Alias('install',
-          env.InstallLibrary('$libdir', libfinder))
+# library target
+if is_shared:
+    libfinder = libfinder_env.SharedLibrary(target = 'libfinder',
+                                            source = libfinder_sources)
+    env.Alias('install',
+              env.InstallLibrary('$libdir', libfinder))
+else:
+    libfinder = libfinder_env.StaticLibrary(target = 'libfinder',
+                                            source = libfinder_sources)
 
 #
 # finder, call_xrl, finder, etc. executables
@@ -157,8 +189,10 @@ xorp_finder = env.Program(target = 'xorp_finder',
 call_xrl = env.Program(target = 'call_xrl',
                        source = [ 'call_xrl.cc'])
 
+# new directory structure
 #env.Alias('install',
 #          env.InstallProgram('$bindir', xorp_finder))
+# old directory structure
 env.Alias('install',
           env.InstallProgram('$exec_prefix/libxipc', xorp_finder))
 

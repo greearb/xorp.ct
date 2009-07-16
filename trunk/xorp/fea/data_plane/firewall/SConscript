@@ -22,6 +22,8 @@ Import("env")
 
 env = env.Clone()
 
+is_shared = env.has_key('SHAREDLIBS')
+
 env.AppendUnique(CPPPATH = [
     '#',
     '$BUILDDIR',
@@ -39,9 +41,11 @@ sources = [
 	'firewall_set_pf.cc',
 	]
 
-libxfw = env.SharedLibrary(target = 'libxorp_firewall', source = sources)
-
-env.Alias('install',
-    env.InstallLibrary('$libdir', libxfw))
+if is_shared:
+    libxfw = env.SharedLibrary(target = 'libxorp_firewall', source = sources)
+    env.Alias('install',
+        env.InstallLibrary('$libdir', libxfw))
+else:
+    libxfw = env.StaticLibrary(target = 'libxorp_firewall', source = sources)
 
 Default(libxfw)

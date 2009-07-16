@@ -24,6 +24,8 @@ Import("env")
 
 env = env.Clone()
 
+is_shared = env.has_key('SHAREDLIBS')
+
 env.AppendUnique(CPPPATH = [ "#" ])
 env.AppendUnique(LIBPATH = [ '$BUILDDIR/libxipc',
 			     '$BUILDDIR/libcomm',
@@ -93,14 +95,6 @@ xifs = [
     'xorp_if_mib.xif',
     ]
 
-#if env['WITH_BGP']:
-#    xifs.extend([
-#        'bgp_mib_traps.xif',
-#        'bgp.xif'])
-
-if env['WITH_OLSR']:
-    xifs.append('olsr4.xif')
-
 all_xif_libs = []
 
 for xif in xifs:
@@ -110,10 +104,15 @@ for xif in xifs:
 
     env.CLNTGEN(xif)
 
-    lib = env.SharedLibrary(tgt, src)
+    if is_shared:
+        lib = env.SharedLibrary(tgt, src)
+    else:
+        lib = env.StaticLibrary(tgt, src)
+
     all_xif_libs.append(lib)
 
     if base[:4] != "test":
-        env.Alias('install', env.InstallLibrary('$libdir', lib))
+        if is_shared:
+            env.Alias('install', env.InstallLibrary('$libdir', lib))
 
 Default(all_xif_libs)

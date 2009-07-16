@@ -22,10 +22,11 @@ Import('env')
 
 env = env.Clone()
 
+is_shared = env.has_key('SHAREDLIBS')
+
 env.AppendUnique(CPPPATH = [ '#' ])
 
 libpcmsrcs = [
-    '../../bgp/aspath.cc',		# XXX FIXME
     'dispatcher.cc',
     'elem_set.cc',
     'element.cc',
@@ -36,10 +37,22 @@ libpcmsrcs = [
     'policy_utils.cc',
     'register_elements.cc',
     'register_operations.cc',
-    'varrw.cc'
+    'varrw.cc',
     ]
 
-libpcm = env.SharedLibrary(target = 'libpolicycommon', source = libpcmsrcs)
+# deal with bgp aspath shared code
+if is_shared:
+    libpcmsrcs += '../../bgp/aspath.cc'
+else:
+    obj_aspath = env.StaticObject(target = 'aspath',
+                                  source = '../../bgp/aspath.cc')
+    libpcmsrcs += obj_aspath
 
-env.Alias('install',
-    env.InstallLibrary('$libdir', libpcm))
+if is_shared:
+    libpcm = env.SharedLibrary(target = 'libpolicycommon', source = libpcmsrcs)
+    env.Alias('install',
+        env.InstallLibrary('$libdir', libpcm))
+else:
+    libpcm = env.StaticLibrary(target = 'libpolicycommon', source = libpcmsrcs)
+
+Default(libpcm)

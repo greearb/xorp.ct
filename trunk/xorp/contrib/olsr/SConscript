@@ -24,6 +24,8 @@ Import('env')
 
 env = env.Clone()
 
+is_shared = env.has_key('SHAREDLIBS')
+
 subdirs = ['tools']
 
 SConscript(dirs = subdirs, exports = 'env')
@@ -85,10 +87,13 @@ libolsrsrcs = [
 	'twohop.cc',
 	]
 
-libolsr = env.SharedLibrary(target = 'libolsr', source = libolsrsrcs, LIBS = '')
 
-env.Alias('install',
-          env.InstallLibrary('$libdir', libolsr))
+if is_shared:
+    libolsr = env.SharedLibrary(target = 'libolsr', source = libolsrsrcs, LIBS = '')
+    env.Alias('install',
+              env.InstallLibrary('$libdir', libolsr))
+else:
+    libolsr = env.StaticLibrary(target = 'libolsr', source = libolsrsrcs, LIBS = '')
 
 ### libolsrxrl
 
@@ -99,10 +104,12 @@ libolsrxrlsrcs = [
 	'xrl_target.cc',
 	]
 
-libolsrxrl = env.SharedLibrary(target = 'libolsrxrl', source = libolsrxrlsrcs, LIBS = '')
-
-env.Alias('install',
-          env.InstallLibrary('$libdir', libolsrxrl))
+if is_shared:
+    libolsrxrl = env.SharedLibrary(target = 'libolsrxrl', source = libolsrxrlsrcs, LIBS = '')
+    env.Alias('install',
+              env.InstallLibrary('$libdir', libolsrxrl))
+else:
+    libolsrxrl = env.StaticLibrary(target = 'libolsrxrl', source = libolsrxrlsrcs, LIBS = '')
 
 ### olsr4
 

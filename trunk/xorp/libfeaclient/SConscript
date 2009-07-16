@@ -21,6 +21,7 @@ import os
 Import("env")
 
 env = env.Clone()
+is_shared = env.has_key('SHAREDLIBS')
 
 env.AppendUnique(CPPPATH = [
     '#',
@@ -36,9 +37,13 @@ sources = [
 	'ifmgr_xrl_mirror.cc',
 	]
 
-libfeaclient = env.SharedLibrary(target = 'libfeaclient', source = sources)
+if is_shared:
+    libfeaclient = env.SharedLibrary(target = 'libfeaclient', source = sources)
+else:
+    libfeaclient = env.StaticLibrary(target = 'libfeaclient', source = sources)
 
-env.Alias('install',
-    env.InstallLibrary('$libdir', libfeaclient))
+if is_shared:
+    env.Alias('install',
+        env.InstallLibrary('$libdir', libfeaclient))
 
 Default(libfeaclient)

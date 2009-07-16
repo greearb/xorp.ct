@@ -29,6 +29,10 @@ SConscript(dirs = subdirs, exports='env')
 
 env = env.Clone()
 
+# XXX Not used, bgp linkage must remain static until we fix the
+# dependency graph in here.
+#is_shared = env.has_key('SHAREDLIBS')
+
 env.AppendUnique(CPPPATH = [
     '#',
     '$BUILDDIR',

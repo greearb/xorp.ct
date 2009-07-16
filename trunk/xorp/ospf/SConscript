@@ -22,6 +22,8 @@ Import('env')
 
 env = env.Clone()
 
+is_shared = env.has_key('SHAREDLIBS')
+
 subdirs = ['tools']
 
 SConscript(dirs = subdirs, exports = 'env')
@@ -83,7 +85,10 @@ libospfsrcs = [
 	     'vlink.cc'
              ]
 
-libospf = env.SharedLibrary(target = 'libospf', source = libospfsrcs, LIBS = '')
+if is_shared:
+    libospf = env.SharedLibrary(target = 'libospf', source = libospfsrcs, LIBS = '')
+else:
+    libospf = env.StaticLibrary(target = 'libospf', source = libospfsrcs, LIBS = '')
 
 ospfv2srcs = [
           'xorp_ospfv2.cc',
@@ -106,7 +111,8 @@ env.Alias('install',
 env.Alias('install',
           env.InstallProgram(ospfpath, ospfv3))
 
-env.Alias('install',
-          env.InstallLibrary('$libdir', libospf))
+if is_shared:
+    env.Alias('install',
+              env.InstallLibrary('$libdir', libospf))
 
 Default(ospfv2, ospfv3)

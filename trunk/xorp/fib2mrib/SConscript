@@ -22,6 +22,8 @@ Import('env')
 
 env = env.Clone()
 
+is_shared = env.has_key('SHAREDLIBS')
+
 env.AppendUnique(CPPPATH = [
     '#',
     '$BUILDDIR',
@@ -65,7 +67,10 @@ libfib2mribsrcs = [
 	     'xrl_fib2mrib_node.cc'
              ]
 
-libfib2mrib = env.SharedLibrary(target = 'libfib2mrib', source = libfib2mribsrcs, LIBS = '')
+if is_shared:
+    libfib2mrib = env.SharedLibrary(target = 'libfib2mrib', source = libfib2mribsrcs, LIBS = '')
+else:
+    libfib2mrib = env.StaticLibrary(target = 'libfib2mrib', source = libfib2mribsrcs, LIBS = '')
 
 fib2mribsrcs = [
           'xorp_fib2mrib.cc',
@@ -79,7 +84,8 @@ fib2mrib_path = '$exec_prefix/fib2mrib'
 env.Alias('install',
           env.InstallProgram(fib2mrib_path, fib2mrib))
 
-env.Alias('install',
-          env.InstallLibrary('$libdir', libfib2mrib))
+if is_shared:
+    env.Alias('install',
+              env.InstallLibrary('$libdir', libfib2mrib))
 
 Default(fib2mrib)

@@ -27,6 +27,8 @@ env.AppendUnique(CPPPATH = [
     '$BUILDDIR',
     ])
 
+is_shared = env.has_key('SHAREDLIBS')
+
 sources = [
 	# C++ files
 	'fea_data_plane_manager_bsd.cc',
@@ -36,9 +38,13 @@ sources = [
 	'fea_data_plane_manager_windows.cc',
 	]
 
-libxdpm = env.SharedLibrary(target = 'libxorp_data_plane_managers', source = sources)
+if is_shared:
+    libxdpm = env.SharedLibrary(target = 'libxorp_data_plane_managers', source = sources)
+else:
+    libxdpm = env.StaticLibrary(target = 'libxorp_data_plane_managers', source = sources)
 
-env.Alias('install',
-    env.InstallLibrary('$libdir', libxdpm))
+if is_shared:
+    env.Alias('install',
+        env.InstallLibrary('$libdir', libxdpm))
 
 Default(libxdpm)

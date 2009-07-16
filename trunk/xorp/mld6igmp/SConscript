@@ -21,6 +21,7 @@ import os
 Import('env')
 
 env = env.Clone()
+is_shared = env.has_key('SHAREDLIBS')
 
 env.AppendUnique(CPPPATH = [
     '#',
@@ -71,8 +72,10 @@ libmld6igmpsrcs = [
 	     'xrl_mld6igmp_node.cc'
              ]
 
-libmld6igmp = env.SharedLibrary(target = 'libmld6igmp', source = libmld6igmpsrcs, LIBS = '')
-
+if is_shared:
+    libmld6igmp = env.SharedLibrary(target = 'libmld6igmp', source = libmld6igmpsrcs, LIBS = '')
+else:
+    libmld6igmp = env.StaticLibrary(target = 'libmld6igmp', source = libmld6igmpsrcs, LIBS = '')
 
 igmpsrcs = [
           'xorp_igmp.cc',
@@ -95,7 +98,8 @@ env.Alias('install',
 env.Alias('install',
           env.InstallProgram(mldpath, mld))
 
-env.Alias('install',
-          env.InstallLibrary('$libdir', libmld6igmp))
+if is_shared:
+    env.Alias('install',
+              env.InstallLibrary('$libdir', libmld6igmp))
 
 Default(igmp, mld)
