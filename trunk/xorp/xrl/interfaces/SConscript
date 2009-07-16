@@ -34,7 +34,6 @@ env.AppendUnique(LIBS = [ 'libxipc',
 
 xifs = [
     'bgp.xif',
-    #'bgp_mib_traps.xif',
     'cli_manager.xif',
     'cli_processor.xif',
     'common.xif',
