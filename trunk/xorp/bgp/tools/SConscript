@@ -1,0 +1,92 @@
+# Copyright (c) 2009 XORP, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License, Version 2, June
+# 1991 as published by the Free Software Foundation. Redistribution
+# and/or modification of this program under the terms of any other
+# version of the GNU General Public License is not permitted.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
+# see the GNU General Public License, Version 2, a copy of which can be
+# found in the XORP LICENSE.gpl file.
+#
+# XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+# http://xorp.net
+
+# $XORP$
+
+import os
+Import('env')
+
+env = env.Clone()
+
+env.AppendUnique(CPPPATH = [
+    '#',
+    '$BUILDDIR',
+     ])
+
+env.AppendUnique(LIBPATH = [
+    '$BUILDDIR/libxorp',
+    '$BUILDDIR/libcomm',
+    '$BUILDDIR/libxipc',
+    '$BUILDDIR/xrl/interfaces',
+    '$BUILDDIR/xrl/targets',
+    '$BUILDDIR/bgp',
+    '.',
+    ])
+
+env.AppendUnique(LIBS = [
+    'bgp',			# for ASPath
+    'bgpxif',
+    'xipc',
+    'xorp',
+    'comm',
+    ])
+
+### print_peers
+
+ppeers_srcs = [
+	'print_peer.cc',
+	'print_peers.cc',
+	]
+
+ppeers = env.Program(target = 'print_peers', source = ppeers_srcs)
+env.Alias('install',
+    env.InstallProgram('$bindir', ppeers))
+
+### print_routes
+
+proutes_srcs = [
+	'print_routes.cc',
+	'print_routes_main.cc',
+	]
+
+proutes = env.Program(target = 'print_routes', source = proutes_srcs)
+env.Alias('install',
+    env.InstallProgram('$bindir', proutes))
+
+### xorpsh_print_peers
+
+xppeers_srcs = [
+	'print_peer.cc',
+	'xorpsh_print_peers.cc',
+	]
+
+xppeers = env.Program(target = 'print_peers', source = ppeers_srcs)
+env.Alias('install',
+    env.InstallProgram('$bindir', xppeers))
+
+### xorpsh_print_routes
+
+xproutes_srcs = [
+	'print_routes.cc',
+	'xorpsh_print_routes.cc',
+	]
+
+xproutes = env.Program(target = 'print_routes', source = proutes_srcs)
+env.Alias('install',
+    env.InstallProgram('$bindir', xproutes))
+
+Default(ppeers, proutes, xppeers, xproutes)

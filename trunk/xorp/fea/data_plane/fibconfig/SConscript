@@ -1,0 +1,81 @@
+# Copyright (c) 2009 XORP, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License, Version 2, June
+# 1991 as published by the Free Software Foundation. Redistribution
+# and/or modification of this program under the terms of any other
+# version of the GNU General Public License is not permitted.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
+# see the GNU General Public License, Version 2, a copy of which can be
+# found in the XORP LICENSE.gpl file.
+#
+# XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+# http://xorp.net
+
+# $ID$
+
+import os
+Import("env")
+
+env = env.Clone()
+
+env.AppendUnique(CPPPATH = [
+    '#',
+    '$BUILDDIR',
+    ])
+
+sources = [
+	# C++ files
+	'fibconfig_entry_get_click.cc',
+	'fibconfig_entry_get_dummy.cc',
+	'fibconfig_entry_get_iphelper.cc',
+	'fibconfig_entry_get_netlink_socket.cc',
+	'fibconfig_entry_get_routing_socket.cc',
+	'fibconfig_entry_get_rtmv2.cc',
+	'fibconfig_entry_observer_dummy.cc',
+	'fibconfig_entry_observer_iphelper.cc',
+	'fibconfig_entry_observer_netlink_socket.cc',
+	'fibconfig_entry_observer_routing_socket.cc',
+	'fibconfig_entry_observer_rtmv2.cc',
+	'fibconfig_entry_parse_netlink_socket.cc',
+	'fibconfig_entry_parse_routing_socket.cc',
+	'fibconfig_entry_set_click.cc',
+	'fibconfig_entry_set_dummy.cc',
+	'fibconfig_entry_set_iphelper.cc',
+	'fibconfig_entry_set_netlink_socket.cc',
+	'fibconfig_entry_set_routing_socket.cc',
+	'fibconfig_entry_set_rtmv2.cc',
+	'fibconfig_forwarding_dummy.cc',
+	'fibconfig_forwarding_proc_linux.cc',
+	'fibconfig_forwarding_solaris.cc',
+	'fibconfig_forwarding_sysctl.cc',
+	'fibconfig_forwarding_windows.cc',
+	'fibconfig_table_get_click.cc',
+	'fibconfig_table_get_dummy.cc',
+	'fibconfig_table_get_iphelper.cc',
+	'fibconfig_table_get_netlink_socket.cc',
+	'fibconfig_table_get_sysctl.cc',
+	'fibconfig_table_observer_dummy.cc',
+	'fibconfig_table_observer_iphelper.cc',
+	'fibconfig_table_observer_netlink_socket.cc',
+	'fibconfig_table_observer_routing_socket.cc',
+	'fibconfig_table_observer_rtmv2.cc',
+	'fibconfig_table_parse_netlink_socket.cc',
+	'fibconfig_table_parse_routing_socket.cc',
+	'fibconfig_table_set_click.cc',
+	'fibconfig_table_set_dummy.cc',
+	'fibconfig_table_set_iphelper.cc',
+	'fibconfig_table_set_netlink_socket.cc',
+	'fibconfig_table_set_routing_socket.cc',
+	'fibconfig_table_set_rtmv2.cc',
+	]
+
+libxfc = env.SharedLibrary(target = 'libxorp_fibconfig', source = sources)
+
+env.Alias('install',
+    env.InstallLibrary('$libdir', libxfc))
+
+Default(libxfc)

@@ -1,0 +1,105 @@
+# Copyright (c) 2009 XORP, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License, Version 2, June
+# 1991 as published by the Free Software Foundation. Redistribution
+# and/or modification of this program under the terms of any other
+# version of the GNU General Public License is not permitted.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
+# see the GNU General Public License, Version 2, a copy of which can be
+# found in the XORP LICENSE.gpl file.
+#
+# XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+# http://xorp.net
+
+# $XORP$
+
+import os
+Import('env')
+
+SConscript(['backend/SConscript'], exports='env')
+SConscript(['common/SConscript'], exports='env')
+
+env = env.Clone()
+
+env.AppendUnique(CPPPATH = [
+    '#',
+    '$BUILDDIR',
+    ])
+
+env.AppendUnique(LIBPATH = [
+    '../libxorp',
+    '../libcomm',
+    '../libxipc',
+    '../libproto',
+    '../libfeaclient',
+    'backend',
+    'common',
+    '../xrl/interfaces',
+    '../xrl/targets',
+    '.'
+    ])
+
+env.AppendUnique(LIBS = [
+    'policy',
+    'policybackend',
+    'policycommon',
+    'policybase',
+    'policybackendxif',
+    'findereventnotifierxif',
+    'ribxif',
+    'xipc',
+    'xorp',
+    'proto',
+    'comm'
+])
+
+libpolicysrcs = [
+	     'code.cc',
+	     'code_generator.cc',
+	     'code_list.cc',
+	     'configuration.cc',
+	     'dependency.cc',
+	     'export_code_generator.cc',
+	     'filter_manager.cc',
+	     'parser.cc',
+	     'policy_list.cc',
+	     'policy_map.cc',
+	     'policy_statement.cc',
+	     'policy_target.cc',
+	     'process_watch.cc',
+	     'protocol_map.cc',
+	     'semantic_varrw.cc',
+	     'set_map.cc',
+	     'source_match_code_generator.cc',
+	     'term.cc',
+	     'test_varrw.cc',
+	     'var_map.cc',
+	     'visitor_dep.cc',
+	     'visitor_printer.cc',
+	     'visitor_semantic.cc',
+	     'visitor_test.cc',
+	     'xrl_target.cc',
+	     'yacc.yy_policy_parser.cc',
+	     'lex.yy_policy_parser.cc'
+             ]
+
+libpolicy = env.SharedLibrary(target = 'libpolicy', source = libpolicysrcs, LIBS = '')
+
+
+policysrcs = [
+          'xorp_policy.cc',
+          ]
+
+policy = env.Program(target = 'xorp_policy', source = policysrcs)
+
+env.Alias('install',
+          env.InstallProgram('$bindir', policy))
+
+env.Alias('install',
+          env.InstallLibrary('$libdir', libpolicy))
+
+Default(libpolicy, policy)

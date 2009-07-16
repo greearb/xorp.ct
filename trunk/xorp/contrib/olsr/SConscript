@@ -1,0 +1,118 @@
+# Copyright (c) 2009 XORP, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License, Version 2, June
+# 1991 as published by the Free Software Foundation. Redistribution
+# and/or modification of this program under the terms of any other
+# version of the GNU General Public License is not permitted.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
+# see the GNU General Public License, Version 2, a copy of which can be
+# found in the XORP LICENSE.gpl file.
+#
+# XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+# http://xorp.net
+
+# $XORP$
+
+# FIXME: tests
+
+import os
+Import('env')
+
+env = env.Clone()
+
+subdirs = ['tools']
+
+SConscript(dirs = subdirs, exports = 'env')
+
+env.AppendUnique(CPPPATH = [
+    '#',
+    '$BUILDDIR',
+    ])
+
+env.AppendUnique(LIBPATH = [
+    '../libxorp',
+    '../libcomm',
+    '../libxipc',
+    '../libproto',
+    '../libfeaclient',
+    '../policy/backend',
+    '../policy/common',
+    '../xrl/interfaces',
+    '../xrl/targets',
+    '../mrt',
+    '.'
+    ])
+
+env.AppendUnique(LIBS = [
+    'olsr',
+    'olsr4base',
+    'policybackend',
+    'policycommon',
+    'feaclient',
+    'ribxif',
+    'findereventnotifierxif',
+    'feaifmgrmirrorxif',
+    'feaifmgrreplicatorxif',
+    'profileclientxif',
+    'fearawpkt4xif',
+    'fearawpkt6xif',
+    'feaifmgrmirrorbase',
+    'xipc',
+    'xorp',
+    'proto',
+    'comm',
+])
+
+### libolsr
+
+libolsrsrcs = [
+	'external.cc',
+	'face.cc',
+	'face_manager.cc',
+	'link.cc',
+	'message.cc',
+	'neighbor.cc',
+	'neighborhood.cc',
+	'olsr.cc',
+	'olsr_types.cc',
+	'policy_varrw.cc',
+	'route_manager.cc',
+	'topology.cc',
+	'twohop.cc',
+	]
+
+libolsr = env.SharedLibrary(target = 'libolsr', source = libolsrsrcs, LIBS = '')
+
+env.Alias('install',
+          env.InstallLibrary('$libdir', libolsr))
+
+### libolsrxrl
+
+libolsrxrlsrcs = [
+	'xrl_io.cc',
+	'xrl_port.cc',
+	'xrl_queue.cc',
+	'xrl_target.cc',
+	]
+
+libolsrxrl = env.SharedLibrary(target = 'libolsrxrl', source = libolsrxrlsrcs, LIBS = '')
+
+env.Alias('install',
+          env.InstallLibrary('$libdir', libolsrxrl))
+
+### olsr4
+
+olsr4srcs = [
+	'xorp_olsr.cc',
+	]
+
+olsr4 = env.Program(target = 'xorp_olsr4', source = olsr4srcs)
+
+env.Alias('install',
+          env.InstallProgram('$bindir', olsr4))
+
+Default(libolsr, libolsrxrl, olsr4)

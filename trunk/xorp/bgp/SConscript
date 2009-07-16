@@ -1,0 +1,151 @@
+# Copyright (c) 2009 XORP, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License, Version 2, June
+# 1991 as published by the Free Software Foundation. Redistribution
+# and/or modification of this program under the terms of any other
+# version of the GNU General Public License is not permitted.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
+# see the GNU General Public License, Version 2, a copy of which can be
+# found in the XORP LICENSE.gpl file.
+#
+# XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+# http://xorp.net
+
+# $XORP$
+
+import os
+Import('env')
+
+subdirs = [
+	'harness',
+	'tools',
+    ]
+
+SConscript(dirs = subdirs, exports='env')
+
+env = env.Clone()
+
+env.AppendUnique(CPPPATH = [
+    '#',
+    '$BUILDDIR',
+    ])
+
+env.AppendUnique(LIBPATH = [
+    '$BUILDDIR/libxorp',
+    '$BUILDDIR/libcomm',
+    '$BUILDDIR/libxipc',
+    '$BUILDDIR/libfeaclient',
+    '$BUILDDIR/policy/backend',
+    '$BUILDDIR/policy/common',
+    '$BUILDDIR/xrl/interfaces',
+    '$BUILDDIR/xrl/targets',
+    '.',
+    ])
+
+env.AppendUnique(LIBS = [
+    'policybackend',
+    'policycommon',
+    'feaclient',
+    'bgpbase',
+    'feaifmgrmirrorbase',
+    'ribxif',
+    'findereventnotifierxif',
+    #'bgpmibtrapsxif',		# XXX MIBS broken for now
+    'profileclientxif',
+    'feaifmgrmirrorxif',
+    'feaifmgrreplicatorxif',
+    'xipc',
+    'comm',
+    'xorp'
+])
+
+### libbgp
+
+libbgp_env = env.Clone()
+
+#libbgp_env.AppendUnique(LINKFLAGS = [
+#    '-Wl,-z,defs',
+#])
+
+libbgpsrcs = [
+	'aspath.cc',
+	'attribute_manager.cc',
+	'bgp_trie.cc',
+	'bgp_varrw.cc',
+	'bgp_varrw_export.cc',
+	'crash_dump.cc',
+	'damping.cc',
+	'dump_iterators.cc',
+	'internal_message.cc',
+	'iptuple.cc',
+	'local_data.cc',
+	'next_hop_resolver.cc',
+	'notification_packet.cc',
+	'open_packet.cc',
+	'packet.cc',
+	'parameter.cc',
+	'path_attribute.cc',
+	'peer.cc',
+	'peer_data.cc',
+	'peer_handler.cc',
+	'peer_list.cc',
+	'plumbing.cc',
+	'process_watch.cc',
+	'profile_vars.cc',
+	'rib_ipc_handler.cc',
+	'route_queue.cc',
+	'route_table_aggregation.cc',
+	'route_table_base.cc',
+	'route_table_cache.cc',
+	'route_table_damping.cc',
+	'route_table_decision.cc',
+	'route_table_deletion.cc',
+	'route_table_dump.cc',
+	'route_table_fanout.cc',
+	'route_table_filter.cc',
+	'route_table_nhlookup.cc',
+	'route_table_policy.cc',
+	'route_table_policy_ex.cc',
+	'route_table_policy_im.cc',
+	'route_table_policy_sm.cc',
+	'route_table_reader.cc',
+	'route_table_ribin.cc',
+	'route_table_ribout.cc',
+	'socket.cc',
+	'subnet_route.cc',
+	'update_attrib.cc',
+	'update_packet.cc',
+	'xrl_target.cc',
+	]
+
+#libbgp = libbgp_env.SharedLibrary(target = 'libbgp', source = libbgpsrcs)
+
+# XXX Static until ASPath and other objects are dealt with.
+libbgp = libbgp_env.StaticLibrary(target = 'libbgp', source = libbgpsrcs)
+
+#env.Alias('install',
+#          env.InstallLibrary('$libdir', libbgp))
+
+### xorp_bgp
+
+bgp_env = env.Clone()
+
+bgp_env.AppendUnique(LIBS = [
+    'bgp',
+])
+
+bgpsrcs = [
+          'bgp.cc',
+          'main.cc',
+          ]
+
+bgp = bgp_env.Program(target = 'xorp_bgp', source = bgpsrcs)
+
+env.Alias('install',
+          env.InstallProgram('$bindir', bgp))
+
+Default(libbgp, bgp)

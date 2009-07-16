@@ -1,0 +1,44 @@
+# Copyright (c) 2009 XORP, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License, Version 2, June
+# 1991 as published by the Free Software Foundation. Redistribution
+# and/or modification of this program under the terms of any other
+# version of the GNU General Public License is not permitted.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
+# see the GNU General Public License, Version 2, a copy of which can be
+# found in the XORP LICENSE.gpl file.
+#
+# XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+# http://xorp.net
+
+# $ID$
+
+import os
+Import("env")
+
+env = env.Clone()
+
+env.AppendUnique(CPPPATH = [
+    '#',
+    '$BUILDDIR',
+    ])
+
+sources = [
+	# C++ files
+	'fea_data_plane_manager_bsd.cc',
+	'fea_data_plane_manager_click.cc',
+	'fea_data_plane_manager_dummy.cc',
+	'fea_data_plane_manager_linux.cc',
+	'fea_data_plane_manager_windows.cc',
+	]
+
+libxdpm = env.SharedLibrary(target = 'libxorp_data_plane_managers', source = sources)
+
+env.Alias('install',
+    env.InstallLibrary('$libdir', libxdpm))
+
+Default(libxdpm)

@@ -1,0 +1,67 @@
+# Copyright (c) 2009 XORP, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License, Version 2, June
+# 1991 as published by the Free Software Foundation. Redistribution
+# and/or modification of this program under the terms of any other
+# version of the GNU General Public License is not permitted.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
+# see the GNU General Public License, Version 2, a copy of which can be
+# found in the XORP LICENSE.gpl file.
+#
+# XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+# http://xorp.net
+
+# $XORP$
+
+import os
+Import('env')
+
+env = env.Clone()
+
+env.AppendUnique(CPPPATH = [ '#' ])
+
+try:
+    env['CFLAGS'].remove('-Werror')
+except ValueError:
+    pass
+
+env['CPPDEFINES'] = {
+    'STDC_HEADERS': 1,
+    'HAVE_SYS_TYPES_H': 1,
+    'HAVE_SYS_STAT_H': 1,
+    'HAVE_STDLIB_H': 1,
+    'HAVE_STRING_H': 1,
+    'HAVE_MEMORY_H': 1,
+    'HAVE_STRINGS_H': 1,
+    'HAVE_INTTYPES_H': 1,
+    'HAVE_STDINT_H': 1,
+    'HAVE_UNISTD_H': 1,
+    'HAVE_SYS_IOCTL_H': 1,
+    'HAVE_TERMIOS_H': 1,
+    'HAVE_SELECT_H': 1,
+    'HAVE_TERMINFO_H': 1,
+    }
+
+libtecla = env.SharedLibrary('libtecla', ['cplfile.c',
+	                 'cplmatch.c',
+	                 'direader.c',
+	                 'expand.c',
+	                 'freelist.c',
+	                 'getline.c',
+	                 'hash.c',
+	                 'history.c',
+	                 'homedir.c',
+	                 'keytab.c',
+	                 'pathutil.c',
+	                 'pcache.c',
+	                 'stringrp.c',
+	                 'strngmem.c',
+	                 'version.c'])
+
+env.Alias('install',
+          env.InstallLibrary('$libdir', libtecla))
+

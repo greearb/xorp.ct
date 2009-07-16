@@ -1,0 +1,284 @@
+#Copyright (c) 2009 XORP, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License, Version 2, June
+# 1991 as published by the Free Software Foundation. Redistribution
+# and/or modification of this program under the terms of any other
+# version of the GNU General Public License is not permitted.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
+# see the GNU General Public License, Version 2, a copy of which can be
+# found in the XORP LICENSE.gpl file.
+#
+# XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+# http://xorp.net
+
+# $ID$
+
+# TODO FIXME install target.
+# TODO FIXME cross compiles.
+# TODO Add separate toolchain test for C99 varargs macros.
+# TODO Add separate toolchain test for GNU varargs macros.
+# TODO Push config header into build dir for parallel / cross build use.
+# TODO Fix default include/lib paths, pass in from environment.
+# TODO Pass in DEBUG_CALLBACKS DEBUG_LOGGING_GLOBAL DEBUG_PRINT_FUNCTION_NAME
+# from command line easily.
+# TODO Merge scons-unfamiliar syntactic sugar from YHC's sconsfiles.
+
+Help("""
+    cross=true if you are doing a cross build.
+    arch={i686} to identify the target architecture.
+    os={linux|freebsd|..} to identify the target os.
+    rel={public17|..} to identify the target release.
+    builddir=<some path> to specify a different build directory.
+	  The default build directory is $HOME/arch-os-rel.
+""")
+#Help(opts.GenerateHelpText(env))
+
+import sys
+import os
+import string
+import SCons
+from SCons.Script.SConscript import SConsEnvironment
+import SCons.Action
+import SCons.Builder
+
+build_arch = os.uname()[4].lower()
+build_os = os.uname()[0].lower()
+
+# figure out the host arch
+host_arch = ARGUMENTS.get('arch')
+if not host_arch:
+	host_arch = build_arch
+
+host_os = ARGUMENTS.get('os')
+if not host_os:
+	host_os = build_os
+
+cross = ARGUMENTS.get('cross', build_os != host_os or build_arch != host_arch)
+rel = ARGUMENTS.get('rel', 'public17')
+tempbuilddir = ARGUMENTS.get('tempbuilddir', '#/../'+host_arch+'-'+host_os+'-'+rel)
+tempstagingdir = ARGUMENTS.get('tempstagingdir', tempbuilddir+'/stage')
+builddir=ARGUMENTS.get('builddir', Dir(tempbuilddir))
+stagingdir=ARGUMENTS.get('stagingdir', Dir(tempstagingdir))
+
+print 'Cross build is     ', cross
+print 'Architecture is   ', host_arch
+print 'Operating System is', host_os
+print 'Release is         ', rel
+print 'Build directory is ', builddir
+print 'Staging directory is ', stagingdir
+
+env = Environment(
+	         # ENV = {'HOME'      : os.environ['HOME'] },
+		  TOOLS = ['default', 'clntgen', 'tgtgen', 'TOOL_SUBST'],
+		  ENV = os.environ,
+		  CROSS = cross,
+		  ARCH = host_arch,
+		  OS = host_os,
+		  REL = rel,
+		  BUILDDIR = builddir,
+		  STAGINGDIR = stagingdir,
+		  CPPPATH=['/usr/sfw/include', '/opt/local/include', '/usr/local/include'],
+		  LIBPATH=['/usr/sfw/lib', '/opt/local/lib', '/usr/local/lib'])
+
+SConsEnvironment.Chmod = SCons.Action.ActionFactory(os.chmod,
+    lambda dest, mode: 'Chmod("%s", 0%o)' % (dest, mode))
+
+def InstallProgram(env, dest, files, perm = 0755):
+    if env.has_key('DESTDIR'):
+	# NB: use simple concatenation
+	dest = env.Dir(env['DESTDIR'] + env.Dir(dest).path)
+    obj = env.Install(dest, files)
+    for i in obj:
+	env.AddPostAction(i, env.Chmod(str(i), perm))
+	if env.has_key('strip') and env.has_key('STRIP'):
+	    env.AddPostAction(i, Action("$STRIP $TARGET"))
+    return obj 
+SConsEnvironment.InstallProgram = InstallProgram
+
+def InstallScript(env, dest, files, perm = 0555):
+    if env.has_key('DESTDIR'):
+	# NB: use simple concatenation
+	dest = env.Dir(env['DESTDIR'] + env.Dir(dest).path)
+    obj = env.Install(dest, files)
+    for i in obj:
+	env.AddPostAction(i, env.Chmod(str(i), perm))
+    return obj 
+SConsEnvironment.InstallScript = InstallScript
+
+def InstallLibrary(env, dest, files, perm = 0644):
+    if env.has_key('DESTDIR'):
+	# NB: use simple concatenation
+	dest = env.Dir(env['DESTDIR'] + env.Dir(dest).path)
+    obj = env.Install(dest, files)
+    for i in obj:
+	env.AddPostAction(i, env.Chmod(str(i), perm))
+	if env.has_key('strip') and env.has_key('STRIP'):
+	    env.AddPostAction(i, Action("$STRIP --strip-unneeded $TARGET"))
+    return obj
+SConsEnvironment.InstallLibrary = InstallLibrary
+
+def InstallData(env, dest, files, perm = 0644):
+    if env.has_key('DESTDIR'):
+	# NB: use simple concatenation
+	dest = env.Dir(env['DESTDIR'] + env.Dir(dest).path)
+    obj = env.Install(dest, files)
+    for i in obj:
+	env.AddPostAction(i, env.Chmod(str(i), perm))
+    return obj
+SConsEnvironment.InstallData = InstallData
+
+env['DESTDIR'] = ARGUMENTS.get('DESTDIR', Dir(stagingdir).abspath)
+
+env['prefix'] = ARGUMENTS.get('prefix', '/opt/xorp')
+env['exec_prefix'] = ARGUMENTS.get('exec_prefix', '$prefix')
+env['bindir'] = ARGUMENTS.get('bindir', '$exec_prefix/bin')
+env['sbindir'] = ARGUMENTS.get('sbindir', '$exec_prefix/sbin')
+env['libexecdir'] = ARGUMENTS.get('libexecdir', '$exec_prefix/libexec')
+env['datarootdir'] = ARGUMENTS.get('datarootdir', '$prefix/share')
+env['datadir'] = ARGUMENTS.get('datadir', '$datarootdir')
+env['sysconfdir'] = ARGUMENTS.get('sysconfdir', '$prefix/etc')
+env['sharedstatedir'] = ARGUMENTS.get('sharedstatedir', '$prefix/com')
+env['localstatedir'] = ARGUMENTS.get('localstatedir', '$prefix/var')
+env['includedir'] = ARGUMENTS.get('includedir', '$prefix/include')
+env['oldincludedir'] = ARGUMENTS.get('oldincludedir', '/usr/include')
+env['docdir'] = ARGUMENTS.get('docdir', '$datarootdir/doc/$PACKAGE_TARNAME')
+env['infodir'] = ARGUMENTS.get('infodir', '$datarootdir/info')
+env['htmldir'] = ARGUMENTS.get('htmldir', '$docdir')
+env['dvidir'] = ARGUMENTS.get('dvidir', '$docdir')
+env['pdfdir'] = ARGUMENTS.get('pdfdir', '$docdir')
+env['psdir'] = ARGUMENTS.get('psdir', '$docdir')
+env['libdir'] = ARGUMENTS.get('libdir', '$exec_prefix/lib')
+env['localedir'] = ARGUMENTS.get('localdir', '$datarootdir/locale')
+env['mandir'] = ARGUMENTS.get('mandir', '$datarootdir/man')
+
+env['SUBST_DICT'] = {
+    '@prefix@' : '$prefix',
+    '@exec_prefix@' : '$exec_prefix',
+    '@bindir@' : '$bindir',
+    '@sbindir@' : '$sbindir',
+    '@libexecdir@' : '$libexecdir',
+    '@datarootdir@' : '$datarootdir',
+    '@datadir@' : '$datadir',
+    '@sysconfdir@' : '$sysconfdir',
+    '@sharedstatedir@' : '$sharedstatedir',
+    '@localstatedir@' : '$localstatedir',
+    '@includedir@' : '$includedir',
+    '@oldincludedir@' : '$oldincludedir',
+    '@docdir@' : '$docdir',
+    '@infodir@' : '$infodir',
+    '@htmldir@' : '$htmldir',
+    '@dvidir@' : '$dvidir',
+    '@pdfdir@' : '$pdfdir',
+    '@psdir@' : '$psdir',
+    '@libdir@' : '$libdir',
+    '@localedir@' : '$localedir',
+    '@mandir@' : '$mandir',
+    }
+
+env['XORP_SOURCEDIR'] = Dir(".")
+env['XORP_BUILDDIR'] = Dir(".")
+
+env['strip'] = ARGUMENTS.get('strip', False)
+
+# turnoff bgp, olsr for now.
+env['WITH_BGP'] = ARGUMENTS.get('enable-bgp', False)
+env['WITH_OLSR'] = ARGUMENTS.get('enable-olsr', False)
+
+########## start configure magic
+
+if not env.GetOption('clean'):
+    from config.endian import CheckEndianness
+    from config.member import CheckTypeMember
+    from config.sysctl import CheckSysctl
+
+    my_custom_tests = {
+	'CheckEndianness' : CheckEndianness,
+	'CheckTypeMember' : CheckTypeMember,
+	'CheckSysctl' :     CheckSysctl
+    }
+
+    conf = env.Configure(config_h = 'xorp_config.h',
+                         custom_tests = my_custom_tests)
+
+    ##########
+    # target os
+
+    # friendly name of target
+    osname = host_os
+    if host_os == 'freebsd':
+        osname = "FreeBSD"
+        conf.Define('HOST_OS_FREEBSD')
+        conf.Define('ENABLE_ADVANCED_MULTICAST_API')
+    if host_os == 'linux':
+        osname = "Linux"
+        conf.Define('HOST_OS_LINUX')
+        conf.Define('HAVE_PROC_LINUX')
+        conf.Define('ENABLE_ADVANCED_MULTICAST_API')
+    if host_os == 'sunos':
+        osname = "Solaris"
+        conf.Define('HOST_OS_SOLARIS')
+    else:
+	osname = sys.platform.upper()
+    conf.Define('HOST_OS_NAME', '"' + osname + '"')
+
+    # paths
+    conf.Define('XORP_ROOT', '"' + '/usr/local/xorp' + '"')
+    conf.Define('XORP_INSTALL_ROOT', '"' + '/usr/local' + '"')
+    conf.Define('XORP_BUILD_ROOT', '"' + str(builddir) + '"')
+    conf.Define('XORP_SRC_ROOT', '"' + Dir('.').abspath + '"')
+
+    # toolchain
+    conf.Define('CPP_SUPPORTS_C99_VA_ARGS')
+    conf.Define('CPP_SUPPORTS_GNU_VA_ARGS')
+
+    # Big ball of mud.
+    from config.allconfig import DoAllConfig
+    DoAllConfig(env, conf, host_os)
+
+    conf.Finish()
+
+########## end configure magic
+
+env['CFLAGS'] = Split(ARGUMENTS.get('CFLAGS', "-g"))
+env['CXXFLAGS'] = Split(ARGUMENTS.get('CXXFLAGS', "-g"))
+
+env.AppendUnique(CPPDEFINES = [
+    ( '_FORTIFY_SOURCE', 0 ),
+    ])
+
+env.AppendUnique(CFLAGS = [
+    '-Werror',
+    '-W',
+    '-Wall',
+    '-Wwrite-strings',
+    '-Wbad-function-cast',
+    '-Wmissing-prototypes',
+    '-Wcast-qual',
+    '-Wmissing-declarations',
+    '-Wpointer-arith',
+    '-Wcast-align',
+    '-Wstrict-prototypes',
+    '-Wnested-externs'
+    ])
+
+env.AppendUnique(CXXFLAGS = [
+    '-Werror',
+    '-W',
+    '-Wall',
+    '-Wwrite-strings',
+    '-Wcast-qual',
+    '-Wpointer-arith',
+    '-Wcast-align',
+    '-Woverloaded-virtual',
+    '-ftemplate-depth-25'
+    ])
+
+env.AppendUnique(RPATH = [
+    '$libdir',
+    ])
+
+env.SConscript(['SConscript'], variant_dir='$BUILDDIR', exports='env')

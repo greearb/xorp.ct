@@ -1,0 +1,95 @@
+# Copyright (c) 2009 XORP, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License, Version 2, June
+# 1991 as published by the Free Software Foundation. Redistribution
+# and/or modification of this program under the terms of any other
+# version of the GNU General Public License is not permitted.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
+# see the GNU General Public License, Version 2, a copy of which can be
+# found in the XORP LICENSE.gpl file.
+#
+# XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+# http://xorp.net
+
+# $XORP$
+
+import os
+import string
+
+Import("env")
+
+env = env.Clone()
+
+env.AppendUnique(CPPPATH = [ "#" ])
+env.AppendUnique(LIBPATH = [ '$BUILDDIR/libxipc',
+			     '$BUILDDIR/libcomm',
+                             '$BUILDDIR/libxorp' ] )
+env.AppendUnique(LIBS = [ 'libxipc',
+			  'libcomm',
+                          'libxorp' ])
+
+env['TGTGEN_CPPPATH'] = [ '#/xrl/interfaces' ]
+
+tgts = [
+    'bgp.tgt',
+    'cli.tgt',
+    'coord.tgt',
+    'fea.tgt',
+    'fea_ifmgr_mirror.tgt',
+    'fib2mrib.tgt',
+    'finder.tgt',
+    'finder_client.tgt',
+    'mfea.tgt',
+    'mld6igmp.tgt',
+    'ospfv2.tgt',
+    'ospfv3.tgt',
+    'pim.tgt',
+    'policy.tgt',
+    'profiler.tgt',
+    'rib.tgt',
+    'ribclient.tgt',
+    'rip.tgt',
+    'ripng.tgt',
+    'rtrmgr.tgt',
+    'show_distances.tgt',
+    'show_routes.tgt',
+    'static_routes.tgt',
+    'test.tgt',
+    'test_fea_ifmgr_mirror.tgt',
+    'test_fea_rawlink.tgt',
+    'test_finder_events.tgt',
+    'test_peer.tgt',
+    'test_socket4.tgt',
+    'test_socket6.tgt',
+    'test_xrls.tgt',
+    'vrrp.tgt',
+    'xorp_if_mib.tgt',
+    'xorpsh.tgt',
+    ]
+
+if env['WITH_BGP']:
+    tgts.append('bgp.tgt')
+    tgts.append('bgp4_mib.tgt')
+
+if env['WITH_OLSR']:
+    tgts.append('olsr4.tgt')
+
+all_tgt_libs = []
+for tgt in tgts:
+    base = tgt[:-len('.tgt')]
+    target = 'lib' + base.translate(string.maketrans('',''),'_') + 'base'
+    source = base + '_base.cc'
+
+    env.TGTGEN(tgt)
+
+    lib = env.SharedLibrary(target, source)
+    all_tgt_libs.append(lib)
+
+    if base[:4] != "test":
+        env.Alias('install', env.InstallLibrary('$libdir', lib))
+
+Default(all_tgt_libs)

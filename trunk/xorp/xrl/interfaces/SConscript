@@ -1,0 +1,120 @@
+# Copyright (c) 2009 XORP, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License, Version 2, June
+# 1991 as published by the Free Software Foundation. Redistribution
+# and/or modification of this program under the terms of any other
+# version of the GNU General Public License is not permitted.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
+# see the GNU General Public License, Version 2, a copy of which can be
+# found in the XORP LICENSE.gpl file.
+#
+# XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+# http://xorp.net
+
+# $XORP$
+
+import os
+import string
+
+Import("env")
+
+env = env.Clone()
+
+env.AppendUnique(CPPPATH = [ "#" ])
+env.AppendUnique(LIBPATH = [ '$BUILDDIR/libxipc',
+			     '$BUILDDIR/libcomm',
+                             '$BUILDDIR/libxorp' ] )
+env.AppendUnique(LIBS = [ 'libxipc',
+			  'libcomm',
+                          'libxorp' ])
+
+xifs = [
+    'bgp.xif',
+    #'bgp_mib_traps.xif',
+    'cli_manager.xif',
+    'cli_processor.xif',
+    'common.xif',
+    'coord.xif',
+    'datain.xif',
+    'fea_click.xif',
+    'fea_fib_client.xif',
+    'fea_fib.xif',
+    'fea_firewall.xif',
+    'fea_ifmgr_mirror.xif',
+    'fea_ifmgr_replicator.xif',
+    'fea_ifmgr.xif',
+    'fea_rawlink_client.xif',
+    'fea_rawlink.xif',
+    'fea_rawpkt4_client.xif',
+    'fea_rawpkt4.xif',
+    'fea_rawpkt6_client.xif',
+    'fea_rawpkt6.xif',
+    'fib2mrib.xif',
+    'finder_client.xif',
+    'finder_event_notifier.xif',
+    'finder_event_observer.xif',
+    'finder.xif',
+    'fti.xif',
+    'mfea_client.xif',
+    'mfea.xif',
+    'mld6igmp_client.xif',
+    'mld6igmp.xif',
+    'ospfv2.xif',
+    'ospfv3.xif',
+    'pim.xif',
+    'policy_backend.xif',
+    'policy_redist4.xif',
+    'policy_redist6.xif',
+    'policy.xif',
+    'profile_client.xif',
+    'profile.xif',
+    'redist4.xif',
+    'redist6.xif',
+    'redist_transaction4.xif',
+    'redist_transaction6.xif',
+    'rib_client.xif',
+    'rib.xif',
+    'ripng.xif',
+    'rip.xif',
+    'rtrmgr_client.xif',
+    'rtrmgr.xif',
+    'socket4_user.xif',
+    'socket4.xif',
+    'socket6_user.xif',
+    'socket6.xif',
+    'static_routes.xif',
+    'test_peer.xif',
+    'test.xif',
+    'test_xrls.xif',
+    'vrrp.xif',
+    'xorp_if_mib.xif',
+    ]
+
+#if env['WITH_BGP']:
+#    xifs.extend([
+#        'bgp_mib_traps.xif',
+#        'bgp.xif'])
+
+if env['WITH_OLSR']:
+    xifs.append('olsr4.xif')
+
+all_xif_libs = []
+
+for xif in xifs:
+    base = xif[:-len('.xif')]
+    tgt = 'lib' + base.translate(string.maketrans('',''),'_') + 'xif'
+    src = base + '_xif.cc'
+
+    env.CLNTGEN(xif)
+
+    lib = env.SharedLibrary(tgt, src)
+    all_xif_libs.append(lib)
+
+    if base[:4] != "test":
+        env.Alias('install', env.InstallLibrary('$libdir', lib))
+
+Default(all_xif_libs)

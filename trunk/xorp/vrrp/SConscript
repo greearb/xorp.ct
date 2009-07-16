@@ -1,0 +1,77 @@
+# Copyright (c) 2009 XORP, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License, Version 2, June
+# 1991 as published by the Free Software Foundation. Redistribution
+# and/or modification of this program under the terms of any other
+# version of the GNU General Public License is not permitted.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
+# see the GNU General Public License, Version 2, a copy of which can be
+# found in the XORP LICENSE.gpl file.
+#
+# XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+# http://xorp.net
+
+# $XORP$
+
+import os
+Import('env')
+
+env = env.Clone()
+
+env.AppendUnique(CPPPATH = [
+    '#',
+    '$BUILDDIR',
+    ])
+
+env.AppendUnique(LIBPATH = [
+    '../libxorp',
+    '../libcomm',
+    '../libxipc',
+    '../libproto',
+    '../libfeaclient',
+    '../xrl/interfaces',
+    '../xrl/targets',
+    '.'
+    ])
+
+env.AppendUnique(LIBS = [
+    'vrrp',
+    'vrrpbase',
+    'feaclient',
+    'feaifmgrxif',
+    'feaifmgrmirrorxif',
+    'feaifmgrreplicatorxif',
+    'fearawlinkxif',
+    'fearawpkt4xif',
+    'feaifmgrmirrorbase',
+    'xipc',
+    'xorp',
+    'proto',
+    'comm'
+])
+
+libvrrpsources = ['arpd.cc',
+	       'vrrp.cc',
+	       'vrrp_packet.cc',
+	       'vrrp_target.cc',
+	       'vrrp_vif.cc'
+	       ]
+
+libvrrp = env.SharedLibrary(LIBS = '', target = 'libvrrp', source = libvrrpsources)
+
+vrrpsources = [ 'xorp_vrrp.cc' ]
+
+xorp_vrrp = env.Program(target = 'xorp_vrrp',
+            source = vrrpsources)
+
+env.Alias('install',
+          env.InstallProgram('$bindir', xorp_vrrp))
+
+env.Alias('install',
+          env.InstallLibrary('$libdir', libvrrp))
+
+Default(xorp_vrrp)

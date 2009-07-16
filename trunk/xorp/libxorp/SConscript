@@ -1,0 +1,81 @@
+# Copyright (c) 2009 XORP, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License, Version 2, June
+# 1991 as published by the Free Software Foundation. Redistribution
+# and/or modification of this program under the terms of any other
+# version of the GNU General Public License is not permitted.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
+# see the GNU General Public License, Version 2, a copy of which can be
+# found in the XORP LICENSE.gpl file.
+#
+# XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+# http://xorp.net
+
+# $ID$
+
+import os
+Import("env")
+
+env = env.Clone()
+env.AppendUnique(CPPPATH = [ '#' ])
+
+sources = [
+	# C files
+	'daemon.c',
+	'debug.c',
+	'ether_compat.c',
+	'gai_strerror.c',
+	'getopt.c',
+	'inet_ntop.c',
+	'inet_pton.c',
+	'random.c',
+	'strlcpy.c',
+	'strptime.c',
+	'utility.c',
+	'win_io.c',
+	'xlog.c',
+
+	# C++ files
+	'asyncio.cc',
+	'buffered_asyncio.cc',
+	'c_format.cc',
+	'callback.cc',
+	'clock.cc',
+	'eventloop.cc',
+	'exceptions.cc',
+	'heap.cc',
+	'ipnet.cc',
+	'ipv4.cc',
+	'ipv6.cc',
+	'ipvx.cc',
+	'mac.cc',
+	'nexthop.cc',
+	'popen.cc',
+	'profile.cc',
+	'ref_ptr.cc',
+	'round_robin.cc',
+	'run_command.cc',
+	'safe_callback_obj.cc',
+	'selector.cc',
+	'service.cc',
+	'task.cc',
+	'time_slice.cc',
+	'timer.cc',
+	'timeval.cc',
+	'token.cc',
+	'transaction.cc',
+	'utils.cc',
+	'vif.cc',
+	'win_dispatcher.cc',
+	]
+
+libxorp = env.SharedLibrary(target = 'libxorp', source = sources)
+
+env.Alias('install',
+    env.InstallLibrary('$libdir', libxorp))
+
+Default(libxorp)

@@ -1,0 +1,82 @@
+# Copyright (c) 2009 XORP, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License, Version 2, June
+# 1991 as published by the Free Software Foundation. Redistribution
+# and/or modification of this program under the terms of any other
+# version of the GNU General Public License is not permitted.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
+# see the GNU General Public License, Version 2, a copy of which can be
+# found in the XORP LICENSE.gpl file.
+#
+# XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+# http://xorp.net
+
+# $XORP$
+
+import os
+Import('env')
+
+env = env.Clone()
+
+env.AppendUnique(CPPPATH = [
+    '#',
+    '$BUILDDIR',
+    ])
+
+env.AppendUnique(LIBPATH = [
+    '../libxorp',
+    '../libcomm',
+    '../libxipc',
+    '../libproto',
+    '../libfeaclient',
+    '../policy/backend',
+    '../policy/common',
+    '../xrl/interfaces',
+    '../xrl/targets',
+    '.'
+    ])
+
+env.AppendUnique(LIBS = [
+    'fib2mrib',
+    'fib2mribbase',
+    'policybackend',
+    'policycommon',
+    'feaclient',
+    'findereventnotifierxif',
+    'feaifmgrmirrorxif',
+    'feaifmgrreplicatorxif',
+    'ftixif',
+    'feafibxif',
+    'ribxif',
+    'feaifmgrmirrorbase',
+    'xipc',
+    'xorp',
+    'proto',
+    'comm'
+])
+
+libfib2mribsrcs = [
+	     'fib2mrib_node.cc',
+	     'fib2mrib_varrw.cc',
+	     'xrl_fib2mrib_node.cc'
+             ]
+
+libfib2mrib = env.SharedLibrary(target = 'libfib2mrib', source = libfib2mribsrcs, LIBS = '')
+
+fib2mribsrcs = [
+          'xorp_fib2mrib.cc',
+          ]
+
+fib2mrib = env.Program(target = 'xorp_fib2mrib', source = fib2mribsrcs)
+
+env.Alias('install',
+          env.InstallProgram('$bindir', fib2mrib))
+
+env.Alias('install',
+          env.InstallLibrary('$libdir', libfib2mrib))
+
+Default(fib2mrib)

@@ -1,0 +1,504 @@
+# Copyright (c) 2009 XORP, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License, Version 2, June
+# 1991 as published by the Free Software Foundation. Redistribution
+# and/or modification of this program under the terms of any other
+# version of the GNU General Public License is not permitted.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
+# see the GNU General Public License, Version 2, a copy of which can be
+# found in the XORP LICENSE.gpl file.
+#
+# XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+# http://xorp.net
+
+# $Id$
+
+import sys
+import os
+import string
+from SCons.Script.SConscript import SConsEnvironment
+
+# TODO SCons support for headerfilename needs to be fixed at source--
+# that would let us use confdefs.h for the include file header
+# conditionals, instead of having everything in one file like this.
+#
+# TODO Some of these checks should be fatal.
+# TODO Split this up into separate files.
+#  Hint: Some tests depend on others.
+
+def DoAllConfig(env, conf, host_os):
+    ##########
+    # endian
+    # XXX Wot about cross compilation??
+    conf.CheckEndianness()
+    
+    ##########
+    # c99
+    has_stdint_h = conf.CheckHeader('stdint.h')
+    has_inttypes_h = conf.CheckHeader('inttypes.h')
+    for type in [ 'int8_t',  'uint8_t',
+                  'int16_t', 'uint16_t',
+                  'int32_t', 'uint32_t',
+                  'int64_t', 'uint64_t'  ]:
+        includes = ""
+    if has_inttypes_h:
+    	includes += '#include <inttypes.h>'
+    if has_stdint_h:
+    	includes += '#include <stdint.h>'
+    conf.CheckType(type, includes)
+    
+    ##########
+    # stdc
+    has_stddef_h = conf.CheckHeader('stddef.h')
+    has_stdarg_h = conf.CheckHeader('stdarg.h')
+    has_stdlib_h = conf.CheckHeader('stdlib.h')
+    has_strings_h = conf.CheckHeader('strings.h')
+    has_string_h = conf.CheckHeader('string.h')
+    has_signal_h = conf.CheckHeader('signal.h')
+    has_math_h = conf.CheckHeader('math.h') # SUNWlibm
+    has_memory_h = conf.CheckHeader('memory.h')
+    
+    # c90, libc: functions
+    has_strftime = conf.CheckFunc('strftime')
+    has_strlcpy = conf.CheckFunc('strlcpy')  # not in glibc!
+    has_strlcat = conf.CheckFunc('strlcat')  # not in glibc!
+    
+    has_va_copy = conf.CheckDeclaration('va_copy', '#include <stdarg.h>')
+    if has_va_copy:
+        conf.Define('HAVE_VA_COPY') # autoconf compat
+    
+    ##########
+    # posix
+    has_fcntl_h = conf.CheckHeader('fcntl.h')
+    has_getopt_h = conf.CheckHeader('getopt.h')
+    has_glob_h = conf.CheckHeader('glob.h')
+    has_grp_h = conf.CheckHeader('grp.h')
+    has_pthread_h = conf.CheckHeader('pthread.h')
+    has_pwd_h = conf.CheckHeader('pwd.h')
+    has_mqueue_h = conf.CheckHeader('mqueue.h')
+    has_regex_h = conf.CheckHeader('regex.h')
+    has_syslog_h = conf.CheckHeader('syslog.h')
+    has_termios_h = conf.CheckHeader('termios.h')
+    has_time_h = conf.CheckHeader('time.h')
+    has_unistd_h = conf.CheckHeader('unistd.h')
+    has_vfork_h = conf.CheckHeader('vfork.h')
+    
+    # posix: function tests
+    has_readv = conf.CheckFunc('readv')
+    has_strerror = conf.CheckFunc('strerror')
+    has_syslog = conf.CheckFunc('syslog')
+    has_uname = conf.CheckFunc('uname')
+    has_writev = conf.CheckFunc('writev')
+
+    # may be in -lxnet on opensolaris
+    has_libxnet = conf.CheckLib('xnet')
+    has_recvmsg = conf.CheckFunc('recvmsg')
+    has_sendmsg = conf.CheckFunc('sendmsg')
+    
+    # may be in -lrt
+    has_librt = conf.CheckLib('rt')
+    has_clock_gettime = conf.CheckFunc('clock_gettime')
+    has_clock_monotonic = conf.CheckDeclaration('CLOCK_MONOTONIC', '#include <time.h>')
+    if has_clock_monotonic:
+        conf.Define('HAVE_CLOCK_MONOTONIC') # autoconf compat
+    
+    has_struct_timespec = conf.CheckType('struct timespec', includes='#include <time.h>')
+    
+    ##########
+    # bsd: headers
+    has_paths_h = conf.CheckHeader('paths.h')
+    has_sysexits_h = conf.CheckHeader('sysexits.h')
+    
+    # bsd: functions
+    has_realpath = conf.CheckFunc('realpath')
+    has_strptime = conf.CheckFunc('strptime')
+    has_sysctl = conf.CheckFunc('sysctl')
+
+    # bsd-style resolver: functions
+    has_netdb_h = conf.CheckHeader('netdb.h')
+    has_libresolv = conf.CheckLib('resolv')  # opensolaris needs it
+    has_hstrerror = conf.CheckFunc('hstrerror')
+    
+    ##########
+    # unix: system headers
+    has_sys_cdefs_h = conf.CheckHeader('sys/cdefs.h')
+    has_sys_param_h = conf.CheckHeader('sys/param.h')
+    has_sys_types_h = conf.CheckHeader('sys/types.h')
+    has_sys_utsname_h = conf.CheckHeader('sys/utsname.h')
+    has_sys_errno_h = conf.CheckHeader('sys/errno.h')
+    has_sys_wait_h = conf.CheckHeader('sys/wait.h')
+    has_sys_signal_h = conf.CheckHeader('sys/signal.h')
+    has_sys_time_h = conf.CheckHeader('sys/time.h')
+    has_sys_uio_h = conf.CheckHeader('sys/uio.h')
+    has_sys_ioctl_h = conf.CheckHeader('sys/ioctl.h')
+    has_sys_select_h = conf.CheckHeader('sys/select.h')
+    has_sys_socket_h = conf.CheckHeader('sys/socket.h')
+    has_sys_sockio_h = conf.CheckHeader('sys/sockio.h')
+    has_sys_un_h = conf.CheckHeader('sys/un.h')
+    has_sys_mount_h = conf.CheckHeader('sys/mount.h')
+    has_sys_resource_h = conf.CheckHeader('sys/resource.h')
+    has_sys_stat_h = conf.CheckHeader('sys/stat.h')
+    has_sys_syslog_h = conf.CheckHeader('sys/syslog.h')
+    
+    # bsd
+    has_sys_linker_h = conf.CheckHeader(['sys/param.h', 'sys/linker.h'])
+    has_sys_sysctl_h = conf.CheckHeader(['sys/types.h', 'sys/sysctl.h'])
+    
+    # linux
+    has_linux_types_h = conf.CheckHeader('linux/types.h')
+    has_linux_sockios_h = conf.CheckHeader('linux/sockios.h')
+    
+    # XXX needs header conditionals
+    has_struct_iovec = conf.CheckType('struct iovec', includes='#include <sys/uio.h>')
+    has_struct_msghdr = conf.CheckType('struct msghdr', includes='#include <sys/socket.h>')
+    has_struct_cmsghdr = conf.CheckType('struct cmsghdr', includes='#include <sys/socket.h>')
+
+    
+
+    ##########
+    # Socket support checks
+    # XXX header conditionals needed
+    prereq_af_inet_includes = [ 'sys/types.h', 'sys/socket.h' ]
+    af_inet_includes = []
+    for s in prereq_af_inet_includes:
+        af_inet_includes.append("#include <%s>\n" % s)
+    af_inet_includes = string.join(af_inet_includes, '')
+    
+    has_af_inet = conf.CheckDeclaration('AF_INET', af_inet_includes)
+    has_af_inet6 = conf.CheckDeclaration('AF_INET6', af_inet_includes)
+    has_sock_stream = conf.CheckDeclaration('SOCK_STREAM', af_inet_includes)
+    has_sock_dgram = conf.CheckDeclaration('SOCK_DGRAM', af_inet_includes)
+    has_sock_raw = conf.CheckDeclaration('SOCK_RAW', af_inet_includes)
+    
+    if has_af_inet and has_sock_stream and has_sock_dgram:
+        conf.Define('HAVE_TCPUDP_UNIX_SOCKETS')
+    if has_af_inet and has_sock_raw:
+        conf.Define('HAVE_IP_RAW_SOCKETS')
+	if host_os == 'linux' or host_os == 'openbsd':
+            conf.Define('IPV4_RAW_OUTPUT_IS_RAW')
+            conf.Define('IPV4_RAW_INPUT_IS_RAW')
+    
+    if has_struct_msghdr:
+        has_struct_msghdr_msg_control = conf.CheckTypeMember('struct msghdr', 'msg_control', includes='#include <sys/socket.h>')
+        has_struct_msghdr_msg_iov = conf.CheckTypeMember('struct msghdr', 'msg_iov', includes='#include <sys/socket.h>')
+        has_struct_msghdr_msg_name = conf.CheckTypeMember('struct msghdr', 'msg_name', includes='#include <sys/socket.h>')
+        has_struct_msghdr_msg_namelen = conf.CheckTypeMember('struct msghdr', 'msg_namelen', includes='#include <sys/socket.h>')
+    
+    has_struct_sockaddr_sa_len = conf.CheckTypeMember('struct sockaddr', 'sa_len', includes='#include <sys/socket.h>')
+    has_struct_sockaddr_storage_ss_len = conf.CheckTypeMember('struct sockaddr_storage', 'ss_len', includes='#include <sys/socket.h>')
+    
+    has_struct_sockaddr_un_sun_len = conf.CheckTypeMember('struct sockaddr_un', 'sun_len', includes='#include <sys/socket.h>\n#include <sys/un.h>')
+    
+    ##########
+    # net stack
+    has_net_ethernet_h = conf.CheckHeader(['sys/types.h', 'net/ethernet.h'])
+    has_sys_ethernet_h = conf.CheckHeader('sys/ethernet.h')
+    has_net_if_h = conf.CheckHeader(['sys/types.h', 'sys/ioctl.h', 'sys/socket.h', 'net/if.h'])
+    has_net_if_arp_h = conf.CheckHeader(['sys/types.h', 'sys/ioctl.h', 'sys/socket.h', 'net/if.h', 'net/if_arp.h'])
+    has_net_if_dl_h = conf.CheckHeader(['sys/types.h', 'net/if_dl.h'])
+    has_net_if_ether_h = conf.CheckHeader('net/if_ether.h')
+    has_net_if_media_h = conf.CheckHeader(['sys/types.h', 'net/if_media.h'])
+    
+    has_net_if_var_h = conf.CheckHeader(['sys/types.h', 'sys/ioctl.h', 'sys/socket.h', 'net/if.h', 'net/if_var.h'])
+    has_net_if_types_h = conf.CheckHeader('net/if_types.h')
+    has_net_route_h = conf.CheckHeader(['sys/types.h', 'sys/ioctl.h', 'sys/socket.h', 'net/if.h', 'net/route.h'])
+    has_ifaddrs_h = conf.CheckHeader(['sys/types.h', 'sys/socket.h', 'ifaddrs.h'])
+    has_stropts_h = conf.CheckHeader('stropts.h')
+    
+    has_linux_ethtool_h = conf.CheckHeader('linux/ethtool.h')
+    has_linux_if_tun_h = conf.CheckHeader('linux/if_tun.h')
+    has_linux_netlink_h = conf.CheckHeader('linux/netlink.h')
+    has_linux_rtnetlink_h = conf.CheckHeader('linux/rtnetlink.h')
+    
+    if has_linux_netlink_h:
+        conf.Define('HAVE_NETLINK_SOCKETS')
+    elif has_net_route_h and host_os != 'linux':
+        conf.Define('HAVE_ROUTING_SOCKETS')
+    
+    # net stack: struct members
+    # XXX header conditionals for linux/bsd variants needed.
+    has_struct_sockaddr_dl_sdl_len = conf.CheckTypeMember('struct sockaddr_dl', 'sdl_len', includes='#include <sys/types.h>\n#include <net/if_dl.h>')
+    has_struct_ifreq_ifr_hwaddr = conf.CheckTypeMember('struct ifreq', 'ifr_hwaddr', includes='#include <sys/types.h>\n#include <net/if.h>')
+    has_struct_ifreq_ifr_ifindex = conf.CheckTypeMember('struct ifreq', 'ifr_ifindex', includes='#include <sys/types.h>\n#include <net/if.h>')
+    
+    # net stack: functions
+    # XXX some may be in libc or libnsl
+    has_ether_aton = conf.CheckFunc('ether_aton')
+    has_ether_aton_r = conf.CheckFunc('ether_aton_r')
+    has_ether_ntoa = conf.CheckFunc('ether_ntoa')
+    has_ether_ntoa_r = conf.CheckFunc('ether_ntoa_r')
+    has_getaddrinfo = conf.CheckFunc('getaddrinfo')
+    has_getifaddrs = conf.CheckFunc('getifaddrs')
+    has_getnameinfo = conf.CheckFunc('getnameinfo')
+    has_if_indextoname = conf.CheckFunc('if_indextoname')
+    has_if_nametoindex = conf.CheckFunc('if_nametoindex')
+    has_inet_ntop = conf.CheckFunc('inet_ntop')
+    has_inet_pton = conf.CheckFunc('inet_pton')
+    
+    # net stack: types
+    # XXX header conditionals for linux/bsd variants needed.
+    prereq_ether_includes = [ 'sys/types.h', 'sys/socket.h', 'net/ethernet.h' ]
+    ether_includes = []
+    for s in prereq_ether_includes:
+        ether_includes.append("#include <%s>\n" % s)
+    ether_includes = string.join(ether_includes, '')
+    has_struct_ether_addr = conf.CheckType('struct ether_addr', includes=ether_includes)
+    
+    # net stack: sysctl (bsd)
+    conf.CheckSysctl('NET_RT_DUMP', oid='CTL_NET, AF_ROUTE, 0, AF_INET, NET_RT_DUMP, 0', includes='#include <sys/socket.h>')
+    conf.CheckSysctl('NET_RT_IFLIST', oid='CTL_NET, AF_ROUTE, 0, AF_INET, NET_RT_IFLIST, 0', includes='#include <sys/socket.h>')
+    
+    # XXX test for SIOCGIFCONF. Very gnarly.
+    siocgifconf_includes = [ 'stdlib.h', 'errno.h' ]
+    if has_sys_types_h:
+        siocgifconf_includes.append('sys/types.h')
+    if has_sys_socket_h:
+        siocgifconf_includes.append('sys/socket.h')
+    if has_sys_sockio_h:
+        siocgifconf_includes.append('sys/sockio.h')
+    if has_sys_ioctl_h:
+        siocgifconf_includes.append('sys/ioctl.h')
+    if has_net_if_h:
+        siocgifconf_includes.append('net/if.h')
+    si = []
+    for s in siocgifconf_includes:
+        si.append("#include <%s>\n" % s)
+    si = string.join(si, '')
+    has_siocgifconf = conf.CheckDeclaration('SIOCGIFCONF', si)
+    if has_siocgifconf:
+        conf.Define('HAVE_IOCTL_SIOCGIFCONF') # autoconf compat
+
+    ##########
+    # v4 stack
+    has_netinet_in_h = conf.CheckHeader('netinet/in.h')
+    has_netinet_in_systm_h = conf.CheckHeader(['sys/types.h', 'netinet/in_systm.h'])
+    has_netinet_in_var_h = conf.CheckHeader(['sys/types.h', 'sys/ioctl.h', 'sys/socket.h', 'net/if.h', 'netinet/in.h', 'net/if_var.h', 'netinet/in_var.h'])
+    has_netinet_ip_var_h = conf.CheckHeader(['sys/types.h', 'netinet/in.h', 'netinet/ip.h'])
+    has_netinet_tcp_h = conf.CheckHeader(['sys/param.h', 'sys/socket.h', 'netinet/in.h', 'netinet/in_systm.h', 'netinet/ip.h', 'netinet/tcp.h'])
+    has_netinet_igmp_h = conf.CheckHeader(['sys/types.h', 'netinet/in.h', 'netinet/igmp.h'])
+    has_netinet_ether_h = conf.CheckHeader('netinet/ether.h')
+    # XXX needs linux/bsd header conditionals
+    has_netinet_if_ether_h = conf.CheckHeader(['sys/param.h', 'sys/ioctl.h', 'sys/socket.h', 'sys/sockio.h', 'net/ethernet.h', 'net/if.h', 'netinet/in.h', 'netinet/in_systm.h', 'netinet/if_ether.h'])
+
+    # opensolaris
+    has_inet_nd_h = conf.CheckHeader('inet/nd.h')
+    has_inet_ip_h = conf.CheckHeader('inet/ip.h')
+
+    # name lookup, telnet
+    has_arpa_inet_h = conf.CheckHeader('arpa/inet.h')
+    has_arpa_telnet_h = conf.CheckHeader('arpa/telnet.h')
+    
+    has_struct_sockaddr_in_sin_len = conf.CheckTypeMember('struct sockaddr_in', 'sin_len', includes='#include <sys/socket.h>\n#include <netinet/in.h>')
+    
+    # check for v4 multicast capability
+    # XXX conditional on these headers please
+    prereq_v4mcast = [ 'sys/types.h', 'sys/socket.h', 'netinet/in.h' ]
+    v4mcast_symbols = [ 'IP_MULTICAST_IF', 'IP_MULTICAST_TTL', 'IP_MULTICAST_LOOP', 'IP_ADD_MEMBERSHIP', 'IP_DROP_MEMBERSHIP' ]
+    # munge header list
+    v4mcast_includes = []
+    for s in prereq_v4mcast:
+        v4mcast_includes.append("#include <%s>\n" % s)
+    v4mcast_includes = string.join(v4mcast_includes, '')
+    # check for each symbol
+    gotv4sym = True
+    for s in v4mcast_symbols:
+        gotv4sym = gotv4sym and conf.CheckDeclaration(s, v4mcast_includes)
+    has_v4_mcast = gotv4sym
+    # test result
+    if has_v4_mcast:
+        conf.Define('HAVE_IPV4_MULTICAST')
+    
+    # v4 stack: sysctl (bsd)
+    conf.CheckSysctl('IPCTL_FORWARDING', oid='CTL_NET, AF_INET, IPPROTO_IP, IPCTL_FORWARDING', includes='#include <sys/socket.h>\n#include <netinet/in.h>')
+    
+    ##########
+    # v6 stack
+    
+    if has_af_inet6 and has_sock_stream:
+        conf.Define('HAVE_IPV6')
+    
+    prereq_rfc3542 = ['stdlib.h', 'sys/types.h', 'netinet/in.h']
+    rfc3542_includes = []
+    for s in prereq_rfc3542:
+        rfc3542_includes.append("#include <%s>\n" % s)
+    rfc3542_includes = string.join(rfc3542_includes, '')
+    has___kame__ = conf.CheckDeclaration('__KAME__', rfc3542_includes)
+    # CheckFunc() too tight.
+    has_inet6_opt_init = conf.CheckDeclaration('inet6_opt_init', rfc3542_includes)
+    
+    if has___kame__:
+        conf.Define('IPV6_STACK_KAME')
+    if has_inet6_opt_init:
+        conf.Define('HAVE_RFC3542')
+    
+    has_struct_sockaddr_in6_sin6_len = conf.CheckTypeMember('struct sockaddr_in6', 'sin6_len', includes='#include <sys/socket.h>\n#include <netinet/in.h>')
+    has_struct_sockaddr_in6_sin6_scope_id = conf.CheckTypeMember('struct sockaddr_in6', 'sin6_scope_id', includes='#include <sys/socket.h>\n#include <netinet/in.h>')
+    
+    has_netinet_ip6_h = conf.CheckHeader(['sys/types.h', 'netinet/in.h', 'netinet/ip6.h'])
+    
+    prereq_netinet_icmp6_h = ['sys/types.h', 'sys/socket.h', 'netinet/in.h', 'netinet/ip6.h']
+    netinet_icmp6_h = 'netinet/icmp6.h'
+    has_netinet_icmp6_h = conf.CheckHeader(prereq_netinet_icmp6_h + [ netinet_icmp6_h ])
+    
+    # struct mld_hdr normally defined in <netinet/icmp6.h>
+    mld_hdr_includes = []
+    for s in prereq_netinet_icmp6_h + [ netinet_icmp6_h ]:
+        mld_hdr_includes.append("#include <%s>\n" % s)
+    mld_hdr_includes = string.join(mld_hdr_includes, '')
+    has_struct_mld_hdr = conf.CheckType('struct mld_hdr', includes=mld_hdr_includes)
+    
+    has_netinet6_ip6_var_h = conf.CheckHeader(['sys/types.h', 'sys/queue.h', 'sys/socket.h', 'net/route.h', 'netinet/in.h', 'netinet/ip6.h', 'netinet6/ip6_var.h'])
+    has_netinet6_in6_var_h = conf.CheckHeader(['sys/types.h', 'sys/queue.h', 'sys/socket.h', 'net/if.h', 'net/if_var.h', 'net/route.h', 'netinet/in.h', 'netinet/ip6.h', 'netinet6/in6_var.h'])
+    
+    prereq_netinet6_nd6_h = ['sys/param.h', 'sys/ioctl.h', 'sys/socket.h', 'net/if.h', 'net/if_var.h', 'netinet/in.h', 'netinet/in_var.h' ]
+    netinet6_nd6_h = 'netinet6/nd6.h'
+    has_netinet6_nd6_h = conf.CheckHeader(prereq_netinet6_nd6_h + [ netinet6_nd6_h ])
+    has_cxx_netinet6_nd6_h = conf.CheckHeader(prereq_netinet6_nd6_h + [ netinet6_nd6_h ], language='C++')
+    if not has_cxx_netinet6_nd6_h:
+        conf.Define('HAVE_BROKEN_CXX_NETINET6_ND6_H')
+    
+    # v6 stack: sysctl (bsd)
+    conf.CheckSysctl('IPV6CTL_FORWARDING', oid='CTL_NET, AF_INET6, IPPROTO_IPV6, IPV6CTL_FORWARDING', includes='#include <sys/socket.h>\n#include <netinet/in.h>')
+    conf.CheckSysctl('IPV6CTL_ACCEPT_RTADV', oid='CTL_NET, AF_INET6, IPPROTO_IPV6, IPV6CTL_ACCEPT_RTADV', includes='#include <sys/socket.h>\n#include <netinet/in.h>')
+    
+    ##########
+    # v4 mforwarding
+    
+    # this platform's multicast forwarding header(s)
+    prereq_mroute_h = []
+    mroute_h = None
+    
+    if host_os == 'sunos':
+        prereq_netinet_ip_mroute_h = ['sys/types.h', 'sys/ioctl.h', 'sys/socket.h', 'sys/time.h', 'inet/ip.h', 'netinet/in.h']
+    else:
+        prereq_netinet_ip_mroute_h = ['sys/types.h', 'sys/ioctl.h', 'sys/socket.h', 'sys/time.h', 'net/if.h', 'net/if_var.h', 'net/route.h', 'netinet/in.h']
+    netinet_ip_mroute_h = 'netinet/ip_mroute.h'
+    has_netinet_ip_mroute_h = conf.CheckHeader(prereq_netinet_ip_mroute_h + [ netinet_ip_mroute_h ])
+    if has_netinet_ip_mroute_h:
+        prereq_mroute_h = prereq_netinet_ip_mroute_h
+        mroute_h = netinet_ip_mroute_h
+    
+    prereq_net_ip_mroute_ip_mroute_h = ['sys/types.h', 'sys/ioctl.h', 'sys/socket.h', 'sys/time.h', 'net/if.h', 'net/if_var.h', 'net/route.h', 'netinet/in.h']
+    net_ip_mroute_ip_mroute_h = 'net/ip_mroute/ip_mroute.h'
+    has_net_ip_mroute_ip_mroute_h = conf.CheckHeader(prereq_net_ip_mroute_ip_mroute_h + [ net_ip_mroute_ip_mroute_h ])
+    if has_net_ip_mroute_ip_mroute_h:
+        prereq_mroute_h = prereq_net_ip_mroute_ip_mroute_h
+        mroute_h = net_ip_mroute_ip_mroute_h
+    
+    prereq_linux_mroute_h = ['sys/types.h', 'sys/socket.h', 'netinet/in.h', 'linux/types.h']
+    linux_mroute_h = 'linux/mroute.h'
+    has_linux_mroute_h = conf.CheckHeader(prereq_linux_mroute_h + [ linux_mroute_h ])
+    if has_linux_mroute_h:
+        prereq_mroute_h = prereq_linux_mroute_h
+        mroute_h = linux_mroute_h
+    
+    mfcctl2_includes = []
+    for s in prereq_mroute_h + [ mroute_h ]:
+        mfcctl2_includes.append("#include <%s>\n" % s)
+    mfcctl2_includes = string.join(mfcctl2_includes, '')
+    
+    # common structs
+    has_struct_mfcctl2 = conf.CheckType('struct mfcctl2', includes=mfcctl2_includes)
+    has_struct_mfcctl2_mfcc_flags = conf.CheckTypeMember('struct mfcctl2', 'mfcc_flags', includes=mfcctl2_includes)
+    has_struct_mfcctl2_mfcc_rp = conf.CheckTypeMember('struct mfcctl2', 'mfcc_rp', includes=mfcctl2_includes)
+    
+    # pim
+    has_netinet_pim_h = conf.CheckHeader('netinet/pim.h')
+    has_struct_pim = conf.CheckType('struct pim', includes='#include <netinet/pim.h>')
+    has_struct_pim_pim_vt = conf.CheckTypeMember('struct pim', 'pim_vt', includes='#include <netinet/pim.h>')
+    
+    if has_netinet_ip_mroute_h or has_net_ip_mroute_ip_mroute_h or has_linux_mroute_h:
+        conf.Define('HAVE_IPV4_MULTICAST_ROUTING')
+    
+    
+    ##########
+    # v6 mforwarding
+    
+    # this platform's v6 multicast forwarding header(s)
+    prereq_mroute6_h = []
+    mroute6_h = None
+    
+    # bsd
+    prereq_netinet6_ip6_mroute_h = ['sys/param.h', 'sys/socket.h', 'sys/time.h', 'net/if.h', 'net/if_var.h', 'net/route.h', 'netinet/in.h']
+    netinet6_ip6_mroute_h = 'netinet6/ip6_mroute.h'
+    has_netinet6_ip6_mroute_h = conf.CheckHeader(prereq_netinet6_ip6_mroute_h + [ netinet6_ip6_mroute_h ])
+    if has_netinet6_ip6_mroute_h:
+        prereq_mroute6_h = prereq_netinet6_ip6_mroute_h
+        mroute6_h = netinet6_ip6_mroute_h
+    
+    # linux
+    prereq_linux_mroute6_h = ['sys/types.h', 'sys/socket.h', 'netinet/in.h', 'linux/types.h']
+    linux_mroute6_h = 'linux/mroute6.h'
+    has_linux_mroute6_h = conf.CheckHeader(prereq_linux_mroute6_h + [ linux_mroute6_h ])
+    if has_linux_mroute6_h:
+        prereq_mroute6_h = prereq_linux_mroute6_h
+        mroute6_h = linux_mroute6_h
+    
+    # common structs
+    mf6cctl2_includes = []
+    for s in prereq_mroute6_h + [ mroute6_h ]:
+        mf6cctl2_includes.append("#include <%s>\n" % s)
+    mf6cctl2_includes = string.join(mf6cctl2_includes, '')
+    
+    has_struct_mf6cctl2 = conf.CheckType('struct mf6cctl2', includes=mf6cctl2_includes)
+    has_struct_mfcctl2_mfcc_flags = conf.CheckTypeMember('struct mf6cctl2', 'mf6cc_flags', includes=mf6cctl2_includes)
+    has_struct_mfcctl2_mfcc_rp = conf.CheckTypeMember('struct mf6cctl2', 'mf6cc_rp', includes=mf6cctl2_includes)
+   
+    # XXX: linux marked inet6_option_space() and friends as deprecated;
+    # either rework mfea code or do this.
+    if has_netinet6_ip6_mroute_h or has_linux_mroute6_h and host_os != 'linux':
+        conf.Define('HAVE_IPV6_MULTICAST_ROUTING')
+    
+    ##########
+    # packet filters
+    has_netinet_ip_compat_h = conf.CheckHeader(['sys/types.h', 'netinet/ip_compat.h'])
+    has_netinet_ip_fil_h = conf.CheckHeader(['sys/types.h', 'sys/ioctl.h', 'sys/socket.h', 'netinet/in.h', 'netinet/in_systm.h', 'netinet/ip.h', 'netinet/ip_compat.h', 'netinet/ip_fil.h'])
+    has_netinet_ip_fw_h = conf.CheckHeader(['sys/types.h', 'sys/ioctl.h', 'sys/socket.h', 'net/if.h', 'netinet/in.h', 'net/if_var.h', 'netinet/ip_fw.h'])
+    has_net_pfvar_h = conf.CheckHeader(['sys/param.h', 'sys/file.h', 'sys/ioctl.h', 'sys/socket.h', 'net/if.h', 'netinet/in.h', 'net/if_var.h', 'net/pfvar.h'])
+    # XXX force IPTables tests to be C++ friendly.
+    has_linux_netfilter_ipv4_ip_tables_h = conf.CheckHeader(['sys/param.h', 'net/if.h', 'netinet/in.h', 'linux/netfilter_ipv4/ip_tables.h'], language = "C++")
+    has_linux_netfilter_ipv6_ip6_tables_h = conf.CheckHeader(['sys/param.h', 'net/if.h', 'netinet/in.h', 'linux/netfilter_ipv6/ip6_tables.h'], language = "C++")
+    
+    ##########
+    # vlan
+    has_net_if_vlanvar_h = conf.CheckHeader('net/if_vlanvar.h')
+    has_net_if_vlan_var_h = conf.CheckHeader(['sys/param.h', 'sys/ioctl.h', 'sys/socket.h', 'sys/sockio.h', 'net/ethernet.h', 'net/if.h', 'net/if_vlan_var.h'])
+    has_net_vlan_if_vlan_var_h = conf.CheckHeader('net/vlan/if_vlan_var.h')
+    has_linux_if_vlan_h = conf.CheckHeader('linux/if_vlan.h')
+    
+    if has_linux_if_vlan_h:
+        conf.Define('HAVE_VLAN_LINUX')
+    else:
+        conf.Define('HAVE_VLAN_BSD')
+    
+    ##########
+    # pcre posix regexp emulation
+    # used by policy for regexps.
+    has_pcre_h = conf.CheckHeader('pcre.h')
+    has_pcreposix_h = conf.CheckHeader('pcreposix.h')
+    has_libpcre = conf.CheckLib('pcre')
+    has_libpcreposix = conf.CheckLib('pcreposix')
+    
+    ##########
+    # openssl for md5
+    # XXX Check for MD5_Init()
+    has_openssl_md5_h = conf.CheckHeader('openssl/md5.h')
+    has_libcrypto = conf.CheckLib('crypto')
+    has_md5_init = conf.CheckFunc('MD5_Init')
+    
+    ##########
+    # x/open dynamic linker
+    # XXX Check for dlopen() for fea use.
+    has_dlfcn_h = conf.CheckHeader('dlfcn.h')
+    has_libdl = conf.CheckLib('dl')
+    has_dl_open = conf.CheckFunc('dlopen')
+    
+    ##########
+    # pcap for l2 comms
+    has_pcap_h = conf.CheckHeader('pcap.h')
+    has_libpcap = conf.CheckLib('pcap')
+    has_pcap_sendpacket = conf.CheckFunc('pcap_sendpacket')

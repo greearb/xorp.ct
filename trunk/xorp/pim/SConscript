@@ -1,0 +1,124 @@
+# Copyright (c) 2009 XORP, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License, Version 2, June
+# 1991 as published by the Free Software Foundation. Redistribution
+# and/or modification of this program under the terms of any other
+# version of the GNU General Public License is not permitted.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
+# see the GNU General Public License, Version 2, a copy of which can be
+# found in the XORP LICENSE.gpl file.
+#
+# XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+# http://xorp.net
+
+# $XORP$
+
+import os
+Import('env')
+
+env = env.Clone()
+
+env.AppendUnique(CPPPATH = [
+    '#',
+    '$BUILDDIR',
+    ])
+
+env.AppendUnique(LIBPATH = [
+    '../libxorp',
+    '../libcomm',
+    '../libxipc',
+    '../libproto',
+    '../libfeaclient',
+    '../policy/backend',
+    '../policy/common',
+    '../xrl/interfaces',
+    '../xrl/targets',
+    '../mrt',
+    '.'
+    ])
+
+env.AppendUnique(LIBS = [
+    'pim',
+    'feaclient',
+    'ribxif',
+    'mld6igmpxif',
+    'mfeaxif',
+    'fearawpkt4xif',
+    'fearawpkt6xif',
+    'feaifmgrmirrorxif',
+    'feaifmgrreplicatorxif',
+    'climanagerxif',
+    'findereventnotifierxif',
+    'feaifmgrmirrorbase',
+    'pimbase',
+    'mrt',
+    'xipc',
+    'xorp',
+    'proto',
+    'comm'
+])
+
+libpimsrcs = [
+	     'pim_bsr.cc',
+	     'pim_config.cc',
+	     'pim_mfc.cc',
+	     'pim_mre.cc',
+	     'pim_mre_assert.cc',
+	     'pim_mre_data.cc',
+	     'pim_mre_join_prune.cc',
+	     'pim_mre_register.cc',
+	     'pim_mre_rpf.cc',
+	     'pim_mre_task.cc',
+	     'pim_mre_track_state.cc',
+	     'pim_mrib_table.cc',
+	     'pim_mrt.cc',
+	     'pim_mrt_mfc.cc',
+	     'pim_mrt_task.cc',
+	     'pim_nbr.cc',
+	     'pim_node.cc',
+	     'pim_node_cli.cc',
+	     'pim_proto_assert.cc',
+	     'pim_proto_bootstrap.cc',
+	     'pim_proto_cand_rp_adv.cc',
+	     'pim_proto_graft.cc',
+	     'pim_proto_graft_ack.cc',
+	     'pim_proto_hello.cc',
+	     'pim_proto_join_prune.cc',
+	     'pim_proto_join_prune_message.cc',
+	     'pim_proto_register.cc',
+	     'pim_proto_register_stop.cc',
+	     'pim_rp.cc',
+	     'pim_scope_zone_table.cc',
+	     'pim_vif.cc',
+	     'xrl_pim_node.cc'
+             ]
+
+libpim = env.SharedLibrary(target = 'libpim', source = libpimsrcs, LIBS = '')
+
+
+pim4srcs = [
+          'xorp_pimsm4.cc',
+          ]
+
+pim4 = env.Program(target = 'xorp_pimsm4', source = pim4srcs)
+
+pim6srcs = [
+          'xorp_pimsm6.cc',
+          ]
+
+pim6 = env.Program(target = 'xorp_pimsm6', source = pim6srcs)
+
+env.Alias('install',
+          env.InstallProgram('$bindir', pim4))
+
+env.Alias('install',
+          env.InstallProgram('$bindir', pim6))
+
+env.Alias('install',
+          env.InstallLibrary('$libdir', libpim))
+
+Default(pim4, pim6)

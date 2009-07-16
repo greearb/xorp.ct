@@ -1,0 +1,188 @@
+# Copyright (c) 2009 XORP, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License, Version 2, June
+# 1991 as published by the Free Software Foundation. Redistribution
+# and/or modification of this program under the terms of any other
+# version of the GNU General Public License is not permitted.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
+# see the GNU General Public License, Version 2, a copy of which can be
+# found in the XORP LICENSE.gpl file.
+#
+# XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+# http://xorp.net
+
+# $XORP$
+
+import os
+Import('env')
+
+subdirs = [
+	#'config' # FIXME install
+    ]
+
+SConscript(dirs = subdirs, exports='env')
+
+env = env.Clone()
+
+env.AppendUnique(CPPPATH = [
+    '#',
+    '$BUILDDIR',
+    ])
+
+env.AppendUnique(LIBPATH = [
+    '$BUILDDIR/libxorp',
+    '$BUILDDIR/libcomm',
+    '$BUILDDIR/libxipc',
+    '$BUILDDIR/libproto',
+    '$BUILDDIR/xrl/interfaces',
+    '$BUILDDIR/xrl/targets',
+    '$BUILDDIR/cli',
+    '$BUILDDIR/cli/libtecla',
+    '.',
+    ])
+
+### librtrmgr
+
+librtrmgr_env = env.Clone()
+
+# FIXME generate lex/yacc from source
+# shorthand this plz
+# see http://209.85.229.132/search?q=cache:3j0AsRORc6MJ:https://gforge.inria.fr/plugins/scmsvn/viewcvs.php/scons_util/trunk/src/platform.py%3Frev%3D18%26root%3Dopenalea%26view%3Dmarkup+scons+lexflags+append&cd=2&hl=en&ct=clnk&gl=uk&client=firefox-a
+# ... needs toolchain check for flex 2.5.4 or poss more recent.
+# known to work with freebsd base system flex.
+#tplt_env = env.Clone()
+#tplt_env.AppendUnique(LEXFLAGS='-Ptplt')
+#tplt_env.CXXFile(source='template.ll', target='lex.tplt.cc')
+#boot_env = env.Clone()
+#boot_env.AppendUnique(LEXFLAGS='-Pboot')
+#boot_env.CXXFile(source='boot.ll', target='lex.boot.cc')
+#opcmd_env = env.Clone()
+#opcmd_env.AppendUnique(LEXFLAGS='-Popcmd')
+#opcmd_env.CXXFile(source='op_commands.ll', target='lex.opcmd.cc')
+
+librtrmgr_srcs = [
+	'command_tree.cc',
+	'conf_tree.cc',
+	'conf_tree_node.cc',
+	'config_operators.cc',
+	'generic_module_manager.cc',
+	'glob_win32.c',
+	'lex.boot.cc',
+	'lex.opcmd.cc',
+	'lex.tplt.cc',
+	'master_conf_tree.cc',
+	'master_conf_tree_node.cc',
+	'master_template_tree.cc',
+	'master_template_tree_node.cc',
+	'module_command.cc',
+	'module_manager.cc',
+	'op_commands.cc',
+	'randomness.cc',
+	'slave_conf_tree.cc',
+	'slave_conf_tree_node.cc',
+	'slave_module_manager.cc',
+	'task.cc',
+	'template_base_command.cc',
+	'template_commands.cc',
+	'template_tree.cc',
+	'template_tree_node.cc',
+	'unexpanded_program.cc',
+	'unexpanded_xrl.cc',
+	'userdb.cc',
+	'util.cc',
+	'xorp_client.cc',
+	'xrldb.cc',
+	'y.boot_tab.cc',
+	'y.opcmd_tab.cc',
+	'y.tplt_tab.cc',
+	]
+
+librtrmgr = librtrmgr_env.StaticLibrary(target = 'librtrmgr',
+					source = librtrmgr_srcs)
+
+### rtrmgr
+
+rtrmgr_env = env.Clone()
+
+rtrmgr_env.AppendUnique(LIBS = [
+    'rtrmgr',
+    'rtrmgrbase',
+    'rtrmgrclientxif',
+    'findereventnotifierxif',
+    'finder',
+    'xipc',
+    'comm',
+    'xorp'
+])
+
+rtrmgr_srcs = [
+	'main_rtrmgr.cc',
+	'xrl_rtrmgr_interface.cc',
+	]
+
+rtrmgr = rtrmgr_env.Program(target = 'xorp_rtrmgr', source = rtrmgr_srcs)
+
+env.Alias('install',
+          env.InstallProgram('$bindir', rtrmgr))
+
+### xorpsh
+
+xorpsh_env = env.Clone()
+
+xorpsh_env.AppendUnique(LIBS = [
+    'rtrmgr',
+    'cli',
+    'clibase',			# XXX Not picked up automagically?
+    'cliprocessorxif',		# XXX ditto?
+    'proto',
+    'tecla',
+    'rtrmgrxif',
+    'xorpshbase',
+    'findereventnotifierxif',
+    'xipc',
+    'comm',
+    'xorp',
+    'curses'	# XXX only for non-windows
+])
+
+xorpsh_srcs = [
+	'xorpsh_main.cc',
+	'xrl_xorpsh_interface.cc',
+	'cli.cc',
+	]
+
+xorpsh = xorpsh_env.Program(target = 'xorpsh', source = xorpsh_srcs)
+
+env.Alias('install',
+          env.InstallProgram('$bindir', xorpsh))
+
+### profiler
+
+profiler_env = env.Clone()
+
+profiler_env.AppendUnique(LIBS = [
+    'profilexif',
+    'profilerbase',
+    'finder',
+    'xipc',
+    'comm',
+    'xorp'
+])
+
+profiler_srcs = [
+	'profiler.cc',
+	]
+
+profiler = profiler_env.Program(target = 'xorp_profiler',
+				source = profiler_srcs)
+
+env.Alias('install',
+          env.InstallProgram('$bindir', profiler))
+
+###
+
+Default(rtrmgr, xorpsh, profiler)

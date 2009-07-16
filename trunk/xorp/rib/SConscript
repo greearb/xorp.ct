@@ -1,0 +1,110 @@
+# Copyright (c) 2009 XORP, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License, Version 2, June
+# 1991 as published by the Free Software Foundation. Redistribution
+# and/or modification of this program under the terms of any other
+# version of the GNU General Public License is not permitted.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
+# see the GNU General Public License, Version 2, a copy of which can be
+# found in the XORP LICENSE.gpl file.
+#
+# XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+# http://xorp.net
+
+# $XORP$
+
+import os
+Import('env')
+
+env = env.Clone()
+
+subdirs = ['tools']
+
+SConscript(dirs = subdirs, exports = 'env')
+
+env.AppendUnique(CPPPATH = [
+    '#',
+    '$BUILDDIR',
+    ])
+
+env.AppendUnique(LIBPATH = [
+    '../libxorp',
+    '../libcomm',
+    '../libxipc',
+    '../libproto',
+    '../libfeaclient',
+    '../policy/backend',
+    '../policy/common',
+    '../xrl/interfaces',
+    '../xrl/targets',
+    '.'
+    ])
+
+env.AppendUnique(LIBS = [
+    'rib',
+    'feaclient',
+    'feaifmgrmirrorxif',
+    'feaifmgrreplicatorxif',
+    'ftixif',
+    'ribclientxif',
+    'findereventnotifierxif',
+    'redist4xif',
+    'redist6xif',
+    'redisttransaction4xif',
+    'redisttransaction6xif',
+    'policyredist4xif',
+    'policyredist6xif',
+    'profileclientxif',
+    'feaifmgrmirrorbase',
+    'ribbase',
+    'policybackend',
+    'policycommon',
+    'finder',
+    'xipc',
+    'xorp',
+    'proto',
+    'comm'
+])
+
+libribsrcs = [
+	     'profile_vars.cc',
+	     'protocol.cc',
+	     'redist_xrl.cc',
+	     'register_server.cc',
+	     'rib.cc',
+	     'rib_manager.cc',
+	     'rib_varrw.cc',
+	     'route.cc',
+	     'rt_tab_base.cc',
+	     'rt_tab_deletion.cc',
+	     'rt_tab_extint.cc',
+	     'rt_tab_log.cc',
+	     'rt_tab_merged.cc',
+	     'rt_tab_origin.cc',
+	     'rt_tab_pol_conn.cc',
+	     'rt_tab_pol_redist.cc',
+	     'rt_tab_redist.cc',
+	     'rt_tab_register.cc',
+	     'vifmanager.cc',
+	     'xrl_target.cc'
+             ]
+
+librib = env.SharedLibrary(target = 'librib', source = libribsrcs, LIBS = '')
+
+ribsrcs = [
+          'main_rib.cc',
+          ]
+
+rib = env.Program(target = 'xorp_rib', source = ribsrcs)
+
+env.Alias('install',
+          env.InstallProgram('$bindir', rib))
+
+env.Alias('install',
+          env.InstallLibrary('$libdir', librib))
+
+Default(rib)

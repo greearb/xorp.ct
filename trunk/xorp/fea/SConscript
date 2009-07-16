@@ -1,0 +1,158 @@
+# Copyright (c) 2009 XORP, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License, Version 2, June
+# 1991 as published by the Free Software Foundation. Redistribution
+# and/or modification of this program under the terms of any other
+# version of the GNU General Public License is not permitted.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
+# see the GNU General Public License, Version 2, a copy of which can be
+# found in the XORP LICENSE.gpl file.
+#
+# XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+# http://xorp.net
+
+# $XORP$
+
+import os
+Import('env')
+
+subdirs = [
+	'data_plane',
+	'tools'
+    ]
+
+SConscript(dirs = subdirs, exports='env')
+
+env = env.Clone()
+
+env.AppendUnique(CPPPATH = [
+    '#',
+    '$BUILDDIR',
+    ])
+
+env.AppendUnique(LIBPATH = [
+    '$BUILDDIR/libxorp',
+    '$BUILDDIR/libcomm',
+    '$BUILDDIR/libxipc',
+    '$BUILDDIR/libproto',
+    '$BUILDDIR/libfeaclient',
+    '$BUILDDIR/xrl/interfaces',
+    '$BUILDDIR/xrl/targets',
+    '$BUILDDIR/mrt',
+    '$BUILDDIR/cli',
+    '$BUILDDIR/cli/libtecla',
+    '.',
+    '$BUILDDIR/fea/data_plane/managers',
+    '$BUILDDIR/fea/data_plane/fibconfig',
+    '$BUILDDIR/fea/data_plane/firewall',
+    '$BUILDDIR/fea/data_plane/ifconfig',
+    '$BUILDDIR/fea/data_plane/io',
+    '$BUILDDIR/fea/data_plane/control_socket',
+    ])
+
+env.AppendUnique(LIBS = [
+    'xorp_data_plane_managers',
+    'xorp_fibconfig',
+    'xorp_firewall',
+    'xorp_ifconfig',
+    'xorp_io',
+    'xorp_control_socket',
+    'feafibclientxif',
+    'fearawlinkclientxif',
+    'fearawpkt4clientxif',
+    'fearawpkt6clientxif',
+    'socket4userxif',
+    'socket6userxif',
+    'findereventnotifierxif',
+    'feabase',
+    'climanagerxif',
+    'mfeaclientxif',
+    'mfeabase',
+    'mrt',
+    'cli',
+    'tecla',
+    'cliprocessorxif',
+    'clibase',
+    'feaclient',
+    'feaifmgrmirrorxif',
+    'feaifmgrreplicatorxif',
+    'feaifmgrmirrorbase',
+    'profileclientxif',
+    'xipc',
+    'proto',
+    'comm',
+    'xorp'
+])
+
+env.AppendUnique(LINKFLAGS = [
+    '-Wl,-z,defs',
+])
+
+libfeasrcs = [
+	     'fea_data_plane_manager.cc',
+	     'fea_io.cc',
+	     'fea_node.cc',
+	     'fibconfig.cc',
+	     'fibconfig_forwarding.cc',
+	     'fibconfig_transaction.cc',
+	     'firewall_entry.cc',
+	     'firewall_manager.cc',
+	     'firewall_transaction.cc',
+	     'ifconfig.cc',
+	     'ifconfig_property.cc',
+	     'ifconfig_reporter.cc',
+	     'ifconfig_transaction.cc',
+	     'iftree.cc',
+	     'io_ip.cc',
+	     'io_ip_manager.cc',
+	     'io_link.cc',
+	     'io_link_manager.cc',
+	     'io_tcpudp.cc',
+	     'io_tcpudp_manager.cc',
+	     'libfeaclient_bridge.cc',
+	     'mfea_config.cc',
+	     'mfea_dataflow.cc',
+	     'mfea_mrouter.cc',
+	     'mfea_node.cc',
+	     'mfea_node_cli.cc',
+	     'mfea_vif.cc',
+	     'nexthop_port_mapper.cc',
+	     'profile_vars.cc',
+	     'xrl_fea_io.cc',
+	     'xrl_fea_node.cc',
+	     'xrl_fea_target.cc',
+	     'xrl_fib_client_manager.cc',
+	     'xrl_io_ip_manager.cc',
+	     'xrl_io_link_manager.cc',
+	     'xrl_io_tcpudp_manager.cc',
+	     'xrl_mfea_node.cc'
+             ]
+
+libfea = env.SharedLibrary(target = 'libfea', source = libfeasrcs)
+
+
+env = env.Clone()
+
+env.AppendUnique(LIBS = [
+    'fea',
+])
+
+feasrcs = [
+          'xorp_fea.cc',
+          ]
+
+fea = env.Program(target = 'xorp_fea', source = feasrcs)
+
+#feadummy = env.Program(target = 'xorp_fea_dummy', source = mldsrcs)
+
+env.Alias('install',
+          env.InstallLibrary('$libdir', libfea))
+
+env.Alias('install',
+          env.InstallProgram('$bindir', fea))
+
+Default(fea)
