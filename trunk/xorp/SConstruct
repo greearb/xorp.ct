@@ -19,6 +19,10 @@
 
 # TODO FIXME install target.
 # TODO FIXME cross compiles.
+# TODO make shared library linker flags portable to non-gnu linkers.
+# TODO change CONFIGUREDIR to be under the builddir?
+# TODO change CONFIGURELOG to be under the builddir?
+# TODO tone down linker line spamming, -lpcre etc; stage use of LIBS please.
 # TODO Add separate toolchain test for C99 varargs macros.
 # TODO Add separate toolchain test for GNU varargs macros.
 # TODO Push config header into build dir for parallel / cross build use.
