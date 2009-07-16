@@ -163,4 +163,4 @@ env.Alias('install',
 env.Alias('install',
           env.InstallProgram('$bindir', call_xrl))
 
-Default(libxipc, libfinder)
+Default(libxipc, libfinder, xorp_finder, call_xrl)
