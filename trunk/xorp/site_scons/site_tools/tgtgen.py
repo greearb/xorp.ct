@@ -9,7 +9,7 @@ def tgtgen_emitter(target, source, env):
     cc = base + "_base.cc"
     hh = base + "_base.hh"
     xrls = base + ".xrls"
-    t = [cc, hh]
+    t = [cc, hh, xrls]
     return (t, source)
 
 tgtgen_scanner = SCons.Scanner.ClassicCPP("TGTGENScan",
