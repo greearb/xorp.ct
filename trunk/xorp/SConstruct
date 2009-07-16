@@ -17,11 +17,11 @@
 
 # $ID$
 
-# TODO FIXME install target.
-# TODO cross compiles.
-# TODO pass paths on command line, to avoid rebuild if install prefix changed
+# TODO build static and shared libraries. do so concisely and without bugs.
 # TODO make shared library linker flags portable to non-gnu linkers.
 # TODO tone down linker line spamming, -lpcre etc; stage use of LIBS please.
+# TODO cross compiles.
+# TODO pass paths on command line, to avoid rebuild if install prefix changed
 # TODO Add separate toolchain test for C99 varargs macros.
 # TODO Add separate toolchain test for GNU varargs macros.
 # TODO Fix default include/lib paths, pass in from environment.
