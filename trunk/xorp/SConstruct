@@ -96,12 +96,12 @@ env = Environment(
 
 env['DESTDIR'] = ARGUMENTS.get('DESTDIR', Dir(installdir).abspath)
 
-if ARGUMENTS.get('strip', False) is True:
+if ARGUMENTS.get('strip', False) == 'true':
     env['strip'] = True
     env['STRIP'] = "strip"
 print 'Strip binaries:   ', env.has_key('strip')
 
-if ARGUMENTS.get('shared', False) is True:
+if ARGUMENTS.get('shared', False) == 'true':
     env['SHAREDLIBS'] = "defined"
 print 'Shared libraries: ', env.has_key('SHAREDLIBS')
 
