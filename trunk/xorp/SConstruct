@@ -18,9 +18,8 @@
 # $ID$
 
 # TODO FIXME install target.
-# TODO FIXME cross compiles.
-# TODO Pass paths on command line, to avoid rebuilding if we re-base
-# for installation.
+# TODO cross compiles.
+# TODO pass paths on command line, to avoid rebuild if install prefix changed
 # TODO make shared library linker flags portable to non-gnu linkers.
 # TODO tone down linker line spamming, -lpcre etc; stage use of LIBS please.
 # TODO Add separate toolchain test for C99 varargs macros.
@@ -29,6 +28,10 @@
 # TODO Pass in DEBUG_CALLBACKS DEBUG_LOGGING_GLOBAL DEBUG_PRINT_FUNCTION_NAME
 # from command line easily.
 # TODO Merge scons-unfamiliar syntactic sugar from YHC's sconsfiles.
+# TODO support non-gnu strip
+# TODO support static *and* shared library build in same tree/run
+# TODO disambiguate arch specification cross-platform
+# TODO conditionalize new directory layout here
 
 Help("""
     cross=true if you are doing a cross build. Default is false.
@@ -39,6 +42,7 @@ Help("""
         Default is "../arch-os-rel".
     installdir=<some path> to specify a different installation directory.
         Default is "../arch-os-rel/stage".
+    shared=true to build with shared libraries. Default is false.
     strip=true to strip binaries when installed. Default is false.
 """)
 #Help(opts.GenerateHelpText(env))
@@ -51,13 +55,9 @@ from SCons.Script.SConscript import SConsEnvironment
 import SCons.Action
 import SCons.Builder
 
-# XXX is this portable to windows?
 build_arch = os.uname()[4].lower()
 build_os = os.uname()[0].lower()
 
-# figure out the host arch
-# XXX Different systems supply different architectures in different ways.
-# Disambiguate these somehow.
 host_arch = ARGUMENTS.get('arch')
 if not host_arch:
 	host_arch = build_arch
@@ -95,10 +95,15 @@ env = Environment(
 		  LIBPATH=['/usr/sfw/lib', '/opt/local/lib', '/usr/local/lib'])
 
 env['DESTDIR'] = ARGUMENTS.get('DESTDIR', Dir(installdir).abspath)
-env['strip'] = ARGUMENTS.get('strip', False)
 
-# XXX
-env['STRIP'] = "strip"
+if ARGUMENTS.get('strip', False) is True:
+    env['strip'] = True
+    env['STRIP'] = "strip"
+print 'Strip binaries:   ', env.has_key('strip')
+
+if ARGUMENTS.get('shared', False) is True:
+    env['SHAREDLIBS'] = "defined"
+print 'Shared libraries: ', env.has_key('SHAREDLIBS')
 
 env['CONFIGURELOG'] = str(builddir) + os.sep + 'config.log'
 env['CONFIGUREDIR'] = str(builddir) + os.sep + '.sconf_temp'
