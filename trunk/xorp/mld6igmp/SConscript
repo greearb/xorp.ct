@@ -86,11 +86,14 @@ mldsrcs = [
 
 mld = env.Program(target = 'xorp_mld', source = mldsrcs)
 
-env.Alias('install',
-          env.InstallProgram('$bindir', igmp))
+#mldpath = '$bindir'
+mldpath = '$exec_prefix' + '/' + 'mld6igmp'
 
 env.Alias('install',
-          env.InstallProgram('$bindir', mld))
+          env.InstallProgram(mldpath, igmp))
+
+env.Alias('install',
+          env.InstallProgram(mldpath, mld))
 
 env.Alias('install',
           env.InstallLibrary('$libdir', libmld6igmp))

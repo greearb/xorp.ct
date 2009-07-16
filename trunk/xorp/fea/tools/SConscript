@@ -55,7 +55,10 @@ showifsrcs = [
 
 showif = env.Program(target = 'show_interfaces', source = showifsrcs)
 
+#showifpath = '$bindir'
+showifpath = '$exec_prefix/fea/tools'
+
 env.Alias('install',
-    env.InstallProgram('$bindir', showif))
+    env.InstallProgram(showifpath, showif))
 
 Default(showif)

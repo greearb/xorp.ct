@@ -97,11 +97,14 @@ ospfv3srcs = [
 
 ospfv3 = env.Program(target = 'xorp_ospfv3', source = ospfv3srcs)
 
-env.Alias('install',
-          env.InstallProgram('$bindir', ospfv2))
+#ospfpath = '$bindir'
+ospfpath = '$exec_prefix/ospf'
 
 env.Alias('install',
-          env.InstallProgram('$bindir', ospfv3))
+          env.InstallProgram(ospfpath, ospfv2))
+
+env.Alias('install',
+          env.InstallProgram(ospfpath, ospfv3))
 
 env.Alias('install',
           env.InstallLibrary('$libdir', libospf))

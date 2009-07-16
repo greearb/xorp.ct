@@ -60,10 +60,13 @@ shpeer = env.Program(target = 'show_peer_stats', source = shpeersrcs)
 
 shstats = env.Program(target = 'show_stats', source = shstatssrcs)
 
-env.Alias('install',
-    env.InstallProgram('$bindir', shpeer))
+#riptoolpath = '$bindir'
+riptoolpath = '$exec_prefix/rip/tools'
 
 env.Alias('install',
-    env.InstallProgram('$bindir', shstats))
+    env.InstallProgram(riptoolpath, shpeer))
+
+env.Alias('install',
+    env.InstallProgram(riptoolpath, shstats))
 
 Default(shpeer, shstats)

@@ -66,13 +66,16 @@ printlsas = env.Program(target = 'print_lsas', source = printlsassrcs)
 
 printneighbors = env.Program(target = 'print_neighbours', source = printneighborssrcs)
 
-env.Alias('install',
-    env.InstallProgram('$bindir', cleardb))
+#ospftoolpath = '$bindir'
+ospftoolpath = '$exec_prefix/ospf/tools'
 
 env.Alias('install',
-    env.InstallProgram('$bindir', printlsas))
+    env.InstallProgram(ospftoolpath, cleardb))
 
 env.Alias('install',
-    env.InstallProgram('$bindir', printneighbors))
+    env.InstallProgram(ospftoolpath, printlsas))
+
+env.Alias('install',
+    env.InstallProgram(ospftoolpath, printneighbors))
 
 Default(cleardb, printlsas, printneighbors)

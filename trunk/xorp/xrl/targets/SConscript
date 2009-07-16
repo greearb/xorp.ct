@@ -71,12 +71,11 @@ tgts = [
     'xorpsh.tgt',
     ]
 
-if env['WITH_BGP']:
-    tgts.append('bgp.tgt')
-    tgts.append('bgp4_mib.tgt')
-
 if env['WITH_OLSR']:
     tgts.append('olsr4.tgt')
+
+#xrls_path = '$datadir'
+xrlspath = '$exec_prefix/xrl/targets'
 
 all_tgt_libs = []
 for tgt in tgts:
@@ -86,10 +85,15 @@ for tgt in tgts:
 
     env.TGTGEN(tgt)
 
+    # XXX should build static stubs too
     lib = env.SharedLibrary(target, source)
     all_tgt_libs.append(lib)
 
+    # XXX os.sep-ify
+    xrls = '$BUILDDIR/xrl/targets/' + base + '.xrls'
+
     if base[:4] != "test":
         env.Alias('install', env.InstallLibrary('$libdir', lib))
+        env.Alias('install', env.InstallData(xrlspath, xrls))
 
 Default(all_tgt_libs)

@@ -112,11 +112,14 @@ pim6srcs = [
 
 pim6 = env.Program(target = 'xorp_pimsm6', source = pim6srcs)
 
-env.Alias('install',
-          env.InstallProgram('$bindir', pim4))
+pimpath = '$bindir'
+pimpath = '$exec_prefix/pim'
 
 env.Alias('install',
-          env.InstallProgram('$bindir', pim6))
+          env.InstallProgram(pimpath, pim4))
+
+env.Alias('install',
+          env.InstallProgram(pimpath, pim6))
 
 env.Alias('install',
           env.InstallLibrary('$libdir', libpim))

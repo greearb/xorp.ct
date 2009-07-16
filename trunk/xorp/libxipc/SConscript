@@ -157,8 +157,10 @@ xorp_finder = env.Program(target = 'xorp_finder',
 call_xrl = env.Program(target = 'call_xrl',
                        source = [ 'call_xrl.cc'])
 
+#env.Alias('install',
+#          env.InstallProgram('$bindir', xorp_finder))
 env.Alias('install',
-          env.InstallProgram('$bindir', xorp_finder))
+          env.InstallProgram('$exec_prefix/libxipc', xorp_finder))
 
 env.Alias('install',
           env.InstallProgram('$bindir', call_xrl))

@@ -74,8 +74,11 @@ libsr = env.SharedLibrary(LIBS = '', target = 'libstaticroutes', source = libsrs
 
 xorp_static_routes = env.Program(target = 'xorp_static_routes', source = srsources)
 
+#srpath = '$bindir'
+srpath = '$exec_prefix/static_routes'
+
 env.Alias('install',
-          env.InstallProgram('$bindir', xorp_static_routes))
+          env.InstallProgram(srpath, xorp_static_routes))
 
 env.Alias('install',
           env.InstallLibrary('$libdir', libsr))

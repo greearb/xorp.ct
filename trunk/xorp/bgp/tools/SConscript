@@ -45,6 +45,10 @@ env.AppendUnique(LIBS = [
     'comm',
     ])
 
+
+#bgptoolpath = '$bindir'
+bgptoolpath = '$exec_prefix/bgp/tools'
+
 ### print_peers
 
 ppeers_srcs = [
@@ -53,8 +57,10 @@ ppeers_srcs = [
 	]
 
 ppeers = env.Program(target = 'print_peers', source = ppeers_srcs)
-env.Alias('install',
-    env.InstallProgram('$bindir', ppeers))
+
+# don't install -for debug only
+#env.Alias('install',
+#    env.InstallProgram(bgptoolpath, ppeers))
 
 ### print_routes
 
@@ -64,8 +70,10 @@ proutes_srcs = [
 	]
 
 proutes = env.Program(target = 'print_routes', source = proutes_srcs)
-env.Alias('install',
-    env.InstallProgram('$bindir', proutes))
+
+# don't install -for debug only
+#env.Alias('install',
+#    env.InstallProgram(bgptoolpath, proutes))
 
 ### xorpsh_print_peers
 
@@ -74,9 +82,9 @@ xppeers_srcs = [
 	'xorpsh_print_peers.cc',
 	]
 
-xppeers = env.Program(target = 'print_peers', source = ppeers_srcs)
+xppeers = env.Program(target = 'xorpsh_print_peers', source = xppeers_srcs)
 env.Alias('install',
-    env.InstallProgram('$bindir', xppeers))
+    env.InstallProgram(bgptoolpath, xppeers))
 
 ### xorpsh_print_routes
 
@@ -85,8 +93,8 @@ xproutes_srcs = [
 	'xorpsh_print_routes.cc',
 	]
 
-xproutes = env.Program(target = 'print_routes', source = proutes_srcs)
+xproutes = env.Program(target = 'xorpsh_print_routes', source = xproutes_srcs)
 env.Alias('install',
-    env.InstallProgram('$bindir', xproutes))
+    env.InstallProgram(bgptoolpath, xproutes))
 
-Default(ppeers, proutes, xppeers, xproutes)
+Default(xppeers, xproutes)

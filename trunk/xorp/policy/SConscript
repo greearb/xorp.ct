@@ -96,8 +96,11 @@ policysrcs = [
 
 policy = env.Program(target = 'xorp_policy', source = policysrcs)
 
+#pcpath = '$bindir'
+pcpath = '$exec_prefix/policy'
+
 env.Alias('install',
-          env.InstallProgram('$bindir', policy))
+          env.InstallProgram(pcpath, policy))
 
 env.Alias('install',
           env.InstallLibrary('$libdir', libpolicy))

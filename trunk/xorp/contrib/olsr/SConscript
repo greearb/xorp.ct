@@ -112,6 +112,8 @@ olsr4srcs = [
 
 olsr4 = env.Program(target = 'xorp_olsr4', source = olsr4srcs)
 
+# XXX not ready for prime time.
+
 env.Alias('install',
           env.InstallProgram('$bindir', olsr4))
 

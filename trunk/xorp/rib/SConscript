@@ -101,8 +101,11 @@ ribsrcs = [
 
 rib = env.Program(target = 'xorp_rib', source = ribsrcs)
 
+#ribpath = '$bindir'
+ribpath = '$exec_prefix/rib'
+
 env.Alias('install',
-          env.InstallProgram('$bindir', rib))
+          env.InstallProgram(ribpath, rib))
 
 env.Alias('install',
           env.InstallLibrary('$libdir', librib))

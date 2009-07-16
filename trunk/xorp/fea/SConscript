@@ -134,6 +134,15 @@ libfeasrcs = [
 
 libfea = env.SharedLibrary(target = 'libfea', source = libfeasrcs)
 
+env.Alias('install',
+          env.InstallLibrary('$libdir', libfea))
+
+#######################
+
+#feapath = '$bindir'
+feapath = '$exec_prefix/fea'
+
+#######################
 
 env = env.Clone()
 
@@ -147,12 +156,33 @@ feasrcs = [
 
 fea = env.Program(target = 'xorp_fea', source = feasrcs)
 
-#feadummy = env.Program(target = 'xorp_fea_dummy', source = mldsrcs)
+env.Alias('install',
+          env.InstallProgram(feapath, fea))
+
+#######################
+
+env = env.Clone()
+
+env['OBJPREFIX'] = 'dummy-'
+
+env.AppendUnique(CPPDEFINES = 'FEA_DUMMY=1')
+
+feadummysrcs = [
+          'xorp_fea.cc',
+          ]
+
+feadummy = env.Program(target = 'xorp_fea_dummy', source = feadummysrcs)
 
 env.Alias('install',
-          env.InstallLibrary('$libdir', libfea))
+          env.InstallProgram(feapath, feadummy))
+
+#######################
+
+clickgen = 'xorp_fea_click_config_generator'
 
 env.Alias('install',
-          env.InstallProgram('$bindir', fea))
+          env.InstallScript(feapath, clickgen))
 
-Default(fea)
+#######################
+
+Default(fea, feadummy)

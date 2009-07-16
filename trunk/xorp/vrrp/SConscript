@@ -68,8 +68,11 @@ vrrpsources = [ 'xorp_vrrp.cc' ]
 xorp_vrrp = env.Program(target = 'xorp_vrrp',
             source = vrrpsources)
 
+#vrrppath = '$bindir'
+vrrppath = '$exec_prefix' + '/' + 'vrrp'
+
 env.Alias('install',
-          env.InstallProgram('$bindir', xorp_vrrp))
+          env.InstallProgram(vrrppath, xorp_vrrp))
 
 env.Alias('install',
           env.InstallLibrary('$libdir', libvrrp))

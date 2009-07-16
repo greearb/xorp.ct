@@ -22,6 +22,10 @@ Import('env')
 
 e = env.Clone()
 
+# XXX
+#rippath = '$bindir'
+rippath = '$exec_prefix/rip'
+
 subdirs = ['tools']
 
 SConscript(dirs = subdirs, exports = 'env')
@@ -127,7 +131,7 @@ libripxrl = e.SharedLibrary(target = 'libripxrl', source = libripxrlsrc, LIBS = 
 rip = e.Program(target = 'xorp_rip', source = ripsrcs)
 
 e.Alias('install',
-          [ e.InstallProgram('$bindir', rip),
+          [ e.InstallProgram(rippath, rip),
             e.InstallLibrary('$libdir', librip),
             e.InstallLibrary('$libdir', libripxrl) ])
 
@@ -188,7 +192,7 @@ libripngxrl = e.SharedLibrary(target = 'libripngxrl', source = libripxrlsrc, LIB
 ripng = e.Program(target = 'xorp_ripng', source = ripngsrcs)
 
 e.Alias('install',
-          [ e.InstallProgram('$bindir', ripng),
+          [ e.InstallProgram(rippath, ripng),
             e.InstallLibrary('$libdir', libripng),
             e.InstallLibrary('$libdir', libripngxrl) ])
 

@@ -86,6 +86,8 @@ mldlitesrcs = [
 
 mldlite = env.Program(target = 'xorp_mld_lite', source = mldlitesrcs)
 
+# XXX Not ready for prime time
+
 env.Alias('install',
           env.InstallProgram('$bindir', igmplite))
 

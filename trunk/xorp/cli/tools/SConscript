@@ -57,10 +57,13 @@ cligen = env.Program(target = 'cli_generic', source = cligensrcs)
 
 sendcli = env.Program(target = 'send_cli_processor_xrl', source = sendclisrcs)
 
-env.Alias('install',
-    env.InstallProgram('$bindir', cligen))
+#clitoolpath = '$bindir'
+clitoolpath = '$exec_prefix/cli/tools'
 
 env.Alias('install',
-    env.InstallProgram('$bindir', sendcli))
+    env.InstallProgram(clitoolpath, cligen))
+
+env.Alias('install',
+    env.InstallProgram(clitoolpath, sendcli))
 
 Default(cligen, sendcli)

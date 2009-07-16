@@ -60,10 +60,13 @@ shdist = env.Program(target = 'show_distances', source = shdistsrcs)
 
 shrtes = env.Program(target = 'show_routes', source = shrtessrcs)
 
-env.Alias('install',
-    env.InstallProgram('$bindir', shdist))
+#ribtoolpath = '$bindir'
+ribtoolpath = '$exec_prefix/rib/tools'
 
 env.Alias('install',
-    env.InstallProgram('$bindir', shrtes))
+    env.InstallProgram(ribtoolpath, shdist))
+
+env.Alias('install',
+    env.InstallProgram(ribtoolpath, shrtes))
 
 Default(shdist, shrtes)
