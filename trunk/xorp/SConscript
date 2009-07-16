@@ -20,7 +20,7 @@
 Import('env')
 
 subdirs = [
-    #'etc/templates',  # FIXME for install
+    'etc/templates',
     'cli',
     'xrl/targets',
     'xrl/interfaces',
