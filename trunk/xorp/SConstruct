@@ -22,26 +22,24 @@
 # TODO Pass paths on command line, to avoid rebuilding if we re-base
 # for installation.
 # TODO make shared library linker flags portable to non-gnu linkers.
-# TODO change CONFIGUREDIR to be under the builddir?
-# TODO change CONFIGURELOG to be under the builddir?
 # TODO tone down linker line spamming, -lpcre etc; stage use of LIBS please.
 # TODO Add separate toolchain test for C99 varargs macros.
 # TODO Add separate toolchain test for GNU varargs macros.
-# TODO Push config header into build dir for parallel / cross build use.
 # TODO Fix default include/lib paths, pass in from environment.
 # TODO Pass in DEBUG_CALLBACKS DEBUG_LOGGING_GLOBAL DEBUG_PRINT_FUNCTION_NAME
 # from command line easily.
 # TODO Merge scons-unfamiliar syntactic sugar from YHC's sconsfiles.
 
 Help("""
-    cross=true if you are doing a cross build.
+    cross=true if you are doing a cross build. Default is false.
     arch={i686} to identify the target architecture.
     os={linux|freebsd|..} to identify the target os.
     rel={public17|..} to identify the target release.
     builddir=<some path> to specify a different build directory.
-        The default build directory is ../arch-os-rel.
+        Default is "../arch-os-rel".
     installdir=<some path> to specify a different installation directory.
-        The default install directory is ../arch-os-rel/stage.
+        Default is "../arch-os-rel/stage".
+    strip=true to strip binaries when installed. Default is false.
 """)
 #Help(opts.GenerateHelpText(env))
 
@@ -97,6 +95,13 @@ env = Environment(
 		  LIBPATH=['/usr/sfw/lib', '/opt/local/lib', '/usr/local/lib'])
 
 env['DESTDIR'] = ARGUMENTS.get('DESTDIR', Dir(installdir).abspath)
+env['strip'] = ARGUMENTS.get('strip', False)
+
+# XXX
+env['STRIP'] = "strip"
+
+env['CONFIGURELOG'] = str(builddir) + os.sep + 'config.log'
+env['CONFIGUREDIR'] = str(builddir) + os.sep + '.sconf_temp'
 
 SConsEnvironment.Chmod = SCons.Action.ActionFactory(os.chmod,
     lambda dest, mode: 'Chmod("%s", 0%o)' % (dest, mode))
@@ -173,9 +178,6 @@ env['mandir'] = ARGUMENTS.get('mandir', '$datarootdir/man')
 env['XORP_SOURCEDIR'] = sourcedir
 env['XORP_BUILDDIR'] = builddir
 
-# XXX should check for strip in toolchain
-env['strip'] = ARGUMENTS.get('strip', False)
-
 # turnoff bgp, olsr for now.
 # XXX bgp is always built, olsr never built.
 env['WITH_BGP'] = ARGUMENTS.get('enable-bgp', False)
@@ -194,6 +196,11 @@ if not env.GetOption('clean') and not env.GetOption('help'):
 	'CheckSysctl' :     CheckSysctl
     }
 
+    # TODO Push config header into build dir for parallel / cross build use.
+    # Currently cannot do this due to SCons limitations.
+    #conf = env.Configure(config_h = str(builddir) + 'xorp_config.h',
+    #                     custom_tests = my_custom_tests)
+    #
     conf = env.Configure(config_h = 'xorp_config.h',
                          custom_tests = my_custom_tests)
 
