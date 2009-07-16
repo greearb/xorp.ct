@@ -36,8 +36,6 @@
 
 #include "libproto/packet.hh"
 
-#include "xrl/interfaces/bgp_mib_traps_xif.hh"
-
 #include "peer.hh"
 #include "bgp.hh"
 #include "profile_vars.hh"
