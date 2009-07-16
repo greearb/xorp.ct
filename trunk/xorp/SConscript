@@ -20,15 +20,15 @@
 Import('env')
 
 subdirs = [
-    'etc/templates',
-    'cli',
-    'xrl/targets',
-    'xrl/interfaces',
-    'libxipc',
-    'libproto',
     'libcomm',
     'libxorp',
+    'libxipc',
+    'libproto',
     'libfeaclient',
+    'xrl/targets',
+    'xrl/interfaces',
+    'etc/templates',
+    'cli',
     'fea',
     'fib2mrib',
     'mld6igmp',
@@ -42,8 +42,6 @@ subdirs = [
     'static_routes',
     'vrrp',
     'bgp',
-    #'contrib/olsr',
-    #'contrib/mld6igmp_lite',
     ]
 
 SConscript(dirs = subdirs, exports='env')
