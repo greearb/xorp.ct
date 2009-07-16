@@ -37,7 +37,9 @@ Help("""
     os={linux|freebsd|..} to identify the target os.
     rel={public17|..} to identify the target release.
     builddir=<some path> to specify a different build directory.
-	  The default build directory is $HOME/arch-os-rel.
+        The default build directory is ../arch-os-rel.
+    installdir=<some path> to specify a different installation directory.
+        The default install directory is ../arch-os-rel/stage.
 """)
 #Help(opts.GenerateHelpText(env))
 
@@ -49,10 +51,13 @@ from SCons.Script.SConscript import SConsEnvironment
 import SCons.Action
 import SCons.Builder
 
+# XXX is this portable to windows?
 build_arch = os.uname()[4].lower()
 build_os = os.uname()[0].lower()
 
 # figure out the host arch
+# XXX Different systems supply different architectures in different ways.
+# Disambiguate these somehow.
 host_arch = ARGUMENTS.get('arch')
 if not host_arch:
 	host_arch = build_arch
@@ -64,19 +69,20 @@ if not host_os:
 cross = ARGUMENTS.get('cross', build_os != host_os or build_arch != host_arch)
 rel = ARGUMENTS.get('rel', 'public17')
 tempbuilddir = ARGUMENTS.get('tempbuilddir', '#/../'+host_arch+'-'+host_os+'-'+rel)
-tempstagingdir = ARGUMENTS.get('tempstagingdir', tempbuilddir+'/stage')
+tempinstalldir = ARGUMENTS.get('tempinstalldir', tempbuilddir+'/stage')
+sourcedir=Dir(".").abspath
 builddir=ARGUMENTS.get('builddir', Dir(tempbuilddir))
-stagingdir=ARGUMENTS.get('stagingdir', Dir(tempstagingdir))
+installdir=ARGUMENTS.get('installdir', Dir(tempinstalldir))
 
-print 'Cross build is     ', cross
-print 'Architecture is   ', host_arch
-print 'Operating System is', host_os
-print 'Release is         ', rel
-print 'Build directory is ', builddir
-print 'Staging directory is ', stagingdir
+print 'Cross build:      ', cross
+print 'Architecture:     ', host_arch
+print 'Operating System: ', host_os
+print 'Release:          ', rel
+print 'Source path:      ', sourcedir
+print 'Build path:       ', builddir
+print 'Install path:     ', installdir
 
 env = Environment(
-	         # ENV = {'HOME'      : os.environ['HOME'] },
 		  TOOLS = ['default', 'clntgen', 'tgtgen', 'TOOL_SUBST'],
 		  ENV = os.environ,
 		  CROSS = cross,
@@ -84,9 +90,11 @@ env = Environment(
 		  OS = host_os,
 		  REL = rel,
 		  BUILDDIR = builddir,
-		  STAGINGDIR = stagingdir,
+		  STAGINGDIR = installdir,
 		  CPPPATH=['/usr/sfw/include', '/opt/local/include', '/usr/local/include'],
 		  LIBPATH=['/usr/sfw/lib', '/opt/local/lib', '/usr/local/lib'])
+
+env['DESTDIR'] = ARGUMENTS.get('DESTDIR', Dir(installdir).abspath)
 
 SConsEnvironment.Chmod = SCons.Action.ActionFactory(os.chmod,
     lambda dest, mode: 'Chmod("%s", 0%o)' % (dest, mode))
@@ -135,66 +143,45 @@ def InstallData(env, dest, files, perm = 0644):
     return obj
 SConsEnvironment.InstallData = InstallData
 
-env['DESTDIR'] = ARGUMENTS.get('DESTDIR', Dir(stagingdir).abspath)
+# only bindir, libdir actually used just now.
+# follow freebsd hier(5) unless we've got better suggestions-
+# what is equivalent ref for red hat / debian based systems?
 
-env['prefix'] = ARGUMENTS.get('prefix', '/opt/xorp')
+env['prefix'] = ARGUMENTS.get('prefix', env['DESTDIR'])
 env['exec_prefix'] = ARGUMENTS.get('exec_prefix', '$prefix')
 env['bindir'] = ARGUMENTS.get('bindir', '$exec_prefix/bin')
 env['sbindir'] = ARGUMENTS.get('sbindir', '$exec_prefix/sbin')
+# TODO the routing daemons themselves should go here (never executed
+# directly by users)
 env['libexecdir'] = ARGUMENTS.get('libexecdir', '$exec_prefix/libexec')
+# TODO put templates and .xrl files here.
 env['datarootdir'] = ARGUMENTS.get('datarootdir', '$prefix/share')
+# TODO ?
 env['datadir'] = ARGUMENTS.get('datadir', '$datarootdir')
+# TODO xorp.conf goes here.
 env['sysconfdir'] = ARGUMENTS.get('sysconfdir', '$prefix/etc')
-env['sharedstatedir'] = ARGUMENTS.get('sharedstatedir', '$prefix/com')
+# TODO we don't have this state yet, and we should use /var for it.
 env['localstatedir'] = ARGUMENTS.get('localstatedir', '$prefix/var')
-env['includedir'] = ARGUMENTS.get('includedir', '$prefix/include')
-env['oldincludedir'] = ARGUMENTS.get('oldincludedir', '/usr/include')
-env['docdir'] = ARGUMENTS.get('docdir', '$datarootdir/doc/$PACKAGE_TARNAME')
-env['infodir'] = ARGUMENTS.get('infodir', '$datarootdir/info')
-env['htmldir'] = ARGUMENTS.get('htmldir', '$docdir')
-env['dvidir'] = ARGUMENTS.get('dvidir', '$docdir')
-env['pdfdir'] = ARGUMENTS.get('pdfdir', '$docdir')
-env['psdir'] = ARGUMENTS.get('psdir', '$docdir')
+# TODO libraries clearly go here.
 env['libdir'] = ARGUMENTS.get('libdir', '$exec_prefix/lib')
-env['localedir'] = ARGUMENTS.get('localdir', '$datarootdir/locale')
+# TODO incorporate a man page.
 env['mandir'] = ARGUMENTS.get('mandir', '$datarootdir/man')
 
-env['SUBST_DICT'] = {
-    '@prefix@' : '$prefix',
-    '@exec_prefix@' : '$exec_prefix',
-    '@bindir@' : '$bindir',
-    '@sbindir@' : '$sbindir',
-    '@libexecdir@' : '$libexecdir',
-    '@datarootdir@' : '$datarootdir',
-    '@datadir@' : '$datadir',
-    '@sysconfdir@' : '$sysconfdir',
-    '@sharedstatedir@' : '$sharedstatedir',
-    '@localstatedir@' : '$localstatedir',
-    '@includedir@' : '$includedir',
-    '@oldincludedir@' : '$oldincludedir',
-    '@docdir@' : '$docdir',
-    '@infodir@' : '$infodir',
-    '@htmldir@' : '$htmldir',
-    '@dvidir@' : '$dvidir',
-    '@pdfdir@' : '$pdfdir',
-    '@psdir@' : '$psdir',
-    '@libdir@' : '$libdir',
-    '@localedir@' : '$localedir',
-    '@mandir@' : '$mandir',
-    }
+# XXX needed by scons xrl idl wrappers
+env['XORP_SOURCEDIR'] = sourcedir
+env['XORP_BUILDDIR'] = builddir
 
-env['XORP_SOURCEDIR'] = Dir(".")
-env['XORP_BUILDDIR'] = Dir(".")
-
+# XXX should check for strip in toolchain
 env['strip'] = ARGUMENTS.get('strip', False)
 
 # turnoff bgp, olsr for now.
+# XXX bgp is always built, olsr never built.
 env['WITH_BGP'] = ARGUMENTS.get('enable-bgp', False)
 env['WITH_OLSR'] = ARGUMENTS.get('enable-olsr', False)
 
 ########## start configure magic
 
-if not env.GetOption('clean'):
+if not env.GetOption('clean') and not env.GetOption('help'):
     from config.endian import CheckEndianness
     from config.member import CheckTypeMember
     from config.sysctl import CheckSysctl
@@ -230,10 +217,10 @@ if not env.GetOption('clean'):
     conf.Define('HOST_OS_NAME', '"' + osname + '"')
 
     # paths
-    conf.Define('XORP_ROOT', '"' + '/usr/local/xorp' + '"')
-    conf.Define('XORP_INSTALL_ROOT', '"' + '/usr/local' + '"')
+    conf.Define('XORP_ROOT', '"' + str(installdir) + '"')
+    conf.Define('XORP_INSTALL_ROOT', '"' + str(installdir) + '"')
     conf.Define('XORP_BUILD_ROOT', '"' + str(builddir) + '"')
-    conf.Define('XORP_SRC_ROOT', '"' + Dir('.').abspath + '"')
+    conf.Define('XORP_SRC_ROOT', '"' + str(sourcedir) + '"')
 
     # toolchain
     conf.Define('CPP_SUPPORTS_C99_VA_ARGS')
