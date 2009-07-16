@@ -74,7 +74,7 @@ env.AppendUnique(LIBS = [
     'mfeabase',
     'mrt',
     'cli',
-    'tecla',
+    'tecla_xorp',
     'cliprocessorxif',
     'clibase',
     'feaclient',

@@ -46,7 +46,7 @@ env['CPPDEFINES'] = {
     'HAVE_TERMINFO_H': 1,
     }
 
-libtecla = env.SharedLibrary('libtecla', ['cplfile.c',
+libtecla_xorp = env.SharedLibrary('libtecla_xorp', ['cplfile.c',
 	                 'cplmatch.c',
 	                 'direader.c',
 	                 'expand.c',
@@ -63,5 +63,5 @@ libtecla = env.SharedLibrary('libtecla', ['cplfile.c',
 	                 'version.c'])
 
 env.Alias('install',
-          env.InstallLibrary('$libdir', libtecla))
+          env.InstallLibrary('$libdir', libtecla_xorp))
 

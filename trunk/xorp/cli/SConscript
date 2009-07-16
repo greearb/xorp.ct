@@ -44,7 +44,7 @@ env.AppendUnique(LIBPATH = [
 env.AppendUnique(LIBS = [
     'cliprocessorxif',
     'clibase',
-    'tecla',
+    'tecla_xorp',
     'proto',
     'xipc',
     'comm',

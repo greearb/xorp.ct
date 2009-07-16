@@ -139,7 +139,7 @@ xorpsh_env.AppendUnique(LIBS = [
     'clibase',			# XXX Not picked up automagically?
     'cliprocessorxif',		# XXX ditto?
     'proto',
-    'tecla',
+    'tecla_xorp',
     'rtrmgrxif',
     'xorpshbase',
     'findereventnotifierxif',
