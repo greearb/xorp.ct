@@ -20,8 +20,7 @@
 import os
 Import('env')
 
-SConscript(['backend/SConscript'], exports='env')
-SConscript(['common/SConscript'], exports='env')
+SConscript([ 'backend/SConscript', 'common/SConscript' ], exports='env')
 
 env = env.Clone()
 
@@ -33,16 +32,16 @@ env.AppendUnique(CPPPATH = [
     ])
 
 env.AppendUnique(LIBPATH = [
-    '../libxorp',
-    '../libcomm',
-    '../libxipc',
-    '../libproto',
-    '../libfeaclient',
-    'backend',
-    'common',
-    '../xrl/interfaces',
-    '../xrl/targets',
-    '.'
+    '$BUILDDIR/libfeaclient',
+    '$BUILDDIR/policy/backend',
+    '$BUILDDIR/policy/common',
+    '$BUILDDIR/xrl/interfaces',
+    '$BUILDDIR/xrl/targets',
+    '$BUILDDIR/libproto',
+    '$BUILDDIR/libxipc',
+    '$BUILDDIR/libxorp',
+    '$BUILDDIR/libcomm',
+    '.',
     ])
 
 env.AppendUnique(LIBS = [
@@ -60,51 +59,49 @@ env.AppendUnique(LIBS = [
 ])
 
 libpolicysrcs = [
-	     'code.cc',
-	     'code_generator.cc',
-	     'code_list.cc',
-	     'configuration.cc',
-	     'dependency.cc',
-	     'export_code_generator.cc',
-	     'filter_manager.cc',
-	     'parser.cc',
-	     'policy_list.cc',
-	     'policy_map.cc',
-	     'policy_statement.cc',
-	     'policy_target.cc',
-	     'process_watch.cc',
-	     'protocol_map.cc',
-	     'semantic_varrw.cc',
-	     'set_map.cc',
-	     'source_match_code_generator.cc',
-	     'term.cc',
-	     'test_varrw.cc',
-	     'var_map.cc',
-	     'visitor_dep.cc',
-	     'visitor_printer.cc',
-	     'visitor_semantic.cc',
-	     'visitor_test.cc',
-	     'xrl_target.cc',
-	     'yacc.yy_policy_parser.cc',
-	     'lex.yy_policy_parser.cc'
-             ]
+     'code.cc',
+     'code_generator.cc',
+     'code_list.cc',
+     'configuration.cc',
+     'dependency.cc',
+     'export_code_generator.cc',
+     'filter_manager.cc',
+     'parser.cc',
+     'policy_list.cc',
+     'policy_map.cc',
+     'policy_statement.cc',
+     'policy_target.cc',
+     'process_watch.cc',
+     'protocol_map.cc',
+     'semantic_varrw.cc',
+     'set_map.cc',
+     'source_match_code_generator.cc',
+     'term.cc',
+     'test_varrw.cc',
+     'var_map.cc',
+     'visitor_dep.cc',
+     'visitor_printer.cc',
+     'visitor_semantic.cc',
+     'visitor_test.cc',
+     'xrl_target.cc',
+     'yacc.yy_policy_parser.cc',
+     'lex.yy_policy_parser.cc'
+     ]
+
+######
 
 if is_shared:
     libpolicy = env.SharedLibrary(target = 'libpolicy', source = libpolicysrcs, LIBS = '')
-    env.Alias('install',
-              env.InstallLibrary('$libdir', libpolicy))
+    env.Alias('install', env.InstallLibrary('$libdir', libpolicy))
 else:
     libpolicy = env.StaticLibrary(target = 'libpolicy', source = libpolicysrcs, LIBS = '')
 
-policysrcs = [
-          'xorp_policy.cc',
-          ]
+######
 
+policysrcs = [ 'xorp_policy.cc', ]
 policy = env.Program(target = 'xorp_policy', source = policysrcs)
-
 #pcpath = '$bindir'
 pcpath = '$exec_prefix/policy'
-
 env.Alias('install',
           env.InstallProgram(pcpath, policy))
 

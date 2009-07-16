@@ -38,16 +38,16 @@ env.AppendUnique(CPPPATH = [
     '$BUILDDIR',
     ])
 
-env.AppendUnique(LIBPATH = [
-    '$BUILDDIR/libxorp',
-    '$BUILDDIR/libcomm',
-    '$BUILDDIR/libxipc',
-    '$BUILDDIR/libfeaclient',
+env.PrependUnique(LIBPATH = [
+    '.',
     '$BUILDDIR/policy/backend',
     '$BUILDDIR/policy/common',
+    '$BUILDDIR/libfeaclient',
     '$BUILDDIR/xrl/interfaces',
     '$BUILDDIR/xrl/targets',
-    '.',
+    '$BUILDDIR/libxipc',
+    '$BUILDDIR/libxorp',
+    '$BUILDDIR/libcomm',
     ])
 
 env.AppendUnique(LIBS = [
@@ -58,22 +58,22 @@ env.AppendUnique(LIBS = [
     'feaifmgrmirrorbase',
     'ribxif',
     'findereventnotifierxif',
-    #'bgpmibtrapsxif',		# XXX MIBS broken for now
     'profileclientxif',
     'feaifmgrmirrorxif',
     'feaifmgrreplicatorxif',
     'xipc',
+    'xorp',
     'comm',
-    'xorp'
 ])
 
 ### libbgp
 
 libbgp_env = env.Clone()
 
-#libbgp_env.AppendUnique(LINKFLAGS = [
-#    '-Wl,-z,defs',
-#])
+#if is_shared:
+#    libbgp_env.AppendUnique(LINKFLAGS = [
+#        '-Wl,-z,defs',
+#    ])
 
 libbgpsrcs = [
 	'aspath.cc',
@@ -138,7 +138,7 @@ libbgp = libbgp_env.StaticLibrary(target = 'libbgp', source = libbgpsrcs)
 
 bgp_env = env.Clone()
 
-bgp_env.AppendUnique(LIBS = [
+bgp_env.PrependUnique(LIBS = [
     'bgp',
 ])
 

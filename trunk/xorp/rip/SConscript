@@ -93,23 +93,24 @@ e.AppendUnique(CPPDEFINES = [
     'INSTANTIATE_IPV4'
     ])
 
-e.AppendUnique(LIBPATH = [
-    '../libxorp',
-    '../libcomm',
-    '../libxipc',
-    '../libproto',
-    '../libfeaclient',
+e.PrependUnique(LIBPATH = [
     '../policy/backend',
     '../policy/common',
     '../xrl/interfaces',
     '../xrl/targets',
-    '.'
+    '.',
+    '$BUILDDIR/libfeaclient',
+    '../libproto',
+    '../libxipc',
+    '../libxorp',
+    '../libcomm',
     ])
 
-e.AppendUnique(LIBS = [
-    'rip',
+e.PrependUnique(LIBS = [
     'ripxrl',
+    'rip',
     'ripbase',
+    'ribxif',
     'findereventnotifierxif',
     'feaclient',
     'feaifmgrmirrorxif',
@@ -118,24 +119,24 @@ e.AppendUnique(LIBS = [
     'socket4xif',
     'policybackend',
     'policycommon',
-    'ribxif',
+    'proto',
     'xipc',
     'xorp',
-    'proto',
     'comm',
 ])
 
-
-librip = e.SharedLibrary(target = 'librip', source = libripsrcs, LIBS = '')
-
-libripxrl = e.SharedLibrary(target = 'libripxrl', source = libripxrlsrc, LIBS = '')
+if is_shared:
+    librip = e.SharedLibrary(target = 'librip', source = libripsrcs, LIBS = '')
+    libripxrl = e.SharedLibrary(target = 'libripxrl', source = libripxrlsrc, LIBS = '')
+    e.Alias('install',
+                [ e.InstallLibrary('$libdir', librip),
+                  e.InstallLibrary('$libdir', libripxrl) ])
+else:
+    librip = e.StaticLibrary(target = 'librip', source = libripsrcs, LIBS = '')
+    libripxrl = e.StaticLibrary(target = 'libripxrl', source = libripxrlsrc, LIBS = '')
 
 rip = e.Program(target = 'xorp_rip', source = ripsrcs)
-
-e.Alias('install',
-          [ e.InstallProgram(rippath, rip),
-            e.InstallLibrary('$libdir', librip),
-            e.InstallLibrary('$libdir', libripxrl) ])
+e.Alias('install', e.InstallProgram(rippath, rip))
 
 #
 # RIPng
@@ -154,23 +155,24 @@ e.AppendUnique(CPPDEFINES = [
     'INSTANTIATE_IPV6'
     ])
 
-e.AppendUnique(LIBPATH = [
-    '../libxorp',
-    '../libcomm',
-    '../libxipc',
-    '../libproto',
+e.PrependUnique(LIBPATH = [
+    '.',
     '../libfeaclient',
     '../policy/backend',
     '../policy/common',
     '../xrl/interfaces',
     '../xrl/targets',
-    '.'
+    '../libproto',
+    '../libxipc',
+    '../libxorp',
+    '../libcomm',
     ])
 
-e.AppendUnique(LIBS = [
-    'ripng',
+e.PrependUnique(LIBS = [
     'ripngxrl',
+    'ripng',
     'ripngbase',
+    'ribxif',
     'findereventnotifierxif',
     'feaclient',
     'feaifmgrmirrorxif',
@@ -179,13 +181,11 @@ e.AppendUnique(LIBS = [
     'socket6xif',
     'policybackend',
     'policycommon',
-    'ribxif',
+    'proto',
     'xipc',
     'xorp',
-    'proto',
     'comm',
 ])
-
 
 if is_shared:
     libripng = e.SharedLibrary(target = 'libripng', source = libripsrcs, LIBS = '')
@@ -198,7 +198,6 @@ else:
     libripngxrl = e.StaticLibrary(target = 'libripngxrl', source = libripxrlsrc, LIBS = '')
 
 ripng = e.Program(target = 'xorp_ripng', source = ripngsrcs)
-
 e.Alias('install', e.InstallProgram(rippath, ripng))
 
 Default(rip, ripng)
