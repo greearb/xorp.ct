@@ -34,7 +34,7 @@ cmds = [
     'mfea6',
     'misc',
     'mld',
-    'olsr4',
+    #'olsr4', #notyet
     'ospfv2',
     'ospfv3',
     'pim',
@@ -57,7 +57,7 @@ tps = [
     'mfea4',
     'mfea6',
     'mld',
-    'olsr4',
+    #'olsr4', #notyet
     'ospfv2',
     'ospfv3',
     'pimsm4',
