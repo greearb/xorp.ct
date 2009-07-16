@@ -19,6 +19,8 @@
 
 # TODO FIXME install target.
 # TODO FIXME cross compiles.
+# TODO Pass paths on command line, to avoid rebuilding if we re-base
+# for installation.
 # TODO make shared library linker flags portable to non-gnu linkers.
 # TODO change CONFIGUREDIR to be under the builddir?
 # TODO change CONFIGURELOG to be under the builddir?
@@ -100,9 +102,9 @@ SConsEnvironment.Chmod = SCons.Action.ActionFactory(os.chmod,
     lambda dest, mode: 'Chmod("%s", 0%o)' % (dest, mode))
 
 def InstallProgram(env, dest, files, perm = 0755):
-    if env.has_key('DESTDIR'):
-	# NB: use simple concatenation
-	dest = env.Dir(env['DESTDIR'] + env.Dir(dest).path)
+    #if env.has_key('DESTDIR'):
+    #	# NB: use simple concatenation
+    #	dest = env.Dir(env['DESTDIR'] + env.Dir(dest).path)
     obj = env.Install(dest, files)
     for i in obj:
 	env.AddPostAction(i, env.Chmod(str(i), perm))
@@ -112,9 +114,9 @@ def InstallProgram(env, dest, files, perm = 0755):
 SConsEnvironment.InstallProgram = InstallProgram
 
 def InstallScript(env, dest, files, perm = 0555):
-    if env.has_key('DESTDIR'):
-	# NB: use simple concatenation
-	dest = env.Dir(env['DESTDIR'] + env.Dir(dest).path)
+    #if env.has_key('DESTDIR'):
+    #	# NB: use simple concatenation
+    #	dest = env.Dir(env['DESTDIR'] + env.Dir(dest).path)
     obj = env.Install(dest, files)
     for i in obj:
 	env.AddPostAction(i, env.Chmod(str(i), perm))
@@ -122,9 +124,9 @@ def InstallScript(env, dest, files, perm = 0555):
 SConsEnvironment.InstallScript = InstallScript
 
 def InstallLibrary(env, dest, files, perm = 0644):
-    if env.has_key('DESTDIR'):
-	# NB: use simple concatenation
-	dest = env.Dir(env['DESTDIR'] + env.Dir(dest).path)
+    #if env.has_key('DESTDIR'):
+    #	# NB: use simple concatenation
+    #	dest = env.Dir(env['DESTDIR'] + env.Dir(dest).path)
     obj = env.Install(dest, files)
     for i in obj:
 	env.AddPostAction(i, env.Chmod(str(i), perm))
@@ -134,9 +136,9 @@ def InstallLibrary(env, dest, files, perm = 0644):
 SConsEnvironment.InstallLibrary = InstallLibrary
 
 def InstallData(env, dest, files, perm = 0644):
-    if env.has_key('DESTDIR'):
-	# NB: use simple concatenation
-	dest = env.Dir(env['DESTDIR'] + env.Dir(dest).path)
+    #if env.has_key('DESTDIR'):
+    #	# NB: use simple concatenation
+    #	dest = env.Dir(env['DESTDIR'] + env.Dir(dest).path)
     obj = env.Install(dest, files)
     for i in obj:
 	env.AddPostAction(i, env.Chmod(str(i), perm))
