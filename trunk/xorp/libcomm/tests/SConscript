@@ -20,29 +20,10 @@
 import os
 Import("env")
 
-subdirs = [ 'tests' ]
- 
-SConscript(dirs = subdirs, exports='env')
-
 env = env.Clone()
-is_shared = env.has_key('SHAREDLIBS')
 
-env.AppendUnique(CPPPATH = [ "#" ])
-env.AppendUnique(LIBPATH = [ '$BUILDDIR/libxorp' ] )
-env.AppendUnique(LIBS = ['libxorp'])
+env.AppendUnique(CPPPATH = [ '#', '$BUILDDIR', '$BUILDDIR/libcomm', ])
+env.AppendUnique(LIBPATH = [ '$BUILDDIR/libxorp', '$BUILDDIR/libcomm', ])
+env.AppendUnique(LIBS = [ 'xorp', 'comm' ])
 
-sources = [
-	'comm_sock.c',
-	'comm_user.c',
-	]
-
-if is_shared:
-    libcomm = env.SharedLibrary(target = 'libcomm', source = sources)
-else:
-    libcomm = env.StaticLibrary(target = 'libcomm', source = sources)
-
-if is_shared:
-    env.Alias("install",
-        env.InstallLibrary('$libdir', libcomm))
-
-Default(libcomm)
+test_comm = env.AutoTest(target = 'test_comm', source = 'test_comm.c')
