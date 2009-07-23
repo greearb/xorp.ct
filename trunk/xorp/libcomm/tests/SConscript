@@ -26,4 +26,5 @@ env.AppendUnique(CPPPATH = [ '#', '$BUILDDIR', '$BUILDDIR/libcomm', ])
 env.AppendUnique(LIBPATH = [ '$BUILDDIR/libxorp', '$BUILDDIR/libcomm', ])
 env.AppendUnique(LIBS = [ 'xorp', 'comm' ])
 
+# XXX Not for cross-compilation.
 test_comm = env.AutoTest(target = 'test_comm', source = 'test_comm.c')
