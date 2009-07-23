@@ -83,7 +83,8 @@ print 'Build path:       ', builddir
 print 'Install path:     ', installdir
 
 env = Environment(
-		  TOOLS = ['default', 'clntgen', 'tgtgen', 'TOOL_SUBST'],
+		  TOOLS = ['default', 'autotest', 'clntgen', 'tgtgen',
+		           'TOOL_SUBST'],
 		  ENV = os.environ,
 		  CROSS = cross,
 		  ARCH = host_arch,
