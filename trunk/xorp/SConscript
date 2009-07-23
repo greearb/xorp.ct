@@ -27,6 +27,7 @@ subdirs = [
     'libfeaclient',
     'xrl/targets',
     'xrl/interfaces',
+    #'xrl/tests',		# XXX not in use.
     'etc/templates',
     'cli',
     'fea',
