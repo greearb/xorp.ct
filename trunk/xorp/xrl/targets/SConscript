@@ -14,25 +14,28 @@
 #
 # XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 # http://xorp.net
-
+#
 # $XORP$
 
 import os
 import string
-
 Import("env")
 
 env = env.Clone()
-
 is_shared = env.has_key('SHAREDLIBS')
 
 env.AppendUnique(CPPPATH = [ "#" ])
-env.AppendUnique(LIBPATH = [ '$BUILDDIR/libxipc',
-			     '$BUILDDIR/libcomm',
-                             '$BUILDDIR/libxorp' ] )
-env.AppendUnique(LIBS = [ 'libxipc',
-			  'libcomm',
-                          'libxorp' ])
+env.AppendUnique(LIBPATH = [
+	'$BUILDDIR/libxipc',
+	'$BUILDDIR/libcomm',
+	'$BUILDDIR/libxorp',
+	])
+
+env.AppendUnique(LIBS = [
+	'libxipc',
+	'libcomm',
+	'libxorp',
+	])
 
 env['TGTGEN_CPPPATH'] = [ '#/xrl/interfaces' ]
 
@@ -79,8 +82,8 @@ if env['WITH_OLSR']:
 #xrls_path = '$datadir'
 xrlspath = '$exec_prefix/xrl/targets'
 
-all_tgt_libs = []
-for tgt in tgts:
+def BuildXrlTarget(tgt):
+    lib = None
     base = tgt[:-len('.tgt')]
     target = 'lib' + base.translate(string.maketrans('',''),'_') + 'base'
     source = base + '_base.cc'
@@ -92,13 +95,17 @@ for tgt in tgts:
     else:
         lib = env.StaticLibrary(target, source)
 
-    all_tgt_libs.append(lib)
-
     xrls = '$BUILDDIR/xrl/targets/' + base + '.xrls'
 
     if base[:4] != "test":
         if is_shared:
             env.Alias('install', env.InstallLibrary('$libdir', lib))
         env.Alias('install', env.InstallData(xrlspath, xrls))
+
+    return lib
+
+all_tgt_libs = []
+for tgt in tgts:
+    all_tgt_libs.append(BuildXrlTarget(tgt))
 
 Default(all_tgt_libs)
