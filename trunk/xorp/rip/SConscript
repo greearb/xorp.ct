@@ -20,17 +20,19 @@
 import os
 Import('env')
 
-e = env.Clone()
+subdirs = [
+	'tests',
+	'tools',
+	]
 
+SConscript(dirs = subdirs, exports='env')
+
+e = env.Clone()
 is_shared = env.has_key('SHAREDLIBS')
 
 # XXX
 #rippath = '$bindir'
 rippath = '$exec_prefix/rip'
-
-subdirs = ['tools']
-
-SConscript(dirs = subdirs, exports = 'env')
 
 #
 # NB: The same sources are used for RIP and RIPng.  We use separate
