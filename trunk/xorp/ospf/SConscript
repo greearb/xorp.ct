@@ -20,13 +20,15 @@
 import os
 Import('env')
 
+subdirs = [
+	'tests',
+	'tools',
+]
+
+SConscript(dirs = subdirs, exports='env')
+
 env = env.Clone()
-
 is_shared = env.has_key('SHAREDLIBS')
-
-subdirs = ['tools']
-
-SConscript(dirs = subdirs, exports = 'env')
 
 env.AppendUnique(CPPPATH = [
     '#',
