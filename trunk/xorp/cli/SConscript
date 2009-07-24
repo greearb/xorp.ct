@@ -20,13 +20,16 @@
 import os
 Import('env')
 
-env = env.Clone()
-
-is_shared = env.has_key('SHAREDLIBS')
-
-subdirs = ['libtecla', 'tools']
+subdirs = [
+	'libtecla',
+	'tests',
+	'tools',
+	]
 
 SConscript(dirs = subdirs, exports = 'env')
+
+env = env.Clone()
+is_shared = env.has_key('SHAREDLIBS')
 
 env.AppendUnique(CPPPATH = [
     '#',
