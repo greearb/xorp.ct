@@ -21,7 +21,8 @@ import os
 Import('env')
 
 subdirs = [
-	'harness',
+	#'harness',
+	'tests',
 	'tools',
     ]
 

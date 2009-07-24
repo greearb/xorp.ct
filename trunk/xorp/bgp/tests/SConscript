@@ -1,0 +1,95 @@
+# Copyright (c) 2009 XORP, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License, Version 2, June
+# 1991 as published by the Free Software Foundation. Redistribution
+# and/or modification of this program under the terms of any other
+# version of the GNU General Public License is not permitted.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
+# see the GNU General Public License, Version 2, a copy of which can be
+# found in the XORP LICENSE.gpl file.
+#
+# XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+# http://xorp.net
+#
+# $XORP$
+
+import os
+Import("env")
+
+env = env.Clone()
+
+env.AppendUnique(CPPPATH = [
+	'#',
+	'$BUILDDIR',
+	'$BUILDDIR/ospf',
+	'$BUILDDIR/ospf/tests',
+	])
+
+env.AppendUnique(LIBPATH = [
+	'$BUILDDIR/ospf',
+	'$BUILDDIR/libfeaclient',
+	'$BUILDDIR/policy/backend',
+	'$BUILDDIR/policy/common',
+	'$BUILDDIR/xrl/interfaces',
+	'$BUILDDIR/xrl/targets',
+	'$BUILDDIR/libxipc',
+	'$BUILDDIR/libproto',
+	'$BUILDDIR/libxorp',
+	'$BUILDDIR/libcomm',
+	])
+
+env.AppendUnique(LIBS = [
+	'ospf',
+	#'ospfv2base',
+	#'ospfv3base',
+	'ripxif',
+	'findereventnotifierxif',
+	'feaclient',
+	'feaifmgrmirrorxif',
+	'feaifmgrreplicatorxif',
+	'feaifmgrmirrorbase',
+	'fearawpkt4xif',
+	'fearawpkt6xif',
+	'policybackend',
+	'policycommon',
+	'xipc',
+	'proto',
+	'xorp',
+	'comm',
+	])
+
+# XXX BGP regression tests are currently stubbed out in
+# shipping XORP community releases.
+
+# XXX test_leaks.sh is a shell script (compound test);
+# should probably be eliminated in favour of valgrind.
+
+simple_cpp_tests = [
+	'cache',
+	'decision',
+	'deletion',
+	'dump',
+	'fanout',
+	'filter',
+	'main',
+	'next_hop_resolver',
+	'nhlookup',
+	'packet',
+	'packet_coding',
+	'peer_data',
+	'plumbing',
+	'policy',
+	'ribin',
+	'ribout',
+	'subnet_route',
+]
+
+cpp_test_targets = []
+
+#for ct in simple_cpp_tests:
+#    cpp_test_targets.append(env.AutoTest(target = 'test_%s' % ct,
+#                                         source = 'test_%s.cc' % ct))
