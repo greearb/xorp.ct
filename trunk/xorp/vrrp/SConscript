@@ -20,6 +20,12 @@
 import os
 Import('env')
 
+# XXX Tests don't follow Autotools-style regression test format.
+#
+#subdirs = [ 'tests' ]
+#
+#SConscript(dirs = subdirs, exports='env')
+
 env = env.Clone()
 is_shared = env.has_key('SHAREDLIBS')
 
