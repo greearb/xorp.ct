@@ -1,0 +1,113 @@
+# Copyright (c) 2009 XORP, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License, Version 2, June
+# 1991 as published by the Free Software Foundation. Redistribution
+# and/or modification of this program under the terms of any other
+# version of the GNU General Public License is not permitted.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
+# see the GNU General Public License, Version 2, a copy of which can be
+# found in the XORP LICENSE.gpl file.
+#
+# XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+# http://xorp.net
+#
+# $XORP$
+
+import os
+Import("env")
+
+env = env.Clone()
+
+env.AppendUnique(CPPPATH = [
+	'#',
+	'$BUILDDIR',
+	'$BUILDDIR/fea',
+	'$BUILDDIR/fea/tests',
+	])
+
+is_shared = env.has_key('SHAREDLIBS')
+
+############### begin linking gunk
+### XXX Linking the FEA statically vs shared is gnarly.
+
+env.PrependUnique(LIBPATH = [
+	'$BUILDDIR/fea/data_plane/managers',
+	'$BUILDDIR/fea/data_plane/fibconfig',
+	'$BUILDDIR/fea/data_plane/firewall',
+	'$BUILDDIR/fea/data_plane/ifconfig',
+	'$BUILDDIR/fea/data_plane/io',
+	'$BUILDDIR/fea/data_plane/control_socket',
+	'.',
+	'$BUILDDIR/mrt',
+	'$BUILDDIR/cli',
+	'$BUILDDIR/cli/libtecla',
+	'$BUILDDIR/xrl/interfaces',
+	'$BUILDDIR/xrl/targets',
+	'$BUILDDIR/libfeaclient',
+	'$BUILDDIR/libproto',
+	'$BUILDDIR/libxipc',
+	'$BUILDDIR/libxorp',
+	'$BUILDDIR/libcomm',
+	])
+
+libfea_linkorder = [
+	'xorp_data_plane_managers',
+	'xorp_fibconfig',
+	'xorp_firewall', # XXX?
+	'xorp_ifconfig',
+	'xorp_io',
+	'xorp_control_socket',
+	]
+
+if not is_shared:
+	libfea_linkorder.append('libfea_data_plane_base')
+
+libfea_linkorder += [
+	'feafibclientxif',
+	'fearawlinkclientxif',
+	'fearawpkt4clientxif',
+	'fearawpkt6clientxif',
+	'socket4userxif',
+	'socket6userxif',
+	'findereventnotifierxif',
+	'cli',
+	'cliprocessorxif',
+	'feaclient',
+	'feaifmgrmirrorxif',   # XXX?
+	'feaifmgrreplicatorxif', # XXX?
+	'feaifmgrmirrorbase', # XXX?
+	'climanagerxif',
+	'mfeaclientxif',
+	'profileclientxif',
+	'clibase',
+	'feabase',
+	'mfeabase',
+	'mrt',
+	'tecla_xorp',
+	'proto',
+	'xipc',
+	'comm',
+	'xorp'
+	]
+
+env.PrependUnique(LIBS = libfea_linkorder)
+
+############### end linking gunk
+
+# NOTYET: these are compound tests which need to be driven by a shell script.
+
+simple_cpp_tests = [
+#	'fea_rawlink',
+#	'xrl_sockets4_tcp',
+#	'xrl_sockets4_udp',
+]
+
+cpp_test_targets = []
+
+for ct in simple_cpp_tests:
+    cpp_test_targets.append(env.AutoTest(target = 'test_%s' % ct,
+                                         source = 'test_%s.cc' % ct))

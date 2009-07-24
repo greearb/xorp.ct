@@ -22,7 +22,8 @@ Import('env')
 
 subdirs = [
 	'data_plane',
-	'tools'
+	'tests',
+	'tools',
     ]
 
 SConscript(dirs = subdirs, exports='env')
