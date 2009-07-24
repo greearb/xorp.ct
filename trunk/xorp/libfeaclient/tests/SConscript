@@ -1,0 +1,65 @@
+# Copyright (c) 2009 XORP, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License, Version 2, June
+# 1991 as published by the Free Software Foundation. Redistribution
+# and/or modification of this program under the terms of any other
+# version of the GNU General Public License is not permitted.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
+# see the GNU General Public License, Version 2, a copy of which can be
+# found in the XORP LICENSE.gpl file.
+#
+# XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+# http://xorp.net
+
+# $XORP$
+
+import os
+Import("env")
+
+env = env.Clone()
+
+env.AppendUnique(CPPPATH = [
+	'#',
+	'$BUILDDIR',
+	'$BUILDDIR/libfeaclient',
+	'$BUILDDIR/libfeaclient/tests',
+	])
+
+env.AppendUnique(LIBPATH = [
+	'$BUILDDIR/libfeaclient',
+	'$BUILDDIR/xrl/interfaces',
+	'$BUILDDIR/xrl/targets',
+	'$BUILDDIR/libxipc',
+	'$BUILDDIR/libxorp',
+	'$BUILDDIR/libcomm',
+	])
+
+# XXX Why does this look for the .so before the .a in linkage, and break?
+# XXX Can we inherit these from libfeaclient deps?
+env.AppendUnique(LIBS = [
+	'feaclient',
+	'feaifmgrmirrorxif',
+	'feaifmgrreplicatorxif',
+	'feaifmgrmirrorbase',
+	'xipc',
+	'xorp',
+	'comm',
+	])
+
+test_redist = env.AutoTest(target = 'test_local_copy',
+                           source = 'test_local_copy.cc')
+
+env = env.Clone()
+env.PrependUnique(LIBS = [
+	'testfeaifmgrmirrorbase',
+	'feaifmgrreplicatorxif',
+	'finder',
+	'ribxif',
+	'ribclientbase',
+	])
+test_remote_copy = env.AutoTest(target = 'test_remote_copy',
+                                source = 'test_remote_copy.cc')
