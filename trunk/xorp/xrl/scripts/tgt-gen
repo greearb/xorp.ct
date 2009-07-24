@@ -376,6 +376,11 @@ def generate_target_methods(tgt, interfaces):
 
 
 def main():
+
+    # Print a warning to avoid spamming CVS with whitespace changes.
+    if os.linesep != '\n':
+	print "WARNING: host does not use POSIX end-of-line convention."
+
     # Command line arguments passed on to cpp
     pipe_string = "cpp -C "
     for a in sys.argv[1:]:
