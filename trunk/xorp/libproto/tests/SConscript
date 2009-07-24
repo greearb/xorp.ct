@@ -47,9 +47,11 @@ tests = [
 	'checksum',
 	'config_node_id',
 	'packet',
-	'spt',
+	#'spt', # XXX notyet
 	]
 
+# XXX UNIX environment needs 'srcdir' set to point to source so
+# SPT test can find spt_graph1 file.
 # XXX No direct dependency on libproto in graph -- fix.
 
 test_targets = []
