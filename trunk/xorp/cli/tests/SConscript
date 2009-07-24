@@ -53,7 +53,7 @@ env.AppendUnique(LIBS = [
 	])
 
 simple_cpp_tests = [
-	'cli',
+	#'cli',		# Not fully automated unit test; stubbed out.
 ]
 
 cpp_test_targets = []
