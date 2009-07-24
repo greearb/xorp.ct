@@ -1,0 +1,100 @@
+# Copyright (c) 2009 XORP, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License, Version 2, June
+# 1991 as published by the Free Software Foundation. Redistribution
+# and/or modification of this program under the terms of any other
+# version of the GNU General Public License is not permitted.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
+# see the GNU General Public License, Version 2, a copy of which can be
+# found in the XORP LICENSE.gpl file.
+#
+# XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+# http://xorp.net
+
+# $XORP$
+
+import os
+Import("env")
+
+env = env.Clone()
+
+env.AppendUnique(CPPPATH = [
+	'#',
+	'$BUILDDIR',
+	'$BUILDDIR/rib',
+	'$BUILDDIR/rib/tests',
+	])
+
+env.AppendUnique(LIBPATH = [
+	'$BUILDDIR/rib',
+	'$BUILDDIR/policy',
+	'$BUILDDIR/policy/backend',
+	'$BUILDDIR/policy/common',
+	'$BUILDDIR/libfeaclient',
+	'$BUILDDIR/xrl/interfaces',
+	'$BUILDDIR/xrl/targets',
+	'$BUILDDIR/libproto',
+	'$BUILDDIR/libxipc',
+	'$BUILDDIR/libxorp',
+	'$BUILDDIR/libcomm',
+	])
+
+env.AppendUnique(LIBS = [
+	'rib',
+	#'ribxrl', #notyet
+	'feaclient',
+	'feaifmgrmirrorxif',
+	'feaifmgrreplicatorxif',
+	'ftixif',
+	'ribclientxif',
+	'findereventnotifierxif',
+	'redist4xif',
+	'redist6xif',
+	'redisttransaction4xif',
+	'redisttransaction6xif',
+	'policyredist4xif',
+	'policyredist6xif',
+	'profileclientxif',
+	'feaifmgrmirrorbase',
+	'ribbase',
+	'policybackend',
+	'policycommon',
+	'proto',
+	'finder',
+	'xipc',
+	'xorp',
+	'comm',
+	])
+
+# XXX: Shell script wrappers here.
+# These just take input from a file 'command'.
+#test_rib_direct.cc
+#test_rib_direct.sh
+#test_rib_xrls.cc
+#test_rib_xrls.sh
+
+test_deletion = env.AutoTest(target = 'test_deletion',
+                             source = [
+                                 'test_deletion.cc',
+                                 'rt_tab_expect.cc'
+                             ])
+test_redist = env.AutoTest(target = 'test_redist',
+                           source = 'test_redist.cc')
+test_register = env.AutoTest(target = 'test_register',
+                             source = [
+                                 'test_register.cc',
+                                 'dummy_register_server.cc'
+                             ])
+
+# XXX NOTYET: part of compound test, scripting needed.
+#env = env.Clone()
+#env.AppendUnique(LIBS = [
+#	'ribxif',
+#	'ribclientbase',
+#	])
+#test_register_xrls = env.AutoTest(target = 'test_register_xrls',
+#                                  source = 'test_register_xrls.cc')

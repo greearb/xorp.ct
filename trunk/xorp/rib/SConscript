@@ -24,7 +24,10 @@ env = env.Clone()
 
 is_shared = env.has_key('SHAREDLIBS')
 
-subdirs = ['tools']
+subdirs = [
+	'tests',
+	'tools',
+	]
 
 SConscript(dirs = subdirs, exports = 'env')
 
