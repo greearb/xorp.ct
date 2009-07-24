@@ -15,32 +15,30 @@
 # XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 # http://xorp.net
 
-# $ID$
+# $XORP$
 
 import os
 Import("env")
 
-subdirs = [ 'tests' ]
-SConscript(dirs = subdirs, exports='env')
-
 env = env.Clone()
-is_shared = env.has_key('SHAREDLIBS')
 
-env.AppendUnique(CPPPATH = [ '#' ])
+env.AppendUnique(CPPPATH = [
+	'#',
+	'$BUILDDIR',
+	'$BUILDDIR/mrt',
+	])
 
-sources = [
-	'buffer.c',
-	'mifset.cc',
-	'mrib_table.cc'
-	]
+env.AppendUnique(LIBPATH = [
+	'$BUILDDIR/mrt',
+	'$BUILDDIR/libxorp',
+	'$BUILDDIR/libcomm',
+	])
 
-if is_shared:
-    libmrt = env.SharedLibrary(target = 'libmrt', source = sources)
-else:
-    libmrt = env.StaticLibrary(target = 'libmrt', source = sources)
+env.AppendUnique(LIBS = [
+	'mrt',
+	'xorp',
+	'comm',
+	])
 
-if is_shared:
-    env.Alias('install',
-        env.InstallLibrary('$libdir', libmrt))
-
-Default(libmrt)
+test_mrib = env.AutoTest(target = 'test_mrib', source = 'test_mrib.cc')
+test_mrt = env.AutoTest(target = 'test_mrt', source = 'test_mrt.cc')
