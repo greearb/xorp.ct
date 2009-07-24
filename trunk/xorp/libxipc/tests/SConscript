@@ -1,0 +1,77 @@
+# Copyright (c) 2009 XORP, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License, Version 2, June
+# 1991 as published by the Free Software Foundation. Redistribution
+# and/or modification of this program under the terms of any other
+# version of the GNU General Public License is not permitted.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
+# see the GNU General Public License, Version 2, a copy of which can be
+# found in the XORP LICENSE.gpl file.
+#
+# XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+# http://xorp.net
+
+# $XORP$
+
+import os
+Import("env")
+
+env = env.Clone()
+
+env.AppendUnique(CPPPATH = [
+	'#',
+	'$BUILDDIR',
+	'$BUILDDIR/libxipc',
+	])
+
+env.AppendUnique(LIBPATH = [
+	'$BUILDDIR/libxipc',
+	'$BUILDDIR/libxorp',
+	'$BUILDDIR/libcomm',
+	])
+
+env.AppendUnique(LIBS = [
+	'xipc',
+	'finder',
+	'xorp',
+	'comm',
+	])
+
+# Missing:
+# test_finder_deaths.sh
+# test_leaks.sh
+# test_xrl_parser.sh
+
+simple_cpp_tests = [
+	#'finder',		# XXX test target needed
+	#'finder_events',
+	#'finder_messenger',
+	#'finder_msgs',
+	#'finder_tcp',
+	#'finder_to',
+	'header',
+	'inproc',
+	'lemming',
+	#'receiver',		# compound
+	'stcp',
+	'stcppf',
+	'sudp',
+	'xrl',
+	'xrl_args',
+	'xrl_atom',
+	'xrl_error',
+	'xrl_parser',
+	#'xrl_receiver',	# compound
+	'xrl_router',
+	#'xrl_sender',		# compound
+]
+
+cpp_test_targets = []
+
+for ct in simple_cpp_tests:
+    cpp_test_targets.append(env.AutoTest(target = 'test_%s' % ct,
+                                         source = 'test_%s.cc' % ct))

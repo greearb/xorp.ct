@@ -20,6 +20,10 @@
 import os
 Import("env")
 
+subdirs = [ 'tests' ]
+
+SConscript(dirs = subdirs, exports='env')
+
 is_shared = env.has_key('SHAREDLIBS')
 
 #
@@ -38,8 +42,8 @@ libxipc_env.AppendUnique(LIBPATH = [
     ])
 
 libxipc_env.AppendUnique(LIBS = [
-    'libcomm',
-    'libxorp'
+    'comm',
+    'xorp'
     ])
 
 libxipc_sources = [
@@ -177,10 +181,10 @@ env.AppendUnique(LIBPATH = [
     ])
 
 env.AppendUnique(LIBS = [
-    'libfinder',
-    'libxipc',
-    'libcomm',
-    'libxorp'
+    'finder',
+    'xipc',
+    'comm',
+    'xorp'
     ])
 
 xorp_finder = env.Program(target = 'xorp_finder',
