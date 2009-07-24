@@ -20,6 +20,9 @@
 import os
 Import('env')
 
+# XXX Not sure how to proceed here.
+#subdirs = [ 'tests' ]
+
 SConscript([ 'backend/SConscript', 'common/SConscript' ], exports='env')
 
 env = env.Clone()
