@@ -39,7 +39,7 @@ subdirs = [
 	'rip',
 	'rtrmgr',
 	#'slides',		# old content
-	'snmp',
+	#'snmp',		# old content
 	'test_harness',
 	'user_manual',
 	'windows_port',
