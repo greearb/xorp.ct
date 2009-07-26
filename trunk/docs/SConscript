@@ -23,7 +23,6 @@ subdirs = [
 	'bgp',
 	'design_arch',
 	'fea',
-	#'historic',		# notyet
 	#'kdoc',		# notyet
 	'libxipc',
 	'libxorp',
@@ -32,14 +31,14 @@ subdirs = [
 	'mld6igmp',
 	'multicast',
 	'olsr',
-	'papers',
+	#'papers',		# old content
 	'pim',
 	'pim_testsuite',
 	'policy',
 	'rib',
 	'rip',
 	'rtrmgr',
-	'slides',
+	#'slides',		# old content
 	'snmp',
 	'test_harness',
 	'user_manual',
