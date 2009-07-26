@@ -20,30 +20,30 @@
 Import('env')
 
 subdirs = [
-	'bgp',
-	'design_arch',
-	'fea',
+	'bgp',			# XORP BGP Routing Daemon
+	'design_arch',		# XORP Design Overview
+	'fea',			# FEA
 	#'kdoc',		# notyet
-	'libxipc',
-	'libxorp',
-	'man',
-	'mfea',
-	'mld6igmp',
-	'multicast',
-	'olsr',
+	'libxipc',		# Inter-Process Communication Library
+	'libxorp',		# LIBXORP Library Overview
+	#'man',			# source build not yet implemented
+	'mfea',			# Multicast FEA
+	'mld6igmp',		# MLD/IGMP
+	'multicast',		# Multicast Architecture
+	#'olsr',		# don't build by default
 	#'papers',		# old content
-	'pim',
-	'pim_testsuite',
-	'policy',
-	'rib',
-	'rip',
-	'rtrmgr',
+	'pim',			# PIM-SM
+	'pim_testsuite',	# PIM-SM Test Suite
+	#'policy',		# source build not yet implemented
+	'rib',			# RIB
+	#'rip',			# broken, old content
+	'rtrmgr',		# Router Manager
 	#'slides',		# old content
 	#'snmp',		# old content
-	'test_harness',
-	'user_manual',
-	'windows_port',
-	'xorpdev_101',
+	'test_harness',		# this is actually BGP's test harness.
+	'user_manual',		# XORP User Manual
+	#'windows_port',	# don't build by default
+	'xorpdev_101',		# Introduction to Writing a XORP Process
 	]
 
 SConscript(dirs = subdirs, exports='env')
