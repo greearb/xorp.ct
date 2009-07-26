@@ -1,0 +1,75 @@
+# Copyright (c) 2009 XORP, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License, Version 2, June
+# 1991 as published by the Free Software Foundation. Redistribution
+# and/or modification of this program under the terms of any other
+# version of the GNU General Public License is not permitted.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
+# see the GNU General Public License, Version 2, a copy of which can be
+# found in the XORP LICENSE.gpl file.
+#
+# XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+# http://xorp.net
+#
+# $ID$
+
+Help("""
+    rel={public17|..} to identify the target release.
+    builddir=<some path> to specify a different build directory.
+        Default is "../arch-os-rel".
+    installdir=<some path> to specify a different installation directory.
+        Default is "../arch-os-rel/stage".
+""")
+
+import sys
+import os
+import string
+import SCons
+from SCons.Script.SConscript import SConsEnvironment
+import SCons.Action
+import SCons.Builder
+
+rel = ARGUMENTS.get('rel', 'public17')
+tempbuilddir = ARGUMENTS.get('tempbuilddir', '#/../'+host_arch+'-'+host_os+'-'+rel)
+tempinstalldir = ARGUMENTS.get('tempinstalldir', tempbuilddir+'/stage')
+sourcedir=Dir(".").abspath
+builddir=ARGUMENTS.get('builddir', Dir(tempbuilddir))
+installdir=ARGUMENTS.get('installdir', Dir(tempinstalldir))
+
+print 'Release:          ', rel
+print 'Source path:      ', sourcedir
+print 'Build path:       ', builddir
+print 'Install path:     ', installdir
+
+env = Environment(
+		  TOOLS = ['default'],
+		  ENV = os.environ,
+		  REL = rel,
+		  BUILDDIR = builddir,
+		  STAGINGDIR = installdir,
+		)
+
+env['DESTDIR'] = ARGUMENTS.get('DESTDIR', Dir(installdir).abspath)
+
+SConsEnvironment.Chmod = SCons.Action.ActionFactory(os.chmod,
+    lambda dest, mode: 'Chmod("%s", 0%o)' % (dest, mode))
+
+def InstallScript(env, dest, files, perm = 0555):
+    obj = env.Install(dest, files)
+    for i in obj:
+	env.AddPostAction(i, env.Chmod(str(i), perm))
+    return obj 
+SConsEnvironment.InstallScript = InstallScript
+
+def InstallData(env, dest, files, perm = 0644):
+    obj = env.Install(dest, files)
+    for i in obj:
+	env.AddPostAction(i, env.Chmod(str(i), perm))
+    return obj
+SConsEnvironment.InstallData = InstallData
+
+env.SConscript(['SConscript'], variant_dir='$BUILDDIR', exports='env')
