@@ -72,4 +72,6 @@ def InstallData(env, dest, files, perm = 0644):
     return obj
 SConsEnvironment.InstallData = InstallData
 
+env['ENV']['TEXMFHOME'] = os.path.join(sourcedir,'tex')
+
 env.SConscript(['SConscript'], variant_dir='$BUILDDIR', exports='env')
