@@ -31,12 +31,12 @@
 
 % The following is needed in order to make the code compatible
 % with both latex/dvips and pdflatex.
-\ifx\pdftexversion\undefined
-\usepackage[dvipdf]{graphicx}
-\else
+%\ifx\pdftexversion\undefined
+%\usepackage[dvipdf]{graphicx}
+%\else
 \usepackage{graphicx}
 %\DeclareGraphicsRule{*}{mps}{*}{}
-\fi
+%\fi
 
 \definecolor{gray}{rgb}{0.5,0.5,0.5}
 \newcommand{\etc}{\emph{etc.}\xspace}
@@ -318,7 +318,7 @@ of pending I/O events.
 
 \begin{figure}
  \centering
- \includegraphics[scale=0.5,bb=0 0 622 456]{figs/windispatcher.pdf}
+ \includegraphics[scale=0.5,bb=0 0 622 456]{figs/windispatcher}
  % windispatcher.pdf: 622x456 pixel, 72dpi, 21.94x16.09 cm, bb=0 0 622 456
  \caption{UML class diagram of portable I/O facilities}
 \end{figure}
@@ -1685,7 +1685,7 @@ ported to Windows idioms.
 
 Access to the multicast forwarding cache in Windows uses a completely
 different set of hooks from the {\tt MROUTING}
-\footnote{\url{http://tldp.org/HOWTO/Multicast-HOWTO-7.html#ss7.2}}
+\footnote{\url{http://tldp.org/HOWTO/Multicast-HOWTO-7.html}}
 API used by the open-source
 FreeBSD and Linux implementations, and this would certainly need to be
 revisited in future. These hooks are part of the Router Manager V2 API,
@@ -1767,7 +1767,7 @@ Windows network architecture.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %     BIBLIOGRAPHY
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibliography{../tex/xorp}
+\bibliography{xorp}
 \bibliographystyle{plain}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
