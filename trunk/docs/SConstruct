@@ -34,7 +34,7 @@ import SCons.Action
 import SCons.Builder
 
 rel = ARGUMENTS.get('rel', 'public17')
-tempbuilddir = ARGUMENTS.get('tempbuilddir', '#/../'+host_arch+'-'+host_os+'-'+rel)
+tempbuilddir = ARGUMENTS.get('tempbuilddir', '#/../docs-'+rel)
 tempinstalldir = ARGUMENTS.get('tempinstalldir', tempbuilddir+'/stage')
 sourcedir=Dir(".").abspath
 builddir=ARGUMENTS.get('builddir', Dir(tempbuilddir))
@@ -72,6 +72,12 @@ def InstallData(env, dest, files, perm = 0644):
     return obj
 SConsEnvironment.InstallData = InstallData
 
-env['ENV']['TEXMFHOME'] = os.path.join(sourcedir,'tex')
+env['sourcedir'] = sourcedir
+env.AppendUnique(TEXINPUTS = [
+	os.path.join(sourcedir, 'tex'),
+])
+env.AppendUnique(BIBINPUTS = [
+	os.path.join(sourcedir, 'tex'),
+])
 
 env.SConscript(['SConscript'], variant_dir='$BUILDDIR', exports='env')
