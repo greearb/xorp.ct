@@ -231,6 +231,53 @@ run_test()
     test_xrlerror_note(eventloop, listener);
 }
 
+static void
+run_no_keepalive_test()
+{
+    static const uint32_t KEEPALIVE_MS = 2500;
+    EventLoop eventloop;
+
+    XrlDispatcher cmd_dispatcher("tester");
+    cmd_dispatcher.add_handler("hello", callback(hello_recv_handler));
+    cmd_dispatcher.add_handler("get_int32", callback(int32_recv_handler));
+    cmd_dispatcher.add_handler("no_execute",
+			callback(no_execute_recv_handler, NOISE));
+
+    setenv("XORP_LISTENER_KEEPALIVE_TIMEOUT", "0", 1);
+    setenv("XORP_SENDER_KEEPALIVE_TIME", "0", 1);
+
+    XrlPFSTCPListener listener(eventloop, &cmd_dispatcher);
+    XrlPFSTCPSender s(eventloop, listener.address());
+
+    tracef("listener address: %s\n", listener.address());
+
+    XorpTimer dp = eventloop.new_periodic_ms(500, callback(&print_twirl));
+
+    bool run_tests = true;
+    XorpTimer rt = eventloop.new_periodic_ms(5 * KEEPALIVE_MS / 4,
+					     callback(&toggle_flag, &run_tests));
+
+    tracef("Testing XrlPFSTCP\n");
+    bool stop = false;
+    XorpTimer stop_timer = eventloop.set_flag_after_ms(20 * KEEPALIVE_MS,
+						       &stop);
+
+    while (stop == false) {
+	assert(s.alive());
+
+	if (run_tests) {
+	    test_hello(eventloop, s);
+	    test_int32(eventloop, s);
+	} else {
+	    eventloop.run();
+	}
+    }
+    test_xrlerror_note(eventloop, listener);
+
+    unsetenv("XORP_LISTENER_KEEPALIVE_TIMEOUT");
+    unsetenv("XORP_SENDER_KEEPALIVE_TIME");
+}
+
 // ----------------------------------------------------------------------------
 // Main
 
@@ -250,8 +297,13 @@ int main(int /* argc */, char *argv[])
     // Set alarm
     alarm(60);
 #endif
-
     run_test();
+
+#ifndef HOST_OS_WINDOWS
+    // Set alarm
+    alarm(60);
+#endif
+    run_no_keepalive_test();
 
     //
     // Gracefully stop and exit xlog

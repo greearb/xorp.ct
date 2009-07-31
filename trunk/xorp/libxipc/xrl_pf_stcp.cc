@@ -59,9 +59,6 @@
 const char* XrlPFSTCPSender::_protocol   = "stcp";
 const char* XrlPFSTCPListener::_protocol = "stcp";
 
-static const TimeVal 	DEFAULT_SENDER_KEEPALIVE_TIME = TimeVal(10, 0);
-static const TimeVal	QUIET_LIFE_TIME = TimeVal(180, 0);   // 3 min
-
 // The maximum number of bytes worth of XRL buffered before send()
 // returns false.  Resource preservation.
 static const size_t 	MAX_ACTIVE_BYTES 	    = 100000;
@@ -85,20 +82,42 @@ static const uint32_t   MAX_WRITES		    = 16;
 // themselves using a timeout timer when they have been quiescent for a while
 
 class STCPRequestHandler {
+protected:
+    static const TimeVal	DEFAULT_KEEPALIVE_TIMEOUT;
 public:
     STCPRequestHandler(XrlPFSTCPListener& parent, XorpFd sock) :
 	_parent(parent), _sock(sock),
 	_reader(parent.eventloop(), sock, 4 * 65536,
 		callback(this, &STCPRequestHandler::read_event)),
 	_writer(parent.eventloop(), sock, MAX_WRITES),
-	_responses_size(0)
+	_responses_size(0),
+	_keepalive_timeout(DEFAULT_KEEPALIVE_TIMEOUT)
     {
 	EventLoop& e = _parent.eventloop();
-	_life_timer = e.new_oneoff_after(QUIET_LIFE_TIME,
-					 callback(this,
-						  &STCPRequestHandler::die,
-						  "life timer expired",
-						  true));
+
+	// Set the STCP request timeout from environment variable if it is set.
+	char* value = getenv("XORP_LISTENER_KEEPALIVE_TIMEOUT");
+	if (value != NULL) {
+	    char* ep = NULL;
+	    uint32_t timeout_s = 0;
+	    timeout_s = strtoul(value, &ep, 10);
+	    if ( !(*value != '\0' && *ep == '\0') &&
+		  (timeout_s <= 0 || timeout_s > 300)) {
+		XLOG_ERROR("Invalid \"XORP_LISTENER_KEEPALIVE_TIMEOUT\": %s",
+			   value);
+	    } else {
+		_keepalive_timeout = TimeVal(timeout_s, 0);
+	    }
+	}
+
+	if (! _keepalive_timeout.is_zero()) {
+	    _life_timer = e.new_oneoff_after(_keepalive_timeout,
+					     callback(this,
+						      &STCPRequestHandler::die,
+						      "life timer expired",
+						      true));
+	}
+
 	_reader.start();
 	debug_msg("STCPRequestHandler (%p) fd = %s\n",
 		  this, sock.str().c_str());
@@ -152,12 +171,19 @@ private:
     list<ReplyPacket> 	_responses; 	// head is currently being written
     uint32_t		_responses_size;
 
-    // STCPRequestHandlers delete themselves if quiescent for timeout period
-    XorpTimer _life_timer;
+    // If the STCP keepalive timeout is non-zero, then STCPRequestHandlers
+    // will delete themselves if quiescent for timeout period. Otherwise,
+    // we rely upon socket layer notification of a TCP session close in
+    // AsyncFileReader/Writer to close STCP sessions.
+    TimeVal		_keepalive_timeout;
+    XorpTimer		_life_timer;
 
     void parse_header(const uint8_t* buffer, size_t buffer_bytes);
     void parse_payload();
 };
+
+// Default life timer for STCP session is 3 minutes.
+const TimeVal STCPRequestHandler::DEFAULT_KEEPALIVE_TIMEOUT = TimeVal(180, 0);
 
 void
 STCPRequestHandler::read_event(BufferedAsyncReader*		/* source */,
@@ -367,7 +393,8 @@ STCPRequestHandler::update_writer(AsyncFileWriter::Event ev,
 void
 STCPRequestHandler::postpone_death()
 {
-    _life_timer.schedule_after(QUIET_LIFE_TIME);
+    if (! _keepalive_timeout.is_zero())
+	_life_timer.schedule_after(_keepalive_timeout);
 }
 
 void
@@ -636,23 +663,27 @@ protected:
 static uint32_t direct_calls = 0;
 static uint32_t indirect_calls = 0;
 
+const TimeVal XrlPFSTCPSender::DEFAULT_SENDER_KEEPALIVE_PERIOD = TimeVal(10, 0);
+
 uint32_t XrlPFSTCPSender::_next_uid = 0;
 
-XrlPFSTCPSender::XrlPFSTCPSender(EventLoop& e, const char* addr_slash_port)
+XrlPFSTCPSender::XrlPFSTCPSender(EventLoop& e, const char* addr_slash_port,
+				 TimeVal keepalive_time)
     throw (XrlPFConstructorError)
     : XrlPFSender(e, addr_slash_port),
       _uid(_next_uid++),
-      _keepalive_time(DEFAULT_SENDER_KEEPALIVE_TIME),
+      _keepalive_time(keepalive_time),
       _batching(false)
 {
     _sock = create_connected_tcp4_socket(addr_slash_port);
     construct();
 }
 
-XrlPFSTCPSender::XrlPFSTCPSender(EventLoop* e, const char* addr_slash_port)
+XrlPFSTCPSender::XrlPFSTCPSender(EventLoop* e, const char* addr_slash_port,
+				 TimeVal keepalive_time)
     : XrlPFSender(*e, addr_slash_port),
       _uid(_next_uid++), _writer(NULL),
-      _keepalive_time(DEFAULT_SENDER_KEEPALIVE_TIME),
+      _keepalive_time(keepalive_time),
       _reader(NULL), _batching(false)
 {
 }
@@ -691,7 +722,22 @@ XrlPFSTCPSender::construct()
     _active_requests = 0;
     _keepalive_sent  = false;
 
-    start_keepalives();
+    // Set the STCP keepalive timeout from environment variable if it is set.
+    char* value = getenv("XORP_SENDER_KEEPALIVE_TIME");
+    if (value != NULL) {
+	char* ep = NULL;
+	uint32_t keepalive_s = 0;
+	keepalive_s = strtoul(value, &ep, 10);
+	if ( !(*value != '\0' && *ep == '\0') &&
+	      (keepalive_s <= 0 || keepalive_s > 120)) {
+	    XLOG_ERROR("Invalid \"XORP_SENDER_KEEPALIVE_TIME\": %s", value);
+	} else {
+	    _keepalive_time = TimeVal(keepalive_s, 0);
+	}
+    }
+
+    if (! _keepalive_time.is_zero())
+	start_keepalives();
     sender_list.add_instance(_uid);
 }
 
@@ -977,7 +1023,11 @@ void
 XrlPFSTCPSender::set_keepalive_time(const TimeVal& time)
 {
     _keepalive_time = time;
-    start_keepalives();
+    if (! _keepalive_time.is_zero()) {
+	start_keepalives();
+    } else {
+	stop_keepalives();
+    }
 }
 
 void

@@ -72,9 +72,11 @@ private:
  */
 class XrlPFSTCPSender : public XrlPFSender {
 public:
-    XrlPFSTCPSender(EventLoop& e, const char* address = 0)
+    XrlPFSTCPSender(EventLoop& e, const char* address = 0,
+	TimeVal keepalive_period = DEFAULT_SENDER_KEEPALIVE_PERIOD)
 	throw (XrlPFConstructorError);
-    XrlPFSTCPSender(EventLoop* e, const char* address = 0);
+    XrlPFSTCPSender(EventLoop* e, const char* address = 0,
+	TimeVal keepalive_period = DEFAULT_SENDER_KEEPALIVE_PERIOD);
     virtual ~XrlPFSTCPSender();
 
     bool send(const Xrl& 			x,
@@ -117,6 +119,9 @@ private:
     void stop_keepalives();
     void defer_keepalives();
     bool send_keepalive();
+
+public:
+    static const TimeVal	 DEFAULT_SENDER_KEEPALIVE_PERIOD;
 
 private:
     uint32_t 			 _uid;
