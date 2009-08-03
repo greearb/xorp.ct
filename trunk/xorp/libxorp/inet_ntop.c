@@ -1,4 +1,5 @@
 /*	$OpenBSD: inet_ntop.c,v 1.7 2005/08/06 20:30:03 espie Exp $	*/
+/* vim:set sts=4 ts=8: */
 
 /* Copyright (c) 1996 by Internet Software Consortium.
  *

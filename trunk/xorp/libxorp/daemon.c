@@ -1,3 +1,5 @@
+/* vim:set sts=4 ts=8: */
+
 /*-
  * Copyright (c) 1990, 1993
  *	The Regents of the University of California.  All rights reserved.

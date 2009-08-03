@@ -1,4 +1,5 @@
 /*	$KAME: inet_pton.c,v 1.5 2001/08/20 02:32:40 itojun Exp $	*/
+/* vim:set sts=4 ts=8: */
 
 /* Copyright (c) 1996 by Internet Software Consortium.
  *
