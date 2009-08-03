@@ -1,4 +1,6 @@
 /*
+ * vim:set sts=4 ts=8:
+ *
  * FILE:    hmac.c
  * AUTHORS: Colin Perkins
  *
