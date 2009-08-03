@@ -1,4 +1,5 @@
 /* -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*- */
+/* vim:set sts=4 ts=8: */
 
 /*
  * Copyright (c) 2001-2009 XORP, Inc.
