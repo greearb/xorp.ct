@@ -87,7 +87,7 @@ env = Environment(
 		  OS = host_os,
 		  REL = rel,
 		  BUILDDIR = builddir,
-		  CPPPATH=['/usr/sfw/include', '/opt/local/include', '/usr/local/include'],
+		  CPPPATH=['/usr/sfw/include', '/opt/local/include', '/usr/local/include', '$BUILDDIR'],
 		  LIBPATH=['/usr/sfw/lib', '/opt/local/lib', '/usr/local/lib'])
 
 env['DESTDIR'] = ARGUMENTS.get('DESTDIR', '')
@@ -200,12 +200,8 @@ if not env.GetOption('clean') and not env.GetOption('help'):
 	'CheckSysctl' :     CheckSysctl
     }
 
-    # TODO Push config header into build dir for parallel / cross build use.
-    # Currently cannot do this due to SCons limitations.
-    #conf = env.Configure(config_h = str(builddir) + 'xorp_config.h',
-    #                     custom_tests = my_custom_tests)
-    #
-    conf = env.Configure(config_h = 'xorp_config.h',
+    conf = env.Configure(config_h = str(builddir) + '/xorp_config.h',
+			log_file='foo',
                          custom_tests = my_custom_tests)
 
     ##########
