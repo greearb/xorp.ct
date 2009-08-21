@@ -2,10 +2,11 @@ import SCons.Action
 import SCons.Builder
 import SCons.Scanner
 
-tgtgen_action = SCons.Action.Action("$TGTGEN $_TGTGEN_INCFLAGS $SOURCE")
+tgtgen_action = SCons.Action.Action("$TGTGEN $_TGTGEN_INCFLAGS --output-dir ${TARGET.dir} ${SOURCE}")
 
 def tgtgen_emitter(target, source, env):
     base,ext = SCons.Util.splitext(str(source[0]))
+    base = base[base.rfind("/") + 1:] 
     cc = base + "_base.cc"
     hh = base + "_base.hh"
     xrls = base + ".xrls"

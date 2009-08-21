@@ -2,6 +2,7 @@
 
 """Program to generate Xrl Interface Client related files"""
 
+from optparse import OptionParser
 import os, sys
 
 # This is a bit of mess as this code was split into separate files
@@ -68,7 +69,7 @@ def implement_send_xrl(cls, method_no, method, ifqname):
     s += "    if (!x) {\n"
     s += "        x = new Xrl(dst_xrl_target_name, \"%s\");\n" % ifqname
     for a in method.args():
-        s += "        x->args().add(XrlAtom(%s));\n" % (a.name())
+        s += "        x->args().add(\"%s\", %s);\n" % (a.name(), a.name())
     s += "    }\n"
     s += "\n"
     s += "    x->set_target(dst_xrl_target_name);\n"
@@ -78,24 +79,21 @@ def implement_send_xrl(cls, method_no, method, ifqname):
         s += "    x->args().set_arg(%d, %s);\n" % (i, a.name())
 	i += 1
     s += "\n"
-    s += "    return _sender->send(*x, callback(this, &%s::unmarshall_%s, cb));\n" % (cls, method.name())
+    s += "    return _sender->send(*x, callback(&%s::unmarshall_%s, cb));\n" % (cls, method.name())
     s += "}\n\n"
 
     return s
 
-def declare_unmarshall_common(cls, indent, method_name):
-    s = xorp_indent_string(indent , "void")
-    s += "%sunmarshall_%s(" % (cls, method_name)
+def declare_unmarshall(method_name):
+    s = xorp_indent_string(1, "static void ")
+    s += "unmarshall_%s(" % method_name
     cb_name = "%sCB" % (caps_cpp_classname(method_name))
     args = [ "const XrlError&\te", "XrlArgs*\ta", "%s\t\tcb" % cb_name]
     for i in range(0, len(args)):
         args[i] = "\n\t" + args[i]
     s += csv(args)
-    s += "\n%s)" % xorp_indent(indent)
+    s += "\n%s);\n\n" % xorp_indent(1)
     return s
-
-def declare_unmarshall(method_name):
-    return declare_unmarshall_common(" ", 1, method_name) + ";\n\n"
 
 def implement_unmarshall(cls, method_no, method):
 
@@ -105,7 +103,14 @@ def implement_unmarshall(cls, method_no, method):
     fail_args = joining_csv(nargs)
 
     s = "\n/* Unmarshall %s */\n" % method.name()
-    s += declare_unmarshall_common("\n%s::" % cls, 0, method.name()) + "\n{\n"
+    s += "void\n%s::unmarshall_%s(" % (cls, method.name())
+    cb_name = "%sCB" % (caps_cpp_classname(method.name()))
+    args = [ "const XrlError&\te", "XrlArgs*\ta", "%s\t\tcb" % cb_name]
+    for i in range(0, len(args)):
+        args[i] = "\n\t" + args[i]
+    s += csv(args)
+    s += "\n)\n" 
+    s += "{\n"
     s += "    if (e != XrlError::OKAY()) {\n"
     s += "\tcb->dispatch(e%s);\n" % fail_args
     s += "\treturn;\n"
@@ -202,15 +207,29 @@ def client_if_cc(cls, ifname, ifversion, methods):
     return s
 
 def main():
+    usage = "usage: %prog [options] arg"
+    parser = OptionParser(usage)
+    parser.add_option("-o", "--output-dir",
+		      action="store", 
+		      type="string", 
+		      dest="output_dir",
+		      metavar="DIR")
+    parser.add_option("-I",
+                      action="append",
+                      type="string",
+                      dest="includes",
+                      metavar="DIR")
+    (options,args) = parser.parse_args()
 
-    # Print a warning to avoid spamming CVS with whitespace changes.
-    if os.linesep != '\n':
-	print "WARNING: host does not use POSIX end-of-line convention."
+    if len(args) != 1:
+        parser_error("incorrect number of arguments")
 
     # Command line arguments passed on to cpp
     pipe_string = "cpp -C "
-    for a in sys.argv[1:]:
-	pipe_string += "%s " % a
+    if options.includes:
+	for a in options.includes:
+	    pipe_string += "-I%s " % a
+    pipe_string += args[0] 
 
     cpp_pipe = os.popen(pipe_string, 'r')
 
@@ -240,10 +259,15 @@ def main():
         sys.exit(1)
 
     basename = sourcefile[:-4]
+    basename = basename[basename.rfind("/") + 1:]
 
-    modulename = "Xif%s" % cpp_classname(basename[basename.rfind("/") + 1:])
+    modulename = "Xif%s" % cpp_classname(basename)
     hh_file = "%s_xif.hh" % basename
     cc_file = "%s_xif.cc" % basename
+
+    if options.output_dir:
+	hh_file = os.path.join(options.output_dir, hh_file)
+	cc_file = os.path.join(options.output_dir, cc_file)
     
     # Generate header file
     hh_txt = prepare_client_if_hh(modulename, hh_file)

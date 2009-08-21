@@ -2,6 +2,7 @@
 
 """Program to generate Xrl Target related files"""
 
+from optparse import OptionParser
 import os, sys
 
 # This is a bit of mess as this code was split into separate files
@@ -376,15 +377,29 @@ def generate_target_methods(tgt, interfaces):
 
 
 def main():
+    usage = "usage: %prog [options] arg"
+    parser = OptionParser(usage)
+    parser.add_option("-o", "--output-dir",
+		      action="store", 
+		      type="string", 
+		      dest="output_dir",
+		      metavar="DIR")
+    parser.add_option("-I",
+                      action="append",
+                      type="string",
+                      dest="includes",
+                      metavar="DIR")
+    (options,args) = parser.parse_args()
 
-    # Print a warning to avoid spamming CVS with whitespace changes.
-    if os.linesep != '\n':
-	print "WARNING: host does not use POSIX end-of-line convention."
+    if len(args) != 1:
+        parser_error("incorrect number of arguments")
 
     # Command line arguments passed on to cpp
     pipe_string = "cpp -C "
-    for a in sys.argv[1:]:
-	pipe_string += "%s " % a
+    if options.includes:
+	for a in options.includes:
+	    pipe_string += "-I%s " % a
+    pipe_string += args[0] 
 
     cpp_pipe = os.popen(pipe_string, 'r')
 
@@ -405,13 +420,19 @@ def main():
     if sourcefile[-4:] != ".tgt":
         print "Source file does not end in .tgt suffix - basename transform failure."
         sys.exit(1)
+        
     basename = sourcefile[:-4]
+    basename = basename[basename.rfind("/") + 1:]
 
-    modulename = "Xrl%sTarget" % \
-                 cpp_classname(basename[basename.rfind("/") + 1:])
+    modulename = "Xrl%sTarget" % cpp_classname(basename)
     hh_file = "%s_base.hh" % basename
     cc_file = "%s_base.cc" % basename
     xrl_file = "%s.xrls" % basename
+
+    if options.output_dir:
+        hh_file = os.path.join(options.output_dir, hh_file)
+        cc_file = os.path.join(options.output_dir, cc_file)
+        xrl_file = os.path.join(options.output_dir, xrl_file)
 
     hh_txt  = prepare_target_hh(modulename, hh_file)
     cc_txt  = prepare_target_cc(hh_file, cc_file)

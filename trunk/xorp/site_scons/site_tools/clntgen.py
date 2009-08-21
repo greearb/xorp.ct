@@ -1,10 +1,11 @@
 import SCons.Action
 import SCons.Builder
 
-clntgen_action = SCons.Action.Action("$CLNTGEN $SOURCE")
+clntgen_action = SCons.Action.Action("$CLNTGEN --output-dir ${TARGET.dir} ${SOURCE}")
 
 def clntgen_emitter(target, source, env):
     base,ext = SCons.Util.splitext(str(source[0]))
+    base = base[base.rfind("/") + 1:]
     cc = base + "_xif.cc"
     hh = base + "_xif.hh"
     t = [cc, hh]

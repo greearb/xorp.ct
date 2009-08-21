@@ -283,4 +283,4 @@ env.AppendUnique(RPATH = [
     '$libdir',
     ])
 
-env.SConscript(['SConscript'], variant_dir='$BUILDDIR', exports='env')
+env.SConscript(['SConscript'], variant_dir='$BUILDDIR', exports='env', duplicate=0)
