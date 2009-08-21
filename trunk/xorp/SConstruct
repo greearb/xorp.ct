@@ -154,7 +154,7 @@ SConsEnvironment.InstallData = InstallData
 # follow freebsd hier(5) unless we've got better suggestions-
 # what is equivalent ref for red hat / debian based systems?
 
-prefix = ARGUMENTS.get('prefix', '/usr/local')
+prefix = ARGUMENTS.get('prefix', '/usr/local/xorp')
 env['prefix'] = prefix
 exec_prefix = ARGUMENTS.get('exec_prefix', '$prefix')
 env['exec_prefix'] = exec_prefix
