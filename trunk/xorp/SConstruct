@@ -21,7 +21,6 @@
 # TODO make shared library linker flags portable to non-gnu linkers.
 # TODO tone down linker line spamming, -lpcre etc; stage use of LIBS please.
 # TODO cross compiles.
-# TODO pass paths on command line, to avoid rebuild if install prefix changed
 # TODO Add separate toolchain test for C99 varargs macros.
 # TODO Add separate toolchain test for GNU varargs macros.
 # TODO Fix default include/lib paths, pass in from environment.
@@ -40,6 +39,8 @@ Help("""
     rel={public17|..} to identify the target release.
     builddir=<some path> to specify a different build directory.
         Default is "../arch-os-rel".
+    prefix=<some path> to specify a different install directory.
+        Default is "/usr/local/xorp".
     shared=true to build with shared libraries. Default is false.
     strip=true to strip binaries when installed. Default is false.
 """)
@@ -177,6 +178,7 @@ env['libdir'] = ARGUMENTS.get('libdir', '$exec_prefix/lib')
 env['mandir'] = ARGUMENTS.get('mandir', '$datarootdir/man')
 
 # XXX needed by scons xrl idl wrappers
+# ...and rtrmgr/util.cc
 env['XORP_SOURCEDIR'] = sourcedir
 env['XORP_BUILDDIR'] = builddir
 
@@ -227,12 +229,6 @@ if not env.GetOption('clean') and not env.GetOption('help'):
 	osname = sys.platform.upper()
     conf.Define('HOST_OS_NAME', '"' + osname + '"')
 
-    # paths
-    conf.Define('XORP_ROOT', '"' + str(prefix) + '"')
-    conf.Define('XORP_INSTALL_ROOT', '"' + str(prefix) + '"')
-    conf.Define('XORP_BUILD_ROOT', '"' + str(builddir) + '"')
-    conf.Define('XORP_SRC_ROOT', '"' + str(sourcedir) + '"')
-
     # toolchain
     conf.Define('CPP_SUPPORTS_C99_VA_ARGS')
     conf.Define('CPP_SUPPORTS_GNU_VA_ARGS')
@@ -240,6 +236,8 @@ if not env.GetOption('clean') and not env.GetOption('help'):
     # Big ball of mud.
     from config.allconfig import DoAllConfig
     DoAllConfig(env, conf, host_os)
+
+    # Note: hard-coded paths pushed down to rtrmgr/util.cc environment.
 
     conf.Finish()
 

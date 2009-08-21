@@ -94,13 +94,24 @@ librtrmgr_srcs = [
 	'unexpanded_program.cc',
 	'unexpanded_xrl.cc',
 	'userdb.cc',
-	'util.cc',
 	'xorp_client.cc',
 	'xrldb.cc',
 	'y.boot_tab.cc',
 	'y.opcmd_tab.cc',
 	'y.tplt_tab.cc',
 	]
+
+# Pushdown for static paths in util.cc.
+xorp_paths = {
+    "XORP_INSTALL_ROOT" : '\\"' + str(env['prefix']) + '\\"',
+    "XORP_BUILD_ROOT"   : '\\"' + str(env['XORP_BUILDDIR']) + '\\"',
+    "XORP_SRC_ROOT"     : '\\"' + str(env['XORP_SOURCEDIR']) + '\\"',
+}
+
+util_cc_env = env.Clone()
+util_cc_env.AppendUnique(CPPDEFINES=xorp_paths.items())
+obj_util = util_cc_env.StaticObject(source='util.cc')
+librtrmgr_srcs += [ obj_util ]
 
 librtrmgr = librtrmgr_env.StaticLibrary(target = 'librtrmgr',
 					source = librtrmgr_srcs)
