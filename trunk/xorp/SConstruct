@@ -67,9 +67,9 @@ if not host_os:
 
 cross = ARGUMENTS.get('cross', build_os != host_os or build_arch != host_arch)
 rel = ARGUMENTS.get('rel', 'public17')
-tempbuilddir = ARGUMENTS.get('tempbuilddir', '#/../'+host_arch+'-'+host_os+'-'+rel)
+
 sourcedir=Dir(".").abspath
-builddir=ARGUMENTS.get('builddir', Dir(tempbuilddir))
+builddir=Dir(ARGUMENTS.get('builddir', '#obj/' + host_arch+'-'+host_os+'-'+rel)).abspath
 
 print 'Cross build:      ', cross
 print 'Architecture:     ', host_arch
