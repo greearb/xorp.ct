@@ -201,7 +201,6 @@ if not env.GetOption('clean') and not env.GetOption('help'):
     }
 
     conf = env.Configure(config_h = str(builddir) + '/xorp_config.h',
-			log_file='foo',
                          custom_tests = my_custom_tests)
 
     ##########
