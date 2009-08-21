@@ -40,8 +40,6 @@ Help("""
     rel={public17|..} to identify the target release.
     builddir=<some path> to specify a different build directory.
         Default is "../arch-os-rel".
-    installdir=<some path> to specify a different installation directory.
-        Default is "../arch-os-rel/stage".
     shared=true to build with shared libraries. Default is false.
     strip=true to strip binaries when installed. Default is false.
 """)
@@ -69,10 +67,8 @@ if not host_os:
 cross = ARGUMENTS.get('cross', build_os != host_os or build_arch != host_arch)
 rel = ARGUMENTS.get('rel', 'public17')
 tempbuilddir = ARGUMENTS.get('tempbuilddir', '#/../'+host_arch+'-'+host_os+'-'+rel)
-tempinstalldir = ARGUMENTS.get('tempinstalldir', tempbuilddir+'/stage')
 sourcedir=Dir(".").abspath
 builddir=ARGUMENTS.get('builddir', Dir(tempbuilddir))
-installdir=ARGUMENTS.get('installdir', Dir(tempinstalldir))
 
 print 'Cross build:      ', cross
 print 'Architecture:     ', host_arch
@@ -80,7 +76,6 @@ print 'Operating System: ', host_os
 print 'Release:          ', rel
 print 'Source path:      ', sourcedir
 print 'Build path:       ', builddir
-print 'Install path:     ', installdir
 
 env = Environment(
 		  TOOLS = ['default', 'autotest', 'clntgen', 'tgtgen',
@@ -91,11 +86,10 @@ env = Environment(
 		  OS = host_os,
 		  REL = rel,
 		  BUILDDIR = builddir,
-		  STAGINGDIR = installdir,
 		  CPPPATH=['/usr/sfw/include', '/opt/local/include', '/usr/local/include'],
 		  LIBPATH=['/usr/sfw/lib', '/opt/local/lib', '/usr/local/lib'])
 
-env['DESTDIR'] = ARGUMENTS.get('DESTDIR', Dir(installdir).abspath)
+env['DESTDIR'] = ARGUMENTS.get('DESTDIR', '')
 
 if ARGUMENTS.get('strip', False) == 'true':
     env['strip'] = True
@@ -113,9 +107,9 @@ SConsEnvironment.Chmod = SCons.Action.ActionFactory(os.chmod,
     lambda dest, mode: 'Chmod("%s", 0%o)' % (dest, mode))
 
 def InstallProgram(env, dest, files, perm = 0755):
-    #if env.has_key('DESTDIR'):
-    #	# NB: use simple concatenation
-    #	dest = env.Dir(env['DESTDIR'] + env.Dir(dest).path)
+    if env.has_key('DESTDIR'):
+    	# NB: use simple concatenation
+    	dest = env.Dir(env['DESTDIR'] + env.Dir(dest).path)
     obj = env.Install(dest, files)
     for i in obj:
 	env.AddPostAction(i, env.Chmod(str(i), perm))
@@ -125,9 +119,9 @@ def InstallProgram(env, dest, files, perm = 0755):
 SConsEnvironment.InstallProgram = InstallProgram
 
 def InstallScript(env, dest, files, perm = 0555):
-    #if env.has_key('DESTDIR'):
-    #	# NB: use simple concatenation
-    #	dest = env.Dir(env['DESTDIR'] + env.Dir(dest).path)
+    if env.has_key('DESTDIR'):
+    	# NB: use simple concatenation
+    	dest = env.Dir(env['DESTDIR'] + env.Dir(dest).path)
     obj = env.Install(dest, files)
     for i in obj:
 	env.AddPostAction(i, env.Chmod(str(i), perm))
@@ -135,9 +129,9 @@ def InstallScript(env, dest, files, perm = 0555):
 SConsEnvironment.InstallScript = InstallScript
 
 def InstallLibrary(env, dest, files, perm = 0644):
-    #if env.has_key('DESTDIR'):
-    #	# NB: use simple concatenation
-    #	dest = env.Dir(env['DESTDIR'] + env.Dir(dest).path)
+    if env.has_key('DESTDIR'):
+    	# NB: use simple concatenation
+    	dest = env.Dir(env['DESTDIR'] + env.Dir(dest).path)
     obj = env.Install(dest, files)
     for i in obj:
 	env.AddPostAction(i, env.Chmod(str(i), perm))
@@ -147,9 +141,9 @@ def InstallLibrary(env, dest, files, perm = 0644):
 SConsEnvironment.InstallLibrary = InstallLibrary
 
 def InstallData(env, dest, files, perm = 0644):
-    #if env.has_key('DESTDIR'):
-    #	# NB: use simple concatenation
-    #	dest = env.Dir(env['DESTDIR'] + env.Dir(dest).path)
+    if env.has_key('DESTDIR'):
+    	# NB: use simple concatenation
+    	dest = env.Dir(env['DESTDIR'] + env.Dir(dest).path)
     obj = env.Install(dest, files)
     for i in obj:
 	env.AddPostAction(i, env.Chmod(str(i), perm))
@@ -160,8 +154,10 @@ SConsEnvironment.InstallData = InstallData
 # follow freebsd hier(5) unless we've got better suggestions-
 # what is equivalent ref for red hat / debian based systems?
 
-env['prefix'] = ARGUMENTS.get('prefix', env['DESTDIR'])
-env['exec_prefix'] = ARGUMENTS.get('exec_prefix', '$prefix')
+prefix = ARGUMENTS.get('prefix', '/usr/local')
+env['prefix'] = prefix
+exec_prefix = ARGUMENTS.get('exec_prefix', '$prefix')
+env['exec_prefix'] = exec_prefix
 env['bindir'] = ARGUMENTS.get('bindir', '$exec_prefix/bin')
 env['sbindir'] = ARGUMENTS.get('sbindir', '$exec_prefix/sbin')
 # TODO the routing daemons themselves should go here (never executed
@@ -232,8 +228,8 @@ if not env.GetOption('clean') and not env.GetOption('help'):
     conf.Define('HOST_OS_NAME', '"' + osname + '"')
 
     # paths
-    conf.Define('XORP_ROOT', '"' + str(installdir) + '"')
-    conf.Define('XORP_INSTALL_ROOT', '"' + str(installdir) + '"')
+    conf.Define('XORP_ROOT', '"' + str(prefix) + '"')
+    conf.Define('XORP_INSTALL_ROOT', '"' + str(prefix) + '"')
     conf.Define('XORP_BUILD_ROOT', '"' + str(builddir) + '"')
     conf.Define('XORP_SRC_ROOT', '"' + str(sourcedir) + '"')
 
