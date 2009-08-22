@@ -200,7 +200,7 @@ def DoAllConfig(env, conf, host_os):
     has_net_if_h = conf.CheckHeader(['sys/types.h', 'sys/ioctl.h', 'sys/socket.h', 'net/if.h'])
     has_net_if_arp_h = conf.CheckHeader(['sys/types.h', 'sys/ioctl.h', 'sys/socket.h', 'net/if.h', 'net/if_arp.h'])
     has_net_if_dl_h = conf.CheckHeader(['sys/types.h', 'net/if_dl.h'])
-    has_net_if_ether_h = conf.CheckHeader('net/if_ether.h')
+    has_net_if_ether_h = conf.CheckHeader(['sys/types.h', 'net/if.h', 'net/if_ether.h'])
     has_net_if_media_h = conf.CheckHeader(['sys/types.h', 'net/if_media.h'])
     
     has_net_if_var_h = conf.CheckHeader(['sys/types.h', 'sys/ioctl.h', 'sys/socket.h', 'net/if.h', 'net/if_var.h'])
