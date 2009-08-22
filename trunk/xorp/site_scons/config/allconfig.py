@@ -241,7 +241,13 @@ def DoAllConfig(env, conf, host_os):
     
     # net stack: types
     # XXX header conditionals for linux/bsd variants needed.
-    prereq_ether_includes = [ 'sys/types.h', 'sys/socket.h', 'net/ethernet.h' ]
+    prereq_ether_includes = [ 'sys/types.h', 'sys/socket.h' ]
+    if has_net_ethernet_h:
+	prereq_ether_includes.append('net/ethernet.h')
+    if has_net_if_h:
+	prereq_ether_includes.append('net/if.h')
+    if has_net_if_ether_h:
+	prereq_ether_includes.append('net/if_ether.h')
     ether_includes = []
     for s in prereq_ether_includes:
         ether_includes.append("#include <%s>\n" % s)
