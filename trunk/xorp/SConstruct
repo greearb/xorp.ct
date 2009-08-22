@@ -212,12 +212,16 @@ if not env.GetOption('clean') and not env.GetOption('help'):
         osname = "FreeBSD"
         conf.Define('HOST_OS_FREEBSD')
         conf.Define('ENABLE_ADVANCED_MULTICAST_API')
-    if host_os == 'linux':
+    elif host_os == 'linux':
         osname = "Linux"
         conf.Define('HOST_OS_LINUX')
         conf.Define('HAVE_PROC_LINUX')
         conf.Define('ENABLE_ADVANCED_MULTICAST_API')
-    if host_os == 'sunos':
+    elif host_os == 'netbsd':
+	osname = "NetBSD"
+	conf.Define('HOST_OS_NETBSD')
+        conf.Define('ENABLE_ADVANCED_MULTICAST_API')
+    elif host_os == 'sunos':
         osname = "Solaris"
         conf.Define('HOST_OS_SOLARIS')
     else:
