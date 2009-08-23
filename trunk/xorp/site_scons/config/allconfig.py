@@ -139,7 +139,14 @@ def DoAllConfig(env, conf, host_os):
     has_sys_socket_h = conf.CheckHeader('sys/socket.h')
     has_sys_sockio_h = conf.CheckHeader('sys/sockio.h')
     has_sys_un_h = conf.CheckHeader('sys/un.h')
-    has_sys_mount_h = conf.CheckHeader('sys/mount.h')
+
+    prereq_sys_mount_h = []
+    if has_sys_types_h:
+        prereq_sys_mount_h.append('sys/types.h')
+    if has_sys_param_h:
+        prereq_sys_mount_h.append('sys/param.h')
+    has_sys_mount_h = conf.CheckHeader(prereq_sys_mount_h + ['sys/mount.h'])
+
     has_sys_resource_h = conf.CheckHeader('sys/resource.h')
     has_sys_stat_h = conf.CheckHeader('sys/stat.h')
     has_sys_syslog_h = conf.CheckHeader('sys/syslog.h')
@@ -282,8 +289,30 @@ def DoAllConfig(env, conf, host_os):
     # v4 stack
     has_netinet_in_h = conf.CheckHeader('netinet/in.h')
     has_netinet_in_systm_h = conf.CheckHeader(['sys/types.h', 'netinet/in_systm.h'])
-    has_netinet_in_var_h = conf.CheckHeader(['sys/types.h', 'sys/ioctl.h', 'sys/socket.h', 'net/if.h', 'netinet/in.h', 'net/if_var.h', 'netinet/in_var.h'])
-    has_netinet_ip_var_h = conf.CheckHeader(['sys/types.h', 'netinet/in.h', 'netinet/ip.h'])
+    prereq_netinet_in_var_h = []
+    if has_sys_types_h:
+        prereq_netinet_in_var_h.append('sys/types.h')
+    if has_sys_socket_h:
+        prereq_netinet_in_var_h.append('sys/socket.h')
+    if has_net_if_h:
+        prereq_netinet_in_var_h.append('net/if.h')
+    if has_net_if_var_h:
+        prereq_netinet_in_var_h.append('net/if_var.h')
+    if has_netinet_in_h:
+        prereq_netinet_in_var_h.append('netinet/in.h')
+    has_netinet_in_var_h = conf.CheckHeader(prereq_netinet_in_var_h + ['netinet/in_var.h'])
+
+    # Header file <netinet/ip.h> might need <sys/types.h>, <netinet.in.h>,
+    # and/or <netinet/in_systm.h>
+    prereq_netinet_ip_h = []
+    if has_sys_types_h:
+	prereq_netinet_ip_h.append('sys/types.h')
+    if has_netinet_in_h:
+        prereq_netinet_ip_h.append('netinet/in.h')
+    if has_netinet_in_systm_h:
+	prereq_netinet_ip_h.append('netinet/in_systm.h')
+    has_netinet_ip_h = conf.CheckHeader(prereq_netinet_ip_h + ['netinet/ip.h'])
+
     has_netinet_tcp_h = conf.CheckHeader(['sys/param.h', 'sys/socket.h', 'netinet/in.h', 'netinet/in_systm.h', 'netinet/ip.h', 'netinet/tcp.h'])
     has_netinet_igmp_h = conf.CheckHeader(['sys/types.h', 'netinet/in.h', 'netinet/igmp.h'])
     has_netinet_ether_h = conf.CheckHeader('netinet/ether.h')
@@ -357,10 +386,36 @@ def DoAllConfig(env, conf, host_os):
     mld_hdr_includes = string.join(mld_hdr_includes, '')
     has_struct_mld_hdr = conf.CheckType('struct mld_hdr', includes=mld_hdr_includes)
     
-    has_netinet6_ip6_var_h = conf.CheckHeader(['sys/types.h', 'sys/queue.h', 'sys/socket.h', 'net/route.h', 'netinet/in.h', 'netinet/ip6.h', 'netinet6/ip6_var.h'])
-    has_netinet6_in6_var_h = conf.CheckHeader(['sys/types.h', 'sys/queue.h', 'sys/socket.h', 'net/if.h', 'net/if_var.h', 'net/route.h', 'netinet/in.h', 'netinet/ip6.h', 'netinet6/in6_var.h'])
-    
-    prereq_netinet6_nd6_h = ['sys/param.h', 'sys/ioctl.h', 'sys/socket.h', 'net/if.h', 'net/if_var.h', 'netinet/in.h', 'netinet/in_var.h' ]
+    # Header file <netinet6/in6_var.h> might need <sys/types.h>, <sys/socket.h>,
+    # <net/if.h>, <net/if_var.h>, and/or <netinet/in.h>.
+    prereq_netinet6_in6_var_h = []
+    if has_sys_types_h:
+        prereq_netinet6_in6_var_h.append('sys/types.h')
+    if has_sys_socket_h:
+        prereq_netinet6_in6_var_h.append('sys/socket.h')
+    if has_net_if_h:
+        prereq_netinet6_in6_var_h.append('net/if.h')
+    if has_net_if_var_h:
+        prereq_netinet6_in6_var_h.append('net/if_var.h')
+    if has_netinet_in_h:
+        prereq_netinet6_in6_var_h.append('netinet/in.h')
+    has_netinet6_in6_var_h = conf.CheckHeader(prereq_netinet6_in6_var_h + ['netinet6/in6_var.h'])
+   
+    # Header file <netinet6/nd6.h> might need <sys/types.h>, <sys/socket.h>,
+    # <net/if.h>, <net/if_var.h>, <netinet/in.h>, and/or <netinet6/in6_var.h> 
+    prereq_netinet6_nd6_h = []
+    if has_sys_types_h:
+	prereq_netinet6_nd6_h.append('sys/types.h')
+    if has_sys_socket_h:
+	prereq_netinet6_nd6_h.append('sys/socket.h')
+    if has_net_if_h:
+	prereq_netinet6_nd6_h.append('net/if.h')
+    if has_net_if_var_h:
+	prereq_netinet6_nd6_h.append('net/if_var.h')
+    if has_netinet_in_h:
+	prereq_netinet6_nd6_h.append('netinet/in.h')
+    if has_netinet6_in6_var_h:
+	prereq_netinet6_nd6_h.append('netinet6/in6_var.h')
     netinet6_nd6_h = 'netinet6/nd6.h'
     has_netinet6_nd6_h = conf.CheckHeader(prereq_netinet6_nd6_h + [ netinet6_nd6_h ])
     has_cxx_netinet6_nd6_h = conf.CheckHeader(prereq_netinet6_nd6_h + [ netinet6_nd6_h ], language='C++')
@@ -471,11 +526,31 @@ def DoAllConfig(env, conf, host_os):
     
     ##########
     # vlan
-    has_net_if_vlanvar_h = conf.CheckHeader('net/if_vlanvar.h')
-    has_net_if_vlan_var_h = conf.CheckHeader(['sys/param.h', 'sys/ioctl.h', 'sys/socket.h', 'sys/sockio.h', 'net/ethernet.h', 'net/if.h', 'net/if_vlan_var.h'])
-    has_net_vlan_if_vlan_var_h = conf.CheckHeader('net/vlan/if_vlan_var.h')
-    has_linux_if_vlan_h = conf.CheckHeader('linux/if_vlan.h')
     
+    # Header files <net/if_vlan_var.h>, <net/if_vlanvar.h>, and 
+    # <net/vlan/if_vlan_var.h> might need a list of other files.
+    prereq_vlan = []
+    if has_sys_types_h:
+	prereq_vlan.append('sys/types.h')
+    if has_sys_socket_h:
+	prereq_vlan.append('sys/socket.h')
+    if has_net_if_h:
+	prereq_vlan.append('net/if.h')
+    if has_net_ethernet_h:
+	prereq_vlan.append('net/ethernet.h')
+    if has_net_if_ether_h:
+	prereq_vlan.append('net/if_ether.h')
+    if has_netinet_in_h:
+	prereq_vlan.append('netinet/in.h')
+    if has_netinet_if_ether_h:
+	prereq_vlan.append('netinet/if_ether.h')
+
+    has_net_if_vlanvar_h = conf.CheckHeader(prereq_vlan + ['net/if_vlanvar.h'])
+
+    has_net_if_vlan_var_h = conf.CheckHeader(prereq_vlan +  ['net/if_vlan_var.h'])
+    has_net_vlan_if_vlan_var_h = conf.CheckHeader(prereq_vlan + ['net/vlan/if_vlan_var.h'])
+
+    has_linux_if_vlan_h = conf.CheckHeader('linux/if_vlan.h')
     if has_linux_if_vlan_h:
         conf.Define('HAVE_VLAN_LINUX')
     else:
