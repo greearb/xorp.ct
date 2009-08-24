@@ -116,6 +116,7 @@ public:
 		       XrlCmdMap&		cmds,
 		       IPv4			host,
 		       uint16_t			port);
+    virtual ~FinderTcpConnector();
 
     /**
      * Connect to host specified in constructor.

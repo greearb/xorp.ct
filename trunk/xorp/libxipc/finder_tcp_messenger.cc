@@ -263,6 +263,10 @@ FinderTcpConnector::FinderTcpConnector(EventLoop&		e,
     : _e(e), _mm(mm), _cmds(cmds), _host(host), _port(port)
 {}
 
+FinderTcpConnector::~FinderTcpConnector()
+{
+}
+
 int
 FinderTcpConnector::connect(FinderTcpMessenger*& created_messenger)
 {

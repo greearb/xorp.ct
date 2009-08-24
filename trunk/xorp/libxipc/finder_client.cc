@@ -165,6 +165,7 @@ class FinderClientOneOffOp : public FinderClientOp
 {
 public:
     FinderClientOneOffOp(FinderClient& fc) : FinderClientOp(fc) {}
+    virtual ~FinderClientOneOffOp() {}
 
     virtual void force_failure(const XrlError&) = 0;
 };
@@ -179,6 +180,7 @@ class FinderClientRepeatOp : public FinderClientOp
 public:
     FinderClientRepeatOp(FinderClient& fc, uint32_t target_id)
 	: FinderClientOp(fc), _tid(target_id) {}
+    virtual ~FinderClientRepeatOp() {}
 
     uint32_t target_id() const { return _tid; }
 
