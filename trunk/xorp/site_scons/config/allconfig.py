@@ -218,8 +218,8 @@ def DoAllConfig(env, conf, host_os):
     
     has_linux_ethtool_h = conf.CheckHeader('linux/ethtool.h')
     has_linux_if_tun_h = conf.CheckHeader('linux/if_tun.h')
-    has_linux_netlink_h = conf.CheckHeader('linux/netlink.h')
-    has_linux_rtnetlink_h = conf.CheckHeader('linux/rtnetlink.h')
+    has_linux_netlink_h = conf.CheckHeader(['sys/types.h', 'sys/socket.h', 'linux/netlink.h'])
+    has_linux_rtnetlink_h = conf.CheckHeader(['sys/types.h', 'sys/socket.h', 'linux/rtnetlink.h'])
     
     if has_linux_netlink_h:
         conf.Define('HAVE_NETLINK_SOCKETS')
@@ -419,7 +419,7 @@ def DoAllConfig(env, conf, host_os):
     netinet6_nd6_h = 'netinet6/nd6.h'
     has_netinet6_nd6_h = conf.CheckHeader(prereq_netinet6_nd6_h + [ netinet6_nd6_h ])
     has_cxx_netinet6_nd6_h = conf.CheckHeader(prereq_netinet6_nd6_h + [ netinet6_nd6_h ], language='C++')
-    if not has_cxx_netinet6_nd6_h:
+    if has_netinet6_nd6_h and not has_cxx_netinet6_nd6_h:
         conf.Define('HAVE_BROKEN_CXX_NETINET6_ND6_H')
     
     # v6 stack: sysctl (bsd)
