@@ -2497,7 +2497,7 @@ AcceptSession::swap_sockets(const OpenPacket& p)
     uint8_t *buf = new uint8_t[BGPPacket::MAXPACKETSIZE];
     XLOG_ASSERT(p.encode(buf, ccnt, NULL));
     _peer.get_message(BGPPacket::GOOD_MESSAGE, buf, ccnt, 0);
-    delete buf;
+    delete[] buf;
 #endif
 }
 
