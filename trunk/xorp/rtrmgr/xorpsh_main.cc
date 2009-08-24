@@ -285,11 +285,10 @@ XorpShell::run(const string& commands, bool exit_on_error)
     }
     char buf[256];
     memset(buf, 0, sizeof(buf));
-    if (fgets(buf, sizeof(buf) - 1, file) == 0) {
-	fclose(file);
-	XLOG_FATAL("Failed to read authfile %s", _authfile.c_str());
-    }
+    char *pbuf = fgets(buf, sizeof(buf) - 1, file);
     fclose(file);
+    if (pbuf == NULL)
+	XLOG_FATAL("Failed to read authfile %s", _authfile.c_str());
 #ifdef HOST_OS_WINDOWS
     (void)DeleteFileA(_authfile.c_str());	// XXX
 #else
