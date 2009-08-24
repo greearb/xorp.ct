@@ -73,6 +73,8 @@ def DoAllConfig(env, conf, host_os):
     
     ##########
     # posix
+    has_sys_types_h = conf.CheckHeader('sys/types.h')
+
     has_fcntl_h = conf.CheckHeader('fcntl.h')
     has_getopt_h = conf.CheckHeader('getopt.h')
     has_glob_h = conf.CheckHeader('glob.h')
@@ -80,7 +82,12 @@ def DoAllConfig(env, conf, host_os):
     has_pthread_h = conf.CheckHeader('pthread.h')
     has_pwd_h = conf.CheckHeader('pwd.h')
     has_mqueue_h = conf.CheckHeader('mqueue.h')
-    has_regex_h = conf.CheckHeader('regex.h')
+
+    prereq_regex_h = []
+    if has_sys_types_h:
+	prereq_regex_h.append('sys/types.h')
+    has_regex_h = conf.CheckHeader(prereq_regex_h + ['regex.h'])
+
     has_syslog_h = conf.CheckHeader('syslog.h')
     has_termios_h = conf.CheckHeader('termios.h')
     has_time_h = conf.CheckHeader('time.h')
@@ -127,7 +134,6 @@ def DoAllConfig(env, conf, host_os):
     # unix: system headers
     has_sys_cdefs_h = conf.CheckHeader('sys/cdefs.h')
     has_sys_param_h = conf.CheckHeader('sys/param.h')
-    has_sys_types_h = conf.CheckHeader('sys/types.h')
     has_sys_utsname_h = conf.CheckHeader('sys/utsname.h')
     has_sys_errno_h = conf.CheckHeader('sys/errno.h')
     has_sys_wait_h = conf.CheckHeader('sys/wait.h')
@@ -215,11 +221,41 @@ def DoAllConfig(env, conf, host_os):
     has_net_route_h = conf.CheckHeader(['sys/types.h', 'sys/ioctl.h', 'sys/socket.h', 'net/if.h', 'net/route.h'])
     has_ifaddrs_h = conf.CheckHeader(['sys/types.h', 'sys/socket.h', 'ifaddrs.h'])
     has_stropts_h = conf.CheckHeader('stropts.h')
-    
-    has_linux_ethtool_h = conf.CheckHeader('linux/ethtool.h')
+
+    # Header file <linux/ethtool.h> might need <inttypes.h>, <stdint.h>,
+    # and/or <linux/types.h>
+    prereq_linux_ethtool_h = []
+    if has_inttypes_h:
+	prereq_linux_ethtool_h.append('inttypes.h')
+    if has_stdint_h:
+	prereq_linux_ethtool_h.append('stdint.h')
+    if has_linux_types_h:
+	prereq_linux_ethtool_h.append('linux/types.h')
+    has_linux_ethtool_h = conf.CheckHeader(prereq_linux_ethtool_h + ['linux/ethtool.h'])
+
     has_linux_if_tun_h = conf.CheckHeader('linux/if_tun.h')
-    has_linux_netlink_h = conf.CheckHeader(['sys/types.h', 'sys/socket.h', 'linux/netlink.h'])
-    has_linux_rtnetlink_h = conf.CheckHeader(['sys/types.h', 'sys/socket.h', 'linux/rtnetlink.h'])
+
+    # Header file <linux/netlink.h> might need <sys/types.h>, <sys/socket.h>,
+    # and/or <linux/types.h>
+    prereq_linux_netlink_h = []
+    if has_sys_types_h:
+        prereq_linux_netlink_h.append('sys/types.h')
+    if has_sys_socket_h:
+        prereq_linux_netlink_h.append('sys/socket.h')
+    if has_linux_types_h:
+        prereq_linux_netlink_h.append('linux/types.h')
+    has_linux_netlink_h = conf.CheckHeader(prereq_linux_netlink_h + ['linux/netlink.h'])
+
+    # Header file <linux/rtnetlink.h> might need <sys/types.h>, <sys/socket.h>,
+    # and/or <linux/types.h>
+    prereq_linux_rtnetlink_h = []
+    if has_sys_types_h:
+        prereq_linux_rtnetlink_h.append('sys/types.h')
+    if has_sys_socket_h:
+        prereq_linux_rtnetlink_h.append('sys/socket.h')
+    if has_linux_types_h:
+        prereq_linux_rtnetlink_h.append('linux/types.h')
+    has_linux_rtnetlink_h = conf.CheckHeader(prereq_linux_rtnetlink_h + ['linux/rtnetlink.h'])
     
     if has_linux_netlink_h:
         conf.Define('HAVE_NETLINK_SOCKETS')
@@ -316,8 +352,19 @@ def DoAllConfig(env, conf, host_os):
     has_netinet_tcp_h = conf.CheckHeader(['sys/param.h', 'sys/socket.h', 'netinet/in.h', 'netinet/in_systm.h', 'netinet/ip.h', 'netinet/tcp.h'])
     has_netinet_igmp_h = conf.CheckHeader(['sys/types.h', 'netinet/in.h', 'netinet/igmp.h'])
     has_netinet_ether_h = conf.CheckHeader('netinet/ether.h')
-    # XXX needs linux/bsd header conditionals
-    has_netinet_if_ether_h = conf.CheckHeader(['sys/param.h', 'sys/ioctl.h', 'sys/socket.h', 'sys/sockio.h', 'net/ethernet.h', 'net/if.h', 'netinet/in.h', 'netinet/in_systm.h', 'netinet/if_ether.h'])
+
+    # Header file <netinet/if_ether.h> might need <sys/types.h>, 
+    # <sys/socket.h>, <net/if.h>, and/or <netinet/in.h>
+    prereq_netinet_if_ether_h = []
+    if has_sys_types_h: 
+	prereq_netinet_if_ether_h.append('sys/types.h')
+    if has_sys_socket_h: 
+	prereq_netinet_if_ether_h.append('sys/socket.h')
+    if has_net_if_h: 
+	prereq_netinet_if_ether_h.append('net/if.h')
+    if has_netinet_in_h:
+	prereq_netinet_if_ether_h.append('netinet/in.h')
+    has_netinet_if_ether_h = conf.CheckHeader(prereq_netinet_if_ether_h + ['netinet/if_ether.h'])
 
     # opensolaris
     has_inet_nd_h = conf.CheckHeader('inet/nd.h')
