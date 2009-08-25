@@ -72,7 +72,6 @@ tgts = [
     'test_socket6.tgt',
     'test_xrls.tgt',
     'vrrp.tgt',
-    'xorp_if_mib.tgt',
     'xorpsh.tgt',
     ]
 
