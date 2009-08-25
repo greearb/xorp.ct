@@ -38,7 +38,7 @@ Help("""
     os={linux|freebsd|..} to identify the target os.
     rel={public17|..} to identify the target release.
     builddir=<some path> to specify a different build directory.
-        Default is "../arch-os-rel".
+        Default is "obj/<arch>-<os>-<rel>".
     prefix=<some path> to specify a different install directory.
         Default is "/usr/local/xorp".
     shared=true to build with shared libraries. Default is false.
