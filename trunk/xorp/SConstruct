@@ -41,10 +41,7 @@ Help("""
         Default is "obj/<arch>-<os>-<rel>".
     prefix=<some path> to specify a different install directory.
         Default is "/usr/local/xorp".
-    shared=true to build with shared libraries. Default is false.
-    strip=true to strip binaries when installed. Default is false.
 """)
-#Help(opts.GenerateHelpText(env))
 
 import sys
 import os
@@ -53,6 +50,14 @@ import SCons
 from SCons.Script.SConscript import SConsEnvironment
 import SCons.Action
 import SCons.Builder
+
+vars = Variables()
+
+vars.AddVariables(
+    BoolVariable('shared', 'build with shared libraries', False),
+    BoolVariable('strip',  'strip executables and libraries when installed', False),
+
+    )
 
 build_arch = os.uname()[4].lower()
 build_os = os.uname()[0].lower()
@@ -88,16 +93,17 @@ env = Environment(
 		  REL = rel,
 		  BUILDDIR = builddir,
 		  CPPPATH=['/usr/sfw/include', '/opt/local/include', '/usr/local/include', '$BUILDDIR'],
-		  LIBPATH=['/usr/sfw/lib', '/opt/local/lib', '/usr/local/lib'])
+		  LIBPATH=['/usr/sfw/lib', '/opt/local/lib', '/usr/local/lib'],
+		  variables = vars)
 
 env['DESTDIR'] = ARGUMENTS.get('DESTDIR', '')
 
-if ARGUMENTS.get('strip', False) == 'true':
+if env['strip']:
     env['strip'] = True
     env['STRIP'] = "strip"
 print 'Strip binaries:   ', env.has_key('strip')
 
-if ARGUMENTS.get('shared', False) == 'true':
+if env['shared']:
     env['SHAREDLIBS'] = "defined"
 print 'Shared libraries: ', env.has_key('SHAREDLIBS')
 
@@ -282,3 +288,5 @@ env.AppendUnique(RPATH = [
     ])
 
 env.SConscript(['SConscript'], variant_dir='$BUILDDIR', exports='env', duplicate=0)
+
+env.Help(vars.GenerateHelpText(env))
