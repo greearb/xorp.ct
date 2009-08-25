@@ -56,9 +56,10 @@ Requirements
 
 * To build the XORP Live Image using NanoBSD:
 
-- Run it as ROOT! You must have write permission on several places.
+- Run it as ROOT! You must have write permission for several steps in
+  this procedure to run correctly.
 - A working FreeBSD machine running version 7.0-RELEASE or higher.
-- A checkout of the FreeBSD 7.0-RELEASE sources.
+- A checkout of the FreeBSD 7.2-STABLE sources.
   This can be your installed /usr/src sources, however it is recommended
   that you keep a backup copy, as certain files need to be modified.
   In the livecd.nano configuration file, the NANO_SRC variable must point
@@ -73,20 +74,20 @@ Requirements
 
 - In the XORP CVS repository, the files relative to the other/LiveCD
   directory must be used to overwrite the FreeBSD sources you will be
-  building the system from.
-  It is hoped that such modification will not be required in future.
+  building the system from, if you are using a version of the FreeBSD
+  sources prior to 7.2-STABLE.
 
-  Please refer to http://www.xorp.org/cvs.html for instructions on checking
+  Please refer to http://www.xorp.org/svn.html for instructions on checking
   out from the XORP repository, before checking out other/LiveCD:
-    # cvs checkout other/LiveCD
+    # svn co http://xorp.svn.sourceforge.net/svnroot/trunk/other/LiveCD
 
   Once the sources are checked out, use the following commands to copy
   the LiveCD modifications on top of your FreeBSD sources:
     # cd other/LiveCD
     # tar cf - . | ( cd $NANO_SRC && tar xvf - )
 
-- A pre-built XORP package from the FreeBSD ports collection, net/xorp.
-  This may be built by cd'ing to /usr/ports/net/xorp and running
+- A pre-built XORP package from the FreeBSD ports collection, net/xorp-devel.
+  This may be built by cd'ing to /usr/ports/net/xorp-devel and running
   "make package", however, this will also install XORP on your build system.
   This step is non-optional and is a limitation of the FreeBSD ports system.
 
@@ -100,8 +101,7 @@ Requirements
 
 - 2 GB of free disk space under /usr/obj (where NanoBSD builds by default).
 
-Of course you need a CD Recorder to burn a LiveCD image, but it does not need 
-to be in the FreeBSD system.
+You will need a CD recorder in order to burn a LiveCD ISO image.
 
 * To run the system based on a XORP Live Image requires an x86 based PC
   with at least 256MB memory. The BIOS must be configured to boot from the
@@ -111,7 +111,7 @@ to be in the FreeBSD system.
    saving configuration.
 
  * If using the USB image, a writable USB disk is required.
-   A PC with a USB 2.0 capable controller and disk are recommended.
+   A PC with a USB 2.0 capable controller and disk are highly recommended.
 
 The Live Image now uses a multiprocessor kernel; it is backwards compatible
 with uniprocessor machines. Most, but not all, network card drivers are
@@ -122,16 +122,17 @@ How to use it
 =============
 
 XORP's Live Image is delivered as a set of scripts which build on the
-existing NanoBSD framework in FreeBSD 7.1-RELEASE. In the near future
-it is hoped the changes can be pushed back to the FreeBSD Project.
+existing NanoBSD framework in FreeBSD 7.2.
 
 The nanobsd.sh script is the main tool, used to generate the bootable image.
+Additional patches are supplied for LiveCD generation, which are not part
+of NanoBSD as shipped in FreeBSD.
 
 
 nanobsd.sh usage
 ================
 
-Before using the nanobsd.sh script you should edit the livecd.nano
+Before using the nanobsd.sh script, you should edit the livecd.nano
 config file and set some basic variables in there. Those variables will
 define paths, places and files that will be used and/or generated during
 the operation.
