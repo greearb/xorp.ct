@@ -38,6 +38,7 @@ env.AppendUnique(CPPPATH = [
     ])
 
 env.PrependUnique(LIBPATH = [
+    '$BUILDDIR/fea',
     '$BUILDDIR/fea/data_plane/managers',
     '$BUILDDIR/fea/data_plane/fibconfig',
     '$BUILDDIR/fea/data_plane/firewall',
@@ -168,14 +169,12 @@ feapath = '$exec_prefix/fea'
 
 env = env.Clone()
 
-#env.AppendUnique(LIBS = [
-#    'fea',
-#])
-
-env.PrependUnique(LIBS = [ libfea ])
-#env.PrependUnique(LIBS = [
-#    'fea',
-#])
+if is_shared:
+    env.PrependUnique(LIBS = [
+        'fea',
+    ])
+else:
+    env.PrependUnique(LIBS = [ libfea ])
 
 feasrcs = [
           'xorp_fea.cc',
@@ -212,4 +211,4 @@ env.Alias('install',
 
 #######################
 
-Default(fea, feadummy)
+Default(libfea, fea, feadummy)
