@@ -14,10 +14,10 @@ check: $(TARGETS)
 	@for i in $(TARGETS) ; do xmllint --valid --html --noout $$i && echo $$i passed. ; done
 
 install-www: all
-	rsync -avz ./ www.xorp.org:/var/www/xorp.org/www.xorp.org/
+	rsync -avz --delete --exclude=.svn/ ./ www.xorp.org:/var/www/xorp.org/www.xorp.org/
 
 install-test: all
-	rsync -avz ./ www.xorp.org:/var/www/xorp.org/test.xorp.org/
+	rsync -avz --delete --exclude=.svn/ ./ www.xorp.org:/var/www/xorp.org/test.xorp.org/
 
 clean:
 	rm -rf $(TARGETS)
