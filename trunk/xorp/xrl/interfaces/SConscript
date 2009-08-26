@@ -92,7 +92,6 @@ xifs = [
     'test.xif',
     'test_xrls.xif',
     'vrrp.xif',
-    'xorp_if_mib.xif',
     ]
 
 all_xif_libs = []
