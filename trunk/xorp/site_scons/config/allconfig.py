@@ -45,11 +45,11 @@ def DoAllConfig(env, conf, host_os):
                   'int32_t', 'uint32_t',
                   'int64_t', 'uint64_t'  ]:
         includes = ""
-    if has_inttypes_h:
-    	includes += '#include <inttypes.h>'
-    if has_stdint_h:
-    	includes += '#include <stdint.h>'
-    conf.CheckType(type, includes)
+	if has_inttypes_h:
+	    includes += '#include <inttypes.h>\n'
+	if has_stdint_h:
+	    includes += '#include <stdint.h>\n'
+	conf.CheckType(type, includes)
     
     ##########
     # stdc
