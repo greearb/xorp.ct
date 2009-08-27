@@ -473,7 +473,6 @@ PimNode::updates_made()
 	    // Update the vif flags
 	    //
 	    bool is_up = ifmgr_iface.enabled();
-	    is_up &= (! ifmgr_iface.no_carrier());
 	    is_up &= ifmgr_vif.enabled();
 	    set_config_vif_flags(ifmgr_vif_name,
 				 ifmgr_vif.pim_register(),

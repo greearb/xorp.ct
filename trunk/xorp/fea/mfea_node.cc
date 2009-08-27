@@ -434,7 +434,6 @@ MfeaNode::interface_update(const string&	ifname,
 	return;		// No IfTreeVif to consider
 
     is_up = ifp->enabled();
-    is_up &= (! ifp->no_carrier());
     is_up &= vifp->enabled();
     ProtoNode<MfeaVif>::set_config_vif_flags(ifname,
 					     false,	// is_pim_register
@@ -561,7 +560,6 @@ MfeaNode::vif_update(const string&	ifname,
     // Update the vif flags
     //
     is_up = ifp->enabled();
-    is_up &= (! ifp->no_carrier());
     is_up &= vifp->enabled();
     ProtoNode<MfeaVif>::set_config_vif_flags(vifname,
 					     false,	// is_pim_register
