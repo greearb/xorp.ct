@@ -261,6 +261,17 @@ def DoAllConfig(env, conf, host_os):
         conf.Define('HAVE_NETLINK_SOCKETS')
     elif has_net_route_h and host_os != 'linux':
         conf.Define('HAVE_ROUTING_SOCKETS')
+
+    if has_linux_netlink_h:
+        rta_nl_includes = []
+        for s in prereq_linux_rtnetlink_h:
+            rta_nl_includes.append("#include <%s>\n" % s)
+            
+        rta_nl_includes.append("#include <linux/rtnetlink.h>\n");
+        rta_nl_includes = string.join(rta_nl_includes, '')
+        has_netlink_rta_table = conf.CheckDeclaration('RTA_TABLE', rta_nl_includes)
+        if has_netlink_rta_table:
+            conf.Define('HAVE_NETLINK_SOCKET_ATTRIBUTE_RTA_TABLE')
     
     # net stack: struct members
     # XXX header conditionals for linux/bsd variants needed.
