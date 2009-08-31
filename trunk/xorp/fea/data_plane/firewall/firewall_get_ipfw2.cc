@@ -148,6 +148,7 @@ FirewallGetIpfw2::get_table6(list<FirewallEntry>& firewall_entry_list,
     error_msg = c_format("Cannot get the IPv6 firewall table: "
 			 "IPv6 is not supported");
     return (XORP_ERROR);
+    UNUSED(firewall_entry_list);
 #endif
 }
 
