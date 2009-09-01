@@ -577,8 +577,10 @@ PimVif::pim_send(const IPvX& src, const IPvX& dst,
     int ttl = MINTTL;
     bool ip_internet_control = true;	// XXX: might be overwritten below
 
-    if (! (is_up() || is_pending_down()))
+    if (! (is_up() || is_pending_down())) {
+	debug_msg("Vif %s is currently down\n", name().c_str());
 	return (XORP_ERROR);
+    }
 
     //
     // Some of the messages should never be send via the PIM Register vif
@@ -591,6 +593,8 @@ PimVif::pim_send(const IPvX& src, const IPvX& dst,
 	case PIM_ASSERT:
 	case PIM_GRAFT:
 	case PIM_GRAFT_ACK:
+	    debug_msg("Invalid message type %d on register vif\n",
+		message_type);
 	    return (XORP_ERROR);	// Those messages are not allowed
 	case PIM_REGISTER:
 	case PIM_REGISTER_STOP:
