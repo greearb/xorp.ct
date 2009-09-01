@@ -3567,7 +3567,7 @@ XrlCmdError
 XrlPimNode::mld6igmp_client_0_1_add_membership4(
     // Input values, 
     const string&	, // xrl_sender_name, 
-    const string&	, // vif_name, 
+    const string&	vif_name,
     const uint32_t&	vif_index, 
     const IPv4&		source, 
     const IPv4&		group)
@@ -3585,8 +3585,12 @@ XrlPimNode::mld6igmp_client_0_1_add_membership4(
 
     if (PimNode::add_membership(vif_index, IPvX(source), IPvX(group))
 	!= XORP_OK) {
-	error_msg = c_format("Failed to add membership for (%s, %s)",
-			     cstring(source), cstring(group));
+	error_msg = c_format("Failed to add membership for (%s, %s)"
+			     "on vif %s: %s",
+			     cstring(source),
+			     cstring(group),
+			     vif_name.c_str(),
+			     error_msg.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -3597,7 +3601,7 @@ XrlCmdError
 XrlPimNode::mld6igmp_client_0_1_add_membership6(
     // Input values, 
     const string&	, // xrl_sender_name, 
-    const string&	, // vif_name, 
+    const string&	vif_name,
     const uint32_t&	vif_index, 
     const IPv6&		source, 
     const IPv6&		group)
@@ -3615,8 +3619,12 @@ XrlPimNode::mld6igmp_client_0_1_add_membership6(
 
     if (PimNode::add_membership(vif_index, IPvX(source), IPvX(group))
 	!= XORP_OK) {
-	error_msg = c_format("Failed to add membership for (%s, %s)",
-			     cstring(source), cstring(group));
+	error_msg = c_format("Failed to add membership for (%s, %s)"
+			     "on vif %s: %s",
+			     cstring(source),
+			     cstring(group),
+			     vif_name.c_str(),
+			     error_msg.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -3627,7 +3635,7 @@ XrlCmdError
 XrlPimNode::mld6igmp_client_0_1_delete_membership4(
     // Input values, 
     const string&	, // xrl_sender_name, 
-    const string&	, // vif_name, 
+    const string&	vif_name,
     const uint32_t&	vif_index, 
     const IPv4&		source, 
     const IPv4&		group)
@@ -3645,8 +3653,12 @@ XrlPimNode::mld6igmp_client_0_1_delete_membership4(
 
     if (PimNode::delete_membership(vif_index, IPvX(source), IPvX(group))
 	!= XORP_OK) {
-	error_msg = c_format("Failed to delete membership for (%s, %s)",
-			     cstring(source), cstring(group));
+	error_msg = c_format("Failed to delete membership for (%s, %s)"
+			     "on vif %s: %s",
+			     cstring(source),
+			     cstring(group),
+			     vif_name.c_str(),
+			     error_msg.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -3658,7 +3670,7 @@ XrlCmdError
 XrlPimNode::mld6igmp_client_0_1_delete_membership6(
     // Input values, 
     const string&	, // xrl_sender_name, 
-    const string&	, // vif_name, 
+    const string&	vif_name,
     const uint32_t&	vif_index, 
     const IPv6&		source, 
     const IPv6&		group)
@@ -3676,8 +3688,12 @@ XrlPimNode::mld6igmp_client_0_1_delete_membership6(
 
     if (PimNode::delete_membership(vif_index, IPvX(source), IPvX(group))
 	!= XORP_OK) {
-	error_msg = c_format("Failed to delete membership for (%s, %s)",
-			     cstring(source), cstring(group));
+	error_msg = c_format("Failed to delete membership for (%s, %s)"
+			     "on vif %s: %s",
+			     cstring(source),
+			     cstring(group),
+			     vif_name.c_str(),
+			     error_msg.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
