@@ -93,6 +93,14 @@ public:
      */
     void	disable();
 
+    /**
+     * Apply BSR configuration changes.
+     *
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		apply_bsr_changes(string& error_msg);
+
     PimNode&	pim_node()	const	{ return (_pim_node); }
     
     int		unicast_pim_bootstrap(PimVif *pim_vif,

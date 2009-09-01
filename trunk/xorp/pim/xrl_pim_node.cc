@@ -3946,6 +3946,17 @@ XrlPimNode::pim_0_1_stop_bsr()
     return XrlCmdError::OKAY();
 }
 
+XrlCmdError
+XrlPimNode::pim_0_1_apply_bsr_changes()
+{
+    string error_msg;
+    
+    if (PimNode::apply_bsr_changes(error_msg) != XORP_OK)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+
+    return XrlCmdError::OKAY();
+}
+
 //
 // PIM configuration
 //

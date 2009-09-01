@@ -59,6 +59,11 @@ interface pim/0.1 {
 	stop_bsr
 
 	/**
+	 * Apply BSR configuration changes.
+	 */
+	 apply_bsr_changes
+
+	/**
 	 * Add/delete scope zone.
 	 *
 	 * @param scope_zone_id the ID of the configured zone.

@@ -709,6 +709,11 @@ protected:
     XrlCmdError pim_0_1_stop_bsr();
 
     /**
+     *  Apply BSR configuration changes.
+     */
+    XrlCmdError pim_0_1_apply_bsr_changes();
+
+    /**
      *  Add/delete scope zone.
      *  
      *  @param scope_zone_id the ID of the configured zone.

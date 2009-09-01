@@ -316,6 +316,121 @@ PimBsr::disable()
     XLOG_INFO("Bootstrap mechanism disabled");
 }
 
+int
+PimBsr::apply_bsr_changes(string& error_msg)
+{
+    list<BsrZone*>::iterator iter;
+    list<BsrZone*> del_list;
+
+    if (! is_enabled())
+	return (XORP_OK);
+
+    //
+    // Preserve any elected BSR zones
+    //
+    for (iter = _active_bsr_zone_list.begin();
+	 iter != _active_bsr_zone_list.end(); iter++) {
+	BsrZone* tmp_zone = *iter;
+	// If the BSR zone is not elected BSR, just remove it
+	if (tmp_zone->bsr_zone_state() != BsrZone::STATE_ELECTED_BSR) {
+	    del_list.push_back(tmp_zone);
+	} else {
+	    //
+	    // It is an Elected BSR. We will keep the BSR zone in the list
+	    // but remove all Cand RPs. Some of them may have been deleted.
+	    // The Cand RPs that were not deleted will be added again below.
+	    //
+	    delete_pointers_list(tmp_zone->bsr_group_prefix_list());
+	}
+    }
+
+    for (iter = del_list.begin(); iter != del_list.end(); ++iter) {
+	_active_bsr_zone_list.remove(*iter);
+    }
+    delete_pointers_list(del_list);
+
+    //
+    // Clean up any deleted zone
+    //
+    for (iter = _active_bsr_zone_list.begin();
+	 iter != _active_bsr_zone_list.end(); ++iter) {
+	BsrZone *active_bsr_zone = *iter;
+	if (active_bsr_zone->bsr_zone_state() == BsrZone::STATE_ELECTED_BSR) {
+	    BsrZone *config_bsr_zone;
+	    config_bsr_zone = find_config_bsr_zone(active_bsr_zone->zone_id());
+	    if (config_bsr_zone == NULL) {
+		// Zone removed from config
+		del_list.push_back(active_bsr_zone);
+		continue;
+	    }
+
+	    //
+	    // Zone is no longer BSR candidate (i.e., removed from Cand-BSR but
+	    // still has some Cand-RP state).
+	    //
+	    // Remove it too, as the Cand-RP state is re-added below
+	    if (! config_bsr_zone->i_am_candidate_bsr()) {
+		del_list.push_back(active_bsr_zone);
+		continue;
+	    }
+	}
+    }
+
+    //
+    // Delete the vanished items
+    //
+    for (iter = del_list.begin(); iter != del_list.end(); ++iter) {
+	BsrZone *active_bsr_zone = *iter;
+	_active_bsr_zone_list.remove(active_bsr_zone);
+    }
+    delete_pointers_list(del_list);
+
+    //
+    // Activate all configured BSR zones
+    //
+    for (iter = _config_bsr_zone_list.begin();
+	 iter != _config_bsr_zone_list.end();
+	 ++iter) {
+	BsrZone *config_bsr_zone = *iter;
+
+	if (config_bsr_zone->i_am_candidate_bsr()) {
+	    if (add_active_bsr_zone(*config_bsr_zone, error_msg) == NULL) {
+		XLOG_ERROR("Cannot add configured Bootstrap zone %s: %s",
+			   cstring(config_bsr_zone->zone_id()),
+			   error_msg.c_str());
+		stop();
+		return (XORP_ERROR);
+	    }
+	}
+	config_bsr_zone->start_candidate_rp_advertise_timer();
+    }
+
+    //
+    // When restarting we want to keep any previously enabled BSR.
+    // Set it to PENDING and expire the bsr_timer immediately.
+    // As soon as the timer runs, it puts the zone back in the ELECTED
+    // state and run the needed actions (calculate RP-Set and send a
+    // BSR Message with the new RP-Set).
+    //
+    for (iter = _active_bsr_zone_list.begin();
+	 iter != _active_bsr_zone_list.end();
+	 ++iter) {
+	BsrZone *active_bsr_zone = *iter;
+	if (active_bsr_zone->bsr_zone_state() == BsrZone::STATE_ELECTED_BSR) {
+	    if (active_bsr_zone->i_am_candidate_bsr()) {
+		// zone was not changed
+		active_bsr_zone->set_bsr_zone_state(BsrZone::STATE_PENDING_BSR);
+	    } else {
+		// zone is no longer Cand-BSR, but contains Cand-RPs
+		active_bsr_zone->set_bsr_zone_state(BsrZone::STATE_ACCEPT_ANY);
+	    }
+	    active_bsr_zone->expire_bsr_timer();
+	}
+    }
+
+    return (XORP_OK);
+}
+
 // Unicast the Bootstrap message(s) to a (new) neighbor
 int
 PimBsr::unicast_pim_bootstrap(PimVif *pim_vif, const IPvX& nbr_addr) const

@@ -872,7 +872,17 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		stop_bsr() { return (pim_bsr().stop()); }
-    
+
+    /**
+     * Apply BSR configuration changes.
+     *
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		apply_bsr_changes(string& error_msg) {
+	return (pim_bsr().apply_bsr_changes(error_msg));
+    }
+
     //
     // Configuration methods
     //
