@@ -56,7 +56,10 @@ vars = Variables()
 vars.AddVariables(
     BoolVariable('shared', 'build with shared libraries', False),
     BoolVariable('strip',  'strip executables and libraries when installed', False),
-
+    BoolVariable('debug_stl',  'Build with checked STL operations', False),
+    BoolVariable('debug_msg',  'Build with debug messages', False),
+    BoolVariable('debug_fn',  'Build with function names in debug_msg output', False),
+    BoolVariable('debug_cb',  'Build with callback debugging', False),
     )
 
 build_arch = os.uname()[4].lower()
@@ -76,12 +79,15 @@ rel = ARGUMENTS.get('rel', 'public17')
 sourcedir=Dir(".").abspath
 builddir=Dir(ARGUMENTS.get('builddir', '#obj/' + host_arch+'-'+host_os+'-'+rel)).abspath
 
+prefix = ARGUMENTS.get('prefix', '/usr/local/xorp')
+
 print 'Cross build:      ', cross
 print 'Architecture:     ', host_arch
 print 'Operating System: ', host_os
 print 'Release:          ', rel
 print 'Source path:      ', sourcedir
 print 'Build path:       ', builddir
+print 'Install path:     ', prefix
 
 env = Environment(
 		  TOOLS = ['default', 'autotest', 'clntgen', 'tgtgen',
@@ -106,6 +112,13 @@ print 'Strip binaries:   ', env.has_key('strip')
 if env['shared']:
     env['SHAREDLIBS'] = "defined"
 print 'Shared libraries: ', env.has_key('SHAREDLIBS')
+
+print 'Debug STL:        ', env['debug_stl']
+# XXX Enabling debug messages for the whole tree may not be what you want,
+# as it can lead to premature timeouts.
+print 'Debug messages:   ', env['debug_msg']
+print 'Debug function names: ', env['debug_fn']
+print 'Debug callbacks:  ', env['debug_cb']
 
 env['CONFIGURELOG'] = str(builddir) + os.sep + 'config.log'
 env['CONFIGUREDIR'] = str(builddir) + os.sep + '.sconf_temp'
@@ -161,7 +174,6 @@ SConsEnvironment.InstallData = InstallData
 # follow freebsd hier(5) unless we've got better suggestions-
 # what is equivalent ref for red hat / debian based systems?
 
-prefix = ARGUMENTS.get('prefix', '/usr/local/xorp')
 env['prefix'] = prefix
 exec_prefix = ARGUMENTS.get('exec_prefix', '$prefix')
 env['exec_prefix'] = exec_prefix
@@ -281,6 +293,38 @@ env.AppendUnique(CXXFLAGS = [
     '-Wcast-align',
     '-Woverloaded-virtual',
     '-ftemplate-depth-25'
+    ])
+
+# XXX For GNU STL only at this time.
+if env['debug_stl']:
+    env.AppendUnique(CXXFLAGS = [
+        '-D_GLIBCXX_DEBUG',
+        '-D_GLIBCXX_DEBUG_PEDANTIC',
+    ])
+
+# XXX DEBUG_LOGGING_GLOBAL current a no-op.
+if env['debug_msg']:
+    env.AppendUnique(CFLAGS = [
+        '-DDEBUG_LOGGING',
+    ])
+    env.AppendUnique(CXXFLAGS = [
+        '-DDEBUG_LOGGING',
+    ])
+
+if env['debug_fn']:
+    env.AppendUnique(CFLAGS = [
+        '-DDEBUG_PRINT_FUNCTION_NAME',
+    ])
+    env.AppendUnique(CXXFLAGS = [
+        '-DDEBUG_PRINT_FUNCTION_NAME',
+    ])
+
+if env['debug_cb']:
+    env.AppendUnique(CFLAGS = [
+        '-DDEBUG_CALLBACKS',
+    ])
+    env.AppendUnique(CXXFLAGS = [
+        '-DDEBUG_CALLBACKS',
     ])
 
 env.AppendUnique(RPATH = [
