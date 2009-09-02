@@ -25,8 +25,7 @@
 #include "libxorp/xorp.h"
 
 /*
- * This code is only compiled if DEBUG_CALLBACKS is defined in
- * config.h via 'configure --enable-callback-debug'.  All callback
+ * This code is only compiled if DEBUG_CALLBACKS is defined. All callback
  * debugging entails is watching that individual callbacks do not take
  * too long in their dispatch method.  Since XORP is event and timer
  * driven taking anything more than a few seconds is potentially bad.
