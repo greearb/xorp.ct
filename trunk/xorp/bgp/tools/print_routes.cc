@@ -124,7 +124,7 @@ PrintRoutes<A>::get_route_list_start_done(const XrlError& e,
     if (e != XrlError::OKAY()) {
 	//fprintf(stderr, "Failed to get peer list start\n");
 	if (_prev_no_bgp == false)
-	    printf("\n\nNo BGP Exists\n");
+	    printf("\n\nBGP is not running or may not be configured\n");
 	_prev_no_bgp = true;
 	_done = true;
 	return;

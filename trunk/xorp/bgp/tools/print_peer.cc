@@ -75,7 +75,7 @@ PrintPeers::get_peer_list_start_done(const XrlError& e,
     if (e != XrlError::OKAY()) {
 	//fprintf(stderr, "Failed to get peer list start\n");
 	if (_prev_no_bgp == false)
-	    printf("\n\nNo BGP Exists\n");
+	    printf("\n\nBGP is not running or may not be configured\n");
 	_prev_no_bgp = true;
 	_done = true;
 	return;
@@ -83,7 +83,7 @@ PrintPeers::get_peer_list_start_done(const XrlError& e,
     _prev_no_bgp = false;
     if (*more == false) {
 	if (_prev_no_peers == false)
-	    printf("\n\nNo Peerings Exist\n");
+	    printf("\n\nNo BGP peers are configured\n");
 	_prev_no_peers = true;
 	_done = true;
 	return;
