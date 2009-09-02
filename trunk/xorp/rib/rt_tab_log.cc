@@ -228,7 +228,10 @@ template class XLogTraceTable<IPv6>;
 
 // ----------------------------------------------------------------------------
 
+#ifndef DEBUG_LOGGING
 #define DEBUG_LOGGING
+#endif
+
 #include "libxorp/debug.h"
 
 template <typename A>
