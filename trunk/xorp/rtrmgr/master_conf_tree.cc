@@ -29,6 +29,9 @@
 #ifdef HAVE_GRP_H
 #include <grp.h>
 #endif
+#ifdef HAVE_PWD_H
+#include <pwd.h>
+#endif
 
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
@@ -64,6 +67,9 @@
 #define fchown(x,y,z) (0)
 
 #endif
+
+#define XORP_CONFIG_FORMAT_VERSION		"1.1"
+#define XORP_CONFIG_XORP_VERSION		"1.7-WIP"
 
 //
 // The strings that are used to add and delete a load or save file, to
@@ -837,7 +843,10 @@ MasterConfigTree::save_to_file(const string& filename, uid_t user_id,
 		umask(orig_mask);
 		return false;
 	    }
-	    if (strncmp(line, "/*XORP", 6) != 0) {
+	    // Check for pre-1.7 config file header first.
+	    if ((strncmp(&line[0], "/*", 2) != 0) &&
+	        ((strncmp(&line[2], "XORP", 4) != 0) ||
+	         (strncmp(&line[2], " XORP", 5) != 0))) {
 		error_msg = c_format("File %s exists, but it is not an "
 				     "existing XORP config file.\n",
 				     full_filename.c_str());
@@ -875,8 +884,43 @@ MasterConfigTree::save_to_file(const string& filename, uid_t user_id,
 	return false;
     }
 
+    // Prepare values for the file header
+#ifdef HOST_OS_WINDOWS
+    string username("root");
+#else
+    struct passwd *pwent = getpwuid(user_id);
+    string username;
+    if (pwent == NULL)
+	username = c_format("UID:%u", XORP_UINT_CAST(user_id));
+    else
+	username = pwent->pw_name;
+#endif
+
+    char hbuf[MAXHOSTNAMELEN];
+    if (gethostname(hbuf, sizeof(hbuf)) < 0) {
+#ifdef HOST_OS_WINDOWS
+	XLOG_FATAL("gethostname() failed: %d", WSAGetLastError());
+#else
+	XLOG_FATAL("gethostname() failed: %s", strerror(errno));
+#endif
+    }
+    hbuf[sizeof(hbuf) - 1] = '\0';
+
     // Write the file header
-    string header = "/*XORP Configuration File, v1.0*/\n";
+    string header = "/* XORP configuration file";
+    header += "\n *";
+    header += "\n * Configuration format: ";
+    header += XORP_CONFIG_FORMAT_VERSION;
+    header += "\n * XORP version: ";
+    header += XORP_CONFIG_XORP_VERSION;
+    header += "\n * Date: ";
+    header += xlog_localtime2string();
+    header += "\n * Host: ";
+    header += hbuf;
+    header += "\n * User: ";
+    header += username;
+    header += "\n */\n\n";
+
     size_t bytes;
     bytes = fwrite(header.c_str(), sizeof(char), header.size(), file);
     if (bytes < header.size()) {
