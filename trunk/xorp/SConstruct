@@ -24,8 +24,6 @@
 # TODO Add separate toolchain test for C99 varargs macros.
 # TODO Add separate toolchain test for GNU varargs macros.
 # TODO Fix default include/lib paths, pass in from environment.
-# TODO Pass in DEBUG_CALLBACKS DEBUG_LOGGING_GLOBAL DEBUG_PRINT_FUNCTION_NAME
-# from command line easily.
 # TODO Merge scons-unfamiliar syntactic sugar from YHC's sconsfiles.
 # TODO support non-gnu strip
 # TODO support static *and* shared library build in same tree/run
