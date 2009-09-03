@@ -197,7 +197,9 @@ SocketClient::connect(ConnectCallback cb)
 	      get_remote_host());
 
     // Assert that socket doesn't already exist, as we are about to create it.
-    XLOG_ASSERT(!get_sock().is_valid());
+    // XXX: This paranoid assertion existed to catch socket recycling
+    // issues on the Windows platform; commented out for now.
+    //XLOG_ASSERT(!get_sock().is_valid());
 
     size_t len;
     create_socket(get_local_socket(len), COMM_SOCK_BLOCKING);
