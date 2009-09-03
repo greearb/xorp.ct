@@ -206,6 +206,10 @@ env['WITH_OLSR'] = ARGUMENTS.get('enable-olsr', False)
 ########## start configure magic
 
 if not env.GetOption('clean') and not env.GetOption('help'):
+
+    env['MISSING_DEPS'] = []
+    env['SKIPPED_DEPS'] = []
+
     from config.endian import CheckEndianness
     from config.member import CheckTypeMember
     from config.sysctl import CheckSysctl
@@ -254,6 +258,16 @@ if not env.GetOption('clean') and not env.GetOption('help'):
     DoAllConfig(env, conf, host_os)
 
     # Note: hard-coded paths pushed down to rtrmgr/util.cc environment.
+
+    # Print warnings about missing/skipped dependencies.
+    if env['MISSING_DEPS']:
+        print '\nRequired dependencies not found, exiting:\n   - %s' % '\n   - '.join(env['MISSING_DEPS'])
+        if env['SKIPPED_DEPS']:
+            print 'Optional dependencies not found:\n   - %s' % '\n   - '.join(env['SKIPPED_DEPS'])
+        Exit(1)
+
+    if env['SKIPPED_DEPS']:
+        print 'Optional dependencies not found:\n   - %s' % '\n   - '.join(env['SKIPPED_DEPS'])
 
     conf.Finish()
 
