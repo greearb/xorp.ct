@@ -213,11 +213,14 @@ if not env.GetOption('clean') and not env.GetOption('help'):
     from config.endian import CheckEndianness
     from config.member import CheckTypeMember
     from config.sysctl import CheckSysctl
+    from config.boost import CheckBoost, CheckBoostLibrary
 
     my_custom_tests = {
-	'CheckEndianness' : CheckEndianness,
-	'CheckTypeMember' : CheckTypeMember,
-	'CheckSysctl' :     CheckSysctl
+	'CheckBoost'        : CheckBoost,
+	'CheckBoostLibrary' : CheckBoostLibrary,
+	'CheckEndianness'   : CheckEndianness,
+	'CheckTypeMember'   : CheckTypeMember,
+	'CheckSysctl'       : CheckSysctl
     }
 
     conf = env.Configure(config_h = str(builddir) + '/xorp_config.h',
@@ -252,6 +255,20 @@ if not env.GetOption('clean') and not env.GetOption('help'):
     # toolchain
     conf.Define('CPP_SUPPORTS_C99_VA_ARGS')
     conf.Define('CPP_SUPPORTS_GNU_VA_ARGS')
+
+    # Boost
+    #env['boost_suffix'] = "-mt"		# Not for FreeBSD
+    #conf.CheckBoost(require_version='1.39')
+    #conf.CheckBoostLibrary('system')
+    #conf.CheckBoostLibrary('date_time')
+    #conf.CheckBoostLibrary('iostreams')
+
+    # Additional Boost libraries
+    #conf.CheckBoostLibrary('filesystem')
+    #conf.CheckBoostLibrary('program_options')
+    #conf.CheckBoostLibrary('regex')
+    #conf.CheckBoostLibrary('signals')
+    #conf.CheckBoostLibrary('thread')
 
     # Big ball of mud.
     from config.allconfig import DoAllConfig
