@@ -285,8 +285,7 @@ protocols {
 */
 
 	    as {
-		%allow-range: $(@) "1" "65535" %help: "The peer AS number";
-
+		/*%allow-range: $(@) "1" "65535" %help: "The peer AS number";*/
 		%set: xrl "$(bgp.targetname)/bgp/0.3/set_peer_as?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&peer_as:txt=$(@)";
 	    }
 
