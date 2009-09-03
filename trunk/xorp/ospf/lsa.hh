@@ -1663,7 +1663,7 @@ class ASExternalLsa : public Lsa {
 	    return 16;
 	    break;
 	case OspfTypes::V3:
-	    return 12;
+	    return 8;
 	    break;
 	}
 	XLOG_UNREACHABLE();
