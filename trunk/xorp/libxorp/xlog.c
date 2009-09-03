@@ -1283,7 +1283,7 @@ x_asprintf(char **ret, const char *format, ...)
 #if defined(HAVE_SYSLOG_H) && defined(HAVE_SYSLOG)
 typedef struct _code {
 	const char	*c_name;
-	int		c_val;
+	int32_t		c_val;
 } SYSLOG_CODE;
 
 static SYSLOG_CODE prioritynames[] = {
@@ -1319,7 +1319,7 @@ static SYSLOG_CODE facilitynames[] = {
 	{ NULL,		-1,		}
 };
 
-static int
+static int32_t
 xlog_level_to_syslog_priority(xlog_level_t xloglevel)
 {
 
@@ -1349,12 +1349,12 @@ xlog_level_to_syslog_priority(xlog_level_t xloglevel)
 static int
 xlog_syslog_output_func(void *obj, xlog_level_t level, const char *msg)
 {
-    int priority = xlog_level_to_syslog_priority(level);
+    int32_t facility = (intptr_t)obj;
+    int32_t priority = xlog_level_to_syslog_priority(level);
 
-    syslog(priority, "%s", msg);
+    syslog(facility|priority, "%s", msg);
 
     return (0);
-    UNUSED(obj);
 }
 
 /*
@@ -1363,7 +1363,9 @@ xlog_syslog_output_func(void *obj, xlog_level_t level, const char *msg)
 static int
 xlog_parse_syslog_spec(const char *syslogspec, int *facility, int *priority)
 {
-    int i, retval, xfacility, xpriority;
+    int retval;
+    int8_t i;
+    int32_t xfacility, xpriority;
     char *facname, *priname, *tmpspec;
     SYSLOG_CODE* sc;
 
@@ -1415,14 +1417,14 @@ out:
 int
 xlog_add_syslog_output(const char *syslogspec)
 {
-    int facility = -1;
-    int priority = -1;
+    int32_t facility = -1;
+    int32_t priority = -1;
 
     if (-1 == xlog_parse_syslog_spec(syslogspec, &facility, &priority))
 	return (-1);
 
     openlog("xorp", LOG_PID | LOG_NDELAY | LOG_CONS, facility);
-    xlog_add_output_func(xlog_syslog_output_func, NULL);
+    xlog_add_output_func(xlog_syslog_output_func, (void *)(intptr_t)facility);
 
     return (0);
 }
