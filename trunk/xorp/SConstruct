@@ -105,6 +105,15 @@ env = Environment(
 
 env['DESTDIR'] = ARGUMENTS.get('DESTDIR', '')
 
+# Provide mechanism to override CC, CXX, etc.
+if ARGUMENTS.get('CC', None):
+    env['CC'] = ARGUMENTS.get('CC')
+print 'CC:               ', env['CC']
+
+if ARGUMENTS.get('CXX', None):
+    env['CXX'] = ARGUMENTS.get('CXX')
+print 'CXX:              ', env['CXX']
+
 if env['strip']:
     env['strip'] = True
     env['STRIP'] = "strip"
