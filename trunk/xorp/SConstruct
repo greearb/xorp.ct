@@ -114,9 +114,11 @@ if ARGUMENTS.get('CXX', None):
     env['CXX'] = ARGUMENTS.get('CXX')
 print 'CXX:              ', env['CXX']
 
+env['STRIP'] = ARGUMENTS.get('STRIP', 'strip')
+print 'STRIP:            ', env['STRIP']
+
 if env['strip']:
     env['strip'] = True
-    env['STRIP'] = "strip"
 print 'Strip binaries:   ', env.has_key('strip')
 
 if env['shared']:
