@@ -507,8 +507,24 @@ def DoAllConfig(env, conf, host_os):
     if has_net_ip_mroute_ip_mroute_h:
         prereq_mroute_h = prereq_net_ip_mroute_ip_mroute_h
         mroute_h = net_ip_mroute_ip_mroute_h
-    
-    prereq_linux_mroute_h = ['sys/types.h', 'sys/socket.h', 'netinet/in.h', 'linux/types.h']
+  
+    # Header file <linux/mroute.h> might need <sys/types>, <sys/socket.h>,
+    # <netinet/in.h>, and/or <linux/types.h>
+    #
+    # TODO: The autoconf feature test for this contained a hack to exclude 
+    # <linux/in.h> that might be included by <linux/mroute.h>, because
+    # <linux/in.h> might conflict with <netinet/in.h> that was included
+    # earlier.  This is currently difficult to replicate in SCons, as
+    # you can't pass arbitrary code that is prepended to the test.
+    prereq_linux_mroute_h = []
+    if has_sys_types_h:
+	prereq_linux_mroute_h.append('sys/types.h')
+    if has_sys_socket_h:
+	prereq_linux_mroute_h.append('sys/socket.h')
+    if has_netinet_in_h:
+	prereq_linux_mroute_h.append('netinet/in.h')
+    if has_linux_types_h:
+	prereq_linux_mroute_h.append('linux/types.h')
     linux_mroute_h = 'linux/mroute.h'
     has_linux_mroute_h = conf.CheckHeader(prereq_linux_mroute_h + [ linux_mroute_h ])
     if has_linux_mroute_h:
