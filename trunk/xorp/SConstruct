@@ -30,6 +30,8 @@
 # TODO disambiguate arch specification cross-platform
 # TODO conditionalize new directory layout here
 
+EnsureSConsVersion(1, 2)
+
 Help("""
     cross=true if you are doing a cross build. Default is false.
     arch={i686} to identify the target architecture.
