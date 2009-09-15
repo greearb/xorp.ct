@@ -30,6 +30,7 @@
 # TODO disambiguate arch specification cross-platform
 # TODO conditionalize new directory layout here
 
+EnsurePythonVersion(2, 3)
 EnsureSConsVersion(1, 2)
 
 Help("""
