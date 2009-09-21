@@ -39,7 +39,6 @@
 #include <sys/uio.h>
 #endif
 
-#include "header.hh"
 #include "xrl_error.hh"
 #include "xrl_pf_kill.hh"
 #include "xrl_dispatcher.hh"

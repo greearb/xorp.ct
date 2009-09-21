@@ -48,7 +48,6 @@
 #include "libcomm/comm_api.h"
 
 #include "sockutil.hh"
-#include "header.hh"
 
 #include "xrl.hh"
 #include "xrl_error.hh"
