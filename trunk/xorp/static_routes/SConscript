@@ -47,7 +47,6 @@ env.AppendUnique(LIBS = [
     'feaclient',
     'feaifmgrmirrorxif',
     'feaifmgrreplicatorxif',
-    'fearawlinkxif',
     'findereventnotifierxif',
     'feaifmgrmirrorbase',
     'staticroutesbase',
