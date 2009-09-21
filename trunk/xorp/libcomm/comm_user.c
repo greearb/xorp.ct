@@ -153,6 +153,26 @@ comm_bindtodevice_present(void)
 }
 
 int
+comm_keepalive_present(void)
+{
+#ifdef SO_KEEPALIVE
+    return XORP_OK;
+#else
+    return XORP_ERROR;
+#endif
+}
+
+int
+comm_linger_present(void)
+{
+#ifdef SO_LINGER
+    return XORP_OK;
+#else
+    return XORP_ERROR;
+#endif
+}
+
+int
 comm_onesbcast_present(void)
 {
 #ifdef IP_ONESBCAST

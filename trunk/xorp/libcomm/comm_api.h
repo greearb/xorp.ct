@@ -160,6 +160,20 @@ extern int	comm_ipv6_present(void);
 extern int	comm_bindtodevice_present(void);
 
 /**
+ * Test whether the underlying system has SO_LINGER support.
+ *
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+extern int	comm_linger_present(void);
+
+/**
+ * Test whether the underlying system has SO_KEEPALIVE support.
+ *
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+extern int	comm_keepalive_present(void);
+
+/**
  * Test whether the underlying system has IP_ONESBCAST support.
  *
  * @return XORP_OK on success, otherwise XORP_ERROR.
@@ -784,6 +798,24 @@ extern int	comm_set_receive_broadcast(xsock_t sock, int val);
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 extern int	comm_set_nodelay(xsock_t sock, int val);
+
+/**
+ * Set/reset the SO_LINGER option on a socket.
+ *
+ * @param sock the socket whose option we want to set/reset.
+ * @param val if non-zero, the option will be set, otherwise will be reset.
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+extern int	comm_set_linger(xsock_t sock, int enabled, int secs);
+
+/**
+ * Set/reset the SO_KEEPALIVE option on a socket.
+ *
+ * @param sock the socket whose option we want to set/reset.
+ * @param val if non-zero, the option will be set, otherwise will be reset.
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+extern int	comm_set_keepalive(xsock_t sock, int val);
 
 /**
  * Set/reset the SO_REUSEADDR option on a socket.

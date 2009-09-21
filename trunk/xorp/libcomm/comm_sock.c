@@ -848,6 +848,59 @@ comm_set_nodelay(xsock_t sock, int val)
 }
 
 int
+comm_set_linger(xsock_t sock, int enabled, int secs)
+{
+#ifdef SO_LINGER
+    struct linger l;
+
+    l.l_onoff = enabled;
+    l.l_linger = secs;
+    if (setsockopt(sock, SOL_SOCKET, SO_LINGER, 
+		   XORP_SOCKOPT_CAST(&l), sizeof(l)) < 0) {
+	_comm_set_serrno();
+	XLOG_ERROR("Error %s SO_LINGER %ds on socket %d: %s",
+		   (enabled)? "set": "reset", secs, sock,
+		   comm_get_error_str(comm_get_last_error()));
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+
+#else /* ! SO_LINGER */
+    UNUSED(sock);
+    UNUSED(enabled);
+    UNUSED(secs);
+    XLOG_WARNING("SO_LINGER Undefined!");
+
+    return (XORP_ERROR);
+#endif /* ! SO_LINGER */
+}
+
+int
+comm_set_keepalive(xsock_t sock, int val)
+{
+#ifdef SO_KEEPALIVE
+    if (setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE,
+		   XORP_SOCKOPT_CAST(&val), sizeof(val)) < 0) {
+	_comm_set_serrno();
+	XLOG_ERROR("Error %s SO_KEEPALIVE on socket %d: %s",
+		   (val)? "set": "reset", sock,
+		   comm_get_error_str(comm_get_last_error()));
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+
+#else /* ! SO_KEEPALIVE */
+    UNUSED(sock);
+    UNUSED(val);
+    XLOG_WARNING("SO_KEEPALIVE Undefined!");
+
+    return (XORP_ERROR);
+#endif /* ! SO_KEEPALIVE */
+}
+
+int
 comm_set_reuseaddr(xsock_t sock, int val)
 {
 #ifdef SO_REUSEADDR
