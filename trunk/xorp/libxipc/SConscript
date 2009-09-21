@@ -54,7 +54,7 @@ libxipc_sources = [
     'finder_msgs.cc',
     'finder_tcp.cc',
     'finder_tcp_messenger.cc',
-    'header.cc',
+    'header.cc',			# only for udp
     'hmac.cc',
     'hmac_md5.c',
     'permits.cc',
@@ -80,7 +80,7 @@ libxipc_sources = [
     'xrl_router.cc',
     'xrl_std_router.cc',
     'xrl_tokens.cc',
-    'xuid.cc',
+    'xuid.cc',				# only for udp
     ]
 
 # deal with shared objects
