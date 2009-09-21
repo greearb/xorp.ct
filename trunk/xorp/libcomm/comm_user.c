@@ -193,6 +193,16 @@ comm_tos_present(void)
 }
 
 int
+comm_nopush_present(void)
+{
+#ifdef TCP_NOPUSH
+    return XORP_OK;
+#else
+    return XORP_ERROR;
+#endif
+}
+
+int
 comm_unicast_ttl_present(void)
 {
 #ifdef IP_TTL

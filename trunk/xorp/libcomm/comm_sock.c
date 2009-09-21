@@ -1018,6 +1018,30 @@ comm_set_tcpmd5(xsock_t sock, int val)
 }
 
 int
+comm_set_nopush(xsock_t sock, int val)
+{
+#ifdef TCP_NOPUSH /* XXX: Defined in <netinet/tcp.h> across Free/Net/OpenBSD */
+    if (setsockopt(sock, IPPROTO_TCP, TCP_NOPUSH,
+		   XORP_SOCKOPT_CAST(&val), sizeof(val)) < 0) {
+	_comm_set_serrno();
+	XLOG_ERROR("Error %s TCP_NOPUSH on socket %d: %s",
+		   (val)? "set": "reset",  sock,
+		   comm_get_error_str(comm_get_last_error()));
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+
+#else /* ! TCP_NOPUSH */
+    UNUSED(sock);
+    UNUSED(val);
+    XLOG_WARNING("TCP_NOPUSH Undefined!");
+
+    return (XORP_ERROR);
+#endif /* ! TCP_NOPUSH */
+}
+
+int
 comm_set_tos(xsock_t sock, int val)
 {
 #ifdef IP_TOS

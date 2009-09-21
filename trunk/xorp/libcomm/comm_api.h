@@ -188,6 +188,13 @@ extern int	comm_onesbcast_present(void);
 extern int	comm_tos_present(void);
 
 /**
+ * Test whether the underlying system has TCP_NOPUSH support.
+ *
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+extern int	comm_nopush_present(void);
+
+/**
  * Test whether the underlying system has IP_TTL support.
  *
  * @return XORP_OK on success, otherwise XORP_ERROR.
@@ -798,6 +805,15 @@ extern int	comm_set_receive_broadcast(xsock_t sock, int val);
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 extern int	comm_set_nodelay(xsock_t sock, int val);
+
+/**
+ * Set/reset the TCP_NOPUSH option on a TCP socket.
+ *
+ * @param sock the socket whose option we want to set/reset.
+ * @param val if non-zero, the option will be set, otherwise will be reset.
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+extern int	comm_set_nopush(xsock_t sock, int val);
 
 /**
  * Set/reset the SO_LINGER option on a socket.
