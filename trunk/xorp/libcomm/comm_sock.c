@@ -901,6 +901,29 @@ comm_set_keepalive(xsock_t sock, int val)
 }
 
 int
+comm_set_nosigpipe(xsock_t sock, int val)
+{
+#ifdef SO_NOSIGPIPE
+    if (setsockopt(sock, SOL_SOCKET, SO_NOSIGPIPE,
+		   XORP_SOCKOPT_CAST(&val), sizeof(val)) < 0) {
+	_comm_set_serrno();
+	XLOG_ERROR("Error %s SO_NOSIGPIPE on socket %d: %s",
+		   (val)? "set": "reset",  sock,
+		   comm_get_error_str(comm_get_last_error()));
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+#else /* ! SO_NOSIGPIPE */
+    UNUSED(sock);
+    UNUSED(val);
+    XLOG_WARNING("SO_NOSIGPIPE Undefined!");
+
+    return (XORP_ERROR);
+#endif /* ! SO_NOSIGPIPE */
+}
+
+int
 comm_set_reuseaddr(xsock_t sock, int val)
 {
 #ifdef SO_REUSEADDR

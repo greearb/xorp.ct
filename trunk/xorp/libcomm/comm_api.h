@@ -174,6 +174,13 @@ extern int	comm_linger_present(void);
 extern int	comm_keepalive_present(void);
 
 /**
+ * Test whether the underlying system has SO_NOSIGPIPE support.
+ *
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+extern int	comm_nosigpipe_present(void);
+
+/**
  * Test whether the underlying system has IP_ONESBCAST support.
  *
  * @return XORP_OK on success, otherwise XORP_ERROR.
@@ -832,6 +839,15 @@ extern int	comm_set_linger(xsock_t sock, int enabled, int secs);
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 extern int	comm_set_keepalive(xsock_t sock, int val);
+
+/**
+ * Set/reset the SO_NOSIGPIPE option on a socket.
+ *
+ * @param sock the socket whose option we want to set/reset.
+ * @param val if non-zero, the option will be set, otherwise will be reset.
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+extern int	comm_set_nosigpipe(xsock_t sock, int val);
 
 /**
  * Set/reset the SO_REUSEADDR option on a socket.

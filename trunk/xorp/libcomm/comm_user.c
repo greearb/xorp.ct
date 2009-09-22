@@ -173,6 +173,16 @@ comm_linger_present(void)
 }
 
 int
+comm_nosigpipe_present(void)
+{
+#ifdef SO_NOSIGPIPE
+    return XORP_OK;
+#else
+    return XORP_ERROR;
+#endif
+}
+
+int
 comm_onesbcast_present(void)
 {
 #ifdef IP_ONESBCAST
