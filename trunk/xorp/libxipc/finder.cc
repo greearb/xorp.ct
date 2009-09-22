@@ -19,8 +19,6 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-
-
 #include <set>
 
 #include "finder_module.h"
@@ -295,6 +293,7 @@ validate_finder_classes_and_instances(const Finder::ClassTable&  classes,
 				      const Finder::TargetTable& targets)
 
 {
+#ifdef FINDER_CONSISTENCY_CHECKS
     typedef Finder::ClassTable  ClassTable;
     typedef Finder::TargetTable TargetTable;
 
@@ -341,6 +340,12 @@ validate_finder_classes_and_instances(const Finder::ClassTable&  classes,
 	    }
 	}
     }
+
+#else // ! FINDER_CONSISTENCY_CHECKS
+    return;
+    UNUSED(classes);
+    UNUSED(targets);
+#endif // FINDER_CONSISTENCY_CHECKS
 }
 
 
