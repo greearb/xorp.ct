@@ -23,9 +23,9 @@
 
 #include "xrl_module.h"
 #include "xrl_std_router.hh"
-#include "xrl_pf_inproc.hh"
+//#include "xrl_pf_inproc.hh"
 #include "xrl_pf_stcp.hh"
-#include "xrl_pf_sudp.hh"
+//#include "xrl_pf_sudp.hh"
 #include "xrl_pf_unix.hh"
 #include "libxorp/xlog.h"
 
@@ -39,11 +39,13 @@ XrlStdRouter::create_listener()
 
     if (pf != NULL) {
 	switch (pf[0]) {
+#if 0
 	case 'i':
 	    return new XrlPFInProcListener(_e, this);
 
 	case 'u':
 	    return new XrlPFSUDPListener(_e, this);
+#endif
 
 	case 'x':
 	    XLOG_ASSERT(_unix == NULL);
