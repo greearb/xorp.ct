@@ -30,8 +30,14 @@
 # TODO disambiguate arch specification cross-platform
 # TODO conditionalize new directory layout here
 
+# The XRL tgt-gen and clnt-gen scripts use Python 2.3+'s optparse
+# class.
 EnsurePythonVersion(2, 3)
-EnsureSConsVersion(1, 2)
+
+# SCons 0.98.4 is the earliest release that we have tested.  Earlier
+# ones may work.  If so, please submit a Trac issue so the check can
+# be relaxed.
+EnsureSConsVersion(0, 98, 4)
 
 Help("""
     cross=true if you are doing a cross build. Default is false.
