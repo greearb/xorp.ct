@@ -86,6 +86,8 @@ rel = ARGUMENTS.get('rel', 'public17')
 sourcedir=Dir(".").abspath
 builddir=Dir(ARGUMENTS.get('builddir', '#obj/' + host_arch+'-'+host_os+'-'+rel)).abspath
 
+SConsignFile(builddir + '/.sconsign')
+
 prefix = ARGUMENTS.get('prefix', '/usr/local/xorp')
 
 print 'Cross build:      ', cross
