@@ -242,9 +242,9 @@ ExternalRoutes::delete_hna_route_in(OlsrTypes::ExternalID erid)
 	 ExternalDestInMap::iterator> rd =
 	_routes_in_by_dest.equal_range(er->dest());
     ExternalDestInMap::iterator jj;
-    for (jj = rd.first; jj != rd.second; ) {
+    for (jj = rd.first; jj != rd.second; jj++) {
 	if ((*jj).second == erid) {
-	    _routes_in_by_dest.erase(jj);
+	    _routes_in_by_dest.erase(jj);   // jj now invalidated; break.
 	    break;
 	}
     }
