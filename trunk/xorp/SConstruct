@@ -153,7 +153,7 @@ def InstallProgram(env, dest, files, perm = 0755):
     obj = env.Install(dest, files)
     for i in obj:
 	env.AddPostAction(i, env.Chmod(str(i), perm))
-	if env.has_key('strip') and env.has_key('STRIP'):
+	if env['strip']:
 	    env.AddPostAction(i, Action("$STRIP $TARGET"))
     return obj 
 SConsEnvironment.InstallProgram = InstallProgram
@@ -175,7 +175,7 @@ def InstallLibrary(env, dest, files, perm = 0644):
     obj = env.Install(dest, files)
     for i in obj:
 	env.AddPostAction(i, env.Chmod(str(i), perm))
-	if env.has_key('strip') and env.has_key('STRIP'):
+	if env['strip']:
 	    env.AddPostAction(i, Action("$STRIP --strip-unneeded $TARGET"))
     return obj
 SConsEnvironment.InstallLibrary = InstallLibrary
