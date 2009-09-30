@@ -623,11 +623,11 @@ ExternalRoutes::event_receive_hna(
 
     // 12.5, 1: Sender must be in symmetric 1-hop neighborhood.
     if (! _nh.is_sym_neighbor_addr(remote_addr)) {
-	debug_msg("Rejecting TC message from %s via non-neighbor %s\n",
+	debug_msg("Rejecting HNA message from %s via non-neighbor %s\n",
 		  cstring(msg->origin()),
 		  cstring(remote_addr));
 	XLOG_TRACE(_olsr.trace()._input_errors,
-		   "Rejecting TC message from %s via non-neighbor %s",
+		   "Rejecting HNA message from %s via non-neighbor %s",
 		   cstring(msg->origin()),
 		   cstring(remote_addr));
 	return true; // consumed but invalid.
