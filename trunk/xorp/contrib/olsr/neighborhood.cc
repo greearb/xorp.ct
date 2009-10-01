@@ -1878,7 +1878,7 @@ Neighborhood::consider_remaining_cand_mprs(const size_t n2_count,
     map<OlsrTypes::NeighborID, Neighbor*>::iterator ii;
     for (ii = _neighbors.begin(); ii != _neighbors.end(); ii++) {
 	Neighbor* n = (*ii).second;
-	if (! n->is_mpr() && n->is_cand_mpr() &&
+	if (n->is_cand_mpr() &&
 	    n->willingness() != OlsrTypes::WILL_ALWAYS) {
 	    // 8.4.1, 4.1:
 	    // Recompute n's reachability. We cannot amortize or
