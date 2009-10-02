@@ -207,8 +207,10 @@ XrlRouter::initialize(const char* class_name,
 	char *ep = NULL;
 	timeout_ms = strtoul(value, &ep, 10);
 	if ( !(*value != '\0' && *ep == '\0') &&
-	      (timeout_ms <= 0 || timeout_ms > 6000)) {
-	    XLOG_ERROR("Invalid \"XORP_FINDER_CONNECT_TIMEOUT_MS\": %s", value);
+	      (timeout_ms <= 0 || timeout_ms > 120000)) {
+	    XLOG_ERROR(
+"Out of bounds \"XORP_FINDER_CONNECT_TIMEOUT_MS\": %s (must be 0..120000",
+	        value);
 	    timeout_ms = DEFAULT_FINDER_CONNECT_TIMEOUT_MS;
 	}
     }
