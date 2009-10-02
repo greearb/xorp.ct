@@ -410,15 +410,19 @@ def DoAllConfig(env, conf, host_os):
     
     ##########
     # v6 stack
-    
+
     if has_af_inet6 and has_sock_stream:
         conf.Define('HAVE_IPV6')
-    
+
     prereq_rfc3542 = ['stdlib.h', 'sys/types.h', 'netinet/in.h']
     rfc3542_includes = []
     for s in prereq_rfc3542:
+	# XXX: __USE_GNU must be defined for RFC3542 defines under Linux.
+	if host_os == 'linux' and s == 'netinet/in.h':
+	    rfc3542_includes.append("#define __USE_GNU\n")
         rfc3542_includes.append("#include <%s>\n" % s)
     rfc3542_includes = string.join(rfc3542_includes, '')
+
     has___kame__ = conf.CheckDeclaration('__KAME__', rfc3542_includes)
     # CheckFunc() too tight.
     has_inet6_opt_init = conf.CheckDeclaration('inet6_opt_init', rfc3542_includes)
@@ -483,7 +487,25 @@ def DoAllConfig(env, conf, host_os):
     # v6 stack: sysctl (bsd)
     conf.CheckSysctl('IPV6CTL_FORWARDING', oid='CTL_NET, AF_INET6, IPPROTO_IPV6, IPV6CTL_FORWARDING', includes='#include <sys/socket.h>\n#include <netinet/in.h>')
     conf.CheckSysctl('IPV6CTL_ACCEPT_RTADV', oid='CTL_NET, AF_INET6, IPPROTO_IPV6, IPV6CTL_ACCEPT_RTADV', includes='#include <sys/socket.h>\n#include <netinet/in.h>')
-    
+
+    # check for v6 multicast capability
+    # XXX conditional on these headers please
+    prereq_v6mcast = [ 'sys/types.h', 'sys/socket.h', 'netinet/in.h' ]
+    v6mcast_symbols = [ 'IPV6_MULTICAST_IF', 'IPV6_MULTICAST_LOOP' ]
+    # munge header list
+    v6mcast_includes = []
+    for s in prereq_v6mcast:
+        v6mcast_includes.append("#include <%s>\n" % s)
+    v6mcast_includes = string.join(v6mcast_includes, '')
+    # check for each symbol
+    gotv6sym = True
+    for s in v6mcast_symbols:
+        gotv6sym = gotv6sym and conf.CheckDeclaration(s, v6mcast_includes)
+    has_v6_mcast = gotv6sym
+    # test result
+    if has_v6_mcast:
+        conf.Define('HAVE_IPV6_MULTICAST')
+
     ##########
     # v4 mforwarding
     
@@ -585,7 +607,7 @@ def DoAllConfig(env, conf, host_os):
    
     # XXX: linux marked inet6_option_space() and friends as deprecated;
     # either rework mfea code or do this.
-    if has_netinet6_ip6_mroute_h or has_linux_mroute6_h and host_os != 'linux':
+    if has_netinet6_ip6_mroute_h or has_linux_mroute6_h:
         conf.Define('HAVE_IPV6_MULTICAST_ROUTING')
     
     ##########
