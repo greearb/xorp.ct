@@ -201,7 +201,10 @@ SelectorList::Node::is_empty()
 
 SelectorList::SelectorList(ClockBase *clock)
     : _clock(clock), _observer(NULL), _testfds_n(0), _last_served_fd(-1),
-      _last_served_sel(-1), _maxfd(0), _descriptor_count(0), _is_debug(false)
+      _last_served_sel(-1),
+      // XXX: Preallocate to work around use-after-free in Node::run_hooks().
+      _selector_entries(256),
+      _maxfd(0), _descriptor_count(0), _is_debug(false)
 {
     static_assert(SEL_RD == (1 << SEL_RD_IDX) && SEL_WR == (1 << SEL_WR_IDX)
 		  && SEL_EX == (1 << SEL_EX_IDX) && SEL_MAX_IDX == 3);
