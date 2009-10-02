@@ -28,7 +28,7 @@ env.AppendUnique(CPPPATH = [
     '$BUILDDIR',
     ])
 
-env.AppendUnique(LIBPATH = [
+env.PrependUnique(LIBPATH = [
     '../libxorp',
     '../libcomm',
     '../libxipc',

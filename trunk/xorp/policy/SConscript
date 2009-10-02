@@ -34,7 +34,7 @@ env.AppendUnique(CPPPATH = [
     '$BUILDDIR',
     ])
 
-env.AppendUnique(LIBPATH = [
+env.PrependUnique(LIBPATH = [
     '$BUILDDIR/libfeaclient',
     '$BUILDDIR/policy/backend',
     '$BUILDDIR/policy/common',

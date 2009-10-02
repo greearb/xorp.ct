@@ -36,7 +36,7 @@ env.AppendUnique(CPPPATH = [
     '$BUILDDIR',
      ])
 
-env.AppendUnique(LIBPATH = [
+env.PrependUnique(LIBPATH = [
     '$BUILDDIR/xrl/interfaces',
     '$BUILDDIR/xrl/targets',
     '$BUILDDIR/libxipc',

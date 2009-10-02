@@ -27,7 +27,7 @@ env = env.Clone()
 is_shared = env.has_key('SHAREDLIBS')
 
 env.AppendUnique(CPPPATH = [ "#" ])
-env.AppendUnique(LIBPATH = [ '$BUILDDIR/libxorp'] )
+env.PrependUnique(LIBPATH = [ '$BUILDDIR/libxorp'] )
 env.AppendUnique(LIBS = ['libxorp', 'crypto'])
 
 sources = [
