@@ -5,6 +5,13 @@
 	Build Notes for XORP (eXtensible Open Router Platform)
 
 
+0. Preface
+==========
+
+As of September 2009, much of the information in this file may be outdated,
+and should probably be moved to a Wiki. Some instructions refer to the
+old GNU Autotools based build system, which is now deprecated. SNMP support
+is currently deprecated and requires a rewrite.
 
 1. Compilation
 ==============
@@ -12,27 +19,22 @@
 1.1 Compiling the binaries
 ==========================
 
-To compile XORP, you must have GNU make (gmake) installed. Then just
+To compile XORP, you must have SCons installed. Then just
 run the following commands in the top-level directory:
 
-./configure
-gmake
+scons
 
 To change the default C and C++ compilers, then assign the binary
 names to the CC and CXX user environmental variables respectively.
 E.g., if you want to use the gcc34/g++34 compilers, then use (in case
-of csh/tcsh) the following commands before running "./configure":
+of csh/tcsh) the following commands before running "scons":
 
 setenv CC gcc34
 setenv CXX g++34
 
 To compile XORP with additional user-specified compiler flags, assign
 those flags to the CFLAGS and CXXFLAGS environmental variables (for the
-C and C++ compiler respectively) before running "./configure".
-If the flags must be after all other compiler flags (e.g., if they
-are suppose to overwrite some internally added flags), then use
-environmental variables CFLAGS_END and CXXFLAGS_END (for the C and C++
-compiler respectively).
+C and C++ compiler respectively) before running "scons".
 
 1.2 Generating documentation
 ============================
@@ -40,6 +42,9 @@ compiler respectively).
 The documentation for each XORP release is available from the XORP Web
 site. The following procedure can be used to generate the
 documentation directly from the source files.
+
+The documentation is now in a separate area of the XORP SVN repository,
+and is no longer part of the source tree itself.
 
 1.2.1. Install TeX and LaTeX
 
@@ -59,16 +64,16 @@ documentation directly from the source files.
 
 1.2.2. Compile the documentation.
 
-# Note that this must be done directly in the XORP directory with the
+# Note that this must be done directly in the XORP docs directory with the
 # original source files.
-cd /path/to/xorp
-./configure
-cd docs
-gmake
-gmake
+cd /path/to/xorp/docs
+scons
 
 2. Internal tests
 =================
+
+As of September 2009, not all of the regression tests are active in
+the public SVN tree.
 
 To run the internal tests, you must have "bash" and "python" installed.
 Note that if the python's executable filename is not "python", then
@@ -81,7 +86,7 @@ ln -s python2.4 python
 After the code is compiled, you need to run the following command
 in the top-level XORP directory:
 
-gmake check
+scons check
 
 
 3. OS-specific notes
