@@ -28,12 +28,12 @@ env.AppendUnique(CPPPATH = [
      ])
 
 env.AppendUnique(LIBPATH = [
-    '../../libxorp',
-    '../../libcomm',
-    '../../libxipc',
-    '../../libproto',
-    '../../xrl/interfaces',
-    '../../xrl/targets',
+    '$BUILDDIR/libxorp',
+    '$BUILDDIR/libcomm',
+    '$BUILDDIR/libxipc',
+    '$BUILDDIR/libproto',
+    '$BUILDDIR/xrl/interfaces',
+    '$BUILDDIR/xrl/targets',
     '.',
     ])
 

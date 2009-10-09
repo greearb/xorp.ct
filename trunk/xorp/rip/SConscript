@@ -96,16 +96,16 @@ e.AppendUnique(CPPDEFINES = [
     ])
 
 e.PrependUnique(LIBPATH = [
-    '../policy/backend',
-    '../policy/common',
-    '../xrl/interfaces',
-    '../xrl/targets',
     '.',
+    '$BUILDDIR/policy/backend',
+    '$BUILDDIR/policy/common',
+    '$BUILDDIR/xrl/interfaces',
+    '$BUILDDIR/xrl/targets',
     '$BUILDDIR/libfeaclient',
-    '../libproto',
-    '../libxipc',
-    '../libxorp',
-    '../libcomm',
+    '$BUILDDIR/libproto',
+    '$BUILDDIR/libxipc',
+    '$BUILDDIR/libcomm',
+    '$BUILDDIR/libxorp',
     ])
 
 e.PrependUnique(LIBS = [
@@ -123,8 +123,8 @@ e.PrependUnique(LIBS = [
     'policycommon',
     'proto',
     'xipc',
-    'xorp',
     'comm',
+    'xorp',
 ])
 
 if is_shared:
@@ -159,15 +159,15 @@ e.AppendUnique(CPPDEFINES = [
 
 e.PrependUnique(LIBPATH = [
     '.',
-    '../libfeaclient',
-    '../policy/backend',
-    '../policy/common',
-    '../xrl/interfaces',
-    '../xrl/targets',
-    '../libproto',
-    '../libxipc',
-    '../libxorp',
-    '../libcomm',
+    '$BUILDDIR/libfeaclient',
+    '$BUILDDIR/policy/backend',
+    '$BUILDDIR/policy/common',
+    '$BUILDDIR/xrl/interfaces',
+    '$BUILDDIR/xrl/targets',
+    '$BUILDDIR/libproto',
+    '$BUILDDIR/libxipc',
+    '$BUILDDIR/libcomm',
+    '$BUILDDIR/libxorp',
     ])
 
 e.PrependUnique(LIBS = [
@@ -185,8 +185,8 @@ e.PrependUnique(LIBS = [
     'policycommon',
     'proto',
     'xipc',
-    'xorp',
     'comm',
+    'xorp',
 ])
 
 if is_shared:

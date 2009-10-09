@@ -37,15 +37,15 @@ env.AppendUnique(CPPPATH = [
     ])
 
 env.PrependUnique(LIBPATH = [
-    '../libxorp',
-    '../libcomm',
-    '../libxipc',
-    '../libproto',
-    '../libfeaclient',
-    '../policy/backend',
-    '../policy/common',
-    '../xrl/interfaces',
-    '../xrl/targets',
+    '$BUILDDIR/libxorp',
+    '$BUILDDIR/libcomm',
+    '$BUILDDIR/libxipc',
+    '$BUILDDIR/libproto',
+    '$BUILDDIR/libfeaclient',
+    '$BUILDDIR/policy/backend',
+    '$BUILDDIR/policy/common',
+    '$BUILDDIR/xrl/interfaces',
+    '$BUILDDIR/xrl/targets',
     '.'
     ])
 
