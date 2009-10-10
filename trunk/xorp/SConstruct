@@ -40,10 +40,6 @@ EnsurePythonVersion(2, 3)
 EnsureSConsVersion(0, 98, 4)
 
 Help("""
-    cross=true if you are doing a cross build. Default is false.
-    arch={i686} to identify the target architecture.
-    os={linux|freebsd|..} to identify the target os.
-    rel={public17|..} to identify the target release.
     builddir=<some path> to specify a different build directory.
         Default is "obj/<arch>-<os>-<rel>".
     prefix=<some path> to specify a different install directory.
@@ -53,6 +49,9 @@ Help("""
 import sys
 import os
 import string
+import subprocess
+import fnmatch
+
 import SCons
 from SCons.Script.SConscript import SConsEnvironment
 import SCons.Action
@@ -69,34 +68,45 @@ vars.AddVariables(
     BoolVariable('debug_cb',  'Build with callback debugging', False),
     )
 
-build_arch = os.uname()[4].lower()
-build_os = os.uname()[0].lower()
+def tgt_guess():
+    p = subprocess.Popen(['./config.guess'], stdout=subprocess.PIPE)
+    o = p.communicate()[0]
+    if p.returncode != 0:
+        Exit(1)
+    return o.strip()
 
-host_arch = ARGUMENTS.get('arch')
-if not host_arch:
-	host_arch = build_arch
+def tgt_canonicalize(alias):
+    p = subprocess.Popen(['./config.sub', alias], stdout=subprocess.PIPE)
+    o = p.communicate()[0]
+    if p.returncode != 0:
+        Exit(1)
+    return o.strip()
 
-host_os = ARGUMENTS.get('os')
-if not host_os:
-	host_os = build_os
+build_alias = ARGUMENTS.get('build', None)
+if build_alias == None:
+    build_alias = tgt_guess()
+build = tgt_canonicalize(build_alias)
+(build_cpu, build_vendor, build_os) = build.split('-', 2)
+    
+host_alias = ARGUMENTS.get('host', None)
+if host_alias == None:
+    host_alias = build_alias
+host = tgt_canonicalize(host_alias)
+(host_cpu, host_vendor, host_os)  = host.split('-', 2)
 
-cross = ARGUMENTS.get('cross', build_os != host_os or build_arch != host_arch)
-rel = ARGUMENTS.get('rel', 'public17')
 
 sourcedir=Dir(".").abspath
-builddir=Dir(ARGUMENTS.get('builddir', '#obj/' + host_arch+'-'+host_os+'-'+rel)).abspath
+builddir=Dir(ARGUMENTS.get('builddir', '#obj/' + host)).abspath
 
 SConsignFile(builddir + '/.sconsign')
 
 prefix = ARGUMENTS.get('prefix', '/usr/local/xorp')
 
-print 'Cross build:      ', cross
-print 'Architecture:     ', host_arch
-print 'Operating System: ', host_os
-print 'Release:          ', rel
-print 'Source path:      ', sourcedir
-print 'Build path:       ', builddir
-print 'Install path:     ', prefix
+print 'Build System Type: ', build
+print 'Host System Type:  ', host
+print 'Source path:       ', sourcedir
+print 'Build path:        ', builddir
+print 'Install prefix:    ', prefix
 
 env = Environment(
 		  TOOLS = ['default', 'autotest', 'clntgen', 'tgtgen',
@@ -250,20 +260,20 @@ if not env.GetOption('clean') and not env.GetOption('help'):
 
     # friendly name of target
     osname = host_os
-    if host_os == 'freebsd':
+    if fnmatch.fnmatch(host_os, 'freebsd*'):
         osname = "FreeBSD"
         conf.Define('HOST_OS_FREEBSD')
         conf.Define('ENABLE_ADVANCED_MULTICAST_API')
-    elif host_os == 'linux':
+    elif fnmatch.fnmatch(host_os, 'linux*'):
         osname = "Linux"
         conf.Define('HOST_OS_LINUX')
         conf.Define('HAVE_PROC_LINUX')
         conf.Define('ENABLE_ADVANCED_MULTICAST_API')
-    elif host_os == 'netbsd':
+    elif fnmatch.fnmatch(host_os, 'netbsd*'):
 	osname = "NetBSD"
 	conf.Define('HOST_OS_NETBSD')
         conf.Define('ENABLE_ADVANCED_MULTICAST_API')
-    elif host_os == 'sunos':
+    elif fnmatch.fnmatch(host_os, 'sunos*'):
         osname = "Solaris"
         conf.Define('HOST_OS_SOLARIS')
     else:
