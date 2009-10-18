@@ -320,6 +320,7 @@ if not env.GetOption('clean') and not env.GetOption('help'):
 
 env['CFLAGS'] = Split(ARGUMENTS.get('CFLAGS', "-g"))
 env['CXXFLAGS'] = Split(ARGUMENTS.get('CXXFLAGS', "-g"))
+env['LINKFLAGS'] = Split(ARGUMENTS.get('LINKFLAGS', ""))
 
 env.AppendUnique(CPPDEFINES = [
     ( '_FORTIFY_SOURCE', 0 ),
