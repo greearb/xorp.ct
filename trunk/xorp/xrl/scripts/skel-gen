@@ -1,0 +1,261 @@
+#! /usr/bin/env python
+
+"""Program to generate a skeleton Xrl Target derived class"""
+
+from optparse import OptionParser
+import os, sys
+
+# This is a bit of mess as this code was split into separate files
+import Xif.util
+
+from Xif.util import \
+     joining_csv, csv, cpp_name, cpp_classname, xorp_indent_string, xorp_indent
+
+from Xif.xiftypes import \
+     XrlArg, XrlMethod, XrlInterface, XrlTarget
+
+from Xif.parse import \
+     XifParser
+
+from Xif.kdoc import \
+     XifKdocThing
+
+# -----------------------------------------------------------------------------
+# Xrl output list
+# -----------------------------------------------------------------------------
+
+def xrl_arg_str(a):
+    return a.name() + ":" + a.type()
+
+def output_xrls(tgt_name, methods):
+    s = ""
+
+    for m in methods:
+        kdoc_note = kdoc_comment(m, "")
+        if len(kdoc_note):
+            s += kdoc_note + "\n"
+
+        s += "finder://%s/%s" % (tgt_name, m.name())
+        if len(m.args()):
+            s += "?"
+            s += csv(map(xrl_arg_str, m.args()), "&")
+        if len(m.rargs()):
+            s += "->"
+            s += csv(map(xrl_arg_str, m.rargs()), "&")
+        s += "\n\n"
+
+    return s
+
+# -----------------------------------------------------------------------------
+# Target file output related
+# -----------------------------------------------------------------------------
+
+def kdoc_comment(method, indent_chars, preamble = ""):
+    kdoc_source = method.annotation()
+    if kdoc_source == "":
+        return ""
+    kdt = Xif.kdoc.parse_kdoc_comment(kdoc_source)
+    params = []
+    for a in method.args():
+        params.append(a.name())
+    for a in method.rargs():
+        params.append(a.name())
+    return kdt.output_kdoc(indent_chars, params, preamble)
+
+def generate_method_args(method, indent_level):
+    args = []
+    # input args
+    if len(method.args()):
+	args.append("\n%s// Input values" % xorp_indent(indent_level))
+    for a in method.args():
+	cpa = "\n%sconst %s&\t%s" % \
+	  (xorp_indent(indent_level), a.cpp_type(), cpp_name(a.name()))
+	args.append(cpa)
+    # output args
+    if len(method.rargs()):
+	args.append("\n%s// Output values" % xorp_indent(indent_level))
+    for r in method.rargs():
+	cpa = "\n%s%s&\t%s" % \
+	  (xorp_indent(indent_level), r.cpp_type(), cpp_name(r.name()))
+	args.append(cpa)
+    return csv(args)
+
+def target_declare_derived(methods):
+    s = ""
+    for m in methods:
+	cpp_method_name = cpp_name(m.name())
+	args = generate_method_args(m, indent_level=2)
+	s += "    XrlCmdError %s(%s);\n\n" % (cpp_method_name, args)
+    return s;
+
+def target_derived_methods(cls, name, methods):
+    s = ""
+    for m in methods:
+	cpp_method_name = cpp_name(m.name())
+	args = generate_method_args(m, indent_level=1)
+	s += "XrlCmdError\n%s::%s(%s)\n" % (cls, cpp_method_name, args)
+	s += "{\n"
+	s += "    return XrlCmdError::COMMAND_FAILED(\"Not implemented\");\n"
+	for a in m.args():
+	    s += "    UNUSED(%s);\n" % a.name();
+	for r in m.rargs():
+	    s += "    UNUSED(%s);\n" % r.name();
+	s += "}\n"
+	s += "\n"
+    return s
+
+def protect(file):
+ # remove direcory component
+    r = file.rfind("/") + 1
+    return "__%s__" % file[r:].upper().replace(".", "_")
+
+# TODO: make path to XRL target retargettable.
+def prepare_target_hh(base_hh_file, hh_file):
+    s   = Xif.util.standard_preamble(1, hh_file)
+    s  += \
+"""
+#ifndef %s
+#define %s
+
+#include "libxipc/xrl_router.h"
+#include "xrl/targets/%s"
+""" % (protect(hh_file), protect(hh_file), base_hh_file)
+    return s
+
+def output_target_hh(cls, tgt_name, tgt_version, methods):
+    s = """
+class %s {
+public:
+    %s(XrlRouter& rtr);
+    ~%s();
+
+protected:
+""" % (cls, cls, cls)
+    s += target_declare_derived(methods)
+    s += "private:\n"
+    s += "    XrlRouter&\t\t_rtr;\n"
+    s += "};\n"
+    return s
+
+def finish_target_hh(hh_file):
+    return "\n#endif // %s\n" % protect(hh_file)
+
+def prepare_target_cc(target_hh, target_cc, base_modulename):
+    r = target_hh.rfind("/") + 1
+    s = Xif.util.standard_preamble(0, target_cc)
+    s += "#include \"%s_module.h\"\n" % base_modulename
+    s += "#include \"libxorp/xorp.h\"\n"
+    s += "#include \"libxorp/xlog.h\"\n"
+    s += "#include \"libxorp/status_codes.h\"\n\n"
+    s += "#include \"%s\"\n\n" % target_hh[r:]
+    return s
+
+def output_target_cc(cls, tgt_name, methods):
+    s = ""
+    s += """
+%s::%s(XrlRouter& rtr)
+    : %sBase(&rtr),
+      _rtr(rtr)
+{
+}
+
+%s::~%s()
+{
+}
+
+""" % tuple([cls] * 5)
+    s += target_derived_methods(cls, tgt_name, methods)
+    return s
+
+def generate_target_methods(tgt, interfaces):
+    methods = []
+    # tgt.interfaces is a list of tuples ("interface_name", "interface_version")
+    # Convert this to a list of methods
+    for tif_info in tgt.interfaces():
+        found = 0
+        for tif in interfaces:
+            if (tif.name() == tif_info[0]) & (tif.version() == tif_info[1]):
+                found = 1
+                break
+        if found == 0:
+            print "Error interface %s data not found" % tif_info[0]
+            sys.exit(1)
+        for m in tif.methods():
+            full_name = Xif.util.xrl_method_name(tif.name(), tif.version(), m.name())
+            fq_method = m
+            fq_method.set_name(full_name)
+            methods.append(fq_method)
+    return methods
+
+
+def main():
+    usage = "usage: %prog [options] arg"
+    parser = OptionParser(usage)
+    parser.add_option("-o", "--output-dir",
+		      action="store", 
+		      type="string", 
+		      dest="output_dir",
+		      metavar="DIR")
+    parser.add_option("-I",
+                      action="append",
+                      type="string",
+                      dest="includes",
+                      metavar="DIR")
+    (options,args) = parser.parse_args()
+
+    if len(args) != 1:
+        parser_error("incorrect number of arguments")
+
+    # Command line arguments passed on to cpp
+    pipe_string = "cpp -C "
+    if options.includes:
+	for a in options.includes:
+	    pipe_string += "-I%s " % a
+    pipe_string += args[0] 
+
+    cpp_pipe = os.popen(pipe_string, 'r')
+
+    xp = XifParser(cpp_pipe)
+
+    tgts = xp.targets()
+    if len(tgts) == 0:
+        print "Not targets found in input files."
+        sys.exit(1)
+
+    sourcefile = tgts[0].sourcefile()
+    for tgt in tgts:
+        if (tgt.sourcefile() != sourcefile):
+            print "Multiple .tgt files presented, expected just one."
+            sys.exit(1)
+
+    # basename transformation - this is a lame test
+    if sourcefile[-4:] != ".tgt":
+        print "Source file does not end in .tgt suffix - basename transform failure."
+        sys.exit(1)
+        
+    basename = sourcefile[:-4]
+    basename = basename[basename.rfind("/") + 1:]
+
+    base_hh_filename = "%s_base.hh" % basename
+    hh_file = "xrl_target_%s.hh" % basename
+    cc_file = "xrl_target_%s.cc" % basename
+
+    if options.output_dir:
+        hh_file = os.path.join(options.output_dir, hh_file)
+        cc_file = os.path.join(options.output_dir, cc_file)
+
+    hh_txt  = prepare_target_hh(base_hh_filename, hh_file)
+    cc_txt  = prepare_target_cc(hh_file, cc_file, basename)
+
+    for tgt in tgts:
+        tgt_methods = generate_target_methods(tgt, xp.interfaces())
+        cls = "Xrl%sTarget" % cpp_classname(tgt.name())
+        hh_txt += output_target_hh(cls, tgt.name(), tgt.version(), tgt_methods)
+        hh_txt += finish_target_hh(hh_file)
+        cc_txt += output_target_cc(cls, tgt.name(), tgt_methods)
+
+    Xif.util.file_write_string(hh_file, hh_txt)
+    Xif.util.file_write_string(cc_file, cc_txt)
+
+if __name__ == '__main__':
+    main()
