@@ -106,8 +106,7 @@ public:
     
 protected:
     /**
-     * Find command associated with Xrl and dispatch it.  pre_dispatch_xrl()
-     * and post_dispatch_xrl() are called either side of Xrl.  
+     * Find command associated with Xrl and dispatch it.
      */
     void dispatch_xrl(uint32_t seqno, const Xrl& x);
     
