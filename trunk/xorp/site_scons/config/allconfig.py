@@ -191,7 +191,7 @@ def DoAllConfig(env, conf, host_os):
         conf.Define('HAVE_TCPUDP_UNIX_SOCKETS')
     if has_af_inet and has_sock_raw:
         conf.Define('HAVE_IP_RAW_SOCKETS')
-	if host_os == 'linux' or host_os == 'openbsd':
+	if host_os == 'linux-gnu' or host_os == 'openbsd':
             conf.Define('IPV4_RAW_OUTPUT_IS_RAW')
             conf.Define('IPV4_RAW_INPUT_IS_RAW')
     
@@ -259,7 +259,7 @@ def DoAllConfig(env, conf, host_os):
     
     if has_linux_netlink_h:
         conf.Define('HAVE_NETLINK_SOCKETS')
-    elif has_net_route_h and host_os != 'linux':
+    elif has_net_route_h and host_os != 'linux-gnu':
         conf.Define('HAVE_ROUTING_SOCKETS')
 
     if has_linux_netlink_h:
@@ -418,7 +418,7 @@ def DoAllConfig(env, conf, host_os):
     rfc3542_includes = []
     for s in prereq_rfc3542:
 	# XXX: __USE_GNU must be defined for RFC3542 defines under Linux.
-	if host_os == 'linux' and s == 'netinet/in.h':
+	if host_os == 'linux-gnu' and s == 'netinet/in.h':
 	    rfc3542_includes.append("#define __USE_GNU\n")
         rfc3542_includes.append("#include <%s>\n" % s)
     rfc3542_includes = string.join(rfc3542_includes, '')
