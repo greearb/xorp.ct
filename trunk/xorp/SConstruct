@@ -388,6 +388,11 @@ env.AppendUnique(RPATH = [
     '$libdir',
     ])
 
+# Export dynamic symbols in executables for runtime backtraces w/o GDB.
+env.AppendUnique(LINKFLAGS = [
+    '-rdynamic',
+    ])
+
 env.SConscript(['SConscript'], variant_dir='$BUILDDIR', exports='env', duplicate=0)
 
 env.Help(vars.GenerateHelpText(env))
