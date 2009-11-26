@@ -61,6 +61,7 @@ vars = Variables()
 vars.AddVariables(
     BoolVariable('shared', 'build with shared libraries', False),
     BoolVariable('strip',  'strip executables and libraries when installed', False),
+    BoolVariable('ignore_check_errors', 'Ignore errors when building tests', False),
     BoolVariable('debug_stl',  'Build with checked STL operations', False),
     BoolVariable('debug_msg',  'Build with debug messages', False),
     BoolVariable('debug_fn',  'Build with function names in debug_msg output', False),
@@ -137,6 +138,10 @@ print 'Strip binaries:   ', env.has_key('strip')
 if env['shared']:
     env['SHAREDLIBS'] = "defined"
 print 'Shared libraries: ', env.has_key('SHAREDLIBS')
+
+if env['ignore_check_errors']:
+    env['AUTOTEST_SKIP_ERRORS'] = True
+print 'Ignore test errors: ', env.has_key('AUTOTEST_SKIP_ERRORS')
 
 print 'Debug STL:        ', env['debug_stl']
 # XXX Enabling debug messages for the whole tree may not be what you want,
@@ -317,9 +322,9 @@ if not env.GetOption('clean') and not env.GetOption('help'):
 
 ########## end configure magic
 
-env['CFLAGS'] = Split(ARGUMENTS.get('CFLAGS', "-g"))
-env['CXXFLAGS'] = Split(ARGUMENTS.get('CXXFLAGS', "-g"))
-env['LINKFLAGS'] = Split(ARGUMENTS.get('LINKFLAGS', ""))
+env.AppendUnique( CFLAGS = Split(ARGUMENTS.get('CFLAGS', "-g")) )
+env.AppendUnique( CXXFLAGS = Split(ARGUMENTS.get('CXXFLAGS', "-g")) )
+env.AppendUnique( LINKFLAGS = Split(ARGUMENTS.get('LINKFLAGS', "")) )
 
 env.AppendUnique(CPPDEFINES = [
     ( '_FORTIFY_SOURCE', 0 ),
@@ -384,9 +389,11 @@ if env['debug_cb']:
         '-DDEBUG_CALLBACKS',
     ])
 
-env.AppendUnique(RPATH = [
-    '$libdir',
-    ])
+# XXX: This should not yet be needed, we do not yet install
+# libs into a single libdir in the community XORP installation layout.
+#env.AppendUnique(RPATH = [
+#    '$libdir',
+#    ])
 
 # Export dynamic symbols in executables for runtime backtraces w/o GDB.
 env.AppendUnique(LINKFLAGS = [
