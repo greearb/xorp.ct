@@ -21,6 +21,7 @@ import os
 Import("env")
 
 env = env.Clone()
+is_shared = env.has_key('SHAREDLIBS')
 
 env.AppendUnique(CPPPATH = [
 	'#',
@@ -43,9 +44,6 @@ env.AppendUnique(LIBPATH = [
 	])
 
 env.AppendUnique(LIBS = [
-	'ospf',
-	#'ospfv2base',
-	#'ospfv3base',
 	'ribxif',
 	'findereventnotifierxif',
 	'feaclient',
@@ -61,6 +59,17 @@ env.AppendUnique(LIBS = [
 	'xorp',
 	'comm',
 	])
+
+# XXX Do we need to link against this now?
+if is_shared:
+    env.PrependUnique(LIBS = [
+	'ospfv2base',
+	'ospfv3base',
+    ])
+
+env.PrependUnique(LIBS = [
+	'ospf',
+])
 
 # XXX NOTYET: compound test; two modules, one test scaffold, run from
 # test_routing.py.
