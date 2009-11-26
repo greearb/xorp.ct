@@ -25,7 +25,6 @@
 # TODO Add separate toolchain test for GNU varargs macros.
 # TODO Fix default include/lib paths, pass in from environment.
 # TODO Merge scons-unfamiliar syntactic sugar from YHC's sconsfiles.
-# TODO support non-gnu strip
 # TODO support static *and* shared library build in same tree/run
 # TODO conditionalize new directory layout here
 
@@ -136,6 +135,13 @@ if env['strip']:
     env['strip'] = True
 print 'Strip binaries:   ', env.has_key('strip')
 
+# POSIX strip has no options by the strict letter of the law.
+# Assume we have GNU binutils strip until proven otherwise.
+gnustrip = True
+env['_STRIP_UNNEEDED'] = ""
+if gnustrip:
+    env['_STRIP_UNNEEDED'] = "--strip-unneeded"
+
 if env['shared']:
     env['SHAREDLIBS'] = "defined"
 print 'Shared libraries: ', env.has_key('SHAREDLIBS')
@@ -189,7 +195,7 @@ def InstallLibrary(env, dest, files, perm = 0644):
     for i in obj:
 	env.AddPostAction(i, env.Chmod(str(i), perm))
 	if env['strip']:
-	    env.AddPostAction(i, Action("$STRIP --strip-unneeded $TARGET"))
+	    env.AddPostAction(i, Action("$STRIP $_STRIP_UNNEEDED $TARGET"))
     return obj
 SConsEnvironment.InstallLibrary = InstallLibrary
 
