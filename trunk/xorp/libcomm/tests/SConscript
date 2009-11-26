@@ -22,9 +22,9 @@ Import("env")
 
 env = env.Clone()
 
-env.AppendUnique(CPPPATH = [ '#', '$BUILDDIR', '$BUILDDIR/libcomm', ])
-env.AppendUnique(LIBPATH = [ '$BUILDDIR/libxorp', '$BUILDDIR/libcomm', ])
-env.AppendUnique(LIBS = [ 'xorp', 'comm' ])
+env.PrependUnique(CPPPATH = [ '#', '$BUILDDIR', '$BUILDDIR/libcomm', ])
+env.PrependUnique(LIBPATH = [ '$BUILDDIR/libxorp', '$BUILDDIR/libcomm', ])
+env.PrependUnique(LIBS = [ 'xorp', 'comm' ])
 
 # XXX Not for cross-compilation.
 test_comm = env.AutoTest(target = 'test_comm', source = 'test_comm.c')
