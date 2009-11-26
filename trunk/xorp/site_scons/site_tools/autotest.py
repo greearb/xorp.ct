@@ -60,10 +60,36 @@ def _UnitTest(env, target, source = [], **kwargs):
     # get the c and cxx flags to process.
     ccflags   = Split( multiget([kwargs, env], 'CCFLAGS' ))
     cxxflags  = Split( multiget([kwargs, env], 'CXXFLAGS'))
+    libpath  = Split( multiget([kwargs, env], 'LIBPATH'))
+    rpath  = Split( multiget([kwargs, env], 'RPATH'))
+    linkflags  = Split( multiget([kwargs, env], 'LINKFLAGS'))
+
+    myrpath = rpath
+
+    # For a test, take the our passed in LIBPATH, expand it, and prepend
+    # to our passed in RPATH, so that tests can build using shared
+    # libraries, even though they are not installed.
+    if env.has_key('SHAREDLIBS'):
+        # Figure out our absolute BUILDDIR path. If we're not using
+        # ORIGIN, then the test can be run
+        my_rpath_base = Dir(env['BUILDDIR']).abspath
+        # If ORIGIN is enabled, figure out our test's path relative
+        # to the BUILDDIR, and pass that to the linker in RPATH.
+        # XXX: Perhaps we should set '-z origin' at the top level?
+        #if env['use_rtld_origin']:
+        #    env.PrependUnique( LINKFLAGS = Split('-z origin') )
+        #    my_rpath_base = os.path.relpath(my_rpath_base, Dir('.').abspath)
+        # Expand the RPATH according to destdir layout.
+        myrpath += [ x.replace('$BUILDDIR', my_rpath_base) for x in libpath ]
 
     # fill the flags into kwargs
     kwargs["CXXFLAGS"] = cxxflags
     kwargs["CCFLAGS"]  = ccflags
+    kwargs["LIBPATH"]  = libpath
+    kwargs["RPATH"]  = myrpath
+    kwargs["LINKFLAGS"]  = linkflags
+
+    # build the test program
     test = env.Program(target, source = source, **kwargs)
 
     # FIXME: Skip this step if we are cross-compiling (don't run the runner).
@@ -73,6 +99,7 @@ def _UnitTest(env, target, source = [], **kwargs):
         runner = env.Action(test[0].abspath)
     env.Alias(env['AUTOTEST_TARGET'], test, runner)
     env.AlwaysBuild(env['AUTOTEST_TARGET'])
+
     return test
 
 def generate(env, **kwargs):
