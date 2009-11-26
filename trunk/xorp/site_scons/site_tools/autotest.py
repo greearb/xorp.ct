@@ -65,6 +65,8 @@ def _UnitTest(env, target, source = [], **kwargs):
     kwargs["CXXFLAGS"] = cxxflags
     kwargs["CCFLAGS"]  = ccflags
     test = env.Program(target, source = source, **kwargs)
+
+    # FIXME: Skip this step if we are cross-compiling (don't run the runner).
     if multiget([kwargs, env], 'AUTOTEST_SKIP_ERRORS', False):
         runner = env.Action(test[0].abspath, exitstatfunc=lambda x:0)
     else:
