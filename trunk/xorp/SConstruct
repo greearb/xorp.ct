@@ -139,9 +139,11 @@ if env['shared']:
     env['SHAREDLIBS'] = "defined"
 print 'Shared libraries: ', env.has_key('SHAREDLIBS')
 
+# AUTOTEST_SKIP_ERRORS is SetDefault() by site_scons/site_tools/autotest.py,
+# so print its value here.
 if env['ignore_check_errors']:
     env['AUTOTEST_SKIP_ERRORS'] = True
-print 'Ignore test errors: ', env.has_key('AUTOTEST_SKIP_ERRORS')
+print 'Ignore check errors: ', env['AUTOTEST_SKIP_ERRORS']
 
 print 'Debug STL:        ', env['debug_stl']
 # XXX Enabling debug messages for the whole tree may not be what you want,
