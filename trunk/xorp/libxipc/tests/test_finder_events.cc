@@ -244,6 +244,11 @@ public:
 	return XrlCmdError::OKAY();
     }
 
+    XrlCmdError common_0_1_startup()
+    {
+	return XrlCmdError::OKAY();
+    }
+
     XrlCmdError common_0_1_shutdown()
     {
 	//We don't normally want to shutdown a process through this

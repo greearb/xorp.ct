@@ -48,6 +48,7 @@ private:
 	string&	reason);
 
     XrlCmdError common_0_1_shutdown();
+    XrlCmdError common_0_1_startup() { return XrlCmdError::OKAY(); }
 
     XrlCmdError test_xrls_0_1_start_transmission();
 
