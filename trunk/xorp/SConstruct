@@ -17,14 +17,12 @@
 
 # $ID$
 
-# TODO build static and shared libraries. do so concisely and without bugs.
 # TODO tone down linker line spamming, -lpcre etc; stage use of LIBS please.
 # TODO cross compiles.
 # TODO Add separate toolchain test for C99 varargs macros.
 # TODO Add separate toolchain test for GNU varargs macros.
 # TODO Fix default include/lib paths, pass in from environment.
 # TODO Merge scons-unfamiliar syntactic sugar from YHC's sconsfiles.
-# TODO support static *and* shared library build in same tree/run
 # TODO conditionalize new directory layout here
 
 # The XRL tgt-gen and clnt-gen scripts use Python 2.3+'s optparse
@@ -57,7 +55,7 @@ import SCons.Builder
 vars = Variables()
 
 vars.AddVariables(
-    BoolVariable('shared', 'build with shared libraries', False),
+    BoolVariable('shared', 'build with shared libraries', True),
     BoolVariable('strip',  'strip executables and libraries when installed', False),
     #BoolVariable('use_rtld_origin', 'Use ORIGIN in dynamically linked programs ', False),
     BoolVariable('ignore_check_errors', 'Ignore errors when building tests', False),
