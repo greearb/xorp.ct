@@ -46,7 +46,7 @@ env.AppendUnique(LIBS = [
 	'ospf',
 	#'ospfv2base',
 	#'ospfv3base',
-	'ripxif',
+	'ribxif',
 	'findereventnotifierxif',
 	'feaclient',
 	'feaifmgrmirrorxif',
