@@ -18,7 +18,6 @@
 # $ID$
 
 # TODO build static and shared libraries. do so concisely and without bugs.
-# TODO make shared library linker flags portable to non-gnu linkers.
 # TODO tone down linker line spamming, -lpcre etc; stage use of LIBS please.
 # TODO cross compiles.
 # TODO Add separate toolchain test for C99 varargs macros.
@@ -142,8 +141,17 @@ env['_STRIP_UNNEEDED'] = ""
 if gnustrip:
     env['_STRIP_UNNEEDED'] = "--strip-unneeded"
 
+# Most of our shared library tweaks are specific to GNU ld.
+# Check if the GNU linker is available, and print a warning if not.
 if env['shared']:
     env['SHAREDLIBS'] = "defined"
+    if SCons.Tool.FindTool(['gnulink'], env) is None:
+        print \
+"""
+WARNING: The GNU linker was not detected on your system.
+Some combinations of linker and compiler flags, specific to building
+shared libraries, may not function correctly.
+"""
 print 'Shared libraries: ', env.has_key('SHAREDLIBS')
 
 # AUTOTEST_SKIP_ERRORS is SetDefault() by site_scons/site_tools/autotest.py,
@@ -339,6 +347,7 @@ env.AppendUnique(CPPDEFINES = [
     ( '_FORTIFY_SOURCE', 0 ),
     ])
 
+# NOTE: gcc specific flags.
 env.AppendUnique(CFLAGS = [
     '-Werror',
     '-W',
@@ -366,14 +375,14 @@ env.AppendUnique(CXXFLAGS = [
     '-ftemplate-depth-25'
     ])
 
-# XXX For GNU STL only at this time.
+# NOTE: For GNU STL only at this time.
 if env['debug_stl']:
     env.AppendUnique(CXXFLAGS = [
         '-D_GLIBCXX_DEBUG',
         '-D_GLIBCXX_DEBUG_PEDANTIC',
     ])
 
-# XXX DEBUG_LOGGING_GLOBAL current a no-op.
+# NOTE: DEBUG_LOGGING_GLOBAL currently a no-op.
 if env['debug_msg']:
     env.AppendUnique(CFLAGS = [
         '-DDEBUG_LOGGING',
@@ -404,6 +413,7 @@ env.AppendUnique(RPATH = [
     ])
 
 # Export dynamic symbols in executables for runtime backtraces w/o GDB.
+# NOTE: GNU ld specific flag.
 env.AppendUnique(LINKFLAGS = [
     '-rdynamic',
     ])
