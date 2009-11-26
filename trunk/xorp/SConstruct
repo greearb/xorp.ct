@@ -398,11 +398,10 @@ if env['debug_cb']:
         '-DDEBUG_CALLBACKS',
     ])
 
-# XXX: This should not yet be needed, we do not yet install
-# libs into a single libdir in the community XORP installation layout.
-#env.AppendUnique(RPATH = [
-#    '$libdir',
-#    ])
+# Shared libraries are installed in $exec_prefix/lib by default.
+env.AppendUnique(RPATH = [
+    '$libdir',
+    ])
 
 # Export dynamic symbols in executables for runtime backtraces w/o GDB.
 env.AppendUnique(LINKFLAGS = [
