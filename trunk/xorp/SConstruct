@@ -69,6 +69,9 @@ vars.AddVariables(
     BoolVariable('debug_msg',  'Build with debug messages', False),
     BoolVariable('debug_fn',  'Build with function names in debug_msg output', False),
     BoolVariable('debug_cb',  'Build with callback debugging', False),
+    EnumVariable('optimize', 'Build with optimization', 'yes',
+                 allowed_values=('no', 'yes', 'full', 'size', 'override'),
+                 map={}, ignorecase=2),
     )
 
 def tgt_guess():
@@ -144,6 +147,10 @@ gnustrip = True
 env['_STRIP_UNNEEDED'] = ""
 if gnustrip:
     env['_STRIP_UNNEEDED'] = "--strip-unneeded"
+
+# User can override this. Defaults to gcc's -O1, as this trims
+# most of the template fat.
+print 'Optimize code:    ', env['optimize']
 
 # Most of our shared library tweaks are specific to GNU ld.
 # Check if the GNU linker is available, and print a warning if not.
@@ -345,6 +352,19 @@ if SCons.Tool.FindTool(['gcc'], env) is None or \
 env.AppendUnique( CFLAGS = Split(ARGUMENTS.get('CFLAGS', "-g")) )
 env.AppendUnique( CXXFLAGS = Split(ARGUMENTS.get('CXXFLAGS', "-g")) )
 env.AppendUnique( LINKFLAGS = Split(ARGUMENTS.get('LINKFLAGS', "")) )
+
+# If the user didn't override our default optimization, then
+# sanitize user's CFLAGS/CXXFLAGS to not contain optimization options,
+# and map to an appropriate GCC flag.
+if not env['optimize'] == 'override':
+    env.Replace( CFLAGS = filter(lambda s: not s.startswith('-O'),
+                                 Split(env['CFLAGS'])))
+    env.Replace( CXXFLAGS = filter(lambda s: not s.startswith('-O'),
+                                   Split(env['CXXFLAGS'])))
+    bigodict = { 'no': '-O0', 'yes': '-O1', 'full': '-O2', 'size': '-Os' }
+    bigoflag = bigodict[env['optimize']]
+    env.AppendUnique(CFLAGS = [ bigoflag ])
+    env.AppendUnique(CXXFLAGS = [ bigoflag ])
 
 env.AppendUnique(CPPDEFINES = [
     ( '_FORTIFY_SOURCE', 0 ),
