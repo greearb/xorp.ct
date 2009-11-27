@@ -141,7 +141,7 @@ libxorp_bgp = libxorp_bgp_env.StaticLibrary(target = 'libxorp_bgp',
 bgp_env = env.Clone()
 
 bgp_env.PrependUnique(LIBS = [
-    'bgp',
+    'xorp_bgp',
 ])
 
 bgpsrcs = [
