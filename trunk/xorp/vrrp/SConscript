@@ -46,7 +46,7 @@ env.PrependUnique(LIBPATH = [
     ])
 
 env.AppendUnique(LIBS = [
-    'vrrp',
+    'xorp_vrrp',
     'vrrpbase',
     'xorp_fea_client',
     'feaifmgrxif',
@@ -61,7 +61,7 @@ env.AppendUnique(LIBS = [
     'xorp_comm'
 ])
 
-libvrrpsources = ['arpd.cc',
+libxorp_vrrp_srcs = ['arpd.cc',
 	       'vrrp.cc',
 	       'vrrp_packet.cc',
 	       'vrrp_target.cc',
@@ -69,9 +69,13 @@ libvrrpsources = ['arpd.cc',
 	       ]
 
 if is_shared:
-    libvrrp = env.SharedLibrary(LIBS = '', target = 'libvrrp', source = libvrrpsources)
+    libxorp_vrrp = env.SharedLibrary(target = 'libxorp_vrrp',
+				     source = libxorp_vrrp_srcs,
+				     LIBS = '')
 else:
-    libvrrp = env.StaticLibrary(LIBS = '', target = 'libvrrp', source = libvrrpsources)
+    libxorp_vrrp = env.StaticLibrary(target = 'libxorp_vrrp',
+				     source = libxorp_vrrp_srcs,
+				     LIBS = '')
 
 vrrpsources = [ 'xorp_vrrp.cc' ]
 
@@ -86,6 +90,6 @@ env.Alias('install',
 
 if is_shared:
     env.Alias('install',
-              env.InstallLibrary('$libdir', libvrrp))
+              env.InstallLibrary('$libdir', libxorp_vrrp))
 
 Default(xorp_vrrp)
