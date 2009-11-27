@@ -134,7 +134,7 @@ if env['debug_xrldb']:
     ])
 
 rtrmgr_env.AppendUnique(LIBS = [
-    'rtrmgr',
+    'xorp_rtrmgr',
     'rtrmgrbase',
     'rtrmgrclientxif',
     'findereventnotifierxif',
@@ -159,7 +159,7 @@ env.Alias('install',
 xorpsh_env = env.Clone()
 
 xorpsh_env.AppendUnique(LIBS = [
-    'rtrmgr',
+    'xorp_rtrmgr',
     'xorp_cli',
     'clibase',			# XXX Not picked up automagically?
     'cliprocessorxif',		# XXX ditto?
