@@ -50,7 +50,7 @@ env.AppendUnique(LIBS = [
     'cliprocessorxif',
     'clibase',
     'tecla_xorp',
-    'proto',
+    'xorp_proto',
     'xipc',
     'comm',
     'xorp',

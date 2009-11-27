@@ -88,7 +88,7 @@ libxorp_fea_linkorder += [
 	'mfeabase',
 	'xorp_mrt',
 	'tecla_xorp',
-	'proto',
+	'xorp_proto',
 	'xipc',
 	'comm',
 	'xorp'

@@ -63,7 +63,7 @@ env.AppendUnique(LIBS = [
 	'ribbase',
 	'policybackend',
 	'policycommon',
-	'proto',
+	'xorp_proto',
 	'finder',
 	'xipc',
 	'xorp',

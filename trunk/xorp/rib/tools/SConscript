@@ -44,7 +44,7 @@ env.AppendUnique(LIBS = [
     'showroutesbase',
     'xipc',
     'xorp',
-    'proto',
+    'xorp_proto',
     'comm',
     ])
 

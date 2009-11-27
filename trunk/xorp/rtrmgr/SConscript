@@ -163,7 +163,7 @@ xorpsh_env.AppendUnique(LIBS = [
     'cli',
     'clibase',			# XXX Not picked up automagically?
     'cliprocessorxif',		# XXX ditto?
-    'proto',
+    'xorp_proto',
     'tecla_xorp',
     'rtrmgrxif',
     'xorpshbase',

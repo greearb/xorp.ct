@@ -57,7 +57,7 @@ env.AppendUnique(LIBS = [
     'ribxif',
     'xipc',
     'xorp',
-    'proto',
+    'xorp_proto',
     'comm'
 ])
 
