@@ -67,16 +67,16 @@ env.AppendUnique(LIBS = [
     'xorp_comm',
 ])
 
-### libbgp
+### libxorp_bgp
 
-libbgp_env = env.Clone()
+libxorp_bgp_env = env.Clone()
 
 #if is_shared:
-#    libbgp_env.AppendUnique(LINKFLAGS = [
+#    libxorp_bgp_env.AppendUnique(LINKFLAGS = [
 #        '-Wl,-z,defs',
 #    ])
 
-libbgpsrcs = [
+libxorp_bgp_srcs = [
 	'aspath.cc',
 	'attribute_manager.cc',
 	'bgp_trie.cc',
@@ -127,13 +127,14 @@ libbgpsrcs = [
 	'xrl_target.cc',
 	]
 
-#libbgp = libbgp_env.SharedLibrary(target = 'libbgp', source = libbgpsrcs)
+#libxorp_bgp = libxorp_bgp_env.SharedLibrary(target = 'libxorp_bgp', source = libxorp_bgp_srcs)
 
 # XXX Static until ASPath and other objects are dealt with.
-libbgp = libbgp_env.StaticLibrary(target = 'libbgp', source = libbgpsrcs)
+libxorp_bgp = libxorp_bgp_env.StaticLibrary(target = 'libxorp_bgp',
+					    source = libxorp_bgp_srcs)
 
 #env.Alias('install',
-#          env.InstallLibrary('$libdir', libbgp))
+#          env.InstallLibrary('$libdir', libxorp_bgp))
 
 ### xorp_bgp
 
@@ -156,4 +157,4 @@ bgppath = '$exec_prefix/bgp'
 env.Alias('install',
           env.InstallProgram(bgppath, bgp))
 
-Default(libbgp, bgp)
+Default(libxorp_bgp, bgp)

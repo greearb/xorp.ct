@@ -43,7 +43,7 @@ env.AppendUnique(LIBPATH = [
 	])
 
 env.AppendUnique(LIBS = [
-	'ospf',
+	'xorp_ospf',
 	#'ospfv2base',
 	#'ospfv3base',
 	'ripxif',
