@@ -104,7 +104,7 @@ libxorp_fea_linkorder += [
     'tecla_xorp',
     'xorp_proto',
     'xipc',
-    'comm',
+    'xorp_comm',
     'xorp'
     ]
 

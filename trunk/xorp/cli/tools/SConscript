@@ -42,7 +42,7 @@ env.AppendUnique(LIBS = [
     'xipc',
     'xorp',
     'proto',
-    'comm',
+    'xorp_comm',
     ])
 
 cligensrcs = [

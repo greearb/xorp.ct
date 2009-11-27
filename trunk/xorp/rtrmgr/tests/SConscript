@@ -44,7 +44,7 @@ env.AppendUnique(LIBS = [
 	'finder',
 	'xipc',
 	'xorp',
-	'comm',
+	'xorp_comm',
 	])
 
 # XXX Must propagate srcdir in UNIX environment to UnitTest.

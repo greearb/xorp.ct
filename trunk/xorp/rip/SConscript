@@ -123,7 +123,7 @@ e.PrependUnique(LIBS = [
     'policycommon',
     'xorp_proto',
     'xipc',
-    'comm',
+    'xorp_comm',
     'xorp',
 ])
 
@@ -185,7 +185,7 @@ e.PrependUnique(LIBS = [
     'policycommon',
     'xorp_proto',
     'xipc',
-    'comm',
+    'xorp_comm',
     'xorp',
 ])
 

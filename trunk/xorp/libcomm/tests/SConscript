@@ -24,7 +24,7 @@ env = env.Clone()
 
 env.PrependUnique(CPPPATH = [ '#', '$BUILDDIR', '$BUILDDIR/libcomm', ])
 env.PrependUnique(LIBPATH = [ '$BUILDDIR/libxorp', '$BUILDDIR/libcomm', ])
-env.PrependUnique(LIBS = [ 'xorp', 'comm' ])
+env.PrependUnique(LIBS = [ 'xorp', 'xorp_comm' ])
 
 # XXX Not for cross-compilation.
 test_comm = env.AutoTest(target = 'test_comm', source = 'test_comm.c')

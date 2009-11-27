@@ -57,7 +57,7 @@ env.AppendUnique(LIBS = [
 	'xipc',
 	'xorp_proto',
 	'xorp',
-	'comm',
+	'xorp_comm',
 	])
 
 # XXX Do we need to link against this now?

@@ -38,7 +38,7 @@ env.AppendUnique(LIBS = [
 	'xipc',
 	'finder',
 	'xorp',
-	'comm',
+	'xorp_comm',
 	])
 
 # Missing:

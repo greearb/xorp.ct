@@ -47,7 +47,7 @@ env.AppendUnique(LIBS = [
 	'feaifmgrmirrorbase',
 	'xipc',
 	'xorp',
-	'comm',
+	'xorp_comm',
 	])
 
 test_redist = env.AutoTest(target = 'test_local_copy',

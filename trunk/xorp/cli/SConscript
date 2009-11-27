@@ -52,7 +52,7 @@ env.AppendUnique(LIBS = [
     'tecla_xorp',
     'xorp_proto',
     'xipc',
-    'comm',
+    'xorp_comm',
     'xorp',
     ])
 

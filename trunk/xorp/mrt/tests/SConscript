@@ -37,7 +37,7 @@ env.AppendUnique(LIBPATH = [
 env.AppendUnique(LIBS = [
 	'xorp_mrt',
 	'xorp',
-	'comm',
+	'xorp_comm',
 	])
 
 test_mrib = env.AutoTest(target = 'test_mrib', source = 'test_mrib.cc')

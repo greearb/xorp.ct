@@ -49,7 +49,7 @@ env.AppendUnique(LIBS = [
 	'xipc',
 	'xorp_proto',
 	'xorp',
-	'comm',
+	'xorp_comm',
 	])
 
 simple_cpp_tests = [

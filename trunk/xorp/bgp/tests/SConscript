@@ -59,7 +59,7 @@ env.AppendUnique(LIBS = [
 	'xipc',
 	'xorp_proto',
 	'xorp',
-	'comm',
+	'xorp_comm',
 	])
 
 # XXX BGP regression tests are currently stubbed out in

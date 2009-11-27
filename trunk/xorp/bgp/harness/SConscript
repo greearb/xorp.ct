@@ -40,7 +40,7 @@ env.AppendUnique(LIBS = [
     'bgpxif',
     'xipc',
     'xorp',
-    'comm',
+    'xorp_comm',
     ])
 
 # XXX FIXME

@@ -36,16 +36,16 @@ env.AppendUnique(CPPPATH = [
     ])
 
 env.AppendUnique(LIBPATH = [
-    '../libxorp',
-    '../libcomm',
-    '../libxipc',
-    '../libproto',
-    '../libfeaclient',
-    '../policy/backend',
-    '../policy/common',
-    '../xrl/interfaces',
-    '../xrl/targets',
-    '../mrt',
+    '$BUILDDIR/libxorp',
+    '$BUILDDIR/libcomm',
+    '$BUILDDIR/libxipc',
+    '$BUILDDIR/libproto',
+    '$BUILDDIR/libfeaclient',
+    '$BUILDDIR/policy/backend',
+    '$BUILDDIR/policy/common',
+    '$BUILDDIR/xrl/interfaces',
+    '$BUILDDIR/xrl/targets',
+    '$BUILDDIR/mrt',
     '.'
     ])
 
@@ -66,7 +66,7 @@ env.AppendUnique(LIBS = [
     'xipc',
     'xorp',
     'xorp_proto',
-    'comm',
+    'xorp_comm',
 ])
 
 ### libolsr

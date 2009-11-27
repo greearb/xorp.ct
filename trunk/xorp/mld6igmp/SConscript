@@ -58,7 +58,7 @@ env.AppendUnique(LIBS = [
     'xorp_proto',
     'xipc',
     'xorp',
-    'comm'
+    'xorp_comm'
 ])
 
 libmld6igmpsrcs = [

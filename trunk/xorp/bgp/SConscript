@@ -64,7 +64,7 @@ env.AppendUnique(LIBS = [
     'feaifmgrreplicatorxif',
     'xipc',
     'xorp',
-    'comm',
+    'xorp_comm',
 ])
 
 ### libbgp

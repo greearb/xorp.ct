@@ -23,7 +23,7 @@ Import("env")
 env = env.Clone()
 env.AppendUnique(CPPPATH = [ '#', '$BUILDDIR', '$BUILDDIR/libxorp', ])
 env.AppendUnique(LIBPATH = [ '$BUILDDIR/libxorp', '$BUILDDIR/libcomm', ])
-env.AppendUnique(LIBS = [ 'xorp', 'comm' ])
+env.AppendUnique(LIBS = [ 'xorp', 'xorp_comm' ])
 
 tests = [
 	'asyncio',

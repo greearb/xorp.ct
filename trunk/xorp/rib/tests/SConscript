@@ -67,7 +67,7 @@ env.AppendUnique(LIBS = [
 	'finder',
 	'xipc',
 	'xorp',
-	'comm',
+	'xorp_comm',
 	])
 
 # XXX: Shell script wrappers here.

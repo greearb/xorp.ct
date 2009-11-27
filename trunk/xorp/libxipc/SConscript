@@ -42,7 +42,7 @@ libxipc_env.PrependUnique(LIBPATH = [
     ])
 
 libxipc_env.AppendUnique(LIBS = [
-    'comm',
+    'xorp_comm',
     'xorp'
     ])
 
@@ -183,7 +183,7 @@ env.AppendUnique(LIBPATH = [
 env.AppendUnique(LIBS = [
     'finder',
     'xipc',
-    'comm',
+    'xorp_comm',
     'xorp'
     ])
 

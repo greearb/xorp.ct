@@ -57,7 +57,7 @@ env.AppendUnique(LIBS = [
 	'policycommon',
 	'xipc',
 	'xorp',
-	'comm',
+	'xorp_comm',
 	])
 
 simple_cpp_tests = [
