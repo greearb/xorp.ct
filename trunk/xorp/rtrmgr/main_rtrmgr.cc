@@ -78,7 +78,6 @@ static bool default_verbose = false;
 //
 static volatile bool	running = false;
 static string	template_dir;
-static string	xrl_targets_dir;
 static string	boot_file;
 static bool     do_logfile = false;
 static bool     do_pidfile = false;
@@ -93,6 +92,7 @@ static string	logfilename;
 static string	pidfilename;
 int32_t		quit_time = -1;
 static bool	daemon_mode = false;
+static string	xrl_targets_dir;	// for DEBUG_XRLDB
 
 static void cleanup_and_exit(int errcode);
 
@@ -122,7 +122,10 @@ usage(const char* argv0)
     fprintf(stderr, "  -p <port> Set port to run Finder on\n");
     fprintf(stderr, "  -q <secs> Set forced quit period\n");
     fprintf(stderr, "  -t <dir>  Specify templates directory\n");
-    fprintf(stderr, "  -x <dir>  Specify Xrl targets directory\n");
+#ifdef DEBUG_XRLDB
+    fprintf(stderr,
+	    "  -x <dir>  Specify Xrl targets directory (debug_xrldb)\n");
+#endif
 }
 
 static void
@@ -133,8 +136,10 @@ display_defaults()
 	    xorp_boot_file().c_str());
     fprintf(stderr, "  Templates directory        := %s\n",
 	    xorp_template_dir().c_str());
+#ifdef DEBUG_XRLDB
     fprintf(stderr, "  Xrl targets directory      := %s\n",
 	    xorp_xrl_targets_dir().c_str());
+#endif
     fprintf(stderr, "  Execute Xrls               := %s\n",
 	    bool_c_str(default_do_exec));
     fprintf(stderr, "  Restart failed processes   := %s\n",
@@ -228,8 +233,6 @@ Rtrmgr::run()
 	       boot_file.c_str());
     XLOG_TRACE(_verbose, "Templates directory        := %s\n",
 	       template_dir.c_str());
-    XLOG_TRACE(_verbose, "Xrl targets directory      := %s\n",
-	       xrl_targets_dir.c_str());
     XLOG_TRACE(_verbose, "Execute Xrls               := %s\n",
 	       bool_c_str(do_exec));
     XLOG_TRACE(_verbose, "Restart failed processes   := %s\n",
@@ -237,20 +240,30 @@ Rtrmgr::run()
     XLOG_TRACE(_verbose, "Print verbose information  := %s\n",
 	       bool_c_str(_verbose));
 
+#ifdef DEBUG_XRLDB
+# define DEBUG_XRLDB_INSTANCE	xrldb
+    XRLdb* xrldb = 0;
 
-    XRLdb* xrldb = NULL;
+    XLOG_TRACE(_verbose, "Xrl targets directory      := %s\n",
+	       xrl_targets_dir.c_str());
+    XLOG_TRACE(_verbose, "Validate XRL syntax        := %s\n",
+	       bool_c_str(true));
     try {
 	xrldb = new XRLdb(_xrl_targets_dir, _verbose);
     } catch (const InitError& e) {
 	XLOG_ERROR("Shutting down due to an init error: %s", e.why().c_str());
 	return (1);
     }
+#else // ! DEBUG_XRLDB
+# define DEBUG_XRLDB_INSTANCE	0
+#endif // DEBUG_XRLDB
 
     //
     // Read the router config template files
     //
     MasterTemplateTree* tt = new MasterTemplateTree(xorp_config_root_dir(),
-						    *xrldb, _verbose);
+						    DEBUG_XRLDB_INSTANCE,
+						    _verbose);
     if (!tt->load_template_tree(_template_dir, errmsg)) {
 	XLOG_ERROR("Shutting down due to an init error: %s", errmsg.c_str());
 	return (1);
@@ -388,13 +401,16 @@ Rtrmgr::run()
     // Delete the template tree
     delete tt;
 
+#ifdef DEBUG_XRLDB
     // Delete the XRLdb
     delete xrldb;
+#endif
 
     // Shutdown the finder
     delete fs;
 
     return (errcode);
+#undef DEBUG_XRLDB_INSTANCE
 }
 
 bool 
@@ -517,11 +533,19 @@ main(int argc, char* const argv[])
     //
     xorp_path_init(argv[0]);
     template_dir	= xorp_template_dir();
-    xrl_targets_dir	= xorp_xrl_targets_dir();
     boot_file		= xorp_boot_file();
+    xrl_targets_dir	= xorp_xrl_targets_dir();
 
+#ifdef DEBUG_XRLDB
+#define RTRMGR_X_OPT ""
+#else
+#define RTRMGR_X_OPT "x:"
+#endif
+
+    static const char* optstring =
+	"da:l:L:n:t:b:" RTRMGR_X_OPT "i:P:p:q:Nrvh";
     int c;
-    while ((c = getopt(argc, argv, "da:l:L:n:t:b:x:i:P:p:q:Nrvh")) != EOF) {
+    while ((c = getopt(argc, argv, optstring)) != EOF) {
 	switch(c) {
 	case 'd':
 	    daemon_mode = true;
@@ -566,9 +590,11 @@ main(int argc, char* const argv[])
 	case 'b':
 	    boot_file = optarg;
 	    break;
+#ifdef DEBUG_XRLDB
 	case 'x':
 	    xrl_targets_dir = optarg;
 	    break;
+#endif
 	case 'q':
 	    quit_time = atoi(optarg);
 	    break;
@@ -653,6 +679,7 @@ main(int argc, char* const argv[])
     errcode = rtrmgr.run();
 
     cleanup_and_exit(errcode);
+#undef RTRMGR_X_OPT
 }
 
 void

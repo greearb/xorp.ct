@@ -35,7 +35,10 @@
 #include "template_tree.hh"
 #include "template_tree_node.hh"
 #include "util.hh"
+
+#ifdef DEBUG_XRLDB
 #include "xrldb.hh"
+#endif
 
 #include "libxipc/xrl_atom_encoding.hh"
 
@@ -161,11 +164,18 @@ Action::check_referred_variables(string& error_msg) const
 /***********************************************************************/
 
 XrlAction::XrlAction(TemplateTreeNode& template_tree_node,
-		     const list<string>& action, const XRLdb& xrldb)
+		     const list<string>& action, const XRLdb* xrldb)
     throw (ParseError)
     : Action(template_tree_node, action),
-      _xrldb(xrldb)
+      _xrldb(0)
 {
+#ifdef DEBUG_XRLDB
+    XLOG_ASSERT(0 != dynamic_cast<const XRLdb*>(xrldb));
+    _xrldb = xrldb;
+#else
+    UNUSED(xrldb);
+#endif
+
     list<string> xrl_parts = _split_cmd;
 
     debug_msg("XrlAction constructor\n");
@@ -271,19 +281,24 @@ XrlAction::expand_action(string& error_msg)
 	return false;
     }
 
+#ifdef DEBUG_XRLDB
     if (check_xrl_is_valid(_action, _xrldb, error_msg) != true)
 	return false;
+#endif
 
     return true;
 }
 
+#ifdef DEBUG_XRLDB
 bool
-XrlAction::check_xrl_is_valid(const list<string>& action, const XRLdb& xrldb,
+XrlAction::check_xrl_is_valid(const list<string>& action,
+			      const XRLdb* xrldb,
 			      string& error_msg)
 {
     const string module_name = template_tree_node().module_name();
 
     XLOG_ASSERT(action.front() == "xrl");
+    XLOG_ASSERT(0 != dynamic_cast<const XRLdb*>(xrldb));
 
     list<string>::const_iterator xrl_pos = ++action.begin();
     if (xrl_pos == action.end()) {
@@ -450,13 +465,13 @@ XrlAction::check_xrl_is_valid(const list<string>& action, const XRLdb& xrldb,
     }
     debug_msg("XrlAction after cleaning:\n%s\n", cleaned_xrl.c_str());
 
-    if (xrldb.check_xrl_syntax(cleaned_xrl) == false) {
+    if (xrldb->check_xrl_syntax(cleaned_xrl) == false) {
 	error_msg = c_format("Syntax error in module %s XRL %s: "
 			     "invalid XRL syntax",
 			     module_name.c_str(), cleaned_xrl.c_str());
 	return false;
     }
-    XRLMatchType match = xrldb.check_xrl_exists(cleaned_xrl);
+    XRLMatchType match = xrldb->check_xrl_exists(cleaned_xrl);
     switch (match) {
     case MATCH_FAIL:
     case MATCH_RSPEC: {
@@ -479,6 +494,7 @@ XrlAction::check_xrl_is_valid(const list<string>& action, const XRLdb& xrldb,
 
     return true;
 }
+#endif // DEBUG_XRLDB
 
 int
 XrlAction::execute(const MasterConfigTreeNode& ctn,
@@ -1263,7 +1279,7 @@ Command::~Command()
 }
 
 void
-Command::add_action(const list<string>& action, const XRLdb& xrldb)
+Command::add_action(const list<string>& action, const XRLdb* xrldb)
     throw (ParseError)
 {
     string action_type;

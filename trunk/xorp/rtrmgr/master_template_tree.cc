@@ -36,7 +36,7 @@
 
 
 MasterTemplateTree::MasterTemplateTree(const string& xorp_root_dir,
-				       XRLdb& xrldb,
+				       XRLdb* xrldb,
 				       bool verbose) throw (InitError)
     : TemplateTree(xorp_root_dir, verbose),
       _xrldb(xrldb)

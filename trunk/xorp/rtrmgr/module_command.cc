@@ -35,8 +35,10 @@
 #include "template_tree_node.hh"
 #include "master_conf_tree_node.hh"
 #include "util.hh"
-#include "xrldb.hh"
 
+#ifdef DEBUG_XRLDB
+#include "xrldb.hh"
+#endif
 
 static string
 strip_quotes(const string& command, const string& value) throw (ParseError)
@@ -91,7 +93,7 @@ ModuleCommand::~ModuleCommand()
 }
 
 void
-ModuleCommand::add_action(const list<string>& action, const XRLdb& xrldb)
+ModuleCommand::add_action(const list<string>& action, const XRLdb* xrldb)
     throw (ParseError)
 {
     size_t expected_action_size = 2;

@@ -39,7 +39,7 @@ public:
     ~ModuleCommand();
 
     void add_action(const list<string>& action,
-		    const XRLdb& xrldb) throw (ParseError);
+		    const XRLdb* xrldb) throw (ParseError);
     virtual bool expand_actions(string& error_msg);
     virtual bool check_referred_variables(string& error_msg) const;
 

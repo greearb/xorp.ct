@@ -41,7 +41,7 @@ public:
 
     void add_cmd(const string& cmd, TemplateTree& tt) throw (ParseError);
     void add_action(const string& cmd, const list<string>& action_list,
-		    const XRLdb& xrldb) throw (ParseError);
+		    const XRLdb* xrldb) throw (ParseError);
     bool expand_master_template_tree(string& error_msg);
     bool check_master_template_tree(string& error_msg) const;
 

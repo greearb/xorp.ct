@@ -69,6 +69,7 @@ vars.AddVariables(
     BoolVariable('debug_msg',  'Build with debug messages', False),
     BoolVariable('debug_fn',  'Build with function names in debug_msg output', False),
     BoolVariable('debug_cb',  'Build with callback debugging', False),
+    BoolVariable('debug_xrldb',  'Build with runtime XRL syntax validation in Router Manager', False),
     EnumVariable('debug', 'Build with debug symbols', 'full',
                  allowed_values=('no', 'yes', 'full', 'override'),
                  map={}, ignorecase=2),
@@ -178,6 +179,7 @@ print 'Debug STL:        ', env['debug_stl']
 print 'Debug messages:   ', env['debug_msg']
 print 'Debug function names: ', env['debug_fn']
 print 'Debug callbacks:  ', env['debug_cb']
+print 'Debug XRL syntax: ', env['debug_xrldb']
 
 env['CONFIGURELOG'] = str(builddir) + os.sep + 'config.log'
 env['CONFIGUREDIR'] = str(builddir) + os.sep + '.sconf_temp'

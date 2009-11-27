@@ -61,7 +61,7 @@ protected:
 class XrlAction : public Action {
 public:
     XrlAction(TemplateTreeNode& template_tree_node, const list<string>& action,
-	      const XRLdb& xrldb) throw (ParseError);
+	      const XRLdb* xrldb) throw (ParseError);
 
     virtual bool expand_action(string& error_msg);
     int execute(const MasterConfigTreeNode& ctn, TaskManager& task_manager,
@@ -79,18 +79,20 @@ public:
     string affected_module() const;
 
 private:
+#ifdef DEBUG_XRLDB
     bool check_xrl_is_valid(const list<string>& action,
-			    const XRLdb& xrldb, string& error_msg);
+			    const XRLdb* xrldb, string& error_msg);
+#endif
     template<class TreeNode> bool expand_vars(const TreeNode& tn,
 					      const string& s, 
 					      string& result) const;
 
-    const XRLdb&	_xrldb;
     string		_module_name;
     list<string>	_split_request;
     string		_request;
     list<string>	_split_response;
     string		_response;
+    const XRLdb*	_xrldb;
 };
 
 class ProgramAction : public Action {
@@ -129,7 +131,7 @@ public:
     Command(TemplateTreeNode& template_tree_node, const string& cmd_name);
     virtual ~Command();
 
-    void add_action(const list<string>& action, const XRLdb& xrldb)
+    void add_action(const list<string>& action, const XRLdb* xrldb)
 	throw (ParseError);
     int execute(MasterConfigTreeNode& ctn, TaskManager& task_manager) const;
     void xrl_action_complete(const XrlError& err,

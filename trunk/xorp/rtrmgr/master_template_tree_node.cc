@@ -76,7 +76,7 @@ MasterTemplateTreeNode::add_cmd(const string& cmd, TemplateTree& tt)
 void
 MasterTemplateTreeNode::add_action(const string& cmd,
 				   const list<string>& action_list,
-				   const XRLdb& xrldb) throw (ParseError)
+				   const XRLdb* xrldb) throw (ParseError)
 {
     BaseCommand* command;
     map<string, BaseCommand*>::iterator iter;

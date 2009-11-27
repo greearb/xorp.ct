@@ -33,8 +33,10 @@
 #include "config_operators.hh"
 #include "rtrmgr_error.hh"
 #include "xorp_client.hh"
-#include "xrldb.hh"
 
+#ifdef DEBUG_XRLDB
+#include "xrldb.hh"
+#endif
 
 enum TTNodeType {
     NODE_VOID		= 0,

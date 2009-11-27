@@ -95,11 +95,17 @@ librtrmgr_srcs = [
 	'unexpanded_xrl.cc',
 	'userdb.cc',
 	'xorp_client.cc',
-	'xrldb.cc',
 	'y.boot_tab.cc',
 	'y.opcmd_tab.cc',
 	'y.tplt_tab.cc',
 	]
+
+# Runtime XRL syntax validation for developers.
+if env['debug_xrldb']:
+    librtrmgr_srcs += [ 'xrldb.cc' ]
+    librtrmgr_env.AppendUnique(CPPDEFINES = [
+        ( 'DEBUG_XRLDB', 1 ),
+    ])
 
 # Pushdown for static paths in util.cc.
 xorp_paths = {
@@ -119,6 +125,13 @@ librtrmgr = librtrmgr_env.StaticLibrary(target = 'librtrmgr',
 ### rtrmgr
 
 rtrmgr_env = env.Clone()
+
+# The Router Manager's main() function is responsible for
+# creating the XRLdb, if XRL syntax debugging is enabled.
+if env['debug_xrldb']:
+    rtrmgr_env.AppendUnique(CPPDEFINES = [
+        ( 'DEBUG_XRLDB', 1 ),
+    ])
 
 rtrmgr_env.AppendUnique(LIBS = [
     'rtrmgr',
