@@ -25,6 +25,12 @@
 # TODO Merge scons-unfamiliar syntactic sugar from YHC's sconsfiles.
 # TODO conditionalize new directory layout here
 
+gnutoolwarning = """
+WARNING: The GNU %s was not detected on your system.
+Some combinations of linker or compiler flags, specific to building XORP,
+may not function correctly.
+"""
+
 # The XRL tgt-gen and clnt-gen scripts use Python 2.3+'s optparse
 # class.
 EnsurePythonVersion(2, 3)
@@ -142,14 +148,9 @@ if gnustrip:
 # Most of our shared library tweaks are specific to GNU ld.
 # Check if the GNU linker is available, and print a warning if not.
 if env['shared']:
-    env['SHAREDLIBS'] = "defined"
     if SCons.Tool.FindTool(['gnulink'], env) is None:
-        print \
-"""
-WARNING: The GNU linker was not detected on your system.
-Some combinations of linker and compiler flags, specific to building
-shared libraries, may not function correctly.
-"""
+        print gnutoolwarning % 'ld linker'
+    env['SHAREDLIBS'] = "defined"
 print 'Shared libraries: ', env.has_key('SHAREDLIBS')
 
 # AUTOTEST_SKIP_ERRORS is SetDefault() by site_scons/site_tools/autotest.py,
@@ -337,6 +338,10 @@ if not env.GetOption('clean') and not env.GetOption('help'):
 
 ########## end configure magic
 
+if SCons.Tool.FindTool(['gcc'], env) is None or \
+   SCons.Tool.FindTool(['g++'], env) is None:
+    print gnutoolwarning % 'gcc or g++ compiler'
+
 env.AppendUnique( CFLAGS = Split(ARGUMENTS.get('CFLAGS', "-g")) )
 env.AppendUnique( CXXFLAGS = Split(ARGUMENTS.get('CXXFLAGS', "-g")) )
 env.AppendUnique( LINKFLAGS = Split(ARGUMENTS.get('LINKFLAGS', "")) )
@@ -358,7 +363,8 @@ env.AppendUnique(CFLAGS = [
     '-Wpointer-arith',
     '-Wcast-align',
     '-Wstrict-prototypes',
-    '-Wnested-externs'
+    '-Wnested-externs',
+    #'-pipe',
     ])
 
 env.AppendUnique(CXXFLAGS = [
@@ -370,7 +376,8 @@ env.AppendUnique(CXXFLAGS = [
     '-Wpointer-arith',
     '-Wcast-align',
     '-Woverloaded-virtual',
-    '-ftemplate-depth-25'
+    '-ftemplate-depth-25',
+    #'-pipe',
     ])
 
 # NOTE: For GNU STL only at this time.
