@@ -42,7 +42,7 @@ env.AppendUnique(LIBS = [
     'ribxif',
     'showdistancesbase',
     'showroutesbase',
-    'xipc',
+    'xorp_ipc',
     'xorp',
     'xorp_proto',
     'xorp_comm',

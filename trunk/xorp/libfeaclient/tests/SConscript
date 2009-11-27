@@ -45,7 +45,7 @@ env.AppendUnique(LIBS = [
 	'feaifmgrmirrorxif',
 	'feaifmgrreplicatorxif',
 	'feaifmgrmirrorbase',
-	'xipc',
+	'xorp_ipc',
 	'xorp',
 	'xorp_comm',
 	])

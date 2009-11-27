@@ -55,7 +55,7 @@ env.AppendUnique(LIBS = [
 	'socket4xif',
 	'policybackend',
 	'policycommon',
-	'xipc',
+	'xorp_ipc',
 	'xorp',
 	'xorp_comm',
 	])

@@ -62,7 +62,7 @@ env.AppendUnique(LIBS = [
     'profileclientxif',
     'feaifmgrmirrorxif',
     'feaifmgrreplicatorxif',
-    'xipc',
+    'xorp_ipc',
     'xorp',
     'xorp_comm',
 ])

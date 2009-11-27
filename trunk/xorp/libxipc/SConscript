@@ -91,22 +91,25 @@ if is_shared:
         '$BUILDDIR/xrl/interfaces/common_xif$SHOBJSUFFIX',
     ]
 else:
-    obj_fcb = libxipc_env.StaticObject(target = 'libxipc_finder_client_base',
-                                       source = '$BUILDDIR/xrl/targets/finder_client_base.cc')
-    obj_fxif = libxipc_env.StaticObject(target = 'libxipc_finder_xif',
-                                        source = '$BUILDDIR/xrl/interfaces/finder_xif.cc')
-    obj_cxif = libxipc_env.StaticObject(target = 'libxipc_common_xif',
-                                        source = '$BUILDDIR/xrl/interfaces/common_xif.cc')
+    obj_fcb = libxipc_env.StaticObject(
+	target = 'libxipc_finder_client_base',
+	source = '$BUILDDIR/xrl/targets/finder_client_base.cc')
+    obj_fxif = libxipc_env.StaticObject(
+	target = 'libxipc_finder_xif',
+	source = '$BUILDDIR/xrl/interfaces/finder_xif.cc')
+    obj_cxif = libxipc_env.StaticObject(
+	target = 'libxipc_common_xif',
+	source = '$BUILDDIR/xrl/interfaces/common_xif.cc')
     libxipc_sources += [ obj_fcb, obj_fxif, obj_cxif ]
 
 # actual library target
 if is_shared:
-    libxipc = libxipc_env.SharedLibrary(target = 'libxipc',
+    libxipc = libxipc_env.SharedLibrary(target = 'libxorp_ipc',
                                         source = libxipc_sources)
     env.Alias('install',
               env.InstallLibrary('$libdir', libxipc))
 else:
-    libxipc = libxipc_env.StaticLibrary(target = 'libxipc',
+    libxipc = libxipc_env.StaticLibrary(target = 'libxorp_ipc',
                                         source = libxipc_sources)
 
 #
@@ -126,9 +129,9 @@ libfinder_env.AppendUnique(LIBPATH = [
     ])
 
 libfinder_env.AppendUnique(LIBS = [
-    'libxipc',
-    'libcomm',
-    'libxorp'
+    'xorp_ipc',
+    'xorp_comm',
+    'xorp'
     ])
 
 libfinder_sources = [
@@ -146,22 +149,25 @@ if is_shared:
         '$BUILDDIR/xrl/interfaces/finder_event_observer_xif$SHOBJSUFFIX',
     ]
 else:
-    obj_f_base = libfinder_env.StaticObject(target = 'libfinder_finder_client_base',
-                                       source = '$BUILDDIR/xrl/targets/finder_base.cc')
-    obj_f_cxif = libfinder_env.StaticObject(target = 'libfinder_finder_client_xif',
-                                        source = '$BUILDDIR/xrl/interfaces/finder_client_xif.cc')
-    obj_f_eoxif = libfinder_env.StaticObject(target = 'libfinder_finder_event_observer_xif',
-                                        source = '$BUILDDIR/xrl/interfaces/finder_event_observer_xif.cc')
+    obj_f_base = libfinder_env.StaticObject(
+	target = 'libfinder_finder_client_base',
+	source = '$BUILDDIR/xrl/targets/finder_base.cc')
+    obj_f_cxif = libfinder_env.StaticObject(
+	target = 'libfinder_finder_client_xif',
+	source = '$BUILDDIR/xrl/interfaces/finder_client_xif.cc')
+    obj_f_eoxif = libfinder_env.StaticObject(
+	target = 'libfinder_finder_event_observer_xif',
+	source = '$BUILDDIR/xrl/interfaces/finder_event_observer_xif.cc')
     libfinder_sources += [ obj_f_base, obj_f_cxif, obj_f_eoxif ]
 
 # library target
 if is_shared:
-    libfinder = libfinder_env.SharedLibrary(target = 'libfinder',
+    libfinder = libfinder_env.SharedLibrary(target = 'libxorp_finder',
                                             source = libfinder_sources)
     env.Alias('install',
               env.InstallLibrary('$libdir', libfinder))
 else:
-    libfinder = libfinder_env.StaticLibrary(target = 'libfinder',
+    libfinder = libfinder_env.StaticLibrary(target = 'libxorp_finder',
                                             source = libfinder_sources)
 
 #
@@ -181,8 +187,8 @@ env.AppendUnique(LIBPATH = [
     ])
 
 env.AppendUnique(LIBS = [
-    'finder',
-    'xipc',
+    'xorp_finder',
+    'xorp_ipc',
     'xorp_comm',
     'xorp'
     ])

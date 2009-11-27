@@ -89,7 +89,7 @@ libxorp_fea_linkorder += [
 	'xorp_mrt',
 	'tecla_xorp',
 	'xorp_proto',
-	'xipc',
+	'xorp_ipc',
 	'xorp_comm',
 	'xorp'
 	]
