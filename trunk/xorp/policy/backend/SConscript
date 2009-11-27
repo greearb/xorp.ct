@@ -42,10 +42,12 @@ libpbesrcs = [
     ]
 
 if is_shared:
-    libpbe = env.SharedLibrary(target = 'libpolicybackend', source = libpbesrcs)
+    libpbe = env.SharedLibrary(target = 'libxorp_policy_backend',
+			       source = libpbesrcs)
     env.Alias('install',
         env.InstallLibrary('$libdir', libpbe))
 else:
-    libpbe = env.StaticLibrary(target = 'libpolicybackend', source = libpbesrcs)
+    libpbe = env.StaticLibrary(target = 'libxorp_policy_backend',
+			       source = libpbesrcs)
 
 Default(libpbe)

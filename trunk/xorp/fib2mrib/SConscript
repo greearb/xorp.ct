@@ -45,8 +45,8 @@ env.PrependUnique(LIBPATH = [
 env.AppendUnique(LIBS = [
     'fib2mrib',
     'fib2mribbase',
-    'policybackend',
-    'policycommon',
+    'xorp_policy_backend',
+    'xorp_policy_common',
     'xorp_fea_client',
     'findereventnotifierxif',
     'feaifmgrmirrorxif',

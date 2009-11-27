@@ -53,8 +53,8 @@ env.AppendUnique(LIBS = [
     'xorp_ospf',		# Refers to the library, not the executable.
     'ospfv2base',
     'ospfv3base',
-    'policybackend',
-    'policycommon',
+    'xorp_policy_backend',
+    'xorp_policy_common',
     'xorp_fea_client',
     'ribxif',
     'findereventnotifierxif',

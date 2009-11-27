@@ -43,12 +43,14 @@ is_shared = env.has_key('SHAREDLIBS')
 # deal with bgp aspath shared code
 if is_shared:
     libpcmsrcs += [ '../../bgp/aspath.cc' ]
-    libpcm = env.SharedLibrary(target = 'libpolicycommon', source = libpcmsrcs)
+    libpcm = env.SharedLibrary(target = 'libxorp_policy_common',
+			       source = libpcmsrcs)
     env.Alias('install', env.InstallLibrary('$libdir', libpcm))
 else:
     obj_aspath = env.StaticObject(target = 'aspath',
                                   source = '../../bgp/aspath.cc')
     libpcmsrcs += [ obj_aspath ]
-    libpcm = env.StaticLibrary(target = 'libpolicycommon', source = libpcmsrcs)
+    libpcm = env.StaticLibrary(target = 'libxorp_policy_common',
+			       source = libpcmsrcs)
 
 Default(libpcm)

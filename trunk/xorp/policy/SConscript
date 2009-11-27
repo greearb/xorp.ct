@@ -48,9 +48,9 @@ env.PrependUnique(LIBPATH = [
     ])
 
 env.AppendUnique(LIBS = [
-    'policy',
-    'policybackend',
-    'policycommon',
+    'xorp_policy',
+    'xorp_policy_backend',
+    'xorp_policy_common',
     'policybase',
     'policybackendxif',
     'findereventnotifierxif',
@@ -61,7 +61,7 @@ env.AppendUnique(LIBS = [
     'xorp_comm'
 ])
 
-libpolicysrcs = [
+libxorp_policy_srcs = [
      'code.cc',
      'code_generator.cc',
      'code_list.cc',
@@ -94,10 +94,14 @@ libpolicysrcs = [
 ######
 
 if is_shared:
-    libpolicy = env.SharedLibrary(target = 'libpolicy', source = libpolicysrcs, LIBS = '')
-    env.Alias('install', env.InstallLibrary('$libdir', libpolicy))
+    libxorp_policy = env.SharedLibrary(target = 'libxorp_policy',
+				       source = libxorp_policy_srcs,
+				       LIBS = '')
+    env.Alias('install', env.InstallLibrary('$libdir', libxorp_policy))
 else:
-    libpolicy = env.StaticLibrary(target = 'libpolicy', source = libpolicysrcs, LIBS = '')
+    libxorp_policy = env.StaticLibrary(target = 'libxorp_policy',
+				       source = libxorp_policy_srcs,
+				       LIBS = '')
 
 ######
 
@@ -108,4 +112,4 @@ pcpath = '$exec_prefix/policy'
 env.Alias('install',
           env.InstallProgram(pcpath, policy))
 
-Default(libpolicy, policy)
+Default(libxorp_policy, policy)
