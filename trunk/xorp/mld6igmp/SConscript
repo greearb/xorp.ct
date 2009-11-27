@@ -43,7 +43,7 @@ env.PrependUnique(LIBPATH = [
     ])
 
 env.AppendUnique(LIBS = [
-    'mld6igmp',
+    'xorp_mld6igmp',
     'xorp_fea_client',
     'xif_mld6igmp_client',
     'xif_fea_rawpkt4',
@@ -61,7 +61,7 @@ env.AppendUnique(LIBS = [
     'xorp_comm'
 ])
 
-libmld6igmpsrcs = [
+libxorp_mld6igmp_srcs = [
 	     'mld6igmp_config.cc',
 	     'mld6igmp_group_record.cc',
 	     'mld6igmp_node.cc',
@@ -73,9 +73,13 @@ libmld6igmpsrcs = [
              ]
 
 if is_shared:
-    libmld6igmp = env.SharedLibrary(target = 'libmld6igmp', source = libmld6igmpsrcs, LIBS = '')
+    libxorp_mld6igmp = env.SharedLibrary(target = 'libxorp_mld6igmp',
+					 source = libxorp_mld6igmp_srcs,
+					 LIBS = '')
 else:
-    libmld6igmp = env.StaticLibrary(target = 'libmld6igmp', source = libmld6igmpsrcs, LIBS = '')
+    libxorp_mld6igmp = env.StaticLibrary(target = 'libxorp_mld6igmp',
+					 source = libxorp_mld6igmp_srcs,
+					 LIBS = '')
 
 igmpsrcs = [
           'xorp_igmp.cc',
@@ -100,6 +104,6 @@ env.Alias('install',
 
 if is_shared:
     env.Alias('install',
-              env.InstallLibrary('$libdir', libmld6igmp))
+              env.InstallLibrary('$libdir', libxorp_mld6igmp))
 
 Default(igmp, mld)
