@@ -38,10 +38,10 @@ env.AppendUnique(LIBPATH = [
     ])
 
 env.AppendUnique(LIBS = [
-    'libcliprocessorxif',
+    'cliprocessorxif',
     'xorp_ipc',
     'xorp_core',
-    'proto',
+    'xorp_proto',
     'xorp_comm',
     ])
 
