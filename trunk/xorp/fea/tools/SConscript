@@ -40,9 +40,9 @@ env.AppendUnique(LIBPATH = [
 
 env.AppendUnique(LIBS = [
     'xorp_fea_client',
-    'feaifmgrmirrorxif',
-    'feaifmgrreplicatorxif',
-    'feaifmgrmirrorbase',
+    'xif_fea_ifmgr_mirror',
+    'xif_fea_ifmgr_replicator',
+    'xst_fea_ifmgr_mirror',
     'xorp_ipc',
     'xorp_core',
     'xorp_proto',

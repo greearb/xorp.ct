@@ -44,14 +44,14 @@ env.AppendUnique(LIBPATH = [
 	])
 
 env.AppendUnique(LIBS = [
-	'ribxif',
-	'findereventnotifierxif',
+	'xif_rib',
+	'xif_finder_event_notifier',
 	'xorp_fea_client',
-	'feaifmgrmirrorxif',
-	'feaifmgrreplicatorxif',
-	'feaifmgrmirrorbase',
-	'fearawpkt4xif',
-	'fearawpkt6xif',
+	'xif_fea_ifmgr_mirror',
+	'xif_fea_ifmgr_replicator',
+	'xst_fea_ifmgr_mirror',
+	'xif_fea_rawpkt4',
+	'xif_fea_rawpkt6',
 	'xorp_policy_backend',
 	'xorp_policy_common',
 	'xorp_ipc',
@@ -63,8 +63,8 @@ env.AppendUnique(LIBS = [
 # XXX Do we need to link against this now?
 if is_shared:
     env.PrependUnique(LIBS = [
-	'ospfv2base',
-	'ospfv3base',
+	'xst_ospfv2',
+	'xst_ospfv3',
     ])
 
 env.PrependUnique(LIBS = [

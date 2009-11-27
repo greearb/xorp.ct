@@ -38,10 +38,10 @@ env.AppendUnique(LIBPATH = [
     ])
 
 env.AppendUnique(LIBS = [
-    'findereventnotifierxif',
-    'ribxif',
-    'showdistancesbase',
-    'showroutesbase',
+    'xif_finder_event_notifier',
+    'xif_rib',
+    'xst_show_distances',
+    'xst_show_routes',
     'xorp_ipc',
     'xorp_core',
     'xorp_proto',

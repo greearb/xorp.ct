@@ -43,15 +43,15 @@ env.PrependUnique(LIBPATH = [
     ])
 
 env.AppendUnique(LIBS = [
-    'staticroutes',
+    'xorp_static_routes',		# the library, not the executable
     'xorp_fea_client',
-    'feaifmgrmirrorxif',
-    'feaifmgrreplicatorxif',
-    'findereventnotifierxif',
-    'feaifmgrmirrorbase',
-    'staticroutesbase',
-    'ribxif',
-    'findereventnotifierxif',
+    'xif_fea_ifmgr_mirror',
+    'xif_fea_ifmgr_replicator',
+    'xif_finder_event_notifier',
+    'xst_fea_ifmgr_mirror',
+    'xst_static_routes',
+    'xif_rib',
+    'xif_finder_event_notifier',
     'xorp_policy_backend',
     'xorp_policy_common',
     'xorp_ipc',
@@ -60,23 +60,29 @@ env.AppendUnique(LIBS = [
     'xorp_comm',
     ])
 
-
-libsrsources = [
+libxorp_static_routes_srcs = [
     'static_routes_node.cc',
     'static_routes_varrw.cc',
     'xrl_static_routes_node.cc'
     ]
 
-srsources = [
+xorp_static_routes_srcs = [
     'xorp_static_routes.cc'
     ]
 
 if is_shared:
-    libsr = env.SharedLibrary(LIBS = '', target = 'libstaticroutes', source = libsrsources)
+    libxorp_static_routes = env.SharedLibrary(
+	target = 'libxorp_static_routes',
+	source = libxorp_static_routes_srcs,
+	LIBS = '')
 else:
-    libsr = env.StaticLibrary(LIBS = '', target = 'libstaticroutes', source = libsrsources)
+    libxorp_static_routes = env.StaticLibrary(
+	target = 'libxorp_static_routes',
+	source = libxorp_static_routes_srcs,
+	LIBS = '')
 
-xorp_static_routes = env.Program(target = 'xorp_static_routes', source = srsources)
+xorp_static_routes = env.Program(target = 'xorp_static_routes',
+				 source = xorp_static_routes_srcs)
 
 #srpath = '$bindir'
 srpath = '$exec_prefix/static_routes'
@@ -86,6 +92,6 @@ env.Alias('install',
 
 if is_shared:
     env.Alias('install',
-              env.InstallLibrary('$libdir', libsr))
+              env.InstallLibrary('$libdir', libxorp_static_routes))
 
 Default(xorp_static_routes)

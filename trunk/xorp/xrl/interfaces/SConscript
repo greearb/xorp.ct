@@ -98,7 +98,7 @@ all_xif_libs = []
 
 for xif in xifs:
     base = xif[:-len('.xif')]
-    tgt = 'lib' + base.translate(string.maketrans('',''),'_') + 'xif'
+    tgt = 'libxif_' + base
     src = base + '_xif.cc'
 
     env.CLNTGEN(xif)

@@ -81,25 +81,25 @@ if not is_shared:
     libxorp_fea_linkorder.append('libxorp_fea_data_plane_base')
 
 libxorp_fea_linkorder += [
-    'feafibclientxif',
-    'fearawlinkclientxif',
-    'fearawpkt4clientxif',
-    'fearawpkt6clientxif',
-    'socket4userxif',
-    'socket6userxif',
-    'findereventnotifierxif',
+    'xif_fea_fib_client',
+    'xif_fea_rawlink_client',
+    'xif_fea_rawpkt4_client',
+    'xif_fea_rawpkt6_client',
+    'xif_socket4_user',
+    'xif_socket6_user',
+    'xif_finder_event_notifier',
     'xorp_cli',
-    'cliprocessorxif',
+    'xif_cli_processor',
     'xorp_fea_client',
-    'feaifmgrmirrorxif',   # XXX?
-    'feaifmgrreplicatorxif', # XXX?
-    'feaifmgrmirrorbase', # XXX?
-    'climanagerxif',
-    'mfeaclientxif',
-    'profileclientxif',
-    'clibase',
-    'feabase',
-    'mfeabase',
+    'xif_fea_ifmgr_mirror',   # XXX?
+    'xif_fea_ifmgr_replicator', # XXX?
+    'xst_fea_ifmgr_mirror', # XXX?
+    'xif_cli_manager',
+    'xif_mfea_client',
+    'xif_profile_client',
+    'xst_cli',
+    'xst_fea',
+    'xst_mfea',
     'xorp_mrt',
     'xorp_tecla',
     'xorp_proto',

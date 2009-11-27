@@ -42,8 +42,8 @@ env.AppendUnique(LIBPATH = [
 
 env.AppendUnique(LIBS = [
 	'xorp_cli',
-	'cliprocessorxif',
-	'clibase',
+	'xif_cli_processor',
+	'xst_cli',
 	'xorp_finder',
 	'xorp_tecla',
 	'xorp_ipc',

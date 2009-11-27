@@ -43,34 +43,40 @@ env.PrependUnique(LIBPATH = [
     ])
 
 env.AppendUnique(LIBS = [
-    'fib2mrib',
-    'fib2mribbase',
+    'xorp_fib2mrib',
+    'xst_fib2mrib',
     'xorp_policy_backend',
     'xorp_policy_common',
     'xorp_fea_client',
-    'findereventnotifierxif',
-    'feaifmgrmirrorxif',
-    'feaifmgrreplicatorxif',
-    'ftixif',
-    'feafibxif',
-    'ribxif',
-    'feaifmgrmirrorbase',
+    'xif_finder_event_notifier',
+    'xif_fea_ifmgr_mirror',
+    'xif_fea_ifmgr_replicator',
+    'xif_fti',
+    'xif_fea_fib',
+    'xif_rib',
+    'xst_fea_ifmgr_mirror',
     'xorp_ipc',
     'xorp_core',
     'xorp_proto',
     'xorp_comm'
 ])
 
-libfib2mribsrcs = [
+libxorp_fib2mrib_srcs = [
 	     'fib2mrib_node.cc',
 	     'fib2mrib_varrw.cc',
 	     'xrl_fib2mrib_node.cc'
              ]
 
 if is_shared:
-    libfib2mrib = env.SharedLibrary(target = 'libfib2mrib', source = libfib2mribsrcs, LIBS = '')
+    libxorp_fib2mrib = env.SharedLibrary(
+	target = 'libxorp_fib2mrib',
+	source = libxorp_fib2mrib_srcs,
+	LIBS = '')
 else:
-    libfib2mrib = env.StaticLibrary(target = 'libfib2mrib', source = libfib2mribsrcs, LIBS = '')
+    libxorp_fib2mrib = env.StaticLibrary(
+	target = 'libxorp_fib2mrib',
+	source = libxorp_fib2mrib_srcs,
+	LIBS = '')
 
 fib2mribsrcs = [
           'xorp_fib2mrib.cc',
@@ -86,6 +92,6 @@ env.Alias('install',
 
 if is_shared:
     env.Alias('install',
-              env.InstallLibrary('$libdir', libfib2mrib))
+              env.InstallLibrary('$libdir', libxorp_fib2mrib))
 
 Default(fib2mrib)

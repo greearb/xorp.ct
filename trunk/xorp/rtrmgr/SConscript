@@ -135,9 +135,9 @@ if env['debug_xrldb']:
 
 rtrmgr_env.AppendUnique(LIBS = [
     'xorp_rtrmgr',
-    'rtrmgrbase',
-    'rtrmgrclientxif',
-    'findereventnotifierxif',
+    'xst_rtrmgr',
+    'xif_rtrmgr_client',
+    'xif_finder_event_notifier',
     'xorp_finder',
     'xorp_ipc',
     'xorp_comm',
@@ -161,13 +161,13 @@ xorpsh_env = env.Clone()
 xorpsh_env.AppendUnique(LIBS = [
     'xorp_rtrmgr',
     'xorp_cli',
-    'clibase',			# XXX Not picked up automagically?
-    'cliprocessorxif',		# XXX ditto?
+    'xst_cli',			# XXX Not picked up automagically?
+    'xif_cli_processor',		# XXX ditto?
     'xorp_proto',
     'xorp_tecla',
-    'rtrmgrxif',
-    'xorpshbase',
-    'findereventnotifierxif',
+    'xif_rtrmgr',
+    'xst_xorpsh',
+    'xif_finder_event_notifier',
     'xorp_ipc',
     'xorp_comm',
     'xorp_core',
@@ -190,8 +190,8 @@ env.Alias('install',
 profiler_env = env.Clone()
 
 profiler_env.AppendUnique(LIBS = [
-    'profilexif',
-    'profilerbase',
+    'xif_profile',
+    'xst_profiler',
     'xorp_finder',
     'xorp_ipc',
     'xorp_comm',

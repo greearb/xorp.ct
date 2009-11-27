@@ -42,9 +42,9 @@ env.AppendUnique(LIBPATH = [
 # XXX Can we inherit these from libfeaclient deps?
 env.AppendUnique(LIBS = [
 	'xorp_fea_client',
-	'feaifmgrmirrorxif',
-	'feaifmgrreplicatorxif',
-	'feaifmgrmirrorbase',
+	'xif_fea_ifmgr_mirror',
+	'xif_fea_ifmgr_replicator',
+	'xst_fea_ifmgr_mirror',
 	'xorp_ipc',
 	'xorp_core',
 	'xorp_comm',
@@ -55,11 +55,11 @@ test_redist = env.AutoTest(target = 'test_local_copy',
 
 env = env.Clone()
 env.PrependUnique(LIBS = [
-	'testfeaifmgrmirrorbase',
-	'feaifmgrreplicatorxif',
+	'xst_test_fea_ifmgr_mirror',
+	'xif_fea_ifmgr_replicator',
 	'xorp_finder',
-	'ribxif',
-	'ribclientbase',
+	'xif_rib',
+	'xst_ribclient',
 	])
 test_remote_copy = env.AutoTest(target = 'test_remote_copy',
                                 source = 'test_remote_copy.cc')

@@ -43,16 +43,16 @@ env.AppendUnique(LIBPATH = [
 	])
 
 env.AppendUnique(LIBS = [
-	'ripbase',
+	'xst_rip',
 	'xorp_rip',
 	'xorp_ripng',
-	'ripxif',
-	'findereventnotifierxif',
+	'xif_rip',
+	'xif_finder_event_notifier',
 	'xorp_fea_client',
-	'feaifmgrmirrorxif',
-	'feaifmgrreplicatorxif',
-	'feaifmgrmirrorbase',
-	'socket4xif',
+	'xif_fea_ifmgr_mirror',
+	'xif_fea_ifmgr_replicator',
+	'xst_fea_ifmgr_mirror',
+	'xif_socket4',
 	'xorp_policy_backend',
 	'xorp_policy_common',
 	'xorp_ipc',

@@ -84,7 +84,7 @@ xrlspath = '$exec_prefix/xrl/targets'
 def BuildXrlTarget(tgt):
     lib = None
     base = tgt[:-len('.tgt')]
-    target = 'lib' + base.translate(string.maketrans('',''),'_') + 'base'
+    target = 'libxst_' + base
     source = base + '_base.cc'
 
     env.TGTGEN(tgt)
