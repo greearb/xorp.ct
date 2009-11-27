@@ -29,7 +29,7 @@ is_shared = env.has_key('SHAREDLIBS')
 
 env.AppendUnique(CPPPATH = [ "#" ])
 env.PrependUnique(LIBPATH = [ '$BUILDDIR/libxorp' ] )
-env.AppendUnique(LIBS = ['libxorp'])
+env.AppendUnique(LIBS = ['xorp_core'])
 
 sources = [
 	'comm_sock.c',
