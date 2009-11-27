@@ -69,6 +69,9 @@ vars.AddVariables(
     BoolVariable('debug_msg',  'Build with debug messages', False),
     BoolVariable('debug_fn',  'Build with function names in debug_msg output', False),
     BoolVariable('debug_cb',  'Build with callback debugging', False),
+    EnumVariable('debug', 'Build with debug symbols', 'full',
+                 allowed_values=('no', 'yes', 'full', 'override'),
+                 map={}, ignorecase=2),
     EnumVariable('optimize', 'Build with optimization', 'yes',
                  allowed_values=('no', 'yes', 'full', 'size', 'override'),
                  map={}, ignorecase=2),
@@ -166,9 +169,12 @@ if env['ignore_check_errors']:
     env['AUTOTEST_SKIP_ERRORS'] = True
 print 'Ignore check errors: ', env['AUTOTEST_SKIP_ERRORS']
 
-print 'Debug STL:        ', env['debug_stl']
-# XXX Enabling debug messages for the whole tree may not be what you want,
+# NOTE: Enabling debug messages for the whole tree may not be what you want,
 # as it can lead to premature timeouts.
+# Enabling callback debugging is currently not advised as it does
+# inline printfs.
+print 'Debug symbols:    ', env['debug']
+print 'Debug STL:        ', env['debug_stl']
 print 'Debug messages:   ', env['debug_msg']
 print 'Debug function names: ', env['debug_fn']
 print 'Debug callbacks:  ', env['debug_cb']
@@ -349,9 +355,9 @@ if SCons.Tool.FindTool(['gcc'], env) is None or \
    SCons.Tool.FindTool(['g++'], env) is None:
     print gnutoolwarning % 'gcc or g++ compiler'
 
-env.AppendUnique( CFLAGS = Split(ARGUMENTS.get('CFLAGS', "-g")) )
-env.AppendUnique( CXXFLAGS = Split(ARGUMENTS.get('CXXFLAGS', "-g")) )
-env.AppendUnique( LINKFLAGS = Split(ARGUMENTS.get('LINKFLAGS', "")) )
+env.AppendUnique( CFLAGS = Split(ARGUMENTS.get('CFLAGS', '')) )
+env.AppendUnique( CXXFLAGS = Split(ARGUMENTS.get('CXXFLAGS', '')) )
+env.AppendUnique( LINKFLAGS = Split(ARGUMENTS.get('LINKFLAGS', '')) )
 
 # If the user didn't override our default optimization, then
 # sanitize user's CFLAGS/CXXFLAGS to not contain optimization options,
@@ -365,6 +371,17 @@ if not env['optimize'] == 'override':
     bigoflag = bigodict[env['optimize']]
     env.AppendUnique(CFLAGS = [ bigoflag ])
     env.AppendUnique(CXXFLAGS = [ bigoflag ])
+
+# Do the same for the flags which control debug symbols.
+if not env['debug'] == 'override':
+    env.Replace( CFLAGS = filter(lambda s: not s.startswith('-g'),
+                                 Split(env['CFLAGS'])))
+    env.Replace( CXXFLAGS = filter(lambda s: not s.startswith('-g'),
+                                   Split(env['CXXFLAGS'])))
+    gdict = { 'no': '', 'yes': '-g', 'full': '-g3' }
+    gflag = gdict[env['debug']]
+    env.AppendUnique(CFLAGS = [ gflag ])
+    env.AppendUnique(CXXFLAGS = [ gflag ])
 
 env.AppendUnique(CPPDEFINES = [
     ( '_FORTIFY_SOURCE', 0 ),
