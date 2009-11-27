@@ -28,7 +28,8 @@ is_shared = env.has_key('SHAREDLIBS')
 
 env.AppendUnique(CPPPATH = [ "#" ])
 env.PrependUnique(LIBPATH = [ '$BUILDDIR/libxorp'] )
-env.AppendUnique(LIBS = ['libxorp', 'crypto'])
+# XXX 'crypto' is a base system prerequisite; use LINKFLAGS?
+env.AppendUnique(LIBS = ['xorp_core', 'crypto'])
 
 sources = [
 	'checksum.c',

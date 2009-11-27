@@ -30,9 +30,9 @@ env.AppendUnique(CPPPATH = [ "#" ])
 env.AppendUnique(LIBPATH = [ '$BUILDDIR/libxipc',
 			     '$BUILDDIR/libcomm',
                              '$BUILDDIR/libxorp' ] )
-env.AppendUnique(LIBS = [ 'libxipc',
-			  'libcomm',
-                          'libxorp' ])
+env.AppendUnique(LIBS = [ 'xorp_ipc',
+			  'xorp_comm',
+                          'xorp_core' ])
 
 xifs = [
     'bgp.xif',
