@@ -46,9 +46,9 @@ env.PrependUnique(LIBPATH = [
     '.',
     ])
 
-### librtrmgr
+### libxorp_rtrmgr
 
-librtrmgr_env = env.Clone()
+libxorp_rtrmgr_env = env.Clone()
 
 # FIXME generate lex/yacc from source
 # shorthand this plz
@@ -65,7 +65,7 @@ librtrmgr_env = env.Clone()
 #opcmd_env.AppendUnique(LEXFLAGS='-Popcmd')
 #opcmd_env.CXXFile(source='op_commands.ll', target='lex.opcmd.cc')
 
-librtrmgr_srcs = [
+libxorp_rtrmgr_srcs = [
 	'command_tree.cc',
 	'conf_tree.cc',
 	'conf_tree_node.cc',
@@ -102,8 +102,8 @@ librtrmgr_srcs = [
 
 # Runtime XRL syntax validation for developers.
 if env['debug_xrldb']:
-    librtrmgr_srcs += [ 'xrldb.cc' ]
-    librtrmgr_env.AppendUnique(CPPDEFINES = [
+    libxorp_rtrmgr_srcs += [ 'xrldb.cc' ]
+    libxorp_rtrmgr_env.AppendUnique(CPPDEFINES = [
         ( 'DEBUG_XRLDB', 1 ),
     ])
 
@@ -117,10 +117,10 @@ xorp_paths = {
 util_cc_env = env.Clone()
 util_cc_env.AppendUnique(CPPDEFINES=xorp_paths.items())
 obj_util = util_cc_env.StaticObject(source='util.cc')
-librtrmgr_srcs += [ obj_util ]
+libxorp_rtrmgr_srcs += [ obj_util ]
 
-librtrmgr = librtrmgr_env.StaticLibrary(target = 'librtrmgr',
-					source = librtrmgr_srcs)
+libxorp_rtrmgr = libxorp_rtrmgr_env.StaticLibrary(target = 'libxorp_rtrmgr',
+					source = libxorp_rtrmgr_srcs)
 
 ### rtrmgr
 

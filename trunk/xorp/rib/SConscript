@@ -50,7 +50,7 @@ env.PrependUnique(LIBPATH = [
     ])
 
 env.AppendUnique(LIBS = [
-    'rib',
+    'xorp_rib',				# The library, not the executable.
     'xorp_fea_client',
     'feaifmgrmirrorxif',
     'feaifmgrreplicatorxif',
@@ -75,7 +75,7 @@ env.AppendUnique(LIBS = [
     'xorp_comm'
 ])
 
-libribsrcs = [
+libxorp_rib_srcs = [
 	     'profile_vars.cc',
 	     'protocol.cc',
 	     'redist_xrl.cc',
@@ -99,9 +99,13 @@ libribsrcs = [
              ]
 
 if is_shared:
-    librib = env.SharedLibrary(target = 'librib', source = libribsrcs, LIBS = '')
+    libxorp_rib = env.SharedLibrary(target = 'libxorp_rib',
+				    source = libxorp_rib_srcs,
+				    LIBS = '')
 else:
-    librib = env.StaticLibrary(target = 'librib', source = libribsrcs, LIBS = '')
+    libxorp_rib = env.StaticLibrary(target = 'libxorp_rib',
+				    source = libxorp_rib_srcs,
+				    LIBS = '')
 
 ribsrcs = [
           'main_rib.cc',
@@ -117,6 +121,6 @@ env.Alias('install',
 
 if is_shared:
     env.Alias('install',
-              env.InstallLibrary('$libdir', librib))
+              env.InstallLibrary('$libdir', libxorp_rib))
 
 Default(rib)
