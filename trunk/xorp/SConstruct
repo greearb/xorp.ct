@@ -364,7 +364,7 @@ env.AppendUnique(CFLAGS = [
     '-Wcast-align',
     '-Wstrict-prototypes',
     '-Wnested-externs',
-    #'-pipe',
+    '-pipe',
     ])
 
 env.AppendUnique(CXXFLAGS = [
@@ -377,7 +377,7 @@ env.AppendUnique(CXXFLAGS = [
     '-Wcast-align',
     '-Woverloaded-virtual',
     '-ftemplate-depth-25',
-    #'-pipe',
+    '-pipe',
     ])
 
 # NOTE: For GNU STL only at this time.
