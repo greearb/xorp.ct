@@ -44,8 +44,8 @@ env.AppendUnique(LIBPATH = [
 
 env.AppendUnique(LIBS = [
 	'ripbase',
-	'rip',
-	'ripng',
+	'xorp_rip',
+	'xorp_ripng',
 	'ripxif',
 	'findereventnotifierxif',
 	'xorp_fea_client',

@@ -68,7 +68,7 @@ if is_shared:
     ])
 
 env.PrependUnique(LIBS = [
-	'ospf',
+	'xorp_ospf',
 ])
 
 # XXX NOTYET: compound test; two modules, one test scaffold, run from

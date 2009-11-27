@@ -57,7 +57,7 @@ env = env.Clone()
 env.PrependUnique(LIBS = [
 	'testfeaifmgrmirrorbase',
 	'feaifmgrreplicatorxif',
-	'finder',
+	'xorp_finder',
 	'ribxif',
 	'ribclientbase',
 	])
