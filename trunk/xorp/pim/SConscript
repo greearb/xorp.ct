@@ -44,7 +44,7 @@ env.PrependUnique(LIBPATH = [
     ])
 
 env.AppendUnique(LIBS = [
-    'pim',
+    'xorp_pim',			# The library, not the executable.
     'feaclient',
     'ribxif',
     'mld6igmpxif',
@@ -64,7 +64,7 @@ env.AppendUnique(LIBS = [
     'xorp_comm'
 ])
 
-libpimsrcs = [
+libxorp_pim_srcs = [
 	     'pim_bsr.cc',
 	     'pim_config.cc',
 	     'pim_mfc.cc',
@@ -100,11 +100,13 @@ libpimsrcs = [
              ]
 
 if is_shared:
-    libpim = env.SharedLibrary(target = 'libpim', source = libpimsrcs, LIBS = '')
+    libxorp_pim = env.SharedLibrary(target = 'libxorp_pim',
+				    source = libxorp_pim_srcs, LIBS = '')
     env.Alias('install',
-              env.InstallLibrary('$libdir', libpim))
+              env.InstallLibrary('$libdir', libxorp_pim))
 else:
-    libpim = env.StaticLibrary(target = 'libpim', source = libpimsrcs, LIBS = '')
+    libxorp_pim = env.StaticLibrary(target = 'libxorp_pim',
+				    source = libxorp_pim_srcs, LIBS = '')
 
 pim4srcs = [
           'xorp_pimsm4.cc',
