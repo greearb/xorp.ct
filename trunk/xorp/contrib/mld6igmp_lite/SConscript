@@ -55,7 +55,7 @@ env.AppendUnique(LIBS = [
     'findereventnotifierxif',
     'feaifmgrmirrorbase',
     'mld6igmpbase',
-    'mrt',
+    'xorp_mrt',
     'xipc',
     'xorp',
     'proto',

@@ -35,7 +35,7 @@ env.AppendUnique(LIBPATH = [
 	])
 
 env.AppendUnique(LIBS = [
-	'mrt',
+	'xorp_mrt',
 	'xorp',
 	'comm',
 	])

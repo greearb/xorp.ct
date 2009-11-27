@@ -35,12 +35,12 @@ sources = [
 	]
 
 if is_shared:
-    libmrt = env.SharedLibrary(target = 'libmrt', source = sources)
+    libxorp_mrt = env.SharedLibrary(target = 'libxorp_mrt', source = sources)
 else:
-    libmrt = env.StaticLibrary(target = 'libmrt', source = sources)
+    libxorp_mrt = env.StaticLibrary(target = 'libxorp_mrt', source = sources)
 
 if is_shared:
     env.Alias('install',
-        env.InstallLibrary('$libdir', libmrt))
+        env.InstallLibrary('$libdir', libxorp_mrt))
 
-Default(libmrt)
+Default(libxorp_mrt)
