@@ -57,6 +57,7 @@ def declare_send_xrl(method_no, method):
 
 def implement_send_xrl(cls, method_no, method, ifqname):
     cb_name = "%sCB" % (caps_cpp_classname(method.name()))
+    xrl_ptr_name = "ap_xrl_%s" % method.name()
     atypes = ["\n\tconst char*\tdst_xrl_target_name"]
     for a in method.args():
         atypes.append("\n\tconst %s&\t%s" % (a.cpp_type(), a.name()))
@@ -64,12 +65,13 @@ def implement_send_xrl(cls, method_no, method, ifqname):
     s = "\nbool\n%s::send_%s(%s\n)\n{\n" \
         % (cls, cpp_name(method.name()), csv(atypes))
 
-    s += "    static Xrl* x = NULL;\n"
+    s += "    Xrl* x = %s.get();\n" % xrl_ptr_name
     s += "\n"
     s += "    if (!x) {\n"
     s += "        x = new Xrl(dst_xrl_target_name, \"%s\");\n" % ifqname
     for a in method.args():
         s += "        x->args().add(\"%s\", %s);\n" % (a.name(), a.name())
+    s += "        %s.reset(x);\n" % xrl_ptr_name
     s += "    }\n"
     s += "\n"
     s += "    x->set_target(dst_xrl_target_name);\n"
@@ -93,6 +95,11 @@ def declare_unmarshall(method_name):
         args[i] = "\n\t" + args[i]
     s += csv(args)
     s += "\n%s);\n\n" % xorp_indent(1)
+    return s
+
+def declare_xrl_auto_ptr(method_name):
+    xrl_ptr_name = "ap_xrl_%s" % method_name
+    s = xorp_indent(1) + "auto_ptr<Xrl> %s;\n" % xrl_ptr_name
     return s
 
 def implement_unmarshall(cls, method_no, method):
@@ -163,6 +170,7 @@ def prepare_client_if_hh(modulename, hh_file):
 #include "libxipc/xrl_error.hh"
 #include "libxipc/xrl_sender.hh"
 
+#include <memory>
 """ % (protect(hh_file), protect(hh_file), modulename)
     return s
 
@@ -184,6 +192,12 @@ private:
 """
     for i in range(0, len(methods)):
         s += declare_unmarshall(methods[i].name())
+
+    s += "private:\n"
+    s += "    /* Declare cached Xrl pointers */\n"
+    for i in range(0, len(methods)):
+        s += declare_xrl_auto_ptr(methods[i].name())
+
     s += "};\n"
 
     return s
