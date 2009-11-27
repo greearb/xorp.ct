@@ -68,10 +68,10 @@ libtecla_srcs = [
 
 
 if is_shared:
-    libtecla_xorp = env.SharedLibrary('libtecla_xorp', libtecla_srcs)
+    libxorp_tecla = env.SharedLibrary('libxorp_tecla', libtecla_srcs)
     env.Alias('install',
-              env.InstallLibrary('$libdir', libtecla_xorp))
+              env.InstallLibrary('$libdir', libxorp_tecla))
 else:
-    libtecla_xorp = env.StaticLibrary('libtecla_xorp', libtecla_srcs)
+    libxorp_tecla = env.StaticLibrary('libxorp_tecla', libtecla_srcs)
 
-Default(libtecla_xorp)
+Default(libxorp_tecla)

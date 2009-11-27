@@ -74,7 +74,7 @@ libxorp_fea_linkorder += [
 	'socket4userxif',
 	'socket6userxif',
 	'findereventnotifierxif',
-	'cli',
+	'xorp_cli',
 	'cliprocessorxif',
 	'xorp_fea_client',
 	'feaifmgrmirrorxif',   # XXX?
@@ -87,7 +87,7 @@ libxorp_fea_linkorder += [
 	'feabase',
 	'mfeabase',
 	'xorp_mrt',
-	'tecla_xorp',
+	'xorp_tecla',
 	'xorp_proto',
 	'xorp_ipc',
 	'xorp_comm',

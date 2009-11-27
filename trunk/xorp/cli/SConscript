@@ -49,14 +49,14 @@ env.PrependUnique(LIBPATH = [
 env.AppendUnique(LIBS = [
     'cliprocessorxif',
     'clibase',
-    'tecla_xorp',
+    'xorp_tecla',
     'xorp_proto',
     'xorp_ipc',
     'xorp_comm',
     'xorp_core',
     ])
 
-libclisrcs = [
+libxorp_cli_srcs = [
     'cli_client.cc',
     'cli_command.cc',
     'cli_command_pipe.cc',
@@ -66,12 +66,13 @@ libclisrcs = [
     'xrl_cli_node.cc'
     ]
 
-
 if is_shared:
-    libcli = env.SharedLibrary(target = 'libcli', source = libclisrcs)
+    libxorp_cli = env.SharedLibrary(target = 'libxorp_cli',
+				    source = libxorp_cli_srcs)
     env.Alias('install',
-              env.InstallLibrary('$libdir', libcli))
+              env.InstallLibrary('$libdir', libxorp_cli))
 else:
-    libcli = env.StaticLibrary(target = 'libcli', source = libclisrcs)
+    libxorp_cli = env.StaticLibrary(target = 'libxorp_cli',
+				    source = libxorp_cli_srcs)
 
-Default(libcli)
+Default(libxorp_cli)

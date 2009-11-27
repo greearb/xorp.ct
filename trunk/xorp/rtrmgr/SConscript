@@ -160,11 +160,11 @@ xorpsh_env = env.Clone()
 
 xorpsh_env.AppendUnique(LIBS = [
     'rtrmgr',
-    'cli',
+    'xorp_cli',
     'clibase',			# XXX Not picked up automagically?
     'cliprocessorxif',		# XXX ditto?
     'xorp_proto',
-    'tecla_xorp',
+    'xorp_tecla',
     'rtrmgrxif',
     'xorpshbase',
     'findereventnotifierxif',
