@@ -50,7 +50,7 @@ env.PrependUnique(LIBPATH = [
     ])
 
 env.AppendUnique(LIBS = [
-    'ospf',
+    'xorp_ospf',		# Refers to the library, not the executable.
     'ospfv2base',
     'ospfv3base',
     'policybackend',
@@ -70,7 +70,7 @@ env.AppendUnique(LIBS = [
     'xorp_comm',
 ])
 
-libospfsrcs = [
+libxorp_ospf_srcs = [
 	     'auth.cc',
 	     'area_router.cc',
 	     'external.cc',
@@ -88,9 +88,13 @@ libospfsrcs = [
              ]
 
 if is_shared:
-    libospf = env.SharedLibrary(target = 'libospf', source = libospfsrcs, LIBS = '')
+    libxorp_ospf = env.SharedLibrary(target = 'libxorp_ospf',
+				     source = libxorp_ospf_srcs,
+				     LIBS = '')
 else:
-    libospf = env.StaticLibrary(target = 'libospf', source = libospfsrcs, LIBS = '')
+    libxorp_ospf = env.StaticLibrary(target = 'libxorp_ospf',
+				     source = libxorp_ospf_srcs,
+				     LIBS = '')
 
 ospfv2srcs = [
           'xorp_ospfv2.cc',
@@ -115,6 +119,6 @@ env.Alias('install',
 
 if is_shared:
     env.Alias('install',
-              env.InstallLibrary('$libdir', libospf))
+              env.InstallLibrary('$libdir', libxorp_ospf))
 
 Default(ospfv2, ospfv3)
