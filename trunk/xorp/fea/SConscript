@@ -110,6 +110,7 @@ libfea_linkorder += [
 
 env.PrependUnique(LIBS = libfea_linkorder)
 
+# Report unresolved symbol references when building the FEA.
 if is_shared:
     env.AppendUnique(LINKFLAGS = [ '-Wl,-z,defs', ])
 
