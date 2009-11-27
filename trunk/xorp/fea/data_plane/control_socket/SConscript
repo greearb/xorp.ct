@@ -41,10 +41,12 @@ sources = [
 	]
 
 if is_shared:
-    libxcs = env.SharedLibrary(target = 'libxorp_control_socket', source = sources)
+    libxcs = env.SharedLibrary(target = 'libxorp_fea_control_socket',
+			       source = sources)
     env.Alias('install',
         env.InstallLibrary('$libdir', libxcs))
 else:
-    libxcs = env.StaticLibrary(target = 'libxorp_control_socket', source = sources)
+    libxcs = env.StaticLibrary(target = 'libxorp_fea_control_socket',
+			       source = sources)
 
 Default(libxcs)

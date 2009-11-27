@@ -40,10 +40,10 @@ sources = [
 	]
 
 if is_shared:
-    libxio = env.SharedLibrary(target = 'libxorp_io', source = sources)
+    libxio = env.SharedLibrary(target = 'libxorp_fea_io', source = sources)
     env.Alias('install',
         env.InstallLibrary('$libdir', libxio))
 else:
-    libxio = env.StaticLibrary(target = 'libxorp_io', source = sources)
+    libxio = env.StaticLibrary(target = 'libxorp_fea_io', source = sources)
 
 Default(libxio)

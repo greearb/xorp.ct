@@ -68,9 +68,11 @@ sources = [
 	]
 
 if is_shared:
-    libxifc = env.SharedLibrary(target = 'libxorp_ifconfig', source = sources)
+    libxifc = env.SharedLibrary(target = 'libxorp_fea_ifconfig',
+				source = sources)
 else:
-    libxifc = env.StaticLibrary(target = 'libxorp_ifconfig', source = sources)
+    libxifc = env.StaticLibrary(target = 'libxorp_fea_ifconfig',
+				source = sources)
 
 if is_shared:
     env.Alias('install',

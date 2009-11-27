@@ -58,7 +58,7 @@ env.PrependUnique(LIBPATH = [
     '$BUILDDIR/libcomm',
     ])
 
-libfdp_srcs = [
+libxfdp_srcs = [
      'fea_data_plane_manager.cc',
      'fibconfig_forwarding.cc',
      'ifconfig_property.cc',
@@ -68,19 +68,19 @@ libfdp_srcs = [
      'io_tcpudp.cc',
 ]
 
-libfea_linkorder = [
-    'xorp_data_plane_managers',
-    'xorp_fibconfig',
-    'xorp_firewall', # XXX?
-    'xorp_ifconfig',
-    'xorp_io',
-    'xorp_control_socket',
+libxorp_fea_linkorder = [
+    'xorp_fea_data_plane_managers',
+    'xorp_fea_fibconfig',
+    'xorp_fea_firewall', # XXX?
+    'xorp_fea_ifconfig',
+    'xorp_fea_io',
+    'xorp_fea_control_socket',
     ]
 
 if not is_shared:
-    libfea_linkorder.append('libfea_data_plane_base')
+    libxorp_fea_linkorder.append('libxorp_fea_data_plane_base')
 
-libfea_linkorder += [
+libxorp_fea_linkorder += [
     'feafibclientxif',
     'fearawlinkclientxif',
     'fearawpkt4clientxif',
@@ -108,13 +108,13 @@ libfea_linkorder += [
     'xorp'
     ]
 
-env.PrependUnique(LIBS = libfea_linkorder)
+env.PrependUnique(LIBS = libxorp_fea_linkorder)
 
 # Report unresolved symbol references when building the FEA.
 if is_shared:
     env.AppendUnique(LINKFLAGS = [ '-Wl,-z,defs', ])
 
-libfeasrcs = [
+libxorp_fea_srcs = [
      'fea_io.cc',
      'fea_node.cc',
      'fibconfig.cc',
@@ -148,15 +148,18 @@ libfeasrcs = [
     ]
 
 if is_shared:
-    libfeasrcs += libfdp_srcs
-    libfea = env.SharedLibrary(target = 'libfea', source = libfeasrcs)
+    libxorp_fea_srcs += libxfdp_srcs
+    libxorp_fea = env.SharedLibrary(target = 'libxorp_fea',
+			       source = libxorp_fea_srcs)
     env.Alias('install',
-              env.InstallLibrary('$libdir', libfea))
+              env.InstallLibrary('$libdir', libxorp_fea))
 else:
     # Use an intermediate static lib to deal with some dependencies.
-    libfdp = env.StaticLibrary(target = 'libfea_data_plane_base', source = libfdp_srcs)
-    env.PrependUnique(LIBS = [ libfdp ])
-    libfea = env.StaticLibrary(target = 'libfea', source = libfeasrcs)
+    libxfdp = env.StaticLibrary(target = 'libxorp_fea_data_plane_base',
+			        source = libxfdp_srcs)
+    env.PrependUnique(LIBS = [ libxfdp ])
+    libxorp_fea = env.StaticLibrary(target = 'libxorp_fea',
+				    source = libxorp_fea_srcs)
 
 #######################
 
@@ -172,10 +175,10 @@ env = env.Clone()
 
 if is_shared:
     env.PrependUnique(LIBS = [
-        'fea',
+        'xorp_fea',		# -lxorp_fea, not the xorp_fea executable
     ])
 else:
-    env.PrependUnique(LIBS = [ libfea ])
+    env.PrependUnique(LIBS = [ libxorp_fea ])
 
 feasrcs = [
           'xorp_fea.cc',
@@ -212,4 +215,4 @@ env.Alias('install',
 
 #######################
 
-Default(libfea, fea, feadummy)
+Default(libxorp_fea, fea, feadummy)

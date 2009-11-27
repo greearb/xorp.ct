@@ -39,9 +39,11 @@ sources = [
 	]
 
 if is_shared:
-    libxdpm = env.SharedLibrary(target = 'libxorp_data_plane_managers', source = sources)
+    libxdpm = env.SharedLibrary(target = 'libxorp_fea_data_plane_managers',
+				source = sources)
 else:
-    libxdpm = env.StaticLibrary(target = 'libxorp_data_plane_managers', source = sources)
+    libxdpm = env.StaticLibrary(target = 'libxorp_fea_data_plane_managers',
+				source = sources)
 
 if is_shared:
     env.Alias('install',

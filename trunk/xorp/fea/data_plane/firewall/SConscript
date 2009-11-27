@@ -42,10 +42,12 @@ sources = [
 	]
 
 if is_shared:
-    libxfw = env.SharedLibrary(target = 'libxorp_firewall', source = sources)
+    libxfw = env.SharedLibrary(target = 'libxorp_fea_firewall',
+			       source = sources)
     env.Alias('install',
         env.InstallLibrary('$libdir', libxfw))
 else:
-    libxfw = env.StaticLibrary(target = 'libxorp_firewall', source = sources)
+    libxfw = env.StaticLibrary(target = 'libxorp_fea_firewall',
+			       source = sources)
 
 Default(libxfw)
