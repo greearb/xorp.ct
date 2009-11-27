@@ -32,7 +32,7 @@ env.AppendUnique(CPPPATH = [
     '$BUILDDIR',
     ])
 
-sources = [
+libxorp_fea_client_srcs = [
 	# C++ files
 	'ifmgr_atoms.cc',
 	'ifmgr_cmds.cc',
@@ -42,12 +42,14 @@ sources = [
 	]
 
 if is_shared:
-    libfeaclient = env.SharedLibrary(target = 'libfeaclient', source = sources)
+    libxorp_fea_client = env.SharedLibrary(target = 'libxorp_fea_client',
+					   source = libxorp_fea_client_srcs)
 else:
-    libfeaclient = env.StaticLibrary(target = 'libfeaclient', source = sources)
+    libxorp_fea_client = env.StaticLibrary(target = 'libxorp_fea_client',
+					   source = libxorp_fea_client_srcs)
 
 if is_shared:
     env.Alias('install',
-        env.InstallLibrary('$libdir', libfeaclient))
+        env.InstallLibrary('$libdir', libxorp_fea_client))
 
-Default(libfeaclient)
+Default(libxorp_fea_client)

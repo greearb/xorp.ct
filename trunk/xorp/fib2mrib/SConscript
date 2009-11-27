@@ -47,7 +47,7 @@ env.AppendUnique(LIBS = [
     'fib2mribbase',
     'policybackend',
     'policycommon',
-    'feaclient',
+    'xorp_fea_client',
     'findereventnotifierxif',
     'feaifmgrmirrorxif',
     'feaifmgrreplicatorxif',

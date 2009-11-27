@@ -46,7 +46,7 @@ env.AppendUnique(LIBPATH = [
 env.AppendUnique(LIBS = [
 	'rib',
 	#'ribxrl', #notyet
-	'feaclient',
+	'xorp_fea_client',
 	'feaifmgrmirrorxif',
 	'feaifmgrreplicatorxif',
 	'ftixif',

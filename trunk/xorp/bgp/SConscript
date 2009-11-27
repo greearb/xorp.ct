@@ -54,7 +54,7 @@ env.PrependUnique(LIBPATH = [
 env.AppendUnique(LIBS = [
     'policybackend',
     'policycommon',
-    'feaclient',
+    'xorp_fea_client',
     'bgpbase',
     'feaifmgrmirrorbase',
     'ribxif',

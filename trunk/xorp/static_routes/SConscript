@@ -44,7 +44,7 @@ env.PrependUnique(LIBPATH = [
 
 env.AppendUnique(LIBS = [
     'staticroutes',
-    'feaclient',
+    'xorp_fea_client',
     'feaifmgrmirrorxif',
     'feaifmgrreplicatorxif',
     'findereventnotifierxif',

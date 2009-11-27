@@ -48,7 +48,7 @@ env.PrependUnique(LIBPATH = [
 env.AppendUnique(LIBS = [
     'vrrp',
     'vrrpbase',
-    'feaclient',
+    'xorp_fea_client',
     'feaifmgrxif',
     'feaifmgrmirrorxif',
     'feaifmgrreplicatorxif',

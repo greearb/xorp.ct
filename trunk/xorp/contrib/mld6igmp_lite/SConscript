@@ -45,7 +45,7 @@ env.AppendUnique(LIBPATH = [
 
 env.AppendUnique(LIBS = [
     'mld6igmp',
-    'feaclient',
+    'xorp_fea_client',
     'mld6igmpclientxif',
     'fearawpkt4xif',
     'fearawpkt6xif',

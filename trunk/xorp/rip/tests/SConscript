@@ -48,7 +48,7 @@ env.AppendUnique(LIBS = [
 	'ripng',
 	'ripxif',
 	'findereventnotifierxif',
-	'feaclient',
+	'xorp_fea_client',
 	'feaifmgrmirrorxif',
 	'feaifmgrreplicatorxif',
 	'feaifmgrmirrorbase',

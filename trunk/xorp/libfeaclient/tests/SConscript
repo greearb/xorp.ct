@@ -41,7 +41,7 @@ env.AppendUnique(LIBPATH = [
 # XXX Why does this look for the .so before the .a in linkage, and break?
 # XXX Can we inherit these from libfeaclient deps?
 env.AppendUnique(LIBS = [
-	'feaclient',
+	'xorp_fea_client',
 	'feaifmgrmirrorxif',
 	'feaifmgrreplicatorxif',
 	'feaifmgrmirrorbase',

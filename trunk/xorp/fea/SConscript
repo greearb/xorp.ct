@@ -90,7 +90,7 @@ libxorp_fea_linkorder += [
     'findereventnotifierxif',
     'cli',
     'cliprocessorxif',
-    'feaclient',
+    'xorp_fea_client',
     'feaifmgrmirrorxif',   # XXX?
     'feaifmgrreplicatorxif', # XXX?
     'feaifmgrmirrorbase', # XXX?

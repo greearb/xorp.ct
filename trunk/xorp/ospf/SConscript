@@ -55,7 +55,7 @@ env.AppendUnique(LIBS = [
     'ospfv3base',
     'policybackend',
     'policycommon',
-    'feaclient',
+    'xorp_fea_client',
     'ribxif',
     'findereventnotifierxif',
     'feaifmgrmirrorxif',

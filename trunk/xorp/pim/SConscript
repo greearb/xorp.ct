@@ -45,7 +45,7 @@ env.PrependUnique(LIBPATH = [
 
 env.AppendUnique(LIBS = [
     'xorp_pim',			# The library, not the executable.
-    'feaclient',
+    'xorp_fea_client',
     'ribxif',
     'mld6igmpxif',
     'mfeaxif',
