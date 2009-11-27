@@ -43,7 +43,7 @@ env.AppendUnique(LIBS = [
 	'rtrmgr',
 	'finder',
 	'xorp_ipc',
-	'xorp',
+	'xorp_core',
 	'xorp_comm',
 	])
 

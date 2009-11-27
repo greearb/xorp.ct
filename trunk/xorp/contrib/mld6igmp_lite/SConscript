@@ -57,7 +57,7 @@ env.AppendUnique(LIBS = [
     'mld6igmpbase',
     'xorp_mrt',
     'xorp_ipc',
-    'xorp',
+    'xorp_core',
     'xorp_proto',
     'xorp_comm'
 ])

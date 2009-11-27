@@ -91,7 +91,7 @@ libxorp_fea_linkorder += [
 	'xorp_proto',
 	'xorp_ipc',
 	'xorp_comm',
-	'xorp'
+	'xorp_core'
 	]
 
 env.PrependUnique(LIBS = libxorp_fea_linkorder)

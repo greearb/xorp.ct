@@ -124,7 +124,7 @@ e.PrependUnique(LIBS = [
     'xorp_proto',
     'xorp_ipc',
     'xorp_comm',
-    'xorp',
+    'xorp_core',
 ])
 
 if is_shared:
@@ -194,7 +194,7 @@ e.PrependUnique(LIBS = [
     'xorp_proto',
     'xorp_ipc',
     'xorp_comm',
-    'xorp',
+    'xorp_core',
 ])
 
 if is_shared:

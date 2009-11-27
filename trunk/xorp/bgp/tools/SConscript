@@ -41,7 +41,7 @@ env.AppendUnique(LIBS = [
     'bgp',			# for ASPath
     'bgpxif',
     'xorp_ipc',
-    'xorp',
+    'xorp_core',
     'xorp_comm',
     ])
 

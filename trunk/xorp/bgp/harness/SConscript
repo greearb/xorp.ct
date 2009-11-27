@@ -39,7 +39,7 @@ env.AppendUnique(LIBPATH = [
 env.AppendUnique(LIBS = [
     'bgpxif',
     'xorp_ipc',
-    'xorp',
+    'xorp_core',
     'xorp_comm',
     ])
 

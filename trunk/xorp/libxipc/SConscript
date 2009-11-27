@@ -43,7 +43,7 @@ libxipc_env.PrependUnique(LIBPATH = [
 
 libxipc_env.AppendUnique(LIBS = [
     'xorp_comm',
-    'xorp'
+    'xorp_core'
     ])
 
 libxipc_sources = [
@@ -131,7 +131,7 @@ libfinder_env.AppendUnique(LIBPATH = [
 libfinder_env.AppendUnique(LIBS = [
     'xorp_ipc',
     'xorp_comm',
-    'xorp'
+    'xorp_core'
     ])
 
 libfinder_sources = [
@@ -190,7 +190,7 @@ env.AppendUnique(LIBS = [
     'xorp_finder',
     'xorp_ipc',
     'xorp_comm',
-    'xorp'
+    'xorp_core'
     ])
 
 xorp_finder = env.Program(target = 'xorp_finder',

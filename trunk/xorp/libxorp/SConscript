@@ -28,7 +28,7 @@ is_shared = env.has_key('SHAREDLIBS')
 
 env.AppendUnique(CPPPATH = [ '#' ])
 
-sources = [
+libxorp_core_srcs = [
 	# C files
 	'daemon.c',
 	'debug.c',
@@ -79,12 +79,14 @@ sources = [
 	]
 
 if is_shared:
-    libxorp = env.SharedLibrary(target = 'libxorp', source = sources)
+    libxorp_core = env.SharedLibrary(target = 'libxorp_core',
+				     source = libxorp_core_srcs)
 else:
-    libxorp = env.StaticLibrary(target = 'libxorp', source = sources)
+    libxorp_core = env.StaticLibrary(target = 'libxorp_core',
+				     source = libxorp_core_srcs)
 
 if is_shared:
     env.Alias('install',
-        env.InstallLibrary('$libdir', libxorp))
+        env.InstallLibrary('$libdir', libxorp_core))
 
-Default(libxorp)
+Default(libxorp_core)

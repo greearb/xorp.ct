@@ -53,7 +53,7 @@ env.AppendUnique(LIBS = [
     'xorp_proto',
     'xorp_ipc',
     'xorp_comm',
-    'xorp',
+    'xorp_core',
     ])
 
 libclisrcs = [

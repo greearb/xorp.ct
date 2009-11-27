@@ -141,7 +141,7 @@ rtrmgr_env.AppendUnique(LIBS = [
     'finder',
     'xorp_ipc',
     'xorp_comm',
-    'xorp'
+    'xorp_core'
 ])
 
 rtrmgr_srcs = [
@@ -170,7 +170,7 @@ xorpsh_env.AppendUnique(LIBS = [
     'findereventnotifierxif',
     'xorp_ipc',
     'xorp_comm',
-    'xorp',
+    'xorp_core',
     'curses'	# XXX only for non-windows
 ])
 
@@ -195,7 +195,7 @@ profiler_env.AppendUnique(LIBS = [
     'finder',
     'xorp_ipc',
     'xorp_comm',
-    'xorp'
+    'xorp_core'
 ])
 
 profiler_srcs = [
