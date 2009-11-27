@@ -41,7 +41,7 @@ rippath = '$exec_prefix/rip'
 #
 
 # RIP/RIPng Library Sources.
-libripsrcs = [
+libxorp_rip_srcs = [
     'auth.cc',
     'output_table.cc',
     'output_updates.cc',
@@ -57,7 +57,7 @@ libripsrcs = [
     ]
 
 # RIP/RIPng XRL Library Sources.
-libripxrlsrc = [
+libxorp_rip_xrl_srcs = [
     'xrl_config.cc',
     'xrl_port_manager.cc',
     'xrl_port_io.cc',
@@ -109,8 +109,8 @@ e.PrependUnique(LIBPATH = [
     ])
 
 e.PrependUnique(LIBS = [
-    'ripxrl',
-    'rip',
+    'xorp_rip_xrl',
+    'xorp_rip',			# Refers to library, not the executable.
     'ripbase',
     'ribxif',
     'findereventnotifierxif',
@@ -128,14 +128,22 @@ e.PrependUnique(LIBS = [
 ])
 
 if is_shared:
-    librip = e.SharedLibrary(target = 'librip', source = libripsrcs, LIBS = '')
-    libripxrl = e.SharedLibrary(target = 'libripxrl', source = libripxrlsrc, LIBS = '')
+    libxorp_rip = e.SharedLibrary(target = 'libxorp_rip',
+				  source = libxorp_rip_srcs,
+				  LIBS = '')
+    libxorp_rip_xrl = e.SharedLibrary(target = 'libxorp_rip_xrl',
+				      source = libxorp_rip_xrl_srcs,
+				      LIBS = '')
     e.Alias('install',
-                [ e.InstallLibrary('$libdir', librip),
-                  e.InstallLibrary('$libdir', libripxrl) ])
+                [ e.InstallLibrary('$libdir', libxorp_rip),
+                  e.InstallLibrary('$libdir', libxorp_rip_xrl) ])
 else:
-    librip = e.StaticLibrary(target = 'librip', source = libripsrcs, LIBS = '')
-    libripxrl = e.StaticLibrary(target = 'libripxrl', source = libripxrlsrc, LIBS = '')
+    libxorp_rip = e.StaticLibrary(target = 'libxorp_rip',
+				  source = libxorp_rip_srcs,
+				  LIBS = '')
+    libxorp_rip_xrl = e.StaticLibrary(target = 'libxorp_rip_xrl',
+				      source = libxorp_rip_xrl_srcs,
+				      LIBS = '')
 
 rip = e.Program(target = 'xorp_rip', source = ripsrcs)
 e.Alias('install', e.InstallProgram(rippath, rip))
@@ -158,12 +166,12 @@ e.AppendUnique(CPPDEFINES = [
     ])
 
 e.PrependUnique(LIBPATH = [
-    '.',
     '$BUILDDIR/libfeaclient',
     '$BUILDDIR/policy/backend',
     '$BUILDDIR/policy/common',
     '$BUILDDIR/xrl/interfaces',
     '$BUILDDIR/xrl/targets',
+    '.',
     '$BUILDDIR/libproto',
     '$BUILDDIR/libxipc',
     '$BUILDDIR/libcomm',
@@ -171,8 +179,8 @@ e.PrependUnique(LIBPATH = [
     ])
 
 e.PrependUnique(LIBS = [
-    'ripngxrl',
-    'ripng',
+    'xorp_ripng_xrl',
+    'xorp_ripng',
     'ripngbase',
     'ribxif',
     'findereventnotifierxif',
@@ -190,14 +198,22 @@ e.PrependUnique(LIBS = [
 ])
 
 if is_shared:
-    libripng = e.SharedLibrary(target = 'libripng', source = libripsrcs, LIBS = '')
-    libripngxrl = e.SharedLibrary(target = 'libripngxrl', source = libripxrlsrc, LIBS = '')
+    libxorp_ripng = e.SharedLibrary(target = 'libxorp_ripng',
+				    source = libxorp_rip_srcs,
+				    LIBS = '')
+    libxorp_ripngxrl = e.SharedLibrary(target = 'libxorp_ripng_xrl',
+				       source = libxorp_rip_xrl_srcs,
+				       LIBS = '')
     e.Alias('install',
-                [ e.InstallLibrary('$libdir', libripng),
-                  e.InstallLibrary('$libdir', libripngxrl) ])
+                [ e.InstallLibrary('$libdir', libxorp_ripng),
+                  e.InstallLibrary('$libdir', libxorp_ripngxrl) ])
 else:
-    libripng = e.StaticLibrary(target = 'libripng', source = libripsrcs, LIBS = '')
-    libripngxrl = e.StaticLibrary(target = 'libripngxrl', source = libripxrlsrc, LIBS = '')
+    libxorp_ripng = e.StaticLibrary(target = 'libxorp_ripng',
+				    source = libxorp_rip_srcs,
+				    LIBS = '')
+    libxorp_ripngxrl = e.StaticLibrary(target = 'libxorp_ripngxrl',
+				       source = libxorp_rip_xrl_srcs,
+				       LIBS = '')
 
 ripng = e.Program(target = 'xorp_ripng', source = ripngsrcs)
 e.Alias('install', e.InstallProgram(rippath, ripng))
