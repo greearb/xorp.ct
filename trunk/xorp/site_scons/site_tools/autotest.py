@@ -64,23 +64,15 @@ def _UnitTest(env, target, source = [], **kwargs):
     rpath  = Split( multiget([kwargs, env], 'RPATH'))
     linkflags  = Split( multiget([kwargs, env], 'LINKFLAGS'))
 
-    myrpath = rpath
-
     # For a test, take the our passed in LIBPATH, expand it, and prepend
     # to our passed in RPATH, so that tests can build using shared
     # libraries, even though they are not installed.
+    # Tests are not intended to be installed, so we don't do any
+    # further RPATH magic here.
+    myrpath = rpath
     if env.has_key('SHAREDLIBS'):
-        # Figure out our absolute BUILDDIR path. If we're not using
-        # ORIGIN, then the test can be run
-        my_rpath_base = Dir(env['BUILDDIR']).abspath
-        # If ORIGIN is enabled, figure out our test's path relative
-        # to the BUILDDIR, and pass that to the linker in RPATH.
-        # XXX: Perhaps we should set '-z origin' at the top level?
-        #if env['use_rtld_origin']:
-        #    env.PrependUnique( LINKFLAGS = Split('-z origin') )
-        #    my_rpath_base = os.path.relpath(my_rpath_base, Dir('.').abspath)
-        # Expand the RPATH according to destdir layout.
-        myrpath += [ x.replace('$BUILDDIR', my_rpath_base) for x in libpath ]
+        baserpath = Dir(env['BUILDDIR']).abspath
+        myrpath += [ x.replace('$BUILDDIR', baserpath) for x in libpath ]
 
     # fill the flags into kwargs
     kwargs["CXXFLAGS"] = cxxflags
