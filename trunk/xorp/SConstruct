@@ -81,6 +81,13 @@ vars.AddVariables(
                  map={}, ignorecase=2),
     )
 
+def log_args(afname):
+    f = open(afname, 'w')
+    for a in ARGUMENTS.iteritems():
+        print >>f, "%s=%s" % a,
+    print >>f
+    f.close()
+
 def tgt_guess():
     p = subprocess.Popen(['./config.guess'], stdout=subprocess.PIPE)
     o = p.communicate()[0]
@@ -112,6 +119,8 @@ sourcedir=Dir(".").abspath
 builddir=Dir(ARGUMENTS.get('builddir', '#obj/' + host)).abspath
 
 SConsignFile(builddir + '/.sconsign')
+
+log_args(builddir + '/.scons_build_args')
 
 prefix = ARGUMENTS.get('prefix', '/usr/local/xorp')
 
