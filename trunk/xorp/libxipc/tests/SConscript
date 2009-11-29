@@ -29,6 +29,8 @@ env.AppendUnique(CPPPATH = [
 	])
 
 env.AppendUnique(LIBPATH = [
+	'$BUILDDIR/xrl/interfaces',
+	'$BUILDDIR/xrl/targets',
 	'$BUILDDIR/libxipc',
 	'$BUILDDIR/libxorp',
 	'$BUILDDIR/libcomm',
@@ -65,9 +67,7 @@ simple_cpp_tests = [
 	'xrl_atom',
 	'xrl_error',
 	'xrl_parser',
-	#'xrl_receiver',	# compound
 	#'xrl_router',		# uses XrlPFUDP*
-	#'xrl_sender',		# compound
 ]
 
 cpp_test_targets = []
@@ -75,3 +75,32 @@ cpp_test_targets = []
 for ct in simple_cpp_tests:
     cpp_test_targets.append(env.AutoTest(target = 'test_%s' % ct,
                                          source = 'test_%s.cc' % ct))
+
+### test_xrl_sender/receiver
+
+env = env.Clone()
+
+env.PrependUnique(LIBS = [
+	'xif_test_xrls',
+	'xst_test_xrls',
+	])
+
+test_receiver_o = env.Object('test_receiver.cc')
+
+test_xrl_receiver_srcs = [ 'test_xrl_receiver.cc', test_receiver_o ]
+test_xrl_receiver = env.Program(target = 'test_xrl_receiver',
+				source = test_xrl_receiver_srcs)
+# XXX Build on 'check', but don't run.
+env.Alias('check', test_xrl_receiver)
+
+# TODO: Run on 'check' using the provided shell scripts.
+#runner = env.Action(test[0].abspath)
+#env.Alias('check', test, runner)
+
+test_xrl_sender_srcs = [ 'test_xrl_sender.cc', test_receiver_o ]
+test_xrl_sender = env.Program(target = 'test_xrl_sender',
+			      source = test_xrl_sender_srcs)
+# XXX Build on 'check', but don't run.
+env.Alias('check', test_xrl_sender)
+
+Default()
