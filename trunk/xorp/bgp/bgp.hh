@@ -1167,7 +1167,7 @@ BGPMain::get_route_list_next(
 			      bool& multicast_global)
 {
     IPNet<A> prefix;
-    bool unicast, multicast;
+    bool unicast = false, multicast = false;
     uint32_t internal_token, global_token;
     internal_token = global_token = token;
 
