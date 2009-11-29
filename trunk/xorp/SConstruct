@@ -63,7 +63,7 @@ vars = Variables()
 vars.AddVariables(
     BoolVariable('shared', 'build with shared libraries', True),
     BoolVariable('strip',  'strip executables and libraries when installed', False),
-    #BoolVariable('use_rtld_origin', 'Use ORIGIN in dynamically linked programs ', False),
+    BoolVariable('rtld_origin', 'Use ORIGIN in dynamically linked programs', False),
     BoolVariable('ignore_check_errors', 'Ignore errors when building tests', False),
     BoolVariable('debug_stl',  'Build with checked STL operations', False),
     BoolVariable('debug_msg',  'Build with debug messages', False),
@@ -163,6 +163,7 @@ if env['shared']:
         print gnutoolwarning % 'ld linker'
     env['SHAREDLIBS'] = "defined"
 print 'Shared libraries: ', env.has_key('SHAREDLIBS')
+print 'Use rtld ORIGIN:  ', env['rtld_origin']
 
 # AUTOTEST_SKIP_ERRORS is SetDefault() by site_scons/site_tools/autotest.py,
 # so print its value here.
@@ -452,11 +453,31 @@ if env['debug_cb']:
     ])
 
 # Shared libraries are installed in $exec_prefix/lib by default.
-env.AppendUnique(RPATH = [
-    '$libdir',
-    ])
+#
+# Experimental feature: if rtld_origin is True, the linker will
+# be passed a relative RPATH. The ORIGIN flag will be enabled for all
+# dynamically linked binaries, instead of hardcoding an absolute RPATH.
+#
+# XXX This may not be correct for all binaries. Some binaries still
+# get installed in locations other than $bindir.
+if env.has_key('SHAREDLIBS'):
+    if env['rtld_origin']:
+	# XXX Will this pass it to the linker correctly?
+	# In most cases the C++ compiler is used as the link tool.
+	#env.PrependUnique( LINKFLAGS = [ '-Wl,-z,origin' ] )
+	env.PrependUnique( LINKFLAGS = Split('-z origin') )
+	rellibdir = os.path.relpath(env.Dir('$libdir').abspath,
+				    env.Dir('$bindir').abspath)
+	env.AppendUnique(RPATH = [
+	    env.Literal(os.path.join('\\$$ORIGIN', rellibdir))
+	])
+    else:
+	env.AppendUnique(RPATH = [
+	    '$libdir',
+	])
 
-# Export dynamic symbols in executables for runtime backtraces w/o GDB.
+# Export global symbols as dynamic in executables for runtime backtraces
+# w/o GDB or corefiles in production deployments.
 # NOTE: GNU ld specific flag.
 env.AppendUnique(LINKFLAGS = [
     '-rdynamic',
