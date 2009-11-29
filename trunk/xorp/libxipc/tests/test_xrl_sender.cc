@@ -106,8 +106,8 @@ enum {
 //
 // Global variables
 //
-static uint32_t    MAX_XRL_ID	    = 10000;	// Number of Xrls in a test run
 static uint32_t    XRL_PIPE_SIZE    = 40;	// Maximum in flight
+static uint32_t    g_max_xrls_per_run	    = 10000;
 static uint32_t    g_send_method    = SEND_METHOD_PIPELINE;
 static uint32_t    g_send_style     = SEND_CMDLINE_VAR_XRL;
 static uint32_t    g_atoms_per_xrl  = 1;
@@ -329,7 +329,7 @@ TestSender::start_transmission_cb(const XrlError& xrl_error)
 void
 TestSender::send_batch()
 {
-    unsigned xrls = 100000;
+    unsigned int xrls = 100000;
 
     // XXX get target into finder cache
     bool rc = transmit_xrl_next(&TestSender::send_batch_cb);
@@ -634,6 +634,7 @@ usage(const char *argv0, int exit_value)
     fprintf(output, "           -h                                    : usage (this message)\n");
     fprintf(output, "           -m <M>                                : send method (see below)\n");
     fprintf(output, "           -n <count>                            : number of XrlAtoms in each Xrl call\n");
+    fprintf(output, "           -N <count>                            : number of Xrls to send in a test run\n");
     fprintf(output, "           -r                                    : run receiver in same process\n");
     fprintf(output, "           -a                                    : eventloop aggressiveness\n");
     fprintf(output, "           -1                                    : parameter 1\n");
@@ -670,7 +671,7 @@ test_xrls_sender_main(const char* finder_hostname, uint16_t finder_port)
     XrlStdRouter xrl_std_router_test_sender(eventloop, "test_xrl_sender",
 					    finder_hostname, finder_port);
     TestSender test_sender(eventloop, &xrl_std_router_test_sender,
-			   MAX_XRL_ID);
+			   g_max_xrls_per_run);
     g_test_sender = &test_sender;
 
     xrl_std_router_test_sender.finalize();
@@ -744,7 +745,7 @@ main(int argc, char *argv[])
     //
     // Get the program options
     //
-    while ((ch = getopt(argc, argv, "F:hm:n:ra:1:2:")) != -1) {
+    while ((ch = getopt(argc, argv, "F:hm:n:N:ra:1:2:")) != -1) {
 	switch (ch) {
 	case 'a':
 	    g_aggressiveness = atoi(optarg);
@@ -781,6 +782,9 @@ main(int argc, char *argv[])
 	    break;
 	case 'n':
 	    g_atoms_per_xrl = atoi(optarg);
+	    break;
+	case 'N':
+	    g_max_xrls_per_run = atoi(optarg);
 	    break;
 	case 'r':
 	    g_run_receiver = true;
