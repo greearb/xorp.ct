@@ -211,7 +211,7 @@ else:
     libxorp_ripng = e.StaticLibrary(target = 'libxorp_ripng',
 				    source = libxorp_rip_srcs,
 				    LIBS = '')
-    libxorp_ripngxrl = e.StaticLibrary(target = 'libxorp_ripngxrl',
+    libxorp_ripngxrl = e.StaticLibrary(target = 'libxorp_ripng_xrl',
 				       source = libxorp_rip_xrl_srcs,
 				       LIBS = '')
 
