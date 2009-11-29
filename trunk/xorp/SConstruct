@@ -430,7 +430,7 @@ and shared libraries. This is UNSUPPORTED, and probably will not link.
         # If you do insert calls, please bracket them with WITH_PPROF.
         if env['profile'] == 'pprof':
             env.AppendUnique( LIBS = [ 'profiler' ] )
-            env.AppendUnique( CPPDEFINES = [ 'WITH_PPROF' ] )
+            #env.AppendUnique( CPPDEFINES = [ 'WITH_PPROF' ] )
 
 env.AppendUnique(CPPDEFINES = [
     ( '_FORTIFY_SOURCE', 0 ),
