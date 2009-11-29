@@ -76,6 +76,9 @@ vars.AddVariables(
     EnumVariable('optimize', 'Build with optimization', 'yes',
                  allowed_values=('no', 'yes', 'full', 'size', 'override'),
                  map={}, ignorecase=2),
+    EnumVariable('profile', 'Build with profiling', 'no',
+                 allowed_values=('no', 'gprof', 'pprof', 'override'),
+                 map={}, ignorecase=2),
     )
 
 def tgt_guess():
@@ -155,6 +158,9 @@ if gnustrip:
 # User can override this. Defaults to gcc's -O1, as this trims
 # most of the template fat.
 print 'Optimize code:    ', env['optimize']
+
+# Default to disable; wrapper for compiler profiling support.
+print 'Profile code:     ', env['profile']
 
 # Most of our shared library tweaks are specific to GNU ld.
 # Check if the GNU linker is available, and print a warning if not.
@@ -372,8 +378,9 @@ if not env['optimize'] == 'override':
                                    Split(env['CXXFLAGS'])))
     bigodict = { 'no': '-O0', 'yes': '-O1', 'full': '-O2', 'size': '-Os' }
     bigoflag = bigodict[env['optimize']]
-    env.AppendUnique(CFLAGS = [ bigoflag ])
-    env.AppendUnique(CXXFLAGS = [ bigoflag ])
+    if not env['optimize'] == 'no':
+        env.AppendUnique(CFLAGS = [ bigoflag ])
+        env.AppendUnique(CXXFLAGS = [ bigoflag ])
 
 # Do the same for the flags which control debug symbols.
 if not env['debug'] == 'override':
@@ -383,8 +390,47 @@ if not env['debug'] == 'override':
                                    Split(env['CXXFLAGS'])))
     gdict = { 'no': '', 'yes': '-g', 'full': '-g3' }
     gflag = gdict[env['debug']]
-    env.AppendUnique(CFLAGS = [ gflag ])
-    env.AppendUnique(CXXFLAGS = [ gflag ])
+    if not env['debug'] == 'no':
+        env.AppendUnique(CFLAGS = [ gflag ])
+        env.AppendUnique(CXXFLAGS = [ gflag ])
+
+# Do the same for the flags which control code profiling.
+if not env['profile'] == 'override':
+    if env['profile'] == 'gprof' and env.has_key('SHAREDLIBS'):
+        print """
+WARNING: You have requested GNU gprof style profiling
+and shared libraries. This is UNSUPPORTED, and probably will not link.
+"""
+    strip_pg_flags = [ '-pg', '-finstrument-functions', '-fno-omit-frame-pointer', '-fno-optimize-sibling-calls' ]
+    env.Replace( CFLAGS = filter(
+	lambda s: not s.startswith(tuple(strip_pg_flags)),
+	Split(env['CFLAGS']))
+    )
+    env.Replace( CXXFLAGS = filter(
+	lambda s: not s.startswith(tuple(strip_pg_flags)),
+	Split(env['CXXFLAGS']))
+    )
+    # Full use of profiling may require more than one flag, so Split() them.
+    pgdict = {'no': '',
+              'gprof': '-pg',
+              'pprof': '',
+    }
+    pgflag = pgdict[env['profile']]
+    if not env['profile'] == 'no':
+        pgflags = pgflag + ' -fno-omit-frame-pointer -fno-optimize-sibling-calls'
+        env.AppendUnique( CFLAGS = Split(pgflags))
+        env.AppendUnique( CXXFLAGS = Split(pgflags) )
+        # Using gprof requires we link with the '-pg' option.
+        if env['profile'] == 'gprof':
+            env.AppendUnique( LINKFLAGS = Split(pgflag) )
+        # Using pprof requires we link with the '-lprofiler' library
+        # from the Google Performance Tools package. To avoid having
+        # to insert calls to the profiler, use the environment
+        # variable CPUPROFILE when running the program.
+        # If you do insert calls, please bracket them with WITH_PPROF.
+        if env['profile'] == 'pprof':
+            env.AppendUnique( LIBS = [ 'profiler' ] )
+            env.AppendUnique( CPPDEFINES = [ 'WITH_PPROF' ] )
 
 env.AppendUnique(CPPDEFINES = [
     ( '_FORTIFY_SOURCE', 0 ),
