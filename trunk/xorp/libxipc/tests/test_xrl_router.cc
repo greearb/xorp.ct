@@ -26,7 +26,7 @@
 #include "xrl_module.h"
 #include "libxorp/xlog.h"
 #include "xrl_router.hh"
-#include "xrl_pf_sudp.hh"
+#include "xrl_pf_stcp.hh"
 #include "xrl_args.hh"
 #include "finder_server.hh"
 
@@ -121,7 +121,7 @@ test_main()
     
     // Create and configure "party_A"
     XrlRouter party_a(eventloop, "party_A", finder->addr(), finder->port());
-    XrlPFSUDPListener	listener_a(eventloop);
+    XrlPFSTCPListener	listener_a(eventloop);
     party_a.add_listener(&listener_a);
 
     // Add command that party_A knows about
@@ -132,7 +132,7 @@ test_main()
     
     // Create and configure "party_B"
     XrlRouter party_b(eventloop, "party_B", finder->addr(), finder->port());
-    XrlPFSUDPListener	listener_b(eventloop);
+    XrlPFSTCPListener	listener_b(eventloop);
     party_b.add_listener(&listener_b);
     party_b.finalize();
 
