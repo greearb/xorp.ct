@@ -112,6 +112,11 @@ def DoAllConfig(env, conf, host_os):
     has_clock_monotonic = conf.CheckDeclaration('CLOCK_MONOTONIC', '#include <time.h>')
     if has_clock_monotonic:
         conf.Define('HAVE_CLOCK_MONOTONIC') # autoconf compat
+    # BSD extension
+    has_clock_monotonic_fast = conf.CheckDeclaration(
+	'CLOCK_MONOTONIC_FAST', '#include <time.h>')
+    if has_clock_monotonic_fast:
+        conf.Define('HAVE_CLOCK_MONOTONIC_FAST')
     
     has_struct_timespec = conf.CheckType('struct timespec', includes='#include <time.h>')
     
