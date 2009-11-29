@@ -67,7 +67,7 @@ simple_cpp_tests = [
 	'xrl_atom',
 	'xrl_error',
 	'xrl_parser',
-	#'xrl_router',		# uses XrlPFUDP*
+	'xrl_router',
 ]
 
 cpp_test_targets = []
@@ -76,9 +76,18 @@ for ct in simple_cpp_tests:
     cpp_test_targets.append(env.AutoTest(target = 'test_%s' % ct,
                                          source = 'test_%s.cc' % ct))
 
+# XXX Now to run them.
+
 ### test_xrl_sender/receiver
 
 env = env.Clone()
+
+def local_rpath(tenv):
+    """ Return tenv's RPATH munged to contain absolute build path. """
+    return [ x.replace('$BUILDDIR', Dir(tenv['BUILDDIR']).abspath) \
+             for x in tenv['LIBPATH'] ]
+
+env['RPATH'] += local_rpath(env)
 
 env.PrependUnique(LIBS = [
 	'xif_test_xrls',
@@ -100,6 +109,7 @@ env.Alias('check', test_xrl_receiver)
 test_xrl_sender_srcs = [ 'test_xrl_sender.cc', test_receiver_o ]
 test_xrl_sender = env.Program(target = 'test_xrl_sender',
 			      source = test_xrl_sender_srcs)
+
 # XXX Build on 'check', but don't run.
 env.Alias('check', test_xrl_sender)
 
