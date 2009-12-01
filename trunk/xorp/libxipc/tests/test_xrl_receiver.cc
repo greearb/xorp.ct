@@ -128,7 +128,8 @@ test_xrls_receiver_main(const char* finder_hostname, uint16_t finder_port)
     //
     XrlStdRouter xrl_std_router_test_receiver(eventloop, "test_xrl_receiver",
 					      finder_hostname, finder_port);
-    TestReceiver test_receiver(eventloop, &xrl_std_router_test_receiver);
+    TestReceiver test_receiver(eventloop, &xrl_std_router_test_receiver,
+			       stdout);
     wait_until_xrl_router_is_ready(eventloop, xrl_std_router_test_receiver);
 
     //

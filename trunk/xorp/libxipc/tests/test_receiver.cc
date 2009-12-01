@@ -35,17 +35,22 @@
 #include "xrl/targets/test_xrls_base.hh"
 #include "test_receiver.hh"
 
+#include <cstdio>
+
 #define TIMEOUT_EXIT_MS 20000
 
 using namespace SP;
 
-TestReceiver::TestReceiver(EventLoop& eventloop, XrlRouter* xrl_router)
+TestReceiver::TestReceiver(EventLoop& eventloop, XrlRouter* xrl_router,
+			   FILE* output)
 	: XrlTestXrlsTargetBase(xrl_router),
 	  _eventloop(eventloop),
+	  _output(output),
 	  _received_xrls(0),
 	  _done(false),
 	  _sample(false)
 {
+    setvbuf(_output, (char *)NULL, _IOLBF, 0);
 }
 
 TestReceiver::~TestReceiver()
@@ -68,9 +73,9 @@ void
 TestReceiver::print_xrl_received() const
 {
 #if PRINT_DEBUG
-    printf(".");
+    fprintf(_output, ".");
     if (! (_received_xrls % 10000))
-	printf("Received %u\n", XORP_UINT_CAST(_received_xrls));
+	fprintf(_output, "Received %u\n", XORP_UINT_CAST(_received_xrls));
 #endif // PRINT_DEBUG
 }
 
@@ -204,12 +209,12 @@ TestReceiver::print_statistics()
     TimeVal delta_time = _end_time - _start_time;
 
     if (_received_xrls == 0) {
-        printf("No XRLs received\n");
+        fprintf(_output, "No XRLs received\n");
         return;
     }
     if (delta_time == TimeVal::ZERO()) {
-        printf("Received %u XRLs; delta-time = %s secs\n",
-	       XORP_UINT_CAST(_received_xrls), delta_time.str().c_str());
+        fprintf(_output, "Received %u XRLs; delta-time = %s secs\n",
+	        XORP_UINT_CAST(_received_xrls), delta_time.str().c_str());
         return;
     }
 
@@ -217,7 +222,8 @@ TestReceiver::print_statistics()
     double speed = _received_xrls;
     speed /= double_time;
 
-    printf("Received %u XRLs; delta_time = %s secs; speed = %f XRLs/s\n",
+    fprintf(_output,
+	   "Received %u XRLs; delta_time = %s secs; speed = %f XRLs/s\n",
            XORP_UINT_CAST(_received_xrls),
 	   delta_time.str().c_str(), speed);
 

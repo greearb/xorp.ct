@@ -26,7 +26,8 @@
 
 class TestReceiver : public XrlTestXrlsTargetBase {
 public:
-    TestReceiver(EventLoop& eventloop, XrlRouter* xrl_router);
+    TestReceiver(EventLoop& eventloop, XrlRouter* xrl_router,
+		 FILE* output);
     ~TestReceiver();
 
     bool done() const;
@@ -82,6 +83,7 @@ private:
     void print_statistics();
 
     EventLoop&	_eventloop;
+    FILE*	_output;
     TimeVal	_start_time;
     TimeVal	_end_time;
     size_t	_received_xrls;

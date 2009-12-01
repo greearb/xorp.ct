@@ -688,7 +688,8 @@ test_xrls_sender_main(const char* finder_hostname, uint16_t finder_port)
 							finder_hostname,
 							finder_port);
 	test_receiver = new TestReceiver(eventloop,
-					 xrl_std_router_test_receiver);
+					 xrl_std_router_test_receiver,
+					 stdout);
 
 	if (g_send_method == SEND_METHOD_SINGLE)
 	    test_receiver->enable_sampler();
