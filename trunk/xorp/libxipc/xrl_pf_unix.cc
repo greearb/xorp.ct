@@ -58,7 +58,7 @@ XrlPFUNIXListener::get_sock_path()
     string path;
     string err;
 
-    FILE* f = xorp_make_temporary_file("/tmp", "unix", path, err);
+    FILE* f = xorp_make_temporary_file("/var/tmp", "xrl", path, err);
     if (!f)
 	xorp_throw(XrlPFConstructorError, err);
 
