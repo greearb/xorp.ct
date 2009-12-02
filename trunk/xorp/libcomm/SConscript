@@ -38,6 +38,11 @@ sources = [
 
 if is_shared:
     libxorp_comm = env.SharedLibrary(target = 'libxorp_comm', source = sources)
+    # build symlink for resolving links whilst in BUILDDIR
+    if env['rtld_origin']:
+        for obj in libxorp_comm:
+            env.AddPostAction(libxorp_comm,
+                env.Symlink(obj.abspath, env['BUILDDIR'] + '/lib/' + str(obj)))
 else:
     libxorp_comm = env.StaticLibrary(target = 'libxorp_comm', source = sources)
 

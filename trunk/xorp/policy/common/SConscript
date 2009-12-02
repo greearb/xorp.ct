@@ -45,6 +45,10 @@ if is_shared:
     libpcmsrcs += [ '../../bgp/aspath.cc' ]
     libpcm = env.SharedLibrary(target = 'libxorp_policy_common',
 			       source = libpcmsrcs)
+    if env['rtld_origin']:
+        for obj in libpcm:
+            env.AddPostAction(libpcm,
+                env.Symlink(obj.abspath, env['BUILDDIR'] + '/lib/' + str(obj)))
     env.Alias('install', env.InstallLibrary('$libdir', libpcm))
 else:
     obj_aspath = env.StaticObject(target = 'aspath',

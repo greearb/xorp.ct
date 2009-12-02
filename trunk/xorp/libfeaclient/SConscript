@@ -44,6 +44,10 @@ libxorp_fea_client_srcs = [
 if is_shared:
     libxorp_fea_client = env.SharedLibrary(target = 'libxorp_fea_client',
 					   source = libxorp_fea_client_srcs)
+    if env['rtld_origin']:
+        for obj in libxorp_fea_client:
+            env.AddPostAction(libxorp_fea_client,
+                env.Symlink(obj.abspath, env['BUILDDIR'] + '/lib/' + str(obj)))
 else:
     libxorp_fea_client = env.StaticLibrary(target = 'libxorp_fea_client',
 					   source = libxorp_fea_client_srcs)

@@ -91,6 +91,10 @@ if is_shared:
     libxorp_ospf = env.SharedLibrary(target = 'libxorp_ospf',
 				     source = libxorp_ospf_srcs,
 				     LIBS = '')
+    if env['rtld_origin']:
+        for obj in libxorp_ospf:
+            env.AddPostAction(libxorp_ospf,
+                env.Symlink(obj.abspath, env['BUILDDIR'] + '/lib/' + str(obj)))
 else:
     libxorp_ospf = env.StaticLibrary(target = 'libxorp_ospf',
 				     source = libxorp_ospf_srcs,

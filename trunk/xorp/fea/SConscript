@@ -151,6 +151,10 @@ if is_shared:
     libxorp_fea_srcs += libxfdp_srcs
     libxorp_fea = env.SharedLibrary(target = 'libxorp_fea',
 			       source = libxorp_fea_srcs)
+    if env['rtld_origin']:
+        for obj in libxorp_fea:
+            env.AddPostAction(libxorp_fea,
+                env.Symlink(obj.abspath, env['BUILDDIR'] + '/lib/' + str(obj)))
     env.Alias('install',
               env.InstallLibrary('$libdir', libxorp_fea))
 else:

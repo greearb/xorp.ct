@@ -102,6 +102,10 @@ if is_shared:
     libxorp_rib = env.SharedLibrary(target = 'libxorp_rib',
 				    source = libxorp_rib_srcs,
 				    LIBS = '')
+    if env['rtld_origin']:
+        for obj in libxorp_rib:
+            env.AddPostAction(libxorp_rib,
+                env.Symlink(obj.abspath, env['BUILDDIR'] + '/lib/' + str(obj)))
 else:
     libxorp_rib = env.StaticLibrary(target = 'libxorp_rib',
 				    source = libxorp_rib_srcs,

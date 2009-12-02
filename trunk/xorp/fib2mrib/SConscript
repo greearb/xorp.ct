@@ -72,6 +72,10 @@ if is_shared:
 	target = 'libxorp_fib2mrib',
 	source = libxorp_fib2mrib_srcs,
 	LIBS = '')
+    if env['rtld_origin']:
+        for obj in libxorp_fib2mrib:
+            env.AddPostAction(libxorp_fib2mrib,
+                env.Symlink(obj.abspath, env['BUILDDIR'] + '/lib/' + str(obj)))
 else:
     libxorp_fib2mrib = env.StaticLibrary(
 	target = 'libxorp_fib2mrib',

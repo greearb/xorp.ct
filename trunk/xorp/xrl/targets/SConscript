@@ -91,6 +91,12 @@ def BuildXrlTarget(tgt):
 
     if is_shared:
         lib = env.SharedLibrary(target, source)
+        # symlink an alias for each library when $ORIGIN is in use.
+        if env['rtld_origin']:
+            for obj in lib:
+                env.AddPostAction(lib,
+                    env.Symlink(obj.abspath,
+                                env['BUILDDIR'] + '/lib/' + str(obj)))
     else:
         lib = env.StaticLibrary(target, source)
 

@@ -131,9 +131,17 @@ if is_shared:
     libxorp_rip = e.SharedLibrary(target = 'libxorp_rip',
 				  source = libxorp_rip_srcs,
 				  LIBS = '')
+    if env['rtld_origin']:
+        for obj in libxorp_rip:
+            env.AddPostAction(libxorp_rip,
+                env.Symlink(obj.abspath, env['BUILDDIR'] + '/lib/' + str(obj)))
     libxorp_rip_xrl = e.SharedLibrary(target = 'libxorp_rip_xrl',
 				      source = libxorp_rip_xrl_srcs,
 				      LIBS = '')
+    if env['rtld_origin']:
+        for obj in libxorp_rip_xrl:
+            env.AddPostAction(libxorp_rip_xrl,
+                env.Symlink(obj.abspath, env['BUILDDIR'] + '/lib/' + str(obj)))
     e.Alias('install',
                 [ e.InstallLibrary('$libdir', libxorp_rip),
                   e.InstallLibrary('$libdir', libxorp_rip_xrl) ])
@@ -201,9 +209,17 @@ if is_shared:
     libxorp_ripng = e.SharedLibrary(target = 'libxorp_ripng',
 				    source = libxorp_rip_srcs,
 				    LIBS = '')
+    if env['rtld_origin']:
+        for obj in libxorp_ripng:
+            env.AddPostAction(libxorp_ripng,
+                env.Symlink(obj.abspath, env['BUILDDIR'] + '/lib/' + str(obj)))
     libxorp_ripngxrl = e.SharedLibrary(target = 'libxorp_ripng_xrl',
 				       source = libxorp_rip_xrl_srcs,
 				       LIBS = '')
+    if env['rtld_origin']:
+        for obj in libxorp_ripngxrl:
+            env.AddPostAction(libxorp_ripngxrl,
+                env.Symlink(obj.abspath, env['BUILDDIR'] + '/lib/' + str(obj)))
     e.Alias('install',
                 [ e.InstallLibrary('$libdir', libxorp_ripng),
                   e.InstallLibrary('$libdir', libxorp_ripngxrl) ])

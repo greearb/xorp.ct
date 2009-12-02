@@ -203,6 +203,15 @@ env['CONFIGUREDIR'] = str(builddir) + os.sep + '.sconf_temp'
 SConsEnvironment.Chmod = SCons.Action.ActionFactory(os.chmod,
     lambda dest, mode: 'Chmod("%s", 0%o)' % (dest, mode))
 
+def Symlink(src, link_name):
+    try:
+        os.unlink(link_name)
+    except OSError:
+        pass
+    os.symlink(src, link_name)
+SConsEnvironment.Symlink = SCons.Action.ActionFactory(Symlink,
+    lambda src, link_name: 'Symlink("%s", "%s")' % (src, link_name))
+
 def InstallProgram(env, dest, files, perm = 0755):
     if env.has_key('DESTDIR'):
     	# NB: use simple concatenation
@@ -507,26 +516,38 @@ if env['debug_cb']:
         '-DDEBUG_CALLBACKS',
     ])
 
+#
+# Fixup shared library paths.
 # Shared libraries are installed in $exec_prefix/lib by default.
 #
-# Experimental feature: if rtld_origin is True, the linker will
-# be passed a relative RPATH. The ORIGIN flag will be enabled for all
-# dynamically linked binaries, instead of hardcoding an absolute RPATH.
+# If rtld_origin is True, the linker will be passed a relative RPATH.
+# This allows the package itself to be relocated in the filesystem
+# as a whole.
 #
-# XXX This may not be correct for all binaries. Some binaries still
-# get installed in locations other than $bindir.
 if env.has_key('SHAREDLIBS'):
     if env['rtld_origin']:
-	# XXX Will this pass it to the linker correctly?
-	# In most cases the C++ compiler is used as the link tool.
-	#env.PrependUnique( LINKFLAGS = [ '-Wl,-z,origin' ] )
-	env.PrependUnique( LINKFLAGS = Split('-z origin') )
-	rellibdir = os.path.relpath(env.Dir('$libdir').abspath,
-				    env.Dir('$bindir').abspath)
+	# Build a subdirectory for holding symlinks to libraries upfront, so
+	# that binaries about to be built can be run from inside the BUILDDIR.
+	Execute(Mkdir(builddir + '/lib'))
+	# Tell rtld to turn on $ORIGIN processing by default.
+	# NOTE: GNU ld specific flag.
+	env.PrependUnique( LINKFLAGS = [ '-Wl,-z,origin' ] )
+	#
+	# Now fixup the RPATH.
+	# FIXME This is not correct for all binaries. Some
+	# get installed in locations other than $bindir.
+	# The RPATH actually needs to get re-evaluated on each
+	# binary target, depending on how far down they get installed.
+	#
+	#rellibdir = os.path.relpath(env.Dir('$libdir').abspath,
+	#			    env.Dir('$bindir').abspath)
+	rellibdir = '../lib'
 	env.AppendUnique(RPATH = [
 	    env.Literal(os.path.join('\\$$ORIGIN', rellibdir))
 	])
     else:
+	# Hardcode the RPATH to our final destination.
+	# Developers will need to set LD_LIBRARY_PATH until they install.
 	env.AppendUnique(RPATH = [
 	    '$libdir',
 	])

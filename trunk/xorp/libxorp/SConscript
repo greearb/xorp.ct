@@ -81,6 +81,17 @@ libxorp_core_srcs = [
 if is_shared:
     libxorp_core = env.SharedLibrary(target = 'libxorp_core',
 				     source = libxorp_core_srcs)
+    # Symlink the library into builddir's copy of lib, so that
+    # rtld $ORIGIN references will pick it up automatically without
+    # relinking. This syntax looks a little weird, as it makes the
+    # action of building the symlink a 'PostAction' in the SCons
+    # dependency graph.
+    # We basically do this for every SharedLibrary we potentially
+    # need to see for binaries not yet installed from the BUILDDIR.
+    if env['rtld_origin']:
+        for obj in libxorp_core:
+            env.AddPostAction(libxorp_core,
+                env.Symlink(obj.abspath, env['BUILDDIR'] + '/lib/' + str(obj)))
 else:
     libxorp_core = env.StaticLibrary(target = 'libxorp_core',
 				     source = libxorp_core_srcs)

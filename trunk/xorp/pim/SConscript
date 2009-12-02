@@ -102,6 +102,10 @@ libxorp_pim_srcs = [
 if is_shared:
     libxorp_pim = env.SharedLibrary(target = 'libxorp_pim',
 				    source = libxorp_pim_srcs, LIBS = '')
+    if env['rtld_origin']:
+        for obj in libxorp_pim:
+            env.AddPostAction(libxorp_pim,
+                env.Symlink(obj.abspath, env['BUILDDIR'] + '/lib/' + str(obj)))
     env.Alias('install',
               env.InstallLibrary('$libdir', libxorp_pim))
 else:

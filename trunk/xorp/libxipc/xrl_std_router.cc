@@ -23,42 +23,55 @@
 
 #include "xrl_module.h"
 #include "xrl_std_router.hh"
-//#include "xrl_pf_inproc.hh"
+//#include "xrl_pf_inproc.hh"	// Inproc is deprecated.
 #include "xrl_pf_stcp.hh"
-//#include "xrl_pf_sudp.hh"
+//#include "xrl_pf_sudp.hh"	// UDP is deprecated.
 #include "xrl_pf_unix.hh"
 #include "libxorp/xlog.h"
 
+
 // ----------------------------------------------------------------------------
 // Helper methods
+
+#if !defined(XRL_PF)
+#error "A default transport for XRL must be defined using the preprocessor."
+#endif
+
+static const char default_pf[] = { XRL_PF, '\0' };
 
 XrlPFListener*
 XrlStdRouter::create_listener()
 {
     const char* pf = getenv("XORP_PF");
+    if (pf == NULL)
+	pf = default_pf;
 
-    if (pf != NULL) {
-	switch (pf[0]) {
-#if 0
+    switch (pf[0]) {
+#if 0	// Inproc is deprecated.
 	case 'i':
 	    return new XrlPFInProcListener(_e, this);
-
+#endif
+	// For the benefit of bench_ipc.sh.
+	case 't':
+	    return new XrlPFSTCPListener(_e, this);
+	    break;
+#if 0	// UDP is deprecated.
 	case 'u':
 	    return new XrlPFSUDPListener(_e, this);
 #endif
-
 	case 'x':
+#if XRL_PF != 'x'
 	    XLOG_ASSERT(_unix == NULL);
+#endif
 	    return new XrlPFUNIXListener(_e, this);
-
 	default:
 	    XLOG_ERROR("Unknown PF %s\n", pf);
 	    XLOG_ASSERT(false);
 	    break;
-	}
     }
 
-    return new XrlPFSTCPListener(_e, this);
+    XLOG_UNREACHABLE();
+    return 0;
 }
 
 static void
@@ -124,6 +137,14 @@ void
 XrlStdRouter::construct(bool unix_socket)
 {
     _unix = _l = NULL;
+
+    // We need to check the environment otherwise
+    // we get the compiled-in default.
+    const char* pf = getenv("XORP_PF");
+    if (pf == NULL)
+	pf = default_pf;
+    if (pf[0] != 'x')
+	unix_socket = false;
 
     if (unix_socket)
 	create_unix_listener();

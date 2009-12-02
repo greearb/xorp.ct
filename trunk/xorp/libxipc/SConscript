@@ -106,6 +106,11 @@ else:
 if is_shared:
     libxipc = libxipc_env.SharedLibrary(target = 'libxorp_ipc',
                                         source = libxipc_sources)
+    # build symlink for resolving links whilst in BUILDDIR
+    if env['rtld_origin']:
+        for obj in libxipc:
+            env.AddPostAction(libxipc,
+                env.Symlink(obj.abspath, env['BUILDDIR'] + '/lib/' + str(obj)))
     env.Alias('install',
               env.InstallLibrary('$libdir', libxipc))
 else:
@@ -164,6 +169,11 @@ else:
 if is_shared:
     libfinder = libfinder_env.SharedLibrary(target = 'libxorp_finder',
                                             source = libfinder_sources)
+    # build symlink for resolving links whilst in BUILDDIR
+    if env['rtld_origin']:
+        for obj in libfinder:
+            env.AddPostAction(libfinder,
+                env.Symlink(obj.abspath, env['BUILDDIR'] + '/lib/' + str(obj)))
     env.Alias('install',
               env.InstallLibrary('$libdir', libfinder))
 else:

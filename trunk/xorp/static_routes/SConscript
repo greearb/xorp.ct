@@ -75,6 +75,10 @@ if is_shared:
 	target = 'libxorp_static_routes',
 	source = libxorp_static_routes_srcs,
 	LIBS = '')
+    if env['rtld_origin']:
+        for obj in libxorp_static_routes:
+            env.AddPostAction(libxorp_static_routes,
+                env.Symlink(obj.abspath, env['BUILDDIR'] + '/lib/' + str(obj)))
 else:
     libxorp_static_routes = env.StaticLibrary(
 	target = 'libxorp_static_routes',

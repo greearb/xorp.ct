@@ -97,6 +97,10 @@ if is_shared:
     libxorp_policy = env.SharedLibrary(target = 'libxorp_policy',
 				       source = libxorp_policy_srcs,
 				       LIBS = '')
+    if env['rtld_origin']:
+        for obj in libxorp_policy:
+            env.AddPostAction(libxorp_policy,
+                env.Symlink(obj.abspath, env['BUILDDIR'] + '/lib/' + str(obj)))
     env.Alias('install', env.InstallLibrary('$libdir', libxorp_policy))
 else:
     libxorp_policy = env.StaticLibrary(target = 'libxorp_policy',
