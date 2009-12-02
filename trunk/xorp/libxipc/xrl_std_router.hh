@@ -27,11 +27,7 @@
 #include "xrl_router.hh"
 #include "xrl_pf.hh"
 
-#if !defined(XRL_PF) || (XRL_PF == 'x')
-#define UNIX_SOCKET_DEFAULT true
-#else
 #define UNIX_SOCKET_DEFAULT false
-#endif
 
 /**
  * @short Standard XRL transmission and reception point.
