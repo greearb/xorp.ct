@@ -70,12 +70,12 @@ sources = [
 if is_shared:
     libxifc = env.SharedLibrary(target = 'libxorp_fea_ifconfig',
 				source = sources)
+    # XXX missing RPATH.
 else:
     libxifc = env.StaticLibrary(target = 'libxorp_fea_ifconfig',
 				source = sources)
 
 if is_shared:
-    env.Alias('install',
-        env.InstallLibrary('$libdir', libxifc))
+    env.Alias('install', env.InstallLibrary(env['xorp_libdir'], libxifc))
 
 Default(libxifc)

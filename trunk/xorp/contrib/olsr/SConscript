@@ -91,7 +91,7 @@ libolsrsrcs = [
 if is_shared:
     libolsr = env.SharedLibrary(target = 'libolsr', source = libolsrsrcs, LIBS = '')
     env.Alias('install',
-              env.InstallLibrary('$libdir', libolsr))
+              env.InstallLibrary(env['xorp_libdir'], libolsr))
 else:
     libolsr = env.StaticLibrary(target = 'libolsr', source = libolsrsrcs, LIBS = '')
 
@@ -107,7 +107,7 @@ libolsrxrlsrcs = [
 if is_shared:
     libolsrxrl = env.SharedLibrary(target = 'libolsrxrl', source = libolsrxrlsrcs, LIBS = '')
     env.Alias('install',
-              env.InstallLibrary('$libdir', libolsrxrl))
+              env.InstallLibrary(env['xorp_libdir'], libolsrxrl))
 else:
     libolsrxrl = env.StaticLibrary(target = 'libolsrxrl', source = libolsrxrlsrcs, LIBS = '')
 
@@ -121,7 +121,6 @@ olsr4 = env.Program(target = 'xorp_olsr4', source = olsr4srcs)
 
 # XXX not ready for prime time.
 
-env.Alias('install',
-          env.InstallProgram('$bindir', olsr4))
+env.Alias('install', env.InstallProgram(env['xorp_moduledir'], olsr4))
 
 Default(libolsr, libolsrxrl, olsr4)

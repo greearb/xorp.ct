@@ -56,17 +56,10 @@ shrtessrcs = [
 	'show_routes.cc'
     ]
 
-shdist = env.Program(target = 'show_distances', source = shdistsrcs)
+shdist = env.Program(target = 'rib_show_distances', source = shdistsrcs)
+shrtes = env.Program(target = 'rib_show_routes', source = shrtessrcs)
 
-shrtes = env.Program(target = 'show_routes', source = shrtessrcs)
-
-#ribtoolpath = '$bindir'
-ribtoolpath = '$exec_prefix/rib/tools'
-
-env.Alias('install',
-    env.InstallProgram(ribtoolpath, shdist))
-
-env.Alias('install',
-    env.InstallProgram(ribtoolpath, shrtes))
+env.Alias('install', env.InstallProgram(env['xorp_tooldir'], shdist))
+env.Alias('install', env.InstallProgram(env['xorp_tooldir'], shrtes))
 
 Default(shdist, shrtes)

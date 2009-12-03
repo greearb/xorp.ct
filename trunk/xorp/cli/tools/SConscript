@@ -54,16 +54,9 @@ sendclisrcs = [
     ]
 
 cligen = env.Program(target = 'cli_generic', source = cligensrcs)
+sendcli = env.Program(target = 'cli_send_processor_xrl', source = sendclisrcs)
 
-sendcli = env.Program(target = 'send_cli_processor_xrl', source = sendclisrcs)
-
-#clitoolpath = '$bindir'
-clitoolpath = '$exec_prefix/cli/tools'
-
-env.Alias('install',
-    env.InstallProgram(clitoolpath, cligen))
-
-env.Alias('install',
-    env.InstallProgram(clitoolpath, sendcli))
+env.Alias('install', env.InstallProgram(env['xorp_tooldir'], cligen))
+env.Alias('install', env.InstallProgram(env['xorp_tooldir'], sendcli))
 
 Default(cligen, sendcli)

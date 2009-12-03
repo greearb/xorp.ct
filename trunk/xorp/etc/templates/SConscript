@@ -22,9 +22,6 @@ Import('env')
 
 e = env.Clone()
 
-#etctemplatepath = '$datadir'
-etctemplatepath = '$exec_prefix/etc/templates'
-
 cmds = [
     'bgp',
     'fea',
@@ -73,6 +70,9 @@ tps = [
     'vrrp',
 ]
 
-e.Alias('install',
-          [ e.InstallData(etctemplatepath, [c.__add__('.cmds') for c in cmds]),
-            e.InstallData(etctemplatepath, [t.__add__('.tp') for t in tps]) ])
+e.Alias('install', [
+        e.InstallData(env['xorp_templatedir'],
+                      [c.__add__('.cmds') for c in cmds]),
+        e.InstallData(env['xorp_templatedir'],
+                      [t.__add__('.tp') for t in tps])
+])

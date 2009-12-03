@@ -152,7 +152,7 @@ rtrmgr_srcs = [
 rtrmgr = rtrmgr_env.Program(target = 'xorp_rtrmgr', source = rtrmgr_srcs)
 
 env.Alias('install',
-          env.InstallProgram('$bindir', rtrmgr))
+          env.InstallProgram(env['xorp_sbindir'], rtrmgr))
 
 ### xorpsh
 
@@ -183,7 +183,7 @@ xorpsh_srcs = [
 xorpsh = xorpsh_env.Program(target = 'xorpsh', source = xorpsh_srcs)
 
 env.Alias('install',
-          env.InstallProgram('$bindir', xorpsh))
+          env.InstallProgram(env['xorp_sbindir'], xorpsh))
 
 ### profiler
 
@@ -206,7 +206,7 @@ profiler = profiler_env.Program(target = 'xorp_profiler',
 				source = profiler_srcs)
 
 env.Alias('install',
-          env.InstallProgram('$bindir', profiler))
+          env.InstallProgram(env['xorp_sbindir'], profiler))
 
 ###
 

@@ -117,14 +117,9 @@ ribsrcs = [
 
 rib = env.Program(target = 'xorp_rib', source = ribsrcs)
 
-#ribpath = '$bindir'
-ribpath = '$exec_prefix/rib'
-
-env.Alias('install',
-          env.InstallProgram(ribpath, rib))
+env.Alias('install', env.InstallProgram(env['xorp_moduledir'], rib))
 
 if is_shared:
-    env.Alias('install',
-              env.InstallLibrary('$libdir', libxorp_rib))
+    env.Alias('install', env.InstallLibrary(env['xorp_libdir'], libxorp_rib))
 
 Default(rib)

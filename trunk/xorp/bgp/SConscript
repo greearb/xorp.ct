@@ -150,11 +150,6 @@ bgpsrcs = [
           ]
 
 bgp = bgp_env.Program(target = 'xorp_bgp', source = bgpsrcs)
-
-bgppath = '$bindir'
-bgppath = '$exec_prefix/bgp'
-
-env.Alias('install',
-          env.InstallProgram(bgppath, bgp))
+env.Alias('install', env.InstallProgram(env['xorp_moduledir'], bgp))
 
 Default(libxorp_bgp, bgp)

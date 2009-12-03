@@ -56,17 +56,10 @@ shstatssrcs = [
 	'common.cc'
     ]
 
-shpeer = env.Program(target = 'show_peer_stats', source = shpeersrcs)
+shpeer = env.Program(target = 'rip_show_peer_stats', source = shpeersrcs)
+shstats = env.Program(target = 'rip_show_stats', source = shstatssrcs)
 
-shstats = env.Program(target = 'show_stats', source = shstatssrcs)
-
-#riptoolpath = '$bindir'
-riptoolpath = '$exec_prefix/rip/tools'
-
-env.Alias('install',
-    env.InstallProgram(riptoolpath, shpeer))
-
-env.Alias('install',
-    env.InstallProgram(riptoolpath, shstats))
+env.Alias('install', env.InstallProgram(env['xorp_tooldir'], shpeer))
+env.Alias('install', env.InstallProgram(env['xorp_tooldir'], shstats))
 
 Default(shpeer, shstats)

@@ -156,7 +156,7 @@ if is_shared:
             env.AddPostAction(libxorp_fea,
                 env.Symlink(obj.abspath, env['BUILDDIR'] + '/lib/' + str(obj)))
     env.Alias('install',
-              env.InstallLibrary('$libdir', libxorp_fea))
+              env.InstallLibrary(env['xorp_libdir'], libxorp_fea))
 else:
     # Use an intermediate static lib to deal with some dependencies.
     libxfdp = env.StaticLibrary(target = 'libxorp_fea_data_plane_base',
@@ -190,8 +190,7 @@ feasrcs = [
 
 fea = env.Program(target = 'xorp_fea', source = feasrcs)
 
-env.Alias('install',
-          env.InstallProgram(feapath, fea))
+env.Alias('install', env.InstallProgram(env['xorp_moduledir'], fea))
 
 #######################
 
@@ -206,16 +205,13 @@ feadummysrcs = [
           ]
 
 feadummy = env.Program(target = 'xorp_fea_dummy', source = feadummysrcs)
-
-env.Alias('install',
-          env.InstallProgram(feapath, feadummy))
+env.Alias('install', env.InstallProgram(env['xorp_moduledir'], feadummy))
 
 #######################
 
-clickgen = 'xorp_fea_click_config_generator'
-
-env.Alias('install',
-          env.InstallScript(feapath, clickgen))
+# XXX conditional on click support, please.
+clickgen = 'fea_click_config_generator'
+env.Alias('install', env.InstallScript(env['xorp_tooldir'], clickgen))
 
 #######################
 

@@ -104,9 +104,9 @@ def BuildXrlTarget(tgt):
 
     if base[:4] != "test":
         if is_shared:
-            env.Alias('install', env.InstallLibrary('$libdir', lib))
+            env.Alias('install', env.InstallLibrary(env['xorp_libdir'], lib))
         if env['debug_xrldb']:
-            env.Alias('install', env.InstallData(xrlspath, xrls))
+            env.Alias('install', env.InstallData(env['xorp_xrlsdir'], xrls))
 
     return lib
 

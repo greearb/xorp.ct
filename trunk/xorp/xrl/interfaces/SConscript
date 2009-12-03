@@ -118,6 +118,6 @@ for xif in xifs:
 
     if base[:4] != "test":
         if is_shared:
-            env.Alias('install', env.InstallLibrary('$libdir', lib))
+            env.Alias('install', env.InstallLibrary(env['xorp_libdir'], lib))
 
 Default(all_xif_libs)

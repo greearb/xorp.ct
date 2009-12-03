@@ -46,7 +46,6 @@ else:
 				source = sources)
 
 if is_shared:
-    env.Alias('install',
-        env.InstallLibrary('$libdir', libxdpm))
+    env.Alias('install', env.InstallLibrary(env['xorp_libdir'], libxdpm))
 
 Default(libxdpm)

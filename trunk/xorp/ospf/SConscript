@@ -100,29 +100,15 @@ else:
 				     source = libxorp_ospf_srcs,
 				     LIBS = '')
 
-ospfv2srcs = [
-          'xorp_ospfv2.cc',
-          ]
-
+ospfv2srcs = [ 'xorp_ospfv2.cc', ]
 ospfv2 = env.Program(target = 'xorp_ospfv2', source = ospfv2srcs)
 
-ospfv3srcs = [
-          'xorp_ospfv3.cc',
-          ]
-
+ospfv3srcs = [ 'xorp_ospfv3.cc', ]
 ospfv3 = env.Program(target = 'xorp_ospfv3', source = ospfv3srcs)
 
-#ospfpath = '$bindir'
-ospfpath = '$exec_prefix/ospf'
-
-env.Alias('install',
-          env.InstallProgram(ospfpath, ospfv2))
-
-env.Alias('install',
-          env.InstallProgram(ospfpath, ospfv3))
-
+env.Alias('install', env.InstallProgram(env['xorp_moduledir'], ospfv2))
+env.Alias('install', env.InstallProgram(env['xorp_moduledir'], ospfv3))
 if is_shared:
-    env.Alias('install',
-              env.InstallLibrary('$libdir', libxorp_ospf))
+    env.Alias('install', env.InstallLibrary(env['xorp_libdir'], libxorp_ospf))
 
 Default(ospfv2, ospfv3)

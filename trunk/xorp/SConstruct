@@ -264,7 +264,7 @@ SConsEnvironment.InstallData = InstallData
 # from 'prefix'.
 # Not all of them are used at the moment.
 #
-exec_prefix = ARGUMENTS.get('exec_prefix', '$prefix')
+env['exec_prefix'] = ARGUMENTS.get('exec_prefix', '$prefix')
 env['sbindir'] = ARGUMENTS.get('sbindir', '$exec_prefix/sbin')
 env['libexecdir'] = ARGUMENTS.get('libexecdir', '$exec_prefix/lib')
 env['datarootdir'] = ARGUMENTS.get('datarootdir', '$prefix/share')
@@ -284,13 +284,13 @@ env['mandir'] = ARGUMENTS.get('mandir', '$datarootdir/man')
 # The image layout is intended to be FHS 2.3 compliant, for the benefit
 # of 3rd party packagers and distributors.
 #
-env['xorp_confdir']     = '$sysconfdir'			# path to xorp.conf
-env['xorp_libdir']      = '$libdir/xorp/lib'		# Shared libraries
-env['xorp_moduledir']   = '$libdir/xorp/sbin'		# Protocol modules
-env['xorp_sbindir']     = '$sbindir'			# End-user binaries
-env['xorp_templatedir'] = '$datadir/xorp/templates'	# Router Manager .tp
-env['xorp_tooldir']     = '$libdir/xorp/bin'		# tools/*
-env['xorp_xrlsdir']     = '$datadir/xorp/xrls'		# *.xrls
+env['xorp_confdir']     = env['sysconfdir']		# path to xorp.conf
+env['xorp_libdir']      = env['libdir']  + '/xorp/lib'	# Shared libraries
+env['xorp_moduledir']   = env['libdir']  + '/xorp/sbin'	# Protocol modules
+env['xorp_sbindir']     = env['sbindir']		# End-user binaries
+env['xorp_templatedir'] = env['datadir'] + '/templates'
+env['xorp_tooldir']     = env['libdir']  + '/xorp/bin'	# tools/*
+env['xorp_xrlsdir']     = env['datadir'] + '/xorp/xrls'	# *.xrls
 
 # XXX needed by scons xrl idl wrappers
 # ...and rtrmgr/util.cc

@@ -78,7 +78,7 @@ libmld6igmplitesrcs = [
 if is_shared:
     libmld6igmplite = env.SharedLibrary(target = 'libmld6igmplite', source = libmld6igmplitesrcs, LIBS = '')
     env.Alias('install',
-              env.InstallLibrary('$libdir', libmld6igmplite))
+              env.InstallLibrary(env['xorp_libdir'], libmld6igmplite))
 else:
     libmld6igmplite = env.StaticLibrary(target = 'libmld6igmplite', source = libmld6igmplitesrcs, LIBS = '')
 
@@ -96,10 +96,10 @@ mldlitesrcs = [
 mldlite = env.Program(target = 'xorp_mld_lite', source = mldlitesrcs)
 
 env.Alias('install',
-          env.InstallProgram('$bindir', igmplite))
+          env.InstallProgram(env['xorp_moduledir'], igmplite))
 
 env.Alias('install',
-          env.InstallProgram('$bindir', mldlite))
+          env.InstallProgram(env['xorp_moduledir'], mldlite))
 
 
 Default(libmld6igmplite, igmplite, mldlite)

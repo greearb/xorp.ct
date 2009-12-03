@@ -54,6 +54,6 @@ else:
 
 if is_shared:
     env.Alias('install',
-        env.InstallLibrary('$libdir', libxorp_fea_client))
+        env.InstallLibrary(env['xorp_libdir'], libxorp_fea_client))
 
 Default(libxorp_fea_client)

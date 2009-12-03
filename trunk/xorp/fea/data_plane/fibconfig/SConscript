@@ -78,8 +78,7 @@ sources = [
 if is_shared:
     libxfc = env.SharedLibrary(target = 'libxorp_fea_fibconfig',
 			       source = sources)
-    env.Alias('install',
-        env.InstallLibrary('$libdir', libxfc))
+    env.Alias('install', env.InstallLibrary(env['xorp_libdir'], libxfc))
 else:
     libxfc = env.StaticLibrary(target = 'libxorp_fea_fibconfig',
 			       source = sources)

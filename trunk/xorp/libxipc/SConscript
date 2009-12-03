@@ -112,7 +112,7 @@ if is_shared:
             env.AddPostAction(libxipc,
                 env.Symlink(obj.abspath, env['BUILDDIR'] + '/lib/' + str(obj)))
     env.Alias('install',
-              env.InstallLibrary('$libdir', libxipc))
+              env.InstallLibrary(env['xorp_libdir'], libxipc))
 else:
     libxipc = libxipc_env.StaticLibrary(target = 'libxorp_ipc',
                                         source = libxipc_sources)
@@ -175,7 +175,7 @@ if is_shared:
             env.AddPostAction(libfinder,
                 env.Symlink(obj.abspath, env['BUILDDIR'] + '/lib/' + str(obj)))
     env.Alias('install',
-              env.InstallLibrary('$libdir', libfinder))
+              env.InstallLibrary(env['xorp_libdir'], libfinder))
 else:
     libfinder = libfinder_env.StaticLibrary(target = 'libxorp_finder',
                                             source = libfinder_sources)
@@ -209,14 +209,7 @@ xorp_finder = env.Program(target = 'xorp_finder',
 call_xrl = env.Program(target = 'call_xrl',
                        source = [ 'call_xrl.cc'])
 
-# new directory structure
-#env.Alias('install',
-#          env.InstallProgram('$bindir', xorp_finder))
-# old directory structure
-env.Alias('install',
-          env.InstallProgram('$exec_prefix/libxipc', xorp_finder))
+# XXX The finder and call_xrl binaries are now no longer installed
+# by default, as they are not used in deployment.
 
-env.Alias('install',
-          env.InstallProgram('$bindir', call_xrl))
-
-Default(libxipc, libfinder, xorp_finder, call_xrl)
+Default(libxipc, libfinder)

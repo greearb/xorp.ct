@@ -107,7 +107,7 @@ if is_shared:
             env.AddPostAction(libxorp_pim,
                 env.Symlink(obj.abspath, env['BUILDDIR'] + '/lib/' + str(obj)))
     env.Alias('install',
-              env.InstallLibrary('$libdir', libxorp_pim))
+              env.InstallLibrary(env['xorp_libdir'], libxorp_pim))
 else:
     libxorp_pim = env.StaticLibrary(target = 'libxorp_pim',
 				    source = libxorp_pim_srcs, LIBS = '')
@@ -124,13 +124,8 @@ pim6srcs = [
 
 pim6 = env.Program(target = 'xorp_pimsm6', source = pim6srcs)
 
-pimpath = '$bindir'
-pimpath = '$exec_prefix/pim'
+env.Alias('install', env.InstallProgram(env['xorp_moduledir'], pim4))
 
-env.Alias('install',
-          env.InstallProgram(pimpath, pim4))
-
-env.Alias('install',
-          env.InstallProgram(pimpath, pim6))
+env.Alias('install', env.InstallProgram(env['xorp_moduledir'], pim6))
 
 Default(pim4, pim6)

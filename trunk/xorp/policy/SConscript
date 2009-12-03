@@ -101,7 +101,7 @@ if is_shared:
         for obj in libxorp_policy:
             env.AddPostAction(libxorp_policy,
                 env.Symlink(obj.abspath, env['BUILDDIR'] + '/lib/' + str(obj)))
-    env.Alias('install', env.InstallLibrary('$libdir', libxorp_policy))
+    env.Alias('install', env.InstallLibrary(env['xorp_libdir'], libxorp_policy))
 else:
     libxorp_policy = env.StaticLibrary(target = 'libxorp_policy',
 				       source = libxorp_policy_srcs,
@@ -111,9 +111,6 @@ else:
 
 policysrcs = [ 'xorp_policy.cc', ]
 policy = env.Program(target = 'xorp_policy', source = policysrcs)
-#pcpath = '$bindir'
-pcpath = '$exec_prefix/policy'
-env.Alias('install',
-          env.InstallProgram(pcpath, policy))
+env.Alias('install', env.InstallProgram(env['xorp_moduledir'], policy))
 
 Default(libxorp_policy, policy)

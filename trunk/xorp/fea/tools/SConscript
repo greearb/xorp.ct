@@ -53,12 +53,8 @@ showifsrcs = [
 	'show_interfaces.cc'
     ]
 
-showif = env.Program(target = 'show_interfaces', source = showifsrcs)
+showif = env.Program(target = 'fea_show_interfaces', source = showifsrcs)
 
-#showifpath = '$bindir'
-showifpath = '$exec_prefix/fea/tools'
-
-env.Alias('install',
-    env.InstallProgram(showifpath, showif))
+env.Alias('install', env.InstallProgram(env['xorp_tooldir'], showif))
 
 Default(showif)

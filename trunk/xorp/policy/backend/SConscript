@@ -49,7 +49,7 @@ if is_shared:
             env.AddPostAction(libpbe,
                 env.Symlink(obj.abspath, env['BUILDDIR'] + '/lib/' + str(obj)))
     env.Alias('install',
-        env.InstallLibrary('$libdir', libpbe))
+        env.InstallLibrary(env['xorp_libdir'], libpbe))
 else:
     libpbe = env.StaticLibrary(target = 'libxorp_policy_backend',
 			       source = libpbesrcs)

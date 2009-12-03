@@ -49,7 +49,7 @@ if is_shared:
         for obj in libpcm:
             env.AddPostAction(libpcm,
                 env.Symlink(obj.abspath, env['BUILDDIR'] + '/lib/' + str(obj)))
-    env.Alias('install', env.InstallLibrary('$libdir', libpcm))
+    env.Alias('install', env.InstallLibrary(env['xorp_libdir'], libpcm))
 else:
     obj_aspath = env.StaticObject(target = 'aspath',
                                   source = '../../bgp/aspath.cc')

@@ -87,15 +87,10 @@ else:
 
 xorp_static_routes = env.Program(target = 'xorp_static_routes',
 				 source = xorp_static_routes_srcs)
-
-#srpath = '$bindir'
-srpath = '$exec_prefix/static_routes'
-
-env.Alias('install',
-          env.InstallProgram(srpath, xorp_static_routes))
+env.Alias('install', env.InstallProgram(env['xorp_moduledir'], xorp_static_routes))
 
 if is_shared:
     env.Alias('install',
-              env.InstallLibrary('$libdir', libxorp_static_routes))
+              env.InstallLibrary(env['xorp_libdir'], libxorp_static_routes))
 
 Default(xorp_static_routes)

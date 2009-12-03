@@ -69,22 +69,15 @@ printneighborssrcs = [
         'print_neighbours.cc'
     ]
 
-cleardb = env.Program(target = 'clear_database', source = cleardbsrcs)
+cleardb = env.Program(target = 'ospf_clear_database',
+		      source = cleardbsrcs)
+printlsas = env.Program(target = 'ospf_print_lsas',
+			source = printlsassrcs)
+printneighbors = env.Program(target = 'ospf_print_neighbours',
+			     source = printneighborssrcs)
 
-printlsas = env.Program(target = 'print_lsas', source = printlsassrcs)
-
-printneighbors = env.Program(target = 'print_neighbours', source = printneighborssrcs)
-
-#ospftoolpath = '$bindir'
-ospftoolpath = '$exec_prefix/ospf/tools'
-
-env.Alias('install',
-    env.InstallProgram(ospftoolpath, cleardb))
-
-env.Alias('install',
-    env.InstallProgram(ospftoolpath, printlsas))
-
-env.Alias('install',
-    env.InstallProgram(ospftoolpath, printneighbors))
+env.Alias('install', env.InstallProgram(env['xorp_tooldir'], cleardb))
+env.Alias('install', env.InstallProgram(env['xorp_tooldir'], printlsas))
+env.Alias('install', env.InstallProgram(env['xorp_tooldir'], printneighbors))
 
 Default(cleardb, printlsas, printneighbors)

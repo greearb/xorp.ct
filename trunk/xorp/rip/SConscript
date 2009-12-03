@@ -30,10 +30,6 @@ SConscript(dirs = subdirs, exports='env')
 e = env.Clone()
 is_shared = env.has_key('SHAREDLIBS')
 
-# XXX
-#rippath = '$bindir'
-rippath = '$exec_prefix/rip'
-
 #
 # NB: The same sources are used for RIP and RIPng.  We use separate
 # scons environments with different CPPDEFINES and SHOBJPREFIXES to
@@ -143,8 +139,8 @@ if is_shared:
             env.AddPostAction(libxorp_rip_xrl,
                 env.Symlink(obj.abspath, env['BUILDDIR'] + '/lib/' + str(obj)))
     e.Alias('install',
-                [ e.InstallLibrary('$libdir', libxorp_rip),
-                  e.InstallLibrary('$libdir', libxorp_rip_xrl) ])
+                [ e.InstallLibrary(env['xorp_libdir'], libxorp_rip),
+                  e.InstallLibrary(env['xorp_libdir'], libxorp_rip_xrl) ])
 else:
     libxorp_rip = e.StaticLibrary(target = 'libxorp_rip',
 				  source = libxorp_rip_srcs,
@@ -154,7 +150,7 @@ else:
 				      LIBS = '')
 
 rip = e.Program(target = 'xorp_rip', source = ripsrcs)
-e.Alias('install', e.InstallProgram(rippath, rip))
+e.Alias('install', e.InstallProgram(env['xorp_moduledir'], rip))
 
 #
 # RIPng
@@ -221,8 +217,8 @@ if is_shared:
             env.AddPostAction(libxorp_ripngxrl,
                 env.Symlink(obj.abspath, env['BUILDDIR'] + '/lib/' + str(obj)))
     e.Alias('install',
-                [ e.InstallLibrary('$libdir', libxorp_ripng),
-                  e.InstallLibrary('$libdir', libxorp_ripngxrl) ])
+                [ e.InstallLibrary(env['xorp_libdir'], libxorp_ripng),
+                  e.InstallLibrary(env['xorp_libdir'], libxorp_ripngxrl) ])
 else:
     libxorp_ripng = e.StaticLibrary(target = 'libxorp_ripng',
 				    source = libxorp_rip_srcs,
@@ -232,6 +228,6 @@ else:
 				       LIBS = '')
 
 ripng = e.Program(target = 'xorp_ripng', source = ripngsrcs)
-e.Alias('install', e.InstallProgram(rippath, ripng))
+e.Alias('install', e.InstallProgram(env['xorp_moduledir'], ripng))
 
 Default(rip, ripng)

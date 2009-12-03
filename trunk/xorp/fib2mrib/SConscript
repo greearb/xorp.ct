@@ -88,14 +88,9 @@ fib2mribsrcs = [
 
 fib2mrib = env.Program(target = 'xorp_fib2mrib', source = fib2mribsrcs)
 
-#fib2mrib_path = '$bindir'
-fib2mrib_path = '$exec_prefix/fib2mrib'
-
-env.Alias('install',
-          env.InstallProgram(fib2mrib_path, fib2mrib))
+env.Alias('install', env.InstallProgram(env['xorp_moduledir'], fib2mrib))
 
 if is_shared:
-    env.Alias('install',
-              env.InstallLibrary('$libdir', libxorp_fib2mrib))
+    env.Alias('install', env.InstallLibrary(env['xorp_libdir'], libxorp_fib2mrib))
 
 Default(fib2mrib)

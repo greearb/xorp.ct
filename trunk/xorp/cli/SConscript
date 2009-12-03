@@ -70,7 +70,7 @@ if is_shared:
     libxorp_cli = env.SharedLibrary(target = 'libxorp_cli',
 				    source = libxorp_cli_srcs)
     env.Alias('install',
-              env.InstallLibrary('$libdir', libxorp_cli))
+              env.InstallLibrary(env['xorp_libdir'], libxorp_cli))
 else:
     libxorp_cli = env.StaticLibrary(target = 'libxorp_cli',
 				    source = libxorp_cli_srcs)
