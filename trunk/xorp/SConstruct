@@ -74,6 +74,9 @@ vars.AddVariables(
     EnumVariable('profile', 'Build with profiling', 'no',
                  allowed_values=('no', 'gprof', 'pprof', 'override'),
                  map={}, ignorecase=2),
+     EnumVariable('transport', 'Set default XRL transport protocol', 'local',
+                  allowed_values=('tcp', 'local'),
+                  map={}, ignorecase=2),
     PathVariable('prefix', 'Install prefix',
                  '/usr/local/xorp', PathVariable.PathAccept),
     )
@@ -169,6 +172,9 @@ print 'Optimize code:    ', env['optimize']
 
 # Default to disable; wrapper for compiler profiling support.
 print 'Profile code:     ', env['profile']
+
+# Default to local (UNIX domain sockets).
+print 'Default XRL transport:', env['transport']
 
 # Most of our shared library tweaks are specific to GNU ld.
 # Check if the GNU linker is available, and print a warning if not.
@@ -495,6 +501,24 @@ and shared libraries. This is UNSUPPORTED, and probably will not link.
             env.AppendUnique( LIBS = [ 'profiler' ] )
             #env.AppendUnique( CPPDEFINES = [ 'WITH_PPROF' ] )
 
+#
+# Apply top-level 'transport' protocol option, which controls the
+# default transport protocol chosen by libxipc.
+#
+# We pass it as an ordinal character constant to avoid shell
+# quoting issues, as it is specified by 1 character.
+#
+# Note: We need to do this at top level to make sure the option
+# is propagated correctly, because anything which includes
+# <libxipc/xrl_std_router.hh> will be affected by this option.
+#
+xrl_pf_dict = { 'tcp': 't', 'local': 'x' }
+env.AppendUnique(CPPDEFINES = [
+    ( 'XRL_PF', ord(xrl_pf_dict[env['transport']]) ),
+    ])
+
+# Forcibly disable GCC's SSP support., as it may be incompatible
+# with the XORP code base.
 env.AppendUnique(CPPDEFINES = [
     ( '_FORTIFY_SOURCE', 0 ),
     ])
