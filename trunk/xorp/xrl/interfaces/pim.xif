@@ -435,21 +435,21 @@ interface pim/0.1 {
 	 * of all neighbors (one number per neighbor).
 	 */
 	pimstat_neighbors4		-> nbrs_number:u32		\
-					& vifs:list			\
-					& addresses:list		\
-					& pim_versions:list		\
-					& dr_priorities:list		\
-					& holdtimes:list		\
-					& timeouts:list			\
-					& uptimes:list
+					& vifs:list<txt>		\
+					& addresses:list<ipv4>		\
+					& pim_versions:list<i32>	\
+					& dr_priorities:list<i32>	\
+					& holdtimes:list<i32>		\
+					& timeouts:list<i32>		\
+					& uptimes:list<i32>
 	pimstat_neighbors6		-> nbrs_number:u32		\
-					& vifs:list			\
-					& addresses:list		\
-					& pim_versions:list		\
-					& dr_priorities:list		\
-					& holdtimes:list		\
-					& timeouts:list			\
-					& uptimes:list
+					& vifs:list<txt>		\
+					& addresses:list<ipv6>		\
+					& pim_versions:list<i32>	\
+					& dr_priorities:list<i32>	\
+					& holdtimes:list<i32>		\
+					& timeouts:list<i32>		\
+					& uptimes:list<i32>
 
 	/**
 	 * Retrieve information about PIM interfaces.
@@ -497,20 +497,20 @@ interface pim/0.1 {
 	 * there will be a number of entries for that RP: one per group prefix.
 	 */
 	pimstat_rps4			-> rps_number:u32		\
-					& addresses:list		\
-					& types:list			\
-					& priorities:list		\
-					& holdtimes:list		\
-					& timeouts:list			\
-					& group_prefixes:list
+					& addresses:list<ipv4>		\
+					& types:list<txt>		\
+					& priorities:list<i32>		\
+					& holdtimes:list<i32>		\
+					& timeouts:list<i32>		\
+					& group_prefixes:list<ipv4net>
 
 	pimstat_rps6			-> rps_number:u32		\
-					& addresses:list		\
-					& types:list			\
-					& priorities:list		\
-					& holdtimes:list		\
-					& timeouts:list			\
-					& group_prefixes:list
+					& addresses:list<ipv6>		\
+					& types:list<txt>		\
+					& priorities:list<i32>		\
+					& holdtimes:list<i32>		\
+					& timeouts:list<i32>		\
+					& group_prefixes:list<ipv6net>
 
 	/**
 	 * Clear all statistics

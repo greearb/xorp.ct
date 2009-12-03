@@ -349,9 +349,9 @@ interface rip/0.1 {
     /**
      * Get addresses running RIP.
      */
-    get_all_addresses			-> ifnames:list			\
-					&  vifnames:list		\
-					&  addrs:list
+    get_all_addresses			-> ifnames:list<txt>		\
+					&  vifnames:list<txt>		\
+					&  addrs:list<ipv4>
 
     /**
      * Get counters associated with interface / vif /address.
@@ -359,8 +359,8 @@ interface rip/0.1 {
     get_counters			? ifname:txt			\
 					& vifname:txt			\
 					& addr:ipv4			\
-					-> counter_descriptions:list	\
-					&  counter_values:list
+					-> counter_descriptions:list<txt> \
+					&  counter_values:list<u32>
 
     /**
      * Get the list of peers associated with interface / vif / address.
@@ -368,16 +368,16 @@ interface rip/0.1 {
     get_peers				? ifname:txt			\
 					& vifname:txt			\
 					& addr:ipv4			\
-					-> peers:list
+					-> peers:list<ipv4>
 
     /**
      * Get list of all peers known to RIP.  There is a 1-to-1 correspondence
      * between the items in the lists of peers, ifnames, vifnames, addrs.
      */
-    get_all_peers			-> peers:list			\
-					& ifnames:list			\
-					& vifnames:list			\
-					& addrs:list
+    get_all_peers			-> peers:list<ipv4>		\
+					& ifnames:list<txt>		\
+					& vifnames:list<txt>		\
+					& addrs:list<ipv4>
 
     /**
      * Get counters associated with peer of interface / vif /address.
@@ -390,8 +390,8 @@ interface rip/0.1 {
 					& vifname:txt			\
 					& addr:ipv4			\
 					& peer:ipv4			\
-					-> counter_descriptions:list	\
-					&  counter_values:list		\
+					-> counter_descriptions:list<txt> \
+					&  counter_values:list<u32>	\
 					&  peer_last_active:u32
 	
      /**

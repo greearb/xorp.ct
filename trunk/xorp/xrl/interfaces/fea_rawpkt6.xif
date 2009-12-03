@@ -42,8 +42,8 @@ interface raw_packet6/0.1 {
 		& ip_tos:i32						\
 		& ip_router_alert:bool 					\
 		& ip_internet_control:bool				\
-		& ext_headers_type:list					\
-		& ext_headers_payload:list				\
+		& ext_headers_type:list<u32>				\
+		& ext_headers_payload:list<binary>			\
 		& payload:binary
 
 	/**

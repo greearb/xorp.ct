@@ -7,9 +7,9 @@
 interface ifmgr/0.1 {
 	set_restore_original_config_on_shutdown ? enable:bool
 
-	get_configured_interface_names -> ifnames:list
+	get_configured_interface_names -> ifnames:list<txt>
 
-	get_configured_vif_names ? ifname:txt -> vifs:list
+	get_configured_vif_names ? ifname:txt -> vifs:list<txt>
 
 	get_configured_vif_flags ? ifname:txt				\
 				& vif:txt				\
@@ -23,9 +23,11 @@ interface ifmgr/0.1 {
 					& vif:txt			\
 					-> pif_index:u32
 
-	get_configured_vif_addresses4 ? ifname:txt & vif:txt -> addresses:list
+	get_configured_vif_addresses4 ? ifname:txt & vif:txt \
+				      -> addresses:list<ipv4>
 
-	get_configured_vif_addresses6 ? ifname:txt & vif:txt -> addresses:list
+	get_configured_vif_addresses6 ? ifname:txt & vif:txt \
+				      -> addresses:list<ipv4>
 
 	get_configured_address_flags4	? ifname:txt			\
 					& vif:txt			\

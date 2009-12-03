@@ -305,7 +305,7 @@ interface ospfv3/0.1 {
      *
      * Return a list of u32 type values. Each value is an area ID.
      */
-    get_area_list -> areas:list
+    get_area_list -> areas:list<u32>
 
     /**
      * Get the list of neighbours.
@@ -313,7 +313,7 @@ interface ospfv3/0.1 {
      * Return a list of u32 type values. Each value is an internal
      * identifier that can be used with the get_neighbour_info XRL.
      */
-    get_neighbour_list -> areas:list
+    get_neighbour_list -> areas:list<u32>
 
     /**
      * Get information on a neighbour.

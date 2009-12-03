@@ -107,7 +107,7 @@ interface vrrp/0.1 {
      *
      * @param ifs a list of interface names (strings).
      */
-    get_ifs	    -> ifs:list
+    get_ifs	    -> ifs:list<txt>
 
     /**
      * For a given physical interface, get the virtual interfaces on which VRRP
@@ -117,7 +117,7 @@ interface vrrp/0.1 {
      * @param vifs a list of virtual interface names (strings).
      */
     get_vifs	    ? ifname:txt			\
-		    -> vifs:list
+		    -> vifs:list<txt>
 
     /**
      * Get the virtual router IDs of all the VRRP instances running on a network
@@ -129,7 +129,7 @@ interface vrrp/0.1 {
      */
     get_vrids       ? ifname:txt			\
 		    & vifname:txt			\
-		    -> vrids:list
+		    -> vrids:list<u32>
 
     /**
      * Get state information from a particular VRRP instance.

@@ -23,7 +23,7 @@ interface rtrmgr/0.1 {
 
     leave_config_mode ? token:txt
 
-    get_config_users ? token:txt -> users:list
+    get_config_users ? token:txt -> users:list<u32>
 
     get_running_config ? token:txt -> ready:bool & config:txt
 

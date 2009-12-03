@@ -298,7 +298,7 @@ interface olsr4/0.1 {
      * Return a list of u32 type values. Each value is an internal
      * ID that can be used with the get_interface_info XRL.
      */
-    get_interface_list -> interfaces:list
+    get_interface_list -> interfaces:list<u32>
 
     /**
      * Get the per-interface information for the given interface.
@@ -369,7 +369,7 @@ interface olsr4/0.1 {
      * Return a list of u32 type values. Each value is an internal
      * ID that can be used with the get_link_info XRL.
      */
-    get_link_list -> links:list
+    get_link_list -> links:list<u32>
 
     /**
      * Get the information for a one-hop link.
@@ -405,7 +405,7 @@ interface olsr4/0.1 {
      * Return a list of u32 type values. Each value is an internal
      * ID that can be used with the get_neighbor_info XRL.
      */
-    get_neighbor_list -> neighbors:list
+    get_neighbor_list -> neighbors:list<u32>
 
     /**
      * Get the information for a one-hop neighbor.
@@ -444,7 +444,7 @@ interface olsr4/0.1 {
      * Return a list of u32 type values. Each value is an internal
      * ID that can be used with the get_twohop_link_info XRL.
      */
-    get_twohop_link_list -> twohop_links:list
+    get_twohop_link_list -> twohop_links:list<u32>
 
     /**
      * Get the information for a two-hop link.
@@ -472,7 +472,7 @@ interface olsr4/0.1 {
      * Return a list of u32 type values. Each value is an internal
      * ID that can be used with the get_twohop_neighbor_info XRL.
      */
-    get_twohop_neighbor_list -> twohop_neighbors:list
+    get_twohop_neighbor_list -> twohop_neighbors:list<u32>
 
     /**
      * Get the information for a two-hop neighbor.
@@ -503,7 +503,7 @@ interface olsr4/0.1 {
      * Return a list of u32 type values. Each value is an internal
      * ID that can be used with the get_mid_entry XRL.
      */
-    get_mid_entry_list -> mid_entries:list
+    get_mid_entry_list -> mid_entries:list<u32>
 
     /**
      * Get the information contained in a MID entry.
@@ -528,7 +528,7 @@ interface olsr4/0.1 {
      * Return a list of u32 type values. Each value is an internal
      * ID that can be used with the get_tc_entry XRL.
      */
-    get_tc_entry_list -> tc_entries:list
+    get_tc_entry_list -> tc_entries:list<u32>
 
     /**
      * Get the information contained in a TC entry.
@@ -555,7 +555,7 @@ interface olsr4/0.1 {
      * Return a list of u32 type values. Each value is an internal
      * ID that can be used with the get_hna_entry XRL.
      */
-    get_hna_entry_list -> hna_entries:list
+    get_hna_entry_list -> hna_entries:list<u32>
 
     /**
      * Get the information contained in a HNA entry.

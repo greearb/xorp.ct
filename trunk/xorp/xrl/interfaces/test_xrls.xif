@@ -27,5 +27,6 @@ interface test_xrls/0.1 {
 			& data8:txt					\
 			& data9:binary
 
-	add_xrlX	? data:list
+	/* XXX: the list member type doesn't matter for this test. */
+	add_xrlX	? data:list<u32>
 }

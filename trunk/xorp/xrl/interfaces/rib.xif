@@ -38,10 +38,10 @@ interface rib/0.1 {
 	 */
 	get_registered_protocols	? ipv4:bool & ipv6:bool		\
 					& unicast:bool & multicast:bool	\
-					-> ipv4_unicast_protocols:list	\
-					& ipv6_unicast_protocols:list	\
-					& ipv4_multicast_protocols:list	\
-					& ipv6_multicast_protocols:list
+					-> ipv4_unicast_protocols:list<txt> \
+					& ipv6_unicast_protocols:list<txt> \
+					& ipv4_multicast_protocols:list<txt> \
+					& ipv6_multicast_protocols:list<txt>
 
 	/**
 	 * Add/delete an IGP or EGP table.
@@ -98,19 +98,19 @@ interface rib/0.1 {
 	 */
 	add_route4	? protocol:txt & unicast:bool & multicast:bool	\
 			& network:ipv4net & nexthop:ipv4 & metric:u32   \
-			& policytags:list
+			& policytags:list<u32>
 
 	add_route6	? protocol:txt & unicast:bool & multicast:bool	\
 			& network:ipv6net & nexthop:ipv6 & metric:u32   \
-			& policytags:list
+			& policytags:list<u32>
 
 	replace_route4	? protocol:txt & unicast:bool & multicast:bool	\
 			& network:ipv4net & nexthop:ipv4 & metric:u32   \
-			& policytags:list
+			& policytags:list<u32>
 
 	replace_route6	? protocol:txt & unicast:bool & multicast:bool	\
 			& network:ipv6net & nexthop:ipv6 & metric:u32   \
-			& policytags:list
+			& policytags:list<u32>
 
 	delete_route4	? protocol:txt & unicast:bool & multicast:bool	\
 			& network:ipv4net
@@ -139,25 +139,25 @@ interface rib/0.1 {
 				& unicast:bool & multicast:bool		\
 				& network:ipv4net & nexthop:ipv4	\
 				& ifname:txt & vifname:txt & metric:u32 \
-				& policytags:list
+				& policytags:list<u32>
 
 	add_interface_route6	? protocol:txt				\
 				& unicast:bool & multicast:bool		\
 				& network:ipv6net & nexthop:ipv6	\
 				& ifname:txt & vifname:txt & metric:u32 \
-				& policytags:list
+				& policytags:list<u32>
 
 	replace_interface_route4 ? protocol:txt				\
 				& unicast:bool & multicast:bool		\
 				& network:ipv4net & nexthop:ipv4	\
 				& ifname:txt & vifname:txt & metric:u32 \
-				& policytags:list
+				& policytags:list<u32>
 
 	replace_interface_route6 ? protocol:txt				\
 				& unicast:bool & multicast:bool		\
 				& network:ipv6net & nexthop:ipv6	\
 				& ifname:txt & vifname:txt & metric:u32 \
-				& policytags:list
+				& policytags:list<u32>
 
 	/**
 	 * Lookup nexthop.
@@ -539,7 +539,7 @@ interface rib/0.1 {
 	 * @param policytags The set of policytags of interest for the protocol.
 	 *
 	 */
-	insert_policy_redist_tags ? protocol:txt & policytags:list
+	insert_policy_redist_tags ? protocol:txt & policytags:list<u32>
 
 	/**
 	 * Reset the policy redistribution map.
@@ -564,8 +564,8 @@ interface rib/0.1 {
 	 */
 	get_protocol_admin_distances	? ipv4:bool			\
 					& unicast:bool			\
-					-> protocols:list		\
-					& admin_distances:list
+					-> protocols:list<txt>		\
+					& admin_distances:list<u32>
 
 	/**
 	 * Get administrative distance for an individual protocol in
