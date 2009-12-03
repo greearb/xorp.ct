@@ -43,8 +43,6 @@ EnsureSConsVersion(0, 98, 4)
 Help("""
     builddir=<some path> to specify a different build directory.
         Default is "obj/<arch>-<os>-<rel>".
-    prefix=<some path> to specify a different install directory.
-        Default is "/usr/local/xorp".
 """)
 
 import sys
@@ -79,6 +77,8 @@ vars.AddVariables(
     EnumVariable('profile', 'Build with profiling', 'no',
                  allowed_values=('no', 'gprof', 'pprof', 'override'),
                  map={}, ignorecase=2),
+    PathVariable('prefix', 'Install prefix',
+                 '/usr/local/xorp', PathVariable.PathAccept),
     )
 
 def log_args(afname):
@@ -122,14 +122,6 @@ SConsignFile(builddir + '/.sconsign')
 
 log_args(builddir + '/.scons_build_args')
 
-prefix = ARGUMENTS.get('prefix', '/usr/local/xorp')
-
-print 'Build System Type: ', build
-print 'Host System Type:  ', host
-print 'Source path:       ', sourcedir
-print 'Build path:        ', builddir
-print 'Install prefix:    ', prefix
-
 env = Environment(
 		  TOOLS = ['default', 'autotest', 'clntgen', 'tgtgen',
 		           'TOOL_SUBST'],
@@ -138,6 +130,14 @@ env = Environment(
 		  CPPPATH=['/usr/sfw/include', '/opt/local/include', '/usr/local/include', '$BUILDDIR'],
 		  LIBPATH=['/usr/sfw/lib', '/opt/local/lib', '/usr/local/lib'],
 		  variables = vars)
+
+prefix = env['prefix']
+
+print 'Build System Type: ', build
+print 'Host System Type:  ', host
+print 'Source path:       ', sourcedir
+print 'Build path:        ', builddir
+print 'Install prefix:    ', prefix
 
 env['DESTDIR'] = ARGUMENTS.get('DESTDIR', '')
 
@@ -256,33 +256,45 @@ def InstallData(env, dest, files, perm = 0644):
     return obj
 SConsEnvironment.InstallData = InstallData
 
-# only bindir, libdir actually used just now.
-# follow freebsd hier(5) unless we've got better suggestions-
-# what is equivalent ref for red hat / debian based systems?
-
-env['prefix'] = prefix
+#
+# GNU-style package paths.
+#
+# These are not parsed using PathVariable() above, to avoid confusion
+# on the part of the user, as their default values are derived
+# from 'prefix'.
+# Not all of them are used at the moment.
+#
 exec_prefix = ARGUMENTS.get('exec_prefix', '$prefix')
-env['exec_prefix'] = exec_prefix
-env['bindir'] = ARGUMENTS.get('bindir', '$exec_prefix/bin')
 env['sbindir'] = ARGUMENTS.get('sbindir', '$exec_prefix/sbin')
-# TODO the routing daemons themselves should go here (never executed
-# directly by users)
-env['libexecdir'] = ARGUMENTS.get('libexecdir', '$exec_prefix/libexec')
-# TODO put templates and .xrl files here.
+env['libexecdir'] = ARGUMENTS.get('libexecdir', '$exec_prefix/lib')
 env['datarootdir'] = ARGUMENTS.get('datarootdir', '$prefix/share')
-# TODO ?
-env['datadir'] = ARGUMENTS.get('datadir', '$datarootdir')
-# TODO xorp.conf goes here.
+env['datadir'] = ARGUMENTS.get('datadir', '$datarootdir/xorp')
 env['sysconfdir'] = ARGUMENTS.get('sysconfdir', '$prefix/etc')
-# TODO we don't have this state yet, and we should use /var for it.
 env['localstatedir'] = ARGUMENTS.get('localstatedir', '$prefix/var')
-# TODO libraries clearly go here.
 env['libdir'] = ARGUMENTS.get('libdir', '$exec_prefix/lib')
-# TODO incorporate a man page.
 env['mandir'] = ARGUMENTS.get('mandir', '$datarootdir/man')
+
+#
+# XORP internal package paths.
+#
+# These are the paths actually used to build the package image
+# when installed in its destination directory.
+# Most of these paths are derived from the GNU-style variables above.
+#
+# The image layout is intended to be FHS 2.3 compliant, for the benefit
+# of 3rd party packagers and distributors.
+#
+env['xorp_confdir']     = '$sysconfdir'			# path to xorp.conf
+env['xorp_libdir']      = '$libdir/xorp/lib'		# Shared libraries
+env['xorp_moduledir']   = '$libdir/xorp/sbin'		# Protocol modules
+env['xorp_sbindir']     = '$sbindir'			# End-user binaries
+env['xorp_templatedir'] = '$datadir/xorp/templates'	# Router Manager .tp
+env['xorp_tooldir']     = '$libdir/xorp/bin'		# tools/*
+env['xorp_xrlsdir']     = '$datadir/xorp/xrls'		# *.xrls
 
 # XXX needed by scons xrl idl wrappers
 # ...and rtrmgr/util.cc
+# XXX Push this down...
 env['XORP_SOURCEDIR'] = sourcedir
 env['XORP_BUILDDIR'] = builddir
 
@@ -518,7 +530,7 @@ if env['debug_cb']:
 
 #
 # Fixup shared library paths.
-# Shared libraries are installed in $exec_prefix/lib by default.
+# Shared libraries are installed in $xorp_libdir by default.
 #
 # If rtld_origin is True, the linker will be passed a relative RPATH.
 # This allows the package itself to be relocated in the filesystem
@@ -528,10 +540,16 @@ if env.has_key('SHAREDLIBS'):
     if env['rtld_origin']:
 	# Build a subdirectory for holding symlinks to libraries upfront, so
 	# that binaries about to be built can be run from inside the BUILDDIR.
+	# Build a further alias for the benefit of entities installed
+	# in $xorp_sbindir.
 	Execute(Mkdir(builddir + '/lib'))
+	Execute(Mkdir(builddir + '/lib/xorp'))
+	Execute(env.Symlink(builddir + '/lib', builddir + '/lib/xorp/lib'))
+
 	# Tell rtld to turn on $ORIGIN processing by default.
 	# NOTE: GNU ld specific flag.
 	env.PrependUnique( LINKFLAGS = [ '-Wl,-z,origin' ] )
+
 	#
 	# Now fixup the RPATH.
 	# FIXME This is not correct for all binaries. Some
@@ -549,6 +567,7 @@ if env.has_key('SHAREDLIBS'):
 	# Hardcode the RPATH to our final destination.
 	# Developers will need to set LD_LIBRARY_PATH until they install.
 	env.AppendUnique(RPATH = [
+	    #'$xorp_libdir',
 	    '$libdir',
 	])
 
