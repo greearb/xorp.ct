@@ -25,12 +25,7 @@
 
 #include "libxorp/xorp.h"
 
-#if defined(HAVE_REGEX_H)
-#include <regex.h>
-#elif defined(HAVE_PCREPOSIX_H)
-#include <pcre.h>
-#include <pcreposix.h>
-#endif
+#include <boost/cregex.hpp>
 
 #include "policy/common/element_base.hh"
 #include "policy/common/operator_base.hh"

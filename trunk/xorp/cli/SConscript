@@ -59,7 +59,7 @@ env.AppendUnique(LIBS = [
 
 # External libraries.
 env.AppendUnique(LIBS = [
-    'pcreposix'
+    'boost_regex'
 ])
 
 env.Replace(RPATH = [

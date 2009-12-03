@@ -40,7 +40,7 @@ libpcmsrcs = [
 
 # External libraries
 env.AppendUnique(LIBS = [
-    'pcreposix'
+    'boost_regex'
 ])
 
 is_shared = env.has_key('SHAREDLIBS')

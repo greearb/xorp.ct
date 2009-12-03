@@ -22,14 +22,7 @@
 
 #include "libxorp/xorp.h"
 
-#if defined(HAVE_REGEX_H)
-#include <regex.h>
-#elif defined(HAVE_PCREPOSIX_H)
-#include <pcre.h>
-#include <pcreposix.h>
-#else
-#error "No header defining regex_t is present."
-#endif
+#include <boost/regex.h>
 
 #include "policy_utils.hh"
 

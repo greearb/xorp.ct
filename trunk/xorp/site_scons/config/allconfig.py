@@ -83,10 +83,10 @@ def DoAllConfig(env, conf, host_os):
     has_pwd_h = conf.CheckHeader('pwd.h')
     has_mqueue_h = conf.CheckHeader('mqueue.h')
 
-    prereq_regex_h = []
-    if has_sys_types_h:
-	prereq_regex_h.append('sys/types.h')
-    has_regex_h = conf.CheckHeader(prereq_regex_h + ['regex.h'])
+    #prereq_regex_h = []
+    #if has_sys_types_h:
+    #	prereq_regex_h.append('sys/types.h')
+    #has_regex_h = conf.CheckHeader(prereq_regex_h + ['regex.h'])
 
     has_syslog_h = conf.CheckHeader('syslog.h')
     has_termios_h = conf.CheckHeader('termios.h')
@@ -660,10 +660,10 @@ def DoAllConfig(env, conf, host_os):
     ##########
     # pcre posix regexp emulation
     # used by policy for regexps.
-    has_pcre_h = conf.CheckHeader('pcre.h')
-    has_pcreposix_h = conf.CheckHeader('pcreposix.h')
-    has_libpcre = conf.CheckLib('pcre')
-    has_libpcreposix = conf.CheckLib('pcreposix')
+    #has_pcre_h = conf.CheckHeader('pcre.h')
+    #has_pcreposix_h = conf.CheckHeader('pcreposix.h')
+    #has_libpcre = conf.CheckLib('pcre')
+    #has_libpcreposix = conf.CheckLib('pcreposix')
     
     ##########
     # openssl for md5
