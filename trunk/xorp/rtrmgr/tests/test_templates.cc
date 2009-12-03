@@ -43,11 +43,6 @@
 #include <getopt.h>
 #endif // HAVE_GETOPT_H
 
-// XXX: hack.
-#ifdef HOST_OS_WINDOWS
-#include "glob_win32.h"
-#endif // HOST_OS_WINDOWS
-
 //
 // Defaults
 //

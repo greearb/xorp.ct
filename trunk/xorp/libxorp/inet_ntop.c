@@ -23,23 +23,6 @@
 
 #ifndef HAVE_INET_NTOP
 
-#ifdef HOST_OS_WINDOWS
-
-#include <stdio.h>
-#include <string.h>
-
-#ifndef EAFNOSUPPORT
-#define EAFNOSUPPORT WSAEAFNOSUPPORT
-#endif
-#ifndef IN6ADDRSZ
-#define IN6ADDRSZ 16
-#endif
-#ifndef INT16SZ
-#define INT16SZ 2
-#endif
-
-#else /* ! HOST_OS_WINDOWS */
-
 #include <sys/param.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -49,8 +32,6 @@
 #include <string.h>
 #include <errno.h>
 #include <stdio.h>
-
-#endif /* ! HOST_OS_WINDOWS */
 
 /*
  * WARNING: Don't even consider trying to compile this on a system where

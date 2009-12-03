@@ -281,10 +281,6 @@ ClickSocket::start(string& error_msg)
 int
 ClickSocket::stop(string& error_msg)
 {
-#ifdef HOST_OS_WINDOWS
-    UNUSED(error_msg)
-    return (XORP_ERROR);
-#else /* !HOST_OS_WINDOWS */
     //
     // XXX: First we should stop user-level Click, and then kernel-level Click.
     // Otherwise, the user-level Click process may block the unmounting
@@ -323,7 +319,6 @@ ClickSocket::stop(string& error_msg)
     }
 
     return (XORP_OK);
-#endif /* HOST_OS_WINDOWS */
 }
 
 int
@@ -673,12 +668,6 @@ ClickSocket::kernel_module_filename2modulename(const string& module_filename)
 int
 ClickSocket::mount_click_file_system(string& error_msg)
 {
-#if defined(HOST_OS_WINDOWS)
-    // Whilst Cygwin has a mount(), it is very different.
-    // Windows itself has no mount().
-    UNUSED(error_msg);
-    return (XORP_ERROR);
-#else
     if (_kernel_click_mount_directory.empty()) {
 	error_msg = c_format("Kernel Click mount directory is empty");
 	return (XORP_ERROR);
@@ -752,16 +741,11 @@ ClickSocket::mount_click_file_system(string& error_msg)
     _mounted_kernel_click_mount_directory = _kernel_click_mount_directory;
 
     return (XORP_OK);
-#endif // HOST_OS_WINDOWS
 }
 
 int
 ClickSocket::unmount_click_file_system(string& error_msg)
 {
-#ifdef HOST_OS_WINDOWS
-    UNUSED(error_msg);
-    return (XORP_OK);
-#else
     if (_mounted_kernel_click_mount_directory.empty())
 	return (XORP_OK);	// Directory not mounted
 
@@ -787,7 +771,6 @@ ClickSocket::unmount_click_file_system(string& error_msg)
     _mounted_kernel_click_mount_directory.erase();
 
     return (XORP_OK);
-#endif // HOST_OS_WINDOWS
 }
 
 int
@@ -864,16 +847,6 @@ ClickSocket::write_config(const string& element, const string& handler,
 			  bool has_user_config, const string& user_config,
 			  string& error_msg)
 {
-#ifdef HOST_OS_WINDOWS
-    UNUSED(element);
-    UNUSED(handler);
-    UNUSED(has_kernel_config);
-    UNUSED(kernel_config);
-    UNUSED(has_user_config);
-    UNUSED(user_config);
-    UNUSED(error_msg);
-    return (0);
-#else /* !HOST_OS_WINDOWS */
     if (is_kernel_click() && has_kernel_config) {
 	//
 	// Prepare the output handler name
@@ -1003,21 +976,13 @@ ClickSocket::write_config(const string& element, const string& handler,
     }
 
     return (XORP_OK);
-#endif /* HOST_OS_WINDOWS */
 }
 
 ssize_t
 ClickSocket::write(XorpFd fd, const void* data, size_t nbytes)
 {
-#ifdef HOST_OS_WINDOWS
-    UNUSED(fd);
-    UNUSED(data);
-    UNUSED(nbytes);
-    return (0);
-#else
     _seqno++;
     return ::write(fd, data, nbytes);
-#endif
 }
 
 int
@@ -1138,12 +1103,6 @@ int
 ClickSocket::force_read_message(XorpFd fd, vector<uint8_t>& message,
 				string& error_msg)
 {
-#ifdef HOST_OS_WINDOWS
-    UNUSED(fd);
-    UNUSED(message);
-    UNUSED(error_msg);
-    return (XORP_ERROR);
-#else /* !HOST_OS_WINDOWS */
     vector<uint8_t> buffer(CLSOCK_BYTES);
 
     for ( ; ; ) {
@@ -1177,7 +1136,6 @@ ClickSocket::force_read_message(XorpFd fd, vector<uint8_t>& message,
     }
 
     return (XORP_OK);
-#endif /* HOST_OS_WINDOWS */
 }
 
 void

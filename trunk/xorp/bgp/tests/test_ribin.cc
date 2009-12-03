@@ -47,16 +47,9 @@ validate_reference_file(string reference_file, string output_file,
 bool
 test_ribin_dump(TestInfo& /*info*/)
 {
-#ifndef HOST_OS_WINDOWS
     struct passwd *pwd = getpwuid(getuid());
     string filename = "/tmp/test_ribin_dump.";
     filename += pwd->pw_name;
-#else
-    char *tmppath = (char *)malloc(256);
-    GetTempPathA(256, tmppath);
-    string filename = string(tmppath) + "test_ribin_dump";
-    free(tmppath);
-#endif
 
     EventLoop eventloop;
     BGPMain bgpmain(eventloop);
@@ -155,16 +148,9 @@ test_ribin_dump(TestInfo& /*info*/)
 bool
 test_ribin(TestInfo& /*info*/)
 {
-#ifndef HOST_OS_WINDOWS
     struct passwd *pwd = getpwuid(getuid());
     string filename = "/tmp/test_ribin.";
     filename += pwd->pw_name;
-#else
-    char *tmppath = (char *)malloc(256);
-    GetTempPathA(256, tmppath);
-    string filename = string(tmppath) + "test_ribin";
-    free(tmppath);
-#endif
 
     EventLoop eventloop;
     BGPMain bgpmain(eventloop);

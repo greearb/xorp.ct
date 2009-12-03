@@ -43,16 +43,9 @@
 bool
 test_deletion(TestInfo& /*info*/)
 {
-#ifndef HOST_OS_WINDOWS
     struct passwd *pwd = getpwuid(getuid());
     string filename = "/tmp/test_deletion.";
     filename += pwd->pw_name;
-#else
-    char *tmppath = (char *)malloc(256);
-    GetTempPathA(256, tmppath);
-    string filename = string(tmppath) + "test_deletion";
-    free(tmppath);
-#endif
 
     EventLoop eventloop;
     BGPMain bgpmain(eventloop);
@@ -650,11 +643,8 @@ test_deletion(TestInfo& /*info*/)
 	return false;
 	
     }
-#ifndef HOST_OS_WINDOWS
+
     unlink(filename.c_str());
-#else
-    DeleteFileA(filename.c_str());
-#endif
     return true;
 }
 

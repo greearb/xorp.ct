@@ -429,9 +429,6 @@ private:
 
     ClockBase* 			_clock;
     TimerListObserverBase* 	_observer;
-#ifdef HOST_OS_WINDOWS
-    HANDLE			_hirestimer;
-#endif
 
     friend class TimerNode;
     friend class TimerListObserverBase;

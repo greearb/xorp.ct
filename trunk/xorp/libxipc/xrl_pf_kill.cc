@@ -85,13 +85,6 @@ XrlPFKillSender::send(const Xrl&			x,
 		      bool				direct_call,
 		      const XrlPFSender::SendCallback&	cb)
 {
-#ifdef HOST_OS_WINDOWS
-    // XXX: Windows has no notion of process signals.
-    return false;
-    UNUSED(x);
-    UNUSED(direct_call);
-    UNUSED(cb);
-#else
     try {
 	int32_t sig = x.args().get_int32("signal");
 	int err = ::kill(_pid, sig);
@@ -113,7 +106,6 @@ XrlPFKillSender::send(const Xrl&			x,
 	cb->dispatch(XrlError(SEND_FAILED, "Bad XRL format"), 0);
 	return true;
     }
-#endif
 }
 
 bool

@@ -39,8 +39,6 @@
 #include "eventloop.hh"
 
 
-#ifndef HOST_OS_WINDOWS
-
 static int fired(0);
 
 static int add_rem_fd_counter(0);
@@ -153,21 +151,12 @@ void run_test()
     XorpFd fd[2];
     int pipefds[2];
 
-#ifndef HOST_OS_WINDOWS
     if (pipe(pipefds)) {
 	fprintf(stderr, "unable to generate file descriptors for test\n");
 	exit(2);
     }
     fd[0] = XorpFd(pipefds[0]);
     fd[1] = XorpFd(pipefds[1]);
-#else // HOST_OS_WINDOWS
-    if (_pipe(pipefds, 65536, _O_BINARY)) {
-	fprintf(stderr, "unable to generate file descriptors for test\n");
-	exit(2);
-    }
-    fd[0] = XorpFd(_get_osfhandle(pipefds[0]));
-    fd[1] = XorpFd(_get_osfhandle(pipefds[1]));
-#endif // HOST_OS_WINDOWS
 
     XorpCallback2<void,XorpFd,IoEventType>::RefPtr cb = callback(do_the_twist);
     e.selector_list().add_ioevent_cb(fd[0], IOT_READ, cb);
@@ -187,13 +176,9 @@ void run_test()
     no_notifications_beyond_this_point = true;
     e.selector_list().remove_ioevent_cb(fd[0], IOT_READ);
     e.selector_list().remove_ioevent_cb(fd[1], IOT_WRITE);
-#ifndef HOST_OS_WINDOWS
+
     close(fd[0]);
     close(fd[1]);
-#else
-    _close(fd[0]);
-    _close(fd[1]);
-#endif
     
     one_fd_rem_per_each_fd_add_notif =  (add_rem_fd_counter == 0) &&
 					(add_rem_mask_counter == 0);
@@ -212,13 +197,9 @@ void run_test()
     fprintf(stderr, "Test passed\n");
 }
 
-#endif // !HOST_OS_WINDOWS
 
 int main(int /* argc */, const char* argv[]) 
 {
-    // TODO: enable the test for Windows
-#ifndef HOST_OS_WINDOWS
-
     //
     // Initialize and start xlog
     //
@@ -240,8 +221,5 @@ int main(int /* argc */, const char* argv[])
     xlog_stop();
     xlog_exit();
 
-#else // HOST_OS_WINDOWS
-    UNUSED(argv);
-#endif // HOST_OS_WINDOWS
     return 0;
 }

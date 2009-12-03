@@ -32,8 +32,4 @@ pid_t	popen2(const string& command, const list<string>& arguments,
 int	pclose2(FILE *iop_out, bool dont_wait);
 int	popen2_mark_as_closed(pid_t pid, int wait_status);
 
-#ifdef HOST_OS_WINDOWS
-HANDLE	pgethandle(pid_t pid);
-#endif
-
 #endif // __LIBXORP_POPEN_HH__

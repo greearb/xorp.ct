@@ -28,9 +28,7 @@
 
 #include "crash_dump.hh"
 
-#ifndef HOST_OS_WINDOWS
 #include <pwd.h>
-#endif
 
 #define CRASHLOG_SIZE 100
 
@@ -67,16 +65,9 @@ CrashDumpManager::crash_dump()
 {
     FILE *dumpfile;
 
-#ifndef HOST_OS_WINDOWS
     struct passwd *pwd = getpwuid(getuid());
     string filename = "/tmp/bgp_dump.";
     filename += pwd->pw_name;
-#else
-    char *tmppath = (char *)malloc(256);
-    GetTempPathA(256, tmppath);
-    string filename = string(tmppath) + "bgp_dump";
-    free(tmppath);
-#endif
 
     dumpfile = fopen(filename.c_str(), "w");
     if (dumpfile == NULL) {

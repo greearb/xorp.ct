@@ -71,7 +71,6 @@ int
 IfConfigGetIoctl::parse_buffer_ioctl(IfConfig& ifconfig, IfTree& iftree,
 				     int family, const vector<uint8_t>& buffer)
 {
-#ifndef HOST_OS_WINDOWS
     int s;
     uint32_t if_index = 0;
     string if_name, alias_if_name;
@@ -596,14 +595,6 @@ IfConfigGetIoctl::parse_buffer_ioctl(IfConfig& ifconfig, IfTree& iftree,
     comm_close(s);
 
     return (XORP_OK);
-#else // HOST_OS_WINDOWS
-    XLOG_FATAL("WinSock2 does not support struct ifreq.");
-
-    UNUSED(it);
-    UNUSED(family);
-    UNUSED(buffer);
-    return (XORP_ERROR);
-#endif // HOST_OS_WINDOWS
 }
 
 #endif // HAVE_IOCTL_SIOCGIFCONF

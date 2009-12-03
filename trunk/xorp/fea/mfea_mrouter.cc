@@ -108,10 +108,6 @@
 // Local structures/classes, typedefs and macros
 //
 
-#ifdef HOST_OS_WINDOWS
-typedef char *caddr_t;
-#endif
-
 //
 // Local variables
 //
@@ -176,11 +172,6 @@ MfeaMrouter::start()
 {
     string error_msg;
 
-#ifdef HOST_OS_WINDOWS
-    XLOG_ERROR("Multicast routing is not supported on Windows");
-    return (XORP_ERROR);
-#endif
-
     // XXX: MfeaMrouter is automatically enabled by default
     ProtoUnit::enable();
     
@@ -190,14 +181,12 @@ MfeaMrouter::start()
     if (ProtoUnit::start() != XORP_OK)
 	return (XORP_ERROR);
     
-#ifndef HOST_OS_WINDOWS
     // Check if we have the necessary permission
     if (geteuid() != 0) {
 	XLOG_ERROR("Must be root");
 	exit (1);
 	// return (XORP_ERROR);
     }
-#endif // ! HOST_OS_WINDOWS
 
     // Register as multicast upcall receiver
     IoIpManager& io_ip_manager = mfea_node().fea_node().io_ip_manager();

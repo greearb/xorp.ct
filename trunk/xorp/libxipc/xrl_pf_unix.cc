@@ -64,23 +64,18 @@ XrlPFUNIXListener::get_sock_path()
 
     fclose(f);
 
-    // XXX we shouldn't be compiling this under windows
-#ifndef HOST_OS_WINDOWS
     unlink(path.c_str());
-#endif
 
     return path;
 }
 
 XrlPFUNIXListener::~XrlPFUNIXListener()
 {
-#ifndef HOST_OS_WINDOWS
     // XXX this probably isn't the right place for this.  Perhaps libcomm should
     // sort this out.
     string path = _address_slash_port;
     decode_address(path);
     unlink(path.c_str());
-#endif
 }
 
 const char*

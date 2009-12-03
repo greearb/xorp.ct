@@ -70,16 +70,9 @@ private:
 bool
 test_nhlookup(TestInfo& /*info*/)
 {
-#ifndef HOST_OS_WINDOWS
     struct passwd *pwd = getpwuid(getuid());
     string filename = "/tmp/test_nhlookup.";
     filename += pwd->pw_name;
-#else
-    char *tmppath = (char *)malloc(256);
-    GetTempPathA(256, tmppath);
-    string filename = string(tmppath) + "test_nhlookup";
-    free(tmppath);
-#endif
 
     EventLoop eventloop;
     BGPMain bgpmain(eventloop);
@@ -638,11 +631,8 @@ test_nhlookup(TestInfo& /*info*/)
 	return false;
 	
     }
-#ifndef HOST_OS_WINDOWS
+
     unlink(filename.c_str());
-#else
-    DeleteFileA(filename.c_str());
-#endif
     return true;
 }
 

@@ -175,9 +175,7 @@ private:
 
     XorpTimer           _repeat_request_timer;
 
-#ifndef HOST_OS_WINDOWS
     XorpFd		_fddesc[2];
-#endif
 
     // XXX: must be last
     XrlXorpshInterface	_xorpsh_interface;

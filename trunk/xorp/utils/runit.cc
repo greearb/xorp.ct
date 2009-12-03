@@ -41,18 +41,8 @@
 #include <sys/wait.h>
 #endif
 
-#ifdef HOST_OS_WINDOWS
-typedef HANDLE PID_T;
-#define INVALID_PID (INVALID_HANDLE_VALUE)
-#else
 typedef pid_t PID_T;
 #define INVALID_PID (0)
-#endif
-
-
-#ifndef XORP_WIN32_SH_PATH
-#define XORP_WIN32_SH_PATH "C:\\MINGW\\BIN\\SH.EXE"
-#endif
 
 /**
  * For a lot of our testing from shell scripts it is necessary to have
@@ -78,14 +68,8 @@ typedef pid_t PID_T;
  * all output to DEVNULL.
  */
 
-#ifdef HOST_OS_WINDOWS
-static HANDLE hTimer = INVALID_HANDLE_VALUE;
-#define DEVNULL "NUL:"
-#define SLEEP_CMD "sleep 2"
-#else
 #define DEVNULL "/dev/null"
 #define SLEEP_CMD "/bin/sleep 2"
-#endif
 
 /**
  * Split a line into multple tokens.
@@ -117,103 +101,6 @@ tokenize(const string& str,
 PID_T
 xorp_spawn(const string& process, const char *output = NULL)
 {
-#ifdef HOST_OS_WINDOWS
-    HANDLE houtput;
-    STARTUPINFOA si;
-    SECURITY_ATTRIBUTES sa = { sizeof(SECURITY_ATTRIBUTES), NULL, TRUE };
-    PROCESS_INFORMATION pi;
-
-    GetStartupInfoA(&si);
-
-    if (output != NULL) {
-	houtput = CreateFileA(output,
-			     FILE_READ_DATA | FILE_WRITE_DATA,
-			     FILE_SHARE_READ,
-			     &sa,
-			     OPEN_EXISTING,
-			     FILE_ATTRIBUTE_NORMAL,
-			     NULL);
-	if (houtput == INVALID_HANDLE_VALUE)
-		return (0);
-	si.hStdInput = houtput;
-	si.hStdOutput = houtput;
-	si.hStdError = GetStdHandle(STD_ERROR_HANDLE);
-    } else {
-	si.hStdInput = NULL;	/* XXX: is this OK? */
-	si.hStdOutput = NULL;
-	si.hStdError = GetStdHandle(STD_ERROR_HANDLE);
-    }
-
-    //
-    // XXX: Convert POSIX paths to NT ones, and insert shell if needed.
-    //
-    static const char *exe_suffix = ".exe";
-    static const char *sh_suffix = ".sh";
-    static const char *sh_interp = XORP_WIN32_SH_PATH;
-
-    string::size_type n;
-    string _process = process;
-
-    //fprintf(stderr, "old process string is: '%s'\n", _process.c_str());
-
-    // Strip any leading or trailing white space.
-    n = _process.find_first_not_of("\t\n\v\f\r ");
-    _process.erase(0, n);
-
-    //fprintf(stderr, "process string after leading space is: '%s'\n", _process.c_str());
-
-    string::size_type _cmd_end = _process.find(' ');
-    string _cmd = _process.substr(0, _cmd_end);
-
-    //fprintf(stderr, "old argv[0] is: '%s'\n", _cmd.c_str());
-
-    // Convert slashes.
-    _cmd = unix_path_to_native(_cmd);
-
-    //fprintf(stderr, "argv[0] after slashify is: '%s'\n", _cmd.c_str());
-
-    // Deal with shell scripts.
-    bool is_shell_script = false;
-    if (_cmd.rfind(sh_suffix) != string::npos)
-	is_shell_script = true;
-
-    if (!is_shell_script && _cmd.rfind(exe_suffix) == string::npos) {
-	    _cmd.append(exe_suffix);
-    }
-
-    if (is_shell_script) {
-	_cmd.insert(0, " ");
-	_cmd.insert(0, sh_interp); 
-    }
-
-    //fprintf(stderr, "new argv[0] is: %s\n", _cmd.c_str());
-
-    // Prepend the new argv[0].
-    _process.erase(0, _cmd_end);
-    _process.insert(0, _cmd);
-
-    //fprintf(stderr, "XXX: about to launch: '%s'\n", _process.c_str());
-
-    if (CreateProcessA(NULL,
-		       const_cast<char *>(_process.c_str()),
-		       NULL, NULL, TRUE,
-		       CREATE_DEFAULT_ERROR_MODE | CREATE_SUSPENDED,
-		       NULL, NULL, &si, &pi) == 0) {
-	DWORD err = GetLastError();
-	CloseHandle(houtput);
-	fprintf(stderr, "Failed to exec: %s reason: %ld\n",
-		_process.c_str(), err);
-	return (0);
-    }
-
-    // XXX
-    //fprintf(stderr, "XXX: process 0x%08lx launched!\n", pi.hProcess);
-
-    ResumeThread(pi.hThread);
-    return (pi.hProcess);
-
-#else /* !HOST_OS_WINDOWS */
-
     PID_T pid;
     switch (pid = fork()) {
     case 0:
@@ -264,7 +151,6 @@ xorp_spawn(const string& process, const char *output = NULL)
     }
 
     return -1;
-#endif /* !HOST_OS_WINDOWS */
 }
 
 /**
@@ -299,7 +185,6 @@ string wait_command;
 
 bool core_dump = false;
 
-#ifndef HOST_OS_WINDOWS
 /**
  * Signal handler that reaps dead children.
  */
@@ -349,7 +234,6 @@ sigchld(int)
     }
     cerr << "Unknown pid: " << pid << endl;
 }
-#endif /* !HOST_OS_WINDOWS */
 
 void
 die(int)
@@ -360,35 +244,13 @@ die(int)
     _exit(-1);
 }
 
-#ifdef HOST_OS_WINDOWS
-CALLBACK void
-die_wrapper(LPVOID arg, DWORD timerLow, DWORD timerHigh)
-{
-    die(0);
-    UNUSED(arg);
-    UNUSED(timerLow);
-    UNUSED(timerHigh);
-}
-
-void
-cleanup_timer(void)
-{
-    if (hTimer != INVALID_HANDLE_VALUE) {
-	CancelWaitableTimer(hTimer);
-	CloseHandle(hTimer);
-    }
-}
-#endif
-
 /**
  * When this process exits kill all the background processes.
  */
 void
 tidy()
 {
-#ifndef HOST_OS_WINDOWS
     signal(SIGCHLD, SIG_DFL);
-#endif
     vector<Command>::iterator i;
 
     /*
@@ -401,14 +263,7 @@ tidy()
 	do {
 	    i--;
 	    if (INVALID_PID != i->_pid) {
-#ifdef HOST_OS_WINDOWS
-		GenerateConsoleCtrlEvent(CTRL_C_EVENT, GetProcessId(i->_pid));
-		Sleep(200);
-		TerminateProcess(i->_pid, 0xFF);
-		CloseHandle(i->_pid);
-#else
 		kill(i->_pid, SIGTERM);
-#endif
 	    } else {
 		commands.erase(i);
 		goto restart;
@@ -420,17 +275,8 @@ tidy()
     ** Wait for ten seconds for the processes that we have sent kills
     ** to to die then exit anyway.
     */
-#ifdef HOST_OS_WINDOWS
-    SECURITY_ATTRIBUTES sa = { sizeof(SECURITY_ATTRIBUTES), NULL, TRUE };
-    LARGE_INTEGER wt;
-
-    hTimer = CreateWaitableTimer(&sa, TRUE, NULL);
-    wt.QuadPart = -(10 * 1000 * 1000 * 10);
-    SetWaitableTimer(hTimer, &wt, 0, die_wrapper, NULL, FALSE);
-#else
     signal(SIGALRM, die);
     alarm(10);
-#endif
 
     for (;;) {
 	PID_T pid;
@@ -439,32 +285,8 @@ tidy()
 	if (commands.empty())
 	    return;
 
-#ifdef HOST_OS_WINDOWS
-	/*
-	 * Yes, this is lame.
-	 */
-	HANDLE awhandles[MAXIMUM_WAIT_OBJECTS];
-	DWORD cnt;
-	DWORD result;
-
-	for (cnt = 0, i = commands.begin();
-	     cnt < MAXIMUM_WAIT_OBJECTS && i != commands.end(); cnt++, i++) {
-	    awhandles[cnt] = i->_pid;
-	}
-	result = WaitForMultipleObjectsEx(cnt, awhandles, FALSE, INFINITE,
-					  FALSE);
-	if (result <= WAIT_OBJECT_0 + cnt - 1) {
-	    result -= WAIT_OBJECT_0;
-	    pid = awhandles[result];
-	} else
-	   return;
-
-#else /* !HOST_OS_WINDOWS */
-
 	int status;
 	pid = wait(&status);
-
-#endif /* HOST_OS_WINDOWS */
 
 	for (i = commands.begin(); i != commands.end(); i++) {
 	    if (pid == i->_pid) {
@@ -555,16 +377,12 @@ main(int argc, char *argv[])
     /*
     ** Register the function to called on exit.
     */
-#ifdef HOST_OS_WINDOWS
-    atexit(cleanup_timer);
-#endif
     atexit(tidy);
 
     /*
     ** Start all the background processes.
     */
     for (unsigned int i = 0; i < commands.size(); i++) {
-#ifndef HOST_OS_WINDOWS
 	sigset_t set;
 	if (0 != sigemptyset(&set)) {
 	    cerr << "sigemptyset failed: " << strerror(errno) << endl;
@@ -578,23 +396,17 @@ main(int argc, char *argv[])
 	    cerr << "sigprocmask failed: " << strerror(errno) << endl;
 	    exit(-1);
 	}
-#endif /* !HOST_OS_WINDOWS */
 
 	commands[i]._pid = xorp_spawn(commands[i]._command, output);
 
-#ifndef HOST_OS_WINDOWS
 	if (0 != sigprocmask(SIG_UNBLOCK, &set, 0)) {
 	    cerr << "sigprockmask failed: " << strerror(errno) << endl;
 	    exit(-1);
 	}
  	sleep(1);
-#else
-	SleepEx(1 * 1000, FALSE);
-#endif
 	if ("" != commands[i]._wait_command) {
 	    wait_command = commands[i]._wait_command;
 
-#ifndef HOST_OS_WINDOWS
 	    /*
 	    ** Block SIGCHLD delivery until the xorp_spawn command has completed.
 	    ** It seems on Linux the child can run to completion.
@@ -603,14 +415,10 @@ main(int argc, char *argv[])
 		cerr << "sigprockmask failed: " << strerror(errno) << endl;
 		exit(-1);
 	    }
-#endif /* !HOST_OS_WINDOWS */
 
 	    wait_command_pid = xorp_spawn(commands[i]._wait_command.c_str(),
 					  output);
 
-#ifdef HOST_OS_WINDOWS
-	    WaitForSingleObject((HANDLE)wait_command_pid, INFINITE);
-#else
 	    if (0 != sigprocmask(SIG_UNBLOCK, &set, 0)) {
 		cerr << "sigprockmask failed: " << strerror(errno) << endl;
 		exit(-1);
@@ -619,7 +427,6 @@ main(int argc, char *argv[])
 	    while (INVALID_PID != wait_command_pid) {
 		pause();
 	    }
-#endif
 	}
     }
 
@@ -627,22 +434,14 @@ main(int argc, char *argv[])
     ** Wait five seconds for the commands that we have started to
     ** settle.
     */
-#ifdef HOST_OS_WINDOWS
-    SleepEx(5 * 1000, FALSE);
-#else
 //     sleep(5);
-#endif
 
     /*
     ** Start the main script.
     */
     cpid = xorp_spawn(command, silent);
-#ifdef HOST_OS_WINDOWS
-    WaitForSingleObject((HANDLE)cpid, INFINITE);
-#else
     for (;;)
 	pause();
-#endif
 
     return 0;
 }

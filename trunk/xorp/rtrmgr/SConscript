@@ -71,7 +71,6 @@ libxorp_rtrmgr_srcs = [
 	'conf_tree_node.cc',
 	'config_operators.cc',
 	'generic_module_manager.cc',
-	'glob_win32.c',
 	'lex.boot.cc',
 	'lex.opcmd.cc',
 	'lex.tplt.cc',

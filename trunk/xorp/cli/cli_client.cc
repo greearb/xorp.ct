@@ -40,10 +40,6 @@
 #include "cli_command_pipe.hh"
 #include "cli_private.hh"
 
-#ifdef HOST_OS_WINDOWS
-#define isatty(x) (x).is_console()
-#endif
-
 //
 // Exported variables
 //

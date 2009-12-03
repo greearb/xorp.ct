@@ -229,17 +229,12 @@
 
 /* PIM message max. payload (IP header and Router Alert IP option excluded) */
 #ifndef HAVE_IPV6
-#ifndef HOST_OS_WINDOWS
 #define PIM_MAXPACKET(ip_family) (((ip_family) == AF_INET) ?		\
 					(IP_MAXPACKET			\
 						- sizeof(struct ip)	\
 						- 4*sizeof(uint8_t))	\
 					: (0))
-#else /* HOST_OS_WINDOWS */
 
-#define PIM_MAXPACKET(ip_family)	65496
-
-#endif /* !HOST_OS_WINDOWS */
 #else
 #ifndef IPV6_MAXPACKET
 #define IPV6_MAXPACKET 65535	/* ip6 max packet size without Jumbo payload */

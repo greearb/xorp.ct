@@ -161,11 +161,7 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
     // 6) Keep the file open.
     // 7) Don't call gettimeofday directly, get the time from the eventloop.
 
-#ifndef HOST_OS_WINDOWS
     string fname = "/tmp/bgpin.mrtd";
-#else
-    string fname = "C:\\BGPIN.MRTD";
-#endif
 
     FILE *fp = fopen(fname.c_str(), "a");
     if(0 == fp)

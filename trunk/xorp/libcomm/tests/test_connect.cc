@@ -142,11 +142,7 @@ lookup4(const char* addr)
 #else
                 "",
 #endif
-#ifdef HOST_OS_WINDOWS
-                WSAGetLastError()
-#else
                 h_errno
-#endif
         );
         exit(EXIT_FAILURE);
     }

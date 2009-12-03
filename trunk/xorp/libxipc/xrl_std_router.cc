@@ -135,10 +135,8 @@ XrlStdRouter::construct(bool unix_socket)
 void
 XrlStdRouter::create_unix_listener()
 {
-#ifndef HOST_OS_WINDOWS
     _unix = new XrlPFUNIXListener(_e, this);
     add_listener(_unix);
-#endif // ! HOST_OS_WINDOWS
 }
 
 XrlStdRouter::~XrlStdRouter()

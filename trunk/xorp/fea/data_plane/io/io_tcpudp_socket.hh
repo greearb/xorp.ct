@@ -382,16 +382,6 @@ private:
 			   size_t			buffer_bytes,
 			   size_t			offset);
 
-    /**
-     * I/O event callback: the peer has closed the connection.
-     *
-     * This callback is used only for Windows, and only for TCP sockets.
-     *
-     * @param fd the file descriptor of the socket with the data.
-     * @param io_event_type the event type (@ref IoEventType).
-     */
-    void disconnect_io_cb(XorpFd fd, IoEventType io_event_type);
-
     XorpFd	_socket_fd;
     IPvX	_peer_address;		// Peer address (valid for TCP only)
     uint16_t	_peer_port;		// Peer port (valid for TCP only)

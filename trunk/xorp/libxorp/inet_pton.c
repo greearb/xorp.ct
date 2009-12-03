@@ -28,29 +28,6 @@
 __FBSDID("$FreeBSD: src/lib/libc/net/inet_pton.c,v 1.11 2002/09/06 11:23:49 tjr Exp $");
 #endif
 
-#ifdef HOST_OS_WINDOWS
-
-#ifndef EAFNOSUPPORT
-#define EAFNOSUPPORT WSAEAFNOSUPPORT
-#endif
-#ifndef INADDRSZ
-#define INADDRSZ 4
-#endif
-#ifndef NS_INADDRSZ
-#define NS_INADDRSZ INADDRSZ
-#endif
-#ifndef IN6ADDRSZ
-#define IN6ADDRSZ 16
-#endif
-#ifndef NS_IN6ADDRSZ
-#define NS_IN6ADDRSZ IN6ADDRSZ
-#endif
-#ifndef NS_INT16SZ
-#define NS_INT16SZ 2
-#endif
-
-#else
-
 #include <sys/param.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -64,8 +41,6 @@ __FBSDID("$FreeBSD: src/lib/libc/net/inet_pton.c,v 1.11 2002/09/06 11:23:49 tjr 
 #include <arpa/nameser.h>
 #include <string.h>
 #include <errno.h>
-
-#endif
 
 /*
  * WARNING: Don't even consider trying to compile this on a system where

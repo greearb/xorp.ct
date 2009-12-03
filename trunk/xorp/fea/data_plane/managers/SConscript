@@ -35,7 +35,6 @@ sources = [
 	'fea_data_plane_manager_click.cc',
 	'fea_data_plane_manager_dummy.cc',
 	'fea_data_plane_manager_linux.cc',
-	'fea_data_plane_manager_windows.cc',
 	]
 
 if is_shared:

@@ -66,22 +66,10 @@ static XrlPFInProcListener* get_inproc_listener(uint32_t instance_no);
 static const string
 this_host()
 {
-#ifdef HOST_OS_WINDOWS
-    char buffer[MAX_COMPUTERNAME_LENGTH + 1];
-    DWORD bufsiz;
-
-    bufsiz = sizeof(buffer);
-    if (0 == GetComputerNameExA(ComputerNamePhysicalDnsFullyQualified,
-				buffer, &bufsiz)) {
-	XLOG_FATAL("Could not obtain local computer name.");
-    }
-    return string(buffer);
-#else
     char buffer[MAXHOSTNAMELEN + 1];
     buffer[MAXHOSTNAMELEN] ='\0';
     gethostname(buffer, MAXHOSTNAMELEN);
     return string(buffer);
-#endif
 }
 
 bool

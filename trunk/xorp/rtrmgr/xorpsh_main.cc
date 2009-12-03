@@ -25,9 +25,6 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/utils.hh"
-#ifdef HOST_OS_WINDOWS
-#include "libxorp/win_io.h"
-#endif
 
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
@@ -54,12 +51,7 @@
 #include "util.hh"
 #include "xorpsh_main.hh"
 
-
-#ifdef HOST_OS_WINDOWS
-#define FILENO(x) ((HANDLE)_get_osfhandle(_fileno(x)))
-#else
 #define FILENO(x) fileno(x)
-#endif
 
 //
 // Default values
@@ -192,7 +184,6 @@ XorpShell::~XorpShell()
     if (_router_cli != NULL)
 	delete _router_cli;
 
-#ifndef HOST_OS_WINDOWS
     // Close the opened file descriptors
     size_t i;
     for (i = 0; i < sizeof(_fddesc) / sizeof(_fddesc[0]); i++) {
@@ -201,7 +192,6 @@ XorpShell::~XorpShell()
 	    _fddesc[i].clear();
 	}
     }
-#endif // ! HOST_OS_WINDOWS
 }
 
 void
@@ -217,9 +207,7 @@ XorpShell::run(const string& commands, bool exit_on_error)
 	// Accept commands from the stdin
 	xorpsh_input_fd = FILENO(stdin);
 	xorpsh_output_fd = FILENO(stdout);
-    }
-#ifndef HOST_OS_WINDOWS
-    else {
+    } else {
 	//
 	// Create an internal pipe to pass the commands to the CLI
 	//
@@ -235,7 +223,6 @@ XorpShell::run(const string& commands, bool exit_on_error)
 	_fddesc[1] = xorpsh_write_commands_fd = pipedesc[1];
 	xorpsh_output_fd = FILENO(stdout);
     }
-#endif // ! HOST_OS_WINDOWS
 
     // Set the callback when the CLI exits (e.g., after Ctrl-D)
     _cli_node.set_cli_client_delete_callback(callback(exit_handler));
@@ -253,11 +240,7 @@ XorpShell::run(const string& commands, bool exit_on_error)
     signal(SIGTERM, signal_handler);
     signal(SIGINT, signal_handler);
 
-#ifdef HOST_OS_WINDOWS
-    const uint32_t uid = 0;
-#else
     const uint32_t uid = getuid();
-#endif
     success = _rtrmgr_client.send_register_client("rtrmgr", uid, _ipc_name,
 						  callback(this,
 							   &XorpShell::register_done));
@@ -289,14 +272,12 @@ XorpShell::run(const string& commands, bool exit_on_error)
     fclose(file);
     if (pbuf == NULL)
 	XLOG_FATAL("Failed to read authfile %s", _authfile.c_str());
-#ifdef HOST_OS_WINDOWS
-    (void)DeleteFileA(_authfile.c_str());	// XXX
-#else
+
     if (unlink(_authfile.c_str()) != 0) {
 	XLOG_WARNING("xorpsh is unable to unlink temporary file %s",
 		     _authfile.c_str());
     }
-#endif // ! HOST_OS_WINDOWS
+
     _authtoken = buf;
 #endif // ! NO_XORPSH_AUTHENTICATION
 
@@ -373,16 +354,9 @@ XorpShell::run(const string& commands, bool exit_on_error)
 	if (! modified_commands.empty()) {
 	    if (modified_commands[modified_commands.size() - 1] != '\n')
 		modified_commands += "\n";
-#ifdef HOST_OS_WINDOWS
-	    DWORD written;
-	    WriteFile(xorpsh_write_commands_fd, modified_commands.c_str(),
-		  modified_commands.size(), &written, NULL);
-	    CloseHandle(xorpsh_write_commands_fd);
-#else // ! HOST_OS_WINDOWS
 	    write(xorpsh_write_commands_fd, modified_commands.c_str(),
 		  modified_commands.size());
 	    close(xorpsh_write_commands_fd);
-#endif // ! HOST_OS_WINDOWS
 	    xorpsh_write_commands_fd.clear();
 	}
     }
@@ -683,9 +657,6 @@ XorpShell::config_changed(uid_t user_id, const string& deltas,
 	return;
     }
 
-#ifdef HOST_OS_WINDOWS
-    string username("root");
-#else // ! HOST_OS_WINDOWS
     // Notify the user that the config changed
     struct passwd *pwent = getpwuid(user_id);
     string username;
@@ -693,8 +664,6 @@ XorpShell::config_changed(uid_t user_id, const string& deltas,
 	username = c_format("UID:%u", XORP_UINT_CAST(user_id));
     else
 	username = pwent->pw_name;
-#endif // ! HOST_OS_WINDOWS
-
 
     if (_mode == MODE_COMMITTING) {
 	// This is the response back to our own request
@@ -886,11 +855,7 @@ main(int argc, char *argv[])
     //
     char hostname[MAXHOSTNAMELEN];
     if (gethostname(hostname, sizeof(hostname)) < 0) {
-#ifdef HOST_OS_WINDOWS
-	XLOG_FATAL("gethostname() failed: %s", win_strerror(WSAGetLastError()));
-#else
 	XLOG_FATAL("gethostname() failed: %s", strerror(errno));
-#endif
     }
     hostname[sizeof(hostname) - 1] = '\0';
 

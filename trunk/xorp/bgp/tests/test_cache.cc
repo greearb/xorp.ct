@@ -43,16 +43,9 @@
 bool
 test_cache(TestInfo& /*info*/)
 {
-#ifndef HOST_OS_WINDOWS
     struct passwd *pwd = getpwuid(getuid());
     string filename = "/tmp/test_cache.";
     filename += pwd->pw_name;
-#else
-    char *tmppath = (char *)malloc(256);
-    GetTempPathA(256, tmppath);
-    string filename = string(tmppath) + "test_cache";
-    free(tmppath);
-#endif
 
     EventLoop eventloop;
     BGPMain bgpmain(eventloop);
@@ -432,11 +425,8 @@ Test no longer makes sense now we cache all data
 	return false;
 
     }
-#ifndef HOST_OS_WINDOWS
+
     unlink(filename.c_str());
-#else
-    DeleteFileA(filename.c_str());
-#endif
     return true;
 }
 

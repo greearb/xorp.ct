@@ -287,7 +287,6 @@ private:
     struct iovec	_rcviov[1]; // The scatter/gatter array for receiving
     struct iovec	_sndiov[1]; // The scatter/gatter array for sending
 
-#ifndef HOST_OS_WINDOWS
     struct msghdr	_rcvmh;	// The msghdr structure used by recvmsg()
     struct msghdr	_sndmh;	// The msghdr structure used by sendmsg()
     struct sockaddr_in	_from4;	// The source addr of recvmsg() msg (IPv4)
@@ -296,7 +295,6 @@ private:
     struct sockaddr_in6	_from6;	// The source addr of recvmsg() msg (IPv6)
     struct sockaddr_in6	_to6;	// The dest.  addr of sendmsg() msg (IPv6)
 #endif
-#endif // ! HOST_OS_WINDOWS
 };
 
 #endif // __FEA_DATA_PLANE_IO_IO_IP_SOCKET_HH__

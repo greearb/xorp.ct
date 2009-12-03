@@ -32,8 +32,6 @@
 
 #ifdef HAVE_GLOB_H
 #include <glob.h>
-#elif defined(HOST_OS_WINDOWS)
-#include "glob_win32.h"
 #endif
 
 #ifdef HAVE_SYS_STAT_H
@@ -49,15 +47,6 @@
 #include "template_tree.hh"
 #include "slave_module_manager.hh"
 #include "y.opcmd_tab.h"
-
-
-#ifdef HOST_OS_WINDOWS
-#ifdef _NO_OLDNAMES
-#define	stat	_stat
-#define	S_IFDIR	_S_IFDIR
-#define	S_ISREG	_S_ISREG
-#endif
-#endif
 
 extern int init_opcmd_parser(const char *filename, OpCommandList *o);
 extern void parse_opcmd() throw (ParseError);

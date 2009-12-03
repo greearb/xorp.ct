@@ -139,10 +139,8 @@ protected:
 	: _eventloop(e), _fd(fd), _running(false),
 	  _last_error(0), _priority(priority)
     {
-#ifndef HOST_OS_WINDOWS
 	int fl = fcntl(fd, F_GETFL);
 	assert(fl & O_NONBLOCK);
-#endif
     }
     virtual ~AsyncFileOperator();
 
@@ -244,13 +242,6 @@ protected:
     void complete_transfer(int err, ssize_t done);
 
     list<BufferInfo *> _buffers;
-
-#ifdef HOST_OS_WINDOWS
-    void disconnect(XorpFd fd, IoEventType type);
-
-    XorpTask		_deferred_io_task;
-    bool		_disconnect_added;
-#endif
 };
 
 
@@ -428,13 +419,6 @@ protected:
     struct iovec* 	_iov;
     ref_ptr<int>	_dtoken;
     list<BufferInfo *> 	_buffers;
-
-#ifdef HOST_OS_WINDOWS
-    void disconnect(XorpFd fd, IoEventType type);
-
-    XorpTask		_deferred_io_task;
-    bool		_disconnect_added;
-#endif
 };
 
 #endif // __LIBXORP_ASYNCIO_HH__

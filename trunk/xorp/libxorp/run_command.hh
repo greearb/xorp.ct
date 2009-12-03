@@ -406,13 +406,6 @@ private:
      */
     void done(XorpTimer& done_timer);
 
-#ifdef HOST_OS_WINDOWS
-    static const int WIN32_PROC_TIMEOUT_MS = 500;
-
-    void win_proc_done_cb(XorpFd fd, IoEventType type);
-    void win_proc_reaper_cb();
-#endif
-
     static const size_t	BUF_SIZE = 8192;
     EventLoop&		_eventloop;
 
@@ -429,10 +422,6 @@ private:
     size_t		_last_stdout_offset;
     size_t		_last_stderr_offset;
     pid_t		_pid;
-#ifdef HOST_OS_WINDOWS
-    HANDLE		_ph;
-    XorpTimer		_reaper_timer;
-#endif
     bool		_is_error;
     string		_error_msg;
     bool		_is_running;

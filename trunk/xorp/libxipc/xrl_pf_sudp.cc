@@ -604,14 +604,6 @@ XrlPFSUDPListener::send_reply(struct sockaddr_storage*	ss,
 
     int err = 0;
     bool is_error = false;
-#ifdef HOST_OS_WINDOWS
-    if (SOCKET_ERROR == WSASendTo(_sock, (LPWSABUF)v, 2, (LPDWORD)&v_bytes,
-				  0, (sockaddr*)ss, ss_len, NULL, NULL)) {
-	err = WSAGetLastError();
-	is_error = true;
-    }
-
-#else // ! HOST_OS_WINDOWS
     msghdr m;
     memset(&m, 0, sizeof(m));
     m.msg_name = (caddr_t)ss;
@@ -627,7 +619,6 @@ XrlPFSUDPListener::send_reply(struct sockaddr_storage*	ss,
 	err = errno;
 	is_error = true;
     }
-#endif // ! HOST_OS_WINDOWS
 
     if (is_error) {
 	XLOG_ERROR("Failed to send reply (%d): %s",

@@ -26,9 +26,6 @@
 #include "libxorp/debug.h"
 #include "libxorp/token.hh"
 #include "libxorp/utils.hh"
-#ifdef HOST_OS_WINDOWS
-#include "libxorp/win_io.h"
-#endif
 
 #include <sstream>
 
@@ -48,27 +45,16 @@
 #include "template_tree.hh"
 #include "template_tree_node.hh"
 
-
-#ifdef HOST_OS_WINDOWS
-inline uid_t getuid() { return 0; }
-#endif
-
 static string
 get_user_name(uid_t uid)
 {
     string result;
 
-#ifdef HOST_OS_WINDOWS
-    // TODO: implement it for Windows
-    UNUSED(uid);
-    return (result);
-#else // ! HOST_OS_WINDOWS
     struct passwd* pw = getpwuid(uid);
     if (pw != NULL)
 	result = pw->pw_name;
     endpwent();
     return (result);
-#endif // ! HOST_OS_WINDOWS
 }
 
 static string
@@ -124,12 +110,7 @@ RouterCLI::RouterCLI(XorpShellBase& xorpsh, CliNode& cli_node,
 	char buf[MAXHOSTNAMELEN];
 	memset(buf, 0, sizeof(buf));
 	if (gethostname(buf, sizeof(buf)) < 0) {
-#ifdef HOST_OS_WINDOWS
-       	    XLOG_FATAL("gethostname() failed: %s",
-		       win_strerror(WSAGetLastError()));
-#else
             XLOG_FATAL("gethostname() failed: %s", strerror(errno));
-#endif
 	}
 	buf[sizeof(buf) - 1] = '\0';
 	host_name = buf;

@@ -31,9 +31,6 @@
 #include "libxorp/xorpfd.hh"
 #include "libxorp/asyncio.hh"
 #include "libxorp/popen.hh"
-#ifdef HOST_OS_WINDOWS
-#include "libxorp/win_io.h"
-#endif
 
 #include <map>
 
@@ -47,31 +44,12 @@
 
 #include "run_command.hh"
 
-
-#ifdef HOST_OS_WINDOWS
-
-#ifndef _PATH_BSHELL
-#define _PATH_BSHELL "C:\\MSYS\\bin\\sh.exe"
-#endif
-
-
-#ifdef fileno
-#undef fileno
-#endif
-
-#define	fileno(stream) (_get_osfhandle(_fileno(stream)))
-
-#else // ! HOST_OS_WINDOWS
-
 #ifndef _PATH_BSHELL
 #define _PATH_BSHELL "/bin/sh"
 #endif
 
-#endif // ! HOST_OS_WINDOWS
-
 static map<pid_t, RunCommandBase *> pid2command;
 
-#ifndef HOST_OS_WINDOWS
 static void
 child_handler(int signo)
 {
@@ -107,29 +85,11 @@ child_handler(int signo)
 	run_command->wait_status_changed(wait_status);
     } while (true);
 }
-#endif // ! HOST_OS_WINDOWS
 
 static string
 get_path_bshell()
 {
-#ifndef HOST_OS_WINDOWS
     return (string(_PATH_BSHELL));
-
-#else // HOST_OS_WINDOWS
-    //
-    // Use the DOS style path to the user's shell specified in the
-    // environment if available; otherwise, fall back to hard-coded default.
-    //
-    static string path_bshell;
-    if (path_bshell.empty()) {
-	char* g = getenv("SHELL");
-	if (g != NULL)
-	    path_bshell = string(g);
-	else
-	    path_bshell = string(_PATH_BSHELL);
-    }
-    return (path_bshell);
-#endif // HOST_OS_WINDOWS
 }
 
 RunCommand::RunCommand(EventLoop&			eventloop,
@@ -227,7 +187,6 @@ RunCommandBase::cleanup()
 int
 RunCommandBase::block_child_signals()
 {
-#ifndef HOST_OS_WINDOWS
     //
     // Block SIGCHLD signal in current signal mask
     //
@@ -244,7 +203,6 @@ RunCommandBase::block_child_signals()
 		   strerror(errno));
 	return (XORP_ERROR);
     }
-#endif // ! HOST_OS_WINDOWS
 
     return (XORP_OK);
 }
@@ -252,7 +210,6 @@ RunCommandBase::block_child_signals()
 int
 RunCommandBase::unblock_child_signals()
 {
-#ifndef HOST_OS_WINDOWS
     //
     // Unblock SIGCHLD signal in current signal mask
     //
@@ -269,7 +226,6 @@ RunCommandBase::unblock_child_signals()
 		   strerror(errno));
 	return (XORP_ERROR);
     }
-#endif // ! HOST_OS_WINDOWS
 
     return (XORP_OK);
 }
@@ -301,9 +257,7 @@ RunCommandBase::execute()
 	return (XORP_ERROR);
     }
 
-#ifndef HOST_OS_WINDOWS
     signal(SIGCHLD, child_handler);
-#endif
 
     //
     // Temporary block the child signals
@@ -324,28 +278,6 @@ RunCommandBase::execute()
     // Insert the new process to the map of processes
     XLOG_ASSERT(pid2command.find(_pid) == pid2command.end());
     pid2command[_pid] = this;
-
-#ifdef HOST_OS_WINDOWS
-    // We need to obtain the handle directly from the popen code because
-    // the handle returned by CreateProcess() has the privileges we need.
-    _ph = pgethandle(_pid);
-
-    // If the handle is invalid, the process failed to start.
-    if (_ph == INVALID_HANDLE_VALUE) {
-	XLOG_ERROR("Failed to execute command \"%s\"", final_command.c_str());
-	cleanup();
-	_exec_id.restore_saved_exec_id(error_msg);
-	return (XORP_ERROR);
-    }
-
-    // We can't rely on end-of-file indicators alone on Win32 to determine
-    // when a child process died; we must wait for it in the event loop.
-    if (!_eventloop.add_ioevent_cb(
-	    _ph,
-	    IOT_EXCEPTION,
-	    callback(this, &RunCommandBase::win_proc_done_cb)))
-	XLOG_FATAL("Cannot add child process handle to event loop.\n");
-#endif // HOST_OS_WINDOWS
 
     // Create the stdout and stderr readers
     _stdout_file_reader = new AsyncFileReader(_eventloop,
@@ -410,34 +342,10 @@ RunCommandBase::terminate_process(bool with_prejudice)
 {
     // Kill the process group
     if (0 != _pid) {
-#ifdef HOST_OS_WINDOWS
-	UNUSED(with_prejudice);
-	//
-	// _ph will be invalid if the process didn't start.
-	// _ph will be valid if the process handle is open but the
-	// process is no longer running. Calling TerminateProcess()
-	// on a valid handle to a process which has terminated results
-	// in an ACCESS_DENIED error.
-	// Don't close the handle. pclose2() does this.
-	//
-	if (_ph != INVALID_HANDLE_VALUE) {
-	    DWORD result; 
-	    GetExitCodeProcess(_ph, &result);
-	    if (result == STILL_ACTIVE) {
-		DWORD result = 0;
-		result = TerminateProcess(_ph, 32768);
-		if (result == 0) {
-		    XLOG_WARNING("TerminateProcess(): %s",
-				 win_strerror(GetLastError()));
-		}
-	    }
-	}
-#else // ! HOST_OS_WINDOWS
 	if (with_prejudice)
 	    killpg(_pid, SIGKILL);
 	else
 	    killpg(_pid, SIGTERM);
-#endif // ! HOST_OS_WINDOWS
     }
 }
 
@@ -482,24 +390,8 @@ RunCommandBase::close_stdout_output()
     }
 
     if (_stdout_stream != NULL) {
-#ifdef HOST_OS_WINDOWS
-	// pclose2() will close the process handle from under us.
-	_eventloop.remove_ioevent_cb(_ph, IOT_EXCEPTION);
-	_ph = INVALID_HANDLE_VALUE;
-
-	//
-	// XXX: in case of Windows we don't use the SIGCHLD mechanism
-	// hence the process is done when the I/O is completed.
-	//
-	int status = pclose2(_stdout_stream, false);
-	_stdout_stream = NULL;
-	set_command_status(status);
-	_command_is_exited = true;	// XXX: A Windows hack
-
-#else // ! HOST_OS_WINDOWS
 	pclose2(_stdout_stream, true);
 	_stdout_stream = NULL;
-#endif // ! HOST_OS_WINDOWS
     }
 }
 
@@ -531,9 +423,6 @@ RunCommandBase::set_command_status(int status)
     _command_stop_signal = 0;
 
     // Set the command status
-#ifdef HOST_OS_WINDOWS
-    _command_exit_status = status;
-#else // ! HOST_OS_WINDOWS
     if (status >= 0) {
 	_command_is_exited = WIFEXITED(status);
 	_command_is_signal_terminated = WIFSIGNALED(status);
@@ -548,7 +437,6 @@ RunCommandBase::set_command_status(int status)
 	    _command_stop_signal = WSTOPSIG(status);
 	}
     }
-#endif // ! HOST_OS_WINDOWS
 
     if (_command_is_stopped)
 	stopped_cb_dispatch(_command_stop_signal);
@@ -779,19 +667,14 @@ RunCommandBase::ExecId::ExecId(uid_t uid, gid_t gid)
 void
 RunCommandBase::ExecId::save_current_exec_id()
 {
-#ifndef HOST_OS_WINDOWS
     _saved_uid = getuid();
     _saved_gid = getgid();
-#endif
     _is_exec_id_saved = true;
 }
 
 int
 RunCommandBase::ExecId::restore_saved_exec_id(string& error_msg) const
 {
-#ifdef HOST_OS_WINDOWS
-    UNUSED(error_msg);
-#else // ! HOST_OS_WINDOWS
     if (! _is_exec_id_saved)
 	return (XORP_OK);	// Nothing to do, because nothing was saved
 
@@ -806,7 +689,6 @@ RunCommandBase::ExecId::restore_saved_exec_id(string& error_msg) const
 			     XORP_UINT_CAST(saved_gid()), strerror(errno));
 	return (XORP_ERROR);
     }
-#endif // ! HOST_OS_WINDOWS
 
     return (XORP_OK);
 }
@@ -814,9 +696,6 @@ RunCommandBase::ExecId::restore_saved_exec_id(string& error_msg) const
 int
 RunCommandBase::ExecId::set_effective_exec_id(string& error_msg)
 {
-#ifdef HOST_OS_WINDOWS
-    UNUSED(error_msg);
-#else // ! HOST_OS_WINDOWS
     if (! is_set())
 	return (XORP_OK);
 
@@ -841,7 +720,6 @@ RunCommandBase::ExecId::set_effective_exec_id(string& error_msg)
 	    return (XORP_ERROR);
 	}
     }
-#endif // ! HOST_OS_WINDOWS
 
     return (XORP_OK);
 }
@@ -863,33 +741,3 @@ RunCommandBase::ExecId::reset()
     _saved_gid = 0;
     _is_exec_id_saved = false;
 }
-
-#ifdef HOST_OS_WINDOWS
-//
-// Hack to get asynchronous notification of Win32 process death.
-// The process handle will be SIGNALLED when the process terminates.
-// Because Win32 pipes must be polled, we must make sure that RunCommand
-// does not tear down the pipes until everything is read, otherwise the
-// process death event will be dispatched before the pipe I/O events.
-// We schedule a timer to make sure output is read from the pipes
-// before they close, as Win32 pipes lose data when closed; the parent
-// must hold handles for both ends of the pipe, unlike UNIX.
-//
-void
-RunCommandBase::win_proc_done_cb(XorpFd fd, IoEventType type)
-{
-    XLOG_ASSERT(type == IOT_EXCEPTION);
-    XLOG_ASSERT(static_cast<HANDLE>(fd) == _ph);
-    _eventloop.remove_ioevent_cb(_ph, IOT_EXCEPTION);
-    _reaper_timer = _eventloop.new_oneoff_after_ms(
-	WIN32_PROC_TIMEOUT_MS,
-	callback(this, &RunCommandBase::win_proc_reaper_cb));
-    XLOG_ASSERT(_reaper_timer.scheduled());
-}
-
-void
-RunCommandBase::win_proc_reaper_cb()
-{
-    io_done(AsyncFileOperator::END_OF_FILE, 0);
-}
-#endif // HOST_OS_WINDOWS

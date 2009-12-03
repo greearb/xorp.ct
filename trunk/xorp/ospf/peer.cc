@@ -54,9 +54,6 @@
 #ifdef HAVE_NETINET_IP6_H
 #include <netinet/ip6.h>
 #endif
-#ifdef HOST_OS_WINDOWS
-#include "fea/ip.h"
-#endif
 
 #include "libproto/spt.hh"
 

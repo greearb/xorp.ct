@@ -37,7 +37,6 @@ libxorp_core_srcs = [
 	'daemon.c',
 	'debug.c',
 	'ether_compat.c',
-	'gai_strerror.c',
 	'getopt.c',
 	'inet_ntop.c',
 	'inet_pton.c',
@@ -45,7 +44,6 @@ libxorp_core_srcs = [
 	'strlcpy.c',
 	'strptime.c',
 	'utility.c',
-	'win_io.c',
 	'xlog.c',
 
 	# C++ files
@@ -79,7 +77,6 @@ libxorp_core_srcs = [
 	'transaction.cc',
 	'utils.cc',
 	'vif.cc',
-	'win_dispatcher.cc',
 	]
 
 if is_shared:

@@ -28,8 +28,6 @@
 
 #ifdef HAVE_GLOB_H
 #include <glob.h>
-#elif defined(HOST_OS_WINDOWS)
-#include "glob_win32.h"
 #endif
 
 #ifdef HAVE_SYS_STAT_H
@@ -42,11 +40,6 @@
 #include "template_commands.hh"
 #include "main_rtrmgr.hh"
 #include "util.hh"
-
-
-#ifdef HOST_OS_WINDOWS
-#define stat _stat
-#endif
 
 const TimeVal Module::SHUTDOWN_TIMEOUT_TIMEVAL = TimeVal(2, 0);
 
@@ -307,11 +300,9 @@ Module::module_exited(bool success, bool is_signal_terminated, int term_signal,
 	    // DO NOT restart it, because probably it was killed for a reason.
 	    //
 	    switch (term_signal) {
-#ifndef HOST_OS_WINDOWS
 	    case SIGTERM:
 	    case SIGKILL:
 		break;
-#endif // HOST_OS_WINDOWS
 	    default:
 		restart();
 		break;
@@ -371,12 +362,6 @@ ModuleManager::expand_execution_path(const string& path, string& expath,
 	// Add the XORP root path to the front
 	expath = xorp_root_dir() + PATH_DELIMITER_STRING + path;
     }
-
-#ifdef HOST_OS_WINDOWS
-    // Assume the path is still in UNIX format at this point and needs to
-    // be converted to the native format.
-    expath = unix_path_to_native(expath);
-#endif
 
     if (! is_absolute_path(expath, false)) {
 	debug_msg("calling glob\n");

@@ -32,15 +32,6 @@
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
-#ifdef HAVE_WINDOWS_H
-#include <windows.h>
-#endif
-#ifdef HAVE_WINSOCK2_H
-#include <winsock2.h>
-#endif
-#ifdef HAVE_WS2TCPIP_H
-#include <ws2tcpip.h>
-#endif
 
 #include "asyncio.hh"
 
@@ -79,24 +70,6 @@ local_comm_init(void)
     if (init_flag)
 	return (XORP_OK);
 
-#ifdef HOST_OS_WINDOWS
-    {
-	int result;
-	WORD version;
-	WSADATA wsadata;
-
-	version = MAKEWORD(2, 2);
-	result = WSAStartup(version, &wsadata);
-	if (result != 0) {
-	    return (XORP_ERROR);
-	}
-	if (LOBYTE(wsadata.wVersion) != 2 || HIBYTE(wsadata.wVersion) != 2) {
-	    (void)WSACleanup();
-	    return (XORP_ERROR);
-	}
-    }
-#endif // HOST_OS_WINDOWS
-
     init_flag = 1;
 
     return (XORP_OK);
@@ -107,15 +80,11 @@ local_comm_init(void)
  * @void:
  *
  * Library termination/cleanup. Must be called at process exit.
- * XXX: Not currently thread-safe.
  *
  **/
 void
 local_comm_exit(void)
 {
-#ifdef HOST_OS_WINDOWS
-    (void)WSACleanup();
-#endif
 }
 
 /**
@@ -123,10 +92,6 @@ local_comm_exit(void)
  *
  * Create a pair of connected sockets. The sockets will be created in
  * the blocking state by default, and with no additional socket options set.
- *
- * On Windows platforms, a domain of AF_UNIX, AF_INET, or AF_INET6 must
- * be specified. For the AF_UNIX case, the sockets created will actually
- * be in the AF_INET domain. The protocol field is ignored.
  *
  * On UNIX, this function simply wraps the socketpair() system call.
  *
@@ -145,145 +110,11 @@ local_comm_exit(void)
 static int
 local_comm_sock_pair(int domain, int type, int protocol, xsock_t sv[2])
 {
-#ifndef HOST_OS_WINDOWS
     if (socketpair(domain, type, protocol, sv) == -1) {
 	XLOG_ERROR("socketpair() failed: %s", strerror(errno));
 	return (XORP_ERROR);
     }
     return (XORP_OK);
-
-#else // HOST_OS_WINDOWS
-    struct sockaddr_storage ss;
-    struct sockaddr_in	*psin;
-    socklen_t		sslen;
-    SOCKET		st[3];
-    u_long		optval;
-    int			numtries, error, intdomain;
-    unsigned short	port;
-    static const int	CSP_LOWPORT = 40000;
-    static const int	CSP_HIGHPORT = 65536;
-#ifdef HAVE_IPV6
-    struct sockaddr_in6 *psin6;
-#endif
-
-    UNUSED(protocol);
-
-    if (domain != AF_UNIX && domain != AF_INET
-#ifdef HAVE_IPV6
-	&& domain != AF_INET6
-#endif
-	) {
-	XLOG_ERROR("Invalid socket domain: %d", domain);
-	return (XORP_ERROR);
-    }
-
-    intdomain = domain;
-    if (intdomain == AF_UNIX)
-	intdomain = AF_INET;
-
-    st[0] = st[1] = st[2] = INVALID_SOCKET;
-
-    st[2] = socket(intdomain, type, 0);
-    if (st[2] == INVALID_SOCKET)
-	goto error;
-
-    memset(&ss, 0, sizeof(ss));
-    psin = (struct sockaddr_in *)&ss;
-#ifdef HAVE_IPV6
-    psin6 = (struct sockaddr_in6 *)&ss;
-    if (intdomain == AF_INET6) {
-	sslen = sizeof(struct sockaddr_in6);
-	ss.ss_family = AF_INET6;
-	psin6->sin6_addr = in6addr_loopback;
-    } else
-#endif  // HAVE_IPV6
-    {
-	sslen = sizeof(struct sockaddr_in);
-	ss.ss_family = AF_INET;
-	psin->sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-    }
-
-    numtries = 3;
-    do {
-	port = htons((xorp_random() % (CSP_LOWPORT - CSP_HIGHPORT)) + CSP_LOWPORT);
-#ifdef HAVE_IPV6
-	if (intdomain == AF_INET6)
-	    psin6->sin6_port = port;
-	else
-#endif
-	    psin->sin_port = port;
-	error = bind(st[2], (struct sockaddr *)&ss, sslen);
-	if (error == 0)
-	    break;
-	if ((error != 0) &&
-	    ((WSAGetLastError() != WSAEADDRNOTAVAIL) ||
-	     (WSAGetLastError() != WSAEADDRINUSE)))
-	    break;
-    } while (--numtries > 0);
-
-    if (error != 0)
-	goto error;
-
-    error = listen(st[2], 5);
-    if (error != 0)
-	goto error;
-
-    st[0] = socket(intdomain, type, 0);
-    if (st[0] == INVALID_SOCKET)
-	goto error;
-
-    optval = 1L;
-    error = ioctlsocket(st[0], FIONBIO, &optval);
-    if (error != 0)
-	goto error;
-
-    error = connect(st[0], (struct sockaddr *)&ss, sslen);
-    if (error != 0 && WSAGetLastError() != WSAEWOULDBLOCK)
-	goto error;
-
-    numtries = 3;
-    do {
-	st[1] = accept(st[2], NULL, NULL);
-	if (st[1] != INVALID_SOCKET) {
-	    break;
-	} else {
-	    if (WSAGetLastError() == WSAEWOULDBLOCK) {
-		SleepEx(100, TRUE);
-	    } else {
-		break;
-	    }
-	}
-    } while (--numtries > 0);
-
-    if (st[1] == INVALID_SOCKET)
-	goto error;
-
-    // Squelch inherited socket event mask
-    (void)WSAEventSelect(st[1], NULL, 0);
-
-    //
-    // XXX: Should use getsockname() here to verify that the client socket
-    // is connected.
-    //
-    optval = 0L;
-    error = ioctlsocket(st[0], FIONBIO, &optval);
-    if (error != 0)
-	goto error;
-
-    closesocket(st[2]);
-    sv[0] = st[0];
-    sv[1] = st[1];
-    return (XORP_OK);
-
-error:
-    if (st[0] != INVALID_SOCKET)
-	closesocket(st[0]);
-    if (st[1] != INVALID_SOCKET)
-	closesocket(st[1]);
-    if (st[2] != INVALID_SOCKET)
-	closesocket(st[2]);
-    return (XORP_ERROR);
-#endif // HOST_OS_WINDOWS
 }
 
 /**
@@ -300,22 +131,6 @@ error:
 static int
 local_comm_sock_set_blocking(xsock_t sock, int is_blocking)
 {
-#ifdef HOST_OS_WINDOWS
-    u_long opt;
-    int flags;
-
-    if (is_blocking)
-	opt = 0;
-    else
-	opt = 1;
-
-    flags = ioctlsocket(sock, FIONBIO, &opt);
-    if (flags != 0) {
-	XLOG_ERROR("FIONBIO error");
-	return (XORP_ERROR);
-    }
-
-#else // !HOST_OS_WINDOWS
     int flags;
     if ( (flags = fcntl(sock, F_GETFL, 0)) < 0) {
 	XLOG_ERROR("F_GETFL error");
@@ -331,7 +146,6 @@ local_comm_sock_set_blocking(xsock_t sock, int is_blocking)
 	XLOG_ERROR("F_SETFL error");
 	return (XORP_ERROR);
     }
-#endif // HOST_OS_WINDOWS
 
     return (XORP_OK);
 }
@@ -349,12 +163,7 @@ local_comm_sock_close(xsock_t sock)
 {
     int ret;
 
-#ifndef HOST_OS_WINDOWS
     ret = close(sock);
-#else
-    (void)WSAEventSelect(sock, NULL, 0);
-    ret = closesocket(sock);
-#endif
 
     if (ret < 0) {
 	XLOG_ERROR("Error closing socket (socket = %d)", sock);

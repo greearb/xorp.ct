@@ -161,11 +161,7 @@ test_xorp_make_temporary_file()
     if (fp != NULL) {
 	// Close and unlink the temporary file
 	fclose(fp);
-#ifdef HOST_OS_WINDOWS
-	DeleteFileA(final_filename.c_str());
-#else
 	unlink(final_filename.c_str());
-#endif
     }
 }
 

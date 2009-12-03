@@ -29,19 +29,11 @@
 
 #ifdef HAVE_GLOB_H
 #include <glob.h>
-#elif defined(HOST_OS_WINDOWS)
-#include "glob_win32.h"
 #endif
 
 #include "libxipc/xrl_parser.hh"
 
 #include "xrldb.hh"
-
-
-#ifdef HOST_OS_WINDOWS
-#define	stat	_stat
-#define	S_IFDIR	_S_IFDIR
-#endif
 
 XrlSpec::XrlSpec(const Xrl& xrl, const XrlArgs& rspec, bool verbose)
     : _xrl(xrl),
