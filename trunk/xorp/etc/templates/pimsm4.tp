@@ -78,7 +78,7 @@ protocols {
 	%modinfo:	depends		mfea4;
 	%modinfo:	depends		igmp;
 	%modinfo:	depends		rib;
-	%modinfo:	path		"pim/xorp_pimsm4";
+	%modinfo:	path		"xorp_pimsm4";
 	%modinfo:	default_targetname "pim";
 	%modinfo:	status_method	xrl "$(pimsm4.targetname)/common/0.1/get_status->status:u32&reason:txt";
 	%modinfo:	startup_method	xrl "$(pimsm4.targetname)/pim/0.1/start_pim";

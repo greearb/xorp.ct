@@ -70,7 +70,7 @@ protocols {
 	%modinfo:	provides		ripng;
 	%modinfo:	depends			rib;
 	%modinfo:	depends			policy;
-	%modinfo:	path			"rip/xorp_ripng";
+	%modinfo:	path			"xorp_ripng";
 	%modinfo:	default_targetname	"ripng";
 	%modinfo:	status_method xrl	"$(ripng.targetname)/common/0.1/get_status->status:u32&reason:txt";
 	%modinfo:	shutdown_method xrl	"$(ripng.targetname)/common/0.1/shutdown";

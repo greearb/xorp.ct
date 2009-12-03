@@ -35,7 +35,7 @@ protocols {
 	%help:		short		"Configure the MLD protocol";
 	%modinfo:	provides	mld;
 	%modinfo:	depends		mfea6;
-	%modinfo:	path		"mld6igmp/xorp_mld";
+	%modinfo:	path		"xorp_mld";
 	%modinfo:	default_targetname "mld6igmp";
 	%modinfo:	status_method	xrl "$(mld.targetname)/common/0.1/get_status->status:u32&reason:txt";
 	%modinfo:	startup_method	xrl "$(mld.targetname)/mld6igmp/0.1/start_mld6igmp";

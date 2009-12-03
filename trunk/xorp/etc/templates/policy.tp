@@ -66,7 +66,7 @@ policy {
     %help:      short "Configure routing policies";
     %modinfo:   provides policy;
     %modinfo:   depends rib;
-    %modinfo:   path "policy/xorp_policy";
+    %modinfo:   path "xorp_policy";
     %modinfo:   default_targetname "policy";
     %modinfo:   status_method xrl "$(policy.targetname)/common/0.1/get_status->status:u32&reason:txt";
     %modinfo:   shutdown_method xrl "$(policy.targetname)/common/0.1/shutdown";

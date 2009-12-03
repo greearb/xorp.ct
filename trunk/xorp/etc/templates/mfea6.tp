@@ -29,7 +29,7 @@ plumbing {
 	%help:		short		"Configure the IPv6 Multicast Forwarding Engine Abstraction";
 	%modinfo:	provides	mfea6;
 	%modinfo:	depends		fea;
-	%modinfo:	path		"fea/xorp_fea";
+	%modinfo:	path		"xorp_fea";
 	%modinfo:	default_targetname "mfea";
 	%modinfo:	status_method	xrl "$(mfea6.targetname)/common/0.1/get_status->status:u32&reason:txt";
 	%modinfo:	startup_method	xrl "$(mfea6.targetname)/mfea/0.1/start_mfea";

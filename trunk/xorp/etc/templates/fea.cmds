@@ -1,13 +1,13 @@
 /* $XORP: xorp/etc/templates/fea.cmds,v 1.8 2004/05/26 04:25:08 pavlin Exp $ */
 
 show interfaces {
-    %command: "fea/tools/show_interfaces" %help: HELP;
+    %command: "fea_show_interfaces" %help: HELP;
     %module: interfaces;
     %tag: HELP "Show network interface information";
 }
 
 show interfaces $(interfaces.interface.*) {
-    %command: "fea/tools/show_interfaces -i $3" %help: HELP;
+    %command: "fea_show_interfaces -i $3" %help: HELP;
     %module: interfaces;
     %tag: HELP "Show information about a single network interface";
 }

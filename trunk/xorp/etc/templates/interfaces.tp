@@ -49,7 +49,7 @@ interfaces {
 interfaces {
     %help:	short		"Configure network interfaces";
     %modinfo:	provides	interfaces;
-    %modinfo:	path		"fea/xorp_fea";
+    %modinfo:	path		"xorp_fea";
     %modinfo:	default_targetname "fea";
     %modinfo:	status_method	xrl "$(interfaces.targetname)/common/0.1/get_status->status:u32&reason:txt";
     %modinfo:	shutdown_method xrl "$(interfaces.targetname)/common/0.1/shutdown";

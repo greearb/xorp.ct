@@ -93,7 +93,7 @@ protocols {
 	%modinfo: provides ospf6;
 	%modinfo: depends rib;
 	%modinfo: depends policy;
-	%modinfo: path "ospf/xorp_ospfv3";
+	%modinfo: path "xorp_ospfv3";
 	%modinfo: default_targetname "ospfv3";
 	%modinfo: status_method xrl "$(ospf6.@.targetname)/common/0.1/get_status->status:u32&reason:txt";
 	%modinfo: shutdown_method xrl "$(ospf6.@.targetname)/common/0.1/shutdown";

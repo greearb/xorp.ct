@@ -1,7 +1,7 @@
 /* $XORP: xorp/etc/templates/ospfv2.cmds,v 1.10 2006/04/27 20:01:32 pavlin Exp $ */
 
 clear ospf4 database {
-    %command: "ospf/tools/clear_database -2" %help: HELP;
+    %command: "clear_database -2" %help: HELP;
     %module: ospf4;
     %tag: HELP "Clear LSA database";
 }
@@ -12,19 +12,19 @@ show ospf4 {
 }
 
 show ospf4 database {
-    %command: "ospf/tools/print_lsas -b" %help: HELP;
+    %command: "ospf_print_lsas -b" %help: HELP;
     %module: ospf4;
     %tag: HELP "Show LSA database";
 }
 
 show ospf4 database brief {
-    %command: "ospf/tools/print_lsas -b" %help: HELP;
+    %command: "ospf_print_lsas -b" %help: HELP;
     %module: ospf4;
     %tag: HELP "Display brief output (default)";
 }
 
 show ospf4 database detail {
-    %command: "ospf/tools/print_lsas -d" %help: HELP;
+    %command: "ospf_print_lsas -d" %help: HELP;
     %module: ospf4;
     %tag: HELP "Display detailed output";
 }
@@ -32,19 +32,19 @@ show ospf4 database detail {
 /* Router-LSA */
 
 show ospf4 database router {
-    %command: "ospf/tools/print_lsas -b -f 1" %help: HELP;
+    %command: "ospf_print_lsas -b -f 1" %help: HELP;
     %module: ospf4;
     %tag: HELP "Show Router-LSA database";
 }
 
 show ospf4 database router brief {
-    %command: "ospf/tools/print_lsas -b -f 1" %help: HELP;
+    %command: "ospf_print_lsas -b -f 1" %help: HELP;
     %module: ospf4;
     %tag: HELP "Display brief output (default)";
 }
 
 show ospf4 database router detail {
-    %command: "ospf/tools/print_lsas -d -f 1" %help: HELP;
+    %command: "ospf_print_lsas -d -f 1" %help: HELP;
     %module: ospf4;
     %tag: HELP "Display detailed output";
 }
@@ -52,19 +52,19 @@ show ospf4 database router detail {
 /* Network-LSA */
 
 show ospf4 database network {
-    %command: "ospf/tools/print_lsas -b -f 2" %help: HELP;
+    %command: "ospf_print_lsas -b -f 2" %help: HELP;
     %module: ospf4;
     %tag: HELP "Show Network-LSA database";
 }
 
 show ospf4 database network brief {
-    %command: "ospf/tools/print_lsas -b -f 2" %help: HELP;
+    %command: "ospf_print_lsas -b -f 2" %help: HELP;
     %module: ospf4;
     %tag: HELP "Display brief output (default)";
 }
 
 show ospf4 database network detail {
-    %command: "ospf/tools/print_lsas -d -f 2" %help: HELP;
+    %command: "ospf_print_lsas -d -f 2" %help: HELP;
     %module: ospf4;
     %tag: HELP "Display detailed output";
 }
@@ -72,19 +72,19 @@ show ospf4 database network detail {
 /* Summary-LSA (network) */
 
 show ospf4 database netsummary {
-    %command: "ospf/tools/print_lsas -b -f 3" %help: HELP;
+    %command: "ospf_print_lsas -b -f 3" %help: HELP;
     %module: ospf4;
     %tag: HELP "Show Summary-LSA (network) database";
 }
 
 show ospf4 database netsummary brief {
-    %command: "ospf/tools/print_lsas -b -f 3" %help: HELP;
+    %command: "ospf_print_lsas -b -f 3" %help: HELP;
     %module: ospf4;
     %tag: HELP "Display brief output (default)";
 }
 
 show ospf4 database netsummary detail {
-    %command: "ospf/tools/print_lsas -d -f 3" %help: HELP;
+    %command: "ospf_print_lsas -d -f 3" %help: HELP;
     %module: ospf4;
     %tag: HELP "Display detailed output";
 }
@@ -92,19 +92,19 @@ show ospf4 database netsummary detail {
 /* Summary-LSA (AS boundary router) */
 
 show ospf4 database asbrsummary {
-    %command: "ospf/tools/print_lsas -b -f 4" %help: HELP;
+    %command: "ospf_print_lsas -b -f 4" %help: HELP;
     %module: ospf4;
     %tag: HELP "Show Summary-LSA (AS boundary router) database";
 }
 
 show ospf4 database asbrsummary brief {
-    %command: "ospf/tools/print_lsas -b -f 4" %help: HELP;
+    %command: "ospf_print_lsas -b -f 4" %help: HELP;
     %module: ospf4;
     %tag: HELP "Display brief output (default)";
 }
 
 show ospf4 database asbrsummary detail {
-    %command: "ospf/tools/print_lsas -d -f 4" %help: HELP;
+    %command: "ospf_print_lsas -d -f 4" %help: HELP;
     %module: ospf4;
     %tag: HELP "Display detailed output";
 }
@@ -112,19 +112,19 @@ show ospf4 database asbrsummary detail {
 /* AS-External-LSA */
 
 show ospf4 database external {
-    %command: "ospf/tools/print_lsas -b -f 5" %help: HELP;
+    %command: "ospf_print_lsas -b -f 5" %help: HELP;
     %module: ospf4;
     %tag: HELP "Show External-LSA database";
 }
 
 show ospf4 database external brief {
-    %command: "ospf/tools/print_lsas -b -f 5" %help: HELP;
+    %command: "ospf_print_lsas -b -f 5" %help: HELP;
     %module: ospf4;
     %tag: HELP "Display brief output (default)";
 }
 
 show ospf4 database external detail {
-    %command: "ospf/tools/print_lsas -d -f 5" %help: HELP;
+    %command: "ospf_print_lsas -d -f 5" %help: HELP;
     %module: ospf4;
     %tag: HELP "Display detailed output";
 }
@@ -132,19 +132,19 @@ show ospf4 database external detail {
 /* NSSA-LSA */
 
 show ospf4 database nssa {
-    %command: "ospf/tools/print_lsas -b -f 7" %help: HELP;
+    %command: "ospf_print_lsas -b -f 7" %help: HELP;
     %module: ospf4;
     %tag: HELP "Show NSSA-LSA database";
 }
 
 show ospf4 database nssa brief {
-    %command: "ospf/tools/print_lsas -b -f 7" %help: HELP;
+    %command: "ospf_print_lsas -b -f 7" %help: HELP;
     %module: ospf4;
     %tag: HELP "Display brief output (default)";
 }
 
 show ospf4 database nssa detail {
-    %command: "ospf/tools/print_lsas -d -f 7" %help: HELP;
+    %command: "ospf_print_lsas -d -f 7" %help: HELP;
     %module: ospf4;
     %tag: HELP "Display detailed output";
 }
@@ -152,19 +152,19 @@ show ospf4 database nssa detail {
 /* AREA */
 
 show ospf4 database area $(protocols.ospf4.area.*) {
-    %command: "ospf/tools/print_lsas -a $5 -b" %help: HELP;
+    %command: "ospf_print_lsas -a $5 -b" %help: HELP;
     %module: ospf4;
     %tag: HELP "Show LSA database";
 }
 
 show ospf4 database area $(protocols.ospf4.area.*) brief {
-    %command: "ospf/tools/print_lsas -a $5 -b" %help: HELP;
+    %command: "ospf_print_lsas -a $5 -b" %help: HELP;
     %module: ospf4;
     %tag: HELP "Display brief output (default)";
 }
 
 show ospf4 database area $(protocols.ospf4.area.*) detail {
-    %command: "ospf/tools/print_lsas -a $5 -d" %help: HELP;
+    %command: "ospf_print_lsas -a $5 -d" %help: HELP;
     %module: ospf4;
     %tag: HELP "Display detailed output";
 }
@@ -172,19 +172,19 @@ show ospf4 database area $(protocols.ospf4.area.*) detail {
 /* Router-LSA */
 
 show ospf4 database area $(protocols.ospf4.area.*) router {
-    %command: "ospf/tools/print_lsas -a $5 -b -f 1" %help: HELP;
+    %command: "ospf_print_lsas -a $5 -b -f 1" %help: HELP;
     %module: ospf4;
     %tag: HELP "Show Router-LSA database";
 }
 
 show ospf4 database area $(protocols.ospf4.area.*) router brief {
-    %command: "ospf/tools/print_lsas -a $5 -b -f 1" %help: HELP;
+    %command: "ospf_print_lsas -a $5 -b -f 1" %help: HELP;
     %module: ospf4;
     %tag: HELP "Display brief output (default)";
 }
 
 show ospf4 database area $(protocols.ospf4.area.*) router detail {
-    %command: "ospf/tools/print_lsas -a $5 -d -f 1" %help: HELP;
+    %command: "ospf_print_lsas -a $5 -d -f 1" %help: HELP;
     %module: ospf4;
     %tag: HELP "Display detailed output";
 }
@@ -192,19 +192,19 @@ show ospf4 database area $(protocols.ospf4.area.*) router detail {
 /* Network-LSA */
 
 show ospf4 database area $(protocols.ospf4.area.*) network {
-    %command: "ospf/tools/print_lsas -a $5 -b -f 2" %help: HELP;
+    %command: "ospf_print_lsas -a $5 -b -f 2" %help: HELP;
     %module: ospf4;
     %tag: HELP "Show Network-LSA database";
 }
 
 show ospf4 database area $(protocols.ospf4.area.*) network brief {
-    %command: "ospf/tools/print_lsas -a $5 -b -f 2" %help: HELP;
+    %command: "ospf_print_lsas -a $5 -b -f 2" %help: HELP;
     %module: ospf4;
     %tag: HELP "Display brief output (default)";
 }
 
 show ospf4 database area $(protocols.ospf4.area.*) network detail {
-    %command: "ospf/tools/print_lsas -a $5 -d -f 2" %help: HELP;
+    %command: "ospf_print_lsas -a $5 -d -f 2" %help: HELP;
     %module: ospf4;
     %tag: HELP "Display detailed output";
 }
@@ -212,19 +212,19 @@ show ospf4 database area $(protocols.ospf4.area.*) network detail {
 /* Summary-LSA (network) */
 
 show ospf4 database area $(protocols.ospf4.area.*) netsummary {
-    %command: "ospf/tools/print_lsas -a $5 -b -f 3" %help: HELP;
+    %command: "ospf_print_lsas -a $5 -b -f 3" %help: HELP;
     %module: ospf4;
     %tag: HELP "Show Summary-LSA (network) database";
 }
 
 show ospf4 database area $(protocols.ospf4.area.*) netsummary brief {
-    %command: "ospf/tools/print_lsas -a $5 -b -f 3" %help: HELP;
+    %command: "ospf_print_lsas -a $5 -b -f 3" %help: HELP;
     %module: ospf4;
     %tag: HELP "Display brief output (default)";
 }
 
 show ospf4 database area $(protocols.ospf4.area.*) netsummary detail {
-    %command: "ospf/tools/print_lsas -a $5 -d -f 3" %help: HELP;
+    %command: "ospf_print_lsas -a $5 -d -f 3" %help: HELP;
     %module: ospf4;
     %tag: HELP "Display detailed output";
 }
@@ -232,19 +232,19 @@ show ospf4 database area $(protocols.ospf4.area.*) netsummary detail {
 /* Summary-LSA (AS boundary router) */
 
 show ospf4 database area $(protocols.ospf4.area.*) asbrsummary {
-    %command: "ospf/tools/print_lsas -a $5 -b -f 4" %help: HELP;
+    %command: "ospf_print_lsas -a $5 -b -f 4" %help: HELP;
     %module: ospf4;
     %tag: HELP "Show Summary-LSA (AS boundary router) database";
 }
 
 show ospf4 database area $(protocols.ospf4.area.*) asbrsummary brief {
-    %command: "ospf/tools/print_lsas -a $5 -b -f 4" %help: HELP;
+    %command: "ospf_print_lsas -a $5 -b -f 4" %help: HELP;
     %module: ospf4;
     %tag: HELP "Display brief output (default)";
 }
 
 show ospf4 database area $(protocols.ospf4.area.*) asbrsummary detail {
-    %command: "ospf/tools/print_lsas -a $5 -d -f 4" %help: HELP;
+    %command: "ospf_print_lsas -a $5 -d -f 4" %help: HELP;
     %module: ospf4;
     %tag: HELP "Display detailed output";
 }
@@ -252,19 +252,19 @@ show ospf4 database area $(protocols.ospf4.area.*) asbrsummary detail {
 /* AS-External-LSA */
 
 show ospf4 database area $(protocols.ospf4.area.*) external {
-    %command: "ospf/tools/print_lsas -a $5 -b -f 5" %help: HELP;
+    %command: "ospf_print_lsas -a $5 -b -f 5" %help: HELP;
     %module: ospf4;
     %tag: HELP "Show External-LSA database";
 }
 
 show ospf4 database area $(protocols.ospf4.area.*) external brief {
-    %command: "ospf/tools/print_lsas -a $5 -b -f 5" %help: HELP;
+    %command: "ospf_print_lsas -a $5 -b -f 5" %help: HELP;
     %module: ospf4;
     %tag: HELP "Display brief output (default)";
 }
 
 show ospf4 database area $(protocols.ospf4.area.*) external detail {
-    %command: "ospf/tools/print_lsas -a $5 -d -f 5" %help: HELP;
+    %command: "ospf_print_lsas -a $5 -d -f 5" %help: HELP;
     %module: ospf4;
     %tag: HELP "Display detailed output";
 }
@@ -272,19 +272,19 @@ show ospf4 database area $(protocols.ospf4.area.*) external detail {
 /* NSSA-LSA */
 
 show ospf4 database area $(protocols.ospf4.area.*) nssa {
-    %command: "ospf/tools/print_lsas -a $5 -b -f 7" %help: HELP;
+    %command: "ospf_print_lsas -a $5 -b -f 7" %help: HELP;
     %module: ospf4;
     %tag: HELP "Show NSSA-LSA database";
 }
 
 show ospf4 database area $(protocols.ospf4.area.*) nssa brief {
-    %command: "ospf/tools/print_lsas -a $5 -b -f 7" %help: HELP;
+    %command: "ospf_print_lsas -a $5 -b -f 7" %help: HELP;
     %module: ospf4;
     %tag: HELP "Display brief output (default)";
 }
 
 show ospf4 database area $(protocols.ospf4.area.*) nssa detail {
-    %command: "ospf/tools/print_lsas -a $5 -d -f 7" %help: HELP;
+    %command: "ospf_print_lsas -a $5 -d -f 7" %help: HELP;
     %module: ospf4;
     %tag: HELP "Display detailed output";
 }
@@ -292,85 +292,85 @@ show ospf4 database area $(protocols.ospf4.area.*) nssa detail {
 /* SUMMARY */
 
 show ospf4 database summary {
-    %command: "ospf/tools/print_lsas -s" %help: HELP;
+    %command: "ospf_print_lsas -s" %help: HELP;
     %module: ospf4;
     %tag: HELP "Display summary output";
 }
 
 show ospf4 database summary router {
-    %command: "ospf/tools/print_lsas -s -f 1" %help: HELP;
+    %command: "ospf_print_lsas -s -f 1" %help: HELP;
     %module: ospf4;
     %tag: HELP "Show Router-LSA database";
 }
 
 show ospf4 database summary network {
-    %command: "ospf/tools/print_lsas -s -f 2" %help: HELP;
+    %command: "ospf_print_lsas -s -f 2" %help: HELP;
     %module: ospf4;
     %tag: HELP "Show Network-LSA database";
 }
 
 show ospf4 database summary netsummary {
-    %command: "ospf/tools/print_lsas -s -f 3" %help: HELP;
+    %command: "ospf_print_lsas -s -f 3" %help: HELP;
     %module: ospf4;
     %tag: HELP "Show Summary-LSA (network) database";
 }
 
 show ospf4 database summary asbrsummary {
-    %command: "ospf/tools/print_lsas -s -f 4" %help: HELP;
+    %command: "ospf_print_lsas -s -f 4" %help: HELP;
     %module: ospf4;
     %tag: HELP "Show Summary-LSA (AS boundary router) database";
 }
 
 show ospf4 database summary external {
-    %command: "ospf/tools/print_lsas -s -f 5" %help: HELP;
+    %command: "ospf_print_lsas -s -f 5" %help: HELP;
     %module: ospf4;
     %tag: HELP "Show External-LSA database";
 }
 
 show ospf4 database summary nssa {
-    %command: "ospf/tools/print_lsas -s -f 7" %help: HELP;
+    %command: "ospf_print_lsas -s -f 7" %help: HELP;
     %module: ospf4;
     %tag: HELP "Show NSSA-LSA database";
 }
 
 show ospf4 database summary area $(protocols.ospf4.area.*) {
-    %command: "ospf/tools/print_lsas -a $6 -s" %help: HELP;
+    %command: "ospf_print_lsas -a $6 -s" %help: HELP;
     %module: ospf4;
     %tag: HELP "Display summary output";
 }
 
 show ospf4 database summary area $(protocols.ospf4.area.*) router {
-    %command: "ospf/tools/print_lsas -a $6 -s -f 1" %help: HELP;
+    %command: "ospf_print_lsas -a $6 -s -f 1" %help: HELP;
     %module: ospf4;
     %tag: HELP "Show Router-LSA database";
 }
 
 show ospf4 database summary area $(protocols.ospf4.area.*) network {
-    %command: "ospf/tools/print_lsas -a $6 -s -f 2" %help: HELP;
+    %command: "ospf_print_lsas -a $6 -s -f 2" %help: HELP;
     %module: ospf4;
     %tag: HELP "Show Network-LSA database";
 }
 
 show ospf4 database summary area $(protocols.ospf4.area.*) netsummary {
-    %command: "ospf/tools/print_lsas -a $6 -s -f 3" %help: HELP;
+    %command: "ospf_print_lsas -a $6 -s -f 3" %help: HELP;
     %module: ospf4;
     %tag: HELP "Show Summary-LSA (network) database";
 }
 
 show ospf4 database summary area $(protocols.ospf4.area.*) asbrsummary {
-    %command: "ospf/tools/print_lsas -a $6 -s -f 4" %help: HELP;
+    %command: "ospf_print_lsas -a $6 -s -f 4" %help: HELP;
     %module: ospf4;
     %tag: HELP "Show Summary-LSA (AS boundary router) database";
 }
 
 show ospf4 database summary area $(protocols.ospf4.area.*) external {
-    %command: "ospf/tools/print_lsas -a $6 -s -f 5" %help: HELP;
+    %command: "ospf_print_lsas -a $6 -s -f 5" %help: HELP;
     %module: ospf4;
     %tag: HELP "Show External-LSA database";
 }
 
 show ospf4 database summary area $(protocols.ospf4.area.*) nssa {
-    %command: "ospf/tools/print_lsas -a $6 -s -f 7" %help: HELP;
+    %command: "ospf_print_lsas -a $6 -s -f 7" %help: HELP;
     %module: ospf4;
     %tag: HELP "Show NSSA-LSA database";
 }
@@ -378,37 +378,37 @@ show ospf4 database summary area $(protocols.ospf4.area.*) nssa {
 /* Neighbor commands */
 
 show ospf4 neighbor {
-    %command: "ospf/tools/print_neighbours" %help: HELP;
+    %command: "ospf_print_neighbours" %help: HELP;
     %module: ospf4;
     %tag: HELP "Show Neighbors";
 }
 
 show ospf4 neighbor brief {
-    %command: "ospf/tools/print_neighbours -b" %help: HELP;
+    %command: "ospf_print_neighbours -b" %help: HELP;
     %module: ospf4;
     %tag: HELP "Show Neighbors";
 }
 
 show ospf4 neighbor detail {
-    %command: "ospf/tools/print_neighbours -d" %help: HELP;
+    %command: "ospf_print_neighbours -d" %help: HELP;
     %module: ospf4;
     %tag: HELP "Show Neighbors";
 }
 
 show ospf4 neighbor <neighbor> {
-    %command: "ospf/tools/print_neighbours -f $4" %help: HELP;
+    %command: "ospf_print_neighbours -f $4" %help: HELP;
     %module: ospf4;
     %tag: HELP "Show Neighbors";
 }
 
 show ospf4 neighbor <neighbor> brief {
-    %command: "ospf/tools/print_neighbours -b -f $4" %help: HELP;
+    %command: "ospf_print_neighbours -b -f $4" %help: HELP;
     %module: ospf4;
     %tag: HELP "Show Neighbors";
 }
 
 show ospf4 neighbor <neighbor> detail {
-    %command: "ospf/tools/print_neighbours -d -f $4" %help: HELP;
+    %command: "ospf_print_neighbours -d -f $4" %help: HELP;
     %module: ospf4;
     %tag: HELP "Show Neighbors";
 }

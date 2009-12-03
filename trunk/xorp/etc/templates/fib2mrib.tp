@@ -13,7 +13,7 @@ protocols {
 	%help:		short		"Configure the FIB2MRIB module";
 	%modinfo:	provides	fib2mrib;
 	%modinfo:	depends		rib;
-	%modinfo:	path		"fib2mrib/xorp_fib2mrib";
+	%modinfo:	path		"xorp_fib2mrib";
 	%modinfo:	default_targetname "fib2mrib";
 	%modinfo:	status_method	xrl "$(fib2mrib.targetname)/common/0.1/get_status->status:u32&reason:txt";
 	%modinfo:	shutdown_method	xrl "$(fib2mrib.targetname)/common/0.1/shutdown";

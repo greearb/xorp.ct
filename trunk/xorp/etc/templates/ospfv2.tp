@@ -121,7 +121,7 @@ protocols {
 	%modinfo: provides ospf4;
 	%modinfo: depends rib;
 	%modinfo: depends policy;
-	%modinfo: path "ospf/xorp_ospfv2";
+	%modinfo: path "xorp_ospfv2";
 	%modinfo: default_targetname "ospfv2";
 	%modinfo: status_method xrl "$(ospf4.targetname)/common/0.1/get_status->status:u32&reason:txt";
 	%modinfo: shutdown_method xrl "$(ospf4.targetname)/common/0.1/shutdown";

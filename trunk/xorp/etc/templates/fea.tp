@@ -55,7 +55,7 @@ fea {
     %help:	short		"Configure the Forwarding Engine Abstraction";
     %modinfo:	provides	fea;
     %modinfo:	depends		firewall;
-    %modinfo:	path		"fea/xorp_fea";
+    %modinfo:	path		"xorp_fea";
     %modinfo:	default_targetname "fea";
 
     %mandatory:	$(@.targetname);

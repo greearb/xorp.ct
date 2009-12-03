@@ -15,7 +15,7 @@ plumbing {
 	%help:		short		"Configure the Routing Information Base module";
 	%modinfo:	provides	rib;
 	%modinfo:	depends		fea;
-	%modinfo:	path		"rib/xorp_rib";
+	%modinfo:	path		"xorp_rib";
 	%modinfo:	default_targetname "rib";
 	%modinfo:	status_method	xrl "$(rib.targetname)/common/0.1/get_status->status:u32&reason:txt";
 	%modinfo:	shutdown_method xrl "$(rib.targetname)/common/0.1/shutdown";

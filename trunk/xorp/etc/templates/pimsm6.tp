@@ -78,7 +78,7 @@ protocols {
 	%modinfo:	depends		mfea6;
 	%modinfo:	depends		mld;
 	%modinfo:	depends		rib;
-	%modinfo:	path		"pim/xorp_pimsm6";
+	%modinfo:	path		"xorp_pimsm6";
 	%modinfo:	default_targetname "pim";
 	%modinfo:	status_method	xrl "$(pimsm6.targetname)/common/0.1/get_status->status:u32&reason:txt";
 	%modinfo:	startup_method	xrl "$(pimsm6.targetname)/pim/0.1/start_pim";

@@ -104,9 +104,7 @@ protocols {
 	%modinfo: provides olsr4;
 	%modinfo: depends rib;
 	%modinfo: depends policy;
-	/* Valgrind debugging wrapper (comment out for production) */
-	/*%modinfo: path "contrib/olsr/xorp_olsr4_wrapper.sh";*/
-	%modinfo: path "contrib/olsr/xorp_olsr4";
+	%modinfo: path "xorp_olsr4";
 	%modinfo: default_targetname "olsr4";
 	%modinfo: status_method xrl "$(olsr4.targetname)/common/0.1/get_status->status:u32&reason:txt";
 	%modinfo: shutdown_method xrl "$(olsr4.targetname)/common/0.1/shutdown";
