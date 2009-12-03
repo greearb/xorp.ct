@@ -68,7 +68,7 @@ vars.AddVariables(
                  allowed_values=('no', 'yes', 'full', 'override'),
                  map={}, ignorecase=2),
     EnumVariable('optimize', 'Build with optimization', 'yes',
-                 allowed_values=('no', 'minimal', 'yes', 'full',
+                 allowed_values=('no', 'minimal', 'yes', 'full', 'highest',
                                  'size', 'override'),
                  map={}, ignorecase=2),
     EnumVariable('profile', 'Build with profiling', 'no',
@@ -438,6 +438,7 @@ if not env['optimize'] == 'override':
 -fno-merge-constants",
                  'yes': '-O1',
                  'full': '-O2',
+                 'highest': '-O3',
                  'size': '-Os' }
     bigoflag = bigodict[env['optimize']]
     if not env['optimize'] == 'no':
