@@ -27,6 +27,9 @@
 
 #include "fibconfig_transaction.hh"
 
+#include <boost/cast.hpp>
+
+using boost::polymorphic_cast;
 
 int
 FibConfigTransactionManager::set_error(const string& error)
@@ -70,8 +73,7 @@ FibConfigTransactionManager::operation_result(bool success,
 	return;
 
     const FibConfigTransactionOperation* fto;
-    fto = dynamic_cast<const FibConfigTransactionOperation*>(&op);
-    XLOG_ASSERT(fto != NULL);
+    fto = polymorphic_cast<const FibConfigTransactionOperation*>(&op);
 
     //
     // Record error and xlog first error only

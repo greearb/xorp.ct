@@ -25,15 +25,14 @@
 //
 // Copyright (c) 1999-2000 Massachusetts Institute of Technology
 
-
-
-
 #include "libxorp_module.h"
 #include "xorp.h"
 
 #include "xlog.h"
 #include "timer.hh"
 #include "clock.hh"
+
+#include <boost/cast.hpp>
 
 // Implementation Notes:
 //
@@ -408,7 +407,7 @@ TimerList::expire_one(int worst_priority)
 			     tardiness.str().c_str());
 	    }
 
-	    TimerNode *t = static_cast<TimerNode *>(n->object);
+	    TimerNode *t = boost::polymorphic_downcast<TimerNode *>(n->object);
 	    heap->pop();
 	    // _hook() requires a XorpTimer as first argument, we have
 	    // only a timernode, so we have to create a temporary

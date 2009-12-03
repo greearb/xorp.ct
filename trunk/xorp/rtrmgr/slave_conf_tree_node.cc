@@ -33,6 +33,9 @@
 #include "template_tree_node.hh"
 #include "util.hh"
 
+#include <boost/cast.hpp>
+
+using boost::polymorphic_cast;
 
 extern int booterror(const char *s);
 
@@ -65,9 +68,11 @@ SlaveConfigTreeNode::create_node(const string& segment, const string& path,
 				 bool verbose)
 {
     SlaveConfigTreeNode *new_node, *parent;
-    parent = dynamic_cast<SlaveConfigTreeNode *>(parent_node);
 
     // sanity check - all nodes in this tree should be Slave nodes
+    // BOOST: This is a conditional downcast, so polymorphic casts
+    // can't be applied.
+    parent = dynamic_cast<SlaveConfigTreeNode *>(parent_node);
     if (parent_node != NULL)
 	XLOG_ASSERT(parent != NULL);
 
@@ -85,8 +90,7 @@ SlaveConfigTreeNode::create_node(const ConfigTreeNode& ctn)
     debug_msg("SlaveConfigTreeNode::create_node\n");
 
     // sanity check - all nodes in this tree should be Slave nodes
-    orig = dynamic_cast<const SlaveConfigTreeNode *>(&ctn);
-    XLOG_ASSERT(orig != NULL);
+    orig = polymorphic_cast<const SlaveConfigTreeNode *>(&ctn);
 
     new_node = new SlaveConfigTreeNode(*orig);
     return new_node;
@@ -296,9 +300,8 @@ SlaveConfigTreeNode::get_deltas(const SlaveConfigTreeNode& master_node)
 	     iter != master_node.const_children().end();
 	     ++iter) {
 	    SlaveConfigTreeNode* new_node;
-	    const SlaveConfigTreeNode* my_child
-		= dynamic_cast<SlaveConfigTreeNode*>(*iter);
-	    XLOG_ASSERT(my_child != NULL);
+	    const SlaveConfigTreeNode* my_child =
+		polymorphic_cast<SlaveConfigTreeNode*>(*iter);
 
 	    new_node = new SlaveConfigTreeNode(*my_child);
 	    new_node->set_parent(this);
@@ -330,9 +333,9 @@ SlaveConfigTreeNode::get_deletions(const SlaveConfigTreeNode& master_node)
 	     iter != master_node.const_children().end();
 	     ++iter) {
 	    SlaveConfigTreeNode* new_node;
-	    const SlaveConfigTreeNode* my_child  
-		= dynamic_cast<SlaveConfigTreeNode*>(*iter);
-	    XLOG_ASSERT(my_child != NULL);
+	    const SlaveConfigTreeNode* my_child =
+		polymorphic_cast<SlaveConfigTreeNode*>(*iter);
+
 	    new_node = new SlaveConfigTreeNode(*my_child);
 	    new_node->set_parent(this);
 	    new_node->undelete();

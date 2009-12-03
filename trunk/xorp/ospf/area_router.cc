@@ -41,12 +41,16 @@
 #include <set>
 #include <deque>
 
+#include <boost/cast.hpp>
+
 #include "libproto/spt.hh"
 
 #include "ospf.hh"
 #include "delay_queue.hh"
 #include "vertex.hh"
 #include "area_router.hh"
+
+using boost::polymorphic_cast;
 
 template <typename A>
 AreaRouter<A>::AreaRouter(Ospf<A>& ospf, OspfTypes::AreaID area,
@@ -370,8 +374,7 @@ AreaRouter<A>::check_for_virtual_linkV2(const RouteCmd<Vertex>& rc,
 {
     Vertex node = rc.node();
     Lsa::LsaRef lsar = node.get_lsa();
-    RouterLsa *rlsa = dynamic_cast<RouterLsa *>(lsar.get());
-    XLOG_ASSERT(rlsa);
+    RouterLsa *rlsa = polymorphic_cast<RouterLsa *>(lsar.get());
     OspfTypes::RouterID rid = rlsa->get_header().get_link_state_id();
 
     // If this router ID is in the tmp set then it is already up, just
@@ -431,8 +434,7 @@ AreaRouter<IPv6>::check_for_virtual_linkV3(const RouteCmd<Vertex>& rc,
     list<Lsa::LsaRef>::iterator l = lsars.begin();
     XLOG_ASSERT(l != lsars.end());
     Lsa::LsaRef lsar = *l++;
-    RouterLsa *rlsa = dynamic_cast<RouterLsa *>(lsar.get());
-    XLOG_ASSERT(rlsa);
+    RouterLsa *rlsa = polymorphic_cast<RouterLsa *>(lsar.get());
     OspfTypes::RouterID rid = rlsa->get_header().get_advertising_router();
 
     // If this router ID is in the tmp set then it is already up, just
@@ -505,6 +507,8 @@ AreaRouter<IPv4>::find_interface_address(Lsa::LsaRef src, Lsa::LsaRef dst,
 	       "Find interface address \nsrc:\n%s\ndst:\n%s\n",
 	       cstring(*src), cstring(*dst));
 
+    // XXX: Candidates for polymorphic_cast<T>, but used within
+    // logic below.
     RouterLsa *rlsa = dynamic_cast<RouterLsa *>(src.get());
     NetworkLsa *nlsa = dynamic_cast<NetworkLsa *>(src.get());
 
@@ -621,8 +625,7 @@ AreaRouter<IPv6>::find_interface_address(OspfTypes::RouterID rid,
 			 cstring(*lsa));
 	    return false;
 	}
-	LinkLsa *llsa = dynamic_cast<LinkLsa *>(lsa.get());
-	XLOG_ASSERT(llsa);
+	LinkLsa *llsa = polymorphic_cast<LinkLsa *>(lsa.get());
 	interface = llsa->get_link_local_address();
 	return true;
     }
@@ -1427,8 +1430,7 @@ template <typename A>
 Lsa::LsaRef
 AreaRouter<A>::external_generate_type7(Lsa::LsaRef lsar, bool& indb)
 {
-    ASExternalLsa *aselsa = dynamic_cast<ASExternalLsa *>(lsar.get());
-    XLOG_ASSERT(aselsa);
+    ASExternalLsa *aselsa = polymorphic_cast<ASExternalLsa *>(lsar.get());
 
     OspfTypes::Version version = _ospf.get_version();
     Type7Lsa *type7= new Type7Lsa(version);
@@ -1487,8 +1489,7 @@ template <typename A>
 Lsa::LsaRef
 AreaRouter<A>::external_generate_external(Lsa::LsaRef lsar)
 {
-    Type7Lsa *type7 = dynamic_cast<Type7Lsa *>(lsar.get());
-    XLOG_ASSERT(type7);
+    Type7Lsa *type7 = polymorphic_cast<Type7Lsa *>(lsar.get());
 
     OspfTypes::Version version = _ospf.get_version();
     ASExternalLsa *aselsa= new ASExternalLsa(version);
@@ -1816,8 +1817,7 @@ AreaRouter<A>::update_network_lsa(OspfTypes::PeerID peerid,
 	return false;
     }
 
-    NetworkLsa *nlsa = dynamic_cast<NetworkLsa *>(_db[index].get());
-    XLOG_ASSERT(nlsa);
+    NetworkLsa *nlsa = polymorphic_cast<NetworkLsa *>(_db[index].get());
 
     // If routers is empty this is a refresh.
     if (!routers.empty()) {
@@ -1900,8 +1900,7 @@ void
 AreaRouter<A>::refresh_network_lsa(OspfTypes::PeerID peerid, Lsa::LsaRef lsar,
 				   bool timer)
 {
-    NetworkLsa *nlsa = dynamic_cast<NetworkLsa *>(lsar.get());
-    XLOG_ASSERT(nlsa);
+    NetworkLsa *nlsa = polymorphic_cast<NetworkLsa *>(lsar.get());
     XLOG_ASSERT(nlsa->valid());
 
     uint32_t network_mask = 0;
@@ -2127,8 +2126,7 @@ AreaRouter<A>::update_intra_area_prefix_lsa(OspfTypes::PeerID peerid,
     }
 
     IntraAreaPrefixLsa *iaplsa =
-	dynamic_cast<IntraAreaPrefixLsa *>(_db[index].get());
-    XLOG_ASSERT(iaplsa);
+	polymorphic_cast<IntraAreaPrefixLsa *>(_db[index].get());
     
     // If attached_routers is empty this is a refresh.
     if (!attached_routers.empty()) {
@@ -3504,8 +3502,7 @@ AreaRouter<A>::stub_networksV3(bool timer)
 	Lsa::LsaRef lsar = _db[index];
 
 	IntraAreaPrefixLsa *iaplsa = 
-	    dynamic_cast<IntraAreaPrefixLsa *>(lsar.get());
-	XLOG_ASSERT(iaplsa);
+	    polymorphic_cast<IntraAreaPrefixLsa *>(lsar.get());
 
 	list<IPv6Prefix>& nprefixes = iaplsa->get_prefixes();
 	nprefixes.insert(nprefixes.begin(), prefixes.begin(), prefixes.end());
@@ -3523,8 +3520,7 @@ AreaRouter<A>::stub_networksV3(bool timer)
     // the newly computed one then update the old one and publish.
     Lsa::LsaRef lsar = _db[index];
     IntraAreaPrefixLsa *iaplsa = 
-	dynamic_cast<IntraAreaPrefixLsa *>(lsar.get());
-    XLOG_ASSERT(iaplsa);
+	polymorphic_cast<IntraAreaPrefixLsa *>(lsar.get());
 
     list<IPv6Prefix>& oprefixes = iaplsa->get_prefixes();
     list<IPv6Prefix>::iterator j, k;
@@ -4043,8 +4039,7 @@ AreaRouter<IPv4>::routing_total_recomputeV2()
 	    route_entry.set_area_border_router(rlsa->get_b_bit());
 	    route_entry.set_as_boundary_router(rlsa->get_e_bit());
 	} else {
-	    nlsa = dynamic_cast<NetworkLsa *>(lsar.get());
-	    XLOG_ASSERT(nlsa);
+	    nlsa = polymorphic_cast<NetworkLsa *>(lsar.get());
 // 	    route_entry.set_router_id(nlsa->get_header().
 // 				      get_advertising_router());
 	    route_entry.set_address(nlsa->get_header().get_link_state_id());
@@ -4345,8 +4340,7 @@ AreaRouter<IPv6>::routing_total_recomputeV3()
 // 					route_entry);
 	    }
 	} else {
-	    NetworkLsa *nlsa = dynamic_cast<NetworkLsa *>(lsar.get());
-	    XLOG_ASSERT(nlsa);
+	    NetworkLsa *nlsa = polymorphic_cast<NetworkLsa *>(lsar.get());
 	    const list<IntraAreaPrefixLsa *>& lsai = 
 		lsa_temp_store.get_intra_area_prefix_lsas(node.get_nodeid());
 	    if (!lsai.empty()) {

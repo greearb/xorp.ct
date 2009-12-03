@@ -27,6 +27,10 @@
 
 #include "firewall_transaction.hh"
 
+#include <boost/cast.hpp>
+
+using boost::polymorphic_cast;
+
 void
 FirewallTransactionManager::pre_commit(uint32_t tid)
 {
@@ -42,8 +46,7 @@ FirewallTransactionManager::operation_result(bool success,
 	return;
 
     const FirewallTransactionOperation* fto;
-    fto = dynamic_cast<const FirewallTransactionOperation*>(&op);
-    XLOG_ASSERT(fto != NULL);
+    fto = polymorphic_cast<const FirewallTransactionOperation*>(&op);
 
     if (_first_error.empty()) {
 	_first_error = c_format("Failed executing: \"%s\": %s",

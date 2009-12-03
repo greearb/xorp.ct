@@ -1221,6 +1221,7 @@ Peer<A>::receive(A dst, A src, Packet *packet)
     LinkStateUpdatePacket *lsup;
     LinkStateAcknowledgementPacket *lsap;
 
+    // XXX: Candidate for a packet_type<T>() template function.
     if (0 != (hello = dynamic_cast<HelloPacket *>(packet))) {
 	return process_hello_packet(dst, src, hello);
     } else if(0 != (dd = dynamic_cast<DataDescriptionPacket *>(packet))) {

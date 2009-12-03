@@ -38,6 +38,8 @@
 #include <list>
 #include <set>
 
+#include <boost/cast.hpp>
+
 #include "libproto/spt.hh"
 
 #include "ospf.hh"
@@ -46,6 +48,8 @@
 #include "area_router.hh"
 #include "external.hh"
 #include "policy_varrw.hh"
+
+using boost::polymorphic_cast;
 
 template <typename A>
 External<A>::External(Ospf<A>& ospf,
@@ -126,11 +130,9 @@ External<IPv4>::unique_link_state_id(Lsa::LsaRef lsar)
     Lsa::LsaRef lsar_in_db = *i;
     XLOG_ASSERT(lsar_in_db->get_self_originating());
 
-    ASExternalLsa *aselsa = dynamic_cast<ASExternalLsa *>(lsar.get());
-    XLOG_ASSERT(aselsa);
+    ASExternalLsa *aselsa = polymorphic_cast<ASExternalLsa *>(lsar.get());
     ASExternalLsa *aselsa_in_db =
-	dynamic_cast<ASExternalLsa *>(lsar_in_db.get());
-    XLOG_ASSERT(aselsa_in_db);
+	polymorphic_cast<ASExternalLsa *>(lsar_in_db.get());
     if (aselsa->get_network_mask() == aselsa_in_db->get_network_mask())
 	return;
 
@@ -181,8 +183,7 @@ External<IPv4>::unique_find_lsa(Lsa::LsaRef lsar, const IPNet<IPv4>& net)
     Lsa::LsaRef lsar_in_db = *i;
     XLOG_ASSERT(lsar_in_db->get_self_originating());
     ASExternalLsa *aselsa_in_db =
-	dynamic_cast<ASExternalLsa *>(lsar_in_db.get());
-    XLOG_ASSERT(aselsa_in_db);
+	polymorphic_cast<ASExternalLsa *>(lsar_in_db.get());
     IPv4 mask_in_db = IPv4(htonl(aselsa_in_db->get_network_mask()));
     // If the mask/prefix lengths match then the LSA has been found.
     if (mask_in_db.mask_len() == net.prefix_len())
@@ -455,8 +456,7 @@ External<A>::suppress_lsas(OspfTypes::AreaID area)
     RouteEntry<A> rte;
     list<Lsa::LsaRef>::iterator i;
     for (i = _suppress_temp.begin(); i != _suppress_temp.end(); i++) {
-	ASExternalLsa *aselsa = dynamic_cast<ASExternalLsa *>((*i).get());
-	XLOG_ASSERT(aselsa);
+	ASExternalLsa *aselsa = polymorphic_cast<ASExternalLsa *>((*i).get());
 	Lsa::LsaRef olsar = aselsa->get_suppressed_lsa();
 	aselsa->release_suppressed_lsa();
 	if (!rt.lookup_entry_by_advertising_router(area,
@@ -523,8 +523,7 @@ External<A>::clone_lsa(Lsa::LsaRef olsar)
 {
     XLOG_ASSERT(olsar->get_self_originating());
 
-    ASExternalLsa *olsa = dynamic_cast<ASExternalLsa *>(olsar.get());
-    XLOG_ASSERT(olsa);
+    ASExternalLsa *olsa = polymorphic_cast<ASExternalLsa *>(olsar.get());
 
     OspfTypes::Version version = _ospf.version();
     ASExternalLsa *nlsa = new ASExternalLsa(version);
@@ -641,8 +640,7 @@ template <typename A>
 void 
 External<A>::suppress_self(Lsa::LsaRef lsar)
 {
-    ASExternalLsa *aselsa = dynamic_cast<ASExternalLsa *>(lsar.get());
-    XLOG_ASSERT(aselsa);
+    ASExternalLsa *aselsa = polymorphic_cast<ASExternalLsa *>(lsar.get());
 
     // This may be a refresh of previously announce AS-external-LSA.
     bool suppressed = false;
@@ -689,8 +687,7 @@ External<A>::suppress_self_check(Lsa::LsaRef lsar)
     XLOG_ASSERT(lsar->external());
     XLOG_ASSERT(!lsar->get_self_originating());
 
-    ASExternalLsa *aselsa = dynamic_cast<ASExternalLsa *>(lsar.get());
-    XLOG_ASSERT(aselsa);
+    ASExternalLsa *aselsa = polymorphic_cast<ASExternalLsa *>(lsar.get());
 
     OspfTypes::Version version = _ospf.version();
 
@@ -713,8 +710,7 @@ External<A>::suppress_self_check(Lsa::LsaRef lsar)
     if (0 == olsar.get())
 	return false;
 
-    ASExternalLsa *olsa = dynamic_cast<ASExternalLsa *>(olsar.get());
-    XLOG_ASSERT(olsa);
+    ASExternalLsa *olsa = polymorphic_cast<ASExternalLsa *>(olsar.get());
 
     switch(version) {
     case OspfTypes::V2:

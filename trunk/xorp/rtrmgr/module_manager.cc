@@ -18,6 +18,9 @@
 // http://xorp.net
 
 
+#include <boost/cast.hpp>
+
+using boost::polymorphic_cast;
 
 #include "rtrmgr_module.h"
 
@@ -439,8 +442,7 @@ ModuleManager::start_module(const string& module_name, bool do_exec,
 {
     Module* module;
 
-    module = dynamic_cast<Module *>(find_module(module_name));
-    XLOG_ASSERT(module != NULL);
+    module = polymorphic_cast<Module *>(find_module(module_name));
 
     return (module->execute(do_exec, is_verification, cb));
 }
@@ -451,8 +453,7 @@ ModuleManager::kill_module(const string& module_name,
 {
     Module* module;
 
-    module = dynamic_cast<Module *>(find_module(module_name));
-    XLOG_ASSERT(module != NULL);
+    module = polymorphic_cast<Module *>(find_module(module_name));
 
     module->terminate(cb);
     return XORP_OK;
@@ -487,8 +488,7 @@ ModuleManager::shutdown()
 
     map<string, GenericModule *>::iterator iter;
     for (iter = _modules.begin(); iter != _modules.end(); ++iter) {
-	Module *module = dynamic_cast<Module *>(iter->second);
-	XLOG_ASSERT(module != NULL);
+	Module *module = polymorphic_cast<Module *>(iter->second);
 	module->terminate(callback(this, &ModuleManager::module_shutdown_cb,
 				   module->name()));
     }
@@ -546,8 +546,7 @@ ModuleManager::find_running_modules_by_path(const string& expath)
 
     map<string, GenericModule *>::const_iterator iter;
     for (iter = _modules.begin(); iter != _modules.end(); ++iter) {
-	Module* module = dynamic_cast<Module *>(iter->second);
-	XLOG_ASSERT(module != NULL);
+	Module* module = polymorphic_cast<Module *>(iter->second);
 	if (module->expath() != expath)
 	    continue;
 	switch (module->status()) {

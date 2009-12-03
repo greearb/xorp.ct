@@ -36,6 +36,8 @@
 #include "libxorp/eventloop.hh"
 #include "libproto/packet.hh"
 
+#include <boost/cast.hpp>
+
 #include "ospf.hh"
 #include "auth.hh"
 
@@ -801,8 +803,8 @@ Auth::set_simple_authentication_key(const string& password, string& error_msg)
     if (plaintext_ah == NULL) {
 	set_method(PlaintextAuthHandler::auth_type_name());
     }
-    plaintext_ah = dynamic_cast<PlaintextAuthHandler*>(_auth_handler);
-    XLOG_ASSERT(plaintext_ah != NULL);
+    plaintext_ah =
+	boost::polymorphic_cast<PlaintextAuthHandler*>(_auth_handler);
     plaintext_ah->set_key(password);
 
     error_msg = "";
