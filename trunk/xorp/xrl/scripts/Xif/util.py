@@ -4,9 +4,12 @@ from time import time, localtime, strftime
 # -----------------------------------------------------------------------------
 # Utility methods and structures
 
-def quit(file, lineno, reason):
+def warn(file, lineno, reason):
     print "In Xrl starting at line %d in %s:" % (lineno, file)
     print "\t", reason
+
+def quit(file, lineno, reason):
+    warn(file, lineno, reason)
     sys.exit(1)
 
 def file_write_string(fname, data):

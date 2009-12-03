@@ -1,7 +1,7 @@
 # Python imports
 import string, re, sys
 from xiftypes import *
-from util import quit
+from util import quit, warn
 
 # XIF specific imports
 
@@ -91,6 +91,7 @@ def parse_args(file, lineno, str):
 
     # arg format is <name>[<type>]
     #                     ^      ^
+    # list types may *optionally* carry a member type hint.
 
     xrl_args = []
     for t in toks:
@@ -104,11 +105,27 @@ def parse_args(file, lineno, str):
 
         validate_name(file, lineno, "Atom", name, '_-')
 
+        lab = string.find(type, "<")
+        member_type = None
+        if lab != -1:
+            rab = string.find(type, ">")
+            if rab == -1:
+                quit(file, lineno, "Invalid type spec \"%s\"" % type)
+            member_type = type[lab + 1:rab]
+            type = type[:lab]
+
         if xrl_atom_type.has_key(type) == 0:
             quit(file, lineno, "Atom type \"%s\" not amongst those known %s"
                  % (type, xrl_atom_type.keys()))
 
-        xrl_args.append(XrlArg(name, type))
+        xa = XrlArg(name, type)
+        if type == 'list':
+            # TODO: Force syntax check that member_type is present.
+            if xrl_atom_type.has_key(member_type) == 0:
+                warn(file, lineno, "Member atom type \"%s\" not amongst those known %s" % (member_type, xrl_atom_type.keys()))
+            xa.set_member_type(member_type)
+
+        xrl_args.append(xa)
     return xrl_args
 
 """ Fill in any missing separators in Xrl to make parsing trivial"""

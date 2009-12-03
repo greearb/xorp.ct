@@ -20,6 +20,7 @@ class XrlArg:
         self._name = name
         self._type = type
         self._note = annotation
+        self._member_type = None
     def name(self):
         return self._name
     def type(self):
@@ -27,6 +28,11 @@ class XrlArg:
     def cpp_type(self):
         tuple = xrl_atom_type[self._type] 
         return tuple[0]
+    def set_member_type(self, member_type):
+        self._member_type = member_type
+    def member_type(self):
+        """If type is list, the type of the members embedded within."""
+        return self._member_type
     def accessor(self):
         tuple = xrl_atom_type[self._type] 
         return tuple[1]
