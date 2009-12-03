@@ -55,8 +55,8 @@ import SCons.Builder
 vars = Variables()
 
 vars.AddVariables(
-    BoolVariable('shared', 'build with shared libraries', True),
-    BoolVariable('strip',  'strip executables and libraries when installed', False),
+    BoolVariable('shared', 'Build with shared libraries', True),
+    BoolVariable('strip',  'Strip all installed binaries', False),
     BoolVariable('rtld_origin', 'Use ORIGIN in dynamically linked programs', True),
     BoolVariable('ignore_check_errors', 'Ignore errors when building tests', False),
     BoolVariable('debug_stl',  'Build with checked STL operations', False),
