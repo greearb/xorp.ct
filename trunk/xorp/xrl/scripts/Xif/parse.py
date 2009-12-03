@@ -105,6 +105,7 @@ def parse_args(file, lineno, str):
 
         validate_name(file, lineno, "Atom", name, '_-')
 
+        # Parse <type>\<<member_type>\> (\<\> are literal angle brackets).
         lab = string.find(type, "<")
         member_type = None
         if lab != -1:
@@ -117,12 +118,12 @@ def parse_args(file, lineno, str):
         if xrl_atom_type.has_key(type) == 0:
             quit(file, lineno, "Atom type \"%s\" not amongst those known %s"
                  % (type, xrl_atom_type.keys()))
-
         xa = XrlArg(name, type)
         if type == 'list':
-            # TODO: Force syntax check that member_type is present.
+            # Deal with type of members embedded in the container. These
+            # are now mandatory for XIF in this branch.
             if xrl_atom_type.has_key(member_type) == 0:
-                warn(file, lineno, "Member atom type \"%s\" not amongst those known %s" % (member_type, xrl_atom_type.keys()))
+                quit(file, lineno, "Member atom type \"%s\" not amongst those known %s" % (member_type, xrl_atom_type.keys()))
             xa.set_member_type(member_type)
 
         xrl_args.append(xa)
