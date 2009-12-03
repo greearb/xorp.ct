@@ -210,7 +210,7 @@ def Symlink(src, link_name):
         pass
     os.symlink(src, link_name)
 SConsEnvironment.Symlink = SCons.Action.ActionFactory(Symlink,
-    lambda src, link_name: 'Symlink("%s", "%s")' % (src, link_name))
+    lambda src, link_name: 'Symlink("%s", as "%s")' % (src, link_name))
 
 def InstallProgram(env, dest, files, perm = 0755):
     if env.has_key('DESTDIR'):
