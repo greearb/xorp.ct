@@ -36,6 +36,8 @@
 
 #include <vector>
 
+#include <boost/noncopyable.hpp>
+
 #include "callback.hh"
 #include "ioevents.hh"
 #include "task.hh"
@@ -97,7 +99,9 @@ private:
  * are invoked when one of the @ref wait_and_dispatch methods is called
  * and I/O is pending on the particular descriptors.
  */
-class SelectorList {
+class SelectorList :
+    public boost::noncopyable
+{
 public:
 
     /**
@@ -228,9 +232,6 @@ protected:
 
 private:
     int do_select(struct timeval* to, bool force);
-
-    SelectorList(const SelectorList&);			// not implemented
-    SelectorList& operator=(const SelectorList&);	// not implemented
 
 private:
     enum {

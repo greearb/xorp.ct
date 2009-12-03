@@ -26,6 +26,8 @@
 #include <string>
 #include <map>
 
+#include <boost/noncopyable.hpp>
+
 #include "policy/common/varrw.hh"
 #include "policy/common/policy_exception.hh"
 #include "policy_instr.hh"
@@ -39,7 +41,10 @@
  *
  * It may accept/reject/modify any route which supports VarRW.
  */
-class PolicyFilter : public FilterBase {
+class PolicyFilter :
+    public boost::noncopyable,
+    public FilterBase
+{
 public:
     /**
      * @short Exception thrown on configuration error.
@@ -85,10 +90,6 @@ private:
     IvExec		    _exec;
     PolicyProfiler*	    _profiler_exec;
     SUBR*		    _subr;
-
-    // not impl
-    PolicyFilter(const PolicyFilter&);
-    PolicyFilter& operator=(const PolicyFilter&);
 };
 
 typedef ref_ptr<PolicyFilter> RefPf;

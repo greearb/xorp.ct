@@ -23,6 +23,8 @@
 #ifndef __POLICY_POLICY_LIST_HH__
 #define __POLICY_POLICY_LIST_HH__
 
+#include <boost/noncopyable.hpp>
+
 #include "code_list.hh"
 #include "set_map.hh"
 #include "var_map.hh"
@@ -40,7 +42,9 @@
  * Each policy list is an instantiation of a policy, and thus it hold the
  * specific code for this instantiation.
  */
-class PolicyList {
+class PolicyList :
+    public boost::noncopyable
+{
 public:
     typedef set<uint32_t> TagSet;
     typedef map<string,TagSet*> TagMap;
@@ -175,10 +179,6 @@ private:
     Term*	    _mod_term_export;
     static uint32_t _pe;
     POLICIES	    _pe_policies;
-
-    // not impl
-    PolicyList(const PolicyList&);
-    PolicyList& operator=(const PolicyList&);
 };
 
 #endif // __POLICY_POLICY_LIST_HH__

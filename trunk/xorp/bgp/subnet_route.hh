@@ -625,9 +625,9 @@ private:
 	if (_metadata.bump_refcount(delta))
 	    delete this;
     }
-    //prevent accidental use of default assignment operator
-    const SubnetRoute<A>& operator=(const SubnetRoute<A>&);
 
+    // Copyable, but not assignable.
+    const SubnetRoute<A>& operator=(const SubnetRoute<A>&);
 
     /**
      * _net is the subnet (address and prefix) for this route.

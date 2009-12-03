@@ -114,8 +114,11 @@ protected:
 /**
  * Base class for Xrl Jobs that are invoked by classes derived
  * from XrlJobQueue.
+ * Non-copyable due to inheriting from CallbackSafeObject.
  */
-class XrlJobBase : public CallbackSafeObject {
+class XrlJobBase :
+    public CallbackSafeObject
+{
 public:
     XrlJobBase(XrlJobQueue& q) : _q(q) {}
 
@@ -124,10 +127,6 @@ public:
 
 protected:
     XrlJobQueue& queue() { return _q; }
-
-private:
-    XrlJobBase(const XrlJobBase&);		// Not implemented
-    XrlJobBase& operator=(const XrlJobBase&);	// Not implemented
 
 private:
     XrlJobQueue& _q;

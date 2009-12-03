@@ -23,11 +23,13 @@
 #ifndef __POLICY_BACKEND_SET_MANAGER_HH__
 #define __POLICY_BACKEND_SET_MANAGER_HH__
 
-#include "policy/common/element_base.hh"
-#include "policy/common/policy_exception.hh"
 #include <string>
 #include <map>
 
+#include <boost/noncopyable.hpp>
+
+#include "policy/common/element_base.hh"
+#include "policy/common/policy_exception.hh"
 
 /**
  * @short Class that owns all sets. It resolves set names to ElemSet's.
@@ -36,7 +38,9 @@
  * reconfigured, but only the sets. This is currently not the case, but there is
  * enough structure to allow it.
  */
-class SetManager {
+class SetManager :
+    public boost::noncopyable
+{
 public:
     typedef map<string,Element*> SetMap;
 
@@ -72,13 +76,9 @@ public:
      * Zap all sets.
      */
     void clear();
+
 private:
-
     SetMap* _sets;
-
-    // not impl
-    SetManager(const SetManager&);
-    SetManager& operator=(const SetManager&);
 };
 
 #endif // __POLICY_BACKEND_SET_MANAGER_HH__

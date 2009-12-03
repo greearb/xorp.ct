@@ -23,6 +23,8 @@
 #ifndef __POLICY_BACKEND_POLICY_FILTERS_HH__
 #define __POLICY_BACKEND_POLICY_FILTERS_HH__
 
+#include <boost/noncopyable.hpp>
+
 #include "policy_filter.hh"
 #include "policy/common/filter.hh"
 #include "policy/common/varrw.hh"
@@ -35,7 +37,9 @@
  * future an option to disable a filter should be added. Although, not running a
  * filter is harmless for now [if configured however, state consumes memory].
  */
-class PolicyFilters {
+class PolicyFilters :
+    public boost::noncopyable
+{
 public:
     class PolicyFiltersErr : public PolicyException {
     public:
@@ -87,13 +91,10 @@ private:
      */
     FilterBase&   whichFilter(const uint32_t& ftype);
 
+private:
     FilterBase*   _import_filter;
     FilterBase*   _export_sm_filter;
     FilterBase*   _export_filter;
-
-    // not impl
-    PolicyFilters(const PolicyFilters&);
-    PolicyFilters& operator=(const PolicyFilters&);
 };
 
 #endif // __POLICY_BACKEND_POLICY_FILTERS_HH__

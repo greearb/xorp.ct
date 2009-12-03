@@ -31,6 +31,7 @@
 #include "cli.hh"
 #include "rtrmgr_error.hh"
 
+#include <boost/noncopyable.hpp>
 
 class ConfigTree;
 class OpCommand;
@@ -38,7 +39,9 @@ class RunCommand;
 class TemplateTree;
 class SlaveModuleManager;
 
-class OpInstance {
+class OpInstance :
+    public boost::noncopyable
+{
 public:
     OpInstance(EventLoop&			eventloop,
 	       OpCommand&			op_command,
@@ -59,9 +62,6 @@ public:
     void terminate_with_prejudice();
 
 private:
-    OpInstance(const OpInstance&);		// Not implemented
-    OpInstance& operator=(const OpInstance&);	// Not implemented
-
     void stdout_cb(RunCommand* run_command, const string& output);
     void stderr_cb(RunCommand* run_command, const string& output);
     void done_cb(RunCommand* run_command, bool success,

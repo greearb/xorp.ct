@@ -23,17 +23,19 @@
 #ifndef __POLICY_CODE_LIST_HH__
 #define __POLICY_CODE_LIST_HH__
 
-
 #include <string>
 #include <list>
 
-#include "code.hh"
+#include <boost/noncopyable.hpp>
 
+#include "code.hh"
 
 /**
  * @short A collection of code fragments.
  */
-class CodeList {
+class CodeList :
+    public boost::noncopyable
+{
 public:
     /**
      * Initialize codelist.
@@ -98,10 +100,6 @@ private:
     typedef list<Code*> ListCode;
 
     ListCode _codes;
-
-    // not impl
-    CodeList(const CodeList&);
-    CodeList& operator=(const CodeList&);
 };
 
 #endif // __POLICY_CODE_LIST_HH__

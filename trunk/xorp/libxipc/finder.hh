@@ -34,12 +34,15 @@
 #include "finder_messenger.hh"
 #include "finder_xrl_queue.hh"
 
+#include <boost/noncopyable.hpp>
 
 class FinderTarget;
 class FinderClass;
 class FinderEvent;
 
-class Finder : public FinderMessengerManager
+class Finder :
+    public boost::noncopyable,
+    public FinderMessengerManager
 {
 public:
     typedef list<FinderMessengerBase*> FinderMessengerList;
@@ -153,9 +156,6 @@ protected:
     bool class_exists(const string& class_name) const;
 
     EventLoop& eventloop() const { return _e; }
-
-    Finder(const Finder&);		// Not implemented
-    Finder& operator=(const Finder&);	// Not implemented
 
 protected:
     EventLoop&		 _e;

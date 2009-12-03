@@ -22,6 +22,8 @@
 #ifndef __RIP_XRL_PORT_MANAGER_HH__
 #define __RIP_XRL_PORT_MANAGER_HH__
 
+#include <boost/noncopyable.hpp>
+
 #include "libxorp/service.hh"
 #include "libfeaclient/ifmgr_xrl_mirror.hh"
 #include "port_manager.hh"
@@ -43,11 +45,12 @@ class XrlRouter;
  * appropriate @ref XrlPortIO object.
  */
 template <typename A>
-class XrlPortManager
-    : public PortManagerBase<A>,
-      public IfMgrHintObserver,
-      public ServiceBase,
-      public ServiceChangeObserverBase
+class XrlPortManager :
+    public boost::noncopyable,
+    public PortManagerBase<A>,
+    public IfMgrHintObserver,
+    public ServiceBase,
+    public ServiceChangeObserverBase
 {
 public:
     XrlPortManager(System<A>& 		system,
@@ -195,10 +198,6 @@ protected:
     // sockets with the fea.
     //
     void try_start_next_io_handler();
-
-private:
-    XrlPortManager(const XrlPortManager&);		// not implemented
-    XrlPortManager& operator=(const XrlPortManager&);	// not implemented
 
 protected:
     XrlRouter& 				_xr;	// XrlRouter

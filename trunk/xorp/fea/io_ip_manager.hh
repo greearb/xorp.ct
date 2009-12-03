@@ -26,6 +26,7 @@
 #include <vector>
 #include <set>
 #include <map>
+#include <boost/noncopyable.hpp>
 
 #include "libxorp/callback.hh"
 #include "libxorp/ipvx.hh"
@@ -62,7 +63,10 @@ struct IPvXHeaderInfo {
  * It also allows arbitrary filters to receive the raw IP data for that
  * protocol.
  */
-class IoIpComm : public IoIpReceiver {
+class IoIpComm :
+    public boost::noncopyable,
+    public IoIpReceiver
+{
 public:
     /**
      * Filter class.

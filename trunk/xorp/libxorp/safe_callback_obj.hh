@@ -26,6 +26,7 @@
 
 #include <algorithm>
 #include <vector>
+#include <boost/noncopyable.hpp>
 
 struct SafeCallbackBase;
 
@@ -38,21 +39,20 @@ struct SafeCallbackBase;
  * a CallbackSafeObject is destructed it informs all the callbacks that
  * refer to it that this is the case and invalidates (sets to null)
  * the object they point to.
+ *
+ * Copy operations are not supported.  It's hard to know what the
+ * correct thing to do on assignment or copy, so best bet is not
+ * to do anything.
  */
-class CallbackSafeObject {
+class CallbackSafeObject :
+    public boost::noncopyable
+{
 public:
     CallbackSafeObject() {}
     virtual ~CallbackSafeObject();
 
     void ref_cb(SafeCallbackBase* scb);
     void unref_cb(SafeCallbackBase* scb);
-
-protected:
-    // Copy operations are not supported.  It's hard to know what the
-    // correct thing to do on assignment or copy, so best bet is not
-    // to do anything.
-    CallbackSafeObject(const CallbackSafeObject&);		// Not implemented
-    CallbackSafeObject& operator=(const CallbackSafeObject&);	// Not implemented
 
 protected:
     std::vector<SafeCallbackBase*> _cbs;
@@ -64,7 +64,9 @@ protected:
  * These are object callbacks that are only dispatched if target of
  * callback is non-null.
  */
-class SafeCallbackBase {
+class SafeCallbackBase :
+    public boost::noncopyable
+{
 public:
     /**
      * Constructor.
@@ -86,10 +88,9 @@ public:
     bool valid() const;
 
 protected:
-    SafeCallbackBase();					  // Not implemented
-    SafeCallbackBase(const SafeCallbackBase&);		  // Not implemented
-    SafeCallbackBase& operator=(const SafeCallbackBase&); // Not implemented
+    SafeCallbackBase();			  // Not directly constructible
 
+protected:
     CallbackSafeObject* _cso;
 };
 

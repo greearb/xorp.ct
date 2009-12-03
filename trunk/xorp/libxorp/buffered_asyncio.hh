@@ -32,10 +32,14 @@
 #include <fcntl.h>
 #endif
 
+#include <boost/noncopyable.hpp>
+
 #include "libxorp/callback.hh"
 #include "libxorp/eventloop.hh"
 
-class BufferedAsyncReader {
+class BufferedAsyncReader :
+    public boost::noncopyable
+{
 public:
     enum Event {
 	DATA 		  = 1,
@@ -144,9 +148,7 @@ public:
     void stop();
 
 private:
-    BufferedAsyncReader();				// Not implemented
-    BufferedAsyncReader(const BufferedAsyncReader&);	// Not implemented
-    BufferedAsyncReader& operator=(const BufferedAsyncReader&); // Not implemented
+    BufferedAsyncReader();		// Not directly constructible
 
 private:
     void io_event(XorpFd fd, IoEventType type);

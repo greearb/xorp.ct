@@ -25,16 +25,20 @@
 
 #include <vector>
 #include <string>
+
+#include <boost/noncopyable.hpp>
+
 #include "instruction.hh"
 #include "policy/common/policy_utils.hh"
-
 
 /**
  * @short Container of instructions.
  *
  * A term is an atomic policy unit which may be executed.
  */
-class TermInstr {
+class TermInstr :
+    public boost::noncopyable
+{
 public:
     /**
      * @param name term name.
@@ -79,10 +83,6 @@ private:
     string _name;
     Instruction** _instructions;
     int		  _instrc;
-
-    // not impl
-    TermInstr(const TermInstr&);
-    TermInstr& operator=(const TermInstr&);
 };
 
 #endif // __POLICY_BACKEND_TERM_INSTR_HH__

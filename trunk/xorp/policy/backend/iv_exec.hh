@@ -25,11 +25,15 @@
 
 #include <stack>
 
+#include <boost/noncopyable.hpp>
+
 #include "libxorp/xorp.h"
+
 #include "policy/common/dispatcher.hh"
 #include "policy/common/varrw.hh"
 #include "policy/common/policy_exception.hh"
 #include "policy_profiler.hh"
+
 #include "instruction.hh"
 #include "set_manager.hh"
 #include "term_instr.hh"
@@ -42,7 +46,10 @@
  * The execution process may be optimized by not using visitors. Having
  * instructions implement a method that returns a flow action directly.
  */
-class IvExec : public InstrVisitor {
+class IvExec :
+    public boost::noncopyable,
+    public InstrVisitor
+{
 public:
     /**
      * A FlowAction is what has to be done with the route. DEFAULT is the
@@ -170,10 +177,6 @@ private:
     bool	    _did_trace;
     Next::Flow	    _ctr_flow;
     SUBR*	    _subr;
-
-    // not impelmented
-    IvExec(const IvExec&);
-    IvExec& operator=(const IvExec&);
 };
 
 #endif // __POLICY_BACKEND_IV_EXEC_HH__

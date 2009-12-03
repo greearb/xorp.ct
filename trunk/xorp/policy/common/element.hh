@@ -451,7 +451,7 @@ public:
     ElemNet();
     ElemNet(const char*);
     ElemNet(const A&);
-    ElemNet(const ElemNet<A>&);
+    ElemNet(const ElemNet<A>&);	    // copyable
     ~ElemNet();
 
     string	    str() const;
@@ -465,8 +465,7 @@ public:
     bool	operator==(const ElemNet<A>& rhs) const;
 
 private:
-    // not implemented
-    ElemNet& operator=(const ElemNet<A>&);
+    ElemNet& operator=(const ElemNet<A>&);	// not assignable
 
     const A*		_net;
     Mod			_mod;

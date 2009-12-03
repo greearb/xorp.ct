@@ -23,12 +23,16 @@
 #ifndef __POLICY_SEMANTIC_VARRW_HH__
 #define __POLICY_SEMANTIC_VARRW_HH__
 
+#include <string>
+
+#include <boost/noncopyable.hpp>
+
 #include "policy/common/varrw.hh"
 #include "policy/common/element_base.hh"
 #include "policy/common/element_factory.hh"
 #include "policy/common/policy_exception.hh"
+
 #include "var_map.hh"
-#include <string>
 
 /**
  * @short A VarRW used for semantic checking.
@@ -41,7 +45,10 @@
  * The SemanticVarRW will create dummy elements which are initialized to a
  * default value. This may not be optimal for semantic checking.
  */
-class SemanticVarRW : public VarRW {
+class SemanticVarRW :
+    public boost::noncopyable,
+    public VarRW
+{
 public:
     /**
      * @short Exception thrown on illegal variable use.
@@ -103,10 +110,6 @@ private:
     ElementFactory _ef;
 
     set<Element*> _trash;
-
-    // not implemented.
-    SemanticVarRW(const SemanticVarRW&);
-    SemanticVarRW& operator=(const SemanticVarRW&);
 };
 
 #endif // __POLICY_SEMANTIC_VARRW_HH__

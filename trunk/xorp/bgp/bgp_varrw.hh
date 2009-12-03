@@ -35,9 +35,13 @@ class BGPVarRWCallbacks;
  *
  * If the route is modified, the user is responsible for retrieving the
  * filtered message and deleting it.
+ *
+ * Non-copyable due to inheritance from VarRW<A>.
  */
 template <class A>
-class BGPVarRW : public SingleVarRW {
+class BGPVarRW :
+    public SingleVarRW
+{
 public:
     enum {
 	VAR_NETWORK4 = VAR_PROTOCOL,

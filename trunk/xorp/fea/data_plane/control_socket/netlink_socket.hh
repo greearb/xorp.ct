@@ -27,6 +27,8 @@
 #include "libxorp/eventloop.hh"
 #include "libxorp/exceptions.hh"
 
+#include <boost/noncopyable.hpp>
+
 class NetlinkSocketObserver;
 struct NetlinkSocketPlumber;
 
@@ -35,7 +37,9 @@ struct NetlinkSocketPlumber;
  * on the socket to NetlinkSocketObservers.  The NetlinkSocket hooks itself
  * into the EventLoop and activity usually happens asynchronously.
  */
-class NetlinkSocket {
+class NetlinkSocket :
+    public boost::noncopyable
+{
 public:
     NetlinkSocket(EventLoop& eventloop);
     ~NetlinkSocket();
@@ -189,9 +193,6 @@ private:
      * socket.
      */
     void io_event(XorpFd fd, IoEventType sm);
-
-    NetlinkSocket& operator=(const NetlinkSocket&);	// Not implemented
-    NetlinkSocket(const NetlinkSocket&);		// Not implemented
 
     static const size_t NETLINK_SOCKET_BYTES = 8*1024;	// Initial guess at msg size
 

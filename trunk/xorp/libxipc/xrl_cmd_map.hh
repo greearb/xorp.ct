@@ -27,6 +27,8 @@
 #include <map>
 #include <string>
 
+#include <boost/noncopyable.hpp>
+
 #include "libxorp/callback.hh"
 #include "xrl.hh"
 #include "xrl_error.hh"
@@ -49,7 +51,9 @@ protected:
     XrlRecvCallback	_cb;
 };
 
-class XrlCmdMap {
+class XrlCmdMap :
+    public boost::noncopyable
+{
 public:
     typedef map<string, XrlCmdEntry> CmdMap;
 
@@ -78,9 +82,6 @@ public:
 
 protected:
     bool add_handler (const XrlCmdEntry& c);
-
-    XrlCmdMap(const XrlCmdMap&);		// not implemented
-    XrlCmdMap& operator=(const XrlCmdMap&);	// not implemented
 
 protected:
     const string _name;

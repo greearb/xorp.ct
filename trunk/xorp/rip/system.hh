@@ -24,6 +24,8 @@
 #define __RIP_SYSTEM_HH__
 
 #include <map>
+#include <boost/noncopyable.hpp>
+
 #include "trace.hh"
 #include "route_db.hh"
 #include "port_manager.hh"
@@ -34,7 +36,9 @@
  * @short Top Level container for XORP RIP implementation.
  */
 template <typename A>
-class System {
+class System :
+    public boost::noncopyable
+{
 public:
     typedef RouteDB<A>		RouteDatabase;
     typedef PortManagerBase<A>	PortManager;
@@ -119,10 +123,6 @@ public:
     PolicyFilters& policy_filters() { return _policy_filters; }
 
     Trace& route_trace() { return _rtdb.trace(); }
-
-protected:
-    System(const System&);				// Not implemented
-    System& operator=(const System&);			// Not implemented
 
 protected:
     EventLoop&		_e;

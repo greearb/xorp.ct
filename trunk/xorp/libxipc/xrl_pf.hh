@@ -32,6 +32,8 @@
 #include "libxorp/timer.hh"
 #include "libxorp/exceptions.hh"
 
+#include <boost/noncopyable.hpp>
+
 class Xrl;
 class XrlError;
 class XrlArgs;
@@ -72,6 +74,7 @@ protected:
 // XrlPFSender
 
 class XrlPFSender
+    : public boost::noncopyable
 {
 public:
     typedef
@@ -108,10 +111,6 @@ public:
 
     const string& address() const		{ return _address; }
     EventLoop& eventloop() const		{ return _eventloop; }
-
-private:
-    XrlPFSender(const XrlPFSender&);			// Not implemented
-    XrlPFSender& operator=(const XrlPFSender&);		// Not implemented
 
 protected:
     EventLoop& _eventloop;

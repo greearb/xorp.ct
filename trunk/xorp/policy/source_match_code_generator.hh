@@ -26,7 +26,10 @@
 #include <vector>
 #include <string>
 
+#include <boost/noncopyable.hpp>
+
 #include "policy/common/policy_exception.hh"
+
 #include "code_generator.hh"
 
 /**
@@ -37,7 +40,10 @@
  * It skips dest and action blocks in policies. 
  * The action block is replaced with the actual policy tagging.
  */
-class SourceMatchCodeGenerator : public CodeGenerator {
+class SourceMatchCodeGenerator :
+    public boost::noncopyable,
+    public CodeGenerator
+{
 public:
     // bool == tag used
     // uint32_t actual tag
@@ -119,10 +125,6 @@ private:
     map<string, set<uint32_t> >	_protocol_tags;
     bool			_protocol_statement;
     string			_policy;
-
-    // not impl
-    SourceMatchCodeGenerator(const SourceMatchCodeGenerator&);
-    SourceMatchCodeGenerator& operator=(const SourceMatchCodeGenerator&);
 };
 
 #endif // __POLICY_SOURCE_MATCH_CODE_GENERATOR_HH__

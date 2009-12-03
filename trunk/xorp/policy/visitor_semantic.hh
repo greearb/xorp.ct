@@ -23,9 +23,13 @@
 #ifndef __POLICY_VISITOR_SEMANTIC_HH__
 #define __POLICY_VISITOR_SEMANTIC_HH__
 
+#include <boost/noncopyable.hpp>
+
 #include "libxorp/xorp.h"
+
 #include "policy/common/varrw.hh"
 #include "policy/common/dispatcher.hh"
+
 #include "visitor.hh"
 #include "semantic_varrw.hh"
 #include "set_map.hh"
@@ -39,7 +43,10 @@
  * checking must be performed realtive to the instantiation. [Generic semantic
  * checking may be accomplished too, but it is not done.]
  */
-class VisitorSemantic : public Visitor {
+class VisitorSemantic :
+    public boost::noncopyable,
+    public Visitor
+{
 public:
     enum PolicyType {
 	IMPORT,
@@ -107,10 +114,6 @@ private:
     PolicyType	    _ptype;
     set<Element*>   _trash;
     bool	    _reject;
-
-    // not impl
-    VisitorSemantic(const VisitorSemantic&);
-    VisitorSemantic& operator=(const VisitorSemantic&);
 };
 
 #endif // __POLICY_VISITOR_SEMANTIC_HH__

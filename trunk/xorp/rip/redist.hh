@@ -41,9 +41,12 @@ class RouteWalker;
  * associated with them.  set_allow_timers() is called when the
  * RedistTable is going to be withdrawn.  This allows routes to be
  * advertised as unreachable via host before they are deleted.
+ *
+ * Non-copyable due to inheritance from RouteEntryOrigin<A>.
  */
 template <typename A>
-class RedistRouteOrigin : public RouteEntryOrigin<A>
+class RedistRouteOrigin :
+    public RouteEntryOrigin<A>
 {
 public:
     RedistRouteOrigin() : RouteEntryOrigin<A>(true) {}
@@ -61,10 +64,6 @@ public:
      * expiry.
      */
     uint32_t deletion_secs() const;
-
-private:
-    RedistRouteOrigin(const RedistRouteOrigin&);		// not impl
-    RedistRouteOrigin& operator=(const RedistRouteOrigin&);	// not impl
 };
 
 
@@ -72,7 +71,9 @@ private:
  * @short Store for redistributed routes.
  */
 template <typename A>
-class RouteRedistributor {
+class RouteRedistributor :
+    public boost::noncopyable
+{
 public:
     typedef A Addr;
     typedef IPNet<A> Net;
@@ -137,9 +138,6 @@ public:
     bool withdrawing_routes() const;
 
 private:
-    RouteRedistributor(const RouteRedistributor& );		// not impl
-    RouteRedistributor& operator=(const RouteRedistributor& );	// not impl
-
     /**
      * Periodic timer callback for withdrawing a batch of routes.  The timer
      * is triggered by @ref withdraw_routes().

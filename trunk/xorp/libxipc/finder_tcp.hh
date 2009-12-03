@@ -34,6 +34,8 @@
 
 #include <vector>
 
+#include <boost/noncopyable.hpp>
+
 #ifdef HAVE_SYS_UIO_H
 #include <sys/uio.h>
 #endif
@@ -42,7 +44,9 @@
 #define MAX_XRL_INPUT_SIZE	65536	// maximum total XRL input buffer
 					// size on the network.
 
-class FinderTcpBase {
+class FinderTcpBase :
+    public boost::noncopyable
+{
 public:
     FinderTcpBase(EventLoop& e, XorpFd fd);
 
@@ -111,9 +115,6 @@ public:
     bool closed() const;
 
 protected:
-    FinderTcpBase(const FinderTcpBase&);		// Not implemented
-    FinderTcpBase& operator=(const FinderTcpBase&);	// Not implemented
-
     void read_callback(AsyncFileOperator::Event,
 		       const uint8_t*, size_t, size_t);
     void write_callback(AsyncFileOperator::Event,
@@ -130,7 +131,9 @@ protected:
     uint32_t _osize;	// output buffer size as advertised.
 };
 
-class FinderTcpListenerBase {
+class FinderTcpListenerBase :
+    public boost::noncopyable
+{
 public:
     typedef vector<IPv4> AddrList;
     typedef vector<IPv4Net> NetList;
@@ -181,9 +184,6 @@ protected:
      * connection_event() if source is valid.
      */
     void connect_hook(XorpFd fd, IoEventType type);
-
-    FinderTcpListenerBase(const FinderTcpListenerBase&);	    // Not impl
-    FinderTcpListenerBase& operator=(const FinderTcpListenerBase&); // Not impl
 
     EventLoop& eventloop() const { return _e; }
 

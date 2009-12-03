@@ -28,6 +28,8 @@
 #include "libxorp/exceptions.hh"
 #include "libxorp/ipvx.hh"
 
+#include <boost/noncopyable.hpp>
+
 class ClickSocketObserver;
 struct ClickSocketPlumber;
 class RunCommand;
@@ -37,7 +39,9 @@ class RunCommand;
  * on the socket to ClickSocketObservers.  The ClickSocket hooks itself
  * into the EventLoop and activity usually happens asynchronously.
  */
-class ClickSocket {
+class ClickSocket :
+    public boost::noncopyable
+{
 public:
     ClickSocket(EventLoop& eventloop);
     ~ClickSocket();
@@ -489,9 +493,6 @@ private:
      */
     void user_click_command_done_cb(RunCommand* run_command, bool success,
 				    const string& error_msg);
-
-    ClickSocket& operator=(const ClickSocket&);		// Not implemented
-    ClickSocket(const ClickSocket&);			// Not implemented
 
 private:
     static const size_t CLSOCK_BYTES = 8*1024; // Initial guess at msg size

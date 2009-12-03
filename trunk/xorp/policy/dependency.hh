@@ -29,6 +29,8 @@
 #include <sstream>
 #include <set>
 
+#include <boost/noncopyable.hpp>
+
 #include "policy/common/policy_exception.hh"
 
 /**
@@ -46,7 +48,9 @@
  * Having a consistent dependency list allows objects to be deleted correctly.
  */
 template <class T>
-class Dependency {
+class Dependency :
+    public boost::noncopyable
+{
 public:
     // things that depend on object
     typedef list<string>	    DependencyList;
@@ -204,10 +208,6 @@ private:
     Map _map;
 
     Pair* findDepend(const string& objectname) const;
-
-    // not impl
-    Dependency(const Dependency&);
-    Dependency& operator=(const Dependency&);
 };
 
 #endif // __POLICY_DEPENDENCY_HH__

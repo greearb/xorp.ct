@@ -33,6 +33,8 @@
 #include <fcntl.h>
 #endif
 
+#include <boost/noncopyable.hpp>
+
 #include "libxorp/xorpfd.hh"
 #include "libxorp/callback.hh"
 #include "libxorp/eventloop.hh"
@@ -211,7 +213,9 @@ public:
     void flush_buffers();
 
 protected:
-    class BufferInfo {
+    class BufferInfo :
+        public boost::noncopyable
+    {
     public:
 	BufferInfo(uint8_t* b, size_t bb, Callback cb)
 	    : _buffer(b), _buffer_bytes(bb), _offset(0), _cb(cb) {}
@@ -228,9 +232,7 @@ protected:
 	void incr_offset(size_t done) { _offset += done; }
 
     private:
-	BufferInfo();					// Not implemented
-	BufferInfo(const BufferInfo&);			// Not implemented
-	BufferInfo& operator=(const BufferInfo&);	// Not implemented
+	BufferInfo();				// Not directly constructible
 
 	uint8_t*	_buffer;
 	size_t		_buffer_bytes;
@@ -248,7 +250,10 @@ protected:
 /**
  * @short Write asynchronously to non-blocking file.
  */
-class AsyncFileWriter : public AsyncFileOperator {
+class AsyncFileWriter :
+    public boost::noncopyable,
+    public AsyncFileOperator
+{
 public:
     /**
      * @param e EventLoop that object should associate itself with.
@@ -358,12 +363,12 @@ public:
     void flush_buffers();
 
 private:
-    AsyncFileWriter();					// Not implemented
-    AsyncFileWriter(const AsyncFileWriter&);		// Not implemented
-    AsyncFileWriter& operator=(const AsyncFileWriter&);	// Not implemented
+    AsyncFileWriter();			// Not directly constructible
 
 protected:
-    class BufferInfo {
+    class BufferInfo :
+	public boost::noncopyable
+    {
     public:
 	BufferInfo(const uint8_t* b, size_t bb, const Callback& cb)
 	    : _buffer(b), _buffer_bytes(bb), _offset(0), _dst_port(0),
@@ -398,9 +403,7 @@ protected:
 	bool is_sendto() const { return (_is_sendto); }
 
     private:
-	BufferInfo();					// Not implemented
-	BufferInfo(const BufferInfo&);			// Not implemented
-	BufferInfo& operator=(const BufferInfo&);	// Not implemented
+	BufferInfo();			// Not directly constructible
 
 	const vector<uint8_t>	_data;		// Local copy of the data
 	const uint8_t*		_buffer;

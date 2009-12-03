@@ -22,6 +22,8 @@
 #ifndef __RIB_REDIST_POLICY_HH__
 #define __RIB_REDIST_POLICY_HH__
 
+#include <boost/noncopyable.hpp>
+
 /**
  * @short Base class for Redistribution Policy objects.
  *
@@ -48,7 +50,9 @@ public:
  * @short Base class for Unary Redistribution Policy objects.
  */
 template <typename A>
-class RedistUnaryOp {
+class RedistUnaryOp :
+    public boost::noncopyable
+{
 public:
     /**
      * Constructor.
@@ -61,8 +65,6 @@ public:
 private:
     // The following are not implemented
     RedistUnaryOp();
-    RedistUnaryOp(const RedistUnaryOp<A>&);
-    RedistUnaryOp<A>& operator=(const RedistUnaryOp<A>&);
 
 protected:
     const RedistPolicy<A>* _p1;
@@ -72,7 +74,10 @@ protected:
  * @short Base class for Binary Redistribution Policy objects.
  */
 template <typename A>
-class RedistBinaryOp : public RedistPolicy<A> {
+class RedistBinaryOp :
+    public boost::noncopyable,
+    public RedistPolicy<A>
+{
 public:
     /**
      * Constructor.
@@ -89,8 +94,6 @@ public:
 private:
     // The following are not implemented
     RedistBinaryOp();
-    RedistBinaryOp(const RedistBinaryOp<A>&);
-    RedistBinaryOp<A>& operator=(const RedistBinaryOp<A>&);
 
 protected:
     const RedistPolicy<A>* _p1;

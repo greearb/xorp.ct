@@ -30,6 +30,7 @@
 #include "round_robin.hh"
 #include "callback.hh"
 
+#include <boost/noncopyable.hpp>
 
 class TaskList;
 class TaskNode;
@@ -40,7 +41,10 @@ typedef XorpCallback0<bool>::RefPtr RepeatedTaskCallback;
 typedef XorpCallback1<void, XorpTask&>::RefPtr BasicTaskCallback;
 
 
-class TaskNode : public RoundRobinObjBase {
+class TaskNode :
+    public boost::noncopyable,
+    public RoundRobinObjBase
+{
 public:
     TaskNode(TaskList* task_list, BasicTaskCallback cb);
     virtual ~TaskNode();
@@ -58,9 +62,6 @@ public:
     virtual void run(XorpTask &) {};     // Implemented by children
 
 private:
-    TaskNode(const TaskNode&);			// not implemented
-    TaskNode& operator=(const TaskNode&);	// not implemented
-
     TaskList*	_task_list;	// TaskList this node is associated with
     BasicTaskCallback _cb;
     int		_ref_cnt;	// Number of referring XorpTask objects

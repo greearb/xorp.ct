@@ -26,6 +26,8 @@
 #include <string>
 #include <map>
 
+#include <boost/noncopyable.hpp>
+
 /**
  * @short Maps protocols to the XORP process name.
  *
@@ -33,7 +35,9 @@
  * explicitly added.  This class is used to map user configuration directives
  * regarding protocols to the actual name of the XORP process for that protocol.
  */
-class ProtocolMap {
+class ProtocolMap :
+    public boost::noncopyable
+{
 public:
     ProtocolMap();
 
@@ -63,9 +67,6 @@ public:
 
 private:
     typedef map<string, string> Map;
-
-    ProtocolMap(const ProtocolMap&); // not impl
-    ProtocolMap& operator=(const ProtocolMap&); // not impl
 
     Map _map;
 };

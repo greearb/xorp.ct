@@ -33,6 +33,8 @@
 #include <set>
 #include <vector>
 
+#include <boost/noncopyable.hpp>
+
 #include <openssl/md5.h>
 
 #include "exceptions.hh"	// for CorruptMessage exception
@@ -96,7 +98,9 @@ enum PathAttType {
 // MAX_ATTRIBUTE must contain the largest attribute number from the enum above
 #define MAX_ATTRIBUTE 20
 
-class PathAttribute {
+class PathAttribute :
+    public boost::noncopyable
+{
 public:
     enum Flags {
 	Optional	= 0x80,
@@ -253,9 +257,7 @@ protected:
     uint8_t	_type;
 
 private:
-    PathAttribute();	// forbidden
-    PathAttribute(const PathAttribute &); // forbidden
-    PathAttribute& operator=(const PathAttribute &); // forbidden
+    PathAttribute();	// Not directly constructible.
 };
 
 
@@ -283,8 +285,6 @@ public:
 
     bool encode(uint8_t* buf, size_t &wire_size, const BGPPeerData* peerdata) const;
 
-
-protected:
 private:
     OriginType	_origin;
 };
@@ -312,8 +312,6 @@ public:
 
     bool encode(uint8_t* buf, size_t &wire_size, const BGPPeerData* peerdata) const;
 
-
-protected:
 private:
     ASPath *_as_path;
 };
@@ -340,7 +338,6 @@ public:
 
     bool encode(uint8_t* buf, size_t &wire_size, const BGPPeerData* peerdata) const;
 
-protected:
 private:
     AS4Path *_as_path;
 };
@@ -366,7 +363,6 @@ public:
 
     bool encode(uint8_t* buf, size_t &wire_size, const BGPPeerData* peerdata) const;
 
-protected:
 private:
     A _next_hop;
 };
@@ -391,7 +387,6 @@ public:
 
     bool encode(uint8_t* buf, size_t &wire_size, const BGPPeerData* peerdata) const;
 
-protected:
 private:
     uint32_t _med;	// XXX stored in host format!
 };
@@ -418,7 +413,6 @@ public:
 
     bool encode(uint8_t* buf, size_t &wire_size, const BGPPeerData* peerdata) const;
 
-protected:
 private:
     uint32_t _localpref;
 
@@ -437,7 +431,6 @@ public:
 
     bool encode(uint8_t* buf, size_t &wire_size, const BGPPeerData* peerdata) const;
 
-protected:
 private:
 };
 
@@ -455,7 +448,6 @@ public:
 
     bool encode(uint8_t* buf, size_t &wire_size, const BGPPeerData* peerdata) const;
 
-protected:
 private:
     IPv4 _speaker;
     AsNum _as;
@@ -475,7 +467,6 @@ public:
 
     bool encode(uint8_t* buf, size_t &wire_size, const BGPPeerData* peerdata) const;
 
-protected:
 private:
     IPv4 _speaker;
     AsNum _as;
@@ -501,7 +492,6 @@ public:
 
     bool encode(uint8_t* buf, size_t &wire_size, const BGPPeerData* peerdata) const;
 
-protected:
 private:
     set <uint32_t> _communities;
 };
@@ -522,7 +512,6 @@ public:
 
     bool encode(uint8_t* buf, size_t &wire_size, const BGPPeerData* peerdata) const;
 
-protected:
 private:
     IPv4 _originator_id;	
 };
@@ -543,7 +532,6 @@ public:
 
     bool encode(uint8_t* buf, size_t &wire_size, const BGPPeerData* peerdata) const;
 
-protected:
 private:
     list <IPv4> _cluster_list;
 };
@@ -581,7 +569,6 @@ public:
     bool encode(uint8_t* buf, size_t &wire_size, 
 		const BGPPeerData* peerdata) const;
 
-protected:
 private:
 
     Afi _afi;			// Address Family Identifier.
@@ -617,7 +604,6 @@ public:
     bool encode(uint8_t* buf, size_t &wire_size, 
 		const BGPPeerData* peerdata) const;
 
-protected:
 private:
 
     Afi _afi;			// Address Family Identifier.
@@ -638,7 +624,6 @@ public:
     bool encode(uint8_t* buf, size_t &wire_size, 
 		const BGPPeerData* peerdata) const;
 
-protected:
 private:
     // storage for information in the attribute.
 

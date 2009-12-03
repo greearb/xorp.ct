@@ -23,17 +23,21 @@
 #ifndef __POLICY_BACKEND_POLICY_INSTR_HH__
 #define __POLICY_BACKEND_POLICY_INSTR_HH__
 
-#include "term_instr.hh"
 #include <vector>
 #include <string>
 
+#include <boost/noncopyable.hpp>
+
+#include "term_instr.hh"
 
 /**
  * @short Container for terms instructions.
  *
  * A policy instruction is a list of term instructions.
  */
-class PolicyInstr {
+class PolicyInstr :
+    public boost::noncopyable
+{
 public:
     /**
      * @param name name of the policy.
@@ -83,10 +87,6 @@ private:
     TermInstr**	_terms;
     int		_termc;
     bool	_trace;
-
-    // not impl
-    PolicyInstr(const PolicyInstr&);
-    PolicyInstr& operator=(const PolicyInstr&);
 };
 
 #endif // __POLICY_BACKEND_POLICY_INSTR_HH__

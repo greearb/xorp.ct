@@ -22,6 +22,8 @@
 #ifndef __RIB_RT_TAB_REDIST_HH__
 #define __RIB_RT_TAB_REDIST_HH__
 
+#include <boost/noncopyable.hpp>
+
 #include "rt_tab_base.hh"
 
 template <typename A>
@@ -141,7 +143,8 @@ protected:
  * associated with it.
  */
 template <typename A>
-class Redistributor
+class Redistributor :
+    public boost::noncopyable
 {
 public:
     class RedistEventInterface {
@@ -249,10 +252,6 @@ private:
     RedistOutput<A>* output()			{ return _output; }
 
 private:
-    // The following are not implemented
-    Redistributor(const Redistributor<A>&);
-    Redistributor<A>& operator=(const Redistributor<A>&);
-
     // These are nested classes and need to be friends to invoke methods in
     // enclosing class.
     friend class RedistEventInterface;
@@ -282,7 +281,8 @@ private:
  * Base class for propagaing output of route add and delete messages.
  */
 template <typename A>
-class RedistOutput
+class RedistOutput :
+    public boost::noncopyable
 {
 public:
     RedistOutput(Redistributor<A>* r);
@@ -309,11 +309,6 @@ protected:
     void announce_low_water()		{ _r->output_event().low_water(); }
     void announce_high_water()		{ _r->output_event().high_water(); }
     void announce_fatal_error()		{ _r->output_event().fatal_error(); }
-
-private:
-    // The following are not implemented
-    RedistOutput(const RedistOutput<A>&);
-    RedistOutput<A>& operator=(const RedistOutput<A>&);
 
 private:
     Redistributor<A>* _r;

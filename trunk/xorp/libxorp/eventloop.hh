@@ -37,6 +37,8 @@
 
 #include "selector.hh"
 
+#include <boost/noncopyable.hpp>
+
 /**
  * @short Event Loop.
  *
@@ -44,7 +46,9 @@
  * for Xorp processes.  All XorpTimer and select operations should be
  * co-ordinated through this interface.
  */
-class EventLoop {
+class EventLoop :
+    public boost::noncopyable
+{
 public:
     /**
      * Constructor
@@ -341,9 +345,6 @@ public:
     void set_aggressiveness(int num);
 
 private:
-    EventLoop(const EventLoop&);		// not implemented
-    EventLoop& operator=(const EventLoop&);	// not implemented
-
     bool do_work(bool can_block);
 
 private:

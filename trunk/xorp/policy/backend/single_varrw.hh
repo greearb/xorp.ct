@@ -25,6 +25,8 @@
 
 #include <list>
 
+#include <boost/noncopyable.hpp>
+
 #include "policy/common/varrw.hh"
 #include "policy/common/policy_utils.hh"
 #include "policy/common/element_base.hh"
@@ -39,7 +41,10 @@
  * Because of this caching, the SingleVarRW is usuable only once. After it has
  * done its work once, it has to be re-created.
  */
-class SingleVarRW : public VarRW {
+class SingleVarRW :
+    public boost::noncopyable,
+    public VarRW
+{
 public:
     /**
      * @short Exception thrown on error, such as reading unsupported variable.
@@ -141,10 +146,6 @@ private:
     bool	    _modified[VAR_MAX]; // variable id's that changed
     bool	    _did_first_read;
     PolicyTags*	    _pt;
-
-    // not impl
-    SingleVarRW(const SingleVarRW&);
-    SingleVarRW& operator=(const SingleVarRW&);
 };
 
 #endif // __POLICY_BACKEND_SINGLE_VARRW_HH__

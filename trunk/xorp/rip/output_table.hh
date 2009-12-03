@@ -35,9 +35,11 @@
  * intended use is for solicited and unsolicited routing table.
  *
  * Specialized implementations exist for IPv4 and IPv6.
+ * Non-copyable due to inheritance from OutputBase<A>.
  */
 template <typename A>
-class OutputTable : public OutputBase<A>
+class OutputTable :
+    public OutputBase<A>
 {
 public:
     OutputTable(EventLoop&	e,
@@ -52,14 +54,8 @@ public:
 
 protected:
     void output_packet();
-
     void start_output_processing();
-
     void stop_output_processing();
-
-private:
-    OutputTable(const OutputTable<A>& o);		// Not implemented
-    OutputTable<A>& operator=(const OutputTable<A>& o);	// Not implemented
 
 private:
     RouteWalker<A>	_rw;		// RouteWalker

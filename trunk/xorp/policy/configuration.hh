@@ -23,7 +23,10 @@
 #ifndef __POLICY_CONFIGURATION_HH__
 #define __POLICY_CONFIGURATION_HH__
 
+#include <boost/noncopyable.hpp>
+
 #include "policy/common/policy_exception.hh"
+
 #include "process_watch_base.hh"
 #include "set_map.hh"
 #include "policy_map.hh"
@@ -81,7 +84,9 @@ private:
  * checking by (dis)allowing the user to do certain actions [such as delete sets
  * which are referenced in policies].
  */
-class Configuration {
+class Configuration :
+    public boost::noncopyable
+{
 public:
     typedef map<string,Code*> CodeMap;
     typedef map<string,TagSet*> TagMap;
@@ -397,10 +402,6 @@ private:
     TagMap		    _tagmap;
     VarMap		    _varmap;
     FilterManagerBase*	    _filter_manager; // do not delete
-
-    // not impl
-    Configuration(const Configuration&);
-    Configuration& operator=(const Configuration&);
 };
 
 #endif // __POLICY_CONFIGURATION_HH__

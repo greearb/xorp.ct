@@ -24,6 +24,7 @@
 
 #include <map>
 #include <set>
+#include <boost/noncopyable.hpp>
 
 #include "libxorp/ipvx.hh"
 
@@ -37,7 +38,10 @@ class FeaDataPlaneManager;
 /**
  * A class that handles I/O TCP/UDP communication.
  */
-class IoTcpUdpComm : public IoTcpUdpReceiver {
+class IoTcpUdpComm :
+    public boost::noncopyable,
+    public IoTcpUdpReceiver
+{
 public:
     /**
      * Joined multicast group class.

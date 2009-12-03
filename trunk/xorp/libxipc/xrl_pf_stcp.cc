@@ -40,6 +40,8 @@
 #include <map>
 #include <algorithm>
 
+#include <boost/noncopyable.hpp>
+
 #include "libxorp/debug.h"
 #include "libxipc/xrl_module.h"
 #include "libxorp/xlog.h"
@@ -517,7 +519,9 @@ XrlPFSTCPListener::response_pending() const
  * in wire format rather than as an Xrl since the existing scheme
  * requires additional copy operations.
  */
-class RequestState {
+class RequestState :
+    public boost::noncopyable
+{
 public:
     typedef XrlPFSender::SendCallback Callback;
 
@@ -592,10 +596,6 @@ public:
 	if (_b != _buffer)
 	    delete [] _b;
     }
-
-private:
-    RequestState(const RequestState&);			// Not implemented
-    RequestState& operator=(const RequestState&);	// Not implemented
 
 private:
     XrlPFSTCPSender*	_p;				// parent

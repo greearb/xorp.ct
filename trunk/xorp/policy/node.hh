@@ -23,17 +23,23 @@
 #ifndef __POLICY_NODE_HH__
 #define __POLICY_NODE_HH__
 
+#include <string>
+
+#include <boost/noncopyable.hpp>
+
 #include "policy/common/operator_base.hh"
 #include "policy/common/varrw.hh"
+
 #include "node_base.hh"
 #include "visitor.hh"
-#include <string>
 
 /**
  * @short A generic node wrapper.
  */
 template<class T>
-class NodeAny : public Node {
+class NodeAny :
+    public Node
+{
 public:
     /**
      * @param val the value of the node.
@@ -63,7 +69,10 @@ typedef NodeAny<string>	NodeVar;
  *
  * Such as an IP address.
  */
-class NodeElem : public Node {
+class NodeElem :
+    public boost::noncopyable,
+    public Node
+{
 public:
     /**
      * The node owns the element. Caller must not modify / delete.
@@ -83,10 +92,6 @@ public:
 
 private:
     Element* _elem;
-
-    // not impl
-    NodeElem(const NodeElem&);
-    NodeElem& operator=(const NodeElem&);
 };
 
 /**
@@ -119,7 +124,10 @@ private:
  * The node will thus have two children. It owns both of them.
  *
  */
-class NodeBin : public Node {
+class NodeBin :
+    public boost::noncopyable,
+    public Node
+{
 public:
     /**
      * Caller must not delete / modify pointers.
@@ -158,10 +166,6 @@ private:
     BinOper* _op;
     Node *_left;
     Node *_right;
-   
-    // not impl
-    NodeBin(const NodeBin&);
-    NodeBin& operator=(const NodeBin&);
 };
 
 /**
@@ -169,7 +173,10 @@ private:
  *
  * The node will have one child. It owns it.
  */
-class NodeUn : public Node {
+class NodeUn :
+    public boost::noncopyable,
+    public Node
+{
 public:
     /**
      * Caller must not delete / modify pointers.
@@ -199,17 +206,16 @@ public:
 private:
     UnOper* _op;
     Node* _node;
-
-    // not impl
-    NodeUn(const NodeUn&);
-    NodeUn& operator=(const NodeUn&);
 };
 
 
 /**
  * @short An assignment operation.
  */
-class NodeAssign : public Node {
+class NodeAssign :
+    public boost::noncopyable,
+    public Node
+{
 public:
     /**
      * Caller must not delete / modify pointer.
@@ -241,10 +247,6 @@ private:
     string	_varid;
     BinOper*	_mod;
     Node*	_rvalue;
-
-    // not impl
-    NodeAssign(const NodeAssign&);
-    NodeAssign& operator=(const NodeAssign&);
 };
 
 /**

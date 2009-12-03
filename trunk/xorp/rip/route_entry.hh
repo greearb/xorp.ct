@@ -27,11 +27,11 @@
 #include "libxorp/ipnet.hh"
 #include "libxorp/timer.hh"
 
+#include <boost/noncopyable.hpp>
+
 #include "policy/backend/policytags.hh"
 
-
 template<typename A> class RouteEntryOrigin;
-
 template<typename A> class RouteEntryRef;
 
 /**
@@ -42,7 +42,9 @@ template<typename A> class RouteEntryRef;
  * Only IPv4 and IPv6 types may be supplied.
  */
 template<typename A>
-class RouteEntry {
+class RouteEntry :
+    public boost::noncopyable
+{
 public:
     typedef A Addr;
     typedef IPNet<A> Net;
@@ -231,12 +233,8 @@ private:
     uint16_t ref_cnt() const		{ return _ref_cnt; }
 
 protected:
-    RouteEntry(const RouteEntry&);			// Not implemented.
-    RouteEntry& operator=(const RouteEntry&);		// Not implemented.
-
     void dissociate();
     void associate(Origin* o);
-
 
 protected:
     Net		_net;
@@ -308,7 +306,9 @@ public:
  * Only IPv4 and IPv6 types may be supplied.
  */
 template <typename A>
-class RouteEntryOrigin {
+class RouteEntryOrigin :
+    public boost::noncopyable
+{
 public:
     typedef RouteEntry<A> Route;
     typedef IPNet<A>	  Net;
@@ -373,10 +373,6 @@ public:
      * expiry.
      */
     virtual uint32_t deletion_secs() const = 0;
-
-private:
-    RouteEntryOrigin(const RouteEntryOrigin& reo);		// Not impl
-    RouteEntryOrigin& operator=(const RouteEntryOrigin&);	// Not impl
 
 protected:
     struct RouteEntryStore* _rtstore;

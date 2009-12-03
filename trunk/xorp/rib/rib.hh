@@ -25,6 +25,8 @@
 
 #include <string>
 
+#include <boost/noncopyable.hpp>
+
 #include "libxorp/xorp.h"
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
@@ -73,7 +75,9 @@ enum RibVerifyType {
  * taken place to route to command to the right RIB.
  */
 template<class A>
-class RIB {
+class RIB :
+    public boost::noncopyable
+{
 public:
     /**
      * RIB Constructor.
@@ -696,20 +700,9 @@ private:
     IPPeerNextHop<A>* find_or_create_peer_nexthop(const A& addr);
 
     /**
-     * not implemented - force use of default copy constuctor to fail.
-     */
-    RIB(const RIB& );
-
-    /**
-     * not implemented - force use of default assignment operator to fail.
-     */
-    RIB& operator=(const RIB& );
-
-    /**
      * Flush out routing table changes to other processes.
      */
     void flush();
-
 
 protected:
     RibManager&		_rib_manager;

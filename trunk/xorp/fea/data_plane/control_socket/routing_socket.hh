@@ -27,6 +27,8 @@
 #include "libxorp/eventloop.hh"
 #include "libxorp/exceptions.hh"
 
+#include <boost/noncopyable.hpp>
+
 class RoutingSocketObserver;
 struct RoutingSocketPlumber;
 
@@ -35,7 +37,9 @@ struct RoutingSocketPlumber;
  * on the socket to RoutingSocketObservers.  The RoutingSocket hooks itself
  * into the EventLoop and activity usually happens asynchronously.
  */
-class RoutingSocket {
+class RoutingSocket :
+    public boost::noncopyable
+{
 public:
     RoutingSocket(EventLoop& eventloop);
     ~RoutingSocket();
@@ -124,9 +128,6 @@ private:
      * socket.
      */
     void io_event(XorpFd fd, IoEventType type);
-
-    RoutingSocket& operator=(const RoutingSocket&);	// Not implemented
-    RoutingSocket(const RoutingSocket&);		// Not implemented
 
 private:
     static const size_t ROUTING_SOCKET_BYTES = 8*1024;	// Initial guess at msg size

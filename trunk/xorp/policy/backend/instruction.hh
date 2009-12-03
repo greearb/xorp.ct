@@ -46,7 +46,10 @@
  *
  * The Push instruction owns the element.
  */
-class Push : public Instruction {
+class Push :
+    public boost::noncopyable,
+    public Instruction
+{
 public:
     /**
      * Element is owned by Push.
@@ -67,10 +70,6 @@ public:
 
 private:
     Element* _elem;
-    
-    // not implemented
-    Push(const Push&);
-    Push& operator=(const Push&);
 };
 
 /**
@@ -214,7 +213,10 @@ private:
  *
  * Operation will pop N elements from the stack.
  */
-class NaryInstr : public Instruction {
+class NaryInstr :
+    public boost::noncopyable,
+    public Instruction
+{
 public:
     /**
      * Caller must not delete / modify operation.
@@ -234,10 +236,6 @@ public:
 
 private:
     Oper* _op;
-
-    // not impl
-    NaryInstr(const NaryInstr&);
-    NaryInstr& operator=(const NaryInstr&);
 };
 
 #endif // __POLICY_BACKEND_INSTRUCTION_HH__

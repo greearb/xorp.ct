@@ -27,19 +27,22 @@
 #include <string>
 #include <set>
 
+#include <boost/noncopyable.hpp>
+
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
 #include "libxorp/mac.hh"
 
 class IPvX;
 
-
 /**
  * Base class for FEA configurable items where the modifications need
  * to be held over and propagated later, ie changes happen during a
  * transaction but are propagated during the commit.
  */
-class IfTreeItem {
+class IfTreeItem :
+    public boost::noncopyable
+{
 public:
     IfTreeItem() : _st(CREATED), _soft(false) {}
     virtual ~IfTreeItem() {}
@@ -534,7 +537,9 @@ private:
 /**
  * FEA class for holding physical interface state.
  */
-class IfTreeInterface : public IfTreeItem {
+class IfTreeInterface :
+    public IfTreeItem
+{
 public:
     typedef map<const string, IfTreeVif*> VifMap;
     typedef set<Mac>			  MacSet;
@@ -765,9 +770,6 @@ public:
     string str() const;
 
 private:
-    IfTreeInterface(const IfTreeInterface&);		  // Not implemented
-    IfTreeInterface& operator=(const IfTreeInterface&);	  // Not implemented
-
     IfTree&	_iftree;
     const string _ifname;
     uint32_t	_pif_index;
@@ -789,7 +791,9 @@ private:
 /**
  * FEA class for virtual (logical) interface state.
  */
-class IfTreeVif : public IfTreeItem {
+class IfTreeVif :
+    public IfTreeItem
+{
 public:
     typedef map<const IPv4, IfTreeAddr4*> IPv4Map;
     typedef map<const IPv6, IfTreeAddr6*> IPv6Map;
@@ -999,9 +1003,6 @@ public:
     string str() const;
 
 private:
-    IfTreeVif(const IfTreeVif&);		// Not implemented
-    IfTreeVif& operator=(const IfTreeVif&);	// Not implemented
-
     IfTreeInterface& _iface;
     const string _vifname;
 
@@ -1025,7 +1026,9 @@ private:
 /**
  * Class for holding an IPv4 interface address and address related items.
  */
-class IfTreeAddr4 : public IfTreeItem {
+class IfTreeAddr4 :
+    public IfTreeItem
+{
 public:
     IfTreeAddr4(const IPv4& addr)
 	: IfTreeItem(),
@@ -1129,9 +1132,6 @@ public:
     string str() const;
 
 private:
-    IfTreeAddr4(const IfTreeAddr4&);		// Not implemented
-    IfTreeAddr4& operator=(const IfTreeAddr4&);	// Not implemented
-
     IPv4	_addr;
 
     bool 	_enabled;
@@ -1148,7 +1148,8 @@ private:
 /**
  * Class for holding an IPv6 interface address and address related items.
  */
-class IfTreeAddr6 : public IfTreeItem
+class IfTreeAddr6 :
+    public IfTreeItem
 {
 public:
     IfTreeAddr6(const IPv6& addr)
@@ -1222,9 +1223,6 @@ public:
     string str() const;
 
 private:
-    IfTreeAddr6(const IfTreeAddr6&);		// Not implemented
-    IfTreeAddr6& operator=(const IfTreeAddr6&);	// Not implemented
-
     IPv6	_addr;
 
     bool 	_enabled;

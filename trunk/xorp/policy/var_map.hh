@@ -23,11 +23,15 @@
 #ifndef __POLICY_VAR_MAP_HH__
 #define __POLICY_VAR_MAP_HH__
 
-#include "policy/common/policy_exception.hh"
-#include "policy/common/varrw.hh"
-#include "process_watch.hh"
 #include <string>
 #include <map>
+
+#include <boost/noncopyable.hpp>
+
+#include "policy/common/policy_exception.hh"
+#include "policy/common/varrw.hh"
+
+#include "process_watch.hh"
 
 /**
  * @short A VarMap contains all information for legal protocol variables.
@@ -38,7 +42,9 @@
  *
  * This is crutial for semantic checking.
  */
-class VarMap {
+class VarMap :
+    public boost::noncopyable
+{
 public:
     /**
      * @short Exception thrown on VarMap errors such as on unknown variables.
@@ -177,10 +183,6 @@ private:
 
     typedef VariableMap MetaVarContainer;
     MetaVarContainer _metavars;
-    
-    // not impl
-    VarMap(const VarMap&);
-    VarMap& operator=(const VarMap&);
 };
 
 #endif // __POLICY_VAR_MAP_HH__

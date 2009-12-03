@@ -27,6 +27,7 @@
 #include <vector>
 #include <set>
 #include <map>
+#include <boost/noncopyable.hpp>
 
 #include "libxorp/callback.hh"
 #include "libxorp/mac.hh"
@@ -56,7 +57,10 @@ struct MacHeaderInfo {
  * It also allows arbitrary filters to receive the raw link-level data for that
  * protocol.
  */
-class IoLinkComm : public IoLinkReceiver {
+class IoLinkComm :
+    public boost::noncopyable,
+    public IoLinkReceiver
+{
 public:
     /**
      * Filter class.

@@ -27,6 +27,7 @@
 #include "libxorp/ref_ptr.hh"
 
 #include <map>
+#include <boost/noncopyable.hpp>
 
 #include "policy/backend/policy_filters.hh"
 
@@ -69,7 +70,9 @@ struct NetCmp {
  * The @ref RouteWalker class provides a way to walk the routes held.
  */
 template <typename A>
-class RouteDB {
+class RouteDB :
+    public boost::noncopyable
+{
 public:
     typedef A					Addr;
     typedef IPNet<A> 				Net;
@@ -215,9 +218,6 @@ public:
     Trace& trace() { return _trace; }
 
 protected:
-    RouteDB(const RouteDB&);			// not implemented
-    RouteDB& operator=(const RouteDB&);		// not implemented
-
     void expire_route(Route* r);
     void set_expiry_timer(Route* r);
 
@@ -262,7 +262,8 @@ private:
  * expensive.
  */
 template <typename A>
-class RouteWalker
+class RouteWalker :
+    public boost::noncopyable
 {
 public:
     typedef A			  		Addr;
@@ -325,10 +326,6 @@ public:
      * stored route and the state is set to STATE_RUNNING.
      */
     void reset();
-
-protected:
-    RouteWalker(const RouteWalker&);				// Not impl
-    RouteWalker& operator=(const RouteWalker&);			// Not impl
 
 private:
     static const Net NO_NET;

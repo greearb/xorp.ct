@@ -23,9 +23,12 @@
 #ifndef __POLICY_BACKEND_POLICY_REDIST_MAP_HH__
 #define __POLICY_BACKEND_POLICY_REDIST_MAP_HH__
 
-#include "policytags.hh"
 #include <map>
 #include <string>
+
+#include <boost/noncopyable.hpp>
+
+#include "policytags.hh"
 
 /**
  * @short A Map between policytags and where the route should be redistributed.
@@ -34,7 +37,9 @@
  * policytags need to be analyzed. According to these tags, the route must be
  * sent to various routing protocols to enable export policies.
  */
-class PolicyRedistMap {
+class PolicyRedistMap :
+    public boost::noncopyable
+{
 public:
     PolicyRedistMap();
     ~PolicyRedistMap();
@@ -63,13 +68,7 @@ public:
 private:
     // XXX: this should be the other way around for faster lookups
     typedef map<string,PolicyTags*> Map;
-
     Map _map;
-
-
-    // not impl
-    PolicyRedistMap(const PolicyRedistMap&);
-    PolicyRedistMap& operator=(const PolicyRedistMap&);
 };
 
 #endif // __POLICY_BACKEND_POLICY_REDIST_MAP_HH__

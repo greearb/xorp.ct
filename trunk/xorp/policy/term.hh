@@ -23,13 +23,16 @@
 #ifndef __POLICY_TERM_HH__
 #define __POLICY_TERM_HH__
 
-#include "libproto/config_node_id.hh"
-#include "policy/common/policy_exception.hh"
-
 #include <map>
 #include <string>
-#include "node_base.hh"
 
+#include <boost/noncopyable.hpp>
+
+#include "libproto/config_node_id.hh"
+
+#include "policy/common/policy_exception.hh"
+
+#include "node_base.hh"
 
 /**
  * @short A term is an atomic policy unit. 
@@ -37,7 +40,9 @@
  * It is a complete specification of how a route needs to be matched, and what
  * actions must be taken.
  */
-class Term {
+class Term :
+    public boost::noncopyable
+{
 public:
     enum BLOCKS {
 	SOURCE = 0,
@@ -165,10 +170,6 @@ private:
     Nodes*& _action_nodes;
 
     string  _from_protocol;	// The protocol (in the "from" block)
-
-    // not impl
-    Term(const Term&);
-    Term& operator=(const Term&);
 };
 
 #endif // __POLICY_TERM_HH__

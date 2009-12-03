@@ -19,10 +19,10 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-
-
 #include <functional>
 #include <algorithm>
+
+#include <boost/noncopyable.hpp>
 
 #include "finder_module.h"
 
@@ -192,16 +192,16 @@ private:
  * Class that handles resolutions for FinderClient, and puts results
  * into FinderClient's resolved table and notifies the client.
  */
-class FinderClientQuery : public FinderClientOneOffOp
+class FinderClientQuery :
+    public boost::noncopyable,
+    public FinderClientOneOffOp
 {
 public:
     typedef FinderClient::QueryCallback QueryCallback;
     typedef FinderClient::ResolvedTable ResolvedTable;
 
 private:
-    FinderClientQuery();					// Not Impl.
-    FinderClientQuery(const FinderClientQuery&);		// Not Impl.
-    FinderClientQuery& operator=(const FinderClientQuery&);	// Not Impl.
+    FinderClientQuery();	// Not directly constructible.
 
 public:
     FinderClientQuery(EventLoop&	   eventloop,

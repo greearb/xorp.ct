@@ -30,6 +30,8 @@
 #include "libxorp/debug.h"
 #include "libxorp/eventloop.hh"
 
+#include <boost/noncopyable.hpp>
+
 #include "policy/backend/policy_filters.hh"
 
 #include "port.hh"
@@ -49,7 +51,9 @@ class PacketQueue;
  * packets.  Timers elsewhere schedule the start of each packet train.
  */
 template <typename A>
-class OutputBase {
+class OutputBase :
+    public boost::noncopyable
+{
 public:
     typedef A		Addr;
     typedef IPNet<A>	Net;
@@ -132,10 +136,6 @@ protected:
      * @return true if the route was accepted, false otherwise.
      */
     bool do_filtering(RouteEntry<A>* r);
-
-private:
-    OutputBase(const OutputBase<A>& o);			// Not implemented
-    OutputBase<A>& operator=(const OutputBase<A>& o);	// Not implemented
 
 protected:
     EventLoop&		_e;

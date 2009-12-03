@@ -33,6 +33,8 @@
 #include <sys/time.h>
 #endif
 
+#include <boost/noncopyable.hpp>
+
 #include "timeval.hh"
 #include "heap.hh"
 #include "callback.hh"
@@ -420,8 +422,9 @@ private:
     bool expire_one(int worst_priority);
 
 private:
-    TimerList(const TimerList&);		// not implemented
-    TimerList& operator=(const TimerList&);	// not implemented
+    // The following is not a noncopyable candidate.
+    TimerList(const TimerList&);		// Not copyable.
+    TimerList& operator=(const TimerList&);	// Assignable only by self.
 
 private:
     // we need one heap for each priority level
@@ -434,8 +437,10 @@ private:
     friend class TimerListObserverBase;
 };
 
-
-class TimerNode : public HeapBase {
+class TimerNode :
+    public boost::noncopyable,
+    public HeapBase
+{
 protected:
     TimerNode(TimerList*, BasicTimerCallback);
     virtual ~TimerNode();

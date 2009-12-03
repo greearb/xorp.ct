@@ -36,9 +36,11 @@
  * triggered update packets.
  *
  * Specialized implementations exist for IPv4 and IPv6.
+ * Non-copyable due to inheritance from OutputBase<A>.
  */
 template <typename A>
-class OutputUpdates : public OutputBase<A>
+class OutputUpdates :
+    public OutputBase<A>
 {
 public:
     OutputUpdates(EventLoop&	  e,
@@ -66,10 +68,6 @@ protected:
     void start_output_processing();
 
     void stop_output_processing();
-
-private:
-    OutputUpdates(const OutputUpdates<A>& o);		    // Not implemented
-    OutputUpdates<A>& operator=(const OutputUpdates<A>& o); // Not implemented
 
 private:
     UpdateQueue<A>&		 	  _uq;

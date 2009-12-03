@@ -27,20 +27,24 @@
 #include <set>
 #include <string>
 
+#include <boost/noncopyable.hpp>
+
 #include "libproto/config_node_id.hh"
+
 #include "policy/common/policy_exception.hh"
+
 #include "set_map.hh"
 #include "term.hh"
 
 class PolicyMap;
-
 typedef set<string> DEPS;
 
 /**
  * @short A policy statement is a collection of terms.
  */
-class PolicyStatement {
-
+class PolicyStatement :
+    public boost::noncopyable
+{
 public:
     /**
      * @short Exception thrown on error such as when no term is found.
@@ -167,10 +171,6 @@ private:
     DEPS				_policies;
     SetMap&				_smap;
     PolicyMap&				_pmap;
-
-    // not impl
-    PolicyStatement(const PolicyStatement&);
-    PolicyStatement& operator=(const PolicyStatement&);
 };
 
 #endif // __POLICY_POLICY_STATEMENT_HH__
