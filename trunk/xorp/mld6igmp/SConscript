@@ -76,7 +76,10 @@ if is_shared:
     libxorp_mld6igmp = env.SharedLibrary(target = 'libxorp_mld6igmp',
 					 source = libxorp_mld6igmp_srcs,
 					 LIBS = '')
-    # XXX missing RPATH
+    if env['rtld_origin']:
+        for obj in libxorp_mld6igmp:
+            env.AddPostAction(libxorp_mld6igmp,
+                env.Symlink(obj.abspath, env['BUILDDIR'] + '/lib/' + str(obj)))
 else:
     libxorp_mld6igmp = env.StaticLibrary(target = 'libxorp_mld6igmp',
 					 source = libxorp_mld6igmp_srcs,
