@@ -60,6 +60,10 @@ env.AppendUnique(LIBS = [
     'xorp_comm',
     ])
 
+env.Replace(RPATH = [
+    env.Literal(env['xorp_module_rpath'])
+])
+
 libxorp_static_routes_srcs = [
     'static_routes_node.cc',
     'static_routes_varrw.cc',
@@ -78,7 +82,8 @@ if is_shared:
     if env['rtld_origin']:
         for obj in libxorp_static_routes:
             env.AddPostAction(libxorp_static_routes,
-                env.Symlink(obj.abspath, env['BUILDDIR'] + '/lib/' + str(obj)))
+                env.Symlink(obj.abspath,
+                            os.path.join(env['xorp_alias_libdir'], str(obj))))
 else:
     libxorp_static_routes = env.StaticLibrary(
 	target = 'libxorp_static_routes',

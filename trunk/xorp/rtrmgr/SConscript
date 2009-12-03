@@ -122,6 +122,13 @@ libxorp_rtrmgr_srcs += [ obj_util ]
 libxorp_rtrmgr = libxorp_rtrmgr_env.StaticLibrary(target = 'libxorp_rtrmgr',
 					source = libxorp_rtrmgr_srcs)
 
+#
+# Common RPATH.
+#
+env.Replace(RPATH = [
+    env.Literal(env['xorp_sbin_rpath'])
+])
+
 ### rtrmgr
 
 rtrmgr_env = env.Clone()

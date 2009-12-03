@@ -41,9 +41,15 @@ libxipc_env.PrependUnique(LIBPATH = [
     '$BUILDDIR/libxorp'
     ])
 
+# Internal libraries
 libxipc_env.AppendUnique(LIBS = [
     'xorp_comm',
     'xorp_core'
+    ])
+
+# External libraries
+libxipc_env.AppendUnique(LIBS = [
+    'crypto'
     ])
 
 libxipc_sources = [
@@ -110,7 +116,8 @@ if is_shared:
     if env['rtld_origin']:
         for obj in libxipc:
             env.AddPostAction(libxipc,
-                env.Symlink(obj.abspath, env['BUILDDIR'] + '/lib/' + str(obj)))
+                env.Symlink(obj.abspath,
+                            os.path.join(env['xorp_alias_libdir'], str(obj))))
     env.Alias('install',
               env.InstallLibrary(env['xorp_libdir'], libxipc))
 else:
@@ -173,7 +180,8 @@ if is_shared:
     if env['rtld_origin']:
         for obj in libfinder:
             env.AddPostAction(libfinder,
-                env.Symlink(obj.abspath, env['BUILDDIR'] + '/lib/' + str(obj)))
+                env.Symlink(obj.abspath,
+                            os.path.join(env['xorp_alias_libdir'], str(obj))))
     env.Alias('install',
               env.InstallLibrary(env['xorp_libdir'], libfinder))
 else:
@@ -202,6 +210,10 @@ env.AppendUnique(LIBS = [
     'xorp_comm',
     'xorp_core'
     ])
+
+env.Replace(RPATH = [
+    env.Literal(env['xorp_sbin_rpath'])
+])
 
 xorp_finder = env.Program(target = 'xorp_finder',
                      source = [ 'finder_main.cc' ])

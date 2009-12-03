@@ -67,14 +67,13 @@ env.AppendUnique(LIBS = [
     'xorp_comm',
 ])
 
+env.Replace(RPATH = [
+    env.Literal(env['xorp_module_rpath'])
+])
+
 ### libxorp_bgp
 
 libxorp_bgp_env = env.Clone()
-
-#if is_shared:
-#    libxorp_bgp_env.AppendUnique(LINKFLAGS = [
-#        '-Wl,-z,defs',
-#    ])
 
 libxorp_bgp_srcs = [
 	'aspath.cc',

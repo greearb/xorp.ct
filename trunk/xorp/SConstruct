@@ -17,13 +17,9 @@
 
 # $ID$
 
-# TODO tone down linker line spamming, -lpcre etc; stage use of LIBS please.
 # TODO cross compiles.
-# TODO Add separate toolchain test for C99 varargs macros.
-# TODO Add separate toolchain test for GNU varargs macros.
 # TODO Fix default include/lib paths, pass in from environment.
 # TODO Merge scons-unfamiliar syntactic sugar from YHC's sconsfiles.
-# TODO conditionalize new directory layout here
 
 gnutoolwarning = """
 WARNING: The GNU %s was not detected on your system.
@@ -32,8 +28,8 @@ may not function correctly.
 """
 
 # The XRL tgt-gen and clnt-gen scripts use Python 2.3+'s optparse
-# class.
-EnsurePythonVersion(2, 3)
+# class. However, os.path.relpath() requires Python 2.6.
+EnsurePythonVersion(2, 6)
 
 # SCons 0.98.4 is the earliest release that we have tested.  Earlier
 # ones may work.  If so, please submit a Trac issue so the check can
@@ -72,7 +68,8 @@ vars.AddVariables(
                  allowed_values=('no', 'yes', 'full', 'override'),
                  map={}, ignorecase=2),
     EnumVariable('optimize', 'Build with optimization', 'yes',
-                 allowed_values=('no', 'yes', 'full', 'size', 'override'),
+                 allowed_values=('no', 'minimal', 'yes', 'full',
+                                 'size', 'override'),
                  map={}, ignorecase=2),
     EnumVariable('profile', 'Build with profiling', 'no',
                  allowed_values=('no', 'gprof', 'pprof', 'override'),
@@ -122,13 +119,15 @@ SConsignFile(builddir + '/.sconsign')
 
 log_args(builddir + '/.scons_build_args')
 
+# XXX TODO: Make initial CPPPATH/LIBPATH derive from
+# autodetected host system *or* command line.
 env = Environment(
 		  TOOLS = ['default', 'autotest', 'clntgen', 'tgtgen',
 		           'TOOL_SUBST'],
 		  ENV = os.environ,
 		  BUILDDIR = builddir,
-		  CPPPATH=['/usr/sfw/include', '/opt/local/include', '/usr/local/include', '$BUILDDIR'],
-		  LIBPATH=['/usr/sfw/lib', '/opt/local/lib', '/usr/local/lib'],
+		  CPPPATH=['/usr/local/include', '$BUILDDIR'],
+		  LIBPATH=['/usr/local/lib'],
 		  variables = vars)
 
 prefix = env['prefix']
@@ -284,8 +283,9 @@ env['mandir'] = ARGUMENTS.get('mandir', '$datarootdir/man')
 # The image layout is intended to be FHS 2.3 compliant, for the benefit
 # of 3rd party packagers and distributors.
 #
+env['xorp_rootdir']     = env['exec_prefix']	# used to determine RPATH
 env['xorp_confdir']     = env['sysconfdir']		# path to xorp.conf
-env['xorp_libdir']      = env['libdir']  + '/xorp/lib'	# Shared libraries
+env['xorp_libdir']      = env['libdir']  + '/xorp/lib'
 env['xorp_moduledir']   = env['libdir']  + '/xorp/sbin'	# Protocol modules
 env['xorp_sbindir']     = env['sbindir']		# End-user binaries
 env['xorp_templatedir'] = env['datadir'] + '/templates'
@@ -300,7 +300,13 @@ env['WITH_OLSR'] = ARGUMENTS.get('enable-olsr', False)
 
 ########## start configure magic
 
-if not env.GetOption('clean') and not env.GetOption('help'):
+if env.has_key('LIBS'):
+    pre_LIBS = env['LIBS']
+else:
+    pre_LIBS = []
+
+if not env.GetOption('clean') and \
+   not env.GetOption('help'):
 
     env['MISSING_DEPS'] = []
     env['SKIPPED_DEPS'] = []
@@ -381,7 +387,26 @@ if not env.GetOption('clean') and not env.GetOption('help'):
     if env['SKIPPED_DEPS']:
         print 'Optional dependencies not found:\n   - %s' % '\n   - '.join(env['SKIPPED_DEPS'])
 
-    conf.Finish()
+    newenv = conf.Finish()
+    #
+    # Configure will put all libraries in global link line, during checks.
+    # This is not what we want, as it means all binaries get these LIBS.
+    # We should be able to check, for libraries, at SCons level,
+    # by looking in conf.havedict, but that isn't exported.
+    #
+    # It seems we'd be best off defining a class of our own, containing
+    # things we want to see, and passing that in and out of the
+    # config tests when we split up allconfig.py.
+    # For now, let's assume that libraries are present, and link against
+    # them on a piecemeal basis.
+    #
+    post_LIBS = env['LIBS']
+    env['LIBS'] = pre_LIBS
+
+    print 'Detected libraries:',
+    for x in post_LIBS:
+        print x,
+    print
 
 ########## end configure magic
 
@@ -401,7 +426,19 @@ if not env['optimize'] == 'override':
                                  Split(env['CFLAGS'])))
     env.Replace( CXXFLAGS = filter(lambda s: not s.startswith('-O'),
                                    Split(env['CXXFLAGS'])))
-    bigodict = { 'no': '-O0', 'yes': '-O1', 'full': '-O2', 'size': '-Os' }
+    bigodict = { 'no': '-O0',
+                 # 'minimal' denotes only those optimizations
+                 # necessary to force gcc to perform the tree_sink
+                 # pass, to elide most STL template instantiations.
+                 'minimal': "-O1 -fno-defer-pop -fno-delayed-branch \
+-fno-guess-branch-probability -fno-cprop-registers -fno-if-conversion \
+-fno-if-conversion2 -fno-tree-ccp -fno-tree-dce -fno-tree-dominator-opts \
+-fno-tree-dse -fno-tree-ter -fno-tree-lrs -fno-tree-sra \
+-fno-tree-copyrename -fno-tree-fre -fno-tree-ch -fno-unit-at-a-time \
+-fno-merge-constants",
+                 'yes': '-O1',
+                 'full': '-O2',
+                 'size': '-Os' }
     bigoflag = bigodict[env['optimize']]
     if not env['optimize'] == 'no':
         env.AppendUnique(CFLAGS = [ bigoflag ])
@@ -529,42 +566,56 @@ if env['debug_cb']:
 #
 # If rtld_origin is True, the linker will be passed a relative RPATH.
 # This allows the package itself to be relocated in the filesystem
-# as a whole.
+# as a whole. This also allows us to run binaries before we ship them.
 #
 if env.has_key('SHAREDLIBS'):
     if env['rtld_origin']:
+	#
 	# Build a subdirectory for holding symlinks to libraries upfront, so
 	# that binaries about to be built can be run from inside the BUILDDIR.
-	# Build a further alias for the benefit of entities installed
-	# in $xorp_sbindir.
-	Execute(Mkdir(builddir + '/lib'))
-	Execute(Mkdir(builddir + '/lib/xorp'))
-	Execute(env.Symlink(builddir + '/lib', builddir + '/lib/xorp/lib'))
+	#
+	# XXX Assumes that $libdir is below $exec_prefix. If the
+	# user changes this, results are undefined.
+	#
+	# $BUILDIR/lib will contain .so symlinks
+	#
+	xorp_alias_libdir = os.path.join(builddir, 'lib')
+	Execute(Mkdir(xorp_alias_libdir))
+	env['xorp_alias_libdir'] = xorp_alias_libdir
+	#
+	# Build a further alias for the benefit of entities which
+	# will be later installed in $xorp_sbindir.
+	#
+	# $BUILDIR/lib/xorp/lib will point to $BUILDIR/lib
+	#
+	xorp_alias_subdir = os.path.join(xorp_alias_libdir, 'xorp')
+	Execute(Mkdir(xorp_alias_subdir))
+	#
+	xorp_module_alias_libdir = os.path.join(xorp_alias_subdir, 'lib')
+	Execute(env.Symlink(xorp_alias_libdir, xorp_module_alias_libdir))
+	env['xorp_module_alias_libdir'] = xorp_module_alias_libdir
 
 	# Tell rtld to turn on $ORIGIN processing by default.
 	# NOTE: GNU ld specific flag.
 	env.PrependUnique( LINKFLAGS = [ '-Wl,-z,origin' ] )
 
-	#
-	# Now fixup the RPATH.
-	# FIXME This is not correct for all binaries. Some
-	# get installed in locations other than $bindir.
-	# The RPATH actually needs to get re-evaluated on each
-	# binary target, depending on how far down they get installed.
-	#
-	#rellibdir = os.path.relpath(env.Dir('$libdir').abspath,
-	#			    env.Dir('$bindir').abspath)
-	rellibdir = '../lib'
-	env.AppendUnique(RPATH = [
-	    env.Literal(os.path.join('\\$$ORIGIN', rellibdir))
-	])
+	# Set relative RPATH for each kind of installed XORP component.
+	env['xorp_sbin_rpath'] = os.path.join('\\$$ORIGIN',
+	   os.path.relpath(env.Dir('$xorp_libdir').abspath,
+			   env.Dir('$xorp_sbindir').abspath))
+	env['xorp_tool_rpath'] = os.path.join('\\$$ORIGIN',
+	   os.path.relpath(env.Dir('$xorp_libdir').abspath,
+			   env.Dir('$xorp_tooldir').abspath))
+	env['xorp_module_rpath'] = os.path.join('\\$$ORIGIN',
+	   os.path.relpath(env.Dir('$xorp_libdir').abspath,
+			   env.Dir('$xorp_moduledir').abspath))
     else:
 	# Hardcode the RPATH to our final destination.
-	# Developers will need to set LD_LIBRARY_PATH until they install.
-	env.AppendUnique(RPATH = [
-	    #'$xorp_libdir',
-	    '$libdir',
-	])
+	# Developers will need to set LD_LIBRARY_PATH until they install
+	# binaries from the BUILDDIR.
+	env['xorp_sbin_rpath'] = env['xorp_libdir']
+	env['xorp_tool_rpath'] = env['xorp_libdir']
+	env['xorp_module_rpath'] = env['xorp_libdir']
 
 # Export global symbols as dynamic in executables for runtime backtraces
 # w/o GDB or corefiles in production deployments.
@@ -573,6 +624,7 @@ env.AppendUnique(LINKFLAGS = [
     '-rdynamic',
     ])
 
-env.SConscript(['SConscript'], variant_dir='$BUILDDIR', exports='env', duplicate=0)
+env.SConscript(['SConscript'], variant_dir='$BUILDDIR',
+               exports='env', duplicate=0)
 
 env.Help(vars.GenerateHelpText(env))

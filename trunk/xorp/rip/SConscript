@@ -28,7 +28,7 @@ subdirs = [
 SConscript(dirs = subdirs, exports='env')
 
 e = env.Clone()
-is_shared = env.has_key('SHAREDLIBS')
+is_shared = e.has_key('SHAREDLIBS')
 
 #
 # NB: The same sources are used for RIP and RIPng.  We use separate
@@ -123,24 +123,30 @@ e.PrependUnique(LIBS = [
     'xorp_core',
 ])
 
+e.Replace(RPATH = [
+    e.Literal(e['xorp_module_rpath'])
+])
+
 if is_shared:
     libxorp_rip = e.SharedLibrary(target = 'libxorp_rip',
 				  source = libxorp_rip_srcs,
 				  LIBS = '')
-    if env['rtld_origin']:
+    if e['rtld_origin']:
         for obj in libxorp_rip:
-            env.AddPostAction(libxorp_rip,
-                env.Symlink(obj.abspath, env['BUILDDIR'] + '/lib/' + str(obj)))
+            e.AddPostAction(libxorp_rip,
+                e.Symlink(obj.abspath,
+                          os.path.join(env['xorp_alias_libdir'], str(obj))))
     libxorp_rip_xrl = e.SharedLibrary(target = 'libxorp_rip_xrl',
 				      source = libxorp_rip_xrl_srcs,
 				      LIBS = '')
-    if env['rtld_origin']:
+    if e['rtld_origin']:
         for obj in libxorp_rip_xrl:
-            env.AddPostAction(libxorp_rip_xrl,
-                env.Symlink(obj.abspath, env['BUILDDIR'] + '/lib/' + str(obj)))
+            e.AddPostAction(libxorp_rip_xrl,
+                e.Symlink(obj.abspath,
+                            os.path.join(env['xorp_alias_libdir'], str(obj))))
     e.Alias('install',
-                [ e.InstallLibrary(env['xorp_libdir'], libxorp_rip),
-                  e.InstallLibrary(env['xorp_libdir'], libxorp_rip_xrl) ])
+                [ e.InstallLibrary(e['xorp_libdir'], libxorp_rip),
+                  e.InstallLibrary(e['xorp_libdir'], libxorp_rip_xrl) ])
 else:
     libxorp_rip = e.StaticLibrary(target = 'libxorp_rip',
 				  source = libxorp_rip_srcs,
@@ -150,7 +156,7 @@ else:
 				      LIBS = '')
 
 rip = e.Program(target = 'xorp_rip', source = ripsrcs)
-e.Alias('install', e.InstallProgram(env['xorp_moduledir'], rip))
+e.Alias('install', e.InstallProgram(e['xorp_moduledir'], rip))
 
 #
 # RIPng
@@ -201,24 +207,30 @@ e.PrependUnique(LIBS = [
     'xorp_core',
 ])
 
+e.Replace(RPATH = [
+    e.Literal(e['xorp_module_rpath'])
+])
+
 if is_shared:
     libxorp_ripng = e.SharedLibrary(target = 'libxorp_ripng',
 				    source = libxorp_rip_srcs,
 				    LIBS = '')
-    if env['rtld_origin']:
+    if e['rtld_origin']:
         for obj in libxorp_ripng:
-            env.AddPostAction(libxorp_ripng,
-                env.Symlink(obj.abspath, env['BUILDDIR'] + '/lib/' + str(obj)))
+            e.AddPostAction(libxorp_ripng,
+                e.Symlink(obj.abspath,
+                          os.path.join(env['xorp_alias_libdir'], str(obj))))
     libxorp_ripngxrl = e.SharedLibrary(target = 'libxorp_ripng_xrl',
 				       source = libxorp_rip_xrl_srcs,
 				       LIBS = '')
-    if env['rtld_origin']:
+    if e['rtld_origin']:
         for obj in libxorp_ripngxrl:
-            env.AddPostAction(libxorp_ripngxrl,
-                env.Symlink(obj.abspath, env['BUILDDIR'] + '/lib/' + str(obj)))
+            e.AddPostAction(libxorp_ripngxrl,
+                e.Symlink(obj.abspath,
+                          os.path.join(env['xorp_alias_libdir'], str(obj))))
     e.Alias('install',
-                [ e.InstallLibrary(env['xorp_libdir'], libxorp_ripng),
-                  e.InstallLibrary(env['xorp_libdir'], libxorp_ripngxrl) ])
+                [ e.InstallLibrary(e['xorp_libdir'], libxorp_ripng),
+                  e.InstallLibrary(e['xorp_libdir'], libxorp_ripngxrl) ])
 else:
     libxorp_ripng = e.StaticLibrary(target = 'libxorp_ripng',
 				    source = libxorp_rip_srcs,
@@ -228,6 +240,6 @@ else:
 				       LIBS = '')
 
 ripng = e.Program(target = 'xorp_ripng', source = ripngsrcs)
-e.Alias('install', e.InstallProgram(env['xorp_moduledir'], ripng))
+e.Alias('install', e.InstallProgram(e['xorp_moduledir'], ripng))
 
 Default(rip, ripng)

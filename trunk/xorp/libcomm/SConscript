@@ -42,7 +42,8 @@ if is_shared:
     if env['rtld_origin']:
         for obj in libxorp_comm:
             env.AddPostAction(libxorp_comm,
-                env.Symlink(obj.abspath, env['BUILDDIR'] + '/lib/' + str(obj)))
+                env.Symlink(obj.abspath,
+                            os.path.join(env['xorp_alias_libdir'], str(obj))))
 else:
     libxorp_comm = env.StaticLibrary(target = 'libxorp_comm', source = sources)
 

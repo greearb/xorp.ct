@@ -87,7 +87,7 @@ def local_rpath(tenv):
     return [ x.replace('$BUILDDIR', Dir(tenv['BUILDDIR']).abspath) \
              for x in tenv['LIBPATH'] ]
 
-env['RPATH'] += local_rpath(env)
+env.AppendUnique(RPATH = local_rpath(env) )
 
 env.PrependUnique(LIBS = [
 	'xif_test_xrls',

@@ -45,6 +45,10 @@ env.AppendUnique(LIBS = [
     'xorp_comm',
     ])
 
+env.Replace(RPATH = [
+    env.Literal(env['xorp_tool_rpath'])
+])
+
 ### print_peers
 
 ppeers_srcs = [

@@ -28,6 +28,10 @@ is_shared = env.has_key('SHAREDLIBS')
 
 env.AppendUnique(CPPPATH = [ '#' ])
 
+# External libraries.
+# On BSD, and others, we need -lrt for clock_gettime().
+env.AppendUnique(LIBS = [ 'rt' ])
+
 libxorp_core_srcs = [
 	# C files
 	'daemon.c',
@@ -91,7 +95,8 @@ if is_shared:
     if env['rtld_origin']:
         for obj in libxorp_core:
             env.AddPostAction(libxorp_core,
-                env.Symlink(obj.abspath, env['BUILDDIR'] + '/lib/' + str(obj)))
+                env.Symlink(obj.abspath,
+                            os.path.join(env['xorp_alias_libdir'], str(obj))))
 else:
     libxorp_core = env.StaticLibrary(target = 'libxorp_core',
 				     source = libxorp_core_srcs)

@@ -61,6 +61,10 @@ env.AppendUnique(LIBS = [
     'xorp_comm'
 ])
 
+env.Replace(RPATH = [
+    env.Literal(env['xorp_module_rpath'])
+])
+
 libxorp_fib2mrib_srcs = [
 	     'fib2mrib_node.cc',
 	     'fib2mrib_varrw.cc',
@@ -75,7 +79,8 @@ if is_shared:
     if env['rtld_origin']:
         for obj in libxorp_fib2mrib:
             env.AddPostAction(libxorp_fib2mrib,
-                env.Symlink(obj.abspath, env['BUILDDIR'] + '/lib/' + str(obj)))
+                env.Symlink(obj.abspath,
+                            os.path.join(env['xorp_alias_libdir'], str(obj))))
 else:
     libxorp_fib2mrib = env.StaticLibrary(
 	target = 'libxorp_fib2mrib',

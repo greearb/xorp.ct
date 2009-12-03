@@ -70,6 +70,10 @@ env.AppendUnique(LIBS = [
     'xorp_comm',
 ])
 
+env.Replace(RPATH = [
+    env.Literal(env['xorp_module_rpath'])
+])
+
 libxorp_ospf_srcs = [
 	     'auth.cc',
 	     'area_router.cc',
@@ -94,7 +98,8 @@ if is_shared:
     if env['rtld_origin']:
         for obj in libxorp_ospf:
             env.AddPostAction(libxorp_ospf,
-                env.Symlink(obj.abspath, env['BUILDDIR'] + '/lib/' + str(obj)))
+                env.Symlink(obj.abspath,
+                            os.path.join(env['xorp_alias_libdir'], str(obj))))
 else:
     libxorp_ospf = env.StaticLibrary(target = 'libxorp_ospf',
 				     source = libxorp_ospf_srcs,

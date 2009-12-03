@@ -62,6 +62,10 @@ env.AppendUnique(LIBS = [
     'xorp_comm'
 ])
 
+env.Replace(RPATH = [
+    env.Literal(env['xorp_module_rpath'])
+])
+
 libmld6igmplitesrcs = [
 	'mld6igmp_config.cc',
 	'mld6igmp_group_record.cc',

@@ -28,8 +28,10 @@ is_shared = env.has_key('SHAREDLIBS')
 
 env.AppendUnique(CPPPATH = [ "#" ])
 env.PrependUnique(LIBPATH = [ '$BUILDDIR/libxorp'] )
-# XXX 'crypto' is a base system prerequisite; use LINKFLAGS?
-env.AppendUnique(LIBS = ['xorp_core', 'crypto'])
+
+env.AppendUnique(LIBS = [
+    'xorp_core'
+])
 
 sources = [
 	'checksum.c',
@@ -46,7 +48,8 @@ if is_shared:
     if env['rtld_origin']:
         for obj in libxorp_proto:
             env.AddPostAction(libxorp_proto,
-                env.Symlink(obj.abspath, env['BUILDDIR'] + '/lib/' + str(obj)))
+                env.Symlink(obj.abspath,
+                            os.path.join(env['xorp_alias_libdir'], str(obj))))
 else:
     libxorp_proto = env.StaticLibrary(target = 'libxorp_proto',
 				      source = sources)

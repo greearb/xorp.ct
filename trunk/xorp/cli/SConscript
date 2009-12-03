@@ -46,6 +46,7 @@ env.PrependUnique(LIBPATH = [
     '$BUILDDIR/cli/libtecla',
     ])
 
+# Internal libraries.
 env.AppendUnique(LIBS = [
     'xif_cli_processor',
     'xst_cli',
@@ -55,6 +56,15 @@ env.AppendUnique(LIBS = [
     'xorp_comm',
     'xorp_core',
     ])
+
+# External libraries.
+env.AppendUnique(LIBS = [
+    'pcreposix'
+])
+
+env.Replace(RPATH = [
+    env.Literal(env['xorp_tool_rpath'])
+])
 
 libxorp_cli_srcs = [
     'cli_client.cc',

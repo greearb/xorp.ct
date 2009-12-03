@@ -47,7 +47,8 @@ if is_shared:
     if env['rtld_origin']:
         for obj in libpbe:
             env.AddPostAction(libpbe,
-                env.Symlink(obj.abspath, env['BUILDDIR'] + '/lib/' + str(obj)))
+                env.Symlink(obj.abspath,
+                            os.path.join(env['xorp_alias_libdir'], str(obj))))
     env.Alias('install',
         env.InstallLibrary(env['xorp_libdir'], libpbe))
 else:

@@ -64,6 +64,10 @@ env.AppendUnique(LIBS = [
     'xorp_comm'
 ])
 
+env.Replace(RPATH = [
+    env.Literal(env['xorp_module_rpath'])
+])
+
 libxorp_pim_srcs = [
 	     'pim_bsr.cc',
 	     'pim_config.cc',
@@ -105,7 +109,8 @@ if is_shared:
     if env['rtld_origin']:
         for obj in libxorp_pim:
             env.AddPostAction(libxorp_pim,
-                env.Symlink(obj.abspath, env['BUILDDIR'] + '/lib/' + str(obj)))
+                env.Symlink(obj.abspath,
+                            os.path.join(env['xorp_alias_libdir'], str(obj))))
     env.Alias('install',
               env.InstallLibrary(env['xorp_libdir'], libxorp_pim))
 else:

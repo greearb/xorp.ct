@@ -48,6 +48,10 @@ env.AppendUnique(LIBS = [
     'xorp_comm',
     ])
 
+env.Replace(RPATH = [
+    env.Literal(env['xorp_tool_rpath'])
+])
+
 cleardbsrcs = [
 	'clear_database.cc'
     ]

@@ -68,6 +68,10 @@ libxorp_vrrp_srcs = ['arpd.cc',
 	       'vrrp_vif.cc'
 	       ]
 
+env.Replace(RPATH = [
+    env.Literal(env['xorp_module_rpath'])
+])
+
 if is_shared:
     libxorp_vrrp = env.SharedLibrary(target = 'libxorp_vrrp',
 				     source = libxorp_vrrp_srcs,
@@ -75,7 +79,8 @@ if is_shared:
     if env['rtld_origin']:
         for obj in libxorp_vrrp:
             env.AddPostAction(libxorp_vrrp,
-                env.Symlink(obj.abspath, env['BUILDDIR'] + '/lib/' + str(obj)))
+                env.Symlink(obj.abspath,
+                            os.path.join(env['xorp_alias_libdir'], str(obj))))
 else:
     libxorp_vrrp = env.StaticLibrary(target = 'libxorp_vrrp',
 				     source = libxorp_vrrp_srcs,

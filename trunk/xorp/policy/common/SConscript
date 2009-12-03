@@ -38,6 +38,11 @@ libpcmsrcs = [
     'varrw.cc'
     ]
 
+# External libraries
+env.AppendUnique(LIBS = [
+    'pcreposix'
+])
+
 is_shared = env.has_key('SHAREDLIBS')
 
 # deal with bgp aspath shared code
@@ -48,7 +53,8 @@ if is_shared:
     if env['rtld_origin']:
         for obj in libpcm:
             env.AddPostAction(libpcm,
-                env.Symlink(obj.abspath, env['BUILDDIR'] + '/lib/' + str(obj)))
+                env.Symlink(obj.abspath,
+                            os.path.join(env['xorp_alias_libdir'], str(obj))))
     env.Alias('install', env.InstallLibrary(env['xorp_libdir'], libpcm))
 else:
     obj_aspath = env.StaticObject(target = 'aspath',

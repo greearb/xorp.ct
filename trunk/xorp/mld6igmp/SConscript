@@ -72,6 +72,10 @@ libxorp_mld6igmp_srcs = [
 	     'xrl_mld6igmp_node.cc'
              ]
 
+env.Replace(RPATH = [
+    env.Literal(env['xorp_module_rpath'])
+])
+
 if is_shared:
     libxorp_mld6igmp = env.SharedLibrary(target = 'libxorp_mld6igmp',
 					 source = libxorp_mld6igmp_srcs,
@@ -79,7 +83,8 @@ if is_shared:
     if env['rtld_origin']:
         for obj in libxorp_mld6igmp:
             env.AddPostAction(libxorp_mld6igmp,
-                env.Symlink(obj.abspath, env['BUILDDIR'] + '/lib/' + str(obj)))
+                env.Symlink(obj.abspath,
+                            os.path.join(env['xorp_alias_libdir'], str(obj))))
 else:
     libxorp_mld6igmp = env.StaticLibrary(target = 'libxorp_mld6igmp',
 					 source = libxorp_mld6igmp_srcs,

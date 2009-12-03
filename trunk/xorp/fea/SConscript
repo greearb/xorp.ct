@@ -108,7 +108,14 @@ libxorp_fea_linkorder += [
     'xorp_core'
     ]
 
+# Internal libraries.
+# Note special use of conditional above.
 env.PrependUnique(LIBS = libxorp_fea_linkorder)
+
+# External libraries.
+env.AppendUnique(LIBS = [
+    'pcap'
+])
 
 # Report unresolved symbol references when building the FEA.
 if is_shared:
@@ -147,6 +154,10 @@ libxorp_fea_srcs = [
      'xrl_mfea_node.cc'
     ]
 
+env.Replace(RPATH = [
+    env.Literal(env['xorp_module_rpath'])
+])
+
 if is_shared:
     libxorp_fea_srcs += libxfdp_srcs
     libxorp_fea = env.SharedLibrary(target = 'libxorp_fea',
@@ -154,7 +165,8 @@ if is_shared:
     if env['rtld_origin']:
         for obj in libxorp_fea:
             env.AddPostAction(libxorp_fea,
-                env.Symlink(obj.abspath, env['BUILDDIR'] + '/lib/' + str(obj)))
+                env.Symlink(obj.abspath,
+                            os.path.join(env['xorp_alias_libdir'], str(obj))))
     env.Alias('install',
               env.InstallLibrary(env['xorp_libdir'], libxorp_fea))
 else:
@@ -164,14 +176,6 @@ else:
     env.PrependUnique(LIBS = [ libxfdp ])
     libxorp_fea = env.StaticLibrary(target = 'libxorp_fea',
 				    source = libxorp_fea_srcs)
-
-#######################
-
-# new path
-#feapath = '$bindir'
-
-# old path
-feapath = '$exec_prefix/fea'
 
 #######################
 

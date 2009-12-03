@@ -66,6 +66,10 @@ libtecla_srcs = [
     'version.c'
     ]
 
+# External libraries
+env.AppendUnique(LIBS = [
+    'curses'
+])
 
 if is_shared:
     libxorp_tecla = env.SharedLibrary('libxorp_tecla', libtecla_srcs)

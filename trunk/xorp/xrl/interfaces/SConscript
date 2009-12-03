@@ -110,7 +110,7 @@ for xif in xifs:
             for obj in lib:
                 env.AddPostAction(lib,
                     env.Symlink(obj.abspath,
-                                env['BUILDDIR'] + '/lib/' + str(obj)))
+                                os.path.join(env['xorp_alias_libdir'], str(obj))))
     else:
         lib = env.StaticLibrary(tgt, src)
 
