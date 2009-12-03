@@ -30,10 +30,7 @@
 #include <map>
 
 #include "xrl_pf_factory.hh"
-//#include "xrl_pf_inproc.hh"
-//#include "xrl_pf_sudp.hh"
 #include "xrl_pf_stcp.hh"
-//#include "xrl_pf_kill.hh"
 #include "xrl_pf_unix.hh"
 
 
@@ -49,23 +46,12 @@ XrlPFSenderFactory::create_sender(EventLoop&	eventloop,
     debug_msg("instantiating sender pf = \"%s\", addr = \"%s\"\n",
 	      protocol, address);
     try {
-#if 0
-	if (strcmp(XrlPFSUDPSender::protocol_name(), protocol) == 0) {
-	    return new XrlPFSUDPSender(eventloop, address);
-	} else
-#endif
 	if (strcmp(XrlPFSTCPSender::protocol_name(), protocol) == 0) {
 	    return new XrlPFSTCPSender(eventloop, address);
 	}
-#if 0
-	else if (strcmp(XrlPFInProcSender::protocol_name(), protocol) == 0) {
-	    return new XrlPFInProcSender(eventloop, address);
-	} else if (strcmp(XrlPFKillSender::protocol_name(), protocol) == 0) {
-	    return new XrlPFKillSender(eventloop, address);
-	} else
-#endif
-	if (strcmp(XrlPFUNIXSender::protocol_name(), protocol) == 0)
+	if (strcmp(XrlPFUNIXSender::protocol_name(), protocol) == 0) {
 	    return new XrlPFUNIXSender(eventloop, address);
+	}
     } catch (XorpException& e) {
 	XLOG_ERROR("XrlPFSenderFactory::create failed: %s\n", e.str().c_str());
     }

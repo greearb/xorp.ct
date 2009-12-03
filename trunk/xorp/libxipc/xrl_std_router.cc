@@ -23,9 +23,7 @@
 
 #include "xrl_module.h"
 #include "xrl_std_router.hh"
-//#include "xrl_pf_inproc.hh"	// Inproc is deprecated.
 #include "xrl_pf_stcp.hh"
-//#include "xrl_pf_sudp.hh"	// UDP is deprecated.
 #include "xrl_pf_unix.hh"
 #include "libxorp/xlog.h"
 
@@ -47,18 +45,10 @@ XrlStdRouter::create_listener()
 	pf = default_pf;
 
     switch (pf[0]) {
-#if 0	// Inproc is deprecated.
-	case 'i':
-	    return new XrlPFInProcListener(_e, this);
-#endif
 	// For the benefit of bench_ipc.sh.
 	case 't':
 	    return new XrlPFSTCPListener(_e, this);
 	    break;
-#if 0	// UDP is deprecated.
-	case 'u':
-	    return new XrlPFSUDPListener(_e, this);
-#endif
 	case 'x':
 #if XRL_PF != 'x'
 	    XLOG_ASSERT(_unix == NULL);

@@ -55,13 +55,10 @@ simple_cpp_tests = [
 	#'finder_msgs',
 	#'finder_tcp',
 	#'finder_to',
-	#'header',		# no longer used in shipping libxipc
-	#'inproc',		# no longer used in shipping libxipc
 	'lemming',
 	#'receiver',		# compound
 	'stcp',
 	'stcppf',
-	#'sudp',		# no longer used in shipping libxipc
 	'xrl',
 	'xrl_args',
 	'xrl_atom',

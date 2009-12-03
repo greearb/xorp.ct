@@ -52,21 +52,13 @@ awk '{if ($1 == "#") { print $0 } else { print $1" "$2" "$3} }' $1 > $2
 # Setup various parameters
 setup_vars() {
 
-filter_input $stat1.dat $stat1.dat.gnuplot
 filter_input $stat2.dat $stat2.dat.gnuplot
-filter_input $stat3.dat $stat3.dat.gnuplot
 
-IFILE1="$stat1.dat.gnuplot"
 IFILE2="$stat2.dat.gnuplot"
-IFILE3="$stat3.dat.gnuplot"
 
 # Parameters
-PAR_AVE1="using 1:2 t \"$NAME1\" w lp lt 1 lw 2 pt 2"
-PAR_BAR1="t \"\" w yerrorbars lt 1 lw 2 pt 2"
 PAR_AVE2="using 1:2 t \"$NAME2\" w lp lt 1 lw 2 pt 4"
 PAR_BAR2="t \"\" w yerrorbars lt 1 lw 2 pt 4"
-PAR_AVE3="using 1:2 t \"$NAME3\" w lp lt 1 lw 2 pt 6"
-PAR_BAR3="t \"\" w yerrorbars lt 1 lw 2 pt 6"
 
 }
 
@@ -77,21 +69,15 @@ LOGSCALE="nologscale xy"
 XRANGE="[*:*]"
 YRANGE="[*:*]"
 #SET_KEY="set key top right"
-PLOT="plot \"$IFILE1\" $PAR_AVE1, \"$IFILE1\" $PAR_BAR1, \"$IFILE2\" $PAR_AVE2, \"$IFILE2\" $PAR_BAR2, \"$IFILE3\" $PAR_AVE3, \"$IFILE3\" $PAR_BAR3"
+PLOT="plot \"$IFILE2\" $PAR_AVE2, \"$IFILE2\" $PAR_BAR2,"
 
-stat1="inproc"
 stat2="tcp"
-stat3="udp"
-NAME1="In-Process"
 NAME2="TCP"
-NAME3="UDP"
 YLABEL="Performance (XRLs/sec)"
 TITLE="XRL performance for various communication families"
 setup_vars
 OFILE="xrl_performance.eps"
-# Select with or without std. deviation
-#PLOT="plot \"$IFILE1\" $PAR_AVE1, \"$IFILE2\" $PAR_AVE2, \"$IFILE3\" $PAR_AVE3"
-PLOT="plot \"$IFILE1\" $PAR_AVE1, \"$IFILE1\" $PAR_BAR1, \"$IFILE2\" $PAR_AVE2, \"$IFILE2\" $PAR_BAR2, \"$IFILE3\" $PAR_AVE3, \"$IFILE3\" $PAR_BAR3"
+PLOT="plot \"$IFILE2\" $PAR_AVE2, \"$IFILE2\" $PAR_BAR2"
 plot_eps
 
 exit 0

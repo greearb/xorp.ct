@@ -24,7 +24,6 @@
 
 
 #include "libxipc/xrl_router.hh"
-#include "libxipc/xrl_pf_sudp.hh"
 
 
 class MasterConfigTreeNode;

@@ -42,8 +42,6 @@ test_pf()
     echo "    Processed data file = ${outfile}"
 }
 
-#test_pf "inproc" "i" "-m 0 -r"
-#test_pf "udp" "u" "-m 0 -r"
 test_pf "tcp" "t" "-m 0 -r"
 test_pf "local" "x" "-m 0 -r"
 
