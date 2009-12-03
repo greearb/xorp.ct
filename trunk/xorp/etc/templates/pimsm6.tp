@@ -209,15 +209,7 @@ protocols {
 	    %help:	short "Configure the IPv6 Bootstrap mechanism";
 	    %activate:	xrl "$(pimsm6.targetname)/pim/0.1/stop_bsr";
 	    %activate:	xrl "$(pimsm6.targetname)/pim/0.1/start_bsr";
-	    /*
-	     * To test runtime BSR reconfiguration, comment out the two
-	     * lines below, and uncomment the apply_bsr_changes line.
-	     */
-	    %update:	xrl "$(pimsm6.targetname)/pim/0.1/stop_bsr";
-	    %update:	xrl "$(pimsm6.targetname)/pim/0.1/start_bsr";
-	    /*
 	    %update:	xrl "$(pimsm6.targetname)/pim/0.1/apply_bsr_changes";
-	     */
 	    %delete:	xrl "$(pimsm6.targetname)/pim/0.1/stop_bsr";
 
 	    disable {
