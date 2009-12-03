@@ -291,12 +291,7 @@ env['xorp_sbindir']     = env['sbindir']		# End-user binaries
 env['xorp_templatedir'] = env['datadir'] + '/templates'
 env['xorp_tooldir']     = env['libdir']  + '/xorp/bin'	# tools/*
 env['xorp_xrlsdir']     = env['datadir'] + '/xorp/xrls'	# *.xrls
-
-# XXX needed by scons xrl idl wrappers
-# ...and rtrmgr/util.cc
-# XXX Push this down...
-env['XORP_SOURCEDIR'] = sourcedir
-env['XORP_BUILDDIR'] = builddir
+env['xorp_sourcedir']   = sourcedir	# rtrmgr/util.cc and xif need this
 
 # turnoff bgp, olsr for now.
 # XXX bgp is always built, olsr never built.

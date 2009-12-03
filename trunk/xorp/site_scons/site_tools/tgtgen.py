@@ -29,7 +29,7 @@ def generate(env):
 
     env['BUILDERS']['TGTGEN'] = tgtgen_builder
 
-    env['TGTGEN'] = "$XORP_SOURCEDIR/xrl/scripts/tgt-gen"
+    env['TGTGEN'] = "$xorp_sourcedir/xrl/scripts/tgt-gen"
     env['TGTGEN_CPPPATH'] = []
     env['_TGTGEN_INCFLAGS'] = '$( ${_concat(INCPREFIX, TGTGEN_CPPPATH, INCSUFFIX, __env__, RDirs, TARGET, SOURCE)} $)'
 

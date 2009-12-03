@@ -110,8 +110,8 @@ if env['debug_xrldb']:
 # Pushdown for static paths in util.cc.
 xorp_paths = {
     "XORP_INSTALL_ROOT" : '\\"' + str(env['prefix']) + '\\"',
-    "XORP_BUILD_ROOT"   : '\\"' + str(env['XORP_BUILDDIR']) + '\\"',
-    "XORP_SRC_ROOT"     : '\\"' + str(env['XORP_SOURCEDIR']) + '\\"',
+    "XORP_BUILD_ROOT"   : '\\"' + str(env['BUILDDIR']) + '\\"',
+    "XORP_SRC_ROOT"     : '\\"' + str(env['xorp_sourcedir']) + '\\"',
 }
 
 util_cc_env = env.Clone()
