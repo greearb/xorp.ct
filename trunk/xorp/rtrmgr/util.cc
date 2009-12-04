@@ -261,6 +261,7 @@ find_executable_filename(const string& program_filename)
     string xorp_root_dir = xorp_binary_root_dir();
 
     list<string> path;
+    path.push_back(xorp_command_dir());		// XXX FHS
     path.push_back(xorp_root_dir);
 
     // Expand path
