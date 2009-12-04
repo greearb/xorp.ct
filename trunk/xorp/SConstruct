@@ -607,7 +607,11 @@ if env.has_key('SHAREDLIBS'):
 	# $BUILDIR/lib will contain .so symlinks
 	#
 	xorp_alias_libdir = os.path.join(builddir, 'lib')
-	Execute(Mkdir(xorp_alias_libdir))
+	# XXX workaround Mkdir() failure on EEXIST, SCons < 20090223.
+	try:
+		Execute(Mkdir(xorp_alias_libdir))
+	except:
+		pass
 	env['xorp_alias_libdir'] = xorp_alias_libdir
 	#
 	# Build a further alias for the benefit of entities which
@@ -616,9 +620,13 @@ if env.has_key('SHAREDLIBS'):
 	# $BUILDIR/lib/xorp/lib will point to $BUILDIR/lib
 	#
 	xorp_alias_subdir = os.path.join(xorp_alias_libdir, 'xorp')
-	Execute(Mkdir(xorp_alias_subdir))
 	#
+	# XXX workaround Mkdir() failure on EEXIST, SCons < 20090223.
 	xorp_module_alias_libdir = os.path.join(xorp_alias_subdir, 'lib')
+	try:
+		Execute(Mkdir(xorp_alias_subdir))
+	except:
+		pass
 	Execute(env.Symlink(xorp_alias_libdir, xorp_module_alias_libdir))
 	env['xorp_module_alias_libdir'] = xorp_module_alias_libdir
 
