@@ -329,13 +329,15 @@ Module::module_stopped(int stop_signal)
 
 ModuleManager::ModuleManager(EventLoop& eventloop, Rtrmgr& rtrmgr,
 			     bool do_restart, bool verbose,
-			     const string& xorp_root_dir)
+			     const string& xorp_root_dir,
+			     const string& xorp_module_dir)
     : GenericModuleManager(eventloop, verbose),
       _rtrmgr(rtrmgr),
       _master_config_tree(NULL),
       _do_restart(do_restart),
       _verbose(verbose),
-      _xorp_root_dir(xorp_root_dir)
+      _xorp_root_dir(xorp_root_dir),
+      _xorp_module_dir(xorp_module_dir)
 {
 }
 
@@ -359,8 +361,8 @@ ModuleManager::expand_execution_path(const string& path, string& expath,
 	// The path to the module doesn't starts from the user home directory
 	// and is not an absolute path (in UNIX, DOS or NT UNC form).
 	//
-	// Add the XORP root path to the front
-	expath = xorp_root_dir() + PATH_DELIMITER_STRING + path;
+	// Add the XORP module path to the front
+	expath = xorp_module_dir() + PATH_DELIMITER_STRING + path;
     }
 
     if (! is_absolute_path(expath, false)) {

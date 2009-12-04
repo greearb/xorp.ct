@@ -33,7 +33,7 @@
 
 static string s_cfg_root;
 static string s_bin_root;
-static string s_boot_file;
+static string s_config_file;
 
 /**
  * Find the directory of executable program.
@@ -117,7 +117,7 @@ xorp_path_init(const char* argv0)
     if (xr != NULL) {
 	s_bin_root = xr;
 	s_cfg_root = xr;
-	s_boot_file = s_cfg_root + "/etc/xorp.conf";
+	s_config_file = s_cfg_root + "/etc/xorp.conf";
 	return;
     }
 
@@ -133,11 +133,11 @@ xorp_path_init(const char* argv0)
     if (current_root == build_root) {
 	s_bin_root = build_root;
 	s_cfg_root = xorp_real_path(XORP_SRC_ROOT);
-	s_boot_file = s_cfg_root + "/rtrmgr/xorp.conf";
+	s_config_file = s_cfg_root + "/rtrmgr/xorp.conf";
 
 	debug_msg("s_bin_root:   %s\n", s_bin_root.c_str());
 	debug_msg("s_cfg_root:   %s\n", s_cfg_root.c_str());
-	debug_msg("s_boot_file:  %s\n", s_boot_file.c_str());
+	debug_msg("s_config_file:  %s\n", s_config_file.c_str());
 
 	return;
     }
@@ -145,11 +145,11 @@ xorp_path_init(const char* argv0)
     string install_root = xorp_real_path(XORP_INSTALL_ROOT);
     s_bin_root = install_root;
     s_cfg_root = install_root;
-    s_boot_file = s_cfg_root + "/etc/xorp.conf";
+    s_config_file = s_cfg_root + "/etc/xorp.conf";
 
     debug_msg("s_bin_root:   %s\n", s_bin_root.c_str());
     debug_msg("s_cfg_root:   %s\n", s_cfg_root.c_str());
-    debug_msg("s_boot_file:  %s\n", s_boot_file.c_str());
+    debug_msg("s_config_file:  %s\n", s_config_file.c_str());
 }
 
 const string&
@@ -165,6 +165,18 @@ xorp_config_root_dir()
 }
 
 string
+xorp_module_dir()
+{
+    return s_cfg_root + string("/lib/xorp/sbin");
+}
+
+string
+xorp_command_dir()
+{
+    return s_cfg_root + string("/lib/xorp/bin");
+}
+
+string
 xorp_template_dir()
 {
     return s_cfg_root + string("/share/xorp/templates");
@@ -177,9 +189,9 @@ xorp_xrl_targets_dir()
 }
 
 string
-xorp_boot_file()
+xorp_config_file()
 {
-    return s_boot_file;
+    return s_config_file;
 }
 
 string&

@@ -34,9 +34,11 @@ class XrlRtrmgrInterface;
 
 class Rtrmgr {
 public:
-    Rtrmgr(const string& template_dir,
+    Rtrmgr(const string& module_dir,
+	   const string& command_dir,
+	   const string& template_dir,
 	   const string& xrl_targets_dir,
-	   const string& boot_file,
+	   const string& config_file,
 	   const list<IPv4>& bind_addrs,
 	   uint16_t bind_port,
 	   bool	do_exec,
@@ -54,9 +56,11 @@ public:
     bool verbose() const { return _verbose; }
 
 private:
+    string	_module_dir;
+    string	_command_dir;
     string	_template_dir;
-    string	_xrl_targets_dir;
-    string	_boot_file;
+    string	_xrl_targets_dir;        // Only used by DEBUG_XRLDB.
+    string	_config_file;
     list<IPv4>	_bind_addrs;
     uint16_t	_bind_port;
 

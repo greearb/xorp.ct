@@ -34,9 +34,11 @@
  *
  *   @li @ref xorp_binary_root_dir()
  *   @li @ref xorp_config_root_dir()
+ *   @li @ref xorp_module_dir()
+ *   @li @ref xorp_command_dir()
  *   @li @ref xorp_template_dir()
  *   @li @ref xorp_xrl_targets_dir()
- *   @li @ref xorp_boot_file()
+ *   @li @ref xorp_config_file()
  *
  * @param argv0 the argv[0] supplied to main().
  */
@@ -57,6 +59,24 @@ const string& xorp_binary_root_dir();
  * value.
  */
 const string& xorp_config_root_dir();
+
+/**
+ * Return the path of the xorp module directory given the xorp_root
+ * path.
+ *
+ * @ref xorp_path_init() must be called before this method will return a sane
+ * value.
+ */
+string xorp_module_dir();
+
+/**
+ * Return the path of the xorp command directory given the xorp_root
+ * path.
+ *
+ * @ref xorp_path_init() must be called before this method will return a sane
+ * value.
+ */
+string xorp_command_dir();
 
 /**
  * Return the path of the xorp templates directory given the xorp_root
@@ -82,7 +102,7 @@ string xorp_xrl_targets_dir();
  * @ref xorp_path_init() must be called before this method will return a sane
  * value.
  */
-string xorp_boot_file();
+string xorp_config_file();
 
 /**
  * Remove enclosing quotes from string.

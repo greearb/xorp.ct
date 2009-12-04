@@ -77,22 +77,29 @@ static bool default_verbose = false;
 // Local state
 //
 static volatile bool	running = false;
+
+static string	module_dir;
+static string	command_dir;
 static string	template_dir;
-static string	boot_file;
+static string	config_file;
+static string	xrl_targets_dir;	// for DEBUG_XRLDB
+
 static bool     do_logfile = false;
 static bool     do_pidfile = false;
 static bool     do_syslog = false;
 static bool	do_exec = default_do_exec;
 static bool	do_restart = default_do_restart;
 static bool	verbose = default_verbose;
+
 list<IPv4>	bind_addrs;
 uint16_t	bind_port = FinderConstants::FINDER_DEFAULT_PORT();
+
 static string	syslogspec;
 static string	logfilename;
 static string	pidfilename;
+
 int32_t		quit_time = -1;
 static bool	daemon_mode = false;
-static string	xrl_targets_dir;	// for DEBUG_XRLDB
 
 static void cleanup_and_exit(int errcode);
 
@@ -108,20 +115,25 @@ usage(const char* argv0)
     fprintf(stderr, "Usage: %s [options]\n", xorp_basename(argv0));
     fprintf(stderr, "Options:\n");
     fprintf(stderr, "  -a <allowed host> Host allowed by the finder\n");
+    fprintf(stderr, "  -b|-c <file> Specify configuration file\n");
+    fprintf(stderr, "  -C <dir>  Specify operational commands directory\n");
     fprintf(stderr, "  -d        Run in daemon mode in background\n");
-    fprintf(stderr, "  -l <file> Log to file <file>\n");
+    fprintf(stderr, "  -h        Display this information\n");
+    fprintf(stderr, "  -i <addr> Set or add an interface run Finder on\n");
     fprintf(stderr, "  -L <facility.priority> Log to syslog facility\n");
+    fprintf(stderr, "  -l <file> Log to file <file>\n");
+    fprintf(stderr, "  -m <dir>  Specify protocol modules directory\n");
+    // This option is only for testing
+    fprintf(stderr, "  -N        Do not execute XRLs and do not start processes\n");
     fprintf(stderr, "  -n <allowed net>  Subnet allowed by the finder\n");
     fprintf(stderr, "  -P <pid>  Write process ID to file <pid>\n");
-    fprintf(stderr, "  -h        Display this information\n");
-    fprintf(stderr, "  -v        Print verbose information\n");
-    fprintf(stderr, "  -b <file> Specify boot file\n");
-    fprintf(stderr, "  -N        Do not execute XRLs and do not start processes\n");
-    fprintf(stderr, "  -r        Restart failed processes (not implemented yet)\n");
-    fprintf(stderr, "  -i <addr> Set or add an interface run Finder on\n");
     fprintf(stderr, "  -p <port> Set port to run Finder on\n");
+    // This option is only for testing
     fprintf(stderr, "  -q <secs> Set forced quit period\n");
+    fprintf(stderr, "  -r        Restart failed processes (not implemented yet)\n");
     fprintf(stderr, "  -t <dir>  Specify templates directory\n");
+    fprintf(stderr, "  -v        Print verbose information\n");
+    // This option is only for testing
 #ifdef DEBUG_XRLDB
     fprintf(stderr,
 	    "  -x <dir>  Specify Xrl targets directory (debug_xrldb)\n");
@@ -132,8 +144,12 @@ static void
 display_defaults()
 {
     fprintf(stderr, "Defaults:\n");
-    fprintf(stderr, "  Boot file                  := %s\n",
-	    xorp_boot_file().c_str());
+    fprintf(stderr, "  Configuration file         := %s\n",
+	    xorp_config_file().c_str());
+    fprintf(stderr, "  Module directory           := %s\n",
+	    xorp_module_dir().c_str());
+    fprintf(stderr, "  Command directory          := %s\n",
+	    xorp_command_dir().c_str());
     fprintf(stderr, "  Templates directory        := %s\n",
 	    xorp_template_dir().c_str());
 #ifdef DEBUG_XRLDB
@@ -165,10 +181,11 @@ add_cmd_action_adaptor(const string& cmd, const list<string>& action,
     ((MasterTemplateTree*)tt)->add_cmd_action(cmd, action);
 }
 
-
-Rtrmgr::Rtrmgr(const string& template_dir, 
+Rtrmgr::Rtrmgr(const string& module_dir, 
+               const string& command_dir, 
+               const string& template_dir, 
 	       const string& xrl_targets_dir,
-	       const string& boot_file,
+	       const string& config_file,
 	       const list<IPv4>& bind_addrs,
 	       uint16_t bind_port,
 	       bool	do_exec,
@@ -176,9 +193,11 @@ Rtrmgr::Rtrmgr(const string& template_dir,
 	       bool	verbose,
 	       int32_t quit_time,
 	       bool daemon_mode)
-    : _template_dir(template_dir),
+    : _module_dir(module_dir),
+      _command_dir(command_dir),
+      _template_dir(template_dir),
       _xrl_targets_dir(xrl_targets_dir),
-      _boot_file(boot_file),
+      _config_file(config_file),
       _bind_addrs(bind_addrs),
       _bind_port(bind_port),
       _do_exec(do_exec),
@@ -229,8 +248,12 @@ Rtrmgr::run()
     //
     // Print various information
     //
-    XLOG_TRACE(_verbose, "Boot file                  := %s\n",
-	       boot_file.c_str());
+    XLOG_TRACE(_verbose, "Configuration fil          := %s\n",
+	       config_file.c_str());
+    XLOG_TRACE(_verbose, "Module directory           := %s\n",
+	       module_dir.c_str());
+    XLOG_TRACE(_verbose, "Command directory          := %s\n",
+	       command_dir.c_str());
     XLOG_TRACE(_verbose, "Templates directory        := %s\n",
 	       template_dir.c_str());
     XLOG_TRACE(_verbose, "Execute Xrls               := %s\n",
@@ -307,7 +330,7 @@ Rtrmgr::run()
     // Start the module manager
     //
     ModuleManager mmgr(eventloop, *this, _do_restart, _verbose,
-		       xorp_binary_root_dir());
+		       xorp_binary_root_dir(), module_dir);
 
     try {
 	//
@@ -328,7 +351,7 @@ Rtrmgr::run()
 	mmgr.set_xrl_interface(_xrt);
 #endif
 
-	_mct = new MasterConfigTree(boot_file, tt, mmgr, xclient, _do_exec,
+	_mct = new MasterConfigTree(config_file, tt, mmgr, xclient, _do_exec,
 				    _verbose);
 	if (_daemon_mode) {
 	    _mct->set_task_completed(callback(this, &Rtrmgr::daemonize));
@@ -530,8 +553,10 @@ main(int argc, char* const argv[])
     // Expand the default variables to include the XORP root path
     //
     xorp_path_init(argv[0]);
+    module_dir		= xorp_module_dir();
+    command_dir		= xorp_command_dir();
     template_dir	= xorp_template_dir();
-    boot_file		= xorp_boot_file();
+    config_file		= xorp_config_file();
     xrl_targets_dir	= xorp_xrl_targets_dir();
 
 #ifdef DEBUG_XRLDB
@@ -541,12 +566,12 @@ main(int argc, char* const argv[])
 #endif
 
     static const char* optstring =
-	"da:l:L:n:t:b:" RTRMGR_X_OPT "i:P:p:q:Nrvh";
+	"a:b:c:C:dhi:L:l:m:P:p:q:Nn:rt:v" RTRMGR_X_OPT;
     int c;
     while ((c = getopt(argc, argv, optstring)) != EOF) {
 	switch(c) {
 	case 'd':
-	    daemon_mode = true;
+	    daemon_mode = true;    // XXX must come before other options?
 	    break;
 	case 'a':
 	    //
@@ -561,6 +586,9 @@ main(int argc, char* const argv[])
 		cleanup_and_exit(1);
 	    }
 	    break;
+	case 'C':
+	    command_dir = optarg;
+	    break;
 	case 'l':
 	    do_logfile = true;
 	    logfilename = optarg;
@@ -568,6 +596,9 @@ main(int argc, char* const argv[])
 	case 'L':
 	    do_syslog = true;
 	    syslogspec = optarg;
+	    break;
+	case 'm':
+	    module_dir = optarg;
 	    break;
 	case 'n':
 	    //
@@ -586,7 +617,9 @@ main(int argc, char* const argv[])
 	    template_dir = optarg;
 	    break;
 	case 'b':
-	    boot_file = optarg;
+	    /* FALLTHROUGH */
+	case 'c':
+	    config_file = optarg;
 	    break;
 #ifdef DEBUG_XRLDB
 	case 'x':
@@ -645,7 +678,9 @@ main(int argc, char* const argv[])
 	    }
 	    break;
 	case 'h':
+	    /* FALLTHROUGH */
 	case '?':
+	    /* FALLTHROUGH */
 	default:
 	    usage(argv[0]);
 	    display_defaults();
@@ -671,7 +706,8 @@ main(int argc, char* const argv[])
     //
     // The main procedure
     //
-    Rtrmgr rtrmgr(template_dir, xrl_targets_dir, boot_file, bind_addrs,
+    Rtrmgr rtrmgr(module_dir, command_dir, template_dir, xrl_targets_dir,
+		  config_file, bind_addrs,
 		  bind_port, do_exec, do_restart, verbose, quit_time,
 		  daemon_mode);
     errcode = rtrmgr.run();

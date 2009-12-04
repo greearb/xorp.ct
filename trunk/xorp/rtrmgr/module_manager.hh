@@ -166,10 +166,12 @@ public:
      * @param do_restart if true, then restart a module if it failed.
      * @param verbose if true, then output trace messages.
      * @param xorp_root_dir the XORP root directory.
+     * @param xorp_module_dir the XORP module directory.
      */
     ModuleManager(EventLoop& eventloop, Rtrmgr& rtrmgr,
 		  bool do_restart, bool verbose,
-		  const string& xorp_root_dir);
+		  const string& xorp_root_dir,
+		  const string& xorp_module_dir);
 
     /**
      * The default destructor.
@@ -316,6 +318,13 @@ public:
     const string& xorp_root_dir() const { return _xorp_root_dir; }
 
     /**
+     * Get the XORP module directory.
+     *
+     * @return the XORP module directory.
+     */
+    const string& xorp_module_dir() const { return _xorp_module_dir; }
+
+    /**
      * Get the master configuration tree.
      *
      * @return the master configuration tree.
@@ -392,6 +401,7 @@ private:
     bool		_do_restart;	// Set to true to enable module restart
     bool		_verbose;	// Set to true if output is verbose
     string		_xorp_root_dir;	// The root of the XORP tree
+    string		_xorp_module_dir; // Module directory
 };
 
 #endif // __RTRMGR_MODULE_MANAGER_HH__
