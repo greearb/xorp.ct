@@ -166,6 +166,14 @@ public:
     string str() const;
 
     /**
+     * Get the raw value of this address.
+     *
+     * @return the value of this MAC address as a pointer to an array
+     * of unsigned bytes.
+     */
+    const uint8_t* addr() const { return _addr; }
+
+    /**
      * Get the size of the raw Mac address (in octets).
      *
      * @return the size of the raw Mac address (in octets).
