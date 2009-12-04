@@ -208,6 +208,14 @@ env['CONFIGUREDIR'] = str(builddir) + os.sep + '.sconf_temp'
 SConsEnvironment.Chmod = SCons.Action.ActionFactory(os.chmod,
     lambda dest, mode: 'Chmod("%s", 0%o)' % (dest, mode))
 
+# XXX Temporary workaround. Ben Greear reports a problem with
+# Mkdir() on Linux when the directory already exists.
+def XMkdir(path):
+    if not os.access(path, os.F_OK):
+        os.makedirs(path)
+SConsEnvironment.XMkdir = SCons.Action.ActionFactory(XMkdir,
+    lambda path: 'XMkdir("%s")' % (path))
+
 def Symlink(src, link_name):
     try:
         os.unlink(link_name)
@@ -605,7 +613,7 @@ if env.has_key('SHAREDLIBS'):
 	# $BUILDIR/lib will contain .so symlinks
 	#
 	xorp_alias_libdir = os.path.join(builddir, 'lib')
-	Execute(Mkdir(xorp_alias_libdir))
+	Execute(XMkdir(xorp_alias_libdir))
 	env['xorp_alias_libdir'] = xorp_alias_libdir
 	#
 	# Build a further alias for the benefit of entities which
@@ -614,7 +622,7 @@ if env.has_key('SHAREDLIBS'):
 	# $BUILDIR/lib/xorp/lib will point to $BUILDIR/lib
 	#
 	xorp_alias_subdir = os.path.join(xorp_alias_libdir, 'xorp')
-	Execute(Mkdir(xorp_alias_subdir))
+	Execute(XMkdir(xorp_alias_subdir))
 	#
 	xorp_module_alias_libdir = os.path.join(xorp_alias_subdir, 'lib')
 	Execute(env.Symlink(xorp_alias_libdir, xorp_module_alias_libdir))
