@@ -74,7 +74,7 @@ vars.AddVariables(
     EnumVariable('profile', 'Build with profiling', 'no',
                  allowed_values=('no', 'gprof', 'pprof', 'override'),
                  map={}, ignorecase=2),
-     EnumVariable('transport', 'Set default XRL transport protocol', 'local',
+    EnumVariable('transport', 'Set default XRL transport protocol', 'local',
                   allowed_values=('tcp', 'local'),
                   map={}, ignorecase=2),
     PathVariable('prefix', 'Install prefix',
