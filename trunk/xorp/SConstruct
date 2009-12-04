@@ -21,6 +21,8 @@
 # TODO Fix default include/lib paths, pass in from environment.
 # TODO Merge scons-unfamiliar syntactic sugar from YHC's sconsfiles.
 
+import relpath
+
 gnutoolwarning = """
 WARNING: The GNU %s was not detected on your system.
 Some combinations of linker or compiler flags, specific to building XORP,
@@ -29,7 +31,7 @@ may not function correctly.
 
 # The XRL tgt-gen and clnt-gen scripts use Python 2.3+'s optparse
 # class. However, os.path.relpath() requires Python 2.6.
-EnsurePythonVersion(2, 6)
+EnsurePythonVersion(2, 3)
 
 # SCons 0.98.4 is the earliest release that we have tested.  Earlier
 # ones may work.  If so, please submit a Trac issue so the check can
