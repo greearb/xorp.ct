@@ -37,9 +37,6 @@
 #include "master_template_tree_node.hh"
 #include "util.hh"
 
-#include <boost/cast.hpp>
-
-using boost::polymorphic_cast;
 
 void
 MasterTemplateTreeNode::add_cmd(const string& cmd, TemplateTree& tt)
@@ -86,8 +83,8 @@ MasterTemplateTreeNode::add_action(const string& cmd,
 	iter = _cmd_map.find("%modinfo");
 	XLOG_ASSERT(iter != _cmd_map.end());
 	command = iter->second;
-	ModuleCommand* module_command =
-	    polymorphic_cast<ModuleCommand*>(command);
+	ModuleCommand* module_command = dynamic_cast<ModuleCommand*>(command);
+	XLOG_ASSERT(module_command != NULL);
 	module_command->add_action(action_list, xrldb);
     } else if ((cmd == "%create")
 	       || (cmd == "%activate")
@@ -119,8 +116,8 @@ MasterTemplateTreeNode::expand_master_template_tree(string& error_msg)
     cmd_iter = _cmd_map.find("%modinfo");
     if (cmd_iter != _cmd_map.end()) {
 	BaseCommand* command = cmd_iter->second;
-	ModuleCommand* module_command =
-	    polymorphic_cast<ModuleCommand*>(command);
+	ModuleCommand* module_command = dynamic_cast<ModuleCommand*>(command);
+	XLOG_ASSERT(module_command != NULL);
 	if (module_command->expand_actions(error_msg) != true)
 	    return (false);
     }
@@ -143,7 +140,7 @@ MasterTemplateTreeNode::expand_master_template_tree(string& error_msg)
     list<TemplateTreeNode*>::iterator iter2;
     for (iter2 = _children.begin(); iter2 != _children.end(); ++iter2) {
 	MasterTemplateTreeNode* mttn;
-	mttn = polymorphic_cast<MasterTemplateTreeNode*>(*iter2);
+	mttn = static_cast<MasterTemplateTreeNode*>(*iter2);
 	if (mttn->expand_master_template_tree(error_msg) != true)
 	    return false;
     }
@@ -163,7 +160,8 @@ MasterTemplateTreeNode::check_master_template_tree(string& error_msg) const
     if (cmd_iter != _cmd_map.end()) {
 	const BaseCommand* command = cmd_iter->second;
 	const ModuleCommand* module_command;
-	module_command = polymorphic_cast<const ModuleCommand*>(command);
+	module_command = dynamic_cast<const ModuleCommand*>(command);
+	XLOG_ASSERT(module_command != NULL);
 	if (module_command->check_referred_variables(error_msg) != true)
 	    return (false);
     }
@@ -174,7 +172,7 @@ MasterTemplateTreeNode::check_master_template_tree(string& error_msg) const
     list<TemplateTreeNode*>::const_iterator iter2;
     for (iter2 = _children.begin(); iter2 != _children.end(); ++iter2) {
 	const MasterTemplateTreeNode* mttn;
-	mttn = polymorphic_cast<MasterTemplateTreeNode*>(*iter2);
+	mttn = static_cast<const MasterTemplateTreeNode*>(*iter2);
 	if (mttn->check_master_template_tree(error_msg) != true)
 	    return false;
     }

@@ -548,7 +548,6 @@ XrlPortManager<A>::try_start_next_io_handler()
 	    return;
 	}
 	Port<A>* p = (*pi);
-	// XXX: Downcast result used as a loop control variable.
 	xio = dynamic_cast<XrlPortIO<A>*>(p->io_handler());
 	pi++;
     }

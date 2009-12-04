@@ -31,10 +31,6 @@
 #include "ifmgr_cmds.hh"
 #include "ifmgr_cmd_queue.hh"
 
-#include <boost/cast.hpp>
-
-using boost::polymorphic_cast;
-
 // ----------------------------------------------------------------------------
 // IfMgrCommandSinkBase
 
@@ -131,8 +127,8 @@ IfMgrCommandIfClusteringQueue::IfMgrCommandIfClusteringQueue()
 void
 IfMgrCommandIfClusteringQueue::push(const Cmd& cmd)
 {
-    IfMgrIfCommandBase* ifcmd =
-	polymorphic_cast<IfMgrIfCommandBase*>(cmd.get());
+    IfMgrIfCommandBase* ifcmd = dynamic_cast<IfMgrIfCommandBase*>(cmd.get());
+    XLOG_ASSERT(ifcmd != NULL);
     if (ifcmd->ifname() == _current_ifname) {
 	_current_cmds.push_back(cmd);
     } else {
@@ -168,7 +164,8 @@ IfMgrCommandIfClusteringQueue::pop_front()
     if (_current_cmds.empty() == false) {
 	Cmd& c = _current_cmds.front();
 	IfMgrIfCommandBase* ifcmd =
-	    polymorphic_cast<IfMgrIfCommandBase*>(c.get());
+	    dynamic_cast<IfMgrIfCommandBase*>(c.get());
+	XLOG_ASSERT(ifcmd != NULL);
 	_current_ifname = ifcmd->ifname();
 	_current_cmds.pop_front();
     }
@@ -189,8 +186,8 @@ public:
     {}
 
     bool operator() (IfMgrCommandIfClusteringQueue::Cmd c) {
-	IfMgrIfCommandBase* ifcmd =
-	    polymorphic_cast<IfMgrIfCommandBase*>(c.get());
+	IfMgrIfCommandBase* ifcmd = dynamic_cast<IfMgrIfCommandBase*>(c.get());
+	XLOG_ASSERT(ifcmd != NULL);
 	return ifcmd->ifname() == _ifname;
     }
 protected:
@@ -209,7 +206,8 @@ IfMgrCommandIfClusteringQueue::change_active_interface()
     // as new current interface.
     Cmd& c = _future_cmds.front();
     IfMgrIfCommandBase* ifcmd =
-	polymorphic_cast<IfMgrIfCommandBase*>(c.get());
+	dynamic_cast<IfMgrIfCommandBase*>(c.get());
+    XLOG_ASSERT(ifcmd != NULL);
     _current_ifname = ifcmd->ifname();
     back_insert_iterator<CmdList> bi(_current_cmds);
     remove_copy_if(_future_cmds.begin(), _future_cmds.end(), bi,

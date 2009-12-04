@@ -275,8 +275,6 @@ MasterConfigTree::create_node(const string& segment, const string& path,
 			      uid_t user_id, bool verbose)
 {
     MasterConfigTreeNode *ctn, *parent;
-
-    // BOOST: Conditional downcast means polymorphic casts can't be used.
     parent = dynamic_cast<MasterConfigTreeNode *>(parent_node);
     if (parent_node != NULL)
 	XLOG_ASSERT(parent != NULL);

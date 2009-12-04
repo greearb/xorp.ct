@@ -26,8 +26,6 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 
-#include <boost/cast.hpp>
-
 #include "command_tree.hh"
 #include "master_conf_tree_node.hh"
 #include "module_command.hh"
@@ -81,10 +79,9 @@ MasterConfigTreeNode::create_node(const string& segment, const string& path,
 {
     UNUSED(clientid);
     MasterConfigTreeNode *new_node, *parent;
+    parent = dynamic_cast<MasterConfigTreeNode *>(parent_node);
 
     // sanity check - all nodes in this tree should be Master nodes
-    // BOOST: Conditional downcast means polymorphic casts can't be used.
-    parent = dynamic_cast<MasterConfigTreeNode *>(parent_node);
     if (parent_node != NULL)
 	XLOG_ASSERT(parent != NULL);
 
@@ -99,7 +96,8 @@ MasterConfigTreeNode::create_node(const ConfigTreeNode& ctn) {
     const MasterConfigTreeNode *orig;
 
     // sanity check - all nodes in this tree should be Master nodes
-    orig = boost::polymorphic_cast<const MasterConfigTreeNode *>(&ctn);
+    orig = dynamic_cast<const MasterConfigTreeNode *>(&ctn);
+    XLOG_ASSERT(orig != NULL);
 
     new_node = new MasterConfigTreeNode(*orig);
     return new_node;
@@ -451,8 +449,8 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
 		    const AllowCommand* allow_cmd;
 		    debug_msg("found ALLOW command: %s\n",
 			      cmd->str().c_str());
-		    allow_cmd =
-			boost::polymorphic_cast<const AllowCommand*>(base_cmd);
+		    allow_cmd = dynamic_cast<const AllowCommand*>(base_cmd);
+		    XLOG_ASSERT(allow_cmd != NULL);
 		    if (allow_cmd->verify_variables(*this, error_msg)
 			!= true) {
 			//
@@ -490,8 +488,8 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
 		    const AllowCommand* allow_cmd;
 		    debug_msg("found ALLOW command: %s\n",
 			      cmd->str().c_str());
-		    allow_cmd =
-			boost::polymorphic_cast<const AllowCommand*>(base_cmd);
+		    allow_cmd = dynamic_cast<const AllowCommand*>(base_cmd);
+		    XLOG_ASSERT(allow_cmd != NULL);
 		    if (allow_cmd->verify_variables(*this, error_msg)
 			!= true) {
 			error_msg = c_format("Bad operator for \"%s\": %s; ",

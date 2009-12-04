@@ -31,8 +31,6 @@
 #include "rib_manager.hh"
 #include "rib.hh"
 
-#include <boost/cast.hpp>
-
 
 // ----------------------------------------------------------------------------
 // Inline table utility methods
@@ -47,7 +45,6 @@ private:
     const string& _n;
 };
 
-// XXX: Unused template function.
 template <typename A, typename T>
 struct table_has_name_and_type {
     table_has_name_and_type(const string& name) : _n(name) {}
@@ -137,7 +134,6 @@ RIB<A>::set_protocol_admin_distance(const string& protocol_name,
 {
     map<string, uint32_t>::iterator mi = _admin_distances.find(protocol_name);
     if (mi != _admin_distances.end()) {
-	// XXX: Candidate for a table_has_type() template function.
 	OriginTable<A>* ot =
 	    dynamic_cast<OriginTable<A>* >(find_table(protocol_name));
 	if (NULL != ot) {
@@ -776,7 +772,6 @@ RIB<A>::add_route(const string&		tablename,
 	}
     }
 
-    // XXX: Candidate for a table_has_type() template function.
     OriginTable<A>* ot = dynamic_cast<OriginTable<A>* >(rt);
     if (ot == NULL) {
 	if (_errors_are_fatal) {
@@ -890,7 +885,6 @@ RIB<A>::replace_route(const string&	tablename,
     if (NULL == rt)
 	return XORP_ERROR; // Table does not exist
 
-    // XXX: Candidate for a table_has_type() template function.
     OriginTable<A>* ot = dynamic_cast<OriginTable<A>* >(rt);
     if (NULL == ot)
 	return XORP_ERROR; // Table is not an origin table
@@ -915,7 +909,6 @@ RIB<A>::delete_route(const string& tablename, const IPNet<A>& net)
     if (NULL == rt)
 	return XORP_ERROR; // Table does not exist
 
-    // XXX: Candidate for a table_has_type() template function.
     OriginTable<A>* ot = dynamic_cast<OriginTable<A>* >(rt);
     if (NULL == ot)
 	return XORP_ERROR; // Table is not an origin table
@@ -1060,8 +1053,7 @@ RIB<A>::lookup_route(const A& lookupaddr)
     return A::ZERO();
 #else
     // Default: Assume the route points to a resolved IPNextHop.
-    IPNextHop<A>* route_nexthop =
-	boost::polymorphic_downcast<IPNextHop<A>* >(re->nexthop());
+    IPNextHop<A>* route_nexthop = static_cast<IPNextHop<A>* >(re->nexthop());
     return route_nexthop->addr();
 #endif
 }
@@ -1093,8 +1085,6 @@ template <typename A>
 RedistTable<A>*
 RIB<A>::protocol_redist_table(const string& protocol)
 {
-    // XXX: Candidate for a polymorphic_cast, but our callers check
-    // for the 0 return value.
     RouteTable<A>* rt = find_table(redist_tablename(protocol));
     if (rt != NULL) {
 	return dynamic_cast<RedistTable<A>*>(rt);
@@ -1242,7 +1232,6 @@ RIB<A>::add_origin_table(const string& tablename,
     // Check if table exists and check type if so
     RouteTable<A>* rt = find_table(tablename);
     if (rt != NULL) {
-	// XXX: Candidate for a table_has_type() template function.
 	OriginTable<A>* ot = dynamic_cast<OriginTable<A>* >(rt);
 	if (ot == NULL) {
 	    XLOG_ERROR("add_origin_table: table \"%s\" already exists, but is "
@@ -1275,10 +1264,7 @@ RIB<A>::add_origin_table(const string& tablename,
 	return XORP_ERROR;
     }
 
-    // XXX: Unchecked upcast from RouteTable to OriginTable.
-    OriginTable<A>* new_table =
-	boost::polymorphic_downcast<OriginTable<A>* >(find_table(tablename));
-
+    OriginTable<A>* new_table = static_cast<OriginTable<A>* >(find_table(tablename));
     // XXX: the table was created by new_origin_table() above, so it must exist
     XLOG_ASSERT(new_table != NULL);
     if (_final_table == new_table) {
@@ -1319,7 +1305,6 @@ RIB<A>::add_origin_table(const string& tablename,
 	    continue;
 	}
 
-	// XXX: Candidate for a table_has_type() template function.
 	OriginTable<A>* ot = dynamic_cast<OriginTable<A>* >(current);
 	if (ot != NULL) {
 	    if (ot->protocol_type() == IGP) {
@@ -1474,7 +1459,6 @@ RIB<A>::delete_origin_table(const string& tablename,
 			    const string& target_class,
 			    const string& target_instance)
 {
-    // XXX: Candidate for a table_has_type() template function.
     OriginTable<A>* ot = dynamic_cast<OriginTable<A>* >(find_table(tablename));
     if (NULL == ot)
 	return XORP_ERROR;
@@ -1612,8 +1596,8 @@ RIB<A>::push_routes()
     RouteTable<A>* rt = find_table(PolicyConnectedTable<A>::table_name);
     XLOG_ASSERT(rt != NULL);
 
-    PolicyConnectedTable<A>* pct =
-	boost::polymorphic_cast<PolicyConnectedTable<A>*>(rt);
+    PolicyConnectedTable<A>* pct = dynamic_cast<PolicyConnectedTable<A>*>(rt);
+    XLOG_ASSERT(pct != NULL);
 
     pct->push_routes();
 }

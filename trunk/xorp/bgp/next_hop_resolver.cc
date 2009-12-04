@@ -38,9 +38,6 @@
 #include "route_table_decision.hh"
 #include "profile_vars.hh"
 
-#include <boost/cast.hpp>
-
-using boost::polymorphic_cast;
 
 template <class A>
 NextHopResolver<A>::NextHopResolver(XrlStdRouter *xrl_router,
@@ -1332,7 +1329,8 @@ NextHopRibRequest<A>::deregister_interest_response(const XrlError& error,
     //Check that this answer is for the question on the front of the queue
     XLOG_ASSERT(!_queue.empty());
     RibDeregisterQueueEntry<A> *rd = 
-	polymorphic_cast<RibDeregisterQueueEntry<A> *>(_queue.front());
+	dynamic_cast<RibDeregisterQueueEntry<A> *>(_queue.front());
+    XLOG_ASSERT(rd != NULL);
     XLOG_ASSERT(addr == rd->base_addr());
     XLOG_ASSERT(prefix_len == rd->prefix_len());
 

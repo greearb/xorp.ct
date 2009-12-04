@@ -435,7 +435,6 @@ CliNode::find_cli_by_session_id(uint32_t session_id) const
 int
 CliNode::xlog_output(void *obj, xlog_level_t level, const char *msg)
 {
-    // XXX: Unchecked runtime cast of void pointer.
     CliClient *cli_client = static_cast<CliClient *>(obj);
 
     int ret_value = cli_client->cli_print(msg);

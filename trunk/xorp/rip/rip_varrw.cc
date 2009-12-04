@@ -26,8 +26,6 @@
 #include "policy/common/policy_utils.hh"
 #include "rip_varrw.hh"
 
-#include <boost/cast.hpp>
-
 template <class A>
 RIPVarRW<A>::RIPVarRW(RouteEntry<A>& route)
     : _route(route)
@@ -46,7 +44,6 @@ RIPVarRW<A>::start_read()
 
     // XXX which tag wins?
     Element* element = _route.policytags().element_tag();
-
     ElemU32* e = dynamic_cast<ElemU32*>(element);
     if (e != NULL && e->val())
 	_route.set_tag(e->val());
@@ -77,17 +74,21 @@ RIPVarRW<A>::single_write(const Id& id, const Element& e)
     if (write_nexthop(id, e))
 	return;
 
-    const ElemU32* u32 = 0;
+    const ElemU32* u32 = NULL;
     if (e.type() == ElemU32::id) {
-	u32 = boost::polymorphic_cast<const ElemU32*>(&e);
+	u32 = dynamic_cast<const ElemU32*>(&e);
+	XLOG_ASSERT(u32 != NULL);
     }
 
     if (id == VAR_METRIC) {
+	XLOG_ASSERT(u32 != NULL);
+
 	_route.set_cost(u32->val());
 	return;
     }
-
     if (id == VAR_TAG) {
+	XLOG_ASSERT(u32 != NULL);
+
 	_route.set_tag(u32->val());
 	_route.policytags().set_tag(e);
 	return;
@@ -101,8 +102,9 @@ bool
 RIPVarRW<IPv4>::write_nexthop(const Id& id, const Element& e)
 {
     if (id == VAR_NEXTHOP4 && e.type() == ElemIPv4NextHop::id) {
-	const ElemIPv4NextHop* v4 =
-	    boost::polymorphic_cast<const ElemIPv4NextHop*>(&e);
+	const ElemIPv4NextHop* v4 = dynamic_cast<const ElemIPv4NextHop*>(&e);
+
+	XLOG_ASSERT(v4 != NULL);
 
 	IPv4 nh(v4->val());
 
@@ -132,8 +134,9 @@ bool
 RIPVarRW<IPv6>::write_nexthop(const Id& id, const Element& e)
 {
     if (id == VAR_NEXTHOP6 && e.type() == ElemIPv6NextHop::id) {
-	const ElemIPv6NextHop* v6 =
-	    boost::polymorphic_cast<const ElemIPv6NextHop*>(&e);
+	const ElemIPv6NextHop* v6 = dynamic_cast<const ElemIPv6NextHop*>(&e);
+
+	XLOG_ASSERT(v6 != NULL);
 
 	IPv6 nh(v6->val());
 

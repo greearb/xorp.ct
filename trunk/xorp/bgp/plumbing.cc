@@ -38,9 +38,6 @@
 #include "profile_vars.hh"
 #include "dump_iterators.hh"
 
-#include <boost/cast.hpp>
-
-using boost::polymorphic_cast;
 
 BGPPlumbing::BGPPlumbing(const Safi safi,
 			 RibIpcHandler* ribhandler,
@@ -936,7 +933,8 @@ BGPPlumbingAF<A>::peering_came_up(PeerHandler* peer_handler)
     }
 
     debug_msg("type = %d", prevrt->type());
-    FilterTable<A> *filter_out = polymorphic_cast<FilterTable<A> *>(prevrt);
+    FilterTable<A> *filter_out = dynamic_cast<FilterTable<A> *>(prevrt);
+    XLOG_ASSERT(filter_out != NULL);
 
     filter_out->set_parent(_fanout_table);
     _fanout_table->add_next_table(filter_out, peer_handler, rib_in->genid());
@@ -1033,7 +1031,8 @@ BGPPlumbingAF<A>::dump_entire_table(FilterTable<A> *filter_out, string ribname)
     _fanout_table->dump_entire_table(filter_out, _master.safi(), ribname);
 
     DumpTable<A> *dump_table =
-	polymorphic_cast<DumpTable<A> *>(filter_out->parent());
+	dynamic_cast<DumpTable<A> *>(filter_out->parent());
+    XLOG_ASSERT(dump_table);
 
     /*
     ** It is possible that another peer was in the middle of going

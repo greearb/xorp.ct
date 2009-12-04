@@ -34,10 +34,6 @@
 #include "pim_vif.hh"
 #include "xrl_pim_node.hh"
 
-#include <boost/cast.hpp>
-
-using boost::polymorphic_cast;
-
 const TimeVal XrlPimNode::RETRY_TIMEVAL = TimeVal(1, 0);
 
 //
@@ -415,7 +411,8 @@ XrlPimNode::send_register_unregister_interest()
     XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
     RegisterUnregisterInterest* entry;
 
-    entry = polymorphic_cast<RegisterUnregisterInterest*>(xrl_task_base);
+    entry = dynamic_cast<RegisterUnregisterInterest*>(xrl_task_base);
+    XLOG_ASSERT(entry != NULL);
 
     if (entry->is_register()) {
 	// Register interest
@@ -449,7 +446,8 @@ XrlPimNode::finder_send_register_unregister_interest_cb(const XrlError& xrl_erro
     XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
     RegisterUnregisterInterest* entry;
 
-    entry = polymorphic_cast<RegisterUnregisterInterest*>(xrl_task_base);
+    entry = dynamic_cast<RegisterUnregisterInterest*>(xrl_task_base);
+    XLOG_ASSERT(entry != NULL);
 
     switch (xrl_error.error_code()) {
     case OKAY:
@@ -1030,7 +1028,8 @@ XrlPimNode::send_register_unregister_receiver()
     XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
     RegisterUnregisterReceiver* entry;
 
-    entry = polymorphic_cast<RegisterUnregisterReceiver*>(xrl_task_base);
+    entry = dynamic_cast<RegisterUnregisterReceiver*>(xrl_task_base);
+    XLOG_ASSERT(entry != NULL);
 
     //
     // Check whether we have already registered with the FEA
@@ -1118,7 +1117,8 @@ XrlPimNode::fea_client_send_register_unregister_receiver_cb(
     XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
     RegisterUnregisterReceiver* entry;
 
-    entry = polymorphic_cast<RegisterUnregisterReceiver*>(xrl_task_base);
+    entry = dynamic_cast<RegisterUnregisterReceiver*>(xrl_task_base);
+    XLOG_ASSERT(entry != NULL);
 
     switch (xrl_error.error_code()) {
     case OKAY:
@@ -1222,7 +1222,8 @@ XrlPimNode::send_register_unregister_protocol()
     XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
     RegisterUnregisterProtocol* entry;
 
-    entry = polymorphic_cast<RegisterUnregisterProtocol*>(xrl_task_base);
+    entry = dynamic_cast<RegisterUnregisterProtocol*>(xrl_task_base);
+    XLOG_ASSERT(entry != NULL);
 
     //
     // Check whether we have already registered with the MFEA
@@ -1306,7 +1307,8 @@ XrlPimNode::mfea_client_send_register_unregister_protocol_cb(
     XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
     RegisterUnregisterProtocol* entry;
 
-    entry = polymorphic_cast<RegisterUnregisterProtocol*>(xrl_task_base);
+    entry = dynamic_cast<RegisterUnregisterProtocol*>(xrl_task_base);
+    XLOG_ASSERT(entry != NULL);
 
     switch (xrl_error.error_code()) {
     case OKAY:
@@ -1410,7 +1412,8 @@ XrlPimNode::send_join_leave_multicast_group()
     XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
     JoinLeaveMulticastGroup* entry;
 
-    entry = polymorphic_cast<JoinLeaveMulticastGroup*>(xrl_task_base);
+    entry = dynamic_cast<JoinLeaveMulticastGroup*>(xrl_task_base);
+    XLOG_ASSERT(entry != NULL);
 
     //
     // Check whether we have already registered with the FEA
@@ -1499,7 +1502,8 @@ XrlPimNode::fea_client_send_join_leave_multicast_group_cb(
     XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
     JoinLeaveMulticastGroup* entry;
 
-    entry = polymorphic_cast<JoinLeaveMulticastGroup*>(xrl_task_base);
+    entry = dynamic_cast<JoinLeaveMulticastGroup*>(xrl_task_base);
+    XLOG_ASSERT(entry != NULL);
 
     switch (xrl_error.error_code()) {
     case OKAY:
@@ -1599,7 +1603,8 @@ XrlPimNode::send_add_delete_mfc()
     XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
     AddDeleteMfc* entry;
 
-    entry = polymorphic_cast<AddDeleteMfc*>(xrl_task_base);
+    entry = dynamic_cast<AddDeleteMfc*>(xrl_task_base);
+    XLOG_ASSERT(entry != NULL);
 
     size_t max_vifs_oiflist = entry->olist().size();
     const IPvX& source_addr = entry->source_addr();
@@ -1700,7 +1705,8 @@ XrlPimNode::mfea_client_send_add_delete_mfc_cb(
     XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
     AddDeleteMfc* entry;
 
-    entry = polymorphic_cast<AddDeleteMfc*>(xrl_task_base);
+    entry = dynamic_cast<AddDeleteMfc*>(xrl_task_base);
+    XLOG_ASSERT(entry != NULL);
 
     switch (xrl_error.error_code()) {
     case OKAY:
@@ -1837,7 +1843,8 @@ XrlPimNode::send_add_delete_dataflow_monitor()
     XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
     AddDeleteDataflowMonitor* entry;
 
-    entry = polymorphic_cast<AddDeleteDataflowMonitor*>(xrl_task_base);
+    entry = dynamic_cast<AddDeleteDataflowMonitor*>(xrl_task_base);
+    XLOG_ASSERT(entry != NULL);
 
     //
     // Check whether we have already registered with the MFEA
@@ -1974,7 +1981,8 @@ XrlPimNode::mfea_client_send_add_delete_dataflow_monitor_cb(
     XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
     AddDeleteDataflowMonitor* entry;
 
-    entry = polymorphic_cast<AddDeleteDataflowMonitor*>(xrl_task_base);
+    entry = dynamic_cast<AddDeleteDataflowMonitor*>(xrl_task_base);
+    XLOG_ASSERT(entry != NULL);
 
     switch (xrl_error.error_code()) {
     case OKAY:
@@ -2342,7 +2350,8 @@ XrlPimNode::send_protocol_message()
     XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
     SendProtocolMessage* entry;
 
-    entry = polymorphic_cast<SendProtocolMessage*>(xrl_task_base);
+    entry = dynamic_cast<SendProtocolMessage*>(xrl_task_base);
+    XLOG_ASSERT(entry != NULL);
 
     //
     // Check whether we have already registered with the FEA
@@ -2423,7 +2432,8 @@ XrlPimNode::fea_client_send_protocol_message_cb(const XrlError& xrl_error)
     XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
     SendProtocolMessage* entry;
 
-    entry = polymorphic_cast<SendProtocolMessage*>(xrl_task_base);
+    entry = dynamic_cast<SendProtocolMessage*>(xrl_task_base);
+    XLOG_ASSERT(entry != NULL);
 
     switch (xrl_error.error_code()) {
     case OKAY:
