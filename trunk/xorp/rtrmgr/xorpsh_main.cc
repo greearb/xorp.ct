@@ -121,7 +121,6 @@ XorpShell::XorpShell(EventLoop& eventloop,
 		     const string& IPCname,
 		     const string& xorp_root_dir,
 		     const string& config_template_dir,
-		     const string& xrl_targets_dir,
 		     bool verbose) throw (InitError)
     : XrlStdRouter(eventloop, IPCname.c_str()),
       _eventloop(eventloop),
@@ -152,8 +151,6 @@ XorpShell::XorpShell(EventLoop& eventloop,
 	       xorp_root_dir.c_str());
     XLOG_TRACE(_verbose, "Templates directory        := %s\n",
 	       config_template_dir.c_str());
-    XLOG_TRACE(_verbose, "Xrl targets directory      := %s\n",
-	       xrl_targets_dir.c_str());
     XLOG_TRACE(_verbose, "Print verbose information  := %s\n",
 	       bool_c_str(_verbose));
 
@@ -771,7 +768,6 @@ usage(const char *argv0)
     fprintf(stderr, "  -h        Display this information\n");
     fprintf(stderr, "  -v        Print verbose information\n");
     fprintf(stderr, "  -t <dir>  Specify templates directory\n");
-    fprintf(stderr, "  -x <dir>  Specify Xrl targets directory\n");
 }
 
 static void
@@ -780,8 +776,6 @@ display_defaults()
     fprintf(stderr, "Defaults:\n");
     fprintf(stderr, "  Templates directory        := %s\n",
 	    xorp_template_dir().c_str());
-    fprintf(stderr, "  Xrl targets directory      := %s\n",
-	    xorp_xrl_targets_dir().c_str());
     fprintf(stderr, "  Print verbose information  := %s\n",
 	    bool_c_str(default_verbose));
 }
@@ -817,10 +811,11 @@ main(int argc, char *argv[])
     //
     xorp_path_init(argv[0]);
     string template_dir		= xorp_template_dir();
-    string xrl_targets_dir	= xorp_xrl_targets_dir();
+
+    static const char optstring[] = "c:et:vh";
 
     int c;
-    while ((c = getopt(argc, argv, "c:et:x:vh")) != EOF) {
+    while ((c = getopt(argc, argv, optstring)) != EOF) {
 	switch(c) {
 	case 'c':
 	    // XXX: Append the arguments to allow multiple "-c cmd" commands
@@ -832,9 +827,6 @@ main(int argc, char *argv[])
 	    break;
 	case 't':
 	    template_dir = optarg;
-	    break;
-	case 'x':
-	    xrl_targets_dir = optarg;
 	    break;
 	case 'v':
 	    verbose = true;
@@ -864,7 +856,7 @@ main(int argc, char *argv[])
 	string xname = "xorpsh" + c_format("-%d-%s", XORP_INT_CAST(getpid()),
 					   hostname);
 	XorpShell xorpsh(eventloop, xname, xorp_binary_root_dir(),
-			 template_dir, xrl_targets_dir, verbose);
+			 template_dir, verbose);
 	xorpsh.run(commands, exit_on_error);
     } catch (const InitError& e) {
 	XLOG_ERROR("xorpsh exiting due to an init error: %s", e.why().c_str());

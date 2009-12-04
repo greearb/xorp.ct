@@ -48,7 +48,6 @@ public:
 	      const string& IPCname, 
 	      const string& xorp_root_dir,
 	      const string& config_template_dir, 
-	      const string& xrl_targets_dir,
 	      bool verbose) throw (InitError);
     ~XorpShell();
 
