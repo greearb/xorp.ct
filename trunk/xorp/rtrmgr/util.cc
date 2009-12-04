@@ -117,7 +117,7 @@ xorp_path_init(const char* argv0)
     if (xr != NULL) {
 	s_bin_root = xr;
 	s_cfg_root = xr;
-	s_boot_file = s_cfg_root + "/rtrmgr/xorp.conf";
+	s_boot_file = s_cfg_root + "/etc/xorp.conf";
 	return;
     }
 
@@ -145,7 +145,7 @@ xorp_path_init(const char* argv0)
     string install_root = xorp_real_path(XORP_INSTALL_ROOT);
     s_bin_root = install_root;
     s_cfg_root = install_root;
-    s_boot_file = s_cfg_root + "/xorp.conf";
+    s_boot_file = s_cfg_root + "/etc/xorp.conf";
 
     debug_msg("s_bin_root:   %s\n", s_bin_root.c_str());
     debug_msg("s_cfg_root:   %s\n", s_cfg_root.c_str());
@@ -167,13 +167,13 @@ xorp_config_root_dir()
 string
 xorp_template_dir()
 {
-    return s_cfg_root + string("/etc/templates");
+    return s_cfg_root + string("/share/xorp/templates");
 }
 
 string
 xorp_xrl_targets_dir()
 {
-    return s_cfg_root + string("/xrl/targets");
+    return s_cfg_root + string("/share/xorp/xrl/targets");
 }
 
 string
