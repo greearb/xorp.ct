@@ -91,7 +91,7 @@ def parse_args(file, lineno, str):
 
     # arg format is <name>[<type>]
     #                     ^      ^
-    # list types may *optionally* carry a member type hint.
+    # list types now *require* a member type hint list<type>.
 
     xrl_args = []
     for t in toks:
