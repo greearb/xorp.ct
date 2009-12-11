@@ -122,6 +122,10 @@ builddir=Dir(ARGUMENTS.get('builddir', '#obj/' + host)).abspath
 
 SConsignFile(builddir + '/.sconsign')
 
+try:
+    Execute(Mkdir(builddir))
+except:
+    pass
 log_args(builddir + '/.scons_build_args')
 
 # XXX TODO: Make initial CPPPATH/LIBPATH derive from
