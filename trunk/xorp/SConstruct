@@ -529,6 +529,12 @@ env.AppendUnique(CPPDEFINES = [
     ( '_FORTIFY_SOURCE', 0 ),
     ])
 
+# Forcibly disable Boost's thread support; the XORP code base is
+# not yet threaded.
+env.AppendUnique(CPPDEFINES = [
+    ( 'BOOST_DISABLE_THREADS' ),
+    ])
+
 # NOTE: gcc specific flags.
 env.AppendUnique(CFLAGS = [
     '-Werror',
