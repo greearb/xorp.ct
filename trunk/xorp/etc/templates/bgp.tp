@@ -150,7 +150,7 @@ protocols {
 	%modinfo: provides bgp;
 	%modinfo: depends rib;
 	%modinfo: depends policy;
-	%modinfo: path "bgp/xorp_bgp";
+	%modinfo: path "xorp_bgp";
 	%modinfo: default_targetname "bgp";
 	%modinfo: status_method xrl "$(bgp.targetname)/common/0.1/get_status->status:u32&reason:txt";
 	%modinfo: shutdown_method xrl "$(bgp.targetname)/common/0.1/shutdown";
