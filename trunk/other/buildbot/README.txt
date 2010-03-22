@@ -1,3 +1,5 @@
+This file details the packages added to the default installations of the different os's used in the buildbot system. Dependencies aren't listed.
+
 debian 5.0.4 sparc (buildbot3.cs.ucl.ac.uk)
 
 openssh-server
@@ -31,3 +33,4 @@ libssl-dev
 libpcap-dev 
 libboost-regex1.40-dev 
 build-essential
+libncurses-dev
