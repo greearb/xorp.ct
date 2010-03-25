@@ -34,3 +34,11 @@ libpcap-dev
 libboost-regex1.40-dev 
 build-essential
 libncurses-dev
+
+freebsd 8.0 i386 (buildbot2.cs.ucl.ac.uk)
+
+devel/scons
+devel/subversion
+lang/gcc42
+devel/boost-libs
+devel/buildbot
