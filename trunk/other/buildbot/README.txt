@@ -42,3 +42,7 @@ devel/subversion
 lang/gcc42
 devel/boost-libs
 devel/buildbot
+
+master config
+
+set the buildbot to retry the checkout 5 times with a 10 second delay between each try.
