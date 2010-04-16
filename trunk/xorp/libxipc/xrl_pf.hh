@@ -105,7 +105,15 @@ public:
 
     virtual bool	sends_pending() const = 0;
     virtual const char*	protocol() const = 0;
+
+    /**
+     * Determine if the underlying transport is still open.
+     *
+     * @return true if the transport is alive.
+     */
     virtual bool	alive() const = 0;
+
+    // XXX Unfinished support for XRL batching.
     virtual void	batch_start() {}
     virtual void	batch_stop() {}
 

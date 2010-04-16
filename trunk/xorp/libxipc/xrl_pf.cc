@@ -55,4 +55,5 @@ XrlPFSender::XrlPFSender(EventLoop& e, const char* address)
 
 XrlPFSender::~XrlPFSender()
 {
+    // XXX put a debug_msg() here; we are now deleted through shared_ptr.
 }

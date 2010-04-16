@@ -1083,12 +1083,17 @@ XrlPFSTCPSender::send_keepalive()
 void
 XrlPFSTCPSender::batch_start()
 {
+#if 0
     _batching = true;
+#else
+    XLOG_UNREACHABLE();
+#endif
 }
 
 void
 XrlPFSTCPSender::batch_stop()
 {
+#if 0
     _batching = false;
 
     // If we aint got no requests, we may not be able to signal to the receiver
@@ -1100,4 +1105,7 @@ XrlPFSTCPSender::batch_stop()
 
     if (_writer->running() == false)
 	_writer->start();
+#else
+    XLOG_UNREACHABLE();
+#endif
 }

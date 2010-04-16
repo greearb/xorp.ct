@@ -33,12 +33,14 @@
 #include "xrl_pf_stcp.hh"
 #include "xrl_pf_unix.hh"
 
+//#include <boost/make_shared.hpp>
+//using boost::make_shared;
 
 // STCP senders are a special case.  Constructing an STCP sender has
 // real cost, unlike InProc and SUDP, so we maintain a cache of
 // STCP senders with one per sender destination address.
 
-XrlPFSender*
+shared_ptr<XrlPFSender>
 XrlPFSenderFactory::create_sender(EventLoop&	eventloop,
 				  const char*	protocol,
 				  const char*	address)
@@ -47,18 +49,22 @@ XrlPFSenderFactory::create_sender(EventLoop&	eventloop,
 	      protocol, address);
     try {
 	if (strcmp(XrlPFSTCPSender::protocol_name(), protocol) == 0) {
-	    return new XrlPFSTCPSender(eventloop, address);
+	    // XXX boost::make_shared() candidate.
+	    return shared_ptr<XrlPFSender>(
+		new XrlPFSTCPSender(eventloop, address));
 	}
 	if (strcmp(XrlPFUNIXSender::protocol_name(), protocol) == 0) {
-	    return new XrlPFUNIXSender(eventloop, address);
+	    // XXX boost::make_shared() candidate.
+	    return shared_ptr<XrlPFSender>(
+		new XrlPFUNIXSender(eventloop, address));
 	}
     } catch (XorpException& e) {
 	XLOG_ERROR("XrlPFSenderFactory::create failed: %s\n", e.str().c_str());
     }
-    return 0;
+    return shared_ptr<XrlPFSender>();
 }
 
-XrlPFSender*
+shared_ptr<XrlPFSender>
 XrlPFSenderFactory::create_sender(EventLoop& eventloop,
 				  const char* protocol_colon_address)
 {
@@ -66,20 +72,11 @@ XrlPFSenderFactory::create_sender(EventLoop& eventloop,
     if (colon == 0) {
 	debug_msg("No colon in supposedly colon separated <protocol><address>"
 		  "combination\n\t\"%s\".\n", protocol_colon_address);
-	return 0;
+	return shared_ptr<XrlPFSender>();
     }
 
     string protocol(protocol_colon_address, colon - protocol_colon_address);
     return create_sender(eventloop, protocol.c_str(), colon + 1);
-}
-
-void
-XrlPFSenderFactory::destroy_sender(XrlPFSender* s)
-{
-    debug_msg("destroying sender pf = \"%s\", addr = \"%s\"\n",
-	      s->protocol(), s->address().c_str());
-
-    delete s;
 }
 
 void

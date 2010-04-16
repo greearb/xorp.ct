@@ -76,7 +76,7 @@ Xrl::Xrl(const string&	protocol,
 	 const XrlArgs&	args)
     : _protocol(protocol), _target(protocol_target), _command(command),
       _args(args), _sna_atom(NULL), _packed_bytes(0), _argp(&_args),
-      _to_finder(-1), _resolved(false), _resolved_sender(NULL)
+      _to_finder(-1), _resolved(false)
 {
 }
 
@@ -85,7 +85,7 @@ Xrl::Xrl(const string&	target,
 	 const XrlArgs&	args)
     : _protocol(_finder_protocol), _target(target), _command(command),
       _args(args), _sna_atom(NULL), _packed_bytes(0), _argp(&_args),
-      _to_finder(-1), _resolved(false), _resolved_sender(NULL)
+      _to_finder(-1), _resolved(false)
 {
 }
 
@@ -94,7 +94,7 @@ Xrl::Xrl(const string& protocol,
 	 const string& command)
     : _protocol(protocol), _target(protocol_target), _command(command),
       _sna_atom(NULL), _packed_bytes(0), _argp(&_args), _to_finder(-1),
-      _resolved(false), _resolved_sender(NULL)
+      _resolved(false)
 {
 }
 
@@ -102,7 +102,7 @@ Xrl::Xrl(const string& target,
 	 const string& command)
     : _protocol(_finder_protocol), _target(target), _command(command),
       _sna_atom(NULL), _packed_bytes(0), _argp(&_args), _to_finder(-1),
-      _resolved(false), _resolved_sender(NULL)
+      _resolved(false)
 {
 }
 
@@ -110,13 +110,13 @@ Xrl::Xrl(const char* target,
 	 const char* command)
 	: _protocol(_finder_protocol), _target(target), _command(command),
 	  _sna_atom(NULL), _packed_bytes(0), _argp(&_args), _to_finder(-1),
-	  _resolved(false), _resolved_sender(NULL)
+	  _resolved(false)
 {
 }
 
 Xrl::Xrl(const char* c_str) throw (InvalidString) 
         : _sna_atom(NULL), _packed_bytes(0), _argp(&_args),
-	  _to_finder(-1), _resolved(false), _resolved_sender(NULL)
+	  _to_finder(-1), _resolved(false)
 {
     if (0 == c_str)
 	xorp_throw0(InvalidString);
@@ -136,7 +136,7 @@ Xrl::Xrl(const char* c_str) throw (InvalidString)
 
 Xrl::Xrl() 
     : _sna_atom(0), _packed_bytes(0), _argp(&_args), _to_finder(-1),
-      _resolved(false), _resolved_sender(NULL) 
+      _resolved(false)
 {
 }
 
@@ -335,7 +335,8 @@ Xrl::clear_cache()
     _packed_bytes   = 0;
     _to_finder	    = -1;
     _resolved	    = false;
-    _resolved_sender = NULL;
+
+    _resolved_sender.reset();
 
     delete _sna_atom;
     _sna_atom = NULL;

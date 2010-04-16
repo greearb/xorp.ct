@@ -38,6 +38,10 @@
 
 #include "sockutil.hh"
 
+// XXX should be included nested above.
+//#include <boost/shared_ptr.hpp>
+//#include <boost/weak_ptr.hpp>
+
 //
 // Enable this macro to enable Xrl callback checker that checks each Xrl
 // callback is dispatched just once.
@@ -273,10 +277,8 @@ XrlRouter::~XrlRouter()
     _fc->detach_observer(this);
     _fac->set_enabled(false);
 
-    while (_senders.empty() == false) {
-	XrlPFSenderFactory::destroy_sender(_senders.front());
+    while (_senders.empty() == false)
 	_senders.pop_front();
-    }
 
     while (_dsl.empty() == false) {
 	delete _dsl.front();
@@ -389,7 +391,8 @@ XrlRouter::send_resolved(const Xrl&		xrl,
 			 bool  direct_call)
 {
     try {
-	XrlPFSender* s = get_sender(xrl, const_cast<FinderDBEntry*>(dbe));
+	shared_ptr<XrlPFSender> s =
+            lookup_sender(xrl, const_cast<FinderDBEntry*>(dbe));
 	if (s == 0) {
 	    // Notify Finder client that result was bad.
 	    _fc->uncache_result(dbe);
@@ -400,10 +403,11 @@ XrlRouter::send_resolved(const Xrl&		xrl,
 
 	const Xrl& x = dbe->xrls().front();
     	x.set_args(xrl);
-	if (s) {
+	if (s != 0) {
 	    trace_xrl("Sending ", x);
 	    return s->send(x, direct_call,
-			   callback(this, &XrlRouter::send_callback, s, cb));
+			   callback(this, &XrlRouter::send_callback,
+                                    s.get(), cb));
 	}
 	cb->dispatch(XrlError(SEND_FAILED, "sender not instantiated"), 0);
     } catch (const InvalidString&) {
@@ -412,30 +416,46 @@ XrlRouter::send_resolved(const Xrl&		xrl,
     return false;
 }
 
-XrlPFSender*
-XrlRouter::get_sender(const Xrl& xrl, FinderDBEntry* dbe)
+// XXX Return uninitialized shared_ptr, or locked shared_ptr,
+// on desired XrlPFSender.
+shared_ptr<XrlPFSender>
+XrlRouter::lookup_sender(const Xrl& xrl, FinderDBEntry* dbe)
 {
     const Xrl& x = dbe->xrls().front();
-    XrlPFSender* s = NULL;
+    shared_ptr<XrlPFSender> s;
 
-    // Use the cache pointer to the sender.
+    // Try to use the cached pointer to the sender.
     if (xrl.resolved()) {
-	s = xrl.resolved_sender();
+        weak_ptr<XrlPFSender> w = xrl.resolved_sender();
 
-	if (s->alive())
+        // Check if cached weak_ptr to sender is still valid; we may
+        // have lost a race on the XRLDB.
+        // Check if transport layer is still up for this sender.
+        // If good to go, return shared pointer for which we
+        // still hold the lock.
+        s = w.lock();
+        if (s.get() != 0 && s->alive())
 	    return s;
 
+        // We lost the race.
+
+        // XXX Sanity check that this sender's protocol and endpoint
+        // addresses are the same as they were when the Xrl was
+        // instantiated.
 	XLOG_ASSERT(s->protocol() == x.protocol());
 	XLOG_ASSERT(s->address()  == x.target());
 
 	xrl.set_resolved(false);
-	xrl.set_resolved_sender(NULL);
+	xrl.set_resolved_sender(weak_ptr<XrlPFSender>());
     }
 
     // Find a new sender.
-    for (list<XrlPFSender*>::iterator i = _senders.begin();
+    for (list< shared_ptr<XrlPFSender> >::iterator i = _senders.begin();
 	 i != _senders.end(); ++i) {
 	s = *i;
+
+	// This XrlRouter holds the reference, so the pointer should be valid.
+	XLOG_ASSERT(s.get() != 0);
 
 	if (s->protocol() != x.protocol() || s->address()  != x.target())
 	    continue;
@@ -448,13 +468,13 @@ XrlRouter::get_sender(const Xrl& xrl, FinderDBEntry* dbe)
 
 	XLOG_INFO("Sender died (protocol = \"%s\", address = \"%s\")",
 		  s->protocol(), s->address().c_str());
-	XrlPFSenderFactory::destroy_sender(s);
+
 	_senders.erase(i);
 	_senders2.erase(xrl.target());
 	break;
     }
 
-    s = NULL;
+    s.reset();
 
     // create sender
     while (dbe->xrls().size()) {
@@ -462,7 +482,7 @@ XrlRouter::get_sender(const Xrl& xrl, FinderDBEntry* dbe)
 
 	s = XrlPFSenderFactory::create_sender(_e, x.protocol().c_str(),
 					      x.target().c_str());
-	if (s)
+	if (s.get() != 0)
 	    break;
 
 	XLOG_ERROR("Could not create XrlPFSender for protocol = \"%s\" "
@@ -471,15 +491,18 @@ XrlRouter::get_sender(const Xrl& xrl, FinderDBEntry* dbe)
 
 	dbe->pop_front();
     }
-    if (!s)
-	return NULL;
 
+    // Unable to instantiate.
+    if (s == 0)
+	return shared_ptr<XrlPFSender>();
+
+    // New sender instantiated, take lock and record state.
     const Xrl& front = dbe->xrls().front();
 
     XLOG_ASSERT(s->protocol() == front.protocol());
     XLOG_ASSERT(s->address()  == front.target());
     _senders.push_back(s);
-    _senders2[xrl.target()] = s;
+    _senders2[xrl.target()] = s.get();
 
     // Don't do this here as it is set in the Xrl that is stored with
     // the finder client, so is not used. But if the connection needs
@@ -506,7 +529,7 @@ XrlRouter::resolve_callback(const XrlError&	 	e,
     if (e == XrlError::OKAY()) {
 	const Xrl& xrl = ds->xrl();
 	xrl.set_resolved(false);
-	xrl.set_resolved_sender(NULL);
+	xrl.set_resolved_sender(weak_ptr<XrlPFSender>());
 	if (send_resolved(xrl, dbe, ds->cb(), false) == false) {
 	    // We tried to force sender to send xrl and it declined the
 	    // opportunity.  This should only happen when it's out of buffer
@@ -710,25 +733,44 @@ XrlRouter::finder_ready_event(const string& tgt_name)
     debug_msg("Finder target ready event: \"%s\"\n", tgt_name.c_str());
 }
 
+//
+// XXX This is unfinished code related to a batch XRL implementation.
+// It is unfortunately incompatible, straight off, with using refcounts to
+// manage XrlPFSender's lifecycle, so it needs to be revisited later by
+// an interested party.
+// Also, the overloading of the get_sender() method name is potentially
+// confusing. --bms
+
 void
 XrlRouter::batch_start(const string& target)
 {
+#if 0
     XrlPFSender& sender = get_sender(target);
 
     sender.batch_start();
+#else
+    XLOG_UNREACHABLE();
+    UNUSED(target);
+#endif
 }
 
 void
 XrlRouter::batch_stop(const string& target)
 {
+#if 0
     XrlPFSender& sender = get_sender(target);
 
     sender.batch_stop();
+#else
+    XLOG_UNREACHABLE();
+    UNUSED(target);
+#endif
 }
 
 XrlPFSender&
 XrlRouter::get_sender(const string& target)
 {
+#if 0
     XrlPFSender* s = 0;
 
     SENDERS::iterator i = _senders2.find(target);
@@ -737,6 +779,12 @@ XrlRouter::get_sender(const string& target)
     s = i->second;
 
     return *s;
+#else
+    XLOG_UNREACHABLE();
+    XrlPFSender* s = 0;
+    return *s;
+    UNUSED(target);
+#endif
 }
 
 
