@@ -9,17 +9,17 @@ interface ospfv2/0.1 {
     /**
      * Set router id 
      */
-    set_router_id ? id:ipv4
+    set_router_id ? id:ipv4;
 
     /**
      * Set RFC 1583 compatibility.
      */
-    set_rfc1583_compatibility ? compatibility:bool
+    set_rfc1583_compatibility ? compatibility:bool;
 
     /**
      * Set the router alert in the IP options.
      */
-    set_ip_router_alert ? ip_router_alert:bool
+    set_ip_router_alert ? ip_router_alert:bool;
 
     /**
      * Create an area.
@@ -28,7 +28,7 @@ interface ospfv2/0.1 {
      * @param type of area "border", "stub", "nssa"
      */
     create_area_router ? area:ipv4 \
-		       & type:txt
+		       & type:txt;
 
     /**
      * Change area type.
@@ -37,14 +37,14 @@ interface ospfv2/0.1 {
      * @param type of area "border", "stub", "nssa"
      */
     change_area_router_type ?  area:ipv4 \
-		       & type:txt
+		       & type:txt;
 
     /**
      * Destroy area.
      *
      * @param area id of the area
      */
-    destroy_area_router ? area:ipv4
+    destroy_area_router ? area:ipv4;
 
     /**
      * Create a binding to an interface.
@@ -58,21 +58,21 @@ interface ospfv2/0.1 {
 		& vifname:txt \
 		& addr:ipv4 \
 		& type:txt \
-		& area:ipv4  
+		& area:ipv4;
 
     /**
      * Delete peer.
      *
      */
     delete_peer ? ifname:txt \
-		& vifname:txt
+		& vifname:txt;
 
     /**
      * Set the peer state up or down.
      */
     set_peer_state ? ifname:txt \
 		   & vifname:txt \
-		   & enable:bool
+		   & enable:bool;
 
     /**
      * Add a neighbour to the peer.
@@ -81,7 +81,7 @@ interface ospfv2/0.1 {
 		  & vifname:txt \
 		  & area:ipv4 \
 		  & neighbour_address:ipv4 \
-		  & neighbour_id:ipv4
+		  & neighbour_id:ipv4;
 
     /**
      * Remove a neighbour from the peer.
@@ -90,7 +90,7 @@ interface ospfv2/0.1 {
 		  & vifname:txt \
 		  & area:ipv4 \
 		  & neighbour_address:ipv4 \
-		  & neighbour_id:ipv4
+		  & neighbour_id:ipv4;
 
     /**
      * Create a virtual link.
@@ -101,14 +101,14 @@ interface ospfv2/0.1 {
      * be checked by the protocol.
      */
     create_virtual_link ? neighbour_id:ipv4 \
-			& area:ipv4
+			& area:ipv4;
 
     /**
      * Delete virtual link
      *
      * @param neighbour_id the router ID of the other end of the link.
      */
-    delete_virtual_link ? neighbour_id:ipv4
+    delete_virtual_link ? neighbour_id:ipv4;
      
     /**
      * The area through which the virtual link transits.
@@ -117,7 +117,7 @@ interface ospfv2/0.1 {
      * @param transit_area that the virtual link transits.
      */
     transit_area_virtual_link ? neighbour_id:ipv4 \
-			& transit_area:ipv4
+			& transit_area:ipv4;
 
     /**
      * The edge cost of this interface.
@@ -125,7 +125,7 @@ interface ospfv2/0.1 {
     set_interface_cost ? ifname:txt \
 		       & vifname:txt \
 		       & area:ipv4 \
-		       & cost:u32
+		       & cost:u32;
 
     /**
      * 	RxmtInterval
@@ -142,7 +142,7 @@ interface ospfv2/0.1 {
     set_retransmit_interval ? ifname:txt \
 		       & vifname:txt \
 		       & area:ipv4 \
-		       & interval:u32
+		       & interval:u32;
 
     /**
      * The estimated number of seconds it takes to transmit a Link
@@ -155,14 +155,14 @@ interface ospfv2/0.1 {
     set_inftransdelay ? ifname:txt \
 		       & vifname:txt \
 		       & area:ipv4 \
-		       & delay:u32
+		       & delay:u32;
     /**
      * Used in the designated router election.
      */
     set_router_priority ? ifname:txt \
 		       & vifname:txt \
 		       & area:ipv4 \
-		       & priority:u32
+		       & priority:u32;
 
     /**
      * The interval between hello messages.
@@ -170,7 +170,7 @@ interface ospfv2/0.1 {
     set_hello_interval ? ifname:txt \
 		       & vifname:txt \
 		       & area:ipv4 \
-		       & interval:u32
+		       & interval:u32;
 
     /**
      * The period to wait before considering a router dead.
@@ -178,7 +178,7 @@ interface ospfv2/0.1 {
     set_router_dead_interval ? ifname:txt \
 		       & vifname:txt \
 		       & area:ipv4 \
-		       & interval:u32
+		       & interval:u32;
 
     /**
      * Set simple password authentication key.
@@ -191,7 +191,7 @@ interface ospfv2/0.1 {
     set_simple_authentication_key	? ifname:txt			\
 					& vifname:txt			\
 					& area:ipv4			\
-					& password:txt
+					& password:txt;
 
     /**
      * Delete simple password authentication key.
@@ -202,7 +202,7 @@ interface ospfv2/0.1 {
      */
     delete_simple_authentication_key	? ifname:txt			\
 					& vifname:txt			\
-					& area:ipv4
+					& area:ipv4;
 
     /**
      * Set MD5 authentication key.
@@ -225,7 +225,7 @@ interface ospfv2/0.1 {
 					& password:txt			\
 					& start_time:txt		\
 					& end_time:txt			\
-					& max_time_drift:u32
+					& max_time_drift:u32;
 
     /**
      * Delete MD5 authentication key.
@@ -238,7 +238,7 @@ interface ospfv2/0.1 {
     delete_md5_authentication_key	? ifname:txt			\
 					& vifname:txt			\
 					& area:ipv4			\
-					& key_id:u32
+					& key_id:u32;
 
 
     /**
@@ -248,47 +248,47 @@ interface ospfv2/0.1 {
 		& vifname:txt \
 		& area:ipv4 \
 		& passive:bool \
-		& host:bool
+		& host:bool;
 	
     /**
      * If this is a "stub" or "nssa" area toggle the sending of a
      *	default route.
      */
     originate_default_route ? area:ipv4 \
-		& enable:bool
+		& enable:bool;
 
     /**
      * Set the StubDefaultCost, the default cost sent in a default route in
      * a "stub" or "nssa" area.
      */
     stub_default_cost ? area:ipv4 \
-		& cost:u32
+		& cost:u32;
 
     /**
      * Toggle the sending of summaries into "stub" or "nssa" areas.
      */
     summaries ? area:ipv4 \
-		& enable:bool
+		& enable:bool;
 
     /**
      * Add area range.
      */
     area_range_add ? area:ipv4 \
 		   & net:ipv4net \
-		   & advertise:bool	
+		   & advertise:bool;
 
     /**
      * Delete area range.
      */
     area_range_delete ? area:ipv4 \
-		      & net:ipv4net \
+		      & net:ipv4net;
 
     /**
      *  Change the advertised state of this area.
      */
     area_range_change_state ? area:ipv4 \
 			    & net:ipv4net \
-			    & advertise:bool	
+			    & advertise:bool;
 
 
      /**
@@ -298,7 +298,7 @@ interface ospfv2/0.1 {
       * @param enable set to true to enable false to disable.
       */
      trace ? tvar:txt \
-	& enable:bool
+	& enable:bool;
 
     /**
      * Get a single lsa from an area.
@@ -321,14 +321,14 @@ interface ospfv2/0.1 {
 	    valid:bool \
 	    & toohigh:bool \
 	    & self:bool \
-	    & lsa:binary
+	    & lsa:binary;
 
     /**
      * Get a list of all the configured areas.
      *
      * Return a list of u32 type values. Each value is an area ID.
      */
-    get_area_list -> areas:list<u32>
+    get_area_list -> areas:list<u32>;
 
     /**
      * Get the list of neighbours.
@@ -336,7 +336,7 @@ interface ospfv2/0.1 {
      * Return a list of u32 type values. Each value is an internal
      * identifier that can be used with the get_neighbour_info XRL.
      */
-    get_neighbour_list -> areas:list<u32>
+    get_neighbour_list -> areas:list<u32>;
 
     /**
      * Get information on a neighbour.
@@ -369,10 +369,10 @@ interface ospfv2/0.1 {
 	& dr:ipv4 \
 	& bdr:ipv4 \
 	& up:u32 \
-	& adjacent:u32
+	& adjacent:u32;
 
     /**
      * Clear the OSPF database.
      */
-    clear_database
+    clear_database;
 }

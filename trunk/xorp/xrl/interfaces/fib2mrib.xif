@@ -13,9 +13,9 @@ interface fib2mrib/0.1 {
 	 * @param enable if true, then enable Fib2mrib, otherwise
 	 * disable it.
 	 */
-	enable_fib2mrib		? enable:bool
-	start_fib2mrib
-	stop_fib2mrib
+	enable_fib2mrib		? enable:bool;
+	start_fib2mrib;
+	stop_fib2mrib;
 
 	/**
 	 * Enable/disable the Fib2mrib trace log for all operations.
@@ -23,5 +23,5 @@ interface fib2mrib/0.1 {
 	 * @param enable if true, then enable the trace log, otherwise
 	 * disable it.
 	 */
-	enable_log_trace_all	? enable:bool
+	enable_log_trace_all	? enable:bool;
 }

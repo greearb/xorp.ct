@@ -12,4 +12,4 @@ target ripng implements common/0.1,					\
 			policy_backend/0.1,				\
 			policy_redist6/0.1,				\
 			ripng/0.1,					\
-			socket6_user/0.1
+			socket6_user/0.1;

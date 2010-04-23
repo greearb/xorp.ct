@@ -18,7 +18,7 @@ interface profile_client/0.1 {
 		pname:txt \
 		& sec:u32 \
 	        & usec:u32 \
-	        & comment:txt
+	        & comment:txt;
 
 	/**
 	 * Sent to notify the client that all log entries have been sent.
@@ -26,5 +26,5 @@ interface profile_client/0.1 {
 	 * @param pname profiling variable.
 	 */
 	finished ? \
-		pname:txt
+		pname:txt;
 }

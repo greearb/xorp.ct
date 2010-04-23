@@ -10,7 +10,7 @@ interface vrrp/0.1 {
      */
     add_vrid	    ? ifname:txt			\
 		    & vifname:txt			\
-		    & vrid:u32
+		    & vrid:u32;
 
     /**
      * Remove a VRRP instance.
@@ -21,7 +21,7 @@ interface vrrp/0.1 {
      */
     delete_vrid	    ? ifname:txt			\
 		    & vifname:txt			\
-		    & vrid:u32
+		    & vrid:u32;
 
     /**
      * Set the router's priority.
@@ -34,7 +34,7 @@ interface vrrp/0.1 {
     set_priority    ? ifname:txt			\
 		    & vifname:txt			\
 		    & vrid:u32				\
-		    & priority:u32			
+		    & priority:u32;
 
     /**
      * Set the advertisement interval.
@@ -47,7 +47,7 @@ interface vrrp/0.1 {
     set_interval    ? ifname:txt			\
 		    & vifname:txt			\
 		    & vrid:u32				\
-		    & interval:u32
+		    & interval:u32;
 
     /**
      * Set whether a high priority backup router should preempt a low priority
@@ -61,7 +61,7 @@ interface vrrp/0.1 {
     set_preempt	    ? ifname:txt			\
 		    & vifname:txt			\
 		    & vrid:u32				\
-		    & preempt:bool
+		    & preempt:bool;
 
     /**
      * Start or stop a VRRP instance.
@@ -74,7 +74,7 @@ interface vrrp/0.1 {
     set_disable	    ? ifname:txt			\
 		    & vifname:txt			\
 		    & vrid:u32				\
-		    & disable:bool
+		    & disable:bool;
 
     /**
      * Add an IP to the virtual router.
@@ -87,7 +87,7 @@ interface vrrp/0.1 {
     add_ip	    ? ifname:txt			\
 		    & vifname:txt			\
 		    & vrid:u32				\
-		    & ip:ipv4
+		    & ip:ipv4;
     
     /**
      * Remove an IP from the virtual router.
@@ -100,14 +100,14 @@ interface vrrp/0.1 {
     delete_ip	    ? ifname:txt			\
 		    & vifname:txt			\
 		    & vrid:u32				\
-		    & ip:ipv4
+		    & ip:ipv4;
 
     /**
      * Get the physical interfaces on which VRRP is running.
      *
      * @param ifs a list of interface names (strings).
      */
-    get_ifs	    -> ifs:list<txt>
+    get_ifs	    -> ifs:list<txt>;
 
     /**
      * For a given physical interface, get the virtual interfaces on which VRRP
@@ -117,7 +117,7 @@ interface vrrp/0.1 {
      * @param vifs a list of virtual interface names (strings).
      */
     get_vifs	    ? ifname:txt			\
-		    -> vifs:list<txt>
+		    -> vifs:list<txt>;
 
     /**
      * Get the virtual router IDs of all the VRRP instances running on a network
@@ -129,7 +129,7 @@ interface vrrp/0.1 {
      */
     get_vrids       ? ifname:txt			\
 		    & vifname:txt			\
-		    -> vrids:list<u32>
+		    -> vrids:list<u32>;
 
     /**
      * Get state information from a particular VRRP instance.
@@ -144,5 +144,5 @@ interface vrrp/0.1 {
 		    & vifname:txt			\
 		    & vrid:u32				\
 		    -> state:txt			\
-		    & master:ipv4
+		    & master:ipv4;
 }

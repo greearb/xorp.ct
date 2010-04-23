@@ -8,15 +8,15 @@ interface rib/0.1 {
 	/**
 	 * Enable/disable/start/stop RIB.
 	 */
-	enable_rib
-	disable_rib
-	start_rib
-	stop_rib
+	enable_rib;
+	disable_rib;
+	start_rib;
+	stop_rib;
 
 	/**
 	 * Make errors fatal; used to detect errors we'd normally mask
 	 */
-	make_errors_fatal
+	make_errors_fatal;
 
 	/**
 	 * Get the list of registered protocols.
@@ -41,7 +41,7 @@ interface rib/0.1 {
 					-> ipv4_unicast_protocols:list<txt> \
 					& ipv6_unicast_protocols:list<txt> \
 					& ipv4_multicast_protocols:list<txt> \
-					& ipv6_multicast_protocols:list<txt>
+					& ipv6_multicast_protocols:list<txt>;
 
 	/**
 	 * Add/delete an IGP or EGP table.
@@ -54,35 +54,35 @@ interface rib/0.1 {
 	 */
 	add_igp_table4		? protocol:txt				\
 				& target_class:txt & target_instance:txt\
-				& unicast:bool & multicast:bool
+				& unicast:bool & multicast:bool;
 
 	add_igp_table6		? protocol:txt				\
 				& target_class:txt & target_instance:txt\
-				& unicast:bool & multicast:bool
+				& unicast:bool & multicast:bool;
 
 	delete_igp_table4	? protocol:txt				\
 				& target_class:txt & target_instance:txt\
-				& unicast:bool & multicast:bool
+				& unicast:bool & multicast:bool;
 
 	delete_igp_table6	? protocol:txt				\
 				& target_class:txt & target_instance:txt\
-				& unicast:bool & multicast:bool
+				& unicast:bool & multicast:bool;
 
 	add_egp_table4		? protocol:txt				\
 				& target_class:txt & target_instance:txt\
-				& unicast:bool & multicast:bool
+				& unicast:bool & multicast:bool;
 
 	add_egp_table6		? protocol:txt				\
 				& target_class:txt & target_instance:txt\
-				& unicast:bool & multicast:bool
+				& unicast:bool & multicast:bool;
 
 	delete_egp_table4	? protocol:txt				\
 				& target_class:txt & target_instance:txt\
-				& unicast:bool & multicast:bool
+				& unicast:bool & multicast:bool;
 
 	delete_egp_table6	? protocol:txt				\
 				& target_class:txt & target_instance:txt\
-				& unicast:bool & multicast:bool
+				& unicast:bool & multicast:bool;
 
 	/**
 	 * Add/replace/delete a route.
@@ -98,25 +98,25 @@ interface rib/0.1 {
 	 */
 	add_route4	? protocol:txt & unicast:bool & multicast:bool	\
 			& network:ipv4net & nexthop:ipv4 & metric:u32   \
-			& policytags:list<u32>
+			& policytags:list<u32>;
 
 	add_route6	? protocol:txt & unicast:bool & multicast:bool	\
 			& network:ipv6net & nexthop:ipv6 & metric:u32   \
-			& policytags:list<u32>
+			& policytags:list<u32>;
 
 	replace_route4	? protocol:txt & unicast:bool & multicast:bool	\
 			& network:ipv4net & nexthop:ipv4 & metric:u32   \
-			& policytags:list<u32>
+			& policytags:list<u32>;
 
 	replace_route6	? protocol:txt & unicast:bool & multicast:bool	\
 			& network:ipv6net & nexthop:ipv6 & metric:u32   \
-			& policytags:list<u32>
+			& policytags:list<u32>;
 
 	delete_route4	? protocol:txt & unicast:bool & multicast:bool	\
-			& network:ipv4net
+			& network:ipv4net;
 
 	delete_route6	? protocol:txt & unicast:bool & multicast:bool	\
-			& network:ipv6net
+			& network:ipv6net;
 
 	/**
 	 * Add/replace a route by explicitly specifying the network
@@ -139,25 +139,25 @@ interface rib/0.1 {
 				& unicast:bool & multicast:bool		\
 				& network:ipv4net & nexthop:ipv4	\
 				& ifname:txt & vifname:txt & metric:u32 \
-				& policytags:list<u32>
+				& policytags:list<u32>;
 
 	add_interface_route6	? protocol:txt				\
 				& unicast:bool & multicast:bool		\
 				& network:ipv6net & nexthop:ipv6	\
 				& ifname:txt & vifname:txt & metric:u32 \
-				& policytags:list<u32>
+				& policytags:list<u32>;
 
 	replace_interface_route4 ? protocol:txt				\
 				& unicast:bool & multicast:bool		\
 				& network:ipv4net & nexthop:ipv4	\
 				& ifname:txt & vifname:txt & metric:u32 \
-				& policytags:list<u32>
+				& policytags:list<u32>;
 
 	replace_interface_route6 ? protocol:txt				\
 				& unicast:bool & multicast:bool		\
 				& network:ipv6net & nexthop:ipv6	\
 				& ifname:txt & vifname:txt & metric:u32 \
-				& policytags:list<u32>
+				& policytags:list<u32>;
 
 	/**
 	 * Lookup nexthop.
@@ -173,7 +173,7 @@ interface rib/0.1 {
 	 * fields to both be true or both false.
 	 */
 	lookup_route_by_dest4 ? addr:ipv4 & unicast:bool & multicast:bool \
-		-> nexthop:ipv4
+		-> nexthop:ipv4;
 
 	/**
 	 * Lookup nexthop.
@@ -189,7 +189,7 @@ interface rib/0.1 {
 	 * fields to both be true or both false.
 	 */
 	lookup_route_by_dest6 ? addr:ipv6 & unicast:bool & multicast:bool \
-		-> nexthop:ipv6
+		-> nexthop:ipv6;
 
 	/**
 	 * Add a vif or a vif address to the RIB.
@@ -197,7 +197,7 @@ interface rib/0.1 {
 	 *
 	 * @param name the name of the vif.
 	 */
-	new_vif ? name:txt
+	new_vif ? name:txt;
 
 	/**
 	 * Add a vif address to the RIB.
@@ -207,9 +207,9 @@ interface rib/0.1 {
 	 * @param addr the address to add.
 	 * @param subnet the subnet address to add.
 	 */
-	add_vif_addr4 ? name:txt & addr:ipv4 & subnet:ipv4net
+	add_vif_addr4 ? name:txt & addr:ipv4 & subnet:ipv4net;
 
-	add_vif_addr6 ? name:txt & addr:ipv6 & subnet:ipv6net
+	add_vif_addr6 ? name:txt & addr:ipv6 & subnet:ipv6net;
 
 	/**
 	 * Enable route redistribution from one routing protocol to
@@ -238,7 +238,7 @@ interface rib/0.1 {
 		       & unicast:bool					\
 		       & multicast:bool					\
 		       & network_prefix:ipv4net				\
-		       & cookie:txt
+		       & cookie:txt;
 
 	/**
 	 * Enable route redistribution from one routing protocol to
@@ -267,7 +267,7 @@ interface rib/0.1 {
 		       & unicast:bool					\
 		       & multicast:bool					\
 		       & network_prefix:ipv6net				\
-		       & cookie:txt
+		       & cookie:txt;
 
 	/**
 	 * Disable route redistribution from one routing protocol to
@@ -296,7 +296,7 @@ interface rib/0.1 {
 			& from_protocol:txt				\
 			& unicast:bool					\
 			& multicast:bool				\
-			& cookie:txt
+			& cookie:txt;
 
 	/**
 	 * Disable route redistribution from one routing protocol to
@@ -322,7 +322,7 @@ interface rib/0.1 {
 			& from_protocol:txt				\
 			& unicast:bool					\
 			& multicast:bool				\
-			& cookie:txt
+			& cookie:txt;
 
 	/**
 	 * Enable transaction-based route redistribution from
@@ -351,7 +351,7 @@ interface rib/0.1 {
 					& unicast:bool			\
 					& multicast:bool		\
 					& network_prefix:ipv4net	\
-					& cookie:txt
+					& cookie:txt;
 
 	/**
 	 * Enable transaction-based route redistribution from
@@ -380,7 +380,7 @@ interface rib/0.1 {
 					& unicast:bool			\
 					& multicast:bool		\
 					& network_prefix:ipv6net	\
-					& cookie:txt
+					& cookie:txt;
 
 	/**
 	 * Disable transaction-based route redistribution from
@@ -409,7 +409,7 @@ interface rib/0.1 {
 					& from_protocol:txt		\
 					& unicast:bool			\
 					& multicast:bool		\
-					& cookie:txt
+					& cookie:txt;
 
 	/**
 	 * Disable transaction-based route redistribution from
@@ -435,7 +435,7 @@ interface rib/0.1 {
 					& from_protocol:txt		\
 					& unicast:bool			\
 					& multicast:bool		\
-					& cookie:txt
+					& cookie:txt;
 
 	/**
  	 * Register an interest in a route.
@@ -468,7 +468,7 @@ interface rib/0.1 {
          */
 	register_interest4 ? target:txt & addr:ipv4 \
 		-> resolves:bool & base_addr:ipv4 & prefix_len:u32 & \
-                   real_prefix_len:u32 & nexthop:ipv4 & metric:u32
+                   real_prefix_len:u32 & nexthop:ipv4 & metric:u32;
 
 	/**
 	 * De-register an interest in a route.
@@ -483,7 +483,7 @@ interface rib/0.1 {
 	 * @param prefix_len the prefix length of the registered interest,
          * as given in the response from register_interest.
 	 */
-	deregister_interest4 ?  target:txt & addr:ipv4 & prefix_len:u32
+	deregister_interest4 ?  target:txt & addr:ipv4 & prefix_len:u32;
 
 	/**
  	 * Register an interest in a route.
@@ -515,7 +515,7 @@ interface rib/0.1 {
          */
 	register_interest6 ? target:txt & addr:ipv6 \
 		-> resolves:bool & base_addr:ipv6 & prefix_len:u32 & \
-                   real_prefix_len:u32 & nexthop:ipv6 & metric:u32
+                   real_prefix_len:u32 & nexthop:ipv6 & metric:u32;
 
 	/**
 	 * De-register an interest in a route.
@@ -530,7 +530,7 @@ interface rib/0.1 {
 	 * @param prefix_len the prefix length of the registered interest,
          * as given in the response from register_interest.
 	 */
-	deregister_interest6 ?  target:txt & addr:ipv6 & prefix_len:u32
+	deregister_interest6 ?  target:txt & addr:ipv6 & prefix_len:u32;
 
 	/**
 	 * Add policy tags for a specific protcol in the redistribution map.
@@ -539,7 +539,7 @@ interface rib/0.1 {
 	 * @param policytags The set of policytags of interest for the protocol.
 	 *
 	 */
-	insert_policy_redist_tags ? protocol:txt & policytags:list<u32>
+	insert_policy_redist_tags ? protocol:txt & policytags:list<u32>;
 
 	/**
 	 * Reset the policy redistribution map.
@@ -547,7 +547,7 @@ interface rib/0.1 {
 	 * No policy based route redistribution will be available at this point.
 	 *
 	 */
-	reset_policy_redist_tags
+	reset_policy_redist_tags;
 
 	/**
 	 * Get administrative distance for all protocols registered as
@@ -565,7 +565,7 @@ interface rib/0.1 {
 	get_protocol_admin_distances	? ipv4:bool			\
 					& unicast:bool			\
 					-> protocols:list<txt>		\
-					& admin_distances:list<u32>
+					& admin_distances:list<u32>;
 
 	/**
 	 * Get administrative distance for an individual protocol in
@@ -581,7 +581,7 @@ interface rib/0.1 {
 	get_protocol_admin_distance	? protocol:txt			\
 					& ipv4:bool			\
 					& unicast:bool			\
-					-> admin_distance:u32
+					-> admin_distance:u32;
 
 	/**
 	 * Set administrative distance for an individual protocol.
@@ -598,5 +598,5 @@ interface rib/0.1 {
 					& ipv6:bool			\
 					& unicast:bool			\
 					& multicast:bool		\
-					& admin_distance:u32
+					& admin_distance:u32;
 }

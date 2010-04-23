@@ -9,4 +9,4 @@
  */
 
 target fea_ifmgr_mirror implements	common/0.1,			\
-					fea_ifmgr_mirror/0.1
+					fea_ifmgr_mirror/0.1;

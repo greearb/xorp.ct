@@ -33,5 +33,5 @@ interface raw_packet4_client/0.1 {
 		& ip_tos:i32						\
 		& ip_router_alert:bool					\
 		& ip_internet_control:bool				\
-		& payload:binary
+		& payload:binary;
 }

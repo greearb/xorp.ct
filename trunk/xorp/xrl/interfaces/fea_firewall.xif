@@ -10,21 +10,21 @@ interface fea_firewall/0.1 {
 	 *
 	 * @param tid the transaction ID returned by this operation.
 	 */
-	start_transaction -> tid:u32
+	start_transaction -> tid:u32;
 
 	/**
 	 * Commit firewall configuration transaction.
 	 *
 	 * @param tid the transaction ID for this operation.
 	 */
-	commit_transaction ? tid:u32
+	commit_transaction ? tid:u32;
 
 	/**
 	 * Abort firewall configuration transaction.
 	 *
 	 * @param tid the transaction ID for this operation.
 	 */
-	abort_transaction ? tid:u32
+	abort_transaction ? tid:u32;
 
 	/**
 	 * Add an IPv4 firewall entry.
@@ -58,7 +58,7 @@ interface fea_firewall/0.1 {
 			& src_port_end:u32				\
 			& dst_port_begin:u32				\
 			& dst_port_end:u32				\
-			& action:txt
+			& action:txt;
 
 	/**
 	 * Replace an IPv4 firewall entry.
@@ -92,7 +92,7 @@ interface fea_firewall/0.1 {
 			& src_port_end:u32				\
 			& dst_port_begin:u32				\
 			& dst_port_end:u32				\
-			& action:txt
+			& action:txt;
 
 	/**
 	 * Delete an IPv4 firewall entry.
@@ -122,14 +122,14 @@ interface fea_firewall/0.1 {
 			& src_port_begin:u32				\
 			& src_port_end:u32				\
 			& dst_port_begin:u32				\
-			& dst_port_end:u32
+			& dst_port_end:u32;
 
 	/**
 	 * Delete all IPv4 firewall entries.
 	 *
 	 * @param tid the transaction ID for this operation.
 	 */
-	delete_all_entries4 ? tid:u32
+	delete_all_entries4 ? tid:u32;
 
 	/**
 	 * Get a token for a list of IPv4 firewall entries.
@@ -137,7 +137,7 @@ interface fea_firewall/0.1 {
 	 * @param token to be provided when calling get_entry_list_next4.
 	 * @param more true if the list is not empty.
 	 */
-	get_entry_list_start4 -> token:u32 & more:bool
+	get_entry_list_start4 -> token:u32 & more:bool;
 
 	/**
 	 * Get the next item in a list of IPv4 firewall entries.
@@ -171,7 +171,7 @@ interface fea_firewall/0.1 {
 				& dst_port_begin:u32			\
 				& dst_port_end:u32			\
 				& action:txt				\
-				& more:bool
+				& more:bool;
 
 	/**
 	 * Add an IPv6 firewall entry.
@@ -205,7 +205,7 @@ interface fea_firewall/0.1 {
 			& src_port_end:u32				\
 			& dst_port_begin:u32				\
 			& dst_port_end:u32				\
-			& action:txt
+			& action:txt;
 
 	/**
 	 * Replace an IPv6 firewall entry.
@@ -239,7 +239,7 @@ interface fea_firewall/0.1 {
 			& src_port_end:u32				\
 			& dst_port_begin:u32				\
 			& dst_port_end:u32				\
-			& action:txt
+			& action:txt;
 
 	/**
 	 * Delete an IPv6 firewall entry.
@@ -269,14 +269,14 @@ interface fea_firewall/0.1 {
 			& src_port_begin:u32				\
 			& src_port_end:u32				\
 			& dst_port_begin:u32				\
-			& dst_port_end:u32
+			& dst_port_end:u32;
 
 	/**
 	 * Delete all IPv6 firewall entries.
 	 *
 	 * @param tid the transaction ID for this operation.
 	 */
-	delete_all_entries6 ? tid:u32
+	delete_all_entries6 ? tid:u32;
 
 	/**
 	 * Get a token for a list of IPv6 firewall entries.
@@ -284,7 +284,7 @@ interface fea_firewall/0.1 {
 	 * @param token to be provided when calling get_entry_list_next6.
 	 * @param more true if the list is not empty.
 	 */
-	get_entry_list_start6 -> token:u32 & more:bool
+	get_entry_list_start6 -> token:u32 & more:bool;
 
 	/**
 	 * Get the next item in a list of IPv6 firewall entries.
@@ -318,5 +318,5 @@ interface fea_firewall/0.1 {
 				& dst_port_begin:u32			\
 				& dst_port_end:u32			\
 				& action:txt				\
-				& more:bool
+				& more:bool;
 }

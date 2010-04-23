@@ -13,7 +13,7 @@ interface policy/0.1 {
 	 * @param order position of term.
 	 * @param term the name of the term.
 	 */
-	create_term ? policy:txt & order:txt & term:txt
+	create_term ? policy:txt & order:txt & term:txt;
 
 	/**
 	 * Delete a term in a policy.
@@ -21,7 +21,7 @@ interface policy/0.1 {
 	 * @param policy the name of the policy.
 	 * @param term the name of the term.
 	 */
-	delete_term ? policy:txt & term:txt
+	delete_term ? policy:txt & term:txt;
 
 	/**
 	 * Update the source/dest/action block of a term in a policy.
@@ -36,28 +36,28 @@ interface policy/0.1 {
 	 * @param statement the statement to insert or delete.
 	 */
 	update_term_block ? policy:txt & term:txt & block:u32 & order:txt \
-			  & statement:txt
+			  & statement:txt;
 	
 	/**
 	 * Create a policy.
 	 *
 	 * @param policy name of the policy.
 	 */
-	create_policy ? policy:txt
+	create_policy ? policy:txt;
 
 	/**
 	 * Delete a policy.
 	 *
 	 * @param policy name of the policy.
 	 */
-	delete_policy ? policy:txt
+	delete_policy ? policy:txt;
 
 	/**
 	 * Create a set.
 	 *
 	 * @param set name of the set.
 	 */
-	create_set ? set:txt
+	create_set ? set:txt;
 
 	/**
 	 * Replace elements in a set.
@@ -66,14 +66,14 @@ interface policy/0.1 {
 	 * @param set name of the set.
 	 * @param elements comma delimited list of set elements.
 	 */
-	update_set ? type:txt & set:txt & elements:txt
+	update_set ? type:txt & set:txt & elements:txt;
 
 	/**
 	 * Delete a set.
 	 *
 	 * @param set name of the set.
 	 */
-	delete_set ? set:txt
+	delete_set ? set:txt;
 
 	/**
 	 * Add an element to a set.
@@ -82,7 +82,7 @@ interface policy/0.1 {
 	 * @param set name of the set.
 	 * @param element the element to add.
 	 */
-	add_to_set ? type:txt & set:txt & element:txt
+	add_to_set ? type:txt & set:txt & element:txt;
 
 	/**
 	 * Delete an element from a set.
@@ -91,12 +91,12 @@ interface policy/0.1 {
 	 * @param set name of the set.
 	 * @param element the element to delete.
 	 */
-	delete_from_set ? type:txt & set:txt & element:txt
+	delete_from_set ? type:txt & set:txt & element:txt;
 
 	/**
 	 * Commit the configuration.
 	 */
-	done_global_policy_conf
+	done_global_policy_conf;
 
 	/**
 	 * Replace import/export policies for a protocol.
@@ -107,8 +107,8 @@ interface policy/0.1 {
 	 * @param policies comma separated list of policies.
 	 * @param modifier a match statement to insert in each policy.
 	 */
-	import ? protocol:txt & policies:txt & modifier:txt
-	export ? protocol:txt & policies:txt & modifier:txt
+	import ? protocol:txt & policies:txt & modifier:txt;
+	export ? protocol:txt & policies:txt & modifier:txt;
 
 	/**
 	 * Add a variable to the varmap configuration.
@@ -120,14 +120,14 @@ interface policy/0.1 {
 	 * @param id unique id for this var.  Scoped by protocol.
 	 */
 	add_varmap ? protocol:txt & variable:txt & type:txt & access:txt \
-		   & id:u32
+		   & id:u32;
 
 	/**
 	 * Dump state of policy manager.  To be used ONLY for debugging.
 	 *
 	 * @param id which aspect of the internal state to dump.
 	 */
-	dump_state ? id:u32 -> state:txt
+	dump_state ? id:u32 -> state:txt;
 
 	/**
 	 * Update the mapping from protocols to their XRL target name.
@@ -135,5 +135,5 @@ interface policy/0.1 {
 	 * @param protocol protocol to update.
 	 * @param target XRL target for the protocol.
 	 */
-	set_proto_target ? protocol:txt & target:txt
+	set_proto_target ? protocol:txt & target:txt;
 }

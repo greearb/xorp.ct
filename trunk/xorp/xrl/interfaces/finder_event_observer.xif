@@ -11,7 +11,7 @@ interface finder_event_observer/0.1 {
 	 * @param target_class the target class name.
 	 * @param target_instance the target instance name.
 	 */	  
-	xrl_target_birth ? target_class:txt & target_instance:txt
+	xrl_target_birth ? target_class:txt & target_instance:txt;
 
 	/**
 	 * Announce target death to observer.
@@ -19,5 +19,5 @@ interface finder_event_observer/0.1 {
 	 * @param target_class the target class name.
 	 * @param target_instance the target instance name.
 	 */	  
-	xrl_target_death ? target_class:txt & target_instance:txt
+	xrl_target_death ? target_class:txt & target_instance:txt;
 }

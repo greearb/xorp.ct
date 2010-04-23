@@ -4,4 +4,4 @@
 #include "test_peer.xif"
 
 target test_peer implements	common/0.1,				\
-				test_peer/0.1
+				test_peer/0.1;

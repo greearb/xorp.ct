@@ -14,4 +14,4 @@ target olsr4 implements	common/0.1,				\
 			policy_backend/0.1,			\
 			policy_redist4/0.1,			\
 			profile/0.1,				\
-			olsr4/0.1
+			olsr4/0.1;

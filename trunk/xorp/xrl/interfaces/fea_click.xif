@@ -9,12 +9,12 @@ interface fea_click/0.1 {
 	/**
 	 * Load Click FEA support.
 	 */
-	load_click
+	load_click;
 
 	/**
 	 * Unload Click FEA support.
 	 */
-	unload_click
+	unload_click;
 
 	/**
 	 * Enable/disable Click FEA support.
@@ -22,17 +22,17 @@ interface fea_click/0.1 {
 	 * @param enable if true, then enable the Click FEA support,
 	 * otherwise disable it.
 	 */
-	enable_click	? enable:bool
+	enable_click	? enable:bool;
 
 	/**
 	 * Start Click FEA support.
 	 */
-	start_click
+	start_click;
 
 	/**
 	 * Stop Click FEA support.
 	 */
-	stop_click
+	stop_click;
 
 	/**
 	 * Enable/disable duplicating the Click routes to the system kernel.
@@ -40,7 +40,7 @@ interface fea_click/0.1 {
 	 * @param enable if true, then enable duplicating the Click routes
 	 * to the system kernel, otherwise disable it.
 	 */
-	enable_duplicate_routes_to_kernel		? enable:bool
+	enable_duplicate_routes_to_kernel		? enable:bool;
 
 	/**
 	 * Enable/disable kernel-level Click FEA support.
@@ -48,14 +48,14 @@ interface fea_click/0.1 {
 	 * @param enable if true, then enable the kernel-level Click FEA
 	 * support, otherwise disable it.
 	 */
-	enable_kernel_click			? enable:bool
+	enable_kernel_click			? enable:bool;
 
 	/**
 	 * Enable/disable installing kernel-level Click on startup.
 	 *
 	 * @param enable if true, then install kernel-level Click on startup.
 	 */
-	enable_kernel_click_install_on_startup	? enable:bool
+	enable_kernel_click_install_on_startup	? enable:bool;
 
 	/**
 	 * Specify the list of kernel Click modules to load on startup
@@ -65,14 +65,14 @@ interface fea_click/0.1 {
 	 * @param modules the list of kernel Click modules (separated by
 	 * colon) to load.
 	 */
-	set_kernel_click_modules		? modules:txt
+	set_kernel_click_modules		? modules:txt;
 
 	/**
 	 * Specify the kernel-level Click mount directory.
 	 *
 	 * @param directory the kernel-level Click mount directory.
 	 */
-	set_kernel_click_mount_directory	? directory:txt
+	set_kernel_click_mount_directory	? directory:txt;
 
 	/**
 	 * Specify the external program to generate the kernel-level Click
@@ -81,7 +81,7 @@ interface fea_click/0.1 {
 	 * @param kernel_click_config_generator_file the name of the external
 	 * program to generate the kernel-level Click configuration.
 	 */
-	set_kernel_click_config_generator_file	? kernel_click_config_generator_file:txt
+	set_kernel_click_config_generator_file	? kernel_click_config_generator_file:txt;
 
 	/**
 	 * Enable/disable user-level Click FEA support.
@@ -89,7 +89,7 @@ interface fea_click/0.1 {
 	 * @param enable if true, then enable the user-level Click FEA
 	 * support, otherwise disable it.
 	 */
-	enable_user_click			? enable:bool
+	enable_user_click			? enable:bool;
 
 	/**
 	 * Specify the user-level Click command file.
@@ -97,7 +97,7 @@ interface fea_click/0.1 {
 	 * @param user_click_command_file the name of the user-level Click
 	 * command file.
 	 */
-	set_user_click_command_file	? user_click_command_file:txt
+	set_user_click_command_file	? user_click_command_file:txt;
 
 	/**
 	 * Specify the extra arguments to the user-level Click command.
@@ -106,7 +106,7 @@ interface fea_click/0.1 {
 	 * to the user-level Click command.
 	 */
 	set_user_click_command_extra_arguments		?		\
-					 user_click_command_extra_arguments:txt
+					 user_click_command_extra_arguments:txt;
 
 	/**
 	 * Specify whether to execute on startup the user-level Click command.
@@ -115,7 +115,7 @@ interface fea_click/0.1 {
 	 * the user-level Click command on startup.
 	 */
 	set_user_click_command_execute_on_startup	?		\
-				 user_click_command_execute_on_startup:bool
+				 user_click_command_execute_on_startup:bool;
 
 	/**
 	 * Specify the address to use for control access to the
@@ -125,7 +125,7 @@ interface fea_click/0.1 {
 	 * control access to the user-level Click.
 	 */
 	set_user_click_control_address			?		\
-				 user_click_control_address:ipv4
+				 user_click_control_address:ipv4;
 
 	/**
 	 * Specify the socket port to use for control access to the
@@ -135,7 +135,7 @@ interface fea_click/0.1 {
 	 * control access to the user-level Click.
 	 */
 	set_user_click_control_socket_port		?		\
-				 user_click_control_socket_port:u32
+				 user_click_control_socket_port:u32;
 
 	/**
 	 * Specify the configuration file to be used by user-level Click
@@ -145,7 +145,7 @@ interface fea_click/0.1 {
 	 * configuration file to be used by user-level Click on startup.
 	 */
 	set_user_click_startup_config_file		?		\
-				user_click_startup_config_file:txt
+				user_click_startup_config_file:txt;
 
 	/**
 	 * Specify the external program to generate the user-level Click
@@ -154,5 +154,5 @@ interface fea_click/0.1 {
 	 * @param user_click_config_generator_file the name of the external
 	 * program to generate the user-level Click configuration.
 	 */
-	set_user_click_config_generator_file	? user_click_config_generator_file:txt
+	set_user_click_config_generator_file	? user_click_config_generator_file:txt;
 }

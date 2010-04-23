@@ -6,13 +6,13 @@
  */
 
 interface rtrmgr_client/0.2 {
-    new_config_user ? userid:u32
+    new_config_user ? userid:u32;
 
-    config_saved_done ? success:bool & errmsg:txt
+    config_saved_done ? success:bool & errmsg:txt;
 
-    config_change_done ? success:bool & errmsg:txt
+    config_change_done ? success:bool & errmsg:txt;
 
-    config_changed ? userid:u32 & deltas:txt & deletions:txt
+    config_changed ? userid:u32 & deltas:txt & deletions:txt;
 
-    module_status ? modname:txt & status:u32
+    module_status ? modname:txt & status:u32;
 }

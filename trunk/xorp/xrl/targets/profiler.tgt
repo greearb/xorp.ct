@@ -4,4 +4,4 @@
 #include "profile_client.xif"
 
 target profiler implements	common/0.1,				\
-				profile_client/0.1
+				profile_client/0.1;

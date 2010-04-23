@@ -18,14 +18,14 @@ interface mld6igmp_client/0.1 {
 	 */
 	add_membership4		? xrl_sender_name:txt			\
 				& vif_name:txt & vif_index:u32		\
-				& source:ipv4 & group:ipv4
+				& source:ipv4 & group:ipv4;
 	add_membership6		? xrl_sender_name:txt			\
 				& vif_name:txt & vif_index:u32		\
-				& source:ipv6 & group:ipv6
+				& source:ipv6 & group:ipv6;
 	delete_membership4	? xrl_sender_name:txt			\
 				& vif_name:txt & vif_index:u32		\
-				& source:ipv4 & group:ipv4
+				& source:ipv4 & group:ipv4;
 	delete_membership6	? xrl_sender_name:txt			\
 				& vif_name:txt & vif_index:u32		\
-				& source:ipv6 & group:ipv6
+				& source:ipv6 & group:ipv6;
 }

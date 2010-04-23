@@ -32,4 +32,4 @@ target fea implements	common/0.1,					\
 			raw_packet6/0.1,				\
 			socket4/0.1,					\
 			socket6/0.1,					\
-			profile/0.1
+			profile/0.1;

@@ -16,7 +16,7 @@ interface datain/0.1 {
 	 * @param micro. Time that the message was received in microseconds.
 	 * @param data.
 	 */
-	receive ? peer:txt & genid:u32 & status:bool & secs:u32 & micro:u32 & data:binary
+	receive ? peer:txt & genid:u32 & status:bool & secs:u32 & micro:u32 & data:binary;
 
 	/*
 	 * Error. There has been an error on the endpoint.
@@ -25,7 +25,7 @@ interface datain/0.1 {
 	 * @param genid. The generation id.
 	 * @param reason. The error message
 	 */
-	error ? peer:txt & genid:u32 & reason:txt
+	error ? peer:txt & genid:u32 & reason:txt;
 
 	/*
 	 * Closed. The endpointed has been closed.
@@ -33,5 +33,5 @@ interface datain/0.1 {
 	 * @param peer. The peers router name.
 	 * @param genid. The generation id.
 	 */
-	closed ? peer:txt & genid:u32
+	closed ? peer:txt & genid:u32;
 }

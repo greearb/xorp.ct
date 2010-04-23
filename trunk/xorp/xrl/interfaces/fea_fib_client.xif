@@ -24,10 +24,10 @@ interface fea_fib_client/0.1 {
 	 */
 	add_route4	? network:ipv4net & nexthop:ipv4 & ifname:txt	\
 			& vifname:txt & metric:u32 & admin_distance:u32	\
-			& protocol_origin:txt & xorp_route:bool
+			& protocol_origin:txt & xorp_route:bool;
 	add_route6	? network:ipv6net & nexthop:ipv6 & ifname:txt	\
 			& vifname:txt & metric:u32 & admin_distance:u32	\
-			& protocol_origin:txt & xorp_route:bool
+			& protocol_origin:txt & xorp_route:bool;
 
 	/**
 	 * Notification of a route being replaced.
@@ -48,10 +48,10 @@ interface fea_fib_client/0.1 {
 	 */
 	replace_route4	? network:ipv4net & nexthop:ipv4 & ifname:txt	\
 			& vifname:txt & metric:u32 & admin_distance:u32	\
-			& protocol_origin:txt & xorp_route:bool
+			& protocol_origin:txt & xorp_route:bool;
 	replace_route6	? network:ipv6net & nexthop:ipv6 & ifname:txt	\
 			& vifname:txt & metric:u32 & admin_distance:u32	\
-			& protocol_origin:txt & xorp_route:bool
+			& protocol_origin:txt & xorp_route:bool;
 
 	/**
 	 * Notification of a route being deleted.
@@ -62,8 +62,8 @@ interface fea_fib_client/0.1 {
 	 * @param vifname the name of the virtual interface toward the
 	 * destination.
 	 */
-	delete_route4	? network:ipv4net & ifname:txt & vifname: txt
-	delete_route6	? network:ipv6net & ifname:txt & vifname: txt
+	delete_route4	? network:ipv4net & ifname:txt & vifname: txt;
+	delete_route6	? network:ipv6net & ifname:txt & vifname: txt;
 
 	/**
 	 * Notification of a route resolution request. This is issued
@@ -74,6 +74,6 @@ interface fea_fib_client/0.1 {
 	 * forwarding plane requires a route to be resolved by the
 	 * upper layer.
 	 */
-	resolve_route4	? network:ipv4net
-	resolve_route6	? network:ipv6net
+	resolve_route4	? network:ipv4net;
+	resolve_route6	? network:ipv6net;
 }

@@ -15,9 +15,9 @@ interface mld6igmp/0.1 {
 	 * @param enable if true, then enable the vif, otherwise
 	 * disable it.
 	 */
-	enable_vif	? vif_name:txt & enable:bool
-	start_vif	? vif_name:txt
-	stop_vif	? vif_name:txt
+	enable_vif	? vif_name:txt & enable:bool;
+	start_vif	? vif_name:txt;
+	stop_vif	? vif_name:txt;
 
 	/**
 	 * Enable/disable/start/stop all MLD6IGMP vif interfaces.
@@ -25,9 +25,9 @@ interface mld6igmp/0.1 {
 	 * @param enable if true, then enable the vifs, otherwise
 	 * disable them.
 	 */
-	enable_all_vifs	? enable:bool
-	start_all_vifs
-	stop_all_vifs
+	enable_all_vifs	? enable:bool;
+	start_all_vifs;
+	stop_all_vifs;
 	
 	/**
 	 * Enable/disable/start/stop the MLD6IGMP protocol.
@@ -35,9 +35,9 @@ interface mld6igmp/0.1 {
 	 * @param enable if true, then enable the MLD6IGMP protocol, otherwise
 	 * disable it.
 	 */
-	enable_mld6igmp	? enable:bool
-	start_mld6igmp
-	stop_mld6igmp
+	enable_mld6igmp	? enable:bool;
+	start_mld6igmp;
+	stop_mld6igmp;
 
 	/**
 	 * Enable/disable/start/stop the MLD6IGMP CLI access.
@@ -45,9 +45,9 @@ interface mld6igmp/0.1 {
 	 * @param enable if true, then enable the MLD6IGMP CLI access,
 	 * otherwise disable it.
 	 */
-	enable_cli	? enable:bool
-	start_cli
-	stop_cli
+	enable_cli	? enable:bool;
+	start_cli;
+	stop_cli;
 
 	/**
 	 * Get the configured protocol version per interface.
@@ -55,7 +55,7 @@ interface mld6igmp/0.1 {
 	 * @param vif_name the name of the vif to apply to.
 	 * @param proto_version the protocol version.
 	 */
-	get_vif_proto_version		? vif_name:txt -> proto_version:u32
+	get_vif_proto_version		? vif_name:txt -> proto_version:u32;
 
 	/**
 	 * Set the protocol version per interface.
@@ -63,14 +63,14 @@ interface mld6igmp/0.1 {
 	 * @param vif_name the name of the vif to apply to.
 	 * @param proto_version the protocol version.
 	 */
-	set_vif_proto_version		? vif_name:txt & proto_version:u32
+	set_vif_proto_version		? vif_name:txt & proto_version:u32;
 
 	/**
 	 * Reset the protocol version per interface to its default value.
 	 * 
 	 * @param vif_name the name of the vif to apply to.
 	 */
-	reset_vif_proto_version		? vif_name:txt
+	reset_vif_proto_version		? vif_name:txt;
 
 	/**
 	 * Get the IP Router Alert option check per interface for received
@@ -80,7 +80,7 @@ interface mld6igmp/0.1 {
 	 * @param enabled if true, then the IP Router Alert option check was
 	 * enabled, otherwise it was disabled.
 	 */
-	get_vif_ip_router_alert_option_check	? vif_name:txt -> enabled:bool
+	get_vif_ip_router_alert_option_check	? vif_name:txt -> enabled:bool;
 
 	/**
 	 * Set the IP Router Alert option check per interface for received
@@ -90,7 +90,7 @@ interface mld6igmp/0.1 {
 	 * @param enable if true, then enable the IP Router Alert option check,
 	 * otherwise disable it.
 	 */
-	set_vif_ip_router_alert_option_check	? vif_name:txt & enable:bool
+	set_vif_ip_router_alert_option_check	? vif_name:txt & enable:bool;
 
 	/**
 	 * Reset the IP Router Alert option check for received packets per
@@ -98,7 +98,7 @@ interface mld6igmp/0.1 {
 	 *
 	 * @param vif_name the name of the vif to apply to.
 	 */
-	reset_vif_ip_router_alert_option_check	? vif_name:txt
+	reset_vif_ip_router_alert_option_check	? vif_name:txt;
 
 	/**
 	 * Get the Query Interval per interface.
@@ -110,7 +110,7 @@ interface mld6igmp/0.1 {
 	 */
 	get_vif_query_interval			? vif_name:txt		\
 						-> interval_sec:u32	\
-						& interval_usec:u32
+						& interval_usec:u32;
 
 	/**
 	 * Set the Query Interval per interface.
@@ -122,14 +122,14 @@ interface mld6igmp/0.1 {
 	 */
 	set_vif_query_interval			? vif_name:txt		\
 						& interval_sec:u32	\
-						& interval_usec:u32
+						& interval_usec:u32;
 
 	/**
 	 * Reset the Query Interval per interface to its default value.
 	 *
 	 * @param vif_name the name of the vif to apply to.
 	 */
-	reset_vif_query_interval		? vif_name:txt
+	reset_vif_query_interval		? vif_name:txt;
 
 	/**
 	 * Get the Last Member Query Interval per interface.
@@ -141,7 +141,7 @@ interface mld6igmp/0.1 {
 	 */
 	get_vif_query_last_member_interval	? vif_name:txt		\
 						-> interval_sec:u32	\
-						& interval_usec:u32
+						& interval_usec:u32;
 
 	/**
 	 * Set the Last Member Query Interval per interface.
@@ -153,7 +153,7 @@ interface mld6igmp/0.1 {
 	 */
 	set_vif_query_last_member_interval	? vif_name:txt		\
 						& interval_sec:u32	\
-						& interval_usec:u32
+						& interval_usec:u32;
 
 	/**
 	 * Reset the Last Member Query Interval per interface to its
@@ -161,7 +161,7 @@ interface mld6igmp/0.1 {
 	 *
 	 * @param vif_name the name of the vif to apply to.
 	 */
-	reset_vif_query_last_member_interval	? vif_name:txt
+	reset_vif_query_last_member_interval	? vif_name:txt;
 
 	/**
 	 * Get the Query Response Interval per interface.
@@ -173,7 +173,7 @@ interface mld6igmp/0.1 {
 	 */
 	get_vif_query_response_interval		? vif_name:txt		\
 						-> interval_sec:u32	\
-						& interval_usec:u32
+						& interval_usec:u32;
 
 	/**
 	 * Set the Query Response Interval per interface.
@@ -185,7 +185,7 @@ interface mld6igmp/0.1 {
 	 */
 	set_vif_query_response_interval		? vif_name:txt		\
 						& interval_sec:u32	\
-						& interval_usec:u32
+						& interval_usec:u32;
 
 	/**
 	 * Reset the Query Response Interval per interface to its
@@ -193,7 +193,7 @@ interface mld6igmp/0.1 {
 	 *
 	 * @param vif_name the name of the vif to apply to.
 	 */
-	reset_vif_query_response_interval	? vif_name:txt
+	reset_vif_query_response_interval	? vif_name:txt;
 
 	/**
 	 * Get the Robustness Variable count per interface.
@@ -202,7 +202,7 @@ interface mld6igmp/0.1 {
 	 * @param robust_count the count value.
 	 */
 	get_vif_robust_count			? vif_name:txt		\
-						-> robust_count:u32
+						-> robust_count:u32;
 
 	/**
 	 * Set the Robustness Variable count per interface.
@@ -211,7 +211,7 @@ interface mld6igmp/0.1 {
 	 * @param robust_count the count value.
 	 */
 	set_vif_robust_count			? vif_name:txt		\
-						& robust_count:u32
+						& robust_count:u32;
 
 	/**
 	 * Reset the Robustness Variable count per interface to its
@@ -219,7 +219,7 @@ interface mld6igmp/0.1 {
 	 *
 	 * @param vif_name the name of the vif to apply to.
 	 */
-	reset_vif_robust_count			? vif_name:txt
+	reset_vif_robust_count			? vif_name:txt;
 
 	/**
 	 * Enable/disable the MLD6IGMP trace log for all operations.
@@ -227,7 +227,7 @@ interface mld6igmp/0.1 {
 	 * @param enable if true, then enable the trace log, otherwise
 	 * disable it.
 	 */
-	log_trace_all	? enable:bool
+	log_trace_all	? enable:bool;
 
 	/**
 	 * Add/delete a client protocol in the MLD/IGMP protocol.
@@ -247,15 +247,15 @@ interface mld6igmp/0.1 {
 	/* TODO: the protocol names have to be globally defined */
 	add_protocol4	? xrl_sender_name:txt				\
 			& protocol_name:txt & protocol_id:u32		\
-			& vif_name:txt & vif_index:u32
+			& vif_name:txt & vif_index:u32;
 	add_protocol6	? xrl_sender_name:txt				\
 			& protocol_name:txt & protocol_id:u32		\
-			& vif_name:txt & vif_index:u32
+			& vif_name:txt & vif_index:u32;
 	
 	delete_protocol4 ? xrl_sender_name:txt				\
 			& protocol_name:txt & protocol_id:u32		\
-			& vif_name:txt & vif_index:u32
+			& vif_name:txt & vif_index:u32;
 	delete_protocol6 ? xrl_sender_name:txt				\
 			& protocol_name:txt & protocol_id:u32		\
-			& vif_name:txt & vif_index:u32
+			& vif_name:txt & vif_index:u32;
 }

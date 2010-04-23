@@ -290,6 +290,14 @@ class XifParser:
                 line_buffer = line_buffer[0 : -1]
                 continue
 
+            # Must terminate with semi-colon
+            if line_buffer[-1] != ";":
+                #print "line_buffer doesn't end with semicolon, continuing: ", line_buffer
+                continue
+            else:
+                line_buffer = line_buffer[0 : -1]
+                #print "got line: ", line_buffer
+
             # Parse line
             while line_buffer != "":
                 # This strip() is paranoia

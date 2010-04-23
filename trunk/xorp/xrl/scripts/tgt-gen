@@ -407,7 +407,7 @@ def main():
 
     tgts = xp.targets()
     if len(tgts) == 0:
-        print "Not targets found in input files."
+        print "No targets found in input files."
         sys.exit(1)
 
     sourcefile = tgts[0].sourcefile()

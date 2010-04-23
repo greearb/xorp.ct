@@ -13,17 +13,17 @@ interface policy_backend/0.1 {
 	 * @param filter the identifier of the filter to configure.
 	 * @param conf the configuration of the filter.
 	 */
-        configure ? filter:u32 & conf:txt
+        configure ? filter:u32 & conf:txt;
 
 	/**
 	 * Reset a policy filter.
 	 *
 	 * @param filter the identifier of the filter to reset.
 	 */
-        reset ? filter:u32
+        reset ? filter:u32;
 
 	/**
 	 * Push all available routes through all filters for re-filtering.
 	 */
-        push_routes
+        push_routes;
 }

@@ -10,5 +10,5 @@ target ospfv2 implements	common/0.1,				\
 				raw_packet4_client/0.1,			\
 				policy_backend/0.1,			\
 				policy_redist4/0.1,			\
-				ospfv2/0.1
+				ospfv2/0.1;
 

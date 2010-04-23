@@ -15,21 +15,21 @@ interface test_peer/0.1 {
 	 * @param Coordinator. Coordinator's name.
 	 * @param genid Generation id.
 	 */ 
-	register ? coordinator:txt & genid:u32
+	register ? coordinator:txt & genid:u32;
 
 	/**
          * Packetisation style.
 	 *
 	 * @param protocol. Protocol that is being handled.
 	 */
-	packetisation ? protocol:txt
+	packetisation ? protocol:txt;
 
 	/**
          * Set whether to assume 2 or 4 byte AS numbers when decoding.
 	 *
 	 * @param use.  True if 4 byte asnums
 	 */
-	use_4byte_asnums ? use:bool
+	use_4byte_asnums ? use:bool;
 
 	/**
 	 * Make a tcp connection to the specified host and port.
@@ -37,7 +37,7 @@ interface test_peer/0.1 {
 	 * @param host name.
 	 * @param port number.
 	 */
-	connect ? host:txt & port:u32
+	connect ? host:txt & port:u32;
 
 	/**
          * Listen for connections on this address and port.
@@ -45,7 +45,7 @@ interface test_peer/0.1 {
 	 * @param address local address.
 	 * @param port local port number.
 	 */
-	listen ? address:txt & port:u32
+	listen ? address:txt & port:u32;
 
 	/**
          * Bind the port but don't perform the listen or accept.
@@ -53,30 +53,30 @@ interface test_peer/0.1 {
 	 * @param address local address.
 	 * @param port local port number.
 	 */
-	bind ? address:txt & port:u32
+	bind ? address:txt & port:u32;
 
 	/**
 	 * Send data
 	 *
 	 * Send data to the peer.
 	 */
-	send ? data:binary
+	send ? data:binary;
 
 	/**
 	 * Disconnect from the peer.
 	 *
 	 */
-	disconnect
+	disconnect;
         
 	/**
 	 * Reset the peer.
 	 * Take it back to a known state.
 	 */
-	reset
+	reset;
 
 	/**
 	 * Terminate the test peer process.
 	 *
 	 */
-	terminate
+	terminate;
 }

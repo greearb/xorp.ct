@@ -24,5 +24,5 @@ interface raw_link_client/0.1 {
 		& src_address:mac					\
 		& dst_address:mac					\
 		& ether_type:u32					\
-		& payload:binary
+		& payload:binary;
 }

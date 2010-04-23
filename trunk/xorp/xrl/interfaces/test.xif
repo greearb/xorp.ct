@@ -9,19 +9,19 @@ interface test/1.0 {
 	/**
 	 * Print "hello world".
 	 */
-	print_hello_world
+	print_hello_world;
 
 	/** 
 	 * Print "hello world" and a user supplied greeting.
 	 *
 	 * @param msg greeting to be printed.
 	 */
-	 print_hello_world_and_message ? msg:txt  
+	 print_hello_world_and_message ? msg:txt;
 
 	 /**
 	  * Count number of greetings available.
 	  */
-	 get_greeting_count -> num_msgs:i32
+	 get_greeting_count -> num_msgs:i32;
 
 	 /**
 	  * Get greeting.
@@ -30,10 +30,10 @@ interface test/1.0 {
 	  *
 	  * @param greeting text of greeting.
 	  */
-	 get_greeting ? greeting_num:i32 -> greeting:txt
+	 get_greeting ? greeting_num:i32 -> greeting:txt;
 
 	 /**
 	  * Something that always fails.
 	  */
-	 shoot_foot
+	 shoot_foot;
 }

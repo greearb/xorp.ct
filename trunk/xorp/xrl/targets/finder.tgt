@@ -6,4 +6,4 @@
 
 target finder implements	common/0.1,				\
 				finder/0.2,				\
-				finder_event_notifier/0.1
+				finder_event_notifier/0.1;

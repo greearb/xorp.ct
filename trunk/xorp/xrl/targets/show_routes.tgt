@@ -5,9 +5,8 @@
 #include "redist4.xif"
 #include "redist6.xif"
 
-target show_routes implements						\
-			common/0.1,					\
+target show_routes implements	common/0.1,				\
 			finder_event_observer/0.1,			\
 			redist4/0.1,					\
-			redist6/0.1
+			redist6/0.1;
 

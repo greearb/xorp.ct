@@ -4,4 +4,4 @@
 #include "rtrmgr_client.xif"
 
 target xorpsh implements	common/0.1,				\
-				rtrmgr_client/0.2
+				rtrmgr_client/0.2;

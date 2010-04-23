@@ -24,7 +24,7 @@ interface socket6_user/0.1 {
 			& vif_name: txt					\
 			& src_host:ipv6					\
 			& src_port:u32					\
-			& data:binary
+			& data:binary;
 
     /**
      * Method invoked by target implementing socket6/0.1 when a connection
@@ -45,7 +45,7 @@ interface socket6_user/0.1 {
 				& src_host:ipv6				\
 				& src_port:u32				\
 				& new_sockid:txt			\
-				-> accept:bool
+				-> accept:bool;
 
     /**
      * Method invoked by target implementing socket6/0.1 when an outgoing
@@ -58,7 +58,7 @@ interface socket6_user/0.1 {
      * @param sockid the identifier associated with socket where the event
      *               occurred.
      */
-     outgoing_connect_event	? sockid:txt
+     outgoing_connect_event	? sockid:txt;
 
     /**
      * Method invoked by target implementing socket6/0.1 when an error occurs.
@@ -70,7 +70,7 @@ interface socket6_user/0.1 {
      */
     error_event		? sockid:txt					\
 			& error:txt					\
-			& fatal:bool
+			& fatal:bool;
 
     /**
      * Method invoked by target implementing socket6/0.1 when the peer
@@ -82,5 +82,5 @@ interface socket6_user/0.1 {
      * @param sockid the identifier associated with socket where the event
      *               occurred.
      */
-     disconnect_event	? sockid:txt
+     disconnect_event	? sockid:txt;
 }

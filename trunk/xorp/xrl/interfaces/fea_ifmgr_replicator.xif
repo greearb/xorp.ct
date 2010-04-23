@@ -12,10 +12,10 @@ interface ifmgr_replicator/0.1
 	/**
 	 * Register remote mirror of interface state.
 	 */
-	register_ifmgr_mirror ? clientname:txt
+	register_ifmgr_mirror ? clientname:txt;
 
 	/**
 	 * Register remote mirror of interface state.
 	 */
-	unregister_ifmgr_mirror ? clientname:txt
+	unregister_ifmgr_mirror ? clientname:txt;
 }

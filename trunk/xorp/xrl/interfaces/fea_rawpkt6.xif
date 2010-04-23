@@ -44,7 +44,7 @@ interface raw_packet6/0.1 {
 		& ip_internet_control:bool				\
 		& ext_headers_type:list<u32>				\
 		& ext_headers_payload:list<binary>			\
-		& payload:binary
+		& payload:binary;
 
 	/**
 	 * Register to receive IPv6 packets.  The receiver is expected to
@@ -66,7 +66,7 @@ interface raw_packet6/0.1 {
 				& if_name:txt				\
 				& vif_name:txt				\
 				& ip_protocol:u32			\
-				& enable_multicast_loopback:bool
+				& enable_multicast_loopback:bool;
 
 	/**
 	 * Unregister to receive IPv6 packets.
@@ -84,7 +84,7 @@ interface raw_packet6/0.1 {
 	unregister_receiver	? xrl_target_instance_name:txt		\
 				& if_name:txt				\
 				& vif_name:txt				\
-				& ip_protocol:u32
+				& ip_protocol:u32;
 
 	/**
 	 * Join an IPv6 multicast group.
@@ -103,7 +103,7 @@ interface raw_packet6/0.1 {
 				& if_name:txt				\
 				& vif_name:txt				\
 				& ip_protocol:u32			\
-				& group_address:ipv6
+				& group_address:ipv6;
 
 	/**
 	 * Leave an IPv6 multicast group.
@@ -123,5 +123,5 @@ interface raw_packet6/0.1 {
 				& if_name:txt				\
 				& vif_name:txt				\
 				& ip_protocol:u32			\
-				& group_address:ipv6
+				& group_address:ipv6;
 }

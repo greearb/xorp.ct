@@ -24,7 +24,7 @@ interface raw_link/0.1 {
 		& src_address:mac					\
 		& dst_address:mac  					\
 		& ether_type:u32  					\
-		& payload:binary
+		& payload:binary;
 
 	/**
 	 * Register to receive raw link-level packets. The receiver is
@@ -52,7 +52,7 @@ interface raw_link/0.1 {
 				& vif_name:txt				\
 				& ether_type:u32			\
 				& filter_program:txt			\
-				& enable_multicast_loopback:bool
+				& enable_multicast_loopback:bool;
 
 	/**
 	 * Unregister to receive raw link-level packets.
@@ -76,7 +76,7 @@ interface raw_link/0.1 {
 				& if_name:txt				\
 				& vif_name:txt				\
 				& ether_type:u32			\
-				& filter_program:txt
+				& filter_program:txt;
 
 	/**
 	 * Join a MAC multicast group.
@@ -101,7 +101,7 @@ interface raw_link/0.1 {
 				& vif_name:txt				\
 				& ether_type:u32			\
 				& filter_program:txt			\
-				& group_address:mac
+				& group_address:mac;
 
 	/**
 	 * Leave a MAC multicast group.
@@ -127,5 +127,5 @@ interface raw_link/0.1 {
 				& vif_name:txt				\
 				& ether_type:u32			\
 				& filter_program:txt			\
-				& group_address:mac
+				& group_address:mac;
 }

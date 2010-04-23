@@ -8,4 +8,4 @@
 target static_routes implements	common/0.1,				\
 				finder_event_observer/0.1,		\
 				policy_backend/0.1,			\
-				static_routes/0.1
+				static_routes/0.1;

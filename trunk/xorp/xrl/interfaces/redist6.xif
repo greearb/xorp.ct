@@ -30,7 +30,7 @@ interface redist6/0.1 {
 			& metric:u32					\
 			& admin_distance:u32				\
 			& cookie:txt					\
-			& protocol_origin:txt
+			& protocol_origin:txt;
 
 	delete_route	? dst:ipv6net					\
 			& nexthop:ipv6					\
@@ -39,7 +39,7 @@ interface redist6/0.1 {
 			& metric:u32					\
 			& admin_distance:u32				\
 			& cookie:txt					\
-			& protocol_origin:txt
+			& protocol_origin:txt;
 
 	/**
 	 * When route redistribution begins, the receiver is sent the existing
@@ -50,7 +50,7 @@ interface redist6/0.1 {
 	 *        redistribution source.  Typical value is the originating
 	 *        protocol name.
 	 */
-	starting_route_dump ? cookie:txt
+	starting_route_dump ? cookie:txt;
 
 	/**
 	 * When route redistribution begins, the receiver is sent the existing
@@ -61,5 +61,5 @@ interface redist6/0.1 {
 	 *        redistribution source.  Typical value is the originating
 	 *        protocol name.
 	 */
-	finishing_route_dump ? cookie:txt
+	finishing_route_dump ? cookie:txt;
 }

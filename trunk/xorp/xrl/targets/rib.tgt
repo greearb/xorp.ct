@@ -10,4 +10,4 @@ target rib implements		common/0.1,				\
 				finder_event_observer/0.1,		\
 				policy_backend/0.1,			\
 				rib/0.1,				\
-				profile/0.1
+				profile/0.1;

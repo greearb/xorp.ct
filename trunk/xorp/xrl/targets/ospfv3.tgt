@@ -12,4 +12,4 @@ target ospfv3 implements	common/0.1,				\
 				raw_packet6_client/0.1,			\
 				policy_backend/0.1,			\
 				policy_redist6/0.1,			\
-				ospfv3/0.1
+				ospfv3/0.1;

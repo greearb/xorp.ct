@@ -10,4 +10,4 @@ target fib2mrib implements	common/0.1,				\
 				finder_event_observer/0.1,		\
 				fea_fib_client/0.1,			\
 				policy_backend/0.1,			\
-				fib2mrib/0.1
+				fib2mrib/0.1;

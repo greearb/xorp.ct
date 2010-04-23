@@ -15,9 +15,9 @@ interface finder/0.2 {
 				 & class_name:txt			      \
 				 & singleton:bool			      \
 				 & in_cookie:txt			      \
-				 -> out_cookie:txt
+				 -> out_cookie:txt;
 
-	  unregister_finder_client ? instance_name:txt
+	  unregister_finder_client ? instance_name:txt;
 
 	  /**
 	   * Enable resolution of Xrls associated with target.  Disabling
@@ -28,12 +28,12 @@ interface finder/0.2 {
 	   * Caller must be client that registered Xrl.
 	   */
 	  set_finder_client_enabled ? instance_name:txt			      \
-				    & enabled:bool
+				    & enabled:bool;
 
 	  /**
 	   * Get enabled state information associated with finder client.
 	   */
-	  finder_client_enabled ? instance_name:txt -> enabled:bool
+	  finder_client_enabled ? instance_name:txt -> enabled:bool;
 
 	  /** 
 	   * Add resolved Xrl into system, fails if xrl is already
@@ -42,49 +42,49 @@ interface finder/0.2 {
 	  add_xrl ? xrl:txt			      			      \
 		  & protocol_name:txt					      \
 		  & protocol_args:txt					      \
-		  -> resolved_xrl_method_name:txt
+		  -> resolved_xrl_method_name:txt;
 
 	  /**
 	   * Remove xrl
 	   */
-	  remove_xrl ? xrl:txt
+	  remove_xrl ? xrl:txt;
 
 	  /**
 	   * Resolve Xrl
 	   */
-	   resolve_xrl ? xrl:txt -> resolutions:list<txt>
+	   resolve_xrl ? xrl:txt -> resolutions:list<txt>;
 
 	  /**
 	   * Get list of registered Xrl targets 
 	   */
-	  get_xrl_targets -> target_names:list<txt>
+	  get_xrl_targets -> target_names:list<txt>;
 
 	  /**
 	   * Get list of Xrls registered by target
 	   */
-	  get_xrls_registered_by ? target_name:txt -> xrls:list<txt>
+	  get_xrls_registered_by ? target_name:txt -> xrls:list<txt>;
 
 	  /**
 	   * Get list of IPv4 hosts that clients should accept IPC requests
 	   * from.
 	   */
-	   get_ipv4_permitted_hosts -> ipv4s:list<ipv4>
+	   get_ipv4_permitted_hosts -> ipv4s:list<ipv4>;
 
 	  /**
 	   * Get list of IPv4 nets that clients should accept IPC requests
 	   * from.
 	   */
-	   get_ipv4_permitted_nets -> ipv4nets:list<ipv4net>
+	   get_ipv4_permitted_nets -> ipv4nets:list<ipv4net>;
 
 	  /**
 	   * Get list of IPv6 hosts that clients should accept IPC requests
 	   * from.
 	   */
-	   get_ipv6_permitted_hosts -> ipv6s:list<ipv6>
+	   get_ipv6_permitted_hosts -> ipv6s:list<ipv6>;
 
 	  /**
 	   * Get list of IPv6 nets that clients should accept IPC requests
 	   * from.
 	   */
-	   get_ipv6_permitted_nets -> ipv6nets:list<ipv6net>
+	   get_ipv6_permitted_nets -> ipv6nets:list<ipv6net>;
 }

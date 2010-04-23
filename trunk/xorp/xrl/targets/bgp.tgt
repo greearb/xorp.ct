@@ -16,4 +16,4 @@ target bgp implements		common/0.1,				\
 				policy_redist4/0.1,			\
 				policy_redist6/0.1,			\
 				rib_client/0.1,				\
-				profile/0.1
+				profile/0.1;

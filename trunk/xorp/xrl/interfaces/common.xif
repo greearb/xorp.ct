@@ -7,14 +7,14 @@
 
 interface common/0.1 {
 	/** Get name of Xrl Target */
-	get_target_name	-> name:txt
+	get_target_name	-> name:txt;
 
 	/** Get version string from Xrl Target */
-	get_version	-> version:txt
+	get_version	-> version:txt;
 
 	/** Get status of Xrl Target */
-	get_status	-> status:u32 & reason:txt
+	get_status	-> status:u32 & reason:txt;
 
 	/** Request clean shutdown of Xrl Target */
-	shutdown
+	shutdown;
 }

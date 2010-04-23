@@ -18,7 +18,7 @@ interface policy_redist4/0.1 {
 	 * @param policytags the set of policy-tags associated with the route.
 	 */
 	add_route4	? network:ipv4net & unicast:bool & multicast:bool  \
-			& nexthop:ipv4 & metric:u32 & policytags:list<u32>
+			& nexthop:ipv4 & metric:u32 & policytags:list<u32>;
 
 	/**
 	 * Terminate route redistribution for an IPv4 route.
@@ -27,5 +27,5 @@ interface policy_redist4/0.1 {
 	 * @param unicast whether the route is unicast.
 	 * @param multicast whether the route is multicast.
 	 */
-	delete_route4	? network:ipv4net & unicast:bool & multicast:bool
+	delete_route4	? network:ipv4net & unicast:bool & multicast:bool;
 }

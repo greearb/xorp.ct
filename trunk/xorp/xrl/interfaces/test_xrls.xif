@@ -7,15 +7,15 @@
 
 interface test_xrls/0.1 {
 
-	start_transmission
-	end_transmission
+	start_transmission;
+	end_transmission;
 
-	add_xrl0
+	add_xrl0;
 
-	add_xrl1	? data1:txt
+	add_xrl1	? data1:txt;
 
 	add_xrl2	? data1:txt					\
-			& data2:txt
+			& data2:txt;
 
 	add_xrl9	? data1:bool					\
 			& data2:i32					\
@@ -25,8 +25,8 @@ interface test_xrls/0.1 {
 			& data6:ipv6net					\
 			& data7:mac					\
 			& data8:txt					\
-			& data9:binary
+			& data9:binary;
 
 	/* XXX: the list member type doesn't matter for this test. */
-	add_xrlX	? data:list<u32>
+	add_xrlX	? data:list<u32>;
 }

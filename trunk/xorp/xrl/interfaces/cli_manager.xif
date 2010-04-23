@@ -12,9 +12,9 @@ interface cli_manager/0.1 {
 	 * @param enable if true, then enable the CLI, otherwise
 	 * disable it.
 	 */
-	enable_cli	? enable:bool
-	start_cli
-	stop_cli
+	enable_cli	? enable:bool;
+	start_cli;
+	stop_cli;
 
 	/**
 	 * Add a subnet address to the list of subnet addresses enabled
@@ -24,8 +24,8 @@ interface cli_manager/0.1 {
 	 *
 	 * @param subnet_addr the subnet address to add.
 	 */
-	add_enable_cli_access_from_subnet4	? subnet_addr:ipv4net
-	add_enable_cli_access_from_subnet6	? subnet_addr:ipv6net
+	add_enable_cli_access_from_subnet4	? subnet_addr:ipv4net;
+	add_enable_cli_access_from_subnet6	? subnet_addr:ipv6net;
 
 	/**
 	 * Delete a subnet address from the list of subnet addresses enabled
@@ -33,8 +33,8 @@ interface cli_manager/0.1 {
 	 *
 	 * @param subnet_addr the subnet address to delete.
 	 */
-	delete_enable_cli_access_from_subnet4	? subnet_addr:ipv4net
-	delete_enable_cli_access_from_subnet6	? subnet_addr:ipv6net
+	delete_enable_cli_access_from_subnet4	? subnet_addr:ipv4net;
+	delete_enable_cli_access_from_subnet6	? subnet_addr:ipv6net;
 
 	/**
 	 * Add a subnet address to the list of subnet addresses disabled
@@ -44,8 +44,8 @@ interface cli_manager/0.1 {
 	 *
 	 * @param subnet_addr the subnet address to add.
 	 */
-	add_disable_cli_access_from_subnet4	? subnet_addr:ipv4net
-	add_disable_cli_access_from_subnet6	? subnet_addr:ipv6net
+	add_disable_cli_access_from_subnet4	? subnet_addr:ipv4net;
+	add_disable_cli_access_from_subnet6	? subnet_addr:ipv6net;
 
 	/**
 	 * Delete a subnet address from the list of subnet addresses disabled
@@ -53,8 +53,8 @@ interface cli_manager/0.1 {
 	 *
 	 * @param subnet_addr the subnet address to delete.
 	 */
-	delete_disable_cli_access_from_subnet4	? subnet_addr:ipv4net
-	delete_disable_cli_access_from_subnet6	? subnet_addr:ipv6net
+	delete_disable_cli_access_from_subnet4	? subnet_addr:ipv4net;
+	delete_disable_cli_access_from_subnet6	? subnet_addr:ipv6net;
 
 	/**
 	 * Add a CLI command to the CLI manager
@@ -76,7 +76,7 @@ interface cli_manager/0.1 {
 				& command_help:txt			\
 				& is_command_cd:bool			\
 				& command_cd_prompt:txt			\
-				& is_command_processor:bool
+				& is_command_processor:bool;
 
 	/**
 	 * Delete a CLI command from the CLI manager
@@ -84,11 +84,11 @@ interface cli_manager/0.1 {
 	 * @param processor_name the name of the module that sends the request.
 	 * @param command_name the name of the command to delete.
 	 */	
-	delete_cli_command	? processor_name:txt & command_name:txt
+	delete_cli_command	? processor_name:txt & command_name:txt;
 	
 	/*
 	 * TODO: do we want 'add_cli_commands_done' to indicate
 	 * end-of-adding?
 	 */
-	/* add_cli_commands_done ? processor_name:txt */
+	/* add_cli_commands_done ? processor_name:txt;*/
 }

@@ -37,7 +37,7 @@ interface raw_packet4/0.1 {
 		& ip_tos:i32 						\
 		& ip_router_alert:bool 					\
 		& ip_internet_control:bool				\
-		& payload:binary
+		& payload:binary;
 
 	/**
 	 * Register to receive IPv4 packets.  The receiver is expected to
@@ -59,7 +59,7 @@ interface raw_packet4/0.1 {
 				& if_name:txt				\
 				& vif_name:txt				\
 				& ip_protocol:u32			\
-				& enable_multicast_loopback:bool
+				& enable_multicast_loopback:bool;
 
 	/**
 	 * Unregister to receive IPv4 packets.
@@ -77,7 +77,7 @@ interface raw_packet4/0.1 {
 	unregister_receiver	? xrl_target_instance_name:txt		\
 				& if_name:txt				\
 				& vif_name:txt				\
-				& ip_protocol:u32
+				& ip_protocol:u32;
 
 	/**
 	 * Join an IPv4 multicast group.
@@ -96,7 +96,7 @@ interface raw_packet4/0.1 {
 				& if_name:txt				\
 				& vif_name:txt				\
 				& ip_protocol:u32			\
-				& group_address:ipv4
+				& group_address:ipv4;
 
 	/**
 	 * Leave an IPv4 multicast group.
@@ -116,5 +116,5 @@ interface raw_packet4/0.1 {
 				& if_name:txt				\
 				& vif_name:txt				\
 				& ip_protocol:u32			\
-				& group_address:ipv4
+				& group_address:ipv4;
 }

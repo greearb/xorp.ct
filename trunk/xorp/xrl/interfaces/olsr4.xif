@@ -18,7 +18,7 @@ interface olsr4/0.1 {
      * @param enable set to true to enable, false to disable.
      */
     trace ? tvar:txt \
-	    & enable:bool
+	    & enable:bool;
 
 
     /*
@@ -28,7 +28,7 @@ interface olsr4/0.1 {
     /**
      * Clear all OLSR protocol databases.
      */
-    clear_database
+    clear_database;
 
 
     /*
@@ -40,24 +40,24 @@ interface olsr4/0.1 {
      *
      * @param willingness the new willingness-to-forward.
      */
-    set_willingness ? willingness:u32
+    set_willingness ? willingness:u32;
 
     /**
      * Get the willingness-to-forward.
      */
-    get_willingness -> willingness:u32
+    get_willingness -> willingness:u32;
 
     /**
      * Set the MPR_COVERAGE.
      *
      * @param coverage the new MPR_COVERAGE value.
      */
-    set_mpr_coverage ? coverage:u32
+    set_mpr_coverage ? coverage:u32;
 
     /**
      * Get the MPR_COVERAGE.
      */
-    get_mpr_coverage -> coverage:u32
+    get_mpr_coverage -> coverage:u32;
 
     /**
      * Set the TC_REDUNDANCY.
@@ -65,34 +65,34 @@ interface olsr4/0.1 {
      * @param coverage the new TC_REDUNDANCY value as follows:
      *  "mprs" "mprs-and-selectors" "all"
      */
-    set_tc_redundancy ? redundancy:txt
+    set_tc_redundancy ? redundancy:txt;
 
     /**
      * Get the TC_REDUNDANCY.
      */
-    get_tc_redundancy -> redundancy:txt
+    get_tc_redundancy -> redundancy:txt;
 
     /**
      * Enable/disable TC fisheye mode.
      *
      * @param enabled true to enable fisheye, false to disable it.
      */
-    set_tc_fisheye ? enabled:bool
+    set_tc_fisheye ? enabled:bool;
 
     /**
      * Get the current TC fisheye mode.
      */
-    get_tc_fisheye -> enabled:bool
+    get_tc_fisheye -> enabled:bool;
 
     /**
      * Set the current HNA base cost metric.
      */
-    set_hna_base_cost ? metric:u32
+    set_hna_base_cost ? metric:u32;
 
     /**
      * Get the current HNA base cost metric.
      */
-    get_hna_base_cost -> metric:u32
+    get_hna_base_cost -> metric:u32;
 
 
     /*
@@ -104,84 +104,84 @@ interface olsr4/0.1 {
      *
      * @param interval the new HELLO_INTERVAL.
      */
-    set_hello_interval ? interval:u32
+    set_hello_interval ? interval:u32;
 
     /**
      * Get the HELLO_INTERVAL.
      */
-    get_hello_interval -> interval:u32
+    get_hello_interval -> interval:u32;
 
     /**
      * Set the REFRESH_INTERVAL.
      *
      * @param interval the new REFRESH_INTERVAL.
      */
-    set_refresh_interval ? interval:u32
+    set_refresh_interval ? interval:u32;
 
     /**
      * Get the REFRESH_INTERVAL.
      */
-    get_refresh_interval -> interval:u32
+    get_refresh_interval -> interval:u32;
 
     /**
      * Set the TC_INTERVAL.
      *
      * @param interval the new TC_INTERVAL.
      */
-    set_tc_interval ? interval:u32
+    set_tc_interval ? interval:u32;
 
     /**
      * Get the TC_INTERVAL.
      */
-    get_tc_interval -> interval:u32
+    get_tc_interval -> interval:u32;
 
     /**
      * Set the MID_INTERVAL.
      *
      * @param interval the new MID_INTERVAL.
      */
-    set_mid_interval ? interval:u32
+    set_mid_interval ? interval:u32;
 
     /**
      * Get the MID_INTERVAL.
      */
-    get_mid_interval -> interval:u32
+    get_mid_interval -> interval:u32;
 
     /**
      * Set the HNA_INTERVAL.
      *
      * @param interval the new HNA_INTERVAL.
      */
-    set_hna_interval ? interval:u32
+    set_hna_interval ? interval:u32;
 
     /**
      * Get the HNA_INTERVAL.
      */
-    get_hna_interval -> interval:u32
+    get_hna_interval -> interval:u32;
 
     /**
      * Set the DUP_HOLD_TIME.
      *
      * @param dup_hold_time the new DUP_HOLD_TIME.
      */
-    set_dup_hold_time ? dup_hold_time:u32
+    set_dup_hold_time ? dup_hold_time:u32;
 
     /**
      * Get the DUP_HOLD_TIME.
      */
-    get_dup_hold_time -> dup_hold_time:u32
+    get_dup_hold_time -> dup_hold_time:u32;
 
     /**
      * Set the main address.
      *
      * @param addr Our main IPv4 address which OLSR uses as a router ID.
      */
-    set_main_address ? addr:ipv4
+    set_main_address ? addr:ipv4;
 
     /**
      * Get the main address.
      */
-    get_main_address -> addr:ipv4
+    get_main_address -> addr:ipv4;
 
 
     /*
@@ -217,7 +217,7 @@ interface olsr4/0.1 {
 		 & local_addr:ipv4		\
 		 & local_port:u32		\
 		 & all_nodes_addr:ipv4		\
-		 & all_nodes_port:u32
+		 & all_nodes_port:u32;
 
     /**
      * Destroy an IPv4 address binding for OLSR.
@@ -226,7 +226,7 @@ interface olsr4/0.1 {
      * @param vifname the vif to unbind.
      */
     unbind_address ? ifname:txt			\
-		   & vifname:txt
+		   & vifname:txt;
 
     /**
      * Set the enabled state of an IPv4 address binding for OLSR.
@@ -239,7 +239,7 @@ interface olsr4/0.1 {
      */
     set_binding_enabled ? ifname:txt		\
 		        & vifname:txt		\
-		        & enabled:bool
+		        & enabled:bool;
 
     /**
      * Get the state of an IPv4 address binding for OLSR.
@@ -251,7 +251,7 @@ interface olsr4/0.1 {
      */
     get_binding_enabled ? ifname:txt		\
 		        & vifname:txt		\
-		        -> enabled:bool
+		        -> enabled:bool;
 
     /**
      * Change the UDP address and port where OLSR listens for
@@ -268,7 +268,7 @@ interface olsr4/0.1 {
     change_local_addr_port ? ifname:txt		\
 			   & vifname:txt	\
 			   & local_addr:ipv4	\
-			   & local_port:u32
+			   & local_port:u32;
 
     /**
      * Change the address where OLSR sends control traffic
@@ -286,7 +286,7 @@ interface olsr4/0.1 {
     change_all_nodes_addr_port ? ifname:txt		\
 			       & vifname:txt		\
 			       & all_nodes_addr:ipv4	\
-			       & all_nodes_port:u32
+			       & all_nodes_port:u32;
 
     /*
      * Interface properties.
@@ -298,7 +298,7 @@ interface olsr4/0.1 {
      * Return a list of u32 type values. Each value is an internal
      * ID that can be used with the get_interface_info XRL.
      */
-    get_interface_list -> interfaces:list<u32>
+    get_interface_list -> interfaces:list<u32>;
 
     /**
      * Get the per-interface information for the given interface.
@@ -318,7 +318,7 @@ interface olsr4/0.1 {
 	& local_addr:ipv4			\
 	& local_port:u32			\
 	& all_nodes_addr:ipv4			\
-	& all_nodes_port:u32
+	& all_nodes_port:u32;
 
     /**
      * Set the edge cost of an interface/vif.
@@ -329,7 +329,7 @@ interface olsr4/0.1 {
      */
     set_interface_cost ? ifname:txt		\
 		       & vifname:txt		\
-		       & cost:u32
+		       & cost:u32;
 
     /**
      * Get the per-interface statistics for the given interface.
@@ -356,7 +356,7 @@ interface olsr4/0.1 {
 			& messages_from_self:u32 \
 			& unknown_messages:u32	\
 			& duplicates:u32	\
-			& forwarded:u32
+			& forwarded:u32;
 
 
     /*
@@ -369,7 +369,7 @@ interface olsr4/0.1 {
      * Return a list of u32 type values. Each value is an internal
      * ID that can be used with the get_link_info XRL.
      */
-    get_link_list -> links:list<u32>
+    get_link_list -> links:list<u32>;
 
     /**
      * Get the information for a one-hop link.
@@ -397,7 +397,7 @@ interface olsr4/0.1 {
 	& link_type:u32					\
 	& sym_time:u32					\
 	& asym_time:u32					\
-	& hold_time:u32
+	& hold_time:u32;
 
     /**
      * Get the list of one-hop neighbors.
@@ -405,7 +405,7 @@ interface olsr4/0.1 {
      * Return a list of u32 type values. Each value is an internal
      * ID that can be used with the get_neighbor_info XRL.
      */
-    get_neighbor_list -> neighbors:list<u32>
+    get_neighbor_list -> neighbors:list<u32>;
 
     /**
      * Get the information for a one-hop neighbor.
@@ -436,7 +436,7 @@ interface olsr4/0.1 {
 	& is_advertised:bool				\
 	& is_sym:bool					\
 	& is_mpr:bool					\
-	& is_mpr_selector:bool
+	& is_mpr_selector:bool;
 
     /**
      * Get the list of two-hop links.
@@ -444,7 +444,7 @@ interface olsr4/0.1 {
      * Return a list of u32 type values. Each value is an internal
      * ID that can be used with the get_twohop_link_info XRL.
      */
-    get_twohop_link_list -> twohop_links:list<u32>
+    get_twohop_link_list -> twohop_links:list<u32>;
 
     /**
      * Get the information for a two-hop link.
@@ -464,7 +464,7 @@ interface olsr4/0.1 {
 	last_face_id:u32				\
 	& nexthop_addr:ipv4				\
 	& dest_addr:ipv4				\
-	& hold_time:u32
+	& hold_time:u32;
 
     /**
      * Get the list of two-hop neighbors.
@@ -472,7 +472,7 @@ interface olsr4/0.1 {
      * Return a list of u32 type values. Each value is an internal
      * ID that can be used with the get_twohop_neighbor_info XRL.
      */
-    get_twohop_neighbor_list -> twohop_neighbors:list<u32>
+    get_twohop_neighbor_list -> twohop_neighbors:list<u32>;
 
     /**
      * Get the information for a two-hop neighbor.
@@ -494,7 +494,7 @@ interface olsr4/0.1 {
 	& is_strict:bool				\
 	& link_count:u32				\
 	& reachability:u32				\
-	& coverage:u32
+	& coverage:u32;
 
     /**
      * Get the list of learned Multiple Interface Declaration (MID)
@@ -503,7 +503,7 @@ interface olsr4/0.1 {
      * Return a list of u32 type values. Each value is an internal
      * ID that can be used with the get_mid_entry XRL.
      */
-    get_mid_entry_list -> mid_entries:list<u32>
+    get_mid_entry_list -> mid_entries:list<u32>;
 
     /**
      * Get the information contained in a MID entry.
@@ -520,7 +520,7 @@ interface olsr4/0.1 {
 	main_addr:ipv4					\
 	& iface_addr:ipv4				\
 	& distance:u32					\
-	& hold_time:u32
+	& hold_time:u32;
 
     /**
      * Get the list of learned Topology Control (TC) entries.
@@ -528,7 +528,7 @@ interface olsr4/0.1 {
      * Return a list of u32 type values. Each value is an internal
      * ID that can be used with the get_tc_entry XRL.
      */
-    get_tc_entry_list -> tc_entries:list<u32>
+    get_tc_entry_list -> tc_entries:list<u32>;
 
     /**
      * Get the information contained in a TC entry.
@@ -547,7 +547,7 @@ interface olsr4/0.1 {
 	& lasthop:ipv4					\
 	& distance:u32					\
 	& seqno:u32					\
-	& hold_time:u32
+	& hold_time:u32;
 
     /**
      * Get the list of learned external route (HNA) entries.
@@ -555,7 +555,7 @@ interface olsr4/0.1 {
      * Return a list of u32 type values. Each value is an internal
      * ID that can be used with the get_hna_entry XRL.
      */
-    get_hna_entry_list -> hna_entries:list<u32>
+    get_hna_entry_list -> hna_entries:list<u32>;
 
     /**
      * Get the information contained in a HNA entry.
@@ -572,5 +572,5 @@ interface olsr4/0.1 {
 	destination:ipv4net				\
 	& lasthop:ipv4					\
 	& distance:u32					\
-	& hold_time:u32
+	& hold_time:u32;
 }

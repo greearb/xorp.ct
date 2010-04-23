@@ -25,10 +25,10 @@ interface rib_client/0.1 {
 	 */
 	route_info_changed4 ? addr:ipv4 & prefix_len:u32 &		\
 			      nexthop:ipv4 & metric:u32 &		\
-			      admin_distance:u32 & protocol_origin:txt
+			      admin_distance:u32 & protocol_origin:txt;
 	route_info_changed6 ? addr:ipv6 & prefix_len:u32 &		\
 			      nexthop:ipv6 & metric:u32 &		\
-			      admin_distance:u32 & protocol_origin:txt
+			      admin_distance:u32 & protocol_origin:txt;
 
 	/**
          * Route Info Invalid
@@ -43,7 +43,7 @@ interface rib_client/0.1 {
          * interest in the route, and the client will normally need to
          * send a register_interest request again.
          */
-	route_info_invalid4 ? addr:ipv4 & prefix_len:u32
-	route_info_invalid6 ? addr:ipv6 & prefix_len:u32
+	route_info_invalid4 ? addr:ipv4 & prefix_len:u32;
+	route_info_invalid6 ? addr:ipv6 & prefix_len:u32;
 }    
 

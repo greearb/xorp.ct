@@ -4,4 +4,4 @@
 #include "cli_manager.xif"
 
 target cli implements		common/0.1,				\
-				cli_manager/0.1
+				cli_manager/0.1;

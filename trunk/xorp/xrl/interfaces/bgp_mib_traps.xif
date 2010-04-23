@@ -11,7 +11,7 @@ interface bgp_mib_traps/0.1 {
 	send_bgp_established_trap \
 		? \
 		bgp_last_error:txt \
-		& bgp_state:u32
+		& bgp_state:u32;
 
 	/**
 	 * Send bgpBackwardTransition trap
@@ -19,5 +19,5 @@ interface bgp_mib_traps/0.1 {
         send_bgp_backward_transition_trap \
 		? \
 		bgp_last_error:txt \
-		& bgp_state:u32
+		& bgp_state:u32;
 }

@@ -6,4 +6,4 @@
 
 target coord implements		common/0.1,				\
 				coord/0.1,				\
-				datain/0.1
+				datain/0.1;

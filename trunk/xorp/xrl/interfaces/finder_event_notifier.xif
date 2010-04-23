@@ -22,7 +22,7 @@ interface finder_event_notifier/0.1 {
 	 *	notifications for.
 	 */
 	register_class_event_interest	 ? requester_instance:txt	\
-					 & class_name:txt
+					 & class_name:txt;
 
 	/**
 	 * Deregister interest in events relating to a particular class.
@@ -34,7 +34,7 @@ interface finder_event_notifier/0.1 {
 	 *	notifications for.
 	 */
 	deregister_class_event_interest	 ? requester_instance:txt	\
-					 & class_name:txt
+					 & class_name:txt;
 
 	/**
 	 * Register interest in events relating to a particular instance.
@@ -53,7 +53,7 @@ interface finder_event_notifier/0.1 {
 	 *	notifications for.
 	 */
 	register_instance_event_interest ? requester_instance:txt	\
-					 & instance_name:txt
+					 & instance_name:txt;
 	/**
 	 * Register interest in events relating to a particular instance.
 	 *
@@ -64,5 +64,5 @@ interface finder_event_notifier/0.1 {
 	 *	notifications for.
 	 */
 	deregister_instance_event_interest ? requester_instance:txt	\
-					   & instance_name:txt
+					   & instance_name:txt;
 }

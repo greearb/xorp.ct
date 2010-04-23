@@ -4,4 +4,4 @@
 #include "bgp_mib_traps.xif"
 
 target bgp4_mib implements	common/0.1,				\
-				bgp_mib_traps/0.1
+				bgp_mib_traps/0.1;

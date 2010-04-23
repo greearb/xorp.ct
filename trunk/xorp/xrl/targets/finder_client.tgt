@@ -4,4 +4,4 @@
 #include "finder_client.xif"
 
 target FinderClient implements	common/0.1,				\
-				finder_client/0.2
+				finder_client/0.2;

@@ -40,5 +40,5 @@ interface raw_packet6_client/0.1 {
 		& ip_internet_control:bool				\
 		& ext_headers_type:list<u32>				\
 		& ext_headers_payload:list<binary>			\
-		& payload:binary
+		& payload:binary;
 }

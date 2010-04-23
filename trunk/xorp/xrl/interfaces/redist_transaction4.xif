@@ -12,21 +12,21 @@ interface redist_transaction4/0.1 {
 	 * 
 	 * @param tid the transaction ID to use for this transaction.
 	 */
-	start_transaction -> tid:u32
+	start_transaction -> tid:u32;
 
 	/**
 	 * Commit transaction.
 	 * 
 	 * @param tid the transaction ID of this transaction.
 	 */
-	commit_transaction ? tid:u32
+	commit_transaction ? tid:u32;
 
 	/**
 	 * Abort transaction.
 	 * 
 	 * @param tid the transaction ID of this transaction.
 	 */
-	abort_transaction ? tid:u32
+	abort_transaction ? tid:u32;
 
 	/**
 	 * Add/delete a routing entry.
@@ -53,7 +53,7 @@ interface redist_transaction4/0.1 {
 			& metric:u32					\
 			& admin_distance:u32				\
 			& cookie:txt					\
-			& protocol_origin:txt
+			& protocol_origin:txt;
 
 	delete_route	? tid:u32					\
 			& dst:ipv4net					\
@@ -63,7 +63,7 @@ interface redist_transaction4/0.1 {
 			& metric:u32					\
 			& admin_distance:u32				\
 			& cookie:txt					\
-			& protocol_origin:txt
+			& protocol_origin:txt;
 
 	/**
 	 * Delete all routing entries.
@@ -73,5 +73,5 @@ interface redist_transaction4/0.1 {
 	 *        redistribution source.  Typical value is the originating
 	 *        protocol name.
 	 */
-	delete_all_routes ? tid:u32 & cookie:txt
+	delete_all_routes ? tid:u32 & cookie:txt;
 }

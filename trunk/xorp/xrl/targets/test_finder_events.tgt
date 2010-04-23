@@ -4,4 +4,4 @@
 #include "finder_event_observer.xif"
 
 target test_finder_events implements	common/0.1,			\
-					finder_event_observer/0.1
+					finder_event_observer/0.1;

@@ -24,13 +24,13 @@ interface mfea_client/0.1 {
 					& vif_name:txt & vif_index:u32	\
 					& source_address:ipv4		\
 					& dest_address:ipv4		\
-					& protocol_message:binary
+					& protocol_message:binary;
 	recv_kernel_signal_message6	? xrl_sender_name:txt		\
 					& message_type:u32		\
 					& vif_name:txt & vif_index:u32	\
 					& source_address:ipv6		\
 					& dest_address:ipv6		\
-					& protocol_message:binary
+					& protocol_message:binary;
 	
 	/**
 	 * A signal that a dataflow-related pre-condition is true.
@@ -75,7 +75,7 @@ interface mfea_client/0.1 {
 				& is_threshold_in_packets: bool		\
 				& is_threshold_in_bytes: bool		\
 				& is_geq_upcall:bool			\
-				& is_leq_upcall: bool
+				& is_leq_upcall: bool;
 	recv_dataflow_signal6	? xrl_sender_name:txt			\
 				& source_address:ipv6			\
 				& group_address:ipv6			\
@@ -90,5 +90,5 @@ interface mfea_client/0.1 {
 				& is_threshold_in_packets: bool		\
 				& is_threshold_in_bytes: bool		\
 				& is_geq_upcall:bool			\
-				& is_leq_upcall:bool
+				& is_leq_upcall:bool;
 }

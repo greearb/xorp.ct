@@ -13,7 +13,7 @@ interface mfea/0.1 {
 	 * @param result true if the underlying system supports IPv4
 	 * multicast routing, otherwise false.
 	 */
-	have_multicast_routing4 -> result:bool
+	have_multicast_routing4 -> result:bool;
 
 	/**
 	 * Test if the underlying system supports IPv6 multicast routing.
@@ -21,7 +21,7 @@ interface mfea/0.1 {
 	 * @param result true if the underlying system supports IPv6
 	 * multicast routing, otherwise false.
 	 */
-	have_multicast_routing6 -> result:bool
+	have_multicast_routing6 -> result:bool;
 
 	/**
 	 * Register a protocol on an interface in the Multicast FEA.
@@ -38,10 +38,10 @@ interface mfea/0.1 {
 	 */
 	register_protocol4 ? xrl_sender_name:txt			\
 			& if_name:txt & vif_name:txt			\
-			& ip_protocol:u32
+			& ip_protocol:u32;
 	register_protocol6 ? xrl_sender_name:txt			\
 			& if_name:txt & vif_name:txt			\
-			& ip_protocol:u32
+			& ip_protocol:u32;
 
 	/**
 	 * Unregister a protocol on an interface in the Multicast FEA.
@@ -55,9 +55,9 @@ interface mfea/0.1 {
 	 * particular protocol.
 	 */
 	unregister_protocol4 ? xrl_sender_name:txt			\
-			& if_name:txt & vif_name:txt
+			& if_name:txt & vif_name:txt;
 	unregister_protocol6 ? xrl_sender_name:txt			\
-			& if_name:txt & vif_name:txt
+			& if_name:txt & vif_name:txt;
 
 	/**
 	 * Add/delete a Multicast Forwarding Cache with the kernel.
@@ -80,18 +80,18 @@ interface mfea/0.1 {
 			& oiflist:binary				\
 			& oiflist_disable_wrongvif:binary		\
 			& max_vifs_oiflist:u32				\
-			& rp_address:ipv4
+			& rp_address:ipv4;
 	add_mfc6	? xrl_sender_name:txt				\
 			& source_address:ipv6 & group_address:ipv6	\
 			& iif_vif_index:u32				\
 			& oiflist:binary				\
 			& oiflist_disable_wrongvif:binary		\
 			& max_vifs_oiflist:u32				\
-			& rp_address:ipv6
+			& rp_address:ipv6;
 	delete_mfc4	? xrl_sender_name:txt				\
-			& source_address:ipv4 & group_address:ipv4
+			& source_address:ipv4 & group_address:ipv4;
 	delete_mfc6	? xrl_sender_name:txt				\
-			& source_address:ipv6 & group_address:ipv6
+			& source_address:ipv6 & group_address:ipv6;
 	
 	/**
 	 * Add/delete a dataflow monitor with the MFEA.
@@ -126,7 +126,7 @@ interface mfea/0.1 {
 				& is_threshold_in_packets:bool		\
 				& is_threshold_in_bytes:bool		\
 				& is_geq_upcall:bool			\
-				& is_leq_upcall:bool
+				& is_leq_upcall:bool;
 	add_dataflow_monitor6	? xrl_sender_name:txt			\
 				& source_address:ipv6			\
 				& group_address:ipv6			\
@@ -137,7 +137,7 @@ interface mfea/0.1 {
 				& is_threshold_in_packets:bool		\
 				& is_threshold_in_bytes:bool		\
 				& is_geq_upcall:bool			\
-				& is_leq_upcall:bool
+				& is_leq_upcall:bool;
 	delete_dataflow_monitor4? xrl_sender_name:txt			\
 				& source_address:ipv4			\
 				& group_address:ipv4			\
@@ -148,7 +148,7 @@ interface mfea/0.1 {
 				& is_threshold_in_packets:bool		\
 				& is_threshold_in_bytes:bool		\
 				& is_geq_upcall:bool			\
-				& is_leq_upcall:bool
+				& is_leq_upcall:bool;
 	delete_dataflow_monitor6? xrl_sender_name:txt			\
 				& source_address:ipv6			\
 				& group_address:ipv6			\
@@ -159,13 +159,13 @@ interface mfea/0.1 {
 				& is_threshold_in_packets:bool		\
 				& is_threshold_in_bytes:bool		\
 				& is_geq_upcall:bool			\
-				& is_leq_upcall:bool
+				& is_leq_upcall:bool;
 	delete_all_dataflow_monitor4? xrl_sender_name:txt		\
 				& source_address:ipv4			\
-				& group_address:ipv4
+				& group_address:ipv4;
 	delete_all_dataflow_monitor6? xrl_sender_name:txt		\
 				& source_address:ipv6			\
-				& group_address:ipv6
+				& group_address:ipv6;
 
 	/**
 	 * Enable/disable/start/stop a MFEA vif interface.
@@ -174,9 +174,9 @@ interface mfea/0.1 {
 	 * @param enable if true, then enable the vif, otherwise
 	 * disable it.
 	 */
-	enable_vif	? vif_name:txt & enable:bool
-	start_vif	? vif_name:txt
-	stop_vif	? vif_name:txt
+	enable_vif	? vif_name:txt & enable:bool;
+	start_vif	? vif_name:txt;
+	stop_vif	? vif_name:txt;
 
 	/**
 	 * Enable/disable/start/stop all MFEA vif interfaces.
@@ -184,9 +184,9 @@ interface mfea/0.1 {
 	 * @param enable if true, then enable the vifs, otherwise
 	 * disable them.
 	 */
-	enable_all_vifs	? enable:bool
-	start_all_vifs
-	stop_all_vifs
+	enable_all_vifs	? enable:bool;
+	start_all_vifs;
+	stop_all_vifs;
 
 	/**
 	 * Enable/disable/start/stop the MFEA.
@@ -194,9 +194,9 @@ interface mfea/0.1 {
 	 * @param enable if true, then enable the MFEA, otherwise
 	 * disable it.
 	 */
-	enable_mfea	? enable:bool
-	start_mfea
-	stop_mfea
+	enable_mfea	? enable:bool;
+	start_mfea;
+	stop_mfea;
 
 	/**
 	 * Enable/disable/start/stop the MFEA CLI access.
@@ -204,9 +204,9 @@ interface mfea/0.1 {
 	 * @param enable if true, then enable the MFEA CLI access, otherwise
 	 * disable it.
 	 */
-	enable_cli	? enable:bool
-	start_cli
-	stop_cli
+	enable_cli	? enable:bool;
+	start_cli;
+	stop_cli;
 
 	/**
 	 * Enable/disable the MFEA trace log for all operations.
@@ -214,5 +214,5 @@ interface mfea/0.1 {
 	 * @param enable if true, then enable the trace log, otherwise
 	 * disable it.
 	 */
-	log_trace_all	? enable:bool
+	log_trace_all	? enable:bool;
 }

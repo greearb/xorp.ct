@@ -12,7 +12,7 @@ interface rip/0.1 {
      */
     add_rip_address ? ifname:txt					\
 		    & vifname:txt					\
-		    & addr:ipv4
+		    & addr:ipv4;
 
     /**
      * Remove an address RIP process is running on.
@@ -21,17 +21,17 @@ interface rip/0.1 {
      * @param vifname virtual interface owning address.
      * @param addr the address to be removed.
      */
-    remove_rip_address ? ifname:txt & vifname:txt & addr:ipv4
+    remove_rip_address ? ifname:txt & vifname:txt & addr:ipv4;
 
     set_rip_address_enabled ? ifname:txt 	  			\
 			    & vifname:txt				\
 			    & addr:ipv4 				\
-			    & enabled:bool
+			    & enabled:bool;
 
     rip_address_enabled	    ? ifname:txt				\
 			    & vifname:txt				\
 			    & addr:ipv4					\
-			    -> enabled:bool
+			    -> enabled:bool;
 
     /**
      * Set cost metric associated with address.
@@ -39,7 +39,7 @@ interface rip/0.1 {
     set_cost		    ? ifname:txt				\
 			    & vifname:txt				\
 			    & addr:ipv4 				\
-			    & cost:u32
+			    & cost:u32;
 
     /**
      * Get cost metric associated with address.
@@ -47,7 +47,7 @@ interface rip/0.1 {
     cost		    ? ifname:txt				\
 			    & vifname:txt				\
 			    & addr:ipv4					\
-			    -> cost:u32
+			    -> cost:u32;
 
     /**
      * Set horizon type applied to routes advertised from address.
@@ -59,7 +59,7 @@ interface rip/0.1 {
     set_horizon		    ? ifname:txt				\
 			    & vifname:txt				\
 			    & addr:ipv4 				\
-			    & horizon:txt
+			    & horizon:txt;
 
     /**
      * Get horizon type applied to routes advertised from address.
@@ -67,7 +67,7 @@ interface rip/0.1 {
     horizon		    ? ifname:txt				\
 			    & vifname:txt				\
 			    & addr:ipv4 				\
-			    -> horizon:txt
+			    -> horizon:txt;
 
     /**
      * Make RIP passive (receive only) on interface/vif/address.
@@ -75,7 +75,7 @@ interface rip/0.1 {
     set_passive		    ? ifname:txt				\
 			    & vifname:txt				\
 			    & addr:ipv4					\
-			    & passive:bool
+			    & passive:bool;
 
     /**
      * Get value indicating whether RIP is passive (receive only)
@@ -84,7 +84,7 @@ interface rip/0.1 {
     passive		    ? ifname:txt				\
 			    & vifname:txt				\
 			    & addr:ipv4					\
-			    -> passive:bool
+			    -> passive:bool;
 
     /**
      * Accept and respond to non-RIP requests.
@@ -92,7 +92,7 @@ interface rip/0.1 {
     set_accept_non_rip_requests		? ifname:txt			\
 					& vifname:txt			\
 					& addr:ipv4			\
-					& accept:bool
+					& accept:bool;
 
     /**
      * Get value indicating whether non-RIP requests are accepted and
@@ -101,7 +101,7 @@ interface rip/0.1 {
     accept_non_rip_requests	? ifname:txt				\
 				& vifname:txt				\
 				& addr:ipv4				\
-				-> accept:bool
+				-> accept:bool;
 
     /**
      * Accept default route from peers.
@@ -109,7 +109,7 @@ interface rip/0.1 {
     set_accept_default_route	? ifname:txt				\
 				& vifname:txt				\
 				& addr:ipv4				\
-				& accept:bool
+				& accept:bool;
 
     /**
      * Accessor for whether default route is accepted from peers.
@@ -117,7 +117,7 @@ interface rip/0.1 {
     accept_default_route	? ifname:txt				\
 				& vifname:txt				\
 				& addr:ipv4				\
-				-> accept:bool
+				-> accept:bool;
 
     /**
      * Advertise default route (if present).
@@ -125,7 +125,7 @@ interface rip/0.1 {
     set_advertise_default_route	? ifname:txt				\
 				& vifname:txt				\
 				& addr:ipv4				\
-				& advertise:bool
+				& advertise:bool;
 
     /**
      * Accessor for whether default route is advertised.
@@ -133,7 +133,7 @@ interface rip/0.1 {
     advertise_default_route	? ifname:txt				\
 				& vifname:txt				\
 				& addr:ipv4				\
-				-> advertise:bool
+				-> advertise:bool;
 
     /**
      * Set period that routes associated with reception address will
@@ -142,7 +142,7 @@ interface rip/0.1 {
     set_route_timeout		? ifname:txt				\
 				& vifname:txt				\
 				& addr:ipv4				\
-				& t_secs:u32
+				& t_secs:u32;
 
     /**
      * Get period that routes associated with reception address will
@@ -151,7 +151,7 @@ interface rip/0.1 {
     route_timeout		? ifname:txt				\
 				& vifname:txt				\
 				& addr:ipv4				\
-				-> t_secs:u32
+				-> t_secs:u32;
 
     /**
      * Set period that routes associated with reception address will be
@@ -160,7 +160,7 @@ interface rip/0.1 {
     set_deletion_delay		? ifname:txt				\
 				& vifname:txt				\
 				& addr:ipv4				\
-				& t_secs:u32
+				& t_secs:u32;
 
     /**
      * Get period that routes associated with reception address will be
@@ -169,7 +169,7 @@ interface rip/0.1 {
      deletion_delay		? ifname:txt				\
 				& vifname:txt				\
 				& addr:ipv4				\
-				-> t_secs:u32
+				-> t_secs:u32;
 
     /**
      * Set period that route table requests should be sent from address
@@ -178,7 +178,7 @@ interface rip/0.1 {
     set_request_interval	? ifname:txt				\
 				& vifname:txt				\
 				& addr:ipv4				\
-				& t_secs:u32
+				& t_secs:u32;
 
     /**
      * Set period that route table requests should be sent from address
@@ -187,7 +187,7 @@ interface rip/0.1 {
     request_interval		? ifname:txt				\
 				& vifname:txt				\
 				& addr:ipv4				\
-				-> t_secs:u32
+				-> t_secs:u32;
 
     /**
      * Set period between the unsolicited sending of the routing
@@ -196,7 +196,7 @@ interface rip/0.1 {
     set_update_interval		? ifname:txt				\
 				& vifname:txt				\
 				& addr:ipv4				\
-				& t_secs:u32
+				& t_secs:u32;
 
     /**
      * Get period between the unsolicited sending of the routing
@@ -205,7 +205,7 @@ interface rip/0.1 {
     update_interval		? ifname:txt				\
 				& vifname:txt				\
 				& addr:ipv4				\
-				-> t_secs:u32
+				-> t_secs:u32;
 
     /**
      * Set jitter between the unsolicited sending of the routing
@@ -214,7 +214,7 @@ interface rip/0.1 {
     set_update_jitter		? ifname:txt				\
 				& vifname:txt				\
 				& addr:ipv4				\
-				& t_jitter:u32
+				& t_jitter:u32;
 
     /**
      * Get jitter between the unsolicited sending of the routing
@@ -223,7 +223,7 @@ interface rip/0.1 {
     update_jitter		? ifname:txt				\
 				& vifname:txt				\
 				& addr:ipv4				\
-				-> t_jitter:u32
+				-> t_jitter:u32;
 
     /**
      * Set period between sending triggered updates from address.
@@ -231,7 +231,7 @@ interface rip/0.1 {
     set_triggered_update_delay	? ifname:txt				\
 				& vifname:txt				\
 				& addr:ipv4				\
-				& t_secs:u32
+				& t_secs:u32;
 
     /**
      * Get period between sending triggered updates from address.
@@ -239,7 +239,7 @@ interface rip/0.1 {
     triggered_update_delay	? ifname:txt				\
 				& vifname:txt				\
 				& addr:ipv4				\
-				-> t_secs:u32
+				-> t_secs:u32;
 
     /**
      * Set jitter between sending triggered updates from address
@@ -248,7 +248,7 @@ interface rip/0.1 {
     set_triggered_update_jitter	? ifname:txt				\
 				& vifname:txt				\
 				& addr:ipv4				\
-				& t_jitter:u32
+				& t_jitter:u32;
 
     /**
      * Get jitter between sending triggered updates from address
@@ -257,7 +257,7 @@ interface rip/0.1 {
     triggered_update_jitter	? ifname:txt				\
 				& vifname:txt				\
 				& addr:ipv4				\
-				-> t_jitter:u32
+				-> t_jitter:u32;
 
     /**
      * Set the inter-packet delay between the output of packets from
@@ -266,7 +266,7 @@ interface rip/0.1 {
     set_interpacket_delay		? ifname:txt			\
 					& vifname:txt			\
 					& addr:ipv4			\
-					& t_msecs:u32
+					& t_msecs:u32;
 
     /**
      * Get the inter-packet delay between the output of packets from
@@ -275,7 +275,7 @@ interface rip/0.1 {
     interpacket_delay			? ifname:txt			\
 					& vifname:txt			\
 					& addr:ipv4			\
-					-> t_msecs:u32
+					-> t_msecs:u32;
 
     /**
      * Set simple password authentication key.
@@ -288,7 +288,7 @@ interface rip/0.1 {
     set_simple_authentication_key	? ifname:txt			\
 					& vifname:txt			\
 					& addr:ipv4			\
-					& password:txt
+					& password:txt;
 
     /**
      * Delete simple password authentication key.
@@ -299,7 +299,7 @@ interface rip/0.1 {
      */
     delete_simple_authentication_key	? ifname:txt			\
 					& vifname:txt			\
-					& addr:ipv4
+					& addr:ipv4;
 
     /**
      * Set MD5 authentication key.
@@ -318,7 +318,7 @@ interface rip/0.1 {
 					& key_id:u32			\
 					& password:txt			\
 					& start_time:txt		\
-					& end_time:txt
+					& end_time:txt;
 
     /**
      * Delete MD5 authentication key.
@@ -331,7 +331,7 @@ interface rip/0.1 {
     delete_md5_authentication_key	? ifname:txt			\
 					& vifname:txt			\
 					& addr:ipv4			\
-					& key_id:u32
+					& key_id:u32;
 
     /**
      * Get a textual description of the status of address RIP is running
@@ -344,14 +344,14 @@ interface rip/0.1 {
     rip_address_status			? ifname:txt			\
 					& vifname:txt			\
 					& addr:ipv4			\
-					-> status:txt
+					-> status:txt;
 
     /**
      * Get addresses running RIP.
      */
     get_all_addresses			-> ifnames:list<txt>		\
 					&  vifnames:list<txt>		\
-					&  addrs:list<ipv4>
+					&  addrs:list<ipv4>;
 
     /**
      * Get counters associated with interface / vif /address.
@@ -360,7 +360,7 @@ interface rip/0.1 {
 					& vifname:txt			\
 					& addr:ipv4			\
 					-> counter_descriptions:list<txt> \
-					&  counter_values:list<u32>
+					&  counter_values:list<u32>;
 
     /**
      * Get the list of peers associated with interface / vif / address.
@@ -368,7 +368,7 @@ interface rip/0.1 {
     get_peers				? ifname:txt			\
 					& vifname:txt			\
 					& addr:ipv4			\
-					-> peers:list<ipv4>
+					-> peers:list<ipv4>;
 
     /**
      * Get list of all peers known to RIP.  There is a 1-to-1 correspondence
@@ -377,7 +377,7 @@ interface rip/0.1 {
     get_all_peers			-> peers:list<ipv4>		\
 					& ifnames:list<txt>		\
 					& vifnames:list<txt>		\
-					& addrs:list<ipv4>
+					& addrs:list<ipv4>;
 
     /**
      * Get counters associated with peer of interface / vif /address.
@@ -392,7 +392,7 @@ interface rip/0.1 {
 					& peer:ipv4			\
 					-> counter_descriptions:list<txt> \
 					&  counter_values:list<u32>	\
-					&  peer_last_active:u32
+					&  peer_last_active:u32;
 	
      /**
       * Enable/Disable tracing.
@@ -401,5 +401,5 @@ interface rip/0.1 {
       * @param enable set to true to enable false to disable.
       */
      trace ? tvar:txt \
-	& enable:bool
+	& enable:bool;
 }

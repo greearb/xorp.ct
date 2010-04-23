@@ -29,5 +29,5 @@ interface cli_processor/0.1 {
 			-> ret_processor_name:txt			\
 			& ret_cli_term_name:txt				\
 			& ret_cli_session_id:u32			\
-			& ret_command_output:txt
+			& ret_command_output:txt;
 }

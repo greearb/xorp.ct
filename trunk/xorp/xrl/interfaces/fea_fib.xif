@@ -14,16 +14,16 @@ interface fea_fib/0.1 {
 	 */
 	add_fib_client4		? client_target_name:txt	\
 				& send_updates:bool		\
-				& send_resolves:bool
+				& send_resolves:bool;
 	add_fib_client6		? client_target_name:txt	\
 				& send_updates:bool		\
-				& send_resolves:bool
+				& send_resolves:bool;
 	/**
 	 * Delete a FIB client.
 	 *
 	 * @param client_target_name the target name of the FIB client to
 	 * delete.
 	 */
-	delete_fib_client4	? client_target_name:txt
-	delete_fib_client6	? client_target_name:txt
+	delete_fib_client4	? client_target_name:txt;
+	delete_fib_client6	? client_target_name:txt;
 }

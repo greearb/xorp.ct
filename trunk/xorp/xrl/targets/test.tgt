@@ -4,4 +4,4 @@
 #include "test.xif"
 
 target test implements		common/0.1,				\
-				test/1.0
+				test/1.0;

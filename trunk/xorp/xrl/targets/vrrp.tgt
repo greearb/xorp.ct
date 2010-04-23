@@ -8,4 +8,4 @@
 target vrrp implements		common/0.1,			\
 				vrrp/0.1,			\
 				raw_packet4_client/0.1,		\
-				raw_link_client/0.1
+				raw_link_client/0.1;

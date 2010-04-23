@@ -5,7 +5,9 @@
  */
 
 interface rtrmgr/0.1 {
-    get_pid ? -> pid:u32
+
+    get_pid ? -> pid:u32;
+
     /**
      * Register a user and client process with the rtrmgr.
      *
@@ -13,33 +15,33 @@ interface rtrmgr/0.1 {
      * rtrmgr_client.xif methods.  
      */
     register_client ? userid:u32 & clientname:txt \
-	-> filename:txt & pid:u32 & clientid:u32
+	-> filename:txt & pid:u32 & clientid:u32;
     
-    unregister_client ? token:txt
+    unregister_client ? token:txt;
 
-    authenticate_client ? userid:u32 & clientname:txt & token:txt
+    authenticate_client ? userid:u32 & clientname:txt & token:txt;
 
-    enter_config_mode ? token:txt & exclusive:bool
+    enter_config_mode ? token:txt & exclusive:bool;
 
-    leave_config_mode ? token:txt
+    leave_config_mode ? token:txt;
 
-    get_config_users ? token:txt -> users:list<u32>
+    get_config_users ? token:txt -> users:list<u32>;
 
-    get_running_config ? token:txt -> ready:bool & config:txt
+    get_running_config ? token:txt -> ready:bool & config:txt;
 
-    apply_config_change ? token:txt & target:txt & deltas:txt & deletions:txt
+    apply_config_change ? token:txt & target:txt & deltas:txt & deletions:txt;
 
-    lock_config ? token:txt & timeout:u32 -> success:bool & holder:u32
+    lock_config ? token:txt & timeout:u32 -> success:bool & holder:u32;
 
-    unlock_config ? token:txt 
+    unlock_config ? token:txt;
 
-    lock_node ? token:txt & node:txt & timeout:u32 -> success:bool & holder:u32
+    lock_node ? token:txt & node:txt & timeout:u32 -> success:bool & holder:u32;
 
-    unlock_node ? token:txt & node:txt
+    unlock_node ? token:txt & node:txt;
 
-    save_config ? token:txt & target:txt & filename:txt
+    save_config ? token:txt & target:txt & filename:txt;
 
-    load_config ? token:txt & target:txt & filename:txt
+    load_config ? token:txt & target:txt & filename:txt;
 
     /**
      * Set the name of the directory with the configuration files.
@@ -47,5 +49,5 @@ interface rtrmgr/0.1 {
      * @param config_directory the name of the directory with the configuration
      * files.
      */
-    set_config_directory ? config_directory:txt
+    set_config_directory ? config_directory:txt;
 }
