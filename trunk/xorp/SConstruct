@@ -535,9 +535,22 @@ env.AppendUnique(CPPDEFINES = [
     ( 'BOOST_DISABLE_THREADS' ),
     ])
 
+# Some platforms have alignment warnings that cannot easily be
+# fixed, so we can't enable Werror for them.
+if (host_cpu == "i686" or
+    host_cpu == "x86_64"):
+        env.AppendUnique(CFLAGS = [
+	        '-Werror',
+		])
+	env.AppendUnique(CXXFLAGS = [
+		'-Werror',
+		])
+else:
+	print "WARNING:  Detected non x86 platform, will not enable -Werror compile option: ", host_cpu
+	
+
 # NOTE: gcc specific flags.
 env.AppendUnique(CFLAGS = [
-    '-Werror',
     '-W',
     '-Wall',
     '-Wwrite-strings',
@@ -553,7 +566,6 @@ env.AppendUnique(CFLAGS = [
     ])
 
 env.AppendUnique(CXXFLAGS = [
-    '-Werror',
     '-W',
     '-Wall',
     '-Wwrite-strings',
