@@ -39,9 +39,9 @@ libpcmsrcs = [
     ]
 
 # External libraries
-env.AppendUnique(LIBS = [
-    'boost_regex'
-])
+#env.AppendUnique(LIBS = [
+#    'boost_regex'
+#])
 
 is_shared = env.has_key('SHAREDLIBS')
 

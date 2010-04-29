@@ -379,7 +379,7 @@ if not env.GetOption('clean') and \
     # Additional Boost libraries
     #conf.CheckBoostLibrary('filesystem')
     #conf.CheckBoostLibrary('program_options')
-    conf.CheckBoostLibrary('regex')
+    #conf.CheckBoostLibrary('regex')
     #conf.CheckBoostLibrary('signals')
     #conf.CheckBoostLibrary('thread')
 

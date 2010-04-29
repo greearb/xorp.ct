@@ -22,7 +22,16 @@
 
 #include "libxorp/xorp.h"
 
-#include <boost/regex.h>
+#ifdef HAVE_REGEX_H
+#  include <regex.h>
+#else // ! HAVE_REGEX_H
+#  ifdef HAVE_PCRE_H
+#    include <pcre.h>
+#  endif
+#  ifdef HAVE_PCREPOSIX_H
+#    include <pcreposix.h>
+#  endif
+#endif // ! HAVE_REGEX_H
 
 #include "policy_utils.hh"
 
