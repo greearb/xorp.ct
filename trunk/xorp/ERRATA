@@ -1,14 +1,10 @@
-#
-# $XORP: xorp/ERRATA,v 1.49 2008/12/19 00:35:26 abittau Exp $
-#
 
 		XORP ERRATA
 
-  ALL:
-    - Parallel building (e.g., "gmake -j 4") may fail on multi-CPU
-      machines. The simplest work-around is to rerun gmake or not to use
-      the -j flag.
+  See:  https://sourceforge.net/apps/trac/xorp/report for current
+     bug list.
 
+  ALL:
     - The following compiler is known to be buggy, and should not be
       used to compile XORP:
         gcc34 (GCC) 3.4.0 20040310 (prerelease) [FreeBSD]
@@ -33,9 +29,7 @@
 
   RTRMGR:
     - There are several known issues, but none of them is considered
-      critical. The list of known issues is available from:
-
-        http://www.xorp.org/bugzilla/query.cgi
+      critical.
 
     - Using the rtrmgr "-r" command-line option to restart processes
       that have failed does not work if a process fails while being
@@ -50,9 +44,7 @@
 
   XORPSH:
     - There are several known issues, but none of them is considered
-      critical. The list of known issues is available from:
-
-        http://www.xorp.org/bugzilla/query.cgi
+      critical.
 
   FEA/MFEA:
     - On Linux with kernels prior to 2.6.24 and IPv6 support, interfaces
@@ -134,9 +126,7 @@
       may not work for the following OS-es because the kernel for those
       systems does not provide a mechanism for asynchronous notification
       of userland programs when the link status changes: FreeBSD-5.2 and
-      earlier and MacOS X (note: if the Windows kernel supports this
-      feature, it is not used yet in XORP). Though, for those systems
-      the link status should be read properly on startup.
+      earlier and MacOS X.
 
     - On Linux with kernel version linux-2.6.17 and older there is a
       kernel bug which prevents adding an IPv6 address to an interface
@@ -195,9 +185,7 @@
       Eventually this limitation would be fixed in Linux kernel 2.6.28.
 
   RIB:
-    - In some rare cases, the RIB may fail to delete an existing route:
-
-        http://www.xorp.org/bugzilla/show_bug.cgi?id=62
+    - In some rare cases, the RIB may fail to delete an existing route.
 
       We are aware of the issue and will attempt to fix it in the
       future.
@@ -222,8 +210,6 @@
 
     - There are several other known issues, but none of them is
       considered critical. The list of known issues is available from:
-
-        http://www.xorp.org/bugzilla/query.cgi
 
   BGP:
     - The BGP configuration mandates that an IPv4 nexthop must be
@@ -360,55 +346,3 @@
 
   CLI:
     - No known issues.
-
-  SNMP:
-    - On some versions of Linux, there are some bugs in net-snmp
-      versions 5.0.8 and 5.0.9, which prevent dynamic loading from
-      working. See the following URL for links to the net-snmp
-      patches that solve the problems:
-
-        http://www.xorp.org/snmp.html
-
-    - Version 5.1 of net-snmp requires a simple modification, otherwise
-      XORP will fail to compile.
-      See the following URL for a link to the net-snmp patch that solves
-      the problems:
-
-         http://www.xorp.org/snmp.html 
-
-    - There might be a compilation error in the mibs directory on some
-      systems running on 64-bit machines (e.g., FreeBSD or Linux on amd64):
-
-g++ -shared   xorpevents.lo -Wl,--whole-archive ../libxipc/.libs/libxipc.a ../libxorp/.libs/libxorp.a ../libcomm/.libs/libcomm.a -Wl,--no-whole-archive  ../libxipc/.libs/libxipc.a ../libxorp/.libs/libxorp.a ../libcomm/.libs/libcomm.a -lcrypto  -Wl,-soname -Wl,libnetsnmpxorp.so -o .libs/libnetsnmpxorp.so
-/usr/bin/ld: ../libxipc/.libs/libxipc.a(hmac_md5.o): relocation R_X86_64_32S can not be used when making a shared object; recompile with -fPIC
-../libxipc/.libs/libxipc.a(hmac_md5.o): could not read symbols: Bad value
-gmake[1]: *** [libnetsnmpxorp.la] Error 1
-
-     In that case use the "--enable-shared" flag to "./configure", and
-     remove the previous compilation:
-
-       ./configure --with-snmp --enable-shared
-       gmake clean
-       gmake
-
-    - There might be a compilation error when running "gmake check"
-      in the mibs directory on some systems (e.g., Ubuntu Linux):
-
-g++ -DNETSNMP_NO_INLINE -g -Werror -W -Wall -Wwrite-strings -Wcast-qual
--Wpointer-arith -Wcast-align -Woverloaded-virtual -ftemplate-depth-25 -pipe -o
-.libs/test_xorpevents test_xorpevents.o -Wl,-Bsymbolic-functions -Wl,-E 
-../libxipc/.libs/libfinder.a ./.libs/libnetsnmpxorp.so -lpcap -lrt -L/usr/lib
--L/usr/local/lib -L/usr/lib/perl/5.8/CORE /usr/lib/libnetsnmpmibs.so -lsensors
-/usr/lib/libnetsnmphelpers.so /usr/lib/libnetsnmpagent.so -lwrap -lperl -ldl
--lm -lpthread -lc -lcrypt /usr/lib/libnetsnmp.so -lcrypto -Wl,--rpath
--Wl,/home/nithya/bug765/xorp/mibs/.libs -Wl,--rpath -Wl,/usr/local/xorp/mibs/.
-/usr/local/bin/ld: cannot find -lperl
-collect2: ld returned 1 exit status
-make[2]: *** [test_xorpevents] Error 1
-
-      A possible work around is to link /usr/lib/libperl to
-      /usr/lib/libperl.so.5.10 :
-
-        su
-        cd /usr/lib
-        ln -s libperl.so.5.10 libperl.so

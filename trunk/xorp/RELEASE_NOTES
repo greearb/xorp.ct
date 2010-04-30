@@ -1,78 +1,24 @@
-#
-# $XORP: xorp/RELEASE_NOTES,v 1.235 2009/01/09 19:20:58 jtc Exp $
-#
 
 		XORP RELEASE NOTES
 
 This file contains XORP release notes (most recent releases first).
 
-Release 2.0 (2010/??/??)
+Release 1.7  May 1, 2010
 ============================
   ALL:
-    - 
-
-  CONFIGURATION:
-    - 
-
-  LIBXORP:
-    - 
-
-  LIBXIPC:
-    - 
-
-  LIBFEACLIENT:
-    - 
-
-  XRL:
-    - 
-
-  RTRMGR:
-    - 
-
-  XORPSH:
-    - 
-
-  POLICY:
-    - 
-
-  FEA/MFEA:
-    - 
-
-  RIB:
-    - 
-
-  RIP/RIPng:
-    - 
+    - Compiles on Linux (x86-32, x86-64, Sparc, at least) and BSD variants.
+    - Replaced 'make' build system with 'scons'
+    - New installation layout.
+    - Footprint reduction.
+    - Bug fixes here an there, more queued for release 1.8.
+    - Support shared libraries.
 
   OLSR:
-    - 
-
-  OSPF:
-    - 
-	
-  BGP:
-    - 
-
-  STATIC_ROUTES:
-    - 
-
-  MLD/IGMP:
-    - 
-
-  MLD/IGMP-Lite:
-    - 
-
-  PIM-SM:
-    - 
-
-  FIB2MRIB:
-    - 
+    - Currently broken in 1.7
 
   SNMP:
-    - 
+    - Removed
 
-  VRRP:
-    - 
 
 Release 1.6 (2009/01/07)
 ============================

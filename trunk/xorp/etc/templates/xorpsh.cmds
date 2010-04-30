@@ -6,6 +6,6 @@ show {
 }
 
 show version {
-    %command: "echo Version 1.7-WIP" %help: HELP;
+    %command: "echo Version 1.7" %help: HELP;
     %tag: HELP "Display system version";
 }
