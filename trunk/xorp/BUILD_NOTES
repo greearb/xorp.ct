@@ -18,7 +18,7 @@ mailing list if your preferred system is not currently supported.
 To compile XORP, you must have SCons installed. Then just
 run the following commands in the top-level directory:
 
-scons -j4
+scons
 scons install
 
 To change the default C and C++ compilers, then assign the binary
