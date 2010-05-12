@@ -21,25 +21,23 @@ import os
 Import('env')
 
 subdirs = [
-	#'harness',
-	'tests',
 	'tools',
+	'tests',
+	'harness',
     ]
 
 SConscript(dirs = subdirs, exports='env')
 
-env = env.Clone()
+bgp_env = env.Clone()
 
-# XXX Not used, bgp linkage must remain static until we fix the
-# dependency graph in here.
-#is_shared = env.has_key('SHAREDLIBS')
+is_shared = bgp_env.has_key('SHAREDLIBS')
 
-env.AppendUnique(CPPPATH = [
+bgp_env.AppendUnique(CPPPATH = [
     '#',
     '$BUILDDIR',
     ])
 
-env.PrependUnique(LIBPATH = [
+bgp_env.PrependUnique(LIBPATH = [
     '.',
     '$BUILDDIR/policy/backend',
     '$BUILDDIR/policy/common',
@@ -51,7 +49,7 @@ env.PrependUnique(LIBPATH = [
     '$BUILDDIR/libcomm',
     ])
 
-env.AppendUnique(LIBS = [
+bgp_env.AppendUnique(LIBS = [
     'xorp_policy_backend',
     'xorp_policy_common',
     'xorp_fea_client',
@@ -59,7 +57,6 @@ env.AppendUnique(LIBS = [
     'xst_fea_ifmgr_mirror',
     'xif_rib',
     'xif_finder_event_notifier',
-    'xif_profile_client',
     'xif_fea_ifmgr_mirror',
     'xif_fea_ifmgr_replicator',
     'xorp_ipc',
@@ -67,17 +64,21 @@ env.AppendUnique(LIBS = [
     'xorp_comm',
 ])
 
-env.Replace(RPATH = [
-    env.Literal(env['xorp_module_rpath'])
+if not (bgp_env.has_key('disable_profile') and bgp_env['disable_profile']):
+    bgp_env.AppendUnique(LIBS = [ 'xif_profile_client' ])
+
+bgp_env.Replace(RPATH = [
+    bgp_env.Literal(bgp_env['xorp_module_rpath'])
 ])
 
 ### libxorp_bgp
 
-libxorp_bgp_env = env.Clone()
+libxorp_bgp_env = bgp_env.Clone()
 
 libxorp_bgp_srcs = [
 	'aspath.cc',
 	'attribute_manager.cc',
+        'bgp.cc',
 	'bgp_trie.cc',
 	'bgp_varrw.cc',
 	'bgp_varrw_export.cc',
@@ -99,7 +100,6 @@ libxorp_bgp_srcs = [
 	'peer_list.cc',
 	'plumbing.cc',
 	'process_watch.cc',
-	'profile_vars.cc',
 	'rib_ipc_handler.cc',
 	'route_queue.cc',
 	'route_table_aggregation.cc',
@@ -126,29 +126,43 @@ libxorp_bgp_srcs = [
 	'xrl_target.cc',
 	]
 
-#libxorp_bgp = libxorp_bgp_env.SharedLibrary(target = 'libxorp_bgp', source = libxorp_bgp_srcs)
+if not (bgp_env.has_key('disable_profile') and bgp_env['disable_profile']):
+    libxorp_bgp_srcs.append('profile_vars.cc')
 
-# XXX Static until ASPath and other objects are dealt with.
-libxorp_bgp = libxorp_bgp_env.StaticLibrary(target = 'libxorp_bgp',
-					    source = libxorp_bgp_srcs)
-
-#env.Alias('install',
-#          env.InstallLibrary('$libdir', libxorp_bgp))
+if is_shared:
+    libxorp_bgp = bgp_env.SharedLibrary(target = 'libxorp_bgp',
+                                        source = libxorp_bgp_srcs,
+                                        LIBS = '')
+    if bgp_env['rtld_origin']:
+        for obj in libxorp_bgp:
+            bgp_env.AddPostAction(libxorp_bgp,
+                                  bgp_env.Symlink(obj.abspath,
+                                                  os.path.join(bgp_env['xorp_alias_libdir'], str(obj))))
+else:
+    libxorp_ospf = bgp_env.StaticLibrary(target = 'libxorp_bgp',
+                                         source = libxorp_bgp_srcs,
+                                         LIBS = '')
 
 ### xorp_bgp
 
-bgp_env = env.Clone()
+#bgp_env2 = bgp_env.Clone()
 
 bgp_env.PrependUnique(LIBS = [
     'xorp_bgp',
 ])
 
 bgpsrcs = [
-          'bgp.cc',
-          'main.cc',
-          ]
+    'main.cc',
+    ]
 
 bgp = bgp_env.Program(target = 'xorp_bgp', source = bgpsrcs)
-env.Alias('install', env.InstallProgram(env['xorp_moduledir'], bgp))
+bgp_env.Alias('install', bgp_env.InstallProgram(bgp_env['xorp_moduledir'], bgp))
 
-Default(libxorp_bgp, bgp)
+
+if is_shared:
+    bgp_env.Alias('install', env.InstallLibrary(bgp_env['xorp_libdir'], libxorp_bgp))
+
+# Install scripts
+env.Alias('install', env.InstallProgram('$exec_prefix/sbin/', env.Entry('bgp_xrl_shell_funcs.sh')))
+
+Default(bgp)

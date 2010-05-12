@@ -19,6 +19,8 @@
 
 set -e
 
+. ./setup_paths.sh
+
 # Configure an interface and re-write all next hops to go through this
 # interface
 VIF0="dc0"
@@ -28,7 +30,14 @@ NEXT_HOP_REWRITE1="10.1.0.2"
 NEXT_HOP_REWRITE2="10.1.0.3"
 
 LOCALHOST=$(hostname)
-MY_IP=$(host $LOCALHOST | cut -f 4 -d ' ')
+if host $LOCALHOST
+then 
+    MY_IP=$(host $LOCALHOST | cut -f 4 -d ' '|head -1)
+else
+    LOCALHOST=localhost
+    MY_IP=127.0.0.1
+fi
+echo "MY_IP: $MY_IP"
 
 MY_AS=65008
 MY_ID=$MY_IP
@@ -46,6 +55,15 @@ TEST_PEER_PORT=9001
 TREETOP=${PWD}/../../../xorp
 
 DUMPNAME=${DUMPNAME:-$TREETOP/../data/bgp/icsi1.mrtd}
+if [ ! -f $DUMPNAME ]
+then
+    DUMPNAME=/root/icsi1.mrtd
+    if [ ! -f $DUMPNAME ]
+	then
+	echo "ERROR:  Cannot find iscsi1.mrtd file."
+	exit 1
+    fi
+fi
 
 #
 # Start all the required processes
@@ -53,7 +71,7 @@ DUMPNAME=${DUMPNAME:-$TREETOP/../data/bgp/icsi1.mrtd}
 start_processes()
 {
     (cd $TREETOP 
-    for i in libxipc/xorp_finder fea/xorp_fea_dummy rib/xorp_rib bgp/xorp_bgp \
+    for i in lib/xorp/sbin/xorp_finder lib/xorp/sbin/xorp_fea_dummy lib/xorp/sbin/xorp_rib lib/xorp/sbin/xorp_bgp \
 	    "bgp/harness/test_peer -s peer1 -v" \
 	    "bgp/harness/test_peer -s peer2 -v" \
 	    bgp/harness/coord
@@ -70,8 +88,6 @@ fea()
 {
     echo "Configuring fea"
 
-    export CALLXRL=$TREETOP/libxipc/call_xrl
-    FEA_FUNCS=$TREETOP/fea/xrl_shell_funcs.sh
     local tid=$($FEA_FUNCS start_fea_transaction)
 
     $FEA_FUNCS create_interface $tid $VIF0
@@ -92,36 +108,35 @@ fea()
 
 bgp()
 {
-    echo "Configuring bgp"
-    export CALLXRL=$TREETOP/libxipc/call_xrl
-    BGP_FUNCS=$TREETOP/bgp/xrl_shell_funcs.sh
-
     PORT=$MY_PORT
     AS=$MY_AS
     ID=$MY_ID
     USE4BYTEAS=false
     HOLDTIME=0
+    echo "Configuring bgp, AS: $AS ID: $ID  USE4BYTEAS: $USE4BYTEAS"
     $BGP_FUNCS local_config $AS $ID $USE4BYTEAS
 #   register_rib "rib"
 	
     # Test peer used for route injection
-
-    PEER=$LOCALHOST
+    
+    MY_DEV="lo"
+    PEER=$MY_IP
     PEER_AS=$INJECT_PEER_AS
     PEER_PORT=$INJECT_PEER_PORT
-    IPTUPLE="$LOCALHOST $MY_INJECT_PORT $PEER $PEER_PORT"
-    $BGP_FUNCS add_peer $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
+    IPTUPLE="$MY_IP $MY_INJECT_PORT $PEER $PEER_PORT"
+    $BGP_FUNCS add_peer $MY_DEV $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
     # Rewrite the next hop onto our test net
     $BGP_FUNCS next_hop_rewrite_filter $IPTUPLE $NEXT_HOP_REWRITE1
     $BGP_FUNCS enable_peer $IPTUPLE
 
     # Our test peer.
 
-    PEER=$LOCALHOST
+    
+    PEER=$MY_IP
     PEER_AS=$TEST_PEER_AS
     PEER_PORT=$TEST_PEER_PORT
-    IPTUPLE="$LOCALHOST $PORT $PEER $PEER_PORT"
-    $BGP_FUNCS add_peer $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
+    IPTUPLE="$MY_IP $PORT $PEER $PEER_PORT"
+    $BGP_FUNCS add_peer $MY_DEV $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
     # Rewrite the next hop onto our test net
     $BGP_FUNCS next_hop_rewrite_filter $IPTUPLE $NEXT_HOP_REWRITE2
     $BGP_FUNCS enable_peer $IPTUPLE
@@ -130,9 +145,6 @@ bgp()
 bgp_enable()
 {
     echo "Enable peering to main router"
-    export CALLXRL=$TREETOP/libxipc/call_xrl
-    BGP_FUNCS=$TREETOP/bgp/xrl_shell_funcs.sh
-
     PORT=$MY_PORT
     PEER=$BORDER_ROUTER_NAME
     PEER_AS=$BORDER_ROUTER_AS
@@ -144,9 +156,6 @@ bgp_enable()
 bgp_disable()
 {
     echo "Disable peering to main router"
-    export CALLXRL=$TREETOP/libxipc/call_xrl
-    BGP_FUNCS=$TREETOP/bgp/xrl_shell_funcs.sh
-
     PORT=$MY_PORT
     PEER=$BORDER_ROUTER_NAME
     PEER_AS=$BORDER_ROUTER_AS
@@ -159,7 +168,6 @@ reset()
 {
     echo "Resetting coordinator"
 
-    export CALLXRL=$TREETOP/libxipc/call_xrl
     TEST_FUNCS=$TREETOP/bgp/harness/xrl_shell_funcs.sh
 
     $TEST_FUNCS coord reset
@@ -168,7 +176,6 @@ reset()
 test_peer()
 {
     echo "Configuring test peer"
-    export CALLXRL=$TREETOP/libxipc/call_xrl
     TEST_FUNCS=$TREETOP/bgp/harness/xrl_shell_funcs.sh
 
     PEER=$LOCALHOST
@@ -192,7 +199,6 @@ test_peer_inject()
 	return
     fi
 
-    export CALLXRL=$TREETOP/libxipc/call_xrl
     TEST_FUNCS=$TREETOP/bgp/harness/xrl_shell_funcs.sh
 
     PEER=$LOCALHOST

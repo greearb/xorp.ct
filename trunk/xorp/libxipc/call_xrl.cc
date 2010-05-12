@@ -62,7 +62,7 @@ response_handler(const XrlError& e,
     if (e != XrlError::OKAY()) {
 	XLOG_ERROR("Failed.  Reason: %s (\"%s\")",
 		   e.str().c_str(), xrl->str().c_str());
-	exit(-1);
+	exit(3);
     }
     if (!response->str().empty()) {
 	printf("%s\n", response->str().c_str());
@@ -114,6 +114,7 @@ call_xrl(EventLoop& e, XrlRouter& router, const char* request)
 	    tries++;
 
 	    if (resolve_failed) {
+		sleep(1);
 		continue;
 	    }
 	    
@@ -303,12 +304,12 @@ main(int argc, char* const argv[])
 
 	if (true == router.failed()) {
 	    XLOG_ERROR("Router failed to communicate with finder.\n");
-	    exit(-1);
+	    exit(1);
 	}
 
 	if (false == router.ready()) {
 	    XLOG_ERROR("Connected to finder, but did not become ready.\n");
-	    exit(-1);
+	    exit(2);
 	}
 
 	if (fileinput) {

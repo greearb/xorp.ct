@@ -41,6 +41,7 @@ subdirs = [
     'rip',
     'rtrmgr',
     'static_routes',
+    'utils',
     'vrrp',
     'bgp',
     ]

@@ -8,7 +8,7 @@
 # Send configuration commands to a running bgp process.
 #
 
-. ./xrl_shell_funcs.sh
+. ./bgp_xrl_shell_funcs.sh
 
 case `hostname` in
 	aardvark)

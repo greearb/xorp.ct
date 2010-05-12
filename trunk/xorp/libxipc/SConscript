@@ -20,16 +20,19 @@
 import os
 Import("env")
 
-subdirs = [ 'tests' ]
+env = env.Clone();
 
-SConscript(dirs = subdirs, exports='env')
+libxipc_env = env.Clone()
+
+#if env['WITH_TESTS']:
+subdirs = [ 'tests' ]
+SConscript(dirs=subdirs, exports='env')
 
 is_shared = env.has_key('SHAREDLIBS')
 
 #
 # XIPC Library
 #
-libxipc_env = env.Clone()
 
 libxipc_env.AppendUnique(CPPPATH = [
     "#",
@@ -217,7 +220,12 @@ xorp_finder = env.Program(target = 'xorp_finder',
 call_xrl = env.Program(target = 'call_xrl',
                        source = [ 'call_xrl.cc'])
 
-# XXX The finder and call_xrl binaries are now no longer installed
-# by default, as they are not used in deployment.
+# call_xrl is not required for normal use, but can be useful for
+# applications wanting to configure XRL via shell scripts.
+env.Alias('install', env.InstallProgram('$exec_prefix/sbin/', call_xrl))
 
-Default(libxipc, libfinder)
+#if env['WITH_TESTS']:
+#    env.Alias('install', env.InstallProgram(env['xorp_moduledir'], xorp_finder))
+    
+Default(libxipc, libfinder, call_xrl, xorp_finder)
+

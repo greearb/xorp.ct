@@ -17,11 +17,12 @@
 # 4) Run "../xorp_bgp"
 
 set -e
+. ./setup_paths.sh
 
 # srcdir is set by make for check target
 if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
 . ${srcdir}/xrl_shell_funcs.sh ""
-. ${srcdir}/../xrl_shell_funcs.sh ""
+. $BGP_FUNCS ""
 
 onexit()
 {
@@ -55,7 +56,7 @@ test1()
 {
     echo "TEST1 - Verify that BGP shuts down cleanly"
 
-    CALLXRL=$CALLXRL ${srcdir}/../xrl_shell_funcs.sh shutdown
+    CALLXRL=$CALLXRL $BGP_FUNCS shutdown
 
     sleep 5
 }
@@ -71,20 +72,20 @@ test2()
 
     PORT=10001;PEER_PORT=20001;PEER_AS=6401
     IPTUPLE="$LOCALHOST $PORT $PEER $PEER_PORT"
-    add_peer $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
+    add_peer lo $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
     enable_peer $IPTUPLE
 
     PORT=10002;PEER_PORT=20002;PEER_AS=6402
     IPTUPLE="$LOCALHOST $PORT $PEER $PEER_PORT"
-    add_peer $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
+    add_peer lo $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
     enable_peer $IPTUPLE
 
     PORT=10003;PEER_PORT=20003;PEER_AS=6403
     IPTUPLE="$LOCALHOST $PORT $PEER $PEER_PORT"
-    add_peer $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
+    add_peer lo $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
     enable_peer $IPTUPLE
 
-    CALLXRL=$CALLXRL ${srcdir}/../xrl_shell_funcs.sh shutdown
+    CALLXRL=$CALLXRL $BGP_FUNCS shutdown
 
     sleep 5
 }
@@ -99,10 +100,10 @@ if [ $START_PROGRAMS = "yes" ]
 then
     CXRL="$CALLXRL -r 10"
     runit $QUIET $VERBOSE -c "$0 -s -c $*" <<EOF
-    ../../libxipc/xorp_finder
-    ../../fea/xorp_fea_dummy  = $CXRL finder://fea/common/0.1/get_target_name
-    ../../rib/xorp_rib        = $CXRL finder://rib/common/0.1/get_target_name
-    ../xorp_bgp               = $CXRL finder://bgp/common/0.1/get_target_name
+    $XORP_FINDER
+    $XORP_FEA_DUMMY  = $CXRL finder://fea/common/0.1/get_target_name
+    $XORP_RIB        = $CXRL finder://rib/common/0.1/get_target_name
+    $XORP_BGP        = $CXRL finder://bgp/common/0.1/get_target_name
 EOF
     trap '' 0
     exit $?

@@ -136,8 +136,15 @@ xorp_spawn(const string& process, const char *output = NULL)
 		exit(-1);
 	    }
 
-	    execv(argv[0], argv);
-	    cerr << "Failed to exec: " << process << endl;
+	    errno = 0;
+	    execvp(argv[0], argv);
+	    cerr << "\nFailed to exec: " << process << " errno: "
+		 << strerror(errno) << " argv[0]: " << argv[0]
+		 << " argv: ";
+
+	    for (unsigned int i = 0; i<tokens.size(); i++) {
+		cerr << " arg [" << i << "] = -:" << argv[i] << ":-" << endl;
+	    }
 	    // Can't call the regular exit as it will cause tidy() to
 	    // be run.
 	    _exit(-1);
@@ -196,12 +203,40 @@ sigchld(int)
 
     if (wait_command_pid == pid) {
 	wait_command_pid = INVALID_PID;
-	if (WIFEXITED(status) && 0 != WEXITSTATUS(status)) {
-	   cerr << "Wait command: " << wait_command 
-	   << " exited with not zero status: " << WEXITSTATUS(status) << endl;
-	   exit(-1);
+	if (status == 0) {
+	    return;
 	}
-	return;
+
+	cerr << "Error running command: " << wait_command << endl;
+	if (status == -1) {
+	    cerr << " (execv of /bin/sh failed), possible error: "
+		 << strerror(errno) << endl;
+	}
+	else {
+	    if (WIFEXITED(status)) {
+		int child_rv = WEXITSTATUS(status);
+		cerr << " exited with not zero status: "
+		     << child_rv << " status: "
+		     << status << "  possible error: " << strerror(errno)
+		     << endl;
+	    }
+	    else {
+		if (WIFSIGNALED(status)) {
+		    int csig = WTERMSIG(status);
+		    if (errno == 0) {
+			cerr << " terminated with signal: " << csig << endl;
+		    }
+		    else {
+			cerr << " terminated with signal: " << csig << " possible error: "
+			     << strerror(errno) << endl;
+		    }
+		}
+		else {
+		    cerr << " terminated without exiting properly" << endl;
+		}
+	    }
+	}
+	exit(1);
     }
 
     if (cpid == pid) {

@@ -21,11 +21,12 @@
 # 8) Run "./coord"
 #
 set -e
+. ./setup_paths.sh
 
 # srcdir is set by make for check target
 if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
 . ${srcdir}/xrl_shell_funcs.sh ""
-. ${srcdir}/../xrl_shell_funcs.sh ""
+. $BGP_FUNCS ""
 
 onexit()
 {
@@ -75,19 +76,19 @@ configure_bgp()
 
     PEER=$HOST
     IPTUPLE="$LOCALHOST $PORT1 $PEER $PEER1_PORT"
-    add_peer $IPTUPLE $PEER1_AS $NEXT_HOP $HOLDTIME
+    add_peer lo $IPTUPLE $PEER1_AS $NEXT_HOP $HOLDTIME
     set_parameter $IPTUPLE MultiProtocol.IPv4.Unicast true
     enable_peer $IPTUPLE
 
     PEER=$HOST
     IPTUPLE="$LOCALHOST $PORT2 $PEER $PEER2_PORT"
-    add_peer $IPTUPLE $PEER2_AS $NEXT_HOP $HOLDTIME
+    add_peer lo $IPTUPLE $PEER2_AS $NEXT_HOP $HOLDTIME
     set_parameter $IPTUPLE MultiProtocol.IPv4.Unicast true
     enable_peer $IPTUPLE
 
     PEER=$HOST
     IPTUPLE="$LOCALHOST $PORT3 $PEER $PEER3_PORT"
-    add_peer $IPTUPLE $PEER3_AS $NEXT_HOP $HOLDTIME
+    add_peer lo $IPTUPLE $PEER3_AS $NEXT_HOP $HOLDTIME
     set_parameter $IPTUPLE MultiProtocol.IPv4.Unicast true
     enable_peer $IPTUPLE
 }
@@ -456,10 +457,10 @@ if [ $START_PROGRAMS = "yes" ]
 then
     CXRL="$CALLXRL -r 10"
     runit $QUIET $VERBOSE -c "$0 -s -c $*" <<EOF
-    ../../libxipc/xorp_finder
-    ../../fea/xorp_fea_dummy  = $CXRL finder://fea/common/0.1/get_target_name
-    ../../rib/xorp_rib        = $CXRL finder://rib/common/0.1/get_target_name
-    ../xorp_bgp               = $CXRL finder://bgp/common/0.1/get_target_name
+    $XORP_FINDER
+    $XORP_FEA_DUMMY           = $CXRL finder://fea/common/0.1/get_target_name
+    $XORP_RIB                 = $CXRL finder://rib/common/0.1/get_target_name
+    $XORP_BGP                 = $CXRL finder://bgp/common/0.1/get_target_name
     ./test_peer -s peer1      = $CXRL finder://peer1/common/0.1/get_target_name
     ./test_peer -s peer2      = $CXRL finder://peer1/common/0.1/get_target_name
     ./test_peer -s peer3      = $CXRL finder://peer1/common/0.1/get_target_name

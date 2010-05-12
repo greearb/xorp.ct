@@ -14,7 +14,12 @@ RESTART="yes"
 
 # Perform Win32 path conversion for runit if required.
 RUNIT="runit"
-RUNITDIR="../../utils"
+if [ -x ../../utils/runit ]
+then
+    RUNITDIR="../../utils"
+else
+    RUNITDIR="../../lib/xorp/bin/"
+fi
 RUNITPRE=""
 if [ x"$OSTYPE" = xmsys ]; then
     RUNITPRE="cmd //c"

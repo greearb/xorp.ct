@@ -31,6 +31,9 @@ env.AppendUnique(LIBPATH = [
     '$BUILDDIR/libxorp',
     '$BUILDDIR/libcomm',
     '$BUILDDIR/libxipc',
+    '$BUILDDIR/libfeaclient',
+    '$BUILDDIR/policy/backend',
+    '$BUILDDIR/policy/common',
     '$BUILDDIR/xrl/interfaces',
     '$BUILDDIR/xrl/targets',
     '$BUILDDIR/bgp',
@@ -40,9 +43,19 @@ env.AppendUnique(LIBPATH = [
 env.AppendUnique(LIBS = [
     'xorp_bgp',			# for ASPath
     'xif_bgp',
+    'xorp_policy_backend',
+    'xorp_policy_common',
     'xorp_ipc',
     'xorp_core',
     'xorp_comm',
+    'xif_rib',
+    'xorp_fea_client',
+    'xif_fea_ifmgr_mirror',
+    'xst_fea_ifmgr_mirror',
+    'xif_fea_ifmgr_replicator',
+    'xst_bgp',
+    'xif_profile_client',
+    'xif_finder_event_notifier',
     ])
 
 env.Replace(RPATH = [

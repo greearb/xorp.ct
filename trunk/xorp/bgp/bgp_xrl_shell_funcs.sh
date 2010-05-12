@@ -28,8 +28,13 @@ set_damping()
 add_peer()
 {
     echo "add_peer" $*
-#    $CALLXRL "finder://bgp/bgp/0.1/add_peer?peer:txt=$1&as:i32=$2&port:i32=$3&next_hop:ipv4=$4"	
-    $CALLXRL "finder://bgp/bgp/0.3/add_peer?local_ip:txt=$1&local_port:u32=$2&peer_ip:txt=$3&peer_port:u32=$4&as:txt=$5&next_hop:ipv4=$6&holdtime:u32=$7"
+    if [ $1 == "lo" ]
+    then
+     #  This is using xorp.ct syntax..easier this small hack than changing all the test harness scripts.
+     $CALLXRL "finder://bgp/bgp/0.3/add_peer?local_ip:txt=$2&local_port:u32=$3&peer_ip:txt=$4&peer_port:u32=$5&as:txt=$6&next_hop:ipv4=$7&holdtime:u32=$8"
+    else
+     $CALLXRL "finder://bgp/bgp/0.3/add_peer?local_ip:txt=$1&local_port:u32=$2&peer_ip:txt=$3&peer_port:u32=$4&as:txt=$5&next_hop:ipv4=$6&holdtime:u32=$7"
+    fi
 }
 
 delete_peer()

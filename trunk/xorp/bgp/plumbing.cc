@@ -1105,7 +1105,14 @@ BGPPlumbingAF<A>::add_route(const IPNet<A>& net,
 		   pretty_string_safi(_master.safi()));
 
     rib_in = iter->second;
-    result = rib_in->add_route(net, pa_list, policy_tags);
+    try {
+	result = rib_in->add_route(net, pa_list, policy_tags);
+    }
+    catch(XorpException &e) {
+	XLOG_WARNING("Exception in add_route: %s, assuming failure\n",
+		     e.str().c_str());
+	result = ADD_FAILURE;
+    }
 
     if (result == ADD_USED || result == ADD_UNUSED) {
 	_awaits_push = true;

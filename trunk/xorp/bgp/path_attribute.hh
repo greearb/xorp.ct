@@ -35,6 +35,7 @@
 
 #include <boost/noncopyable.hpp>
 
+
 #include <openssl/md5.h>
 
 #include "exceptions.hh"	// for CorruptMessage exception
@@ -349,9 +350,14 @@ template <class A>
 class NextHopAttribute : public PathAttribute
 {
 public:
-    NextHopAttribute(const A& n);
+    NextHopAttribute(const A& n) throw(CorruptMessage);
     NextHopAttribute(const uint8_t* d) throw(CorruptMessage);
     PathAttribute *clone() const;
+
+    /* Throw exception if there are problems...do nothing
+     * otherwise.
+     */
+    void verify() throw(CorruptMessage);
 
     string str() const				{
 	return "Next Hop Attribute " + _next_hop.str();

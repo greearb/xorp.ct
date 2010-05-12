@@ -16,8 +16,11 @@ import time
 import sys
 import getopt
 
-CALL_XRL_LOCATION="../../libxipc/call_xrl"
 
+CALL_XRL_LOCATION="../../sbin/call_xrl"
+if (not os.path.isfile(CALL_XRL_LOCATION)):
+    CALL_XRL_LOCATION="../../libxipc/call_xrl"
+    
 def call_xrl(command):
     """
     Call an XRL

@@ -31,8 +31,13 @@ env.AppendUnique(LIBPATH = [
     '$BUILDDIR/libxorp',
     '$BUILDDIR/libcomm',
     '$BUILDDIR/libxipc',
+    '$BUILDDIR/libfeaclient',
     '$BUILDDIR/xrl/interfaces',
     '$BUILDDIR/xrl/targets',
+    '$BUILDDIR/policy/backend',
+    '$BUILDDIR/policy/common',
+    '$BUILDDIR/bgp',
+    '$BUILDDIR/fea',
     '.',
     ])
 
@@ -41,6 +46,114 @@ env.AppendUnique(LIBS = [
     'xorp_ipc',
     'xorp_core',
     'xorp_comm',
+    'xst_test_peer',
+    'xorp_bgp',
+    'xif_test_peer',
+    'xst_coord',
+    'xif_coord',
+    'xif_rib',
+    'xif_datain',
+    'xorp_fea_client',
+    'xorp_policy_backend',
+    'xorp_policy_common',
+    'xif_fea_ifmgr_mirror',
+    'xif_fea_ifmgr_replicator',
+    'xst_fea_ifmgr_mirror',
+    'xst_bgp',
+    'xif_profile_client',
+    'xif_finder_event_notifier',
     ])
 
-# XXX FIXME
+coord_srcs = [
+    'bgppp.cc',
+    'command.cc',
+    'coord.cc',
+    'peer.cc',
+    'trie.cc',
+    ]
+
+test_peer_srcs = [
+    'test_peer.cc',
+    'bgppp.cc',
+    ]
+
+test_trie_srcs = [
+    'test_peer.cc',
+    'bgppp.cc',
+    ]
+
+script_srcs = [
+    'args.sh',
+    'test_path_attribute1.sh',
+    'test_rib1.sh',
+    'test_routing2.sh',
+    'inject.sh',
+    'test_path_attribute2.sh',
+    'test_rib_fea1.sh',
+    'test_terminate.sh',
+    'notification_codes.sh',
+    'test_path_attribute3.sh',
+    'test_route_flap_damping1.sh',
+    'xrl_shell_funcs.sh',
+    'setup_paths.sh',
+    'soak.sh',
+    'test_peering1.sh',
+    'test_route_reflection1.sh',
+    'test1.sh',
+    'test_peering2.sh',
+    'test_route_reflection2.sh',
+    'test2.sh',
+    'test_peering3.sh',
+    'test_routing1.sh',
+    'harness.py',
+    'lookup.py',
+    'NOTES',
+    'originate_routes.pl',
+    ]
+
+
+coord = env.Program(target = 'coord', source = coord_srcs)
+test_peer = env.Program(target = 'test_peer', source = test_peer_srcs)
+test_trie  = env.Program(target = 'test_trie', source = test_trie_srcs)
+
+harnesspath = '$exec_prefix/bgp/harness'
+
+#if env['WITH_TESTS']:
+#    env.Alias('install', env.InstallProgram(harnesspath, coord))
+#    env.Alias('install', env.InstallProgram(harnesspath, test_peer))
+#    env.Alias('install', env.InstallProgram(harnesspath, test_trie))
+
+#    for ss in script_srcs:
+#        env.Alias('install', env.InstallProgram(harnesspath, env.Entry('%s' % ss)))
+
+if 'check' in COMMAND_LINE_TARGETS:
+    from subprocess import call
+    
+    for ss in script_srcs:
+        env.Alias('check', env.Execute(Copy('%s' % ss, '../../../../bgp/harness/%s' %ss)))
+
+    # Tests to run automatically with 'scons test'
+    # This 'Execute' recipe doesn't work right, because if a program fails,
+    #  then scons will exit.  Use 'call' instead to force them to be run.
+    #env.Alias('check', env.Execute(env.Action('./test_peering1.sh')))
+    
+    call("./test_peering1.sh")
+    call("./test_peering2.sh")
+    call('./test_peering3.sh')
+    call('./test_routing1.sh')
+    call('./test_routing2.sh')
+    call('./test_rib1.sh')
+    call('./test_rib_fea1.sh')    
+    call('./test_path_attribute1.sh')
+    call('./test_path_attribute2.sh')
+    call('./test_path_attribute3.sh')
+    call('./test_route_reflection1.sh')
+    call('./test_route_reflection2.sh')
+    call('./test_route_flap_damping1.sh')
+    call('./test_terminate.sh')
+
+#for t in tests:
+#    test_targets.append(env.AutoTest(target = 'test_%s' % t,
+#                                     source = 'test_%s.cc' % t))
+
+Default(coord, test_peer, test_trie)

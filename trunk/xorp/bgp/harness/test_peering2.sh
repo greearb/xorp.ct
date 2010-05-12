@@ -22,11 +22,13 @@
 #
 set -e
 
+. ./setup_paths.sh
+
 # srcdir is set by make for check target
 if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
 . ${srcdir}/xrl_shell_funcs.sh ""
-. ${srcdir}/../xrl_shell_funcs.sh ""
-. ${srcdir}/../../rib/xrl_shell_funcs.sh ""
+. $BGP_FUNCS ""
+. $RIB_FUNCS ""
 . ${srcdir}/notification_codes.sh
 
 onexit()
@@ -83,6 +85,10 @@ PEER6_AS=65003
 HOLDTIME=5
 
 TRAFFIC_DIR="${srcdir}/../../../data/bgp"
+if [ ! -d $TRAFFIC_DIR ]
+    then
+    TRAFFIC_DIR=/usr/local/xorp_data
+fi
 TRAFFIC_FILES="${TRAFFIC_DIR}/icsi1.mrtd"
 
 # NOTE: The Win32 versions of coord and peer will perform
@@ -100,42 +106,42 @@ configure_bgp()
     # IBGP - IPV4
     PEER=$HOST
     NEXT_HOP=192.150.187.78
-    add_peer $LOCALHOST $PORT1 $PEER $PEER1_PORT $PEER1_AS $NEXT_HOP $HOLDTIME
+    add_peer lo $LOCALHOST $PORT1 $PEER $PEER1_PORT $PEER1_AS $NEXT_HOP $HOLDTIME
     set_parameter $LOCALHOST $PORT1 $PEER $PEER1_PORT MultiProtocol.IPv4.Unicast true
     enable_peer $LOCALHOST $PORT1 $PEER $PEER1_PORT
 
     # EBGP - IPV4
     PEER=$HOST
     NEXT_HOP=192.150.187.78
-    add_peer $LOCALHOST $PORT2 $PEER $PEER2_PORT $PEER2_AS $NEXT_HOP $HOLDTIME
+    add_peer lo $LOCALHOST $PORT2 $PEER $PEER2_PORT $PEER2_AS $NEXT_HOP $HOLDTIME
     set_parameter $LOCALHOST $PORT2 $PEER $PEER2_PORT MultiProtocol.IPv4.Unicast true
     enable_peer $LOCALHOST $PORT2 $PEER $PEER2_PORT
 
     # EBGP - IPV4
     PEER=$HOST
     NEXT_HOP=192.150.187.78
-    add_peer $LOCALHOST $PORT3 $PEER $PEER3_PORT $PEER3_AS $NEXT_HOP $HOLDTIME
+    add_peer lo $LOCALHOST $PORT3 $PEER $PEER3_PORT $PEER3_AS $NEXT_HOP $HOLDTIME
     set_parameter $LOCALHOST $PORT3 $PEER $PEER3_PORT MultiProtocol.IPv4.Unicast true
     enable_peer $LOCALHOST $PORT3 $PEER $PEER3_PORT
 
     # IBGP - IPV6
     PEER=$HOST
     NEXT_HOP=192.150.187.78
-    add_peer $LOCALHOST $PORT4 $PEER $PEER4_PORT $PEER4_AS $NEXT_HOP $HOLDTIME
+    add_peer lo $LOCALHOST $PORT4 $PEER $PEER4_PORT $PEER4_AS $NEXT_HOP $HOLDTIME
     set_parameter $LOCALHOST $PORT4 $PEER $PEER4_PORT MultiProtocol.IPv6.Unicast true
     enable_peer $LOCALHOST $PORT4 $PEER $PEER4_PORT
 
     # EBGP - IPV6
     PEER=$HOST
     NEXT_HOP=192.150.187.78
-    add_peer $LOCALHOST $PORT5 $PEER $PEER5_PORT $PEER5_AS $NEXT_HOP $HOLDTIME
+    add_peer lo $LOCALHOST $PORT5 $PEER $PEER5_PORT $PEER5_AS $NEXT_HOP $HOLDTIME
     set_parameter $LOCALHOST $PORT5 $PEER $PEER5_PORT MultiProtocol.IPv6.Unicast true
     enable_peer $LOCALHOST $PORT5 $PEER $PEER5_PORT
 
     # EBGP - IPV6
     PEER=$HOST
     NEXT_HOP=192.150.187.78
-    add_peer $LOCALHOST $PORT6 $PEER $PEER6_PORT $PEER6_AS $NEXT_HOP $HOLDTIME
+    add_peer lo $LOCALHOST $PORT6 $PEER $PEER6_PORT $PEER6_AS $NEXT_HOP $HOLDTIME
     set_parameter $LOCALHOST $PORT6 $PEER $PEER6_PORT MultiProtocol.IPv6.Unicast true
     enable_peer $LOCALHOST $PORT6 $PEER $PEER6_PORT
 }
@@ -146,7 +152,7 @@ wait_for_peerdown()
     # gone down. If we are not testing the XORP bgp then replace with the
     # sleep.
 
-    while ../tools/print_peers -v | grep 'Peer State' | grep ESTABLISHED
+    while $PRINT_PEERS show bgp peers detail | grep 'Peer State' | grep ESTABLISHED
     do
 	sleep 2
     done
@@ -453,7 +459,7 @@ test5()
 
     # Debugging to demonstrate that the BGP process believes that both peerings
     # have been taken down.
-    ../tools/print_peers -v
+    $PRINT_PEERS show bgp peers detail || exit 10
 
     # debug
     status peer1
@@ -1067,10 +1073,10 @@ if [ $START_PROGRAMS = "yes" ]
 then
     CXRL="$CALLXRL -r 10"
     runit $QUIET $VERBOSE -c "$0 -s -c $*" <<EOF
-    ../../libxipc/xorp_finder
-    ../../fea/xorp_fea_dummy  = $CXRL finder://fea/common/0.1/get_target_name
-    ../../rib/xorp_rib        = $CXRL finder://rib/common/0.1/get_target_name
-    ../xorp_bgp               = $CXRL finder://bgp/common/0.1/get_target_name
+    $XORP_FINDER
+    $XORP_FEA_DUMMY           = $CXRL finder://fea/common/0.1/get_target_name
+    $XORP_RIB                 = $CXRL finder://rib/common/0.1/get_target_name
+    $XORP_BGP                 = $CXRL finder://bgp/common/0.1/get_target_name
     ./test_peer -s peer1      = $CXRL finder://peer1/common/0.1/get_target_name
     ./test_peer -s peer2      = $CXRL finder://peer1/common/0.1/get_target_name
     ./test_peer -s peer3      = $CXRL finder://peer1/common/0.1/get_target_name

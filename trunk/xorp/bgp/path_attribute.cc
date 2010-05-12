@@ -289,8 +289,10 @@ const
 
 template <class A>
 NextHopAttribute<A>::NextHopAttribute(const A& n)
+    throw(CorruptMessage)
 	: PathAttribute(Transitive, NEXT_HOP), _next_hop(n)
 {
+    verify();
 }
 
 template <class A>
@@ -298,6 +300,23 @@ PathAttribute *
 NextHopAttribute<A>::clone() const
 {
     return new NextHopAttribute(_next_hop);
+}
+
+/* Throw exception if there are problems...do nothing
+ * otherwise.
+ */
+template <class A>
+void
+NextHopAttribute<A>::verify()
+    throw(CorruptMessage)
+{
+    if (!_next_hop.is_unicast()) {
+	//XLOG_ASSERT(0);
+	xorp_throw(CorruptMessage,
+		   c_format("NextHop %s is not a unicast address",
+			    _next_hop.str().c_str()),
+		   UPDATEMSGERR, INVALNHATTR);
+    }
 }
 
 template <class A>
@@ -318,11 +337,7 @@ NextHopAttribute<A>::NextHopAttribute(const uint8_t* d)
 
     _next_hop = A(payload(d));
 
-    if (!_next_hop.is_unicast())
-	xorp_throw(CorruptMessage,
-		   c_format("NextHop %s is not a unicast address",
-			    _next_hop.str().c_str()),
-		   UPDATEMSGERR, INVALNHATTR, d, total_tlv_length(d));
+    verify();
 }
 
 template<class A>
@@ -2852,6 +2867,8 @@ FastPathAttributeList<A>::load_raw_data(const uint8_t *data,
 		}
 	    }
 	}
+
+#ifdef HAVE_IPV6
 	MPReachNLRIAttribute<IPv6>* mp6_reach_att =
 	    dynamic_cast<MPReachNLRIAttribute<IPv6>*>(_att[MP_REACH_NLRI]);
 	if (mp6_reach_att) {
@@ -2876,6 +2893,7 @@ FastPathAttributeList<A>::load_raw_data(const uint8_t *data,
 		}
 	    }
 	}
+#endif
 	MPUNReachNLRIAttribute<IPv4>* mp4_unreach_att =
 	    dynamic_cast<MPUNReachNLRIAttribute<IPv4>*>(_att[MP_UNREACH_NLRI]);
 	if (mp4_unreach_att) {
@@ -3407,13 +3425,18 @@ FastPathAttributeList<A>::str() const
 	if (_att[type]) {
 	    s += "\n\t" + _att[type]->str();
 	} else if(_att_lengths[type]>0) {
-	    // we're got data for an attribute, but not decoded it yet
-	    size_t used = _att_lengths[type];
-	    PathAttribute *pa = PathAttribute::create(_att_bytes[type], 
-						      _att_lengths[type], 
-						      used, NULL, A::ip_version());
-	    _att[type] = pa;
-	    s += "\n\t" + _att[type]->str();
+	    try {
+		// we've got data for an attribute, but not decoded it yet
+		size_t used = _att_lengths[type];
+		PathAttribute *pa = PathAttribute::create(_att_bytes[type], 
+							  _att_lengths[type], 
+							  used, NULL, A::ip_version());
+		_att[type] = pa;
+		s += "\n\t" + _att[type]->str();
+	    }
+	    catch (const XorpException& e) {
+		s += "\n\tException: " + e.str();
+	    }
 	}
     }
     return s;

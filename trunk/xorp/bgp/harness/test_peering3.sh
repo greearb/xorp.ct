@@ -38,11 +38,13 @@
 #
 set -e
 
+. ./setup_paths.sh
+
 # srcdir is set by make for check target
 if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
 . ${srcdir}/xrl_shell_funcs.sh ""
-. ${srcdir}/../xrl_shell_funcs.sh ""
-. ${srcdir}/../../rib/xrl_shell_funcs.sh ""
+. $BGP_FUNCS ""
+. $RIB_FUNCS ""
 . ${srcdir}/notification_codes.sh
 
 onexit()
@@ -92,7 +94,7 @@ configure_bgp()
     # EBGP - IPV4
     PEER=$HOST
     NEXT_HOP=192.150.187.78
-    add_peer $LOCALHOST $PORT1 $PEER $PEER1_PORT $PEER1_AS $NEXT_HOP $HOLDTIME
+    add_peer lo $LOCALHOST $PORT1 $PEER $PEER1_PORT $PEER1_AS $NEXT_HOP $HOLDTIME
     set_parameter $LOCALHOST $PORT1 $PEER $PEER1_PORT MultiProtocol.IPv4.Unicast true
     enable_peer $LOCALHOST $PORT1 $PEER $PEER1_PORT
 }
@@ -217,7 +219,7 @@ test1()
 }
 
 TESTS_NOT_FIXED='test1'
-TESTS=''
+TESTS='test1'
 
 # Sanity check that python is present on the host system.
 PYTHON=${PYTHON:=python}
@@ -235,12 +237,12 @@ if [ $START_PROGRAMS = "yes" ]
 then
     CXRL="$CALLXRL -r 10"
     runit $QUIET $VERBOSE -c "$0 -s -c $*" <<EOF
-    ../../libxipc/xorp_finder
-    ../../fea/xorp_fea_dummy  = $CXRL finder://fea/common/0.1/get_target_name
-    ../../rib/xorp_rib        = $CXRL finder://rib/common/0.1/get_target_name
-    ../xorp_bgp               = $CXRL finder://bgp/common/0.1/get_target_name
-    ./test_peer -s peer1      = $CXRL finder://peer1/common/0.1/get_target_name
-    ./coord                   = $CXRL finder://coord/common/0.1/get_target_name
+    $XORP_FINDER
+    $XORP_FEA_DUMMY      = $CXRL finder://fea/common/0.1/get_target_name
+    $XORP_RIB            = $CXRL finder://rib/common/0.1/get_target_name
+    $XORP_BGP            = $CXRL finder://bgp/common/0.1/get_target_name
+    ./test_peer -s peer1 = $CXRL finder://peer1/common/0.1/get_target_name
+    ./coord              = $CXRL finder://coord/common/0.1/get_target_name
 EOF
     trap '' 0
     exit $?

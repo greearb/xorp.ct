@@ -91,13 +91,15 @@ public:
 			    const string& key);
 
     bool add_class_watch(const string& target,
-			 const string& class_to_watch);
+			 const string& class_to_watch,
+			 string& err_msg);
 
     bool remove_class_watch(const string& target,
 			    const string& class_to_watch);
 
     bool add_instance_watch(const string& target,
-			    const string& instance_to_watch);
+			    const string& instance_to_watch,
+			    string& err_msg);
 
     bool remove_instance_watch(const string& target,
 			       const string& instance_to_watch);

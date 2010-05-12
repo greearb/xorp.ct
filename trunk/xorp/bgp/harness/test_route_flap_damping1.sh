@@ -25,6 +25,7 @@
 # Peer 3 I-BGP
 
 set -e
+. ./setup_paths.sh
 
 onexit()
 {
@@ -43,8 +44,8 @@ trap onexit 0 2
 
 if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
 . ${srcdir}/xrl_shell_funcs.sh ""
-. ${srcdir}/../xrl_shell_funcs.sh ""
-. ${srcdir}/../../rib/xrl_shell_funcs.sh ""
+. $BGP_FUNCS ""
+. $RIB_FUNCS ""
 
 HOST=127.0.0.1
 PORT1=10001
@@ -94,7 +95,7 @@ configure_bgp()
     PEER=$HOST
     PORT=$PORT1;PEER_PORT=$PEER_PORT1;PEER_AS=$PEER1_AS
     IPTUPLE="$LOCALHOST $PORT $PEER $PEER_PORT"
-    add_peer $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
+    add_peer lo $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
     set_parameter $IPTUPLE MultiProtocol.IPv4.Unicast true
     enable_peer $IPTUPLE
 
@@ -102,7 +103,7 @@ configure_bgp()
     PEER=$HOST
     PORT=$PORT2;PEER_PORT=$PEER_PORT2;PEER_AS=$PEER2_AS
     IPTUPLE="$LOCALHOST $PORT $PEER $PEER_PORT"
-    add_peer $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
+    add_peer lo $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
     set_parameter $IPTUPLE MultiProtocol.IPv4.Unicast true
     enable_peer $IPTUPLE
 
@@ -110,7 +111,7 @@ configure_bgp()
     PEER=$HOST
     PORT=$PORT3;PEER_PORT=$PEER_PORT3;PEER_AS=$PEER3_AS
     IPTUPLE="$LOCALHOST $PORT $PEER $PEER_PORT"
-    add_peer $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
+    add_peer lo $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
     set_parameter $IPTUPLE MultiProtocol.IPv4.Unicast true
     enable_peer $IPTUPLE
 
@@ -118,7 +119,7 @@ configure_bgp()
     PEER=$HOST
     PORT=$PORT1_IPV6;PEER_PORT=$PEER_PORT1_IPV6;PEER_AS=$PEER1_AS_IPV6
     IPTUPLE="$LOCALHOST $PORT $PEER $PEER_PORT"
-    add_peer $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
+    add_peer lo $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
     set_parameter $IPTUPLE MultiProtocol.IPv6.Unicast true
     enable_peer $IPTUPLE
 
@@ -126,7 +127,7 @@ configure_bgp()
     PEER=$HOST
     PORT=$PORT2_IPV6;PEER_PORT=$PEER_PORT2_IPV6;PEER_AS=$PEER2_AS_IPV6
     IPTUPLE="$LOCALHOST $PORT $PEER $PEER_PORT"
-    add_peer $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
+    add_peer lo $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
     set_parameter $IPTUPLE MultiProtocol.IPv6.Unicast true
     enable_peer $IPTUPLE
 
@@ -134,7 +135,7 @@ configure_bgp()
     PEER=$HOST
     PORT=$PORT3_IPV6;PEER_PORT=$PEER_PORT3_IPV6;PEER_AS=$PEER3_AS_IPV6
     IPTUPLE="$LOCALHOST $PORT $PEER $PEER_PORT"
-    add_peer $IPTUPLE  $PEER_AS $NEXT_HOP $HOLDTIME
+    add_peer lo $IPTUPLE  $PEER_AS $NEXT_HOP $HOLDTIME
     set_parameter $IPTUPLE MultiProtocol.IPv6.Unicast true
     enable_peer $IPTUPLE
 }
@@ -321,10 +322,10 @@ if [ $START_PROGRAMS = "yes" ]
 then
     CXRL="$CALLXRL -r 10"
     runit $QUIET $VERBOSE -c "$0 -s -c $*" <<EOF
-    ../../libxipc/xorp_finder
-    ../../fea/xorp_fea_dummy  = $CXRL finder://fea/common/0.1/get_target_name
-    ../../rib/xorp_rib        = $CXRL finder://rib/common/0.1/get_target_name
-    ../xorp_bgp               = $CXRL finder://bgp/common/0.1/get_target_name
+    $XORP_FINDER
+    $XORP_FEA_DUMMY           = $CXRL finder://fea/common/0.1/get_target_name
+    $XORP_RIB                 = $CXRL finder://rib/common/0.1/get_target_name
+    $XORP_BGP                 = $CXRL finder://bgp/common/0.1/get_target_name
     ./test_peer -s peer1      = $CXRL finder://peer1/common/0.1/get_target_name
     ./test_peer -s peer2      = $CXRL finder://peer2/common/0.1/get_target_name
     ./test_peer -s peer3      = $CXRL finder://peer3/common/0.1/get_target_name

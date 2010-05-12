@@ -862,14 +862,21 @@ Finder::primary_instance(const string& instance_or_class) const
 
 bool
 Finder::add_class_watch(const string& target,
-			const string& class_to_watch)
+			const string& class_to_watch,
+			string& err_msg)
 {
     TargetTable::iterator i = _targets.find(target);
+    if (i == _targets.end()) {
+	err_msg += c_format("could not find target: %s in Finder::add_class_watch\n",
+			   target.c_str());
+	return false;
+    }
 
-    if (i != _targets.end() && i->second.add_class_watch(class_to_watch)) {
+    if (i->second.add_class_watch(class_to_watch)) {
 	announce_class_instances(target, class_to_watch);
 	return true;
     }
+    err_msg += "Class watch already existed.\n";
     return false;
 }
 
@@ -886,15 +893,22 @@ Finder::remove_class_watch(const string& target,
 
 bool
 Finder::add_instance_watch(const string& target,
-			   const string& instance_to_watch)
+			   const string& instance_to_watch,
+			   string& err_msg)
 {
     TargetTable::iterator watcher_i = _targets.find(target);
-    if (watcher_i == _targets.end())
+    if (watcher_i == _targets.end()) {
+	err_msg += "Could not find target: ";
+	err_msg += target;
 	return false;	// watcher does not exist
+    }
 
     TargetTable::const_iterator watched_i = _targets.find(instance_to_watch);
-    if (watched_i == _targets.end())
+    if (watched_i == _targets.end()) {
+	err_msg += "Could not find instance-to-watch: ";
+	err_msg += instance_to_watch;
 	return false;	// watched does not exist
+    }
 
     FinderTarget& watcher = watcher_i->second;
     if (watcher.add_instance_watch(instance_to_watch)) {
@@ -907,6 +921,7 @@ Finder::add_instance_watch(const string& target,
 			      watched.name());
 	return true;
     }
+    err_msg += "Watcher failed to add_instance_watch.\n";
     return false;
 }
 

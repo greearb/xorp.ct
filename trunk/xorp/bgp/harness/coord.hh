@@ -72,6 +72,8 @@ public:
 				      uint32_t& status,
 				      string&	reason);
 
+    XrlCmdError common_0_1_startup() { return XrlCmdError::OKAY(); }
+
     /**
      * shutdown target
      */

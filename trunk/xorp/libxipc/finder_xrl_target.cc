@@ -443,13 +443,16 @@ FinderXrlTarget::finder_event_notifier_0_1_register_class_event_interest(
 {
     finder_trace_init("register_class_event_interest (who = %s, class = %s)",
 		      who.c_str(), class_name.c_str());
+    string err_msg;
     if (_finder.active_messenger_represents_target(who) == false) {
 	finder_trace_result("messenger does not represent target.");
 	return XrlCmdError::COMMAND_FAILED("failed (not originator).");
     }
-    if (_finder.add_class_watch(who, class_name) == false) {
-	finder_trace_result("failed to add watch.");
-	return XrlCmdError::COMMAND_FAILED("failed to add watch");
+    if (_finder.add_class_watch(who, class_name, err_msg) == false) {
+	string em = c_format("failed to add class event watch, who: %s  class_name: %s  err: %s\n",
+			     who.c_str(), class_name.c_str(), err_msg.c_str());
+	finder_trace_result("%s", em.c_str());
+	return XrlCmdError::COMMAND_FAILED(em);
     }
     finder_trace_result("okay");
     return XrlCmdError::OKAY();
@@ -481,15 +484,18 @@ FinderXrlTarget::finder_event_notifier_0_1_register_instance_event_interest(
 						 const string& instance_name
 						 )
 {
+    string err_msg;
     finder_trace_init("register_instance_event_interest (who = %s, instance = %s)",
 		      who.c_str(), instance_name.c_str());
     if (_finder.active_messenger_represents_target(who) == false) {
 	finder_trace_result("messenger does not represent target.");
 	return XrlCmdError::COMMAND_FAILED("failed (not originator).");
     }
-    if (_finder.add_instance_watch(who, instance_name) == false) {
-	finder_trace_result("failed to add watch.");
-	return XrlCmdError::COMMAND_FAILED("failed to add watch");
+    if (_finder.add_instance_watch(who, instance_name, err_msg) == false) {
+	string em = c_format("failed to add instance event watch, who: %s  instance_name: %s  err: %s\n",
+			     who.c_str(), instance_name.c_str(), err_msg.c_str());
+	finder_trace_result("%s", em.c_str());
+	return XrlCmdError::COMMAND_FAILED(em.c_str());
     }
     finder_trace_result("okay");
     return XrlCmdError::OKAY();

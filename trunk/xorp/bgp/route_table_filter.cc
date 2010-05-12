@@ -201,14 +201,18 @@ NexthopRewriteFilter<A>::filter(InternalMessage<A>& rtmsg) const
 	return true;
     }
 
-    //Form a new path attribute list containing the new nexthop
-    FPAListRef& palist = rtmsg.attributes();
-    palist->replace_nexthop(_local_nexthop);
+    // This check is needed to fix crash in test2-ipv6 of test_routing1.sh
+    // TODO:  This needs review. --Ben
+    if (_local_nexthop.is_unicast()) {
+	//Form a new path attribute list containing the new nexthop
+	FPAListRef& palist = rtmsg.attributes();
+	palist->replace_nexthop(_local_nexthop);
     
 
-    //note that we changed the route
-    rtmsg.set_changed();
-
+	//note that we changed the route
+	rtmsg.set_changed();
+    }
+    
     return true;
 }
 
@@ -235,12 +239,17 @@ NexthopPeerCheckFilter<A>::filter(InternalMessage<A>& rtmsg) const
 	return true;
     }
 
-    // The nexthop matches the peer's address so rewrite it.
-    FPAListRef& palist = rtmsg.attributes();
-    palist->replace_nexthop(_local_nexthop);
-    
-    //note that we changed the route
-    rtmsg.set_changed();
+    // Make sure we don't throw an exception due to :: for nexthop.
+    // See similar change in NexthopRewriteFilter::filter.
+    // TODO:  This needs review. --Ben
+    if (_local_nexthop.is_unicast()) {
+	// The nexthop matches the peer's address so rewrite it.
+	FPAListRef& palist = rtmsg.attributes();
+	palist->replace_nexthop(_local_nexthop);
+	
+	//note that we changed the route
+	rtmsg.set_changed();
+    }
 
     return true;
 }

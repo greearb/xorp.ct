@@ -117,6 +117,8 @@ public:
 	// Output values, 
 	string&	name);
 
+    XrlCmdError common_0_1_startup() { return XrlCmdError::OKAY(); }
+
     /**
      *  Get version string from Xrl Target
      */

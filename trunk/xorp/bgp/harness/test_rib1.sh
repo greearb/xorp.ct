@@ -21,6 +21,7 @@
 #
 
 set -e
+. ./setup_paths.sh
 
 onexit()
 {
@@ -40,8 +41,8 @@ trap onexit 0 2
 # srcdir is set by make for check target
 if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
 . ${srcdir}/xrl_shell_funcs.sh ""
-. ${srcdir}/../xrl_shell_funcs.sh ""
-. ${srcdir}/../../rib/xrl_shell_funcs.sh ""
+. $BGP_FUNCS ""
+. $RIB_FUNCS ""
 
 HOST=127.0.0.1
 AS=65008
@@ -80,7 +81,7 @@ configure_bgp()
     NEXT_HOP=192.150.187.78
     PORT=$PORT1;PEER_PORT=$PEER1_PORT;PEER_AS=$PEER1_AS
     IPTUPLE="$LOCALHOST $PORT $PEER $PEER_PORT"
-    add_peer $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
+    add_peer lo $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
     set_parameter $IPTUPLE MultiProtocol.IPv4.Unicast true
     enable_peer $IPTUPLE
 
@@ -89,7 +90,7 @@ configure_bgp()
     NEXT_HOP=192.150.187.78
     PORT=$PORT2;PEER_PORT=$PEER2_PORT;PEER_AS=$PEER2_AS
     IPTUPLE="$LOCALHOST $PORT $PEER $PEER_PORT"
-    add_peer $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
+    add_peer lo $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
     set_parameter $IPTUPLE MultiProtocol.IPv4.Unicast true
     enable_peer $IPTUPLE
 
@@ -98,7 +99,7 @@ configure_bgp()
     NEXT_HOP=192.150.187.78
     PORT=$PORT1_IPV6;PEER_PORT=$PEER1_PORT_IPV6;PEER_AS=$PEER1_AS_IPV6
     IPTUPLE="$LOCALHOST $PORT $PEER $PEER_PORT"
-    add_peer $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
+    add_peer lo $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
     set_parameter $IPTUPLE MultiProtocol.IPv6.Unicast true
     enable_peer $IPTUPLE
 
@@ -107,7 +108,7 @@ configure_bgp()
     NEXT_HOP=192.150.187.78
     PORT=$PORT2_IPV6;PEER_PORT=$PEER2_PORT_IPV6;PEER_AS=$PEER2_AS_IPV6
     IPTUPLE="$LOCALHOST $PORT $PEER $PEER_PORT"
-    add_peer $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
+    add_peer lo $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
     set_parameter $IPTUPLE MultiProtocol.IPv6.Unicast true
     enable_peer $IPTUPLE
 }
@@ -563,15 +564,16 @@ TESTS='test1 test1_ipv6 test2 test3 test4 test5 test6 test7 test8 test9 test10'
 
 # Include command line
 . ${srcdir}/args.sh
+. ./setup_paths.sh
 
 if [ $START_PROGRAMS = "yes" ]
 then
     CXRL="$CALLXRL -r 10"
     runit $QUIET $VERBOSE -c "$0 -s -c $*" <<EOF
-    ../../libxipc/xorp_finder
-    ../../fea/xorp_fea_dummy  = $CXRL finder://fea/common/0.1/get_target_name
-    ../../rib/xorp_rib        = $CXRL finder://rib/common/0.1/get_target_name
-    ../xorp_bgp               = $CXRL finder://bgp/common/0.1/get_target_name
+    $XORP_FINDER
+    $XORP_FEA_DUMMY           = $CXRL finder://fea/common/0.1/get_target_name
+    $XORP_RIB                 = $CXRL finder://rib/common/0.1/get_target_name
+    $XORP_BGP                 = $CXRL finder://bgp/common/0.1/get_target_name
     ./test_peer -s peer1      = $CXRL finder://peer1/common/0.1/get_target_name
     ./coord                   = $CXRL finder://coord/common/0.1/get_target_name
 EOF

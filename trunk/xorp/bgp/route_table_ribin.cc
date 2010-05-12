@@ -369,14 +369,22 @@ RibInTable<A>::dump_next_route(DumpIterator<A>& dump_iter)
 	if (chained_rt->is_winner() || dump_iter.peer_to_dump_to() == NULL) {
 	    InternalMessage<A> rt_msg(chained_rt, _peer, _genid);
 	   
-	    log("dump route: " + rt_msg.net().str());
-	    int res = this->_next_table->route_dump(rt_msg, (BGPRouteTable<A>*)this,
-				    dump_iter.peer_to_dump_to());
-	    if(res == ADD_FILTERED) 
-		chained_rt->set_filtered(true);
-	    else
-		chained_rt->set_filtered(false);
-	    
+	    //XLOG_WARNING("dump route: %s", rt_msg.str().c_str());
+	    try {
+		int res = this->_next_table->route_dump(rt_msg, (BGPRouteTable<A>*)this,
+							dump_iter.peer_to_dump_to());
+		if(res == ADD_FILTERED) 
+		    chained_rt->set_filtered(true);
+		else
+		    chained_rt->set_filtered(false);
+	    }
+	    catch (const XorpException& e) {
+		//TODO:  Make sure bad routes never get into the table in the first place
+		// (was an IPv6 zero default route that triggered this bug initially)
+		//  See test 28-ipv6 in harness/test_peering1.sh  --Ben
+		XLOG_WARNING("Exception in dump_next_route: %s\n", e.str().c_str());
+		XLOG_WARNING("  rt_msg: %s\n", rt_msg.str().c_str());
+	    }
 	    break;
 	}
     }

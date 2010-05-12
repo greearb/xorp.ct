@@ -230,6 +230,10 @@ SocketClient::connected(XorpFd s)
 
     XLOG_ASSERT(!get_sock().is_valid());
     XLOG_ASSERT(!_connecting);
+    // Clean up any old reader/writers we might have around.
+    // This can happen if you kill network connection between two peers
+    // for 10 seconds and then re-start it.
+    async_remove();
     set_sock(s);
     async_add(s);
 }
@@ -528,6 +532,9 @@ SocketClient::connect_socket_complete(XorpFd sock, IoEventType type,
 
     debug_msg("connect suceeded %s\n", sock.str().c_str());
 
+    // Clean up any old reader/writers we might have around.
+    // Not sure exactly how this one was triggered.
+    async_remove();
     async_add(sock);
     cb->dispatch(true);
     return;
@@ -543,7 +550,6 @@ SocketClient::connect_socket_complete(XorpFd sock, IoEventType type,
 void
 SocketClient::connect_socket_break()
 {
-    XLOG_ASSERT(_connecting);
     _connecting = false;
 
     eventloop().remove_ioevent_cb(get_sock());

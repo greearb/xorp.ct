@@ -81,7 +81,7 @@ if [ $# != 1 ]
 then
 	./BGPTest $CONFIG_FILE
 else
-	. ./xrl_shell_funcs.sh
+	. ./bgp_xrl_shell_funcs.sh
 	# Start a finder in the background.
 	$FINDER &
 	# Start a bgp process and then send it the XRL config commands.
