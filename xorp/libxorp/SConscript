@@ -49,6 +49,7 @@ libxorp_core_srcs = [
 	# C++ files
 	'asyncio.cc',
 	'buffered_asyncio.cc',
+        'bug_catcher.cc',
 	'c_format.cc',
 	'callback.cc',
 	'clock.cc',

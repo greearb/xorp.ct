@@ -25,7 +25,7 @@
 
 #include <map>
 #include <vector>
-
+#include "libxorp/bug_catcher.hh"
 #include "libxorp/run_command.hh"
 #include "libxorp/status_codes.h"
 
@@ -505,7 +505,7 @@ private:
     bool	_verbose;	 // Set to true if output is verbose
 };
 
-class TaskManager {
+class TaskManager : public BugCatcher {
     typedef XorpCallback2<void, bool, string>::RefPtr CallBack;
 
 public:

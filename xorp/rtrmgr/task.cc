@@ -2245,6 +2245,7 @@ TaskManager::run_task()
 void
 TaskManager::task_done(bool success, const string& errmsg)
 {
+    assert_not_deleted();
     debug_msg("TaskManager::task_done, success: %i errmsg: %s\n", (int)(success), errmsg.c_str());
 
     if (! success) {
@@ -2253,7 +2254,24 @@ TaskManager::task_done(bool success, const string& errmsg)
 	reset();
 	return;
     }
-    _tasklist.pop_front();
+    if (_tasklist.empty()) {
+	/** This indicates we are badly out of sync.  We got some callback we
+	 * weren't expecting, basically.  That this happens with the scenario below
+	 * indicates the task-manager & task logic is busted somewhere.
+	 * Reported by:  Li Zhao
+	 * 1. start rtrmgr from linux shell on the system;
+	 * 2. manually start xorp_static_routes from linux shell. This static will hijack the xrl channels to rtrmgr;
+	 * 3. use cli command "create protocol static" to start a second xorp_static_routes.
+	 * 4. use cli command "delete protocol static" to stop static. both xorp_static_routes
+	 *    were terminated. depended process like fea, rib and policy were also terminated. rtrmgr crash.
+	 *
+	 * With this check for empty task list, it at least doesn't crash, but the logic is still busted somewhere.
+	 */
+	XLOG_ERROR("ERROR:  _tasklist empty in TaskManager::task_done.");
+    }
+    else {
+	_tasklist.pop_front();
+    }
     run_task();
 }
 
