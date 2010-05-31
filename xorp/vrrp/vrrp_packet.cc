@@ -169,8 +169,9 @@ VrrpPacket::finalize()
     _ip.compute_checksum();
 
     XLOG_ASSERT(size <= VRRP_MAX_PACKET_SIZE);
-    XLOG_ASSERT(_data.size() == _data.capacity() 
-                && _data.size() == VRRP_MAX_PACKET_SIZE);
+    // I don't see how this assert can possibly be correct! --Ben
+    //XLOG_ASSERT(_data.size() == _data.capacity() 
+    //            && _data.size() == VRRP_MAX_PACKET_SIZE);
 
     _data.resize(size);
 }
