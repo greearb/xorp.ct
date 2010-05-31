@@ -85,6 +85,12 @@ XrlRipngTarget::common_0_1_shutdown()
 }
 
 XrlCmdError
+XrlRipngTarget::common_0_1_startup()
+{
+    return _ct->common_0_1_startup();
+}
+
+XrlCmdError
 XrlRipngTarget::finder_event_observer_0_1_xrl_target_birth(const string& cname,
 							   const string& iname)
 {

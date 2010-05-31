@@ -17,4 +17,7 @@ interface common/0.1 {
 
 	/** Request clean shutdown of Xrl Target */
 	shutdown;
+
+	/** Request a startup of Xrl Target */
+	startup;
 }

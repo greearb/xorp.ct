@@ -130,6 +130,10 @@ protected:
      */
     XrlCmdError common_0_1_shutdown();
 
+    XrlCmdError common_0_1_startup() {
+	return mfea_0_1_start_mfea();
+    }
+
     /**
      *  Announce target birth to observer.
      *

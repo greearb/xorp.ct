@@ -51,6 +51,7 @@ public:
     XrlCmdError common_0_1_get_version(string& version);
     XrlCmdError common_0_1_get_status(uint32_t& status, string& reason);
     XrlCmdError common_0_1_shutdown();
+    XrlCmdError common_0_1_startup();
 
     XrlCmdError
     finder_event_observer_0_1_xrl_target_birth(const string& class_name,

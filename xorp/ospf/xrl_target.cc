@@ -154,6 +154,20 @@ XrlOspfV2Target::common_0_1_shutdown()
 }
 
 XrlCmdError
+XrlOspfV2Target::common_0_1_startup()
+{
+    // Starts by default...nothing to do here.
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlOspfV3Target::common_0_1_startup()
+{
+    // Starts by default...nothing to do here.
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
 XrlOspfV3Target::common_0_1_shutdown()
 {
     _ospf_ipv6.shutdown();

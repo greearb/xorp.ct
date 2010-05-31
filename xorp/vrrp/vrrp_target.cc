@@ -91,7 +91,7 @@ void
 VrrpTarget::start()
 {
     if (_ifmgr.startup() != XORP_OK)
-	xorp_throw(VrrpException, "Can't startup fea mirror");
+	xorp_throw(VrrpException, "Can't startup Vrrp");
 }
 
 bool
@@ -404,6 +404,13 @@ VrrpTarget::common_0_1_shutdown()
 {
     shutdown();
 
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+VrrpTarget::common_0_1_startup()
+{
+    start();
     return XrlCmdError::OKAY();
 }
 

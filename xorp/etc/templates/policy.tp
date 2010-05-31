@@ -69,7 +69,7 @@ policy {
     %modinfo:   path "xorp_policy";
     %modinfo:   default_targetname "policy";
     %modinfo:   status_method xrl "$(policy.targetname)/common/0.1/get_status->status:u32&reason:txt";
-    %modinfo:	startup_method	xrl "$(policy.targetname)/policy/0.1/start_policy";
+    %modinfo:	startup_method	xrl "$(policy.targetname)/common/0.1/startup";
     %modinfo:   shutdown_method xrl "$(policy.targetname)/common/0.1/shutdown";
     %modinfo:   end_commit xrl "$(policy.targetname)/policy/0.1/done_global_policy_conf";
     %mandatory: $(@.targetname);

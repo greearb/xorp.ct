@@ -64,6 +64,8 @@ public:
      */
     XrlCmdError common_0_1_shutdown();
 
+    XrlCmdError common_0_1_startup() { return XrlCmdError::OKAY(); }
+
     /**
      * Announce target birth to observer.
      *

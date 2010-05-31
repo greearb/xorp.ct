@@ -38,7 +38,7 @@ protocols {
 	%modinfo:	path		"xorp_igmp";
 	%modinfo:	default_targetname "mld6igmp";
 	%modinfo:	status_method	xrl "$(igmp.targetname)/common/0.1/get_status->status:u32&reason:txt";
-	%modinfo:	startup_method	xrl "$(igmp.targetname)/mld6igmp/0.1/start_mld6igmp";
+	%modinfo:	startup_method	xrl "$(igmp.targetname)/common/0.1/startup";
 	%modinfo:	shutdown_method	xrl "$(igmp.targetname)/common/0.1/shutdown";
 
 	%mandatory:	$(@.targetname);

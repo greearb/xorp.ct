@@ -112,7 +112,6 @@ static void	xlog_record_va(xlog_level_t log_level, const char* module_name,
 static int	xlog_write(FILE* fp, const char* fmt, ...);
 static int	xlog_write_va(FILE* fp, const char* fmt, va_list ap);
 static int	xlog_flush(FILE* fp);
-//static const char* xlog_localtime2string_short(void);
 
 /*
  * ****************************************************************************
@@ -1061,33 +1060,6 @@ xlog_remove_default_output(void)
 }
 
 /**
- * xlog_localtime2string_short:
- * @void:
- *
- * Compute the current local time and return it as a string in the format:
- *   Year/Month/Day Hour:Minute:Second
- *   Example: 2002/02/05 20:22:09
- *   Note that the returned string uses statically allocated memory,
- *   and does not need to be de-allocated.
- *
- * Return value: A statically allocated string with the local time using
- * the format described above.
- **/
-/*
-static const char*
-xlog_localtime2string_short(void)
-{
-    static char	  buf[64];
-    static size_t buf_bytes = sizeof(buf) / sizeof(buf[0]);
-    time_t	now = time(NULL);
-    struct tm	*timeptr = localtime(&now);
-
-    strftime(buf, buf_bytes, "%Y/%m/%d %H:%M:%S", timeptr);
-
-    return (buf);
-}
-*/
-/**
  * xlog_localtime2string:
  * @void:
  *
@@ -1104,9 +1076,7 @@ xlog_localtime2string_short(void)
 const char *
 xlog_localtime2string(void)
 {
-    /* XXX: The code below may stop working after year 999999999 */
-    char buf[sizeof("999999999/99/99 99/99/99.999999999 ")];
-    static char ret_buf[sizeof(buf)];
+    static char ret_buf[64];
     struct timeval tv;
     time_t clock;
     struct tm *tm;
@@ -1114,13 +1084,15 @@ xlog_localtime2string(void)
     gettimeofday(&tv, NULL);
     clock = tv.tv_sec;
     tm = localtime(&clock);
-    if (strftime(buf, sizeof(buf), "%Y/%m/%d %H:%M:%S", tm) == 0) {
+    time_t sofar = strftime(ret_buf, sizeof(ret_buf), "%Y/%m/%d %H:%M:%S", tm);
+    if (sofar == 0) {
 	snprintf(ret_buf, sizeof(ret_buf), "strftime ERROR");
 	return (ret_buf);
     }
 
-    snprintf(ret_buf, sizeof(ret_buf), "%s.%lu", buf,
-	     (unsigned long)tv.tv_usec);
+#ifdef XORP_LOG_PRINT_USECS
+    snprintf(ret_buf + sofar, sizeof(ret_buf) - sofar, ".%lu", (unsigned long)tv.tv_usec);
+#endif
 
     return (ret_buf);
 }

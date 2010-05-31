@@ -59,6 +59,7 @@ _xdebug_preamble(const char*	file,
 	sbuf = (char*)realloc(sbuf, sbuf_bytes);
     }
 
+#ifdef XORP_LOG_PRINT_USECS
     struct timeval tv;
     gettimeofday(&tv, NULL);
     unsigned long long us = tv.tv_usec;
@@ -75,6 +76,19 @@ _xdebug_preamble(const char*	file,
     } else {
 	snprintf(sbuf, sbuf_bytes, "[ %d %llu %+5d %s ] ", spid, us, line, file);
     }
+#else
+    /* Format is <pid> [time-us] +<line> <file> [<function>] <users_debug_message>
+     *
+     * The <line> and <file> formatting is for cutting and pasting as
+     * arguments to emacs, vi, vim, nedit, etc, but not ed :-( 
+     */
+    if (func) {
+	snprintf(sbuf, sbuf_bytes, "[ %d %+5d %s %s ] ", spid, line, file,
+		 func);
+    } else {
+	snprintf(sbuf, sbuf_bytes, "[ %d %+5d %s ] ", spid, line, file);
+    }
+#endif    
     return sbuf;
 }
 

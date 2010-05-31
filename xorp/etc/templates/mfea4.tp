@@ -32,7 +32,7 @@ plumbing {
 	%modinfo:	path		"xorp_fea";
 	%modinfo:	default_targetname "mfea";
 	%modinfo:	status_method	xrl "$(mfea4.targetname)/common/0.1/get_status->status:u32&reason:txt";
-	%modinfo:	startup_method	xrl "$(mfea4.targetname)/mfea/0.1/start_mfea";
+	%modinfo:	startup_method	xrl "$(mfea4.targetname)/common/0.1/startup";
 	%modinfo:	shutdown_method	xrl "$(mfea4.targetname)/common/0.1/shutdown";
 
 	%mandatory:	$(@.targetname);

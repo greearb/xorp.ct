@@ -17,7 +17,7 @@ plumbing {
 	%modinfo:	depends		fea;
 	%modinfo:	path		"xorp_rib";
 	%modinfo:	default_targetname "rib";
-	%modinfo:	startup_method	xrl "$(rib.targetname)/rib/0.1/start_rib";
+	%modinfo:	startup_method	xrl "$(rib.targetname)/common/0.1/startup";
 	%modinfo:	status_method	xrl "$(rib.targetname)/common/0.1/get_status->status:u32&reason:txt";
 	%modinfo:	shutdown_method xrl "$(rib.targetname)/common/0.1/shutdown";
 

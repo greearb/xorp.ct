@@ -84,6 +84,10 @@ class XrlProfilerTarget :  XrlProfilerTargetBase {
 	return XrlCmdError::OKAY();
     }
 
+    XrlCmdError common_0_1_startup() {
+	return XrlCmdError::OKAY();
+    }
+
     XrlCmdError
     profile_client_0_1_log(const string& pname,	const uint32_t&	sec,
 			   const uint32_t& usec, const string&	comment)

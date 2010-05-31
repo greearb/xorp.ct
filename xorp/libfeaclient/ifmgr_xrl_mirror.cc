@@ -76,6 +76,8 @@ protected:
 
     XrlCmdError common_0_1_shutdown();
 
+    XrlCmdError common_0_1_startup() { return XrlCmdError::OKAY(); }
+
     XrlCmdError fea_ifmgr_mirror_0_1_interface_add(
 	// Input values,
 	const string&	ifname);

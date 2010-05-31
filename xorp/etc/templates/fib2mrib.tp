@@ -16,7 +16,7 @@ protocols {
 	%modinfo:	path		"xorp_fib2mrib";
 	%modinfo:	default_targetname "fib2mrib";
 	%modinfo:	status_method	xrl "$(fib2mrib.targetname)/common/0.1/get_status->status:u32&reason:txt";
-	%modinfo:	startup_method	xrl "$(fib2mrib.targetname)/fib2mrib/0.1/start_fib2mrib";
+	%modinfo:	startup_method	xrl "$(fib2mrib.targetname)/common/0.1/startup";
 	%modinfo:	shutdown_method	xrl "$(fib2mrib.targetname)/common/0.1/shutdown";
 
 	%mandatory:	$(@.targetname);

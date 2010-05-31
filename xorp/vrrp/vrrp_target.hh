@@ -148,6 +148,7 @@ protected:
         string& reason);
 
     XrlCmdError common_0_1_shutdown();
+    XrlCmdError common_0_1_startup();
 
     XrlCmdError vrrp_0_1_add_vrid(
         // Input values,

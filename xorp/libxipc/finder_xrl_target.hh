@@ -49,6 +49,8 @@ public:
      */
     XrlCmdError common_0_1_shutdown();
 
+    XrlCmdError common_0_1_startup() { return XrlCmdError::OKAY(); }
+
     /**
      *  Fails if target_name is already registered. The target_name must
      *  support the finder_client interface in order to be able to process

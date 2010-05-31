@@ -55,7 +55,7 @@ public:
 
     XrlCmdError common_0_1_shutdown();
 
-    virtual XrlCmdError policy_0_1_start_policy() {
+    virtual XrlCmdError common_0_1_startup() {
 	return XrlCmdError::OKAY();
     }
 

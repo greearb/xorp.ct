@@ -73,6 +73,8 @@ public:
      */
     XrlCmdError common_0_1_shutdown();
 
+    XrlCmdError common_0_1_startup() { return XrlCmdError::OKAY(); }
+
     XrlCmdError rtrmgr_0_1_get_pid(
         // Output values, 
 	uint32_t& pid);

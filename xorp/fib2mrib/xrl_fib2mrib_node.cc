@@ -1516,6 +1516,15 @@ XrlFib2mribNode::common_0_1_shutdown()
     return XrlCmdError::OKAY();
 }
 
+XrlCmdError XrlFib2mribNode::common_0_1_startup() {
+    if (startup() != XORP_OK) {
+	string error_msg = c_format("Failed to startup Fib2mrib");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    return XrlCmdError::OKAY();
+}
+
+
 /**
  *  Announce target birth to observer.
  *

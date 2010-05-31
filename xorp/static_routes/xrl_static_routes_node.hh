@@ -108,6 +108,8 @@ protected:
      */
     XrlCmdError common_0_1_shutdown();
 
+    XrlCmdError common_0_1_startup();
+
     /**
      *  Announce target birth to observer.
      *

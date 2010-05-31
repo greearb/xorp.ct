@@ -97,6 +97,7 @@ protocols {
 	%modinfo: default_targetname "ospfv3";
 	%modinfo: status_method xrl "$(ospf6.@.targetname)/common/0.1/get_status->status:u32&reason:txt";
 	%modinfo: shutdown_method xrl "$(ospf6.@.targetname)/common/0.1/shutdown";
+	%modinfo: startup_method xrl "$(ospf6.@.targetname)/common/0.1/startup";
 
 	%create: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_instance_id?id:u32=$(ospf6.@)";
 

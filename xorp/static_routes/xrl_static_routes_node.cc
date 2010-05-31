@@ -979,6 +979,20 @@ XrlStaticRoutesNode::common_0_1_shutdown()
 }
 
 /**
+ *  Request clean shutdown of Xrl Target
+ */
+XrlCmdError
+XrlStaticRoutesNode::common_0_1_startup()
+{
+    if (startup() != XORP_OK) {
+	string error_msg = c_format("Failed to startup StaticRoutes");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+/**
  *  Announce target birth to observer.
  *
  *  @param target_class the target class name.

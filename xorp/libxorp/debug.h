@@ -80,6 +80,10 @@
 #endif
 #endif /* __printflike */
 
+
+// TODO:  Make this configurable in scons  (remove it from xlog.h too)
+#define XORP_LOG_PRINT_USECS
+
 /*
  * `configure' defines DEBUG_LOGGING_GLOBAL, user may define DEBUG_LOGGING.
  */

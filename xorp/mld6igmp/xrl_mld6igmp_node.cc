@@ -1552,20 +1552,24 @@ XrlMld6igmpNode::common_0_1_get_status(// Output values,
 XrlCmdError
 XrlMld6igmpNode::common_0_1_shutdown()
 {
-    bool is_error = false;
-    string error_msg;
-
     if (shutdown() != XORP_OK) {
-	if (! is_error)
-	    error_msg = c_format("Failed to shutdown %s",
-				 Mld6igmpNode::proto_is_igmp() ?
-				 "IGMP" : "MLD");
-	is_error = true;
-    }
-
-    if (is_error)
+	string error_msg = c_format("Failed to shutdown %s",
+			     Mld6igmpNode::proto_is_igmp() ?
+			     "IGMP" : "MLD");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    return XrlCmdError::OKAY();
+}
 
+XrlCmdError
+XrlMld6igmpNode::common_0_1_startup()
+{
+    if (startup() != XORP_OK) {
+	string error_msg = c_format("Failed to startup %s",
+			     Mld6igmpNode::proto_is_igmp() ?
+			     "IGMP" : "MLD");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
     return XrlCmdError::OKAY();
 }
 

@@ -32,6 +32,9 @@
 #include "libxorp/xorp.h"
 
 
+// TODO:  Make this configurable in scons
+#define XORP_LOG_PRINT_USECS
+
 /*
  * The following defines and notes we defined __printfike if it does not
  * already exist.  The expansion of this macro uses a gcc extension to

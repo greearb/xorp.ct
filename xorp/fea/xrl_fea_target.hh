@@ -124,6 +124,7 @@ public:
      */
     XrlCmdError common_0_1_shutdown();
 
+    XrlCmdError common_0_1_startup() { return XrlCmdError::OKAY(); }
 
     /** Does nothing, but allows us to have rtrmgr verify startup. */
     virtual XrlCmdError ifmgr_0_1_startup_ifmgr();

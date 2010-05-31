@@ -59,6 +59,8 @@ class XrlOspfV2Target : XrlOspfv2TargetBase {
      */
     XrlCmdError common_0_1_shutdown();
 
+    XrlCmdError common_0_1_startup();
+
     /**
      *  Receive an IPv4 packet from a raw socket.
      *
@@ -652,6 +654,8 @@ class XrlOspfV3Target : XrlOspfv3TargetBase {
      *  Request clean shutdown of Xrl Target
      */
     XrlCmdError common_0_1_shutdown();
+
+    XrlCmdError common_0_1_startup();
 
     /**
      *  Receive an IPv4 packet from a raw socket.

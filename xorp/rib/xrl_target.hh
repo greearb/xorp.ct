@@ -101,6 +101,8 @@ protected:
      */
     XrlCmdError common_0_1_shutdown();
 
+    XrlCmdError common_0_1_startup() { return rib_0_1_start_rib(); }
+
     /**
      *  Enable/disable/start/stop RIB.
      */

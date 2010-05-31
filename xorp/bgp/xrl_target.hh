@@ -47,6 +47,8 @@ public:
      */
     XrlCmdError common_0_1_shutdown();
 
+    XrlCmdError common_0_1_startup() { return XrlCmdError::OKAY(); }
+
     XrlCmdError bgp_0_3_get_bgp_version(
 					// Output values,
 					uint32_t& version);

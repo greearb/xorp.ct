@@ -98,6 +98,8 @@ protected:
      */
     virtual XrlCmdError common_0_1_shutdown();
 
+    virtual XrlCmdError common_0_1_startup() { return XrlCmdError::OKAY(); }
+
     /**
      *  Enable/disable/start/stop the CLI.
      *

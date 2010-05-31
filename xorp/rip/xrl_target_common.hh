@@ -54,6 +54,7 @@ public:
     XrlCmdError common_0_1_get_status(uint32_t& status, string& reason);
 
     XrlCmdError common_0_1_shutdown();
+    XrlCmdError common_0_1_startup();
 
     XrlCmdError
     finder_event_observer_0_1_xrl_target_birth(const string& class_name,
@@ -392,6 +393,14 @@ XrlRipCommonTarget<A>::common_0_1_shutdown()
 {
     debug_msg("Shutdown requested.\n");
     _should_exit = true;
+    return XrlCmdError::OKAY();
+}
+
+template <typename A>
+XrlCmdError
+XrlRipCommonTarget<A>::common_0_1_startup()
+{
+    debug_msg("Startup requested.\n");
     return XrlCmdError::OKAY();
 }
 
