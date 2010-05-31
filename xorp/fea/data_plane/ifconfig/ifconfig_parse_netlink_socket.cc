@@ -84,8 +84,8 @@ IfConfigGetNetlinkSocket::parse_buffer_netlink_socket(IfConfig& ifconfig,
 
     for (nlh = align_data.payload();
 	 NLMSG_OK(nlh, buffer_bytes);
-	 nlh = NLMSG_NEXT(const_cast<struct nlmsghdr*>(nlh), buffer_bytes)) {
-	void* nlmsg_data = NLMSG_DATA(const_cast<struct nlmsghdr*>(nlh));
+	 nlh = NLMSG_NEXT(nlh, buffer_bytes)) {
+	void* nlmsg_data = NLMSG_DATA(nlh);
 	
 	switch (nlh->nlmsg_type) {
 	case NLMSG_ERROR:
@@ -269,7 +269,7 @@ nlm_cond_newlink_to_fea_cfg(const IfTree& user_cfg, IfTree& iftree, const struct
     
     // The attributes
     memset(rta_array, 0, sizeof(rta_array));
-    rtattr = IFLA_RTA(const_cast<struct ifinfomsg*>(ifinfomsg));
+    rtattr = IFLA_RTA(ifinfomsg);
     NlmUtils::get_rtattr(rtattr, rta_len, rta_array,
 			 sizeof(rta_array) / sizeof(rta_array[0]));
     
@@ -290,8 +290,8 @@ nlm_cond_newlink_to_fea_cfg(const IfTree& user_cfg, IfTree& iftree, const struct
 		  ifinfomsg->ifi_index);
 	return;
     }
-    caddr_t rta_data = reinterpret_cast<caddr_t>(RTA_DATA(const_cast<struct rtattr*>(rta_array[IFLA_IFNAME])));
-    if_name = string(reinterpret_cast<char*>(rta_data));
+    
+    if_name = (char*)(RTA_DATA(rta_array[IFLA_IFNAME]));
     //XLOG_WARNING("newlink, interface: %s  tree: %s\n", if_name.c_str(), iftree.getName().c_str());
 
     if (! user_cfg.find_interface(if_name)) {
@@ -540,7 +540,7 @@ nlm_dellink_to_fea_cfg(IfTree& iftree, const struct ifinfomsg* ifinfomsg,
     
     // The attributes
     memset(rta_array, 0, sizeof(rta_array));
-    rtattr = IFLA_RTA(const_cast<struct ifinfomsg*>(ifinfomsg));
+    rtattr = IFLA_RTA(ifinfomsg);
     NlmUtils::get_rtattr(rtattr, rta_len, rta_array,
 			 sizeof(rta_array) / sizeof(rta_array[0]));
     
@@ -551,8 +551,8 @@ nlm_dellink_to_fea_cfg(IfTree& iftree, const struct ifinfomsg* ifinfomsg,
 	XLOG_FATAL("Could not find interface name for interface index %d",
 		   ifinfomsg->ifi_index);
     }
-    caddr_t rta_data = reinterpret_cast<caddr_t>(RTA_DATA(const_cast<struct rtattr*>(rta_array[IFLA_IFNAME])));
-    if_name = string(reinterpret_cast<char*>(rta_data));
+
+    if_name = (char*)(RTA_DATA(rta_array[IFLA_IFNAME]));
     XLOG_WARNING("dellink, interface: %s  tree: %s\n", if_name.c_str(), iftree.getName().c_str());
     
     //
@@ -611,7 +611,7 @@ nlm_cond_newdeladdr_to_fea_cfg(const IfTree& user_config, IfTree& iftree, const 
     
     // The attributes
     memset(rta_array, 0, sizeof(rta_array));
-    rtattr = IFA_RTA(const_cast<struct ifaddrmsg*>(ifaddrmsg));
+    rtattr = IFA_RTA(ifaddrmsg);
     NlmUtils::get_rtattr(rtattr, rta_len, rta_array,
 			 sizeof(rta_array) / sizeof(rta_array[0]));
 
