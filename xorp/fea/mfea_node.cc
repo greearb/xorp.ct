@@ -571,6 +571,12 @@ MfeaNode::vif_update(const string&	ifname,
 					     is_up,
 					     ifp->mtu(),
 					     error_msg);
+
+    // See if it wants to start?
+    MfeaVif *mfea_vif = vif_find_by_name(vifname);
+    if (mfea_vif) {
+	mfea_vif->notifyUpdated();
+    }
 }
 
 void

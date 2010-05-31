@@ -107,6 +107,9 @@ public:
      */
     void	disable();
 
+    /** System detected some change.  */
+    void notifyUpdated();
+
     /**
      * Register a protocol on a single virtual interface.
      *
@@ -216,6 +219,8 @@ private:
     //
     string	_registered_module_instance_name;
     uint8_t	_registered_ip_protocol;
+
+    bool wants_to_be_started; // as soon as we can, ie if the interface appears.
 };
 
 //

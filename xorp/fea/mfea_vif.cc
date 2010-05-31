@@ -73,7 +73,7 @@ MfeaVif::MfeaVif(MfeaNode& mfea_node, const Vif& vif)
       _max_rate_limit(0),		// XXX: unlimited rate limit
       _registered_ip_protocol(0)
 {
-
+    wants_to_be_started = false;
 }
 
 /**
@@ -126,8 +126,11 @@ MfeaVif::start(string& error_msg)
 	return (XORP_OK);
 
     if (! is_underlying_vif_up()) {
-	error_msg = "underlying vif is not UP";
-	return (XORP_ERROR);
+	// Start us later.
+	wants_to_be_started = true;
+	XLOG_WARNING("WARNING:  Delaying start of mfea-vif: %s because underlying vif is not up.",
+		     name().c_str());
+	return XORP_OK;
     }
 
     //
@@ -153,9 +156,27 @@ MfeaVif::start(string& error_msg)
     XLOG_INFO("Interface started: %s%s",
 	      this->str().c_str(), flags_string().c_str());
 
+    wants_to_be_started = false; //it worked
+
     return (XORP_OK);
 }
 
+/** System detected some change.  */
+void MfeaVif::notifyUpdated() {
+    if (wants_to_be_started) {
+	string err_msg;
+	int rv = start(err_msg);
+	if (rv == XORP_OK) {
+	    XLOG_WARNING("notifyUpdated, successfully started mfea_vif: %s",
+			 name().c_str());
+	}
+	else {
+	    XLOG_WARNING("notifyUpdated, tried to start vif: %s, but failed: %s",
+			 name().c_str(), err_msg.c_str());
+	}
+    }
+}
+	    
 /**
  * MfeaVif::stop:
  * @error_msg: The error message (if error).
@@ -168,6 +189,7 @@ int
 MfeaVif::stop(string& error_msg)
 {
     int ret_value = XORP_OK;
+    wants_to_be_started = false;
 
     if (is_down())
 	return (XORP_OK);
