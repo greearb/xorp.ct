@@ -504,7 +504,10 @@ IoTcpUdpComm::udp_leave_group(const IPvX& mcast_addr,
 			     "the group was not joined",
 			     mcast_addr.str().c_str(),
 			     leave_if_addr.str().c_str());
-	return (XORP_ERROR);
+	XLOG_WARNING("%s", error_msg.c_str());
+	// Don't fail this..would fail the whole commit, and the group isn't joined
+	// anyway, so no loss of validity in the configuration.
+	return XORP_OK;
     }
 
     JoinedMulticastGroup& jmg = joined_iter->second;

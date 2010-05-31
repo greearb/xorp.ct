@@ -398,7 +398,10 @@ IoLinkComm::leave_multicast_group(const Mac&	group_address,
 			     group_address.str().c_str(),
 			     if_name().c_str(),
 			     vif_name().c_str());
-	return (XORP_ERROR);
+	XLOG_WARNING("%s", error_msg.c_str());
+	// Don't fail this..would fail the whole commit, and the group isn't joined
+	// anyway, so no loss of validity in the configuration.
+	return XORP_OK;
     }
     JoinedMulticastGroup& jmg = joined_iter->second;
 
