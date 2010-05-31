@@ -22,6 +22,9 @@
 #ifndef __FEA_DATA_PLANE_CONTROL_SOCKET_NETLINK_SOCKET_UTILITIES_HH__
 #define __FEA_DATA_PLANE_CONTROL_SOCKET_NETLINK_SOCKET_UTILITIES_HH__
 
+#include <xorp_config.h>
+#ifdef HAVE_NETLINK_SOCKETS
+
 #include "libxorp/xorp.h"
 
 #ifdef HAVE_LINUX_TYPES_H
@@ -144,4 +147,5 @@ public:
 				     string& error_msg);
 };
 
+#endif
 #endif // __FEA_DATA_PLANE_CONTROL_SOCKET_NETLINK_SOCKET_UTILITIES_HH__

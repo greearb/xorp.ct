@@ -18,6 +18,9 @@
 // http://xorp.net
 
 
+#include <xorp_config.h>
+#ifdef HAVE_NETLINK_SOCKETS
+
 
 #include "fea/fea_module.h"
 
@@ -48,7 +51,6 @@
 // Reading netlink(3) manual page is a good start for understanding this
 //
 
-#ifdef HAVE_NETLINK_SOCKETS
 
 int
 FibConfigEntryGetNetlinkSocket::parse_buffer_netlink_socket(

@@ -22,6 +22,9 @@
 #ifndef __FEA_DATA_PLANE_CONTROL_SOCKET_NETLINK_SOCKET_HH__
 #define __FEA_DATA_PLANE_CONTROL_SOCKET_NETLINK_SOCKET_HH__
 
+#include <xorp_config.h>
+#ifdef HAVE_NETLINK_SOCKETS
+
 #include <list>
 
 #include "libxorp/eventloop.hh"
@@ -263,4 +266,7 @@ private:
     vector<uint8_t> _cache_data;	// Cached netlink socket data.
 };
 
+
+
+#endif // HAVE_NETLINK_SOCKETS
 #endif // __FEA_DATA_PLANE_CONTROL_SOCKET_NETLINK_SOCKET_HH__

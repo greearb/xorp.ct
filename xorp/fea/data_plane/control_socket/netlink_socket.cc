@@ -17,6 +17,9 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
+#include <xorp_config.h>
+#ifdef HAVE_NETLINK_SOCKETS
+
 
 
 #include "fea/fea_module.h"
@@ -105,47 +108,6 @@ int
 NetlinkSocket::force_recvmsg(bool only_kernel_messages, string& err_msg) {
     return force_recvmsg_flgs(MSG_DONTWAIT, only_kernel_messages, err_msg);
 }
-
-#ifndef HAVE_NETLINK_SOCKETS
-
-int
-NetlinkSocket::start(string& error_msg)
-{
-    error_msg = c_format("The system does not support netlink sockets");
-    XLOG_UNREACHABLE();
-    return (XORP_ERROR);
-}
-
-int
-NetlinkSocket::stop(string& error_msg)
-{
-    UNUSED(error_msg);
-
-    //
-    // XXX: Even if the system doesn not support netlink sockets, we
-    // still allow to call the no-op stop() method and return success.
-    // This is needed to cover the case when a NetlinkSocket is allocated
-    // but not used.
-    //
-    return (XORP_OK);
-}
-
-
-int
-NetlinkSocket::force_recvmsg_flgs(int flags, bool only_kernel_messages,
-			     string& error_msg)
-{
-    UNUSED(flags);
-    UNUSED(only_kernel_messages);
-
-    XLOG_UNREACHABLE();
-
-    error_msg = "method not supported";
-
-    return (XORP_ERROR);
-}
-
-#else // HAVE_NETLINK_SOCKETS
 
 int NetlinkSocket::bind_table_id() {
 #ifndef HAVE_PCAP_BPF_H
@@ -501,7 +463,6 @@ NetlinkSocket::io_event(XorpFd fd, IoEventType type)
     }
 }
 
-#endif // HAVE_NETLINK_SOCKETS
 
 //
 // Observe netlink sockets activity
@@ -590,12 +551,6 @@ NetlinkSocketReader::receive_data(NetlinkSocket& ns, uint32_t seqno,
     return (XORP_OK);
 }
 
-#ifndef HAVE_NETLINK_SOCKETS
-int NetlinkSocket::notify_table_id_change(uint32_t new_tbl) {
-    UNUSED(new_tbl);
-    return XORP_OK;
-}
-#endif
 
 /**
  * Receive data from the netlink socket.
@@ -609,13 +564,6 @@ int NetlinkSocket::notify_table_id_change(uint32_t new_tbl) {
 void
 NetlinkSocketReader::netlink_socket_data(const vector<uint8_t>& buffer)
 {
-#ifndef HAVE_NETLINK_SOCKETS
-    UNUSED(buffer);
-
-    XLOG_UNREACHABLE();
-
-#else // HAVE_NETLINK_SOCKETS
-
     size_t d = 0, off = 0;
     AlignData<struct nlmsghdr> align_data(buffer);
 
@@ -638,5 +586,6 @@ NetlinkSocketReader::netlink_socket_data(const vector<uint8_t>& buffer)
 
     // XXX: shrink _cache_data to contain only the data copied to it
     _cache_data.resize(off);
-#endif // HAVE_NETLINK_SOCKETS
 }
+
+#endif // HAVE_NETLINK_SOCKETS

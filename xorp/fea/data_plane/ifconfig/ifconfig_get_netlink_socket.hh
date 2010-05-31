@@ -22,6 +22,10 @@
 #ifndef __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_GET_NETLINK_SOCKET_HH__
 #define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_GET_NETLINK_SOCKET_HH__
 
+#include <xorp_config.h>
+
+#ifdef HAVE_NETLINK_SOCKETS
+
 #include "fea/ifconfig_get.hh"
 #include "fea/data_plane/control_socket/netlink_socket.hh"
 
@@ -105,4 +109,5 @@ private:
     NetlinkSocketReader	_ns_reader;
 };
 
+#endif
 #endif // __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_GET_NETLINK_SOCKET_HH__
