@@ -700,6 +700,13 @@ def DoAllConfig(env, conf, host_os):
     has_libpcap = conf.CheckLib('pcap')
     has_pcap_sendpacket = conf.CheckFunc('pcap_sendpacket')
 
+    # pcap filtering can be used to cut down on un-needed netlink packets.
+    #  This is a performance gain only, can function fine without it.
+    prereq_pcap_bpf = []
+    if has_sys_types_h:
+	prereq_pcap_bpf.append('sys/types.h')
+    has_pcap_bpf_h = conf.CheckHeader(prereq_pcap_bpf + ['pcap-bpf.h'])
+
     ##########
     # curses for cli/libtecla
     has_libcurses = conf.CheckLib('curses')

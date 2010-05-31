@@ -53,7 +53,9 @@
 
 #endif
 
+#ifdef HAVE_PCAP_BPF_H
 #include <pcap-bpf.h>
+#endif
 
 // standard headers might not be up to date with the latest kernels.
 #ifndef SKF_AD_OFF
@@ -146,6 +148,12 @@ NetlinkSocket::force_recvmsg_flgs(int flags, bool only_kernel_messages,
 #else // HAVE_NETLINK_SOCKETS
 
 int NetlinkSocket::bind_table_id() {
+#ifndef HAVE_PCAP_BPF_H
+    #pragma message "PCAP-BPF is not supported on this system, socket filtering will not work."
+    #pragma message "  This is not a real problem, just a small performance loss when using."
+    #pragma message "  multiple virtual routers on the same system."
+    return XORP_OK; // No big problem, just slightly dif
+#else
     if (_table_id) {
 	// Use socket filter.  Shouldn't require kernel hackings if it's a recent-ish kernel (2.6.30+ I think).
 	struct bpf_program bpf;
@@ -214,6 +222,7 @@ int NetlinkSocket::bind_table_id() {
 	}
     }
     return XORP_OK;
+#endif
 }
 
 /** Routing table ID that we are interested in might have changed.
