@@ -65,8 +65,10 @@ private:
 class XRLdb {
 public:
     XRLdb(const string& xrldir, bool verbose) throw (InitError);
+#ifdef VALIDATE_XRLDB
     bool check_xrl_syntax(const string& xrl) const;
     XRLMatchType check_xrl_exists(const string& xrl) const;
+#endif
     string str() const;
 
 private:

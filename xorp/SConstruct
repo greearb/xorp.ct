@@ -43,6 +43,9 @@ Help("""
         Default is "obj/<arch>-<os>-<rel>".
     prefix=<some path> to specify a different install directory.
         Default is "/usr/local/xorp".
+    enable_xrldb_validation=true if you want XRLdb runtime validation enabled..
+        This is not normally required unless you are developing and making changes
+        to the XRL template files.  XRLdb validation increases startup time.
     enable_olsr=true if you want to build OLSR.
 """)
 
@@ -68,6 +71,7 @@ vars.AddVariables(
     BoolVariable('debug_msg',  'Build with debug messages', False),
     BoolVariable('debug_fn',  'Build with function names in debug_msg output', False),
     BoolVariable('debug_cb',  'Build with callback debugging', False),
+    BoolVariable('enable_xrldb_validation',  'Enable Runtime XRLdb Validation', False),
     BoolVariable('enable_olsr',  'Build OLSR', False),
     BoolVariable('debug_xrldb',  'Build with runtime XRL syntax validation in Router Manager', False),
     EnumVariable('debug', 'Build with debug symbols', 'full',
@@ -213,6 +217,9 @@ print 'Debug messages:   ', env['debug_msg']
 print 'Debug function names: ', env['debug_fn']
 print 'Debug callbacks:  ', env['debug_cb']
 print 'Debug XRL syntax: ', env['debug_xrldb']
+
+env['VALIDATE_XRLDB'] = ARGUMENTS.get('enable_xrldb_validation', False)
+print 'Enable XRLdb Validation:      ', env['enable_xrldb_validation']
 
 env['WITH_OLSR'] = ARGUMENTS.get('enable_olsr', False)
 print 'Enable OLSR:      ', env['enable_olsr']
@@ -616,6 +623,18 @@ if env['debug_cb']:
     ])
     env.AppendUnique(CXXFLAGS = [
         '-DDEBUG_CALLBACKS',
+    ])
+
+if env['VALIDATE_XRLDB']:
+    env.AppendUnique(CFLAGS = [
+        '-DVALIDATE_XRLDB',
+    ])
+    env.AppendUnique(CXXFLAGS = [
+        '-DVALIDATE_XRLDB',
+    ])
+
+env.AppendUnique(RPATH = [
+    '$libdir',
     ])
 
 #

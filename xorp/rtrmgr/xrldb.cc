@@ -152,6 +152,7 @@ XRLtarget::str() const
 XRLdb::XRLdb(const string& xrldir, bool verbose) throw (InitError)
     : _verbose(verbose)
 {
+#ifdef VALIDATE_XRLDB
     string errmsg;
     list<string> files;
 
@@ -192,8 +193,15 @@ XRLdb::XRLdb(const string& xrldir, bool verbose) throw (InitError)
 
     debug_msg("XRLdb initialized\n");
     debug_msg("%s\n", str().c_str());
+    XLOG_WARNING("XRLdb validation is enabled.");
+#else
+    UNUSED(xrldir);
+    XLOG_WARNING("XRLdb validation is disabled (this is good, unless you are un-sure of"
+		 " the syntax of your XRL template files).");
+#endif
 }
 
+#ifdef VALIDATE_XRLDB
 bool
 XRLdb::check_xrl_syntax(const string& xrlstr) const
 {
@@ -249,6 +257,7 @@ XRLdb::check_xrl_exists(const string& xrlstr) const
     }
     return failure_type;
 }
+#endif
 
 string 
 XRLdb::str() const
