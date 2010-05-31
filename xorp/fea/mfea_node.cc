@@ -1214,9 +1214,9 @@ MfeaNode::stop_vif(const string& vif_name, string& error_msg)
 {
     MfeaVif *mfea_vif = vif_find_by_name(vif_name);
     if (mfea_vif == NULL) {
-	error_msg = c_format("Cannot stop vif %s: no such vif",
+	error_msg = c_format("Cannot stop vif %s: no such vif  (will continue)",
 			     vif_name.c_str());
-	XLOG_ERROR("%s", error_msg.c_str());
+	XLOG_WARNING("%s", error_msg.c_str());
 	// If it doesn't exist, it's as stopped as it's going to get.  Returning
 	// error will cause entire commit to fail.
 	//return (XORP_ERROR);

@@ -1114,10 +1114,12 @@ Mld6igmpNode::stop_vif(const string& vif_name, string& error_msg)
 {
     Mld6igmpVif *mld6igmp_vif = vif_find_by_name(vif_name);
     if (mld6igmp_vif == NULL) {
-	error_msg = c_format("Cannot stop vif %s: no such vif",
+	error_msg = c_format("Cannot stop vif %s: no such vif (will continue)",
 			     vif_name.c_str());
-	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
+	XLOG_WARNING("%s", error_msg.c_str());
+	// VIF is gone, it's as stopped as it will get.  Returning error will cause entire
+	// commit to fail.
+	return XORP_OK;
     }
     
     if (mld6igmp_vif->stop(error_msg) != XORP_OK) {
