@@ -40,6 +40,19 @@ IfMgrIfTree::find_interface(const string& ifname) const
     return (&ii->second);
 }
 
+
+/*  Print this thing out for debugging purposes. */
+string
+IfMgrIfTree::toString() {
+    ostringstream oss;
+    IfMgrIfTree::IfMap::iterator ii = interfaces().begin();
+    while (ii != interfaces().end()) {
+	oss << ii->second.toString() << endl;
+	ii++;
+    }
+    return oss.str();
+}
+
 IfMgrIfAtom*
 IfMgrIfTree::find_interface(const string& ifname)
 {
@@ -414,6 +427,21 @@ IfMgrIfAtom::operator==(const IfMgrIfAtom& o) const
 	    );
 }
 
+string
+IfMgrIfAtom::toString() const {
+    ostringstream oss;
+    oss << " Name: " << _name << " enabled: " << _enabled << " discard: " << _discard
+	<< " unreachable: " << _unreachable << " management: " << _management
+	<< " mtu: " << _mtu << " mac: " << _mac.str() << " pif_index: " << _pif_index
+	<< " no_carrier: " << _no_carrier << " baudrate: " << _baudrate << endl;
+    IfMgrIfAtom::VifMap::const_iterator vi = vifs().begin();
+    while (vi != vifs().end()) {
+	oss << "  Vif: " << vi->second.toString() << endl;
+	vi++;
+    }
+    return oss.str();
+}
+
 const IfMgrVifAtom*
 IfMgrIfAtom::find_vif(const string& vifname) const
 {
@@ -457,6 +485,29 @@ IfMgrVifAtom::operator==(const IfMgrVifAtom& o) const
 	    ipv6addrs()			== o.ipv6addrs()
 	    );
 }
+
+string
+IfMgrVifAtom::toString() const {
+    ostringstream oss;
+    oss << " Name: " << _name << " enabled: " << _enabled << " mcast_capable: " << _multicast_capable
+	<< " bcast_capable: " << _broadcast_capable << " p2p-capable: " << _p2p_capable
+	<< " loopback: " << _loopback << " pim_register: " << _pim_register << " pif_index: " << _pif_index
+	<< " vif index: " << _vif_index << " is_vlan: " << _is_vlan << " vlan_id: " << _vlan_id
+	<< endl;
+    
+    IfMgrVifAtom::IPv4Map::const_iterator ai = ipv4addrs().begin();
+    while (ai != ipv4addrs().end()) {
+	oss << "     Addr4: " << ai->second.toString() << endl;
+	ai++;
+    }
+    IfMgrVifAtom::IPv6Map::const_iterator ai6 = ipv6addrs().begin();
+    while (ai6 != ipv6addrs().end()) {
+	oss << "     Addr6: " << ai6->second.toString() << endl;
+	ai6++;
+    }
+    return oss.str();
+}
+
 
 const IfMgrIPv4Atom*
 IfMgrVifAtom::find_addr(const IPv4& addr) const
@@ -518,6 +569,18 @@ IfMgrIPv4Atom::operator==(const IfMgrIPv4Atom& o) const
 	    );
 }
 
+// Debugging info
+string
+IfMgrIPv4Atom::toString() const {
+    ostringstream oss;
+    oss << " Addr: " << _addr.str() << "/" << _prefix_len << " enabled: " << _enabled
+	<< " mcast-capable: " << _multicast_capable << " loopback: " << _loopback
+	<< " broadcast: " << _broadcast << " p2p: " << _p2p
+	<< " other-addr: " << _other_addr.str() << endl;
+    return oss.str();
+}
+
+
 
 // ----------------------------------------------------------------------------
 // IfMgrIfIPv6Atom methods
@@ -534,4 +597,15 @@ IfMgrIPv6Atom::operator==(const IfMgrIPv6Atom& o) const
 	    has_endpoint()		== o.has_endpoint()		&&
 	    endpoint_addr()		== o.endpoint_addr()
 	    );
+}
+
+
+// Debugging info
+string
+IfMgrIPv6Atom::toString() const {
+    ostringstream oss;
+    oss << " Addr: " << _addr.str() << "/" << _prefix_len << " enabled: " << _enabled
+	<< " mcast-capable: " << _multicast_capable << " loopback: " << _loopback
+	<< " p2p: " << _p2p << " other-addr: " << _other_addr.str() << endl;
+    return oss.str();
 }

@@ -768,8 +768,8 @@ void
 PeerManager<A>::vif_status_change(const string& interface, const string& vif,
 				  bool state)
 {
-    debug_msg("interface %s vif %s state %s\n",
-	      interface.c_str(), vif.c_str(), bool_c_str(state));
+    XLOG_WARNING("interface %s vif %s state %s\n",
+		 interface.c_str(), vif.c_str(), bool_c_str(state));
 
     OspfTypes::PeerID peerid;
 
@@ -786,7 +786,7 @@ PeerManager<A>::vif_status_change(const string& interface, const string& vif,
 	return;
     }
 
-    _peers[peerid]->set_link_status(state, "vif_status_change");
+    _peers[peerid]->set_link_status(state, "PeerManager::vif_status_change");
 
     return;
 }

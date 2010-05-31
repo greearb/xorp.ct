@@ -1203,6 +1203,8 @@ XrlIO<IPv4>::updates_made()
     const IfMgrIPv4Atom* addr_atom;
     const IfMgrIPv4Atom* other_addr_atom;
 
+    XLOG_WARNING("XrlIO<IPv4>::updates_made, _iftree:\n%s", _iftree.toString().c_str());
+
     //
     // Check whether the old interfaces, vifs and addresses are still there
     //
@@ -1254,6 +1256,8 @@ XrlIO<IPv4>::updates_made()
 	    if ((is_old_vif_enabled != is_new_vif_enabled)
 		&& (! _vif_status_cb.is_empty())) {
 		// The vif's enabled flag has changed
+		XLOG_WARNING("Vif: %s/%s changed enabled state to: %i, in XrlIO::updates_made\n",
+			     if_atom->name().c_str(), vif_atom->name().c_str(), (int)(is_new_vif_enabled));
 		_vif_status_cb->dispatch(if_atom->name(),
 					 vif_atom->name(),
 					 is_new_vif_enabled);
@@ -1321,6 +1325,8 @@ XrlIO<IPv4>::updates_made()
 		    && (! if_atom->no_carrier())
 		    && (vif_atom->enabled())
 		    && (! _vif_status_cb.is_empty())) {
+		    XLOG_WARNING("Vif: %s/%s changed enabled state to TRUE (new vif), in XrlIO::updates_made\n",
+				 if_atom->name().c_str(), vif_atom->name().c_str());
 		    _vif_status_cb->dispatch(if_atom->name(), vif_atom->name(),
 					     true);
 		}
@@ -1423,6 +1429,8 @@ XrlIO<IPv6>::updates_made()
 	    if ((is_old_vif_enabled != is_new_vif_enabled)
 		&& (! _vif_status_cb.is_empty())) {
 		// The vif's enabled flag has changed
+		XLOG_WARNING("Vif: %s/%s changed enabled state to: %i, in XrlIO<IPv6>::updates_made\n",
+			     if_atom->name().c_str(), vif_atom->name().c_str(), (int)(is_new_vif_enabled));
 		_vif_status_cb->dispatch(if_atom->name(),
 					 vif_atom->name(),
 					 is_new_vif_enabled);
@@ -1490,6 +1498,8 @@ XrlIO<IPv6>::updates_made()
 		    && (! if_atom->no_carrier())
 		    && (vif_atom->enabled())
 		    && (! _vif_status_cb.is_empty())) {
+		    XLOG_WARNING("Vif: %s/%s changed enabled state to TRUE (new vif), in XrlIO<IPv6>::updates_made\n",
+				 if_atom->name().c_str(), vif_atom->name().c_str());
 		    _vif_status_cb->dispatch(if_atom->name(), vif_atom->name(),
 					     true);
 		}

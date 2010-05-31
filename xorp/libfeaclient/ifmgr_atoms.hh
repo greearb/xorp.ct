@@ -254,6 +254,9 @@ public:
     bool is_directly_connected(const IPvX& addr, string& ifname,
 			       string& vifname) const;
 
+    /*  Print this thing out for debugging purposes. */
+    string toString();
+
 protected:
     IfMap	_interfaces;		// The interface configuration state
 };
@@ -309,6 +312,9 @@ public:
     IfMgrVifAtom*	find_vif(const string& vifname);
 
     bool operator==(const IfMgrIfAtom& o) const;
+
+    // Print this thing out for debugging purposes.
+    string toString() const;
 
 private:
     IfMgrIfAtom();					// not implemented
@@ -387,6 +393,9 @@ public:
 
     bool 		operator==(const IfMgrVifAtom& o) const;
 
+    // Print this thing out for debugging purposes.
+    string toString() const;
+
 private:
     IfMgrVifAtom();			// Not implemented
 
@@ -445,6 +454,9 @@ public:
 
     bool 	operator==(const IfMgrIPv4Atom& o) const;
 
+    // Debugging info
+    string toString() const;
+
 private:
     IfMgrIPv4Atom();			// Not implemented
 
@@ -493,6 +505,9 @@ public:
     const IPv6&	endpoint_addr() const;
 
     bool 	operator==(const IfMgrIPv6Atom& o) const;
+
+    // Debugging info
+    string toString() const;
 
 private:
     IfMgrIPv6Atom();			// Not implemented
