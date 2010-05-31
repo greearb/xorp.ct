@@ -46,4 +46,8 @@ subdirs = [
     'bgp',
     ]
 
+if env['WITH_OLSR']:
+    subdirs.append('contrib/olsr')
+
+
 SConscript(dirs = subdirs, exports='env')

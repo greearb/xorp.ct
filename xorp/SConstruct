@@ -41,6 +41,9 @@ EnsureSConsVersion(0, 98, 4)
 Help("""
     builddir=<some path> to specify a different build directory.
         Default is "obj/<arch>-<os>-<rel>".
+    prefix=<some path> to specify a different install directory.
+        Default is "/usr/local/xorp".
+    enable_olsr=true if you want to build OLSR.
 """)
 
 import sys
@@ -65,6 +68,7 @@ vars.AddVariables(
     BoolVariable('debug_msg',  'Build with debug messages', False),
     BoolVariable('debug_fn',  'Build with function names in debug_msg output', False),
     BoolVariable('debug_cb',  'Build with callback debugging', False),
+    BoolVariable('enable_olsr',  'Build OLSR', False),
     BoolVariable('debug_xrldb',  'Build with runtime XRL syntax validation in Router Manager', False),
     EnumVariable('debug', 'Build with debug symbols', 'full',
                  allowed_values=('no', 'yes', 'full', 'override'),
@@ -82,6 +86,8 @@ vars.AddVariables(
     PathVariable('prefix', 'Install prefix',
                  '/usr/local/xorp', PathVariable.PathAccept),
     )
+
+build_arch = os.uname()[4].lower()
 
 def log_args(afname):
     f = open(afname, 'w')
@@ -208,6 +214,10 @@ print 'Debug function names: ', env['debug_fn']
 print 'Debug callbacks:  ', env['debug_cb']
 print 'Debug XRL syntax: ', env['debug_xrldb']
 
+env['WITH_OLSR'] = ARGUMENTS.get('enable_olsr', False)
+print 'Enable OLSR:      ', env['enable_olsr']
+
+
 env['CONFIGURELOG'] = str(builddir) + os.sep + 'config.log'
 env['CONFIGUREDIR'] = str(builddir) + os.sep + '.sconf_temp'
 
@@ -305,10 +315,9 @@ env['xorp_tooldir']     = env['libdir']  + '/xorp/bin'	# tools/*
 env['xorp_xrlsdir']     = env['datadir'] + '/xorp/xrls'	# *.xrls
 env['xorp_sourcedir']   = sourcedir	# rtrmgr/util.cc and xif need this
 
-# turnoff bgp, olsr for now.
-# XXX bgp is always built, olsr never built.
+# XXX bgp is always built
 env['WITH_BGP'] = ARGUMENTS.get('enable-bgp', False)
-env['WITH_OLSR'] = ARGUMENTS.get('enable-olsr', False)
+
 
 ########## start configure magic
 
