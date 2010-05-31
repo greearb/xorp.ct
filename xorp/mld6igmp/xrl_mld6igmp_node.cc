@@ -840,13 +840,17 @@ XrlMld6igmpNode::fea_client_send_join_leave_multicast_group_cb(
 	break;
 
     case COMMAND_FAILED:
-	//
-	// If a command failed because the other side rejected it, this is
-	// fatal.
-	//
-	XLOG_FATAL("Cannot %s a multicast group with the FEA: %s",
-		   entry->operation_name(),
-		   xrl_error.str().c_str());
+
+	XLOG_WARNING("Cannot %s a multicast group with the FEA: %s",
+		     entry->operation_name(),
+		     xrl_error.str().c_str());
+	// If it was a join, try to leave it to clean things up as best as possible.
+	// Currently, this doesn't seem to really do anything locally, but might
+	// help FEA clean out it's logic.
+	if (entry->is_join()) {
+	    leave_multicast_group(entry->if_name(), entry->vif_name(),
+				  entry->ip_protocol(), entry->group_address());
+	}
 	break;
 
     case NO_FINDER:
