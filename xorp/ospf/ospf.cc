@@ -134,8 +134,8 @@ template <typename A>
 bool
 Ospf<A>::disable_interface_vif(const string& interface, const string& vif)
 {
-    XLOG_TRACE(trace()._packets, "Disable Interface %s Vif %s\n",
-	       interface.c_str(), vif.c_str());
+    XLOG_WARNING("Disable Interface %s Vif %s\n",
+		 interface.c_str(), vif.c_str());
 
     if (string(VLINK) == interface)
 	return true;

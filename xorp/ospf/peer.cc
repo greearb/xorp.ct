@@ -298,6 +298,8 @@ template <typename A>
 void
 PeerOut<A>::peer_change()
 {
+    XLOG_WARNING("PeerOut, peer_change on nterface: %s  running: %i  status: %i  link-status: %i",
+		 get_if_name().c_str(), (int)(_running), (int)(_status), (int)(_link_status));
     switch (_running) {
     case true:
 	if (false == _status || false == _link_status) {
@@ -588,6 +590,9 @@ PeerOut<A>::take_down_peering()
 	area_router->peer_down(_peerid);
     }
 
+    XLOG_WARNING("PeerOut, take_down_peering on interface: %s",
+		 get_if_name().c_str());
+
     stop_receiving_packets();
 }
 
@@ -638,6 +643,9 @@ PeerOut<A>::stop_receiving_packets()
 {
     if (!_receiving)
 	return;
+
+    XLOG_WARNING("PeerOut, stop_receiving_packets on interface: %s",
+		 get_if_name().c_str());
 
     // Stop receiving packets on this peering.
     if (do_multicast(get_linktype()))
@@ -1964,9 +1972,8 @@ void
 Peer<A>::event_loop_ind()
 {
     const char *event_name = "LoopInd";
-    XLOG_TRACE(_ospf.trace()._interface_events,
-	       "Event(%s) Interface(%s) State(%s) ", event_name,
-	       get_if_name().c_str(), pp_interface_state(get_state()).c_str());
+    XLOG_WARNING("Event(%s) Interface(%s) State(%s) ", event_name,
+		 get_if_name().c_str(), pp_interface_state(get_state()).c_str());
 
     change_state(Loopback);
 
@@ -3411,6 +3418,8 @@ Peer<A>::set_passive(bool passive, bool host)
 
     if (change_state) {
 	if (passive) {
+	    XLOG_WARNING("Peer, set_passive on nterface: %s  passive: %i  host: %i",
+			 get_if_name().c_str(), (int)(passive), (int)(host));
 	    event_loop_ind();
 	} else {
 	    event_unloop_ind();	
