@@ -496,12 +496,15 @@ MD5AuthHandler::authenticate_inbound(const vector<uint8_t>& pkt,
     MD5_CTX ctx;
     uint8_t digest[MD5_DIGEST_LENGTH];
 
+    // length to compute MD5 over
+    uint32_t md5_packet_length = extract_16(&ptr[Packet::LEN_OFFSET]);
+
     MD5_Init(&ctx);
-    MD5_Update(&ctx, &ptr[0], pkt.size() - MD5_DIGEST_LENGTH);
+    MD5_Update(&ctx, &ptr[0], md5_packet_length);
     MD5_Update(&ctx, key->key_data(), key->key_data_bytes());
     MD5_Final(&digest[0], &ctx);
 
-    if (0 != memcmp(&digest[0], &ptr[pkt.size() - MD5_DIGEST_LENGTH],
+    if (0 != memcmp(&digest[0], &ptr[md5_packet_length],
 		    MD5_DIGEST_LENGTH)) {
 	set_error(c_format("authentication digest doesn't match local key "
 			   "(key ID = %d)", key->id()));

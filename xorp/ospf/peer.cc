@@ -2618,20 +2618,21 @@ Peer<IPv4>::update_router_linksV2(list<RouterLink>& router_links)
     case Loopback: {
 	// XXX - We should be checking to see if this is p2p unnumbered.
 	uint16_t prefix_length;
-	if (_passive_host)
+	if (_passive_host) {
 	    prefix_length = IPv4::ADDR_BITLEN;
+	    router_link.set_metric(0);
+	}
 	else {
 	    prefix_length = get_interface_prefix_length();
+	    router_link.set_metric(_peerout.get_interface_cost());
 	}
 	IPNet<IPv4> net(get_interface_address(), prefix_length);
 	router_link.set_type(RouterLink::stub);
 	router_link.set_link_id(ntohl(net.masked_addr().addr()));
 	router_link.set_link_data(ntohl(net.netmask().addr()));
-	router_link.set_metric(0);
 	router_links.push_back(router_link);
-    }
 	return;
-	break;
+    }
     case Waiting:
 	break;
     case Point2Point:
