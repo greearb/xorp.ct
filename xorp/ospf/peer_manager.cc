@@ -510,7 +510,7 @@ PeerManager<A>::create_peer(const string& interface, const string& vif,
     area_router->add_peer(peerid);
 
     // If the interface, vif and source are up the peer will start running.
-    _peers[peerid]->set_link_status(enabled(interface, vif, source));
+    _peers[peerid]->set_link_status(enabled(interface, vif, source), "create_peer");
 
     return peerid;
 }
@@ -574,7 +574,7 @@ PeerManager<A>::set_link_status_peer(const OspfTypes::PeerID peerid,
 	return false;
     }
 
-    _peers[peerid]->set_link_status(state);
+    _peers[peerid]->set_link_status(state, "PeerManager::set_link_status_peer");
 
     return true;
 }
@@ -675,7 +675,7 @@ PeerManager<A>::activate_peer(const string& interface, const string& vif,
     recompute_addresses_peer(peerid, area);
 
     A source = _peers[peerid]->get_interface_address();
-    _peers[peerid]->set_link_status(enabled(interface, vif, source));
+    _peers[peerid]->set_link_status(enabled(interface, vif, source), "activate_peer");
 
     return true;
 }
@@ -786,7 +786,7 @@ PeerManager<A>::vif_status_change(const string& interface, const string& vif,
 	return;
     }
 
-    _peers[peerid]->set_link_status(state);
+    _peers[peerid]->set_link_status(state, "vif_status_change");
 
     return;
 }
@@ -819,7 +819,7 @@ PeerManager<A>::address_status_change(const string& interface,
     _peers[peerid]->set_link_status(enabled(interface,
 					    vif,
 					    _peers[peerid]->
-					    get_interface_address()));
+					    get_interface_address()), "address_status_change");
 
     switch(_ospf.get_version()) {
     case OspfTypes::V2:

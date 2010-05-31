@@ -187,7 +187,7 @@ class PeerOut {
      * Set the link status. This is not only the link status but is
      * the interface/vif/address configured up.
      */
-    void set_link_status(bool status);
+    void set_link_status(bool status, const char* dbg);
 
     /**
      * Dependent on the configured peer status and the link status
