@@ -530,7 +530,7 @@ IoIpComm::leave_multicast_group(const string&	if_name,
     joined_iter = _joined_groups_table.find(init_jmg);
     if (joined_iter == _joined_groups_table.end()) {
 	error_msg = c_format("Cannot leave group %s on interface %s vif %s: "
-			     "the group was not joined",
+			     "the group was not joined (will continue)",
 			     group_address.str().c_str(),
 			     if_name.c_str(),
 			     vif_name.c_str());

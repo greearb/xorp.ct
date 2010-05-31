@@ -541,6 +541,17 @@ FibConfigEntrySetNetlinkSocket::delete_entry(const FteX& fte)
 	// an overkill. If such check should be performed, we should
 	// use the corresponding FibConfigTableGetNetlink plugin.
 	//
+
+	// If the route doesn't exist, maybe something else deleted it
+	// for some reason.  Don't fail commits on this particular error.
+	// --Ben
+	if (last_errno == ESRCH) {
+	    XLOG_WARNING("Delete route entry failed, route was already gone (will continue), route: %s",
+		       fte.str().c_str());
+	    return XORP_OK;
+	}
+
+#if 0
 	do {
 	    // Check whether the error code matches
 	    if (last_errno != ESRCH) {
@@ -563,8 +574,9 @@ FibConfigEntrySetNetlinkSocket::delete_entry(const FteX& fte)
 
 	    return (XORP_OK);
 	} while (false);
+#endif
 
-	XLOG_ERROR("Error checking netlink request: %s", error_msg.c_str());
+	XLOG_ERROR("Error checking netlink delete_entry request: %s", error_msg.c_str());
 	return (XORP_ERROR);
     }
 

@@ -1461,12 +1461,12 @@ MfeaNode::unregister_protocol(const string&	module_instance_name,
 
     if (mfea_vif == NULL) {
 	error_msg = c_format("Cannot unregister module %s on interface %s "
-			     "vif %s: no such vif",
+			     "vif %s: no such vif (will continue)",
 			     module_instance_name.c_str(),
 			     if_name.c_str(),
 			     vif_name.c_str());
-	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
+	XLOG_WARNING("%s", error_msg.c_str());
+	return XORP_OK;
     }
 
     uint8_t ip_protocol = mfea_vif->registered_ip_protocol();
