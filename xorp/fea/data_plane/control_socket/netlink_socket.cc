@@ -149,9 +149,6 @@ NetlinkSocket::force_recvmsg_flgs(int flags, bool only_kernel_messages,
 
 int NetlinkSocket::bind_table_id() {
 #ifndef HAVE_PCAP_BPF_H
-    #pragma message "PCAP-BPF is not supported on this system, socket filtering will not work."
-    #pragma message "  This is not a real problem, just a small performance loss when using."
-    #pragma message "  multiple virtual routers on the same system."
     return XORP_OK; // No big problem, just slightly dif
 #else
     if (_table_id) {

@@ -698,7 +698,10 @@ def DoAllConfig(env, conf, host_os):
     # pcap for l2 comms
     has_pcap_h = conf.CheckHeader('pcap.h')
     has_libpcap = conf.CheckLib('pcap')
+    env['has_libpcap'] = has_libpcap
     has_pcap_sendpacket = conf.CheckFunc('pcap_sendpacket')
+    if not has_libpcap:
+        print "\nWARNING:  Libpcap was not detected.  VRRP and other protocols may have issues.\n"
 
     # pcap filtering can be used to cut down on un-needed netlink packets.
     #  This is a performance gain only, can function fine without it.
@@ -706,6 +709,10 @@ def DoAllConfig(env, conf, host_os):
     if has_sys_types_h:
 	prereq_pcap_bpf.append('sys/types.h')
     has_pcap_bpf_h = conf.CheckHeader(prereq_pcap_bpf + ['pcap-bpf.h'])
+    if not has_pcap_bpf_h:
+        print "\nWARNING: PCAP-BPF is not supported on this system, socket filtering will not work.\n"
+        print "  This is not a real problem, just a small performance loss when using.\n"
+        print "  multiple virtual routers on the same system.\n"
 
     ##########
     # curses for cli/libtecla
