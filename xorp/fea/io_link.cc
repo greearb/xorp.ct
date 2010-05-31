@@ -104,15 +104,20 @@ IoLink::recv_ethernet_packet(const uint8_t* packet, size_t packet_size)
     size_t	payload_offset = 0;
     const uint8_t* ptr = packet;
 
-    // Test the received packet size
-    if (packet_size < ETHERNET_MIN_FRAME_SIZE) {
+    // NOTE:  The padded bytes on small packets may not be delivered to
+    // off the NIC, so just make sure we have enough room for the ethernet
+    // header and one byte extra for payload (or dsap).  I can't think of
+    // any reason to accept a frame with ONLY an ethernet header..but if there
+    // is one, we can relax the +1 and add safety checks below.
+    static unsigned int min_frame_size = (Mac::ADDR_BYTELEN * 2 + 2 + 1);
+    if (packet_size < min_frame_size) {
 	XLOG_WARNING("Received packet on interface %s vif %s: "
 		     "packet is too short "
 		     "(captured %u expecting at least %u octets)",
 		     if_name().c_str(),
 		     vif_name().c_str(),
 		     XORP_UINT_CAST(packet_size),
-		     XORP_UINT_CAST(ETHERNET_MIN_FRAME_SIZE));
+		     min_frame_size);
 	return;			// Error
     }
 
@@ -157,6 +162,7 @@ IoLink::recv_ethernet_packet(const uint8_t* packet, size_t packet_size)
     payload_size = packet_size - payload_offset;
 
     // Process the result
+    // TODO:  get rid of this memory copy somehow.
     vector<uint8_t> payload(payload_size);
     memcpy(&payload[0], packet + payload_offset, payload_size);
     recv_packet(src_address, dst_address, ether_type, payload);
