@@ -1241,10 +1241,10 @@ PimNode::stop_vif(const string& vif_name, string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
     if (pim_vif == NULL) {
-	error_msg = c_format("Cannot stop vif %s: no such vif",
+	error_msg = c_format("Cannot stop vif %s: no such vif (will continue)",
 			     vif_name.c_str());
-	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
+	XLOG_INFO("%s", error_msg.c_str());
+	return XORP_OK;
     }
     
     if (pim_vif->stop(error_msg) != XORP_OK) {
