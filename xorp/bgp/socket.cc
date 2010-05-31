@@ -69,8 +69,16 @@ Socket::create_listener()
     if (!_s.is_valid()) {
 	XLOG_ERROR("comm_bind_tcp failed");
     }
-    if (comm_listen(_s, COMM_LISTEN_DEFAULT_BACKLOG) != XORP_OK) {
-	XLOG_ERROR("comm_listen failed");
+    else {
+	// bindtodevice?
+	debug_msg("create_listener, local_interface: %s", get_local_interface().c_str());
+	if (get_local_interface().size()) {
+	    comm_set_bindtodevice(_s, get_local_interface().c_str());
+	}
+
+	if (comm_listen(_s, COMM_LISTEN_DEFAULT_BACKLOG) != XORP_OK) {
+	    XLOG_ERROR("comm_listen failed");
+	}
     }
 }
 
@@ -196,6 +204,12 @@ SocketClient::connect(ConnectCallback cb)
 
     size_t len;
     create_socket(get_local_socket(len), COMM_SOCK_BLOCKING);
+
+    // bindtodevice?
+    debug_msg("SocketClient::connect, local_interface: %s", get_local_interface().c_str());
+    if (get_local_interface().size()) {
+	comm_set_bindtodevice(get_sock(), get_local_interface().c_str());
+    }
 
     if (_md5sig)
  	comm_set_tcpmd5(get_sock(), _md5sig);
@@ -450,6 +464,12 @@ SocketClient::connect_socket(XorpFd sock, string raddr, uint16_t port,
 	cb->dispatch(false);
 
 	return;
+    }
+
+    // bindtodevice?
+    debug_msg("SocketClient::connect_socket, local_interface: %s", get_local_interface().c_str());
+    if (get_local_interface().size()) {
+	comm_set_bindtodevice(sock, get_local_interface().c_str());
     }
 
     const struct sockaddr *servername = get_remote_socket(len);

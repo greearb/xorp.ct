@@ -1242,9 +1242,9 @@ BGPMain::find_tuple_179(string peer_addr, Iptuple& otuple)
 }
 
 bool
-BGPMain::change_local_ip(const Iptuple& iptuple, const string& local_ip)
+BGPMain::change_local_ip(const Iptuple& iptuple, const string& local_ip, const string& local_dev)
 {
-    Iptuple nptuple(local_ip.c_str(), iptuple.get_local_port(),
+    Iptuple nptuple(local_dev.c_str(), local_ip.c_str(), iptuple.get_local_port(),
 		    iptuple.get_peer_addr().c_str(), iptuple.get_peer_port());
 
     // XXX
@@ -1270,7 +1270,8 @@ BGPMain::change_local_ip(const Iptuple& iptuple, const string& local_ip)
 bool
 BGPMain::change_local_port(const Iptuple& iptuple, uint32_t local_port)
 {
-    Iptuple nptuple(iptuple.get_local_addr().c_str(), local_port,
+    Iptuple nptuple(iptuple.get_local_interface().c_str(),
+		    iptuple.get_local_addr().c_str(), local_port,
 		    iptuple.get_peer_addr().c_str(), iptuple.get_peer_port());
 
     return change_tuple(iptuple, nptuple);
@@ -1279,7 +1280,8 @@ BGPMain::change_local_port(const Iptuple& iptuple, uint32_t local_port)
 bool
 BGPMain::change_peer_port(const Iptuple& iptuple, uint32_t peer_port)
 {
-    Iptuple nptuple(iptuple.get_local_addr().c_str(), iptuple.get_local_port(),
+    Iptuple nptuple(iptuple.get_local_interface().c_str(),
+		    iptuple.get_local_addr().c_str(), iptuple.get_local_port(),
 		    iptuple.get_peer_addr().c_str(), peer_port);
 
     return change_tuple(iptuple, nptuple);

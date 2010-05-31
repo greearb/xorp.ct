@@ -170,13 +170,13 @@ public:
      */
     void clear();			// erase timer
 
-    XorpTimer()				: _node(0) { }
+    XorpTimer()				: _node(NULL) { }
     XorpTimer(TimerList* list, BasicTimerCallback cb);
     XorpTimer(const XorpTimer&);
     ~XorpTimer();
 
     XorpTimer& operator=(const XorpTimer&);
-    TimerNode* node() const		{ return _node; }
+    const TimerNode* node() const { return _node; }
 
 private:
     TimerNode* _node;

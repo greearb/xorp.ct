@@ -205,6 +205,8 @@ public:
 	 */
 	bool empty() const { return _receivers.empty(); }
 
+	set<string>& get_receivers() { return _receivers; }
+
     private:
 	string		_if_name;
 	string		_vif_name;
@@ -407,6 +409,19 @@ public:
 				      string&		error_msg);
 
     /**
+     * Leave all IP multicast groups on this interface.
+     * 
+     * @param if_name the interface through which packets should not be
+     * accepted.
+     * @param vif_name the vif through which packets should not be accepted.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int leave_all_multicast_groups(const string& if_name,
+			      const string& vif_name,
+			      string& error_msg);
+
+    /**
      * Get the IP protocol.
      *
      * @return the IP protocol.
@@ -419,7 +434,7 @@ public:
      * @return the first valid file descriptor for receiving protocol
      * messages.
      */
-    XorpFd first_valid_protocol_fd_in();
+    XorpFd first_valid_mcast_protocol_fd_in();
 
 private:
     IoIpComm(const IoIpComm&);			// Not implemented.
@@ -618,6 +633,11 @@ public:
 			      const IPvX&	group_address,
 			      string&		error_msg);
 
+    /** Leave all multicast groups on this vif */
+    int leave_all_multicast_groups(const string& if_name,
+				   const string& vif_name,
+				   string& error_msg);
+
     /**
      * Register to receive multicast forwarding related upcalls from the
      * system.
@@ -637,7 +657,7 @@ public:
     int register_system_multicast_upcall_receiver(int		family,
 						  uint8_t	ip_protocol,
 						  IoIpManager::UpcallReceiverCb receiver_cb,
-						  XorpFd&	receiver_fd,
+						  XorpFd&	mcast_receiver_fd,
 						  string&	error_msg);
 
     /**

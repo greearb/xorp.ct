@@ -308,6 +308,16 @@ Module::module_exited(bool success, bool is_signal_terminated, int term_signal,
 		break;
 	    }
 	}
+	else {
+	    // Some (all??) of these are fatal to useful working being done.
+	    if ((strstr(_name.c_str(), "ospf")) ||
+		(strstr(_name.c_str(), "fea"))) {
+		XLOG_ERROR("FATAL:  A non-restartable process: %s died...so killing rtr-mgr as well.\n",
+			   _name.c_str());
+		exit(1);
+	    }
+	}
+
 	return;
     }
 

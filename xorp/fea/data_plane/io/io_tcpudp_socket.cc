@@ -348,8 +348,8 @@ IoTcpUdpSocket::tcp_open_and_bind(const IPvX& local_addr, uint16_t local_port,
 }
 
 int
-IoTcpUdpSocket::udp_open_and_bind(const IPvX& local_addr, uint16_t local_port,
-				  string& error_msg)
+IoTcpUdpSocket::udp_open_and_bind(const IPvX& local_addr, uint16_t local_port, const string& local_dev,
+				  int reuse_addr, string& error_msg)
 {
     XLOG_ASSERT(family() == local_addr.af());
 
@@ -365,7 +365,20 @@ IoTcpUdpSocket::udp_open_and_bind(const IPvX& local_addr, uint16_t local_port,
 
 	local_addr.copy_out(local_in_addr);
 	_socket_fd = comm_bind_udp4(&local_in_addr, htons(local_port),
-				    COMM_SOCK_NONBLOCKING);
+				    COMM_SOCK_NONBLOCKING, reuse_addr);
+#ifdef SO_BINDTODEVICE
+	if (local_dev.size()) {
+	    if (setsockopt(_socket_fd, SOL_SOCKET, SO_BINDTODEVICE,
+			   local_dev.c_str(), local_dev.size() + 1)) {
+		XLOG_WARNING("ERROR:  IoTcpUdpSocket::udp_open_and_bind, setsockopt (BINDTODEVICE):  failed: %s",
+			     strerror(errno));
+	    }
+	    else {
+		XLOG_INFO("NOTE:  Successfully bound socket: %i to vif: %s\n",
+			  (int)(_socket_fd), local_dev.c_str());
+	    }
+	}
+#endif
 	break;
     }
 #ifdef HAVE_IPV6
@@ -738,6 +751,12 @@ IoTcpUdpSocket::udp_open_bind_broadcast(const string& ifname,
         ret_value = comm_set_reuseport(_socket_fd, 1);
 	if (ret_value != XORP_OK) {
 	    error_msg = c_format("Cannot enable port re-use: %s",
+				 comm_get_last_error_str());
+	    return (XORP_ERROR);
+	}
+        ret_value = comm_set_reuseaddr(_socket_fd, 1);
+	if (ret_value != XORP_OK) {
+	    error_msg = c_format("Cannot enable address re-use: %s",
 				 comm_get_last_error_str());
 	    return (XORP_ERROR);
 	}
@@ -1234,6 +1253,7 @@ IoTcpUdpSocket::send_from_multicast_if(const IPvX& group_addr,
 	struct in_addr ifaddr_in_addr;
 
 	ifaddr.copy_out(ifaddr_in_addr);
+	// TODO:  Not needed if we are binding to specific ports.
 	ret_value = comm_set_iface4(_socket_fd, &ifaddr_in_addr);
 	break;
     }

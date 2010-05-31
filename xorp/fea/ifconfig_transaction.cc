@@ -43,3 +43,9 @@ IfConfigTransactionManager::operation_result(bool success,
 	flush(_tid_exec);
     }
 }
+
+bool RemoveInterface::dispatch() {
+    if (ifconfig().remove_interface(ifname()) != XORP_OK)
+	return (false);
+    return (true);
+}

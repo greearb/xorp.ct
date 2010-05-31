@@ -302,7 +302,7 @@ class PeerManager {
     /**
      * Send (push) any queued LSAs.
      */
-    bool push_lsas(const OspfTypes::PeerID peerid);
+    bool push_lsas(const OspfTypes::PeerID peerid, const char* msg);
 
     /**
      * Get the interface ID of this peer OSPFv3 only.

@@ -65,7 +65,7 @@ public:
 
     State state() const 		{ return _st; }
 
-    int mark(State st) {
+    virtual int mark(State st) {
 	if (bits(st) > 1) {
 	    return (XORP_ERROR);
 	}
@@ -115,6 +115,35 @@ class IfTreeVif;
 class IfTreeAddr4;
 class IfTreeAddr6;
 
+
+enum IfTreeIfaceEventE {
+    IFTREE_DELETE_IFACE, // marked deleted
+    IFTREE_ERASE_IFACE //erased entirely
+};
+
+enum IfTreeVifEventE {
+    IFTREE_DELETE_VIF, // marked deleted
+    IFTREE_ERASE_VIF //erased entirely
+};
+
+/** IfTree will make these callbacks to listeners when certain actions
+ * occur.
+ */
+class IfTreeListener {
+public:
+    virtual ~IfTreeListener() { }
+
+    virtual void notifyDeletingIface(const string& ifname) = 0; // marking iface deleted
+    virtual void notifyErasingIface(const string& ifname) = 0; // erasing iface memory
+
+    // These may not be called if the parrent iface is being deleted, so
+    // alwaysclean up all VIFs in the iface handler.
+    virtual void notifyDeletingVif(const string& ifname, const string& vifname) = 0; // marking vif deleted
+    virtual void notifyErasingVif(const string& ifname, const string& vifname) = 0; // erasing vif memory
+
+    // Add more as are needed.
+};
+
 /**
  * Container class for FEA Interface objects in a system.
  */
@@ -132,7 +161,7 @@ public:
     /**
      * Default constructor.
      */
-    IfTree();
+    IfTree(const char* tree_name);
 
     /**
      * Constructor from another IfTree.
@@ -157,6 +186,17 @@ public:
      * Remove all interface state from the interface tree.
      */
     void clear();
+
+    /** Not really const, but better than having to pass non-const
+     * references to other classes.
+     */
+    void registerListener(IfTreeListener* l) const;
+
+    /** Not really const, but better than having to pass non-const
+     * references to other classes.
+     */
+    void unregisterListener(IfTreeListener* l) const;
+
 
     /**
      * Add recursively a new interface.
@@ -518,6 +558,11 @@ public:
      */
     string str() const;
 
+    const string& getName() const { return name; }
+
+    void markVifDeleted(IfTreeVif* ifp);
+    void markIfaceDeleted(IfTreeInterface* ifp);
+
 protected:
     friend class IfTreeInterface;
     friend class IfTreeVif;
@@ -527,10 +572,18 @@ protected:
     void insert_vifindex(IfTreeVif* vifp);
     void erase_vifindex(IfTreeVif* vifp);
 
+    void sendEvent(IfTreeVifEventE e, IfTreeVif* vifp);
+    void sendEvent(IfTreeIfaceEventE e, IfTreeInterface* ifp);
+
 private:
+    string name; // identifier for this tree
     IfMap	_interfaces;
     IfIndexMap	_ifindex_map;		// Map of pif_index to interface
     VifIndexMap	_vifindex_map;		// Map of pif_index to vif
+
+    // Make this mutable so that we can past const references to other classes,
+    // but still let them be listeners.
+    mutable list<IfTreeListener*> listeners;
 };
 
 
@@ -557,6 +610,17 @@ public:
 	mark(CHANGED);
 	iftree().insert_ifindex(this);
     }
+
+    virtual int mark(State st) {
+	int rv = IfTreeItem::mark(st);
+	if (st == DELETED) {
+	    set_probed_vlan(false); // need to reprobe if this ever goes un-deleted
+	}
+	return rv;
+    }
+
+    bool probed_vlan() const { return _probed_vlan; }
+    void set_probed_vlan(bool b) { _probed_vlan = b; }
 
     bool enabled() const		{ return _enabled; }
     void set_enabled(bool en)		{ _enabled = en; mark(CHANGED); }
@@ -773,6 +837,7 @@ private:
     IfTree&	_iftree;
     const string _ifname;
     uint32_t	_pif_index;
+    bool        _probed_vlan;
     bool 	_enabled;
     bool	_discard;
     bool	_unreachable;

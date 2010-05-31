@@ -94,7 +94,7 @@ public:
      * @param iftree the interface tree configuration to push.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int push_config(IfTree& iftree);
+    virtual int push_config(const IfTree& iftree);
 
 protected:
     /**
@@ -314,8 +314,8 @@ protected:
     bool	_is_running;
 
 private:
-    void push_iftree_begin(IfTree& iftree);
-    void push_iftree_end(IfTree& iftree);
+    void push_iftree_begin(const IfTree& iftree);
+    void push_iftree_end(const IfTree& iftree);
     void push_interface_begin(const IfTreeInterface* pulled_ifp,
 			      IfTreeInterface& config_iface);
     void push_interface_end(const IfTreeInterface* pulled_ifp,

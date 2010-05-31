@@ -141,8 +141,9 @@ IfConfigGetIoctl::stop(string& error_msg)
 }
 
 int
-IfConfigGetIoctl::pull_config(IfTree& iftree)
+IfConfigGetIoctl::pull_config(const IfTree* local_config, IfTree& iftree)
 {
+    UNUSED(local_config);
     return read_config(iftree);
 }
 
@@ -182,10 +183,11 @@ IfConfigGetIoctl::read_config(IfTree& iftree)
     //
     // Get the VLAN vif info
     //
+    bool modified = false;
     IfConfigVlanGet* ifconfig_vlan_get;
     ifconfig_vlan_get = fea_data_plane_manager().ifconfig_vlan_get();
     if (ifconfig_vlan_get != NULL) {
-	if (ifconfig_vlan_get->pull_config(iftree) != XORP_OK)
+	if (ifconfig_vlan_get->pull_config(iftree, modified) != XORP_OK)
 	    return (XORP_ERROR);
     }
     

@@ -97,6 +97,7 @@ public:
 
     XrlCmdError bgp_0_3_add_peer(
 	// Input values,
+	const string&	local_dev,
 	const string&	local_ip,
 	const uint32_t&	local_port,
 	const string&	peer_ip,
@@ -132,7 +133,8 @@ public:
 	const uint32_t&	local_port,
 	const string&	peer_ip,
 	const uint32_t&	peer_port,
-	const string&	new_local_ip);
+	const string&	new_local_ip,
+	const string&	new_local_dev);
 
     XrlCmdError bgp_0_3_change_local_port(
 	// Input values,

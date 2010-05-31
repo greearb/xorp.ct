@@ -45,6 +45,7 @@ IfConfigSetClick::IfConfigSetClick(FeaDataPlaneManager& fea_data_plane_manager)
     : IfConfigSet(fea_data_plane_manager),
       ClickSocket(fea_data_plane_manager.eventloop()),
       _cs_reader(*(ClickSocket *)this),
+      _iftree("click-set"),
       _kernel_click_config_generator(NULL),
       _user_click_config_generator(NULL),
       _has_kernel_click_config(false),

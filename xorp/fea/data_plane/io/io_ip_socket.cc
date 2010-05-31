@@ -164,8 +164,8 @@ static uint8_t		ra_opt6[IP6OPT_RTALERT_LEN];
 #endif // HAVE_IPV6
 
 IoIpSocket::IoIpSocket(FeaDataPlaneManager& fea_data_plane_manager,
-		       const IfTree& iftree, int family, uint8_t ip_protocol)
-    : IoIp(fea_data_plane_manager, iftree, family, ip_protocol),
+		       const IfTree& ift, int family, uint8_t ip_protocol)
+    : IoIp(fea_data_plane_manager, ift, family, ip_protocol),
       _is_ip_hdr_included(false),
       _ip_id(xorp_random())
 {
@@ -186,6 +186,8 @@ IoIpSocket::IoIpSocket(FeaDataPlaneManager& fea_data_plane_manager,
     _rcvcmsgbuf = new uint8_t[CMSG_BUF_SIZE];
     _sndcmsgbuf = new uint8_t[CMSG_BUF_SIZE];
 
+    memset(_sndcmsgbuf, 0, CMSG_BUF_SIZE);
+
     // Scatter/gatter array initialization
     _rcviov[0].iov_base		= (caddr_t)_rcvbuf;
     _rcviov[0].iov_len		= IO_BUF_SIZE;
@@ -193,6 +195,10 @@ IoIpSocket::IoIpSocket(FeaDataPlaneManager& fea_data_plane_manager,
     _sndiov[0].iov_len		= 0;
 
     // recvmsg() and sendmsg() related initialization
+
+    memset(&_rcvmh, 0, sizeof(_rcvmh));
+    memset(&_sndmh, 0, sizeof(_sndmh));
+
     switch (family) {
     case AF_INET:
 	_rcvmh.msg_name		= (caddr_t)&_from4;
@@ -220,11 +226,18 @@ IoIpSocket::IoIpSocket(FeaDataPlaneManager& fea_data_plane_manager,
     _sndmh.msg_control		= (caddr_t)_sndcmsgbuf;
     _rcvmh.msg_controllen	= CMSG_BUF_SIZE;
     _sndmh.msg_controllen	= 0;
+
+    XLOG_WARNING("Registering with iftree: %s\n", iftree().getName().c_str());
+    // Register interest in interface deletions.
+    iftree().registerListener(this);
 }
 
 IoIpSocket::~IoIpSocket()
 {
     string error_msg;
+
+    // Register interest in interface deletions.
+    iftree().unregisterListener(this);
 
     if (stop(error_msg) != XORP_OK) {
 	XLOG_ERROR("Cannot stop the I/O IP raw socket mechanism: %s",
@@ -439,26 +452,37 @@ IoIpSocket::join_multicast_group(const string& if_name,
 				 string& error_msg)
 {
     const IfTreeVif* vifp;
+    XorpFd* _proto_socket_in = NULL;
 
     // Find the vif
     vifp = iftree().find_vif(if_name, vif_name);
     if (vifp == NULL) {
-	error_msg = c_format("Joining multicast group %s failed: "
+	error_msg += c_format("Joining multicast group %s failed: "
 			     "interface %s vif %s not found",
 			     cstring(group),
 			     if_name.c_str(),
 			     vif_name.c_str());
-	return (XORP_ERROR);
+	goto out_err;
+    }
+
+    _proto_socket_in = findOrCreateInputSocket(if_name, vif_name, error_msg);
+
+    if (! _proto_socket_in) {
+	string em = c_format("ERROR:  Could not find or create input socket, if_name: %s  vif_name: %s  error_msg: %s",
+			     if_name.c_str(), vif_name.c_str(), error_msg.c_str());
+	XLOG_WARNING("%s", em.c_str());
+	error_msg += em;
+	goto out_err;
     }
     
 #if 0	// TODO: enable or disable the enabled() check?
     if (! vifp->enabled()) {
-	error_msg = c_format("Cannot join group %s on interface %s vif %s: "
+	error_msg += c_format("Cannot join group %s on interface %s vif %s: "
 			     "interface/vif is DOWN",
 			     cstring(group),
 			     if_name.c_str(),
 			     vif_name.c_str());
-	return (XORP_ERROR);
+	goto out_err;
     }
 #endif // 0/1
     
@@ -471,12 +495,12 @@ IoIpSocket::join_multicast_group(const string& if_name,
 	// Find the first address
 	IfTreeVif::IPv4Map::const_iterator ai = vifp->ipv4addrs().begin();
 	if (ai == vifp->ipv4addrs().end()) {
-	    error_msg = c_format("Cannot join group %s on interface %s vif %s: "
+	    error_msg += c_format("Cannot join group %s on interface %s vif %s: "
 				 "interface/vif has no address",
 				 cstring(group),
 				 if_name.c_str(),
 				 vif_name.c_str());
-	    return (XORP_ERROR);
+	    goto out_err;
 	}
 	const IfTreeAddr4& fa = *(ai->second);
 	
@@ -484,14 +508,19 @@ IoIpSocket::join_multicast_group(const string& if_name,
 	group.copy_out(mreq.imr_multiaddr);
 	mreq.imr_interface.s_addr = in_addr.s_addr;
 
-	if (setsockopt(_proto_socket_in, IPPROTO_IP, IP_ADD_MEMBERSHIP,
+	if (setsockopt(*_proto_socket_in, IPPROTO_IP, IP_ADD_MEMBERSHIP,
 		       XORP_SOCKOPT_CAST(&mreq), sizeof(mreq)) < 0) {
-	    error_msg = c_format("Cannot join group %s on interface %s vif %s: %s",
+	    error_msg += c_format("Cannot join group %s on interface %s vif %s: %s",
 				 cstring(group),
 				 if_name.c_str(),
 				 vif_name.c_str(),
 				 strerror(errno));
-	    return (XORP_ERROR);
+	    goto out_err;
+	}
+	else {
+	    XLOG_INFO("Joined IPv4 group: %s on interface %s vif %s  socket: %i",
+		      cstring(group), if_name.c_str(), vif_name.c_str(),
+		      (int)(*_proto_socket_in));
 	}
     }
     break;
@@ -500,22 +529,27 @@ IoIpSocket::join_multicast_group(const string& if_name,
     case AF_INET6:
     {
 #ifndef HAVE_IPV6_MULTICAST
-	error_msg = c_format("join_multicast_group() failed: "
+	error_msg += c_format("join_multicast_group() failed: "
 			     "IPv6 multicast not supported");
-	return (XORP_ERROR);
+	goto out_err;
 #else
 	struct ipv6_mreq mreq6;
 	
 	group.copy_out(mreq6.ipv6mr_multiaddr);
 	mreq6.ipv6mr_interface = vifp->pif_index();
-	if (setsockopt(_proto_socket_in, IPPROTO_IPV6, IPV6_JOIN_GROUP,
+	if (setsockopt(*_proto_socket_in, IPPROTO_IPV6, IPV6_JOIN_GROUP,
 		       XORP_SOCKOPT_CAST(&mreq6), sizeof(mreq6)) < 0) {
-	    error_msg = c_format("Cannot join group %s on interface %s vif %s: %s",
+	    error_msg += c_format("Cannot join group %s on interface %s vif %s: %s",
 				 cstring(group),
 				 if_name.c_str(),
 				 vif_name.c_str(),
 				 strerror(errno));
-	    return (XORP_ERROR);
+	    goto out_err;
+	}
+	else {
+	    XLOG_INFO("Joined IPv6 group: %s on interface %s vif %s  socket: %i",
+		      cstring(group), if_name.c_str(), vif_name.c_str(),
+		      (int)(*_proto_socket_in));
 	}
 #endif // HAVE_IPV6_MULTICAST
     }
@@ -524,12 +558,73 @@ IoIpSocket::join_multicast_group(const string& if_name,
     
     default:
 	XLOG_UNREACHABLE();
-	error_msg = c_format("Invalid address family %d", family());
-	return (XORP_ERROR);
+	error_msg += c_format("Invalid address family %d", family());
+	goto out_err;
     }
     
     return (XORP_OK);
+
+  out_err:
+    if (error_msg.size()) {
+	XLOG_ERROR("ERROR in join_multicast_group: %s", error_msg.c_str());
+    }
+    return XORP_ERROR;
 }
+
+
+XorpFd* IoIpSocket::mcast_protocol_fd_in() {
+#ifdef USE_SOCKET_PER_IFACE
+    if (! _mcast_proto_socket_in.is_valid()) {
+	// Try to open the socket.
+	_mcast_proto_socket_in = socket(family(), SOCK_RAW, ip_protocol());
+	if (!_mcast_proto_socket_in.is_valid()) {
+	    char *errstr;
+
+#ifdef HAVE_STRERROR
+	    errstr = strerror(errno);
+#else
+	    errstr = "unknown error";
+#endif
+	    XLOG_WARNING("Cannot open multicast IP protocol %u raw socket: %s",
+				 ip_protocol(), errstr);
+	}
+	else {
+	    string err_msg;
+	    initializeInputSocket(&_mcast_proto_socket_in, err_msg);
+	    if (err_msg.size()) {
+		XLOG_WARNING("%s", err_msg.c_str());
+	    }
+	}
+    }
+    return &_mcast_proto_socket_in;
+#else
+    string nll;
+    // Just grabs first and only socket when USE_SOCKET_PER_IFACE is not defined.
+    return findExistingInputSocket(nll, nll);
+#endif
+}
+
+
+XorpFd* IoIpSocket::findExistingInputSocket(const string& if_name, const string& vif_name) {
+#ifdef USE_SOCKET_PER_IFACE
+    string k(if_name);
+    k += " ";
+    k += vif_name;
+    map<string, XorpFd*>::iterator i = _proto_sockets_in.find(k);
+#else
+    UNUSED(if_name);
+    UNUSED(vif_name);
+    map<string, XorpFd*>::iterator i = _proto_sockets_in.begin();
+#endif
+    if (i == _proto_sockets_in.end()) {
+	return NULL;
+    }
+    else {
+	return i->second;
+    }
+    
+}
+
 
 int
 IoIpSocket::leave_multicast_group(const string& if_name,
@@ -542,18 +637,28 @@ IoIpSocket::leave_multicast_group(const string& if_name,
     // Find the vif
     vifp = iftree().find_vif(if_name, vif_name);
     if (vifp == NULL) {
-	error_msg = c_format("Leaving multicast group %s failed: "
-			     "interface %s vif %s not found",
+	error_msg += c_format("Leaving multicast group %s failed: "
+			     "interface %s vif %s not found\n",
 			     cstring(group),
 			     if_name.c_str(),
 			     vif_name.c_str());
 	return (XORP_ERROR);
     }
+
+    XorpFd* _proto_socket_in = findExistingInputSocket(if_name, vif_name);
+    if (!_proto_socket_in) {
+	error_msg += c_format("Leaving multicast group %s failed: "
+			     "interface %s vif %s does not have a socket assigned.\n",
+			      cstring(group),
+			      if_name.c_str(),
+			      vif_name.c_str());
+	return (XORP_ERROR);
+    }
     
 #if 0	// TODO: enable or disable the enabled() check?
     if (! vifp->enabled()) {
-	error_msg = c_format("Cannot leave group %s on interface %s vif %s: "
-			     "interface/vif is DOWN",
+	error_msg += c_format("Cannot leave group %s on interface %s vif %s: "
+			     "interface/vif is DOWN\n",
 			     cstring(group),
 			     if_name.c_str(),
 			     vif_name.c_str());
@@ -570,8 +675,8 @@ IoIpSocket::leave_multicast_group(const string& if_name,
 	// Find the first address
 	IfTreeVif::IPv4Map::const_iterator ai = vifp->ipv4addrs().begin();
 	if (ai == vifp->ipv4addrs().end()) {
-	    error_msg = c_format("Cannot leave group %s on interface %s vif %s: "
-				 "interface/vif has no address",
+	    error_msg += c_format("Cannot leave group %s on interface %s vif %s: "
+				 "interface/vif has no address\n",
 				 cstring(group),
 				 if_name.c_str(),
 				 vif_name.c_str());
@@ -582,14 +687,19 @@ IoIpSocket::leave_multicast_group(const string& if_name,
 	fa.addr().copy_out(in_addr);
 	group.copy_out(mreq.imr_multiaddr);
 	mreq.imr_interface.s_addr = in_addr.s_addr;
-	if (setsockopt(_proto_socket_in, IPPROTO_IP, IP_DROP_MEMBERSHIP,
+	if (setsockopt(*_proto_socket_in, IPPROTO_IP, IP_DROP_MEMBERSHIP,
 		       XORP_SOCKOPT_CAST(&mreq), sizeof(mreq)) < 0) {
-	    error_msg = c_format("Cannot leave group %s on interface %s vif %s: %s",
+	    error_msg += c_format("Cannot leave group %s on interface %s vif %s socket: %i: %s\n",
 				 cstring(group),
 				 if_name.c_str(),
-				 vif_name.c_str(),
+				  vif_name.c_str(), (int)(*_proto_socket_in),
 				 strerror(errno));
 	    return (XORP_ERROR);
+	}
+	else {
+	    XLOG_INFO("Left group: %s on interface %s vif %s socket: %i",
+		      cstring(group), if_name.c_str(), vif_name.c_str(),
+		      (int)(*_proto_socket_in));
 	}
     }
     break;
@@ -598,20 +708,20 @@ IoIpSocket::leave_multicast_group(const string& if_name,
     case AF_INET6:
     {
 #ifndef HAVE_IPV6_MULTICAST
-	error_msg = c_format("leave_multicast_group() failed: "
-			     "IPv6 multicast not supported");
+	error_msg += c_format("leave_multicast_group() failed: "
+			     "IPv6 multicast not supported\n");
 	return (XORP_ERROR);
 #else
 	struct ipv6_mreq mreq6;
 	
 	group.copy_out(mreq6.ipv6mr_multiaddr);
 	mreq6.ipv6mr_interface = vifp->pif_index();
-	if (setsockopt(_proto_socket_in, IPPROTO_IPV6, IPV6_LEAVE_GROUP,
+	if (setsockopt(*_proto_socket_in, IPPROTO_IPV6, IPV6_LEAVE_GROUP,
 		       XORP_SOCKOPT_CAST(&mreq6), sizeof(mreq6)) < 0) {
-	    error_msg = c_format("Cannot leave group %s on interface %s vif %s: %s",
+	    error_msg += c_format("Cannot leave V6 group %s on interface %s vif %s  socket: %i: %s\n",
 				 cstring(group),
 				 if_name.c_str(),
-				 vif_name.c_str(),
+				  vif_name.c_str(), (int)(*_proto_socket_in),
 				 strerror(errno));
 	    return (XORP_ERROR);
 	}
@@ -622,25 +732,27 @@ IoIpSocket::leave_multicast_group(const string& if_name,
     
     default:
 	XLOG_UNREACHABLE();
-	error_msg = c_format("Invalid address family %d", family());
+	error_msg += c_format("Invalid address family %d\n", family());
 	return (XORP_ERROR);
     }
     
     return (XORP_OK);
 }
 
-int
-IoIpSocket::open_proto_sockets(string& error_msg)
-{
-    string dummy_error_msg;
 
-    if (_proto_socket_in.is_valid() && _proto_socket_out.is_valid())
-	return (XORP_OK);
-    
-    // If necessary, open the protocol sockets
-    if (! _proto_socket_in.is_valid()) {
-	_proto_socket_in = socket(family(), SOCK_RAW, ip_protocol());
-	if (!_proto_socket_in.is_valid()) {
+XorpFd* IoIpSocket::findOrCreateInputSocket(const string& if_name, const string& vif_name,
+					    string& error_msg) {
+    XorpFd* rv = findExistingInputSocket(if_name, vif_name);
+
+    string key(if_name);
+    key += " ";
+    key += vif_name;
+
+    if (!rv) {
+	// Create a new one
+	rv = new XorpFd();
+	*rv = socket(family(), SOCK_RAW, ip_protocol());
+	if (!rv->is_valid()) {
 	    char *errstr;
 
 #ifdef HAVE_STRERROR
@@ -648,70 +760,68 @@ IoIpSocket::open_proto_sockets(string& error_msg)
 #else
 	    errstr = "unknown error";
 #endif
-	    error_msg = c_format("Cannot open IP protocol %u raw socket: %s",
-				 ip_protocol(), errstr);
-	    return (XORP_ERROR);
+	    error_msg += c_format("Cannot open IP protocol %u raw socket: %s",
+				  ip_protocol(), errstr);
+	    delete rv;
+	    return NULL;
 	}
-    }
+	else {
+	    _proto_sockets_in[key] = rv;
+	}
 
-    if (! _proto_socket_out.is_valid()) {
-	_proto_socket_out = socket(family(), SOCK_RAW, ip_protocol());
-	if (!_proto_socket_out.is_valid()) {
-	    char *errstr;
+	int rslt = initializeInputSocket(rv, error_msg);
+	if (rslt != XORP_OK) {
+	    _proto_sockets_in.erase(key);
+	    cleanupXorpFd(rv);
+	    return NULL;
+	}
 
+	// Bind to a particular interface.
+#ifdef USE_SOCKET_PER_IFACE
+#ifdef SO_BINDTODEVICE
+	if (setsockopt(*rv, SOL_SOCKET, SO_BINDTODEVICE,
+		       vif_name.c_str(), vif_name.size() + 1)) {
+	    error_msg += c_format("ERROR:  IoIpSocket::open_proto_socket, setsockopt (BINDTODEVICE):  failed: %s",
 #ifdef HAVE_STRERROR
-	    errstr = strerror(errno);
+				  strerror(errno)
 #else
-	    errstr = "unknown error";
-#endif
-	    error_msg = c_format("Cannot open IP protocol %u raw socket: %s",
-				 ip_protocol(), errstr);
-	    return (XORP_ERROR);
+				  "unknown error"
+#endif 
+		);
 	}
+	else {
+	    XLOG_INFO("Successfully bound socket: %i to interface: %s  input sockets size: %i\n",
+		      (int)(*rv), vif_name.c_str(), (int)(_proto_sockets_in.size()));
+	}
+#endif
+#endif
     }
 
+    return rv;
+}
+
+
+int IoIpSocket::initializeInputSocket(XorpFd* rv, string& error_msg) {
     //
     // Set various socket options
     //
 
     // Lots of input buffering
-    if (comm_sock_set_rcvbuf(_proto_socket_in, SO_RCV_BUF_SIZE_MAX,
+    if (comm_sock_set_rcvbuf(*rv, SO_RCV_BUF_SIZE_MAX,
 			     SO_RCV_BUF_SIZE_MIN)
 	< SO_RCV_BUF_SIZE_MIN) {
-	error_msg = c_format("Cannot set the receiver buffer size: %s",
-			     comm_get_last_error_str());
-	close_proto_sockets(dummy_error_msg);
-	return (XORP_ERROR);
+	error_msg += c_format("Cannot set the receiver buffer size: %s",
+			      comm_get_last_error_str());
+	// doesn't seem fatal....continue on.
+	//close_proto_sockets(error_msg);
+	//return (XORP_ERROR);
     }
-    // Lots of output buffering
-    if (comm_sock_set_sndbuf(_proto_socket_out, SO_SND_BUF_SIZE_MAX,
-			     SO_SND_BUF_SIZE_MIN)
-	< SO_SND_BUF_SIZE_MIN) {
-	error_msg = c_format("Cannot set the sender buffer size: %s",
-			     comm_get_last_error_str());
-	close_proto_sockets(dummy_error_msg);
-	return (XORP_ERROR);
-    }
-    // Include IP header when sending (XXX: doesn't do anything for IPv6)
-    if (enable_ip_hdr_include(true, error_msg) != XORP_OK) {
-	close_proto_sockets(dummy_error_msg);
-	return (XORP_ERROR);
-    }
+
     // Show interest in receiving information from IP header
-    if (enable_recv_pktinfo(true, error_msg) != XORP_OK) {
-	close_proto_sockets(dummy_error_msg);
-	return (XORP_ERROR);
+    if (enable_recv_pktinfo(rv, true, error_msg) != XORP_OK) {
+	return XORP_ERROR;
     }
-    // Restrict multicast TTL
-    if (set_multicast_ttl(MINTTL, error_msg) != XORP_OK) {
-	close_proto_sockets(dummy_error_msg);
-	return (XORP_ERROR);
-    }
-    // Disable mcast loopback
-    if (enable_multicast_loopback(false, error_msg) != XORP_OK) {
-	close_proto_sockets(dummy_error_msg);
-	return (XORP_ERROR);
-    }
+
     // Protocol-specific setup
     switch (family()) {
     case AF_INET:
@@ -741,12 +851,11 @@ IoIpSocket::open_proto_sockets(string& error_msg)
 	    }
 #endif // 0
 #endif // HAVE_IPV6_MULTICAST_ROUTING
-	    if (setsockopt(_proto_socket_in, ip_protocol(), ICMP6_FILTER,
+	    if (setsockopt(*rv, ip_protocol(), ICMP6_FILTER,
 			   XORP_SOCKOPT_CAST(&filter), sizeof(filter)) < 0) {
-		close_proto_sockets(dummy_error_msg);
-		error_msg = c_format("setsockopt(ICMP6_FILTER) failed: %s",
-				     strerror(errno));
-		return (XORP_ERROR);
+		error_msg += c_format("setsockopt(ICMP6_FILTER) failed: %s",
+				      strerror(errno));
+		return XORP_ERROR;
 	    }
 	}
     }
@@ -754,18 +863,80 @@ IoIpSocket::open_proto_sockets(string& error_msg)
 #endif // HAVE_IPV6
     default:
 	XLOG_UNREACHABLE();
-	error_msg = c_format("Invalid address family %d", family());
-	return (XORP_ERROR);
+	error_msg += c_format("Invalid address family %d", family());
+	return XORP_ERROR;
     }
 
     // Assign a method to read from this socket
-    if (eventloop().add_ioevent_cb(_proto_socket_in, IOT_READ,
+    if (eventloop().add_ioevent_cb(*rv, IOT_READ,
 				   callback(this,
 					    &IoIpSocket::proto_socket_read))
 	== false) {
+	error_msg += c_format("Cannot add protocol socket: %i to the set of "
+			      "sockets to read from in the event loop", (int)(*rv));
+	return XORP_ERROR;
+    }
+
+    return XORP_OK;
+}//initializeInputSocket
+
+
+int
+IoIpSocket::open_proto_sockets(string& error_msg)
+{
+    string dummy_error_msg;
+
+    // We will open input sockets as interfaces are registered (due to listening for mcast addrs)
+    if (_proto_socket_out.is_valid())
+	return (XORP_OK);
+    
+    if (! _proto_socket_out.is_valid()) {
+	_proto_socket_out = socket(family(), SOCK_RAW, ip_protocol());
+	if (!_proto_socket_out.is_valid()) {
+	    char *errstr;
+
+#ifdef HAVE_STRERROR
+	    errstr = strerror(errno);
+#else
+	    errstr = "unknown error";
+#endif
+	    error_msg = c_format("Cannot open IP protocol %u raw socket: %s",
+				 ip_protocol(), errstr);
+	    return (XORP_ERROR);
+	}
+    }
+
+    //
+    // Set various socket options
+    //
+
+    // Lots of output buffering
+    if (comm_sock_set_sndbuf(_proto_socket_out, SO_SND_BUF_SIZE_MAX,
+			     SO_SND_BUF_SIZE_MIN)
+	< SO_SND_BUF_SIZE_MIN) {
+	error_msg = c_format("Cannot set the sender buffer size: %s",
+			     comm_get_last_error_str());
 	close_proto_sockets(dummy_error_msg);
-	error_msg = c_format("Cannot add a protocol socket to the set of "
-			     "sockets to read from in the event loop");
+	return (XORP_ERROR);
+    }
+
+    // Very small input buffering, as we never read this, but don't fail if
+    // we can't...it just wastes a bit of memory.
+    comm_sock_set_rcvbuf(_proto_socket_out, 2000, 2000);
+
+    // Include IP header when sending (XXX: doesn't do anything for IPv6)
+    if (enable_ip_hdr_include(true, error_msg) != XORP_OK) {
+	close_proto_sockets(dummy_error_msg);
+	return (XORP_ERROR);
+    }
+    // Restrict multicast TTL
+    if (set_multicast_ttl(MINTTL, error_msg) != XORP_OK) {
+	close_proto_sockets(dummy_error_msg);
+	return (XORP_ERROR);
+    }
+    // Disable mcast loopback
+    if (enable_multicast_loopback(false, error_msg) != XORP_OK) {
+	close_proto_sockets(dummy_error_msg);
 	return (XORP_ERROR);
     }
 
@@ -785,19 +956,40 @@ IoIpSocket::close_proto_sockets(string& error_msg)
 	_proto_socket_out.clear();
     }
 
+#ifdef USE_SOCKET_PER_IFACE
+    if (_mcast_proto_socket_in.is_valid()) {
+	comm_close(_mcast_proto_socket_in);
+	_mcast_proto_socket_in.clear();
+    }
+#endif
+
+    map<string, XorpFd*>::iterator i;
+    for (i = _proto_sockets_in.begin(); i != _proto_sockets_in.end(); i++) {
+    
+	XorpFd* fd = i->second;
+
+	cleanupXorpFd(fd);
+    }
+    _proto_sockets_in.clear();
+
+    return (XORP_OK);
+}
+
+int IoIpSocket::cleanupXorpFd(XorpFd* fd) {
     //
     // Close the incoming protocol socket
     //
-    if (_proto_socket_in.is_valid()) {
+    if (fd->is_valid()) {
 	// Remove it just in case, even though it may not be select()-ed
-	eventloop().remove_ioevent_cb(_proto_socket_in);
+	eventloop().remove_ioevent_cb(*fd);
 
-	comm_close(_proto_socket_in);
-	_proto_socket_in.clear();
+	comm_close(*fd);
+	fd->clear();
     }
-    
-    return (XORP_OK);
+    delete fd;
+    return XORP_OK;
 }
+
 
 int
 IoIpSocket::enable_ip_hdr_include(bool is_enabled, string& error_msg)
@@ -838,7 +1030,7 @@ IoIpSocket::enable_ip_hdr_include(bool is_enabled, string& error_msg)
 }
 
 int
-IoIpSocket::enable_recv_pktinfo(bool is_enabled, string& error_msg)
+IoIpSocket::enable_recv_pktinfo(XorpFd* input_fd, bool is_enabled, string& error_msg)
 {
     switch (family()) {
     case AF_INET:
@@ -851,7 +1043,7 @@ IoIpSocket::enable_recv_pktinfo(bool is_enabled, string& error_msg)
 	//
 #ifdef IP_RECVIF
 	// XXX: BSD
-	if (setsockopt(_proto_socket_in, IPPROTO_IP, IP_RECVIF,
+	if (setsockopt(*input_fd, IPPROTO_IP, IP_RECVIF,
 		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	    XLOG_ERROR("setsockopt(IP_RECVIF, %u) failed: %s",
 		       bool_flag, strerror(errno));
@@ -861,7 +1053,7 @@ IoIpSocket::enable_recv_pktinfo(bool is_enabled, string& error_msg)
 
 #ifdef IP_PKTINFO
 	// XXX: Linux
-	if (setsockopt(_proto_socket_in, IPPROTO_IP, IP_PKTINFO,
+	if (setsockopt(*input_fd, IPPROTO_IP, IP_PKTINFO,
 		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	    XLOG_ERROR("setsockopt(IP_PKTINFO, %u) failed: %s",
 		       bool_flag, strerror(errno));
@@ -884,7 +1076,7 @@ IoIpSocket::enable_recv_pktinfo(bool is_enabled, string& error_msg)
 	//
 #ifdef IPV6_RECVPKTINFO
 	// The new option (applies to receiving only)
-	if (setsockopt(_proto_socket_in, IPPROTO_IPV6, IPV6_RECVPKTINFO,
+	if (setsockopt(*input_fd, IPPROTO_IPV6, IPV6_RECVPKTINFO,
 		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	    error_msg = c_format("setsockopt(IPV6_RECVPKTINFO, %u) failed: %s",
 				 bool_flag, strerror(errno));
@@ -892,7 +1084,7 @@ IoIpSocket::enable_recv_pktinfo(bool is_enabled, string& error_msg)
 	}
 #else
 	// The old option (see RFC-2292)
-	if (setsockopt(_proto_socket_in, IPPROTO_IPV6, IPV6_PKTINFO,
+	if (setsockopt(*input_fd, IPPROTO_IPV6, IPV6_PKTINFO,
 		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	    error_msg = c_format("setsockopt(IPV6_PKTINFO, %u) failed: %s",
 				 bool_flag, strerror(errno));
@@ -904,14 +1096,14 @@ IoIpSocket::enable_recv_pktinfo(bool is_enabled, string& error_msg)
 	// Hop-limit field
 	//
 #ifdef IPV6_RECVHOPLIMIT
-	if (setsockopt(_proto_socket_in, IPPROTO_IPV6, IPV6_RECVHOPLIMIT,
+	if (setsockopt(*input_fd, IPPROTO_IPV6, IPV6_RECVHOPLIMIT,
 		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	    error_msg = c_format("setsockopt(IPV6_RECVHOPLIMIT, %u) failed: %s",
 				 bool_flag, strerror(errno));
 	    return (XORP_ERROR);
 	}
 #else
-	if (setsockopt(_proto_socket_in, IPPROTO_IPV6, IPV6_HOPLIMIT,
+	if (setsockopt(*input_fd, IPPROTO_IPV6, IPV6_HOPLIMIT,
 		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	    error_msg = c_format("setsockopt(IPV6_HOPLIMIT, %u) failed: %s",
 				 bool_flag, strerror(errno));
@@ -923,7 +1115,7 @@ IoIpSocket::enable_recv_pktinfo(bool is_enabled, string& error_msg)
 	// Traffic class value
 	//
 #ifdef IPV6_RECVTCLASS
-	if (setsockopt(_proto_socket_in, IPPROTO_IPV6, IPV6_RECVTCLASS,
+	if (setsockopt(*input_fd, IPPROTO_IPV6, IPV6_RECVTCLASS,
 		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	    error_msg = c_format("setsockopt(IPV6_RECVTCLASS, %u) failed: %s",
 				 bool_flag, strerror(errno));
@@ -935,14 +1127,14 @@ IoIpSocket::enable_recv_pktinfo(bool is_enabled, string& error_msg)
 	// Hop-by-hop options
 	//
 #ifdef IPV6_RECVHOPOPTS
-	if (setsockopt(_proto_socket_in, IPPROTO_IPV6, IPV6_RECVHOPOPTS,
+	if (setsockopt(*input_fd, IPPROTO_IPV6, IPV6_RECVHOPOPTS,
 		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	    error_msg = c_format("setsockopt(IPV6_RECVHOPOPTS, %u) failed: %s",
 				 bool_flag, strerror(errno));
 	    return (XORP_ERROR);
 	}
 #else
-	if (setsockopt(_proto_socket_in, IPPROTO_IPV6, IPV6_HOPOPTS,
+	if (setsockopt(*input_fd, IPPROTO_IPV6, IPV6_HOPOPTS,
 		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	    error_msg = c_format("setsockopt(IPV6_HOPOPTS, %u) failed: %s",
 				 bool_flag, strerror(errno));
@@ -954,14 +1146,14 @@ IoIpSocket::enable_recv_pktinfo(bool is_enabled, string& error_msg)
 	// Routing header options
 	//
 #ifdef IPV6_RECVRTHDR
-	if (setsockopt(_proto_socket_in, IPPROTO_IPV6, IPV6_RECVRTHDR,
+	if (setsockopt(*input_fd, IPPROTO_IPV6, IPV6_RECVRTHDR,
 		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	    error_msg = c_format("setsockopt(IPV6_RECVRTHDR, %u) failed: %s",
 				 bool_flag, strerror(errno));
 	    return (XORP_ERROR);
 	}
 #else
-	if (setsockopt(_proto_socket_in, IPPROTO_IPV6, IPV6_RTHDR,
+	if (setsockopt(*input_fd, IPPROTO_IPV6, IPV6_RTHDR,
 		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	    error_msg = c_format("setsockopt(IPV6_RTHDR, %u) failed: %s",
 				 bool_flag, strerror(errno));
@@ -973,14 +1165,14 @@ IoIpSocket::enable_recv_pktinfo(bool is_enabled, string& error_msg)
 	// Destination options
 	//
 #ifdef IPV6_RECVDSTOPTS
-	if (setsockopt(_proto_socket_in, IPPROTO_IPV6, IPV6_RECVDSTOPTS,
+	if (setsockopt(*input_fd, IPPROTO_IPV6, IPV6_RECVDSTOPTS,
 		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	    error_msg = c_format("setsockopt(IPV6_RECVDSTOPTS, %u) failed: %s",
 				 bool_flag, strerror(errno));
 	    return (XORP_ERROR);
 	}
 #else
-	if (setsockopt(_proto_socket_in, IPPROTO_IPV6, IPV6_DSTOPTS,
+	if (setsockopt(*input_fd, IPPROTO_IPV6, IPV6_DSTOPTS,
 		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	    error_msg = c_format("setsockopt(IPV6_DSTOPTS, %u) failed: %s",
 				 bool_flag, strerror(errno));
@@ -999,6 +1191,66 @@ IoIpSocket::enable_recv_pktinfo(bool is_enabled, string& error_msg)
     
     return (XORP_OK);
 }
+
+
+void IoIpSocket::notifyDeletingIface(const string& ifname) {
+// Only clean up here if we are using multiple input sockets.
+    XLOG_INFO("IoIpSocket::notifyDeletingIface: %s\n", ifname.c_str());
+
+#ifdef USE_SOCKET_PER_IFACE
+    const IfTreeInterface* ifp = iftree().find_interface(ifname);
+    if (ifp) {
+	for (IfTreeInterface::VifMap::const_iterator i = ifp->vifs().begin(); i != ifp->vifs().end(); i++) {
+	    string ifn = i->second->ifname();
+	    string vn = i->second->vifname();
+	    XorpFd* fd = findExistingInputSocket(ifn, vn);
+	    if (fd) {
+		string key(ifn);
+		key += " ";
+		key += vn;
+		int _fd = (int)(*fd);
+		UNUSED(_fd); // in case XLOG_INFO is compiled out.
+
+		_proto_sockets_in.erase(key);
+		cleanupXorpFd(fd);
+
+		XLOG_INFO("Closed socket: %i on interface: %s:%s because its interface is being deleted, input sockets count: %i\n",
+			  _fd, ifn.c_str(), vn.c_str(), (int)(_proto_sockets_in.size()));
+
+	    }
+	}
+    }
+#else
+    UNUSED(ifname);
+#endif
+}
+
+void IoIpSocket::notifyDeletingVif(const string& ifn, const string& vn) {
+// Only clean up here if we are using multiple input sockets.
+    XLOG_INFO("IoIpSocket::notifyDeletingVif: %s:%s\n", ifn.c_str(), vn.c_str());
+
+#ifdef USE_SOCKET_PER_IFACE
+    XorpFd* fd = findExistingInputSocket(ifn, vn);
+    if (fd) {
+	string key(ifn);
+	key += " ";
+	key += vn;
+	int _fd = (int)(*fd);
+	UNUSED(_fd); // in case XLOG_INFO is compiled out.
+
+	_proto_sockets_in.erase(key);
+	cleanupXorpFd(fd);
+	
+	XLOG_INFO("Closed socket: %i on interface: %s:%s because it is being deleted, input sockets count: %i\n",
+		  _fd, ifn.c_str(), vn.c_str(), (int)(_proto_sockets_in.size()));
+	
+    }
+#else
+    UNUSED(ifn);
+    UNUSED(vn);
+#endif
+}
+
 
 void
 IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
@@ -1045,12 +1297,12 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
     }
    
     // Read from the socket
-    nbytes = recvmsg(_proto_socket_in, &_rcvmh, 0);
+    nbytes = recvmsg(fd, &_rcvmh, 0);
     if (nbytes < 0) {
 	if (errno == EINTR)
 	    return;		// OK: restart receiving
 	XLOG_ERROR("recvmsg() on socket %s failed: %s",
-		   _proto_socket_in.str().c_str(), strerror(errno));
+		   fd.str().c_str(), strerror(errno));
 	return;			// Error
     }
 
@@ -1521,10 +1773,28 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
     
     if ((ifp == NULL) || (vifp == NULL)) {
 	// No vif found. Ignore this packet.
-	XLOG_WARNING("proto_socket_read() failed: "
-		     "RX packet from %s to %s pif_index %u: no vif found",
-		     cstring(src_address), cstring(dst_address), pif_index);
-	return;			// Error
+#ifdef USE_SOCKET_PER_IFACE
+	// For multicast packets, there seems no good way to filter
+	// currently, so we just have to ignore them here.  Ignoring
+	// this error message to decrease spammage if dest is mcast.
+	if (!dst_address.is_multicast()) {
+	    // Don't expect this to happen, so log all errors.
+	    XLOG_WARNING("proto_socket_read() failed: "
+			 "RX packet from %s to %s pif_index %u: no vif found",
+			 cstring(src_address), cstring(dst_address), pif_index);
+	}
+#else
+	// On a multi-port system, one can rx pkts for devices not in use by this system,
+	// so don't print the error messages so often.
+	static int bad_vifs = 0;
+	if ((bad_vifs++ % 1000) == 0) {
+	    XLOG_WARNING("proto_socket_read(), total bad_vifs: %i: "
+			 "RX packets from %s to %s pif_index %u: no vif found",
+			 bad_vifs, cstring(src_address), cstring(dst_address),
+			 pif_index);
+	}
+#endif
+	return;// Error
     }
     if (! (ifp->enabled() || vifp->enabled())) {
 	// This vif is down. Silently ignore this packet.
@@ -1576,13 +1846,15 @@ IoIpSocket::send_packet(const string& if_name,
 
     XLOG_ASSERT(ext_headers_type.size() == ext_headers_payload.size());
 
+    _sndmh.msg_flags = 0; // Initialize flags to zero
+
     // Initialize state that might be modified later
     _sndmh.msg_control = (caddr_t)_sndcmsgbuf;
     _sndmh.msg_controllen = 0;
 
     ifp = iftree().find_interface(if_name);
     if (ifp == NULL) {
-	error_msg = c_format("No interface %s", if_name.c_str());
+	error_msg = c_format("No interface %s in tree: %s", if_name.c_str(), iftree().getName().c_str());
 	return (XORP_ERROR);
     }
     vifp = ifp->find_vif(vif_name);
@@ -1736,6 +2008,7 @@ IoIpSocket::send_packet(const string& if_name,
 	    if (enable_ip_hdr_include(do_ip_hdr_include, error_msg)
 		!= XORP_OK) {
 		XLOG_ERROR("%s", error_msg.c_str());
+		assert(error_msg.size());
 		return (XORP_ERROR);
 	    }
 	}
@@ -1803,11 +2076,45 @@ IoIpSocket::send_packet(const string& if_name,
 	    memcpy(_sndbuf, &payload[0], payload.size()); // XXX: _sndiov[0].iov_base
 	    _sndiov[0].iov_len = payload.size();
 
+	    // Not using aux data, so zero that out.
+	    // This used to be done in the proto_socket_transmit code.
+	    _sndmh.msg_controllen = 0;
+
 	    // Transmit the packet
 	    ret_value = proto_socket_transmit(ifp, vifp,
 					      src_address, dst_address,
 					      error_msg);
 	    break;
+	}
+	else {
+            // NOTE:  BSD doesn't seem to support in_pktinfo...not sure if this needs
+            //     a work-around or not. --Ben
+#ifdef IP_PKTINFO
+	    int ctllen = 0;
+	    struct cmsghdr *cmsgp;
+	    struct in_pktinfo *sndpktinfo;
+	
+	    ctllen = CMSG_SPACE(sizeof(struct in_pktinfo));
+	
+	    XLOG_ASSERT(ctllen <= CMSG_BUF_SIZE);   // XXX
+
+	    // Linux mostly ignores the IP header sent in with sendmsg, especially the
+	    // source IP part.  The pktinfo logic below make sure it uses the correct
+	    // local IP address.  This fixes source-routing problems as well.
+	    // --Ben  Aug 21, 2008
+	
+	    _sndmh.msg_controllen = ctllen;
+	    cmsgp = CMSG_FIRSTHDR(&_sndmh);
+	
+	    // Add the IPV4_PKTINFO ancillary data
+	    cmsgp->cmsg_len   = CMSG_LEN(sizeof(struct in_pktinfo));
+	    cmsgp->cmsg_level = SOL_IP;
+	    cmsgp->cmsg_type  = IP_PKTINFO;
+	    cmsg_data = CMSG_DATA(cmsgp);
+	    sndpktinfo = reinterpret_cast<struct in_pktinfo *>(cmsg_data);
+	    memset(sndpktinfo, 0, sizeof(*sndpktinfo));
+	    src_address.copy_out(sndpktinfo->ipi_spec_dst);
+#endif
 	}
 
 	//
@@ -1912,6 +2219,7 @@ IoIpSocket::send_packet(const string& if_name,
 	ip4.set_ip_id(_ip_id);
 	if (ip4.fragment(ifp->mtu(), fragments, false, error_msg)
 	    != XORP_OK) {
+	    assert(error_msg.size());
 	    return (XORP_ERROR);
 	}
 	XLOG_ASSERT(! fragments.empty());
@@ -2028,7 +2336,8 @@ IoIpSocket::send_packet(const string& if_name,
 	}
 	src_address.copy_out(sndpktinfo->ipi6_addr);
 	cmsgp = CMSG_NXTHDR(&_sndmh, cmsgp);
-	
+	assert(cmsgp);
+
 	//
 	// Include the Router Alert option if needed
 	//
@@ -2061,7 +2370,7 @@ IoIpSocket::send_packet(const string& if_name,
 		return (XORP_ERROR);
 	    }
 	    cmsgp = CMSG_NXTHDR(&_sndmh, cmsgp);
-	    
+
 #else  // ! HAVE_RFC3542 (i.e., the old advanced API)
 
 #ifdef HAVE_IPV6_MULTICAST_ROUTING
@@ -2074,6 +2383,7 @@ IoIpSocket::send_packet(const string& if_name,
 		error_msg = c_format("inet6_option_init(IPV6_HOPOPTS) failed");
 		return (XORP_ERROR);
 	    }
+	    assert(cmsgp);
 	    if (inet6_option_append(cmsgp, ra_opt6, 4, 0)) {
 		error_msg = c_format("inet6_option_append(Router Alert) failed");
 		return (XORP_ERROR);
@@ -2169,6 +2479,10 @@ IoIpSocket::proto_socket_transmit(const IfTreeInterface* ifp,
     bool setbind = false;
     int ret_value = XORP_OK;
 
+    //XLOG_ERROR("proto_socket_transmit: ifp: %s  vifp: %s  src: %s  dst: %s\n",
+    //       ifp->ifname().c_str(), vifp->vifname().c_str(),
+    //       src_address.str().c_str(), dst_address.str().c_str());
+
     //
     // Adjust some IPv4 header fields
     //
@@ -2235,6 +2549,10 @@ IoIpSocket::proto_socket_transmit(const IfTreeInterface* ifp,
     switch (family()) {
     case AF_INET:
 	dst_address.copy_out(_to4);
+	_sndmh.msg_namelen	= sizeof(_to4);
+	// Using msg_control to pass ipv4 local IP now. --Ben
+	//_sndmh.msg_control	= NULL;
+	//_sndmh.msg_controllen	= 0;
 	break;
 #ifdef HAVE_IPV6
     case AF_INET6:
@@ -2256,6 +2574,8 @@ IoIpSocket::proto_socket_transmit(const IfTreeInterface* ifp,
 	    // TODO: check the interface status.
 	    // E.g., vif_state_check(family());
 	    //
+	    error_msg = c_format("sendmsg failed, error: %s  socket: %i",
+				 strerror(errno), (int)(_proto_socket_out));
 	} else {
 	    error_msg = c_format("sendmsg(proto %d size %u from %s to %s "
 				 "on interface %s vif %s) failed: %s",
@@ -2285,6 +2605,9 @@ IoIpSocket::proto_socket_transmit(const IfTreeInterface* ifp,
 	}
     }
 
+    if (ret_value != XORP_OK) {
+	assert(error_msg.size());
+    }
     return (ret_value);
 }
 

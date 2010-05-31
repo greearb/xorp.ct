@@ -2047,6 +2047,8 @@ public:
 	const string&	creator,
 	const IPv4&	local_addr,
 	const uint32_t&	local_port,
+	const string&   local_dev,
+	const uint32_t& reuse,
 	// Output values,
 	string&	sockid);
 
@@ -2424,6 +2426,8 @@ public:
 	const string&	creator,
 	const IPv6&	local_addr,
 	const uint32_t&	local_port,
+	const string&   local_dev,
+	const uint32_t& reuse,
 	// Output values,
 	string&	sockid);
 

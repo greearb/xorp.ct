@@ -365,14 +365,15 @@ XrlRtrmgrInterface::rtrmgr_0_1_enter_config_mode(
     const bool&		exclusive)
 {
     string error_msg;
+    string reason;
 
     if (! verify_token(token)) {
 	error_msg = "AUTH_FAIL";
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     uid_t user_id = get_user_id_from_token(token);
-    if (_userdb.has_capability(user_id, "config") == false) {
-	error_msg = "You do not have permission for this operation";
+    if (_userdb.has_capability(user_id, "config", reason) == false) {
+	error_msg = "You do not have permission for this operation, token: " + token + " reason: " + reason;
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     XLOG_TRACE(_verbose, "user %u entering config mode\n",
@@ -456,15 +457,15 @@ XrlRtrmgrInterface::rtrmgr_0_1_get_config_users(
     XrlAtomList&	users)
 {
     string error_msg;
+    string reason;
 
     if (!verify_token(token)) {
 	error_msg = "AUTH_FAIL";
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     uid_t user_id = get_user_id_from_token(token);
-    if (_userdb.has_capability(user_id, "config") == false) {
-	error_msg = "You do not have permission to view the configuration "
-	    "mode users";
+    if (_userdb.has_capability(user_id, "config", reason) == false) {
+	error_msg = "You do not have permission to view the cnofiguration, token: " + token + " reason: " + reason;
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     multimap<uid_t, UserInstance*>::const_iterator iter;
@@ -521,6 +522,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_apply_config_change(
     const string&	deletions)
 {
     string error_msg;
+    string reason;
 
     if (!verify_token(token)) {
 	error_msg = "AUTH_FAIL";
@@ -531,8 +533,8 @@ XrlRtrmgrInterface::rtrmgr_0_1_apply_config_change(
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     uid_t user_id = get_user_id_from_token(token);
-    if (_userdb.has_capability(user_id, "config") == false) {
-	error_msg = "You do not have permission for this operation";
+    if (_userdb.has_capability(user_id, "config", reason) == false) {
+	error_msg = "You do not have permission for this operation, token: " + token + " reason: " + reason;
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     // XXX: TBD
@@ -674,14 +676,15 @@ XrlRtrmgrInterface::rtrmgr_0_1_lock_config(
     uint32_t&		holder)
 {
     string error_msg;
+    string reason;
 
     if (!verify_token(token)) {
 	error_msg = "AUTH_FAIL";
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     uid_t user_id = get_user_id_from_token(token);
-    if (_userdb.has_capability(user_id, "config") == false) {
-	error_msg = "You do not have permission to lock the configuration";
+    if (_userdb.has_capability(user_id, "config", reason) == false) {
+	error_msg = "You do not have permission for this operation, token: " + token + " reason: " + reason;
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     if (_config_locked) {
@@ -745,14 +748,15 @@ XrlRtrmgrInterface::rtrmgr_0_1_lock_node(
     uint32_t&		holder)
 {
     string error_msg;
+    string reason;
 
     if (!verify_token(token)) {
 	error_msg = "AUTH_FAIL";
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     uid_t user_id = get_user_id_from_token(token);
-    if (_userdb.has_capability(user_id, "config") == false) {
-	error_msg = "You do not have permission to lock the configuration";
+    if (_userdb.has_capability(user_id, "config", reason) == false) {
+	error_msg = "You do not have permission for this operation, token: " + token + " reason: " + reason;
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     if (user_id == (uid_t)-1) {
@@ -797,14 +801,15 @@ XrlRtrmgrInterface::rtrmgr_0_1_save_config(// Input values:
 					   const string& filename)
 {
     string error_msg;
+    string reason;
 
     if (!verify_token(token)) {
 	error_msg = "AUTH_FAIL";
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     uid_t user_id = get_user_id_from_token(token);
-    if (_userdb.has_capability(user_id, "config") == false) {
-	error_msg = "You do not have permission to save the configuration";
+    if (_userdb.has_capability(user_id, "config", reason) == false) {
+	error_msg = "You do not have permission for this operation, token: " + token + " reason: " + reason;
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     if (_config_locked && (token != _lock_holder_token)) {
@@ -833,14 +838,15 @@ XrlRtrmgrInterface::rtrmgr_0_1_load_config(// Input values:
 					   const string& filename)
 {
     string error_msg;
+    string reason;
 
     if (!verify_token(token)) {
 	error_msg = "AUTH_FAIL";
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     uid_t user_id = get_user_id_from_token(token);
-    if (_userdb.has_capability(user_id, "config") == false) {
-	error_msg = "You do not have permission to reload the configuration";
+    if (_userdb.has_capability(user_id, "config", reason) == false) {
+	error_msg = "You do not have permission for this operation, token: " + token + " reason: " + reason;
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     if (_config_locked && (token != _lock_holder_token)) {

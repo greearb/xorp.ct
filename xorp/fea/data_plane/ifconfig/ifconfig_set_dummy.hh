@@ -72,7 +72,7 @@ public:
      * @param iftree the interface tree configuration to push.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int push_config(IfTree& iftree);
+    virtual int push_config(const IfTree& iftree);
 
 private:
     /**

@@ -95,10 +95,10 @@ RoutingTable<A>::begin(OspfTypes::AreaID area)
 template <typename A>
 bool
 RoutingTable<A>::add_entry(OspfTypes::AreaID area, IPNet<A> net,
-			   const RouteEntry<A>& rt)
+			   const RouteEntry<A>& rt, const char* msg)
 {
-    debug_msg("area %s %s %s\n", pr_id(area).c_str(), cstring(net),
-	      const_cast<RouteEntry<A>&>(rt).str().c_str());
+    debug_msg("area %s %s %s msg: %s\n", pr_id(area).c_str(), cstring(net),
+	      const_cast<RouteEntry<A>&>(rt).str().c_str(), msg);
     XLOG_ASSERT(_in_transaction);
     XLOG_ASSERT(area == rt.get_area());
     XLOG_ASSERT(rt.get_directly_connected() || rt.get_nexthop() != A::ZERO());
@@ -160,7 +160,7 @@ RoutingTable<A>::replace_entry(OspfTypes::AreaID area, IPNet<A> net,
     typename Trie<A, InternalRouteEntry<A> >::iterator i;
     i = _current->lookup_node(net);
     if (_current->end() == i) {
-	return add_entry(area, net, rt);
+	return add_entry(area, net, rt, __PRETTY_FUNCTION__);
     }
 
     InternalRouteEntry<A>& irentry = i.payload();

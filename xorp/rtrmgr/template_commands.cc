@@ -441,8 +441,8 @@ XrlAction::check_xrl_is_valid(const list<string>& action,
 		mode_stack.pop_front();
 		if (mode_stack.front() != NON_VAR) {
 		    error_msg = c_format("Syntax error in module %s XRL %s: "
-					 "invalid XRL syntax",
-					 module_name.c_str(), xrl_str.c_str());
+					 "invalid XRL syntax, char-idx: %i (rxl_str[i] == &, mode_stack.front() != NON_VAR)",
+					 module_name.c_str(), xrl_str.c_str(), (int)(i));
 		    return false;
 		}
 		cleaned_xrl += xrl_str[i];
@@ -455,8 +455,8 @@ XrlAction::check_xrl_is_valid(const list<string>& action,
 		mode_stack.pop_front();
 		if (mode_stack.front() != NON_VAR) {
 		    error_msg = c_format("Syntax error in module %s XRL %s: "
-					 "invalid XRL syntax",
-					 module_name.c_str(), xrl_str.c_str());
+					 "invalid XRL syntax, char-idx: %i (start of return spec)",
+					 module_name.c_str(), xrl_str.c_str(), (int)(i));
 		    return false;
 		}
 	    }
@@ -467,7 +467,7 @@ XrlAction::check_xrl_is_valid(const list<string>& action,
 
     if (xrldb->check_xrl_syntax(cleaned_xrl) == false) {
 	error_msg = c_format("Syntax error in module %s XRL %s: "
-			     "invalid XRL syntax",
+			     "invalid XRL syntax (check_xrl_syntax failed)",
 			     module_name.c_str(), cleaned_xrl.c_str());
 	return false;
     }

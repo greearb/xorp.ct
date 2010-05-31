@@ -64,7 +64,7 @@ public:
      * @param iftree the IfTree storage to store the pulled information.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int pull_config(IfTree& iftree);
+    virtual int pull_config(const IfTree* local_config, IfTree& iftree);
     
 private:
     int read_config(IfTree& iftree);

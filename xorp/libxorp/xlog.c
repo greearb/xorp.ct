@@ -435,8 +435,8 @@ xlog_##fn (const char *module_name, int line, const char *file, const char *func
 {									\
     va_list ap;								\
     char where_buf[8000];						\
-    snprintf(where_buf, sizeof(where_buf), "+%d %s %s",			\
-		 line, file, (function) ? function : "(unknown_func)");	\
+    snprintf(where_buf, sizeof(where_buf), "%s:%d %s",			\
+	     file, line, (function) ? function : "(unknown_func)");	\
     va_start(ap, fmt);							\
     xlog_record_va(log_level, module_name, where_buf, fmt, ap);		\
     va_end(ap);								\

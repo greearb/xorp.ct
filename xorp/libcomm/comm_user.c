@@ -309,7 +309,7 @@ comm_bind_tcp(const struct sockaddr *sock, int is_blocking)
 
 xsock_t
 comm_bind_udp4(const struct in_addr *my_addr, unsigned short my_port,
-	       int is_blocking)
+	       int is_blocking, int reuse_flag)
 {
     xsock_t sock;
 
@@ -317,6 +317,21 @@ comm_bind_udp4(const struct in_addr *my_addr, unsigned short my_port,
     sock = comm_sock_open(AF_INET, SOCK_DGRAM, 0, is_blocking);
     if (sock == XORP_BAD_SOCKET)
 	return (XORP_BAD_SOCKET);
+
+    /* For multicast, you need to set reuse before you bind, if you want
+     * more than one socket to be able to bind to a particular IP (like, 0.0.0.0)
+     */
+    if (reuse_flag) {
+	if (comm_set_reuseaddr(sock, 1) != XORP_OK) {
+	    comm_sock_close(sock);
+	    return (XORP_BAD_SOCKET);
+	}
+	if (comm_set_reuseport(sock, 1) != XORP_OK) {
+	    comm_sock_close(sock);
+	    return (XORP_BAD_SOCKET);
+	}
+    }
+    
     if (comm_sock_bind4(sock, my_addr, my_port) != XORP_OK) {
 	comm_sock_close(sock);
 	return (XORP_BAD_SOCKET);

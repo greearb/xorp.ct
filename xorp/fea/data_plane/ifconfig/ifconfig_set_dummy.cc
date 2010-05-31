@@ -40,7 +40,7 @@
 //
 
 IfConfigSetDummy::IfConfigSetDummy(FeaDataPlaneManager& fea_data_plane_manager)
-    : IfConfigSet(fea_data_plane_manager)
+	: IfConfigSet(fea_data_plane_manager), _iftree("ifcfg-set-dummy")
 {
 }
 
@@ -83,7 +83,7 @@ IfConfigSetDummy::stop(string& error_msg)
 }
 
 int
-IfConfigSetDummy::push_config(IfTree& iftree)
+IfConfigSetDummy::push_config(const IfTree& iftree)
 {
     _iftree = iftree;
 

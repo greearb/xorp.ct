@@ -1032,7 +1032,7 @@ Mld6igmpNode::enable_vif(const string& vif_name, string& error_msg)
 {
     Mld6igmpVif *mld6igmp_vif = vif_find_by_name(vif_name);
     if (mld6igmp_vif == NULL) {
-	error_msg = c_format("Cannot enable vif %s: no such vif",
+	error_msg = c_format("Mld6igmpNode:  Cannot enable vif %s: no such vif",
 			     vif_name.c_str());
 	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
@@ -1060,7 +1060,9 @@ Mld6igmpNode::disable_vif(const string& vif_name, string& error_msg)
 	error_msg = c_format("Cannot disable vif %s: no such vif",
 			     vif_name.c_str());
 	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
+	// It's as disabled as it will get, don't fail commit.
+	error_msg = "";
+	return XORP_OK;
     }
     
     mld6igmp_vif->disable();

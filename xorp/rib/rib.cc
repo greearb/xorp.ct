@@ -263,9 +263,17 @@ RIB<A>::RIB(RibTransportType t, RibManager& rib_manager, EventLoop& eventloop)
 	XLOG_FATAL("Unknown RibTransportType.");
     }
 
+    uint32_t static_distance = 1;
+    char* v = getenv("XORP_RIB_STATIC_DISTANCE");
+    if (v) {
+	static_distance = atoi(v);
+	XLOG_INFO("Setting 'static' distance to: %u based on XORP_RIB_STATIC_DISTANCE environment variable.",
+		  static_distance);
+    }
+
     // TODO: XXX: don't use hard-coded values below!
     _admin_distances["connected"] =        CONNECTED_ADMIN_DISTANCE;
-    _admin_distances["static"] =           1;
+    _admin_distances["static"] =           static_distance;
     _admin_distances["eigrp-summary"] =    5;
     _admin_distances["ebgp"] =            20;
     _admin_distances["eigrp-internal"] =  90;

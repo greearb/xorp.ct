@@ -20,6 +20,7 @@
 
 
 #include "fea/fea_module.h"
+#include "fea/fibconfig.hh"
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
@@ -169,7 +170,7 @@ NlmUtils::get_rtattr(const struct rtattr* rtattr, int rta_len,
 int
 NlmUtils::nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 			     const struct nlmsghdr* nlh,
-			     const struct rtmsg* rtmsg, int rta_len)
+			     const struct rtmsg* rtmsg, int rta_len, const FibConfig& fibconfig)
 {
     const struct rtattr *rtattr;
     const struct rtattr *rta_array[RTA_MAX + 1];
@@ -186,6 +187,36 @@ NlmUtils::nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
     // Test if this entry was deleted
     if (nlh->nlmsg_type == RTM_DELROUTE)
 	is_deleted = true;
+
+
+    //
+    // Get the attributes
+    //
+    memset(rta_array, 0, sizeof(rta_array));
+    rtattr = RTM_RTA(const_cast<struct rtmsg *>(rtmsg));
+    NlmUtils::get_rtattr(rtattr, rta_len, rta_array,
+			 sizeof(rta_array) / sizeof(rta_array[0]));
+
+    // Discard the route if we are using a specific table.
+    if (fibconfig.unicast_forwarding_table_id_is_configured(family)) {
+	int rttable = fibconfig.unicast_forwarding_table_id(family);
+	int rtmt = rtmsg->rtm_table;
+#ifdef HAVE_NETLINK_SOCKET_ATTRIBUTE_RTA_TABLE
+	if (rta_array[RTA_TABLE] != NULL) {
+	    const uint8_t* p = static_cast<const uint8_t *>(
+		RTA_DATA(const_cast<struct rtattr *>(rta_array[RTA_TABLE])));
+	    rtmt = extract_host_int(p);
+	}
+#endif
+	if ((rtmt != RT_TABLE_UNSPEC) && (rtmt != rttable)) {
+	    //XLOG_WARNING("Ignoring route from table: %i\n", rtmt);
+	    return XORP_ERROR;
+	}
+	else {
+	    //XLOG_WARNING("Accepting route from table: %i\n", rtmt);
+	}
+    }
+
 
     IPvX nexthop_addr(family);
     IPvX dst_addr(family);
@@ -277,14 +308,6 @@ NlmUtils::nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 	return (XORP_ERROR);		// Invalid address family
 
     //
-    // Get the attributes
-    //
-    memset(rta_array, 0, sizeof(rta_array));
-    rtattr = RTM_RTA(const_cast<struct rtmsg *>(rtmsg));
-    NlmUtils::get_rtattr(rtattr, rta_len, rta_array,
-			 sizeof(rta_array) / sizeof(rta_array[0]));
-
-    //
     // Get the destination
     //
     if (rta_array[RTA_DST] == NULL) {
@@ -358,7 +381,10 @@ NlmUtils::nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 	    } else {
 		//
 		// XXX: A route was added, but we cannot find the corresponding
-		// interface/vif. This might happen because of a race
+		// interface/vif.
+		// This is probably because the interface in question is not in our
+		// local config.
+		// Another possibility:  This might happen because of a race
 		// condition. E.g., an interface was added and then
 		// immediately deleted, but the processing for the addition of
 		// the corresponding connected route was delayed.
@@ -368,12 +394,13 @@ NlmUtils::nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 		// For the time being make it a fatal error until there is
 		// enough evidence and the issue is understood.
 		//
-		IPvXNet dst_subnet(dst_addr, dst_mask_len);
-		XLOG_FATAL("Decoding for route %s next hop %s failed: "
-			   "could not find interface and vif for index %d",
-			   dst_subnet.str().c_str(),
-			   nexthop_addr.str().c_str(),
-			   if_index);
+		//IPvXNet dst_subnet(dst_addr, dst_mask_len);
+		//XLOG_WARNING("WARNING:  Decoding for route %s next hop %s failed: "
+		//	   "could not find interface and vif for index %d",
+		//	   dst_subnet.str().c_str(),
+		//	   nexthop_addr.str().c_str(),
+		//	   if_index);
+		return XORP_ERROR;
 	    }
 	}
     }

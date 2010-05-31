@@ -208,6 +208,8 @@ XrlStatusValidation::xrl_done(const XrlError& e, XrlArgs* xrl_args)
 	//
 	// TODO: Make retries and delay configurable (no magic numbers).
 	//
+        XLOG_WARNING("Failed to receive reply, code: %s  retries: %i  max_retries: %i\n",
+		     e.str().c_str(), _retries, MAX_STATUS_RETRIES);
 	_retries++;
 	if (_retries > MAX_STATUS_RETRIES) {
 	    _cb->dispatch(false);

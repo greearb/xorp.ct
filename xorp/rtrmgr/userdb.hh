@@ -33,7 +33,7 @@ public:
 
     const string& username() const { return _username; }
     uid_t user_id() const { return _user_id; }
-    bool has_acl_capability(const string& capname) const;
+    bool has_acl_capability(const string& capname, string& err_msg) const;
     void add_acl_capability(const string& capname);
 
 private:
@@ -94,7 +94,7 @@ public:
     void load_password_file();
     const User* find_user_by_user_id(uid_t user_id);
     void remove_user(uid_t user_id);
-    bool has_capability(uid_t user_id, const string& capability);
+    bool has_capability(uid_t user_id, const string& capability, string& err_msg);
 
 private:
     map<uid_t, User*> _users;

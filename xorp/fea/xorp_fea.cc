@@ -131,6 +131,7 @@ main(int argc, char *argv[])
     xlog_set_verbose(XLOG_VERBOSE_LOW);		// Least verbose messages
     // XXX: verbosity of the error messages temporary increased
     xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
+    //xlog_enable(XLOG_LEVEL_INFO);  Doesn't work?  --Ben
     xlog_add_default_output();
     xlog_start();
 

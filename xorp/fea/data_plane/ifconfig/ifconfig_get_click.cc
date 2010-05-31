@@ -91,8 +91,9 @@ IfConfigGetClick::stop(string& error_msg)
 }
 
 int
-IfConfigGetClick::pull_config(IfTree& iftree)
+IfConfigGetClick::pull_config(const IfTree* local_config, IfTree& iftree)
 {
+    UNUSED(local_config);
     return read_config(iftree);
 }
 

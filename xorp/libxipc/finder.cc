@@ -754,7 +754,7 @@ Finder::fill_targets_xrl_list(const string& target,
 void
 Finder::start_hello_timer()
 {
-    _hello = _e.new_periodic_ms(1000, callback(this, &Finder::send_hello));
+    _hello = _e.new_periodic_ms(XORP_HELLO_TIMER_MS, callback(this, &Finder::send_hello));
 }
 
 bool

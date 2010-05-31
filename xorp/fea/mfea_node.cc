@@ -79,8 +79,9 @@ MfeaNode::MfeaNode(FeaNode& fea_node, int family, xorp_module_id module_id,
     : ProtoNode<MfeaVif>(family, module_id, eventloop),
       IfConfigUpdateReporterBase(fea_node.ifconfig().ifconfig_update_replicator()),
       _fea_node(fea_node),
-      _mfea_mrouter(*this),
+      _mfea_mrouter(*this, fea_node.fibconfig()),
       _mfea_dft(*this),
+      _mfea_iftree("mfea-tree"),
       _mfea_iftree_update_replicator(_mfea_iftree),
       _is_log_trace(false)
 {
@@ -1128,7 +1129,7 @@ MfeaNode::enable_vif(const string& vif_name, string& error_msg)
 {
     MfeaVif *mfea_vif = vif_find_by_name(vif_name);
     if (mfea_vif == NULL) {
-	error_msg = c_format("Cannot enable vif %s: no such vif",
+	error_msg = c_format("MfeaNode:  Cannot enable vif %s: no such vif",
 			     vif_name.c_str());
 	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
@@ -1156,7 +1157,9 @@ MfeaNode::disable_vif(const string& vif_name, string& error_msg)
 	error_msg = c_format("Cannot disable vif %s: no such vif",
 			     vif_name.c_str());
 	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
+        // If it's gone, it's as disabled as it can be.
+	//return (XORP_ERROR);
+        return XORP_OK;
     }
     
     mfea_vif->disable();
@@ -1214,7 +1217,10 @@ MfeaNode::stop_vif(const string& vif_name, string& error_msg)
 	error_msg = c_format("Cannot stop vif %s: no such vif",
 			     vif_name.c_str());
 	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
+	// If it doesn't exist, it's as stopped as it's going to get.  Returning
+	// error will cause entire commit to fail.
+	//return (XORP_ERROR);
+	return XORP_OK;
     }
     
     if (mfea_vif->stop(error_msg) != XORP_OK) {
@@ -1657,8 +1663,11 @@ MfeaNode::signal_message_recv(const string&	, // src_module_instance_name,
     // Test if we should accept or drop the message
     //
     MfeaVif *mfea_vif = vif_find_by_vif_index(vif_index);
-    if (mfea_vif == NULL)
+    if (mfea_vif == NULL) {
+	XLOG_ERROR("signal_message_recv, can't find mfea_vif, vif_index: %i\n",
+		   vif_index);
 	return (XORP_ERROR);
+    }
     
     //
     // Send the signal to all upper-layer protocols that expect it.

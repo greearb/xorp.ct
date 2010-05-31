@@ -210,8 +210,25 @@ TimerList::~TimerList()
 	delete (*ii).second;
 #endif
 
+#if 0
+    // TODO:  Looks like this should work, but it crashes.  hi->second
+    // seems a valid pointer, but what it points to is corrupted, it seems.
+    fprintf(stderr, "heaplist-size: %i\n", (int)(_heaplist.size()));
+    // Delete all of the heaps we've previously created
+    map<int, Heap*>::const_iterator hi;
+    Heap* tmp = NULL;
+    for (hi = _heaplist.begin(); hi != _heaplist.end(); ++hi) {
+	tmp = hi->second;
+	fprintf(stderr, "deleting heap: %p\n", tmp);
+	fflush(stderr);
+	delete tmp;
+    }
+    _heaplist.clear();
+#endif
+
     timerlist_instance_count--;
     the_timerlist = NULL;
+
 }
 
 TimerList*
@@ -268,6 +285,7 @@ TimerList::find_heap(int priority)
     map<int, Heap*>::iterator hi = _heaplist.find(priority);
     if (hi == _heaplist.end()) {
 	Heap* h = new Heap(true);
+	//printf("created new heap in find_heap, ptr: %p\n", h);
 	_heaplist[priority] = h;
 	return h;
     } else {

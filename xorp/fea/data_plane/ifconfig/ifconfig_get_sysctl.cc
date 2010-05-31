@@ -92,8 +92,9 @@ IfConfigGetSysctl::stop(string& error_msg)
 }
 
 int
-IfConfigGetSysctl::pull_config(IfTree& iftree)
+IfConfigGetSysctl::pull_config(const IfTree* local_config, IfTree& iftree)
 {
+    UNUSED(local_config);
     return read_config(iftree);
 }
 

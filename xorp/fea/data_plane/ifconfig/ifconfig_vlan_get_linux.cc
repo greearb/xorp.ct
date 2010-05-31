@@ -115,16 +115,17 @@ IfConfigVlanGetLinux::stop(string& error_msg)
 }
 
 int
-IfConfigVlanGetLinux::pull_config(IfTree& iftree)
+IfConfigVlanGetLinux::pull_config(IfTree& iftree, bool& modified)
 {
-    return read_config(iftree);
+    return read_config(iftree, modified);
 }
 
 int
-IfConfigVlanGetLinux::read_config(IfTree& iftree)
+IfConfigVlanGetLinux::read_config(IfTree& iftree, bool& modified)
 {
     IfTree::IfMap::iterator ii;
     string error_msg;
+    bool mod_on_entry = modified;
 
     if (! _is_running) {
 	error_msg = c_format("Cannot read VLAN interface intormation: "
@@ -150,6 +151,22 @@ IfConfigVlanGetLinux::read_config(IfTree& iftree)
 	if (ifp->is_marked(IfTreeItem::DELETED))
 	    continue;
 
+	// If the iface list was modified on entry (ie, we added/deleted an ifp somewhere
+	// when reading iface config, then it's possible a parent has appeared and so we must
+	// reprobe everything just in case.
+	if (mod_on_entry) {
+	    ifp->set_probed_vlan(false);
+	}
+
+	// If we've already probed this device for vlan-ness, then
+	// no need to probe again I think.
+	if (ifp->probed_vlan()) {
+	    continue;
+	}
+
+	/** we'll have probed it when we return. */
+	ifp->set_probed_vlan(true);
+
 	struct vlan_ioctl_args vlanreq;
 
 	// Test whether a VLAN interface
@@ -157,8 +174,9 @@ IfConfigVlanGetLinux::read_config(IfTree& iftree)
 	strncpy(vlanreq.device1, ifp->ifname().c_str(),
 		sizeof(vlanreq.device1) - 1);
 	vlanreq.cmd = GET_VLAN_REALDEV_NAME_CMD;
-	if (ioctl(_s4, SIOCGIFVLAN, &vlanreq) < 0)
-	    continue;		// XXX: Most likely not a VLAN interface
+	if (ioctl(_s4, SIOCGIFVLAN, &vlanreq) < 0) {
+	    continue; // not a vlan
+	}
 
 	//
 	// XXX: VLAN interface
@@ -166,8 +184,11 @@ IfConfigVlanGetLinux::read_config(IfTree& iftree)
 
 	// Get the parent device
 	string parent_ifname = vlanreq.u.device2;
-	if (parent_ifname.empty())
+	if (parent_ifname.empty()) {
+	    // BUG
+	    XLOG_ERROR("Could not find parent ifname for iface: %s\n", ifp->ifname().c_str());
 	    continue;
+	}
 
 	// Get the VLAN ID
 	memset(&vlanreq, 0, sizeof(vlanreq));
@@ -182,26 +203,52 @@ IfConfigVlanGetLinux::read_config(IfTree& iftree)
 	}
 	uint16_t vlan_id = vlanreq.u.VID;
 
+	// NOTE:  It's possible for VLANs to be configured and not
+	// have the parent device configured (or even visible at all, when linux namespace
+	// code is completed.)  Since VLANs are 'real' devices in Linux, this might not really
+	// matter if Xorp doesn't notice... --Ben
 	IfTreeInterface* parent_ifp = iftree.find_interface(parent_ifname);
-	if ((parent_ifp == NULL) || parent_ifp->is_marked(IfTreeItem::DELETED))
-	    continue;
-
-	// Find or add the VLAN vif
-	IfTreeVif* parent_vifp = parent_ifp->find_vif(ifp->ifname());
-	if (parent_vifp == NULL) {
-	    parent_ifp->add_vif(ifp->ifname());
-	    parent_vifp = parent_ifp->find_vif(ifp->ifname());
+	IfTreeVif* parent_vifp = NULL;
+	if ((parent_ifp == NULL) || parent_ifp->is_marked(IfTreeItem::DELETED)) {
+	    // It could appear later, go set the vifp if we can find it
 	}
-	XLOG_ASSERT(parent_vifp != NULL);
+	else {
+	    // Find or add the VLAN vif
+	    parent_vifp = parent_ifp->find_vif(ifp->ifname());
+	    if (parent_vifp == NULL) {
+		modified = true;
+		parent_ifp->add_vif(ifp->ifname());
+		parent_vifp = parent_ifp->find_vif(ifp->ifname());
+	    }
+	    XLOG_ASSERT(parent_vifp != NULL);
+	}
 
 	// Copy the vif state
 	IfTreeVif* vifp = ifp->find_vif(ifp->ifname());
-	if (vifp != NULL)
-	    parent_vifp->copy_recursive_vif(*vifp);
-
-	// Set the VLAN vif info
-	parent_vifp->set_vlan(true);
-	parent_vifp->set_vlan_id(vlan_id);
+	if (vifp != NULL) {
+	    if (parent_vifp) {
+		modified = true; /* TODO: this could be a lie, but better safe than sorry until
+				  * the copy-recursive method takes 'modified'.
+				  */
+		parent_vifp->copy_recursive_vif(*vifp);
+	    }
+	    else {
+		// Well, lie and set the info in the vifp instead, since it's actually
+		// a vlan.
+		parent_vifp = vifp;
+	    }
+	}
+	if (parent_vifp) {
+	    // Set the VLAN vif info
+	    if (!parent_vifp->is_vlan()) {
+		parent_vifp->set_vlan(true);
+		modified = true;
+	    }
+	    if (parent_vifp->vlan_id() != vlan_id) {
+		parent_vifp->set_vlan_id(vlan_id);
+		modified = true;
+	    }
+	}
     }
 
     return (XORP_OK);

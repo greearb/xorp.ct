@@ -50,6 +50,7 @@ class MfeaNode;
 class SgCount;
 class TimeVal;
 class VifCount;
+class FibConfig;
 
 
 /**
@@ -65,7 +66,7 @@ public:
      * 
      * @param mfea_node the MFEA node (@ref MfeaNode) this entry belongs to.
      */
-    MfeaMrouter(MfeaNode& mfea_node);
+    MfeaMrouter(MfeaNode& mfea_node, const FibConfig& fibconfig);
     
     /**
      * Destructor
@@ -85,7 +86,13 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		stop();
-    
+
+    /** Get the multicast table id that is currently configured.
+     * Currently, changing configured table-id at run-time will break
+     * things, by the way.
+     */
+    int getTableId() const;
+
     /**
      * Test if the underlying system supports IPv4 multicast routing.
      * 
@@ -430,6 +437,7 @@ private:
     // Original state from the underlying system before the MFEA was started
     //
     bool	_multicast_forwarding_enabled;
+    const FibConfig& _fibconfig;
 };
 
 /**

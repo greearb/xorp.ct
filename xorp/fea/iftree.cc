@@ -59,15 +59,18 @@ IfTreeItem::str() const
 /* ------------------------------------------------------------------------- */
 /* IfTree code */
 
-IfTree::IfTree()
+IfTree::IfTree(const char* tree_name)
     : IfTreeItem()
 {
+    name = tree_name;
 }
 
 IfTree::IfTree(const IfTree& other)
     : IfTreeItem()
 {
     *this = other;
+    name = "copy of ";
+    name += other.name;
 }
 
 IfTree::~IfTree()
@@ -96,8 +99,10 @@ IfTree::operator=(const IfTree& other)
 void
 IfTree::clear()
 {
+    XLOG_WARNING("Clearing iftree: %s\n", name.c_str());
     while (! _interfaces.empty()) {
 	IfTreeInterface* ifp = _interfaces.begin()->second;
+	sendEvent(IFTREE_ERASE_IFACE, ifp);
 	_interfaces.erase(_interfaces.begin());
 	delete ifp;
     }
@@ -122,6 +127,8 @@ IfTree::add_recursive_interface(const IfTreeInterface& other_iface,
     else
 	ifp->mark(CREATED);
 
+    //XLOG_WARNING("Adding interface: %s recursively to tree: %s\n", ifname.c_str(), name.c_str());
+
     // Add recursively all vifs from the other interface
     IfTreeInterface::VifMap::const_iterator ov;
     for (ov = other_iface.vifs().begin();
@@ -145,8 +152,19 @@ IfTree::add_interface(const string& ifname)
     ifp = new IfTreeInterface(*this, ifname);
     _interfaces.insert(IfMap::value_type(ifname, ifp));
 
+    //XLOG_WARNING("Adding interface: %s to tree: %s\n", ifname.c_str(), name.c_str());
+
     return (XORP_OK);
 }
+
+void IfTree::registerListener(IfTreeListener* l) const {
+    listeners.push_back(l);
+}
+
+void IfTree::unregisterListener(IfTreeListener* l) const {
+    listeners.remove(l);
+}
+
 
 IfTreeInterface*
 IfTree::find_interface(const string& ifname)
@@ -440,15 +458,63 @@ IfTree::find_interface_vif_same_subnet_or_p2p(const IPvX& addr,
     return (false);
 }
 
+void IfTree::sendEvent(IfTreeIfaceEventE e, IfTreeInterface* ifp) {
+    list<IfTreeListener*>::iterator i;
+    for (i = listeners.begin(); i != listeners.end(); i++) {
+	IfTreeListener* l = *i;
+	switch (e) {
+	case IFTREE_DELETE_IFACE:
+	    l->notifyDeletingIface(ifp->ifname());
+	    break;
+	case IFTREE_ERASE_IFACE:
+	    l->notifyErasingIface(ifp->ifname());
+	    break;
+	default:
+	    // Should never be here
+	    XLOG_ASSERT(0);
+	}//switch
+    }
+}
+
+void IfTree::sendEvent(IfTreeVifEventE e, IfTreeVif* vifp) {
+    list<IfTreeListener*>::iterator i;
+    for (i = listeners.begin(); i != listeners.end(); i++) {
+	IfTreeListener* l = *i;
+	switch (e) {
+	case IFTREE_DELETE_VIF:
+	    l->notifyDeletingVif(vifp->ifname(), vifp->vifname());
+	    break;
+	case IFTREE_ERASE_VIF:
+	    l->notifyErasingVif(vifp->ifname(), vifp->vifname());
+	    break;
+	default:
+	    // Should never be here
+	    XLOG_ASSERT(0);
+	}//switch
+    }
+}
+
+void IfTree::markIfaceDeleted(IfTreeInterface* ifp) {
+    sendEvent(IFTREE_DELETE_IFACE, ifp);
+    ifp->mark(DELETED);
+}
+
+void IfTree::markVifDeleted(IfTreeVif* vifp) {
+    sendEvent(IFTREE_DELETE_VIF, vifp);
+    vifp->mark(DELETED);
+}
+
 int
 IfTree::remove_interface(const string& ifname)
 {
     IfTreeInterface* ifp = find_interface(ifname);
 
+    XLOG_WARNING("Marking interface: %s in tree: %s DELETED\n", ifname.c_str(), name.c_str());
+
     if (ifp == NULL)
 	return (XORP_ERROR);
 
-    ifp->mark(DELETED);
+    markIfaceDeleted(ifp);
 
     return (XORP_OK);
 }
@@ -491,7 +557,7 @@ IfTree::update_interface(const IfTreeInterface& other_iface)
 
 	other_vifp = other_iface.find_vif(this_vifp->vifname());
 	if ((other_vifp == NULL) || (other_vifp->is_marked(DELETED))) {
-	    this_vifp->mark(DELETED);
+	    markVifDeleted(this_vifp);
 	    continue;
 	}
 
@@ -610,7 +676,9 @@ IfTree::finalize_state()
 
 	// If interface is marked as deleted, delete it.
 	if (ifp->is_marked(DELETED)) {
+	    sendEvent(IFTREE_ERASE_IFACE, ifp);
 	    _interfaces.erase(ii++);
+	    XLOG_WARNING("Deleting interface: %s from tree: %s\n", ifp->ifname().c_str(), name.c_str());
 	    delete ifp;
 	    continue;
 	}
@@ -624,7 +692,8 @@ IfTree::finalize_state()
 string
 IfTree::str() const
 {
-    string r;
+    string r(name);
+    r += "\n";
     IfMap::const_iterator ii;
 
     //
@@ -739,7 +808,7 @@ IfTree::align_with_pulled_changes(const IfTree& other,
 		     vi != this_ifp->vifs().end();
 		     ++vi) {
 		    IfTreeVif* this_vifp = vi->second;
-		    this_vifp->mark(DELETED);
+		    markVifDeleted(this_vifp);
 		}
 	    }
 	    continue;
@@ -1415,7 +1484,7 @@ IfTree::prepare_replacement_state(const IfTree& other)
 	    ifp = find_interface(ifname);
 	    XLOG_ASSERT(ifp != NULL);
 	    ifp->copy_state(other_iface, false);
-	    ifp->mark(DELETED);
+	    markIfaceDeleted(ifp);
 	}
 
 	//
@@ -1436,7 +1505,7 @@ IfTree::prepare_replacement_state(const IfTree& other)
 		vifp = ifp->find_vif(vifname);
 		XLOG_ASSERT(vifp != NULL);
 		vifp->copy_state(other_vif);
-		vifp->mark(DELETED);
+		markVifDeleted(vifp);
 	    }
 
 	    //
@@ -1515,6 +1584,7 @@ IfTree::prune_bogus_deleted_state(const IfTree& old_iftree)
 	old_ifp = old_iftree.find_interface(ifname);
 	if (old_ifp == NULL) {
 	    // Remove this item from the local tree
+	    sendEvent(IFTREE_ERASE_IFACE, ifp);
 	    _interfaces.erase(ii++);
 	    delete ifp;
 	    continue;
@@ -1536,6 +1606,7 @@ IfTree::prune_bogus_deleted_state(const IfTree& old_iftree)
 	    old_vifp = old_ifp->find_vif(vifname);
 	    if (old_vifp == NULL) {
 		// Remove this item from the local tree
+		sendEvent(IFTREE_ERASE_VIF, vifp);
 		ifp->vifs().erase(vi++);
 		delete vifp;
 		continue;
@@ -1604,6 +1675,9 @@ IfTree::insert_ifindex(IfTreeInterface* ifp)
 
     iter = _ifindex_map.find(ifp->pif_index());
     if (iter != _ifindex_map.end()) {
+	XLOG_WARNING("_ifindex_map appears corrupted, found iter->second: %p (%d) != ifp: %p for pif_index: %d\n",
+		     iter->second, iter->second->pif_index(), ifp, ifp->pif_index());
+
 	XLOG_ASSERT(iter->second == ifp);
 	iter->second = ifp;
 	return;
@@ -1688,6 +1762,7 @@ IfTreeInterface::IfTreeInterface(IfTree& iftree, const string& ifname)
       _iftree(iftree),
       _ifname(ifname),
       _pif_index(0),
+      _probed_vlan(false),
       _enabled(false),
       _discard(false),
       _unreachable(false),
@@ -1703,6 +1778,7 @@ IfTreeInterface::~IfTreeInterface()
 {
     while (! _vifs.empty()) {
 	IfTreeVif* vifp = _vifs.begin()->second;
+	iftree().sendEvent(IFTREE_ERASE_VIF, vifp);
 	_vifs.erase(_vifs.begin());
 	delete vifp;
     }
@@ -1768,7 +1844,7 @@ IfTreeInterface::remove_vif(const string& vifname)
     if (vifp == NULL)
 	return (XORP_ERROR);
 
-    vifp->mark(DELETED);
+    iftree().markVifDeleted(vifp);
 
     return (XORP_OK);
 }
@@ -1877,6 +1953,7 @@ IfTreeInterface::finalize_state()
 
 	// If interface is marked as deleted, delete it.
 	if (vifp->is_marked(DELETED)) {
+	    iftree().sendEvent(IFTREE_ERASE_VIF, vifp);
 	    _vifs.erase(vi++);
 	    delete vifp;
 	    continue;

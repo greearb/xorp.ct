@@ -56,7 +56,7 @@ FibConfigTableGetNetlinkSocket::parse_buffer_netlink_socket(
     const IfTree& iftree,
     list<FteX>& fte_list,
     const vector<uint8_t>& buffer,
-    bool is_nlm_get_only)
+    bool is_nlm_get_only, const FibConfig& fibconfig)
 {
     size_t buffer_bytes = buffer.size();
     AlignData<struct nlmsghdr> align_data(buffer);
@@ -123,7 +123,7 @@ FibConfigTableGetNetlinkSocket::parse_buffer_netlink_socket(
 		break;		// XXX: ignore broadcast entries
 	    
 	    FteX fte(family);
-	    if (NlmUtils::nlm_get_to_fte_cfg(iftree, fte, nlh, rtmsg, rta_len)
+	    if (NlmUtils::nlm_get_to_fte_cfg(iftree, fte, nlh, rtmsg, rta_len, fibconfig)
 		== XORP_OK) {
 		fte_list.push_back(fte);
 	    }

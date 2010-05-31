@@ -108,8 +108,12 @@ AsyncFileReader::read(XorpFd fd, IoEventType type)
     _last_error = 0;
     done = ::read(_fd, head->buffer() + head->offset(),
 		  head->buffer_bytes() - head->offset());
-    if (done < 0)
+    if (done < 0) {
 	_last_error = errno;
+	XLOG_WARNING("read error: _fd: %i  offset: %i  total-len: %i error: %s\n",
+		     (int)(_fd), (int)(head->offset()), (int)(head->buffer_bytes()),
+		     strerror(errno));
+    }
     errno = 0;
 
     debug_msg("Read %d bytes\n", XORP_INT_CAST(done));

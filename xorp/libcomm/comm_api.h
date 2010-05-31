@@ -298,7 +298,8 @@ extern xsock_t	comm_bind_tcp(const struct sockaddr *sin, int is_blocking);
  * @return the new socket on success, otherwise XORP_BAD_SOCKET.
  */
 extern xsock_t	comm_bind_udp4(const struct in_addr *my_addr,
-			       unsigned short my_port, int is_blocking);
+			       unsigned short my_port, int is_blocking,
+			       int reuse_flag);
 
 /**
  * Open an IPv6 UDP socket and bind it to a local address and a port.

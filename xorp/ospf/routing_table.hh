@@ -419,7 +419,7 @@ class RoutingTable {
     void begin(OspfTypes::AreaID area);
 
     bool add_entry(OspfTypes::AreaID area, IPNet<A> net,
-		   const RouteEntry<A>& rt);
+		   const RouteEntry<A>& rt, const char* message);
 
     bool replace_entry(OspfTypes::AreaID area, IPNet<A> net,
 		       const RouteEntry<A>& rt);

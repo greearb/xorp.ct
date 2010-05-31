@@ -108,12 +108,14 @@ IoTcpUdpDummy::tcp_open_and_bind(const IPvX& local_addr, uint16_t local_port,
 }
 
 int
-IoTcpUdpDummy::udp_open_and_bind(const IPvX& local_addr, uint16_t local_port,
-				 string& error_msg)
+IoTcpUdpDummy::udp_open_and_bind(const IPvX& local_addr, uint16_t local_port, const string& local_dev,
+				 int reuse, string& error_msg)
 {
     XLOG_ASSERT(family() == local_addr.af());
 
     UNUSED(local_addr);
+    UNUSED(local_dev);
+    UNUSED(reuse);
     UNUSED(local_port);
     UNUSED(error_msg);
 

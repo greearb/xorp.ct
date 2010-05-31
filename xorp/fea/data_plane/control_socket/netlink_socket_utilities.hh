@@ -81,6 +81,7 @@
 
 class NetlinkSocket;
 class NetlinkSocketReader;
+class FibConfig;
 
 /**
  * @short Helper class for various NETLINK-format related utilities.
@@ -121,7 +122,8 @@ public:
      */
     static int	nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 				   const struct nlmsghdr* nlh,
-				   const struct rtmsg* rtmsg, int rta_len);
+				   const struct rtmsg* rtmsg, int rta_len,
+				   const FibConfig& fibconfig);
 
     /**
      * Check that a previous netlink request has succeeded.

@@ -212,6 +212,8 @@ public:
 	 */
 	bool empty() const { return _receivers.empty(); }
 
+	set<string>& get_receivers() { return _receivers; }
+
     private:
 	Mac		_group_address;
 	set<string>	_receivers;

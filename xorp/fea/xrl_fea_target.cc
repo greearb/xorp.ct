@@ -1882,6 +1882,15 @@ XrlFeaTarget::ifmgr_0_1_delete_interface(
 {
     string error_msg;
 
+    XLOG_INFO("Deleting interface, ifname: %s\n", ifname.c_str());
+
+    // Hack:  Remove multicast addrs first. --Ben
+    string empty;
+    _io_ip_manager.leave_all_multicast_groups(ifname, empty, error_msg);
+    if (error_msg.size()) {
+	XLOG_ERROR(error_msg.c_str());
+    }
+
     if (_ifconfig.add_transaction_operation(
 	    tid,
 	    new RemoveInterface(_ifconfig, ifname),
@@ -2381,6 +2390,14 @@ XrlFeaTarget::ifmgr_0_1_delete_vif(
     const string&	vifname)
 {
     string error_msg;
+
+    XLOG_ERROR("Deleting vif, ifname: %s  vif: %s\n", ifname.c_str(), vifname.c_str());
+
+    // Hack:  Remove multicast addrs first. --Ben
+    _io_ip_manager.leave_all_multicast_groups(ifname, vifname, error_msg);
+    if (error_msg.size()) {
+	XLOG_ERROR(error_msg.c_str());
+    }
 
     if (_ifconfig.add_transaction_operation(
 	    tid,
@@ -3379,6 +3396,10 @@ XrlFeaTarget::raw_link_0_1_register_receiver(
 {
     string error_msg;
 
+    XLOG_INFO("register receiver, target: %s iface: %s:%s ether: %i  filter: %s  mcast_loopback: %i\n",
+	      xrl_target_instance_name.c_str(), if_name.c_str(), vif_name.c_str(),
+	      ether_type, filter_program.c_str(), (int)(enable_multicast_loopback));
+
     if (_io_link_manager.register_receiver(xrl_target_instance_name,
 					   if_name, vif_name,
 					   ether_type, filter_program,
@@ -3401,6 +3422,10 @@ XrlFeaTarget::raw_link_0_1_unregister_receiver(
     const string&	filter_program)
 {
     string error_msg;
+
+    XLOG_INFO("unregister receiver, target: %s iface: %s:%s ether: %i  filter: %s\n",
+	      xrl_target_instance_name.c_str(), if_name.c_str(), vif_name.c_str(),
+	      ether_type, filter_program.c_str());
 
     if (_io_link_manager.unregister_receiver(xrl_target_instance_name,
 					     if_name, vif_name,
@@ -3488,6 +3513,9 @@ XrlFeaTarget::raw_packet4_0_1_send(
 			    ext_headers_payload_vector,
 			    payload, error_msg)
 	!= XORP_OK) {
+	assert(error_msg.size()); // don't allow empty error messages.
+	//XLOG_ERROR("Failed raw_packet4_0_1_send, iface: %s/%s  error_msg: %s\n",
+	//	   if_name.c_str(), vif_name.c_str(), error_msg.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -3794,6 +3822,8 @@ XrlFeaTarget::socket4_0_1_udp_open_and_bind(
     const string&	creator,
     const IPv4&		local_addr,
     const uint32_t&	local_port,
+    const string&       local_dev,
+    const uint32_t&     reuse,
     // Output values,
     string&		sockid)
 {
@@ -3806,6 +3836,7 @@ XrlFeaTarget::socket4_0_1_udp_open_and_bind(
 
     if (_io_tcpudp_manager.udp_open_and_bind(IPv4::af(), creator,
 					     IPvX(local_addr), local_port,
+					     local_dev, reuse,
 					     sockid, error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -4232,6 +4263,8 @@ XrlFeaTarget::socket6_0_1_udp_open_and_bind(
     const string&	creator,
     const IPv6&		local_addr,
     const uint32_t&	local_port,
+    const string&       local_dev,
+    const uint32_t&     reuse,
     // Output values,
     string&		sockid)
 {
@@ -4244,6 +4277,7 @@ XrlFeaTarget::socket6_0_1_udp_open_and_bind(
 
     if (_io_tcpudp_manager.udp_open_and_bind(IPv6::af(), creator,
 					     IPvX(local_addr), local_port,
+					     local_dev, reuse,
 					     sockid, error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);

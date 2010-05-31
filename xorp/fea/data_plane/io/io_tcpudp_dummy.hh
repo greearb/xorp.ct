@@ -105,8 +105,8 @@ public:
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int udp_open_and_bind(const IPvX& local_addr, uint16_t local_port,
-			  string& error_msg);
+    int udp_open_and_bind(const IPvX& local_addr, uint16_t local_port, const string& local_dev,
+			  int reuse, string& error_msg);
 
     /**
      * Create a bound UDP multicast socket.

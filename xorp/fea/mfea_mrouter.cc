@@ -90,6 +90,68 @@
 #include "mfea_kernel_messages.hh"
 #include "mfea_osdep.hh"
 #include "mfea_mrouter.hh"
+#include "fibconfig.hh"
+
+
+#if defined(HOST_OS_LINUX)
+// Attempt to use multiple mcast tables if kernel supports it.
+#define USE_MULT_MCAST_TABLES
+#endif
+
+#ifdef USE_MULT_MCAST_TABLES
+/** In order to support multiple routing tables, the kernel API had to be extended.
+ * Since no distro has this currently in #include files, add private definitions
+ * here. --Ben
+ */
+
+// Assume supported until we know otherwise.
+bool supports_mcast_tables = true;
+
+#define DFLT_MROUTE_TBL 254  /* 'main' routing table id in Linux */
+
+
+// Support for multiple routing tables.
+#define SIOCGETVIFCNT_NG	(SIOCPROTOPRIVATE+3)
+#define SIOCGETSGCNT_NG	(SIOCPROTOPRIVATE+4)
+
+/* For supporting multiple routing tables */
+struct vifctl_ng {
+	struct vifctl vif;
+	unsigned int table_id;
+} __attribute__ ((packed));
+
+struct mfcctl_ng {
+	struct mfcctl mfc;
+	unsigned int table_id;
+} __attribute__ ((packed));
+
+/* Used with these options:
+	case MRT_INIT:
+	case MRT_DONE:
+	case MRT_ASSERT:
+#ifdef CONFIG_IP_PIMSM
+	case MRT_PIM:
+#endif
+and all getsockopt options
+*/
+struct mrt_sockopt_simple {
+	unsigned int optval;
+	unsigned int table_id;
+};
+
+struct sioc_sg_req_ng {
+	struct sioc_sg_req req;
+	unsigned int table_id;
+} __attribute__ ((packed));
+	
+struct sioc_vif_req_ng {
+	struct sioc_vif_req vif;
+	unsigned int table_id;
+} __attribute__ ((packed));
+
+#else
+bool supports_mcast_tables = false;
+#endif
 
 
 //
@@ -120,14 +182,14 @@
  * MfeaMrouter::MfeaMrouter:
  * @mfea_node: The MfeaNode I belong to.
  **/
-MfeaMrouter::MfeaMrouter(MfeaNode& mfea_node)
+MfeaMrouter::MfeaMrouter(MfeaNode& mfea_node, const FibConfig& fibconfig)
     : ProtoUnit(mfea_node.family(), mfea_node.module_id()),
       _mfea_node(mfea_node),
       _mrt_api_mrt_mfc_flags_disable_wrongvif(false),
       _mrt_api_mrt_mfc_flags_border_vif(false),
       _mrt_api_mrt_mfc_rp(false),
       _mrt_api_mrt_mfc_bw_upcall(false),
-      _multicast_forwarding_enabled(false)
+      _multicast_forwarding_enabled(false), _fibconfig(fibconfig)
 {
     string error_msg;
 
@@ -279,6 +341,14 @@ MfeaMrouter::stop()
     return (XORP_OK);
 }
 
+int MfeaMrouter::getTableId() const {
+    int table_id = DFLT_MROUTE_TBL;
+    if (_fibconfig.unicast_forwarding_table_id_is_configured(family())) {
+        table_id = _fibconfig.unicast_forwarding_table_id(family());
+    }
+    return table_id;
+}
+
 /**
  * Test if the underlying system supports IPv4 multicast routing.
  * 
@@ -293,7 +363,14 @@ MfeaMrouter::have_multicast_routing4() const
 #else
     int s;
     int mrouter_version = 1;	// XXX: hardcoded version
-    
+
+#ifdef USE_MULT_MCAST_TABLES
+    struct mrt_sockopt_simple tmp;
+    memset(&tmp, 0, sizeof(tmp));
+    tmp.table_id = getTableId();
+    tmp.optval = 1; //version
+#endif
+
     if (! is_ipv4())
 	return (false);		// Wrong family
     
@@ -310,12 +387,24 @@ MfeaMrouter::have_multicast_routing4() const
     s = socket(family(), SOCK_RAW, kernel_mrouter_ip_protocol());
     if (s < 0)
 	return (false);		// Failure to open the socket
-    
-    if (setsockopt(s, IPPROTO_IP, MRT_INIT,
-		   (void *)&mrouter_version, sizeof(mrouter_version))
-	< 0) {
-	close(s);
-	return (false);
+
+    // First, try for multiple routing tables.
+#ifdef USE_MULT_MCAST_TABLES
+    errno = 0;
+    if (setsockopt(s, IPPROTO_IP, MRT_INIT, &tmp, sizeof(tmp)) < 0) {
+	// Ok, not this
+	supports_mcast_tables = false;
+    }
+    else {
+	supports_mcast_tables = true;
+    }
+#endif
+
+    if (!supports_mcast_tables) {
+	if (setsockopt(s, IPPROTO_IP, MRT_INIT, &mrouter_version, sizeof(mrouter_version)) < 0) {
+	    close(s);
+	    return (false);
+	}
     }
     
     // Success
@@ -691,12 +780,39 @@ MfeaMrouter::start_mrt()
 		       error_msg.c_str());
 	    return (XORP_ERROR);
 	}
-	if (setsockopt(_mrouter_socket, IPPROTO_IP, MRT_INIT,
-		       (void *)&mrouter_version, sizeof(mrouter_version))
-	    < 0) {
-	    XLOG_ERROR("setsockopt(MRT_INIT, %u) failed: %s",
-		       mrouter_version, strerror(errno));
-	    return (XORP_ERROR);
+
+#ifdef USE_MULT_MCAST_TABLES
+	struct mrt_sockopt_simple tmp;
+	memset(&tmp, 0, sizeof(tmp));
+	tmp.table_id = getTableId();
+	tmp.optval = 1; //version
+
+	if (setsockopt(_mrouter_socket, IPPROTO_IP, MRT_INIT, &tmp, sizeof(tmp)) < 0) {
+	    // Ok, not this
+	    supports_mcast_tables = false;
+	    XLOG_ERROR("MROUTE:  WARNING:  setsockopt(MRT_INIT) does not support multiple routing tables:: %s",
+		       strerror(errno));
+	}
+	else {
+	    supports_mcast_tables = true;
+	    XLOG_ERROR("MROUTE:  setsockopt(MRT_INIT) supports multiple routing tables!");
+	    XLOG_ERROR("mroute ioctl struct sizes: mfcctl: %i mfcctl_ng: %i  mrt_sockopt_simple: %i"
+		       "  sioc_sg_req: %i  sioc_sg_req_ng: %i  sioc_vif_req: %i  sioc_vif_req_ng: %i\n",
+		       (int)(sizeof(struct mfcctl)), (int)(sizeof(struct mfcctl_ng)),
+		       (int)(sizeof(struct mrt_sockopt_simple)),
+		       (int)(sizeof(struct sioc_sg_req)), (int)(sizeof(struct sioc_sg_req_ng)),
+		       (int)(sizeof(struct sioc_vif_req)), (int)(sizeof(struct sioc_vif_req_ng)));
+	}
+#endif
+
+	if (!supports_mcast_tables) {
+	    if (setsockopt(_mrouter_socket, IPPROTO_IP, MRT_INIT,
+			   (void *)&mrouter_version, sizeof(mrouter_version))
+		< 0) {
+		XLOG_ERROR("setsockopt(MRT_INIT, %u) failed: %s",
+			   mrouter_version, strerror(errno));
+		return (XORP_ERROR);
+	    }
 	}
 #endif // HAVE_IPV4_MULTICAST_ROUTING
 	break;
@@ -899,6 +1015,9 @@ MfeaMrouter::stop_mrt()
     if (!_mrouter_socket.is_valid())
 	return (XORP_ERROR);
     
+    size_t sz = 0;
+    void* o = NULL;
+
     switch (family()) {
     case AF_INET:
 #ifndef HAVE_IPV4_MULTICAST_ROUTING
@@ -911,8 +1030,21 @@ MfeaMrouter::stop_mrt()
 		       error_msg.c_str());
 	    return (XORP_ERROR);
 	}
-	if (setsockopt(_mrouter_socket, IPPROTO_IP, MRT_DONE, NULL, 0)
-	    < 0) {
+
+#ifdef USE_MULT_MCAST_TABLES
+	struct mrt_sockopt_simple tmp;
+	memset(&tmp, 0, sizeof(tmp));
+	tmp.table_id = getTableId();
+	tmp.optval = 1; //version
+	sz = sizeof(tmp);
+	o = &tmp;
+	if (!supports_mcast_tables) {
+	    sz = 0;
+	    o = NULL;
+	}
+#endif
+
+	if (setsockopt(_mrouter_socket, IPPROTO_IP, MRT_DONE, o, sz) < 0) {
 	    XLOG_ERROR("setsockopt(MRT_DONE) failed: %s", strerror(errno));
 	    return (XORP_ERROR);
 	}
@@ -952,6 +1084,8 @@ int
 MfeaMrouter::start_pim(string& error_msg)
 {
     int v = 1;
+    size_t sz = 0;
+    void* o = NULL;
 
     switch (family()) {
     case AF_INET:
@@ -960,8 +1094,23 @@ MfeaMrouter::start_pim(string& error_msg)
 			     "IPv4 multicast routing not supported");
 	return (XORP_ERROR);
 #else
-	if (setsockopt(_mrouter_socket, IPPROTO_IP, MRT_PIM,
-		       (void *)&v, sizeof(v)) < 0) {
+#ifdef USE_MULT_MCAST_TABLES
+	struct mrt_sockopt_simple tmp;
+	memset(&tmp, 0, sizeof(tmp));
+	tmp.table_id = getTableId();
+	tmp.optval = 1; //pim
+	sz = sizeof(tmp);
+	o = &tmp;
+	if (!supports_mcast_tables) {
+	    sz = sizeof(v);
+	    o = &v;
+	}
+#else
+	sz = sizeof(v);
+	o = &v;
+#endif
+
+	if (setsockopt(_mrouter_socket, IPPROTO_IP, MRT_PIM, o, sz) < 0) {
 	    error_msg = c_format("setsockopt(MRT_PIM, %u) failed: %s",
 				 v, strerror(errno));
 	    return (XORP_ERROR);
@@ -1001,6 +1150,8 @@ int
 MfeaMrouter::stop_pim(string& error_msg)
 {
     int v = 0;
+    size_t sz = 0;
+    void* o = NULL;
 
     if (!_mrouter_socket.is_valid())
 	return (XORP_ERROR);
@@ -1012,9 +1163,23 @@ MfeaMrouter::stop_pim(string& error_msg)
 			     "IPv4 multicast routing not supported");
 	return (XORP_ERROR);
 #else
-	v = 0;
-	if (setsockopt(_mrouter_socket, IPPROTO_IP, MRT_PIM,
-		       (void *)&v, sizeof(v)) < 0) {
+#ifdef USE_MULT_MCAST_TABLES
+	struct mrt_sockopt_simple tmp;
+	memset(&tmp, 0, sizeof(tmp));
+	tmp.table_id = getTableId();
+	tmp.optval = 0; //pim
+	sz = sizeof(tmp);
+	o = &tmp;
+	if (!supports_mcast_tables) {
+	    sz = sizeof(v);
+	    o = &v;
+	}
+#else
+	sz = sizeof(v);
+	o = &v;
+#endif
+
+	if (setsockopt(_mrouter_socket, IPPROTO_IP, MRT_PIM, o, sz) < 0) {
 	    error_msg = c_format("setsockopt(MRT_PIM, %u) failed: %s",
 				 v, strerror(errno));
 	    return (XORP_ERROR);
@@ -1066,6 +1231,9 @@ MfeaMrouter::add_multicast_vif(uint32_t vif_index)
     
     if (mfea_vif == NULL)
 	return (XORP_ERROR);
+
+    void* sopt_arg = NULL;
+    size_t sz = 0;
     
     switch (family()) {
     case AF_INET:
@@ -1075,9 +1243,24 @@ MfeaMrouter::add_multicast_vif(uint32_t vif_index)
 		   "IPv4 multicast routing not supported");
 	return (XORP_ERROR);
 #else
+#ifdef USE_MULT_MCAST_TABLES
+	struct vifctl_ng vc_ng;
+	struct vifctl& vc = vc_ng.vif;
+	memset(&vc_ng, 0, sizeof(vc_ng));
+	sopt_arg = &vc_ng;
+	sz = sizeof(vc_ng);
+	vc_ng.table_id = getTableId();
+	if (!supports_mcast_tables) {
+	    sopt_arg = &(vc_ng.vif);
+	    sz = sizeof(vc_ng.vif);
+	}
+#else
 	struct vifctl vc;
-	
 	memset(&vc, 0, sizeof(vc));
+	sopt_arg = &vc;
+	sz = sizeof(vc);
+#endif
+
 	vc.vifc_vifi = mfea_vif->vif_index();
 	// XXX: we don't (need to) support VIFF_TUNNEL; VIFF_SRCRT is obsolete
 	vc.vifc_flags = 0;
@@ -1097,9 +1280,10 @@ MfeaMrouter::add_multicast_vif(uint32_t vif_index)
 	// because we don't (need to) support IPIP tunnels.
 	//
 	if (setsockopt(_mrouter_socket, IPPROTO_IP, MRT_ADD_VIF,
-		       (void *)&vc, sizeof(vc)) < 0) {
-	    XLOG_ERROR("setsockopt(MRT_ADD_VIF, vif %s) failed: %s",
-		       mfea_vif->name().c_str(), strerror(errno));
+		       sopt_arg, sz) < 0) {
+	    XLOG_ERROR("setsockopt(MRT_ADD_VIF, vif %s) failed: %s  sz: %i",
+		       mfea_vif->name().c_str(), strerror(errno),
+		       (int)(sz));
 	    return (XORP_ERROR);
 	}
 #endif // HAVE_IPV4_MULTICAST_ROUTING
@@ -1178,11 +1362,26 @@ MfeaMrouter::delete_multicast_vif(uint32_t vif_index)
 	// an argument of type "vifi_t".
 	//
 #ifdef HOST_OS_LINUX
+#ifdef USE_MULT_MCAST_TABLES
+	struct vifctl_ng vc_ng;
+	struct vifctl& vc = vc_ng.vif;
+	memset(&vc_ng, 0, sizeof(vc_ng));
+	void* sopt_arg = &vc_ng;
+	size_t sz = sizeof(vc_ng);
+	vc_ng.table_id = getTableId();
+	if (!supports_mcast_tables) {
+	    sopt_arg = &(vc_ng.vif);
+	    sz = sizeof(vc_ng.vif);
+	}
+#else
 	struct vifctl vc;
 	memset(&vc, 0, sizeof(vc));
+	void* sopt_arg = &vc;
+	size_t sz = sizeof(vc);
+#endif
 	vc.vifc_vifi = mfea_vif->vif_index();
 	ret_value = setsockopt(_mrouter_socket, IPPROTO_IP, MRT_DEL_VIF,
-			       (void *)&vc, sizeof(vc));
+			       sopt_arg, sz);
 #else
 	vifi_t vifi = mfea_vif->vif_index();
 	ret_value = setsockopt(_mrouter_socket, IPPROTO_IP, MRT_DEL_VIF,
@@ -1253,6 +1452,11 @@ MfeaMrouter::add_mfc(const IPvX& source, const IPvX& group,
 		     uint8_t *oifs_flags,
 		     const IPvX& rp_addr)
 {
+
+    //XLOG_ERROR("MfeaMrouter::add_mfc, source: %s group: %s iif_vif_index: %i  rp_addr: %s\n",
+    //       source.str().c_str(), group.str().c_str(), iif_vif_index,
+    //       rp_addr.str().c_str());
+
     if (iif_vif_index >= mfea_node().maxvifs())
 	return (XORP_ERROR);
     
@@ -1291,13 +1495,28 @@ MfeaMrouter::add_mfc(const IPvX& source, const IPvX& group,
 	return (XORP_ERROR);
 #else
 
+#ifdef USE_MULT_MCAST_TABLES
+	struct mfcctl_ng mc_ng;
+	struct mfcctl& mc = mc_ng.mfc;
+	memset(&mc_ng, 0, sizeof(mc_ng));
+	void* sopt_arg = &mc_ng;
+	size_t sz = sizeof(mc_ng);
+	mc_ng.table_id = getTableId();
+	if (!supports_mcast_tables) {
+	    sopt_arg = &(mc_ng.mfc);
+	    sz = sizeof(mc_ng.mfc);
+	}
+#else
 #if defined(HAVE_STRUCT_MFCCTL2) && defined(ENABLE_ADVANCED_MULTICAST_API)
 	struct mfcctl2 mc;
 #else
 	struct mfcctl mc;
 #endif
-	
+	void* sopt_arg = &mc;
+	size_t sz = sizeof(mc);
 	memset(&mc, 0, sizeof(mc));
+#endif
+	
 	source.copy_out(mc.mfcc_origin);
 	group.copy_out(mc.mfcc_mcastgrp);
 	mc.mfcc_parent = iif_vif_index;
@@ -1313,7 +1532,7 @@ MfeaMrouter::add_mfc(const IPvX& source, const IPvX& group,
 #endif
 	
 	if (setsockopt(_mrouter_socket, IPPROTO_IP, MRT_ADD_MFC,
-		       (void *)&mc, sizeof(mc)) < 0) {
+		       sopt_arg, sz) < 0) {
 	    XLOG_ERROR("setsockopt(MRT_ADD_MFC, (%s, %s)) failed: %s",
 		       cstring(source), cstring(group), strerror(errno));
 	    return (XORP_ERROR);
@@ -1404,13 +1623,28 @@ MfeaMrouter::delete_mfc(const IPvX& source, const IPvX& group)
 		   "IPv4 multicast routing not supported");
 	return (XORP_ERROR);
 #else
+#ifdef USE_MULT_MCAST_TABLES
+	struct mfcctl_ng mc_ng;
+	struct mfcctl& mc = mc_ng.mfc;
+	memset(&mc_ng, 0, sizeof(mc_ng));
+	void* sopt_arg = &mc_ng;
+	size_t sz = sizeof(mc_ng);
+	mc_ng.table_id = getTableId();
+	if (!supports_mcast_tables) {
+	    sopt_arg = &(mc_ng.mfc);
+	    sz = sizeof(mc_ng.mfc);
+	}
+#else
 	struct mfcctl mc;
-	
+	void* sopt_arg = &mc;
+	size_t sz = sizeof(mc);
+#endif
+
 	source.copy_out(mc.mfcc_origin);
 	group.copy_out(mc.mfcc_mcastgrp);
 	
 	if (setsockopt(_mrouter_socket, IPPROTO_IP, MRT_DEL_MFC,
-		       (void *)&mc, sizeof(mc)) < 0) {
+		       sopt_arg, sz) < 0) {
 	    XLOG_ERROR("setsockopt(MRT_DEL_MFC, (%s, %s)) failed: %s",
 		       cstring(source), cstring(group), strerror(errno));
 	    return (XORP_ERROR);
@@ -1992,23 +2226,39 @@ MfeaMrouter::get_sg_count(const IPvX& source, const IPvX& group,
 		   "IPv4 multicast routing not supported");
 	return (XORP_ERROR);
 #else
+	int ioctl_cmd = SIOCGETSGCNT;
+#ifdef USE_MULT_MCAST_TABLES
+	struct sioc_sg_req_ng sgreq_ng;
+	memset(&sgreq_ng, 0, sizeof(sgreq_ng));
+	sgreq_ng.table_id = getTableId();
+	struct sioc_sg_req& sgreq = (sgreq_ng.req);
+	void* o = &sgreq_ng;
+	ioctl_cmd = SIOCGETSGCNT_NG;
+	if (!supports_mcast_tables) {
+	    o = &(sgreq_ng.req);
+	    ioctl_cmd = SIOCGETSGCNT;
+	}
+#else
 	struct sioc_sg_req sgreq;
-	
 	memset(&sgreq, 0, sizeof(sgreq));
+	void* o = &sgreq;
+#endif
+	
 	source.copy_out(sgreq.src);
 	group.copy_out(sgreq.grp);
+
 	//
 	// XXX: some older mcast code has bug in ip_mroute.c, get_sg_cnt():
 	// the return code is always 0, so this is why we need to check
 	// if all values are 0xffffffffU (the indication for error).
 	// TODO: remove the 0xffffffffU check in the future.
 	//
-	if ((ioctl(_mrouter_socket, SIOCGETSGCNT, &sgreq) < 0)
+	if ((ioctl(_mrouter_socket, ioctl_cmd, o) < 0)
 	    || ((sgreq.pktcnt == 0xffffffffU)
 		&& (sgreq.bytecnt == 0xffffffffU)
 		&& (sgreq.wrong_if == 0xffffffffU))) {
-	    XLOG_ERROR("ioctl(SIOCGETSGCNT, (%s %s)) failed: %s",
-		       cstring(source), cstring(group), strerror(errno));
+	    XLOG_ERROR("ioctl(SIOCGETSGCNT(%i), (%s %s)) failed: %s",
+		       ioctl_cmd, cstring(source), cstring(group), strerror(errno));
 	    sg_count.set_pktcnt(~0U);
 	    sg_count.set_bytecnt(~0U);
 	    sg_count.set_wrong_if(~0U);
@@ -2091,11 +2341,27 @@ MfeaMrouter::get_vif_count(uint32_t vif_index, VifCount& vif_count)
 		   "IPv4 multicast routing not supported");
 	return (XORP_ERROR);
 #else
+	int ioctl_cmd = SIOCGETVIFCNT;
+#ifdef USE_MULT_MCAST_TABLES
+	struct sioc_vif_req_ng vreq_ng;
+	memset(&vreq_ng, 0, sizeof(vreq_ng));
+	vreq_ng.table_id = getTableId();
+	struct sioc_vif_req& vreq = (vreq_ng.vif);
+	void* o = &vreq_ng;
+	ioctl_cmd = SIOCGETVIFCNT_NG;
+	if (!supports_mcast_tables) {
+	    o = &(vreq_ng.vif);
+	    ioctl_cmd = SIOCGETVIFCNT;
+	}
+#else
 	struct sioc_vif_req vreq;
-
 	memset(&vreq, 0, sizeof(vreq));
+	void* o = &vreq;
+#endif
+
 	vreq.vifi = mfea_vif->vif_index();
-	if (ioctl(_mrouter_socket, SIOCGETVIFCNT, &vreq) < 0) {
+
+	if (ioctl(_mrouter_socket, ioctl_cmd, o) < 0) {
 	    XLOG_ERROR("ioctl(SIOCGETVIFCNT, vif %s) failed: %s",
 		       mfea_vif->name().c_str(), strerror(errno));
 	    vif_count.set_icount(~0U);
@@ -2219,6 +2485,9 @@ MfeaMrouter::kernel_call_process(const uint8_t *databuf, size_t datalen)
 	    MfeaVif *mfea_vif = mfea_node().vif_find_by_vif_index(iif_vif_index);
 	    if ((mfea_vif == NULL) || (! mfea_vif->is_up())) {
 		// Silently ignore the packet
+		XLOG_ERROR("kernel_call_process, ignoring pkt, can't find mfea_vif by index: %i",
+			   iif_vif_index);
+
 		return (XORP_ERROR);
 	    }
 	}
@@ -2242,6 +2511,9 @@ MfeaMrouter::kernel_call_process(const uint8_t *databuf, size_t datalen)
 		|| (! dst.is_multicast())
 		|| (dst.is_linklocal_multicast())) {
 		// XXX: LAN-scoped addresses are not routed
+		XLOG_ERROR("kernel_call_process, src and/or dst not valid, src: %s  dst: %s",
+			   src.str().c_str(), dst.str().c_str());
+
 		return (XORP_ERROR);
 	    }
 	    break;

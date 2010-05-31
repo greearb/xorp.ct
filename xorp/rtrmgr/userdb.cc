@@ -43,12 +43,16 @@ User::User(uid_t user_id, const string& username)
 }
 
 bool 
-User::has_acl_capability(const string& capname) const
+User::has_acl_capability(const string& capname, string& err_msg) const
 {
     set<string>::const_iterator iter;
 
     iter = _capabilities.find(capname);
     if (iter == _capabilities.end()) {
+	char msg[128];
+	snprintf(msg, 128, "Cannot find capability: %s in user: %s (%i)",
+		 capname.c_str(), _username.c_str(), (int)(_user_id));
+	err_msg = msg;
 	return false;
     } else {
 	return true;
@@ -171,11 +175,15 @@ UserDB::remove_user(uid_t user_id)
 }
 
 bool
-UserDB::has_capability(uid_t user_id, const string& capability)
+UserDB::has_capability(uid_t user_id, const string& capability, string& err_msg)
 {
     const User* user = find_user_by_user_id(user_id);
 
-    if (user == NULL) 
+    if (user == NULL) {
+	char msg[128];
+	snprintf(msg, 128, "Cannot find user: %i\n", (int)(user_id));
+	err_msg = msg;
 	return false;
-    return (user->has_acl_capability(capability));
+    }
+    return (user->has_acl_capability(capability, err_msg));
 }

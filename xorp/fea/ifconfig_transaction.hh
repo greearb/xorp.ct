@@ -135,7 +135,7 @@ public:
 	: IfConfigTransactionOperation(ifconfig, ifname) {}
 
     bool dispatch() {
-	if (iftree().add_interface(ifname()) != XORP_OK)
+	if (ifconfig().add_interface(ifname()) != XORP_OK)
 	    return (false);
 	return (true);
     }
@@ -149,13 +149,9 @@ public:
 class RemoveInterface : public IfConfigTransactionOperation {
 public:
     RemoveInterface(IfConfig& ifconfig, const string& ifname)
-	: IfConfigTransactionOperation(ifconfig, ifname) {}
+	: IfConfigTransactionOperation(ifconfig, ifname) { }
 
-    bool dispatch() {
-	if (iftree().remove_interface(ifname()) != XORP_OK)
-	    return (false);
-	return (true);
-    }
+    bool dispatch();
 
     string str() const {
 	return string("RemoveInterface: ") + ifname();
@@ -174,6 +170,10 @@ public:
     {}
 
     bool dispatch() {
+	// Force a read of ALL interfaces, not just ones we are configured
+	// to care about.
+	ifconfig().full_pulled_config();
+
 	if (_enable) {
 	    //
 	    // Configure all interfaces
@@ -184,7 +184,7 @@ public:
 		 iter != dev_config.interfaces().end();
 		 ++iter) {
 		const IfTreeInterface& iface = *(iter->second);
-		if (iftree().update_interface(iface) != XORP_OK)
+		if (ifconfig().update_interface(iface) != XORP_OK)
 		    return (false);
 	    }
 	}

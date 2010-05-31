@@ -111,7 +111,7 @@ public:
      */
     static int parse_buffer_netlink_socket(const IfTree& iftree, FteX& fte,
 					   const vector<uint8_t>& buffer,
-					   bool is_nlm_get_only);
+					   bool is_nlm_get_only, const FibConfig& fibconfig);
 
 private:
     /**

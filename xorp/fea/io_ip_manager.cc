@@ -329,6 +329,10 @@ IoIpComm::send_packet(const string&	if_name,
 	    ret_value = XORP_ERROR;
 	    if (! error_msg.empty())
 		error_msg += " ";
+	    error_msg += c_format("Error while sending to vif: %s:%s  src: %s  dest: %s:  ",
+				  if_name.c_str(), vif_name.c_str(),
+				  src_address.str().c_str(),
+				  dst_address.str().c_str());
 	    error_msg += error_msg2;
 	}
     }
@@ -461,6 +465,45 @@ IoIpComm::join_multicast_group(const string&	if_name,
 
     return (ret_value);
 }
+
+
+int
+IoIpComm::leave_all_multicast_groups(const string&	if_name,
+				const string&	vif_name,
+				string&		error_msg)
+{
+    //XLOG_ERROR("IoIpComm::leave_all_multicast_groups, if: %s  vif: %s\n",
+    //if_name.c_str(), vif_name.c_str());
+  start:
+    {
+	JoinedGroupsTable::iterator joined_iter;
+	for (joined_iter = _joined_groups_table.begin();
+	     joined_iter != _joined_groups_table.end(); joined_iter++) {
+	    //XLOG_ERROR("Found group, if: %s  vif: %s\n",
+	    //	       joined_iter->second.if_name().c_str(),
+	    //	       joined_iter->second.vif_name().c_str());
+	    if ((joined_iter->second.if_name() == if_name) &&
+		((vif_name.size() == 0) || (joined_iter->second.vif_name() == vif_name))) {
+
+		string tmp_vifn(joined_iter->second.vif_name());
+
+		//XLOG_ERROR("Matched, looking for receivers.\n");
+		set<string>::iterator ri = joined_iter->second.get_receivers().begin();
+		while (ri != joined_iter->second.get_receivers().end()) {
+		    //XLOG_ERROR("Found receiver: %s\n", ri->c_str());
+		    leave_multicast_group(if_name, tmp_vifn, joined_iter->second.group_address(),
+					  *ri, error_msg);
+		    // Maybe there are more...back out to top and search again.  This should keep our iterators
+		    // from being corrupted by the leave_multicast_group call.
+		    goto start;
+		}//for all receivers
+	    }//if this joined group matches our interface and vif (if specified)
+	}//for all joined groups
+    }//scoping brace
+    // We delete all we can find...whatever we found must have been OK.
+    return XORP_OK;
+}
+
 
 int
 IoIpComm::leave_multicast_group(const string&	if_name,
@@ -648,7 +691,7 @@ IoIpComm::stop_io_ip_plugins()
 }
 
 XorpFd
-IoIpComm::first_valid_protocol_fd_in()
+IoIpComm::first_valid_mcast_protocol_fd_in()
 {
     XorpFd xorp_fd;
 
@@ -656,7 +699,7 @@ IoIpComm::first_valid_protocol_fd_in()
     IoIpPlugins::iterator iter;
     for (iter = _io_ip_plugins.begin(); iter != _io_ip_plugins.end(); ++iter) {
 	IoIp* io_ip = iter->second;
-	xorp_fd = io_ip->protocol_fd_in();
+	xorp_fd = *(io_ip->mcast_protocol_fd_in());
 	if (xorp_fd.is_valid())
 	    return (xorp_fd);
     }
@@ -1010,6 +1053,19 @@ IoIpManager::join_multicast_group(const string&	receiver_name,
     return (XORP_ERROR);
 }
 
+
+int IoIpManager::leave_all_multicast_groups(const string& if_name,
+				       const string& vif_name,
+				       string& error_msg) {
+    CommTable::iterator cti;
+    for (cti = _comm_table4.begin(); cti != _comm_table4.end(); cti++) {
+	IoIpComm* c = cti->second;
+	c->leave_all_multicast_groups(if_name, vif_name, error_msg);
+    }
+    return XORP_OK;
+}
+
+
 int
 IoIpManager::leave_multicast_group(const string&	receiver_name,
 				   const string&	if_name,
@@ -1058,7 +1114,7 @@ IoIpManager::register_system_multicast_upcall_receiver(
     int		family,
     uint8_t	ip_protocol,
     IoIpManager::UpcallReceiverCb receiver_cb,
-    XorpFd&	receiver_fd,
+    XorpFd&	mcast_receiver_fd,
     string&	error_msg)
 {
     SystemMulticastUpcallFilter* filter;
@@ -1098,7 +1154,7 @@ IoIpManager::register_system_multicast_upcall_receiver(
 	if (filter->ip_protocol() == ip_protocol) {
 	    // Already have this filter
 	    filter->set_receiver_cb(receiver_cb);
-	    receiver_fd = io_ip_comm->first_valid_protocol_fd_in();
+	    mcast_receiver_fd = io_ip_comm->first_valid_mcast_protocol_fd_in();
 	    return (XORP_OK);
 	}
     }
@@ -1115,7 +1171,7 @@ IoIpManager::register_system_multicast_upcall_receiver(
     // Add the filter to those associated with empty receiver_name
     filters.insert(FilterBag::value_type(receiver_name, filter));
 
-    receiver_fd = io_ip_comm->first_valid_protocol_fd_in();
+    mcast_receiver_fd = io_ip_comm->first_valid_mcast_protocol_fd_in();
 
     return (XORP_OK);
 }

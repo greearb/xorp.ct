@@ -235,7 +235,7 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int udp_open_and_bind(const IPvX& local_addr, uint16_t local_port,
-			  string& sockid, string& error_msg);
+			  const string& local_dev, int reuse, string& sockid, string& error_msg);
 
     /**
      * Create a bound UDP multicast socket.
@@ -742,6 +742,7 @@ public:
      */
     int udp_open_and_bind(int family, const string& creator,
 			  const IPvX& local_addr, uint16_t local_port,
+			  const string& local_dev, int reuse,
 			  string& sockid, string& error_msg);
 
     /**

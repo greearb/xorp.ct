@@ -79,7 +79,7 @@ Ospf<A>::receive(const string& interface, const string& vif,
 		 A dst, A src, uint8_t* data, uint32_t len)
 {
     XLOG_TRACE(trace()._packets, 
-	       "Interface %s Vif %s dst %s src %s data %p len %u\n",
+	       "Ospf::received packet, Interface %s Vif %s dst %s src %s data %p len %u\n",
 	      interface.c_str(), vif.c_str(),
 	      dst.str().c_str(), src.str().c_str(),
 	      data, len);
@@ -121,7 +121,8 @@ template <typename A>
 bool
 Ospf<A>::enable_interface_vif(const string& interface, const string& vif)
 {
-    debug_msg("Interface %s Vif %s\n", interface.c_str(), vif.c_str());
+    XLOG_TRACE(trace()._packets, "Enable Interface %s Vif %s\n",
+	       interface.c_str(), vif.c_str());
 
     if (string(VLINK) == interface)
 	return true;
@@ -133,7 +134,8 @@ template <typename A>
 bool
 Ospf<A>::disable_interface_vif(const string& interface, const string& vif)
 {
-    debug_msg("Interface %s Vif %s\n", interface.c_str(), vif.c_str());
+    XLOG_TRACE(trace()._packets, "Disable Interface %s Vif %s\n",
+	       interface.c_str(), vif.c_str());
 
     if (string(VLINK) == interface)
 	return true;

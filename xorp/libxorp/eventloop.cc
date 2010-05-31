@@ -26,6 +26,7 @@
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+#include "libxipc/finder.hh"
 
 #include "eventloop.hh"
 
@@ -74,7 +75,7 @@ EventLoop::~EventLoop()
 void
 EventLoop::run()
 {
-    static const time_t MAX_ALLOWED = 2;
+    static const time_t MAX_ALLOWED = (XORP_HELLO_TIMER_MS/1000) + 2;
     TimeVal t;
 
     _timer_list.advance_time();
@@ -117,10 +118,34 @@ bool
 EventLoop::do_work(bool can_block)
 {
     TimeVal t;
+    UNUSED(can_block);
 
     _timer_list.current_time(t);
     _timer_list.get_next_delay(t);
 
+    
+    // Run timers if they need it.
+    if (t == TimeVal::ZERO()) {
+	_timer_list.run();
+    }
+    
+    if (!_task_list.empty()) {
+	_task_list.run();
+	if (!_task_list.empty()) {
+	    // Run task again as soon as possible.
+	    t = TimeVal::ZERO();
+	}
+    }
+    
+#ifdef HOST_OS_WINDOWS
+    _win_dispatcher.wait_and_dispatch(t);
+#else
+    _selector_list.wait_and_dispatch(t);
+#endif
+    
+    return false; // don't use the 'aggressiveness' logic.
+    
+#if 0
     int timer_priority	  = XorpTask::PRIORITY_INFINITY;
     int selector_priority = XorpTask::PRIORITY_INFINITY;
     int task_priority	  = XorpTask::PRIORITY_INFINITY;
@@ -180,7 +205,7 @@ EventLoop::do_work(bool can_block)
 	_selector_list.wait_and_dispatch(t);
 	// XXX return false if you want to be conservative.  -sorbo.
     }
-
+#endif
     return true;
 }
 

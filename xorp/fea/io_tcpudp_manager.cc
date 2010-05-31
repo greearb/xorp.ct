@@ -171,6 +171,7 @@ IoTcpUdpComm::tcp_open_and_bind(const IPvX& local_addr, uint16_t local_port,
 
 int
 IoTcpUdpComm::udp_open_and_bind(const IPvX& local_addr, uint16_t local_port,
+				const string& local_dev, int reuse,
 				string& sockid, string& error_msg)
 {
     int ret_value = XORP_OK;
@@ -188,7 +189,7 @@ IoTcpUdpComm::udp_open_and_bind(const IPvX& local_addr, uint16_t local_port,
 	 iter != _io_tcpudp_plugins.end();
 	 ++iter) {
 	IoTcpUdp* io_tcpudp = iter->second;
-	if (io_tcpudp->udp_open_and_bind(local_addr, local_port, error_msg2)
+	if (io_tcpudp->udp_open_and_bind(local_addr, local_port, local_dev, reuse, error_msg2)
 	    != XORP_OK) {
 	    ret_value = XORP_ERROR;
 	    if (! error_msg.empty())
@@ -1261,6 +1262,7 @@ IoTcpUdpManager::tcp_open_and_bind(int family, const string& creator,
 int
 IoTcpUdpManager::udp_open_and_bind(int family, const string& creator,
 				   const IPvX& local_addr, uint16_t local_port,
+				   const string& local_dev, int reuse,
 				   string& sockid, string& error_msg)
 {
     IoTcpUdpComm* io_tcpudp_comm;
@@ -1280,7 +1282,7 @@ IoTcpUdpManager::udp_open_and_bind(int family, const string& creator,
     io_tcpudp_comm = open_io_tcpudp_comm(family, false, creator);
     XLOG_ASSERT(io_tcpudp_comm != NULL);
 
-    if (io_tcpudp_comm->udp_open_and_bind(local_addr, local_port, sockid,
+    if (io_tcpudp_comm->udp_open_and_bind(local_addr, local_port, local_dev, reuse, sockid,
 					  error_msg)
 	!= XORP_OK) {
 	delete_io_tcpudp_comm(family, io_tcpudp_comm->sockid());

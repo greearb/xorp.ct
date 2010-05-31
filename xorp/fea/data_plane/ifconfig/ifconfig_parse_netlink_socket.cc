@@ -60,27 +60,27 @@
 
 #ifdef HAVE_NETLINK_SOCKETS
 
-static void nlm_newlink_to_fea_cfg(IfTree& iftree,
-				   const struct ifinfomsg* ifinfomsg,
-				   int rta_len);
+static void nlm_cond_newlink_to_fea_cfg(const IfTree& user_config, IfTree& iftree,
+					const struct ifinfomsg* ifinfomsg,
+					int rta_len, bool& modified);
 static void nlm_dellink_to_fea_cfg(IfTree& iftree,
 				   const struct ifinfomsg* ifinfomsg,
-				   int rta_len);
-static void nlm_newdeladdr_to_fea_cfg(IfTree& iftree,
-				      const struct ifaddrmsg* ifaddrmsg,
-				      int rta_len, bool is_deleted);
+				   int rta_len, bool& modified);
+static void nlm_cond_newdeladdr_to_fea_cfg(const IfTree& user_config, IfTree& iftree,
+					   const struct ifaddrmsg* ifaddrmsg,
+					   int rta_len, bool is_deleted,
+					   bool& modified);
 
 int
 IfConfigGetNetlinkSocket::parse_buffer_netlink_socket(IfConfig& ifconfig,
 						      IfTree& iftree,
-						      const vector<uint8_t>& buffer)
+						      const vector<uint8_t>& buffer,
+						      bool& modified)
 {
     size_t buffer_bytes = buffer.size();
     AlignData<struct nlmsghdr> align_data(buffer);
     const struct nlmsghdr* nlh;
     bool recognized = false;
-
-    UNUSED(ifconfig);
 
     for (nlh = align_data.payload();
 	 NLMSG_OK(nlh, buffer_bytes);
@@ -125,9 +125,10 @@ IfConfigGetNetlinkSocket::parse_buffer_netlink_socket(IfConfig& ifconfig,
 	    }
 	    ifinfomsg = reinterpret_cast<const struct ifinfomsg*>(nlmsg_data);
 	    if (nlh->nlmsg_type == RTM_NEWLINK)
-		nlm_newlink_to_fea_cfg(iftree, ifinfomsg, rta_len);
+		nlm_cond_newlink_to_fea_cfg(ifconfig.user_config(), iftree,
+					    ifinfomsg, rta_len, modified);
 	    else
-		nlm_dellink_to_fea_cfg(iftree, ifinfomsg, rta_len);
+		nlm_dellink_to_fea_cfg(iftree, ifinfomsg, rta_len, modified);
 	    recognized = true;
 	}
 	break;
@@ -144,9 +145,11 @@ IfConfigGetNetlinkSocket::parse_buffer_netlink_socket(IfConfig& ifconfig,
 	    }
 	    ifaddrmsg = reinterpret_cast<const struct ifaddrmsg*>(nlmsg_data);
 	    if (nlh->nlmsg_type == RTM_NEWADDR) {
-		nlm_newdeladdr_to_fea_cfg(iftree, ifaddrmsg, rta_len, false);
+		nlm_cond_newdeladdr_to_fea_cfg(ifconfig.user_config(), iftree,
+					       ifaddrmsg, rta_len, false, modified);
 	    } else {
-		nlm_newdeladdr_to_fea_cfg(iftree, ifaddrmsg, rta_len, true);
+		nlm_cond_newdeladdr_to_fea_cfg(ifconfig.user_config(), iftree,
+					       ifaddrmsg, rta_len, true, modified);
 	    }
 	    recognized = true;
 	}
@@ -255,8 +258,8 @@ nlm_decode_ipvx_interface_address(const struct ifinfomsg* ifinfomsg,
 }
 
 static void
-nlm_newlink_to_fea_cfg(IfTree& iftree, const struct ifinfomsg* ifinfomsg,
-		       int rta_len)
+nlm_cond_newlink_to_fea_cfg(const IfTree& user_cfg, IfTree& iftree, const struct ifinfomsg* ifinfomsg,
+			    int rta_len, bool& modified)
 {
     const struct rtattr *rtattr;
     const struct rtattr *rta_array[IFLA_MAX + 1];
@@ -289,7 +292,14 @@ nlm_newlink_to_fea_cfg(IfTree& iftree, const struct ifinfomsg* ifinfomsg,
     }
     caddr_t rta_data = reinterpret_cast<caddr_t>(RTA_DATA(const_cast<struct rtattr*>(rta_array[IFLA_IFNAME])));
     if_name = string(reinterpret_cast<char*>(rta_data));
-    debug_msg("interface: %s\n", if_name.c_str());
+    //XLOG_WARNING("newlink, interface: %s  tree: %s\n", if_name.c_str(), iftree.getName().c_str());
+
+    if (! user_cfg.find_interface(if_name)) {
+	//XLOG_WARNING("Ignoring interface: %s as it is not found in the local config.\n", if_name.c_str());
+	return;
+    }
+
+    modified = true; // this is just for optimization..so if we somehow don't modify things, it's not a big deal.
     
     //
     // Get the interface index
@@ -521,7 +531,7 @@ nlm_newlink_to_fea_cfg(IfTree& iftree, const struct ifinfomsg* ifinfomsg,
 
 static void
 nlm_dellink_to_fea_cfg(IfTree& iftree, const struct ifinfomsg* ifinfomsg,
-		       int rta_len)
+		       int rta_len, bool& modified)
 {
     const struct rtattr *rtattr;
     const struct rtattr *rta_array[IFLA_MAX + 1];
@@ -543,7 +553,7 @@ nlm_dellink_to_fea_cfg(IfTree& iftree, const struct ifinfomsg* ifinfomsg,
     }
     caddr_t rta_data = reinterpret_cast<caddr_t>(RTA_DATA(const_cast<struct rtattr*>(rta_array[IFLA_IFNAME])));
     if_name = string(reinterpret_cast<char*>(rta_data));
-    debug_msg("Deleting interface name: %s\n", if_name.c_str());
+    XLOG_WARNING("dellink, interface: %s  tree: %s\n", if_name.c_str(), iftree.getName().c_str());
     
     //
     // Get the interface index
@@ -561,17 +571,23 @@ nlm_dellink_to_fea_cfg(IfTree& iftree, const struct ifinfomsg* ifinfomsg,
     //
     IfTreeInterface* ifp = iftree.find_interface(if_index);
     if (ifp != NULL) {
-	ifp->mark(IfTree::DELETED);
+	if (!ifp->is_marked(IfTree::DELETED)) {
+	    iftree.markIfaceDeleted(ifp);
+	    modified = true;
+	}
     }
     IfTreeVif* vifp = iftree.find_vif(if_index);
     if (vifp != NULL) {
-	vifp->mark(IfTree::DELETED);
+	if (!vifp->is_marked(IfTree::DELETED)) {
+	    iftree.markVifDeleted(vifp);
+	    modified = true;
+	}
     }
 }
 
 static void
-nlm_newdeladdr_to_fea_cfg(IfTree& iftree, const struct ifaddrmsg* ifaddrmsg,
-			  int rta_len, bool is_deleted)
+nlm_cond_newdeladdr_to_fea_cfg(const IfTree& user_config, IfTree& iftree, const struct ifaddrmsg* ifaddrmsg,
+			       int rta_len, bool is_deleted, bool& modified)
 {
     const struct rtattr *rtattr;
     const struct rtattr *rta_array[IFA_MAX + 1];
@@ -625,11 +641,20 @@ nlm_newdeladdr_to_fea_cfg(IfTree& iftree, const struct ifaddrmsg* ifaddrmsg,
 	    //
 	    return;
 	}
-	XLOG_FATAL("Could not find vif with index %u in IfTree", if_index);
+	else {
+	    const IfTreeVif* vifpc = user_config.find_vif(if_index);
+	    if (vifpc) {
+		XLOG_FATAL("Could not find vif with index %u in IfTree", if_index);
+	    }
+	    //else, not in local config, so ignore it
+	    return;
+	}
     }
     debug_msg("Address event on interface %s vif %s with interface index %u\n",
 	      vifp->ifname().c_str(), vifp->vifname().c_str(),
 	      vifp->pif_index());
+
+    modified = true; // this is just for optimization..so if we somehow don't modify things, it's not a big deal.
 
     //
     // Get the IP address, netmask, broadcast address, P2P destination

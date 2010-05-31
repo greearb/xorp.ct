@@ -300,7 +300,7 @@ FibConfigEntryGetNetlinkSocket::lookup_route_by_dest(const IPvX& dst,
 	return (XORP_ERROR);
     }
     if (parse_buffer_netlink_socket(fibconfig().system_config_iftree(), fte,
-				    _ns_reader.buffer(), true)
+				    _ns_reader.buffer(), true, fibconfig())
 	!= XORP_OK) {
 	return (XORP_ERROR);
     }

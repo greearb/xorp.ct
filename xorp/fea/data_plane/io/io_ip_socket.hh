@@ -37,6 +37,12 @@
 
 #include "fea/io_ip.hh"
 
+// Shall we use one socket per interface for receiving?  Defaulting
+// to enabled for Linux (its the only thing that supports SO_BINDTODEVICE it seems.)
+#ifdef SO_BINDTODEVICE
+#define USE_SOCKET_PER_IFACE
+#endif
+
 
 /**
  * @short A base class for I/O IP raw socket communication.
@@ -44,7 +50,7 @@
  * Each protocol 'registers' for I/O and gets assigned one object
  * of this class.
  */
-class IoIpSocket : public IoIp {
+class IoIpSocket : public IoIp, public IfTreeListener {
 public:
     /**
      * Constructor for a given address family and protocol.
@@ -185,12 +191,29 @@ public:
 			    string&		error_msg);
 
     /**
-     * Get the file descriptor for receiving protocol messages.
+     * Get the file descriptor for receiving protocol messages on the specified vif.
      *
      * @return a reference to the file descriptor for receiving protocol
      * messages.
      */
-    XorpFd& protocol_fd_in() { return (_proto_socket_in); }
+    XorpFd* findExistingInputSocket(const string& if_name, const string& vif_name);
+
+    /** Get the input file descriptor to be used for multicast routing.  This
+     * should not be bound to any specific interface.  Returns NULL if cannot
+     * find or create one.
+     */
+    XorpFd* mcast_protocol_fd_in();
+
+    /** Interface is going away..clean up the sockets for the associated vif(s) */
+    void notifyDeletingIface(const string& ifname);
+    void notifyErasingIface(const string& ifname) { notifyDeletingIface(ifname); }
+
+    /** VIF is going away..clean up the socket */
+    void notifyDeletingVif(const string& ifname, const string& vifname);
+    void notifyErasingVif(const string& ifname, const string& vifname) {
+	notifyDeletingVif(ifname, vifname);
+    }
+
 
 private:
     /**
@@ -204,6 +227,16 @@ private:
      */
     int		open_proto_sockets(string& error_msg);
 
+
+    /** Returns XORP_ERROR on error. */
+    int initializeInputSocket(XorpFd* rv, string& error_msg);
+
+    /** Find or create an input socket for the specified VIF.  Returns NULL
+     * if the socket cannot be found or created.
+     */
+    XorpFd* findOrCreateInputSocket(const string& if_name, const string& vif_name,
+				    string& error_msg);
+
     /**
      * Close the protocol sockets.
      * 
@@ -211,6 +244,12 @@ private:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		close_proto_sockets(string& error_msg);
+
+    /** Helper method to close a single socket.  Does not remove from
+     * socket map structure.  Deletes memory associated with 'fd'.
+     */
+    int cleanupXorpFd(XorpFd* fd);
+
 
     /**
      * Enable/disable the "Header Included" option (for IPv4) on the outgoing
@@ -244,7 +283,7 @@ private:
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		enable_recv_pktinfo(bool is_enabled, string& error_msg);
+    int enable_recv_pktinfo(XorpFd* input_fd, bool is_enabled, string& error_msg);
 
     /**
      * Read data from a protocol socket, and then call the appropriate protocol
@@ -274,7 +313,12 @@ private:
 				      string&		error_msg);
 
     // Private state
-    XorpFd	_proto_socket_in;    // The socket to receive protocol message
+    //XorpFd	_proto_socket_in;    // The socket to receive protocol message
+    // The key is "if_name vif_name"
+    map<string, XorpFd*> _proto_sockets_in;
+#ifdef USE_SOCKET_PER_IFACE
+    XorpFd        _mcast_proto_socket_in;
+#endif
     XorpFd	_proto_socket_out;   // The socket to end protocol message
     bool	_is_ip_hdr_included; // True if IP header is included on send
     uint16_t	_ip_id;		     // IPv4 Header ID

@@ -401,13 +401,15 @@ SelectorList::get_ready_priority(bool force)
     // Test the priority of remaining events for the last served file
     // descriptor.
     //
+    bool found_one = false;
     if ((_last_served_fd >= 0) && (_last_served_fd <= _maxfd)) {
 	for (int sel_idx = _last_served_sel + 1;
 	     sel_idx < SEL_MAX_IDX;
 	     sel_idx++) {
 	    if (FD_ISSET(_last_served_fd, &_testfds[sel_idx])) {
 		int p = _selector_entries[_last_served_fd]._priority[sel_idx];
-		if (p < max_priority) {
+		if ((p < max_priority) || (!found_one)) {
+		    found_one = true;
 		    max_priority = p;
 		    _maxpri_fd   = _last_served_fd;
 		    _maxpri_sel  = sel_idx;
@@ -425,7 +427,8 @@ SelectorList::get_ready_priority(bool force)
 	for (int sel_idx = 0; sel_idx < SEL_MAX_IDX; sel_idx++) {
 	    if (FD_ISSET(fd, &_testfds[sel_idx])) {
 		int p = _selector_entries[fd]._priority[sel_idx];
-		if (p < max_priority) {
+		if ((p < max_priority) || (!found_one)) {
+		    found_one = true;
 		    max_priority = p;
 		    _maxpri_fd   = fd;
 		    _maxpri_sel  = sel_idx;

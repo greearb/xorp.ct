@@ -92,9 +92,9 @@ copy_vif_state(const IfTreeVif* pulled_vifp, IfTreeVif& config_vif)
 }
 
 int
-IfConfigSet::push_config(IfTree& iftree)
+IfConfigSet::push_config(const IfTree& iftree)
 {
-    IfTree::IfMap::iterator ii;
+    IfTree::IfMap::const_iterator ii;
     IfTreeInterface::VifMap::iterator vi;
     IfConfigErrorReporterBase& error_reporter =
 	ifconfig().ifconfig_error_reporter();
@@ -145,9 +145,11 @@ IfConfigSet::push_config(IfTree& iftree)
 		// XXX: ignore deleted interfaces that are not recognized
 		continue;
 	    }
-	    error_reporter.interface_error(config_iface.ifname(),
-					   "interface not recognized");
-	    break;
+	    // Maybe it was already deleted from xorp due to OS removal.  We should
+	    // just ignore this one
+	    //error_reporter.interface_error(config_iface.ifname(),
+	    //			   "interface not recognized");
+	    //break;
 	}
 
 	//
@@ -249,6 +251,7 @@ IfConfigSet::push_config(IfTree& iftree)
 
 	    push_vif_creation(system_ifp, system_vifp, config_iface,
 			      config_vif);
+
 	}
     }
 
@@ -256,7 +259,7 @@ IfConfigSet::push_config(IfTree& iftree)
     // 2. Pull the config from the system (e.g., to obtain information
     //    such as interface indexes for newly created interfaces/vifs).
     //
-    ifconfig().pull_config();
+    ifconfig().pull_config(NULL, -1);
 
     //
     // 3. Push the interface/vif/address configuration.
@@ -349,7 +352,7 @@ IfConfigSet::push_config(IfTree& iftree)
 }
 
 void
-IfConfigSet::push_iftree_begin(IfTree& iftree)
+IfConfigSet::push_iftree_begin(const IfTree& iftree)
 {
     string error_msg;
     IfConfigErrorReporterBase& error_reporter =
@@ -373,7 +376,7 @@ IfConfigSet::push_iftree_begin(IfTree& iftree)
 }
 
 void
-IfConfigSet::push_iftree_end(IfTree& iftree)
+IfConfigSet::push_iftree_end(const IfTree& iftree)
 {
     string error_msg;
     IfConfigErrorReporterBase& error_reporter =
@@ -653,8 +656,24 @@ IfConfigSet::push_vif_address(const IfTreeInterface*	system_ifp,
 			       config_iface, config_vif, config_addr,
 			       error_msg)
 	    != XORP_OK) {
-	    error_msg = c_format("Failed to add address: %s",
-				 error_msg.c_str());
+	    if (strstr(error_msg.c_str(), "No such device")) {
+		XLOG_ERROR("Failed to configure address because of device not found: %s",
+			   error_msg.c_str());
+		// We can't pass this back as an error to the cli because the device is gone,
+		// and if we fail this set, the whole commit will fail.  This commit could be
+		// deleting *another* device, with a (very near) future set of xorpsh commands
+		// coming in to delete *this* interface in question.
+		// This is a hack...we really need a way to pass warnings back to the
+		// cli but NOT fail the commit if the logical state is correct but the
+		// (transient, unpredictable, asynchronously discovered) state of the actual
+		// OS network devices is currently out of state.
+		// --Ben
+		error_msg = "";
+	    }
+	    else {
+		error_msg = c_format("Failed to add address, not device-no-found error: %s",
+				     error_msg.c_str());
+	    }
 	}
     } else {
 	//
@@ -725,8 +744,24 @@ IfConfigSet::push_vif_address(const IfTreeInterface*	system_ifp,
 			       config_iface, config_vif, config_addr,
 			       error_msg)
 	    != XORP_OK) {
-	    error_msg = c_format("Failed to configure address: %s",
-				 error_msg.c_str());
+	    if (strstr(error_msg.c_str(), "No such device")) {
+		XLOG_ERROR("Failed to configure address because of device not found: %s",
+			   error_msg.c_str());
+		// We can't pass this back as an error to the cli because the device is gone,
+		// and if we fail this set, the whole commit will fail.  This commit could be
+		// deleting *another* device, with a (very near) future set of xorpsh commands
+		// coming in to delete *this* interface in question.
+		// This is a hack...we really need a way to pass warnings back to the
+		// cli but NOT fail the commit if the logical state is correct but the
+		// (transient, unpredictable, asynchronously discovered) state of the actual
+		// OS network devices is currently out of state.
+		// --Ben
+		error_msg = "";
+	    }
+	    else {
+		error_msg = c_format("Failed to configure address, not device-no-found error: %s",
+				     error_msg.c_str());
+	    }
 	}
     } else {
 	//

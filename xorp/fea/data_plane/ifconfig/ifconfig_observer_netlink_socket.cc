@@ -120,35 +120,40 @@ IfConfigObserverNetlinkSocket::stop(string& error_msg)
 void
 IfConfigObserverNetlinkSocket::receive_data(const vector<uint8_t>& buffer)
 {
+    bool modified = false;
     // Pre-processing cleanup
     ifconfig().system_config().finalize_state();
 
     if (IfConfigGetNetlinkSocket::parse_buffer_netlink_socket(
-	    ifconfig(), ifconfig().system_config(), buffer)
+	ifconfig(), ifconfig().system_config(), buffer, modified)
 	!= XORP_OK) {
 	return;
     }
 
+    // TODO:  If the parse_buffer call above didn't modify anything, is the vlan pull
+    // below actually needed?
     //
     // Get the VLAN vif info
     //
     IfConfigVlanGet* ifconfig_vlan_get;
     ifconfig_vlan_get = fea_data_plane_manager().ifconfig_vlan_get();
     if (ifconfig_vlan_get != NULL) {
-	if (ifconfig_vlan_get->pull_config(ifconfig().system_config())
+	if (ifconfig_vlan_get->pull_config(ifconfig().system_config(), modified)
 	    != XORP_OK) {
 	    XLOG_ERROR("Unknown error while pulling VLAN information");
 	}
     }
 
-    //
-    // Propagate the changes from the system config to the merged config
-    //
-    IfTree& merged_config = ifconfig().merged_config();
-    merged_config.align_with_observed_changes(ifconfig().system_config(),
-					      ifconfig().user_config());
-    ifconfig().report_updates(merged_config);
-    merged_config.finalize_state();
+    if (modified) {
+	//
+	// Propagate the changes from the system config to the merged config
+	//
+	IfTree& merged_config = ifconfig().merged_config();
+	merged_config.align_with_observed_changes(ifconfig().system_config(),
+						  ifconfig().user_config());
+	ifconfig().report_updates(merged_config);
+	merged_config.finalize_state();
+    }
 }
 
 void

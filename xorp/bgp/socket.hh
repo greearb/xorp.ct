@@ -90,6 +90,7 @@ protected:
     const struct sockaddr *get_local_socket(size_t& len) {
 	return _iptuple.get_local_socket(len);
     }
+    const string& get_local_interface() const { return _iptuple.get_local_interface(); }
     string get_local_addr() {return _iptuple.get_local_addr();}
     uint16_t get_local_port() {return _iptuple.get_local_port();}
 

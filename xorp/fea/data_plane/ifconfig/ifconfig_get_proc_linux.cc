@@ -131,16 +131,16 @@ IfConfigGetProcLinux::stop(string& error_msg)
 }
 
 int
-IfConfigGetProcLinux::pull_config(IfTree& iftree)
+IfConfigGetProcLinux::pull_config(const IfTree* local_config, IfTree& iftree)
 {
-    return read_config(iftree);
+    return read_config(local_config, iftree);
 }
 
 int
-IfConfigGetProcLinux::read_config(IfTree& iftree)
+IfConfigGetProcLinux::read_config(const IfTree* local_config, IfTree& iftree)
 {
     // XXX: this method relies on the ioctl() method
-    _ifconfig_get_ioctl->pull_config(iftree);
+    _ifconfig_get_ioctl->pull_config(local_config, iftree);
     
     //
     // The IPv4 information
@@ -170,7 +170,8 @@ IfConfigGetProcLinux::read_config(IfTree& iftree)
     IfConfigVlanGet* ifconfig_vlan_get;
     ifconfig_vlan_get = fea_data_plane_manager().ifconfig_vlan_get();
     if (ifconfig_vlan_get != NULL) {
-	if (ifconfig_vlan_get->pull_config(iftree) != XORP_OK)
+	bool modified = false;
+	if (ifconfig_vlan_get->pull_config(iftree, modified) != XORP_OK)
 	    return (XORP_ERROR);
     }
     

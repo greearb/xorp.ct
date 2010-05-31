@@ -85,10 +85,10 @@ XrlPortIO<IPv4>::request_open_bind_socket()
 {
     XrlSocket4V0p1Client cl(&_xr);
     return cl.send_udp_open_and_bind(
-		_ss.c_str(), _xr.instance_name(), IPv4::ANY(),
-		RIP_AF_CONSTANTS<IPv4>::IP_PORT,
-		callback(this, &XrlPortIO<IPv4>::open_bind_socket_cb)
-		);
+	_ss.c_str(), _xr.instance_name(), IPv4::ANY(),
+	RIP_AF_CONSTANTS<IPv4>::IP_PORT, vifname(), 1,
+	callback(this, &XrlPortIO<IPv4>::open_bind_socket_cb)
+	);
 }
 
 template <>
@@ -188,10 +188,10 @@ XrlPortIO<IPv6>::request_open_bind_socket()
 {
     XrlSocket6V0p1Client cl(&_xr);
     return cl.send_udp_open_and_bind(
-		_ss.c_str(), _xr.instance_name(), IPv6::ANY(),
-		RIP_AF_CONSTANTS<IPv6>::IP_PORT,
-		callback(this, &XrlPortIO<IPv6>::open_bind_socket_cb)
-		);
+	_ss.c_str(), _xr.instance_name(), IPv6::ANY(),
+	RIP_AF_CONSTANTS<IPv6>::IP_PORT, vifname(), 1,
+	callback(this, &XrlPortIO<IPv6>::open_bind_socket_cb)
+	);
 }
 
 template <>
@@ -342,8 +342,7 @@ XrlPortIO<A>::startup_socket()
 {
     _ss = xrl_fea_name();
 
-    _sid = socket_manager.sockid(_ss);
-    if (_sid == SocketManager<A>::no_entry) {
+    if (_sid.size() == 0) {
 	// Nobody has created the RIP socket yet do it!
 	// If we succeed here the path is:
 	// request_open_bind_socket()

@@ -119,6 +119,10 @@ PimVif::pim_hello_recv(PimNbr *pim_nbr,
     list<IPvX>	secondary_addr_list;
     list<IPvX>::iterator addr_list_iter;
     int		rcvd_family;
+
+    //XLOG_WARNING("pim_hello_recv:  RX %s from %s to %s: ",
+    //	 PIMTYPE2ASCII(PIM_HELLO),
+    //	 cstring(src), cstring(dst));
     
     //
     // Parse the message
@@ -669,8 +673,8 @@ PimVif::pim_hello_send(string& error_msg)
 	}
     }
     
-    return (pim_send(primary_addr(), IPvX::PIM_ROUTERS(family()),
-		     PIM_HELLO, buffer, error_msg));
+    return pim_send(primary_addr(), IPvX::PIM_ROUTERS(family()),
+		    PIM_HELLO, buffer, error_msg);
     
  invalid_addr_family_error:
     XLOG_UNREACHABLE();

@@ -188,7 +188,9 @@ public:
      * @return a reference to the file descriptor for receiving protocol
      * messages.
      */
-    XorpFd& protocol_fd_in() { return (_dummy_protocol_fd_in); }
+    XorpFd* mcast_protocol_fd_in() {
+	return (&_dummy_protocol_fd_in);
+    }
 
 private:
     // Private state

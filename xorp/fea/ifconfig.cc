@@ -57,7 +57,7 @@ map_changes(const IfTreeItem::State&		fci,
     default:
 	XLOG_FATAL("Unknown IfTreeItem::State");
 	break;
-    }
+    }  
     return true;
 }
 
@@ -66,6 +66,11 @@ IfConfig::IfConfig(FeaNode& fea_node)
       _eventloop(fea_node.eventloop()),
       _nexthop_port_mapper(fea_node.nexthop_port_mapper()),
       _itm(NULL),
+      //_live_config("live-config"),
+      _user_config("user-config"),
+      _system_config("system-config"),
+      _merged_config("pushed-config"),
+      _original_config("original-config"),
       _restore_original_config_on_shutdown(false),
       _ifconfig_update_replicator(merged_config()),
       _is_running(false)
@@ -146,6 +151,48 @@ IfConfig::add_transaction_operation(uint32_t tid,
     return (XORP_OK);
 }
 
+int IfConfig::add_interface(const char* ifname) {
+    IfTreeInterface* ifpl = user_config().find_interface(ifname);
+    //XLOG_WARNING("Add interface: %s  current local_cfg: %p\n", ifname, ifpl);
+    if (!ifpl) {
+	// Add to our local config
+	user_config().add_interface(ifname);
+
+	// Read in the OS's information for this interface.
+	pull_config(ifname, -1);
+
+	IfTreeInterface* ifp = system_config().find_interface(ifname);
+	if (ifp) {
+	    //XLOG_WARNING("Added new interface: %s, found it in pulled config.\n", ifname);
+	    user_config().update_interface(*ifp);
+	}
+	else {
+	    //XLOG_WARNING("Added new interface: %s, but not found in pulled config.\n", ifname);
+	}
+    }
+
+    // Add this to our original config if it's not there already.
+    if (!_original_config.find_interface(ifname)) {
+	IfTreeInterface* ifp = _system_config.find_interface(ifname);
+	if (ifp) {
+	    _original_config.update_interface(*ifp);
+	}
+    }
+    return XORP_OK;
+}   
+    
+int IfConfig::remove_interface(const char* ifname) {
+    //XLOG_WARNING("Remove interface: %s\n", ifname);
+    user_config().remove_interface(ifname);
+    system_config().remove_interface(ifname);
+    return XORP_OK;
+}
+
+int IfConfig::update_interface(const IfTreeInterface& iface) {
+    return _user_config.update_interface(iface);
+}
+
+
 int
 IfConfig::commit_transaction(uint32_t tid, string& error_msg)
 {
@@ -156,7 +203,7 @@ IfConfig::commit_transaction(uint32_t tid, string& error_msg)
     // XXX: Pull in advance the current system config, in case it is needed
     // by some of the transaction operations.
     //
-    IfTree old_system_config = pull_config();
+    IfTree old_system_config = pull_config(NULL, -1);
 
     if (_itm->commit(tid) != true) {
 	error_msg = c_format("Expired or invalid transaction ID presented");
@@ -200,7 +247,7 @@ IfConfig::commit_transaction(uint32_t tid, string& error_msg)
     //
     // Pull the new device configuration
     //
-    pull_config();
+    pull_config(NULL, -1);
     debug_msg("SYSTEM CONFIG %s\n", system_config().str().c_str());
     debug_msg("USER CONFIG %s\n", user_config().str().c_str());
     debug_msg("MERGED CONFIG %s\n", merged_config().str().c_str());
@@ -236,7 +283,7 @@ IfConfig::restore_config(const IfTree& old_user_config,
     // Restore the config
     set_user_config(old_user_config);
     set_merged_config(old_user_config);
-    pull_config();		// Get the current system config
+    pull_config(NULL, -1);	// Get the current system config
     iftree.prepare_replacement_state(system_config());
 
     // Push the config
@@ -246,7 +293,7 @@ IfConfig::restore_config(const IfTree& old_user_config,
     }
 
     // Align the state
-    pull_config();
+    pull_config(NULL, -1);
     merged_config().align_with_pulled_changes(system_config(), user_config());
     user_config().finalize_state();
     merged_config().finalize_state();
@@ -572,7 +619,7 @@ IfConfig::start(string& error_msg)
 	    return (XORP_ERROR);
     }
 
-    pull_config();
+    pull_config(NULL, -1);
     _system_config.finalize_state();
 
     _original_config = _system_config;
@@ -585,6 +632,19 @@ IfConfig::start(string& error_msg)
 
     return (XORP_OK);
 }
+
+const IfTree& IfConfig::full_pulled_config() {
+    // XXX: We pull the configuration by using only the first method.
+    // In the future we need to rething this and be more flexible.
+    //
+    if (! _ifconfig_gets.empty()) {
+	IfConfigGet* ifconfig_get = _ifconfig_gets.front();
+
+	ifconfig_get->pull_config(NULL, _system_config);
+    }
+    return _system_config;
+}
+
 
 int
 IfConfig::stop(string& error_msg)
@@ -713,7 +773,7 @@ IfConfig::stop(string& error_msg)
 }
 
 int
-IfConfig::push_config(IfTree& iftree)
+IfConfig::push_config(const IfTree& iftree)
 {
     list<IfConfigSet*>::const_iterator ifconfig_set_iter;
 
@@ -731,19 +791,38 @@ IfConfig::push_config(IfTree& iftree)
     return (XORP_OK);
 }
 
+// TODO:  This can be costly when you have lots of interfaces, so try to
+// optimize things so this is called rarely.  Currently it is called
+// several times on startup of fea.
 const IfTree&
-IfConfig::pull_config()
+IfConfig::pull_config(const char* ifname, int if_index)
 {
-    // Clear the old state
-    _system_config.clear();
-
     //
     // XXX: We pull the configuration by using only the first method.
     // In the future we need to rething this and be more flexible.
     //
     if (! _ifconfig_gets.empty()) {
 	IfConfigGet* ifconfig_get = _ifconfig_gets.front();
-	ifconfig_get->pull_config(_system_config);
+
+	if (ifname && ifconfig_get->can_pull_one()) {
+	    // Just request a pull of this interface
+	    //
+	    //XLOG_WARNING("Pull_config_one for interface: %s\n", ifname);
+	    int rv = ifconfig_get->pull_config_one(_system_config, ifname, if_index);
+	    if (rv != XORP_OK) {
+		XLOG_WARNING("ERROR:  pull_config_one for interface: %s failed: %i\n", ifname, rv);
+	    }
+	    if (!_system_config.find_interface(ifname)) {
+		XLOG_WARNING("ERROR:  Could not find interface: %s after pull_config_one.\n", ifname);
+	    }
+	}
+	else {
+	    // Pull all
+	    // Clear the old state
+	    _system_config.clear();
+	    
+	    ifconfig_get->pull_config(&_user_config, _system_config);
+	}
     }
 
     return _system_config;

@@ -29,6 +29,7 @@ protocols {
 	    peer-port: u32 = 179;
 	    local-port: u32 = 179;
 	    local-ip: txt;
+	    local-dev: txt = "";
 	    as: txt;
 	    next-hop: ipv4;
 	    next-hop6: ipv6;
@@ -261,7 +262,7 @@ protocols {
 	    %mandatory: $(@.peer-port);
 	    %mandatory: $(@.local-ip);
 
-	    %create: xrl "$(bgp.targetname)/bgp/0.3/add_peer?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)&as:txt=$(@.as)&next_hop:ipv4=$(@.next-hop)&holdtime:u32=$(@.holdtime)";
+	    %create: xrl "$(bgp.targetname)/bgp/0.3/add_peer?local_dev:txt=$(@.local-dev)&local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)&as:txt=$(@.as)&next_hop:ipv4=$(@.next-hop)&holdtime:u32=$(@.holdtime)";
 	    %delete: xrl "$(bgp.targetname)/bgp/0.3/delete_peer?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)";
 	    %activate: xrl "$(bgp.targetname)/bgp/0.3/activate?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)";
 /*
@@ -274,8 +275,14 @@ protocols {
 		%set: xrl "$(bgp.targetname)/bgp/0.3/change_local_port?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&new_local_port:u32=$(@)";
 	    }
 */
+
+	    local-dev {
+                %set: xrl "$(bgp.targetname)/bgp/0.3/change_local_ip?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&new_local_ip:txt=$(peer.@.local-ip)&new_local_dev:txt=$(@)";
+	    }
+
+
 	    local-ip {
-		%set: xrl "$(bgp.targetname)/bgp/0.3/change_local_ip?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&new_local_ip:txt=$(@)";
+		%set: xrl "$(bgp.targetname)/bgp/0.3/change_local_ip?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&new_local_ip:txt=$(@)&new_local_dev:txt=$(peer.@.local-dev)";
 	    }
 
 /*

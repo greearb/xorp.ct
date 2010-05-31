@@ -415,12 +415,12 @@ PeerOut<A>::queue_lsa(OspfTypes::PeerID peerid, OspfTypes::NeighbourID nid,
 
 template <typename A>
 bool
-PeerOut<A>::push_lsas()
+PeerOut<A>::push_lsas(const char* message)
 {
     typename map<OspfTypes::AreaID, Peer<A> *>::iterator i;
 
     for(i = _areas.begin(); i != _areas.end(); i++) {
-	if (!(*i).second->push_lsas())
+	if (!(*i).second->push_lsas(message))
 	    return false;
     }
 
@@ -1298,11 +1298,11 @@ Peer<A>::queue_lsa(OspfTypes::PeerID peerid, OspfTypes::NeighbourID nid,
 
 template <typename A>
 bool
-Peer<A>::push_lsas()
+Peer<A>::push_lsas(const char* message)
 {
     typename list<Neighbour<A> *>::iterator n;
     for(n = _neighbours.begin(); n != _neighbours.end(); n++)
-	if (!(*n)->push_lsas())
+	if (!(*n)->push_lsas(message))
 	    return false;
 
     return true;
@@ -3687,6 +3687,12 @@ Neighbour<A>::start_rxmt_timer(uint32_t index, RxmtCallback rcb,
 			       bool immediate, 
 			       const char *comment)
 {
+    XLOG_TRACE(_ospf.trace()._neighbour_events, 
+	       "start_rxmt_timer: %p %s Neighbour: %s  State: %s  %s\n", this,
+	       _peer.get_if_name().c_str(),
+	       pr_id(get_candidate_id()).c_str(),
+	       pp_state(get_state()).c_str(),
+	       comment);
     debug_msg("start_rxmt_timer: %p %s %s\n", this, 
 	      _peer.get_if_name().c_str(),
 	      comment);
@@ -3713,6 +3719,13 @@ template <typename A>
 void
 Neighbour<A>::stop_rxmt_timer(uint32_t index, const char *comment)
 {
+    XLOG_TRACE(_ospf.trace()._neighbour_events, 
+	       "stop_rxmt_timer: %p %s index: %i Neighbour: %s  State: %s  %s\n", this,
+	       _peer.get_if_name().c_str(), (int)(index),
+	       pr_id(get_candidate_id()).c_str(),
+	       pp_state(get_state()).c_str(),
+	       comment);
+
     debug_msg("stop_rxmt_timer: %p %s %s\n", this,
 	      _peer.get_if_name().c_str(), comment);
     XLOG_ASSERT(index < TIMERS);
@@ -3727,14 +3740,14 @@ Neighbour<A>::stop_rxmt_timer(uint32_t index, const char *comment)
 
 template <typename A>
 void
-Neighbour<A>::restart_retransmitter()
+Neighbour<A>::restart_retransmitter(const char* message)
 {
     if (_rxmt_wrapper[FULL])
-	stop_rxmt_timer(FULL, "restart retransmitter");
+	stop_rxmt_timer(FULL, message);
 
     start_rxmt_timer(FULL, callback(this, &Neighbour<A>::retransmitter),
 		     false,
-		     "restart retransmitter");
+		     message);
 }
 
 // template <typename A>
@@ -3750,6 +3763,14 @@ Neighbour<A>::retransmitter()
 {
     // When there is nothing left to retransmit stop the timer 
     bool more = false;
+
+    XLOG_TRACE(_ospf.trace()._neighbour_events, 
+	       "retransmitter, ls_req_list.size(): %i  lsa_rxmit.size(): %i Interface(%s) Neighbour(%s) State(%s)",
+	       (int)(_ls_request_list.size()),
+	       (int)(_lsa_rxmt.size()),
+	       _peer.get_if_name().c_str(),
+	       pr_id(get_candidate_id()).c_str(),
+	       pp_state(get_state()).c_str());
 
     if (!_ls_request_list.empty()) {
 
@@ -3885,6 +3906,12 @@ template <typename A>
 bool
 Neighbour<A>::send_data_description_packet()
 {
+    XLOG_TRACE(_ospf.trace()._neighbour_events, 
+	       "send_data_description_packet, Interface(%s) Neighbour(%s) State(%s)",
+	       _peer.get_if_name().c_str(),
+	       pr_id(get_candidate_id()).c_str(),
+	       pp_state(get_state()).c_str());
+
     _peer.populate_common_header(_data_description_packet);
     switch(get_linktype()) {
     case OspfTypes::PointToPoint:
@@ -3941,6 +3968,14 @@ Neighbour<A>::start_sending_data_description_packets(const char *event_name,
 						     bool immediate)
 {
     XLOG_ASSERT(ExStart == get_state());
+
+    XLOG_TRACE(_ospf.trace()._neighbour_events, 
+	       "start_sending_data_description_packets, Event(%s) Interface(%s) Neighbour(%s) "
+	       "State(%s)",
+	       event_name,
+	       _peer.get_if_name().c_str(),
+	       pr_id(get_candidate_id()).c_str(),
+	       pp_state(get_state()).c_str());
 
     // Clear out the request list.
     _ls_request_list.clear();
@@ -4708,6 +4743,9 @@ Neighbour<A>::link_state_update_received(LinkStateUpdatePacket *lsup)
 	is_router_bdr = is_BDR();
 	is_neighbour_dr = is_neighbour_DR();
     }
+
+    XLOG_TRACE(_ospf.trace()._neighbour_events, "isDR: %i  isBDR: %i isNeighbourDR: %i\n",
+	       (int)(is_router_dr), (int)(is_router_bdr), (int)(is_neighbour_dr));
     
     get_area_router()->
 	receive_lsas(_peer.get_peerid(),
@@ -4732,6 +4770,8 @@ Neighbour<A>::link_state_update_received(LinkStateUpdatePacket *lsup)
     // LSA remove the MaxAge LSA. An incoming LSA can be rewritten and
     // placed on the retransmission list, leave these alone.
     // 
+    XLOG_TRACE(_ospf.trace()._neighbour_events, "MAX_AGE_IN_DATABASE is not defined.\n");
+
  again:
     for (list<Lsa::LsaRef>::iterator i = _lsa_rxmt.begin();
 	 i != _lsa_rxmt.end(); i++) {
@@ -4756,16 +4796,21 @@ Neighbour<A>::link_state_update_received(LinkStateUpdatePacket *lsup)
 #endif
 
     // Have any of the update packets satisfied outstanding requests?
-    if (_ls_request_list.empty())
+    if (_ls_request_list.empty()) {
+	XLOG_TRACE(_ospf.trace()._neighbour_events, "_ls_request_list is empty\n");
 	return;
+    }
     
     list<Lsa::LsaRef>& lsas = lsup->get_lsas();
     list<Lsa::LsaRef>::const_iterator i;
     list<Lsa_header>::iterator j;
 
     for (i = lsas.begin(); i != lsas.end(); i++) {
+	XLOG_TRACE(_ospf.trace()._neighbour_events, "lsa: %s\n", (*i)->str().c_str());
 	for (j = _ls_request_list.begin(); j != _ls_request_list.end(); j++) {
+	    XLOG_TRACE(_ospf.trace()._neighbour_events, "lsa-req: %s\n", j->str().c_str());
 	    if ((*j) == (*i)->get_header()) {
+		XLOG_TRACE(_ospf.trace()._neighbour_events, "Header matched, erasing j\n");
 		_ls_request_list.erase(j);
 		break;
 	    }
@@ -5045,8 +5090,9 @@ Neighbour<A>::queue_lsa(OspfTypes::PeerID peerid, OspfTypes::NeighbourID nid,
 
 template <typename A>
 bool
-Neighbour<A>::push_lsas()
+Neighbour<A>::push_lsas(const char* message)
 {
+
     // Typically push_lsas will be called immediately after one or
     // more calls to queue_lsa, it therefore shouldn't be possible for
     // the state to change. If the state was less than exchange then
@@ -5086,7 +5132,7 @@ Neighbour<A>::push_lsas()
     // sending. Zap the queue.
     _lsa_queue.clear();
 
-    restart_retransmitter();
+    restart_retransmitter(message);
 
     return true;
 }
@@ -5259,7 +5305,7 @@ Neighbour<A>::event_exchange_done()
 	    event_loading_done();
 	    return;
 	}
-	restart_retransmitter();
+	restart_retransmitter("event_exchange_done, state Exchange");
 	debug_msg("link state request list count: %d\n",
 		  XORP_INT_CAST(_ls_request_list.size()));
 	break;

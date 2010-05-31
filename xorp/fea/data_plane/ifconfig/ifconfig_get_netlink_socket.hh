@@ -64,7 +64,14 @@ public:
      * @param iftree the IfTree storage to store the pulled information.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int pull_config(IfTree& iftree);
+    virtual int pull_config(const IfTree* local_cfg, IfTree& iftree);
+
+
+    virtual bool can_pull_one() { return true; }
+
+    /** If_index can be -1 if unknown:  We will try to resolve it from ifname.
+     */
+    virtual int pull_config_one(IfTree& iftree, const char* ifname, int if_index);
 
     /**
      * Parse information about network interface configuration change from
@@ -80,10 +87,20 @@ public:
      * @see IfTree.
      */
     static int parse_buffer_netlink_socket(IfConfig& ifconfig, IfTree& iftree,
-					   const vector<uint8_t>& buffer);
+					   const vector<uint8_t>& buffer) {
+	bool modified = false;
+	return parse_buffer_netlink_socket(ifconfig, iftree, buffer, modified);
+    }
+
+    /** Same as above, but also return whether or not something was actually modified in iftree.
+     */
+    static int parse_buffer_netlink_socket(IfConfig& ifconfig, IfTree& iftree,
+					   const vector<uint8_t>& buffer, bool& modified);
     
 private:
-    int read_config(IfTree& iftree);
+    int read_config(const IfTree* local_config, IfTree& iftree);
+    int read_config_all(IfTree& iftree);
+    int read_config_one(IfTree& iftree, const char* ifname, int if_index);
 
     NetlinkSocketReader	_ns_reader;
 };

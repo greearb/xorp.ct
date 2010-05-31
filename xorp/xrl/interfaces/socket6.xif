@@ -73,6 +73,8 @@ interface socket6/0.1 {
     udp_open_and_bind		? creator:txt				\
 				& local_addr:ipv6			\
 				& local_port:u32			\
+				& local_dev:txt			\
+				& reuse:u32			\
 				-> sockid:txt;
 
     /**

@@ -92,7 +92,7 @@ XrlIO<IPv4>::send(const string& interface, const string& vif,
 {
     bool success;
 
-    debug_msg("send(interface = %s, vif = %s, src = %s, dst = %s, "
+    debug_msg("XrlIO<IPv4>::send  send(interface = %s, vif = %s, src = %s, dst = %s, "
 	      "payload_size = %u\n",
 	      interface.c_str(), vif.c_str(),
 	      src.str().c_str(), dst.str().c_str(),
@@ -201,7 +201,8 @@ XrlIO<IPv4>::enable_interface_vif(const string& interface, const string& vif)
 {
     bool success;
 
-    debug_msg("Enable Interface %s Vif %s\n", interface.c_str(), vif.c_str());
+    XLOG_WARNING("XRL-IO: Enable Interface %s Vif %s\n",
+		 interface.c_str(), vif.c_str());
 
     XrlRawPacket4V0p1Client fea_client(&_xrl_router);
     success = fea_client.send_register_receiver(
@@ -280,7 +281,8 @@ XrlIO<IPv4>::disable_interface_vif(const string& interface, const string& vif)
 {
     bool success;
 
-    debug_msg("Disable Interface %s Vif %s\n", interface.c_str(), vif.c_str());
+    XLOG_WARNING("XRL-IO: Disable Interface %s Vif %s\n",
+		 interface.c_str(), vif.c_str());
 
     XrlRawPacket4V0p1Client fea_client(&_xrl_router);
     success = fea_client.send_unregister_receiver(
@@ -619,7 +621,7 @@ XrlIO<A>::join_multicast_group_cb(const XrlError& xrl_error, string interface,
 	break;
 
     case REPLY_TIMED_OUT:
-	XLOG_ERROR("Cannot join a multicast group on interface %s vif %s: %s",
+	XLOG_ERROR("Cannot join a multicast group on interface %s vif %s: %s (TIMED_OUT)",
 		   interface.c_str(), vif.c_str(), xrl_error.str().c_str());
 	break;
 
@@ -627,7 +629,7 @@ XrlIO<A>::join_multicast_group_cb(const XrlError& xrl_error, string interface,
     case SEND_FAILED:
     case SEND_FAILED_TRANSIENT:
     case NO_SUCH_METHOD:
-	XLOG_ERROR("Cannot join a multicast group on interface %s vif %s: %s",
+	XLOG_ERROR("Cannot join a multicast group on interface %s vif %s: %s (RESOLVE or SEND failed, or not such method)",
 		   interface.c_str(), vif.c_str(), xrl_error.str().c_str());
 	break;
 
@@ -639,7 +641,7 @@ XrlIO<A>::join_multicast_group_cb(const XrlError& xrl_error, string interface,
     case BAD_ARGS:
     case COMMAND_FAILED:
     case INTERNAL_ERROR:
-	XLOG_ERROR("Cannot join a multicast group on interface %s vif %s: %s",
+	XLOG_ERROR("Cannot join a multicast group on interface %s vif %s: %s (BAD_ARGS, CMD_FAILED, INTERNAL_ERR)",
 		   interface.c_str(), vif.c_str(), xrl_error.str().c_str());
 	break;
     }

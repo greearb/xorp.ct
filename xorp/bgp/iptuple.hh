@@ -42,7 +42,7 @@ public:
 };
 
 /**
- * Store the Local Interface, Local Server Port, Peer Interface and
+ * Store the Local Interface, IP, Local Server Port, Peer IP and
  * Peer Server Port tuple.
  *
  * Also create the socket buffers to be used by the socket code. All the IP
@@ -59,8 +59,8 @@ public:
 class Iptuple {
 public:
     Iptuple();
-    Iptuple(const char *local_interface, uint16_t local_port,
-	    const char *peer_interface, uint16_t peer_port)
+    Iptuple(const char* local_dev, const char *local_addr, uint16_t local_port,
+	    const char *peer_addr, uint16_t peer_port)
 	throw(UnresolvableHost,AddressFamilyMismatch);
 
     Iptuple(const Iptuple&);
@@ -79,6 +79,7 @@ public:
 
     const struct sockaddr *get_peer_socket(size_t& len) const;
     string get_peer_addr() const;
+    const string& get_local_interface() const { return _local_dev; }
     bool get_peer_addr(IPv4& addr) const;
     bool get_peer_addr(IPv6& addr) const;
     uint16_t get_peer_port() const;
@@ -86,13 +87,14 @@ public:
     string str() const;
 private:
     void
-    fill_address(const char *interface, uint16_t local_port,
+    fill_address(const char *addr, uint16_t local_port,
 		 struct sockaddr_storage& ss, size_t& len,
-		 string& interface_numeric)
+		 string& addr_numeric)
 	throw(UnresolvableHost);
 
-    string _local_interface;	// String representation only for debugging.
-    string _peer_interface;	// String representation only for debugging.
+    string _local_dev; // The interface (device) name.  NOT IP.
+    string _local_addr;	// String representation only for debugging.  IP Address.
+    string _peer_addr;	// String representation only for debugging.  IP Address
 
     // For listen().
     struct sockaddr_storage	_local_sock;	 // Local socket

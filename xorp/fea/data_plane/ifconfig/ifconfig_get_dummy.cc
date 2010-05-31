@@ -82,8 +82,9 @@ IfConfigGetDummy::stop(string& error_msg)
 }
 
 int
-IfConfigGetDummy::pull_config(IfTree& iftree)
+IfConfigGetDummy::pull_config(const IfTree* local_config, IfTree& iftree)
 {
+    UNUSED(local_config);
     //
     // XXX: Get the tree from the IfConfigSetDummy instance.
     //

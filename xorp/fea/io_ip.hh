@@ -260,10 +260,10 @@ public:
     /**
      * Get the file descriptor for receiving protocol messages.
      *
-     * @return a reference to the file descriptor for receiving protocol
-     * messages.
+     * @return a pointer to the file descriptor for receiving protocol
+     * messages, or NULL if it cannot be found.
      */
-    virtual XorpFd& protocol_fd_in() = 0;
+    virtual XorpFd* mcast_protocol_fd_in() = 0;
 
 protected:
     /**

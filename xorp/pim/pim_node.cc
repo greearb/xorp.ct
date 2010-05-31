@@ -1159,7 +1159,7 @@ PimNode::enable_vif(const string& vif_name, string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
     if (pim_vif == NULL) {
-	error_msg = c_format("Cannot enable vif %s: no such vif",
+	error_msg = c_format("PimNode:  Cannot enable vif %s: no such vif",
 			     vif_name.c_str());
 	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
@@ -1187,7 +1187,9 @@ PimNode::disable_vif(const string& vif_name, string& error_msg)
 	error_msg = c_format("Cannot disable vif %s: no such vif",
 			     vif_name.c_str());
 	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
+	// It's as disabled as it's going to get..don't fail the commit.
+	error_msg = "";
+	return XORP_OK;
     }
     
     pim_vif->disable();
@@ -1518,7 +1520,8 @@ PimNode::pim_send(const string& if_name,
 		  string& error_msg)
 {
     if (! (is_up() || is_pending_down())) {
-	error_msg = c_format("MLD/IGMP node is not UP");
+	error_msg = c_format("PimNode::pim_send MLD/IGMP node is not UP");
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     

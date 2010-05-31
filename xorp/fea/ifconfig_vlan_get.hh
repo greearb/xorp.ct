@@ -90,9 +90,10 @@ public:
      * The VLAN information is added to the existing state in the iftree.
      *
      * @param iftree the IfTree storage to store the pulled information.
+     * @param modified Will be false if it is guaranteed that nothing changed in iftree or any of it's objects.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int pull_config(IfTree& iftree) = 0;
+    virtual int pull_config(IfTree& iftree, bool& modified) = 0;
     
 protected:
     // Misc other state

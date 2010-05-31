@@ -132,7 +132,7 @@ FibConfigTableObserverNetlinkSocket::receive_data(const vector<uint8_t>& buffer)
 	    fibconfig().system_config_iftree(),
 	    fte_list,
 	    buffer,
-	    false);
+	    false, fibconfig());
 	if (! fte_list.empty()) {
 	    fibconfig().propagate_fib_changes(fte_list, this);
 	    fte_list.clear();
@@ -149,7 +149,7 @@ FibConfigTableObserverNetlinkSocket::receive_data(const vector<uint8_t>& buffer)
 	    fibconfig().system_config_iftree(),
 	    fte_list,
 	    buffer,
-	    false);
+	    false, fibconfig());
 	if (! fte_list.empty()) {
 	    fibconfig().propagate_fib_changes(fte_list, this);
 	    fte_list.clear();

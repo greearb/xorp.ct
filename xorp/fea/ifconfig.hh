@@ -114,6 +114,15 @@ public:
 				  const TransactionManager::Operation& op,
 				  string& error_msg);
 
+    /** These are used by the Transaction Operation callbacks to actually do work.
+     * All of these apply to the user_config unless otherwise specified.
+     */
+    int add_interface(const char* ifname);
+    int add_interface(const string& ifname) { return add_interface(ifname.c_str()); }
+    int remove_interface(const char* ifname);
+    int remove_interface(const string& ifname) { return remove_interface(ifname.c_str()); }
+    int update_interface(const IfTreeInterface& iface);
+
     /**
      * Get a reference to the @ref NexthopPortMapper instance.
      *
@@ -348,7 +357,7 @@ public:
      * @param iftree the interface configuration to be pushed down.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int push_config(IfTree& iftree);
+    int push_config(const IfTree& iftree);
 
     /**
      * Get the error message associated with a push operation.
@@ -358,11 +367,24 @@ public:
     const string& push_error() const;
 
     /**
-     * Pull up current interface configuration from the system.
+     * Pull up current interface configuration from the system, but only for interfaces
+     * currently configured by the user.
+     * If ifname is specified, pull only this interface's information.  Use NULL to ignore.
+     * if if_index is specified, pull only this interface's information.  Use -1 to ignore.
      *
      * @return the current interface configuration from the system.
      */
-    const IfTree& pull_config();
+    const IfTree& pull_config(const char* ifname, int if_index);
+
+
+    /** NOTE:  This will cause the system to read *all* interface information into
+     * the _pulled_config list.  If you are trying to optimize by only pulling information
+     * for interfaces configured in the local_config, do not use this method.
+     *
+     * @return a reference to the pulled interface configuration from the
+     * system.
+     */
+    const IfTree& full_pulled_config();
 
     /**
      * Check IfTreeInterface and report updates to IfConfigUpdateReporter.
@@ -437,7 +459,8 @@ private:
     IfConfigTransactionManager* _itm;	// The interface transaction manager
 
     IfTree		_user_config;	// The IfTree with the user config
-    IfTree		_system_config;	// The IfTree with the system config
+    IfTree		_system_config;	/* The IfTree with the system config.
+					 * This usually only holds info for devices in _user_config */
     IfTree		_merged_config; // The merged system-user config
     IfTree		_original_config; // The IfTree on startup
     bool		_restore_original_config_on_shutdown; // If true, then

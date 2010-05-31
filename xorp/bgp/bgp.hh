@@ -415,11 +415,12 @@ public:
      * Change the local IP address of this peering.
      *
      * @param iptuple iptuple.
-     * @param local_ip new value.
+     * @param local_ip new IP value
+     * @param local_dev new Interface value.
      *
      * @return true on success
      */
-    bool change_local_ip(const Iptuple& iptuple, const string& local_ip);
+    bool change_local_ip(const Iptuple& iptuple, const string& local_ip, const string& local_dev);
 
     /**
      * Change the local IP port of this peering.

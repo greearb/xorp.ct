@@ -383,7 +383,7 @@ AreaRouter<A>::check_for_virtual_linkV2(const RouteCmd<Vertex>& rc,
     }
 
     XLOG_TRACE(_ospf.trace()._virtual_link,
-	       "Checking for virtual links %s\n", cstring(*rlsa));
+	       "Checking for virtual links V2, count(rid): %i %s\n", (int)(_vlinks.count(rid)), cstring(*rlsa));
 
     if (0 == _vlinks.count(rid))
 	return;	// Not a candidate endpoint.
@@ -1588,7 +1588,7 @@ AreaRouter<A>::external_announce_complete()
     if (!external_area_type())
 	return;
 
-    push_lsas();
+    push_lsas("external_announce_complete");
 }
 
 template <typename A>
@@ -1623,7 +1623,7 @@ AreaRouter<A>::external_refresh(Lsa::LsaRef lsar)
     bool multicast_on_peer;
     publish(OspfTypes::ALLPEERS, OspfTypes::ALLNEIGHBOURS, lsar,
 	    multicast_on_peer);
-    push_lsas();
+    push_lsas("external_refresh");
 }
 
 template <typename A>
@@ -2690,7 +2690,7 @@ AreaRouter<A>::receive_lsas(OspfTypes::PeerID peerid,
     }
 
  out:
-    push_lsas();
+    push_lsas("receive_lsas");
     external_push_all_areas();
     routing_end();
     _ospf.get_peer_manager().external_suppress_lsas(_area);
@@ -2725,13 +2725,17 @@ AreaRouter<A>::maxage_reached(Lsa::LsaRef lsar, size_t i)
 
     XLOG_ASSERT(!lsar->external());
 
-    if (!find_lsa(lsar, index))
-	XLOG_FATAL("LSA not in database: %s", cstring(*lsar));
+    if (!find_lsa(lsar, index)) {
+	XLOG_WARNING("LSA not in database: %s", cstring(*lsar));
+	return;
+    }
 
-    if (i != index)
-	XLOG_FATAL("Indexes don't match %u != %u %s",  XORP_UINT_CAST(i),
-		   XORP_UINT_CAST(index),
-		   cstring(*_db[index]));
+    if (i != index) {
+	XLOG_WARNING("Indexes don't match %u != %u %s",  XORP_UINT_CAST(i),
+		     XORP_UINT_CAST(index),
+		     cstring(*_db[index]));
+	return;
+    }
 
 #ifdef PARANOIA
     if (!lsar->get_self_originating()) {
@@ -3293,7 +3297,7 @@ template <typename A>
 void
 AreaRouter<A>::testing_print_link_state_database() const
 {
-    fprintf(stderr, "****** DATABASE START ******\n");
+    fprintf(stderr, "****** DATABASE START (testing_print_link_state) ******\n");
     for (size_t index = 0 ; index < _last_entry; index++) {
 	Lsa::LsaRef lsar = _db[index];
 	if (!lsar->valid())
@@ -3599,18 +3603,18 @@ AreaRouter<A>::publish_all(Lsa::LsaRef lsar)
     publish(OspfTypes::ALLPEERS, OspfTypes::ALLNEIGHBOURS, lsar,
 	    multicast_on_peer);
 
-    push_lsas();	// NOTE: a push after every LSA.
+    push_lsas("publish_all");	// NOTE: a push after every LSA.
 }
 
 template <typename A>
 void
-AreaRouter<A>::push_lsas()
+AreaRouter<A>::push_lsas(const char* msg)
 {
     typename PeerMap::iterator i;
     for(i = _peers.begin(); i != _peers.end(); i++) {
 	PeerStateRef temp_psr = i->second;
 	if (temp_psr->_up) {
-	    if (!_ospf.get_peer_manager().push_lsas(i->first))
+	    if (!_ospf.get_peer_manager().push_lsas(i->first, msg))
 		XLOG_FATAL("Unable to push LSAs");
 	}
     }
@@ -3931,7 +3935,7 @@ void
 AreaRouter<IPv4>::routing_total_recomputeV2()
 {
 #ifdef	DEBUG_LOGGING
-    testing_print_link_state_database();
+    //testing_print_link_state_database();
 #endif
 
     // RFC 2328 16.1.  Calculating the shortest-path tree for an area
@@ -4066,7 +4070,7 @@ AreaRouter<IPv4>::routing_total_recomputeV2()
 	route_entry.set_area(_area);
 	route_entry.set_lsa(lsar);
 
-	routing_table_add_entry(routing_table, net, route_entry);
+	routing_table_add_entry(routing_table, net, route_entry, __PRETTY_FUNCTION__);
     }
 
     end_virtual_link();
@@ -4134,7 +4138,7 @@ void
 AreaRouter<IPv6>::routing_total_recomputeV3()
 {
 #ifdef	DEBUG_LOGGING
-    testing_print_link_state_database();
+    //testing_print_link_state_database();
 #endif
 
     // RFC 2328 16.1.  Calculating the shortest-path tree for an area
@@ -4303,7 +4307,7 @@ AreaRouter<IPv6>::routing_total_recomputeV3()
 			continue;
 		    route_entry.set_cost(ri->weight() + j->get_metric());
 		    routing_table_add_entry(routing_table, j->get_network(),
-					    route_entry);
+					    route_entry, __PRETTY_FUNCTION__);
 		}
 	    }
 	    if (rlsa->get_e_bit() || rlsa->get_b_bit()) {
@@ -4340,7 +4344,7 @@ AreaRouter<IPv6>::routing_total_recomputeV3()
 		route_entry.set_area_border_router(rlsa->get_b_bit());
 		route_entry.set_as_boundary_router(rlsa->get_e_bit());
  		IPNet<IPv6> net(router_address,	IPv6::ADDR_BITLEN);
- 		routing_table_add_entry(routing_table, net, route_entry);
+ 		routing_table_add_entry(routing_table, net, route_entry, __PRETTY_FUNCTION__);
 // 		routing_table_add_entry(routing_table, IPNet<IPv6>(),
 // 					route_entry);
 	    }
@@ -4377,7 +4381,7 @@ AreaRouter<IPv6>::routing_total_recomputeV3()
 			continue;
 		    route_entry.set_cost(ri->weight() + j->get_metric());
 		    routing_table_add_entry(routing_table, j->get_network(),
-					    route_entry);
+					    route_entry, __PRETTY_FUNCTION__);
 		}
 	    }
 	}
@@ -4457,7 +4461,7 @@ template <typename A>
 void 
 AreaRouter<A>::routing_table_add_entry(RoutingTable<A>& routing_table,
 				       IPNet<A> net,
-				       RouteEntry<A>& route_entry)
+				       RouteEntry<A>& route_entry, const char* msg)
 {
     // Verify that a route is not already in the table. In the OSPFv2
     // case stub links are processed in the main processing loop
@@ -4472,7 +4476,7 @@ AreaRouter<A>::routing_table_add_entry(RoutingTable<A>& routing_table,
     // router to be indexed by router id.
     if (route_entry.get_destination_type() == OspfTypes::Router &&
 	!net.is_valid()) {
-	routing_table.add_entry(_area, net, route_entry);
+	routing_table.add_entry(_area, net, route_entry, msg);
 	return;
     }
 
@@ -4489,7 +4493,7 @@ AreaRouter<A>::routing_table_add_entry(RoutingTable<A>& routing_table,
 		routing_table.replace_entry(_area, net, route_entry);
 	}
     } else {
-	routing_table.add_entry(_area, net, route_entry);
+	routing_table.add_entry(_area, net, route_entry, msg);
     }
 }
 
@@ -4566,7 +4570,7 @@ AreaRouter<IPv4>::routing_area_rangesV2(const list<RouteCmd<Vertex> >& r)
     for (i = ranges.begin(); i != ranges.end(); i++) {
 	IPNet<IPv4> net = i->first;
 	RouteEntry<IPv4> route_entry = i->second;
-	routing_table.add_entry(_area, net, route_entry);
+	routing_table.add_entry(_area, net, route_entry, __PRETTY_FUNCTION__);
     }
 }
 
@@ -4662,7 +4666,7 @@ AreaRouter<IPv6>::routing_area_rangesV3(const list<RouteCmd<Vertex> >& r,
     for (i = ranges.begin(); i != ranges.end(); i++) {
 	IPNet<IPv6> net = i->first;
 	RouteEntry<IPv6> route_entry = i->second;
-	routing_table.add_entry(_area, net, route_entry);
+	routing_table.add_entry(_area, net, route_entry, __PRETTY_FUNCTION__);
     }
 }
 
@@ -4766,7 +4770,7 @@ AreaRouter<IPv4>::routing_inter_areaV2()
 	rtentry.set_lsa(lsar);
 
 	if (add_entry)
-	    routing_table.add_entry(_area, n, rtentry);
+	    routing_table.add_entry(_area, n, rtentry, __PRETTY_FUNCTION__);
 	if (replace_entry)
 	    routing_table.replace_entry(_area, n, rtentry);
     }
@@ -4888,7 +4892,7 @@ AreaRouter<IPv6>::routing_inter_areaV3()
 	rtentry.set_lsa(lsar);
 
 	if (add_entry)
-	    routing_table.add_entry(_area, n, rtentry);
+	    routing_table.add_entry(_area, n, rtentry, __PRETTY_FUNCTION__);
 	if (replace_entry)
 	    routing_table.replace_entry(_area, n, rtentry);
     }
@@ -5222,7 +5226,7 @@ AreaRouter<IPv4>::routing_as_externalV2()
 				       get_advertising_router());
 
 	if (add_entry)
-	    routing_table.add_entry(_area, n, rtentry);
+	    routing_table.add_entry(_area, n, rtentry, __PRETTY_FUNCTION__);
 	if (replace_entry)
 	    routing_table.replace_entry(_area, n, rtentry);
 	
@@ -5392,7 +5396,7 @@ AreaRouter<IPv6>::routing_as_externalV3()
 				       get_advertising_router());
 
 	if (add_entry)
-	    routing_table.add_entry(_area, n, rtentry);
+	    routing_table.add_entry(_area, n, rtentry, __PRETTY_FUNCTION__);
 	if (replace_entry)
 	    routing_table.replace_entry(_area, n, rtentry);
 	

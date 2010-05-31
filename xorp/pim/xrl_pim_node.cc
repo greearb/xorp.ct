@@ -487,8 +487,6 @@ XrlPimNode::finder_send_register_unregister_interest_cb(const XrlError& xrl_erro
 		PimNode::decr_shutdown_requests_n();	// XXX: for the MFEA
 	    }
 	}
-	pop_xrl_task();
-	send_xrl_task();
 	break;
 
     case COMMAND_FAILED:
@@ -518,8 +516,6 @@ XrlPimNode::finder_send_register_unregister_interest_cb(const XrlError& xrl_erro
 	    if (entry->target_name() == _mfea_target) {
 		_is_mfea_registered = false;
 	    }
-	    pop_xrl_task();
-	    send_xrl_task();
 	}
 	break;
 
@@ -543,8 +539,11 @@ XrlPimNode::finder_send_register_unregister_interest_cb(const XrlError& xrl_erro
 		   "Will try again.",
 		   entry->operation_name(), xrl_error.str().c_str());
 	retry_xrl_task();
-	break;
+	return;
     }
+
+    pop_xrl_task();
+    send_xrl_task();
 }
 
 //
@@ -1130,8 +1129,6 @@ XrlPimNode::fea_client_send_register_unregister_receiver_cb(
 	else {
 	    PimNode::decr_shutdown_requests_n(); // XXX: for FEA-non-receiver
 	}
-	pop_xrl_task();
-	send_xrl_task();
 	break;
 
     case COMMAND_FAILED:
@@ -1156,8 +1153,6 @@ XrlPimNode::fea_client_send_register_unregister_receiver_cb(
 	    XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
 	} else {
 	    PimNode::decr_shutdown_requests_n();  // XXX: for FEA-non-receiver
-	    pop_xrl_task();
-	    send_xrl_task();
 	}
 	break;
 
@@ -1181,8 +1176,10 @@ XrlPimNode::fea_client_send_register_unregister_receiver_cb(
 		   "Will try again.",
 		   entry->operation_name(), xrl_error.str().c_str());
 	retry_xrl_task();
-	break;
+	return;
     }
+    pop_xrl_task();
+    send_xrl_task();
 }
 
 int
@@ -1319,16 +1316,15 @@ XrlPimNode::mfea_client_send_register_unregister_protocol_cb(
 	    PimNode::decr_startup_requests_n();	 // XXX: for MFEA-protocol
 	else
 	    PimNode::decr_shutdown_requests_n(); // XXX: for MFEA-non-protocol
-	pop_xrl_task();
-	send_xrl_task();
 	break;
 
     case COMMAND_FAILED:
 	//
 	// If a command failed because the other side rejected it, this is
 	// fatal.
+	// Shouldn't be fatal, network device can suddenly dissappear, for instance.
 	//
-	XLOG_FATAL("Cannot %s protocol with the MFEA: %s",
+	XLOG_ERROR("Cannot %s protocol with the MFEA: %s",
 		   entry->operation_name(), xrl_error.str().c_str());
 	break;
 
@@ -1345,8 +1341,6 @@ XrlPimNode::mfea_client_send_register_unregister_protocol_cb(
 	    XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
 	} else {
 	    PimNode::decr_shutdown_requests_n(); // XXX: for MFEA-non-protocol
-	    pop_xrl_task();
-	    send_xrl_task();
 	}
 	break;
 
@@ -1370,8 +1364,10 @@ XrlPimNode::mfea_client_send_register_unregister_protocol_cb(
 		   "Will try again.",
 		   entry->operation_name(), xrl_error.str().c_str());
 	retry_xrl_task();
-	break;
+	return;
     }
+    pop_xrl_task();
+    send_xrl_task();
 }
 
 int
@@ -1514,8 +1510,6 @@ XrlPimNode::fea_client_send_join_leave_multicast_group_cb(
 	    PimNode::decr_startup_requests_n();		// XXX: for FEA-join
 	else
 	    PimNode::decr_shutdown_requests_n();	// XXX: for FEA-leave
-	pop_xrl_task();
-	send_xrl_task();
 	break;
 
     case COMMAND_FAILED:
@@ -1523,7 +1517,7 @@ XrlPimNode::fea_client_send_join_leave_multicast_group_cb(
 	// If a command failed because the other side rejected it, this is
 	// fatal.
 	//
-	XLOG_FATAL("Cannot %s a multicast group with the FEA: %s",
+	XLOG_WARNING("Cannot %s a multicast group with the FEA: %s",
 		   entry->operation_name(),
 		   xrl_error.str().c_str());
 	break;
@@ -1541,8 +1535,6 @@ XrlPimNode::fea_client_send_join_leave_multicast_group_cb(
 	    XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
 	} else {
 	    PimNode::decr_shutdown_requests_n();	// XXX: for FEA-leave
-	    pop_xrl_task();
-	    send_xrl_task();
 	}
 	break;
 
@@ -1571,8 +1563,10 @@ XrlPimNode::fea_client_send_join_leave_multicast_group_cb(
 		   entry->vif_name().c_str(),
 		   xrl_error.str().c_str());
 	retry_xrl_task();
-	break;
+	return;
     }
+    pop_xrl_task();
+    send_xrl_task();
 }
 
 int
@@ -1713,8 +1707,6 @@ XrlPimNode::mfea_client_send_add_delete_mfc_cb(
 	//
 	// If success, then schedule the next task
 	//
-	pop_xrl_task();
-	send_xrl_task();
 	break;
 
     case COMMAND_FAILED:
@@ -1725,8 +1717,6 @@ XrlPimNode::mfea_client_send_add_delete_mfc_cb(
 	XLOG_ERROR("Cannot %s a multicast forwarding entry with the MFEA: %s",
 		   entry->operation_name(),
 		   xrl_error.str().c_str());
-	pop_xrl_task();
-	send_xrl_task();
 	break;
 
     case NO_FINDER:
@@ -1762,8 +1752,10 @@ XrlPimNode::mfea_client_send_add_delete_mfc_cb(
 		   "Will try again.",
 		   xrl_error.str().c_str());
 	retry_xrl_task();
-	break;
+	return;
     }
+    pop_xrl_task();
+    send_xrl_task();
 }
 
 int
@@ -1989,16 +1981,12 @@ XrlPimNode::mfea_client_send_add_delete_dataflow_monitor_cb(
 	//
 	// If success, then schedule the next task
 	//
-	pop_xrl_task();
-	send_xrl_task();
 	break;
 
     case COMMAND_FAILED:
 	XLOG_ERROR("Cannot %s dataflow monitor entry with the MFEA: %s",
 		   entry->operation_name(),
 		   xrl_error.str().c_str());
-	pop_xrl_task();
-	send_xrl_task();
 	break;
 
     case NO_FINDER:
@@ -2034,8 +2022,10 @@ XrlPimNode::mfea_client_send_add_delete_dataflow_monitor_cb(
 		   entry->operation_name(),
 		   xrl_error.str().c_str());
 	retry_xrl_task();
-	break;
+	return;
     }
+    pop_xrl_task();
+    send_xrl_task();
 }
 
 int
@@ -2343,8 +2333,10 @@ XrlPimNode::send_protocol_message()
 {
     bool success = true;
 
-    if (! _is_finder_alive)
+    if (! _is_finder_alive) {
+	XLOG_ERROR("ERROR: XrlPimNode::send_protocol_message, finder is NOT alive!\n");
 	return;		// The Finder is dead
+    }
 
     XLOG_ASSERT(! _xrl_tasks_queue.empty());
     XrlTaskBase* xrl_task_base = _xrl_tasks_queue.front();
@@ -2353,10 +2345,15 @@ XrlPimNode::send_protocol_message()
     entry = dynamic_cast<SendProtocolMessage*>(xrl_task_base);
     XLOG_ASSERT(entry != NULL);
 
+    //XLOG_ERROR("XrlPimNode::send_protocol_message interface/vif %s/%s. ",
+    //       entry->if_name().c_str(),
+    //       entry->vif_name().c_str());
+
     //
     // Check whether we have already registered with the FEA
     //
     if (! _is_fea_registered) {
+	XLOG_ERROR("ERROR: XrlPimNode::send_protocol_message, finder is NOT registered!\n");
 	retry_xrl_task();
 	return;
     }
@@ -2440,8 +2437,6 @@ XrlPimNode::fea_client_send_protocol_message_cb(const XrlError& xrl_error)
 	//
 	// If success, then schedule the next task
 	//
-	pop_xrl_task();
-	send_xrl_task();
 	break;
 
     case COMMAND_FAILED:
@@ -2459,8 +2454,6 @@ XrlPimNode::fea_client_send_protocol_message_cb(const XrlError& xrl_error)
 	//
 	XLOG_ERROR("Cannot send a protocol message: %s",
 		   xrl_error.str().c_str());
-	pop_xrl_task();
-	send_xrl_task();
 	break;
 
     case NO_FINDER:
@@ -2474,8 +2467,6 @@ XrlPimNode::fea_client_send_protocol_message_cb(const XrlError& xrl_error)
 	//
 	XLOG_ERROR("Cannot send a protocol message: %s",
 		   xrl_error.str().c_str());
-	pop_xrl_task();
-	send_xrl_task();
 	break;
 
     case BAD_ARGS:
@@ -2499,10 +2490,12 @@ XrlPimNode::fea_client_send_protocol_message_cb(const XrlError& xrl_error)
 	//
 	XLOG_ERROR("Failed to send a protocol message: %s",
 		   xrl_error.str().c_str());
-	pop_xrl_task();
-	send_xrl_task();
 	break;
     }
+
+    // In all cases, do the next task.
+    pop_xrl_task();
+    send_xrl_task();
 }
 
 //
@@ -3980,6 +3973,8 @@ XrlPimNode::pim_0_1_add_config_scope_zone_by_vif_name4(
     if (PimNode::add_config_scope_zone_by_vif_name(IPvXNet(scope_zone_id),
 						   vif_name, error_msg)
 	!= XORP_OK) {
+	error_msg = c_format("Failed to delete membership for (src: %s,  vif: %s)",
+			     cstring(scope_zone_id), vif_name.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     

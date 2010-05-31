@@ -279,9 +279,9 @@ FibConfigEntrySetNetlinkSocket::add_entry(const FteX& fte)
 	if (if_index != 0)
 	    break;
 
-	XLOG_FATAL("Could not find interface index for interface %s vif %s",
+	XLOG_ERROR("Could not find interface index for interface %s vif %s",
 		   fte.ifname().c_str(), fte.vifname().c_str());
-	break;
+	return XORP_ERROR;
     } while (false);
 
     //

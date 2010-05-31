@@ -186,6 +186,46 @@ FibConfigTableGetNetlinkSocket::get_table(int family, list<FteX>& fte_list)
     nlh->nlmsg_pid = ns.nl_pid();
     rtgenmsg = reinterpret_cast<struct rtgenmsg*>(NLMSG_DATA(nlh));
     rtgenmsg->rtgen_family = family;
+
+    struct rtmsg* rtmsg = reinterpret_cast<struct rtmsg*>(NLMSG_DATA(nlh));
+    uint32_t table_id = RT_TABLE_UNSPEC; // Default value for lookup
+
+    //
+    // Set the routing/forwarding table ID.
+    // If the table ID is <= 0xff, then we set it in rtmsg->rtm_table,
+    // otherwise we set rtmsg->rtm_table to RT_TABLE_UNSPEC and add the
+    // real value as an RTA_TABLE attribute.
+    //
+    if (fibconfig().unicast_forwarding_table_id_is_configured(family))
+	table_id = fibconfig().unicast_forwarding_table_id(family);
+    if (table_id <= 0xff)
+	rtmsg->rtm_table = table_id;
+    else
+	rtmsg->rtm_table = RT_TABLE_UNSPEC;
+
+#ifdef HAVE_NETLINK_SOCKET_ATTRIBUTE_RTA_TABLE
+    struct rtattr* rtattr = RTM_RTA(rtmsg);
+    // Add the table ID as an attribute
+    if (table_id > 0xff) {
+	uint8_t* data;
+	uint32_t uint32_table_id = table_id;
+	int rta_len = RTA_LENGTH(sizeof(uint32_table_id));
+	if (NLMSG_ALIGN(nlh->nlmsg_len) + rta_len > sizeof(buffer)) {
+	    XLOG_FATAL("AF_NETLINK buffer size error: %u instead of %u",
+		       XORP_UINT_CAST(sizeof(buffer)),
+		       XORP_UINT_CAST(NLMSG_ALIGN(nlh->nlmsg_len) + rta_len));
+	}
+	void* rta_align_data = reinterpret_cast<char*>(rtattr)
+	    + RTA_ALIGN(rtattr->rta_len);
+	rtattr = static_cast<struct rtattr*>(rta_align_data);
+	rtattr->rta_type = RTA_TABLE;
+	rtattr->rta_len = rta_len;
+	data = static_cast<uint8_t*>(RTA_DATA(rtattr));
+	memcpy(data, &uint32_table_id, sizeof(uint32_table_id));
+	nlh->nlmsg_len = NLMSG_ALIGN(nlh->nlmsg_len) + rta_len;
+    }
+#endif // HAVE_NETLINK_SOCKET_ATTRIBUTE_RTA_TABLE
+
     
     if (ns.sendto(&buffer, nlh->nlmsg_len, 0,
 		  reinterpret_cast<struct sockaddr*>(&snl),
@@ -214,8 +254,9 @@ FibConfigTableGetNetlinkSocket::get_table(int family, list<FteX>& fte_list)
     }
     // XXX: reset the multipart message read hackish flag
     ns.set_multipart_message_read(false);
+
     if (parse_buffer_netlink_socket(family, fibconfig().system_config_iftree(),
-				    fte_list, _ns_reader.buffer(), true)
+				    fte_list, _ns_reader.buffer(), true, fibconfig())
 	!= XORP_OK) {
 	return (XORP_ERROR);
     }

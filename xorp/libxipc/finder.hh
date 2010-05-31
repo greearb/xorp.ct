@@ -36,6 +36,10 @@
 
 #include <boost/noncopyable.hpp>
 
+// periodic HELLO ping of 100 seconds to decrease useless xorp
+// RPC messages.
+#define XORP_HELLO_TIMER_MS 100000
+
 class FinderTarget;
 class FinderClass;
 class FinderEvent;

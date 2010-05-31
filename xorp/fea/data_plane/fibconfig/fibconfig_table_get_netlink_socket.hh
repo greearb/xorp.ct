@@ -96,7 +96,7 @@ public:
     static int parse_buffer_netlink_socket(int family, const IfTree& iftree,
 					   list<FteX>& fte_list,
 					   const vector<uint8_t>& buffer,
-					   bool is_nlm_get_only);
+					   bool is_nlm_get_only, const FibConfig& fibconfig);
 
 private:
     int get_table(int family, list<FteX>& fte_list);

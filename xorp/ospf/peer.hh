@@ -234,7 +234,7 @@ class PeerOut {
     /**
      * Send (push) any queued LSAs.
      */
-    bool push_lsas();
+    bool push_lsas(const char* message);
 
     /**
      * Are any of the neighbours of this peer in the state exchange or
@@ -806,7 +806,7 @@ class Peer {
     /**
      * Send (push) any queued LSAs.
      */
-    bool push_lsas();
+    bool push_lsas(const char* message);
 
     /*
      * Should we be computing the DR and BDR on this peer?
@@ -1627,7 +1627,7 @@ class Neighbour {
     /**
      * Send (push) any queued LSAs.
      */
-    bool push_lsas();
+    bool push_lsas(const char* message);
 
     /**
      * Is this LSA on this neighbours link state request list.
@@ -1776,7 +1776,7 @@ class Neighbour {
     /**
      * restart transmitter.
      */
-    void restart_retransmitter();
+    void restart_retransmitter(const char* comment);
 
     /**
      * Stop the transmitter.

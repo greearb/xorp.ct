@@ -98,6 +98,7 @@ interface bgp/0.3 {
 	/** 
 	 * Add peer.
 	 *
+	 * @param local Interface Name.
 	 * @param local IP address.
 	 * @param local server port.
 	 * @param peer IP address.
@@ -109,7 +110,8 @@ interface bgp/0.3 {
 	 */
 	add_peer \
 		? \
-		local_ip:txt \
+		local_dev:txt \
+		& local_ip:txt \
 	        & local_port:u32 \
 		& peer_ip:txt \
 		& peer_port:u32 \
@@ -163,13 +165,14 @@ interface bgp/0.3 {
 		& peer_port:u32;
 
 	/**
-	 * Change the local IP address.
+	 * Change the local IP address and interface.
 	 *
 	 * @param local_ip current IP address.
 	 * @param local_port server port.
 	 * @param peer_ip IP address.
 	 * @param peer_port peer port.
 	 * @param new_local_ip new IP address.
+	 * @param new_local_dev new Interface Name.
 	 */
 	change_local_ip \
 		? \
@@ -177,7 +180,8 @@ interface bgp/0.3 {
 	        & local_port:u32 \
 		& peer_ip:txt \
 		& peer_port:u32 \
-		& new_local_ip:txt;
+		& new_local_ip:txt \
+		& new_local_dev:txt;
 
 	/**
 	 * Change the local port.

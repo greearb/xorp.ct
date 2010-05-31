@@ -45,7 +45,7 @@ XrlMfeaNode::XrlMfeaNode(FeaNode&	fea_node,
 			 const string&	finder_hostname,
 			 uint16_t	finder_port,
 			 const string&	finder_target)
-    : MfeaNode(fea_node, family, module_id, eventloop),
+	: MfeaNode(fea_node, family, module_id, eventloop),
       XrlStdRouter(eventloop, class_name.c_str(), finder_hostname.c_str(),
 		   finder_port),
       XrlMfeaTargetBase(&xrl_router()),
@@ -1412,8 +1412,10 @@ XrlMfeaNode::mfea_0_1_enable_vif(
     else
 	ret_code = MfeaNode::disable_vif(vif_name, error_msg);
 
-    if (ret_code != XORP_OK)
-	return XrlCmdError::COMMAND_FAILED(error_msg);
+    if (ret_code != XORP_OK) {
+        XLOG_ERROR("Mfea, enable/disable vif failed.  Allowing commit to succeed anyway since this is likely a race with a deleted interface, error: %s\n", error_msg.c_str());
+	//return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
     
     return XrlCmdError::OKAY();
 }

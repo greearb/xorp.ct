@@ -1074,7 +1074,7 @@ class AreaRouter : public ServiceBase {
     /**
      * Send (push) any queued LSAs.
      */
-    void push_lsas();
+    void push_lsas(const char* msg);
 
     /**
      * Return the setting of the propagate bit in a Type-7-LSA.
@@ -1248,7 +1248,7 @@ class AreaRouter : public ServiceBase {
      */
     void routing_table_add_entry(RoutingTable<A>& routing_table,
 				 IPNet<A> net,
-				 RouteEntry<A>& route_entry);
+				 RouteEntry<A>& route_entry, const char* msg);
 
     /**
      * Compute the discard routes related to area ranges.

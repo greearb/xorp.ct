@@ -37,32 +37,36 @@
 Iptuple::Iptuple()
 {}
 
-Iptuple::Iptuple(const char *local_interface, uint16_t local_port,
-		 const char *peer_interface, uint16_t peer_port)
+Iptuple::Iptuple(const char* local_dev, const char *local_addr, uint16_t local_port,
+		 const char *peer_addr, uint16_t peer_port)
     throw(UnresolvableHost,AddressFamilyMismatch)
-    : _local_interface(local_interface),
-      _peer_interface(peer_interface),
-      _local_port(local_port),
-      _peer_port(peer_port)
+	: _local_dev(local_dev),
+	  _local_addr(local_addr),
+	  _peer_addr(peer_addr),
+	  _local_port(local_port),
+	  _peer_port(peer_port)
 {
     _local_sock_len = sizeof(_local_sock);
     _bind_sock_len = sizeof(_bind_sock);
     _peer_sock_len = sizeof(_peer_sock);
 
-    fill_address(local_interface, local_port, _local_sock, _local_sock_len,
+    debug_msg("Iptuple creation, local_dev: %s  local_addr: %s  local_port: %i peer_addr: %s  peer_port: %i\n",
+	      local_dev, local_addr, (int)(local_port), peer_addr, (int)(peer_port));
+
+    fill_address(local_addr, local_port, _local_sock, _local_sock_len,
 		 _local_address);
     string bind_address; // We don't care about this address
-    fill_address(local_interface, 0, _bind_sock, _bind_sock_len,
+    fill_address(local_addr, 0, _bind_sock, _bind_sock_len,
 		 bind_address);
-    fill_address(peer_interface, peer_port, _peer_sock, _peer_sock_len,
+    fill_address(peer_addr, peer_port, _peer_sock, _peer_sock_len,
 		 _peer_address);
 
     //  Test for an address family mismatch
     if (_local_sock.ss_family != _peer_sock.ss_family)
 	xorp_throw(AddressFamilyMismatch,
 		   c_format("mismatch %s (%u) %s (%u)",
-			    local_interface, _local_sock.ss_family, 
-			    peer_interface, _peer_sock.ss_family));
+			    local_addr, _local_sock.ss_family, 
+			    peer_addr, _peer_sock.ss_family));
 
     _local_address_ipvx = IPvX(_local_address.c_str());
     _peer_address_ipvx = IPvX(_peer_address.c_str());
@@ -87,8 +91,9 @@ Iptuple::operator=(const Iptuple& rhs)
 void
 Iptuple::copy(const Iptuple& rhs)
 {
-    _local_interface = rhs._local_interface;
-    _peer_interface = rhs._peer_interface;
+    _local_addr = rhs._local_addr;
+    _local_dev = rhs._local_dev;
+    _peer_addr = rhs._peer_addr;
 
     memcpy(&_local_sock, &rhs._local_sock, sizeof(_local_sock));
     _local_sock_len = rhs._local_sock_len;
@@ -126,9 +131,9 @@ Iptuple::operator==(const Iptuple& rhs) const
 ** the numeric representation of the address.
 */
 void
-Iptuple::fill_address(const char *interface, uint16_t local_port,
+Iptuple::fill_address(const char *addr, uint16_t local_port,
 		      struct sockaddr_storage& ss, size_t& len,
-		      string& numeric_interface)
+		      string& numeric_addr)
     throw(UnresolvableHost)
 {
     string port = c_format("%d", local_port);
@@ -145,11 +150,11 @@ Iptuple::fill_address(const char *interface, uint16_t local_port,
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = PF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
-    if ((error = getaddrinfo(interface, servname, &hints, &res0))) {
+    if ((error = getaddrinfo(addr, servname, &hints, &res0))) {
 	const char *error_string = gai_strerror(error);
 	xorp_throw(UnresolvableHost,
 		   c_format("getaddrinfo(%s,%s,...) failed: %s",
-			    interface, port.c_str(),
+			    addr, port.c_str(),
 			    error_string));
 
     }
@@ -172,9 +177,9 @@ Iptuple::fill_address(const char *interface, uint16_t local_port,
 		   c_format("getnameinfo() failed: %s", error_string));
     }
 
-    numeric_interface = hostname;
-    debug_msg("Original %s Hostname: %s\n", interface,
-	      numeric_interface.c_str());
+    numeric_addr = hostname;
+    debug_msg("Original %s Hostname: %s\n", addr,
+	      numeric_addr.c_str());
     
     freeaddrinfo(res0);
 }
@@ -271,7 +276,8 @@ Iptuple::get_peer_port() const
 string
 Iptuple::str() const
 {
-    return c_format("{%s(%d) %s(%d)}",
-		    _local_interface.c_str(), _local_port,
-		    _peer_interface.c_str(),  _peer_port);
+    return c_format("{%s%s(%d) %s(%d)}",
+		    _local_dev.c_str(),
+		    _local_addr.c_str(), _local_port,
+		    _peer_addr.c_str(),  _peer_port);
 }

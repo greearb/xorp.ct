@@ -982,7 +982,7 @@ IfConfigSetNetlinkSocket::add_addr(const string& ifname,
     if (ns.sendto(&buffer, nlh->nlmsg_len, 0,
 		  reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl))
 	!= (ssize_t)nlh->nlmsg_len) {
-	error_msg = c_format("Cannot add address '%s' "
+	error_msg = c_format("IfConfigSetNetlinkSocket::add_addr: sendto: Cannot add address '%s' "
 			     "on interface '%s' vif '%s': %s",
 			     addr.str().c_str(),
 			     ifname.c_str(), vifname.c_str(), strerror(errno));
@@ -991,7 +991,7 @@ IfConfigSetNetlinkSocket::add_addr(const string& ifname,
     if (NlmUtils::check_netlink_request(_ns_reader, ns, nlh->nlmsg_seq,
 					last_errno, error_msg)
 	!= XORP_OK) {
-	error_msg = c_format("Cannot add address '%s' "
+	error_msg = c_format("IfConfigSetNetlinkSocket::add_addr: check_nl_req: Cannot add address '%s' "
 			     "on interface '%s' vif '%s': %s",
 			     addr.str().c_str(),
 			     ifname.c_str(), vifname.c_str(),

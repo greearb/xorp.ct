@@ -118,13 +118,13 @@ IfConfigVlanGetBsd::stop(string& error_msg)
 }
 
 int
-IfConfigVlanGetBsd::pull_config(IfTree& iftree)
+IfConfigVlanGetBsd::pull_config(IfTree& iftree, bool& modified)
 {
-    return read_config(iftree);
+    return read_config(iftree, bool& modified);
 }
 
 int
-IfConfigVlanGetBsd::read_config(IfTree& iftree)
+IfConfigVlanGetBsd::read_config(IfTree& iftree, bool& modified)
 {
     IfTree::IfMap::iterator ii;
     string error_msg;
@@ -183,6 +183,7 @@ IfConfigVlanGetBsd::read_config(IfTree& iftree)
 	// Find or add the VLAN vif
 	IfTreeVif* parent_vifp = parent_ifp->find_vif(ifp->ifname());
 	if (parent_vifp == NULL) {
+	    modified = true;
 	    parent_ifp->add_vif(ifp->ifname());
 	    parent_vifp = parent_ifp->find_vif(ifp->ifname());
 	}
@@ -190,12 +191,23 @@ IfConfigVlanGetBsd::read_config(IfTree& iftree)
 
 	// Copy the vif state
 	IfTreeVif* vifp = ifp->find_vif(ifp->ifname());
-	if (vifp != NULL)
+	if (vifp != NULL) {
+	    modified = true; /* TODO: this could be a lie, but better safe than sorry until
+			      * the copy-recursive method takes 'modified'.
+			      */
 	    parent_vifp->copy_recursive_vif(*vifp);
+	}
 
 	// Set the VLAN vif info
-	parent_vifp->set_vlan(true);
-	parent_vifp->set_vlan_id(vlan_id);
+	// Set the VLAN vif info
+	if (!parent_vifp->is_vlan()) {
+	    parent_vifp->set_vlan(true);
+	    modified = true;
+	}
+	if (parent_vifp->vlan_id() != vlan_id) {
+	    parent_vifp->set_vlan_id(vlan_id);
+	    modified = true;
+	}
     }
 
     return (XORP_OK);

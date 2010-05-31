@@ -87,10 +87,27 @@ public:
     /**
      * Pull the network interface information from the underlying system.
      * 
+     * @param local_config If not NULL, optimized ifconfig-get subclasses
+     *  may pull interface config for only interfaces found in local_config.
+     *  Set to NULl to pull all information from the kernel.
      * @param iftree the IfTree storage to store the pulled information.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int pull_config(IfTree& iftree) = 0;
+    virtual int pull_config(const IfTree* local_config, IfTree& iftree) = 0;
+
+    /** Child classes that *can* do this should over-ride.
+     */
+    virtual bool can_pull_one() { return false; }
+
+    /** If_index can be -1 if unknown:  We will try to resolve it from ifname.
+     * Child classes that can do this should implement the method.
+     */
+    virtual int pull_config_one(IfTree& iftree, const char* ifname, int if_index) {
+	UNUSED(iftree);
+	UNUSED(ifname);
+	UNUSED(if_index);
+	return XORP_ERROR;
+    }
     
 protected:
     // Misc other state

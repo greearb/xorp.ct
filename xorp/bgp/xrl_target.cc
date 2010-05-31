@@ -281,6 +281,7 @@ XrlBgpTarget::bgp_0_3_set_damping(const uint32_t& half_life,
 XrlCmdError 
 XrlBgpTarget::bgp_0_3_add_peer(
 	// Input values, 
+	const string&	local_dev, 
 	const string&	local_ip, 
 	const uint32_t&	local_port, 
 	const string&	peer_ip, 
@@ -304,7 +305,7 @@ XrlBgpTarget::bgp_0_3_add_peer(
 
     BGPPeerData *pd = 0;
     try {
-	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+	Iptuple iptuple(local_dev.c_str(), local_ip.c_str(), local_port, peer_ip.c_str(),
 			peer_port);
 
         AsNum asn(as); 
@@ -337,7 +338,7 @@ XrlBgpTarget::bgp_0_3_delete_peer(
 	      peer_ip.c_str(), XORP_UINT_CAST(peer_port));
 
     try {
-	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
 			peer_port);
 
 	if(!_bgp.delete_peer(iptuple))
@@ -362,7 +363,7 @@ XrlBgpTarget::bgp_0_3_enable_peer(
 	      peer_ip.c_str(), XORP_UINT_CAST(peer_port));
 
     try {
-	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
 			peer_port);
 
 	if(!_bgp.enable_peer(iptuple))
@@ -387,7 +388,7 @@ XrlBgpTarget::bgp_0_3_disable_peer(
 	      peer_ip.c_str(), XORP_UINT_CAST(peer_port));
 
     try {
-	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
 			peer_port);
 
 	if(!_bgp.disable_peer(iptuple))
@@ -406,19 +407,20 @@ XrlBgpTarget::bgp_0_3_change_local_ip(
 	const uint32_t&	local_port,
 	const string&	peer_ip,
 	const uint32_t&	peer_port,
-	const string&	new_local_ip)
+	const string&	new_local_ip,
+	const string&	new_local_dev)
 {
-    debug_msg("local ip %s local port %u peer ip %s peer port %u"
-	      " new local ip %s\n",
+    XLOG_ERROR("local ip %s local port %u peer ip %s peer port %u"
+	      " new_local_ip %s new_local_dev: %s\n",
 	      local_ip.c_str(), XORP_UINT_CAST(local_port),
 	      peer_ip.c_str(), XORP_UINT_CAST(peer_port),
-	      new_local_ip.c_str());
+	      new_local_ip.c_str(), new_local_dev.c_str());
 
     try {
-	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
 			peer_port);
 
-	if(!_bgp.change_local_ip(iptuple, new_local_ip))
+	if(!_bgp.change_local_ip(iptuple, new_local_ip, new_local_dev))
 	    return XrlCmdError::COMMAND_FAILED();
     } catch(XorpException& e) {
 	return XrlCmdError::COMMAND_FAILED(e.str());
@@ -443,7 +445,7 @@ XrlBgpTarget::bgp_0_3_change_local_port(
 	      new_local_port);
 
     try {
-	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
 			peer_port);
 
 	if(!_bgp.change_local_port(iptuple, new_local_port))
@@ -471,7 +473,7 @@ XrlBgpTarget::bgp_0_3_change_peer_port(
 	      new_peer_port);
 
     try {
-	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
 			peer_port);
 
 	if(!_bgp.change_peer_port(iptuple, new_peer_port))
@@ -499,7 +501,7 @@ XrlBgpTarget::bgp_0_3_set_peer_as(
 	      peer_as.c_str());
 
     try {
-	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
 			peer_port);
 	AsNum peer_asn(peer_as);
 	if(!_bgp.set_peer_as(iptuple, peer_asn.as4()))
@@ -527,7 +529,7 @@ XrlBgpTarget::bgp_0_3_set_holdtime(
 	      holdtime);
 
     try {
-	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
 			peer_port);
 
 	if(!_bgp.set_holdtime(iptuple, holdtime))
@@ -555,7 +557,7 @@ XrlBgpTarget::bgp_0_3_set_delay_open_time(
 	      delay_open_time);
 
     try {
-	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
 			peer_port);
 
 	if(!_bgp.set_delay_open_time(iptuple, delay_open_time))
@@ -583,7 +585,7 @@ XrlBgpTarget::bgp_0_3_set_route_reflector_client(
 	      bool_c_str(state));
 
     try {
-	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
 			peer_port);
 
 	if(!_bgp.set_route_reflector_client(iptuple, state))
@@ -611,7 +613,7 @@ XrlBgpTarget::bgp_0_3_set_confederation_member(
 	      bool_c_str(state));
 
     try {
-	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
 			peer_port);
 
 	if(!_bgp.set_confederation_member(iptuple, state))
@@ -640,7 +642,7 @@ XrlBgpTarget::bgp_0_3_set_prefix_limit(
 	      XORP_UINT_CAST(maximum), bool_c_str(state));
 
     try {
-	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
 			peer_port);
 
 	if(!_bgp.set_prefix_limit(iptuple, maximum, state))
@@ -668,7 +670,7 @@ XrlBgpTarget::bgp_0_3_set_nexthop4(
 	      cstring(next_hop));
 
     try {
-	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
 			peer_port);
 
 	if(!_bgp.set_nexthop4(iptuple, next_hop))
@@ -696,7 +698,7 @@ XrlBgpTarget::bgp_0_3_set_nexthop6(
 	      cstring(next_hop));
 
     try {
-	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
 			peer_port);
 
 	if(!_bgp.set_nexthop6(iptuple, next_hop))
@@ -722,7 +724,7 @@ XrlBgpTarget::bgp_0_3_get_nexthop6(
 	      peer_ip.c_str(), XORP_UINT_CAST(peer_port));
 
     try {
-	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
 			peer_port);
 
 	if(!_bgp.get_nexthop6(iptuple, next_hop))
@@ -748,7 +750,7 @@ XrlBgpTarget::bgp_0_3_set_peer_state(
 	      peer_ip.c_str(), XORP_UINT_CAST(peer_port), toggle);
 
     try {
-	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
 			peer_port);
 
 	if(!_bgp.set_peer_state(iptuple, toggle))
@@ -775,7 +777,7 @@ XrlBgpTarget::bgp_0_3_set_peer_md5_password(
 	      password.c_str());
 
     try {
-	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
 			peer_port);
 
 	if(!_bgp.set_peer_md5_password(iptuple, password))
@@ -800,7 +802,7 @@ XrlBgpTarget::bgp_0_3_activate(
 	      peer_ip.c_str(), XORP_UINT_CAST(peer_port));
 
     try {
-	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
 			peer_port);
 
 	if(!_bgp.activate(iptuple))
@@ -828,7 +830,7 @@ XrlBgpTarget::bgp_0_3_next_hop_rewrite_filter(
 	      next_hop.str().c_str());
 
     try {
-	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
 			peer_port);
 
 	if(!_bgp.next_hop_rewrite_filter(iptuple, next_hop))
@@ -984,7 +986,7 @@ XrlBgpTarget::bgp_0_3_get_peer_id(
 	      peer_ip.c_str(), XORP_UINT_CAST(peer_port));
 
     try {
-	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
 			peer_port);
 
 	if (!_bgp.get_peer_id(iptuple, peer_id)) {
@@ -1010,7 +1012,7 @@ XrlBgpTarget::bgp_0_3_get_peer_status(
 {
 
     try {
-	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
 			peer_port);
 
 	if (!_bgp.get_peer_status(iptuple, peer_state, admin_status)) {
@@ -1034,7 +1036,7 @@ XrlBgpTarget::bgp_0_3_get_peer_negotiated_version(
 						  int32_t& neg_version)
 {
     try {
-	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
 			peer_port);
 
 	if (!_bgp.get_peer_negotiated_version(iptuple, neg_version)) {
@@ -1058,7 +1060,7 @@ XrlBgpTarget::bgp_0_3_get_peer_as(
 				  string& peer_as)
 {
     try {
-	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
 			peer_port);
 	uint32_t peer_asn;
 	if (!_bgp.get_peer_as(iptuple, peer_asn)) {
@@ -1088,7 +1090,7 @@ XrlBgpTarget::bgp_0_3_get_peer_msg_stats(
 					 uint32_t&	in_update_elapsed)
 {
     try {
-	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
 			peer_port);
 
 	uint16_t last_error_short;
@@ -1117,7 +1119,7 @@ XrlBgpTarget::bgp_0_3_get_peer_established_stats(
 						 uint32_t& established_time)
 {
     try {
-	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
 			peer_port);
 
 	if (!_bgp.get_peer_established_stats(iptuple, transitions,
@@ -1147,7 +1149,7 @@ XrlBgpTarget::bgp_0_3_get_peer_timer_config(
 					    uint32_t& min_route_adv_interval)
 {
     try {
-	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
 			peer_port);
 	if (!_bgp.get_peer_timer_config(iptuple, retry_interval, hold_time,
 					keep_alive, hold_time_conf,
@@ -1385,7 +1387,7 @@ XrlCmdError XrlBgpTarget::bgp_0_3_set_parameter(
 	      parameter.c_str(), toggle ? "set" : "unset");
 
     try {
-	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
 			peer_port);
 
 	if(!_bgp.set_parameter(iptuple,parameter, toggle))

@@ -80,9 +80,9 @@ IfConfigVlanGetDummy::stop(string& error_msg)
 }
 
 int
-IfConfigVlanGetDummy::pull_config(IfTree& iftree)
+IfConfigVlanGetDummy::pull_config(IfTree& iftree, bool& modified)
 {
     UNUSED(iftree);
-
+    UNUSED(modified);
     return (XORP_OK);
 }
