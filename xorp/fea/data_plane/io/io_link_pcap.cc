@@ -45,7 +45,7 @@
 #include "io_link_pcap.hh"
 
 
-#ifdef HAVE_PCAP
+#ifdef HAVE_PCAP_H
 
 IoLinkPcap::IoLinkPcap(FeaDataPlaneManager& fea_data_plane_manager,
 		       const IfTree& iftree, const string& if_name,
@@ -612,4 +612,4 @@ IoLinkPcap::reopen_pcap_access(string& error_msg)
     return (XORP_OK);
 }
 
-#endif // HAVE_PCAP
+#endif // HAVE_PCAP_H

@@ -209,7 +209,7 @@ FeaDataPlaneManagerLinux::allocate_io_link(const IfTree& iftree,
     UNUSED(ether_type);
     UNUSED(filter_program);
 
-#ifdef HAVE_PCAP
+#ifdef HAVE_PCAP_H
     io_link = new IoLinkPcap(*this, iftree, if_name, vif_name, ether_type,
 			     filter_program);
     _io_link_list.push_back(io_link);

@@ -493,9 +493,9 @@ test_main(IPv4 finder_host, uint16_t finder_port,
     bool eflag(false);		// Error flag set by timed events
     Mac mac;
 
-#ifndef HAVE_PCAP
+#ifndef HAVE_PCAP_H
     fprintf(stdout, "Test Skipped: No L2 I/O mechanism found: "
-	    "HAVE_PCAP is not defined.\n");
+	    "HAVE_PCAP_H is not defined.\n");
     return 0;
 #endif
 
