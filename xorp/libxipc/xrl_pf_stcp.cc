@@ -168,8 +168,7 @@ private:
     // Writer associated current response (head of responses).
     AsyncFileWriter _writer;
 
-    typedef vector<uint8_t> ReplyPacket;
-    list<ReplyPacket> 	_responses; 	// head is currently being written
+    list<vector<uint8_t> > 	_responses; 	// head is currently being written
     uint32_t		_responses_size;
 
     // If the STCP keepalive timeout is non-zero, then STCPRequestHandlers
@@ -305,11 +304,11 @@ STCPRequestHandler::dispatch_request(uint32_t 		seqno,
     size_t xrl_response_bytes = response.packed_bytes();
     size_t note_bytes = e.note().size();
 
-    _responses.push_back(ReplyPacket(STCPPacketHeader::header_size()
+    _responses.push_back(vector<uint8_t>(STCPPacketHeader::header_size()
 			 + note_bytes + xrl_response_bytes));
 
     _responses_size++;
-    ReplyPacket& r = _responses.back();
+    vector<uint8_t>& r = _responses.back();
 
     STCPPacketHeader sph(&r[0]);
     sph.initialize(seqno, STCP_PT_RESPONSE, e, xrl_response_bytes);
@@ -336,9 +335,9 @@ STCPRequestHandler::dispatch_request(uint32_t 		seqno,
 void
 STCPRequestHandler::ack_helo(uint32_t seqno)
 {
-    _responses.push_back(ReplyPacket(STCPPacketHeader::header_size()));
+    _responses.push_back(vector<uint8_t>(STCPPacketHeader::header_size()));
     _responses_size++;
-    ReplyPacket& r = _responses.back();
+    vector<uint8_t>& r = _responses.back();
 
     STCPPacketHeader sph(&r[0]);
     sph.initialize(seqno, STCP_PT_HELO_ACK, XrlError::OKAY(), 0);
