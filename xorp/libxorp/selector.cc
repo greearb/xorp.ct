@@ -76,10 +76,37 @@ map_ioevent_to_selectormask(const IoEventType type)
 // SelectorList::Node methods
 
 inline
-SelectorList::Node::Node()
-{
-    _mask[SEL_RD_IDX] = _mask[SEL_WR_IDX] = _mask[SEL_EX_IDX] = 0;
+SelectorList::Node::Node() {
+    magic = GOOD_NODE_MAGIC;
+    for (int i = 0; i<SEL_MAX_IDX; i++) {
+	_mask[i] = 0;
+	_priority[i] = XorpTask::PRIORITY_INFINITY;
+	_iot[i] = IOT_ANY;
+	_cb[i] = NULL; // callbacks are ref_ptr objects.
+    }
 }
+
+SelectorList::Node::~Node() {
+    magic = 0xDEADBEEF;
+}
+
+SelectorList::Node::Node(const Node& rhs) {
+    magic = GOOD_NODE_MAGIC;
+    *this = rhs;
+}
+
+SelectorList::Node& SelectorList::Node::operator=(const Node& rhs) {
+    if (this == &rhs) {
+	return *this;
+    }
+    for (int i = 0; i<SEL_MAX_IDX; i++) {
+	_mask[i] = rhs._mask[i];
+	_priority[i] = rhs._priority[i];
+	_iot[i] = rhs._iot[i];
+	_cb[i] = rhs._cb[i];
+    }
+    return *this;
+} 
 
 inline bool
 SelectorList::Node::add_okay(SelectorMask m, IoEventType type,
@@ -164,10 +191,12 @@ SelectorList::Node::run_hooks(SelectorMask m, XorpFd fd)
     SelectorMask already_matched = SelectorMask(0);
 
     for (int i = 0; i < SEL_MAX_IDX; i++) {
+	assert(magic == GOOD_NODE_MAGIC);
 	SelectorMask match = SelectorMask(_mask[i] & m & ~already_matched);
 	if (match) {
 	    assert(_cb[i].is_empty() == false);
 	    _cb[i]->dispatch(fd, _iot[i]);
+	    assert(magic == GOOD_NODE_MAGIC);
 	    n++;
 	}
 	already_matched = SelectorMask(already_matched | match);
@@ -197,11 +226,17 @@ SelectorList::Node::is_empty()
 // ----------------------------------------------------------------------------
 // SelectorList implementation
 
+
+// NOTE:  It is possible for callbacks to add an event, that that event can
+// cause the selector_entries to be resized.  See:  add_ioevent_cb
+// This in turn deletes the old memory in the vector.  This this causes
+// Node::run_hooks to be accessing deleted memory (ie, 'this' was deleted during
+// the call to dispatch().
+// Seems like a lot of pain to fix this right, so in the meantime, will pre-allocate
+// logs of space in the selector_entries vector in hopes we do not have to resize.
 SelectorList::SelectorList(ClockBase *clock)
     : _clock(clock), _observer(NULL), _testfds_n(0), _last_served_fd(-1),
-      _last_served_sel(-1),
-      // XXX: Preallocate to work around use-after-free in Node::run_hooks().
-      _selector_entries(256),
+      _last_served_sel(-1), _selector_entries(1024),
       _maxfd(0), _descriptor_count(0), _is_debug(false)
 {
     static_assert(SEL_RD == (1 << SEL_RD_IDX) && SEL_WR == (1 << SEL_WR_IDX)
@@ -232,20 +267,13 @@ SelectorList::add_ioevent_cb(XorpFd		fd,
 		   "descriptor (fd = %s)\n", fd.str().c_str());
     }
 
-    bool resize = false;
     if (fd >= _maxfd) {
 	_maxfd = fd;
-	size_t entries_n = _selector_entries.size();
-	if ((size_t)fd >= entries_n) {
+	if ((size_t)fd >= _selector_entries.size()) {
 	    _selector_entries.resize(fd + 32);
-	    for (size_t j = entries_n; j < _selector_entries.size(); j++) {
-		for (int i = 0; i < SEL_MAX_IDX; i++) {
-		    _selector_entries[j]._priority[i] = XorpTask::PRIORITY_INFINITY;
-		}
-	    }
-	    resize = true;
 	}
     }
+
     bool no_selectors_with_fd = _selector_entries[fd].is_empty();
     if (_selector_entries[fd].add_okay(mask, type, cb, priority) == false) {
 	return false;
@@ -483,6 +511,10 @@ SelectorList::wait_and_dispatch(TimeVal& timeout)
     default:
 	XLOG_ASSERT(false);
     }
+
+
+    XLOG_ASSERT((_maxpri_fd >= 0) && (_maxpri_fd < (int)(_selector_entries.size())));
+    XLOG_ASSERT(_selector_entries[_maxpri_fd].magic == GOOD_NODE_MAGIC);
 
     _selector_entries[_maxpri_fd].run_hooks(sm, _maxpri_fd);
 

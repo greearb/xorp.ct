@@ -242,7 +242,10 @@ private:
 	SEL_EX_IDX	= 2,
 	SEL_MAX_IDX	= 3
     };
+
+    #define GOOD_NODE_MAGIC 0x12345678
     struct Node {
+	int magic; // catch memory errors.
 	int		_mask[SEL_MAX_IDX];
 	IoEventCb	_cb[SEL_MAX_IDX];
 	// Reverse mapping of legacy UNIX event to IoEvent
@@ -250,6 +253,10 @@ private:
 	int		_priority[SEL_MAX_IDX];
 
 	Node();
+	~Node();
+	Node(const Node& rhs); // copy constructor
+	Node& operator=(const Node& rhs); // operator= overload
+
 	bool		add_okay(SelectorMask m, IoEventType type,
 				 const IoEventCb& cb, int priority);
 	int		run_hooks(SelectorMask m, XorpFd fd);
