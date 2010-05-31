@@ -2136,9 +2136,12 @@ XrlFeaTarget::add_remove_mac(bool add, const string& ifname, const Mac& mac,
 	// Sanity check
 	if (macs.find(mac) != macs.end() || current_mac == mac) {
 	    error_msg = c_format("Cannot add MAC address %s on interface %s: "
-				 "MAC already added",
-				 mac.str().c_str(), ifname.c_str());
-	    return (XORP_ERROR);
+				 "MAC already exists, current_mac: %s  mac count: %i",
+				 mac.str().c_str(), ifname.c_str(), current_mac.str().c_str(),
+				 (int)(macs.size()));
+	    // This doesn't seem so bad to me...going to log it and pass back success. --Ben
+	    XLOG_WARNING("%s", error_msg.c_str());
+	    return XORP_OK;
 	}
 
 	if (macs.size())
@@ -2171,7 +2174,8 @@ XrlFeaTarget::add_remove_mac(bool add, const string& ifname, const Mac& mac,
 		error_msg = c_format("Cannot remove MAC address %s "
 				     "on interface %s: last address",
 				     mac.str().c_str(), ifname.c_str());
-		return (XORP_ERROR);
+		XLOG_WARNING("%s", error_msg.c_str());
+		return XORP_OK;
 	    }
 	    candidate_mac = *(macs.begin());
 
