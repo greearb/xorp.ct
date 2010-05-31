@@ -43,6 +43,7 @@ Help("""
         Default is "obj/<arch>-<os>-<rel>".
     prefix=<some path> to specify a different install directory.
         Default is "/usr/local/xorp".
+    enable_gprof=true if you want things compiled with '-pg' flag.
     enable_xrldb_validation=true if you want XRLdb runtime validation enabled..
         This is not normally required unless you are developing and making changes
         to the XRL template files.  XRLdb validation increases startup time.
@@ -71,8 +72,10 @@ vars.AddVariables(
     BoolVariable('debug_msg',  'Build with debug messages', False),
     BoolVariable('debug_fn',  'Build with function names in debug_msg output', False),
     BoolVariable('debug_cb',  'Build with callback debugging', False),
-    BoolVariable('enable_xrldb_validation',  'Enable Runtime XRLdb Validation', False),
+    BoolVariable('enable_gprof',  'Enable gprof (compile with -pg)', False),
     BoolVariable('enable_olsr',  'Build OLSR', False),
+    BoolVariable('enable_tests', 'Build Test Programs', False),
+    BoolVariable('save_args', 'Save scons arguments to .scons_build_args file', False),
     BoolVariable('debug_xrldb',  'Build with runtime XRL syntax validation in Router Manager', False),
     EnumVariable('debug', 'Build with debug symbols', 'full',
                  allowed_values=('no', 'yes', 'full', 'override'),
@@ -92,6 +95,20 @@ vars.AddVariables(
     )
 
 build_arch = os.uname()[4].lower()
+build_os = os.uname()[0].lower()
+host_arch = ARGUMENTS.get('arch')
+if not host_arch:
+	host_arch = build_arch
+
+if ARGUMENTS.get("save_args"):
+    del ARGUMENTS["save_args"]
+    f = open(".scons_build_args", 'w')
+    arg_keys = ARGUMENTS.keys()
+    for a in arg_keys:
+        f.write(a)
+        f.write("=")
+        f.write(ARGUMENTS.get(a))
+        f.write(" ")
 
 def log_args(afname):
     f = open(afname, 'w')
@@ -218,8 +235,11 @@ print 'Debug function names: ', env['debug_fn']
 print 'Debug callbacks:  ', env['debug_cb']
 print 'Debug XRL syntax: ', env['debug_xrldb']
 
+env['WITH_GPROF'] = ARGUMENTS.get('enable_gprof', False)
+print 'Enable gprof:     ', env['enable_gprof']
+
 env['VALIDATE_XRLDB'] = ARGUMENTS.get('enable_xrldb_validation', False)
-print 'Enable XRLdb Validation:      ', env['enable_xrldb_validation']
+print 'Enable XRLdb Validation:      ', env['VALIDATE_XRLDB']
 
 env['WITH_OLSR'] = ARGUMENTS.get('enable_olsr', False)
 print 'Enable OLSR:      ', env['enable_olsr']
@@ -633,6 +653,21 @@ if env['VALIDATE_XRLDB']:
         '-DVALIDATE_XRLDB',
     ])
 
+if env['WITH_GPROF']:
+    env.AppendUnique(CFLAGS = [
+        '-pg',
+        '-fno-omit-frame-pointer',
+        '-fno-optimize-sibling-calls',
+    ])
+    env.AppendUnique(CXXFLAGS = [
+        '-pg',
+        '-fno-omit-frame-pointer',
+        '-fno-optimize-sibling-calls',
+    ])
+    env.AppendUnique(LINKFLAGS = [
+        '-pg',
+    ])
+    
 env.AppendUnique(RPATH = [
     '$libdir',
     ])
