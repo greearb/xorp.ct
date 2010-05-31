@@ -1013,7 +1013,7 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
     }
 
     XLOG_TRACE(mld6igmp_node().is_log_trace(),
-	       "RX %s from %s to %s on vif %s",
+	       "mld6igmp_process:  RX %s from %s to %s on vif %s",
 	       proto_message_type2ascii(message_type),
 	       cstring(src), cstring(dst),
 	       name().c_str());

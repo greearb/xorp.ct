@@ -807,9 +807,6 @@ string XrlRouter::toString() const {
 void
 wait_until_xrl_router_is_ready(EventLoop& eventloop, XrlRouter& xrl_router)
 {
-    if (xlog_is_running()) {
-	XLOG_WARNING("Starting xrl_router_is_ready method....\n");
-    }
     while (! xrl_router.failed()) {
 	eventloop.run();
 	if (xrl_router.ready())

@@ -70,13 +70,8 @@ xorp_daemonize(int nochdir, int noclose)
 		return (-1);
 	case 0:
 		break;
-#if 0
-	default:
-		_exit(0);		/* We need to return the pid */
-#else
 	default:
 		return (newpid);
-#endif
 	}
 
 	newgrp = setsid();

@@ -795,8 +795,8 @@ MfeaMrouter::start_mrt()
 	}
 	else {
 	    supports_mcast_tables = true;
-	    XLOG_ERROR("MROUTE:  setsockopt(MRT_INIT) supports multiple routing tables!");
-	    XLOG_ERROR("mroute ioctl struct sizes: mfcctl: %i mfcctl_ng: %i  mrt_sockopt_simple: %i"
+	    XLOG_WARNING("NOTE:  MROUTE:  setsockopt(MRT_INIT) supports multiple routing tables!");
+	    XLOG_WARNING("NOTE:  mroute ioctl struct sizes: mfcctl: %i mfcctl_ng: %i  mrt_sockopt_simple: %i"
 		       "  sioc_sg_req: %i  sioc_sg_req_ng: %i  sioc_vif_req: %i  sioc_vif_req_ng: %i\n",
 		       (int)(sizeof(struct mfcctl)), (int)(sizeof(struct mfcctl_ng)),
 		       (int)(sizeof(struct mrt_sockopt_simple)),

@@ -99,7 +99,7 @@ static string	logfilename;
 static string	pidfilename;
 
 int32_t		quit_time = -1;
-static bool	daemon_mode = false;
+FILE*           pidfile = NULL;
 
 static void cleanup_and_exit(int errcode);
 
@@ -479,19 +479,22 @@ open_syslog()
 	fprintf(stderr, "Failed to open syslog spec %s\n", logfilename.c_str());
 }
 
-void
-write_pidfile(pid_t thepid)
-{
-    if (pidfilename.empty()) {
-	fprintf(stderr, "Empty PID filename specified\n");
-	return;
+void handle_atexit(void) {
+    if (do_pidfile && pidfilename.size()) {
+	cout << "In rtrmgr atexit, unlinking: " << pidfilename << endl;
+	unlink(pidfilename.c_str());
     }
-    FILE *pidfile;
-    if ((pidfile = fopen(pidfilename.c_str(), "w")) != NULL) {
-	fprintf(pidfile, "%u\n", thepid);
+}
+
+void write_pidfile() {
+    if (pidfile) {
+	fprintf(pidfile, "%u\n", getpid());
+	fflush(pidfile);
 	fclose(pidfile);
-    } else {
-	fprintf(stderr, "Failed to write pid file\n");
+	pidfile = NULL;
+
+	// Clean up the pid-file on exit, if possible.
+	atexit(handle_atexit);
     }
 }
 
@@ -499,7 +502,7 @@ void
 Rtrmgr::daemonize()
 {
     // If not daemonizing, do nothing.
-    if (! daemon_mode)
+    if (! _daemon_mode)
 	return;
 
     // Daemonize the XORP process. Close open stdio descriptors,
@@ -513,17 +516,11 @@ Rtrmgr::daemonize()
     // Make sure we open the pid file in the parent, and the
     // log file in the child. Close fds but don't chdir.
     if (newpid == 0) {
-	// We are now in the child.
-#if 0
-	if (do_logfile)
-	    open_logfile();
-#endif
+	// We are now in the child, write out our pid file.
+	write_pidfile();
 	return;
     }
 
-    // We are in the parent. Write the PID file and exit.
-    if (do_pidfile)
-	write_pidfile(newpid);
     _exit(0);
 }
 
@@ -531,6 +528,8 @@ int
 main(int argc, char* const argv[])
 {
     int errcode = 0;
+
+    bool daemon_mode = false;
 
     //
     // Initialize and start xlog
@@ -688,10 +687,23 @@ main(int argc, char* const argv[])
 	}
     }
 
-    // If not daemonizing, open the pid file now.
-    if (! daemon_mode) {
-	if (do_pidfile)
-	    write_pidfile(getpid());
+    // Open this before we daemonize things, so that it's in the proper relative
+    // file system path.
+    if (do_pidfile) {
+	pidfile = fopen(pidfilename.c_str(), "w");
+	if (!pidfile) {
+	    cerr << "ERROR:  Could not open pidfile: " << pidfilename << " error: "
+		 << strerror(errno) << endl;
+	}
+	else {
+	    if (!daemon_mode) {
+		write_pidfile();
+	    }
+	    // else, will write this later when we daemonize.
+	}
+    }
+    else {
+	cout << "Not doing pidfile...\n";
     }
 
     // Open the new log facility now so that all output, up to when we

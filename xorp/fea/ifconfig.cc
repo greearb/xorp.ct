@@ -807,13 +807,16 @@ IfConfig::pull_config(const char* ifname, int if_index)
 	if (ifname && ifconfig_get->can_pull_one()) {
 	    // Just request a pull of this interface
 	    //
-	    //XLOG_WARNING("Pull_config_one for interface: %s\n", ifname);
-	    int rv = ifconfig_get->pull_config_one(_system_config, ifname, if_index);
-	    if (rv != XORP_OK) {
-		XLOG_WARNING("ERROR:  pull_config_one for interface: %s failed: %i\n", ifname, rv);
-	    }
-	    if (!_system_config.find_interface(ifname)) {
-		XLOG_WARNING("ERROR:  Could not find interface: %s after pull_config_one.\n", ifname);
+	    // Can't pull my_discard, it's a fake device.
+	    if (strcmp(ifname, "my_discard") != 0) {
+		//XLOG_WARNING("Pull_config_one for interface: %s\n", ifname);
+		int rv = ifconfig_get->pull_config_one(_system_config, ifname, if_index);
+		if (rv != XORP_OK) {
+		    XLOG_WARNING("ERROR:  pull_config_one for interface: %s failed: %i\n", ifname, rv);
+		}
+		if (!_system_config.find_interface(ifname)) {
+		    XLOG_WARNING("ERROR:  Could not find interface: %s after pull_config_one.\n", ifname);
+		}
 	    }
 	}
 	else {
