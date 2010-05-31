@@ -1888,7 +1888,7 @@ XrlFeaTarget::ifmgr_0_1_delete_interface(
     string empty;
     _io_ip_manager.leave_all_multicast_groups(ifname, empty, error_msg);
     if (error_msg.size()) {
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
     }
 
     if (_ifconfig.add_transaction_operation(
@@ -2396,7 +2396,7 @@ XrlFeaTarget::ifmgr_0_1_delete_vif(
     // Hack:  Remove multicast addrs first. --Ben
     _io_ip_manager.leave_all_multicast_groups(ifname, vifname, error_msg);
     if (error_msg.size()) {
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
     }
 
     if (_ifconfig.add_transaction_operation(
