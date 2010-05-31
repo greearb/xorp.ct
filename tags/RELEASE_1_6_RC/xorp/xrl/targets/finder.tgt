@@ -1,9 +1,0 @@
-/* $XORP: xorp/xrl/targets/finder.tgt,v 1.5 2007/05/31 19:02:26 pavlin Exp $ */
-
-#include "common.xif"
-#include "finder.xif"
-#include "finder_event_notifier.xif"
-
-target finder implements	common/0.1,				\
-				finder/0.2,				\
-				finder_event_notifier/0.1

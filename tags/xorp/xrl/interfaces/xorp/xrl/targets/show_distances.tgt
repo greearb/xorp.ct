@@ -1,8 +1,0 @@
-/* $XORP: xorp/xrl/targets/show_distances.tgt,v 1.2 2007/05/31 19:02:27 pavlin Exp $ */
-
-#include "common.xif"
-#include "finder_event_observer.xif"
-
-target show_distances implements					\
-			common/0.1,					\
-			finder_event_observer/0.1			

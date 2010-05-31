@@ -1,8 +1,0 @@
-#
-# $XORP$
-#
-
-SubDir TOP contrib ;
-#SubInclude TOP contrib olsr ;
-#SubInclude TOP contrib win32 ;
-#SubDir TOP contrib ;

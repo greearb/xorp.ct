@@ -1,7 +1,0 @@
-#
-# $XORP$
-#
-
-SubDir TOP etc ;
-SubIncludeOnce TOP etc templates ;
-SubDir TOP etc ;

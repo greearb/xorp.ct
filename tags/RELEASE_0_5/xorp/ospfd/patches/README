@@ -1,2 +1,0 @@
-fetch-patches.sh - fetches patches from ospf.org ftp directory.
-apply-patches.sh - prompts user to apply unapplied patches one at a time.

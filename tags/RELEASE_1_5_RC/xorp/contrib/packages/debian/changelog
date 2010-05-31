@@ -1,9 +1,0 @@
-xorp (1.2-1) stable; urgency=low
-
-  * Initial Release.
-
- -- Benjamin Sonntag <benjamin@sonntag.fr>  Sun,  4 Jun 2006 21:03:51 +0200
-
-Local variables:
-mode: debian-changelog
-End:

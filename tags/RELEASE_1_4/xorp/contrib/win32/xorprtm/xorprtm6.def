@@ -1,4 +1,0 @@
-LIBRARY XORPRTM6
-
-EXPORTS
-    RegisterProtocol

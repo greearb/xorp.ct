@@ -1,6 +1,0 @@
-#
-# $XORP: xorp/libproto/TODO,v 1.2 2004/06/22 01:38:40 pavlin Exp $
-#
-
-* Rename ProtoNode::proto_send() to send_protocol_message()
-  Do similar renaming for other methods in ProtoNode. (??)

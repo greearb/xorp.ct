@@ -1,7 +1,0 @@
-/* $XORP$ */
-
-#include "common.xif"
-#include "ospfv3.xif"
-
-target ospfv3 implements	common/0.1,				\
-				ospfv3/0.1

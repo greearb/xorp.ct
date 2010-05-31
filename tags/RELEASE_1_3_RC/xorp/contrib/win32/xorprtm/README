@@ -1,8 +1,0 @@
-This is XORPRTM; a loadable protocol DLL for Microsoft's Routing and
-Remote Access Service. XORPRTM implements a named pipe server with
-asynchronous I/O which translates Router Manager V2 events into
-BSD routing socket messages, and vice versa.
-
-Using this mechanism, XORP is able to participate fully in the exchange
-of routes as part of Microsoft's Routing and Remote Access Server on
-Windows Server 2003 and Windows 'Longhorn' Server.

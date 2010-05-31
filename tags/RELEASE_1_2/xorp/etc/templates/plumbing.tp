@@ -1,5 +1,0 @@
-/* $XORP$ */
-
-plumbing {
-    %help:		short		"Configure plumbing modules";
-}

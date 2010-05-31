@@ -1,5 +1,0 @@
-
-all: configure
-
-configure: configure.in
-	autoconf

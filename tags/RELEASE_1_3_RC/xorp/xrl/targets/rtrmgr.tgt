@@ -1,9 +1,0 @@
-/* $XORP: xorp/xrl/targets/rtrmgr.tgt,v 1.2 2004/04/10 07:41:43 pavlin Exp $ */
-
-#include "common.xif"
-#include "rtrmgr.xif"
-#include "finder_event_observer.xif"
-
-target rtrmgr implements	common/0.1,				\
-				rtrmgr/0.1,				\
-				finder_event_observer/0.1

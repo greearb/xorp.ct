@@ -1,8 +1,0 @@
-#
-# $XORP: xorp/contrib/Jamfile,v 1.5 2008/07/10 07:38:39 pavlin Exp $
-#
-
-SubDir TOP contrib ;
-SubInclude TOP contrib mld6igmp_lite ;
-SubInclude TOP contrib olsr ;
-SubDir TOP contrib ;
