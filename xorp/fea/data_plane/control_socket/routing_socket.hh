@@ -22,6 +22,9 @@
 #ifndef __FEA_DATA_PLANE_CONTROL_SOCKET_ROUTING_SOCKET_HH__
 #define __FEA_DATA_PLANE_CONTROL_SOCKET_ROUTING_SOCKET_HH__
 
+#include <xorp_config.h>
+#ifdef HAVE_ROUTING_SOCKETS
+
 #include <list>
 
 #include "libxorp/eventloop.hh"
@@ -215,4 +218,5 @@ private:
     vector<uint8_t> _cache_data;	// Cached routing socket data.
 };
 
+#endif
 #endif // __FEA_DATA_PLANE_CONTROL_SOCKET_ROUTING_SOCKET_HH__

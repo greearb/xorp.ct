@@ -17,6 +17,8 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
+#include <xorp_config.h>
+#ifdef HAVE_ROUTING_SOCKETS
 
 
 #include "fea/fea_module.h"
@@ -44,8 +46,6 @@
 //
 // Reading route(4) manual page is a good start for understanding this
 //
-
-#ifdef HAVE_ROUTING_SOCKETS
 
 int
 FibConfigEntryGetRoutingSocket::parse_buffer_routing_socket(

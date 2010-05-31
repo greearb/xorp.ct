@@ -18,6 +18,8 @@
 // http://xorp.net
 
 
+#include <xorp_config.h>
+#ifdef HAVE_ROUTING_SOCKETS
 
 #include "fea/fea_module.h"
 
@@ -44,8 +46,6 @@
 //
 // Reading route(4) manual page is a good start for understanding this
 //
-
-#if defined(HAVE_ROUTING_SOCKETS)
 
 int
 FibConfigTableGetSysctl::parse_buffer_routing_socket(int family,

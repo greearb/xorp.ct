@@ -22,6 +22,9 @@
 #ifndef __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_TABLE_SET_ROUTING_SOCKET_HH__
 #define __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_TABLE_SET_ROUTING_SOCKET_HH__
 
+#include <xorp_config.h>
+#ifdef HAVE_ROUTING_SOCKETS
+
 #include "fea/fibconfig_table_set.hh"
 #include "fea/data_plane/control_socket/routing_socket.hh"
 
@@ -104,4 +107,5 @@ public:
 private:
 };
 
+#endif
 #endif // __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_TABLE_SET_ROUTING_SOCKET_HH__

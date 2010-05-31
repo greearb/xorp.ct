@@ -17,6 +17,8 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
+#include <xorp_config.h>
+#ifdef HAVE_ROUTING_SOCKETS
 
 
 #include "fea/fea_module.h"
@@ -45,7 +47,6 @@
 // The mechanism to obtain the information is routing sockets.
 //
 
-#ifdef HAVE_ROUTING_SOCKETS
 
 FibConfigEntryGetRoutingSocket::FibConfigEntryGetRoutingSocket(FeaDataPlaneManager& fea_data_plane_manager)
     : FibConfigEntryGet(fea_data_plane_manager),

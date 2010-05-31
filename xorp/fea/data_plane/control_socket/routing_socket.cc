@@ -17,6 +17,8 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
+#include <xorp_config.h>
+#ifdef HAVE_ROUTING_SOCKETS
 
 
 #include "fea/fea_module.h"
@@ -77,43 +79,6 @@ RoutingSocket::~RoutingSocket()
     XLOG_ASSERT(_ol.empty());
 }
 
-#ifndef HAVE_ROUTING_SOCKETS
-
-int
-RoutingSocket::start(int af, string& error_msg)
-{
-    UNUSED(af);
-
-    error_msg = c_format("The system does not support routing sockets");
-    XLOG_UNREACHABLE();
-    return (XORP_ERROR);
-}
-
-int
-RoutingSocket::stop(string& error_msg)
-{
-    UNUSED(error_msg);
-
-    //
-    // XXX: Even if the system doesn not support routing sockets, we
-    // still allow to call the no-op stop() method and return success.
-    // This is needed to cover the case when a RoutingSocket is allocated
-    // but not used.
-    //
-    return (XORP_OK);
-}
-
-int
-RoutingSocket::force_read(string& error_msg)
-{
-    XLOG_UNREACHABLE();
-
-    error_msg = "method not supported";
-
-    return (XORP_ERROR);
-}
-
-#else // HAVE_ROUTING_SOCKETS
 
 int
 RoutingSocket::start(int af, string& error_msg)
@@ -270,7 +235,6 @@ RoutingSocket::io_event(XorpFd fd, IoEventType type)
     }
 }
 
-#endif // HAVE_ROUTING_SOCKETS
 
 //
 // Observe routing sockets activity
@@ -366,12 +330,6 @@ RoutingSocketReader::receive_data(RoutingSocket& rs, uint32_t seqno,
 void
 RoutingSocketReader::routing_socket_data(const vector<uint8_t>& buffer)
 {
-#ifndef HAVE_ROUTING_SOCKETS
-    UNUSED(buffer);
-
-    XLOG_UNREACHABLE();
-
-#else // HAVE_ROUTING_SOCKETS
     size_t d = 0, off = 0;
     pid_t my_pid = _rs.pid();
     AlignData<struct rt_msghdr> align_data(buffer);
@@ -395,5 +353,6 @@ RoutingSocketReader::routing_socket_data(const vector<uint8_t>& buffer)
 
     // XXX: shrink _cache_data to contain only the data copied to it
     _cache_data.resize(off);
-#endif // HAVE_ROUTING_SOCKETS
 }
+
+#endif // HAVE_ROUTING_SOCKETS

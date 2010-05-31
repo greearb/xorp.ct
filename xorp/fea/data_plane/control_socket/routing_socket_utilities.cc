@@ -17,6 +17,8 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
+#include <xorp_config.h>
+#ifdef HAVE_ROUTING_SOCKETS
 
 
 #include "fea/fea_module.h"
@@ -57,8 +59,6 @@
 // RTM format related utilities for manipulating data
 // (e.g., obtained by routing sockets or by sysctl(3) mechanism).
 //
-
-#if defined(HAVE_ROUTING_SOCKETS)
 
 /**
  * @param m message type from routing socket message

@@ -22,6 +22,9 @@
 #ifndef __FEA_ROUTING_SOCKET_UTILS_HH__
 #define __FEA_ROUTING_SOCKET_UTILS_HH__
 
+#include <xorp_config.h>
+#ifdef HAVE_ROUTING_SOCKETS
+
 #include "fea/fte.hh"
 #include "fea/iftree.hh"
 
@@ -70,4 +73,5 @@ public:
 				  const struct rt_msghdr* rtm);
 };
 
+#endif
 #endif // __FEA_ROUTING_SOCKET_UTILS_HH__
