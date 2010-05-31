@@ -538,8 +538,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_apply_config_change(
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     // XXX: TBD
-    XLOG_TRACE(_verbose,
-	       "\nXRL got config change: deltas: \n%s\nend deltas\ndeletions:\n%s\nend deletions\n",
+    XLOG_WARNING("\nXRL got config change: deltas: \n%s\nend deltas\ndeletions:\n%s\nend deletions\n",
 	       deltas.c_str(), deletions.c_str());
 
     ConfigChangeCallBack cb;
@@ -547,9 +546,9 @@ XrlRtrmgrInterface::rtrmgr_0_1_apply_config_change(
 		  user_id, string(target));
     if (_master_config_tree->apply_config_change(user_id, error_msg, deltas,
 						 deletions, cb) != true) {
+	XLOG_WARNING("config change failed: %s", error_msg.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
-
     return XrlCmdError::OKAY();
 }
 
@@ -561,20 +560,18 @@ XrlRtrmgrInterface::apply_config_change_done(bool success,
 					     uid_t user_id,
 					     string target)
 {
-    XLOG_TRACE(_verbose,
-	       "apply_config_change_done: status: %d response: %s target: %s",
-	       success, error_msg.c_str(), target.c_str());
+    XLOG_WARNING("apply_config_change_done: status: %d response: %s target: %s",
+		 success, error_msg.c_str(), target.c_str());
 
     if (success) {
 	// Check everything really worked, and finalize the commit
 	if (_master_config_tree->check_commit_status(error_msg) == false) {
-	    XLOG_TRACE(_verbose,
-		       "check commit status indicates failure: >%s<\n",
-		       error_msg.c_str());
+	    XLOG_WARNING("check commit status indicates failure: >%s<, back out changes.\n",
+			 error_msg.c_str());
 	    success = false;
 	}
     }  else {
-	XLOG_TRACE(_verbose, "request failed: >%s<\n", error_msg.c_str());
+	XLOG_WARNING("request failed: >%s<\n", error_msg.c_str());
     }
 
     GENERIC_CALLBACK cb1;
@@ -594,13 +591,14 @@ XrlRtrmgrInterface::apply_config_change_done(bool success,
 						  user_id,
 						  deltas, deletions, cb2);
 	}
-	debug_msg("Sending config change done to %s\n", target.c_str());
+	XLOG_WARNING("Sending config change done (success) to %s\n", target.c_str());
 	_client_interface.send_config_change_done(target.c_str(),
 						  true, "", cb1);
     } else {
 	// Something went wrong
 	_master_config_tree->discard_changes();
-	debug_msg("Sending config change failed to %s\n", target.c_str());
+	XLOG_WARNING("Sending config change failed to %s, error_msg: %s\n",
+		     target.c_str(), error_msg.c_str());
 	_client_interface.send_config_change_done(target.c_str(),
 						  false, error_msg, cb1);
     }
