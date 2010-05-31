@@ -232,32 +232,23 @@ IpHeader4Writer::compute_checksum()
     set_ip_sum(ntohs(inet_checksum(data(), ip_header_len())));
 }
 
-ArpHeader&
-ArpHeader::assign(uint8_t* data)
-{
-    ArpHeader* h = reinterpret_cast<ArpHeader*>(data);
-
-    memset(h, 0, sizeof(*h));
-
-    return *h;
+ArpHeader::ArpHeader() {
+    memset(this, 0, sizeof(this));
+    ah_hw_len = 6;
+    ah_proto_len = 4;
 }
 
-const ArpHeader&
-ArpHeader::assign(const PAYLOAD& payload)
-{
-    const ArpHeader* h = reinterpret_cast<const ArpHeader*>(&payload[0]);
-
-    unsigned size = sizeof(*h);
-
-    if (payload.size() < size)
-	xorp_throw(BadPacketException, "ARP packet too small");
-
-    size += h->ah_hw_len * 2 + h->ah_proto_len * 2;
-
-    if (payload.size() < size)
-	xorp_throw(BadPacketException, "ARP packet too small");
-
-    return *h;
+ArpHeader::ArpHeader(const vector<uint8_t>& pkt) {
+    XLOG_ASSERT(pkt.size() <= sizeof(*this));
+    memcpy(this, &pkt[0], pkt.size());
+    if (ah_hw_len != 6) {
+	XLOG_WARNING("Bad arp header len: %i\n", (int)(ah_hw_len));
+	ah_hw_len = 6;
+    }
+    if (ah_proto_len != 4) {
+	XLOG_WARNING("Bad arp proto len: %i\n", (int)(ah_proto_len));
+	ah_proto_len = 4;
+    }
 }
 
 bool
@@ -277,13 +268,13 @@ ArpHeader::get_request() const
 
     IPv4 ip;
 
-    ip.copy_in(&ah_data[ah_hw_len * 2 + ah_proto_len]);
+    ip.copy_in(&ah_data_store[ah_hw_len * 2 + ah_proto_len]);
 
     return ip;
 }
 
 void
-ArpHeader::make_reply(PAYLOAD& out, const Mac& mac) const
+ArpHeader::make_reply(vector<uint8_t>& out, const Mac& mac) const
 {
     // sanity checks
     if (!is_request())
@@ -293,35 +284,39 @@ ArpHeader::make_reply(PAYLOAD& out, const Mac& mac) const
 	xorp_throw(BadPacketException, "Not an ethernet ARP");
 
     // allocate size
-    int size = sizeof(*this) + ah_hw_len * 2 + ah_proto_len * 2;
-    out.reserve(size);
-    out.resize(size);
+    int sz = size();
+    out.reserve(sz);
+    out.resize(sz);
 
-    // copy request into reply
-    memcpy(&out[0], this, size);
+    ArpHeader reply;
+
+    // copy request (this) into reply
+    memcpy(&reply, this, sz);
 
     // make it a reply
-    ArpHeader& reply = const_cast<ArpHeader&>(ArpHeader::assign(out));
     reply.ah_op = htons(ARP_REPLY);
 
     // set the destination
-    size = ah_hw_len + ah_proto_len;
-    memcpy(&reply.ah_data[size], reply.ah_data, size);
+    sz = ah_hw_len + ah_proto_len;
+    memcpy(&reply.ah_data_store[sz], ah_data_store, sz);
 
     // set the source
-    mac.copy_out(reply.ah_data);
-    size += ah_hw_len;
-    memcpy(&reply.ah_data[ah_hw_len], &ah_data[size], ah_proto_len);
+    mac.copy_out(reply.ah_data_store);
+    sz += ah_hw_len;
+    memcpy(&reply.ah_data_store[ah_hw_len], &ah_data_store[sz], ah_proto_len);
+
+    // Copy reply into 'out' vector.
+    memcpy(&out[0], &reply, reply.size());
 }
 
 void
 ArpHeader::set_sender(const Mac& mac, const IPv4& ip)
 {
     ah_hw_fmt = htons(HW_ETHER);
-    ah_hw_len = mac.copy_out(ah_data);
+    ah_hw_len = mac.copy_out(ah_data_store);
 
     ah_proto_fmt = htons(ETHERTYPE_IP);
-    ah_proto_len = ip.copy_out(&ah_data[ah_hw_len]);
+    ah_proto_len = ip.copy_out(&ah_data_store[ah_hw_len]);
 }
 
 void
@@ -332,7 +327,7 @@ ArpHeader::set_request(const IPv4& ip)
 
     ah_op = htons(ARP_REQUEST);
 
-    ip.copy_out(&ah_data[ah_hw_len * 2 + ah_proto_len]);
+    ip.copy_out(&ah_data_store[ah_hw_len * 2 + ah_proto_len]);
 }
 
 void
@@ -345,27 +340,28 @@ ArpHeader::set_reply(const Mac& mac, const IPv4& ip)
     set_request(ip);
     ah_op = htons(ARP_REPLY);
 
-    mac.copy_out(&ah_data[ah_hw_len + ah_proto_len]);
+    mac.copy_out(&ah_data_store[ah_hw_len + ah_proto_len]);
 }
 
 uint32_t
 ArpHeader::size() const
 {
-    return sizeof(*this) + ah_hw_len * 2 + ah_proto_len * 2;
+    uint32_t rv = 8 + ah_hw_len * 2 + ah_proto_len * 2;
+    XLOG_ASSERT(rv <= sizeof(*this));
+    return rv;
 }
 
 void
-ArpHeader::make_gratuitous(PAYLOAD& data, const Mac& mac, const IPv4& ip)
+ArpHeader::make_gratuitous(vector<uint8_t>& data, const Mac& mac, const IPv4& ip)
 {
-    uint32_t sz = sizeof(ArpHeader) + 6 * 2 + 4 * 2;
+    ArpHeader arp;
 
+    uint32_t sz = arp.size();
     data.resize(sz, 0);
-
-    ArpHeader& arp = ArpHeader::assign(&data[0]);
 
     arp.set_sender(mac, ip);
     arp.set_request(ip);
 
     XLOG_ASSERT(arp.size() <= data.capacity());
-    data.resize(arp.size());
+    memcpy(&data[0], &arp, sz);
 }

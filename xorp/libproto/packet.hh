@@ -914,9 +914,8 @@ public:
 /**
  * @short an ARP packet.
  */
-struct ArpHeader {
-    typedef vector<uint8_t> PAYLOAD;
-
+class ArpHeader {
+public:
     enum Op {
 	ARP_REQUEST = 1,
 	ARP_REPLY
@@ -925,22 +924,8 @@ struct ArpHeader {
 	HW_ETHER = 1
     };
 
-    /**
-     * Create an ARP packet.  The caller must allocate memory and ensure enough
-     * space (sizeof(ArpHeader) + (2 hw addresses) + (2 network addresses)).
-     *
-     * @return the ARP header.
-     * @param data pointer where data should be stored.
-     */
-    static ArpHeader&	    assign(uint8_t* data);
-
-    /**
-     * Parse an ARP packet.
-     *
-     * @return the ARP header.
-     * @param payload the ARP header and data.
-     */
-    static const ArpHeader& assign(const PAYLOAD& payload);
+    ArpHeader();
+    ArpHeader(const vector<uint8_t>& pkt);
 
     /**
      * Create a gratuitous ARP.  I.e., an ARP request for my own IP address -
@@ -950,8 +935,8 @@ struct ArpHeader {
      * @param MAC address of IP.
      * @param ip IP address to create request for.
      */
-    static void		    make_gratuitous(PAYLOAD& payload, const Mac& mac,
-					    const IPv4& ip);
+    static void make_gratuitous(vector<uint8_t>& payload, const Mac& mac,
+				const IPv4& ip);
 
     /**
      * Set the sender information in the ARP packet.
@@ -1004,14 +989,16 @@ struct ArpHeader {
      * @param out the ARP reply data (output parameter).
      * @param mac the MAC address of the requested IP address.
      */
-    void		    make_reply(PAYLOAD& out, const Mac& mac) const;
+    void make_reply(vector<uint8_t>& out, const Mac& mac) const;
 
+private:
     uint16_t	ah_hw_fmt;
     uint16_t	ah_proto_fmt;
     uint8_t	ah_hw_len;
     uint8_t	ah_proto_len;
     uint16_t	ah_op;
-    uint8_t	ah_data[0];
-};
+    uint8_t	ah_data_store[6 * 2 + 4 * 2];
+} __attribute__((__packed__));
+
 
 #endif // __LIBPROTO_PACKET_HH__

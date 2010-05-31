@@ -116,7 +116,13 @@ ARPd::recv(const Mac& src, const PAYLOAD& payload)
     if (!_receiving)
 	return;
 
-    const ArpHeader& ah = ArpHeader::assign(payload);
+    if (payload.size() > sizeof(ArpHeader)) {
+	XLOG_ERROR("ERROR:  payload_size: %i is > than ArpHeader size: %i\n",
+		   (int)(payload.size()), (int)(sizeof(ArpHeader)));
+	return;
+    }
+
+    ArpHeader ah(payload);
 
     if (!ah.is_request())
 	return;

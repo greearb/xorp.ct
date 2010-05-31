@@ -2285,7 +2285,7 @@ XrlFeaTarget::send_gratuitous_arps(const string& ifname, const Mac& mac,
 	    if (! addr->enabled())
 		continue;
 
-	    ArpHeader::PAYLOAD data;
+	    vector<uint8_t> data;
 	    ArpHeader::make_gratuitous(data, mac, ip);
 
 	    XrlCmdError e = raw_link_0_1_send(ifname, vifname, mac,
