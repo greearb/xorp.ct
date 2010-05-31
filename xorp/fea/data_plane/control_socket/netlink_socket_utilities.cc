@@ -51,6 +51,130 @@
 
 #ifdef HAVE_NETLINK_SOCKETS
 
+
+string NlmUtils::nlm_print_msg(const vector<uint8_t>& buffer) {
+    ostringstream oss;
+
+    size_t buffer_bytes = buffer.size();
+    AlignData<struct nlmsghdr> align_data(buffer);
+    const struct nlmsghdr* nlh;
+
+    for (nlh = align_data.payload();
+	 NLMSG_OK(nlh, buffer_bytes);
+	 nlh = NLMSG_NEXT(const_cast<struct nlmsghdr*>(nlh), buffer_bytes)) {
+	void* nlmsg_data = NLMSG_DATA(const_cast<struct nlmsghdr*>(nlh));
+
+	oss << "type:  " << NlmUtils::nlm_msg_type(nlh->nlmsg_type);
+	
+	// Decode a few further.
+	switch (nlh->nlmsg_type) {
+	case NLMSG_ERROR: {
+	    const struct nlmsgerr* err;
+	    
+	    err = reinterpret_cast<const struct nlmsgerr*>(nlmsg_data);
+	    if (nlh->nlmsg_len < NLMSG_LENGTH(sizeof(*err))) {
+		XLOG_ERROR("AF_NETLINK nlmsgerr length error");
+		break;
+	    }
+	    errno = -err->error;
+	    oss << "  AF_NETLINK NLMSG_ERROR message: " << strerror(errno) << endl;
+	    break;
+	}
+	
+	case RTM_NEWROUTE:
+	case RTM_DELROUTE:
+	case RTM_GETROUTE: {
+
+	    const struct rtmsg* rtmsg;
+	    int rta_len = RTM_PAYLOAD(nlh);
+	    
+	    if (rta_len < 0) {
+		XLOG_ERROR("AF_NETLINK rtmsg length error");
+		break;
+	    }
+	    rtmsg = reinterpret_cast<const struct rtmsg*>(nlmsg_data);
+
+	    oss << " rtm_type: ";
+	    if (rtmsg->rtm_type == RTN_MULTICAST)
+		oss << "MULTICAST";
+	    else if (rtmsg->rtm_type == RTN_BROADCAST)
+		oss << "BROADCAST";
+	    else if (rtmsg->rtm_type == RTN_UNICAST)
+		oss << "UNICAST";
+	    else
+		oss << (int)(rtmsg->rtm_type);
+		
+	    const struct rtattr *rtattr;
+	    const struct rtattr *rta_array[RTA_MAX + 1];
+	    int family = rtmsg->rtm_family;
+    
+	    //
+	    // Get the attributes
+	    //
+	    memset(rta_array, 0, sizeof(rta_array));
+	    rtattr = RTM_RTA(const_cast<struct rtmsg *>(rtmsg));
+	    NlmUtils::get_rtattr(rtattr, rta_len, rta_array,
+				 sizeof(rta_array) / sizeof(rta_array[0]));
+
+	    int rtmt = rtmsg->rtm_table;
+#ifdef HAVE_NETLINK_SOCKET_ATTRIBUTE_RTA_TABLE
+	    if (rta_array[RTA_TABLE] != NULL) {
+		const uint8_t* p = static_cast<const uint8_t *>(
+		    RTA_DATA(const_cast<struct rtattr *>(rta_array[RTA_TABLE])));
+		rtmt = extract_host_int(p);
+	    }
+#endif
+	    oss << " table: " << rtmt;
+
+
+	    IPvX nexthop_addr(family);
+	    IPvX dst_addr(family);
+
+	    if (rta_array[RTA_DST] == NULL) {
+		// The default entry
+	    } else {
+		// TODO: fix this!!
+		dst_addr.copy_in(family, (uint8_t *)RTA_DATA(const_cast<struct rtattr *>(rta_array[RTA_DST])));
+		dst_addr = system_adjust_ipvx_recv(dst_addr);
+		oss << " dest: " << dst_addr.str() << "/" << (int)(rtmsg->rtm_dst_len);
+	    }
+
+    
+	    if (rta_array[RTA_GATEWAY] != NULL) {
+		nexthop_addr.copy_in(family, (uint8_t *)RTA_DATA(const_cast<struct rtattr *>(rta_array[RTA_GATEWAY])));
+		oss << " nexthop: " << nexthop_addr.str();
+	    }
+
+
+	    if (rtmsg->rtm_protocol == RTPROT_XORP)
+		oss << " proto: XORP";
+	    else
+		oss << " proto: " << rtmsg->rtm_protocol;
+	    
+	    // Get the interface index
+	    if (rta_array[RTA_OIF] != NULL) {
+		const uint8_t* p = static_cast<const uint8_t *>(
+		    RTA_DATA(const_cast<struct rtattr *>(rta_array[RTA_OIF])));
+		oss << " iface: " << extract_host_int(p);
+	    }
+
+	    if (rta_array[RTA_PRIORITY] != NULL) {
+		const uint8_t* p = static_cast<const uint8_t *>(
+		    RTA_DATA(const_cast<struct rtattr *>(rta_array[RTA_PRIORITY])));
+		oss << " metric: " << extract_host_int(p);
+	    }
+	    oss << endl;
+	}
+	
+	default:
+	    // ignore
+	    oss << endl;
+	}
+    }
+    return oss.str();
+}//nlm_print_msg
+
+
 /**
  * @param m message type from netlink socket message
  * @return human readable form.

@@ -70,7 +70,8 @@ NetlinkSocket::NetlinkSocket(EventLoop& eventloop)
       _seqno(0),
       _instance_no(_instance_cnt++),
       _nl_groups(0),		// XXX: no netlink multicast groups
-      _is_multipart_message_read(false)
+      _is_multipart_message_read(false),
+      _nlm_count(0)
 {
     
 }
@@ -110,30 +111,6 @@ NetlinkSocket::stop(string& error_msg)
     return (XORP_OK);
 }
 
-int
-NetlinkSocket::force_read(string& error_msg)
-{
-    XLOG_UNREACHABLE();
-
-    error_msg = "method not supported";
-
-    return (XORP_ERROR);
-}
-
-int
-NetlinkSocket::force_recvfrom(int flags, struct sockaddr* from,
-			      socklen_t* fromlen, string& error_msg)
-{
-    UNUSED(flags);
-    UNUSED(from);
-    UNUSED(fromlen);
-
-    XLOG_UNREACHABLE();
-
-    error_msg = "method not supported";
-
-    return (XORP_ERROR);
-}
 
 int
 NetlinkSocket::force_recvmsg(int flags, bool only_kernel_messages,
@@ -273,160 +250,6 @@ NetlinkSocket::sendto(const void* data, size_t nbytes, int flags,
     return ::sendto(_fd, data, nbytes, flags, to, tolen);
 }
 
-int
-NetlinkSocket::force_read(string& error_msg)
-{
-    vector<uint8_t> message;
-    vector<uint8_t> buffer(NETLINK_SOCKET_BYTES);
-    size_t off = 0;
-    size_t last_mh_off = 0;
-    
-    for ( ; ; ) {
-	ssize_t got;
-	// Find how much data is queued in the first message
-	do {
-	    got = recv(_fd, &buffer[0], buffer.size(),
-		       MSG_DONTWAIT | MSG_PEEK);
-	    if ((got < 0) && (errno == EINTR))
-		continue;	// XXX: the receive was interrupted by a signal
-	    if ((got < 0) || (got < (ssize_t)buffer.size()))
-		break;		// The buffer is big enough
-	    buffer.resize(buffer.size() + NETLINK_SOCKET_BYTES);
-	} while (true);
-	
-	got = read(_fd, &buffer[0], buffer.size());
-	if (got < 0) {
-	    if (errno == EINTR)
-		continue;
-	    error_msg = c_format("Netlink socket read error: %s",
-			      strerror(errno));
-	    return (XORP_ERROR);
-	}
-	message.resize(message.size() + got);
-	memcpy(&message[off], &buffer[0], got);
-	off += got;
-	
-	if ((off - last_mh_off) < (ssize_t)sizeof(struct nlmsghdr)) {
-	    error_msg = c_format("Netlink socket read failed: "
-				 "message truncated: "
-				 "received %d bytes instead of (at least) %u "
-				 "bytes",
-				 XORP_INT_CAST(got),
-				 XORP_UINT_CAST(sizeof(struct nlmsghdr)));
-	    return (XORP_ERROR);
-	}
-	
-	//
-	// If this is a multipart message, it must be terminated by NLMSG_DONE
-	//
-	bool is_end_of_message = true;
-	size_t new_size = off - last_mh_off;
-	AlignData<struct nlmsghdr> align_data(message);
-	const struct nlmsghdr* mh;
-	for (mh = align_data.payload_by_offset(last_mh_off);
-	     NLMSG_OK(mh, new_size);
-	     mh = NLMSG_NEXT(const_cast<struct nlmsghdr*>(mh), new_size)) {
-	    XLOG_ASSERT(mh->nlmsg_len <= buffer.size());
-	    if ((mh->nlmsg_flags & NLM_F_MULTI)
-		|| _is_multipart_message_read) {
-		is_end_of_message = false;
-		if (mh->nlmsg_type == NLMSG_DONE)
-		    is_end_of_message = true;
-	    }
-	}
-	last_mh_off = reinterpret_cast<size_t>(mh) - reinterpret_cast<size_t>(&message[0]);
-	if (is_end_of_message)
-	    break;
-    }
-    XLOG_ASSERT(last_mh_off == message.size());
-    
-    //
-    // Notify observers
-    //
-    for (ObserverList::iterator i = _ol.begin(); i != _ol.end(); i++) {
-	(*i)->netlink_socket_data(message);
-    }
-
-    return (XORP_OK);
-}
-
-int
-NetlinkSocket::force_recvfrom(int flags, struct sockaddr* from,
-			      socklen_t* fromlen, string& error_msg)
-{
-    vector<uint8_t> message;
-    vector<uint8_t> buffer(NETLINK_SOCKET_BYTES);
-    size_t off = 0;
-    size_t last_mh_off = 0;
-    
-    for ( ; ; ) {
-	ssize_t got;
-	// Find how much data is queued in the first message
-	do {
-	    got = recv(_fd, &buffer[0], buffer.size(),
-		       MSG_DONTWAIT | MSG_PEEK);
-	    if ((got < 0) && (errno == EINTR))
-		continue;	// XXX: the receive was interrupted by a signal
-	    if ((got < 0) || (got < (ssize_t)buffer.size()))
-		break;		// The buffer is big enough
-	    buffer.resize(buffer.size() + NETLINK_SOCKET_BYTES);
-	} while (true);
-	
-	got = recvfrom(_fd, &buffer[0], buffer.size(), flags, from, fromlen);
-	if (got < 0) {
-	    if (errno == EINTR)
-		continue;
-	    error_msg = c_format("Netlink socket recvfrom error: %s",
-				 strerror(errno));
-	    return (XORP_ERROR);
-	}
-	message.resize(message.size() + got);
-	memcpy(&message[off], &buffer[0], got);
-	off += got;
-	
-	if ((off - last_mh_off) < (ssize_t)sizeof(struct nlmsghdr)) {
-	    error_msg = c_format("Netlink socket recvfrom failed: "
-				 "message truncated: "
-				 "received %d bytes instead of (at least) %u "
-				 "bytes",
-				 XORP_INT_CAST(got),
-				 XORP_UINT_CAST(sizeof(struct nlmsghdr)));
-	    return (XORP_ERROR);
-	}
-	
-	//
-	// If this is a multipart message, it must be terminated by NLMSG_DONE
-	//
-	bool is_end_of_message = true;
-	size_t new_size = off - last_mh_off;
-	AlignData<struct nlmsghdr> align_data(message);
-	const struct nlmsghdr* mh;
-	for (mh = align_data.payload_by_offset(last_mh_off);
-	     NLMSG_OK(mh, new_size);
-	     mh = NLMSG_NEXT(const_cast<struct nlmsghdr*>(mh), new_size)) {
-	    XLOG_ASSERT(mh->nlmsg_len <= buffer.size());
-	    if ((mh->nlmsg_flags & NLM_F_MULTI)
-		|| _is_multipart_message_read) {
-		is_end_of_message = false;
-		if (mh->nlmsg_type == NLMSG_DONE)
-		    is_end_of_message = true;
-	    }
-	}
-	last_mh_off = reinterpret_cast<size_t>(mh) - reinterpret_cast<size_t>(&message[0]);
-	if (is_end_of_message)
-	    break;
-    }
-    XLOG_ASSERT(last_mh_off == message.size());
-    
-    //
-    // Notify observers
-    //
-    for (ObserverList::iterator i = _ol.begin(); i != _ol.end(); i++) {
-	(*i)->netlink_socket_data(message);
-    }
-
-    return (XORP_OK);
-}
 
 int
 NetlinkSocket::force_recvmsg(int flags, bool only_kernel_messages,
@@ -480,6 +303,9 @@ NetlinkSocket::force_recvmsg(int flags, bool only_kernel_messages,
 				 strerror(errno));
 	    return (XORP_ERROR);
 	}
+	else {
+	    _nlm_count++;
+	}
 
 	//
 	// If necessary, ignore messages that were not originated by the kernel
@@ -506,8 +332,8 @@ NetlinkSocket::force_recvmsg(int flags, bool only_kernel_messages,
 				 XORP_INT_CAST(got),
 				 XORP_UINT_CAST(sizeof(struct nlmsghdr)));
 	    return (XORP_ERROR);
-	}
-	
+	}	
+
 	//
 	// If this is a multipart message, it must be terminated by NLMSG_DONE
 	//
@@ -518,6 +344,7 @@ NetlinkSocket::force_recvmsg(int flags, bool only_kernel_messages,
 	for (mh = align_data.payload_by_offset(last_mh_off);
 	     NLMSG_OK(mh, new_size);
 	     mh = NLMSG_NEXT(const_cast<struct nlmsghdr*>(mh), new_size)) {
+
 	    XLOG_ASSERT(mh->nlmsg_len <= buffer.size());
 	    if ((mh->nlmsg_flags & NLM_F_MULTI)
 		|| _is_multipart_message_read) {
@@ -531,6 +358,9 @@ NetlinkSocket::force_recvmsg(int flags, bool only_kernel_messages,
 	    break;
     }
     XLOG_ASSERT(last_mh_off == message.size());
+
+    //XLOG_WARNING("Got a netlink message: %s  nlm_count: %u",
+    //	 NlmUtils::nlm_print_msg(message).c_str(), _nlm_count);
     
     //
     // Notify observers

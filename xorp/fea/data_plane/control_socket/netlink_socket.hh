@@ -109,37 +109,6 @@ public:
      */
     uint32_t nl_pid() const { return _nl_pid; }
 
-    /**
-     * Force socket to read data.
-     * 
-     * This usually is performed after writing a request that the
-     * kernel will answer (e.g., after writing a route lookup).
-     * Use sparingly, with caution, and at your own risk.
-     *
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int force_read(string& error_msg);
-
-    /**
-     * Force socket to recvfrom data.
-     * 
-     * This usually is performed after writing a sendto() request that the
-     * kernel will answer (e.g., after writing a route lookup).
-     * Use sparingly, with caution, and at your own risk.
-     *
-     * @param flags the flags argument to the underlying recvfrom(2)
-     * system call.
-     * @param from if not NULL, on return it will be filled in with the source
-     * address of the received message.
-     * @param fromlen it should be initialized to the size of the buffer
-     * associated with @ref from. On return it will be modified to indicate the
-     * actual size of the address stored there.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int force_recvfrom(int flags, struct sockaddr* from, socklen_t* fromlen,
-		       string& error_msg);
 
     /**
      * Force socket to recvmsg data.
@@ -208,6 +177,8 @@ private:
 
     uint32_t	_nl_groups;	// The netlink multicast groups to listen for
     bool	_is_multipart_message_read; // If true, expect to read a multipart message
+
+    uint32_t   _nlm_count; // keep track of how many msgs received.
 
     friend class NetlinkSocketPlumber; // class that hooks observers in and out
 };

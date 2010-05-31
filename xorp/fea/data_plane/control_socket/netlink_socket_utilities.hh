@@ -97,6 +97,8 @@ public:
      */
     static string nlm_msg_type(uint32_t m);
 
+    static string nlm_print_msg(const vector<uint8_t>& message);
+
     /**
      * Get pointers to set of netlink rtattr entries.
      * 
