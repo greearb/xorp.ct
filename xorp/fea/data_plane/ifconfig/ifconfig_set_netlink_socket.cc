@@ -540,101 +540,158 @@ IfConfigSetNetlinkSocket::set_interface_status(const string& ifname,
     else
 	interface_flags &= ~IFF_UP;
 
-#ifndef HAVE_NETLINK_SOCKETS_SET_FLAGS_IS_BROKEN
-    static const size_t	buffer_size = sizeof(struct nlmsghdr)
-	+ sizeof(struct ifinfomsg) + 2*sizeof(struct rtattr) + 512;
-    union {
-	uint8_t		data[buffer_size];
-	struct nlmsghdr	nlh;
-    } buffer;
-    struct nlmsghdr*	nlh = &buffer.nlh;
-    struct sockaddr_nl	snl;
-    struct ifinfomsg*	ifinfomsg;
-    NetlinkSocket&	ns = *this;
-    int			last_errno = 0;
-
-    memset(&buffer, 0, sizeof(buffer));
-
-    // Set the socket
-    memset(&snl, 0, sizeof(snl));
-    snl.nl_family = AF_NETLINK;
-    snl.nl_pid    = 0;		// nl_pid = 0 if destination is the kernel
-    snl.nl_groups = 0;
-
-    //
-    // Set the request
-    //
-    nlh->nlmsg_len = NLMSG_LENGTH(sizeof(*ifinfomsg));
-    nlh->nlmsg_type = RTM_NEWLINK;
-    nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_CREATE | NLM_F_REPLACE | NLM_F_ACK;
-    nlh->nlmsg_seq = ns.seqno();
-    nlh->nlmsg_pid = ns.nl_pid();
-    ifinfomsg = static_cast<struct ifinfomsg*>(NLMSG_DATA(nlh));
-    ifinfomsg->ifi_family = AF_UNSPEC;
-    ifinfomsg->ifi_type = IFLA_UNSPEC;
-    ifinfomsg->ifi_index = if_index;
-    ifinfomsg->ifi_flags = interface_flags;
-    ifinfomsg->ifi_change = 0xffffffff;
-
-    if (NLMSG_ALIGN(nlh->nlmsg_len) > sizeof(buffer)) {
-	XLOG_FATAL("AF_NETLINK buffer size error: %u instead of %u",
-		   XORP_UINT_CAST(sizeof(buffer)),
-		   XORP_UINT_CAST(NLMSG_ALIGN(nlh->nlmsg_len)));
-    }
-    nlh->nlmsg_len = NLMSG_ALIGN(nlh->nlmsg_len);
-
-    if (ns.sendto(&buffer, nlh->nlmsg_len, 0,
-		  reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl))
-	!= (ssize_t)nlh->nlmsg_len) {
-	error_msg = c_format("Cannot set the interface flags to 0x%x on "
-			     "interface %s: %s",
-			     interface_flags, ifname.c_str(), strerror(errno));
-	return (XORP_ERROR);
-    }
-    if (NlmUtils::check_netlink_request(_ns_reader, ns, nlh->nlmsg_seq,
-					last_errno, error_msg)
-	!= XORP_OK) {
-	error_msg = c_format("Cannot set the interface flags to 0x%x on "
-			     "interface %s: %s",
-			     interface_flags, ifname.c_str(),
-			     error_msg.c_str());
-	return (XORP_ERROR);
-    }
-
-    return (XORP_OK);
-
-#else // HAVE_NETLINK_SOCKETS_SET_FLAGS_IS_BROKEN
-    //
-    // XXX: a work-around in case the kernel doesn't support setting
-    // the flags on an interface by using netlink.
-    // In this case, the work-around is to use ioctl(). Sigh...
-    //
     struct ifreq ifreq;
+    int s = -1;
+    bool test_ioctl = false;
 
-    UNUSED(if_index);
+    // Evidently, some older systems don't return errors, but just do not
+    // actually work.
+    static int netlink_set_status_works = -1;
 
-    int s = socket(AF_INET, SOCK_DGRAM, 0);
-    if (s < 0) {
-	XLOG_FATAL("Could not initialize IPv4 ioctl() socket");
+    if (netlink_set_status_works != 0) {
+	static const size_t	buffer_size = sizeof(struct nlmsghdr)
+	    + sizeof(struct ifinfomsg) + 2*sizeof(struct rtattr) + 512;
+	union {
+	    uint8_t		data[buffer_size];
+	    struct nlmsghdr	nlh;
+	} buffer;
+	struct nlmsghdr*	nlh = &buffer.nlh;
+	struct sockaddr_nl	snl;
+	struct ifinfomsg*	ifinfomsg;
+	NetlinkSocket&	ns = *this;
+	int			last_errno = 0;
+
+	memset(&buffer, 0, sizeof(buffer));
+
+	// Set the socket
+	memset(&snl, 0, sizeof(snl));
+	snl.nl_family = AF_NETLINK;
+	snl.nl_pid    = 0;		// nl_pid = 0 if destination is the kernel
+	snl.nl_groups = 0;
+
+	//
+	// Set the request
+	//
+	nlh->nlmsg_len = NLMSG_LENGTH(sizeof(*ifinfomsg));
+	nlh->nlmsg_type = RTM_NEWLINK;
+	nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_CREATE | NLM_F_REPLACE | NLM_F_ACK;
+	nlh->nlmsg_seq = ns.seqno();
+	nlh->nlmsg_pid = ns.nl_pid();
+	ifinfomsg = static_cast<struct ifinfomsg*>(NLMSG_DATA(nlh));
+	ifinfomsg->ifi_family = AF_UNSPEC;
+	ifinfomsg->ifi_type = IFLA_UNSPEC;
+	ifinfomsg->ifi_index = if_index;
+	ifinfomsg->ifi_flags = interface_flags;
+	ifinfomsg->ifi_change = 0xffffffff;
+
+	if (NLMSG_ALIGN(nlh->nlmsg_len) > sizeof(buffer)) {
+	    XLOG_FATAL("AF_NETLINK buffer size error: %u instead of %u",
+		       XORP_UINT_CAST(sizeof(buffer)),
+		       XORP_UINT_CAST(NLMSG_ALIGN(nlh->nlmsg_len)));
+	}
+	nlh->nlmsg_len = NLMSG_ALIGN(nlh->nlmsg_len);
+
+	if (ns.sendto(&buffer, nlh->nlmsg_len, 0,
+		      reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl))
+	    != (ssize_t)nlh->nlmsg_len) {
+	    error_msg = c_format("Cannot set the interface flags to 0x%x on "
+				 "interface %s: %s",
+				 interface_flags, ifname.c_str(), strerror(errno));
+	    return (XORP_ERROR);
+	}
+	if (NlmUtils::check_netlink_request(_ns_reader, ns, nlh->nlmsg_seq,
+					    last_errno, error_msg)
+	    != XORP_OK) {
+	    error_msg = c_format("Cannot set the interface flags to 0x%x on "
+				 "interface %s: %s",
+				 interface_flags, ifname.c_str(),
+				 error_msg.c_str());
+	    test_ioctl = true;
+	    goto use_ioctl; // try ioctl method.
+	}
+
+	if (netlink_set_status_works == -1) {
+	    // test that it actually worked using ioctl.
+	    s = socket(AF_INET, SOCK_DGRAM, 0);
+	    memset(&ifreq, 0, sizeof(ifreq));
+	    strncpy(ifreq.ifr_name, ifname.c_str(), sizeof(ifreq.ifr_name) - 1);
+	    ifreq.ifr_flags = interface_flags;
+	    if (ioctl(s, SIOCGIFFLAGS, &ifreq) < 0) {
+		error_msg = c_format("Cannot get the interface flags on "
+				     "interface %s: %s",
+				     ifname.c_str(),
+				     strerror(errno));
+	    }
+	    else {
+		// Make sure we could at least set the enable/disable
+		if ((!!is_enabled) != (!!(ifreq.ifr_flags & IFF_UP))) {
+		    error_msg = c_format("WARNING:  Settting interface status using netlink failed"
+					 " on: %s.  Will try to use ioctl method instead.",
+					 ifname.c_str());
+		    XLOG_ERROR("%s", error_msg.c_str());
+		    // Seems it really is broken, don't try netlink again..just use ioctl.
+		    test_ioctl = true;
+		    goto use_ioctl;
+		}
+		else {
+		    netlink_set_status_works = 1; // looks like it worked
+		}
+	    }
+	}
     }
+    else {
+	//
+	// XXX: a work-around in case the kernel doesn't support setting
+	// the flags on an interface by using netlink.
+	// In this case, the work-around is to use ioctl(). Sigh...
+	//
+      use_ioctl:
+	if (s < 0) {
+	    s = socket(AF_INET, SOCK_DGRAM, 0);
+	}
 
-    memset(&ifreq, 0, sizeof(ifreq));
-    strncpy(ifreq.ifr_name, ifname.c_str(), sizeof(ifreq.ifr_name) - 1);
-    ifreq.ifr_flags = interface_flags;
-    if (ioctl(s, SIOCSIFFLAGS, &ifreq) < 0) {
-	error_msg = c_format("Cannot set the interface flags to 0x%x on "
-			     "interface %s: %s",
-			     interface_flags,
-			     ifname.c_str(),
-			     strerror(errno));
+	if (s < 0) {
+	    XLOG_ERROR("Could not initialize IPv4 ioctl() socket while trying to set status: %s",
+		       strerror(errno));
+	    return XORP_ERROR;
+	}
+	
+	memset(&ifreq, 0, sizeof(ifreq));
+
+	strncpy(ifreq.ifr_name, ifname.c_str(), sizeof(ifreq.ifr_name) - 1);
+	ifreq.ifr_flags = interface_flags;
+	if (ioctl(s, SIOCSIFFLAGS, &ifreq) < 0) {
+	    error_msg = c_format("Cannot set the interface flags to 0x%x on "
+				 "interface %s: %s",
+				 interface_flags,
+				 ifname.c_str(),
+				 strerror(errno));
+	    close(s);
+	    return (XORP_ERROR);
+	}
+	else {
+	    // setting *seemed* to work, but let's check to make sure.
+	    if (test_ioctl) {
+		memset(&ifreq, 0, sizeof(ifreq));
+		strncpy(ifreq.ifr_name, ifname.c_str(), sizeof(ifreq.ifr_name) - 1);
+		ifreq.ifr_flags = interface_flags;
+		if (ioctl(s, SIOCGIFFLAGS, &ifreq) >= 0) {
+		    if ((!!is_enabled) == (!!(ifreq.ifr_flags & IFF_UP))) {
+			// Ok, it all worked.  We assume that netlink just doesn't work, so
+			// don't try it again.
+			error_msg = c_format("WARNING:  Settting interface status using netlink failed"
+					     " on: %s but ioctl method worked.  Will use ioctl method from"
+					     " now on.",
+					     ifname.c_str());
+			XLOG_ERROR("%s", error_msg.c_str());
+			netlink_set_status_works = 0;
+		    }
+		}
+	    }
+	}
 	close(s);
-	return (XORP_ERROR);
     }
-    close(s);
-
     return (XORP_OK);
-
-#endif // HAVE_NETLINK_SOCKETS_SET_FLAGS_IS_BROKEN
 }
 
 void
