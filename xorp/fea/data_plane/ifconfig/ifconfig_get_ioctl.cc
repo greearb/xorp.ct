@@ -17,6 +17,8 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
+#include <xorp_config.h>
+#if defined(HAVE_IOCTL_SIOCGIFCONF) && !defined(HAVE_NETLINK_SOCKETS)
 
 
 #include "fea/fea_module.h"
@@ -47,8 +49,6 @@
 //
 // The mechanism to obtain the information is ioctl(2).
 //
-
-#ifdef HAVE_IOCTL_SIOCGIFCONF
 
 static bool ioctl_read_ifconf(int family, ifconf *ifconf);
 

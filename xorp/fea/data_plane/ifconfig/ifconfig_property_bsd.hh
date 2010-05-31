@@ -22,6 +22,14 @@
 #ifndef __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_PROPERTY_BSD_HH__
 #define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_PROPERTY_BSD_HH__
 
+#if	defined(HOST_OS_BSDI)			\
+	|| defined(HOST_OS_DRAGONFLYBSD)	\
+	|| defined(HOST_OS_FREEBSD)		\
+	|| defined(HOST_OS_MACOSX)		\
+	|| defined(HOST_OS_NETBSD)		\
+	|| defined(HOST_OS_OPENBSD)
+
+
 #include "fea/ifconfig_property.hh"
 
 
@@ -56,4 +64,5 @@ private:
     virtual bool test_have_ipv6() const;
 };
 
+#endif
 #endif // __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_PROPERTY_BSD_HH__

@@ -180,10 +180,12 @@ FeaDataPlaneManagerLinux::unload_plugins(string& error_msg)
     if (! _is_loaded_plugins)
 	return (XORP_OK);
 
+#if defined(HAVE_PROC_LINUX) && defined(HAVE_IOCTL_SIOCGIFCONF) and !defined(HAVE_NETLINK_SOCKETS)
     if (_ifconfig_get_ioctl != NULL) {
 	delete _ifconfig_get_ioctl;
 	_ifconfig_get_ioctl = NULL;
     }
+#endif
 
     return (FeaDataPlaneManager::unload_plugins(error_msg));
 }

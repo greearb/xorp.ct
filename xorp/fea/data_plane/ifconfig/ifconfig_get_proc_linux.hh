@@ -22,6 +22,9 @@
 #ifndef __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_GET_PROC_LINUX_HH__
 #define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_GET_PROC_LINUX_HH__
 
+#include <xorp_config.h>
+#if defined(HAVE_IOCTL_SIOCGIFCONF) && defined(HAVE_PROC_LINUX) && !defined(HAVE_NETLINK_SOCKETS)
+
 #include "fea/ifconfig_get.hh"
 
 class IfConfigGetIoctl;
@@ -74,4 +77,5 @@ private:
     static const string PROC_LINUX_NET_DEVICES_FILE_V6;
 };
 
+#endif
 #endif // __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_GET_PROC_LINUX_HH__

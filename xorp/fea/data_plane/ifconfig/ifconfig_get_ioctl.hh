@@ -22,6 +22,10 @@
 #ifndef __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_GET_IOCTL_HH__
 #define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_GET_IOCTL_HH__
 
+#include <xorp_config.h>
+#if defined(HAVE_IOCTL_SIOCGIFCONF) && !defined(HAVE_NETLINK_SOCKETS)
+
+
 #include "fea/ifconfig_get.hh"
 
 
@@ -89,4 +93,5 @@ private:
     int _s6;
 };
 
+#endif
 #endif // __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_GET_IOCTL_HH__

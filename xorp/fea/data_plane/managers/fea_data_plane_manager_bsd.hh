@@ -22,6 +22,15 @@
 #ifndef __FEA_DATA_PLANE_MANAGERS_FEA_DATA_PLANE_MANAGER_BSD_HH__
 #define __FEA_DATA_PLANE_MANAGERS_FEA_DATA_PLANE_MANAGER_BSD_HH__
 
+#include <xorp_config.h>
+#if	defined(HOST_OS_BSDI)			\
+	|| defined(HOST_OS_DRAGONFLYBSD)	\
+	|| defined(HOST_OS_FREEBSD)		\
+	|| defined(HOST_OS_MACOSX)		\
+	|| defined(HOST_OS_NETBSD)		\
+	|| defined(HOST_OS_OPENBSD)
+
+
 #include "fea/fea_data_plane_manager.hh"
 
 
@@ -103,4 +112,5 @@ public:
 private:
 };
 
+#endif
 #endif // __FEA_DATA_PLANE_MANAGERS_FEA_DATA_PLANE_MANAGER_BSD_HH__

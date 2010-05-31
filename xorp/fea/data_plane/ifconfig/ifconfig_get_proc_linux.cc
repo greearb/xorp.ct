@@ -17,6 +17,8 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
+#include <xorp_config.h>
+#if defined(HAVE_IOCTL_SIOCGIFCONF) && defined(HAVE_PROC_LINUX) && !defined(HAVE_NETLINK_SOCKETS)
 
 
 #include "fea/fea_module.h"
@@ -51,8 +53,6 @@ const string IfConfigGetProcLinux::PROC_LINUX_NET_DEVICES_FILE_V6 = "/proc/net/i
 // The mechanism to obtain the information is Linux's /proc/net/dev (for IPv4)
 // or /proc/net/if_inet6 (for IPv6).
 //
-
-#ifdef HAVE_PROC_LINUX
 
 static char* get_proc_linux_iface_name(char* name, char* p);
 static int proc_read_ifconf_linux(IfConfig& ifconfig, IfTree& iftree,

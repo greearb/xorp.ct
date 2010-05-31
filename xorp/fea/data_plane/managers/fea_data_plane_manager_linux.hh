@@ -111,12 +111,14 @@ public:
     IoTcpUdp* allocate_io_tcpudp(const IfTree& iftree, int family,
 				 bool is_tcp);
 
+#if defined(HAVE_PROC_LINUX) && defined(HAVE_IOCTL_SIOCGIFCONF) and !defined(HAVE_NETLINK_SOCKETS)
     /**
      * Get the IfConfigGetIoctl plugin.
      *
      * @return the @ref IfConfigGetIoctl plugin.
      */
     IfConfigGetIoctl* ifconfig_get_ioctl() { return (_ifconfig_get_ioctl); }
+#endif
 
 private:
     IfConfigGetIoctl*	_ifconfig_get_ioctl;

@@ -17,6 +17,9 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
+#include <xorp_config.h>
+// We use Netlink if we can
+#if defined(HAVE_IOCTL_SIOCGIFCONF) && !defined(HAVE_NETLINK_SOCKETS)
 
 
 #include "fea/fea_module.h"
@@ -64,8 +67,6 @@
 // The information to parse is in "struct ifreq" format
 // (e.g., obtained by ioctl(SIOCGIFCONF) mechanism).
 //
-
-#ifdef HAVE_IOCTL_SIOCGIFCONF
 
 int
 IfConfigGetIoctl::parse_buffer_ioctl(IfConfig& ifconfig, IfTree& iftree,
@@ -597,4 +598,4 @@ IfConfigGetIoctl::parse_buffer_ioctl(IfConfig& ifconfig, IfTree& iftree,
     return (XORP_OK);
 }
 
-#endif // HAVE_IOCTL_SIOCGIFCONF
+#endif // HAVE_IOCTL_SIOCGIFCONF and not NETLINK

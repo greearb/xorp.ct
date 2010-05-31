@@ -17,6 +17,8 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
+#include <xorp_config.h>
+#ifdef HOST_OS_SOLARIS
 
 
 #include "fea/fea_module.h"
@@ -38,8 +40,6 @@
 // The mechanism to obtain the information is for Solaris systems.
 //
 
-
-#ifdef HOST_OS_SOLARIS
 
 IfConfigPropertySolaris::IfConfigPropertySolaris(FeaDataPlaneManager& fea_data_plane_manager)
     : IfConfigProperty(fea_data_plane_manager)

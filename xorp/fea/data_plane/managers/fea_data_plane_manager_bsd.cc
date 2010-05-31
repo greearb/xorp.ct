@@ -17,6 +17,13 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
+#include <xorp_config.h>
+#if	defined(HOST_OS_BSDI)			\
+	|| defined(HOST_OS_DRAGONFLYBSD)	\
+	|| defined(HOST_OS_FREEBSD)		\
+	|| defined(HOST_OS_MACOSX)		\
+	|| defined(HOST_OS_NETBSD)		\
+	|| defined(HOST_OS_OPENBSD)
 
 
 #include "fea/fea_module.h"
@@ -104,14 +111,7 @@ FeaDataPlaneManagerBsd::load_plugins(string& error_msg)
     //
     // Load the plugins
     //
-#if	defined(HOST_OS_BSDI)			\
-	|| defined(HOST_OS_DRAGONFLYBSD)	\
-	|| defined(HOST_OS_FREEBSD)		\
-	|| defined(HOST_OS_MACOSX)		\
-	|| defined(HOST_OS_NETBSD)		\
-	|| defined(HOST_OS_OPENBSD)
     _ifconfig_property = new IfConfigPropertyBsd(*this);
-#endif
 
 #if defined(HAVE_GETIFADDRS)
     _ifconfig_get = new IfConfigGetGetifaddrs(*this);
@@ -243,3 +243,6 @@ FeaDataPlaneManagerBsd::allocate_io_tcpudp(const IfTree& iftree, int family,
 
     return (io_tcpudp);
 }
+
+
+#endif // bsd

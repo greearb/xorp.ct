@@ -17,6 +17,15 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
+#include <xorp_config.h>
+
+#if	defined(HOST_OS_BSDI)			\
+	|| defined(HOST_OS_DRAGONFLYBSD)	\
+	|| defined(HOST_OS_FREEBSD)		\
+	|| defined(HOST_OS_MACOSX)		\
+	|| defined(HOST_OS_NETBSD)		\
+	|| defined(HOST_OS_OPENBSD)
+
 
 
 #include "fea/fea_module.h"
@@ -38,13 +47,6 @@
 // The mechanism to obtain the information is for BSD systems.
 //
 
-
-#if	defined(HOST_OS_BSDI)			\
-	|| defined(HOST_OS_DRAGONFLYBSD)	\
-	|| defined(HOST_OS_FREEBSD)		\
-	|| defined(HOST_OS_MACOSX)		\
-	|| defined(HOST_OS_NETBSD)		\
-	|| defined(HOST_OS_OPENBSD)
 
 IfConfigPropertyBsd::IfConfigPropertyBsd(FeaDataPlaneManager& fea_data_plane_manager)
     : IfConfigProperty(fea_data_plane_manager)
