@@ -557,6 +557,21 @@ def DoAllConfig(env, conf, host_os):
     if has_linux_mroute_h:
         prereq_mroute_h = prereq_linux_mroute_h
         mroute_h = linux_mroute_h
+    else:
+        # Try without netinet/in.h, older releases (CentOS 5, for instance) doesn't need it
+        # and break with it.
+        prereq_linux_mroute_h = []
+        if has_sys_types_h:
+            prereq_linux_mroute_h.append('sys/types.h')
+        if has_sys_socket_h:
+            prereq_linux_mroute_h.append('sys/socket.h')
+        if has_linux_types_h:
+            prereq_linux_mroute_h.append('linux/types.h')
+        linux_mroute_h = 'linux/mroute.h'
+        has_linux_mroute_h = conf.CheckHeader(prereq_linux_mroute_h + [ linux_mroute_h ])
+        if has_linux_mroute_h:
+            prereq_mroute_h = prereq_linux_mroute_h
+            mroute_h = linux_mroute_h
     
     mfcctl2_includes = []
     for s in prereq_mroute_h + [ mroute_h ]:
