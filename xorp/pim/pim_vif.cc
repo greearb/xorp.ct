@@ -164,6 +164,7 @@ PimVif::PimVif(PimNode& pim_node, const Vif& vif)
       //
       _usage_by_pim_mre_task(0)
 {
+    wants_to_be_started = false;
     _buffer_send = BUFFER_MALLOC(BUF_SIZE_DEFAULT);
     _buffer_send_hello = BUFFER_MALLOC(BUF_SIZE_DEFAULT);
     _buffer_send_bootstrap = BUFFER_MALLOC(BUF_SIZE_DEFAULT);
@@ -265,6 +266,23 @@ PimVif::pim_mrt() const
     return (_pim_node.pim_mrt());
 }
 
+/** System detected some change.  */
+void PimVif::notifyUpdated() {
+    if (wants_to_be_started) {
+	string err_msg;
+	int rv = start(err_msg);
+	if (rv == XORP_OK) {
+	    XLOG_WARNING("notifyUpdated, successfully started pim_vif: %s",
+			 name().c_str());
+	}
+	else {
+	    XLOG_WARNING("notifyUpdated, tried to start vif: %s, but failed: %s",
+			 name().c_str(), err_msg.c_str());
+	}
+    }
+}
+
+
 /**
  * PimVif::start:
  * @error_msg: The error message (if error).
@@ -283,8 +301,10 @@ PimVif::start(string& error_msg)
 	return (XORP_OK);
 
     if (! is_underlying_vif_up()) {
-	error_msg = "underlying vif is not UP";
-	return (XORP_ERROR);
+	wants_to_be_started = true;
+	XLOG_WARNING("WARNING:  Delaying start of pim-vif: %s because underlying vif is not up.",
+		     name().c_str());
+	return XORP_OK;
     }
 
     //
@@ -364,7 +384,8 @@ PimVif::start(string& error_msg)
 
     XLOG_INFO("Interface started: %s%s",
 	      this->str().c_str(), flags_string().c_str());
-    
+
+    wants_to_be_started = false; //it worked
     return (XORP_OK);
 }
 
@@ -385,6 +406,7 @@ int
 PimVif::stop(string& error_msg)
 {
     int ret_value = XORP_OK;
+    wants_to_be_started = false; //it worked
 
     if (is_down())
 	return (XORP_OK);

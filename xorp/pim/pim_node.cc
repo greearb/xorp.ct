@@ -906,8 +906,10 @@ PimNode::set_vif_flags(const string& vif_name,
     if (pim_vif->is_pim_register())
 	_pim_register_vif_index = pim_vif->vif_index();
     
-    if (is_changed)
+    if (is_changed) {
 	XLOG_INFO("Interface flags changed: %s", pim_vif->str().c_str());
+	pim_vif->notifyUpdated();
+    }
     
     return (XORP_OK);
 }

@@ -100,6 +100,10 @@ public:
      */
     int		start(string& error_msg);
     
+    /**  Attempt deferred start.
+     */
+    void notifyUpdated();
+
     /**
      * Gracefully stop PIM on a single virtual interface.
      * 
@@ -678,6 +682,7 @@ private:
 					  const IPvX& source_addr,
 					  const IPvX& group_addr,
 					  uint8_t group_mask_len);
+    bool wants_to_be_started; // as soon as we can, ie if the interface appears.
 };
 
 //
