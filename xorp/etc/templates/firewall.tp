@@ -50,6 +50,8 @@ firewall {
     %modinfo:	default_targetname "fea";
     %modinfo:	start_commit	xrl "$(interfaces.targetname)/fea_firewall/0.1/start_transaction->tid:u32=$(firewall.TID)";
     %modinfo:	end_commit	xrl "$(interfaces.targetname)/fea_firewall/0.1/commit_transaction?tid:u32=$(firewall.TID)";
+    %modinfo:   status_method   xrl "$(interfaces.targetname)/common/0.1/get_status->status:u32&reason:txt";
+    %modinfo:	startup_method	xrl "$(interfaces.targetname)/fea_firewall/0.1/startup_firewall";
 
     %mandatory:	$(@.targetname);
 

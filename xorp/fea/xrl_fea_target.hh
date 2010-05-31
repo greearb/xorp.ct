@@ -124,6 +124,14 @@ public:
      */
     XrlCmdError common_0_1_shutdown();
 
+
+    /** Does nothing, but allows us to have rtrmgr verify startup. */
+    virtual XrlCmdError ifmgr_0_1_startup_ifmgr();
+
+    /** Does nothing, but allows us to have rtrmgr verify startup. */
+    virtual XrlCmdError fea_firewall_0_1_startup_firewall();
+
+
     /**
      *  Announce target birth to observer.
      *

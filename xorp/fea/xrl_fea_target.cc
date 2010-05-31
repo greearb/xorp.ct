@@ -2701,6 +2701,16 @@ XrlFeaTarget::ifmgr_0_1_set_endpoint6(
 }
 
 XrlCmdError
+XrlFeaTarget::ifmgr_0_1_startup_ifmgr() {
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::fea_firewall_0_1_startup_firewall() {
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
 XrlFeaTarget::ifmgr_replicator_0_1_register_ifmgr_mirror(
     // Input values,
     const string&	clientname)

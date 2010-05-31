@@ -53,6 +53,7 @@ interfaces {
     %modinfo:	default_targetname "fea";
     %modinfo:	status_method	xrl "$(interfaces.targetname)/common/0.1/get_status->status:u32&reason:txt";
     %modinfo:	shutdown_method xrl "$(interfaces.targetname)/common/0.1/shutdown";
+    %modinfo:	startup_method	xrl "$(interfaces.targetname)/ifmgr/0.1/startup_ifmgr";
     %modinfo:	start_commit	xrl "$(interfaces.targetname)/ifmgr/0.1/start_transaction->tid:u32=$(interfaces.TID)";
     %modinfo:	end_commit	xrl "$(interfaces.targetname)/ifmgr/0.1/commit_transaction?tid:u32=$(interfaces.TID)";
 

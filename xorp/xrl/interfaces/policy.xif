@@ -136,4 +136,7 @@ interface policy/0.1 {
 	 * @param target XRL target for the protocol.
 	 */
 	set_proto_target ? protocol:txt & target:txt;
+
+	/* Does nothing. */
+	start_policy;
 }

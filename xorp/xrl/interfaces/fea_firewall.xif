@@ -319,4 +319,7 @@ interface fea_firewall/0.1 {
 				& dst_port_end:u32			\
 				& action:txt				\
 				& more:bool;
+
+	/* Does nothing, but allows us to 'verify' startup in rtr-mgr*/
+	startup_firewall;
 }

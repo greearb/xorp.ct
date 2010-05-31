@@ -55,6 +55,10 @@ public:
 
     XrlCmdError common_0_1_shutdown();
 
+    virtual XrlCmdError policy_0_1_start_policy() {
+	return XrlCmdError::OKAY();
+    }
+
     XrlCmdError policy_0_1_create_term(
         // Input values,
         const string&   policy,

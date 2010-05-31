@@ -214,4 +214,7 @@ interface ifmgr/0.1 {
 				& vif:txt				\
 				& address:ipv6				\
 				& endpoint:ipv6;
+
+	/* Does nothing, but allows us to 'verify' startup in rtr-mgr*/
+	startup_ifmgr;
 }
