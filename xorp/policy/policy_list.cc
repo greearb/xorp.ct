@@ -161,7 +161,8 @@ PolicyList::add_policy_expression(const string& exp)
 
 void 
 PolicyList::compile_policy(PolicyStatement& ps,Code::TargetSet& mod, 
-			   uint32_t& tagstart)
+			   uint32_t& tagstart,
+			    map<string, set<uint32_t> >& ptags)
 {
     // go throw all the policies present in this list
     for(PolicyCodeList::iterator i = _policies.begin();
@@ -174,7 +175,7 @@ PolicyList::compile_policy(PolicyStatement& ps,Code::TargetSet& mod,
 		    compile_import(i,ps,mod);
 		    break;
 		case EXPORT:
-		    compile_export(i,ps,mod,tagstart);
+		    compile_export(i,ps,mod,tagstart, ptags);
 		    break;
 	    }
 	}
@@ -182,7 +183,7 @@ PolicyList::compile_policy(PolicyStatement& ps,Code::TargetSet& mod,
 }
 
 void 
-PolicyList::compile(Code::TargetSet& mod, uint32_t& tagstart)
+PolicyList::compile(Code::TargetSet& mod, uint32_t& tagstart, map<string, set<uint32_t> >& ptags)
 {
     // go throw all policies in the list
     for (PolicyCodeList::iterator i = _policies.begin();
@@ -204,7 +205,7 @@ PolicyList::compile(Code::TargetSet& mod, uint32_t& tagstart)
 	    break;
 	
 	case EXPORT:
-	    compile_export(i, ps, mod, tagstart);
+	    compile_export(i, ps, mod, tagstart, ptags);
 	    break;
 	}
     }    
@@ -352,7 +353,8 @@ PolicyList::compile_import(PolicyCodeList::iterator& iter,
 void 
 PolicyList::compile_export(PolicyCodeList::iterator& iter, PolicyStatement& ps, 
 			   Code::TargetSet& modified_targets, 
-			   uint32_t& tagstart)
+			   uint32_t& tagstart,
+			    map<string, set<uint32_t> >& ptags)
 {
     _mod_term = _mod_term_export;
 
@@ -360,7 +362,7 @@ PolicyList::compile_export(PolicyCodeList::iterator& iter, PolicyStatement& ps,
     semantic_check(ps, VisitorSemantic::EXPORT);
 
     // generate source match code
-    SourceMatchCodeGenerator smcg(tagstart, _varmap, _pmap);
+    SourceMatchCodeGenerator smcg(tagstart, _varmap, _pmap, ptags);
     
     // check modifier [a bit of a hack]
     if (_mod_term)

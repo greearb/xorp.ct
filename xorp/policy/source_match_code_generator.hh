@@ -74,7 +74,8 @@ public:
      * @param varmap the varmap.
      */
     SourceMatchCodeGenerator(uint32_t tagstart, const VarMap& varmap,
-			     PolicyMap& pmap);
+			     PolicyMap& pmap, 
+			    map<string, set<uint32_t> >& ptags);
 
     const Element* visit_policy(PolicyStatement& policy);
     const Element* visit_term(Term& term);
@@ -122,7 +123,7 @@ private:
     // FIXME: who deletes these on exception ?
     vector<Code*>		_codes_vect; 
     Tags			_tags;
-    map<string, set<uint32_t> >	_protocol_tags;
+    map<string, set<uint32_t> >& _protocol_tags;
     bool			_protocol_statement;
     string			_policy;
 };

@@ -85,7 +85,8 @@ public:
      */
     void compile_policy(PolicyStatement& ps,
 			Code::TargetSet& mod, 
-			uint32_t& tagstart);
+			uint32_t& tagstart,
+			map<string, set<uint32_t> >& ptags);
 
     /**
      * Compile all policies which were not previously compiled.
@@ -95,7 +96,7 @@ public:
      * @param mod set filled with targets which are modified by compilation.
      * @param tagstart first policy tag available.
      */
-    void compile(Code::TargetSet& mod, uint32_t& tagstart);
+    void compile(Code::TargetSet& mod, uint32_t& tagstart, map<string, set<uint32_t> >& ptags);
    
     /**
      * @return string representation of list
@@ -162,7 +163,8 @@ private:
      * @param tagstart first policy tag available.
      */
     void compile_export(PolicyCodeList::iterator& iter, PolicyStatement& ps,
-			Code::TargetSet& modified_targets, uint32_t& tagstart);
+			Code::TargetSet& modified_targets, uint32_t& tagstart,
+			map<string, set<uint32_t> > & ptags);
 
     Term* create_mod(Term::BLOCKS block);
     void  add_policy_expression(const string& exp);

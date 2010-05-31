@@ -27,8 +27,10 @@
 
 SourceMatchCodeGenerator::SourceMatchCodeGenerator(uint32_t tagstart,
 						   const VarMap& varmap,
-						   PolicyMap& pmap) 
-	   : CodeGenerator(varmap, pmap), _currtag(tagstart)
+						   PolicyMap& pmap,
+					map<string, set<uint32_t> > & ptags) 
+	   : CodeGenerator(varmap, pmap), _currtag(tagstart),
+	     _protocol_tags(ptags)
 {
 }
 

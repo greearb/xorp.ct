@@ -304,10 +304,10 @@ Configuration::compile_policy(const string& name)
     tag_t old_currtag = _currtag; 
 
     // go through all the import statements
-    _imports.compile(policy, _modified_targets, _currtag);
+    _imports.compile(policy, _modified_targets, _currtag, _protocol_tags);
 
     // go through all export statements
-    _exports.compile(policy, _modified_targets, _currtag);
+    _exports.compile(policy, _modified_targets, _currtag, _protocol_tags);
 
     // integer overflow
     if (_currtag < old_currtag)
@@ -332,10 +332,10 @@ Configuration::compile_policies()
     // compile any import policies that have not yet been compiled.
     // This is a case if a policy is not modified, but just added to a policy
     // list.
-    _imports.compile(_modified_targets, _currtag);
+    _imports.compile(_modified_targets, _currtag, _protocol_tags);
 
     // same for exports.
-    _exports.compile(_modified_targets, _currtag);
+    _exports.compile(_modified_targets, _currtag, _protocol_tags);
 
     // integer overflow.
     if (_currtag < old_currtag) {
@@ -731,22 +731,22 @@ IEMap::get_targets(const string& proto, const string& mod, TARGETSET& ts)
 }
 
 void
-IEMap::compile(PolicyStatement& ps, TARGETSET& ts, tag_t& tag)
+IEMap::compile(PolicyStatement& ps, TARGETSET& ts, tag_t& tag, map<string, set<uint32_t> >& ptags)
 {
     FOR_ALL_POLICIES(j) {
 	PolicyList* p = j->second;
 
-	p->compile_policy(ps, ts, tag);
+	p->compile_policy(ps, ts, tag, ptags);
     }
 }
 
 void
-IEMap::compile(TARGETSET& ts, tag_t& tag)
+IEMap::compile(TARGETSET& ts, tag_t& tag, map<string, set<uint32_t> >& ptags)
 {
     FOR_ALL_POLICIES(j) {
 	PolicyList* p = j->second;
 
-	p->compile(ts, tag);
+	p->compile(ts, tag, ptags);
     }
 }
 

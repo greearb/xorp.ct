@@ -63,8 +63,8 @@ public:
     void	clear(TARGETSET& ts);
     void	get_targets(const string& proto, const string& mod,
 			    TARGETSET& targets);
-    void	compile(PolicyStatement& ps, TARGETSET& targets, tag_t& tag);
-    void	compile(TARGETSET& targets, tag_t& tag);
+    void	compile(PolicyStatement& ps, TARGETSET& targets, tag_t& tag, map<string, set<uint32_t> >& ptags);
+    void	compile(TARGETSET& targets, tag_t& tag, map<string, set<uint32_t> >& ptags);
     void	link_code(Code& code);
     void	link_code(const string& proto, Code& code);
     void	get_redist_tags(const string& proto, TagSet& ts);
@@ -399,6 +399,7 @@ private:
     CodeMap		    _sourcematch_filters;
     CodeMap		    _export_filters;
     tag_t		    _currtag;
+    map<string, set<uint32_t> > _protocol_tags;
     TagMap		    _tagmap;
     VarMap		    _varmap;
     FilterManagerBase*	    _filter_manager; // do not delete

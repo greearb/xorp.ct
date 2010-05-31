@@ -69,7 +69,7 @@ IvExec::run(VarRW* varrw)
     _stackptr--;
 
     // execute all policies
-    for (unsigned i = 0; i < _policy_count; ++i) {
+    for (int i = _policy_count-1; i>= 0; --i) {
 	FlowAction fa = runPolicy(*_policies[i]);
 
 	// if a policy rejected/accepted a route then terminate.
