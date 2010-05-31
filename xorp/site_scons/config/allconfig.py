@@ -409,7 +409,10 @@ def DoAllConfig(env, conf, host_os):
     # test result
     if has_v4_mcast:
         conf.Define('HAVE_IPV4_MULTICAST')
-    
+        if host_os == 'linux-gnu':
+            print "Enabling MULT_MCAST_TABLES logic since we are compiling for Linux.\n"
+            conf.Define('USE_MULT_MCAST_TABLES')
+
     # v4 stack: sysctl (bsd)
     conf.CheckSysctl('IPCTL_FORWARDING', oid='CTL_NET, AF_INET, IPPROTO_IP, IPCTL_FORWARDING', includes='#include <sys/socket.h>\n#include <netinet/in.h>')
     

@@ -93,11 +93,6 @@
 #include "fibconfig.hh"
 
 
-#if defined(HOST_OS_LINUX)
-// Attempt to use multiple mcast tables if kernel supports it.
-#define USE_MULT_MCAST_TABLES
-#endif
-
 #ifdef USE_MULT_MCAST_TABLES
 /** In order to support multiple routing tables, the kernel API had to be extended.
  * Since no distro has this currently in #include files, add private definitions
