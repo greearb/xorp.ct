@@ -18,6 +18,8 @@
 // http://xorp.net
 
 
+//#define DEBUG_LOGGING
+
 
 #include "rtrmgr_module.h"
 
@@ -351,7 +353,7 @@ MasterConfigTree::find_inactive_modules() const
     for (final_iter = ordered_all_modules.begin();
 	 final_iter != ordered_all_modules.end();
 	 ++final_iter) {
-	debug_msg("%s ", final_iter->c_str());
+	debug_msg("  %s\n", final_iter->c_str());
     }
     debug_msg("\n");
 
@@ -491,7 +493,7 @@ MasterConfigTree::order_module_list(const set<string>& module_set,
     for (final_iter = ordered_modules.begin();
 	 final_iter != ordered_modules.end();
 	 ++final_iter) {
-	debug_msg("%s ", final_iter->c_str());
+	debug_msg("  %s\n", final_iter->c_str());
     }
     debug_msg("\n");
 }
@@ -577,6 +579,7 @@ MasterConfigTree::commit_changes_pass1(CallBack cb)
     }
 #endif // 0
 
+    debug_msg("Queueing commit_pass1_done callback.\n");
     _task_manager->run(callback(this, &MasterConfigTree::commit_pass1_done));
 }
 

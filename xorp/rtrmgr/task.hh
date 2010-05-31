@@ -409,7 +409,7 @@ private:
 
 class Task {
 public:
-    typedef XorpCallback2<void, bool, string>::RefPtr CallBack;
+    typedef XorpCallback2<void, bool, const string&>::RefPtr CallBack;
 
     Task(const string& name, TaskManager& taskmgr);
     ~Task();
@@ -425,7 +425,7 @@ public:
     Validation* ready_validation() const { return _ready_validation; }
     bool will_shutdown_module() const { return _stop_module; }
     void run(CallBack cb);
-    void item_done(bool success, bool fatal, string errmsg); 
+    void item_done(bool success, bool fatal, const string& errmsg); 
     bool do_exec() const;
     bool is_verification() const;
     XorpClient& xorp_client() const;
@@ -479,7 +479,7 @@ protected:
     void step7_kill();
 
     void step8_report();
-    void task_fail(string errmsg, bool fatal);
+    void task_fail(const string& errmsg, bool fatal);
 
 private:
     string	_name;		// The name of the task
@@ -564,7 +564,7 @@ public:
 private:
     void reorder_tasks();
     void run_task();
-    void task_done(bool success, string errmsg);
+    void task_done(bool success, const string& errmsg);
     void fail_tasklist_initialization(const string& errmsg);
     Task& find_task(const string& module_name);
     void null_callback();

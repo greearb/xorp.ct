@@ -324,6 +324,7 @@ ModuleCommand::startup_validation(TaskManager& taskmgr) const
 	}
 	return NULL;
     } else {
+	XLOG_WARNING("WARNING:  Using DelayValidation, module_name: %s", _module_name.c_str());
 	return new DelayValidation(_module_name, taskmgr.eventloop(), 2000,
 				   _verbose);
     }
@@ -344,6 +345,7 @@ ModuleCommand::config_validation(TaskManager& taskmgr) const
 	}
 	return NULL;
     } else {
+	XLOG_WARNING("WARNING:  Using DelayValidation, module_name: %s", _module_name.c_str());
 	return new DelayValidation(_module_name, taskmgr.eventloop(), 2000,
 				   _verbose);
     }
@@ -364,6 +366,7 @@ ModuleCommand::ready_validation(TaskManager& taskmgr) const
 	}
 	return NULL;
     } else {
+	XLOG_WARNING("WARNING:  Using DelayValidation, module_name: %s", _module_name.c_str());
 	return new DelayValidation(_module_name, taskmgr.eventloop(), 2000,
 				   _verbose);
     }
@@ -384,6 +387,7 @@ ModuleCommand::shutdown_validation(TaskManager& taskmgr) const
 	}
 	return NULL;
     } else {
+	XLOG_WARNING("WARNING:  Using DelayValidation, module_name: %s", _module_name.c_str());
 	return new DelayValidation(_module_name, taskmgr.eventloop(), 2000,
 				   _verbose);
     }

@@ -148,7 +148,10 @@ XrlStatusValidation::validate(RunShellCommand::ExecId exec_id, CallBack cb)
 	// that the xrl_done response gets the right arguments even
 	// though we're not going to call the XRL.
 	//
-	_retry_timer = eventloop().new_oneoff_after_ms(1000,
+	// This used to be a 1000-milisecond sleep, but that seems lame.  This would make
+	// commit changes take 1+ seconds of real-time, which sucks when you're scripting xorp.
+	// Changing it to zero. --Ben
+	_retry_timer = eventloop().new_oneoff_after_ms(0,
 			callback(this, &XrlStatusValidation::dummy_response));
     }
 }
@@ -1870,7 +1873,7 @@ Task::step3_config()
 }
 
 void
-Task::item_done(bool success, bool fatal, string errmsg)
+Task::item_done(bool success, bool fatal, const string& errmsg)
 {
     debug_msg("item_done (%s)\n", _module_name.c_str());
 
@@ -1996,7 +1999,7 @@ Task::step8_report()
 }
 
 void
-Task::task_fail(string errmsg, bool fatal)
+Task::task_fail(const string& errmsg, bool fatal)
 {
     debug_msg("%s\n", errmsg.c_str());
 
@@ -2240,9 +2243,9 @@ TaskManager::run_task()
 }
 
 void
-TaskManager::task_done(bool success, string errmsg)
+TaskManager::task_done(bool success, const string& errmsg)
 {
-    debug_msg("TaskManager::task_done\n");
+    debug_msg("TaskManager::task_done, success: %i errmsg: %s\n", (int)(success), errmsg.c_str());
 
     if (! success) {
 	debug_msg("task failed\n");

@@ -545,7 +545,6 @@ XrlRtrmgrInterface::rtrmgr_0_1_apply_config_change(
     ConfigChangeCallBack cb;
     cb = callback(this, &XrlRtrmgrInterface::apply_config_change_done,
 		  user_id, string(target));
-
     if (_master_config_tree->apply_config_change(user_id, error_msg, deltas,
 						 deletions, cb) != true) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);

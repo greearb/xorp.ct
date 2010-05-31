@@ -112,7 +112,7 @@ static void	xlog_record_va(xlog_level_t log_level, const char* module_name,
 static int	xlog_write(FILE* fp, const char* fmt, ...);
 static int	xlog_write_va(FILE* fp, const char* fmt, va_list ap);
 static int	xlog_flush(FILE* fp);
-static const char* xlog_localtime2string_short(void);
+//static const char* xlog_localtime2string_short(void);
 
 /*
  * ****************************************************************************
@@ -643,7 +643,7 @@ xlog_record_va(xlog_level_t log_level, const char *module_name,
 	
     case XLOG_VERBOSE_LOW:	/* The minimum log information */
 	x_asprintf(&buf_preamble_ptr, "[ %s %s %s %s ] ",
-		   xlog_localtime2string_short(),
+		   xlog_localtime2string(),
 		   xlog_level_names[log_level],
 		   process_name_lead,
 		   module_name);
@@ -651,7 +651,7 @@ xlog_record_va(xlog_level_t log_level, const char *module_name,
 
     case XLOG_VERBOSE_MEDIUM:	/* Add preamble string if non-NULL */
 	x_asprintf(&buf_preamble_ptr, "[ %s %s %s %s %s ] ",
-		   xlog_localtime2string_short(),
+		   xlog_localtime2string(),
 		   preamble_lead,
 		   xlog_level_names[log_level],
 		   process_name_lead,
@@ -661,7 +661,7 @@ xlog_record_va(xlog_level_t log_level, const char *module_name,
     case XLOG_VERBOSE_HIGH:	/* Most verbose */
     default:
 	x_asprintf(&buf_preamble_ptr, "[ %s %s %s %s:%d %s %s ] ",
-		   xlog_localtime2string_short(),
+		   xlog_localtime2string(),
 		   preamble_lead,
 		   xlog_level_names[log_level],
 		   process_name_lead,
@@ -1073,6 +1073,7 @@ xlog_remove_default_output(void)
  * Return value: A statically allocated string with the local time using
  * the format described above.
  **/
+/*
 static const char*
 xlog_localtime2string_short(void)
 {
@@ -1085,7 +1086,7 @@ xlog_localtime2string_short(void)
 
     return (buf);
 }
-
+*/
 /**
  * xlog_localtime2string:
  * @void:
