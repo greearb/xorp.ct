@@ -97,6 +97,15 @@ public:
      */
     virtual int delete_entry6(const Fte6& fte);
 
+    /** Routing table ID that we are interested in might have changed.
+     */
+    virtual int notify_table_id_change(uint32_t new_tbl) {
+	// Virtual routing tables not implemented on BSD
+	UNUSED(new_tbl);
+	return XORP_OK;
+    }
+
+
 private:
     int add_entry(const FteX& fte);
     int delete_entry(const FteX& fte);

@@ -108,6 +108,14 @@ public:
 					   const vector<uint8_t>& buffer,
 					   FibMsgSet filter);
 
+    /** Routing table ID that we are interested in might have changed.
+     */
+    virtual int notify_table_id_change(uint32_t new_tbl) {
+	// Virtual routing tables not implemented on BSD
+	UNUSED(new_tbl);
+	return XORP_OK;
+    }
+
 private:
     int get_table(int family, list<FteX>& fte_list);
 };

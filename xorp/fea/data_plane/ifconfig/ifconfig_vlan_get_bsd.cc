@@ -120,7 +120,7 @@ IfConfigVlanGetBsd::stop(string& error_msg)
 int
 IfConfigVlanGetBsd::pull_config(IfTree& iftree, bool& modified)
 {
-    return read_config(iftree, bool& modified);
+    return read_config(iftree, modified);
 }
 
 int

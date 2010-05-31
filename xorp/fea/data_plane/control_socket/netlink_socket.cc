@@ -590,6 +590,13 @@ NetlinkSocketReader::receive_data(NetlinkSocket& ns, uint32_t seqno,
     return (XORP_OK);
 }
 
+#ifndef HAVE_NETLINK_SOCKETS
+int NetlinkSocket::notify_table_id_change(uint32_t new_tbl) {
+    UNUSED(new_tbl);
+    return XORP_OK;
+}
+#endif
+
 /**
  * Receive data from the netlink socket.
  *

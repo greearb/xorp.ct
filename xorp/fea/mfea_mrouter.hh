@@ -87,11 +87,13 @@ public:
      */
     int		stop();
 
+#ifdef USE_MULT_MCAST_TABLES
     /** Get the multicast table id that is currently configured.
      * Currently, changing configured table-id at run-time will break
      * things, by the way.
      */
     int getTableId() const;
+#endif
 
     /**
      * Test if the underlying system supports IPv4 multicast routing.

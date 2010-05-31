@@ -105,7 +105,8 @@ IfConfigObserverRoutingSocket::receive_data(const vector<uint8_t>& buffer)
     IfConfigVlanGet* ifconfig_vlan_get;
     ifconfig_vlan_get = fea_data_plane_manager().ifconfig_vlan_get();
     if (ifconfig_vlan_get != NULL) {
-	if (ifconfig_vlan_get->pull_config(ifconfig().system_config())
+	bool modified = false; // Ignore this...assume it's always modified.
+	if (ifconfig_vlan_get->pull_config(ifconfig().system_config(), modified)
 	    != XORP_OK) {
 	    XLOG_ERROR("Unknown error while pulling VLAN information");
 	}

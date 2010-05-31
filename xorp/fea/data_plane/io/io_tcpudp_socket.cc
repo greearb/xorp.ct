@@ -378,6 +378,8 @@ IoTcpUdpSocket::udp_open_and_bind(const IPvX& local_addr, uint16_t local_port, c
 			  (int)(_socket_fd), local_dev.c_str());
 	    }
 	}
+#else
+	UNUSED(local_dev);
 #endif
 	break;
     }

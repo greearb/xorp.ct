@@ -341,6 +341,7 @@ MfeaMrouter::stop()
     return (XORP_OK);
 }
 
+#ifdef USE_MULT_MCAST_TABLES
 int MfeaMrouter::getTableId() const {
     int table_id = DFLT_MROUTE_TBL;
     if (_fibconfig.unicast_forwarding_table_id_is_configured(family())) {
@@ -348,6 +349,7 @@ int MfeaMrouter::getTableId() const {
     }
     return table_id;
 }
+#endif
 
 /**
  * Test if the underlying system supports IPv4 multicast routing.

@@ -143,7 +143,8 @@ IfConfigGetSysctl::read_config(IfTree& iftree)
 	    IfConfigVlanGet* ifconfig_vlan_get;
 	    ifconfig_vlan_get = fea_data_plane_manager().ifconfig_vlan_get();
 	    if (ifconfig_vlan_get != NULL) {
-		if (ifconfig_vlan_get->pull_config(iftree) != XORP_OK)
+		bool modified = false;
+		if (ifconfig_vlan_get->pull_config(iftree, modified) != XORP_OK)
 		    return (XORP_ERROR);
 	    }
 	    return (XORP_OK);
