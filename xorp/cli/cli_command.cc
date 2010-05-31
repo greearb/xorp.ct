@@ -95,6 +95,7 @@ CliCommand::~CliCommand()
 {
     // Delete recursively all child commands
     delete_pointers_list(_child_command_list);
+    delete_pipes();
 }
 
 //
@@ -428,6 +429,7 @@ CliCommand::add_pipes(string& error_msg)
     if (com0 == NULL) {
 	return (XORP_ERROR);
     }
+    delete_pipes(); // be sure to not leak memory if one is already set.
     set_cli_command_pipe(com0);
     
     cli_pipe = new CliPipe("count");
