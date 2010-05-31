@@ -188,6 +188,8 @@ IoIpSocket::IoIpSocket(FeaDataPlaneManager& fea_data_plane_manager,
 
     memset(_sndcmsgbuf, 0, CMSG_BUF_SIZE);
 
+    memset(_sndcmsgbuf, 0, CMSG_BUF_SIZE);
+
     // Scatter/gatter array initialization
     _rcviov[0].iov_base		= (caddr_t)_rcvbuf;
     _rcviov[0].iov_len		= IO_BUF_SIZE;

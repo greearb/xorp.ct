@@ -92,7 +92,7 @@ public:
     TransactionManager(EventLoop& e,
 		       uint32_t timeout_ms = 0,
 		       uint32_t max_pending = 10) : 
-	_e(e), _timeout_ms(timeout_ms), _max_pending(max_pending) 
+	    _e(e), _timeout_ms(timeout_ms), _max_pending(max_pending), _next_tid(0)
     {
     }
 

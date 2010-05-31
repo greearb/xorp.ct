@@ -38,7 +38,9 @@ public:
      */
     IfConfigTransactionManager(EventLoop& eventloop)
 	: TransactionManager(eventloop, TIMEOUT_MS, MAX_PENDING)
-    {}
+	{
+	    _tid_exec = 0xFFFFFFFF;
+	}
 
     /**
      * Get the string with the first error during commit.
