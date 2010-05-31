@@ -113,6 +113,12 @@ public:
 					   const vector<uint8_t>& buffer,
 					   bool is_nlm_get_only, const FibConfig& fibconfig);
 
+    /** Routing table ID that we are interested in might have changed.
+     */
+    virtual int notify_table_id_change(uint32_t new_tbl) {
+	return NetlinkSocket::notify_table_id_change(new_tbl);
+    }
+
 private:
     /**
      * Lookup a route by destination address.

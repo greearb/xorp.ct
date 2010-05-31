@@ -62,6 +62,10 @@ public:
      * @param buffer the buffer with the received data.
      */
     virtual void receive_data(const vector<uint8_t>& buffer);
+
+    /** Routing table ID that we are interested in might have changed.
+     */
+    virtual int notify_table_id_change(uint32_t new_tbl) { UNUSED(new_tbl); return XORP_OK; }
     
 private:
 };

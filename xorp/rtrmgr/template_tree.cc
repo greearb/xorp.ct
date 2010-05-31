@@ -42,8 +42,10 @@ extern void parse_template() throw (ParseError);
 
 TemplateTree::TemplateTree(const string& xorp_root_dir,
 			   bool verbose) throw (InitError)
-    : _xorp_root_dir(xorp_root_dir),
-      _verbose(verbose)
+	: _root_node(NULL),
+	  _current_node(NULL),
+	  _xorp_root_dir(xorp_root_dir),
+	  _verbose(verbose)
 {
 }
 

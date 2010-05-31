@@ -47,7 +47,8 @@
 
 FibConfigTableGetNetlinkSocket::FibConfigTableGetNetlinkSocket(FeaDataPlaneManager& fea_data_plane_manager)
     : FibConfigTableGet(fea_data_plane_manager),
-      NetlinkSocket(fea_data_plane_manager.eventloop()),
+      NetlinkSocket(fea_data_plane_manager.eventloop(),
+		    fea_data_plane_manager.fibconfig().get_netlink_filter_table_id()),
       _ns_reader(*(NetlinkSocket *)this)
 {
 }

@@ -45,6 +45,7 @@
 #endif
 
 #include "fea/ifconfig.hh"
+#include "fea/fibconfig.hh"
 #include "fea/data_plane/control_socket/netlink_socket_utilities.hh"
 
 #include "ifconfig_set_netlink_socket.hh"
@@ -61,7 +62,8 @@
 
 IfConfigSetNetlinkSocket::IfConfigSetNetlinkSocket(FeaDataPlaneManager& fea_data_plane_manager)
     : IfConfigSet(fea_data_plane_manager),
-      NetlinkSocket(fea_data_plane_manager.eventloop()),
+      NetlinkSocket(fea_data_plane_manager.eventloop(),
+		    fea_data_plane_manager.fibconfig().get_netlink_filter_table_id()),
       _ns_reader(*(NetlinkSocket *)this)
 {
 }
@@ -650,7 +652,7 @@ IfConfigSetNetlinkSocket::wait_interface_status(const IfTreeInterface* ifp,
 	return;
 
     while (ifp->enabled() != is_enabled) {
-	if (ns->force_recvmsg(0, true, error_msg) != XORP_OK)
+	if (ns->force_recvmsg(true, error_msg) != XORP_OK)
 	    XLOG_ERROR("Netlink force_recvmsg(): %s", error_msg.c_str());
     }
 }

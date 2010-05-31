@@ -51,7 +51,8 @@
 
 FibConfigEntrySetNetlinkSocket::FibConfigEntrySetNetlinkSocket(FeaDataPlaneManager& fea_data_plane_manager)
     : FibConfigEntrySet(fea_data_plane_manager),
-      NetlinkSocket(fea_data_plane_manager.eventloop()),
+      NetlinkSocket(fea_data_plane_manager.eventloop(),
+		    fea_data_plane_manager.fibconfig().get_netlink_filter_table_id()),
       _ns_reader(*(NetlinkSocket *)this)
 {
 }
@@ -66,6 +67,12 @@ FibConfigEntrySetNetlinkSocket::~FibConfigEntrySetNetlinkSocket()
 		   "system: %s",
 		   error_msg.c_str());
     }
+}
+
+/** Routing table ID that we are interested in might have changed.
+ */
+int FibConfigEntrySetNetlinkSocket::notify_table_id_change(uint32_t new_tbl) {
+    return NetlinkSocket::notify_table_id_change(new_tbl);
 }
 
 int

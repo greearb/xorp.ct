@@ -465,6 +465,14 @@ public:
 	return (_unicast_forwarding_table_id6);
     }
 
+    /** If IPv4 and IPv6 table ids are configured, and configured to the same thing,
+     * we can attempt to filter the netlink route messages on that table id.
+     * Otherwise, return 0 (no filtering)
+     */
+    uint32_t get_netlink_filter_table_id() const;
+
+    void propagate_table_id_change();
+
     /**
      * Set the IPv4 unicast forwarding table ID to be used.
      *

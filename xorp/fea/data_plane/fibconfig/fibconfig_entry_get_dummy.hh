@@ -92,6 +92,10 @@ public:
      */
     virtual int lookup_route_by_network6(const IPv6Net& dst, Fte6& fte);
 
+    /** Routing table ID that we are interested in might have changed.
+     */
+    virtual int notify_table_id_change(uint32_t new_tbl) { UNUSED(new_tbl); return XORP_OK; }
+
 private:
 };
 

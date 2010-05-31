@@ -86,6 +86,72 @@ FibConfig::status(string& reason) const
     return (PROC_READY);
 }
 
+uint32_t FibConfig::get_netlink_filter_table_id() const {
+    uint32_t tbl_id = 0;
+    if (unicast_forwarding_table_id4_is_configured() ||
+	unicast_forwarding_table_id6_is_configured()) {
+	if (unicast_forwarding_table_id4_is_configured()) {
+	    tbl_id = unicast_forwarding_table_id4();
+	    if (unicast_forwarding_table_id6_is_configured()) {
+		if (unicast_forwarding_table_id6() != tbl_id) {
+		    XLOG_WARNING("WARNING:  IPv4 and v6 tables are configured and are different.  Cannot filter on netlink table-id, will use default behaviour and listen to all tables.\n");
+		    tbl_id = 0;
+		}
+	    }
+	}
+	else {
+	    tbl_id = unicast_forwarding_table_id6();
+	}
+    }
+    //XLOG_WARNING("IPv4 configured: %i %u  IPv6: %i %u  filter-table: %u",
+    //	 unicast_forwarding_table_id4_is_configured(),
+    //	 unicast_forwarding_table_id4(),
+    //	 unicast_forwarding_table_id6_is_configured(),
+    //	 unicast_forwarding_table_id6(), tbl_id);
+    return tbl_id;
+}
+
+void FibConfig::propagate_table_id_change() {
+    uint32_t tbl_id = get_netlink_filter_table_id();
+    // Tell the various plugins our configured table changed in case they can filter.
+    {
+	list<FibConfigEntryGet*>::iterator iter = _fibconfig_entry_gets.begin();
+	for (; iter != _fibconfig_entry_gets.end(); iter++) {
+	    (*iter)->notify_table_id_change(tbl_id);
+	}
+    }
+    {
+	list<FibConfigEntrySet*>::iterator iter = _fibconfig_entry_sets.begin();
+	for (; iter != _fibconfig_entry_sets.end(); iter++) {
+	    (*iter)->notify_table_id_change(tbl_id);
+	}
+    }
+    {
+	list<FibConfigEntryObserver*>::iterator iter = _fibconfig_entry_observers.begin();
+	for (; iter != _fibconfig_entry_observers.end(); iter++) {
+	    (*iter)->notify_table_id_change(tbl_id);
+	}
+    }
+    {
+	list<FibConfigTableGet*>::iterator iter = _fibconfig_table_gets.begin();
+	for (; iter != _fibconfig_table_gets.end(); iter++) {
+	    (*iter)->notify_table_id_change(tbl_id);
+	}
+    }
+    {
+	list<FibConfigTableSet*>::iterator iter = _fibconfig_table_sets.begin();
+	for (; iter != _fibconfig_table_sets.end(); iter++) {
+	    (*iter)->notify_table_id_change(tbl_id);
+	}
+    }
+    {
+	list<FibConfigTableObserver*>::iterator iter = _fibconfig_table_observers.begin();
+	for (; iter != _fibconfig_table_observers.end(); iter++) {
+	    (*iter)->notify_table_id_change(tbl_id);
+	}
+    }
+}
+
 int
 FibConfig::start_transaction(uint32_t& tid, string& error_msg)
 {
@@ -909,8 +975,12 @@ FibConfig::set_unicast_forwarding_table_id4(bool is_configured,
 					    uint32_t table_id,
 					    string& error_msg)
 {
-    _unicast_forwarding_table_id4_is_configured = is_configured;
-    _unicast_forwarding_table_id4 = table_id;
+    if ((_unicast_forwarding_table_id4_is_configured != is_configured) ||
+	(_unicast_forwarding_table_id4 != table_id)) {
+	_unicast_forwarding_table_id4_is_configured = is_configured;
+	_unicast_forwarding_table_id4 = table_id;
+	propagate_table_id_change();
+    }
 
     error_msg = "";		// XXX: reset
     return (XORP_OK);
@@ -921,8 +991,12 @@ FibConfig::set_unicast_forwarding_table_id6(bool is_configured,
 					    uint32_t table_id,
 					    string& error_msg)
 {
-    _unicast_forwarding_table_id6_is_configured = is_configured;
-    _unicast_forwarding_table_id6 = table_id;
+    if ((_unicast_forwarding_table_id6_is_configured != is_configured) ||
+	(_unicast_forwarding_table_id6 != table_id)) {
+	_unicast_forwarding_table_id6_is_configured = is_configured;
+	_unicast_forwarding_table_id6 = table_id;
+	propagate_table_id_change();
+    }
 
     error_msg = "";		// XXX: reset
     return (XORP_OK);

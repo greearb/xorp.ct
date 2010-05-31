@@ -75,6 +75,10 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int get_table6(list<Fte6>& fte_list);
+
+    /** Routing table ID that we are interested in might have changed.
+     */
+    virtual int notify_table_id_change(uint32_t new_tbl) { UNUSED(new_tbl); return XORP_OK; }
     
 private:
     ClickSocketReader	_cs_reader;

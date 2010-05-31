@@ -32,6 +32,7 @@
 class NetlinkSocketObserver;
 struct NetlinkSocketPlumber;
 
+
 /**
  * NetlinkSocket class opens a netlink socket and forwards data arriving
  * on the socket to NetlinkSocketObservers.  The NetlinkSocket hooks itself
@@ -41,8 +42,8 @@ class NetlinkSocket :
     public boost::noncopyable
 {
 public:
-    NetlinkSocket(EventLoop& eventloop);
-    ~NetlinkSocket();
+    NetlinkSocket(EventLoop& eventloop, uint32_t table_id);
+    virtual ~NetlinkSocket();
 
     /**
      * Start the netlink socket operation.
@@ -109,7 +110,6 @@ public:
      */
     uint32_t nl_pid() const { return _nl_pid; }
 
-
     /**
      * Force socket to recvmsg data.
      * 
@@ -124,7 +124,12 @@ public:
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int force_recvmsg(int flags, bool only_kernel_messages, string& error_msg);
+    int force_recvmsg_flgs(int flags, bool only_kernel_messages, string& error_msg);
+
+    /** Same as above, but always passes MSG_DONTWAIT as flags so that we don't block
+     * if packet is filtered, for example.
+     */
+    int force_recvmsg(bool only_kernel_messages, string& err_msg);
 
     /**
      * Set the netlink multicast groups to listen for on the netlink socket.
@@ -153,6 +158,10 @@ public:
      */
     void	set_multipart_message_read(bool v) { _is_multipart_message_read = v; }
 
+    /** Routing table ID that we are interested in might have changed.
+     */
+    virtual int notify_table_id_change(uint32_t new_tbl);
+
 private:
     typedef list<NetlinkSocketObserver*> ObserverList;
 
@@ -162,6 +171,8 @@ private:
      * socket.
      */
     void io_event(XorpFd fd, IoEventType sm);
+
+    int bind_table_id();
 
     static const size_t NETLINK_SOCKET_BYTES = 8*1024;	// Initial guess at msg size
 
@@ -176,6 +187,7 @@ private:
     uint32_t	_nl_pid;
 
     uint32_t	_nl_groups;	// The netlink multicast groups to listen for
+    uint32_t _table_id; // routing table.. or 0 if any/all (default behaviour) 
     bool	_is_multipart_message_read; // If true, expect to read a multipart message
 
     uint32_t   _nlm_count; // keep track of how many msgs received.

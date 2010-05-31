@@ -121,6 +121,10 @@ public:
      */
     const map<IPv6Net, Fte6>& fte_table6() const { return _fte_table6; }
 
+    /** Routing table ID that we are interested in might have changed.
+     */
+    virtual int notify_table_id_change(uint32_t new_tbl) { UNUSED(new_tbl); return XORP_OK; }
+
 private:
     virtual void nexthop_port_mapper_event(bool is_mapping_changed);
 

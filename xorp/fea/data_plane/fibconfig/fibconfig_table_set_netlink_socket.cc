@@ -55,6 +55,7 @@ FibConfigTableSetNetlinkSocket::~FibConfigTableSetNetlinkSocket()
     }
 }
 
+
 int
 FibConfigTableSetNetlinkSocket::start(string& error_msg)
 {

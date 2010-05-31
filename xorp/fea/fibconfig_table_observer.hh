@@ -94,6 +94,11 @@ public:
      */
     virtual void receive_data(const vector<uint8_t>& buffer) = 0;
 
+    /** Routing table ID that we are interested in might have changed.  Maybe something
+     * can filter on this for increased efficiency.
+     */
+    virtual int notify_table_id_change(uint32_t new_tbl) = 0;
+
 protected:
     // Misc other state
     bool	_is_running;

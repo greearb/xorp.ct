@@ -50,6 +50,18 @@
 #endif
 #ifdef HAVE_LINUX_RTNETLINK_H
 #include <linux/rtnetlink.h>
+
+#endif
+
+#include <pcap-bpf.h>
+
+// standard headers might not be up to date with the latest kernels.
+#ifndef SKF_AD_OFF
+#define SKF_AD_OFF (-0x1000)
+#endif
+
+#ifndef SKF_AD_NLATTR
+#define SKF_AD_NLATTR 12
 #endif
 
 #include "libcomm/comm_api.h"
@@ -57,19 +69,19 @@
 #include "netlink_socket.hh"
 #include "netlink_socket_utilities.hh"
 
-
 uint16_t NetlinkSocket::_instance_cnt = 0;
 
 //
 // Netlink Sockets (see netlink(7)) communication with the kernel
 //
 
-NetlinkSocket::NetlinkSocket(EventLoop& eventloop)
+NetlinkSocket::NetlinkSocket(EventLoop& eventloop, uint32_t table_id)
     : _eventloop(eventloop),
       _fd(-1),
       _seqno(0),
       _instance_no(_instance_cnt++),
       _nl_groups(0),		// XXX: no netlink multicast groups
+      _table_id(table_id),
       _is_multipart_message_read(false),
       _nlm_count(0)
 {
@@ -85,6 +97,11 @@ NetlinkSocket::~NetlinkSocket()
     }
 
     XLOG_ASSERT(_ol.empty());
+}
+
+int
+NetlinkSocket::force_recvmsg(bool only_kernel_messages, string& err_msg) {
+    return force_recvmsg_flgs(MSG_DONTWAIT, only_kernel_messages, err_msg);
 }
 
 #ifndef HAVE_NETLINK_SOCKETS
@@ -113,7 +130,7 @@ NetlinkSocket::stop(string& error_msg)
 
 
 int
-NetlinkSocket::force_recvmsg(int flags, bool only_kernel_messages,
+NetlinkSocket::force_recvmsg_flgs(int flags, bool only_kernel_messages,
 			     string& error_msg)
 {
     UNUSED(flags);
@@ -128,11 +145,93 @@ NetlinkSocket::force_recvmsg(int flags, bool only_kernel_messages,
 
 #else // HAVE_NETLINK_SOCKETS
 
+int NetlinkSocket::bind_table_id() {
+    if (_table_id) {
+	// Use socket filter.  Shouldn't require kernel hackings if it's a recent-ish kernel (2.6.30+ I think).
+	struct bpf_program bpf;
+	bpf.bf_insns = NULL;
+	static struct bpf_insn instructions[] = {
+	    {
+		/* A = offset of first attribute */
+		BPF_LD | BPF_IMM, 0, 0, sizeof(struct nlmsghdr) + NLMSG_ALIGN(sizeof(struct rtmsg))
+	    },
+	    {
+		/* X = RTA_TABLE */
+		BPF_LDX | BPF_IMM, 0, 0, RTA_TABLE
+	    },
+	    {
+		/* A = netlink attribute (X) offset */
+		BPF_LD | BPF_W | BPF_ABS, 0, 0, SKF_AD_OFF + SKF_AD_NLATTR
+	    },
+	    {
+		/* If table offset was not found, then pass it through. */
+		BPF_JMP | BPF_JEQ | BPF_K, 3, 0, 0
+	    },
+	    {
+		/* X = A (netlink attribute offset) */
+		BPF_MISC | BPF_TAX, 0, 0, 0
+	    },
+	    {
+		/* A = skb->data[X + k] */
+		BPF_LD | BPF_W | BPF_IND, 0, 0, sizeof(struct nlattr)
+	    },
+	    {
+		/* Exit if wrong routing table */
+		BPF_JMP | BPF_JEQ | BPF_K, 0, 1, /*<error>*/ _table_id
+	    },
+	    {
+		/* Packet may pass */
+		BPF_RET | BPF_K, 0, 0, ~0
+	    },
+	    /* <error>: */
+	    {
+		/* Packet may not pass */
+		BPF_RET | BPF_K, 0, 0, 0
+	    }
+	}; /* bpf instructions */
+	bpf.bf_insns = instructions;
+	bpf.bf_len = 9;
+	
+	if (setsockopt(_fd, SOL_SOCKET, SO_ATTACH_FILTER, &bpf, sizeof(bpf)) < 0) {
+	    XLOG_WARNING("Failed to set filter on netlink socket, error: %s\n"
+			 "The program will run fine, but may be slightly less efficient if\n"
+			 "multiple Xorps are run on the same system using different routing tables.\n",
+			 strerror(errno));
+	}
+	else {
+	    static bool do_once = true;
+	    if (do_once) {
+		XLOG_WARNING("Successfully attached Netlink socket filter for table id: %u on fd: %i",
+			     _table_id, _fd);
+		do_once = false;
+	    }
+	}
+    }
+    else {
+	if (setsockopt(_fd, SOL_SOCKET, SO_DETACH_FILTER, 0, 0) < 0) {
+	    // Not a real problem..fails if we don't have one already attached, for instance.
+	    //XLOG_WARNING("Failed to detach filter on netlink socket, error: %s", strerror(errno));
+	}
+    }
+    return XORP_OK;
+}
+
+/** Routing table ID that we are interested in might have changed.
+ */
+int NetlinkSocket::notify_table_id_change(uint32_t new_tbl) {
+    if (new_tbl != _table_id) {
+	_table_id = new_tbl;
+	return bind_table_id();
+    }
+    return XORP_OK;
+}
+	
+
 int
 NetlinkSocket::start(string& error_msg)
 {
-    struct sockaddr_nl	snl;
-    socklen_t		snl_len;
+    struct sockaddr_nl snl;
+    socklen_t snl_len = sizeof(snl);
 
     if (_fd >= 0)
 	return (XORP_OK);
@@ -160,11 +259,12 @@ NetlinkSocket::start(string& error_msg)
     //
     // Bind the socket
     //
-    memset(&snl, 0, sizeof(snl));
+    memset(&snl, 0, snl_len);
     snl.nl_family = AF_NETLINK;
     snl.nl_pid    = 0;		// Let the kernel assign the pid to the socket
     snl.nl_groups = _nl_groups;
-    if (bind(_fd, reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl)) < 0) {
+
+    if (bind(_fd, reinterpret_cast<struct sockaddr*>(&snl), snl_len) < 0) {
 	error_msg = c_format("bind(AF_NETLINK) failed: %s", strerror(errno));
 	close(_fd);
 	_fd = -1;
@@ -199,6 +299,9 @@ NetlinkSocket::start(string& error_msg)
 	_fd = -1;
 	return (XORP_ERROR);
     }
+
+    // Bind to table-id
+    bind_table_id();
 
     //
     // Store the pid of the socket for checking the unicast destination of
@@ -252,7 +355,7 @@ NetlinkSocket::sendto(const void* data, size_t nbytes, int flags,
 
 
 int
-NetlinkSocket::force_recvmsg(int flags, bool only_kernel_messages,
+NetlinkSocket::force_recvmsg_flgs(int flags, bool only_kernel_messages,
 			     string& error_msg)
 {
     vector<uint8_t> message;
@@ -297,6 +400,10 @@ NetlinkSocket::force_recvmsg(int flags, bool only_kernel_messages,
 	
 	got = recvmsg(_fd, &msg, flags);
 	if (got < 0) {
+	    // Nothing to read after all, msg was probably filtered.
+	    if ((errno == EAGAIN) || (errno == EWOULDBLOCK))
+		return XORP_ERROR;
+
 	    if (errno == EINTR)
 		continue;
 	    error_msg = c_format("Netlink socket recvmsg error: %s",
@@ -379,9 +486,12 @@ NetlinkSocket::io_event(XorpFd fd, IoEventType type)
 
     XLOG_ASSERT(fd == _fd);
     XLOG_ASSERT(type == IOT_READ);
-    if (force_recvmsg(0, true, error_msg) != XORP_OK) {
-	XLOG_ERROR("Error force_recvmsg() from netlink socket: %s",
-		   error_msg.c_str());
+    errno = 0;
+    if (force_recvmsg(true, error_msg) != XORP_OK) {
+	if (!(errno == EWOULDBLOCK || errno == EAGAIN)) {
+	    XLOG_ERROR("Error force_recvmsg() from netlink socket: %s",
+		       error_msg.c_str());
+	}
     }
 }
 
@@ -461,9 +571,14 @@ NetlinkSocketReader::receive_data(NetlinkSocket& ns, uint32_t seqno,
 {
     _cache_seqno = seqno;
     _cache_valid = false;
+    errno = 0;
     while (_cache_valid == false) {
-	if (ns.force_recvmsg(0, true, error_msg) != XORP_OK)
+	if (ns.force_recvmsg(true, error_msg) != XORP_OK) {
+	    if (errno == EWOULDBLOCK || errno == EAGAIN) {
+		return XORP_OK;
+	    }
 	    return (XORP_ERROR);
+	}
     }
 
     return (XORP_OK);

@@ -91,6 +91,10 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int delete_all_entries6();
+
+    /** Routing table ID that we are interested in might have changed.
+     */
+    virtual int notify_table_id_change(uint32_t new_tbl) { UNUSED(new_tbl); return XORP_OK; }
     
 private:
 };
