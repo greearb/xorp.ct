@@ -110,6 +110,8 @@ public:
      */
     bool failed() const;
 
+    string toString() const;
+
     /**
      * Send XRL.
      *

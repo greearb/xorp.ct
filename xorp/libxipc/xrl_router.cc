@@ -211,10 +211,9 @@ XrlRouter::initialize(const char* class_name,
 	char *ep = NULL;
 	timeout_ms = strtoul(value, &ep, 10);
 	if ( !(*value != '\0' && *ep == '\0') &&
-	      (timeout_ms <= 0 || timeout_ms > 120000)) {
-	    XLOG_ERROR(
-"Out of bounds \"XORP_FINDER_CONNECT_TIMEOUT_MS\": %s (must be 0..120000",
-	        value);
+	     (timeout_ms <= 0 || timeout_ms > 120000)) {
+	    XLOG_ERROR("Out of bounds \"XORP_FINDER_CONNECT_TIMEOUT_MS\": %s (must be 0..120000",
+		       value);
 	    timeout_ms = DEFAULT_FINDER_CONNECT_TIMEOUT_MS;
 	}
     }
@@ -787,26 +786,44 @@ XrlRouter::get_sender(const string& target)
 #endif
 }
 
-
+string XrlRouter::toString() const {
+    ostringstream oss;
+    if (_fac) {
+	oss << " fac enabled: " << _fac->enabled() << " fac connect failed: "
+	    << _fac->connect_failed() << " fac connected: " << _fac->connected()
+	    << " ready: " << ready() << endl;
+    }
+    else {
+	oss << " fac NULL, ready: " << ready() << endl;
+    }
+    return oss.str();
+}
+
+
+
 // ----------------------------------------------------------------------------
 // wait_until_xrl_router_is_ready
 
 void
 wait_until_xrl_router_is_ready(EventLoop& eventloop, XrlRouter& xrl_router)
 {
-    while (xrl_router.failed() == false) {
+    if (xlog_is_running()) {
+	XLOG_WARNING("Starting xrl_router_is_ready method....\n");
+    }
+    while (! xrl_router.failed()) {
 	eventloop.run();
 	if (xrl_router.ready())
 	    return;
     }
 
-    static const char* msg = "XrlRouter failed.  No Finder?";
+    ostringstream msg;
+    msg << "XrlRouter failed.  No Finder?  xrl_router debug: " << xrl_router.toString() << endl;
     if (xlog_is_running()) {
-	XLOG_ERROR("%s", msg);
+	XLOG_ERROR("%s", msg.str().c_str());
 	xlog_stop();
 	xlog_exit();
     } else {
-	fprintf(stderr, "%s", msg);
+	fprintf(stderr, "%s", msg.str().c_str());
     }
     exit(-1);
 }
