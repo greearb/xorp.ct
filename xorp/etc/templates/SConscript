@@ -31,7 +31,6 @@ cmds = [
     'mfea6',
     'misc',
     'mld',
-    #'olsr4', #notyet
     'ospfv2',
     'ospfv3',
     'pim',
@@ -69,6 +68,11 @@ tps = [
     'static_routes',
     'vrrp',
 ]
+
+if env['WITH_OLSR']:
+    cmds.append('olsr4')
+    tps.append('olsr4')
+
 
 e.Alias('install', [
         e.InstallData(env['xorp_templatedir'],
