@@ -95,7 +95,8 @@ Mld6igmpVif::Mld6igmpVif(Mld6igmpNode& mld6igmp_node, const Vif& vif)
       _dummy_flag(false)
 {
     XLOG_ASSERT(proto_is_igmp() || proto_is_mld6());
-    
+    wants_to_be_started = false;
+
     //
     // TODO: when more things become classes, most of this init should go away
     //
@@ -207,6 +208,23 @@ Mld6igmpVif::proto_is_ssm() const
     return (false);
 }
 
+/** System detected some change.  */
+void Mld6igmpVif::notifyUpdated() {
+    if (wants_to_be_started) {
+	string err_msg;
+	int rv = start(err_msg);
+	if (rv == XORP_OK) {
+	    XLOG_WARNING("notifyUpdated, successfully started mld6igmp_vif: %s",
+			 name().c_str());
+	}
+	else {
+	    XLOG_WARNING("notifyUpdated, tried to start vif: %s, but failed: %s",
+			 name().c_str(), err_msg.c_str());
+	}
+    }
+}
+	  
+
 /**
  * Mld6igmpVif::start:
  * @error_msg: The error message (if error).
@@ -227,8 +245,10 @@ Mld6igmpVif::start(string& error_msg)
 	return (XORP_OK);
 
     if (! is_underlying_vif_up()) {
-	error_msg = "underlying vif is not UP";
-	return (XORP_ERROR);
+	wants_to_be_started = true;
+	XLOG_WARNING("WARNING:  Delaying start of mld6igmp-vif: %s because underlying vif is not up.",
+		     name().c_str());
+	return XORP_OK;
     }
 
     //
@@ -312,7 +332,8 @@ Mld6igmpVif::start(string& error_msg)
 
     XLOG_INFO("Interface started: %s%s",
 	      this->str().c_str(), flags_string().c_str());
-    
+
+    wants_to_be_started = false; //it worked
     return (XORP_OK);
 }
 
@@ -328,6 +349,7 @@ int
 Mld6igmpVif::stop(string& error_msg)
 {
     int ret_value = XORP_OK;
+    wants_to_be_started = false;
 
     if (is_down())
 	return (XORP_OK);

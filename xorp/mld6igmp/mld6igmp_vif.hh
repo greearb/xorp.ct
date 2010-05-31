@@ -88,6 +88,10 @@ public:
      */
     int		start(string& error_msg);
     
+    /**  Attempt deferred start.
+     */
+    void notifyUpdated();
+
     /**
      *  Stop MLD/IGMP on a single virtual interface.
      * 
@@ -731,6 +735,8 @@ private:
     void	encode_exp_time_code16(const TimeVal& timeval,
 				       uint16_t& code,
 				       uint32_t timer_scale);
+
+    bool wants_to_be_started; // as soon as we can, ie if the interface appears.
 };
 
 //

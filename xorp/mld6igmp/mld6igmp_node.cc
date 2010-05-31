@@ -848,8 +848,10 @@ Mld6igmpNode::set_vif_flags(const string& vif_name,
 	is_changed = true;
     }
     
-    if (is_changed)
+    if (is_changed) {
 	XLOG_INFO("Interface flags changed: %s", mld6igmp_vif->str().c_str());
+	mld6igmp_vif->notifyUpdated();
+    }
     
     return (XORP_OK);
 }
