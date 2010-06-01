@@ -158,94 +158,94 @@ else:
 rip = e.Program(target = 'xorp_rip', source = ripsrcs)
 e.Alias('install', e.InstallProgram(e['xorp_moduledir'], rip))
 
-#
-# RIPng
-#
-e = env.Clone()
-
-e['OBJPREFIX'] = 'ripng-'
-e['SHOBJPREFIX'] = 'ripng-'
-
-e.AppendUnique(CPPPATH = [
-    '#',
-    '$BUILDDIR',
-    ])
-
-e.AppendUnique(CPPDEFINES = [
-    'INSTANTIATE_IPV6'
-    ])
-
-e.PrependUnique(LIBPATH = [
-    '$BUILDDIR/libfeaclient',
-    '$BUILDDIR/policy/backend',
-    '$BUILDDIR/policy/common',
-    '$BUILDDIR/xrl/interfaces',
-    '$BUILDDIR/xrl/targets',
-    '.',
-    '$BUILDDIR/libproto',
-    '$BUILDDIR/libxipc',
-    '$BUILDDIR/libcomm',
-    '$BUILDDIR/libxorp',
-    ])
-
-e.PrependUnique(LIBS = [
-    'xorp_ripng_xrl',
-    'xst_ripng',
-    'xif_rib',
-    'xif_finder_event_notifier',
-    'xorp_fea_client',
-    'xif_fea_ifmgr_mirror',
-    'xif_fea_ifmgr_replicator',
-    'xst_fea_ifmgr_mirror',
-    'xorp_policy_backend',
-    'xorp_policy_common',
-    'xorp_proto',
-    'xorp_ipc',
-    'xorp_comm',
-    'xorp_core',
-    'xorp_ripng',
-    ])
-
-
 if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
+    #
+    # RIPng
+    #
+    e = env.Clone()
+
+    e['OBJPREFIX'] = 'ripng-'
+    e['SHOBJPREFIX'] = 'ripng-'
+
+    e.AppendUnique(CPPPATH = [
+        '#',
+        '$BUILDDIR',
+        ])
+
+    if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
+        e.AppendUnique(CPPDEFINES = [
+            'INSTANTIATE_IPV6'
+            ])
+
+    e.PrependUnique(LIBPATH = [
+        '$BUILDDIR/libfeaclient',
+        '$BUILDDIR/policy/backend',
+        '$BUILDDIR/policy/common',
+        '$BUILDDIR/xrl/interfaces',
+        '$BUILDDIR/xrl/targets',
+        '.',
+        '$BUILDDIR/libproto',
+        '$BUILDDIR/libxipc',
+        '$BUILDDIR/libcomm',
+        '$BUILDDIR/libxorp',
+        ])
+
     e.PrependUnique(LIBS = [
+        'xorp_ripng_xrl',
+        'xst_ripng',
+        'xif_rib',
+        'xif_finder_event_notifier',
+        'xorp_fea_client',
+        'xif_fea_ifmgr_mirror',
+        'xif_fea_ifmgr_replicator',
+        'xst_fea_ifmgr_mirror',
+        'xorp_policy_backend',
+        'xorp_policy_common',
+        'xorp_proto',
+        'xorp_ipc',
+        'xorp_comm',
+        'xorp_core',
+        'xorp_ripng',
         'xif_socket6',
         ])
 
 
-e.Replace(RPATH = [
-    e.Literal(e['xorp_module_rpath'])
-    ])
+    e.Replace(RPATH = [
+        e.Literal(e['xorp_module_rpath'])
+        ])
 
-if is_shared:
-    libxorp_ripng = e.SharedLibrary(target = 'libxorp_ripng',
-                                    source = libxorp_rip_srcs,
-                                    LIBS = '')
-    if e['rtld_origin']:
-        for obj in libxorp_ripng:
-            e.AddPostAction(libxorp_ripng,
-                            e.Symlink(obj.abspath,
-                                      os.path.join(env['xorp_alias_libdir'], str(obj))))
-    libxorp_ripngxrl = e.SharedLibrary(target = 'libxorp_ripng_xrl',
-                                       source = libxorp_rip_xrl_srcs,
-                                       LIBS = '')
-    if e['rtld_origin']:
-        for obj in libxorp_ripngxrl:
-            e.AddPostAction(libxorp_ripngxrl,
-                            e.Symlink(obj.abspath,
-                                      os.path.join(env['xorp_alias_libdir'], str(obj))))
-    e.Alias('install',
-            [ e.InstallLibrary(e['xorp_libdir'], libxorp_ripng),
-              e.InstallLibrary(e['xorp_libdir'], libxorp_ripngxrl) ])
+    if is_shared:
+        libxorp_ripng = e.SharedLibrary(target = 'libxorp_ripng',
+                                        source = libxorp_rip_srcs,
+                                        LIBS = '')
+        if e['rtld_origin']:
+            for obj in libxorp_ripng:
+                e.AddPostAction(libxorp_ripng,
+                                e.Symlink(obj.abspath,
+                                          os.path.join(env['xorp_alias_libdir'], str(obj))))
+        libxorp_ripngxrl = e.SharedLibrary(target = 'libxorp_ripng_xrl',
+                                           source = libxorp_rip_xrl_srcs,
+                                           LIBS = '')
+        if e['rtld_origin']:
+            for obj in libxorp_ripngxrl:
+                e.AddPostAction(libxorp_ripngxrl,
+                                e.Symlink(obj.abspath,
+                                          os.path.join(env['xorp_alias_libdir'], str(obj))))
+        e.Alias('install',
+                [ e.InstallLibrary(e['xorp_libdir'], libxorp_ripng),
+                  e.InstallLibrary(e['xorp_libdir'], libxorp_ripngxrl) ])
+    else:
+        libxorp_ripng = e.StaticLibrary(target = 'libxorp_ripng',
+                                        source = libxorp_rip_srcs,
+                                        LIBS = '')
+        libxorp_ripngxrl = e.StaticLibrary(target = 'libxorp_ripng_xrl',
+                                           source = libxorp_rip_xrl_srcs,
+                                           LIBS = '')
+
+    ripng = e.Program(target = 'xorp_ripng', source = ripngsrcs)
+    e.Alias('install', e.InstallProgram(e['xorp_moduledir'], ripng))
+
+    Default(rip, ripng)
 else:
-    libxorp_ripng = e.StaticLibrary(target = 'libxorp_ripng',
-				    source = libxorp_rip_srcs,
-				    LIBS = '')
-    libxorp_ripngxrl = e.StaticLibrary(target = 'libxorp_ripng_xrl',
-				       source = libxorp_rip_xrl_srcs,
-				       LIBS = '')
-
-ripng = e.Program(target = 'xorp_ripng', source = ripngsrcs)
-e.Alias('install', e.InstallProgram(e['xorp_moduledir'], ripng))
-
-Default(rip, ripng)
+    Default(rip)
+    
