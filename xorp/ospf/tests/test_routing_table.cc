@@ -376,7 +376,7 @@ routing1(TestInfo& info, OspfTypes::Version /*version*/)
     route_entry1.set_area(a1);
     route_entry1.set_lsa(lsar);
 
-    routing_table.add_entry(a1, IPNet<A>("192.150.187.108/32"), route_entry1);
+    routing_table.add_entry(a1, IPNet<A>("192.150.187.108/32"), route_entry1, "entry1a");
     routing_table.end();
 
     /****************************************/
@@ -385,7 +385,7 @@ routing1(TestInfo& info, OspfTypes::Version /*version*/)
     route_entry1.set_area(a1);
     route_entry1.set_lsa(lsar);
 
-    routing_table.add_entry(a1, IPNet<A>("192.150.187.108/32"), route_entry1);
+    routing_table.add_entry(a1, IPNet<A>("192.150.187.108/32"), route_entry1, "entry1b");
     routing_table.end();
 
     /****************************************/
@@ -394,7 +394,7 @@ routing1(TestInfo& info, OspfTypes::Version /*version*/)
     route_entry2.set_area(az);
     route_entry2.set_lsa(lsar);
 
-    routing_table.add_entry(az, IPNet<A>("192.150.187.108/32"), route_entry2);
+    routing_table.add_entry(az, IPNet<A>("192.150.187.108/32"), route_entry2, "entry2");
     routing_table.end();
 
     /****************************************/

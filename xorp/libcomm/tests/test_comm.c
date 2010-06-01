@@ -135,7 +135,7 @@ main(int argc, char *argv[])
     /*
      * Test `bind UDP socket'
      */
-    sock = comm_bind_udp4(NULL, port, COMM_SOCK_BLOCKING);
+    sock = comm_bind_udp4(NULL, port, COMM_SOCK_BLOCKING, false);
     if (sock == XORP_BAD_SOCKET) {
 	printf("ERROR: cannot open and bind UDP socket to port %d\n",
 	       ntohs(port));
