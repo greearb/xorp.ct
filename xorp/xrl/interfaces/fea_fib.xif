@@ -25,10 +25,8 @@ interface fea_fib/0.1 {
 	 */
 	delete_fib_client4	? client_target_name:txt;
 
-#ifdef HAVE_IPV6
 	add_fib_client6		? client_target_name:txt	\
 				& send_updates:bool		\
 				& send_resolves:bool;
 	delete_fib_client6	? client_target_name:txt;
-#endif
 }

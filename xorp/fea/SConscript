@@ -82,7 +82,9 @@ libxorp_fea_linkorder += [
     'xif_fea_fib_client',
     'xif_fea_rawlink_client',
     'xif_fea_rawpkt4_client',
+    'xif_fea_rawpkt6_client',
     'xif_socket4_user',
+    'xif_socket6_user',
     'xif_finder_event_notifier',
     'xorp_cli',
     'xif_cli_processor',
@@ -102,11 +104,6 @@ libxorp_fea_linkorder += [
     'xorp_comm',
     'xorp_core'
     ]
-
-# IPv6 related stuff should only be enabled when needed.
-if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
-    libxorp_fea_linkorder.append('xif_fea_rawpkt6_client')
-    libxorp_fea_linkorder.append('xif_socket6_user')
 
 if not (env.has_key('disable_fw') and env['disable_fw']):
     env.PrependUnique(LIBPATH = [ '$BUILDDIR/fea/data_plane/firewall' ])

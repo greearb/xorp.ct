@@ -51,9 +51,7 @@
 #include "libxipc/xrl_std_router.hh"
 
 #include "xrl/interfaces/ospfv2_xif.hh"
-#ifdef HAVE_IPV6
 #include "xrl/interfaces/ospfv3_xif.hh"
-#endif
 
 #include "ospf/ospf.hh"
 #include "ospf/test_common.hh"
@@ -102,11 +100,9 @@ public:
 	}
 	    break;
 	case OspfTypes::V3: {
-#ifdef HAVE_IPV6
 	    XrlOspfv3V0p1Client ospfv3(&_xrl_router);
 	    ospfv3.send_get_area_list(xrl_target(_version),
 				      callback(this, &GetAreaList::response));
-#endif
 	}
 	    break;
 	}
@@ -167,11 +163,9 @@ public:
 	}
 	    break;
 	case OspfTypes::V3: {
-#ifdef HAVE_IPV6
 	    XrlOspfv3V0p1Client ospfv3(&_xrl_router);
 	    ospfv3.send_get_lsa(xrl_target(_version), _area, _index,
 				callback(this, &FetchDB::response));
-#endif
 	}
 	    break;
 	}

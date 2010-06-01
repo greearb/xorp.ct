@@ -32,11 +32,9 @@
 #include "libxipc/xrl_router.hh"
 
 #include "xrl/interfaces/redist4_xif.hh"
-#include "xrl/interfaces/redist_transaction4_xif.hh"
-#ifdef HAVE_IPV6
 #include "xrl/interfaces/redist6_xif.hh"
+#include "xrl/interfaces/redist_transaction4_xif.hh"
 #include "xrl/interfaces/redist_transaction6_xif.hh"
-#endif
 
 #include "rib.hh"
 #include "route.hh"
@@ -194,7 +192,6 @@ template <>
 bool
 AddRoute<IPv6>::dispatch(XrlRouter& xrl_router, Profile& profile)
 {
-#ifdef HAVE_IPV6
 #ifndef XORP_DISABLE_PROFILE
     if (profile.enabled(profile_route_rpc_out))
 	profile.log(profile_route_rpc_out,
@@ -212,11 +209,7 @@ AddRoute<IPv6>::dispatch(XrlRouter& xrl_router, Profile& profile)
 			     _protocol_origin,
 			     callback(this, &AddRoute<IPv6>::dispatch_complete)
 	);
-#else
-    UNUSED(xrl_router);
-    UNUSED(profile);
-    return false;
-#endif
+
 }
 
 template <typename A>
@@ -286,7 +279,6 @@ template <>
 bool
 DeleteRoute<IPv6>::dispatch(XrlRouter& xrl_router, Profile& profile)
 {
-#ifdef HAVE_IPV6
 #ifndef XORP_DISABLE_PROFILE
     if (profile.enabled(profile_route_rpc_out))
 	profile.log(profile_route_rpc_out,
@@ -305,11 +297,6 @@ DeleteRoute<IPv6>::dispatch(XrlRouter& xrl_router, Profile& profile)
 				callback(this,
 					 &DeleteRoute<IPv6>::dispatch_complete)
 	);
-#else
-    UNUSED(xrl_router);
-    UNUSED(profile);
-    return false;
-#endif
 }
 
 template <typename A>
@@ -360,7 +347,6 @@ template <>
 bool
 StartingRouteDump<IPv6>::dispatch(XrlRouter& xrl_router, Profile&)
 {
-#ifdef HAVE_IPV6
     RedistXrlOutput<IPv6>* p = this->parent();
 
     XrlRedist6V0p1Client cl(&xrl_router);
@@ -369,10 +355,6 @@ StartingRouteDump<IPv6>::dispatch(XrlRouter& xrl_router, Profile&)
 		p->cookie(),
 		callback(this, &StartingRouteDump<IPv6>::dispatch_complete)
 		);
-#else
-    UNUSED(xrl_router);
-    return false;
-#endif
 }
 
 template <typename A>
@@ -422,7 +404,6 @@ template <>
 bool
 FinishingRouteDump<IPv6>::dispatch(XrlRouter& xrl_router, Profile&)
 {
-#ifdef HAVE_IPV6
     RedistXrlOutput<IPv6>* p = this->parent();
 
     XrlRedist6V0p1Client cl(&xrl_router);
@@ -431,10 +412,6 @@ FinishingRouteDump<IPv6>::dispatch(XrlRouter& xrl_router, Profile&)
 		p->cookie(),
 		callback(this, &FinishingRouteDump<IPv6>::dispatch_complete)
 		);
-#else
-    UNUSED(xrl_router);
-    return false;
-#endif
 }
 
 template <typename A>
@@ -744,7 +721,6 @@ template <>
 bool
 AddTransactionRoute<IPv6>::dispatch(XrlRouter& xrl_router, Profile& profile)
 {
-#ifdef HAVE_IPV6
     RedistTransactionXrlOutput<IPv6>* p =
 	reinterpret_cast<RedistTransactionXrlOutput<IPv6>*>(this->parent());
 
@@ -776,11 +752,6 @@ AddTransactionRoute<IPv6>::dispatch(XrlRouter& xrl_router, Profile& profile)
 			     callback(static_cast<AddRoute<IPv6>*>(this),
 				      &AddRoute<IPv6>::dispatch_complete)
 	);
-#else
-    UNUSED(xrl_router);
-    UNUSED(profile);
-    return false;
-#endif
 }
 
 
@@ -826,7 +797,6 @@ template <>
 bool
 DeleteTransactionRoute<IPv6>::dispatch(XrlRouter& xrl_router, Profile& profile)
 {
-#ifdef HAVE_IPV6
     RedistTransactionXrlOutput<IPv6>* p =
 	reinterpret_cast<RedistTransactionXrlOutput<IPv6>*>(this->parent());
 
@@ -856,11 +826,6 @@ DeleteTransactionRoute<IPv6>::dispatch(XrlRouter& xrl_router, Profile& profile)
 				callback(static_cast<DeleteRoute<IPv6>*>(this),
 					 &DeleteRoute<IPv6>::dispatch_complete)
 	);
-#else
-    UNUSED(xrl_router);
-    UNUSED(profile);
-    return false;
-#endif
 }
 
 
@@ -889,7 +854,6 @@ template <>
 bool
 StartTransaction<IPv6>::dispatch(XrlRouter& xrl_router, Profile&)
 {
-#ifdef HAVE_IPV6
     RedistTransactionXrlOutput<IPv6>* p =
 	reinterpret_cast<RedistTransactionXrlOutput<IPv6>*>(this->parent());
 
@@ -902,10 +866,6 @@ StartTransaction<IPv6>::dispatch(XrlRouter& xrl_router, Profile&)
     return cl.send_start_transaction(
 	p->xrl_target_name().c_str(),
 	callback(this, &StartTransaction<IPv6>::dispatch_complete));
-#else
-    UNUSED(xrl_router);
-    return false;
-#endif
 }
 
 template <typename A>
@@ -961,7 +921,6 @@ template <>
 bool
 CommitTransaction<IPv6>::dispatch(XrlRouter& xrl_router, Profile&)
 {
-#ifdef HAVE_IPV6
     RedistTransactionXrlOutput<IPv6>* p =
 	reinterpret_cast<RedistTransactionXrlOutput<IPv6>*>(this->parent());
 
@@ -976,10 +935,6 @@ CommitTransaction<IPv6>::dispatch(XrlRouter& xrl_router, Profile&)
 	p->xrl_target_name().c_str(),
 	tid,
 	callback(this, &CommitTransaction<IPv6>::dispatch_complete));
-#else
-    UNUSED(xrl_router);
-    return false;
-#endif
 }
 
 template <typename A>
@@ -1029,7 +984,6 @@ template <>
 bool
 AbortTransaction<IPv6>::dispatch(XrlRouter& xrl_router, Profile&)
 {
-#ifdef HAVE_IPV6
     RedistTransactionXrlOutput<IPv6>* p =
 	reinterpret_cast<RedistTransactionXrlOutput<IPv6>*>(this->parent());
 
@@ -1044,10 +998,6 @@ AbortTransaction<IPv6>::dispatch(XrlRouter& xrl_router, Profile&)
 	p->xrl_target_name().c_str(),
 	tid,
 	callback(this, &AbortTransaction<IPv6>::dispatch_complete));
-#else
-    UNUSED(xrl_router);
-    return false;
-#endif
 }
 
 template <typename A>

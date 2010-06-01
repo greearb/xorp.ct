@@ -52,6 +52,7 @@ env.PrependUnique(LIBPATH = [
 env.AppendUnique(LIBS = [
     'xorp_ospf',		# Refers to the library, not the executable.
     'xst_ospfv2',
+    'xst_ospfv3',
     'xorp_policy_backend',
     'xorp_policy_common',
     'xorp_fea_client',
@@ -61,19 +62,13 @@ env.AppendUnique(LIBS = [
     'xif_fea_ifmgr_replicator',
     'xif_profile_client',
     'xif_fea_rawpkt4',
+    'xif_fea_rawpkt6',
     'xst_fea_ifmgr_mirror',
     'xorp_ipc',
     'xorp_core',
     'xorp_proto',
     'xorp_comm',
 ])
-
-# IPv6 related stuff should only be enabled when needed.
-if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
-    env.AppendUnique(LIBS = [
-        'xst_ospfv3',
-        'xif_fea_rawpkt6',
-        ])
 
 env.Replace(RPATH = [
     env.Literal(env['xorp_module_rpath'])

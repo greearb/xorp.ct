@@ -4,16 +4,12 @@
 #include "cli_processor.xif"
 #include "finder_event_observer.xif"
 #include "fea_rawpkt4_client.xif"
-#ifdef HAVE_IPV6
 #include "fea_rawpkt6_client.xif"
-#endif
 #include "mld6igmp.xif"
 
-target	mld6igmp implements	common/0.1,
-				cli_processor/0.1,
-				finder_event_observer/0.1,
-				raw_packet4_client/0.1,
-#ifdef HAVE_IPV6
-				raw_packet6_client/0.1,
-#endif
+target	mld6igmp implements	common/0.1,				\
+				cli_processor/0.1,			\
+				finder_event_observer/0.1,		\
+				raw_packet4_client/0.1,			\
+				raw_packet6_client/0.1,			\
 				mld6igmp/0.1;

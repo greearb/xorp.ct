@@ -50,6 +50,8 @@ xifs = [
     'fea_rawlink.xif',
     'fea_rawpkt4_client.xif',
     'fea_rawpkt4.xif',
+    'fea_rawpkt6_client.xif',
+    'fea_rawpkt6.xif',
     'fib2mrib.xif',
     'finder_client.xif',
     'finder_event_notifier.xif',
@@ -61,22 +63,28 @@ xifs = [
     'mld6igmp_client.xif',
     'mld6igmp.xif',
     'ospfv2.xif',
+    'ospfv3.xif',
     'pim.xif',
     'policy_backend.xif',
     'policy_redist4.xif',
+    'policy_redist6.xif',
     'policy.xif',
     'profile_client.xif',
     'profile.xif',
     'redist4.xif',
+    'redist6.xif',
     'redist_transaction4.xif',
     'redist_transaction6.xif',
     'rib_client.xif',
     'rib.xif',
+    'ripng.xif',
     'rip.xif',
     'rtrmgr_client.xif',
     'rtrmgr.xif',
     'socket4_user.xif',
     'socket4.xif',
+    'socket6_user.xif',
+    'socket6.xif',
     'static_routes.xif',
     'test_peer.xif',
     'test.xif',
@@ -84,30 +92,16 @@ xifs = [
     'vrrp.xif',
     ]
 
-# IPv6 related stuff should only be enabled when needed.
-if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
-    xifs.append('policy_redist6.xif')
-    xifs.append('ospfv3.xif')
-    xifs.append('fea_rawpkt6_client.xif')
-    xifs.append('fea_rawpkt6.xif')
-    xifs.append('redist6.xif')
-    xifs.append('socket6_user.xif')
-    xifs.append('socket6.xif')
-    xifs.append('ripng.xif')
-
 if env['enable_olsr']:
     xifs.append('olsr4.xif')
 
 if not (env.has_key('disable_fw') and env['disable_fw']):
     xifs.append('fea_firewall.xif')
 
-# Not sure these dependencies really work. --Ben
 Depends('common.xif', '../../xorp_config.h');
 Depends('fea.xif', 'common.xif');
 
 all_xif_libs = []
-
-env['CLNTGEN_ARGS'] = "-I./ -I#/xrl/interfaces -I$BUILDDIR"
 
 for xif in xifs:
     base = xif[:-len('.xif')]

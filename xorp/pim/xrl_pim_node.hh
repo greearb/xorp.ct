@@ -37,15 +37,12 @@
 
 #include "xrl/interfaces/finder_event_notifier_xif.hh"
 #include "xrl/interfaces/fea_rawpkt4_xif.hh"
+#include "xrl/interfaces/fea_rawpkt6_xif.hh"
 #include "xrl/interfaces/mfea_xif.hh"
 #include "xrl/interfaces/rib_xif.hh"
+#include "xrl/interfaces/mld6igmp_xif.hh"
 #include "xrl/interfaces/cli_manager_xif.hh"
 #include "xrl/targets/pim_base.hh"
-
-#ifdef HAVE_IPV6
-#include "xrl/interfaces/fea_rawpkt6_xif.hh"
-#endif
-#include "xrl/interfaces/mld6igmp_xif.hh"
 
 #include "pim_node.hh"
 #include "pim_node_cli.hh"
@@ -2543,12 +2540,10 @@ private:
 
     TransactionManager		_mrib_transaction_manager;
     XrlRawPacket4V0p1Client	_xrl_fea_client4;
-#ifdef HAVE_IPV6
     XrlRawPacket6V0p1Client	_xrl_fea_client6;
-#endif
-    XrlMld6igmpV0p1Client	_xrl_mld6igmp_client;
     XrlMfeaV0p1Client		_xrl_mfea_client;
     XrlRibV0p1Client		_xrl_rib_client;
+    XrlMld6igmpV0p1Client	_xrl_mld6igmp_client;
     XrlCliManagerV0p1Client	_xrl_cli_manager_client;
     XrlFinderEventNotifierV0p1Client	_xrl_finder_client;
 

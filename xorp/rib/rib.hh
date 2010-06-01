@@ -726,26 +726,18 @@ protected:
 };
 
 typedef RIB<IPv4> IPv4RIB;
-#ifdef HAVE_IPV6
 typedef RIB<IPv6> IPv6RIB;
-#endif
 
 class RibVif : public Vif {
 public:
     RibVif(RIB<IPv4>* rib, const Vif& vif)
-	: Vif(vif), _rib4(rib),
-#ifdef HAVE_IPV6
-	  _rib6(NULL),
-#endif
-	  _usage_counter(0),
+	: Vif(vif), _rib4(rib), _rib6(NULL), _usage_counter(0),
 	  _is_deleted(false)
     {}
-#ifdef HAVE_IPV6
     RibVif(RIB<IPv6>* rib, const Vif& vif)
 	: Vif(vif), _rib4(NULL), _rib6(rib), _usage_counter(0),
 	  _is_deleted(false)
     {}
-#endif
 
     ~RibVif() {}
 
@@ -766,12 +758,10 @@ public:
 		_rib4->destroy_deleted_vif(this);
 		return;
 	    }
-#ifdef HAVE_IPV6
 	    if (_rib6 != NULL) {
 		_rib6->destroy_deleted_vif(this);
 		return;
 	    }
-#endif
 	}
     }
 
@@ -782,9 +772,7 @@ private:
     // the generic RouteEntry also needs to become a template.
     //
     RIB<IPv4>*	_rib4;
-#ifdef HAVE_IPV6
     RIB<IPv6>*	_rib6;
-#endif
     uint32_t	_usage_counter;
     bool	_is_deleted;
 };

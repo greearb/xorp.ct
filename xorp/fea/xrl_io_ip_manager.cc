@@ -28,9 +28,7 @@
 #include "libxipc/xrl_router.hh"
 
 #include "xrl/interfaces/fea_rawpkt4_client_xif.hh"
-#ifdef HAVE_IPV6
 #include "xrl/interfaces/fea_rawpkt6_client_xif.hh"
-#endif
 
 #include "xrl_io_ip_manager.hh"
 
@@ -91,7 +89,6 @@ XrlIoIpManager::recv_event(const string& receiver_name,
 			      header.src_address.af(), receiver_name));
     }
 
-#ifdef HAVE_IPV6
     if (header.src_address.is_ipv6()) {
 	//
 	// Instantiate client sending interface
@@ -118,7 +115,6 @@ XrlIoIpManager::recv_event(const string& receiver_name,
 			      &XrlIoIpManager::xrl_send_recv_cb,
 			      header.src_address.af(), receiver_name));
     }
-#endif
 }
 
 void

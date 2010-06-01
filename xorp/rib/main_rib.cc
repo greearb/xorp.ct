@@ -69,7 +69,6 @@ main (int /* argc */, char* argv[])
 					   "all",	/* cookie */
 					   true /* is_xrl_transaction_output */
 	    );
-#ifdef HAVE_IPV6
 	rib_manager.add_redist_xrl_output6("fea",	/* target_name */
 					   "all",	/* from_protocol */
 					   true,	/* unicast */
@@ -78,7 +77,6 @@ main (int /* argc */, char* argv[])
 					   "all",	/* cookie */
 					   true /* is_xrl_transaction_output */
 	    );
-#endif
 
 	rib_manager.start();
 

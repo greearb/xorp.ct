@@ -35,9 +35,7 @@
 #include "libxipc/xrl_std_router.hh"
 
 #include "xrl/interfaces/rip_xif.hh"
-#ifdef HAVE_IPV6
 #include "xrl/interfaces/ripng_xif.hh"
-#endif
 
 #include "common.hh"
 
@@ -350,7 +348,6 @@ protected:
     IPv4 	_a;
 };
 
-#ifdef HAVE_IPV6
 /**
  * Invoke Xrl to get peer stats on RIP address and pretty print result.
  */
@@ -525,7 +522,6 @@ protected:
     string 	_vifn;
     IPv6 	_a;
 };
-#endif
 
 
 // ----------------------------------------------------------------------------
@@ -615,13 +611,11 @@ main(int argc, char* const argv[])
 					  do_single_line)
 			);
 		} else if (ip_version == 6) {
-#ifdef HAVE_IPV6
 		    job_queue.enqueue(
 			new GetPeerStats6(job_queue,
 					  argv[0], argv[1], argv[2], argv[3],
 					  do_single_line)
 			);
-#endif
 		}
 	    } else if (argc == 3) {
 		if (ip_version == 4) {
@@ -630,22 +624,18 @@ main(int argc, char* const argv[])
 					      argv[0], argv[1], argv[2])
 			);
 		} else if (ip_version == 6) {
-#ifdef HAVE_IPV6
 		    job_queue.enqueue(
 			new GetPortPeerStats6(job_queue,
 					      argv[0], argv[1], argv[2])
 			);
-#endif
 		}
 	    } else if (argc == 0) {
 		if (ip_version == 4) {
 		    job_queue.enqueue(new GetAllPeerStats4(job_queue,
 							   do_single_line));
 		} else if (ip_version == 6) {
-#ifdef HAVE_IPV6
 		    job_queue.enqueue(new GetAllPeerStats6(job_queue,
 							   do_single_line));
-#endif
 		}
 	    } else {
 		usage();

@@ -24,9 +24,7 @@
 #define __OSPF_XRL_TARGET_HH__
 
 #include "xrl/targets/ospfv2_base.hh"
-#ifdef HAVE_IPV6
 #include "xrl/targets/ospfv3_base.hh"
-#endif
 
 #include "ospf.hh"
 
@@ -622,7 +620,6 @@ class XrlOspfV2Target : XrlOspfv2TargetBase {
     XrlIO<IPv4>& _xrl_io;
 };
 
-#ifdef HAVE_IPV6
 class XrlOspfV3Target : XrlOspfv3TargetBase {
  public:
     XrlOspfV3Target(XrlRouter *r,
@@ -768,7 +765,6 @@ class XrlOspfV3Target : XrlOspfv3TargetBase {
      *  Push all available routes through all filters for re-filtering.
      */
     XrlCmdError policy_backend_0_1_push_routes();
-
 
     /**
      *  Start route redistribution for an IPv6 route.
@@ -1230,6 +1226,4 @@ class XrlOspfV3Target : XrlOspfv3TargetBase {
 //     XrlIO<IPv4>& _xrl_io_ipv4;
     XrlIO<IPv6>& _xrl_io_ipv6;
 };
-#endif //IPV6
-
 #endif // __OSPF_XRL_TARGET_HH__

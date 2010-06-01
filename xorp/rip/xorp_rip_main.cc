@@ -42,9 +42,7 @@
 #include "rip/xrl_rib_notifier.hh"
 
 #include "rip/xrl_target_rip.hh"
-#ifdef HAVE_IPV6
 #include "rip/xrl_target_ripng.hh"
-#endif
 
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
@@ -63,13 +61,11 @@ struct XrlTarget<IPv4> {
     static const char* name() { return "rip"; }
 };
 
-#ifdef HAVE_IPV6
 template <>
 struct XrlTarget<IPv6> {
     typedef XrlRipngTarget Type;
     static const char* name() { return "ripng"; }
 };
-#endif
 
 
 /**

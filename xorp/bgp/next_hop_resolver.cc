@@ -821,7 +821,6 @@ template<>
 void
 NextHopRibRequest<IPv6>::register_interest(IPv6 nexthop)
 {
-#ifdef HAVE_IPV6
     debug_msg("nexthop %s\n", nexthop.str().c_str());
     PROFILE(XLOG_TRACE(_bgp.profile().enabled(trace_nexthop_resolution),
 		       "nexthop %s\n", nexthop.str().c_str()));
@@ -835,9 +834,6 @@ NextHopRibRequest<IPv6>::register_interest(IPv6 nexthop)
 		&NextHopRibRequest::register_interest_response,
 		nexthop,
 		c_format("nexthop: %s", nexthop.str().c_str())));
-#else
-    UNUSED(nexthop);
-#endif
 }
 
 template<class A>
@@ -1303,7 +1299,6 @@ void
 NextHopRibRequest<IPv6>::deregister_interest(IPv6 addr, 
 					     uint32_t prefix_len)
 {
-#ifdef HAVE_IPV6
     debug_msg("addr %s/%u\n", addr.str().c_str(), XORP_UINT_CAST(prefix_len));
     PROFILE(XLOG_TRACE(_bgp.profile().enabled(trace_nexthop_resolution),
 		       "addr %s/%u\n", addr.str().c_str(),
@@ -1321,10 +1316,6 @@ NextHopRibRequest<IPv6>::deregister_interest(IPv6 addr,
 		       c_format("deregister_from_rib: addr %s/%u",
 				addr.str().c_str(),
 				XORP_UINT_CAST(prefix_len))));
-#else
-    UNUSED(addr);
-    UNUSED(prefix_len);
-#endif
 }
 
 template <class A>

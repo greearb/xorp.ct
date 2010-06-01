@@ -68,13 +68,11 @@ ripsrcs = [
     'xrl_target_rip.cc'
     ]
 
-# IPv6 related stuff should only be enabled when needed.
-if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
-    # RIPng Main/Driver Sources
-    ripngsrcs = [
-        'xorp_rip_main.cc',
-        'xrl_target_ripng.cc'
-        ]
+# RIPng Main/Driver Sources
+ripngsrcs = [
+    'xorp_rip_main.cc',
+    'xrl_target_ripng.cc'
+    ]
 
 
 #
@@ -205,39 +203,34 @@ e.PrependUnique(LIBS = [
     'xorp_ipc',
     'xorp_comm',
     'xorp_core',
-])
-
-# IPv6 related stuff should only be enabled when needed.
-if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
-    e.PrependUnique(LIBS = [
-        'xorp_ripng',
-        'xif_socket6',
-        ])
+    'xorp_ripng',
+    'xif_socket6',
+    ])
 
 e.Replace(RPATH = [
     e.Literal(e['xorp_module_rpath'])
-])
+    ])
 
 if is_shared:
     libxorp_ripng = e.SharedLibrary(target = 'libxorp_ripng',
-				    source = libxorp_rip_srcs,
-				    LIBS = '')
+                                    source = libxorp_rip_srcs,
+                                    LIBS = '')
     if e['rtld_origin']:
         for obj in libxorp_ripng:
             e.AddPostAction(libxorp_ripng,
-                e.Symlink(obj.abspath,
-                          os.path.join(env['xorp_alias_libdir'], str(obj))))
+                            e.Symlink(obj.abspath,
+                                      os.path.join(env['xorp_alias_libdir'], str(obj))))
     libxorp_ripngxrl = e.SharedLibrary(target = 'libxorp_ripng_xrl',
-				       source = libxorp_rip_xrl_srcs,
-				       LIBS = '')
+                                       source = libxorp_rip_xrl_srcs,
+                                       LIBS = '')
     if e['rtld_origin']:
         for obj in libxorp_ripngxrl:
             e.AddPostAction(libxorp_ripngxrl,
-                e.Symlink(obj.abspath,
-                          os.path.join(env['xorp_alias_libdir'], str(obj))))
+                            e.Symlink(obj.abspath,
+                                      os.path.join(env['xorp_alias_libdir'], str(obj))))
     e.Alias('install',
-                [ e.InstallLibrary(e['xorp_libdir'], libxorp_ripng),
-                  e.InstallLibrary(e['xorp_libdir'], libxorp_ripngxrl) ])
+            [ e.InstallLibrary(e['xorp_libdir'], libxorp_ripng),
+              e.InstallLibrary(e['xorp_libdir'], libxorp_ripngxrl) ])
 else:
     libxorp_ripng = e.StaticLibrary(target = 'libxorp_ripng',
 				    source = libxorp_rip_srcs,
@@ -246,12 +239,7 @@ else:
 				       source = libxorp_rip_xrl_srcs,
 				       LIBS = '')
 
-# IPv6 related stuff should only be enabled when needed.
-if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
-    ripng = e.Program(target = 'xorp_ripng', source = ripngsrcs)
-    e.Alias('install', e.InstallProgram(e['xorp_moduledir'], ripng))
+ripng = e.Program(target = 'xorp_ripng', source = ripngsrcs)
+e.Alias('install', e.InstallProgram(e['xorp_moduledir'], ripng))
 
-    Default(rip, ripng)
-else:
-    Default(rip)
-    
+Default(rip, ripng)

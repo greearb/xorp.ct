@@ -189,7 +189,6 @@ public:
 			   const IPv4& addr,
 			   string& err);
 
-#ifdef HAVE_IPV6
     /**
      * add_vif_address is called to inform all the RIBs that a new IPv6
      * address has been added to a virtual interface.
@@ -225,7 +224,6 @@ public:
     int delete_vif_address(const string& vifname,
 			   const IPv6& addr,
 			   string& err);
-#endif
 
     /**
      * Make some errors we'd normally mask fatal.  Should be used for
@@ -299,7 +297,6 @@ public:
 			       const string&	cookie,
 			       bool		is_xrl_transaction_output);
 
-#ifdef HAVE_IPV6
     /**
      * Add Route Redistributor that generates updates with redist6
      * XRL interface.
@@ -323,7 +320,6 @@ public:
 			       const IPv6Net&	network_prefix,
 			       const string&	cookie,
 			       bool		is_xrl_transaction_output);
-#endif
 
     /**
      * Remove Route Redistributor that generates updates with redist4
@@ -346,7 +342,6 @@ public:
 				  const string&	cookie,
 				  bool		is_xrl_transaction_output);
 
-#ifdef HAVE_IPV6
     /**
      * Remove Route Redistributor that generates updates with redist6
      * XRL interface.
@@ -367,7 +362,7 @@ public:
 				  bool		multicast,
 				  const string&	cookie,
 				  bool		is_xrl_transaction_output);
-#endif
+
 
     XrlStdRouter& xrl_router() {    return _xrl_router; }
 
@@ -443,7 +438,6 @@ public:
      */
     RIB<IPv4>& mrib4() { return _mrib4; }
 
-#ifdef HAVE_IPV6
     /**
      * @return a reference to the IPv6 unicast RIB.
      */
@@ -453,7 +447,6 @@ public:
      * @return a reference to the IPv6 multicast RIB.
      */
     RIB<IPv6>& mrib6() { return _mrib6; }
-#endif
 
     /**
      * @return a reference to the XRL RIB target.
@@ -469,10 +462,8 @@ private:
 
     RIB<IPv4>		_urib4;			// The IPv4 unicast RIB
     RIB<IPv4>		_mrib4;			// The IPv4 multicast RIB
-#ifdef HAVE_IPV6
     RIB<IPv6>		_urib6;			// The IPv6 unicast RIB
     RIB<IPv6>		_mrib6;			// The IPv6 multicast RIB
-#endif
 
     VifManager		_vif_manager;		// The VIF manager
     XrlRibTarget	_xrl_rib_target;

@@ -46,9 +46,7 @@ PolicyRedistTable<A>::PolicyRedistTable(RouteTable<A>* parent, XrlRouter& rtr,
       _eventloop(_xrl_router.eventloop()),
       _redist_map(rmap),
       _redist4_client(&_xrl_router),
-#ifdef HAVE_IPV6
       _redist6_client(&_xrl_router),
-#endif
       _multicast(multicast)
 {
     if (_parent->next_table() != NULL) {
@@ -222,8 +220,6 @@ PolicyRedistTable<IPv4>::del_redist(const IPRouteEntry<IPv4>& route,
 template class PolicyRedistTable<IPv4>;
 
 
-#ifdef HAVE_IPV6
-
 template <>
 void
 PolicyRedistTable<IPv6>::add_redist(const IPRouteEntry<IPv6>& route,
@@ -287,4 +283,3 @@ PolicyRedistTable<A>::replace_policytags(const IPRouteEntry<A>& route,
 }					 
 
 template class PolicyRedistTable<IPv6>;
-#endif
