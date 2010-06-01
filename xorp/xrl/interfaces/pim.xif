@@ -4,6 +4,7 @@
  * Protocol Independent Multicast XRL interface.
  */
 
+#include <xorp_config.h>
 
 interface pim/0.1 {
 
@@ -74,20 +75,22 @@ interface pim/0.1 {
 	 */
 	add_config_scope_zone_by_vif_name4?	scope_zone_id:ipv4net	\
 						& vif_name:txt;
+#ifdef HAVE_IPV6
 	add_config_scope_zone_by_vif_name6?	scope_zone_id:ipv6net	\
 						& vif_name:txt;
-	add_config_scope_zone_by_vif_addr4?	scope_zone_id:ipv4net	\
-						& vif_addr:ipv4;
 	add_config_scope_zone_by_vif_addr6?	scope_zone_id:ipv6net	\
 						& vif_addr:ipv6;
-	delete_config_scope_zone_by_vif_name4?	scope_zone_id:ipv4net	\
-						& vif_name:txt;
 	delete_config_scope_zone_by_vif_name6?	scope_zone_id:ipv6net	\
+						& vif_name:txt;
+	delete_config_scope_zone_by_vif_addr6?	scope_zone_id:ipv6net	\
+						& vif_addr:ipv6;
+#endif
+	add_config_scope_zone_by_vif_addr4?	scope_zone_id:ipv4net	\
+						& vif_addr:ipv4;
+	delete_config_scope_zone_by_vif_name4?	scope_zone_id:ipv4net	\
 						& vif_name:txt;
 	delete_config_scope_zone_by_vif_addr4?	scope_zone_id:ipv4net	\
 						& vif_addr:ipv4;
-	delete_config_scope_zone_by_vif_addr6?	scope_zone_id:ipv6net	\
-						& vif_addr:ipv6;
 
 	/**
 	 * Add/delete candidate-BSR configuration.
@@ -107,17 +110,18 @@ interface pim/0.1 {
 					& vif_addr:ipv4			\
 					& bsr_priority:u32		\
 					& hash_mask_len:u32;
+#ifdef HAVE_IPV6
 	add_config_cand_bsr6?		scope_zone_id:ipv6net		\
 					& is_scope_zone:bool		\
 					& vif_name:txt			\
 					& vif_addr:ipv6			\
 					& bsr_priority:u32		\
 					& hash_mask_len:u32;
-	delete_config_cand_bsr4		? scope_zone_id:ipv4net		\
-					& is_scope_zone:bool;
 	delete_config_cand_bsr6		? scope_zone_id:ipv6net		\
 					& is_scope_zone:bool;
-
+#endif
+	delete_config_cand_bsr4		? scope_zone_id:ipv4net		\
+					& is_scope_zone:bool;
 	/**
 	 * Add/delete Candidate-RP configuration.
 	 *
@@ -136,20 +140,22 @@ interface pim/0.1 {
 					& vif_addr:ipv4			\
 					& rp_priority:u32		\
 					& rp_holdtime:u32;
+#ifdef HAVE_IPV6
 	add_config_cand_rp6		? group_prefix:ipv6net		\
 					& is_scope_zone:bool		\
 					& vif_name:txt			\
 					& vif_addr:ipv6			\
 					& rp_priority:u32		\
 					& rp_holdtime:u32;
-	delete_config_cand_rp4?		group_prefix:ipv4net		\
-					& is_scope_zone:bool		\
-					& vif_name:txt			\
-					& vif_addr:ipv4;
 	delete_config_cand_rp6?		group_prefix:ipv6net		\
 					& is_scope_zone:bool		\
 					& vif_name:txt			\
 					& vif_addr:ipv6;
+#endif
+	delete_config_cand_rp4?		group_prefix:ipv4net		\
+					& is_scope_zone:bool		\
+					& vif_name:txt			\
+					& vif_addr:ipv4;
 
 	/**
 	 * Add/delete/complete static RP configuration.
@@ -165,16 +171,20 @@ interface pim/0.1 {
 					& rp_addr:ipv4			\
 					& rp_priority:u32		\
 					& hash_mask_len:u32;
+
+#ifdef HAVE_IPV6
 	add_config_static_rp6		? group_prefix:ipv6net		\
 					& rp_addr:ipv6			\
 					& rp_priority:u32		\
 					& hash_mask_len:u32;
-	delete_config_static_rp4	? group_prefix:ipv4net		\
-					& rp_addr:ipv4;
 	delete_config_static_rp6	? group_prefix:ipv6net		\
 					& rp_addr:ipv6;
-	delete_config_all_static_group_prefixes_rp4	? rp_addr:ipv4;
 	delete_config_all_static_group_prefixes_rp6	? rp_addr:ipv6;
+#endif
+
+	delete_config_static_rp4	? group_prefix:ipv4net		\
+					& rp_addr:ipv4;
+	delete_config_all_static_group_prefixes_rp4	? rp_addr:ipv4;
 	delete_config_all_static_rps;
 	config_static_rp_done;
 
@@ -299,9 +309,11 @@ interface pim/0.1 {
 	 * @param subnet the subnet address to add or delete.
 	 */
 	add_alternative_subnet4		? vif_name:txt & subnet:ipv4net;
+#ifdef HAVE_IPV6
 	add_alternative_subnet6		? vif_name:txt & subnet:ipv6net;
-	delete_alternative_subnet4	? vif_name:txt & subnet:ipv4net;
 	delete_alternative_subnet6	? vif_name:txt & subnet:ipv6net;
+#endif
+	delete_alternative_subnet4	? vif_name:txt & subnet:ipv4net;
 	remove_all_alternative_subnets	? vif_name:txt;
 
 	/**
@@ -322,14 +334,16 @@ interface pim/0.1 {
 				& action_jp:txt				\
 				& holdtime:u32				\
 				& is_new_group:bool;
+#ifdef HAVE_IPV6
 	add_test_jp_entry6	? source_addr:ipv6 & group_addr:ipv6	\
 				& group_mask_len:u32			\
 				& mrt_entry_type:txt			\
 				& action_jp:txt				\
 				& holdtime:u32				\
 				& is_new_group:bool;
-	send_test_jp_entry4	? vif_name:txt & nbr_addr:ipv4;
 	send_test_jp_entry6	? vif_name:txt & nbr_addr:ipv6;
+#endif
+	send_test_jp_entry4	? vif_name:txt & nbr_addr:ipv4;
 
 	/**
 	 * Test-related methods: send an Assert message on an interface.
@@ -347,11 +361,13 @@ interface pim/0.1 {
 				& rpt_bit:bool				\
 				& metric_preference:u32			\
 				& metric:u32;
+#ifdef HAVE_IPV6
 	send_test_assert6	? vif_name:txt				\
 				& source_addr:ipv6 & group_addr:ipv6	\
 				& rpt_bit:bool				\
 				& metric_preference:u32			\
 				& metric:u32;
+#endif
 
 	/**
 	 * Test-related methods: send Bootstrap and Cand-RP-Adv messages.
@@ -380,20 +396,30 @@ interface pim/0.1 {
 				& bsr_priority:u32			\
 				& hash_mask_len:u32			\
 				& fragment_tag:u32;
+#ifdef HAVE_IPV6
 	add_test_bsr_zone6	? zone_id_scope_zone_prefix:ipv6net	\
 				& zone_id_is_scope_zone:bool		\
 				& bsr_addr:ipv6				\
 				& bsr_priority:u32			\
 				& hash_mask_len:u32			\
 				& fragment_tag:u32;
-	add_test_bsr_group_prefix4 ? zone_id_scope_zone_prefix:ipv4net	\
-				& zone_id_is_scope_zone:bool		\
-				& group_prefix:ipv4net			\
-				& is_scope_zone:bool			\
-				& expected_rp_count:u32;
 	add_test_bsr_group_prefix6 ? zone_id_scope_zone_prefix:ipv6net	\
 				& zone_id_is_scope_zone:bool		\
 				& group_prefix:ipv6net			\
+				& is_scope_zone:bool			\
+				& expected_rp_count:u32;
+	add_test_bsr_rp6	? zone_id_scope_zone_prefix:ipv6net	\
+				& zone_id_is_scope_zone:bool		\
+				& group_prefix:ipv6net			\
+				& rp_addr:ipv6				\
+				& rp_priority:u32			\
+				& rp_holdtime:u32;
+	send_test_bootstrap_by_dest6 ? vif_name:txt			\
+				& dest_addr:ipv6;
+#endif
+	add_test_bsr_group_prefix4 ? zone_id_scope_zone_prefix:ipv4net	\
+				& zone_id_is_scope_zone:bool		\
+				& group_prefix:ipv4net			\
 				& is_scope_zone:bool			\
 				& expected_rp_count:u32;
 	add_test_bsr_rp4	? zone_id_scope_zone_prefix:ipv4net	\
@@ -402,17 +428,9 @@ interface pim/0.1 {
 				& rp_addr:ipv4				\
 				& rp_priority:u32			\
 				& rp_holdtime:u32;
-	add_test_bsr_rp6	? zone_id_scope_zone_prefix:ipv6net	\
-				& zone_id_is_scope_zone:bool		\
-				& group_prefix:ipv6net			\
-				& rp_addr:ipv6				\
-				& rp_priority:u32			\
-				& rp_holdtime:u32;
 	send_test_bootstrap	? vif_name:txt;
 	send_test_bootstrap_by_dest4 ? vif_name:txt			\
 				& dest_addr:ipv4;
-	send_test_bootstrap_by_dest6 ? vif_name:txt			\
-				& dest_addr:ipv6;
 	send_test_cand_rp_adv;
 
 	/**
@@ -442,6 +460,7 @@ interface pim/0.1 {
 					& holdtimes:list<i32>		\
 					& timeouts:list<i32>		\
 					& uptimes:list<i32>;
+#ifdef HAVE_IPV6
 	pimstat_neighbors6		-> nbrs_number:u32		\
 					& vifs:list<txt>		\
 					& addresses:list<ipv6>		\
@@ -450,6 +469,7 @@ interface pim/0.1 {
 					& holdtimes:list<i32>		\
 					& timeouts:list<i32>		\
 					& uptimes:list<i32>;
+#endif
 
 	/**
 	 * Retrieve information about PIM interfaces.
@@ -470,12 +490,14 @@ interface pim/0.1 {
 					& dr_priority:u32		\
 					& dr_address:ipv4		\
 					& pim_nbrs_number:u32;
+#ifdef HAVE_IPV6
 	pimstat_interface6		? vif_name:txt			\
 					-> pim_version:u32		\
 					& is_dr:bool			\
 					& dr_priority:u32		\
 					& dr_address:ipv6		\
 					& pim_nbrs_number:u32;
+#endif
 
 	/**
 	 * Retrieve information about the RP-Set.
@@ -504,6 +526,7 @@ interface pim/0.1 {
 					& timeouts:list<i32>		\
 					& group_prefixes:list<ipv4net>;
 
+#ifdef HAVE_IPV6
 	pimstat_rps6			-> rps_number:u32		\
 					& addresses:list<ipv6>		\
 					& types:list<txt>		\
@@ -512,6 +535,7 @@ interface pim/0.1 {
 					& timeouts:list<i32>		\
 					& group_prefixes:list<ipv6net>;
 
+#endif
 	/**
 	 * Clear all statistics
 	 */
