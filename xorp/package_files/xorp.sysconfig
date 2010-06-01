@@ -1,0 +1,7 @@
+# /etc/sysconfig/xorp
+#
+# Specify boot config
+# BOOT_CONF="/etc/xorp/xorp.conf"
+#
+# Add extra daemon options here
+# OPTIONS=""

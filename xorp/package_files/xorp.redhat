@@ -1,0 +1,164 @@
+#!/bin/bash
+#
+# xorp            This shell script takes care of starting and stopping
+#                 the Open Router Platform XORP.
+#
+# chkconfig: - 84 16
+# description:    XORP is the eXtensible Open Router Platform (XORP).
+# processname:    xorp
+# config:         /etc/xorp/xorp.conf
+# pidfile:        /var/run/xorp.pid
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+# Source networking configuration.
+. /etc/sysconfig/network
+
+# Check that networking is up.
+[ ${NETWORKING} = "no" ] && exit 1
+
+# Defines
+DESC="the Open Router Platform (XORP)"
+PROG="xorp"
+EXEC="/usr/sbin/${PROG}"
+LOCK="/var/lock/subsys/${PROG}"
+LOGF="/var/log/${PROG}.log"
+PIDF="/var/run/${PROG}.pid"
+CONF="/etc/${PROG}/${PROG}.conf"
+
+# Include config
+if [ -s /etc/sysconfig/${PROG} ]; then
+  . /etc/sysconfig/${PROG}
+fi
+
+# Further defines
+XORP_CONF="${BOOT_CONF:-${CONF}}"
+XORP_LOGF="${XORP_LOGF:-${LOGF}}"
+XORP_TMPL="${XORP_TMPL:-/usr/local/xorp/share/${PROG}/templates}"
+XORP_SHUT="${XORP_SHUT:-100}"
+
+# Check for binaries and configs
+[ -x ${EXEC} ] || exit 5
+[ -f ${CONF} ] || exit 6
+
+
+start() {
+	# Start daemons.
+	echo -n $"Starting ${DESC}: "
+	daemon "${EXEC} -d -l ${XORP_LOGF} -P ${PIDF} -b ${XORP_CONF} -t ${XORP_TMPL} ${OPTIONS} >/dev/null"
+	RETVAL=${?}
+
+	[ ${RETVAL} -eq 0 ] && touch ${LOCK}
+	echo
+	return ${RETVAL}
+}
+
+stop() {
+	# Stop daemons.
+	echo -n $"Shutting down ${DESC}: "
+	PID=`pidof -o %PPID ${PROG}`
+	RETVAL=${?}
+
+	[ ${RETVAL} -eq 0 ] && {
+	  kill -TERM ${PID}
+
+	  TIMEOUT=0
+	  while pidof -o %PPID ${PROG} >/dev/null; do
+	    if [ ${TIMEOUT} -ge ${XORP_SHUT} ]; then
+	      RETVAL=1
+	      break
+	    else
+	      sleep 5 && echo -n "."
+	      TIMEOUT=$((TIMEOUT+5))
+	    fi
+	  done
+
+	  [ ${RETVAL} -eq 0 ] && rm -f ${LOCK} ${PIDF}
+	}
+
+	[ ${RETVAL} -eq 0 ] && success $"${PROG} shutdown" || failure $"${PROG} shutdown"
+	echo
+	return ${RETVAL}
+}
+
+force_stop () {
+        # Force Stopping daemons.
+        echo -n $"Force-Shutting down ${DESC}: "
+        PCPID=`pgrep ${PROG}_`
+        PID=`pidof -o %PPID ${PROG}`
+        RETVAL=${?}
+
+        [ ${RETVAL} -eq 0 ] && {
+          kill -TERM ${PID}
+
+          TIMEOUT=0
+          
+          kill -TERM ${PCPID}
+          while pidof -o %PPID ${PROG} >/dev/null; do
+            if [ ${TIMEOUT} -ge ${XORP_SHUT} ]; then
+               sleep 5 && echo -n "."
+               TIMEOUT=$((TIMEOUT+5))
+            else
+              sleep 5 && echo -n "."
+              TIMEOUT=$((TIMEOUT+5))
+            fi
+          done
+
+          [ ${RETVAL} -eq 0 ] && rm -f ${LOCK} ${PIDF}
+        }
+
+        [ ${RETVAL} -eq 0 ] && success $"${PROG} shutdown" || failure $"${PROG} shutdown"
+        echo
+        return ${RETVAL}
+}
+
+restart() {
+	stop
+	sleep 2
+	start
+}
+
+force-stop() {
+	force_stop
+}
+
+rh_status() {
+	status ${PROG}
+}
+
+rh_status_q() {
+	rh_status >/dev/null 2>&1
+}
+
+
+# See how we were called.
+case "${1}" in
+    start)
+	rh_status_q && exit 0
+	${1}
+	;;
+    stop)
+	rh_status_q || exit 0
+	${1}
+	;;
+    restart)
+	${1}
+	;;
+    force-stop)
+        rh_status_q || exit 0
+	${1}
+	;;
+    status)
+	rh_status
+	;;
+    condrestart|try-restart)
+	rh_status_q || exit 0
+	force-stop
+        start
+	;;
+    *)
+	echo $"Usage: service ${PROG} {start|stop|status|restart|try-restart|force-stop}"
+	exit 2
+esac
+exit ${?}

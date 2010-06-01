@@ -1,0 +1,6 @@
+/var/log/xorp.log {
+    copytruncate
+    notifempty
+    missingok
+    delaycompress
+}
