@@ -73,6 +73,7 @@ vars.AddVariables(
     BoolVariable('debug_fn',  'Build with function names in debug_msg output', False),
     BoolVariable('debug_cb',  'Build with callback debugging', False),
     BoolVariable('enable_gprof',  'Enable gprof (compile with -pg)', False),
+    BoolVariable('disable_ipv6',  'Force disable of IPv6', False),
     BoolVariable('enable_olsr',  'Build OLSR', False),
     BoolVariable('enable_tests', 'Build Test Programs', False),
     BoolVariable('save_args', 'Save scons arguments to .scons_build_args file', False),
@@ -239,6 +240,7 @@ print 'Debug XRL syntax: ', env['debug_xrldb']
 print 'Enable OLSR:      ', env['enable_olsr']
 print 'Enable CLICK:     ', env['enable_click']
 print 'Enable BGP:       ', env['enable_bgp']
+print 'Disable IPv6:     ', env['disable_ipv6']
 
 env['WITH_GPROF'] = ARGUMENTS.get('enable_gprof', False)
 print 'Enable gprof:     ', env['enable_gprof']
@@ -346,6 +348,12 @@ env['xorp_sourcedir']   = sourcedir	# rtrmgr/util.cc and xif need this
 # XXX bgp is always built
 env['WITH_BGP'] = ARGUMENTS.get('enable-bgp', False)
 
+
+tst = ARGUMENTS.get('disable_ipv6', False)
+if tst and not (tst == "no"):
+    env['disable_ipv6'] = True;
+else:
+    env['disable_ipv6'] = False
 
 ########## start configure magic
 

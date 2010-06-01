@@ -113,10 +113,10 @@ libxorp_fea_linkorder += [
 env.PrependUnique(LIBS = libxorp_fea_linkorder)
 
 # External libraries.
-if env['has_libpcap']:
+if env.has_key('has_libpcap') and env['has_libpcap']:
     env.AppendUnique(LIBS = [
         'pcap'
-    ])
+        ])
 
 # Report unresolved symbol references when building the FEA.
 if is_shared:

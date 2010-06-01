@@ -420,7 +420,8 @@ def DoAllConfig(env, conf, host_os):
     # v6 stack
 
     if has_af_inet6 and has_sock_stream:
-        conf.Define('HAVE_IPV6')
+        if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
+            conf.Define('HAVE_IPV6')
 
     prereq_rfc3542 = ['stdlib.h', 'sys/types.h', 'netinet/in.h']
     rfc3542_includes = []
@@ -512,7 +513,8 @@ def DoAllConfig(env, conf, host_os):
     has_v6_mcast = gotv6sym
     # test result
     if has_v6_mcast:
-        conf.Define('HAVE_IPV6_MULTICAST')
+        if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
+            conf.Define('HAVE_IPV6_MULTICAST')
 
     ##########
     # v4 mforwarding
@@ -631,7 +633,8 @@ def DoAllConfig(env, conf, host_os):
     # XXX: linux marked inet6_option_space() and friends as deprecated;
     # either rework mfea code or do this.
     if has_netinet6_ip6_mroute_h or has_linux_mroute6_h:
-        conf.Define('HAVE_IPV6_MULTICAST_ROUTING')
+        if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
+            conf.Define('HAVE_IPV6_MULTICAST_ROUTING')
     
     ##########
     # packet filters
