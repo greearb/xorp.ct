@@ -1771,7 +1771,7 @@ MfeaMrouter::add_bw_upcall(const IPvX& source, const IPvX& group,
 	       is_threshold_in_packets, is_threshold_in_bytes,
 	       is_geq_upcall, is_leq_upcall);
 
-#if ! defined(ENABLE_ADVANCED_MULTICAST_API)
+#if ! (defined(ENABLE_ADVANCED_MULTICAST_API) && defined(MRT_ADD_BW_UPCALL))
     UNUSED(threshold_interval);
     UNUSED(threshold_packets);
     UNUSED(threshold_bytes);
@@ -1969,7 +1969,7 @@ MfeaMrouter::delete_bw_upcall(const IPvX& source, const IPvX& group,
 	       is_threshold_in_packets, is_threshold_in_bytes,
 	       is_geq_upcall, is_leq_upcall);
 
-#if ! defined(ENABLE_ADVANCED_MULTICAST_API)
+#if ! (defined(ENABLE_ADVANCED_MULTICAST_API) && defined(MRT_ADD_BW_UPCALL))
     UNUSED(threshold_interval);
     UNUSED(threshold_packets);
     UNUSED(threshold_bytes);

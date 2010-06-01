@@ -126,10 +126,9 @@ Socket::init_sockaddr(string addr, uint16_t local_port,
     hints.ai_socktype = SOCK_STREAM;
     // addr must be numeric so this can't fail.
     if ((error = getaddrinfo(addr.c_str(), port.c_str(), &hints, &res0))) {
-	const char *error_string = gai_strerror(error);
 	XLOG_FATAL("getaddrinfo(%s,%s,...) failed: %s", addr.c_str(),
 		   port.c_str(),
-		   error_string);
+		   gai_strerror(error));
     }
 
     XLOG_ASSERT(res0->ai_addrlen <= sizeof(ss));

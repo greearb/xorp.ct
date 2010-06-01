@@ -1053,6 +1053,7 @@ XrlStaticRoutesNode::finder_event_observer_0_1_xrl_target_death(
     const string&   target_class,
     const string&   target_instance)
 {
+    UNUSED(target_instance);
     bool do_shutdown = false;
 
     if (target_class == _fea_target) {

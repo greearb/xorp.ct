@@ -96,6 +96,8 @@ ProcessWatch::finder_death(const char *file, const int lineno)
 {
     XLOG_ERROR("The finder has died BGP process exiting called from %s:%d",
 	       file, lineno);
+    UNUSED(file);
+    UNUSED(lineno);
 
     start_kill_timer();
     xorp_throw(NoFinder, "");

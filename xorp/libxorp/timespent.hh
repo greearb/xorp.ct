@@ -75,6 +75,9 @@ public:
     void check(const char *function, const char *file, int line)
     {
 	TimeVal delta;
+	UNUSED(function);
+	UNUSED(file);
+	UNUSED(line);
 
 	if (overlimit(delta))
 	    XLOG_WARNING("Function %s +%d %s took %s\n", function, line, file,

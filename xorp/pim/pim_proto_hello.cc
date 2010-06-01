@@ -120,6 +120,8 @@ PimVif::pim_hello_recv(PimNbr *pim_nbr,
     list<IPvX>::iterator addr_list_iter;
     int		rcvd_family;
 
+    UNUSED(dst);
+
     //XLOG_WARNING("pim_hello_recv:  RX %s from %s to %s: ",
     //	 PIMTYPE2ASCII(PIM_HELLO),
     //	 cstring(src), cstring(dst));

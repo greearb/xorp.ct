@@ -180,6 +180,7 @@ PolicyRedistTable<A>::del_redist(const IPRouteEntry<A>& route,
 template <class A>
 void
 PolicyRedistTable<A>::xrl_cb(const XrlError& e, string action) {
+    UNUSED(action);
     if (e != XrlError::OKAY()) {
 	XLOG_WARNING("Unable to complete XRL: %s", action.c_str());
     }

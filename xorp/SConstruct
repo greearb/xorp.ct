@@ -75,6 +75,13 @@ vars.AddVariables(
     BoolVariable('enable_gprof',  'Enable gprof (compile with -pg)', False),
     BoolVariable('disable_ipv6',  'Force disable of IPv6', False),
     BoolVariable('disable_fw',  'Disable Firewall feature', False),
+    BoolVariable('disable_warninglogs',  'Force disable warning logs', False),
+    BoolVariable('disable_tracelogs',  'Force disable trace logs', False),
+    BoolVariable('disable_fatallogs',  'Force disable fatal logs', False),
+    BoolVariable('disable_infologs',  'Force disable info logs', False),
+    BoolVariable('disable_assertlogs',  'Force disable assert logs', False),
+    BoolVariable('disable_errorlogs',  'Force disable error logs', False),
+    BoolVariable('disable_otherlogs',  'Force disable other logs', False),
     BoolVariable('disable_profile',  'Disable Xorp Profiler feature', False),
     BoolVariable('enable_olsr',  'Build OLSR', False),
     BoolVariable('enable_tests', 'Build Test Programs', False),
@@ -248,6 +255,14 @@ print 'Enable BGP:       ', env['enable_bgp']
 print 'Disable IPv6:     ', env['disable_ipv6']
 print 'Disable Firewall: ', env['disable_fw']
 print 'Disable Profile : ', env['disable_profile']
+print 'Disable warning logs : ', env['disable_warninglogs']
+print 'Disable error logs : ', env['disable_errorlogs']
+print 'Disable trace logs : ', env['disable_tracelogs']
+print 'Disable fatal logs : ', env['disable_fatallogs']
+print 'Disable info logs : ', env['disable_infologs']
+print 'Disable assert logs : ', env['disable_assertlogs']
+print 'Disable other logs : ', env['disable_otherlogs']
+
 
 env['WITH_GPROF'] = ARGUMENTS.get('enable_gprof', False)
 print 'Enable gprof:     ', env['enable_gprof']
@@ -373,6 +388,48 @@ if tst and not (tst == "no"):
     env['disable_profile'] = True;
 else:
     env['disable_profile'] = False
+
+tst = ARGUMENTS.get('disable_warninglogs', False)
+if tst and not (tst == "no"):
+    env['disable_warninglogs'] = True;
+else:
+    env['disable_warninglogs'] = False
+
+tst = ARGUMENTS.get('disable_errorlogs', False)
+if tst and not (tst == "no"):
+    env['disable_errorlogs'] = True;
+else:
+    env['disable_errorlogs'] = False
+
+tst = ARGUMENTS.get('disable_tracelogs', False)
+if tst and not (tst == "no"):
+    env['disable_tracelogs'] = True;
+else:
+    env['disable_tracelogs'] = False
+
+tst = ARGUMENTS.get('disable_fatallogs', False)
+if tst and not (tst == "no"):
+    env['disable_fatallogs'] = True;
+else:
+    env['disable_fatallogs'] = False
+
+tst = ARGUMENTS.get('disable_infologs', False)
+if tst and not (tst == "no"):
+    env['disable_infologs'] = True;
+else:
+    env['disable_infologs'] = False
+
+tst = ARGUMENTS.get('disable_assertlogs', False)
+if tst and not (tst == "no"):
+    env['disable_assertlogs'] = True;
+else:
+    env['disable_assertlogs'] = False
+
+tst = ARGUMENTS.get('disable_otherlogs', False)
+if tst and not (tst == "no"):
+    env['disable_otherlogs'] = True;
+else:
+    env['disable_otherlogs'] = False
 
 ########## start configure magic
 
@@ -613,15 +670,14 @@ env.AppendUnique(CPPDEFINES = [
 # fixed, so we can't enable Werror for them.
 if (host_cpu == "i686" or
     host_cpu == "x86_64"):
-        env.AppendUnique(CFLAGS = [
-	        '-Werror',
-		])
-	env.AppendUnique(CXXFLAGS = [
-		'-Werror',
-		])
+    env.AppendUnique(CFLAGS = [
+        '-Werror',
+        ])
+    env.AppendUnique(CXXFLAGS = [
+        '-Werror',
+        ])
 else:
-	print "WARNING:  Detected non x86 platform, will not enable -Werror compile option: ", host_cpu
-	
+    print "WARNING:  Detected non x86 platform, will not enable -Werror compile option: ", host_cpu
 
 # NOTE: gcc specific flags.
 env.AppendUnique(CFLAGS = [

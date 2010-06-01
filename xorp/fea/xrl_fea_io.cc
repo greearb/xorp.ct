@@ -135,6 +135,7 @@ void
 XrlFeaIo::deregister_instance_event_interest_cb(const XrlError& xrl_error,
 						string instance_name)
 {
+    UNUSED(instance_name);
     if (xrl_error != XrlError::OKAY()) {
 	XLOG_ERROR("Failed to deregister event interest in instance %s: %s",
 		   instance_name.c_str(), xrl_error.str().c_str());

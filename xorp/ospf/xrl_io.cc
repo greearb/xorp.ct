@@ -126,6 +126,8 @@ template <typename A>
 void
 XrlIO<A>::send_cb(const XrlError& xrl_error, string interface, string vif)
 {
+    UNUSED(interface);
+    UNUSED(vif);
     switch (xrl_error.error_code()) {
     case OKAY:
 	// Success
@@ -186,6 +188,8 @@ void
 XrlIO<A>::enable_interface_vif_cb(const XrlError& xrl_error, string interface,
 				  string vif)
 {
+    UNUSED(interface);
+    UNUSED(vif);
     switch (xrl_error.error_code()) {
     case OKAY:
 	// Success
@@ -244,6 +248,8 @@ void
 XrlIO<A>::disable_interface_vif_cb(const XrlError& xrl_error, string interface,
 				   string vif)
 {
+    UNUSED(interface);
+    UNUSED(vif);
     switch (xrl_error.error_code()) {
     case OKAY:
 	// Success
@@ -438,6 +444,8 @@ void
 XrlIO<A>::join_multicast_group_cb(const XrlError& xrl_error, string interface,
 				  string vif)
 {
+    UNUSED(interface);
+    UNUSED(vif);
     switch (xrl_error.error_code()) {
     case OKAY:
 	// Success
@@ -498,6 +506,8 @@ void
 XrlIO<A>::leave_multicast_group_cb(const XrlError& xrl_error, string interface,
 				   string vif)
 {
+    UNUSED(interface);
+    UNUSED(vif);
     switch (xrl_error.error_code()) {
     case OKAY:
 	// Success

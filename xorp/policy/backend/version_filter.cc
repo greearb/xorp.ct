@@ -79,6 +79,7 @@ VersionFilter::acceptRoute(VarRW& varrw)
 	filter = ef.val();
     } catch(const bad_cast& exp) {
 	const Element& e = varrw.read(_fname);
+	UNUSED(e); // in case XLOG_FATAL is compiled out.
 
 	XLOG_FATAL("Reading %d but didn't get ElemFilter! Got %s: (%s)", 
 		   _fname, e.type(), e.str().c_str());

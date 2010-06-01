@@ -1812,9 +1812,8 @@ template <typename A>
 void
 Peer<A>::event_interface_up()
 {
-    const char *event_name = "InterfaceUp";
     XLOG_TRACE(_ospf.trace()._interface_events,
-	       "Event(%s) Interface(%s) State(%s) ", event_name,
+	       "Event(InterfaceUp) Interface(%s) State(%s) ",
 	       get_if_name().c_str(), pp_interface_state(get_state()).c_str());
 
     XLOG_ASSERT(Down == get_state());
@@ -1857,9 +1856,8 @@ template <typename A>
 void
 Peer<A>::event_wait_timer()
 {
-    const char *event_name = "WaitTimer";
     XLOG_TRACE(_ospf.trace()._interface_events,
-	       "Event(%s) Interface(%s) State(%s) ", event_name,
+	       "Event(WaitTimer) Interface(%s) State(%s) ",
 	       get_if_name().c_str(), pp_interface_state(get_state()).c_str());
 
     switch(get_state()) {
@@ -1904,9 +1902,8 @@ template <typename A>
 void
 Peer<A>::event_backup_seen()
 {
-    const char *event_name = "BackupSeen";
     XLOG_TRACE(_ospf.trace()._interface_events,
-	       "Event(%s) Interface(%s) State(%s) ", event_name,
+	       "Event(BackupSeen) Interface(%s) State(%s) ",
 	       get_if_name().c_str(), pp_interface_state(get_state()).c_str());
 
     switch(get_state()) {
@@ -1939,9 +1936,8 @@ template <typename A>
 void
 Peer<A>::event_neighbour_change()
 {
-    const char *event_name = "NeighborChange";
     XLOG_TRACE(_ospf.trace()._interface_events,
-	       "Event(%s) Interface(%s) State(%s) ", event_name,
+	       "Event(NeighborChange) Interface(%s) State(%s) ",
 	       get_if_name().c_str(), pp_interface_state(get_state()).c_str());
 
     switch(get_state()) {
@@ -1973,8 +1969,7 @@ template <typename A>
 void
 Peer<A>::event_loop_ind()
 {
-    const char *event_name = "LoopInd";
-    XLOG_WARNING("Event(%s) Interface(%s) State(%s) ", event_name,
+    XLOG_WARNING("Event(LoopInd) Interface(%s) State(%s) ",
 		 get_if_name().c_str(), pp_interface_state(get_state()).c_str());
 
     change_state(Loopback);
@@ -1991,9 +1986,8 @@ template <typename A>
 void
 Peer<A>::event_unloop_ind()
 {
-    const char *event_name = "UnLoopInd";
     XLOG_TRACE(_ospf.trace()._interface_events,
-	       "Event(%s) Interface(%s) State(%s) ", event_name,
+	       "Event(UnLoopInd) Interface(%s) State(%s) ",
 	       get_if_name().c_str(), pp_interface_state(get_state()).c_str());
 
     switch(get_state()) {
@@ -2024,9 +2018,8 @@ template <typename A>
 void
 Peer<A>::event_interface_down()
 {
-    const char *event_name = "InterfaceDown";
     XLOG_TRACE(_ospf.trace()._interface_events,
-	       "Event(%s) Interface(%s) State(%s) ", event_name,
+	       "Event(InterfaceDown) Interface(%s) State(%s) ",
 	       get_if_name().c_str(), pp_interface_state(get_state()).c_str());
 
     change_state(Down);
@@ -4188,11 +4181,9 @@ template <typename A>
 void
 Neighbour<A>::event_hello_received(HelloPacket *hello)
 {
-    const char *event_name = "HelloReceived";
     XLOG_TRACE(_ospf.trace()._neighbour_events, 
-	       "Event(%s) Interface(%s) Neighbour(%s) DR (%s) BDR (%s) "
+	       "Event(HelloReceived) Interface(%s) Neighbour(%s) DR (%s) BDR (%s) "
 	       "State(%s)",
-	       event_name,
 	       _peer.get_if_name().c_str(),
 	       pr_id(get_candidate_id()).c_str(),
 	       pr_id(hello->get_designated_router()).c_str(),
@@ -4320,10 +4311,8 @@ template <typename A>
 void
 Neighbour<A>::event_1_way_received()
 {
-    const char *event_name = "1-WayReceived";
     XLOG_TRACE(_ospf.trace()._neighbour_events, 
-	       "Event(%s) Interface(%s) Neighbour(%s) State(%s)",
-	       event_name,
+	       "Event(1-WayReceived) Interface(%s) Neighbour(%s) State(%s)",
 	       _peer.get_if_name().c_str(),
 	       pr_id(get_candidate_id()).c_str(),
 	       pp_state(get_state()).c_str());
@@ -4442,10 +4431,8 @@ template <typename A>
 void
 Neighbour<A>::data_description_received(DataDescriptionPacket *dd)
 {
-    const char *event_name = "DataDescriptionReceived-pseudo-event";
     XLOG_TRACE(_ospf.trace()._neighbour_events, 
-	       "Event(%s) Interface(%s) Neighbour(%s) State(%s)",
-	       event_name,
+	       "Event(DataDescriptionReceived-pseudo-event) Interface(%s) Neighbour(%s) State(%s)",
 	       _peer.get_if_name().c_str(),
 	       pr_id(get_candidate_id()).c_str(),
 	       pp_state(get_state()).c_str());
@@ -4657,10 +4644,8 @@ template <typename A>
 void
 Neighbour<A>::link_state_request_received(LinkStateRequestPacket *lsrp)
 {
-    const char *event_name = "LinkStateRequestReceived-pseudo-event";
     XLOG_TRACE(_ospf.trace()._neighbour_events, 
-	       "Event(%s) Interface(%s) Neighbour(%s) State(%s)",
-	       event_name,
+	       "Event(LinkStateRequestReceived-pseudo-event) Interface(%s) Neighbour(%s) State(%s)",
 	       _peer.get_if_name().c_str(),
 	       pr_id(get_candidate_id()).c_str(),
 	       pp_state(get_state()).c_str());
@@ -4718,10 +4703,8 @@ template <typename A>
 void
 Neighbour<A>::link_state_update_received(LinkStateUpdatePacket *lsup)
 {
-    const char *event_name = "LinkStateUpdateReceived-pseudo-event";
     XLOG_TRACE(_ospf.trace()._neighbour_events, 
-	       "Event(%s) Interface(%s) Neighbour(%s) State(%s)",
-	       event_name,
+	       "Event(LinkStateUpdateReceived-pseudo-event) Interface(%s) Neighbour(%s) State(%s)",
 	       _peer.get_if_name().c_str(),
 	       pr_id(get_candidate_id()).c_str(),
 	       pp_state(get_state()).c_str());
@@ -4837,10 +4820,8 @@ void
 Neighbour<A>::
 link_state_acknowledgement_received(LinkStateAcknowledgementPacket *lsap)
 {
-    const char *event_name = "LinkStateAcknowledgementReceived-pseudo-event";
     XLOG_TRACE(_ospf.trace()._neighbour_events, 
-	       "Event(%s) Interface(%s) Neighbour(%s) State(%s)",
-	       event_name,
+	       "Event(LinkStateAcknowledgementReceived-pseudo-event) Interface(%s) Neighbour(%s) State(%s)",
 	       _peer.get_if_name().c_str(),
 	       pr_id(get_candidate_id()).c_str(),
 	       pp_state(get_state()).c_str());
@@ -5215,10 +5196,8 @@ template <typename A>
 void
 Neighbour<A>::event_negotiation_done()
 {
-    const char *event_name = "NegotiationDone";
     XLOG_TRACE(_ospf.trace()._neighbour_events, 
-	       "Event(%s) Interface(%s) Neighbour(%s) State(%s)",
-	       event_name,
+	       "Event(NegotiationDone) Interface(%s) Neighbour(%s) State(%s)",
 	       _peer.get_if_name().c_str(),
 	       pr_id(get_candidate_id()).c_str(),
 	       pp_state(get_state()).c_str());
@@ -5278,10 +5257,8 @@ template <typename A>
 void
 Neighbour<A>::event_exchange_done()
 {
-    const char *event_name = "ExchangeDone";
     XLOG_TRACE(_ospf.trace()._neighbour_events, 
-	       "Event(%s) Interface(%s) Neighbour(%s) State(%s)",
-	       event_name,
+	       "Event(ExchangeDone) Interface(%s) Neighbour(%s) State(%s)",
 	       _peer.get_if_name().c_str(),
 	       pr_id(get_candidate_id()).c_str(),
 	       pp_state(get_state()).c_str());
@@ -5340,10 +5317,8 @@ template <typename A>
 void
 Neighbour<A>::event_loading_done()
 {
-    const char *event_name = "LoadingDone";
     XLOG_TRACE(_ospf.trace()._neighbour_events, 
-	       "Event(%s) Interface(%s) Neighbour(%s) State(%s)",
-	       event_name,
+	       "Event(LoadingDone) Interface(%s) Neighbour(%s) State(%s)",
 	       _peer.get_if_name().c_str(),
 	       pr_id(get_candidate_id()).c_str(),
 	       pp_state(get_state()).c_str());
@@ -5381,10 +5356,8 @@ template <typename A>
 void
 Neighbour<A>::event_kill_neighbour()
 {
-    const char *event_name = "KillNbr";
     XLOG_TRACE(_ospf.trace()._neighbour_events, 
-	       "Event(%s) Interface(%s) Neighbour(%s) State(%s)",
-	       event_name,
+	       "Event(KillNbr) Interface(%s) Neighbour(%s) State(%s)",
 	       _peer.get_if_name().c_str(),
 	       pr_id(get_candidate_id()).c_str(),
 	       pp_state(get_state()).c_str());
@@ -5453,10 +5426,8 @@ template <typename A>
 void
 Neighbour<A>::event_inactivity_timer()
 {
-    const char *event_name = "InactivityTimer";
     XLOG_TRACE(_ospf.trace()._neighbour_events, 
-	       "Event(%s) Interface(%s) Neighbour(%s) State(%s)",
-	       event_name,
+	       "Event(InactivityTimer) Interface(%s) Neighbour(%s) State(%s)",
 	       _peer.get_if_name().c_str(),
 	       pr_id(get_candidate_id()).c_str(),
 	       pp_state(get_state()).c_str());

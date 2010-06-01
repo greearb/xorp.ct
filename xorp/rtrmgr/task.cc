@@ -409,6 +409,7 @@ void
 XrlStatusStartupValidation::handle_status_response(ProcessStatus status,
 						   const string& reason)
 {
+    UNUSED(reason);
     switch (status) {
     case PROC_NULL:
 	// This is not a valid responses.
@@ -472,6 +473,7 @@ void
 XrlStatusReadyValidation::handle_status_response(ProcessStatus status,
 						 const string& reason)
 {
+    UNUSED(reason);
     switch (status) {
     case PROC_NULL:
 	// This is not a valid response.
@@ -541,6 +543,7 @@ void
 XrlStatusConfigMeValidation::handle_status_response(ProcessStatus status,
 						    const string& reason)
 {
+    UNUSED(reason);
     switch (status) {
     case PROC_NULL:
 	// This is not a valid responses.
@@ -609,6 +612,7 @@ void
 XrlStatusShutdownValidation::handle_status_response(ProcessStatus status,
 						    const string& reason)
 {
+    UNUSED(reason);
     switch (status) {
     case PROC_NULL:
 	// This is not a valid responses.
@@ -2278,6 +2282,7 @@ TaskManager::task_done(bool success, const string& errmsg)
 void
 TaskManager::fail_tasklist_initialization(const string& errmsg)
 {
+    UNUSED(errmsg);
     XLOG_ERROR("%s", errmsg.c_str());
     reset();
     return;

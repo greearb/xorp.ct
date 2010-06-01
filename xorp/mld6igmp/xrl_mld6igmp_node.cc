@@ -1085,7 +1085,9 @@ void
 XrlMld6igmpNode::mld6igmp_client_send_add_delete_membership_cb(
     const XrlError& xrl_error)
 {
+#ifdef L_ERROR
     const SendAddDeleteMembership& membership = _send_add_delete_membership_queue.front();
+#endif
 
     switch (xrl_error.error_code()) {
     case OKAY:
@@ -1637,6 +1639,7 @@ XrlMld6igmpNode::finder_event_observer_0_1_xrl_target_death(
     const string&	target_instance)
 {
     bool do_shutdown = false;
+    UNUSED(target_instance);
 
     if (target_class == _fea_target) {
 	XLOG_ERROR("FEA (instance %s) has died, shutting down.",

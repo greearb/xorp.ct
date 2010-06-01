@@ -78,7 +78,8 @@ PimVif::pim_register_stop_recv(PimNbr *pim_nbr,
     uint8_t group_addr_reserved_flags;
     uint8_t group_mask_len;
     IPvX source_addr(family()), group_addr(family());
-    
+    UNUSED(dst);
+
     //
     // Parse the message
     //
@@ -157,7 +158,8 @@ PimVif::pim_register_stop_process(const IPvX& rp_addr,
 {
     uint32_t	lookup_flags;
     PimMre	*pim_mre;
-    
+    UNUSED(rp_addr);
+
     lookup_flags = PIM_MRE_SG;
     
     if (group_mask_len != IPvX::addr_bitlen(family())) {

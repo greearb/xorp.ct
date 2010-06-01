@@ -128,6 +128,7 @@ void
 IfMgrXrlReplicator::xrl_error_event(const XrlError& err)
 {
     XLOG_ERROR("%s", err.str().c_str());
+    UNUSED(err);
 }
 
 

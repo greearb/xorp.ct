@@ -1264,6 +1264,7 @@ XrlFib2mribNode::finder_event_observer_0_1_xrl_target_death(
     const string&	target_instance)
 {
     bool do_shutdown = false;
+    UNUSED(target_instance);
 
     if (target_class == _fea_target) {
 	XLOG_ERROR("FEA (instance %s) has died, shutting down.",

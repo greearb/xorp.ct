@@ -44,6 +44,9 @@
 bool
 is_pseudo_error(const char* name, XorpFd fd, int error_num)
 {
+    UNUSED(fd);
+    UNUSED(name);
+
     switch (error_num) {
     case EINTR:
 	XLOG_WARNING("%s (fd = %d) got EINTR, continuing.", name,

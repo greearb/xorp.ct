@@ -91,7 +91,11 @@ PimVif::pim_join_prune_recv(PimNbr *pim_nbr, const IPvX& src,
     action_jp_t	action_jp;
     mrt_entry_type_t mrt_entry_type;
     PimJpHeader jp_header(pim_node());
-    
+
+    UNUSED(src);
+    UNUSED(dst);
+    UNUSED(message_type);
+
     //
     // Parse the message
     //

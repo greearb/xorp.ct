@@ -89,6 +89,9 @@ PimVif::pim_cand_rp_adv_recv(PimNbr *pim_nbr,
     string	error_msg = "";
     bool	bool_add_rps_to_rp_table = false;
 
+    UNUSED(src);
+    UNUSED(dst);
+
     //
     // XXX: Don't accept Bootstrap-related messages if the BSR is not running
     //

@@ -463,19 +463,32 @@ xlog_##fn (const char *module_name, int line, const char *file, const char *func
 /*
  * Generate the log functions
  */
+#ifdef L_FATAL
 xlog_fn_abort(fatal, 	XLOG_LEVEL_FATAL)
+#endif
 xlog_fn(error, 		XLOG_LEVEL_ERROR)
 xlog_fn(warning,	XLOG_LEVEL_WARNING)
 xlog_fn(info, 		XLOG_LEVEL_INFO)
 /* XXX: temp, to be removed; see Bugzilla entry 795 */
 xlog_fn(rtrmgr_only_no_preamble,	XLOG_LEVEL_RTRMGR_ONLY_NO_PREAMBLE)
 
+#ifdef L_ASSERT
 void
 xlog_assert(const char *module_name, int line, const char *file, const char *function, const char *failedexpr)
 {
+#ifdef L_FATAL
     xlog_fatal(module_name, line, file, function, 
 	       "Assertion (%s) failed", failedexpr);
+#else
+    UNUSED(module_name);
+    UNUSED(line);
+    UNUSED(file);
+    UNUSED(function);
+    UNUSED(failedexpr);
+    assert(0);
+#endif
 }
+#endif
 
 
 /*

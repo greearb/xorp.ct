@@ -1390,6 +1390,7 @@ MasterConfigTree::save_config_file_cleanup_cb(bool success,
 					      uid_t user_id,
 					      ConfigSaveCallBack cb)
 {
+    UNUSED(filename); // in case XLOG_TRACE is compiled out.
     if (! orig_success) {
 	XLOG_TRACE(_verbose, "Failed to save file %s: %s",
 		   filename.c_str(), orig_error_msg.c_str());

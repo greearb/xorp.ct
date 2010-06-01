@@ -426,6 +426,10 @@ Port<A>::record_bad_packet(const string& why,
 	      this->_pio->ifname().c_str(), this->_pio->vifname().c_str(),
 	      this->_pio->address().str().c_str(), host.str().c_str(), port,
 	      why.c_str());
+    UNUSED(why); // in case XLOG_INFO is compiled out.
+    UNUSED(host);
+    UNUSED(port);
+
     counters().incr_bad_packets();
     if (p) {
 	p->counters().incr_bad_packets();
@@ -443,6 +447,10 @@ Port<A>::record_bad_auth_packet(const string&	why,
 	      this->_pio->ifname().c_str(), this->_pio->vifname().c_str(),
 	      this->_pio->address().str().c_str(), host.str().c_str(), port,
 	      why.c_str());
+    UNUSED(why); // in case XLOG_INFO is compiled out.
+    UNUSED(host);
+    UNUSED(port);
+
     counters().incr_bad_auth_packets();
     if (p) {
 	p->counters().incr_bad_auth_packets();
@@ -460,6 +468,11 @@ Port<A>::record_bad_route(const string&	why,
 	      this->_pio->ifname().c_str(), this->_pio->vifname().c_str(),
 	      this->_pio->address().str().c_str(), host.str().c_str(), port,
 	      why.c_str());
+
+    UNUSED(why); // in case XLOG_INFO is compiled out.
+    UNUSED(host);
+    UNUSED(port);
+
     counters().incr_bad_routes();
     if (p) {
 	p->counters().incr_bad_routes();

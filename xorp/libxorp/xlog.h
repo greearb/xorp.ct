@@ -286,6 +286,7 @@ int	xlog_add_default_output(void);
  */
 int	xlog_remove_default_output(void);
 
+#ifdef L_FATAL
 /**
  * Write a FATAL message to the xlog output streams and aborts the program.
  *
@@ -304,7 +305,10 @@ void	xlog_fatal(const char *module_name,
 		   const char *file,
 		   const char *function,
 		   const char *format, ...) __printflike(5,6);
-#define XLOG_FATAL(fmt...)	XLOG_FN(xlog_fatal, fmt)
+# define XLOG_FATAL(fmt...)	XLOG_FN(xlog_fatal, fmt)
+#else
+# define XLOG_FATAL(fmt...)	assert(0);
+#endif    
 
 /**
  * Write an ERROR message to the xlog output streams.
@@ -322,7 +326,11 @@ void	xlog_error(const char *module_name,
 		   const char *file,
 		   const char *function, 
 		   const char *format, ...) __printflike(5,6);
-#define XLOG_ERROR(fmt...)	XLOG_FN(xlog_error, fmt)
+#ifdef L_ERROR
+ #define XLOG_ERROR(fmt...)	XLOG_FN(xlog_error, fmt)
+#else
+ #define XLOG_ERROR(fmt...)	do{}while(0)
+#endif     
 
 /**
  * Write a WARNING message to the xlog output streams.
@@ -340,7 +348,11 @@ void	xlog_warning(const char *module_name,
 		     const char *file,
 		     const char *function, 
 		     const char *format, ...) __printflike(5,6);
-#define XLOG_WARNING(fmt...)	XLOG_FN(xlog_warning, fmt)
+#ifdef L_WARNING
+ #define XLOG_WARNING(fmt...)	XLOG_FN(xlog_warning, fmt)
+#else
+ #define XLOG_WARNING(fmt...)	do{}while(0)
+#endif
 
 /**
  * Write an INFO message to the xlog output streams.
@@ -358,7 +370,11 @@ void	xlog_info(const char *module_name,
 		  const char *file,
 		  const char *function, 
 		  const char *format, ...) __printflike(5,6);
-#define XLOG_INFO(fmt...)	XLOG_FN(xlog_info, fmt)
+#ifdef L_INFO
+ #define XLOG_INFO(fmt...)	XLOG_FN(xlog_info, fmt)
+#else
+ #define XLOG_INFO(fmt...)  do{}while(0)
+#endif
 
 /**
  * Write a message without a preamble to the xlog output streams.
@@ -378,8 +394,13 @@ void	xlog_rtrmgr_only_no_preamble(const char *module_name,
 				     const char *file,
 				     const char *function,
 				     const char *format, ...) __printflike(5,6);
-#define XLOG_RTRMGR_ONLY_NO_PREAMBLE(fmt...)	XLOG_FN(xlog_rtrmgr_only_no_preamble, fmt)
+#ifdef L_OTHER
+ #define XLOG_RTRMGR_ONLY_NO_PREAMBLE(fmt...)	XLOG_FN(xlog_rtrmgr_only_no_preamble, fmt)
+#else
+ #define XLOG_RTRMGR_ONLY_NO_PREAMBLE(fmt...)	do{}while(0)
+#endif    
 
+#ifdef L_ASSERT
 /**
  * Write a FATAL message to the xlog output streams and aborts the program.
  *
@@ -403,16 +424,19 @@ void	xlog_assert(const char *module_name,
  *
  * @param assertion the assertion condition.
  */
-#define XLOG_ASSERT(assertion)						\
-do {									\
-	if (!(assertion)) {						\
-		xlog_assert(_XLOG_MODULE_NAME,				\
-			    __LINE__, 					\
-			    __FILE__, 					\
-			    __FUNCTION__,				\
-			    #assertion);				\
-	}								\
-} while (0)
+ #define XLOG_ASSERT(assertion)						\
+ do {									\
+ 	if (!(assertion)) {						\
+ 		xlog_assert(_XLOG_MODULE_NAME,				\
+ 			    __LINE__, 					\
+ 			    __FILE__, 					\
+ 			    __FUNCTION__,				\
+ 			    #assertion);				\
+ 	}								\
+ } while (0)
+#else
+# define XLOG_ASSERT(assertion)	assert(assertion)
+#endif
 
 /**
  * A marker that can be used to indicate code that should never be executed.
@@ -421,11 +445,15 @@ do {									\
  * the standard XLOG mechanism.
  * Always calls XLOG_FATAL.
  */
-#define XLOG_UNREACHABLE()						\
-do {									\
-	XLOG_FATAL("Internal fatal error: unreachable code reached");	\
-	exit(1);	/* unreached: keep the compiler happy */	\
-} while (0)
+#ifdef L_OTHER
+ #define XLOG_UNREACHABLE()						\
+ do {									\
+ 	XLOG_FATAL("Internal fatal error: unreachable code reached");	\
+ 	exit(1);	/* unreached: keep the compiler happy */	\
+ } while (0)
+#else
+# define XLOG_UNREACHABLE() assert(0)
+#endif
 
 /**
  * A marker that can be used to indicate code that is not yet
@@ -435,11 +463,15 @@ do {									\
  * the standard XLOG mechanism.
  * Always calls XLOG_FATAL.
  */
-#define XLOG_UNFINISHED()						\
-do {									\
-	XLOG_FATAL("Internal fatal error: unfinished code reached");	\
-	exit(1);	/* unreached: keep the compiler happy */	\
-} while (0)
+#ifdef L_OTHER
+ #define XLOG_UNFINISHED()						\
+ do {									\
+ 	XLOG_FATAL("Internal fatal error: unfinished code reached");	\
+ 	exit(1);	/* unreached: keep the compiler happy */	\
+ } while (0)
+#else
+# define XLOG_UNFINISHED()  assert(0)
+#endif
 
 /*
  * The macros below define the XLOG_TRACE(), the macro responsible for
@@ -462,13 +494,17 @@ do {									\
  * TODO: the magic below should be used for the other XLOG_* entries
  * as well.
  */
-#ifdef CPP_SUPPORTS_GNU_VA_ARGS
+#ifdef L_TRACE
+#   ifdef CPP_SUPPORTS_GNU_VA_ARGS
 #	    define XLOG_TRACE(args...)					\
 		_xcond_trace_msg_long(XORP_MODULE_NAME, __FILE__, __LINE__, __FUNCTION__, args)
-#else
+#   else
 #	    define XLOG_TRACE						\
 		_xcond_trace_entry(XORP_MODULE_NAME, __FILE__, __LINE__, __FUNCTION__),	\
 		_xcond_trace_msg_short
+#   endif
+#else
+#	    define XLOG_TRACE(args...) do{} while(0)
 #endif
 
 /* Function for systems with variable argument macros */

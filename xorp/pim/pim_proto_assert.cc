@@ -148,7 +148,9 @@ PimVif::pim_assert_process(PimNbr *pim_nbr,
 {
     PimMre	*pim_mre_sg, *pim_mre_wc;
     int ret_value;
-    
+    UNUSED(src);
+    UNUSED(dst);
+
     if (group_mask_len != IPvX::addr_bitlen(family())) {
 	XLOG_WARNING("RX %s from %s to %s: "
 		     "invalid group mask length = %d "

@@ -197,6 +197,8 @@ PeerHandler::add<IPv6>(const UpdatePacket *p,
 		       Safi safi)
 {
     UNUSED(original_pa_list);
+    UNUSED(p);
+
     const MPReachNLRIAttribute<IPv6> *mpreach = pa_list->mpreach<IPv6>(safi);
     if(!mpreach)
 	return false;

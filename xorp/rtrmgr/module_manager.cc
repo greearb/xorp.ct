@@ -725,6 +725,7 @@ void
 ModuleManager::Process::stdout_cb(RunCommand* run_command,
 				  const string& output)
 {
+    UNUSED(output);
     XLOG_ASSERT(run_command == _run_command);
     // XXX: output the message from the child process to stdout as-is
     // XXX: temp, to be removed; see Bugzilla entry 795 */
@@ -735,6 +736,7 @@ void
 ModuleManager::Process::stderr_cb(RunCommand* run_command,
 				  const string& output)
 {
+    UNUSED(output);
     XLOG_ASSERT(run_command == _run_command);
     // XXX: output the message from the child process to stderr as-is
     // XXX: temp, to be removed; see Bugzilla entry 795 */
@@ -745,6 +747,7 @@ void
 ModuleManager::Process::done_cb(RunCommand* run_command, bool success,
 				const string& error_msg)
 {
+    UNUSED(error_msg);
     XLOG_ASSERT(run_command == _run_command);
 
     bool is_signal_terminated = run_command->is_signal_terminated();

@@ -415,7 +415,24 @@ def DoAllConfig(env, conf, host_os):
 
     # v4 stack: sysctl (bsd)
     conf.CheckSysctl('IPCTL_FORWARDING', oid='CTL_NET, AF_INET, IPPROTO_IP, IPCTL_FORWARDING', includes='#include <sys/socket.h>\n#include <netinet/in.h>')
-    
+   
+    ##########
+    # logs
+    if not (env.has_key('disable_warninglogs') and env['disable_warninglogs']):
+            conf.Define('L_WARNING')
+    if not (env.has_key('disable_infologs') and env['disable_infologs']):
+            conf.Define('L_INFO')
+    if not (env.has_key('disable_errorlogs') and env['disable_errorlogs']):
+            conf.Define('L_ERROR')
+    if not (env.has_key('disable_tracelogs') and env['disable_tracelogs']):
+            conf.Define('L_TRACE')
+    if not (env.has_key('disable_assertlogs') and env['disable_assertlogs']):
+            conf.Define('L_ASSERT')
+    if not (env.has_key('disable_otherlogs') and env['disable_otherlogs']):
+            conf.Define('L_OTHER')
+    if not (env.has_key('disable_fatallogs') and env['disable_fatallogs']):
+            conf.Define('L_FATAL')
+
     ##########
     # v6 stack
 

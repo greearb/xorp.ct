@@ -63,6 +63,9 @@
 #include "comm_api.h"
 #include "comm_private.h"
 
+#ifdef L_ERROR
+char addr_str_255[sizeof "ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255"];
+#endif
 
 /* XXX: Single threaded socket errno, used to record last error code. */
 int _comm_serrno;
@@ -196,13 +199,12 @@ comm_sock_bind6(xsock_t sock, const struct in6_addr *my_addr,
 	sin6_addr.sin6_scope_id = 0;
 
     if (bind(sock, (struct sockaddr *)&sin6_addr, sizeof(sin6_addr)) < 0) {
-	char addr_str[sizeof "ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255"];
 	_comm_set_serrno();
 	XLOG_ERROR("Error binding socket (family = %d, "
 		   "my_addr = %s, my_port = %d): %s",
 		   family,
 		   (my_addr)?
-		   inet_ntop(family, my_addr, addr_str, sizeof(addr_str))
+		   inet_ntop(family, my_addr, addr_str_255, sizeof(addr_str_255))
 		   : "ANY",
 		   ntohs(my_port), comm_get_error_str(comm_get_last_error()));
 	return (XORP_ERROR);
@@ -307,12 +309,11 @@ comm_sock_join6(xsock_t sock, const struct in6_addr *mcast_addr,
     imr6.ipv6mr_interface = my_ifindex;
     if (setsockopt(sock, IPPROTO_IPV6, IPV6_JOIN_GROUP,
 		   XORP_SOCKOPT_CAST(&imr6), sizeof(imr6)) < 0) {
-	char addr_str[sizeof "ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255"];
 	_comm_set_serrno();
 	XLOG_ERROR("Error joining mcast group (family = %d, "
 		   "mcast_addr = %s my_ifindex = %d): %s",
 		   family,
-		   inet_ntop(family, mcast_addr, addr_str, sizeof(addr_str)),
+		   inet_ntop(family, mcast_addr, addr_str_255, sizeof(addr_str_255)),
 		   my_ifindex, comm_get_error_str(comm_get_last_error()));
 	return (XORP_ERROR);
     }
@@ -388,12 +389,11 @@ comm_sock_leave6(xsock_t sock, const struct in6_addr *mcast_addr,
     imr6.ipv6mr_interface = my_ifindex;
     if (setsockopt(sock, IPPROTO_IPV6, IPV6_LEAVE_GROUP,
 		   XORP_SOCKOPT_CAST(&imr6), sizeof(imr6)) < 0) {
-	char addr_str[sizeof "ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255"];
 	_comm_set_serrno();
 	XLOG_ERROR("Error leaving mcast group (family = %d, "
 		   "mcast_addr = %s my_ifindex = %d): %s",
 		   family,
-		   inet_ntop(family, mcast_addr, addr_str, sizeof(addr_str)),
+		   inet_ntop(family, mcast_addr, addr_str_255, sizeof(addr_str_255)),
 		   my_ifindex, comm_get_error_str(comm_get_last_error()));
 	return (XORP_ERROR);
     }
@@ -487,7 +487,6 @@ comm_sock_connect6(xsock_t sock, const struct in6_addr *remote_addr,
     sin6_addr.sin6_scope_id = 0;		/* XXX: unused (?)	     */
 
     if (connect(sock, (struct sockaddr *)&sin6_addr, sizeof(sin6_addr)) < 0) {
-	char addr_str[sizeof "ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255"];
 	_comm_set_serrno();
 	if (! is_blocking) {
 	    if (comm_get_last_error() == EINPROGRESS) {
@@ -506,7 +505,7 @@ comm_sock_connect6(xsock_t sock, const struct in6_addr *remote_addr,
 		   "remote_addr = %s, remote_port = %d): %s",
 		   family,
 		   (remote_addr)?
-		   inet_ntop(family, remote_addr, addr_str, sizeof(addr_str))
+		   inet_ntop(family, remote_addr, addr_str_255, sizeof(addr_str_255))
 		   : "ANY",
 		   ntohs(remote_port),
 		   comm_get_error_str(comm_get_last_error()));
@@ -1092,6 +1091,7 @@ comm_set_onesbcast(xsock_t sock, int enabled)
     XLOG_ERROR("setsockopt IP_ONESBCAST %u: %s", enabled,
 	       "IP_ONESBCAST support not present.");
     UNUSED(sock);
+    UNUSED(enabled);
     return (XORP_ERROR);
 #endif /* ! IP_ONESBCAST */
 }
@@ -1327,6 +1327,7 @@ comm_sock_no_ipv6(const char* method, ...)
 {
     _comm_serrno = EAFNOSUPPORT;
     XLOG_ERROR("%s: IPv6 support not present.", method);
+    UNUSED(method);
 }
 
 void

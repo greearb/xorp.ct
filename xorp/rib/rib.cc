@@ -756,6 +756,8 @@ RIB<A>::add_route(const string&		tablename,
 		  uint32_t		metric,
 		  const PolicyTags&	policytags)
 {
+    UNUSED(ifname);
+
     RouteTable<A>* rt = find_table(tablename);
     if (rt == NULL) {
 	if (_errors_are_fatal) {
@@ -889,6 +891,8 @@ RIB<A>::replace_route(const string&	tablename,
 		      uint32_t		metric,
 		      const PolicyTags&	policytags)
 {
+    UNUSED(ifname);
+
     RouteTable<A>* rt = find_table(tablename);
     if (NULL == rt)
 	return XORP_ERROR; // Table does not exist

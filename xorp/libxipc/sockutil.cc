@@ -213,6 +213,7 @@ address_lookup(const string& addr, in_addr& ia)
     do {
 	struct hostent *h = gethostbyname(addr.c_str());
 	if (h == NULL) {
+#ifdef L_ERROR
 #ifdef HAVE_HSTRERROR
 	    int err = h_errno;
 	    const char *strerr = hstrerror(err);
@@ -222,6 +223,7 @@ address_lookup(const string& addr, in_addr& ia)
 #endif
 	    XLOG_ERROR("Can't resolve IP address for %s: %s %d",
 		       addr.c_str(), strerr, err);
+#endif
 	    return false;
 	} else {
 	    memcpy(&ia, h->h_addr_list[0], sizeof(ia));

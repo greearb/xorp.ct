@@ -304,6 +304,7 @@ XrlRtrmgrInterface::initialize_client_state(uid_t user_id,
 void
 XrlRtrmgrInterface::finder_register_done(const XrlError& e, string clientname) 
 {
+    UNUSED(clientname);
     if (e != XrlError::OKAY()) {
 	XLOG_ERROR("Failed to register with finder about XRL %s (err: %s)\n",
 		   clientname.c_str(), e.error_msg());
@@ -991,6 +992,8 @@ XrlRtrmgrInterface::finder_event_observer_0_1_xrl_target_birth(
 {
     XLOG_TRACE(_verbose, "XRL Birth: class %s instance %s\n",
 	       target_class.c_str(), target_instance.c_str());
+    UNUSED(target_class); // in case XLOG_TRACE is compiled out
+    UNUSED(target_instance);
     return XrlCmdError::OKAY();
 }
 
@@ -1002,6 +1005,8 @@ XrlRtrmgrInterface::finder_event_observer_0_1_xrl_target_death(
 {
     XLOG_TRACE(_verbose, "XRL Death: class %s instance %s\n",
 	       target_class.c_str(), target_instance.c_str());
+
+    UNUSED(target_instance); // in case XLOG_TRACE is compiled out
 
     multimap<uid_t, UserInstance*>::iterator iter;
     for (iter = _config_users.begin(); iter != _config_users.end(); ++iter) {

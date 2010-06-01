@@ -67,6 +67,7 @@ PimMrt::signal_message_nocache_recv(const string& src_module_instance_name,
 	       src_module_instance_name.c_str(),
 	       vif_index,
 	       cstring(src), cstring(dst));
+    UNUSED(src_module_instance_name); // in case XLOG_TRACE is compiled out.
     
     receive_data(vif_index, src, dst);
     
@@ -84,6 +85,7 @@ PimMrt::signal_message_wrongvif_recv(const string& src_module_instance_name,
 	       src_module_instance_name.c_str(),
 	       vif_index,
 	       cstring(src), cstring(dst));
+    UNUSED(src_module_instance_name); // in case XLOG_TRACE is compiled out.
     
     receive_data(vif_index, src, dst);
     
@@ -102,7 +104,8 @@ PimMrt::signal_message_wholepkt_recv(const string& src_module_instance_name,
     const IPvX *rp_addr_ptr;
     PimVif *pim_vif = NULL;
     string dummy_error_msg;
-    
+    UNUSED(src_module_instance_name);
+
     XLOG_TRACE(pim_node().is_log_trace(),
 	       "RX WHOLEPKT signal from %s: vif_index = %d "
 	       "src = %s dst = %s len = %u",
@@ -473,6 +476,9 @@ PimMrt::signal_dataflow_recv(const IPvX& source_addr,
     uint32_t lookup_flags
 	= PIM_MRE_RP | PIM_MRE_WC | PIM_MRE_SG | PIM_MRE_SG_RPT;
     uint32_t expected_dataflow_monitor_sec = PIM_KEEPALIVE_PERIOD_DEFAULT;
+
+    // TODO:  Maybe code should really be using this??
+    UNUSED(measured_interval_usec); // in case XLOG_TRACE is compiled out.
     
     XLOG_TRACE(pim_node().is_log_trace(),
 	       "RX DATAFLOW signal: "

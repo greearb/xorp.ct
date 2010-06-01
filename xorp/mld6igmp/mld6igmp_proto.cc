@@ -403,7 +403,8 @@ Mld6igmpVif::mld6igmp_membership_report_recv(const IPvX& src,
 					     buffer_t *buffer)
 {
     Mld6igmpGroupRecord *group_record = NULL;
-    
+    UNUSED(dst);
+
     // The group address must be a valid multicast address
     if (! group_address.is_multicast()) {
 	XLOG_WARNING("RX %s from %s to %s on vif %s: "
@@ -487,6 +488,8 @@ Mld6igmpVif::mld6igmp_leave_group_recv(const IPvX& src,
 {
     Mld6igmpGroupRecord *group_record = NULL;
     string dummy_error_msg;
+    UNUSED(dst);
+    UNUSED(message_type);
 
     // The group address must be a valid multicast address
     if (! group_address.is_multicast()) {
@@ -820,6 +823,9 @@ Mld6igmpVif::mld6igmp_query_version_consistency_check(const IPvX& src,
 						      int message_version)
 {
     string proto_name, mode_config, mode_received;
+    UNUSED(src);
+    UNUSED(dst);
+    UNUSED(message_type);
 
     if (message_version == proto_version())
 	return (XORP_OK);

@@ -571,7 +571,6 @@ PimVif::pim_bootstrap_send(const IPvX& dst_addr, const BsrZone& bsr_zone,
     return (XORP_OK);
     
  invalid_addr_family_error:
-    XLOG_UNREACHABLE();
     error_msg = c_format("TX %s from %s to %s: "
 			 "invalid address family error = %d",
 			 PIMTYPE2ASCII(PIM_BOOTSTRAP),
@@ -581,7 +580,6 @@ PimVif::pim_bootstrap_send(const IPvX& dst_addr, const BsrZone& bsr_zone,
     return (XORP_ERROR);
     
  buflen_error:
-    XLOG_UNREACHABLE();
     error_msg = c_format("TX %s from %s to %s: "
 			 "packet cannot fit into sending buffer",
 			 PIMTYPE2ASCII(PIM_BOOTSTRAP),
@@ -601,7 +599,9 @@ PimVif::pim_bootstrap_send_prepare(const IPvX& src_addr, const IPvX& dst_addr,
     buffer_t *buffer = buffer_send_prepare(_buffer_send_bootstrap);
     uint8_t hash_mask_len = bsr_zone.hash_mask_len();
     uint8_t group_addr_reserved_flags = 0;
-    
+    UNUSED(src_addr);
+    UNUSED(dst_addr);
+
     //
     // Write zone-related data to the buffer
     //
@@ -652,7 +652,6 @@ PimVif::pim_bootstrap_send_prepare(const IPvX& src_addr, const IPvX& dst_addr,
     return (buffer);
 
  invalid_addr_family_error:
-    XLOG_UNREACHABLE();
     XLOG_ERROR("TX %s from %s to %s: "
 	       "invalid address family error = %d",
 	       PIMTYPE2ASCII(PIM_BOOTSTRAP),
@@ -661,7 +660,6 @@ PimVif::pim_bootstrap_send_prepare(const IPvX& src_addr, const IPvX& dst_addr,
     return (NULL);
     
  buflen_error:
-    XLOG_UNREACHABLE();
     XLOG_ERROR("TX %s from %s to %s: "
 	       "packet cannot fit into sending buffer",
 	       PIMTYPE2ASCII(PIM_BOOTSTRAP),

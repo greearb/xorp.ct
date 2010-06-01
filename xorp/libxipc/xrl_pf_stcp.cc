@@ -759,6 +759,7 @@ void
 XrlPFSTCPSender::die(const char* reason, bool verbose)
 {
     XLOG_ASSERT(_sock.is_valid());
+    UNUSED(reason);
 
     if (verbose)
 	XLOG_ERROR("XrlPFSTCPSender died: %s", reason);
