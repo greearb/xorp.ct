@@ -541,7 +541,15 @@ NetlinkSocketReader::receive_data(NetlinkSocket& ns, uint32_t seqno,
     while (_cache_valid == false) {
 	if (ns.force_recvmsg(true, error_msg) != XORP_OK) {
 	    if (errno == EWOULDBLOCK || errno == EAGAIN) {
-		return XORP_OK;
+		if (!_cache_valid) {
+		    error_msg += c_format("No more netlink messages to read, but didn't find response for seqno: %i\n",
+					  seqno);
+		    XLOG_WARNING("%s", error_msg.c_str());
+		    return XORP_ERROR;
+		}
+		else {
+		    return XORP_OK;
+		}
 	    }
 	    return (XORP_ERROR);
 	}
