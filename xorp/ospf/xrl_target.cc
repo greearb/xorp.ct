@@ -206,9 +206,10 @@ XrlOspfV2Target::policy_redist4_0_1_add_route4(const IPv4Net& network,
     debug_msg("Net: %s Nexthop: %s Unicast: %s Multicast %s metric %d\n",
 	      cstring(network), cstring(nexthop), bool_c_str(unicast),
 	      bool_c_str(multicast), metric);
-
+#if 0
     if (!unicast)
 	return XrlCmdError::OKAY();
+#endif
 
     if (!_ospf.originate_route(network, nexthop, metric, policytags)) {
 	return XrlCmdError::COMMAND_FAILED("Network: " + network.str());
@@ -225,8 +226,10 @@ XrlOspfV2Target::policy_redist4_0_1_delete_route4(const IPv4Net& network,
     debug_msg("Net: %s Unicast: %s Multicast %s\n",
 	      cstring(network), bool_c_str(unicast), bool_c_str(multicast));
 
+#if 0
     if (!unicast)
 	return XrlCmdError::OKAY();
+#endif
 
     if (!_ospf.withdraw_route(network)) {
 	return XrlCmdError::COMMAND_FAILED("Network: " + network.str());

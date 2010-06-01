@@ -8,11 +8,23 @@ protocols {
     }
 }
 
+policy {
+    policy-statement @: txt {
+	term @: txt {
+	    from {
+		metric: u32range;
+	    }
+	}
+    }
+}
+
+
 protocols {
     fib2mrib {
 	%help:		short		"Configure the FIB2MRIB module";
 	%modinfo:	provides	fib2mrib;
 	%modinfo:	depends		rib;
+	%modinfo:	depends		policy;
 	%modinfo:	path		"xorp_fib2mrib";
 	%modinfo:	default_targetname "fib2mrib";
 	%modinfo:	status_method	xrl "$(fib2mrib.targetname)/common/0.1/get_status->status:u32&reason:txt";
@@ -41,6 +53,24 @@ protocols {
 	    %help:	short "Enable the FIB2MRIB module";
 	    %create:;
 	    %set:	xrl "$(fib2mrib.targetname)/fib2mrib/0.1/enable_fib2mrib?enable:bool=$(@)";
+	}
+    }
+}
+
+policy {
+    %create: xrl "$(policy.targetname)/policy/0.1/set_proto_target?protocol:txt=fib2mrib&target:txt=fib2mrib";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=fib2mrib&variable:txt=network4&type:txt=ipv4net&access:txt=r&id:u32=10";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=fib2mrib&variable:txt=metric&type:txt=u32&access:txt=rw&id:u32=14";
+
+    policy-statement @: txt {
+	term @: txt {
+	    from {
+		metric {
+		    %help: short "Set the metric value";
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=metric $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
+		}
+	    }
 	}
     }
 }

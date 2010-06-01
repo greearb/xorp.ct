@@ -96,6 +96,7 @@ policy {
 		    %help: short "Protocol from which route was learned";
 		    %allow: $(@) "bgp" %help: "BGP routes";
 		    %allow: $(@) "connected" %help: "Directly connected sub-network routes";
+		    %allow: $(@) "fib2mrib" %help: "FIB2MRIB routes";
 		    %allow: $(@) "olsr4" %help: "OLSRv1 IPv4 routes";
 		    %allow: $(@) "ospf4" %help: "OSPF IPv4 routes";
 		    %allow: $(@) "ospf6" %help: "OSPF IPv6 routes";
