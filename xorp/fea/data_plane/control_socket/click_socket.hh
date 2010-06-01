@@ -22,6 +22,9 @@
 #ifndef __FEA_DATA_PLANE_CONTROL_SOCKET_CLICK_SOCKET_HH__
 #define __FEA_DATA_PLANE_CONTROL_SOCKET_CLICK_SOCKET_HH__
 
+#include <xorp_config.h>
+#ifdef XORP_USE_CLICK
+
 #include <list>
 
 #include "libxorp/eventloop.hh"
@@ -639,4 +642,5 @@ private:
     string	    _cache_data;	// Cached Click socket data.
 };
 
+#endif // click
 #endif // __FEA_DATA_PLANE_CONTROL_SOCKET_CLICK_SOCKET_HH__

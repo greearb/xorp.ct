@@ -31,12 +31,14 @@ is_shared = env.has_key('SHAREDLIBS')
 
 sources = [
 	# C++ files
-	'click_socket.cc',
 	'netlink_socket.cc',
 	'netlink_socket_utilities.cc',
 	'routing_socket.cc',
 	'routing_socket_utilities.cc',
 	]
+
+if env['enable_click']:
+    sources.append('click_socket.cc')
 
 if is_shared:
     libxcs = env.SharedLibrary(target = 'libxorp_fea_control_socket',

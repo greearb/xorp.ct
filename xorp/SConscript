@@ -46,7 +46,7 @@ subdirs = [
     'bgp',
     ]
 
-if env['WITH_OLSR']:
+if env['enable_olsr']:
     subdirs.append('contrib/olsr')
 
 

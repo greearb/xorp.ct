@@ -22,6 +22,9 @@
 #ifndef __FEA_DATA_PLANE_MANAGERS_FEA_DATA_PLANE_MANAGER_CLICK_HH__
 #define __FEA_DATA_PLANE_MANAGERS_FEA_DATA_PLANE_MANAGER_CLICK_HH__
 
+#include <xorp_config.h>
+#ifdef XORP_USE_CLICK
+
 #include "fea/fea_data_plane_manager.hh"
 
 class FibConfigEntryGetClick;
@@ -298,4 +301,5 @@ private:
     FibConfigTableSetClick*	_fibconfig_table_set_click;
 };
 
+#endif // click
 #endif // _FEA_DATA_PLANE_MANAGERS_FEA_DATA_PLANE_MANAGER_CLICK_HH__

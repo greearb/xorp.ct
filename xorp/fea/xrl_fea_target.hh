@@ -34,7 +34,9 @@
 #include "xrl_fib_client_manager.hh"
 
 class EventLoop;
+#ifdef XORP_USE_CLICK
 class FeaDataPlaneManagerClick;
+#endif
 class FeaNode;
 class FibConfig;
 class FirewallManager;
@@ -157,6 +159,7 @@ public:
 	const string&	target_class,
 	const string&	target_instance);
 
+#ifdef XORP_USE_CLICK
     /**
      *  Load Click FEA support.
      */
@@ -331,6 +334,8 @@ public:
     XrlCmdError fea_click_0_1_set_user_click_config_generator_file(
 	// Input values,
 	const string&	user_click_config_generator_file);
+
+#endif // click
 
     /**
      *  Add a FIB client.
@@ -2738,10 +2743,12 @@ private:
     bool	_is_running;	// True if the service is running
     bool	_is_shutdown_received; // True if shutdown XRL request received
 
+#ifdef XORP_USE_CLICK
     //
     // The externally loadable managers
     //
     FeaDataPlaneManagerClick*	_fea_data_plane_manager_click;
+#endif
 };
 
 #endif // __FEA_XRL_FEA_TARGET_HH__

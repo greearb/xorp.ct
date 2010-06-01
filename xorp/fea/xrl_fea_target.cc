@@ -54,7 +54,9 @@
 #include "profile_vars.hh"
 #include "xrl_fea_target.hh"
 
+#ifdef XORP_USE_CLICK
 #include "fea/data_plane/managers/fea_data_plane_manager_click.hh"
+#endif
 
 XrlFeaTarget::XrlFeaTarget(EventLoop&			eventloop,
 			   FeaNode&			fea_node,
@@ -76,8 +78,10 @@ XrlFeaTarget::XrlFeaTarget(EventLoop&			eventloop,
       _io_tcpudp_manager(fea_node.io_tcpudp_manager()),
       _lib_fea_client_bridge(lib_fea_client_bridge),
       _is_running(false),
-      _is_shutdown_received(false),
-      _fea_data_plane_manager_click(NULL)
+      _is_shutdown_received(false)
+#ifdef XORP_USE_CLICK
+    , _fea_data_plane_manager_click(NULL)
+#endif
 {
 }
 
@@ -202,6 +206,8 @@ XrlFeaTarget::finder_event_observer_0_1_xrl_target_death(
     return XrlCmdError::OKAY();
 }
 
+
+#ifdef XORP_USE_CLICK
 /**
  *  Load Click FEA support.
  */
@@ -452,7 +458,6 @@ XrlFeaTarget::fea_click_0_1_set_kernel_click_modules(
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
-
     return XrlCmdError::OKAY();
 }
 
@@ -692,7 +697,6 @@ XrlFeaTarget::fea_click_0_1_set_user_click_startup_config_file(
     const string&	user_click_startup_config_file)
 {
     string error_msg;
-
     if (_fea_data_plane_manager_click == NULL) {
 	error_msg = c_format("Data plane manager Click is not loaded");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -720,7 +724,6 @@ XrlFeaTarget::fea_click_0_1_set_user_click_config_generator_file(
     const string&	user_click_config_generator_file)
 {
     string error_msg;
-
     if (_fea_data_plane_manager_click == NULL) {
 	error_msg = c_format("Data plane manager Click is not loaded");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -734,6 +737,8 @@ XrlFeaTarget::fea_click_0_1_set_user_click_config_generator_file(
 
     return XrlCmdError::OKAY();
 }
+
+#endif //click
 
 /**
  *  Add a FIB client.

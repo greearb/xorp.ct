@@ -69,7 +69,7 @@ tps = [
     'vrrp',
 ]
 
-if env['WITH_OLSR']:
+if env['enable_olsr']:
     cmds.append('olsr4')
     tps.append('olsr4')
 

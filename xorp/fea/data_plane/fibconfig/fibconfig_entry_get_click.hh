@@ -22,6 +22,10 @@
 #ifndef __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_ENTRY_GET_CLICK_HH__
 #define __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_ENTRY_GET_CLICK_HH__
 
+#include <xorp_config.h>
+#ifdef XORP_USE_CLICK
+
+
 #include "fea/fibconfig_entry_get.hh"
 #include "fea/data_plane/control_socket/click_socket.hh"
 
@@ -102,4 +106,5 @@ private:
     ClickSocketReader	_cs_reader;
 };
 
+#endif
 #endif // __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_ENTRY_GET_CLICK_HH__

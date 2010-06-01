@@ -31,7 +31,6 @@ is_shared = env.has_key('SHAREDLIBS')
 
 sources = [
 	# C++ files
-	'fibconfig_entry_get_click.cc',
 	'fibconfig_entry_get_dummy.cc',
 	'fibconfig_entry_get_netlink_socket.cc',
 	'fibconfig_entry_get_routing_socket.cc',
@@ -40,7 +39,6 @@ sources = [
 	'fibconfig_entry_observer_routing_socket.cc',
 	'fibconfig_entry_parse_netlink_socket.cc',
 	'fibconfig_entry_parse_routing_socket.cc',
-	'fibconfig_entry_set_click.cc',
 	'fibconfig_entry_set_dummy.cc',
 	'fibconfig_entry_set_netlink_socket.cc',
 	'fibconfig_entry_set_routing_socket.cc',
@@ -48,7 +46,6 @@ sources = [
 	'fibconfig_forwarding_proc_linux.cc',
 	'fibconfig_forwarding_solaris.cc',
 	'fibconfig_forwarding_sysctl.cc',
-	'fibconfig_table_get_click.cc',
 	'fibconfig_table_get_dummy.cc',
 	'fibconfig_table_get_netlink_socket.cc',
 	'fibconfig_table_get_sysctl.cc',
@@ -57,11 +54,17 @@ sources = [
 	'fibconfig_table_observer_routing_socket.cc',
 	'fibconfig_table_parse_netlink_socket.cc',
 	'fibconfig_table_parse_routing_socket.cc',
-	'fibconfig_table_set_click.cc',
 	'fibconfig_table_set_dummy.cc',
 	'fibconfig_table_set_netlink_socket.cc',
 	'fibconfig_table_set_routing_socket.cc',
 	]
+
+if env['enable_click']:
+	sources.append('fibconfig_entry_get_click.cc')
+        sources.append('fibconfig_entry_set_click.cc')
+        sources.append('fibconfig_table_set_click.cc')
+        sources.append('fibconfig_table_get_click.cc')
+                       
 
 if is_shared:
     libxfc = env.SharedLibrary(target = 'libxorp_fea_fibconfig',

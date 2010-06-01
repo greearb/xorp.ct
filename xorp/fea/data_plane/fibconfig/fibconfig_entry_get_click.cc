@@ -17,6 +17,8 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
+#include <xorp_config.h>
+#ifdef XORP_USE_CLICK
 
 
 #include "fea/fea_module.h"
@@ -199,3 +201,6 @@ FibConfigEntryGetClick::lookup_route_by_network6(const IPv6Net& dst, Fte6& fte)
 
     return (XORP_ERROR);
 }
+
+
+#endif //click

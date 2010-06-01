@@ -4,6 +4,7 @@
  * XRL interface common to all XRL target entities.
  */
 
+#include <xorp_config.h>
 
 interface common/0.1 {
 	/** Get name of Xrl Target */

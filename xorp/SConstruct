@@ -76,6 +76,8 @@ vars.AddVariables(
     BoolVariable('enable_olsr',  'Build OLSR', False),
     BoolVariable('enable_tests', 'Build Test Programs', False),
     BoolVariable('save_args', 'Save scons arguments to .scons_build_args file', False),
+    BoolVariable('enable_click',  'Build CLICK support', False),
+    BoolVariable('enable_bgp',  'Build BGP', False),
     BoolVariable('debug_xrldb',  'Build with runtime XRL syntax validation in Router Manager', False),
     EnumVariable('debug', 'Build with debug symbols', 'full',
                  allowed_values=('no', 'yes', 'full', 'override'),
@@ -234,16 +236,15 @@ print 'Debug messages:   ', env['debug_msg']
 print 'Debug function names: ', env['debug_fn']
 print 'Debug callbacks:  ', env['debug_cb']
 print 'Debug XRL syntax: ', env['debug_xrldb']
+print 'Enable OLSR:      ', env['enable_olsr']
+print 'Enable CLICK:     ', env['enable_click']
+print 'Enable BGP:       ', env['enable_bgp']
 
 env['WITH_GPROF'] = ARGUMENTS.get('enable_gprof', False)
 print 'Enable gprof:     ', env['enable_gprof']
 
 env['VALIDATE_XRLDB'] = ARGUMENTS.get('enable_xrldb_validation', False)
 print 'Enable XRLdb Validation:      ', env['VALIDATE_XRLDB']
-
-env['WITH_OLSR'] = ARGUMENTS.get('enable_olsr', False)
-print 'Enable OLSR:      ', env['enable_olsr']
-
 
 env['CONFIGURELOG'] = str(builddir) + os.sep + 'config.log'
 env['CONFIGUREDIR'] = str(builddir) + os.sep + '.sconf_temp'
@@ -422,6 +423,10 @@ if not env.GetOption('clean') and \
     # Big ball of mud.
     from config.allconfig import DoAllConfig
     DoAllConfig(env, conf, host_os)
+
+    tst = ARGUMENTS.get('enable_click', False)
+    if tst and not (tst == "no"):
+        conf.Define('XORP_USE_CLICK')
 
     # Note: hard-coded paths pushed down to rtrmgr/util.cc environment.
 

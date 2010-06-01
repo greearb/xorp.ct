@@ -22,6 +22,10 @@
 #ifndef __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_SET_CLICK_HH__
 #define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_SET_CLICK_HH__
 
+#include <xorp_config.h>
+#ifdef XORP_USE_CLICK
+
+
 #include "fea/ifconfig_set.hh"
 #include "fea/data_plane/control_socket/click_socket.hh"
 
@@ -351,4 +355,5 @@ private:
     string			_generated_user_click_config;
 };
 
+#endif
 #endif // __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_SET_CLICK_HH__

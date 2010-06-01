@@ -17,7 +17,8 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-
+#include <xorp_config.h>
+#ifdef XORP_USE_CLICK
 
 #include "fea/fea_module.h"
 
@@ -657,3 +658,5 @@ FeaDataPlaneManagerClick::set_user_click_config_generator_file(const string& v,
 
     return (XORP_OK);
 }
+
+#endif // click

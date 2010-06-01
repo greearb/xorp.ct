@@ -41,7 +41,6 @@ xifs = [
     'common.xif',
     'coord.xif',
     'datain.xif',
-    'fea_click.xif',
     'fea_fib_client.xif',
     'fea_fib.xif',
     'fea_firewall.xif',
@@ -93,6 +92,9 @@ xifs = [
     'test_xrls.xif',
     'vrrp.xif',
     ]
+
+Depends('common.xif', '../../xorp_config.h');
+Depends('fea.xif', 'common.xif');
 
 all_xif_libs = []
 

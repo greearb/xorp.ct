@@ -16,29 +16,29 @@
 # http://xorp.net
 #
 # $XORP$
-
+ 
 import os
 import string
 Import("env")
-
+ 
 env = env.Clone()
 is_shared = env.has_key('SHAREDLIBS')
-
+ 
 env.AppendUnique(CPPPATH = [ "#" ])
 env.AppendUnique(LIBPATH = [
-	'$BUILDDIR/libxipc',
-	'$BUILDDIR/libcomm',
-	'$BUILDDIR/libxorp',
-	])
-
+    '$BUILDDIR/libxipc',
+    '$BUILDDIR/libcomm',
+    '$BUILDDIR/libxorp',
+    ])
+ 
 env.AppendUnique(LIBS = [
-	'xorp_ipc',
-	'xorp_comm',
-	'xorp_core',
-	])
-
-env['TGTGEN_CPPPATH'] = [ '#/xrl/interfaces' ]
-
+    'xorp_ipc',
+    'xorp_comm',
+    'xorp_core',
+    ])
+ 
+env['TGTGEN_CPPPATH'] = [ '#/xrl/interfaces', '$BUILDDIR' ]
+ 
 tgts = [
     'bgp.tgt',
     'cli.tgt',
@@ -75,11 +75,17 @@ tgts = [
     'xorpsh.tgt',
     ]
 
-if env['WITH_OLSR']:
+if env['enable_olsr']:
     tgts.append('olsr4.tgt')
-
+ 
 #xrls_path = '$datadir'
 xrlspath = '$exec_prefix/xrl/targets'
+
+# Not sure this is working right...I want some way to make the
+# targets depend on the xorp_config.h so we can enable/disable various
+# features w/out having to re-compile everything to get the changes to
+# take affect. --Ben
+Depends('fea.tgt', '../../xorp_config.h');
 
 def BuildXrlTarget(tgt):
     lib = None
