@@ -92,8 +92,6 @@ UNCONST(const void *a)
 }
 
 
-/*	$NetBSD: localedef.h,v 1.7 2005/11/29 03:12:16 christos Exp $	*/
-
 /*
  * Copyright (c) 1994 Winning Strategies, Inc.
  * All rights reserved.

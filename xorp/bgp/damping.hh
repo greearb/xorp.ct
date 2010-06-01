@@ -18,7 +18,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/bgp/damping.hh,v 1.7 2008/10/02 21:56:15 bms Exp $
 
 #ifndef __BGP_DAMPING_HH__
 #define __BGP_DAMPING_HH__

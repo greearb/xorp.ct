@@ -18,7 +18,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/bgp/bgp.hh,v 1.73 2008/11/08 06:14:36 mjh Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__

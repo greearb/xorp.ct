@@ -64,7 +64,6 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * __FBSDID("$FreeBSD: src/lib/libc/stdlib/getopt.c,v 1.7 2004/03/06 17:05:45 ache Exp $");
  */
 
 #include "libxorp/xorp.h"

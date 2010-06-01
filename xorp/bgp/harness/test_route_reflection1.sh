@@ -1,10 +1,6 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_route_reflection1.sh,v 1.7 2007/12/10 23:26:33 mjh Exp $
-#
-
-#
 # Test basic BGP routing reflection.
 #
 # This script started with no arguments will start all required process and

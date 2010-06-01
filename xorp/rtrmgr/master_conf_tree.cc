@@ -48,7 +48,7 @@
 #include "util.hh"
 
 #define XORP_CONFIG_FORMAT_VERSION		"1.1"
-#define XORP_CONFIG_XORP_VERSION		"1.7"
+#define XORP_CONFIG_XORP_VERSION		"1.8-CT"
 
 //
 // The strings that are used to add and delete a load or save file, to

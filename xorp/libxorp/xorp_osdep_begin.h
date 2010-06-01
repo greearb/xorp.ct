@@ -21,9 +21,6 @@
  * http://xorp.net
  */
 
-/*
- * $XORP: xorp/libxorp/xorp_osdep_begin.h,v 1.7 2008/10/02 21:57:37 bms Exp $
- */
 
 #ifndef __LIBXORP_XORP_OSDEP_BEGIN_H__
 #define __LIBXORP_XORP_OSDEP_BEGIN_H__
