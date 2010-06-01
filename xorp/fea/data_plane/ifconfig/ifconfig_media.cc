@@ -279,28 +279,32 @@ ifconfig_media_get_link_status(const string& if_name, bool& no_carrier,
     cfn.append(if_name);
     cfn.append("/carrier");
     errno = 0;
+
+    // Seems that C++ throws an exception if you just do the >> and the
+    // underlying logic returns EINVAL.  Use read and then check for good
+    // instead.
     ifstream cf(cfn.c_str());
-    if (cf) {
-        int c = -1;
-        cf >> c;
-	// Old 2.6.18-ish kernels return EINVAL when trying to read
-	// carrier file when carrier is not active.  Yay them!
-	// So, consider EINVAL a successful (no-carrier) detection.
-        if ((c == 0) || (errno == EINVAL)) {
+    char dummy[4];
+    dummy[0] = 0;
+    cf.read(dummy, 1);
+    if (cf.good()) {
+	if (dummy[0] == '0') {
 	    no_carrier = 1;
 	}
-        else if (c == 1) {
+        else if (dummy[0] == '1') {
             no_carrier = 0;
         }
         else {
-	    // can't read, dunno why, but don't trust value.
+	    // can't read, or got funky value, cannot detect this way.
+	    error_msg += c_format("Got un-known value: 0x%02hx for %s, cannot probe carrier for this device using sysfs.\n",
+				  (unsigned short)(dummy[0]), cfn.c_str());
 	    goto notfound;
 	}
 	error_msg = ""; // all is forgiven
 	return XORP_OK;
     }
     else {
-	error_msg += c_format("error opening file: %s errno: %i\n", cfn.c_str(), errno);
+	error_msg += c_format("error reading file: %s errno: %i\n", cfn.c_str(), errno);
     }
  
 notfound:
