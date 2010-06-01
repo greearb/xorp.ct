@@ -65,7 +65,7 @@ public:
      * 
      * @return the string with the type of this exception.
      */
-    const string what() const { return _what; }
+    const string& what() const { return _what; }
 
     /**
      * Get the location for throwing an exception.
