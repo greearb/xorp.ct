@@ -37,7 +37,6 @@ sources = [
 	'fibconfig_entry_observer_dummy.cc',
 	'fibconfig_entry_observer_netlink_socket.cc',
 	'fibconfig_entry_observer_routing_socket.cc',
-	'fibconfig_entry_parse_netlink_socket.cc',
 	'fibconfig_entry_parse_routing_socket.cc',
 	'fibconfig_entry_set_dummy.cc',
 	'fibconfig_entry_set_netlink_socket.cc',
