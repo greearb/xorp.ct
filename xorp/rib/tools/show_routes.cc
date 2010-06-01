@@ -306,6 +306,9 @@ ShowRoutesProcessor::ShowRoutesProcessor(EventLoop&		e,
 
 ShowRoutesProcessor::~ShowRoutesProcessor()
 {
+    // Withdraw the Xrl methods
+    set_command_map(NULL);
+
     if (_rtr != NULL) {
 	delete _rtr;
 	_rtr = NULL;
@@ -342,9 +345,6 @@ ShowRoutesProcessor::startup()
 int
 ShowRoutesProcessor::shutdown()
 {
-    // Withdraw the Xrl methods
-    this->set_command_map(NULL);
-
     ServiceStatus st = this->status();
     if (st == SERVICE_FAILED
 	|| st == SERVICE_SHUTTING_DOWN
@@ -353,6 +353,7 @@ ShowRoutesProcessor::shutdown()
 
     set_status(SERVICE_SHUTTING_DOWN);
     step_1000_request_cease();
+    
     return (XORP_OK);
 }
 
