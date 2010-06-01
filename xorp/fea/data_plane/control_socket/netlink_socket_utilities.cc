@@ -594,15 +594,15 @@ NlmUtils::check_netlink_request(NetlinkSocketReader& ns_reader,
 
 	    err = reinterpret_cast<const struct nlmsgerr*>(nlmsg_data);
 	    if (nlh->nlmsg_len < NLMSG_LENGTH(sizeof(*err))) {
-		error_msg = "AF_NETLINK nlmsgerr length error";
+		error_msg += "AF_NETLINK nlmsgerr length error\n";
 		return (XORP_ERROR);
 	    }
 	    if (err->error == 0)
 		return (XORP_OK);	// No error
 	    errno = -err->error;
 	    last_errno = errno;
-	    error_msg = c_format("AF_NETLINK NLMSG_ERROR message: %s",
-				 strerror(errno));
+	    error_msg += c_format("AF_NETLINK NLMSG_ERROR message: %s\n",
+				  strerror(errno));
 	    return (XORP_ERROR);
 	}
 	break;
@@ -610,7 +610,7 @@ NlmUtils::check_netlink_request(NetlinkSocketReader& ns_reader,
 	case NLMSG_DONE:
 	{
 	    // End-of-message, and no ACK was received: error.
-	    error_msg = "No ACK was received";
+	    error_msg += "No ACK was received\n";
 	    return (XORP_ERROR);
 	}
 	break;
@@ -626,7 +626,7 @@ NlmUtils::check_netlink_request(NetlinkSocketReader& ns_reader,
 	}
     }
 
-    error_msg = "No ACK was received";
+    error_msg += "No ACK was received\n";
     return (XORP_ERROR);		// No ACK was received: error.
 }
 

@@ -121,6 +121,8 @@ public:
      */
     XrlErrorCode error_code() const;
 
+    bool isOK() const { return error_code() == ::OKAY; }
+
     /**
      * @return string containing textual description of error.
      */
@@ -161,10 +163,13 @@ protected:
     string	     _note;
 };
 
-
+
 /**
  * Error codes for user callbacks.
  * These are a subset of @ref XrlError
+ * TODO:  Passing these on the stack wastes resources, and comparing
+ *   them with generated values != XrlCmdError::OKAY(), for instance,
+ *   is not good for performance or code size either.
  */
 struct XrlCmdError {
 public:
@@ -205,6 +210,8 @@ public:
      */
     XrlErrorCode error_code() const { return _xrl_error.error_code(); }
 
+    bool isOK() const { return _xrl_error.isOK(); }
+
     /**
      * @return note associated with origin of error (i.e., the reason).
      */
@@ -212,7 +219,7 @@ public:
 
 private:
     XrlCmdError(const XrlError& xe) : _xrl_error(xe) {}
-    const XrlError _xrl_error;
+    XrlError _xrl_error;
 };
 
 

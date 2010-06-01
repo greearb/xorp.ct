@@ -2680,26 +2680,27 @@ XrlFeaTarget::set_mac(const string& ifname, const Mac& mac, string& error_msg)
     // this MAC hack.
     //
     uint32_t tid;
+    XrlCmdError e = XrlCmdError::OKAY();
 
-    if (ifmgr_0_1_start_transaction(tid) != XrlCmdError::OKAY()) {
+    if (!((e = ifmgr_0_1_start_transaction(tid))).isOK()) {
 	error_msg = c_format("Cannot set MAC address %s on interface %s: "
-			     "cannot start the transaction",
-			     mac.str().c_str(), ifname.c_str());
+			     "cannot start the transaction, err: %s",
+			     mac.str().c_str(), ifname.c_str(), e.str().c_str());
 	return (XORP_ERROR);
     }
 
-    if (ifmgr_0_1_set_mac(tid, ifname, mac) != XrlCmdError::OKAY()) {
+    if (!((e = ifmgr_0_1_set_mac(tid, ifname, mac))).isOK()) {
 	ifmgr_0_1_abort_transaction(tid);
 	error_msg = c_format("Cannot set MAC address %s on interface %s: "
-			     "cannot perform the operation",
-			     mac.str().c_str(), ifname.c_str());
+			     "cannot perform the operation, err: %s",
+			     mac.str().c_str(), ifname.c_str(), e.str().c_str());
 	return (XORP_ERROR);
     }
 
-    if (ifmgr_0_1_commit_transaction(tid) != XrlCmdError::OKAY()) {
+    if (!((e = ifmgr_0_1_commit_transaction(tid))).isOK()) {
 	error_msg = c_format("Cannot set MAC address %s on interface %s: "
-			     "cannot commit the transaction",
-			     mac.str().c_str(), ifname.c_str());
+			     "cannot commit the transaction, err: %s",
+			     mac.str().c_str(), ifname.c_str(), e.str().c_str());
 	return (XORP_ERROR);
     }
 

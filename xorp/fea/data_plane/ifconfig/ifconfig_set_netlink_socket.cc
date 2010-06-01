@@ -595,18 +595,19 @@ IfConfigSetNetlinkSocket::set_interface_status(const string& ifname,
 	if (ns.sendto(&buffer, nlh->nlmsg_len, 0,
 		      reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl))
 	    != (ssize_t)nlh->nlmsg_len) {
-	    error_msg = c_format("Cannot set the interface flags to 0x%x on "
-				 "interface %s: %s",
-				 interface_flags, ifname.c_str(), strerror(errno));
-	    return (XORP_ERROR);
+	    error_msg += c_format("Cannot set the interface flags to 0x%x on "
+				  "interface %s using netlink, error: %s\n",
+				  interface_flags, ifname.c_str(), strerror(errno));
+	    test_ioctl = true;
+	    goto use_ioctl;
 	}
 	if (NlmUtils::check_netlink_request(_ns_reader, ns, nlh->nlmsg_seq,
 					    last_errno, error_msg)
 	    != XORP_OK) {
-	    error_msg = c_format("Cannot set the interface flags to 0x%x on "
-				 "interface %s: %s",
-				 interface_flags, ifname.c_str(),
-				 error_msg.c_str());
+	    error_msg += c_format("Request to set the interface flags to 0x%x on "
+				  "interface %s using netlink failed: %s\n",
+				  interface_flags, ifname.c_str(),
+				  error_msg.c_str());
 	    test_ioctl = true;
 	    goto use_ioctl; // try ioctl method.
 	}
@@ -618,18 +619,17 @@ IfConfigSetNetlinkSocket::set_interface_status(const string& ifname,
 	    strncpy(ifreq.ifr_name, ifname.c_str(), sizeof(ifreq.ifr_name) - 1);
 	    ifreq.ifr_flags = interface_flags;
 	    if (ioctl(s, SIOCGIFFLAGS, &ifreq) < 0) {
-		error_msg = c_format("Cannot get the interface flags on "
-				     "interface %s: %s",
-				     ifname.c_str(),
-				     strerror(errno));
+		error_msg += c_format("Cannot get the interface flags on "
+				      "interface %s: %s\n",
+				      ifname.c_str(),
+				      strerror(errno));
 	    }
 	    else {
 		// Make sure we could at least set the enable/disable
 		if ((!!is_enabled) != (!!(ifreq.ifr_flags & IFF_UP))) {
-		    error_msg = c_format("WARNING:  Settting interface status using netlink failed"
-					 " on: %s.  Will try to use ioctl method instead.",
-					 ifname.c_str());
-		    XLOG_ERROR("%s", error_msg.c_str());
+		    error_msg += c_format("WARNING:  Settting interface status using netlink failed"
+					  " on: %s.  Will try to use ioctl method instead.\n",
+					  ifname.c_str());
 		    // Seems it really is broken, don't try netlink again..just use ioctl.
 		    test_ioctl = true;
 		    goto use_ioctl;
@@ -662,11 +662,11 @@ IfConfigSetNetlinkSocket::set_interface_status(const string& ifname,
 	strncpy(ifreq.ifr_name, ifname.c_str(), sizeof(ifreq.ifr_name) - 1);
 	ifreq.ifr_flags = interface_flags;
 	if (ioctl(s, SIOCSIFFLAGS, &ifreq) < 0) {
-	    error_msg = c_format("Cannot set the interface flags to 0x%x on "
-				 "interface %s: %s",
-				 interface_flags,
-				 ifname.c_str(),
-				 strerror(errno));
+	    error_msg += c_format("Cannot set the interface flags to 0x%x on "
+				  "interface %s using SIOCSIFFLAGS: %s\n",
+				  interface_flags,
+				  ifname.c_str(),
+				  strerror(errno));
 	    close(s);
 	    return (XORP_ERROR);
 	}
@@ -678,19 +678,24 @@ IfConfigSetNetlinkSocket::set_interface_status(const string& ifname,
 		ifreq.ifr_flags = interface_flags;
 		if (ioctl(s, SIOCGIFFLAGS, &ifreq) >= 0) {
 		    if ((!!is_enabled) == (!!(ifreq.ifr_flags & IFF_UP))) {
-			// Ok, it all worked.  We assume that netlink just doesn't work, so
-			// don't try it again.
-			error_msg = c_format("WARNING:  Settting interface status using netlink failed"
-					     " on: %s but ioctl method worked.  Will use ioctl method from"
-					     " now on.",
-					     ifname.c_str());
-			XLOG_ERROR("%s", error_msg.c_str());
-			netlink_set_status_works = 0;
+			if (netlink_set_status_works != 0) {
+			    // Ok, it all worked.  We assume that netlink just doesn't work, so
+			    // don't try it again.
+			    error_msg += c_format("WARNING:  Settting interface status using netlink failed"
+						  " on: %s but ioctl method worked.  Will use ioctl method from"
+						  " now on.\n",
+						  ifname.c_str());
+			    netlink_set_status_works = 0;
+			}
 		    }
 		}
 	    }
 	}
 	close(s);
+    }
+    if (error_msg.size()) {
+	XLOG_WARNING("%s", error_msg.c_str());
+	error_msg = ""; //we worked around the error..don't pass back warning messages!
     }
     return (XORP_OK);
 }
@@ -779,21 +784,22 @@ IfConfigSetNetlinkSocket::set_interface_mac_address(const string& ifname,
     if (ns.sendto(&buffer, nlh->nlmsg_len, 0,
 		  reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl))
 	!= (ssize_t)nlh->nlmsg_len) {
-	error_msg = c_format("Cannot set the MAC address to %s "
-			     "on interface %s: %s",
+	error_msg += c_format("Cannot set the MAC address to %s "
+			     "on interface %s: %s\n",
 			     mac.str().c_str(),
 			     ifname.c_str(),
 			     strerror(errno));
 	return (XORP_ERROR);
     }
+
+    string em;
     if (NlmUtils::check_netlink_request(_ns_reader, ns, nlh->nlmsg_seq,
-					last_errno, error_msg)
+					last_errno, em)
 	!= XORP_OK) {
-	error_msg = c_format("Cannot set the MAC address to %s "
-			     "on interface %s: %s",
-			     mac.str().c_str(),
-			     ifname.c_str(),
-			     error_msg.c_str());
+	error_msg += c_format("Cannot set the MAC address to %s "
+			      "on interface %s using netlink: %s",
+			      mac.str().c_str(),
+			      ifname.c_str(), em.c_str());
 	return (XORP_ERROR);
     }
 
@@ -822,11 +828,11 @@ IfConfigSetNetlinkSocket::set_interface_mac_address(const string& ifname,
     ifreq.ifr_hwaddr.sa_len = ETH_ALEN;
 #endif
     if (ioctl(s, SIOCSIFHWADDR, &ifreq) < 0) {
-	error_msg = c_format("Cannot set the MAC address to %s "
-			     "on interface %s: %s",
-			     mac.str().c_str(),
-			     ifname.c_str(),
-			     strerror(errno));
+	error_msg += c_format("Cannot set the MAC address to %s "
+			      "on interface %s using SIOCSIFHWADDR: %s",
+			      mac.str().c_str(),
+			      ifname.c_str(),
+			      strerror(errno));
 	close(s);
 	return (XORP_ERROR);
     }

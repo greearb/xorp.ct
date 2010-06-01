@@ -206,12 +206,13 @@ IfConfig::commit_transaction(uint32_t tid, string& error_msg)
     IfTree old_system_config = pull_config(NULL, -1);
 
     if (_itm->commit(tid) != true) {
-	error_msg = c_format("Expired or invalid transaction ID presented");
+	error_msg += c_format("Expired or invalid transaction ID presented\n");
 	return (XORP_ERROR);
     }
 
     if (_itm->error().empty() != true) {
-	error_msg = _itm->error();
+	error_msg += "IfConfig::commit_transaction: _itm had non-empty error:\n";
+	error_msg += _itm->error();
 	return (XORP_ERROR);
     }
 
@@ -230,15 +231,17 @@ IfConfig::commit_transaction(uint32_t tid, string& error_msg)
     merged_config().align_with_user_config(user_config());
     if (push_config(merged_config()) != XORP_OK) {
 	string error_msg2;
-	error_msg = push_error();
+	error_msg += " push_config failed: ";
+	error_msg += push_error();
+	error_msg += "\n";
 
 	// Reverse-back to the previously working configuration
 	if (restore_config(old_user_config, old_system_config,
 			   error_msg2) != XORP_OK) {
 	    // Failed to reverse back
-	    error_msg = c_format("%s [Also, failed to reverse-back to the "
-				 "previous config: %s]",
-				 error_msg.c_str(), error_msg2.c_str());
+	    error_msg += c_format("%s [Also, failed to reverse-back to the "
+				  "previous config: %s]\n",
+				  error_msg.c_str(), error_msg2.c_str());
 	}
 
 	return (XORP_ERROR);
