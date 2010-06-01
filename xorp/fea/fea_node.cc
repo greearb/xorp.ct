@@ -48,7 +48,9 @@ FeaNode::FeaNode(EventLoop& eventloop, FeaIo& fea_io, bool is_dummy)
       _is_running(false),
       _is_dummy(is_dummy),
       _ifconfig(*this),
+#ifndef XORP_DISABLE_FIREWALL
       _firewall_manager(*this, ifconfig().merged_config()),
+#endif
       _fibconfig(*this, _ifconfig.system_config(), _ifconfig.merged_config()),
       _io_link_manager(*this, ifconfig().merged_config()),
       _io_ip_manager(*this, ifconfig().merged_config()),
@@ -120,9 +122,11 @@ FeaNode::shutdown()
     if (_fibconfig.stop(error_msg) != XORP_OK) {
 	XLOG_ERROR("Cannot stop FibConfig: %s", error_msg.c_str());
     }
+#ifndef XORP_DISABLE_FIREWALL
     if (_firewall_manager.stop(error_msg) != XORP_OK) {
 	XLOG_ERROR("Cannot stop FirewallManager: %s", error_msg.c_str());
     }
+#endif
     if (_ifconfig.stop(error_msg) != XORP_OK) {
 	XLOG_ERROR("Cannot stop IfConfig: %s", error_msg.c_str());
     }

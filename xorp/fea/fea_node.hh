@@ -31,7 +31,9 @@
 #include "libxorp/profile.hh"
 
 #include "fibconfig.hh"
+#ifndef XORP_DISABLE_FIREWALL
 #include "firewall_manager.hh"
+#endif
 #include "ifconfig.hh"
 #include "io_link_manager.hh"
 #include "io_ip_manager.hh"
@@ -137,6 +139,7 @@ public:
      */
     IfConfig& ifconfig() { return (_ifconfig); }
 
+#ifndef XORP_DISABLE_FIREWALL
     /**
      * Get the FirewallManager instance.
      *
@@ -144,6 +147,7 @@ public:
      * @see FirewallManager.
      */
     FirewallManager& firewall_manager() { return (_firewall_manager); }
+#endif
 
     /**
      * Get the FibConfig instance.
@@ -227,7 +231,9 @@ private:
     NexthopPortMapper		_nexthop_port_mapper;	// Next-hop port mapper
 
     IfConfig			_ifconfig;
+#ifndef XORP_DISABLE_FIREWALL
     FirewallManager		_firewall_manager;
+#endif
     FibConfig			_fibconfig;
 
     IoLinkManager		_io_link_manager;

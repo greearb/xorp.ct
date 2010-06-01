@@ -35,8 +35,10 @@
 #include "fea/data_plane/ifconfig/ifconfig_observer_netlink_socket.hh"
 #include "fea/data_plane/ifconfig/ifconfig_vlan_get_linux.hh"
 #include "fea/data_plane/ifconfig/ifconfig_vlan_set_linux.hh"
+#ifndef XORP_DISABLE_FIREWALL
 #include "fea/data_plane/firewall/firewall_get_netfilter.hh"
 #include "fea/data_plane/firewall/firewall_set_netfilter.hh"
+#endif
 #include "fea/data_plane/fibconfig/fibconfig_forwarding_proc_linux.hh"
 #include "fea/data_plane/fibconfig/fibconfig_entry_get_netlink_socket.hh"
 #include "fea/data_plane/fibconfig/fibconfig_entry_set_netlink_socket.hh"
@@ -92,8 +94,10 @@ FeaDataPlaneManagerLinux::load_plugins(string& error_msg)
     XLOG_ASSERT(_ifconfig_observer == NULL);
     XLOG_ASSERT(_ifconfig_vlan_get == NULL);
     XLOG_ASSERT(_ifconfig_vlan_set == NULL);
+#ifndef XORP_DISABLE_FIREWALL
     XLOG_ASSERT(_firewall_get == NULL);
     XLOG_ASSERT(_firewall_set == NULL);
+#endif
     XLOG_ASSERT(_fibconfig_forwarding == NULL);
     XLOG_ASSERT(_fibconfig_entry_get == NULL);
     XLOG_ASSERT(_fibconfig_entry_set == NULL);
@@ -136,9 +140,11 @@ FeaDataPlaneManagerLinux::load_plugins(string& error_msg)
     _ifconfig_vlan_set = new IfConfigVlanSetLinux(*this);
 #endif
 
+#ifndef XORP_DISABLE_FIREWALL
 #if defined(HAVE_FIREWALL_NETFILTER)
     _firewall_get = new FirewallGetNetfilter(*this);
     _firewall_set = new FirewallSetNetfilter(*this);
+#endif
 #endif
 
 #if defined(HAVE_PROC_LINUX)

@@ -42,8 +42,10 @@ FeaDataPlaneManager::FeaDataPlaneManager(FeaNode& fea_node,
       _ifconfig_observer(NULL),
       _ifconfig_vlan_get(NULL),
       _ifconfig_vlan_set(NULL),
+#ifndef XORP_DISABLE_FIREWALL
       _firewall_get(NULL),
       _firewall_set(NULL),
+#endif
       _fibconfig_forwarding(NULL),
       _fibconfig_entry_get(NULL),
       _fibconfig_entry_set(NULL),
@@ -155,6 +157,7 @@ FeaDataPlaneManager::unload_plugins(string& error_msg)
 	_ifconfig_vlan_set = NULL;
     }
 
+#ifndef XORP_DISABLE_FIREWALL
     //
     // Firewall plugins
     //
@@ -166,6 +169,7 @@ FeaDataPlaneManager::unload_plugins(string& error_msg)
 	delete _firewall_set;
 	_firewall_set = NULL;
     }
+#endif
 
     //
     // FibConfig plugins
@@ -245,6 +249,7 @@ FeaDataPlaneManager::unregister_plugins(string& error_msg)
     if (_fibconfig_forwarding != NULL)
 	fibconfig().unregister_fibconfig_forwarding(_fibconfig_forwarding);
 
+#ifndef XORP_DISABLE_FIREWALL
     //
     // Firewall plugins
     //
@@ -252,6 +257,7 @@ FeaDataPlaneManager::unregister_plugins(string& error_msg)
 	firewall_manager().unregister_firewall_set(_firewall_set);
     if (_firewall_get != NULL)
 	firewall_manager().unregister_firewall_get(_firewall_get);
+#endif
 
     //
     // IfConfig plugins
@@ -325,6 +331,7 @@ FeaDataPlaneManager::start_plugins(string& error_msg)
 	    goto error_label;
     }
 
+#ifndef XORP_DISABLE_FIREWALL
     //
     // Firewall plugins
     //
@@ -336,6 +343,7 @@ FeaDataPlaneManager::start_plugins(string& error_msg)
 	if (_firewall_set->start(error_msg) != XORP_OK)
 	    goto error_label;
     }
+#endif
 
     //
     // FibConfig plugins
@@ -505,6 +513,7 @@ FeaDataPlaneManager::register_all_plugins(bool is_exclusive, string& error_msg)
 	}
     }
 
+#ifndef XORP_DISABLE_FIREWALL
     //
     // Firewall plugins
     //
@@ -530,6 +539,7 @@ FeaDataPlaneManager::register_all_plugins(bool is_exclusive, string& error_msg)
 	    return (XORP_ERROR);
 	}
     }
+#endif
 
     //
     // FibConfig plugins
@@ -732,6 +742,7 @@ FeaDataPlaneManager::stop_all_plugins(string& error_msg)
 	}
     }
 
+#ifndef XORP_DISABLE_FIREWALL
     //
     // Firewall plugins
     //
@@ -751,6 +762,7 @@ FeaDataPlaneManager::stop_all_plugins(string& error_msg)
 	    error_msg += error_msg2;
 	}
     }
+#endif
 
     //
     // IfConfig plugins
@@ -837,11 +849,13 @@ FeaDataPlaneManager::ifconfig()
     return (_fea_node.ifconfig());
 }
 
+#ifndef XORP_DISABLE_FIREWALL
 FirewallManager&
 FeaDataPlaneManager::firewall_manager()
 {
     return (_fea_node.firewall_manager());
 }
+#endif
 
 FibConfig&
 FeaDataPlaneManager::fibconfig()

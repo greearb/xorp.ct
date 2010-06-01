@@ -34,9 +34,11 @@ class FibConfigForwarding;
 class FibConfigTableGet;
 class FibConfigTableObserver;
 class FibConfigTableSet;
+#ifndef XORP_DISABLE_FIREWALL
 class FirewallGet;
 class FirewallManager;
 class FirewallSet;
+#endif
 class IfConfig;
 class IfConfigGet;
 class IfConfigObserver;
@@ -169,12 +171,29 @@ public:
      */
     IfConfig& ifconfig();
 
+#ifndef XORP_DISABLE_FIREWALL
     /**
      * Get the @ref FirewallManager instance.
      *
      * @return the @ref FirewallManager instance.
      */
     FirewallManager& firewall_manager();
+
+    /**
+     * Get the FirewallGet plugin.
+     *
+     * @return the @ref FirewallGet plugin.
+     */
+    FirewallGet* firewall_get() { return _firewall_get; }
+
+    /**
+     * Get the FirewallSet plugin.
+     *
+     * @return the @ref FirewallSet plugin.
+     */
+    FirewallSet* firewall_set() { return _firewall_set; }
+
+#endif
 
     /**
      * Get the @ref FibConfig instance.
@@ -245,20 +264,6 @@ public:
      * @return the @ref IfConfigVlanSet plugin.
      */
     IfConfigVlanSet* ifconfig_vlan_set() { return _ifconfig_vlan_set; }
-
-    /**
-     * Get the FirewallGet plugin.
-     *
-     * @return the @ref FirewallGet plugin.
-     */
-    FirewallGet* firewall_get() { return _firewall_get; }
-
-    /**
-     * Get the FirewallSet plugin.
-     *
-     * @return the @ref FirewallSet plugin.
-     */
-    FirewallSet* firewall_set() { return _firewall_set; }
 
     /**
      * Get the FibConfigForwarding plugin.
@@ -403,8 +408,10 @@ protected:
     IfConfigObserver*		_ifconfig_observer;
     IfConfigVlanGet*		_ifconfig_vlan_get;
     IfConfigVlanSet*		_ifconfig_vlan_set;
+#ifndef XORP_DISABLE_FIREWALL
     FirewallGet*		_firewall_get;
     FirewallSet*		_firewall_set;
+#endif
     FibConfigForwarding*	_fibconfig_forwarding;
     FibConfigEntryGet*		_fibconfig_entry_get;
     FibConfigEntrySet*		_fibconfig_entry_set;

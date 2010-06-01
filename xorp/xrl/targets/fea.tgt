@@ -27,7 +27,9 @@ target fea implements	common/0.1,
 			fea_click/0.1,
 #endif
 			fea_fib/0.1,
+#ifndef XORP_DISABLE_FIREWALL
 			fea_firewall/0.1,
+#endif
 			ifmgr/0.1,
 			ifmgr_replicator/0.1,
 			fti/0.2,

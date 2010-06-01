@@ -41,7 +41,6 @@ env.PrependUnique(LIBPATH = [
     '$BUILDDIR/fea',
     '$BUILDDIR/fea/data_plane/managers',
     '$BUILDDIR/fea/data_plane/fibconfig',
-    '$BUILDDIR/fea/data_plane/firewall',
     '$BUILDDIR/fea/data_plane/ifconfig',
     '$BUILDDIR/fea/data_plane/io',
     '$BUILDDIR/fea/data_plane/control_socket',
@@ -71,7 +70,6 @@ libxfdp_srcs = [
 libxorp_fea_linkorder = [
     'xorp_fea_data_plane_managers',
     'xorp_fea_fibconfig',
-    'xorp_fea_firewall', # XXX?
     'xorp_fea_ifconfig',
     'xorp_fea_io',
     'xorp_fea_control_socket',
@@ -110,7 +108,11 @@ libxorp_fea_linkorder += [
 if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
     libxorp_fea_linkorder.append('xif_fea_rawpkt6_client')
     libxorp_fea_linkorder.append('xif_socket6_user')
-    
+
+if not (env.has_key('disable_fw') and env['disable_fw']):
+    env.PrependUnique(LIBPATH = [ '$BUILDDIR/fea/data_plane/firewall' ])
+    libxorp_fea_linkorder += [ 'xorp_fea_firewall' ]
+
 
 # Internal libraries.
 # Note special use of conditional above.
@@ -131,9 +133,6 @@ libxorp_fea_srcs = [
      'fea_node.cc',
      'fibconfig.cc',
      'fibconfig_transaction.cc',
-     'firewall_entry.cc',
-     'firewall_manager.cc',
-     'firewall_transaction.cc',
      'ifconfig.cc',
      'ifconfig_reporter.cc',
      'ifconfig_transaction.cc',
@@ -158,6 +157,12 @@ libxorp_fea_srcs = [
      'xrl_io_tcpudp_manager.cc',
      'xrl_mfea_node.cc'
     ]
+
+if not (env.has_key('disable_fw') and env['disable_fw']):
+    libxorp_fea_srcs += [ 'firewall_entry.cc',
+                          'firewall_manager.cc',
+                          'firewall_transaction.cc',
+                          ]
 
 env.Replace(RPATH = [
     env.Literal(env['xorp_module_rpath'])

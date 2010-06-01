@@ -48,7 +48,9 @@
 
 #include "fea_node.hh"
 #include "fibconfig_transaction.hh"
+#ifndef XORP_DISABLE_FIREWALL
 #include "firewall_transaction.hh"
+#endif
 #include "ifconfig_transaction.hh"
 #include "libfeaclient_bridge.hh"
 #include "profile_vars.hh"
@@ -71,7 +73,9 @@ XrlFeaTarget::XrlFeaTarget(EventLoop&			eventloop,
       _profile(profile),
       _xrl_fib_client_manager(xrl_fib_client_manager),
       _ifconfig(fea_node.ifconfig()),
+#ifndef XORP_DISABLE_FIREWALL
       _firewall_manager(fea_node.firewall_manager()),
+#endif
       _fibconfig(fea_node.fibconfig()),
       _io_link_manager(fea_node.io_link_manager()),
       _io_ip_manager(fea_node.io_ip_manager()),
@@ -794,6 +798,14 @@ XrlFeaTarget::fea_fib_0_1_delete_fib_client6(
 }
 #endif
 
+
+#ifndef XORP_DISABLE_FIREWALL
+
+XrlCmdError
+XrlFeaTarget::fea_firewall_0_1_startup_firewall() {
+    return XrlCmdError::OKAY();
+}
+
 XrlCmdError
 XrlFeaTarget::fea_firewall_0_1_start_transaction(
     // Output values,
@@ -1219,6 +1231,8 @@ XrlFeaTarget::fea_firewall_0_1_get_entry_list_next6(
 
     return XrlCmdError::OKAY();
 }
+
+#endif // firewall
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_set_restore_original_config_on_shutdown(
@@ -2718,10 +2732,6 @@ XrlFeaTarget::ifmgr_0_1_startup_ifmgr() {
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError
-XrlFeaTarget::fea_firewall_0_1_startup_firewall() {
-    return XrlCmdError::OKAY();
-}
 
 XrlCmdError
 XrlFeaTarget::ifmgr_replicator_0_1_register_ifmgr_mirror(

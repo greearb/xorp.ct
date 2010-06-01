@@ -43,7 +43,6 @@ xifs = [
     'datain.xif',
     'fea_fib_client.xif',
     'fea_fib.xif',
-    'fea_firewall.xif',
     'fea_ifmgr_mirror.xif',
     'fea_ifmgr_replicator.xif',
     'fea_ifmgr.xif',
@@ -98,6 +97,9 @@ if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
 
 if env['enable_olsr']:
     xifs.append('olsr4.xif')
+
+if not (env.has_key('disable_fw') and env['disable_fw']):
+    xifs.append('fea_firewall.xif')
 
 # Not sure these dependencies really work. --Ben
 Depends('common.xif', '../../xorp_config.h');

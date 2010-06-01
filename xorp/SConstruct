@@ -74,6 +74,7 @@ vars.AddVariables(
     BoolVariable('debug_cb',  'Build with callback debugging', False),
     BoolVariable('enable_gprof',  'Enable gprof (compile with -pg)', False),
     BoolVariable('disable_ipv6',  'Force disable of IPv6', False),
+    BoolVariable('disable_fw',  'Disable Firewall feature', False),
     BoolVariable('enable_olsr',  'Build OLSR', False),
     BoolVariable('enable_tests', 'Build Test Programs', False),
     BoolVariable('save_args', 'Save scons arguments to .scons_build_args file', False),
@@ -241,6 +242,7 @@ print 'Enable OLSR:      ', env['enable_olsr']
 print 'Enable CLICK:     ', env['enable_click']
 print 'Enable BGP:       ', env['enable_bgp']
 print 'Disable IPv6:     ', env['disable_ipv6']
+print 'Disable Firewall: ', env['disable_fw']
 
 env['WITH_GPROF'] = ARGUMENTS.get('enable_gprof', False)
 print 'Enable gprof:     ', env['enable_gprof']
@@ -355,6 +357,12 @@ if tst and not (tst == "no"):
 else:
     env['disable_ipv6'] = False
 
+tst = ARGUMENTS.get('disable_fw', False)
+if tst and not (tst == "no"):
+    env['disable_fw'] = True;
+else:
+    env['disable_fw'] = False
+
 ########## start configure magic
 
 if env.has_key('LIBS'):
@@ -413,6 +421,9 @@ if not env.GetOption('clean') and \
     # toolchain
     conf.Define('CPP_SUPPORTS_C99_VA_ARGS')
     conf.Define('CPP_SUPPORTS_GNU_VA_ARGS')
+
+    if env['disable_fw']:
+        conf.Define("XORP_DISABLE_FIREWALL")
 
     # Boost
     #env['boost_suffix'] = "-mt"		# Not for FreeBSD

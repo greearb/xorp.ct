@@ -131,10 +131,6 @@ public:
     /** Does nothing, but allows us to have rtrmgr verify startup. */
     virtual XrlCmdError ifmgr_0_1_startup_ifmgr();
 
-    /** Does nothing, but allows us to have rtrmgr verify startup. */
-    virtual XrlCmdError fea_firewall_0_1_startup_firewall();
-
-
     /**
      *  Announce target birth to observer.
      *
@@ -372,9 +368,14 @@ public:
 	const string&	client_target_name);
 #endif
 
+#ifndef XORP_DISABLE_FIREWALL
     //
     // FEA firewall interface
     //
+
+    /** Does nothing, but allows us to have rtrmgr verify startup. */
+    virtual XrlCmdError fea_firewall_0_1_startup_firewall();
+
 
     /**
      *  Start firewall configuration transaction.
@@ -794,6 +795,9 @@ public:
 	uint32_t&	dst_port_end,
 	string&		action,
 	bool&		more);
+
+#endif
+
 
     //
     // FEA network interface management interface
@@ -2745,7 +2749,9 @@ private:
     Profile&			_profile;
     XrlFibClientManager&	_xrl_fib_client_manager;
     IfConfig&			_ifconfig;
+#ifndef XORP_DISABLE_FIREWALL
     FirewallManager&		_firewall_manager;
+#endif
     FibConfig&			_fibconfig;
     IoLinkManager&		_io_link_manager;
     IoIpManager&		_io_ip_manager;
