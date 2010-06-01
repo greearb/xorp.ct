@@ -1121,8 +1121,12 @@ comm_set_bindtodevice(xsock_t sock, const char * my_ifname)
     if (setsockopt(sock, SOL_SOCKET, SO_BINDTODEVICE, tmp_ifname,
 		   sizeof(tmp_ifname)) < 0) {
 	_comm_set_serrno();
-	XLOG_ERROR("setsockopt SO_BINDTODEVICE %s: %s",
-		   tmp_ifname, comm_get_error_str(comm_get_last_error()));
+	static bool do_once = true;
+	if (do_once) {
+	    XLOG_WARNING("setsockopt SO_BINDTODEVICE %s: %s  This error will only be printed once per program instance.",
+			 tmp_ifname, comm_get_error_str(comm_get_last_error()));
+	    do_once = false;
+	}
 
 	return (XORP_ERROR);
     }

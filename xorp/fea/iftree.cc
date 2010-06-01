@@ -99,7 +99,7 @@ IfTree::operator=(const IfTree& other)
 void
 IfTree::clear()
 {
-    XLOG_WARNING("Clearing iftree: %s\n", name.c_str());
+    //XLOG_WARNING("Clearing iftree: %s\n", name.c_str());
     while (! _interfaces.empty()) {
 	IfTreeInterface* ifp = _interfaces.begin()->second;
 	sendEvent(IFTREE_ERASE_IFACE, ifp);
