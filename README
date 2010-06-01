@@ -6,9 +6,12 @@
 1. Overview
 ===========
 
-XORP is an open networking platform being developed by a core team of
-developers from XORP, Inc., and members of the XORP.org community.
-It started life as a project at the ICSI Center for Open Networking (ICON)
+XORP is an open networking platform that supports OSPF, RIP, BGP,
+OLSR, VRRP, PIM, IGMP (Multicast) and other routing protocols.  Most protocols
+support IPv4 and IPv6 where applicable.  It is known to work on various
+Linux distributions and flavors of BSD.  It does not support MS Windows.
+
+XORP started life as a project at the ICSI Center for Open Networking (ICON)
 at the International Computer Science Institute in Berkeley, California,
 USA, and spent some time with the team at XORP, Inc.  It is now maintained
 and improved on a volunteer basis by a core of long-term XORP developers
@@ -19,9 +22,7 @@ Candela Technologies, with input from the community.
 
 XORP's primary goal is to be an open platform for networking protocol
 implementations and an alternative to proprietary and closed networking
-products in the marketplace today. XORP hopes to drive innovation in
-the networking field by making available an enterprise-grade open
-networking platform to the development community.
+products in the marketplace today.
 
 XORP design philosophy is:
   * modularity
@@ -38,11 +39,7 @@ access.
 
 User-level XORP uses multi-process architecture with one process per
 routing protocol, and a novel inter-process communication mechanism
-called XRL (XORP Resource Locator). XRLs can be used across the network,
-therefore XORP can in principle run in distributed fashion. For
-example, we can have a distributed router with the forwarding engine
-running on one machine, and each of the routing protocols that update
-the forwarding engine is running on a separate machine.
+called XRL (XORP Resource Locator).
 
 The lower-level subsystem can use traditional UNIX kernel forwarding, or
 Click modular router. The modularity and independency of the lower-level
@@ -68,7 +65,7 @@ Supported platforms:
   * Mac OS X ???
   * Linux (x86-32, x86-64, Sparc)
 
-See ${XORP}/BUILD_NOTES for OS-specific details, compilation
+See xorp/BUILD_NOTES for OS-specific details, compilation
 information, etc.
 
 Development platform:
@@ -79,7 +76,7 @@ Other platforms can also be used for development, perhaps with a bit
 of effort.  Ask on the xorp-hackers mailing list if your preferred
 platform is not currently supported.
 
-See ${XORP}/ERRATA for the list of known problems.
+See xorp/ERRATA for the list of known problems.
 
 Currently, XORP implements the following protocols:
 
@@ -133,6 +130,8 @@ For description of the changes in each release, see ${XORP}/RELEASE_NOTES.
 To compile XORP, you must have a recent version of scons and g++
 compiler toolset installed.
 
+cd xorp
+
 scons
 
 scons install
@@ -150,7 +149,7 @@ http://www.xorp.org/getting_started.html
 
 For additional information see the user documentation:
 http://www.xorp.org/releases/current/docs/user_manual/user_manual.pdf
-and ${XORP}/docs/user_manual.
+and docs/user_manual.
 
 
 4. Code structure and documentation
@@ -165,39 +164,39 @@ following places:
 
   * a high level architecture overview, available in
 
-	${XORP}/docs/<modulename>/
+	docs/<modulename>/
 
   * kdoc-generated documentation, created with the script
 
-	${XORP}/docs/kdoc/gen-kdoc.sh
+	docs/kdoc/gen-kdoc.sh
 
     whose output goes into
 
-	${XORP}/docs/kdoc/html/<modulename>/
+	docs/kdoc/html/<modulename>/
 
     with top-level index file in
 
-	${XORP}/docs/kdoc/html/index.html
+	docs/kdoc/html/index.html
 
 The content of each of the directories is the following:
 
-  * bgp : BGP implementation.
+  * xorp/bgp : BGP implementation.
 
-  * cli : CLI (Command-Line Interface) library.
+  * xorp/cli : CLI (Command-Line Interface) library.
     It is used by the Router Manager (rtrmgr), and by some of the
     multicast code (the multicast-specific part of fea, mld6igmp, pim).
 
   * docs : XORP user documentation.
 
-  * etc : Various XORP-related files (e.g., configuration, templates).
+  * xorp/etc : Various XORP-related files (e.g., configuration, templates).
 
-  * fea : Forwarding Engine Abstraction.
+  * xorp/fea : Forwarding Engine Abstraction.
     The FEA implements the interface between XORP and the underlying
     forwarding engine (e.g., the UNIX kernel). It is used both for
     unicast and multicast. Note that the multicast-specific
     documentation is in ${XORP}/docs/mfea.
 
-  * fib2mrib : Forwarding Information Base to the Multicast Routing
+  * xorp/fib2mrib : Forwarding Information Base to the Multicast Routing
     Information Base route propagator.
     It uses the FEA to obtain the FIB information from the underlying
     system, and propagates it to the MRIB, so it can be used by
@@ -205,52 +204,52 @@ The content of each of the directories is the following:
     only if the unicast routing protocols run within XORP do not inject
     routes in the MRIB.
 
-  * libcomm : Communication socket library.
+  * xorp/libcomm : Communication socket library.
 
-  * libfeaclient : Library that is useful to clients of the FEA.
+  * xorp/libfeaclient : Library that is useful to clients of the FEA.
 
-  * libproto : Abstract protocol library.
+  * xorp/libproto : Abstract protocol library.
     Used by the following modules/directories: cli, fea, mld6igmp, ospf,
     pim.
 
-  * libxipc : XRL (XORP Resource Locator) library and XRL-related
+  * xorp/libxipc : XRL (XORP Resource Locator) library and XRL-related
     programs.
 
-  * libxorp : XORP library that contains various basic
+  * xorp/libxorp : XORP library that contains various basic
     functionalities such as IP addresses, IP subnets, etc.
 
-  * mld6igmp : Multicast Listen Discovery/Internet Group Management
+  * xorp/mld6igmp : Multicast Listen Discovery/Internet Group Management
     Protocol (MLD/IGMP) implementation.
 
-  * mrt : Various multicast-related code.
+  * xorp/mrt : Various multicast-related code.
     Used by the following modules/directories: fea, mld6igmp, pim.
 
-  * ospf : Open Shortest Path First implementation.
+  * xorp/ospf : Open Shortest Path First implementation.
 
-  * policy : Policy-related library.
+  * xorp/policy : Policy-related library.
 
-  * pim : Protocol Independent Multicast - Sparse Mode (PIM-SM)
+  * xorp/pim : Protocol Independent Multicast - Sparse Mode (PIM-SM)
     implementation.
 
-  * rib : Routing Information Base.
+  * xorp/rib : Routing Information Base.
     It is used to store the routing information from various protocols.
 
-  * rip: Routing Information Protocol implementation.
+  * xorp/rip: Routing Information Protocol implementation.
 
-  * rtrmgr : Router Manager.
+  * xorp/rtrmgr : Router Manager.
     It is used to manage and configure all XORP components.
 
-  * static_routes : Static routes management.
+  * xorp/static_routes : Static routes management.
     It is used to configure static routes.
 
-  * vrrp : Virtual Router Redundancy Protocol implementation.
+  * xorp/vrrp : Virtual Router Redundancy Protocol implementation.
 
-  * xrl : XRL (XORP Resource Locator) interface.
+  * xorp/xrl : XRL (XORP Resource Locator) interface.
 
 The directories listed below contain third-party contributed code which
 is distributed with each XORP source release:
 
-  * contrib : various contributed code.
+  * xorp/contrib : various contributed code.
 
     * olsr : RFC 3626 Optimized Link State Routing implementation.
       Generously funded by CenGen, Inc.  (Does not compile in 1.7,
