@@ -22,6 +22,8 @@
 #ifndef __RIB_PROFILE_VARS_HH__
 #define __RIB_PROFILE_VARS_HH__
 
+#ifndef XORP_DISABLE_PROFILE
+
 /**
  * Profile variables
  * See: profile_vars.cc for definitions.
@@ -31,5 +33,7 @@ const string profile_route_rpc_in = "route_rpc_in";
 const string profile_route_rpc_out = "route_rpc_out";
 
 void initialize_profiling_variables(Profile& p);
+
+#endif // profile
 
 #endif // __RIB_PROFILE_VARS_HH__

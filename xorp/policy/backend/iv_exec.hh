@@ -32,7 +32,9 @@
 #include "policy/common/dispatcher.hh"
 #include "policy/common/varrw.hh"
 #include "policy/common/policy_exception.hh"
+#ifndef XORP_DISABLE_PROFILE
 #include "policy_profiler.hh"
+#endif
 
 #include "instruction.hh"
 #include "set_manager.hh"
@@ -147,7 +149,9 @@ public:
      */
     static string fa2str(const FlowAction& fa);
 
+#ifndef XORP_DISABLE_PROFILE
     void    set_profiler(PolicyProfiler*);
+#endif
     string  tracelog();
     void    set_subr(SUBR* subr);
 
@@ -172,7 +176,9 @@ private:
     unsigned	    _trashc;
     unsigned	    _trashs;
     ostringstream   _os;
+#ifndef XORP_DISABLE_PROFILE
     PolicyProfiler* _profiler;
+#endif
     bool	    _do_trace;
     bool	    _did_trace;
     Next::Flow	    _ctr_flow;

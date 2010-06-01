@@ -22,6 +22,8 @@
 #ifndef __BGP_PROFILE_VARS_HH__
 #define __BGP_PROFILE_VARS_HH__
 
+#ifndef XORP_DISABLE_PROFILE
+
 /**
  * Profile variables
  * See: profile_vars.cc for definitions.
@@ -38,5 +40,7 @@ const string trace_policy_configure = "trace_policy_configure";
 const string trace_state_change = "trace_state_change";
 
 void initialize_profiling_variables(Profile& p);
+
+#endif // profile
 
 #endif // __BGP_PROFILE_VARS_HH__

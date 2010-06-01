@@ -93,6 +93,10 @@ Module::execute(bool do_exec, bool is_verification,
     if (! is_verification)
 	XLOG_INFO("Executing module: %s (%s)", _name.c_str(), _path.c_str());
 
+#ifdef XORP_DISABLE_FIREWALL
+    XLOG_ASSERT(strcmp(_name.c_str(), "firewall") != 0);
+#endif
+
     _do_exec = do_exec;
 
     if (! _do_exec) {

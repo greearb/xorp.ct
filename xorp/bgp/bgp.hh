@@ -840,10 +840,12 @@ public:
      */
     void push_routes();
     
+#ifndef XORP_DISABLE_PROFILE
     /**
      * @return a reference to the profiler.
      */
     Profile& profile() {return _profile;}
+#endif
 
 protected:
 private:
@@ -1040,7 +1042,9 @@ private:
     XrlStdRouter *_xrl_router;
     ProcessWatch *_process_watch;
     VersionFilters _policy_filters;
+#ifndef XORP_DISABLE_PROFILE
     Profile _profile;
+#endif
 
     size_t		_component_count;
     IfMgrXrlMirror*	_ifmgr;

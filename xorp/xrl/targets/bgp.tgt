@@ -7,13 +7,18 @@
 #include "policy_redist4.xif"
 #include "policy_redist6.xif"
 #include "rib_client.xif"
+#ifndef XORP_DISABLE_PROFILE
 #include "profile.xif"
+#endif
 
-target bgp implements		common/0.1,				\
-				bgp/0.3,				\
-				finder_event_observer/0.1,		\
-				policy_backend/0.1,			\
-				policy_redist4/0.1,			\
-				policy_redist6/0.1,			\
-				rib_client/0.1,				\
-				profile/0.1;
+target bgp implements		common/0.1,
+				bgp/0.3,
+				finder_event_observer/0.1,
+				policy_backend/0.1,
+				policy_redist4/0.1,
+				policy_redist6/0.1,
+				rib_client/0.1,
+#ifndef XORP_DISABLE_PROFILE
+				profile/0.1
+#endif
+				;

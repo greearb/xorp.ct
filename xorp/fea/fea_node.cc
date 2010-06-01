@@ -40,8 +40,9 @@
 
 #include "fea_io.hh"
 #include "fea_node.hh"
+#ifndef XORP_DISABLE_PROFILE
 #include "profile_vars.hh"
-
+#endif
 
 FeaNode::FeaNode(EventLoop& eventloop, FeaIo& fea_io, bool is_dummy)
     : _eventloop(eventloop),
@@ -72,7 +73,10 @@ FeaNode::startup()
     _is_running = false;
 
     comm_init();
+
+#ifndef XORP_DISABLE_PROFILE
     initialize_profiling_variables(_profile);
+#endif
 
     if (load_data_plane_managers(error_msg) != XORP_OK) {
 	XLOG_FATAL("Cannot load the data plane manager(s): %s",

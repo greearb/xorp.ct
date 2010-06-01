@@ -46,7 +46,9 @@ class FibConfigTransactionManager;
 class FibTableObserverBase;
 class IfTree;
 class NexthopPortMapper;
+#ifndef XORP_DISABLE_PROFILE
 class Profile;
+#endif
 
 typedef Trie<IPv4, Fte4> Trie4;
 typedef Trie<IPv6, Fte6> Trie6;
@@ -742,7 +744,9 @@ protected:
 private:
     FeaNode&				_fea_node;
     EventLoop&				_eventloop;
+#ifndef XORP_DISABLE_PROFILE
     Profile&				_profile;
+#endif
     NexthopPortMapper&			_nexthop_port_mapper;
     const IfTree&			_system_config_iftree;
     const IfTree&			_merged_config_iftree;

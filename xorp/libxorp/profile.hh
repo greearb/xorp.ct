@@ -24,6 +24,15 @@
 #ifndef __LIBXORP_PROFILE_HH__
 #define __LIBXORP_PROFILE_HH__
 
+#ifdef XORP_DISABLE_PROFILE
+
+#  define Profile int
+#  define PROFILE(a) /* do nothing */
+
+#else
+
+#  define PROFILE(a) a
+
 #include <list>
 #include <map>
 
@@ -305,5 +314,7 @@ namespace SP {
     SAMPLE  sampler_tsc();
 #endif
 } // namespace SP
+
+#endif // profile
 
 #endif // __LIBXORP_PROFILE_HH__

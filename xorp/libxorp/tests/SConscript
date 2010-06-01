@@ -39,7 +39,6 @@ tests = [
 	'ipvxnet',
 	'mac',
 	'observers',
-	'profile',
 	'ref_ptr',
 	'ref_trie',
 	'run_command',	# Wrapper script needed on Windows MinGW.
@@ -55,6 +54,9 @@ tests = [
 	'utils',
 	'vif',
 ]
+
+if not (env.has_key('disable_profile') and env['disable_profile']):
+    tests.append('profile')
 
 test_targets = []
 

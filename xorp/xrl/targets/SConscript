@@ -52,7 +52,6 @@ tgts = [
     'ospfv2.tgt',
     'pim.tgt',
     'policy.tgt',
-    'profiler.tgt',
     'rib.tgt',
     'ribclient.tgt',
     'rip.tgt',
@@ -80,7 +79,10 @@ if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
     tgts.append('test_socket6.tgt')    
     tgts.append('ospfv3.tgt')
     tgts.append('ripng.tgt')
- 
+
+if not (env.has_key('disable_profile') and env['disable_profile']):
+    tgts.append('profiler.tgt')
+
 #xrls_path = '$datadir'
 xrlspath = '$exec_prefix/xrl/targets'
 

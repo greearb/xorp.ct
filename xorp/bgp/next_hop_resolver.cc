@@ -38,7 +38,6 @@
 #include "route_table_decision.hh"
 #include "profile_vars.hh"
 
-
 template <class A>
 NextHopResolver<A>::NextHopResolver(XrlStdRouter *xrl_router,
 				    EventLoop& eventloop,
@@ -190,10 +189,10 @@ NextHopResolver<A>::rib_client_route_info_changed(const A& addr,
     debug_msg("addr %s prefix_len %u nexthop %s metric %u\n",
 	      addr.str().c_str(), XORP_UINT_CAST(prefix_len),
 	      nexthop.str().c_str(), XORP_UINT_CAST(metric));
-    XLOG_TRACE(_bgp.profile().enabled(trace_nexthop_resolution),
-	       "addr %s prefix_len %u nexthop %s metric %u\n",
-	       addr.str().c_str(), XORP_UINT_CAST(prefix_len),
-	       nexthop.str().c_str(), XORP_UINT_CAST(metric));
+    PROFILE(XLOG_TRACE(_bgp.profile().enabled(trace_nexthop_resolution),
+		       "addr %s prefix_len %u nexthop %s metric %u\n",
+		       addr.str().c_str(), XORP_UINT_CAST(prefix_len),
+		       nexthop.str().c_str(), XORP_UINT_CAST(metric)));
 
     UNUSED(nexthop);
 
@@ -216,9 +215,9 @@ NextHopResolver<A>::rib_client_route_info_invalid(const A& addr,
 {
     debug_msg("addr %s prefix_len %u\n", addr.str().c_str(),
 	      XORP_UINT_CAST(prefix_len));
-    XLOG_TRACE(_bgp.profile().enabled(trace_nexthop_resolution),
-	       "addr %s prefix_len %u\n", addr.str().c_str(),
-	       XORP_UINT_CAST(prefix_len));
+    PROFILE(XLOG_TRACE(_bgp.profile().enabled(trace_nexthop_resolution),
+		       "addr %s prefix_len %u\n", addr.str().c_str(),
+		       XORP_UINT_CAST(prefix_len)));
 
     /*
     ** This is a callback from the RIB telling us that this
@@ -804,8 +803,8 @@ void
 NextHopRibRequest<IPv4>::register_interest(IPv4 nexthop)
 {
     debug_msg("nexthop %s\n", nexthop.str().c_str());
-    XLOG_TRACE(_bgp.profile().enabled(trace_nexthop_resolution),
-	       "nexthop %s\n", nexthop.str().c_str());
+    PROFILE(XLOG_TRACE(_bgp.profile().enabled(trace_nexthop_resolution),
+		       "nexthop %s\n", nexthop.str().c_str()));
     if (0 == _xrl_router)	// The test code sets _xrl_router to zero
 	return;
 
@@ -824,8 +823,8 @@ NextHopRibRequest<IPv6>::register_interest(IPv6 nexthop)
 {
 #ifdef HAVE_IPV6
     debug_msg("nexthop %s\n", nexthop.str().c_str());
-    XLOG_TRACE(_bgp.profile().enabled(trace_nexthop_resolution),
-	       "nexthop %s\n", nexthop.str().c_str());
+    PROFILE(XLOG_TRACE(_bgp.profile().enabled(trace_nexthop_resolution),
+		       "nexthop %s\n", nexthop.str().c_str()));
     if (0 == _xrl_router)	// The test code sets _xrl_router to zero
 	return;
 
@@ -890,14 +889,14 @@ NextHopRibRequest<A>::register_interest_response(const XrlError& error,
 	      XORP_UINT_CAST(*prefix_len), XORP_UINT_CAST(*real_prefix_len),
 	      actual_nexthop->str().c_str(), XORP_UINT_CAST(*metric),
 	      comment.c_str());
-    XLOG_TRACE(_bgp.profile().enabled(trace_nexthop_resolution),
-	       "Error %s resolves %d addr %s "
-	      "prefix_len %u real prefix_len %u "
-	       "actual nexthop %s metric %d %s\n",
-	       error.str().c_str(), *resolves, addr->str().c_str(),
-	       XORP_UINT_CAST(*prefix_len), XORP_UINT_CAST(*real_prefix_len),
-	       actual_nexthop->str().c_str(), XORP_UINT_CAST(*metric),
-	       comment.c_str());
+    PROFILE(XLOG_TRACE(_bgp.profile().enabled(trace_nexthop_resolution),
+		       "Error %s resolves %d addr %s "
+		       "prefix_len %u real prefix_len %u "
+		       "actual nexthop %s metric %d %s\n",
+		       error.str().c_str(), *resolves, addr->str().c_str(),
+		       XORP_UINT_CAST(*prefix_len), XORP_UINT_CAST(*real_prefix_len),
+		       actual_nexthop->str().c_str(), XORP_UINT_CAST(*metric),
+		       comment.c_str()));
 
     XLOG_ASSERT(*real_prefix_len <= A::addr_bitlen());
 
@@ -1281,9 +1280,9 @@ NextHopRibRequest<IPv4>::deregister_interest(IPv4 addr,
 					     uint32_t prefix_len)
 {
     debug_msg("addr %s/%u\n", addr.str().c_str(), XORP_UINT_CAST(prefix_len));
-    XLOG_TRACE(_bgp.profile().enabled(trace_nexthop_resolution),
-	       "addr %s/%u\n", addr.str().c_str(),
-	       XORP_UINT_CAST(prefix_len));	       
+    PROFILE(XLOG_TRACE(_bgp.profile().enabled(trace_nexthop_resolution),
+		       "addr %s/%u\n", addr.str().c_str(),
+		       XORP_UINT_CAST(prefix_len)));
     if (0 == _xrl_router)	// The test code sets _xrl_router to zero
 	return;
 
@@ -1306,9 +1305,9 @@ NextHopRibRequest<IPv6>::deregister_interest(IPv6 addr,
 {
 #ifdef HAVE_IPV6
     debug_msg("addr %s/%u\n", addr.str().c_str(), XORP_UINT_CAST(prefix_len));
-    XLOG_TRACE(_bgp.profile().enabled(trace_nexthop_resolution),
-	       "addr %s/%u\n", addr.str().c_str(),
-	       XORP_UINT_CAST(prefix_len));	       
+    PROFILE(XLOG_TRACE(_bgp.profile().enabled(trace_nexthop_resolution),
+		       "addr %s/%u\n", addr.str().c_str(),
+		       XORP_UINT_CAST(prefix_len)));
     if (0 == _xrl_router)	// The test code sets _xrl_router to zero
 	return;
 

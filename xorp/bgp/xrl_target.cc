@@ -36,13 +36,14 @@
 #include "libxipc/xrl_std_router.hh"
 #include "libxipc/xrl_error.hh"
 
+#ifndef XORP_DISABLE_PROFILE
 #include "xrl/interfaces/profile_client_xif.hh"
+#endif
 
 #include "bgp.hh"
 #include "iptuple.hh"
 #include "xrl_target.hh"
 #include "profile_vars.hh"
-
 
 XrlBgpTarget::XrlBgpTarget(XrlRouter *r, BGPMain& bgp)
 	: XrlBgpTargetBase(r),
@@ -923,6 +924,7 @@ XrlBgpTarget::bgp_0_3_trace(const string& tvar,
 	return XrlCmdError::OKAY();
     }
 
+#ifndef XORP_DISABLE_PROFILE
     try {
 	if (enable)
 	    _bgp.profile().enable(tvar);
@@ -933,6 +935,7 @@ XrlBgpTarget::bgp_0_3_trace(const string& tvar,
     } catch(PVariableLocked& e) {
 	return XrlCmdError::COMMAND_FAILED(e.str());
     }
+#endif
 
     return XrlCmdError::OKAY();
 }
@@ -1433,8 +1436,8 @@ XrlBgpTarget::policy_backend_0_1_configure(const uint32_t& filter,
 {
     try {
 	debug_msg("[BGP] policy filter: %d conf: %s\n", filter, conf.c_str());
-	XLOG_TRACE(_bgp.profile().enabled(trace_policy_configure),
-		   "policy filter: %d conf: %s\n", filter, conf.c_str());
+	PROFILE(XLOG_TRACE(_bgp.profile().enabled(trace_policy_configure),
+			   "policy filter: %d conf: %s\n", filter, conf.c_str()));
 	_bgp.configure_filter(filter,conf);
     } catch(const PolicyException& e) {
 	return XrlCmdError::COMMAND_FAILED("Filter configure failed: " +
@@ -1448,8 +1451,8 @@ XrlBgpTarget::policy_backend_0_1_reset(const uint32_t& filter)
 {
     try {
 	debug_msg("[BGP] policy reset: %d\n", filter);
-	XLOG_TRACE(_bgp.profile().enabled(trace_policy_configure),
-		   "policy filter: %d\n", filter);
+	PROFILE(XLOG_TRACE(_bgp.profile().enabled(trace_policy_configure),
+			   "policy filter: %d\n", filter));
 	_bgp.reset_filter(filter);
     } catch(const PolicyException& e){ 
 	return XrlCmdError::COMMAND_FAILED("Filter reset failed: " +
@@ -1537,6 +1540,7 @@ XrlBgpTarget::policy_redist6_0_1_delete_route6(
     return XrlCmdError::OKAY();
 }	
 
+#ifndef XORP_DISABLE_PROFILE
 XrlCmdError
 XrlBgpTarget::profile_0_1_enable(const string& pname)
 {
@@ -1611,6 +1615,7 @@ XrlBgpTarget::profile_0_1_list(string& info)
     info = _bgp.profile().list();
     return XrlCmdError::OKAY();
 }
+#endif
 
 bool 
 XrlBgpTarget::waiting()

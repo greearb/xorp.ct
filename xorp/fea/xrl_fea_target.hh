@@ -46,7 +46,9 @@ class IoIpManager;
 class IoTcpUdpManager;
 class LibFeaClientBridge;
 class XrlFibClientManager;
+#ifndef XORP_DISABLE_PROFILE
 class Profile;
+#endif
 
 /**
  * @short FEA (Forwarding Engine Abstraction) XRL target class.
@@ -61,7 +63,9 @@ public:
     XrlFeaTarget(EventLoop&		eventloop,
 		 FeaNode&		fea_node,
 		 XrlRouter&		xrl_router,
+#ifndef XORP_DISABLE_PROFILE
 		 Profile&		profile,
+#endif
 		 XrlFibClientManager&	xrl_fib_client_manager,
 		 LibFeaClientBridge&	lib_fea_client_bridge);
 
@@ -2684,6 +2688,7 @@ public:
 
 #endif
 
+#ifndef XORP_DISABLE_PROFILE
     //
     // Profile-related interface
     //
@@ -2707,6 +2712,7 @@ public:
     XrlCmdError profile_0_1_list(
 	// Output values,
 	string&	info);
+#endif
 
 private:
     /**
@@ -2746,7 +2752,9 @@ private:
     FeaNode&		_fea_node;	// The corresponding FeaNode
 
     XrlRouter&		       	_xrl_router;
+#ifndef XORP_DISABLE_PROFILE
     Profile&			_profile;
+#endif
     XrlFibClientManager&	_xrl_fib_client_manager;
     IfConfig&			_ifconfig;
 #ifndef XORP_DISABLE_FIREWALL

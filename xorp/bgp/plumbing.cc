@@ -127,9 +127,10 @@ BGPPlumbing::add_route(const IPv4Net& net,
 		       PeerHandler* peer_handler) 
 {
     debug_msg("BGPPlumbing::add_route IPv4\n");
-    if (main().profile().enabled(profile_route_ribin))
-	main().profile().log(profile_route_ribin, 
-			     c_format("add %s", net.str().c_str()));
+    PROFILE(if (main().profile().enabled(profile_route_ribin))
+		main().profile().log(profile_route_ribin,
+				     c_format("add %s", net.str().c_str())));
+
     XLOG_ASSERT(!pa_list->is_locked());
     return plumbing_ipv4().add_route(net, pa_list, policy_tags, peer_handler);
 }
@@ -141,9 +142,10 @@ BGPPlumbing::add_route(const IPv6Net& net,
 		       PeerHandler* peer_handler)  
 {
     debug_msg("BGPPlumbing::add_route IPv6\n");
-    if (main().profile().enabled(profile_route_ribin))
-	main().profile().log(profile_route_ribin,
-			     c_format("add %s", net.str().c_str()));
+    PROFILE(if (main().profile().enabled(profile_route_ribin))
+		main().profile().log(profile_route_ribin,
+				     c_format("add %s", net.str().c_str())));
+
     XLOG_ASSERT(!pa_list->is_locked());
     return plumbing_ipv6().add_route(net, pa_list, policy_tags, peer_handler);
 }
@@ -152,9 +154,10 @@ int
 BGPPlumbing::delete_route(InternalMessage<IPv4> &rtmsg, 
 			  PeerHandler* peer_handler) 
 {
-    if (main().profile().enabled(profile_route_ribin))
-	main().profile().log(profile_route_ribin,
-			     c_format("delete %s", rtmsg.net().str().c_str()));
+    PROFILE(if (main().profile().enabled(profile_route_ribin))
+		main().profile().log(profile_route_ribin,
+				     c_format("delete %s", rtmsg.net().str().c_str())));
+
     return plumbing_ipv4().delete_route(rtmsg, peer_handler);
 }
 
@@ -162,9 +165,10 @@ int
 BGPPlumbing::delete_route(InternalMessage<IPv6> &rtmsg, 
 			  PeerHandler* peer_handler) 
 {
-    if (main().profile().enabled(profile_route_ribin))
-	main().profile().log(profile_route_ribin,
-			     c_format("delete %s", rtmsg.net().str().c_str()));
+    PROFILE(if (main().profile().enabled(profile_route_ribin))
+		main().profile().log(profile_route_ribin,
+				     c_format("delete %s", rtmsg.net().str().c_str())));
+
     return plumbing_ipv6().delete_route(rtmsg, peer_handler);
 }
 
@@ -172,9 +176,10 @@ int
 BGPPlumbing::delete_route(const IPNet<IPv4>& net,
 			  PeerHandler* peer_handler) 
 {
-    if (main().profile().enabled(profile_route_ribin))
-	main().profile().log(profile_route_ribin,
-			     c_format("delete %s", net.str().c_str()));
+    PROFILE(if (main().profile().enabled(profile_route_ribin))
+		main().profile().log(profile_route_ribin,
+				     c_format("delete %s", net.str().c_str())));
+
     return plumbing_ipv4().delete_route(net, peer_handler);
 }
 
@@ -182,9 +187,9 @@ int
 BGPPlumbing::delete_route(const IPNet<IPv6>& net,
 			  PeerHandler* peer_handler) 
 {
-    if (main().profile().enabled(profile_route_ribin))
-	main().profile().log(profile_route_ribin,
-			     c_format("delete %s", net.str().c_str()));
+    PROFILE(if (main().profile().enabled(profile_route_ribin))
+		main().profile().log(profile_route_ribin,
+				     c_format("delete %s", net.str().c_str())));
     return plumbing_ipv6().delete_route(net, peer_handler);
 }
 

@@ -489,6 +489,7 @@ private:
 						// targets].
 						// only one should be present.
     Profile _profile;				// Profiling logs.
+
 };
 
 #endif // __RIB_RIB_MANAGER_HH__

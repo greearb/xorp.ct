@@ -17,7 +17,7 @@
 
 # $XORP$
 
-import os
+import os, re
 Import('env')
 
 e = env.Clone()
@@ -45,15 +45,12 @@ cmds = [
 
 tps = [
     'bgp',
-    'fea',
     'fib2mrib',
-    'firewall',
     'igmp',
     'interfaces',
     'mfea4',
     'mfea6',
     'mld',
-    #'olsr4', #notyet
     'ospfv2',
     'ospfv3',
     'pimsm4',
@@ -73,10 +70,61 @@ if env['enable_olsr']:
     cmds.append('olsr4')
     tps.append('olsr4')
 
+tp_raw = [
+    'fea'
+    ]
+
+if not (env.has_key('disable_fw') and env['disable_fw']):
+    tps.append('firewall')
+
+# Total hack for now, might want to consider some sort of lame CPP syntax
+# instead of hard-coding the pattern matching below.
+def BuildXrlTemplate(target, source, env):
+    #    base = tp[:-len('.raw')]
+    skip_fw = False
+    if (env.has_key('disable_fw') and env['disable_fw']):
+        skip_fw = True
+
+    sfname = str(source[0])
+    
+    print "source: ", sfname
+    print "target: ", str(target[0])
+    
+    ifile = open(sfname, 'r')
+    ofile = open(str(target[0]), 'w')
+    
+    if sfname == 'etc/templates/fea.tp.raw':
+        ignore_ln = re.compile(".*firewall.*")
+        for line in ifile.readlines():
+            if not (skip_fw and ignore_ln.match(line)):
+                if line[-1] == "\n":
+                    # trim trailing newline
+                    line = line[0 : -1]
+                print >>ofile, "%s" % line
+    else:
+        return -1 # error
+    
+    return None
+
+bld = Builder(action = BuildXrlTemplate,
+              suffix = '.tp',
+              src_suffix = '.tp.raw')
+
+e.Append(BUILDERS = {'BuildTP' : bld})
+
+
+all_tp_raw = []
+for tp in tp_raw:
+    all_tp_raw.append(e.BuildTP(tp))
+
+Default(all_tp_raw)
+
 
 e.Alias('install', [
         e.InstallData(env['xorp_templatedir'],
                       [c.__add__('.cmds') for c in cmds]),
         e.InstallData(env['xorp_templatedir'],
-                      [t.__add__('.tp') for t in tps])
+                      [t.__add__('.tp') for t in tps]),
+        e.InstallData(env['xorp_templatedir'],
+                      [t.__add__('.tp') for t in tp_raw])
 ])

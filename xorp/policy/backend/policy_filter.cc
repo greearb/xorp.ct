@@ -32,7 +32,10 @@
 using namespace policy_utils;
 using policy_backend_parser::policy_backend_parse;
 
-PolicyFilter::PolicyFilter() : _policies(NULL), _profiler_exec(NULL),
+PolicyFilter::PolicyFilter() : _policies(NULL),
+#ifndef XORP_DISABLE_PROFILE
+			       _profiler_exec(NULL),
+#endif
 			       _subr(NULL)
 {
     _exec.set_set_manager(&_sman);
@@ -103,8 +106,10 @@ bool PolicyFilter::acceptRoute(VarRW& varrw)
 	return default_action;
     }	
 
+#ifndef XORP_DISABLE_PROFILE
     // setup profiling
     _exec.set_profiler(_profiler_exec);
+#endif
 
     // run policies
     IvExec::FlowAction fa = _exec.run(&varrw);
@@ -163,8 +168,10 @@ bool PolicyFilter::acceptRoute(VarRW& varrw)
     return default_action;
 }
 
+#ifndef XORP_DISABLE_PROFILE
 void
 PolicyFilter::set_profiler_exec(PolicyProfiler* profiler)
 {
     _profiler_exec = profiler;
 }
+#endif

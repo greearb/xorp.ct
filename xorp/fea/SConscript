@@ -92,7 +92,6 @@ libxorp_fea_linkorder += [
     'xst_fea_ifmgr_mirror', # XXX?
     'xif_cli_manager',
     'xif_mfea_client',
-    'xif_profile_client',
     'xst_cli',
     'xst_fea',
     'xst_mfea',
@@ -113,6 +112,8 @@ if not (env.has_key('disable_fw') and env['disable_fw']):
     env.PrependUnique(LIBPATH = [ '$BUILDDIR/fea/data_plane/firewall' ])
     libxorp_fea_linkorder += [ 'xorp_fea_firewall' ]
 
+if not (env.has_key('disable_profile') and env['disable_profile']):
+    libxorp_fea_linkorder += [ 'xif_profile_client' ]
 
 # Internal libraries.
 # Note special use of conditional above.
@@ -147,7 +148,6 @@ libxorp_fea_srcs = [
      'mfea_node_cli.cc',
      'mfea_vif.cc',
      'nexthop_port_mapper.cc',
-     'profile_vars.cc',
      'xrl_fea_io.cc',
      'xrl_fea_node.cc',
      'xrl_fea_target.cc',
@@ -163,6 +163,10 @@ if not (env.has_key('disable_fw') and env['disable_fw']):
                           'firewall_manager.cc',
                           'firewall_transaction.cc',
                           ]
+
+if not (env.has_key('disable_profile') and env['disable_profile']):
+    libxorp_fea_srcs += [ 'profile_vars.cc' ]
+
 
 env.Replace(RPATH = [
     env.Literal(env['xorp_module_rpath'])

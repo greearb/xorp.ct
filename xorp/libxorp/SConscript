@@ -63,7 +63,6 @@ libxorp_core_srcs = [
 	'mac.cc',
 	'nexthop.cc',
 	'popen.cc',
-	'profile.cc',
 	'ref_ptr.cc',
 	'round_robin.cc',
 	'run_command.cc',
@@ -79,6 +78,11 @@ libxorp_core_srcs = [
 	'utils.cc',
 	'vif.cc',
 	]
+
+if not (env.has_key('disable_profile') and env['disable_profile']):
+    libxorp_core_srcs.append('profile.cc');
+
+
 
 if is_shared:
     libxorp_core = env.SharedLibrary(target = 'libxorp_core',

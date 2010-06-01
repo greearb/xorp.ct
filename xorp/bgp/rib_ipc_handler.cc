@@ -32,6 +32,7 @@
 #include "rib_ipc_handler.hh"
 #include "profile_vars.hh"
 
+
 RibIpcHandler::RibIpcHandler(XrlStdRouter& xrl_router, BGPMain& bgp) 
     : PeerHandler("RIBIpcHandler", NULL, NULL, NULL), 
       _ribname(""),
@@ -487,9 +488,9 @@ XrlQueue<A>::queue_add_route(string ribname, bool ibgp, Safi safi,
 {
     Queued q;
 
-    if (_bgp.profile().enabled(profile_route_rpc_in))
-	_bgp.profile().log(profile_route_rpc_in,
-			   c_format("add %s", net.str().c_str()));
+    PROFILE(if (_bgp.profile().enabled(profile_route_rpc_in))
+		_bgp.profile().log(profile_route_rpc_in,
+				   c_format("add %s", net.str().c_str())));
 
     q.add = true;
     q.ribname = ribname;
@@ -518,9 +519,9 @@ XrlQueue<A>::queue_delete_route(string ribname, bool ibgp, Safi safi,
 {
     Queued q;
 
-    if (_bgp.profile().enabled(profile_route_rpc_in))
-	_bgp.profile().log(profile_route_rpc_in,
-			   c_format("delete %s", net.str().c_str()));
+    PROFILE(if (_bgp.profile().enabled(profile_route_rpc_in))
+		_bgp.profile().log(profile_route_rpc_in,
+				   c_format("delete %s", net.str().c_str())));
 
     q.add = false;
     q.ribname = ribname;
@@ -626,9 +627,10 @@ XrlQueue<IPv4>::sendit_spec(Queued& q, const char *bgp)
     XrlRibV0p1Client rib(&_xrl_router);
     if(q.add) {
 	debug_msg("adding route from %s peer to rib\n", bgp);
-	if (_bgp.profile().enabled(profile_route_rpc_out))
-	    _bgp.profile().log(profile_route_rpc_out, 
-			       c_format("add %s", q.net.str().c_str()));
+	PROFILE(if (_bgp.profile().enabled(profile_route_rpc_out))
+		    _bgp.profile().log(profile_route_rpc_out, 
+				       c_format("add %s", q.net.str().c_str())));
+
 	sent = rib.send_add_route4(q.ribname.c_str(),
 			    bgp,
 			    unicast, multicast,
@@ -641,9 +643,9 @@ XrlQueue<IPv4>::sendit_spec(Queued& q, const char *bgp)
 // 			 q.net.str().c_str());
     } else {
 	debug_msg("deleting route from %s peer to rib\n", bgp);
-	if (_bgp.profile().enabled(profile_route_rpc_out))
-	    _bgp.profile().log(profile_route_rpc_out, 
-			       c_format("delete %s", q.net.str().c_str()));
+	PROFILE(if (_bgp.profile().enabled(profile_route_rpc_out))
+		    _bgp.profile().log(profile_route_rpc_out, 
+				       c_format("delete %s", q.net.str().c_str())));
 	sent = rib.send_delete_route4(q.ribname.c_str(),
 				      bgp,
 				      unicast, multicast,
@@ -680,9 +682,9 @@ XrlQueue<IPv6>::sendit_spec(Queued& q, const char *bgp)
     XrlRibV0p1Client rib(&_xrl_router);
     if(q.add) {
 	debug_msg("adding route from %s peer to rib\n", bgp);
-	if (_bgp.profile().enabled(profile_route_rpc_out))
-	    _bgp.profile().log(profile_route_rpc_out, 
-			       c_format("add %s", q.net.str().c_str()));
+	PROFILE(if (_bgp.profile().enabled(profile_route_rpc_out))
+		    _bgp.profile().log(profile_route_rpc_out, 
+				       c_format("add %s", q.net.str().c_str())));
 	sent = rib.send_add_route6(q.ribname.c_str(),
 			    bgp,
 			    unicast, multicast,
@@ -695,9 +697,9 @@ XrlQueue<IPv6>::sendit_spec(Queued& q, const char *bgp)
 // 			 q.net.str().c_str());
     } else {
 	debug_msg("deleting route from %s peer to rib\n", bgp);
-	if (_bgp.profile().enabled(profile_route_rpc_out))
-	    _bgp.profile().log(profile_route_rpc_out, 
-			       c_format("delete %s", q.net.str().c_str()));
+	PROFILE(if (_bgp.profile().enabled(profile_route_rpc_out))
+		    _bgp.profile().log(profile_route_rpc_out, 
+				       c_format("delete %s", q.net.str().c_str())));
 	sent = rib.send_delete_route6(q.ribname.c_str(),
 			       bgp,
 			       unicast, multicast,

@@ -75,6 +75,7 @@ vars.AddVariables(
     BoolVariable('enable_gprof',  'Enable gprof (compile with -pg)', False),
     BoolVariable('disable_ipv6',  'Force disable of IPv6', False),
     BoolVariable('disable_fw',  'Disable Firewall feature', False),
+    BoolVariable('disable_profile',  'Disable Xorp Profiler feature', False),
     BoolVariable('enable_olsr',  'Build OLSR', False),
     BoolVariable('enable_tests', 'Build Test Programs', False),
     BoolVariable('save_args', 'Save scons arguments to .scons_build_args file', False),
@@ -246,6 +247,7 @@ print 'Enable CLICK:     ', env['enable_click']
 print 'Enable BGP:       ', env['enable_bgp']
 print 'Disable IPv6:     ', env['disable_ipv6']
 print 'Disable Firewall: ', env['disable_fw']
+print 'Disable Profile : ', env['disable_profile']
 
 env['WITH_GPROF'] = ARGUMENTS.get('enable_gprof', False)
 print 'Enable gprof:     ', env['enable_gprof']
@@ -366,6 +368,12 @@ if tst and not (tst == "no"):
 else:
     env['disable_fw'] = False
 
+tst = ARGUMENTS.get('disable_profile', False)
+if tst and not (tst == "no"):
+    env['disable_profile'] = True;
+else:
+    env['disable_profile'] = False
+
 ########## start configure magic
 
 if env.has_key('LIBS'):
@@ -427,6 +435,9 @@ if not env.GetOption('clean') and \
 
     if env['disable_fw']:
         conf.Define("XORP_DISABLE_FIREWALL")
+
+    if env['disable_profile']:
+        conf.Define("XORP_DISABLE_PROFILE")
 
     # Boost
     #env['boost_suffix'] = "-mt"		# Not for FreeBSD

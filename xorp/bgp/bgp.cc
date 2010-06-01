@@ -41,8 +41,9 @@
 #include "path_attribute.hh"
 #include "iptuple.hh"
 #include "xrl_target.hh"
+#ifndef XORP_DISABLE_PROFILE
 #include "profile_vars.hh"
-
+#endif
 
 // ----------------------------------------------------------------------------
 // BGPMain implementation
@@ -119,7 +120,7 @@ BGPMain::BGPMain(EventLoop& eventloop)
     //
     startup();
 
-    initialize_profiling_variables(_profile);
+    PROFILE(initialize_profiling_variables(_profile));
     comm_init();
 }
 

@@ -171,9 +171,13 @@ template <>
 bool
 AddRoute<IPv4>::dispatch(XrlRouter& xrl_router, Profile& profile)
 {
+#ifndef XORP_DISABLE_PROFILE
     if (profile.enabled(profile_route_rpc_out))
 	profile.log(profile_route_rpc_out,
 		    c_format("add %s", _net.str().c_str()));
+#else
+    UNUSED(profile);
+#endif
 
     RedistXrlOutput<IPv4>* p = this->parent();
 
@@ -191,9 +195,13 @@ bool
 AddRoute<IPv6>::dispatch(XrlRouter& xrl_router, Profile& profile)
 {
 #ifdef HAVE_IPV6
+#ifndef XORP_DISABLE_PROFILE
     if (profile.enabled(profile_route_rpc_out))
 	profile.log(profile_route_rpc_out,
 		    c_format("add %s", _net.str().c_str()));
+#else
+    UNUSED(profile);
+#endif
 
     RedistXrlOutput<IPv6>* p = this->parent();
 
@@ -254,9 +262,13 @@ template <>
 bool
 DeleteRoute<IPv4>::dispatch(XrlRouter& xrl_router, Profile& profile)
 {
+#ifndef XORP_DISABLE_PROFILE
     if (profile.enabled(profile_route_rpc_out))
 	profile.log(profile_route_rpc_out,
 		    c_format("delete %s", _net.str().c_str()));
+#else
+    UNUSED(profile);
+#endif
 
     RedistXrlOutput<IPv4>* p = this->parent();
 
@@ -275,9 +287,13 @@ bool
 DeleteRoute<IPv6>::dispatch(XrlRouter& xrl_router, Profile& profile)
 {
 #ifdef HAVE_IPV6
+#ifndef XORP_DISABLE_PROFILE
     if (profile.enabled(profile_route_rpc_out))
 	profile.log(profile_route_rpc_out,
 		    c_format("delete %s", _net.str().c_str()));
+#else
+    UNUSED(profile);
+#endif
 
     RedistXrlOutput<IPv6>* p = this->parent();
 
@@ -515,9 +531,9 @@ RedistXrlOutput<A>::add_route(const IPRouteEntry<A>& ipr)
     if (! _network_prefix.contains(ipr.net()))
 	return;		// The target is not interested in this route
 
-    if (_profile.enabled(profile_route_rpc_in))
-	_profile.log(profile_route_rpc_in,
-		     c_format("add %s", ipr.net().str().c_str()));
+    PROFILE(if (_profile.enabled(profile_route_rpc_in))
+		_profile.log(profile_route_rpc_in,
+			     c_format("add %s", ipr.net().str().c_str())));
     
     enqueue_task(new AddRoute<A>(this, ipr));
     if (_queued == 1)
@@ -531,9 +547,9 @@ RedistXrlOutput<A>::delete_route(const IPRouteEntry<A>& ipr)
     if (! _network_prefix.contains(ipr.net()))
 	return;		// The target is not interested in this route
 
-    if (_profile.enabled(profile_route_rpc_in))
-	_profile.log(profile_route_rpc_in,
-		     c_format("delete %s", ipr.net().str().c_str()));
+    PROFILE(if (_profile.enabled(profile_route_rpc_in))
+		_profile.log(profile_route_rpc_in,
+			     c_format("delete %s", ipr.net().str().c_str())));
 
     enqueue_task(new DeleteRoute<A>(this, ipr));
     if (_queued == 1)
@@ -701,6 +717,7 @@ AddTransactionRoute<IPv4>::dispatch(XrlRouter& xrl_router, Profile& profile)
 	return true;	// XXX: we return true to avoid retransmission
     }
 
+#ifndef XORP_DISABLE_PROFILE
     if (profile.enabled(profile_route_rpc_out))
 	profile.log(profile_route_rpc_out,
 		     c_format("add %s %s %s %u", 
@@ -708,6 +725,9 @@ AddTransactionRoute<IPv4>::dispatch(XrlRouter& xrl_router, Profile& profile)
 			      _net.str().c_str(),
 			      _nexthop.str().c_str(),
 			      XORP_UINT_CAST(_metric)));
+#else
+    UNUSED(profile);
+#endif
 
     XrlRedistTransaction4V0p1Client cl(&xrl_router);
     return cl.send_add_route(p->xrl_target_name().c_str(),
@@ -735,6 +755,7 @@ AddTransactionRoute<IPv6>::dispatch(XrlRouter& xrl_router, Profile& profile)
 	return true;	// XXX: we return true to avoid retransmission
     }
 
+#ifndef XORP_DISABLE_PROFILE
     if (profile.enabled(profile_route_rpc_out))
 	profile.log(profile_route_rpc_out,
 		     c_format("add %s %s %s %u", 
@@ -742,6 +763,9 @@ AddTransactionRoute<IPv6>::dispatch(XrlRouter& xrl_router, Profile& profile)
 			      _net.str().c_str(),
 			      _nexthop.str().c_str(),
 			      XORP_UINT_CAST(_metric)));
+#else
+    UNUSED(profile);
+#endif
 
     XrlRedistTransaction6V0p1Client cl(&xrl_router);
     return cl.send_add_route(p->xrl_target_name().c_str(),
@@ -777,11 +801,15 @@ DeleteTransactionRoute<IPv4>::dispatch(XrlRouter& xrl_router, Profile& profile)
 	return true;	// XXX: we return true to avoid retransmission
     }
 
+#ifndef XORP_DISABLE_PROFILE
     if (profile.enabled(profile_route_rpc_out))
 	profile.log(profile_route_rpc_out,
 		     c_format("delete %s %s", 
 			      p->xrl_target_name().c_str(),
 			      _net.str().c_str()));
+#else
+    UNUSED(profile);
+#endif
 
     XrlRedistTransaction4V0p1Client cl(&xrl_router);
     return cl.send_delete_route(p->xrl_target_name().c_str(),
@@ -809,11 +837,15 @@ DeleteTransactionRoute<IPv6>::dispatch(XrlRouter& xrl_router, Profile& profile)
 	return true;	// XXX: we return true to avoid retransmission
     }
 
+#ifndef XORP_DISABLE_PROFILE
     if (profile.enabled(profile_route_rpc_out))
 	profile.log(profile_route_rpc_out,
 		     c_format("delete %s %s", 
 			      p->xrl_target_name().c_str(),
 			      _net.str().c_str()));
+#else
+    UNUSED(profile);
+#endif
 
     XrlRedistTransaction6V0p1Client cl(&xrl_router);
     return cl.send_delete_route(p->xrl_target_name().c_str(),
@@ -1064,13 +1096,13 @@ template <typename A>
 void
 RedistTransactionXrlOutput<A>::add_route(const IPRouteEntry<A>& ipr)
 {
-    if (this->_profile.enabled(profile_route_rpc_in))
-	this->_profile.log(profile_route_rpc_in,
-			   c_format("add %s %s %s %u",
-				    ipr.protocol().name().c_str(),
-				    ipr.net().str().c_str(),
-				    ipr.nexthop()->str().c_str(),
-				    XORP_UINT_CAST(ipr.metric())));
+    PROFILE(if (this->_profile.enabled(profile_route_rpc_in))
+		this->_profile.log(profile_route_rpc_in,
+				   c_format("add %s %s %s %u",
+					    ipr.protocol().name().c_str(),
+					    ipr.net().str().c_str(),
+					    ipr.nexthop()->str().c_str(),
+					    XORP_UINT_CAST(ipr.metric()))));
 
     bool no_running_tasks = (this->_queued == 0);
 
@@ -1095,11 +1127,11 @@ template <typename A>
 void
 RedistTransactionXrlOutput<A>::delete_route(const IPRouteEntry<A>& ipr)
 {
-    if (this->_profile.enabled(profile_route_rpc_in))
-	this->_profile.log(profile_route_rpc_in,
-			   c_format("add %s %s",
-				    ipr.protocol().name().c_str(),
-				    ipr.net().str().c_str()));
+    PROFILE(if (this->_profile.enabled(profile_route_rpc_in))
+		this->_profile.log(profile_route_rpc_in,
+				   c_format("add %s %s",
+					    ipr.protocol().name().c_str(),
+					    ipr.net().str().c_str())));
 
     bool no_running_tasks = (this->_queued == 0);
 

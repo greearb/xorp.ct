@@ -85,7 +85,6 @@ env.Replace(RPATH = [
 ])
 
 libxorp_rib_srcs = [
-	     'profile_vars.cc',
 	     'protocol.cc',
 	     'redist_xrl.cc',
 	     'register_server.cc',
@@ -107,6 +106,9 @@ libxorp_rib_srcs = [
 	     'xrl_target.cc'
              ]
 
+if not (env.has_key('disable_profile') and env['disable_profile']):
+	     libxorp_rib_srcs.append('profile_vars.cc')
+             
 if is_shared:
     libxorp_rib = env.SharedLibrary(target = 'libxorp_rib',
 				    source = libxorp_rib_srcs,

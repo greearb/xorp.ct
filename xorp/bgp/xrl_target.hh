@@ -527,6 +527,7 @@ public:
         const bool&     unicast,
         const bool&     multicast);
 
+#ifndef XORP_DISABLE_PROFILE
     XrlCmdError profile_0_1_enable(
 	// Input values,
 	const string&	pname);
@@ -547,6 +548,7 @@ public:
     XrlCmdError profile_0_1_list(
 	// Output values,
 	string&	info);
+#endif
 
     bool waiting();
     bool done();

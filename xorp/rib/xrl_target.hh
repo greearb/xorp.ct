@@ -906,6 +906,7 @@ protected:
      */
     XrlCmdError rib_0_1_reset_policy_redist_tags();
 
+#ifndef XORP_DISABLE_PROFILE
     /**
      *  Enable profiling
      *
@@ -951,6 +952,7 @@ protected:
     XrlCmdError profile_0_1_list(
 	// Output values,
 	string&	info);
+#endif
 };
 
 #endif // __RIB_XRL_TARGET_HH__

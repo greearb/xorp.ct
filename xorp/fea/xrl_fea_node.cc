@@ -74,7 +74,10 @@ XrlFeaNode::XrlFeaNode(EventLoop& eventloop, const string& xrl_fea_targetname,
 		      finder_hostname, finder_port,
 		      xrl_finder_targetname),
 #endif
-      _xrl_fea_target(_eventloop, _fea_node, _xrl_router, _fea_node.profile(),
+      _xrl_fea_target(_eventloop, _fea_node, _xrl_router,
+#ifndef XORP_DISABLE_PROFILE
+		      _fea_node.profile(),
+#endif
 		      _xrl_fib_client_manager, _lib_fea_client_bridge),
       _xrl_finder_targetname(xrl_finder_targetname)
 {

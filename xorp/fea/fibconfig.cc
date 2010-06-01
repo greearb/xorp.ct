@@ -25,9 +25,13 @@
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+
 #include "libxorp/profile.hh"
 
+#ifndef XORP_DISABLE_PROFILE
 #include "profile_vars.hh"
+#endif
+
 #include "fibconfig.hh"
 #include "fibconfig_transaction.hh"
 #include "fea_node.hh"
@@ -42,7 +46,9 @@ FibConfig::FibConfig(FeaNode& fea_node, const IfTree& system_config_iftree,
 		     const IfTree& merged_config_iftree)
     : _fea_node(fea_node),
       _eventloop(fea_node.eventloop()),
+#ifndef XORP_DISABLE_PROFILE
       _profile(fea_node.profile()),
+#endif
       _nexthop_port_mapper(fea_node.nexthop_port_mapper()),
       _system_config_iftree(system_config_iftree),
       _merged_config_iftree(merged_config_iftree),
@@ -1147,9 +1153,9 @@ FibConfig::add_entry4(const Fte4& fte)
     if (_fibconfig_entry_sets.empty())
 	return (XORP_ERROR);
 
-    if (_profile.enabled(profile_route_out))
-	_profile.log(profile_route_out,
-		     c_format("add %s", fte.net().str().c_str()));
+    PROFILE(if (_profile.enabled(profile_route_out))
+		_profile.log(profile_route_out,
+			     c_format("add %s", fte.net().str().c_str())));
 
     for (fibconfig_entry_set_iter = _fibconfig_entry_sets.begin();
 	 fibconfig_entry_set_iter != _fibconfig_entry_sets.end();
@@ -1170,9 +1176,9 @@ FibConfig::delete_entry4(const Fte4& fte)
     if (_fibconfig_entry_sets.empty())
 	return (XORP_ERROR);
 
-    if (_profile.enabled(profile_route_out))
-	_profile.log(profile_route_out,
-		     c_format("delete %s", fte.net().str().c_str()));
+    PROFILE(if (_profile.enabled(profile_route_out))
+		_profile.log(profile_route_out,
+			     c_format("delete %s", fte.net().str().c_str())));
 
     for (fibconfig_entry_set_iter = _fibconfig_entry_sets.begin();
 	 fibconfig_entry_set_iter != _fibconfig_entry_sets.end();
@@ -1283,9 +1289,9 @@ FibConfig::add_entry6(const Fte6& fte)
     if (_fibconfig_entry_sets.empty())
 	return (XORP_ERROR);
 
-    if (_profile.enabled(profile_route_out))
-	_profile.log(profile_route_out,
-		     c_format("add %s", fte.net().str().c_str()));
+    PROFILE(if (_profile.enabled(profile_route_out))
+		_profile.log(profile_route_out,
+			     c_format("add %s", fte.net().str().c_str())));
 
     for (fibconfig_entry_set_iter = _fibconfig_entry_sets.begin();
 	 fibconfig_entry_set_iter != _fibconfig_entry_sets.end();
@@ -1306,9 +1312,9 @@ FibConfig::delete_entry6(const Fte6& fte)
     if (_fibconfig_entry_sets.empty())
 	return (XORP_ERROR);
 
-    if (_profile.enabled(profile_route_out))
-	_profile.log(profile_route_out,
-		     c_format("delete %s", fte.net().str().c_str()));
+    PROFILE(if (_profile.enabled(profile_route_out))
+		_profile.log(profile_route_out,
+			     c_format("delete %s", fte.net().str().c_str())));
 
     for (fibconfig_entry_set_iter = _fibconfig_entry_sets.begin();
 	 fibconfig_entry_set_iter != _fibconfig_entry_sets.end();

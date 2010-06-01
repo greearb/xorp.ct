@@ -30,7 +30,6 @@ libpbesrcs = [
     'iv_exec.cc',
     'policy_filter.cc',
     'policy_filters.cc',
-    'policy_profiler.cc',
     'policy_redist_map.cc',
     'policytags.cc',
     'set_manager.cc',
@@ -40,6 +39,9 @@ libpbesrcs = [
     'lex.yy_policy_backend_parser.cc',
     'yacc.yy_policy_backend_parser.cc'
     ]
+
+if not (env.has_key('disable_profile') and env['disable_profile']):
+    libpbesrcs.append('policy_profiler.cc')
 
 if is_shared:
     libpbe = env.SharedLibrary(target = 'libxorp_policy_backend',

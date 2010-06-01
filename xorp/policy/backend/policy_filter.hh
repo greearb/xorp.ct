@@ -82,13 +82,17 @@ public:
      */
     bool acceptRoute(VarRW& varrw);
 
+#ifndef XORP_DISABLE_PROFILE
     void set_profiler_exec(PolicyProfiler* profiler);
+#endif
 
 private:
     vector<PolicyInstr*>*   _policies;
     SetManager		    _sman;
     IvExec		    _exec;
+#ifndef XORP_DISABLE_PROFILE
     PolicyProfiler*	    _profiler_exec;
+#endif
     SUBR*		    _subr;
 };
 

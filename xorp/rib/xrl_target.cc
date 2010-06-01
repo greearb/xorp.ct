@@ -394,6 +394,7 @@ XrlRibTarget::rib_0_1_add_route4(const string&	protocol,
 	      nexthop.str().c_str(),
 	      XORP_UINT_CAST(metric));
  
+#ifndef XORP_DISABLE_PROFILE
     if (_rib_manager->profile().enabled(profile_route_ribin)) {
 	_rib_manager->profile().log(profile_route_ribin,
 				    c_format("add %s %s%s %s %s %u",
@@ -404,6 +405,7 @@ XrlRibTarget::rib_0_1_add_route4(const string&	protocol,
 					     nexthop.str().c_str(),
 					     XORP_UINT_CAST(metric)));
     }
+#endif
     
     if (unicast &&
 	_urib4.add_route(protocol, network, nexthop, "", "", metric, policytags)
@@ -445,6 +447,7 @@ XrlRibTarget::rib_0_1_add_route6(const string&	protocol,
 	      nexthop.str().c_str(),
 	      XORP_UINT_CAST(metric));
 
+#ifndef XORP_DISABLE_PROFILE
     if (_rib_manager->profile().enabled(profile_route_ribin)) {
 	_rib_manager->profile().log(profile_route_ribin,
 				    c_format("add %s %s%s %s %s %u",
@@ -455,6 +458,7 @@ XrlRibTarget::rib_0_1_add_route6(const string&	protocol,
 					     nexthop.str().c_str(),
 					     XORP_UINT_CAST(metric)));
     }
+#endif
 
     if (unicast &&
 	_urib6.add_route(protocol, network, nexthop, "", "", metric,
@@ -498,6 +502,7 @@ XrlRibTarget::rib_0_1_replace_route4(const string&	protocol,
 	      nexthop.str().c_str(),
 	      XORP_UINT_CAST(metric));
 
+#ifndef XORP_DISABLE_PROFILE
     if (_rib_manager->profile().enabled(profile_route_ribin)) {
 	_rib_manager->profile().log(profile_route_ribin,
 				    c_format("replace %s %s%s %s %s %u",
@@ -508,6 +513,7 @@ XrlRibTarget::rib_0_1_replace_route4(const string&	protocol,
 					     nexthop.str().c_str(),
 					     XORP_UINT_CAST(metric)));
     }
+#endif
 
     if (unicast &&
 	_urib4.replace_route(protocol, network, nexthop, "", "",
@@ -547,6 +553,7 @@ XrlRibTarget::rib_0_1_replace_route6(const string&	protocol,
 	      nexthop.str().c_str(),
 	      XORP_UINT_CAST(metric));
 
+#ifndef XORP_DISABLE_PROFILE
     if (_rib_manager->profile().enabled(profile_route_ribin)) {
 	_rib_manager->profile().log(profile_route_ribin,
 				    c_format("replace %s %s%s %s %s %u",
@@ -557,6 +564,7 @@ XrlRibTarget::rib_0_1_replace_route6(const string&	protocol,
 					     nexthop.str().c_str(),
 					     XORP_UINT_CAST(metric)));
     }
+#endif
 
     if (unicast &&
 	_urib6.replace_route(protocol, network, nexthop, "", "", metric,
@@ -591,6 +599,7 @@ XrlRibTarget::rib_0_1_delete_route4(const string&	protocol,
 	      bool_c_str(multicast),
 	      network.str().c_str());
 
+#ifndef XORP_DISABLE_PROFILE
     if (_rib_manager->profile().enabled(profile_route_ribin)) {
 	_rib_manager->profile().log(profile_route_ribin,
 				    c_format("delete %s %s%s %s",
@@ -599,6 +608,7 @@ XrlRibTarget::rib_0_1_delete_route4(const string&	protocol,
 					     multicast ? "m" : "",
 					     network.str().c_str()));
     }
+#endif
 
     if (unicast && _urib4.delete_route(protocol, network) != XORP_OK) {
 	string err = "Could not delete IPv4 route from unicast RIB";
@@ -627,6 +637,7 @@ XrlRibTarget::rib_0_1_delete_route6(const string&	protocol,
 	      bool_c_str(multicast),
 	      network.str().c_str());
 
+#ifndef XORP_DISABLE_PROFILE
     if (_rib_manager->profile().enabled(profile_route_ribin)) {
 	_rib_manager->profile().log(profile_route_ribin,
 				    c_format("delete %s %s%s %s",
@@ -635,6 +646,7 @@ XrlRibTarget::rib_0_1_delete_route6(const string&	protocol,
 					     multicast ? "m" : "",
 					     network.str().c_str()));
     }
+#endif
 
     if (unicast && _urib6.delete_route(protocol, network) != XORP_OK) {
 	string err = "Could not delete IPv6 route from unicast RIB";
@@ -672,6 +684,7 @@ XrlRibTarget::rib_0_1_add_interface_route4(const string&	protocol,
 	      vifname.c_str(),
 	      XORP_UINT_CAST(metric));
 
+#ifndef XORP_DISABLE_PROFILE
     if (_rib_manager->profile().enabled(profile_route_ribin)) {
 	_rib_manager->profile().log(profile_route_ribin,
 				    c_format("add %s %s%s %s %s %s/%s %u",
@@ -684,6 +697,7 @@ XrlRibTarget::rib_0_1_add_interface_route4(const string&	protocol,
 					     vifname.c_str(),
 					     XORP_UINT_CAST(metric)));
     }
+#endif
 
     if (unicast &&
 	_urib4.add_route(protocol, network, nexthop, ifname, vifname, metric,
@@ -727,6 +741,7 @@ XrlRibTarget::rib_0_1_add_interface_route6(const string&	protocol,
 	      vifname.c_str(),
 	      XORP_UINT_CAST(metric));
 
+#ifndef XORP_DISABLE_PROFILE
     if (_rib_manager->profile().enabled(profile_route_ribin)) {
 	_rib_manager->profile().log(profile_route_ribin,
 				    c_format("add %s %s%s %s %s %s/%s %u",
@@ -739,6 +754,7 @@ XrlRibTarget::rib_0_1_add_interface_route6(const string&	protocol,
 					     vifname.c_str(),
 					     XORP_UINT_CAST(metric)));
     }
+#endif
 
     if (unicast &&
 	_urib6.add_route(protocol, network, nexthop, ifname, vifname,
@@ -782,6 +798,7 @@ XrlRibTarget::rib_0_1_replace_interface_route4(const string&	    protocol,
 	      vifname.c_str(),
 	      XORP_UINT_CAST(metric));
 
+#ifndef XORP_DISABLE_PROFILE
     if (_rib_manager->profile().enabled(profile_route_ribin)) {
 	_rib_manager->profile().log(profile_route_ribin,
 				    c_format("replace %s %s%s %s %s %s/%s %u",
@@ -794,6 +811,7 @@ XrlRibTarget::rib_0_1_replace_interface_route4(const string&	    protocol,
 					     vifname.c_str(),
 					     XORP_UINT_CAST(metric)));
     }
+#endif
 
     if (unicast &&
 	_urib4.replace_route(protocol, network, nexthop, ifname, vifname,
@@ -837,6 +855,7 @@ XrlRibTarget::rib_0_1_replace_interface_route6(const string&	    protocol,
 	      vifname.c_str(),
 	      XORP_UINT_CAST(metric));
 
+#ifndef XORP_DISABLE_PROFILE
     if (_rib_manager->profile().enabled(profile_route_ribin)) {
 	_rib_manager->profile().log(profile_route_ribin,
 				    c_format("replace %s %s%s %s %s %s/%s %u",
@@ -849,6 +868,7 @@ XrlRibTarget::rib_0_1_replace_interface_route6(const string&	    protocol,
 					     vifname.c_str(),
 					     XORP_UINT_CAST(metric)));
     }
+#endif
 
     if (unicast &&
 	_urib6.replace_route(protocol, network, nexthop, ifname, vifname,
@@ -1529,6 +1549,7 @@ XrlRibTarget::rib_0_1_reset_policy_redist_tags()
     return XrlCmdError::OKAY();
 }
 
+#ifndef XORP_DISABLE_PROFILE
 XrlCmdError
 XrlRibTarget::profile_0_1_enable(const string& pname)
 {
@@ -1558,6 +1579,7 @@ XrlRibTarget::profile_0_1_disable(const string&	pname)
 
     return XrlCmdError::OKAY();
 }
+
 
 XrlCmdError 
 XrlRibTarget::profile_0_1_get_entries(const string& pname,
@@ -1606,3 +1628,5 @@ XrlRibTarget::profile_0_1_list(string& info)
     info = _rib_manager->profile().list();
     return XrlCmdError::OKAY();
 }
+
+#endif // profile

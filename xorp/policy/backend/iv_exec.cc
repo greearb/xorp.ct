@@ -30,7 +30,10 @@
 IvExec::IvExec() : 
 	       _policies(NULL), _policy_count(0), _stack_bottom(NULL), 
 	       _sman(NULL), _varrw(NULL), _finished(false), _fa(DEFAULT),
-	       _trash(NULL), _trashc(0), _trashs(2000), _profiler(NULL)
+	       _trash(NULL), _trashc(0), _trashs(2000)
+#ifndef XORP_DISABLE_PROFILE
+	       , _profiler(NULL)
+#endif
 {
     unsigned ss = 128;
     _trash = new Element*[_trashs];
@@ -163,13 +166,16 @@ IvExec::runTerm(TermInstr& ti)
 
     // run all instructions
     for (int i = 0; i < instrc; ++i) {
+#ifndef XORP_DISABLE_PROFILE
 	if (_profiler)
 	    _profiler->start();
-
+#endif
 	(instr[i])->accept(*this);
 
+#ifndef XORP_DISABLE_PROFILE
 	if (_profiler)
 	    _profiler->stop();
+#endif
 
 	// a flow action occured [accept/reject/default -- exit]
 	if (_finished)
@@ -425,11 +431,13 @@ IvExec::set_set_manager(SetManager* sman)
     _sman = sman;
 }
 
+#ifndef XORP_DISABLE_PROFILE
 void
 IvExec::set_profiler(PolicyProfiler* pp)
 {
     _profiler = pp;
 }
+#endif
 
 string
 IvExec::tracelog()

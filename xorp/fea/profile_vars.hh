@@ -23,6 +23,10 @@
 #ifndef __FEA_PROFILE_VARS_HH__
 #define __FEA_PROFILE_VARS_HH__
 
+#ifdef XORP_DISABLE_PROFILE
+#error "BUG BUG BUG  Do not include this file if profiling is disabled."
+#endif
+
 /**
  * Profile variables
  * See: profile_vars.cc for definitions.

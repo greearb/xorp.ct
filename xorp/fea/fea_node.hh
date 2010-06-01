@@ -28,7 +28,9 @@
 // FEA (Forwarding Engine Abstraction) node implementation.
 //
 
+#ifndef XORP_DISABLE_PROFILE
 #include "libxorp/profile.hh"
+#endif
 
 #include "fibconfig.hh"
 #ifndef XORP_DISABLE_FIREWALL
@@ -115,6 +117,7 @@ public:
      */
     EventLoop& eventloop() { return (_eventloop); }
 
+#ifndef XORP_DISABLE_PROFILE
     /**
      * Get the Profile instance.
      *
@@ -122,6 +125,7 @@ public:
      * @see Profile.
      */
     Profile& profile() { return (_profile); }
+#endif
 
     /**
      * Get the NexthopPortMapper instance.
@@ -227,7 +231,9 @@ private:
     EventLoop&	_eventloop;	// The event loop to use
     bool	_is_running;	// True if the service is running
     bool	_is_dummy;	// True if running in dummy node
+#ifndef XORP_DISABLE_PROFILE
     Profile	_profile;	// Profile entity
+#endif
     NexthopPortMapper		_nexthop_port_mapper;	// Next-hop port mapper
 
     IfConfig			_ifconfig;

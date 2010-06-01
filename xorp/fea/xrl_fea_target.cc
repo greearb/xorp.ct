@@ -38,7 +38,10 @@
 
 #include "libxipc/xrl_std_router.hh"
 
+#ifndef XORP_DISABLE_PROFILE
 #include "xrl/interfaces/profile_client_xif.hh"
+#endif
+
 //
 // XXX: file "libxorp/profile.hh" must be included after
 // "libxipc/xrl_std_router.hh" and "xrl/interfaces/profile_client_xif.hh"
@@ -53,7 +56,9 @@
 #endif
 #include "ifconfig_transaction.hh"
 #include "libfeaclient_bridge.hh"
+#ifndef XORP_DISABLE_PROFILE
 #include "profile_vars.hh"
+#endif
 #include "xrl_fea_target.hh"
 
 #ifdef XORP_USE_CLICK
@@ -63,14 +68,18 @@
 XrlFeaTarget::XrlFeaTarget(EventLoop&			eventloop,
 			   FeaNode&			fea_node,
 			   XrlRouter&			xrl_router,
+#ifndef XORP_DISABLE_PROFILE
 			   Profile&			profile,
+#endif
 			   XrlFibClientManager&		xrl_fib_client_manager,
 			   LibFeaClientBridge&		lib_fea_client_bridge)
     : XrlFeaTargetBase(&xrl_router),
       _eventloop(eventloop),
       _fea_node(fea_node),
       _xrl_router(xrl_router),
+#ifndef XORP_DISABLE_PROFILE
       _profile(profile),
+#endif
       _xrl_fib_client_manager(xrl_fib_client_manager),
       _ifconfig(fea_node.ifconfig()),
 #ifndef XORP_DISABLE_FIREWALL
@@ -3138,8 +3147,8 @@ XrlFeaTarget::redist_transaction4_0_1_add_route(
     if (protocol_origin == "connected")
 	is_connected_route = true;
 
-    if (_profile.enabled(profile_route_in))
-	_profile.log(profile_route_in, c_format("add %s", dst.str().c_str()));
+    PROFILE(if (_profile.enabled(profile_route_in))
+		_profile.log(profile_route_in, c_format("add %s", dst.str().c_str())));
 
     if (_fibconfig.add_transaction_operation(
 	    tid,
@@ -3190,9 +3199,9 @@ XrlFeaTarget::redist_transaction4_0_1_delete_route(
     if (protocol_origin == "connected")
 	is_connected_route = true;
 
-    if (_profile.enabled(profile_route_in))
-	_profile.log(profile_route_in,
-		     c_format("delete %s", dst.str().c_str()));
+    PROFILE(if (_profile.enabled(profile_route_in))
+		_profile.log(profile_route_in,
+			     c_format("delete %s", dst.str().c_str())));
 
     if (_fibconfig.add_transaction_operation(
 	    tid,
@@ -3303,8 +3312,8 @@ XrlFeaTarget::redist_transaction6_0_1_add_route(
     if (protocol_origin == "connected")
 	is_connected_route = true;
 
-    if (_profile.enabled(profile_route_in))
-	_profile.log(profile_route_in, c_format("add %s", dst.str().c_str()));
+    PROFILE(if (_profile.enabled(profile_route_in))
+		_profile.log(profile_route_in, c_format("add %s", dst.str().c_str())));
 
     if (_fibconfig.add_transaction_operation(
 	    tid,
@@ -3355,9 +3364,9 @@ XrlFeaTarget::redist_transaction6_0_1_delete_route(
     if (protocol_origin == "connected")
 	is_connected_route = true;
 
-    if (_profile.enabled(profile_route_in))
-	_profile.log(profile_route_in,
-		     c_format("delete %s", dst.str().c_str()));
+    PROFILE(if (_profile.enabled(profile_route_in))
+		_profile.log(profile_route_in,
+			     c_format("delete %s", dst.str().c_str())));
 
     if (_fibconfig.add_transaction_operation(
 	    tid,
@@ -4605,6 +4614,7 @@ XrlFeaTarget::socket6_0_1_set_socket_option(
 
 #endif
 
+#ifndef XORP_DISABLE_PROFILE
 // ----------------------------------------------------------------------------
 // Profiling related
 
@@ -4685,3 +4695,5 @@ XrlFeaTarget::profile_0_1_list(string& info)
     info = _profile.list();
     return XrlCmdError::OKAY();
 }
+
+#endif

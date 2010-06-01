@@ -191,29 +191,31 @@ xorpsh = xorpsh_env.Program(target = 'xorpsh', source = xorpsh_srcs)
 env.Alias('install',
           env.InstallProgram(env['xorp_sbindir'], xorpsh))
 
-### profiler
+if not (env.has_key('disable_profile') and env['disable_profile']):
+    ### profiler
 
-profiler_env = env.Clone()
+    profiler_env = env.Clone()
 
-profiler_env.AppendUnique(LIBS = [
-    'xif_profile',
-    'xst_profiler',
-    'xorp_finder',
-    'xorp_ipc',
-    'xorp_comm',
-    'xorp_core'
-])
+    profiler_env.AppendUnique(LIBS = [
+        'xif_profile',
+        'xst_profiler',
+        'xorp_finder',
+        'xorp_ipc',
+        'xorp_comm',
+        'xorp_core'
+        ])
 
-profiler_srcs = [
+    profiler_srcs = [
 	'profiler.cc',
 	]
 
-profiler = profiler_env.Program(target = 'xorp_profiler',
-				source = profiler_srcs)
+    profiler = profiler_env.Program(target = 'xorp_profiler',
+                                    source = profiler_srcs)
 
-env.Alias('install',
-          env.InstallProgram(env['xorp_sbindir'], profiler))
+    env.Alias('install',
+              env.InstallProgram(env['xorp_sbindir'], profiler))
 
-###
-
-Default(rtrmgr, xorpsh, profiler)
+    Default(rtrmgr, xorpsh, profiler)
+else:
+    Default(rtrmgr, xorpsh)
+    

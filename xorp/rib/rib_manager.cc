@@ -65,7 +65,9 @@ RibManager::RibManager(EventLoop& eventloop, XrlStdRouter& xrl_std_router,
 #endif
     PeriodicTimerCallback cb = callback(this, &RibManager::status_updater);
     _status_update_timer = _eventloop.new_periodic_ms(1000, cb);
+#ifndef XORP_DISABLE_PROFILE
     initialize_profiling_variables(_profile);
+#endif
 }
 
 RibManager::~RibManager()

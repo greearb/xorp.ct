@@ -117,11 +117,11 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 {
     XLOG_ASSERT(0 == socket_client || _SocketClient == socket_client);
 
-    if (main()->profile().enabled(profile_message_in))
-	main()->profile().log(profile_message_in,
-			      c_format("message on %s len %u",
-				       str().c_str(),
-				       XORP_UINT_CAST(length)));
+    PROFILE(if (main()->profile().enabled(profile_message_in))
+		main()->profile().log(profile_message_in,
+				      c_format("message on %s len %u",
+					       str().c_str(),
+					       XORP_UINT_CAST(length))));
 	
     TIMESPENT();
 
@@ -245,10 +245,10 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	case MESSAGETYPEOPEN: {
 	    debug_msg("OPEN Packet RECEIVED\n");
 	    OpenPacket pac(buf, length);
-	    XLOG_TRACE(main()->profile().enabled(trace_message_in),
-		       "Peer %s: Receive: %s",
-		       peerdata()->iptuple().str().c_str(),
-		       cstring(pac));
+	    PROFILE(XLOG_TRACE(main()->profile().enabled(trace_message_in),
+			       "Peer %s: Receive: %s",
+			       peerdata()->iptuple().str().c_str(),
+			       cstring(pac)));
 	    // All decode errors should throw a CorruptMessage.
 	    debug_msg("%s", pac.str().c_str());
 	    // want unified decode call. now need to get peerdata out.
@@ -262,10 +262,11 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 		      XORP_UINT_CAST(length));
 	    // Check that the length is correct or throw an exception
 	    KeepAlivePacket pac(buf, length);
-	    XLOG_TRACE(main()->profile().enabled(trace_message_in),
-		       "Peer %s: Receive: %s",
-		       peerdata()->iptuple().str().c_str(),
-		       cstring(pac));
+	    PROFILE(XLOG_TRACE(main()->profile().enabled(trace_message_in),
+			       "Peer %s: Receive: %s",
+			       peerdata()->iptuple().str().c_str(),
+			       cstring(pac)));
+
 	    // debug_msg("%s", pac.str().c_str());
 	    event_keepmess();
 	    TIMESPENT_CHECK();
@@ -277,10 +278,11 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	    _mainprocess->eventloop().current_time(_in_update_time);
 	    UpdatePacket pac(buf, length, _peerdata, _mainprocess, /*do checks*/true);
 
-	    XLOG_TRACE(main()->profile().enabled(trace_message_in),
-		       "Peer %s: Receive: %s",
-		       peerdata()->iptuple().str().c_str(),
-		       cstring(pac));
+	    PROFILE(XLOG_TRACE(main()->profile().enabled(trace_message_in),
+			       "Peer %s: Receive: %s",
+			       peerdata()->iptuple().str().c_str(),
+			       cstring(pac)));
+
 	    // All decode errors should throw a CorruptMessage.
 	    debug_msg("%s", pac.str().c_str());
 
@@ -296,10 +298,12 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	case MESSAGETYPENOTIFICATION: {
 	    debug_msg("NOTIFICATION Packet RECEIVED\n");
 	    NotificationPacket pac(buf, length);
-	    XLOG_TRACE(main()->profile().enabled(trace_message_in),
-		       "Peer %s: Receive: %s",
-		       peerdata()->iptuple().str().c_str(),
-		       cstring(pac));
+	    
+	    PROFILE(XLOG_TRACE(main()->profile().enabled(trace_message_in),
+			       "Peer %s: Receive: %s",
+			       peerdata()->iptuple().str().c_str(),
+			       cstring(pac)));
+
 	    // All decode errors should throw a CorruptMessage.
 	    debug_msg("%s", pac.str().c_str());
 	    event_recvnotify(pac);
@@ -355,10 +359,10 @@ BGPPeer::send_message(const BGPPacket& p)
 {
     debug_msg("%s", p.str().c_str());
 
-    XLOG_TRACE(main()->profile().enabled(trace_message_out),
-	       "Peer %s: Send: %s",
-	       peerdata()->iptuple().str().c_str(),
-	       cstring(p));
+    PROFILE(XLOG_TRACE(main()->profile().enabled(trace_message_out),
+		       "Peer %s: Send: %s",
+		       peerdata()->iptuple().str().c_str(),
+		       cstring(p)));
 
     uint8_t packet_type = p.type();
 
@@ -454,10 +458,10 @@ BGPPeer::send_notification(const NotificationPacket& p, bool restart,
 
     XLOG_INFO("Sending: %s", cstring(p));
 
-    XLOG_TRACE(main()->profile().enabled(trace_message_out),
-	       "Peer %s: Send: %s",
-	       peerdata()->iptuple().str().c_str(),
-	       cstring(p));
+    PROFILE(XLOG_TRACE(main()->profile().enabled(trace_message_out),
+		       "Peer %s: Send: %s",
+		       peerdata()->iptuple().str().c_str(),
+		       cstring(p)));
 
     /*
     ** We need to deal with NOTIFICATION differently from other packets -
@@ -2046,11 +2050,12 @@ BGPPeer::set_state(FSMState s, bool restart, bool automatic)
 	      peerdata()->iptuple().str().c_str(),
 	      pretty_print_state(_state),
 	      pretty_print_state(s));
-    XLOG_TRACE(main()->profile().enabled(trace_state_change),
-	       "Peer %s: Previous state: %s Current state: %s\n",
-	       peerdata()->iptuple().str().c_str(),
-	       pretty_print_state(_state),
-	       pretty_print_state(s));
+    PROFILE(XLOG_TRACE(main()->profile().enabled(trace_state_change),
+		       "Peer %s: Previous state: %s Current state: %s\n",
+		       peerdata()->iptuple().str().c_str(),
+		       pretty_print_state(_state),
+		       pretty_print_state(s)));
+
     FSMState previous_state = _state;
     _state = s;
 
@@ -2326,10 +2331,10 @@ AcceptSession::send_notification_accept(const NotificationPacket& np)
 
     XLOG_INFO("Sending: %s", cstring(np));
 
-    XLOG_TRACE(main()->profile().enabled(trace_message_out),
-	       "Peer %s: Send: %s",
-	       peerdata()->iptuple().str().c_str(),
-	       cstring(np));
+    PROFILE(XLOG_TRACE(main()->profile().enabled(trace_message_out),
+		       "Peer %s: Send: %s",
+		       peerdata()->iptuple().str().c_str(),
+		       cstring(np)));
     
     // Free the buffer in the completion routine.
     bool ret =_socket_client->send_message(buf, ccnt,
@@ -2612,10 +2617,11 @@ AcceptSession::get_message_accept(BGPPacket::Status status,
 	case MESSAGETYPEOPEN: {
 	    debug_msg("OPEN Packet RECEIVED\n");
 	    OpenPacket pac(buf, length);
- 	    XLOG_TRACE(main()->profile().enabled(trace_message_in),
-		       "Peer %s: Receive: %s",
-		       peerdata()->iptuple().str().c_str(),
- 		       cstring(pac));
+ 	    PROFILE(XLOG_TRACE(main()->profile().enabled(trace_message_in),
+			       "Peer %s: Receive: %s",
+			       peerdata()->iptuple().str().c_str(),
+			       cstring(pac)));
+
 	    // All decode errors should throw a CorruptMessage.
 	    debug_msg("%s", pac.str().c_str());
 	    // want unified decode call. now need to get peerdata out.
@@ -2629,10 +2635,12 @@ AcceptSession::get_message_accept(BGPPacket::Status status,
 		      XORP_UINT_CAST(length));
 	    // Check that the length is correct or throw an exception
 	    KeepAlivePacket pac(buf, length);
- 	    XLOG_TRACE(main()->profile().enabled(trace_message_in),
-		       "Peer %s: Receive: %s",
-		       peerdata()->iptuple().str().c_str(),
- 		       cstring(pac));
+
+ 	    PROFILE(XLOG_TRACE(main()->profile().enabled(trace_message_in),
+			       "Peer %s: Receive: %s",
+			       peerdata()->iptuple().str().c_str(),
+			       cstring(pac)));
+
 	    // debug_msg(pac.str().c_str());
 	    event_keepmess_accept();
 	    TIMESPENT_CHECK();
@@ -2644,10 +2652,12 @@ AcceptSession::get_message_accept(BGPPacket::Status status,
 // 	    main()->eventloop().current_time(_in_update_time);
 	    UpdatePacket pac(buf, length, _peer.peerdata(), 
 			     _peer.main(), /*do checks*/true);
- 	    XLOG_TRACE(main()->profile().enabled(trace_message_in),
-		       "Peer %s: Receive: %s",
-		       peerdata()->iptuple().str().c_str(),
- 		       cstring(pac));
+
+ 	    PROFILE(XLOG_TRACE(main()->profile().enabled(trace_message_in),
+			       "Peer %s: Receive: %s",
+			       peerdata()->iptuple().str().c_str(),
+			       cstring(pac)));
+
 	    // All decode errors should throw a CorruptMessage.
 	    debug_msg("%s", pac.str().c_str());
 	    event_recvupdate_accept(pac);
@@ -2662,10 +2672,12 @@ AcceptSession::get_message_accept(BGPPacket::Status status,
 	case MESSAGETYPENOTIFICATION: {
 	    debug_msg("NOTIFICATION Packet RECEIVED\n");
 	    NotificationPacket pac(buf, length);
-	    XLOG_TRACE(main()->profile().enabled(trace_message_in),
-		       "Peer %s: Receive: %s",
-		       peerdata()->iptuple().str().c_str(),
-		       cstring(pac));
+	    
+	    PROFILE(XLOG_TRACE(main()->profile().enabled(trace_message_in),
+			       "Peer %s: Receive: %s",
+			       peerdata()->iptuple().str().c_str(),
+			       cstring(pac)));
+
 	    // All decode errors should throw a CorruptMessage.
 	    debug_msg("%s", pac.str().c_str());
 	    event_recvnotify_accept(pac);
