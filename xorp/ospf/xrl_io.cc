@@ -40,7 +40,9 @@
 #include <set>
 
 #include "xrl/interfaces/fea_rawpkt4_xif.hh"
+#ifdef HAVE_IPV6
 #include "xrl/interfaces/fea_rawpkt6_xif.hh"
+#endif
 #include "xrl/interfaces/rib_xif.hh"
 
 #include "ospf.hh"
@@ -126,6 +128,7 @@ XrlIO<IPv6>::send(const string& interface, const string& vif,
 		  IPv6 dst, IPv6 src,
 		  int ttl, uint8_t* data, uint32_t len)
 {
+#ifdef HAVE_IPV6
     bool success;
 
     debug_msg("send(%s,%s,%s,%s,%p,%d\n",
@@ -157,6 +160,16 @@ XrlIO<IPv6>::send(const string& interface, const string& vif,
 	callback(this, &XrlIO::send_cb, interface, vif));
 
     return success;
+#else
+    UNUSED(interface);
+    UNUSED(vif);
+    UNUSED(dst);
+    UNUSED(src);
+    UNUSED(ttl);
+    UNUSED(data);
+    UNUSED(len);
+    return false;
+#endif
 }
 
 template <typename A>
@@ -221,6 +234,7 @@ template <>
 bool
 XrlIO<IPv6>::enable_interface_vif(const string& interface, const string& vif)
 {
+#ifdef HAVE_IPV6
     bool success;
 
     debug_msg("Enable Interface %s Vif %s\n", interface.c_str(), vif.c_str());
@@ -236,6 +250,11 @@ XrlIO<IPv6>::enable_interface_vif(const string& interface, const string& vif)
 	callback(this, &XrlIO::enable_interface_vif_cb, interface, vif));
 
     return success;
+#else
+    UNUSED(interface);
+    UNUSED(vif);
+    return false;
+#endif
 }
 
 template <typename A>
@@ -300,6 +319,7 @@ template <>
 bool
 XrlIO<IPv6>::disable_interface_vif(const string& interface, const string& vif)
 {
+#ifdef HAVE_IPV6
     bool success;
 
     debug_msg("Disable Interface %s Vif %s\n", interface.c_str(), vif.c_str());
@@ -314,6 +334,11 @@ XrlIO<IPv6>::disable_interface_vif(const string& interface, const string& vif)
 	callback(this, &XrlIO::disable_interface_vif_cb, interface, vif));
 
     return success;
+#else
+    UNUSED(interface);
+    UNUSED(vif);
+    return false;
+#endif
 }
 
 template <typename A>
@@ -407,6 +432,7 @@ bool
 XrlIO<IPv6>::is_address_enabled(const string& interface, const string& vif,
 				const IPv6& address) const
 {
+#ifdef HAVE_IPV6
     debug_msg("Interface %s Vif %s Address %s\n", interface.c_str(),
 	      vif.c_str(), cstring(address));
 
@@ -420,6 +446,12 @@ XrlIO<IPv6>::is_address_enabled(const string& interface, const string& vif,
 	return false;
 
     return (fa->enabled());
+#else
+    UNUSED(interface);
+    UNUSED(vif);
+    UNUSED(address);
+    return false;
+#endif
 }
 
 template <>
@@ -445,6 +477,7 @@ bool
 XrlIO<IPv6>::get_addresses(const string& interface, const string& vif,
 			   list<IPv6>& addresses) const
 {
+#ifdef HAVE_IPV6
     debug_msg("Interface %s Vif %s\n", interface.c_str(), vif.c_str());
 
     const IfMgrVifAtom* fv = ifmgr_iftree().find_vif(interface, vif);
@@ -456,6 +489,12 @@ XrlIO<IPv6>::get_addresses(const string& interface, const string& vif,
 	addresses.push_back(i->second.addr());
 
     return true;
+#else
+    UNUSED(interface);
+    UNUSED(vif);
+    UNUSED(addresses);
+    return false;
+#endif
 }
 
 template <>
@@ -485,6 +524,7 @@ bool
 XrlIO<IPv6>::get_link_local_address(const string& interface, const string& vif,
 				    IPv6& address)
 {
+#ifdef HAVE_IPV6
     debug_msg("Interface %s Vif %s\n", interface.c_str(), vif.c_str());
 
     const IfMgrVifAtom* fv = ifmgr_iftree().find_vif(interface, vif);
@@ -500,6 +540,12 @@ XrlIO<IPv6>::get_link_local_address(const string& interface, const string& vif,
     }
 
     return false;
+#else
+    UNUSED(interface);
+    UNUSED(vif);
+    UNUSED(address);
+    return false;
+#endif
 }
 
 template <typename A>
@@ -539,6 +585,7 @@ uint32_t
 XrlIO<IPv6>::get_prefix_length(const string& interface, const string& vif,
 			       IPv6 address)
 {
+#ifdef HAVE_IPV6
     debug_msg("Interface %s Vif %s Address %s\n", interface.c_str(),
 	      vif.c_str(), cstring(address));
 
@@ -549,6 +596,12 @@ XrlIO<IPv6>::get_prefix_length(const string& interface, const string& vif,
 	return 0;
 
     return (fa->prefix_len());
+#else
+    UNUSED(interface);
+    UNUSED(vif);
+    UNUSED(address);
+    return false;
+#endif
 }
 
 template <typename A>
@@ -592,6 +645,7 @@ bool
 XrlIO<IPv6>::join_multicast_group(const string& interface, const string& vif,
 				  IPv6 mcast)
 {
+#ifdef HAVE_IPV6
     bool success;
 
     debug_msg("Join Interface %s Vif %s mcast %s\n", interface.c_str(),
@@ -608,6 +662,12 @@ XrlIO<IPv6>::join_multicast_group(const string& interface, const string& vif,
 	callback(this, &XrlIO::join_multicast_group_cb, interface, vif));
 
     return success;
+#else
+    UNUSED(interface);
+    UNUSED(vif);
+    UNUSED(mcast);
+    return false;
+#endif
 }
 
 template <typename A>
@@ -675,6 +735,7 @@ bool
 XrlIO<IPv6>::leave_multicast_group(const string& interface, const string& vif,
 				   IPv6 mcast)
 {
+#ifdef HAVE_IPV6
     bool success;
 
     debug_msg("Leave Interface %s Vif %s mcast %s\n", interface.c_str(),
@@ -691,6 +752,12 @@ XrlIO<IPv6>::leave_multicast_group(const string& interface, const string& vif,
 	callback(this, &XrlIO::leave_multicast_group_cb, interface, vif));
 
     return success;
+#else
+    UNUSED(interface);
+    UNUSED(vif);
+    UNUSED(mcast);
+    return false;
+#endif
 }
 
 template <typename A>
@@ -751,6 +818,7 @@ XrlIO<A>::register_rib()
 	XLOG_FATAL("Failed to add OSPF table to RIB");
     }
 
+#ifdef HAVE_IPV6
     if(!rib.send_add_igp_table6(_ribname.c_str(),
 				"ospf", _xrl_router.class_name(),
 				_xrl_router.instance_name(), true, true,
@@ -760,6 +828,7 @@ XrlIO<A>::register_rib()
 					 "add_table"))) {
 	XLOG_FATAL("Failed to add OSPF table to RIB");
     }
+#endif
 
 }
 
@@ -779,6 +848,7 @@ XrlIO<A>::unregister_rib()
 	XLOG_FATAL("Failed to delete OSPF table to RIB");
     }
 
+#ifdef HAVE_IPV6
     if(!rib.send_delete_igp_table6(_ribname.c_str(),
 				   "ospf", _xrl_router.class_name(),
 				   _xrl_router.instance_name(), true, true,
@@ -788,6 +858,7 @@ XrlIO<A>::unregister_rib()
 					    "delete table"))) {
 	XLOG_FATAL("Failed to delete OSPF table to RIB");
     }
+#endif
 
 }
 
@@ -1067,6 +1138,7 @@ template<>
 bool
 XrlQueue<IPv6>::sendit_spec(Queued& q, const char *protocol)
 {
+#ifdef HAVE_IPV6
     bool sent = false;
     bool unicast = true;
     bool multicast = false;
@@ -1133,6 +1205,11 @@ XrlQueue<IPv6>::sendit_spec(Queued& q, const char *protocol)
     }
 
     return sent;
+#else
+    UNUSED(q);
+    UNUSED(protocol);
+    return false;
+#endif
 }
 
 template<class A>
@@ -1368,6 +1445,7 @@ template<>
 void
 XrlIO<IPv6>::updates_made()
 {
+#ifdef HAVE_IPV6
     IfMgrIfTree::IfMap::const_iterator ii;
     IfMgrIfAtom::VifMap::const_iterator vi;
     IfMgrVifAtom::IPv6Map::const_iterator ai;
@@ -1535,6 +1613,7 @@ XrlIO<IPv6>::updates_made()
     // Update the local copy of the interface tree
     //
     _iftree = ifmgr_iftree();
+#endif
 }
 
 template class XrlQueue<IPv4>;

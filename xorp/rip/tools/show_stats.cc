@@ -35,7 +35,9 @@
 #include "libxipc/xrl_std_router.hh"
 
 #include "xrl/interfaces/rip_xif.hh"
+#ifdef HAVE_IPV6
 #include "xrl/interfaces/ripng_xif.hh"
+#endif
 
 #include "common.hh"
 
@@ -254,12 +256,16 @@ template <>
 bool
 GetAddressStats<IPv6>::dispatch()
 {
+#ifdef HAVE_IPV6
     XrlRipngV0p1Client cl(queue().sender());
     return cl.send_get_counters(queue().target().c_str(),
 				this->ifname(), this->vifname(), this->addr(),
 				callback(this,
 					 &GetAddressStats<IPv6>::cmd_callback)
 				);
+#else
+    return false;
+#endif
 }
 
 /**
@@ -304,11 +310,15 @@ template <>
 bool
 GetAddressStatus<IPv6>::dispatch()
 {
+#ifdef HAVE_IPV6
     XrlRipngV0p1Client cl(queue().sender());
     return cl.send_rip_address_status(queue().target().c_str(),
 		this->ifname(), this->vifname(), this->addr(),
 		callback(this, &GetAddressStatus<IPv6>::cmd_callback)
 		);
+#else
+    return false;
+#endif
 }
 
 /**
@@ -359,10 +369,14 @@ template <>
 bool
 GetAllAddressStats<IPv6>::dispatch()
 {
+#ifdef HAVE_IPV6
     XrlRipngV0p1Client cl(queue().sender());
     return cl.send_get_all_addresses(queue().target().c_str(),
 		callback(this, &GetAllAddressStats<IPv6>::cmd_callback)
 				     );
+#else
+    return false;
+#endif
 }
 
 template <typename A>

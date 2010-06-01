@@ -45,17 +45,24 @@ RibManager::RibManager(EventLoop& eventloop, XrlStdRouter& xrl_std_router,
       _register_server(&_xrl_router),
       _urib4(UNICAST, *this, _eventloop),
       _mrib4(MULTICAST, *this, _eventloop),
+#ifdef HAVE_IPV6
       _urib6(UNICAST, *this, _eventloop),
       _mrib6(MULTICAST, *this, _eventloop),
+#endif
       _vif_manager(_xrl_router, _eventloop, this, fea_target),
-      _xrl_rib_target(&_xrl_router, _urib4, _mrib4, _urib6, _mrib6,
+      _xrl_rib_target(&_xrl_router, _urib4, _mrib4,
+#ifdef HAVE_IPV6
+		      _urib6, _mrib6,
+#endif
 		      _vif_manager, this),
       _fea_target(fea_target)
 {
     _urib4.initialize(_register_server);
     _mrib4.initialize(_register_server);
+#ifdef HAVE_IPV6
     _urib6.initialize(_register_server);
     _mrib6.initialize(_register_server);
+#endif
     PeriodicTimerCallback cb = callback(this, &RibManager::status_updater);
     _status_update_timer = _eventloop.new_periodic_ms(1000, cb);
     initialize_profiling_variables(_profile);
@@ -179,8 +186,11 @@ RibManager::new_vif(const string& vifname, const Vif& vif, string& err)
     err.resize(0);
     return (add_rib_vif(_urib4, vifname, vif, err)
 	    | add_rib_vif(_mrib4, vifname, vif, err)
+#ifdef HAVE_IPV6
 	    | add_rib_vif(_urib6, vifname, vif, err)
-	    | add_rib_vif(_mrib6, vifname, vif, err));
+	    | add_rib_vif(_mrib6, vifname, vif, err)
+#endif
+	);
 }
 
 template <typename A>
@@ -206,8 +216,11 @@ RibManager::delete_vif(const string& vifname, string& err)
     err.resize(0);
     return (delete_rib_vif(_urib4, vifname, err)
 	    | delete_rib_vif(_mrib4, vifname, err)
+#ifdef HAVE_IPV6
 	    | delete_rib_vif(_urib6, vifname, err)
-	    | delete_rib_vif(_mrib6, vifname, err));
+	    | delete_rib_vif(_mrib6, vifname, err)
+#endif
+	);
 }
 
 
@@ -239,11 +252,14 @@ RibManager::set_vif_flags(const string& vifname,
     if (set_rib_vif_flags(_urib4, vifname, is_p2p, is_loopback, is_multicast,
 			  is_broadcast, is_up, mtu, err) != XORP_OK ||
 	set_rib_vif_flags(_mrib4, vifname, is_p2p, is_loopback, is_multicast,
-			  is_broadcast, is_up, mtu, err) != XORP_OK ||
-	set_rib_vif_flags(_urib6, vifname, is_p2p, is_loopback, is_multicast,
-			  is_broadcast, is_up, mtu, err) != XORP_OK ||
-	set_rib_vif_flags(_mrib6, vifname, is_up, is_loopback, is_multicast,
-			  is_broadcast, is_up, mtu, err) != XORP_OK) {
+			  is_broadcast, is_up, mtu, err) != XORP_OK
+#ifdef HAVE_IPV6
+	|| set_rib_vif_flags(_urib6, vifname, is_p2p, is_loopback, is_multicast,
+			     is_broadcast, is_up, mtu, err) != XORP_OK
+	|| set_rib_vif_flags(_mrib6, vifname, is_up, is_loopback, is_multicast,
+			     is_broadcast, is_up, mtu, err) != XORP_OK
+#endif
+	) {
 	return XORP_ERROR;
     }
     return XORP_OK;
@@ -312,6 +328,7 @@ RibManager::delete_vif_address(const string& 	vifn,
     return delete_vif_address_from_ribs(_urib4, _mrib4, vifn, addr, err);
 }
 
+#ifdef HAVE_IPV6
 int
 RibManager::add_vif_address(const string&	vifn,
 			    const IPv6&		addr,
@@ -331,15 +348,18 @@ RibManager::delete_vif_address(const string& 	vifn,
 {
     return delete_vif_address_from_ribs(_urib6, _mrib6, vifn, addr, err);
 }
+#endif
 
 
 void
 RibManager::make_errors_fatal()
 {
     _urib4.set_errors_are_fatal();
-    _urib6.set_errors_are_fatal();
     _mrib4.set_errors_are_fatal();
+#ifdef HAVE_IPV6
+    _urib6.set_errors_are_fatal();
     _mrib6.set_errors_are_fatal();
+#endif
 }
 
 void
@@ -403,9 +423,11 @@ RibManager::target_death(const string& target_class,
 
     // Inform the RIBs in case this was a routing protocol that died.
     _urib4.target_death(target_class, target_instance);
-    _urib6.target_death(target_class, target_instance);
     _mrib4.target_death(target_class, target_instance);
+#ifdef HAVE_IPV6
+    _urib6.target_death(target_class, target_instance);
     _mrib6.target_death(target_class, target_instance);
+#endif
 }
 
 static inline
@@ -560,6 +582,7 @@ RibManager::add_redist_xrl_output4(const string&	to_xrl_target,
     return XORP_OK;
 }
 
+#ifdef HAVE_IPV6
 int
 RibManager::add_redist_xrl_output6(const string&	to_xrl_target,
 				   const string&	from_protocol,
@@ -594,6 +617,7 @@ RibManager::add_redist_xrl_output6(const string&	to_xrl_target,
     }
     return XORP_OK;
 }
+#endif
 
 int
 RibManager::delete_redist_xrl_output4(const string&	to_xrl_target,
@@ -612,6 +636,7 @@ RibManager::delete_redist_xrl_output4(const string&	to_xrl_target,
     return XORP_OK;
 }
 
+#ifdef HAVE_IPV6
 int
 RibManager::delete_redist_xrl_output6(const string&	to_xrl_target,
 				      const string&	from_protocol,
@@ -628,15 +653,18 @@ RibManager::delete_redist_xrl_output6(const string&	to_xrl_target,
 				  is_xrl_transaction_output);
     return XORP_OK;
 }
+#endif
 
 void
 RibManager::push_routes()
 {
     _urib4.push_routes();
-    _urib6.push_routes();
-    
     _mrib4.push_routes();
+
+#ifdef HAVE_IPV6
+    _urib6.push_routes();
     _mrib6.push_routes();
+#endif
 }
 
 void

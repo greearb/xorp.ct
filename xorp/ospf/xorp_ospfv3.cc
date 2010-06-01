@@ -68,8 +68,10 @@ main(int /*argc*/, char **argv)
 //  	Ospf<IPv4> ospf_ipv4(OspfTypes::V3, eventloop, &io_ipv4);
 	Ospf<IPv6> ospf_ipv6(OspfTypes::V3, eventloop, &io_ipv6);
 
+#ifdef HAVE_IPV6
 	XrlOspfV3Target v3target(&xrl_router, /* ospf_ipv4,*/ ospf_ipv6,
 				 /* io_ipv4, */ io_ipv6);
+#endif
 	wait_until_xrl_router_is_ready(eventloop, xrl_router);
 // 	io_ipv4.startup();
 	io_ipv6.startup();

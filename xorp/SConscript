@@ -32,7 +32,6 @@ subdirs = [
     'cli',
     'fea',
     'fib2mrib',
-    'mld6igmp',
     'mrt',
     'ospf',
     'pim',
@@ -48,6 +47,10 @@ subdirs = [
 
 if env['enable_olsr']:
     subdirs.append('contrib/olsr')
+
+# IPv6 related stuff should only be enabled when needed.
+if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
+    subdirs.append('mld6igmp')
 
 
 SConscript(dirs = subdirs, exports='env')

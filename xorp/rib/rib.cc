@@ -1611,4 +1611,6 @@ RIB<A>::push_routes()
 }
 
 template class RIB<IPv4>;
+#ifdef HAVE_IPV6
 template class RIB<IPv6>;
+#endif

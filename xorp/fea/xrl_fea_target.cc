@@ -3627,6 +3627,9 @@ XrlFeaTarget::raw_packet4_0_1_leave_multicast_group(
     return XrlCmdError::OKAY();
 }
 
+
+#ifdef HAVE_IPV6
+
 // ----------------------------------------------------------------------------
 // IPv6 Raw Socket related
 
@@ -3771,6 +3774,8 @@ XrlFeaTarget::raw_packet6_0_1_leave_multicast_group(
 
     return XrlCmdError::OKAY();
 }
+
+#endif
 
 // ----------------------------------------------------------------------------
 // TCP/UDP I/O Socket Server Interface
@@ -4216,6 +4221,8 @@ XrlFeaTarget::socket4_0_1_set_socket_option_txt(
     return XrlCmdError::OKAY();
 }
 
+#ifdef HAVE_IPV6
+
 XrlCmdError
 XrlFeaTarget::socket6_0_1_tcp_open(
     // Input values,
@@ -4581,6 +4588,8 @@ XrlFeaTarget::socket6_0_1_set_socket_option(
 
     return XrlCmdError::OKAY();
 }
+
+#endif
 
 // ----------------------------------------------------------------------------
 // Profiling related

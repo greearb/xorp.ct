@@ -1834,6 +1834,9 @@ public:
 	const uint32_t&	ip_protocol,
 	const IPv4&	group_address);
 
+
+#ifdef HAVE_IPV6
+
     //
     // IPv6 Raw Socket Server Interface
     //
@@ -1987,6 +1990,8 @@ public:
 	const string&	vif_name,
 	const uint32_t&	ip_protocol,
 	const IPv6&	group_address);
+
+#endif
 
     //
     // TCP/UDP I/O Socket Server Interface
@@ -2371,6 +2376,8 @@ public:
 	const string&	optname,
 	const string&	optval);
 
+
+#ifdef HAVE_IPV6
     /**
      *  Open a TCP socket.
      *
@@ -2667,6 +2674,8 @@ public:
 	const string&	sockid,
 	const string&	optname,
 	const uint32_t&	optval);
+
+#endif
 
     //
     // Profile-related interface

@@ -11,12 +11,14 @@
 #include "fea_ifmgr_replicator.xif"
 #include "fti.xif"
 #include "redist_transaction4.xif"
-#include "redist_transaction6.xif"
 #include "fea_rawlink.xif"
 #include "fea_rawpkt4.xif"
-#include "fea_rawpkt6.xif"
 #include "socket4.xif"
+#ifdef HAVE_IPV6
+#include "redist_transaction6.xif"
+#include "fea_rawpkt6.xif"
 #include "socket6.xif"
+#endif
 #include "profile.xif"
 
 target fea implements	common/0.1,
@@ -30,10 +32,12 @@ target fea implements	common/0.1,
 			ifmgr_replicator/0.1,
 			fti/0.2,
 			redist_transaction4/0.1,
-			redist_transaction6/0.1,
 			raw_link/0.1,
 			raw_packet4/0.1,
-			raw_packet6/0.1,
 			socket4/0.1,
+#ifdef HAVE_IPV6
+			redist_transaction6/0.1,
 			socket6/0.1,
+			raw_packet6/0.1,
+#endif
 			profile/0.1;

@@ -54,10 +54,15 @@ public:
      */
     XrlRibTarget(XrlRouter* xrl_router,
 		 RIB<IPv4>& urib4, RIB<IPv4>& mrib4,
+#ifdef HAVE_IPV6
 		 RIB<IPv6>& urib6, RIB<IPv6>& mrib6,
+#endif
 		 VifManager& vif_manager, RibManager* rib_manager)
 	: XrlRibTargetBase(xrl_router),
-	  _urib4(urib4), _mrib4(mrib4), _urib6(urib6), _mrib6(mrib6),
+	  _urib4(urib4), _mrib4(mrib4),
+#ifdef HAVE_IPV6
+	  _urib6(urib6), _mrib6(mrib6),
+#endif
 	  _vif_manager(vif_manager), _rib_manager(rib_manager) {}
     /**
      * XrlRibTarget destructor
@@ -67,8 +72,10 @@ public:
 protected:
     RIB<IPv4>&	_urib4;
     RIB<IPv4>&	_mrib4;
+#ifdef HAVE_IPV6
     RIB<IPv6>&	_urib6;
     RIB<IPv6>&	_mrib6;
+#endif
     VifManager& _vif_manager;
     RibManager*	_rib_manager;
 
@@ -177,6 +184,7 @@ protected:
 	const bool&	unicast,
 	const bool&	multicast);
 
+#ifdef HAVE_IPV6
     XrlCmdError rib_0_1_add_igp_table6(
 	// Input values,
 	const string&	protocol,
@@ -184,6 +192,7 @@ protected:
 	const string&	target_instance,
 	const bool&	unicast,
 	const bool&	multicast);
+#endif
 
     XrlCmdError rib_0_1_delete_igp_table4(
 	// Input values,
@@ -193,6 +202,7 @@ protected:
 	const bool&	unicast,
 	const bool&	multicast);
 
+#ifdef HAVE_IPV6
     XrlCmdError rib_0_1_delete_igp_table6(
 	// Input values,
 	const string&	protocol,
@@ -200,6 +210,7 @@ protected:
 	const string&	target_instance,
 	const bool&	unicast,
 	const bool&	multicast);
+#endif
 
     XrlCmdError rib_0_1_add_egp_table4(
 	// Input values,
@@ -209,6 +220,7 @@ protected:
 	const bool&	unicast,
 	const bool&	multicast);
 
+#ifdef HAVE_IPV6
     XrlCmdError rib_0_1_add_egp_table6(
 	// Input values,
 	const string&	protocol,
@@ -216,6 +228,7 @@ protected:
 	const string&	target_instance,
 	const bool&	unicast,
 	const bool&	multicast);
+#endif
 
     XrlCmdError rib_0_1_delete_egp_table4(
 	// Input values,
@@ -225,6 +238,7 @@ protected:
 	const bool&	unicast,
 	const bool&	multicast);
 
+#ifdef HAVE_IPV6
     XrlCmdError rib_0_1_delete_egp_table6(
 	// Input values,
 	const string&	protocol,
@@ -232,6 +246,7 @@ protected:
 	const string&	target_instance,
 	const bool&	unicast,
 	const bool&	multicast);
+#endif
 
     /**
      *  Add/replace/delete a route.

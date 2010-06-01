@@ -23,7 +23,9 @@
 #define __RIP_XRL_TARGET_RIPNG_HH__
 
 #include "libxorp/status_codes.h"
+#ifdef HAVE_IPV6
 #include "xrl/targets/ripng_base.hh"
+#endif
 
 class XrlRouter;
 class XrlProcessSpy;

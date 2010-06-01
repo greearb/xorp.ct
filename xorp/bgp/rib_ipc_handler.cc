@@ -99,6 +99,7 @@ RibIpcHandler::register_ribname(const string& r)
 		callback(this, 
 			 &RibIpcHandler::rib_command_done,"add_table"));
 
+#ifdef HAVE_IPV6
     //create our tables
     //ebgp - v6
     //name - "ebgp"
@@ -118,6 +119,7 @@ RibIpcHandler::register_ribname(const string& r)
                 _xrl_router.instance_name(), true, true,
 		callback(this,
 			 &RibIpcHandler::rib_command_done,"add_table"));
+#endif
 
     return true;
 }
@@ -151,6 +153,7 @@ RibIpcHandler::unregister_rib(string ribname)
 					&RibIpcHandler::rib_command_done,
 					"delete_table"));
 
+#ifdef HAVE_IPV6
     //create our tables
     //ebgp - v6
     //name - "ebgp"
@@ -175,6 +178,7 @@ RibIpcHandler::unregister_rib(string ribname)
  			       callback(this,
  					&RibIpcHandler::rib_command_done,
  					"delete_table"));
+#endif
 
     return true;
 }
@@ -659,6 +663,7 @@ template<>
 bool
 XrlQueue<IPv6>::sendit_spec(Queued& q, const char *bgp)
 {
+#ifdef HAVE_IPV6
     bool sent;
     bool unicast = false;
     bool multicast = false;
@@ -705,6 +710,11 @@ XrlQueue<IPv6>::sendit_spec(Queued& q, const char *bgp)
     }
 
     return sent;
+#else
+    UNUSED(q);
+    UNUSED(bgp);
+    return false;
+#endif
 }
 
 template<class A>

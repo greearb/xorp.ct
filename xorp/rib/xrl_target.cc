@@ -139,6 +139,7 @@ XrlRibTarget::rib_0_1_get_registered_protocols(
 		ipv4_multicast_protocols.append(XrlAtom(*iter));
 	}
     }
+#ifdef HAVE_IPV6
     if (ipv6) {
 	if (unicast) {
 	    names = _urib6.registered_protocol_names();
@@ -151,7 +152,11 @@ XrlRibTarget::rib_0_1_get_registered_protocols(
 		ipv6_multicast_protocols.append(XrlAtom(*iter));
 	}
     }
-
+#else
+    UNUSED(ipv6);
+    UNUSED(ipv6_unicast_protocols);
+    UNUSED(ipv6_multicast_protocols);
+#endif
     return XrlCmdError::OKAY();
 }
 
@@ -181,6 +186,7 @@ XrlRibTarget::rib_0_1_add_igp_table4(const string&	protocol,
     return XrlCmdError::OKAY();
 }
 
+#ifdef HAVE_IPV6
 XrlCmdError
 XrlRibTarget::rib_0_1_add_igp_table6(const string&	protocol,
 				     const string&	target_class,
@@ -206,6 +212,7 @@ XrlRibTarget::rib_0_1_add_igp_table6(const string&	protocol,
 
     return XrlCmdError::OKAY();
 }
+#endif
 
 XrlCmdError
 XrlRibTarget::rib_0_1_delete_igp_table4(const string&	protocol,
@@ -233,6 +240,7 @@ XrlRibTarget::rib_0_1_delete_igp_table4(const string&	protocol,
     return XrlCmdError::OKAY();
 }
 
+#ifdef HAVE_IPV6
 XrlCmdError
 XrlRibTarget::rib_0_1_delete_igp_table6(const string&	protocol,
 					const string&	target_class,
@@ -258,6 +266,7 @@ XrlRibTarget::rib_0_1_delete_igp_table6(const string&	protocol,
 
     return XrlCmdError::OKAY();
 }
+#endif
 
 XrlCmdError
 XrlRibTarget::rib_0_1_add_egp_table4(const string&	protocol,
@@ -285,6 +294,7 @@ XrlRibTarget::rib_0_1_add_egp_table4(const string&	protocol,
     return XrlCmdError::OKAY();
 }
 
+#ifdef HAVE_IPV6
 XrlCmdError
 XrlRibTarget::rib_0_1_add_egp_table6(const string&	protocol,
 				     const string&	target_class,
@@ -310,6 +320,7 @@ XrlRibTarget::rib_0_1_add_egp_table6(const string&	protocol,
 
     return XrlCmdError::OKAY();
 }
+#endif
 
 XrlCmdError
 XrlRibTarget::rib_0_1_delete_egp_table4(const string&	protocol,
@@ -337,6 +348,7 @@ XrlRibTarget::rib_0_1_delete_egp_table4(const string&	protocol,
     return XrlCmdError::OKAY();
 }
 
+#ifdef HAVE_IPV6
 XrlCmdError
 XrlRibTarget::rib_0_1_delete_egp_table6(const string&	protocol,
 					const string&	target_class,
@@ -362,6 +374,7 @@ XrlRibTarget::rib_0_1_delete_egp_table6(const string&	protocol,
 
     return XrlCmdError::OKAY();
 }
+#endif
 
 XrlCmdError
 XrlRibTarget::rib_0_1_add_route4(const string&	protocol,
@@ -413,6 +426,7 @@ XrlRibTarget::rib_0_1_add_route4(const string&	protocol,
     return XrlCmdError::OKAY();
 }
 
+#ifdef HAVE_IPV6
 XrlCmdError
 XrlRibTarget::rib_0_1_add_route6(const string&	protocol,
 				 const bool&	unicast,
@@ -464,6 +478,7 @@ XrlRibTarget::rib_0_1_add_route6(const string&	protocol,
 
     return XrlCmdError::OKAY();
 }
+#endif
 
 XrlCmdError
 XrlRibTarget::rib_0_1_replace_route4(const string&	protocol,
@@ -513,6 +528,7 @@ XrlRibTarget::rib_0_1_replace_route4(const string&	protocol,
     return XrlCmdError::OKAY();
 }
 
+#ifdef HAVE_IPV6
 XrlCmdError
 XrlRibTarget::rib_0_1_replace_route6(const string&	protocol,
 				     const bool&	unicast,
@@ -560,6 +576,7 @@ XrlRibTarget::rib_0_1_replace_route6(const string&	protocol,
 
     return XrlCmdError::OKAY();
 }
+#endif
 
 XrlCmdError
 XrlRibTarget::rib_0_1_delete_route4(const string&	protocol,
@@ -596,6 +613,7 @@ XrlRibTarget::rib_0_1_delete_route4(const string&	protocol,
     return XrlCmdError::OKAY();
 }
 
+#ifdef HAVE_IPV6
 XrlCmdError
 XrlRibTarget::rib_0_1_delete_route6(const string&	protocol,
 				    const bool&		unicast,
@@ -630,6 +648,7 @@ XrlRibTarget::rib_0_1_delete_route6(const string&	protocol,
 
     return XrlCmdError::OKAY();
 }
+#endif
 
 XrlCmdError
 XrlRibTarget::rib_0_1_add_interface_route4(const string&	protocol,
@@ -685,6 +704,7 @@ XrlRibTarget::rib_0_1_add_interface_route4(const string&	protocol,
     return XrlCmdError::OKAY();
 }
 
+#ifdef HAVE_IPV6
 XrlCmdError
 XrlRibTarget::rib_0_1_add_interface_route6(const string&	protocol,
 					   const bool&		unicast,
@@ -738,6 +758,7 @@ XrlRibTarget::rib_0_1_add_interface_route6(const string&	protocol,
 
     return XrlCmdError::OKAY();
 }
+#endif
 
 XrlCmdError
 XrlRibTarget::rib_0_1_replace_interface_route4(const string&	    protocol,
@@ -793,6 +814,7 @@ XrlRibTarget::rib_0_1_replace_interface_route4(const string&	    protocol,
     return XrlCmdError::OKAY();
 }
 
+#ifdef HAVE_IPV6
 XrlCmdError
 XrlRibTarget::rib_0_1_replace_interface_route6(const string&	    protocol,
 					       const bool&	    unicast,
@@ -846,6 +868,7 @@ XrlRibTarget::rib_0_1_replace_interface_route6(const string&	    protocol,
 
     return XrlCmdError::OKAY();
 }
+#endif
 
 XrlCmdError
 XrlRibTarget::rib_0_1_lookup_route_by_dest4(
@@ -867,6 +890,7 @@ XrlRibTarget::rib_0_1_lookup_route_by_dest4(
     return XrlCmdError::OKAY();
 }
 
+#ifdef HAVE_IPV6
 XrlCmdError
 XrlRibTarget::rib_0_1_lookup_route_by_dest6(
     // Input values,
@@ -886,6 +910,7 @@ XrlRibTarget::rib_0_1_lookup_route_by_dest6(
     }
     return XrlCmdError::OKAY();
 }
+#endif
 
 XrlCmdError
 XrlRibTarget::rib_0_1_new_vif(const string& name)
@@ -923,6 +948,7 @@ XrlRibTarget::rib_0_1_new_vif(const string& name)
 	return XrlCmdError::COMMAND_FAILED(err);
     }
 
+#ifdef HAVE_IPV6
     if (_urib6.new_vif(name, v) != XORP_OK) {
 	string err = c_format("Failed to add vif \"%s\" to unicast IPv6 rib",
 			      name.c_str());
@@ -934,6 +960,7 @@ XrlRibTarget::rib_0_1_new_vif(const string& name)
 			      name.c_str());
 	return XrlCmdError::COMMAND_FAILED(err);
     }
+#endif
 
     return XrlCmdError::OKAY();
 }
@@ -958,6 +985,7 @@ XrlRibTarget::rib_0_1_add_vif_addr4(const string&	name,
     return XrlCmdError::OKAY();
 }
 
+#ifdef HAVE_IPV6
 XrlCmdError
 XrlRibTarget::rib_0_1_add_vif_addr6(const string&	name,
 				    const IPv6&		addr,
@@ -977,6 +1005,7 @@ XrlRibTarget::rib_0_1_add_vif_addr6(const string&	name,
 
     return XrlCmdError::OKAY();
 }
+#endif
 
 XrlCmdError
 XrlRibTarget::rib_0_1_redist_enable4(const string&	target_name,
@@ -997,6 +1026,7 @@ XrlRibTarget::rib_0_1_redist_enable4(const string&	target_name,
     return XrlCmdError::OKAY();
 }
 
+#ifdef HAVE_IPV6
 XrlCmdError
 XrlRibTarget::rib_0_1_redist_enable6(const string&	target_name,
 				     const string&	from,
@@ -1015,6 +1045,7 @@ XrlRibTarget::rib_0_1_redist_enable6(const string&	target_name,
     }
     return XrlCmdError::OKAY();
 }
+#endif
 
 XrlCmdError
 XrlRibTarget::rib_0_1_redist_disable4(const string&	target_name,
@@ -1034,6 +1065,7 @@ XrlRibTarget::rib_0_1_redist_disable4(const string&	target_name,
     return XrlCmdError::OKAY();
 }
 
+#ifdef HAVE_IPV6
 XrlCmdError
 XrlRibTarget::rib_0_1_redist_disable6(const string&	target_name,
 				      const string&	from,
@@ -1051,6 +1083,7 @@ XrlRibTarget::rib_0_1_redist_disable6(const string&	target_name,
     }
     return XrlCmdError::OKAY();
 }
+#endif
 
 XrlCmdError
 XrlRibTarget::rib_0_1_redist_transaction_enable4(const string&	target_name,
@@ -1072,6 +1105,7 @@ XrlRibTarget::rib_0_1_redist_transaction_enable4(const string&	target_name,
     return XrlCmdError::OKAY();
 }
 
+#ifdef HAVE_IPV6
 XrlCmdError
 XrlRibTarget::rib_0_1_redist_transaction_enable6(const string&	target_name,
 						 const string&	from,
@@ -1091,6 +1125,7 @@ XrlRibTarget::rib_0_1_redist_transaction_enable6(const string&	target_name,
     }
     return XrlCmdError::OKAY();
 }
+#endif
 
 XrlCmdError
 XrlRibTarget::rib_0_1_redist_transaction_disable4(const string&	target_name,
@@ -1111,6 +1146,7 @@ XrlRibTarget::rib_0_1_redist_transaction_disable4(const string&	target_name,
     return XrlCmdError::OKAY();
 }
 
+#ifdef HAVE_IPV6
 XrlCmdError
 XrlRibTarget::rib_0_1_redist_transaction_disable6(const string&	target_name,
 						  const string&	from,
@@ -1129,6 +1165,7 @@ XrlRibTarget::rib_0_1_redist_transaction_disable6(const string&	target_name,
     }
     return XrlCmdError::OKAY();
 }
+#endif
 
 XrlCmdError
 XrlRibTarget::rib_0_1_register_interest4(// Input values,
@@ -1195,6 +1232,7 @@ XrlRibTarget::rib_0_1_deregister_interest4(// Input values,
     return XrlCmdError::OKAY();
 }
 
+#ifdef HAVE_IPV6
 XrlCmdError
 XrlRibTarget::rib_0_1_register_interest6(// Input values,
 					 const string& target,
@@ -1259,6 +1297,8 @@ XrlRibTarget::rib_0_1_deregister_interest6(// Input values,
     }
     return XrlCmdError::OKAY();
 }
+#endif
+
 
 XrlCmdError
 XrlRibTarget::rib_0_1_get_protocol_admin_distances(
@@ -1286,7 +1326,9 @@ XrlRibTarget::rib_0_1_get_protocol_admin_distances(
 	    protocols.append(XrlAtom(iter->first));
 	    admin_distances.append(XrlAtom(iter->second));
 	}
-    } else if (!ipv4 && unicast) {
+    }
+#ifdef HAVE_IPV6
+    else if (!ipv4 && unicast) {
 	// ipv6 unicast
 	map<string, uint32_t>& rad = _urib6.get_protocol_admin_distances();
 	map<string, uint32_t>::iterator iter;
@@ -1303,6 +1345,7 @@ XrlRibTarget::rib_0_1_get_protocol_admin_distances(
 	    admin_distances.append(XrlAtom(iter->second));
 	}
     }
+#endif
 
     return XrlCmdError::OKAY();
 }
@@ -1321,11 +1364,14 @@ XrlRibTarget::rib_0_1_get_protocol_admin_distance(
 	admin_distance = _urib4.get_protocol_admin_distance(protocol);
     } else if (ipv4 && !unicast) {
 	admin_distance = _mrib4.get_protocol_admin_distance(protocol);
-    } else if (!ipv4 && unicast) {
+    }
+#ifdef HAVE_IPV6
+    else if (!ipv4 && unicast) {
 	admin_distance = _urib6.get_protocol_admin_distance(protocol);
     } else if (!ipv4 && !unicast) {
 	admin_distance = _mrib6.get_protocol_admin_distance(protocol);
     }
+#endif
 
     return XrlCmdError::OKAY();
 }
@@ -1372,6 +1418,7 @@ XrlRibTarget::rib_0_1_set_protocol_admin_distance(
 	return XrlCmdError::COMMAND_FAILED(err);
     }
 
+#ifdef HAVE_IPV6
     if (ipv6 && unicast &&
 	_urib6.set_protocol_admin_distance(protocol, admin_distance)
 	!= XORP_OK) {
@@ -1389,6 +1436,9 @@ XrlRibTarget::rib_0_1_set_protocol_admin_distance(
 			      "IPv6", "multicast", protocol.c_str());
 	return XrlCmdError::COMMAND_FAILED(err);
     }
+#else
+    UNUSED(ipv6);
+#endif
 
     return XrlCmdError::OKAY();
 }

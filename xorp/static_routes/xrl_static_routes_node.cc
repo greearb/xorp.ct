@@ -582,6 +582,7 @@ XrlStaticRoutesNode::send_rib_add_tables()
 	goto start_timer_label;
     }
 
+#ifdef HAVE_IPV6
     if (! _is_rib_igp_table6_registered) {
 	success = _xrl_rib_client.send_add_igp_table6(
 	    _rib_target.c_str(),
@@ -598,6 +599,7 @@ XrlStaticRoutesNode::send_rib_add_tables()
 		   "Will try again.");
 	goto start_timer_label;
     }
+#endif
 
     if (! success) {
 	//
@@ -766,6 +768,7 @@ XrlStaticRoutesNode::send_rib_delete_tables()
 	}
     }
 
+#ifdef HAVE_IPV6
     if (_is_rib_igp_table6_registered) {
 	bool success6;
 	success6 = _xrl_rib_client.send_delete_igp_table6(
@@ -782,6 +785,7 @@ XrlStaticRoutesNode::send_rib_delete_tables()
 	    success = false;
 	}
     }
+#endif
 
     if (! success) {
 	StaticRoutesNode::set_status(SERVICE_FAILED);
@@ -1832,6 +1836,7 @@ XrlStaticRoutesNode::send_rib_route_change()
 		    return;
 	    }
 	}
+#ifdef HAVE_IPV6
 	if (static_route.is_ipv6()) {
 	    if (static_route.is_interface_route()) {
 		success = _xrl_rib_client.send_add_interface_route6(
@@ -1863,6 +1868,7 @@ XrlStaticRoutesNode::send_rib_route_change()
 		    return;
 	    }
 	}
+#endif
     }
     
     if (static_route.is_replace_route()) {
@@ -1897,6 +1903,7 @@ XrlStaticRoutesNode::send_rib_route_change()
 		    return;
 	    }
 	}
+#ifdef HAVE_IPV6
 	if (static_route.is_ipv6()) {
 	    if (static_route.is_interface_route()) {
 		success = _xrl_rib_client.send_replace_interface_route6(
@@ -1928,6 +1935,7 @@ XrlStaticRoutesNode::send_rib_route_change()
 		    return;
 	    }
 	}
+#endif
     }
 
     if (static_route.is_delete_route()) {
@@ -1942,6 +1950,7 @@ XrlStaticRoutesNode::send_rib_route_change()
 		if (success)
 		    return;
 	}
+#ifdef HAVE_IPV6
 	if (static_route.is_ipv6()) {
 	    success = _xrl_rib_client.send_delete_route6(
 		_rib_target.c_str(),
@@ -1953,6 +1962,7 @@ XrlStaticRoutesNode::send_rib_route_change()
 		if (success)
 		    return;
 	}
+#endif
     }
 
     if (! success) {

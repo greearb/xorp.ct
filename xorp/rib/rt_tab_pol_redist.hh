@@ -34,7 +34,9 @@
 #include "policy/backend/policy_redist_map.hh"
 
 #include "xrl/interfaces/policy_redist4_xif.hh"
+#ifdef HAVE_IPV6
 #include "xrl/interfaces/policy_redist6_xif.hh"
+#endif
 
 /**
  * @short This table redistributes routes to protocols according to policytags.
@@ -121,7 +123,9 @@ private:
     PolicyRedistMap&		_redist_map;
 
     XrlPolicyRedist4V0p1Client	_redist4_client;
+#ifdef HAVE_IPV6
     XrlPolicyRedist6V0p1Client	_redist6_client;
+#endif
 
     bool			_multicast;
 };

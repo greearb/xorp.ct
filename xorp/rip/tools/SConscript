@@ -39,12 +39,17 @@ env.AppendUnique(LIBPATH = [
 
 env.AppendUnique(LIBS = [
     'xif_rip',
-    'xif_ripng',
     'xorp_ipc',
     'xorp_core',
     'xorp_proto',
     'xorp_comm',
     ])
+
+# IPv6 related stuff should only be enabled when needed.
+if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
+    env.AppendUnique(LIBS = [
+        'xif_ripng',
+        ])
 
 env.Replace(RPATH = [
     env.Literal(env['xorp_tool_rpath'])

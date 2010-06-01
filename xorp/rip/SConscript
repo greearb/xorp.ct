@@ -68,11 +68,13 @@ ripsrcs = [
     'xrl_target_rip.cc'
     ]
 
-# RIPng Main/Driver Sources
-ripngsrcs = [
-    'xorp_rip_main.cc',
-    'xrl_target_ripng.cc'
-    ]
+# IPv6 related stuff should only be enabled when needed.
+if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
+    # RIPng Main/Driver Sources
+    ripngsrcs = [
+        'xorp_rip_main.cc',
+        'xrl_target_ripng.cc'
+        ]
 
 
 #
@@ -190,7 +192,6 @@ e.PrependUnique(LIBPATH = [
 
 e.PrependUnique(LIBS = [
     'xorp_ripng_xrl',
-    'xorp_ripng',
     'xst_ripng',
     'xif_rib',
     'xif_finder_event_notifier',
@@ -198,7 +199,6 @@ e.PrependUnique(LIBS = [
     'xif_fea_ifmgr_mirror',
     'xif_fea_ifmgr_replicator',
     'xst_fea_ifmgr_mirror',
-    'xif_socket6',
     'xorp_policy_backend',
     'xorp_policy_common',
     'xorp_proto',
@@ -206,6 +206,13 @@ e.PrependUnique(LIBS = [
     'xorp_comm',
     'xorp_core',
 ])
+
+# IPv6 related stuff should only be enabled when needed.
+if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
+    e.PrependUnique(LIBS = [
+        'xorp_ripng',
+        'xif_socket6',
+        ])
 
 e.Replace(RPATH = [
     e.Literal(e['xorp_module_rpath'])
@@ -239,7 +246,12 @@ else:
 				       source = libxorp_rip_xrl_srcs,
 				       LIBS = '')
 
-ripng = e.Program(target = 'xorp_ripng', source = ripngsrcs)
-e.Alias('install', e.InstallProgram(e['xorp_moduledir'], ripng))
+# IPv6 related stuff should only be enabled when needed.
+if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
+    ripng = e.Program(target = 'xorp_ripng', source = ripngsrcs)
+    e.Alias('install', e.InstallProgram(e['xorp_moduledir'], ripng))
 
-Default(rip, ripng)
+    Default(rip, ripng)
+else:
+    Default(rip)
+    

@@ -58,11 +58,8 @@ env.AppendUnique(LIBS = [
     'xif_rib_client',
     'xif_finder_event_notifier',
     'xif_redist4',
-    'xif_redist6',
     'xif_redist_transaction4',
-    'xif_redist_transaction6',
     'xif_policy_redist4',
-    'xif_policy_redist6',
     'xif_profile_client',
     'xst_fea_ifmgr_mirror',
     'xst_rib',
@@ -74,6 +71,14 @@ env.AppendUnique(LIBS = [
     'xorp_proto',
     'xorp_comm'
 ])
+
+# IPv6 related stuff should only be enabled when needed.
+if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
+    env.AppendUnique(LIBS = [
+        'xif_redist6',
+        'xif_redist_transaction6',
+        'xif_policy_redist6',
+        ])
 
 env.Replace(RPATH = [
     env.Literal(env['xorp_module_rpath'])

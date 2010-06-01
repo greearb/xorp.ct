@@ -49,16 +49,13 @@ tgts = [
     'finder.tgt',
     'finder_client.tgt',
     'mfea.tgt',
-    'mld6igmp.tgt',
     'ospfv2.tgt',
-    'ospfv3.tgt',
     'pim.tgt',
     'policy.tgt',
     'profiler.tgt',
     'rib.tgt',
     'ribclient.tgt',
     'rip.tgt',
-    'ripng.tgt',
     'rtrmgr.tgt',
     'show_distances.tgt',
     'show_routes.tgt',
@@ -69,14 +66,20 @@ tgts = [
     'test_finder_events.tgt',
     'test_peer.tgt',
     'test_socket4.tgt',
-    'test_socket6.tgt',
     'test_xrls.tgt',
     'vrrp.tgt',
     'xorpsh.tgt',
+    'mld6igmp.tgt',
     ]
 
 if env['enable_olsr']:
     tgts.append('olsr4.tgt')
+    
+# IPv6 related stuff should only be enabled when needed.
+if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
+    tgts.append('test_socket6.tgt')    
+    tgts.append('ospfv3.tgt')
+    tgts.append('ripng.tgt')
  
 #xrls_path = '$datadir'
 xrlspath = '$exec_prefix/xrl/targets'
