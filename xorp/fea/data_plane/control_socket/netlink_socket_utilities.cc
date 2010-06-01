@@ -187,6 +187,15 @@ NlmUtils::nlm_msg_type(uint32_t m)
 	const char*	name;
     } nlm_msg_types[] = {
 #define RTM_MSG_ENTRY(X) { X, #X }
+#ifdef NLMSG_ERROR
+	RTM_MSG_ENTRY(NLMSG_ERROR),
+#endif
+#ifdef NLMSG_DONE
+	RTM_MSG_ENTRY(NLMSG_DONE),
+#endif
+#ifdef NLMSG_NOOP
+	RTM_MSG_ENTRY(NLMSG_NOOP),
+#endif
 #ifdef RTM_NEWLINK
 	RTM_MSG_ENTRY(RTM_NEWLINK),
 #endif

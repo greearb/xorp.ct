@@ -102,7 +102,11 @@ IfConfigGetNetlinkSocket::parse_buffer_netlink_socket(IfConfig& ifconfig,
 		break;
 	    }
 	    errno = -err->error;
-	    XLOG_ERROR("AF_NETLINK NLMSG_ERROR message: %s", strerror(errno));
+	    XLOG_ERROR("AF_NETLINK NLMSG_ERROR: %s  msg->len: %hu msg->type: %hu(%s) "
+		       " msg->flags: %hu msg->seq: %u  msg->pid: %u",
+		       strerror(errno), err->msg.nlmsg_len, err->msg.nlmsg_type,
+		       NlmUtils::nlm_msg_type(err->msg.nlmsg_type).c_str(),
+		       err->msg.nlmsg_flags, err->msg.nlmsg_seq, err->msg.nlmsg_pid);
 	}
 	break;
 	
