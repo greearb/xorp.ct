@@ -157,7 +157,10 @@ try:
     Execute(Mkdir(builddir))
 except:
     pass
-log_args(builddir + '/.scons_build_args')
+
+# Only save args when doing the default build process.
+if (len(COMMAND_LINE_TARGETS) == 0):
+    log_args(builddir + '/.scons_build_args')
 
 # XXX TODO: Make initial CPPPATH/LIBPATH derive from
 # autodetected host system *or* command line.

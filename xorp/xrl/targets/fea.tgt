@@ -6,7 +6,9 @@
 #include "fea_click.xif"
 #endif
 #include "fea_fib.xif"
+#ifndef XORP_DISABLE_FIREWALL
 #include "fea_firewall.xif"
+#endif
 #include "fea_ifmgr.xif"
 #include "fea_ifmgr_replicator.xif"
 #include "fti.xif"
