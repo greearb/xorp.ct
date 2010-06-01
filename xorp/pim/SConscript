@@ -127,14 +127,18 @@ pim4srcs = [
 
 pim4 = env.Program(target = 'xorp_pimsm4', source = pim4srcs)
 
-pim6srcs = [
-          'xorp_pimsm6.cc',
-          ]
-
-pim6 = env.Program(target = 'xorp_pimsm6', source = pim6srcs)
-
 env.Alias('install', env.InstallProgram(env['xorp_moduledir'], pim4))
 
-env.Alias('install', env.InstallProgram(env['xorp_moduledir'], pim6))
+if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
+    pim6srcs = [
+        'xorp_pimsm6.cc',
+        ]
 
-Default(pim4, pim6)
+    pim6 = env.Program(target = 'xorp_pimsm6', source = pim6srcs)
+
+
+    env.Alias('install', env.InstallProgram(env['xorp_moduledir'], pim6))
+
+    Default(pim4, pim6)
+else:
+    Default(pim4)
