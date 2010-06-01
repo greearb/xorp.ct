@@ -182,6 +182,12 @@ VrrpPacket::size() const
     return _data.size();
 }
 
+void
+VrrpPacket::set_size(uint32_t size)
+{
+    _data.resize(size);
+}
+
 const PAYLOAD&
 VrrpPacket::data() const
 {

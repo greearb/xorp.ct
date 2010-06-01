@@ -182,6 +182,13 @@ public:
      */
     uint32_t	    size() const;
 
+     /**
+     * Set the packet size.
+     *
+     * @param packet size.
+     */
+    void set_size(uint32_t size);
+
     /**
      * Set multiple IPs from a container into the VRRP header.
      *

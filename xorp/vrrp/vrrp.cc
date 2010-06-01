@@ -323,6 +323,7 @@ Vrrp::send_advertisement(uint32_t priority)
 void
 Vrrp::prepare_advertisement(uint32_t priority)
 {
+    _adv_packet.set_size(VRRP_MAX_PACKET_SIZE);
     _adv_packet.set_source(_vif.addr());
     _adv_packet.set_vrid(_vrid);
     _adv_packet.set_priority(priority);
