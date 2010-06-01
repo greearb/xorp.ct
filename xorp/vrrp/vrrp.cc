@@ -104,6 +104,14 @@ Vrrp::set_priority(uint32_t priority)
 void
 Vrrp::set_interval(uint32_t interval)
 {
+    if (interval == 0) {
+	XLOG_WARNING("Interval was configured for zero.  Increasing to 1.\n");
+	interval = 1;
+    }
+    if (interval > 255) {
+	XLOG_WARNING("Interval was > 255: %u.  Setting to 255.\n", interval);
+	interval = 255;
+    }
     _interval = interval;
 
     setup_intervals();
