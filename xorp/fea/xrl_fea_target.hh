@@ -2382,6 +2382,7 @@ public:
 	const string&	optname,
 	const string&	optval);
 
+#ifdef HAVE_IPV6
     /**
      *  Open a TCP socket.
      *
@@ -2678,6 +2679,7 @@ public:
 	const string&	sockid,
 	const string&	optname,
 	const uint32_t&	optval);
+#endif
 
 #ifndef XORP_DISABLE_PROFILE
     //

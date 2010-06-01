@@ -4239,6 +4239,7 @@ XrlFeaTarget::socket4_0_1_set_socket_option_txt(
     return XrlCmdError::OKAY();
 }
 
+#ifdef HAVE_IPV6
 XrlCmdError
 XrlFeaTarget::socket6_0_1_tcp_open(
     // Input values,
@@ -4604,6 +4605,7 @@ XrlFeaTarget::socket6_0_1_set_socket_option(
 
     return XrlCmdError::OKAY();
 }
+#endif
 
 #ifndef XORP_DISABLE_PROFILE
 // ----------------------------------------------------------------------------
