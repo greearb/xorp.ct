@@ -53,6 +53,13 @@ TwoHopNeighbor::TwoHopNeighbor(EventLoop& ev, Neighborhood* parent,
     add_twohop_link(tlid);
 }
 
+string TwoHopNeighbor::toStringBrief() {
+    ostringstream oss;
+    oss << id() << "-(" << main_addr().str() << ")";
+    return oss.str();
+}
+
+
 void
 TwoHopNeighbor::add_twohop_link(const OlsrTypes::TwoHopLinkID tlid)
 {

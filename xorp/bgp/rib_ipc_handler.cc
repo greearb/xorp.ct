@@ -279,11 +279,18 @@ RibIpcHandler::originate_route(const OriginType origin, const ASPath& aspath,
 	      origin, aspath.str().c_str(), nlri.str().c_str(),
 	      next_hop.str().c_str(), unicast, multicast);
 
-    /*
-    ** Construct the path attribute list.
-    */
-    FPAList4Ref pa_list = 
-	new FastPathAttributeList<IPv4>(next_hop, aspath, origin);
+    FPAList4Ref pa_list;
+    try {
+	/*
+	** Construct the path attribute list.
+	*/
+	pa_list = new FastPathAttributeList<IPv4>(next_hop, aspath, origin);
+    }
+    catch (const XorpException& e) {
+	XLOG_WARNING("WARNING:  Exception in originate_route: %s\n", e.str().c_str());
+	// Returning false may cause more trouble than it's worth..
+	return true;
+    }
 
     /*
     ** Add a local pref for I-BGP peers.
@@ -651,16 +658,23 @@ RibIpcHandler::originate_route(const OriginType origin, const ASPath& aspath,
 			       const bool& unicast, const bool& multicast,
 			       const PolicyTags& policy_tags)
 {
-    debug_msg("origin %d aspath %s nlri %s next hop %s unicast %d"
-	      " multicast %d\n",
-	      origin, aspath.str().c_str(), nlri.str().c_str(),
-	      next_hop.str().c_str(), unicast, multicast);
+    XLOG_WARNING("origin %d aspath %s nlri %s next hop %s unicast %d"
+		 " multicast %d\n",
+		 origin, aspath.str().c_str(), nlri.str().c_str(),
+		 next_hop.str().c_str(), unicast, multicast);
 
     /*
     ** Construct the path attribute list.
     */
-    FPAList6Ref pa_list = 
-	new FastPathAttributeList<IPv6>(next_hop, aspath, origin);
+    FPAList6Ref pa_list;
+    try {
+	pa_list = new FastPathAttributeList<IPv6>(next_hop, aspath, origin);
+    }
+    catch (const XorpException& e) {
+	XLOG_WARNING("WARNING:  Exception in originate_route(v6): %s\n", e.str().c_str());
+	// Returning false may cause more trouble than it's worth..
+	return true;
+    }
 
     /*
     ** Add a local pref for I-BGP peers.

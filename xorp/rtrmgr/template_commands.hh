@@ -79,9 +79,9 @@ public:
     string affected_module() const;
 
 private:
-#ifdef VALIDATE_XRLDB
+#ifdef DEBUG_XRLDB
     bool check_xrl_is_valid(const list<string>& action,
-			    const XRLdb& xrldb, string& error_msg);
+			    const XRLdb* xrldb, string& error_msg);
 #endif
     template<class TreeNode> bool expand_vars(const TreeNode& tn,
 					      const string& s, 

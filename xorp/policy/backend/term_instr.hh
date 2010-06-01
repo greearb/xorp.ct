@@ -26,7 +26,7 @@
 #include <vector>
 #include <string>
 
-#include <boost/noncopyable.hpp>
+
 
 #include "instruction.hh"
 #include "policy/common/policy_utils.hh"
@@ -37,7 +37,7 @@
  * A term is an atomic policy unit which may be executed.
  */
 class TermInstr :
-    public boost::noncopyable
+    public NONCOPYABLE
 {
 public:
     /**

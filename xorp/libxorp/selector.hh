@@ -36,7 +36,7 @@
 
 #include <vector>
 
-#include <boost/noncopyable.hpp>
+
 
 #include "callback.hh"
 #include "ioevents.hh"
@@ -100,7 +100,7 @@ private:
  * and I/O is pending on the particular descriptors.
  */
 class SelectorList :
-    public boost::noncopyable
+    public NONCOPYABLE
 {
 public:
 

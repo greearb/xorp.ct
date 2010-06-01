@@ -31,8 +31,6 @@
 #include "libxorp/exceptions.hh"
 #include "libxorp/ipvx.hh"
 
-#include <boost/noncopyable.hpp>
-
 class ClickSocketObserver;
 struct ClickSocketPlumber;
 class RunCommand;
@@ -43,7 +41,7 @@ class RunCommand;
  * into the EventLoop and activity usually happens asynchronously.
  */
 class ClickSocket :
-    public boost::noncopyable
+    public NONCOPYABLE
 {
 public:
     ClickSocket(EventLoop& eventloop);

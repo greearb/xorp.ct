@@ -1,9 +1,19 @@
 #!/bin/bash
 
+# Usage:  cd /usr/local/xorp; ./xorp_install.bash
+#
+# This will create the xorp user, attempt to fix up the
+# group configure properly, and also attempt to soft-link
+# some libraries to help binaries compiled on other OS versions
+# to work on the target systems.
+
 # Xorp should be un-tarred in /usr/local
 if [ `pwd` != "/usr/local/xorp" ]
     then
-    echo "ERROR:  You must un-tar xorp.tgz in /usr/local so that the files are placed in /usr/local/xorp"
+    echo ""
+    echo "ERROR:  You must un-tar xorp.tgz in /usr/local so that the files"
+    echo "  are placed in /usr/local/xorp, and this script must be run from"
+    echo "  the /usr/local/xorp directory."
     exit 1
 fi
 
@@ -15,52 +25,64 @@ usermod -a -G xorp root
 usermod -a -G xorp lanforge
 usermod -a -G root xorp
 
-# I compile xorp on FC5, and it has a hard dependency on libpcap.0.9.4 and libcrypto.so.6
-# Fake out the link here so that it will start OK.  This works on Ubuntu 8.0.4, no idea
-# if it will work elsewhere. --Ben
-if [ ! -f /usr/lib/libpcap.so.0.9 ]
-    then
-    for i in `ls /usr/lib/libpcap.so.0.9.*`
+# Xorp may have been compiled on older systems and thus have dependencies
+# on older libraries.  Often, we can just link to newer ones and things
+# work fine.
+for i in `ldd ./sbin/* ./lib/xorp/sbin/*|grep "not found"|cut -f1 -d" "|sort|uniq`
     do
-      echo "Attempting to soft-link /usr/lib/libpcap.so.9 to a similar library ($i)."
-      ln -s $i /usr/lib/libpcap.so.0.9
-      break
+    echo "Missing library: $i"
+    extension=(`expr match "$i" '.*\([0-9]\)'`);
+    filename=${i%$extension}
+    #echo "base: $filename  extension: $extension"
+    while [ $extension -lt 20 ]
+        do
+        #echo "extension: $extension"
+	let extension++
+        if uname -a|grep x86_64 > /dev/null 2>&1
+	    then
+	    if [ -f /lib64/$filename$extension ]
+		then
+		echo "Linking: /lib64/$filename$extension to /lib64/$i"
+		ln -s /lib64/$filename$extension /lib64/$i
+		break
+	    fi
+	    if [ -f /usr/lib64/$filename$extension ]
+		then
+		echo "Linking: /usr/lib64/$filename$extension to /usr/lib64/$i"
+		ln -s /usr/lib64/$filename$extension /usr/lib64/$i
+		break
+	    fi
+	else
+	    if [ -f /lib/$filename$extension ]
+		then
+		echo "Linking: /lib/$filename$extension to /lib/$i"
+		ln -s /lib/$filename$extension /lib/$i
+		break
+	    fi
+	    if [ -f /usr/lib/$filename$extension ]
+		then
+		echo "Linking: /usr/lib/$filename$extension to /usr/lib/$i"
+		ln -s /usr/lib/$filename$extension /usr/lib/$i
+		break
+	    fi
+	fi
     done
-fi
+done
 
-if [ ! -f /usr/lib/libpcap.so.0.9.4 ]
-    then
-    echo "Attempting to soft-link /usr/lib/libpcap.so.9.4 to a similar library...."
-    ln -s /usr/lib/libpcap.so.0.9.* /usr/lib/libpcap.so.0.9.4
-fi
-
-if [ -d /usr/lib64 ]
-then
-  if [ ! -f /usr/lib64/libpcap.so.0.9.4 ]
-      then
-      echo "Attempting to soft-link /usr/lib64/libpcap.so.9.4 to a similar library...."
-      ln -s /usr/lib64/libpcap.so.0.9.* /usr/lib64/libpcap.so.0.9.4
-  fi
-fi
-
-
-if [ ! -f /lib/libcrypto.so.6 ]
-    then
-    if [ -f /lib/libcrypto.so.7 ]
-	then
-	echo "Attempting to soft-link /lib/libcrypto.so.6 to a similar library...."
-	ln -s /lib/libcrypto.so.7 /lib/libcrypto.so.6
-    else
-	echo "WARNING:  Can't figure out how to link libcrypto.so.6 properly, contact support"
-	echo "  if xorp fails to work (it's possible libcrypto is elsewhere on your system.)"
-    fi
-fi
 
 echo "Completed installation setup for Xorp, testing library linkage...."
 
-if /usr/local/xorp/bin/xorpsh -h > /dev/null 2>&1
+if /usr/local/xorp/sbin/xorpsh -h > /dev/null 2>&1
     then
-    echo "Seems to work fine..."
+    echo ""
+    echo "SUCCESS:  Xorpsh seems to work fine..."
 else
+    echo ""
     echo "ERROR:  xorpsh returned error code.  Please contact support."
+    echo "  You are probably missing some libraries, perhaps older versions"
+    echo "  of ones existing on your system.  The command:"
+    echo "  ldd /usr/local/xorp/sbin/xorpsh"
+    echo "  might help you figure out which ones are missing."
 fi
+
+  

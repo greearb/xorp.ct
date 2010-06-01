@@ -154,6 +154,12 @@ class Spt {
      * of the graph.
      */
     string str() const;
+
+    /**
+     * Find this node.
+     */
+    typename Node<A>::NodeRef find_node(const A& node);
+
  private:
     bool _trace;		// True of tracing is enabled.
     /**
@@ -169,11 +175,6 @@ class Spt {
      * @return true on success.
      */
     bool incremental_spt();
-
-    /**
-     * Find this node.
-     */
-    typename Node<A>::NodeRef find_node(const A& node);
 
     /**
      * Remove all the nodes that have been marked for deletion.

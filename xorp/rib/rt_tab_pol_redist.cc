@@ -218,6 +218,37 @@ PolicyRedistTable<IPv4>::del_redist(const IPRouteEntry<IPv4>& route,
 				       !_multicast, _multicast,	// XXX
 				       callback(this, &PolicyRedistTable<IPv4>::xrl_cb, error));
 }
+
+
+template <class A>
+void
+PolicyRedistTable<A>::replace_policytags(const IPRouteEntry<A>& route,
+					 const PolicyTags& prevtags,
+					 RouteTable<A>* caller)
+{
+    XLOG_ASSERT(caller == _parent);
+
+    set<string> del_protos;
+    set<string> add_protos;
+
+    // who doesn't have to redistribute this route anymore ?
+    _redist_map.get_protocols(del_protos, prevtags);
+
+    // who has to redistribute this route ?
+    _redist_map.get_protocols(add_protos, route.policytags());
+
+    // ok since it is "tags only change and nothing else"
+    // we can be smart i.e. weed out the intersection of del/add
+    // but not implement yet.
+
+    // commit changes
+    if (!del_protos.empty())
+        del_redist(route, del_protos);
+    if (!add_protos.empty())
+	add_redist(route, add_protos);
+}					 
+
+
 template class PolicyRedistTable<IPv4>;
 
 
@@ -253,34 +284,5 @@ PolicyRedistTable<IPv6>::del_redist(const IPRouteEntry<IPv6>& route,
 				       !_multicast, _multicast, // XXX: mutex ?
 				       callback(this, &PolicyRedistTable<IPv6>::xrl_cb, error));
 }
-
-
-template <class A>
-void
-PolicyRedistTable<A>::replace_policytags(const IPRouteEntry<A>& route,
-					 const PolicyTags& prevtags,
-					 RouteTable<A>* caller)
-{
-    XLOG_ASSERT(caller == _parent);
-
-    set<string> del_protos;
-    set<string> add_protos;
-
-    // who doesn't have to redistribute this route anymore ?
-    _redist_map.get_protocols(del_protos, prevtags);
-
-    // who has to redistribute this route ?
-    _redist_map.get_protocols(add_protos, route.policytags());
-
-    // ok since it is "tags only change and nothing else"
-    // we can be smart i.e. weed out the intersection of del/add
-    // but not implement yet.
-
-    // commit changes
-    if (!del_protos.empty())
-        del_redist(route, del_protos);
-    if (!add_protos.empty())
-	add_redist(route, add_protos);
-}					 
 
 template class PolicyRedistTable<IPv6>;

@@ -236,7 +236,9 @@ SelectorList::Node::is_empty()
 // logs of space in the selector_entries vector in hopes we do not have to resize.
 SelectorList::SelectorList(ClockBase *clock)
     : _clock(clock), _observer(NULL), _testfds_n(0), _last_served_fd(-1),
-      _last_served_sel(-1), _selector_entries(1024),
+      _last_served_sel(-1),
+      // XXX: Preallocate to work around use-after-free in Node::run_hooks().
+      _selector_entries(1024),
       _maxfd(0), _descriptor_count(0), _is_debug(false)
 {
     static_assert(SEL_RD == (1 << SEL_RD_IDX) && SEL_WR == (1 << SEL_WR_IDX)

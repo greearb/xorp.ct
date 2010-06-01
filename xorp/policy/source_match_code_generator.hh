@@ -26,7 +26,7 @@
 #include <vector>
 #include <string>
 
-#include <boost/noncopyable.hpp>
+
 
 #include "policy/common/policy_exception.hh"
 
@@ -41,7 +41,7 @@
  * The action block is replaced with the actual policy tagging.
  */
 class SourceMatchCodeGenerator :
-    public boost::noncopyable,
+    public NONCOPYABLE,
     public CodeGenerator
 {
 public:

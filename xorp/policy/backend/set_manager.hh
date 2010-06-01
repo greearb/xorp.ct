@@ -26,7 +26,7 @@
 #include <string>
 #include <map>
 
-#include <boost/noncopyable.hpp>
+
 
 #include "policy/common/element_base.hh"
 #include "policy/common/policy_exception.hh"
@@ -39,7 +39,7 @@
  * enough structure to allow it.
  */
 class SetManager :
-    public boost::noncopyable
+    public NONCOPYABLE
 {
 public:
     typedef map<string,Element*> SetMap;

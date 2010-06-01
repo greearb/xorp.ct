@@ -57,11 +57,6 @@ env.AppendUnique(LIBS = [
     'xorp_core',
     ])
 
-# External libraries.
-#env.AppendUnique(LIBS = [
-#    'boost_regex'
-#])
-
 env.Replace(RPATH = [
     env.Literal(env['xorp_tool_rpath'])
 ])

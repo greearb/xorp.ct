@@ -23,7 +23,7 @@
 #ifndef __POLICY_VISITOR_SEMANTIC_HH__
 #define __POLICY_VISITOR_SEMANTIC_HH__
 
-#include <boost/noncopyable.hpp>
+
 
 #include "libxorp/xorp.h"
 
@@ -44,7 +44,7 @@
  * checking may be accomplished too, but it is not done.]
  */
 class VisitorSemantic :
-    public boost::noncopyable,
+    public NONCOPYABLE,
     public Visitor
 {
 public:

@@ -38,11 +38,6 @@ libpcmsrcs = [
     'varrw.cc'
     ]
 
-# External libraries
-#env.AppendUnique(LIBS = [
-#    'boost_regex'
-#])
-
 is_shared = env.has_key('SHAREDLIBS')
 
 # deal with bgp aspath shared code

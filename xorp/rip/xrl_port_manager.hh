@@ -22,7 +22,7 @@
 #ifndef __RIP_XRL_PORT_MANAGER_HH__
 #define __RIP_XRL_PORT_MANAGER_HH__
 
-#include <boost/noncopyable.hpp>
+
 
 #include "libxorp/service.hh"
 #include "libfeaclient/ifmgr_xrl_mirror.hh"
@@ -46,7 +46,7 @@ class XrlRouter;
  */
 template <typename A>
 class XrlPortManager :
-    public boost::noncopyable,
+    public NONCOPYABLE,
     public PortManagerBase<A>,
     public IfMgrHintObserver,
     public ServiceBase,

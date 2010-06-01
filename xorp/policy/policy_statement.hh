@@ -27,7 +27,7 @@
 #include <set>
 #include <string>
 
-#include <boost/noncopyable.hpp>
+
 
 #include "libproto/config_node_id.hh"
 
@@ -43,7 +43,7 @@ typedef set<string> DEPS;
  * @short A policy statement is a collection of terms.
  */
 class PolicyStatement :
-    public boost::noncopyable
+    public NONCOPYABLE
 {
 public:
     /**

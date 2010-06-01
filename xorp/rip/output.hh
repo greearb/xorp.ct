@@ -30,7 +30,7 @@
 #include "libxorp/debug.h"
 #include "libxorp/eventloop.hh"
 
-#include <boost/noncopyable.hpp>
+
 
 #include "policy/backend/policy_filters.hh"
 
@@ -52,7 +52,7 @@ class PacketQueue;
  */
 template <typename A>
 class OutputBase :
-    public boost::noncopyable
+    public NONCOPYABLE
 {
 public:
     typedef A		Addr;

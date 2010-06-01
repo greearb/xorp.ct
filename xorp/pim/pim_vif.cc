@@ -601,7 +601,7 @@ PimVif::pim_send(const IPvX& src, const IPvX& dst,
 
     if (! (is_up() || is_pending_down())) {
 	error_msg += "Interface: " + name() + " is down or pending down when trying pim_send\n";
-	XLOG_WARNING("%s", error_msg.c_str());
+	debug_msg("Vif %s is currently down\n", name().c_str());
 	return (XORP_ERROR);
     }
 
@@ -616,8 +616,9 @@ PimVif::pim_send(const IPvX& src, const IPvX& dst,
 	case PIM_ASSERT:
 	case PIM_GRAFT:
 	case PIM_GRAFT_ACK:
+	    error_msg += "Invalid message_type, is_pim_register == true\n";
 	    debug_msg("Invalid message type %d on register vif\n",
-		message_type);
+		      message_type);
 	    return (XORP_ERROR);	// Those messages are not allowed
 	case PIM_REGISTER:
 	case PIM_REGISTER_STOP:
@@ -755,12 +756,12 @@ PimVif::pim_send(const IPvX& src, const IPvX& dst,
     BUFFER_COPYPUT_INET_CKSUM(cksum, buffer, 2);	// XXX: the checksum
 
     XLOG_TRACE(pim_node().is_log_trace(),
-	       "TX %s from %s to %s on vif %s",
-	       PIMTYPE2ASCII(message_type),
-	       cstring(src),
-	       cstring(dst),
-	       name().c_str());
-    
+              "pim_send: TX %s from %s to %s on vif %s",
+              PIMTYPE2ASCII(message_type),
+              cstring(src),
+              cstring(dst),
+              name().c_str());    
+
     //
     // Send the message
     //
@@ -923,7 +924,6 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
 	case PIM_ASSERT:
 	case PIM_GRAFT:
 	case PIM_GRAFT_ACK:
-	    //error_msg += "Invalid message_type, is_pim_register == true\n";
 	    return (XORP_ERROR);	// Those messages are not allowed
 	case PIM_REGISTER:
 	case PIM_REGISTER_STOP:
@@ -1308,15 +1308,11 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
     }
     
     XLOG_TRACE(pim_node().is_log_trace(),
-              "pim_send: TX %s from %s to %s on vif %s",
-              PIMTYPE2ASCII(message_type),
-              cstring(src),
-              cstring(dst),
-              name().c_str());    
-
-    //
-    // Send the message
-    //
+	       "RX %s from %s to %s on vif %s",
+	       PIMTYPE2ASCII(message_type),
+	       cstring(src), cstring(dst),
+	       name().c_str());
+    
     /*
      * Process each message based on its type.
      */

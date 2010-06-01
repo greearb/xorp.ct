@@ -54,9 +54,7 @@ paper available from http://www.xorp.org/ :
 2. Status
 =========
 
-This is XORP Release 1.7
-It is reasonably stable and can be used for routing, but there are known
-issues.
+This is XORP Release 1.7-CT
 
 Supported platforms:
 
@@ -64,6 +62,7 @@ Supported platforms:
   * FreeBSD
   * NetBSD
   * OpenBSD
+  * Mac OS X ???
   * Linux (x86-32, x86-64, Sparc)
 
 See ${XORP}/BUILD_NOTES for OS-specific details, compilation
@@ -133,7 +132,13 @@ compiler toolset installed.
 
 scons
 
-See ${XORP}/BUILD_NOTES for additional information of building XORP.
+scons install
+
+For help on scons and available compile options:
+scons --help
+
+You may also wish to try this script to create a tar.gz install package:
+./lf_pkg.bash
 
 In general, configuration and startup of the various XORP processes are
 normally meant to happen via the router manager (rtrmgr), so please
@@ -317,6 +322,7 @@ The core team currently consists of:
 =========================
 
   * WWW: http://www.xorp.org/
+  * WWW: http://www.candelatech.com/oss/xorp-ct.html
 
   * Source code and CVS access: see XORP Web site.
 

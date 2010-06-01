@@ -2227,12 +2227,17 @@ XrlPimNode::mld6igmp_client_send_add_delete_protocol_mld6igmp_cb(
 
     case COMMAND_FAILED:
 	//
-	// If a command failed because the other side rejected it, this is
-	// fatal.
+	// These errors can be caused by VIFs suddenly dissappearing.  For now,
+	// register failure is still considered fatal.
 	//
-	XLOG_FATAL("Cannot %s with the MLD6IGMP: %s",
-		   (is_add)? "register" : "deregister",
-		   xrl_error.str().c_str());
+	if (is_add) {
+	    XLOG_FATAL("Cannot register with the MLD6IGMP: %s",
+		       xrl_error.str().c_str());
+	}
+	else {
+	    XLOG_WARNING("Cannot deregister with the MLD6IGMP: %s",
+			 xrl_error.str().c_str());
+	}
 	break;
 
     case NO_FINDER:
@@ -4005,8 +4010,6 @@ XrlPimNode::pim_0_1_add_config_scope_zone_by_vif_name4(
     if (PimNode::add_config_scope_zone_by_vif_name(IPvXNet(scope_zone_id),
 						   vif_name, error_msg)
 	!= XORP_OK) {
-	error_msg = c_format("Failed to delete membership for (src: %s,  vif: %s)",
-			     cstring(scope_zone_id), vif_name.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     

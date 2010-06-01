@@ -31,7 +31,7 @@
 #include "cli.hh"
 #include "rtrmgr_error.hh"
 
-#include <boost/noncopyable.hpp>
+
 
 class ConfigTree;
 class OpCommand;
@@ -40,7 +40,7 @@ class TemplateTree;
 class SlaveModuleManager;
 
 class OpInstance :
-    public boost::noncopyable
+    public NONCOPYABLE
 {
 public:
     OpInstance(EventLoop&			eventloop,

@@ -220,7 +220,10 @@ RouteManager::recompute_all_routes()
 
     // Add the origin node.
     _origin = make_origin_vertex();
-    _spt.add_node(_origin);
+    Node<Vertex>::NodeRef vtmp = _spt.find_node(_origin);
+    if (vtmp.is_empty() || !vtmp->valid()) {
+	_spt.add_node(_origin);
+    }
     _spt.set_origin(_origin);
 
     // Ask the associated classes to push their topology to us.
@@ -430,10 +433,12 @@ RouteManager::add_tc_link(const TopologyEntry* tc)
     }
 
     // Add the vertex for the remote endpoint learned from TC.
-    // A trace statement may be printed if the node already exists.
     Vertex v_tc(*tc);
-    bool is_tc_added = _spt.add_node(v_tc);
-    UNUSED(is_tc_added);
+    Node<Vertex>::NodeRef vtmp = _spt.find_node(v_tc);
+    // Don't try to add it if it already exists..spams the logs with spt.hh warnings.
+    if (vtmp.is_empty() || !vtmp->valid()) {
+	_spt.add_node(v_tc);
+    }
 
     // Add the link from v_lh to v_tc.
     // For a non-LQ link the cost is always 1.

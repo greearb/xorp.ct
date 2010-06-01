@@ -40,6 +40,7 @@
 // real cost, unlike InProc and SUDP, so we maintain a cache of
 // STCP senders with one per sender destination address.
 
+//ref_ptr<XrlPFSender>
 shared_ptr<XrlPFSender>
 XrlPFSenderFactory::create_sender(EventLoop&	eventloop,
 				  const char*	protocol,

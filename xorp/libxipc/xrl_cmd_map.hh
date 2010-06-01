@@ -27,7 +27,7 @@
 #include <map>
 #include <string>
 
-#include <boost/noncopyable.hpp>
+
 
 #include "libxorp/callback.hh"
 #include "xrl.hh"
@@ -52,7 +52,7 @@ protected:
 };
 
 class XrlCmdMap :
-    public boost::noncopyable
+    public NONCOPYABLE
 {
 public:
     typedef map<string, XrlCmdEntry> CmdMap;

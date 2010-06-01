@@ -26,7 +26,7 @@
 #include <map>
 #include <string>
 
-#include <boost/noncopyable.hpp>
+
 
 #include "policytags.hh"
 
@@ -38,7 +38,7 @@
  * sent to various routing protocols to enable export policies.
  */
 class PolicyRedistMap :
-    public boost::noncopyable
+    public NONCOPYABLE
 {
 public:
     PolicyRedistMap();

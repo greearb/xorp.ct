@@ -27,7 +27,7 @@
 #include "libxorp/ipnet.hh"
 #include "libxorp/timer.hh"
 
-#include <boost/noncopyable.hpp>
+
 
 #include "policy/backend/policytags.hh"
 
@@ -43,7 +43,7 @@ template<typename A> class RouteEntryRef;
  */
 template<typename A>
 class RouteEntry :
-    public boost::noncopyable
+    public NONCOPYABLE
 {
 public:
     typedef A Addr;
@@ -307,7 +307,7 @@ public:
  */
 template <typename A>
 class RouteEntryOrigin :
-    public boost::noncopyable
+    public NONCOPYABLE
 {
 public:
     typedef RouteEntry<A> Route;

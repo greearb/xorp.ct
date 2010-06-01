@@ -26,7 +26,7 @@
 #include <string>
 #include <map>
 
-#include <boost/noncopyable.hpp>
+
 
 #include "policy/common/policy_exception.hh"
 #include "policy/common/varrw.hh"
@@ -43,7 +43,7 @@
  * This is crutial for semantic checking.
  */
 class VarMap :
-    public boost::noncopyable
+    public NONCOPYABLE
 {
 public:
     /**

@@ -26,7 +26,7 @@
 #include <map>
 #include <string>
 
-#include <boost/noncopyable.hpp>
+
 
 #include "libproto/config_node_id.hh"
 
@@ -41,7 +41,7 @@
  * actions must be taken.
  */
 class Term :
-    public boost::noncopyable
+    public NONCOPYABLE
 {
 public:
     enum BLOCKS {

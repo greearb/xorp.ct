@@ -23,7 +23,7 @@
 #ifndef __POLICY_BACKEND_POLICY_FILTERS_HH__
 #define __POLICY_BACKEND_POLICY_FILTERS_HH__
 
-#include <boost/noncopyable.hpp>
+
 
 #include "policy_filter.hh"
 #include "policy/common/filter.hh"
@@ -38,7 +38,7 @@
  * filter is harmless for now [if configured however, state consumes memory].
  */
 class PolicyFilters :
-    public boost::noncopyable
+    public NONCOPYABLE
 {
 public:
     class PolicyFiltersErr : public PolicyException {

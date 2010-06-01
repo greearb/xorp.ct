@@ -72,14 +72,13 @@ tgts = [
     'xorpsh.tgt',
     ]
 
-if env['enable_olsr']:
-    tgts.append('olsr4.tgt')
-
 if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
     tgts.append('test_socket6.tgt')
     tgts.append('ospfv3.tgt')
 
-    
+if env['WITH_OLSR']:
+    tgts.append('olsr4.tgt')
+
 if not (env.has_key('disable_profile') and env['disable_profile']):
     tgts.append('profiler.tgt')
 
@@ -113,7 +112,7 @@ def BuildXrlTarget(tgt):
 
     xrls = '$BUILDDIR/xrl/targets/' + base + '.xrls'
 
-    if base[:4] != "test":
+    if env['WITH_TESTS'] or base[:4] != "test":
         if is_shared:
             env.Alias('install', env.InstallLibrary(env['xorp_libdir'], lib))
         if env['debug_xrldb']:

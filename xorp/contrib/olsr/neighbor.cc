@@ -86,6 +86,13 @@ Neighbor::Neighbor(EventLoop& ev,
     update_cand_mpr(false);
 }
 
+string Neighbor::toStringBrief() {
+    ostringstream oss;
+    oss << id() << "-(" << main_addr().str() << ")";
+    return oss.str();
+}
+
+
 OlsrTypes::NeighborType
 Neighbor::neighbor_type() const
 {

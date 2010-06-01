@@ -24,7 +24,7 @@
 #define __RIP_SYSTEM_HH__
 
 #include <map>
-#include <boost/noncopyable.hpp>
+
 
 #include "trace.hh"
 #include "route_db.hh"
@@ -37,7 +37,7 @@
  */
 template <typename A>
 class System :
-    public boost::noncopyable
+    public NONCOPYABLE
 {
 public:
     typedef RouteDB<A>		RouteDatabase;

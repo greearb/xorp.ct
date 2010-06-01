@@ -23,7 +23,7 @@
 #ifndef __POLICY_CONFIGURATION_HH__
 #define __POLICY_CONFIGURATION_HH__
 
-#include <boost/noncopyable.hpp>
+
 
 #include "policy/common/policy_exception.hh"
 
@@ -85,7 +85,7 @@ private:
  * which are referenced in policies].
  */
 class Configuration :
-    public boost::noncopyable
+    public NONCOPYABLE
 {
 public:
     typedef map<string,Code*> CodeMap;

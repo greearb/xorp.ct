@@ -33,7 +33,7 @@
 #include <set>
 #include <vector>
 
-#include <boost/noncopyable.hpp>
+
 
 
 #include <openssl/md5.h>
@@ -100,7 +100,7 @@ enum PathAttType {
 #define MAX_ATTRIBUTE 20
 
 class PathAttribute :
-    public boost::noncopyable
+    public NONCOPYABLE
 {
 public:
     enum Flags {

@@ -1456,7 +1456,7 @@ Mld6igmpNode::add_protocol(const string& module_instance_name,
 int
 Mld6igmpNode::delete_protocol(const string& module_instance_name,
 			      xorp_module_id module_id,
-			      uint32_t vif_index)
+			      uint32_t vif_index, string& error_msg)
 {
     Mld6igmpVif *mld6igmp_vif = vif_find_by_vif_index(vif_index);
     
@@ -1465,10 +1465,11 @@ Mld6igmpNode::delete_protocol(const string& module_instance_name,
 	oss << "Cannot delete protocol instance: " << module_instance_name
 	    << " on vif_index: " << vif_index << ".  No such vif.";
 	XLOG_ERROR("%s", oss.str().c_str());
+	error_msg.append(oss.str());
 	return (XORP_ERROR);
     }
     
-    if (mld6igmp_vif->delete_protocol(module_id, module_instance_name)
+    if (mld6igmp_vif->delete_protocol(module_id, module_instance_name, error_msg)
 	!= XORP_OK) {
 	return (XORP_ERROR);
     }

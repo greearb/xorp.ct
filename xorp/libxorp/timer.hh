@@ -33,7 +33,7 @@
 #include <sys/time.h>
 #endif
 
-#include <boost/noncopyable.hpp>
+
 
 #include "timeval.hh"
 #include "heap.hh"
@@ -438,7 +438,7 @@ private:
 };
 
 class TimerNode :
-    public boost::noncopyable,
+    public NONCOPYABLE,
     public HeapBase
 {
 protected:

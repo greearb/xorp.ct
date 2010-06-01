@@ -100,6 +100,7 @@ static string	pidfilename;
 
 int32_t		quit_time = -1;
 FILE*           pidfile = NULL;
+//static string	xrl_targets_dir;	// for DEBUG_XRLDB
 
 static void cleanup_and_exit(int errcode);
 

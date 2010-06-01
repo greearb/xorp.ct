@@ -22,7 +22,7 @@
 #ifndef __RIB_REDIST_POLICY_HH__
 #define __RIB_REDIST_POLICY_HH__
 
-#include <boost/noncopyable.hpp>
+
 
 /**
  * @short Base class for Redistribution Policy objects.
@@ -51,7 +51,7 @@ public:
  */
 template <typename A>
 class RedistUnaryOp :
-    public boost::noncopyable
+    public NONCOPYABLE
 {
 public:
     /**
@@ -75,7 +75,7 @@ protected:
  */
 template <typename A>
 class RedistBinaryOp :
-    public boost::noncopyable,
+    public NONCOPYABLE,
     public RedistPolicy<A>
 {
 public:

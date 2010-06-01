@@ -32,13 +32,13 @@
 #include <fcntl.h>
 #endif
 
-#include <boost/noncopyable.hpp>
+
 
 #include "libxorp/callback.hh"
 #include "libxorp/eventloop.hh"
 
 class BufferedAsyncReader :
-    public boost::noncopyable
+    public NONCOPYABLE
 {
 public:
     enum Event {

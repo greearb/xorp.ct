@@ -39,9 +39,21 @@
 #include <inttypes.h>
 #endif
 
+#if defined (__cplusplus)
+#if defined (USE_BOOST) && defined (HAS_BOOST_NONCOPYABLE_INC)
+#  include <boost/noncopyable.hpp>
+#  define NONCOPYABLE boost::noncopyable
+#else
+#  define NONCOPYABLE xorp_noncopyable
+#  include "xorp_noncopyable.hh"
+#endif
+#endif
+
 #if defined (__cplusplus) && !defined(__STL_NO_NAMESPACES)
 using namespace std;
 #endif
+
+
 
 /*
  * Include sys/cdefs.h to define __BEGIN_DECLS and __END_DECLS.  Even if

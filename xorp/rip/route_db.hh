@@ -27,7 +27,7 @@
 #include "libxorp/ref_ptr.hh"
 
 #include <map>
-#include <boost/noncopyable.hpp>
+
 
 #include "policy/backend/policy_filters.hh"
 
@@ -71,7 +71,7 @@ struct NetCmp {
  */
 template <typename A>
 class RouteDB :
-    public boost::noncopyable
+    public NONCOPYABLE
 {
 public:
     typedef A					Addr;
@@ -263,7 +263,7 @@ private:
  */
 template <typename A>
 class RouteWalker :
-    public boost::noncopyable
+    public NONCOPYABLE
 {
 public:
     typedef A			  		Addr;

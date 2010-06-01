@@ -131,4 +131,7 @@ env.Alias('install', env.InstallProgram(env['xorp_moduledir'], rib))
 if is_shared:
     env.Alias('install', env.InstallLibrary(env['xorp_libdir'], libxorp_rib))
 
+# Install scripts
+env.Alias('install', env.InstallProgram('$exec_prefix/sbin/', env.Entry('rib_xrl_shell_funcs.sh')))
+
 Default(rib)

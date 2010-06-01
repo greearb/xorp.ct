@@ -58,7 +58,7 @@ sources = [
 	'fibconfig_table_set_routing_socket.cc',
 	]
 
-if env['enable_click']:
+if env['WITH_CLICK']:
 	sources.append('fibconfig_entry_get_click.cc')
         sources.append('fibconfig_entry_set_click.cc')
         sources.append('fibconfig_table_set_click.cc')

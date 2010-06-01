@@ -118,13 +118,13 @@ test_trie  = env.Program(target = 'test_trie', source = test_trie_srcs)
 
 harnesspath = '$exec_prefix/bgp/harness'
 
-#if env['WITH_TESTS']:
-#    env.Alias('install', env.InstallProgram(harnesspath, coord))
-#    env.Alias('install', env.InstallProgram(harnesspath, test_peer))
-#    env.Alias('install', env.InstallProgram(harnesspath, test_trie))
+if env['WITH_TESTS']:
+    env.Alias('install', env.InstallProgram(harnesspath, coord))
+    env.Alias('install', env.InstallProgram(harnesspath, test_peer))
+    env.Alias('install', env.InstallProgram(harnesspath, test_trie))
 
-#    for ss in script_srcs:
-#        env.Alias('install', env.InstallProgram(harnesspath, env.Entry('%s' % ss)))
+    for ss in script_srcs:
+        env.Alias('install', env.InstallProgram(harnesspath, env.Entry('%s' % ss)))
 
 if 'check' in COMMAND_LINE_TARGETS:
     from subprocess import call

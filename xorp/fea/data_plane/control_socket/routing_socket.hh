@@ -30,7 +30,6 @@
 #include "libxorp/eventloop.hh"
 #include "libxorp/exceptions.hh"
 
-#include <boost/noncopyable.hpp>
 
 class RoutingSocketObserver;
 struct RoutingSocketPlumber;
@@ -41,7 +40,7 @@ struct RoutingSocketPlumber;
  * into the EventLoop and activity usually happens asynchronously.
  */
 class RoutingSocket :
-    public boost::noncopyable
+    public NONCOPYABLE
 {
 public:
     RoutingSocket(EventLoop& eventloop);

@@ -26,7 +26,8 @@
 
 #include <algorithm>
 #include <vector>
-#include <boost/noncopyable.hpp>
+#include "xorp.h"
+
 
 struct SafeCallbackBase;
 
@@ -45,7 +46,7 @@ struct SafeCallbackBase;
  * to do anything.
  */
 class CallbackSafeObject :
-    public boost::noncopyable
+    public NONCOPYABLE
 {
 public:
     CallbackSafeObject() {}
@@ -65,7 +66,7 @@ protected:
  * callback is non-null.
  */
 class SafeCallbackBase :
-    public boost::noncopyable
+    public NONCOPYABLE
 {
 public:
     /**

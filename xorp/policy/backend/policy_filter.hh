@@ -26,7 +26,7 @@
 #include <string>
 #include <map>
 
-#include <boost/noncopyable.hpp>
+
 
 #include "policy/common/varrw.hh"
 #include "policy/common/policy_exception.hh"
@@ -42,7 +42,7 @@
  * It may accept/reject/modify any route which supports VarRW.
  */
 class PolicyFilter :
-    public boost::noncopyable,
+    public NONCOPYABLE,
     public FilterBase
 {
 public:

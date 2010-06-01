@@ -24,9 +24,9 @@ env = env.Clone();
 
 libxipc_env = env.Clone()
 
-#if env['WITH_TESTS']:
-subdirs = [ 'tests' ]
-SConscript(dirs=subdirs, exports='env')
+if env['WITH_TESTS']:
+    subdirs = [ 'tests' ]
+    SConscript(dirs=subdirs, exports='env')
 
 is_shared = env.has_key('SHAREDLIBS')
 
@@ -224,8 +224,8 @@ call_xrl = env.Program(target = 'call_xrl',
 # applications wanting to configure XRL via shell scripts.
 env.Alias('install', env.InstallProgram('$exec_prefix/sbin/', call_xrl))
 
-#if env['WITH_TESTS']:
-#    env.Alias('install', env.InstallProgram(env['xorp_moduledir'], xorp_finder))
+if env['WITH_TESTS']:
+    env.Alias('install', env.InstallProgram(env['xorp_moduledir'], xorp_finder))
     
 Default(libxipc, libfinder, call_xrl, xorp_finder)
 

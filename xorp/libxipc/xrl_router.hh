@@ -153,8 +153,10 @@ public:
 
     XI* lookup_xrl(const string& name) const;
 
+#if 0
     void batch_start(const string& target);
     void batch_stop(const string& target);
+#endif
 
 protected:
     /**
@@ -199,7 +201,7 @@ protected:
      */
     void send_callback(const XrlError&	e,
 		       XrlArgs*		reply,
-		       XrlPFSender*	sender,
+		       XrlPFSender*	sender, // un-used, should be ref-ptr if we ever actually use this.
 		       XrlCallback	user_callback);
 
     /**
@@ -218,7 +220,9 @@ protected:
 
 private:
     // XXX
+#if 0
     XrlPFSender& get_sender(const string& target);
+#endif
     shared_ptr<XrlPFSender> lookup_sender(const Xrl& xrl, FinderDBEntry *dbe);
 
 protected:
@@ -237,9 +241,10 @@ protected:
 
     // XXX the following are mostly only used by the incomplete
     // batch support. Stick to using unchecked pointers for now --bms
+    // TODO:  That is just waiting for bugs to happen..fix this. --Ben
 private:
     typedef map<string, XI*>		XIM;
-    typedef map<string, XrlPFSender*>	SENDERS;
+    typedef map<string, XrlPFSender* >	SENDERS;
 
     mutable XIM			_xi_cache;
     SENDERS			_senders2;

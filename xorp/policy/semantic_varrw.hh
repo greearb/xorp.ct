@@ -25,7 +25,7 @@
 
 #include <string>
 
-#include <boost/noncopyable.hpp>
+
 
 #include "policy/common/varrw.hh"
 #include "policy/common/element_base.hh"
@@ -46,7 +46,7 @@
  * default value. This may not be optimal for semantic checking.
  */
 class SemanticVarRW :
-    public boost::noncopyable,
+    public NONCOPYABLE,
     public VarRW
 {
 public:

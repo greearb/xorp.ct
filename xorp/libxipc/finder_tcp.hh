@@ -34,7 +34,7 @@
 
 #include <vector>
 
-#include <boost/noncopyable.hpp>
+
 
 #ifdef HAVE_SYS_UIO_H
 #include <sys/uio.h>
@@ -45,7 +45,7 @@
 					// size on the network.
 
 class FinderTcpBase :
-    public boost::noncopyable
+    public NONCOPYABLE
 {
 public:
     FinderTcpBase(EventLoop& e, XorpFd fd);
@@ -132,7 +132,7 @@ protected:
 };
 
 class FinderTcpListenerBase :
-    public boost::noncopyable
+    public NONCOPYABLE
 {
 public:
     typedef vector<IPv4> AddrList;

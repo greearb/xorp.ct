@@ -77,6 +77,8 @@ class Neighbor {
 
     inline const IPv4 main_addr() const { return _main_addr; }
 
+    string toStringBrief();
+
     OlsrTypes::NeighborType neighbor_type() const;
 
     /**

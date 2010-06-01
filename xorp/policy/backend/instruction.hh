@@ -51,7 +51,7 @@
  * The Push instruction owns the element.
  */
 class Push :
-    public boost::noncopyable,
+    public NONCOPYABLE,
     public Instruction
 {
 public:
@@ -218,7 +218,7 @@ private:
  * Operation will pop N elements from the stack.
  */
 class NaryInstr :
-    public boost::noncopyable,
+    public NONCOPYABLE,
     public Instruction
 {
 public:

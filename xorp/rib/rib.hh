@@ -25,7 +25,7 @@
 
 #include <string>
 
-#include <boost/noncopyable.hpp>
+
 
 #include "libxorp/xorp.h"
 #include "libxorp/ipv4.hh"
@@ -76,7 +76,7 @@ enum RibVerifyType {
  */
 template<class A>
 class RIB :
-    public boost::noncopyable
+    public NONCOPYABLE
 {
 public:
     /**

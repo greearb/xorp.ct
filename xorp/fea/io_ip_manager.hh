@@ -26,7 +26,7 @@
 #include <vector>
 #include <set>
 #include <map>
-#include <boost/noncopyable.hpp>
+
 
 #include "libxorp/callback.hh"
 #include "libxorp/ipvx.hh"
@@ -64,7 +64,7 @@ struct IPvXHeaderInfo {
  * protocol.
  */
 class IoIpComm :
-    public boost::noncopyable,
+    public NONCOPYABLE,
     public IoIpReceiver
 {
 public:

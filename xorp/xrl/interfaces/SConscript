@@ -85,9 +85,6 @@ xifs = [
     'vrrp.xif',
     ]
 
-if env['enable_olsr']:
-    xifs.append('olsr4.xif')
-
 if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
     xifs.append('socket6.xif')
     xifs.append('socket6_user.xif')
@@ -101,6 +98,9 @@ if not (env.has_key('disable_profile') and env['disable_profile']):
 
 if not (env.has_key('disable_fw') and env['disable_fw']):
     xifs.append('fea_firewall.xif')
+
+if env['WITH_OLSR']:
+    xifs.append('olsr4.xif')
 
 Depends('common.xif', '../../xorp_config.h');
 Depends('fea.xif', 'common.xif');
@@ -127,7 +127,7 @@ for xif in xifs:
 
     all_xif_libs.append(lib)
 
-    if base[:4] != "test":
+    if env['WITH_TESTS'] or base[:4] != "test":
         if is_shared:
             env.Alias('install', env.InstallLibrary(env['xorp_libdir'], lib))
 

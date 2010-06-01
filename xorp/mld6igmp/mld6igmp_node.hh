@@ -501,7 +501,7 @@ public:
      */
     int delete_protocol(const string& module_instance_name,
 			xorp_module_id module_id,
-			uint32_t vif_index);
+			uint32_t vif_index, string& error_msg);
     
     /**
      * Send "add membership" to a protocol that needs to be notified

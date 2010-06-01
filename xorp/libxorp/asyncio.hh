@@ -33,7 +33,7 @@
 #include <fcntl.h>
 #endif
 
-#include <boost/noncopyable.hpp>
+
 
 #include "libxorp/xorpfd.hh"
 #include "libxorp/callback.hh"
@@ -214,7 +214,7 @@ public:
 
 protected:
     class BufferInfo :
-        public boost::noncopyable
+        public NONCOPYABLE
     {
     public:
 	BufferInfo(uint8_t* b, size_t bb, Callback cb)
@@ -251,7 +251,7 @@ protected:
  * @short Write asynchronously to non-blocking file.
  */
 class AsyncFileWriter :
-    public boost::noncopyable,
+    public NONCOPYABLE,
     public AsyncFileOperator
 {
 public:
@@ -367,7 +367,7 @@ private:
 
 protected:
     class BufferInfo :
-	public boost::noncopyable
+	public NONCOPYABLE
     {
     public:
 	BufferInfo(const uint8_t* b, size_t bb, const Callback& cb)

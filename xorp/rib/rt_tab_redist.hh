@@ -22,7 +22,7 @@
 #ifndef __RIB_RT_TAB_REDIST_HH__
 #define __RIB_RT_TAB_REDIST_HH__
 
-#include <boost/noncopyable.hpp>
+
 
 #include "rt_tab_base.hh"
 
@@ -144,7 +144,7 @@ protected:
  */
 template <typename A>
 class Redistributor :
-    public boost::noncopyable
+    public NONCOPYABLE
 {
 public:
     class RedistEventInterface {
@@ -282,7 +282,7 @@ private:
  */
 template <typename A>
 class RedistOutput :
-    public boost::noncopyable
+    public NONCOPYABLE
 {
 public:
     RedistOutput(Redistributor<A>* r);

@@ -29,7 +29,7 @@
 #include <sstream>
 #include <set>
 
-#include <boost/noncopyable.hpp>
+
 
 #include "policy/common/policy_exception.hh"
 
@@ -49,7 +49,7 @@
  */
 template <class T>
 class Dependency :
-    public boost::noncopyable
+    public NONCOPYABLE
 {
 public:
     // things that depend on object

@@ -6,7 +6,7 @@
 */
 
 clear olsr4 database {
-    %command: "clear_database" %help: HELP;
+    %command: "olsr_clear_database" %help: HELP;
     %module: olsr4;
     %tag: HELP "Clear OLSRv1 databases";
 }

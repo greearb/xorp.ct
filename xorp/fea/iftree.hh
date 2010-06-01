@@ -27,7 +27,7 @@
 #include <string>
 #include <set>
 
-#include <boost/noncopyable.hpp>
+
 
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
@@ -41,7 +41,7 @@ class IPvX;
  * transaction but are propagated during the commit.
  */
 class IfTreeItem :
-    public boost::noncopyable
+    public NONCOPYABLE
 {
 public:
     IfTreeItem() : _st(CREATED), _soft(false) {}

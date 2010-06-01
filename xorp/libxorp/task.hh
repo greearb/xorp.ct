@@ -30,7 +30,7 @@
 #include "round_robin.hh"
 #include "callback.hh"
 
-#include <boost/noncopyable.hpp>
+
 
 class TaskList;
 class TaskNode;
@@ -42,7 +42,7 @@ typedef XorpCallback1<void, XorpTask&>::RefPtr BasicTaskCallback;
 
 
 class TaskNode :
-    public boost::noncopyable,
+    public NONCOPYABLE,
     public RoundRobinObjBase
 {
 public:

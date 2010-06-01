@@ -25,7 +25,7 @@
 
 #include <stack>
 
-#include <boost/noncopyable.hpp>
+
 
 #include "libxorp/xorp.h"
 
@@ -49,7 +49,7 @@
  * instructions implement a method that returns a flow action directly.
  */
 class IvExec :
-    public boost::noncopyable,
+    public NONCOPYABLE,
     public InstrVisitor
 {
 public:

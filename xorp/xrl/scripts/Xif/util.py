@@ -1,4 +1,4 @@
-import sys, string, re
+import sys, traceback, string, re
 from time import time, localtime, strftime
 
 # -----------------------------------------------------------------------------
@@ -10,6 +10,7 @@ def warn(file, lineno, reason):
 
 def quit(file, lineno, reason):
     warn(file, lineno, reason)
+    traceback.print_stack()
     sys.exit(1)
 
 def file_write_string(fname, data):

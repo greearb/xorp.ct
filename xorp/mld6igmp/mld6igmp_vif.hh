@@ -382,7 +382,7 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		delete_protocol(xorp_module_id module_id,
-				const string& module_instance_name);
+				const string& module_instance_name, string& error_msg);
 
     /**
      * Notify the interested parties that there is membership change among

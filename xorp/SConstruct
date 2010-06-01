@@ -33,21 +33,9 @@ may not function correctly.
 # class. However, os.path.relpath() requires Python 2.6.
 EnsurePythonVersion(2, 3)
 
-# SCons 0.98.4 is the earliest release that we have tested.  Earlier
-# ones may work.  If so, please submit a Trac issue so the check can
-# be relaxed.
-EnsureSConsVersion(0, 98, 4)
-
 Help("""
     builddir=<some path> to specify a different build directory.
         Default is "obj/<arch>-<os>-<rel>".
-    prefix=<some path> to specify a different install directory.
-        Default is "/usr/local/xorp".
-    enable_gprof=true if you want things compiled with '-pg' flag.
-    enable_xrldb_validation=true if you want XRLdb runtime validation enabled..
-        This is not normally required unless you are developing and making changes
-        to the XRL template files.  XRLdb validation increases startup time.
-    enable_olsr=true if you want to build OLSR.
 """)
 
 import sys
@@ -61,6 +49,16 @@ from SCons.Script.SConscript import SConsEnvironment
 import SCons.Action
 import SCons.Builder
 
+try:
+    # SCons 0.98.4 is the earliest release that we have tested.  Earlier
+    # ones may work.  If so, please submit a Trac issue so the check can
+    # be relaxed.
+    EnsureSConsVersion(0, 98, 4)
+except SystemExit:
+    print "WARNING:  Actually, SCONS version 0.98.4 or later is _preferred_."
+    print "Attempting to continue with version: " + SCons.__version__ + " but it may not work properly.\n"
+
+
 vars = Variables()
 
 vars.AddVariables(
@@ -72,7 +70,6 @@ vars.AddVariables(
     BoolVariable('debug_msg',  'Build with debug messages', False),
     BoolVariable('debug_fn',  'Build with function names in debug_msg output', False),
     BoolVariable('debug_cb',  'Build with callback debugging', False),
-    BoolVariable('enable_gprof',  'Enable gprof (compile with -pg)', False),
     BoolVariable('disable_ipv6',  'Force disable of IPv6', False),
     BoolVariable('disable_fw',  'Disable Firewall feature', False),
     BoolVariable('disable_warninglogs',  'Force disable warning logs', False),
@@ -83,9 +80,9 @@ vars.AddVariables(
     BoolVariable('disable_errorlogs',  'Force disable error logs', False),
     BoolVariable('disable_otherlogs',  'Force disable other logs', False),
     BoolVariable('disable_profile',  'Disable Xorp Profiler feature', False),
+    BoolVariable('enable_boost',  'Use BOOST', False),
     BoolVariable('enable_olsr',  'Build OLSR', False),
-    BoolVariable('enable_tests', 'Build Test Programs', False),
-    BoolVariable('save_args', 'Save scons arguments to .scons_build_args file', False),
+    BoolVariable('enable_tests',  'Build Test Programs', False),
     BoolVariable('enable_click',  'Build CLICK support', False),
     BoolVariable('enable_bgp',  'Build BGP', False),
     BoolVariable('debug_xrldb',  'Build with runtime XRL syntax validation in Router Manager', False),
@@ -105,22 +102,6 @@ vars.AddVariables(
     PathVariable('prefix', 'Install prefix',
                  '/usr/local/xorp', PathVariable.PathAccept),
     )
-
-build_arch = os.uname()[4].lower()
-build_os = os.uname()[0].lower()
-host_arch = ARGUMENTS.get('arch')
-if not host_arch:
-	host_arch = build_arch
-
-if ARGUMENTS.get("save_args"):
-    del ARGUMENTS["save_args"]
-    f = open(".scons_build_args", 'w')
-    arg_keys = ARGUMENTS.keys()
-    for a in arg_keys:
-        f.write(a)
-        f.write("=")
-        f.write(ARGUMENTS.get(a))
-        f.write(" ")
 
 def log_args(afname):
     f = open(afname, 'w')
@@ -178,7 +159,7 @@ env = Environment(
 		  ENV = os.environ,
 		  BUILDDIR = builddir,
 		  CPPPATH=['/usr/local/include', '$BUILDDIR'],
-		  LIBPATH=['/usr/local/lib'],
+		  LIBPATH=['usr/lib', '/usr/local/lib'],
 		  variables = vars)
 
 prefix = env['prefix']
@@ -250,8 +231,10 @@ print 'Debug function names: ', env['debug_fn']
 print 'Debug callbacks:  ', env['debug_cb']
 print 'Debug XRL syntax: ', env['debug_xrldb']
 print 'Enable OLSR:      ', env['enable_olsr']
+print 'Enable Test Programs: ', env['enable_tests']
 print 'Enable CLICK:     ', env['enable_click']
 print 'Enable BGP:       ', env['enable_bgp']
+print 'Try Enable BOOST: ', env['enable_boost']
 print 'Disable IPv6:     ', env['disable_ipv6']
 print 'Disable Firewall: ', env['disable_fw']
 print 'Disable Profile : ', env['disable_profile']
@@ -263,12 +246,6 @@ print 'Disable info logs : ', env['disable_infologs']
 print 'Disable assert logs : ', env['disable_assertlogs']
 print 'Disable other logs : ', env['disable_otherlogs']
 
-
-env['WITH_GPROF'] = ARGUMENTS.get('enable_gprof', False)
-print 'Enable gprof:     ', env['enable_gprof']
-
-env['VALIDATE_XRLDB'] = ARGUMENTS.get('enable_xrldb_validation', False)
-print 'Enable XRLdb Validation:      ', env['VALIDATE_XRLDB']
 
 env['CONFIGURELOG'] = str(builddir) + os.sep + 'config.log'
 env['CONFIGUREDIR'] = str(builddir) + os.sep + '.sconf_temp'
@@ -367,9 +344,16 @@ env['xorp_tooldir']     = env['libdir']  + '/xorp/bin'	# tools/*
 env['xorp_xrlsdir']     = env['datadir'] + '/xorp/xrls'	# *.xrls
 env['xorp_sourcedir']   = sourcedir	# rtrmgr/util.cc and xif need this
 
-# XXX bgp is always built
-env['WITH_BGP'] = ARGUMENTS.get('enable-bgp', False)
+env['WITH_BGP'] = ARGUMENTS.get('enable_bgp', False)
+env['WITH_OLSR'] = ARGUMENTS.get('enable_olsr', False)
+env['WITH_TESTS'] = ARGUMENTS.get('enable_tests', False)
+env['WITH_CLICK'] = ARGUMENTS.get('enable_click', False)
 
+tst = ARGUMENTS.get('enable_boost', False)
+if tst and not (tst == "no"):
+    env['enable_boost'] = True;
+else:
+    env['enable_boost'] = False
 
 tst = ARGUMENTS.get('disable_ipv6', False)
 if tst and not (tst == "no"):
@@ -496,19 +480,32 @@ if not env.GetOption('clean') and \
     if env['disable_profile']:
         conf.Define("XORP_DISABLE_PROFILE")
 
-    # Boost
-    #env['boost_suffix'] = "-mt"		# Not for FreeBSD
-    conf.CheckBoost(require_version='1.39')
-    #conf.CheckBoostLibrary('system')
-    #conf.CheckBoostLibrary('date_time')
-    #conf.CheckBoostLibrary('iostreams')
+    if env['enable_boost']:
+        # Boost
+        #env['boost_suffix'] = "-mt"		# Not for FreeBSD
+        if  not conf.CheckBoost(require_version='1.34'):
+            print "Boost version check for 1.34 failed, disabling boost support.\n"
+            env['enable_boost'] = False
+        
+        #conf.CheckBoostLibrary('system')
+        #conf.CheckBoostLibrary('date_time')
+        #conf.CheckBoostLibrary('iostreams')
 
-    # Additional Boost libraries
-    #conf.CheckBoostLibrary('filesystem')
-    #conf.CheckBoostLibrary('program_options')
-    #conf.CheckBoostLibrary('regex')
-    #conf.CheckBoostLibrary('signals')
-    #conf.CheckBoostLibrary('thread')
+        # Additional Boost libraries
+        #conf.CheckBoostLibrary('filesystem')
+        #conf.CheckBoostLibrary('program_options')
+        #conf.CheckBoostLibrary('regex')
+        #if env['enable_boost'] and not conf.CheckBoostLibrary('regex'):
+        #    print "Boost regex library check failed, disabling boost support.\n"
+        #    env['enable_boost'] = False
+        #conf.CheckBoostLibrary('signals')
+        #conf.CheckBoostLibrary('thread')
+
+    if env['enable_boost']:
+        conf.Define("USE_BOOST")
+        #  I tried checking this with conf.CheckHeader, but it always returns false,
+        #  so just over-ride it here and assume it exists.
+        conf.Define('HAS_BOOST_NONCOPYABLE_INC')
 
     # Big ball of mud.
     from config.allconfig import DoAllConfig
@@ -608,14 +605,23 @@ WARNING: You have requested GNU gprof style profiling
 and shared libraries. This is UNSUPPORTED, and probably will not link.
 """
     strip_pg_flags = [ '-pg', '-finstrument-functions', '-fno-omit-frame-pointer', '-fno-optimize-sibling-calls' ]
-    env.Replace( CFLAGS = filter(
-	lambda s: not s.startswith(tuple(strip_pg_flags)),
-	Split(env['CFLAGS']))
-    )
-    env.Replace( CXXFLAGS = filter(
-	lambda s: not s.startswith(tuple(strip_pg_flags)),
-	Split(env['CXXFLAGS']))
-    )
+    try:
+        env.Replace( CFLAGS = filter(
+            lambda s: not s.startswith(tuple(strip_pg_flags)),
+            Split(env['CFLAGS']))
+        )
+        env.Replace( CXXFLAGS = filter(
+            lambda s: not s.startswith(tuple(strip_pg_flags)),
+            Split(env['CXXFLAGS']))
+        )
+    except TypeError:
+        print """
+        WARNING: Your version of scons and/or python has a syntax issue with this code.
+        It cannot strip out the gprof related flags.  If your compile fails, please try
+        disabling gprof profiling and/or shared libraries.  If the compile works, then
+        you can ignore this warning.
+        """
+        
     # Full use of profiling may require more than one flag, so Split() them.
     pgdict = {'no': '',
               'gprof': '-pg',
@@ -660,24 +666,26 @@ env.AppendUnique(CPPDEFINES = [
     ( '_FORTIFY_SOURCE', 0 ),
     ])
 
-# Forcibly disable Boost's thread support; the XORP code base is
-# not yet threaded.
-env.AppendUnique(CPPDEFINES = [
-    ( 'BOOST_DISABLE_THREADS' ),
-    ])
+if env['enable_boost']:
+    # Forcibly disable Boost's thread support; the XORP code base is
+    # not yet threaded.
+    env.AppendUnique(CPPDEFINES = [
+        ( 'BOOST_DISABLE_THREADS' ),
+        ])
 
 # Some platforms have alignment warnings that cannot easily be
 # fixed, so we can't enable Werror for them.
 if (host_cpu == "i686" or
     host_cpu == "x86_64"):
-    env.AppendUnique(CFLAGS = [
-        '-Werror',
-        ])
-    env.AppendUnique(CXXFLAGS = [
-        '-Werror',
-        ])
+        env.AppendUnique(CFLAGS = [
+	        '-Werror',
+		])
+	env.AppendUnique(CXXFLAGS = [
+		'-Werror',
+		])
 else:
-    print "WARNING:  Detected non x86 platform, will not enable -Werror compile option: ", host_cpu
+	print "WARNING:  Detected non x86 platform, will not enable -Werror compile option: ", host_cpu
+	
 
 # NOTE: gcc specific flags.
 env.AppendUnique(CFLAGS = [
@@ -737,33 +745,6 @@ if env['debug_cb']:
     ])
     env.AppendUnique(CXXFLAGS = [
         '-DDEBUG_CALLBACKS',
-    ])
-
-if env['VALIDATE_XRLDB']:
-    env.AppendUnique(CFLAGS = [
-        '-DVALIDATE_XRLDB',
-    ])
-    env.AppendUnique(CXXFLAGS = [
-        '-DVALIDATE_XRLDB',
-    ])
-
-if env['WITH_GPROF']:
-    env.AppendUnique(CFLAGS = [
-        '-pg',
-        '-fno-omit-frame-pointer',
-        '-fno-optimize-sibling-calls',
-    ])
-    env.AppendUnique(CXXFLAGS = [
-        '-pg',
-        '-fno-omit-frame-pointer',
-        '-fno-optimize-sibling-calls',
-    ])
-    env.AppendUnique(LINKFLAGS = [
-        '-pg',
-    ])
-    
-env.AppendUnique(RPATH = [
-    '$libdir',
     ])
 
 #

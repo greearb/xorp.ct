@@ -281,7 +281,7 @@ XrlAction::expand_action(string& error_msg)
 	return false;
     }
 
-#ifdef VALIDATE_XRLDB
+#ifdef DEBUG_XRLDB
     if (check_xrl_is_valid(_action, _xrldb, error_msg) != true)
 	return false;
 #endif
@@ -289,7 +289,7 @@ XrlAction::expand_action(string& error_msg)
     return true;
 }
 
-#ifdef VALIDATE_XRLDB
+#ifdef DEBUG_XRLDB
 bool
 XrlAction::check_xrl_is_valid(const list<string>& action,
 			      const XRLdb* xrldb,
@@ -494,7 +494,7 @@ XrlAction::check_xrl_is_valid(const list<string>& action,
 
     return true;
 }
-#endif // VALIDATE_XRLDB
+#endif // DEBUG_XRLDB
 
 int
 XrlAction::execute(const MasterConfigTreeNode& ctn,

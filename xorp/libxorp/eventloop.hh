@@ -37,7 +37,7 @@
 
 #include "selector.hh"
 
-#include <boost/noncopyable.hpp>
+
 
 /**
  * @short Event Loop.
@@ -47,7 +47,7 @@
  * co-ordinated through this interface.
  */
 class EventLoop :
-    public boost::noncopyable
+    public NONCOPYABLE
 {
 public:
     /**

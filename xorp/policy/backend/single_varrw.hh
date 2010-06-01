@@ -25,7 +25,7 @@
 
 #include <list>
 
-#include <boost/noncopyable.hpp>
+
 
 #include "policy/common/varrw.hh"
 #include "policy/common/policy_utils.hh"
@@ -42,7 +42,7 @@
  * done its work once, it has to be re-created.
  */
 class SingleVarRW :
-    public boost::noncopyable,
+    public NONCOPYABLE,
     public VarRW
 {
 public:

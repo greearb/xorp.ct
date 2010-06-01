@@ -3,7 +3,16 @@
 # Conditionally set ${srcdir} if it wasn't assigned (e.g., by `gmake check`)
 if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
 
-CALLXRL=${CALLXRL:-../libxipc/call_xrl}
+if [ "_$CALLXRL" == "_" ]
+then
+    if which call_xrl > /dev/null 2>&1
+	then
+	CALLXRL=call_xrl
+    else
+	CALLXRL=/usr/local/xorp/sbin/call_xrl
+    fi
+fi
+
 XRLDIR=${XRLDIR:-${srcdir}/../xrl}
 
 get_configured_interface_names()
@@ -436,7 +445,7 @@ validate_xrls()
 #
 # STOPLOOKING
 #
-    script_name="${srcdir}/xrl_shell_funcs.sh"
+    script_name="${srcdir}/fea_xrl_shell_funcs.sh"
     script_xrls=`cat ${script_name} | sed -n '1,/STOPLOOKING/p' | sed -n '/finder:\/\// p' | sed 's/[^"]*"\([^"]*\).*/\1/g' | sed 's/=[^-&]*//g' | sed 's/->.*//g'`
     source_xrl_files="${XRLDIR}/targets/*.xrls"
 

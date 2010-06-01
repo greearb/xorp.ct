@@ -2356,7 +2356,7 @@ XrlMld6igmpNode::mld6igmp_0_1_add_protocol4(
     //
     Mld6igmpVif *mld6igmp_vif = Mld6igmpNode::vif_find_by_vif_index(vif_index);
     if (mld6igmp_vif == NULL) {
-	Mld6igmpNode::delete_protocol(xrl_sender_name, src_module_id, vif_index);
+	Mld6igmpNode::delete_protocol(xrl_sender_name, src_module_id, vif_index, error_msg);
 	error_msg = c_format("Cannot add protocol instance '%s' "
 			     "on vif %s with vif_index %d: "
 			     "no such vif",
@@ -2430,7 +2430,7 @@ XrlMld6igmpNode::mld6igmp_0_1_add_protocol6(
     //
     Mld6igmpVif *mld6igmp_vif = Mld6igmpNode::vif_find_by_vif_index(vif_index);
     if (mld6igmp_vif == NULL) {
-	Mld6igmpNode::delete_protocol(xrl_sender_name, src_module_id, vif_index);
+	Mld6igmpNode::delete_protocol(xrl_sender_name, src_module_id, vif_index, error_msg);
 	error_msg = c_format("Cannot add protocol instance '%s' "
 			     "on vif %s with vif_index %d: "
 			     "no such vif",
@@ -2467,6 +2467,7 @@ XrlMld6igmpNode::mld6igmp_0_1_delete_protocol4(
     const string&	vif_name, 
     const uint32_t&	vif_index)
 {
+    UNUSED(vif_name);
     string error_msg;
 
     //
@@ -2488,14 +2489,8 @@ XrlMld6igmpNode::mld6igmp_0_1_delete_protocol4(
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
-    if (Mld6igmpNode::delete_protocol(xrl_sender_name, src_module_id, vif_index)
+    if (Mld6igmpNode::delete_protocol(xrl_sender_name, src_module_id, vif_index, error_msg)
 	!= XORP_OK) {
-	// TODO: must find-out and return the reason for failure
-	error_msg = c_format("Cannot delete protocol instance '%s' "
-			     "on vif %s with vif_index %d",
-			     xrl_sender_name.c_str(),
-			     vif_name.c_str(),
-			     XORP_INT_CAST(vif_index));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2514,6 +2509,7 @@ XrlMld6igmpNode::mld6igmp_0_1_delete_protocol6(
     const string&	vif_name, 
     const uint32_t&	vif_index)
 {
+    UNUSED(vif_name);
     string error_msg;
 
     //
@@ -2535,14 +2531,8 @@ XrlMld6igmpNode::mld6igmp_0_1_delete_protocol6(
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
-    if (Mld6igmpNode::delete_protocol(xrl_sender_name, src_module_id, vif_index)
+    if (Mld6igmpNode::delete_protocol(xrl_sender_name, src_module_id, vif_index, error_msg)
 	!= XORP_OK) {
-	// TODO: must find-out and return the reason for failure
-	error_msg = c_format("Cannot delete protocol instance '%s' "
-			     "on vif %s with vif_index %d",
-			     xrl_sender_name.c_str(),
-			     vif_name.c_str(),
-			     XORP_INT_CAST(vif_index));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     

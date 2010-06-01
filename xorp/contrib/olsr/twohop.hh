@@ -45,6 +45,8 @@ class TwoHopNeighbor {
     inline OlsrTypes::TwoHopNodeID id() const { return _id; }
     inline IPv4 main_addr() const { return _main_addr; }
 
+    string toStringBrief();
+
     /**
      * Associate this N2 with an N1, using an instance of
      * the association class TwoHopLink.

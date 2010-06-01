@@ -25,7 +25,7 @@
 
 #include <string>
 
-#include <boost/noncopyable.hpp>
+
 
 #include "policy/common/operator_base.hh"
 #include "policy/common/varrw.hh"
@@ -70,7 +70,7 @@ typedef NodeAny<string>	NodeVar;
  * Such as an IP address.
  */
 class NodeElem :
-    public boost::noncopyable,
+    public NONCOPYABLE,
     public Node
 {
 public:
@@ -125,7 +125,7 @@ private:
  *
  */
 class NodeBin :
-    public boost::noncopyable,
+    public NONCOPYABLE,
     public Node
 {
 public:
@@ -174,7 +174,7 @@ private:
  * The node will have one child. It owns it.
  */
 class NodeUn :
-    public boost::noncopyable,
+    public NONCOPYABLE,
     public Node
 {
 public:
@@ -213,7 +213,7 @@ private:
  * @short An assignment operation.
  */
 class NodeAssign :
-    public boost::noncopyable,
+    public NONCOPYABLE,
     public Node
 {
 public:

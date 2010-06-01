@@ -36,36 +36,28 @@ env.AppendUnique(CPPPATH = [
     ])
 
 env.AppendUnique(LIBPATH = [
-    '../../libxorp',
-    '../../libcomm',
-    '../../libxipc',
-    '../../libproto',
-    '../../libfeaclient',
-    '../../policy/backend',
-    '../../policy/common',
-    '../../xrl/interfaces',
-    '../../xrl/targets',
-    '../../mrt',
+    '$BUILDDIR/libxorp',
+    '$BUILDDIR/libcomm',
+    '$BUILDDIR/libxipc',
+    '$BUILDDIR/libproto',
+    '$BUILDDIR/libfeaclient',
+    '$BUILDDIR/policy/backend',
+    '$BUILDDIR/policy/common',
+    '$BUILDDIR/xrl/interfaces',
+    '$BUILDDIR/xrl/targets',
+    '$BUILDDIR/mrt',
     '.'
     ])
 
 env.AppendUnique(LIBS = [
     'olsr',
     'olsrxrl',
-    'policybackend',
-    'policycommon',
     'xst_olsr4',
     'xorp_policy_backend',
     'xorp_policy_common',
     'xorp_fea_client',
     'xif_rib',
-    'findereventnotifierxif',
-    'feaifmgrmirrorxif',
-    'feaifmgrreplicatorxif',
-    'libsocket4xif',
-    'profileclientxif',
-    'fearawpkt4xif',
-    'fearawpkt6xif',
+    'xif_socket4',
     'xif_finder_event_notifier',
     'xif_fea_ifmgr_mirror',
     'xif_fea_ifmgr_replicator',
@@ -133,8 +125,6 @@ olsr4srcs = [
 
 olsr4 = env.Program(target = 'xorp_olsr4', source = olsr4srcs)
 
-olsrpath = '$exec_prefix/contrib/olsr'
-env.Alias('install',
-          env.InstallProgram(olsrpath, olsr4))
+env.Alias('install', env.InstallProgram(env['xorp_moduledir'], olsr4))
 
 Default(libolsr, libolsrxrl, olsr4)

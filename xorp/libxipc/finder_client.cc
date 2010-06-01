@@ -22,7 +22,7 @@
 #include <functional>
 #include <algorithm>
 
-#include <boost/noncopyable.hpp>
+
 
 #include "finder_module.h"
 
@@ -193,7 +193,7 @@ private:
  * into FinderClient's resolved table and notifies the client.
  */
 class FinderClientQuery :
-    public boost::noncopyable,
+    public NONCOPYABLE,
     public FinderClientOneOffOp
 {
 public:

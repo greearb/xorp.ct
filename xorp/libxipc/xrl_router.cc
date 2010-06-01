@@ -211,7 +211,7 @@ XrlRouter::initialize(const char* class_name,
 	char *ep = NULL;
 	timeout_ms = strtoul(value, &ep, 10);
 	if ( !(*value != '\0' && *ep == '\0') &&
-	     (timeout_ms <= 0 || timeout_ms > 120000)) {
+	      (timeout_ms <= 0 || timeout_ms > 120000)) {
 	    XLOG_ERROR("Out of bounds \"XORP_FINDER_CONNECT_TIMEOUT_MS\": %s (must be 0..120000",
 		       value);
 	    timeout_ms = DEFAULT_FINDER_CONNECT_TIMEOUT_MS;
@@ -377,7 +377,7 @@ XrlRouter::add_handler(const string& cmd, const XrlRecvCallback& rcb)
 void
 XrlRouter::send_callback(const XrlError& e,
 			 XrlArgs*	 reply,
-			 XrlPFSender*	 /* s */,
+			 XrlPFSender* /* s */, // Don't use, should be a ref-ptr if it is ever used.
 			 XrlCallback	 user_callback)
 {
     user_callback->dispatch(e, reply);
@@ -404,6 +404,9 @@ XrlRouter::send_resolved(const Xrl&		xrl,
     	x.set_args(xrl);
 	if (s != 0) {
 	    trace_xrl("Sending ", x);
+	    // NOTE:  using s.get below breaks ref counting, but can't figure out WTF the
+	    // callback template magic is to make it work with a ref-ptr.  Either way, it appears
+	    // the ptr may not be used anyway (it's not in send_callback, for instance)
 	    return s->send(x, direct_call,
 			   callback(this, &XrlRouter::send_callback,
                                     s.get(), cb));
@@ -732,6 +735,11 @@ XrlRouter::finder_ready_event(const string& tgt_name)
     debug_msg("Finder target ready event: \"%s\"\n", tgt_name.c_str());
 }
 
+
+// If this really doesn't work..then don't let anyone use it.  Making
+// it #if 0. --Ben
+
+#if 0
 //
 // XXX This is unfinished code related to a batch XRL implementation.
 // It is unfortunately incompatible, straight off, with using refcounts to
@@ -743,33 +751,22 @@ XrlRouter::finder_ready_event(const string& tgt_name)
 void
 XrlRouter::batch_start(const string& target)
 {
-#if 0
     XrlPFSender& sender = get_sender(target);
 
     sender.batch_start();
-#else
-    XLOG_UNREACHABLE();
-    UNUSED(target);
-#endif
 }
 
 void
 XrlRouter::batch_stop(const string& target)
 {
-#if 0
     XrlPFSender& sender = get_sender(target);
 
     sender.batch_stop();
-#else
-    XLOG_UNREACHABLE();
-    UNUSED(target);
-#endif
 }
 
-XrlPFSender&
+ref_ptr<XrlPFSender>
 XrlRouter::get_sender(const string& target)
 {
-#if 0
     XrlPFSender* s = 0;
 
     SENDERS::iterator i = _senders2.find(target);
@@ -777,14 +774,9 @@ XrlRouter::get_sender(const string& target)
 
     s = i->second;
 
-    return *s;
-#else
-    XLOG_UNREACHABLE();
-    XrlPFSender* s = 0;
-    return *s;
-    UNUSED(target);
-#endif
+    return s;
 }
+#endif
 
 string XrlRouter::toString() const {
     ostringstream oss;

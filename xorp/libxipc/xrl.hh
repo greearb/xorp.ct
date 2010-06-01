@@ -32,6 +32,8 @@
 #include "xrl_atom.hh"
 #include "xrl_args.hh"
 #include "xrl_tokens.hh"
+//#include "libxorp/ref_ptr.hh"
+//#include "xrl_pf.hh"  // Needed for ref_ptr instantiation of XrlPFSender
 
 using boost::weak_ptr;
 
@@ -203,6 +205,7 @@ private:
     mutable XrlArgs*		    _argp; // XXX shouldn't be mutable
     mutable int			    _to_finder;
     mutable bool		    _resolved; // XXX ditto
+    //mutable ref_ptr<XrlPFSender> _resolved_sender; // XXX ditto
     mutable weak_ptr<XrlPFSender>   _resolved_sender; // XXX ditto
 
     static const string _finder_protocol;

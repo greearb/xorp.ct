@@ -36,7 +36,7 @@ sources = [
 	'fea_data_plane_manager_linux.cc',
 	]
 
-if env['enable_click']:
+if env['WITH_CLICK']:
     sources.append('fea_data_plane_manager_click.cc')
 
 if is_shared:

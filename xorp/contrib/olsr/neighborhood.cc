@@ -1467,13 +1467,14 @@ Neighborhood::recount_mpr_set()
 {
     //if (_neighbors.empty()
     //	return;
+    ostringstream dbg;
 
     // Clear all existing MPR state for Neighbors.
     reset_onehop_mpr_state();
 
     // Clear all existing MPR state for TwoHopNeighbors.
     // Compute number of now uncovered reachable nodes at radius=2.
-    const size_t reachable_n2_count = reset_twohop_mpr_state();
+    const size_t reachable_n2_count = reset_twohop_mpr_state(dbg);
     size_t covered_n2_count = 0;
 
     set<OlsrTypes::NeighborID> new_mpr_set; // For debugging.
@@ -1481,22 +1482,29 @@ Neighborhood::recount_mpr_set()
     if (_mpr_computation_enabled) {
 	// 8.3.1, 1: Start with an MPR set made of all members of N with
 	// willingness equal to WILL_ALWAYS.
-	covered_n2_count += consider_persistent_cand_mprs();
+	covered_n2_count += consider_persistent_cand_mprs(dbg);
 
 	// 8.3.1, 3: If N2 is still not fully covered, ensure that for
 	// all uncovered strict N2 reachable only via 1 edge, their
 	// neighbor N is selected as an MPR.
-	if (covered_n2_count < reachable_n2_count)
-	    covered_n2_count += consider_poorly_covered_twohops();
+	if (covered_n2_count < reachable_n2_count) {
+	    covered_n2_count += consider_poorly_covered_twohops(dbg);
+	}
 
 	// 8.3.1, 4: If N2 is still not fully covered, consider
 	// candidate MPRs in descending order of willingness, reachability
 	// and degree.
-	if (covered_n2_count < reachable_n2_count)
-	    consider_remaining_cand_mprs(reachable_n2_count, covered_n2_count);
+	if (covered_n2_count < reachable_n2_count) {
+	    consider_remaining_cand_mprs(reachable_n2_count, covered_n2_count, dbg);
+	}
 
-	// Invariant: All reachable N2 must now be covered by MPRs.
-	XLOG_ASSERT(covered_n2_count >= reachable_n2_count);
+	if (covered_n2_count < reachable_n2_count) {
+	    dbg << " covered_n2_count: " << covered_n2_count << " reachable_n2_count: "
+		<< reachable_n2_count << endl;
+	    XLOG_WARNING("%s", dbg.str().c_str());
+	    // Invariant: All reachable N2 must now be covered by MPRs.
+	    XLOG_ASSERT(covered_n2_count >= reachable_n2_count);
+	}
 
 	size_t removed_mpr_count = minimize_mpr_set(new_mpr_set);
 	debug_msg("MPRs removed: %u\n", XORP_UINT_CAST(removed_mpr_count));
@@ -1690,7 +1698,7 @@ Neighborhood::reset_onehop_mpr_state()
 }
 
 size_t
-Neighborhood::reset_twohop_mpr_state()
+Neighborhood::reset_twohop_mpr_state(ostringstream& oss)
 {
     size_t n2_count = 0;
 
@@ -1710,8 +1718,11 @@ Neighborhood::reset_twohop_mpr_state()
 	update_twohop_reachability(n2);
 
 	// If N2 is strict and is reachable, count it as a member of N2.
-	if (n2->is_strict() && n2->is_reachable())
-	   n2_count++;
+	if (n2->is_strict() && n2->is_reachable()) {
+	    oss << "Counting 2-hop neighbor, is strict and reachable: " << n2->reachability()
+		<< ", n2: " << n2->toStringBrief() << endl;
+	    n2_count++;
+	}
     }
 
     return n2_count;
@@ -1766,7 +1777,7 @@ Neighborhood::update_twohop_reachability(TwoHopNeighbor* n2)
 }
 
 size_t
-Neighborhood::consider_persistent_cand_mprs()
+Neighborhood::consider_persistent_cand_mprs(ostringstream& dbg)
 {
     size_t persistent_mpr_count = 0;
 
@@ -1817,7 +1828,12 @@ Neighborhood::consider_persistent_cand_mprs()
 	    XLOG_ASSERT(n->is_mpr());
 
 	    n2->add_covering_mpr(n->id());
+	    dbg << "Covered n2: " << n2->toStringBrief() << " in consider_persistent.\n";
 	    covered_n2_count++;
+	}
+	else {
+	    dbg << "NOT covering n2: " << n2->toStringBrief() << " in consider_persistent, strict: "
+		<< n2->is_strict() << "  n: " << n->toStringBrief() << " n->willingness: " << n->willingness() << endl;
 	}
     }
 
@@ -1830,7 +1846,7 @@ Neighborhood::consider_persistent_cand_mprs()
 }
 
 size_t
-Neighborhood::consider_poorly_covered_twohops()
+Neighborhood::consider_poorly_covered_twohops(ostringstream& dbg)
 {
     size_t covered_n2_count = 0;
 
@@ -1858,7 +1874,13 @@ Neighborhood::consider_poorly_covered_twohops()
 	    //
 	    n2->add_covering_mpr(n->id());
 	    n->set_is_mpr(true);
+	    dbg << "Counting poorly_covered n2: " << n2->toStringBrief() << " n is set as mpr: "
+		<< n->toStringBrief() << endl;
 	    covered_n2_count++;
+	}
+	else {
+	    dbg << "NOT Counting poorly_covered n2: " << n2->toStringBrief() << "  strict: " << n2->is_strict()
+		<< "  reachability: " << n2->reachability() << "  n2-covered: " << n2->is_covered() << endl;
 	}
     }
 
@@ -1867,9 +1889,10 @@ Neighborhood::consider_poorly_covered_twohops()
 
 void
 Neighborhood::consider_remaining_cand_mprs(const size_t n2_count,
-					   size_t& covered_n2_count)
+					   size_t& covered_n2_count, ostringstream& dbg)
 {
     typedef set<Neighbor*, CandMprOrderPred> CandMprBag;
+    UNUSED(n2_count);
 
     CandMprBag cand_mprs;
 
@@ -1892,6 +1915,11 @@ Neighborhood::consider_remaining_cand_mprs(const size_t n2_count,
 	    if (n->reachability() > 0)
 		cand_mprs.insert(n); // Insertion sort.
 	}
+	else {
+	    dbg << "Not using n: " << n->toStringBrief() << " as cand_mpr, willingness: "
+		<< n->willingness() << "  is_cand_mpr: " << n->is_cand_mpr() << "  is_mpr: "
+		<< n->is_mpr() << endl;
+	}
     }
 
     // 8.3.1, 4.2: Select as an MPR the node with highest
@@ -1900,9 +1928,14 @@ Neighborhood::consider_remaining_cand_mprs(const size_t n2_count,
     for (jj = cand_mprs.begin(); jj != cand_mprs.end(); jj++) {
 	Neighbor* n = (*jj);
 
+	dbg << "Checking neighbour: " << n->toStringBrief() << "  link count: "
+	    << n->twohop_links().size() << endl;
+
 	// If all N2 are covered, we're done.
-	if (covered_n2_count >= n2_count)
-	    break;
+	// How do you know you haven't counted duplicates??  Comments indicate that redundant
+	// MPRs will be cleaned up below....  --Ben
+	//if (covered_n2_count >= n2_count)
+	//    break;
 
 	// Mark each N2 reachable from this N as covered,
 	// and mark this N as a candidate MPR.
@@ -1914,9 +1947,13 @@ Neighborhood::consider_remaining_cand_mprs(const size_t n2_count,
 	    TwoHopNeighbor* n2 = l2->destination();
 	    if (n2->is_strict()) {
 		// Mark this strict N2 as covered by N. Mark N as MPR.
+		dbg << "Adding covering_mpr: " << n->toStringBrief() << "  to n2: " << n2->toStringBrief() << endl;
 		n2->add_covering_mpr(n->id());
 		n->set_is_mpr(true);
 		covered_n2_count++;
+	    }
+	    else {
+		dbg << "n2: " << n2->toStringBrief() << "  is strict, skipping.\n";
 	    }
 	}
     }

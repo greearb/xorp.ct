@@ -72,7 +72,7 @@ public:
  */
 template <typename A>
 class RouteRedistributor :
-    public boost::noncopyable
+    public NONCOPYABLE
 {
 public:
     typedef A Addr;

@@ -26,7 +26,7 @@
 #include <string>
 #include <list>
 
-#include <boost/noncopyable.hpp>
+
 
 #include "code.hh"
 
@@ -34,7 +34,7 @@
  * @short A collection of code fragments.
  */
 class CodeList :
-    public boost::noncopyable
+    public NONCOPYABLE
 {
 public:
     /**

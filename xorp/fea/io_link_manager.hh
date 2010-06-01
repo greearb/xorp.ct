@@ -27,7 +27,7 @@
 #include <vector>
 #include <set>
 #include <map>
-#include <boost/noncopyable.hpp>
+
 
 #include "libxorp/callback.hh"
 #include "libxorp/mac.hh"
@@ -58,7 +58,7 @@ struct MacHeaderInfo {
  * protocol.
  */
 class IoLinkComm :
-    public boost::noncopyable,
+    public NONCOPYABLE,
     public IoLinkReceiver
 {
 public:

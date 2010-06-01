@@ -755,7 +755,7 @@ class Neighborhood {
      * @return The number of reachable, strict two-hop neighbors
      *         to be considered by MPR selection.
      */
-    size_t reset_twohop_mpr_state();
+    size_t reset_twohop_mpr_state(ostringstream& dbg);
 
     /**
      * Compute one-hop neighbor reachability and update it in the
@@ -807,7 +807,7 @@ class Neighborhood {
      * @return The number of two-hop neighbors which have been covered
      *         by considering the persistent MPR candidates.
      */
-    size_t consider_persistent_cand_mprs();
+    size_t consider_persistent_cand_mprs(ostringstream& dbg);
 
     /**
      * Consider MPR coverage of poorly covered two-hop neighbors.
@@ -820,7 +820,7 @@ class Neighborhood {
      * @return The number of two-hop neighbors which have been covered
      *         by considering the persistent MPR candidates.
      */
-    size_t consider_poorly_covered_twohops();
+    size_t consider_poorly_covered_twohops(ostringstream& dbg);
 
     /**
      * Consider remaining MPR candidates for MPR selection.
@@ -840,7 +840,7 @@ class Neighborhood {
      *                         which this method will update.
      */
     void consider_remaining_cand_mprs(const size_t n2_count,
-				      size_t& covered_n2_count);
+				      size_t& covered_n2_count, ostringstream& oss);
 
     /**
      * Mark all N1 neighbors was MPRs.

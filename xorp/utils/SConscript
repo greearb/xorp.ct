@@ -50,8 +50,8 @@ runit_srcs = [
 
 runit = env.Program(target = 'runit', source = runit_srcs)
 
-#if env['WITH_TESTS']:
-#    env.Alias('install', env.InstallProgram(env['xorp_tooldir'], runit))
+if env['WITH_TESTS']:
+    env.Alias('install', env.InstallProgram(env['xorp_tooldir'], runit))
 
 # Install scripts
 #env.Alias('install', env.InstallProgram('$exec_prefix/sbin/', env.Entry('bgp_xrl_shell_funcs.sh')))

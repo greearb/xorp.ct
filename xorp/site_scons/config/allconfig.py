@@ -175,8 +175,12 @@ def DoAllConfig(env, conf, host_os):
     has_struct_msghdr = conf.CheckType('struct msghdr', includes='#include <sys/socket.h>')
     has_struct_cmsghdr = conf.CheckType('struct cmsghdr', includes='#include <sys/socket.h>')
 
+    #  Check for boost noncopyable include file.
+    #  This doesn't work..not too sure why. --Ben
+    #has_boost_noncopyable_hpp = conf.CheckHeader('boost/noncopyable.hpp');
+    #if has_boost_noncopyable_hpp:
+    #    conf.Define('HAS_BOOST_NONCOPYABLE_INC')
     
-
     ##########
     # Socket support checks
     # XXX header conditionals needed

@@ -1542,7 +1542,7 @@ Mld6igmpVif::add_protocol(xorp_module_id module_id,
  **/
 int
 Mld6igmpVif::delete_protocol(xorp_module_id module_id,
-			     const string& module_instance_name)
+			     const string& module_instance_name, string& error_msg)
 {
     vector<pair<xorp_module_id, string> >::iterator iter;
     
@@ -1550,8 +1550,13 @@ Mld6igmpVif::delete_protocol(xorp_module_id module_id,
 		_notify_routing_protocols.end(),
 		pair<xorp_module_id, string>(module_id, module_instance_name));
     
-    if (iter == _notify_routing_protocols.end())
+    if (iter == _notify_routing_protocols.end()) {
+	ostringstream oss;
+	oss << "ERROR:  Cannot find routing module matching module_id: " << module_id
+	    << " instance_name: " << module_instance_name;
+	error_msg.append(oss.str());
 	return (XORP_ERROR);		// Not on the list
+    }
     
     _notify_routing_protocols.erase(iter);
     

@@ -34,7 +34,7 @@
 #include "finder_messenger.hh"
 #include "finder_xrl_queue.hh"
 
-#include <boost/noncopyable.hpp>
+
 
 // periodic HELLO ping of 100 seconds to decrease useless xorp
 // RPC messages.
@@ -45,7 +45,7 @@ class FinderClass;
 class FinderEvent;
 
 class Finder :
-    public boost::noncopyable,
+    public NONCOPYABLE,
     public FinderMessengerManager
 {
 public:

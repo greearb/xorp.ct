@@ -30,8 +30,6 @@
 #include "libxorp/eventloop.hh"
 #include "libxorp/exceptions.hh"
 
-#include <boost/noncopyable.hpp>
-
 class NetlinkSocketObserver;
 struct NetlinkSocketPlumber;
 
@@ -42,7 +40,7 @@ struct NetlinkSocketPlumber;
  * into the EventLoop and activity usually happens asynchronously.
  */
 class NetlinkSocket :
-    public boost::noncopyable
+    public NONCOPYABLE
 {
 public:
     NetlinkSocket(EventLoop& eventloop, uint32_t table_id);

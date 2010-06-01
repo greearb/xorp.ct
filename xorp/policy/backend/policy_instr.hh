@@ -26,7 +26,7 @@
 #include <vector>
 #include <string>
 
-#include <boost/noncopyable.hpp>
+
 
 #include "term_instr.hh"
 
@@ -36,7 +36,7 @@
  * A policy instruction is a list of term instructions.
  */
 class PolicyInstr :
-    public boost::noncopyable
+    public NONCOPYABLE
 {
 public:
     /**

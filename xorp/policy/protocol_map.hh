@@ -26,7 +26,7 @@
 #include <string>
 #include <map>
 
-#include <boost/noncopyable.hpp>
+
 
 /**
  * @short Maps protocols to the XORP process name.
@@ -36,7 +36,7 @@
  * regarding protocols to the actual name of the XORP process for that protocol.
  */
 class ProtocolMap :
-    public boost::noncopyable
+    public NONCOPYABLE
 {
 public:
     ProtocolMap();
