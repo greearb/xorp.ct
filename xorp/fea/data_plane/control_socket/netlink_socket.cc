@@ -110,7 +110,7 @@ NetlinkSocket::force_recvmsg(bool only_kernel_messages, string& err_msg) {
 }
 
 int NetlinkSocket::bind_table_id() {
-#ifndef HAVE_PCAP_BPF_H
+#if ! (defined(HAVE_PCAP_BPF_H) && defined(RTA_TABLE))
     return XORP_OK; // No big problem, just slightly dif
 #else
     if (_table_id) {

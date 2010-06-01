@@ -675,8 +675,16 @@ def DoAllConfig(env, conf, host_os):
     has_linux_if_vlan_h = conf.CheckHeader('linux/if_vlan.h')
     if has_linux_if_vlan_h:
         conf.Define('HAVE_VLAN_LINUX')
+        # Check for really old if_vlan.h that doesn't have GET_VLAN_REALDEV_NAME_CMD enum
+        # Vlans might still not work if the target kernel doesn't support these options,
+        # but at least it will compile and has the potential to work.
+        if not conf.CheckDeclaration('GET_VLAN_REALDEV_NAME_CMD', '#include <linux/if_vlan.h>'):
+            conf.Define('GET_VLAN_REALDEV_NAME_CMD', '8')
+        if not conf.CheckDeclaration('GET_VLAN_VID_CMD', '#include <linux/if_vlan.h>'):
+            conf.Define('GET_VLAN_VID_CMD', '9')
     else:
         conf.Define('HAVE_VLAN_BSD')
+
     
     ##########
     # pcre posix regexp emulation
