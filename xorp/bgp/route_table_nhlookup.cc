@@ -167,7 +167,7 @@ NhLookupTable<A>::replace_route(InternalMessage<A> &old_rtmsg,
     bool old_msg_is_queued;
     MessageQueueEntry<A>* mqe =
 	lookup_in_queue(old_rtmsg.nexthop(), net);
-    old_msg_is_queued = 0 != mqe;
+    old_msg_is_queued = (mqe != NULL);
 
     // The correct behaviour is to deregister interest in this
     // nexthop. If the nexthop for the old route is the same as in the
