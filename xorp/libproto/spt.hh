@@ -26,7 +26,7 @@
 
 // #define INCREMENTAL_SPT
 
-#define DEBUG_LOGGING
+//#define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "libxorp/ref_ptr.hh"

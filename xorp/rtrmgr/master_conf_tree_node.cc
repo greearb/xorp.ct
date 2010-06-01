@@ -447,10 +447,10 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
 		}
 		if (base_cmd != NULL) {
 		    const AllowCommand* allow_cmd;
-		    debug_msg("found ALLOW command: %s\n",
-			      cmd->str().c_str());
 		    allow_cmd = dynamic_cast<const AllowCommand*>(base_cmd);
 		    XLOG_ASSERT(allow_cmd != NULL);
+		    debug_msg("found ALLOW command: %s\n",
+			      allow_cmd->str().c_str());
 		    if (allow_cmd->verify_variables(*this, error_msg)
 			!= true) {
 			//
