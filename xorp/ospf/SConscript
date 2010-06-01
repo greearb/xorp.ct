@@ -95,6 +95,10 @@ libxorp_ospf_srcs = [
 	     'vlink.cc'
              ]
 
+if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
+    libxorp_ospf_srcs.append('xrl_target3.cc')
+
+
 if is_shared:
     libxorp_ospf = env.SharedLibrary(target = 'libxorp_ospf',
 				     source = libxorp_ospf_srcs,
@@ -117,9 +121,7 @@ if is_shared:
     env.Alias('install', env.InstallLibrary(env['xorp_libdir'], libxorp_ospf))
 
 if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
-    ospfv3srcs = [ 'xorp_ospfv3.cc',
-                   'xrl_target3.cc',
-                   ]
+    ospfv3srcs = [ 'xorp_ospfv3.cc' ]
     ospfv3 = env.Program(target = 'xorp_ospfv3', source = ospfv3srcs)
 
     env.Alias('install', env.InstallProgram(env['xorp_moduledir'], ospfv3))

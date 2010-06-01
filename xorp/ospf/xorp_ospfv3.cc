@@ -37,6 +37,7 @@
 #include "io.hh"
 #include "xrl_io.hh"
 #include "xrl_target.hh"
+#include "xrl_target3.hh"
 
 
 int

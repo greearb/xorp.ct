@@ -49,7 +49,7 @@ env.AppendUnique(LIBS = [
 
 if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
     env.AppendUnique(LIBS = [
-        'xst_ospfv3',
+        'xif_ospfv3',
         ])
 
 
