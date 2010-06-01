@@ -179,7 +179,7 @@ public:
      * still return OKAY(), but the return list should indicate the
      * error.
      */
-    static const XrlCmdError OKAY() { return XrlError::OKAY(); }
+    static const XrlCmdError& OKAY() { return _xce_ok; }
 
     /**
      * Return value when the method arguments are incorrect.
@@ -215,11 +215,12 @@ public:
     /**
      * @return note associated with origin of error (i.e., the reason).
      */
-    string note() const { return _xrl_error.note(); }
+    const string& note() const { return _xrl_error.note(); }
 
 private:
     XrlCmdError(const XrlError& xe) : _xrl_error(xe) {}
     XrlError _xrl_error;
+    static XrlCmdError _xce_ok;
 };
 
 

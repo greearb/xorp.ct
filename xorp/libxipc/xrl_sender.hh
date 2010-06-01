@@ -30,6 +30,7 @@ class XrlError;
 
 /**
  * Base for classes able to transport Xrls.
+ * See xrl_router.hh for implementor of this base class.
  */
 class XrlSender {
 public:

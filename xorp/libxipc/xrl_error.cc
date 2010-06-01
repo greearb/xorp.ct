@@ -116,3 +116,6 @@ XrlError::error_msg() const
 {
     return _errlet->error_msg();
 }
+
+
+XrlCmdError XrlCmdError::_xce_ok(XrlError::OKAY());
