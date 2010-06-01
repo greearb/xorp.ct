@@ -7,9 +7,11 @@
 #include "policy_redist6.xif"
 #include "ospfv3.xif"
 
-target ospfv3 implements	common/0.1,				\
-				raw_packet4_client/0.1,			\
-				raw_packet6_client/0.1,			\
-				policy_backend/0.1,			\
-				policy_redist6/0.1,			\
+target ospfv3 implements	common/0.1,
+				raw_packet4_client/0.1,
+#ifdef HAVE_IPV6
+				raw_packet6_client/0.1,
+#endif
+				policy_backend/0.1,
+				policy_redist6/0.1,
 				ospfv3/0.1;

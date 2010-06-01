@@ -1845,6 +1845,7 @@ public:
 	const uint32_t&	ip_protocol,
 	const IPv4&	group_address);
 
+#ifdef HAVE_IPV6
     //
     // IPv6 Raw Socket Server Interface
     //
@@ -1998,6 +1999,7 @@ public:
 	const string&	vif_name,
 	const uint32_t&	ip_protocol,
 	const IPv6&	group_address);
+#endif
 
     //
     // TCP/UDP I/O Socket Server Interface

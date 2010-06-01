@@ -50,7 +50,6 @@ env.AppendUnique(LIBS = [
     'xif_mld6igmp',
     'xif_mfea',
     'xif_fea_rawpkt4',
-    'xif_fea_rawpkt6',
     'xif_fea_ifmgr_mirror',
     'xif_fea_ifmgr_replicator',
     'xif_cli_manager',
@@ -63,6 +62,11 @@ env.AppendUnique(LIBS = [
     'xorp_core',
     'xorp_comm'
 ])
+
+if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
+    env.AppendUnique(LIBS = [
+        'xif_fea_rawpkt6',
+        ])
 
 env.Replace(RPATH = [
     env.Literal(env['xorp_module_rpath'])

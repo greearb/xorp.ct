@@ -66,7 +66,9 @@ XrlPimNode::XrlPimNode(int		family,
 	     xrl_router().finder_port()),
       _mrib_transaction_manager(eventloop),
       _xrl_fea_client4(&xrl_router()),
+#ifdef HAVE_IPV6
       _xrl_fea_client6(&xrl_router()),
+#endif
       _xrl_mfea_client(&xrl_router()),
       _xrl_rib_client(&xrl_router()),
       _xrl_mld6igmp_client(&xrl_router()),
@@ -1053,6 +1055,7 @@ XrlPimNode::send_register_unregister_receiver()
 		return;
 	}
 
+#ifdef HAVE_IPV6
 	if (PimNode::is_ipv6()) {
 	    success = _xrl_fea_client6.send_register_receiver(
 		_fea_target.c_str(),
@@ -1065,6 +1068,7 @@ XrlPimNode::send_register_unregister_receiver()
 	    if (success)
 		return;
 	}
+#endif
     } else {
 	// Unregister a receiver with the FEA
 	if (PimNode::is_ipv4()) {
@@ -1079,6 +1083,7 @@ XrlPimNode::send_register_unregister_receiver()
 		return;
 	}
 
+#ifdef HAVE_IPV6
 	if (PimNode::is_ipv6()) {
 	    success = _xrl_fea_client6.send_unregister_receiver(
 		_fea_target.c_str(),
@@ -1090,6 +1095,7 @@ XrlPimNode::send_register_unregister_receiver()
 	    if (success)
 		return;
 	}
+#endif
     }
 
     if (! success) {
@@ -1434,6 +1440,7 @@ XrlPimNode::send_join_leave_multicast_group()
 		return;
 	}
 
+#ifdef HAVE_IPV6
 	if (PimNode::is_ipv6()) {
 	    success = _xrl_fea_client6.send_join_multicast_group(
 		_fea_target.c_str(),
@@ -1446,6 +1453,7 @@ XrlPimNode::send_join_leave_multicast_group()
 	    if (success)
 		return;
 	}
+#endif
     } else {
 	// Leave a multicast group with the FEA
 	if (PimNode::is_ipv4()) {
@@ -1461,6 +1469,7 @@ XrlPimNode::send_join_leave_multicast_group()
 		return;
 	}
 
+#ifdef HAVE_IPV6
 	if (PimNode::is_ipv6()) {
 	    success = _xrl_fea_client6.send_leave_multicast_group(
 		_fea_target.c_str(),
@@ -1473,6 +1482,7 @@ XrlPimNode::send_join_leave_multicast_group()
 	    if (success)
 		return;
 	}
+#endif
     }
 
     if (! success) {
@@ -2381,6 +2391,7 @@ XrlPimNode::send_protocol_message()
 	    break;
 	}
 
+#ifdef HAVE_IPV6
 	if (PimNode::is_ipv6()) {
 	    // XXX: no Extention headers
 	    XrlAtomList ext_headers_type;
@@ -2404,8 +2415,8 @@ XrlPimNode::send_protocol_message()
 		return;
 	    break;
 	}
-
 	XLOG_UNREACHABLE();
+#endif
 	break;
     } while (false);
 

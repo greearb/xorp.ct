@@ -1,5 +1,9 @@
 /* $XORP: xorp/xrl/interfaces/fea_rawpkt6_client.xif,v 1.6 2007/05/10 22:56:59 pavlin Exp $ */
 
+#include <xorp_config.h>
+
+#ifdef HAVE_IPV6
+
 /*
  * Interface for receiving IPv6 packets on a raw socket.
  */
@@ -42,3 +46,5 @@ interface raw_packet6_client/0.1 {
 		& ext_headers_payload:list<binary>			\
 		& payload:binary;
 }
+
+#endif

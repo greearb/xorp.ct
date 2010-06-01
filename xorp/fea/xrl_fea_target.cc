@@ -3650,6 +3650,7 @@ XrlFeaTarget::raw_packet4_0_1_leave_multicast_group(
     return XrlCmdError::OKAY();
 }
 
+#ifdef HAVE_IPV6
 // ----------------------------------------------------------------------------
 // IPv6 Raw Socket related
 
@@ -3794,6 +3795,7 @@ XrlFeaTarget::raw_packet6_0_1_leave_multicast_group(
 
     return XrlCmdError::OKAY();
 }
+#endif
 
 // ----------------------------------------------------------------------------
 // TCP/UDP I/O Socket Server Interface

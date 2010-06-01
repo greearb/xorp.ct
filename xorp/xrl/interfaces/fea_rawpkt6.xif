@@ -1,5 +1,9 @@
 /* $XORP: xorp/xrl/interfaces/fea_rawpkt6.xif,v 1.7 2007/07/12 21:35:27 pavlin Exp $ */
 
+#include <xorp_config.h>
+
+#ifdef HAVE_IPV6
+
 /*
  * Interface for sending IPv6 packets on a raw socket.
  * Typically implemented by the fea.
@@ -125,3 +129,6 @@ interface raw_packet6/0.1 {
 				& ip_protocol:u32			\
 				& group_address:ipv6;
 }
+
+
+#endif

@@ -37,7 +37,9 @@
 
 #include "xrl/interfaces/finder_event_notifier_xif.hh"
 #include "xrl/interfaces/fea_rawpkt4_xif.hh"
+#ifdef HAVE_IPV6
 #include "xrl/interfaces/fea_rawpkt6_xif.hh"
+#endif
 #include "xrl/interfaces/mfea_xif.hh"
 #include "xrl/interfaces/rib_xif.hh"
 #include "xrl/interfaces/mld6igmp_xif.hh"
@@ -2540,7 +2542,9 @@ private:
 
     TransactionManager		_mrib_transaction_manager;
     XrlRawPacket4V0p1Client	_xrl_fea_client4;
+#ifdef HAVE_IPV6
     XrlRawPacket6V0p1Client	_xrl_fea_client6;
+#endif
     XrlMfeaV0p1Client		_xrl_mfea_client;
     XrlRibV0p1Client		_xrl_rib_client;
     XrlMld6igmpV0p1Client	_xrl_mld6igmp_client;

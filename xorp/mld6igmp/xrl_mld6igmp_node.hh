@@ -33,7 +33,9 @@
 
 #include "xrl/interfaces/finder_event_notifier_xif.hh"
 #include "xrl/interfaces/fea_rawpkt4_xif.hh"
+#ifdef HAVE_IPV6
 #include "xrl/interfaces/fea_rawpkt6_xif.hh"
+#endif
 #include "xrl/interfaces/cli_manager_xif.hh"
 #include "xrl/interfaces/mld6igmp_client_xif.hh"
 #include "xrl/targets/mld6igmp_base.hh"
@@ -956,7 +958,9 @@ private:
     IfMgrXrlMirror		_ifmgr;
 
     XrlRawPacket4V0p1Client	_xrl_fea_client4;
+#ifdef HAVE_IPV6
     XrlRawPacket6V0p1Client	_xrl_fea_client6;
+#endif
     XrlMld6igmpClientV0p1Client	_xrl_mld6igmp_client_client;
     XrlCliManagerV0p1Client	_xrl_cli_manager_client;
     XrlFinderEventNotifierV0p1Client	_xrl_finder_client;

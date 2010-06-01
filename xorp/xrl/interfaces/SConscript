@@ -50,8 +50,6 @@ xifs = [
     'fea_rawlink.xif',
     'fea_rawpkt4_client.xif',
     'fea_rawpkt4.xif',
-    'fea_rawpkt6_client.xif',
-    'fea_rawpkt6.xif',
     'fib2mrib.xif',
     'finder_client.xif',
     'finder_event_notifier.xif',
@@ -96,6 +94,8 @@ if env['enable_olsr']:
 if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
     xifs.append('socket6.xif')
     xifs.append('socket6_user.xif')
+    xifs.append('fea_rawpkt6_client.xif')
+    xifs.append('fea_rawpkt6.xif')
 
 if not (env.has_key('disable_fw') and env['disable_fw']):
     xifs.append('fea_firewall.xif')
