@@ -1,4 +1,3 @@
-/* $XORP: xorp/xrl/targets/ripng.tgt,v 1.7 2007/07/12 21:39:28 pavlin Exp $ */
 
 #include "common.xif"
 #include "finder_event_observer.xif"

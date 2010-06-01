@@ -9,7 +9,7 @@
 
 Summary:          An eXtensible Open Router Platform (XORP)
 Name:             xorp-ct
-Version:          1.7
+Version:          1.8-CT
 Release:          WIP.1%{?dist}%{?pext}
 License:          GPL
 Group:            System Environment/Daemons
@@ -166,5 +166,6 @@ fi
 
 
 %changelog
+* Jun 1 2010 Ben Greear <greearb@candelatech.com> ct-1.8-CT
 * Sun Mar 14 2010 Achmad Basuki <abazh@soi.asia> - ct-1.7-WIP.1
 - Initial build of xorp.ct

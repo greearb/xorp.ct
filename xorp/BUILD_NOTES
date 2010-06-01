@@ -304,7 +304,8 @@ scons check
 ==========
 
   * It is difficult to get distributions older than Fedora Core 5
-    to compile XORP 1.7, primarily due to scons and python dependencies.
+    to compile XORP 1.7 and above, primarily due to scons and
+    python dependencies.
 
   * Linux Red Hat Enterprise Linux Server release 5 (Tikanga)
     (kernel 2.6.18-8.el5)
@@ -498,7 +499,8 @@ scons check
 
 3.6. Mac OS X
 =============
-  * NOTE:  I have no idea if XORP 1.7 on Mac OS X compiles at all. --Ben
+  * NOTE:  I have no idea if XORP 1.7 and above on Mac OS X compiles
+    at all. --Ben
 
   * All:
     - Unicast routing appears to work.

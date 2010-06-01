@@ -1,4 +1,3 @@
-/* $XORP: xorp/xrl/targets/bgp.tgt,v 1.7 2007/07/12 21:39:27 pavlin Exp $ */
 
 #include "common.xif"
 #include "bgp.xif"

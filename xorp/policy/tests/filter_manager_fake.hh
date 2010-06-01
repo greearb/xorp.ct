@@ -17,7 +17,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/policy/test/filter_manager_fake.hh,v 1.7 2008/10/02 21:58:09 bms Exp $
 
 #ifndef __POLICY_TEST_FILTER_MANAGER_FAKE_HH__
 #define __POLICY_TEST_FILTER_MANAGER_FAKE_HH__

@@ -17,7 +17,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/pim/pim_node.hh,v 1.70 2008/10/02 21:57:54 bms Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__

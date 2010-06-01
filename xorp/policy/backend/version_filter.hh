@@ -18,7 +18,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/policy/backend/version_filter.hh,v 1.7 2008/10/02 21:58:05 bms Exp $
 
 #ifndef __POLICY_BACKEND_VERSION_FILTER_HH__
 #define __POLICY_BACKEND_VERSION_FILTER_HH__

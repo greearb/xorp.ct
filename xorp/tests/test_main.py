@@ -17,8 +17,6 @@
 # XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 # http://xorp.net
 
-# $XORP: xorp/tests/test_main.py,v 1.7 2008/10/02 21:58:30 bms Exp $
-
 # A common main to be used by all test programs plus the entry point into
 # running the tests.
 

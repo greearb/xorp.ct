@@ -17,7 +17,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/fea/fea_io.hh,v 1.7 2008/10/02 21:56:45 bms Exp $
 
 
 #ifndef __FEA_FEA_IO_HH__

@@ -1,10 +1,6 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/utils/xorpc.sh,v 1.7 2002/12/09 11:13:07 pavlin Exp $
-#
-
-#
 # Create ssh tunnels to all peripherals connected via xorpc which provide
 # a HTTP interface.
 # Atanu.

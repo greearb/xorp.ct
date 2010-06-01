@@ -17,7 +17,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/rib/profile_vars.hh,v 1.7 2008/10/02 21:58:10 bms Exp $
 
 #ifndef __RIB_PROFILE_VARS_HH__
 #define __RIB_PROFILE_VARS_HH__

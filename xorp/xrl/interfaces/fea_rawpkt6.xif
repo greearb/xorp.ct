@@ -1,4 +1,3 @@
-/* $XORP: xorp/xrl/interfaces/fea_rawpkt6.xif,v 1.7 2007/07/12 21:35:27 pavlin Exp $ */
 
 #include <xorp_config.h>
 
