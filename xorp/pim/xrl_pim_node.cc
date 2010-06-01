@@ -786,6 +786,7 @@ XrlPimNode::send_rib_redist_transaction_enable()
 		return;
 	}
 
+#ifdef HAVE_IPV6
 	if (PimNode::is_ipv6()) {
 	    success = _xrl_rib_client.send_redist_transaction_enable6(
 		_rib_target.c_str(),
@@ -799,6 +800,7 @@ XrlPimNode::send_rib_redist_transaction_enable()
 	    if (success)
 		return;
 	}
+#endif
     }
 
     if (! success) {
@@ -902,6 +904,7 @@ XrlPimNode::send_rib_redist_transaction_disable()
 		success = false;
 	}
 
+#ifdef HAVE_IPV6
 	if (PimNode::is_ipv6()) {
 	    bool success6;
 	    success6 = _xrl_rib_client.send_redist_transaction_disable6(
@@ -915,6 +918,7 @@ XrlPimNode::send_rib_redist_transaction_disable()
 	    if (success6 != true)
 		success = false;
 	}
+#endif
     }
 
     if (! success) {
