@@ -2925,7 +2925,7 @@ XrlPimNode::raw_packet4_client_0_1_recv(
     //
     return XrlCmdError::OKAY();
 }
-
+#ifdef HAVE_IPV6
 XrlCmdError
 XrlPimNode::raw_packet6_client_0_1_recv(
     // Input values,
@@ -2978,7 +2978,7 @@ XrlPimNode::raw_packet6_client_0_1_recv(
     //
     return XrlCmdError::OKAY();
 }
-
+#endif
 XrlCmdError
 XrlPimNode::mfea_client_0_1_recv_kernel_signal_message4(
     // Input values, 
@@ -3019,7 +3019,7 @@ XrlPimNode::mfea_client_0_1_recv_kernel_signal_message4(
     //
     return XrlCmdError::OKAY();
 }
-
+#ifdef HAVE_IPV6
 XrlCmdError
 XrlPimNode::mfea_client_0_1_recv_kernel_signal_message6(
     // Input values, 
@@ -3060,7 +3060,7 @@ XrlPimNode::mfea_client_0_1_recv_kernel_signal_message6(
     //
     return XrlCmdError::OKAY();
 }
-
+#endif
 XrlCmdError
 XrlPimNode::mfea_client_0_1_recv_dataflow_signal4(
     // Input values, 
@@ -3113,7 +3113,7 @@ XrlPimNode::mfea_client_0_1_recv_dataflow_signal4(
     // XXX: we don't care if the signal delivery failed
     return XrlCmdError::OKAY();
 }
-
+#ifdef HAVE_IPV6
 XrlCmdError
 XrlPimNode::mfea_client_0_1_recv_dataflow_signal6(
     // Input values, 
@@ -3166,7 +3166,7 @@ XrlPimNode::mfea_client_0_1_recv_dataflow_signal6(
     // XXX: we don't care if the signal delivery failed
     return XrlCmdError::OKAY();
 }
-
+#endif
 XrlCmdError
 XrlPimNode::redist_transaction4_0_1_start_transaction(
     // Output values, 
@@ -3376,7 +3376,7 @@ XrlPimNode::redist_transaction4_0_1_delete_all_routes(
     //
     return XrlCmdError::OKAY();
 }
-
+#ifdef HAVE_IPV6
 XrlCmdError
 XrlPimNode::redist_transaction6_0_1_start_transaction(
     // Output values, 
@@ -3401,7 +3401,7 @@ XrlPimNode::redist_transaction6_0_1_start_transaction(
     
     return XrlCmdError::OKAY();
 }
-
+#endif
 XrlCmdError
 XrlPimNode::redist_transaction6_0_1_commit_transaction(
     // Input values, 

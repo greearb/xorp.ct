@@ -17,9 +17,9 @@ target pim implements		common/0.1,
 				raw_packet4_client/0.1,
 #ifdef HAVE_IPV6
 				raw_packet6_client/0.1,
+				redist_transaction6/0.1,
 #endif
 				mfea_client/0.1,
 				redist_transaction4/0.1,
-				redist_transaction6/0.1,
 				mld6igmp_client/0.1,
 				pim/0.1;

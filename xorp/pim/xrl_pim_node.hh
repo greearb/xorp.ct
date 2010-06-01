@@ -252,7 +252,7 @@ protected:
 	const bool&	ip_router_alert,
 	const bool&	ip_internet_control,
 	const vector<uint8_t>&	payload);
-
+    #ifdef HAVE_IPV6
     /**
      *  Receive an IPv6 packet from a raw socket.
      *
@@ -298,7 +298,7 @@ protected:
 	const XrlAtomList&	ext_headers_type,
 	const XrlAtomList&	ext_headers_payload,
 	const vector<uint8_t>&	payload);
-    
+    #endif
     /**
      *  
      *  Receive a kernel signal message from the MFEA.
@@ -327,7 +327,7 @@ protected:
 	const IPv4&	source_address, 
 	const IPv4&	dest_address, 
 	const vector<uint8_t>&	protocol_message);
-
+    #ifdef HAVE_IPV6
     XrlCmdError mfea_client_0_1_recv_kernel_signal_message6(
 	// Input values, 
 	const string&	xrl_sender_name, 
@@ -337,7 +337,7 @@ protected:
 	const IPv6&	source_address, 
 	const IPv6&	dest_address, 
 	const vector<uint8_t>&	protocol_message);
-    
+    #endif
     /**
      *  A signal that a dataflow-related pre-condition is true.
      *  
@@ -396,7 +396,7 @@ protected:
 	const bool&	is_threshold_in_bytes, 
 	const bool&	is_geq_upcall, 
 	const bool&	is_leq_upcall);
-
+    #ifdef HAVE_IPV6
     XrlCmdError mfea_client_0_1_recv_dataflow_signal6(
 	// Input values, 
 	const string&	xrl_sender_name, 
@@ -414,7 +414,7 @@ protected:
 	const bool&	is_threshold_in_bytes, 
 	const bool&	is_geq_upcall, 
 	const bool&	is_leq_upcall);
-
+    #endif
     /**
      *  Start transaction.
      *
@@ -502,7 +502,7 @@ protected:
 	// Input values,
 	const uint32_t&	tid,
 	const string&	cookie);
-
+    #ifdef HAVE_IPV6
     /**
      *  Start transaction.
      *
@@ -511,7 +511,7 @@ protected:
     XrlCmdError redist_transaction6_0_1_start_transaction(
 	// Output values,
 	uint32_t&	tid);
-
+    #endif 
     /**
      *  Commit transaction.
      *
