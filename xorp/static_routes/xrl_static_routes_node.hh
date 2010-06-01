@@ -499,10 +499,14 @@ private:
     void finder_deregister_interest_rib_cb(const XrlError& xrl_error);
     void send_rib_add_tables();
     void rib_client_send_add_igp_table4_cb(const XrlError& xrl_error);
+#ifdef HAVE_IPV6
     void rib_client_send_add_igp_table6_cb(const XrlError& xrl_error);
+#endif
     void send_rib_delete_tables();
     void rib_client_send_delete_igp_table4_cb(const XrlError& xrl_error);
+#ifdef HAVE_IPV6
     void rib_client_send_delete_igp_table6_cb(const XrlError& xrl_error);
+#endif
 
     /**
      * Inform the RIB about a route change.
@@ -548,7 +552,9 @@ private:
     bool		_is_rib_registering;
     bool		_is_rib_deregistering;
     bool		_is_rib_igp_table4_registered;
+#ifdef HAVE_IPV6
     bool		_is_rib_igp_table6_registered;
+#endif
     XorpTimer		_rib_register_startup_timer;
     XorpTimer		_rib_register_shutdown_timer;
     XorpTimer		_rib_igp_table_registration_timer;
