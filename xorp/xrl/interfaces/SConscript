@@ -83,8 +83,6 @@ xifs = [
     'rtrmgr.xif',
     'socket4_user.xif',
     'socket4.xif',
-    'socket6_user.xif',
-    'socket6.xif',
     'static_routes.xif',
     'test_peer.xif',
     'test.xif',
@@ -94,6 +92,10 @@ xifs = [
 
 if env['enable_olsr']:
     xifs.append('olsr4.xif')
+
+if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
+    xifs.append('socket6.xif')
+    xifs.append('socket6_user.xif')
 
 if not (env.has_key('disable_fw') and env['disable_fw']):
     xifs.append('fea_firewall.xif')

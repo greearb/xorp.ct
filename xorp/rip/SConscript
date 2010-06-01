@@ -204,8 +204,14 @@ e.PrependUnique(LIBS = [
     'xorp_comm',
     'xorp_core',
     'xorp_ripng',
-    'xif_socket6',
     ])
+
+
+if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
+    e.PrependUnique(LIBS = [
+        'xif_socket6',
+        ])
+
 
 e.Replace(RPATH = [
     e.Literal(e['xorp_module_rpath'])

@@ -1,5 +1,10 @@
 /* $XORP: xorp/xrl/interfaces/socket6.xif,v 1.14 2008/04/23 15:22:41 bms Exp $ */
 
+#include <xorp_config.h>
+
+#ifdef HAVE_IPV6
+
+
 /**
  * Interface implementing basic IPv6 socket functionality.  This interface
  * provides methods for creating and binding sockets, sending data on
@@ -276,3 +281,5 @@ interface socket6/0.1 {
 				& optname:txt				\
 				& optval:u32;
 }
+
+#endif
