@@ -68,15 +68,6 @@ public:
     void process_fib_changes(const list<Fte4>& fte_list);
 
     /**
-     * Process a list of IPv6 FIB route changes.
-     * 
-     * The FIB route changes come from the underlying system.
-     * 
-     * @param fte_list the list of Fte entries to add or delete.
-     */
-    void process_fib_changes(const list<Fte6>& fte_list);
-
-    /**
      * Add an IPv4 FIB client.
      *
      * @param client_target_name the target name of the client to add.
@@ -87,6 +78,59 @@ public:
     XrlCmdError add_fib_client4(const string& client_target_name,
 				const bool send_updates,
 				const bool send_resolves);
+
+    /**
+     * Delete an IPv4 FIB client.
+     * 
+     * @param client_target_name the target name of the client to delete.
+     * @return the XRL command error.
+     */
+    XrlCmdError delete_fib_client4(const string& client_target_name);
+
+    /**
+     * Send an XRL to a FIB client to add an IPv4 route.
+     *
+     * @param target_name the target name of the FIB client.
+     * @param fte the Fte with the route information to add.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @see Fte4.
+     */
+    int send_fib_client_add_route(const string& target_name,
+				  const Fte4& fte);
+
+    /**
+     * Send an XRL to a FIB client to delete an IPv4 route.
+     *
+     * @param target_name the target name of the FIB client.
+     * @param fte the Fte with the route information to delete.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @see Fte4.
+     */
+    int send_fib_client_delete_route(const string& target_name,
+				     const Fte4& fte);
+
+    /**
+     * Send an XRL to a FIB client to inform it of an IPv4 route miss.
+     *
+     * @param target_name the target name of the FIB client.
+     * @param fte the Fte with the destination to resolve.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @see Fte4.
+     */
+    int send_fib_client_resolve_route(const string& target_name,
+				     const Fte4& fte);
+
+
+#ifdef HAVE_IPV6
+
+    /**
+     * Process a list of IPv6 FIB route changes.
+     * 
+     * The FIB route changes come from the underlying system.
+     * 
+     * @param fte_list the list of Fte entries to add or delete.
+     */
+    void process_fib_changes(const list<Fte6>& fte_list);
 
     /**
      * Add an IPv6 FIB client.
@@ -101,31 +145,12 @@ public:
 				const bool send_resolves);
 
     /**
-     * Delete an IPv4 FIB client.
-     * 
-     * @param client_target_name the target name of the client to delete.
-     * @return the XRL command error.
-     */
-    XrlCmdError delete_fib_client4(const string& client_target_name);
-
-    /**
      * Delete an IPv6 FIB client.
      * 
      * @param client_target_name the target name of the client to delete.
      * @return the XRL command error.
      */
     XrlCmdError delete_fib_client6(const string& client_target_name);
-
-    /**
-     * Send an XRL to a FIB client to add an IPv4 route.
-     *
-     * @param target_name the target name of the FIB client.
-     * @param fte the Fte with the route information to add.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     * @see Fte4.
-     */
-    int send_fib_client_add_route(const string& target_name,
-				  const Fte4& fte);
 
     /**
      * Send an XRL to a FIB client to add an IPv6 route.
@@ -138,16 +163,6 @@ public:
     int send_fib_client_add_route(const string& target_name,
 				  const Fte6& fte);
 
-    /**
-     * Send an XRL to a FIB client to delete an IPv4 route.
-     *
-     * @param target_name the target name of the FIB client.
-     * @param fte the Fte with the route information to delete.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     * @see Fte4.
-     */
-    int send_fib_client_delete_route(const string& target_name,
-				     const Fte4& fte);
 
     /**
      * Send an XRL to a FIB client to delete an IPv6 route.
@@ -161,17 +176,6 @@ public:
 				     const Fte6& fte);
 
     /**
-     * Send an XRL to a FIB client to inform it of an IPv4 route miss.
-     *
-     * @param target_name the target name of the FIB client.
-     * @param fte the Fte with the destination to resolve.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     * @see Fte4.
-     */
-    int send_fib_client_resolve_route(const string& target_name,
-				     const Fte4& fte);
-
-    /**
      * Send an XRL to a FIB client to inform it of an IPv6 route miss.
      *
      * @param target_name the target name of the FIB client.
@@ -182,6 +186,8 @@ public:
     int send_fib_client_resolve_route(const string& target_name,
 				     const Fte6& fte);
 
+#endif
+
 protected:
     FibConfig&		_fibconfig;
 
@@ -189,16 +195,18 @@ private:
 
     void send_fib_client_add_route4_cb(const XrlError& xrl_error,
 				       string target_name);
-    void send_fib_client_add_route6_cb(const XrlError& xrl_error,
-				       string target_name);
     void send_fib_client_delete_route4_cb(const XrlError& xrl_error,
-					  string target_name);
-    void send_fib_client_delete_route6_cb(const XrlError& xrl_error,
 					  string target_name);
     void send_fib_client_resolve_route4_cb(const XrlError& xrl_error,
 					  string target_name);
+#ifdef HAVE_IPV6
+    void send_fib_client_delete_route6_cb(const XrlError& xrl_error,
+					  string target_name);
+    void send_fib_client_add_route6_cb(const XrlError& xrl_error,
+				       string target_name);
     void send_fib_client_resolve_route6_cb(const XrlError& xrl_error,
 					  string target_name);
+#endif
 
     /**
      * A template class for storing FIB client information.
@@ -233,10 +241,12 @@ private:
     };
 
     typedef FibClient<Fte4>	FibClient4;
-    typedef FibClient<Fte6>	FibClient6;
-
     map<string, FibClient4>	_fib_clients4;
+
+#ifdef HAVE_IPV6
+    typedef FibClient<Fte6>	FibClient6;
     map<string, FibClient6>	_fib_clients6;
+#endif
 
     XrlFeaFibClientV0p1Client	_xrl_fea_fib_client;
 };

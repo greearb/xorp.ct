@@ -46,23 +46,6 @@ XrlFibClientManager::process_fib_changes(const list<Fte4>& fte_list)
     }
 }
 
-/**
- * Process a list of IPv6 FIB route changes.
- * 
- * The FIB route changes come from the underlying system.
- * 
- * @param fte_list the list of Fte entries to add or delete.
- */
-void
-XrlFibClientManager::process_fib_changes(const list<Fte6>& fte_list)
-{
-    map<string, FibClient6>::iterator iter;
-
-    for (iter = _fib_clients6.begin(); iter != _fib_clients6.end(); ++iter) {
-	FibClient6& fib_client = iter->second;
-	fib_client.activate(fte_list);
-    }
-}
 
 XrlCmdError
 XrlFibClientManager::add_fib_client4(const string& client_target_name,
@@ -95,36 +78,6 @@ XrlFibClientManager::add_fib_client4(const string& client_target_name,
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError
-XrlFibClientManager::add_fib_client6(const string& client_target_name,
-				     const bool send_updates,
-				     const bool send_resolves)
-{
-    // Test if we have this client already
-    if (_fib_clients6.find(client_target_name) != _fib_clients6.end()) {
-	string error_msg = c_format("Target %s is already an IPv6 FIB client",
-				    client_target_name.c_str());
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    // Add the client
-    _fib_clients6.insert(make_pair(client_target_name,
-				   FibClient6(client_target_name, *this)));
-    FibClient6& fib_client = _fib_clients6.find(client_target_name)->second;
-
-    fib_client.set_send_updates(send_updates);
-    fib_client.set_send_resolves(send_resolves);
-
-    // Activate the client
-    list<Fte6> fte_list;
-    if (_fibconfig.get_table6(fte_list) != XORP_OK) {
-	string error_msg = "Cannot get the IPv6 FIB";
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    fib_client.activate(fte_list);
-
-    return XrlCmdError::OKAY();
-}
 
 XrlCmdError
 XrlFibClientManager::delete_fib_client4(const string& client_target_name)
@@ -139,23 +92,6 @@ XrlFibClientManager::delete_fib_client4(const string& client_target_name)
     }
 
     _fib_clients4.erase(iter);
-
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlFibClientManager::delete_fib_client6(const string& client_target_name)
-{
-    map<string, FibClient6>::iterator iter;
-
-    iter = _fib_clients6.find(client_target_name);
-    if (iter == _fib_clients6.end()) {
-	string error_msg = c_format("Target %s is not an IPv6 FIB client",
-				    client_target_name.c_str());
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    _fib_clients6.erase(iter);
 
     return XrlCmdError::OKAY();
 }
@@ -187,32 +123,6 @@ XrlFibClientManager::send_fib_client_add_route(const string& target_name,
 }
 
 int
-XrlFibClientManager::send_fib_client_add_route(const string& target_name,
-					       const Fte6& fte)
-{
-    bool success;
-
-    success = _xrl_fea_fib_client.send_add_route6(
-	target_name.c_str(),
-	fte.net(),
-	fte.nexthop(),
-	fte.ifname(),
-	fte.vifname(),
-	fte.metric(),
-	fte.admin_distance(),
-	string("NOT_SUPPORTED"),
-	fte.xorp_route(),
-	callback(this,
-		 &XrlFibClientManager::send_fib_client_add_route6_cb,
-		 target_name));
-
-    if (success)
-	return XORP_OK;
-    else
-	return XORP_ERROR;
-}
-
-int
 XrlFibClientManager::send_fib_client_delete_route(const string& target_name,
 						  const Fte4& fte)
 {
@@ -225,27 +135,6 @@ XrlFibClientManager::send_fib_client_delete_route(const string& target_name,
 	fte.vifname(),
 	callback(this,
 		 &XrlFibClientManager::send_fib_client_delete_route4_cb,
-		 target_name));
-
-    if (success)
-	return XORP_OK;
-    else
-	return XORP_ERROR;
-}
-
-int
-XrlFibClientManager::send_fib_client_delete_route(const string& target_name,
-						  const Fte6& fte)
-{
-    bool success;
-
-    success = _xrl_fea_fib_client.send_delete_route6(
-	target_name.c_str(),
-	fte.net(),
-	fte.ifname(),
-	fte.vifname(),
-	callback(this,
-		 &XrlFibClientManager::send_fib_client_delete_route6_cb,
 		 target_name));
 
     if (success)
@@ -273,25 +162,6 @@ XrlFibClientManager::send_fib_client_resolve_route(const string& target_name,
 	return XORP_ERROR;
 }
 
-int
-XrlFibClientManager::send_fib_client_resolve_route(const string& target_name,
-						   const Fte6& fte)
-{
-    bool success;
-
-    success = _xrl_fea_fib_client.send_resolve_route6(
-	target_name.c_str(),
-	fte.net(),
-	callback(this,
-		 &XrlFibClientManager::send_fib_client_resolve_route6_cb,
-		 target_name));
-
-    if (success)
-	return XORP_OK;
-    else
-	return XORP_ERROR;
-}
-
 void
 XrlFibClientManager::send_fib_client_add_route4_cb(const XrlError& xrl_error,
 						   string target_name)
@@ -305,22 +175,6 @@ XrlFibClientManager::send_fib_client_add_route4_cb(const XrlError& xrl_error,
     }
 
     FibClient4& fib_client = iter->second;
-    fib_client.send_fib_client_route_change_cb(xrl_error);
-}
-
-void
-XrlFibClientManager::send_fib_client_add_route6_cb(const XrlError& xrl_error,
-						   string target_name)
-{
-    map<string, FibClient6>::iterator iter;
-
-    iter = _fib_clients6.find(target_name);
-    if (iter == _fib_clients6.end()) {
-	// The client has probably gone. Silently ignore.
-	return;
-    }
-
-    FibClient6& fib_client = iter->second;
     fib_client.send_fib_client_route_change_cb(xrl_error);
 }
 
@@ -342,23 +196,6 @@ XrlFibClientManager::send_fib_client_delete_route4_cb(
 }
 
 void
-XrlFibClientManager::send_fib_client_delete_route6_cb(
-    const XrlError& xrl_error,
-    string target_name)
-{
-    map<string, FibClient6>::iterator iter;
-
-    iter = _fib_clients6.find(target_name);
-    if (iter == _fib_clients6.end()) {
-	// The client has probably gone. Silently ignore.
-	return;
-    }
-
-    FibClient6& fib_client = iter->second;
-    fib_client.send_fib_client_route_change_cb(xrl_error);
-}
-
-void
 XrlFibClientManager::send_fib_client_resolve_route4_cb(
     const XrlError& xrl_error,
     string target_name)
@@ -372,23 +209,6 @@ XrlFibClientManager::send_fib_client_resolve_route4_cb(
     }
 
     FibClient4& fib_client = iter->second;
-    fib_client.send_fib_client_route_change_cb(xrl_error);
-}
-
-void
-XrlFibClientManager::send_fib_client_resolve_route6_cb(
-    const XrlError& xrl_error,
-    string target_name)
-{
-    map<string, FibClient6>::iterator iter;
-
-    iter = _fib_clients6.find(target_name);
-    if (iter == _fib_clients6.end()) {
-	// The client has probably gone. Silently ignore.
-	return;
-    }
-
-    FibClient6& fib_client = iter->second;
     fib_client.send_fib_client_route_change_cb(xrl_error);
 }
 
@@ -512,4 +332,198 @@ XrlFibClientManager::FibClient<F>::send_fib_client_route_change_cb(
 }
 
 template class XrlFibClientManager::FibClient<Fte4>;
+
+
+#ifdef HAVE_IPV6
+
+/**
+ * Process a list of IPv6 FIB route changes.
+ * 
+ * The FIB route changes come from the underlying system.
+ * 
+ * @param fte_list the list of Fte entries to add or delete.
+ */
+void
+XrlFibClientManager::process_fib_changes(const list<Fte6>& fte_list)
+{
+    map<string, FibClient6>::iterator iter;
+
+    for (iter = _fib_clients6.begin(); iter != _fib_clients6.end(); ++iter) {
+	FibClient6& fib_client = iter->second;
+	fib_client.activate(fte_list);
+    }
+}
+
+XrlCmdError
+XrlFibClientManager::add_fib_client6(const string& client_target_name,
+				     const bool send_updates,
+				     const bool send_resolves)
+{
+    // Test if we have this client already
+    if (_fib_clients6.find(client_target_name) != _fib_clients6.end()) {
+	string error_msg = c_format("Target %s is already an IPv6 FIB client",
+				    client_target_name.c_str());
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    // Add the client
+    _fib_clients6.insert(make_pair(client_target_name,
+				   FibClient6(client_target_name, *this)));
+    FibClient6& fib_client = _fib_clients6.find(client_target_name)->second;
+
+    fib_client.set_send_updates(send_updates);
+    fib_client.set_send_resolves(send_resolves);
+
+    // Activate the client
+    list<Fte6> fte_list;
+    if (_fibconfig.get_table6(fte_list) != XORP_OK) {
+	string error_msg = "Cannot get the IPv6 FIB";
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    fib_client.activate(fte_list);
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFibClientManager::delete_fib_client6(const string& client_target_name)
+{
+    map<string, FibClient6>::iterator iter;
+
+    iter = _fib_clients6.find(client_target_name);
+    if (iter == _fib_clients6.end()) {
+	string error_msg = c_format("Target %s is not an IPv6 FIB client",
+				    client_target_name.c_str());
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    _fib_clients6.erase(iter);
+
+    return XrlCmdError::OKAY();
+}
+
+
+int
+XrlFibClientManager::send_fib_client_add_route(const string& target_name,
+					       const Fte6& fte)
+{
+    bool success;
+
+    success = _xrl_fea_fib_client.send_add_route6(
+	target_name.c_str(),
+	fte.net(),
+	fte.nexthop(),
+	fte.ifname(),
+	fte.vifname(),
+	fte.metric(),
+	fte.admin_distance(),
+	string("NOT_SUPPORTED"),
+	fte.xorp_route(),
+	callback(this,
+		 &XrlFibClientManager::send_fib_client_add_route6_cb,
+		 target_name));
+
+    if (success)
+	return XORP_OK;
+    else
+	return XORP_ERROR;
+}
+
+
+int
+XrlFibClientManager::send_fib_client_delete_route(const string& target_name,
+						  const Fte6& fte)
+{
+    bool success;
+
+    success = _xrl_fea_fib_client.send_delete_route6(
+	target_name.c_str(),
+	fte.net(),
+	fte.ifname(),
+	fte.vifname(),
+	callback(this,
+		 &XrlFibClientManager::send_fib_client_delete_route6_cb,
+		 target_name));
+
+    if (success)
+	return XORP_OK;
+    else
+	return XORP_ERROR;
+}
+
+
+int
+XrlFibClientManager::send_fib_client_resolve_route(const string& target_name,
+						   const Fte6& fte)
+{
+    bool success;
+
+    success = _xrl_fea_fib_client.send_resolve_route6(
+	target_name.c_str(),
+	fte.net(),
+	callback(this,
+		 &XrlFibClientManager::send_fib_client_resolve_route6_cb,
+		 target_name));
+
+    if (success)
+	return XORP_OK;
+    else
+	return XORP_ERROR;
+}
+
+
+void
+XrlFibClientManager::send_fib_client_add_route6_cb(const XrlError& xrl_error,
+						   string target_name)
+{
+    map<string, FibClient6>::iterator iter;
+
+    iter = _fib_clients6.find(target_name);
+    if (iter == _fib_clients6.end()) {
+	// The client has probably gone. Silently ignore.
+	return;
+    }
+
+    FibClient6& fib_client = iter->second;
+    fib_client.send_fib_client_route_change_cb(xrl_error);
+}
+
+
+void
+XrlFibClientManager::send_fib_client_delete_route6_cb(
+    const XrlError& xrl_error,
+    string target_name)
+{
+    map<string, FibClient6>::iterator iter;
+
+    iter = _fib_clients6.find(target_name);
+    if (iter == _fib_clients6.end()) {
+	// The client has probably gone. Silently ignore.
+	return;
+    }
+
+    FibClient6& fib_client = iter->second;
+    fib_client.send_fib_client_route_change_cb(xrl_error);
+}
+
+
+void
+XrlFibClientManager::send_fib_client_resolve_route6_cb(
+    const XrlError& xrl_error,
+    string target_name)
+{
+    map<string, FibClient6>::iterator iter;
+
+    iter = _fib_clients6.find(target_name);
+    if (iter == _fib_clients6.end()) {
+	// The client has probably gone. Silently ignore.
+	return;
+    }
+
+    FibClient6& fib_client = iter->second;
+    fib_client.send_fib_client_route_change_cb(xrl_error);
+}
+
 template class XrlFibClientManager::FibClient<Fte6>;
+
+#endif

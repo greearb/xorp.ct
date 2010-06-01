@@ -800,6 +800,7 @@ public:
      */
     virtual void process_fib_changes(const list<Fte4>& fte_list) = 0;
 
+#ifdef HAVE_IPV6
     /**
      * Process a list of IPv6 FIB route changes.
      * 
@@ -808,6 +809,7 @@ public:
      * @param fte_list the list of Fte entries to add or delete.
      */
     virtual void process_fib_changes(const list<Fte6>& fte_list) = 0;
+#endif
 
 private:
 };

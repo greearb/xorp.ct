@@ -350,12 +350,6 @@ public:
 	const bool&	send_updates,
 	const bool&	send_resolves);
 
-    XrlCmdError fea_fib_0_1_add_fib_client6(
-	// Input values,
-	const string&	client_target_name,
-	const bool&	send_updates,
-	const bool&	send_resolves);
-
     /**
      *  Delete a FIB client.
      *
@@ -365,9 +359,18 @@ public:
 	// Input values,
 	const string&	client_target_name);
 
+
+#ifdef HAVE_IPV6
+    XrlCmdError fea_fib_0_1_add_fib_client6(
+	// Input values,
+	const string&	client_target_name,
+	const bool&	send_updates,
+	const bool&	send_resolves);
+
     XrlCmdError fea_fib_0_1_delete_fib_client6(
 	// Input values,
 	const string&	client_target_name);
+#endif
 
     //
     // FEA firewall interface

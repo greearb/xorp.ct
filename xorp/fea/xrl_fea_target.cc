@@ -757,17 +757,6 @@ XrlFeaTarget::fea_fib_0_1_add_fib_client4(
 						   send_resolves);
 }
 
-XrlCmdError
-XrlFeaTarget::fea_fib_0_1_add_fib_client6(
-    // Input values,
-    const string&	client_target_name,
-    const bool&		send_updates,
-    const bool&		send_resolves)
-{
-    return _xrl_fib_client_manager.add_fib_client6(client_target_name,
-						   send_updates,
-						   send_resolves);
-}
 
 /**
  *  Delete a FIB client.
@@ -782,6 +771,20 @@ XrlFeaTarget::fea_fib_0_1_delete_fib_client4(
     return _xrl_fib_client_manager.delete_fib_client4(client_target_name);
 }
 
+
+#ifdef HAVE_IPV6
+XrlCmdError
+XrlFeaTarget::fea_fib_0_1_add_fib_client6(
+    // Input values,
+    const string&	client_target_name,
+    const bool&		send_updates,
+    const bool&		send_resolves)
+{
+    return _xrl_fib_client_manager.add_fib_client6(client_target_name,
+						   send_updates,
+						   send_resolves);
+}
+
 XrlCmdError
 XrlFeaTarget::fea_fib_0_1_delete_fib_client6(
     // Input values,
@@ -789,6 +792,7 @@ XrlFeaTarget::fea_fib_0_1_delete_fib_client6(
 {
     return _xrl_fib_client_manager.delete_fib_client6(client_target_name);
 }
+#endif
 
 XrlCmdError
 XrlFeaTarget::fea_firewall_0_1_start_transaction(

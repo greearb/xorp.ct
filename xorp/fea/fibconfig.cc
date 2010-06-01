@@ -1450,7 +1450,9 @@ FibConfig::propagate_fib_changes(const list<FteX>& fte_list,
 				 const FibConfigTableObserver* fibconfig_table_observer)
 {
     list<Fte4> fte_list4;
+#ifdef HAVE_IPV6
     list<Fte6> fte_list6;
+#endif
     list<FteX>::const_iterator ftex_iter;
 
     //
@@ -1476,11 +1478,13 @@ FibConfig::propagate_fib_changes(const list<FteX>& fte_list,
 	    fte_list4.push_back(fte4);
 	}
 
+#ifdef HAVE_IPV6
 	if (ftex.net().is_ipv6()) {
 	    // IPv6 entry
 	    Fte6 fte6 = ftex.get_fte6();
 	    fte_list6.push_back(fte6);
 	}
+#endif
     }
 
     // Inform all observers about the changes
@@ -1491,7 +1495,9 @@ FibConfig::propagate_fib_changes(const list<FteX>& fte_list,
 	FibTableObserverBase* fib_table_observer = *iter;
 	if (! fte_list4.empty())
 	    fib_table_observer->process_fib_changes(fte_list4);
+#ifdef HAVE_IPV6
 	if (! fte_list6.empty())
 	    fib_table_observer->process_fib_changes(fte_list6);
+#endif
     }
 }

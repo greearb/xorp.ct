@@ -37,7 +37,7 @@ target fea implements	common/0.1,
 			socket4/0.1,
 #ifdef HAVE_IPV6
 			redist_transaction6/0.1,
-			socket6/0.1,
 			raw_packet6/0.1,
+			socket6/0.1,
 #endif
 			profile/0.1;

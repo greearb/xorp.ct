@@ -4,6 +4,8 @@
  * FEA Forwarding Information Base XRL interface.
  */
 
+#include <xorp_config.h>
+
 interface fea_fib/0.1 {
 	/**
 	 * Add a FIB client.
@@ -15,9 +17,6 @@ interface fea_fib/0.1 {
 	add_fib_client4		? client_target_name:txt	\
 				& send_updates:bool		\
 				& send_resolves:bool;
-	add_fib_client6		? client_target_name:txt	\
-				& send_updates:bool		\
-				& send_resolves:bool;
 	/**
 	 * Delete a FIB client.
 	 *
@@ -25,5 +24,11 @@ interface fea_fib/0.1 {
 	 * delete.
 	 */
 	delete_fib_client4	? client_target_name:txt;
+
+#ifdef HAVE_IPV6
+	add_fib_client6		? client_target_name:txt	\
+				& send_updates:bool		\
+				& send_resolves:bool;
 	delete_fib_client6	? client_target_name:txt;
+#endif
 }
