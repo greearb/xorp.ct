@@ -490,7 +490,19 @@ SelectorList::wait_and_dispatch(TimeVal& timeout)
     get_ready_priority(false);
 
     XLOG_ASSERT(_maxpri_fd != -1);
-    XLOG_ASSERT(FD_ISSET(_maxpri_fd, &_testfds[_maxpri_sel]));
+
+    // I hit this assert while trying to add 5000 BGP originate-routes via call_xrl:
+    // /usr/local/xorp/bgp/harness/originate_routes.pl ip=10.1.1.0 nh=10.1.1.1 sigb=4 amt=5000
+    // I cannot figure out how this assert could happen..unless maybe there is some re-entry issue or
+    // similar.  Going to deal with things as best as possible w/out asserting.
+    // TODO:  Re-write this logic entirely to be less crufty all around.
+    if (!(FD_ISSET(_maxpri_fd, &_testfds[_maxpri_sel]))) {
+	_testfds_n = 0;
+	_maxpri_fd = -1;
+	_maxpri_sel = -1;
+	return 0;
+    }
+
     FD_CLR(_maxpri_fd, &_testfds[_maxpri_sel]);
 
     SelectorMask sm = SEL_NONE;
