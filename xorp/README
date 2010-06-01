@@ -14,6 +14,9 @@ USA, and spent some time with the team at XORP, Inc.  It is now maintained
 and improved on a volunteer basis by a core of long-term XORP developers
 and some newer contributors.
 
+XORP.ct is branch of XORP under active development and maintained by
+Candela Technologies, with input from the community.
+
 XORP's primary goal is to be an open platform for networking protocol
 implementations and an alternative to proprietary and closed networking
 products in the marketplace today. XORP hopes to drive innovation in
@@ -54,7 +57,7 @@ paper available from http://www.xorp.org/ :
 2. Status
 =========
 
-This is XORP Release 1.7-CT
+This is XORP Release 1.8-CT
 
 Supported platforms:
 
@@ -268,14 +271,11 @@ limited interest, or are not relevant to the current release:
 5. Future plans
 ===============
 
-In the short-term we plan to add:
-  * Integrate changes found in 'xorp.ct' repository.
-  * Get regression tests working again.
-  * Implement batching and other performance improvements for BGP
-    and other protocols.
+  * BGP performance improvements, including XRL IPC batching.
 
-In the long-term, we plan to add:
-  * BGMP
+  * Bug Fixes
+
+  * [Your project here]
 
 
 6. Authors
@@ -287,7 +287,7 @@ The core team currently consists of:
   * Andrea Bittau
   * Javier Cardona
   * Atanu Ghosh
-  * Ben Greear
+  * Ben Greear  (Maintainer of XORP.ct branch)
   * Adam Greenhalgh
   * Mark Handley
   * Orion Hodson
@@ -321,10 +321,11 @@ The core team currently consists of:
 8. Additional information
 =========================
 
-  * WWW: http://www.xorp.org/
   * WWW: http://www.candelatech.com/oss/xorp-ct.html
+  * WWW: http://www.xorp.org/
 
-  * Source code and CVS access: see XORP Web site.
+  * Source code and binary distribution access:
+    http://github.com/greearb/xorp.ct
 
   * XORP Bugzilla database and bug reports: see XORP Web site.
 
@@ -354,5 +355,3 @@ The core team currently consists of:
     of the email. For more subscription options, send the command
     "help" instead, or use the following URL:
     http://mailman.ICSI.Berkeley.edu/mailman/listinfo/xorp-announce
-
-  * Feedback: feedback@xorp.org
