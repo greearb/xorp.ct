@@ -17,14 +17,13 @@ what additional help you would find useful.
 
 <a name="getting"></a><h2>Getting XORP</h2>
 
-<P>There are three ways to try out XORP.
+<P>There are several ways to try out XORP.
 <UL>
-<LI><a href="downloads.html">Download</a> a release, and <a
-href="#compiling">compile</a> it from source.
-<LI>Get the current source snapshot <a href="cvs.html">from CVS</a> and <a
-href="#compiling">compile</a> it.
-<LI>Download a <a href="livecd.html">live CD</a>, and try out a
-precompiled release.
+<LI><a href="http://github.com/greearb/xorp.ct/downloads">Download</a> a pre-built release.</li>
+<LI>Get <a href="http://github.com/greearb/xorp.ct/downloads">released source package</a>
+    and <a href="#compiling">compile</a> it.</li>
+<LI>Get the <a href="cvs.html">current source snapshot</a> and <a href="#compiling">compile</a> it.</li>
+<LI>Download a <a href="livecd.html">live CD</a>, and try out a precompiled release.</li>
 </UL>
 
 <p>If you want to develop new functionality for XORP, you'll obviously
@@ -39,106 +38,34 @@ operating system installed.
 XORP should be fairly portable.  At the present time, the main
 development platforms for XORP are FreeBSD and Linux.  XORP should run
 on all recent versions of FreeBSD, and on most versions of Linux with a
-2.4.x or 2.6.x kernel.
+2.6.x kernel.
 
 <P>
 XORP also appears to work on DragonFlyBSD, NetBSD, OpenBSD,
-MacOS X (10.2 or later), and on Windows Server 2003, but if you want to
+but if you want to
 use it for multicast routing make sure that the kernel has the
-appropriate support (not available for MacOS X and Windows at this
-time). If you try XORP on another platform, let us know
+appropriate support. If you try XORP on another platform, let us know
 how you fare.  See <a href="porting.html">porting</a> if you're
 interested in porting XORP to a new platform.
 
 <a name="compiling"></a><h2>Compiling XORP from source</h2>
 
 <P>
-XORP is written in C++.  We've endeavoured to comply as far as
-possible with the ANSI standards, but currently XORP has only been
-compiled with variants of gcc.  XORP is known to compile on gcc
-2.95.x, 2.96, 3.2.x, 3.3.x, 3.4.x, 4.0.x, 4.1.x, and experimental
-releases of 4.2.0 and 4.3.0. 
-
+After downloading the source, change to the 'xorp'
+directory and read the BUILD_NOTES file.
 <P>
-We run a tinderbox that checks daily that XORP still compiles and
-passes its unit tests with 2.95.4, 2.96, 3.3.x, 3.4.x, and 4.1.1.  The
-aim is that you should always be able to check out a current source
-snapshot from CVS, compile it, and have it pass all the internal
-validation tests.  We don't always succeed, but failures identified by
-the tinderbox are always fixed very rapidly.
-
-<P>
-To compile XORP requires nearly 1.4GB of free disk space, and up to an
-hour depending on your CPU speed and the version of the compiler
-you're using.  Much of this is spent compiling the validation tests,
-which are always built by default.
-<P>
-To compile XORP, you will need <a
-href="http://www.gnu.org/software/make/make.html">gmake</a>
-installed. This is the default on Linux but not on BSD-derived systems
-(including MacOS X).
-<P>
-To build XORP with SNMP support, you need net-snmp installed (details
-<a href="snmp.html">here</a>).
-<P>
-Assuming you have a checked out copy of the XORP source, you should be
-able to compile XORP by typing the following in the top-level XORP
-source directory where file "VERSION" is located:
-<PRE>
-# ./configure
-# gmake
-</PRE>
-Note that "gmake" may be installed as "make" on some platforms.  Then
-go away and have a coffee or two.
-<P>
-This will build XORP "in place".  That is, the bgp binary (xorp_bgp)
-will be left in the bgp subdirectory, the XORP shell binary (xorpsh)
-will be left in the rtrmgr directory, and so on.  This default can be
-overridden (for example, if you're cross-compiling multiple platforms
-from the same source), but there's no need to if you're just starting
-out.
-<P>
-To compile XORP on Windows see file "BUILD_NOTES" in the top-level
-XORP source directory.
-<P>
-XORP can be cross-compiled for a variety of processors.
-Currently it is known to cross-compile for IA-64, MIPS, PowerPC-603,
-Sparc64, and XScale. See file "BUILD_NOTES" in the top-level XORP source
-directory for details and instructions.
+Briefly:<br><pre>
+cd xorp
+scons
+scons install
+</pre>
 
 <a name="validating"></a><h2>Validating a XORP Compilation</h2>
 <P>
-Assuming the compilation completed without errors, you should now
-validate that the build actually runs correctly.  First, make sure that
-"bash" and "python" are installed.  Then type the following in the
-top-level directory:
-<PRE>
-# gmake check
-</PRE>
-This will run all the internal validation tests for all the XORP
-modules.  This is a rather lengthy procedure (nearly an hour), but
-it's a good idea to be sure that everything is working.
-<P>
-The debugging output can sometimes be a little excessive, but what
-you're looking for is lines like:
-<pre>
-PASS: test_trie
+Assuming the compilation completed without errors, you can run some
+self-tests:<br><pre>
+scons check
 </pre>
-which indicates that a particular test program completed successfully.
-Hopefully you won't see any lines like:
-<pre>
-FAIL: test_peering1.sh
-</pre>
-which indicates a particular validation test failed.
-<P>
-There can be warnings such as:
-<pre>
-[ 2004/04/22 00:48:57 WARNING coord BGP ] TCP connection 
-from test_peer: peer1 to localhost closed
-</pre>
-Unless these result in a FAIL message, they are typically
-transient artifacts of the testing methodology, and can safely be
-ignored.
 <P>
 
 <a name="running"></a><h2>Running XORP</h2>
@@ -171,18 +98,12 @@ Typically xorp_rtrmgr must be run as root.  This is because it starts
 up processes that need privileged access to insert routes into
 the forwarding path in the kernel.
 <P>
-If you are using the live CD, then xorp_rtrmgr should start by default
-after the OS has booted, and read the config.boot file from the floppy
-drive.
-<P>
 To interact with the router via the command line interface, the
 operator uses the XORP command shell <B>xorpsh</B>.  If you compiled
 from source, this should also be in the rtrmgr subdirectory.  Xorpsh
 should not normally be run as root, but if a user is going to change
 the configuration of the router (as opposed to simply monitor the
-router's operation) then they need to be in the "xorp" Unix group.  If
-you are using the live CD then, by default, logging in as username
-xorp should cause the user's login shell to be xorpsh.
+router's operation) then they need to be in the "xorp" Unix group.
 <P>
 The "help" command provides basic online help. The <a
 href="releases/current/docs/user_manual/user_manual.pdf">XORP user
@@ -218,7 +139,7 @@ The configuration information can be provided in one of the two ways:
     user@hostname# 
 </PRE>
 
-   On UNIX, only an user who belongs to group "xorp" can run xorpsh
+   On UNIX, only a user who belongs to group "xorp" can run xorpsh
    in configurational mode.
    It should be noted that command line completion in the xorpsh
    does greatly simplify configuration.
@@ -270,9 +191,6 @@ interfaces {
 }
 </PRE>
 
-<P><U>Note</U>: Prior to XORP Release-1.1, the "enabled" flag was used
-instead of "disable".
-
 <P>
 We recommend that you select the interfaces that you want to use on
 your system and configure them as above. If you are configuring an
@@ -303,10 +221,6 @@ fea {
 
 If IPv4 and IPv6 forwarding are required you will require the configuration
 above.
-
-<P><U>Note</U>: Prior to XORP Release-1.1, the "enable-unicast-forwarding4"
-and "enable-unicast-forwarding6" flags were used instead to enable or disable
-the IPv4 and IPv6 forwarding.
 
 <P>
 Now that we have configured the interfaces and enabled forwarding we
@@ -346,10 +260,6 @@ protocols {
     }
 }
 </PRE>
-
-<P><U>Note</U>: Prior to XORP Release-1.3, the "route4" and "route6"
-statements were used instead of "route". Also, "mrib-route4" and "mrib-route6"
-statements were used instead of "mrib-route".
 
 <H4>Routing Information Protocol</H4>
 
@@ -417,9 +327,6 @@ protocols {
     }
 }
 </PRE>
-
-<P><U>Note</U>: Prior to XORP Release-1.1, the "enabled" flag was used
-instead of "disable".
 
 <H4>Open Shortest Path First</H4>
 
@@ -511,9 +418,6 @@ protocols {
 }
 </PRE>
 
-<P><U>Note</U>: Prior to XORP Release-1.1, the "enabled" flag was used
-instead of "disable".
-
 
 <H4>Multicast Forwarding Engine Abstraction</H4>
 
@@ -570,8 +474,6 @@ plumbing {
 }
 </PRE>
 
-<P><U>Note</U>: Prior to XORP Release-1.1, the "enabled" flag was used
-instead of "disable".
 
 <P>
 Note that the interface/vif named "register_vif" is special.
@@ -636,12 +538,6 @@ protocols {
     }
 }
 </PRE>
-
-<P><U>Note</U>: Prior to XORP Release-1.1, the "enabled" flag was used
-instead of "disable".
-<P><U>Note</U>: The "version", "enable-ip-router-alert-option-check",
-"query-interval", "query-last-member-interval", "query-response-interval",
-and "robust-count" statements appeared after XORP Release-1.1.
 
 A number of parameters have default values, therefore
 they don't have to be configured (those parameters are commented-out
@@ -818,15 +714,6 @@ protocols {
 }
 </PRE>
 
-<P><U>Note</U>: Prior to XORP Release-1.1, the "enabled" flag was used
-instead of "disable".
-<P><U>Note</U>: The "enable-ip-router-alert-option-check",
-"cand-bsr-by-vif-addr", "cand-rp-by-vif-addr",
-"hello-period" and "hello-triggered-delay" statements appeared after XORP
-Release-1.1.
-<P><U>Note</U>: Prior to XORP Release-1.3, the "interval-sec" statement
-was used instead of "interval".
-
 <P>
 A number of parameters have default values, therefore
 they don't have to be configured (those parameters are commented-out
@@ -941,5 +828,3 @@ protocols {
 }
 </PRE>
 
-<p><U>Note</U>: Prior to XORP Release-1.1, the "enabled" flag was used
-instead of "disable".
