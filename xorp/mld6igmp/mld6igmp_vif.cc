@@ -1486,7 +1486,8 @@ Mld6igmpVif::update_primary_address(string& error_msg)
     // Check that the interface has a primary address.
     //
     if (primary_addr().is_zero() && primary_a.is_zero()) {
-	error_msg = "invalid primary address";
+	error_msg = c_format("invalid primary address: %s  primary_a: %s",
+			     primary_addr().str().c_str(), primary_a.str().c_str());
 	return (XORP_ERROR);
     }
     

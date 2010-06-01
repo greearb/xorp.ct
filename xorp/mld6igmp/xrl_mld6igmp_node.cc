@@ -1103,23 +1103,11 @@ XrlMld6igmpNode::mld6igmp_client_send_add_delete_membership_cb(
 	// If a command failed because the other side rejected it,
 	// then print an error and send the next one.
 	//
-	XLOG_ERROR("Cannot %s for a multicast group with a client: %s",
+	XLOG_ERROR("Cannot %s for a multicast group with a client: %s:  Will continue.",
 		   membership.operation_name(),
 		   xrl_error.str().c_str());
 	_send_add_delete_membership_queue.pop_front();
 	send_add_delete_membership();
-	break;
-
-    case NO_FINDER:
-    case RESOLVE_FAILED:
-    case SEND_FAILED:
-	//
-	// A communication error that should have been caught elsewhere
-	// (e.g., by tracking the status of the Finder and the other targets).
-	// Probably we caught it here because of event reordering.
-	// In some cases we print an error. In other cases our job is done.
-	//
-	XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
 	break;
 
     case BAD_ARGS:
@@ -1132,6 +1120,20 @@ XrlMld6igmpNode::mld6igmp_client_send_add_delete_membership_cb(
 	//
 	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
 	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+    case SEND_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the Finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
+	// TODO:  We must make some progress or otherwise deal with this error.
+	// For now, fall through and re-try.
+	// Fall through to the retry logic below.
 
     case REPLY_TIMED_OUT:
     case SEND_FAILED_TRANSIENT:
@@ -1148,7 +1150,7 @@ XrlMld6igmpNode::mld6igmp_client_send_add_delete_membership_cb(
 		callback(this, &XrlMld6igmpNode::send_add_delete_membership));
 	}
 	break;
-    }
+    }/* switch */
 }
 
 //
