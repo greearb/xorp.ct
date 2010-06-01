@@ -203,10 +203,16 @@ XrlOspfV2Target::policy_redist4_0_1_add_route4(const IPv4Net& network,
 					       const uint32_t& metric,
 					       const XrlAtomList& policytags)
 {
-    XLOG_INFO("Net: %s Nexthop: %s Unicast: %s Multicast %s metric %d\n",
-	      cstring(network), cstring(nexthop), bool_c_str(unicast),
-	      bool_c_str(multicast), metric);
+    //XLOG_INFO("Net: %s Nexthop: %s Unicast: %s Multicast %s metric %d\n",
+    //          cstring(network), cstring(nexthop), bool_c_str(unicast),
+    //          bool_c_str(multicast), metric);
+    UNUSED(unicast);
+    UNUSED(multicast);
+
 #if 0
+    // Routes coming from fib2mrib have unicast set as false, even though
+    // they are dealing with unicast addresses, so ignore that here.  This
+    // allows policy redistribution of routes coming from fib2mrib.
     if (!unicast)
 	return XrlCmdError::OKAY();
 #endif
@@ -223,8 +229,10 @@ XrlOspfV2Target::policy_redist4_0_1_delete_route4(const IPv4Net& network,
 						  const bool& unicast,
 						  const bool& multicast)
 {
-    XLOG_INFO("Net: %s Unicast: %s Multicast %s\n",
-	      cstring(network), bool_c_str(unicast), bool_c_str(multicast));
+    //XLOG_INFO("Net: %s Unicast: %s Multicast %s\n",
+    //          cstring(network), bool_c_str(unicast), bool_c_str(multicast));
+    UNUSED(unicast);
+    UNUSED(multicast);
 
 #if 0
     if (!unicast)

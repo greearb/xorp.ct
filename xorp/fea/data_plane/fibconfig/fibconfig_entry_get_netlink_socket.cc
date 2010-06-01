@@ -326,6 +326,9 @@ FibConfigEntryGetNetlinkSocket::parse_buffer_netlink_socket(
 	 NLMSG_OK(nlh, buffer_bytes);
 	 nlh = NLMSG_NEXT(const_cast<struct nlmsghdr*>(nlh), buffer_bytes)) {
 	void* nlmsg_data = NLMSG_DATA(const_cast<struct nlmsghdr*>(nlh));
+
+	//XLOG_INFO("Received fibconfig netlink msg, type: %i\n",
+	//	  (int)(nlh->nlmsg_type));
 	
 	switch (nlh->nlmsg_type) {
 	case NLMSG_ERROR:
@@ -378,8 +381,13 @@ FibConfigEntryGetNetlinkSocket::parse_buffer_netlink_socket(
 	    if (rtmsg->rtm_type == RTN_BROADCAST)
 		break;		// XXX: ignore broadcast entries
 
-	    return (NlmUtils::nlm_get_to_fte_cfg(iftree, fte, nlh, rtmsg,
-						 rta_len, fibconfig));
+	    string err_msg;
+	    int rv = NlmUtils::nlm_get_to_fte_cfg(iftree, fte, nlh, rtmsg,
+						  rta_len, fibconfig, err_msg);
+	    //if (rv != XORP_OK) {
+	    //XLOG_WARNING("WARNING:  nlm_get_to_fte_cfg failed: %s\n", err_msg.c_str());
+	    //}
+	    return rv;
 	}
 	break;
 	

@@ -303,7 +303,8 @@ NlmUtils::get_rtattr(const struct rtattr* rtattr, int rta_len,
 int
 NlmUtils::nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 			     const struct nlmsghdr* nlh,
-			     const struct rtmsg* rtmsg, int rta_len, const FibConfig& fibconfig)
+			     const struct rtmsg* rtmsg, int rta_len, const FibConfig& fibconfig,
+			     string& err_msg)
 {
     const struct rtattr *rtattr;
     const struct rtattr *rta_array[RTA_MAX + 1];
@@ -342,7 +343,7 @@ NlmUtils::nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 	}
 #endif
 	if ((rtmt != RT_TABLE_UNSPEC) && (rtmt != rttable)) {
-	    //XLOG_WARNING("Ignoring route from table: %i\n", rtmt);
+	    err_msg += c_format("Ignoring route from table: %i\n", rtmt);
 	    return XORP_ERROR;
 	}
 	else {
@@ -355,12 +356,15 @@ NlmUtils::nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
     IPvX dst_addr(family);
     int dst_mask_len = 0;
 
+    //XLOG_INFO("rtm type: %i\n", (int)(rtmsg->rtm_type));
+
     //
     // Type-specific processing
     //
     switch (rtmsg->rtm_type) {
     case RTN_LOCAL:
 	// TODO: XXX: PAVPAVPAV: handle it, if needed!
+	err_msg += "RTM type is RTN_LOCAL, ignoring.\n";
 	return (XORP_ERROR);		// TODO: is it really an error?
 
     case RTN_BLACKHOLE:
@@ -385,6 +389,7 @@ NlmUtils::nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 	    // XXX: Cannot map a discard route back to an FEA soft discard
 	    // interface.
 	    //
+	    err_msg += "Can't map discard route back to FEA soft discard interface.\n";
 	    return (XORP_ERROR);
 	}
 	if_name = pi->ifname();
@@ -415,6 +420,7 @@ NlmUtils::nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 	    // XXX: Cannot map an unreachable route back to an FEA soft
 	    // unreachable interface.
 	    //
+	    err_msg += "Can't map unreachable route back to FEA soft unreachable interface.\n";
 	    return (XORP_ERROR);
 	}
 	if_name = pi->ifname();
@@ -431,14 +437,17 @@ NlmUtils::nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 	XLOG_ERROR("nlm_get_to_fte_cfg() failed: "
 		   "unrecognized AF_NETLINK route type: %d",
 		   rtmsg->rtm_type);
+	err_msg += c_format("Unrecognized route type: %i\n", (int)(rtmsg->rtm_type));
 	return (XORP_ERROR);
     }
 
     //
     // Check the address family
     //
-    if (rtmsg->rtm_family != family)
-	return (XORP_ERROR);		// Invalid address family
+    if (rtmsg->rtm_family != family) {
+	err_msg += "Invalid family.\n";
+	return (XORP_ERROR);
+    }
 
     //
     // Get the destination
@@ -452,7 +461,8 @@ NlmUtils::nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 	if (! dst_addr.is_unicast()) {
 	    // TODO: should we make this check?
 	    fte.zero();
-	    return (XORP_ERROR);	// XXX: invalid unicast address
+	    err_msg += c_format("Ignoring non-unicast destination: %s\n", dst_addr.str().c_str());
+	    return (XORP_ERROR);
 	}
     }
     
@@ -486,6 +496,7 @@ NlmUtils::nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 	    if_index = extract_host_int(p);
 	} else {
 	    XLOG_ERROR("nlm_get_to_fte_cfg() failed: no interface found");
+	    err_msg += "Could not find interface (no RTA_OIF)\n";
 	    return (XORP_ERROR);
 	}
 
@@ -528,11 +539,11 @@ NlmUtils::nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 		// enough evidence and the issue is understood.
 		//
 		//IPvXNet dst_subnet(dst_addr, dst_mask_len);
-		//XLOG_WARNING("WARNING:  Decoding for route %s next hop %s failed: "
-		//	   "could not find interface and vif for index %d",
-		//	   dst_subnet.str().c_str(),
-		//	   nexthop_addr.str().c_str(),
-		//	   if_index);
+		err_msg += c_format("WARNING:  Decoding for route %s next hop %s failed: "
+				    "could not find interface and vif for index %d",
+				    dst_addr.str().c_str(),
+				    nexthop_addr.str().c_str(),
+				    if_index);
 		return XORP_ERROR;
 	    }
 	}
@@ -556,6 +567,8 @@ NlmUtils::nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 	       if_name, vif_name, route_metric, 0xffff, xorp_route);
     if (is_deleted)
 	fte.mark_deleted();
+
+    //XLOG_INFO("get_fte_cfg, route: %s", fte.str().c_str());
     
     return (XORP_OK);
 }

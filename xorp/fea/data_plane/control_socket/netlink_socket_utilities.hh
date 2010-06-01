@@ -128,7 +128,7 @@ public:
     static int	nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 				   const struct nlmsghdr* nlh,
 				   const struct rtmsg* rtmsg, int rta_len,
-				   const FibConfig& fibconfig);
+				   const FibConfig& fibconfig, string& err_msg);
 
     /**
      * Check that a previous netlink request has succeeded.

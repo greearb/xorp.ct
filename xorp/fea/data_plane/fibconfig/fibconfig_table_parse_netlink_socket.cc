@@ -67,9 +67,9 @@ FibConfigTableGetNetlinkSocket::parse_buffer_netlink_socket(
 	 nlh = NLMSG_NEXT(const_cast<struct nlmsghdr*>(nlh), buffer_bytes)) {
 	void* nlmsg_data = NLMSG_DATA(const_cast<struct nlmsghdr*>(nlh));
 
-	//XLOG_ERROR("nlh->msg-type: %s (%i)",
-	//	   NlmUtils::nlm_msg_type(nlh->nlmsg_type).c_str(),
-	//	   (int)(nlh->nlmsg_type));
+	//XLOG_INFO("nlh->msg-type: %s (%i)",
+	//	  NlmUtils::nlm_msg_type(nlh->nlmsg_type).c_str(),
+	//	  (int)(nlh->nlmsg_type));
 	
 	switch (nlh->nlmsg_type) {
 	case NLMSG_ERROR:
@@ -127,9 +127,13 @@ FibConfigTableGetNetlinkSocket::parse_buffer_netlink_socket(
 		break;		// XXX: ignore broadcast entries
 	    
 	    FteX fte(family);
-	    if (NlmUtils::nlm_get_to_fte_cfg(iftree, fte, nlh, rtmsg, rta_len, fibconfig)
+	    string err_msg;
+	    if (NlmUtils::nlm_get_to_fte_cfg(iftree, fte, nlh, rtmsg, rta_len, fibconfig, err_msg)
 		== XORP_OK) {
 		fte_list.push_back(fte);
+	    }
+	    else {
+		//XLOG_INFO("nlm_get_to_fte_cfg had error: %s", err_msg.c_str());
 	    }
 	}
 	break;
