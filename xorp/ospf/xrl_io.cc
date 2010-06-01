@@ -122,56 +122,6 @@ XrlIO<IPv4>::send(const string& interface, const string& vif,
     return success;
 }
 
-template <>
-bool
-XrlIO<IPv6>::send(const string& interface, const string& vif,
-		  IPv6 dst, IPv6 src,
-		  int ttl, uint8_t* data, uint32_t len)
-{
-#ifdef HAVE_IPV6
-    bool success;
-
-    debug_msg("send(%s,%s,%s,%s,%p,%d\n",
-	      interface.c_str(), vif.c_str(),
-	      dst.str().c_str(), src.str().c_str(),
-	      data, len);
-
-    // Copy the payload
-    vector<uint8_t> payload(len);
-    memcpy(&payload[0], data, len);
-    XrlAtomList ext_headers_type;
-    XrlAtomList ext_headers_payload;
-
-    XrlRawPacket6V0p1Client fea_client(&_xrl_router);
-    success = fea_client.send_send(
-	_feaname.c_str(),
-	interface,
-	vif,
-	src,
-	dst,
-	get_ip_protocol_number(),
-	dst.is_multicast() ? 1 : ttl,
-	-1,					// XXX: let the FEA set TOS
-	get_ip_router_alert(),
-	true,					// ip_internet_control
-	ext_headers_type,
-	ext_headers_payload,
-	payload,
-	callback(this, &XrlIO::send_cb, interface, vif));
-
-    return success;
-#else
-    UNUSED(interface);
-    UNUSED(vif);
-    UNUSED(dst);
-    UNUSED(src);
-    UNUSED(ttl);
-    UNUSED(data);
-    UNUSED(len);
-    return false;
-#endif
-}
-
 template <typename A>
 void
 XrlIO<A>::send_cb(const XrlError& xrl_error, string interface, string vif)
@@ -230,32 +180,6 @@ XrlIO<IPv4>::enable_interface_vif(const string& interface, const string& vif)
     return success;
 }
 
-template <>
-bool
-XrlIO<IPv6>::enable_interface_vif(const string& interface, const string& vif)
-{
-#ifdef HAVE_IPV6
-    bool success;
-
-    debug_msg("Enable Interface %s Vif %s\n", interface.c_str(), vif.c_str());
-
-    XrlRawPacket6V0p1Client fea_client(&_xrl_router);
-    success = fea_client.send_register_receiver(
-	_feaname.c_str(),
-	_xrl_router.instance_name(),
-	interface,
-	vif,
-	get_ip_protocol_number(),
-	false,			// disable multicast loopback
-	callback(this, &XrlIO::enable_interface_vif_cb, interface, vif));
-
-    return success;
-#else
-    UNUSED(interface);
-    UNUSED(vif);
-    return false;
-#endif
-}
 
 template <typename A>
 void
@@ -313,32 +237,6 @@ XrlIO<IPv4>::disable_interface_vif(const string& interface, const string& vif)
 	callback(this, &XrlIO::disable_interface_vif_cb, interface, vif));
 
     return success;
-}
-
-template <>
-bool
-XrlIO<IPv6>::disable_interface_vif(const string& interface, const string& vif)
-{
-#ifdef HAVE_IPV6
-    bool success;
-
-    debug_msg("Disable Interface %s Vif %s\n", interface.c_str(), vif.c_str());
-
-    XrlRawPacket6V0p1Client fea_client(&_xrl_router);
-    success = fea_client.send_unregister_receiver(
-	_feaname.c_str(),
-	_xrl_router.instance_name(),
-	interface,
-	vif,
-	get_ip_protocol_number(),
-	callback(this, &XrlIO::disable_interface_vif_cb, interface, vif));
-
-    return success;
-#else
-    UNUSED(interface);
-    UNUSED(vif);
-    return false;
-#endif
 }
 
 template <typename A>
@@ -429,26 +327,6 @@ XrlIO<IPv4>::is_address_enabled(const string& interface, const string& vif,
 
 template <>
 bool
-XrlIO<IPv6>::is_address_enabled(const string& interface, const string& vif,
-				const IPv6& address) const
-{
-    debug_msg("Interface %s Vif %s Address %s\n", interface.c_str(),
-	      vif.c_str(), cstring(address));
-
-    if (! is_vif_enabled(interface, vif))
-	return false;
-
-    const IfMgrIPv6Atom* fa = ifmgr_iftree().find_addr(interface,
-						       vif,
-						       address);
-    if (fa == NULL)
-	return false;
-
-    return (fa->enabled());
-}
-
-template <>
-bool
 XrlIO<IPv4>::get_addresses(const string& interface, const string& vif,
 			   list<IPv4>& addresses) const
 {
@@ -467,24 +345,6 @@ XrlIO<IPv4>::get_addresses(const string& interface, const string& vif,
 
 template <>
 bool
-XrlIO<IPv6>::get_addresses(const string& interface, const string& vif,
-			   list<IPv6>& addresses) const
-{
-    debug_msg("Interface %s Vif %s\n", interface.c_str(), vif.c_str());
-
-    const IfMgrVifAtom* fv = ifmgr_iftree().find_vif(interface, vif);
-    if (fv == NULL)
-	return false;
-
-    IfMgrVifAtom::IPv6Map::const_iterator i;
-    for (i = fv->ipv6addrs().begin(); i != fv->ipv6addrs().end(); i++)
-	addresses.push_back(i->second.addr());
-
-    return true;
-}
-
-template <>
-bool
 XrlIO<IPv4>::get_link_local_address(const string& interface, const string& vif,
 				    IPv4& address)
 {
@@ -496,28 +356,6 @@ XrlIO<IPv4>::get_link_local_address(const string& interface, const string& vif,
 
     IfMgrVifAtom::IPv4Map::const_iterator i;
     for (i = fv->ipv4addrs().begin(); i != fv->ipv4addrs().end(); i++) {
-	if (i->second.addr().is_linklocal_unicast()) {
-	    address = i->second.addr();
-	    return true;
-	}
-    }
-
-    return false;
-}
-
-template <>
-bool
-XrlIO<IPv6>::get_link_local_address(const string& interface, const string& vif,
-				    IPv6& address)
-{
-    debug_msg("Interface %s Vif %s\n", interface.c_str(), vif.c_str());
-
-    const IfMgrVifAtom* fv = ifmgr_iftree().find_vif(interface, vif);
-    if (fv == NULL)
-	return false;
-
-    IfMgrVifAtom::IPv6Map::const_iterator i;
-    for (i = fv->ipv6addrs().begin(); i != fv->ipv6addrs().end(); i++) {
 	if (i->second.addr().is_linklocal_unicast()) {
 	    address = i->second.addr();
 	    return true;
@@ -551,23 +389,6 @@ XrlIO<IPv4>::get_prefix_length(const string& interface, const string& vif,
 	      vif.c_str(), cstring(address));
 
     const IfMgrIPv4Atom* fa = ifmgr_iftree().find_addr(interface,
-						       vif,
-						       address);
-    if (fa == NULL)
-	return 0;
-
-    return (fa->prefix_len());
-}
-
-template <>
-uint32_t
-XrlIO<IPv6>::get_prefix_length(const string& interface, const string& vif,
-			       IPv6 address)
-{
-    debug_msg("Interface %s Vif %s Address %s\n", interface.c_str(),
-	      vif.c_str(), cstring(address));
-
-    const IfMgrIPv6Atom* fa = ifmgr_iftree().find_addr(interface,
 						       vif,
 						       address);
     if (fa == NULL)
@@ -610,36 +431,6 @@ XrlIO<IPv4>::join_multicast_group(const string& interface, const string& vif,
 	callback(this, &XrlIO::join_multicast_group_cb, interface, vif));
 
     return success;
-}
-
-template <>
-bool
-XrlIO<IPv6>::join_multicast_group(const string& interface, const string& vif,
-				  IPv6 mcast)
-{
-#ifdef HAVE_IPV6
-    bool success;
-
-    debug_msg("Join Interface %s Vif %s mcast %s\n", interface.c_str(),
-	      vif.c_str(), cstring(mcast));
-
-    XrlRawPacket6V0p1Client fea_client(&_xrl_router);
-    success = fea_client.send_join_multicast_group(
-	_feaname.c_str(),
-	_xrl_router.instance_name(),
-	interface,
-	vif,
-	get_ip_protocol_number(),
-	mcast,
-	callback(this, &XrlIO::join_multicast_group_cb, interface, vif));
-
-    return success;
-#else
-    UNUSED(interface);
-    UNUSED(vif);
-    UNUSED(mcast);
-    return false;
-#endif
 }
 
 template <typename A>
@@ -700,36 +491,6 @@ XrlIO<IPv4>::leave_multicast_group(const string& interface, const string& vif,
 	callback(this, &XrlIO::leave_multicast_group_cb, interface, vif));
 
     return success;
-}
-
-template <>
-bool
-XrlIO<IPv6>::leave_multicast_group(const string& interface, const string& vif,
-				   IPv6 mcast)
-{
-#ifdef HAVE_IPV6
-    bool success;
-
-    debug_msg("Leave Interface %s Vif %s mcast %s\n", interface.c_str(),
-	      vif.c_str(), cstring(mcast));
-
-    XrlRawPacket6V0p1Client fea_client(&_xrl_router);
-    success = fea_client.send_leave_multicast_group(
-	_feaname.c_str(),
-	_xrl_router.instance_name(),
-	interface,
-	vif,
-	get_ip_protocol_number(),
-	mcast,
-	callback(this, &XrlIO::leave_multicast_group_cb, interface, vif));
-
-    return success;
-#else
-    UNUSED(interface);
-    UNUSED(vif);
-    UNUSED(mcast);
-    return false;
-#endif
 }
 
 template <typename A>
@@ -1102,78 +863,6 @@ XrlQueue<IPv4>::sendit_spec(Queued& q, const char *protocol)
     return sent;
 }
 
-template<>
-bool
-XrlQueue<IPv6>::sendit_spec(Queued& q, const char *protocol)
-{
-    bool sent = false;
-    bool unicast = true;
-    bool multicast = false;
-
-    XrlRibV0p1Client rib(&_xrl_router);
-    if(q.add) {
-	debug_msg("adding route from %s peer to rib\n", protocol);
-#if	0
-	if (_bgp.profile().enabled(profile_route_rpc_out))
-	    _bgp.profile().log(profile_route_rpc_out, 
-			       c_format("add %s", q.net.str().c_str()));
-#endif
-	if (OspfTypes::UNUSED_INTERFACE_ID == q.nexthop_id) {
-	    sent = rib.
-		send_add_route6(q.ribname.c_str(),
-				protocol,
-				unicast, multicast,
-				q.net, q.nexthop, q.metric, 
-				q.policytags.xrl_atomlist(),
-				callback(this, &XrlQueue::route_command_done,
-					 q.comment));
-	} else {
-	    string interface;
-	    string vif;
-	    XLOG_ASSERT(_io);
-	    if (!_io->get_interface_vif_by_interface_id(q.nexthop_id,
-							interface, vif)) {
-		XLOG_ERROR("Unable to find interface/vif associated with %u",
-			   q.nexthop_id);
-		return false;
-	    }
-	    sent = rib.
-		send_add_interface_route6(q.ribname.c_str(),
-					  protocol,
-					  unicast, multicast,
-					  q.net, q.nexthop,
-					  interface, vif,
-					  q.metric, 
-					  q.policytags.xrl_atomlist(),
-					  callback(this,
-					    &XrlQueue::route_command_done,
-						   q.comment));
-	}
-	if (!sent)
-	    XLOG_WARNING("scheduling add route %s failed",
-			 q.net.str().c_str());
-    } else {
-	debug_msg("deleting route from %s peer to rib\n", protocol);
-#if	0
-	if (_bgp.profile().enabled(profile_route_rpc_out))
-	    _bgp.profile().log(profile_route_rpc_out, 
-			       c_format("delete %s", q.net.str().c_str()));
-#endif
-	sent = rib.
-	    send_delete_route6(q.ribname.c_str(),
-			       protocol,
-			       unicast, multicast,
-			       q.net,
-			       callback(this, &XrlQueue::route_command_done,
-					q.comment));
-	if (!sent)
-	    XLOG_WARNING("scheduling delete route %s failed",
-			 q.net.str().c_str());
-    }
-
-    return sent;
-}
-
 template<class A>
 void
 XrlQueue<A>::route_command_done(const XrlError& error,
@@ -1403,6 +1092,325 @@ XrlIO<IPv4>::updates_made()
     _iftree = ifmgr_iftree();
 }
 
+template class XrlQueue<IPv4>;
+template class XrlIO<IPv4>;
+
+
+/** IPv6 Stuff */
+
+template <>
+bool
+XrlIO<IPv6>::send(const string& interface, const string& vif,
+		  IPv6 dst, IPv6 src,
+		  int ttl, uint8_t* data, uint32_t len)
+{
+#ifdef HAVE_IPV6
+    bool success;
+
+    debug_msg("send(%s,%s,%s,%s,%p,%d\n",
+	      interface.c_str(), vif.c_str(),
+	      dst.str().c_str(), src.str().c_str(),
+	      data, len);
+
+    // Copy the payload
+    vector<uint8_t> payload(len);
+    memcpy(&payload[0], data, len);
+    XrlAtomList ext_headers_type;
+    XrlAtomList ext_headers_payload;
+
+    XrlRawPacket6V0p1Client fea_client(&_xrl_router);
+    success = fea_client.send_send(
+	_feaname.c_str(),
+	interface,
+	vif,
+	src,
+	dst,
+	get_ip_protocol_number(),
+	dst.is_multicast() ? 1 : ttl,
+	-1,					// XXX: let the FEA set TOS
+	get_ip_router_alert(),
+	true,					// ip_internet_control
+	ext_headers_type,
+	ext_headers_payload,
+	payload,
+	callback(this, &XrlIO::send_cb, interface, vif));
+
+    return success;
+#else
+    UNUSED(interface);
+    UNUSED(vif);
+    UNUSED(dst);
+    UNUSED(src);
+    UNUSED(ttl);
+    UNUSED(data);
+    UNUSED(len);
+    return false;
+#endif
+}
+
+template <>
+bool
+XrlIO<IPv6>::enable_interface_vif(const string& interface, const string& vif)
+{
+#ifdef HAVE_IPV6
+    bool success;
+
+    debug_msg("Enable Interface %s Vif %s\n", interface.c_str(), vif.c_str());
+
+    XrlRawPacket6V0p1Client fea_client(&_xrl_router);
+    success = fea_client.send_register_receiver(
+	_feaname.c_str(),
+	_xrl_router.instance_name(),
+	interface,
+	vif,
+	get_ip_protocol_number(),
+	false,			// disable multicast loopback
+	callback(this, &XrlIO::enable_interface_vif_cb, interface, vif));
+
+    return success;
+#else
+    UNUSED(interface);
+    UNUSED(vif);
+    return false;
+#endif
+}
+
+
+template <>
+bool
+XrlIO<IPv6>::disable_interface_vif(const string& interface, const string& vif)
+{
+#ifdef HAVE_IPV6
+    bool success;
+
+    debug_msg("Disable Interface %s Vif %s\n", interface.c_str(), vif.c_str());
+
+    XrlRawPacket6V0p1Client fea_client(&_xrl_router);
+    success = fea_client.send_unregister_receiver(
+	_feaname.c_str(),
+	_xrl_router.instance_name(),
+	interface,
+	vif,
+	get_ip_protocol_number(),
+	callback(this, &XrlIO::disable_interface_vif_cb, interface, vif));
+
+    return success;
+#else
+    UNUSED(interface);
+    UNUSED(vif);
+    return false;
+#endif
+}
+
+template <>
+bool
+XrlIO<IPv6>::is_address_enabled(const string& interface, const string& vif,
+				const IPv6& address) const
+{
+    debug_msg("Interface %s Vif %s Address %s\n", interface.c_str(),
+	      vif.c_str(), cstring(address));
+
+    if (! is_vif_enabled(interface, vif))
+	return false;
+
+    const IfMgrIPv6Atom* fa = ifmgr_iftree().find_addr(interface,
+						       vif,
+						       address);
+    if (fa == NULL)
+	return false;
+
+    return (fa->enabled());
+}
+
+template <>
+bool
+XrlIO<IPv6>::get_addresses(const string& interface, const string& vif,
+			   list<IPv6>& addresses) const
+{
+    debug_msg("Interface %s Vif %s\n", interface.c_str(), vif.c_str());
+
+    const IfMgrVifAtom* fv = ifmgr_iftree().find_vif(interface, vif);
+    if (fv == NULL)
+	return false;
+
+    IfMgrVifAtom::IPv6Map::const_iterator i;
+    for (i = fv->ipv6addrs().begin(); i != fv->ipv6addrs().end(); i++)
+	addresses.push_back(i->second.addr());
+
+    return true;
+}
+
+template <>
+bool
+XrlIO<IPv6>::get_link_local_address(const string& interface, const string& vif,
+				    IPv6& address)
+{
+    debug_msg("Interface %s Vif %s\n", interface.c_str(), vif.c_str());
+
+    const IfMgrVifAtom* fv = ifmgr_iftree().find_vif(interface, vif);
+    if (fv == NULL)
+	return false;
+
+    IfMgrVifAtom::IPv6Map::const_iterator i;
+    for (i = fv->ipv6addrs().begin(); i != fv->ipv6addrs().end(); i++) {
+	if (i->second.addr().is_linklocal_unicast()) {
+	    address = i->second.addr();
+	    return true;
+	}
+    }
+
+    return false;
+}
+
+template <>
+uint32_t
+XrlIO<IPv6>::get_prefix_length(const string& interface, const string& vif,
+			       IPv6 address)
+{
+    debug_msg("Interface %s Vif %s Address %s\n", interface.c_str(),
+	      vif.c_str(), cstring(address));
+
+    const IfMgrIPv6Atom* fa = ifmgr_iftree().find_addr(interface,
+						       vif,
+						       address);
+    if (fa == NULL)
+	return 0;
+
+    return (fa->prefix_len());
+}
+
+template <>
+bool
+XrlIO<IPv6>::join_multicast_group(const string& interface, const string& vif,
+				  IPv6 mcast)
+{
+#ifdef HAVE_IPV6
+    bool success;
+
+    debug_msg("Join Interface %s Vif %s mcast %s\n", interface.c_str(),
+	      vif.c_str(), cstring(mcast));
+
+    XrlRawPacket6V0p1Client fea_client(&_xrl_router);
+    success = fea_client.send_join_multicast_group(
+	_feaname.c_str(),
+	_xrl_router.instance_name(),
+	interface,
+	vif,
+	get_ip_protocol_number(),
+	mcast,
+	callback(this, &XrlIO::join_multicast_group_cb, interface, vif));
+
+    return success;
+#else
+    UNUSED(interface);
+    UNUSED(vif);
+    UNUSED(mcast);
+    return false;
+#endif
+}
+
+template <>
+bool
+XrlIO<IPv6>::leave_multicast_group(const string& interface, const string& vif,
+				   IPv6 mcast)
+{
+#ifdef HAVE_IPV6
+    bool success;
+
+    debug_msg("Leave Interface %s Vif %s mcast %s\n", interface.c_str(),
+	      vif.c_str(), cstring(mcast));
+
+    XrlRawPacket6V0p1Client fea_client(&_xrl_router);
+    success = fea_client.send_leave_multicast_group(
+	_feaname.c_str(),
+	_xrl_router.instance_name(),
+	interface,
+	vif,
+	get_ip_protocol_number(),
+	mcast,
+	callback(this, &XrlIO::leave_multicast_group_cb, interface, vif));
+
+    return success;
+#else
+    UNUSED(interface);
+    UNUSED(vif);
+    UNUSED(mcast);
+    return false;
+#endif
+}
+
+template<>
+bool
+XrlQueue<IPv6>::sendit_spec(Queued& q, const char *protocol)
+{
+    bool sent = false;
+    bool unicast = true;
+    bool multicast = false;
+
+    XrlRibV0p1Client rib(&_xrl_router);
+    if(q.add) {
+	debug_msg("adding route from %s peer to rib\n", protocol);
+#if	0
+	if (_bgp.profile().enabled(profile_route_rpc_out))
+	    _bgp.profile().log(profile_route_rpc_out, 
+			       c_format("add %s", q.net.str().c_str()));
+#endif
+	if (OspfTypes::UNUSED_INTERFACE_ID == q.nexthop_id) {
+	    sent = rib.
+		send_add_route6(q.ribname.c_str(),
+				protocol,
+				unicast, multicast,
+				q.net, q.nexthop, q.metric, 
+				q.policytags.xrl_atomlist(),
+				callback(this, &XrlQueue::route_command_done,
+					 q.comment));
+	} else {
+	    string interface;
+	    string vif;
+	    XLOG_ASSERT(_io);
+	    if (!_io->get_interface_vif_by_interface_id(q.nexthop_id,
+							interface, vif)) {
+		XLOG_ERROR("Unable to find interface/vif associated with %u",
+			   q.nexthop_id);
+		return false;
+	    }
+	    sent = rib.
+		send_add_interface_route6(q.ribname.c_str(),
+					  protocol,
+					  unicast, multicast,
+					  q.net, q.nexthop,
+					  interface, vif,
+					  q.metric, 
+					  q.policytags.xrl_atomlist(),
+					  callback(this,
+					    &XrlQueue::route_command_done,
+						   q.comment));
+	}
+	if (!sent)
+	    XLOG_WARNING("scheduling add route %s failed",
+			 q.net.str().c_str());
+    } else {
+	debug_msg("deleting route from %s peer to rib\n", protocol);
+#if	0
+	if (_bgp.profile().enabled(profile_route_rpc_out))
+	    _bgp.profile().log(profile_route_rpc_out, 
+			       c_format("delete %s", q.net.str().c_str()));
+#endif
+	sent = rib.
+	    send_delete_route6(q.ribname.c_str(),
+			       protocol,
+			       unicast, multicast,
+			       q.net,
+			       callback(this, &XrlQueue::route_command_done,
+					q.comment));
+	if (!sent)
+	    XLOG_WARNING("scheduling delete route %s failed",
+			 q.net.str().c_str());
+    }
+
+    return sent;
+}
+
 template<>
 void
 XrlIO<IPv6>::updates_made()
@@ -1576,8 +1584,5 @@ XrlIO<IPv6>::updates_made()
     _iftree = ifmgr_iftree();
 }
 
-template class XrlQueue<IPv4>;
 template class XrlQueue<IPv6>;
-
-template class XrlIO<IPv4>;
 template class XrlIO<IPv6>;
