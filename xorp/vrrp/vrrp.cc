@@ -289,7 +289,7 @@ Vrrp::become_backup()
 	for (IPS::iterator i = _ips.begin(); i != _ips.end(); ++i) {
 	    const IPv4& ip = *i;
 
-	    XLOG_WARNING("become_master, deleting IP: %s\n",
+	    XLOG_WARNING("become_backup, deleting IP: %s\n",
 			 ip.str().c_str());
 	    _vif.delete_ip(ip);
 	}
@@ -315,6 +315,14 @@ Vrrp::stop()
 	send_advertisement(PRIORITY_LEAVE);
 	_vif.delete_mac(_source_mac);
 	//_arpd.stop();
+
+	for (IPS::iterator i = _ips.begin(); i != _ips.end(); ++i) {
+	    const IPv4& ip = *i;
+	    
+	    XLOG_WARNING("stopping, deleting IP: %s\n",
+			 ip.str().c_str());
+	    _vif.delete_ip(ip);
+	}
     }
 
     _state = INITIALIZE;

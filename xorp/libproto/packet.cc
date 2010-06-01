@@ -322,7 +322,6 @@ ArpHeader::set_sender(const Mac& mac, const IPv4& ip)
 void
 ArpHeader::set_request(const IPv4& ip)
 {
-    XLOG_ASSERT(ah_op == 0);
     XLOG_ASSERT(ah_proto_fmt == htons(ETHERTYPE_IP));
 
     ah_op = htons(ARP_REQUEST);
@@ -333,7 +332,6 @@ ArpHeader::set_request(const IPv4& ip)
 void
 ArpHeader::set_reply(const Mac& mac, const IPv4& ip)
 {
-    XLOG_ASSERT(ah_op == 0);
     XLOG_ASSERT(ah_hw_fmt    == htons(HW_ETHER));
     XLOG_ASSERT(ah_proto_fmt == htons(ETHERTYPE_IP));
 

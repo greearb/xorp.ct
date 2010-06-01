@@ -236,7 +236,10 @@ VrrpVif::recv(const IPv4& from, const PAYLOAD& payload)
 
 	Vrrp* v = find_vrid(vh.vh_vrid);
 	if (!v) {
-	    XLOG_WARNING("Cannot find VRID %d", vh.vh_vrid);
+	    // This is a normal and common occurance if there are
+	    // lots of different VRRP protocol groups running on
+	    // the LAN.  Don't be noisy about it.
+	    //XLOG_WARNING("Cannot find VRID %d", vh.vh_vrid);
 	    return;
 	}
 
