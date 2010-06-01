@@ -21,6 +21,8 @@
 #include <xorp_config.h>
 #ifdef HAVE_NETLINK_SOCKETS
 
+using namespace std;
+#include <fstream>
 
 #include "fea/fea_module.h"
 
@@ -397,6 +399,30 @@ nlm_cond_newlink_to_fea_cfg(const IfTree& user_cfg, IfTree& iftree, const struct
 	
 	XLOG_ASSERT(RTA_PAYLOAD(rta_array[IFLA_MTU]) == sizeof(mtu));
 	mtu = *reinterpret_cast<unsigned int*>(RTA_DATA(const_cast<struct rtattr*>(rta_array[IFLA_MTU])));
+	if (is_newlink || (mtu != ifp->mtu()))
+	    ifp->set_mtu(mtu);
+    }
+    else {
+	static bool do_once = true;
+	if (do_once) {
+	    do_once = false;
+	    XLOG_WARNING("WARNING:  MTU was not in rta_array, attempting to get it via"
+			 "/sys/class/net/%s/mtu instead.  Will not print this message again.\n",
+			 if_name.c_str());
+	}
+	// That sucks...try another way.
+        unsigned int mtu = 1500; //default to something probably right.
+        string ifn("/sys/class/net/");
+	ifn.append(if_name);
+        ifn.append("/mtu");
+        ifstream ifs(ifn.c_str());
+        if (ifs) {
+	    ifs >> mtu;
+        }
+        else {
+            XLOG_WARNING("WARNING: %s: MTU not in rta_array, and cannot open %s"
+			 "  Defaulting to 1500\n", if_name.c_str(), ifn.c_str());
+        }
 	if (is_newlink || (mtu != ifp->mtu()))
 	    ifp->set_mtu(mtu);
     }

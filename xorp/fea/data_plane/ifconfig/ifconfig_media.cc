@@ -17,7 +17,8 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-
+using namespace std;
+#include <fstream>
 
 #include "fea/fea_module.h"
 
@@ -93,7 +94,7 @@ ifconfig_media_get_link_status(const string& if_name, bool& no_carrier,
 	
 	s = socket(AF_INET, SOCK_DGRAM, 0);
 	if (s < 0) {
-	    XLOG_FATAL("Could not initialize IPv4 ioctl() socket");
+	    break; // try another method
 	}
 	if (ioctl(s, SIOCGIFMEDIA, (caddr_t)&ifmr) < 0) {
 	    //
@@ -102,7 +103,7 @@ ifconfig_media_get_link_status(const string& if_name, bool& no_carrier,
 	    //
 	    no_carrier = false;
 	    close(s);
-	    return (XORP_OK);
+	    break; // Try another method
 	}
 	close(s);
 
@@ -142,6 +143,7 @@ ifconfig_media_get_link_status(const string& if_name, bool& no_carrier,
 	}
 #endif // IFM_BAUDRATE_DESCRIPTIONS
 
+	error_msg = ""; // all is forgiven
 	return (XORP_OK);
     } while (false);
 #endif // SIOCGIFMEDIA
@@ -155,8 +157,8 @@ ifconfig_media_get_link_status(const string& if_name, bool& no_carrier,
 	// XXX: Do this only if we have the necessary permission
 	//
 	if (geteuid() != 0) {
-	    error_msg = c_format("Must be root to query the interface status");
-	    return (XORP_ERROR);
+	    error_msg += c_format("Must be root to query the interface status\n");
+	    break; // try another method
 	}
 
 	memset(&ifreq, 0, sizeof(ifreq));
@@ -164,7 +166,7 @@ ifconfig_media_get_link_status(const string& if_name, bool& no_carrier,
 
 	s = socket(AF_INET, SOCK_DGRAM, 0);
 	if (s < 0) {
-	    XLOG_FATAL("Could not initialize IPv4 ioctl() socket");
+	    break; //try another method
 	}
 
 	// Get the link status
@@ -173,11 +175,11 @@ ifconfig_media_get_link_status(const string& if_name, bool& no_carrier,
 	edata.cmd = ETHTOOL_GLINK;
 	ifreq.ifr_data = reinterpret_cast<caddr_t>(&edata);
 	if (ioctl(s, SIOCETHTOOL, &ifreq) < 0) {
-	    error_msg = c_format("ioctl(SIOCETHTOOL) for interface %s "
-				 "failed: %s",
-				 if_name.c_str(), strerror(errno));
+	    error_msg += c_format("ioctl(SIOCETHTOOL) for interface %s "
+				  "failed: %s\n",
+				  if_name.c_str(), strerror(errno));
 	    close(s);
-	    return (XORP_ERROR);
+	    break; //try another method
 	}
 	if (edata.data != 0)
 	    no_carrier = false;
@@ -205,6 +207,7 @@ ifconfig_media_get_link_status(const string& if_name, bool& no_carrier,
 
 	close(s);
 
+	error_msg = ""; // all is forgiven
 	return (XORP_OK);
     } while (false);
 #endif // SIOCETHTOOL && ETHTOOL_GLINK
@@ -240,25 +243,25 @@ ifconfig_media_get_link_status(const string& if_name, bool& no_carrier,
 
 	s = socket(AF_INET, SOCK_DGRAM, 0);
 	if (s < 0) {
-	    XLOG_FATAL("Could not initialize IPv4 ioctl() socket");
+	    break; //try another method
 	}
 	if (ioctl(s, SIOCGMIIPHY, &ifreq) < 0) {
-	    error_msg = c_format("ioctl(SIOCGMIIPHY) for interface %s "
-				 "failed: %s",
-				 if_name.c_str(), strerror(errno));
+	    error_msg += c_format("ioctl(SIOCGMIIPHY) for interface %s "
+				  "failed: %s\n",
+				  if_name.c_str(), strerror(errno));
 	    close(s);
-	    return (XORP_ERROR);
+	    break; //try another method
 	}
 
 	struct mii_data* mii;
 	mii = reinterpret_cast<struct mii_data *>(&ifreq.ifr_addr);
 	mii->reg_num = MII_BMSR;
 	if (ioctl(s, SIOCGMIIREG, &ifreq) < 0) {
-	    error_msg = c_format("ioctl(SIOCGMIIREG) for interface %s "
-				 "failed: %s",
-				 if_name.c_str(), strerror(errno));
+	    error_msg += c_format("ioctl(SIOCGMIIREG) for interface %s "
+				  "failed: %s\n",
+				  if_name.c_str(), strerror(errno));
 	    close(s);
-	    return (XORP_ERROR);
+	    break; //try another method
 	}
 	close(s);
 
@@ -267,10 +270,40 @@ ifconfig_media_get_link_status(const string& if_name, bool& no_carrier,
 	    no_carrier = false;
 	else
 	    no_carrier = true;
+	error_msg = ""; // all is forgiven
 	return (XORP_OK);
     } while (false);
 #endif // SIOCGMIIREG
 
-    error_msg = c_format("No mechanism to test the link status");
+    string cfn("/sys/class/net/");
+    cfn.append(if_name);
+    cfn.append("/carrier");
+    errno = 0;
+    ifstream cf(cfn.c_str());
+    if (cf) {
+        int c = -1;
+        cf >> c;
+	// Old 2.6.18-ish kernels return EINVAL when trying to read
+	// carrier file when carrier is not active.  Yay them!
+	// So, consider EINVAL a successful (no-carrier) detection.
+        if ((c == 0) || (errno == EINVAL)) {
+	    no_carrier = 1;
+	}
+        else if (c == 1) {
+            no_carrier = 0;
+        }
+        else {
+	    // can't read, dunno why, but don't trust value.
+	    goto notfound;
+	}
+	error_msg = ""; // all is forgiven
+	return XORP_OK;
+    }
+    else {
+	error_msg += c_format("error opening file: %s errno: %i\n", cfn.c_str(), errno);
+    }
+ 
+notfound:
+    error_msg += c_format("No functional mechanism found to test the link status\n");
     return (XORP_ERROR);
 }
