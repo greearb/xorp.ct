@@ -81,7 +81,7 @@ vars.AddVariables(
     BoolVariable('disable_otherlogs',  'Force disable other logs', False),
     BoolVariable('disable_profile',  'Disable Xorp Profiler feature', False),
     BoolVariable('enable_boost',  'Use BOOST', False),
-    BoolVariable('enable_olsr',  'Build OLSR', False),
+    BoolVariable('enable_olsr',  'Build OLSR', True),
     BoolVariable('enable_tests',  'Build Test Programs', False),
     BoolVariable('enable_click',  'Build CLICK support', False),
     BoolVariable('enable_bgp',  'Build BGP', False),
@@ -345,7 +345,7 @@ env['xorp_xrlsdir']     = env['datadir'] + '/xorp/xrls'	# *.xrls
 env['xorp_sourcedir']   = sourcedir	# rtrmgr/util.cc and xif need this
 
 env['WITH_BGP'] = ARGUMENTS.get('enable_bgp', False)
-env['WITH_OLSR'] = ARGUMENTS.get('enable_olsr', False)
+env['WITH_OLSR'] = ARGUMENTS.get('enable_olsr', True)
 env['WITH_TESTS'] = ARGUMENTS.get('enable_tests', False)
 env['WITH_CLICK'] = ARGUMENTS.get('enable_click', False)
 
