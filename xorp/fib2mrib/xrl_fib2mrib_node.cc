@@ -58,18 +58,20 @@ XrlFib2mribNode::XrlFib2mribNode(EventLoop&	eventloop,
       _is_fea_registered(false),
       _is_fea_registering(false),
       _is_fea_deregistering(false),
-      _is_fea_have_ipv4_tested(false),
+#ifdef HAVE_IPV6
       _is_fea_have_ipv6_tested(false),
-      _fea_have_ipv4(false),
       _fea_have_ipv6(false),
-      _is_fea_fib_client4_registered(false),
       _is_fea_fib_client6_registered(false),
+      _is_rib_igp_table6_registered(false),
+#endif
+      _is_fea_have_ipv4_tested(false),
+      _fea_have_ipv4(false),
+      _is_fea_fib_client4_registered(false),
       _is_rib_alive(false),
       _is_rib_registered(false),
       _is_rib_registering(false),
       _is_rib_deregistering(false),
-      _is_rib_igp_table4_registered(false),
-      _is_rib_igp_table6_registered(false)
+      _is_rib_igp_table4_registered(false)
 {
     _ifmgr.set_observer(dynamic_cast<Fib2mribNode*>(this));
     _ifmgr.attach_hint_observer(dynamic_cast<Fib2mribNode*>(this));
@@ -146,8 +148,10 @@ XrlFib2mribNode::fea_register_startup()
 
 	if (! _is_fea_fib_client4_registered)
 	    Fib2mribNode::incr_startup_requests_n();
+#ifdef HAVE_IPV6
 	if (! _is_fea_fib_client6_registered)
 	    Fib2mribNode::incr_startup_requests_n();
+#endif
 
 	_is_fea_registering = true;
     }
@@ -257,9 +261,10 @@ XrlFib2mribNode::fea_register_shutdown()
 
 	if (_is_fea_fib_client4_registered)
 	    Fib2mribNode::incr_shutdown_requests_n();
+#ifdef HAVE_IPV6
 	if (_is_fea_fib_client6_registered)
 	    Fib2mribNode::incr_shutdown_requests_n();
-
+#endif
 	_is_fea_deregistering = true;
     }
 
@@ -372,9 +377,10 @@ XrlFib2mribNode::rib_register_startup()
     if (! _is_rib_registering) {
 	if (! _is_rib_igp_table4_registered)
 	    Fib2mribNode::incr_startup_requests_n();
+#ifdef HAVE_IPV6
 	if (! _is_rib_igp_table6_registered)
 	    Fib2mribNode::incr_startup_requests_n();
-
+#endif
 	_is_rib_registering = true;
     }
 
@@ -482,9 +488,10 @@ XrlFib2mribNode::rib_register_shutdown()
     if (! _is_rib_deregistering) {
 	if (_is_rib_igp_table4_registered)
 	    Fib2mribNode::incr_shutdown_requests_n();
+#ifdef HAVE_IPV6
 	if (_is_rib_igp_table6_registered)
 	    Fib2mribNode::incr_shutdown_requests_n();
-
+#endif
 	_is_rib_deregistering = true;
     }
 
@@ -597,6 +604,7 @@ XrlFib2mribNode::send_fea_add_fib_client()
 	goto start_timer_label;
     }
 
+#ifdef HAVE_IPV6
     //
     // Test whether the underlying system supports IPv6
     //
@@ -611,6 +619,7 @@ XrlFib2mribNode::send_fea_add_fib_client()
 		   "Will try again.");
 	goto start_timer_label;
     }
+#endif
 
     if (_fea_have_ipv4 && ! _is_fea_fib_client4_registered) {
 	success = _xrl_fea_fib_client.send_add_fib_client4(
@@ -723,75 +732,6 @@ XrlFib2mribNode::fea_fti_client_send_have_ipv4_cb(const XrlError& xrl_error,
 }
 
 void
-XrlFib2mribNode::fea_fti_client_send_have_ipv6_cb(const XrlError& xrl_error,
-						  const bool* result)
-{
-    switch (xrl_error.error_code()) {
-    case OKAY:
-	//
-	// If success, then we are done
-	//
-	_is_fea_have_ipv6_tested = true;
-	_fea_have_ipv6 = *result;
-	send_fea_add_fib_client();
-	// XXX: if the underying system doesn't support IPv6, then we are done
-	if (! _fea_have_ipv6)
-	    Fib2mribNode::decr_startup_requests_n();
-	break;
-
-    case COMMAND_FAILED:
-	//
-	// If a command failed because the other side rejected it, this is
-	// fatal.
-	//
-	XLOG_FATAL("Cannot test using the FEA whether the system "
-		   "supports IPv6: %s",
-		   xrl_error.str().c_str());
-	break;
-
-    case NO_FINDER:
-    case RESOLVE_FAILED:
-    case SEND_FAILED:
-	//
-	// A communication error that should have been caught elsewhere
-	// (e.g., by tracking the status of the Finder and the other targets).
-	// Probably we caught it here because of event reordering.
-	// In some cases we print an error. In other cases our job is done.
-	//
-	XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
-	break;
-
-    case BAD_ARGS:
-    case NO_SUCH_METHOD:
-    case INTERNAL_ERROR:
-	//
-	// An error that should happen only if there is something unusual:
-	// e.g., there is XRL mismatch, no enough internal resources, etc.
-	// We don't try to recover from such errors, hence this is fatal.
-	//
-	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
-	break;
-
-    case REPLY_TIMED_OUT:
-    case SEND_FAILED_TRANSIENT:
-	//
-	// If a transient error, then start a timer to try again
-	// (unless the timer is already running).
-	//
-	if (! _fea_fib_client_registration_timer.scheduled()) {
-	    XLOG_ERROR("Failed to test using the FEA whether the system "
-		       "supports IPv6: %s. "
-		       "Will try again.",
-		       xrl_error.str().c_str());
-	    _fea_fib_client_registration_timer = _eventloop.new_oneoff_after(
-		RETRY_TIMEVAL,
-		callback(this, &XrlFib2mribNode::send_fea_add_fib_client));
-	}
-	break;
-    }
-}
-
-void
 XrlFib2mribNode::fea_fib_client_send_add_fib_client4_cb(
     const XrlError& xrl_error)
 {
@@ -845,70 +785,6 @@ XrlFib2mribNode::fea_fib_client_send_add_fib_client4_cb(
 	//
 	if (! _fea_fib_client_registration_timer.scheduled()) {
 	    XLOG_ERROR("Failed to add IPv4 FIB client to the FEA: %s. "
-		       "Will try again.",
-		       xrl_error.str().c_str());
-	    _fea_fib_client_registration_timer = _eventloop.new_oneoff_after(
-		RETRY_TIMEVAL,
-		callback(this, &XrlFib2mribNode::send_fea_add_fib_client));
-	}
-	break;
-    }
-}
-
-void
-XrlFib2mribNode::fea_fib_client_send_add_fib_client6_cb(
-    const XrlError& xrl_error)
-{
-    switch (xrl_error.error_code()) {
-    case OKAY:
-	//
-	// If success, then we are done
-	//
-	_is_fea_fib_client6_registered = true;
-	send_fea_add_fib_client();
-	Fib2mribNode::decr_startup_requests_n();
-	break;
-
-    case COMMAND_FAILED:
-	//
-	// If a command failed because the other side rejected it, this is
-	// fatal.
-	//
-	XLOG_FATAL("Cannot add IPv6 FIB client to the FEA: %s",
-		   xrl_error.str().c_str());
-	break;
-
-    case NO_FINDER:
-    case RESOLVE_FAILED:
-    case SEND_FAILED:
-	//
-	// A communication error that should have been caught elsewhere
-	// (e.g., by tracking the status of the Finder and the other targets).
-	// Probably we caught it here because of event reordering.
-	// In some cases we print an error. In other cases our job is done.
-	//
-	XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
-	break;
-
-    case BAD_ARGS:
-    case NO_SUCH_METHOD:
-    case INTERNAL_ERROR:
-	//
-	// An error that should happen only if there is something unusual:
-	// e.g., there is XRL mismatch, no enough internal resources, etc.
-	// We don't try to recover from such errors, hence this is fatal.
-	//
-	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
-	break;
-
-    case REPLY_TIMED_OUT:
-    case SEND_FAILED_TRANSIENT:
-	//
-	// If a transient error, then start a timer to try again
-	// (unless the timer is already running).
-	//
-	if (! _fea_fib_client_registration_timer.scheduled()) {
-	    XLOG_ERROR("Failed to add IPv6 FIB client to the FEA: %s. "
 		       "Will try again.",
 		       xrl_error.str().c_str());
 	    _fea_fib_client_registration_timer = _eventloop.new_oneoff_after(
@@ -1032,74 +908,6 @@ XrlFib2mribNode::fea_fib_client_send_delete_fib_client4_cb(
     }
 }
 
-void
-XrlFib2mribNode::fea_fib_client_send_delete_fib_client6_cb(
-    const XrlError& xrl_error)
-{
-    switch (xrl_error.error_code()) {
-    case OKAY:
-	//
-	// If success, then we are done
-	//
-	_is_fea_have_ipv6_tested = false;
-	_fea_have_ipv6 = false;
-	_is_fea_fib_client6_registered = false;
-	Fib2mribNode::decr_shutdown_requests_n();
-	break;
-
-    case COMMAND_FAILED:
-	//
-	// If a command failed because the other side rejected it, this is
-	// fatal.
-	//
-	XLOG_FATAL("Failed to deregister IPv6 FIB client with the FEA: %s",
-		   xrl_error.str().c_str());
-	break;
-
-    case NO_FINDER:
-    case RESOLVE_FAILED:
-    case SEND_FAILED:
-	//
-	// A communication error that should have been caught elsewhere
-	// (e.g., by tracking the status of the Finder and the other targets).
-	// Probably we caught it here because of event reordering.
-	// In some cases we print an error. In other cases our job is done.
-	//
-	_is_fea_have_ipv6_tested = false;
-	_fea_have_ipv6 = false;
-	_is_fea_fib_client6_registered = false;
-	Fib2mribNode::decr_shutdown_requests_n();
-	break;
-
-    case BAD_ARGS:
-    case NO_SUCH_METHOD:
-    case INTERNAL_ERROR:
-	//
-	// An error that should happen only if there is something unusual:
-	// e.g., there is XRL mismatch, no enough internal resources, etc.
-	// We don't try to recover from such errors, hence this is fatal.
-	//
-	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
-	break;
-
-    case REPLY_TIMED_OUT:
-    case SEND_FAILED_TRANSIENT:
-	//
-	// If a transient error, then start a timer to try again
-	// (unless the timer is already running).
-	//
-	if (! _rib_register_shutdown_timer.scheduled()) {
-	    XLOG_ERROR("Cannot deregister IPv6 FIB client with the FEA: %s. "
-		       "Will try again.",
-		       xrl_error.str().c_str());
-	    _rib_register_shutdown_timer = _eventloop.new_oneoff_after(
-		RETRY_TIMEVAL,
-		callback(this, &XrlFib2mribNode::rib_register_shutdown));
-	}
-	break;
-    }
-}
-
 //
 // Add tables with the RIB
 //
@@ -1127,6 +935,7 @@ XrlFib2mribNode::send_rib_add_tables()
 	goto start_timer_label;
     }
 
+#ifdef HAVE_IPV6
     if (! _is_rib_igp_table6_registered) {
 	success = _xrl_rib_client.send_add_igp_table6(
 	    _rib_target.c_str(),
@@ -1142,6 +951,7 @@ XrlFib2mribNode::send_rib_add_tables()
 		   "Will try again.");
 	goto start_timer_label;
     }
+#endif
 
     if (! success) {
 	//
@@ -1217,69 +1027,6 @@ XrlFib2mribNode::rib_client_send_add_igp_table4_cb(const XrlError& xrl_error)
     }
 }
 
-void
-XrlFib2mribNode::rib_client_send_add_igp_table6_cb(const XrlError& xrl_error)
-{
-    switch (xrl_error.error_code()) {
-    case OKAY:
-	//
-	// If success, then we are done
-	//
-	_is_rib_igp_table6_registered = true;
-	send_rib_add_tables();
-	Fib2mribNode::decr_startup_requests_n();
-	break;
-
-    case COMMAND_FAILED:
-	//
-	// If a command failed because the other side rejected it, this is
-	// fatal.
-	//
-	XLOG_FATAL("Cannot add IPv6 IGP table to the RIB: %s",
-		   xrl_error.str().c_str());
-	break;
-
-    case NO_FINDER:
-    case RESOLVE_FAILED:
-    case SEND_FAILED:
-	//
-	// A communication error that should have been caught elsewhere
-	// (e.g., by tracking the status of the Finder and the other targets).
-	// Probably we caught it here because of event reordering.
-	// In some cases we print an error. In other cases our job is done.
-	//
-	XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
-	break;
-
-    case BAD_ARGS:
-    case NO_SUCH_METHOD:
-    case INTERNAL_ERROR:
-	//
-	// An error that should happen only if there is something unusual:
-	// e.g., there is XRL mismatch, no enough internal resources, etc.
-	// We don't try to recover from such errors, hence this is fatal.
-	//
-	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
-	break;
-
-    case REPLY_TIMED_OUT:
-    case SEND_FAILED_TRANSIENT:
-	//
-	// If a transient error, then start a timer to try again
-	// (unless the timer is already running).
-	//
-	if (! _rib_igp_table_registration_timer.scheduled()) {
-	    XLOG_ERROR("Failed to add IPv6 IGP table to the RIB: %s. "
-		       "Will try again.",
-		       xrl_error.str().c_str());
-	    _rib_igp_table_registration_timer = _eventloop.new_oneoff_after(
-		RETRY_TIMEVAL,
-		callback(this, &XrlFib2mribNode::send_rib_add_tables));
-	}
-	break;
-    }
-}
-
 //
 // Delete tables with the RIB
 //
@@ -1308,6 +1055,7 @@ XrlFib2mribNode::send_rib_delete_tables()
 	}
     }
 
+#ifdef HAVE_IPV6
     if (_is_rib_igp_table6_registered) {
 	bool success6;
 	success6 = _xrl_rib_client.send_delete_igp_table6(
@@ -1324,6 +1072,7 @@ XrlFib2mribNode::send_rib_delete_tables()
 	    success = false;
 	}
     }
+#endif
 
     if (! success) {
 	Fib2mribNode::set_status(SERVICE_FAILED);
@@ -1385,70 +1134,6 @@ XrlFib2mribNode::rib_client_send_delete_igp_table4_cb(
 	//
 	if (! _rib_register_shutdown_timer.scheduled()) {
 	    XLOG_ERROR("Failed to deregister IPv4 IGP table with the RIB: %s. "
-		       "Will try again.",
-		       xrl_error.str().c_str());
-	    _rib_register_shutdown_timer = _eventloop.new_oneoff_after(
-		RETRY_TIMEVAL,
-		callback(this, &XrlFib2mribNode::rib_register_shutdown));
-	}
-	break;
-    }
-}
-
-void
-XrlFib2mribNode::rib_client_send_delete_igp_table6_cb(
-    const XrlError& xrl_error)
-{
-    switch (xrl_error.error_code()) {
-    case OKAY:
-	//
-	// If success, then we are done
-	//
-	_is_rib_igp_table6_registered = false;
-	Fib2mribNode::decr_shutdown_requests_n();
-	break;
-
-    case COMMAND_FAILED:
-	//
-	// If a command failed because the other side rejected it, this is
-	// fatal.
-	//
-	XLOG_FATAL("Cannot deregister IPv6 IGP table with the RIB: %s",
-		   xrl_error.str().c_str());
-	break;
-
-    case NO_FINDER:
-    case RESOLVE_FAILED:
-    case SEND_FAILED:
-	//
-	// A communication error that should have been caught elsewhere
-	// (e.g., by tracking the status of the Finder and the other targets).
-	// Probably we caught it here because of event reordering.
-	// In some cases we print an error. In other cases our job is done.
-	//
-	_is_rib_igp_table6_registered = false;
-	Fib2mribNode::decr_shutdown_requests_n();
-	break;
-
-    case BAD_ARGS:
-    case NO_SUCH_METHOD:
-    case INTERNAL_ERROR:
-	//
-	// An error that should happen only if there is something unusual:
-	// e.g., there is XRL mismatch, no enough internal resources, etc.
-	// We don't try to recover from such errors, hence this is fatal.
-	//
-	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
-	break;
-
-    case REPLY_TIMED_OUT:
-    case SEND_FAILED_TRANSIENT:
-	//
-	// If a transient error, then start a timer to try again
-	// (unless the timer is already running).
-	//
-	if (! _rib_register_shutdown_timer.scheduled()) {
-	    XLOG_ERROR("Failed to deregister IPv6 IGP table with the RIB: %s. "
 		       "Will try again.",
 		       xrl_error.str().c_str());
 	    _rib_register_shutdown_timer = _eventloop.new_oneoff_after(
@@ -1661,42 +1346,6 @@ XrlFib2mribNode::fea_fib_client_0_1_add_route4(
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError
-XrlFib2mribNode::fea_fib_client_0_1_add_route6(
-    // Input values,
-    const IPv6Net&	network,
-    const IPv6&		nexthop,
-    const string&	ifname,
-    const string&	vifname,
-    const uint32_t&	metric,
-    const uint32_t&	admin_distance,
-    const string&	protocol_origin,
-    const bool&	xorp_route)
-{
-    string error_msg;
-
-    debug_msg("fea_fib_client_0_1_add_route6(): "
-	      "network = %s nexthop = %s ifname = %s vifname = %s "
-	      "metric = %u admin_distance = %u protocol_origin = %s "
-	      "xorp_route = %s\n",
-	      network.str().c_str(),
-	      nexthop.str().c_str(),
-	      ifname.c_str(),
-	      vifname.c_str(),
-	      XORP_UINT_CAST(metric),
-	      XORP_UINT_CAST(admin_distance),
-	      protocol_origin.c_str(),
-	      bool_c_str(xorp_route));
-
-    if (Fib2mribNode::add_route6(network, nexthop, ifname, vifname,
-				 metric, admin_distance,
-				 protocol_origin, xorp_route,
-				 error_msg) != XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    return XrlCmdError::OKAY();
-}
 
 /**
  *  Replace a route.
@@ -1759,43 +1408,6 @@ XrlFib2mribNode::fea_fib_client_0_1_replace_route4(
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError
-XrlFib2mribNode::fea_fib_client_0_1_replace_route6(
-    // Input values,
-    const IPv6Net&	network,
-    const IPv6&		nexthop,
-    const string&	ifname,
-    const string&	vifname,
-    const uint32_t&	metric,
-    const uint32_t&	admin_distance,
-    const string&	protocol_origin,
-    const bool&	xorp_route)
-{
-    string error_msg;
-
-    debug_msg("fea_fib_client_0_1_replace_route6(): "
-	      "network = %s nexthop = %s ifname = %s vifname = %s "
-	      "metric = %u admin_distance = %u protocol_origin = %s "
-	      "xorp_route = %s\n",
-	      network.str().c_str(),
-	      nexthop.str().c_str(),
-	      ifname.c_str(),
-	      vifname.c_str(),
-	      XORP_UINT_CAST(metric),
-	      XORP_UINT_CAST(admin_distance),
-	      protocol_origin.c_str(),
-	      bool_c_str(xorp_route));
-
-    if (Fib2mribNode::replace_route6(network, nexthop, ifname, vifname,
-				     metric, admin_distance,
-				     protocol_origin, xorp_route,
-				     error_msg) != XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    return XrlCmdError::OKAY();
-}
-
 /**
  *  Delete a route.
  *
@@ -1829,29 +1441,6 @@ XrlFib2mribNode::fea_fib_client_0_1_delete_route4(
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError
-XrlFib2mribNode::fea_fib_client_0_1_delete_route6(
-    // Input values,
-    const IPv6Net&	network,
-    const string&	ifname,
-    const string&	vifname)
-{
-    string error_msg;
-
-    debug_msg("fea_fib_client_0_1_delete_route6(): "
-	      "network = %s ifname = %s vifname = %s\n",
-	      network.str().c_str(),
-	      ifname.c_str(),
-	      vifname.c_str());
-
-    if (Fib2mribNode::delete_route6(network, ifname, vifname, error_msg)
-	!= XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    return XrlCmdError::OKAY();
-}
-
 /**
  *  Route resolve notification.
  *
@@ -1863,15 +1452,6 @@ XrlCmdError
 XrlFib2mribNode::fea_fib_client_0_1_resolve_route4(
     // Input values,
     const IPv4Net&	network)
-{
-    UNUSED(network);
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlFib2mribNode::fea_fib_client_0_1_resolve_route6(
-    // Input values,
-    const IPv6Net&	network)
 {
     UNUSED(network);
     return XrlCmdError::OKAY();
@@ -1990,10 +1570,12 @@ XrlFib2mribNode::send_rib_route_change()
 	goto start_timer_label;
     }
 
+#ifdef HAVE_IPV6
     if (fib2mrib_route.is_ipv6() && (! _is_rib_igp_table6_registered)) {
 	success = false;
 	goto start_timer_label;
     }
+#endif
 
     //
     // Send the appropriate XRL
@@ -2030,6 +1612,8 @@ XrlFib2mribNode::send_rib_route_change()
 		    return;
 	    }
 	}
+
+#ifdef HAVE_IPV6
 	if (fib2mrib_route.is_ipv6()) {
 	    if (fib2mrib_route.is_interface_route()) {
 		success = _xrl_rib_client.send_add_interface_route6(
@@ -2061,6 +1645,7 @@ XrlFib2mribNode::send_rib_route_change()
 		    return;
 	    }
 	}
+#endif
     }
 
     if (fib2mrib_route.is_replace_route()) {
@@ -2095,6 +1680,8 @@ XrlFib2mribNode::send_rib_route_change()
 		    return;
 	    }
 	}
+
+#ifdef HAVE_IPV6
 	if (fib2mrib_route.is_ipv6()) {
 	    if (fib2mrib_route.is_interface_route()) {
 		success = _xrl_rib_client.send_replace_interface_route6(
@@ -2126,6 +1713,7 @@ XrlFib2mribNode::send_rib_route_change()
 		    return;
 	    }
 	}
+#endif
     }
 
     if (fib2mrib_route.is_delete_route()) {
@@ -2140,6 +1728,8 @@ XrlFib2mribNode::send_rib_route_change()
 	    if (success)
 		return;
 	}
+
+#ifdef HAVE_IPV6
 	if (fib2mrib_route.is_ipv6()) {
 	    success = _xrl_rib_client.send_delete_route6(
 		_rib_target.c_str(),
@@ -2151,6 +1741,7 @@ XrlFib2mribNode::send_rib_route_change()
 	    if (success)
 		return;
 	}
+#endif
     }
 
     if (! success) {
@@ -2278,3 +1869,449 @@ XrlFib2mribNode::policy_backend_0_1_push_routes()
     Fib2mribNode::push_routes(); 
     return XrlCmdError::OKAY();
 }
+
+
+/** IPv6 stuff */
+
+#ifdef HAVE_IPV6
+
+XrlCmdError
+XrlFib2mribNode::fea_fib_client_0_1_add_route6(
+    // Input values,
+    const IPv6Net&	network,
+    const IPv6&		nexthop,
+    const string&	ifname,
+    const string&	vifname,
+    const uint32_t&	metric,
+    const uint32_t&	admin_distance,
+    const string&	protocol_origin,
+    const bool&	xorp_route)
+{
+    string error_msg;
+
+    debug_msg("fea_fib_client_0_1_add_route6(): "
+	      "network = %s nexthop = %s ifname = %s vifname = %s "
+	      "metric = %u admin_distance = %u protocol_origin = %s "
+	      "xorp_route = %s\n",
+	      network.str().c_str(),
+	      nexthop.str().c_str(),
+	      ifname.c_str(),
+	      vifname.c_str(),
+	      XORP_UINT_CAST(metric),
+	      XORP_UINT_CAST(admin_distance),
+	      protocol_origin.c_str(),
+	      bool_c_str(xorp_route));
+
+    if (Fib2mribNode::add_route6(network, nexthop, ifname, vifname,
+				 metric, admin_distance,
+				 protocol_origin, xorp_route,
+				 error_msg) != XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFib2mribNode::fea_fib_client_0_1_replace_route6(
+    // Input values,
+    const IPv6Net&	network,
+    const IPv6&		nexthop,
+    const string&	ifname,
+    const string&	vifname,
+    const uint32_t&	metric,
+    const uint32_t&	admin_distance,
+    const string&	protocol_origin,
+    const bool&	xorp_route)
+{
+    string error_msg;
+
+    debug_msg("fea_fib_client_0_1_replace_route6(): "
+	      "network = %s nexthop = %s ifname = %s vifname = %s "
+	      "metric = %u admin_distance = %u protocol_origin = %s "
+	      "xorp_route = %s\n",
+	      network.str().c_str(),
+	      nexthop.str().c_str(),
+	      ifname.c_str(),
+	      vifname.c_str(),
+	      XORP_UINT_CAST(metric),
+	      XORP_UINT_CAST(admin_distance),
+	      protocol_origin.c_str(),
+	      bool_c_str(xorp_route));
+
+    if (Fib2mribNode::replace_route6(network, nexthop, ifname, vifname,
+				     metric, admin_distance,
+				     protocol_origin, xorp_route,
+				     error_msg) != XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFib2mribNode::fea_fib_client_0_1_delete_route6(
+    // Input values,
+    const IPv6Net&	network,
+    const string&	ifname,
+    const string&	vifname)
+{
+    string error_msg;
+
+    debug_msg("fea_fib_client_0_1_delete_route6(): "
+	      "network = %s ifname = %s vifname = %s\n",
+	      network.str().c_str(),
+	      ifname.c_str(),
+	      vifname.c_str());
+
+    if (Fib2mribNode::delete_route6(network, ifname, vifname, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+
+XrlCmdError
+XrlFib2mribNode::fea_fib_client_0_1_resolve_route6(
+    // Input values,
+    const IPv6Net&	network)
+{
+    UNUSED(network);
+    return XrlCmdError::OKAY();
+}
+
+void
+XrlFib2mribNode::fea_fti_client_send_have_ipv6_cb(const XrlError& xrl_error,
+						  const bool* result)
+{
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
+	_is_fea_have_ipv6_tested = true;
+	_fea_have_ipv6 = *result;
+	send_fea_add_fib_client();
+	// XXX: if the underying system doesn't support IPv6, then we are done
+	if (! _fea_have_ipv6)
+	    Fib2mribNode::decr_startup_requests_n();
+	break;
+
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
+	XLOG_FATAL("Cannot test using the FEA whether the system "
+		   "supports IPv6: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+    case SEND_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the Finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _fea_fib_client_registration_timer.scheduled()) {
+	    XLOG_ERROR("Failed to test using the FEA whether the system "
+		       "supports IPv6: %s. "
+		       "Will try again.",
+		       xrl_error.str().c_str());
+	    _fea_fib_client_registration_timer = _eventloop.new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlFib2mribNode::send_fea_add_fib_client));
+	}
+	break;
+    }
+}
+
+
+void
+XrlFib2mribNode::fea_fib_client_send_add_fib_client6_cb(
+    const XrlError& xrl_error)
+{
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
+	_is_fea_fib_client6_registered = true;
+	send_fea_add_fib_client();
+	Fib2mribNode::decr_startup_requests_n();
+	break;
+
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
+	XLOG_FATAL("Cannot add IPv6 FIB client to the FEA: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+    case SEND_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the Finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _fea_fib_client_registration_timer.scheduled()) {
+	    XLOG_ERROR("Failed to add IPv6 FIB client to the FEA: %s. "
+		       "Will try again.",
+		       xrl_error.str().c_str());
+	    _fea_fib_client_registration_timer = _eventloop.new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlFib2mribNode::send_fea_add_fib_client));
+	}
+	break;
+    }
+}
+
+
+void
+XrlFib2mribNode::fea_fib_client_send_delete_fib_client6_cb(
+    const XrlError& xrl_error)
+{
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
+	_is_fea_have_ipv6_tested = false;
+	_fea_have_ipv6 = false;
+	_is_fea_fib_client6_registered = false;
+	Fib2mribNode::decr_shutdown_requests_n();
+	break;
+
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
+	XLOG_FATAL("Failed to deregister IPv6 FIB client with the FEA: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+    case SEND_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the Finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	_is_fea_have_ipv6_tested = false;
+	_fea_have_ipv6 = false;
+	_is_fea_fib_client6_registered = false;
+	Fib2mribNode::decr_shutdown_requests_n();
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _rib_register_shutdown_timer.scheduled()) {
+	    XLOG_ERROR("Cannot deregister IPv6 FIB client with the FEA: %s. "
+		       "Will try again.",
+		       xrl_error.str().c_str());
+	    _rib_register_shutdown_timer = _eventloop.new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlFib2mribNode::rib_register_shutdown));
+	}
+	break;
+    }
+}
+
+
+void
+XrlFib2mribNode::rib_client_send_add_igp_table6_cb(const XrlError& xrl_error)
+{
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
+	_is_rib_igp_table6_registered = true;
+	send_rib_add_tables();
+	Fib2mribNode::decr_startup_requests_n();
+	break;
+
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
+	XLOG_FATAL("Cannot add IPv6 IGP table to the RIB: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+    case SEND_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the Finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _rib_igp_table_registration_timer.scheduled()) {
+	    XLOG_ERROR("Failed to add IPv6 IGP table to the RIB: %s. "
+		       "Will try again.",
+		       xrl_error.str().c_str());
+	    _rib_igp_table_registration_timer = _eventloop.new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlFib2mribNode::send_rib_add_tables));
+	}
+	break;
+    }
+}
+
+
+void
+XrlFib2mribNode::rib_client_send_delete_igp_table6_cb(
+    const XrlError& xrl_error)
+{
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
+	_is_rib_igp_table6_registered = false;
+	Fib2mribNode::decr_shutdown_requests_n();
+	break;
+
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
+	XLOG_FATAL("Cannot deregister IPv6 IGP table with the RIB: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+    case SEND_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the Finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	_is_rib_igp_table6_registered = false;
+	Fib2mribNode::decr_shutdown_requests_n();
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _rib_register_shutdown_timer.scheduled()) {
+	    XLOG_ERROR("Failed to deregister IPv6 IGP table with the RIB: %s. "
+		       "Will try again.",
+		       xrl_error.str().c_str());
+	    _rib_register_shutdown_timer = _eventloop.new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlFib2mribNode::rib_register_shutdown));
+	}
+	break;
+    }
+}
+
+#endif // ipv6

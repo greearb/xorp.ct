@@ -170,17 +170,6 @@ protected:
 	const string&	protocol_origin,
 	const bool&	xorp_route);
 
-    XrlCmdError fea_fib_client_0_1_add_route6(
-	// Input values,
-	const IPv6Net&	network,
-	const IPv6&	nexthop,
-	const string&	ifname,
-	const string&	vifname,
-	const uint32_t&	metric,
-	const uint32_t&	admin_distance,
-	const string&	protocol_origin,
-	const bool&	xorp_route);
-
     /**
      *  Replace a route.
      *
@@ -216,17 +205,6 @@ protected:
 	const string&	protocol_origin,
 	const bool&	xorp_route);
 
-    XrlCmdError fea_fib_client_0_1_replace_route6(
-	// Input values,
-	const IPv6Net&	network,
-	const IPv6&	nexthop,
-	const string&	ifname,
-	const string&	vifname,
-	const uint32_t&	metric,
-	const uint32_t&	admin_distance,
-	const string&	protocol_origin,
-	const bool&	xorp_route);
-
     /**
      *  Delete a route.
      *
@@ -244,12 +222,6 @@ protected:
 	const string&	ifname,
 	const string&	vifname);
 
-    XrlCmdError fea_fib_client_0_1_delete_route6(
-	// Input values,
-	const IPv6Net&	network,
-	const string&	ifname,
-	const string&	vifname);
-
     /**
      *  Route resolve notification.
      *
@@ -260,10 +232,6 @@ protected:
     XrlCmdError fea_fib_client_0_1_resolve_route4(
 	// Input values,
 	const IPv4Net&	network);
-
-    XrlCmdError fea_fib_client_0_1_resolve_route6(
-	// Input values,
-	const IPv6Net&	network);
 
     /**
      *  Enable/disable/start/stop Fib2mrib.
@@ -313,6 +281,42 @@ protected:
     XrlCmdError policy_backend_0_1_push_routes();
 
 
+#ifdef HAVE_IPV6
+    XrlCmdError fea_fib_client_0_1_add_route6(
+	// Input values,
+	const IPv6Net&	network,
+	const IPv6&	nexthop,
+	const string&	ifname,
+	const string&	vifname,
+	const uint32_t&	metric,
+	const uint32_t&	admin_distance,
+	const string&	protocol_origin,
+	const bool&	xorp_route);
+
+
+    XrlCmdError fea_fib_client_0_1_replace_route6(
+	// Input values,
+	const IPv6Net&	network,
+	const IPv6&	nexthop,
+	const string&	ifname,
+	const string&	vifname,
+	const uint32_t&	metric,
+	const uint32_t&	admin_distance,
+	const string&	protocol_origin,
+	const bool&	xorp_route);
+
+    XrlCmdError fea_fib_client_0_1_delete_route6(
+	// Input values,
+	const IPv6Net&	network,
+	const string&	ifname,
+	const string&	vifname);
+
+    XrlCmdError fea_fib_client_0_1_resolve_route6(
+	// Input values,
+	const IPv6Net&	network);
+
+#endif
+
 private:
     const ServiceBase* ifmgr_mirror_service_base() const {
 	return dynamic_cast<const ServiceBase*>(&_ifmgr);
@@ -341,13 +345,18 @@ private:
     void send_fea_add_fib_client();
     void fea_fti_client_send_have_ipv4_cb(const XrlError& xrl_error,
 					  const bool* result);
+#ifdef HAVE_IPV6
     void fea_fti_client_send_have_ipv6_cb(const XrlError& xrl_error,
 					  const bool* result);
-    void fea_fib_client_send_add_fib_client4_cb(const XrlError& xrl_error);
     void fea_fib_client_send_add_fib_client6_cb(const XrlError& xrl_error);
+    void fea_fib_client_send_delete_fib_client6_cb(const XrlError& xrl_error);
+    void rib_client_send_add_igp_table6_cb(const XrlError& xrl_error);
+    void rib_client_send_delete_igp_table6_cb(const XrlError& xrl_error);
+#endif
+
+    void fea_fib_client_send_add_fib_client4_cb(const XrlError& xrl_error);
     void send_fea_delete_fib_client();
     void fea_fib_client_send_delete_fib_client4_cb(const XrlError& xrl_error);
-    void fea_fib_client_send_delete_fib_client6_cb(const XrlError& xrl_error);
 
     void rib_register_startup();
     void finder_register_interest_rib_cb(const XrlError& xrl_error);
@@ -355,10 +364,8 @@ private:
     void finder_deregister_interest_rib_cb(const XrlError& xrl_error);
     void send_rib_add_tables();
     void rib_client_send_add_igp_table4_cb(const XrlError& xrl_error);
-    void rib_client_send_add_igp_table6_cb(const XrlError& xrl_error);
     void send_rib_delete_tables();
     void rib_client_send_delete_igp_table4_cb(const XrlError& xrl_error);
-    void rib_client_send_delete_igp_table6_cb(const XrlError& xrl_error);
 
     /**
      * Inform the RIB about a route change.
@@ -401,12 +408,16 @@ private:
     XorpTimer		_fea_register_startup_timer;
     XorpTimer		_fea_register_shutdown_timer;
 
-    bool		_is_fea_have_ipv4_tested;
+#ifdef HAVE_IPV6
     bool		_is_fea_have_ipv6_tested;
-    bool		_fea_have_ipv4;
     bool		_fea_have_ipv6;
-    bool		_is_fea_fib_client4_registered;
     bool		_is_fea_fib_client6_registered;
+    bool		_is_rib_igp_table6_registered;
+#endif
+
+    bool		_is_fea_have_ipv4_tested;
+    bool		_fea_have_ipv4;
+    bool		_is_fea_fib_client4_registered;
     XorpTimer		_fea_fib_client_registration_timer;
 
     bool		_is_rib_alive;
@@ -414,7 +425,6 @@ private:
     bool		_is_rib_registering;
     bool		_is_rib_deregistering;
     bool		_is_rib_igp_table4_registered;
-    bool		_is_rib_igp_table6_registered;
     XorpTimer		_rib_register_startup_timer;
     XorpTimer		_rib_register_shutdown_timer;
     XorpTimer		_rib_igp_table_registration_timer;
