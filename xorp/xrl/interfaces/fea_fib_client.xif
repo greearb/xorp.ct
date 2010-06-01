@@ -1,5 +1,7 @@
 /* $XORP: xorp/xrl/interfaces/fea_fib_client.xif,v 1.5 2007/01/13 04:20:04 pavlin Exp $ */
 
+#include <xorp_config.h>
+
 /*
  * FEA Forwarding Information Base Client XRL interface.
  */
@@ -25,9 +27,6 @@ interface fea_fib_client/0.1 {
 	add_route4	? network:ipv4net & nexthop:ipv4 & ifname:txt	\
 			& vifname:txt & metric:u32 & admin_distance:u32	\
 			& protocol_origin:txt & xorp_route:bool;
-	add_route6	? network:ipv6net & nexthop:ipv6 & ifname:txt	\
-			& vifname:txt & metric:u32 & admin_distance:u32	\
-			& protocol_origin:txt & xorp_route:bool;
 
 	/**
 	 * Notification of a route being replaced.
@@ -49,9 +48,6 @@ interface fea_fib_client/0.1 {
 	replace_route4	? network:ipv4net & nexthop:ipv4 & ifname:txt	\
 			& vifname:txt & metric:u32 & admin_distance:u32	\
 			& protocol_origin:txt & xorp_route:bool;
-	replace_route6	? network:ipv6net & nexthop:ipv6 & ifname:txt	\
-			& vifname:txt & metric:u32 & admin_distance:u32	\
-			& protocol_origin:txt & xorp_route:bool;
 
 	/**
 	 * Notification of a route being deleted.
@@ -63,7 +59,6 @@ interface fea_fib_client/0.1 {
 	 * destination.
 	 */
 	delete_route4	? network:ipv4net & ifname:txt & vifname: txt;
-	delete_route6	? network:ipv6net & ifname:txt & vifname: txt;
 
 	/**
 	 * Notification of a route resolution request. This is issued
@@ -75,5 +70,16 @@ interface fea_fib_client/0.1 {
 	 * upper layer.
 	 */
 	resolve_route4	? network:ipv4net;
+
+#ifdef HAVE_IPV6
+	add_route6	? network:ipv6net & nexthop:ipv6 & ifname:txt	\
+			& vifname:txt & metric:u32 & admin_distance:u32	\
+			& protocol_origin:txt & xorp_route:bool;
 	resolve_route6	? network:ipv6net;
+	replace_route6	? network:ipv6net & nexthop:ipv6 & ifname:txt	\
+			& vifname:txt & metric:u32 & admin_distance:u32	\
+			& protocol_origin:txt & xorp_route:bool;
+	delete_route6	? network:ipv6net & ifname:txt & vifname: txt;
+
+#endif
 }
