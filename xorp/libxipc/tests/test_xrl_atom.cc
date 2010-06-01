@@ -119,10 +119,10 @@ test_atom(const XrlAtom& a)
     // Print test name
     tracef("Testing %s %s\n",
 	   (a.name().size()) ? "Named" : "Unnamed",
-	   a.type_name().c_str());
+	   a.type_name());
 
     const char* name = a.name().c_str();
-    const char* tname = a.type_name().c_str();
+    const char* tname = a.type_name();
 
     if (assignment_test(a) == false) {
 	fprintf(stderr, "Failed assignment test: %s:%s", name, tname);

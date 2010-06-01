@@ -636,6 +636,7 @@ usage(const char *argv0, int exit_value)
     fprintf(output, "           -n <count>                            : number of XrlAtoms in each Xrl call\n");
     fprintf(output, "           -N <count>                            : number of Xrls to send in a test run\n");
     fprintf(output, "           -r                                    : run receiver in same process\n");
+    fprintf(output, "           -s <style>  0: short-xrl, 1: var-xrl (default), 2: long-xrl\n");
     fprintf(output, "           -a                                    : eventloop aggressiveness\n");
     fprintf(output, "           -1                                    : parameter 1\n");
     fprintf(output, "           -2                                    : parameter 2\n");
@@ -746,7 +747,7 @@ main(int argc, char *argv[])
     //
     // Get the program options
     //
-    while ((ch = getopt(argc, argv, "F:hm:n:N:ra:1:2:")) != -1) {
+    while ((ch = getopt(argc, argv, "F:hm:n:N:rs:a:1:2:")) != -1) {
 	switch (ch) {
 	case 'a':
 	    g_aggressiveness = atoi(optarg);
@@ -790,6 +791,9 @@ main(int argc, char *argv[])
 	case 'r':
 	    g_run_receiver = true;
 	    break;
+	case 's':
+	    g_send_style = atoi(optarg);
+	    break;
 	case 'h':
 	case '?':
 	    // Help
@@ -811,6 +815,7 @@ main(int argc, char *argv[])
 
     fprintf(stdout, "XrlAtoms per call = %u\n", g_atoms_per_xrl);
     fprintf(stdout, "Send method = %s\n", send_methods[g_send_method]);
+    fprintf(stdout, "Send style = %i\n", g_send_style);
 
     //
     // Run everything

@@ -41,7 +41,7 @@ typedef IPNet<IPvX> BaseIPvXNet;
 
 template<>
 inline
-IPNet<IPvX>::IPNet(const IPvX& ipvx, uint32_t prefix_len)
+IPNet<IPvX>::IPNet(const IPvX& ipvx, uint8_t prefix_len)
     throw (InvalidNetmaskLength)
     : _prefix_len(prefix_len)
 {
@@ -131,7 +131,7 @@ public:
      * @param a base address for the subnet.
      * @param prefix_len length of subnet mask.
      */
-    IPvXNet(const IPvX& a, uint32_t prefix_len) throw (InvalidNetmaskLength)
+    IPvXNet(const IPvX& a, uint8_t prefix_len) throw (InvalidNetmaskLength)
 	: BaseIPvXNet(a, prefix_len) {}
 
     // The following methods are specific to IPvXNet

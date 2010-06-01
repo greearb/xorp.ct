@@ -181,22 +181,22 @@ public:
     // ipv4 constructors
     explicit XrlAtom(const IPv4& addr)
 	: _type(xrlatom_ipv4), _have_data(true), _own(true),
-	_ipv4(new IPv4(addr)) {}
+	  _ipv4(addr) {}
 
     XrlAtom(const char* name, const IPv4& addr) throw (BadName)
 	: _type(xrlatom_ipv4), _have_data(true), _own(true),
-	_ipv4(new IPv4(addr)) {
+	  _ipv4(addr) {
 	set_name(name);
     }
 
     // ipv4net constructors
     explicit XrlAtom(const IPv4Net& subnet)
-	: _type(xrlatom_ipv4net), _have_data(true), _own(true),
-	_ipv4net(new IPv4Net(subnet)) {}
+	    : _type(xrlatom_ipv4net), _have_data(true), _own(true),
+	      _ipv4net(subnet) {}
 
     XrlAtom(const char* name, const IPv4Net& subnet) throw (BadName)
-	: _type(xrlatom_ipv4net), _have_data(true), _own(true),
-	_ipv4net(new IPv4Net(subnet)) {
+	    : _type(xrlatom_ipv4net), _have_data(true), _own(true),
+	      _ipv4net(subnet) {
 	set_name(name);
     }
 
@@ -230,7 +230,7 @@ public:
 	set_name(name);
 	if (ipvx.is_ipv4()) {
 	    _type = xrlatom_ipv4;
-	    _ipv4 = new IPv4(ipvx.get_ipv4());
+	    _ipv4 = ipvx.get_ipv4();
 	} else if (ipvx.is_ipv6()) {
 	    _type = xrlatom_ipv6;
 	    _ipv6 = new IPv6(ipvx.get_ipv6());
@@ -247,7 +247,7 @@ public:
 	set_name(name);
 	if (ipvxnet.is_ipv4()) {
 	    _type = xrlatom_ipv4net;
-	    _ipv4net = new IPv4Net(ipvxnet.get_ipv4net());
+	    _ipv4net = ipvxnet.get_ipv4net();
 	} else if (ipvxnet.is_ipv6()) {
 	    _type = xrlatom_ipv6net;
 	    _ipv6net = new IPv6Net(ipvxnet.get_ipv6net());
@@ -346,7 +346,7 @@ public:
     void set_name(const string& n) throw (BadName) { set_name (n.c_str()); }
 
     string str() const;
-    const string type_name() const;
+    const char* type_name() const;
     const string value() const;
 
     const bool&		has_data() const { return _have_data; }
@@ -357,7 +357,7 @@ public:
     const int32_t&	   int32() const throw (NoData, WrongType);
     const uint32_t&	   uint32() const throw (NoData, WrongType);
     const IPv4&		   ipv4() const throw (NoData, WrongType);
-    const IPv4Net&	   ipv4net() const throw (NoData, WrongType);
+    const IPv4Net&         ipv4net() const throw (NoData, WrongType);
     const IPv6&		   ipv6() const throw (NoData, WrongType);
     const IPv6Net&	   ipv6net() const throw (NoData, WrongType);
     const IPvX		   ipvx() const throw (NoData, WrongType);
@@ -386,8 +386,6 @@ public:
     SET(int64_t, _i64val, )
     SET(uint64_t, _u64val, )
     SET(bool, _boolean, )
-    SET(IPv4, _ipv4, &)
-    SET(IPv4Net, _ipv4net, &)
     SET(IPv6, _ipv6, &)
     SET(IPv6Net, _ipv6net, &)
     SET(Mac, _mac, &)
@@ -395,6 +393,16 @@ public:
     SET(XrlAtomList, _list, &)
     SET(vector<uint8_t>, _binary, &);
 #undef SET
+
+    void set(const IPv4& v) {
+	abandon_data();
+	_ipv4 = v;
+    }
+
+    void set(const IPv4Net& v) {
+	abandon_data();
+	_ipv4net = v;
+    }
 
     // Equality tests
     bool operator==(const XrlAtom& x) const;
@@ -463,8 +471,6 @@ private:
 	bool		 _boolean;
         int32_t		 _i32val;
         uint32_t	 _u32val;
-        IPv4*		 _ipv4;
-        IPv4Net*	 _ipv4net;
         IPv6*		 _ipv6;
         IPv6Net*	 _ipv6net;
         Mac*		 _mac;
@@ -477,6 +483,10 @@ private:
         // ... Your type here, if it's more than sizeof(uintptr_t) bytes,
 	// use a pointer ...
     } ;
+
+    // Can't put this in a union, evidently.
+    IPv4	         _ipv4;
+    IPv4Net              _ipv4net;
 };
 
 // XrlAtomSpell is a placeholder class for Xrl mapping

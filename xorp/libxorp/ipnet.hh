@@ -54,7 +54,7 @@ public:
      * @param prefix_len length of subnet mask (e.g., class C nets would have
      * prefix_len=24).
      */
-    IPNet(const A& a, uint32_t prefix_len) throw (InvalidNetmaskLength)
+    IPNet(const A& a, uint8_t prefix_len) throw (InvalidNetmaskLength)
 	: _masked_addr(a), _prefix_len(prefix_len)
     {
 	if (prefix_len > A::addr_bitlen())
@@ -272,12 +272,16 @@ public:
      */
     const A& masked_addr() const { return _masked_addr; }
 
+    A& masked_addr_nc() { return _masked_addr; }
+
     /**
      * Get the prefix length.
      *
      * @return the prefix length for this subnet.
      */
-    uint32_t prefix_len() const { return _prefix_len; }
+    uint8_t prefix_len() const { return _prefix_len; }
+
+    void set_prefix_len(uint8_t v) { _prefix_len = v; }
 
     /**
      * Get the network mask.
@@ -446,7 +450,7 @@ private:
 	throw (InvalidString, InvalidNetmaskLength);
 
     A		_masked_addr;
-    uint32_t	_prefix_len;
+    uint8_t	_prefix_len;
 };
 
 /* ------------------------------------------------------------------------- */
@@ -487,7 +491,7 @@ IPNet<A>::operator<(const IPNet& other) const
 
 #else	// old code
     const A& maddr_him = other.masked_addr();
-    uint32_t his_prefix_len = other.prefix_len();
+    uint8_t his_prefix_len = other.prefix_len();
 
     //the ordering is important because we want the longest match to
     //be first.  For example, we want the following:

@@ -174,11 +174,12 @@ XrlAtom::data_from_c_str(const char* c_str)
 	_u32val = (uint32_t)strtoul(c_str, (char**)NULL, 10);
 	break;
     case xrlatom_ipv4:
-	_ipv4 = new IPv4(c_str);
+	_ipv4 = IPv4(c_str);
 	break;
-    case xrlatom_ipv4net:
-	_ipv4net = new IPv4Net(c_str);
+    case xrlatom_ipv4net: {
+	_ipv4net = IPv4Net(c_str);
 	break;
+    }
     case xrlatom_ipv6:
 	_ipv6 = new IPv6(c_str);
 	break;
@@ -251,14 +252,14 @@ const IPv4&
 XrlAtom::ipv4() const throw (NoData, WrongType)
 {
     type_and_data_okay(xrlatom_ipv4);
-    return *_ipv4;
+    return _ipv4;
 }
 
 const IPv4Net&
 XrlAtom::ipv4net() const throw (NoData, WrongType)
 {
     type_and_data_okay(xrlatom_ipv4net);
-    return *_ipv4net;
+    return _ipv4net;
 }
 
 const IPv6&
@@ -369,10 +370,10 @@ XrlAtom::copy(const XrlAtom& xa)
             _u32val = xa._u32val;
             break;
         case xrlatom_ipv4:
-            _ipv4 = new IPv4(*xa._ipv4);
+            _ipv4 = xa._ipv4;
             break;
         case xrlatom_ipv4net:
-            _ipv4net = new IPv4Net(*xa._ipv4net);
+            _ipv4net = xa._ipv4net;
             break;
         case xrlatom_ipv6:
             _ipv6 = new IPv6(*xa._ipv6);
@@ -415,15 +416,9 @@ XrlAtom::discard_dynamic()
 	case xrlatom_boolean:
         case xrlatom_int32:
         case xrlatom_uint32:
-	    break;
-        case xrlatom_ipv4:
-            delete _ipv4;
-            _ipv4 = 0;
-            break;
         case xrlatom_ipv4net:
-            delete _ipv4net;
-            _ipv4net = 0;
-            break;
+        case xrlatom_ipv4:
+	    break;
         case xrlatom_ipv6:
             delete _ipv6;
             _ipv6 = 0;
@@ -467,11 +462,11 @@ XrlAtom::str() const
 {
     if (_have_data) {
 	return c_format("%s%s%s%s%s", name().c_str(), XrlToken::ARG_NT_SEP,
-			type_name().c_str(), XrlToken::ARG_TV_SEP,
+			type_name(), XrlToken::ARG_TV_SEP,
 			value().c_str());
     }
     return c_format("%s%s%s", name().c_str(), XrlToken::ARG_NT_SEP,
-		    type_name().c_str());
+		    type_name());
 }
 
 XrlAtom::XrlAtom(const char* serialized) throw (InvalidString, BadName)
@@ -564,9 +559,9 @@ XrlAtom::value() const
 	return xrlatom_encode_value(tmp, strlen(tmp));
 	break;
     case xrlatom_ipv4:
-	return xrlatom_encode_value(_ipv4->str());
+	return xrlatom_encode_value(_ipv4.str());
     case xrlatom_ipv4net:
-	return xrlatom_encode_value(_ipv4net->str());
+	return xrlatom_encode_value(_ipv4net.str());
     case xrlatom_ipv6:
 	return xrlatom_encode_value(_ipv6->str());
     case xrlatom_ipv6net:
@@ -596,7 +591,7 @@ XrlAtom::value() const
     return tmp;
 }
 
-const string
+const char*
 XrlAtom::type_name() const
 {
     return xrlatom_type_name(_type);
@@ -634,10 +629,10 @@ XrlAtom::operator==(const XrlAtom& other) const
 	    mv = (_u32val == other._u32val);
 	    break;
 	case xrlatom_ipv4:
-	    mv = (*_ipv4 == *other._ipv4);
+	    mv = (_ipv4 == other._ipv4);
 	    break;
 	case xrlatom_ipv4net:
-	    mv = (*_ipv4net == *other._ipv4net);
+	    mv = (_ipv4net == other._ipv4net);
 	    break;
 	case xrlatom_ipv6:
 	    mv = (*_ipv6 == *other._ipv6);
@@ -857,33 +852,25 @@ XrlAtom::unpack_uint32(const uint8_t* buf)
 size_t
 XrlAtom::pack_ipv4(uint8_t* buffer) const
 {
-    uint32_t ul = _ipv4->addr();
-    memcpy(buffer, &ul, sizeof(ul));
-    return sizeof(ul);
+    uint32_t u = _ipv4.addr();
+    memcpy(buffer, &u, sizeof(u));
+    return sizeof(u);
 }
 
 size_t
 XrlAtom::unpack_ipv4(const uint8_t* b)
 {
-    uint32_t a;
-
-    // XXX ntohl ?
-    if (_type == xrlatom_no_type) {
-	memcpy(&a, b, sizeof(a));
-	_ipv4 = new IPv4(a);
-    } else
-	_ipv4->copy_in(b);
-
-    return sizeof(a);
+    _ipv4.copy_in(b);
+    return 4;
 }
 
 size_t
 XrlAtom::pack_ipv4net(uint8_t* buffer) const
 {
-    uint32_t ul = _ipv4net->masked_addr().addr();
+    uint32_t ul = _ipv4net.masked_addr().addr();
     memcpy(buffer, &ul, sizeof(ul));
-    buffer[sizeof(ul)] = (uint8_t)_ipv4net->prefix_len();
-    return sizeof(ul) + sizeof(uint8_t);
+    buffer[sizeof(ul)] = _ipv4net.prefix_len();
+    return 5;
 }
 
 size_t
@@ -891,14 +878,9 @@ XrlAtom::unpack_ipv4net(const uint8_t* b)
 {
     uint32_t a;
     memcpy(&a, b, sizeof(a));
-    IPv4 v(a);
-
-    if (_type == xrlatom_no_type)
-	_ipv4net = new IPv4Net(v, b[sizeof(a)]);
-    else
-	*_ipv4net = IPv4Net(v, b[sizeof(a)]);
-
-    return sizeof(a) + sizeof(uint8_t);
+    _ipv4net.masked_addr_nc().set_addr(a);
+    _ipv4net.set_prefix_len(b[4]);
+    return 5;
 }
 
 size_t
