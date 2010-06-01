@@ -89,7 +89,7 @@ update_file()
 #
 update_all_files()
 {
-    echo "$update_all_files: args: $#"
+    echo "$update_all_files: -:$1:- -:$2:- args: $#"
     if [ $# -lt 2 ] ; then
 	echo "$0: invalid number of arguments: expected 2+, received $#"
 	exit 1
@@ -140,7 +140,7 @@ update_template_files()
         # Update only the template files
 	while [ "$1" ] ; do
 	    echo  "update_file (template) -:${old_string}:- -:${new_string}:- -:${1}:-"
-	    #update_file "${old_string}" "${new_string}" "${1}"
+	    update_file "${old_string}" "${new_string}" "${1}"
 	    shift
 	done
     else
@@ -181,10 +181,10 @@ fi
 
 #
 # Update the template files:
-#     change "(c) OLD" copyright year to "(c) NEW" copyright year.
+#     change "(c) OLD" copyright year to "(c) OLD-NEW" copyright year.
 #
 OLD_YEAR_ID="(c) ${old_year}"
-NEW_YEAR_ID="(c) ${new_year}"
+NEW_YEAR_ID="(c) ${old_year}-${new_year}"
 OLD_STRING="${OLD_YEAR_ID} ${OLD_COPYRIGHT_HOLDER}"
 NEW_STRING="${NEW_YEAR_ID} ${COPYRIGHT_HOLDER}"
 update_template_files "${OLD_STRING}" "${NEW_STRING}" $@
