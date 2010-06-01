@@ -88,6 +88,8 @@ interface vrrp/0.1 {
 		    & vifname:txt			\
 		    & vrid:u32				\
 		    & ip:ipv4;
+
+    set_prefix	    ? ifname:txt & vifname:txt & vrid:u32 & ip:ipv4 & prefix_len:u32;
     
     /**
      * Remove an IP from the virtual router.

@@ -10,7 +10,9 @@ protocols {
 		    priority: u32   = 100;
 		    interval: u32   = 1;
 		    preempt: bool   = true;
-		    ip @: ipv4 {}
+		    ip @: ipv4 {
+			prefix-length: u32 = 24;
+		    }
 
 		    disable: bool   = false;
 		}
@@ -74,6 +76,12 @@ protocols {
 			%help: short "IP associated with virtual router";
 		        %create: xrl "$(vrrp.targetname)/vrrp/0.1/add_ip?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&vrid:u32=$(vrid.@)&ip:ipv4=$(ip.@)";
 		        %delete: xrl "$(vrrp.targetname)/vrrp/0.1/delete_ip?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&vrid:u32=$(vrid.@)&ip:ipv4=$(ip.@)";
+
+                        prefix-length {
+		            %help: short "Assign the virtual-router network prefix length";
+		            %allow-range: $(@) "1" "32" %help: "The virtual-router network prefix length";
+  		            %set: xrl "$(vrrp.targetname)/vrrp/0.1/set_prefix?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&vrid:u32=$(vrid.@)&ip:ipv4=$(ip.@)&prefix_len:u32=$(@)";
+                        }
 		    }
 		}
 	    }

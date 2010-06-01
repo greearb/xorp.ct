@@ -30,17 +30,18 @@
 #include "libfeaclient/ifmgr_atoms.hh"
 #include "libxipc/xrl_error.hh"
 
-#include "vrrp.hh"
-#include "vrrp_interface.hh"
+//#include "vrrp.hh"
+//#include "vrrp_interface.hh"
 
 class VrrpTarget;
+class Vrrp;
 
 /**
  * @short Implementation of a VRRP network interface.
  *
  * This class links the VRRP state machine to the actual network.
  */
-class VrrpVif : public VrrpInterface {
+class VrrpVif {
 public:
     typedef set<uint8_t>    VRIDS;
 
@@ -51,6 +52,8 @@ public:
      */
     VrrpVif(VrrpTarget& vt, const string& ifname, const string& vifname);
     ~VrrpVif();
+
+    VrrpTarget& get_vrrp_target() { return _vt; }
 
     /**
      * Check whether an IP address is configured on this interface.
@@ -112,7 +115,7 @@ public:
      * @param payload the data following the MAC header.
      */
     void	    send(const Mac& src, const Mac& dst, uint32_t ether,
-			 const PAYLOAD& payload);
+			 const vector<uint8_t>& payload);
 
     /**
      * Join the VRRP multicast group.
@@ -130,21 +133,24 @@ public:
      * @param from the source IP address.
      * @param payload the IP payload.
      */
-    void	    recv(const IPv4& from, const PAYLOAD& payload);
+    void recv(const IPv4& from, const vector<uint8_t>& payload);
 
     /**
      * Add a MAC address to this interface.
      *
      * @param mac MAC address to add.
      */
-    void	    add_mac(const Mac& mac);
+    void add_mac(const Mac& mac);
+    void add_ip(const IPv4& ip, uint32_t prefix);
 
     /**
      * Delete a MAC address from this interface.
      *
      * @param mac MAC address to remove.
      */
-    void	    delete_mac(const Mac& mac);
+    void delete_mac(const Mac& mac);
+
+    void delete_ip(const IPv4& ip);
 
     /**
      * Start the reception of ARP packets.
@@ -162,7 +168,7 @@ public:
      * @param src the source MAC address.
      * @param payload the ARP header and data.
      */
-    void	    recv_arp(const Mac& src, const PAYLOAD& payload);
+    void recv_arp(const Mac& src, const vector<uint8_t>& payload);
 
     /**
      * Obtain a list of VRRP instance configured on this interface.

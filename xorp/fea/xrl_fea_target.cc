@@ -2511,6 +2511,38 @@ XrlFeaTarget::ifmgr_0_1_create_mac(
 }
 
 XrlCmdError
+XrlFeaTarget::ifmgr_0_1_delete_address_atomic(
+    // Input values,
+    const string&   ifname,
+    const string&   vifname,
+    const IPv4& ip)
+{
+    string error_msg;
+
+    if (add_remove_address(false, ifname, vifname, ip, 0, error_msg) != XORP_OK)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_create_address_atomic(
+    // Input values,
+    const string&   ifname,
+    const string&   vifname,
+    const IPv4& ip,
+    const uint32_t& prefix)
+{
+    string error_msg;
+
+    if (add_remove_address(true, ifname, vifname, ip, prefix, error_msg) != XORP_OK)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    
+    return XrlCmdError::OKAY();
+}
+
+
+XrlCmdError
 XrlFeaTarget::ifmgr_0_1_delete_mac(
     // Input values,
     const string&   ifname,
@@ -2667,6 +2699,83 @@ XrlFeaTarget::add_remove_mac(bool add, const string& ifname, const Mac& mac,
 			 error_msg.c_str());
 	}
     }
+
+    return (XORP_OK);
+}
+
+
+int
+XrlFeaTarget::add_remove_address(bool add, const string& ifname, const string& vifname,
+				 const IPv4& ip, uint32_t prefix, string& error_msg)
+{
+    uint32_t tid;
+    XrlCmdError e = XrlCmdError::OKAY();
+
+    XLOG_WARNING("add_remove_address, add: %i  vif: %s/%s  ip: %s\n",
+		 (int)(add), ifname.c_str(), vifname.c_str(), ip.str().c_str());
+
+    if (!((e = ifmgr_0_1_start_transaction(tid))).isOK()) {
+	error_msg = c_format("Cannot add/remove address %s on interface %s: "
+			     "cannot start the transaction, err: %s  add: %i",
+			     ip.str().c_str(), ifname.c_str(), e.str().c_str(),
+			     (int)(add));
+	return (XORP_ERROR);
+    }
+
+    if (add) {
+	if (!((e = ifmgr_0_1_create_address4(tid, ifname, vifname, ip))).isOK()) {
+	    ifmgr_0_1_abort_transaction(tid);
+	    error_msg = c_format("Cannot add IP address %s on interface %s: "
+				 "cannot perform the operation, err: %s",
+				 ip.str().c_str(), ifname.c_str(), e.str().c_str());
+	    return (XORP_ERROR);
+	}
+	if (!((e = ifmgr_0_1_set_prefix4(tid, ifname, vifname, ip, prefix))).isOK()) {
+	    ifmgr_0_1_abort_transaction(tid);
+	    error_msg = c_format("Cannot set IP prefix %s/%i on interface %s: "
+				 "cannot perform the operation, err: %s",
+				 ip.str().c_str(), prefix, ifname.c_str(), e.str().c_str());
+	    return (XORP_ERROR);
+	}
+	bool enabled = true;
+	if (!((e = ifmgr_0_1_set_address_enabled4(tid, ifname, vifname, ip, enabled))).isOK()) {
+	    ifmgr_0_1_abort_transaction(tid);
+	    error_msg = c_format("Cannot set IP enabled %s/%i on interface %s: "
+				 "cannot perform the operation, err: %s",
+				 ip.str().c_str(), prefix, ifname.c_str(), e.str().c_str());
+	    return (XORP_ERROR);
+	}
+    }
+    else {
+	if (!((e = ifmgr_0_1_delete_address4(tid, ifname, vifname, ip))).isOK()) {
+	    ifmgr_0_1_abort_transaction(tid);
+	    error_msg = c_format("Cannot delete IP address %s on interface %s: "
+				 "cannot perform the operation, err: %s",
+				 ip.str().c_str(), ifname.c_str(), e.str().c_str());
+	    return (XORP_ERROR);
+	}
+    }
+
+    if (!((e = ifmgr_0_1_commit_transaction(tid))).isOK()) {
+	error_msg = c_format("Cannot add/delete address %s on interface %s: "
+			     "cannot commit the transaction, err: %s  add: %i",
+			     ip.str().c_str(), ifname.c_str(), e.str().c_str(),
+			     (int)(add));
+	return (XORP_ERROR);
+    }
+
+#if 0
+    // TODO:  Should we send gratuitous arp here??
+    if (send_gratuitous_arps(ifname, mac, error_msg) != XORP_OK) {
+	error_msg = c_format("Cannot set MAC address %s on interface %s: %s",
+			     ip.str().c_str(), ifname.c_str(),
+			     error_msg.c_str());
+	return (XORP_ERROR);
+    }
+#endif
+
+    XLOG_WARNING("returning from add_remove_address, add: %i  vif: %s/%s  ip: %s\n",
+		 (int)(add), ifname.c_str(), vifname.c_str(), ip.str().c_str());
 
     return (XORP_OK);
 }

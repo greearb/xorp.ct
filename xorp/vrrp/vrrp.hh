@@ -31,7 +31,9 @@
 #include "libxorp/mac.hh"
 #include "libxorp/eventloop.hh"
 #include "vrrp_packet.hh"
-#include "arpd.hh"
+#include "vrrp_vif.hh"
+
+//#include "arpd.hh"
 
 #define MAX_VRRP_SIZE (20 + VRRP_MAX_PACKET_SIZE)
 
@@ -50,7 +52,7 @@ public:
      * @param e eventloop.
      * @param vrid the VRRP id of this instance.
      */
-    Vrrp(VrrpInterface& vif, EventLoop& e, uint32_t vrid);
+    Vrrp(VrrpVif& vif, EventLoop& e, uint32_t vrid);
     ~Vrrp();
 
     /**
@@ -89,6 +91,8 @@ public:
      */
     void	    add_ip(const IPv4& ip);
 
+    void set_prefix(const IPv4& ip, uint32_t prefix);
+
     /**
      * Delete an IP from the virtual router.
      * 
@@ -124,7 +128,7 @@ public:
      * Check whether the router owns all IPs configured for the virtual router.
      * This must be called after updating IP addresses.
      */
-    void	    check_ownership();
+    //void	    check_ownership();
 
     /**
      * Must be called when a VRRP packet is received.
@@ -139,7 +143,7 @@ public:
      *
      * @return an instance of the ARP daemon.
      */
-    ARPd&	    arpd();
+    //ARPd&	    arpd();
 
     /**
      * Returns information about the state of the protocol.
@@ -272,22 +276,23 @@ private:
     bool check_ips(const VrrpHeader& vh);
 
     IPv4	    _last_adv;
-    VrrpInterface&  _vif;
+    VrrpVif&  _vif;
     uint32_t	    _vrid;
     uint32_t	    _priority;
     uint32_t	    _interval;
     double	    _skew_time;
     double	    _master_down_interval;
     bool	    _preempt;
-    IPS		    _ips;
+    set<IPv4>       _ips;
+    map<uint32_t, uint32_t> _prefixes; // map IP addr to prefix value.
     State	    _state;
     XorpTimer	    _master_down_timer;
     XorpTimer	    _adver_timer;
-    bool	    _own;
+    //bool	    _own;
     bool	    _disable;
     VrrpPacket	    _adv_packet;
     Mac		    _source_mac;
-    ARPd	    _arpd; // XXX use OS proxy arp mechanism?
+    //ARPd	    _arpd; // XXX use OS proxy arp mechanism?
 };
 
 #endif // __VRRP_VRRP_HH__

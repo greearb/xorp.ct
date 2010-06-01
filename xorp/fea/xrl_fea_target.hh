@@ -949,6 +949,20 @@ public:
         const string&   ifname,
         const Mac&      mac);
 
+    
+    XrlCmdError ifmgr_0_1_create_address_atomic(
+	// Input values,
+	const string&   ifname,
+	const string&   vifname,
+	const IPv4& ip,
+	const uint32_t& prefix_length);
+
+    XrlCmdError ifmgr_0_1_delete_address_atomic(
+	// Input values,
+	const string&   ifname,
+	const string&   vifname,
+	const IPv4& ip);
+
     XrlCmdError ifmgr_0_1_delete_mac(
         // Input values,
         const string&   ifname,
@@ -2743,6 +2757,10 @@ private:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int set_mac(const string& ifname, const Mac& mac, string& error_msg);
+
+    int add_remove_address(bool add, const string& ifname, const string& vifname,
+			   const IPv4& ip, uint32_t prefix, string& error_msg);
+
 
     /**
      * Send gratuitous ARP packets for all IP addresses on on an interface.

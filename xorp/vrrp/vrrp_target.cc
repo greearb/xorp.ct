@@ -338,6 +338,16 @@ VrrpTarget::add_mac(const string& ifname, const Mac& mac)
     if (!_fea.send_create_mac(fea_target_name.c_str(), ifname, mac,
 			      callback(this, &VrrpTarget::xrl_cb)))
 	XLOG_FATAL("Cannot add MAC");
+    _xrls_pending++;
+}
+
+void
+VrrpTarget::add_ip(const string& ifname, const IPv4& ip, const uint32_t prefix)
+{
+    if (!_fea.send_create_address_atomic(fea_target_name.c_str(), ifname, ifname,
+					 ip, prefix,
+					 callback(this, &VrrpTarget::xrl_cb)))
+	XLOG_FATAL("Cannot add IP");
 
     _xrls_pending++;
 }
@@ -348,6 +358,16 @@ VrrpTarget::delete_mac(const string& ifname, const Mac& mac)
     if (!_fea.send_delete_mac(fea_target_name.c_str(), ifname, mac,
 			      callback(this, &VrrpTarget::xrl_cb)))
 	XLOG_FATAL("Cannot delete MAC");
+
+    _xrls_pending++;
+}
+
+void
+VrrpTarget::delete_ip(const string& ifname, const IPv4& ip)
+{
+    if (!_fea.send_delete_address_atomic(fea_target_name.c_str(), ifname, ifname, ip,
+					 callback(this, &VrrpTarget::xrl_cb)))
+	XLOG_FATAL("Cannot delete IP");
 
     _xrls_pending++;
 }
@@ -540,6 +560,25 @@ VrrpTarget::vrrp_0_1_add_ip(
 
     return XrlCmdError::OKAY();
 }
+
+XrlCmdError
+VrrpTarget::vrrp_0_1_set_prefix (
+        // Input values,
+        const string&   ifname,
+        const string&   vifname,
+        const uint32_t& vrid,
+        const IPv4&     ip,
+	const uint32_t& prefix_len) {
+    try {
+	Vrrp& v = find_vrid(ifname, vifname, vrid);
+
+	v.set_prefix(ip, prefix_len);
+    } catch(const VrrpException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
+    return XrlCmdError::OKAY();
+}
+
 
 XrlCmdError
 VrrpTarget::vrrp_0_1_delete_ip(

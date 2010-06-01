@@ -145,6 +145,10 @@ interface ifmgr/0.1 {
 
 	delete_address4 ? tid:u32 & ifname:txt & vif:txt & address:ipv4;
 
+	create_address_atomic ? ifname:txt & vif:txt & address:ipv4 & prefix_length:u32;
+
+	delete_address_atomic ? ifname:txt & vif:txt & address:ipv4;
+
 	set_address_enabled4	? tid:u32				\
 				& ifname:txt				\
 				& vif:txt				\

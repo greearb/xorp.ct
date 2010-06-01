@@ -26,6 +26,7 @@
 #include "libxipc/xrl_error.hh"
 
 #include "vrrp_vif.hh"
+#include "vrrp.hh"
 #include "vrrp_target.hh"
 #include "vrrp_exception.hh"
 
@@ -109,8 +110,12 @@ VrrpVif::configure(const IfMgrIfTree& conf)
 
 	const IfMgrIPv4Atom& addr = i->second;
 
-	if (addr.enabled())
+	if (addr.enabled()) {
+	    XLOG_WARNING("vif: %s/%s configured with IP: %s\n",
+			 _ifname.c_str(), _vifname.c_str(),
+			 addr.toString().c_str());
 	    _ips.insert(addr.addr());
+	}
     }
 
     if (_ips.empty()) {
@@ -143,7 +148,7 @@ VrrpVif::set_ready(bool ready)
 	Vrrp* v = i->second;
 
 	if (ready) {
-	    v->check_ownership();
+	    //v->check_ownership();
 	    v->start();
 	} else
 	    v->stop();
@@ -245,6 +250,9 @@ VrrpVif::recv(const IPv4& from, const PAYLOAD& payload)
 void
 VrrpVif::recv_arp(const Mac& from, const PAYLOAD& payload)
 {
+    UNUSED(from);
+    UNUSED(payload);
+#if 0
     // XXX the arp object should be part of VrrpVif
     for (VRRPS::iterator i = _vrrps.begin(); i != _vrrps.end(); ++i) {
 	ARPd& arp = i->second->arpd();
@@ -256,6 +264,7 @@ VrrpVif::recv_arp(const Mac& from, const PAYLOAD& payload)
 	    break;
 	}
     }
+#endif
 }
 
 void
@@ -275,12 +284,28 @@ VrrpVif::add_mac(const Mac& mac)
 }
 
 void
+VrrpVif::add_ip(const IPv4& ip, uint32_t prefix)
+{
+    XLOG_ASSERT(_ifname == _vifname);
+    _vt.add_ip(_ifname, ip, prefix);
+}
+
+void
 VrrpVif::delete_mac(const Mac& mac)
 {
     // XXX see add mac
     XLOG_ASSERT(_ifname == _vifname);
 
     _vt.delete_mac(_ifname, mac);
+}
+
+void
+VrrpVif::delete_ip(const IPv4& ip)
+{
+    // XXX see add mac
+    XLOG_ASSERT(_ifname == _vifname);
+
+    _vt.delete_ip(_ifname, ip);
 }
 
 void

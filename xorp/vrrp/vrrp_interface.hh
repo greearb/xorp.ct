@@ -90,14 +90,16 @@ public:
      *
      * @param mac MAC address to add.
      */
-    virtual void	    add_mac(const Mac& mac) = 0;
+    virtual void add_mac(const Mac& mac) = 0;
+    virtual void add_ip(const IPv4& ip) = 0;
 
     /**
      * Delete a MAC address from this interface.
      *
      * @param mac MAC address to delete from this interface.
      */
-    virtual void	    delete_mac(const Mac& mac) = 0;
+    virtual void delete_mac(const Mac& mac) = 0;
+    virtual void delete_ip(const IPv4& ip) = 0;
 
     // XXX these should be handled elsewhere, or differently.  VRRP doesn't have
     // to "know" about ARPs.

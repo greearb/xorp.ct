@@ -628,11 +628,11 @@ IfTree::update_interface(const IfTreeInterface& other_iface)
 	for (oa4 = other_vifp->ipv4addrs().begin();
 	     oa4 != other_vifp->ipv4addrs().end();
 	     ++oa4) {
+	    // Add the address
 	    const IfTreeAddr4* other_ap = oa4->second;
 	    IfTreeAddr4* this_ap;
 	    this_ap = this_vifp->find_addr(other_ap->addr());
 	    if (this_ap == NULL) {
-		// Add the address
 		this_vifp->add_addr(other_ap->addr());
 		this_ap = this_vifp->find_addr(other_ap->addr());
 		XLOG_ASSERT(this_ap != NULL);

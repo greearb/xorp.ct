@@ -50,7 +50,7 @@ out_of_range(const string& msg, const T& x)
 // XXX init from VrrpPacket::mcast_group
 const Mac Vrrp::mcast_mac = Mac("01:00:5E:00:00:12");
 
-Vrrp::Vrrp(VrrpInterface& vif, EventLoop& e, uint32_t vrid)
+Vrrp::Vrrp(VrrpVif& vif, EventLoop& e, uint32_t vrid)
     : _vif(vif),
       _vrid(vrid),
       _priority(100),
@@ -59,17 +59,21 @@ Vrrp::Vrrp(VrrpInterface& vif, EventLoop& e, uint32_t vrid)
       _master_down_interval(0),
       _preempt(true),
       _state(INITIALIZE),
-      _own(false),
-      _disable(true),
-      _arpd(_vif)
+      //_own(false),
+      _disable(true)
+      //, _arpd(_vif)
 {
     if (_vrid < 1 || _vrid > 255)
 	out_of_range("VRID out of range", _vrid);
 
     char tmp[sizeof "ff:ff:ff:ff:ff:ff"];
+
+    // This specific mac prefix is standard for VRRP, not just some
+    // random value someone chose!
     snprintf(tmp, sizeof(tmp), "00:00:5E:00:01:%X", (uint8_t) vrid);
+
     _source_mac = Mac(tmp);
-    _arpd.set_mac(_source_mac);
+    //_arpd.set_mac(_source_mac);
 
     _master_down_timer = e.new_periodic_ms(0x29a,
 			    callback(this, &Vrrp::master_down_expiry));
@@ -127,7 +131,16 @@ Vrrp::add_ip(const IPv4& ip)
 {
     _ips.insert(ip);
 
-    check_ownership();
+    //check_ownership();
+}
+
+void Vrrp::set_prefix(const IPv4& ip, uint32_t prefix) {
+    _prefixes[ip.addr()] = prefix;
+
+    set<IPv4>::iterator i = _ips.find(ip);
+    if (i == _ips.end()) {
+	add_ip(ip);
+    }
 }
 
 void
@@ -135,7 +148,7 @@ Vrrp::delete_ip(const IPv4& ip)
 {
     _ips.erase(ip);
 
-    check_ownership();
+    //check_ownership();
 }
 
 void
@@ -178,31 +191,34 @@ Vrrp::setup_timers(bool skew)
     }
 }
 
+#if 0
 void
 Vrrp::check_ownership()
 {
     bool own = true;
 
-    _arpd.clear();
+    //_arpd.clear();
 
     for (IPS::iterator i = _ips.begin(); i != _ips.end(); ++i) {
 	own &= _vif.own(*i);
 
-	if (!own)
-	    _arpd.insert(*i);
+	//if (!own)
+	//    _arpd.insert(*i);
     }
 
-    _arpd.ips_updated();
+    //_arpd.ips_updated();
 
+    // This is broken if IPs are split (we have two, own one, but not the other)
     _own = own;
     setup_intervals();
 }
+#endif
 
 uint32_t
 Vrrp::priority() const
 {
-    if (_own)
-	return PRIORITY_OWN;
+    //if (_own)
+    //    return PRIORITY_OWN;
 
     return _priority;
 }
@@ -227,40 +243,50 @@ Vrrp::start()
 void
 Vrrp::become_master()
 {
-    _state = MASTER;
-
+    _state = MASTER; 
+    XLOG_WARNING("become master.");
     _vif.add_mac(_source_mac);
+
+    for (set<IPv4>::iterator i = _ips.begin(); i != _ips.end(); ++i) {
+	const IPv4& ip = *i;
+	XLOG_WARNING("become_master, adding IP: %s\n",
+		     ip.str().c_str());
+	uint32_t pf = 24;
+	if (_prefixes.find(ip.addr()) != _prefixes.end()) {
+	    pf = _prefixes[ip.addr()];
+	    if (pf <= 0)
+		pf = 24;
+	    if (pf > 32)
+		pf = 32;
+	}
+	_vif.add_ip(ip, pf);
+    }
+    XLOG_WARNING("done adding IPs.");
+
     send_advertisement();
     send_arps();
     setup_timers();
-    _arpd.start();
+    //_arpd.start();
 }
 
 void
 Vrrp::become_backup()
 {
+    XLOG_WARNING("become backup.");
     if (_state == MASTER) {
+	XLOG_WARNING("deleting mac.");
 	_vif.delete_mac(_source_mac);
-	_arpd.stop();
-    }
+	//_arpd.stop();
 
-    //
-    // TODO
-    //
-    // -  MUST NOT respond to ARP requests for the IP address(s) associated
-    //    with the virtual router.
-    //
-    // -  MUST NOT accept packets addressed to the IP address(es) associated
-    //    with the virtual router.
-    //
-    for (IPS::iterator i = _ips.begin(); i != _ips.end(); ++i) {
-	const IPv4& ip = *i;
+	for (IPS::iterator i = _ips.begin(); i != _ips.end(); ++i) {
+	    const IPv4& ip = *i;
 
-	// We should change IP / "disable" it at this point, and restore it
-	// later.
-	if (_vif.own(ip))
-	    XLOG_WARNING("XXX we will be responding to %s", ip.str().c_str());
+	    XLOG_WARNING("become_master, deleting IP: %s\n",
+			 ip.str().c_str());
+	    _vif.delete_ip(ip);
+	}
     }
+    XLOG_WARNING("done deleting things.");
 
     _state = BACKUP;
 
@@ -280,7 +306,7 @@ Vrrp::stop()
     if (_state == MASTER) {
 	send_advertisement(PRIORITY_LEAVE);
 	_vif.delete_mac(_source_mac);
-	_arpd.stop();
+	//_arpd.stop();
     }
 
     _state = INITIALIZE;
@@ -408,7 +434,7 @@ Vrrp::recv_adver_master(const IPv4& from, uint32_t pri)
     if (pri == PRIORITY_LEAVE) {
 	send_advertisement();
 	setup_timers();
-    } else if (pri >= priority() || (pri == priority() && from > _vif.addr()))
+    } else if (pri > priority() || (pri == priority() && from > _vif.addr()))
 	become_backup();
 }
 
@@ -420,8 +446,9 @@ Vrrp::recv(const IPv4& from, const VrrpHeader& vh)
     if (!running())
 	xorp_throw(VrrpException, "VRRID not running");
 
-    if (priority() == PRIORITY_OWN)
-	xorp_throw(VrrpException, "I own VRRID but got advertisement");
+    //if (priority() == PRIORITY_OWN)
+//	xorp_throw(VrrpException, "I own VRR-IP but got advertisement, priority: %i",
+    //	   priority());
 
     if (vh.vh_auth != VrrpHeader::VRRP_AUTH_NONE)
 	xorp_throw(VrrpException, "Auth method not supported");
@@ -459,11 +486,13 @@ Vrrp::check_ips(const VrrpHeader& vh)
     return true;
 }
 
+#if 0
 ARPd&
 Vrrp::arpd()
 {
     return _arpd;
 }
+#endif
 
 void
 Vrrp::get_info(string& state, IPv4& master) const

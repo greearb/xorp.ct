@@ -118,7 +118,7 @@ public:
      * @param ifname the interface on which to add the MAC.
      * @param mac the MAC address.
      */
-    void       add_mac(const string& ifname, const Mac& mac);
+    void add_mac(const string& ifname, const Mac& mac);
 
     /**
      * Delete MAC address from the router.
@@ -126,7 +126,11 @@ public:
      * @param ifname the interface on which the MAC should be deleted.
      * @param mac the MAC to remove.
      */
-    void       delete_mac(const string& ifname, const Mac& mac);
+    void delete_mac(const string& ifname, const Mac& mac);
+
+    void add_ip(const string& ifname, const IPv4& ip, uint32_t prefix);
+    void delete_ip(const string& ifname, const IPv4& ip);
+
 
     /**
      * @return an instance of the eventloop.
@@ -196,6 +200,14 @@ protected:
         const string&   vifname,
         const uint32_t& vrid,
         const IPv4&     ip);
+
+    XrlCmdError vrrp_0_1_set_prefix (
+        // Input values,
+        const string&   ifname,
+        const string&   vifname,
+        const uint32_t& vrid,
+        const IPv4&     ip,
+	const uint32_t& prefix_len);
 
     XrlCmdError vrrp_0_1_delete_ip(
         // Input values,
