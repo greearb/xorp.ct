@@ -125,11 +125,12 @@ void
 IfConfigObserverNetlinkSocket::receive_data(const vector<uint8_t>& buffer)
 {
     bool modified = false;
+    int nl_errno = 0;
     // Pre-processing cleanup
     ifconfig().system_config().finalize_state();
 
     if (IfConfigGetNetlinkSocket::parse_buffer_netlink_socket(
-	ifconfig(), ifconfig().system_config(), buffer, modified)
+	    ifconfig(), ifconfig().system_config(), buffer, modified, nl_errno)
 	!= XORP_OK) {
 	return;
     }

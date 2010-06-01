@@ -75,7 +75,7 @@ int
 IfConfigGetNetlinkSocket::parse_buffer_netlink_socket(IfConfig& ifconfig,
 						      IfTree& iftree,
 						      const vector<uint8_t>& buffer,
-						      bool& modified)
+						      bool& modified, int& nl_errno)
 {
     size_t buffer_bytes = buffer.size();
     AlignData<struct nlmsghdr> align_data(buffer);
@@ -102,6 +102,7 @@ IfConfigGetNetlinkSocket::parse_buffer_netlink_socket(IfConfig& ifconfig,
 		break;
 	    }
 	    errno = -err->error;
+	    nl_errno = -err->error;
 	    XLOG_ERROR("AF_NETLINK NLMSG_ERROR: %s  msg->len: %hu msg->type: %hu(%s) "
 		       " msg->flags: %hu msg->seq: %u  msg->pid: %u",
 		       strerror(errno), err->msg.nlmsg_len, err->msg.nlmsg_type,

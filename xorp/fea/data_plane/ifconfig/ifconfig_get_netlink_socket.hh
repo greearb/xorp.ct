@@ -71,7 +71,7 @@ public:
     virtual int pull_config(const IfTree* local_cfg, IfTree& iftree);
 
 
-    virtual bool can_pull_one() { return true; }
+    virtual bool can_pull_one() { return can_get_single != 0; }
 
     /** If_index can be -1 if unknown:  We will try to resolve it from ifname.
      */
@@ -93,18 +93,24 @@ public:
     static int parse_buffer_netlink_socket(IfConfig& ifconfig, IfTree& iftree,
 					   const vector<uint8_t>& buffer) {
 	bool modified = false;
-	return parse_buffer_netlink_socket(ifconfig, iftree, buffer, modified);
+	int nl_errno = 0;
+	return parse_buffer_netlink_socket(ifconfig, iftree, buffer, modified, nl_errno);
     }
 
     /** Same as above, but also return whether or not something was actually modified in iftree.
      */
     static int parse_buffer_netlink_socket(IfConfig& ifconfig, IfTree& iftree,
-					   const vector<uint8_t>& buffer, bool& modified);
+					   const vector<uint8_t>& buffer,
+					   bool& modified, int& nl_errno);
     
 private:
     int read_config(const IfTree* local_config, IfTree& iftree);
     int read_config_all(IfTree& iftree);
-    int read_config_one(IfTree& iftree, const char* ifname, int if_index);
+    int read_config_one(IfTree& iftree, const char* ifname, int if_index,
+			int& nl_errno);
+    int try_read_config_one(IfTree& iftree, const char* ifname, int if_index);
+
+    int can_get_single;
 
     NetlinkSocketReader	_ns_reader;
 };

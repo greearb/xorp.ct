@@ -57,6 +57,7 @@ IfConfigGetNetlinkSocket::IfConfigGetNetlinkSocket(FeaDataPlaneManager& fea_data
 		    fea_data_plane_manager.fibconfig().get_netlink_filter_table_id()),
       _ns_reader(*(NetlinkSocket *)this)
 {
+    can_get_single = -1;
 }
 
 IfConfigGetNetlinkSocket::~IfConfigGetNetlinkSocket()
@@ -105,10 +106,46 @@ IfConfigGetNetlinkSocket::pull_config(const IfTree* local_cfg, IfTree& iftree)
     return read_config(local_cfg, iftree);
 }
 
+
+int IfConfigGetNetlinkSocket::try_read_config_one(IfTree& iftree, const char* ifname,
+						  int ifindex) {
+    int nl_errno = 0;
+    int rv = read_config_one(iftree, ifname, ifindex, nl_errno);
+    if (rv != XORP_OK) {
+	if ((nl_errno == EINVAL) && (can_get_single == -1)) {
+	    // Attempt work-around, maybe kernel is too old to do single requests.
+	    can_get_single = 0;
+	    nl_errno = 0;
+	    rv = read_config_one(iftree, ifname, ifindex, nl_errno);
+	    if (rv == XORP_OK) {
+		// Might have worked...look for device.
+		if (iftree.find_interface(ifname)) {
+		    XLOG_WARNING("WARNING:  It seems that we cannot get a single Network device"
+				 " via NETLINK, probably due to an older kernel.  Will enable"
+				 " work-around to grab entire device listing instead.  This may"
+				 " cause a slight performance hit on systems with lots of interfaces"
+				 " but for most users it should not be noticeable.");
+		}
+		else {
+		    // Still no luck..assume netlink get single can still work.
+		    can_get_single = -1;
+		}
+	    }
+	}
+    }
+    else {
+	if (can_get_single == -1) {
+	    XLOG_WARNING("NOTE:  Netlink get single network device works on this system.");
+	    can_get_single = 1;
+	}
+    }
+    return rv;
+}
+
 int
 IfConfigGetNetlinkSocket::pull_config_one(IfTree& iftree, const char* ifname, int ifindex)
 {
-    return read_config_one(iftree, ifname, ifindex);
+    return try_read_config_one(iftree, ifname, ifindex);
 }
 
 
@@ -133,7 +170,8 @@ int findDeviceIndex(const char* device_name) {
 
 int
 IfConfigGetNetlinkSocket::read_config_one(IfTree& iftree,
-					  const char* ifname, int if_index)
+					  const char* ifname, int if_index,
+					  int& nl_errno)
 {
     static const size_t	buffer_size = sizeof(struct nlmsghdr)
 	+ sizeof(struct ifinfomsg) + sizeof(struct ifaddrmsg) + 512;
@@ -171,7 +209,17 @@ IfConfigGetNetlinkSocket::read_config_one(IfTree& iftree,
     memset(&buffer, 0, sizeof(buffer));
     nlh->nlmsg_len = NLMSG_LENGTH(sizeof(*ifinfomsg));
     nlh->nlmsg_type = RTM_GETLINK;
-    nlh->nlmsg_flags = NLM_F_REQUEST; // | NLM_F_ROOT; // Get the whole table (NO, not now. --Ben )
+    nlh->nlmsg_flags = NLM_F_REQUEST; // Get info for single device
+
+    /** Older kernels (2.6.18, for instance), cannot get a single network device
+     * unless configured for CONFIG_NET_WIRELESS_RTNETLINK.
+     * They just return EINVAL.  So, for these, we need to include the NLM_F_ROOT
+     * flag.
+     */
+    if (can_get_single == 0) {
+	nlh->nlmsg_flags |= NLM_F_ROOT; // get the whole table
+    }
+
     nlh->nlmsg_seq = ns.seqno();
     nlh->nlmsg_pid = ns.nl_pid();
     ifinfomsg = reinterpret_cast<struct ifinfomsg*>(NLMSG_DATA(nlh));
@@ -200,7 +248,8 @@ IfConfigGetNetlinkSocket::read_config_one(IfTree& iftree,
     }
 
     bool modified = false;
-    if (parse_buffer_netlink_socket(ifconfig(), iftree, _ns_reader.buffer(), modified)
+    if (parse_buffer_netlink_socket(ifconfig(), iftree, _ns_reader.buffer(),
+				    modified, nl_errno)
 	!= XORP_OK) {
 	return (XORP_ERROR);
     }
@@ -440,7 +489,7 @@ IfConfigGetNetlinkSocket::read_config_all(IfTree& iftree)
 int
 IfConfigGetNetlinkSocket::read_config(const IfTree* local_cfg, IfTree& iftree)
 {
-    if (!local_cfg) {
+    if ((!local_cfg) || (can_get_single == 0)) {
 	return read_config_all(iftree);
     }
 
@@ -473,7 +522,7 @@ IfConfigGetNetlinkSocket::read_config(const IfTree* local_cfg, IfTree& iftree)
 	     vif_iter != iface.vifs().end();
 	     ++vif_iter) {
 	    const IfTreeVif& vif = *(vif_iter->second);
-	    read_config_one(iftree, vif.vifname().c_str(), vif.pif_index());
+	    try_read_config_one(iftree, vif.vifname().c_str(), vif.pif_index());
 	}
     }
 
