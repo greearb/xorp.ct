@@ -26,6 +26,7 @@
 #include "libxorp/debug.h"
 #include "libxorp/eventloop.hh"
 #include "libxorp/exceptions.hh"
+#include "libxorp/clock.hh"
 
 #include "xrl_fea_node.hh"
 
@@ -123,6 +124,12 @@ main(int argc, char *argv[])
     const char *argv0 = argv[0];
     string finder_hostname = FinderConstants::FINDER_DEFAULT_HOST().str();
     uint16_t finder_port = FinderConstants::FINDER_DEFAULT_PORT();
+
+    // Initialize random number generator.
+    SystemClock sc;
+    TimeVal tv;
+    sc.current_time(tv);
+    xorp_srandom(tv.usec());
 
     //
     // Initialize and start xlog

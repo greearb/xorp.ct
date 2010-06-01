@@ -2592,7 +2592,7 @@ XrlFeaTarget::add_remove_mac(bool add, const string& ifname, const Mac& mac,
     }
 
     // These are the multicast MACs.
-    IfTreeInterface::MacSet& macs = ifp->macs();
+    set<Mac>& macs = ifp->macs();
 
     //
     // This is the real MAC.  
@@ -2659,14 +2659,23 @@ XrlFeaTarget::add_remove_mac(bool add, const string& ifname, const Mac& mac,
 	if (mac == current_mac) {
 	    if (macs.empty()) {
 		error_msg = c_format("Cannot remove MAC address %s "
-				     "on interface %s: last address",
+				     "on interface %s: last address."
+				     "  Will create a random MAC address for use on this interface.",
 				     mac.str().c_str(), ifname.c_str());
 		XLOG_WARNING("%s", error_msg.c_str());
-		return XORP_OK;
+		uint8_t rnd_mac[6];
+		rnd_mac[0] = 0;
+		for (unsigned int i = 1; i<sizeof(rnd_mac); i++) {
+		    rnd_mac[i] = xorp_random();
+		}
+		candidate_mac.copy_in(rnd_mac);
 	    }
-	    candidate_mac = *(macs.begin());
+	    else {
+		candidate_mac.copy_in(macs.begin()->addr());
+		// remove from spare mac-list before setting the new one.
+		macs.erase(macs.begin());
+	    }
 
-	    // XXX: should remove from multi first
 	    if (set_mac(ifname, candidate_mac, error_msg) != XORP_OK) {
 		error_msg = c_format("Cannot replace MAC address %s with %s "
 				     "on interface %s: %s",
@@ -2687,7 +2696,7 @@ XrlFeaTarget::add_remove_mac(bool add, const string& ifname, const Mac& mac,
 	    candidate_mac = *i;
 	}
 
-	// Remove MAC from multicast list
+	// Remove MAC from multicast list (might not be in the list..no big deal if so)
 	macs.erase(candidate_mac);
 
 	if (_io_link_manager.remove_multicast_mac(ifname, candidate_mac,
