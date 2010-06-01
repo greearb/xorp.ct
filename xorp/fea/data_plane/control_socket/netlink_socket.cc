@@ -418,8 +418,7 @@ NetlinkSocket::force_recvmsg_flgs(int flags, bool only_kernel_messages,
 	const struct nlmsghdr* mh;
 	for (mh = align_data.payload_by_offset(last_mh_off);
 	     NLMSG_OK(mh, new_size);
-	     mh = NLMSG_NEXT(const_cast<struct nlmsghdr*>(mh), new_size)) {
-
+	     mh = NLMSG_NEXT(mh, new_size)) {
 	    XLOG_ASSERT(mh->nlmsg_len <= buffer.size());
 	    if ((mh->nlmsg_flags & NLM_F_MULTI)
 		|| _is_multipart_message_read) {
@@ -428,7 +427,7 @@ NetlinkSocket::force_recvmsg_flgs(int flags, bool only_kernel_messages,
 		    is_end_of_message = true;
 	    }
 	}
-	last_mh_off = reinterpret_cast<size_t>(mh) - reinterpret_cast<size_t>(&message[0]);
+	last_mh_off = (size_t)(mh) - (size_t)(&message[0]);
 	if (is_end_of_message)
 	    break;
     }

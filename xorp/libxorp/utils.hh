@@ -325,6 +325,9 @@ public:
     }
 
 private:
+    // Damn..code assumes data is not coppied, see:
+    // NetlinkSocket::force_recvmsg_flgs
+    // Will just have to assume that alignment is OK till we can clean this up. --Ben
     static const bool _data_is_copied = false;
 
     void*	_data;
