@@ -1098,13 +1098,14 @@ template class XrlIO<IPv4>;
 
 /** IPv6 Stuff */
 
+#ifdef HAVE_IPV6
+
 template <>
 bool
 XrlIO<IPv6>::send(const string& interface, const string& vif,
 		  IPv6 dst, IPv6 src,
 		  int ttl, uint8_t* data, uint32_t len)
 {
-#ifdef HAVE_IPV6
     bool success;
 
     debug_msg("send(%s,%s,%s,%s,%p,%d\n",
@@ -1136,23 +1137,12 @@ XrlIO<IPv6>::send(const string& interface, const string& vif,
 	callback(this, &XrlIO::send_cb, interface, vif));
 
     return success;
-#else
-    UNUSED(interface);
-    UNUSED(vif);
-    UNUSED(dst);
-    UNUSED(src);
-    UNUSED(ttl);
-    UNUSED(data);
-    UNUSED(len);
-    return false;
-#endif
 }
 
 template <>
 bool
 XrlIO<IPv6>::enable_interface_vif(const string& interface, const string& vif)
 {
-#ifdef HAVE_IPV6
     bool success;
 
     debug_msg("Enable Interface %s Vif %s\n", interface.c_str(), vif.c_str());
@@ -1168,11 +1158,6 @@ XrlIO<IPv6>::enable_interface_vif(const string& interface, const string& vif)
 	callback(this, &XrlIO::enable_interface_vif_cb, interface, vif));
 
     return success;
-#else
-    UNUSED(interface);
-    UNUSED(vif);
-    return false;
-#endif
 }
 
 
@@ -1180,7 +1165,6 @@ template <>
 bool
 XrlIO<IPv6>::disable_interface_vif(const string& interface, const string& vif)
 {
-#ifdef HAVE_IPV6
     bool success;
 
     debug_msg("Disable Interface %s Vif %s\n", interface.c_str(), vif.c_str());
@@ -1195,11 +1179,6 @@ XrlIO<IPv6>::disable_interface_vif(const string& interface, const string& vif)
 	callback(this, &XrlIO::disable_interface_vif_cb, interface, vif));
 
     return success;
-#else
-    UNUSED(interface);
-    UNUSED(vif);
-    return false;
-#endif
 }
 
 template <>
@@ -1284,7 +1263,6 @@ bool
 XrlIO<IPv6>::join_multicast_group(const string& interface, const string& vif,
 				  IPv6 mcast)
 {
-#ifdef HAVE_IPV6
     bool success;
 
     debug_msg("Join Interface %s Vif %s mcast %s\n", interface.c_str(),
@@ -1301,12 +1279,6 @@ XrlIO<IPv6>::join_multicast_group(const string& interface, const string& vif,
 	callback(this, &XrlIO::join_multicast_group_cb, interface, vif));
 
     return success;
-#else
-    UNUSED(interface);
-    UNUSED(vif);
-    UNUSED(mcast);
-    return false;
-#endif
 }
 
 template <>
@@ -1314,7 +1286,6 @@ bool
 XrlIO<IPv6>::leave_multicast_group(const string& interface, const string& vif,
 				   IPv6 mcast)
 {
-#ifdef HAVE_IPV6
     bool success;
 
     debug_msg("Leave Interface %s Vif %s mcast %s\n", interface.c_str(),
@@ -1331,12 +1302,6 @@ XrlIO<IPv6>::leave_multicast_group(const string& interface, const string& vif,
 	callback(this, &XrlIO::leave_multicast_group_cb, interface, vif));
 
     return success;
-#else
-    UNUSED(interface);
-    UNUSED(vif);
-    UNUSED(mcast);
-    return false;
-#endif
 }
 
 template<>
@@ -1586,3 +1551,5 @@ XrlIO<IPv6>::updates_made()
 
 template class XrlQueue<IPv6>;
 template class XrlIO<IPv6>;
+
+#endif // ipv6
