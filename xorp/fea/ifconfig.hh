@@ -415,6 +415,7 @@ public:
 		       const IfTreeVif&		fv,
 		       const IfTreeAddr4&	fa);
 
+#ifdef HAVE_IPV6
     /**
      * Check IfTreeAddr6 and report updates to IfConfigUpdateReporter.
      *
@@ -426,6 +427,7 @@ public:
     bool report_update(const IfTreeInterface&	fi,
 		       const IfTreeVif&		fv,
 		       const IfTreeAddr6&	fa);
+#endif
 
     /**
      * Report that updates were completed to IfConfigUpdateReporter.

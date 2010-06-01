@@ -33,8 +33,9 @@
 class IfConfigUpdateReplicator;
 class IfTree;
 class IPv4;
+#ifdef HAVE_IPV6
 class IPv6;
-
+#endif
 
 /**
  * @short Base class for propagating update information on from IfConfig.
@@ -98,10 +99,12 @@ public:
 				 const IPv4&   addr,
 				 const Update& u) = 0;
 
+#ifdef HAVE_IPV6
     virtual void vifaddr6_update(const string& ifname,
 				 const string& vifname,
 				 const IPv6&   addr,
 				 const Update& u) = 0;
+#endif
 
     virtual void updates_completed() = 0;
 
@@ -161,6 +164,7 @@ public:
 			 const IPv4&   addr,
 			 const Update& u);
 
+#ifdef HAVE_IPV6
     /**
      * Forward virtual interface address update notification to
      * reporter instances on update notification list.
@@ -169,6 +173,7 @@ public:
 			 const string& vifname,
 			 const IPv6&   addr,
 			 const Update& u);
+#endif
 
     /**
      * Forward notification that updates were completed to
@@ -206,10 +211,12 @@ public:
 			       const IPv4&   addr,
 			       const string& error_msg) = 0;
 
+#ifdef HAVE_IPV6
     virtual void vifaddr_error(const string& ifname,
 			       const string& vifname,
 			       const IPv6&   addr,
 			       const string& error_msg) = 0;
+#endif
 
     /**
      * @return error message of first error encountered.
@@ -271,10 +278,12 @@ public:
 		       const IPv4&   addr,
 		       const string& error_msg);
 
+#ifdef HAVE_IPV6
     void vifaddr_error(const string& ifname,
 		       const string& vifname,
 		       const IPv6&   addr,
 		       const string& error_msg);
+#endif
 
 private:
 };

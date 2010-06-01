@@ -1049,6 +1049,7 @@ XrlFeaTarget::fea_firewall_0_1_get_entry_list_next4(
     return XrlCmdError::OKAY();
 }
 
+#ifdef HAVE_IPV6
 XrlCmdError
 XrlFeaTarget::fea_firewall_0_1_add_entry6(
     // Input values,
@@ -1240,7 +1241,7 @@ XrlFeaTarget::fea_firewall_0_1_get_entry_list_next6(
 
     return XrlCmdError::OKAY();
 }
-
+#endif //ipv6
 #endif // firewall
 
 XrlCmdError
@@ -1652,6 +1653,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_vif_addresses4(
     return XrlCmdError::OKAY();
 }
 
+#ifdef HAVE_IPV6
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_get_configured_prefix6(
     // Input values,
@@ -1736,6 +1738,482 @@ XrlFeaTarget::ifmgr_0_1_get_configured_vif_addresses6(
     return XrlCmdError::OKAY();
 }
 
+
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_get_configured_address_flags6(
+    // Input values
+    const string&	ifname,
+    const string&	vifname,
+    const IPv6&		address,
+    // Output values
+    bool&		up,
+    bool&		loopback,
+    bool&		point_to_point,
+    bool&		multicast)
+{
+    const IfTreeAddr6* ap = NULL;
+    string error_msg;
+
+    ap = _ifconfig.merged_config().find_addr(ifname, vifname, address);
+    if (ap == NULL) {
+	error_msg = c_format("Interface %s vif %s address %s not found",
+			     ifname.c_str(), vifname.c_str(),
+			     address.str().c_str());
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    up = ap->enabled();
+    loopback = ap->loopback();
+    point_to_point = ap->point_to_point();
+    multicast = ap->multicast();
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_get_configured_address_enabled6(
+    // Input values,
+    const string&	ifname,
+    const string&	vifname,
+    const IPv6&		address,
+    bool&		enabled)
+{
+    const IfTreeAddr6* ap = NULL;
+    string error_msg;
+
+    ap = _ifconfig.merged_config().find_addr(ifname, vifname, address);
+    if (ap == NULL) {
+	error_msg = c_format("Interface %s vif %s address %s not found",
+			     ifname.c_str(), vifname.c_str(),
+			     address.str().c_str());
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    enabled = ap->enabled();
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_create_address6(
+    // Input values,
+    const uint32_t&	tid,
+    const string&	ifname,
+    const string&	vifname,
+    const IPv6&		address)
+{
+    string error_msg;
+
+    if (_ifconfig.add_transaction_operation(
+	    tid,
+	    new AddAddr6(_ifconfig, ifname, vifname, address),
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_delete_address6(
+    // Input values,
+    const uint32_t&	tid,
+    const string&	ifname,
+    const string&	vifname,
+    const IPv6&		address)
+{
+    string error_msg;
+
+    if (_ifconfig.add_transaction_operation(
+	    tid,
+	    new RemoveAddr6(_ifconfig, ifname, vifname, address),
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_set_address_enabled6(
+    // Input values,
+    const uint32_t&	tid,
+    const string&	ifname,
+    const string&	vifname,
+    const IPv6&		address,
+    const bool&		enabled)
+{
+    string error_msg;
+
+    if (_ifconfig.add_transaction_operation(
+	    tid,
+	    new SetAddr6Enabled(_ifconfig, ifname, vifname, address, enabled),
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_set_prefix6(
+    // Input values,
+    const uint32_t&	tid,
+    const string&	ifname,
+    const string&	vifname,
+    const IPv6&	  	address,
+    const uint32_t&	prefix_len)
+{
+    string error_msg;
+
+    if (_ifconfig.add_transaction_operation(
+	    tid,
+	    new SetAddr6Prefix(_ifconfig, ifname, vifname, address, prefix_len),
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_set_endpoint6(
+    // Input values,
+    const uint32_t&	tid,
+    const string&	ifname,
+    const string&	vifname,
+    const IPv6&		address,
+    const IPv6&		endpoint)
+{
+    string error_msg;
+
+    if (_ifconfig.add_transaction_operation(
+	    tid,
+	    new SetAddr6Endpoint(_ifconfig, ifname, vifname, address, endpoint),
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::fti_0_2_lookup_route_by_dest6(
+    // Input values,
+    const IPv6&		dst,
+    // Output values,
+    IPv6Net&		netmask,
+    IPv6&		nexthop,
+    string&		ifname,
+    string&		vifname,
+    uint32_t&		metric,
+    uint32_t&		admin_distance,
+    string&		protocol_origin)
+{
+    Fte6 fte;
+    if (_fibconfig.lookup_route_by_dest6(dst, fte) == XORP_OK) {
+	netmask = fte.net();
+	nexthop = fte.nexthop();
+	ifname = fte.ifname();
+	vifname = fte.vifname();
+	metric = fte.metric();
+	admin_distance = fte.admin_distance();
+	// TODO: set the value of protocol_origin to something meaningful
+	protocol_origin = "NOT_SUPPORTED";
+	return XrlCmdError::OKAY();
+    }
+    return XrlCmdError::COMMAND_FAILED("No route for " + dst.str());
+}
+
+XrlCmdError
+XrlFeaTarget::fti_0_2_lookup_route_by_network6(
+    // Input values,
+    const IPv6Net&	dst,
+    // Output values,
+    IPv6&		nexthop,
+    string&		ifname,
+    string&		vifname,
+    uint32_t&		metric,
+    uint32_t&		admin_distance,
+    string&		protocol_origin)
+{
+    Fte6 fte;
+    if (_fibconfig.lookup_route_by_network6(dst, fte) == XORP_OK) {
+	nexthop = fte.nexthop();
+	ifname = fte.ifname();
+	vifname = fte.vifname();
+	metric = fte.metric();
+	admin_distance = fte.admin_distance();
+	// TODO: set the value of protocol_origin to something meaningful
+	protocol_origin = "NOT_SUPPORTED";
+	return XrlCmdError::OKAY();
+    }
+    return XrlCmdError::COMMAND_FAILED("No entry for " + dst.str());
+}
+
+XrlCmdError
+XrlFeaTarget::fti_0_2_have_ipv6(
+    // Output values,
+    bool&	result)
+{
+    result = _fea_node.have_ipv6();
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::fti_0_2_get_unicast_forwarding_enabled6(
+    // Output values,
+    bool&	enabled)
+{
+    string error_msg;
+
+    if (_fibconfig.unicast_forwarding_enabled6(enabled, error_msg) != XORP_OK)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::fti_0_2_set_unicast_forwarding_enabled6(
+    // Input values,
+    const bool&	enabled)
+{
+    string error_msg;
+
+    if (_fibconfig.set_unicast_forwarding_enabled6(enabled, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::fti_0_2_set_unicast_forwarding_entries_retain_on_startup6(
+    // Input values,
+    const bool&	retain)
+{
+    string error_msg;
+
+    if (_fibconfig.set_unicast_forwarding_entries_retain_on_startup6(
+	    retain,
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::fti_0_2_set_unicast_forwarding_entries_retain_on_shutdown6(
+    // Input values,
+    const bool&	retain)
+{
+    string error_msg;
+
+    if (_fibconfig.set_unicast_forwarding_entries_retain_on_shutdown6(
+	    retain,
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::fti_0_2_set_unicast_forwarding_table_id6(
+    // Input values,
+    const bool&		is_configured,
+    const uint32_t&	table_id)
+{
+    string error_msg;
+
+    if (_fibconfig.set_unicast_forwarding_table_id6(
+	    is_configured,
+	    table_id,
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::redist_transaction6_0_1_start_transaction(
+    // Output values,
+    uint32_t&	tid)
+{
+    string error_msg;
+
+    if (_fibconfig.start_transaction(tid, error_msg) != XORP_OK)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::redist_transaction6_0_1_commit_transaction(
+    // Input values,
+    const uint32_t&	tid)
+{
+    string error_msg;
+
+    if (_fibconfig.commit_transaction(tid, error_msg) != XORP_OK)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::redist_transaction6_0_1_abort_transaction(
+    // Input values,
+    const uint32_t&	tid)
+{
+    string error_msg;
+
+    if (_fibconfig.abort_transaction(tid, error_msg) != XORP_OK)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::redist_transaction6_0_1_add_route(
+    // Input values,
+    const uint32_t&	tid,
+    const IPv6Net&	dst,
+    const IPv6&		nexthop,
+    const string&	ifname,
+    const string&	vifname,
+    const uint32_t&	metric,
+    const uint32_t&	admin_distance,
+    const string&	cookie,
+    const string&	protocol_origin)
+{
+    bool is_xorp_route;
+    bool is_connected_route = false;
+    string error_msg;
+
+    debug_msg("redist_transaction6_0_1_add_route(): "
+	      "dst = %s nexthop = %s ifname = %s vifname = %s "
+	      "metric = %u admin_distance = %u protocol_origin = %s\n",
+	      dst.str().c_str(),
+	      nexthop.str().c_str(),
+	      ifname.c_str(),
+	      vifname.c_str(),
+	      XORP_UINT_CAST(metric),
+	      XORP_UINT_CAST(admin_distance),
+	      protocol_origin.c_str());
+
+    UNUSED(cookie);
+
+    is_xorp_route = true;	// XXX: unconditionally set to true
+
+    // TODO: XXX: get rid of the hard-coded "connected" string here
+    if (protocol_origin == "connected")
+	is_connected_route = true;
+
+    PROFILE(if (_profile.enabled(profile_route_in))
+		_profile.log(profile_route_in, c_format("add %s", dst.str().c_str())));
+
+    if (_fibconfig.add_transaction_operation(
+	    tid,
+	    new FibAddEntry6(_fibconfig, dst, nexthop, ifname, vifname,
+			     metric, admin_distance, is_xorp_route,
+			     is_connected_route),
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::redist_transaction6_0_1_delete_route(
+    // Input values,
+    const uint32_t&	tid,
+    const IPv6Net&	dst,
+    const IPv6&		nexthop,
+    const string&	ifname,
+    const string&	vifname,
+    const uint32_t&	metric,
+    const uint32_t&	admin_distance,
+    const string&	cookie,
+    const string&	protocol_origin)
+{
+    bool is_xorp_route;
+    bool is_connected_route = false;
+    string error_msg;
+
+    debug_msg("redist_transaction6_0_1_delete_route(): "
+	      "dst = %s nexthop = %s ifname = %s vifname = %s "
+	      "metric = %u admin_distance = %u protocol_origin = %s\n",
+	      dst.str().c_str(),
+	      nexthop.str().c_str(),
+	      ifname.c_str(),
+	      vifname.c_str(),
+	      XORP_UINT_CAST(metric),
+	      XORP_UINT_CAST(admin_distance),
+	      protocol_origin.c_str());
+
+    UNUSED(cookie);
+
+    is_xorp_route = true;	// XXX: unconditionally set to true
+
+    // TODO: XXX: get rid of the hard-coded "connected" string here
+    if (protocol_origin == "connected")
+	is_connected_route = true;
+
+    PROFILE(if (_profile.enabled(profile_route_in))
+		_profile.log(profile_route_in,
+			     c_format("delete %s", dst.str().c_str())));
+
+    if (_fibconfig.add_transaction_operation(
+	    tid,
+	    new FibDeleteEntry6(_fibconfig, dst, nexthop, ifname, vifname,
+				metric, admin_distance, is_xorp_route,
+				is_connected_route),
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::redist_transaction6_0_1_delete_all_routes(
+    // Input values,
+    const uint32_t&	tid,
+    const string&	cookie)
+{
+    string error_msg;
+
+    UNUSED(cookie);
+
+    if (_fibconfig.add_transaction_operation(
+	    tid,
+	    new FibDeleteAllEntries6(_fibconfig),
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+#endif
+
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_get_configured_address_flags4(
     // Input values
@@ -1770,37 +2248,6 @@ XrlFeaTarget::ifmgr_0_1_get_configured_address_flags4(
 }
 
 XrlCmdError
-XrlFeaTarget::ifmgr_0_1_get_configured_address_flags6(
-    // Input values
-    const string&	ifname,
-    const string&	vifname,
-    const IPv6&		address,
-    // Output values
-    bool&		up,
-    bool&		loopback,
-    bool&		point_to_point,
-    bool&		multicast)
-{
-    const IfTreeAddr6* ap = NULL;
-    string error_msg;
-
-    ap = _ifconfig.merged_config().find_addr(ifname, vifname, address);
-    if (ap == NULL) {
-	error_msg = c_format("Interface %s vif %s address %s not found",
-			     ifname.c_str(), vifname.c_str(),
-			     address.str().c_str());
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    up = ap->enabled();
-    loopback = ap->loopback();
-    point_to_point = ap->point_to_point();
-    multicast = ap->multicast();
-
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
 XrlFeaTarget::ifmgr_0_1_get_configured_address_enabled4(
     // Input values,
     const string&	ifname,
@@ -1809,30 +2256,6 @@ XrlFeaTarget::ifmgr_0_1_get_configured_address_enabled4(
     bool&		enabled)
 {
     const IfTreeAddr4* ap = NULL;
-    string error_msg;
-
-    ap = _ifconfig.merged_config().find_addr(ifname, vifname, address);
-    if (ap == NULL) {
-	error_msg = c_format("Interface %s vif %s address %s not found",
-			     ifname.c_str(), vifname.c_str(),
-			     address.str().c_str());
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    enabled = ap->enabled();
-
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlFeaTarget::ifmgr_0_1_get_configured_address_enabled6(
-    // Input values,
-    const string&	ifname,
-    const string&	vifname,
-    const IPv6&		address,
-    bool&		enabled)
-{
-    const IfTreeAddr6* ap = NULL;
     string error_msg;
 
     ap = _ifconfig.merged_config().find_addr(ifname, vifname, address);
@@ -2629,114 +3052,6 @@ XrlFeaTarget::ifmgr_0_1_set_endpoint4(
 }
 
 XrlCmdError
-XrlFeaTarget::ifmgr_0_1_create_address6(
-    // Input values,
-    const uint32_t&	tid,
-    const string&	ifname,
-    const string&	vifname,
-    const IPv6&		address)
-{
-    string error_msg;
-
-    if (_ifconfig.add_transaction_operation(
-	    tid,
-	    new AddAddr6(_ifconfig, ifname, vifname, address),
-	    error_msg)
-	!= XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlFeaTarget::ifmgr_0_1_delete_address6(
-    // Input values,
-    const uint32_t&	tid,
-    const string&	ifname,
-    const string&	vifname,
-    const IPv6&		address)
-{
-    string error_msg;
-
-    if (_ifconfig.add_transaction_operation(
-	    tid,
-	    new RemoveAddr6(_ifconfig, ifname, vifname, address),
-	    error_msg)
-	!= XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlFeaTarget::ifmgr_0_1_set_address_enabled6(
-    // Input values,
-    const uint32_t&	tid,
-    const string&	ifname,
-    const string&	vifname,
-    const IPv6&		address,
-    const bool&		enabled)
-{
-    string error_msg;
-
-    if (_ifconfig.add_transaction_operation(
-	    tid,
-	    new SetAddr6Enabled(_ifconfig, ifname, vifname, address, enabled),
-	    error_msg)
-	!= XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlFeaTarget::ifmgr_0_1_set_prefix6(
-    // Input values,
-    const uint32_t&	tid,
-    const string&	ifname,
-    const string&	vifname,
-    const IPv6&	  	address,
-    const uint32_t&	prefix_len)
-{
-    string error_msg;
-
-    if (_ifconfig.add_transaction_operation(
-	    tid,
-	    new SetAddr6Prefix(_ifconfig, ifname, vifname, address, prefix_len),
-	    error_msg)
-	!= XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlFeaTarget::ifmgr_0_1_set_endpoint6(
-    // Input values,
-    const uint32_t&	tid,
-    const string&	ifname,
-    const string&	vifname,
-    const IPv6&		address,
-    const IPv6&		endpoint)
-{
-    string error_msg;
-
-    if (_ifconfig.add_transaction_operation(
-	    tid,
-	    new SetAddr6Endpoint(_ifconfig, ifname, vifname, address, endpoint),
-	    error_msg)
-	!= XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
 XrlFeaTarget::ifmgr_0_1_startup_ifmgr() {
     return XrlCmdError::OKAY();
 }
@@ -2807,34 +3122,6 @@ XrlFeaTarget::fti_0_2_lookup_route_by_dest4(
 }
 
 XrlCmdError
-XrlFeaTarget::fti_0_2_lookup_route_by_dest6(
-    // Input values,
-    const IPv6&		dst,
-    // Output values,
-    IPv6Net&		netmask,
-    IPv6&		nexthop,
-    string&		ifname,
-    string&		vifname,
-    uint32_t&		metric,
-    uint32_t&		admin_distance,
-    string&		protocol_origin)
-{
-    Fte6 fte;
-    if (_fibconfig.lookup_route_by_dest6(dst, fte) == XORP_OK) {
-	netmask = fte.net();
-	nexthop = fte.nexthop();
-	ifname = fte.ifname();
-	vifname = fte.vifname();
-	metric = fte.metric();
-	admin_distance = fte.admin_distance();
-	// TODO: set the value of protocol_origin to something meaningful
-	protocol_origin = "NOT_SUPPORTED";
-	return XrlCmdError::OKAY();
-    }
-    return XrlCmdError::COMMAND_FAILED("No route for " + dst.str());
-}
-
-XrlCmdError
 XrlFeaTarget::fti_0_2_lookup_route_by_network4(
     // Input values,
     const IPv4Net&	dst,
@@ -2861,47 +3148,11 @@ XrlFeaTarget::fti_0_2_lookup_route_by_network4(
 }
 
 XrlCmdError
-XrlFeaTarget::fti_0_2_lookup_route_by_network6(
-    // Input values,
-    const IPv6Net&	dst,
-    // Output values,
-    IPv6&		nexthop,
-    string&		ifname,
-    string&		vifname,
-    uint32_t&		metric,
-    uint32_t&		admin_distance,
-    string&		protocol_origin)
-{
-    Fte6 fte;
-    if (_fibconfig.lookup_route_by_network6(dst, fte) == XORP_OK) {
-	nexthop = fte.nexthop();
-	ifname = fte.ifname();
-	vifname = fte.vifname();
-	metric = fte.metric();
-	admin_distance = fte.admin_distance();
-	// TODO: set the value of protocol_origin to something meaningful
-	protocol_origin = "NOT_SUPPORTED";
-	return XrlCmdError::OKAY();
-    }
-    return XrlCmdError::COMMAND_FAILED("No entry for " + dst.str());
-}
-
-XrlCmdError
 XrlFeaTarget::fti_0_2_have_ipv4(
     // Output values,
     bool&	result)
 {
     result = _fea_node.have_ipv4();
-
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlFeaTarget::fti_0_2_have_ipv6(
-    // Output values,
-    bool&	result)
-{
-    result = _fea_node.have_ipv6();
 
     return XrlCmdError::OKAY();
 }
@@ -2920,19 +3171,6 @@ XrlFeaTarget::fti_0_2_get_unicast_forwarding_enabled4(
 }
 
 XrlCmdError
-XrlFeaTarget::fti_0_2_get_unicast_forwarding_enabled6(
-    // Output values,
-    bool&	enabled)
-{
-    string error_msg;
-
-    if (_fibconfig.unicast_forwarding_enabled6(enabled, error_msg) != XORP_OK)
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
 XrlFeaTarget::fti_0_2_set_unicast_forwarding_enabled4(
     // Input values,
     const bool&	enabled)
@@ -2940,21 +3178,6 @@ XrlFeaTarget::fti_0_2_set_unicast_forwarding_enabled4(
     string error_msg;
 
     if (_fibconfig.set_unicast_forwarding_enabled4(enabled, error_msg)
-	!= XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlFeaTarget::fti_0_2_set_unicast_forwarding_enabled6(
-    // Input values,
-    const bool&	enabled)
-{
-    string error_msg;
-
-    if (_fibconfig.set_unicast_forwarding_enabled6(enabled, error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -2997,40 +3220,6 @@ XrlFeaTarget::fti_0_2_set_unicast_forwarding_entries_retain_on_shutdown4(
 }
 
 XrlCmdError
-XrlFeaTarget::fti_0_2_set_unicast_forwarding_entries_retain_on_startup6(
-    // Input values,
-    const bool&	retain)
-{
-    string error_msg;
-
-    if (_fibconfig.set_unicast_forwarding_entries_retain_on_startup6(
-	    retain,
-	    error_msg)
-	!= XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlFeaTarget::fti_0_2_set_unicast_forwarding_entries_retain_on_shutdown6(
-    // Input values,
-    const bool&	retain)
-{
-    string error_msg;
-
-    if (_fibconfig.set_unicast_forwarding_entries_retain_on_shutdown6(
-	    retain,
-	    error_msg)
-	!= XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
 XrlFeaTarget::fti_0_2_set_unicast_forwarding_table_id4(
     // Input values,
     const bool&		is_configured,
@@ -3039,25 +3228,6 @@ XrlFeaTarget::fti_0_2_set_unicast_forwarding_table_id4(
     string error_msg;
 
     if (_fibconfig.set_unicast_forwarding_table_id4(
-	    is_configured,
-	    table_id,
-	    error_msg)
-	!= XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlFeaTarget::fti_0_2_set_unicast_forwarding_table_id6(
-    // Input values,
-    const bool&		is_configured,
-    const uint32_t&	table_id)
-{
-    string error_msg;
-
-    if (_fibconfig.set_unicast_forwarding_table_id6(
 	    is_configured,
 	    table_id,
 	    error_msg)
@@ -3229,171 +3399,6 @@ XrlFeaTarget::redist_transaction4_0_1_delete_all_routes(
     if (_fibconfig.add_transaction_operation(
 	    tid,
 	    new FibDeleteAllEntries4(_fibconfig),
-	    error_msg)
-	!= XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlFeaTarget::redist_transaction6_0_1_start_transaction(
-    // Output values,
-    uint32_t&	tid)
-{
-    string error_msg;
-
-    if (_fibconfig.start_transaction(tid, error_msg) != XORP_OK)
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlFeaTarget::redist_transaction6_0_1_commit_transaction(
-    // Input values,
-    const uint32_t&	tid)
-{
-    string error_msg;
-
-    if (_fibconfig.commit_transaction(tid, error_msg) != XORP_OK)
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlFeaTarget::redist_transaction6_0_1_abort_transaction(
-    // Input values,
-    const uint32_t&	tid)
-{
-    string error_msg;
-
-    if (_fibconfig.abort_transaction(tid, error_msg) != XORP_OK)
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlFeaTarget::redist_transaction6_0_1_add_route(
-    // Input values,
-    const uint32_t&	tid,
-    const IPv6Net&	dst,
-    const IPv6&		nexthop,
-    const string&	ifname,
-    const string&	vifname,
-    const uint32_t&	metric,
-    const uint32_t&	admin_distance,
-    const string&	cookie,
-    const string&	protocol_origin)
-{
-    bool is_xorp_route;
-    bool is_connected_route = false;
-    string error_msg;
-
-    debug_msg("redist_transaction6_0_1_add_route(): "
-	      "dst = %s nexthop = %s ifname = %s vifname = %s "
-	      "metric = %u admin_distance = %u protocol_origin = %s\n",
-	      dst.str().c_str(),
-	      nexthop.str().c_str(),
-	      ifname.c_str(),
-	      vifname.c_str(),
-	      XORP_UINT_CAST(metric),
-	      XORP_UINT_CAST(admin_distance),
-	      protocol_origin.c_str());
-
-    UNUSED(cookie);
-
-    is_xorp_route = true;	// XXX: unconditionally set to true
-
-    // TODO: XXX: get rid of the hard-coded "connected" string here
-    if (protocol_origin == "connected")
-	is_connected_route = true;
-
-    PROFILE(if (_profile.enabled(profile_route_in))
-		_profile.log(profile_route_in, c_format("add %s", dst.str().c_str())));
-
-    if (_fibconfig.add_transaction_operation(
-	    tid,
-	    new FibAddEntry6(_fibconfig, dst, nexthop, ifname, vifname,
-			     metric, admin_distance, is_xorp_route,
-			     is_connected_route),
-	    error_msg)
-	!= XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlFeaTarget::redist_transaction6_0_1_delete_route(
-    // Input values,
-    const uint32_t&	tid,
-    const IPv6Net&	dst,
-    const IPv6&		nexthop,
-    const string&	ifname,
-    const string&	vifname,
-    const uint32_t&	metric,
-    const uint32_t&	admin_distance,
-    const string&	cookie,
-    const string&	protocol_origin)
-{
-    bool is_xorp_route;
-    bool is_connected_route = false;
-    string error_msg;
-
-    debug_msg("redist_transaction6_0_1_delete_route(): "
-	      "dst = %s nexthop = %s ifname = %s vifname = %s "
-	      "metric = %u admin_distance = %u protocol_origin = %s\n",
-	      dst.str().c_str(),
-	      nexthop.str().c_str(),
-	      ifname.c_str(),
-	      vifname.c_str(),
-	      XORP_UINT_CAST(metric),
-	      XORP_UINT_CAST(admin_distance),
-	      protocol_origin.c_str());
-
-    UNUSED(cookie);
-
-    is_xorp_route = true;	// XXX: unconditionally set to true
-
-    // TODO: XXX: get rid of the hard-coded "connected" string here
-    if (protocol_origin == "connected")
-	is_connected_route = true;
-
-    PROFILE(if (_profile.enabled(profile_route_in))
-		_profile.log(profile_route_in,
-			     c_format("delete %s", dst.str().c_str())));
-
-    if (_fibconfig.add_transaction_operation(
-	    tid,
-	    new FibDeleteEntry6(_fibconfig, dst, nexthop, ifname, vifname,
-				metric, admin_distance, is_xorp_route,
-				is_connected_route),
-	    error_msg)
-	!= XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlFeaTarget::redist_transaction6_0_1_delete_all_routes(
-    // Input values,
-    const uint32_t&	tid,
-    const string&	cookie)
-{
-    string error_msg;
-
-    UNUSED(cookie);
-
-    if (_fibconfig.add_transaction_operation(
-	    tid,
-	    new FibDeleteAllEntries6(_fibconfig),
 	    error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -4691,4 +4696,4 @@ XrlFeaTarget::profile_0_1_list(string& info)
     return XrlCmdError::OKAY();
 }
 
-#endif
+#endif //profile

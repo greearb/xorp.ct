@@ -33,7 +33,9 @@ class IfMgrIfTree;
 class IfMgrIfAtom;
 class IfMgrVifAtom;
 class IfMgrIPv4Atom;
+#ifdef HAVE_IPV6
 class IfMgrIPv6Atom;
+#endif
 
 /**
  * @short Base class for command sinks.
@@ -369,6 +371,7 @@ protected:
     const IfMgrIPv4Atom& _a;
 };
 
+#ifdef HAVE_IPV6
 /**
  * @short Class to convert an IfMgrIPv6Atom object into a sequence of commands.
  */
@@ -402,5 +405,6 @@ protected:
     const string&	 _vifn;
     const IfMgrIPv6Atom& _a;
 };
+#endif //ipv6
 
 #endif // __IFMGR_CMD_QUEUE_HH__

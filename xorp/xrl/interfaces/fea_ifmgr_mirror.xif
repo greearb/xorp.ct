@@ -3,6 +3,8 @@
  * changes in the Forwarding Engine Abstraction process.
  */
 
+#include <xorp_config.h>
+
 interface fea_ifmgr_mirror/0.1 {
 	interface_add ? ifname:txt;
 	interface_remove ? ifname:txt;
@@ -46,6 +48,7 @@ interface fea_ifmgr_mirror/0.1 {
 			  & endpoint_addr:ipv4;
 
 
+#ifdef HAVE_IPV6
 
 	ipv6_add ? ifname:txt & vifname:txt & addr:ipv6;
 	ipv6_remove ? ifname:txt & vifname:txt & addr:ipv6;
@@ -58,7 +61,7 @@ interface fea_ifmgr_mirror/0.1 {
 	ipv6_set_endpoint ? ifname:txt & vifname:txt & addr:ipv6	\
 			  & endpoint_addr:ipv6;
 
-
+#endif //ipv6
 
 	hint_tree_complete;
 	hint_updates_made;

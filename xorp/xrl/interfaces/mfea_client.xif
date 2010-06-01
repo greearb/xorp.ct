@@ -1,5 +1,7 @@
 /* $XORP: xorp/xrl/interfaces/mfea_client.xif,v 1.11 2007/05/19 01:52:48 pavlin Exp $ */
 
+#include <xorp_config.h>
+
 /*
  * Multicast Forwarding Engine Abstraction client XRL interface.
  */
@@ -24,12 +26,6 @@ interface mfea_client/0.1 {
 					& vif_name:txt & vif_index:u32	\
 					& source_address:ipv4		\
 					& dest_address:ipv4		\
-					& protocol_message:binary;
-	recv_kernel_signal_message6	? xrl_sender_name:txt		\
-					& message_type:u32		\
-					& vif_name:txt & vif_index:u32	\
-					& source_address:ipv6		\
-					& dest_address:ipv6		\
 					& protocol_message:binary;
 	
 	/**
@@ -76,6 +72,15 @@ interface mfea_client/0.1 {
 				& is_threshold_in_bytes: bool		\
 				& is_geq_upcall:bool			\
 				& is_leq_upcall: bool;
+
+#ifdef HAVE_IPV6
+	recv_kernel_signal_message6	? xrl_sender_name:txt		\
+					& message_type:u32		\
+					& vif_name:txt & vif_index:u32	\
+					& source_address:ipv6		\
+					& dest_address:ipv6		\
+					& protocol_message:binary;
+
 	recv_dataflow_signal6	? xrl_sender_name:txt			\
 				& source_address:ipv6			\
 				& group_address:ipv6			\
@@ -91,4 +96,5 @@ interface mfea_client/0.1 {
 				& is_threshold_in_bytes: bool		\
 				& is_geq_upcall:bool			\
 				& is_leq_upcall:bool;
+#endif //ipv6
 }

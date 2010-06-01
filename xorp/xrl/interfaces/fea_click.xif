@@ -1,5 +1,9 @@
 /* $XORP: xorp/xrl/interfaces/fea_click.xif,v 1.5 2007/07/11 22:18:18 pavlin Exp $ */
 
+#include <xorp_config.h>
+
+#ifdef XORP_USE_CLICK
+
 /*
  * Click FEA XRL interface.
  */
@@ -156,3 +160,5 @@ interface fea_click/0.1 {
 	 */
 	set_user_click_config_generator_file	? user_click_config_generator_file:txt;
 }
+
+#endif //click

@@ -47,4 +47,4 @@ interface raw_packet6_client/0.1 {
 		& payload:binary;
 }
 
-#endif
+#endif //ipv6

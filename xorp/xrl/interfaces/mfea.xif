@@ -1,5 +1,7 @@
 /* $XORP: xorp/xrl/interfaces/mfea.xif,v 1.9 2007/05/19 01:52:48 pavlin Exp $ */
 
+#include <xorp_config.h>
+
 /*
  * Multicast Forwarding Engine Abstraction XRL interface.
  */
@@ -14,14 +16,6 @@ interface mfea/0.1 {
 	 * multicast routing, otherwise false.
 	 */
 	have_multicast_routing4 -> result:bool;
-
-	/**
-	 * Test if the underlying system supports IPv6 multicast routing.
-	 * 
-	 * @param result true if the underlying system supports IPv6
-	 * multicast routing, otherwise false.
-	 */
-	have_multicast_routing6 -> result:bool;
 
 	/**
 	 * Register a protocol on an interface in the Multicast FEA.
@@ -39,9 +33,6 @@ interface mfea/0.1 {
 	register_protocol4 ? xrl_sender_name:txt			\
 			& if_name:txt & vif_name:txt			\
 			& ip_protocol:u32;
-	register_protocol6 ? xrl_sender_name:txt			\
-			& if_name:txt & vif_name:txt			\
-			& ip_protocol:u32;
 
 	/**
 	 * Unregister a protocol on an interface in the Multicast FEA.
@@ -55,8 +46,6 @@ interface mfea/0.1 {
 	 * particular protocol.
 	 */
 	unregister_protocol4 ? xrl_sender_name:txt			\
-			& if_name:txt & vif_name:txt;
-	unregister_protocol6 ? xrl_sender_name:txt			\
 			& if_name:txt & vif_name:txt;
 
 	/**
@@ -81,17 +70,8 @@ interface mfea/0.1 {
 			& oiflist_disable_wrongvif:binary		\
 			& max_vifs_oiflist:u32				\
 			& rp_address:ipv4;
-	add_mfc6	? xrl_sender_name:txt				\
-			& source_address:ipv6 & group_address:ipv6	\
-			& iif_vif_index:u32				\
-			& oiflist:binary				\
-			& oiflist_disable_wrongvif:binary		\
-			& max_vifs_oiflist:u32				\
-			& rp_address:ipv6;
 	delete_mfc4	? xrl_sender_name:txt				\
 			& source_address:ipv4 & group_address:ipv4;
-	delete_mfc6	? xrl_sender_name:txt				\
-			& source_address:ipv6 & group_address:ipv6;
 	
 	/**
 	 * Add/delete a dataflow monitor with the MFEA.
@@ -127,17 +107,6 @@ interface mfea/0.1 {
 				& is_threshold_in_bytes:bool		\
 				& is_geq_upcall:bool			\
 				& is_leq_upcall:bool;
-	add_dataflow_monitor6	? xrl_sender_name:txt			\
-				& source_address:ipv6			\
-				& group_address:ipv6			\
-				& threshold_interval_sec:u32		\
-				& threshold_interval_usec:u32		\
-				& threshold_packets:u32			\
-				& threshold_bytes:u32			\
-				& is_threshold_in_packets:bool		\
-				& is_threshold_in_bytes:bool		\
-				& is_geq_upcall:bool			\
-				& is_leq_upcall:bool;
 	delete_dataflow_monitor4? xrl_sender_name:txt			\
 				& source_address:ipv4			\
 				& group_address:ipv4			\
@@ -149,23 +118,9 @@ interface mfea/0.1 {
 				& is_threshold_in_bytes:bool		\
 				& is_geq_upcall:bool			\
 				& is_leq_upcall:bool;
-	delete_dataflow_monitor6? xrl_sender_name:txt			\
-				& source_address:ipv6			\
-				& group_address:ipv6			\
-				& threshold_interval_sec:u32		\
-				& threshold_interval_usec:u32		\
-				& threshold_packets:u32			\
-				& threshold_bytes:u32			\
-				& is_threshold_in_packets:bool		\
-				& is_threshold_in_bytes:bool		\
-				& is_geq_upcall:bool			\
-				& is_leq_upcall:bool;
 	delete_all_dataflow_monitor4? xrl_sender_name:txt		\
 				& source_address:ipv4			\
 				& group_address:ipv4;
-	delete_all_dataflow_monitor6? xrl_sender_name:txt		\
-				& source_address:ipv6			\
-				& group_address:ipv6;
 
 	/**
 	 * Enable/disable/start/stop a MFEA vif interface.
@@ -215,4 +170,57 @@ interface mfea/0.1 {
 	 * disable it.
 	 */
 	log_trace_all	? enable:bool;
+
+#ifdef HAVE_IPV6
+
+
+	/**
+	 * Test if the underlying system supports IPv6 multicast routing.
+	 * 
+	 * @param result true if the underlying system supports IPv6
+	 * multicast routing, otherwise false.
+	 */
+	have_multicast_routing6 -> result:bool;
+
+	register_protocol6 ? xrl_sender_name:txt			\
+			& if_name:txt & vif_name:txt			\
+			& ip_protocol:u32;
+	unregister_protocol6 ? xrl_sender_name:txt			\
+			& if_name:txt & vif_name:txt;
+	add_mfc6	? xrl_sender_name:txt				\
+			& source_address:ipv6 & group_address:ipv6	\
+			& iif_vif_index:u32				\
+			& oiflist:binary				\
+			& oiflist_disable_wrongvif:binary		\
+			& max_vifs_oiflist:u32				\
+			& rp_address:ipv6;
+	delete_mfc6	? xrl_sender_name:txt				\
+			& source_address:ipv6 & group_address:ipv6;
+	add_dataflow_monitor6	? xrl_sender_name:txt			\
+				& source_address:ipv6			\
+				& group_address:ipv6			\
+				& threshold_interval_sec:u32		\
+				& threshold_interval_usec:u32		\
+				& threshold_packets:u32			\
+				& threshold_bytes:u32			\
+				& is_threshold_in_packets:bool		\
+				& is_threshold_in_bytes:bool		\
+				& is_geq_upcall:bool			\
+				& is_leq_upcall:bool;
+	delete_dataflow_monitor6? xrl_sender_name:txt			\
+				& source_address:ipv6			\
+				& group_address:ipv6			\
+				& threshold_interval_sec:u32		\
+				& threshold_interval_usec:u32		\
+				& threshold_packets:u32			\
+				& threshold_bytes:u32			\
+				& is_threshold_in_packets:bool		\
+				& is_threshold_in_bytes:bool		\
+				& is_geq_upcall:bool			\
+				& is_leq_upcall:bool;
+	delete_all_dataflow_monitor6? xrl_sender_name:txt		\
+				& source_address:ipv6			\
+				& group_address:ipv6;
+
+#endif //ipv6
 }

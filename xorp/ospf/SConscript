@@ -59,7 +59,6 @@ env.AppendUnique(LIBS = [
     'xif_finder_event_notifier',
     'xif_fea_ifmgr_mirror',
     'xif_fea_ifmgr_replicator',
-    'xif_profile_client',
     'xif_fea_rawpkt4',
     'xst_fea_ifmgr_mirror',
     'xorp_ipc',
@@ -98,6 +97,10 @@ libxorp_ospf_srcs = [
 if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
     libxorp_ospf_srcs.append('xrl_target3.cc')
 
+if not (env.has_key('disable_profile') and env['disable_profile']):
+    env.AppendUnique(LIBS = [
+        'xif_profile_client',
+        ])
 
 if is_shared:
     libxorp_ospf = env.SharedLibrary(target = 'libxorp_ospf',

@@ -839,6 +839,9 @@ protected:
 };
 
 
+
+#ifdef HAVE_IPV6
+
 /**
  * @short Base class for interface IPv6 address data manipulation.
  */
@@ -1033,6 +1036,7 @@ public:
 protected:
     IPv6	_endpoint_addr;
 };
+#endif
 
 
 /**

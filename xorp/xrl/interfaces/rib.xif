@@ -603,5 +603,5 @@ interface rib/0.1 {
          * as given in the response from register_interest.
 	 */
 	deregister_interest6 ?  target:txt & addr:ipv6 & prefix_len:u32;
-#endif
+#endif //ipv6
 }

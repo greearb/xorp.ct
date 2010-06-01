@@ -315,6 +315,7 @@ LibFeaClientBridge::vifaddr4_update(const string& ifname,
 }
 
 
+#ifdef HAVE_IPV6
 void
 LibFeaClientBridge::vifaddr6_update(const string& ifname,
 				    const string& vifname,
@@ -395,6 +396,7 @@ LibFeaClientBridge::vifaddr6_update(const string& ifname,
     _rm->push(new
 	      IfMgrIPv6SetEndpoint(ifname, vifname, addr, ap->endpoint()));
 }
+#endif
 
 
 void

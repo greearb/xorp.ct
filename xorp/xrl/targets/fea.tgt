@@ -2,13 +2,9 @@
 
 #include "common.xif"
 #include "finder_event_observer.xif"
-#ifdef XORP_USE_CLICK
 #include "fea_click.xif"
-#endif
 #include "fea_fib.xif"
-#ifndef XORP_DISABLE_FIREWALL
 #include "fea_firewall.xif"
-#endif
 #include "fea_ifmgr.xif"
 #include "fea_ifmgr_replicator.xif"
 #include "fti.xif"
@@ -19,9 +15,7 @@
 #include "fea_rawpkt6.xif"
 #include "socket4.xif"
 #include "socket6.xif"
-#ifndef XORP_DISABLE_PROFILE
 #include "profile.xif"
-#endif
 
 target fea implements	common/0.1,
 			finder_event_observer/0.1,
@@ -36,11 +30,11 @@ target fea implements	common/0.1,
 			ifmgr_replicator/0.1,
 			fti/0.2,
 			redist_transaction4/0.1,
-			redist_transaction6/0.1,
 			raw_link/0.1,
 			raw_packet4/0.1,
 			socket4/0.1,
 #ifdef HAVE_IPV6
+			redist_transaction6/0.1,
 			socket6/0.1,
 			raw_packet6/0.1,
 #endif

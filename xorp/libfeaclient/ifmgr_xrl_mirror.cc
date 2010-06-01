@@ -255,6 +255,7 @@ protected:
 	const IPv4&	addr,
 	const IPv4&	endpoint_addr);
 
+#ifdef HAVE_IPV6
     XrlCmdError fea_ifmgr_mirror_0_1_ipv6_add(
 	// Input values,
 	const string&	ifname,
@@ -301,6 +302,7 @@ protected:
 	const string&	vifname,
 	const IPv6&	addr,
 	const IPv6&	endpoint_addr);
+#endif
 
     XrlCmdError fea_ifmgr_mirror_0_1_hint_tree_complete();
 
@@ -789,6 +791,7 @@ IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_ipv4_set_endpoint(
     return XrlCmdError::COMMAND_FAILED(DISPATCH_FAILED);
 }
 
+#ifdef HAVE_IPV6
 XrlCmdError
 IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_ipv6_add(
 	const string&	ifname,
@@ -891,6 +894,7 @@ IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_ipv6_set_endpoint(
     }
     return XrlCmdError::COMMAND_FAILED(DISPATCH_FAILED);
 }
+#endif //ipv6
 
 bool
 IfMgrXrlMirrorTarget::attach(IfMgrHintObserver* ho)

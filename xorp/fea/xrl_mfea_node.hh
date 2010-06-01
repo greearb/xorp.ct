@@ -216,6 +216,7 @@ protected:
 	// Output values, 
 	bool&	result);
 
+#ifdef HAVE_IPV6
     /**
      *  Test if the underlying system supports IPv6 multicast routing.
      *  
@@ -225,6 +226,7 @@ protected:
     XrlCmdError mfea_0_1_have_multicast_routing6(
 	// Output values, 
 	bool&	result);
+#endif
 
     /**
      *  Register a protocol on an interface in the Multicast FEA. There could
@@ -248,12 +250,72 @@ protected:
 	const string&	vif_name,
 	const uint32_t&	ip_protocol);
 
+#ifdef HAVE_IPV6
     XrlCmdError mfea_0_1_register_protocol6(
 	// Input values,
 	const string&	xrl_sender_name,
 	const string&	if_name,
 	const string&	vif_name,
 	const uint32_t&	ip_protocol);
+
+    XrlCmdError mfea_0_1_unregister_protocol6(
+	// Input values,
+	const string&	xrl_sender_name,
+	const string&	if_name,
+	const string&	vif_name);
+
+    XrlCmdError mfea_0_1_add_mfc6(
+	// Input values, 
+	const string&	xrl_sender_name, 
+	const IPv6&	source_address, 
+	const IPv6&	group_address, 
+	const uint32_t&	iif_vif_index, 
+	const vector<uint8_t>&	oiflist, 
+	const vector<uint8_t>&	oiflist_disable_wrongvif, 
+	const uint32_t&	max_vifs_oiflist, 
+	const IPv6&	rp_address);
+
+    XrlCmdError mfea_0_1_delete_mfc6(
+	// Input values, 
+	const string&	xrl_sender_name, 
+	const IPv6&	source_address, 
+	const IPv6&	group_address);
+
+    XrlCmdError mfea_0_1_add_dataflow_monitor6(
+	// Input values, 
+	const string&	xrl_sender_name, 
+	const IPv6&	source_address, 
+	const IPv6&	group_address, 
+	const uint32_t&	threshold_interval_sec, 
+	const uint32_t&	threshold_interval_usec, 
+	const uint32_t&	threshold_packets, 
+	const uint32_t&	threshold_bytes, 
+	const bool&	is_threshold_in_packets, 
+	const bool&	is_threshold_in_bytes, 
+	const bool&	is_geq_upcall, 
+	const bool&	is_leq_upcall);
+
+    XrlCmdError mfea_0_1_delete_dataflow_monitor6(
+	// Input values, 
+	const string&	xrl_sender_name, 
+	const IPv6&	source_address, 
+	const IPv6&	group_address, 
+	const uint32_t&	threshold_interval_sec, 
+	const uint32_t&	threshold_interval_usec, 
+	const uint32_t&	threshold_packets, 
+	const uint32_t&	threshold_bytes, 
+	const bool&	is_threshold_in_packets, 
+	const bool&	is_threshold_in_bytes, 
+	const bool&	is_geq_upcall, 
+	const bool&	is_leq_upcall);
+
+    XrlCmdError mfea_0_1_delete_all_dataflow_monitor6(
+	// Input values, 
+	const string&	xrl_sender_name, 
+	const IPv6&	source_address, 
+	const IPv6&	group_address);
+
+#endif //ipv6
 
     /**
      *  Unregister a protocol on an interface in the Multicast FEA. There could
@@ -268,12 +330,6 @@ protected:
      *  protocol.
      */
     XrlCmdError mfea_0_1_unregister_protocol4(
-	// Input values,
-	const string&	xrl_sender_name,
-	const string&	if_name,
-	const string&	vif_name);
-
-    XrlCmdError mfea_0_1_unregister_protocol6(
 	// Input values,
 	const string&	xrl_sender_name,
 	const string&	if_name,
@@ -312,28 +368,11 @@ protected:
 	const uint32_t&	max_vifs_oiflist, 
 	const IPv4&	rp_address);
 
-    XrlCmdError mfea_0_1_add_mfc6(
-	// Input values, 
-	const string&	xrl_sender_name, 
-	const IPv6&	source_address, 
-	const IPv6&	group_address, 
-	const uint32_t&	iif_vif_index, 
-	const vector<uint8_t>&	oiflist, 
-	const vector<uint8_t>&	oiflist_disable_wrongvif, 
-	const uint32_t&	max_vifs_oiflist, 
-	const IPv6&	rp_address);
-
     XrlCmdError mfea_0_1_delete_mfc4(
 	// Input values, 
 	const string&	xrl_sender_name, 
 	const IPv4&	source_address, 
 	const IPv4&	group_address);
-
-    XrlCmdError mfea_0_1_delete_mfc6(
-	// Input values, 
-	const string&	xrl_sender_name, 
-	const IPv6&	source_address, 
-	const IPv6&	group_address);
 
     /**
      *  Add/delete a dataflow monitor with the MFEA.
@@ -380,20 +419,6 @@ protected:
 	const bool&	is_geq_upcall, 
 	const bool&	is_leq_upcall);
 
-    XrlCmdError mfea_0_1_add_dataflow_monitor6(
-	// Input values, 
-	const string&	xrl_sender_name, 
-	const IPv6&	source_address, 
-	const IPv6&	group_address, 
-	const uint32_t&	threshold_interval_sec, 
-	const uint32_t&	threshold_interval_usec, 
-	const uint32_t&	threshold_packets, 
-	const uint32_t&	threshold_bytes, 
-	const bool&	is_threshold_in_packets, 
-	const bool&	is_threshold_in_bytes, 
-	const bool&	is_geq_upcall, 
-	const bool&	is_leq_upcall);
-
     XrlCmdError mfea_0_1_delete_dataflow_monitor4(
 	// Input values, 
 	const string&	xrl_sender_name, 
@@ -408,31 +433,11 @@ protected:
 	const bool&	is_geq_upcall, 
 	const bool&	is_leq_upcall);
 
-    XrlCmdError mfea_0_1_delete_dataflow_monitor6(
-	// Input values, 
-	const string&	xrl_sender_name, 
-	const IPv6&	source_address, 
-	const IPv6&	group_address, 
-	const uint32_t&	threshold_interval_sec, 
-	const uint32_t&	threshold_interval_usec, 
-	const uint32_t&	threshold_packets, 
-	const uint32_t&	threshold_bytes, 
-	const bool&	is_threshold_in_packets, 
-	const bool&	is_threshold_in_bytes, 
-	const bool&	is_geq_upcall, 
-	const bool&	is_leq_upcall);
-
     XrlCmdError mfea_0_1_delete_all_dataflow_monitor4(
 	// Input values, 
 	const string&	xrl_sender_name, 
 	const IPv4&	source_address, 
 	const IPv4&	group_address);
-
-    XrlCmdError mfea_0_1_delete_all_dataflow_monitor6(
-	// Input values, 
-	const string&	xrl_sender_name, 
-	const IPv6&	source_address, 
-	const IPv6&	group_address);
 
     /**
      *  Enable/disable/start/stop a MFEA vif interface.

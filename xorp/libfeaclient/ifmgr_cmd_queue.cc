@@ -275,11 +275,13 @@ IfMgrVifAtomToCommands::convert(IfMgrCommandSinkBase& s) const
 	IfMgrIPv4AtomToCommands(ifn, vifn, cai->second).convert(s);
     }
 
+#ifdef HAVE_IPV6
     const IfMgrVifAtom::IPv6Map& v6s = _v.ipv6addrs();
     for (IfMgrVifAtom::IPv6Map::const_iterator cai = v6s.begin();
 	 cai != v6s.end(); ++cai) {
 	IfMgrIPv6AtomToCommands(ifn, vifn, cai->second).convert(s);
     }
+#endif
 }
 
 void
@@ -299,6 +301,7 @@ IfMgrIPv4AtomToCommands::convert(IfMgrCommandSinkBase& s) const
     s.push(new IfMgrIPv4SetEndpoint(ifn, vifn, addr, _a.endpoint_addr()));
 }
 
+#ifdef HAVE_IPV6
 void
 IfMgrIPv6AtomToCommands::convert(IfMgrCommandSinkBase& s) const
 {
@@ -314,3 +317,5 @@ IfMgrIPv6AtomToCommands::convert(IfMgrCommandSinkBase& s) const
     s.push(new IfMgrIPv6SetLoopback(ifn, vifn, addr, _a.loopback()));
     s.push(new IfMgrIPv6SetEndpoint(ifn, vifn, addr, _a.endpoint_addr()));
 }
+
+#endif

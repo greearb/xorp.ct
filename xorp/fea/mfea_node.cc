@@ -732,6 +732,7 @@ MfeaNode::vifaddr4_update(const string&	ifname,
     }
 }
 
+#ifdef HAVE_IPV6
 void
 MfeaNode::vifaddr6_update(const string&	ifname,
 			  const string&	vifname,
@@ -883,6 +884,7 @@ MfeaNode::vifaddr6_update(const string&	ifname,
 		   addr.str().c_str(), vifname.c_str(), error_msg.c_str());
     }
 }
+#endif
 
 void
 MfeaNode::updates_completed()
@@ -1063,6 +1065,7 @@ MfeaNode::add_pim_register_vif()
 							       CREATED);
 	    }
 
+#ifdef HAVE_IPV6
 	    if (ipvx.is_ipv6()) {
 		IPv6 ipv6 = ipvx.get_ipv6();
 		mfea_vifp->add_addr(ipv6);
@@ -1075,6 +1078,7 @@ MfeaNode::add_pim_register_vif()
 							       ap->addr(),
 							       CREATED);
 	    }
+#endif
 	}
 
 	_mfea_iftree_update_replicator.updates_completed();

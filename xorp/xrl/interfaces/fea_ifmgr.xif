@@ -1,5 +1,8 @@
 /* $XORP: xorp/xrl/interfaces/fea_ifmgr.xif,v 1.27 2008/06/15 00:19:55 pavlin Exp $ */
 
+#include <xorp_config.h>
+
+
 /*
  * Forwarding Engine Abstraction Interface Management XRL interface.
  */
@@ -26,22 +29,11 @@ interface ifmgr/0.1 {
 	get_configured_vif_addresses4 ? ifname:txt & vif:txt \
 				      -> addresses:list<ipv4>;
 
-	get_configured_vif_addresses6 ? ifname:txt & vif:txt \
-				      -> addresses:list<ipv4>;
-
 	get_configured_address_flags4	? ifname:txt			\
 					& vif:txt			\
 					& address:ipv4			\
 					-> enabled:bool			\
 					& broadcast:bool		\
-					& loopback:bool			\
-					& point_to_point:bool		\
-					& multicast:bool;
-
-	get_configured_address_flags6	? ifname:txt			\
-					& vif:txt			\
-					& address:ipv6			\
-					-> enabled:bool			\
 					& loopback:bool			\
 					& point_to_point:bool		\
 					& multicast:bool;
@@ -73,12 +65,6 @@ interface ifmgr/0.1 {
 
 	get_configured_endpoint4 ? ifname:txt & vif:txt & address:ipv4	\
 			-> endpoint:ipv4;
-
-	get_configured_prefix6 ? ifname:txt & vif:txt & address:ipv6	\
-			-> prefix_len:u32;
-
-	get_configured_endpoint6 ? ifname:txt & vif:txt & address:ipv6	\
-			-> endpoint:ipv6;
 
 	start_transaction -> tid:u32;
 
@@ -188,6 +174,30 @@ interface ifmgr/0.1 {
 				& address:ipv4				\
 				& endpoint:ipv4;
 
+	/* Does nothing, but allows us to 'verify' startup in rtr-mgr*/
+	startup_ifmgr;
+
+#ifdef HAVE_IPV6
+
+	get_configured_vif_addresses6 ? ifname:txt & vif:txt \
+				      -> addresses:list<ipv4>;
+
+
+	get_configured_address_flags6	? ifname:txt			\
+					& vif:txt			\
+					& address:ipv6			\
+					-> enabled:bool			\
+					& loopback:bool			\
+					& point_to_point:bool		\
+					& multicast:bool;
+
+	get_configured_prefix6 ? ifname:txt & vif:txt & address:ipv6	\
+			-> prefix_len:u32;
+
+	get_configured_endpoint6 ? ifname:txt & vif:txt & address:ipv6	\
+			-> endpoint:ipv6;
+
+
 	create_address6 ? tid:u32 & ifname:txt & vif:txt & address:ipv6;
 
 	delete_address6 ? tid:u32 & ifname:txt & vif:txt & address:ipv6;
@@ -215,6 +225,6 @@ interface ifmgr/0.1 {
 				& address:ipv6				\
 				& endpoint:ipv6;
 
-	/* Does nothing, but allows us to 'verify' startup in rtr-mgr*/
-	startup_ifmgr;
+#endif //ipv6
+
 }

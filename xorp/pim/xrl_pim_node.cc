@@ -1254,6 +1254,7 @@ XrlPimNode::send_register_unregister_protocol()
 		return;
 	}
 
+#ifdef HAVE_IPV6
 	if (PimNode::is_ipv6()) {
 	    success = _xrl_mfea_client.send_register_protocol6(
 		_mfea_target.c_str(),
@@ -1265,6 +1266,7 @@ XrlPimNode::send_register_unregister_protocol()
 	    if (success)
 		return;
 	}
+#endif
     } else {
 	// Unregister a protocol with the MFEA
 	if (PimNode::is_ipv4()) {
@@ -1278,6 +1280,7 @@ XrlPimNode::send_register_unregister_protocol()
 		return;
 	}
 
+#ifdef HAVE_IPV6
 	if (PimNode::is_ipv6()) {
 	    success = _xrl_mfea_client.send_unregister_protocol6(
 		_mfea_target.c_str(),
@@ -1288,6 +1291,7 @@ XrlPimNode::send_register_unregister_protocol()
 	    if (success)
 		return;
 	}
+#endif
     }
 
     if (! success) {
@@ -1652,6 +1656,7 @@ XrlPimNode::send_add_delete_mfc()
 		return;
 	}
 
+#ifdef HAVE_IPV6
 	if (PimNode::is_ipv6()) {
 	    success = _xrl_mfea_client.send_add_mfc6(
 		_mfea_target.c_str(),
@@ -1667,6 +1672,7 @@ XrlPimNode::send_add_delete_mfc()
 	    if (success)
 		return;
 	}
+#endif
     } else {
 	// Delete a MFC with the MFEA
 	if (PimNode::is_ipv4()) {
@@ -1680,6 +1686,7 @@ XrlPimNode::send_add_delete_mfc()
 		return;
 	}
 
+#ifdef HAVE_IPV6
 	if (PimNode::is_ipv6()) {
 	    success = _xrl_mfea_client.send_delete_mfc6(
 		_mfea_target.c_str(),
@@ -1690,6 +1697,7 @@ XrlPimNode::send_add_delete_mfc()
 	    if (success)
 		return;
 	}
+#endif
     }
 
     if (! success) {
@@ -1873,6 +1881,7 @@ XrlPimNode::send_add_delete_dataflow_monitor()
 		return;
 	}
 
+#ifdef HAVE_IPV6
 	if (PimNode::is_ipv6()) {
 	    success = _xrl_mfea_client.send_delete_all_dataflow_monitor6(
 		_mfea_target.c_str(),
@@ -1883,6 +1892,7 @@ XrlPimNode::send_add_delete_dataflow_monitor()
 	    if (success)
 		return;
 	}
+#endif
     } else {
 	if (entry->is_add()) {
 	    // Add a dataflow monitor with the MFEA
@@ -1905,6 +1915,7 @@ XrlPimNode::send_add_delete_dataflow_monitor()
 		    return;
 	    }
 
+#ifdef HAVE_IPV6
 	    if (PimNode::is_ipv6()) {
 		success = _xrl_mfea_client.send_add_dataflow_monitor6(
 		    _mfea_target.c_str(),
@@ -1923,6 +1934,7 @@ XrlPimNode::send_add_delete_dataflow_monitor()
 		if (success)
 		    return;
 	    }
+#endif
 	} else {
 	    // Delete a dataflow monitor with the MFEA
 	    if (PimNode::is_ipv4()) {
@@ -1944,6 +1956,7 @@ XrlPimNode::send_add_delete_dataflow_monitor()
 		    return;
 	    }
 
+#ifdef HAVE_IPV6
 	    if (PimNode::is_ipv6()) {
 		success = _xrl_mfea_client.send_delete_dataflow_monitor6(
 		    _mfea_target.c_str(),
@@ -1962,6 +1975,7 @@ XrlPimNode::send_add_delete_dataflow_monitor()
 		if (success)
 		    return;
 	    }
+#endif
 	}
     }
 

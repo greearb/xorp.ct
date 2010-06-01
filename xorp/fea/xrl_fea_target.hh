@@ -604,6 +604,8 @@ public:
 	string&		action,
 	bool&		more);
 
+#ifdef HAVE_IPV6
+
     /**
      *  Add an IPv6 firewall entry.
      *
@@ -799,8 +801,8 @@ public:
 	uint32_t&	dst_port_end,
 	string&		action,
 	bool&		more);
-
-#endif
+#endif //ipv6
+#endif //firewall
 
 
     //
@@ -1004,17 +1006,6 @@ public:
 	bool& point_to_point,
 	bool& multicast);
 
-    XrlCmdError ifmgr_0_1_get_configured_address_flags6(
-	// Input values,
-	const string& ifname,
-	const string& vif,
-	const IPv6&   address,
-	// Output values,
-	bool& up,
-	bool& loopback,
-	bool& point_to_point,
-	bool& multicast);
-
     XrlCmdError ifmgr_0_1_create_vif(
 	// Input values,
 	const uint32_t&	tid,
@@ -1147,6 +1138,18 @@ public:
 	// Output values,
 	IPv4&	endpoint);
 
+#ifdef HAVE_IPV6
+    XrlCmdError ifmgr_0_1_get_configured_address_flags6(
+	// Input values,
+	const string& ifname,
+	const string& vif,
+	const IPv6&   address,
+	// Output values,
+	bool& up,
+	bool& loopback,
+	bool& point_to_point,
+	bool& multicast);
+
     XrlCmdError ifmgr_0_1_get_configured_vif_addresses6(
 	// Input values,
 	const string&	ifname,
@@ -1214,6 +1217,7 @@ public:
 	const IPv6&	address,
 	// Output values,
 	IPv6&		endpoint);
+#endif
 
     XrlCmdError ifmgr_replicator_0_1_register_ifmgr_mirror(
 	// Input values,
@@ -1239,18 +1243,6 @@ public:
 	uint32_t&	admin_distance,
 	string&		protocol_origin);
 
-    XrlCmdError fti_0_2_lookup_route_by_dest6(
-	// Input values,
-	const IPv6&	host,
-	// Output values,
-	IPv6Net&	netmask,
-	IPv6&		nexthop,
-	string&		ifname,
-	string&		vifname,
-	uint32_t&	metric,
-	uint32_t&	admin_distance,
-	string&		protocol_origin);
-
     XrlCmdError fti_0_2_lookup_route_by_network4(
 	// Input values,
 	const IPv4Net&	dst,
@@ -1262,22 +1254,7 @@ public:
 	uint32_t&	admin_distance,
 	string&		protocol_origin);
 
-    XrlCmdError fti_0_2_lookup_route_by_network6(
-	// Input values,
-	const IPv6Net&	dst,
-	// Output values,
-	IPv6&		nexthop,
-	string&		ifname,
-	string&		vifname,
-	uint32_t&	metric,
-	uint32_t&	admin_distance,
-	string&		protocol_origin);
-
     XrlCmdError fti_0_2_have_ipv4(
-	// Output values, 
-	bool&	result);
-
-    XrlCmdError fti_0_2_have_ipv6(
 	// Output values, 
 	bool&	result);
 
@@ -1285,15 +1262,7 @@ public:
 	// Output values,
 	bool&	enabled);
 
-    XrlCmdError fti_0_2_get_unicast_forwarding_enabled6(
-	// Output values,
-	bool&	enabled);
-
     XrlCmdError fti_0_2_set_unicast_forwarding_enabled4(
-	// Input values,
-	const bool&	enabled);
-
-    XrlCmdError fti_0_2_set_unicast_forwarding_enabled6(
 	// Input values,
 	const bool&	enabled);
 
@@ -1320,6 +1289,56 @@ public:
 	const bool&	retain);
 
     /**
+     *  Set the IPv4 unicast forwarding table ID to be used.
+     *
+     *  @param is_configured if true, the forwarding table ID is configured,
+     *  otherwise the default table should be used.
+     *
+     *  @param table_id the IPv4 unicast forwarding table ID to be used.
+     */
+    XrlCmdError fti_0_2_set_unicast_forwarding_table_id4(
+	// Input values,
+	const bool&	is_configured,
+	const uint32_t&	table_id);
+
+#ifdef HAVE_IPV6
+    XrlCmdError fti_0_2_lookup_route_by_dest6(
+	// Input values,
+	const IPv6&	host,
+	// Output values,
+	IPv6Net&	netmask,
+	IPv6&		nexthop,
+	string&		ifname,
+	string&		vifname,
+	uint32_t&	metric,
+	uint32_t&	admin_distance,
+	string&		protocol_origin);
+
+    XrlCmdError fti_0_2_lookup_route_by_network6(
+	// Input values,
+	const IPv6Net&	dst,
+	// Output values,
+	IPv6&		nexthop,
+	string&		ifname,
+	string&		vifname,
+	uint32_t&	metric,
+	uint32_t&	admin_distance,
+	string&		protocol_origin);
+
+
+    XrlCmdError fti_0_2_have_ipv6(
+	// Output values, 
+	bool&	result);
+
+    XrlCmdError fti_0_2_get_unicast_forwarding_enabled6(
+	// Output values,
+	bool&	enabled);
+
+    XrlCmdError fti_0_2_set_unicast_forwarding_enabled6(
+	// Input values,
+	const bool&	enabled);
+
+    /**
      *  Set the IPv6 unicast forwarding engine whether to retain existing XORP
      *  forwarding entries on startup.
      *
@@ -1342,19 +1361,6 @@ public:
 	const bool&	retain);
 
     /**
-     *  Set the IPv4 unicast forwarding table ID to be used.
-     *
-     *  @param is_configured if true, the forwarding table ID is configured,
-     *  otherwise the default table should be used.
-     *
-     *  @param table_id the IPv4 unicast forwarding table ID to be used.
-     */
-    XrlCmdError fti_0_2_set_unicast_forwarding_table_id4(
-	// Input values,
-	const bool&	is_configured,
-	const uint32_t&	table_id);
-
-    /**
      *  Set the IPv6 unicast forwarding table ID to be used.
      *
      *  @param is_configured if true, the forwarding table ID is configured,
@@ -1366,6 +1372,7 @@ public:
 	// Input values,
 	const bool&	is_configured,
 	const uint32_t&	table_id);
+#endif
 
     //
     // RIB routes redistribution transaction-based XRL interface
@@ -1459,6 +1466,8 @@ public:
 	const uint32_t&	tid,
 	const string&	cookie);
 
+
+#ifdef HAVE_IPV6
     /**
      *  Start transaction.
      *
@@ -1546,6 +1555,9 @@ public:
 	// Input values,
 	const uint32_t&	tid,
 	const string&	cookie);
+
+#endif //ipv6
+
 
     //
     // Raw Link-Level Server Interface

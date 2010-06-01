@@ -1,5 +1,9 @@
 /* $XORP: xorp/xrl/interfaces/fea_firewall.xif,v 1.1 2008/04/26 00:59:49 pavlin Exp $ */
 
+#include <xorp_config.h>
+
+#ifndef XORP_DISABLE_FIREWALL
+
 /*
  * FEA Firewall interface.
  */
@@ -172,6 +176,7 @@ interface fea_firewall/0.1 {
 				& dst_port_end:u32			\
 				& action:txt				\
 				& more:bool;
+#ifdef HAVE_IPV6
 
 	/**
 	 * Add an IPv6 firewall entry.
@@ -319,7 +324,10 @@ interface fea_firewall/0.1 {
 				& dst_port_end:u32			\
 				& action:txt				\
 				& more:bool;
+#endif //ipv6
 
 	/* Does nothing, but allows us to 'verify' startup in rtr-mgr*/
 	startup_firewall;
 }
+
+#endif //firewall

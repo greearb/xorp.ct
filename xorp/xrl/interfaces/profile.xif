@@ -1,5 +1,9 @@
 /* $XORP: xorp/xrl/interfaces/profile.xif,v 1.1 2004/09/21 18:09:12 atanu Exp $ */
 
+#include <xorp_config.h>
+
+#ifndef XORP_DISABLE_PROFILE
+
 /*
 ** Profiling
 */
@@ -39,3 +43,5 @@ interface profile/0.1 {
 	 */
 	list -> info:txt;
 }
+
+#endif //profile

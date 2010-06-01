@@ -66,8 +66,6 @@ xifs = [
     'policy_redist4.xif',
     'policy_redist6.xif',
     'policy.xif',
-    'profile_client.xif',
-    'profile.xif',
     'redist4.xif',
     'redist6.xif',
     'redist_transaction4.xif',
@@ -96,6 +94,10 @@ if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
     xifs.append('fea_rawpkt6_client.xif')
     xifs.append('fea_rawpkt6.xif')
     xifs.append('ospfv3.xif')
+
+if not (env.has_key('disable_profile') and env['disable_profile']):
+    xifs.append('profile_client.xif')
+    xifs.append('profile.xif')
 
 if not (env.has_key('disable_fw') and env['disable_fw']):
     xifs.append('fea_firewall.xif')

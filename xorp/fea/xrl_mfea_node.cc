@@ -257,6 +257,7 @@ XrlMfeaNode::signal_message_send(const string& dst_module_instance_name,
 	    break;
 	}
 	
+#ifdef HAVE_IPV6
 	if (dst.is_ipv6()) {
 	    _xrl_mfea_client_client.send_recv_kernel_signal_message6(
 		dst_module_instance_name.c_str(),
@@ -270,6 +271,7 @@ XrlMfeaNode::signal_message_send(const string& dst_module_instance_name,
 		callback(this, &XrlMfeaNode::mfea_client_client_send_recv_kernel_signal_message_cb));
 	    break;
 	}
+#endif
 	
 	XLOG_UNREACHABLE();
 	break;
@@ -383,6 +385,7 @@ XrlMfeaNode::dataflow_signal_send(const string& dst_module_instance_name,
 	    break;
 	}
 	
+#ifdef HAVE_IPV6
 	if (source_addr.is_ipv6()) {
 	    _xrl_mfea_client_client.send_recv_dataflow_signal6(
 		dst_module_instance_name.c_str(),
@@ -404,8 +407,9 @@ XrlMfeaNode::dataflow_signal_send(const string& dst_module_instance_name,
 		callback(this, &XrlMfeaNode::mfea_client_client_send_recv_dataflow_signal_cb));
 	    break;
 	}
-	
 	XLOG_UNREACHABLE();
+#endif
+	
 	break;
     } while (false);
     
@@ -802,6 +806,7 @@ XrlMfeaNode::mfea_0_1_have_multicast_routing4(
     return XrlCmdError::OKAY();
 }
 
+#ifdef HAVE_IPV6
 XrlCmdError
 XrlMfeaNode::mfea_0_1_have_multicast_routing6(
     // Output values, 
@@ -812,39 +817,6 @@ XrlMfeaNode::mfea_0_1_have_multicast_routing6(
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError
-XrlMfeaNode::mfea_0_1_register_protocol4(
-    // Input values,
-    const string&	xrl_sender_name,
-    const string&	if_name,
-    const string&	vif_name,
-    const uint32_t&	ip_protocol)
-{
-    string error_msg;
-
-    //
-    // Verify the address family
-    //
-    if (! MfeaNode::is_ipv4()) {
-	error_msg = c_format("Received protocol message with "
-			     "invalid address family: IPv4");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    //
-    // Register the protocol
-    //
-    if (MfeaNode::register_protocol(xrl_sender_name, if_name, vif_name,
-				    ip_protocol, error_msg)
-	!= XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    //
-    // Success
-    //
-    return XrlCmdError::OKAY();
-}
 
 XrlCmdError
 XrlMfeaNode::mfea_0_1_register_protocol6(
@@ -881,7 +853,7 @@ XrlMfeaNode::mfea_0_1_register_protocol6(
 }
 
 XrlCmdError
-XrlMfeaNode::mfea_0_1_unregister_protocol4(
+XrlMfeaNode::mfea_0_1_unregister_protocol6(
     // Input values,
     const string&	xrl_sender_name,
     const string&	if_name,
@@ -892,9 +864,9 @@ XrlMfeaNode::mfea_0_1_unregister_protocol4(
     //
     // Verify the address family
     //
-    if (! MfeaNode::is_ipv4()) {
+    if (! MfeaNode::is_ipv6()) {
 	error_msg = c_format("Received protocol message with "
-			     "invalid address family: IPv4");
+			     "invalid address family: IPv6");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -914,7 +886,269 @@ XrlMfeaNode::mfea_0_1_unregister_protocol4(
 }
 
 XrlCmdError
-XrlMfeaNode::mfea_0_1_unregister_protocol6(
+XrlMfeaNode::mfea_0_1_add_mfc6(
+    // Input values, 
+    const string&	xrl_sender_name, 
+    const IPv6&		source_address, 
+    const IPv6&		group_address, 
+    const uint32_t&	iif_vif_index, 
+    const vector<uint8_t>& oiflist, 
+    const vector<uint8_t>& oiflist_disable_wrongvif, 
+    const uint32_t&	max_vifs_oiflist, 
+    const IPv6&		rp_address)
+{
+    string error_msg;
+    Mifset mifset;
+    Mifset mifset_disable_wrongvif;
+
+    //
+    // Verify the address family
+    //
+    if (! MfeaNode::is_ipv6()) {
+	error_msg = c_format("Received protocol message with "
+			     "invalid address family: IPv6");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    // Check the number of covered interfaces
+    if (max_vifs_oiflist > mifset.size()) {
+	// Invalid number of covered interfaces
+	error_msg = c_format("Received 'add_mfc' with invalid "
+			     "'max_vifs_oiflist' = %u (expected <= %u)",
+			     XORP_UINT_CAST(max_vifs_oiflist),
+			     XORP_UINT_CAST(mifset.size()));
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    
+    // Get the set of outgoing interfaces
+    vector_to_mifset(oiflist, mifset);
+    
+    // Get the set of interfaces to disable the WRONGVIF signal.
+    vector_to_mifset(oiflist_disable_wrongvif, mifset_disable_wrongvif);
+    
+    if (MfeaNode::add_mfc(xrl_sender_name,
+			  IPvX(source_address), IPvX(group_address),
+			  iif_vif_index, mifset, mifset_disable_wrongvif,
+			  max_vifs_oiflist,
+			  IPvX(rp_address))
+	!= XORP_OK) {
+	// TODO: must find-out and return the reason for failure
+	error_msg = c_format("Cannot add MFC for "
+			     "source %s and group %s "
+			     "with iif_vif_index = %u",
+			     source_address.str().c_str(),
+			     group_address.str().c_str(),
+			     XORP_UINT_CAST(iif_vif_index));
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    
+    //
+    // Success
+    //
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMfeaNode::mfea_0_1_delete_mfc6(
+    // Input values, 
+    const string&	xrl_sender_name, 
+    const IPv6&		source_address, 
+    const IPv6&		group_address)
+{
+    string error_msg;
+
+    //
+    // Verify the address family
+    //
+    if (! MfeaNode::is_ipv6()) {
+	error_msg = c_format("Received protocol message with "
+			     "invalid address family: IPv6");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    if (MfeaNode::delete_mfc(xrl_sender_name,
+			     IPvX(source_address), IPvX(group_address))
+	!= XORP_OK) {
+	// TODO: must find-out and return the reason for failure
+	error_msg = c_format("Cannot delete MFC for "
+			     "source %s and group %s",
+			     source_address.str().c_str(),
+			     group_address.str().c_str());
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    
+    //
+    // Success
+    //
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMfeaNode::mfea_0_1_add_dataflow_monitor6(
+    // Input values, 
+    const string&	xrl_sender_name, 
+    const IPv6&		source_address, 
+    const IPv6&		group_address, 
+    const uint32_t&	threshold_interval_sec, 
+    const uint32_t&	threshold_interval_usec, 
+    const uint32_t&	threshold_packets, 
+    const uint32_t&	threshold_bytes, 
+    const bool&		is_threshold_in_packets, 
+    const bool&		is_threshold_in_bytes, 
+    const bool&		is_geq_upcall, 
+    const bool&		is_leq_upcall)
+{
+    string error_msg;
+
+    //
+    // Verify the address family
+    //
+    if (! MfeaNode::is_ipv6()) {
+	error_msg = c_format("Received protocol message with "
+			     "invalid address family: IPv6");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    if (MfeaNode::add_dataflow_monitor(xrl_sender_name,
+				       IPvX(source_address),
+				       IPvX(group_address),
+				       TimeVal(threshold_interval_sec,
+					       threshold_interval_usec),
+				       threshold_packets,
+				       threshold_bytes,
+				       is_threshold_in_packets,
+				       is_threshold_in_bytes,
+				       is_geq_upcall,
+				       is_leq_upcall,
+				       error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    
+    //
+    // Success
+    //
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMfeaNode::mfea_0_1_delete_dataflow_monitor6(
+    // Input values, 
+    const string&	xrl_sender_name, 
+    const IPv6&		source_address, 
+    const IPv6&		group_address, 
+    const uint32_t&	threshold_interval_sec, 
+    const uint32_t&	threshold_interval_usec, 
+    const uint32_t&	threshold_packets, 
+    const uint32_t&	threshold_bytes, 
+    const bool&		is_threshold_in_packets, 
+    const bool&		is_threshold_in_bytes, 
+    const bool&		is_geq_upcall, 
+    const bool&		is_leq_upcall)
+{
+    string error_msg;
+
+    //
+    // Verify the address family
+    //
+    if (! MfeaNode::is_ipv6()) {
+	error_msg = c_format("Received protocol message with "
+			     "invalid address family: IPv6");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    if (MfeaNode::delete_dataflow_monitor(xrl_sender_name,
+					  IPvX(source_address),
+					  IPvX(group_address),
+					  TimeVal(threshold_interval_sec,
+						  threshold_interval_usec),
+					  threshold_packets,
+					  threshold_bytes,
+					  is_threshold_in_packets,
+					  is_threshold_in_bytes,
+					  is_geq_upcall,
+					  is_leq_upcall,
+					  error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    
+    //
+    // Success
+    //
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMfeaNode::mfea_0_1_delete_all_dataflow_monitor6(
+    // Input values, 
+    const string&	xrl_sender_name, 
+    const IPv6&		source_address, 
+    const IPv6&		group_address)
+{
+    string error_msg;
+
+    //
+    // Verify the address family
+    //
+    if (! MfeaNode::is_ipv6()) {
+	error_msg = c_format("Received protocol message with "
+			     "invalid address family: IPv6");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    if (MfeaNode::delete_all_dataflow_monitor(xrl_sender_name,
+					      IPvX(source_address),
+					      IPvX(group_address),
+					      error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    
+    //
+    // Success
+    //
+    return XrlCmdError::OKAY();
+}
+
+#endif //ipv6
+
+XrlCmdError
+XrlMfeaNode::mfea_0_1_register_protocol4(
+    // Input values,
+    const string&	xrl_sender_name,
+    const string&	if_name,
+    const string&	vif_name,
+    const uint32_t&	ip_protocol)
+{
+    string error_msg;
+
+    //
+    // Verify the address family
+    //
+    if (! MfeaNode::is_ipv4()) {
+	error_msg = c_format("Received protocol message with "
+			     "invalid address family: IPv4");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    //
+    // Register the protocol
+    //
+    if (MfeaNode::register_protocol(xrl_sender_name, if_name, vif_name,
+				    ip_protocol, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    
+    //
+    // Success
+    //
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMfeaNode::mfea_0_1_unregister_protocol4(
     // Input values,
     const string&	xrl_sender_name,
     const string&	if_name,
@@ -925,9 +1159,9 @@ XrlMfeaNode::mfea_0_1_unregister_protocol6(
     //
     // Verify the address family
     //
-    if (! MfeaNode::is_ipv6()) {
+    if (! MfeaNode::is_ipv4()) {
 	error_msg = c_format("Received protocol message with "
-			     "invalid address family: IPv6");
+			     "invalid address family: IPv4");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -1010,69 +1244,6 @@ XrlMfeaNode::mfea_0_1_add_mfc4(
 }
 
 XrlCmdError
-XrlMfeaNode::mfea_0_1_add_mfc6(
-    // Input values, 
-    const string&	xrl_sender_name, 
-    const IPv6&		source_address, 
-    const IPv6&		group_address, 
-    const uint32_t&	iif_vif_index, 
-    const vector<uint8_t>& oiflist, 
-    const vector<uint8_t>& oiflist_disable_wrongvif, 
-    const uint32_t&	max_vifs_oiflist, 
-    const IPv6&		rp_address)
-{
-    string error_msg;
-    Mifset mifset;
-    Mifset mifset_disable_wrongvif;
-
-    //
-    // Verify the address family
-    //
-    if (! MfeaNode::is_ipv6()) {
-	error_msg = c_format("Received protocol message with "
-			     "invalid address family: IPv6");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    // Check the number of covered interfaces
-    if (max_vifs_oiflist > mifset.size()) {
-	// Invalid number of covered interfaces
-	error_msg = c_format("Received 'add_mfc' with invalid "
-			     "'max_vifs_oiflist' = %u (expected <= %u)",
-			     XORP_UINT_CAST(max_vifs_oiflist),
-			     XORP_UINT_CAST(mifset.size()));
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    // Get the set of outgoing interfaces
-    vector_to_mifset(oiflist, mifset);
-    
-    // Get the set of interfaces to disable the WRONGVIF signal.
-    vector_to_mifset(oiflist_disable_wrongvif, mifset_disable_wrongvif);
-    
-    if (MfeaNode::add_mfc(xrl_sender_name,
-			  IPvX(source_address), IPvX(group_address),
-			  iif_vif_index, mifset, mifset_disable_wrongvif,
-			  max_vifs_oiflist,
-			  IPvX(rp_address))
-	!= XORP_OK) {
-	// TODO: must find-out and return the reason for failure
-	error_msg = c_format("Cannot add MFC for "
-			     "source %s and group %s "
-			     "with iif_vif_index = %u",
-			     source_address.str().c_str(),
-			     group_address.str().c_str(),
-			     XORP_UINT_CAST(iif_vif_index));
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    //
-    // Success
-    //
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
 XrlMfeaNode::mfea_0_1_delete_mfc4(
     // Input values, 
     const string&	xrl_sender_name, 
@@ -1087,41 +1258,6 @@ XrlMfeaNode::mfea_0_1_delete_mfc4(
     if (! MfeaNode::is_ipv4()) {
 	error_msg = c_format("Received protocol message with "
 			     "invalid address family: IPv4");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    if (MfeaNode::delete_mfc(xrl_sender_name,
-			     IPvX(source_address), IPvX(group_address))
-	!= XORP_OK) {
-	// TODO: must find-out and return the reason for failure
-	error_msg = c_format("Cannot delete MFC for "
-			     "source %s and group %s",
-			     source_address.str().c_str(),
-			     group_address.str().c_str());
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    //
-    // Success
-    //
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlMfeaNode::mfea_0_1_delete_mfc6(
-    // Input values, 
-    const string&	xrl_sender_name, 
-    const IPv6&		source_address, 
-    const IPv6&		group_address)
-{
-    string error_msg;
-
-    //
-    // Verify the address family
-    //
-    if (! MfeaNode::is_ipv6()) {
-	error_msg = c_format("Received protocol message with "
-			     "invalid address family: IPv6");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -1165,54 +1301,6 @@ XrlMfeaNode::mfea_0_1_add_dataflow_monitor4(
     if (! MfeaNode::is_ipv4()) {
 	error_msg = c_format("Received protocol message with "
 			     "invalid address family: IPv4");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    if (MfeaNode::add_dataflow_monitor(xrl_sender_name,
-				       IPvX(source_address),
-				       IPvX(group_address),
-				       TimeVal(threshold_interval_sec,
-					       threshold_interval_usec),
-				       threshold_packets,
-				       threshold_bytes,
-				       is_threshold_in_packets,
-				       is_threshold_in_bytes,
-				       is_geq_upcall,
-				       is_leq_upcall,
-				       error_msg)
-	!= XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    //
-    // Success
-    //
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlMfeaNode::mfea_0_1_add_dataflow_monitor6(
-    // Input values, 
-    const string&	xrl_sender_name, 
-    const IPv6&		source_address, 
-    const IPv6&		group_address, 
-    const uint32_t&	threshold_interval_sec, 
-    const uint32_t&	threshold_interval_usec, 
-    const uint32_t&	threshold_packets, 
-    const uint32_t&	threshold_bytes, 
-    const bool&		is_threshold_in_packets, 
-    const bool&		is_threshold_in_bytes, 
-    const bool&		is_geq_upcall, 
-    const bool&		is_leq_upcall)
-{
-    string error_msg;
-
-    //
-    // Verify the address family
-    //
-    if (! MfeaNode::is_ipv6()) {
-	error_msg = c_format("Received protocol message with "
-			     "invalid address family: IPv6");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -1287,54 +1375,6 @@ XrlMfeaNode::mfea_0_1_delete_dataflow_monitor4(
 }
 
 XrlCmdError
-XrlMfeaNode::mfea_0_1_delete_dataflow_monitor6(
-    // Input values, 
-    const string&	xrl_sender_name, 
-    const IPv6&		source_address, 
-    const IPv6&		group_address, 
-    const uint32_t&	threshold_interval_sec, 
-    const uint32_t&	threshold_interval_usec, 
-    const uint32_t&	threshold_packets, 
-    const uint32_t&	threshold_bytes, 
-    const bool&		is_threshold_in_packets, 
-    const bool&		is_threshold_in_bytes, 
-    const bool&		is_geq_upcall, 
-    const bool&		is_leq_upcall)
-{
-    string error_msg;
-
-    //
-    // Verify the address family
-    //
-    if (! MfeaNode::is_ipv6()) {
-	error_msg = c_format("Received protocol message with "
-			     "invalid address family: IPv6");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    if (MfeaNode::delete_dataflow_monitor(xrl_sender_name,
-					  IPvX(source_address),
-					  IPvX(group_address),
-					  TimeVal(threshold_interval_sec,
-						  threshold_interval_usec),
-					  threshold_packets,
-					  threshold_bytes,
-					  is_threshold_in_packets,
-					  is_threshold_in_bytes,
-					  is_geq_upcall,
-					  is_leq_upcall,
-					  error_msg)
-	!= XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    //
-    // Success
-    //
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
 XrlMfeaNode::mfea_0_1_delete_all_dataflow_monitor4(
     // Input values, 
     const string&	xrl_sender_name, 
@@ -1349,38 +1389,6 @@ XrlMfeaNode::mfea_0_1_delete_all_dataflow_monitor4(
     if (! MfeaNode::is_ipv4()) {
 	error_msg = c_format("Received protocol message with "
 			     "invalid address family: IPv4");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    if (MfeaNode::delete_all_dataflow_monitor(xrl_sender_name,
-					      IPvX(source_address),
-					      IPvX(group_address),
-					      error_msg)
-	!= XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    //
-    // Success
-    //
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlMfeaNode::mfea_0_1_delete_all_dataflow_monitor6(
-    // Input values, 
-    const string&	xrl_sender_name, 
-    const IPv6&		source_address, 
-    const IPv6&		group_address)
-{
-    string error_msg;
-
-    //
-    // Verify the address family
-    //
-    if (! MfeaNode::is_ipv6()) {
-	error_msg = c_format("Received protocol message with "
-			     "invalid address family: IPv6");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 

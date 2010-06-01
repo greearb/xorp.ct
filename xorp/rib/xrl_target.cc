@@ -33,7 +33,9 @@
 
 #include "libxipc/xrl_std_router.hh"
 
+#ifndef XORP_DISABLE_PROFILE
 #include "xrl/interfaces/profile_client_xif.hh"
+#endif
 
 #include "xrl_target.hh"
 #include "rt_tab_register.hh"

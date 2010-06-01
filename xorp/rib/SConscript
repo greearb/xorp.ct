@@ -63,7 +63,6 @@ env.AppendUnique(LIBS = [
     'xif_redist_transaction6',
     'xif_policy_redist4',
     'xif_policy_redist6',
-    'xif_profile_client',
     'xst_fea_ifmgr_mirror',
     'xst_rib',
     'xorp_policy_backend',
@@ -102,7 +101,10 @@ libxorp_rib_srcs = [
              ]
 
 if not (env.has_key('disable_profile') and env['disable_profile']):
-	     libxorp_rib_srcs.append('profile_vars.cc')
+    libxorp_rib_srcs.append('profile_vars.cc')
+    env.AppendUnique(LIBS = [
+        'xif_profile_client',
+        ])
              
 if is_shared:
     libxorp_rib = env.SharedLibrary(target = 'libxorp_rib',

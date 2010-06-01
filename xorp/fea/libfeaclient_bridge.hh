@@ -82,11 +82,13 @@ protected:
 			 const string& vifname,
 			 const IPv4&   addr,
 			 const Update& update);
+#ifdef HAVE_IPV6
 
     void vifaddr6_update(const string& ifname,
 			 const string& vifname,
 			 const IPv6&   addr,
 			 const Update& update);
+#endif
 
     void updates_completed();
 
