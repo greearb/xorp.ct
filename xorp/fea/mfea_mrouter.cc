@@ -1347,8 +1347,10 @@ MfeaMrouter::add_multicast_vif(uint32_t vif_index)
 	if (mfea_vif->is_pim_register())
 	    mc.mif6c_flags |= MIFF_REGISTER;
 	mc.mif6c_pifi = mfea_vif->pif_index();
+#ifdef HAVE_STRUCT_MIF6CTL_VIFC_THRESHOLD /* BSD does not, it seems, newer Linux does */
 	mc.vifc_threshold = mfea_vif->min_ttl_threshold();
 	mc.vifc_rate_limit = mfea_vif->max_rate_limit();
+#endif
 	if (setsockopt(_mrouter_socket, IPPROTO_IPV6, MRT6_ADD_MIF,
 		       (void *)&mc, sizeof(mc)) < 0) {
 	    XLOG_ERROR("setsockopt(MRT6_ADD_MIF, vif %s) failed: %s",

@@ -652,7 +652,8 @@ def DoAllConfig(env, conf, host_os):
     if has_netinet6_ip6_mroute_h or has_linux_mroute6_h:
         if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
             conf.Define('HAVE_IPV6_MULTICAST_ROUTING')
-    
+
+    has_struct_mif6ctl_vifc_threshold = conf.CheckTypeMember('struct mif6ctl', 'vifc_threshold', includes=mf6cctl2_includes) 
     ##########
     # packet filters
     has_netinet_ip_compat_h = conf.CheckHeader(['sys/types.h', 'netinet/ip_compat.h'])
