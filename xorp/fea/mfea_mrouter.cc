@@ -93,10 +93,16 @@
 #include "fibconfig.hh"
 
 
+bool new_mcast_tables_api = false;
+
 #ifdef USE_MULT_MCAST_TABLES
 /** In order to support multiple routing tables, the kernel API had to be extended.
  * Since no distro has this currently in #include files, add private definitions
  * here. --Ben
+ */
+
+/* NOTE:  This needs to go away as soon as we get the official support
+ * merged into the linux kernel.
  */
 
 // Assume supported until we know otherwise.
@@ -144,7 +150,14 @@ struct sioc_vif_req_ng {
 	unsigned int table_id;
 } __attribute__ ((packed));
 
+
+/* New mcast API */
+#ifndef MRT_TABLE
+#define MRT_TABLE      (MRT_BASE+9)    /* Specify mroute table ID              */
+#endif
+
 #else
+/* Don't support multiple mcast routing tables */
 bool supports_mcast_tables = false;
 #endif
 
@@ -386,10 +399,29 @@ MfeaMrouter::have_multicast_routing4() const
 	return (false);		// Failure to open the socket
 
     // First, try for multiple routing tables.
+    bool do_mrt_init = true;
+    new_mcast_tables_api = false;
 #ifdef USE_MULT_MCAST_TABLES
     errno = 0;
-    if (setsockopt(s, IPPROTO_IP, MRT_INIT, &tmp, sizeof(tmp)) < 0) {
-	// Ok, not this
+    int rv;
+
+    // Try old hacked API
+    rv = setsockopt(s, IPPROTO_IP, MRT_INIT, &tmp, sizeof(tmp));
+    if (rv < 0) {
+	// try new api
+	uint32_t tbl = getTableId();
+	rv = setsockopt(s, IPPROTO_IP, MRT_TABLE, &tbl, sizeof(tbl));
+	if (rv >= 0) {
+	    new_mcast_tables_api = true;
+	}
+    }
+    else {
+	// old api worked
+	do_mrt_init = false;
+    }
+
+    if (rv < 0) {
+	// Ok, doesn't support new or old API
 	supports_mcast_tables = false;
     }
     else {
@@ -397,7 +429,7 @@ MfeaMrouter::have_multicast_routing4() const
     }
 #endif
 
-    if (!supports_mcast_tables) {
+    if (do_mrt_init) {
 	if (setsockopt(s, IPPROTO_IP, MRT_INIT, &mrouter_version, sizeof(mrouter_version)) < 0) {
 	    close(s);
 	    return (false);
@@ -761,6 +793,7 @@ MfeaMrouter::start_mrt()
 {
     int mrouter_version = 1;	// XXX: hardcoded version
     string error_msg;
+    bool do_mrt_init = true;
 
     UNUSED(mrouter_version);
     UNUSED(error_msg);
@@ -778,6 +811,7 @@ MfeaMrouter::start_mrt()
 	    return (XORP_ERROR);
 	}
 
+	new_mcast_tables_api = false;
 #ifdef USE_MULT_MCAST_TABLES
 	struct mrt_sockopt_simple tmp;
 	memset(&tmp, 0, sizeof(tmp));
@@ -785,13 +819,23 @@ MfeaMrouter::start_mrt()
 	tmp.optval = 1; //version
 
 	if (setsockopt(_mrouter_socket, IPPROTO_IP, MRT_INIT, &tmp, sizeof(tmp)) < 0) {
-	    // Ok, not this
-	    supports_mcast_tables = false;
-	    XLOG_ERROR("MROUTE:  WARNING:  setsockopt(MRT_INIT) does not support multiple routing tables:: %s",
-		       strerror(errno));
+	    // Ok, doesn't use old API at least
+	    uint32_t tbl = getTableId();
+	    if (setsockopt(_mrouter_socket, IPPROTO_IP, MRT_TABLE, &tbl, sizeof(tbl)) < 0) {
+		// Nor this
+		supports_mcast_tables = false;
+		XLOG_ERROR("MROUTE:  WARNING:  setsockopt(MRT_INIT) does not support multiple routing tables:: %s",
+			   strerror(errno));
+	    }
+	    else {
+		supports_mcast_tables = true;
+		new_mcast_tables_api = true;
+		XLOG_ERROR("NOTE: MROUTE:  setsockopt(MRT_TABLE) works!  Supports multiple mcast routing tables.\n");
+	    }
 	}
 	else {
 	    supports_mcast_tables = true;
+	    do_mrt_init = false;
 	    XLOG_WARNING("NOTE:  MROUTE:  setsockopt(MRT_INIT) supports multiple routing tables!");
 	    XLOG_WARNING("NOTE:  mroute ioctl struct sizes: mfcctl: %i mfcctl_ng: %i  mrt_sockopt_simple: %i"
 		       "  sioc_sg_req: %i  sioc_sg_req_ng: %i  sioc_vif_req: %i  sioc_vif_req_ng: %i\n",
@@ -802,7 +846,7 @@ MfeaMrouter::start_mrt()
 	}
 #endif
 
-	if (!supports_mcast_tables) {
+	if (do_mrt_init) {
 	    if (setsockopt(_mrouter_socket, IPPROTO_IP, MRT_INIT,
 			   (void *)&mrouter_version, sizeof(mrouter_version))
 		< 0) {
@@ -1035,7 +1079,7 @@ MfeaMrouter::stop_mrt()
 	tmp.optval = 1; //version
 	sz = sizeof(tmp);
 	o = &tmp;
-	if (!supports_mcast_tables) {
+	if (new_mcast_tables_api || !supports_mcast_tables) {
 	    sz = 0;
 	    o = NULL;
 	}
@@ -1098,7 +1142,7 @@ MfeaMrouter::start_pim(string& error_msg)
 	tmp.optval = 1; //pim
 	sz = sizeof(tmp);
 	o = &tmp;
-	if (!supports_mcast_tables) {
+	if (new_mcast_tables_api || !supports_mcast_tables) {
 	    sz = sizeof(v);
 	    o = &v;
 	}
@@ -1167,7 +1211,7 @@ MfeaMrouter::stop_pim(string& error_msg)
 	tmp.optval = 0; //pim
 	sz = sizeof(tmp);
 	o = &tmp;
-	if (!supports_mcast_tables) {
+	if (new_mcast_tables_api || !supports_mcast_tables) {
 	    sz = sizeof(v);
 	    o = &v;
 	}
@@ -1247,7 +1291,7 @@ MfeaMrouter::add_multicast_vif(uint32_t vif_index)
 	sopt_arg = &vc_ng;
 	sz = sizeof(vc_ng);
 	vc_ng.table_id = getTableId();
-	if (!supports_mcast_tables) {
+	if (new_mcast_tables_api || !supports_mcast_tables) {
 	    sopt_arg = &(vc_ng.vif);
 	    sz = sizeof(vc_ng.vif);
 	}
@@ -1366,7 +1410,7 @@ MfeaMrouter::delete_multicast_vif(uint32_t vif_index)
 	void* sopt_arg = &vc_ng;
 	size_t sz = sizeof(vc_ng);
 	vc_ng.table_id = getTableId();
-	if (!supports_mcast_tables) {
+	if (new_mcast_tables_api || !supports_mcast_tables) {
 	    sopt_arg = &(vc_ng.vif);
 	    sz = sizeof(vc_ng.vif);
 	}
@@ -1499,7 +1543,7 @@ MfeaMrouter::add_mfc(const IPvX& source, const IPvX& group,
 	void* sopt_arg = &mc_ng;
 	size_t sz = sizeof(mc_ng);
 	mc_ng.table_id = getTableId();
-	if (!supports_mcast_tables) {
+	if (new_mcast_tables_api || !supports_mcast_tables) {
 	    sopt_arg = &(mc_ng.mfc);
 	    sz = sizeof(mc_ng.mfc);
 	}
@@ -1627,7 +1671,7 @@ MfeaMrouter::delete_mfc(const IPvX& source, const IPvX& group)
 	void* sopt_arg = &mc_ng;
 	size_t sz = sizeof(mc_ng);
 	mc_ng.table_id = getTableId();
-	if (!supports_mcast_tables) {
+	if (new_mcast_tables_api || !supports_mcast_tables) {
 	    sopt_arg = &(mc_ng.mfc);
 	    sz = sizeof(mc_ng.mfc);
 	}
@@ -2231,7 +2275,7 @@ MfeaMrouter::get_sg_count(const IPvX& source, const IPvX& group,
 	struct sioc_sg_req& sgreq = (sgreq_ng.req);
 	void* o = &sgreq_ng;
 	ioctl_cmd = SIOCGETSGCNT_NG;
-	if (!supports_mcast_tables) {
+	if (new_mcast_tables_api || !supports_mcast_tables) {
 	    o = &(sgreq_ng.req);
 	    ioctl_cmd = SIOCGETSGCNT;
 	}
@@ -2346,7 +2390,7 @@ MfeaMrouter::get_vif_count(uint32_t vif_index, VifCount& vif_count)
 	struct sioc_vif_req& vreq = (vreq_ng.vif);
 	void* o = &vreq_ng;
 	ioctl_cmd = SIOCGETVIFCNT_NG;
-	if (!supports_mcast_tables) {
+	if (new_mcast_tables_api || !supports_mcast_tables) {
 	    o = &(vreq_ng.vif);
 	    ioctl_cmd = SIOCGETVIFCNT;
 	}
