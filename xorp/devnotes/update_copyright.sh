@@ -1,10 +1,6 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/devnotes/update_copyright.sh,v 1.8 2008/01/05 00:34:12 pavlin Exp $
-#
-
-#
 # This is a script to update the copyright message for all files.
 # It must be run in the top directory of a a fresh checked-out copy
 # of the source code, otherwise it may overwrite something else.
@@ -21,7 +17,8 @@
 #
 # COPYRIGHT_HOLDER: The name of the copyright holder
 #
-COPYRIGHT_HOLDER="XORP, Inc."
+OLD_COPYRIGHT_HOLDER="XORP, Inc."
+COPYRIGHT_HOLDER="XORP, Inc and Others"
 
 #
 # Print usage and exit
@@ -67,6 +64,8 @@ update_file()
 	return
     fi
 
+    echo "sed cmd -:${sed_cmd}"
+
     cat "${filename}" | sed "${sed_cmd}" > "${filename}"."${tmp_suffix}"
     if [ $? -ne 0 ] ; then
 	echo "Error updating ${filename}"
@@ -86,21 +85,33 @@ update_file()
 #
 # $1 = Old string
 # $2 = New string
+# *  file(s) to update
 #
 update_all_files()
 {
-    if [ $# -ne 2 ] ; then
-	echo "$0: invalid number of arguments: expected 2, received $#"
+    echo "$update_all_files: args: $#"
+    if [ $# -lt 2 ] ; then
+	echo "$0: invalid number of arguments: expected 2+, received $#"
 	exit 1
     fi
     old_string="$1"
     new_string="$2"
 
-    # Update all files
-    find . -type f -print | 
-    while read FILENAME ; do
-	update_file "${old_string}" "${new_string}" "${FILENAME}"
-    done
+    if [ $# -gt 2 ]
+	then
+	shift 2
+	while [ "$1" ] ; do
+	    echo  "update_file (reg) -:${old_string}:- -:${new_string}:- -:${1}:-"
+	    update_file "${old_string}" "${new_string}" "${1}"
+	    shift
+	done
+    else
+        # Update all files
+	find . -type f -print | 
+	while read FILENAME ; do
+	    update_file "${old_string}" "${new_string}" "${FILENAME}"
+	done
+    fi
 }
 
 #
@@ -111,8 +122,8 @@ update_all_files()
 #
 update_template_files()
 {
-    if [ $# -ne 2 ] ; then
-	echo "$0: invalid number of arguments: expected 2, received $#"
+    if [ $# -lt 2 ] ; then
+	echo "$0: invalid number of arguments: expected 2+, received $#"
 	exit 1
     fi
     old_string="$1"
@@ -122,22 +133,34 @@ update_template_files()
     template_dir="devnotes"
     template_files="template.*"
 
-    if [ ! -d "${template_dir}" ] ; then
-	# No sub-directory with the template files
-	return
-    fi
+    if [ $# -gt 2 ] ;
+	then
+	shift 2
 
-    # Update only the template files
-    find "${template_dir}" -name "${template_files}" -type f -print | 
-    while read FILENAME ; do
-	update_file "${old_string}" "${new_string}" "${FILENAME}"
-    done
+        # Update only the template files
+	while [ "$1" ] ; do
+	    echo  "update_file (template) -:${old_string}:- -:${new_string}:- -:${1}:-"
+	    #update_file "${old_string}" "${new_string}" "${1}"
+	    shift
+	done
+    else
+	if [ ! -d "${template_dir}" ] ; then
+	# No sub-directory with the template files
+	    return
+	fi
+
+        # Update only the template files
+	find "${template_dir}" -name "${template_files}" -type f -print | 
+	while read FILENAME ; do
+	    update_file "${old_string}" "${new_string}" "${FILENAME}"
+	done
+    fi
 }
 
 #
 # Extract the arguments
 #
-if [ $# -lt 1 -o $# -gt 2 ] ; then
+if [ $# -lt 2 ] ; then
     echo "$0: invalid number of arguments: received $#"
     usage
 fi
@@ -149,9 +172,12 @@ fi
 old_year="$1"
 if [ $# -lt 2 ] ; then
     new_year=$(($old_year+1))
+    shift
 else
     new_year="$2"
+    shift 2
 fi
+
 
 #
 # Update the template files:
@@ -159,9 +185,9 @@ fi
 #
 OLD_YEAR_ID="(c) ${old_year}"
 NEW_YEAR_ID="(c) ${new_year}"
-OLD_STRING="${OLD_YEAR_ID} ${COPYRIGHT_HOLDER}"
+OLD_STRING="${OLD_YEAR_ID} ${OLD_COPYRIGHT_HOLDER}"
 NEW_STRING="${NEW_YEAR_ID} ${COPYRIGHT_HOLDER}"
-update_template_files "${OLD_STRING}" "${NEW_STRING}"
+update_template_files "${OLD_STRING}" "${NEW_STRING}" $@
 
 #
 # Update all files:
@@ -169,9 +195,9 @@ update_template_files "${OLD_STRING}" "${NEW_STRING}"
 #
 OLD_YEAR_ID="-${old_year}"
 NEW_YEAR_ID="-${new_year}"
-OLD_STRING="${OLD_YEAR_ID} ${COPYRIGHT_HOLDER}"
+OLD_STRING="${OLD_YEAR_ID} ${OLD_COPYRIGHT_HOLDER}"
 NEW_STRING="${NEW_YEAR_ID} ${COPYRIGHT_HOLDER}"
-update_all_files "${OLD_STRING}" "${NEW_STRING}"
+update_all_files "${OLD_STRING}" "${NEW_STRING}" $@
 
 #
 # Update all files:
@@ -179,6 +205,6 @@ update_all_files "${OLD_STRING}" "${NEW_STRING}"
 #
 OLD_YEAR_ID="(c) ${old_year}"
 NEW_YEAR_ID="(c) ${old_year}-${new_year}"
-OLD_STRING="${OLD_YEAR_ID} ${COPYRIGHT_HOLDER}"
+OLD_STRING="${OLD_YEAR_ID} ${OLD_COPYRIGHT_HOLDER}"
 NEW_STRING="${NEW_YEAR_ID} ${COPYRIGHT_HOLDER}"
-update_all_files "${OLD_STRING}" "${NEW_STRING}"
+update_all_files "${OLD_STRING}" "${NEW_STRING}" $@
