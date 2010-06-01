@@ -190,42 +190,6 @@ public:
 			   string& err);
 
     /**
-     * add_vif_address is called to inform all the RIBs that a new IPv6
-     * address has been added to a virtual interface.
-     *
-     * @param vifname the name of the VIF that the address was added to.
-     * @param addr the new address.
-     * @param subnet the subnet (masked address) that the new address
-     * resides on.
-     * @param peer the peer address to add.
-     * @param err reference to string in which to store the
-     * human-readable error message in case anything goes wrong.  Used
-     * for debugging purposes.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int add_vif_address(const string& vifname,
-			const IPv6& addr,
-			const IPv6Net& subnet,
-			const IPv6& peer,
-			string& err);
-
-    /**
-     * delete_vif_address is called to inform all the RIBs that an IPv6
-     * address that they previously know about has been deleted from a
-     * specific VIF.
-     *
-     * @param vifname the name of the VIF that the address was deleted from.
-     * @param addr the address that was deleted.
-     * @param err reference to string in which to store the
-     * human-readable error message in case anything goes wrong.  Used
-     * for debugging purposes.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int delete_vif_address(const string& vifname,
-			   const IPv6& addr,
-			   string& err);
-
-    /**
      * Make some errors we'd normally mask fatal.  Should be used for
      * testing only.
      */
@@ -298,30 +262,6 @@ public:
 			       bool		is_xrl_transaction_output);
 
     /**
-     * Add Route Redistributor that generates updates with redist6
-     * XRL interface.
-     *
-     * @param target_name XRL target to receive redistributed routes.
-     * @param from_protocol protocol routes are redistributed from.
-     * @param unicast apply to unicast rib.
-     * @param multicast apply to multicast rib.
-     * @param network_prefix redistribite only the routes that fall into this
-     * prefix address.
-     * @param cookie cookie passed in route redistribution XRLs.
-     * @param is_xrl_transaction_output if true the add/delete route XRLs
-     * are grouped into transactions.
-     *
-     * @return XORP_OK on success, XORP_ERROR on failure.
-     */
-    int add_redist_xrl_output6(const string&	target_name,
-			       const string&	from_protocol,
-			       bool	   	unicast,
-			       bool		multicast,
-			       const IPv6Net&	network_prefix,
-			       const string&	cookie,
-			       bool		is_xrl_transaction_output);
-
-    /**
      * Remove Route Redistributor that generates updates with redist4
      * XRL interface.
      *
@@ -341,28 +281,6 @@ public:
 				  bool		multicast,
 				  const string&	cookie,
 				  bool		is_xrl_transaction_output);
-
-    /**
-     * Remove Route Redistributor that generates updates with redist6
-     * XRL interface.
-     *
-     * @param target_name XRL target to receive redistributed routes.
-     * @param from_protocol protocol routes are redistributed from.
-     * @param unicast apply to unicast rib.
-     * @param multicast apply to multicast rib.
-     * @param cookie cookie passed in route redistribution XRLs.
-     * @param is_xrl_transaction_output if true the add/delete route XRLs
-     * are grouped into transactions.
-     *
-     * @return XORP_OK on success, XORP_ERROR on failure.
-     */
-    int delete_redist_xrl_output6(const string&	target_name,
-				  const string&	from_protocol,
-				  bool	   	unicast,
-				  bool		multicast,
-				  const string&	cookie,
-				  bool		is_xrl_transaction_output);
-
 
     XrlStdRouter& xrl_router() {    return _xrl_router; }
 
@@ -439,6 +357,96 @@ public:
     RIB<IPv4>& mrib4() { return _mrib4; }
 
     /**
+     * @return a reference to the XRL RIB target.
+     */
+    XrlRibTarget& xrl_rib_target() { return _xrl_rib_target; }
+
+#ifdef HAVE_IPV6
+
+    /**
+     * add_vif_address is called to inform all the RIBs that a new IPv6
+     * address has been added to a virtual interface.
+     *
+     * @param vifname the name of the VIF that the address was added to.
+     * @param addr the new address.
+     * @param subnet the subnet (masked address) that the new address
+     * resides on.
+     * @param peer the peer address to add.
+     * @param err reference to string in which to store the
+     * human-readable error message in case anything goes wrong.  Used
+     * for debugging purposes.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int add_vif_address(const string& vifname,
+			const IPv6& addr,
+			const IPv6Net& subnet,
+			const IPv6& peer,
+			string& err);
+
+    /**
+     * delete_vif_address is called to inform all the RIBs that an IPv6
+     * address that they previously know about has been deleted from a
+     * specific VIF.
+     *
+     * @param vifname the name of the VIF that the address was deleted from.
+     * @param addr the address that was deleted.
+     * @param err reference to string in which to store the
+     * human-readable error message in case anything goes wrong.  Used
+     * for debugging purposes.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int delete_vif_address(const string& vifname,
+			   const IPv6& addr,
+			   string& err);
+
+    /**
+     * Add Route Redistributor that generates updates with redist6
+     * XRL interface.
+     *
+     * @param target_name XRL target to receive redistributed routes.
+     * @param from_protocol protocol routes are redistributed from.
+     * @param unicast apply to unicast rib.
+     * @param multicast apply to multicast rib.
+     * @param network_prefix redistribite only the routes that fall into this
+     * prefix address.
+     * @param cookie cookie passed in route redistribution XRLs.
+     * @param is_xrl_transaction_output if true the add/delete route XRLs
+     * are grouped into transactions.
+     *
+     * @return XORP_OK on success, XORP_ERROR on failure.
+     */
+    int add_redist_xrl_output6(const string&	target_name,
+			       const string&	from_protocol,
+			       bool	   	unicast,
+			       bool		multicast,
+			       const IPv6Net&	network_prefix,
+			       const string&	cookie,
+			       bool		is_xrl_transaction_output);
+
+
+    /**
+     * Remove Route Redistributor that generates updates with redist6
+     * XRL interface.
+     *
+     * @param target_name XRL target to receive redistributed routes.
+     * @param from_protocol protocol routes are redistributed from.
+     * @param unicast apply to unicast rib.
+     * @param multicast apply to multicast rib.
+     * @param cookie cookie passed in route redistribution XRLs.
+     * @param is_xrl_transaction_output if true the add/delete route XRLs
+     * are grouped into transactions.
+     *
+     * @return XORP_OK on success, XORP_ERROR on failure.
+     */
+    int delete_redist_xrl_output6(const string&	target_name,
+				  const string&	from_protocol,
+				  bool	   	unicast,
+				  bool		multicast,
+				  const string&	cookie,
+				  bool		is_xrl_transaction_output);
+
+
+    /**
      * @return a reference to the IPv6 unicast RIB.
      */
     RIB<IPv6>& urib6() { return _urib6; }
@@ -448,10 +456,8 @@ public:
      */
     RIB<IPv6>& mrib6() { return _mrib6; }
 
-    /**
-     * @return a reference to the XRL RIB target.
-     */
-    XrlRibTarget& xrl_rib_target() { return _xrl_rib_target; }
+
+#endif //ipv6
 
 private:
     ProcessStatus       _status_code;
@@ -462,9 +468,10 @@ private:
 
     RIB<IPv4>		_urib4;			// The IPv4 unicast RIB
     RIB<IPv4>		_mrib4;			// The IPv4 multicast RIB
+#ifdef HAVE_IPV6
     RIB<IPv6>		_urib6;			// The IPv6 unicast RIB
     RIB<IPv6>		_mrib6;			// The IPv6 multicast RIB
-
+#endif
     VifManager		_vif_manager;		// The VIF manager
     XrlRibTarget	_xrl_rib_target;
     set<string>		_targets_of_interest;	// Monitored XRL targets

@@ -108,36 +108,12 @@ NotifyQueueChangedEntry<IPv4>::send(ResponseSender* response_sender,
 
 template <>
 void
-NotifyQueueChangedEntry<IPv6>::send(ResponseSender* response_sender,
-				    const string& module_name,
-				    NotifyQueue::XrlCompleteCB& cb) 
-{
-    response_sender->send_route_info_changed6(module_name.c_str(),
-					      _net.masked_addr(),
-					      _net.prefix_len(), _nexthop,
-					      _metric, _admin_distance,
-					      _protocol_origin.c_str(), cb);
-}
-
-template <>
-void
 NotifyQueueInvalidateEntry<IPv4>::send(ResponseSender* response_sender,
 				       const string& module_name,
 				       NotifyQueue::XrlCompleteCB& cb) 
 {
     debug_msg("Sending route_info_invalid4\n");
     response_sender->send_route_info_invalid4(module_name.c_str(),
-					      _net.masked_addr(),
-					      _net.prefix_len(), cb);
-}
-
-template <>
-void
-NotifyQueueInvalidateEntry<IPv6>::send(ResponseSender* response_sender,
-				       const string& module_name,
-				       NotifyQueue::XrlCompleteCB& cb) 
-{
-    response_sender->send_route_info_invalid6(module_name.c_str(),
 					      _net.masked_addr(),
 					      _net.prefix_len(), cb);
 }
@@ -198,6 +174,45 @@ RegisterServer::send_invalidate(const string& module_name,
 }
 
 void
+RegisterServer::flush() 
+{
+    debug_msg("REGSERV: flush\n");
+    map<string, NotifyQueue* >::iterator iter;
+    for (iter = _queuemap.begin(); iter != _queuemap.end(); ++iter) {
+	iter->second->flush(&_response_sender);
+    }
+}
+
+
+/** IPv6 stuff */
+#ifdef HAVE_IPV6
+
+template <>
+void
+NotifyQueueChangedEntry<IPv6>::send(ResponseSender* response_sender,
+				    const string& module_name,
+				    NotifyQueue::XrlCompleteCB& cb) 
+{
+    response_sender->send_route_info_changed6(module_name.c_str(),
+					      _net.masked_addr(),
+					      _net.prefix_len(), _nexthop,
+					      _metric, _admin_distance,
+					      _protocol_origin.c_str(), cb);
+}
+
+template <>
+void
+NotifyQueueInvalidateEntry<IPv6>::send(ResponseSender* response_sender,
+				       const string& module_name,
+				       NotifyQueue::XrlCompleteCB& cb) 
+{
+    response_sender->send_route_info_invalid6(module_name.c_str(),
+					      _net.masked_addr(),
+					      _net.prefix_len(), cb);
+}
+
+
+void
 RegisterServer::send_route_changed(const string& module_name,
 				   const IPv6Net& net,
 				   const IPv6& nexthop,
@@ -225,12 +240,5 @@ RegisterServer::send_invalidate(const string& module_name,
 		       reinterpret_cast<NotifyQueueEntry *>(q_entry));
 }
 
-void
-RegisterServer::flush() 
-{
-    debug_msg("REGSERV: flush\n");
-    map<string, NotifyQueue* >::iterator iter;
-    for (iter = _queuemap.begin(); iter != _queuemap.end(); ++iter) {
-	iter->second->flush(&_response_sender);
-    }
-}
+
+#endif // ipv6

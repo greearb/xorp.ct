@@ -5,7 +5,9 @@
 #include "finder_event_observer.xif"
 #include "policy_backend.xif"
 #include "policy_redist4.xif"
+#ifdef HAVE_IPV6
 #include "policy_redist6.xif"
+#endif
 #include "rib_client.xif"
 #ifndef XORP_DISABLE_PROFILE
 #include "profile.xif"
@@ -16,8 +18,10 @@ target bgp implements		common/0.1,
 				finder_event_observer/0.1,
 				policy_backend/0.1,
 				policy_redist4/0.1,
-				policy_redist6/0.1,
 				rib_client/0.1,
+#ifdef HAVE_IPV6
+				policy_redist6/0.1,
+#endif
 #ifndef XORP_DISABLE_PROFILE
 				profile/0.1
 #endif

@@ -54,10 +54,15 @@ public:
      */
     XrlRibTarget(XrlRouter* xrl_router,
 		 RIB<IPv4>& urib4, RIB<IPv4>& mrib4,
+#ifdef HAVE_IPV6
 		 RIB<IPv6>& urib6, RIB<IPv6>& mrib6,
+#endif
 		 VifManager& vif_manager, RibManager* rib_manager)
 	: XrlRibTargetBase(xrl_router),
-	  _urib4(urib4), _mrib4(mrib4), _urib6(urib6), _mrib6(mrib6),
+	  _urib4(urib4), _mrib4(mrib4),
+#ifdef HAVE_IPV6
+	  _urib6(urib6), _mrib6(mrib6),
+#endif
 	  _vif_manager(vif_manager), _rib_manager(rib_manager) {}
     /**
      * XrlRibTarget destructor
@@ -67,8 +72,10 @@ public:
 protected:
     RIB<IPv4>&	_urib4;
     RIB<IPv4>&	_mrib4;
+#ifdef HAVE_IPV6
     RIB<IPv6>&	_urib6;
     RIB<IPv6>&	_mrib6;
+#endif
     VifManager& _vif_manager;
     RibManager*	_rib_manager;
 
@@ -177,23 +184,7 @@ protected:
 	const bool&	unicast,
 	const bool&	multicast);
 
-    XrlCmdError rib_0_1_add_igp_table6(
-	// Input values,
-	const string&	protocol,
-	const string&	target_class,
-	const string&	target_instance,
-	const bool&	unicast,
-	const bool&	multicast);
-
     XrlCmdError rib_0_1_delete_igp_table4(
-	// Input values,
-	const string&	protocol,
-	const string&	target_class,
-	const string&	target_instance,
-	const bool&	unicast,
-	const bool&	multicast);
-
-    XrlCmdError rib_0_1_delete_igp_table6(
 	// Input values,
 	const string&	protocol,
 	const string&	target_class,
@@ -209,23 +200,7 @@ protected:
 	const bool&	unicast,
 	const bool&	multicast);
 
-    XrlCmdError rib_0_1_add_egp_table6(
-	// Input values,
-	const string&	protocol,
-	const string&	target_class,
-	const string&	target_instance,
-	const bool&	unicast,
-	const bool&	multicast);
-
     XrlCmdError rib_0_1_delete_egp_table4(
-	// Input values,
-	const string&	protocol,
-	const string&	target_class,
-	const string&	target_instance,
-	const bool&	unicast,
-	const bool&	multicast);
-
-    XrlCmdError rib_0_1_delete_egp_table6(
 	// Input values,
 	const string&	protocol,
 	const string&	target_class,
@@ -261,16 +236,6 @@ protected:
 	const uint32_t& metric,
 	const XrlAtomList&	policytags);
 
-    XrlCmdError rib_0_1_add_route6(
-	// Input values,
-	const string&	protocol,
-	const bool&	unicast,
-	const bool&	multicast,
-	const IPv6Net&	network,
-	const IPv6&	nexthop,
-	const uint32_t& metric,
-	const XrlAtomList&	policytags);
-
     XrlCmdError rib_0_1_replace_route4(
 	// Input values,
 	const string&	protocol,
@@ -281,29 +246,12 @@ protected:
 	const uint32_t& metric,
 	const XrlAtomList&	policytags);
 
-    XrlCmdError rib_0_1_replace_route6(
-	// Input values,
-	const string&	protocol,
-	const bool&	unicast,
-	const bool&	multicast,
-	const IPv6Net&	network,
-	const IPv6&	nexthop,
-	const uint32_t& metric,
-	const XrlAtomList&	policytags);
-
     XrlCmdError rib_0_1_delete_route4(
 	// Input values,
 	const string&	protocol,
 	const bool&	unicast,
 	const bool&	multicast,
 	const IPv4Net&	network);
-
-    XrlCmdError rib_0_1_delete_route6(
-	// Input values,
-	const string&	protocol,
-	const bool&	unicast,
-	const bool&	multicast,
-	const IPv6Net&	network);
 
     /**
      *  Add/replace a route by explicitly specifying the network interface
@@ -342,18 +290,6 @@ protected:
 	const uint32_t&	    metric,
 	const XrlAtomList&  policytags);
 
-    XrlCmdError rib_0_1_add_interface_route6(
-	// Input values,
-	const string&	    protocol,
-	const bool&	    unicast,
-	const bool&	    multicast,
-	const IPv6Net&	    network,
-	const IPv6&	    nexthop,
-	const string&	    ifname,
-	const string&	    vifname,
-	const uint32_t&	    metric,
-	const XrlAtomList&  policytags);
-
     XrlCmdError rib_0_1_replace_interface_route4(
 	// Input values,
 	const string&	    protocol,
@@ -361,18 +297,6 @@ protected:
 	const bool&	    multicast,
 	const IPv4Net&	    network,
 	const IPv4&	    nexthop,
-	const string&	    ifname,
-	const string&	    vifname,
-	const uint32_t&	    metric,
-	const XrlAtomList&  policytags);
-
-    XrlCmdError rib_0_1_replace_interface_route6(
-	// Input values,
-	const string&	    protocol,
-	const bool&	    unicast,
-	const bool&	    multicast,
-	const IPv6Net&	    network,
-	const IPv6&	    nexthop,
 	const string&	    ifname,
 	const string&	    vifname,
 	const uint32_t&	    metric,
@@ -400,27 +324,6 @@ protected:
 	IPv4&		nexthop);
 
     /**
-     *  Lookup nexthop.
-     *
-     *  @param addr address to lookup.
-     *
-     *  @param unicast look in unicast RIB.
-     *
-     *  @param multicast look in multicast RIB.
-     *
-     *  @param nexthop contains the resolved nexthop if successful, IPv6::ZERO
-     *  otherwise. It is an error for the unicast and multicast fields to both
-     *  be true or both false.
-     */
-    XrlCmdError rib_0_1_lookup_route_by_dest6(
-	// Input values,
-	const IPv6&	addr,
-	const bool&	unicast,
-	const bool&	multicast,
-	// Output values,
-	IPv6&		nexthop);
-
-    /**
      *  Add a vif or a vif address to the RIB. This interface should be used
      *  only for testing purpose.
      *
@@ -445,12 +348,6 @@ protected:
 	const string&	name,
 	const IPv4&	addr,
 	const IPv4Net&	subnet);
-
-    XrlCmdError rib_0_1_add_vif_addr6(
-	// Input values,
-	const string&	name,
-	const IPv6&	addr,
-	const IPv6Net&	subnet);
 
     /**
      *  Enable route redistribution from one routing protocol to another.
@@ -482,35 +379,6 @@ protected:
 	const string&	cookie);
 
     /**
-     *  Enable route redistribution from one routing protocol to another.
-     *
-     *  @param to_xrl_target the XRL Target instance name of the caller. The
-     *  caller must implement redist6/0.1.
-     *
-     *  @param from_protocol the name of the routing process routes are to be
-     *  redistributed from.
-     *
-     *  @param unicast enable for unicast RIBs matching from and to.
-     *
-     *  @param multicast enable for multicast RIBs matching from and to.
-     *
-     *  @param network_prefix redistribite only the routes that fall into this
-     *  prefix address.
-     *
-     *  @param cookie a text value passed back to creator in each call from the
-     *  RIB. This allows creators to identity the source of updates it receives
-     *  through the redist6/0.1 interface.
-     */
-    XrlCmdError rib_0_1_redist_enable6(
-	// Input values,
-	const string&	to_xrl_target,
-	const string&	from_protocol,
-	const bool&	unicast,
-	const bool&	multicast,
-	const IPv6Net&	network_prefix,
-	const string&	cookie);
-
-    /**
      *  Disable route redistribution from one routing protocol to another.
      *
      *  @param to_xrl_target the XRL Target instance name of the caller. The
@@ -525,28 +393,6 @@ protected:
      *  through the redist4/0.1 interface.
      */
     XrlCmdError rib_0_1_redist_disable4(
-	// Input values,
-	const string&	to_xrl_target,
-	const string&	from_protocol,
-	const bool&	unicast,
-	const bool&	multicast,
-	const string&	cookie);
-
-    /**
-     *  Disable route redistribution from one routing protocol to another.
-     *
-     *  @param to_xrl_target the XRL Target instance name of the caller. The
-     *  caller must implement redist6/0.1 and previously called redist_enable6.
-     *
-     *  @param unicast disable for unicast RIBs matching from and to.
-     *
-     *  @param multicast disable for multicast RIBs matching from and to.
-     *
-     *  @param cookie a text value passed back to creator in each call from the
-     *  RIB. This allows creators to identity the source of updates it receives
-     *  through the redist6/0.1 interface.
-     */
-    XrlCmdError rib_0_1_redist_disable6(
 	// Input values,
 	const string&	to_xrl_target,
 	const string&	from_protocol,
@@ -585,36 +431,6 @@ protected:
 	const string&	cookie);
 
     /**
-     *  Enable transaction-based route redistribution from one routing protocol
-     *  to another.
-     *
-     *  @param to_xrl_target the XRL Target instance name of the caller. The
-     *  caller must implement redist_transaction6/0.1.
-     *
-     *  @param from_protocol the name of the routing process routes are to be
-     *  redistributed from.
-     *
-     *  @param unicast enable for unicast RIBs matching from and to.
-     *
-     *  @param multicast enable for multicast RIBs matching from and to.
-     *
-     *  @param network_prefix redistribite only the routes that fall into this
-     *  prefix address.
-     *
-     *  @param cookie a text value passed back to creator in each call from the
-     *  RIB. This allows creators to identity the source of updates it receives
-     *  through the redist_transaction6/0.1 interface.
-     */
-    XrlCmdError rib_0_1_redist_transaction_enable6(
-	// Input values,
-	const string&	to_xrl_target,
-	const string&	from_protocol,
-	const bool&	unicast,
-	const bool&	multicast,
-	const IPv6Net&	network_prefix,
-	const string&	cookie);
-
-    /**
      *  Disable transaction-based route redistribution from one routing
      *  protocol to another.
      *
@@ -631,30 +447,6 @@ protected:
      *  through the redist_transaction4/0.1 interface.
      */
     XrlCmdError rib_0_1_redist_transaction_disable4(
-	// Input values,
-	const string&	to_xrl_target,
-	const string&	from_protocol,
-	const bool&	unicast,
-	const bool&	multicast,
-	const string&	cookie);
-
-    /**
-     *  Disable transaction-based route redistribution from one routing
-     *  protocol to another.
-     *
-     *  @param to_xrl_target the XRL Target instance name of the caller. The
-     *  caller must implement redist_transaction6/0.1 and previously called
-     *  redist_transaction_enable6.
-     *
-     *  @param unicast disable for unicast RIBs matching from and to.
-     *
-     *  @param multicast disable for multicast RIBs matching from and to.
-     *
-     *  @param cookie a text value passed back to creator in each call from the
-     *  RIB. This allows creators to identity the source of updates it receives
-     *  through the redist_transaction6/0.1 interface.
-     */
-    XrlCmdError rib_0_1_redist_transaction_disable6(
 	// Input values,
 	const string&	to_xrl_target,
 	const string&	from_protocol,
@@ -717,63 +509,6 @@ protected:
 	// Input values,
         const string&	target,
 	const IPv4&	addr,
-	const uint32_t&	prefix_len);
-
-    /**
-     *  Register an interest in a route.
-     *
-     *  @param target the name of the XRL module to notify when the information
-     *  returned by this call becomes invalid.
-     *
-     *  @param addr address of interest.
-     *
-     *  @param resolves returns whether or not the address resolves to a route
-     *  that can be used for forwarding.
-     *
-     *  @param base_addr returns the address of interest (actually the base
-     *  address of the subnet covered by addr/prefix_len).
-     *
-     *  @param prefix_len returns the prefix length that the registration
-     *  covers. This response applies to all addresses in addr/prefix_len.
-     *
-     *  @param real_prefix_len returns the actual prefix length of the route
-     *  that will be used to route addr. If real_prefix_len is not the same as
-     *  prefix_len, this is because there are some more specific routes that
-     *  overlap addr/real_prefix_len. real_prefix_len is primarily given for
-     *  debugging reasons.
-     *
-     *  @param nexthop returns the address of the next hop for packets sent to
-     *  addr.
-     *
-     *  @param metric returns the IGP metric for this route.
-     */
-    XrlCmdError rib_0_1_register_interest6(
-	// Input values,
-        const string&	target,
-	const IPv6&	addr,
-	// Output values,
-	bool&		resolves,
-	IPv6&		base_addr,
-	uint32_t&	prefix_len,
-	uint32_t&	real_prefix_len,
-	IPv6&		nexthop,
-	uint32_t&	metric);
-
-    /**
-     *  De-register an interest in a route.
-     *
-     *  @param target the name of the XRL module that registered the interest.
-     *
-     *  @param addr the address of the previous registered interest. addr
-     *  should be the base address of the add/prefix_len subnet.
-     *
-     *  @param prefix_len the prefix length of the registered interest, as
-     *  given in the response from register_interest.
-     */
-    XrlCmdError rib_0_1_deregister_interest6(
-	// Input values,
-        const string&	target,
-	const IPv6&	addr,
 	const uint32_t&	prefix_len);
 
     /**
@@ -890,6 +625,283 @@ protected:
      * Reset policy redistribution map.
      */
     XrlCmdError rib_0_1_reset_policy_redist_tags();
+
+#ifdef HAVE_IPV6
+
+    XrlCmdError rib_0_1_add_igp_table6(
+	// Input values,
+	const string&	protocol,
+	const string&	target_class,
+	const string&	target_instance,
+	const bool&	unicast,
+	const bool&	multicast);
+
+
+    XrlCmdError rib_0_1_delete_igp_table6(
+	// Input values,
+	const string&	protocol,
+	const string&	target_class,
+	const string&	target_instance,
+	const bool&	unicast,
+	const bool&	multicast);
+
+    XrlCmdError rib_0_1_add_egp_table6(
+	// Input values,
+	const string&	protocol,
+	const string&	target_class,
+	const string&	target_instance,
+	const bool&	unicast,
+	const bool&	multicast);
+
+    XrlCmdError rib_0_1_delete_egp_table6(
+	// Input values,
+	const string&	protocol,
+	const string&	target_class,
+	const string&	target_instance,
+	const bool&	unicast,
+	const bool&	multicast);
+
+    XrlCmdError rib_0_1_add_route6(
+	// Input values,
+	const string&	protocol,
+	const bool&	unicast,
+	const bool&	multicast,
+	const IPv6Net&	network,
+	const IPv6&	nexthop,
+	const uint32_t& metric,
+	const XrlAtomList&	policytags);
+
+    XrlCmdError rib_0_1_replace_route6(
+	// Input values,
+	const string&	protocol,
+	const bool&	unicast,
+	const bool&	multicast,
+	const IPv6Net&	network,
+	const IPv6&	nexthop,
+	const uint32_t& metric,
+	const XrlAtomList&	policytags);
+
+    XrlCmdError rib_0_1_delete_route6(
+	// Input values,
+	const string&	protocol,
+	const bool&	unicast,
+	const bool&	multicast,
+	const IPv6Net&	network);
+
+    XrlCmdError rib_0_1_add_interface_route6(
+	// Input values,
+	const string&	    protocol,
+	const bool&	    unicast,
+	const bool&	    multicast,
+	const IPv6Net&	    network,
+	const IPv6&	    nexthop,
+	const string&	    ifname,
+	const string&	    vifname,
+	const uint32_t&	    metric,
+	const XrlAtomList&  policytags);
+
+    XrlCmdError rib_0_1_replace_interface_route6(
+	// Input values,
+	const string&	    protocol,
+	const bool&	    unicast,
+	const bool&	    multicast,
+	const IPv6Net&	    network,
+	const IPv6&	    nexthop,
+	const string&	    ifname,
+	const string&	    vifname,
+	const uint32_t&	    metric,
+	const XrlAtomList&  policytags);
+
+    /**
+     *  Lookup nexthop.
+     *
+     *  @param addr address to lookup.
+     *
+     *  @param unicast look in unicast RIB.
+     *
+     *  @param multicast look in multicast RIB.
+     *
+     *  @param nexthop contains the resolved nexthop if successful, IPv6::ZERO
+     *  otherwise. It is an error for the unicast and multicast fields to both
+     *  be true or both false.
+     */
+    XrlCmdError rib_0_1_lookup_route_by_dest6(
+	// Input values,
+	const IPv6&	addr,
+	const bool&	unicast,
+	const bool&	multicast,
+	// Output values,
+	IPv6&		nexthop);
+
+    XrlCmdError rib_0_1_add_vif_addr6(
+	// Input values,
+	const string&	name,
+	const IPv6&	addr,
+	const IPv6Net&	subnet);
+
+    /**
+     *  Enable route redistribution from one routing protocol to another.
+     *
+     *  @param to_xrl_target the XRL Target instance name of the caller. The
+     *  caller must implement redist6/0.1.
+     *
+     *  @param from_protocol the name of the routing process routes are to be
+     *  redistributed from.
+     *
+     *  @param unicast enable for unicast RIBs matching from and to.
+     *
+     *  @param multicast enable for multicast RIBs matching from and to.
+     *
+     *  @param network_prefix redistribite only the routes that fall into this
+     *  prefix address.
+     *
+     *  @param cookie a text value passed back to creator in each call from the
+     *  RIB. This allows creators to identity the source of updates it receives
+     *  through the redist6/0.1 interface.
+     */
+    XrlCmdError rib_0_1_redist_enable6(
+	// Input values,
+	const string&	to_xrl_target,
+	const string&	from_protocol,
+	const bool&	unicast,
+	const bool&	multicast,
+	const IPv6Net&	network_prefix,
+	const string&	cookie);
+
+    /**
+     *  Disable route redistribution from one routing protocol to another.
+     *
+     *  @param to_xrl_target the XRL Target instance name of the caller. The
+     *  caller must implement redist6/0.1 and previously called redist_enable6.
+     *
+     *  @param unicast disable for unicast RIBs matching from and to.
+     *
+     *  @param multicast disable for multicast RIBs matching from and to.
+     *
+     *  @param cookie a text value passed back to creator in each call from the
+     *  RIB. This allows creators to identity the source of updates it receives
+     *  through the redist6/0.1 interface.
+     */
+    XrlCmdError rib_0_1_redist_disable6(
+	// Input values,
+	const string&	to_xrl_target,
+	const string&	from_protocol,
+	const bool&	unicast,
+	const bool&	multicast,
+	const string&	cookie);
+
+    /**
+     *  Enable transaction-based route redistribution from one routing protocol
+     *  to another.
+     *
+     *  @param to_xrl_target the XRL Target instance name of the caller. The
+     *  caller must implement redist_transaction6/0.1.
+     *
+     *  @param from_protocol the name of the routing process routes are to be
+     *  redistributed from.
+     *
+     *  @param unicast enable for unicast RIBs matching from and to.
+     *
+     *  @param multicast enable for multicast RIBs matching from and to.
+     *
+     *  @param network_prefix redistribite only the routes that fall into this
+     *  prefix address.
+     *
+     *  @param cookie a text value passed back to creator in each call from the
+     *  RIB. This allows creators to identity the source of updates it receives
+     *  through the redist_transaction6/0.1 interface.
+     */
+    XrlCmdError rib_0_1_redist_transaction_enable6(
+	// Input values,
+	const string&	to_xrl_target,
+	const string&	from_protocol,
+	const bool&	unicast,
+	const bool&	multicast,
+	const IPv6Net&	network_prefix,
+	const string&	cookie);
+
+    /**
+     *  Disable transaction-based route redistribution from one routing
+     *  protocol to another.
+     *
+     *  @param to_xrl_target the XRL Target instance name of the caller. The
+     *  caller must implement redist_transaction6/0.1 and previously called
+     *  redist_transaction_enable6.
+     *
+     *  @param unicast disable for unicast RIBs matching from and to.
+     *
+     *  @param multicast disable for multicast RIBs matching from and to.
+     *
+     *  @param cookie a text value passed back to creator in each call from the
+     *  RIB. This allows creators to identity the source of updates it receives
+     *  through the redist_transaction6/0.1 interface.
+     */
+    XrlCmdError rib_0_1_redist_transaction_disable6(
+	// Input values,
+	const string&	to_xrl_target,
+	const string&	from_protocol,
+	const bool&	unicast,
+	const bool&	multicast,
+	const string&	cookie);
+
+    /**
+     *  Register an interest in a route.
+     *
+     *  @param target the name of the XRL module to notify when the information
+     *  returned by this call becomes invalid.
+     *
+     *  @param addr address of interest.
+     *
+     *  @param resolves returns whether or not the address resolves to a route
+     *  that can be used for forwarding.
+     *
+     *  @param base_addr returns the address of interest (actually the base
+     *  address of the subnet covered by addr/prefix_len).
+     *
+     *  @param prefix_len returns the prefix length that the registration
+     *  covers. This response applies to all addresses in addr/prefix_len.
+     *
+     *  @param real_prefix_len returns the actual prefix length of the route
+     *  that will be used to route addr. If real_prefix_len is not the same as
+     *  prefix_len, this is because there are some more specific routes that
+     *  overlap addr/real_prefix_len. real_prefix_len is primarily given for
+     *  debugging reasons.
+     *
+     *  @param nexthop returns the address of the next hop for packets sent to
+     *  addr.
+     *
+     *  @param metric returns the IGP metric for this route.
+     */
+    XrlCmdError rib_0_1_register_interest6(
+	// Input values,
+        const string&	target,
+	const IPv6&	addr,
+	// Output values,
+	bool&		resolves,
+	IPv6&		base_addr,
+	uint32_t&	prefix_len,
+	uint32_t&	real_prefix_len,
+	IPv6&		nexthop,
+	uint32_t&	metric);
+
+    /**
+     *  De-register an interest in a route.
+     *
+     *  @param target the name of the XRL module that registered the interest.
+     *
+     *  @param addr the address of the previous registered interest. addr
+     *  should be the base address of the add/prefix_len subnet.
+     *
+     *  @param prefix_len the prefix length of the registered interest, as
+     *  given in the response from register_interest.
+     */
+    XrlCmdError rib_0_1_deregister_interest6(
+	// Input values,
+        const string&	target,
+	const IPv6&	addr,
+	const uint32_t&	prefix_len);
+
+#endif //ipv6
 
 #ifndef XORP_DISABLE_PROFILE
     /**

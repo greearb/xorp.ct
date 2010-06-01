@@ -45,17 +45,24 @@ RibManager::RibManager(EventLoop& eventloop, XrlStdRouter& xrl_std_router,
       _register_server(&_xrl_router),
       _urib4(UNICAST, *this, _eventloop),
       _mrib4(MULTICAST, *this, _eventloop),
+#ifdef HAVE_IPV6
       _urib6(UNICAST, *this, _eventloop),
       _mrib6(MULTICAST, *this, _eventloop),
+#endif
       _vif_manager(_xrl_router, _eventloop, this, fea_target),
-      _xrl_rib_target(&_xrl_router, _urib4, _mrib4, _urib6, _mrib6,
+      _xrl_rib_target(&_xrl_router, _urib4, _mrib4,
+#ifdef HAVE_IPV6
+		      _urib6, _mrib6,
+#endif
 		      _vif_manager, this),
       _fea_target(fea_target)
 {
     _urib4.initialize(_register_server);
     _mrib4.initialize(_register_server);
+#ifdef HAVE_IPV6
     _urib6.initialize(_register_server);
     _mrib6.initialize(_register_server);
+#endif
     PeriodicTimerCallback cb = callback(this, &RibManager::status_updater);
     _status_update_timer = _eventloop.new_periodic_ms(1000, cb);
 #ifndef XORP_DISABLE_PROFILE
@@ -181,8 +188,11 @@ RibManager::new_vif(const string& vifname, const Vif& vif, string& err)
     err.resize(0);
     return (add_rib_vif(_urib4, vifname, vif, err)
 	    | add_rib_vif(_mrib4, vifname, vif, err)
+#ifdef HAVE_IPV6
 	    | add_rib_vif(_urib6, vifname, vif, err)
-	    | add_rib_vif(_mrib6, vifname, vif, err));
+	    | add_rib_vif(_mrib6, vifname, vif, err)
+#endif
+	);
 }
 
 template <typename A>
@@ -208,8 +218,11 @@ RibManager::delete_vif(const string& vifname, string& err)
     err.resize(0);
     return (delete_rib_vif(_urib4, vifname, err)
 	    | delete_rib_vif(_mrib4, vifname, err)
+#ifdef HAVE_IPV6
 	    | delete_rib_vif(_urib6, vifname, err)
-	    | delete_rib_vif(_mrib6, vifname, err));
+	    | delete_rib_vif(_mrib6, vifname, err)
+#endif
+	);
 }
 
 
@@ -241,11 +254,14 @@ RibManager::set_vif_flags(const string& vifname,
     if (set_rib_vif_flags(_urib4, vifname, is_p2p, is_loopback, is_multicast,
 			  is_broadcast, is_up, mtu, err) != XORP_OK ||
 	set_rib_vif_flags(_mrib4, vifname, is_p2p, is_loopback, is_multicast,
-			  is_broadcast, is_up, mtu, err) != XORP_OK ||
-	set_rib_vif_flags(_urib6, vifname, is_p2p, is_loopback, is_multicast,
+			  is_broadcast, is_up, mtu, err) != XORP_OK
+#ifdef HAVE_IPV6
+	|| set_rib_vif_flags(_urib6, vifname, is_p2p, is_loopback, is_multicast,
 			  is_broadcast, is_up, mtu, err) != XORP_OK ||
 	set_rib_vif_flags(_mrib6, vifname, is_up, is_loopback, is_multicast,
-			  is_broadcast, is_up, mtu, err) != XORP_OK) {
+			  is_broadcast, is_up, mtu, err) != XORP_OK
+#endif
+	) {
 	return XORP_ERROR;
     }
     return XORP_OK;
@@ -314,34 +330,16 @@ RibManager::delete_vif_address(const string& 	vifn,
     return delete_vif_address_from_ribs(_urib4, _mrib4, vifn, addr, err);
 }
 
-int
-RibManager::add_vif_address(const string&	vifn,
-			    const IPv6&		addr,
-			    const IPv6Net&	subnet,
-			    const IPv6&		peer_addr,
-			    string&		err)
-{
-    int r = add_vif_address_to_ribs(_urib6, _mrib6, vifn, addr, subnet,
-				    IPv6::ZERO(), peer_addr, err);
-    return r;
-}
-
-int
-RibManager::delete_vif_address(const string& 	vifn,
-			       const IPv6& 	addr,
-			       string& 		err)
-{
-    return delete_vif_address_from_ribs(_urib6, _mrib6, vifn, addr, err);
-}
-
 
 void
 RibManager::make_errors_fatal()
 {
     _urib4.set_errors_are_fatal();
-    _urib6.set_errors_are_fatal();
     _mrib4.set_errors_are_fatal();
+#ifdef HAVE_IPV6
+    _urib6.set_errors_are_fatal();
     _mrib6.set_errors_are_fatal();
+#endif
 }
 
 void
@@ -405,9 +403,11 @@ RibManager::target_death(const string& target_class,
 
     // Inform the RIBs in case this was a routing protocol that died.
     _urib4.target_death(target_class, target_instance);
-    _urib6.target_death(target_class, target_instance);
     _mrib4.target_death(target_class, target_instance);
+#ifdef HAVE_IPV6
+    _urib6.target_death(target_class, target_instance);
     _mrib6.target_death(target_class, target_instance);
+#endif
 }
 
 static inline
@@ -563,6 +563,84 @@ RibManager::add_redist_xrl_output4(const string&	to_xrl_target,
 }
 
 int
+RibManager::delete_redist_xrl_output4(const string&	to_xrl_target,
+				      const string&	from_protocol,
+				      bool	   	unicast,
+				      bool		multicast,
+				      const string&	cookie,
+				      bool		is_xrl_transaction_output)
+{
+    if (unicast)
+	redist_disable_xrl_output(_urib4, to_xrl_target, from_protocol, cookie,
+				  is_xrl_transaction_output);
+    if (multicast)
+	redist_disable_xrl_output(_mrib4, to_xrl_target, from_protocol, cookie,
+				  is_xrl_transaction_output);
+    return XORP_OK;
+}
+
+void
+RibManager::push_routes()
+{
+    _urib4.push_routes();
+    _mrib4.push_routes();
+#ifdef HAVE_IPV6
+    _urib6.push_routes();    
+    _mrib6.push_routes();
+#endif
+}
+
+void
+RibManager::configure_filter(const uint32_t& filter, const string& conf)
+{
+    _policy_filters.configure(filter, conf);
+}
+
+void
+RibManager::reset_filter(const uint32_t& filter)
+{
+    _policy_filters.reset(filter);
+}
+
+void
+RibManager::insert_policy_redist_tags(const string& protocol,
+				      const PolicyTags& tags)
+{
+    _policy_redist_map.insert(protocol, tags);
+}				      
+
+void
+RibManager::reset_policy_redist_tags()
+{
+    _policy_redist_map.reset();
+}
+
+
+#ifdef HAVE_IPV6
+/** IPv6 stuff */
+
+
+int
+RibManager::add_vif_address(const string&	vifn,
+			    const IPv6&		addr,
+			    const IPv6Net&	subnet,
+			    const IPv6&		peer_addr,
+			    string&		err)
+{
+    int r = add_vif_address_to_ribs(_urib6, _mrib6, vifn, addr, subnet,
+				    IPv6::ZERO(), peer_addr, err);
+    return r;
+}
+
+int
+RibManager::delete_vif_address(const string& 	vifn,
+			       const IPv6& 	addr,
+			       string& 		err)
+{
+    return delete_vif_address_from_ribs(_urib6, _mrib6, vifn, addr, err);
+}
+
+int
 RibManager::add_redist_xrl_output6(const string&	to_xrl_target,
 				   const string&	from_protocol,
 				   bool			unicast,
@@ -598,23 +676,6 @@ RibManager::add_redist_xrl_output6(const string&	to_xrl_target,
 }
 
 int
-RibManager::delete_redist_xrl_output4(const string&	to_xrl_target,
-				      const string&	from_protocol,
-				      bool	   	unicast,
-				      bool		multicast,
-				      const string&	cookie,
-				      bool		is_xrl_transaction_output)
-{
-    if (unicast)
-	redist_disable_xrl_output(_urib4, to_xrl_target, from_protocol, cookie,
-				  is_xrl_transaction_output);
-    if (multicast)
-	redist_disable_xrl_output(_mrib4, to_xrl_target, from_protocol, cookie,
-				  is_xrl_transaction_output);
-    return XORP_OK;
-}
-
-int
 RibManager::delete_redist_xrl_output6(const string&	to_xrl_target,
 				      const string&	from_protocol,
 				      bool	   	unicast,
@@ -631,37 +692,4 @@ RibManager::delete_redist_xrl_output6(const string&	to_xrl_target,
     return XORP_OK;
 }
 
-void
-RibManager::push_routes()
-{
-    _urib4.push_routes();
-    _urib6.push_routes();
-    
-    _mrib4.push_routes();
-    _mrib6.push_routes();
-}
-
-void
-RibManager::configure_filter(const uint32_t& filter, const string& conf)
-{
-    _policy_filters.configure(filter, conf);
-}
-
-void
-RibManager::reset_filter(const uint32_t& filter)
-{
-    _policy_filters.reset(filter);
-}
-
-void
-RibManager::insert_policy_redist_tags(const string& protocol,
-				      const PolicyTags& tags)
-{
-    _policy_redist_map.insert(protocol, tags);
-}				      
-
-void
-RibManager::reset_policy_redist_tags()
-{
-    _policy_redist_map.reset();
-}
+#endif //ipv6

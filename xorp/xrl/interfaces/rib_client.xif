@@ -1,5 +1,7 @@
 /* $XORP: xorp/xrl/interfaces/rib_client.xif,v 1.4 2004/08/03 05:21:28 pavlin Exp $ */
 
+#include <xorp_config.h>
+
 /*
  * Routing Information Base XRL interface, client interface for
  * callbacks from the RIB.
@@ -26,9 +28,6 @@ interface rib_client/0.1 {
 	route_info_changed4 ? addr:ipv4 & prefix_len:u32 &		\
 			      nexthop:ipv4 & metric:u32 &		\
 			      admin_distance:u32 & protocol_origin:txt;
-	route_info_changed6 ? addr:ipv6 & prefix_len:u32 &		\
-			      nexthop:ipv6 & metric:u32 &		\
-			      admin_distance:u32 & protocol_origin:txt;
 
 	/**
          * Route Info Invalid
@@ -44,6 +43,12 @@ interface rib_client/0.1 {
          * send a register_interest request again.
          */
 	route_info_invalid4 ? addr:ipv4 & prefix_len:u32;
+
+#ifdef HAVE_IPV6
+	route_info_changed6 ? addr:ipv6 & prefix_len:u32 &		\
+			      nexthop:ipv6 & metric:u32 &		\
+			      admin_distance:u32 & protocol_origin:txt;
 	route_info_invalid6 ? addr:ipv6 & prefix_len:u32;
+#endif
 }    
 

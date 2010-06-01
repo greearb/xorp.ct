@@ -311,7 +311,9 @@ VifManager::updates_made()
     IfMgrIfTree::IfMap::const_iterator ifmgr_iface_iter;
     IfMgrIfAtom::VifMap::const_iterator ifmgr_vif_iter;
     IfMgrVifAtom::IPv4Map::const_iterator a4_iter;
+#ifdef HAVE_IPV6
     IfMgrVifAtom::IPv6Map::const_iterator a6_iter;
+#endif
 
     //
     // Update the local copy of the interface tree
@@ -423,6 +425,7 @@ VifManager::updates_made()
 		    }
 		}
 
+#ifdef HAVE_IPV6
 		for (a6_iter = old_ifmgr_vif_ptr->ipv6addrs().begin();
 		     a6_iter != old_ifmgr_vif_ptr->ipv6addrs().end();
 		     ++a6_iter) {
@@ -444,6 +447,7 @@ VifManager::updates_made()
 			}
 		    }
 		}
+#endif
 	    }
 
 	    //
@@ -527,6 +531,7 @@ VifManager::updates_made()
 		}
 	    }
 
+#ifdef HAVE_IPV6
 	    for (a6_iter = ifmgr_vif.ipv6addrs().begin();
 		 a6_iter != ifmgr_vif.ipv6addrs().end();
 		 ++a6_iter) {
@@ -570,6 +575,7 @@ VifManager::updates_made()
 			       error_msg.c_str());
 		}
 	    }
+#endif
 	}
     }
 }

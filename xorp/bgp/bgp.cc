@@ -74,31 +74,37 @@ BGPMain::BGPMain(EventLoop& eventloop)
     _next_hop_resolver_ipv4 = new NextHopResolver<IPv4>(_xrl_router,
 							_eventloop,
 							*this);
+#ifdef HAVE_IPV6
     _next_hop_resolver_ipv6 = new NextHopResolver<IPv6>(_xrl_router,
 							_eventloop,
 							*this);
+    PAListRef<IPv6>* palist6 =  new PAListRef<IPv6>(0);
+    palist6->create_attribute_manager();
+    delete palist6;
+
+#endif
 
     // start up the attribute managers
     PAListRef<IPv4>* palist4 =  new PAListRef<IPv4>(0);
     palist4->create_attribute_manager();
     delete palist4;
 
-    PAListRef<IPv6>* palist6 =  new PAListRef<IPv6>(0);
-    palist6->create_attribute_manager();
-    delete palist6;
-
     _plumbing_unicast = new BGPPlumbing(SAFI_UNICAST,
 					_rib_ipc_handler,
 					_aggregation_handler,
 					*_next_hop_resolver_ipv4,
+#ifdef HAVE_IPV6
 					*_next_hop_resolver_ipv6,
+#endif
 					_policy_filters,
 					*this);
     _plumbing_multicast = new BGPPlumbing(SAFI_MULTICAST,
 					  _rib_ipc_handler,
 					  _aggregation_handler,
 					  *_next_hop_resolver_ipv4,
+#ifdef HAVE_IPV6
 					  *_next_hop_resolver_ipv6,
+#endif
 					  _policy_filters,
 					  *this);
     _rib_ipc_handler->set_plumbing(_plumbing_unicast, _plumbing_multicast);
@@ -148,8 +154,11 @@ BGPMain::~BGPMain()
     debug_msg("-------------------------------------------\n");
     debug_msg("Waiting for all peers to go to idle\n");
     while (_peerlist->not_all_idle() || _rib_ipc_handler->busy() ||
-	   DeleteAllNodes<IPv4>::running() || 
-	   DeleteAllNodes<IPv6>::running()) {
+	   DeleteAllNodes<IPv4>::running()
+#ifdef HAVE_IPV6
+	   || DeleteAllNodes<IPv6>::running()
+#endif
+	) {
 	eventloop().run();
     }
     /*
@@ -223,9 +232,11 @@ BGPMain::~BGPMain()
     debug_msg("Deleting next hop resolver IPv4\n");
     delete _next_hop_resolver_ipv4;
 
+#ifdef HAVE_IPV6
     debug_msg("-------------------------------------------\n");
     debug_msg("Deleting next hop resolver IPv6\n");
     delete _next_hop_resolver_ipv6;
+#endif
 
     debug_msg("-------------------------------------------\n");
     debug_msg("Deleting process watcher\n");
@@ -276,7 +287,9 @@ BGPMain::startup()
     component_up("startup");
 
     register_address_status(callback(this, &BGPMain::address_status_change4));
+#ifdef HAVE_IPV6
     register_address_status(callback(this, &BGPMain::address_status_change6));
+#endif
 
     return (XORP_OK);
 }
@@ -390,25 +403,6 @@ BGPMain::is_address_enabled(const string& interface, const string& vif,
     return (fa->enabled());
 }
 
-bool
-BGPMain::is_address_enabled(const string& interface, const string& vif,
-			    const IPv6& address) const
-{
-    debug_msg("Interface %s Vif %s Address %s\n", interface.c_str(),
-	      vif.c_str(), cstring(address));
-
-    if (! is_vif_enabled(interface, vif))
-	return false;
-
-    const IfMgrIPv6Atom* fa = ifmgr_iftree().find_addr(interface,
-						       vif,
-						       address);
-    if (fa == NULL)
-	return false;
-
-    return (fa->enabled());
-}
-
 uint32_t
 BGPMain::get_prefix_length(const string& interface, const string& vif,
 			   const IPv4& address)
@@ -417,22 +411,6 @@ BGPMain::get_prefix_length(const string& interface, const string& vif,
 	      vif.c_str(), cstring(address));
 
     const IfMgrIPv4Atom* fa = ifmgr_iftree().find_addr(interface,
-						       vif,
-						       address);
-    if (fa == NULL)
-	return 0;
-
-    return (fa->prefix_len());
-}
-
-uint32_t
-BGPMain::get_prefix_length(const string& interface, const string& vif,
-			   const IPv6& address)
-{
-    debug_msg("Interface %s Vif %s Address %s\n", interface.c_str(),
-	      vif.c_str(), cstring(address));
-
-    const IfMgrIPv6Atom* fa = ifmgr_iftree().find_addr(interface,
 						       vif,
 						       address);
     if (fa == NULL)
@@ -470,15 +448,17 @@ BGPMain::updates_made()
     IfMgrIfTree::IfMap::const_iterator ii;
     IfMgrIfAtom::VifMap::const_iterator vi;
     IfMgrVifAtom::IPv4Map::const_iterator ai4;
-    IfMgrVifAtom::IPv6Map::const_iterator ai6;
     const IfMgrIfAtom* if_atom;
     const IfMgrIfAtom* other_if_atom;
     const IfMgrVifAtom* vif_atom;
     const IfMgrVifAtom* other_vif_atom;
     const IfMgrIPv4Atom* addr_atom4;
     const IfMgrIPv4Atom* other_addr_atom4;
+#ifdef HAVE_IPV6
+    IfMgrVifAtom::IPv6Map::const_iterator ai6;
     const IfMgrIPv6Atom* addr_atom6;
     const IfMgrIPv6Atom* other_addr_atom6;
+#endif
 
     //
     // Check whether the old interfaces, vifs and addresses are still there
@@ -566,6 +546,7 @@ BGPMain::updates_made()
 		}
 	    }
 
+#ifdef HAVE_IPV6
 	    for (ai6 = vif_atom->ipv6addrs().begin();
 		 ai6 != vif_atom->ipv6addrs().end();
 		 ++ai6) {
@@ -595,6 +576,7 @@ BGPMain::updates_made()
 						  is_new_address_enabled);
 		}
 	    }
+#endif
 	}
     }
 
@@ -659,6 +641,7 @@ BGPMain::updates_made()
 		}
 	    }
 
+#ifdef HAVE_IPV6
 	    for (ai6 = vif_atom->ipv6addrs().begin();
 		 ai6 != vif_atom->ipv6addrs().end();
 		 ++ai6) {
@@ -683,6 +666,7 @@ BGPMain::updates_made()
 		    }
 		}
 	    }
+#endif
 	}
     }
 
@@ -710,34 +694,10 @@ BGPMain::address_status_change4(const string& interface, const string& vif,
     local_ip_changed(source.str());
 }
 
-void
-BGPMain::address_status_change6(const string& interface, const string& vif,
-				const IPv6& source, uint32_t prefix_len,
-				bool state)
-{
-    debug_msg("interface %s vif %s address %s prefix_len %u state %s\n",
-	      interface.c_str(), vif.c_str(), cstring(source), prefix_len,
-	      bool_c_str(state));
-
-    if (state) {
-	_interfaces_ipv6.insert(make_pair(source, prefix_len));
-    } else {
-	_interfaces_ipv6.erase(source);
-    }
-
-    local_ip_changed(source.str());
-}
-
 bool
 BGPMain::interface_address4(const IPv4& address) const
 {
     return _interfaces_ipv4.end() != _interfaces_ipv4.find(address);
-}
-
-bool
-BGPMain::interface_address6(const IPv6& address) const
-{
-    return _interfaces_ipv6.end() != _interfaces_ipv6.find(address);
 }
 
 bool
@@ -749,21 +709,6 @@ BGPMain::interface_address_prefix_len4(const IPv4& address,
     prefix_len = 0;		// XXX: always reset
     iter = _interfaces_ipv4.find(address);
     if (iter == _interfaces_ipv4.end())
-	return (false);
-
-    prefix_len = iter->second;
-    return (true);
-}
-
-bool
-BGPMain::interface_address_prefix_len6(const IPv6& address,
-				       uint32_t& prefix_len) const
-{
-    map<IPv6, uint32_t>::const_iterator iter;
-
-    prefix_len = 0;		// XXX: always reset
-    iter = _interfaces_ipv6.find(address);
-    if (iter == _interfaces_ipv6.end())
 	return (false);
 
     prefix_len = iter->second;
@@ -1429,36 +1374,6 @@ BGPMain::set_nexthop4(const Iptuple& iptuple, const IPv4& next_hop)
 }
 
 bool
-BGPMain::set_nexthop6(const Iptuple& iptuple, const IPv6& next_hop)
-{
-    BGPPeer *peer = find_peer(iptuple);
-
-    if (peer == 0) {
-	XLOG_WARNING("Could not find peer: %s", iptuple.str().c_str());
-	return false;
-    }
-    const_cast<BGPPeerData*>(peer->peerdata())->set_v6_local_addr(next_hop);
-
-    bounce_peer(iptuple);
-
-    return true;
-}
-
-bool
-BGPMain::get_nexthop6(const Iptuple& iptuple, IPv6& next_hop)
-{
-    BGPPeer *peer = find_peer(iptuple);
-
-    if (peer == 0) {
-	XLOG_WARNING("Could not find peer: %s", iptuple.str().c_str());
-	return false;
-    }
-    next_hop = peer->peerdata()->get_v6_local_addr();
-
-    return true;
-}
-
-bool
 BGPMain::set_peer_state(const Iptuple& iptuple, bool state)
 {
     BGPPeer *peer = find_peer(iptuple);
@@ -1731,9 +1646,11 @@ BGPMain::register_ribname(const string& name)
 	plumbing_ipv4().next_hop_resolver().register_ribname(name))
 	return false;
 
+#ifdef HAVE_IPV6
     if (!plumbing_unicast()->
 	plumbing_ipv6().next_hop_resolver().register_ribname(name))
 	return false;
+#endif
 
     return true;
 }
@@ -1853,32 +1770,7 @@ BGPMain::originate_route(const IPv4Net& nlri, const IPv4& next_hop,
 }
 
 bool
-BGPMain::originate_route(const IPv6Net& nlri, const IPv6& next_hop,
-			  const bool& unicast, const bool& multicast,
-			  const PolicyTags& policytags)
-{
-    debug_msg("nlri %s next hop %s unicast %d multicast %d\n",
-	      nlri.str().c_str(), next_hop.str().c_str(), unicast, multicast);
-
-    ASPath aspath;
-
-    return _rib_ipc_handler->originate_route(IGP, aspath, nlri,
-					      next_hop, unicast,
-					      multicast, policytags);
-}
-
-bool
 BGPMain::withdraw_route(const IPv4Net& nlri, const bool& unicast,
-			 const bool& multicast) const
-{
-    debug_msg("nlri %s unicast %d multicast %d\n",
-	      nlri.str().c_str(), unicast, multicast);
-
-    return _rib_ipc_handler->withdraw_route(nlri, unicast, multicast);
-}
-
-bool
-BGPMain::withdraw_route(const IPv6Net& nlri, const bool& unicast,
 			 const bool& multicast) const
 {
     debug_msg("nlri %s unicast %d multicast %d\n",
@@ -1892,13 +1784,6 @@ BGPMain::RoutingTableToken<IPv4>&
 BGPMain::get_token_table<IPv4>()
 {
     return _table_ipv4;
-}
-
-template <>
-BGPMain::RoutingTableToken<IPv6>&
-BGPMain::get_token_table<IPv6>()
-{
-    return _table_ipv6;
 }
 
 
@@ -1919,22 +1804,6 @@ BGPMain::rib_client_route_info_changed4(const IPv4& addr,
 }
 
 bool
-BGPMain::rib_client_route_info_changed6(const IPv6& addr,
-					const uint32_t& prefix_len,
-					const IPv6& nexthop,
-					const uint32_t& metric)
-{
-    debug_msg("rib_client_route_info_changed6:"
-	      " addr %s prefix_len %u nexthop %s metric %u\n",
-	      addr.str().c_str(), XORP_UINT_CAST(prefix_len),
-	      nexthop.str().c_str(), XORP_UINT_CAST(metric));
-
-    return plumbing_unicast()->plumbing_ipv6().
-	next_hop_resolver().rib_client_route_info_changed(addr, prefix_len,
-							  nexthop, metric);
-}
-
-bool
 BGPMain::rib_client_route_info_invalid4(const IPv4& addr,
 					const uint32_t& prefix_len)
 {
@@ -1943,18 +1812,6 @@ BGPMain::rib_client_route_info_invalid4(const IPv4& addr,
 	      XORP_UINT_CAST(prefix_len));
 
     return plumbing_unicast()->plumbing_ipv4().
-	next_hop_resolver().rib_client_route_info_invalid(addr, prefix_len);
-}
-
-bool
-BGPMain::rib_client_route_info_invalid6(const IPv6& addr,
-					const uint32_t& prefix_len)
-{
-    debug_msg("rib_client_route_info_invalid6:"
-	      " addr %s prefix_len %u\n", addr.str().c_str(),
-	      XORP_UINT_CAST(prefix_len));
-
-    return plumbing_unicast()->plumbing_ipv6().
 	next_hop_resolver().rib_client_route_info_invalid(addr, prefix_len);
 }
 
@@ -1988,12 +1845,14 @@ BGPMain::set_parameter(const Iptuple& iptuple , const string& parameter,
     } else if (strcmp(parameter.c_str(),"MultiProtocol.IPv4.Multicast") == 0) {
  	debug_msg("IPv4 Multicast\n");
 	node = new BGPMultiProtocolCapability(AFI_IPV4, SAFI_MULTICAST);
+#ifdef HAVE_IPV6
     } else if (strcmp(parameter.c_str(),"MultiProtocol.IPv6.Unicast") == 0) {
  	debug_msg("IPv6 Unicast\n");
 	node = new BGPMultiProtocolCapability(AFI_IPV6, SAFI_UNICAST);
     } else if (strcmp(parameter.c_str(),"MultiProtocol.IPv6.Multicast") == 0) {
  	debug_msg("IPv6 Multicast\n");
 	node = new BGPMultiProtocolCapability(AFI_IPV6, SAFI_MULTICAST);
+#endif
     } else {
 	XLOG_WARNING("Unable to set unknown parameter: <%s>.",
 		     parameter.c_str());
@@ -2034,3 +1893,173 @@ BGPMain::push_routes()
 	activate_all_peers();
     }
 }
+
+/** IPv6 stuff */
+#ifdef HAVE_IPV6
+
+
+bool
+BGPMain::is_address_enabled(const string& interface, const string& vif,
+			    const IPv6& address) const
+{
+    debug_msg("Interface %s Vif %s Address %s\n", interface.c_str(),
+	      vif.c_str(), cstring(address));
+
+    if (! is_vif_enabled(interface, vif))
+	return false;
+
+    const IfMgrIPv6Atom* fa = ifmgr_iftree().find_addr(interface,
+						       vif,
+						       address);
+    if (fa == NULL)
+	return false;
+
+    return (fa->enabled());
+}
+
+uint32_t
+BGPMain::get_prefix_length(const string& interface, const string& vif,
+			   const IPv6& address)
+{
+    debug_msg("Interface %s Vif %s Address %s\n", interface.c_str(),
+	      vif.c_str(), cstring(address));
+
+    const IfMgrIPv6Atom* fa = ifmgr_iftree().find_addr(interface,
+						       vif,
+						       address);
+    if (fa == NULL)
+	return 0;
+
+    return (fa->prefix_len());
+}
+
+void
+BGPMain::address_status_change6(const string& interface, const string& vif,
+				const IPv6& source, uint32_t prefix_len,
+				bool state)
+{
+    debug_msg("interface %s vif %s address %s prefix_len %u state %s\n",
+	      interface.c_str(), vif.c_str(), cstring(source), prefix_len,
+	      bool_c_str(state));
+
+    if (state) {
+	_interfaces_ipv6.insert(make_pair(source, prefix_len));
+    } else {
+	_interfaces_ipv6.erase(source);
+    }
+
+    local_ip_changed(source.str());
+}
+
+bool
+BGPMain::interface_address6(const IPv6& address) const
+{
+    return _interfaces_ipv6.end() != _interfaces_ipv6.find(address);
+}
+
+bool
+BGPMain::interface_address_prefix_len6(const IPv6& address,
+				       uint32_t& prefix_len) const
+{
+    map<IPv6, uint32_t>::const_iterator iter;
+
+    prefix_len = 0;		// XXX: always reset
+    iter = _interfaces_ipv6.find(address);
+    if (iter == _interfaces_ipv6.end())
+	return (false);
+
+    prefix_len = iter->second;
+    return (true);
+}
+
+bool
+BGPMain::set_nexthop6(const Iptuple& iptuple, const IPv6& next_hop)
+{
+    BGPPeer *peer = find_peer(iptuple);
+
+    if (peer == 0) {
+	XLOG_WARNING("Could not find peer: %s", iptuple.str().c_str());
+	return false;
+    }
+    const_cast<BGPPeerData*>(peer->peerdata())->set_v6_local_addr(next_hop);
+
+    bounce_peer(iptuple);
+
+    return true;
+}
+
+bool
+BGPMain::get_nexthop6(const Iptuple& iptuple, IPv6& next_hop)
+{
+    BGPPeer *peer = find_peer(iptuple);
+
+    if (peer == 0) {
+	XLOG_WARNING("Could not find peer: %s", iptuple.str().c_str());
+	return false;
+    }
+    next_hop = peer->peerdata()->get_v6_local_addr();
+
+    return true;
+}
+
+bool
+BGPMain::originate_route(const IPv6Net& nlri, const IPv6& next_hop,
+			  const bool& unicast, const bool& multicast,
+			  const PolicyTags& policytags)
+{
+    debug_msg("nlri %s next hop %s unicast %d multicast %d\n",
+	      nlri.str().c_str(), next_hop.str().c_str(), unicast, multicast);
+
+    ASPath aspath;
+
+    return _rib_ipc_handler->originate_route(IGP, aspath, nlri,
+					      next_hop, unicast,
+					      multicast, policytags);
+}
+
+bool
+BGPMain::withdraw_route(const IPv6Net& nlri, const bool& unicast,
+			 const bool& multicast) const
+{
+    debug_msg("nlri %s unicast %d multicast %d\n",
+	      nlri.str().c_str(), unicast, multicast);
+
+    return _rib_ipc_handler->withdraw_route(nlri, unicast, multicast);
+}
+
+template <>
+BGPMain::RoutingTableToken<IPv6>&
+BGPMain::get_token_table<IPv6>()
+{
+    return _table_ipv6;
+}
+
+bool
+BGPMain::rib_client_route_info_changed6(const IPv6& addr,
+					const uint32_t& prefix_len,
+					const IPv6& nexthop,
+					const uint32_t& metric)
+{
+    debug_msg("rib_client_route_info_changed6:"
+	      " addr %s prefix_len %u nexthop %s metric %u\n",
+	      addr.str().c_str(), XORP_UINT_CAST(prefix_len),
+	      nexthop.str().c_str(), XORP_UINT_CAST(metric));
+
+    return plumbing_unicast()->plumbing_ipv6().
+	next_hop_resolver().rib_client_route_info_changed(addr, prefix_len,
+							  nexthop, metric);
+}
+
+bool
+BGPMain::rib_client_route_info_invalid6(const IPv6& addr,
+					const uint32_t& prefix_len)
+{
+    debug_msg("rib_client_route_info_invalid6:"
+	      " addr %s prefix_len %u\n", addr.str().c_str(),
+	      XORP_UINT_CAST(prefix_len));
+
+    return plumbing_unicast()->plumbing_ipv6().
+	next_hop_resolver().rib_client_route_info_invalid(addr, prefix_len);
+}
+
+#endif //ipv6

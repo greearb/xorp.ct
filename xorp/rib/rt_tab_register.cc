@@ -551,6 +551,9 @@ RegisterTable<A>::flush()
 
 
 template class RouteRegister<IPv4>;
-template class RouteRegister<IPv6>;
 template class RegisterTable<IPv4>;
+
+#ifdef HAVE_IPV6
+template class RouteRegister<IPv6>;
 template class RegisterTable<IPv6>;
+#endif

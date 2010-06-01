@@ -388,6 +388,7 @@ interface rib/0.1 {
 					& unicast:bool			\
 					& multicast:bool		\
 					& admin_distance:u32;
+#ifdef HAVE_IPV6
 
 	add_igp_table6		? protocol:txt				\
 				& target_class:txt & target_instance:txt\
@@ -602,4 +603,5 @@ interface rib/0.1 {
          * as given in the response from register_interest.
 	 */
 	deregister_interest6 ?  target:txt & addr:ipv6 & prefix_len:u32;
+#endif
 }

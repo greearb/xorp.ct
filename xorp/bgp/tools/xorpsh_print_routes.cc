@@ -163,10 +163,12 @@ int main(int argc, char **argv)
 	    PrintRoutes<IPv4> route_printer(verbose_ipv4, interval, net_ipv4,
 					    unicast, multicast, lines);
 	}
+#ifdef HAVE_IPV6
 	if (ipv6) {
 	    PrintRoutes<IPv6> route_printer(verbose_ipv6, interval, net_ipv6,
 					    unicast, multicast, lines);
 	}
+#endif
     } catch(...) {
 	xorp_catch_standard_exceptions();
     }

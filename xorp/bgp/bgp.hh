@@ -112,25 +112,12 @@ public:
     bool is_address_enabled(const string& interface, const string& vif,
 			    const IPv4& address) const;
 
-    /**
-     * Test whether an IPv6 interface/vif/address is enabled.
-     *
-     * @param interface the name of the interface to test.
-     * @param vif the name of the vif to test.
-     * @param address the address to test.
-     * @return true if it exists and is enabled, otherwise false.
-     */
-    bool is_address_enabled(const string& interface, const string& vif,
-			    const IPv6& address) const;
-
     typedef XorpCallback2<void, const string&,
 			  bool>::RefPtr InterfaceStatusCb;
     typedef XorpCallback3<void, const string&, const string&,
 			  bool>::RefPtr VifStatusCb;
     typedef XorpCallback5<void, const string&, const string&, const IPv4&,
 			  uint32_t, bool>::RefPtr AddressStatus4Cb;
-    typedef XorpCallback5<void, const string&, const string&, const IPv6&,
-			  uint32_t, bool>::RefPtr AddressStatus6Cb;
 
     /**
      * Add a callback for tracking the interface status.
@@ -170,19 +157,6 @@ public:
     }
 
     /**
-     * Add a callback for tracking the IPv6 interface/vif/address status.
-     *
-     * The callback will be invoked whenever the status of the tuple
-     * (interface, vif, address) is changed from disabled to enabled
-     * or vice-versa.
-     *
-     * @param cb the callback to register.
-     */
-    void register_address_status(AddressStatus6Cb cb) {
-	_address_status6_cb = cb;
-    }
-
-    /**
      * Obtain the subnet prefix length for an IPv4 interface/vif/address.
      *
      * @param interface the name of the interface.
@@ -192,17 +166,6 @@ public:
      */
     uint32_t get_prefix_length(const string& interface, const string& vif,
 			       const IPv4& address);
-
-    /**
-     * Obtain the subnet prefix length for an IPv6 interface/vif/address.
-     *
-     * @param interface the name of the interface.
-     * @param vif the name of the vif.
-     * @param address the address.
-     * @return the subnet prefix length for the address.
-     */
-    uint32_t get_prefix_length(const string& interface, const string& vif,
-			       const IPv6& address);
 
     /**
      * Obtain the MTU for an interface.
@@ -218,11 +181,6 @@ public:
     bool interface_address4(const IPv4& address) const;
 
     /**
-     * Is the address one of this routers interface addresses?
-     */
-    bool interface_address6(const IPv6& address) const;
-
-    /**
      * Obtain the prefix length for a particular IPv4 address.
      *
      * @param address the address to search for.
@@ -231,17 +189,6 @@ public:
      * @return true if the address belongs to this router, otherwise false.
      */
     bool interface_address_prefix_len4(const IPv4& address,
-				       uint32_t& prefix_len) const;
-
-    /**
-     * Obtain the prefix length for a particular IPv6 address.
-     *
-     * @param address the address to search for.
-     * @param prefix_len the return-by-reference prefix length
-     * for @ref address.
-     * @return true if the address belongs to this router, otherwise false.
-     */
-    bool interface_address_prefix_len6(const IPv6& address,
 				       uint32_t& prefix_len) const;
 
     /**
@@ -514,26 +461,6 @@ public:
     bool set_nexthop4(const Iptuple& iptuple, const IPv4& next_hop);
 
     /**
-     * set IPv6 next-hop.
-     *
-     * @param iptuple iptuple.
-     * @param next-hop
-     *
-     * @return true on success
-     */
-    bool set_nexthop6(const Iptuple& iptuple, const IPv6& next_hop);
-
-    /**
-     * get IPv6 next-hop.
-     *
-     * @param iptuple iptuple.
-     * @param next-hop
-     *
-     * @return true on success
-     */
-    bool get_nexthop6(const Iptuple& iptuple, IPv6& next_hop);
-
-    /**
      * Set peer state.
      *
      * @param iptuple iptuple.
@@ -652,23 +579,6 @@ public:
 			 const PolicyTags& policytags);
 
     /**
-     * Originate an IPv6 route
-     *
-     * @param nlri subnet to announce
-     * @param next_hop to forward to
-     * @param unicast if true install in unicast routing table
-     * @param multicast if true install in multicast routing table
-     * @param policytags policy-tags associated with route.
-     *
-     * @return true on success
-     */
-    bool originate_route(const IPv6Net& nlri,
-			 const IPv6& next_hop,
-			 const bool& unicast,
-			 const bool& multicast,
-			 const PolicyTags& policytags);
-
-    /**
      * Withdraw an IPv4 route
      *
      * @param nlri subnet to withdraw
@@ -678,15 +588,6 @@ public:
      * @return true on success
      */
     bool withdraw_route(const IPv4Net&	nlri,
-			const bool& unicast,
-			const bool& multicast) const;
-
-    /**
-     * Withdraw an IPv6 route
-     *
-     * @return true on success
-     */
-    bool withdraw_route(const IPv6Net&	nlri,
 			const bool& unicast,
 			const bool& multicast) const;
 
@@ -723,21 +624,9 @@ public:
 					const IPv4&	nexthop,
 					const uint32_t&	metric);
 
-    bool rib_client_route_info_changed6(
-					// Input values,
-					const IPv6&	addr,
-					const uint32_t&	prefix_len,
-					const IPv6&	nexthop,
-					const uint32_t&	metric);
-
     bool rib_client_route_info_invalid4(
 					// Input values,
 					const IPv4&	addr,
-					const uint32_t&	prefix_len);
-
-    bool rib_client_route_info_invalid6(
-					// Input values,
-					const IPv6&	addr,
 					const uint32_t&	prefix_len);
 
     /**
@@ -839,6 +728,123 @@ public:
      * Push routes through policy filters for re-filtering.
      */
     void push_routes();
+
+/** IPv6 stuff */
+#ifdef HAVE_IPV6
+
+    /**
+     * Test whether an IPv6 interface/vif/address is enabled.
+     *
+     * @param interface the name of the interface to test.
+     * @param vif the name of the vif to test.
+     * @param address the address to test.
+     * @return true if it exists and is enabled, otherwise false.
+     */
+    bool is_address_enabled(const string& interface, const string& vif,
+			    const IPv6& address) const;
+
+    typedef XorpCallback5<void, const string&, const string&, const IPv6&,
+			  uint32_t, bool>::RefPtr AddressStatus6Cb;
+
+    /**
+     * Add a callback for tracking the IPv6 interface/vif/address status.
+     *
+     * The callback will be invoked whenever the status of the tuple
+     * (interface, vif, address) is changed from disabled to enabled
+     * or vice-versa.
+     *
+     * @param cb the callback to register.
+     */
+    void register_address_status(AddressStatus6Cb cb) {
+	_address_status6_cb = cb;
+    }
+
+    /**
+     * Obtain the subnet prefix length for an IPv6 interface/vif/address.
+     *
+     * @param interface the name of the interface.
+     * @param vif the name of the vif.
+     * @param address the address.
+     * @return the subnet prefix length for the address.
+     */
+    uint32_t get_prefix_length(const string& interface, const string& vif,
+			       const IPv6& address);
+
+    /**
+     * Is the address one of this routers interface addresses?
+     */
+    bool interface_address6(const IPv6& address) const;
+
+    /**
+     * Obtain the prefix length for a particular IPv6 address.
+     *
+     * @param address the address to search for.
+     * @param prefix_len the return-by-reference prefix length
+     * for @ref address.
+     * @return true if the address belongs to this router, otherwise false.
+     */
+    bool interface_address_prefix_len6(const IPv6& address,
+				       uint32_t& prefix_len) const;
+
+    /**
+     * set IPv6 next-hop.
+     *
+     * @param iptuple iptuple.
+     * @param next-hop
+     *
+     * @return true on success
+     */
+    bool set_nexthop6(const Iptuple& iptuple, const IPv6& next_hop);
+
+    /**
+     * get IPv6 next-hop.
+     *
+     * @param iptuple iptuple.
+     * @param next-hop
+     *
+     * @return true on success
+     */
+    bool get_nexthop6(const Iptuple& iptuple, IPv6& next_hop);
+
+    /**
+     * Originate an IPv6 route
+     *
+     * @param nlri subnet to announce
+     * @param next_hop to forward to
+     * @param unicast if true install in unicast routing table
+     * @param multicast if true install in multicast routing table
+     * @param policytags policy-tags associated with route.
+     *
+     * @return true on success
+     */
+    bool originate_route(const IPv6Net& nlri,
+			 const IPv6& next_hop,
+			 const bool& unicast,
+			 const bool& multicast,
+			 const PolicyTags& policytags);
+
+    /**
+     * Withdraw an IPv6 route
+     *
+     * @return true on success
+     */
+    bool withdraw_route(const IPv6Net&	nlri,
+			const bool& unicast,
+			const bool& multicast) const;
+
+    bool rib_client_route_info_changed6(
+					// Input values,
+					const IPv6&	addr,
+					const uint32_t&	prefix_len,
+					const IPv6&	nexthop,
+					const uint32_t&	metric);
+
+    bool rib_client_route_info_invalid6(
+					// Input values,
+					const IPv6&	addr,
+					const uint32_t&	prefix_len);
+
+#endif //ipv6
     
 #ifndef XORP_DISABLE_PROFILE
     /**
@@ -893,13 +899,6 @@ private:
      */
     void address_status_change4(const string& interface, const string& vif,
 				const IPv4& source, uint32_t prefix_len,
-				bool state);
-
-    /**
-     * Callback method that is invoked when the status of an address changes.
-     */
-    void address_status_change6(const string& interface, const string& vif,
-				const IPv6& source, uint32_t prefix_len,
 				bool state);
 
     /**
@@ -967,7 +966,6 @@ private:
     * Multicast Routing Table. SAFI = 2.
     */
     BGPPlumbing *_plumbing_multicast;
-    NextHopResolver<IPv6> *_next_hop_resolver_ipv6;
 
     /**
      * Token generator to map between unicast and multicast.
@@ -1033,7 +1031,6 @@ private:
     template <typename A> RoutingTableToken<A>& get_token_table();
 
     RoutingTableToken<IPv4> _table_ipv4;
-    RoutingTableToken<IPv6> _table_ipv6;
 
     XrlBgpTarget *_xrl_target;
     RibIpcHandler *_rib_ipc_handler;
@@ -1054,13 +1051,26 @@ private:
     InterfaceStatusCb	_interface_status_cb;
     VifStatusCb		_vif_status_cb;
     AddressStatus4Cb	_address_status4_cb;
-    AddressStatus6Cb	_address_status6_cb;
 
     map<IPv4, uint32_t> _interfaces_ipv4;	// IPv4 interface addresses
-    map<IPv6, uint32_t> _interfaces_ipv6;	// IPv6 interface addresses
 
     bool _first_policy_push;	     	// Don't form peerings until the
 					// first policy push is seen.
+
+#ifdef HAVE_IPV6
+
+    /**
+     * Callback method that is invoked when the status of an address changes.
+     */
+    void address_status_change6(const string& interface, const string& vif,
+				const IPv6& source, uint32_t prefix_len,
+				bool state);
+    NextHopResolver<IPv6> *_next_hop_resolver_ipv6;
+    RoutingTableToken<IPv6> _table_ipv6;
+    AddressStatus6Cb	_address_status6_cb;
+    map<IPv6, uint32_t> _interfaces_ipv6;	// IPv6 interface addresses
+
+#endif //ipv6
 };
 
 template <typename A>

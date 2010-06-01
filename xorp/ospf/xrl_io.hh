@@ -190,8 +190,13 @@ class XrlIO : public IO<A>,
 	// XXX - Should really get every component to register at
 	// initialisation time and track the individual
 	// status. Simpler to uncomment the printfs and track the count.
+#ifdef HAVE_IPV6
 	if (4 == _component_count)
 	    ServiceBase::set_status(SERVICE_RUNNING);
+#else
+	if (3 == _component_count)
+	    ServiceBase::set_status(SERVICE_RUNNING);
+#endif
     }
 
     /**

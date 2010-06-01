@@ -1,5 +1,7 @@
 /* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.34 2007/07/12 21:35:26 pavlin Exp $ */
 
+#include <xorp_config.h>
+
 /*
 ** BGP protocol XRL interface.
 */
@@ -342,40 +344,6 @@ interface bgp/0.3 {
 		& next_hop:ipv4;
 
 	/**
-	 * Set the IPv6 nexthop.
-	 *
-	 * @param local IP address.
-	 * @param local server port.
-	 * @param peer IP address.
-	 * @param peer port.
-	 * @param next_hop IPv6 nexthop
-	 */
-	set_nexthop6 \
-		? \
-		local_ip:txt \
-	        & local_port:u32 \
-		& peer_ip:txt \
-		& peer_port:u32 \
-		& next_hop:ipv6;
-
-	/**
-	 * Get the IPv6 nexthop.
-	 *
-	 * @param local IP address.
-	 * @param local server port.
-	 * @param peer IP address.
-	 * @param peer port.
-	 * @param next_hop IPv6 nexthop
-	 */
-	get_nexthop6 \
-		? \
-		local_ip:txt \
-	        & local_port:u32 \
-		& peer_ip:txt \
-		& peer_port:u32 \
-		-> next_hop:ipv6;
-
-	/**
          * Set the peer state enabled or disabled.
 	 *
 	 * @param local IP address.
@@ -472,21 +440,6 @@ interface bgp/0.3 {
 		& multicast:bool;
 
 	/**
-	 * Originate route IPv6
-	 *
-	 * @param nlri subnet to announce
-	 * @param next_hop to forward to
-	 * @param unicast if true install in unicast routing table
-	 * @param multicast if true install in multicast routing table
-	 */
-	originate_route6 \
-		? \
-		nlri:ipv6net \
-		& next_hop:ipv6 \
-		& unicast:bool \
-		& multicast:bool;
-
-	/**
 	 * Withdraw route IPv4
 	 *
 	 * @param nlri subnet to withdraw
@@ -496,19 +449,6 @@ interface bgp/0.3 {
 	withdraw_route4 \
 		? \
 		nlri:ipv4net \
-		& unicast:bool \
-		& multicast:bool;
-
-	/**
-	 * Withdraw route IPv6
-	 *
-	 * @param nlri subnet to withdraw
-	 * @param unicast if true withdraw from unicast routing table
-	 * @param multicast if true withdraw from multicast routing table
-	 */
-	withdraw_route6 \
-		? \
-		nlri:ipv6net \
 		& unicast:bool \
 		& multicast:bool;
 
@@ -660,6 +600,78 @@ interface bgp/0.3 {
 		token:u32;
 
 	/**
+         * Get the next route in the list
+	 * See RFC 1657 (BGP MIB) for full definitions of return values.
+         */
+        get_v4_route_list_next \
+		? \
+		token:u32 \
+		-> \
+		peer_id:ipv4 \
+		& net:ipv4net \
+		& best_and_origin:u32 \
+		& aspath:binary \
+		& nexthop:ipv4 \
+		& med:i32 \
+		& localpref:i32 \
+		& atomic_agg:i32 \
+		& aggregator:binary \
+		& calc_localpref:i32 \
+		& attr_unknown:binary \
+		& valid:bool \
+	        & unicast:bool \
+	        & multicast:bool;
+
+#ifdef HAVE_IPV6
+	/**
+	 * Set the IPv6 nexthop.
+	 *
+	 * @param local IP address.
+	 * @param local server port.
+	 * @param peer IP address.
+	 * @param peer port.
+	 * @param next_hop IPv6 nexthop
+	 */
+	set_nexthop6 \
+		? \
+		local_ip:txt \
+	        & local_port:u32 \
+		& peer_ip:txt \
+		& peer_port:u32 \
+		& next_hop:ipv6;
+
+
+	/**
+	 * Get the IPv6 nexthop.
+	 *
+	 * @param local IP address.
+	 * @param local server port.
+	 * @param peer IP address.
+	 * @param peer port.
+	 * @param next_hop IPv6 nexthop
+	 */
+	get_nexthop6 \
+		? \
+		local_ip:txt \
+	        & local_port:u32 \
+		& peer_ip:txt \
+		& peer_port:u32 \
+		-> next_hop:ipv6;
+
+	/**
+	 * Withdraw route IPv6
+	 *
+	 * @param nlri subnet to withdraw
+	 * @param unicast if true withdraw from unicast routing table
+	 * @param multicast if true withdraw from multicast routing table
+	 */
+	withdraw_route6 \
+		? \
+		nlri:ipv6net \
+		& unicast:bool \
+		& multicast:bool;
+
+	/**
 	 * Get the first item of a list of BGP routes
 	 * See RFC 1657 (BGP MIB) for full definitions of return values.
 	 *
@@ -682,27 +694,19 @@ interface bgp/0.3 {
 		token:u32;
 
 	/**
-         * Get the next route in the list
-	 * See RFC 1657 (BGP MIB) for full definitions of return values.
-         */
-        get_v4_route_list_next \
+	 * Originate route IPv6
+	 *
+	 * @param nlri subnet to announce
+	 * @param next_hop to forward to
+	 * @param unicast if true install in unicast routing table
+	 * @param multicast if true install in multicast routing table
+	 */
+	originate_route6 \
 		? \
-		token:u32 \
-		-> \
-		peer_id:ipv4 \
-		& net:ipv4net \
-		& best_and_origin:u32 \
-		& aspath:binary \
-		& nexthop:ipv4 \
-		& med:i32 \
-		& localpref:i32 \
-		& atomic_agg:i32 \
-		& aggregator:binary \
-		& calc_localpref:i32 \
-		& attr_unknown:binary \
-		& valid:bool \
-	        & unicast:bool \
-	        & multicast:bool;
+		nlri:ipv6net \
+		& next_hop:ipv6 \
+		& unicast:bool \
+		& multicast:bool;
 
 	/**
          * Get the next route in the list
@@ -726,4 +730,6 @@ interface bgp/0.3 {
 		& valid:bool \
 	        & unicast:bool \
 	        & multicast:bool;
+
+#endif
 }

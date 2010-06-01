@@ -167,7 +167,9 @@ public:
 		RibIpcHandler* rib_handler,
 		AggregationHandler* aggr_handler,
 		NextHopResolver<IPv4>&,
+#ifdef HAVE_IPV6
 		NextHopResolver<IPv6>&,
+#endif
 		PolicyFilters&,
 		BGPMain& bgp);
 
@@ -182,24 +184,14 @@ public:
 		  FPAList4Ref& pa_list,
 		  const PolicyTags& policytags,
 		  PeerHandler* peer_handler);
-    int add_route(const IPv6Net& net, 
-		  FPAList6Ref& pa_list,
-		  const PolicyTags& policytags,
-		  PeerHandler* peer_handler);
     int delete_route(InternalMessage<IPv4> &rtmsg, 
 		     PeerHandler* peer_handler);
-    int delete_route(InternalMessage<IPv6> &rtmsg, 
-		     PeerHandler* peer_handler);
     int delete_route(const IPNet<IPv4> &net, 
-		     PeerHandler* peer_handler);
-    int delete_route(const IPNet<IPv6> &net,
 		     PeerHandler* peer_handler);
     template<class A> void push(PeerHandler* peer_handler);
     void output_no_longer_busy(PeerHandler* peer_handler);
     const SubnetRoute<IPv4>* 
       lookup_route(const IPNet<IPv4> &net) const;
-    const SubnetRoute<IPv6>* 
-      lookup_route(const IPNet<IPv6> &net) const;
 
     /**
      * @return the number of prefixes in the RIB-IN.
@@ -211,18 +203,12 @@ public:
     BGPPlumbingAF<IPv4>& plumbing_ipv4() {
 	return _plumbing_ipv4;
     }
-    BGPPlumbingAF<IPv6>& plumbing_ipv6() {
-	return _plumbing_ipv6;
-    }
 
     template <typename A> uint32_t
     create_route_table_reader(const IPNet<A>& prefix);
 
     bool read_next_route(uint32_t token, 
 			 const SubnetRoute<IPv4>*& route, 
-			 IPv4& peer_id);
-    bool read_next_route(uint32_t token, 
-			 const SubnetRoute<IPv6>*& route, 
 			 IPv4& peer_id);
 
     /**
@@ -252,6 +238,27 @@ public:
 
     PolicyFilters& policy_filters() { return _policy_filters; }
 
+    /** IPv6 stuff */
+#ifdef HAVE_IPV6
+    int add_route(const IPv6Net& net, 
+		  FPAList6Ref& pa_list,
+		  const PolicyTags& policytags,
+		  PeerHandler* peer_handler);
+
+    int delete_route(InternalMessage<IPv6> &rtmsg, 
+		     PeerHandler* peer_handler);
+    int delete_route(const IPNet<IPv6> &net,
+		     PeerHandler* peer_handler);
+    const SubnetRoute<IPv6>* 
+      lookup_route(const IPNet<IPv6> &net) const;
+    BGPPlumbingAF<IPv6>& plumbing_ipv6() {
+	return _plumbing_ipv6;
+    }
+    bool read_next_route(uint32_t token, 
+			 const SubnetRoute<IPv6>*& route, 
+			 IPv4& peer_id);
+#endif // ipv6
+
 private:
     BGPMain &_bgp;
 
@@ -259,14 +266,17 @@ private:
     AggregationHandler *_aggr_handler;
 
     NextHopResolver<IPv4>& _next_hop_resolver_ipv4;
-    NextHopResolver<IPv6>& _next_hop_resolver_ipv6;
-
     const Safi _safi;
 
     PolicyFilters& _policy_filters;
 
     BGPPlumbingAF<IPv4> _plumbing_ipv4;
+
+#ifdef HAVE_IPV6
+    NextHopResolver<IPv6>& _next_hop_resolver_ipv6;
     BGPPlumbingAF<IPv6> _plumbing_ipv6;
+#endif
+
 };
 
 #endif // __BGP_PLUMBING_HH__

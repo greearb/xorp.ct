@@ -211,23 +211,6 @@ public:
 	const uint32_t&	peer_port,
 	const IPv4&	next_hop);
 
-    XrlCmdError bgp_0_3_set_nexthop6(
-	// Input values,
-	const string&	local_ip,
-	const uint32_t&	local_port,
-	const string&	peer_ip,
-	const uint32_t&	peer_port,
-	const IPv6&	next_hop);
-
-    XrlCmdError bgp_0_3_get_nexthop6(
-	// Input values,
-	const string&	local_ip,
-	const uint32_t&	local_port,
-	const string&	peer_ip,
-	const uint32_t&	peer_port,
-	// Output values,
-	IPv6&	next_hop);
-
     XrlCmdError bgp_0_3_set_peer_state(
 	// Input values,
 	const string&	local_ip,
@@ -266,22 +249,9 @@ public:
 	const bool&	unicast,
 	const bool&	multicast);
 
-    XrlCmdError bgp_0_3_originate_route6(
-	// Input values,
-	const IPv6Net&	nlri,
-	const IPv6&	next_hop,
-	const bool&	unicast,
-	const bool&	multicast);
-
     XrlCmdError bgp_0_3_withdraw_route4(
 	// Input values,
 	const IPv4Net&	nlri,
-	const bool&	unicast,
-	const bool&	multicast);
-
-    XrlCmdError bgp_0_3_withdraw_route6(
-	// Input values,
-	const IPv6Net&	nlri,
 	const bool&	unicast,
 	const bool&	multicast);
 
@@ -393,14 +363,6 @@ public:
 	// Output values,
 	uint32_t& token);
 
-    XrlCmdError bgp_0_3_get_v6_route_list_start(
-	// Input values,
-	const IPv6Net&	net,
-	const bool&	unicast,
-	const bool&	multicast,
-	// Output values,
-	uint32_t& token);
-
     XrlCmdError bgp_0_3_get_v4_route_list_next(
 	// Input values,
 	const uint32_t&	token,
@@ -420,25 +382,6 @@ public:
 	bool& unicast,
 	bool& multicast);
 
-    XrlCmdError bgp_0_3_get_v6_route_list_next(
-	// Input values,
-	const uint32_t&	token,
-	// Output values,
-	IPv4& peer_id,
-	IPv6Net& net,
-	uint32_t& best_and_origin,
-	vector<uint8_t>& aspath,
-	IPv6& nexthop,
-	int32_t& med,
-	int32_t& localpref,
-	int32_t& atomic_agg,
-	vector<uint8_t>& aggregator,
-	int32_t& calc_localpref,
-	vector<uint8_t>& attr_unknown,
-	bool& valid,
-	bool& unicast,
-	bool& multicast);
-
     XrlCmdError rib_client_0_1_route_info_changed4(
 	// Input values,
 	const IPv4&	addr,
@@ -448,23 +391,9 @@ public:
 	const uint32_t&	admin_distance,
 	const string&	protocol_origin);
 
-    XrlCmdError rib_client_0_1_route_info_changed6(
-	// Input values,
-	const IPv6&	addr,
-	const uint32_t&	prefix_len,
-	const IPv6&	nexthop,
-	const uint32_t&	metric,
-	const uint32_t&	admin_distance,
-	const string&	protocol_origin);
-
     XrlCmdError rib_client_0_1_route_info_invalid4(
 	// Input values,
 	const IPv4&	addr,
-	const uint32_t&	prefix_len);
-
-    XrlCmdError rib_client_0_1_route_info_invalid6(
-	// Input values,
-	const IPv6&	addr,
 	const uint32_t&	prefix_len);
 
     XrlCmdError bgp_0_3_set_parameter(
@@ -511,6 +440,81 @@ public:
         const IPv4Net&  network,
         const bool&     unicast,
         const bool&     multicast);
+
+#ifdef HAVE_IPV6
+
+    XrlCmdError bgp_0_3_set_nexthop6(
+	// Input values,
+	const string&	local_ip,
+	const uint32_t&	local_port,
+	const string&	peer_ip,
+	const uint32_t&	peer_port,
+	const IPv6&	next_hop);
+
+
+    XrlCmdError bgp_0_3_get_nexthop6(
+	// Input values,
+	const string&	local_ip,
+	const uint32_t&	local_port,
+	const string&	peer_ip,
+	const uint32_t&	peer_port,
+	// Output values,
+	IPv6&	next_hop);
+
+    XrlCmdError bgp_0_3_originate_route6(
+	// Input values,
+	const IPv6Net&	nlri,
+	const IPv6&	next_hop,
+	const bool&	unicast,
+	const bool&	multicast);
+
+
+    XrlCmdError bgp_0_3_withdraw_route6(
+	// Input values,
+	const IPv6Net&	nlri,
+	const bool&	unicast,
+	const bool&	multicast);
+
+    XrlCmdError bgp_0_3_get_v6_route_list_start(
+	// Input values,
+	const IPv6Net&	net,
+	const bool&	unicast,
+	const bool&	multicast,
+	// Output values,
+	uint32_t& token);
+
+    XrlCmdError bgp_0_3_get_v6_route_list_next(
+	// Input values,
+	const uint32_t&	token,
+	// Output values,
+	IPv4& peer_id,
+	IPv6Net& net,
+	uint32_t& best_and_origin,
+	vector<uint8_t>& aspath,
+	IPv6& nexthop,
+	int32_t& med,
+	int32_t& localpref,
+	int32_t& atomic_agg,
+	vector<uint8_t>& aggregator,
+	int32_t& calc_localpref,
+	vector<uint8_t>& attr_unknown,
+	bool& valid,
+	bool& unicast,
+	bool& multicast);
+
+    XrlCmdError rib_client_0_1_route_info_changed6(
+	// Input values,
+	const IPv6&	addr,
+	const uint32_t&	prefix_len,
+	const IPv6&	nexthop,
+	const uint32_t&	metric,
+	const uint32_t&	admin_distance,
+	const string&	protocol_origin);
+
+    XrlCmdError rib_client_0_1_route_info_invalid6(
+	// Input values,
+	const IPv6&	addr,
+	const uint32_t&	prefix_len);
         
     XrlCmdError policy_redist6_0_1_add_route6(
         // Input values,
@@ -526,6 +530,8 @@ public:
         const IPv6Net&  network,
         const bool&     unicast,
         const bool&     multicast);
+
+#endif //ipv6
 
 #ifndef XORP_DISABLE_PROFILE
     XrlCmdError profile_0_1_enable(

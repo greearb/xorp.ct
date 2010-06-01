@@ -139,6 +139,8 @@ XrlRibTarget::rib_0_1_get_registered_protocols(
 		ipv4_multicast_protocols.append(XrlAtom(*iter));
 	}
     }
+
+#ifdef HAVE_IPV6
     if (ipv6) {
 	if (unicast) {
 	    names = _urib6.registered_protocol_names();
@@ -151,6 +153,11 @@ XrlRibTarget::rib_0_1_get_registered_protocols(
 		ipv6_multicast_protocols.append(XrlAtom(*iter));
 	}
     }
+#else
+    UNUSED(ipv6);
+    UNUSED(ipv6_multicast_protocols);
+    UNUSED(ipv6_unicast_protocols);
+#endif
 
     return XrlCmdError::OKAY();
 }
@@ -174,32 +181,6 @@ XrlRibTarget::rib_0_1_add_igp_table4(const string&	protocol,
 	_mrib4.add_igp_table(protocol, target_class, target_instance)
 	!= XORP_OK) {
 	string err = c_format("Could not add multicast IPv4 igp table \"%s\"",
-			      protocol.c_str());
-	return XrlCmdError::COMMAND_FAILED(err);
-    }
-
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlRibTarget::rib_0_1_add_igp_table6(const string&	protocol,
-				     const string&	target_class,
-				     const string&	target_instance,
-				     const bool&	unicast,
-				     const bool&	multicast)
-{
-    if (unicast &&
-	_urib6.add_igp_table(protocol, target_class, target_instance)
-	!= XORP_OK) {
-	string err = c_format("Could not add unicast IPv6 igp table \"%s\"",
-			      protocol.c_str());
-	return XrlCmdError::COMMAND_FAILED(err);
-    }
-
-    if (multicast &&
-	_mrib6.add_igp_table(protocol, target_class, target_instance)
-	!= XORP_OK) {
-	string err = c_format("Could not add multicast IPv6 igp table \"%s\"",
 			      protocol.c_str());
 	return XrlCmdError::COMMAND_FAILED(err);
     }
@@ -234,32 +215,6 @@ XrlRibTarget::rib_0_1_delete_igp_table4(const string&	protocol,
 }
 
 XrlCmdError
-XrlRibTarget::rib_0_1_delete_igp_table6(const string&	protocol,
-					const string&	target_class,
-					const string&	target_instance,
-					const bool&	unicast,
-					const bool&	multicast)
-{
-    if (unicast &&
-	_urib6.delete_igp_table(protocol, target_class, target_instance)
-	!= XORP_OK) {
-	string err = c_format("Could not delete unicast IPv6 igp table \"%s\"",
-			      protocol.c_str());
-	return XrlCmdError::COMMAND_FAILED(err);
-    }
-
-    if (multicast &&
-	_mrib6.delete_igp_table(protocol, target_class, target_instance)
-	!= XORP_OK) {
-	string err = c_format("Could not delete multicast IPv6 igp table \"%s\"",
-			      protocol.c_str());
-	return XrlCmdError::COMMAND_FAILED(err);
-    }
-
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
 XrlRibTarget::rib_0_1_add_egp_table4(const string&	protocol,
 				     const string&	target_class,
 				     const string&	target_instance,
@@ -278,32 +233,6 @@ XrlRibTarget::rib_0_1_add_egp_table4(const string&	protocol,
 	_mrib4.add_egp_table(protocol, target_class, target_instance)
 	!= XORP_OK) {
 	string err = c_format("Could not add multicast IPv4 egp table \"%s\"",
-			      protocol.c_str());
-	return XrlCmdError::COMMAND_FAILED(err);
-    }
-
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlRibTarget::rib_0_1_add_egp_table6(const string&	protocol,
-				     const string&	target_class,
-				     const string&	target_instance,
-				     const bool&	unicast,
-				     const bool&	multicast)
-{
-    if (unicast &&
-	_urib6.add_egp_table(protocol, target_class, target_instance)
-	!= XORP_OK) {
-	string err = c_format("Could not add unicast IPv6 egp table \"%s\"",
-			      protocol.c_str());
-	return XrlCmdError::COMMAND_FAILED(err);
-    }
-
-    if (multicast &&
-	_mrib6.add_egp_table(protocol, target_class, target_instance)
-	!= XORP_OK) {
-	string err = c_format("Could not add multicast IPv6 egp table \"%s\"",
 			      protocol.c_str());
 	return XrlCmdError::COMMAND_FAILED(err);
     }
@@ -331,32 +260,6 @@ XrlRibTarget::rib_0_1_delete_egp_table4(const string&	protocol,
 	!= XORP_OK) {
 	string err = c_format("Could not delete multicast IPv4 egp table "
 			      "\"%s\"", protocol.c_str());
-	return XrlCmdError::COMMAND_FAILED(err);
-    }
-
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlRibTarget::rib_0_1_delete_egp_table6(const string&	protocol,
-					const string&	target_class,
-					const string&	target_instance,
-					const bool&	unicast,
-					const bool&	multicast)
-{
-    if (unicast &&
-	_urib6.delete_egp_table(protocol, target_class, target_instance)
-	!= XORP_OK) {
-	string err = c_format("Could not delete unicast IPv6 egp table \"%s\"",
-			      protocol.c_str());
-	return XrlCmdError::COMMAND_FAILED(err);
-    }
-
-    if (multicast &&
-	_mrib6.delete_egp_table(protocol, target_class, target_instance)
-	!= XORP_OK) {
-	string err = c_format("Could not delete multicast IPv6 egp table \"%s\"",
-			      protocol.c_str());
 	return XrlCmdError::COMMAND_FAILED(err);
     }
 
@@ -416,60 +319,6 @@ XrlRibTarget::rib_0_1_add_route4(const string&	protocol,
 }
 
 XrlCmdError
-XrlRibTarget::rib_0_1_add_route6(const string&	protocol,
-				 const bool&	unicast,
-				 const bool&	multicast,
-				 const IPv6Net&	network,
-				 const IPv6&	nexthop,
-				 const uint32_t& metric,
-				 const XrlAtomList& policytags)
-{
-    debug_msg("add_route6 protocol: %s unicast: %s multicast: %s "
-	      "network %s nexthop %s metric %u\n",
-	      protocol.c_str(),
-	      bool_c_str(unicast),
-	      bool_c_str(multicast),
-	      network.str().c_str(),
-	      nexthop.str().c_str(),
-	      XORP_UINT_CAST(metric));
-
-#ifndef XORP_DISABLE_PROFILE
-    if (_rib_manager->profile().enabled(profile_route_ribin)) {
-	_rib_manager->profile().log(profile_route_ribin,
-				    c_format("add %s %s%s %s %s %u",
-					     protocol.c_str(),
-					     unicast ? "u" : "",
-					     multicast ? "m" : "",
-					     network.str().c_str(),
-					     nexthop.str().c_str(),
-					     XORP_UINT_CAST(metric)));
-    }
-#endif
-
-    if (unicast &&
-	_urib6.add_route(protocol, network, nexthop, "", "", metric,
-			 policytags)
-	!= XORP_OK) {
-	string err = c_format("Could not add IPv6 route "
-			      "net %s, nexthop: %s to unicast RIB",
-			      network.str().c_str(), nexthop.str().c_str());
-	return XrlCmdError::COMMAND_FAILED(err);
-    }
-
-    if (multicast &&
-	_mrib6.add_route(protocol, network, nexthop, "", "", metric,
-			 policytags)
-	!= XORP_OK) {
-	string err = c_format("Could not add IPv6 route "
-			      "net %s, nexthop: %s to multicast RIB",
-			      network.str().c_str(), nexthop.str().c_str());
-	return XrlCmdError::COMMAND_FAILED(err);
-    }
-
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
 XrlRibTarget::rib_0_1_replace_route4(const string&	protocol,
 				     const bool&	unicast,
 				     const bool&	multicast,
@@ -520,56 +369,6 @@ XrlRibTarget::rib_0_1_replace_route4(const string&	protocol,
 }
 
 XrlCmdError
-XrlRibTarget::rib_0_1_replace_route6(const string&	protocol,
-				     const bool&	unicast,
-				     const bool&	multicast,
-				     const IPv6Net&	network,
-				     const IPv6&	nexthop,
-				     const uint32_t&	metric,
-				     const XrlAtomList& policytags)
-{
-    debug_msg("replace_route6 protocol: %s unicast: %s multicast: %s "
-	      "network %s nexthop %s metric %u\n",
-	      protocol.c_str(),
-	      bool_c_str(unicast),
-	      bool_c_str(multicast),
-	      network.str().c_str(),
-	      nexthop.str().c_str(),
-	      XORP_UINT_CAST(metric));
-
-#ifndef XORP_DISABLE_PROFILE
-    if (_rib_manager->profile().enabled(profile_route_ribin)) {
-	_rib_manager->profile().log(profile_route_ribin,
-				    c_format("replace %s %s%s %s %s %u",
-					     protocol.c_str(),
-					     unicast ? "u" : "",
-					     multicast ? "m" : "",
-					     network.str().c_str(),
-					     nexthop.str().c_str(),
-					     XORP_UINT_CAST(metric)));
-    }
-#endif
-
-    if (unicast &&
-	_urib6.replace_route(protocol, network, nexthop, "", "", metric,
-			     policytags)
-	!= XORP_OK) {
-	string err = "Could not replace IPv6 route in unicast RIB";
-	return XrlCmdError::COMMAND_FAILED(err);
-    }
-
-    if (multicast &&
-	_mrib6.replace_route(protocol, network, nexthop, "", "", metric,
-			     policytags)
-	!= XORP_OK) {
-	string err = "Could not add IPv6 route in multicast RIB";
-	return XrlCmdError::COMMAND_FAILED(err);
-    }
-
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
 XrlRibTarget::rib_0_1_delete_route4(const string&	protocol,
 				    const bool&		unicast,
 				    const bool&		multicast,
@@ -600,43 +399,6 @@ XrlRibTarget::rib_0_1_delete_route4(const string&	protocol,
 
     if (multicast && _mrib4.delete_route(protocol, network) != XORP_OK) {
 	string err = "Could not delete IPv4 route from multicast RIB";
-	return XrlCmdError::COMMAND_FAILED(err);
-    }
-
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlRibTarget::rib_0_1_delete_route6(const string&	protocol,
-				    const bool&		unicast,
-				    const bool&		multicast,
-				    const IPv6Net&	network)
-{
-    debug_msg("delete_route6 protocol: %s unicast: %s multicast: %s "
-	      "network %s\n",
-	      protocol.c_str(),
-	      bool_c_str(unicast),
-	      bool_c_str(multicast),
-	      network.str().c_str());
-
-#ifndef XORP_DISABLE_PROFILE
-    if (_rib_manager->profile().enabled(profile_route_ribin)) {
-	_rib_manager->profile().log(profile_route_ribin,
-				    c_format("delete %s %s%s %s",
-					     protocol.c_str(),
-					     unicast ? "u" : "",
-					     multicast ? "m" : "",
-					     network.str().c_str()));
-    }
-#endif
-
-    if (unicast && _urib6.delete_route(protocol, network) != XORP_OK) {
-	string err = "Could not delete IPv6 route from unicast RIB";
-	return XrlCmdError::COMMAND_FAILED(err);
-    }
-
-    if (multicast && _mrib6.delete_route(protocol, network) != XORP_OK) {
-	string err = "Could not delete IPv6 route from multicast RIB";
 	return XrlCmdError::COMMAND_FAILED(err);
     }
 
@@ -700,62 +462,6 @@ XrlRibTarget::rib_0_1_add_interface_route4(const string&	protocol,
 }
 
 XrlCmdError
-XrlRibTarget::rib_0_1_add_interface_route6(const string&	protocol,
-					   const bool&		unicast,
-					   const bool&		multicast,
-					   const IPv6Net&	network,
-					   const IPv6&		nexthop,
-					   const string&	ifname,
-					   const string&	vifname,
-					   const uint32_t&	metric,
-					   const XrlAtomList&	policytags)
-{
-    debug_msg("add_interface_route6 protocol: %s unicast: %s multicast: %s "
-	      "network %s nexthop %s ifname %s vifname %s metric %u\n",
-	      protocol.c_str(),
-	      bool_c_str(unicast),
-	      bool_c_str(multicast),
-	      network.str().c_str(),
-	      nexthop.str().c_str(),
-	      ifname.c_str(),
-	      vifname.c_str(),
-	      XORP_UINT_CAST(metric));
-
-#ifndef XORP_DISABLE_PROFILE
-    if (_rib_manager->profile().enabled(profile_route_ribin)) {
-	_rib_manager->profile().log(profile_route_ribin,
-				    c_format("add %s %s%s %s %s %s/%s %u",
-					     protocol.c_str(),
-					     unicast ? "u" : "",
-					     multicast ? "m" : "",
-					     network.str().c_str(),
-					     nexthop.str().c_str(),
-					     ifname.c_str(),
-					     vifname.c_str(),
-					     XORP_UINT_CAST(metric)));
-    }
-#endif
-
-    if (unicast &&
-	_urib6.add_route(protocol, network, nexthop, ifname, vifname,
-					metric, policytags)
-	!= XORP_OK) {
-	string err = "Could not add IPv6 interface route to unicast RIB";
-	return XrlCmdError::COMMAND_FAILED(err);
-    }
-
-    if (multicast &&
-	_mrib6.add_route(protocol, network, nexthop, ifname, vifname, metric,
-					policytags)
-	!= XORP_OK) {
-	string err = "Could not add IPv6 interface route to multicast RIB";
-	return XrlCmdError::COMMAND_FAILED(err);
-    }
-
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
 XrlRibTarget::rib_0_1_replace_interface_route4(const string&	    protocol,
 					       const bool&	    unicast,
 					       const bool&	    multicast,
@@ -812,62 +518,6 @@ XrlRibTarget::rib_0_1_replace_interface_route4(const string&	    protocol,
 }
 
 XrlCmdError
-XrlRibTarget::rib_0_1_replace_interface_route6(const string&	    protocol,
-					       const bool&	    unicast,
-					       const bool&	    multicast,
-					       const IPv6Net&	    network,
-					       const IPv6&	    nexthop,
-					       const string&	    ifname,
-					       const string&	    vifname,
-					       const uint32_t&	    metric,
-					       const XrlAtomList&   policytags)
-{
-    debug_msg("replace_interface_route6 protocol: %s unicast: %s multicast: %s "
-	      "network %s nexthop %s ifname %s vifname %s metric %u\n",
-	      protocol.c_str(),
-	      bool_c_str(unicast),
-	      bool_c_str(multicast),
-	      network.str().c_str(),
-	      nexthop.str().c_str(),
-	      ifname.c_str(),
-	      vifname.c_str(),
-	      XORP_UINT_CAST(metric));
-
-#ifndef XORP_DISABLE_PROFILE
-    if (_rib_manager->profile().enabled(profile_route_ribin)) {
-	_rib_manager->profile().log(profile_route_ribin,
-				    c_format("replace %s %s%s %s %s %s/%s %u",
-					     protocol.c_str(),
-					     unicast ? "u" : "",
-					     multicast ? "m" : "",
-					     network.str().c_str(),
-					     nexthop.str().c_str(),
-					     ifname.c_str(),
-					     vifname.c_str(),
-					     XORP_UINT_CAST(metric)));
-    }
-#endif
-
-    if (unicast &&
-	_urib6.replace_route(protocol, network, nexthop, ifname, vifname,
-			     metric, policytags)
-	!= XORP_OK) {
-	string err = "Could not replace IPv6 interface route in unicast RIB";
-	return XrlCmdError::COMMAND_FAILED(err);
-    }
-
-    if (multicast &&
-	_mrib6.replace_route(protocol, network, nexthop, ifname, vifname,
-			     metric, policytags)
-	!= XORP_OK) {
-	string err = "Could not replace IPv6 interface route in multicast RIB";
-	return XrlCmdError::COMMAND_FAILED(err);
-    }
-
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
 XrlRibTarget::rib_0_1_lookup_route_by_dest4(
     // Input values,
     const IPv4&	addr,
@@ -883,26 +533,6 @@ XrlRibTarget::rib_0_1_lookup_route_by_dest4(
 	nexthop = _urib4.lookup_route(addr);
     } else if (multicast) {
 	nexthop = _mrib4.lookup_route(addr);
-    }
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlRibTarget::rib_0_1_lookup_route_by_dest6(
-    // Input values,
-    const IPv6&	addr,
-    const bool&	unicast,
-    const bool&	multicast,
-    // Output values,
-    IPv6& nexthop)
-{
-    // Must look in exactly one RIB
-    if (unicast == multicast) {
-	nexthop = IPv6::ZERO();
-    } else if (unicast) {
-	nexthop = _urib6.lookup_route(addr);
-    } else if (multicast) {
-	nexthop = _mrib6.lookup_route(addr);
     }
     return XrlCmdError::OKAY();
 }
@@ -943,6 +573,7 @@ XrlRibTarget::rib_0_1_new_vif(const string& name)
 	return XrlCmdError::COMMAND_FAILED(err);
     }
 
+#ifdef HAVE_IPV6
     if (_urib6.new_vif(name, v) != XORP_OK) {
 	string err = c_format("Failed to add vif \"%s\" to unicast IPv6 rib",
 			      name.c_str());
@@ -954,6 +585,7 @@ XrlRibTarget::rib_0_1_new_vif(const string& name)
 			      name.c_str());
 	return XrlCmdError::COMMAND_FAILED(err);
     }
+#endif
 
     return XrlCmdError::OKAY();
 }
@@ -972,26 +604,6 @@ XrlRibTarget::rib_0_1_add_vif_addr4(const string&	name,
     if (_mrib4.add_vif_address(name, addr, subnet, IPv4::ZERO(), IPv4::ZERO())
 	!= XORP_OK) {
 	string err = "Failed to add IPv4 Vif address to multicast RIB";
-	return XrlCmdError::COMMAND_FAILED(err);
-    }
-
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlRibTarget::rib_0_1_add_vif_addr6(const string&	name,
-				    const IPv6&		addr,
-				    const IPv6Net&	subnet)
-{
-    if (_urib6.add_vif_address(name, addr, subnet, IPv6::ZERO(), IPv6::ZERO())
-	!= XORP_OK) {
-	string err = "Failed to add IPv6 Vif address to unicast RIB";
-	return XrlCmdError::COMMAND_FAILED(err);
-    }
-
-    if (_mrib6.add_vif_address(name, addr, subnet, IPv6::ZERO(), IPv6::ZERO())
-	!= XORP_OK) {
-	string err = "Failed to add IPv6 Vif address to multicast RIB";
 	return XrlCmdError::COMMAND_FAILED(err);
     }
 
@@ -1018,25 +630,6 @@ XrlRibTarget::rib_0_1_redist_enable4(const string&	target_name,
 }
 
 XrlCmdError
-XrlRibTarget::rib_0_1_redist_enable6(const string&	target_name,
-				     const string&	from,
-				     const bool&	ucast,
-				     const bool&	mcast,
-				     const IPv6Net&	network_prefix,
-				     const string&	cookie)
-{
-    if (_rib_manager->add_redist_xrl_output6(target_name, from, ucast, mcast,
-					     network_prefix, cookie, false)
-	!= XORP_OK) {
-	string err = c_format("Failed to enable route redistribution from "
-			      "protocol \"%s\" to XRL target \"%s\"",
-			      from.c_str(), target_name.c_str());
-	return XrlCmdError::COMMAND_FAILED(err);
-    }
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
 XrlRibTarget::rib_0_1_redist_disable4(const string&	target_name,
 				      const string&	from,
 				      const bool&	ucast,
@@ -1044,24 +637,6 @@ XrlRibTarget::rib_0_1_redist_disable4(const string&	target_name,
 				      const string&	cookie)
 {
     if (_rib_manager->delete_redist_xrl_output4(target_name, from,
-						ucast, mcast,
-						cookie, false) != XORP_OK) {
-	string err = c_format("Failed to disable route redistribution from "
-			      "protocol \"%s\" to XRL target \"%s\"",
-			      from.c_str(), target_name.c_str());
-	return XrlCmdError::COMMAND_FAILED(err);
-    }
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlRibTarget::rib_0_1_redist_disable6(const string&	target_name,
-				      const string&	from,
-				      const bool&	ucast,
-				      const bool&	mcast,
-				      const string&	cookie)
-{
-    if (_rib_manager->delete_redist_xrl_output6(target_name, from,
 						ucast, mcast,
 						cookie, false) != XORP_OK) {
 	string err = c_format("Failed to disable route redistribution from "
@@ -1093,26 +668,6 @@ XrlRibTarget::rib_0_1_redist_transaction_enable4(const string&	target_name,
 }
 
 XrlCmdError
-XrlRibTarget::rib_0_1_redist_transaction_enable6(const string&	target_name,
-						 const string&	from,
-						 const bool&	ucast,
-						 const bool&	mcast,
-						 const IPv6Net&	network_prefix,
-						 const string&	cookie)
-{
-    if (_rib_manager->add_redist_xrl_output6(target_name, from, ucast, mcast,
-					     network_prefix, cookie, true)
-	!= XORP_OK) {
-	string err = c_format("Failed to enable transaction-based "
-			      "route redistribution from "
-			      "protocol \"%s\" to XRL target \"%s\"",
-			      from.c_str(), target_name.c_str());
-	return XrlCmdError::COMMAND_FAILED(err);
-    }
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
 XrlRibTarget::rib_0_1_redist_transaction_disable4(const string&	target_name,
 						  const string&	from,
 						  const bool&	ucast,
@@ -1120,25 +675,6 @@ XrlRibTarget::rib_0_1_redist_transaction_disable4(const string&	target_name,
 						  const string&	cookie)
 {
     if (_rib_manager->delete_redist_xrl_output4(target_name, from,
-						ucast, mcast,
-						cookie, true) != XORP_OK) {
-	string err = c_format("Failed to disable transaction-based "
-			      "route redistribution from "
-			      "protocol \"%s\" to XRL target \"%s\"",
-			      from.c_str(), target_name.c_str());
-	return XrlCmdError::COMMAND_FAILED(err);
-    }
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlRibTarget::rib_0_1_redist_transaction_disable6(const string&	target_name,
-						  const string&	from,
-						  const bool&	ucast,
-						  const bool&	mcast,
-						  const string&	cookie)
-{
-    if (_rib_manager->delete_redist_xrl_output6(target_name, from,
 						ucast, mcast,
 						cookie, true) != XORP_OK) {
 	string err = c_format("Failed to disable transaction-based "
@@ -1216,71 +752,6 @@ XrlRibTarget::rib_0_1_deregister_interest4(// Input values,
 }
 
 XrlCmdError
-XrlRibTarget::rib_0_1_register_interest6(// Input values,
-					 const string& target,
-					 const IPv6& addr,
-					 // Output values,
-					 bool& resolves,
-					 IPv6& base_addr,
-					 uint32_t& prefix_len,
-					 uint32_t& real_prefix_len,
-					 IPv6&	nexthop,
-					 uint32_t& metric)
-{
-    debug_msg("register_interest6 target = %s addr = %s\n",
-	      target.c_str(), addr.str().c_str());
-
-    RouteRegister<IPv6>* rt_reg = _urib6.route_register(addr, target);
-    if (rt_reg->route() == NULL) {
-	base_addr = rt_reg->valid_subnet().masked_addr();
-	prefix_len = real_prefix_len = rt_reg->valid_subnet().prefix_len();
-	resolves = false;
-	debug_msg("#### XRL -> REGISTER INTEREST UNRESOLVABLE %s\n",
-		  rt_reg->valid_subnet().str().c_str());
-    } else {
-	metric = rt_reg->route()->metric();
-	base_addr = rt_reg->valid_subnet().masked_addr();
-	prefix_len = real_prefix_len = rt_reg->valid_subnet().prefix_len();
-	NextHop *nh = rt_reg->route()->nexthop();
-	switch (nh->type()) {
-	case GENERIC_NEXTHOP:
-	    // this shouldn't be possible
-	    XLOG_UNREACHABLE();
-	case PEER_NEXTHOP:
-	case ENCAPS_NEXTHOP:
-	    resolves = true;
-	    nexthop = ((IPNextHop<IPv6>*)nh)->addr();
-	    real_prefix_len = rt_reg->route()->prefix_len();
-	    break;
-	case EXTERNAL_NEXTHOP:
-	case DISCARD_NEXTHOP:
-	case UNREACHABLE_NEXTHOP:
-	    resolves = false;
-	    break;
-	}
-    }
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlRibTarget::rib_0_1_deregister_interest6(// Input values,
-					   const string& target,
-					   const IPv6&	addr,
-					   const uint32_t& prefix_len)
-{
-    if (_urib6.route_deregister(IPv6Net(addr, prefix_len), target)
-	!= XORP_OK) {
-	string error_msg = c_format("Failed to deregister target %s for "
-				    "prefix %s/%u",
-				    target.c_str(),
-				    addr.str().c_str(),
-				    XORP_UINT_CAST(prefix_len));
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
 XrlRibTarget::rib_0_1_get_protocol_admin_distances(
     // Input values,
     const bool&     ipv4,
@@ -1306,6 +777,7 @@ XrlRibTarget::rib_0_1_get_protocol_admin_distances(
 	    protocols.append(XrlAtom(iter->first));
 	    admin_distances.append(XrlAtom(iter->second));
 	}
+#ifdef HAVE_IPV6
     } else if (!ipv4 && unicast) {
 	// ipv6 unicast
 	map<string, uint32_t>& rad = _urib6.get_protocol_admin_distances();
@@ -1322,6 +794,7 @@ XrlRibTarget::rib_0_1_get_protocol_admin_distances(
 	    protocols.append(XrlAtom(iter->first));
 	    admin_distances.append(XrlAtom(iter->second));
 	}
+#endif
     }
 
     return XrlCmdError::OKAY();
@@ -1341,10 +814,12 @@ XrlRibTarget::rib_0_1_get_protocol_admin_distance(
 	admin_distance = _urib4.get_protocol_admin_distance(protocol);
     } else if (ipv4 && !unicast) {
 	admin_distance = _mrib4.get_protocol_admin_distance(protocol);
+#ifdef HAVE_IPV6
     } else if (!ipv4 && unicast) {
 	admin_distance = _urib6.get_protocol_admin_distance(protocol);
     } else if (!ipv4 && !unicast) {
 	admin_distance = _mrib6.get_protocol_admin_distance(protocol);
+#endif
     }
 
     return XrlCmdError::OKAY();
@@ -1392,6 +867,7 @@ XrlRibTarget::rib_0_1_set_protocol_admin_distance(
 	return XrlCmdError::COMMAND_FAILED(err);
     }
 
+#ifdef HAVE_IPV6
     if (ipv6 && unicast &&
 	_urib6.set_protocol_admin_distance(protocol, admin_distance)
 	!= XORP_OK) {
@@ -1409,6 +885,9 @@ XrlRibTarget::rib_0_1_set_protocol_admin_distance(
 			      "IPv6", "multicast", protocol.c_str());
 	return XrlCmdError::COMMAND_FAILED(err);
     }
+#else
+    UNUSED(ipv6);
+#endif
 
     return XrlCmdError::OKAY();
 }
@@ -1580,3 +1059,549 @@ XrlRibTarget::profile_0_1_list(string& info)
 }
 
 #endif // profile
+
+
+/** IPv6 stuff */
+#ifdef HAVE_IPV6
+
+
+XrlCmdError
+XrlRibTarget::rib_0_1_add_igp_table6(const string&	protocol,
+				     const string&	target_class,
+				     const string&	target_instance,
+				     const bool&	unicast,
+				     const bool&	multicast)
+{
+    if (unicast &&
+	_urib6.add_igp_table(protocol, target_class, target_instance)
+	!= XORP_OK) {
+	string err = c_format("Could not add unicast IPv6 igp table \"%s\"",
+			      protocol.c_str());
+	return XrlCmdError::COMMAND_FAILED(err);
+    }
+
+    if (multicast &&
+	_mrib6.add_igp_table(protocol, target_class, target_instance)
+	!= XORP_OK) {
+	string err = c_format("Could not add multicast IPv6 igp table \"%s\"",
+			      protocol.c_str());
+	return XrlCmdError::COMMAND_FAILED(err);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRibTarget::rib_0_1_delete_igp_table6(const string&	protocol,
+					const string&	target_class,
+					const string&	target_instance,
+					const bool&	unicast,
+					const bool&	multicast)
+{
+    if (unicast &&
+	_urib6.delete_igp_table(protocol, target_class, target_instance)
+	!= XORP_OK) {
+	string err = c_format("Could not delete unicast IPv6 igp table \"%s\"",
+			      protocol.c_str());
+	return XrlCmdError::COMMAND_FAILED(err);
+    }
+
+    if (multicast &&
+	_mrib6.delete_igp_table(protocol, target_class, target_instance)
+	!= XORP_OK) {
+	string err = c_format("Could not delete multicast IPv6 igp table \"%s\"",
+			      protocol.c_str());
+	return XrlCmdError::COMMAND_FAILED(err);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRibTarget::rib_0_1_add_egp_table6(const string&	protocol,
+				     const string&	target_class,
+				     const string&	target_instance,
+				     const bool&	unicast,
+				     const bool&	multicast)
+{
+    if (unicast &&
+	_urib6.add_egp_table(protocol, target_class, target_instance)
+	!= XORP_OK) {
+	string err = c_format("Could not add unicast IPv6 egp table \"%s\"",
+			      protocol.c_str());
+	return XrlCmdError::COMMAND_FAILED(err);
+    }
+
+    if (multicast &&
+	_mrib6.add_egp_table(protocol, target_class, target_instance)
+	!= XORP_OK) {
+	string err = c_format("Could not add multicast IPv6 egp table \"%s\"",
+			      protocol.c_str());
+	return XrlCmdError::COMMAND_FAILED(err);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRibTarget::rib_0_1_delete_egp_table6(const string&	protocol,
+					const string&	target_class,
+					const string&	target_instance,
+					const bool&	unicast,
+					const bool&	multicast)
+{
+    if (unicast &&
+	_urib6.delete_egp_table(protocol, target_class, target_instance)
+	!= XORP_OK) {
+	string err = c_format("Could not delete unicast IPv6 egp table \"%s\"",
+			      protocol.c_str());
+	return XrlCmdError::COMMAND_FAILED(err);
+    }
+
+    if (multicast &&
+	_mrib6.delete_egp_table(protocol, target_class, target_instance)
+	!= XORP_OK) {
+	string err = c_format("Could not delete multicast IPv6 egp table \"%s\"",
+			      protocol.c_str());
+	return XrlCmdError::COMMAND_FAILED(err);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+
+XrlCmdError
+XrlRibTarget::rib_0_1_add_route6(const string&	protocol,
+				 const bool&	unicast,
+				 const bool&	multicast,
+				 const IPv6Net&	network,
+				 const IPv6&	nexthop,
+				 const uint32_t& metric,
+				 const XrlAtomList& policytags)
+{
+    debug_msg("add_route6 protocol: %s unicast: %s multicast: %s "
+	      "network %s nexthop %s metric %u\n",
+	      protocol.c_str(),
+	      bool_c_str(unicast),
+	      bool_c_str(multicast),
+	      network.str().c_str(),
+	      nexthop.str().c_str(),
+	      XORP_UINT_CAST(metric));
+
+#ifndef XORP_DISABLE_PROFILE
+    if (_rib_manager->profile().enabled(profile_route_ribin)) {
+	_rib_manager->profile().log(profile_route_ribin,
+				    c_format("add %s %s%s %s %s %u",
+					     protocol.c_str(),
+					     unicast ? "u" : "",
+					     multicast ? "m" : "",
+					     network.str().c_str(),
+					     nexthop.str().c_str(),
+					     XORP_UINT_CAST(metric)));
+    }
+#endif
+
+    if (unicast &&
+	_urib6.add_route(protocol, network, nexthop, "", "", metric,
+			 policytags)
+	!= XORP_OK) {
+	string err = c_format("Could not add IPv6 route "
+			      "net %s, nexthop: %s to unicast RIB",
+			      network.str().c_str(), nexthop.str().c_str());
+	return XrlCmdError::COMMAND_FAILED(err);
+    }
+
+    if (multicast &&
+	_mrib6.add_route(protocol, network, nexthop, "", "", metric,
+			 policytags)
+	!= XORP_OK) {
+	string err = c_format("Could not add IPv6 route "
+			      "net %s, nexthop: %s to multicast RIB",
+			      network.str().c_str(), nexthop.str().c_str());
+	return XrlCmdError::COMMAND_FAILED(err);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRibTarget::rib_0_1_replace_route6(const string&	protocol,
+				     const bool&	unicast,
+				     const bool&	multicast,
+				     const IPv6Net&	network,
+				     const IPv6&	nexthop,
+				     const uint32_t&	metric,
+				     const XrlAtomList& policytags)
+{
+    debug_msg("replace_route6 protocol: %s unicast: %s multicast: %s "
+	      "network %s nexthop %s metric %u\n",
+	      protocol.c_str(),
+	      bool_c_str(unicast),
+	      bool_c_str(multicast),
+	      network.str().c_str(),
+	      nexthop.str().c_str(),
+	      XORP_UINT_CAST(metric));
+
+#ifndef XORP_DISABLE_PROFILE
+    if (_rib_manager->profile().enabled(profile_route_ribin)) {
+	_rib_manager->profile().log(profile_route_ribin,
+				    c_format("replace %s %s%s %s %s %u",
+					     protocol.c_str(),
+					     unicast ? "u" : "",
+					     multicast ? "m" : "",
+					     network.str().c_str(),
+					     nexthop.str().c_str(),
+					     XORP_UINT_CAST(metric)));
+    }
+#endif
+
+    if (unicast &&
+	_urib6.replace_route(protocol, network, nexthop, "", "", metric,
+			     policytags)
+	!= XORP_OK) {
+	string err = "Could not replace IPv6 route in unicast RIB";
+	return XrlCmdError::COMMAND_FAILED(err);
+    }
+
+    if (multicast &&
+	_mrib6.replace_route(protocol, network, nexthop, "", "", metric,
+			     policytags)
+	!= XORP_OK) {
+	string err = "Could not add IPv6 route in multicast RIB";
+	return XrlCmdError::COMMAND_FAILED(err);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRibTarget::rib_0_1_delete_route6(const string&	protocol,
+				    const bool&		unicast,
+				    const bool&		multicast,
+				    const IPv6Net&	network)
+{
+    debug_msg("delete_route6 protocol: %s unicast: %s multicast: %s "
+	      "network %s\n",
+	      protocol.c_str(),
+	      bool_c_str(unicast),
+	      bool_c_str(multicast),
+	      network.str().c_str());
+
+#ifndef XORP_DISABLE_PROFILE
+    if (_rib_manager->profile().enabled(profile_route_ribin)) {
+	_rib_manager->profile().log(profile_route_ribin,
+				    c_format("delete %s %s%s %s",
+					     protocol.c_str(),
+					     unicast ? "u" : "",
+					     multicast ? "m" : "",
+					     network.str().c_str()));
+    }
+#endif
+
+    if (unicast && _urib6.delete_route(protocol, network) != XORP_OK) {
+	string err = "Could not delete IPv6 route from unicast RIB";
+	return XrlCmdError::COMMAND_FAILED(err);
+    }
+
+    if (multicast && _mrib6.delete_route(protocol, network) != XORP_OK) {
+	string err = "Could not delete IPv6 route from multicast RIB";
+	return XrlCmdError::COMMAND_FAILED(err);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRibTarget::rib_0_1_add_interface_route6(const string&	protocol,
+					   const bool&		unicast,
+					   const bool&		multicast,
+					   const IPv6Net&	network,
+					   const IPv6&		nexthop,
+					   const string&	ifname,
+					   const string&	vifname,
+					   const uint32_t&	metric,
+					   const XrlAtomList&	policytags)
+{
+    debug_msg("add_interface_route6 protocol: %s unicast: %s multicast: %s "
+	      "network %s nexthop %s ifname %s vifname %s metric %u\n",
+	      protocol.c_str(),
+	      bool_c_str(unicast),
+	      bool_c_str(multicast),
+	      network.str().c_str(),
+	      nexthop.str().c_str(),
+	      ifname.c_str(),
+	      vifname.c_str(),
+	      XORP_UINT_CAST(metric));
+
+#ifndef XORP_DISABLE_PROFILE
+    if (_rib_manager->profile().enabled(profile_route_ribin)) {
+	_rib_manager->profile().log(profile_route_ribin,
+				    c_format("add %s %s%s %s %s %s/%s %u",
+					     protocol.c_str(),
+					     unicast ? "u" : "",
+					     multicast ? "m" : "",
+					     network.str().c_str(),
+					     nexthop.str().c_str(),
+					     ifname.c_str(),
+					     vifname.c_str(),
+					     XORP_UINT_CAST(metric)));
+    }
+#endif
+
+    if (unicast &&
+	_urib6.add_route(protocol, network, nexthop, ifname, vifname,
+					metric, policytags)
+	!= XORP_OK) {
+	string err = "Could not add IPv6 interface route to unicast RIB";
+	return XrlCmdError::COMMAND_FAILED(err);
+    }
+
+    if (multicast &&
+	_mrib6.add_route(protocol, network, nexthop, ifname, vifname, metric,
+					policytags)
+	!= XORP_OK) {
+	string err = "Could not add IPv6 interface route to multicast RIB";
+	return XrlCmdError::COMMAND_FAILED(err);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRibTarget::rib_0_1_replace_interface_route6(const string&	    protocol,
+					       const bool&	    unicast,
+					       const bool&	    multicast,
+					       const IPv6Net&	    network,
+					       const IPv6&	    nexthop,
+					       const string&	    ifname,
+					       const string&	    vifname,
+					       const uint32_t&	    metric,
+					       const XrlAtomList&   policytags)
+{
+    debug_msg("replace_interface_route6 protocol: %s unicast: %s multicast: %s "
+	      "network %s nexthop %s ifname %s vifname %s metric %u\n",
+	      protocol.c_str(),
+	      bool_c_str(unicast),
+	      bool_c_str(multicast),
+	      network.str().c_str(),
+	      nexthop.str().c_str(),
+	      ifname.c_str(),
+	      vifname.c_str(),
+	      XORP_UINT_CAST(metric));
+
+#ifndef XORP_DISABLE_PROFILE
+    if (_rib_manager->profile().enabled(profile_route_ribin)) {
+	_rib_manager->profile().log(profile_route_ribin,
+				    c_format("replace %s %s%s %s %s %s/%s %u",
+					     protocol.c_str(),
+					     unicast ? "u" : "",
+					     multicast ? "m" : "",
+					     network.str().c_str(),
+					     nexthop.str().c_str(),
+					     ifname.c_str(),
+					     vifname.c_str(),
+					     XORP_UINT_CAST(metric)));
+    }
+#endif
+
+    if (unicast &&
+	_urib6.replace_route(protocol, network, nexthop, ifname, vifname,
+			     metric, policytags)
+	!= XORP_OK) {
+	string err = "Could not replace IPv6 interface route in unicast RIB";
+	return XrlCmdError::COMMAND_FAILED(err);
+    }
+
+    if (multicast &&
+	_mrib6.replace_route(protocol, network, nexthop, ifname, vifname,
+			     metric, policytags)
+	!= XORP_OK) {
+	string err = "Could not replace IPv6 interface route in multicast RIB";
+	return XrlCmdError::COMMAND_FAILED(err);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRibTarget::rib_0_1_lookup_route_by_dest6(
+    // Input values,
+    const IPv6&	addr,
+    const bool&	unicast,
+    const bool&	multicast,
+    // Output values,
+    IPv6& nexthop)
+{
+    // Must look in exactly one RIB
+    if (unicast == multicast) {
+	nexthop = IPv6::ZERO();
+    } else if (unicast) {
+	nexthop = _urib6.lookup_route(addr);
+    } else if (multicast) {
+	nexthop = _mrib6.lookup_route(addr);
+    }
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRibTarget::rib_0_1_add_vif_addr6(const string&	name,
+				    const IPv6&		addr,
+				    const IPv6Net&	subnet)
+{
+    if (_urib6.add_vif_address(name, addr, subnet, IPv6::ZERO(), IPv6::ZERO())
+	!= XORP_OK) {
+	string err = "Failed to add IPv6 Vif address to unicast RIB";
+	return XrlCmdError::COMMAND_FAILED(err);
+    }
+
+    if (_mrib6.add_vif_address(name, addr, subnet, IPv6::ZERO(), IPv6::ZERO())
+	!= XORP_OK) {
+	string err = "Failed to add IPv6 Vif address to multicast RIB";
+	return XrlCmdError::COMMAND_FAILED(err);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRibTarget::rib_0_1_redist_enable6(const string&	target_name,
+				     const string&	from,
+				     const bool&	ucast,
+				     const bool&	mcast,
+				     const IPv6Net&	network_prefix,
+				     const string&	cookie)
+{
+    if (_rib_manager->add_redist_xrl_output6(target_name, from, ucast, mcast,
+					     network_prefix, cookie, false)
+	!= XORP_OK) {
+	string err = c_format("Failed to enable route redistribution from "
+			      "protocol \"%s\" to XRL target \"%s\"",
+			      from.c_str(), target_name.c_str());
+	return XrlCmdError::COMMAND_FAILED(err);
+    }
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRibTarget::rib_0_1_redist_disable6(const string&	target_name,
+				      const string&	from,
+				      const bool&	ucast,
+				      const bool&	mcast,
+				      const string&	cookie)
+{
+    if (_rib_manager->delete_redist_xrl_output6(target_name, from,
+						ucast, mcast,
+						cookie, false) != XORP_OK) {
+	string err = c_format("Failed to disable route redistribution from "
+			      "protocol \"%s\" to XRL target \"%s\"",
+			      from.c_str(), target_name.c_str());
+	return XrlCmdError::COMMAND_FAILED(err);
+    }
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRibTarget::rib_0_1_redist_transaction_enable6(const string&	target_name,
+						 const string&	from,
+						 const bool&	ucast,
+						 const bool&	mcast,
+						 const IPv6Net&	network_prefix,
+						 const string&	cookie)
+{
+    if (_rib_manager->add_redist_xrl_output6(target_name, from, ucast, mcast,
+					     network_prefix, cookie, true)
+	!= XORP_OK) {
+	string err = c_format("Failed to enable transaction-based "
+			      "route redistribution from "
+			      "protocol \"%s\" to XRL target \"%s\"",
+			      from.c_str(), target_name.c_str());
+	return XrlCmdError::COMMAND_FAILED(err);
+    }
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRibTarget::rib_0_1_redist_transaction_disable6(const string&	target_name,
+						  const string&	from,
+						  const bool&	ucast,
+						  const bool&	mcast,
+						  const string&	cookie)
+{
+    if (_rib_manager->delete_redist_xrl_output6(target_name, from,
+						ucast, mcast,
+						cookie, true) != XORP_OK) {
+	string err = c_format("Failed to disable transaction-based "
+			      "route redistribution from "
+			      "protocol \"%s\" to XRL target \"%s\"",
+			      from.c_str(), target_name.c_str());
+	return XrlCmdError::COMMAND_FAILED(err);
+    }
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRibTarget::rib_0_1_register_interest6(// Input values,
+					 const string& target,
+					 const IPv6& addr,
+					 // Output values,
+					 bool& resolves,
+					 IPv6& base_addr,
+					 uint32_t& prefix_len,
+					 uint32_t& real_prefix_len,
+					 IPv6&	nexthop,
+					 uint32_t& metric)
+{
+    debug_msg("register_interest6 target = %s addr = %s\n",
+	      target.c_str(), addr.str().c_str());
+
+    RouteRegister<IPv6>* rt_reg = _urib6.route_register(addr, target);
+    if (rt_reg->route() == NULL) {
+	base_addr = rt_reg->valid_subnet().masked_addr();
+	prefix_len = real_prefix_len = rt_reg->valid_subnet().prefix_len();
+	resolves = false;
+	debug_msg("#### XRL -> REGISTER INTEREST UNRESOLVABLE %s\n",
+		  rt_reg->valid_subnet().str().c_str());
+    } else {
+	metric = rt_reg->route()->metric();
+	base_addr = rt_reg->valid_subnet().masked_addr();
+	prefix_len = real_prefix_len = rt_reg->valid_subnet().prefix_len();
+	NextHop *nh = rt_reg->route()->nexthop();
+	switch (nh->type()) {
+	case GENERIC_NEXTHOP:
+	    // this shouldn't be possible
+	    XLOG_UNREACHABLE();
+	case PEER_NEXTHOP:
+	case ENCAPS_NEXTHOP:
+	    resolves = true;
+	    nexthop = ((IPNextHop<IPv6>*)nh)->addr();
+	    real_prefix_len = rt_reg->route()->prefix_len();
+	    break;
+	case EXTERNAL_NEXTHOP:
+	case DISCARD_NEXTHOP:
+	case UNREACHABLE_NEXTHOP:
+	    resolves = false;
+	    break;
+	}
+    }
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRibTarget::rib_0_1_deregister_interest6(// Input values,
+					   const string& target,
+					   const IPv6&	addr,
+					   const uint32_t& prefix_len)
+{
+    if (_urib6.route_deregister(IPv6Net(addr, prefix_len), target)
+	!= XORP_OK) {
+	string error_msg = c_format("Failed to deregister target %s for "
+				    "prefix %s/%u",
+				    target.c_str(),
+				    addr.str().c_str(),
+				    XORP_UINT_CAST(prefix_len));
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    return XrlCmdError::OKAY();
+}
+
+#endif //ipv6

@@ -36,27 +36,9 @@ PrintRoutes<IPv4>::get_route_list_start(IPNet<IPv4> net, bool unicast,
 
 template <>
 void
-PrintRoutes<IPv6>::get_route_list_start(IPNet<IPv6> net, bool unicast,
-					bool multicast)
-{
-    _active_requests = 0;
-    send_get_v6_route_list_start("bgp", net, unicast, multicast,
-		 callback(this, &PrintRoutes::get_route_list_start_done));
-}
-
-template <>
-void
 PrintRoutes<IPv4>::get_route_list_next()
 {
     send_get_v4_route_list_next("bgp",	_token,
-		callback(this, &PrintRoutes::get_route_list_next_done));
-}
-
-template <>
-void
-PrintRoutes<IPv6>::get_route_list_next()
-{
-    send_get_v6_route_list_next("bgp", _token,
 		callback(this, &PrintRoutes::get_route_list_next_done));
 }
 
@@ -303,4 +285,27 @@ PrintRoutes<A>::timer_expired()
 // Template Instantiations
 
 template class PrintRoutes<IPv4>;
+
+#ifdef HAVE_IPV6
+
+template <>
+void
+PrintRoutes<IPv6>::get_route_list_start(IPNet<IPv6> net, bool unicast,
+					bool multicast)
+{
+    _active_requests = 0;
+    send_get_v6_route_list_start("bgp", net, unicast, multicast,
+		 callback(this, &PrintRoutes::get_route_list_start_done));
+}
+
+template <>
+void
+PrintRoutes<IPv6>::get_route_list_next()
+{
+    send_get_v6_route_list_next("bgp", _token,
+		callback(this, &PrintRoutes::get_route_list_next_done));
+}
+
 template class PrintRoutes<IPv6>;
+
+#endif // ipv6

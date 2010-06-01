@@ -127,22 +127,12 @@ public:
     int add_route(const SubnetRoute<IPv4> &rt, 
 		  FPAList4Ref& pa_list,   
 		  bool ibgp, Safi safi);
-    int add_route(const SubnetRoute<IPv6> &rt, 
-		  FPAList6Ref& pa_list,   
-		  bool ibgp, Safi safi);
     int replace_route(const SubnetRoute<IPv4> &old_rt, bool old_ibgp, 
 		      const SubnetRoute<IPv4> &new_rt, bool new_ibgp, 
 		      FPAList4Ref& pa_list,   
 		      Safi safi);
-    int replace_route(const SubnetRoute<IPv6> &old_rt, bool old_ibgp, 
-		      const SubnetRoute<IPv6> &new_rt, bool new_ibgp, 
-		      FPAList6Ref& pa_list,   
-		      Safi safi);
     int delete_route(const SubnetRoute<IPv4> &rt, 
 		     FPAList4Ref& pa_list,   
-		     bool ibgp, Safi safi);
-    int delete_route(const SubnetRoute<IPv6> &rt, 
-		     FPAList6Ref& pa_list,   
 		     bool ibgp, Safi safi);
     void rib_command_done(const XrlError& error, const char *comment);
     PeerOutputState push_packet();
@@ -157,7 +147,11 @@ public:
      * @return true if routes are being sent to the RIB.
      */
     bool busy() {
-	return _v4_queue.busy() || _v6_queue.busy();
+	return (_v4_queue.busy()
+#ifdef HAVE_IPV6
+		|| _v6_queue.busy()
+#endif
+	    );
     }
 
     /**
@@ -182,6 +176,54 @@ public:
 			 const PolicyTags& policytags);
 
     /**
+     * Withdraw an IPv4 route
+     *
+     * @param nlri subnet to withdraw
+     * @param unicast if true withdraw from unicast routing table
+     * @param multicast if true withdraw from multicast routing table
+     *
+     * @return true on success
+     */
+    bool withdraw_route(const IPv4Net&	nlri,
+			const bool& unicast,
+			const bool& multicast);
+
+    virtual uint32_t get_unique_id() const	{ return _fake_unique_id; }
+
+    //fake a zero IP address so the RIB IPC handler gets listed first
+    //in the Fanout Table.
+    const IPv4& id() const		{ return _fake_id; }
+
+    virtual PeerType get_peer_type() const {
+	return PEER_TYPE_INTERNAL;
+    }                                                                           
+    /**
+     * This is the handler that deals with originating routes.
+     *
+     * @return true
+     */
+    virtual bool originate_route_handler() const {return true;}
+
+    /**
+     * @return the main eventloop
+     */
+    virtual EventLoop& eventloop() const { return _xrl_router.eventloop();}
+
+
+    /** IPv6 stuff */
+#ifdef HAVE_IPV6
+    int add_route(const SubnetRoute<IPv6> &rt, 
+		  FPAList6Ref& pa_list,   
+		  bool ibgp, Safi safi);
+    int replace_route(const SubnetRoute<IPv6> &old_rt, bool old_ibgp, 
+		      const SubnetRoute<IPv6> &new_rt, bool new_ibgp, 
+		      FPAList6Ref& pa_list,   
+		      Safi safi);
+    int delete_route(const SubnetRoute<IPv6> &rt, 
+		     FPAList6Ref& pa_list,   
+		     bool ibgp, Safi safi);
+
+    /**
      * Originate an IPv6 route
      *
      * @param origin of the path information
@@ -203,19 +245,6 @@ public:
 			 const PolicyTags& policytags);
 
     /**
-     * Withdraw an IPv4 route
-     *
-     * @param nlri subnet to withdraw
-     * @param unicast if true withdraw from unicast routing table
-     * @param multicast if true withdraw from multicast routing table
-     *
-     * @return true on success
-     */
-    bool withdraw_route(const IPv4Net&	nlri,
-			const bool& unicast,
-			const bool& multicast);
-
-    /**
      * Withdraw an IPv6 route
      *
      * @return true on success
@@ -223,28 +252,8 @@ public:
     bool withdraw_route(const IPv6Net&	nlri,
 			const bool& unicast,
 			const bool& multicast);
+#endif // ipv6
 
-    
-    virtual uint32_t get_unique_id() const	{ return _fake_unique_id; }
-
-    //fake a zero IP address so the RIB IPC handler gets listed first
-    //in the Fanout Table.
-    const IPv4& id() const		{ return _fake_id; }
-
-    virtual PeerType get_peer_type() const {
-	return PEER_TYPE_INTERNAL;
-    }                                                                           
-    /**
-     * This is the handler that deals with originating routes.
-     *
-     * @return true
-     */
-    virtual bool originate_route_handler() const {return true;}
-
-    /**
-     * @return the main eventloop
-     */
-    virtual EventLoop& eventloop() const { return _xrl_router.eventloop();}
 private:
     bool unregister_rib(string ribname);
 
@@ -252,7 +261,9 @@ private:
     XrlStdRouter& _xrl_router;
 
     XrlQueue<IPv4> _v4_queue;
+#ifdef HAVE_IPV6
     XrlQueue<IPv6> _v6_queue;
+#endif
     const uint32_t _fake_unique_id;
     IPv4 _fake_id;
 };

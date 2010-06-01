@@ -817,24 +817,6 @@ NextHopRibRequest<IPv4>::register_interest(IPv4 nexthop)
 		c_format("nexthop: %s", nexthop.str().c_str())));
 }
 
-template<>
-void
-NextHopRibRequest<IPv6>::register_interest(IPv6 nexthop)
-{
-    debug_msg("nexthop %s\n", nexthop.str().c_str());
-    PROFILE(XLOG_TRACE(_bgp.profile().enabled(trace_nexthop_resolution),
-		       "nexthop %s\n", nexthop.str().c_str()));
-    if (0 == _xrl_router)	// The test code sets _xrl_router to zero
-	return;
-
-    XrlRibV0p1Client rib(_xrl_router);
-    rib.send_register_interest6(_ribname.c_str(), _xrl_router->name(),
-				nexthop,
-				::callback(this,
-		&NextHopRibRequest::register_interest_response,
-		nexthop,
-		c_format("nexthop: %s", nexthop.str().c_str())));
-}
 
 template<class A>
 void
@@ -1294,30 +1276,6 @@ NextHopRibRequest<IPv4>::deregister_interest(IPv4 addr,
 				XORP_UINT_CAST(prefix_len))));
 }
 
-template<>
-void
-NextHopRibRequest<IPv6>::deregister_interest(IPv6 addr, 
-					     uint32_t prefix_len)
-{
-    debug_msg("addr %s/%u\n", addr.str().c_str(), XORP_UINT_CAST(prefix_len));
-    PROFILE(XLOG_TRACE(_bgp.profile().enabled(trace_nexthop_resolution),
-		       "addr %s/%u\n", addr.str().c_str(),
-		       XORP_UINT_CAST(prefix_len)));
-    if (0 == _xrl_router)	// The test code sets _xrl_router to zero
-	return;
-
-    XrlRibV0p1Client rib(_xrl_router);
-    rib.send_deregister_interest6(_ribname.c_str(),
-				  _xrl_router->name(),
-				  addr,
-				  prefix_len,
-	    ::callback(this,&NextHopRibRequest::deregister_interest_response,
-		       addr, prefix_len,
-		       c_format("deregister_from_rib: addr %s/%u",
-				addr.str().c_str(),
-				XORP_UINT_CAST(prefix_len))));
-}
-
 template <class A>
 void
 NextHopRibRequest<A>::deregister_interest_response(const XrlError& error, 
@@ -1476,4 +1434,56 @@ NHRequest<A>::request_nets(NhLookupTable<A>* requester) const
 
 //force these templates to be built
 template class NextHopResolver<IPv4>;
+
+
+#ifdef HAVE_IPV6
+/* IPv6 stuff */
+
+template<>
+void
+NextHopRibRequest<IPv6>::register_interest(IPv6 nexthop)
+{
+    debug_msg("nexthop %s\n", nexthop.str().c_str());
+    PROFILE(XLOG_TRACE(_bgp.profile().enabled(trace_nexthop_resolution),
+		       "nexthop %s\n", nexthop.str().c_str()));
+    if (0 == _xrl_router)	// The test code sets _xrl_router to zero
+	return;
+
+    XrlRibV0p1Client rib(_xrl_router);
+    rib.send_register_interest6(_ribname.c_str(), _xrl_router->name(),
+				nexthop,
+				::callback(this,
+		&NextHopRibRequest::register_interest_response,
+		nexthop,
+		c_format("nexthop: %s", nexthop.str().c_str())));
+}
+
+template<>
+void
+NextHopRibRequest<IPv6>::deregister_interest(IPv6 addr, 
+					     uint32_t prefix_len)
+{
+    debug_msg("addr %s/%u\n", addr.str().c_str(), XORP_UINT_CAST(prefix_len));
+    PROFILE(XLOG_TRACE(_bgp.profile().enabled(trace_nexthop_resolution),
+		       "addr %s/%u\n", addr.str().c_str(),
+		       XORP_UINT_CAST(prefix_len)));
+    if (0 == _xrl_router)	// The test code sets _xrl_router to zero
+	return;
+
+    XrlRibV0p1Client rib(_xrl_router);
+    rib.send_deregister_interest6(_ribname.c_str(),
+				  _xrl_router->name(),
+				  addr,
+				  prefix_len,
+	    ::callback(this,&NextHopRibRequest::deregister_interest_response,
+		       addr, prefix_len,
+		       c_format("deregister_from_rib: addr %s/%u",
+				addr.str().c_str(),
+				XORP_UINT_CAST(prefix_len))));
+}
+
+
 template class NextHopResolver<IPv6>;
+
+
+#endif //ipv6

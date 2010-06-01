@@ -551,6 +551,7 @@ XrlIO<A>::register_rib()
 	XLOG_FATAL("Failed to add OSPF table to RIB");
     }
 
+#ifdef HAVE_IPV6
     if(!rib.send_add_igp_table6(_ribname.c_str(),
 				"ospf", _xrl_router.class_name(),
 				_xrl_router.instance_name(), true, true,
@@ -560,6 +561,7 @@ XrlIO<A>::register_rib()
 					 "add_table"))) {
 	XLOG_FATAL("Failed to add OSPF table to RIB");
     }
+#endif
 
 }
 
@@ -579,6 +581,7 @@ XrlIO<A>::unregister_rib()
 	XLOG_FATAL("Failed to delete OSPF table to RIB");
     }
 
+#ifdef HAVE_IPV6
     if(!rib.send_delete_igp_table6(_ribname.c_str(),
 				   "ospf", _xrl_router.class_name(),
 				   _xrl_router.instance_name(), true, true,
@@ -588,6 +591,7 @@ XrlIO<A>::unregister_rib()
 					    "delete table"))) {
 	XLOG_FATAL("Failed to delete OSPF table to RIB");
     }
+#endif
 
 }
 

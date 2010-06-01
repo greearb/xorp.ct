@@ -514,8 +514,12 @@ RibOutTable<A>::str() const
 }
 
 template class RibOutTable<IPv4>;
+
+/** IPv6 stuff */
+#ifdef HAVE_IPV6
+
 template class RibOutTable<IPv6>;
 
-
+#endif // ipv6
 
 

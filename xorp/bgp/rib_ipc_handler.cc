@@ -38,7 +38,9 @@ RibIpcHandler::RibIpcHandler(XrlStdRouter& xrl_router, BGPMain& bgp)
       _ribname(""),
       _xrl_router(xrl_router),
       _v4_queue(*this, xrl_router, bgp),
+#ifdef HAVE_IPV6
       _v6_queue(*this, xrl_router, bgp),
+#endif
       _fake_unique_id(RIB_IPC_HANDLER_UNIQUE_ID),
       _fake_id(IPv4::ZERO())
 {
@@ -46,7 +48,11 @@ RibIpcHandler::RibIpcHandler(XrlStdRouter& xrl_router, BGPMain& bgp)
 
 RibIpcHandler::~RibIpcHandler() 
 {
-    if(_v4_queue.busy() || _v6_queue.busy())
+    if(_v4_queue.busy()
+#ifdef HAVE_IPV6
+       || _v6_queue.busy()
+#endif
+	)
 	XLOG_WARNING("Deleting RibIpcHandler with callbacks pending");
 
     /*
@@ -100,6 +106,7 @@ RibIpcHandler::register_ribname(const string& r)
 		callback(this, 
 			 &RibIpcHandler::rib_command_done,"add_table"));
 
+#ifdef HAVE_IPV6
     //create our tables
     //ebgp - v6
     //name - "ebgp"
@@ -119,6 +126,7 @@ RibIpcHandler::register_ribname(const string& r)
                 _xrl_router.instance_name(), true, true,
 		callback(this,
 			 &RibIpcHandler::rib_command_done,"add_table"));
+#endif
 
     return true;
 }
@@ -152,7 +160,8 @@ RibIpcHandler::unregister_rib(string ribname)
 					&RibIpcHandler::rib_command_done,
 					"delete_table"));
 
-    //create our tables
+#ifdef HAVE_IPV6
+    //delete our tables
     //ebgp - v6
     //name - "ebgp"
     //unicast - true
@@ -176,6 +185,7 @@ RibIpcHandler::unregister_rib(string ribname)
  			       callback(this,
  					&RibIpcHandler::rib_command_done,
  					"delete_table"));
+#endif
 
     return true;
 }
@@ -204,23 +214,6 @@ RibIpcHandler::add_route(const SubnetRoute<IPv4> &rt,
 }
 
 int 
-RibIpcHandler::add_route(const SubnetRoute<IPv6>& rt, 
-			 FPAList6Ref& pa_list,
-			 bool ibgp, Safi safi)
-{
-    debug_msg("RibIpcHandler::add_route(IPv6) %p\n", &rt);
-
-    if (_ribname.empty())
-	return 0;
-
-    _v6_queue.queue_add_route(_ribname, ibgp, safi, rt.net(), 
-			      pa_list->nexthop(),
-			      rt.policytags());
-
-    return 0;
-}
-
-int 
 RibIpcHandler::replace_route(const SubnetRoute<IPv4> &old_rt,
 			     bool old_ibgp, 
 			     const SubnetRoute<IPv4> &new_rt,
@@ -229,20 +222,6 @@ RibIpcHandler::replace_route(const SubnetRoute<IPv4> &old_rt,
 			     Safi safi)
 {
     debug_msg("RibIpcHandler::replace_route(IPv4) %p %p\n", &old_rt, &new_rt);
-    delete_route(old_rt, pa_list, old_ibgp, safi);
-    add_route(new_rt, pa_list, new_ibgp, safi);
-    return 0;
-}
-
-int 
-RibIpcHandler::replace_route(const SubnetRoute<IPv6> &old_rt,
-			     bool old_ibgp, 
-			     const SubnetRoute<IPv6> &new_rt,
-			     bool new_ibgp, 
-			     FPAList6Ref& pa_list,
-			     Safi safi)
-{
-    debug_msg("RibIpcHandler::replace_route(IPv6) %p %p\n", &old_rt, &new_rt);
     delete_route(old_rt, pa_list, old_ibgp, safi);
     add_route(new_rt, pa_list, new_ibgp, safi);
     return 0;
@@ -259,21 +238,6 @@ RibIpcHandler::delete_route(const SubnetRoute<IPv4> &rt,
 	return 0;
 
     _v4_queue.queue_delete_route(_ribname, ibgp, safi, rt.net());
-
-    return 0;
-}
-
-int 
-RibIpcHandler::delete_route(const SubnetRoute<IPv6>& rt, 
-			    FPAList6Ref& /*pa_list*/,
-			    bool ibgp, Safi safi)
-{
-    debug_msg("RibIpcHandler::delete_route(IPv6) %p\n", &rt);
-    UNUSED(rt);
-    if (_ribname.empty())
-	return 0;
-
-    _v6_queue.queue_delete_route(_ribname, ibgp, safi, rt.net());
 
     return 0;
 }
@@ -343,45 +307,6 @@ RibIpcHandler::originate_route(const OriginType origin, const ASPath& aspath,
     return true;
 }
 
-bool 
-RibIpcHandler::originate_route(const OriginType origin, const ASPath& aspath,
-			       const IPv6Net& nlri, const IPv6& next_hop,
-			       const bool& unicast, const bool& multicast,
-			       const PolicyTags& policy_tags)
-{
-    debug_msg("origin %d aspath %s nlri %s next hop %s unicast %d"
-	      " multicast %d\n",
-	      origin, aspath.str().c_str(), nlri.str().c_str(),
-	      next_hop.str().c_str(), unicast, multicast);
-
-    /*
-    ** Construct the path attribute list.
-    */
-    FPAList6Ref pa_list = 
-	new FastPathAttributeList<IPv6>(next_hop, aspath, origin);
-
-    /*
-    ** Add a local pref for I-BGP peers.
-    */
-    LocalPrefAttribute local_pref_att(LocalPrefAttribute::default_value());
-    pa_list->add_path_attribute(local_pref_att);
-
-    /*
-    ** Inject the message into the plumbing.
-    */
-    if (unicast) {
-	_plumbing_unicast->add_route(nlri, pa_list, policy_tags, this);
-	_plumbing_unicast->push<IPv6>(this);
-    }
-
-    if (multicast) {
-	_plumbing_multicast->add_route(nlri, pa_list, policy_tags, this);
-	_plumbing_multicast->push<IPv6>(this);
-    }
-
-    return true;
-}
-
 bool
 RibIpcHandler::withdraw_route(const IPv4Net& nlri, const bool& unicast,
 			      const bool& multicast)
@@ -414,45 +339,6 @@ RibIpcHandler::withdraw_route(const IPv4Net& nlri, const bool& unicast,
     if (multicast) {
 	_plumbing_multicast->delete_route(nlri, this);
 	_plumbing_multicast->push<IPv4>(this);
-    }
-
-//    msg_route->unref();
-
-    return true;
-}
-
-bool
-RibIpcHandler::withdraw_route(const IPv6Net& nlri, const bool& unicast,
-			      const bool& multicast)
-{
-    debug_msg("nlri %s unicast %d multicast %d\n", nlri.str().c_str(),
-	      unicast, multicast);
-
-// XXX: bug... wrong function called
-#if 0
-    /*
-    ** Create a subnet route
-    */
-    SubnetRoute<IPv6>* msg_route
-	= new SubnetRoute<IPv6>(nlri, 0, NULL);
-
-    /*
-    ** Make an internal message.
-    */
-    InternalMessage<IPv6> msg(msg_route, this, GENID_UNKNOWN);
-
-    /*
-    ** Inject the message into the plumbing.
-    */
-#endif    
-    if (unicast) {
-	_plumbing_unicast->delete_route(nlri, this);
-	_plumbing_unicast->push<IPv6>(this);
-    }
-
-    if (multicast) {
-	_plumbing_multicast->delete_route(nlri, this);
-	_plumbing_multicast->push<IPv6>(this);
     }
 
 //    msg_route->unref();
@@ -657,6 +543,188 @@ XrlQueue<IPv4>::sendit_spec(Queued& q, const char *bgp)
     return sent;
 }
 
+template<class A>
+void
+XrlQueue<A>::route_command_done(const XrlError& error,
+				const string comment)
+{
+    _flying--;
+    debug_msg("callback %s %s\n", comment.c_str(), error.str().c_str());
+
+    switch (error.error_code()) {
+    case OKAY:
+	break;
+
+    case REPLY_TIMED_OUT:
+	// We should really be using a reliable transport where
+	// this error cannot happen. But it has so lets retry if we can.
+	XLOG_WARNING("callback: %s %s",  comment.c_str(), error.str().c_str());
+	break;
+
+    case RESOLVE_FAILED:
+    case SEND_FAILED:
+    case SEND_FAILED_TRANSIENT:
+    case NO_SUCH_METHOD:
+	XLOG_ERROR("callback: %s %s",  comment.c_str(), error.str().c_str());
+	break;
+
+    case NO_FINDER:
+	// XXX - Temporarily code dump if this condition occurs.
+	XLOG_FATAL("NO FINDER");
+	_bgp.finder_death(__FILE__, __LINE__);
+	break;
+
+    case BAD_ARGS:
+	XLOG_FATAL("callback: %s %s",  comment.c_str(), error.str().c_str());
+	break;
+    case COMMAND_FAILED:
+	XLOG_ERROR("callback: %s %s",  comment.c_str(), error.str().c_str());
+	break;
+    case INTERNAL_ERROR:
+	XLOG_FATAL("callback: %s %s",  comment.c_str(), error.str().c_str());
+	break;
+    }
+
+    // Fire of more requests.
+    start();
+}
+
+template class XrlQueue<IPv4>;
+
+/** IPv6 stuff */
+#ifdef HAVE_IPV6
+
+
+int 
+RibIpcHandler::add_route(const SubnetRoute<IPv6>& rt, 
+			 FPAList6Ref& pa_list,
+			 bool ibgp, Safi safi)
+{
+    debug_msg("RibIpcHandler::add_route(IPv6) %p\n", &rt);
+
+    if (_ribname.empty())
+	return 0;
+
+    _v6_queue.queue_add_route(_ribname, ibgp, safi, rt.net(), 
+			      pa_list->nexthop(),
+			      rt.policytags());
+
+    return 0;
+}
+
+
+int 
+RibIpcHandler::replace_route(const SubnetRoute<IPv6> &old_rt,
+			     bool old_ibgp, 
+			     const SubnetRoute<IPv6> &new_rt,
+			     bool new_ibgp, 
+			     FPAList6Ref& pa_list,
+			     Safi safi)
+{
+    debug_msg("RibIpcHandler::replace_route(IPv6) %p %p\n", &old_rt, &new_rt);
+    delete_route(old_rt, pa_list, old_ibgp, safi);
+    add_route(new_rt, pa_list, new_ibgp, safi);
+    return 0;
+}
+
+
+int 
+RibIpcHandler::delete_route(const SubnetRoute<IPv6>& rt, 
+			    FPAList6Ref& /*pa_list*/,
+			    bool ibgp, Safi safi)
+{
+    debug_msg("RibIpcHandler::delete_route(IPv6) %p\n", &rt);
+    UNUSED(rt);
+    if (_ribname.empty())
+	return 0;
+
+    _v6_queue.queue_delete_route(_ribname, ibgp, safi, rt.net());
+
+    return 0;
+}
+
+
+
+bool 
+RibIpcHandler::originate_route(const OriginType origin, const ASPath& aspath,
+			       const IPv6Net& nlri, const IPv6& next_hop,
+			       const bool& unicast, const bool& multicast,
+			       const PolicyTags& policy_tags)
+{
+    debug_msg("origin %d aspath %s nlri %s next hop %s unicast %d"
+	      " multicast %d\n",
+	      origin, aspath.str().c_str(), nlri.str().c_str(),
+	      next_hop.str().c_str(), unicast, multicast);
+
+    /*
+    ** Construct the path attribute list.
+    */
+    FPAList6Ref pa_list = 
+	new FastPathAttributeList<IPv6>(next_hop, aspath, origin);
+
+    /*
+    ** Add a local pref for I-BGP peers.
+    */
+    LocalPrefAttribute local_pref_att(LocalPrefAttribute::default_value());
+    pa_list->add_path_attribute(local_pref_att);
+
+    /*
+    ** Inject the message into the plumbing.
+    */
+    if (unicast) {
+	_plumbing_unicast->add_route(nlri, pa_list, policy_tags, this);
+	_plumbing_unicast->push<IPv6>(this);
+    }
+
+    if (multicast) {
+	_plumbing_multicast->add_route(nlri, pa_list, policy_tags, this);
+	_plumbing_multicast->push<IPv6>(this);
+    }
+
+    return true;
+}
+
+
+bool
+RibIpcHandler::withdraw_route(const IPv6Net& nlri, const bool& unicast,
+			      const bool& multicast)
+{
+    debug_msg("nlri %s unicast %d multicast %d\n", nlri.str().c_str(),
+	      unicast, multicast);
+
+// XXX: bug... wrong function called
+#if 0
+    /*
+    ** Create a subnet route
+    */
+    SubnetRoute<IPv6>* msg_route
+	= new SubnetRoute<IPv6>(nlri, 0, NULL);
+
+    /*
+    ** Make an internal message.
+    */
+    InternalMessage<IPv6> msg(msg_route, this, GENID_UNKNOWN);
+
+    /*
+    ** Inject the message into the plumbing.
+    */
+#endif    
+    if (unicast) {
+	_plumbing_unicast->delete_route(nlri, this);
+	_plumbing_unicast->push<IPv6>(this);
+    }
+
+    if (multicast) {
+	_plumbing_multicast->delete_route(nlri, this);
+	_plumbing_multicast->push<IPv6>(this);
+    }
+
+//    msg_route->unref();
+
+    return true;
+}
+
+
 template<>
 bool
 XrlQueue<IPv6>::sendit_spec(Queued& q, const char *bgp)
@@ -709,51 +777,6 @@ XrlQueue<IPv6>::sendit_spec(Queued& q, const char *bgp)
     return sent;
 }
 
-template<class A>
-void
-XrlQueue<A>::route_command_done(const XrlError& error,
-				const string comment)
-{
-    _flying--;
-    debug_msg("callback %s %s\n", comment.c_str(), error.str().c_str());
-
-    switch (error.error_code()) {
-    case OKAY:
-	break;
-
-    case REPLY_TIMED_OUT:
-	// We should really be using a reliable transport where
-	// this error cannot happen. But it has so lets retry if we can.
-	XLOG_WARNING("callback: %s %s",  comment.c_str(), error.str().c_str());
-	break;
-
-    case RESOLVE_FAILED:
-    case SEND_FAILED:
-    case SEND_FAILED_TRANSIENT:
-    case NO_SUCH_METHOD:
-	XLOG_ERROR("callback: %s %s",  comment.c_str(), error.str().c_str());
-	break;
-
-    case NO_FINDER:
-	// XXX - Temporarily code dump if this condition occurs.
-	XLOG_FATAL("NO FINDER");
-	_bgp.finder_death(__FILE__, __LINE__);
-	break;
-
-    case BAD_ARGS:
-	XLOG_FATAL("callback: %s %s",  comment.c_str(), error.str().c_str());
-	break;
-    case COMMAND_FAILED:
-	XLOG_ERROR("callback: %s %s",  comment.c_str(), error.str().c_str());
-	break;
-    case INTERNAL_ERROR:
-	XLOG_FATAL("callback: %s %s",  comment.c_str(), error.str().c_str());
-	break;
-    }
-
-    // Fire of more requests.
-    start();
-}
-
-template class XrlQueue<IPv4>;
 template class XrlQueue<IPv6>;
+
+#endif //ipv6

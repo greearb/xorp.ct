@@ -96,23 +96,12 @@ public:
     virtual int add_route(const SubnetRoute<IPv4> &rt, 
 			  FPAList4Ref& pa_list,
 			  bool ibgp, Safi safi);
-    virtual int add_route(const SubnetRoute<IPv6> &rt, 
-			  FPAList6Ref& pa_list,
-			  bool ibgp, Safi safi);
     virtual int replace_route(const SubnetRoute<IPv4> &old_rt, bool old_ibgp,
 			      const SubnetRoute<IPv4> &new_rt, bool new_ibgp,
 			      FPAList4Ref& pa_list,
 			      Safi safi);
-    virtual int replace_route(const SubnetRoute<IPv6> &old_rt, bool old_ibgp,
-			      const SubnetRoute<IPv6> &new_rt, bool new_ibgp,
-			      FPAList6Ref& pa_list,
-			      Safi safi);
     virtual int delete_route(const SubnetRoute<IPv4> &rt,  
 			     FPAList4Ref& pa_list,
-			     bool new_ibgp,
-			     Safi safi);
-    virtual int delete_route(const SubnetRoute<IPv6> &rt,  
-			     FPAList6Ref& pa_list,
 			     bool new_ibgp,
 			     Safi safi);
     virtual PeerOutputState push_packet();
@@ -179,10 +168,6 @@ public:
 	return _peer->peerdata()->get_v4_local_addr();
     }
 
-    const IPv6& my_v6_nexthop() const	{
-	return _peer->peerdata()->get_v6_local_addr();
-    }
-
     /**
      * Get the local address as a string in numeric form.
      */
@@ -206,6 +191,31 @@ public:
     }
 
     /**
+     * @return the number of prefixes in the RIB-IN.
+     */
+    uint32_t get_prefix_count() const;
+
+    virtual EventLoop& eventloop() const;
+
+
+#ifdef HAVE_IPV6
+
+    virtual int add_route(const SubnetRoute<IPv6> &rt, 
+			  FPAList6Ref& pa_list,
+			  bool ibgp, Safi safi);
+    virtual int replace_route(const SubnetRoute<IPv6> &old_rt, bool old_ibgp,
+			      const SubnetRoute<IPv6> &new_rt, bool new_ibgp,
+			      FPAList6Ref& pa_list,
+			      Safi safi);
+    virtual int delete_route(const SubnetRoute<IPv6> &rt,  
+			     FPAList6Ref& pa_list,
+			     bool new_ibgp,
+			     Safi safi);
+    const IPv6& my_v6_nexthop() const	{
+	return _peer->peerdata()->get_v6_local_addr();
+    }
+
+    /**
      * @param addr fill in the address if this is IPv6.
      * @return true if the peer address is IPv6.
      */
@@ -213,12 +223,9 @@ public:
 	return _peer->peerdata()->iptuple().get_peer_addr(addr);
     }
 
-    /**
-     * @return the number of prefixes in the RIB-IN.
-     */
-    uint32_t get_prefix_count() const;
 
-    virtual EventLoop& eventloop() const;
+#endif //ipv6
+
 protected:
     BGPPlumbing *_plumbing_unicast;
     BGPPlumbing *_plumbing_multicast;

@@ -43,20 +43,24 @@ BGPPlumbing::BGPPlumbing(const Safi safi,
 			 RibIpcHandler* ribhandler,
 			 AggregationHandler* aggrhandler,
 			 NextHopResolver<IPv4>& next_hop_resolver_ipv4,
+#ifdef HAVE_IPV6
 			 NextHopResolver<IPv6>& next_hop_resolver_ipv6,
+#endif
 			 PolicyFilters& pfs,
 			 BGPMain& bgp)
     : _bgp(bgp),
       _rib_handler(ribhandler),
       _aggr_handler(aggrhandler),
       _next_hop_resolver_ipv4(next_hop_resolver_ipv4),
-      _next_hop_resolver_ipv6(next_hop_resolver_ipv6),
       _safi(safi),
       _policy_filters(pfs),
       _plumbing_ipv4("[IPv4:" + string(pretty_string_safi(safi)) + "]", *this,
-		     _next_hop_resolver_ipv4),
-      _plumbing_ipv6("[IPv6:" + string(pretty_string_safi(safi)) + "]", *this, 
+		     _next_hop_resolver_ipv4)
+#ifdef HAVE_IPV6
+    , _next_hop_resolver_ipv6(next_hop_resolver_ipv6)
+    , _plumbing_ipv6("[IPv6:" + string(pretty_string_safi(safi)) + "]", *this, 
 		     _next_hop_resolver_ipv6)
+#endif
 {
 }
 
@@ -65,7 +69,9 @@ BGPPlumbing::add_peering(PeerHandler* peer_handler)
 {
     int result = 0;
     result |= plumbing_ipv4().add_peering(peer_handler);
+#ifdef HAVE_IPV6
     result |= plumbing_ipv6().add_peering(peer_handler);
+#endif
     return result;
 }
 
@@ -75,7 +81,9 @@ BGPPlumbing::stop_peering(PeerHandler* peer_handler)
     debug_msg("BGPPlumbing::stop_peering\n");
     int result = 0;
     result |= plumbing_ipv4().stop_peering(peer_handler);
+#ifdef HAVE_IPV6
     result |= plumbing_ipv6().stop_peering(peer_handler);
+#endif
     return result;
 }
 
@@ -87,8 +95,10 @@ BGPPlumbing::peering_went_down(PeerHandler* peer_handler)
     TIMESPENT();
     result |= plumbing_ipv4().peering_went_down(peer_handler);
     TIMESPENT_CHECK();
+#ifdef HAVE_IPV6
     result |= plumbing_ipv6().peering_went_down(peer_handler);
     TIMESPENT_CHECK();
+#endif
     return result;
 }
 
@@ -98,7 +108,9 @@ BGPPlumbing::peering_came_up(PeerHandler* peer_handler)
     debug_msg("BGPPlumbing::peering_came_up\n");
     int result = 0;
     result |= plumbing_ipv4().peering_came_up(peer_handler);
+#ifdef HAVE_IPV6
     result |= plumbing_ipv6().peering_came_up(peer_handler);
+#endif
     return result;
 }
 
@@ -108,7 +120,9 @@ BGPPlumbing::delete_peering(PeerHandler* peer_handler)
     debug_msg("BGPPlumbing::delete_peering\n");
     int result = 0;
     result |= plumbing_ipv4().delete_peering(peer_handler);
+#ifdef HAVE_IPV6
     result |= plumbing_ipv6().delete_peering(peer_handler);
+#endif
     return result;
 }
 
@@ -117,7 +131,9 @@ BGPPlumbing::flush(PeerHandler* peer_handler)
 {
     debug_msg("BGPPlumbing::flush\n");
     plumbing_ipv4().flush(peer_handler);
+#ifdef HAVE_IPV6
     plumbing_ipv6().flush(peer_handler);
+#endif
 }
 
 int 
@@ -136,21 +152,6 @@ BGPPlumbing::add_route(const IPv4Net& net,
 }
 
 int 
-BGPPlumbing::add_route(const IPv6Net& net,
-		       FPAList6Ref& pa_list,
-		       const PolicyTags& policy_tags,
-		       PeerHandler* peer_handler)  
-{
-    debug_msg("BGPPlumbing::add_route IPv6\n");
-    PROFILE(if (main().profile().enabled(profile_route_ribin))
-		main().profile().log(profile_route_ribin,
-				     c_format("add %s", net.str().c_str())));
-
-    XLOG_ASSERT(!pa_list->is_locked());
-    return plumbing_ipv6().add_route(net, pa_list, policy_tags, peer_handler);
-}
-
-int 
 BGPPlumbing::delete_route(InternalMessage<IPv4> &rtmsg, 
 			  PeerHandler* peer_handler) 
 {
@@ -159,17 +160,6 @@ BGPPlumbing::delete_route(InternalMessage<IPv4> &rtmsg,
 				     c_format("delete %s", rtmsg.net().str().c_str())));
 
     return plumbing_ipv4().delete_route(rtmsg, peer_handler);
-}
-
-int 
-BGPPlumbing::delete_route(InternalMessage<IPv6> &rtmsg, 
-			  PeerHandler* peer_handler) 
-{
-    PROFILE(if (main().profile().enabled(profile_route_ribin))
-		main().profile().log(profile_route_ribin,
-				     c_format("delete %s", rtmsg.net().str().c_str())));
-
-    return plumbing_ipv6().delete_route(rtmsg, peer_handler);
 }
 
 int 
@@ -183,28 +173,11 @@ BGPPlumbing::delete_route(const IPNet<IPv4>& net,
     return plumbing_ipv4().delete_route(net, peer_handler);
 }
 
-int 
-BGPPlumbing::delete_route(const IPNet<IPv6>& net,
-			  PeerHandler* peer_handler) 
-{
-    PROFILE(if (main().profile().enabled(profile_route_ribin))
-		main().profile().log(profile_route_ribin,
-				     c_format("delete %s", net.str().c_str())));
-    return plumbing_ipv6().delete_route(net, peer_handler);
-}
-
 const SubnetRoute<IPv4>* 
 BGPPlumbing::lookup_route(const IPNet<IPv4> &net) const 
 {
     return const_cast<BGPPlumbing *>(this)->
 	plumbing_ipv4().lookup_route(net);
-}
-
-const SubnetRoute<IPv6>* 
-BGPPlumbing::lookup_route(const IPNet<IPv6> &net) const 
-{
-    return const_cast<BGPPlumbing *>(this)->
-	plumbing_ipv6().lookup_route(net);
 }
 
 template<>
@@ -215,19 +188,13 @@ BGPPlumbing::push<IPv4>(PeerHandler* peer_handler)
     plumbing_ipv4().push(peer_handler);
 }
 
-template<>
-void
-BGPPlumbing::push<IPv6>(PeerHandler* peer_handler) 
-{
-    debug_msg("BGPPlumbing::push\n");
-    plumbing_ipv6().push(peer_handler);
-}
-
 void
 BGPPlumbing::output_no_longer_busy(PeerHandler *peer_handler) 
 {
     plumbing_ipv4().output_no_longer_busy(peer_handler);
+#ifdef HAVE_IPV6
     plumbing_ipv6().output_no_longer_busy(peer_handler);
+#endif
 }
 
 uint32_t
@@ -235,9 +202,12 @@ BGPPlumbing::get_prefix_count(const PeerHandler *peer_handler)
 {
     return
 	plumbing_ipv4().
-	get_prefix_count(const_cast<PeerHandler *>(peer_handler)) +
-	plumbing_ipv6().
-	get_prefix_count(const_cast<PeerHandler *>(peer_handler));
+	get_prefix_count(const_cast<PeerHandler *>(peer_handler))
+#ifdef HAVE_IPV6
+	+ plumbing_ipv6().
+	get_prefix_count(const_cast<PeerHandler *>(peer_handler))
+#endif
+	;
 }
 
 template<>
@@ -245,13 +215,6 @@ uint32_t
 BGPPlumbing::create_route_table_reader<IPv4>(const IPNet<IPv4>& prefix)
 {
     return plumbing_ipv4().create_route_table_reader(prefix);
-}
-
-template<>
-uint32_t 
-BGPPlumbing::create_route_table_reader<IPv6>(const IPNet<IPv6>& prefix)
-{
-    return plumbing_ipv6().create_route_table_reader(prefix);
 }
 
 bool 
@@ -262,14 +225,6 @@ BGPPlumbing::read_next_route(uint32_t token,
     return plumbing_ipv4().read_next_route(token, route, peer_id);
 }
 
-bool 
-BGPPlumbing::read_next_route(uint32_t token, 
-			     const SubnetRoute<IPv6>*& route, 
-			     IPv4& peer_id)
-{
-    return plumbing_ipv6().read_next_route(token, route, peer_id);
-}
-
 bool
 BGPPlumbing::status(string& reason) const
 {
@@ -277,17 +232,21 @@ BGPPlumbing::status(string& reason) const
 	plumbing_ipv4().status(reason) == false) {
 	return false;
     }
+#ifdef HAVE_IPV6
     if (const_cast<BGPPlumbing *>(this)->
 	plumbing_ipv6().status(reason) == false) {
 	return false;
     }
+#endif
     return true;
 }
 
 void
 BGPPlumbing::push_routes() {
     plumbing_ipv4().push_routes();
+#ifdef HAVE_IPV6
     plumbing_ipv6().push_routes();
+#endif
 }
 
 /***********************************************************************/
@@ -1260,13 +1219,6 @@ BGPPlumbingAF<IPv4>::get_local_nexthop(const PeerHandler *peerhandler) const
 }
 
 template <>
-const IPv6& 
-BGPPlumbingAF<IPv6>::get_local_nexthop(const PeerHandler *peerhandler) const 
-{
-    return peerhandler->my_v6_nexthop();
-}
-
-template <>
 bool
 BGPPlumbingAF<IPv4>::directly_connected(const PeerHandler *peer_handler,
 					IPNet<IPv4>& subnet, IPv4& p) const
@@ -1284,37 +1236,6 @@ BGPPlumbingAF<IPv4>::directly_connected(const PeerHandler *peer_handler,
 	    return false;
 
 	IPNet<IPv4> net(local, prefix_len);
-	if (net.contains(peer)) {
-	    subnet = net;
-	    p = peer;
-	    return true;
-	}
-	
-    } catch(...) {
-	return false;
-    }
-
-    return false;
-}
-
-template <>
-bool
-BGPPlumbingAF<IPv6>::directly_connected(const PeerHandler *peer_handler,
-					IPNet<IPv6>& subnet, IPv6& p) const
-{
-    // Get the routers interface address.
-    // There is no reason for the transport address for the session to
-    // match the address family, hence the necessity to catch a
-    // possible exception (IPv4 session with IPv6 AFI).
-    try {
-	IPv6 local(peer_handler->get_local_addr().c_str());
-	IPv6 peer(peer_handler->get_peer_addr().c_str());
-
-	uint32_t prefix_len;
-	if (!_master.main().interface_address_prefix_len6(local, prefix_len))
-	    return false;
-
-	IPNet<IPv6> net(local, prefix_len);
 	if (net.contains(peer)) {
 	    subnet = net;
 	    p = peer;
@@ -1421,4 +1342,118 @@ BGPPlumbingAF<A>::push_routes() {
 }
 
 template class BGPPlumbingAF<IPv4>;
+
+/** IPv6 stuff */
+#ifdef HAVE_IPV6
+
+
+int 
+BGPPlumbing::add_route(const IPv6Net& net,
+		       FPAList6Ref& pa_list,
+		       const PolicyTags& policy_tags,
+		       PeerHandler* peer_handler)  
+{
+    debug_msg("BGPPlumbing::add_route IPv6\n");
+    PROFILE(if (main().profile().enabled(profile_route_ribin))
+		main().profile().log(profile_route_ribin,
+				     c_format("add %s", net.str().c_str())));
+
+    XLOG_ASSERT(!pa_list->is_locked());
+    return plumbing_ipv6().add_route(net, pa_list, policy_tags, peer_handler);
+}
+
+
+int 
+BGPPlumbing::delete_route(InternalMessage<IPv6> &rtmsg, 
+			  PeerHandler* peer_handler) 
+{
+    PROFILE(if (main().profile().enabled(profile_route_ribin))
+		main().profile().log(profile_route_ribin,
+				     c_format("delete %s", rtmsg.net().str().c_str())));
+
+    return plumbing_ipv6().delete_route(rtmsg, peer_handler);
+}
+
+int 
+BGPPlumbing::delete_route(const IPNet<IPv6>& net,
+			  PeerHandler* peer_handler) 
+{
+    PROFILE(if (main().profile().enabled(profile_route_ribin))
+		main().profile().log(profile_route_ribin,
+				     c_format("delete %s", net.str().c_str())));
+    return plumbing_ipv6().delete_route(net, peer_handler);
+}
+
+const SubnetRoute<IPv6>* 
+BGPPlumbing::lookup_route(const IPNet<IPv6> &net) const 
+{
+    return const_cast<BGPPlumbing *>(this)->
+	plumbing_ipv6().lookup_route(net);
+}
+
+template<>
+void
+BGPPlumbing::push<IPv6>(PeerHandler* peer_handler) 
+{
+    debug_msg("BGPPlumbing::push\n");
+    plumbing_ipv6().push(peer_handler);
+}
+
+
+template<>
+uint32_t 
+BGPPlumbing::create_route_table_reader<IPv6>(const IPNet<IPv6>& prefix)
+{
+    return plumbing_ipv6().create_route_table_reader(prefix);
+}
+
+bool 
+BGPPlumbing::read_next_route(uint32_t token, 
+			     const SubnetRoute<IPv6>*& route, 
+			     IPv4& peer_id)
+{
+    return plumbing_ipv6().read_next_route(token, route, peer_id);
+}
+
+template <>
+const IPv6& 
+BGPPlumbingAF<IPv6>::get_local_nexthop(const PeerHandler *peerhandler) const 
+{
+    return peerhandler->my_v6_nexthop();
+}
+
+template <>
+bool
+BGPPlumbingAF<IPv6>::directly_connected(const PeerHandler *peer_handler,
+					IPNet<IPv6>& subnet, IPv6& p) const
+{
+    // Get the routers interface address.
+    // There is no reason for the transport address for the session to
+    // match the address family, hence the necessity to catch a
+    // possible exception (IPv4 session with IPv6 AFI).
+    try {
+	IPv6 local(peer_handler->get_local_addr().c_str());
+	IPv6 peer(peer_handler->get_peer_addr().c_str());
+
+	uint32_t prefix_len;
+	if (!_master.main().interface_address_prefix_len6(local, prefix_len))
+	    return false;
+
+	IPNet<IPv6> net(local, prefix_len);
+	if (net.contains(peer)) {
+	    subnet = net;
+	    p = peer;
+	    return true;
+	}
+	
+    } catch(...) {
+	return false;
+    }
+
+    return false;
+}
+
 template class BGPPlumbingAF<IPv6>;
+
+
+#endif // ipv6
