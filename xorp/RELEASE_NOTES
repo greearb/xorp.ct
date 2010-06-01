@@ -3,6 +3,168 @@
 
 This file contains XORP release notes (most recent releases first).
 
+Relase 1.8-CT  June, 2010
+
+Overview:
+
+Merge xorp.ct changes from Ben's private tree into upstream 1.7.
+
+Major changes include:
+
+   * Allow OSPF, RIP, BGP, OSLR, and PIM to better handle interfaces
+      being added to and deleted from a running xorp instance via the 'xorpsh' CLI tool.
+
+   * PIM: Fix state-machine lockup due to failure to advance state machine in some error cases.
+
+   * RIP, BGP, PIM: Allow binding the protocol sockets to specific interfaces.
+
+   * FEA: Support binding to specific interfaces, including multicast protocols.
+      Use Netlink (Linux only) to filter events so that a single instance of
+      xorp pays attention to only it's interfaces.
+
+   * FEA: Support new Linux kernel API to provide multiple multicast
+     routing tables per kernel instance. This requires kernel 2.6.34
+     and the latest iproute and iptable tools.  These changes are
+     backwards compatible with normal kernels.
+
+   * OLSR: Enable building OLSR, support binding to a specific interface.
+
+   * Support building IPv6 multicast support on Linux. Haven't tested functionality yet.
+
+
+
+git shortlog for commits since Release 1.7.
+
+Achmad Basuki:
+      rpms:  Add scripts & files to build RPM packages on Fedora Linux (at least).
+
+Ben Greear:
+      Remove tags and branches dir.
+      Move trunk/* to ./, remove trunk directory.
+      xorp-ct:  Merge old CVS patch into svn repository.
+      olsr:  Enable OLSR compile in scons
+      olsr:  Fix OLSR install target, properly add OLSR templates if OLSR is enabled.
+      libxorp: Work-around crash in selector.cc due to accessing stale memory.
+      fea:  Add method to dump netlink route messages.
+      libxipc:  De-obfuscate ReplyPacket (it was just a vector of bytes)
+      libxipc:  Give user a better clue as to why xrl router timed out.
+      Fix some uninitialized memory errors found by valgrind.
+      Remove some noisy logging.      Add code to clean up pid-file if possible (on exit)
+      Fix logging & tracing to show micro-seconds, greatly aids debugging performance issues.
+      mfea:  Fix vif removal race related to mld6igmp
+      startup:  Make startup faster by implementing startup methods.
+      fea:  Don't fail commit because we can't remove multicast addresses that are already deleted.
+      startup: Put 'startup' method in common.xif.
+      pim:  Don't fail commit if pim can't find interface to stop.
+      fea:  Don't fail commit if vif is gone when un-registering protocol on interface.
+      mfea:   Defer start of mfea_vif if it can't be started when immediately requested.
+      ospf:  Add OSPF logging in the path that disables an interface.
+      rtrmgr:  Add some logging to rtr-mgr to help track configuration commits.
+      mld6igmp:  Defer mld6igmp vif start if vif is DOWN
+      pim:  Handle deferred vif_start for pim.
+      mld6igmp:   Don't faile igmp if it can't join multicast group.
+      ospf:   More logging to help track down OSPF peer link issue.
+      ospf/fea: Add logic to print out the configuration tree.
+      Add xorp_install.bash script
+      Add scripts to generate .deb files on Fedora.
+      cli:  Fix memory leak
+      libxorp:  Add BugCatcher class to help debug use-after-free and similar errors.
+      rtrmgr: Disable XRLdb run-time verification by default.  Should speed up startup.
+      build:  Enable gprof
+      fea:  Allow filtering netlink messages
+      policy:  Fix redist static and connected routes to ospf.
+      Fix compile errors on Ubuntu
+      fea:  Replace all instances of HAVE_PCAP with HAVE_PCAP_H
+      OSPF:  Interop with RFC4813, fix router-link metric for loopback case.
+      scons:  Properly detect multicast header files for older Linux distributions.
+      fea:  Properly check for minimum ethernet packet size.
+      fea:  Dynamically attempt to use ioctl to set device flags if netlink doesn't work.
+      vrrp:  Remove assert that appears to be wrong.
+      ArpHeader/vrrp:  Fix a compile error on Sparc, related to ArpHeader.
+      fea:  Remove some un-needed casts and assignments related to netlink messages.
+      fea/vrrp:  Make some errors about adding/deleting macs non-critical.
+      fea:  Detect pcap-bpf.h and don't use the feature if it isn't available.
+      fea/pcap:  Don't link against libpcap if it doesn't exist.
+      Fix build on BSD.
+      Move MULT_MCAST table detection logic into allconfig.py instead of hard-coding it.
+      netlink:  ifdef out netlink code if not compiled to use netlink sockets.
+      fea:  Thoroughly disable all routing_socket code if platform doesn't support it.
+      fea: Don't compile ioctl get/set logic if netlink is defined (we prefer netlink).
+      fea/click:  Disable CLICK by default.  Saves around 200k of disk space.
+      AlignData cannot be made to copy-data, other code makes assumptions that it does not.
+      Allow disabling of IPv6 via scons...even if OS supports it.
+      ipv6:  Conditionally compile much of the IPv6 related code.
+      ipv6:  Conditionally compile some more IPv6 code.
+      fea/firewall:  Allow to compile out firewall code, saves ~180k stripped.
+      Only generate .scons_build_args when doing a build (not an install, for instance)
+      Build template 'build-script' to strip 'firewall' out of fea.tp.raw.
+      Fix crash when DEBUG_LOGGING was enabled, fix build when DEBUG_LOGING was enabled.
+      Revert "Conditionally compile much of the IPv6 related code.:
+      fea:  Conditionally compile Remove socket6 API
+      ipv6:  Conditionally compile socket6 logic.  Saves around 80k on disk.
+      ipv6/fea:  Conditionally compile socket6 API        Saves about 80k on disk.
+      ipv6/pim:  Don't build pim6 if IPv6 is disabled.  Saves about 12k on disk
+      ospfv3/ipv6:  Disable ospfv3 when ipv6 is disabled.  Saves about 270k on disk.
+      ospf:  Fix up build errors introduced earlier, when ipv6 is enabled.
+      Fix compile on really old systems (Fedora 5)
+      fea/netlink:  Fix problem with older kernels (FC5, 2.6.28 kernel, for instance)
+      ripng/ipv6:  Don't build ripng if not using IPv6
+      fea/ipv6:  Conditionally compile ipv6 stuff in fea-fib-client interface.
+      rib/xif: Re-arrange so that it will be easier to ifdef out the ipv6 functions.
+      static/ipv6:  Conditionally compile some ipv6 logic in static.
+      ospf:  Group ipv6 code together to make it easier to conditionally compile.
+      ospf/ipv6:  Conditionally compile all ipv6 code in xrl_io.cc, saves 50k
+      rib/ipv6: Conditionally compile some ipv6 code in tools.
+      pim/ipv6:  Conditionally compile some xrl_pim_node ipv6 code.
+      fib2mrib/ipv6:  Conditionally compile ipv6 code, saves 20k
+      ipv6:  Conditionally compile (more) ipv6 code for bgp, ospf, rib, and static-routes.
+      vrrp:  Fix assert related to packet size.
+      fea/ipv6:  Conditionally compile a bunch more fea/rib/pim ipv6 code.
+      vrrp/fea:  The commit logic was paying more attention to the error_msg string than return codes.
+      vrrp:  Enable creating/deleting secondary IP address for the VRRP masters.
+      vrrp:  If vrrp tries to remove the VRRP MAC, and it's the only one that exists
+             ..then create a random MAC to take it's place.  Otherwis
+      ipv6/pim:  conditionally compile more ipv6 code.
+      rpms:  Script to automate building RPMs.
+      fea:  Add better decoding for netlink error messages.
+      vrrp:  Don't allow user to mis-configure interval.
+      fea:  If we try to read netlink for a particular seqno, but do not find it
+            before netlink socket is out of packets to read, then do   
+      fea:  Add work-around for older kernels that cannot pull single interfaces.
+      fea:  Fix link & MTU detection on funky systems.
+      Fix 'scons check' build.
+      carrier-sense:  My previous fix for sensing carrier by looking at sysfs files
+            on linux neglected to deal with exceptions thrown by
+      IPMR:  Add support for new multiple mcast table API.
+      Logging:  Enable conditional compilation of logging code.
+      mfea:  Update IPv6 mcast code to modern kernels.
+      Small improvement to memory usage related to xrl_error
+      xrl:  Move ipv4 and ipv4Net objects into xrl_atom
+      ipv6/mcast:  BSD doesn't have mifc6ctl.vifc_threshold member.
+      selector:  Work around assert in selector logic.
+      beautify code:  Had to stare at offending line for quite a while to parse it.
+      exceptions:  Pass string back by reference.
+      fea,comm:  Remove some noisy logging.
+      mld6igmp:  Tweak logging and add/delete callback.
+      policy:  Add support for exporting routes from fib2mrib to ospf.
+      rib/show_routes:  Fix crash due to race.
+      Move parse_netlink_socket logic into get_netlink_socket.cc file.
+      fea:  route distribution debugging
+      Package script used by Candela.
+      Final xorp.ct merge
+      Update README for XORP.ct and rls 1.8
+      olsr/ospf/libxorp:  Add some files missed in xorp.ct merge.
+      oslr:  Build OLSR by default.
+      Move README to base directory.
+      Update README file.
+
+Eric S. Johnson:
+      vrrp:  Fix asserts, remove IPs on shutdown.
+
+Saurabh <saurabh.pandya@elitecore.com>
+      IPv6/PIM:  conditionally compile more ipv6 code.
+
+
 Release 1.7  May 1, 2010
 ============================
   ALL:
