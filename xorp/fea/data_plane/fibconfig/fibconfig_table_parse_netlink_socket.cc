@@ -66,6 +66,10 @@ FibConfigTableGetNetlinkSocket::parse_buffer_netlink_socket(
 	 NLMSG_OK(nlh, buffer_bytes);
 	 nlh = NLMSG_NEXT(const_cast<struct nlmsghdr*>(nlh), buffer_bytes)) {
 	void* nlmsg_data = NLMSG_DATA(const_cast<struct nlmsghdr*>(nlh));
+
+	//XLOG_ERROR("nlh->msg-type: %s (%i)",
+	//	   NlmUtils::nlm_msg_type(nlh->nlmsg_type).c_str(),
+	//	   (int)(nlh->nlmsg_type));
 	
 	switch (nlh->nlmsg_type) {
 	case NLMSG_ERROR:

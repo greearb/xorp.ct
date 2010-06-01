@@ -87,6 +87,10 @@ IfConfigGetNetlinkSocket::parse_buffer_netlink_socket(IfConfig& ifconfig,
 	 nlh = NLMSG_NEXT(nlh, buffer_bytes)) {
 	void* nlmsg_data = NLMSG_DATA(nlh);
 	
+	//XLOG_WARNING("nlh msg received, type %s(%d) (%d bytes)\n",
+	//	     NlmUtils::nlm_msg_type(nlh->nlmsg_type).c_str(),
+	//	     nlh->nlmsg_type, nlh->nlmsg_len);
+
 	switch (nlh->nlmsg_type) {
 	case NLMSG_ERROR:
 	{
@@ -159,6 +163,9 @@ IfConfigGetNetlinkSocket::parse_buffer_netlink_socket(IfConfig& ifconfig,
 	    debug_msg("Unhandled type %s(%d) (%d bytes)\n",
 		      NlmUtils::nlm_msg_type(nlh->nlmsg_type).c_str(),
 		      nlh->nlmsg_type, nlh->nlmsg_len);
+	    //XLOG_WARNING("Unhandled type %s(%d) (%d bytes)\n",
+	    //	 NlmUtils::nlm_msg_type(nlh->nlmsg_type).c_str(),
+	    //	 nlh->nlmsg_type, nlh->nlmsg_len);
 	    break;
 	}
     }
@@ -282,16 +289,38 @@ nlm_cond_newlink_to_fea_cfg(const IfTree& user_cfg, IfTree& iftree, const struct
 	// It could be because this is a wireless event carried to user
 	// space. Such events are encapsulated in the IFLA_WIRELESS field of
 	// a RTM_NEWLINK message.
-	// Unfortunately, there is no easy way to verify whether this is
-	// indeed a wireless event or a problem with the message integrity,
-	// hence we silently ignore it.
-	//
-	debug_msg("Could not find interface name for interface index %d",
-		  ifinfomsg->ifi_index);
+	// Older kernels (2.6.18, for instance), don't send the name evidently.
+	// Attempt to determine it from the ifindex.
+	static bool warn_once = true;
+	if (warn_once) {
+	    XLOG_WARNING("Could not find interface name for interface index %d in netlink msg.\n  Attempting"
+			 " work-around by using ifindex to find the name.\n  This warning will be printed only"
+			 " once.\n",
+			 ifinfomsg->ifi_index);
+	    warn_once = false;
+	}
+#ifdef HAVE_IF_INDEXTONAME
+	char buf[IF_NAMESIZE + 1];
+	char* ifn = if_indextoname(ifinfomsg->ifi_index, buf);
+	if (ifn) {
+	    if_name = ifn;
+	}
+	else {
+	    XLOG_ERROR("Cannot find ifname for index: %i, unable to process netlink NEWLINK message.\n",
+		       ifinfomsg->ifi_index);
+	    return;
+	}
+#else
+	XLOG_ERROR("ERROR:  IFLA_IFNAME isn't in netlink msg, and don't have if_indextoname on this\n"
+		   "  platform..we cannot properly read network device events.\n  This is likely a fatal"
+		   " error.\n");
 	return;
+#endif
     }
-    
-    if_name = (char*)(RTA_DATA(rta_array[IFLA_IFNAME]));
+    else {
+	if_name = (char*)(RTA_DATA(rta_array[IFLA_IFNAME]));
+    }
+
     //XLOG_WARNING("newlink, interface: %s  tree: %s\n", if_name.c_str(), iftree.getName().c_str());
 
     if (! user_cfg.find_interface(if_name)) {
@@ -524,7 +553,6 @@ nlm_cond_newlink_to_fea_cfg(const IfTree& user_cfg, IfTree& iftree, const struct
     }
 #endif // HAVE_IPV6
     default:
-	XLOG_UNREACHABLE();
 	break;
     }
 }
@@ -548,11 +576,28 @@ nlm_dellink_to_fea_cfg(IfTree& iftree, const struct ifinfomsg* ifinfomsg,
     // Get the interface name
     //
     if (rta_array[IFLA_IFNAME] == NULL) {
-	XLOG_FATAL("Could not find interface name for interface index %d",
-		   ifinfomsg->ifi_index);
+#ifdef HAVE_IF_INDEXTONAME
+	char buf[IF_NAMESIZE + 1];
+	char* ifn = if_indextoname(ifinfomsg->ifi_index, buf);
+	if (ifn) {
+	    if_name = ifn;
+	}
+	else {
+	    XLOG_ERROR("Cannot find ifname for index: %i, unable to process netlink DELLINK message.\n",
+		       ifinfomsg->ifi_index);
+	    return;
+	}
+#else
+	XLOG_ERROR("ERROR:  IFLA_IFNAME isn't in netlink msg, and don't have if_indextoname on this\n"
+		   " platform..we cannot properly read network device events.  This is likely a fatal"
+		   " error.\n");
+	return;
+#endif
+    }
+    else {
+	if_name = (char*)(RTA_DATA(rta_array[IFLA_IFNAME]));
     }
 
-    if_name = (char*)(RTA_DATA(rta_array[IFLA_IFNAME]));
     XLOG_WARNING("dellink, interface: %s  tree: %s\n", if_name.c_str(), iftree.getName().c_str());
     
     //
