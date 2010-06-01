@@ -51,7 +51,6 @@ tgts = [
     'mfea.tgt',
     'mld6igmp.tgt',
     'ospfv2.tgt',
-    'ospfv3.tgt',
     'pim.tgt',
     'policy.tgt',
     'rib.tgt',
@@ -78,6 +77,7 @@ if env['enable_olsr']:
 
 if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
     tgts.append('test_socket6.tgt')
+    tgts.append('ospfv3.tgt')
 
     
 if not (env.has_key('disable_profile') and env['disable_profile']):

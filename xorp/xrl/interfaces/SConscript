@@ -61,7 +61,6 @@ xifs = [
     'mld6igmp_client.xif',
     'mld6igmp.xif',
     'ospfv2.xif',
-    'ospfv3.xif',
     'pim.xif',
     'policy_backend.xif',
     'policy_redist4.xif',
@@ -96,6 +95,7 @@ if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
     xifs.append('socket6_user.xif')
     xifs.append('fea_rawpkt6_client.xif')
     xifs.append('fea_rawpkt6.xif')
+    xifs.append('ospfv3.xif')
 
 if not (env.has_key('disable_fw') and env['disable_fw']):
     xifs.append('fea_firewall.xif')

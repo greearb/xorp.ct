@@ -52,7 +52,6 @@ env.PrependUnique(LIBPATH = [
 env.AppendUnique(LIBS = [
     'xorp_ospf',		# Refers to the library, not the executable.
     'xst_ospfv2',
-    'xst_ospfv3',
     'xorp_policy_backend',
     'xorp_policy_common',
     'xorp_fea_client',
@@ -72,6 +71,7 @@ env.AppendUnique(LIBS = [
 if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
     env.AppendUnique(LIBS = [
         'xif_fea_rawpkt6',
+        'xst_ospfv3',
         ])
 
 env.Replace(RPATH = [
@@ -111,13 +111,20 @@ else:
 
 ospfv2srcs = [ 'xorp_ospfv2.cc', ]
 ospfv2 = env.Program(target = 'xorp_ospfv2', source = ospfv2srcs)
-
-ospfv3srcs = [ 'xorp_ospfv3.cc', ]
-ospfv3 = env.Program(target = 'xorp_ospfv3', source = ospfv3srcs)
-
 env.Alias('install', env.InstallProgram(env['xorp_moduledir'], ospfv2))
-env.Alias('install', env.InstallProgram(env['xorp_moduledir'], ospfv3))
+
 if is_shared:
     env.Alias('install', env.InstallLibrary(env['xorp_libdir'], libxorp_ospf))
 
-Default(ospfv2, ospfv3)
+if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
+    ospfv3srcs = [ 'xorp_ospfv3.cc',
+                   'xrl_target3.cc',
+                   ]
+    ospfv3 = env.Program(target = 'xorp_ospfv3', source = ospfv3srcs)
+
+    env.Alias('install', env.InstallProgram(env['xorp_moduledir'], ospfv3))
+    Default(ospfv2, ospfv3)
+else:
+    Default(ospfv2)
+    
+
