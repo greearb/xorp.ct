@@ -23,4 +23,6 @@ Import("env")
 env = env.Clone()
 
 mld_pdf = env.PDF(env.DVI('mld6igmp_arch.tex'))
-Default(mld_pdf)
+mld_ps = env.PostScript(env.DVI('mld6igmp_arch.tex'))
+
+Default(mld_pdf, mld_ps)

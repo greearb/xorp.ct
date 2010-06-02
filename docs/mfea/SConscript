@@ -23,4 +23,6 @@ Import("env")
 env = env.Clone()
 
 mfea_pdf = env.PDF(env.DVI('mfea_arch.tex'))
-Default(mfea_pdf)
+mfea_ps = env.PostScript(env.DVI('mfea_arch.tex'))
+
+Default(mfea_pdf, mfea_ps)

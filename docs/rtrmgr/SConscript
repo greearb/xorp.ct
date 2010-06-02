@@ -23,4 +23,6 @@ Import("env")
 env = env.Clone()
 
 rtrmgr_pdf = env.PDF(env.DVI('rtrmgr.tex'))
-Default(rtrmgr_pdf)
+rtrmgr_ps = env.PostScript(env.DVI('rtrmgr.tex'))
+
+Default(rtrmgr_pdf, rtrmgr_ps)

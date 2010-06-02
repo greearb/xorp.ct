@@ -23,4 +23,6 @@ Import("env")
 env = env.Clone()
 
 pt_pdf = env.PDF(env.DVI('pim_testsuite.tex'))
-Default(pt_pdf)
+pt_ps = env.PostScript(env.DVI('pim_testsuite.tex'))
+
+Default(pt_pdf, pt_ps)

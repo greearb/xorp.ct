@@ -23,4 +23,6 @@ Import("env")
 env = env.Clone()
 
 fea_pdf = env.PDF(env.DVI('fea.tex'))
-Default(fea_pdf)
+fea_ps = env.PostScript(env.DVI('fea.tex'))
+
+Default(fea_pdf, fea_ps)

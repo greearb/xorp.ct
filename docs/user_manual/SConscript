@@ -53,4 +53,6 @@ env.PrependUnique(TEXINPUTS = [
 ])
 
 manual_pdf = env.PDF(env.DVI(target='user_manual', source=manual_srcs))
-Default(manual_pdf)
+manual_ps = env.PostScript(env.DVI(target='user_manual', source=manual_srcs))
+
+Default(manual_pdf, manual_ps)

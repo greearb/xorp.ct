@@ -24,5 +24,7 @@ env = env.Clone()
 
 da_pdf = env.PDF(env.DVI('design_arch.tex'))
 eh_pdf = env.PDF(env.DVI('error_handling.tex'))
+eh_ps = env.PostScript(env.DVI('error_handling.tex'))
+da_ps = env.PostScript(env.DVI('design_arch.tex'))
 
-Default(da_pdf, eh_pdf)
+Default(da_pdf, eh_pdf, da_ps, eh_ps)

@@ -23,4 +23,6 @@ Import("env")
 env = env.Clone()
 
 pa_pdf = env.PDF(env.DVI('pim_arch.tex'))
-Default(pa_pdf)
+pa_ps = env.PostScript(env.DVI('pim_arch.tex'))
+
+Default(pa_pdf, pa_ps)

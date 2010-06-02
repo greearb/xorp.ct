@@ -33,4 +33,6 @@ env.PrependUnique(TEXINPUTS = [
 ])
 
 olsr_pdf = env.PDF(env.DVI(target='olsr_manual', source=olsr_srcs))
+olsr_ps = env.PostScript(env.DVI(target='olsr_manual', source=olsr_srcs))
+
 Default(olsr_pdf)

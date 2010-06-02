@@ -23,4 +23,6 @@ Import("env")
 env = env.Clone()
 
 xdev_pdf = env.PDF(env.DVI('xorpdev_101.tex'))
-Default(xdev_pdf)
+xdev_ps = env.PostScript(env.DVI('xorpdev_101.tex'))
+
+Default(xdev_pdf, xdev_ps)

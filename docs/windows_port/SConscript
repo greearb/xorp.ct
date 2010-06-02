@@ -23,4 +23,6 @@ Import("env")
 env = env.Clone()
 
 win32_pdf = env.PDF(env.DVI('windows_port.tex'))
-Default(win32_pdf)
+win32_ps = env.PostScript(env.DVI('windows_port.tex'))
+
+Default(win32_pdf, win32_ps)

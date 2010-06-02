@@ -32,4 +32,6 @@ env = env.Clone()
 # document is captured.
 
 bgp_pdf = env.PDF(env.DVI('bgp.tex'))
-Default(bgp_pdf)
+bgp_ps = env.PostScript(env.DVI('bgp.tex'))
+
+Default(bgp_pdf, bgp_ps)

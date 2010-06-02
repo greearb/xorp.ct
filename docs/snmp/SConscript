@@ -23,4 +23,6 @@ Import("env")
 env = env.Clone()
 
 snmp_pdf = env.PDF(env.DVI('snmp_overview.tex'))
-Default(snmp_pdf)
+snmp_ps = env.PostScript(env.DVI('snmp_overview.tex'))
+
+Default(snmp_pdf, snmp_ps)

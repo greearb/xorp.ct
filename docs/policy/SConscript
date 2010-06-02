@@ -17,18 +17,16 @@
 #
 # $Id$
 
-# XXX This is just a placeholder; policy docs not yet built.
-#
-#import os
-#Import("env")
-#
-#env = env.Clone()
-#
-#policy_srcs = [
-#	'design.tex',
-#	'implementation.tex',
-#	'requirements.tex',
-#	]
-#
-#policy_pdf = env.PDF(env.DVI(target='policy', source=policy_srcs))
-#Default(policy_pdf)
+import os
+Import("env")
+
+env = env.Clone()
+
+pd_pdf = env.PDF(env.DVI('design.tex'))
+pd_ps = env.PostScript(env.DVI('design.tex'))
+pi_pdf = env.PDF(env.DVI('implementation.tex'))
+pi_ps = env.PostScript(env.DVI('implementation.tex'))
+pr_pdf = env.PDF(env.DVI('requirements.tex'))
+pr_ps = env.PostScript(env.DVI('requirements.tex'))
+
+Default(pd_pdf, pd_ps, pi_pdf, pi_ps, pr_pdf, pr_ps)

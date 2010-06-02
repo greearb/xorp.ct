@@ -23,4 +23,6 @@ Import("env")
 env = env.Clone()
 
 lx_pdf = env.PDF(env.DVI('libxorp_overview.tex'))
-Default(lx_pdf)
+lx_ps = env.PostScript(env.DVI('libxorp_overview.tex'))
+
+Default(lx_pdf, lx_ps)

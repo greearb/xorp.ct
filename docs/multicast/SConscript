@@ -23,4 +23,6 @@ Import("env")
 env = env.Clone()
 
 ma_pdf = env.PDF(env.DVI('multicast_arch.tex'))
-Default(ma_pdf)
+ma_ps = env.PostScript(env.DVI('multicast_arch.tex'))
+
+Default(ma_pdf, ma_ps)

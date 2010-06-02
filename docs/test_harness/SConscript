@@ -23,4 +23,6 @@ Import("env")
 env = env.Clone()
 
 th_pdf = env.PDF(env.DVI('test_harness.tex'))
-Default(th_pdf)
+th_ps = env.PostScript(env.DVI('test_harness.tex'))
+
+Default(th_pdf, th_ps)

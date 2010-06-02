@@ -22,6 +22,7 @@ Import("env")
 
 env = env.Clone()
 lx_pdf = env.PDF(env.DVI('libxipc_overview.tex'))
+lx_ps = env.PostScript(env.DVI('libxipc_overview.tex'))
 
 # XXX Embedded paths need updated to XIF files.
 # This assumes that XORP source from this branch is checked out
@@ -33,5 +34,6 @@ env.AppendUnique(TEXINPUTS = [
 	env['sourcedir'] + '/libxipc/' + ':',
 	])
 xi_pdf = env.PDF(env.DVI('xrl_interfaces.tex'))
+xi_ps = env.PostScript(env.DVI('xrl_interfaces.tex'))
 
-Default(lx_pdf, xi_pdf)
+Default(lx_pdf, xi_pdf, lx_ps, xi_ps)

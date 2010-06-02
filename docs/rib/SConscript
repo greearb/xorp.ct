@@ -28,4 +28,6 @@ env.AppendUnique(TEXINPUTS = [
 	])
 
 rib_pdf = env.PDF(env.DVI('rib.tex'))
-Default(rib_pdf)
+rib_ps = env.PostScript(env.DVI('rib.tex'))
+
+Default(rib_pdf, rib_ps)
