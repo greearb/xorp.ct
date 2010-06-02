@@ -18,7 +18,7 @@
 # $ID$
 
 Help("""
-    rel={public17|..} to identify the target release.
+    rel={public18|..} to identify the target release.
     builddir=<some path> to specify a different build directory.
         Default is "../arch-os-rel".
     installdir=<some path> to specify a different installation directory.
@@ -33,7 +33,7 @@ from SCons.Script.SConscript import SConsEnvironment
 import SCons.Action
 import SCons.Builder
 
-rel = ARGUMENTS.get('rel', 'public17')
+rel = ARGUMENTS.get('rel', 'public18')
 tempbuilddir = ARGUMENTS.get('tempbuilddir', '#/../docs-'+rel)
 tempinstalldir = ARGUMENTS.get('tempinstalldir', tempbuilddir+'/stage')
 sourcedir=Dir(".").abspath

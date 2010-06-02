@@ -1,6 +1,3 @@
-%
-% $XORP: xorp/docs/user_manual/vrrp.tex,v 1.1 2008/10/09 18:05:00 abittau Exp $
-%
 
 \chapter{\label{vrrp}VRRP}
 
@@ -31,7 +28,7 @@ The configuration syntax for XORP VRRP is given below.
 \begin{minipage}{6in}
 \begin{alltt}
 \begin{tabbing}
-xx\=xx\=xx\=xx\=xx\=\kill
+xx\=xx\=xx\=xx\=xx\=xx\=\kill
 protocols \{\\
 \>vrrp \{\\
 \>\>interface: {\it text} \{\\
@@ -40,7 +37,9 @@ protocols \{\\
 \>\>\>\>\>priority: {\it int(1..254)} \\
 \>\>\>\>\>interval: {\it int(1..255)} \\
 \>\>\>\>\>preempt: {\it bool} \\
-\>\>\>\>\>ip {\it IPv4} \{\}\\
+\>\>\>\>\>ip {\it IPv4} \{\\
+\>\>\>\>\>\>prefix-length: {\it int(1..32)} \\
+\>\>\>\>\>\}\\
 \>\>\>\>\>disable: {\it bool} \\
 \>\>\>\>\}\\
 \>\>\>\}\\
@@ -77,6 +76,9 @@ setting of this flag.
 
 \item[ip]  The IP addresses associated with this VRRP group.  These are the IP
 addresses that client machines will use as their default gateway.
+
+\item[prefix-length]  The prefix for the IP address associated with this VRRP group.
+Introduced in release 1.8-CT
 
 \item[disable]  A flag that can be used to disable or enable this VRRP instance.
 \end{description}
