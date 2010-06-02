@@ -33,13 +33,13 @@ KDOC_LIB_DIR="${KDOC_DEST_DIR}/libdir"
 HTML_TEMPLATES="html_templates"
 HTML_INDEX="html/index.html"
 HTML_INDEX_DATA="html/index.dat"
-HTML_CSS="--html-css http://www.xorp.org/xorp-kdoc.css"
+HTML_CSS="--html-css xorp-kdoc.css"
 
 #
 # Misc. pre-defined variables
 #
-HTML_LOGO="http://www.xorp.org/images/mad/logo-xorp_org.gif"
-HTML_LOGO_LINK="http://www.xorp.org/"
+HTML_LOGO="images/mad/logo-xorp_org.gif"
+HTML_LOGO_LINK="http://www.candelatech.com/xorp.ct/"
 
 #
 # Print message to stderr if DEBUG is set to non-zero value
