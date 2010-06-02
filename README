@@ -145,10 +145,10 @@ You may also wish to try this script to create a tar.gz install package:
 In general, configuration and startup of the various XORP processes are
 normally meant to happen via the router manager (rtrmgr), so please
 refer first to the XORP configuration guide:
-http://www.xorp.org/getting_started.html
+http://www.candelatech.com/xorp.ct/getting_started.html
 
 For additional information see the user documentation:
-http://www.xorp.org/releases/current/docs/user_manual/user_manual.pdf
+http://www.candelatech.com/xorp.ct/releases/current/docs/user_manual/user_manual.pdf
 and docs/user_manual.
 
 
@@ -320,7 +320,7 @@ The core team currently consists of:
 8. Additional information
 =========================
 
-  * WWW: http://www.candelatech.com/oss/xorp-ct.html
+  * WWW: http://www.candelatech.com/xorp.ct/
   * WWW: http://www.xorp.org/
 
   * Source code and binary distribution access:

@@ -107,7 +107,7 @@ def write_search_form():
     close_div("search")
 
 def write_google_tracker():
-    print """<script src="http://www.xorp.org/scripts/tagga.js" type="text/javascript"></script>
+    print """<script src="scripts/tagga.js" type="text/javascript"></script>
     <script type="text/javascript">
             var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
             document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
