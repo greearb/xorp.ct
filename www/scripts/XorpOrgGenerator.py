@@ -37,7 +37,7 @@ xorp_links = [
     ("Mailing Lists", "mailing_lists.html"),
 #    ("Contributing", "contributing.html"),
 #    ("Developers", "people.html"),
-    ("Source Repository", "svn.html"),
+    ("Source Repository", "scm.html"),
     ("Bug Reporting", "http://github.com/greearb/xorp.ct/issues"),
 #    ("Operating a mirror", "mirror_operation.html"),
     ("News", "news.html"),
