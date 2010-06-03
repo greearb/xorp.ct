@@ -34,10 +34,6 @@
 #include "finder_constants.hh"
 #include "finder_client_observer.hh"
 
-#include <boost/shared_ptr.hpp>
-
-using boost::shared_ptr;
-
 class DispatchState;
 
 class FinderClient;
@@ -219,11 +215,7 @@ protected:
 		    uint16_t	finder_port);
 
 private:
-    // XXX
-#if 0
-    XrlPFSender& get_sender(const string& target);
-#endif
-    shared_ptr<XrlPFSender> lookup_sender(const Xrl& xrl, FinderDBEntry *dbe);
+    ref_ptr<XrlPFSender> lookup_sender(const Xrl& xrl, FinderDBEntry *dbe);
 
 protected:
     EventLoop&			_e;
@@ -235,19 +227,14 @@ protected:
 
     list<XrlPFListener*>	_listeners;		// listeners
     list<XrlRouterDispatchState*> _dsl;			// dispatch state
-    list< shared_ptr<XrlPFSender> > _senders;		// active senders
+    list< ref_ptr<XrlPFSender> > _senders;		// active senders
 
     static uint32_t		_icnt;			// instance count
 
-    // XXX the following are mostly only used by the incomplete
-    // batch support. Stick to using unchecked pointers for now --bms
-    // TODO:  That is just waiting for bugs to happen..fix this. --Ben
 private:
     typedef map<string, XI*>		XIM;
-    typedef map<string, XrlPFSender* >	SENDERS;
 
     mutable XIM			_xi_cache;
-    SENDERS			_senders2;
 };
 
 /**

@@ -27,19 +27,15 @@
 #include "xrl_error.hh"
 #include "xrl_pf.hh"
 
-#include <boost/shared_ptr.hpp>
-
-using boost::shared_ptr;
-
 class XrlPFSenderFactory {
 public:
     static void	 	startup();
     static void	 	shutdown();
 
-    static shared_ptr<XrlPFSender> create_sender(
+    static ref_ptr<XrlPFSender> create_sender(
         EventLoop& eventloop, const char* proto_colon_addr);
 
-    static shared_ptr<XrlPFSender> create_sender(EventLoop& e,
+    static ref_ptr<XrlPFSender> create_sender(EventLoop& e,
         const char* protocol, const char* address);
 };
 

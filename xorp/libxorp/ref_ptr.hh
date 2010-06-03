@@ -228,6 +228,9 @@ public:
      * necessary.
      */
     void release() const { unref(); }
+    /* mimic functionality of boost weak_ptr, same as release()
+     */
+    void reset() const { unref(); }
 
     ref_ptr(_Tp* data, int32_t index) : _M_ptr(data), _M_index(index)
     {

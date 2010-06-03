@@ -26,16 +26,13 @@
 
 #include <string>
 
-#include <boost/weak_ptr.hpp>
+#include "libxorp/ref_ptr.hh"
+#include "xrl_pf.hh"  // Needed for ref_ptr instantiation of XrlPFSender
 
 #include "libxorp/exceptions.hh"
 #include "xrl_atom.hh"
 #include "xrl_args.hh"
 #include "xrl_tokens.hh"
-//#include "libxorp/ref_ptr.hh"
-//#include "xrl_pf.hh"  // Needed for ref_ptr instantiation of XrlPFSender
-
-using boost::weak_ptr;
 
 class XrlPFSender;
 
@@ -175,11 +172,11 @@ public:
     bool resolved() const { return _resolved; }
     void set_resolved(bool r) const { _resolved = r; }
 
-    weak_ptr<XrlPFSender> resolved_sender() const {
+    ref_ptr<XrlPFSender> resolved_sender() const {
         return _resolved_sender;
     }
 
-    void set_resolved_sender(weak_ptr<XrlPFSender> s) const {
+    void set_resolved_sender(ref_ptr<XrlPFSender>& s) const {
         _resolved_sender = s;
     }
 
@@ -205,8 +202,7 @@ private:
     mutable XrlArgs*		    _argp; // XXX shouldn't be mutable
     mutable int			    _to_finder;
     mutable bool		    _resolved; // XXX ditto
-    //mutable ref_ptr<XrlPFSender> _resolved_sender; // XXX ditto
-    mutable weak_ptr<XrlPFSender>   _resolved_sender; // XXX ditto
+    mutable ref_ptr<XrlPFSender> _resolved_sender; // XXX ditto
 
     static const string _finder_protocol;
 };

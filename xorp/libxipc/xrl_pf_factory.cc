@@ -33,47 +33,43 @@
 #include "xrl_pf_stcp.hh"
 #include "xrl_pf_unix.hh"
 
-//#include <boost/make_shared.hpp>
-//using boost::make_shared;
-
 // STCP senders are a special case.  Constructing an STCP sender has
 // real cost, unlike InProc and SUDP, so we maintain a cache of
 // STCP senders with one per sender destination address.
 
-//ref_ptr<XrlPFSender>
-shared_ptr<XrlPFSender>
+ref_ptr<XrlPFSender>
 XrlPFSenderFactory::create_sender(EventLoop&	eventloop,
 				  const char*	protocol,
 				  const char*	address)
 {
     debug_msg("instantiating sender pf = \"%s\", addr = \"%s\"\n",
 	      protocol, address);
+    ref_ptr<XrlPFSender> rv;
     try {
 	if (strcmp(XrlPFSTCPSender::protocol_name(), protocol) == 0) {
-	    // XXX boost::make_shared() candidate.
-	    return shared_ptr<XrlPFSender>(
-		new XrlPFSTCPSender(eventloop, address));
+	    rv = new XrlPFSTCPSender(eventloop, address);
+	    return rv;
 	}
 	if (strcmp(XrlPFUNIXSender::protocol_name(), protocol) == 0) {
-	    // XXX boost::make_shared() candidate.
-	    return shared_ptr<XrlPFSender>(
-		new XrlPFUNIXSender(eventloop, address));
+	    rv = new XrlPFUNIXSender(eventloop, address);
+	    return rv;
 	}
     } catch (XorpException& e) {
 	XLOG_ERROR("XrlPFSenderFactory::create failed: %s\n", e.str().c_str());
     }
-    return shared_ptr<XrlPFSender>();
+    return rv;
 }
 
-shared_ptr<XrlPFSender>
+ref_ptr<XrlPFSender>
 XrlPFSenderFactory::create_sender(EventLoop& eventloop,
 				  const char* protocol_colon_address)
 {
     char *colon = strstr(const_cast<char*>(protocol_colon_address), ":");
+    ref_ptr<XrlPFSender> rv;
     if (colon == 0) {
 	debug_msg("No colon in supposedly colon separated <protocol><address>"
 		  "combination\n\t\"%s\".\n", protocol_colon_address);
-	return shared_ptr<XrlPFSender>();
+	return rv;
     }
 
     string protocol(protocol_colon_address, colon - protocol_colon_address);

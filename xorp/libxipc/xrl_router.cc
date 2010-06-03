@@ -38,10 +38,6 @@
 
 #include "sockutil.hh"
 
-// XXX should be included nested above.
-//#include <boost/shared_ptr.hpp>
-//#include <boost/weak_ptr.hpp>
-
 //
 // Enable this macro to enable Xrl callback checker that checks each Xrl
 // callback is dispatched just once.
@@ -390,9 +386,8 @@ XrlRouter::send_resolved(const Xrl&		xrl,
 			 bool  direct_call)
 {
     try {
-	shared_ptr<XrlPFSender> s =
-            lookup_sender(xrl, const_cast<FinderDBEntry*>(dbe));
-	if (s == 0) {
+	ref_ptr<XrlPFSender> s = lookup_sender(xrl, const_cast<FinderDBEntry*>(dbe));
+	if (!s.get()) {
 	    // Notify Finder client that result was bad.
 	    _fc->uncache_result(dbe);
 
@@ -402,15 +397,15 @@ XrlRouter::send_resolved(const Xrl&		xrl,
 
 	const Xrl& x = dbe->xrls().front();
     	x.set_args(xrl);
-	if (s != 0) {
-	    trace_xrl("Sending ", x);
-	    // NOTE:  using s.get below breaks ref counting, but can't figure out WTF the
-	    // callback template magic is to make it work with a ref-ptr.  Either way, it appears
-	    // the ptr may not be used anyway (it's not in send_callback, for instance)
-	    return s->send(x, direct_call,
-			   callback(this, &XrlRouter::send_callback,
-                                    s.get(), cb));
-	}
+
+	trace_xrl("Sending ", x);
+	// NOTE:  using s.get below breaks ref counting, but can't figure out WTF the
+	// callback template magic is to make it work with a ref-ptr.  Either way, it appears
+	// the ptr may not be used anyway (it's not in send_callback, for instance)
+	return s->send(x, direct_call,
+		       callback(this, &XrlRouter::send_callback,
+				s.get(), cb));
+
 	cb->dispatch(XrlError(SEND_FAILED, "sender not instantiated"), 0);
     } catch (const InvalidString&) {
 	cb->dispatch(XrlError(INTERNAL_ERROR, "bad factory arguments"), 0);
@@ -418,46 +413,26 @@ XrlRouter::send_resolved(const Xrl&		xrl,
     return false;
 }
 
-// XXX Return uninitialized shared_ptr, or locked shared_ptr,
-// on desired XrlPFSender.
-shared_ptr<XrlPFSender>
+ref_ptr<XrlPFSender>
 XrlRouter::lookup_sender(const Xrl& xrl, FinderDBEntry* dbe)
 {
     const Xrl& x = dbe->xrls().front();
-    shared_ptr<XrlPFSender> s;
+    ref_ptr<XrlPFSender> s;
 
     // Try to use the cached pointer to the sender.
     if (xrl.resolved()) {
-        weak_ptr<XrlPFSender> w = xrl.resolved_sender();
+        s = xrl.resolved_sender();
 
-        // Check if cached weak_ptr to sender is still valid; we may
-        // have lost a race on the XRLDB.
-        // Check if transport layer is still up for this sender.
-        // If good to go, return shared pointer for which we
-        // still hold the lock.
-        s = w.lock();
-        if (s.get() != 0 && s->alive())
+        if (!s.is_empty())
 	    return s;
 
-        // We lost the race.
-
-        // XXX Sanity check that this sender's protocol and endpoint
-        // addresses are the same as they were when the Xrl was
-        // instantiated.
-	XLOG_ASSERT(s->protocol() == x.protocol());
-	XLOG_ASSERT(s->address()  == x.target());
-
 	xrl.set_resolved(false);
-	xrl.set_resolved_sender(weak_ptr<XrlPFSender>());
     }
 
     // Find a new sender.
-    for (list< shared_ptr<XrlPFSender> >::iterator i = _senders.begin();
+    for (list< ref_ptr<XrlPFSender> >::iterator i = _senders.begin();
 	 i != _senders.end(); ++i) {
 	s = *i;
-
-	// This XrlRouter holds the reference, so the pointer should be valid.
-	XLOG_ASSERT(s.get() != 0);
 
 	if (s->protocol() != x.protocol() || s->address()  != x.target())
 	    continue;
@@ -472,7 +447,6 @@ XrlRouter::lookup_sender(const Xrl& xrl, FinderDBEntry* dbe)
 		  s->protocol(), s->address().c_str());
 
 	_senders.erase(i);
-	_senders2.erase(xrl.target());
 	break;
     }
 
@@ -495,8 +469,8 @@ XrlRouter::lookup_sender(const Xrl& xrl, FinderDBEntry* dbe)
     }
 
     // Unable to instantiate.
-    if (s == 0)
-	return shared_ptr<XrlPFSender>();
+    if (!s.get())
+	return s;
 
     // New sender instantiated, take lock and record state.
     const Xrl& front = dbe->xrls().front();
@@ -504,16 +478,6 @@ XrlRouter::lookup_sender(const Xrl& xrl, FinderDBEntry* dbe)
     XLOG_ASSERT(s->protocol() == front.protocol());
     XLOG_ASSERT(s->address()  == front.target());
     _senders.push_back(s);
-    _senders2[xrl.target()] = s.get();
-
-    // Don't do this here as it is set in the Xrl that is stored with
-    // the finder client, so is not used. But if the connection needs
-    // to be re-established then it will be used and the state will be
-    // bad.
-#if	0
-    xrl.set_resolved(true);
-    xrl.set_resolved_sender(s);
-#endif
 
     return s;
 }
@@ -531,7 +495,8 @@ XrlRouter::resolve_callback(const XrlError&	 	e,
     if (e == XrlError::OKAY()) {
 	const Xrl& xrl = ds->xrl();
 	xrl.set_resolved(false);
-	xrl.set_resolved_sender(weak_ptr<XrlPFSender>());
+	ref_ptr<XrlPFSender> nl;
+	xrl.set_resolved_sender(nl);
 	if (send_resolved(xrl, dbe, ds->cb(), false) == false) {
 	    // We tried to force sender to send xrl and it declined the
 	    // opportunity.  This should only happen when it's out of buffer
@@ -735,48 +700,6 @@ XrlRouter::finder_ready_event(const string& tgt_name)
     debug_msg("Finder target ready event: \"%s\"\n", tgt_name.c_str());
 }
 
-
-// If this really doesn't work..then don't let anyone use it.  Making
-// it #if 0. --Ben
-
-#if 0
-//
-// XXX This is unfinished code related to a batch XRL implementation.
-// It is unfortunately incompatible, straight off, with using refcounts to
-// manage XrlPFSender's lifecycle, so it needs to be revisited later by
-// an interested party.
-// Also, the overloading of the get_sender() method name is potentially
-// confusing. --bms
-
-void
-XrlRouter::batch_start(const string& target)
-{
-    XrlPFSender& sender = get_sender(target);
-
-    sender.batch_start();
-}
-
-void
-XrlRouter::batch_stop(const string& target)
-{
-    XrlPFSender& sender = get_sender(target);
-
-    sender.batch_stop();
-}
-
-ref_ptr<XrlPFSender>
-XrlRouter::get_sender(const string& target)
-{
-    XrlPFSender* s = 0;
-
-    SENDERS::iterator i = _senders2.find(target);
-    XLOG_ASSERT(i != _senders2.end());
-
-    s = i->second;
-
-    return s;
-}
-#endif
 
 string XrlRouter::toString() const {
     ostringstream oss;
