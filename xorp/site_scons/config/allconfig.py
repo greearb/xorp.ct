@@ -719,7 +719,10 @@ def DoAllConfig(env, conf, host_os):
     ##########
     # openssl for md5
     # XXX Check for MD5_Init()
-    has_openssl_md5_h = conf.CheckHeader('openssl/md5.h')
+    prereq_md5 = []
+    if has_sys_types_h:
+	prereq_md5.append('sys/types.h')
+    has_openssl_md5_h = conf.CheckHeader(prereq_md5 + ['openssl/md5.h'])
     if not has_openssl_md5_h:
         print "\nERROR:  Cannot find required openssl/md5.h."
         print "  On Fedora/RedHat:  yum install openssl-devel"
