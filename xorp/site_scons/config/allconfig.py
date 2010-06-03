@@ -720,6 +720,11 @@ def DoAllConfig(env, conf, host_os):
     # openssl for md5
     # XXX Check for MD5_Init()
     has_openssl_md5_h = conf.CheckHeader('openssl/md5.h')
+    if not has_openssl_md5_h:
+        print "\nERROR:  Cannot find required openssl/md5.h."
+        print "  On Fedora/RedHat:  yum install openssl-devel\n\n"
+        sys.exit(1)
+        
     has_libcrypto = conf.CheckLib('crypto')
     has_md5_init = conf.CheckFunc('MD5_Init')
     
@@ -737,7 +742,7 @@ def DoAllConfig(env, conf, host_os):
     env['has_libpcap'] = has_libpcap
     has_pcap_sendpacket = conf.CheckFunc('pcap_sendpacket')
     if not has_libpcap:
-        print "\nWARNING:  Libpcap was not detected.  VRRP and other protocols may have issues.\n"
+        print "\nWARNING:  Libpcap was not detected.\n  VRRP and other protocols may have issues.\n"
 
     # pcap filtering can be used to cut down on un-needed netlink packets.
     #  This is a performance gain only, can function fine without it.
