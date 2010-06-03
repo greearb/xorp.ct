@@ -722,7 +722,9 @@ def DoAllConfig(env, conf, host_os):
     has_openssl_md5_h = conf.CheckHeader('openssl/md5.h')
     if not has_openssl_md5_h:
         print "\nERROR:  Cannot find required openssl/md5.h."
-        print "  On Fedora/RedHat:  yum install openssl-devel\n\n"
+        print "  On Fedora/RedHat:  yum install openssl-devel"
+        print "  After install, rm -fr xorp/obj build directory to"
+        print "  clear the configure cache before re-building."
         sys.exit(1)
         
     has_libcrypto = conf.CheckLib('crypto')
@@ -751,10 +753,17 @@ def DoAllConfig(env, conf, host_os):
 	prereq_pcap_bpf.append('sys/types.h')
     has_pcap_bpf_h = conf.CheckHeader(prereq_pcap_bpf + ['pcap-bpf.h'])
     if not has_pcap_bpf_h:
-        print "\nWARNING: PCAP-BPF is not supported on this system, socket filtering will not work.\n"
-        print "  This is not a real problem, just a small performance loss when using.\n"
-        print "  multiple virtual routers on the same system.\n"
+        print "\nWARNING: PCAP-BPF is not supported on this system,"
+        print "  socket filtering will not work."
+        print "  This is not a real problem, just a small performance"
+        print "  loss when using.multiple virtual routers on the same system."
 
     ##########
     # curses for cli/libtecla
     has_libcurses = conf.CheckLib('curses')
+    if not has_libcurses:
+        print "\nERROR:  Cannot find required curses library."
+        print "  On Fedora/RedHat:  yum install ncurses-devel"
+        print "  After install, rm -fr xorp/obj build directory to"
+        print "  clear the configure cache before re-building."
+        sys.exit(1)
