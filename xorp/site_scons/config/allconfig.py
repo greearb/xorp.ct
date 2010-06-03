@@ -749,7 +749,10 @@ def DoAllConfig(env, conf, host_os):
     env['has_libpcap'] = has_libpcap
     has_pcap_sendpacket = conf.CheckFunc('pcap_sendpacket')
     if not has_libpcap:
-        print "\nWARNING:  Libpcap was not detected.\n  VRRP and other protocols may have issues.\n"
+        print "\nWARNING:  Libpcap was not detected.\n  VRRP and other protocols may have issues."
+        print "  On Fedora/RedHat:  yum install libpcap-devel"
+        print "  After install, rm -fr xorp/obj build directory to"
+        print "  clear the configure cache before re-building.\n"
 
     # pcap filtering can be used to cut down on un-needed netlink packets.
     #  This is a performance gain only, can function fine without it.
