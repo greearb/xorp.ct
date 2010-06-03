@@ -728,6 +728,11 @@ def DoAllConfig(env, conf, host_os):
         sys.exit(1)
         
     has_libcrypto = conf.CheckLib('crypto')
+    if not has_libcrypto:
+        print "\nERROR:  Cannot find required crypto library."
+        print "  clear the configure cache before re-building."
+        sys.exit(1)
+        
     has_md5_init = conf.CheckFunc('MD5_Init')
     
     ##########
@@ -756,7 +761,7 @@ def DoAllConfig(env, conf, host_os):
         print "\nWARNING: PCAP-BPF is not supported on this system,"
         print "  socket filtering will not work."
         print "  This is not a real problem, just a small performance"
-        print "  loss when using.multiple virtual routers on the same system."
+        print "  loss when using multiple virtual routers on the same system.\n"
 
     ##########
     # curses for cli/libtecla
