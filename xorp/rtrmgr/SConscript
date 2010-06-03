@@ -147,7 +147,8 @@ rtrmgr_env.AppendUnique(LIBS = [
     'xorp_finder',
     'xorp_ipc',
     'xorp_comm',
-    'xorp_core'
+    'xorp_core',
+    'crypto'  # Required on Fedora 13.
 ])
 
 rtrmgr_srcs = [
