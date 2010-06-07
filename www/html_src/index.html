@@ -5,8 +5,7 @@
 
 <p>
 XORP is the industry's only extensible open source routing platform.
-Designed for extensibility from the start, XORP provides a
-fully featured platform that implements IPv4 and IPv6 routing
+XORP provides a fully featured platform that implements IPv4 and IPv6 routing
 protocols and a unified platform to configure them.  It is the only
 open source platform to offer integrated multicast capability.  XORP's
 modular architecture allows rapid introduction of new protocols,
@@ -20,7 +19,16 @@ software forwarding.
 <p>
 We are pleased to announce release 1.8-CT of the XORP codebase.  XORP.CT is
 a continuation of the XORP project that is managed by Ben Greear from
-Candela Technologies.
+<a href="http://www.candelatech.com/">Candela Technologies</a>.  The goal
+of the XORP.CT branch is to add features related to virtualizing XORP
+so that multiple instances can run on a single OS.  Each Xorp instance
+will be able to utilize a specific subset of interfaces and ignore the
+rest.  XORP.CT will continue function fine as a normal non-virtualized router
+as well.  We will also strive to incorporate work that others are doing with
+XORP in a more responsive manner.
+<P>
+Key features
+of the 1.8-CT release are:
 
   <ul>
    <li>Allow OSPF, RIP, BGP, OSLR, and PIM to better handle interfaces
@@ -44,7 +52,7 @@ Candela Technologies.
    <li>Support building IPv6 multicast support on Linux. Haven't tested functionality yet.</li>
 
    <li>A more detailed change list list is in Release Notes
-       available at <a href="/releases/1.8-CT/docs/RELEASE_NOTES">releases/1.8-CT/docs/RELEASE_NOTES</a>
+       available at <a href="releases/1.8-CT/docs/RELEASE_NOTES">releases/1.8-CT/docs/RELEASE_NOTES</a>
    </li>
   </ul>
  </p>
