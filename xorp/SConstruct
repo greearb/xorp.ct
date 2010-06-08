@@ -362,17 +362,19 @@ if tst and not (tst == "no"):
 else:
     env['enable_click'] = False
 
+# Default to enabled
 tst = ARGUMENTS.get('enable_bgp', False)
-if tst and not (tst == "no"):
-    env['enable_bgp'] = True;
-else:
+if tst and (tst == "no"):
     env['enable_bgp'] = False
-
-tst = ARGUMENTS.get('enable_olsr', False)
-if tst and not (tst == "no"):
-    env['enable_olsr'] = True;
 else:
+    env['enable_bgp'] = True
+
+# Default to enabled
+tst = ARGUMENTS.get('enable_olsr', False)
+if tst and (tst == "no"):
     env['enable_olsr'] = False
+else:
+    env['enable_olsr'] = True
 
 tst = ARGUMENTS.get('disable_ipv6', False)
 if tst and not (tst == "no"):
