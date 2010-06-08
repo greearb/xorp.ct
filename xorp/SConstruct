@@ -81,10 +81,12 @@ vars.AddVariables(
     BoolVariable('disable_otherlogs',  'Force disable other logs', False),
     BoolVariable('disable_profile',  'Disable Xorp Profiler feature', False),
     BoolVariable('enable_boost',  'Use BOOST', False),
+    BoolVariable('enable_bgp',  'Build BGP', True),
     BoolVariable('enable_olsr',  'Build OLSR', True),
+    BoolVariable('enable_ospf',  'Build OSPF', True),
+    BoolVariable('enable_vrrp',  'Build VRRP', True),
     BoolVariable('enable_tests',  'Build Test Programs', False),
     BoolVariable('enable_click',  'Build CLICK support', False),
-    BoolVariable('enable_bgp',  'Build BGP', True),
     BoolVariable('debug_xrldb',  'Build with runtime XRL syntax validation in Router Manager', False),
     EnumVariable('debug', 'Build with debug symbols', 'full',
                  allowed_values=('no', 'yes', 'full', 'override'),
@@ -231,6 +233,8 @@ print 'Debug function names: ', env['debug_fn']
 print 'Debug callbacks:  ', env['debug_cb']
 print 'Debug XRL syntax: ', env['debug_xrldb']
 print 'Enable OLSR:      ', env['enable_olsr']
+print 'Enable OSPF:      ', env['enable_ospf']
+print 'Enable VRRP:      ', env['enable_vrrp']
 print 'Enable Test Programs: ', env['enable_tests']
 print 'Enable CLICK:     ', env['enable_click']
 print 'Enable BGP:       ', env['enable_bgp']
@@ -375,6 +379,20 @@ if tst and (tst == "no"):
     env['enable_olsr'] = False
 else:
     env['enable_olsr'] = True
+
+# Default to enabled
+tst = ARGUMENTS.get('enable_ospf', False)
+if tst and (tst == "no"):
+    env['enable_ospf'] = False
+else:
+    env['enable_ospf'] = True
+
+# Default to enabled
+tst = ARGUMENTS.get('enable_vrrp', False)
+if tst and (tst == "no"):
+    env['enable_vrrp'] = False
+else:
+    env['enable_vrrp'] = True
 
 tst = ARGUMENTS.get('disable_ipv6', False)
 if tst and not (tst == "no"):

@@ -59,7 +59,6 @@ xifs = [
     'mfea.xif',
     'mld6igmp_client.xif',
     'mld6igmp.xif',
-    'ospfv2.xif',
     'pim.xif',
     'policy_backend.xif',
     'policy_redist4.xif',
@@ -81,7 +80,6 @@ xifs = [
     'test_peer.xif',
     'test.xif',
     'test_xrls.xif',
-    'vrrp.xif',
     ]
 
 if env['enable_bgp']:
@@ -92,7 +90,8 @@ if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
     xifs.append('socket6_user.xif')
     xifs.append('fea_rawpkt6_client.xif')
     xifs.append('fea_rawpkt6.xif')
-    xifs.append('ospfv3.xif')
+    if env['enable_ospf']:
+        xifs.append('ospfv3.xif')
 
 if not (env.has_key('disable_profile') and env['disable_profile']):
     xifs.append('profile_client.xif')
@@ -103,6 +102,12 @@ if not (env.has_key('disable_fw') and env['disable_fw']):
 
 if env['enable_olsr']:
     xifs.append('olsr4.xif')
+    
+if env['enable_vrrp']:
+    xifs.append('vrrp.xif')
+
+if env['enable_ospf']:
+    xifs.append('ospfv2.xif')
 
 Depends('common.xif', '../../xorp_config.h');
 Depends('fea.xif', 'common.xif');

@@ -34,7 +34,6 @@ subdirs = [
     'fib2mrib',
     'mld6igmp',
     'mrt',
-    'ospf',
     'pim',
     'policy',
     'rib',
@@ -42,7 +41,6 @@ subdirs = [
     'rtrmgr',
     'static_routes',
     'utils',
-    'vrrp',
     ]
 
 if env['enable_olsr']:
@@ -50,6 +48,12 @@ if env['enable_olsr']:
 
 if env['enable_bgp']:
     subdirs.append('bgp')
+
+if env['enable_ospf']:
+    subdirs.append('ospf')
+    
+if env['enable_vrrp']:
+    subdirs.append('vrrp')
 
 
 SConscript(dirs = subdirs, exports='env')
