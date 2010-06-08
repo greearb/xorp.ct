@@ -23,7 +23,6 @@ Import('env')
 e = env.Clone()
 
 cmds = [
-    'bgp',
     'fea',
     'host',
     'igmp',
@@ -44,7 +43,6 @@ cmds = [
 ]
 
 tps = [
-    'bgp',
     'fib2mrib',
     'igmp',
     'interfaces',
@@ -73,9 +71,13 @@ tp_raw = [
 if not (env.has_key('disable_fw') and env['disable_fw']):
     tps.append('firewall')
 
-if env['WITH_OLSR']:
+if env['enable_olsr']:
     cmds.append('olsr4')
     tps.append('olsr4')
+
+if env['enable_bgp']:
+    cmds.append('bgp')
+    tps.append('bgp')
 
 # Total hack for now, might want to consider some sort of lame CPP syntax
 # instead of hard-coding the pattern matching below.

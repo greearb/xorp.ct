@@ -40,7 +40,6 @@ env.AppendUnique(LIBS = [
 env['TGTGEN_CPPPATH'] = [ '#/xrl/interfaces', '$BUILDDIR' ]
  
 tgts = [
-    'bgp.tgt',
     'cli.tgt',
     'coord.tgt',
     'fea.tgt',
@@ -72,11 +71,14 @@ tgts = [
     'xorpsh.tgt',
     ]
 
+if env['enable_bgp']:
+    tgts.append('bgp.tgt')
+
 if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
     tgts.append('test_socket6.tgt')
     tgts.append('ospfv3.tgt')
 
-if env['WITH_OLSR']:
+if env['enable_olsr']:
     tgts.append('olsr4.tgt')
 
 if not (env.has_key('disable_profile') and env['disable_profile']):
@@ -112,7 +114,7 @@ def BuildXrlTarget(tgt):
 
     xrls = '$BUILDDIR/xrl/targets/' + base + '.xrls'
 
-    if env['WITH_TESTS'] or base[:4] != "test":
+    if env['enable_tests'] or base[:4] != "test":
         if is_shared:
             env.Alias('install', env.InstallLibrary(env['xorp_libdir'], lib))
         if env['debug_xrldb']:

@@ -118,7 +118,7 @@ test_trie  = env.Program(target = 'test_trie', source = test_trie_srcs)
 
 harnesspath = '$exec_prefix/bgp/harness'
 
-if env['WITH_TESTS']:
+if env['enable_tests']:
     env.Alias('install', env.InstallProgram(harnesspath, coord))
     env.Alias('install', env.InstallProgram(harnesspath, test_peer))
     env.Alias('install', env.InstallProgram(harnesspath, test_trie))

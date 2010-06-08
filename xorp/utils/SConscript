@@ -50,7 +50,7 @@ runit_srcs = [
 
 runit = env.Program(target = 'runit', source = runit_srcs)
 
-if env['WITH_TESTS']:
+if env['enable_tests']:
     env.Alias('install', env.InstallProgram(env['xorp_tooldir'], runit))
 
 # Install scripts

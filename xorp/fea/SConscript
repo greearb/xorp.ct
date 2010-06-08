@@ -227,7 +227,7 @@ env.Alias('install', env.InstallProgram(env['xorp_moduledir'], feadummy))
 
 #######################
 
-if env['WITH_CLICK']:
+if env['enable_click']:
     clickgen = 'fea_click_config_generator'
     env.Alias('install', env.InstallScript(env['xorp_tooldir'], clickgen))
 

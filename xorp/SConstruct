@@ -84,7 +84,7 @@ vars.AddVariables(
     BoolVariable('enable_olsr',  'Build OLSR', True),
     BoolVariable('enable_tests',  'Build Test Programs', False),
     BoolVariable('enable_click',  'Build CLICK support', False),
-    BoolVariable('enable_bgp',  'Build BGP', False),
+    BoolVariable('enable_bgp',  'Build BGP', True),
     BoolVariable('debug_xrldb',  'Build with runtime XRL syntax validation in Router Manager', False),
     EnumVariable('debug', 'Build with debug symbols', 'full',
                  allowed_values=('no', 'yes', 'full', 'override'),
@@ -344,16 +344,35 @@ env['xorp_tooldir']     = env['libdir']  + '/xorp/bin'	# tools/*
 env['xorp_xrlsdir']     = env['datadir'] + '/xorp/xrls'	# *.xrls
 env['xorp_sourcedir']   = sourcedir	# rtrmgr/util.cc and xif need this
 
-env['WITH_BGP'] = ARGUMENTS.get('enable_bgp', False)
-env['WITH_OLSR'] = ARGUMENTS.get('enable_olsr', True)
-env['WITH_TESTS'] = ARGUMENTS.get('enable_tests', False)
-env['WITH_CLICK'] = ARGUMENTS.get('enable_click', False)
-
 tst = ARGUMENTS.get('enable_boost', False)
 if tst and not (tst == "no"):
     env['enable_boost'] = True;
 else:
     env['enable_boost'] = False
+
+tst = ARGUMENTS.get('enable_tests', False)
+if tst and not (tst == "no"):
+    env['enable_tests'] = True;
+else:
+    env['enable_tests'] = False
+
+tst = ARGUMENTS.get('enable_click', False)
+if tst and not (tst == "no"):
+    env['enable_click'] = True;
+else:
+    env['enable_click'] = False
+
+tst = ARGUMENTS.get('enable_bgp', False)
+if tst and not (tst == "no"):
+    env['enable_bgp'] = True;
+else:
+    env['enable_bgp'] = False
+
+tst = ARGUMENTS.get('enable_olsr', False)
+if tst and not (tst == "no"):
+    env['enable_olsr'] = True;
+else:
+    env['enable_olsr'] = False
 
 tst = ARGUMENTS.get('disable_ipv6', False)
 if tst and not (tst == "no"):

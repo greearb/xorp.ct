@@ -37,7 +37,7 @@ sources = [
 	'routing_socket_utilities.cc',
 	]
 
-if env['WITH_CLICK']:
+if env['enable_click']:
     sources.append('click_socket.cc')
 
 if is_shared:

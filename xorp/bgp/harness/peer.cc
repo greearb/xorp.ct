@@ -1600,6 +1600,7 @@ Peer::datain(const bool& status, const TimeVal& tv,
 void 
 Peer::datain_error(const string& reason)
 {
+    UNUSED(reason);
     XLOG_WARNING("Error on TCP connection from test_peer: %s to %s reason: %s",
 		 _peername.c_str(), _target_hostname.c_str(), reason.c_str());
 }

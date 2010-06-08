@@ -43,11 +43,13 @@ subdirs = [
     'static_routes',
     'utils',
     'vrrp',
-    'bgp',
     ]
 
-if env['WITH_OLSR']:
+if env['enable_olsr']:
     subdirs.append('contrib/olsr')
+
+if env['enable_bgp']:
+    subdirs.append('bgp')
 
 
 SConscript(dirs = subdirs, exports='env')

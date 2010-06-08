@@ -53,6 +53,8 @@ response_handler(const XrlError& e,
 		 bool* 		 resolve_failed,
 		 Xrl*		 xrl)
 {
+    UNUSED(xrl);
+
     if (e == XrlError::RESOLVE_FAILED()) {
 	XLOG_ERROR("Failed.  Reason: %s (\"%s\")",
 		   e.str().c_str(), xrl->str().c_str());
