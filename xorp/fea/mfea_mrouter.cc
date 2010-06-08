@@ -156,6 +156,10 @@ struct sioc_vif_req_ng {
 #define MRT_TABLE      (MRT_BASE+9)    /* Specify mroute table ID              */
 #endif
 
+#ifndef MRT6_TABLE
+#define MRT6_TABLE      (MRT6_BASE+9)    /* Specify mroute table ID              */
+#endif
+
 #else
 /* Don't support multiple mcast routing tables */
 bool supports_mcast_tables = false;
@@ -480,7 +484,7 @@ MfeaMrouter::have_multicast_routing6() const
 	close(s);
 	return (false);
     }
-    
+
     // Success
     close(s);
     return (true);
@@ -830,7 +834,8 @@ MfeaMrouter::start_mrt()
 	    else {
 		supports_mcast_tables = true;
 		new_mcast_tables_api = true;
-		XLOG_ERROR("NOTE: MROUTE:  setsockopt(MRT_TABLE) works!  Supports multiple mcast routing tables.\n");
+		XLOG_INFO("NOTE: MROUTE:  setsockopt(MRT_TABLE, %d) works!  Supports multiple"
+			  " mcast routing tables.\n", tbl);
 	    }
 	}
 	else {
@@ -871,6 +876,20 @@ MfeaMrouter::start_mrt()
 		       error_msg.c_str());
 	    return (XORP_ERROR);
 	}
+
+#ifdef USE_MULT_MCAST_TABLES
+	uint32_t tbl = getTableId();
+	if (setsockopt(_mrouter_socket, SOL_IPV6, MRT6_TABLE, &tbl, sizeof(tbl)) < 0) {
+	    XLOG_ERROR("MROUTE:  WARNING:  setsockopt(MRT6_TABLE, %d) does not support"
+		       " multiple routing tables:: %s",
+		       tbl, strerror(errno));
+	}
+	else {
+	    XLOG_INFO("NOTE: MROUTE:  setsockopt(MRT6_TABLE, %d) works!  Supports"
+		      " multiple mcast-6 routing tables.\n", tbl);
+	}
+#endif
+
 	if (setsockopt(_mrouter_socket, IPPROTO_IPV6, MRT6_INIT,
 		       (void *)&mrouter_version, sizeof(mrouter_version))
 	    < 0) {
@@ -878,6 +897,7 @@ MfeaMrouter::start_mrt()
 		       mrouter_version, strerror(errno));
 	    return (XORP_ERROR);
 	}
+
 #endif // HAVE_IPV6_MULTICAST_ROUTING
     }
     break;
