@@ -367,28 +367,28 @@ else:
     env['enable_click'] = False
 
 # Default to enabled
-tst = ARGUMENTS.get('enable_bgp', False)
+tst = ARGUMENTS.get('enable_bgp', True)
 if tst and (tst == "no"):
     env['enable_bgp'] = False
 else:
     env['enable_bgp'] = True
 
 # Default to enabled
-tst = ARGUMENTS.get('enable_olsr', False)
+tst = ARGUMENTS.get('enable_olsr', True)
 if tst and (tst == "no"):
     env['enable_olsr'] = False
 else:
     env['enable_olsr'] = True
 
 # Default to enabled
-tst = ARGUMENTS.get('enable_ospf', False)
+tst = ARGUMENTS.get('enable_ospf', True)
 if tst and (tst == "no"):
     env['enable_ospf'] = False
 else:
     env['enable_ospf'] = True
 
 # Default to enabled
-tst = ARGUMENTS.get('enable_vrrp', False)
+tst = ARGUMENTS.get('enable_vrrp', True)
 if tst and (tst == "no"):
     env['enable_vrrp'] = False
 else:
