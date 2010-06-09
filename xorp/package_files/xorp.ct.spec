@@ -1,26 +1,23 @@
 # configure options
 %define with_shared	1
 %define with_optimize	1
-%define with_bgp	1
-%define with_olsr	1
 %define with_strip	1
-%define with_boost    	0
 %define prefixdir   /usr/local/xorp
 
 Summary:          An eXtensible Open Router Platform (XORP)
 Name:             xorp-ct
-Version:          1.8-CT
-Release:          WIP.1%{?dist}%{?pext}
+Version:          1.8
+Release:          1%{?dist}%{?pext}
 License:          GPL
 Group:            System Environment/Daemons
-Source0:          http://www.%{name}.org/releases/%{version}/%{name}-%{version}-WIP.tar.lzma
+Source0:          xorp-%{version}-CT.tar.lzma
 Source1:          xorp.redhat
 Source2:          xorp.sysconfig
 Source3:          xorp.logrotate
 Source4:          xorp.conf
-URL:              http://candelatech.com/oss/xorp-ct.html/
+URL:              http://candelatech.com/xorp-ct/
 Buildroot:        %{_tmppath}/xorp-%{version}-%{release}-root-%(%{__id_u} -n)
-Vendor:           The XORP Team <feedback@xorp.org>
+Vendor:           The XORP Team <xorp-users@xorp.org>
 Requires:         traceroute
 Requires(pre):    /usr/sbin/groupadd
 Requires(post):   /sbin/chkconfig
@@ -39,7 +36,7 @@ functionality, including support for custom hardware and software forwarding.
 
 
 %prep
-%setup -q -n xorp.ct
+%setup -q -n xorp
 
 
 %build 
@@ -58,19 +55,9 @@ scons -j4 \
 %if %with_optimize
   optimize=yes \
 %endif
-%if %with_bgp
-  enable_bgp=yes \
-%endif
-%if %with_olsr
-  enable_olsr=yes \
-%endif
 %if %with_strip
   strip=yes \
 %endif
-%if %with_boost 
-  enable_boost=yes \
-%endif
-  enable_vrrp=yes \
 
 #scons %{?_smp_mflags}
 
@@ -99,28 +86,16 @@ scons \
 %if %with_optimize
   optimize=yes \
 %endif
-%if %with_bgp
-  enable_bgp=yes \
-%endif
-%if %with_olsr
-  enable_olsr=yes \
-%endif
 %if %with_strip
   strip=yes \
 %endif
-%if %with_boost 
-  enable_boost=yes \
-%endif
-  enable_vrrp=yes \
 				install 
 
-
-%{__ln_s}    %{_sbindir}/xorp_rtrmgr       ${RPM_BUILD_ROOT}%{_sbindir}/xorp
 %{__install} -m 0755 %{SOURCE1}           ${RPM_BUILD_ROOT}%{_initrddir}/xorp
 %{__install} -m 0644 %{SOURCE2}           ${RPM_BUILD_ROOT}%{_sysconfdir}/sysconfig/xorp
 %{__install} -m 0644 %{SOURCE3}           ${RPM_BUILD_ROOT}%{_sysconfdir}/logrotate.d/xorp
 %{__install} -m 0660 %{SOURCE4}           ${RPM_BUILD_ROOT}%{_sysconfdir}/xorp
-cd %{_builddir}/xorp.ct
+cd %{_builddir}/xorp
 
 %pre
 if ! getent group  xorp >/dev/null 2>&1; then
@@ -166,6 +141,6 @@ fi
 
 
 %changelog
-* Jun 1 2010 Ben Greear <greearb@candelatech.com> ct-1.8-CT
+* Wed Jun 9 2010 Ben Greear <greearb@candelatech.com> ct-1.8-CT
 * Sun Mar 14 2010 Achmad Basuki <abazh@soi.asia> - ct-1.7-WIP.1
 - Initial build of xorp.ct
