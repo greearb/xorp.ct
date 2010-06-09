@@ -163,6 +163,6 @@ if is_shared:
     bgp_env.Alias('install', env.InstallLibrary(bgp_env['xorp_libdir'], libxorp_bgp))
 
 # Install scripts
-env.Alias('install', env.InstallProgram('$exec_prefix/sbin/', env.Entry('bgp_xrl_shell_funcs.sh')))
+env.Alias('install', env.InstallScript('$exec_prefix/sbin/', env.Entry('bgp_xrl_shell_funcs.sh')))
 
 Default(bgp)

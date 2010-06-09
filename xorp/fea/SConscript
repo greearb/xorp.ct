@@ -234,6 +234,6 @@ if env['enable_click']:
 #######################
 
 # Install scripts
-env.Alias('install', env.InstallProgram('$exec_prefix/sbin/', env.Entry('fea_xrl_shell_funcs.sh')))
+env.Alias('install', env.InstallScript('$exec_prefix/sbin/', env.Entry('fea_xrl_shell_funcs.sh')))
 
 Default(libxorp_fea, fea, feadummy)
