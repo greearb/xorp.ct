@@ -53,8 +53,6 @@ tgts = [
     'policy.tgt',
     'rib.tgt',
     'ribclient.tgt',
-    'rip.tgt',
-    'ripng.tgt',
     'rtrmgr.tgt',
     'show_distances.tgt',
     'show_routes.tgt',
@@ -82,6 +80,10 @@ if env['enable_olsr']:
 
 if env['enable_vrrp']:
     tgts.append('vrrp.tgt')
+
+if env['enable_rip']:
+    tgts.append('rip.tgt')
+    tgts.append('ripng.tgt')
 
 if env['enable_ospf']:
     tgts.append('ospfv2.tgt')

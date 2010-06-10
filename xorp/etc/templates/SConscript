@@ -36,9 +36,6 @@ cmds = [
     'pim6',
     'policy',
     'rib',
-    'rip',
-    'ripng',
-    'vrrp',
     'xorpsh',
 ]
 
@@ -57,11 +54,8 @@ tps = [
     'policy',
     'protocols',
     'rib',
-    'rip',
-    'ripng',
     'rtrmgr',
     'static_routes',
-    'vrrp',
 ]
 
 tp_raw = [
@@ -78,6 +72,16 @@ if env['enable_olsr']:
 if env['enable_bgp']:
     cmds.append('bgp')
     tps.append('bgp')
+
+if env['enable_rip']:
+    cmds.append('rip')
+    tps.append('rip')
+    cmds.append('ripng')
+    tps.append('ripng')
+
+if env['enable_vrrp']:
+    cmds.append('vrrp')
+    tps.append('vrrp')
 
 # Total hack for now, might want to consider some sort of lame CPP syntax
 # instead of hard-coding the pattern matching below.

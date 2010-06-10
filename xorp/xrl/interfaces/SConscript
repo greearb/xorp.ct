@@ -70,8 +70,6 @@ xifs = [
     'redist_transaction6.xif',
     'rib_client.xif',
     'rib.xif',
-    'ripng.xif',
-    'rip.xif',
     'rtrmgr_client.xif',
     'rtrmgr.xif',
     'socket4_user.xif',
@@ -103,6 +101,10 @@ if not (env.has_key('disable_fw') and env['disable_fw']):
 if env['enable_olsr']:
     xifs.append('olsr4.xif')
     
+if env['enable_rip']:
+    xifs.append('rip.xif')
+    xifs.append('ripng.xif')
+
 if env['enable_vrrp']:
     xifs.append('vrrp.xif')
 

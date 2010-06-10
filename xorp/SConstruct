@@ -84,6 +84,7 @@ vars.AddVariables(
     BoolVariable('enable_bgp',  'Build BGP', True),
     BoolVariable('enable_olsr',  'Build OLSR', True),
     BoolVariable('enable_ospf',  'Build OSPF', True),
+    BoolVariable('enable_rip',  'Build RIP', True),
     BoolVariable('enable_vrrp',  'Build VRRP', True),
     BoolVariable('enable_tests',  'Build Test Programs', False),
     BoolVariable('enable_click',  'Build CLICK support', False),
@@ -234,6 +235,7 @@ print 'Debug callbacks:  ', env['debug_cb']
 print 'Debug XRL syntax: ', env['debug_xrldb']
 print 'Enable OLSR:      ', env['enable_olsr']
 print 'Enable OSPF:      ', env['enable_ospf']
+print 'Enable RIP:       ', env['enable_rip']
 print 'Enable VRRP:      ', env['enable_vrrp']
 print 'Enable Test Programs: ', env['enable_tests']
 print 'Enable CLICK:     ', env['enable_click']
@@ -386,6 +388,13 @@ if tst and (tst == "no"):
     env['enable_ospf'] = False
 else:
     env['enable_ospf'] = True
+
+# Default to enabled
+tst = ARGUMENTS.get('enable_rip', True)
+if tst and (tst == "no"):
+    env['enable_rip'] = False
+else:
+    env['enable_rip'] = True
 
 # Default to enabled
 tst = ARGUMENTS.get('enable_vrrp', True)
