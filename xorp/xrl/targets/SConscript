@@ -64,7 +64,6 @@ tgts = [
     'test_peer.tgt',
     'test_socket4.tgt',
     'test_xrls.tgt',
-    'xorpsh.tgt',
     ]
 
 if env['enable_bgp']:
@@ -78,15 +77,18 @@ if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
 if env['enable_olsr']:
     tgts.append('olsr4.tgt')
 
-if env['enable_vrrp']:
-    tgts.append('vrrp.tgt')
+if env['enable_ospf']:
+    tgts.append('ospfv2.tgt')
 
 if env['enable_rip']:
     tgts.append('rip.tgt')
     tgts.append('ripng.tgt')
 
-if env['enable_ospf']:
-    tgts.append('ospfv2.tgt')
+if env['enable_vrrp']:
+    tgts.append('vrrp.tgt')
+
+if env['enable_xorpsh']:
+    tgts.append('xorpsh.tgt')
 
 if not (env.has_key('disable_profile') and env['disable_profile']):
     tgts.append('profiler.tgt')

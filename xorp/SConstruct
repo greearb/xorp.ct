@@ -86,6 +86,7 @@ vars.AddVariables(
     BoolVariable('enable_ospf',  'Build OSPF', True),
     BoolVariable('enable_rip',  'Build RIP', True),
     BoolVariable('enable_vrrp',  'Build VRRP', True),
+    BoolVariable('enable_xorpsh',  'Build xorpsh', True),
     BoolVariable('enable_tests',  'Build Test Programs', False),
     BoolVariable('enable_click',  'Build CLICK support', False),
     BoolVariable('enable_fea_dummy',  'Build fea-dummy target', True),
@@ -238,6 +239,7 @@ print 'Enable OLSR:      ', env['enable_olsr']
 print 'Enable OSPF:      ', env['enable_ospf']
 print 'Enable RIP:       ', env['enable_rip']
 print 'Enable VRRP:      ', env['enable_vrrp']
+print 'Enable xorpsh     ', env['enable_xorpsh']
 print 'Enable Test Programs: ', env['enable_tests']
 print 'Enable CLICK:     ', env['enable_click']
 print 'Enable FEA Dummy: ', env['enable_fea_dummy']
@@ -412,6 +414,13 @@ if tst and (tst == "no"):
 else:
     env['enable_vrrp'] = True
 
+# Default to enabled
+tst = ARGUMENTS.get('enable_xorpsh', True)
+if tst and (tst == "no"):
+    env['enable_xorpsh'] = False
+else:
+    env['enable_xorpsh'] = True
+
 tst = ARGUMENTS.get('disable_ipv6', False)
 if tst and not (tst == "no"):
     env['disable_ipv6'] = True;
@@ -575,6 +584,9 @@ if not env.GetOption('clean') and \
     tst = ARGUMENTS.get('enable_fea_dummy', True)
     if tst and not (tst == "no"):
         conf.Define('XORP_USE_FEA_DUMMY')
+
+    if env['enable_xorpsh']:
+        conf.Define('XORP_USE_XORPSH')
 
     # Note: hard-coded paths pushed down to rtrmgr/util.cc environment.
 

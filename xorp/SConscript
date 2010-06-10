@@ -20,6 +20,7 @@
 Import('env')
 
 subdirs = [
+    'cli',
     'libcomm',
     'libxorp',
     'libxipc',
@@ -29,7 +30,6 @@ subdirs = [
     'xrl/interfaces',
     #'xrl/tests',		# XXX not in use.
     'etc/templates',
-    'cli',
     'fea',
     'fib2mrib',
     'mld6igmp',
@@ -56,6 +56,5 @@ if env['enable_rip']:
 
 if env['enable_vrrp']:
     subdirs.append('vrrp')
-
 
 SConscript(dirs = subdirs, exports='env')

@@ -17,11 +17,12 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/rtrmgr/xrl_xorpsh_interface.hh,v 1.17 2008/10/02 21:58:27 bms Exp $
+
+#ifdef XORP_USE_XORPSH
+
 
 #ifndef __RTRMGR_XRL_XORPSH_INTERFACE_HH__
 #define __RTRMGR_XRL_XORPSH_INTERFACE_HH__
-
 
 #include "xrl/targets/xorpsh_base.hh"
 
@@ -85,3 +86,4 @@ private:
 };
 
 #endif // __RTRMGR_XRL_XORPSH_INTERFACE_HH__
+#endif

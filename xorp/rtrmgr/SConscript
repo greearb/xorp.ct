@@ -163,34 +163,35 @@ env.Alias('install',
 
 ### xorpsh
 
-xorpsh_env = env.Clone()
+if env['enable_xorpsh']:
+    xorpsh_env = env.Clone()
 
-xorpsh_env.AppendUnique(LIBS = [
-    'xorp_rtrmgr',
-    'xorp_cli',
-    'xst_cli',			# XXX Not picked up automagically?
-    'xif_cli_processor',		# XXX ditto?
-    'xorp_proto',
-    'xorp_tecla',
-    'xif_rtrmgr',
-    'xst_xorpsh',
-    'xif_finder_event_notifier',
-    'xorp_ipc',
-    'xorp_comm',
-    'xorp_core',
-    'curses'	# XXX only for non-windows
-])
+    xorpsh_env.AppendUnique(LIBS = [
+        'xorp_rtrmgr',
+        'xorp_cli',
+        'xst_cli',			# XXX Not picked up automagically?
+        'xif_cli_processor',		# XXX ditto?
+        'xorp_proto',
+        'xorp_tecla',
+        'xif_rtrmgr',
+        'xst_xorpsh',
+        'xif_finder_event_notifier',
+        'xorp_ipc',
+        'xorp_comm',
+        'xorp_core',
+        'curses'	# XXX only for non-windows
+        ])
 
-xorpsh_srcs = [
+    xorpsh_srcs = [
 	'xorpsh_main.cc',
 	'xrl_xorpsh_interface.cc',
 	'cli.cc',
 	]
 
-xorpsh = xorpsh_env.Program(target = 'xorpsh', source = xorpsh_srcs)
+    xorpsh = xorpsh_env.Program(target = 'xorpsh', source = xorpsh_srcs)
 
-env.Alias('install',
-          env.InstallProgram(env['xorp_sbindir'], xorpsh))
+    env.Alias('install',
+              env.InstallProgram(env['xorp_sbindir'], xorpsh))
 
 if not (env.has_key('disable_profile') and env['disable_profile']):
     ### profiler
@@ -216,7 +217,13 @@ if not (env.has_key('disable_profile') and env['disable_profile']):
     env.Alias('install',
               env.InstallProgram(env['xorp_sbindir'], profiler))
 
-    Default(rtrmgr, xorpsh, profiler)
+    if env['enable_xorpsh']:
+        Default(rtrmgr, xorpsh, profiler)
+    else:
+        Default(rtrmgr, profiler)
 else:
-    Default(rtrmgr, xorpsh)
+    if env['enable_xorpsh']:
+        Default(rtrmgr, xorpsh)
+    else:
+        Default(rtrmgr)
     
