@@ -31,13 +31,17 @@ is_shared = env.has_key('SHAREDLIBS')
 
 sources = [
 	# C++ files
-	'io_ip_dummy.cc',
 	'io_ip_socket.cc',
-	'io_link_dummy.cc',
 	'io_link_pcap.cc',
-	'io_tcpudp_dummy.cc',
 	'io_tcpudp_socket.cc',
 	]
+
+if env['enable_fea_dummy']:
+    sources += [
+	'io_ip_dummy.cc',
+	'io_link_dummy.cc',
+	'io_tcpudp_dummy.cc',
+        ]
 
 if is_shared:
     libxio = env.SharedLibrary(target = 'libxorp_fea_io', source = sources)

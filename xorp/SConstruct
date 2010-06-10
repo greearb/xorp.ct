@@ -88,6 +88,7 @@ vars.AddVariables(
     BoolVariable('enable_vrrp',  'Build VRRP', True),
     BoolVariable('enable_tests',  'Build Test Programs', False),
     BoolVariable('enable_click',  'Build CLICK support', False),
+    BoolVariable('enable_fea_dummy',  'Build fea-dummy target', True),
     BoolVariable('debug_xrldb',  'Build with runtime XRL syntax validation in Router Manager', False),
     EnumVariable('debug', 'Build with debug symbols', 'full',
                  allowed_values=('no', 'yes', 'full', 'override'),
@@ -239,6 +240,7 @@ print 'Enable RIP:       ', env['enable_rip']
 print 'Enable VRRP:      ', env['enable_vrrp']
 print 'Enable Test Programs: ', env['enable_tests']
 print 'Enable CLICK:     ', env['enable_click']
+print 'Enable FEA Dummy: ', env['enable_fea_dummy']
 print 'Enable BGP:       ', env['enable_bgp']
 print 'Try Enable BOOST: ', env['enable_boost']
 print 'Disable IPv6:     ', env['disable_ipv6']
@@ -367,6 +369,13 @@ if tst and not (tst == "no"):
     env['enable_click'] = True;
 else:
     env['enable_click'] = False
+
+# Default to enabled
+tst = ARGUMENTS.get('enable_fea_dummy', True)
+if tst and (tst == "no"):
+    env['enable_fea_dummy'] = False
+else:
+    env['enable_fea_dummy'] = True
 
 # Default to enabled
 tst = ARGUMENTS.get('enable_bgp', True)
@@ -562,6 +571,10 @@ if not env.GetOption('clean') and \
     tst = ARGUMENTS.get('enable_click', False)
     if tst and not (tst == "no"):
         conf.Define('XORP_USE_CLICK')
+
+    tst = ARGUMENTS.get('enable_fea_dummy', True)
+    if tst and not (tst == "no"):
+        conf.Define('XORP_USE_FEA_DUMMY')
 
     # Note: hard-coded paths pushed down to rtrmgr/util.cc environment.
 

@@ -32,12 +32,14 @@ is_shared = env.has_key('SHAREDLIBS')
 sources = [
 	# C++ files
 	'fea_data_plane_manager_bsd.cc',
-	'fea_data_plane_manager_dummy.cc',
 	'fea_data_plane_manager_linux.cc',
 	]
 
 if env['enable_click']:
     sources.append('fea_data_plane_manager_click.cc')
+
+if env['enable_fea_dummy']:
+    sources.append('fea_data_plane_manager_dummy.cc')
 
 if is_shared:
     libxdpm = env.SharedLibrary(target = 'libxorp_fea_data_plane_managers',

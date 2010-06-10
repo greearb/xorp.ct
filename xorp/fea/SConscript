@@ -212,18 +212,19 @@ env.Alias('install', env.InstallProgram(env['xorp_moduledir'], fea))
 
 #######################
 
-env = env.Clone()
+if env['enable_fea_dummy']:
+    env = env.Clone()
 
-env['OBJPREFIX'] = 'dummy-'
+    env['OBJPREFIX'] = 'dummy-'
 
-env.AppendUnique(CPPDEFINES = 'FEA_DUMMY=1')
+    env.AppendUnique(CPPDEFINES = 'FEA_DUMMY=1')
 
-feadummysrcs = [
-          'xorp_fea.cc',
-          ]
+    feadummysrcs = [
+        'xorp_fea.cc',
+        ]
 
-feadummy = env.Program(target = 'xorp_fea_dummy', source = feadummysrcs)
-env.Alias('install', env.InstallProgram(env['xorp_moduledir'], feadummy))
+    feadummy = env.Program(target = 'xorp_fea_dummy', source = feadummysrcs)
+    env.Alias('install', env.InstallProgram(env['xorp_moduledir'], feadummy))
 
 #######################
 
@@ -236,4 +237,7 @@ if env['enable_click']:
 # Install scripts
 env.Alias('install', env.InstallScript('$exec_prefix/sbin/', env.Entry('fea_xrl_shell_funcs.sh')))
 
-Default(libxorp_fea, fea, feadummy)
+if env['enable_fea_dummy']:
+    Default(libxorp_fea, fea, feadummy)
+else:
+    Default(libxorp_fea, fea)

@@ -32,14 +32,12 @@ env.AppendUnique(CPPPATH = [
 sources = [
 	# C++ files
 	'ifconfig_get_click.cc',
-	'ifconfig_get_dummy.cc',
 	'ifconfig_get_getifaddrs.cc',
 	'ifconfig_get_ioctl.cc',
 	'ifconfig_get_netlink_socket.cc',
 	'ifconfig_get_proc_linux.cc',
 	'ifconfig_get_sysctl.cc',
 	'ifconfig_media.cc',
-	'ifconfig_observer_dummy.cc',
 	'ifconfig_observer_netlink_socket.cc',
 	'ifconfig_observer_routing_socket.cc',
 	'ifconfig_parse_getifaddrs.cc',
@@ -47,21 +45,27 @@ sources = [
 	'ifconfig_parse_netlink_socket.cc',
 	'ifconfig_parse_routing_socket.cc',
 	'ifconfig_property_bsd.cc',
-	'ifconfig_property_dummy.cc',
 	'ifconfig_property_linux.cc',
 	'ifconfig_property_solaris.cc',
 	'ifconfig_set.cc',
 	'ifconfig_set_click.cc',
-	'ifconfig_set_dummy.cc',
 	'ifconfig_set_ioctl.cc',
 	'ifconfig_set_netlink_socket.cc',
 	'ifconfig_vlan_get_bsd.cc',
-	'ifconfig_vlan_get_dummy.cc',
 	'ifconfig_vlan_get_linux.cc',
 	'ifconfig_vlan_set_bsd.cc',
-	'ifconfig_vlan_set_dummy.cc',
 	'ifconfig_vlan_set_linux.cc',
 	]
+
+if env['enable_fea_dummy']:
+    sources += [
+        'ifconfig_get_dummy.cc',
+	'ifconfig_observer_dummy.cc',
+	'ifconfig_property_dummy.cc',
+	'ifconfig_set_dummy.cc',
+	'ifconfig_vlan_get_dummy.cc',
+	'ifconfig_vlan_set_dummy.cc',
+        ]
 
 if is_shared:
     libxifc = env.SharedLibrary(target = 'libxorp_fea_ifconfig',

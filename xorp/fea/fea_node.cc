@@ -34,8 +34,12 @@
 #include "libcomm/comm_api.h"
 
 #include "fea/data_plane/managers/fea_data_plane_manager_bsd.hh"
+#ifdef XORP_USE_CLICK
 #include "fea/data_plane/managers/fea_data_plane_manager_click.hh"
+#endif
+#ifdef XORP_USE_FEA_DUMMY
 #include "fea/data_plane/managers/fea_data_plane_manager_dummy.hh"
+#endif
 #include "fea/data_plane/managers/fea_data_plane_manager_linux.hh"
 
 #include "fea_io.hh"
@@ -275,7 +279,9 @@ FeaNode::load_data_plane_managers(string& error_msg)
 #endif // 0
 
     if (is_dummy()) {
+#ifdef XORP_USE_FEA_DUMMY
 	fea_data_plane_manager = new FeaDataPlaneManagerDummy(*this);
+#endif
     } else {
 #if defined(HOST_OS_MACOSX) || defined(HOST_OS_DRAGONFLYBSD) || defined(HOST_OS_FREEBSD) || defined(HOST_OS_NETBSD) || defined(HOST_OS_OPENBSD)
 	fea_data_plane_manager = new FeaDataPlaneManagerBsd(*this);
