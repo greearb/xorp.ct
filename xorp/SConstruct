@@ -624,6 +624,13 @@ if not env['optimize'] == 'override':
         env.AppendUnique(CFLAGS = [ bigoflag ])
         env.AppendUnique(CXXFLAGS = [ bigoflag ])
 
+    # At least on Fedora 13, -Os breaks build with strict-aliasing
+    # warnings.  Code looks right to me, so going to just disable
+    # strict aliasing. --Ben
+    if env['optimize'] == 'size':
+        env.AppendUnique(CFLAGS = [ '-fno-strict-aliasing' ])
+        env.AppendUnique(CXXFLAGS = [ '-fno-strict-aliasing' ])
+
 # Do the same for the flags which control debug symbols.
 if not env['debug'] == 'override':
     env.Replace( CFLAGS = filter(lambda s: not s.startswith('-g'),
