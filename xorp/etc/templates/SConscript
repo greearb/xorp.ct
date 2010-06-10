@@ -27,13 +27,9 @@ cmds = [
     'host',
     'igmp',
     'mfea',
-    'mfea6',
     'misc',
     'mld',
-    'ospfv2',
-    'ospfv3',
     'pim',
-    'pim6',
     'policy',
     'rib',
 ]
@@ -43,12 +39,8 @@ tps = [
     'igmp',
     'interfaces',
     'mfea4',
-    'mfea6',
     'mld',
-    'ospfv2',
-    'ospfv3',
     'pimsm4',
-    'pimsm6',
     'plumbing',
     'policy',
     'protocols',
@@ -61,12 +53,26 @@ tp_raw = [
     'fea'
     ]
 
+if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
+    cmds.append('mfea6')
+    tps.append('mfea6')
+    cmds.append('pim6')
+    tps.append('pimsm6')
+    
+    if env['enable_ospf']:
+        cmds.append('ospfv3')
+        tps.append('ospfv3')
+        
 if not (env.has_key('disable_fw') and env['disable_fw']):
     tps.append('firewall')
 
 if env['enable_olsr']:
     cmds.append('olsr4')
     tps.append('olsr4')
+
+if env['enable_ospf']:
+    cmds.append('ospfv2')
+    tps.append('ospfv2')
 
 if env['enable_bgp']:
     cmds.append('bgp')
