@@ -278,6 +278,7 @@ private:
 
     void dump(const char *msg) const
     {
+	UNUSED(msg);
 	trie_debug_msg(" %s %s %s\n",
 		       msg,
 		       _k.str().c_str(), _p ? "PL" : "[]");

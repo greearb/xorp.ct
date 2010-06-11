@@ -17,8 +17,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/pim/pim_bsr.hh,v 1.24 2008/10/28 00:21:18 pavlin Exp $
-
 
 #ifndef __PIM_PIM_BSR_HH__
 #define __PIM_PIM_BSR_HH__
@@ -283,8 +281,8 @@ public:
     bool	i_am_bsr() const;
     bool	is_new_bsr_preferred(const BsrZone& bsr_zone) const;
     bool	is_new_bsr_same_priority(const BsrZone& bsr_zone) const;
-    struct TimeVal randomized_override_interval(const IPvX& my_addr,
-					     uint8_t my_priority) const;
+    TimeVal randomized_override_interval(const IPvX& my_addr,
+					 uint8_t my_priority) const;
     
     bool	is_bsm_forward() const { return (_is_bsm_forward); }
     void	set_bsm_forward(bool v) { _is_bsm_forward = v; }

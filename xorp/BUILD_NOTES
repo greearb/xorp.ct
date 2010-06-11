@@ -33,6 +33,20 @@ To compile XORP with additional user-specified compiler flags, assign
 those flags to the CFLAGS and CXXFLAGS environmental variables (for the
 C and C++ compiler respectively) before running "scons".
 
+To compile using clang and llvm:
+# Install latest clang & llvm
+svn co http://llvm.org/svn/llvm-project/llvm/trunk llvm
+cd llvm/tools
+svn co http://llvm.org/svn/llvm-project/cfe/trunk clang
+cd ..
+./configure --enable-optimized
+make
+(as root):  make install
+
+Then, in xorp directory, build using clang/llvm compiler:
+scons CC=clang CXX=clang++
+
+
 For various compile options use:  scons --help
 
 

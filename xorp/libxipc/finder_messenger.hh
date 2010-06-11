@@ -123,7 +123,8 @@ protected:
     void response_timeout(uint32_t seqno);
 
 private:
-    struct ResponseState {
+    class ResponseState {
+    public:
 	ResponseState(uint32_t		   seqno,
 		      const SendCallback&  cb,
 		      FinderMessengerBase* fmb)

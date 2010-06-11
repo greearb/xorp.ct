@@ -795,6 +795,16 @@ env.AppendUnique(CXXFLAGS = [
     '-pipe',
     ])
 
+# Colors screw up display when showing xemacs (my fav editor), so
+# disable them here if we are using clang.
+if env['CC'] and env['CC'] == 'clang':
+    env.AppendUnique(CFLAGS = [
+        '-fno-color-diagnostics',
+        ])
+    env.AppendUnique(CXXFLAGS = [
+        '-fno-color-diagnostics',
+        ])
+
 # NOTE: For GNU STL only at this time.
 if env['debug_stl']:
     env.AppendUnique(CXXFLAGS = [

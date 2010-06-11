@@ -136,6 +136,7 @@ def implement_unmarshall(cls, method_no, method):
             s += "\ta->get(\"%s\", %s);\n" % (r.name(), cpp_name(r.name()))
 
         s += "    } catch (const XrlArgs::BadArgs& bad_args_err) {\n"
+        s += "\tUNUSED(bad_args_err)\n"  # Fix compile when XLOG_ERROR is #ifdef'd out
         s += "\tXLOG_ERROR(\"Error decoding the arguments: %s\", bad_args_err.str().c_str());\n"
         s += "\tcb->dispatch(XrlError::BAD_ARGS()%s);\n" % fail_args
         s += "\treturn;\n"

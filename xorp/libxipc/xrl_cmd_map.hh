@@ -19,7 +19,6 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxipc/xrl_cmd_map.hh,v 1.21 2008/10/02 21:57:24 bms Exp $
 
 #ifndef __LIBXIPC_XRL_CMD_MAP_HH__
 #define __LIBXIPC_XRL_CMD_MAP_HH__
@@ -36,7 +35,8 @@
 typedef
 XorpCallback2<const XrlCmdError, const XrlArgs&, XrlArgs*>::RefPtr XrlRecvCallback;
 
-struct XrlCmdEntry {
+class XrlCmdEntry {
+public:
     XrlCmdEntry(const string& s, XrlRecvCallback cb) :
 	_name(s), _cb(cb) {}
 
@@ -57,7 +57,6 @@ class XrlCmdMap :
 public:
     typedef map<string, XrlCmdEntry> CmdMap;
 
-public:
     XrlCmdMap(const string& name = "anonymous") : _name(name) {}
     virtual ~XrlCmdMap() {}
 

@@ -46,6 +46,7 @@ FinderServer::FinderServer(EventLoop& e,
 		finder_addr = ipv4;
 	    }
 	} catch (const InvalidString& e) {
+	    UNUSED(e);
 	    XLOG_ERROR("Invalid \"XORP_FINDER_SERVER_ADDRESS\": %s",
 		       e.str().c_str());
 	}

@@ -2336,7 +2336,7 @@ BsrZone::is_new_bsr_same_priority(const BsrZone& bsr_zone) const
     return (false);
 }
 
-struct TimeVal
+TimeVal
 BsrZone::randomized_override_interval(const IPvX& my_addr,
 				      uint8_t my_priority) const
 {

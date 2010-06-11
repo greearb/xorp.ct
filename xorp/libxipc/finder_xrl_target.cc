@@ -108,7 +108,7 @@ FinderXrlTarget::FinderXrlTarget(Finder& finder)
 XrlCmdError
 FinderXrlTarget::common_0_1_get_target_name(string& name)
 {
-    name = XrlFinderTargetBase::name();
+    name = XrlFinderTargetBase::get_name();
     return XrlCmdError::OKAY();
 }
 

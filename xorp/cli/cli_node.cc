@@ -83,7 +83,6 @@ CliNode::CliNode(int init_family, xorp_module_id module_id,
 {
     string error_msg;
 
-    XLOG_ASSERT(module_id == XORP_MODULE_CLI);
     if (module_id != XORP_MODULE_CLI) {
 	XLOG_FATAL("Invalid module ID = %d (must be 'XORP_MODULE_CLI' = %d)",
 		   module_id, XORP_MODULE_CLI);

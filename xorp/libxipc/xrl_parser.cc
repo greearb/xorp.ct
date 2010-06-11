@@ -472,7 +472,7 @@ push_atoms_and_spells(XrlArgs* args,
 				    "Atom cannot be specified here");
 	    args->add(XrlAtom(atom_name, t, atom_value));
 	}
-    } catch (const XrlArgs::XrlAtomFound& xaf) {
+    } catch (const XrlArgs::XrlAtomFound& /*xaf*/) {
 	string e = c_format("Duplicate atom name - \"%s\".",
 				      atom_name.c_str());
 	throw XrlParseError(input, atom_start, e);

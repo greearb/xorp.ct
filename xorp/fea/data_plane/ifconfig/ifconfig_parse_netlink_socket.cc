@@ -21,8 +21,8 @@
 #include <xorp_config.h>
 #ifdef HAVE_NETLINK_SOCKETS
 
-using namespace std;
 #include <fstream>
+using namespace std;
 
 #include "fea/fea_module.h"
 

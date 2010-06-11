@@ -92,7 +92,7 @@ public:
 	    for (i = _resolutions.begin(); i != _resolutions.end(); ++i) {
 		debug_msg("Have \"%s\"\n", i->first.c_str());
 	    }
-	    return false;
+	    return NULL;
 	}
 	return &i->second;
     }

@@ -32,7 +32,8 @@
  * Compile time assertion.
  */
 #ifndef static_assert
-#define static_assert(a) switch (a) case 0: case (a):
+// +0 is to work around clang bug.
+#define static_assert(a) switch ((a) + 0) case 0: case ((a) + 0):
 #endif /* static_assert */
 
 /*
@@ -40,10 +41,9 @@
  * XXX: this should be used only in C. In C++ just remove the argument name
  * in the function definition.
  */
-#ifdef UNUSED
-# undef UNUSED
-#endif /* UNUSED */
+#ifndef UNUSED
 #define UNUSED(var)	static_assert(sizeof(var) != 0)
+#endif /* UNUSED */
 
 #ifdef __cplusplus
 #define cstring(s) (s).str().c_str()

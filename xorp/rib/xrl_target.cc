@@ -46,7 +46,7 @@
 XrlCmdError
 XrlRibTarget::common_0_1_get_target_name(string& name)
 {
-    name = XrlRibTargetBase::name();
+    name = XrlRibTargetBase::get_name();
     return XrlCmdError::OKAY();
 }
 

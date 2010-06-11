@@ -510,7 +510,7 @@ ShowRoutesProcessor::check_cookie(const string& cookie)
 XrlCmdError
 ShowRoutesProcessor::common_0_1_get_target_name(string& name)
 {
-    name = this->name();
+    name = this->get_name();
     return XrlCmdError::OKAY();
 }
 

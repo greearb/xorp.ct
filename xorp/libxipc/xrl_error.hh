@@ -28,7 +28,7 @@
 #include "libxorp/c_format.hh"
 
 
-struct XrlErrlet;
+class XrlErrlet;
 
 enum XrlErrorCode {
     OKAY		  = 100,

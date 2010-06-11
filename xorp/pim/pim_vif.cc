@@ -1802,7 +1802,7 @@ PimVif::upstream_join_timer_t_suppressed() const
 // Compute the randomized 't_override' interval value for Upstream Join Timer:
 // t_override = rand(0, Effective_Override_Interval(I))
 //
-const struct TimeVal&
+const TimeVal&
 PimVif::upstream_join_timer_t_override() const
 {
     static TimeVal tv;

@@ -551,11 +551,12 @@ SelectorList::wait_and_dispatch(int millisecs)
 void
 SelectorList::get_fd_set(SelectorMask selected_mask, fd_set& fds) const
 {
-    if ((SEL_RD != selected_mask) && (SEL_WR != selected_mask) &&
-	(SEL_EX != selected_mask)) return;
-    if (SEL_RD == selected_mask) fds = _fds [SEL_RD_IDX];
-    if (SEL_WR == selected_mask) fds = _fds [SEL_WR_IDX];
-    if (SEL_EX == selected_mask) fds = _fds [SEL_EX_IDX];
+    if (SEL_RD == selected_mask)
+	fds = _fds [SEL_RD_IDX];
+    if (SEL_WR == selected_mask)
+	fds = _fds [SEL_WR_IDX];
+    if (SEL_EX == selected_mask)
+	fds = _fds [SEL_EX_IDX];
     return;
 }
 

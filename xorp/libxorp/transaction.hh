@@ -223,7 +223,8 @@ protected:
      * It is defined here so classes derived from TransactionManager
      * can operate, eg sort operations in list, before committing transaction.
      */
-    struct Transaction {
+    class Transaction {
+    public:
 	typedef list<Operation> OperationList;
 	
 	Transaction(TransactionManager& mgr, const XorpTimer& timeout_timer)

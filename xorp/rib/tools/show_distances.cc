@@ -294,7 +294,7 @@ ShowDistancesProcessor::get_distances_cb(const XrlError& xe,
 XrlCmdError
 ShowDistancesProcessor::common_0_1_get_target_name(string& name)
 {
-    name = this->name();
+    name = this->get_name();
     return XrlCmdError::OKAY();
 }
 

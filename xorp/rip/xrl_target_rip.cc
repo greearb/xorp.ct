@@ -93,7 +93,7 @@ XrlRipTarget::~XrlRipTarget()
 XrlCmdError
 XrlRipTarget::common_0_1_get_target_name(string& n)
 {
-    n = name();
+    n = get_name();
     return XrlCmdError::OKAY();
 }
 

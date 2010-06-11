@@ -287,7 +287,7 @@ public:
     /**
      * Get Xrl instance name associated with command map.
      */
-    const string& name() const { return _cmds->name(); }
+    const string& get_name() const { return _cmds->name(); }
 
     /**
      * Get version string of instance.

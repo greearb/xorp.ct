@@ -30,7 +30,7 @@
 #include "libxorp/exceptions.hh"
 
 class NetlinkSocketObserver;
-struct NetlinkSocketPlumber;
+class NetlinkSocketPlumber;
 
 
 /**

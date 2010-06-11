@@ -49,18 +49,17 @@
 #endif
 #endif
 
-#if defined (__cplusplus) && !defined(__STL_NO_NAMESPACES)
-using namespace std;
-#endif
-
-
-
 /*
  * Include sys/cdefs.h to define __BEGIN_DECLS and __END_DECLS.  Even if
  * this file exists, not all platforms define these macros.
  */
 #ifdef HAVE_SYS_CDEFS_H
 #include <sys/cdefs.h>
+#endif
+
+#if defined (__cplusplus) && !defined(__STL_NO_NAMESPACES)
+#include <string>
+using namespace std;
 #endif
 
 /*
@@ -81,7 +80,6 @@ using namespace std;
 #ifdef __cplusplus
 #include <new>
 #include <iostream>
-#include <string>
 #include <algorithm>
 #include <utility>
 #include <cstdarg>

@@ -70,7 +70,7 @@ XrlCmdError
 XrlRtrmgrInterface::common_0_1_get_target_name(// Output values,
 					       string& name)
 {
-    name = XrlRtrmgrTargetBase::name();
+    name = XrlRtrmgrTargetBase::get_name();
     return XrlCmdError::OKAY();
 }
 

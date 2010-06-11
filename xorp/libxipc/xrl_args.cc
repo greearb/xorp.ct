@@ -635,7 +635,7 @@ XrlArgs::XrlArgs(const char* serialized) throw (InvalidString)
 	try {
 	    XrlAtom xa(tok.c_str());
 	    add(xa);
-	} catch (const XrlAtomFound& xaf) {
+	} catch (const XrlAtomFound& /*xaf*/) {
 	    xorp_throw(InvalidString, "Duplicate Atom found:" + tok);
 	}
 	start = end;

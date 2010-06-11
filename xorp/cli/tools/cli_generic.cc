@@ -569,6 +569,7 @@ main(int argc, char* argv[])
     try {
 	own(argc, argv);
     } catch (const CGException& e) {
+	UNUSED(e);
 	XLOG_FATAL("CGException: %s", e.str().c_str());
     }
 

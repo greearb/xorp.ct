@@ -150,6 +150,7 @@ xrlatom_encode_value(const char* val, size_t val_bytes)
 
     string out;			 // output string
 
+    char encoded_data[val_bytes * 4 + 1];
     while (reg_start != val_end) {
 	reg_end = reg_start;
 	while (reg_end != val_end && fast_needs_escape(*reg_end) == false) {
@@ -159,7 +160,6 @@ xrlatom_encode_value(const char* val, size_t val_bytes)
 
 	// Do escapes one at a time.
 	reg_start = reg_end;
-	char encoded_data[val_bytes * 4 + 1];
 	char *next_code = &encoded_data[0];
 	bool escaped = false;
 	while (reg_start != val_end && fast_needs_escape(*reg_start) == true) {

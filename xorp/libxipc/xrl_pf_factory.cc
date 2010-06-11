@@ -55,6 +55,7 @@ XrlPFSenderFactory::create_sender(EventLoop&	eventloop,
 	    return rv;
 	}
     } catch (XorpException& e) {
+	UNUSED(e);
 	XLOG_ERROR("XrlPFSenderFactory::create failed: %s\n", e.str().c_str());
     }
     return rv;

@@ -29,7 +29,7 @@
 #include "xorp.h"
 
 
-struct SafeCallbackBase;
+class SafeCallbackBase;
 
 /**
  * @short Base class for objects that are callback safe.

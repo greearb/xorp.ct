@@ -43,7 +43,7 @@ XrlCmdError
 XrlXorpshInterface::common_0_1_get_target_name(// Output values, 
 					       string& name)
 {
-    name = XrlXorpshTargetBase::name();
+    name = XrlXorpshTargetBase::get_name();
     return XrlCmdError::OKAY();
 }
 

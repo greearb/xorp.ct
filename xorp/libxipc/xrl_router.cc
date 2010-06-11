@@ -70,12 +70,10 @@ do {									      \
  * Slow-path dispatch state.  Contains information that needs to be held
  * whilst waiting for a finder resolution.
  */
-struct XrlRouterDispatchState
-{
+class XrlRouterDispatchState {
 public:
     typedef XrlRouter::XrlCallback XrlCallback;
 
-public:
     XrlRouterDispatchState(const Xrl&		x,
 			   const XrlCallback&	xcb)
 	: _xrl(x), _xcb(xcb)
@@ -167,6 +165,7 @@ XrlRouter::initialize(const char* class_name,
 			   ipv4.str().c_str());
 	    }
 	} catch (const InvalidString& e) {
+	    UNUSED(e);
 	    XLOG_ERROR("Invalid \"XORP_FINDER_CLIENT_ADDRESS\": %s",
 		       e.str().c_str());
 	}
@@ -184,6 +183,7 @@ XrlRouter::initialize(const char* class_name,
 		finder_addr = ipv4;
 	    }
 	} catch (const InvalidString& e) {
+	    UNUSED(e);
 	    XLOG_ERROR("Invalid \"XORP_FINDER_SERVER_ADDRESS\": %s",
 		       e.str().c_str());
 	}

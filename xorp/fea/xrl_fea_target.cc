@@ -130,7 +130,7 @@ XrlFeaTarget::common_0_1_get_target_name(
     // Output values,
     string&	name)
 {
-    name = this->name();
+    name = this->get_name();
     return XrlCmdError::OKAY();
 }
 

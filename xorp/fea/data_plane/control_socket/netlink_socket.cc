@@ -467,7 +467,8 @@ NetlinkSocket::io_event(XorpFd fd, IoEventType type)
 // Observe netlink sockets activity
 //
 
-struct NetlinkSocketPlumber {
+class NetlinkSocketPlumber {
+public:
     typedef NetlinkSocket::ObserverList ObserverList;
 
     static void

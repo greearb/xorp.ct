@@ -40,8 +40,8 @@ class FinderClientObserver;
  * A one-to-many container used by the FinderClient to store
  * unresolved-to-resolved Xrl mappings.
  */
-struct FinderDBEntry
-{
+class FinderDBEntry {
+public:
     typedef list<Xrl> XRLS;
 
     FinderDBEntry(const string& key);
