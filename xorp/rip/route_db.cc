@@ -32,7 +32,7 @@
 #include "libxorp/ipv6.hh"
 #include "libxorp/xlog.h"
 
-#include <map>
+
 
 #include "constants.hh"
 #include "route_db.hh"

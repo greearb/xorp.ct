@@ -31,8 +31,8 @@
 #include "libxorp/exceptions.hh"
 
 #include <sstream>
-#include <list>
-#include <map>
+
+
 
 //
 // Configuration Node ID support

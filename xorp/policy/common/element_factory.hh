@@ -23,8 +23,8 @@
 #ifndef __POLICY_COMMON_ELEMENT_FACTORY_HH__
 #define __POLICY_COMMON_ELEMENT_FACTORY_HH__
 
-#include <map>
-#include <string>
+
+
 #include <sstream>
 #include "register_elements.hh"
 #include "element_base.hh"

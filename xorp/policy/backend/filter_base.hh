@@ -24,7 +24,7 @@
 #define __POLICY_BACKEND_FILTER_BASE_HH__
 
 #include "policy/common/varrw.hh"
-#include <string>
+
 
 /**
  * @short Base class for all policy filters.

@@ -21,7 +21,7 @@
 
 #include "libxorp/xorp.h"
 
-#include <iostream>
+
 
 #include "filter_manager_fake.hh"
 

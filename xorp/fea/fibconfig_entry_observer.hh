@@ -22,7 +22,7 @@
 #ifndef __FEA_FIBCONFIG_ENTRY_OBSERVER_HH__
 #define __FEA_FIBCONFIG_ENTRY_OBSERVER_HH__
 
-#include <vector>
+
 
 #include "fte.hh"
 #include "iftree.hh"

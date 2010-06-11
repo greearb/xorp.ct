@@ -23,7 +23,7 @@
 #ifndef __POLICY_COMMON_ELEMENT_HH__
 #define __POLICY_COMMON_ELEMENT_HH__
 
-#include <string>
+
 
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"

@@ -22,7 +22,7 @@
 #ifndef __RTRMGR_GENERIC_MODULE_MANAGER_HH__
 #define __RTRMGR_GENERIC_MODULE_MANAGER_HH__
 
-#include <map>
+
 
 
 class EventLoop;

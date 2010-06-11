@@ -81,6 +81,7 @@ vars.AddVariables(
     BoolVariable('disable_otherlogs',  'Force disable other logs', False),
     BoolVariable('disable_profile',  'Disable Xorp Profiler feature', False),
     BoolVariable('enable_boost',  'Use BOOST', False),
+    BoolVariable('enable_ustl',  'Use uSTL', False),
     BoolVariable('enable_bgp',  'Build BGP', True),
     BoolVariable('enable_olsr',  'Build OLSR', True),
     BoolVariable('enable_ospf',  'Build OSPF', True),
@@ -245,6 +246,7 @@ print 'Enable CLICK:     ', env['enable_click']
 print 'Enable FEA Dummy: ', env['enable_fea_dummy']
 print 'Enable BGP:       ', env['enable_bgp']
 print 'Try Enable BOOST: ', env['enable_boost']
+print 'Try Enable uSTL : ', env['enable_ustl']
 print 'Disable IPv6:     ', env['disable_ipv6']
 print 'Disable Firewall: ', env['disable_fw']
 print 'Disable Profile : ', env['disable_profile']
@@ -359,6 +361,12 @@ if tst and not (tst == "no"):
     env['enable_boost'] = True;
 else:
     env['enable_boost'] = False
+
+tst = ARGUMENTS.get('enable_ustl', False)
+if tst and not (tst == "no"):
+    env['enable_ustl'] = True;
+else:
+    env['enable_ustl'] = False
 
 tst = ARGUMENTS.get('enable_tests', False)
 if tst and not (tst == "no"):
@@ -545,6 +553,9 @@ if not env.GetOption('clean') and \
 
     if env['disable_profile']:
         conf.Define("XORP_DISABLE_PROFILE")
+
+    if env['enable_ustl']:
+        conf.Define("XORP_USE_USTL")
 
     if env['enable_boost']:
         # Boost

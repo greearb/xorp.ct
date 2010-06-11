@@ -34,8 +34,8 @@
 #include "libxorp/eventloop.hh"
 #include "libxorp/tlv.hh"
 
-#include <set>
-#include <list>
+
+
 
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>

@@ -21,7 +21,7 @@
 
 
 
-#include <algorithm>
+
 #include <iterator>
 
 #include "libfeaclient_module.h"

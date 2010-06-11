@@ -23,8 +23,8 @@
 #ifndef __LIBXIPC_XRL_CMD_MAP_HH__
 #define __LIBXIPC_XRL_CMD_MAP_HH__
 
-#include <map>
-#include <string>
+
+
 
 
 

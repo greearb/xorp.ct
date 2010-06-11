@@ -28,7 +28,7 @@
 // interested parties.
 //
 
-#include <list>
+
 
 class IfConfigUpdateReplicator;
 class IfTree;

@@ -52,7 +52,7 @@ static int yygrowstack();
  * yacc -d -p yy_policy_parser -o yacc.yy_policy_parser.cc policy.y
  */
 
-#include <vector>
+
 
 #include "policy_module.h"
 #include "libxorp/xorp.h"

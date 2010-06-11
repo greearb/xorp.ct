@@ -22,11 +22,11 @@
 #ifndef __BGP_NEXT_HOP_RESOLVER_HH__
 #define __BGP_NEXT_HOP_RESOLVER_HH__
 
-#include <set>
-#include <map>
-#include <algorithm>
+
+
+
 #include <functional>
-#include <list>
+
 
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"

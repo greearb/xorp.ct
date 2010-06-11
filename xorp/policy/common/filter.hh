@@ -22,7 +22,7 @@
 #ifndef __POLICY_COMMON_FILTER_HH__
 #define __POLICY_COMMON_FILTER_HH__
 
-#include <string>
+
 
 namespace filter {
 

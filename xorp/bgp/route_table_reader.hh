@@ -25,7 +25,7 @@
 #include "libxorp/xorp.h"
 #include "libxorp/ipnet.hh"
 
-#include <map>
+
 
 #include "bgp_trie.hh"
 

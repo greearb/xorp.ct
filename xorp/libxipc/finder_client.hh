@@ -24,9 +24,9 @@
 #ifndef __LIBXIPC_FINDER_CLIENT_HH__
 #define __LIBXIPC_FINDER_CLIENT_HH__
 
-#include <list>
-#include <map>
-#include <string>
+
+
+
 
 #include "xrl/targets/finder_client_base.hh"
 #include "finder_messenger.hh"

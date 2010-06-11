@@ -26,7 +26,7 @@
 #ifndef __LIBXIPC_XRL_PF_HH__
 #define __LIBXIPC_XRL_PF_HH__
 
-#include <string>
+
 
 #include "libxorp/eventloop.hh"
 #include "libxorp/timer.hh"

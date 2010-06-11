@@ -22,7 +22,7 @@
 #ifndef __RIP_TOOLS_COMMON_HH__
 #define __RIP_TOOLS_COMMON_HH__
 
-#include <string>
+
 
 #include "libxorp/xorp.h"
 #include "libxorp/ipv4.hh"

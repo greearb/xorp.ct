@@ -24,7 +24,7 @@
 // #define DEBUG_PRINT_FUNCTION_NAME
 
 #include <math.h>
-#include <vector>
+
 
 #include "bgp_module.h"
 #include "libxorp/xlog.h"

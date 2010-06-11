@@ -28,7 +28,7 @@
 #include "libxorp/ipnet.hh"
 
 #include <functional>
-#include <set>
+
 
 #include "peer.hh"
 #include "route_db.hh"

@@ -27,7 +27,7 @@
 
 #include <exception>
 #include <stdarg.h>
-#include <string>
+
 #include "xorp.h"
 #include "libxorp/c_format.hh"
 

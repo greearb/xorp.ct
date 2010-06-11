@@ -23,8 +23,8 @@
 #define __RTRMGR_USERDB_HH__
 
 
-#include <map>
-#include <set>
+
+
 
 
 class User {

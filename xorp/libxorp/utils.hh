@@ -24,8 +24,8 @@
 #ifndef __LIBXORP_UTILS_HH__
 #define __LIBXORP_UTILS_HH__
 
-#include <list>
-#include <vector>
+
+
 
 #include "utility.h"
 

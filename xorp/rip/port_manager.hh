@@ -22,7 +22,7 @@
 #ifndef __RIP_PORT_MANAGER_HH__
 #define __RIP_PORT_MANAGER_HH__
 
-#include <list>
+
 
 #include "libfeaclient/ifmgr_atoms.hh"
 

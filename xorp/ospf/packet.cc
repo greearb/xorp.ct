@@ -39,10 +39,10 @@
 #include "libproto/checksum.h"
 #include "libproto/packet.hh"
 
-#include <map>
-#include <list>
-#include <set>
-#include <vector>
+
+
+
+
 
 #include "ospf.hh"
 #include "packet.hh"

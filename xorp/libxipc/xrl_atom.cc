@@ -30,8 +30,8 @@
 
 #include "libproto/packet.hh"
 
-#include <map>
-#include <string>
+
+
 
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>

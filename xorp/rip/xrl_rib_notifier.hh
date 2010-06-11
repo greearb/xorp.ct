@@ -22,7 +22,7 @@
 #ifndef __RIP_XRL_RIB_NOTIFIER_HH__
 #define __RIP_XRL_RIB_NOTIFIER_HH__
 
-#include <set>
+
 #include "libxorp/ipnet.hh"
 #include "libxorp/service.hh"
 

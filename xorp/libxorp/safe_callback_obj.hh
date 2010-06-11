@@ -24,8 +24,8 @@
 #ifndef __LIBXORP_SAFE_CALLBACK_OBJ_HH__
 #define __LIBXORP_SAFE_CALLBACK_OBJ_HH__
 
-#include <algorithm>
-#include <vector>
+
+
 #include "xorp.h"
 
 

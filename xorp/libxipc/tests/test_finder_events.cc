@@ -30,8 +30,8 @@
 #include "libxorp/xorpfd.hh"
 #include "libxorp/eventloop.hh"
 
-#include <list>
-#include <vector>
+
+
 
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>

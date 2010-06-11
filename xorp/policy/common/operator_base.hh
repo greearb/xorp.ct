@@ -23,7 +23,7 @@
 #ifndef __POLICY_COMMON_OPERATOR_BASE_HH__
 #define __POLICY_COMMON_OPERATOR_BASE_HH__
 
-#include <string>
+
 
 #include "policy/policy_module.h"
 #include "libxorp/xlog.h"

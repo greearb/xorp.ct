@@ -23,7 +23,7 @@
 #define __BGP_BGP_TRIE_HH__
 
 #include "subnet_route.hh"
-#include <map>
+
 #include "libxorp/ref_trie.hh"
 
 template <class A>

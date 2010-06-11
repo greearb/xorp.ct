@@ -23,8 +23,8 @@
 #ifndef __BGP_ROUTE_TABLE_FILTER_HH__
 #define __BGP_ROUTE_TABLE_FILTER_HH__
 
-#include <set>
-#include <map>
+
+
 #include "route_table_base.hh"
 #include "next_hop_resolver.hh"
 #include "peer_data.hh"

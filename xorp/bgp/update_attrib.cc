@@ -26,7 +26,7 @@
 #include "libxorp/xlog.h"
 #include "libxorp/ipv4net.hh"
 
-#include <set>
+
 
 #include "update_attrib.hh"
 #include "packet.hh"

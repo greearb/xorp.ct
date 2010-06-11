@@ -22,8 +22,8 @@
 #ifndef __RIB_RT_TAB_REGISTER_HH__
 #define __RIB_RT_TAB_REGISTER_HH__
 
-#include <set>
-#include <map>
+
+
 
 #include "libxorp/debug.h"
 

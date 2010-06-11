@@ -22,7 +22,7 @@
 #ifndef __BGP_ATTRIBUTE_MANAGER_HH__
 #define __BGP_ATTRIBUTE_MANAGER_HH__
 
-#include <set>
+
 #include "path_attribute.hh"
 
 template <class A>

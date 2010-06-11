@@ -24,11 +24,11 @@
 #ifndef __LIBXIPC_XRL_PARSER_INPUT_HH__
 #define __LIBXIPC_XRL_PARSER_INPUT_HH__
 
-#include <iostream>
-#include <fstream>
-#include <list>
-#include <vector>
-#include <string>
+
+
+
+
+
 
 #include "libxorp/xorp.h"
 #include "libxorp/exceptions.hh"

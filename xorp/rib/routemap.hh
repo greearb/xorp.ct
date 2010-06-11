@@ -22,7 +22,7 @@
 #ifndef __RIB_ROUTEMAP_HH__
 #define __RIB_ROUTEMAP_HH__
 
-#include <list>
+
 
 #include "libxorp/xorp.h"
 #include "libxorp/ipv4net.hh"

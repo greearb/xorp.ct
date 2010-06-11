@@ -26,8 +26,8 @@
 
 #include "libxorp/xorp.h"
 
-#include <list>
-#include <vector>
+
+
 
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>

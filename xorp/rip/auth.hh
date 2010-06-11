@@ -22,9 +22,9 @@
 #ifndef __RIP_AUTH_HH__
 #define __RIP_AUTH_HH__
 
-#include <list>
-#include <map>
-#include <vector>
+
+
+
 #include "packets.hh"
 
 class EventLoop;

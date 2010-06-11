@@ -38,7 +38,7 @@
 #include "olsr.hh"
 #include "message.hh"
 
-#include <algorithm>
+
 
 // Make sure that all tests free up any memory that they use. This will
 // allow us to use the leak checker program.

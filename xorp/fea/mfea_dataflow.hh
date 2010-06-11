@@ -29,7 +29,7 @@
 //
 
 
-#include <list>
+
 
 #include "libxorp/timer.hh"
 #include "libproto/proto_unit.hh"

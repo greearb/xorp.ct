@@ -26,7 +26,7 @@
 #include "libxorp/xorp.h"
 //#include "libxorp/debug.h"
 
-#include <vector>
+
 #include <cassert>
 
 #ifdef HAVE_EXECINFO_H

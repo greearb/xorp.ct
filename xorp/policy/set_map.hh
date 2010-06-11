@@ -23,8 +23,8 @@
 #ifndef __POLICY_SET_MAP_HH__
 #define __POLICY_SET_MAP_HH__
 
-#include <string>
-#include <vector>
+
+
 
 #include "policy/common/element_factory.hh"
 #include "policy/common/policy_exception.hh"

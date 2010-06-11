@@ -29,7 +29,7 @@
 //
 
 
-#include <list>
+
 
 #include "libxorp/ipvx.hh"
 #include "libxorp/ipvxnet.hh"

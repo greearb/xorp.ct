@@ -19,14 +19,11 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxorp/buffer.hh,v 1.10 2008/10/02 21:57:28 bms Exp $
-
 #ifndef __LIBXORP_BUFFER_HH__
 #define __LIBXORP_BUFFER_HH__
 
 
 #include <string.h>
-#include <new>
 
 #include "xorp.h"
 #include "exceptions.hh"

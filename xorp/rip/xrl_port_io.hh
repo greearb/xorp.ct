@@ -22,7 +22,7 @@
 #ifndef __XRL_PORT_IO_HH__
 #define __XRL_PORT_IO_HH__
 
-#include <string>
+
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
 #include "libxorp/safe_callback_obj.hh"

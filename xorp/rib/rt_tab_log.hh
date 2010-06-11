@@ -22,7 +22,7 @@
 #ifndef __RIB_RT_TAB_LOG_HH__
 #define __RIB_RT_TAB_LOG_HH__
 
-#include <iostream>
+
 
 #include "rt_tab_base.hh"
 

@@ -20,7 +20,7 @@
 
 
 
-#include <iostream>
+
 
 #include "xrl/interfaces/common_xif.hh"
 #include "xrl/interfaces/test_xif.hh"

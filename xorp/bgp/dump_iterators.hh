@@ -23,7 +23,7 @@
 #define __BGP_DUMP_ITERATORS_HH__
 
 
-#include <map>
+
 #include "path_attribute.hh"
 #include "bgp_trie.hh"
 #include "route_queue.hh"

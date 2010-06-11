@@ -51,8 +51,8 @@ static int yygrowstack();
 
 #include "libxorp/xorp.h"
 
-#include <list>
-#include <vector>
+
+
 
 #include "libproto/config_node_id.hh"
 

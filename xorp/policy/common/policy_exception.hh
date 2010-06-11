@@ -22,7 +22,7 @@
 #ifndef __POLICY_COMMON_POLICY_EXCEPTION_HH__
 #define __POLICY_COMMON_POLICY_EXCEPTION_HH__
 
-#include <string>
+
 #include "libxorp/exceptions.hh"
 
 

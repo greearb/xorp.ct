@@ -24,7 +24,7 @@
 #ifndef __LIBXIPC_FINDER_SERVER_HH__
 #define __LIBXIPC_FINDER_SERVER_HH__
 
-#include <list>
+
 
 #include "libxorp/xlog.h"
 

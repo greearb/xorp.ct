@@ -23,7 +23,7 @@
 #ifndef __BGP_ROUTE_TABLE_FANOUT_HH__
 #define __BGP_ROUTE_TABLE_FANOUT_HH__
 
-#include <map>
+
 #include "route_table_base.hh"
 #include "peer_route_pair.hh"
 #include "route_queue.hh"

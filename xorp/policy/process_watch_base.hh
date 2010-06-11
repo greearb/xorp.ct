@@ -23,7 +23,7 @@
 #ifndef __POLICY_PROCESS_WATCH_BASE_HH__
 #define __POLICY_PROCESS_WATCH_BASE_HH__
 
-#include <string>
+
 
 /**
  * @short Base class for a process watcher.

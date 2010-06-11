@@ -20,7 +20,7 @@
 
 
 
-#include <iostream>
+
 
 #include "test_tgt.hh"
 #include "libxorp/status_codes.h"

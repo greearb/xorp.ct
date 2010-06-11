@@ -22,8 +22,8 @@
 #ifndef __BGP_ROUTE_TABLE_BASE_HH__
 #define __BGP_ROUTE_TABLE_BASE_HH__
 
-#include <iostream>
-#include <string>
+
+
 
 #include "libxorp/ipv4net.hh"
 #include "libxorp/ipv4.hh"

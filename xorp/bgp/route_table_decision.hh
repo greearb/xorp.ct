@@ -22,7 +22,7 @@
 #ifndef __BGP_ROUTE_TABLE_DECISION_HH__
 #define __BGP_ROUTE_TABLE_DECISION_HH__
 
-#include <map>
+
 #include "route_table_base.hh"
 #include "dump_iterators.hh"
 #include "peer_handler.hh"

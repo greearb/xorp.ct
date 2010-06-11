@@ -23,8 +23,8 @@
 #ifndef __POLICY_PARSER_HH__
 #define __POLICY_PARSER_HH__
 
-#include <string>
-#include <vector>
+
+
 #include "node_base.hh"
 #include "term.hh"
 

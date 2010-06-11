@@ -29,7 +29,7 @@
 #include "libxorp/run_command.hh"
 #include "libxorp/utils.hh"
 
-#include <algorithm>
+
 
 #ifdef HAVE_SYS_LINKER_H
 #include <sys/linker.h>

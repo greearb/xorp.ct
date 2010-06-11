@@ -23,10 +23,10 @@
 #ifndef __POLICY_COMMON_DISPATCHER_HH__
 #define __POLICY_COMMON_DISPATCHER_HH__
 
-#include <string>
+
 #include <sstream>
-#include <map>
-#include <vector>
+
+
 
 #include "policy/policy_module.h"
 #include "libxorp/xlog.h"

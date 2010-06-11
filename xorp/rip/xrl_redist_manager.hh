@@ -27,8 +27,8 @@
 #include "libxorp/ipnet.hh"
 #include "libxorp/service.hh"
 
-#include <list>
-#include <string>
+
+
 
 #include "redist.hh"
 

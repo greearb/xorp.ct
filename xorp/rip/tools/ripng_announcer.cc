@@ -24,8 +24,8 @@
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 
-#include <vector>
-#include <fstream>
+
+
 
 #ifdef HAVE_NET_IF_H
 #include <net/if.h>

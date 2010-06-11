@@ -29,8 +29,8 @@
 //
 
 
-#include <set>
-#include <vector>
+
+
 
 #include "libxorp/ipvx.hh"
 #include "libxorp/config_param.hh"

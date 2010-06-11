@@ -23,7 +23,7 @@
 #define __BGP_ROUTE_TABLE_RIBIN_HH__
 
 
-#include <map>
+
 #include "libxorp/eventloop.hh"
 #include "route_table_base.hh"
 #include "crash_dump.hh"

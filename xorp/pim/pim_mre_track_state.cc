@@ -30,7 +30,7 @@
 #include "libxorp/debug.h"
 #include "libxorp/ipvx.hh"
 
-#include <algorithm>
+
 
 #include "pim_mfc.hh"
 #include "pim_mre_track_state.hh"

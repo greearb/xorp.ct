@@ -24,7 +24,7 @@
 #include <xorp_config.h>
 #ifdef HAVE_NETLINK_SOCKETS
 
-#include <list>
+
 
 #include "libxorp/eventloop.hh"
 #include "libxorp/exceptions.hh"

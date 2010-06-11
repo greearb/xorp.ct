@@ -36,8 +36,8 @@
 #include "libxorp/service.hh"
 #include "libxorp/eventloop.hh"
 
-#include <list>
-#include <set>
+
+
 
 #include "xrl/interfaces/fea_rawpkt4_xif.hh"
 #ifdef HAVE_IPV6

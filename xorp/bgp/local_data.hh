@@ -29,7 +29,7 @@
 #include "libxorp/ipv4.hh"
 #include "libxorp/asnum.hh"
 
-#include <list>
+
 
 #include "damping.hh"
 

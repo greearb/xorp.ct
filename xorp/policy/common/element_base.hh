@@ -23,7 +23,7 @@
 #ifndef __POLICY_COMMON_ELEMENT_BASE_HH__
 #define __POLICY_COMMON_ELEMENT_BASE_HH__
 
-#include <string>
+
 
 /**
  * @short Basic object type used by policy engine.

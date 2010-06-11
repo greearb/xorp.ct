@@ -23,7 +23,7 @@
 #define __RTRMGR_COMMAND_TREE_HH__
 
 
-#include <list>
+
 
 
 class ConfigTreeNode;

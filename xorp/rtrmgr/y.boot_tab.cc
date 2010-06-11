@@ -47,7 +47,7 @@ static int yygrowstack();
 
 #include <assert.h>
 #include <stdio.h>
-#include <string>
+
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"

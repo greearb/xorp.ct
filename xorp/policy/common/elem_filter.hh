@@ -25,7 +25,7 @@
 #include "policy/backend/policy_filter.hh"
 #include "element_base.hh"
 #include "libxorp/ref_ptr.hh"
-#include <string>
+
 
 /**
  * @short a filter element.  Used when versioning.

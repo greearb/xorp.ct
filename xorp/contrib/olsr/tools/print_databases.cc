@@ -34,8 +34,8 @@
 #include "libxorp/eventloop.hh"
 #include "libxorp/tlv.hh"
 
-#include <set>
-#include <list>
+
+
 
 #include "libxipc/xrl_std_router.hh"
 

@@ -29,7 +29,7 @@
 //
 
 
-#include <list>
+
 
 #include "libxorp/config_param.hh"
 #include "libxorp/vif.hh"

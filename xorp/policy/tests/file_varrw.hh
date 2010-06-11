@@ -26,9 +26,9 @@
 #include "policy/common/varrw.hh"
 #include "policy/common/policy_exception.hh"
 #include "policy/common/element_factory.hh"
-#include <map>
-#include <string>
-#include <set>
+
+
+
 
 class FileVarRW : public VarRW {
 public:

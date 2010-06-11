@@ -36,7 +36,7 @@
 // #define DEBUG_FUNCTION_NAME
 // #define DETAILED_DEBUG
 
-#include <list>
+
 
 #include "libproto/spt.hh"
 

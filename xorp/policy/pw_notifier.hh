@@ -23,7 +23,7 @@
 #ifndef __POLICY_PW_NOTIFIER_HH__
 #define __POLICY_PW_NOTIFIER_HH__
 
-#include <string>
+
 
 /**
  * @short Interface which receives notification events from ProcessWatch.

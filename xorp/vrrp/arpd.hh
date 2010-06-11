@@ -23,7 +23,7 @@
 #ifndef __VRRP_ARPD_HH__
 #define __VRRP_ARPD_HH__
 
-#include <set>
+
 
 #include "libxorp/ipv4.hh"
 #include "vrrp_packet.hh"

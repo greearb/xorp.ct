@@ -23,7 +23,7 @@
 
 // test_xrl: String Serialization Tests
 
-#include <iostream>
+
 
 #include "xrl_module.h"
 #include "libxorp/xlog.h"

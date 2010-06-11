@@ -33,7 +33,7 @@
 
 #include "libproto/packet.hh"
 
-#include <map>
+
 
 #include "olsr_types.hh"
 #include "exceptions.hh"

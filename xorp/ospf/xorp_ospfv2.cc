@@ -31,7 +31,7 @@
 #include "libxorp/status_codes.h"
 #include "libxorp/eventloop.hh"
 
-#include <set>
+
 
 #include "libxipc/xrl_std_router.hh"
 

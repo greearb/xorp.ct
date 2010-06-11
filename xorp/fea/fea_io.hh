@@ -27,7 +27,7 @@
 // FEA (Forwarding Engine Abstraction) I/O interface.
 //
 
-#include <list>
+
 
 class EventLoop;
 class FeaNode;

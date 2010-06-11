@@ -22,7 +22,7 @@
 
 #include "libxorp/xorp.h"
 
-#include <algorithm>
+
 
 #include "elem_set.hh"
 #include "policy_utils.hh"

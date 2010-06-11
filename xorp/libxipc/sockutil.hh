@@ -28,8 +28,8 @@
 
 #include "libxorp/xorp.h"
 
-#include <string>
-#include <vector>
+
+
 
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>

@@ -22,7 +22,7 @@
 #ifndef __FEA_FIBCONFIG_TABLE_SET_HH__
 #define __FEA_FIBCONFIG_TABLE_SET_HH__
 
-#include <list>
+
 
 #include "fte.hh"
 #include "iftree.hh"

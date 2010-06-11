@@ -23,7 +23,7 @@
 
 #include <stdio.h>
 
-#include <string>
+
 
 #include "xrl_module.h"
 #include "libxorp/xorp.h"

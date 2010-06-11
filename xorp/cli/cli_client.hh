@@ -35,7 +35,7 @@
 #include "libxorp/timer.hh"
 #include "cli_node.hh"
 
-#include <list>
+
 
 
 //

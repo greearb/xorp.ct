@@ -34,9 +34,9 @@
 #include "libxorp/eventloop.hh"
 #include "libxorp/tokenize.hh"
 
-#include <map>
-#include <list>
-#include <set>
+
+
+
 
 #include "ospf.hh"
 #include "packet.hh"

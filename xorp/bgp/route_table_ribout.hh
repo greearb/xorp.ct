@@ -22,8 +22,8 @@
 #ifndef __BGP_ROUTE_TABLE_RIBOUT_HH__
 #define __BGP_ROUTE_TABLE_RIBOUT_HH__
 
-#include <set>
-#include <list>
+
+
 
 #include "bgp_module.h"
 #include "libxorp/xlog.h"

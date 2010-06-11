@@ -22,7 +22,7 @@
 #ifndef __FEA_DATA_PLANE_FIREWALL_FIREWALL_SET_DUMMY_HH__
 #define __FEA_DATA_PLANE_FIREWALL_FIREWALL_SET_DUMMY_HH__
 
-#include <map>
+
 
 #include "fea/firewall_set.hh"
 

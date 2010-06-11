@@ -34,7 +34,7 @@
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
 
-#include <set>
+
 
 #include "libxipc/xrl_std_router.hh"
 

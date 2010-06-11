@@ -98,8 +98,8 @@ public:
 #include "libxorp/debug.h"
 #include "libxorp/ref_ptr.hh"
 #include "libxorp/asnum.hh"
-#include <string>
-#include <list>
+
+
 #include "exceptions.hh"
 
 enum ParamType {

@@ -24,7 +24,7 @@
 #define __POLICY_BACKEND_VARRW_HH__
 
 #include "element_base.hh"
-#include <string>
+
 #include <sstream>
 
 /**

@@ -24,7 +24,7 @@
 #ifndef __LIBXIPC_XRL_HH__
 #define __LIBXIPC_XRL_HH__
 
-#include <string>
+
 
 #include "libxorp/ref_ptr.hh"
 #include "xrl_pf.hh"  // Needed for ref_ptr instantiation of XrlPFSender

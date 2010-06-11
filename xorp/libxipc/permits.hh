@@ -24,7 +24,7 @@
 #ifndef __LIBXIPC_PERMITS_HH__
 #define __LIBXIPC_PERMITS_HH__
 
-#include <list>
+
 
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv4net.hh"

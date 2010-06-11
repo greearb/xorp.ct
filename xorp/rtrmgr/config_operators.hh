@@ -22,7 +22,7 @@
 #ifndef __RTRMGR_CONFIG_OPERATORS_HH__
 #define __RTRMGR_CONFIG_OPERATORS_HH__
 
-#include <string>
+
 
 #include "rtrmgr_error.hh"
 

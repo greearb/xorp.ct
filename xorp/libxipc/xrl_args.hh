@@ -32,7 +32,7 @@
 #include "libxorp/mac.hh"
 #include "libxorp/exceptions.hh"
 
-#include <vector>
+
 
 #include "xrl_atom.hh"
 

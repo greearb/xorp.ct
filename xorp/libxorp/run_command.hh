@@ -25,7 +25,7 @@
 #define __LIBXORP_RUN_COMMAND_HH__
 
 
-#include <list>
+
 
 #include "libxorp/asyncio.hh"
 #include "libxorp/callback.hh"

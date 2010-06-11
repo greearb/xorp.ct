@@ -24,7 +24,7 @@
 #ifndef __LIBXORP_TASK_HH__
 #define __LIBXORP_TASK_HH__
 
-#include <map>
+
 
 #include "debug.h"
 #include "round_robin.hh"

@@ -21,7 +21,7 @@
 
 #include "libxorp/xorp.h"
 
-#include <iostream>
+
 
 #include "process_watch_fake.hh"
 

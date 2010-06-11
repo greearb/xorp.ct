@@ -29,8 +29,8 @@
 #include "process_watch_base.hh"
 #include "pw_notifier.hh"
 #include "protocol_map.hh"
-#include <set>
-#include <string>
+
+
 
 /**
  * @short Keeps track of which XORP processes of interest are alive.

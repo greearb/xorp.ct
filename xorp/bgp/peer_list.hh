@@ -22,8 +22,8 @@
 #ifndef __BGP_PEER_LIST_HH__
 #define __BGP_PEER_LIST_HH__
 
-#include <list>
-#include <map>
+
+
 #include "peer.hh"
 
 class BGPPeer;

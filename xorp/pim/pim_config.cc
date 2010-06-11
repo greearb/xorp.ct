@@ -24,7 +24,7 @@
 // TODO: a temporary solution for various PIM configuration
 //
 
-#include <set>
+
 
 #include "pim_module.h"
 #include "libxorp/xorp.h"

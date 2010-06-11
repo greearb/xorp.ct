@@ -24,7 +24,7 @@
 #ifndef __LIBXIPC_HMAC_HH__
 #define __LIBXIPC_HMAC_HH__
 
-#include <string>
+
 #include "hmac_md5.h"
 
 class HMAC {

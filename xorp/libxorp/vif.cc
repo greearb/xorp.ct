@@ -21,9 +21,9 @@
 
 
 #include <functional>
-#include <string>
-#include <algorithm>
-#include <vector>
+
+
+
 
 #include "xorp.h"
 #include "vif.hh"

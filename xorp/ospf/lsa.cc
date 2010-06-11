@@ -37,9 +37,9 @@
 #include "libxorp/eventloop.hh"
 #include "libproto/packet.hh"
 
-#include <map>
-#include <list>
-#include <set>
+
+
+
 
 #include "ospf.hh"
 #include "lsa.hh"

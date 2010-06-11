@@ -23,8 +23,8 @@
 #ifndef __RIP_PORT_HH__
 #define __RIP_PORT_HH__
 
-#include <list>
-#include <string>
+
+
 
 #include "libxorp/eventloop.hh"
 

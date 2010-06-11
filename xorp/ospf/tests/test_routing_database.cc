@@ -39,9 +39,9 @@
 #include "libxorp/eventloop.hh"
 #include "libxorp/tokenize.hh"
 
-#include <map>
-#include <list>
-#include <set>
+
+
+
 #include <deque>
 
 #include "libproto/spt.hh"

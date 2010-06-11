@@ -31,8 +31,8 @@
 #include <sys/types.h>
 #endif
 
-#include <string>
-#include <list>
+
+
 
 #ifdef HAVE_REGEX_H
 #  include <regex.h>

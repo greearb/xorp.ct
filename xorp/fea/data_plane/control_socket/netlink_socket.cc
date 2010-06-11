@@ -28,7 +28,7 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 
-#include <algorithm>
+
 
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>

@@ -23,7 +23,7 @@
 #ifndef __POLICY_VISITOR_DEP_HH__
 #define __POLICY_VISITOR_DEP_HH__
 
-#include <string>
+
 
 #include "policy/common/policy_exception.hh"
 #include "visitor.hh"

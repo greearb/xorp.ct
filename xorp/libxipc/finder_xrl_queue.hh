@@ -24,7 +24,7 @@
 #ifndef __LIBXIPC_FINDER_XRL_QUEUE_HH__
 #define __LIBXIPC_FINDER_XRL_QUEUE_HH__
 
-#include <list>
+
 #include "libxorp/ref_ptr.hh"
 
 class FinderXrlCommandBase;

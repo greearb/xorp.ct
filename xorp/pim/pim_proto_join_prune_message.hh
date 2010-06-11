@@ -28,7 +28,7 @@
 // PIM Join/Prune message creation implementation-specific definitions.
 //
 
-#include <list>
+
 
 #include "mrt/buffer.h"
 #include "mrt/multicast_defs.h"

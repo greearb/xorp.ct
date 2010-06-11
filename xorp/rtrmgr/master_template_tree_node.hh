@@ -23,10 +23,10 @@
 #define __RTRMGR_MASTER_TEMPLATE_TREE_NODE_HH__
 
 
-#include <map>
-#include <list>
-#include <set>
-#include <vector>
+
+
+
+
 
 #include "template_tree_node.hh"
 

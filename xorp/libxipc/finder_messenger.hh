@@ -24,7 +24,7 @@
 #ifndef __LIBXIPC_FINDER_MESSENGER_HH__
 #define __LIBXIPC_FINDER_MESSENGER_HH__
 
-#include <map>
+
 
 #include "libxorp/eventloop.hh"
 #include "xrl_cmd_map.hh"

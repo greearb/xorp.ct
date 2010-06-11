@@ -29,7 +29,7 @@
 //
 
 
-#include <list>
+
 
 #include "libxorp/time_slice.hh"
 #include "pim_mre.hh"

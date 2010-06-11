@@ -24,7 +24,7 @@
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 
-#include <vector>
+
 
 #include "c_format.hh"
 

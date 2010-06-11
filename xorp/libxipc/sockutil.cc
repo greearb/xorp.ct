@@ -30,7 +30,7 @@
 #include "libxorp/eventloop.hh"
 #include "libxorp/ipv4.hh"
 
-#include <vector>
+
 
 #ifdef HAVE_IPTYPES_H
 #include <iptypes.h>

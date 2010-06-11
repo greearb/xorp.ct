@@ -27,7 +27,7 @@
 #include "libxorp/ipv6.hh"
 #include "libxorp/asnum.hh"
 
-#include <list>
+
 
 #include "iptuple.hh"
 #include "parameter.hh"

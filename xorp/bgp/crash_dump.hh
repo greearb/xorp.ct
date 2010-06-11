@@ -22,8 +22,8 @@
 #ifndef __BGP_CRASH_DUMP_HH__
 #define __BGP_CRASH_DUMP_HH__
 
-#include <list>
-#include <vector>
+
+
 
 #include "libxorp/timeval.hh"
 

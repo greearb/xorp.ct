@@ -27,7 +27,7 @@
 // PIM XRL-aware node definition.
 //
 
-#include <set>
+
 
 #include "libxorp/transaction.hh"
 

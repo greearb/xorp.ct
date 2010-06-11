@@ -24,7 +24,7 @@
 #define __POLICY_CODE_GENERATOR_HH__
 
 #include <sstream>
-#include <string>
+
 
 #include "policy/common/varrw.hh"
 #include "policy/common/policy_exception.hh"

@@ -20,7 +20,7 @@
 
 // $XORP: xorp/xrl/tests/test_tgt.hh,v 1.12 2008/10/02 21:58:55 bms Exp $
 
-#include <string>
+
 
 #include "libxipc/xrl_router.hh"
 #include "xrl/targets/test_base.hh"

@@ -29,8 +29,8 @@
 //
 
 
-#include <list>
-#include <utility>
+
+
 
 #include "libxorp/ipvx.hh"
 #include "libxorp/ipvxnet.hh"

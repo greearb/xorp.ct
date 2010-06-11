@@ -19,7 +19,7 @@
 
 
 
-#include <list>
+
 #include "rtrmgr_module.h"
 
 #include "libxorp/xorp.h"

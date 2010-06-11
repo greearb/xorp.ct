@@ -21,15 +21,31 @@
  * http://xorp.net
  */
 
-/*
- * $XORP: xorp/libxorp/xorp.h,v 1.20 2009/01/05 18:30:58 jtc Exp $
- */
-
-
 #ifndef __LIBXORP_XORP_H__
 #define __LIBXORP_XORP_H__
 
 #include "xorp_config.h"
+
+#ifdef __cplusplus
+#ifdef XORP_USE_USTL
+#include <ustl.h>
+using namespace ustl;
+#else
+#include <new>
+#include <iostream>
+#include <fstream>
+#include <algorithm>
+#include <utility>
+#include <cstdarg>
+#include <cstdio>
+#include <string>
+#include <vector>
+#include <list>
+#include <set>
+#include <map>
+#if defined (__cplusplus) && !defined(__STL_NO_NAMESPACES)
+using namespace std;
+#endif
 
 #ifdef HAVE_STDINT_H
 #include <stdint.h>
@@ -57,11 +73,6 @@
 #include <sys/cdefs.h>
 #endif
 
-#if defined (__cplusplus) && !defined(__STL_NO_NAMESPACES)
-#include <string>
-using namespace std;
-#endif
-
 /*
  * Define C++ decls wrappers if not previously defined.
  */
@@ -77,13 +88,7 @@ using namespace std;
 
 #include "xorp_osdep_begin.h"
 
-#ifdef __cplusplus
-#include <new>
-#include <iostream>
-#include <algorithm>
-#include <utility>
-#include <cstdarg>
-#include <cstdio>
+#endif /* ustl */
 #endif /* __cplusplus */
 
 #ifdef HAVE_SYS_TYPES_H

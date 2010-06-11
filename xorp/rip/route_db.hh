@@ -26,7 +26,7 @@
 #include "libxorp/xorp.h"
 #include "libxorp/ref_ptr.hh"
 
-#include <map>
+
 
 
 #include "policy/backend/policy_filters.hh"

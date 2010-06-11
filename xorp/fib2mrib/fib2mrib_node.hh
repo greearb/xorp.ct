@@ -27,7 +27,7 @@
 // Fib2mrib node definition.
 //
 
-#include <map>
+
 
 #include "libxorp/service.hh"
 #include "libxorp/status_codes.h"

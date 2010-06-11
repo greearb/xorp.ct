@@ -22,7 +22,7 @@
 #ifndef __BGP_PEER_ROUTE_PAIR_HH__
 #define __BGP_PEER_ROUTE_PAIR_HH__
 
-#include <list>
+
 
 #include "libxorp/xlog.h"
 #include "libxorp/timer.hh"

@@ -26,9 +26,9 @@
 #define __LIBPROTO_PROTO_NODE_CLI_HH__
 
 
-#include <map>
-#include <vector>
-#include <string>
+
+
+
 
 #include "libxorp/xorp.h"
 #include "libxorp/callback.hh"

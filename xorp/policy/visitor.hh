@@ -23,7 +23,7 @@
 #ifndef __POLICY_VISITOR_HH__
 #define __POLICY_VISITOR_HH__
 
-#include <string>
+
 
 #include "policy/common/element_base.hh"
 

@@ -29,7 +29,7 @@
 //
 
 
-#include <list>
+
 
 #include "libxorp/xorpfd.hh"
 #include "libxorp/eventloop.hh"

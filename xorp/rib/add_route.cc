@@ -34,9 +34,6 @@
 #include "libxorp/timeval.hh"
 #include "libxorp/timer.hh"
 
-#include <fstream>
-#include <cstdlib>
-#include <vector>
 
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>

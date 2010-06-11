@@ -24,7 +24,7 @@
 #include "libxorp/xorp.h"
 #include "libxorp/debug.h"
 
-#include <map>
+
 
 #include "libxipc/xrl_router.hh"
 

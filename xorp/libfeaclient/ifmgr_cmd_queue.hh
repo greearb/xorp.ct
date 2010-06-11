@@ -24,7 +24,7 @@
 #ifndef __IFMGR_CMD_QUEUE_HH__
 #define __IFMGR_CMD_QUEUE_HH__
 
-#include <list>
+
 #include "libxorp/ref_ptr.hh"
 
 class IfMgrCommandBase;

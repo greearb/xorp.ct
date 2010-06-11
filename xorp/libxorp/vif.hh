@@ -24,7 +24,7 @@
 #ifndef __LIBXORP_VIF_HH__
 #define __LIBXORP_VIF_HH__
 
-#include <list>
+
 
 #include "xorp.h"
 #include "ipv4.hh"

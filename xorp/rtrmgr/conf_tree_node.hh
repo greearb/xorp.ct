@@ -23,10 +23,10 @@
 
 #include "libxorp/xorp.h"
 
-#include <map>
-#include <list>
-#include <set>
-#include <vector>
+
+
+
+
 
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>

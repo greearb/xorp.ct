@@ -23,7 +23,7 @@
 #define __RTRMGR_MAIN_RTRMGR_HH__
 
 
-#include <list>
+
 
 #include "libxorp/ipv4.hh"
 #include "generic_module_manager.hh"

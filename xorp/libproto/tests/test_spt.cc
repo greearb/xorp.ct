@@ -24,7 +24,7 @@
 #include "libproto_module.h"
 #include "libxorp/xorp.h"
 
-#include <fstream>
+
 
 #ifndef	DEBUG_LOGGING
 #define DEBUG_LOGGING

@@ -22,8 +22,8 @@
 #ifndef __RIB_REGISTER_SERVER_HH__
 #define __RIB_REGISTER_SERVER_HH__
 
-#include <map>
-#include <list>
+
+
 
 #include "libxorp/xorp.h"
 #include "libxorp/ipv4.hh"

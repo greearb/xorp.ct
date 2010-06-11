@@ -22,7 +22,7 @@
 #ifndef __RIB_DUMMY_REGISTER_SERVER_HH__
 #define __RIB_DUMMY_REGISTER_SERVER_HH__
 
-#include <set>
+
 
 #include "register_server.hh"
 

@@ -23,7 +23,7 @@
 #ifndef __POLICY_POLICY_TARGET_HH__
 #define __POLICY_POLICY_TARGET_HH__
 
-#include <string>
+
 
 #include "libxipc/xrl_std_router.hh"
 #include "process_watch.hh"

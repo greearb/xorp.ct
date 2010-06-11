@@ -31,7 +31,7 @@
 #include "libxorp/xlog.h"
 #include "libxorp/exceptions.hh"
 
-#include <list>
+
 
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>

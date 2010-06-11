@@ -23,7 +23,7 @@
 #define __RTRMGR_XRLDB_HH__
 
 
-#include <list>
+
 
 #include "libxipc/xrl_router.hh"
 

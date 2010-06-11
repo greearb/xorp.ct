@@ -28,7 +28,7 @@
 //
 
 
-#include <vector>
+
 
 #include "libxorp/vif.hh"
 #include "libproto/proto_node.hh"

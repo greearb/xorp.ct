@@ -29,7 +29,7 @@
 //
 
 
-#include <list>
+
 
 #include "libxorp/ipvxnet.hh"
 #include "mrt/mifset.hh"

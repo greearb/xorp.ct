@@ -24,7 +24,7 @@
 #define __POLICY_COMMON_ELEM_NULL_HH__
 
 #include "element_base.hh"
-#include <string>
+
 
 /**
  * @short An element representing nothing. Null.

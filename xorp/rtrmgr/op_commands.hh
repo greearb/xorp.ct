@@ -23,8 +23,8 @@
 #define __RTRMGR_OP_COMMAND_HH__
 
 
-#include <list>
-#include <set>
+
+
 
 #include "libxorp/asyncio.hh"
 

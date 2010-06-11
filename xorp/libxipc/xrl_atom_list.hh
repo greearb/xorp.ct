@@ -24,7 +24,7 @@
 #ifndef __LIBXIPC_XRL_ATOM_LIST_HH__
 #define __LIBXIPC_XRL_ATOM_LIST_HH__
 
-#include <list>
+
 #include "libxorp/exceptions.hh"
 
 class XrlAtom;

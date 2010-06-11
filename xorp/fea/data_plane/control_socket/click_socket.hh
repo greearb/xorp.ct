@@ -25,7 +25,7 @@
 #include <xorp_config.h>
 #ifdef XORP_USE_CLICK
 
-#include <list>
+
 
 #include "libxorp/eventloop.hh"
 #include "libxorp/exceptions.hh"

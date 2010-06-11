@@ -28,7 +28,7 @@
 // The mechanism is Dummy (for testing purpose).
 //
 
-#include <set>
+
 
 #include "libxorp/xorp.h"
 

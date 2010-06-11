@@ -24,7 +24,7 @@
 // PIM PIM_JOIN_PRUNE control messages supporting functions.
 //
 
-#include <map>
+
 
 #include "pim_module.h"
 #include "libxorp/xorp.h"

@@ -23,8 +23,8 @@
 #ifndef __VRRP_VRRP_HH__
 #define __VRRP_VRRP_HH__
 
-#include <set>
-#include <string>
+
+
 
 #include "libxorp/ipv4.hh"
 #include "libxorp/timer.hh"

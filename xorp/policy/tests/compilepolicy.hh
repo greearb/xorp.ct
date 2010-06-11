@@ -22,8 +22,8 @@
 #ifndef __POLICY_TEST_COMPILEPOLICY_HH__
 #define __POLICY_TEST_COMPILEPOLICY_HH__
 
-#include <string>
-#include <vector>
+
+
 
 typedef string yy_statement;
 typedef vector<yy_statement*> yy_statements; 

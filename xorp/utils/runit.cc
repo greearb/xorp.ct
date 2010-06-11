@@ -23,8 +23,8 @@
 #include "libxorp/xorp.h"
 #include "libxorp/utils.hh"
 
-#include <iostream>
-#include <vector>
+
+
 
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>

@@ -25,8 +25,8 @@
 
 #include "node.hh"
 #include "term.hh"
-#include <string>
-#include <vector>
+
+
 
 /**
  * @short Minimises global namespace pollution of yacc/lex variables.

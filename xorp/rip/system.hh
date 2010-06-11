@@ -23,7 +23,7 @@
 #ifndef __RIP_SYSTEM_HH__
 #define __RIP_SYSTEM_HH__
 
-#include <map>
+
 
 
 #include "trace.hh"

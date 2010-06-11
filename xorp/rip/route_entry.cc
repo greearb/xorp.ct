@@ -211,7 +211,7 @@ struct NetCmp {
 // their associated routes.
 //
 
-#include <map>
+
 
 template <typename A>
 struct RouteEntryOrigin<A>::RouteEntryStore {

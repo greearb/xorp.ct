@@ -35,8 +35,8 @@
 #include "libxorp/ipvxnet.hh"
 #include "libxorp/mac.hh"
 
-#include <string>
-#include <vector>
+
+
 
 #include "xrl_atom_list.hh"
 

@@ -33,7 +33,7 @@
 #include <sys/types.h>
 
 #include <bitset>
-#include <vector>
+
 
 #include "libxorp/xorp.h"
 #include "max_vifs.h"

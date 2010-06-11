@@ -23,8 +23,8 @@
 #define __RTRMGR_MODULE_MANAGER_HH__
 
 
-#include <list>
-#include <map>
+
+
 
 #include "libxorp/timer.hh"
 #include "libxorp/callback.hh"

@@ -23,8 +23,8 @@
 #define __RTRMGR_CLI_HH__
 
 
-#include <list>
-#include <map>
+
+
 
 #include "libxipc/xrl_error.hh"
 

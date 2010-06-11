@@ -29,7 +29,7 @@
 #include "libxorp/service.hh"
 #include "libxorp/xorpfd.hh"
 
-#include <set>
+
 
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>

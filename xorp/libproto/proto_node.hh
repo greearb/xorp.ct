@@ -26,8 +26,8 @@
 #define __LIBPROTO_PROTO_NODE_HH__
 
 
-#include <map>
-#include <vector>
+
+
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"

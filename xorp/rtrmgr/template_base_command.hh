@@ -23,9 +23,9 @@
 #define __RTRMGR_TEMPLATE_BASE_COMMAND_HH__
 
 
-#include <map>
-#include <list>
-#include <set>
+
+
+
 
 #include "libxorp/callback.hh"
 #include "rtrmgr_error.hh"

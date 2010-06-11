@@ -38,8 +38,8 @@
 
 #include "libxorp/xorp.h"
 
-#include <iostream>
-#include <fstream>
+
+
 
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>

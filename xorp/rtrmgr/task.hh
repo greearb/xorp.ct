@@ -23,8 +23,8 @@
 #define __RTRMGR_TASK_HH__
 
 
-#include <map>
-#include <vector>
+
+
 #include "libxorp/bug_catcher.hh"
 #include "libxorp/run_command.hh"
 #include "libxorp/status_codes.h"

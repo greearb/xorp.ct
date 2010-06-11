@@ -37,7 +37,7 @@
 #include "libxorp/clock.hh"
 #include "libxorp/timer.hh"
 
-#include <iostream>
+
 
 #include "policy/common/policy_utils.hh"
 #include "policy/backend/policy_filter.hh"

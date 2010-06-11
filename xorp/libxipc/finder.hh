@@ -26,9 +26,9 @@
 
 #include "libxorp/xorp.h"
 
-#include <list>
-#include <map>
-#include <set>
+
+
+
 
 #include "xrl_cmd_map.hh"
 #include "finder_messenger.hh"

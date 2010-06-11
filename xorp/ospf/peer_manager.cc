@@ -36,9 +36,9 @@
 #include "libxorp/service.hh"
 #include "libxorp/eventloop.hh"
 
-#include <map>
-#include <list>
-#include <set>
+
+
+
 #include <queue>
 
 #include "libproto/spt.hh"

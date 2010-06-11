@@ -29,8 +29,8 @@
 #include "libxorp/xlog.h"
 #include "libxorp/test_main.hh"
 
-#include <map>
-#include <vector>
+
+
 
 #include "trie.hh"
 

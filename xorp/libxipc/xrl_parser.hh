@@ -25,7 +25,7 @@
 #define __LIBXIPC_XRL_PARSER_HH__
 
 #include <stdarg.h>
-#include <list>
+
 #include "xrl.hh"
 #include "xrl_parser_input.hh"
 

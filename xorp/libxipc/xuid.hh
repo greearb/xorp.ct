@@ -24,7 +24,7 @@
 #ifndef __LIBXIPC_XUID_HH__
 #define __LIBXIPC_XUID_HH__
 
-#include <string>
+
 
 class XUID {
 public:

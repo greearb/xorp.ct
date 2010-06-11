@@ -27,7 +27,7 @@
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
 
-#include <map>
+
 
 #include "xrl_pf_factory.hh"
 #include "xrl_pf_stcp.hh"

@@ -23,7 +23,7 @@
 #ifndef __BGP_PLUMBING_HH__
 #define __BGP_PLUMBING_HH__
 
-#include <map>
+
 #include "route_table_ribin.hh"
 #include "route_table_damping.hh"
 #include "route_table_deletion.hh"

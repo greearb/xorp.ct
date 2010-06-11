@@ -24,7 +24,7 @@
 #ifndef __LIBXIPC_FINDER_TCP_MESSENGER_HH__
 #define __LIBXIPC_FINDER_TCP_MESSENGER_HH__
 
-#include <list>
+
 
 #include "libxorp/ref_ptr.hh"
 

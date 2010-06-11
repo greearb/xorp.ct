@@ -31,7 +31,7 @@
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
 
-#include <vector>
+
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>

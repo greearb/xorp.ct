@@ -23,7 +23,7 @@
 #ifndef __POLICY_TEST_VARRW_HH__
 #define __POLICY_TEST_VARRW_HH__
 
-#include <map>
+
 
 #include "policy/common/varrw.hh"
 

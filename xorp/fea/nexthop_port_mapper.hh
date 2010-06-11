@@ -23,8 +23,8 @@
 #ifndef __FEA_NEXTHOP_PORT_MAPPER_HH__
 #define __FEA_NEXTHOP_PORT_MAPPER_HH__
 
-#include <list>
-#include <map>
+
+
 
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"

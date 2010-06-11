@@ -23,9 +23,9 @@
 #define __RTRMGR_TEMPLATE_TREE_HH__
 
 
-#include <map>
-#include <list>
-#include <set>
+
+
+
 
 #include "path_segment.hh"
 #include "rtrmgr_error.hh"

@@ -22,7 +22,7 @@
 #ifndef __RIP_UPDATE_QUEUE__
 #define __RIP_UPDATE_QUEUE__
 
-#include <vector>
+
 #include "route_db.hh"
 
 template <typename A>

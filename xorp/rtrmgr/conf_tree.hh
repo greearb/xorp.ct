@@ -23,9 +23,9 @@
 #define __RTRMGR_CONF_TREE_HH__
 
 
-#include <map>
-#include <list>
-#include <set>
+
+
+
 
 #include "libproto/config_node_id.hh"
 

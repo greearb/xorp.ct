@@ -38,7 +38,7 @@
 #include "libxorp/debug.h"
 #include "libxorp/ipvx.hh"
 
-#include <set>
+
 
 #include "mld6igmp_vif.hh"
 

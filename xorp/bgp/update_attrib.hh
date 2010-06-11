@@ -25,7 +25,7 @@
 #include "libxorp/ipvxnet.hh"
 #include "libxorp/exceptions.hh"
 #include "exceptions.hh"
-#include <list>
+
 
 /**
  * Encoding used in BGP update packets to encode prefixes

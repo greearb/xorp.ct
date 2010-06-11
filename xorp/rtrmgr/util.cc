@@ -27,7 +27,7 @@
 #include "libxorp/utility.h"
 #include "libxorp/utils.hh"
 
-#include <list>
+
 
 #include "util.hh"
 

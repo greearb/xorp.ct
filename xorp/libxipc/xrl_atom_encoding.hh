@@ -24,8 +24,8 @@
 #ifndef __LIBXIPC_XRL_ATOM_ENCODING_HH__
 #define __LIBXIPC_XRL_ATOM_ENCODING_HH__
 
-#include <string>
-#include <vector>
+
+
 
 /**
  * Encode the string representation of an XrlAtom value into a value

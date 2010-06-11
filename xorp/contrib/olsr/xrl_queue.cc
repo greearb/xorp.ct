@@ -35,8 +35,8 @@
 #include "libxorp/service.hh"
 #include "libxorp/eventloop.hh"
 
-#include <list>
-#include <set>
+
+
 
 #include "olsr.hh"
 

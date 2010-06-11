@@ -22,7 +22,7 @@
 #ifndef __CLI_XRL_CLI_NODE_HH__
 #define __CLI_XRL_CLI_NODE_HH__
 
-#include <string>
+
 
 #include "libxorp/xlog.h"
 #include "libxipc/xrl_std_router.hh"

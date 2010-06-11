@@ -26,7 +26,7 @@
 #include "libxorp/eventloop.hh"
 #include "libxorp/exceptions.hh"
 
-#include <iostream>
+
 
 #include "libxipc/finder_server.hh"
 #include "libxipc/xrl_std_router.hh"

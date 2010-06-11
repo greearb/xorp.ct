@@ -23,7 +23,7 @@
 #ifndef __POLICY_BACKEND_POLICYTAGS_HH__
 #define __POLICY_BACKEND_POLICYTAGS_HH__
 
-#include <set>
+
 
 #include "policy/common/policy_exception.hh"
 #include "policy/common/element_base.hh"

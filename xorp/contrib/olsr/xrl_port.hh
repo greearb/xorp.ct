@@ -23,7 +23,7 @@
 #ifndef __OLSR_XRL_PORT_HH__
 #define __OLSR_XRL_PORT_HH__
 
-#include <string>
+
 #include "libxorp/ipv4.hh"
 #include "libxorp/safe_callback_obj.hh"
 #include "libxorp/service.hh"

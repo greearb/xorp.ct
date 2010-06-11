@@ -25,7 +25,7 @@
 #include <xorp_config.h>
 #ifdef XORP_USE_CLICK
 
-#include <map>
+
 
 #include "libxorp/ipv4net.hh"
 #include "libxorp/ipv6net.hh"

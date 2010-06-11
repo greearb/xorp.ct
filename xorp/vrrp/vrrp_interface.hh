@@ -23,8 +23,8 @@
 #ifndef __VRRP_VRRP_INTERFACE_HH__
 #define __VRRP_VRRP_INTERFACE_HH__
 
-#include <string>
-#include <set>
+
+
 
 #include "libxorp/ipv4.hh"
 #include "libxorp/mac.hh"

@@ -24,8 +24,8 @@
 
 #include "libxorp/xorp.h"
 
-#include <list>
-#include <vector>
+
+
 
 #include "packets.hh"
 

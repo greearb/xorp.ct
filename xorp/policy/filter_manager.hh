@@ -34,7 +34,7 @@
 #include "filter_manager_base.hh"
 #include "pw_notifier.hh"
 #include "protocol_map.hh"
-#include <map>
+
 
 /**
  * @short Deals with sending code to policy filters.

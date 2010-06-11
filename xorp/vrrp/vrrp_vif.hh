@@ -23,8 +23,8 @@
 #ifndef __VRRP_VRRP_VIF_HH__
 #define __VRRP_VRRP_VIF_HH__
 
-#include <string>
-#include <set>
+
+
 
 #include "libxorp/ipv4.hh"
 #include "libfeaclient/ifmgr_atoms.hh"

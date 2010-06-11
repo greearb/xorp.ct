@@ -24,8 +24,8 @@
 #ifndef __LIBXORP_TEST_MAIN_HH__
 #define __LIBXORP_TEST_MAIN_HH__
 
-#include <string>
-#include <list>
+
+
 
 #include "xorp.h"
 #include "callback.hh"

@@ -25,9 +25,9 @@
 
 #include <sys/types.h>
 #include <inttypes.h>
-#include <string>
-#include <list>
-#include <vector>
+
+
+
 
 #include "libxorp/xorp.h"
 #include "libxorp/debug.h"
