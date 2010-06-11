@@ -43,7 +43,7 @@ DeletionTable<A>::DeletionTable(const string& tablename,
       _ip_route_table(ip_route_trie)
 {
     XLOG_ASSERT(_parent != NULL);
-    set_next_table(_parent->next_table());
+    this->set_next_table(_parent->next_table());
     this->next_table()->replumb(parent, this);
     parent->set_next_table(this);
 

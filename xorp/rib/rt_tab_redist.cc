@@ -340,7 +340,7 @@ RedistTable<A>::RedistTable(const string& tablename,
     : RouteTable<A>(tablename), _parent(parent)
 {
     if (_parent->next_table()) {
-	set_next_table(_parent->next_table());
+	this->set_next_table(_parent->next_table());
 	this->next_table()->replumb(_parent, this);
     }
     _parent->set_next_table(this);

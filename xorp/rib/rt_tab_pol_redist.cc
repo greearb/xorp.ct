@@ -50,7 +50,7 @@ PolicyRedistTable<A>::PolicyRedistTable(RouteTable<A>* parent, XrlRouter& rtr,
       _multicast(multicast)
 {
     if (_parent->next_table() != NULL) {
-        set_next_table(_parent->next_table());
+        this->set_next_table(_parent->next_table());
 
         this->next_table()->replumb(_parent, this);
     }

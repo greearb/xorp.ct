@@ -1064,11 +1064,11 @@ RedistTransactionXrlOutput<A>::add_route(const IPRouteEntry<A>& ipr)
     // current transaction and start a new one.
     //
     if (this->transaction_size() >= MAX_TRANSACTION_SIZE) {
-	enqueue_task(new CommitTransaction<A>(this));
-	enqueue_task(new StartTransaction<A>(this));
+	this->enqueue_task(new CommitTransaction<A>(this));
+	this->enqueue_task(new StartTransaction<A>(this));
     }
 
-    enqueue_task(new AddTransactionRoute<A>(this, ipr));
+    this->enqueue_task(new AddTransactionRoute<A>(this, ipr));
     if (no_running_tasks)
 	this->start_next_task();
 }
@@ -1086,18 +1086,18 @@ RedistTransactionXrlOutput<A>::delete_route(const IPRouteEntry<A>& ipr)
     bool no_running_tasks = (this->_queued == 0);
 
     if (this->transaction_size() == 0)
-	enqueue_task(new StartTransaction<A>(this));
+	this->enqueue_task(new StartTransaction<A>(this));
 
     //
     // If the accumulated transaction size is too large, commit the
     // current transaction and start a new one.
     //
     if (this->transaction_size() >= MAX_TRANSACTION_SIZE) {
-	enqueue_task(new CommitTransaction<A>(this));
-	enqueue_task(new StartTransaction<A>(this));
+	this->enqueue_task(new CommitTransaction<A>(this));
+	this->enqueue_task(new StartTransaction<A>(this));
     }
 
-    enqueue_task(new DeleteTransactionRoute<A>(this, ipr));
+    this->enqueue_task(new DeleteTransactionRoute<A>(this, ipr));
     if (no_running_tasks)
 	this->start_next_task();
 }
@@ -1137,7 +1137,7 @@ RedistTransactionXrlOutput<A>::task_completed(Task* task)
 	// If transaction in progress, and this is the last add/delete,
 	// then send "commit transaction".
 	//
-	enqueue_task(new CommitTransaction<A>(this));
+	this->enqueue_task(new CommitTransaction<A>(this));
 	this->start_next_task();
 	return;
     }

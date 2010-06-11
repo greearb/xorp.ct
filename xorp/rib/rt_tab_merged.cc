@@ -194,7 +194,7 @@ MergedTable<A>::replumb(RouteTable<A>* old_parent,
     } else {
 	XLOG_UNREACHABLE();
     }
-    set_tablename(make_merged_name(_table_a, _table_b));
+    this->set_tablename(make_merged_name(_table_a, _table_b));
     debug_msg("MergedTable: now called \"%s\"\n", this->tablename().c_str());
 }
 

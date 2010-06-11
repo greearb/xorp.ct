@@ -749,7 +749,7 @@ ExtIntTable<A>::replumb(RouteTable<A>* old_parent,
 	// Shouldn't be possible
 	XLOG_UNREACHABLE();
     }
-    set_tablename(make_extint_name(_ext_table, _int_table));
+    this->set_tablename(make_extint_name(_ext_table, _int_table));
     debug_msg("ExtIntTable: now called \"%s\"\n", this->tablename().c_str());
 }
 

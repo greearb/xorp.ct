@@ -45,7 +45,7 @@ PolicyConnectedTable<A>::PolicyConnectedTable (RouteTable<A>* parent,
     : RouteTable<A>(table_name), _parent(parent), _policy_filters(pfs)
 {
     if (_parent->next_table()) {
-	set_next_table(_parent->next_table());
+	this->set_next_table(_parent->next_table());
 
 	this->next_table()->replumb(_parent, this);
     }
