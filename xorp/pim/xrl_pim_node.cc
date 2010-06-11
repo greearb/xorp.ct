@@ -4240,8 +4240,8 @@ XrlPimNode::pim_0_1_add_config_cand_bsr6(
 				     is_scope_zone,
 				     vif_name,
 				     IPvX(vif_addr),
-				     reinterpret_cast<const uint8_t&>(bsr_priority),
-				     reinterpret_cast<const uint8_t&>(hash_mask_len),
+				     (uint8_t)(bsr_priority),
+				     (uint8_t)(hash_mask_len),
 				     error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -4314,8 +4314,8 @@ XrlPimNode::pim_0_1_add_config_cand_bsr4(
 				     is_scope_zone,
 				     vif_name,
 				     IPvX(vif_addr),
-				     reinterpret_cast<const uint8_t&>(bsr_priority),
-				     reinterpret_cast<const uint8_t&>(hash_mask_len),
+				     (uint8_t)(bsr_priority),
+				     (uint8_t)(hash_mask_len),
 				     error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -4387,8 +4387,8 @@ XrlPimNode::pim_0_1_add_config_cand_rp4(
 				    is_scope_zone,
 				    vif_name,
 				    vif_addr,
-				    reinterpret_cast<const uint8_t&>(rp_priority),
-				    reinterpret_cast<const uint16_t&>(rp_holdtime),
+				    (uint8_t)(rp_priority),
+				    (uint16_t)(rp_holdtime),
 				    error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -4541,8 +4541,8 @@ XrlPimNode::pim_0_1_add_config_static_rp4(
     
     if (PimNode::add_config_static_rp(IPvXNet(group_prefix),
 				      IPvX(rp_addr),
-				      reinterpret_cast<const uint8_t&>(rp_priority),
-				      reinterpret_cast<const uint8_t&>(hash_mask_len),
+				      (uint8_t)(rp_priority),
+				      (uint8_t)(hash_mask_len),
 				      error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -4585,8 +4585,8 @@ XrlPimNode::pim_0_1_add_config_static_rp6(
     
     if (PimNode::add_config_static_rp(IPvXNet(group_prefix),
 				      IPvX(rp_addr),
-				      reinterpret_cast<const uint8_t&>(rp_priority),
-				      reinterpret_cast<const uint8_t&>(hash_mask_len),
+				      (uint8_t)(rp_priority),
+				      (uint8_t)(hash_mask_len),
 				      error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -5529,9 +5529,9 @@ XrlPimNode::pim_0_1_add_test_jp_entry4(
     }
     
     if (PimNode::add_test_jp_entry(IPvX(source_addr), IPvX(group_addr),
-				   reinterpret_cast<const uint8_t&>(group_mask_len),
+				   (uint8_t)(group_mask_len),
 				   entry_type, action_type,
-				   reinterpret_cast<const uint16_t&>(holdtime),
+				   (uint16_t)(holdtime),
 				   is_new_group)
 	!= XORP_OK) {
 	error_msg = c_format("Failed to add Join/Prune test entry "
@@ -5626,9 +5626,9 @@ XrlPimNode::pim_0_1_add_test_jp_entry6(
     }
     
     if (PimNode::add_test_jp_entry(IPvX(source_addr), IPvX(group_addr),
-				   reinterpret_cast<const uint8_t&>(group_mask_len),
+				   (uint8_t)(group_mask_len),
 				   entry_type, action_type,
-				   reinterpret_cast<const uint16_t&>(holdtime),
+				   (uint16_t)(holdtime),
 				   is_new_group)
 	!= XORP_OK) {
 	error_msg = c_format("Failed to add Join/Prune test entry "
@@ -5824,9 +5824,9 @@ XrlPimNode::pim_0_1_add_test_bsr_zone4(
     if (PimNode::add_test_bsr_zone(PimScopeZoneId(zone_id_scope_zone_prefix,
 						  zone_id_is_scope_zone),
 				   IPvX(bsr_addr),
-				   reinterpret_cast<const uint8_t&>(bsr_priority),
-				   reinterpret_cast<const uint8_t&>(hash_mask_len),
-				   reinterpret_cast<const uint16_t&>(fragment_tag))
+				   (uint8_t)(bsr_priority),
+				   (uint8_t)(hash_mask_len),
+				   (uint16_t)(fragment_tag))
 	!= XORP_OK) {
 	error_msg = c_format("Failed to add BSR test zone %s "
 			     "with BSR address %s",
@@ -5882,9 +5882,9 @@ XrlPimNode::pim_0_1_add_test_bsr_zone6(
     if (PimNode::add_test_bsr_zone(PimScopeZoneId(zone_id_scope_zone_prefix,
 						  zone_id_is_scope_zone),
 				   IPvX(bsr_addr),
-				   reinterpret_cast<const uint8_t&>(bsr_priority),
-				   reinterpret_cast<const uint8_t&>(hash_mask_len),
-				   reinterpret_cast<const uint16_t&>(fragment_tag))
+				   (uint8_t)(bsr_priority),
+				   (uint8_t)(hash_mask_len),
+				   (uint16_t)(fragment_tag))
 	!= XORP_OK) {
 	error_msg = c_format("Failed to add BSR test zone %s "
 			     "with BSR address %s",
@@ -5924,11 +5924,11 @@ XrlPimNode::pim_0_1_add_test_bsr_group_prefix6(
     }
     
     if (PimNode::add_test_bsr_group_prefix(
-	PimScopeZoneId(zone_id_scope_zone_prefix,
-		       zone_id_is_scope_zone),
-	IPvXNet(group_prefix),
-	is_scope_zone,
-	reinterpret_cast<const uint8_t&>(expected_rp_count))
+	    PimScopeZoneId(zone_id_scope_zone_prefix,
+			   zone_id_is_scope_zone),
+	    IPvXNet(group_prefix),
+	    is_scope_zone,
+	    (uint8_t)(expected_rp_count))
 	!= XORP_OK) {
 	error_msg = c_format("Failed to add group prefix %s "
 			     "for BSR test zone %s",
@@ -5969,11 +5969,11 @@ XrlPimNode::pim_0_1_add_test_bsr_group_prefix4(
     }
     
     if (PimNode::add_test_bsr_group_prefix(
-	PimScopeZoneId(zone_id_scope_zone_prefix,
-		       zone_id_is_scope_zone),
-	IPvXNet(group_prefix),
-	is_scope_zone,
-	reinterpret_cast<const uint8_t&>(expected_rp_count))
+	    PimScopeZoneId(zone_id_scope_zone_prefix,
+			   zone_id_is_scope_zone),
+	    IPvXNet(group_prefix),
+	    is_scope_zone,
+	    (uint8_t)(expected_rp_count))
 	!= XORP_OK) {
 	error_msg = c_format("Failed to add group prefix %s "
 			     "for BSR test zone %s",
@@ -6023,8 +6023,8 @@ XrlPimNode::pim_0_1_add_test_bsr_rp4(
 						zone_id_is_scope_zone),
 				 IPvXNet(group_prefix),
 				 IPvX(rp_addr),
-				 reinterpret_cast<const uint8_t&>(rp_priority),
-				 reinterpret_cast<const uint16_t&>(rp_holdtime))
+				 (uint8_t)(rp_priority),
+				 (uint16_t)(rp_holdtime))
 	!= XORP_OK) {
 	error_msg = c_format("Failed to add test Cand-RP %s "
 			     "for group prefix %s for BSR zone %s",
@@ -6076,8 +6076,8 @@ XrlPimNode::pim_0_1_add_test_bsr_rp6(
 						zone_id_is_scope_zone),
 				 IPvXNet(group_prefix),
 				 IPvX(rp_addr),
-				 reinterpret_cast<const uint8_t&>(rp_priority),
-				 reinterpret_cast<const uint16_t&>(rp_holdtime))
+				 (uint8_t)(rp_priority),
+				 (uint16_t)(rp_holdtime))
 	!= XORP_OK) {
 	error_msg = c_format("Failed to add test Cand-RP %s "
 			     "for group prefix %s for BSR zone %s",
