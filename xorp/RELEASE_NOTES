@@ -3,7 +3,20 @@
 
 This file contains XORP release notes (most recent releases first).
 
-Relase 1.8-CT  June, 2010
+Release 1.9-CT  (Work in Progress)
+
+   *  Add more options for disabling compile of certain modules.
+      See:  scons --help
+
+   *  Add support for IPv6 multicast with virtual routing tables.
+      Requires patched linux kernel or 2.6.35 when it comes out.
+
+   *  Support compiling with clang + llvm compiler:
+      Install latest clang and llvm from their SVN repositories and:
+      scons CC=clang CXX=clang++
+
+
+Release 1.8-CT  June, 2010
 
 Overview:
 

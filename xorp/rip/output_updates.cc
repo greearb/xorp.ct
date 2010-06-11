@@ -78,7 +78,7 @@ OutputUpdates<A>::output_packet()
 						origin, r->tag(),
 						r->policytags());
 
-	bool accepted = do_filtering(copy);
+	bool accepted = this->do_filtering(copy);
 	if (!accepted) {
 	    delete copy;
 	    continue;

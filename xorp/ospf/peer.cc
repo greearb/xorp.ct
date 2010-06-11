@@ -302,19 +302,17 @@ PeerOut<A>::peer_change()
 {
     XLOG_WARNING("PeerOut, peer_change on interface: %s  running: %i  status: %i  link-status: %i",
 		 get_if_name().c_str(), (int)(_running), (int)(_status), (int)(_link_status));
-    switch (_running) {
-    case true:
+    if (_running) {
 	if (false == _status || false == _link_status) {
 	    take_down_peering();
 	    _running = false;
 	}
-	break;
-    case false:
+    }
+    else {
 	if (true == _status && true == _link_status) {
 	    _running = true;
 	    _running = bring_up_peering();
 	}
-	break;
     }
 }
 

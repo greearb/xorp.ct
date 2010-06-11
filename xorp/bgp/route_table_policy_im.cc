@@ -122,8 +122,8 @@ PolicyTableImport<A>::route_dump(InternalMessage<A>& rtmsg,
     // we want current filter
     rtmsg.route()->set_policyfilter(0, RefPf());
 
-    bool old_accepted = do_filtering(*old_rtmsg, false);
-    bool new_accepted = do_filtering(rtmsg, false);
+    bool old_accepted = this->do_filtering(*old_rtmsg, false);
+    bool new_accepted = this->do_filtering(rtmsg, false);
 
     InternalMessage<A> *new_rtmsg = 0;
     SubnetRoute<A>* copy_new_route = 0;

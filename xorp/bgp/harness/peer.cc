@@ -91,7 +91,7 @@ Peer::Peer(const Peer& rhs)
     copy(rhs);
 }
 
-Peer::Peer&
+Peer&
 Peer::operator=(const Peer& rhs)
 {
     debug_msg("= operator\n");

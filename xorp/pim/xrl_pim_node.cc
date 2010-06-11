@@ -4435,8 +4435,8 @@ XrlPimNode::pim_0_1_add_config_cand_rp6(
 				    is_scope_zone,
 				    vif_name,
 				    vif_addr,
-				    reinterpret_cast<const uint8_t&>(rp_priority),
-				    reinterpret_cast<const uint16_t&>(rp_holdtime),
+				    (uint8_t)(rp_priority),
+				    (uint16_t)(rp_holdtime),
 				    error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
