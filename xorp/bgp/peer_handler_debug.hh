@@ -22,7 +22,7 @@
 #ifndef __BGP_PEER_HANDLER_DEBUG_HH__
 #define __BGP_PEER_HANDLER_DEBUG_HH__
 
-#include <queue>
+
 
 #include "peer_handler.hh"
 

@@ -25,7 +25,7 @@
 
 
 
-#include <functional>
+
 
 
 #include "libxorp/ipv4.hh"

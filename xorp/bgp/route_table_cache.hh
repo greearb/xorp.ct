@@ -22,7 +22,7 @@
 #ifndef __BGP_ROUTE_TABLE_CACHE_HH__
 #define __BGP_ROUTE_TABLE_CACHE_HH__
 
-#include <queue>
+
 #include "libxorp/timer.hh"
 #include "route_table_base.hh"
 #include "crash_dump.hh"

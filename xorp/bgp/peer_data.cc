@@ -27,7 +27,7 @@
 #include "libxorp/xorp.h"
 #include "libxorp/debug.h"
 
-#include <functional>
+
 
 #include "peer_data.hh"
 

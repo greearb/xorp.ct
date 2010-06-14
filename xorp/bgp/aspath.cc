@@ -241,7 +241,18 @@ ASSegment::short_str() const
 bool
 ASSegment::operator==(const ASSegment& him) const
 {
-    return (_aslist == him._aslist);
+    if (_aslist.size() != him._aslist.size()) {
+	return false;
+    }
+    const_iterator i;
+    const_iterator b = him._aslist.begin();
+    for (i = _aslist.begin(); i!= _aslist.end(); i++, b++) {
+	if (*i == *b) {
+	    continue;
+	}
+	return false;
+    }
+    return true;
 }
 
 /**
@@ -256,7 +267,17 @@ ASSegment::operator<(const ASSegment& him) const
 	return true;
     if (mysize > hissize)
 	return false;
-    return (_aslist < him._aslist);
+    const_iterator i;
+    const_iterator b = him._aslist.begin();
+    for (i = _aslist.begin(); i!= _aslist.end(); i++, b++) {
+	if (*i == *b) {
+	    continue;
+	}
+	if (*i < *b)
+	    return true;
+	return false;
+    }
+    return false; //must be equal
 }
 
 // XXX isn't this the same format as on the wire ???

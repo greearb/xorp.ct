@@ -20,15 +20,17 @@
 
 
 
-#include "bgp_module.h"
 #include "libxorp/xorp.h"
+#include "bgp_module.h"
 #include "policy/common/policy_utils.hh"
 #include "peer_handler.hh"
 #include "bgp_varrw.hh"
 #include "policy/backend/version_filters.hh"
 #include "policy/common/elem_filter.hh"
 #include "policy/common/elem_bgp.hh"
+#ifndef XORP_USE_USTL
 #include <typeinfo>
+#endif
 
 using namespace policy_utils;
 

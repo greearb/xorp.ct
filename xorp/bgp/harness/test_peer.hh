@@ -24,7 +24,7 @@
 
 #include "xrl/targets/test_peer_base.hh"
 #include "bgp/packet.hh"
-#include <queue>
+
 
 class TestPeer {
 public:
