@@ -735,6 +735,9 @@ and shared libraries. This is UNSUPPORTED, and probably will not link.
             env.AppendUnique( LIBS = [ 'profiler' ] )
             #env.AppendUnique( CPPDEFINES = [ 'WITH_PPROF' ] )
 
+if env['enable_ustl']:
+    env.AppendUnique( LIBS = [ 'ustl' ] )
+    
 #
 # Apply top-level 'transport' protocol option, which controls the
 # default transport protocol chosen by libxipc.
