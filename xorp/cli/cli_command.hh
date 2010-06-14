@@ -557,6 +557,9 @@ public:
 	  _default_nomore_mode(false), _is_command_argument(false),
 	  _is_argument_expected(false)
     {}
+#ifdef XORP_USE_USTL
+    CliCommandMatch() { }
+#endif
 
     /**
      * Get the command name.

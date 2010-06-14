@@ -20,8 +20,8 @@
 
 
 
-#include "cli/cli_module.h"
 #include "libxorp/xorp.h"
+#include "cli/cli_module.h"
 #include "libxorp/xlog.h"
 #include "libxorp/exceptions.hh"
 #include "libxipc/xrl_std_router.hh"
@@ -29,9 +29,6 @@
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
 #endif
-
-#include <sstream>
-
 
 namespace {
 
