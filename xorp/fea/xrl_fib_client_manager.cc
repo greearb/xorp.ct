@@ -253,7 +253,7 @@ XrlFibClientManager::FibClient<F>::send_fib_client_route_change()
 	//
 	if (_send_resolves && fte.is_unresolved()) {
 	    ignore_fte = false;
-	    success = _xfcm.send_fib_client_resolve_route(_target_name, fte);
+	    success = _xfcm->send_fib_client_resolve_route(_target_name, fte);
 	}
 
 	//
@@ -264,10 +264,10 @@ XrlFibClientManager::FibClient<F>::send_fib_client_route_change()
 	    ignore_fte = false;
 	    if (!fte.is_deleted()) {
 		// Send notification of a route being added
-		success = _xfcm.send_fib_client_add_route(_target_name, fte);
+		success = _xfcm->send_fib_client_add_route(_target_name, fte);
 	    } else {
 		// Send notification of a route being deleted
-		success = _xfcm.send_fib_client_delete_route(_target_name,
+		success = _xfcm->send_fib_client_delete_route(_target_name,
 							     fte);
 	    }
 	}

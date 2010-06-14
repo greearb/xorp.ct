@@ -163,6 +163,9 @@ public:
 	JoinedMulticastGroup(const Mac& group_address)
 	    : _group_address(group_address)
 	{}
+#ifdef XORP_USE_USTL
+	JoinedMulticastGroup() { }
+#endif
 	virtual ~JoinedMulticastGroup() {}
 
 	const Mac& group_address() const { return _group_address; }
@@ -674,6 +677,9 @@ private:
 	      _ether_type(ether_type),
 	      _filter_program(filter_program)
 	{}
+#ifdef XORP_USE_USTL
+	CommTableKey() { }
+#endif
 	bool operator<(const CommTableKey& other) const {
 	    if (_ether_type != other._ether_type)
 		return (_ether_type < other._ether_type);

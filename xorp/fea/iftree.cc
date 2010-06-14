@@ -235,7 +235,7 @@ IfTree::find_vif(const string& ifname, const string& vifname) const
 IfTreeVif*
 IfTree::find_vif(uint32_t pif_index)
 {
-    IfTree::VifIndexMap::iterator iter = _vifindex_map.find(pif_index);
+    IfTree::VifIndexMap::const_iterator iter = _vifindex_map.find(pif_index);
 
     if (iter == _vifindex_map.end())
 	return (NULL);
@@ -1706,7 +1706,7 @@ IfTree::erase_ifindex(IfTreeInterface* ifp)
 void
 IfTree::insert_vifindex(IfTreeVif* vifp)
 {
-    VifIndexMap::iterator iter;
+    VifIndexMap::const_iterator iter;
 
     XLOG_ASSERT(vifp != NULL);
 

@@ -4811,7 +4811,7 @@ XrlFeaTarget::profile_0_1_list(string& info)
 {
     debug_msg("\n");
     
-    info = _profile.list();
+    info = _profile.get_list();
     return XrlCmdError::OKAY();
 }
 

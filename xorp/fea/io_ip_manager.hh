@@ -148,6 +148,9 @@ public:
 	      _vif_name(vif_name),
 	      _group_address(group_address)
 	{}
+#ifdef XORP_USE_USTL
+	JoinedMulticastGroup() { }
+#endif
 	virtual ~JoinedMulticastGroup() {}
 
 	const string& if_name() const { return _if_name; }

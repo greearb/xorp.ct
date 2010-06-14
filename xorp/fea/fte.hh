@@ -165,6 +165,10 @@ public:
      */
     explicit FteX(int family) : BaseFteX(family) {}
 
+#ifdef XORP_USE_USTL
+    FteX() : BaseFteX(AF_INET) {}
+#endif
+
     /**
      * Copy constructor for Fte4 entry.
      */

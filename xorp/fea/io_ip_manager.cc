@@ -892,7 +892,7 @@ IoIpManager::register_receiver(int		family,
     // Walk through list of filters looking for matching filter
     //
     FilterBag::iterator fi;
-    FilterBag::iterator fi_end = filters.upper_bound(receiver_name);
+    const FilterBag::iterator fi_end = filters.upper_bound(receiver_name);
     for (fi = filters.lower_bound(receiver_name); fi != fi_end; ++fi) {
 	filter = dynamic_cast<IpVifInputFilter*>(fi->second);
 	if (filter == NULL)

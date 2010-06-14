@@ -148,7 +148,7 @@ public:
  */
 class IfTree : public IfTreeItem {
 public:
-    typedef map<const string, IfTreeInterface*> IfMap;
+    typedef map<string, IfTreeInterface*> IfMap;
     typedef map<uint32_t, IfTreeInterface*> IfIndexMap;
     //
     // XXX: We use a multimap for the index->vif mapping, because a VLAN
@@ -593,7 +593,7 @@ class IfTreeInterface :
     public IfTreeItem
 {
 public:
-    typedef map<const string, IfTreeVif*> VifMap;
+    typedef map<string, IfTreeVif*> VifMap;
     typedef set<Mac>			  MacSet;
 
     IfTreeInterface(IfTree& iftree, const string& ifname);
@@ -859,8 +859,8 @@ class IfTreeVif :
     public IfTreeItem
 {
 public:
-    typedef map<const IPv4, IfTreeAddr4*> IPv4Map;
-    typedef map<const IPv6, IfTreeAddr6*> IPv6Map;
+    typedef map<IPv4, IfTreeAddr4*> IPv4Map;
+    typedef map<IPv6, IfTreeAddr6*> IPv6Map;
 
     IfTreeVif(IfTreeInterface& iface, const string& vifname);
     ~IfTreeVif();

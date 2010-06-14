@@ -214,8 +214,20 @@ private:
     class FibClient {
     public:
 	FibClient(const string& target_name, XrlFibClientManager& xfcm)
-	    : _target_name(target_name), _xfcm(xfcm),
+	    : _target_name(target_name), _xfcm(&xfcm),
 	      _send_updates(false), _send_resolves(false) {}
+
+	FibClient() { _xfcm = NULL; }
+	FibClient& operator=(const FibClient& rhs) {
+	    if (this != &rhs) {
+		_inform_fib_client_queue = rhs._inform_fib_client_queue;
+		_inform_fib_client_queue_timer = rhs._inform_fib_client_queue_timer;
+		_target_name = rhs._target_name;
+		_send_updates = rhs._send_updates;
+		_send_resolves = rhs._send_resolves;
+	    }
+	    return *this;
+	}
 
 	void	activate(const list<F>& fte_list);
 	void	send_fib_client_route_change_cb(const XrlError& xrl_error);
@@ -226,14 +238,14 @@ private:
 	void set_send_resolves(const bool sendit) { _send_resolves = sendit; }
 
     private:
-	EventLoop& eventloop() { return _xfcm.eventloop(); }
+	EventLoop& eventloop() { return _xfcm->eventloop(); }
 	void	send_fib_client_route_change();
 
 	list<F>			_inform_fib_client_queue;
 	XorpTimer		_inform_fib_client_queue_timer;
 
 	string			_target_name;	// Target name of the client
-	XrlFibClientManager&	_xfcm;
+	XrlFibClientManager*	_xfcm;
 
 	bool			_send_updates;	// Event filters
 	bool			_send_resolves;
