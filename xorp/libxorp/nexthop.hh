@@ -108,6 +108,10 @@ public:
      * to initialize nexthop.
      */
     IPNextHop(const A &from_ipaddr);
+
+#ifdef XORP_USE_USTL
+    IPNextHop() { }
+#endif
     
     /**
      * Get the address of the nexthop.
@@ -141,7 +145,11 @@ public:
      * to initialize nexthop.
      */
     IPPeerNextHop(const A &from_addr);
-    
+
+#ifdef XORP_USE_USTL
+    IPPeerNextHop() { }
+#endif
+
     /**
      * Get the type of the nexthop.
      * 
@@ -230,6 +238,10 @@ public:
      * to initialize nexthop.
      */
     IPExternalNextHop(const A &from_addr);
+
+#ifdef XORP_USE_USTL
+    IPExternalNextHop() { }
+#endif
     
     /**
      * Get the type of the nexthop.

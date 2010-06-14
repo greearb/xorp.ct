@@ -61,7 +61,7 @@ SafeCallbackBase::valid() const
 
 CallbackSafeObject::~CallbackSafeObject()
 {
-    std::vector<SafeCallbackBase*>::iterator i = _cbs.begin();
+    vector<SafeCallbackBase*>::iterator i = _cbs.begin();
     while (_cbs.empty() == false) {
 	SafeCallbackBase* scb = *i;
 	if (scb == 0) {

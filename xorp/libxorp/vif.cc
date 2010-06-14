@@ -20,7 +20,7 @@
 
 
 
-#include <functional>
+
 
 
 
@@ -35,6 +35,16 @@ VifAddr::VifAddr(const IPvX& ipvx_addr)
       _peer_addr(ipvx_addr.af())
 {
 }
+
+#ifdef XORP_USE_USTL
+VifAddr::VifAddr()
+    : _addr(AF_INET),
+      _subnet_addr(AF_INET),
+      _broadcast_addr(AF_INET),
+      _peer_addr(AF_INET)
+{
+}
+#endif
 
 VifAddr::VifAddr(const IPvX& ipvx_addr, const IPvXNet& ipvxnet_subnet_addr,
 		 const IPvX& ipvx_broadcast_addr, const IPvX& ipvx_peer_addr)
@@ -64,14 +74,11 @@ VifAddr::is_same_subnet(const IPvX& ipvx_addr) const
 string
 VifAddr::str() const
 {
-    string s = "";
+    ostringstream oss;
+    oss << "addr: " << _addr.str() << " subnet: " << _subnet_addr.str()
+	<< " broadcast: " << _broadcast_addr.str() << " peer: " << _peer_addr.str();
     
-    s += "addr: " + _addr.str();
-    s += " subnet: " + _subnet_addr.str();
-    s += " broadcast: " + _broadcast_addr.str();
-    s += " peer: " + _peer_addr.str();
-    
-    return s;
+    return oss.str();
 }
 
 bool
@@ -156,7 +163,8 @@ Vif::str() const
     // The list of addresses
     list<VifAddr>::const_iterator iter;
     for (iter = _addr_list.begin(); iter != _addr_list.end(); ++iter) {
-	r += " " + iter->str();
+	r += " ";
+	r += iter->str();
     }
     
     // The flags

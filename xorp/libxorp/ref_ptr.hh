@@ -194,11 +194,34 @@ public:
      */
     _Tp* get() const { return _M_ptr; }
 
+#ifdef XORP_USE_USTL
+
+    // Compare pointed-to items.
+    bool operator==(const ref_ptr& rp) const {
+	if (_M_ptr == rp._M_ptr)
+	    return true;
+	if (_M_ptr && rp._M_ptr)
+	    return (*_M_ptr == *rp._M_ptr);
+	return false;
+    }
+
+    // Compare pointed-to items.
+    bool operator< (const ref_ptr& b) {
+	if (_M_ptr && b._M_ptr)
+	    return (*_M_ptr < *b._M_ptr);
+	if (_M_ptr == b._M_ptr)
+	    return false;
+	if (b._M_ptr)
+	    return true;
+    }
+
+#else
     /**
      * Equality Operator
      * @return true if reference pointers refer to same object.
      */
     bool operator==(const ref_ptr& rp) const { return _M_ptr == rp._M_ptr; }
+#endif
 
     /**
      * Check if reference pointer refers to an object or whether it has

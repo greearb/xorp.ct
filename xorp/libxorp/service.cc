@@ -124,7 +124,7 @@ ServiceBase::set_status(ServiceStatus status)
     ServiceStatus ost = _status;
     _status = status;
 
-    _note.erase();
+    _note.clear();
 
     if ((_observer != NULL) && (ost != _status))
 	_observer->status_change(this, ost, _status);

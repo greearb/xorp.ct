@@ -241,7 +241,7 @@ SelectorList::SelectorList(ClockBase *clock)
       _selector_entries(1024),
       _maxfd(0), _descriptor_count(0), _is_debug(false)
 {
-    static_assert(SEL_RD == (1 << SEL_RD_IDX) && SEL_WR == (1 << SEL_WR_IDX)
+    x_static_assert(SEL_RD == (1 << SEL_RD_IDX) && SEL_WR == (1 << SEL_WR_IDX)
 		  && SEL_EX == (1 << SEL_EX_IDX) && SEL_MAX_IDX == 3);
     for (int i = 0; i < SEL_MAX_IDX; i++)
 	FD_ZERO(&_fds[i]);

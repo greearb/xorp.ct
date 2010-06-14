@@ -41,8 +41,6 @@
 #include "libxorp/timeval.hh"
 #include "libxorp/timer.hh"
 
-#include <stack>
-
 
 /**
  * Maximum callback dispatch duration.

@@ -31,10 +31,10 @@
 /*
  * Compile time assertion.
  */
-#ifndef static_assert
+#ifndef x_static_assert
 // +0 is to work around clang bug.
-#define static_assert(a) switch ((a) + 0) case 0: case ((a) + 0):
-#endif /* static_assert */
+#define x_static_assert(a) switch ((a) + 0) case 0: case ((a) + 0):
+#endif /* x_static_assert */
 
 /*
  * A macro to avoid compilation warnings about unused functions arguments.
@@ -42,7 +42,7 @@
  * in the function definition.
  */
 #ifndef UNUSED
-#define UNUSED(var)	static_assert(sizeof(var) != 0)
+#define UNUSED(var)	x_static_assert(sizeof(var) != 0)
 #endif /* UNUSED */
 
 #ifdef __cplusplus

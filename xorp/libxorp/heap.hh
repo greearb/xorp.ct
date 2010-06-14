@@ -27,7 +27,7 @@
 #ifndef __LIBXORP_HEAP_HH__
 #define __LIBXORP_HEAP_HH__
 
-#include <memory>
+
 
 #include <stdio.h>
 #ifdef HAVE_STDLIB_H

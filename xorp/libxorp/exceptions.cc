@@ -20,14 +20,14 @@
 
 
 
+#include "exceptions.hh"
 #include <stdarg.h>
 #include <stdio.h>
 
-#include <exception>
+#ifndef XORP_USE_USTL
 #include <typeinfo>
+#endif
 
-
-#include "exceptions.hh"
 
 XorpException::XorpException(const char* init_what, 
 			     const char* file, 

@@ -35,7 +35,7 @@
 
 
 
-
+#include "xorp.h"
 #include "timeval.hh"
 #include "exceptions.hh"
 #include "ref_ptr.hh"
@@ -103,7 +103,7 @@ class ProfileLogEntry {
  */
 class Profile {
  public:
-    typedef std::list<ProfileLogEntry> logentries;	// Profiling info
+    typedef list<ProfileLogEntry> logentries;	// Profiling info
 
     class ProfileState {
     public:
@@ -215,7 +215,7 @@ class Profile {
      * @return A newline separated list of profiling variables along
      * with the associated comments.
      */
-    string list() const;
+    string get_list() const;
 
  private:
     int _profile_cnt;		// Number of variables that are enabled.

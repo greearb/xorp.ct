@@ -69,7 +69,9 @@ copy_token(const string& token_org)
     }
     
     if (is_enclose_quotations) {
-	token = "\"" + token_org + "\"";
+	token = "\"";
+	token += token_org;
+	token += "\"";
     } else {
 	token = token_org;
     }
@@ -100,7 +102,11 @@ pop_token(string& token_line)
 
     // Check if we reached the end of the token line
     if (i == token_line.length()) {
-	token_line = token_line.erase(0, i);
+#ifdef XORP_USE_USTL
+	token_line.erase((uoff_t)(0), i);
+#else
+	token_line.erase(0, i);
+#endif
 	return (token);
     }
     
@@ -132,8 +138,12 @@ pop_token(string& token_line)
 	}
 	token += token_line[i];
     }
-    
-    token_line = token_line.erase(0, i);
+
+#ifdef XORP_USE_USTL    
+    token_line.erase((uoff_t)(0), i);
+#else
+    token_line.erase(0, i);
+#endif
     
     if (is_escape_begin && !is_escape_end) {
 	// RETURN ERROR

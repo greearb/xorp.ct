@@ -460,7 +460,7 @@ public:
      * @return address size in number of octets.
      */
     static size_t addr_bytelen() {
-	static_assert(sizeof(IPv6) == 4 * sizeof(uint32_t));
+	x_static_assert(sizeof(IPv6) == 4 * sizeof(uint32_t));
 	return sizeof(IPv6);
     }
 

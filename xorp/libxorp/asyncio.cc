@@ -303,7 +303,7 @@ template <typename T, typename U>
 static void
 iov_place(T*& iov_base, U& iov_len, uint8_t* data, size_t data_len)
 {
-    static_assert(sizeof(T*) == sizeof(uint8_t*));
+    x_static_assert(sizeof(T*) == sizeof(uint8_t*));
     iov_base = reinterpret_cast<T*>(data);
     iov_len  = data_len;
 }

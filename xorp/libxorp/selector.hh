@@ -236,7 +236,7 @@ private:
 private:
     enum {
 	// correspond to SelectorMask; correspondence checked with
-	// static_assert
+	// x_static_assert
 	SEL_RD_IDX	= 0,
 	SEL_WR_IDX	= 1,
 	SEL_EX_IDX	= 2,

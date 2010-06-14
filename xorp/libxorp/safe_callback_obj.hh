@@ -28,7 +28,6 @@
 
 #include "xorp.h"
 
-
 class SafeCallbackBase;
 
 /**
@@ -56,7 +55,7 @@ public:
     void unref_cb(SafeCallbackBase* scb);
 
 protected:
-    std::vector<SafeCallbackBase*> _cbs;
+    vector<SafeCallbackBase*> _cbs;
 };
 
 /**
@@ -108,7 +107,7 @@ CallbackSafeObject::ref_cb(SafeCallbackBase* scb)
 inline void
 CallbackSafeObject::unref_cb(SafeCallbackBase* scb)
 {
-    std::vector<SafeCallbackBase*>::iterator i =
+    vector<SafeCallbackBase*>::iterator i =
 	find(_cbs.begin(), _cbs.end(), scb);
     if (i != _cbs.end())
 	_cbs.erase(i);

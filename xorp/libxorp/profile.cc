@@ -36,16 +36,13 @@ Profile::Profile()
 {
 }
 
-inline
-void
-zap(pair<const string, ref_ptr<Profile::ProfileState> >& p)
-{
-    p.second->zap();
-}
-
 Profile::~Profile()
 {
-    for_each(_profiles.begin(), _profiles.end(), ptr_fun(zap));
+    while (!_profiles.empty()) {
+	profiles::iterator i = _profiles.begin();
+	i->second->zap();
+	_profiles.erase(i);
+    }
 }
 
 void
@@ -53,8 +50,10 @@ Profile::create(const string& pname, const string& comment)
     throw(PVariableExists)
 {
     // Catch initialization problems.
+#ifndef XORP_USE_USTL
     if (_profiles.count(pname))
 	xorp_throw(PVariableExists, pname.c_str());
+#endif
 
     ProfileState *p = new ProfileState(comment, false, false, new logentries);
     _profiles[pname] = ref_ptr<ProfileState>(p);
@@ -205,6 +204,7 @@ Profile::clear(const string& pname) throw(PVariableUnknown,PVariableLocked)
     i->second->logptr()->clear();
 }
 
+#if 0
 class List: public unary_function<pair<const string, 
 				       ref_ptr<Profile::ProfileState> >,
 				  void> {
@@ -226,11 +226,20 @@ class List: public unary_function<pair<const string,
  private:
     string _result;
 };
+#endif
 
 string
-Profile::list() const
+Profile::get_list() const
 {
-    return for_each(_profiles.begin(), _profiles.end(), List()).result();
+    ostringstream oss;
+    profiles::const_iterator i = _profiles.begin();
+    while (i != _profiles.end()) {
+	oss << i->first << "\t" << i->second->size() << "\t"
+	    << (i->second->enabled() ? "enabled" : "disabled")
+	    << "\t" << i->second->comment() << "\n";
+	i++;
+    }
+    return oss.str();
 }
 
 // simple profiler

@@ -223,7 +223,7 @@ IPv6
 IPv6::operator<<(uint32_t ls) const
 {
     uint32_t tmp_addr[4];
-    static_assert(sizeof(_addr) == sizeof(tmp_addr));
+    x_static_assert(sizeof(_addr) == sizeof(tmp_addr));
 
     // Shift the words, and at the same time convert them into host-order
     switch (ls / 32) {
@@ -278,7 +278,7 @@ IPv6
 IPv6::operator>>(uint32_t rs) const
 {
     uint32_t tmp_addr[4];
-    static_assert(sizeof(_addr) == sizeof(tmp_addr));
+    x_static_assert(sizeof(_addr) == sizeof(tmp_addr));
 
     // Shift the words, and at the same time convert them into host-order
     switch (rs / 32) {
@@ -333,7 +333,7 @@ bool
 IPv6::operator<(const IPv6& other) const
 {
     int i;
-    static_assert(sizeof(_addr) == 16);
+    x_static_assert(sizeof(_addr) == 16);
 
     for (i = 0; i < 3; i++) {	// XXX: Loop ends intentionally at 3 not 4
 	if (_addr[i] != other._addr[i])

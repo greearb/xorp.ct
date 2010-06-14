@@ -24,7 +24,6 @@
 #ifndef __LIBXORP_POPEN_HH__
 #define __LIBXORP_POPEN_HH__
 
-#include<list>
 
 pid_t	popen2(const string& command, const list<string>& arguments,
 	       FILE *& outstream, FILE *& errstream,

@@ -67,7 +67,7 @@ TransactionManager::Transaction::commit()
 	//
 	// Give manager a chance to deal with success / error
 	//
-	_mgr.operation_result(success, top);
+	_mgr->operation_result(success, top);
     }
 }
 
@@ -83,7 +83,7 @@ TransactionManager::Transaction::flush()
 inline void
 TransactionManager::Transaction::defer_timeout()
 {
-    uint32_t timeout_ms = _mgr.timeout_ms();
+    uint32_t timeout_ms = _mgr->timeout_ms();
     if (timeout_ms)
 	_timeout_timer.schedule_after_ms(timeout_ms);
 }

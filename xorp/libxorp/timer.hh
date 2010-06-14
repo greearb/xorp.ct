@@ -25,7 +25,7 @@
 #define __LIBXORP_TIMER_HH__
 
 #include <assert.h>
-#include <memory>
+
 
 
 

@@ -228,11 +228,20 @@ protected:
 	typedef list<Operation> OperationList;
 	
 	Transaction(TransactionManager& mgr, const XorpTimer& timeout_timer)
-	    : _mgr(mgr), _timeout_timer(timeout_timer), _op_count(0)
+	    : _mgr(&mgr), _timeout_timer(timeout_timer), _op_count(0)
 	{}
 
-	Transaction(TransactionManager& mgr) : _mgr(mgr), _op_count(0)
+	Transaction(TransactionManager& mgr) : _mgr(&mgr), _op_count(0)
 	{}
+	Transaction() { _mgr = NULL; }
+
+	Transaction& operator=(const Transaction& rhs) {
+	    _mgr = rhs._mgr;
+	    _ops = rhs._ops;
+	    _timeout_timer = rhs._timeout_timer;
+	    _op_count = rhs._op_count;
+	    return *this;
+	}
 
 	/** Add an operation to list */
 	void add(const Operation& op);
@@ -256,7 +265,7 @@ protected:
 	uint32_t size() const { return _op_count; }
 	
     private:
-	TransactionManager& _mgr;
+	TransactionManager* _mgr;
 	OperationList	    _ops;
 	XorpTimer	    _timeout_timer;
 	uint32_t	    _op_count;

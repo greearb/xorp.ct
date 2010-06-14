@@ -25,10 +25,17 @@
 #ifndef __LIBXORP_EXCEPTIONS_HH__
 #define __LIBXORP_EXCEPTIONS_HH__
 
+#include "xorp.h"
+
+#ifdef XORP_USE_USTL
+#include <ustl/uexception.h>
+using namespace std;
+#else
 #include <exception>
+#endif
+
 #include <stdarg.h>
 
-#include "xorp.h"
 #include "libxorp/c_format.hh"
 
 /**

@@ -27,42 +27,48 @@
 #include "xorp_config.h"
 
 #ifdef __cplusplus
-#ifdef XORP_USE_USTL
-#include <ustl.h>
-using namespace ustl;
-#else
-#include <new>
-#include <iostream>
-#include <fstream>
-#include <algorithm>
-#include <utility>
-#include <cstdarg>
-#include <cstdio>
-#include <string>
-#include <vector>
-#include <list>
-#include <set>
-#include <map>
-#if defined (__cplusplus) && !defined(__STL_NO_NAMESPACES)
-using namespace std;
-#endif
+#  ifdef XORP_USE_USTL
+#    include <ustl.h>
+     using namespace ustl;
+#  else
+#    include <new>
+#    include <iostream>
+#    include <fstream>
+#    include <sstream>
+#    include <algorithm>
+#    include <utility>
+#    include <cstdarg>
+#    include <cstdio>
+#    include <string>
+#    include <vector>
+#    include <list>
+#    include <set>
+#    include <map>
+#    include <queue>
+#    include <functional>
+#    include <memory>
+#    if !defined(__STL_NO_NAMESPACES)
+       using namespace std;
+#    endif /* namespace std */
+#  endif /* else, not ustl */
+#endif /* c++ */
 
 #ifdef HAVE_STDINT_H
-#include <stdint.h>
+#  include <stdint.h>
 #endif
 
 #ifdef HAVE_INTTYPES_H
-#include <inttypes.h>
+#  include <inttypes.h>
 #endif
 
 #if defined (__cplusplus)
-#if defined (USE_BOOST) && defined (HAS_BOOST_NONCOPYABLE_INC)
+# if defined (USE_BOOST) && defined (HAS_BOOST_NONCOPYABLE_INC)
 #  include <boost/noncopyable.hpp>
 #  define NONCOPYABLE boost::noncopyable
-#else
+# else
 #  define NONCOPYABLE xorp_noncopyable
 #  include "xorp_noncopyable.hh"
-#endif
+# endif
 #endif
 
 /*
@@ -70,7 +76,7 @@ using namespace std;
  * this file exists, not all platforms define these macros.
  */
 #ifdef HAVE_SYS_CDEFS_H
-#include <sys/cdefs.h>
+#  include <sys/cdefs.h>
 #endif
 
 /*
@@ -87,9 +93,6 @@ using namespace std;
 #endif /* __BEGIN_DECLS */
 
 #include "xorp_osdep_begin.h"
-
-#endif /* ustl */
-#endif /* __cplusplus */
 
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -147,7 +150,9 @@ using namespace std;
 #include "xorp_osdep_mid.h"
 
 #if defined (__cplusplus) && !defined(__STL_NO_NAMESPACES)
+#ifndef XORP_USE_USTL
 using namespace std::rel_ops;
+#endif
 #endif
 
 /*

@@ -24,7 +24,7 @@
 #ifndef __LIBXORP_RANGE_HH__
 #define __LIBXORP_RANGE_HH__
 
-#include <sstream>
+
 
 class IPv4;
 class IPv6;
