@@ -293,6 +293,9 @@ public:
        _near_etx(near_etx),
        _far_etx(far_etx)
     {}
+#ifdef XORP_USE_USTL
+    LinkAddrInfo() { }
+#endif
 
     bool has_etx() const { return _has_etx; }
     IPv4 remote_addr() const { return _remote_addr; }

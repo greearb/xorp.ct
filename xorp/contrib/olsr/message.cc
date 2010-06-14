@@ -509,7 +509,7 @@ MessageDecoder::decode(uint8_t* ptr, size_t len)
 void
 MessageDecoder::register_decoder(Message* message)
 {
-    XLOG_ASSERT(0 == _olsrv1.count(message->type()));
+    XLOG_ASSERT(_olsrv1.find(message->type()) == _olsrv1.end());
     XLOG_ASSERT(0 != message->type());
     _olsrv1[message->type()] = message;
 }

@@ -200,7 +200,7 @@ Neighbor::update_link(const OlsrTypes::LogicalLinkID linkid)
 
     bool was_cand_mpr = is_cand_mpr();
 
-    if (0 == _links.count(linkid)) {
+    if (_links.find(linkid) == _links.end()) {
 	_links.insert(linkid);
     }
 
@@ -228,7 +228,7 @@ Neighbor::delete_link(const OlsrTypes::LogicalLinkID linkid)
     debug_msg("LinkID %u\n", XORP_UINT_CAST(linkid));
 
     // Invariant: Non-existent links should not be deleted.
-    XLOG_ASSERT(0 != _links.count(linkid));
+    XLOG_ASSERT(_links.find(linkid) != _links.end());
 
     // Consider node's MPR status before its change in link state.
     bool was_cand_mpr = is_cand_mpr();
@@ -279,7 +279,7 @@ Neighbor::add_twohop_link(const OlsrTypes::TwoHopLinkID tlid)
     debug_msg("TwoHopLinkID %u\n", XORP_UINT_CAST(tlid));
 
     // Invariant: Two-hop links should not be added more than once.
-    XLOG_ASSERT(0 == _twohop_links.count(tlid));
+    XLOG_ASSERT(_twohop_links.find(tlid) == _twohop_links.end());
 
     // Consider node's MPR status before its change in link state.
     bool was_cand_mpr = is_cand_mpr();
@@ -297,7 +297,7 @@ Neighbor::delete_twohop_link(const OlsrTypes::TwoHopLinkID tlid)
     debug_msg("TwoHopLinkID %u\n", XORP_UINT_CAST(tlid));
 
     // Invariant: Non-existent two-hop links should not be deleted.
-    XLOG_ASSERT(0 != _twohop_links.count(tlid));
+    XLOG_ASSERT(_twohop_links.find(tlid) != _twohop_links.end());
 
     // Consider node's MPR status before its change in link state.
     bool was_cand_mpr = is_cand_mpr();

@@ -585,7 +585,11 @@ GetLinks::output()
     // TODO: Turn LinkType into a symbolic string.
 
 #ifdef SORT_OUTPUT
+#ifdef XORP_USE_USTL
+    sort(_infos, LinkSortOrderPred());
+#else
     _infos.sort(LinkSortOrderPred());
+#endif
 #endif
 
     list<LinkInfo>::iterator ii;
@@ -907,7 +911,11 @@ GetNeighbors::output()
 	   "ADV", "SYM", "MPR", "MPRS");
 
 #ifdef SORT_OUTPUT
+#ifdef XORP_USE_USTL
+    sort(_infos, NeighborSortOrderPred());
+#else
     _infos.sort(NeighborSortOrderPred());
+#endif
 #endif
 
     list<NeighborInfo>::iterator ii;

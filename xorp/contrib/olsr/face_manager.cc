@@ -171,7 +171,7 @@ FaceManager::receive(const string& interface, const string& vif,
 	// No Face listening on the given link.
 	return;
     }
-    XLOG_ASSERT(0 != _faces.count(faceid));
+    XLOG_ASSERT(_faces.find(faceid) != _faces.end());
 
     Face* face = _faces[faceid];
 
@@ -288,7 +288,7 @@ FaceManager::create_face(const string& interface, const string& vif)
     debug_msg("Interface %s Vif %s\n", interface.c_str(), vif.c_str());
     string concat = interface + "/" + vif;
 
-    if (0 != _faceid_map.count(concat)) {
+    if (_faceid_map.find(concat) != _faceid_map.end()) {
 	xorp_throw(BadFace,
 		   c_format("Mapping for %s already exists", concat.c_str()));
     }
@@ -339,7 +339,7 @@ FaceManager::delete_face(OlsrTypes::FaceID faceid)
 {
     debug_msg("FaceID %u\n", faceid);
 
-    if (0 == _faces.count(faceid)) {
+    if (_faces.find(faceid) == _faces.end()) {
 	XLOG_ERROR("Unknown FaceID %u", faceid);
 	return false;
     }
@@ -429,7 +429,7 @@ FaceManager::vif_status_change(const string& interface,
 	return;
     }
 
-    if (0 == _faces.count(faceid)) {
+    if (_faces.find(faceid) == _faces.end()) {
 	XLOG_ERROR("Unknown FaceID %u", faceid);
 	return;
     }
@@ -457,7 +457,7 @@ FaceManager::address_status_change(const string& interface,
 	return;
     }
 
-    if (0 == _faces.count(faceid)) {
+    if (_faces.find(faceid) == _faces.end()) {
 	XLOG_ERROR("Unknown FaceID %u", faceid);
 	return;
     }
@@ -481,7 +481,7 @@ FaceManager::get_faceid(const string& interface, const string& vif)
     debug_msg("Interface %s Vif %s\n", interface.c_str(), vif.c_str());
     string concat = interface + "/" + vif;
 
-    if (0 == _faceid_map.count(concat)) {
+    if (_faceid_map.find(concat) == _faceid_map.end()) {
 	xorp_throw(BadFace,
 		   c_format("No mapping for %s exists", concat.c_str()));
     }
@@ -551,7 +551,7 @@ FaceManager::get_interface_cost(OlsrTypes::FaceID faceid, int& cost)
 {
     debug_msg("FaceID %u\n", faceid);
 
-    XLOG_ASSERT(0 != _faces.count(faceid));
+    XLOG_ASSERT(_faces.find(faceid) != _faces.end());
     Face* face = _faces[faceid];
     bool is_found = true;
 
@@ -565,7 +565,7 @@ FaceManager::set_face_enabled(OlsrTypes::FaceID faceid, bool enabled)
 {
     debug_msg("FaceID %u\n", faceid);
 
-    if (0 == _faces.count(faceid)) {
+    if (_faces.find(faceid) == _faces.end()) {
 	XLOG_ERROR("Unknown FaceID %u", faceid);
 	return false;
     }
@@ -676,7 +676,7 @@ FaceManager::get_face_enabled(OlsrTypes::FaceID faceid)
 {
     debug_msg("FaceID %u\n", faceid);
 
-    if (0 == _faces.count(faceid)) {
+    if (_faces.find(faceid) == _faces.end()) {
 	XLOG_ERROR("Unknown FaceID %u", faceid);
 	return false;
     }
@@ -689,7 +689,7 @@ FaceManager::set_interface_cost(OlsrTypes::FaceID faceid, int cost)
 {
     debug_msg("FaceID %u\n", faceid);
 
-    if (0 == _faces.count(faceid)) {
+    if (_faces.find(faceid) == _faces.end()) {
 	XLOG_ERROR("Unknown FaceID %u", faceid);
 	return false;
     }
@@ -704,7 +704,7 @@ FaceManager::set_local_addr(OlsrTypes::FaceID faceid, const IPv4& local_addr)
 {
     debug_msg("FaceID %u\n", faceid);
 
-    if (0 == _faces.count(faceid)) {
+    if (_faces.find(faceid) == _faces.end()) {
 	XLOG_ERROR("Unknown FaceID %u", faceid);
 	return false;
     }
@@ -719,7 +719,7 @@ FaceManager::get_local_addr(OlsrTypes::FaceID faceid, IPv4& local_addr)
 {
     debug_msg("FaceID %u\n", faceid);
 
-    if (0 == _faces.count(faceid)) {
+    if (_faces.find(faceid) == _faces.end()) {
 	XLOG_ERROR("Unknown FaceID %u", faceid);
 	return false;
     }
@@ -735,7 +735,7 @@ FaceManager::set_local_port(OlsrTypes::FaceID faceid,
 {
     debug_msg("FaceID %u\n", faceid);
 
-    if (0 == _faces.count(faceid)) {
+    if (_faces.find(faceid) == _faces.end()) {
 	XLOG_ERROR("Unknown FaceID %u", faceid);
 	return false;
     }
@@ -750,7 +750,7 @@ FaceManager::get_local_port(OlsrTypes::FaceID faceid, uint16_t& local_port)
 {
     debug_msg("FaceID %u\n", faceid);
 
-    if (0 == _faces.count(faceid)) {
+    if (_faces.find(faceid) == _faces.end()) {
 	XLOG_ERROR("Unknown FaceID %u", faceid);
 	return false;
     }
@@ -766,7 +766,7 @@ FaceManager::set_all_nodes_addr(OlsrTypes::FaceID faceid,
 {
     debug_msg("FaceID %u\n", faceid);
 
-    if (0 == _faces.count(faceid)) {
+    if (_faces.find(faceid) == _faces.end()) {
 	XLOG_ERROR("Unknown FaceID %u", faceid);
 	return false;
     }
@@ -852,7 +852,7 @@ FaceManager::get_all_nodes_addr(OlsrTypes::FaceID faceid,
 {
     debug_msg("FaceID %u\n", faceid);
 
-    if (0 == _faces.count(faceid)) {
+    if (_faces.find(faceid) == _faces.end()) {
 	XLOG_ERROR("Unknown FaceID %u", faceid);
 	return false;
     }
@@ -868,7 +868,7 @@ FaceManager::set_all_nodes_port(OlsrTypes::FaceID faceid,
 {
     debug_msg("FaceID %u\n", faceid);
 
-    if (0 == _faces.count(faceid)) {
+    if (_faces.find(faceid) == _faces.end()) {
 	XLOG_ERROR("Unknown FaceID %u", faceid);
 	return false;
     }
@@ -893,7 +893,7 @@ FaceManager::get_all_nodes_port(OlsrTypes::FaceID faceid,
 {
     debug_msg("FaceID %u\n", faceid);
 
-    if (0 == _faces.count(faceid)) {
+    if (_faces.find(faceid) == _faces.end()) {
 	XLOG_ERROR("Unknown FaceID %u", faceid);
 	return false;
     }
@@ -1128,7 +1128,11 @@ FaceManager::delete_message_cb(MessageReceiveCB cb)
 
     vector<MessageReceiveCB>::iterator ii;
     for (ii = _handlers.begin(); ii != _handlers.end(); ii++) {
+#ifdef XORP_USE_USTL
+	if (ii->get() == cb.get()) {
+#else
 	if (*ii == cb) {
+#endif
 	    _handlers.erase(ii);
 	    is_deleted = true;
 	    break;

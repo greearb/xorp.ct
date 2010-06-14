@@ -208,7 +208,7 @@ ExternalRoutes::add_hna_route_in(const IPv4Net& dest,
 
     OlsrTypes::ExternalID erid = _next_erid++;
 
-    if (0 != _routes_in.count(erid)) {
+    if (_routes_in.find(erid) != _routes_in.end()) {
 	xorp_throw(BadExternalRoute,
 		   c_format("Mapping for ExternalID %u already exists",
 		   XORP_UINT_CAST(erid)));
@@ -282,8 +282,8 @@ ExternalRoutes::get_hna_route_in(const IPv4Net& dest,
 				 const IPv4& lasthop)
     throw(BadExternalRoute)
 {
-    pair<ExternalDestInMap::const_iterator,
-	 ExternalDestInMap::const_iterator> rd =
+    pair<ExternalDestInMap::iterator,
+	 ExternalDestInMap::iterator> rd =
 	_routes_in_by_dest.equal_range(dest);
 
     ExternalRoute* er = 0;
@@ -388,14 +388,14 @@ ExternalRoutes::originate_hna_route_out(const IPv4Net& dest)
 
     bool is_first_route = _routes_out.empty();
 
-    if (0 != _routes_out_by_dest.count(dest)) {
+    if (_routes_out_by_dest.find(dest) != _routes_out_by_dest.end()) {
 	debug_msg("Already originating %s\n", cstring(dest));
 	return false;
     }
 
     OlsrTypes::ExternalID erid = _next_erid++;
 
-    if (0 != _routes_out.count(erid)) {
+    if (_routes_out.find(erid) != _routes_out.end()) {
 	xorp_throw(BadExternalRoute,
 		   c_format("Mapping for ExternalID %u already exists",
 		   XORP_UINT_CAST(erid)));

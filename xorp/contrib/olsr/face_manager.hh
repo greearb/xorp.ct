@@ -85,7 +85,7 @@ public:
      * @return true if this message has previously been received by faceid.
      */
     inline bool is_seen_by_face(const OlsrTypes::FaceID faceid) const {
-	return _iface_list.count(faceid) > 0;
+	return (_iface_list.find(faceid) != _iface_list.end());
     }
 
     /**
@@ -95,7 +95,7 @@ public:
      * @param faceid the ID of the interface to add.
      */
     inline void set_seen_by_face(const OlsrTypes::FaceID faceid) {
-	if (0 == _iface_list.count(faceid))
+	if (_iface_list.find(faceid) == _iface_list.end())
 	    _iface_list.insert(faceid);
     }
 

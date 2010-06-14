@@ -329,7 +329,7 @@ class IO : public ServiceBase {
      */
     inline bool get_interface_vif_by_interface_id(uint32_t interface_id,
 	string& interface, string& vif) {
-	if (0 == _interface_vif.count(interface_id))
+	if (_interface_vif.find(interface_id) == _interface_vif.end())
 	    return false;
 
 	interface_vif iv = _interface_vif[interface_id];
