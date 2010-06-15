@@ -83,6 +83,9 @@ private:
 class OpCommand {
 public:
     OpCommand(OpCommandList& ocl, const list<string>& command_parts);
+#ifdef XORP_USE_USTL
+    OpCommand() { _ocl = NULL; }
+#endif
 
     const list<string>& command_parts() const { return _command_parts; }
     const string& command_name() const { return _command_name; }
@@ -164,7 +167,7 @@ public:
     void set_is_invalid(bool v) { _is_invalid = v; }
 
 private:
-    OpCommandList&	_ocl;
+    OpCommandList*	_ocl;
     list<string>	_command_parts;
     string		_command_name;
     string		_help_string;

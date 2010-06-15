@@ -23,10 +23,6 @@
 #ifndef __POLICY_BACKEND_IV_EXEC_HH__
 #define __POLICY_BACKEND_IV_EXEC_HH__
 
-#include <stack>
-
-
-
 #include "libxorp/xorp.h"
 
 #include "policy/common/dispatcher.hh"

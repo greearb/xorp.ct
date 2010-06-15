@@ -43,6 +43,9 @@ public:
     ConfPathSegment(const string& segname, int type,
 		    const ConfigNodeId& node_id)
 	: _segname(segname), _type(type), _node_id(node_id) {}
+#ifdef XORP_USE_USTL
+    ConfPathSegment() { }
+#endif
     const string& segname() const { return _segname; }
     int type() const { return _type; }
     const ConfigNodeId& node_id() const { return _node_id; }

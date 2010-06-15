@@ -1002,7 +1002,8 @@ ProgramAction::check_program_is_valid(const list<string>& action,
 {
     XLOG_ASSERT(action.front() == "program");
 
-    list<string>::const_iterator program_pos = ++action.begin();
+    list<string>::const_iterator program_pos = action.begin();
+    program_pos++;
     if (program_pos == action.end()) {
 	error_msg = "Expected program but none supplied";
 	return false;

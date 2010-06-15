@@ -931,6 +931,10 @@ private:
 	      _source(source),
 	      _group(group),
 	      _is_add(is_add) {}
+#ifdef XORP_USE_USTL
+	SendAddDeleteMembership() { }
+#endif
+
 	const char*	operation_name() const {
 	    return ((_is_add)? "add membership" : "delete membership");
 	}

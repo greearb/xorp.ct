@@ -122,7 +122,7 @@ LogTable<A>::str() const
 template <typename A>
 OstreamLogTable<A>::OstreamLogTable(const string&	tablename,
 				    RouteTable<A>*	parent,
-				    std::ostream&	out)
+				    ostream&	out)
     : LogTable<A>(tablename, parent), _o(out)
 {
 }
@@ -132,9 +132,10 @@ int
 OstreamLogTable<A>::add_route(const IPRouteEntry<A>& 	route,
 			      RouteTable<A>* 		caller)
 {
-    _o << this->update_number() << " Add: " << route.str() << " Return: ";
+    _o << this->update_number() << (const char*)(" Add: ") << route.str()
+       << (const char*)(" Return: ");
     int s = LogTable<A>::add_route(route, caller);
-    _o << s << std::endl;
+    _o << s << endl;
     return s;
 }
 
@@ -144,13 +145,14 @@ OstreamLogTable<A>::delete_route(const IPRouteEntry<A>* 	route,
 				 RouteTable<A>* 		caller)
 {
     if (route != NULL) {
-	_o << this->update_number() << " Delete: " << route->str() << " Return: ";
+	_o << this->update_number() << (const char*)(" Delete: ") << route->str()
+	   << (const char*)(" Return: ");
     }
 
     int s = LogTable<A>::delete_route(route, caller);
 
     if (route != NULL) {
-	_o << s << std::endl;
+	_o << s << endl;
     }
     return s;
 }

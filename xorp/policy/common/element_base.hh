@@ -45,7 +45,7 @@ public:
      *
      * @return string representation of the element.
      */
-    virtual std::string str() const = 0;
+    virtual string str() const = 0;
 
     /**
      * @return string representation of element type.

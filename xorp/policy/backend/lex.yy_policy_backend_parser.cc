@@ -548,7 +548,7 @@ char *yy_policy_backend_parsertext;
 #line 2 "backend.l"
 
 #include <assert.h>
-#include <sstream>
+
 
 #include "libxorp/xorp.h"
 #include "policy/common/policy_utils.hh"

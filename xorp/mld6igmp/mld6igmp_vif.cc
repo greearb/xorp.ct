@@ -1552,7 +1552,7 @@ Mld6igmpVif::delete_protocol(xorp_module_id module_id,
     
     if (iter == _notify_routing_protocols.end()) {
 	ostringstream oss;
-	oss << "ERROR:  Cannot find routing module matching module_id: " << module_id
+	oss << "ERROR:  Cannot find routing module matching module_id: " << (int)(module_id)
 	    << " instance_name: " << module_instance_name;
 	error_msg.append(oss.str());
 	return (XORP_ERROR);		// Not on the list

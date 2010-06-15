@@ -232,8 +232,8 @@ PolicyTarget::test_policy(const string& args)
 
 	// strip quotes if present
 	if (args.find('"') == j) {
-
-	    string::size_type k = args.find_last_of('"');
+	    string tmp("\"");
+	    string::size_type k = args.find_last_of(tmp);
 	    if (j == k || k != (args.length() - 1))
 	        xorp_throw(PolicyException, "Missing last quote");
 

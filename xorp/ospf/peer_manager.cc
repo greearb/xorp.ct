@@ -39,7 +39,7 @@
 
 
 
-#include <queue>
+
 
 #include "libproto/spt.hh"
 

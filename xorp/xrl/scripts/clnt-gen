@@ -171,7 +171,7 @@ def prepare_client_if_hh(modulename, hh_file):
 #include "libxipc/xrl_error.hh"
 #include "libxipc/xrl_sender.hh"
 
-#include <memory>
+//#include <memory>
 """ % (protect(hh_file), protect(hh_file), modulename)
     return s
 

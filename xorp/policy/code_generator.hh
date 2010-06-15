@@ -23,7 +23,7 @@
 #ifndef __POLICY_CODE_GENERATOR_HH__
 #define __POLICY_CODE_GENERATOR_HH__
 
-#include <sstream>
+
 
 
 #include "policy/common/varrw.hh"

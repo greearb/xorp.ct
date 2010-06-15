@@ -224,7 +224,18 @@ PimMreTrackState::ActionLists::compute_action_list()
     for (size_t i = 0; i < _action_list_vector.size(); i++) {
 	list<PimMreAction>& l = _action_list_vector[i];
 	l.erase(unique(l.begin(), l.end()), l.end());
+#ifdef XORP_USE_USTL
+	// uSTL doesn't do reverse()
+	list<PimMreAction> tmp;
+	list<PimMreAction>::iterator q = l.begin();
+	while (q != l.end()) {
+	    tmp.push_front(*q);
+	    q++;
+	}
+	l = tmp;
+#else
 	l.reverse();		// XXX
+#endif
     }
     
     //

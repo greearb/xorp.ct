@@ -17,8 +17,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/rtrmgr/path_segment.hh,v 1.10 2008/10/02 21:58:24 bms Exp $
-
 #ifndef __RTRMGR_PATH_SEGMENT_HH__
 #define __RTRMGR_PATH_SEGMENT_HH__
 
@@ -26,6 +24,10 @@ class PathSegment {
 public:
     PathSegment(const string& segname, bool is_tag) 
 	: _is_tag(is_tag), _segname(segname) {}
+
+#ifdef XORP_USE_USTL
+    PathSegment() { }
+#endif
 
     bool is_tag() const { return _is_tag; }
     const string& segname() const { return _segname; }

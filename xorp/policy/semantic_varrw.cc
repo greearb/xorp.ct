@@ -55,9 +55,9 @@ SemanticVarRW::write(const Id& id, const Element& elem) {
 
     // check the rw access
     if(!var.writable()) {
-	string error = "Trying to write on read-only variable ";
-        error += id;
-        xorp_throw(var_error, error);
+	ostringstream err;
+	err <<"Trying to write on read-only variable " << (int)(id);
+        xorp_throw(var_error, err.str());
     }    
 
     // type checking

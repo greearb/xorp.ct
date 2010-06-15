@@ -25,7 +25,7 @@
 #include "libxorp/xlog.h"
 #include "libxorp/eventloop.hh"
 
-#include <functional>
+
 #include <openssl/md5.h>
 
 #include "constants.hh"
@@ -255,8 +255,8 @@ PlaintextAuthHandler::authenticate_outbound(RipPacket<IPv4>&	packet,
     if (head_entries() > 0)
 	first_entry_ptr = packet.route_entry_ptr(0);
 
-    static_assert(PacketRouteEntry<IPv4>::SIZE == 20);
-    static_assert(PlaintextPacketRouteEntry4::SIZE == 20);
+    x_static_assert(PacketRouteEntry<IPv4>::SIZE == 20);
+    x_static_assert(PlaintextPacketRouteEntry4::SIZE == 20);
     XLOG_ASSERT(packet.data_ptr() + RipPacketHeader::size()
 		== first_entry_ptr);
 
@@ -488,7 +488,7 @@ MD5AuthHandler::authenticate_inbound(const uint8_t*		packet,
 				     const IPv4&		src_addr,
 				     bool			new_peer)
 {
-    static_assert(MD5PacketTrailer::SIZE == 20);
+    x_static_assert(MD5PacketTrailer::SIZE == 20);
 
     //
     // XXX: if no valid keys, then don't use any authentication
@@ -627,7 +627,7 @@ MD5AuthHandler::authenticate_outbound(RipPacket<IPv4>&	packet,
     vector<uint8_t> first_trailer;
     KeyChain::iterator iter;
 
-    static_assert(MD5PacketTrailer::SIZE == 20);
+    x_static_assert(MD5PacketTrailer::SIZE == 20);
 
     //
     // XXX: if no valid keys, then don't use any authentication

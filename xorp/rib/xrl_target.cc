@@ -1056,7 +1056,7 @@ XrlRibTarget::profile_0_1_list(string& info)
 {
     debug_msg("\n");
     
-    info = _rib_manager->profile().list();
+    info = _rib_manager->profile().get_list();
     return XrlCmdError::OKAY();
 }
 

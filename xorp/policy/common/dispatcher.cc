@@ -22,7 +22,9 @@
 
 #include "libxorp/xorp.h"
 
+#ifndef XORP_USE_USTL
 #include <typeinfo>
+#endif
 
 #include "dispatcher.hh"
 #include "elem_null.hh"

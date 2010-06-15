@@ -41,14 +41,14 @@ public:
      *
      * @param process process name which was born.
      */
-    virtual void birth(const std::string& process) = 0;
+    virtual void birth(const string& process) = 0;
 
     /**
      * Method called when a XORP process dies.
      *
      * @param process process name which died.
      */
-    virtual void death(const std::string& process) = 0;
+    virtual void death(const string& process) = 0;
 };
 
 #endif // __POLICY_PW_NOTIFIER_HH__

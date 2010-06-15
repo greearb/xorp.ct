@@ -62,14 +62,25 @@
 
 
 PimJpHeader::PimJpHeader(PimNode& pim_node)
-    : _pim_node(pim_node),
+    : _pim_node(&pim_node),
       _family(pim_node.family()),
       _jp_groups_n(0),
       _jp_sources_n(0),
       _holdtime(PIM_JOIN_PRUNE_HOLDTIME_DEFAULT) // XXX
 {
-    
 }
+
+#ifdef XORP_USE_USTL
+PimJpHeader::PimJpHeader()
+	: _pim_node(NULL),
+	  _family(AF_INET),
+	  _jp_groups_n(0),
+	  _jp_sources_n(0),
+	  _holdtime(PIM_JOIN_PRUNE_HOLDTIME_DEFAULT) // XXX
+{
+}
+#endif
+
 
 PimJpHeader::~PimJpHeader()
 {
@@ -89,7 +100,7 @@ PimJpHeader::reset()
 PimMrt&
 PimJpHeader::pim_mrt() const
 {
-    return (_pim_node.pim_mrt());
+    return (_pim_node->pim_mrt());
 }
 
 // Return true if @ipaddr found

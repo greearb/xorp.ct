@@ -229,7 +229,11 @@ Redistributor<A>::RedistEventInterface::did_add(const IPRouteEntry<A>& ipr)
 
 	const IPNet<A>& last = _r->last_dumped_net();
 	const IPNet<A>& net  = ipr.net();
-	if (RedistNetCmp<A>().operator() (net, last) == false){
+#ifdef XORP_USE_USTL
+	if (!(net < last)) {
+#else
+	if (RedistNetCmp<A>().operator() (net, last) == false) {
+#endif
 	    return;	// route will be hit later on in dump anyway
 	}
     }
@@ -292,7 +296,11 @@ Redistributor<A>::RedistEventInterface::did_delete(const IPRouteEntry<A>& ipr)
 
 	const IPNet<A>& last = _r->last_dumped_net();
 	const IPNet<A>& net  = ipr.net();
+#ifdef XORP_USE_USTL
+	if (!(net < last)) {
+#else
 	if (RedistNetCmp<A>().operator() (net, last) == false) {
+#endif
 	    return;	// route has not yet been announced so ignore
 	}
     }

@@ -25,7 +25,7 @@
 
 #include "element_base.hh"
 
-#include <sstream>
+
 
 /**
  * @short Interface used by policy filters to execute a policy on a route.

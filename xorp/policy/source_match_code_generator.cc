@@ -227,15 +227,15 @@ SourceMatchCodeGenerator::do_term(Term& term)
 
     // Check that the route's tags are subset of this protocol's tags
     _os << "PUSH set_u32 " << element_set.str() << endl;
-    _os << "LOAD " << VarRW::VAR_POLICYTAGS << "\n";
+    _os << "LOAD " << (int)(VarRW::VAR_POLICYTAGS) << "\n";
     _os << "<=\n";
     _os << "ONFALSE_EXIT" << endl;
 
     // Add another tag to the route
     _os << "PUSH u32 " << _currtag << endl;
-    _os << "LOAD " << VarRW::VAR_POLICYTAGS << "\n";
+    _os << "LOAD " << (int)(VarRW::VAR_POLICYTAGS) << "\n";
     _os << "+\n";
-    _os << "STORE " << VarRW::VAR_POLICYTAGS << "\n";
+    _os << "STORE " << (int)(VarRW::VAR_POLICYTAGS) << "\n";
 
 
     _os << "TERM_END\n";

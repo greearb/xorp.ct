@@ -25,7 +25,7 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 
-#include <sstream>
+
 
 #include "libxipc/xrl_router.hh"
 

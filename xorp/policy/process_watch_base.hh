@@ -38,7 +38,7 @@ public:
     /**
      * @param proto protocol to register interest in.
      */
-    virtual void add_interest(const std::string& proto) = 0;
+    virtual void add_interest(const string& proto) = 0;
 };
 
 #endif // __POLICY_PROCESS_WATCH_BASE_HH__

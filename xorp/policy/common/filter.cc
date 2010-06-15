@@ -23,7 +23,7 @@
 
 #include "filter.hh"
 
-std::string
+const char*
 filter::filter2str(const filter::Filter& f) {
     switch(f) {
 	case IMPORT:

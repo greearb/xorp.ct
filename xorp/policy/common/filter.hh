@@ -51,7 +51,7 @@ enum Filter {
  * @param f filter type to convert to human readable string.
  * @return string representation of filter name.
  */
-std::string filter2str(const Filter& f);
+const char* filter2str(const Filter& f);
 
 } // namespace
 

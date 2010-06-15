@@ -89,10 +89,13 @@ class PimNode;
 class PimJpHeader {
 public:
     PimJpHeader(PimNode& pim_node);
+#ifdef XORP_USE_USTL
+    PimJpHeader();
+#endif
     ~PimJpHeader();
     void	reset();
     
-    PimNode&	pim_node() const	{ return (_pim_node);		}
+    PimNode&	pim_node() const	{ return (*_pim_node);		}
     int		family() const		{ return (_family);		}
     PimMrt&	pim_mrt() const;
     
@@ -128,7 +131,7 @@ public:
     void	decr_jp_sources_n()		{ _jp_sources_n--;	}
     
 private:
-    PimNode&	_pim_node;		// The PIM node
+    PimNode*	_pim_node;		// The PIM node
     int		_family;		// The address family
     list<PimJpGroup *> _jp_groups_list;// The list of groups
     uint32_t	_jp_groups_n;		// Total number of groups

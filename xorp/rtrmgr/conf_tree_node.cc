@@ -2038,7 +2038,11 @@ ConfigTreeNode::child_number() const
 void
 ConfigTreeNode::sort_by_template(list<ConfigTreeNode*>& children) const
 {
+#ifdef XORP_USE_USTL
+    sort(children, CTN_Compare());
+#else
     children.sort(CTN_Compare());
+#endif
 } 
 
 string

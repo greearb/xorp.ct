@@ -32,8 +32,8 @@ Code::Target::operator<(const Target& rhs) const
 
     string left, right;
 
-    left = _protocol + policy_utils::to_str(_filter);
-    right = rhs._protocol + policy_utils::to_str(rhs._filter);
+    left = _protocol + policy_utils::to_str((int)(_filter));
+    right = rhs._protocol + policy_utils::to_str((int)(rhs._filter));
 
     return left < right;
 }
@@ -62,7 +62,8 @@ Code::Target::str() const
     string ret = "Protocol: ";
 
     ret += _protocol;
-    ret += ", Filter: " + filter2str(_filter);
+    ret += ", Filter: ";
+    ret += filter2str(_filter);
 
     return ret;
 }

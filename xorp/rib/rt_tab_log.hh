@@ -24,6 +24,7 @@
 
 
 
+#include "libxorp/xorp.h"
 #include "rt_tab_base.hh"
 
 
@@ -73,7 +74,7 @@ private:
 template <typename A>
 class OstreamLogTable : public LogTable<A> {
 public:
-    std::ostream& get();
+    ostream& get();
     OstreamLogTable(const string& 	tablename,
 		    RouteTable<A>*	parent,
 		    ostream& 		out);

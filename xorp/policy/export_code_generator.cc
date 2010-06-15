@@ -57,7 +57,7 @@ ExportCodeGenerator::visit_term(Term& term)
     // tags are linear.. for each term, match the tag in the source block.
     const SourceMatchCodeGenerator::Taginfo& ti = *_tags_iter;
     if (ti.first) {
-        _os << "LOAD " << VarRW::VAR_POLICYTAGS << "\n";
+        _os << "LOAD " << (int)(VarRW::VAR_POLICYTAGS) << "\n";
         _os << "PUSH u32 " << (ti.second) << endl;
         _os << "<=\n";
         _os << "ONFALSE_EXIT" << endl;

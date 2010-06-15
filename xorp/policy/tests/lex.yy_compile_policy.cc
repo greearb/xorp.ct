@@ -1600,7 +1600,7 @@ char *yy_compile_policytext;
 #include "policy/test/compilepolicy.hh"
 #include "yacc.yy_compile_policy.cc.h"
 #include "policy/common/policy_utils.hh"
-#include <sstream>
+
 
 #define yylval yy_compile_policylval
 #define yyparse yy_compile_policyparse

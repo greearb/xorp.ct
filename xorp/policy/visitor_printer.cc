@@ -33,13 +33,16 @@ VisitorPrinter::visit(PolicyStatement& ps)
 {
     PolicyStatement::TermContainer& terms = ps.terms();
     PolicyStatement::TermContainer::iterator i;
-
-    _out << "policy-statement " << ps.name() << " {" << endl;
+    // Work around bugs in uSTL
+    const char* pss = "policy-statement ";
+    const char* op = " {";
+    const char* cp = "}";
+    _out << pss << ps.name() << op << endl;
     // go throgh all terms
     for(i = terms.begin(); i != terms.end(); ++i) {
         (i->second)->accept(*this);
     }
-    _out << "}" << endl;
+    _out << cp << endl;
 
     return NULL;
 }
@@ -52,36 +55,37 @@ VisitorPrinter::visit(Term& term)
     Term::Nodes& actions = term.action_nodes();
     Term::Nodes::iterator i;
 
-    _out << "\tterm " << term.name() << " {" << endl;
+    // NOTE:  const char* casts are to work around bugs in uSTL.
+    _out << (const char*)("\tterm ") << term.name() << (const char*)(" {") << endl;
 
-    _out << "\t\tfrom {" << endl;
+    _out << (const char*)("\t\tfrom {") << endl;
     // do source block
     for (i = source.begin(); i != source.end(); ++i) {
-	_out << "\t\t\t";
+	_out << (const char*)("\t\t\t");
         (i->second)->accept(*this);
-	_out << ";" << endl;
+	_out << (const char*)(";") << endl;
     }
-    _out << "\t\t}" << endl;
+    _out << (const char*)("\t\t}") << endl;
 
-    _out << "\t\tto {" << endl;
+    _out << (const char*)("\t\tto {") << endl;
     // do dest block
     for (i = dest.begin(); i != dest.end(); ++i) {
-	_out << "\t\t\t";
+	_out << (const char*)("\t\t\t");
         (i->second)->accept(*this);
-	_out << ";" << endl;
+	_out << (const char*)(";") << endl;
     }
-    _out << "\t\t}" << endl;
+    _out << (const char*)("\t\t}") << endl;
 
-    _out << "\t\tthen {" << endl;
+    _out << (const char*)("\t\tthen {") << endl;
     // do action block
     for (i = actions.begin(); i != actions.end(); ++i) {
-	_out << "\t\t\t";
+	_out << (const char*)("\t\t\t");
         (i->second)->accept(*this);
-	_out << ";" << endl;
+	_out << (const char*)(";") << endl;
     }
-    _out << "\t\t}" << endl;
+    _out << (const char*)("\t\t}") << endl;
 
-    _out << "\t}" << endl;
+    _out << (const char*)("\t}") << endl;
 
     return NULL;
 }
@@ -89,7 +93,8 @@ VisitorPrinter::visit(Term& term)
 const Element*
 VisitorPrinter::visit(NodeUn& node) 
 {
-    _out << node.op().str() << " ";
+    // const char* cast works around uSTL bug.
+    _out << node.op().str() << (const char*)(" ");
     node.node().accept(*this);
     return NULL;
 }
@@ -98,7 +103,8 @@ const Element*
 VisitorPrinter::visit(NodeBin& node) 
 {
     node.left().accept(*this);
-    _out << " " << node.op().str() << " ";
+    // const char* cast works around uSTL bug.
+    _out << (const char*)(" ") << node.op().str() << (const char*)(" ");
     node.right().accept(*this);
     return NULL;
 }
@@ -106,12 +112,12 @@ VisitorPrinter::visit(NodeBin& node)
 const Element*
 VisitorPrinter::visit(NodeAssign& node) 
 {
-    _out << node.varid() << " ";
+    _out << node.varid() << (const char*)(" ");
 
     if (node.mod()) 
 	_out << node.mod()->str();
 
-    _out << "= ";
+    _out << (const char*)("= ");
 
     node.rvalue().accept(*this);
 
@@ -142,36 +148,36 @@ VisitorPrinter::visit(NodeElem& node)
 const Element*
 VisitorPrinter::visit(NodeAccept& /* node */) 
 {
-    _out << "accept";
+    _out << (const char*)("accept");
     return NULL;
 }
 
 const Element*
 VisitorPrinter::visit(NodeReject& /*node */)
 {
-    _out << "reject";
+    _out << (const char*)("reject");
     return NULL;
 }
 
 const Element*
 VisitorPrinter::visit(NodeProto& node) 
 {
-    _out << "protocol " << node.proto();
+    _out << (const char*)("protocol ") << node.proto();
     return NULL;
 }
 
 const Element*
 VisitorPrinter::visit(NodeNext& node)
 {
-    _out << "next ";
+    _out << (const char*)("next ");
 
     switch (node.flow()) {
     case NodeNext::POLICY:
-	_out << "policy ";
+	_out << (const char*)("policy ");
 	break;
 
     case NodeNext::TERM:
-	_out << "term ";
+	_out << (const char*)("term ");
 	break;
     }
 
@@ -181,7 +187,7 @@ VisitorPrinter::visit(NodeNext& node)
 const Element*
 VisitorPrinter::visit(NodeSubr& node)
 {
-    _out << "policy " << node.policy();
+    _out << (const char*)("policy ") << node.policy();
 
     return NULL;
 }

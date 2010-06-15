@@ -794,8 +794,8 @@ Port<A>::port_io_receive(const A&	src_address,
 {
     string why;
 
-    static_assert(RipPacketHeader::SIZE == 4);
-    static_assert(PacketRouteEntry<A>::SIZE == 20);
+    x_static_assert(RipPacketHeader::SIZE == 4);
+    x_static_assert(PacketRouteEntry<A>::SIZE == 20);
 
     if (enabled() == false) {
 	debug_msg("Discarding RIP packet: Port not enabled.");

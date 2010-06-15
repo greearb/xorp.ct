@@ -624,6 +624,9 @@ public:
     PimMreAction(const PimMreAction& action)
 	: _output_state(action.output_state()),
 	  _entry_type(action.entry_type()) {}
+#ifdef XORP_USE_USTL
+    PimMreAction() { }
+#endif
     PimMreTrackState::output_state_t output_state() const {
 	return (_output_state);
     }

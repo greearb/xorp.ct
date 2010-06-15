@@ -169,7 +169,7 @@ void
 FilterManager::flush_queue(ConfQueue& queue, filter::Filter f)
 {
     debug_msg("[POLICY] Flushing %s queue...\n",
-	      filter::filter2str(f).c_str());
+	      filter::filter2str(f));
 
     // flush all updates on queue
     for(ConfQueue::iterator i = queue.begin(); i != queue.end(); ++i) {

@@ -272,7 +272,7 @@ Packet::decode_standard_header(uint8_t *ptr, size_t& len) throw(InvalidPacket)
     switch(version) {
     case OspfTypes::V2:
 	// Verify the auth structure is the correct size.
-	static_assert(sizeof(_auth) == (64 / 8));
+	x_static_assert(sizeof(_auth) == (64 / 8));
 	set_auth_type(extract_16(&ptr[Packet::AUTH_TYPE_OFFSET]));
 	memcpy(&_auth[0], &ptr[Packet::AUTH_PAYLOAD_OFFSET], sizeof(_auth));
 	// The authentication field is expected to be zero for the

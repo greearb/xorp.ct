@@ -27,7 +27,7 @@
 #include "libxorp/token.hh"
 #include "libxorp/utils.hh"
 
-#include <sstream>
+
 
 #ifdef HAVE_PWD_H
 #include <pwd.h>

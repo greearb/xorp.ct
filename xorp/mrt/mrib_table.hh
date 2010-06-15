@@ -507,6 +507,10 @@ private:
 	      _is_remove_all(false)
 	{}
 
+#ifdef XORP_USE_USTL
+	PendingTransaction(): _mrib(AF_INET) { }
+#endif
+
 	/**
 	 * Constructor to remove all entries.
 	 */

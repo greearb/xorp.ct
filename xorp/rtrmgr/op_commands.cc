@@ -181,7 +181,7 @@ OpInstance::execute_done(bool success)
 }
 
 OpCommand::OpCommand(OpCommandList& ocl, const list<string>& command_parts)
-    : _ocl(ocl),
+    : _ocl(&ocl),
       _command_parts(command_parts),
       _is_invalid(false),
       _default_nomore_mode(false)
@@ -530,7 +530,7 @@ OpCommand::add_instance(OpInstance* instance)
     XLOG_ASSERT(iter == _instances.end());
 
     _instances.insert(instance);
-    _ocl.incr_running_op_instances_n();
+    _ocl->incr_running_op_instances_n();
 }
 
 void
@@ -542,7 +542,7 @@ OpCommand::remove_instance(OpInstance* instance)
     XLOG_ASSERT(iter != _instances.end());
 
     _instances.erase(iter);
-    _ocl.decr_running_op_instances_n();
+    _ocl->decr_running_op_instances_n();
 }
 OpCommandList::OpCommandList(const TemplateTree* tt, SlaveModuleManager& mmgr)
     : _running_op_instances_n(0),

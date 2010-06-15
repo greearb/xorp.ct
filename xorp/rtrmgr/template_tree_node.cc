@@ -30,7 +30,7 @@
 #include <glob.h>
 #endif
 
-#include <sstream>
+
 
 #include "command_tree.hh"
 #include "conf_tree.hh"

@@ -93,6 +93,9 @@ private:
 class PimScopeZone {
 public:
     PimScopeZone(const IPvXNet& scope_zone_prefix, const Mifset& scoped_vifs);
+#ifdef XORP_USE_USTL
+    PimScopeZone() { }
+#endif
     virtual ~PimScopeZone();
     
     const IPvXNet& scope_zone_prefix() const { return (_scope_zone_prefix); }

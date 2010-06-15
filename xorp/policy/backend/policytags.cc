@@ -20,7 +20,7 @@
 
 
 
-#include <sstream>
+
 
 #include "libxorp/xorp.h"
 #include "policytags.hh"
@@ -160,8 +160,8 @@ PolicyTags::contains_atleast_one(const PolicyTags& tags) const
 
     // The two sets must not be dis-joint.
     // The intersection must contain atleast one element.
-    set_intersection(tags._tags.begin(),tags._tags.end(),
-		     _tags.begin(),_tags.end(),
+    set_intersection(tags._tags.begin(), tags._tags.end(),
+		     _tags.begin(), _tags.end(),
 		     insert_iterator<Set>(output,output.begin()));
 	
     return !output.empty();

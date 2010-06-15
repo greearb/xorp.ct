@@ -34,8 +34,8 @@ const IPv4 VrrpPacket::mcast_group = IPv4("224.0.0.18");
 VrrpHeader&
 VrrpHeader::assign(uint8_t* data)
 {
-    static_assert(sizeof(VrrpHeader) == 8);
-    static_assert(sizeof(VrrpAuth) == 8);
+    x_static_assert(sizeof(VrrpHeader) == 8);
+    x_static_assert(sizeof(VrrpAuth) == 8);
 
     VrrpHeader* vh = reinterpret_cast<VrrpHeader*>(data);
 

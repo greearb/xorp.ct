@@ -23,7 +23,7 @@
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
-#include <sstream>
+
 
 #include "policy_module.h"
 #include "libxorp/xorp.h"

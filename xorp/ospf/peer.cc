@@ -39,8 +39,9 @@
 
 
 
-#include <queue>
+#ifndef XORP_USE_USTL
 #include <typeinfo>
+#endif
 
 // XXX
 // The system header files are here to get the sizeof an ipv4 and ipv6
@@ -167,12 +168,12 @@ PeerOut<A>::get_frame_size() const
     switch(_ospf.get_version()) {
     case OspfTypes::V2:
 	frame -= sizeof(struct ip);
-	static_assert(20 == sizeof(struct ip));
+	x_static_assert(20 == sizeof(struct ip));
 	break;
     case OspfTypes::V3:
 #ifdef HAVE_NETINET_IP6_H
 	frame -= sizeof(struct ip6_hdr);
-	static_assert(40 == sizeof(struct ip6_hdr));
+	x_static_assert(40 == sizeof(struct ip6_hdr));
 #else
 	frame -= 40;
 #endif

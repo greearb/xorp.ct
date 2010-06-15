@@ -32,13 +32,12 @@
 
 #include <sys/types.h>
 
-#include <bitset>
-
-
 #include "libxorp/xorp.h"
 #include "max_vifs.h"
 
-
+#ifndef XORP_USE_USTL
+#include <bitset>
+#endif
 
 //
 // Constants definitions

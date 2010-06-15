@@ -87,14 +87,14 @@ public:
      * 
      * @param source_group a reference to the corresponding (S,G) entry.
      */
-    MreSgKey(const SourceGroup& source_group) : _source_group(source_group) {}
+    MreSgKey(const SourceGroup& source_group) : _source_group(&source_group) {}
     
     /**
      * Get the corresponding @ref SourceGroup entry.
      * 
      * @return a reference to the corresponding (S,G) entry.
      */
-    const SourceGroup& source_group() const { return (_source_group); }
+    const SourceGroup& source_group() const { return (*_source_group); }
     
     /**
      * Less-Than Operator
@@ -105,11 +105,18 @@ public:
      * right-hand operand.
      */
     bool operator<(const MreSgKey& other) const {
-	if (_source_group.source_addr() == other.source_group().source_addr())
-	    return (_source_group.group_addr()
-		    < other.source_group().group_addr());	
-	return (_source_group.source_addr()
-		< other.source_group().source_addr());
+	if (_source_group && other._source_group) {
+	    if (_source_group->source_addr() == other.source_group().source_addr())
+		return (_source_group->group_addr()
+			< other.source_group().group_addr());	
+	    return (_source_group->source_addr()
+		    < other.source_group().source_addr());
+	}
+	else {
+	    if (_source_group)
+		return false;
+	    return true;
+	}
     }
     
     /**
@@ -120,15 +127,29 @@ public:
      * right-hand operand.
      */
     bool operator==(const MreSgKey& other) const {
-	return ((_source_group.source_addr()
+	if (_source_group == other._source_group)
+	    return true;
+	if (!(_source_group && other._source_group))
+	    return false;
+	return ((_source_group->source_addr()
 		 == other.source_group().source_addr())
-		&& (_source_group.group_addr()
+		&& (_source_group->group_addr()
 		    == other.source_group().group_addr()));
+    }
+
+    MreSgKey() { _source_group = NULL; }
+
+    MreSgKey& operator=(const MreSgKey& rhs) {
+	if (this != &rhs) {
+	    _source_group = rhs._source_group;
+	}
+	return *this;
     }
     
 private:
-    const SourceGroup& _source_group;	// A reference to the corresponding
-					// (S,G) used for comparison.
+    // A reference to the corresponding
+    // (S,G) used for comparison.
+    mutable const SourceGroup* _source_group;
 };
 
 /**
@@ -141,14 +162,14 @@ public:
      *
      * @param source_group a reference to the corresponding (S,G) entry.
      */
-    MreGsKey(const SourceGroup& source_group) : _source_group(source_group) {}
+    MreGsKey(const SourceGroup& source_group) : _source_group(&source_group) {}
 
     /**
      * Get the corresponding @ref SourceGroup entry.
      * 
      * @return a reference to the corresponding (S,G) entry.
      */
-    const SourceGroup& source_group() const { return (_source_group); }
+    const SourceGroup& source_group() const { return (*_source_group); }
 
     /**
      * Less-Than Operator
@@ -159,11 +180,18 @@ public:
      * right-hand operand.
      */
     bool operator<(const MreGsKey& other) const {
-	if (_source_group.group_addr() == other.source_group().group_addr())
-	    return (_source_group.source_addr()
-		    < other.source_group().source_addr());
-	return (_source_group.group_addr()
-		< other.source_group().group_addr());
+	if (_source_group && other._source_group) {
+	    if (_source_group->group_addr() == other.source_group().group_addr())
+		return (_source_group->source_addr()
+			< other.source_group().source_addr());
+	    return (_source_group->group_addr()
+		    < other.source_group().group_addr());
+	}
+	else {
+	    if (_source_group)
+		return false;
+	    return true;
+	}
     }
     
     /**
@@ -174,15 +202,29 @@ public:
      * right-hand operand.
      */
     bool operator==(const MreGsKey& other) const {
-	return ((_source_group.source_addr()
+	if (_source_group == other._source_group)
+	    return true;
+	if (!(_source_group && other._source_group))
+	    return false;
+	return ((_source_group->source_addr()
 		 == other.source_group().source_addr())
-		&& (_source_group.group_addr()
+		&& (_source_group->group_addr()
 		    == other.source_group().group_addr()) );
+    }
+
+    MreGsKey() { _source_group = NULL; }
+
+    MreGsKey& operator=(const MreGsKey& rhs) {
+	if (this != &rhs) {
+	    _source_group = rhs._source_group;
+	}
+	return *this;
     }
     
 private:
-    const SourceGroup& _source_group;	// A reference to the corresponding
-					// (S,G) used for comparison.
+    // A reference to the corresponding
+    // (S,G) used for comparison.
+    mutable const SourceGroup* _source_group;
 };
 
 /**

@@ -20,7 +20,7 @@
 
 
 
-#include <sstream>
+
 
 #include "vrrp_module.h"
 #include "libxorp/xorp.h"

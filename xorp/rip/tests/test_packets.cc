@@ -53,16 +53,16 @@ static int
 test_main()
 {
     // Static sizing tests
-    static_assert(RipPacketHeader::SIZE == 4);
-    static_assert(PacketRouteEntry<IPv4>::SIZE == 20);
-    static_assert(RipPacketHeader::SIZE == RIPv2_MIN_PACKET_BYTES);
-    static_assert(RipPacketHeader::SIZE + PacketRouteEntry<IPv4>::SIZE
+    x_static_assert(RipPacketHeader::SIZE == 4);
+    x_static_assert(PacketRouteEntry<IPv4>::SIZE == 20);
+    x_static_assert(RipPacketHeader::SIZE == RIPv2_MIN_PACKET_BYTES);
+    x_static_assert(RipPacketHeader::SIZE + PacketRouteEntry<IPv4>::SIZE
 		  == RIPv2_MIN_AUTH_PACKET_BYTES);
-    static_assert(PacketRouteEntry<IPv4>::SIZE
+    x_static_assert(PacketRouteEntry<IPv4>::SIZE
 		  == PlaintextPacketRouteEntry4::SIZE);
-    static_assert(PacketRouteEntry<IPv4>::SIZE == MD5PacketRouteEntry4::SIZE);
-    static_assert(MD5PacketTrailer::SIZE == 20);
-    static_assert(PacketRouteEntry<IPv4>::SIZE
+    x_static_assert(PacketRouteEntry<IPv4>::SIZE == MD5PacketRouteEntry4::SIZE);
+    x_static_assert(MD5PacketTrailer::SIZE == 20);
+    x_static_assert(PacketRouteEntry<IPv4>::SIZE
 		  == PacketRouteEntry<IPv6>::SIZE);
 
     //

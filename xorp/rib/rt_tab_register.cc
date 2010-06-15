@@ -32,14 +32,15 @@
 #include "register_server.hh"
 
 
+
 template<class A>
 int
-RouteRegister<A>::delete_registrant(const ModuleData* module)
+RouteRegister<A>::delete_registrant(const ModuleData& module)
 {
     debug_msg("delete_registrant: this: %p, Module: %s\n", this,
-	   module->str().c_str());
-    set<const ModuleData* , ModuleCmp>::iterator mod_iter;
-    mod_iter = _modules.find(module);
+	   module.str().c_str());
+    map<string, ModuleData>::iterator mod_iter;
+    mod_iter = _modules.find(module.name());
 
     if (mod_iter == _modules.end()) {
 	return XORP_ERROR;
@@ -53,24 +54,24 @@ template<class A>
 string
 RouteRegister<A>::str() const
 {
-    string s;
+    ostringstream oss;
 
-    s += "RR***********************\nRR RouteRegister: ";
-    s += _valid_subnet.str() + "\n";
+    oss << "RR***********************\nRR RouteRegister: "
+	<< _valid_subnet.str() << "\n";
 
     if (_route != NULL)
-	s += "RR Route: " + _route->str() + "\n";
+	oss << "RR Route: " << _route->str() << "\n";
     else
-	s += "RR Route: NONE \n";
+	oss << "RR Route: NONE \n";
 
-    set<const ModuleData*, ModuleCmp>::const_iterator mod_iter;
+    map<string, ModuleData>::const_iterator mod_iter;
     mod_iter = _modules.begin();
     while (mod_iter != _modules.end()) {
-	s += "RR Module: " + (*mod_iter)->str() + "\n";
+	oss << "RR Module: " << mod_iter->second.str() << "\n";
 	++mod_iter;
     }
-    s += "RR***********************\n";
-    return s;
+    oss << "RR***********************\n";
+    return oss.str();
 }
 
 template<class A>
@@ -289,20 +290,14 @@ RegisterTable<A>::add_registration(const IPNet<A>& net,
 				   const IPRouteEntry<A>* route,
 				   const string& module)
 {
-    const ModuleData* newmod = new ModuleData(module);
-    set<const ModuleData* , ModuleCmp>::iterator mod_iter;
-
+    map<string, ModuleData>::const_iterator mod_iter;
     //
     // Add the registered module name to the list of module names if
     // it's not there already.
     //
-    mod_iter = _module_names.find(newmod);
+    mod_iter = _module_names.find(module);
     if (mod_iter == _module_names.end()) {
-	_module_names.insert(newmod);
-    } else {
-	// It already existed
-	delete newmod;
-	newmod = *mod_iter;
+	_module_names[module] = ModuleData(module);
     }
 
     // Do we have an existing registry for this subnet?
@@ -345,12 +340,12 @@ RegisterTable<A>::add_registration(const IPNet<A>& net,
 	    iter = next_iter;
 	}
 
-	rr = new RouteRegister<A>(net, route, newmod);
+	rr = new RouteRegister<A>(net, route, module);
 	_ipregistry.insert(net, rr);
 	print();
     } else {
 	rr = iter.payload();
-	rr->add_registrant(newmod);
+	rr->add_registrant(module);
     }
     debug_msg("added registration: to %p\n%s", rr, rr->str().c_str());
 #ifdef DEBUG_LOGGING
@@ -365,20 +360,14 @@ int
 RegisterTable<A>::delete_registration(const IPNet<A>& net,
 				      const string& module)
 {
-    const ModuleData* tmpmod = new ModuleData(module);
-    set<const ModuleData* , ModuleCmp>::iterator mod_iter;
+    map<string, ModuleData>::iterator mod_iter;
 
-    mod_iter = _module_names.find(tmpmod);
+    mod_iter = _module_names.find(module);
     if (mod_iter == _module_names.end()) {
 	XLOG_ERROR("delete_registration called for unregistered module: %s",
 		   module.c_str());
 	return XORP_ERROR;
     }
-
-    debug_msg("tmpmod: %p\n", tmpmod);
-    delete tmpmod;
-    tmpmod = *mod_iter;
-    debug_msg("tmpmod2: %p\n", tmpmod);
 
     typename Trie<A, RouteRegister<A>* >::iterator iter;
     iter = _ipregistry.lookup_node(net);
@@ -396,7 +385,7 @@ RegisterTable<A>::delete_registration(const IPNet<A>& net,
 
     RouteRegister<A>* rr = iter.payload();
     debug_msg("found registration %p\n", rr);
-    if (rr->delete_registrant(tmpmod) != XORP_OK) {
+    if (rr->delete_registrant(module) != XORP_OK) {
 	XLOG_ERROR("delete_registration failed: %s\n", net.str().c_str());
 	return XORP_ERROR;
     }
@@ -456,15 +445,15 @@ template<class A>
 string
 RegisterTable<A>::str() const
 {
-    string s;
-
-    s = "-------\nRegisterTable: " + this->tablename() + "\n";
-    s += "parent = " + _parent->tablename() + "\n";
+    ostringstream oss;
+    
+    oss << "-------\nRegisterTable: " << this->tablename() << "\n";
+    oss << "parent = " << _parent->tablename() << "\n";
     if (this->next_table() == NULL)
-	s += "no next table\n";
+	oss << "no next table\n";
     else
-	s += "next table = " + this->next_table()->tablename() + "\n";
-    return s;
+	oss << "next table = " << this->next_table()->tablename() << "\n";
+    return oss.str();
 }
 
 template<class A>

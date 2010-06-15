@@ -47,6 +47,8 @@ public:
     ModuleData(const string& modulename)
 	: _modulename(modulename), _is_set(false)	{ }
 
+    ModuleData() { }
+
     /**
      * @return the XRL target name of the module.
      */
@@ -113,22 +115,6 @@ private:
 };
 
 /**
- * @short Helper class for ModuleData comparisons.
- *
- * ModuleCmp is a helper class used to make comparisons between
- * ModuleData pointers.  It's needed so we can store ModuleData
- * pointers in an STL map, but sort and reference them as if we stored
- * the object itself in the map.
- */
-class ModuleCmp {
-public:
-    bool operator() (const ModuleData* a, const ModuleData* b) const {
-	return (*a < *b);
-    }
-};
-
-
-/**
  * @short RouteRegister stores a registration of interest in a subset
  * of a route.
  * 
@@ -163,9 +149,9 @@ public:
      */
     RouteRegister(const IPNet<A>& valid_subnet, 
 		  const IPRouteEntry<A>* route,
-		  const ModuleData* module)
+		  const ModuleData& module)
 	: _valid_subnet(valid_subnet), _route(route) {
-	_modules.insert(module);
+	_modules[module.name()] = module;
     }
 
     /**
@@ -184,12 +170,12 @@ public:
      * additional routing protocol that just registered interest.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int add_registrant(const ModuleData* module) {
-	    debug_msg("add_registrant: Module: %s\n", module->str().c_str());
-	    if (_modules.find(module) != _modules.end())
-		return XORP_ERROR;
-	    _modules.insert(module);
-	    return XORP_OK;
+    int add_registrant(const ModuleData& module) {
+	debug_msg("add_registrant: Module: %s\n", module.str().c_str());
+	if (_modules.find(module.name()) != _modules.end())
+	    return XORP_ERROR;
+	_modules[module.name()] = module;
+	return XORP_OK;
     }
 
     /**
@@ -201,7 +187,7 @@ public:
      * that de-registered.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int delete_registrant(const ModuleData* module);
+    int delete_registrant(const ModuleData& module);
 
     /**
      * mark_modules is called when the routing information matching
@@ -209,9 +195,9 @@ public:
      * the ModuleData as needing nitification.  
      */
     void mark_modules() const {
-	    set<const ModuleData*, ModuleCmp>::const_iterator i;
-	    for (i = _modules.begin(); i != _modules.end(); ++i)
-		(*i)->set();
+	map<string, ModuleData>::const_iterator i;
+	for (i = _modules.begin(); i != _modules.end(); ++i)
+	    i->second.set();
     }
 
     /**
@@ -236,9 +222,9 @@ public:
      */
     list<string> module_names() const {
 	list<string> names;
-	set<const ModuleData*, ModuleCmp>::const_iterator i;
+	map<string, ModuleData>::const_iterator i;
 	for (i = _modules.begin(); i != _modules.end(); ++i)
-	    names.push_back((*i)->name());
+	    names.push_back(i->second.name());
 	return names;
     }
 
@@ -248,7 +234,7 @@ public:
     string str() const;
 
 private:
-    set<const ModuleData*, ModuleCmp> _modules;
+    map<string, ModuleData> _modules;
 
     // _net duplicates the storage of this in the RegisterTable map -
     // not very efficient
@@ -431,7 +417,7 @@ private:
     void notify_route_changed(typename Trie<A, RouteRegister<A>* >::iterator trie_iter,
 			      const IPRouteEntry<A>& changed_route);
 
-    set<const ModuleData*, ModuleCmp>	_module_names;
+    map<string, ModuleData>	_module_names;
     Trie<A, RouteRegister<A>* >		_ipregistry;
     RouteTable<A>*			_parent;
     RegisterServer&			_register_server;

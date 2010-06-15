@@ -1324,7 +1324,7 @@ StaticRoutesNode::do_filtering(StaticRoute& route)
 	bool accepted;
 
 	debug_msg("[STATIC] Running filter: %s on route: %s\n",
-		  filter::filter2str(filter::IMPORT).c_str(),
+		  filter::filter2str(filter::IMPORT),
 		  route.network().str().c_str());
 	accepted = _policy_filters.run_filter(filter::IMPORT, varrw);
 
@@ -1338,7 +1338,7 @@ StaticRoutesNode::do_filtering(StaticRoute& route)
 
 	// Export source-match filtering
 	debug_msg("[STATIC] Running filter: %s on route: %s\n",
-		  filter::filter2str(filter::EXPORT_SOURCEMATCH).c_str(),
+		  filter::filter2str(filter::EXPORT_SOURCEMATCH),
 		  route.network().str().c_str());
 
 	_policy_filters.run_filter(filter::EXPORT_SOURCEMATCH, varrw2);

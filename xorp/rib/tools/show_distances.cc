@@ -26,7 +26,9 @@
 #include "libxorp/xlog.h"
 #include "libxorp/status_codes.h"
 
+#ifndef XORP_USE_USTL
 #include <iomanip>
+#endif
 
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>

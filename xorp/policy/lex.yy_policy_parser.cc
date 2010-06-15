@@ -2915,7 +2915,7 @@ char *yy_policy_parsertext;
 
 
 
-#include <sstream>
+
 
 #include "policy_module.h"
 #include "libxorp/xorp.h"
