@@ -30,7 +30,7 @@
 #include "libxorp/xlog.h"
 #include "libxorp/exceptions.hh"
 
-#include <sstream>
+
 
 
 
@@ -68,6 +68,10 @@ public:
     explicit ConfigNodeId(const string& s) throw (InvalidString) {
 	copy_in(s);
     }
+
+#ifdef XORP_USE_USTL
+    ConfigNodeId() { }
+#endif
 
     /**
      * Constructor for a given unique node ID and position.
