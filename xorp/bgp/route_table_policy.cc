@@ -94,7 +94,7 @@ PolicyTable<A>::do_filtering(InternalMessage<A>& rtmsg,
 	}
 	pf = rtmsg.route()->policyfilter(pfi).get();
 	debug_msg("[BGP] running filter %s on route: %s (filter=%p)\n",
-		  filter::filter2str(_filter_type).c_str(),
+		  filter::filter2str(_filter_type),
 		  rtmsg.str().c_str(), pf);
 
 	accepted = _policy_filters.run_filter(_filter_type, *_varrw);
@@ -131,7 +131,7 @@ PolicyTable<A>::add_route(InternalMessage<A> &rtmsg,
     XLOG_ASSERT(next);
 
     debug_msg("[BGP] PolicyTable %s add_route: %s\n",
-	      filter::filter2str(_filter_type).c_str(),
+	      filter::filter2str(_filter_type),
 	      rtmsg.str().c_str());
     debug_msg("atts before: %s\n", rtmsg.attributes()->str().c_str());
 
@@ -186,7 +186,7 @@ PolicyTable<A>::replace_route(InternalMessage<A>& old_rtmsg,
     XLOG_ASSERT(next);
 
     debug_msg("[BGP] PolicyTable %s replace_route: %s\nWith: %s\n",
-	      filter::filter2str(_filter_type).c_str(),
+	      filter::filter2str(_filter_type),
 	      old_rtmsg.str().c_str(),
 	      new_rtmsg.str().c_str());
 
@@ -227,7 +227,7 @@ PolicyTable<A>::delete_route(InternalMessage<A>& rtmsg,
     XLOG_ASSERT(next);
 
     debug_msg("[BGP] PolicyTable %s delete_route: %s\n",
-	      filter::filter2str(_filter_type).c_str(),
+	      filter::filter2str(_filter_type),
 	      rtmsg.str().c_str());
     debug_msg("atts before: %s\n", rtmsg.attributes()->str().c_str());
 
@@ -272,7 +272,7 @@ PolicyTable<A>::route_dump(InternalMessage<A>& rtmsg,
     XLOG_ASSERT(next);
 
     debug_msg("[BGP] PolicyTable %s route_dump: %s\n",
-	      filter::filter2str(_filter_type).c_str(),
+	      filter::filter2str(_filter_type),
 	      rtmsg.str().c_str());
 
 #if 0
@@ -346,7 +346,7 @@ PolicyTable<A>::lookup_route(const IPNet<A> &net,
     InternalMessage<A> rtmsg(found, pa_list, ribin->peer_handler(), genid);
 
     debug_msg("[BGP] PolicyTable %s lookup_route: %s\n",
-	      filter::filter2str(_filter_type).c_str(),
+	      filter::filter2str(_filter_type),
 	      rtmsg.str().c_str());
 
 #if 0

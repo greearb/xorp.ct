@@ -545,10 +545,10 @@ RoutingTable<A>::do_filtering(IPNet<A>& net, A& nexthop,
 	bool accepted;
 
 	debug_msg("[OSPF] Running filter: %s on route: %s\n",
-		  filter::filter2str(filter::IMPORT).c_str(), cstring(net));
+		  filter::filter2str(filter::IMPORT), cstring(net));
 	XLOG_TRACE(_ospf.trace()._import_policy,
 		   "[OSPF] Running filter: %s on route: %s\n",
-		   filter::filter2str(filter::IMPORT).c_str(), cstring(net));
+		   filter::filter2str(filter::IMPORT), cstring(net));
 		   
 	accepted = _ospf.get_policy_filters().
 	    run_filter(filter::IMPORT, varrw);
@@ -562,11 +562,11 @@ RoutingTable<A>::do_filtering(IPNet<A>& net, A& nexthop,
 
 	// Export source-match filtering
 	debug_msg("[OSPF] Running filter: %s on route: %s\n",
-		  filter::filter2str(filter::EXPORT_SOURCEMATCH).c_str(),
+		  filter::filter2str(filter::EXPORT_SOURCEMATCH),
 		  cstring(net));
 	XLOG_TRACE(_ospf.trace()._import_policy,
 		   "[OSPF] Running filter: %s on route: %s\n",
-		   filter::filter2str(filter::EXPORT_SOURCEMATCH).c_str(),
+		   filter::filter2str(filter::EXPORT_SOURCEMATCH),
 		   cstring(net));
 
 	_ospf.get_policy_filters().

@@ -654,10 +654,10 @@ RouteManager::do_filtering(IPv4Net& net, IPv4& nexthop,
 	bool accepted = false;
 
 	debug_msg("[OLSR] Running filter: %s on route: %s\n",
-		  filter::filter2str(filter::IMPORT).c_str(), cstring(net));
+		  filter::filter2str(filter::IMPORT), cstring(net));
 	XLOG_TRACE(_olsr.trace()._import_policy,
 		  "[OSPF] Running filter: %s on route: %s\n",
-		  filter::filter2str(filter::IMPORT).c_str(), cstring(net));
+		  filter::filter2str(filter::IMPORT), cstring(net));
 
 	accepted = _olsr.get_policy_filters().
 		       run_filter(filter::IMPORT, varrw);
@@ -670,11 +670,11 @@ RouteManager::do_filtering(IPv4Net& net, IPv4& nexthop,
 			 policytags);
 
 	debug_msg("[OLSR] Running filter: %s on route: %s\n",
-		  filter::filter2str(filter::EXPORT_SOURCEMATCH).c_str(),
+		  filter::filter2str(filter::EXPORT_SOURCEMATCH),
 		  cstring(net));
 	XLOG_TRACE(_olsr.trace()._import_policy,
 		   "[OLSR] Running filter: %s on route: %s\n",
-		   filter::filter2str(filter::EXPORT_SOURCEMATCH).c_str(),
+		   filter::filter2str(filter::EXPORT_SOURCEMATCH),
 		  cstring(net));
 
 	_olsr.get_policy_filters().

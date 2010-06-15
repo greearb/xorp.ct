@@ -345,7 +345,7 @@ External<A>::do_filtering(IPNet<A>& network, A& nexthop, uint32_t& metric,
 	OspfVarRW<A> varrw(network, nexthop, metric, e_bit, tag,tag_set,ptags);
 	XLOG_TRACE(_ospf.trace()._export_policy,
 		   "[OSPF] Running filter: %s on route: %s\n",
-		   filter::filter2str(filter::EXPORT).c_str(),
+		   filter::filter2str(filter::EXPORT),
 		   cstring(network));
 	bool accepted = _ospf.get_policy_filters().
 	    run_filter(filter::EXPORT, varrw);

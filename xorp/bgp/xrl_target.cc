@@ -1396,7 +1396,7 @@ XrlBgpTarget::profile_0_1_list(string& info)
 {
     debug_msg("\n");
     
-    info = _bgp.profile().list();
+    info = _bgp.profile().get_list();
     return XrlCmdError::OKAY();
 }
 #endif
