@@ -53,7 +53,7 @@ class IfMgrIPv6Atom;
  */
 class IfMgrIfTree {
 public:
-    typedef map<const string, IfMgrIfAtom> IfMap;
+    typedef map<string, IfMgrIfAtom> IfMap;
 
 public:
 
@@ -272,7 +272,7 @@ protected:
  */
 class IfMgrIfAtom {
 public:
-    typedef map<const string, IfMgrVifAtom> VifMap;
+    typedef map<string, IfMgrVifAtom> VifMap;
 
 public:
     IfMgrIfAtom(const string& name);
@@ -316,8 +316,12 @@ public:
     // Print this thing out for debugging purposes.
     string toString() const;
 
+#ifndef XORP_USE_USTL
 private:
     IfMgrIfAtom();					// not implemented
+#else
+    IfMgrIfAtom() { }
+#endif
 
 protected:
     string	_name;		// The interface name
@@ -343,8 +347,8 @@ protected:
  */
 class IfMgrVifAtom {
 public:
-    typedef map<const IPv4, IfMgrIPv4Atom> IPv4Map;
-    typedef map<const IPv6, IfMgrIPv6Atom> IPv6Map;
+    typedef map<IPv4, IfMgrIPv4Atom> IPv4Map;
+    typedef map<IPv6, IfMgrIPv6Atom> IPv6Map;
 
 public:
     IfMgrVifAtom(const string& name);
@@ -396,8 +400,12 @@ public:
     // Print this thing out for debugging purposes.
     string toString() const;
 
+#ifndef XORP_USE_USTL
 private:
     IfMgrVifAtom();			// Not implemented
+#else
+    IfMgrVifAtom() { }
+#endif
 
 protected:
     string	_name;			// The vif name
@@ -457,8 +465,12 @@ public:
     // Debugging info
     string toString() const;
 
+#ifndef XORP_USE_USTL
 private:
     IfMgrIPv4Atom();			// Not implemented
+#else
+    IfMgrIPv4Atom() { }
+#endif
 
 protected:
     IPv4	_addr;			// The address
@@ -509,8 +521,12 @@ public:
     // Debugging info
     string toString() const;
 
+#ifndef XORP_USE_USTL
 private:
     IfMgrIPv6Atom();			// Not implemented
+#else
+    IfMgrIPv6Atom() { }
+#endif
 
 protected:
     IPv6	_addr;			// The address

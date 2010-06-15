@@ -21,9 +21,7 @@
 
 
 
-
-#include <iterator>
-
+#include "libxorp/xorp.h"
 #include "libfeaclient_module.h"
 #include "libxorp/xlog.h"
 
