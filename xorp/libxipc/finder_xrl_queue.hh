@@ -46,11 +46,17 @@ public:
 public:
     FinderXrlCommandQueue(FinderMessengerBase* messenger);
     FinderXrlCommandQueue(const FinderXrlCommandQueue& oq);
+    FinderXrlCommandQueue() { _m = NULL; }
     ~FinderXrlCommandQueue();
 
     FinderMessengerBase& messenger()	{ return *_m; }
 
     void enqueue(const Command& cmd);
+
+#ifndef XORP_USE_USTL
+private:
+#endif
+    FinderXrlCommandQueue& operator=(const FinderXrlCommandQueue&);
 
 protected:
     void push();
@@ -61,9 +67,6 @@ protected:
     friend class FinderXrlCommandBase;
     void crank();
     void kill_messenger();
-
-private:
-    FinderXrlCommandQueue& operator=(const FinderXrlCommandQueue&); // no impl
 
 private:
     FinderMessengerBase* _m;

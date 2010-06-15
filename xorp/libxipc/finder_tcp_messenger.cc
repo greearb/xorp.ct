@@ -63,7 +63,11 @@ FinderTcpMessenger::read_event(int	      errval,
 	return true;
     }
 
-    string s(data, data + data_bytes);
+    // TODO:  This doesn't seem to conform to STL, not sure how it worked before.
+    //string s(data, data + data_bytes);
+    // Going to assume second arg should just be data_bytes (length)
+    // Needs some actual testing! --Ben
+    string s((const char*)(data), data_bytes);
 
     string ex;
     try {

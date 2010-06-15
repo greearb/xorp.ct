@@ -19,10 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#include <functional>
-
-
-
+#include "libxorp/xorp.h"
 
 #include "finder_module.h"
 
@@ -281,7 +278,7 @@ public:
 	}
 
 	pair<ResolvedTable::iterator, bool> result =
-	    _rt.insert(std::make_pair(_key, FinderDBEntry(_key)));
+	    _rt.insert(make_pair(_key, FinderDBEntry(_key)));
 
 	if (result.second == false && result.first == _rt.end()) {
 	    // Out of memory (?)
@@ -591,6 +588,9 @@ public:
 	  _dispatcher(dispatcher),
 	  _id(_s_id++)
     {}
+#ifdef XORP_USE_USTL
+    InstanceInfo() { };
+#endif
     const string& instance_name() const		{ return _ins_name; }
     const string& class_name() const		{ return _cls_name; }
     const XrlDispatcher* dispatcher() const	{ return _dispatcher; }

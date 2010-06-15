@@ -44,6 +44,16 @@ FinderXrlCommandQueue::~FinderXrlCommandQueue()
 {
 }
 
+FinderXrlCommandQueue& FinderXrlCommandQueue::operator=(const FinderXrlCommandQueue& rhs) {
+    if (&rhs != this) {
+	_m = rhs._m;
+	_cmds = rhs._cmds;
+	_pending = rhs._pending;
+	_dispatcher = rhs._dispatcher;
+    }
+    return *this;
+}
+
 inline EventLoop&
 FinderXrlCommandQueue::eventloop()
 {

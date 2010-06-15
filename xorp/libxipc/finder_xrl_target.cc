@@ -382,7 +382,7 @@ FinderXrlTarget::finder_0_2_get_xrls_registered_by(const string& tgt,
 	_finder.commands().get_command_names(cmds);
 	// Turn command names into Xrls
 	for (list<string>::iterator i = cmds.begin(); i != cmds.end(); i++) {
-	    xrls.push_back(Xrl("finder", *i).str());
+	    xrls.push_back(Xrl("finder", i->c_str()).str());
 	}
     } else if (_finder.fill_targets_xrl_list(tgt, xrls) == false) {
 	return

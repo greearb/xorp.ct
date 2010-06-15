@@ -62,11 +62,11 @@ STCPPacketHeader::STCPPacketHeader(uint8_t* data)
       _error_note_bytes(_data + _error_note_bytes_offset),
       _xrl_data_bytes(_data + _xrl_data_bytes_offset)
 {
-    static_assert(STCPPacketHeader::SIZE == _fourcc_sizeof + _major_sizeof
+    x_static_assert(STCPPacketHeader::SIZE == _fourcc_sizeof + _major_sizeof
 		  + _minor_sizeof + _seqno_sizeof + _flags_sizeof + _type_sizeof
 		  + _error_code_sizeof + _error_note_bytes_sizeof
 		  + _xrl_data_bytes_sizeof);
-    static_assert(STCPPacketHeader::SIZE ==
+    x_static_assert(STCPPacketHeader::SIZE ==
 		  _xrl_data_bytes_offset + _xrl_data_bytes_sizeof);
 }
 

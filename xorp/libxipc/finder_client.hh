@@ -46,6 +46,9 @@ public:
 
     FinderDBEntry(const string& key);
     FinderDBEntry(const string& key, const string& value);
+#ifdef XORP_USE_USTL
+    FinderDBEntry() { }
+#endif
 
     const string&	key() const	{ return _key; }
     const list<string>& values() const	{ return _values; }

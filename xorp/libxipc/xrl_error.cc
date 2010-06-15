@@ -94,8 +94,10 @@ XrlError::XrlError(XrlErrorCode errcode, const string& note)
     if (_errlet == 0) {
 	_errlet = &internal_error;
 	_note = c_format("Errorcode %d unknown", errcode);
-	if (note.empty() == false)
-	    _note += " " + note;
+	if (note.empty() == false) {
+	    _note += " ";
+	    _note += note;
+	}
     }
 }
 

@@ -109,6 +109,8 @@ protected:
     struct FileState {
 	FileState(istream* input, const char* fname) :
 	    _input(input), _fname(fname), _line(0) {}
+	FileState() { _input = NULL; _fname = NULL; } // for uSTL
+
 	// Accessors
 	istream*	input() const { return _input; }
 	const char* 	filename() const { return _fname; }

@@ -53,6 +53,8 @@ public:
 	  _enabled(false), _messenger(fm)
     {}
 
+    FinderTarget() { _messenger = NULL; }
+
     ~FinderTarget() {
 	debug_msg("Destructing %s\n", name().c_str());
     }
@@ -172,6 +174,9 @@ public:
     FinderClass(const string& name, bool singleton)
 	: _name(name), _singleton(singleton)
     {}
+#ifdef XORP_USE_USTL
+    FinderClass() { }
+#endif
 
     const string& name() const			{ return _name; }
     bool singleton() const			{ return _singleton; }
@@ -238,6 +243,9 @@ public:
 		  (_tag == TARGET_BIRTH) ? "birth" : "death",
 		  _class_name.c_str(), _instance_name.c_str());
     }
+#ifdef XORP_USE_USTL
+    FinderEvent() { }
+#endif
     ~FinderEvent()
     {
 	debug_msg("~FinderEvent(%s, \"%s\", \"%s\")\n",

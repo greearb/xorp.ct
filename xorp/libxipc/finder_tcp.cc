@@ -21,7 +21,7 @@
 
 
 
-#include <functional>
+
 
 #include "finder_module.h"
 
@@ -163,9 +163,9 @@ FinderTcpBase::read_callback(AsyncFileOperator::Event	ev,
 	try {
 	    _isize = ntohl(_isize);
 	    if (0 == _isize || _isize > MAX_XRL_INPUT_SIZE)
-		throw std::bad_alloc();
+		throw bad_alloc();
 	    _input_buffer.resize(_isize);
-	} catch (std::bad_alloc) {
+	} catch (bad_alloc) {
 	    XLOG_ERROR("Bad input buffer size (%d bytes) from wire, "
 		       "dropping connection", XORP_INT_CAST(_isize));
 	    error_event();

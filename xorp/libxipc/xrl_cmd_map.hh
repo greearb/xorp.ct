@@ -38,7 +38,10 @@ XorpCallback2<const XrlCmdError, const XrlArgs&, XrlArgs*>::RefPtr XrlRecvCallba
 class XrlCmdEntry {
 public:
     XrlCmdEntry(const string& s, XrlRecvCallback cb) :
-	_name(s), _cb(cb) {}
+	    _name(s), _cb(cb) {}
+#ifdef XORP_USE_USTL
+    XrlCmdEntry() { }
+#endif
 
     const string& name() const { return _name; }
 

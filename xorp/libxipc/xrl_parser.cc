@@ -299,7 +299,7 @@ get_single_quoted_value(const string& s, string::const_iterator& sci,
     assert(*sci == '\'');
 
     sci++;
-    token.erase();
+    token.clear();
 
     string::const_iterator sci_start = sci;
     advance_to_char(s, sci, '\'');
@@ -317,7 +317,7 @@ get_double_quoted_value(const string& input,
 {
     assert(*sci == '\"');
 
-    token.erase();
+    token.clear();
 
     sci++;
 
@@ -485,7 +485,7 @@ push_atoms_and_spells(XrlArgs* args,
 bool
 XrlParser::start_next() throw (XrlParserInputException)
 {
-    _input.erase();
+    _input.clear();
 
     while (_xpi.getline(_input) == true) {
 	// Ignore blank lines and CPP directives (at least for time being).
@@ -594,8 +594,8 @@ XrlParser::get(string& protocol, string& target, string& command,
 	return false;
     }
 
-    target.erase();
-    command.erase();
+    target.clear();
+    command.clear();
     if (args) args->clear();
     if (spells) spells->clear();
 

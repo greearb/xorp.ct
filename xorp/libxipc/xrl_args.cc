@@ -29,8 +29,10 @@
 
 #include "libproto/packet.hh"
 
-#include <functional>
+
+#ifndef XORP_USE_USTL
 #include <stdexcept>
+#endif
 
 #include "xrl_args.hh"
 #include "xrl_tokens.hh"
@@ -636,7 +638,9 @@ XrlArgs::XrlArgs(const char* serialized) throw (InvalidString)
 	    XrlAtom xa(tok.c_str());
 	    add(xa);
 	} catch (const XrlAtomFound& /*xaf*/) {
-	    xorp_throw(InvalidString, "Duplicate Atom found:" + tok);
+	    string tmp("Duplicate Atom found: ");
+	    tmp += tok;
+	    xorp_throw(InvalidString, tmp);
 	}
 	start = end;
     }

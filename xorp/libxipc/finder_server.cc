@@ -104,7 +104,7 @@ FinderServer::add_binding(IPv4 addr, uint16_t port)
         _listeners.push_back(
 	    new FinderTcpListener(_e, _f, _f.commands(), addr, port)
 	    );
-    } catch (const std::bad_alloc&) {
+    } catch (const bad_alloc&) {
 	return false;
     }
     // XXX we'd probably be better to leave permits alone here

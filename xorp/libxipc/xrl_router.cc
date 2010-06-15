@@ -62,7 +62,7 @@ protected:
 
 #define trace_xrl(p, x) 						      \
 do {									      \
-    if (xrl_trace.on()) XLOG_INFO("%s", string((p) + (x).str()).c_str());     \
+    if (xrl_trace.on()) XLOG_INFO("%s", string(string(p) + (x).str()).c_str());     \
 } while (0)
 
 

@@ -110,8 +110,8 @@ static const uint32_t XUID_CSTR_BYTES = (32 + 3);
 
 XUID::XUID(const string& s) throw (InvalidString)
 {
-    static_assert(sizeof(_data) == 16);
-    static_assert(sizeof(_data[0]) == 4);
+    x_static_assert(sizeof(_data) == 16);
+    x_static_assert(sizeof(_data[0]) == 4);
 
     if (s.size() < XUID_CSTR_BYTES)
 	throw InvalidString();
@@ -134,8 +134,8 @@ XUID::operator==(const XUID& x) const
 bool
 XUID::operator<(const XUID& x) const
 {
-    static_assert(sizeof(_data) == 16);
-    static_assert(sizeof(_data[0]) == 4);
+    x_static_assert(sizeof(_data) == 16);
+    x_static_assert(sizeof(_data[0]) == 4);
     int i;
 
     for (i = 0; i < 3; i++) {	// Loop ends intentionally at 3 not 4.

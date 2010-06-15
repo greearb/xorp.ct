@@ -697,10 +697,10 @@ XrlAtom::packed_bytes() const
 	return bytes;
     }
 
-    static_assert(sizeof(IPv4) == 4);
-    static_assert(sizeof(IPv6) == 16);
-    static_assert(sizeof(IPv4Net) == sizeof(IPv4) + 4);
-    static_assert(sizeof(IPv6Net) == sizeof(IPv6) + 4);
+    x_static_assert(sizeof(IPv4) == 4);
+    x_static_assert(sizeof(IPv6) == 16);
+    x_static_assert(sizeof(IPv4Net) == sizeof(IPv4) + 4);
+    x_static_assert(sizeof(IPv6Net) == sizeof(IPv6) + 4);
 
     switch (_type) {
     case xrlatom_no_type:
@@ -1046,7 +1046,7 @@ XrlAtom::pack_list(uint8_t* buffer, size_t buffer_bytes) const
     size_t done = 0;
 
     uint32_t nelem = htonl(_list->size());
-    static_assert(sizeof(nelem) == 4);
+    x_static_assert(sizeof(nelem) == 4);
 
     memcpy(buffer, &nelem, sizeof(nelem));
     done += sizeof(nelem);
