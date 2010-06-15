@@ -1,0 +1,179 @@
+diff --git a/ubitset.h b/ubitset.h
+index edee405..eea64de 100644
+--- a/ubitset.h
++++ b/ubitset.h
+@@ -104,7 +104,7 @@ public:
+     inline size_t	count (void) const	{ size_t sum = 0; foreach (const_iterator, i, *this) sum += popcount(*i); return (sum); }
+     inline bool		operator== (const bitset<Size>& v) const
+ 			    { return (s_nWords == 1 ? (m_Bits[0] == v.m_Bits[0]) : equal (begin(), end(), v.begin())); }
+-    inline const bitset	operator& (const bitset<Size>& v)
++    inline bitset	operator& (const bitset<Size>& v) const
+ 			    { bitset<Size> result; transform (begin(), end(), v.begin(), result.begin(), bitwise_and<value_type>()); return (result); }
+     inline const bitset	operator| (const bitset<Size>& v)
+ 			    { bitset<Size> result; transform (begin(), end(), v.begin(), result.begin(), bitwise_or<value_type>()); return (result); }
+diff --git a/uiterator.h b/uiterator.h
+index f3e8643..4e48cb6 100644
+--- a/uiterator.h
++++ b/uiterator.h
+@@ -121,8 +121,10 @@ public:
+     typedef typename Container::iterator	iterator;
+ public:
+     explicit			insert_iterator (Container& ctr, iterator ip) : m_rCtr (ctr), m_ip (ip) {}
+-    inline insert_iterator&	operator= (typename Container::const_reference v)
+-    				    { m_ip = m_rCtr.insert (m_ip, v); return (*this); }
++    inline insert_iterator&	operator= (typename Container::const_reference v) {
++       m_ip = m_rCtr.insert (m_ip, v);
++       return (*this);
++    }
+     inline insert_iterator&	operator* (void)  { return (*this); }
+     inline insert_iterator&	operator++ (void) { ++ m_ip; return (*this); }
+     inline insert_iterator	operator++ (int)  { insert_iterator prev (*this); ++m_ip; return (prev); }
+diff --git a/umap.h b/umap.h
+index 9f6ff58..94b156d 100644
+--- a/umap.h
++++ b/umap.h
+@@ -58,12 +58,12 @@ public:
+     inline const_iterator	find_data (const_data_ref v, const_iterator first = NULL, const_iterator last = NULL) const;
+     inline iterator		find_data (const_data_ref v, iterator first = NULL, iterator last = NULL);
+     insertrv_t			insert (const_reference v);
++    iterator			insert (iterator pos, const_reference v);
+     void			insert (const_iterator i1, const_iterator i2);
+     inline void			erase (const_key_ref k);
+     inline iterator		erase (iterator ep)	{ return (base_class::erase (ep)); }
+     inline iterator		erase (iterator ep1, iterator ep2) { return (base_class::erase (ep1, ep2)); }
+     inline void			clear (void)		{ base_class::clear(); }
+-private:
+     const_iterator		lower_bound (const_key_ref k) const;
+     inline iterator		lower_bound (const_key_ref k) { return (const_cast<iterator>(const_cast<rcself_t>(*this).lower_bound (k))); }
+ };
+@@ -136,6 +136,17 @@ typename map<K,V>::insertrv_t map<K,V>::insert (const_reference v)
+     return (make_pair (ip, bInserted));
+ }
+ 
++/// Inserts the pair into the container.
++template <typename K, typename V>
++typename map<K,V>::iterator map<K,V>::insert (iterator /*pos*/, const_reference v)
++{
++    iterator ip = lower_bound (v.first);
++    bool bInserted = ip == end() || v.first < ip->first;
++    if (bInserted)
++	ip = base_class::insert (ip, v);
++    return ip;
++}
++
+ /// Inserts elements from range [i1,i2) into the container.
+ template <typename K, typename V>
+ void map<K,V>::insert (const_iterator i1, const_iterator i2)
+diff --git a/umultimap.h b/umultimap.h
+index f755876..4b4cd01 100644
+--- a/umultimap.h
++++ b/umultimap.h
+@@ -53,8 +53,12 @@ public:
+     inline void			push_back (const_reference v)		{ insert (v); }
+     inline const_range_t	equal_range (const_key_ref k) const	{ return (make_pair (lower_bound(k), upper_bound(k))); }
+     inline range_t		equal_range (const_key_ref k)		{ return (make_pair (const_cast<iterator>(lower_bound(k)), const_cast<iterator>(upper_bound(k)))); }
++    const_iterator		find (const_key_ref k) const { return lower_bound(k); }
++    iterator			find (const_key_ref k) { return lower_bound(k); }
+     const_iterator		lower_bound (const_key_ref k) const;
++    iterator			lower_bound (const_key_ref k);
+     const_iterator		upper_bound (const_key_ref k) const;
++    iterator			upper_bound (const_key_ref k);
+     inline iterator		insert (const_reference v);
+     void			insert (const_iterator i1, const_iterator i2);
+     inline void			erase (const_key_ref k)			{ erase (const_cast<iterator>(lower_bound(k)), const_cast<iterator>(upper_bound(k))); }
+@@ -80,6 +84,21 @@ typename multimap<K,V>::const_iterator multimap<K,V>::lower_bound (const_key_ref
+ 
+ /// Returns an iterator to the first element with key value \p k.
+ template <typename K, typename V>
++typename multimap<K,V>::iterator multimap<K,V>::lower_bound (const_key_ref k)
++{
++    iterator first (begin()), last (end());
++    while (first != last) {
++	iterator mid = advance (first, distance (first,last) / 2);
++	if (mid->first < k)
++	    first = advance (mid, 1);
++	else
++	    last = mid;
++    }
++    return (first);
++}
++
++/// Returns an iterator to the last element with key value \p k.
++template <typename K, typename V>
+ typename multimap<K,V>::const_iterator multimap<K,V>::upper_bound (const_key_ref k) const
+ {
+     const_iterator first (begin()), last (end());
+@@ -93,6 +112,21 @@ typename multimap<K,V>::const_iterator multimap<K,V>::upper_bound (const_key_ref
+     return (last);
+ }
+ 
++/// Returns an iterator to the last element with key value \p k.
++template <typename K, typename V>
++typename multimap<K,V>::iterator multimap<K,V>::upper_bound (const_key_ref k)
++{
++    iterator first (begin()), last (end());
++    while (first != last) {
++	iterator mid = advance (first, distance (first,last) / 2);
++	if (k < mid->first)
++	    last = mid;
++	else
++	    first = advance (mid, 1);
++    }
++    return (last);
++}
++
+ /// Inserts the pair into the container.
+ template <typename K, typename V>
+ inline typename multimap<K,V>::iterator multimap<K,V>::insert (const_reference v)
+diff --git a/uset.h b/uset.h
+index c6b3c11..7441bf1 100644
+--- a/uset.h
++++ b/uset.h
+@@ -49,6 +49,7 @@ public:
+     inline const_iterator	find (const_reference v) const	{ const_iterator i = lower_bound (begin(), end(), v); return ((i != end() && *i == v) ? i : end()); }
+     inline iterator		find (const_reference v)	{ return (const_cast<iterator>(const_cast<rcself_t>(*this).find (v))); }
+     insertrv_t			insert (const_reference v);
++    iterator			insert (iterator posn, const_reference v);
+     inline void			insert (const_iterator i1, const_iterator i2);
+     inline void			erase (const_reference v);
+     inline iterator		erase (iterator ep)	{ return (base_class::erase (ep)); }
+@@ -67,6 +68,17 @@ typename set<T>::insertrv_t set<T>::insert (const_reference v)
+     return (make_pair (ip, bInserted));
+ }
+ 
++/// Inserts \p v into the container, maintaining the sort order.
++template <typename T>
++typename set<T>::iterator set<T>::insert (iterator /*position*/, const_reference v)
++{
++    iterator ip = lower_bound (begin(), end(), v);
++    bool bInserted = (ip == end() || v < *ip);
++    if (bInserted)
++	ip = base_class::insert (ip, v);
++    return ip;
++}
++
+ /// Inserts the contents of range [i1,i2)
+ template <typename T>
+ void set<T>::insert (const_iterator i1, const_iterator i2)
+diff --git a/ustring.h b/ustring.h
+index 38c8617..0a19a13 100644
+--- a/ustring.h
++++ b/ustring.h
+@@ -133,6 +133,9 @@ public:
+     inline bool			operator< (const_pointer s) const	{ return (0 > compare (s)); }
+     inline bool			operator< (const_reference c) const	{ return (0 > compare (begin(), end(), &c, &c + 1)); }
+     inline bool			operator> (const_pointer s) const	{ return (0 < compare (s)); }
++
++    friend string operator+(const char* lhs, const string& rhs) { return (string(lhs) + rhs); }
++
+     void			insert (const uoff_t ip, wvalue_type c, size_type n = 1);
+     void			insert (const uoff_t ip, const_wpointer first, const_wpointer last, const size_type n = 1);
+     iterator			insert (iterator start, const_reference c, size_type n = 1);
+@@ -141,6 +144,7 @@ public:
+     inline void			insert (uoff_t ip, const_pointer s, size_type nlen)		{ insert (iat(ip), s, s + nlen); }
+     inline void			insert (uoff_t ip, size_type n, value_type c)			{ insert (iat(ip), c, n); }
+     inline void			insert (uoff_t ip, const string& s, uoff_t sp, size_type slen)	{ insert (iat(ip), s.iat(sp), s.iat(sp + slen)); }
++    inline void			erase (void) { clear(); }
+     iterator			erase (iterator epo, size_type n = 1);
+     void			erase (uoff_t epo, size_type n = 1);
+     inline iterator		erase (iterator first, const_iterator last)	{ return (erase (first, size_type(distance(first,last)))); }

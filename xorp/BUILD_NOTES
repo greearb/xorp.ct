@@ -47,6 +47,39 @@ Then, in xorp directory, build using clang/llvm compiler:
 scons CC=clang CXX=clang++
 
 
+To compile using uSTL instead of standard STL library:
+
+*  Get latest ustl code:
+   git clone git://ustl.git.sourceforge.net/gitroot/ustl/ustl
+   Apply xorp_ustl.patch found in ../other/patches/
+   (Read the README file too)
+   Compile and install ustl.
+
+*  Buld subset of xorp using uSTL libraries (Not all modules support
+   uSTL, but it's of primary use to folks wanting small multicast router
+   packages I think):
+   git://ustl.git.sourceforge.net/gitroot/ustl/ustl
+   Apply xorp_ustl.patch found in ../other/patches/
+   (Read the README file too)
+   Compile and install ustl.
+
+*  Ensure build environment is clean:
+
+   rm -fr obj
+
+*  Buld subset of xorp using uSTL libraries (Not all modules support
+   uSTL, but it's of primary use to folks wanting small multicast router
+   packages I think).  If uSTL proves useful, more modules can be patched
+   to work with uSTL.
+
+   scons disable_ipv6=yes disable_fw=yes disable_warninglogs=yes \
+       disable_tracelogs=yes disable_fatallogs=yes disable_infologs=yes \
+       disable_assertlogs=yes disable_errorlogs=yes enable_olsr=no \
+       enable_bgp=no enable_ospf=no enable_vrrp=no enable_policy=no \
+       enable_rip=no optimize=size enable_fea_dummy=no enable_xorpsh=no \
+       disable_profile=yes enable_ustl=no
+
+
 For various compile options use:  scons --help
 
 

@@ -1,0 +1,24 @@
+This describes some patches to other projects to make them work
+better with Xorp.
+
+xorp_ustl.patch
+  This patch applies to the uSTL project as of June 14, 2010.
+  It has also been submitted upstream in hopes it will be
+  incorporated in the official uSTL project:
+
+  git clone git://ustl.git.sourceforge.net/gitroot/ustl/ustl
+
+  This patch fixes some limitations in the original uSTL that
+  made it hard to use uSTL with Xorp.  There are still some
+  issues, but a subset of xorp will compile with uSTL + this
+  patch.
+
+  uSTL is a minimal STL library package that is meant to have
+  smaller run-time and compile-time memory usage.  It saves a
+  small bit (36k out of 8000k)  of compile-time space.  I have
+  not tested run-time performance or even functionality at this
+  time, but perhaps others will find it useful.  With a bit more
+  build system work, uSTL should be able to replace the entire
+  libc++ library, which may save significant total system space.
+
+  --Ben Greear  June 14, 2010
