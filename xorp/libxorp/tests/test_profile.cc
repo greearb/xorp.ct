@@ -225,7 +225,7 @@ test4(TestInfo& info)
     p.create(ar, "Routes entering the RIB-IN");
     p.create(lr, "Routes being sent to the RIB");
 
-    DOUT(info) << p.list();
+    DOUT(info) << p.get_list();
 
     return true;
 }
