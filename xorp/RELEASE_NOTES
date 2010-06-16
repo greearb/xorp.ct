@@ -15,6 +15,8 @@ Release 1.9-CT  (Work in Progress)
       Install latest clang and llvm from their SVN repositories and:
       scons CC=clang CXX=clang++
 
+   *  Support compiling with uSTL (at least a subset compiles..not everything)
+      See BUILD_NOTES for more info.
 
 Release 1.8-CT  June, 2010
 
