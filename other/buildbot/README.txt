@@ -1,3 +1,17 @@
+
+
+To have your own buildbot:
+
+Install buildbot 7.12 or later
+Ask Ben Greear for a user/password for your bot.
+Run this command to build the slave in a directory of
+your choosing:
+buildbot create-slave slave dmz2.candelatech.com:9989 [bot-name] [bot-passwd]
+vi slave/info/admin
+vi slave/info/host
+buildbot start slave
+
+
 This file details the packages added to the default installations of the different os's used in the buildbot system. Dependencies aren't listed.
 
 debian 5.0.4 sparc (buildbot3.cs.ucl.ac.uk)
