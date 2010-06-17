@@ -54,4 +54,4 @@ fork_sys("./test_peering1.sh -l -t test28_ipv6", $timeout);
 
 fork_sys("./test_peering1.sh -l -t test28_ipv6_ok", $timeout);
 
-mikaaYZAX
+exit(0);
