@@ -1122,12 +1122,16 @@ comm_set_bindtodevice(xsock_t sock, const char * my_ifname)
 		   sizeof(tmp_ifname)) < 0) {
 	_comm_set_serrno();
 	static bool do_once = true;
-	if (do_once) {
-	    XLOG_WARNING("setsockopt SO_BINDTODEVICE %s: %s  This error will only be printed once per program instance.",
-			 tmp_ifname, comm_get_error_str(comm_get_last_error()));
-	    do_once = false;
+	// Ignore EPERM..just means user isn't running as root, ie for 'scons check'
+	// most likely..User will have bigger trouble if not running as root for
+	// a production system anyway.
+	if (errno != EPERM) {
+	    if (do_once) {
+		XLOG_WARNING("setsockopt SO_BINDTODEVICE %s: %s  This error will only be printed once per program instance.",
+			     tmp_ifname, comm_get_error_str(comm_get_last_error()));
+		do_once = false;
+	    }
 	}
-
 	return (XORP_ERROR);
     }
 
