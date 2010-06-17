@@ -293,13 +293,12 @@ public:
 //  	if (_verbose)
 	    cout << "Running: " << test_name << endl;
 	TestInfo info(test_name, _verbose, _verbose_level, cout);
-	switch (cb->dispatch(info)) {
-	case true:
-	    break;
-	case false:
-	   _exit_status = false;
-	   cerr << "Failed: " << test_name << endl;
-	   break;
+	if (!cb->dispatch(info)) {
+	    _exit_status = false;
+	    cerr << "Test Failed: " << test_name << endl;
+	}
+	else {
+	    cout << "Test Passed: " << test_name << endl;
 	}
     }
 
