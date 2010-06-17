@@ -97,6 +97,7 @@ script_srcs = [
     'xrl_shell_funcs.sh',
     'setup_paths.sh',
     'soak.sh',
+    'test_busted',
     'test_peering1.sh',
     'test_route_reflection1.sh',
     'test1.sh',
@@ -137,6 +138,7 @@ if 'check' in COMMAND_LINE_TARGETS:
     #  then scons will exit.  Use 'call' instead to force them to be run.
     #env.Alias('check', env.Execute(env.Action('./test_peering1.sh')))
     
+    call("./test_busted")
     call("./test_peering1.sh")
     call("./test_peering2.sh")
     call('./test_peering3.sh')

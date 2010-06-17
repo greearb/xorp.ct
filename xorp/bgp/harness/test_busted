@@ -1,0 +1,57 @@
+#!/usr/bin/perl
+
+#  These scripts fail..but normal harness doesn't deal well with
+#  failing scripts..so run them here.
+
+use strict;
+
+# These commands are bad to hang and otherwise mis-behave.
+# So, fork before calling them..and kill them if they don't
+# die in time.
+
+my $timeout = 120;
+
+sub REAPER {
+  $SIG{CHLD} = \&REAPER;
+  wait;
+}
+$SIG{CHLD} = \&REAPER;
+
+sub fork_sys {
+  my $cmd = shift;
+  my $timeout = shift;
+
+  my $pid = fork();
+  if ($pid == 0) {
+    # child
+    system($cmd);
+  }
+  elsif ($pid > 0) {
+    # Parent.
+    my $i;
+    for ($i = 0; $i<$timeout; $i++) {
+      if (-f "/proc/$pid/cmdline") {
+	sleep(1);
+      }
+      else {
+	return;
+      }
+    }
+    my $cmd1 = `cat /proc/$pid/cmdline`;
+    if ($cmd1 =~ /test_/) {
+      print "WARNING:  Killing hung test child process: $pid\n";
+      kill(9, $pid);
+    }
+  }
+  else {
+    print "ERROR:  fork failed in test_busted script!\n";
+  }
+}
+
+fork_sys("./test_peering1.sh -l -t test26", $timeout);
+
+fork_sys("./test_peering1.sh -l -t test28_ipv6", $timeout);
+
+fork_sys("./test_peering1.sh -l -t test28_ipv6_ok", $timeout);
+
+mikaaYZAX

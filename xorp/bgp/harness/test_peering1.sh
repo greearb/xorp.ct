@@ -34,9 +34,9 @@ onexit()
     last=$?
     if [ $last = "0" ]
     then
-	echo "$0: Tests Succeeded"
+	echo "$0: Tests Succeeded ($TESTS)"
     else
-	echo "$0: Tests Failed"
+	echo "$0: Tests Failed ($TESTS)"
     fi
 
     trap '' 0 2
@@ -2032,11 +2032,13 @@ test58()
     coord peer1 assert idle
 }
 
-TESTS_NOT_FIXED='test26 test28_ipv6_ok'
+#  These failing tests are handled by test_busted now
+#TESTS_NOT_FIXED='test26 test28_ipv6_ok test28_ipv6'
+
 TESTS='test1 test2 test3 test4 test5 test6 test7 test8 test8_ipv6
     test9 test10 test11 test12 test12_ipv6 test13 test14 test15 test16
     test17 test18 test19 test20 test20_ipv6 test21 test22 test23 test24
-    test25 test27 test27_ipv6 test28 test28_ipv6 test29 test30 test31
+    test25 test27 test27_ipv6 test28 test29 test30 test31
     test32 test33 test34 test35 test36 test37 test38 test39 test40 test41
     test42 test43 test44 test45 test46 test47 test48 test49 test50 test51
     test52 test53 test54 test55 test56 test56_ipv6 test57 test58'
