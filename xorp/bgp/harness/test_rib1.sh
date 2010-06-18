@@ -28,9 +28,9 @@ onexit()
     last=$?
     if [ $last = "0" ]
     then
-	echo "$0: Tests Succeeded"
+	echo "$0: Tests Succeeded (BGP/RIB: $TESTS)"
     else
-	echo "$0: Tests Failed"
+	echo "$0: Tests Failed (BGP/RIB: $TESTS)"
     fi
 
     trap '' 0 2
