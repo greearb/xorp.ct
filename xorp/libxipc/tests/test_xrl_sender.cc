@@ -326,6 +326,7 @@ TestSender::start_transmission_cb(const XrlError& xrl_error)
     }
 }
 
+#if 0
 void
 TestSender::send_batch()
 {
@@ -394,6 +395,8 @@ TestSender::send_batch_do(unsigned xrls)
 	_eventloop.run();
 }
 
+// TODO:  This was removed from the core, comments claimed it never
+// worked?? --Ben
 bool
 TestSender::send_batch_task()
 {
@@ -439,6 +442,7 @@ TestSender::send_batch_cb(const XrlError& xrl_error)
 
     _batch_got++;
 }
+#endif
 
 void
 TestSender::send_next()
@@ -700,8 +704,9 @@ test_xrls_sender_main(const char* finder_hostname, uint16_t finder_port)
     }
 
     if (g_send_method == SEND_METHOD_BATCH) {
-	test_sender.send_batch();
-	exit(0);
+	cerr << "ERROR:  Batch sending not supported!\n";
+	//test_sender.send_batch();
+	exit(1);
     }
 
     //
