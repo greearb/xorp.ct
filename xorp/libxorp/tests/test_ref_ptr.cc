@@ -45,22 +45,15 @@ static const char *program_copyright    = "See file LICENSE";
 static const char *program_return_value = "0 on success, 1 if test error, 2 if internal error";
 
 static bool s_verbose = false;
-bool verbose()                  { return s_verbose; }
-void set_verbose(bool v)        { s_verbose = v; }
+bool verbose()			{ return s_verbose; }
+void set_verbose(bool v)	{ s_verbose = v; }
 
-//
-// printf(3)-like facility to conditionally print a message if verbosity
-// is enabled.
-//
-#define verbose_log(x...) _verbose_log(__FILE__,__LINE__, x)
+static int s_failures = 0;
+bool failures()			{ return (s_failures)? (true) : (false); }
+void incr_failures()		{ s_failures++; }
+void reset_failures()		{ s_failures = 0; }
 
-#define _verbose_log(file, line, x...)                                  \
-do {                                                                    \
-    if (verbose()) {                                                    \
-        printf("From %s:%d: ", file, line);                             \
-        printf(x);                                                      \
-    }                                                                   \
-} while(0)
+#include "libxorp/xorp_tests.hh"
 
 /**
  * Print program info to output stream.

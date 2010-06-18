@@ -38,6 +38,16 @@
 #include "timer.hh"
 #include "eventloop.hh"
 
+static bool s_verbose = false;
+bool verbose()			{ return s_verbose; }
+void set_verbose(bool v)	{ s_verbose = v; }
+
+static int s_failures = 0;
+bool failures()			{ return (s_failures)? (true) : (false); }
+void incr_failures()		{ s_failures++; }
+void reset_failures()		{ s_failures = 0; }
+
+#include "libxorp/xorp_tests.hh"
 
 static int fired(0);
 
@@ -96,7 +106,7 @@ mySelectorListObserver::notify_added(XorpFd fd, const SelectorMask& mask)
 	case SEL_RD:	fd_read_notification_called = true; break;
 	case SEL_WR:	fd_write_notification_called = true; break;
 	case SEL_EX:	fd_exeption_notification_called = true; break;
-	default:	fprintf(stderr, "invalid mask notification\n"); exit(1);
+    default:	print_failed("invalid mask notification"); exit(1);
     }
 } 
 
@@ -108,7 +118,7 @@ mySelectorListObserver::notify_removed(XorpFd fd, const SelectorMask& mask)
     add_rem_fd_counter-=fd;
     add_rem_mask_counter-=mask;
     if (no_notifications_beyond_this_point) {
-	fprintf(stderr, "duplicate removal!!\n");
+	print_failed("duplicate removal!!");
 	exit(1);
     }
     fd_removal_notification_called = true;   
@@ -152,7 +162,7 @@ void run_test()
     int pipefds[2];
 
     if (pipe(pipefds)) {
-	fprintf(stderr, "unable to generate file descriptors for test\n");
+	print_failed("unable to generate file descriptors for test");
 	exit(2);
     }
     fd[0] = XorpFd(pipefds[0]);
@@ -183,6 +193,7 @@ void run_test()
     one_fd_rem_per_each_fd_add_notif =  (add_rem_fd_counter == 0) &&
 					(add_rem_mask_counter == 0);
     if (!one_fd_rem_per_each_fd_add_notif) {
+	print_failed("");
 	fprintf(stderr, "cumulative fd and mask should both be 0 but are ");
 	fprintf(stderr, "fd: %d mask: %d\n", add_rem_fd_counter,
 		add_rem_mask_counter);
@@ -191,10 +202,10 @@ void run_test()
     if (!(fd_read_notification_called && fd_write_notification_called &&
 	fd_exeption_notification_called &&  fd_removal_notification_called &&
 	schedule_notification_called && unschedule_notification_called)) {
-	fprintf(stderr, "Some notifications not called correctly\n");
-	exit(1);  
+	print_failed("Some notifications not called correctly");
+	exit(1);
     }
-    fprintf(stderr, "Test passed\n");
+    print_passed("observers");
 }
 
 

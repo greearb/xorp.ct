@@ -31,6 +31,16 @@
 #include "xorp.h"
 #include "callback.hh"
 
+static bool s_verbose = false;
+bool verbose()			{ return s_verbose; }
+void set_verbose(bool v)	{ s_verbose = v; }
+
+static int s_failures = 0;
+bool failures()			{ return s_failures; }
+void incr_failures()		{ s_failures++; }
+
+#include "libxorp/xorp_tests.hh"
+
 typedef XorpCallback1<void, int>::RefPtr TestCallback;
 
 class Widget {
@@ -66,7 +76,7 @@ main()
 
     // The callback should be empty
     if (!cbm.is_empty()) {
-	printf("ERROR: callback is not empty\n");
+	print_failed("callback is not empty");
 	return -1;
     }
 
@@ -75,7 +85,7 @@ main()
 
     // Test that the callback is not empty
     if (cbm.is_empty()) {
-	printf("ERROR: callback is empty\n");
+	print_failed("ERROR: callback is empty");
 	return -1;
     }
 
@@ -109,7 +119,7 @@ main()
     }
 
     if (counter != stop_point) {
-	printf("ERROR: safe callback executed after object deletion\n");
+	print_failed("safe callback executed after object deletion");
 	return -1;
     }
 
@@ -127,6 +137,6 @@ main()
 	}
 	delete sw;
     }
-
+    print_passed("Callback tests");
     return (0);
 }

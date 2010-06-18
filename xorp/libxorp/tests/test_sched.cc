@@ -48,7 +48,7 @@ namespace Libcomm {
 
 #define TEST_ASSERT(x)						\
     if (!(x))							\
-	xorp_throw(TestException, "Test assertion failed")
+	xorp_throw(TestException, "Test Failed: assertion failed")
 
 namespace {
 

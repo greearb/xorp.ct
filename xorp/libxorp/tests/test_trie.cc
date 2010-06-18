@@ -28,26 +28,39 @@
 #include "ipv6net.hh"
 #include "trie.hh"
 
+static bool s_verbose = false;
+bool verbose()			{ return s_verbose; }
+void set_verbose(bool v)	{ s_verbose = v; }
+
+static int s_failures = 0;
+bool failures()			{ return (s_failures)? (true) : (false); }
+void incr_failures()		{ s_failures++; }
+void reset_failures()		{ s_failures = 0; }
+
+#include "libxorp/xorp_tests.hh"
+
 class IPv4RouteEntry {};
 class IPv6RouteEntry {};
 
 Trie<IPv4, IPv4RouteEntry*> trie;
 Trie<IPv6, IPv6RouteEntry*> trie6;
 
+
 void test(IPv4Net test_net, IPv4RouteEntry *test_route) {
     printf("-----------------------------------------------\n");
     printf("looking up net: %s\n", test_net.str().c_str());
     Trie<IPv4, IPv4RouteEntry*>::iterator ti = trie.lookup_node(test_net);
     if (ti == trie.end()) {
-	printf("Fail: no result\n");
+	print_failed("no result");
 	trie.print();
 	abort();
     }
     const IPv4RouteEntry *r = ti.payload();
     if (r==test_route) {
-	printf("PASS\n");
+	print_passed("");
     } else {
-	printf("Fail: route=%p\n", r);
+	print_failed("");
+	printf("route=%p\n", r);
 	trie.print();
 	abort();
     }
@@ -59,15 +72,16 @@ void test_find(IPv4 test_addr, IPv4RouteEntry *test_route) {
     printf("looking up net: %s\n", test_addr.str().c_str());
     Trie<IPv4, IPv4RouteEntry*>::iterator ti = trie.find(test_addr);
     if (ti == trie.end()) {
-	printf("Fail: no result\n");
+	print_failed("no result");
 	trie.print();
 	abort();
     }
     const IPv4RouteEntry *r = ti.payload();
     if (r==test_route) {
-	printf("PASS\n");
+	print_passed("");
     } else {
-	printf("Fail: route=%p\n", r);
+	print_failed("");
+	printf("route=%p\n", r);
 	trie.print();
 	abort();
     }
@@ -80,19 +94,20 @@ void test_less_specific(IPv4Net test_net, IPv4RouteEntry *test_route) {
     Trie<IPv4, IPv4RouteEntry*>::iterator ti = trie.find_less_specific(test_net);
     if (ti == trie.end()) {
 	if (test_route == NULL) {
-	    printf("PASS\n");
+	    print_passed("");
 	    printf("-----------\n");
 	    return;
 	}
-	printf("Fail: no result\n");
+	print_failed("no result");
 	trie.print();
 	abort();
     }
     const IPv4RouteEntry *r = ti.payload();
     if (r==test_route) {
-	printf("PASS\n");
+	print_passed("");
     } else {
-	printf("Fail: route=%p\n", r);
+	print_failed("");
+	printf("route=%p\n", r);
 	trie.print();
 	abort();
     }
@@ -106,9 +121,10 @@ void test_upper_bound(IPv4 test_addr, IPv4 test_answer) {
     trie.find_bounds(test_addr, lo, hi);
     IPv4 result= hi;
     if (test_answer == result) {
-	printf("Pass: result = %s\n", result.str().c_str());
+	print_passed(result.str());
     } else {
-	printf("Fail: answer should be %s, result was %s\n", 
+	print_failed("");
+	printf("answer should be %s, result was %s\n", 
 	       test_answer.str().c_str(), result.str().c_str());
 	trie.print();
 	abort();
@@ -123,8 +139,9 @@ void test_lower_bound(IPv4 test_addr, IPv4 test_answer) {
     trie.find_bounds(test_addr, lo, hi);
     IPv4 result= lo;
     if (test_answer == result) {
-	printf("Pass: result = %s\n", result.str().c_str());
+	print_passed(result.str());
     } else {
+	print_failed("");
 	printf("Fail: answer should be %s, result was %s\n", 
 	       test_answer.str().c_str(), result.str().c_str());
 	trie.print();
@@ -138,15 +155,16 @@ void test6(IPv6Net test_net, IPv6RouteEntry *test_route) {
     printf("looking up net: %s\n", test_net.str().c_str());
     Trie<IPv6, IPv6RouteEntry*>::iterator ti = trie6.lookup_node(test_net);
     if (ti == trie6.end()) {
-	printf("Fail: no result\n");
+	print_failed("no result");
 	trie.print();
 	abort();
     }
     const IPv6RouteEntry *r = ti.payload();
     if (r==test_route) {
-	printf("PASS\n");
+	print_passed("");
     } else {
-	printf("Fail: route=%p\n", r);
+	print_failed("");
+	printf("route=%p\n", r);
 	trie.print();
 	abort();
     }
@@ -159,14 +177,15 @@ void test_find6(IPv6 test_addr, IPv6RouteEntry *test_route) {
     Trie<IPv6, IPv6RouteEntry*>::iterator ti = trie6.find(test_addr);
     const IPv6RouteEntry *r = ti.payload();
     if (ti == trie6.end()) {
-	printf("Fail: no result\n");
+	print_failed("no result");
 	trie.print();
 	abort();
     }
     if (r==test_route) {
-	printf("PASS\n");
+	print_passed("");
     } else {
-	printf("Fail: route=%p\n", r);
+	print_failed("");
+	printf("route=%p\n", r);
 	trie.print();
 	abort();
     }
@@ -180,8 +199,9 @@ void test_upper_bound6(IPv6 test_addr, IPv6 test_answer) {
     trie6.find_bounds(test_addr, lo, hi);
     IPv6 result= hi;
     if (test_answer == result) {
-	printf("Pass: result = %s\n", result.str().c_str());
+	print_passed(result.str());
     } else {
+	print_failed("");
 	printf("Fail: answer should be %s, result was %s\n", 
 	       test_answer.str().c_str(), result.str().c_str());
 	trie.print();
@@ -216,8 +236,8 @@ test_find_subtree()
 
     iter = trie_subtree.search_subtree(nsearch1);
     for( ;iter != trie_subtree.end(); iter++) {
+	print_failed("");
 	printf("subtree = %s\n", iter.payload().c_str());
-	printf("FAIL\n");
 	abort();
     }
 
@@ -231,12 +251,12 @@ test_find_subtree()
 
     iter = trie_subtree.search_subtree(nsearch2);
     for( ;iter != trie_subtree.end(); iter++) {
+	print_failed("");
 	printf("subtree = %s\n", iter.payload().c_str());
-	printf("FAIL\n");
 	abort();
     }
 
-    printf("PASS\n");
+    print_passed("");
 }
 
 int main() {
@@ -247,7 +267,7 @@ int main() {
 	printf("FAIL\n");
 	abort();
     }
-    printf("PASS: find on empty trie found nothing\n");
+    print_passed("find on empty trie found nothing");
 
     IPv4RouteEntry d1;
     IPv4Net n1(IPv4("1.2.1.0"), 24);
@@ -614,7 +634,7 @@ int main() {
 	fprintf(stderr, "iterator missing nodes!\n");
 	exit(1);
     }
-    printf("PASS\n");
+    print_passed("");
 
     //-------------------------------------------------------    
     printf("-----------\n");
@@ -626,19 +646,19 @@ int main() {
                ti.cur()->k().str().c_str(),
                ti.cur()->has_payload() ? "PL" : "[]");
 	if (strcmp(subnets[subnetidx++],ti.cur()->k().str().c_str())) {
-	    fprintf(stderr, "invalid traversal order detected!\n");
+	    print_failed("invalid traversal order detected!");
 	    exit(1);
 	}
 	if (!ti.cur()->has_payload()) {
-	    fprintf(stderr, "iterator should not return empty nodes!\n");
+	    print_failed("iterator should not return empty nodes!");
 	    exit(1);
 	}
     }
     if (subnetidx != 5) {
-	fprintf(stderr, "iterator missing nodes!\n");
+	print_failed("iterator missing nodes!");
 	exit(1);
     }
-    printf("PASS\n");
+    print_passed("");
 
     test_find_subtree();
 }

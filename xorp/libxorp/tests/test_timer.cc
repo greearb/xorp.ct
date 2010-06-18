@@ -134,7 +134,7 @@ alarm_signalhandler(int sig)
 {
     XLOG_ASSERT(sig == SIGALRM);
 
-    fprintf(stderr, "Test failed: alarm timeout\n");
+    fprintf(stderr, "Test Failed: alarm timeout\n");
     exit(1);
 }
 #endif

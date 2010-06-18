@@ -33,9 +33,11 @@ template <class C> static bool
 test_serialization(const string& name, const C& c)
 {
     string serialized = c.str();
-    if (c.str() == C(serialized.c_str()).str()) 
+    if (c.str() == C(serialized.c_str()).str()) {
+	cout << "Passed Test: serialization test for " << name << endl;
 	return false;
-    cerr << "Failed serialization test for " << name << endl;
+    }
+    cerr << "Failed Test: serialization test for " << name << endl;
     return true;
 }
 

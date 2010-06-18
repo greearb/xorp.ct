@@ -65,19 +65,16 @@ static const uint32_t EXIT_MS = 5 * TRANS_MS;	// Time to exit (millisecs)
 // Verbose output
 
 static bool s_verbose = false;
-
 bool verbose()			{ return s_verbose; }
 void set_verbose(bool v)	{ s_verbose = v; }
 
-#define verbose_log(x...) 						      \
-do {									      \
-    if (verbose()) {							      \
-	printf("From %s:%d: ", __FILE__, __LINE__);			      \
-	printf(x);							      \
-    }									      \
-} while(0)
+static int s_failures = 0;
+bool failures()			{ return (s_failures)? (true) : (false); }
+void incr_failures()		{ s_failures++; }
+void reset_failures()		{ s_failures = 0; }
 
-
+#include "libxorp/xorp_tests.hh"
+
 // ----------------------------------------------------------------------------
 // TestService implementation
 

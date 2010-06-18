@@ -33,7 +33,16 @@
 #include "libxorp/eventloop.hh"
 #include "libxorp/xlog.h"
 
+static bool s_verbose = false;
+bool verbose()			{ return s_verbose; }
+void set_verbose(bool v)	{ s_verbose = v; }
 
+static int s_failures = 0;
+bool failures()			{ return (s_failures)? (true) : (false); }
+void incr_failures()		{ s_failures++; }
+void reset_failures()		{ s_failures = 0; }
+
+#include "libxorp/xorp_tests.hh"
 
 class TestTask {
 public:
@@ -179,21 +188,21 @@ run_test()
 
     TestTask test1(e);
     if (test1.test_weights()) {
-	printf("test weights: PASS\n");
+	print_passed("test weights");
     } else {
-	printf("test weights: FAIL\n");
+	print_failed("test weights");
 	exit(1);
     }
     if (test1.test_priority1()) {
-	printf("test priority 1: PASS\n");
+	print_passed("test priority 1");
     } else {
-	printf("test priority 1: FAIL\n");
+	print_failed("test priority 1");
 	exit(1);
     }
     if (test1.test_priority2()) {
-	printf("test priority 2: PASS\n");
+	print_passed("test priority 2");
     } else {
-	printf("test priority 2: FAIL\n");
+	print_failed("test priority 2");
 	exit(1);
     }
 }

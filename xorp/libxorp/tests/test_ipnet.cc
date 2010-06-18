@@ -37,18 +37,16 @@
 // ----------------------------------------------------------------------------
 // Verbose output
 
-static bool s_verbose = false;
 
+static bool s_verbose = false;
 bool verbose()			{ return s_verbose; }
 void set_verbose(bool v)	{ s_verbose = v; }
 
-#define verbose_log(x...) 						      \
-do {									      \
-    if (verbose()) {							      \
-	printf("From %s:%d: ", __FILE__, __LINE__);			      \
-	printf(x);							      \
-    }									      \
-} while(0)
+static int s_failures = 0;
+bool failures()			{ return s_failures; }
+void incr_failures()		{ s_failures++; }
+
+#include "libxorp/xorp_tests.hh"
 
 // ----------------------------------------------------------------------------
 // The tests
@@ -70,16 +68,16 @@ v4_serialization_test()
     for (size_t i = 0; i < sizeof(srep) / sizeof(srep[0]); i++) {
 	IPv4Net n(srep[i].net);
 	if (n.prefix_len() != srep[i].prefix_len) {
-	    verbose_log("item %u bad prefix_len %u\n", XORP_UINT_CAST(i),
+	    verbose_log("Test Failed: item %u bad prefix_len %u\n", XORP_UINT_CAST(i),
 			XORP_UINT_CAST(n.prefix_len()));
 	    return false;
 	} else if (n.masked_addr() != srep[i].v4) {
-	    verbose_log("item %u bad addr %s != %s\n", 
+	    verbose_log("Test Failed: item %u bad addr %s != %s\n", 
 			XORP_UINT_CAST(i), n.masked_addr().str().c_str(),
 			srep[i].v4.str().c_str());
 	    return false;
 	} else if (n.netmask() != IPv4::make_prefix(n.prefix_len())) {
-	    verbose_log("item %u bad netmask %s != %s\n",
+	    verbose_log("Test Failed: item %u bad netmask %s != %s\n",
 			XORP_UINT_CAST(i), n.netmask().str().c_str(),
 			IPv4::make_prefix(n.prefix_len()).str().c_str());
 	    return false;
@@ -87,12 +85,12 @@ v4_serialization_test()
 
 	IPv4Net u (n.str().c_str());
 	if (u != n) {
-	    verbose_log("item %u to string and back failed.",
+	    verbose_log("Test Failed: item %u to string and back failed.",
 			XORP_UINT_CAST(i));
 	    return false;
 	}
     }
-    verbose_log("Passed serialization test.\n");
+    verbose_log("Test Passed: serialization test.\n");
     return true;
 }
 
@@ -105,13 +103,13 @@ v4_less_than_test()
 	IPv4Net lower(d[i - 1]);
 	IPv4Net upper(d[i]);
 	if (!(lower < upper)) {
-	    verbose_log("%s is not less than %s\n",
+	    verbose_log("Test Failed: %s is not less than %s\n",
 			lower.str().c_str(),
 			upper.str().c_str());
 	    return false;
 	}
     }
-    verbose_log("Passed operator< test.\n");
+    verbose_log("Test Passed: operator< test.\n");
     return true;
 }
 
@@ -126,34 +124,34 @@ v4_is_unicast_test()
     IPv4Net odd4("128.0.0.0/2");	// only unicast, should be valid
     IPv4Net deflt("0.0.0.0/0");		// default route, is valid
     if (!uni.is_unicast()) {
-	verbose_log("%s failed is_unicast test.\n", uni.str().c_str());
+	verbose_log("Test Failed: %s failed is_unicast test.\n", uni.str().c_str());
 	return false;
     }
     if (multi.is_unicast()) {
-	verbose_log("%s failed is_unicast test.\n", multi.str().c_str());
+	verbose_log("Test Failed: %s failed is_unicast test.\n", multi.str().c_str());
 	return false;
     }
     if (odd1.is_unicast()) {
-	verbose_log("%s failed is_unicast test.\n", odd1.str().c_str());
+	verbose_log("Test Failed: %s failed is_unicast test.\n", odd1.str().c_str());
 	return false;
     }
     if (odd2.is_unicast()) {
-	verbose_log("%s failed is_unicast test.\n", odd2.str().c_str());
+	verbose_log("Test Failed: %s failed is_unicast test.\n", odd2.str().c_str());
 	return false;
     }
     if (!odd3.is_unicast()) {
-	verbose_log("%s failed is_unicast test.\n", odd3.str().c_str());
+	verbose_log("Test Failed: %s failed is_unicast test.\n", odd3.str().c_str());
 	return false;
     }
     if (!odd4.is_unicast()) {
-	verbose_log("%s failed is_unicast test.\n", odd4.str().c_str());
+	verbose_log("Test Failed: %s failed is_unicast test.\n", odd4.str().c_str());
 	return false;
     }
     if (!deflt.is_unicast()) {
-	verbose_log("%s failed is_unicast test.\n", deflt.str().c_str());
+	verbose_log("Test Failed: %s failed is_unicast test.\n", deflt.str().c_str());
 	return false;
     }
-    verbose_log("Passed is_unicast test.\n");
+    verbose_log("Test Passed: is_unicast test.\n");
     return true;
 }
 
@@ -178,12 +176,12 @@ v4_overlap_test()
 	    IPv4Net u(a, p);
 	    IPv4Net v(b, p);
 	    if (u.is_overlap(v) != (p <= data[i].overlap)) {
-		verbose_log("bad overlap %u\n", XORP_UINT_CAST(p));
+		verbose_log("Test Failed: bad overlap %u\n", XORP_UINT_CAST(p));
 		return -1;
 	    }
 	}
     }
-    verbose_log("Passed overlap test.\n");
+    verbose_log("Test Passed: overlap test.\n");
     return true;
 }
 

@@ -35,6 +35,16 @@
 
 #include "asyncio.hh"
 
+static bool s_verbose = false;
+bool verbose()			{ return s_verbose; }
+void set_verbose(bool v)	{ s_verbose = v; }
+
+static int s_failures = 0;
+bool failures()			{ return s_failures; }
+void incr_failures()		{ s_failures++; }
+
+#include "xorp_tests.hh"
+
 
 static const int TIMEOUT_MS	  = 2000;
 static const int MAX_ITERS	  = 50;
@@ -240,17 +250,20 @@ run_test()
 
     xsock_t s[2]; // pair of sockets - one for read, one for write
     if (local_comm_sock_pair(AF_UNIX, SOCK_STREAM, 0, s) != XORP_OK) {
-	puts("Failed to open socket pair");
+	print_failed("Failed to open socket pair");
 	exit(1);
     }
+    print_passed("open socket");
     if (local_comm_sock_set_blocking(s[0], 0) != XORP_OK) {
-	puts("Failed to set socket non-blocking");
+	print_failed("Failed to set socket non-blocking");
 	exit(1);
     }
+    print_passed("set nonblock");
     if (local_comm_sock_set_blocking(s[1], 0) != XORP_OK) {
-	puts("Failed to set socket non-blocking");
+	print_failed("Failed to set socket non-blocking");
 	exit(1);
     }
+    print_passed("set nonblock[1]");
 
     AsyncFileWriter afw(e, s[0]);
     AsyncFileReader afr(e, s[1]);
@@ -316,8 +329,10 @@ run_test()
     while (eof_test_done == false)
 	e.run();
 
-    printf("\nTransfered %u bytes between AsyncFileWriter and "
-	   "AsyncFileReader.\n", XORP_UINT_CAST(bytes_transferred));
+    char buf[500];
+    snprintf(buf, 500, "\nTransfered %u bytes between AsyncFileWriter and "
+	     "AsyncFileReader.\n", XORP_UINT_CAST(bytes_transferred));
+    print_passed(buf);
 }
 
 int

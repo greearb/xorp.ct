@@ -58,8 +58,17 @@ tests = [
 if not (env.has_key('disable_profile') and env['disable_profile']):
     tests.append('profile')
 
+libxorptestpath = '$exec_prefix/libxorp/tests'
+
 test_targets = []
 
 for t in tests:
     test_targets.append(env.AutoTest(target = 'test_%s' % t,
                                      source = 'test_%s.cc' % t))
+    
+    if env['enable_tests']:
+        env.Alias('install', env.InstallProgram(libxorptestpath, 'test_%s' %t))
+
+if env['enable_tests']:
+    Default(test_targets)
+    
