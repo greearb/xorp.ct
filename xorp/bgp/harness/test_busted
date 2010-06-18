@@ -25,6 +25,7 @@ sub fork_sys {
   if ($pid == 0) {
     # child
     system($cmd);
+    exit(0);
   }
   elsif ($pid > 0) {
     # Parent.
