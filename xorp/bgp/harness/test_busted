@@ -28,6 +28,7 @@ sub fork_sys {
     exit(0);
   }
   elsif ($pid > 0) {
+    sleep(10); # Let child get started
     # Parent.
     my $i;
     for ($i = 0; $i<$timeout; $i++) {
@@ -35,14 +36,16 @@ sub fork_sys {
 	sleep(1);
       }
       else {
-	return;
+        print "Seems child has exited properly.\n";
+	last;
       }
     }
-    my $cmd1 = `cat /proc/$pid/cmdline`;
-    if ($cmd1 =~ /test_/) {
-      print "WARNING:  Killing hung test child process: $pid\n";
-      kill(9, $pid);
-    }
+    # There should be no test_peer processes running now, kill them if they
+    # exist.
+    print "Killing any existing test_peer processes, child pid: $pid"
+    print `ps auxwww|grep test_peer`;
+    print "\n";
+    system("killall -s 9 -r runit");
   }
   else {
     print "ERROR:  fork failed in test_busted script!\n";
