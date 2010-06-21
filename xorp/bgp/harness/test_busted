@@ -46,6 +46,9 @@ sub fork_sys {
     print `ps auxwww|grep test_peer`;
     print "\n";
     system("killall -s 9 -r runit");
+    system("killall -s 9 -r test_peer");
+    system("killall -s 9 -r runit");
+    system("killall -s 9 -r test_peer");
   }
   else {
     print "ERROR:  fork failed in test_busted script!\n";
