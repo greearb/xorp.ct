@@ -414,7 +414,7 @@ void
 LsaDecoder::register_decoder(Lsa *lsa)
 {
     // Don't allow a registration to be overwritten.
-    XLOG_ASSERT(0 == _lsa_decoders.count(lsa->get_ls_type()));
+    XLOG_ASSERT(_lsa_decoders.find(lsa->get_ls_type()) == _lsa_decoders.end());
     _lsa_decoders[lsa->get_ls_type()] = lsa;
 
     // Keep a record of the smallest LSA that may be decoded.
