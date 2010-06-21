@@ -42,7 +42,7 @@ sub fork_sys {
     }
     # There should be no test_peer processes running now, kill them if they
     # exist.
-    print "Killing any existing test_peer processes, child pid: $pid"
+    print "Killing any existing test_peer processes, child pid: $pid";
     print `ps auxwww|grep test_peer`;
     print "\n";
     system("killall -s 9 -r runit");

@@ -60,9 +60,13 @@ env.AppendUnique(LIBS = [
     'xif_fea_ifmgr_replicator',
     'xst_fea_ifmgr_mirror',
     'xst_bgp',
-    'xif_profile_client',
     'xif_finder_event_notifier',
     ])
+
+if not (env.has_key('disable_profile') and env['disable_profile']):
+    env.AppendUnique(LIBS = [
+        'xif_profile_client',
+        ])
 
 coord_srcs = [
     'bgppp.cc',
