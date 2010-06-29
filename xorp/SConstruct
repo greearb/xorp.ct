@@ -159,13 +159,22 @@ if (len(COMMAND_LINE_TARGETS) == 0):
 
 # XXX TODO: Make initial CPPPATH/LIBPATH derive from
 # autodetected host system *or* command line.
+#env = Environment(
+#		  TOOLS = ['default', 'autotest', 'clntgen', 'tgtgen',
+#		           'TOOL_SUBST'],
+#		  ENV = os.environ,
+#		  BUILDDIR = builddir,
+#		  CPPPATH=['/usr/local/include', '$BUILDDIR'],
+#		  LIBPATH=['usr/lib', '/usr/local/lib'],
+#		  variables = vars)
+
 env = Environment(
 		  TOOLS = ['default', 'autotest', 'clntgen', 'tgtgen',
 		           'TOOL_SUBST'],
 		  ENV = os.environ,
 		  BUILDDIR = builddir,
-		  CPPPATH=['/usr/local/include', '$BUILDDIR'],
-		  LIBPATH=['usr/lib', '/usr/local/lib'],
+		  CPPPATH=['$BUILDDIR'],
+		  LIBPATH=['usr/lib'],
 		  variables = vars)
 
 prefix = env['prefix']
@@ -499,6 +508,10 @@ else:
 if not env.GetOption('clean') and \
    not env.GetOption('help'):
 
+    env.AppendUnique( CFLAGS = Split(ARGUMENTS.get('CFLAGS', '')) )
+    env.AppendUnique( CXXFLAGS = Split(ARGUMENTS.get('CXXFLAGS', '')) )
+    env.AppendUnique( LINKFLAGS = Split(ARGUMENTS.get('LINKFLAGS', '')) )
+
     env['MISSING_DEPS'] = []
     env['SKIPPED_DEPS'] = []
 
@@ -637,10 +650,6 @@ if not env.GetOption('clean') and \
 if SCons.Tool.FindTool(['gcc'], env) is None or \
    SCons.Tool.FindTool(['g++'], env) is None:
     print gnutoolwarning % 'gcc or g++ compiler'
-
-env.AppendUnique( CFLAGS = Split(ARGUMENTS.get('CFLAGS', '')) )
-env.AppendUnique( CXXFLAGS = Split(ARGUMENTS.get('CXXFLAGS', '')) )
-env.AppendUnique( LINKFLAGS = Split(ARGUMENTS.get('LINKFLAGS', '')) )
 
 # If the user didn't override our default optimization, then
 # sanitize user's CFLAGS/CXXFLAGS to not contain optimization options,
