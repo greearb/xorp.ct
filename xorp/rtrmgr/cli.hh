@@ -57,12 +57,12 @@ enum CliModeType {
     CLI_MODE_TEXTENTRY		= 3
 };
 
-class RouterCLI {
+class RouterCLI : public NONCOPYABLE {
 public:
     RouterCLI(XorpShellBase& xorpsh, CliNode& cli_node,
 	      XorpFd cli_client_input_fd, XorpFd cli_client_output_fd,
 	      bool verbose) throw (InitError);
-    ~RouterCLI();
+    virtual ~RouterCLI();
 
     bool done() const;
     bool is_config_mode() const;
@@ -203,7 +203,7 @@ private:
     static const string DEFAULT_XORP_PROMPT_OPERATIONAL;
     static const string DEFAULT_XORP_PROMPT_CONFIGURATION;
 
-    CliClient& cli_client() const { return (*_cli_client_ptr); }
+    CliClient* cli_client() const { return _cli_client_ptr; }
     void reset_path();
     void set_path(string path);
     void apply_path_change();
