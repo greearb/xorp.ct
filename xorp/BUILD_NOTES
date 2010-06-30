@@ -605,14 +605,21 @@ scons check
       make
 
      # install in cross-compiler tree.
+     chmod u+w ~/x-tools/arm-unknown-linux-gnueabi/
      CC=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-gcc \
       RANLIB=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-ranlib \
       AR=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-ar \
       make install
 
-  * Cross-compile ncurses.
+  * Cross-compile ncurses.  I'm using 5.7 with patches from here applied:
+     ftp://invisible-island.net/ncurses/5.7/
+
+     NOTE:  Do not use -j4 or similar.  Ncurses doesn't have good enough makefiles
+     for this to work properly.
 
      # Configure for arm-linux
+      BUILD_CC=gcc \
+      BUILD_CPP=g++ \
       CC=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-gcc \
       CXX=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-g++ \
       RANLIB=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-ranlib \
@@ -622,7 +629,18 @@ scons check
        ./configure --host=arm-unknown-linux-gnueabi --with-shared \
        --prefix=${HOME}/x-tools/arm-unknown-linux-gnueabi/local
 
-     # Compile ncurses.  Setting CC to g++ below isn't a typo..otherwise it
+     # Compile ncurses.  On my system, this fails to link towards the end,
+     # but it gets far enough that the second build below with hacked CC
+     # can complete.
+     make \
+      CC=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-gcc \
+      CXX=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-g++ \
+      RANLIB=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-ranlib \
+      LD=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-ld \
+      AR=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-ar \
+      AS=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-as
+
+     # Finish compiling ncurses.  Setting CC to g++ below isn't a typo..otherwise it
      # it tries to link c++ code with gcc for some bone-headed reason.
      make \
       CC=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-g++ \
@@ -630,8 +648,7 @@ scons check
       RANLIB=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-ranlib \
       LD=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-ld \
       AR=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-ar \
-      AS=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-as \
-      -j4 
+      AS=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-as
       
      make \
       CC=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-g++ \
