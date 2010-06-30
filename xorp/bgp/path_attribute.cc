@@ -3108,9 +3108,17 @@ FastPathAttributeList<A>::add_path_attribute(PathAttribute *a)
     }
 #endif
 
-    XLOG_ASSERT(_att[type] == 0);
-    _att[type] = a;
-    _attribute_count++;
+    if (_att[type]) {
+	XLOG_ERROR("ERROR:  Attribute type: %d already exists.  Currently, only a single"
+		   " attribute for each type is supported.  Deleting old one and adding"
+		   " this new one.", (int)(type));
+	delete _att[type];
+	_att[type] = a;
+    }
+    else {
+	_att[type] = a;
+	_attribute_count++;
+    }
 }
 
 template<class A>
