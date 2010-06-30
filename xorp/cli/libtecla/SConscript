@@ -67,9 +67,16 @@ libtecla_srcs = [
     ]
 
 # External libraries
-env.AppendUnique(LIBS = [
-    'curses'
-])
+# Some sort of curses library is required.
+if env.has_key('has_libncurses') and env['has_libncurses']:
+    env.AppendUnique(LIBS = [
+        'ncurses'
+        ])
+else:
+    # Assume regular curses.
+    env.AppendUnique(LIBS = [
+        'curses'
+        ])
 
 if is_shared:
     libxorp_tecla = env.SharedLibrary('libxorp_tecla', libtecla_srcs)

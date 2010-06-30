@@ -178,9 +178,19 @@ if env['enable_xorpsh']:
         'xif_finder_event_notifier',
         'xorp_ipc',
         'xorp_comm',
-        'xorp_core',
-        'curses'	# XXX only for non-windows
+        'xorp_core'
         ])
+
+    # Some sort of curses library is required.
+    if xorpsh_env.has_key('has_libncurses') and xorpsh_env['has_libncurses']:
+        xorpsh_env.AppendUnique(LIBS = [
+            'ncurses'
+            ])
+    else:
+        # Assume regular curses.
+        xorpsh_env.AppendUnique(LIBS = [
+            'curses'
+            ])
 
     xorpsh_srcs = [
 	'xorpsh_main.cc',

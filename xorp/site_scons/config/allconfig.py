@@ -772,8 +772,11 @@ def DoAllConfig(env, conf, host_os):
     ##########
     # curses for cli/libtecla
     has_libcurses = conf.CheckLib('curses')
-    if not has_libcurses:
-        print "\nERROR:  Cannot find required curses library."
+    has_libncurses = conf.CheckLib('ncurses')
+    env['has_libcurses'] = has_libcurses
+    env['has_libncurses'] = has_libncurses
+    if not has_libcurses and not has_libncurses:
+        print "\nERROR:  Cannot find required (n)curses library."
         print "  On Fedora/RedHat:  yum install ncurses-devel"
         print "  After install, rm -fr xorp/obj build directory to"
         print "  clear the configure cache before re-building."
