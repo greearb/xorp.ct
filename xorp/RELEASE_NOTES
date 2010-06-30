@@ -17,6 +17,10 @@ Release 1.9-CT  (Work in Progress)
 
    *  Support compiling with uSTL (at least a subset compiles..not everything)
       See BUILD_NOTES for more info.
+      NOTE:  uSTL is a moving target..not sure current top-of-tree uSTL works.
+
+   *  Support cross-compiling.  See BUILD_NOTES.
+
 
 Release 1.8-CT  June, 2010
 

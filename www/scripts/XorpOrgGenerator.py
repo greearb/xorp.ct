@@ -39,6 +39,7 @@ xorp_links = [
 #    ("Developers", "people.html"),
     ("Source Repository", "scm.html"),
     ("Bug Reporting", "http://github.com/greearb/xorp.ct/issues"),
+    ("Build Bot", "http://dmz2.candelatech.com:8010/waterfall"),
 #    ("Operating a mirror", "mirror_operation.html"),
     ("News", "news.html"),
     ]
@@ -98,12 +99,25 @@ def write_main_end():
     
 def write_search_form():
     open_div("search")
-    print """<form action="http://www.google.com/cse" id="cse-search-box">
-        <input type="hidden" name="cx" value="017869558586786398708:zlic-3ntnvg" />
-        <input type="hidden" name="ie" value="UTF-8" />
-        <input type="text" name="q" size="31" />
-        <input type="submit" name="sa" value="Search" />
-      </form>"""
+#    print """<form action="http://www.google.com/cse" id="cse-search-box">
+#        <input type="hidden" name="cx" value="017869558586786398708:zlic-3ntnvg" />
+#        <input type="hidden" name="ie" value="UTF-8" />
+#        <input type="text" name="q" size="31" />
+#        <input type="submit" name="sa" value="Search" />
+#      </form>"""
+    print """<form method="get" action="http://www.google.com/search">
+
+<table border="0" cellpadding="0">
+<tr><td>
+<input type="text"   name="q" size="25"
+ maxlength="255" value="" />
+<input type="submit" value="Google Search" /></td></tr>
+<tr><td align="left" style="font-size:75%">
+<input type="checkbox"  name="sitesearch"
+ value="candelatech.com/xorp.ct" checked /> search only XORP.CT<br />
+</td></tr></table>
+
+</form>"""
     close_div("search")
 
 def write_google_tracker():
