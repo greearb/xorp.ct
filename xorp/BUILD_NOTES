@@ -588,6 +588,9 @@ scons check
       arm-unknown-linux-gnueabi
     config file for crosstool-NG 1.7.1.  I disabled gcj and fortran.
 
+    Make sure you have a static glibc installed as cross-tools uses that
+    as part of it's compilation step.  On Fedora:  yum install glibc-static
+
   * Cross-compile openssl (1.0.0.a):
     
      cd to openssl-1.0.0.a
