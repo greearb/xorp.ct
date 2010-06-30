@@ -577,7 +577,118 @@ scons check
 
 3.8. Cross-compilation
 ======================
-  * Not supported at this time, but may not be difficult to enable.
+
+  If you do not already have a functional cross-compiler chain,
+  the directions below might work for you.
+
+  * If you want to build your own tool chain, check out crosstool-NG:
+    http://ymorin.is-a-geek.org/projects/crosstool
+
+    The example here is from my use of the:
+      arm-unknown-linux-gnueabi
+    config file for crosstool-NG 1.7.1.  I disabled gcj and fortran.
+
+  * Cross-compile openssl (1.0.0.a):
+    
+     cd to openssl-1.0.0.a
+
+     # Configure for arm cross-compiler
+     CC=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-gcc \
+      RANLIB=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-ranlib \
+      AR=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-ar \
+     ./Configure --prefix=~/x-tools/arm-unknown-linux-gnueabi/local linux-armv4
+
+     # Build with arm cross compiler
+     CC=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-gcc \
+      RANLIB=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-ranlib \
+      AR=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-ar \
+      make
+
+     # install in cross-compiler tree.
+     CC=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-gcc \
+      RANLIB=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-ranlib \
+      AR=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-ar \
+      make install
+
+  * Cross-compile ncurses.
+
+     # Configure for arm-linux
+      CC=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-gcc \
+      CXX=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-g++ \
+      RANLIB=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-ranlib \
+      LD=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-ld \
+      AR=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-ar \
+      AS=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-as \
+       ./configure --host=arm-unknown-linux-gnueabi --with-shared \
+       --prefix=${HOME}/x-tools/arm-unknown-linux-gnueabi/local
+
+     # Compile ncurses.  Setting CC to g++ below isn't a typo..otherwise it
+     # it tries to link c++ code with gcc for some bone-headed reason.
+     make \
+      CC=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-g++ \
+      CXX=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-g++ \
+      RANLIB=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-ranlib \
+      LD=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-ld \
+      AR=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-ar \
+      AS=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-as \
+      -j4 
+      
+     make \
+      CC=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-g++ \
+      CXX=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-g++ \
+      RANLIB=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-ranlib \
+      LD=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-ld \
+      AR=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-ar \
+      AS=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-as \
+      install
+
+  *  Cross-compile libpcap (version 1.1.1)
+
+     # Configure it for cross-compiling.
+
+      CC=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-gcc \
+      CXX=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-g++ \
+      RANLIB=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-ranlib \
+      LD=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-ld \
+      AR=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-ar \
+      AS=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-as \
+      ac_cv_linux_vers=2 \
+       ./configure --host=arm-unknown-linux-gnueabi --with-shared \
+       --prefix=${HOME}/x-tools/arm-unknown-linux-gnueabi/local \
+       --with-pcap=linux
+
+     # Build it
+     make \
+      CC=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-gcc \
+      CXX=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-g++ \
+      RANLIB=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-ranlib \
+      LD=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-ld \
+      AR=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-ar \
+      AS=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-as
+
+     # Install it
+     make \
+      CC=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-gcc \
+      CXX=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-g++ \
+      RANLIB=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-ranlib \
+      LD=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-ld \
+      AR=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-ar \
+      AS=~/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-as \
+      install
+      
+      
+  *  Build xorp with the cross-compiler, specifying the path to openssl
+
+  scons build=arm-unknown-linux-gnu \
+    STRIP=${HOME}/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-sstrip \
+    CC=${HOME}/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-gcc \
+    CXX=${HOME}/x-tools/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-g++ \
+    CFLAGS=-I${HOME}/x-tools/arm-unknown-linux-gnueabi/local/include \
+    CXXFLAGS=-I${HOME}/x-tools/arm-unknown-linux-gnueabi/local/include \
+    LINKFLAGS=-L${HOME}/x-tools/arm-unknown-linux-gnueabi/local/lib
+
+  This builds binaries, but I have no way actually to test them. --Ben
+
 
 4. Performance optimization
 ===========================
