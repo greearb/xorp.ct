@@ -22,6 +22,8 @@ Import('env')
 
 env = env.Clone()
 
+is_shared = env.has_key('SHAREDLIBS')
+
 env.AppendUnique(CPPPATH = [
     '#',
     '$BUILDDIR',
@@ -48,6 +50,12 @@ env.AppendUnique(LIBS = [
     'xorp_proto',
     'xorp_comm',
     ])
+
+if not is_shared:
+    env.AppendUnique(LIBS = [
+        "crypto",
+        "rt",
+        ])
 
 env.Replace(RPATH = [
     env.Literal(env['xorp_tool_rpath'])

@@ -28,9 +28,15 @@ subdirs = [
 
 SConscript(dirs = subdirs, exports='env')
 
-bgp_env = env.Clone()
+is_shared = env.has_key('SHAREDLIBS')
 
-is_shared = bgp_env.has_key('SHAREDLIBS')
+if not is_shared:
+    env.AppendUnique(LIBS = [
+        "crypto",
+        "rt",
+        ])
+
+bgp_env = env.Clone()
 
 bgp_env.AppendUnique(CPPPATH = [
     '#',

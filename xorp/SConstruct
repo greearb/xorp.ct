@@ -868,6 +868,14 @@ if env['debug_cb']:
 # This allows the package itself to be relocated in the filesystem
 # as a whole. This also allows us to run binaries before we ship them.
 #
+
+# Go ahead and define some variables here so that SConscript files are not
+# so repetitive when dealing with RPATH, etc.
+# Since we are building static, they should be ignored anyway.
+env['xorp_sbin_rpath'] = env['xorp_libdir']
+env['xorp_tool_rpath'] = env['xorp_libdir']
+env['xorp_module_rpath'] = env['xorp_libdir']
+
 if env.has_key('SHAREDLIBS'):
     if env['rtld_origin']:
 	#
@@ -917,14 +925,7 @@ if env.has_key('SHAREDLIBS'):
 	env['xorp_module_rpath'] = os.path.join('\\$$ORIGIN',
 	   os.path.relpath(env.Dir('$xorp_libdir').abspath,
 			   env.Dir('$xorp_moduledir').abspath))
-    else:
-	# Hardcode the RPATH to our final destination.
-	# Developers will need to set LD_LIBRARY_PATH until they install
-	# binaries from the BUILDDIR.
-	env['xorp_sbin_rpath'] = env['xorp_libdir']
-	env['xorp_tool_rpath'] = env['xorp_libdir']
-	env['xorp_module_rpath'] = env['xorp_libdir']
-
+        
 # Export global symbols as dynamic in executables for runtime backtraces
 # w/o GDB or corefiles in production deployments.
 # NOTE: GNU ld specific flag.

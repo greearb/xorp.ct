@@ -63,6 +63,12 @@ env.AppendUnique(LIBS = [
     'xorp_comm'
 ])
 
+if not is_shared:
+    env.AppendUnique(LIBS = [
+        "crypto",
+        "rt",
+        ])
+
 if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
     env.AppendUnique(LIBS = [
         'xif_fea_rawpkt6',

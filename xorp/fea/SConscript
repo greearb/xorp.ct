@@ -129,6 +129,12 @@ if env.has_key('has_libpcap') and env['has_libpcap']:
 if is_shared:
     env.AppendUnique(LINKFLAGS = [ '-Wl,-z,defs', ])
 
+else:
+    env.AppendUnique(LIBS = [
+        "crypto",
+        "rt",
+        ])
+
 libxorp_fea_srcs = [
      'fea_io.cc',
      'fea_node.cc',
