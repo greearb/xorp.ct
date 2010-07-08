@@ -123,6 +123,12 @@ e.PrependUnique(LIBS = [
     'xorp_core',
 ])
 
+if not is_shared:
+    e.AppendUnique(LIBS = [
+        "crypto",
+        "rt",
+        ])
+
 e.Replace(RPATH = [
     e.Literal(e['xorp_module_rpath'])
 ])
@@ -204,12 +210,20 @@ if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
         'xorp_proto',
         'xorp_ipc',
         'xorp_comm',
-        'xorp_core',
         'xorp_ripng',
         'xif_socket6',
+        'xorp_core',
         ])
 
-
+    if not is_shared:
+        e.AppendUnique(LIBS = [
+            "crypto",
+            "rt",
+            ])
+        e.Append(LIBS = [
+            'xorp_policy_backend',
+            ])
+        
     e.Replace(RPATH = [
         e.Literal(e['xorp_module_rpath'])
         ])

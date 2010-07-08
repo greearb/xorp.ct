@@ -61,6 +61,12 @@ env.AppendUnique(LIBS = [
     'xorp_comm'
 ])
 
+if not is_shared:
+    env.AppendUnique(LIBS = [
+        "crypto",
+        "rt",
+        ])
+
 env.Replace(RPATH = [
     env.Literal(env['xorp_module_rpath'])
 ])

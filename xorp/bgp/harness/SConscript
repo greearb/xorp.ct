@@ -68,6 +68,18 @@ if not (env.has_key('disable_profile') and env['disable_profile']):
         'xif_profile_client',
         ])
 
+is_shared = env.has_key('SHAREDLIBS')
+if not is_shared:
+    env.AppendUnique(LIBS = [
+        "crypto",
+        "rt",
+        ])
+    # This is really needed, belive it or not.
+    env.Append(LIBS = [
+        'xorp_core',
+        ]);
+
+
 coord_srcs = [
     'bgppp.cc',
     'command.cc',

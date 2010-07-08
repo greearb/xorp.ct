@@ -22,6 +22,8 @@ Import('env')
 
 env = env.Clone()
 
+is_shared = env.has_key('SHAREDLIBS')
+
 env.AppendUnique(CPPPATH = [
     '#',
     '$BUILDDIR',
@@ -56,6 +58,12 @@ env.AppendUnique(LIBS = [
     'xst_bgp',
     'xif_finder_event_notifier',
     ])
+
+if not is_shared:
+    env.AppendUnique(LIBS = [
+        "crypto",
+        "rt",
+        ])
 
 if not (env.has_key('disable_profile') and env['disable_profile']):
     env.AppendUnique(LIBS = [

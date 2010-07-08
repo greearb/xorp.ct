@@ -354,6 +354,9 @@ scons check
     to compile XORP 1.7 and above, primarily due to scons and
     python dependencies.
 
+  *  If compiling with shared=no, you should also install static glibc
+     openssl and other needed libraries.
+
   * Linux Red Hat Enterprise Linux Server release 5 (Tikanga)
     (kernel 2.6.18-8.el5)
     - Optionally install the following packages:

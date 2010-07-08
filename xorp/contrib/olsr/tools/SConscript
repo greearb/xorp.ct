@@ -49,6 +49,12 @@ env.AppendUnique(LIBS = [
     'xif_olsr4',
     ])
 
+if not is_shared:
+    env.AppendUnique(LIBS = [
+        "crypto",
+        "rt",
+        ])
+
 cleardbsrcs = [
 	'clear_database.cc'
     ]

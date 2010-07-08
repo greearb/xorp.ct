@@ -113,6 +113,15 @@ xorp_paths = {
     "XORP_SRC_ROOT"     : '\\"' + str(env['xorp_sourcedir']) + '\\"',
 }
 
+
+is_shared = env.has_key('SHAREDLIBS')
+if not is_shared:
+    env.AppendUnique(LIBS = [
+        "crypto",
+        "rt",
+        ])
+
+
 util_cc_env = env.Clone()
 util_cc_env.AppendUnique(CPPDEFINES=xorp_paths.items())
 obj_util = util_cc_env.StaticObject(source='util.cc')

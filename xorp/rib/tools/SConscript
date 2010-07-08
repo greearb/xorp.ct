@@ -48,6 +48,13 @@ env.AppendUnique(LIBS = [
     'xorp_comm',
     ])
 
+is_shared = env.has_key('SHAREDLIBS')
+if not is_shared:
+    env.AppendUnique(LIBS = [
+        "crypto",
+        "rt",
+        ])
+
 env.Replace(RPATH = [
     env.Literal(env['xorp_tool_rpath'])
 ])

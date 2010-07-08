@@ -60,6 +60,12 @@ env.AppendUnique(LIBS = [
     'xorp_comm'
 ])
 
+if not is_shared:
+    env.AppendUnique(LIBS = [
+        "crypto",
+        "rt",
+        ])
+
 libxorp_mld6igmp_srcs = [
 	     'mld6igmp_config.cc',
 	     'mld6igmp_group_record.cc',
