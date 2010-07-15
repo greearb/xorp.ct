@@ -563,8 +563,18 @@ NlmUtils::nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
     //
     // TODO: define default admin distance instead of 0xffff
     //
-    fte = FteX(IPvXNet(dst_addr, dst_mask_len), nexthop_addr,
-	       if_name, vif_name, route_metric, 0xffff, xorp_route);
+    try {
+	fte = FteX(IPvXNet(dst_addr, dst_mask_len), nexthop_addr,
+		   if_name, vif_name, route_metric, 0xffff, xorp_route);
+    }
+    catch (XorpException& xe) {
+	err_msg += "exception in nlm_get_to_fte_cfg: ";
+	err_msg += xe.str();
+	err_msg += "\n";
+	XLOG_ERROR("exception in nlm_get_to_fte_cfg: %s", xe.str().c_str());
+	return XORP_ERROR;
+    }
+
     if (is_deleted)
 	fte.mark_deleted();
 

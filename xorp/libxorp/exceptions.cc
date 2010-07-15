@@ -134,6 +134,14 @@ InvalidNetmaskLength::InvalidNetmaskLength(const char* file,
     : XorpException("XorpInvalidNetmaskLength", file, line), 
       _netmask_length (netmask_length) 
 {
+    // There was a case where fea was crashing due to un-caught exception.
+    // Somehow, no useful info was being printed other than the exception
+    // name.  So, add some logging here just in case it happens again.
+    // (On reboot, couldn't cause the problem to happen again, so not sure
+    // I actually fixed the root cause in fea yet.)
+    cerr << "Creating InvalidNetmaskLength exception, file: "
+     << file << ":" << line << " netmask_length: " << netmask_length
+     << endl;
 } 
 
 const string 
