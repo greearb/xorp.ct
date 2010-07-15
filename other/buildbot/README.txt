@@ -12,6 +12,17 @@ vi slave/info/host
 buildbot start slave
 
 
+To set up a build-bot master, do normal buildbot install, then use
+something similar to the master.cfg file located in this directory.
+After renaming the Makefile.sample files to Makefile in the buildbot
+directory, the following crontab for buildbot starts everything on
+boot:
+
+@reboot cd /home/buildbot/xorp.ct.github && make start
+@reboot cd /home/buildbot/slaves/xorp.ct/slave && make start
+@reboot /usr/local/bin/github_buildbot.py&
+
+
 This file details the packages added to the default installations of the different os's used in the buildbot system. Dependencies aren't listed.
 
 debian 5.0.4 sparc (buildbot3.cs.ucl.ac.uk)
