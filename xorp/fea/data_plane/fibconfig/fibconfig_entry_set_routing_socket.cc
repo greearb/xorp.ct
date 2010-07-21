@@ -383,9 +383,15 @@ FibConfigEntrySetRoutingSocket::add_entry(const FteX& fte)
 #endif // AF_LINK
     }
 
+    errno = 0;
     if (rs.write(rtm, rtm->rtm_msglen) != rtm->rtm_msglen) {
 	XLOG_ERROR("Error writing to routing socket: %s", strerror(errno));
-	return (XORP_ERROR);
+	// if error is EEXISTS, then don't return error..we don't want to fail
+	// the entire commit needlessly.
+	if (errno == EEXISTS) {
+	    return XORP_OK;
+	}
+	return XORP_ERROR;
     }
     
     //

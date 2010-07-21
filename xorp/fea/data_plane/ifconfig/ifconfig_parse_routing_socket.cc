@@ -308,7 +308,8 @@ rtm_ifinfo_to_fea_cfg(const struct if_msghdr* ifm, IfTree& iftree,
 	
 	IfTreeInterface* ifp = iftree.find_interface(if_index);
 	if (ifp == NULL) {
-	    XLOG_FATAL("Could not find interface with index %u", if_index);
+	    XLOG_WARNING("Could not find interface with index %u", if_index);
+	    return;
 	}
 	if (ifp->is_marked(IfTreeItem::CREATED))
 	    is_newlink = true;
