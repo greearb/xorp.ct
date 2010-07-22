@@ -21,6 +21,7 @@ Release 1.9-CT  (Work in Progress)
 
    *  Support cross-compiling.  See BUILD_NOTES.
 
+   *  BSD:  Don't crash FEA when interface dissappears.
 
 Release 1.8-CT  June, 2010
 

@@ -386,9 +386,9 @@ FibConfigEntrySetRoutingSocket::add_entry(const FteX& fte)
     errno = 0;
     if (rs.write(rtm, rtm->rtm_msglen) != rtm->rtm_msglen) {
 	XLOG_ERROR("Error writing to routing socket: %s", strerror(errno));
-	// if error is EEXISTS, then don't return error..we don't want to fail
+	// if error is EEXIST, then don't return error..we don't want to fail
 	// the entire commit needlessly.
-	if (errno == EEXISTS) {
+	if (errno == EEXIST) {
 	    return XORP_OK;
 	}
 	return XORP_ERROR;
