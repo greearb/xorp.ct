@@ -38,6 +38,13 @@
 #include "selector.hh"
 
 
+// The default signal handler logic will catch:
+// SIGTERM, SIGINT, SIGXFSZ, SIGXCPU
+// and set xorp_do_run to 0.  Control loops can use this
+// to bail out and gracefully exit.
+extern int xorp_do_run;
+void setup_dflt_sighandlers();
+
 
 /**
  * @short Event Loop.

@@ -27,14 +27,55 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxipc/finder.hh"
-
 #include "eventloop.hh"
-
+#include <signal.h>
 
 //
 // Number of EventLoop instances.
 //
 int eventloop_instance_count = 0;
+
+int xorp_do_run = 1;
+
+//Trap some common signals to allow graceful exit.
+void dflt_sig_handler(int signo) { 
+    //reestablish signal handler
+    signal(signo, (&dflt_sig_handler));
+
+    switch (signo) {
+    case SIGTERM:
+	cerr << "Got SIGTERM, shutting down.\n";
+	goto do_terminate;
+    case SIGINT:
+	cerr << "Got SIGINT, shutting down.\n";
+	goto do_terminate;
+    case SIGXCPU:
+	cerr << "Got SIGXCPU, shutting down.\n";
+	goto do_terminate;
+    case SIGXFSZ:
+	cerr << "Got SIGXFSZ, shutting down.\n";
+	goto do_terminate;
+
+    default:
+	cerr << "WARNING:  Ignoring un-handled error in dflt_sig_handler: " << signo << endl;
+	return;
+    }//switch
+
+  do_terminate:
+    cerr << flush;
+    xorp_do_run = 0;
+
+}//dflt_sig_handler
+
+
+void setup_dflt_sighandlers() {
+    signal(SIGTERM, dflt_sig_handler);
+    signal(SIGINT, dflt_sig_handler);
+    signal(SIGXCPU, dflt_sig_handler);
+    signal(SIGXFSZ, dflt_sig_handler);
+}
+
+
 
 EventLoop::EventLoop()
     : _clock(new SystemClock), _timer_list(_clock), _aggressiveness(0),
