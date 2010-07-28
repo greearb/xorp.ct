@@ -491,6 +491,7 @@ FibConfigEntrySetRoutingSocket::delete_entry(const FteX& fte)
     if (! is_host_route)
 	fte.net().netmask().copy_out(*sin_netmask);
     
+    errno = 0;
     if (rs.write(rtm, rtm->rtm_msglen) != rtm->rtm_msglen) {
 	//
 	// XXX: If the outgoing interface was taken down earlier, then
@@ -507,30 +508,30 @@ FibConfigEntrySetRoutingSocket::delete_entry(const FteX& fte)
 	// an overkill. If such check should be performed, we should
 	// use the corresponding FibConfigTableGetNetlink plugin.
 	//
-	do {
-	    // Check whether the error code matches
-	    if (errno != ESRCH) {
-		//
-		// XXX: The "No such process" error code is used by the
-		// kernel to indicate there is no such forwarding entry
-		// to delete.
-		//
-		break;
-	    }
+	// NOTE:  This seems too harsh to me.  If we get ESRCH, then return
+	// OK, regardless of other things. --Ben
+
+	// Check whether the error code matches
+	if (errno == ESRCH) {
+	    //
+	    // XXX: The "No such process" error code is used by the
+	    // kernel to indicate there is no such forwarding entry
+	    // to delete.
+	    //
+	    return XORP_OK;
 
 	    // Check whether the interface is down
-	    if (fte.ifname().empty())
-		break;		// No interface to check
-	    const IfTree& iftree = fibconfig().system_config_iftree();
-	    const IfTreeVif* vifp = iftree.find_vif(fte.ifname(),
-						    fte.vifname());
-	    if ((vifp != NULL) && vifp->enabled())
-		break;		// The interface is UP
+	    //if (fte.ifname().empty())
+	    //  break;		// No interface to check
+	    //const IfTree& iftree = fibconfig().system_config_iftree();
+	    //const IfTreeVif* vifp = iftree.find_vif(fte.ifname(),
+	    //				    fte.vifname());
+	    //if ((vifp != NULL) && vifp->enabled())
+	    //	break;		// The interface is UP
+	}
 
-	    return (XORP_OK);
-	} while (false);
-
-	XLOG_ERROR("Error writing to routing socket: %s", strerror(errno));
+	XLOG_ERROR("Error writing to routing socket, trying to delete route: %s, error:: %s(%i)",
+		   fte.str().c_str(), strerror(errno), errno);
 	return (XORP_ERROR);
     }
     
