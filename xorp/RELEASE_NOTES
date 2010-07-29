@@ -23,6 +23,10 @@ Release 1.9-CT  (Work in Progress)
 
    *  BSD:  Don't crash FEA when interface dissappears.
 
+   *  BSD:  Don't fail commit if cannot remove route that doesn't exist.
+
+   *  Add signal handling for more graceful exit.  Helps clean up /var/tmp/xrl.* files.
+
 Release 1.8-CT  June, 2010
 
 Overview:
