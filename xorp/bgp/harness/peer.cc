@@ -1468,8 +1468,9 @@ Peer::xrl_callback(const XrlError& error, const char *comment)
 void
 Peer::xrl_callback_connected(const XrlError& error, const char *comment)
 {
-    debug_msg("callback_connected %s %s\n", comment, error.str().c_str());
-    if(XrlError::OKAY() == error) {
+    XLOG_INFO("%s: callback_connected, OK: %i %s %s\n",
+	      _peername.c_str(), (int)(error.isOK()), comment, error.str().c_str());
+    if (error.isOK()) {
 	_connected = true;
     } else {
 	_connected = false;

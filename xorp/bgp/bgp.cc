@@ -160,7 +160,13 @@ BGPMain::~BGPMain()
 #endif
 	) {
 	eventloop().run();
+	if (_peerlist->not_all_idle()) {
+	    // Kick them again
+	    XLOG_WARNING("Stopping all peers in ~BGPMain cleanup loop.\n");
+	    _peerlist->all_stop();
+	}
     }
+
     /*
     ** NOTE: We expect one timer to be pending. The timer is in the xrl_router.
     */

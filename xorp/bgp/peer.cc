@@ -606,7 +606,7 @@ BGPPeer::event_start()			// EVENTBGPSTART
  */
 void
 BGPPeer::event_stop(bool restart, bool automatic)	// EVENTBGPSTOP
-{ 
+{
     TIMESPENT();
 
     switch(_state) {
@@ -2046,7 +2046,7 @@ BGPPeer::set_state(FSMState s, bool restart, bool automatic)
 {
     TIMESPENT();
 
-    debug_msg("Peer %s: Previous state: %s Current state: %s\n",
+    XLOG_INFO("Peer %s: Previous state: %s Current state: %s\n",
 	      peerdata()->iptuple().str().c_str(),
 	      pretty_print_state(_state),
 	      pretty_print_state(s));
