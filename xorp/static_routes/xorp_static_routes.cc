@@ -87,8 +87,10 @@ usage(const char *argv0, int exit_value)
 }
 
 static void
-static_routes_main(const string& finder_hostname, uint16_t finder_port)
-{
+static_routes_main(const string& finder_hostname, uint16_t finder_port) {
+
+    setup_dflt_sighandlers();
+
     //
     // Init stuff
     //
@@ -114,7 +116,7 @@ static_routes_main(const string& finder_hostname, uint16_t finder_port)
     //
     // Main loop
     //
-    while (! xrl_static_routes_node.is_done()) {
+    while (xorp_do_run && !xrl_static_routes_node.is_done()) {
 	eventloop.run();
     }
 }

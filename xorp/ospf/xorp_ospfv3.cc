@@ -64,18 +64,16 @@ main(int /*argc*/, char **argv)
 
 	XrlStdRouter xrl_router(eventloop, TARGET_OSPFv3);
 
-// 	XrlIO<IPv4> io_ipv4(eventloop, xrl_router, feaname, ribname);
 	XrlIO<IPv6> io_ipv6(eventloop, xrl_router, feaname, ribname);
-//  	Ospf<IPv4> ospf_ipv4(OspfTypes::V3, eventloop, &io_ipv4);
 	Ospf<IPv6> ospf_ipv6(OspfTypes::V3, eventloop, &io_ipv6);
 
-	XrlOspfV3Target v3target(&xrl_router, /* ospf_ipv4,*/ ospf_ipv6,
-				 /* io_ipv4, */ io_ipv6);
+	XrlOspfV3Target v3target(&xrl_router, ospf_ipv6, io_ipv6);
 	wait_until_xrl_router_is_ready(eventloop, xrl_router);
-// 	io_ipv4.startup();
 	io_ipv6.startup();
 
-	while (/*ospf_ipv4.running() && */ospf_ipv6.running())
+	setup_dflt_sighandlers();
+
+	while (xorp_do_run && ospf_ipv6.running())
 	    eventloop.run();
 
     } catch(...) {

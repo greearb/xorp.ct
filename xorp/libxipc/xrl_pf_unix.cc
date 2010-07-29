@@ -25,6 +25,7 @@
 #include "xrl_pf_unix.hh"
 #include "libcomm/comm_api.h"
 #include "sockutil.hh"
+#include "libxorp/xlog.h"
 
 const char* XrlPFUNIXListener::_protocol = "unix";
 
@@ -45,6 +46,8 @@ XrlPFUNIXListener::XrlPFUNIXListener(EventLoop& e, XrlDispatcher* xr)
 
     _address_slash_port = path;
     encode_address(_address_slash_port);
+
+    XLOG_INFO("Creating XlfPFUNIXListener: %p  path: %s\n", this, path.c_str());
 
     _eventloop.add_ioevent_cb(_sock, IOT_ACCEPT,
          callback(dynamic_cast<XrlPFSTCPListener*>(this),
@@ -75,7 +78,13 @@ XrlPFUNIXListener::~XrlPFUNIXListener()
     // sort this out.
     string path = _address_slash_port;
     decode_address(path);
-    unlink(path.c_str());
+    if (unlink(path.c_str()) != 0) {
+	XLOG_ERROR("Failed to unlink path while destructing XrlPFUNIXListener: %p -:%s:-, error: %s\n",
+		   this, path.c_str(), strerror(errno));
+    }
+    else {
+	XLOG_INFO("Destructing XlfPFUNIXListener: %p  unlinked path: %s\n", this, path.c_str());
+    }
 }
 
 const char*

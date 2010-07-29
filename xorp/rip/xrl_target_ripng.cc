@@ -40,11 +40,10 @@ XrlRipngTarget::XrlRipngTarget(EventLoop&		el,
 			       XrlProcessSpy&		xps,
 			       XrlPortManager<IPv6>& 	xpm,
 			       XrlRedistManager<IPv6>&	xrm,
-			       bool&			should_exit,
 			       System<IPv6>&		rip_system)
     : XrlRipngTargetBase(&xr), _e(el)
 {
-    _ct = new XrlRipCommonTarget<IPv6>(xps, xpm, xrm, should_exit, rip_system);
+    _ct = new XrlRipCommonTarget<IPv6>(xps, xpm, xrm, rip_system);
 }
 
 XrlRipngTarget::~XrlRipngTarget()

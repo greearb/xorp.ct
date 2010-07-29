@@ -489,7 +489,13 @@ XrlRouter::resolve_callback(const XrlError&	 	e,
 {
     list<XrlRouterDispatchState*>::iterator i;
     i = find(_dsl.begin(), _dsl.end(), ds);
-    XLOG_ASSERT(i == _dsl.begin());
+
+    // It seems that the finder_client force_failure logic can cause
+    // callbacks to be called out of order, so this assert fails.
+    // Test case is to 'killall -r xorp' when lots of things are running.
+    // --Ben
+    //XLOG_ASSERT(i == _dsl.begin());
+
     _dsl.erase(i);
 
     if (e == XrlError::OKAY()) {

@@ -73,7 +73,9 @@ main(int /*argc*/, char **argv)
 	wait_until_xrl_router_is_ready(eventloop, xrl_router);
 	io.startup();
 
-	while (ospf.running())
+	setup_dflt_sighandlers();
+
+	while (xorp_do_run && ospf.running())
 	    eventloop.run();
     } catch(...) {
 	xorp_catch_standard_exceptions();

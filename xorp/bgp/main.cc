@@ -34,16 +34,6 @@
 #include "xrl_target.hh"
 
 
-BGPMain *bgpmain;
-
-void
-terminate_main_loop(int sig)
-{
-    debug_msg("Signal %d\n", sig);
-    UNUSED(sig);
-    bgpmain->terminate();
-}
-
 int
 main(int /*argc*/, char **argv)
 {
@@ -64,14 +54,14 @@ main(int /*argc*/, char **argv)
 
     comm_init();
 
+    setup_dflt_sighandlers();
+
     try {
 	EventLoop eventloop;
 
 // 	signal(SIGINT, terminate_main_loop);
 
 	BGPMain bgp(eventloop);
-	bgpmain = &bgp;		// An external reference for the
-				// signal handler.
 
 	/*
 	** By default assume there is a rib running.
@@ -82,7 +72,7 @@ main(int /*argc*/, char **argv)
 	** Wait for our local configuration information and for the
 	** FEA and RIB to start.
 	*/
-	while (bgp.get_xrl_target()->waiting() && bgp.run()) {
+	while (xorp_do_run && bgp.get_xrl_target()->waiting()) {
 	    eventloop.run();
 	}
 

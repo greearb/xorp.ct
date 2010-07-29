@@ -18,7 +18,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/rip/xrl_target_common.hh,v 1.39 2008/10/29 21:59:39 andrewma Exp $
 
 #ifndef __RIP_XRL_TARGET_COMMON_HH__
 #define __RIP_XRL_TARGET_COMMON_HH__
@@ -44,7 +43,6 @@ public:
     XrlRipCommonTarget(XrlProcessSpy& 		xps,
 		       XrlPortManager<A>&	xpm,
 		       XrlRedistManager<A>&	xrm,
-		       bool& 			should_exit,
 		       System<A>&		rip_system);
 
     ~XrlRipCommonTarget();
@@ -339,8 +337,6 @@ protected:
     XrlPortManager<A>&		_xpm;
     XrlRedistManager<A>&	_xrm;
 
-    bool&			_should_exit;
-
     ProcessStatus		_status;
     string			_status_note;
 
@@ -355,10 +351,9 @@ template <typename A>
 XrlRipCommonTarget<A>::XrlRipCommonTarget(XrlProcessSpy&	xps,
 					  XrlPortManager<A>& 	xpm,
 					  XrlRedistManager<A>&	xrm,
-					  bool&			should_exit,
 					  System<A>&		rip_system)
     : _xps(xps), _xpm(xpm), _xrm(xrm),
-      _should_exit(should_exit), _status(PROC_NULL), _status_note(""),
+      _status(PROC_NULL), _status_note(""),
       _rip_system(rip_system)
 {
 }
@@ -392,7 +387,7 @@ XrlCmdError
 XrlRipCommonTarget<A>::common_0_1_shutdown()
 {
     debug_msg("Shutdown requested.\n");
-    _should_exit = true;
+    xorp_do_run = 0;
     return XrlCmdError::OKAY();
 }
 

@@ -44,6 +44,7 @@
 // to bail out and gracefully exit.
 extern int xorp_do_run;
 void setup_dflt_sighandlers();
+void dflt_sig_handler(int signo);
 
 
 /**

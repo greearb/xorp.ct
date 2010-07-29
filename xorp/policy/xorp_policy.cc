@@ -29,8 +29,10 @@
 #include "xrl_target.hh"
 
 
-void go()
-{
+void go() {
+
+    setup_dflt_sighandlers();
+
     EventLoop e;
 
     XrlStdRouter rtr(e,PolicyTarget::policy_target_name.c_str(),
@@ -39,10 +41,10 @@ void go()
     PolicyTarget policy_target(rtr);
     XrlPolicyTarget xrl_policy_target(&rtr,policy_target);
 
-    while (!rtr.ready())
+    while (xorp_do_run && !rtr.ready())
 	e.run();
 
-    while (policy_target.running())
+    while (xorp_do_run && policy_target.running())
 	e.run();
 }
 

@@ -90,9 +90,12 @@ usage(const char *argv0, int exit_value)
 }
 
 static void
-mld6igmp_main(const string& finder_hostname, uint16_t finder_port)
-{
+mld6igmp_main(const string& finder_hostname, uint16_t finder_port) {
+
 #ifdef HAVE_IPV6
+
+    setup_dflt_sighandlers();
+
     //
     // Init stuff
     //
@@ -129,7 +132,7 @@ mld6igmp_main(const string& finder_hostname, uint16_t finder_port)
     // Main loop
     //
 #ifdef HAVE_IPV6_MULTICAST
-    while (! xrl_mld6igmp_node6.is_done()) {
+    while (xorp_do_run && !xrl_mld6igmp_node6.is_done()) {
 	eventloop.run();
     }
 

@@ -78,11 +78,10 @@ XrlRipTarget::XrlRipTarget(EventLoop&			el,
 			   XrlProcessSpy&		xps,
 			   XrlPortManager<IPv4>& 	xpm,
 			   XrlRedistManager<IPv4>&	xrm,
-			   bool&			should_exit,
 			   System<IPv4>&		rip_system)
     : XrlRipTargetBase(&xr), _e(el)
 {
-    _ct = new XrlRipCommonTarget<IPv4>(xps, xpm, xrm, should_exit, rip_system);
+    _ct = new XrlRipCommonTarget<IPv4>(xps, xpm, xrm, rip_system);
 }
 
 XrlRipTarget::~XrlRipTarget()

@@ -90,8 +90,10 @@ usage(const char *argv0, int exit_value)
 }
 
 static void
-fea_main(const string& finder_hostname, uint16_t finder_port)
-{
+fea_main(const string& finder_hostname, uint16_t finder_port) {
+
+    setup_dflt_sighandlers();
+
     EventLoop eventloop;
     XrlFeaNode xrl_fea_node(eventloop, xrl_fea_targetname,
 			    xrl_finder_targetname, finder_hostname,
@@ -103,7 +105,7 @@ fea_main(const string& finder_hostname, uint16_t finder_port)
     //
     // Main loop
     //
-    while (! xrl_fea_node.is_shutdown_received()) {
+    while (xorp_do_run && !xrl_fea_node.is_shutdown_received()) {
 	eventloop.run();
     }
 

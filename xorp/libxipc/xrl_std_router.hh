@@ -68,7 +68,7 @@ public:
 		 uint16_t	finder_port,
 		 bool		unix_socket = UNIX_SOCKET_DEFAULT);
 
-    ~XrlStdRouter();
+    virtual ~XrlStdRouter();
 
 private:
     void	   construct(bool unix_socket);

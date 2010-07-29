@@ -99,7 +99,7 @@ call_xrl(EventLoop& e, XrlRouter& router, const char* request)
 	done = false;
 	resolve_failed = true;
 
-	while (done == false && tries <= retry_count) {
+	while (xorp_do_run && done == false && tries <= retry_count) {
 	    resolve_failed = false;
 	    router.send(x, callback(&response_handler,
 				    &done,
@@ -108,7 +108,7 @@ call_xrl(EventLoop& e, XrlRouter& router, const char* request)
 	    
 	    bool timed_out = false;
 	    XorpTimer timeout = e.set_flag_after_ms(wait_time, &timed_out);
-	    while (timed_out == false && done == false) {
+	    while (xorp_do_run && timed_out == false && done == false) {
 		// NB we don't test for resolve failed here because if
 		// resolved failed we want to wait before retrying.
 		e.run();
@@ -127,9 +127,11 @@ call_xrl(EventLoop& e, XrlRouter& router, const char* request)
 	    }
 
 	    if (router.connected() == false) {
-		XLOG_FATAL("Lost connection to finder\n");
+		XLOG_ERROR("Lost connection to finder\n");
+		xorp_do_run = 0;
+		break;
 	    }
-	}
+	}//while
 
 	if (resolve_failed) {
 	    XLOG_WARNING("request: %s resolve failed", request);
@@ -294,36 +296,39 @@ main(int argc, char* const argv[])
     argc -= optind;
     argv += optind;
 
+    setup_dflt_sighandlers();
+
+    int rv = 0;
     try {
 	EventLoop e;
 	XrlStdRouter router(e, ROUTER_NAME, finder_host.c_str(), port);
 
 	router.finalize();
 
-	while (false == router.failed() && false == router.ready()) {
+	while (xorp_do_run && !router.failed() && !router.ready()) {
 	    e.run();
 	}
 
-	if (true == router.failed()) {
+	if (router.failed()) {
 	    XLOG_ERROR("Router failed to communicate with finder.\n");
-	    exit(1);
+	    rv = 1;
 	}
-
-	if (false == router.ready()) {
+	else if (!router.ready()) {
 	    XLOG_ERROR("Connected to finder, but did not become ready.\n");
-	    exit(2);
+	    rv = 2;
 	}
-
-	if (fileinput) {
-	    if (input_files(e, router, argc, argv, pponly)) {
-		return -1;
+	else {
+	    if (fileinput) {
+		if (input_files(e, router, argc, argv, pponly)) {
+		    rv = -1;
+		}
+	    } else if (argc != 0) {
+		if (input_cmds(e, router, argc, argv)) {
+		    rv = -1;
+		}
+	    } else {
+		usage();
 	    }
-	} else if (argc != 0) {
-	    if (input_cmds(e, router, argc, argv)) {
-		return -1;
-	    }
-	} else {
-	    usage();
 	}
     } catch(...) {
 	xorp_catch_standard_exceptions();
@@ -335,5 +340,5 @@ main(int argc, char* const argv[])
     xlog_stop();
     xlog_exit();
 
-    return 0;
+    return rv;
 }

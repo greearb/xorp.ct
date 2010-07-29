@@ -18,7 +18,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/rip/xrl_target_rip.hh,v 1.32 2008/10/29 21:59:39 andrewma Exp $
 
 #ifndef __RIP_XRL_TARGET_RIP_HH__
 #define __RIP_XRL_TARGET_RIP_HH__
@@ -41,7 +40,6 @@ public:
 		 XrlProcessSpy& 		xps,
 		 XrlPortManager<IPv4>&		xpm,
 		 XrlRedistManager<IPv4>& 	xrm,
-		 bool& 				should_exit,
 		 System<IPv4>&			rip_system);
     ~XrlRipTarget();
 

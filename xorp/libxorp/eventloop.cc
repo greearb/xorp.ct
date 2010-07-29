@@ -28,6 +28,7 @@
 #include "libxorp/debug.h"
 #include "libxipc/finder.hh"
 #include "eventloop.hh"
+#include <sys/types.h>
 #include <signal.h>
 
 //
@@ -44,26 +45,28 @@ void dflt_sig_handler(int signo) {
 
     switch (signo) {
     case SIGTERM:
-	cerr << "Got SIGTERM, shutting down.\n";
+	XLOG_WARNING("Got SIGTERM, shutting down.\n");
 	goto do_terminate;
     case SIGINT:
-	cerr << "Got SIGINT, shutting down.\n";
+	XLOG_WARNING("Got SIGINT, shutting down.\n");
 	goto do_terminate;
     case SIGXCPU:
-	cerr << "Got SIGXCPU, shutting down.\n";
+	XLOG_WARNING("Got SIGXCPU, shutting down.\n");
 	goto do_terminate;
     case SIGXFSZ:
-	cerr << "Got SIGXFSZ, shutting down.\n";
+	XLOG_WARNING("Got SIGXFSZ, shutting down.\n");
 	goto do_terminate;
 
     default:
-	cerr << "WARNING:  Ignoring un-handled error in dflt_sig_handler: " << signo << endl;
+	XLOG_WARNING("WARNING:  Ignoring un-handled error in dflt_sig_handler: %i\n", signo);
 	return;
     }//switch
 
   do_terminate:
-    cerr << flush;
     xorp_do_run = 0;
+
+    // Now, kick any selects that are blocking
+    kill(getpid(), SIGURG);
 
 }//dflt_sig_handler
 

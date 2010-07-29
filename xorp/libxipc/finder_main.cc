@@ -49,8 +49,6 @@
 #include "permits.hh"
 
 
-static bool gbl_sig_exit = false;			// Exit signal() recv
-
 static bool
 print_twirl()
 {
@@ -75,23 +73,6 @@ usage()
 	    "[-i <interface>]\n");
 }
 
-void
-finder_sig_handler(int s)
-{
-    if (s == SIGINT) {
-	fprintf(stderr, "SIGINT received. Exiting.\n");
-#ifdef SIGHUP
-    } else if (s == SIGHUP) {
-	fprintf(stderr, "SIGHUP received. Exiting.\n");
-#endif
-    } else if (s == SIGTERM) {
-	fprintf(stderr, "SIGTERM received. Exiting.\n");
-    } else {
-	fprintf(stderr, "SIGNAL (%d) received. Exiting.\n", s);
-    }
-    gbl_sig_exit = true;
-}
-
 static void
 finder_main(int argc, char* const argv[])
 {
@@ -99,11 +80,7 @@ finder_main(int argc, char* const argv[])
     list<IPv4>  bind_addrs;
     uint16_t	bind_port = FinderConstants::FINDER_DEFAULT_PORT();
 
-#ifdef SIGHUP
-    signal(SIGHUP, finder_sig_handler);
-#endif
-    signal(SIGINT, finder_sig_handler);
-    signal(SIGTERM, finder_sig_handler);
+    setup_dflt_sighandlers();
 
     int ch;
     while ((ch = getopt(argc, argv, "a:i:n:p:hv")) != -1) {
@@ -205,16 +182,16 @@ finder_main(int argc, char* const argv[])
 	if (run_verbose)
 	    twirl = e.new_periodic_ms(250, callback(print_twirl));
 
-	while (gbl_sig_exit == false) {
+	while (xorp_do_run) {
 	    e.run();
 	}
     } catch (const InvalidPort& i) {
-	fprintf(stderr, "%s: a finder may already be running.\n",
-		i.why().c_str());
+	XLOG_ERROR("%s: a finder may already be running.\n",
+		   i.why().c_str());
 	exit(-1);
     } catch (const InvalidAddress& i) {
-	fprintf(stderr, "Invalid finder server adddress: %s.\n",
-		i.why().c_str());
+	XLOG_ERROR("Invalid finder server adddress: %s.\n",
+		   i.why().c_str());
 	exit(-1);
     } catch (...) {
 	xorp_catch_standard_exceptions();

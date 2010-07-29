@@ -545,11 +545,7 @@ public:
 
     void main_loop();
 
-    /**
-     * shutdown BGP cleanly
-     */
-    void terminate() { _exit_loop = true; }
-    bool run() {return !_exit_loop;}
+    void terminate() { xorp_do_run = 0; }
 
     XorpFd create_listener(const Iptuple& iptuple);
     LocalData *get_local_data();

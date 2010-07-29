@@ -745,7 +745,7 @@ BGPMain::main_loop()
     static XorpTimer t = eventloop().
 	new_periodic_ms(1000, callback(check_callback_duration));
 #endif
-    while ( run() ) {
+    while ( xorp_do_run ) {
 #if defined(DEBUG_MAXIMUM_DELAY)
 	static time_t last = 0;
 	time_t current = time(0);

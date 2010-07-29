@@ -44,6 +44,8 @@ main (int /* argc */, char* argv[])
     xlog_add_default_output();
     xlog_start();
 
+    setup_dflt_sighandlers();
+
     XorpUnexpectedHandler x(xorp_unexpected_handler);
     try {
 	//
@@ -86,7 +88,7 @@ main (int /* argc */, char* argv[])
 	// Main loop
 	//
 	string reason;
-	while (rib_manager.status(reason) != PROC_DONE) {
+	while (xorp_do_run && (rib_manager.status(reason) != PROC_DONE)) {
 	    eventloop.run();
 	}
     } catch (...) {

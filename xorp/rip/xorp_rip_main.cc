@@ -245,14 +245,11 @@ public:
 protected:
     void run(const string& finder_host, uint16_t finder_port);
 
-protected:
-    bool _stop_flag;
 };
 
 
 template <typename A>
 XorpRip<A>::XorpRip()
-    : _stop_flag(false)
 {
 }
 
@@ -273,7 +270,7 @@ XorpRip<A>::run(const string& finder_host, uint16_t finder_port)
 	XrlPortManager<A>	xpm(rip_system, xsr, ixm);
 	XrlRedistManager<A>	xrm(rip_system);
 
-	XrlTargetType xrlt(e, xsr, xps, xpm, xrm, _stop_flag, rip_system);
+	XrlTargetType xrlt(e, xsr, xps, xpm, xrm, rip_system);
 
 	wait_until_xrl_router_is_ready(e, xsr);
 
@@ -299,7 +296,7 @@ XorpRip<A>::run(const string& finder_host, uint16_t finder_port)
 	xrm.startup();
 	smon.add_service(&xrm);
 
-	while ((_stop_flag == false)
+	while (xorp_do_run
 	       && (smon.have_status(SERVICE_FAILED) == false)
 	       && (xsr.failed() == false)) {
 	    e.run();
@@ -339,6 +336,8 @@ XorpRip<A>::main(int argc, char * const argv[])
     xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
     xlog_add_default_output();
     xlog_start();
+
+    setup_dflt_sighandlers();
 
     string	finder_host = FinderConstants::FINDER_DEFAULT_HOST().str();
     uint16_t	finder_port = FinderConstants::FINDER_DEFAULT_PORT();

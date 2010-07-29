@@ -274,8 +274,6 @@ IoIpComm::remove_filter(InputFilter* filter)
 	return (XORP_ERROR);
     }
 
-    XLOG_ASSERT(! _io_ip_plugins.empty());
-
     _input_filters.erase(i);
     if (_input_filters.empty()) {
 	deallocate_io_ip_plugins();

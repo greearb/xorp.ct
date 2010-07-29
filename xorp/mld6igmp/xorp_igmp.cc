@@ -90,8 +90,10 @@ usage(const char *argv0, int exit_value)
 }
 
 static void
-mld6igmp_main(const string& finder_hostname, uint16_t finder_port)
-{
+mld6igmp_main(const string& finder_hostname, uint16_t finder_port) {
+
+    setup_dflt_sighandlers();
+
     //
     // Init stuff
     //
@@ -125,7 +127,7 @@ mld6igmp_main(const string& finder_hostname, uint16_t finder_port)
     //
     // Main loop
     //
-    while (! xrl_mld6igmp_node4.is_done()) {
+    while (xorp_do_run && !xrl_mld6igmp_node4.is_done()) {
 	eventloop.run();
     }
 

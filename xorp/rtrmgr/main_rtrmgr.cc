@@ -73,11 +73,6 @@ static bool default_do_restart = false;
 static bool default_verbose = false;
 
 
-//
-// Local state
-//
-static volatile bool	running = false;
-
 static string	module_dir;
 static string	command_dir;
 static string	template_dir;
@@ -104,11 +99,6 @@ FILE*           pidfile = NULL;
 
 static void cleanup_and_exit(int errcode);
 
-static void
-signalhandler(int)
-{
-    running = false;
-}
 
 static void
 usage(const char* argv0)
@@ -231,15 +221,7 @@ Rtrmgr::run()
     int errcode = 0;
     string errmsg;
 
-    running = true;
-
-    //
-    // Install signal handlers so we can clean up when we're killed
-    //
-    signal(SIGTERM, signalhandler);
-    signal(SIGINT, signalhandler);
-    // XXX signal(SIGBUS, signalhandler);
-    // XXX signal(SIGSEGV, signalhandler);
+    setup_dflt_sighandlers();
 
     //
     // Initialize the event loop
@@ -371,18 +353,18 @@ Rtrmgr::run()
 	if (_quit_time > 0) {
 	    quit_timer =
 		eventloop.new_oneoff_after_ms(_quit_time * 1000,
-					      callback(signalhandler, 0));
+					      callback(dflt_sig_handler, SIGTERM));
 	}
 
 	_ready = true;
 	//
 	// Loop while handling configuration events and signals
 	//
-	while (running) {
+	while (xorp_do_run) {
 	    fflush(stdout);
 	    eventloop.run();
 	    if (_mct->config_failed())
-		running = false;
+		xorp_do_run = 0;
 	}
 	fflush(stdout);
 	_ready = false;

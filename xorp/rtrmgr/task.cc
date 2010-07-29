@@ -1070,7 +1070,7 @@ XrlShutdown::shutdown(const RunShellCommand::ExecId& exec_id, CallBack cb)
 	    return;
 	}
 
-	XLOG_TRACE(_verbose, "Shutdown with XRL: >%s<\n", xrl->str().c_str());
+	XLOG_INFO("Shutdown with XRL: >%s<\n", xrl->str().c_str());
 
 	string response = _xrl_action.xrl_return_spec();
 	_task_manager.xorp_client().send_now(*xrl,
@@ -1084,7 +1084,7 @@ XrlShutdown::shutdown(const RunShellCommand::ExecId& exec_id, CallBack cb)
 	// that the xrl_done response gets the right arguments even
 	// though we're not going to call the XRL.
 	//
-	XLOG_TRACE(_verbose, "XRL: dummy call to %s\n",
+	XLOG_INFO("Shutdown with XRL: dummy call to %s\n",
 		   _xrl_action.request().c_str());
 	_dummy_timer = eventloop().new_oneoff_after_ms(1000,
 			callback(this, &XrlShutdown::dummy_response));
