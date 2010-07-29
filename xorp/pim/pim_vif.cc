@@ -66,13 +66,13 @@
  * 
  * PIM protocol vif constructor.
  **/
-PimVif::PimVif(PimNode& pim_node, const Vif& vif)
-    : ProtoUnit(pim_node.family(), pim_node.module_id()),
+PimVif::PimVif(PimNode* pim_node, const Vif& vif)
+    : ProtoUnit(pim_node->family(), pim_node->module_id()),
       Vif(vif),
       _pim_node(pim_node),
-      _dr_addr(pim_node.family()),
-      _pim_nbr_me(*this, IPvX::ZERO(pim_node.family()), PIM_VERSION_DEFAULT),
-      _domain_wide_addr(IPvX::ZERO(pim_node.family())),
+      _dr_addr(pim_node->family()),
+      _pim_nbr_me(this, IPvX::ZERO(pim_node->family()), PIM_VERSION_DEFAULT),
+      _domain_wide_addr(IPvX::ZERO(pim_node->family())),
       _hello_triggered_delay(PIM_HELLO_HELLO_TRIGGERED_DELAY_DEFAULT),
       _hello_period(PIM_HELLO_HELLO_PERIOD_DEFAULT,
 		    callback(this, &PimVif::set_hello_period_callback)),
@@ -263,7 +263,7 @@ PimVif::set_proto_version(int proto_version)
 PimMrt&
 PimVif::pim_mrt() const
 {
-    return (_pim_node.pim_mrt());
+    return (_pim_node->pim_mrt());
 }
 
 /** System detected some change.  */
@@ -328,9 +328,9 @@ PimVif::start(string& error_msg)
     //
     // Register as a receiver with the kernel
     //
-    if (pim_node().register_receiver(name(),
+    if (pim_node()->register_receiver(name(),
 				     name(),
-				     pim_node().ip_protocol_number(),
+				     pim_node()->ip_protocol_number(),
 				     false)
 	!= XORP_OK) {
 	error_msg = c_format("cannot register as a receiver on vif %s "
@@ -342,9 +342,9 @@ PimVif::start(string& error_msg)
     //
     // Register as a protocol with the MFEA
     //
-    if (pim_node().register_protocol(name(),
+    if (pim_node()->register_protocol(name(),
 				     name(),
-				     pim_node().ip_protocol_number())
+				     pim_node()->ip_protocol_number())
 	!= XORP_OK) {
 	error_msg = c_format("cannot register as a protocol on vif %s "
 			     "with the MFEA",
@@ -357,9 +357,9 @@ PimVif::start(string& error_msg)
 	// Join the appropriate multicast groups: ALL-PIM-ROUTERS
 	//
 	const IPvX group = IPvX::PIM_ROUTERS(family());
-	if (pim_node().join_multicast_group(name(),
+	if (pim_node()->join_multicast_group(name(),
 					    name(),
-					    pim_node().ip_protocol_number(),
+					    pim_node()->ip_protocol_number(),
 					    group)
 	    != XORP_OK) {
 	    error_msg = c_format("cannot join group %s on vif %s",
@@ -372,15 +372,15 @@ PimVif::start(string& error_msg)
 	//
 	// Add MLD6/IGMP membership tracking
 	//
-	pim_node().add_protocol_mld6igmp(vif_index());
+	pim_node()->add_protocol_mld6igmp(vif_index());
     }
     
     //
     // Add the tasks to take care of the PimMre processing
     //
-    pim_node().pim_mrt().add_task_start_vif(vif_index());
-    pim_node().pim_mrt().add_task_my_ip_address(vif_index());
-    pim_node().pim_mrt().add_task_my_ip_subnet_address(vif_index());
+    pim_node()->pim_mrt().add_task_start_vif(vif_index());
+    pim_node()->pim_mrt().add_task_my_ip_address(vif_index());
+    pim_node()->pim_mrt().add_task_my_ip_subnet_address(vif_index());
 
     XLOG_INFO("Interface started: %s%s",
 	      this->str().c_str(), flags_string().c_str());
@@ -424,21 +424,21 @@ PimVif::stop(string& error_msg)
     //
     // Add the tasks to take care of the PimMre processing
     //
-    pim_node().pim_mrt().add_task_stop_vif(vif_index());
-    pim_node().pim_mrt().add_task_my_ip_address(vif_index());
-    pim_node().pim_mrt().add_task_my_ip_subnet_address(vif_index());
+    pim_node()->pim_mrt().add_task_stop_vif(vif_index());
+    pim_node()->pim_mrt().add_task_my_ip_address(vif_index());
+    pim_node()->pim_mrt().add_task_my_ip_subnet_address(vif_index());
 
     //
     // Add the shutdown operation of this vif as a shutdown task
     // for the node.
     //
-    pim_node().incr_shutdown_requests_n();	// XXX: for PIM-stop-vif
+    pim_node()->incr_shutdown_requests_n();	// XXX: for PIM-stop-vif
 
     if (! is_pim_register()) {
 	//
 	// Delete MLD6/IGMP membership tracking
 	//
-	pim_node().delete_protocol_mld6igmp(vif_index());
+	pim_node()->delete_protocol_mld6igmp(vif_index());
 	
 	set_i_am_dr(false);
     }
@@ -471,7 +471,7 @@ PimVif::final_stop(string& error_msg)
 	// Delete MLD6/IGMP membership tracking
 	//
 	if (is_up() || is_pending_up())
-	    pim_node().delete_protocol_mld6igmp(vif_index());
+	    pim_node()->delete_protocol_mld6igmp(vif_index());
 	
 	pim_hello_stop();
 	
@@ -504,7 +504,7 @@ PimVif::final_stop(string& error_msg)
     //
     // Unregister as a protocol with the MFEA
     //
-    if (pim_node().unregister_protocol(name(), name()) != XORP_OK) {
+    if (pim_node()->unregister_protocol(name(), name()) != XORP_OK) {
 	XLOG_ERROR("Cannot unregister as a protocol on vif %s with the MFEA",
 		   name().c_str());
 	ret_value = XORP_ERROR;
@@ -513,9 +513,9 @@ PimVif::final_stop(string& error_msg)
     //
     // Unregister as a receiver with the kernel
     //
-    if (pim_node().unregister_receiver(name(),
+    if (pim_node()->unregister_receiver(name(),
 				       name(),
-				       pim_node().ip_protocol_number())
+				       pim_node()->ip_protocol_number())
 	!= XORP_OK) {
 	XLOG_ERROR("Cannot unregister as a receiver on vif %s with the kernel",
 		   name().c_str());
@@ -528,13 +528,13 @@ PimVif::final_stop(string& error_msg)
     //
     // Inform the node that the vif has completed the shutdown
     //
-    pim_node().vif_shutdown_completed(name());
+    pim_node()->vif_shutdown_completed(name());
 
     //
     // Remove the shutdown operation of this vif as a shutdown task
     // for the node.
     //
-    pim_node().decr_shutdown_requests_n();	// XXX: for PIM-stop-vif
+    pim_node()->decr_shutdown_requests_n();	// XXX: for PIM-stop-vif
 
     return (ret_value);
 }
@@ -755,7 +755,7 @@ PimVif::pim_send(const IPvX& src, const IPvX& dst,
     cksum = inet_checksum_add(cksum, cksum2);
     BUFFER_COPYPUT_INET_CKSUM(cksum, buffer, 2);	// XXX: the checksum
 
-    XLOG_TRACE(pim_node().is_log_trace(),
+    XLOG_TRACE(pim_node()->is_log_trace(),
               "pim_send: TX %s from %s to %s on vif %s",
               PIMTYPE2ASCII(message_type),
               cstring(src),
@@ -765,9 +765,9 @@ PimVif::pim_send(const IPvX& src, const IPvX& dst,
     //
     // Send the message
     //
-    ret_value = pim_node().pim_send(name(), name(),
+    ret_value = pim_node()->pim_send(name(), name(),
 				    src, dst,
-				    pim_node().ip_protocol_number(),
+				    pim_node()->ip_protocol_number(),
 				    ttl, ip_tos,
 				    false, // router alert is deprecated
 				    ip_internet_control,
@@ -888,7 +888,7 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
     int ret_value = XORP_ERROR;
     
     // Ignore my own PIM messages
-    if (pim_node().is_my_addr(src))
+    if (pim_node()->is_my_addr(src))
 	return (XORP_ERROR);
     
     //
@@ -1070,7 +1070,7 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
     case PIM_GRAFT_ACK:
     case PIM_BOOTSTRAP:
 	// Source address must be directly connected
-	if (! pim_node().is_directly_connected(*this, src)) {
+	if (! pim_node()->is_directly_connected(*this, src)) {
 	    XLOG_WARNING("RX %s from %s to %s on vif %s: "
 			 "source must be directly connected",
 			 PIMTYPE2ASCII(message_type),
@@ -1307,7 +1307,7 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
 	break;
     }
     
-    XLOG_TRACE(pim_node().is_log_trace(),
+    XLOG_TRACE(pim_node()->is_log_trace(),
 	       "RX %s from %s to %s on vif %s",
 	       PIMTYPE2ASCII(message_type),
 	       cstring(src), cstring(dst),
@@ -1650,7 +1650,7 @@ PimVif::delete_pim_nbr_from_nbr_list(PimNbr *pim_nbr)
     
     iter = find(_pim_nbrs.begin(), _pim_nbrs.end(), pim_nbr);
     if (iter != _pim_nbrs.end()) {
-	XLOG_TRACE(pim_node().is_log_trace(),
+	XLOG_TRACE(pim_node()->is_log_trace(),
 		   "Delete neighbor %s on vif %s",
 		   cstring(pim_nbr->primary_addr()), name().c_str());
 	_pim_nbrs.erase(iter);
@@ -1662,9 +1662,9 @@ PimVif::delete_pim_nbr(PimNbr *pim_nbr)
 {
     delete_pim_nbr_from_nbr_list(pim_nbr);
     
-    if (find(pim_node().processing_pim_nbr_list().begin(),
-	     pim_node().processing_pim_nbr_list().end(),
-	     pim_nbr) == pim_node().processing_pim_nbr_list().end()) {
+    if (find(pim_node()->processing_pim_nbr_list().begin(),
+	     pim_node()->processing_pim_nbr_list().end(),
+	     pim_nbr) == pim_node()->processing_pim_nbr_list().end()) {
 	//
 	// The PimNbr is not on the processing list, hence move it there
 	//
@@ -1678,8 +1678,8 @@ PimVif::delete_pim_nbr(PimNbr *pim_nbr)
 	    && pim_nbr->processing_pim_mre_sg_rpt_list().empty()) {
 	    delete pim_nbr;
 	} else {
-	    pim_node().processing_pim_nbr_list().push_back(pim_nbr);
-	    pim_node().pim_mrt().add_task_pim_nbr_changed(Vif::VIF_INDEX_INVALID,
+	    pim_node()->processing_pim_nbr_list().push_back(pim_nbr);
+	    pim_node()->pim_mrt().add_task_pim_nbr_changed(Vif::VIF_INDEX_INVALID,
 							  pim_nbr->primary_addr());
 	}
     }
@@ -1864,7 +1864,7 @@ PimVif::set_i_am_dr(bool v)
     } else {
 	_proto_flags &= ~PIM_VIF_DR;
     }
-    pim_node().set_pim_vifs_dr(vif_index(), v);
+    pim_node()->set_pim_vifs_dr(vif_index(), v);
 }
 
 void
@@ -1904,7 +1904,7 @@ PimVif::add_alternative_subnet(const IPvXNet& subnet)
     //
     // Add the tasks to take care of the PimMre processing
     //
-    pim_node().pim_mrt().add_task_my_ip_subnet_address(vif_index());
+    pim_node()->pim_mrt().add_task_my_ip_subnet_address(vif_index());
 }
 
 void
@@ -1923,7 +1923,7 @@ PimVif::delete_alternative_subnet(const IPvXNet& subnet)
     //
     // Add the tasks to take care of the PimMre processing
     //
-    pim_node().pim_mrt().add_task_my_ip_subnet_address(vif_index());
+    pim_node()->pim_mrt().add_task_my_ip_subnet_address(vif_index());
 }
 
 void
@@ -1937,7 +1937,7 @@ PimVif::remove_all_alternative_subnets()
     //
     // Add the tasks to take care of the PimMre processing
     //
-    pim_node().pim_mrt().add_task_my_ip_subnet_address(vif_index());
+    pim_node()->pim_mrt().add_task_my_ip_subnet_address(vif_index());
 }
 
 // TODO: temporary here. Should go to the Vif class after the Vif

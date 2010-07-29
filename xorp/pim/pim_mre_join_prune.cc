@@ -1083,7 +1083,7 @@ PimMre::downstream_prune_pending_timer_timeout_rp(uint32_t vif_index)
 				 IPvX::ip_multicast_base_address_mask_len(family()),
 				 MRT_ENTRY_RP,
 				 ACTION_PRUNE,
-				 pim_nbr_me->pim_vif().join_prune_holdtime().get(),
+				 pim_nbr_me->pim_vif()->join_prune_holdtime().get(),
 				 is_new_group);
     }
     set_downstream_noinfo_state(vif_index);
@@ -1148,7 +1148,7 @@ PimMre::downstream_prune_pending_timer_timeout_wc(uint32_t vif_index)
 				     IPvX::addr_bitlen(family()),
 				     MRT_ENTRY_WC,
 				     ACTION_PRUNE,
-				     pim_nbr_me->pim_vif().join_prune_holdtime().get(),
+				     pim_nbr_me->pim_vif()->join_prune_holdtime().get(),
 				     is_new_group);
 	}
     }
@@ -1206,7 +1206,7 @@ PimMre::downstream_prune_pending_timer_timeout_sg(uint32_t vif_index)
 				 IPvX::addr_bitlen(family()),
 				 MRT_ENTRY_SG,
 				 ACTION_PRUNE,
-				 pim_nbr_me->pim_vif().join_prune_holdtime().get(),
+				 pim_nbr_me->pim_vif()->join_prune_holdtime().get(),
 				 is_new_group);
     }
     set_downstream_noinfo_state(vif_index);
@@ -1804,9 +1804,9 @@ PimMre::recompute_is_join_desired_rp()
 			      IPvX::ip_multicast_base_address_mask_len(family()),
 			      MRT_ENTRY_RP,
 			      ACTION_JOIN,
-			      pim_nbr->pim_vif().join_prune_holdtime().get(),
+			      pim_nbr->pim_vif()->join_prune_holdtime().get(),
 			      is_new_group);
-	join_prune_period = pim_nbr->pim_vif().join_prune_period().get();
+	join_prune_period = pim_nbr->pim_vif()->join_prune_period().get();
     }
     // Set Join Timer to t_periodic
     join_timer() =
@@ -1835,7 +1835,7 @@ PimMre::recompute_is_join_desired_rp()
 			      IPvX::ip_multicast_base_address_mask_len(family()),
 			      MRT_ENTRY_RP,
 			      ACTION_PRUNE,
-			      pim_nbr->pim_vif().join_prune_holdtime().get(),
+			      pim_nbr->pim_vif()->join_prune_holdtime().get(),
 			      is_new_group);
     }
     // Cancel Join Timer
@@ -1932,9 +1932,9 @@ PimMre::recompute_is_join_desired_wc()
 				  IPvX::addr_bitlen(family()),
 				  MRT_ENTRY_WC,
 				  ACTION_JOIN,
-				  pim_nbr->pim_vif().join_prune_holdtime().get(),
+				  pim_nbr->pim_vif()->join_prune_holdtime().get(),
 				  is_new_group);
-	    join_prune_period = pim_nbr->pim_vif().join_prune_period().get();
+	    join_prune_period = pim_nbr->pim_vif()->join_prune_period().get();
 	}
     }
     // Set Join Timer to t_periodic
@@ -1971,7 +1971,7 @@ PimMre::recompute_is_join_desired_wc()
 				  IPvX::addr_bitlen(family()),
 				  MRT_ENTRY_WC,
 				  ACTION_PRUNE,
-				  pim_nbr->pim_vif().join_prune_holdtime().get(),
+				  pim_nbr->pim_vif()->join_prune_holdtime().get(),
 				  is_new_group);
 	}
     }
@@ -2056,9 +2056,9 @@ PimMre::recompute_is_join_desired_sg()
 			      IPvX::addr_bitlen(family()),
 			      MRT_ENTRY_SG,
 			      ACTION_JOIN,
-			      pim_nbr->pim_vif().join_prune_holdtime().get(),
+			      pim_nbr->pim_vif()->join_prune_holdtime().get(),
 			      is_new_group);
-	join_prune_period = pim_nbr->pim_vif().join_prune_period().get();
+	join_prune_period = pim_nbr->pim_vif()->join_prune_period().get();
     }
     // Set Join Timer to t_periodic
     join_timer() =
@@ -2087,7 +2087,7 @@ PimMre::recompute_is_join_desired_sg()
 			      IPvX::addr_bitlen(family()),
 			      MRT_ENTRY_SG,
 			      ACTION_PRUNE,
-			      pim_nbr->pim_vif().join_prune_holdtime().get(),
+			      pim_nbr->pim_vif()->join_prune_holdtime().get(),
 			      is_new_group);
     }
     // Cancel Join Timer
@@ -2202,7 +2202,7 @@ PimMre::recompute_is_prune_desired_sg_rpt()
 				  IPvX::addr_bitlen(family()),
 				  MRT_ENTRY_SG_RPT,
 				  ACTION_JOIN,
-				  pim_nbr->pim_vif().join_prune_holdtime().get(),
+				  pim_nbr->pim_vif()->join_prune_holdtime().get(),
 				  is_new_group);
 	}
     }
@@ -2238,7 +2238,7 @@ PimMre::recompute_is_prune_desired_sg_rpt()
 				  IPvX::addr_bitlen(family()),
 				  MRT_ENTRY_SG_RPT,
 				  ACTION_PRUNE,
-				  pim_nbr->pim_vif().join_prune_holdtime().get(),
+				  pim_nbr->pim_vif()->join_prune_holdtime().get(),
 				  is_new_group);
 	}
     }
@@ -2412,9 +2412,9 @@ PimMre::join_timer_timeout()
 			      IPvX::ip_multicast_base_address_mask_len(family()),
 			      MRT_ENTRY_RP,
 			      ACTION_JOIN,
-			      pim_nbr->pim_vif().join_prune_holdtime().get(),
+			      pim_nbr->pim_vif()->join_prune_holdtime().get(),
 			      is_new_group);
-	join_prune_period = pim_nbr->pim_vif().join_prune_period().get();
+	join_prune_period = pim_nbr->pim_vif()->join_prune_period().get();
     }
     // Set Join Timer to t_periodic
     join_timer() =
@@ -2451,9 +2451,9 @@ PimMre::join_timer_timeout()
 				  IPvX::addr_bitlen(family()),
 				  MRT_ENTRY_WC,
 				  ACTION_JOIN,
-				  pim_nbr->pim_vif().join_prune_holdtime().get(),
+				  pim_nbr->pim_vif()->join_prune_holdtime().get(),
 				  is_new_group);
-	    join_prune_period = pim_nbr->pim_vif().join_prune_period().get();
+	    join_prune_period = pim_nbr->pim_vif()->join_prune_period().get();
 	}
     }
     // Set Join Timer to t_periodic
@@ -2484,9 +2484,9 @@ PimMre::join_timer_timeout()
 			      IPvX::addr_bitlen(family()),
 			      MRT_ENTRY_SG,
 			      ACTION_JOIN,
-			      pim_nbr->pim_vif().join_prune_holdtime().get(),
+			      pim_nbr->pim_vif()->join_prune_holdtime().get(),
 			      is_new_group);
-	join_prune_period = pim_nbr->pim_vif().join_prune_period().get();
+	join_prune_period = pim_nbr->pim_vif()->join_prune_period().get();
     }
     // Set Join Timer to t_periodic
     join_timer() =
@@ -2536,7 +2536,7 @@ PimMre::override_timer_timeout()
 			      IPvX::addr_bitlen(family()),
 			      MRT_ENTRY_SG_RPT,
 			      ACTION_JOIN,
-			      pim_nbr->pim_vif().join_prune_holdtime().get(),
+			      pim_nbr->pim_vif()->join_prune_holdtime().get(),
 			      is_new_group);
     }
     

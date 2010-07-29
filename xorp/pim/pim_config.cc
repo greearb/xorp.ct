@@ -1795,7 +1795,7 @@ PimNode::add_test_jp_entry(const IPvX& source_addr, const IPvX& group_addr,
     int ret_value;
     
     if (_test_jp_headers_list.empty() || is_new_group)
-	_test_jp_headers_list.push_back(PimJpHeader(*this));
+	_test_jp_headers_list.push_back(PimJpHeader(this));
 
     PimJpHeader& pim_jp_header = _test_jp_headers_list.back();
     ret_value = pim_jp_header.jp_entry_add(source_addr, group_addr,

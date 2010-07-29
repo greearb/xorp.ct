@@ -17,7 +17,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/pim/pim_proto_join_prune_message.hh,v 1.14 2008/10/02 21:57:55 bms Exp $
 
 
 #ifndef __PIM_PIM_PROTO_JOIN_PRUNE_MESSAGE_HH__
@@ -88,15 +87,15 @@ class PimNode;
 
 class PimJpHeader {
 public:
-    PimJpHeader(PimNode& pim_node);
+    PimJpHeader(PimNode* pim_node);
 #ifdef XORP_USE_USTL
     PimJpHeader();
 #endif
     ~PimJpHeader();
     void	reset();
     
-    PimNode&	pim_node() const	{ return (*_pim_node);		}
-    int		family() const		{ return (_family);		}
+    PimNode*	pim_node() const	{ return _pim_node; }
+    int		family() const		{ return (_family); }
     PimMrt&	pim_mrt() const;
     
     size_t message_size() const {

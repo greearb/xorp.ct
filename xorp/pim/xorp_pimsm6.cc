@@ -90,9 +90,11 @@ usage(const char *argv0, int exit_value)
 }
 
 static void
-pim_main(const string& finder_hostname, uint16_t finder_port)
-{
+pim_main(const string& finder_hostname, uint16_t finder_port) {
 #ifdef HAVE_IPV6
+
+    setup_dflt_sighandlers();
+
     //
     // Init stuff
     //
@@ -137,7 +139,7 @@ pim_main(const string& finder_hostname, uint16_t finder_port)
     // Main loop
     //
 #ifdef HAVE_IPV6_MULTICAST
-    while (! xrl_pimsm_node6.is_done()) {
+    while (xorp_do_run && !xrl_pimsm_node6.is_done()) {
 	eventloop.run();
     }
 

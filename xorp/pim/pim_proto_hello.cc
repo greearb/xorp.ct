@@ -226,10 +226,10 @@ PimVif::pim_hello_recv(PimNbr *pim_nbr,
     
     if (pim_nbr == NULL) {
 	// A new neighbor
-	pim_nbr = new PimNbr(*this, src, nbr_proto_version);
+	pim_nbr = new PimNbr(this, src, nbr_proto_version);
 	add_pim_nbr(pim_nbr);
 	new_nbr_flag = true;
-	XLOG_TRACE(pim_node().is_log_trace(),
+	XLOG_TRACE(pim_node()->is_log_trace(),
 		   "Added new neighbor %s on vif %s",
 		   cstring(pim_nbr->primary_addr()), name().c_str());
     }
@@ -320,7 +320,7 @@ PimVif::pim_hello_recv(PimNbr *pim_nbr,
 	TimeVal tv(hello_triggered_delay().get(), 0);
 	tv = random_uniform(tv);
 	_hello_once_timer =
-	    pim_node().eventloop().new_oneoff_after(
+	    pim_node()->eventloop().new_oneoff_after(
 		tv,
 		callback(this, &PimVif::hello_once_timer_timeout));
 	
@@ -329,7 +329,7 @@ PimVif::pim_hello_recv(PimNbr *pim_nbr,
 	// neighbor.
 	//
 	if (new_nbr_flag) {
-	    pim_node().pim_mrt().add_task_pim_nbr_changed(
+	    pim_node()->pim_mrt().add_task_pim_nbr_changed(
 		Vif::VIF_INDEX_INVALID,
 		IPvX::ZERO(family()));
 	}
@@ -339,7 +339,7 @@ PimVif::pim_hello_recv(PimNbr *pim_nbr,
 	// action because the GenID of this neighbor changed.
 	//
 	if (is_genid_changed) {
-	    pim_node().pim_mrt().add_task_pim_nbr_gen_id_changed(
+	    pim_node()->pim_mrt().add_task_pim_nbr_gen_id_changed(
 		vif_index(),
 		pim_nbr->primary_addr());
 	}
@@ -389,7 +389,7 @@ PimNbr::pim_hello_holdtime_process(uint16_t holdtime)
     default:
 	// Start the Neighbor Liveness Timer
 	_neighbor_liveness_timer =
-	    pim_node().eventloop().new_oneoff_after(
+	    pim_node()->eventloop().new_oneoff_after(
 		TimeVal(holdtime, 0),
 		callback(this, &PimNbr::neighbor_liveness_timer_timeout));
 	break;
@@ -537,7 +537,7 @@ void
 PimVif::hello_timer_start(uint32_t sec, uint32_t usec)
 {
     _hello_timer =
-	pim_node().eventloop().new_oneoff_after(
+	pim_node()->eventloop().new_oneoff_after(
 	    TimeVal(sec, usec),
 	    callback(this, &PimVif::hello_timer_timeout));
 }
@@ -552,7 +552,7 @@ PimVif::hello_timer_start_random(uint32_t sec, uint32_t usec)
     tv = random_uniform(tv);
     
     _hello_timer =
-	pim_node().eventloop().new_oneoff_after(
+	pim_node()->eventloop().new_oneoff_after(
 	    tv,
 	    callback(this, &PimVif::hello_timer_timeout));
 }
@@ -595,7 +595,7 @@ PimVif::pim_hello_first_send()
 	    const IPvX& nbr_addr = *nbr_iter;
 	    
 	    // Unicast the Bootstrap messages
-	    pim_node().pim_bsr().unicast_pim_bootstrap(this, nbr_addr);
+	    pim_node()->pim_bsr().unicast_pim_bootstrap(this, nbr_addr);
 	}
 	
 	delete_send_unicast_bootstrap_nbr_list();

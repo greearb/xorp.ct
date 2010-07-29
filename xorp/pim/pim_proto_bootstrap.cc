@@ -73,7 +73,7 @@ PimVif::pim_bootstrap_recv(PimNbr *pim_nbr, const IPvX& src,
 			   const IPvX& dst, buffer_t *buffer)
 {
     int		rcvd_family;
-    PimBsr&	pim_bsr = pim_node().pim_bsr();
+    PimBsr&	pim_bsr = pim_node()->pim_bsr();
     bool	is_unicast_message = false;
     IPvX	bsr_addr(family());
     uint8_t	hash_mask_len, bsr_priority;
@@ -89,7 +89,7 @@ PimVif::pim_bootstrap_recv(PimNbr *pim_nbr, const IPvX& src,
     //
     // XXX: Don't accept Bootstrap-related messages if the BSR is not running
     //
-    if (! pim_node().pim_bsr().is_up())
+    if (! pim_node()->pim_bsr().is_up())
 	return (XORP_ERROR);
 
     //
@@ -119,14 +119,14 @@ PimVif::pim_bootstrap_recv(PimNbr *pim_nbr, const IPvX& src,
     //      - The sender is directly connected
     // RPF check
     if (dst == IPvX::PIM_ROUTERS(family())) {
-	PimNbr *pim_nbr_rpf = pim_node().pim_nbr_rpf_find(bsr_addr);
+	PimNbr *pim_nbr_rpf = pim_node()->pim_nbr_rpf_find(bsr_addr);
 	if (pim_nbr_rpf != pim_nbr) {
 	    // RPF failed
 	    ret_value = XORP_ERROR;
 	    ++_pimstat_rx_bsr_not_rpf_interface;
 	    goto ret_label;
 	}
-    } else if (pim_node().is_my_addr(dst)) {
+    } else if (pim_node()->is_my_addr(dst)) {
 	// BSM.dst_ip_address is one of my addresses
 	is_unicast_message = true;
     } else {
@@ -232,7 +232,7 @@ PimVif::pim_bootstrap_recv(PimNbr *pim_nbr, const IPvX& src,
     //
     // Test whether the message is crossing Admin Scope border
     //
-    if (pim_node().pim_scope_zone_table().is_scoped(bsr_zone->zone_id(),
+    if (pim_node()->pim_scope_zone_table().is_scoped(bsr_zone->zone_id(),
 						    pim_nbr->vif_index())) {
 	// if (the interface the message arrived on is an Admin Scope
 	//     border for the BSM.first_group_address) {
@@ -283,8 +283,8 @@ PimVif::pim_bootstrap_recv(PimNbr *pim_nbr, const IPvX& src,
     if ((active_bsr_zone != NULL)
 	&& (active_bsr_zone->is_bsm_originate())) {
 	active_bsr_zone->new_fragment_tag();
-	for (uint32_t i = 0; i < pim_node().maxvifs(); i++) {
-	    PimVif *pim_vif = pim_node().vif_find_by_vif_index(i);
+	for (uint32_t i = 0; i < pim_node()->maxvifs(); i++) {
+	    PimVif *pim_vif = pim_node()->vif_find_by_vif_index(i);
 	    if (pim_vif == NULL)
 		continue;
 	    pim_vif->pim_bootstrap_send(IPvX::PIM_ROUTERS(family()),
@@ -298,8 +298,8 @@ PimVif::pim_bootstrap_recv(PimNbr *pim_nbr, const IPvX& src,
     // If needed, forward the Bootstrap message
     //
     if ((active_bsr_zone != NULL) && (active_bsr_zone->is_bsm_forward())) {
-	for (uint32_t i = 0; i < pim_node().maxvifs(); i++) {
-	    PimVif *pim_vif = pim_node().vif_find_by_vif_index(i);
+	for (uint32_t i = 0; i < pim_node()->maxvifs(); i++) {
+	    PimVif *pim_vif = pim_node()->vif_find_by_vif_index(i);
 	    if (pim_vif == NULL)
 		continue;
 	    // XXX: always forward-back on the iif, because the 06 I-D is wrong
@@ -367,7 +367,7 @@ PimVif::pim_bootstrap_send(const IPvX& dst_addr, const BsrZone& bsr_zone,
     //
     // XXX: Don't transmit Bootstrap-related messages if the BSR is not running
     //
-    if (! pim_node().pim_bsr().is_up())
+    if (! pim_node()->pim_bsr().is_up())
 	return (XORP_ERROR);
 
     if (is_pim_register()) {
@@ -393,7 +393,7 @@ PimVif::pim_bootstrap_send(const IPvX& dst_addr, const BsrZone& bsr_zone,
 	return (XORP_ERROR);	// No PIM neighbors yet, hence don't send it
     }
     
-    if (pim_node().pim_scope_zone_table().is_scoped(bsr_zone.zone_id(),
+    if (pim_node()->pim_scope_zone_table().is_scoped(bsr_zone.zone_id(),
 						    vif_index())) {
 	error_msg = c_format("Should not send PIM Bootstrap message "
 			     "across scope zone boundary");
@@ -550,7 +550,7 @@ PimVif::pim_bootstrap_send(const IPvX& dst_addr, const BsrZone& bsr_zone,
 	    // If this is canceling Bootstrap message, set the Holdtime
 	    // to zero for my RP addresses.
 	    if (bsr_zone.is_cancel()
-		&& (pim_node().is_my_addr(bsr_rp->rp_addr()))) {
+		&& (pim_node()->is_my_addr(bsr_rp->rp_addr()))) {
 		BUFFER_PUT_HOST_16(0, buffer);
 	    } else {
 		BUFFER_PUT_HOST_16(bsr_rp->rp_holdtime(), buffer);

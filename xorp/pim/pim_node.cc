@@ -736,7 +736,7 @@ PimNode::add_vif(const Vif& vif, string& error_msg)
     //
     // Create a new PimVif
     //
-    PimVif *pim_vif = new PimVif(*this, vif);
+    PimVif *pim_vif = new PimVif(this, vif);
     
     if (ProtoNode<PimVif>::add_vif(pim_vif) != XORP_OK) {
 	// Cannot add this new vif
@@ -2070,7 +2070,7 @@ PimNode::add_pim_mre_no_pim_nbr(PimMre *pim_mre)
 	    break;
 	}
 	XLOG_ASSERT(pim_vif != NULL);
-	pim_nbr = new PimNbr(*pim_vif, ipvx_zero, PIM_VERSION_DEFAULT);
+	pim_nbr = new PimNbr(pim_vif, ipvx_zero, PIM_VERSION_DEFAULT);
 	processing_pim_nbr_list().push_back(pim_nbr);
     }
     XLOG_ASSERT(pim_nbr != NULL);

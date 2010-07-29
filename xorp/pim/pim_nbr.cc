@@ -64,12 +64,12 @@
  * 
  * PIM neighbor constructor.
  **/
-PimNbr::PimNbr(PimVif& pim_vif, const IPvX& primary_addr, int proto_version)
-    : _pim_node(pim_vif.pim_node()),
+PimNbr::PimNbr(PimVif* pim_vif, const IPvX& primary_addr, int proto_version)
+    : _pim_node(pim_vif->pim_node()),
       _pim_vif(pim_vif),
       _primary_addr(primary_addr),
       _proto_version(proto_version),
-      _jp_header(pim_vif.pim_node()),
+      _jp_header(pim_vif->pim_node()),
       _startup_time(TimeVal::MAXIMUM())
 {
     reset_received_options();
@@ -95,7 +95,7 @@ PimNbr::~PimNbr()
 void
 PimNbr::reset_received_options()
 {
-    _proto_version = _pim_vif.proto_version();
+    _proto_version = _pim_vif->proto_version();
     // TODO: 0xffffffffU for _genid should be #define
     _genid = 0xffffffffU;
     _is_genid_present = false;
@@ -122,7 +122,7 @@ PimNbr::reset_received_options()
 uint32_t
 PimNbr::vif_index() const
 {
-    return (pim_vif().vif_index());
+    return (pim_vif()->vif_index());
 }
 
 void
@@ -179,7 +179,7 @@ PimNbr::jp_entry_add(const IPvX& source_addr, const IPvX& group_addr,
     // (Re)start the timer to send the J/P message after time 0.
     // XXX: the automatic restarting will postpone the sending of
     // the message until we have no more entries to add to that message.
-    _jp_send_timer = pim_node().eventloop().new_oneoff_after(
+    _jp_send_timer = pim_node()->eventloop().new_oneoff_after(
 	TimeVal(0, 0),
 	callback(this, &PimNbr::jp_send_timer_timeout));
     
@@ -191,7 +191,7 @@ PimNbr::jp_send_timer_timeout()
 {
     string dummy_error_msg;
 
-    pim_vif().pim_join_prune_send(this, &_jp_header, dummy_error_msg);
+    pim_vif()->pim_join_prune_send(this, &_jp_header, dummy_error_msg);
 }
 
 /**
@@ -202,18 +202,18 @@ PimNbr::jp_send_timer_timeout()
 void
 PimNbr::neighbor_liveness_timer_timeout()
 {
-    pim_vif().delete_pim_nbr_from_nbr_list(this);
+    pim_vif()->delete_pim_nbr_from_nbr_list(this);
     
-    if (pim_vif().dr_addr() == primary_addr()) {
+    if (pim_vif()->dr_addr() == primary_addr()) {
 	// The neighbor to expire is the DR. Select a new DR.
-	pim_vif().pim_dr_elect();
+	pim_vif()->pim_dr_elect();
     }
     
-    if (pim_vif().pim_nbrs_number() <= 1) {
+    if (pim_vif()->pim_nbrs_number() <= 1) {
 	// XXX: the last neighbor on this vif: take any actions if necessary
     }
     
-    pim_vif().delete_pim_nbr(this);
+    pim_vif()->delete_pim_nbr(this);
 }
 
 void
@@ -439,11 +439,11 @@ PimNbr::delete_pim_mre(PimMre *pim_mre)
 	}
 	
 	list<PimNbr *>::iterator pim_nbr_iter;
-	pim_nbr_iter = find(pim_node().processing_pim_nbr_list().begin(),
-			    pim_node().processing_pim_nbr_list().end(),
+	pim_nbr_iter = find(pim_node()->processing_pim_nbr_list().begin(),
+			    pim_node()->processing_pim_nbr_list().end(),
 			    this);
-	if (pim_nbr_iter != pim_node().processing_pim_nbr_list().end()) {
-	    pim_node().processing_pim_nbr_list().erase(pim_nbr_iter);
+	if (pim_nbr_iter != pim_node()->processing_pim_nbr_list().end()) {
+	    pim_node()->processing_pim_nbr_list().erase(pim_nbr_iter);
 	    delete this;
 	    return;
 	}

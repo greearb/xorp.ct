@@ -89,9 +89,10 @@ usage(const char *argv0, int exit_value)
     // NOTREACHED
 }
 
-static void
-pim_main(const string& finder_hostname, uint16_t finder_port)
-{
+static void pim_main(const string& finder_hostname, uint16_t finder_port) {
+
+    setup_dflt_sighandlers();
+
     //
     // Init stuff
     //
@@ -134,7 +135,7 @@ pim_main(const string& finder_hostname, uint16_t finder_port)
     //
     // Main loop
     //
-    while (! xrl_pimsm_node4.is_done()) {
+    while (xorp_do_run && !xrl_pimsm_node4.is_done()) {
 	eventloop.run();
     }
 

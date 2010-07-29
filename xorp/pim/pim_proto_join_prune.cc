@@ -273,9 +273,9 @@ PimVif::pim_join_prune_recv(PimNbr *pim_nbr, const IPvX& src,
 		// the (*,G) entry. However, the (S,G) and (S,G,rpt) entries
 		// for same group should still be processed.
 		// 
-		PimRp *pim_rp = pim_node().rp_table().rp_find(group_addr);
+		PimRp *pim_rp = pim_node()->rp_table().rp_find(group_addr);
 		if ((pim_rp == NULL) || (pim_rp->rp_addr() != source_addr)) {
-		    XLOG_TRACE(pim_node().is_log_trace(),
+		    XLOG_TRACE(pim_node()->is_log_trace(),
 			       "RX %s from %s to %s: "
 			       "(*,G) Join/Prune entry for group %s "
 			       "RP address does not match: "

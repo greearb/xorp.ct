@@ -88,7 +88,7 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
     bool sent_register_stop = false;
     bool is_keepalive_timer_restarted = false;
     uint32_t keepalive_timer_sec = PIM_KEEPALIVE_PERIOD_DEFAULT;
-    uint32_t register_vif_index = pim_node().pim_register_vif_index();
+    uint32_t register_vif_index = pim_node()->pim_register_vif_index();
     string dummy_error_msg;
     
     //
@@ -237,7 +237,7 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
     }
     
     lookup_flags = PIM_MRE_RP | PIM_MRE_WC | PIM_MRE_SG | PIM_MRE_SG_RPT;
-    pim_mre = pim_node().pim_mrt().pim_mre_find(inner_src, inner_dst,
+    pim_mre = pim_node()->pim_mrt().pim_mre_find(inner_src, inner_dst,
 						lookup_flags, 0);
     
     //
@@ -320,7 +320,7 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
     if (is_sptbit_set || pim_mre->is_switch_to_spt_desired_sg(0, 0)) {
 	// Create an (S,G) entry that will keep the Keepalive Timer running
 	if (pim_mre_sg == NULL) {
-	    pim_mre_sg = pim_node().pim_mrt().pim_mre_find(inner_src,
+	    pim_mre_sg = pim_node()->pim_mrt().pim_mre_find(inner_src,
 							   inner_dst,
 							   PIM_MRE_SG,
 							   PIM_MRE_SG);
@@ -354,10 +354,10 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 	// XXX: This will happen inside the kernel.
 	// Here we only install the forwarding entry.
 	//
-	pim_mfc = pim_node().pim_mrt().pim_mfc_find(inner_src, inner_dst,
+	pim_mfc = pim_node()->pim_mrt().pim_mfc_find(inner_src, inner_dst,
 						    false);
 	if (pim_mfc == NULL) {
-	    pim_mfc = pim_node().pim_mrt().pim_mfc_find(inner_src, inner_dst,
+	    pim_mfc = pim_node()->pim_mrt().pim_mfc_find(inner_src, inner_dst,
 							true);
 	    pim_mfc->update_mfc(register_vif_index,
 				pim_mre->inherited_olist_sg_rpt(),
@@ -373,7 +373,7 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 	    || ((pim_mfc != NULL)
 		&& (! pim_mfc->has_idle_dataflow_monitor()))) {
 	    if (pim_mfc == NULL) {
-		pim_mfc = pim_node().pim_mrt().pim_mfc_find(inner_src,
+		pim_mfc = pim_node()->pim_mrt().pim_mfc_find(inner_src,
 							    inner_dst,
 							    true);
 		if (is_sptbit_set) {
@@ -408,18 +408,18 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
     // time to switch to the SPT.
     //
     if (pim_mfc == NULL) {
-	pim_mfc = pim_node().pim_mrt().pim_mfc_find(inner_src, inner_dst,
+	pim_mfc = pim_node()->pim_mrt().pim_mfc_find(inner_src, inner_dst,
 						    false);
     }
     if (pim_mfc == NULL)
 	return (XORP_OK);
-    if (pim_node().is_switch_to_spt_enabled().get()
+    if (pim_node()->is_switch_to_spt_enabled().get()
 	&& (pim_mre != NULL)
 	&& (pim_mre->is_monitoring_switch_to_spt_desired_sg(pim_mre_sg))
 	&& (! pim_mfc->has_spt_switch_dataflow_monitor())) {
 	// Install the monitor
-	uint32_t sec = pim_node().switch_to_spt_threshold_interval_sec().get();
-	uint32_t bytes = pim_node().switch_to_spt_threshold_bytes().get();
+	uint32_t sec = pim_node()->switch_to_spt_threshold_interval_sec().get();
+	uint32_t bytes = pim_node()->switch_to_spt_threshold_bytes().get();
 	pim_mfc->add_dataflow_monitor(sec, 0,
 				      0,	// threshold_packets
 				      bytes,	// threshold_bytes

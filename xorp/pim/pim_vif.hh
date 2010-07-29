@@ -69,7 +69,7 @@ public:
      * @param pim_node the @ref PimNode this interface belongs to.
      * @param vif the generic Vif interface that contains various information.
      */
-    PimVif(PimNode& pim_node, const Vif& vif);
+    PimVif(PimNode* pim_node, const Vif& vif);
     
     /**
      * Destructor
@@ -170,7 +170,7 @@ public:
      * 
      * @return a reference to the PIM node (@ref PimNode).
      */
-    PimNode&	pim_node() const	{ return (_pim_node);		}
+    PimNode* pim_node() const { return _pim_node; }
     
     /**
      * Get the PIM Multicast Routing Table (@ref PimMrt).
@@ -517,7 +517,7 @@ private:
     void set_should_send_pim_hello(bool v) { _should_send_pim_hello = v; }
     
     // Private state
-    PimNode&	_pim_node;		// The PIM node I belong to
+    PimNode*	_pim_node;		// The PIM node I belong to
     buffer_t	*_buffer_send;		// Buffer for sending messages
     buffer_t	*_buffer_send_hello;	// Buffer for sending Hello messages
     buffer_t	*_buffer_send_bootstrap;// Buffer for sending Bootstrap msgs

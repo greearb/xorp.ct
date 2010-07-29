@@ -61,9 +61,9 @@
 //
 
 
-PimJpHeader::PimJpHeader(PimNode& pim_node)
-    : _pim_node(&pim_node),
-      _family(pim_node.family()),
+PimJpHeader::PimJpHeader(PimNode* pim_node)
+    : _pim_node(pim_node),
+      _family(pim_node->family()),
       _jp_groups_n(0),
       _jp_sources_n(0),
       _holdtime(PIM_JOIN_PRUNE_HOLDTIME_DEFAULT) // XXX
@@ -1130,7 +1130,7 @@ PimJpHeader::network_send(PimVif *pim_vif, const IPvX& target_nbr_addr,
     uint8_t	source_mask_len;
     IPvX	source_addr(family());
     list<PimJpGroup *>::iterator iter;
-    uint8_t sparse_bit = pim_node().proto_is_pimsm() ? ESADDR_S_BIT : 0;
+    uint8_t sparse_bit = pim_node()->proto_is_pimsm() ? ESADDR_S_BIT : 0;
     buffer_t *buffer = NULL;
     
     //

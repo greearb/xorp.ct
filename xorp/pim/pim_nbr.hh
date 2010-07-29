@@ -46,12 +46,12 @@ class PimVif;
 
 class PimNbr {
 public:
-    PimNbr(PimVif& pim_vif, const IPvX& primary_addr, int proto_version);
+    PimNbr(PimVif* pim_vif, const IPvX& primary_addr, int proto_version);
     ~PimNbr();
     
     void	reset_received_options();
-    PimNode&	pim_node()	const	{ return (_pim_node);	}
-    PimVif&	pim_vif()	const	{ return (_pim_vif);	}
+    PimNode*	pim_node()	const	{ return _pim_node; }
+    PimVif*	pim_vif()	const	{ return _pim_vif; }
     uint32_t	vif_index()	const;
     const IPvX&	primary_addr()	const	{ return (_primary_addr); }
     void	set_primary_addr(const IPvX& v) { _primary_addr = v; }
@@ -154,8 +154,8 @@ private:
     void	jp_send_timer_timeout();
     
     // Fields to hold information from the PIM_HELLO messages
-    PimNode&	_pim_node;		// The associated PIM node
-    PimVif&	_pim_vif;		// The corresponding PIM vif
+    PimNode*	_pim_node;		// The associated PIM node
+    PimVif*	_pim_vif;		// The corresponding PIM vif
     IPvX	_primary_addr;		// The primary address of the neighbor
     list<IPvX>	_secondary_addr_list;	// The secondary addresses of the neighbor
     int		_proto_version;		// The protocol version of the neighbor

@@ -868,9 +868,9 @@ PimMre::recompute_nbr_mrib_next_hop_rp_rp_changed()
 				  IPvX::ip_multicast_base_address_mask_len(family()),
 				  MRT_ENTRY_RP,
 				  ACTION_JOIN,
-				  new_pim_nbr->pim_vif().join_prune_holdtime().get(),
+				  new_pim_nbr->pim_vif()->join_prune_holdtime().get(),
 				  is_new_group);
-	join_prune_period = new_pim_nbr->pim_vif().join_prune_period().get();
+	join_prune_period = new_pim_nbr->pim_vif()->join_prune_period().get();
     }
     //
     // Send Prune(*,*,RP) to the old value of
@@ -882,7 +882,7 @@ PimMre::recompute_nbr_mrib_next_hop_rp_rp_changed()
 				  IPvX::ip_multicast_base_address_mask_len(family()),
 				  MRT_ENTRY_RP,
 				  ACTION_PRUNE,
-				  old_pim_nbr->pim_vif().join_prune_holdtime().get(),
+				  old_pim_nbr->pim_vif()->join_prune_holdtime().get(),
 				  is_new_group);
     }
     // Set the new upstream neighbor.
@@ -920,7 +920,7 @@ PimMre::recompute_nbr_mrib_next_hop_rp_gen_id_changed()
 	return;
     // Restart Join Timer if it is larger than t_override
     TimeVal t_override, tv_left;
-    pim_vif = &pim_nbr->pim_vif();
+    pim_vif = pim_nbr->pim_vif();
     if (pim_vif == NULL)
 	return;
     t_override = pim_vif->upstream_join_timer_t_override();
@@ -1010,7 +1010,7 @@ PimMre::recompute_rpfp_nbr_wc_assert_changed()
 	return;
     // Restart Join Timer if it is larger than t_override
     TimeVal t_override, tv_left;
-    pim_vif = &new_pim_nbr->pim_vif();
+    pim_vif = new_pim_nbr->pim_vif();
     if (pim_vif == NULL)
 	return;
     t_override = pim_vif->upstream_join_timer_t_override();
@@ -1080,10 +1080,10 @@ PimMre::recompute_rpfp_nbr_wc_not_assert_changed()
 				      IPvX::addr_bitlen(family()),
 				      MRT_ENTRY_WC,
 				      ACTION_JOIN,
-				      new_pim_nbr->pim_vif().join_prune_holdtime().get(),
+				      new_pim_nbr->pim_vif()->join_prune_holdtime().get(),
 				      is_new_group);
 	}
-	join_prune_period = new_pim_nbr->pim_vif().join_prune_period().get();
+	join_prune_period = new_pim_nbr->pim_vif()->join_prune_period().get();
     }
     
     // Send Prune(*,G) to the old value of RPF'(*,G)
@@ -1099,7 +1099,7 @@ PimMre::recompute_rpfp_nbr_wc_not_assert_changed()
 				      IPvX::addr_bitlen(family()),
 				      MRT_ENTRY_WC,
 				      ACTION_PRUNE,
-				      old_pim_nbr->pim_vif().join_prune_holdtime().get(),
+				      old_pim_nbr->pim_vif()->join_prune_holdtime().get(),
 				      is_new_group);
 	}
     }
@@ -1138,7 +1138,7 @@ PimMre::recompute_rpfp_nbr_wc_gen_id_changed()
 	return;
     // Restart Join Timer if it is larger than t_override
     TimeVal t_override, tv_left;
-    pim_vif = &pim_nbr->pim_vif();
+    pim_vif = pim_nbr->pim_vif();
     if (pim_vif == NULL)
 	return;
     t_override = pim_vif->upstream_join_timer_t_override();
@@ -1187,7 +1187,7 @@ PimMre::recompute_rpfp_nbr_sg_assert_changed()
 	return;
     // Restart Join Timer if it is larger than t_override
     TimeVal t_override, tv_left;
-    pim_vif = &new_pim_nbr->pim_vif();
+    pim_vif = new_pim_nbr->pim_vif();
     if (pim_vif == NULL)
 	return;
     t_override = pim_vif->upstream_join_timer_t_override();
@@ -1250,9 +1250,9 @@ PimMre::recompute_rpfp_nbr_sg_not_assert_changed()
 				  IPvX::addr_bitlen(family()),
 				  MRT_ENTRY_SG,
 				  ACTION_JOIN,
-				  new_pim_nbr->pim_vif().join_prune_holdtime().get(),
+				  new_pim_nbr->pim_vif()->join_prune_holdtime().get(),
 				  is_new_group);
-	join_prune_period = new_pim_nbr->pim_vif().join_prune_period().get();
+	join_prune_period = new_pim_nbr->pim_vif()->join_prune_period().get();
     }
     
     // Send Prune(S,G) to the old value of RPF'(S,G)
@@ -1262,7 +1262,7 @@ PimMre::recompute_rpfp_nbr_sg_not_assert_changed()
 				  IPvX::addr_bitlen(family()),
 				  MRT_ENTRY_SG,
 				  ACTION_PRUNE,
-				  old_pim_nbr->pim_vif().join_prune_holdtime().get(),
+				  old_pim_nbr->pim_vif()->join_prune_holdtime().get(),
 				  is_new_group);
     }
     // Set the new RPF'(S,G)
@@ -1300,7 +1300,7 @@ PimMre::recompute_rpfp_nbr_sg_gen_id_changed()
 	return;
     // Restart Join Timer if it is larger than t_override
     TimeVal t_override, tv_left;
-    pim_vif = &pim_nbr->pim_vif();
+    pim_vif = pim_nbr->pim_vif();
     if (pim_vif == NULL)
 	return;
     t_override = pim_vif->upstream_join_timer_t_override();
@@ -1351,7 +1351,7 @@ PimMre::recompute_rpfp_nbr_sg_rpt_changed()
     // RPF'(S,G,rpt) === RPF'(*,G)
     // Restart Override Timer if it is larger than t_override
     TimeVal t_override, tv_left;
-    pim_vif = &new_pim_nbr->pim_vif();
+    pim_vif = new_pim_nbr->pim_vif();
     if (pim_vif == NULL)
 	return;
     t_override = pim_vif->upstream_join_timer_t_override();

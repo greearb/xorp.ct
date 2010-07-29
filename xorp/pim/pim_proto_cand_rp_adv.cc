@@ -82,7 +82,7 @@ PimVif::pim_cand_rp_adv_recv(PimNbr *pim_nbr,
     uint8_t	group_mask_len;
     IPvXNet	group_prefix(family());
     uint8_t	group_addr_reserved_flags;
-    PimBsr&	pim_bsr = pim_node().pim_bsr();
+    PimBsr&	pim_bsr = pim_node()->pim_bsr();
     bool	is_scope_zone = false;
     BsrZone	*active_bsr_zone = NULL;
     BsrRp	*bsr_rp;
@@ -95,7 +95,7 @@ PimVif::pim_cand_rp_adv_recv(PimNbr *pim_nbr,
     //
     // XXX: Don't accept Bootstrap-related messages if the BSR is not running
     //
-    if (! pim_node().pim_bsr().is_up())
+    if (! pim_node()->pim_bsr().is_up())
 	return (XORP_ERROR);
     
     //
@@ -308,7 +308,7 @@ PimVif::pim_cand_rp_adv_send(const IPvX& bsr_addr, const BsrZone& bsr_zone)
     //
     // XXX: Don't transmit Bootstrap-related messages if the BSR is not running
     //
-    if (! pim_node().pim_bsr().is_up())
+    if (! pim_node()->pim_bsr().is_up())
 	return (XORP_ERROR);
 
     // TODO: add a check whether I am a Cand-RP for that zone.
@@ -349,7 +349,7 @@ PimVif::pim_cand_rp_adv_send(const IPvX& bsr_addr, const BsrZone& bsr_zone)
 	//
 	// Test if I am Zone Border Router (ZBR) for this prefix 
 	//
-	if (pim_node().pim_scope_zone_table().is_zone_border_router(group_prefix))
+	if (pim_node()->pim_scope_zone_table().is_zone_border_router(group_prefix))
 	    is_zbr = true;
 	else
 	    is_zbr = false;
@@ -361,7 +361,7 @@ PimVif::pim_cand_rp_adv_send(const IPvX& bsr_addr, const BsrZone& bsr_zone)
 	    BsrRp *bsr_rp = *iter_rp;
 	    buffer_t *buffer;
 	    
-	    if (! pim_node().is_my_addr(bsr_rp->rp_addr()))
+	    if (! pim_node()->is_my_addr(bsr_rp->rp_addr()))
 		continue;	// Ignore addresses that aren't mine
 	    
 	    buffer = buffer_send_prepare();
