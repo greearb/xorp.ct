@@ -180,34 +180,35 @@ BGPMain::~BGPMain()
     */
     _rib_ipc_handler->register_ribname("");
 
-    bool message = false;
+    int start = time(NULL);
+    int now;
     while(_xrl_router->pending()) {
 	eventloop().run();
-	if (!message) {
-	    XLOG_INFO("xrl router still has pending operations");
-	    message = true;
+	now = time(NULL);
+	if (now > start + 5) {
+	    XLOG_WARNING("xrl router still has pending operations after %i seconds, giving up.",
+			 now - start);
+	    break;
 	}
-    }
-
-    if (message) {
-	XLOG_INFO("xrl router no more pending operations");
+	XLOG_INFO("xrl router still has pending operations, after %i seconds, will retry.",
+		  now - start);
     }
 
     debug_msg("-------------------------------------------\n");
     debug_msg("Deleting rib_ipc_handler\n");
     delete _rib_ipc_handler;
 
-    message = false;
+    start = time(NULL);
     while(_xrl_router->pending()) {
 	eventloop().run();
-	if (!message) {
-	    XLOG_INFO("xrl router still has pending operations");
-	    message = true;
+	now = time(NULL);
+	if (now > start + 5) {
+	    XLOG_WARNING("xrl router still has pending operations after %i seconds, giving up.",
+			 now - start);
+	    break;
 	}
-    }
-
-    if (message) {
-	XLOG_INFO("xrl router no more pending operations");
+	XLOG_INFO("xrl router still has pending operations, after %i seconds, will retry.",
+		  now - start);
     }
 
     debug_msg("-------------------------------------------\n");
