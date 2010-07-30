@@ -37,41 +37,57 @@
 int eventloop_instance_count = 0;
 
 int xorp_do_run = 1;
+char xorp_sig_msg_buffer[64];
 
 //Trap some common signals to allow graceful exit.
+// NOTE:  Cannot do logging here, that logic is not re-entrant.
+// Copy msg into xorp-sig_msg_buffer instead..main program can check
+// if they want, and we also register an atexit handler to print it out
+// on exit.
 void dflt_sig_handler(int signo) { 
     //reestablish signal handler
     signal(signo, (&dflt_sig_handler));
 
     switch (signo) {
     case SIGTERM:
-	XLOG_WARNING("Got SIGTERM, shutting down.\n");
+	strncpy(xorp_sig_msg_buffer, "SIGTERM received", sizeof(xorp_sig_msg_buffer));
 	goto do_terminate;
     case SIGINT:
-	XLOG_WARNING("Got SIGINT, shutting down.\n");
+	strncpy(xorp_sig_msg_buffer, "SIGINT received", sizeof(xorp_sig_msg_buffer));
 	goto do_terminate;
     case SIGXCPU:
-	XLOG_WARNING("Got SIGXCPU, shutting down.\n");
+	strncpy(xorp_sig_msg_buffer, "SIGINT received", sizeof(xorp_sig_msg_buffer));
 	goto do_terminate;
     case SIGXFSZ:
-	XLOG_WARNING("Got SIGXFSZ, shutting down.\n");
+	strncpy(xorp_sig_msg_buffer, "SIGINT received", sizeof(xorp_sig_msg_buffer));
 	goto do_terminate;
-
     default:
-	XLOG_WARNING("WARNING:  Ignoring un-handled error in dflt_sig_handler: %i\n", signo);
+	// This is a coding error and we need to fix it.
+	assert("WARNING:  Ignoring un-handled error in dflt_sig_handler." == NULL);
 	return;
     }//switch
 
   do_terminate:
     xorp_do_run = 0;
-
-    // Now, kick any selects that are blocking
+	
+    // Now, kick any selects that are blocking,
+    // SIGURG seems harmless enough to use.
     kill(getpid(), SIGURG);
 
 }//dflt_sig_handler
 
 
+void xorp_sig_atexit() {
+    if (xorp_sig_msg_buffer[0]) {
+	cerr << "WARNING:  Process: " << getpid() << " has message from dflt_sig_handler: "
+	     << xorp_sig_msg_buffer << endl;
+    }
+}
+
 void setup_dflt_sighandlers() {
+    memset(xorp_sig_msg_buffer, 0, sizeof(xorp_sig_msg_buffer));
+    atexit(xorp_sig_atexit);
+
     signal(SIGTERM, dflt_sig_handler);
     signal(SIGINT, dflt_sig_handler);
     signal(SIGXCPU, dflt_sig_handler);
