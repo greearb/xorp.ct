@@ -18,7 +18,6 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxorp/timeval.hh,v 1.40 2009/01/05 18:30:58 jtc Exp $
 
 #include "timeval.hh"
 #include "c_format.hh"

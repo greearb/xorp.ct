@@ -19,7 +19,6 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxorp/timeval.hh,v 1.40 2009/01/05 18:30:58 jtc Exp $
 
 #ifndef __LIBXORP_TIMEVAL_HH__
 #define __LIBXORP_TIMEVAL_HH__
@@ -32,6 +31,10 @@
 #endif
 
 #include <math.h>
+
+
+// TODO:  Move this out-of-line (let compiler make the decision)
+// TODO:  Allow setting values, and remove return-by-value where possible.
 
 /**
  * @short TimeVal class
@@ -161,14 +164,14 @@ public:
 #endif
 
     /**
-     * Return an int32_t containing the total number of milliseconds
+     * Return an int64_t containing the total number of milliseconds
      * in the underlying structure.
      * This is intended for convenience when working with Win32 APIs.
      * XXX: This may overflow if _sec is too big.
      *
      * @return the number of milliseconds in total.
      */
-    int32_t to_ms() const;
+    int64_t to_ms() const;
 
     /**
      * Convert a TimeVal value to a double-float value.
@@ -358,14 +361,16 @@ TimeVal::copy_out(timespec& timespec) const
 
 #endif
 
-inline int32_t
+inline int64_t
 TimeVal::to_ms() const
 {
-    int32_t ms = _usec / 1000;
+    int64_t ms = _usec / 1000;
     // Round a truncated fraction of <1ms to 1ms, not zero.
-    if (_sec == 0 && ms == 0)
-	return (1);
-    ms += _sec * 1000;
+    if (_sec == 0 && ms == 0 && _usec != 0)
+	ms = 1;
+    else {
+	ms += (int64_t)(_sec) * 1000LL;
+    }
     return (ms);
 }
 

@@ -197,6 +197,15 @@ EventLoop::do_work(bool can_block)
 	}
     }
     
+    // If we are trying to shut down..make sure the even loop
+    // doesn't hang forever.
+    if (!xorp_do_run) {
+	if ((t == TimeVal::MAXIMUM()) ||
+	    (t.to_ms() > 1000)) {
+	    t = TimeVal(1, 0); // one sec
+	}
+    }
+
 #ifdef HOST_OS_WINDOWS
     _win_dispatcher.wait_and_dispatch(t);
 #else

@@ -238,14 +238,6 @@ RunCommandBase::execute()
     if (_is_running)
 	return (XORP_OK);	// XXX: already running
 
-    // Create a single string with the command name and the arguments
-    string final_command = _command;
-    list<string>::const_iterator iter;
-    for (iter = _argument_list.begin(); iter != _argument_list.end(); ++iter) {
-	final_command += " ";
-	final_command += *iter;
-    }
-
     //
     // Save the current execution ID, and set the new execution ID
     //
@@ -267,10 +259,50 @@ RunCommandBase::execute()
     //
     // Run the command
     //
-    _pid = popen2(_command, _argument_list, _stdout_stream, _stderr_stream,
-		  redirect_stderr_to_stdout());
+
+    ifstream tst("XORP_USE_VALGRIND");
+    if (tst) {
+	string vcmd("/usr/bin/valgrind");
+	list<string> args(_argument_list);
+
+	string uniq;
+	size_t slash = _command.find_last_of("/");
+	if (slash != string::npos) {
+	    uniq = _command.substr(slash + 1);
+	}
+	else {
+	    uniq = _command;
+	}
+
+	char* value = getenv("XORP_FINDER_SERVER_PORT");
+	if (value != NULL) {
+	    uniq.append("-");
+	    uniq.append(value);
+	}
+
+	// Move any old valgrind logs out of the way.
+	string lf0("valgrind_" + uniq + ".txt");
+	string lf1("valgrind_" + uniq + ".txt.1");
+	string lf2("valgrind_" + uniq + ".txt.2");
+	rename(lf1.c_str(), lf2.c_str());
+	rename(lf0.c_str(), lf1.c_str());
+
+	args.push_front(_command);
+	args.push_front("--track-origins=yes");
+	args.push_front("--leak-check=full");
+	args.push_front("--log-file=" + lf0);
+	tst.close();
+
+	_pid = popen2(vcmd, args, _stdout_stream, _stderr_stream,
+		      redirect_stderr_to_stdout());
+    }
+    else {
+	_pid = popen2(_command, _argument_list, _stdout_stream, _stderr_stream,
+		      redirect_stderr_to_stdout());
+    }
+
     if (_stdout_stream == NULL) {
-	XLOG_ERROR("Failed to execute command \"%s\"", final_command.c_str());
+	XLOG_ERROR("Failed to execute command \"%s\"", _command.c_str());
 	cleanup();
 	_exec_id.restore_saved_exec_id(error_msg);
 	return (XORP_ERROR);
@@ -289,7 +321,7 @@ RunCommandBase::execute()
 	callback(this, &RunCommandBase::append_data));
     if (! _stdout_file_reader->start()) {
 	XLOG_ERROR("Failed to start a stdout reader for command \"%s\"",
-		   final_command.c_str());
+		   _command.c_str());
 	cleanup();
 	_exec_id.restore_saved_exec_id(error_msg);
 	return (XORP_ERROR);
@@ -304,7 +336,7 @@ RunCommandBase::execute()
 	callback(this, &RunCommandBase::append_data));
     if (! _stderr_file_reader->start()) {
 	XLOG_ERROR("Failed to start a stderr reader for command \"%s\"",
-		   final_command.c_str());
+		   _command.c_str());
 	cleanup();
 	_exec_id.restore_saved_exec_id(error_msg);
 	return (XORP_ERROR);
