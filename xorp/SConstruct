@@ -779,6 +779,7 @@ if env['enable_boost']:
 # Some platforms have alignment warnings that cannot easily be
 # fixed, so we can't enable Werror for them.
 if (host_cpu == "i686" or
+    host_cpu == "i386" or
     host_cpu == "x86_64"):
         env.AppendUnique(CFLAGS = [
 	        '-Werror',
