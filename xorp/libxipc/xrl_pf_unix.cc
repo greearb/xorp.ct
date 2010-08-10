@@ -20,7 +20,6 @@
 // http://xorp.net
 
 
-
 #include "xrl_module.h"
 #include "xrl_pf_unix.hh"
 #include "libcomm/comm_api.h"
@@ -41,6 +40,13 @@ XrlPFUNIXListener::XrlPFUNIXListener(EventLoop& e, XrlDispatcher* xr)
 	comm_close(_sock);
 	_sock.clear();
         xorp_throw(XrlPFConstructorError, comm_get_last_error_str());
+    }
+
+    // Make sure socket is read/write by group and owner.
+    if (chmod(path.c_str(), S_ISUID | S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP | S_IROTH ) < 0) {
+	cerr << "ERROR:  Failed chgrp on path: " << path << " error: "
+	     << strerror(errno) << endl;
+	// Carry on, might turn out OK!
     }
 
     _address_slash_port = path;
