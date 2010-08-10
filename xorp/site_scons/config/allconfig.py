@@ -726,6 +726,7 @@ def DoAllConfig(env, conf, host_os):
     if not has_openssl_md5_h:
         print "\nERROR:  Cannot find required openssl/md5.h."
         print "  On Fedora/RedHat:  yum install openssl-devel"
+        print "  On Ubuntu:  apt-get install libssl-dev"
         print "  After install, rm -fr xorp/obj build directory to"
         print "  clear the configure cache before re-building."
         sys.exit(1)
@@ -767,7 +768,8 @@ def DoAllConfig(env, conf, host_os):
         print "\nWARNING: PCAP-BPF is not supported on this system,"
         print "  socket filtering will not work."
         print "  This is not a real problem, just a small performance"
-        print "  loss when using multiple virtual routers on the same system.\n"
+        print "  loss when using multiple virtual routers on the same system."
+        print "  On Ubuntu:  apt-get install pcap-dev\n"
 
     ##########
     # curses for cli/libtecla
@@ -778,6 +780,7 @@ def DoAllConfig(env, conf, host_os):
     if not has_libcurses and not has_libncurses:
         print "\nERROR:  Cannot find required (n)curses library."
         print "  On Fedora/RedHat:  yum install ncurses-devel"
+        print "  On Ubuntu:  apt-get install ncurses-dev"
         print "  After install, rm -fr xorp/obj build directory to"
         print "  clear the configure cache before re-building."
         sys.exit(1)
