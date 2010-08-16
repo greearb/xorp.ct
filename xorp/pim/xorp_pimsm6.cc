@@ -147,6 +147,14 @@ pim_main(const string& finder_hostname, uint16_t finder_port) {
 	eventloop.run();
     }
 #endif // HAVE_IPV6_MULTICAST
+
+    // Manually clean up xrl_pim_node.  Without this logic, the destructor
+    // will attempt the same, but that will cause some recursive cleanup
+    // that ends up calling a pure virtual on the xlr_pim_node logic,
+    // which throws an exception from deep in glibc and crashes us.
+    xrl_pimsm_node6.delete_all_vifs();
+    xrl_pimsm_node6.shutdown();
+
 #endif // HAVE_IPV6
 
     UNUSED(finder_hostname);

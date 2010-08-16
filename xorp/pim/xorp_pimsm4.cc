@@ -142,6 +142,13 @@ static void pim_main(const string& finder_hostname, uint16_t finder_port) {
     while (xrl_pimsm_node4.xrl_router().pending()) {
 	eventloop.run();
     }
+
+    // Manually clean up xrl_pim_node.  Without this logic, the destructor
+    // will attempt the same, but that will cause some recursive cleanup
+    // that ends up calling a pure virtual on the xlr_pim_node logic,
+    // which throws an exception from deep in glibc and crashes us.
+    xrl_pimsm_node4.delete_all_vifs();
+    xrl_pimsm_node4.shutdown();
 }
 
 int
