@@ -257,15 +257,19 @@ Heap::heapify()
         push(i);
 }
 
+Heap::Heap()
+	: _size(0), _elements(0), _intrude(false), _p(NULL) {
+    //printf("created heap (dflt), this: %p\n", this);
+}
+
 Heap::Heap(bool intrude)
-{
-    memset(this, 0, sizeof(*this));
-    _intrude = intrude;
-    debug_msg("++ constructor for 0x%p\n", this);
+	: _size(0), _elements(0), _intrude(intrude), _p(NULL) {
+    //printf("created heap, this: %p\n", this);
 }
 
 Heap::~Heap()
 {
+    //printf("deleting heap, this: %p\n", this);
     if (_p != NULL)
         delete[] _p;
 }

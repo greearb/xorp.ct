@@ -203,32 +203,21 @@ TimerList::TimerList(ClockBase* clock)
 
 TimerList::~TimerList()
 {
-#ifdef notyet
-    // Attempting to plug the leak causes problems elsewhere.
-    map<int, Heap*>::iterator ii;
-    for (ii = _heaplist.begin(); ii != _heaplist.end(); ii++)
-	delete (*ii).second;
-#endif
 
-#if 0
-    // TODO:  Looks like this should work, but it crashes.  hi->second
-    // seems a valid pointer, but what it points to is corrupted, it seems.
-    fprintf(stderr, "heaplist-size: %i\n", (int)(_heaplist.size()));
+    //fprintf(stderr, "heaplist-size: %i\n", (int)(_heaplist.size()));
     // Delete all of the heaps we've previously created
     map<int, Heap*>::const_iterator hi;
     Heap* tmp = NULL;
     for (hi = _heaplist.begin(); hi != _heaplist.end(); ++hi) {
 	tmp = hi->second;
-	fprintf(stderr, "deleting heap: %p\n", tmp);
+	//fprintf(stderr, "deleting heap: %p\n", tmp);
 	fflush(stderr);
 	delete tmp;
     }
     _heaplist.clear();
-#endif
 
     timerlist_instance_count--;
     the_timerlist = NULL;
-
 }
 
 TimerList*

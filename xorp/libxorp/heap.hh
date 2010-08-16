@@ -22,11 +22,9 @@
 // Portions of this code originally derived from:
 // 	FreeBSD dummynet code, (C) 2001 Luigi Rizzo.
 
-// $XORP: xorp/libxorp/heap.hh,v 1.18 2008/10/02 21:57:30 bms Exp $
 
 #ifndef __LIBXORP_HEAP_HH__
 #define __LIBXORP_HEAP_HH__
-
 
 
 #include <stdio.h>
@@ -40,6 +38,7 @@
 #endif
 
 #include "timeval.hh"
+#include "bug_catcher.hh"
 
 /**
  * @short Heap class
@@ -65,7 +64,7 @@ class HeapBase {
     int		_pos_in_heap;	// position of this object in the heap
 };
 
-class Heap {
+class Heap /*: public BugCatcher*/ {
     friend class TimerList;
 protected:
 typedef TimeVal Heap_Key ;
@@ -78,8 +77,7 @@ public:
      * Default constructor used to build a standard heap with no support for
      * removal from the middle.
      */
-    Heap() : _intrude(false)
-    {}
+    Heap();
     
     /**
      * Constructor used to build a standard heap with support for
