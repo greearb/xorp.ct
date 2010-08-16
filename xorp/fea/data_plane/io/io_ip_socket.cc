@@ -236,7 +236,10 @@ IoIpSocket::~IoIpSocket()
 {
     string error_msg;
 
-    // Register interest in interface deletions.
+    // Remove from event loop, clean up sockets.
+    close_proto_sockets(error_msg);
+
+    // Un-register interest in interface deletions.
     iftree().unregisterListener(this);
 
     if (stop(error_msg) != XORP_OK) {
@@ -952,12 +955,16 @@ IoIpSocket::close_proto_sockets(string& error_msg)
     // Close the outgoing protocol socket
     //
     if (_proto_socket_out.is_valid()) {
+	// It probably wasn't added...but just in case code changes,
+	// keep the cleanup logic here.
+	eventloop().remove_ioevent_cb(_proto_socket_out);
 	comm_close(_proto_socket_out);
 	_proto_socket_out.clear();
     }
 
 #ifdef USE_SOCKET_PER_IFACE
     if (_mcast_proto_socket_in.is_valid()) {
+	eventloop().remove_ioevent_cb(_mcast_proto_socket_in);
 	comm_close(_mcast_proto_socket_in);
 	_mcast_proto_socket_in.clear();
     }

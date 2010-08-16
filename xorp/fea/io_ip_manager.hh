@@ -17,15 +17,9 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/fea/io_ip_manager.hh,v 1.15 2008/10/02 21:56:48 bms Exp $
 
 #ifndef __FEA_IO_IP_MANAGER_HH__
 #define __FEA_IO_IP_MANAGER_HH__
-
-
-
-
-
 
 
 #include "libxorp/callback.hh"
