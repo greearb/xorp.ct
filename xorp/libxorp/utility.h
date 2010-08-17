@@ -21,10 +21,6 @@
  * http://xorp.net
  */
 
-/*
- * $XORP: xorp/libxorp/utility.h,v 1.21 2008/10/02 21:57:36 bms Exp $
- */
-
 #ifndef __LIBXORP_UTILITY_H__
 #define __LIBXORP_UTILITY_H__
 
@@ -143,14 +139,14 @@ sockaddr_storage2sockaddr(struct sockaddr_storage* ss)
  * CPU instructions, whereas the macro below can be handled by the
  * compiler front-end for literal values.
  */
-#if defined(WORDS_BIGENDIAN)
+#if __BYTE_ORDER == __BIG_ENDIAN
 #  define htonl_literal(x) (x)
-#elif defined(WORDS_SMALLENDIAN)
+#elif __BYTE_ORDER == __LITTLE_ENDIAN
 #  define htonl_literal(x) 						      \
 		((((x) & 0x000000ffU) << 24) | (((x) & 0x0000ff00U) << 8) |   \
 		 (((x) & 0x00ff0000U) >> 8) | (((x) & 0xff000000U) >> 24))
 #else
-#  error "Missing endian definition from config.h"
+#  error "Endian detection is broken."
 #endif
 
 /*

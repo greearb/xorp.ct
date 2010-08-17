@@ -43,41 +43,6 @@
 #include <sys/types.h>
 
 
-#ifndef BYTE_ORDER
-#ifdef __BYTE_ORDER
-#define BYTE_ORDER	__BYTE_ORDER
-#define LITTLE_ENDIAN	__LITTLE_ENDIAN
-#define BIG_ENDIAN	__BIG_ENDIAN
-
-#else /* ! _BYTE_ORDER */
-
-/*
- * XXX: Presume that the autoconf script used the AC_C_BIGENDIAN() macro
- * to test whether the system is big or little endian.
- * If the system is big endian, then WORDS_BIGENDIAN is defined.
- */
-#ifndef LITTLE_ENDIAN
-#define LITTLE_ENDIAN	1234
-#endif
-#ifndef BIG_ENDIAN
-#define BIG_ENDIAN	4321
-#endif
-
-#ifdef WORDS_BIGENDIAN
-#define BYTE_ORDER	BIG_ENDIAN
-#else
-#define BYTE_ORDER	LITTLE_ENDIAN
-#endif
-
-/*
- * XXX: The old C preprocessor error if BYTE_ORDER is not defined.
- *
- * #error "BYTE_ORDER not defined! Define it to either LITTLE_ENDIAN (e.g. i386, vax) or BIG_ENDIAN (e.g.  68000, ibm, net) based on your architecture!"
- */
-
-#endif /* ! __BYTE_ORDER */
-#endif /* ! BYTE_ORDER */
-
 /*
  * Constants definitions
  */

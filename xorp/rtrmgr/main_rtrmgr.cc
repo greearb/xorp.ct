@@ -531,6 +531,15 @@ main(int argc, char* const argv[])
     //
     XorpUnexpectedHandler ex(xorp_unexpected_handler);
 
+    // Check endian-ness was detected properly.
+#if  __BYTE_ORDER == __BIG_ENDIAN
+    assert(0x12345678 == htonl(0x12345678));
+#elif __BYTE_ORDER == __LITTLE_ENDIAN
+    assert(0x12345678 != htonl(0x12345678));
+#else
+#error "Endian detection is not working properly.\n";
+#endif
+
     //
     // Expand the default variables to include the XORP root path
     //

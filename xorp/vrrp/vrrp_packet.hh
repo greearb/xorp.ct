@@ -83,10 +83,10 @@ struct VrrpHeader {
      */
     IPv4		      ip(unsigned index) const;
 
-#if defined(WORDS_BIGENDIAN)
+#if __BYTE_ORDER == __BIG_ENDIAN
     uint8_t	    vh_v:4;
     uint8_t	    vh_type:4;
-#elif defined(WORDS_SMALLENDIAN)
+#elif __BYTE_ORDER == __LITTLE_ENDIAN
     uint8_t	    vh_type:4;
     uint8_t	    vh_v:4;
 #else

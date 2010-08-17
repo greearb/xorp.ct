@@ -33,8 +33,9 @@ from SCons.Script.SConscript import SConsEnvironment
 def DoAllConfig(env, conf, host_os):
     ##########
     # endian
-    # XXX Wot about cross compilation??
-    conf.CheckEndianness()
+    has_endian_h = conf.CheckHeader('endian.h');
+    if not has_endian_h:
+        conf.CheckEndianness()
     
     ##########
     # c99
@@ -200,7 +201,8 @@ def DoAllConfig(env, conf, host_os):
         conf.Define('HAVE_TCPUDP_UNIX_SOCKETS')
     if has_af_inet and has_sock_raw:
         conf.Define('HAVE_IP_RAW_SOCKETS')
-	if host_os == 'linux-gnu' or host_os == 'openbsd':
+        # TODO:  This needs to be properly detected.
+	if host_os == 'linux-gnu' or host_os == 'openbsd' or host_os == "linux-uclibc":
             conf.Define('IPV4_RAW_OUTPUT_IS_RAW')
             conf.Define('IPV4_RAW_INPUT_IS_RAW')
     
