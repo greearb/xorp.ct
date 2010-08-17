@@ -32,6 +32,7 @@
 
 #ifndef BYTE_ORDER
 #ifdef __BYTE_ORDER
+#warning "__BYTE_ORDER is defined."
 #define BYTE_ORDER	__BYTE_ORDER
 #define LITTLE_ENDIAN	__LITTLE_ENDIAN
 #define BIG_ENDIAN	__BIG_ENDIAN
@@ -42,17 +43,28 @@
  * Presume that the scons logic figured defined WORDS_BIGENDIAN
  * or not.
  */
+
+#ifndef __LITTLE_ENDIAN
+#define __LITTLE_ENDIAN   1234
+#endif
+#ifndef __BIG_ENDIAN
+#define __BIG_ENDIAN      4321
+#endif
+
 #ifndef LITTLE_ENDIAN
-#define LITTLE_ENDIAN	1234
+#define LITTLE_ENDIAN   __LITTLE_ENDIAN
 #endif
 #ifndef BIG_ENDIAN
-#define BIG_ENDIAN	4321
+#define BIG_ENDIAN      __BIG_ENDIAN
 #endif
+
 
 #ifdef WORDS_BIGENDIAN
 #define BYTE_ORDER	BIG_ENDIAN
+#define __BYTE_ORDER	BIG_ENDIAN
 #else
 #define BYTE_ORDER	LITTLE_ENDIAN
+#define __BYTE_ORDER	LITTLE_ENDIAN
 #endif
 
 /*
