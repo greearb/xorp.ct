@@ -9,23 +9,39 @@ Release 1.9-CT  (Work in Progress)
       See:  scons --help
 
    *  Add support for IPv6 multicast with virtual routing tables.
-      Requires patched linux kernel or 2.6.35 when it comes out.
+      Requires Linux kernel 2.6.35 or higher.
 
    *  Support compiling with clang + llvm compiler:
       Install latest clang and llvm from their SVN repositories and:
       scons CC=clang CXX=clang++
 
-   *  Support compiling with uSTL (at least a subset compiles..not everything)
+   *  Add some changes to make it easier to support uSTL, but it does not
+      actually work as uSTL had too many limitations and bugs, and didn't seem
+      to gain much space improvements anyway.
       See BUILD_NOTES for more info.
-      NOTE:  uSTL is a moving target..not sure current top-of-tree uSTL works.
 
    *  Support cross-compiling.  See BUILD_NOTES.
 
-   *  BSD:  Don't crash FEA when interface dissappears.
+   *  BSD:  Don't crash FEA when interface disappears.
 
    *  BSD:  Don't fail commit if cannot remove route that doesn't exist.
 
-   *  Add signal handling for more graceful exit.  Helps clean up /var/tmp/xrl.* files.
+   *  Add signal handling for more graceful exit.  Helps clean up /var/tmp/xrl.*
+      files and lets valgrind report more useful information.
+
+   *  timers:  Fix memory leak related to the Heap class.
+
+   *  BGP:  Fix up tear-down logic to make sure it exits promptly in
+      all cases.
+
+   *  pim: Fix a recursive delete issue in pim code, exposed by the ability to
+      gracefully shut down processes with SIGTERM.
+
+   *  rtrmgr:  Allow starting helper processes under valgrind.  Just
+      create a file called XORP_USE_VALGRIND in the working directory.
+      If you want xorp_rtrmgr to use valgrind, you have to start it under
+      valgrind manually.
+
 
 Release 1.8-CT  June, 2010
 
