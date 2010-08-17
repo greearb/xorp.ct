@@ -65,6 +65,14 @@ AsyncFileOperator::~AsyncFileOperator()
 {
 }
 
+string AsyncFileOperator::toString() const {
+    ostringstream oss;
+    oss << " fd: " << _fd.str() << " running: " << _running << " last_err: "
+	<< _last_error << " priority: " << _priority << flush;
+    return oss.str();
+}
+
+
 // ----------------------------------------------------------------------------
 // AsyncFileReader read method and entry hook
 
@@ -293,6 +301,14 @@ AsyncFileWriter::add_data_sendto(const vector<uint8_t>&	data,
     assert(data.size() != 0);
     _buffers.push_back(new BufferInfo(data, dst_addr, dst_port, cb));
 }
+
+
+string AsyncFileWriter::toString() const {
+    ostringstream oss;
+    oss << AsyncFileOperator::toString() << " buffers: " << _buffers.size() << endl;
+    return oss.str();
+}
+
 
 //
 // Different UNIX platforms have different iov.iov_base types which

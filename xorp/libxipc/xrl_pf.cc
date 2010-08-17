@@ -57,3 +57,9 @@ XrlPFSender::~XrlPFSender()
 {
     // XXX put a debug_msg() here; we are now deleted through shared_ptr.
 }
+
+string XrlPFSender::toString() const {
+    ostringstream oss;
+    oss << "address: " << _address << " alive: " << alive();
+    return oss.str();
+}

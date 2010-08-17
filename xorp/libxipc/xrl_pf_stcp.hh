@@ -19,8 +19,6 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxipc/xrl_pf_stcp.hh,v 1.36 2008/10/13 02:06:58 pavlin Exp $
-
 #ifndef __LIBXIPC_XRL_PF_STCP_HH__
 #define __LIBXIPC_XRL_PF_STCP_HH__
 
@@ -54,6 +52,8 @@ public:
     void connect_hook(XorpFd fd, IoEventType type);
     bool response_pending() const;
 
+    virtual string toString() const;
+
 protected:
     XrlPFSTCPListener(EventLoop* e, XrlDispatcher* xr = 0);
 
@@ -64,7 +64,6 @@ private:
     list<STCPRequestHandler*>	_request_handlers;
 
     static const char*		_protocol;
-    static const uint32_t	_timeout_period;
 };
 
 /**

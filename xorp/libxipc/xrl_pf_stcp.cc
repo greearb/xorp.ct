@@ -35,13 +35,6 @@
 #include <fcntl.h>
 #endif
 
-
-
-
-
-
-
-
 #include "libxorp/debug.h"
 #include "libxipc/xrl_module.h"
 #include "libxorp/xlog.h"
@@ -155,6 +148,8 @@ public:
 
     bool response_pending() const;
 
+    string toString() const;
+
 private:
     XrlError do_dispatch(const uint8_t* packed_xrl, size_t packed_xrl_bytes,
                          XrlArgs& response);
@@ -184,6 +179,13 @@ private:
 
 // Default life timer for STCP session is 3 minutes.
 const TimeVal STCPRequestHandler::DEFAULT_KEEPALIVE_TIMEOUT = TimeVal(180, 0);
+
+string STCPRequestHandler::toString() const {
+    ostringstream oss;
+    oss << " sock: " << _sock.str() << " responses: " << _responses_size
+	<< " writer: " << _writer.toString();
+    return oss.str();
+}
 
 void
 STCPRequestHandler::read_event(BufferedAsyncReader*		/* source */,
@@ -495,6 +497,22 @@ XrlPFSTCPListener::remove_request_handler(const STCPRequestHandler* rh)
     assert(i != _request_handlers.end());
     _request_handlers.erase(i);
 }
+
+string XrlPFSTCPListener::toString() const {
+    ostringstream oss;
+    oss << "Protocol: " << _protocol << " sock: " << _sock.str()
+	<< " address: " << _address_slash_port << " response-pending: "
+	<< response_pending();
+
+    int i = 0;
+    list<STCPRequestHandler*>::const_iterator ci;
+    for (ci = _request_handlers.begin(); ci != _request_handlers.end(); ++ci) {
+	STCPRequestHandler* l = *ci;
+	oss << "\n   req-handler [" << i << "]  " << l->toString();
+    }
+    return oss.str();
+}
+
 
 bool
 XrlPFSTCPListener::response_pending() const

@@ -37,6 +37,28 @@
 
 static const char default_pf[] = { XRL_PF, '\0' };
 
+string XrlStdRouter::toString() const {
+    ostringstream oss;
+    oss << XrlRouter::toString();
+    oss << "\n_unix: ";
+
+    if (_unix) {
+	oss << _unix->toString() << endl;
+    }
+    else {
+	oss << "NULL\n";
+    }
+
+    if (_l) {
+	oss << "LISTENER: " << _l->toString() << endl;
+    }
+    else {
+	oss << "LISTENER: NULL\n";
+    }
+    return oss.str();
+}
+
+
 XrlPFListener*
 XrlStdRouter::create_listener()
 {

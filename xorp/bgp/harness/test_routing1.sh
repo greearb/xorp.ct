@@ -32,7 +32,7 @@ onexit()
     then
 	echo "$0: Tests Succeeded (BGP: $TESTS)"
     else
-	echo "$0: Tests Failed (BGP: $TESTS)"
+	echo "$0: Tests Failed: $last (BGP: $TESTS)"
     fi
 
     trap '' 0 2

@@ -325,7 +325,19 @@ XrlRouter::pending() const
 	    return true;
     }
 
-    return _senders.empty() == false && _dsl.empty() == false;
+    if (_dsl.size()) {
+	// Return true if we have any alive senders.
+	for (list< ref_ptr<XrlPFSender> >::const_iterator si = _senders.begin();
+	     si != _senders.end(); ++si) {
+	    ref_ptr<XrlPFSender> s = *si;
+	    if (s->alive()) {
+		return true;
+	    }
+	}
+    }
+
+    // No alive senders it seems.
+    return false;
 }
 
 bool
@@ -712,11 +724,29 @@ string XrlRouter::toString() const {
     if (_fac) {
 	oss << " fac enabled: " << _fac->enabled() << " fac connect failed: "
 	    << _fac->connect_failed() << " fac connected: " << _fac->connected()
-	    << " ready: " << ready() << endl;
+	    << " ready: " << ready() << " pending: " << pending() << endl;
     }
     else {
 	oss << " fac NULL, ready: " << ready() << endl;
     }
+
+    int i = 0;
+    list<XrlPFListener*>::const_iterator ci;
+    for (ci = _listeners.begin(); ci != _listeners.end(); ++ci) {
+	XrlPFListener* l = *ci;
+	oss << " Listener [" << i << "]  " << l->toString() << endl;
+	i++;
+    }
+
+    i = 0;
+    for (list< ref_ptr<XrlPFSender> >::const_iterator si = _senders.begin();
+	 si != _senders.end(); ++si) {
+	ref_ptr<XrlPFSender> s = *si;
+	oss << " Sender [" << i << "]  " << s->toString() << endl;
+    }
+
+    oss << " dispatch-state size: " << _dsl.size() << endl;
+
     return oss.str();
 }
 

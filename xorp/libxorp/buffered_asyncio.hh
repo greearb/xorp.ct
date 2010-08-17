@@ -19,21 +19,13 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxorp/buffered_asyncio.hh,v 1.11 2008/11/02 05:17:33 pavlin Exp $
-
 #ifndef __LIBXORP_BUFFERED_ASYNCIO_HH__
 #define __LIBXORP_BUFFERED_ASYNCIO_HH__
 
 #include "libxorp/xorp.h"
-
-
-
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
-
-
-
 #include "libxorp/callback.hh"
 #include "libxorp/eventloop.hh"
 
@@ -76,7 +68,7 @@ public:
 			const Callback& cb,
 			int priority = XorpTask::PRIORITY_DEFAULT);
 
-    ~BufferedAsyncReader();
+    virtual ~BufferedAsyncReader();
 
     /**
      * Set threshold for event notification.  Only when this threshold

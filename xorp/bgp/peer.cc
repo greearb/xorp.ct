@@ -2046,10 +2046,10 @@ BGPPeer::set_state(FSMState s, bool restart, bool automatic)
 {
     TIMESPENT();
 
-    XLOG_INFO("Peer %s: Previous state: %s Current state: %s\n",
-	      peerdata()->iptuple().str().c_str(),
-	      pretty_print_state(_state),
-	      pretty_print_state(s));
+    //XLOG_INFO("Peer %s: Previous state: %s Current state: %s\n",
+    //      peerdata()->iptuple().str().c_str(),
+    //      pretty_print_state(_state),
+    //      pretty_print_state(s));
     PROFILE(XLOG_TRACE(main()->profile().enabled(trace_state_change),
 		       "Peer %s: Previous state: %s Current state: %s\n",
 		       peerdata()->iptuple().str().c_str(),

@@ -19,8 +19,6 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxipc/xrl_router.hh,v 1.49 2008/11/02 18:35:58 atanu Exp $
-
 #ifndef __LIBXIPC_XRL_ROUTER_HH__
 #define __LIBXIPC_XRL_ROUTER_HH__
 
@@ -106,7 +104,7 @@ public:
      */
     bool failed() const;
 
-    string toString() const;
+    virtual string toString() const;
 
     /**
      * Send XRL.

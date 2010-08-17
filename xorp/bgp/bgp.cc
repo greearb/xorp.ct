@@ -185,13 +185,15 @@ BGPMain::~BGPMain()
     while(_xrl_router->pending()) {
 	eventloop().run();
 	now = time(NULL);
-	if (now > start + 5) {
-	    XLOG_WARNING("xrl router still has pending operations after %i seconds, giving up.",
-			 now - start);
+	if (now > start + 2) {
+	    XLOG_WARNING("xrl router still has pending operations after %i seconds, RIB deregister, giving up, xrl_router: %s",
+			 now - start, _xrl_router->toString().c_str());
 	    break;
 	}
-	XLOG_INFO("xrl router still has pending operations, after %i seconds, will retry.",
-		  now - start);
+	if (now > start) {
+	    XLOG_WARNING("xrl router still has pending operations, after %i seconds, RIB deregister, will retry.",
+			 now - start);
+	}
     }
 
     debug_msg("-------------------------------------------\n");
@@ -202,13 +204,15 @@ BGPMain::~BGPMain()
     while(_xrl_router->pending()) {
 	eventloop().run();
 	now = time(NULL);
-	if (now > start + 5) {
-	    XLOG_WARNING("xrl router still has pending operations after %i seconds, giving up.",
-			 now - start);
+	if (now > start + 2) {
+	    XLOG_WARNING("xrl router still has pending operations after %i seconds, delete RIB IPC, giving up, xrl_router: %s",
+			 now - start, _xrl_router->toString().c_str());
 	    break;
 	}
-	XLOG_INFO("xrl router still has pending operations, after %i seconds, will retry.",
-		  now - start);
+	if (now > start) {
+	    XLOG_WARNING("xrl router still has pending operations, after %i seconds, delete RIB IPC, will retry.",
+			 now - start);
+	}
     }
 
     debug_msg("-------------------------------------------\n");

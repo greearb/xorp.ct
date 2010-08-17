@@ -19,8 +19,6 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxipc/xrl_std_router.hh,v 1.26 2008/10/02 21:57:26 bms Exp $
-
 #ifndef __LIBXIPC_XRL_STD_ROUTER_HH__
 #define __LIBXIPC_XRL_STD_ROUTER_HH__
 
@@ -69,6 +67,8 @@ public:
 		 bool		unix_socket = UNIX_SOCKET_DEFAULT);
 
     virtual ~XrlStdRouter();
+
+    virtual string toString() const;
 
 private:
     void	   construct(bool unix_socket);

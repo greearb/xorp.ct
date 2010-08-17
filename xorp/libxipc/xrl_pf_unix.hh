@@ -19,8 +19,6 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxipc/xrl_pf_unix.hh,v 1.4 2008/10/02 21:57:25 bms Exp $
-
 #ifndef __LIBXIPC_XRL_PF_UNIX_HH__
 #define __LIBXIPC_XRL_PF_UNIX_HH__
 

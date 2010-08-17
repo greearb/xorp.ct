@@ -19,22 +19,13 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxorp/asyncio.hh,v 1.35 2008/10/22 00:26:47 pavlin Exp $
-
 #ifndef __LIBXORP_ASYNCIO_HH__
 #define __LIBXORP_ASYNCIO_HH__
 
 #include "libxorp/xorp.h"
-
-
-
-
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
-
-
-
 #include "libxorp/xorpfd.hh"
 #include "libxorp/callback.hh"
 #include "libxorp/eventloop.hh"
@@ -135,6 +126,8 @@ public:
      */
     int			error() const		{ return _last_error; }
 
+    virtual string toString() const;
+
 protected:
     AsyncFileOperator(EventLoop& e, XorpFd fd, 
 		      int priority = XorpTask::PRIORITY_DEFAULT)
@@ -164,7 +157,7 @@ public:
      */
     AsyncFileReader(EventLoop& e, XorpFd fd,
 		    int priority = XorpTask::PRIORITY_DEFAULT);
-    ~AsyncFileReader();
+    virtual ~AsyncFileReader();
 
     /**
      * Add an additional buffer for reading to.
@@ -264,7 +257,7 @@ public:
     AsyncFileWriter(EventLoop& e, XorpFd fd, uint32_t coalesce = 1,
 		    int priority = XorpTask::PRIORITY_DEFAULT);
 
-    ~AsyncFileWriter();
+    virtual ~AsyncFileWriter();
 
     /**
      * Add an additional buffer for writing from.
@@ -361,6 +354,8 @@ public:
      * Stop asynchronous operation and clear list of buffers.
      */
     void flush_buffers();
+
+    virtual string toString() const;
 
 private:
     AsyncFileWriter();			// Not directly constructible
