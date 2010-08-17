@@ -153,6 +153,9 @@ BGPMain::~BGPMain()
 
     debug_msg("-------------------------------------------\n");
     debug_msg("Waiting for all peers to go to idle\n");
+
+    int start = time(NULL);
+    int now;
     while (_peerlist->not_all_idle() || _rib_ipc_handler->busy() ||
 	   DeleteAllNodes<IPv4>::running()
 #ifdef HAVE_IPV6
@@ -164,6 +167,21 @@ BGPMain::~BGPMain()
 	    // Kick them again
 	    XLOG_WARNING("Stopping all peers in ~BGPMain cleanup loop.\n");
 	    _peerlist->all_stop();
+	}
+
+	now = time(NULL);
+	if (now > start + 2) {
+	    XLOG_WARNING("xrl router still has pending peer-idle operations after %i seconds,"
+			 " not-all-idle: %i  rib_ipc_handler busy: %i  delete-all-nodes-running: %i"
+			 " continuing...",
+			 now - start, (int)(_peerlist->not_all_idle()), (int)(_rib_ipc_handler->busy()),
+			 (int)(DeleteAllNodes<IPv4>::running()));
+#ifdef HAVE_IPV6
+	    if (DeleteAllNodes<IPv6>::running()) {
+		XLOG_WARNING("delete-all-ipv6-nodes is running.");
+	    }
+#endif
+	    break;
 	}
     }
 
@@ -180,8 +198,7 @@ BGPMain::~BGPMain()
     */
     _rib_ipc_handler->register_ribname("");
 
-    int start = time(NULL);
-    int now;
+    start = time(NULL);
     while(_xrl_router->pending()) {
 	eventloop().run();
 	now = time(NULL);
