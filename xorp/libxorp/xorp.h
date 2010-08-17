@@ -32,7 +32,6 @@
 
 #ifndef BYTE_ORDER
 #ifdef __BYTE_ORDER
-#warning "__BYTE_ORDER is defined."
 #define BYTE_ORDER	__BYTE_ORDER
 #define LITTLE_ENDIAN	__LITTLE_ENDIAN
 #define BIG_ENDIAN	__BIG_ENDIAN
