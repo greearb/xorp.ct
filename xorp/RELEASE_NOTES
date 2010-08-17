@@ -42,6 +42,9 @@ Release 1.9-CT  (Work in Progress)
       If you want xorp_rtrmgr to use valgrind, you have to start it under
       valgrind manually.
 
+   *  FEA:  Properly clean up all sockets and remove them from the eventloop
+      callback when cleaing up io_ip_socket objects.
+
 
 Release 1.8-CT  June, 2010
 
