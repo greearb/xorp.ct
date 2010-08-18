@@ -1137,8 +1137,13 @@ comm_set_bindtodevice(xsock_t sock, const char * my_ifname)
 
     return (XORP_OK);
 #else
+#ifndef __FreeBSD__
+    // FreeBSD doesn't implement this, so no use filling logs with errors that can't
+    // be helped.  Assume calling code deals with the error code as needed.
     XLOG_ERROR("setsockopt SO_BINDTODEVICE %s: %s",
 	       my_ifname, "SO_BINDTODEVICE support not present.");
+#endif
+    UNUSED(my_ifname);
     UNUSED(sock);
     return (XORP_ERROR);
 #endif

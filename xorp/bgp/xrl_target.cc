@@ -116,7 +116,7 @@ XrlBgpTarget::bgp_0_3_local_config(
     ** We may already be configured so don't allow a reconfiguration.
     */
     if(!_awaiting_config)
-	return XrlCmdError::COMMAND_FAILED("Attempt to reconfigure BGP");
+	return XrlCmdError::COMMAND_FAILED("Attempt to reconfigure BGP denied.");
 
     _use_4byte_asnums = use_4byte_asnums;
     try {
