@@ -18,6 +18,7 @@ xorp_links = [
 # --
     ("Get XORP.CT", ""),
     ("Downloads", "http://github.com/greearb/xorp.ct/downloads"),
+    ("Live-CD", "livecd.html"),
     ("Browse Code", "http://github.com/greearb/xorp.ct"),
 #    ("Mirror Sites", "mirrors.html"),
     ("Security Advisories", "advisories.html"),

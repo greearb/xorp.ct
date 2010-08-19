@@ -1,11 +1,53 @@
 <h1>XORP Live CD</h1>
 
 <p>
-Quick notes:
+<h2>Quick notes:</h2>
 <ol>
-  <li>Download and burn the live-CD image.</li>
+  <li>Download and burn the
+      <a href="http://www.candelatech.com/private/downloads/index2.html#lfcd">LANforge Live-CD</a>
+      Please note that you do NOT need LANforge licenses to just use LANforge and Xorp as (virtual)
+      routers.  You may
+      <a href="http://www.candelatech.com/cgi/cr_login.cgi">create an account on candelatech.com</a> or
+      just use <pre>user:  guest  password: guest</pre> to log in to the downloads page. </li>
   <li>Boot it up.</li>
-  <li>Look in /usr/local/xorp/</li>
-  <li>Create an appropriate config file and run xorp_rtrmgr -b [cfg-file]</li>
-  <li>Profit! (More details coming later)</li>
+  <li>If you want to use Xorp all by itself, it is installed in /usr/local/xorp.  You
+      can create a config file and start it manually:  xorp_rtrmgr -b [cfg-file]</li>
+  <li>Or, you can use LANforge to auto-create Xorp config files and manage xorp
+      using the Netsmith feature.  See more instructions below if using this method.</li>
+  <li>Profit!</li>
+</ol>
+
+
+<P>
+<h2>Using LANforge and Netsmith to create Xorp routers.</h2>
+<P>
+LANforge is a network testing tool produced by <a href="http://www.candelatech.com">Candela Technologies</a>.
+It can be used for network traffic generation and network emulation (including latency,
+packet loss, bandwidth-constriction, etc).  As part of its virtual-routing feature
+set, it can manage Xorp through its Netsmith GUI widget.  As long as you do not
+attempt to generate traffic or add network impairment, you do not need any LANforge
+licenses.
+<P>
+<ol>
+  <li>After booting up the Live-CD, start LANforge and the LANforge-GUI by
+      clicking on the icons on the desktop.</li>
+  <li>
+  <li>Click 'Netsmith' in the Status panel of the LANforge-GUI.  It will be
+      towards the middle of the screen.</li>
+  <li>In Netsmith, right-click to create a new Virtual Router and then
+      drag network interfaces into the router to use them.  The Virtual Router
+      has different routing options, including OSPF, BGP, etc.</li>
+  <li>You may need to configure the Interfaces as well..right-click on the little
+      green or black squares in Netsmith to modify them.</li>
+  <li>You may optionally create additional virtual routers and connections between
+      the virtual routers.  When creating connections, be sure to skip the 'B'
+      ports and the WanLink, otherwise you will need LANforge-ICE emulation licenses
+      for the WanLink to function.</li>
+  <li>When satisfied, click Apply and Xorp will be (re)started with the proper config.</li>
+  <li>The xorp config files are saved in /home/lanforge/vr_conf/ and may be useful as
+      a starting point for more advanced xorp configurations.</li>
+  <li>You may wish to see some of the
+      <a href="http://www.candelatech.com/lanforge_v3/cb/lfgui_ice_cookbook.html">LANforge cookbook examples</a>
+      for more details.  These examples are tailored to using LANforge, but the ones related to routing
+      will be using Xorp.</li>
 </ol>
