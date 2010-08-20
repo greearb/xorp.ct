@@ -666,10 +666,15 @@ def DoAllConfig(env, conf, host_os):
     has_netinet_ip_fil_h = conf.CheckHeader(['sys/types.h', 'sys/ioctl.h', 'sys/socket.h', 'netinet/in.h', 'netinet/in_systm.h', 'netinet/ip.h', 'netinet/ip_compat.h', 'netinet/ip_fil.h'])
     has_netinet_ip_fw_h = conf.CheckHeader(['sys/types.h', 'sys/ioctl.h', 'sys/socket.h', 'net/if.h', 'netinet/in.h', 'net/if_var.h', 'netinet/ip_fw.h'])
     has_net_pfvar_h = conf.CheckHeader(['sys/param.h', 'sys/file.h', 'sys/ioctl.h', 'sys/socket.h', 'net/if.h', 'netinet/in.h', 'net/if_var.h', 'net/pfvar.h'])
-    # XXX force IPTables tests to be C++ friendly.
+
+    # Older linux kernel headers for netfilter wouldn't compile with C++ w/out hacking on the headers themselves.
     has_linux_netfilter_ipv4_ip_tables_h = conf.CheckHeader(['sys/param.h', 'net/if.h', 'netinet/in.h', 'linux/netfilter_ipv4/ip_tables.h'], language = "C++")
     has_linux_netfilter_ipv6_ip6_tables_h = conf.CheckHeader(['sys/param.h', 'net/if.h', 'netinet/in.h', 'linux/netfilter_ipv6/ip6_tables.h'], language = "C++")
-    
+
+    if has_linux_netfilter_ipv4_ip_tables_h or has_linux_netfilter_ipv6_ip6_tables_h:
+        if not (env.has_key('disable_fw') and env['disable_fw']):
+            conf.Define('HAVE_FIREWALL_NETFILTER')
+            
     ##########
     # vlan
     
@@ -747,6 +752,7 @@ def DoAllConfig(env, conf, host_os):
     has_dlfcn_h = conf.CheckHeader('dlfcn.h')
     has_libdl = conf.CheckLib('dl')
     has_dl_open = conf.CheckFunc('dlopen')
+
     
     ##########
     # pcap for l2 comms
@@ -772,6 +778,25 @@ def DoAllConfig(env, conf, host_os):
         print "  This is not a real problem, just a small performance"
         print "  loss when using multiple virtual routers on the same system."
         print "  On Ubuntu:  apt-get install pcap-dev\n"
+
+    if not (has_linux_netfilter_ipv4_ip_tables_h or has_linux_netfilter_ipv6_ip6_tables_h):
+        if not (env.has_key('disable_fw') and env['disable_fw']):
+            if has_linux_mroute_h:
+                # We are Linux...should warn users about how to make netfiltering work since
+                # it appears their headers are busted.
+                print "\nWARNING: Netfilter include files are broken or do not exist."
+                print "  This means the Linux firewall support will not be compiled in."
+                print "  To fix, you may edit: /usr/include/linux/netfilter_ipv4/ip_tables.h"
+                print "  line 222 or so, to look like this:"
+                print "  /* Helper functions */"
+                print "  static __inline__ struct ipt_entry_target *"
+                print "  ipt_get_target(struct ipt_entry *e)"
+                print "{"
+                print "        /* BEN:  Was void* */"
+                print "        return (struct ipt_entry_target *)e + e->target_offset;"
+                print "}"
+                print "\nYou will also want to edit similar code around line 282 of:"
+                print "/usr/include/linux/netfilter_ipv6/ip6_tables.h"
 
     ##########
     # curses for cli/libtecla
