@@ -45,6 +45,9 @@ Release 1.9-CT  (Work in Progress)
    *  FEA:  Properly clean up all sockets and remove them from the eventloop
       callback when cleaing up io_ip_socket objects.
 
+   *  firewall:  Support compiling netlink firewall support on Linux, if
+      kernel headers are properly modified to compile with c++.
+
 
 Release 1.8-CT  June, 2010
 
