@@ -793,7 +793,7 @@ def DoAllConfig(env, conf, host_os):
                 print "  ipt_get_target(struct ipt_entry *e)"
                 print "{"
                 print "        /* BEN:  Was void* */"
-                print "        return (struct ipt_entry_target *)e + e->target_offset;"
+                print "        return (struct ipt_entry_target *)((char*)e + e->target_offset);"
                 print "}"
                 print "\nYou will also want to edit similar code around line 282 of:"
                 print "/usr/include/linux/netfilter_ipv6/ip6_tables.h"
