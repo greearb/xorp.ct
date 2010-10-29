@@ -147,8 +147,11 @@ XrlIO<A>::send_cb(const XrlError& xrl_error, string interface, string vif)
 	break;
 
     case NO_FINDER:
-	// XXX - Temporarily core dump if this condition occurs.
-	XLOG_FATAL("NO FINDER");
+	// Finders can time-out and go away when system is under extreme load.
+	// I think they will be re-built again later, so don't crash here...just
+	// print error and soldier on. --Ben
+	XLOG_ERROR("Cannot send a packet on interface %s vif %s (NO_FINDER): %s",
+		   interface.c_str(), vif.c_str(), xrl_error.str().c_str());
 	break;
 
     case BAD_ARGS:
