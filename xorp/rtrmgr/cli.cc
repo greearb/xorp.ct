@@ -399,7 +399,7 @@ available using the run command.";
 
     _help_long_c["save"] = "\
 The \"save\" command causes the current running configuration to be saved to\n\
-a named file.  By default, files are loaded from your own home directory \n\
+a named file.  By default, files are saved to your own home directory \n\
 unless an absolute pathname is given.  Directories in the path should be\n\
 separated by slashes (\"/\") and not backslashes (\"\\\").\n\
 \n\
