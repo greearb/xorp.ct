@@ -17,8 +17,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/fea/mfea_mrouter.hh,v 1.26 2008/10/02 21:56:49 bms Exp $
-
 
 #ifndef __FEA_MFEA_MROUTER_HH__
 #define __FEA_MFEA_MROUTER_HH__
@@ -209,7 +207,7 @@ public:
      * @param vif_index the vif index of the virtual interface to add.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		add_multicast_vif(uint32_t vif_index);
+    int	add_multicast_vif(uint32_t vif_index);
     
     /**
      * Delete a virtual multicast interface from the kernel.
@@ -217,7 +215,7 @@ public:
      * @param vif_index the vif index of the interface to delete.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		delete_multicast_vif(uint32_t vif_index);
+    int	delete_multicast_vif(uint32_t vif_index);
     
     /**
      * Install/modify a Multicast Forwarding Cache (MFC) entry in the kernel.

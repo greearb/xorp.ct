@@ -22,12 +22,6 @@
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
 
-
-
-
-
-
-
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
 #include "libxorp/mac.hh"
@@ -597,7 +591,7 @@ public:
     typedef set<Mac>			  MacSet;
 
     IfTreeInterface(IfTree& iftree, const string& ifname);
-    ~IfTreeInterface();
+    virtual ~IfTreeInterface();
 
     IfTree& iftree()			{ return _iftree; }
     const string& ifname() const	{ return _ifname; }
@@ -863,7 +857,7 @@ public:
     typedef map<IPv6, IfTreeAddr6*> IPv6Map;
 
     IfTreeVif(IfTreeInterface& iface, const string& vifname);
-    ~IfTreeVif();
+    virtual ~IfTreeVif();
 
     IfTree& iftree()			{ return _iface.iftree(); }
     const string& ifname() const	{ return _iface.ifname(); }

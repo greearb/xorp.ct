@@ -1404,8 +1404,11 @@ MfeaMrouter::delete_multicast_vif(uint32_t vif_index)
 {
     MfeaVif *mfea_vif = mfea_node().vif_find_by_vif_index(vif_index);
     
-    if (mfea_vif == NULL)
+    if (mfea_vif == NULL) {
+	XLOG_WARNING("Could not find mfea-vif for index: %i\n",
+		     vif_index);
 	return (XORP_ERROR);
+    }
     
     switch (family()) {
     case AF_INET:

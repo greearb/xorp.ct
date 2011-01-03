@@ -17,8 +17,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/fea/mfea_vif.hh,v 1.13 2008/10/02 21:56:50 bms Exp $
-
 
 #ifndef __FEA_MFEA_VIF_HH__
 #define __FEA_MFEA_VIF_HH__
@@ -28,23 +26,9 @@
 // MFEA virtual interface definition.
 //
 
-
-
-
-
-
-
 #include "libxorp/vif.hh"
 #include "libproto/proto_unit.hh"
 
-
-//
-// Constants definitions
-//
-
-//
-// Structures/classes, typedefs and macros
-//
 
 class MfeaNode;
 
@@ -179,7 +163,7 @@ public:
      * @return the registered module instance name.
      */
     const string& registered_module_instance_name() const {
-	return (_registered_module_instance_name);
+	return _registered_module_instance_name;
     }
 
     /**

@@ -37,27 +37,6 @@
 #include "mfea_vif.hh"
 
 
-//
-// Exported variables
-//
-
-//
-// Local constants definitions
-//
-
-//
-// Local structures/classes, typedefs and macros
-//
-
-//
-// Local variables
-//
-
-//
-// Local functions prototypes
-//
-
-
 /**
  * MfeaVif::MfeaVif:
  * @mfea_node: The MFEA node this interface belongs to.

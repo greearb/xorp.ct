@@ -388,6 +388,12 @@ MfeaNode::interface_update(const string&	ifname,
 
     case DELETED:
 	// Update the MFEA iftree
+	XLOG_WARNING("interface_update:  Delete: %s\n",
+		     ifname.c_str());
+	// First, make sure our protocols are un-registered on this interface
+	// and all it's vifs.
+	unregister_protocols_for_iface(ifname);
+
 	_mfea_iftree.remove_interface(ifname);
 	_mfea_iftree_update_replicator.interface_update(ifname, update);
 
@@ -490,6 +496,12 @@ MfeaNode::vif_update(const string&	ifname,
 
     case DELETED:
 	// Update the MFEA iftree
+	XLOG_ERROR("vif_updated:  Delete: %s/%s\n",
+		   ifname.c_str(), vifname.c_str());
+
+	// Unregister protocols on this VIF
+	unregister_protocols_for_vif(ifname, vifname);
+
 	mfea_ifp = _mfea_iftree.find_interface(ifname);
 	if (mfea_ifp != NULL) {
 	    mfea_ifp->remove_vif(vifname);
@@ -1461,14 +1473,69 @@ MfeaNode::register_protocol(const string&	module_instance_name,
     return (XORP_OK);
 }
 
+void MfeaNode::unregister_protocols_for_iface(const string& if_name) {
+    IfTreeInterface* mfea_ifp = _mfea_iftree.find_interface(if_name);
+    if (mfea_ifp) {
+	// This is more paranoid than it currently needs to be.  It seems
+	// that there cannot be more than one vif per iface, and vif-name is
+	// probably always ifname.  But, it shouldn't hurt to make it look
+	// for additional vifs in case support is someday added.
+	//
+	// Gather up list of strings and process them while NOT iterating
+	// over the lists in case something in the unregister logic
+	// changes the lists.
+	// --Ben
+	list<string> vifs;
+	list<string> module_names;
+	IfTreeInterface::VifMap::const_iterator i;
+	for (i = mfea_ifp->vifs().begin(); i != mfea_ifp->vifs().end(); i++) {
+	    vifs.push_back(i->first); // name
+	    MfeaVif *mfea_vif = vif_find_by_name(i->first);
+	    if (mfea_vif) {
+		module_names.push_back(mfea_vif->registered_module_instance_name());
+	    }
+
+	    // Delete the mcast vif from the kernel.
+	    delete_multicast_vif(mfea_vif->vif_index());
+	}
+
+	// Now, for all vifs/modules unregister_protocol.
+	string err_msg;
+	list<string>::iterator si;
+	for (si = vifs.begin(); si != vifs.end(); si++) {
+	    list<string>::iterator mi;
+	    for (mi = module_names.begin(); mi != module_names.end(); mi++) {
+		unregister_protocol(*mi, if_name, *si, err_msg);
+	    }
+	}
+    }
+}
+
+
+void MfeaNode::unregister_protocols_for_vif(const string& ifname, const string& vifname) {
+    MfeaVif *mfea_vif = vif_find_by_name(vifname);
+    if (mfea_vif) {
+	string mn(mfea_vif->registered_module_instance_name());
+	string err_msg;
+
+	// Delete the mcast vif from the kernel.
+	delete_multicast_vif(mfea_vif->vif_index());
+
+	unregister_protocol(mn, ifname, vifname, err_msg);
+    }
+}
+
 int
 MfeaNode::unregister_protocol(const string&	module_instance_name,
 			      const string&	if_name,
 			      const string&	vif_name,
 			      string&		error_msg)
 {
-    MfeaVif *mfea_vif = vif_find_by_name(vif_name);
 
+    XLOG_WARNING("unregister_protocol: module: %s  iface: %s/%s\n",
+		 module_instance_name.c_str(), if_name.c_str(), vif_name.c_str());
+
+    MfeaVif *mfea_vif = vif_find_by_name(vif_name);
     if (mfea_vif == NULL) {
 	error_msg = c_format("Cannot unregister module %s on interface %s "
 			     "vif %s: no such vif (will continue)",

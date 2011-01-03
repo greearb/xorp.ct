@@ -28,26 +28,14 @@
 // MFEA (Multicast Forwarding Engine Abstraction) node definition.
 //
 
-
-
-
-
 #include "libxorp/ipvx.hh"
 #include "libxorp/config_param.hh"
-
 #include "libproto/proto_node.hh"
-
 #include "mrt/mifset.hh"
-
 #include "ifconfig_reporter.hh"
 #include "iftree.hh"
 #include "mfea_dataflow.hh"
 #include "mfea_mrouter.hh"
-
-
-//
-// Constants definitions
-//
 
 
 //
@@ -339,6 +327,19 @@ public:
 			  const string&		vif_name,
 			  uint8_t		ip_protocol,
 			  string&		error_msg);
+
+
+    /** Helper method to unregister all protocols on all vifs for this
+     * interface.  This needs to be called before we delete an interface
+     * to ensure the cleanup can happen properly.
+     */
+    void unregister_protocols_for_iface(const string& ifname);
+
+    /** Helper method to unregister all protocols on this vif.
+     * This needs to be called before we delete an interface
+     * to ensure the cleanup can happen properly.
+     */
+    void unregister_protocols_for_vif(const string& ifname, const string& vifname);
 
     /**
      * Unregister a protocol on an interface in the Multicast FEA.
@@ -858,15 +859,5 @@ private:
     //
     bool	_is_log_trace;		// If true, enable XLOG_TRACE()
 };
-
-
-//
-// Global variables
-//
-
-
-//
-// Global functions prototypes
-//
 
 #endif // __FEA_MFEA_NODE_HH__

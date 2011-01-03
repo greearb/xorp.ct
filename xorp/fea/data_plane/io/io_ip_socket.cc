@@ -1202,7 +1202,8 @@ IoIpSocket::enable_recv_pktinfo(XorpFd* input_fd, bool is_enabled, string& error
 
 void IoIpSocket::notifyDeletingIface(const string& ifname) {
 // Only clean up here if we are using multiple input sockets.
-    XLOG_INFO("IoIpSocket::notifyDeletingIface: %s\n", ifname.c_str());
+    XLOG_INFO("IoIpSocket::notifyDeletingIface:, this: %p  iface: %s\n",
+	      this, ifname.c_str());
 
 #ifdef USE_SOCKET_PER_IFACE
     const IfTreeInterface* ifp = iftree().find_interface(ifname);
@@ -1221,7 +1222,8 @@ void IoIpSocket::notifyDeletingIface(const string& ifname) {
 		_proto_sockets_in.erase(key);
 		cleanupXorpFd(fd);
 
-		XLOG_INFO("Closed socket: %i on interface: %s:%s because its interface is being deleted, input sockets count: %i\n",
+		XLOG_INFO("Closed socket: %i on interface: %s:%s because its interface"
+			  " is being deleted, input sockets count: %i\n",
 			  _fd, ifn.c_str(), vn.c_str(), (int)(_proto_sockets_in.size()));
 
 	    }
