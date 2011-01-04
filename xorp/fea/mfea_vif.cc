@@ -213,10 +213,9 @@ MfeaVif::stop(string& error_msg)
 void
 MfeaVif::enable()
 {
-    ProtoUnit::enable();
-
-    XLOG_INFO("Interface enabled %s%s",
+    XLOG_INFO("MfeaVif: Interface enable %s%s",
 	      this->str().c_str(), flags_string().c_str());
+    ProtoUnit::enable();
 }
 
 /**

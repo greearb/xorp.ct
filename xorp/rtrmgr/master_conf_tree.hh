@@ -17,14 +17,9 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.43 2008/10/02 21:58:23 bms Exp $
 
 #ifndef __RTRMGR_MASTER_CONF_TREE_HH__
 #define __RTRMGR_MASTER_CONF_TREE_HH__
-
-
-
-
 
 
 #include "conf_tree.hh"

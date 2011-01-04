@@ -21,11 +21,9 @@
 
 
 #include "rtrmgr_module.h"
-
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
-
 #include "command_tree.hh"
 #include "master_conf_tree_node.hh"
 #include "module_command.hh"
@@ -360,8 +358,14 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
     const Command *cmd = NULL;
     bool changes_made = false;
 
-    debug_msg("*****COMMIT CHANGES node >%s< >%s<\n",
-	      _path.c_str(), _value.c_str());
+    //if (do_commit) {
+    //XLOG_INFO("*****COMMIT CHANGES node >%s< >%s<, do_commit: %i"
+    //	  "  existence_committed: %i  value_committed: %i "
+    //	  " children_changed: %i\n",
+    //	  _path.c_str(), _value.c_str(), (int)(do_commit),
+    //	  (int)(_existence_committed), (int)(_value_committed),
+    //	  (int)(children_changed()));
+    //}
     if (do_commit)
 	debug_msg("do_commit\n");
     if (_existence_committed == false)
@@ -632,10 +636,12 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
 	}
     }
 
-    debug_msg("Result: %s\n", error_msg.c_str());
-    debug_msg("COMMIT, leaving node >%s<\n", _path.c_str());
-    debug_msg("final node %s actions_pending = %d\n",
-	      _segname.c_str(), _actions_pending);
+    //if (do_commit) {
+    //    if (error_msg.size())
+    //        XLOG_INFO("Result: %s\n", error_msg.c_str());
+    //    XLOG_INFO("COMMIT, leaving node >%s<, segname: %s  actions_pending: %d\n",
+    //	  _path.c_str(), _segname.c_str(), _actions_pending);
+    //}
 
     return success;
 }

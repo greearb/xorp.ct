@@ -32,34 +32,10 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/ipvx.hh"
-
 #include "fea/mfea_kernel_messages.hh"		// TODO: XXX: yuck!
-
 #include "pim_mre.hh"
 #include "pim_node.hh"
 #include "pim_vif.hh"
-
-
-//
-// Exported variables
-//
-
-//
-// Local constants definitions
-//
-
-//
-// Local structures/classes, typedefs and macros
-//
-
-
-//
-// Local variables
-//
-
-//
-// Local functions prototypes
-//
 
 
 /**
@@ -810,11 +786,7 @@ PimNode::add_vif(const string& vif_name, uint32_t vif_index, string& error_msg)
     //
     Vif vif(vif_name);
     vif.set_vif_index(vif_index);
-    if (add_vif(vif, error_msg) != XORP_OK) {
-	return (XORP_ERROR);
-    }
-    
-    return (XORP_OK);
+    return add_vif(vif, error_msg);
 }
 
 /**
@@ -1028,6 +1000,10 @@ PimNode::add_vif_addr(const string& vif_name,
     // Inform the BSR about the change
     //
     pim_bsr().add_vif_addr(pim_vif->vif_index(), addr);
+
+    // Let the VIF know it was updated..might want to start itself
+    // if it was waiting on an IP address.
+    pim_vif->notifyUpdated();
     
     return (XORP_OK);
 }
@@ -1161,15 +1137,34 @@ PimNode::enable_vif(const string& vif_name, string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
     if (pim_vif == NULL) {
-	error_msg = c_format("PimNode:  Cannot enable vif %s: no such vif",
+	// Seems we have some sort of race...it's asked to be enabled before it is
+	// created on config-file reload.
+	// For now, create it manually.
+	// TODO:  Fix enable-vif on cfg-file load.
+	// NOTE:  mld6igmp has similar issue and similar work-around.
+	error_msg = c_format("PimNode:  Cannot enable vif %s: no such vif (will try to create one)",
 			     vif_name.c_str());
 	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
+
+	int if_index = -1;
+	errno = 0;
+#ifdef HAVE_IF_NAMETOINDEX
+	if_index = if_nametoindex(vif_name.c_str());
+#endif
+        if (if_index < 0) {
+	    XLOG_ERROR("Could not convert vif_name to ifindex: %s  possible error: %s\n",
+		       vif_name.c_str(), strerror(errno));
+	    return XORP_ERROR;
+	}
+	else {
+	    add_vif(vif_name, if_index, error_msg);
+	    pim_vif = vif_find_by_name(vif_name);
+	}
     }
     
     pim_vif->enable();
     
-    return (XORP_OK);
+    return XORP_OK;
 }
 
 /**

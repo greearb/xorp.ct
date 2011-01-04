@@ -38,29 +38,6 @@
 #include "mld6igmp_vif.hh"
 
 
-
-//
-// Exported variables
-//
-
-//
-// Local constants definitions
-//
-
-//
-// Local structures/classes, typedefs and macros
-//
-
-
-//
-// Local variables
-//
-
-//
-// Local functions prototypes
-//
-
-
 /**
  * Mld6igmpNode::Mld6igmpNode:
  * @family: The address family (%AF_INET or %AF_INET6
@@ -730,9 +707,8 @@ Mld6igmpNode::add_vif(const Vif& vif, string& error_msg)
 	return (XORP_ERROR);
     } while (false);
 
-    XLOG_INFO("Interface added: %s", mld6igmp_vif->str().c_str());
-    
-    return (XORP_OK);
+    XLOG_INFO("mld6igmp: Interface added: %s", mld6igmp_vif->str().c_str());
+    return XORP_OK;
 }
 
 /**
@@ -752,7 +728,7 @@ Mld6igmpNode::add_vif(const string& vif_name, uint32_t vif_index,
     Mld6igmpVif *mld6igmp_vif = vif_find_by_vif_index(vif_index);
     
     if ((mld6igmp_vif != NULL) && (mld6igmp_vif->name() == vif_name)) {
-	return (XORP_OK);		// Already have this vif
+	return XORP_OK; // Already have this vif
     }
     
     //
@@ -760,11 +736,7 @@ Mld6igmpNode::add_vif(const string& vif_name, uint32_t vif_index,
     //
     Vif vif(vif_name);
     vif.set_vif_index(vif_index);
-    if (add_vif(vif, error_msg) != XORP_OK) {
-	return (XORP_ERROR);
-    }
-    
-    return (XORP_OK);
+    return add_vif(vif, error_msg);
 }
 
 /**
@@ -941,6 +913,8 @@ Mld6igmpNode::add_vif_addr(const string& vif_name,
 	return (XORP_ERROR);
     } while (false);
 
+    mld6igmp_vif->notifyUpdated(); // might be able to start now if it wants to...
+
     return (XORP_OK);
 }
 
@@ -1034,10 +1008,29 @@ Mld6igmpNode::enable_vif(const string& vif_name, string& error_msg)
 {
     Mld6igmpVif *mld6igmp_vif = vif_find_by_name(vif_name);
     if (mld6igmp_vif == NULL) {
-	error_msg = c_format("Mld6igmpNode:  Cannot enable vif %s: no such vif",
+	// Seems we have some sort of race...it's asked to be enabled before it is
+	// created on config-file reload.
+	// For now, create it manually.
+	// TODO:  Fix enable-vif on cfg-file load.
+	// NOTE:  pim has similar issue and similar fixup code.
+	error_msg = c_format("Mld6igmpNode:  Cannot enable vif %s: no such vif (will attempt to create it))",
 			     vif_name.c_str());
 	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
+
+	int if_index = -1;
+	errno = 0;
+#ifdef HAVE_IF_NAMETOINDEX
+	if_index = if_nametoindex(vif_name.c_str());
+#endif
+        if (if_index < 0) {
+	    XLOG_ERROR("Could not convert vif_name to ifindex: %s  possible error: %s\n",
+		       vif_name.c_str(), strerror(errno));
+	    return XORP_ERROR;
+	}
+	else {
+	    add_vif(vif_name, if_index, error_msg);
+	    mld6igmp_vif = vif_find_by_name(vif_name);
+	}
     }
     
     mld6igmp_vif->enable();

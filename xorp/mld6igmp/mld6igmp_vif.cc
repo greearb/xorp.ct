@@ -36,27 +36,6 @@
 #include "mld6igmp_vif.hh"
 
 
-//
-// Exported variables
-//
-
-//
-// Local constants definitions
-//
-
-//
-// Local structures/classes, typedefs and macros
-//
-
-//
-// Local variables
-//
-
-//
-// Local functions prototypes
-//
-
-
 /**
  * Mld6igmpVif::Mld6igmpVif:
  * @mld6igmp_node: The MLD6IGMP node this interface belongs to.

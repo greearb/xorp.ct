@@ -31,32 +31,9 @@
 #include "libxorp/debug.h"
 #include "libxorp/random.h"
 #include "libxorp/ipvx.hh"
-
 #include "libproto/checksum.h"
-
 #include "pim_node.hh"
 #include "pim_vif.hh"
-
-
-//
-// Exported variables
-//
-
-//
-// Local constants definitions
-//
-
-//
-// Local structures/classes, typedefs and macros
-//
-
-//
-// Local variables
-//
-
-//
-// Local functions prototypes
-//
 
 
 /**

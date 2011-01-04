@@ -17,8 +17,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.40 2008/10/02 21:56:51 bms Exp $
-
 #ifndef __FEA_XRL_MFEA_NODE_HH__
 #define __FEA_XRL_MFEA_NODE_HH__
 
@@ -28,12 +26,10 @@
 //
 
 #include "libxipc/xrl_std_router.hh"
-
 #include "xrl/interfaces/finder_event_notifier_xif.hh"
 #include "xrl/interfaces/mfea_client_xif.hh"
 #include "xrl/interfaces/cli_manager_xif.hh"
 #include "xrl/targets/mfea_base.hh"
-
 #include "libfeaclient_bridge.hh"
 #include "mfea_node.hh"
 #include "mfea_node_cli.hh"

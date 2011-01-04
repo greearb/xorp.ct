@@ -19,8 +19,6 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libproto/proto_state.hh,v 1.12 2008/10/02 21:57:18 bms Exp $
-
 
 #ifndef __LIBPROTO_PROTO_STATE_HH__
 #define __LIBPROTO_PROTO_STATE_HH__
@@ -32,15 +30,6 @@
 
 //
 // Protocol state generic functionality
-//
-
-
-//
-// Constants definitions
-//
-
-//
-// Structures/classes, typedefs and macros
 //
 
 /**

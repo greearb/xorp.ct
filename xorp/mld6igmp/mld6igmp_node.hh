@@ -17,7 +17,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.37 2008/10/02 21:57:43 bms Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_MLD6IGMP_NODE_HH__
@@ -27,24 +26,12 @@
 // IGMP and MLD node definition.
 //
 
-
-
-
 #include "libxorp/vif.hh"
 #include "libproto/proto_node.hh"
 #include "libfeaclient/ifmgr_xrl_mirror.hh"
 #include "mrt/buffer.h"
 #include "mrt/multicast_defs.h"
 
-
-//
-// Constants definitions
-//
-
-
-//
-// Structures/classes, typedefs and macros
-//
 
 class EventLoop;
 class IPvX;
@@ -387,7 +374,7 @@ public:
 			    const uint8_t *	, // sndbuf,
 			    size_t		  // sndlen
 	) { XLOG_UNREACHABLE(); return (XORP_ERROR); }
-    
+
     /**
      * Register as a receiver to receive packets.
      * 
