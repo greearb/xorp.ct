@@ -30,39 +30,12 @@
 // MLDv1 (RFC 2710) and MLDv2 (RFC 3810).
 //
 
-
-
 #include "mld6igmp_module.h"
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/ipvx.hh"
-
-
-
 #include "mld6igmp_vif.hh"
-
-
-//
-// Exported variables
-//
-
-//
-// Local constants definitions
-//
-
-//
-// Local structures/classes, typedefs and macros
-//
-
-//
-// Local variables
-//
-
-//
-// Local functions prototypes
-//
-
 
 /**
  * Mld6igmpVif::mld6igmp_membership_query_recv:
@@ -772,6 +745,12 @@ Mld6igmpVif::query_timer_timeout()
 
     if (! i_am_querier())
 	return;		// I am not the querier anymore. Ignore.
+
+    if (primary_addr() == IPvX::ZERO(family())) {
+	XLOG_WARNING("%s: Called query_timer_timeout, but primary_addr"
+		     " is ZERO. Not sending any pkt.\n", name().c_str());
+	return;
+    }
 
     //
     // Send a general membership query

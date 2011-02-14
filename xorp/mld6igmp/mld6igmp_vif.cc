@@ -30,9 +30,7 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/ipvx.hh"
-
 #include "libproto/checksum.h"
-
 #include "mld6igmp_vif.hh"
 
 
@@ -239,8 +237,11 @@ Mld6igmpVif::start(string& error_msg)
 	return (XORP_ERROR);
     }
 
-    if (update_primary_address(error_msg) != XORP_OK)
+    if (update_primary_address(error_msg) != XORP_OK) {
+	// TODO:  Set wants-to-start and try again later
+	// when IP is found??
 	return (XORP_ERROR);
+    }
 
     if (ProtoUnit::start() != XORP_OK) {
 	error_msg = "internal error";
@@ -858,6 +859,8 @@ Mld6igmpVif::mld6igmp_query_send(const IPvX& src,
     //
     // Send the message
     //
+    //XLOG_WARNING("%s:  Sending igmp query, src: %s  dst: %s\n",
+    //             name().c_str(), cstring(src), cstring(dst));
     return (mld6igmp_send(src, dst,
 			  mld6igmp_constant_membership_query(),
 			  scaled_max_resp_time.sec(),

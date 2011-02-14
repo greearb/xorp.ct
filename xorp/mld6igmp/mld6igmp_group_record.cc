@@ -31,33 +31,9 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/ipvx.hh"
-
 #include "mld6igmp_group_record.hh"
 #include "mld6igmp_node.hh"
 #include "mld6igmp_vif.hh"
-
-
-
-//
-// Exported variables
-//
-
-//
-// Local constants definitions
-//
-
-//
-// Local structures/classes, typedefs and macros
-//
-
-
-//
-// Local variables
-//
-
-//
-// Local functions prototypes
-//
 
 
 /**
