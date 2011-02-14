@@ -204,12 +204,11 @@ IfConfigVlanSetLinux::add_vlan(const string& parent_ifname,
     // Set the VLAN interface naming
     //
     memset(&vlanreq, 0, sizeof(vlanreq));
-    vlanreq.u.name_type = VLAN_NAME_TYPE_PLUS_VID_NO_PAD;	// vlan10
+    vlanreq.u.name_type = VLAN_NAME_TYPE_RAW_PLUS_VID_NO_PAD; // eth0.5
     vlanreq.cmd = SET_VLAN_NAME_TYPE_CMD;
     if (ioctl(_s4, SIOCSIFVLAN, &vlanreq) < 0) {
 	error_msg = c_format("Cannot set the VLAN interface name type"
-			     "to %s: %s",
-			     "VLAN_NAME_TYPE_PLUS_VID_NO_PAD",
+			     "to VLAN_NAME_TYPE_RAW_PLUS_VID_NO_PAD: %s",
 			     strerror(errno));
 	return (XORP_ERROR);
     }
@@ -221,18 +220,21 @@ IfConfigVlanSetLinux::add_vlan(const string& parent_ifname,
     strlcpy(vlanreq.device1, parent_ifname.c_str(), sizeof(vlanreq.device1));
     vlanreq.u.VID = vlan_id;
     vlanreq.cmd = ADD_VLAN_CMD;
+    errno = 0;
     if (ioctl(_s4, SIOCSIFVLAN, &vlanreq) < 0) {
-	error_msg = c_format("Cannot create VLAN interface %s "
-			     "(parent = %s VLAN ID = %u): %s",
-			     vlan_name.c_str(), parent_ifname.c_str(),
-			     vlan_id, strerror(errno));
-	return (XORP_ERROR);
+	if (errno != EEXIST) {
+	    error_msg = c_format("Cannot create VLAN interface %s "
+				 "(parent = %s VLAN ID = %u): %s",
+				 vlan_name.c_str(), parent_ifname.c_str(),
+				 vlan_id, strerror(errno));
+	    return (XORP_ERROR);
+	}
     }
 
     //
     // Rename the VLAN interface if necessary
     //
-    string tmp_vlan_name = c_format("vlan%u", vlan_id);
+    string tmp_vlan_name = c_format("%s.%u", parent_ifname.c_str(), vlan_id);
 
     if (vlan_name != tmp_vlan_name) {
 #ifndef SIOCSIFNAME
