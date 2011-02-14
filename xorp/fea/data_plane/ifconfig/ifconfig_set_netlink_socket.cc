@@ -991,6 +991,16 @@ IfConfigSetNetlinkSocket::add_addr(const string& ifname,
     snl.nl_pid    = 0;		// nl_pid = 0 if destination is the kernel
     snl.nl_groups = 0;
 
+    // There are all sorts of bugs with how Xorp handles VLANs (as vifs under
+    // a physical interface).
+    // 1:  It passes the pif_index..when it should use the vif's ifindex.
+    // 2:  It's passing the pif_index as 0, which is wrong in all cases.
+    // Add some hacks to work-around this until we clean up vifs more properly.
+    if ((if_index == 0) ||
+	(strcmp(ifname.c_str(), vifname.c_str()) != 0)) {
+	if_index = if_nametoindex(vifname.c_str());
+    }
+
     //
     // Set the request
     //
@@ -1049,18 +1059,18 @@ IfConfigSetNetlinkSocket::add_addr(const string& ifname,
 		  reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl))
 	!= (ssize_t)nlh->nlmsg_len) {
 	error_msg = c_format("IfConfigSetNetlinkSocket::add_addr: sendto: Cannot add address '%s' "
-			     "on interface '%s' vif '%s': %s",
+			     "on interface '%s' vif '%s', if_index: %i: %s",
 			     addr.str().c_str(),
-			     ifname.c_str(), vifname.c_str(), strerror(errno));
+			     ifname.c_str(), vifname.c_str(), if_index, strerror(errno));
 	return (XORP_ERROR);
     }
     if (NlmUtils::check_netlink_request(_ns_reader, ns, nlh->nlmsg_seq,
 					last_errno, error_msg)
 	!= XORP_OK) {
 	error_msg = c_format("IfConfigSetNetlinkSocket::add_addr: check_nl_req: Cannot add address '%s' "
-			     "on interface '%s' vif '%s': %s",
+			     "on interface '%s' vif '%s', if_index: %i : %s",
 			     addr.str().c_str(),
-			     ifname.c_str(), vifname.c_str(),
+			     ifname.c_str(), vifname.c_str(), if_index,
 			     error_msg.c_str());
 	return (XORP_ERROR);
     }
@@ -1098,6 +1108,16 @@ IfConfigSetNetlinkSocket::delete_addr(const string& ifname,
     snl.nl_family = AF_NETLINK;
     snl.nl_pid    = 0;		// nl_pid = 0 if destination is the kernel
     snl.nl_groups = 0;
+
+    // There are all sorts of bugs with how Xorp handles VLANs (as vifs under
+    // a physical interface).
+    // 1:  It passes the pif_index..when it should use the vif's ifindex.
+    // 2:  It's passing the pif_index as 0, which is wrong in all cases.
+    // Add some hacks to work-around this until we clean up vifs more properly.
+    if ((if_index == 0) ||
+	(strcmp(ifname.c_str(), vifname.c_str()) != 0)) {
+	if_index = if_nametoindex(vifname.c_str());
+    }
 
     //
     // Set the request
