@@ -37,17 +37,23 @@ def DoAllConfig(env, conf, host_os):
     if not has_endian_h:
         conf.CheckEndianness()
 
-    if not conf.CheckCC:
-        print "\nERROR:  Cannot find functional cc compiler."
-        print "  On Fedora/RedHat: yum install gcc"
-        sys.exit(1);
-    print "OK:  c compiler appears functional.";
+    # Bleh, FC8 era scons doesn't have this check.
+    try:
+        if not conf.CheckCC:
+            print "\nERROR:  Cannot find functional cc compiler."
+            print "  On Fedora/RedHat: yum install gcc"
+            sys.exit(1);
+        print "OK:  c compiler appears functional.";
 
-    if not conf.CheckCXX:
-        print "\nERROR:  Cannot find functional c++ compiler."
-        print "  On Fedora/RedHat: yum install gcc-g++"
-        sys.exit(1);
-    print "OK:  C++ compiler appears functional.";
+        if not conf.CheckCXX:
+            print "\nERROR:  Cannot find functional c++ compiler."
+            print "  On Fedora/RedHat: yum install gcc-g++"
+            sys.exit(1);
+        print "OK:  C++ compiler appears functional.";
+    except:
+        print "NOTE:  This version of scons cannot check for"
+        print "  existence of gcc and g++ compilers."
+        print "  Will assume the exist and function properly...\n"
 
     ##########
     # c99
