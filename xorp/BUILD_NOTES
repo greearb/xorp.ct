@@ -576,7 +576,39 @@ scons check
 
 3.7 Microsoft Windows
 =====================
-  * Not supported any longer.
+  * This describes steps to cross-compile Xorp.ct on Linux, using mingw
+    toolchain to produce windows binaries.
+
+  * Install mingw toolchain.
+
+  * Compile openssl:
+   export CROSS_COMPILE=i386-mingw32-
+   vi Configure
+     # Add to the mingw line:  -Wl,--export-all (after -no-cygwin)
+   perl Configure mingw shared
+
+   make CC=i386-mingw32-gcc RANLIB=i386-mingw32-ranlib
+   
+   # Copy appropriate files into the mingw directories
+   mkdir /usr/local/i386-mingw32/include/openssl/
+   /bin/cp include/openssl/* /usr/local/i386-mingw32/include/openssl/
+   cp libcrypto.dll.a /usr/local/i386-mingw32/lib/
+   cp libcrypto.a /usr/local/i386-mingw32/lib/
+   cp libeay32.dll /usr/local/i386-mingw32/lib/
+   cp ssleay32.dll /usr/local/i386-mingw32/lib/
+
+   # Get pdcurses
+   http://sourceforge.net/projects/pdcurses/files/pdcurses/
+   cp curses.h panel.h /usr/local/i386-mingw32/include/
+   cp pdcurses.dll /usr/local/i386-mingw32/lib/libpdcurses.dll.a
+   cp pdcurses.lib /usr/local/i386-mingw32/lib/libpdcurses.a
+   chmod a+r /usr/local/i386-mingw32/include/*
+   chmod a+r /usr/local/i386-mingw32/lib/*
+
+
+   # Build xorp
+   scons build=mingw32 STRIP=/usr/local/bin/i386-mingw32-strip \
+         CC=/usr/local/bin/i386-mingw32-gcc CXX=/usr/local/bin/i386-mingw32-g++
 
 3.8. Cross-compilation
 ======================
