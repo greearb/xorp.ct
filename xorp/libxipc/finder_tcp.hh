@@ -32,10 +32,6 @@
 #include "libxorp/ipv4net.hh"
 #include "libxorp/ref_ptr.hh"
 
-
-
-
-
 #ifdef HAVE_SYS_UIO_H
 #include <sys/uio.h>
 #endif
@@ -140,7 +136,7 @@ public:
 
 public:
     FinderTcpListenerBase(EventLoop&	e,
-			  IPv4		interface,
+			  IPv4		iface,
 			  uint16_t	port,
 			  bool		en = true)
 	throw (InvalidAddress, InvalidPort);

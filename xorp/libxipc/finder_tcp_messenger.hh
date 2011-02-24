@@ -88,15 +88,15 @@ public:
     typedef FinderTcpListenerBase::AddrList Addr4List;
     typedef FinderTcpListenerBase::NetList Net4List;
 
-    FinderTcpListener(EventLoop&		e,
-			FinderMessengerManager& mm,
-			XrlCmdMap&		cmds,
-			IPv4			interface,
-			uint16_t		port,
-			bool			enabled = true)
+    FinderTcpListener(EventLoop& e,
+		      FinderMessengerManager& mm,
+		      XrlCmdMap& cmds,
+		      IPv4 iface,
+		      uint16_t port,
+		      bool enabled = true)
 	throw (InvalidAddress, InvalidPort);
 
-    ~FinderTcpListener();
+    virtual ~FinderTcpListener();
 
     /**
      * Instantiate a Messenger instance for sock.

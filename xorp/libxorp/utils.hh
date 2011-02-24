@@ -48,6 +48,11 @@
 #define	PATH_ENV_DELIMITER_STRING	UNIX_PATH_ENV_DELIMITER_STRING
 #define	EXECUTABLE_SUFFIX		UNIX_EXECUTABLE_SUFFIX
 
+
+#ifdef __WIN32__
+int nonblock(int s, bool nb);
+#endif
+    
 /**
  * Convert a UNIX style path to the platform's native path format.
  *

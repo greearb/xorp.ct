@@ -26,6 +26,19 @@
 #include "utils.hh"
 
 
+#ifdef __WIN32__
+int nonblock(int s, bool nb) {
+    unsigned long lnb = !!nb;
+    if (ioctlsocket(s, FIONBIO, &nb) == SOCKET_ERROR) {
+	return -1
+    }
+    else {
+	return 0;
+    }
+}
+#endif
+
+
 list<string>
 split(const string& s, char ch)
 {

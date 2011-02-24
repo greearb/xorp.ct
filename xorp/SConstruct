@@ -71,6 +71,7 @@ vars.AddVariables(
     BoolVariable('debug_fn',  'Build with function names in debug_msg output', False),
     BoolVariable('debug_cb',  'Build with callback debugging', False),
     BoolVariable('disable_ipv6',  'Force disable of IPv6', False),
+    BoolVariable('disable_libtecla',  'Use some externally compiled libtecla instead.', False),
     BoolVariable('disable_fw',  'Disable Firewall feature', False),
     BoolVariable('disable_warninglogs',  'Force disable warning logs', False),
     BoolVariable('disable_tracelogs',  'Force disable trace logs', False),
@@ -257,6 +258,7 @@ print 'Enable BGP:       ', env['enable_bgp']
 print 'Try Enable BOOST: ', env['enable_boost']
 print 'Try Enable uSTL : ', env['enable_ustl']
 print 'Disable IPv6:     ', env['disable_ipv6']
+print 'Disable libtecla: ', env['disable_libtecla']
 print 'Disable Firewall: ', env['disable_fw']
 print 'Disable Profile : ', env['disable_profile']
 print 'Disable warning logs : ', env['disable_warninglogs']
@@ -449,6 +451,12 @@ if tst and not (tst == "no"):
     env['disable_fw'] = True;
 else:
     env['disable_fw'] = False
+
+tst = ARGUMENTS.get('disable_libtecla', False)
+if tst and not (tst == "no"):
+    env['disable_libtecla'] = True;
+else:
+    env['disable_libtecla'] = False
 
 tst = ARGUMENTS.get('disable_profile', False)
 if tst and not (tst == "no"):
@@ -778,9 +786,10 @@ if env['enable_boost']:
 
 # Some platforms have alignment warnings that cannot easily be
 # fixed, so we can't enable Werror for them.
-if (host_cpu == "i686" or
-    host_cpu == "i386" or
-    host_cpu == "x86_64"):
+if ((build != "i386-pc-mingw32") and
+    (host_cpu == "i686" or
+     host_cpu == "i386" or
+     host_cpu == "x86_64")):
         env.AppendUnique(CFLAGS = [
 	        '-Werror',
 		])
@@ -788,7 +797,7 @@ if (host_cpu == "i686" or
 		'-Werror',
 		])
 else:
-	print "WARNING:  Detected non x86 platform, will not enable -Werror compile option: ", host_cpu
+	print "WARNING:  Detected funky platform, will not enable -Werror compile option: ", host_cpu
 	
 
 # NOTE: gcc specific flags.

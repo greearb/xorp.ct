@@ -34,10 +34,6 @@
 #include <unistd.h>
 #endif
 
-
-
-
-
 #include "callback.hh"
 #include "ioevents.hh"
 #include "task.hh"

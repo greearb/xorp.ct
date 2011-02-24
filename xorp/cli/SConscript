@@ -21,10 +21,12 @@ import os
 Import('env')
 
 subdirs = [
-	'libtecla',
 	'tests',
 	'tools',
 	]
+
+if not env['disable_libtecla']:
+    subdirs.append('libtecla')
 
 SConscript(dirs = subdirs, exports = 'env')
 
@@ -46,16 +48,26 @@ env.PrependUnique(LIBPATH = [
     '$BUILDDIR/cli/libtecla',
     ])
 
+if not env['disable_libtecla']:
+    env.AppendUnique(LIBPATH = [
+        '$BUILDDIR/cli/libtecla',
+    ])
+        
 # Internal libraries.
 env.AppendUnique(LIBS = [
     'xif_cli_processor',
     'xst_cli',
-    'xorp_tecla',
     'xorp_proto',
     'xorp_ipc',
     'xorp_comm',
     'xorp_core',
     ])
+
+if not env['disable_libtecla']:
+    env.AppendUnique(LIBS = [
+        'xorp_tecla',
+    ])
+
 
 env.Replace(RPATH = [
     env.Literal(env['xorp_tool_rpath'])
