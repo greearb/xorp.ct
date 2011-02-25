@@ -103,14 +103,25 @@
 
 #include "popen.hh"
 
+#ifdef HOST_OS_WINDOWS
+extern char **_environ;
+#else
 extern char **environ;
+#endif
 
 // XXX: static instance
 static struct pid_s {
     struct pid_s *next;
     FILE *fp_out;
     FILE *fp_err;
+#ifdef HOST_OS_WINDOWS
+    DWORD pid;
+    HANDLE ph;
+    HANDLE h_out_child;	// child ends of pipes visible in parent
+    HANDLE h_err_child;	// need to be closed after termination. 
+#else
     pid_t pid;
+#endif
     bool is_closed;
     int pstat;		// The process wait status if is_closed is true
 } *pidlist;
@@ -120,6 +131,117 @@ pid_t
 popen2(const string& command, const list<string>& arguments,
        FILE *& outstream, FILE *&errstream, bool redirect_stderr_to_stdout)
 {
+#ifdef HOST_OS_WINDOWS
+    struct pid_s *cur;
+    FILE *iop_out, *iop_err;
+    HANDLE hout[2], herr[2];
+    SECURITY_ATTRIBUTES pipesa = { sizeof(SECURITY_ATTRIBUTES), NULL, TRUE };
+    STARTUPINFOA si;
+    PROCESS_INFORMATION pi;
+
+    outstream = NULL;
+    errstream = NULL;
+
+    if (CreatePipe(&hout[0], &hout[1], &pipesa, 0) == 0)
+	return (0);
+#if 0
+    if (redirect_stderr_to_stdout) {
+	if (0 == DuplicateHandle(GetCurrentProcess(), hout[0],
+				 GetCurrentProcess(), &herr[0],
+				 0, TRUE, DUPLICATE_SAME_ACCESS)) {
+	    CloseHandle(hout[0]);
+	    CloseHandle(hout[1]);
+	    return (0);
+	}
+	if (0 == DuplicateHandle(GetCurrentProcess(), hout[1],
+				 GetCurrentProcess(), &herr[1],
+				 0, TRUE, DUPLICATE_SAME_ACCESS)) {
+	    CloseHandle(hout[0]);
+	    CloseHandle(hout[1]);
+	    return (0);
+	}
+    } else
+#endif // 0
+    {
+	if (0 == CreatePipe(&herr[0], &herr[1], &pipesa, 0)) {
+	    CloseHandle(hout[0]);
+	    CloseHandle(hout[1]);
+	    return (0);
+	}
+    }
+    if ((cur = (struct pid_s*)malloc(sizeof(struct pid_s))) == NULL) {
+	CloseHandle(hout[0]);
+	CloseHandle(hout[1]);
+	CloseHandle(herr[0]);
+	CloseHandle(herr[1]);
+	return (0);
+    }
+
+    GetStartupInfoA(&si);
+    si.dwFlags = STARTF_USESTDHANDLES;
+    si.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
+    si.hStdOutput = hout[1];
+    si.hStdError = herr[1];
+
+    if (redirect_stderr_to_stdout)
+	si.hStdError = hout[1];
+
+#if 0
+    // We need to close the child ends of the pipe when the child terminates.
+    // We need not do this for the parent ends; fclose() does this for us.
+    cur->h_out_child = hout[1];
+    cur->h_err_child = herr[1];
+#endif // 0
+
+    // XXX: We currently force the program name to be escaped with quotes
+    // before munging the command line for CreateProcess().
+    string escaped_args = "\"" + command + "\"";
+    win_quote_args(arguments, escaped_args);
+
+    debug_msg("Trying to execute: '%s'\n", escaped_args.c_str());
+
+    if (CreateProcessA(NULL,
+		       const_cast<char *>(escaped_args.c_str()),
+		       NULL, NULL, TRUE,
+		       CREATE_DEFAULT_ERROR_MODE | CREATE_SUSPENDED,
+		       NULL, NULL, &si, &pi) == 0) {
+	DWORD err = GetLastError();
+	string error_msg = c_format("Execution of %s failed: %u",
+				    command.c_str(),
+				    XORP_UINT_CAST(err));
+	UNUSED(error_msg);
+	CloseHandle(hout[0]);
+	CloseHandle(hout[1]);
+	CloseHandle(herr[0]);
+	CloseHandle(herr[1]);
+	return (0);
+    }
+
+    /* Parent; assume _fdopen can't fail. */
+    iop_out = _fdopen(_open_osfhandle((long)hout[0], _O_RDONLY|_O_TEXT), "r");
+    iop_err = _fdopen(_open_osfhandle((long)herr[0], _O_RDONLY|_O_TEXT), "r");
+    setvbuf(iop_out, NULL, _IONBF, 0);
+    setvbuf(iop_err, NULL, _IONBF, 0);
+
+    /* Link into list of file descriptors. */
+    cur->fp_out = iop_out;
+    cur->fp_err = iop_err;
+    cur->pid = pi.dwProcessId;
+    cur->ph = pi.hProcess;
+    cur->is_closed = false;
+    cur->pstat = 0;
+    cur->next = pidlist;
+    pidlist = cur;
+
+    outstream = iop_out;
+    errstream = iop_err;
+
+    /* Kick off the child process's main thread. */
+    ResumeThread(pi.hThread);
+    return (cur->pid);
+
+#else // ! HOST_OS_WINDOWS
+
     struct pid_s *cur;
     FILE *iop_out, *iop_err;
     int pdes_out[2], pdes_err[2], pid;
@@ -291,6 +413,7 @@ popen2(const string& command, const list<string>& arguments,
     errstream = iop_err;
 
     return pid;
+#endif // ! HOST_OS_WINDOWS
 }
 
 /*
@@ -320,6 +443,28 @@ pclose2(FILE *iop_out, bool dont_wait)
 	    pstat = 0;	// XXX: imitating the result of wait4(WNOHANG)
     }
 
+#ifdef HOST_OS_WINDOWS
+    if (! (dont_wait || cur->is_closed)) {
+	DWORD dwStat = 0;
+	BOOL result = GetExitCodeProcess(cur->ph, (LPDWORD)&dwStat);
+	while (dwStat == STILL_ACTIVE) {
+	    WaitForSingleObject(cur->ph, INFINITE);
+	    result = GetExitCodeProcess(cur->ph, (LPDWORD)&dwStat);
+	}
+	XLOG_ASSERT(result != 0);
+	pstat = (int)dwStat;
+    }
+
+    (void)fclose(cur->fp_out);
+    (void)fclose(cur->fp_err);
+
+    if (! (dont_wait || cur->is_closed)) {
+	// CloseHandle(cur->h_out_child);
+	// CloseHandle(cur->h_err_child);
+	CloseHandle(cur->ph);
+    }
+#else // ! HOST_OS_WINDOWS
+
     (void)fclose(cur->fp_out);
     (void)fclose(cur->fp_err);
 
@@ -333,6 +478,7 @@ pclose2(FILE *iop_out, bool dont_wait)
 	    pid = wait4(cur->pid, &pstat, 0, (struct rusage *)0);
 	} while (pid == -1 && errno == EINTR);
     }
+#endif // ! HOST_OS_WINDOWS
 
     /* Remove the entry from the linked list. */
     if (last == NULL)
@@ -360,3 +506,25 @@ popen2_mark_as_closed(pid_t pid, int wait_status)
     cur->pstat = wait_status;
     return (0);
 }
+
+#ifdef HOST_OS_WINDOWS
+/*
+ * Return the process handle given the process ID.
+ * The handle we get from CreateProcess() has privileges which
+ * the OpenProcess() handle doesn't get.
+ */
+HANDLE
+pgethandle(pid_t pid)
+{
+    struct pid_s *cur;
+
+    for (cur = pidlist; cur != NULL; cur = cur->next) {
+	if (static_cast<pid_t>(cur->pid) == pid)
+	    break;
+    }
+    if (cur == NULL)
+	return (INVALID_HANDLE_VALUE);
+
+    return (cur->ph);
+}
+#endif // HOST_OS_WINDOWS

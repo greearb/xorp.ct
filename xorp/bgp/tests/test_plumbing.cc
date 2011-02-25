@@ -358,6 +358,7 @@ int main(int /* argc */, char *argv[])
 
     try {
 	// The BGP constructor expects to use the finder, so start one.
+#ifndef HOST_OS_WINDOWS
 	pid_t pid;
 
 	switch(pid = fork()) {
@@ -369,6 +370,16 @@ int main(int /* argc */, char *argv[])
 	default:
 	    break;
 	}
+#else	// HOST_OS_WINDOWS
+    STARTUPINFOA si;
+    PROCESS_INFORMATION pi;
+
+    GetStartupInfoA(&si);
+    if (CreateProcessA("..\\libxipc\\xorp_finder.exe", NULL, NULL,
+	NULL, TRUE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi) == 0) {
+	    XLOG_FATAL("unable to exec xorp_finder");
+    }
+#endif	// !HOST_OS_WINDOWS
 
 	EventLoop eventloop;
 	BGPMain bgpm(eventloop);
@@ -381,7 +392,11 @@ int main(int /* argc */, char *argv[])
 	}
 
 	// Remember to kill the finder.
+#ifndef HOST_OS_WINDOWS
  	kill(pid, SIGTERM);
+#else
+	TerminateProcess(pi.hProcess, 1);
+#endif
 
 	printf("Tests successful\n");
     } catch(...) {

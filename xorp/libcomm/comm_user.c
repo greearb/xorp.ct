@@ -45,6 +45,16 @@
 
 #include <signal.h>
 
+#ifdef HAVE_WINDOWS_H
+#include <windows.h>
+#endif
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#endif
+#ifdef HAVE_WS2TCPIP_H
+#include <ws2tcpip.h>
+#endif
+
 #include "comm_api.h"
 #include "comm_private.h"
 
@@ -57,6 +67,24 @@ comm_init(void)
     if (init_flag)
 	return (XORP_OK);
 
+#ifdef HOST_OS_WINDOWS
+    {
+	int result;
+	WORD version;
+	WSADATA wsadata;
+
+	version = MAKEWORD(2, 2);
+	result = WSAStartup(version, &wsadata);
+	if (result != 0) {
+	    return (XORP_ERROR);
+	}
+	if (LOBYTE(wsadata.wVersion) != 2 || HIBYTE(wsadata.wVersion) != 2) {
+	    (void)WSACleanup();
+	    return (XORP_ERROR);
+	}
+    }
+#endif /* HOST_OS_WINDOWS */
+
     init_flag = 1;
 
     return (XORP_OK);
@@ -65,6 +93,9 @@ comm_init(void)
 void
 comm_exit(void)
 {
+#ifdef HOST_OS_WINDOWS
+    (void)WSACleanup();
+#endif
 }
 
 int
@@ -76,7 +107,17 @@ comm_get_last_error(void)
 char const *
 comm_get_error_str(int serrno)
 {
+#ifdef HOST_OS_WINDOWS
+    static char msgbuf[1024];
+
+    FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS |
+		  FORMAT_MESSAGE_MAX_WIDTH_MASK, NULL, serrno,
+		  MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+		  (LPSTR)msgbuf, sizeof(msgbuf), NULL);
+    return (const char *)msgbuf;
+#else
     return (const char *)strerror(serrno);
+#endif
 }
 
 char const *
@@ -775,6 +816,8 @@ comm_bind_connect_udp6(const struct in6_addr *local_addr,
 #endif /* ! HAVE_IPV6 */
 }
 
+#ifndef HOST_OS_WINDOWS
+
 #include <sys/un.h>
 
 static int
@@ -850,3 +893,24 @@ comm_connect_unix(const char* path, int is_blocking)
 
     return (sock);
 }
+
+#else /* ! HOST_OS_WINDOWS */
+
+xsock_t
+comm_bind_unix(const char* path, int is_blocking)
+{
+    UNUSED(path);
+    UNUSED(is_blocking);
+
+    XLOG_ERROR("No UNIX sockets on Windows");
+
+    return (XORP_BAD_SOCKET);
+}
+
+xsock_t
+comm_connect_unix(const char* path, int is_blocking)
+{
+    return comm_bind_unix(path, is_blocking);
+}
+
+#endif /* HOST_OS_WINDOWS */

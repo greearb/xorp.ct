@@ -24,6 +24,10 @@
 #ifndef __LIBXORP_SELECTOR_HH__
 #define __LIBXORP_SELECTOR_HH__
 
+#ifdef HOST_OS_WINDOWS
+#error "This file is not intended to be included on Windows."
+#endif
+
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif

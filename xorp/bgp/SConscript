@@ -33,8 +33,23 @@ is_shared = env.has_key('SHAREDLIBS')
 if not is_shared:
     env.AppendUnique(LIBS = [
         "crypto",
-        "rt",
         ])
+
+    if not (env.has_key('mingw') and env['mingw']):
+        env.AppendUnique(LIBS = [
+            "rt",
+            ])
+
+if (env.has_key('mingw') and env['mingw']):
+    env.AppendUnique(LIBS = [
+        'ws2_32',
+        'iphlpapi',
+#        'mprapi',
+        'regex',
+        ])
+
+    env.Append(LIBS = ['xorp_core'])
+
 
 bgp_env = env.Clone()
 
@@ -69,6 +84,7 @@ bgp_env.AppendUnique(LIBS = [
     'xorp_core',
     'xorp_comm',
 ])
+
 
 if not (bgp_env.has_key('disable_profile') and bgp_env['disable_profile']):
     bgp_env.AppendUnique(LIBS = [ 'xif_profile_client' ])
@@ -134,6 +150,16 @@ libxorp_bgp_srcs = [
 
 if not (bgp_env.has_key('disable_profile') and bgp_env['disable_profile']):
     libxorp_bgp_srcs.append('profile_vars.cc')
+
+if (bgp_env.has_key('mingw') and bgp_env['mingw']):
+    bgp_env.Append(LIBS = [
+        'ws2_32',
+        'iphlpapi',
+#        'mprapi',
+        'regex',
+        ])
+
+    bgp_env.Append(LIBS = ['xorp_core', 'crypto', 'ws2_32'])
 
 if is_shared:
     libxorp_bgp = bgp_env.SharedLibrary(target = 'libxorp_bgp',

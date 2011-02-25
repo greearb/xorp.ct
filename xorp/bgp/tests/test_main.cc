@@ -100,8 +100,12 @@ validate_reference_file(string reference_file, string output_file,
 	return false;
 	
     }
-
+#ifdef HOST_OS_WINDOWS
+    DeleteFileA(output_file.c_str());
+#else
     unlink(output_file.c_str());
+#endif
+
     return true;
 }
 

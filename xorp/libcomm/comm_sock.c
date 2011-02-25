@@ -60,6 +60,16 @@
 #include <arpa/inet.h>
 #endif
 
+#ifdef HAVE_WINDOWS_H
+#include <windows.h>
+#endif
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#endif
+#ifdef HAVE_WS2TCPIP_H
+#include <ws2tcpip.h>
+#endif
+
 #include "comm_api.h"
 #include "comm_private.h"
 
@@ -69,6 +79,15 @@ char addr_str_255[sizeof "ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255"];
 
 /* XXX: Single threaded socket errno, used to record last error code. */
 int _comm_serrno;
+
+#if defined(HOST_OS_WINDOWS) && defined(HAVE_IPV6)
+/*
+ * Windows declares these in <ws2tcpip.h> as externs, but does not
+ * supply symbols for them in the -lws2_32 import library or DLL.
+ */
+const struct in6_addr in6addr_any = { { IN6ADDR_ANY_INIT } };
+const struct in6_addr in6addr_loopback = { { IN6ADDR_LOOPBACK_INIT } };
+#endif
 
 xsock_t
 comm_sock_open(int domain, int type, int protocol, int is_blocking)
@@ -121,11 +140,145 @@ comm_sock_open(int domain, int type, int protocol, int is_blocking)
 int
 comm_sock_pair(int domain, int type, int protocol, xsock_t sv[2])
 {
+#ifndef HOST_OS_WINDOWS
     if (socketpair(domain, type, protocol, sv) == -1) {
 	_comm_set_serrno();
 	return (XORP_ERROR);
     }
     return (XORP_OK);
+
+#else /* HOST_OS_WINDOWS */
+    struct sockaddr_storage ss;
+    struct sockaddr_in	*psin;
+    socklen_t		sslen;
+    SOCKET		st[3];
+    u_long		optval;
+    int			numtries, error, intdomain;
+    unsigned short	port;
+    static const int	CSP_LOWPORT = 40000;
+    static const int	CSP_HIGHPORT = 65536;
+#ifdef HAVE_IPV6
+    struct sockaddr_in6 *psin6;
+#endif
+
+    UNUSED(protocol);
+
+    if (domain != AF_UNIX && domain != AF_INET
+#ifdef HAVE_IPV6
+	&& domain != AF_INET6
+#endif
+	) {
+	_comm_serrno = WSAEAFNOSUPPORT;
+	return (XORP_ERROR);
+    }
+
+    intdomain = domain;
+    if (intdomain == AF_UNIX)
+	intdomain = AF_INET;
+
+    st[0] = st[1] = st[2] = INVALID_SOCKET;
+
+    st[2] = socket(intdomain, type, 0);
+    if (st[2] == INVALID_SOCKET)
+	goto error;
+
+    memset(&ss, 0, sizeof(ss));
+    psin = (struct sockaddr_in *)&ss;
+#ifdef HAVE_IPV6
+    psin6 = (struct sockaddr_in6 *)&ss;
+    if (intdomain == AF_INET6) {
+	sslen = sizeof(struct sockaddr_in6);
+	ss.ss_family = AF_INET6;
+	psin6->sin6_addr = in6addr_loopback;
+    } else
+#endif /* HAVE_IPV6 */
+    {
+	sslen = sizeof(struct sockaddr_in);
+	ss.ss_family = AF_INET;
+	psin->sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    }
+
+    numtries = 3;
+    do {
+	port = htons((xorp_random() % (CSP_LOWPORT - CSP_HIGHPORT)) + CSP_LOWPORT);
+#ifdef HAVE_IPV6
+	if (intdomain == AF_INET6)
+	    psin6->sin6_port = port;
+	else
+#endif
+	    psin->sin_port = port;
+	error = bind(st[2], (struct sockaddr *)&ss, sslen);
+	if (error == 0)
+	    break;
+	if ((error != 0) &&
+	    ((WSAGetLastError() != WSAEADDRNOTAVAIL) ||
+	     (WSAGetLastError() != WSAEADDRINUSE)))
+	    break;
+    } while (--numtries > 0);
+
+    if (error != 0)
+	goto error;
+
+    error = listen(st[2], 5);
+    if (error != 0)
+	goto error;
+
+    st[0] = socket(intdomain, type, 0);
+    if (st[0] == INVALID_SOCKET)
+	goto error;
+
+    optval = 1L;
+    error = ioctlsocket(st[0], FIONBIO, &optval);
+    if (error != 0)
+	goto error;
+
+    error = connect(st[0], (struct sockaddr *)&ss, sslen);
+    if (error != 0 && WSAGetLastError() != WSAEWOULDBLOCK)
+	goto error;
+
+    numtries = 3;
+    do {
+	st[1] = accept(st[2], NULL, NULL);
+	if (st[1] != INVALID_SOCKET) {
+	    break;
+	} else {
+	    if (WSAGetLastError() == WSAEWOULDBLOCK) {
+		SleepEx(100, TRUE);
+	    } else {
+		break;
+	    }
+	}
+    } while (--numtries > 0);
+
+    if (st[1] == INVALID_SOCKET)
+	goto error;
+
+    /* Squelch inherited socket event mask. */
+    (void)WSAEventSelect(st[1], NULL, 0);
+
+    /*
+     * XXX: Should use getsockname() here to verify that the client socket
+     * is connected.
+     */
+    optval = 0L;
+    error = ioctlsocket(st[0], FIONBIO, &optval);
+    if (error != 0)
+	goto error;
+
+    closesocket(st[2]);
+    sv[0] = st[0];
+    sv[1] = st[1];
+    return (XORP_OK);
+
+error:
+    if (st[0] != INVALID_SOCKET)
+	closesocket(st[0]);
+    if (st[1] != INVALID_SOCKET)
+	closesocket(st[1]);
+    if (st[2] != INVALID_SOCKET)
+	closesocket(st[2]);
+    return (XORP_ERROR);
+#endif /* HOST_OS_WINDOWS */
 }
 
 int
@@ -435,7 +588,11 @@ comm_sock_connect4(xsock_t sock, const struct in_addr *remote_addr,
     if (connect(sock, (struct sockaddr *)&sin_addr, sizeof(sin_addr)) < 0) {
 	_comm_set_serrno();
 	if (! is_blocking) {
+#ifdef HOST_OS_WINDOWS
+	    if (comm_get_last_error() == WSAEWOULDBLOCK) {
+#else
 	    if (comm_get_last_error() == EINPROGRESS) {
+#endif
 		/*
 		 * XXX: The connection is non-blocking, and the connection
 		 * cannot be completed immediately, therefore set the
@@ -489,7 +646,11 @@ comm_sock_connect6(xsock_t sock, const struct in6_addr *remote_addr,
     if (connect(sock, (struct sockaddr *)&sin6_addr, sizeof(sin6_addr)) < 0) {
 	_comm_set_serrno();
 	if (! is_blocking) {
+#ifdef HOST_OS_WINDOWS
+	    if (comm_get_last_error() == WSAEWOULDBLOCK) {
+#else
 	    if (comm_get_last_error() == EINPROGRESS) {
+#endif
 		/*
 		 * XXX: The connection is non-blocking, and the connection
 		 * cannot be completed immediately, therefore set the
@@ -571,6 +732,14 @@ comm_sock_accept(xsock_t sock)
 	return (XORP_BAD_SOCKET);
     }
 
+#ifdef HOST_OS_WINDOWS
+    /*
+     * Squelch Winsock event notifications on the new socket which may
+     * have been inherited from the parent listening socket.
+     */
+    (void)WSAEventSelect(sock_accept, NULL, 0);
+#endif
+
     /* Enable TCP_NODELAY */
     if ((addr.sa_family == AF_INET || addr.sa_family == AF_INET6)
         && comm_set_nodelay(sock_accept, 1) != XORP_OK) {
@@ -602,7 +771,13 @@ comm_sock_close(xsock_t sock)
 {
     int ret;
 
+#ifndef HOST_OS_WINDOWS
     ret = close(sock);
+#else
+    (void)WSAEventSelect(sock, NULL, 0);
+    ret = closesocket(sock);
+#endif
+
     if (ret < 0) {
 	_comm_set_serrno();
 	XLOG_ERROR("Error closing socket (socket = %d) : %s",
@@ -631,9 +806,29 @@ comm_set_send_broadcast(xsock_t sock, int val)
 int
 comm_set_receive_broadcast(xsock_t sock, int val)
 {
+#if defined(HOST_OS_WINDOWS) && defined(IP_RECEIVE_BROADCAST)
+    /*
+     * With Windows Server 2003 and later, you have to explicitly
+     * ask to receive broadcast packets.
+     */
+    DWORD ip_rx_bcast = (DWORD)val;
+
+    if (setsockopt(sock, IPPROTO_IP, IP_RECEIVE_BROADCAST,
+		   XORP_SOCKOPT_CAST(&ip_rx_bcast),
+		   sizeof(ip_rx_bcast)) < 0) {
+	_comm_set_serrno();
+	XLOG_ERROR("Error %s IP_RECEIVE_BROADCAST on socket %d: %s",
+		   (val)? "set": "reset",  sock,
+		   comm_get_error_str(comm_get_last_error()));
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+#else
     UNUSED(sock);
     UNUSED(val);
     return (XORP_OK);
+#endif
 }
 
 int
@@ -1238,6 +1433,23 @@ comm_sock_set_rcvbuf(xsock_t sock, int desired_bufsize, int min_bufsize)
 int
 comm_sock_get_family(xsock_t sock)
 {
+#ifdef HOST_OS_WINDOWS
+    WSAPROTOCOL_INFO wspinfo;
+    int err, len;
+
+    len = sizeof(wspinfo);
+    err = getsockopt(sock, SOL_SOCKET, SO_PROTOCOL_INFO,
+			   XORP_SOCKOPT_CAST(&wspinfo), &len);
+    if (err != 0)  {
+	_comm_set_serrno();
+	XLOG_ERROR("Error getsockopt(SO_PROTOCOL_INFO) for socket %d: %s",
+		   sock, comm_get_error_str(comm_get_last_error()));
+	return (XORP_ERROR);
+    }
+
+    return ((int)wspinfo.iAddressFamily);
+
+#else /* ! HOST_OS_WINDOWS */
     /* XXX: Should use struct sockaddr_storage. */
 #ifndef MAXSOCKADDR
 #define MAXSOCKADDR	128	/* max socket address structure size */
@@ -1257,6 +1469,7 @@ comm_sock_get_family(xsock_t sock)
     }
 
     return (un.sa.sa_family);
+#endif /* ! HOST_OS_WINDOWS */
 }
 
 int
@@ -1280,6 +1493,24 @@ comm_sock_get_type(xsock_t sock)
 int
 comm_sock_set_blocking(xsock_t sock, int is_blocking)
 {
+#ifdef HOST_OS_WINDOWS
+    u_long opt;
+    int flags;
+
+    if (is_blocking)
+	opt = 0;
+    else
+	opt = 1;
+
+    flags = ioctlsocket(sock, FIONBIO, &opt);
+    if (flags != 0) {
+	_comm_set_serrno();
+	XLOG_ERROR("FIONBIO error: %s",
+		   comm_get_error_str(comm_get_last_error()));
+	return (XORP_ERROR);
+    }
+
+#else /* ! HOST_OS_WINDOWS */
     int flags;
     if ( (flags = fcntl(sock, F_GETFL, 0)) < 0) {
 	_comm_set_serrno();
@@ -1299,6 +1530,7 @@ comm_sock_set_blocking(xsock_t sock, int is_blocking)
 		   comm_get_error_str(comm_get_last_error()));
 	return (XORP_ERROR);
     }
+#endif /* ! HOST_OS_WINDOWS */
 
     return (XORP_OK);
 }
@@ -1321,6 +1553,17 @@ comm_sock_is_connected(xsock_t sock, int *is_connected)
     memset(&ss, 0, sslen);
     err = getpeername(sock, (struct sockaddr *)&ss, &sslen);
 
+#ifdef HOST_OS_WINDOWS
+    if (err == SOCKET_ERROR) {
+	if ((WSAGetLastError() == WSAENOTCONN)
+	    || (WSAGetLastError() == WSAEINPROGRESS)) {
+	    return (XORP_OK);	/* Socket is not connected */
+	}
+	_comm_set_serrno();
+	return (XORP_ERROR);
+    }
+
+#else /* ! HOST_OS_WINDOWS */
     if (err != 0) {
 	if ((err == ENOTCONN) || (err == ECONNRESET)) {
 	    return (XORP_OK);	/* Socket is not connected */
@@ -1328,6 +1571,7 @@ comm_sock_is_connected(xsock_t sock, int *is_connected)
 	_comm_set_serrno();
 	return (XORP_ERROR);
     }
+#endif /* ! HOST_OS_WINDOWS */
 
     /*  Socket is connected */
     *is_connected = 1;
@@ -1338,7 +1582,11 @@ comm_sock_is_connected(xsock_t sock, int *is_connected)
 void
 comm_sock_no_ipv6(const char* method, ...)
 {
+#ifdef HOST_OS_WINDOWS
+    _comm_serrno = WSAEAFNOSUPPORT;
+#else
     _comm_serrno = EAFNOSUPPORT;
+#endif
     XLOG_ERROR("%s: IPv6 support not present.", method);
     UNUSED(method);
 }
@@ -1346,5 +1594,15 @@ comm_sock_no_ipv6(const char* method, ...)
 void
 _comm_set_serrno(void)
 {
+#ifdef HOST_OS_WINDOWS
+    _comm_serrno = WSAGetLastError();
+    WSASetLastError(0);
+#else
     _comm_serrno = errno;
+    /*
+     * TODO: XXX - Temporarily don't set errno to 0 we still have code
+     * using errno 2005-05-09 Atanu.
+     */
+    /* errno = 0; */
+#endif
 }

@@ -197,6 +197,11 @@ TimerList::TimerList(ClockBase* clock)
 {
     assert(the_timerlist == NULL);
     assert(timerlist_instance_count == 0);
+#ifdef HOST_OS_WINDOWS
+    // timeBeginPeriod(1);	// requires WINMM.DLL
+    _hirestimer = CreateWaitableTimer(NULL, TRUE, NULL);
+    assert(_hirestimer != NULL);
+#endif // HOST_OS_WINDOWS
     the_timerlist = this;
     timerlist_instance_count++;
 }
@@ -216,6 +221,11 @@ TimerList::~TimerList()
     }
     _heaplist.clear();
 
+#ifdef HOST_OS_WINDOWS
+    if (_hirestimer != NULL)
+	CloseHandle(_hirestimer);
+    //timeEndPeriod(1);
+#endif // HOST_OS_WINDOWS
     timerlist_instance_count--;
     the_timerlist = NULL;
 }
@@ -259,11 +269,25 @@ void
 TimerList::system_sleep(const TimeVal& tv)
 {
     TimerList* instance = TimerList::instance();
-
+#ifdef HOST_OS_WINDOWS
+    DWORD ms = tv.to_ms();
+    if (ms == 0 || ms > 10) {
+	Sleep(ms);
+    } else {
+	FILETIME ft;
+	tv.copy_out(ft);
+	assert(instance->_hirestimer != NULL);
+	reinterpret_cast<LARGE_INTEGER *>(&ft)->QuadPart *= -1;
+	SetWaitableTimer(instance->_hirestimer, (LARGE_INTEGER *)&ft, 0,
+			 NULL, NULL, FALSE);
+	WaitForSingleObject(instance->_hirestimer, INFINITE);
+    }
+#else // ! HOST_OS_WINDOWS
     if (tv.sec() > 0)
 	sleep(tv.sec());
     if (tv.usec() > 0)
 	usleep(tv.usec());
+#endif // ! HOST_OS_WINDOWS
 
     instance->advance_time();
 }

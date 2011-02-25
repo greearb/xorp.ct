@@ -55,12 +55,14 @@ void dflt_sig_handler(int signo) {
     case SIGINT:
 	strncpy(xorp_sig_msg_buffer, "SIGINT received", sizeof(xorp_sig_msg_buffer));
 	goto do_terminate;
+#ifndef	HOST_OS_WINDOWS
     case SIGXCPU:
 	strncpy(xorp_sig_msg_buffer, "SIGINT received", sizeof(xorp_sig_msg_buffer));
 	goto do_terminate;
     case SIGXFSZ:
 	strncpy(xorp_sig_msg_buffer, "SIGINT received", sizeof(xorp_sig_msg_buffer));
 	goto do_terminate;
+#endif
     default:
 	// This is a coding error and we need to fix it.
 	assert("WARNING:  Ignoring un-handled error in dflt_sig_handler." == NULL);
@@ -69,10 +71,15 @@ void dflt_sig_handler(int signo) {
 
   do_terminate:
     xorp_do_run = 0;
-	
+
     // Now, kick any selects that are blocking,
+#ifndef	HOST_OS_WINDOWS
     // SIGURG seems harmless enough to use.
     kill(getpid(), SIGURG);
+#else
+    // Maybe this will work on Windows
+    raise(SIGINT);
+#endif
 
 }//dflt_sig_handler
 
@@ -90,8 +97,10 @@ void setup_dflt_sighandlers() {
 
     signal(SIGTERM, dflt_sig_handler);
     signal(SIGINT, dflt_sig_handler);
+#ifndef	HOST_OS_WINDOWS
     signal(SIGXCPU, dflt_sig_handler);
     signal(SIGXFSZ, dflt_sig_handler);
+#endif
 }
 
 
@@ -99,7 +108,11 @@ void setup_dflt_sighandlers() {
 EventLoop::EventLoop()
     : _clock(new SystemClock), _timer_list(_clock), _aggressiveness(0),
       _last_ev_run(0), _last_warned(0), _is_debug(false),
+#ifdef HOST_OS_WINDOWS
+      _win_dispatcher(_clock)
+#else
       _selector_list(_clock)
+#endif
 {
     XLOG_ASSERT(eventloop_instance_count == 0);
     XLOG_ASSERT(_last_ev_run == 0);
@@ -222,7 +235,12 @@ EventLoop::do_work(bool can_block)
     if (t == TimeVal::ZERO())
 	timer_priority = _timer_list.get_expired_priority();
 
+#ifdef HOST_OS_WINDOWS
+    if (_win_dispatcher.ready())
+	selector_priority = _win_dispatcher.get_ready_priority();
+#else
     selector_priority = _selector_list.get_ready_priority(can_block);
+#endif
 
     if (!_task_list.empty())
 	task_priority = _task_list.get_runnable_priority();
@@ -241,7 +259,11 @@ EventLoop::do_work(bool can_block)
 		&& (selector_priority < task_priority) ) {
 
 	// the most important thing to run next is a selector
+#ifdef HOST_OS_WINDOWS
+	_win_dispatcher.wait_and_dispatch(t);
+#else
 	_selector_list.wait_and_dispatch(t);
+#endif
 
     } else if ( (task_priority != XorpTask::PRIORITY_INFINITY)	
 		 && (task_priority < selector_priority) ) {
@@ -262,7 +284,11 @@ EventLoop::do_work(bool can_block)
 			_task_list.run();
 			_last_ev_type[task_priority] = false;
 		    } else {
+#ifdef HOST_OS_WINDOWS
+			_win_dispatcher.wait_and_dispatch(t);
+#else
 			_selector_list.wait_and_dispatch(t);
+#endif
 			_last_ev_type[task_priority] = true;
 		    }
     } else {
@@ -271,7 +297,11 @@ EventLoop::do_work(bool can_block)
 
 	// there's nothing immediate to run, so go to sleep until the
 	// next selector or timer goes off
+#ifdef HOST_OS_WINDOWS
+	_win_dispatcher.wait_and_dispatch(t);
+#else
 	_selector_list.wait_and_dispatch(t);
+#endif
 	// XXX return false if you want to be conservative.  -sorbo.
     }
 #endif
@@ -282,20 +312,32 @@ bool
 EventLoop::add_ioevent_cb(XorpFd fd, IoEventType type, const IoEventCb& cb,
 			  int priority)
 {
+#ifdef HOST_OS_WINDOWS
+    return _win_dispatcher.add_ioevent_cb(fd, type, cb, priority);
+#else
     return _selector_list.add_ioevent_cb(fd, type, cb, priority);
+#endif
 }
 
 bool
 EventLoop::remove_ioevent_cb(XorpFd fd, IoEventType type)
 {
+#ifdef HOST_OS_WINDOWS
+    return _win_dispatcher.remove_ioevent_cb(fd, type);
+#else
     _selector_list.remove_ioevent_cb(fd, type);
     return true;
+#endif
 }
 
 size_t
 EventLoop::descriptor_count() const
 {
+#ifdef HOST_OS_WINDOWS
+    return _win_dispatcher.descriptor_count();
+#else
     return _selector_list.descriptor_count();
+#endif
 }
 
 XorpTask

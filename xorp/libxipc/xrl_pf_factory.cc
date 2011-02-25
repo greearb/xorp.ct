@@ -50,10 +50,12 @@ XrlPFSenderFactory::create_sender(EventLoop&	eventloop,
 	    rv = new XrlPFSTCPSender(eventloop, address);
 	    return rv;
 	}
+#ifndef	HOST_OS_WINDOWS
 	if (strcmp(XrlPFUNIXSender::protocol_name(), protocol) == 0) {
 	    rv = new XrlPFUNIXSender(eventloop, address);
 	    return rv;
 	}
+#endif
     } catch (XorpException& e) {
 	UNUSED(e);
 	XLOG_ERROR("XrlPFSenderFactory::create failed: %s\n", e.str().c_str());

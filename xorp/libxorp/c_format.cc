@@ -28,7 +28,10 @@
 
 #include "c_format.hh"
 
+
+#ifndef HOST_OS_WINDOWS
 #define HAVE_C99_SNPRINTF	// [v]snprintf() conforms to ISO C99 spec
+#endif
 
 #define FORMAT_BUFSIZE	4096
 

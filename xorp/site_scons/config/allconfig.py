@@ -55,6 +55,10 @@ def DoAllConfig(env, conf, host_os):
         print "  existence of gcc and g++ compilers."
         print "  Will assume the exist and function properly...\n"
 
+    # Mingw/windows stuff
+    has_iphlpapi_h = conf.CheckHeader(['winsock2.h', 'iphlpapi.h'])
+    has_routprot_h = conf.CheckHeader('routprot.h')
+
     ##########
     # c99
     has_stdint_h = conf.CheckHeader('stdint.h')
@@ -202,8 +206,10 @@ def DoAllConfig(env, conf, host_os):
     
     ##########
     # Socket support checks
-    # XXX header conditionals needed
-    prereq_af_inet_includes = [ 'sys/types.h', 'sys/socket.h' ]
+    if (env.has_key('mingw') and env['mingw']):
+        prereq_af_inet_includes = [ 'winsock2.h' ]
+    else:
+        prereq_af_inet_includes = [ 'sys/types.h', 'sys/socket.h' ]
     af_inet_includes = []
     for s in prereq_af_inet_includes:
         af_inet_includes.append("#include <%s>\n" % s)
@@ -730,7 +736,8 @@ def DoAllConfig(env, conf, host_os):
         if not conf.CheckDeclaration('GET_VLAN_VID_CMD', '#include <linux/if_vlan.h>'):
             conf.Define('GET_VLAN_VID_CMD', '9')
     else:
-        conf.Define('HAVE_VLAN_BSD')
+        if not (env.has_key('mingw') and env['mingw']):
+            conf.Define('HAVE_VLAN_BSD')
 
     
     ##########

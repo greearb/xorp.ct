@@ -1029,6 +1029,31 @@ xlog_remove_output_func(xlog_output_func_t func, void *obj)
 int
 xlog_add_default_output(void)
 {
+#ifdef HOST_OS_WINDOWS
+    FILE *fp = NULL;
+    HANDLE hstd = INVALID_HANDLE_VALUE;
+
+    /*
+     * XXX: We may need to duplicate these handles;
+     * fclose() on _open_osfhandle() derived handles results
+     * in the underlying handle being closed.
+     */
+    hstd = GetStdHandle(STD_ERROR_HANDLE);
+    fp = _fdopen(_open_osfhandle((long)hstd, _O_TEXT), "w");
+    if (fp != NULL)
+	return (xlog_add_output(fp));
+
+    fp = fopen("CONOUT$", "w");
+    if (fp != NULL)
+	return (xlog_add_output(fp));
+
+    hstd = GetStdHandle(STD_OUTPUT_HANDLE),
+    fp = _fdopen(_open_osfhandle((long)hstd, _O_TEXT), "w");
+    if (fp != NULL)
+	return (xlog_add_output(fp));
+
+#else /* !HOST_OS_WINDOWS */
+
     const char* defaults[] = {	/* The default outputs (in preference order) */
 	"/dev/stderr",		/* XXX: temporary this is the default */
 	"/dev/console",
@@ -1046,6 +1071,7 @@ xlog_add_default_output(void)
 	    return (xlog_add_output(fp_default));
 	}
     }
+#endif /* HOST_OS_WINDOWS */
 
     return -1;
 }
@@ -1089,6 +1115,18 @@ xlog_remove_default_output(void)
 const char *
 xlog_localtime2string(void)
 {
+#ifdef HOST_OS_WINDOWS
+    static char buf[64];
+    SYSTEMTIME st;
+    DWORD usecs;
+
+    GetSystemTime(&st);
+    usecs = st.wMilliseconds * 1000;
+    snprintf(buf, sizeof(buf), "%u/%u/%u %u:%u:%u.%lu",
+	     st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond,
+	     usecs);
+    return (buf);
+#else /* !HOST_OS_WINDOWS */
     static char ret_buf[64];
     struct timeval tv;
     time_t clock;
@@ -1108,6 +1146,7 @@ xlog_localtime2string(void)
 #endif
 
     return (ret_buf);
+#endif /* HOST_OS_WINDOWS */
 }
 
 /**

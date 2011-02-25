@@ -19,10 +19,13 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
+
 #ifndef __LIBXIPC_XRL_PF_UNIX_HH__
 #define __LIBXIPC_XRL_PF_UNIX_HH__
 
 #include "xrl_pf_stcp.hh"
+
+#ifndef	HOST_OS_WINDOWS
 
 class XrlPFUNIXListener : public XrlPFSTCPListener {
 public:
@@ -47,4 +50,7 @@ public:
     static const char* protocol_name();
 };
 
+#endif
+
 #endif // __LIBXIPC_XRL_PF_UNIX_HH__
+

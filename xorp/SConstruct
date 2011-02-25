@@ -197,6 +197,19 @@ if ARGUMENTS.get('CXX', None):
     env['CXX'] = ARGUMENTS.get('CXX')
 print 'CXX:              ', env['CXX']
 
+if ARGUMENTS.get('RANLIB', None):
+    env['RANLIB'] = ARGUMENTS.get('RANLIB')
+print 'RANLIB:           ', env['RANLIB']
+
+if ARGUMENTS.get('AR', None):
+    env['AR'] = ARGUMENTS.get('AR')
+print 'AR:               ', env['AR']
+
+if ARGUMENTS.get('LD', None):
+    env['LD'] = ARGUMENTS.get('LD')
+print 'LD:               ', env['LD']
+
+
 env['STRIP'] = ARGUMENTS.get('STRIP', 'strip')
 print 'STRIP:            ', env['STRIP']
 
@@ -549,6 +562,10 @@ if not env.GetOption('clean') and \
         osname = "FreeBSD"
         conf.Define('HOST_OS_FREEBSD')
         conf.Define('ENABLE_ADVANCED_MULTICAST_API')
+    elif fnmatch.fnmatch(host_os, 'mingw32*'):
+        osname = "Windows"
+        conf.Define('HOST_OS_WINDOWS')
+        env['mingw'] = True;
     elif fnmatch.fnmatch(host_os, 'linux*'):
         osname = "Linux"
         conf.Define('HOST_OS_LINUX')
@@ -921,9 +938,10 @@ if env.has_key('SHAREDLIBS'):
 	Execute(env.Symlink(xorp_alias_libdir, xorp_module_alias_libdir))
 	env['xorp_module_alias_libdir'] = xorp_module_alias_libdir
 
-	# Tell rtld to turn on $ORIGIN processing by default.
-	# NOTE: GNU ld specific flag.
-	env.PrependUnique( LINKFLAGS = [ '-Wl,-z,origin' ] )
+        if not fnmatch.fnmatch(host_os, 'mingw32*'):
+            # Tell rtld to turn on $ORIGIN processing by default.
+            # NOTE: GNU ld specific flag.
+            env.PrependUnique( LINKFLAGS = [ '-Wl,-z,origin' ] )
 
 	# Set relative RPATH for each kind of installed XORP component.
 	env['xorp_sbin_rpath'] = os.path.join('\\$$ORIGIN',
@@ -936,12 +954,14 @@ if env.has_key('SHAREDLIBS'):
 	   os.path.relpath(env.Dir('$xorp_libdir').abspath,
 			   env.Dir('$xorp_moduledir').abspath))
         
-# Export global symbols as dynamic in executables for runtime backtraces
-# w/o GDB or corefiles in production deployments.
-# NOTE: GNU ld specific flag.
-env.AppendUnique(LINKFLAGS = [
-    '-rdynamic',
-    ])
+
+if not fnmatch.fnmatch(host_os, 'mingw32*'):
+    # Export global symbols as dynamic in executables for runtime backtraces
+    # w/o GDB or corefiles in production deployments.
+    # NOTE: GNU ld specific flag.
+    env.AppendUnique(LINKFLAGS = [
+        '-rdynamic',
+        ])
 
 env.SConscript(['SConscript'], variant_dir='$BUILDDIR',
                exports='env', duplicate=0)

@@ -30,6 +30,9 @@
 #ifdef HAVE_NET_ROUTE_H
 #include <net/route.h>
 #endif
+#ifdef HOST_OS_WINDOWS
+#include "fea/data_plane/control_socket/windows_routing_socket.h"
+#endif
 
 #include "fea/fibconfig.hh"
 #include "fea/data_plane/control_socket/routing_socket_utilities.hh"

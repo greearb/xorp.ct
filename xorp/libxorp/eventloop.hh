@@ -35,7 +35,11 @@
 #include "callback.hh"
 #include "ioevents.hh"
 
+#ifdef HOST_OS_WINDOWS
+#include "win_dispatcher.hh"
+#else
 #include "selector.hh"
+#endif
 
 
 // The default signal handler logic will catch:
@@ -124,7 +128,9 @@ public:
 
     void set_debug(bool v) {
 	_is_debug = v;
+#ifndef HOST_OS_WINDOWS
 	_selector_list.set_debug(v);
+#endif
     }
 
     bool is_debug() const { return (_is_debug); }
@@ -135,12 +141,14 @@ public:
      */
     TimerList&    timer_list()		{ return _timer_list; }
 
+#ifndef HOST_OS_WINDOWS
     /**
      * @return reference to the @ref SelectorList used by the @ref
      * EventLoop instance.
      * XXX: Deprecated.
      */
     SelectorList& selector_list()	{ return _selector_list; }
+#endif
 
     /**
      * Add a new one-off timer to the EventLoop.
@@ -366,7 +374,11 @@ private:
     bool		_is_debug;	// If true, debug enabled
     // Was the last event at this priority a selector or a task.
     bool		_last_ev_type[XorpTask::PRIORITY_INFINITY]; 
+#ifdef HOST_OS_WINDOWS
+    WinDispatcher	_win_dispatcher;
+#else
     SelectorList	_selector_list;
+#endif
 };
 
 // ----------------------------------------------------------------------------

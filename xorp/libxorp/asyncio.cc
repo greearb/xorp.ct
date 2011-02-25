@@ -37,6 +37,13 @@
 #include "xorpfd.hh"
 #include "asyncio.hh"
 
+#ifdef HOST_OS_WINDOWS
+#   define EDGE_TRIGGERED_READ_LATENCY		// IOT_READ may be delayed.
+#   define EDGE_TRIGGERED_WRITES		// IOT_WRITE is edge triggered.
+#   include "win_dispatcher.hh"
+#   include "win_io.h"
+#endif
+
 
 // ----------------------------------------------------------------------------
 // Utility
@@ -48,6 +55,24 @@ is_pseudo_error(const char* name, XorpFd fd, int error_num)
     UNUSED(name);
 
     switch (error_num) {
+#ifdef HOST_OS_WINDOWS
+    case ERROR_IO_PENDING:
+	XLOG_WARNING("%s (fd = %p) got ERROR_IO_PENDING, continuing.", name,
+		     (void *)fd);
+	return true;
+    case WSAEINTR:
+	XLOG_WARNING("%s (fd = %p) got WSAEINTR, continuing.", name,
+		     (void *)fd);
+	return true;
+    case WSAEWOULDBLOCK:
+	XLOG_WARNING("%s (fd = %p) got WSAEWOULDBLOCK, continuing.", name,
+		     (void *)fd);
+	return true;
+    case WSAEINPROGRESS:
+	XLOG_WARNING("%s (fd = %p) got WSAEINPROGRESS, continuing.", name,
+		     (void *)fd);
+	return true;
+#else // ! HOST_OS_WINDOWS
     case EINTR:
 	XLOG_WARNING("%s (fd = %d) got EINTR, continuing.", name,
 		     XORP_INT_CAST(fd));
@@ -56,6 +81,7 @@ is_pseudo_error(const char* name, XorpFd fd, int error_num)
 	XLOG_WARNING("%s (fd = %d) got EWOULDBLOCK, continuing.", name,
 		     XORP_INT_CAST(fd));
 	return true;
+#endif // ! HOST_OS_WINDOWS
     }
     return false;
 }
@@ -104,17 +130,94 @@ AsyncFileReader::add_buffer_with_offset(uint8_t*	b,
     _buffers.push_back(new BufferInfo(b, b_bytes, off, cb));
 }
 
+#ifdef HOST_OS_WINDOWS
+void
+AsyncFileReader::disconnect(XorpFd fd, IoEventType type)
+{
+    assert(type == IOT_DISCONNECT);
+    assert(fd == _fd);
+    assert(fd.is_valid()); 
+    assert(fd.is_socket()); 
+    debug_msg("IOT_DISCONNECT close detected (reader side)\n");
+    BufferInfo* head = _buffers.front();
+    head->dispatch_callback(END_OF_FILE);
+}
+#endif // HOST_OS_WINDOWS
+
 void
 AsyncFileReader::read(XorpFd fd, IoEventType type)
 {
+#ifdef EDGE_TRIGGERED_READ_LATENCY
+    if (_running == false)
+	return;
+#endif
     assert(type == IOT_READ);
     assert(fd == _fd);
     assert(_buffers.empty() == false);
+
+#if 0
+    // XXX: comm_sock_is_connected() is cross-reference to libcomm
+    int is_connected = 0;
+    if (_fd.is_socket()) {
+	if ((comm_sock_is_connected(_fd, &is_connected) != XORP_OK)
+	    || (is_connected == 0)) {
+	    debug_msg("Warning: socket %p may have been closed\n",
+		      (HANDLE)_fd);
+	}
+    }
+#endif // 0
 
     debug_msg("Buffer count %u\n", XORP_UINT_CAST(_buffers.size()));
 
     BufferInfo* head = _buffers.front();
     ssize_t done = 0;
+#ifdef HOST_OS_WINDOWS
+    BOOL result = FALSE;
+
+    switch (fd.type()) {
+    case XorpFd::FDTYPE_SOCKET:
+	done = recv((SOCKET)_fd, (char *)(head->buffer() + head->offset()),
+		    head->buffer_bytes() - head->offset(), 0);
+	if (done == SOCKET_ERROR) {
+	    _last_error = WSAGetLastError();
+	    done = -1;
+	} else if (done == 0) {
+	    // Graceful close; make sure complete_transfer() gets this.
+	    debug_msg("graceful close detected\n");
+	    _last_error = WSAENOTCONN;
+	    done = -1;
+	}
+	break;
+
+    case XorpFd::FDTYPE_PIPE:
+	// XXX: Return values need review.
+	done = win_pipe_read(_fd, head->buffer() + head->offset(),
+			     head->buffer_bytes() - head->offset());
+	_last_error = GetLastError();
+	break;
+
+    case XorpFd::FDTYPE_CONSOLE:
+	// XXX: Return values need review.
+	done = win_con_read(_fd, head->buffer() + head->offset(),
+			     head->buffer_bytes() - head->offset());
+	_last_error = GetLastError();
+	break;
+
+    case XorpFd::FDTYPE_FILE:
+	result = ReadFile(_fd, (LPVOID)(head->buffer() + head->offset()),
+			       (DWORD)(head->buffer_bytes() - head->offset()),
+			       (LPDWORD)&done, NULL);
+	if (result == FALSE) {
+	    _last_error = GetLastError();
+	    SetLastError(ERROR_SUCCESS);
+	}
+	break;
+
+    default:
+	XLOG_FATAL("Invalid descriptor type.");
+	break;
+    }
+#else // ! HOST_OS_WINDOWS
     errno = 0;
     _last_error = 0;
     done = ::read(_fd, head->buffer() + head->offset(),
@@ -126,6 +229,7 @@ AsyncFileReader::read(XorpFd fd, IoEventType type)
 		     strerror(errno));
     }
     errno = 0;
+#endif // ! HOST_OS_WINDOWS
 
     debug_msg("Read %d bytes\n", XORP_INT_CAST(done));
 
@@ -133,6 +237,25 @@ AsyncFileReader::read(XorpFd fd, IoEventType type)
 	return;
     }
     complete_transfer(_last_error, done);
+
+#ifdef EDGE_TRIGGERED_READ_LATENCY
+    //
+    // If there's still data which we can read without blocking,
+    // and we didn't fill our buffers, then try to read again
+    // without waiting for an IOT_READ dispatch, as it may not come,
+    // or be delayed due to latency between the primary thread
+    // and the Winsock thread.
+    //
+    if (_fd.is_socket()) {
+	u_long remaining = 0;
+	int result = ioctlsocket(_fd, FIONREAD, &remaining);
+	if (result != SOCKET_ERROR && remaining > 0) {
+	    _deferred_io_task = _eventloop.new_oneoff_task(
+		callback(this, &AsyncFileReader::read, _fd, IOT_READ));
+	    XLOG_ASSERT(_deferred_io_task.scheduled());
+	}
+   }
+#endif // EDGE_TRIGGERED_READ_LATENCY
 }
 
 // transfer_complete() invokes callbacks if necessary and updates buffer
@@ -199,6 +322,25 @@ AsyncFileReader::start()
 	return false;
     }
 
+#ifdef HOST_OS_WINDOWS
+    // Windows notifies us of disconnections using a separate flag.
+    // The file descriptor may no longer be valid when we stop, so
+    // mark the IOT_DISCONNECT callback as being added using a boolean.
+    _disconnect_added = false;
+    if (_fd.is_socket()) {
+	_disconnect_added = e.add_ioevent_cb(
+	    _fd,
+	    IOT_DISCONNECT,
+	    callback(this, &AsyncFileReader::disconnect),
+	    _priority);
+	if (_disconnect_added == false) {
+	    XLOG_ERROR("AsyncFileReader: Failed to add ioevent callback.");
+	    _eventloop.remove_ioevent_cb(_fd, IOT_READ);
+	    return false;
+	}
+    }
+#endif // HOST_OS_WINDOWS
+
     debug_msg("%p start\n", this);
 
     _running = true;
@@ -211,6 +353,17 @@ AsyncFileReader::stop()
     debug_msg("%p stop\n", this);
 
     _eventloop.remove_ioevent_cb(_fd, IOT_READ);
+
+#ifdef EDGE_TRIGGERED_WRITES
+    _deferred_io_task.unschedule();
+#endif
+#ifdef HOST_OS_WINDOWS
+    if (_disconnect_added == true) {
+    	_eventloop.remove_ioevent_cb(_fd, IOT_DISCONNECT);
+	_disconnect_added = false;
+    }
+#endif
+
     _running = false;
 }
 
@@ -261,6 +414,13 @@ AsyncFileWriter::add_buffer(const uint8_t*	b,
 {
     assert(b_bytes != 0);
     _buffers.push_back(new BufferInfo(b, b_bytes, cb));
+#ifdef EDGE_TRIGGERED_WRITES
+    if (_running == true) {
+	_deferred_io_task = _eventloop.new_oneoff_task(
+	    callback(this, &AsyncFileWriter::write, _fd, IOT_WRITE));
+	XLOG_ASSERT(_deferred_io_task.scheduled());
+    }
+#endif // EDGE_TRIGGERED_WRITES
 }
 
 void
@@ -272,6 +432,13 @@ AsyncFileWriter::add_buffer_sendto(const uint8_t*	b,
 {
     assert(b_bytes != 0);
     _buffers.push_back(new BufferInfo(b, b_bytes, dst_addr, dst_port, cb));
+#ifdef EDGE_TRIGGERED_WRITES
+    if (_running == true) {
+	_deferred_io_task = _eventloop.new_oneoff_task(
+	    callback(this, &AsyncFileWriter::write, _fd, IOT_WRITE));
+	XLOG_ASSERT(_deferred_io_task.scheduled());
+    }
+#endif // EDGE_TRIGGERED_WRITES
 }
 
 void
@@ -282,6 +449,13 @@ AsyncFileWriter::add_buffer_with_offset(const uint8_t*	b,
 {
     assert(off < b_bytes);
     _buffers.push_back(new BufferInfo(b, b_bytes, off, cb));
+#ifdef EDGE_TRIGGERED_WRITES
+    if (_running == true) {
+	_deferred_io_task = _eventloop.new_oneoff_task(
+	    callback(this, &AsyncFileWriter::write, _fd, IOT_WRITE));
+	XLOG_ASSERT(_deferred_io_task.scheduled());
+    }
+#endif // EDGE_TRIGGERED_WRITES
 }
 
 void
@@ -290,6 +464,13 @@ AsyncFileWriter::add_data(const vector<uint8_t>&	data,
 {
     assert(data.size() != 0);
     _buffers.push_back(new BufferInfo(data, cb));
+#ifdef EDGE_TRIGGERED_WRITES
+    if (_running == true) {
+	_deferred_io_task = _eventloop.new_oneoff_task(
+	    callback(this, &AsyncFileWriter::write, _fd, IOT_WRITE));
+	XLOG_ASSERT(_deferred_io_task.scheduled());
+    }
+#endif // EDGE_TRIGGERED_WRITES
 }
 
 void
@@ -300,6 +481,13 @@ AsyncFileWriter::add_data_sendto(const vector<uint8_t>&	data,
 {
     assert(data.size() != 0);
     _buffers.push_back(new BufferInfo(data, dst_addr, dst_port, cb));
+#ifdef EDGE_TRIGGERED_WRITES
+    if (_running == true) {
+	_deferred_io_task = _eventloop.new_oneoff_task(
+	    callback(this, &AsyncFileWriter::write, _fd, IOT_WRITE));
+	XLOG_ASSERT(_deferred_io_task.scheduled());
+    }
+#endif // EDGE_TRIGGERED_WRITES
 }
 
 
@@ -324,6 +512,22 @@ iov_place(T*& iov_base, U& iov_len, uint8_t* data, size_t data_len)
     iov_len  = data_len;
 }
 
+#ifdef HOST_OS_WINDOWS
+void
+AsyncFileWriter::disconnect(XorpFd fd, IoEventType type)
+{
+    assert(type == IOT_DISCONNECT);
+    assert(fd == _fd);
+    assert(fd.is_valid()); 
+    assert(fd.is_socket()); 
+    debug_msg("IOT_DISCONNECT close detected (writer side)\n");
+#if 0
+    BufferInfo* head = _buffers.front();
+    head->dispatch_callback(END_OF_FILE);
+#endif // 0
+}
+#endif // HOST_OS_WINDOWS
+
 void
 AsyncFileWriter::write(XorpFd fd, IoEventType type)
 {
@@ -334,12 +538,31 @@ AsyncFileWriter::write(XorpFd fd, IoEventType type)
     size_t total_bytes = 0;
     ssize_t done = 0;
     int flags = 0;
+#ifndef HOST_OS_WINDOWS
     bool mod_signals = true;
+#endif
 
 #ifdef MSG_NOSIGNAL
     flags |= MSG_NOSIGNAL;
     mod_signals = false;
 #endif
+
+#ifdef EDGE_TRIGGERED_WRITES
+    if (_running == false)
+	return;
+#endif
+
+#if 0
+    // XXX: comm_sock_is_connected() is cross-reference to libcomm
+    int is_connected = 0;
+    if (_fd.is_socket()) {
+	if ((comm_sock_is_connected(_fd, &is_connected) != XORP_OK)
+	    || (is_connected == 0)) {
+	    debug_msg("Warning: socket %p may have been closed\n",
+		      (HANDLE)_fd);
+	}
+    }
+#endif // 0
 
     assert(type == IOT_WRITE);
     assert(fd == _fd);
@@ -420,13 +643,43 @@ AsyncFileWriter::write(XorpFd fd, IoEventType type)
 	}
 
 	if (done < 0) {
+#ifdef HOST_OS_WINDOWS
+	    _last_error = WSAGetLastError();
+#else
 	    _last_error = errno;
+#endif
 	}
 
     } else {
 	//
 	// Write the data to the socket/file descriptor
 	//
+#ifdef HOST_OS_WINDOWS
+	if (fd.is_socket()) {
+	    // Socket handles take non-blocking writes.
+	    // WSASend() approximates writev().
+	    int result = WSASend((SOCKET)_fd, (LPWSABUF)_iov, iov_cnt,
+				 (LPDWORD)&done, 0, NULL, NULL);
+	    _last_error = (result == SOCKET_ERROR) ? WSAGetLastError() : 0;
+	    if (_last_error != 0)
+		debug_msg("writer: winsock error %d\n", _last_error);
+	} else {
+	    // Non-socket handles take blocking writes.
+	    // There is no writev() equivalent, so emulate it.
+	    BOOL result = TRUE;
+	    DWORD done2;
+	    for (uint32_t j = 0; j < iov_cnt; j++) {
+		result = WriteFile(_fd, (LPVOID)_iov[j].iov_base,
+				   (DWORD)_iov[j].iov_len, (LPDWORD)&done2,
+				   NULL);
+		done += done2;
+		if (result == FALSE)
+		    break;
+	    }
+	    _last_error = (result == FALSE) ? GetLastError() : 0;
+	}
+#else // ! HOST_OS_WINDOWS
+
 	errno = 0;
 	_last_error = 0;
 
@@ -445,6 +698,7 @@ AsyncFileWriter::write(XorpFd fd, IoEventType type)
 		_last_error = errno;
 	}
 	errno = 0;
+#endif // ! HOST_OS_WINDOWS
     }
 
     debug_msg("Wrote %d of %u bytes\n",
@@ -456,6 +710,14 @@ AsyncFileWriter::write(XorpFd fd, IoEventType type)
     }
 
     complete_transfer(done);
+
+#ifdef EDGE_TRIGGERED_WRITES
+    if (_buffers.empty() == false) {
+	_deferred_io_task = _eventloop.new_oneoff_task(
+	    callback(this, &AsyncFileWriter::write, _fd, IOT_WRITE));
+	XLOG_ASSERT(_deferred_io_task.scheduled());
+    }
+#endif // EDGE_TRIGGERED_WRITES
 }
 
 // transfer_complete() invokes callbacks if necessary and updates buffer
@@ -570,6 +832,35 @@ AsyncFileWriter::start()
 	XLOG_ERROR("AsyncFileWriter: Failed to add I/O event callback.");
 	return false;
     }
+#ifdef HOST_OS_WINDOWS
+    _disconnect_added = false;
+    // Disable disconnection notification on write end for now.
+    // Don't bitch if we can't add the notification.
+    // it's a no-op to see if we pick them up on the write side...
+    // XXX: If we fail to add a notification it's possible the socket
+    // might already have been closed?
+#if 0
+    if (_fd.is_socket()) {
+	_disconnect_added = e.add_ioevent_cb(
+	    _fd,
+	    IOT_DISCONNECT,
+	    callback(this, &AsyncFileWriter::disconnect),
+	    _priority);
+#if 0
+	if (_disconnect_added == false) {
+	    XLOG_ERROR("AsyncFileWriter: Failed to add I/O event callback.");
+	    _eventloop.remove_ioevent_cb(_fd, IOT_WRITE);
+	    return false;
+	}
+#endif // 0
+    }
+#endif // 0
+#endif // HOST_OS_WINDOWS
+
+#ifdef EDGE_TRIGGERED_WRITES
+    _deferred_io_task = _eventloop.new_oneoff_task(
+	callback(this, &AsyncFileWriter::write, _fd, IOT_WRITE));
+#endif // EDGE_TRIGGERED_WRITES
 
     _running = true;
     debug_msg("%p start\n", this);
@@ -581,7 +872,16 @@ AsyncFileWriter::stop()
 {
     debug_msg("%p stop\n", this);
 
+#ifdef EDGE_TRIGGERED_WRITES
+    _deferred_io_task.unschedule();
+#endif // EDGE_TRIGGERED_WRITES
     _eventloop.remove_ioevent_cb(_fd, IOT_WRITE);
+#ifdef HOST_OS_WINDOWS
+    if (_disconnect_added == true) {
+    	_eventloop.remove_ioevent_cb(_fd, IOT_DISCONNECT);
+	_disconnect_added = false;
+    }
+#endif // HOST_OS_WINDOWS
     _running = false;
 }
 

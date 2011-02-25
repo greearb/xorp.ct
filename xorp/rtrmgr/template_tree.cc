@@ -28,6 +28,8 @@
 
 #ifdef HAVE_GLOB_H
 #include <glob.h>
+#elif defined(HOST_OS_WINDOWS)
+#include "glob_win32.h"
 #endif
 
 #include "conf_tree.hh"
@@ -35,6 +37,12 @@
 #include "template_commands.hh"
 #include "template_tree.hh"
 #include "template_tree_node.hh"
+
+
+#ifdef HOST_OS_WINDOWS
+#define	stat	_stat
+#define	S_IFDIR	_S_IFDIR
+#endif
 
 extern int init_template_parser(const char* filename, TemplateTree* c);
 extern void complete_template_parser();

@@ -27,6 +27,8 @@
 
 #ifdef HAVE_GLOB_H
 #include <glob.h>
+#elif defined(HOST_OS_WINDOWS)
+#include "glob_win32.h"
 #endif
 
 #include "command_tree.hh"

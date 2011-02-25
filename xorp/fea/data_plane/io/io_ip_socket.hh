@@ -330,8 +330,11 @@ private:
     struct iovec	_rcviov[1]; // The scatter/gatter array for receiving
     struct iovec	_sndiov[1]; // The scatter/gatter array for sending
 
+#ifndef HOST_OS_WINDOWS
     struct msghdr	_rcvmh;	// The msghdr structure used by recvmsg()
     struct msghdr	_sndmh;	// The msghdr structure used by sendmsg()
+#endif // ! HOST_OS_WINDOWS
+
     struct sockaddr_in	_from4;	// The source addr of recvmsg() msg (IPv4)
     struct sockaddr_in  _to4;	// The dest.  addr of sendmsg() msg (IPv4)
 #ifdef HAVE_IPV6

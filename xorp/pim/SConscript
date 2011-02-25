@@ -66,7 +66,17 @@ env.AppendUnique(LIBS = [
 if not is_shared:
     env.AppendUnique(LIBS = [
         "crypto",
-        "rt",
+        ])
+
+    if not (env.has_key('mingw') and env['mingw']):
+        env.AppendUnique(LIBS = [
+            "rt",
+            ])
+
+if (env.has_key('mingw') and env['mingw']):
+    env.AppendUnique(LIBS = [
+        'ws2_32',
+        'iphlpapi',
         ])
 
 if not (env.has_key('disable_ipv6') and env['disable_ipv6']):

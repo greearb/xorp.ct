@@ -31,6 +31,7 @@ try:
 except ValueError:
     pass
 
+
 env['CPPDEFINES'] = {
     'STDC_HEADERS': 1,
     'HAVE_SYS_TYPES_H': 1,
@@ -42,12 +43,11 @@ env['CPPDEFINES'] = {
     'HAVE_INTTYPES_H': 1,
     'HAVE_STDINT_H': 1,
     'HAVE_UNISTD_H': 1,
-    'HAVE_SYS_IOCTL_H': 1,
-    'HAVE_TERMIOS_H': 1,
     'HAVE_SELECT_H': 1,
     'HAVE_TERMINFO_H': 1,
     }
 
+    
 libtecla_srcs = [
     'cplfile.c',
     'cplmatch.c',

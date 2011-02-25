@@ -129,6 +129,15 @@ BufferedAsyncReader::start()
 	false) {
 	XLOG_ERROR("BufferedAsyncReader: failed to add I/O event callback.");
     }
+#ifdef HOST_OS_WINDOWS
+    if (_eventloop.add_ioevent_cb(_fd, IOT_DISCONNECT,
+				  callback(this,
+					   &BufferedAsyncReader::io_event),
+				  _priority) ==
+	false) {
+	XLOG_ERROR("BufferedAsyncReader: failed to add I/O event callback.");
+    }
+#endif
 
     if (_config.head_bytes >= _config.trigger_bytes) {
 	_ready_timer =
@@ -144,6 +153,9 @@ BufferedAsyncReader::stop()
 {
     debug_msg("%p stop\n", this);
 
+#ifdef HOST_OS_WINDOWS
+    _eventloop.remove_ioevent_cb(_fd, IOT_DISCONNECT);
+#endif
     _eventloop.remove_ioevent_cb(_fd, IOT_READ);
     _ready_timer.unschedule();
 }
@@ -152,7 +164,17 @@ void
 BufferedAsyncReader::io_event(XorpFd fd, IoEventType type)
 {
     assert(fd == _fd);
+#ifndef HOST_OS_WINDOWS
     assert(type == IOT_READ);
+#else
+    // Explicitly handle disconnection events
+    if (type == IOT_DISCONNECT) {
+	XLOG_ASSERT(fd.is_socket());
+	stop();
+	announce_event(END_OF_FILE);
+	return;
+    }
+#endif
 
     uint8_t* 	tail 	   = _config.head + _config.head_bytes;
     size_t 	tail_bytes = _buffer.size() - (tail - &_buffer[0]);
@@ -162,12 +184,26 @@ BufferedAsyncReader::io_event(XorpFd fd, IoEventType type)
 
     ssize_t read_bytes = -1;
 
+#ifdef HOST_OS_WINDOWS
+    if (fd.is_socket()) {
+	read_bytes = ::recvfrom(fd, (char *)tail, tail_bytes, 0,
+		       NULL, 0);
+	_last_error = WSAGetLastError();
+	WSASetLastError(ERROR_SUCCESS);
+    } else {
+	(void)ReadFile(fd, (LPVOID)tail, (DWORD)tail_bytes,
+		       (LPDWORD)&read_bytes, NULL);
+	_last_error = GetLastError();
+	SetLastError(ERROR_SUCCESS);
+    }
+#else
     errno = 0;
     _last_error = 0;
     read_bytes = ::read(fd, tail, tail_bytes);
     if (read_bytes < 0)
 	_last_error = errno;
     errno = 0;
+#endif
 
     if (read_bytes > 0) {
 	_config.head_bytes += read_bytes;

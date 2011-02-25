@@ -31,6 +31,15 @@
 
 #include "util.hh"
 
+#ifdef	HOST_OS_WINDOWS
+#include <io.h>
+#ifdef _NO_OLDNAMES
+#define	access(x,y)	_access(x,y)
+#define	stat		_stat
+#define	S_ISREG		_S_ISREG
+#endif
+#endif
+
 static string s_cfg_root;
 static string s_bin_root;
 static string s_config_file;
@@ -99,11 +108,19 @@ xorp_real_path(const string& path)
 
     char rp[MAXPATHLEN];
 
+#ifdef HOST_OS_WINDOWS
+    char *fp = NULL;
+    if (GetFullPathNameA(path.c_str(), sizeof(rp), rp, &fp) > 0) {
+	debug_msg("return %s\n", rp);
+	return string(rp);
+    }
+#else
     const char* prp = realpath(path.c_str(), rp);
     if (prp != NULL) {
 	debug_msg("return %s\n", prp);
 	return string(prp);
     }
+#endif
 
     // XLOG_WARNING("realpath(%s) failed.", path.c_str());
     debug_msg("return %s\n", path.c_str());
@@ -276,6 +293,11 @@ find_executable_filename(const string& program_filename)
 	// Don't forget to append the executable suffix if needed.
 	string full_path_executable = path.front() + PATH_DELIMITER_STRING +
 				      executable_filename + EXECUTABLE_SUFFIX;
+#ifdef HOST_OS_WINDOWS
+	// Deal with any silly tricks which MSYS may have pulled on
+	// us, like using UNIX-style slashes in a DOS-style path. Grr. -bms
+	full_path_executable = unix_path_to_native(full_path_executable);
+#endif
 	if (stat(full_path_executable.c_str(), &statbuf) == 0 &&
 	    // access(program_filename.c_str(), X_OK) == 0 &&
 	    S_ISREG(statbuf.st_mode)) {

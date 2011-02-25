@@ -72,10 +72,14 @@ XrlStdRouter::create_listener()
 	    return new XrlPFSTCPListener(_e, this);
 	    break;
 	case 'x':
+#ifndef	HOST_OS_WINDOWS
 #if XRL_PF != 'x'
 	    XLOG_ASSERT(_unix == NULL);
 #endif
 	    return new XrlPFUNIXListener(_e, this);
+#else
+	    XLOG_ERROR("PFUnix listener not available on windows builds.\n");
+#endif
 	default:
 	    XLOG_ERROR("Unknown PF %s\n", pf);
 	    XLOG_ASSERT(false);
@@ -168,8 +172,10 @@ XrlStdRouter::construct(bool unix_socket)
 void
 XrlStdRouter::create_unix_listener()
 {
+#ifndef HOST_OS_WINDOWS
     _unix = new XrlPFUNIXListener(_e, this);
     add_listener(_unix);
+#endif // ! HOST_OS_WINDOWS
 }
 
 XrlStdRouter::~XrlStdRouter()

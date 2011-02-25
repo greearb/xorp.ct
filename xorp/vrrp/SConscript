@@ -61,6 +61,15 @@ env.AppendUnique(LIBS = [
     'xorp_comm'
 ])
 
+if (env.has_key('mingw') and env['mingw']):
+    env.AppendUnique(LIBS = [
+#        'mprapi',
+        'regex',
+        ])
+
+    env.Append(LIBS = ['xorp_core', 'crypto', 'ws2_32', 'iphlpapi'])
+
+
 libxorp_vrrp_srcs = ['arpd.cc',
 	       'vrrp.cc',
 	       'vrrp_packet.cc',

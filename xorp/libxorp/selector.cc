@@ -25,6 +25,8 @@
 
 #include "libxorp/xorp.h"
 
+#ifndef HOST_OS_WINDOWS // Entire file is stubbed out on Windows.
+
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
 #include "libxorp/xorpfd.hh"
@@ -621,3 +623,5 @@ SelectorListObserverBase::~SelectorListObserverBase()
 {
     if (_observed) _observed->remove_observer();
 }
+
+#endif // !HOST_OS_WINDOWS

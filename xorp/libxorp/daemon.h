@@ -21,10 +21,6 @@
  * http://xorp.net
  */
 
-/*
- * $XORP: xorp/libxorp/daemon.h,v 1.4 2008/10/02 21:57:30 bms Exp $
- */
-
 #ifndef __LIBXORP_DAEMON_H__
 #define __LIBXORP_DAEMON_H__
 

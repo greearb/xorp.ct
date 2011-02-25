@@ -47,6 +47,16 @@ env.AppendUnique(LIBS = [
     'xorp_comm',
     ])
 
+if (env.has_key('mingw') and env['mingw']):
+    env.Append(LIBS = [
+        'iphlpapi',
+#        'mprapi',
+        'regex',
+        ])
+
+    env.Append(LIBS = ['xorp_core', 'crypto', 'ws2_32'])
+
+
 if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
     env.AppendUnique(LIBS = [
         'xif_ospfv3',

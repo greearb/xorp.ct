@@ -44,6 +44,7 @@ RandomGen::RandomGen()
       _counter(0)
 {
     bool not_enough_randomness = false;
+#ifndef HOST_OS_WINDOWS
     FILE* file;
 
     file = fopen("/dev/urandom", "r");
@@ -79,6 +80,7 @@ RandomGen::RandomGen()
 	}
 	fclose(file);
     }
+#endif // ! HOST_OS_WINDOWS
 
     if ((!_urandom_exists && !_random_exists) || not_enough_randomness) {
 	//
@@ -104,6 +106,7 @@ RandomGen::RandomGen()
 	    _random_data[i] ^= *(((char *)(&d))+i);
 	}
 
+#ifndef HOST_OS_WINDOWS
 	int count = 0;
 	int scount = 0;
 
@@ -224,6 +227,7 @@ RandomGen::RandomGen()
 	    fwrite(&d, 1, sizeof(d), file);
 	    fclose(file);
 	}
+#endif // ! HOST_OS_WINDOWS
     }
 }
 

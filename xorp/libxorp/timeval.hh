@@ -46,6 +46,17 @@ class TimeVal {
 public:
     static const int32_t ONE_MILLION = 1000000;
     static const int32_t ONE_THOUSAND = 1000;
+#ifdef HOST_OS_WINDOWS
+    /*
+     * The difference between the beginning of the Windows epoch
+     * (1601-01-01-00-00) and the UNIX epoch (1970-01-01-00-00)
+     * is 134,774 days on the Julian calendar. Compute this
+     * difference in seconds and use it as a constant.
+     * XXX: This does not take account of leap seconds.
+     */
+    static const int64_t UNIX_WIN32_EPOCH_DIFF = (134774LL * 24LL * 60LL * 60LL);
+    static const int32_t UNITS_100NS_PER_1US = 10;
+#endif
 
 public:
     /**
@@ -60,6 +71,8 @@ public:
      * @param usec the number of microseconds.
      */
     TimeVal(int32_t sec, int32_t usec) : _sec(sec), _usec(usec) {}
+
+#ifndef HOST_OS_WINDOWS
 
     /**
      * Constructor for given "struct timeval".
@@ -80,6 +93,17 @@ public:
     explicit TimeVal(const timespec& timespec)
 	: _sec(timespec.tv_sec), _usec(timespec.tv_nsec / 1000) {}
 #endif
+
+#else /* HOST_OS_WINDOWS */
+
+    /**
+     * Constructor for given "FILETIME".
+     *
+     * @param ft the "FILETIME" time value to initialize this object with.
+     */
+    explicit TimeVal(const FILETIME& ft) { copy_in(ft); }
+
+#endif /* !HOST_OS_WINDOWS */
 
     /**
      * Constructor for given double-float time value.
@@ -172,6 +196,25 @@ public:
      * @return the number of milliseconds in total.
      */
     int64_t to_ms() const;
+
+#ifdef HOST_OS_WINDOWS
+    /**
+     * Copy the time value from a FILETIME structure.
+     *
+     * @param filetime the storage to copy the time from.
+     * @return the number of copied octets.
+     */
+    size_t copy_in(const FILETIME& filetime);
+
+    /**
+     * Copy the time value to a FILETIME structure.
+     *
+     * @param filetime the storage to copy the time to.
+     * @return the number of copied octets.
+     */
+    size_t copy_out(FILETIME& filetime) const;
+
+#endif /* HOST_OS_WINDOWS */
 
     /**
      * Convert a TimeVal value to a double-float value.
@@ -373,6 +416,48 @@ TimeVal::to_ms() const
     }
     return (ms);
 }
+
+#ifdef HOST_OS_WINDOWS
+
+/*
+ * Convert Windows time to a BSD struct timeval using 64-bit integer
+ * arithmetic, by the following steps:
+ * 1. Scale Windows' 100ns resolution to BSD's 1us resolution.
+ * 2. Subtract the difference since the beginning of their respective epochs.
+ * 3. Extract the appropriate fractional parts from the 64-bit
+ *    integer used to represent Windows time.
+ * Both UNIX and NT time systems correspond to UTC, therefore leap second
+ * correction is NTP's problem.
+ */
+inline size_t
+TimeVal::copy_in(const FILETIME& filetime)
+{
+    ULARGE_INTEGER ui;
+
+    ui.LowPart = filetime.dwLowDateTime;
+    ui.HighPart = filetime.dwHighDateTime;
+    ui.QuadPart /= UNITS_100NS_PER_1US;
+    ui.QuadPart -= UNIX_WIN32_EPOCH_DIFF * ONE_MILLION;
+    _usec = ui.QuadPart % ONE_MILLION;
+    _sec = ui.QuadPart / ONE_MILLION;
+    return (sizeof(filetime.dwLowDateTime) + sizeof(filetime.dwHighDateTime));
+}
+
+inline size_t
+TimeVal::copy_out(FILETIME& filetime) const
+{
+    ULARGE_INTEGER ui;
+
+    ui.QuadPart = _sec + UNIX_WIN32_EPOCH_DIFF;
+    ui.QuadPart *= ONE_MILLION;
+    ui.QuadPart += _usec;
+    ui.QuadPart *= UNITS_100NS_PER_1US;
+    filetime.dwLowDateTime = ui.LowPart;
+    filetime.dwHighDateTime = ui.HighPart;
+    return (sizeof(filetime.dwLowDateTime) + sizeof(filetime.dwHighDateTime));
+}
+
+#endif /* HOST_OS_WINDOWS */
 
 inline TimeVal&
 TimeVal::operator=(const TimeVal& other)

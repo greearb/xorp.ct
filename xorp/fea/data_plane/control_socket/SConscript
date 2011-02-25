@@ -35,6 +35,8 @@ sources = [
 	'netlink_socket_utilities.cc',
 	'routing_socket.cc',
 	'routing_socket_utilities.cc',
+	'windows_rras_support.cc',
+	'windows_rtm_pipe.cc'
 	]
 
 if env['enable_click']:

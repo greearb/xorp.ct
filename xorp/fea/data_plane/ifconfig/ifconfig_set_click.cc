@@ -35,6 +35,12 @@
 
 #include "ifconfig_set_click.hh"
 
+
+#ifdef HOST_OS_WINDOWS
+#define	unlink(x)	_unlink(x)
+#endif
+
+
 //
 // Set information about network interfaces configuration with the
 // underlying system.
@@ -965,10 +971,12 @@ IfConfigSetClick::ClickConfigGenerator::ClickConfigGenerator(
 
 IfConfigSetClick::ClickConfigGenerator::~ClickConfigGenerator()
 {
+#ifndef HOST_OS_WINDOWS
     if (_run_command != NULL)
 	delete _run_command;
     if (! _tmp_filename.empty())
 	unlink(_tmp_filename.c_str());
+#endif
 }
 
 int

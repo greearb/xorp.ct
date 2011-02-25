@@ -294,12 +294,16 @@ int main(int /* argc */, char *argv[])
     xlog_add_default_output();
     xlog_start();
 
+#ifndef HOST_OS_WINDOWS
     // Set alarm
     alarm(60);
+#endif
     run_test();
 
+#ifndef HOST_OS_WINDOWS
     // Set alarm
     alarm(60);
+#endif
     run_no_keepalive_test();
 
     //

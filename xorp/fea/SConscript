@@ -96,12 +96,21 @@ libxorp_fea_linkorder += [
     'xst_fea',
     'xst_mfea',
     'xorp_mrt',
-    'xorp_tecla',
     'xorp_proto',
     'xorp_ipc',
     'xorp_comm',
     'xorp_core'
     ]
+
+if not (env.has_key('disable_libtecla') and env['disable_libtecla']):
+    libxorp_fea_linkorder += [
+        'xorp_tecla',
+        ]
+else:
+    # External tecla library
+    libxorp_fea_linkorder += [
+        'tecla',
+        ]
 
 if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
     libxorp_fea_linkorder += [ 'xif_socket6_user',
@@ -132,7 +141,19 @@ if is_shared:
 else:
     env.AppendUnique(LIBS = [
         "crypto",
-        "rt",
+        ])
+
+    if not (env.has_key('mingw') and env['mingw']):
+        env.AppendUnique(LIBS = [
+            "rt",
+            ])
+
+if (env.has_key('mingw') and env['mingw']):
+    env.AppendUnique(LIBS = [
+        'ws2_32',
+        'iphlpapi',
+        'mprapi',
+        'regex',
         ])
 
 libxorp_fea_srcs = [

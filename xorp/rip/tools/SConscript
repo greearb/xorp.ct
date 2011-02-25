@@ -46,6 +46,16 @@ env.AppendUnique(LIBS = [
     'xorp_comm',
     ])
 
+if (env.has_key('mingw') and env['mingw']):
+    env.Append(LIBS = [
+        'iphlpapi',
+#        'mprapi',
+        'regex',
+        ])
+
+    env.Append(LIBS = ['xorp_core', 'crypto', 'ws2_32'])
+
+
 env.Replace(RPATH = [
     env.Literal(env['xorp_tool_rpath'])
 ])

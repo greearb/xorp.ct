@@ -19,11 +19,13 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-
 #include "xrl_module.h"
 #include "xrl_pf_unix.hh"
 #include "libcomm/comm_api.h"
 #include "sockutil.hh"
+
+#ifndef	HOST_OS_WINDOWS
+
 
 const char* XrlPFUNIXListener::_protocol = "unix";
 
@@ -70,18 +72,23 @@ XrlPFUNIXListener::get_sock_path()
 
     fclose(f);
 
+    // XXX we shouldn't be compiling this under windows
+#ifndef HOST_OS_WINDOWS
     unlink(path.c_str());
+#endif
 
     return path;
 }
 
 XrlPFUNIXListener::~XrlPFUNIXListener()
 {
+#ifndef HOST_OS_WINDOWS
     // XXX this probably isn't the right place for this.  Perhaps libcomm should
     // sort this out.
     string path = _address_slash_port;
     decode_address(path);
     unlink(path.c_str());
+#endif
 }
 
 const char*
@@ -163,3 +170,5 @@ XrlPFUNIXSender::protocol() const
 {
     return protocol_name();
 }
+
+#endif

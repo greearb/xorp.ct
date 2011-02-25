@@ -918,9 +918,11 @@ main(int argc, char * const argv[])
     int		reps = 1;
     uint32_t	burst_cnt = 25;
     uint32_t 	dtablesize;
-
+#ifdef HOST_OS_WINDOWS
+    dtablesize = MAXIMUM_WAIT_OBJECTS - 4; // reserve 4 handles.
+#else
     dtablesize = getdtablesize();
-
+#endif
     //
     // For systems with small default dtable sizes.
     //

@@ -20,10 +20,6 @@
  * http://xorp.net
  */
 
-/*
- * $XORP: xorp/mrt/buffer.h,v 1.11 2008/10/02 21:57:45 bms Exp $
- */
-
 
 #ifndef __MRT_BUFFER_H__
 #define __MRT_BUFFER_H__

@@ -24,4 +24,61 @@
 #ifndef __LIBXORP_XORP_OSDEP_END_H__
 #define __LIBXORP_XORP_OSDEP_END_H__
 
+#ifdef HOST_OS_WINDOWS
+
+/*
+ * Numerous kludges for purging items from the Windows namespace
+ * which collide with the XORP namespace exist here.
+ */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/*
+ * XXX: <libxorp/service.hh> ServiceStatus enum members collide
+ * with some of the definitions in <winsvc.h>, which we don't use
+ * [yet], so undefine some of them out of the way for now.
+ */
+#undef SERVICE_RUNNING
+#undef SERVICE_PAUSED
+
+/*
+ * XXX: <libproto/spt.hh> RouteCmd::Cmd enum collides with the
+ * preprocessor define DELETE in <winnt.h>.
+ */
+#undef DELETE
+
+/*
+ * XXX: <policy/filter_manager.hh> _export member name collides with
+ * the preprocessor define _export in <windef.h>.
+ */
+#undef _export
+
+/*
+ * XXX: <bgp/socket.hh> enums collide with the preprocessor define
+ * ERROR in <wingdi.h>.
+ */
+#undef ERROR
+
+/*
+ * XXX: gai_strerror() is #define'd to one of two prototyped functions
+ * by both the MinGW w32api version of the SDK, and the PSDK itself.
+ * However the functions don't actually exist.
+ * The Windows PSDK itself defines both functions as inline C functions.
+ * Here we try to deal with both cases by explicitly defining a single
+ * function prototype for the Win32 case, and purging the preprocessor macro.
+ */
+#ifdef gai_strerror
+#undef gai_strerror
+#endif
+
+char *gai_strerror(int ecode);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* HOST_OS_WINDOWS */
+
 #endif /* __LIBXORP_XORP_OSDEP_END_H__ */

@@ -59,9 +59,16 @@
 #include <arpa/telnet.h>
 #endif
 
+#ifdef HOST_OS_WINDOWS
+#include "libxorp/win_io.h"
+#define DEFAULT_TERM_TYPE	"ansi-nt"
+#define FILENO(x)	((HANDLE)_get_osfhandle(_fileno(x)))
+#define FDOPEN(x,y)	_fdopen(_open_osfhandle((x),_O_RDWR|_O_TEXT),(y))
+#else // ! HOST_OS_WINDOWS
 #define DEFAULT_TERM_TYPE "vt100"
 #define FILENO(x) fileno(x)
 #define FDOPEN(x,y) fdopen((x), (y))
+#endif // HOST_OS_WINDOWS
 
 //
 // Exported variables
@@ -86,6 +93,7 @@
 
 static set<CliClient *> local_cli_clients_;
 
+#ifndef HOST_OS_WINDOWS
 static void
 sigwinch_handler(int signo)
 {
@@ -99,6 +107,7 @@ sigwinch_handler(int signo)
 	cli_client->terminal_resized();
     }
 }
+#endif // ! HOST_OS_WINDOWS
 
 /**
  * CliNode::sock_serv_open:
@@ -193,6 +202,27 @@ CliNode::add_connection(XorpFd input_fd, XorpFd output_fd, bool is_network,
     cli_client->set_network_client(is_network);
     _client_list.push_back(cli_client);
 
+#ifdef HOST_OS_WINDOWS
+    if (cli_client->is_interactive()) {
+	BOOL retval;
+#if 0
+	// XXX: This always fails, so it's commented out.
+	retval = SetConsoleMode(input_fd,
+ENABLE_ECHO_INPUT | ENABLE_PROCESSED_INPUT);
+	if (retval == 0) {
+	    XLOG_WARNING("SetConsoleMode(input) failed: %s",
+	    		 win_strerror(GetLastError()));
+	}
+#endif
+	retval = SetConsoleMode(output_fd,
+ENABLE_PROCESSED_OUTPUT | ENABLE_WRAP_AT_EOL_OUTPUT);
+	if (retval == 0) {
+	    XLOG_WARNING("SetConsoleMode(output) failed: %s",
+			 win_strerror(GetLastError()));
+	}
+    }
+#endif
+    
     //
     // Set peer address (for network connection only)
     //
@@ -386,9 +416,11 @@ CliClient::start_connection(string& error_msg)
     }
 #endif
 
+#ifndef HOST_OS_WINDOWS
     if (! is_network()) {
 	signal(SIGWINCH, sigwinch_handler);
     }
+#endif
     
 #ifdef HAVE_TERMIOS_H
     //
@@ -485,9 +517,22 @@ CliClient::start_connection(string& error_msg)
     // Set the terminal
     string term_name = DEFAULT_TERM_TYPE;
     if (is_output_tty()) {
+#ifdef HOST_OS_WINDOWS
+	//
+	// Do not ask the environment what kind of terminal we use
+	// under Windows, as MSYS is known to lie to us and say 'cygwin'
+	// when in fact we're using an 'ansi-nt'. We've hard-coded
+	// appropriate control sequences in our fork of libtecla to
+	// reflect this fact.
+	// XXX: We need a better way of figuring out when we're in
+	// this situation.
+
+	; // do nothing
+#else
 	char *term = getenv("TERM");
 	if ((term != NULL) && (! string(term).empty()))
 	    term_name = string(term);
+#endif
     }
 
     //
@@ -695,7 +740,23 @@ CliClient::client_read(XorpFd fd, IoEventType type)
     
     XLOG_ASSERT(type == IOT_READ);
 
+#ifdef HOST_OS_WINDOWS
+    if (!is_interactive()) {
+	n = recv(fd, buf, sizeof(buf), 0);
+    } else {
+	//
+	// A 0-byte interactive read is not an error; it may simply
+	// mean the read routine filtered out an event which we
+	// weren't interested in.
+	//
+	n = win_con_read(fd, buf, sizeof(buf));
+	if (n == 0) {
+	    return;
+	}
+    }
+#else /* !HOST_OS_WINDOWS */
     n = read(fd, buf, sizeof(buf) - 1);
+#endif /* HOST_OS_WINDOWS */
     
     debug_msg("client_read %d octet(s)\n", n);
     if (n <= 0) {
@@ -900,6 +961,11 @@ CliClient::preprocess_char(uint8_t val, bool& stop_processing)
 int
 CliClient::process_telnet_option(int val, bool& is_telnet_option)
 {
+#ifdef HOST_OS_WINDOWS
+    UNUSED(val);
+    is_telnet_option = false;
+    return (XORP_OK);
+#else
     is_telnet_option = true;
     if (val == IAC) {
 	// Probably a telnet command
@@ -1066,4 +1132,5 @@ CliClient::process_telnet_option(int val, bool& is_telnet_option)
     is_telnet_option = false;
 
     return (XORP_OK);
+#endif // HOST_OS_WINDOWS
 }

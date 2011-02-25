@@ -17,13 +17,12 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/fea/data_plane/control_socket/routing_socket_utilities.hh,v 1.6 2008/10/02 21:56:54 bms Exp $
 
 #ifndef __FEA_ROUTING_SOCKET_UTILS_HH__
 #define __FEA_ROUTING_SOCKET_UTILS_HH__
 
 #include <xorp_config.h>
-#ifdef HAVE_ROUTING_SOCKETS
+#if defined(HAVE_ROUTING_SOCKETS) || defined(HOST_OS_WINDOWS)
 
 #include "fea/fte.hh"
 #include "fea/iftree.hh"

@@ -26,19 +26,6 @@
 #include "utils.hh"
 
 
-#ifdef __WIN32__
-int nonblock(int s, bool nb) {
-    unsigned long lnb = !!nb;
-    if (ioctlsocket(s, FIONBIO, &nb) == SOCKET_ERROR) {
-	return -1
-    }
-    else {
-	return 0;
-    }
-}
-#endif
-
-
 list<string>
 split(const string& s, char ch)
 {
@@ -94,6 +81,41 @@ has_empty_space(const string& s)
     return (false);
 }
 
+#ifdef HOST_OS_WINDOWS
+void
+win_quote_args(const list<string>& args, string& cmdline)
+{
+    list<string>::const_iterator curarg;
+    for (curarg = args.begin(); curarg != args.end(); ++curarg) {
+	cmdline += " ";
+	if ((curarg->length() == 0 ||
+	     string::npos != curarg->find_first_of("\n\t \"") ||
+	     string::npos != curarg->find("\\\\"))) {
+	    string tmparg(*curarg);
+	    string::size_type len = tmparg.length();
+	    string::size_type pos = 0;
+	    while (pos < len && string::npos != pos) {
+		pos = tmparg.find_first_of("\\\"", pos);
+	        if (tmparg[pos] == '\\') {
+		    if (tmparg[pos+1] == '\\') {
+			pos++;
+		    } else if (pos+1 == len || tmparg[pos+1] == '\"') {
+		        tmparg.insert(pos, "\\");
+			pos += 2;
+		    }
+		} else if (tmparg[pos] == '\"') {
+		    tmparg.insert(pos, "\\");
+		    pos += 2;
+		}
+	    }
+	    cmdline += "\"" + tmparg + "\"";
+	} else {
+	    cmdline += *curarg;
+	}
+    }
+}
+#endif // HOST_OS_WINDOWS
+
 const char*
 xorp_basename(const char* argv0)
 {
@@ -110,6 +132,9 @@ xorp_make_temporary_file(const string& tmp_dir,
 			 string& final_filename,
 			 string& errmsg)
 {
+#ifdef HOST_OS_WINDOWS
+    char dirname[MAXPATHLEN];
+#endif // HOST_OS_WINDOWS
     char filename[MAXPATHLEN];
     list<string> cand_tmp_dirs;
     char* value;
@@ -128,12 +153,34 @@ xorp_make_temporary_file(const string& tmp_dir,
     value = getenv("TMPDIR");
     if (value != NULL)
 	cand_tmp_dirs.push_back(value);
+#ifdef HOST_OS_WINDOWS
+    value = getenv("TEMP");
+    if (value != NULL)
+	cand_tmp_dirs.push_back(value);
+    value = getenv("TMP");
+    if (value != NULL)
+	cand_tmp_dirs.push_back(value);
+#endif // HOST_OS_WINDOWS
 
     // Argument "tmp_dir" if it is not an empty string
     if (! tmp_dir.empty())
 	cand_tmp_dirs.push_back(tmp_dir);
 
     // The system-specific path of the directory designated for temporary files
+#ifdef HOST_OS_WINDOWS
+    size_t size;
+    size = GetTempPathA(sizeof(dirname), dirname);
+    if (size >= sizeof(dirname)) {
+	errmsg = c_format("Internal error: directory name buffer size is too "
+			  "small (allocated %u required %u)",
+			  XORP_UINT_CAST(sizeof(dirname)),
+			  XORP_UINT_CAST(size + 1));
+	return (NULL);
+    }
+    if (size != 0) {
+	cand_tmp_dirs.push_back(dirname);
+    }
+#endif // HOST_OS_WINDOWS
 
     // The "P_tmpdir" directory if this macro is defined
 #ifdef P_tmpdir
@@ -141,9 +188,13 @@ xorp_make_temporary_file(const string& tmp_dir,
 #endif
 
     // A list of hard-coded directory names
+#ifdef HOST_OS_WINDOWS
+    cand_tmp_dirs.push_back("C:\\TEMP");
+#else
     cand_tmp_dirs.push_back("/tmp");
     cand_tmp_dirs.push_back("/usr/tmp");
     cand_tmp_dirs.push_back("/var/tmp");
+#endif
 
     //
     // Find the first directory that allows us to create the temporary file
@@ -158,6 +209,19 @@ xorp_make_temporary_file(const string& tmp_dir,
 	    tmp_dir.erase(tmp_dir.size() - 1);
 
 	filename[0] = '\0';
+
+#ifdef HOST_OS_WINDOWS
+	// Get the temporary filename and open the file
+	snprintf(dirname, sizeof(dirname)/sizeof(dirname[0]), "%s",
+		 tmp_dir.c_str());
+	if (GetTempFileNameA(dirname, filename_template.c_str(), 0,
+	    filename) == 0)
+	    continue;
+	fp = fopen(filename, "w+");
+	if (fp == NULL)
+	    continue;
+
+#else // ! HOST_OS_WINDOWS
 
 	// Compose the temporary file name and try to create the file
 	string tmp_filename = tmp_dir + PATH_DELIMITER_STRING +
@@ -175,6 +239,7 @@ xorp_make_temporary_file(const string& tmp_dir,
 	    close(fd);
 	    continue;
 	}
+#endif // ! HOST_OS_WINDOWS
 
 	// Success
 	final_filename = filename;

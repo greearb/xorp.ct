@@ -126,8 +126,21 @@ e.PrependUnique(LIBS = [
 if not is_shared:
     e.AppendUnique(LIBS = [
         "crypto",
-        "rt",
         ])
+
+    if not (e.has_key('mingw') and e['mingw']):
+        e.AppendUnique(LIBS = [
+            "rt",
+            ])
+
+if (e.has_key('mingw') and e['mingw']):
+    e.AppendUnique(LIBS = [
+        'iphlpapi',
+#        'mprapi',
+        'regex',
+        ])
+
+    e.Append(LIBS = ['xorp_core', 'ws2_32'])
 
 e.Replace(RPATH = [
     e.Literal(e['xorp_module_rpath'])
@@ -218,9 +231,22 @@ if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
     if not is_shared:
         e.AppendUnique(LIBS = [
             "crypto",
-            "rt",
             ])
-        e.Append(LIBS = [
+
+        if not (e.has_key('mingw') and e['mingw']):
+            e.AppendUnique(LIBS = [
+                "rt",
+                ])
+
+    if (e.has_key('mingw') and e['mingw']):
+        e.AppendUnique(LIBS = [
+            'iphlpapi',
+            'regex',
+            ])
+
+        e.Append(LIBS = ['xorp_core', 'ws2_32'])
+
+    e.Append(LIBS = [
             'xorp_policy_backend',
             ])
         

@@ -148,7 +148,11 @@ Iptuple::fill_address(const char *addr, uint16_t local_port,
     struct addrinfo hints, *res0;
     // Need to provide a hint because we are providing a numeric port number.
     memset(&hints, 0, sizeof(hints));
+#ifdef HOST_OS_WINDOWS
+    hints.ai_family = PF_INET;
+#else
     hints.ai_family = PF_UNSPEC;
+#endif
     hints.ai_socktype = SOCK_STREAM;
     if ((error = getaddrinfo(addr, servname, &hints, &res0))) {
 	const char *error_string = gai_strerror(error);

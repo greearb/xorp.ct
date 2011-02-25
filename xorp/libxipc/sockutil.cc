@@ -29,9 +29,15 @@
 #include "libxorp/c_format.hh"
 #include "libxorp/eventloop.hh"
 #include "libxorp/ipv4.hh"
+#ifdef HOST_OS_WINDOWS
+#include "libxorp/win_io.h"
+#endif
 
 
 
+#ifdef HAVE_IPHLPAPI_H
+#include <iphlpapi.h>
+#endif
 #ifdef HAVE_IPTYPES_H
 #include <iptypes.h>
 #endif
@@ -250,6 +256,40 @@ get_active_ipv4_addrs(vector<IPv4>& addrs)
     //
     addrs.push_back(IPv4::LOOPBACK());
 
+#ifdef HOST_OS_WINDOWS
+    PMIB_IPADDRTABLE	pAddrTable = NULL;
+    DWORD		result, tries;
+    ULONG		dwSize;
+
+    tries = 0;
+    result = ERROR_INSUFFICIENT_BUFFER;
+    dwSize = sizeof(MIB_IPADDRTABLE);
+    do {
+	pAddrTable = (PMIB_IPADDRTABLE) ((tries == 0) ? malloc(dwSize) :
+				     realloc(pAddrTable, dwSize));
+	if (pAddrTable == NULL)
+	    break;
+	result = GetIpAddrTable(pAddrTable, &dwSize, TRUE);
+    } while ((++tries < 3) || (result == ERROR_INSUFFICIENT_BUFFER));
+
+    if (result != NO_ERROR) {
+	XLOG_FATAL("GetIpAddrTable(): %s\n", win_strerror(result));
+    }
+    XLOG_ASSERT(pAddrTable->dwNumEntries != 0);
+
+    // Loopback is always listed last in the table, according to MSDN.
+    // They lie. We want it at the front so don't do anything different.
+
+    for (uint32_t i = 0; i < pAddrTable->dwNumEntries; i++) {
+	uint32_t iaddr = pAddrTable->table[i].dwAddr;
+	if (iaddr != INADDR_ANY)
+	    addrs.push_back(IPv4(iaddr));
+    }
+
+    free(pAddrTable);
+
+#else // ! HOST_OS_WINDOWS
+
     int s, ifnum, lastlen;
     struct ifconf ifconf;
     
@@ -399,6 +439,7 @@ get_active_ipv4_addrs(vector<IPv4>& addrs)
     }
 
     comm_close(s);
+#endif // ! HOST_OS_WINDOWS
 }
 
 // Return true if a given IPv4 address is currently configured in the system.

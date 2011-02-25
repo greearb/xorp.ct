@@ -103,11 +103,6 @@
 #  endif /* else, not ustl */
 #endif /* c++ */
 
-#ifdef __WIN32__
-#include <winsock.h>
-#endif
-
-
 #ifdef HAVE_STDINT_H
 #  include <stdint.h>
 #endif

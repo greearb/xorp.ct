@@ -182,6 +182,10 @@ bool supports_mcast_tables = false;
 // Local structures/classes, typedefs and macros
 //
 
+#ifdef HOST_OS_WINDOWS
+typedef char *caddr_t;
+#endif
+
 //
 // Local variables
 //
@@ -246,6 +250,11 @@ MfeaMrouter::start()
 {
     string error_msg;
 
+#ifdef HOST_OS_WINDOWS
+    XLOG_ERROR("Multicast routing is not supported on Windows");
+    return (XORP_ERROR);
+#endif
+
     // XXX: MfeaMrouter is automatically enabled by default
     ProtoUnit::enable();
     
@@ -255,12 +264,14 @@ MfeaMrouter::start()
     if (ProtoUnit::start() != XORP_OK)
 	return (XORP_ERROR);
     
+#ifndef HOST_OS_WINDOWS
     // Check if we have the necessary permission
     if (geteuid() != 0) {
 	XLOG_ERROR("Must be root");
 	exit (1);
 	// return (XORP_ERROR);
     }
+#endif // ! HOST_OS_WINDOWS
 
     // Register as multicast upcall receiver
     IoIpManager& io_ip_manager = mfea_node().fea_node().io_ip_manager();
@@ -805,6 +816,7 @@ MfeaMrouter::start_mrt()
     switch (family()) {
     case AF_INET:
 #ifndef HAVE_IPV4_MULTICAST_ROUTING
+	UNUSED(do_mrt_init);
 	XLOG_ERROR("start_mrt() failed: "
 		   "IPv4 multicast routing not supported");
 	return (XORP_ERROR);
@@ -1082,6 +1094,8 @@ MfeaMrouter::stop_mrt()
     switch (family()) {
     case AF_INET:
 #ifndef HAVE_IPV4_MULTICAST_ROUTING
+	UNUSED(sz);
+	UNUSED(o);
 	XLOG_ERROR("stop_mrt() failed: "
 		   "IPv4 multicast routing not supported");
 	return (XORP_ERROR);
@@ -1151,6 +1165,8 @@ MfeaMrouter::start_pim(string& error_msg)
     switch (family()) {
     case AF_INET:
 #ifndef HAVE_IPV4_MULTICAST_ROUTING
+	UNUSED(sz);
+	UNUSED(o);
 	error_msg = c_format("start_pim() failed: "
 			     "IPv4 multicast routing not supported");
 	return (XORP_ERROR);
@@ -1220,6 +1236,8 @@ MfeaMrouter::stop_pim(string& error_msg)
     switch (family()) {
     case AF_INET:
 #ifndef HAVE_IPV4_MULTICAST_ROUTING
+	UNUSED(sz);
+	UNUSED(o);
 	error_msg = c_format("stop_pim() failed: "
 			     "IPv4 multicast routing not supported");
 	return (XORP_ERROR);
@@ -1300,6 +1318,8 @@ MfeaMrouter::add_multicast_vif(uint32_t vif_index)
     case AF_INET:
     {
 #ifndef HAVE_IPV4_MULTICAST_ROUTING
+	UNUSED(sz);
+	UNUSED(sopt_arg);
 	XLOG_ERROR("add_multicast_vif() failed: "
 		   "IPv4 multicast routing not supported");
 	return (XORP_ERROR);

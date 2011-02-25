@@ -46,10 +46,16 @@
 bool
 test_policy_export(TestInfo& /*info*/)
 {
+#ifndef HOST_OS_WINDOWS
     struct passwd *pwd = getpwuid(getuid());
     string filename = "/tmp/test_policy_export.";
     filename += pwd->pw_name;
-
+#else
+    char *tmppath = (char *)malloc(256);
+    GetTempPathA(256, tmppath);
+    string filename = string(tmppath) + "test_policy_export";
+    free(tmppath);
+#endif
     EventLoop eventloop;
     BGPMain bgpmain(eventloop);
     LocalData localdata(bgpmain.eventloop());
@@ -266,8 +272,11 @@ POLICY_END\n";
 	return false;
 
     }
-
+#ifndef HOST_OS_WINDOWS
     unlink(filename.c_str());
+#else
+    DeleteFileA(filename.c_str());
+#endif
     return true;
 }
 
@@ -275,10 +284,16 @@ POLICY_END\n";
 bool
 test_policy(TestInfo& /*info*/)
 {
+#ifndef HOST_OS_WINDOWS
     struct passwd *pwd = getpwuid(getuid());
     string filename = "/tmp/test_policy.";
     filename += pwd->pw_name;
-
+#else
+    char *tmppath = (char *)malloc(256);
+    GetTempPathA(256, tmppath);
+    string filename = string(tmppath) + "test_policy";
+    free(tmppath);
+#endif
     EventLoop eventloop;
     BGPMain bgpmain(eventloop);
     LocalData localdata(bgpmain.eventloop());
@@ -555,8 +570,11 @@ POLICY_END\n";
 	return false;
 
     }
-
+#ifndef HOST_OS_WINDOWS
     unlink(filename.c_str());
+#else
+    DeleteFileA(filename.c_str());
+#endif
     return true;
 }
 
@@ -564,10 +582,16 @@ POLICY_END\n";
 bool
 test_policy_dump(TestInfo& /*info*/)
 {
+#ifndef HOST_OS_WINDOWS
     struct passwd *pwd = getpwuid(getuid());
     string filename = "/tmp/test_policy_dump.";
     filename += pwd->pw_name;
-
+#else
+    char *tmppath = (char *)malloc(256);
+    GetTempPathA(256, tmppath);
+    string filename = string(tmppath) + "test_policy_dump";
+    free(tmppath);
+#endif
     EventLoop eventloop;
     BGPMain bgpmain(eventloop);
     LocalData localdata(bgpmain.eventloop());
@@ -856,8 +880,11 @@ POLICY_END\n";
 	return false;
 
     }
-
+#ifndef HOST_OS_WINDOWS
     unlink(filename.c_str());
+#else
+    DeleteFileA(filename.c_str());
+#endif
     return true;
 }
 

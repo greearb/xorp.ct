@@ -488,6 +488,7 @@ Rtrmgr::daemonize()
     if (! _daemon_mode)
 	return;
 
+#ifndef HOST_OS_WINDOWS
     // Daemonize the XORP process. Close open stdio descriptors,
     // but don't chdir -- we need to stay where we're told to go.
     int newpid = xorp_daemonize(DAEMON_NOCHDIR, DAEMON_CLOSE);
@@ -505,6 +506,7 @@ Rtrmgr::daemonize()
     }
 
     _exit(0);
+#endif
 }
 
 int

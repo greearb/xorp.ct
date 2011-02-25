@@ -71,6 +71,7 @@ libxorp_rtrmgr_srcs = [
 	'conf_tree_node.cc',
 	'config_operators.cc',
 	'generic_module_manager.cc',
+	'glob_win32.c',
 	'lex.boot.cc',
 	'lex.opcmd.cc',
 	'lex.tplt.cc',
@@ -118,9 +119,12 @@ is_shared = env.has_key('SHAREDLIBS')
 if not is_shared:
     env.AppendUnique(LIBS = [
         "crypto",
-        "rt",
         ])
 
+    if not (env.has_key('mingw') and env['mingw']):
+        env.AppendUnique(LIBS = [
+            "rt",
+            ])
 
 util_cc_env = env.Clone()
 util_cc_env.AppendUnique(CPPDEFINES=xorp_paths.items())
@@ -160,6 +164,17 @@ rtrmgr_env.AppendUnique(LIBS = [
     'crypto'  # Required on Fedora 13.
 ])
 
+if (rtrmgr_env.has_key('mingw') and rtrmgr_env['mingw']):
+    rtrmgr_env.AppendUnique(LIBS = [
+        'ws2_32',
+        'iphlpapi',
+#        'mprapi',
+        'regex',
+        ])
+
+    rtrmgr_env.Append(LIBS = ['xorp_core', 'crypto'])
+
+
 rtrmgr_srcs = [
 	'main_rtrmgr.cc',
 	'xrl_rtrmgr_interface.cc',
@@ -195,11 +210,25 @@ if env['enable_xorpsh']:
         xorpsh_env.AppendUnique(LIBS = [
             'ncurses'
             ])
+    elif xorpsh_env.has_key('has_libpdcurses') and xorpsh_env['has_libpdcurses']:
+        xorpsh_env.AppendUnique(LIBS = [
+            'pdcurses'
+            ])
     else:
         # Assume regular curses.
         xorpsh_env.AppendUnique(LIBS = [
             'curses'
             ])
+
+    if (xorpsh_env.has_key('mingw') and xorpsh_env['mingw']):
+        xorpsh_env.AppendUnique(LIBS = [
+            'ws2_32',
+            'iphlpapi',
+            #        'mprapi',
+            'regex',
+            ])
+
+        xorpsh_env.Append(LIBS = ['xorp_core', 'crypto'])
 
     xorpsh_srcs = [
 	'xorpsh_main.cc',
@@ -226,6 +255,16 @@ if not (env.has_key('disable_profile') and env['disable_profile']):
         'xorp_core'
         ])
 
+    if (profiler_env.has_key('mingw') and profiler_env['mingw']):
+        profiler_env.AppendUnique(LIBS = [
+            'ws2_32',
+            'iphlpapi',
+            #        'mprapi',
+            'regex',
+            ])
+
+        profiler_env.Append(LIBS = ['xorp_core', 'crypto'])
+        
     profiler_srcs = [
 	'profiler.cc',
 	]

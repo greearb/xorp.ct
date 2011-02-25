@@ -53,6 +53,13 @@ SystemClock::advance_time()
     assert(error == 0);
     _tv->copy_in(ts);
 }
+#elif defined(HOST_OS_WINDOWS)
+{
+    FILETIME ft;
+
+    ::GetSystemTimeAsFileTime(&ft);
+    _tv->copy_in(ft);
+}
 #else
 {
     struct timeval t;

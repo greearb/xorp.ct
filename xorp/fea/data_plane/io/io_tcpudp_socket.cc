@@ -813,6 +813,19 @@ IoTcpUdpSocket::udp_open_bind_broadcast(const string& ifname,
 	return (XORP_ERROR);
     }
 
+#ifdef notyet
+    //  5b. On Windows Server 2003 and up, IP_RECEIVE_BROADCAST also
+    //      needs to be set to receive broadcast datagrams.
+    if (comm_receive_broadcast_present() == XORP_OK) {
+	ret_value = comm_set_receive_broadcast(_socket_fd, 1);
+	if (ret_value != XORP_OK) {
+	    error_msg = c_format("Cannot enable broadcast receives: %s",
+				comm_get_last_error_str());
+	    return (XORP_ERROR);
+	}
+    }
+#endif
+
     //  6. On BSD derived systems, if we are going to send to
     //     the limited broadcast address, request IP_ONESBCAST.
     //     This rewrites the network broadcast address to the
@@ -859,6 +872,7 @@ IoTcpUdpSocket::udp_open_bind_broadcast(const string& ifname,
             } else {
 		// Not an IP_ONESBCAST platform.
 		// connect() to limited broadcast address.
+		// XXX This is untested on Windows.
 		IPv4::ALL_ONES().copy_out(remote_in_addr);
             }
         } else {
@@ -1455,6 +1469,19 @@ IoTcpUdpSocket::enable_data_recv(string& error_msg)
 	return (XORP_ERROR);
     }
 
+#ifdef HOST_OS_WINDOWS
+    // XXX: IOT_DISCONNECT is available only on Windows
+    if (is_tcp()) {
+	if (eventloop().add_ioevent_cb(_socket_fd, IOT_DISCONNECT,
+				       callback(this, &IoTcpUdpSocket::disconnect_io_cb))
+	    != true) {
+	    error_msg = c_format("Failed to add I/O callback to detect peer disconnect");
+	    stop(dummy_error_msg);
+	    return (XORP_ERROR);
+	}
+    }
+#endif // HOST_OS_WINDOWS
+
     return (XORP_OK);
 }
 
@@ -1637,11 +1664,14 @@ IoTcpUdpSocket::data_io_cb(XorpFd fd, IoEventType io_event_type)
 
     //
     // Decide whether to use recfrom(2) or recvmsg(2):
-    // - On all systems use recvfrom(2) for TCP, and recvmsg(2) for UDP
+    // - If Windows, use recvfrom(2)
+    // - On all other systems use recvfrom(2) for TCP, and recvmsg(2) for UDP
     //
+#ifndef HOST_OS_WINDOWS
     if (! is_tcp()) {
 	use_recvmsg = true;
     }
+#endif
 
     //
     // Receive the data
@@ -1676,6 +1706,9 @@ IoTcpUdpSocket::data_io_cb(XorpFd fd, IoEventType io_event_type)
 	}
     } else {
 
+#ifdef HOST_OS_WINDOWS
+	XLOG_UNREACHABLE();
+#else
 	//
 	// XXX: Use recvmsg(2) to receive additional information
 	//
@@ -1828,6 +1861,7 @@ IoTcpUdpSocket::data_io_cb(XorpFd fd, IoEventType io_event_type)
 	    XLOG_UNREACHABLE();
 	    break;
 	}
+#endif // ! HOST_OS_WINDOWS
     }
 
     data.resize(bytes_recv);
@@ -1853,6 +1887,9 @@ IoTcpUdpSocket::data_io_cb(XorpFd fd, IoEventType io_event_type)
 	    //
 	    // XXX: Remove from the eventloop for disconnect events.
 	    //
+	    // Note that IOT_DISCONNECT is available only on Windows,
+	    // hence we need to use IOT_READ instead.
+	    //
 	    eventloop().remove_ioevent_cb(_socket_fd, IOT_READ);
 	    io_tcpudp_receiver()->disconnect_event();
 	    return;
@@ -1866,6 +1903,31 @@ IoTcpUdpSocket::data_io_cb(XorpFd fd, IoEventType io_event_type)
     //
     io_tcpudp_receiver()->recv_event(if_name, vif_name, src_host, src_port,
 				     data);
+}
+
+void
+IoTcpUdpSocket::disconnect_io_cb(XorpFd fd, IoEventType io_event_type)
+{
+    XLOG_ASSERT(fd == _socket_fd);
+
+    UNUSED(io_event_type);
+
+    //
+    // Test whether there is a registered receiver
+    //
+    if (io_tcpudp_receiver() == NULL) {
+	//
+	// This might happen only during startup and should be transient.
+	//
+	XLOG_WARNING("Received disconnect event, but no receiver is registered.");
+	return;
+    }
+
+    //
+    // XXX: Remove from the eventloop for disconnect events.
+    //
+    eventloop().remove_ioevent_cb(_socket_fd, IOT_DISCONNECT);
+    io_tcpudp_receiver()->disconnect_event();
 }
 
 #endif // HAVE_TCPUDP_UNIX_SOCKETS

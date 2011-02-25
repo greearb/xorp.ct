@@ -47,6 +47,29 @@
 #include "master_template_tree_node.hh"
 #include "util.hh"
 
+
+#ifdef HOST_OS_WINDOWS
+
+// XXX: Use unlink emulation from MS VC runtime.
+#ifdef unlink
+#undef unlink
+#endif
+#define unlink(x) _unlink(x)
+
+// Stub out umask.
+#ifdef umask
+#undef umask
+#endif
+#define umask(x)
+
+// Stub out fchown.
+#ifdef fchown
+#undef fchown
+#endif
+#define fchown(x,y,z) (0)
+
+#endif
+
 #define XORP_CONFIG_FORMAT_VERSION		"1.1"
 #define XORP_CONFIG_XORP_VERSION		"1.8-CT"
 
@@ -781,6 +804,9 @@ MasterConfigTree::save_to_file(const string& filename, uid_t user_id,
 	return false;
     }
 
+#ifdef HOST_OS_WINDOWS
+    {
+#else
     // Set a umask of 664, to allow sharing of config files between
     // users in group "xorp".
     mode_t orig_mask = umask(S_IWOTH);
@@ -803,6 +829,7 @@ MasterConfigTree::save_to_file(const string& filename, uid_t user_id,
 	    umask(orig_mask);
 	    return false;
 	}
+#endif // ! HOST_OS_WINDOWS
 
 	file = fopen(full_filename.c_str(), "r");
 	if (file != NULL) {
@@ -861,16 +888,24 @@ MasterConfigTree::save_to_file(const string& filename, uid_t user_id,
     }
 
     // Prepare values for the file header
+#ifdef HOST_OS_WINDOWS
+    string username("root");
+#else
     struct passwd *pwent = getpwuid(user_id);
     string username;
     if (pwent == NULL)
 	username = c_format("UID:%u", XORP_UINT_CAST(user_id));
     else
 	username = pwent->pw_name;
+#endif
 
     char hbuf[MAXHOSTNAMELEN];
     if (gethostname(hbuf, sizeof(hbuf)) < 0) {
+#ifdef HOST_OS_WINDOWS
+	XLOG_FATAL("gethostname() failed: %d", WSAGetLastError());
+#else
 	XLOG_FATAL("gethostname() failed: %s", strerror(errno));
+#endif
     }
     hbuf[sizeof(hbuf) - 1] = '\0';
 
@@ -1017,6 +1052,12 @@ bool
 MasterConfigTree::set_config_file_permissions(FILE* fp, uid_t user_id,
 					      string& error_msg)
 {
+#ifdef HOST_OS_WINDOWS
+    UNUSED(fp);
+    UNUSED(user_id);
+    UNUSED(error_msg);
+    return true;
+#else // ! HOST_OS_WINDOWS
     //
     // Set the user and group owner of the file, and change its permissions
     // so it is group-writable.
@@ -1043,6 +1084,7 @@ MasterConfigTree::set_config_file_permissions(FILE* fp, uid_t user_id,
     }
 
     return true;
+#endif // ! HOST_OS_WINDOWS
 }
 
 bool

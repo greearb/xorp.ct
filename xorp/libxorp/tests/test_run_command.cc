@@ -34,9 +34,17 @@
 #include "run_command.hh"
 
 
+#ifdef HOST_OS_WINDOWS
+#define MSYS_DEFAULT_ROOT	"C:\\MinGW"
+#define SLEEP_PATH		"\\bin\\sleep.exe"
+#define AWK_PATH		"\\bin\\gawk.exe"
+// Invocation via shell needs UNIX style path
+#define AWK_VIA_SHELL_PATH	"/bin/gawk"
+#else
 #define SLEEP_PATH		"/bin/sleep"
 string  AWK_PATH("/usr/bin/awk");
 string& AWK_VIA_SHELL_PATH = AWK_PATH;
+#endif
 
 static string cmdroot = "";
 
@@ -855,12 +863,21 @@ main(int argc, char * const argv[])
     xlog_add_default_output();
     xlog_start();
 
+#ifdef HOST_OS_WINDOWS
+    if (cmdroot == "") {
+	char *_cmdroot = getenv("MSYSROOT");
+	if (_cmdroot == NULL)
+	    _cmdroot = const_cast<char *>(MSYS_DEFAULT_ROOT);
+	cmdroot = string(_cmdroot);
+    }
+#else
     struct stat st;
 
     if (stat(AWK_PATH.c_str(), &st) == -1)
 	AWK_PATH = "/bin/awk";
 
     XLOG_ASSERT(stat(AWK_PATH.c_str(), &st) == 0);
+#endif
 
     int ch;
     while ((ch = getopt(argc, argv, "hv")) != -1) {

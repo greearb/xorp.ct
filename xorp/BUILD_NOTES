@@ -579,7 +579,11 @@ scons check
   * This describes steps to cross-compile Xorp.ct on Linux, using mingw
     toolchain to produce windows binaries.
 
-  * Install mingw toolchain.
+  * Install mingw toolchain.  I had to make corrections to my
+    mingw tree to get it to compile..relatively simple hacks to the
+    include files.
+    See xorp.ct build page for a pre-packaged
+    mingw compile chain with the hacks and libs already done to it.
 
   * Compile openssl:
    export CROSS_COMPILE=i386-mingw32-
@@ -602,13 +606,16 @@ scons check
    cp curses.h panel.h /usr/local/i386-mingw32/include/
    cp pdcurses.dll /usr/local/i386-mingw32/lib/libpdcurses.dll.a
    cp pdcurses.lib /usr/local/i386-mingw32/lib/libpdcurses.a
-   chmod a+r /usr/local/i386-mingw32/include/*
-   chmod a+r /usr/local/i386-mingw32/lib/*
-
+   chmod a+r  /usr/local/i386-mingw32/lib/*
+   chmod a+r  /usr/local/i386-mingw32/include/*
 
    # Build xorp
-   scons build=mingw32 STRIP=/usr/local/bin/i386-mingw32-strip \
-         CC=/usr/local/bin/i386-mingw32-gcc CXX=/usr/local/bin/i386-mingw32-g++
+   scons shared=no build=mingw32 STRIP=/usr/local/bin/i386-mingw32-strip \
+         CC=/usr/local/bin/i386-mingw32-gcc CXX=/usr/local/bin/i386-mingw32-g++ \
+	 RANLIB=/usr/local/bin/i386-mingw32-ranlib \
+	 AR=/usr/local/bin/i386-mingw32-ar LD=/usr/local/bin/i386-mingw32-ld
+
+         
 
 3.8. Cross-compilation
 ======================

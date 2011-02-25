@@ -31,25 +31,38 @@ is_shared = env.has_key('SHAREDLIBS')
 
 sources = [
 	# C++ files
-	'fibconfig_entry_get_netlink_socket.cc',
+	'fibconfig_entry_get_iphelper.cc',
 	'fibconfig_entry_get_routing_socket.cc',
-	'fibconfig_entry_observer_netlink_socket.cc',
+	'fibconfig_entry_get_rtmv2.cc',
+	'fibconfig_entry_observer_iphelper.cc',
 	'fibconfig_entry_observer_routing_socket.cc',
+	'fibconfig_entry_observer_rtmv2.cc',
 	'fibconfig_entry_parse_routing_socket.cc',
-	'fibconfig_entry_set_netlink_socket.cc',
+	'fibconfig_entry_set_iphelper.cc',
 	'fibconfig_entry_set_routing_socket.cc',
+	'fibconfig_entry_set_rtmv2.cc',
 	'fibconfig_forwarding_proc_linux.cc',
 	'fibconfig_forwarding_solaris.cc',
 	'fibconfig_forwarding_sysctl.cc',
-	'fibconfig_table_get_netlink_socket.cc',
+	'fibconfig_forwarding_windows.cc',
+	'fibconfig_table_get_iphelper.cc',
 	'fibconfig_table_get_sysctl.cc',
-	'fibconfig_table_observer_netlink_socket.cc',
+	'fibconfig_table_observer_iphelper.cc',
 	'fibconfig_table_observer_routing_socket.cc',
-	'fibconfig_table_parse_netlink_socket.cc',
+	'fibconfig_table_observer_rtmv2.cc',
 	'fibconfig_table_parse_routing_socket.cc',
-	'fibconfig_table_set_netlink_socket.cc',
+	'fibconfig_table_set_iphelper.cc',
 	'fibconfig_table_set_routing_socket.cc',
+	'fibconfig_table_set_rtmv2.cc',
 	]
+
+if not (env.has_key('mingw') and env['mingw']):
+	sources.append('fibconfig_entry_get_netlink_socket.cc')
+	sources.append('fibconfig_table_set_netlink_socket.cc')
+	sources.append('fibconfig_table_parse_netlink_socket.cc')
+	sources.append('fibconfig_table_observer_netlink_socket.cc')
+	sources.append('fibconfig_entry_set_netlink_socket.cc')
+	
 
 if env['enable_click']:
 	sources.append('fibconfig_entry_get_click.cc')

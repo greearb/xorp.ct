@@ -19,7 +19,7 @@
 
 
 #include <xorp_config.h>
-#ifdef HAVE_ROUTING_SOCKETS
+#if defined(HAVE_ROUTING_SOCKETS) || defined(HOST_OS_WINDOWS)
 
 #include "fea/fea_module.h"
 
@@ -30,10 +30,12 @@
 #ifdef HAVE_NET_ROUTE_H
 #include <net/route.h>
 #endif
+#ifdef HOST_OS_WINDOWS
+#include "fea/data_plane/control_socket/windows_routing_socket.h"
+#endif
 
 #include "fea/fibconfig.hh"
 #include "fea/data_plane/control_socket/routing_socket_utilities.hh"
-
 #include "fibconfig_table_get_sysctl.hh"
 
 
@@ -45,6 +47,13 @@
 // (e.g., obtained by routing sockets or by sysctl(3) mechanism).
 //
 // Reading route(4) manual page is a good start for understanding this
+//
+
+//
+// XXX: The FibConfigTableGetSysctl::parse_buffer_routing_socket()
+// static method is used by the FibConfigTableObserverRtmV2
+// Windows implementation as well even though Windows doesn't have
+// routing sockets.
 //
 
 int
@@ -143,4 +152,4 @@ FibConfigTableGetSysctl::parse_buffer_routing_socket(int family,
     return (XORP_OK);
 }
 
-#endif // HAVE_ROUTING_SOCKETS
+#endif // HAVE_ROUTING_SOCKETS || HOST_OS_WINDOWS

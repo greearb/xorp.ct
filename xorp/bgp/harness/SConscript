@@ -72,8 +72,21 @@ is_shared = env.has_key('SHAREDLIBS')
 if not is_shared:
     env.AppendUnique(LIBS = [
         "crypto",
-        "rt",
         ])
+
+    if not (env.has_key('mingw') and env['mingw']):
+        env.AppendUnique(LIBS = [
+            "rt",
+            ])
+
+if (env.has_key('mingw') and env['mingw']):
+    env.AppendUnique(LIBS = [
+        'ws2_32',
+        'iphlpapi',
+#        'mprapi',
+        'regex',
+        ])
+
     # This is really needed, belive it or not.
     env.Append(LIBS = [
         'xorp_core',

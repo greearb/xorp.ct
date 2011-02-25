@@ -1263,6 +1263,25 @@ Peer::dump(const string& line, const vector<string>& words)
     if(words.size() == 7)
 	filename = words[6];
 
+#ifdef HOST_OS_WINDOWS
+    //
+    // If run from an MSYS shell, we need to perform UNIX->NT path
+    // conversion and expansion of /tmp by ourselves.
+    //
+    filename = unix_path_to_native(filename);
+    static const char tmpdirprefix[] = "\\tmp\\";
+    if (0 == _strnicmp(filename.c_str(), tmpdirprefix,
+		       strlen(tmpdirprefix))) {
+    	char tmpexp[MAXPATHLEN];
+    	size_t size = GetTempPathA(sizeof(tmpexp), tmpexp);
+    	if (size == 0 || size >= sizeof(tmpexp)) {
+		xorp_throw(InvalidString,
+        	   c_format("Internal error during tmpdir expansion"));
+	}
+	filename.replace(0, strlen(tmpdirprefix), string(tmpexp));
+    }
+#endif
+
     if("traffic" == words[5]) {
 	if("" == filename) {
 	    dumper->release();

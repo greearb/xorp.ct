@@ -96,6 +96,11 @@ UserDB::~UserDB()
 void 
 UserDB::load_password_file()
 {
+#ifdef HOST_OS_WINDOWS
+    string username("Administrator");
+    uid_t userid = 0;
+    add_user(userid, username, userid);
+#else // ! HOST_OS_WINDOWS
     struct passwd* pwent;
 
     setpwent();			// XXX: Rewind the database
@@ -107,6 +112,7 @@ UserDB::load_password_file()
 	pwent = getpwent();
     }
     endpwent();
+#endif // ! HOST_OS_WINDOWS
 }
 
 User* 
@@ -114,6 +120,7 @@ UserDB::add_user(uid_t user_id, const string& username, gid_t pw_gid)
 {
     if (_users.find(user_id) == _users.end()) {
 	User* newuser = new User(user_id, username);
+#ifndef HOST_OS_WINDOWS
 	struct group* grp = getgrnam("xorp");
 	if (grp != NULL) {
 	    debug_msg("group xorp exists, id=%u\n",
@@ -138,6 +145,10 @@ UserDB::add_user(uid_t user_id, const string& username, gid_t pw_gid)
 	} else {
 	    XLOG_ERROR("Group \"xorp\" does not exist on this system.");
 	}
+#else // ! HOST_OS_WINDOWS
+	UNUSED(pw_gid);
+	newuser->add_acl_capability("config");
+#endif // ! HOST_OS_WINDOWS
 	_users[user_id] = newuser;
 	return newuser;
     } else {

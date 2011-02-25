@@ -1,5 +1,8 @@
 #include "common.xif"
 #include "socket6_user.xif"
 
+#ifdef HAVE_IPV6
 target test_socket6 implements	common/0.1,				\
 				socket6_user/0.1;
+
+#endif

@@ -41,6 +41,7 @@
 #include "fea/data_plane/managers/fea_data_plane_manager_dummy.hh"
 #endif
 #include "fea/data_plane/managers/fea_data_plane_manager_linux.hh"
+#include "fea/data_plane/managers/fea_data_plane_manager_windows.hh"
 
 #include "fea_io.hh"
 #include "fea_node.hh"
@@ -287,6 +288,8 @@ FeaNode::load_data_plane_managers(string& error_msg)
 	fea_data_plane_manager = new FeaDataPlaneManagerBsd(*this);
 #elif defined(HOST_OS_LINUX)
 	fea_data_plane_manager = new FeaDataPlaneManagerLinux(*this);
+#elif defined(HOST_OS_WINDOWS)
+	fea_data_plane_manager = new FeaDataPlaneManagerWindows(*this);
 #else
 #error "No data plane manager to load: unknown system"
 #endif
