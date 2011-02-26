@@ -316,8 +316,11 @@ SP::print_samples()
     printf("Absolute time\tElapsed time\tPercentage\tDescription\n");
 
     for (unsigned i = 0; i < _samplec; i++) {
+#ifdef HOST_OS_WINDOWS
+        printf("%I64u\t", (long long unsigned) _samples[i]);
+#else
         printf("%llu\t", (long long unsigned) _samples[i]);
-
+#endif
         if (i != 0) {
             SAMPLE a, b, diff;
 
@@ -328,15 +331,23 @@ SP::print_samples()
 
             diff = b - a;
 
+#ifdef HOST_OS_WINDOWS
+            printf("%12I64u\t%10.2f\t",
+		   (long long unsigned) diff, (double) diff / total * 100.0);
+#else
             printf("%12llu\t%10.2f\t",
 		   (long long unsigned) diff, (double) diff / total * 100.0);
+#endif
         } else
             printf("\t\t\t\t");
 
         printf("%s\n", _desc[i]);
     }
-
+#ifdef HOST_OS_WINDOWS
+    printf("Total %I64u\n", (long long unsigned) total);
+#else
     printf("Total %llu\n", (long long unsigned) total);
+#endif
     printf("\n");
 
     _samplec = 0;

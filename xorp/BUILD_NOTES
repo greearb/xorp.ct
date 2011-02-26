@@ -579,44 +579,11 @@ scons check
   * This describes steps to cross-compile Xorp.ct on Linux, using mingw
     toolchain to produce windows binaries.
 
-  * Install mingw toolchain.  I had to make corrections to my
-    mingw tree to get it to compile..relatively simple hacks to the
-    include files.
-    See xorp.ct build page for a pre-packaged
-    mingw compile chain with the hacks and libs already done to it.
-
-  * Compile openssl:
-   export CROSS_COMPILE=i386-mingw32-
-   vi Configure
-     # Add to the mingw line:  -Wl,--export-all (after -no-cygwin)
-   perl Configure mingw shared
-
-   make CC=i386-mingw32-gcc RANLIB=i386-mingw32-ranlib
-   
-   # Copy appropriate files into the mingw directories
-   mkdir /usr/local/i386-mingw32/include/openssl/
-   /bin/cp include/openssl/* /usr/local/i386-mingw32/include/openssl/
-   cp libcrypto.dll.a /usr/local/i386-mingw32/lib/
-   cp libcrypto.a /usr/local/i386-mingw32/lib/
-   cp libeay32.dll /usr/local/i386-mingw32/lib/
-   cp ssleay32.dll /usr/local/i386-mingw32/lib/
-
-   # Get pdcurses
-   http://sourceforge.net/projects/pdcurses/files/pdcurses/
-   cp curses.h panel.h /usr/local/i386-mingw32/include/
-   cp pdcurses.dll /usr/local/i386-mingw32/lib/libpdcurses.dll.a
-   cp pdcurses.lib /usr/local/i386-mingw32/lib/libpdcurses.a
-   chmod a+r  /usr/local/i386-mingw32/lib/*
-   chmod a+r  /usr/local/i386-mingw32/include/*
+  *  Install mingw cross compiler.
+   yum install mingw32-gcc-c++ mingw32-libgnurx mingw32-openssl mingw32-pdcurses
 
    # Build xorp
-   scons shared=no build=mingw32 STRIP=/usr/local/bin/i386-mingw32-strip \
-         CC=/usr/local/bin/i386-mingw32-gcc CXX=/usr/local/bin/i386-mingw32-g++ \
-	 RANLIB=/usr/local/bin/i386-mingw32-ranlib \
-	 AR=/usr/local/bin/i386-mingw32-ar LD=/usr/local/bin/i386-mingw32-ld
-
-   yum install mingw32-gcc-c++ mingw32-libgnurx mingw32-openssl mingw32-pdcurses
-   scons shared=no build=mingw32 STRIP=i686-pc-mingw32-strip \
+   scons strip=yes shared=no build=mingw32 STRIP=i686-pc-mingw32-strip \
          CC=i686-pc-mingw32-gcc CXX=i686-pc-mingw32-g++ \
 	 RANLIB=i686-pc-mingw32-ranlib \
 	 AR=i686-pc-mingw32-ar LD=i686-pc-mingw32-ld
@@ -658,9 +625,19 @@ index 54fe9ee..2b57df8 100644
         ULONG AdapterIndex;
         UCHAR Network[4];
 
+   # Bug opened against upstream package here
+   # https://bugzilla.redhat.com/show_bug.cgi?id=680583
 
-   Or, you might find this script handy:
-   ./win32_pkg.bash  (as root user)
+
+   # As root user, install xorp.
+   scons strip=yes shared=no build=mingw32 STRIP=i686-pc-mingw32-strip \
+         CC=i686-pc-mingw32-gcc CXX=i686-pc-mingw32-g++ \
+	 RANLIB=i686-pc-mingw32-ranlib \
+	 AR=i686-pc-mingw32-ar LD=i686-pc-mingw32-ld install
+
+
+   # Package up a zip file, as root user
+   ./win32_pkg.bash
 
    To run xorp on windows:
 

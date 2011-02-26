@@ -591,12 +591,22 @@ XrlAtom::value() const
     case xrlatom_binary:
 	return xrlatom_encode_value(*_binary);
     case xrlatom_int64:
+#ifdef HOST_OS_WINDOWS
+	snprintf(tmp, sizeof(tmp) / sizeof(tmp[0]), "%I64d",
+		 static_cast<long long>(_i64val));
+#else
 	snprintf(tmp, sizeof(tmp) / sizeof(tmp[0]), "%lld",
 		 static_cast<long long>(_i64val));
+#endif
 	return xrlatom_encode_value(tmp, strlen(tmp));
     case xrlatom_uint64:
+#ifdef HOST_OS_WINDOWS
+	snprintf(tmp, sizeof(tmp) / sizeof(tmp[0]), "%I64u",
+		 static_cast<unsigned long long>(_u64val));
+#else
 	snprintf(tmp, sizeof(tmp) / sizeof(tmp[0]), "%llu",
 		 static_cast<unsigned long long>(_u64val));
+#endif
 	return xrlatom_encode_value(tmp, strlen(tmp));
 
 	// ... Your type's c_str equivalent here ...

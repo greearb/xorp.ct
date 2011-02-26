@@ -4,17 +4,16 @@
 
 rm -fr /usr/local/xorp
 
-MINGW_LIB=/usr/local/i386-mingw32/lib
-
-scons shared=no build=mingw32 STRIP=i686-pc-mingw32-strip \
+scons strip=yes shared=no build=mingw32 STRIP=i686-pc-mingw32-strip \
          CC=i686-pc-mingw32-gcc CXX=i686-pc-mingw32-g++ \
 	 RANLIB=i686-pc-mingw32-ranlib \
 	 AR=i686-pc-mingw32-ar LD=i686-pc-mingw32-ld install
 
-#cp $MINGW_LIB/ssleay32.dll /usr/local/xorp/sbin/
-#cp $MINGW_LIB/libeay32.dll /usr/local/xorp/sbin/
-# Total hack...installed mingw32-libgnurx rpm for a working library
-#cp /usr/i686-pc-mingw32/sys-root/mingw/bin/libgnurx-0.dll /usr/local/xorp/sbin/
+# Copy some run-time libraries to the xorp dir for packaging
+cp /usr/i686-pc-mingw32/sys-root/mingw/bin/libcrypto-10.dll /usr/local/xorp/sbin/
+cp /usr/i686-pc-mingw32/sys-root/mingw/bin/zlib1.dll /usr/local/xorp/sbin/
+cp /usr/i686-pc-mingw32/sys-root/mingw/bin/libgcc_s_sjlj-1.dll /usr/local/xorp/sbin/
+cp /usr/i686-pc-mingw32/sys-root/mingw/bin/libgnurx-0.dll /usr/local/xorp/sbin/
 
 
 PWD=$(pwd)

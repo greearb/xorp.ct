@@ -71,10 +71,19 @@ _xdebug_preamble(const char*	file,
      * arguments to emacs, vi, vim, nedit, etc, but not ed :-( 
      */
     if (func) {
+#ifdef HOST_OS_WINDOWS
+	snprintf(sbuf, sbuf_bytes, "[ %d %I64u %+5d %s %s ] ", spid, us, line, file,
+		 func);
+#else
 	snprintf(sbuf, sbuf_bytes, "[ %d %llu %+5d %s %s ] ", spid, us, line, file,
 		 func);
+#endif
     } else {
+#ifdef HOST_OS_WINDOWS
+	snprintf(sbuf, sbuf_bytes, "[ %d %I64u %+5d %s ] ", spid, us, line, file);
+#else
 	snprintf(sbuf, sbuf_bytes, "[ %d %llu %+5d %s ] ", spid, us, line, file);
+#endif
     }
 #else
     /* Format is <pid> [time-us] +<line> <file> [<function>] <users_debug_message>
