@@ -118,7 +118,7 @@ PID_T
 xorp_spawn(const string& process, const char *output = NULL)
 {
 #ifdef HOST_OS_WINDOWS
-    HANDLE houtput;
+    HANDLE houtput = NULL;
     STARTUPINFOA si;
     SECURITY_ATTRIBUTES sa = { sizeof(SECURITY_ATTRIBUTES), NULL, TRUE };
     PROCESS_INFORMATION pi;

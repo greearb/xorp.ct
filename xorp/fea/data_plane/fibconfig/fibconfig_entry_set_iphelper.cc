@@ -21,7 +21,6 @@
 
 
 #include "fea/fea_module.h"
-
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
@@ -35,7 +34,6 @@
 #endif
 
 #include "fea/fibconfig.hh"
-
 #include "fibconfig_entry_set_iphelper.hh"
 
 #ifndef MIB_IPROUTE_TYPE_OTHER
@@ -311,6 +309,13 @@ FibConfigEntrySetIPHelper::delete_entry(const FteX& fte)
     //
     const IfTree& iftree = fibconfig().merged_config_iftree();
     const IfTreeVif* vifp = iftree.find_vif(fte.ifname(), fte.vifname());
+    if (!vifp) {
+	// Maybe VIF is already deleted or we are not configured to use it.
+	XLOG_WARNING("Trying to delete route for iface: %s on tree: %s, but cannot find iface.  Will continue.\n",
+		     fte.ifname().c_str(), iftree.getName().c_str());
+	return XORP_OK;
+    }
+    
     XLOG_ASSERT(vifp != NULL);
     ipfwdrow.dwForwardIfIndex = vifp->pif_index();
 

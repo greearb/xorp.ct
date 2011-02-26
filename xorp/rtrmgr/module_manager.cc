@@ -20,7 +20,6 @@
 
 
 #include "rtrmgr_module.h"
-
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
@@ -403,6 +402,7 @@ ModuleManager::expand_execution_path(const string& path, string& expath,
 	    }
 	}
 	glob_t pglob;
+	expath += EXECUTABLE_SUFFIX;
 	glob(expath.c_str(), 0, NULL, &pglob);
 	if (pglob.gl_pathc != 1) {
 	    error_msg = c_format("%s: file does not exist", expath.c_str());
@@ -411,7 +411,9 @@ ModuleManager::expand_execution_path(const string& path, string& expath,
 	expath = pglob.gl_pathv[0];
 	globfree(&pglob);
     }
-    expath += EXECUTABLE_SUFFIX;
+    else {
+	expath += EXECUTABLE_SUFFIX;
+    }
 
     struct stat sb;
     if (stat(expath.c_str(), &sb) < 0) {
@@ -433,7 +435,7 @@ ModuleManager::expand_execution_path(const string& path, string& expath,
 	default:
 	    error_msg = "unknown error accessing file";
 	}
-	error_msg = c_format("%s: %s", expath.c_str(), error_msg.c_str());
+	error_msg = c_format("expand_exe_path: %s: %s", expath.c_str(), error_msg.c_str());
 	return XORP_ERROR;
     }
     return XORP_OK;
@@ -447,6 +449,7 @@ ModuleManager::new_module(const string& module_name, const string& path,
     debug_msg("ModuleManager::new_module %s\n", module_name.c_str());
 
     if (expand_execution_path(path, expath, error_msg) != XORP_OK) {
+	XLOG_ERROR("Failed expand_execution_path: %s\n", error_msg.c_str());
 	return false;
     }
     Module* module = new Module(*this, module_name, path, expath, _verbose);

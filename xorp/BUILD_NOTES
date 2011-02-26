@@ -615,7 +615,27 @@ scons check
 	 RANLIB=/usr/local/bin/i386-mingw32-ranlib \
 	 AR=/usr/local/bin/i386-mingw32-ar LD=/usr/local/bin/i386-mingw32-ld
 
-         
+   scons strip=yes shared=no build=mingw32 STRIP=/usr/local/bin/i386-mingw32-strip \
+         CC=/usr/local/bin/i386-mingw32-gcc CXX=/usr/local/bin/i386-mingw32-g++ \
+	 RANLIB=/usr/local/bin/i386-mingw32-ranlib \
+	 AR=/usr/local/bin/i386-mingw32-ar LD=/usr/local/bin/i386-mingw32-ld install
+
+   Or, you might find this script handy:
+   ./win32_pkg.bash  (as root user)
+
+   To run xorp on windows:
+
+   *  Unzip it somewhere
+   *  Change to the xorp/sbin directory
+   *  Start router-mgr:
+     set XORP_PF=t
+     set XORP_ROOT=..
+     xorp_rtrmgr.exe -c config.boot.t xt -t ..\share\xorp\templates -m ..\lib\xorp\bin
+
+   * In another window, start xorpsh:
+     set XORP_PF=t
+     set XORP_ROOT=..
+     xorpsh
 
 3.8. Cross-compilation
 ======================

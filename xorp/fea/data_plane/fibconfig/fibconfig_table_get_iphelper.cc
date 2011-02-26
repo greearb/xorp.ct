@@ -20,7 +20,6 @@
 
 
 #include "fea/fea_module.h"
-
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
@@ -198,8 +197,8 @@ FibConfigTableGetIPHelper::get_table(int family, list<FteX>& fte_list)
 	} else {
 	    if_name = "unknown";
 	    vif_name = "unknown";
-	    XLOG_WARNING("Route via unknown interface index %u",
-			 XORP_UINT_CAST(ifindex));
+	    XLOG_WARNING("Route via unknown interface index %u, iftree: %s",
+			 XORP_UINT_CAST(ifindex), iftree.getName().c_str());
 	}
 
 	// TODO: define default routing metric and admin distance.

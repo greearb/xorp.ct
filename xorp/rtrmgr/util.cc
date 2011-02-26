@@ -20,15 +20,11 @@
 
 
 #include "rtrmgr_module.h"
-
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/utility.h"
 #include "libxorp/utils.hh"
-
-
-
 #include "util.hh"
 
 #ifdef	HOST_OS_WINDOWS

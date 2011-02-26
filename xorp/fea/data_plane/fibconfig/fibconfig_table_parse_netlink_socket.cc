@@ -22,7 +22,6 @@
 #ifdef HAVE_NETLINK_SOCKETS
 
 #include "fea/fea_module.h"
-
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"

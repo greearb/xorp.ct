@@ -20,13 +20,11 @@
 
 
 #include "fea_module.h"
-
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/c_format.hh"
 #include "libxorp/vif.hh"
-
 #include "iftree.hh"
 
 
@@ -152,7 +150,10 @@ IfTree::add_interface(const string& ifname)
     ifp = new IfTreeInterface(*this, ifname);
     _interfaces.insert(IfMap::value_type(ifname, ifp));
 
-    //XLOG_WARNING("Adding interface: %s to tree: %s\n", ifname.c_str(), name.c_str());
+#ifdef HOST_OS_WINDOWS
+    // Only spam windows for now.
+    XLOG_WARNING("Adding interface: %s to tree: %s\n", ifname.c_str(), name.c_str());
+#endif
 
     return (XORP_OK);
 }

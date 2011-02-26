@@ -17,14 +17,12 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_get_netlink_socket.hh,v 1.9 2008/10/02 21:56:59 bms Exp $
 
 #ifndef __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_TABLE_GET_NETLINK_SOCKET_HH__
 #define __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_TABLE_GET_NETLINK_SOCKET_HH__
 
 #include <xorp_config.h>
 #ifdef HAVE_NETLINK_SOCKETS
-
 
 #include "fea/fibconfig_table_get.hh"
 #include "fea/data_plane/control_socket/netlink_socket.hh"

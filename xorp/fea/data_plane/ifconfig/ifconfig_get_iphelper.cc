@@ -95,12 +95,11 @@ IfConfigGetIPHelper::stop(string& error_msg)
 int
 IfConfigGetIPHelper::pull_config(const IfTree* local_config, IfTree& iftree)
 {
-    UNUSED(local_config);
-    return read_config(iftree);
+    return read_config(local_config, iftree);
 }
 
 int
-IfConfigGetIPHelper::read_config(IfTree& iftree)
+IfConfigGetIPHelper::read_config(const IfTree* local_config, IfTree& iftree)
 {
     PIP_ADAPTER_ADDRESSES pAdapters = NULL;
     PIP_ADAPTER_ADDRESSES curAdapter;
@@ -150,10 +149,16 @@ IfConfigGetIPHelper::read_config(IfTree& iftree)
 	    continue;
 
 	wcstombs(if_name, curAdapter->FriendlyName, sizeof(if_name));
+	//XLOG_INFO("Found Iface name: %s  idx: %i iftree: %s\n",
+	//	  if_name, (int)(curAdapter->IfIndex), iftree.getName().c_str());
 
 	// Name
 	IfTreeInterface* ifp = iftree.find_interface(if_name);
 	if (ifp == NULL) {
+	    if (local_config && !local_config->find_interface(if_name)) {
+		// Ignore, not configured to use this interface.
+		continue;
+	    }
 	    iftree.add_interface(if_name);
 	    is_newlink = true;
 	    ifp = iftree.find_interface(if_name);

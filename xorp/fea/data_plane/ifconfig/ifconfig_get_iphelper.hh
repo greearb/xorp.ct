@@ -64,7 +64,7 @@ public:
     virtual int pull_config(const IfTree* local_config, IfTree& iftree);
     
 private:
-    int read_config(IfTree& iftree);
+    int read_config(const IfTree* local_config, IfTree& iftree);
 };
 
 #endif // __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_GET_IPHELPER_HH__
