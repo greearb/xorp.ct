@@ -659,11 +659,6 @@ index 54fe9ee..2b57df8 100644
         UCHAR Network[4];
 
 
-   scons strip=yes shared=no build=mingw32 STRIP=/usr/local/bin/i386-mingw32-strip \
-         CC=/usr/local/bin/i386-mingw32-gcc CXX=/usr/local/bin/i386-mingw32-g++ \
-	 RANLIB=/usr/local/bin/i386-mingw32-ranlib \
-	 AR=/usr/local/bin/i386-mingw32-ar LD=/usr/local/bin/i386-mingw32-ld install
-
    Or, you might find this script handy:
    ./win32_pkg.bash  (as root user)
 
