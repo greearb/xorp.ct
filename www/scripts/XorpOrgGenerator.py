@@ -134,7 +134,7 @@ def write_google_tracker():
 
 def write_footer():
     open_div("footer")
-    print """&copy; 2008-2010 XORP, Inc, &copy 2010 Others. All Rights Reserved"""
+    print """&copy; 2008-2010 XORP, Inc, &copy 2010-2011 Others. All Rights Reserved"""
     close_div("footer")
 
 def write_header(filename, headextras = []):

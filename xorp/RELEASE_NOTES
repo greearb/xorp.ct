@@ -3,7 +3,10 @@
 
 This file contains XORP release notes (most recent releases first).
 
-Release 1.9-CT  (Work in Progress)
+Release 1.8.3-CT  (Work in Progress)
+
+   *  Re-add support for XORP on Microsoft Windows.  Add instructions
+      to BUILD_NOTES for cross-compiling with mingw.
 
    *  Add more options for disabling compile of certain modules.
       See:  scons --help
