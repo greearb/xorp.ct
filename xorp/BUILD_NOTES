@@ -615,6 +615,50 @@ scons check
 	 RANLIB=/usr/local/bin/i386-mingw32-ranlib \
 	 AR=/usr/local/bin/i386-mingw32-ar LD=/usr/local/bin/i386-mingw32-ld
 
+   yum install mingw32-gcc-c++ mingw32-libgnurx mingw32-openssl mingw32-pdcurses
+   scons shared=no build=mingw32 STRIP=i686-pc-mingw32-strip \
+         CC=i686-pc-mingw32-gcc CXX=i686-pc-mingw32-g++ \
+	 RANLIB=i686-pc-mingw32-ranlib \
+	 AR=i686-pc-mingw32-ar LD=i686-pc-mingw32-ld
+
+   If you see errors such as:
+In file included from fea/data_plane/fibconfig/fibconfig_entry_get_iphelper.cc:34:
+/usr/i686-pc-mingw32/sys-root/mingw/include/routprot.h:51: error: 'IP_LOCAL_BINDING' does not name a type
+scons: *** [obj/i386-pc-mingw32/fea/data_plane/fibconfig/fibconfig_entry_get_iphelper.o] Error 1
+scons: building terminated because of errors.
+
+   Then you should patch the routprot.h file:
+
+diff --git a/routprot.h.orig b/routprot.h
+index 54fe9ee..2b57df8 100644
+--- a/routprot.h.orig
++++ b/routprot.h
+@@ -43,6 +43,11 @@ extern "C" {
+ #define IPX_PROTOCOL_NLSP 0x00020002
+ /*--- Router Management Reference - Router Management Structures */
+ #if (_WIN32_WINNT >= 0x0500)
++typedef struct IP_LOCAL_BINDING {
++        DWORD Address;
++        DWORD Mask;
++} IP_LOCAL_BINDING,*PIP_LOCAL_BINDING;
++
+ typedef struct IP_ADAPTER_BINDING_INFO {
+        ULONG AddressCount;
+        DWORD RemoteAddress;
+@@ -50,10 +55,7 @@ typedef struct IP_ADAPTER_BINDING_INFO {
+        ULONGLONG Speed;
+        IP_LOCAL_BINDING Address[];
+ } IP_ADAPTER_BINDING_INFO,*PIP_ADAPTER_BINDING_INFO;
+-typedef struct IP_LOCAL_BINDING {
+-       DWORD Address;
+-       DWORD Mask;
+-} IP_LOCAL_BINDING,*PIP_LOCAL_BINDING;
++
+ typedef struct IPX_ADAPTER_BINDING_INFO {
+        ULONG AdapterIndex;
+        UCHAR Network[4];
+
+
    scons strip=yes shared=no build=mingw32 STRIP=/usr/local/bin/i386-mingw32-strip \
          CC=/usr/local/bin/i386-mingw32-gcc CXX=/usr/local/bin/i386-mingw32-g++ \
 	 RANLIB=/usr/local/bin/i386-mingw32-ranlib \
