@@ -57,11 +57,13 @@ sources = [
 	]
 
 if not (env.has_key('mingw') and env['mingw']):
-	sources.append('fibconfig_entry_get_netlink_socket.cc')
 	sources.append('fibconfig_table_set_netlink_socket.cc')
+	sources.append('fibconfig_table_get_netlink_socket.cc')
 	sources.append('fibconfig_table_parse_netlink_socket.cc')
 	sources.append('fibconfig_table_observer_netlink_socket.cc')
+	sources.append('fibconfig_entry_get_netlink_socket.cc')
 	sources.append('fibconfig_entry_set_netlink_socket.cc')
+	sources.append('fibconfig_entry_observer_netlink_socket.cc')
 	
 
 if env['enable_click']:

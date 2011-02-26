@@ -47,6 +47,11 @@ env['CPPDEFINES'] = {
     'HAVE_TERMINFO_H': 1,
     }
 
+if not (env.has_key('mingw') and env['mingw']):
+    env.Append(CPPDEFINES={
+        'HAVE_SYS_IOCTL_H': 1,
+        'HAVE_TERMIOS_H': 1,
+        })
     
 libtecla_srcs = [
     'cplfile.c',

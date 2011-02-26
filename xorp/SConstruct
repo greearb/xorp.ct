@@ -203,11 +203,11 @@ print 'RANLIB:           ', env['RANLIB']
 
 if ARGUMENTS.get('AR', None):
     env['AR'] = ARGUMENTS.get('AR')
-print 'AR:               ', env['AR']
+    print 'AR:               ', env['AR']
 
 if ARGUMENTS.get('LD', None):
     env['LD'] = ARGUMENTS.get('LD')
-print 'LD:               ', env['LD']
+    print 'LD:               ', env['LD']
 
 
 env['STRIP'] = ARGUMENTS.get('STRIP', 'strip')
