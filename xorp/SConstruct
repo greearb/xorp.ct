@@ -784,10 +784,16 @@ if env['enable_ustl']:
 # is propagated correctly, because anything which includes
 # <libxipc/xrl_std_router.hh> will be affected by this option.
 #
-xrl_pf_dict = { 'tcp': 't', 'local': 'x' }
-env.AppendUnique(CPPDEFINES = [
-    ( 'XRL_PF', ord(xrl_pf_dict[env['transport']]) ),
-    ])
+if fnmatch.fnmatch(host_os, 'mingw32*'):
+    # Windows only supports tcp.
+    env.AppendUnique(CPPDEFINES = [
+        ( 'XRL_PF', ord('t')),
+        ])
+else:
+    xrl_pf_dict = { 'tcp': 't', 'local': 'x' }
+    env.AppendUnique(CPPDEFINES = [
+        ( 'XRL_PF', ord(xrl_pf_dict[env['transport']]) ),
+        ])
 
 # Forcibly disable GCC's SSP support., as it may be incompatible
 # with the XORP code base.
