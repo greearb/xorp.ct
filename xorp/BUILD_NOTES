@@ -645,7 +645,7 @@ index 54fe9ee..2b57df8 100644
    *  Change to the xorp/sbin directory
    *  Start router-mgr:
      set XORP_ROOT=..
-     xorp_rtrmgr.exe -c config.boot.txt -t ..\share\xorp\templates -m ..\lib\xorp\bin
+     xorp_rtrmgr.exe -c config.boot.txt -t ..\share\xorp\templates -m ..\lib\xorp\sbin
 
    * In another window, start xorpsh:
      set XORP_ROOT=..
