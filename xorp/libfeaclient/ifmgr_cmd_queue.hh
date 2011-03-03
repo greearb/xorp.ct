@@ -19,8 +19,6 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libfeaclient/ifmgr_cmd_queue.hh,v 1.15 2008/10/02 21:57:16 bms Exp $
-
 #ifndef __IFMGR_CMD_QUEUE_HH__
 #define __IFMGR_CMD_QUEUE_HH__
 

@@ -320,10 +320,8 @@ private:
 			      IfTreeInterface& config_iface);
     void push_interface_end(const IfTreeInterface* pulled_ifp,
 			    IfTreeInterface& config_iface);
-    void push_vif_creation(const IfTreeInterface* pulled_ifp,
-			   const IfTreeVif* pulled_vifp,
-			   IfTreeInterface& config_iface,
-			   IfTreeVif& config_vif);
+    void push_if_creation(const IfTreeInterface* system_ifp,
+			  IfTreeInterface& config_iface);
     void push_vif_begin(const IfTreeInterface* pulled_ifp,
 			const IfTreeVif* pulled_vifp,
 			IfTreeInterface& config_iface,

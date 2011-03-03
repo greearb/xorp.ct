@@ -137,6 +137,9 @@ LibFeaClientBridge::interface_update(const string& ifname,
     _rm->push(new IfMgrIfSetPifIndex(ifname, ifp->pif_index()));
     _rm->push(new IfMgrIfSetNoCarrier(ifname, ifp->no_carrier()));
     _rm->push(new IfMgrIfSetBaudrate(ifname, ifp->baudrate()));
+    _rm->push(new IfMgrIfSetString(ifname, ifp->parent_ifname(), IF_STRING_PARENT_IFNAME));
+    _rm->push(new IfMgrIfSetString(ifname, ifp->iface_type(), IF_STRING_IFTYPE));
+    _rm->push(new IfMgrIfSetString(ifname, ifp->vid(), IF_STRING_VID));
 }
 
 
@@ -214,12 +217,6 @@ LibFeaClientBridge::vif_update(const string& ifname,
 	      );
     _rm->push(new
 	      IfMgrVifSetPimRegister(ifname, vifname, vifp->pim_register())
-	      );
-    _rm->push(new
-	      IfMgrVifSetIsVlan(ifname, vifname, vifp->is_vlan())
-	      );
-    _rm->push(new
-	      IfMgrVifSetVlanId(ifname, vifname, vifp->vlan_id())
 	      );
 }
 

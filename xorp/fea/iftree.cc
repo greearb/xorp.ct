@@ -1787,6 +1787,55 @@ IfTreeInterface::~IfTreeInterface()
     iftree().erase_ifindex(this);
 }
 
+bool
+IfTreeInterface::is_same_state(const IfTreeInterface& o)
+{
+    //
+    // XXX: Explicitly don't consider the discard, unreachable,
+    // management, and default_system_config flags, because they
+    // are always set from user's configuration.
+    //
+    return ((pif_index() == o.pif_index())
+	    && (enabled() == o.enabled())
+	    && (mtu() == o.mtu())
+	    && (mac() == o.mac())
+	    && (no_carrier() == o.no_carrier())
+	    && (baudrate() == o.baudrate())
+	    && (_parent_ifname == o._parent_ifname)
+	    && (strcasecmp(_iface_type.c_str(), o._iface_type.c_str()) == 0)
+	    && (strcasecmp(_vid.c_str(), o._vid.c_str()) == 0)
+	    && (interface_flags() == o.interface_flags()));
+}
+
+void
+IfTreeInterface::copy_state(const IfTreeInterface& o, bool copy_user_config)
+{
+	//
+	// XXX: Explicitly don't consider the discard, unreachable,
+	// management, and default_system_config flags, because they
+	// are always set from user's configuration.
+	//
+	set_pif_index(o.pif_index());
+	set_enabled(o.enabled());
+	set_mtu(o.mtu());
+	set_mac(o.mac());
+	set_no_carrier(o.no_carrier());
+	set_baudrate(o.baudrate());
+	set_interface_flags(o.interface_flags());
+	_parent_ifname = o._parent_ifname;
+	_iface_type = o._iface_type;
+	_vid = o._vid;
+
+	if (copy_user_config) {
+	    // Copy the flags from the user configuration
+	    set_discard(o.discard());
+	    set_unreachable(o.unreachable());
+	    set_management(o.management());
+	    set_default_system_config(o.default_system_config());
+	}
+    }
+
+
 void
 IfTreeInterface::add_recursive_vif(const IfTreeVif& other_vif, bool mark_state)
 {
@@ -1966,6 +2015,10 @@ IfTreeInterface::finalize_state()
     set_state(NO_CHANGE);
 }
 
+bool IfTreeInterface::is_vlan() const {
+    return (strcasecmp(iface_type().c_str(), "VLAN") == 0);
+}
+
 string
 IfTreeInterface::str() const
 {
@@ -1973,7 +2026,8 @@ IfTreeInterface::str() const
 			"{ discard := %s } { unreachable := %s } "
 			"{ management = %s } { default_system_config = %s }"
 			"{ mtu := %u } { mac := %s } { no_carrier = %s } "
-			"{ baudrate := %u } { flags := %u }",
+			"{ baudrate := %u } { flags := %u }"
+			"{ parent-ifname = %s } { iface-type = %s } { vid = %s }",
 			_ifname.c_str(),
 			XORP_UINT_CAST(_pif_index),
 			bool_c_str(_enabled),
@@ -1985,7 +2039,8 @@ IfTreeInterface::str() const
 			_mac.str().c_str(),
 			bool_c_str(_no_carrier),
 			XORP_UINT_CAST(_baudrate),
-			XORP_UINT_CAST(_interface_flags));
+			XORP_UINT_CAST(_interface_flags),
+			_parent_ifname.c_str(), _iface_type.c_str(), _vid.c_str());
     r += string(" ") + IfTreeItem::str();
 
     return (r);
@@ -2006,9 +2061,7 @@ IfTreeVif::IfTreeVif(IfTreeInterface& iface, const string& vifname)
       _point_to_point(false),
       _multicast(false),
       _pim_register(false),
-      _vif_flags(0),
-      _is_vlan(false),
-      _vlan_id(0)
+      _vif_flags(0)
 {}
 
 IfTreeVif::~IfTreeVif()
@@ -2290,10 +2343,6 @@ IfTreeVif::str() const
     if (_vif_index != Vif::VIF_INDEX_INVALID) {
 	vif_index_str = c_format("{ vif_index := %u } ",
 				 XORP_UINT_CAST(_vif_index));
-    }
-    // XXX: Conditionally print the VLAN ID
-    if (_is_vlan) {
-	vlan_str = c_format("{ vlan_id = %u } ", _vlan_id);
     }
     vif_index_str += pim_register_str;
     vif_index_str += vlan_str;

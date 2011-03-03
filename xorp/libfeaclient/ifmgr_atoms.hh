@@ -19,7 +19,6 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.39 2008/10/02 21:57:15 bms Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_ATOMS_HH__
 #define __LIBFEACLIENT_IFMGR_ATOMS_HH__
@@ -306,6 +305,15 @@ public:
     uint64_t	baudrate() const		{ return _baudrate; }
     void	set_baudrate(uint64_t v)	{ _baudrate = v; }
 
+    const string& parent_ifname() const	{ return _parent_ifname; }
+    void set_parent_ifname(const string& v) { _parent_ifname = v; }
+
+    const string& iface_type() const { return _iface_type; }
+    void set_iface_type(const string& v) { _iface_type = v; }
+
+    const string& vid() const	{ return _vid; }
+    void set_vid(const string& v) { _vid = v; }
+
     const VifMap& vifs() const			{ return _vifs; }
     VifMap& vifs()				{ return _vifs; }
     const IfMgrVifAtom*	find_vif(const string& vifname) const;
@@ -335,7 +343,9 @@ protected:
     uint32_t	_pif_index;	// Physical interface index
     bool	_no_carrier;	// True if no carrier
     uint64_t	_baudrate;	// The link baudrate
-
+    string      _parent_ifname;
+    string      _iface_type;
+    string      _vid;
     VifMap	_vifs;		// The vif configuration state
 };
 
@@ -379,12 +389,6 @@ public:
     uint32_t	vif_index() const		{ return _vif_index; }
     void	set_vif_index(uint32_t v) 	{ _vif_index = v; }
 
-    bool	is_vlan() const			{ return _is_vlan; }
-    void	set_vlan(bool v)		{ _is_vlan = v; }
-
-    uint16_t	vlan_id() const			{ return _vlan_id; }
-    void	set_vlan_id(uint16_t v)		{ _vlan_id = v; }
-
     const IPv4Map&	ipv4addrs() const	{ return _ipv4addrs; }
     IPv4Map&		ipv4addrs() 		{ return _ipv4addrs; }
     const IfMgrIPv4Atom* find_addr(const IPv4& addr) const;
@@ -418,8 +422,6 @@ protected:
     bool	_pim_register;		// True if PIM Register vif
     uint32_t	_pif_index;		// Physical interface index
     uint32_t	_vif_index;		// Virtual interface index
-    bool	_is_vlan;		// True if VLAN vif
-    uint16_t	_vlan_id;		// The VLAN ID
 
     IPv4Map	_ipv4addrs;		// The IPv4 addresses
     IPv6Map	_ipv6addrs;		// The IPv6 addresses
@@ -615,9 +617,7 @@ IfMgrVifAtom::IfMgrVifAtom(const string& name)
       _loopback(false),
       _pim_register(false),
       _pif_index(0),
-      _vif_index(Vif::VIF_INDEX_INVALID),
-      _is_vlan(false),
-      _vlan_id(0)
+      _vif_index(Vif::VIF_INDEX_INVALID)
 {
 }
 

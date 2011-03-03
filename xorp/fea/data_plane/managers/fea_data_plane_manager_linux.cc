@@ -136,8 +136,8 @@ FeaDataPlaneManagerLinux::load_plugins(string& error_msg)
 #endif
 
 #if defined(HAVE_VLAN_LINUX)
-    _ifconfig_vlan_get = new IfConfigVlanGetLinux(*this);
-    _ifconfig_vlan_set = new IfConfigVlanSetLinux(*this);
+    _ifconfig_vlan_get = new IfConfigVlanGetLinux(*this, false);
+    _ifconfig_vlan_set = new IfConfigVlanSetLinux(*this, false);
 #endif
 
 #ifndef XORP_DISABLE_FIREWALL

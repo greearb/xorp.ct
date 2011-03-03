@@ -29,8 +29,8 @@
 #include "fea/data_plane/ifconfig/ifconfig_get_dummy.hh"
 #include "fea/data_plane/ifconfig/ifconfig_set_dummy.hh"
 #include "fea/data_plane/ifconfig/ifconfig_observer_dummy.hh"
-#include "fea/data_plane/ifconfig/ifconfig_vlan_get_dummy.hh"
-#include "fea/data_plane/ifconfig/ifconfig_vlan_set_dummy.hh"
+#include "fea/data_plane/ifconfig/ifconfig_vlan_get_linux.hh"
+#include "fea/data_plane/ifconfig/ifconfig_vlan_set_linux.hh"
 #ifndef XORP_DISABLE_FIREWALL
 #include "fea/data_plane/firewall/firewall_get_dummy.hh"
 #include "fea/data_plane/firewall/firewall_set_dummy.hh"
@@ -108,8 +108,8 @@ FeaDataPlaneManagerDummy::load_plugins(string& error_msg)
     _ifconfig_get = new IfConfigGetDummy(*this);
     _ifconfig_set = new IfConfigSetDummy(*this);
     _ifconfig_observer = new IfConfigObserverDummy(*this);
-    _ifconfig_vlan_get = new IfConfigVlanGetDummy(*this);
-    _ifconfig_vlan_set = new IfConfigVlanSetDummy(*this);
+    _ifconfig_vlan_get = new IfConfigVlanGetLinux(*this, true);
+    _ifconfig_vlan_set = new IfConfigVlanSetLinux(*this, true);
 #ifndef XORP_DISABLE_FIREWALL
     _firewall_get = new FirewallGetDummy(*this);
     _firewall_set = new FirewallSetDummy(*this);

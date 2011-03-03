@@ -159,12 +159,10 @@ IfConfigSet::push_config(const IfTree& iftree)
 	     vi != config_iface.vifs().end();
 	     ++vi) {
 	    IfTreeVif& config_vif = *(vi->second);
-	    if (config_vif.is_vlan())
-		continue;
 	    if (config_vif.vifname() != config_iface.ifname()) {
 		error_reporter.vif_error(config_iface.ifname(),
 					 config_vif.vifname(),
-					 "bad vif name");
+					 "bad vif name, must match iface name");
 		break;
 	    }
 	}
@@ -240,19 +238,7 @@ IfConfigSet::push_config(const IfTree& iftree)
 	if (config_iface.default_system_config())
 	    continue;
 
-	for (vi = config_iface.vifs().begin();
-	     vi != config_iface.vifs().end();
-	     ++vi) {
-	    IfTreeVif& config_vif = *(vi->second);
-	    const IfTreeVif* system_vifp = NULL;
-
-	    if (system_ifp != NULL)
-		system_vifp = system_ifp->find_vif(config_vif.vifname());
-
-	    push_vif_creation(system_ifp, system_vifp, config_iface,
-			      config_vif);
-
-	}
+	push_if_creation(system_ifp, config_iface);
     }
 
     //
@@ -456,86 +442,54 @@ IfConfigSet::push_interface_end(const IfTreeInterface*	system_ifp,
 }
 
 void
-IfConfigSet::push_vif_creation(const IfTreeInterface*	system_ifp,
-			       const IfTreeVif*		system_vifp,
-			       IfTreeInterface&		config_iface,
-			       IfTreeVif&		config_vif)
+IfConfigSet::push_if_creation(const IfTreeInterface* system_ifp,
+			      IfTreeInterface& config_if)
 {
     string error_msg;
+
     IfConfigErrorReporterBase& error_reporter =
 	ifconfig().ifconfig_error_reporter();
 
-    if ((system_vifp == NULL) && config_vif.is_marked(IfTreeItem::DELETED)) {
-	// Nothing to do: the vif has been deleted from the system
-	return;
+    IfConfigVlanSet* ifconfig_vlan_set;
+
+    // Get the plugin for VLAN setup
+    ifconfig_vlan_set = fea_data_plane_manager().ifconfig_vlan_set();
+    if (ifconfig_vlan_set == NULL) {
+	error_msg = c_format("Failed to apply VLAN setup to "
+			     "interface %s : no plugin found",
+			     config_if.ifname().c_str());
+	goto done;
     }
 
-    // Copy some of the state from the system configuration
-    copy_interface_state(system_ifp, config_iface);
-    copy_vif_state(system_vifp, config_vif);
-
     //
-    // Configure VLAN vif
+    // Push the VLAN configuration: either add/update or delete it.
     //
-    if (config_vif.is_vlan()) {
-	IfConfigVlanSet* ifconfig_vlan_set;
-	bool is_add = true;
-
-	// Get the plugin for VLAN setup
-	ifconfig_vlan_set = fea_data_plane_manager().ifconfig_vlan_set();
-	if (ifconfig_vlan_set == NULL) {
-	    error_msg = c_format("Failed to apply VLAN setup to "
-				 "interface %s vlan %s : no plugin found",
-				 config_iface.ifname().c_str(),
-				 config_vif.vifname().c_str());
-	    goto done;
-	}
-
-	if (config_vif.state() == IfTreeItem::DELETED)
-	    is_add = false;
-
+    if (!config_if.is_marked(IfTreeItem::DELETED)) {
 	//
-	// Push the VLAN configuration: either add/update or delete it.
+	// Add/update the VLAN
 	//
-	if (is_add) {
-	    //
-	    // Add/update the VLAN
-	    //
-	    if (ifconfig_vlan_set->config_add_vlan(system_ifp,
-						   system_vifp,
-						   config_iface,
-						   config_vif,
-						   error_msg)
-		!= XORP_OK) {
-		error_msg = c_format("Failed to add VLAN to "
-				     "interface %s vlan %s: %s",
-				     config_iface.ifname().c_str(),
-				     config_vif.vifname().c_str(),
-				     error_msg.c_str());
-	    }
-	} else {
-	    //
-	    // Delete the VLAN
-	    //
-	    if (ifconfig_vlan_set->config_delete_vlan(system_ifp,
-						      system_vifp,
-						      config_iface,
-						      config_vif,
-						      error_msg)
-		!= XORP_OK) {
-		error_msg = c_format("Failed to delete VLAN on "
-				     "interface %s vlan %s: %s",
-				     config_iface.ifname().c_str(),
-				     config_vif.vifname().c_str(),
-				     error_msg.c_str());
-	    }
+	if (ifconfig_vlan_set->config_add_vlan(system_ifp,
+					       config_if,
+					       error_msg)
+	    != XORP_OK) {
+	    error_msg = c_format("Failed to add VLAN to "
+				 "interface %s  reason: %s",
+				 config_if.ifname().c_str(),
+				 error_msg.c_str());
 	}
-	goto done;
+    } else {
+	//
+	// Delete the VLAN
+	//
+	if (ifconfig_vlan_set->config_delete_vlan(config_if, error_msg) != XORP_OK) {
+	    error_msg = c_format("Failed to delete VLAN: %s  reason: %s ",
+				 config_if.ifname().c_str(), error_msg.c_str());
+	}
     }
 
 done:
     if (! error_msg.empty()) {
-	error_reporter.vif_error(config_iface.ifname(), config_vif.vifname(),
+	error_reporter.vif_error(config_if.ifname(), config_if.ifname(),
 				 error_msg);
 	XLOG_ERROR("%s", error_reporter.last_error().c_str());
 	return;

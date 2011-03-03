@@ -423,6 +423,9 @@ IfMgrIfAtom::operator==(const IfMgrIfAtom& o) const
 	    pif_index()			== o.pif_index()		&&
 	    no_carrier()		== o.no_carrier()		&&
 	    baudrate()			== o.baudrate()			&&
+	    parent_ifname()		== o.parent_ifname()		&&
+	    iface_type()		== o.iface_type()		&&
+	    vid()			== o.vid()			&&
 	    vifs()			== o.vifs()
 	    );
 }
@@ -479,8 +482,6 @@ IfMgrVifAtom::operator==(const IfMgrVifAtom& o) const
 	    pim_register()		== o.pim_register()		&&
 	    pif_index()			== o.pif_index()		&&
 	    vif_index()			== o.vif_index()		&&
-	    is_vlan()			== o.is_vlan()			&&
-	    vlan_id()			== o.vlan_id()			&&
 	    ipv4addrs()			== o.ipv4addrs()		&&
 	    ipv6addrs()			== o.ipv6addrs()
 	    );
@@ -492,7 +493,7 @@ IfMgrVifAtom::toString() const {
     oss << " Name: " << _name << " enabled: " << _enabled << " mcast_capable: " << _multicast_capable
 	<< " bcast_capable: " << _broadcast_capable << " p2p-capable: " << _p2p_capable
 	<< " loopback: " << _loopback << " pim_register: " << _pim_register << " pif_index: " << _pif_index
-	<< " vif index: " << _vif_index << " is_vlan: " << _is_vlan << " vlan_id: " << _vlan_id
+	<< " vif index: " << _vif_index
 	<< endl;
     
     IfMgrVifAtom::IPv4Map::const_iterator ai = ipv4addrs().begin();

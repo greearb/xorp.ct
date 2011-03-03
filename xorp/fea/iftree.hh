@@ -633,6 +633,16 @@ public:
     uint64_t baudrate() const		{ return _baudrate; }
     void set_baudrate(uint64_t v)	{ _baudrate = v; mark(CHANGED); }
 
+    const string& parent_ifname() const { return _parent_ifname; }
+    void set_parent_ifname(string& v) { if (v != _parent_ifname) { _parent_ifname = v; mark(CHANGED); }}
+
+    bool is_vlan() const;
+    const string& iface_type() const { return _iface_type; }
+    void set_iface_type(string& v) { if (v != _iface_type) { _iface_type = v; mark(CHANGED); }}
+
+    const string& vid() const { return _vid; }
+    void set_vid(string& v) { if (v != _vid) { _vid = v; mark(CHANGED); }}
+
     bool discard() const		{ return _discard; }
     void set_discard(bool discard)	{ _discard = discard; mark(CHANGED); }
 
@@ -667,6 +677,7 @@ public:
 	_interface_flags = v;
 	mark(CHANGED);
     }
+
 
     const VifMap& vifs() const		{ return _vifs; }
     VifMap& vifs()			{ return _vifs; }
@@ -778,28 +789,7 @@ public:
      * @param copy_user_config if true then copy the flags from the
      * user's configuration.
      */
-    void copy_state(const IfTreeInterface& o, bool copy_user_config) {
-	//
-	// XXX: Explicitly don't consider the discard, unreachable,
-	// management, and default_system_config flags, because they
-	// are always set from user's configuration.
-	//
-	set_pif_index(o.pif_index());
-	set_enabled(o.enabled());
-	set_mtu(o.mtu());
-	set_mac(o.mac());
-	set_no_carrier(o.no_carrier());
-	set_baudrate(o.baudrate());
-	set_interface_flags(o.interface_flags());
-
-	if (copy_user_config) {
-	    // Copy the flags from the user configuration
-	    set_discard(o.discard());
-	    set_unreachable(o.unreachable());
-	    set_management(o.management());
-	    set_default_system_config(o.default_system_config());
-	}
-    }
+    void copy_state(const IfTreeInterface& o, bool copy_user_config);
 
     /**
      * Test if the interface-specific internal state is same.
@@ -807,20 +797,7 @@ public:
      * @param o the IfTreeInterface to compare against.
      * @return true if the interface-specific internal state is same.
      */
-    bool is_same_state(const IfTreeInterface& o) {
-	//
-	// XXX: Explicitly don't consider the discard, unreachable,
-	// management, and default_system_config flags, because they
-	// are always set from user's configuration.
-	//
-	return ((pif_index() == o.pif_index())
-		&& (enabled() == o.enabled())
-		&& (mtu() == o.mtu())
-		&& (mac() == o.mac())
-		&& (no_carrier() == o.no_carrier())
-		&& (baudrate() == o.baudrate())
-		&& (interface_flags() == o.interface_flags()));
-    }
+    bool is_same_state(const IfTreeInterface& o);
 
     void finalize_state();
 
@@ -829,6 +806,12 @@ public:
 private:
     IfTree&	_iftree;
     const string _ifname;
+
+    /* virtual interface info */
+    string _parent_ifname;
+    string _iface_type;
+    string _vid;
+
     uint32_t	_pif_index;
     bool        _probed_vlan;
     bool 	_enabled;
@@ -907,12 +890,6 @@ public:
      * @param v the value of the system-specific vif flags to store.
      */
     void set_vif_flags(uint32_t v)	{ _vif_flags = v; mark(CHANGED); }
-
-    bool is_vlan() const		{ return _is_vlan; }
-    void set_vlan(bool v)		{ _is_vlan = v; mark(CHANGED); }
-
-    uint16_t vlan_id() const		{ return _vlan_id; }
-    void set_vlan_id(uint16_t v)	{ _vlan_id = v; mark(CHANGED); }
 
     const IPv4Map& ipv4addrs() const	{ return _ipv4addrs; }
     IPv4Map& ipv4addrs()		{ return _ipv4addrs; }
@@ -1032,8 +1009,6 @@ public:
 	set_multicast(o.multicast());
 	set_pim_register(o.pim_register());
 	set_vif_flags(o.vif_flags());
-	set_vlan(o.is_vlan());
-	set_vlan_id(o.vlan_id());
     }
 
     /**
@@ -1051,9 +1026,7 @@ public:
 		&& (point_to_point() == o.point_to_point())
 		&& (multicast() == o.multicast())
 		&& (pim_register() == o.pim_register())
-		&& (vif_flags() == o.vif_flags())
-		&& (is_vlan() == o.is_vlan())
-		&& (vlan_id() == o.vlan_id()));
+		&& (vif_flags() == o.vif_flags()));
     }
 
     void finalize_state();
@@ -1073,8 +1046,6 @@ private:
     bool	_multicast;
     bool	_pim_register;
     uint32_t	_vif_flags;		// The system-specific vif flags
-    bool	_is_vlan;
-    uint16_t	_vlan_id;
 
     IPv4Map	 _ipv4addrs;
     IPv6Map	 _ipv6addrs;

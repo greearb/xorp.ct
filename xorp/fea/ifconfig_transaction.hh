@@ -17,14 +17,12 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/fea/ifconfig_transaction.hh,v 1.22 2008/10/02 21:56:47 bms Exp $
-
 #ifndef __FEA_IFCONFIG_TRANSACTION_HH__
 #define __FEA_IFCONFIG_TRANSACTION_HH__
 
 #include "libxorp/c_format.hh"
 #include "libxorp/transaction.hh"
-
+#include "libxorp/fea_share.hh"
 #include "ifconfig.hh"
 #include "iftree.hh"
 
@@ -551,6 +549,52 @@ private:
     const string _vifname;
 };
 
+
+/**
+ * Class for setting the VLAN state of a vif.
+ */
+class SetIfString : public InterfaceModifier {
+public:
+    SetIfString(IfConfig& 	ifconfig,
+		const string&	ifname,
+		const string&	str,
+		IfStringTypeE tp)
+    : InterfaceModifier(ifconfig, ifname),
+      _str(str),
+      _tp(tp) {}
+
+    bool dispatch() {
+	IfTreeInterface* fi = interface();
+	if (fi == NULL)
+	    return false;
+	switch (_tp) {
+	case IF_STRING_PARENT_IFNAME:
+	    fi->set_parent_ifname(_str);
+	    return true;
+	case IF_STRING_IFTYPE:
+	    fi->set_iface_type(_str);
+	    return true;
+	case IF_STRING_VID:
+	    fi->set_vid(_str);
+	    return true;
+	default:
+	    XLOG_ERROR("Unknown string type: %i\n", _tp);
+	    return false;
+	}
+    }
+
+    string str() const {
+	return c_format("SetIfString: %s %s %i",
+			path().c_str(), _str.c_str(),
+			_tp);
+    }
+
+private:
+    string _str;
+    IfStringTypeE _tp;
+};
+
+
 /**
  * Base class for vif modifier operations.
  */
@@ -605,39 +649,6 @@ private:
     bool _enabled;
 };
 
-/**
- * Class for setting the VLAN state of a vif.
- */
-class SetVifVlan : public VifModifier {
-public:
-    SetVifVlan(IfConfig& 	ifconfig,
-	       const string&	ifname,
-	       const string&	vifname,
-	       uint32_t		vlan_id)
-	: VifModifier(ifconfig, ifname, vifname), _vlan_id(vlan_id) {}
-
-    // Maximum VLAN ID
-    static const uint32_t MAX_VLAN_ID = 4095;
-
-    bool dispatch() {
-	IfTreeVif* fv = vif();
-	if (fv == NULL)
-	    return (false);
-	if (_vlan_id > MAX_VLAN_ID)
-	    return (false);
-	fv->set_vlan(true);
-	fv->set_vlan_id(_vlan_id);
-	return (true);
-    }
-
-    string str() const {
-	return c_format("SetVifVlan: %s %u",
-			path().c_str(), _vlan_id);
-    }
-
-private:
-    uint32_t _vlan_id;
-};
 
 /**
  * Class for adding an IPv4 address to a VIF.

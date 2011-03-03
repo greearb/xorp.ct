@@ -24,7 +24,6 @@
 #include "libxorp/xorp.h"
 #include "libfeaclient_module.h"
 #include "libxorp/xlog.h"
-
 #include "ifmgr_atoms.hh"
 #include "ifmgr_cmds.hh"
 #include "ifmgr_cmd_queue.hh"
@@ -241,6 +240,9 @@ IfMgrIfAtomToCommands::convert(IfMgrCommandSinkBase& s) const
     s.push(new IfMgrIfSetPifIndex(_i.name(), _i.pif_index()));
     s.push(new IfMgrIfSetNoCarrier(_i.name(), _i.no_carrier()));
     s.push(new IfMgrIfSetBaudrate(_i.name(), _i.baudrate()));
+    s.push(new IfMgrIfSetString(_i.name(), _i.parent_ifname(), IF_STRING_PARENT_IFNAME));
+    s.push(new IfMgrIfSetString(_i.name(), _i.iface_type(), IF_STRING_IFTYPE));
+    s.push(new IfMgrIfSetString(_i.name(), _i.vid(), IF_STRING_VID));
 
     const IfMgrIfAtom::VifMap& vifs = _i.vifs();
     IfMgrIfAtom::VifMap::const_iterator cvi;
@@ -264,8 +266,6 @@ IfMgrVifAtomToCommands::convert(IfMgrCommandSinkBase& s) const
     s.push(new IfMgrVifSetPimRegister(ifn, vifn, _v.pim_register()));
     s.push(new IfMgrVifSetPifIndex(ifn, vifn, _v.pif_index()));
     s.push(new IfMgrVifSetVifIndex(ifn, vifn, _v.vif_index()));
-    s.push(new IfMgrVifSetIsVlan(ifn, vifn, _v.is_vlan()));
-    s.push(new IfMgrVifSetVlanId(ifn, vifn, _v.vlan_id()));
 
     const IfMgrVifAtom::IPv4Map& v4s = _v.ipv4addrs();
     for (IfMgrVifAtom::IPv4Map::const_iterator cai = v4s.begin();

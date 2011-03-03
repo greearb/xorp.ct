@@ -131,6 +131,21 @@ protected:
 	const string&	ifname,
 	const uint64_t&	baudrate);
 
+    XrlCmdError fea_ifmgr_mirror_0_1_interface_set_parent_ifname(
+	// Input values,
+	const string&	ifname,
+	const string&	parent_ifname);
+
+    XrlCmdError fea_ifmgr_mirror_0_1_interface_set_iface_type(
+	// Input values,
+	const string&	ifname,
+	const string&	iface_type);
+
+    XrlCmdError fea_ifmgr_mirror_0_1_interface_set_vid(
+	// Input values,
+	const string&	ifname,
+	const string&	vid);
+
     XrlCmdError fea_ifmgr_mirror_0_1_vif_add(
 	// Input values,
 	const string&	ifname,
@@ -188,18 +203,6 @@ protected:
 	const string&	ifname,
 	const string&	vifname,
 	const uint32_t&	vif_index);
-
-    XrlCmdError fea_ifmgr_mirror_0_1_vif_set_vlan(
-	// Input values,
-	const string&	ifname,
-	const string&	vifname,
-	const bool&	is_vlan);
-
-    XrlCmdError fea_ifmgr_mirror_0_1_vif_set_vlan_id(
-	// Input values,
-	const string&	ifname,
-	const string&	vifname,
-	const uint32_t&	vlan_id);
 
     XrlCmdError fea_ifmgr_mirror_0_1_ipv4_add(
 	// Input values,
@@ -507,6 +510,45 @@ IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_interface_set_baudrate(
 }
 
 XrlCmdError
+IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_interface_set_parent_ifname(
+	const string&	ifname,
+	const string&	parent_ifname
+	)
+{
+    _dispatcher.push(new IfMgrIfSetString(ifname, parent_ifname, IF_STRING_PARENT_IFNAME));
+    if (_dispatcher.execute() == true) {
+	return XrlCmdError::OKAY();
+    }
+    return XrlCmdError::COMMAND_FAILED(DISPATCH_FAILED);
+}
+
+XrlCmdError
+IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_interface_set_iface_type(
+	const string&	ifname,
+	const string&	iface_type
+	)
+{
+    _dispatcher.push(new IfMgrIfSetString(ifname, iface_type, IF_STRING_IFTYPE));
+    if (_dispatcher.execute() == true) {
+	return XrlCmdError::OKAY();
+    }
+    return XrlCmdError::COMMAND_FAILED(DISPATCH_FAILED);
+}
+
+XrlCmdError
+IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_interface_set_vid(
+	const string&	ifname,
+	const string&	vid
+	)
+{
+    _dispatcher.push(new IfMgrIfSetString(ifname, vid, IF_STRING_VID));
+    if (_dispatcher.execute() == true) {
+	return XrlCmdError::OKAY();
+    }
+    return XrlCmdError::COMMAND_FAILED(DISPATCH_FAILED);
+}
+
+XrlCmdError
 IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_vif_add(
 	const string& ifname,
 	const string& vifname
@@ -638,34 +680,6 @@ IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_vif_set_vif_index(
 	)
 {
     _dispatcher.push(new IfMgrVifSetVifIndex(ifname, vifname, vif_index));
-    if (_dispatcher.execute() == true) {
-	return XrlCmdError::OKAY();
-    }
-    return XrlCmdError::COMMAND_FAILED(DISPATCH_FAILED);
-}
-
-XrlCmdError
-IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_vif_set_vlan(
-	const string&	ifname,
-	const string&	vifname,
-	const bool&	is_vlan
-	)
-{
-    _dispatcher.push(new IfMgrVifSetIsVlan(ifname, vifname, is_vlan));
-    if (_dispatcher.execute() == true) {
-	return XrlCmdError::OKAY();
-    }
-    return XrlCmdError::COMMAND_FAILED(DISPATCH_FAILED);
-}
-
-XrlCmdError
-IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_vif_set_vlan_id(
-	const string&	ifname,
-	const string&	vifname,
-	const uint32_t&	vlan_id
-	)
-{
-    _dispatcher.push(new IfMgrVifSetVlanId(ifname, vifname, vlan_id));
     if (_dispatcher.execute() == true) {
 	return XrlCmdError::OKAY();
     }

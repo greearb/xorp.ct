@@ -22,10 +22,8 @@
 
 
 #include "libxorp/c_format.hh"
-
 #include "ifmgr_atoms.hh"
 #include "ifmgr_cmds.hh"
-
 #include "libxipc/xrl_sender.hh"
 #include "xrl/interfaces/fea_ifmgr_mirror_xif.hh"
 
@@ -504,7 +502,68 @@ IfMgrIfSetBaudrate::str() const
 	c_format("%u", XORP_UINT_CAST(baudrate())) + if_str_end();
 }
 
-
+// ----------------------------------------------------------------------------
+// IfMgrIfSetString
+
+bool
+IfMgrIfSetString::execute(IfMgrIfTree& t) const
+{
+    IfMgrIfTree::IfMap& interfaces = t.interfaces();
+    const string& n = ifname();
+
+    IfMgrIfTree::IfMap::iterator i = interfaces.find(n);
+    if (i == interfaces.end())
+	return false;
+
+    IfMgrIfAtom& interface = i->second;
+    switch(_tp) {
+    case IF_STRING_PARENT_IFNAME:
+	interface.set_parent_ifname(_str);
+	return true;
+    case IF_STRING_IFTYPE:
+	interface.set_iface_type(_str);
+	return true;
+    case IF_STRING_VID:
+	interface.set_vid(_str);
+	return true;
+    default:
+	XLOG_ERROR("Unknown string type: %i\n", _tp);
+	return false;
+    }
+}
+
+bool
+IfMgrIfSetString::forward(XrlSender& sender,
+			  const string& xrl_target,
+			  const IfMgrXrlSendCB&	xscb) const
+{
+    XrlFeaIfmgrMirrorV0p1Client c(&sender);
+    const char* xt = xrl_target.c_str();
+
+    switch(_tp) {
+    case IF_STRING_PARENT_IFNAME:
+	c.send_interface_set_parent_ifname(xt, ifname(), _str, xscb);
+	return true;
+    case IF_STRING_IFTYPE:
+	c.send_interface_set_iface_type(xt, ifname(), _str, xscb);
+	return true;
+    case IF_STRING_VID:
+	c.send_interface_set_vid(xt, ifname(), _str, xscb);
+	return true;
+    default:
+	XLOG_ERROR("Unknown string type: %i\n", _tp);
+	return false;
+    }
+}
+
+string
+IfMgrIfSetString::str() const
+{
+    return if_str_begin(this, "SetStromg")
+	+ ", " + _str + c_format(" %i", _tp) + vif_str_end();
+}
+
+
 // ----------------------------------------------------------------------------
 //
 //		V I F   C O N F I G U R A T I O N   C O M M A N D S
@@ -841,69 +900,6 @@ IfMgrVifSetVifIndex::str() const
 	+ ", " + c_format("%u", XORP_UINT_CAST(vif_index())) + vif_str_end();
 }
 
-// ----------------------------------------------------------------------------
-// IfMgrVifSetIsVlan
-
-bool
-IfMgrVifSetIsVlan::execute(IfMgrIfTree& tree) const
-{
-    IfMgrVifAtom* vifa = tree.find_vif(ifname(), vifname());
-    if (vifa == NULL)
-	return false;
-
-    vifa->set_vlan(is_vlan());
-    return true;
-}
-
-bool
-IfMgrVifSetIsVlan::forward(XrlSender&			sender,
-			   const string&		xrl_target,
-			   const IfMgrXrlSendCB&	xscb) const
-{
-    XrlFeaIfmgrMirrorV0p1Client c(&sender);
-    const char* xt = xrl_target.c_str();
-    return c.send_vif_set_vlan(xt, ifname(), vifname(), is_vlan(), xscb);
-}
-
-string
-IfMgrVifSetIsVlan::str() const
-{
-    return vif_str_begin(this, "SetIsVlan")
-	+ ", " + bool_c_str(is_vlan()) + vif_str_end();
-}
-
-// ----------------------------------------------------------------------------
-// IfMgrVifSetVlanId
-
-bool
-IfMgrVifSetVlanId::execute(IfMgrIfTree& tree) const
-{
-    IfMgrVifAtom* vifa = tree.find_vif(ifname(), vifname());
-    if (vifa == NULL)
-	return false;
-
-    vifa->set_vlan_id(vlan_id());
-    return true;
-}
-
-bool
-IfMgrVifSetVlanId::forward(XrlSender&			sender,
-			   const string&		xrl_target,
-			   const IfMgrXrlSendCB&	xscb) const
-{
-    XrlFeaIfmgrMirrorV0p1Client c(&sender);
-    const char* xt = xrl_target.c_str();
-    return c.send_vif_set_vlan_id(xt, ifname(), vifname(), vlan_id(), xscb);
-}
-
-string
-IfMgrVifSetVlanId::str() const
-{
-    return vif_str_begin(this, "SetVlanId")
-	+ ", " + c_format("%u", XORP_UINT_CAST(vlan_id())) + vif_str_end();
-}
-
-
 // ----------------------------------------------------------------------------
 //
 //     I P 4   A D D R E S S   C O N F I G U R A T I O N   C O M M A N D S

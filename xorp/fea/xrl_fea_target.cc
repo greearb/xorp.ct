@@ -28,14 +28,12 @@
 #define PROFILE_UTILS_REQUIRED
 
 #include "fea_module.h"
-
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/status_codes.h"
 #include "libxorp/eventloop.hh"
 #include "libproto/packet.hh"
-
 #include "libxipc/xrl_std_router.hh"
 
 #ifndef XORP_DISABLE_PROFILE
@@ -3010,28 +3008,54 @@ XrlFeaTarget::ifmgr_0_1_set_vif_enabled(
 }
 
 XrlCmdError
-XrlFeaTarget::ifmgr_0_1_set_vif_vlan(
-    // Input values,
-    const uint32_t&	tid,
-    const string&	ifname,
-    const string&	vif,
-    const uint32_t&	vlan_id)
-{
+XrlFeaTarget::ifmgr_0_1_set_parent_ifname(
+	// Input values,
+	const uint32_t&	tid,
+	const string& ifname,
+	const string& parent_ifname) {
     string error_msg;
-    const uint32_t max_vlan_id = 4096;
-
-    // Check the VLAN ID value
-    if (vlan_id >= max_vlan_id) {
-	error_msg = c_format("Invalid VLAN ID %u for interface %s vif %s: "
-			     "maximum value is %u",
-			     vlan_id, ifname.c_str(), vif.c_str(),
-			     max_vlan_id);
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
 
     if (_ifconfig.add_transaction_operation(
 	    tid,
-	    new SetVifVlan(_ifconfig, ifname, vif, vlan_id),
+	    new SetIfString(_ifconfig, ifname, parent_ifname, IF_STRING_PARENT_IFNAME),
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_set_iface_type(
+	// Input values,
+	const uint32_t&	tid,
+	const string& ifname,
+	const string& iface_type) {
+    string error_msg;
+
+    if (_ifconfig.add_transaction_operation(
+	    tid,
+	    new SetIfString(_ifconfig, ifname, iface_type, IF_STRING_IFTYPE),
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_set_vid(
+	// Input values,
+	const uint32_t&	tid,
+	const string& ifname,
+	const string& vid) {
+    string error_msg;
+
+    if (_ifconfig.add_transaction_operation(
+	    tid,
+	    new SetIfString(_ifconfig, ifname, vid, IF_STRING_VID),
 	    error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);

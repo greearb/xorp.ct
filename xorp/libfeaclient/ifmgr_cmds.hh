@@ -18,12 +18,11 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libfeaclient/ifmgr_cmds.hh,v 1.26 2008/10/02 21:57:16 bms Exp $
-
 #ifndef __LIBFEACLIENT_IFMGR_CMDS_HH__
 #define __LIBFEACLIENT_IFMGR_CMDS_HH__
 
 #include "ifmgr_cmd_base.hh"
+#include "libxorp/fea_share.hh"
 
 /**
  * @short Base class for interface state manipulator commands.
@@ -316,6 +315,61 @@ protected:
 };
 
 /**
+ * @short Command to set virtual-interface info.
+ */
+class IfMgrIfSetString : public IfMgrIfCommandBase {
+public:
+    IfMgrIfSetString(const string& ifname,
+		     const string& str,
+		     IfStringTypeE tp)
+	: IfMgrIfCommandBase(ifname),
+	  _str(str),
+	  _tp(tp)
+    {}
+
+    bool execute(IfMgrIfTree& tree) const;
+
+    bool forward(XrlSender&		sender,
+		 const string&		xrl_target,
+		 const IfMgrXrlSendCB&	xscb) const;
+
+    string str() const;
+
+protected:
+    string _str;
+    IfStringTypeE _tp;
+};
+
+/**
+ * @short Command to set the VLAN ID to a virtual interface.
+ */
+class IfMgrVifSetVlanId : public IfMgrVifCommandBase {
+public:
+    IfMgrVifSetVlanId(const string&	ifname,
+		      const string&	vifname,
+		      uint16_t		vlan_id)
+	: IfMgrVifCommandBase(ifname, vifname),
+	  _vlan_id(vlan_id)
+    {}
+
+    uint16_t vlan_id() const 	{ return _vlan_id; }
+
+    bool execute(IfMgrIfTree& tree) const;
+
+    bool forward(XrlSender&		sender,
+		 const string&		xrl_target,
+		 const IfMgrXrlSendCB&	xscb) const;
+
+    string str() const;
+
+protected:
+    uint16_t	_vlan_id;
+};
+
+
+
+
+/**
  * @short Command to add a virtual interface to an interface.
  */
 class IfMgrVifAdd : public IfMgrVifCommandBase {
@@ -560,59 +614,6 @@ protected:
     uint32_t	_vif_index;
 };
 
-/**
- * @short Command to mark virtual interface as VLAN vif.
- */
-class IfMgrVifSetIsVlan : public IfMgrVifCommandBase {
-public:
-    IfMgrVifSetIsVlan(const string&	ifname,
-		      const string&	vifname,
-		      bool		is_vlan)
-	: IfMgrVifCommandBase(ifname, vifname),
-	  _is_vlan(is_vlan)
-    {}
-
-    bool is_vlan() const 	{ return _is_vlan; }
-
-    bool execute(IfMgrIfTree& tree) const;
-
-    bool forward(XrlSender&		sender,
-		 const string&		xrl_target,
-		 const IfMgrXrlSendCB&	xscb) const;
-
-    string str() const;
-
-protected:
-    bool	_is_vlan;
-};
-
-/**
- * @short Command to set the VLAN ID to a virtual interface.
- */
-class IfMgrVifSetVlanId : public IfMgrVifCommandBase {
-public:
-    IfMgrVifSetVlanId(const string&	ifname,
-		      const string&	vifname,
-		      uint16_t		vlan_id)
-	: IfMgrVifCommandBase(ifname, vifname),
-	  _vlan_id(vlan_id)
-    {}
-
-    uint16_t vlan_id() const 	{ return _vlan_id; }
-
-    bool execute(IfMgrIfTree& tree) const;
-
-    bool forward(XrlSender&		sender,
-		 const string&		xrl_target,
-		 const IfMgrXrlSendCB&	xscb) const;
-
-    string str() const;
-
-protected:
-    uint16_t	_vlan_id;
-};
-
-
 /**
  * @short Base class for interface IPv4 address data manipulation.
  */

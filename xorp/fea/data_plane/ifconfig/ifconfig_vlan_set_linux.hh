@@ -17,8 +17,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_vlan_set_linux.hh,v 1.6 2008/10/02 21:57:09 bms Exp $
-
 #ifndef __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_VLAN_SET_LINUX_HH__
 #define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_VLAN_SET_LINUX_HH__
 
@@ -33,7 +31,8 @@ public:
      * @param fea_data_plane_manager the corresponding data plane manager
      * (@ref FeaDataPlaneManager).
      */
-    IfConfigVlanSetLinux(FeaDataPlaneManager& fea_data_plane_manager);
+    IfConfigVlanSetLinux(FeaDataPlaneManager& fea_data_plane_manager,
+			 bool is_dummy);
 
     /**
      * Virtual destructor.
@@ -73,10 +72,8 @@ public:
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int config_add_vlan(const IfTreeInterface* pulled_ifp,
-				const IfTreeVif* pulled_vifp,
-				const IfTreeInterface& config_iface,
-				const IfTreeVif& config_vif,
+    virtual int config_add_vlan(const IfTreeInterface* system_ifp,
+				const IfTreeInterface& config_if,
 				string& error_msg);
 
     /**
@@ -93,10 +90,7 @@ public:
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int config_delete_vlan(const IfTreeInterface* pulled_ifp,
-				   const IfTreeVif* pulled_vifp,
-				   const IfTreeInterface& config_iface,
-				   const IfTreeVif& config_vif,
+    virtual int config_delete_vlan(const IfTreeInterface& config_iface,
 				   string& error_msg);
 
 private:
@@ -117,15 +111,13 @@ private:
     /**
      * Delete a VLAN.
      *
-     * @param parent_ifname the parent interface name.
-     * @param vlan_name the VLAN vif name.
+     * @param ifname The vlan to delete.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int delete_vlan(const string& parent_ifname,
-		    const string& vlan_name,
+    int delete_vlan(const string& ifname,
 		    string& error_msg);
-
+    bool _is_dummy;
     int _s4;
 };
 

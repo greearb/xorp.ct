@@ -38,8 +38,8 @@
 #include "fea/data_plane/ifconfig/ifconfig_get_sysctl.hh"
 #include "fea/data_plane/ifconfig/ifconfig_set_ioctl.hh"
 #include "fea/data_plane/ifconfig/ifconfig_observer_routing_socket.hh"
-#include "fea/data_plane/ifconfig/ifconfig_vlan_get_bsd.hh"
-#include "fea/data_plane/ifconfig/ifconfig_vlan_set_bsd.hh"
+#include "fea/data_plane/ifconfig/ifconfig_vlan_get_linux.hh"
+#include "fea/data_plane/ifconfig/ifconfig_vlan_set_linux.hh"
 #include "fea/data_plane/firewall/firewall_get_ipfw2.hh"
 #include "fea/data_plane/firewall/firewall_get_pf.hh"
 #include "fea/data_plane/firewall/firewall_set_ipfw2.hh"
@@ -130,8 +130,8 @@ FeaDataPlaneManagerBsd::load_plugins(string& error_msg)
 #endif
 
 #if defined(HAVE_VLAN_BSD)
-    _ifconfig_vlan_get = new IfConfigVlanGetBsd(*this);
-    _ifconfig_vlan_set = new IfConfigVlanSetBsd(*this);
+    _ifconfig_vlan_get = new IfConfigVlanGetLinux(*this, false);
+    _ifconfig_vlan_set = new IfConfigVlanSetLinux(*this, false);
 #endif
 
     //

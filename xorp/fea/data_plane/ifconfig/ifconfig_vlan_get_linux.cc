@@ -49,31 +49,43 @@
 // The mechanism to obtain the information is Linux-specific ioctl(2).
 //
 
-#ifdef HAVE_VLAN_LINUX
-
-IfConfigVlanGetLinux::IfConfigVlanGetLinux(FeaDataPlaneManager& fea_data_plane_manager)
+IfConfigVlanGetLinux::IfConfigVlanGetLinux(FeaDataPlaneManager& fea_data_plane_manager,
+					   bool is_dummy)
     : IfConfigVlanGet(fea_data_plane_manager),
+      _is_dummy(is_dummy),
       _s4(-1)
 {
 }
 
 IfConfigVlanGetLinux::~IfConfigVlanGetLinux()
 {
-    string error_msg;
-
-    if (stop(error_msg) != XORP_OK) {
-	XLOG_ERROR("Cannot stop the Linux-specific ioctl(2) mechanism to get "
-		   "information about VLAN network interfaces from the "
-		   "underlying system: %s",
-		   error_msg.c_str());
+    if (_is_dummy) {
+	return;
     }
+#if defined(HAVE_VLAN_LINUX) or defined(HAVE_VLAN_BSD)
+    else {
+	string error_msg;
+
+	if (stop(error_msg) != XORP_OK) {
+	    XLOG_ERROR("Cannot stop the ioctl(2) mechanism to get "
+		       "information about VLAN network interfaces from the "
+		       "underlying system: %s",
+		       error_msg.c_str());
+	}
+    }
+#endif
 }
 
 int
 IfConfigVlanGetLinux::start(string& error_msg)
 {
+    if (_is_dummy)
+	_is_running = true;
+
     if (_is_running)
 	return (XORP_OK);
+
+#if defined(HAVE_VLAN_LINUX) or defined(HAVE_VLAN_BSD)
 
     if (_s4 < 0) {
 	_s4 = socket(AF_INET, SOCK_DGRAM, 0);
@@ -83,6 +95,7 @@ IfConfigVlanGetLinux::start(string& error_msg)
 	    XLOG_FATAL("%s", error_msg.c_str());
 	}
     }
+#endif
 
     _is_running = true;
 
@@ -94,9 +107,13 @@ IfConfigVlanGetLinux::stop(string& error_msg)
 {
     int ret_value4 = XORP_OK;
 
+    if (_is_dummy)
+	_is_running = false;
+
     if (! _is_running)
 	return (XORP_OK);
 
+#if defined(HAVE_VLAN_LINUX) or defined(HAVE_VLAN_BSD)
     if (_s4 >= 0) {
 	ret_value4 = comm_close(_s4);
 	_s4 = -1;
@@ -108,6 +125,7 @@ IfConfigVlanGetLinux::stop(string& error_msg)
 
     if (ret_value4 != XORP_OK)
 	return (XORP_ERROR);
+#endif
 
     _is_running = false;
 
@@ -123,6 +141,9 @@ IfConfigVlanGetLinux::pull_config(IfTree& iftree, bool& modified)
 int
 IfConfigVlanGetLinux::read_config(IfTree& iftree, bool& modified)
 {
+    if (_is_dummy)
+	return XORP_OK;
+
     IfTree::IfMap::iterator ii;
     string error_msg;
     bool mod_on_entry = modified;
@@ -167,6 +188,30 @@ IfConfigVlanGetLinux::read_config(IfTree& iftree, bool& modified)
 	/** we'll have probed it when we return. */
 	ifp->set_probed_vlan(true);
 
+	uint16_t vlan_id;
+	string parent_ifname;
+
+#ifdef HAVE_VLAN_BSD
+	struct ifreq ifreq;
+	struct vlanreq vlanreq;
+
+	// Test whether a VLAN interface
+	memset(&ifreq, 0, sizeof(ifreq));
+	memset(&vlanreq, 0, sizeof(vlanreq));
+	strncpy(ifreq.ifr_name, ifp->ifname().c_str(),
+		sizeof(ifreq.ifr_name) - 1);
+	ifreq.ifr_data = reinterpret_cast<caddr_t>(&vlanreq);
+	if (ioctl(_s4, SIOCGETVLAN, (caddr_t)&ifreq) < 0)
+	    continue;		// XXX: Most likely not a VLAN interface
+
+	// Get the VLAN information
+	vlan_id = vlanreq.vlr_tag;
+	parent_ifname = vlanreq.vlr_parent;
+
+	if (parent_ifname.empty())
+	    continue;
+
+#elif defined(HAVE_VLAN_LINUX)
 	struct vlan_ioctl_args vlanreq;
 
 	// Test whether a VLAN interface
@@ -178,12 +223,8 @@ IfConfigVlanGetLinux::read_config(IfTree& iftree, bool& modified)
 	    continue; // not a vlan
 	}
 
-	//
-	// XXX: VLAN interface
-	//
-
 	// Get the parent device
-	string parent_ifname = vlanreq.u.device2;
+	parent_ifname = vlanreq.u.device2;
 	if (parent_ifname.empty()) {
 	    // BUG
 	    XLOG_ERROR("Could not find parent ifname for iface: %s\n", ifp->ifname().c_str());
@@ -201,57 +242,31 @@ IfConfigVlanGetLinux::read_config(IfTree& iftree, bool& modified)
 	    XLOG_ERROR("%s", error_msg.c_str());
 	    continue;
 	}
-	uint16_t vlan_id = vlanreq.u.VID;
+	vlan_id = vlanreq.u.VID;
+#endif
 
-	// NOTE:  It's possible for VLANs to be configured and not
-	// have the parent device configured (or even visible at all, when linux namespace
-	// code is completed.)  Since VLANs are 'real' devices in Linux, this might not really
-	// matter if Xorp doesn't notice... --Ben
-	IfTreeInterface* parent_ifp = iftree.find_interface(parent_ifname);
-	IfTreeVif* parent_vifp = NULL;
-	if ((parent_ifp == NULL) || parent_ifp->is_marked(IfTreeItem::DELETED)) {
-	    // It could appear later, go set the vifp if we can find it
-	}
-	else {
-	    // Find or add the VLAN vif
-	    parent_vifp = parent_ifp->find_vif(ifp->ifname());
-	    if (parent_vifp == NULL) {
-		modified = true;
-		parent_ifp->add_vif(ifp->ifname());
-		parent_vifp = parent_ifp->find_vif(ifp->ifname());
-	    }
-	    XLOG_ASSERT(parent_vifp != NULL);
-	}
-
-	// Copy the vif state
 	IfTreeVif* vifp = ifp->find_vif(ifp->ifname());
-	if (vifp != NULL) {
-	    if (parent_vifp) {
-		modified = true; /* TODO: this could be a lie, but better safe than sorry until
-				  * the copy-recursive method takes 'modified'.
-				  */
-		parent_vifp->copy_recursive_vif(*vifp);
-	    }
-	    else {
-		// Well, lie and set the info in the vifp instead, since it's actually
-		// a vlan.
-		parent_vifp = vifp;
-	    }
+	if (vifp == NULL) {
+	    ifp->add_vif(ifp->ifname());
+	    modified = true;
 	}
-	if (parent_vifp) {
-	    // Set the VLAN vif info
-	    if (!parent_vifp->is_vlan()) {
-		parent_vifp->set_vlan(true);
-		modified = true;
-	    }
-	    if (parent_vifp->vlan_id() != vlan_id) {
-		parent_vifp->set_vlan_id(vlan_id);
-		modified = true;
-	    }
+
+	if (ifp->parent_ifname() != parent_ifname) {
+	    modified = true;
+	    ifp->set_parent_ifname(parent_ifname);
+	}
+	// TODO:  Use a #define or similar for 'VLAN'
+	string vl("VLAN");
+	if (ifp->iface_type() != vl) {
+	    modified = true;
+	    ifp->set_iface_type(vl);
+	}
+	string vid = c_format("%hu", vlan_id);
+	if (ifp->vid() != vid) {
+	    modified = true;
+	    ifp->set_vid(vid);
 	}
     }
 
-    return (XORP_OK);
+    return XORP_OK;
 }
-
-#endif // HAVE_VLAN_LINUX

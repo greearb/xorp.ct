@@ -33,7 +33,7 @@ public:
      * @param fea_data_plane_manager the corresponding data plane manager
      * (@ref FeaDataPlaneManager).
      */
-    IfConfigVlanGetLinux(FeaDataPlaneManager& fea_data_plane_manager);
+    IfConfigVlanGetLinux(FeaDataPlaneManager& fea_data_plane_manager, bool is_dummy);
 
     /**
      * Virtual destructor.
@@ -68,7 +68,7 @@ public:
 
 private:
     int read_config(IfTree& iftree, bool& modified);
-
+    bool _is_dummy;
     int _s4;
 };
 

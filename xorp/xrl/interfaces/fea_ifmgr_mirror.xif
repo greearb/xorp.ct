@@ -18,6 +18,9 @@ interface fea_ifmgr_mirror/0.1 {
 	interface_set_no_carrier ? ifname:txt & no_carrier:bool;
 	interface_set_baudrate ? ifname:txt & baudrate:u64;
 
+	interface_set_parent_ifname ? ifname:txt & parent_ifname:txt;
+	interface_set_iface_type ? ifname:txt & iface_type:txt;
+	interface_set_vid ? ifname:txt & vid:txt;
 
 	vif_add ? ifname:txt & vifname:txt;
 	vif_remove ? ifname:txt & vifname:txt;
@@ -29,9 +32,6 @@ interface fea_ifmgr_mirror/0.1 {
 	vif_set_pim_register ? ifname:txt & vifname:txt & pim_register:bool;
 	vif_set_pif_index ? ifname:txt & vifname:txt & pif_index:u32;
 	vif_set_vif_index ? ifname:txt & vifname:txt & vif_index:u32;
-	vif_set_vlan ? ifname:txt & vifname:txt & is_vlan:bool;
-	vif_set_vlan_id ? ifname:txt & vifname:txt & vlan_id:u32;
-
 
 
 	ipv4_add ? ifname:txt & vifname:txt & addr:ipv4;

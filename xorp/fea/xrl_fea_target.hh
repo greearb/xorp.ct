@@ -28,7 +28,6 @@
 //
 
 #include "xrl/targets/fea_base.hh"
-
 #include "xrl_fib_client_manager.hh"
 
 class EventLoop;
@@ -1051,20 +1050,23 @@ public:
 	// Output values,
 	XrlAtomList&	addresses);
 
-    /**
-     *  Set VLAN vif.
-     *
-     *  @param ifname the name of the physical interface associated with the
-     *  VLAN.
-     *  @param vif the name of the VLAN.
-     *  @param vlan_id the VLAN ID. It must be in the range 0 through 4095.
-     */
-    XrlCmdError ifmgr_0_1_set_vif_vlan(
+    XrlCmdError ifmgr_0_1_set_parent_ifname(
 	// Input values,
 	const uint32_t&	tid,
-	const string&	ifname,
-	const string&	vif,
-	const uint32_t&	vlan_id);
+	const string& ifname,
+	const string& parent_ifname);
+
+    XrlCmdError ifmgr_0_1_set_iface_type(
+	// Input values,
+	const uint32_t&	tid,
+	const string& ifname,
+	const string& iface_type);
+
+    XrlCmdError ifmgr_0_1_set_vid(
+	// Input values,
+	const uint32_t&	tid,
+	const string& ifname,
+	const string& vid);
 
     XrlCmdError ifmgr_0_1_create_address4(
 	// Input values,

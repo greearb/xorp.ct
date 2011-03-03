@@ -407,6 +407,18 @@ InterfaceMonitor::print_interfaces(const string& print_iface_name) const
 	    if (!ifmgr_iface.mac().is_zero())
 		fprintf(stdout, "        ether %s\n",
 			ifmgr_iface.mac().str().c_str());
+
+	    //
+	    // Print the VLAN-related information
+	    //
+	    if (ifmgr_iface.iface_type().size() ||
+		ifmgr_iface.vid().size() ||
+		ifmgr_iface.parent_ifname().size()) {
+		fprintf(stdout, "        type: %s parent interface: %s vid: %s\n",
+			ifmgr_iface.iface_type().c_str(),
+			ifmgr_iface.parent_ifname().c_str(),
+			ifmgr_iface.vid().c_str());
+	    }
 	}
 
 	for (ifmgr_vif_iter = ifmgr_iface.vifs().begin();
@@ -533,6 +545,18 @@ InterfaceMonitor::print_interfaces(const string& print_iface_name) const
 	    fprintf(stdout, "\n");
 
 	    //
+	    // Print the VLAN-related information
+	    //
+	    if (ifmgr_iface.iface_type().size() ||
+		ifmgr_iface.vid().size() ||
+		ifmgr_iface.parent_ifname().size()) {
+		fprintf(stdout, "        type: %s parent interface: %s vid: %s\n",
+			ifmgr_iface.iface_type().c_str(),
+			ifmgr_iface.parent_ifname().c_str(),
+			ifmgr_iface.vid().c_str());
+	    }
+
+	    //
 	    // Print the IPv6 addresses
 	    //
 	    for (a6_iter = ifmgr_vif.ipv6addrs().begin();
@@ -583,14 +607,6 @@ InterfaceMonitor::print_interfaces(const string& print_iface_name) const
 	    if (!ifmgr_iface.mac().is_zero()) {
 		fprintf(stdout, "        ether %s\n",
 			ifmgr_iface.mac().str().c_str());
-	    }
-
-	    //
-	    // Print the VLAN-related information
-	    //
-	    if (ifmgr_vif.is_vlan()) {
-		fprintf(stdout, "        vlan: %u parent interface: %s\n",
-			ifmgr_vif.vlan_id(), ifmgr_iface_name.c_str());
 	    }
 	}
     }
