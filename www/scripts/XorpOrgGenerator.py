@@ -16,7 +16,7 @@ xorp_main = [
 # nav bar tree
 xorp_links = [
 # --
-    ("Get XORP.CT", ""),
+    ("Get XORP", ""),
     ("Downloads", "http://github.com/greearb/xorp.ct/downloads"),
     ("Live-CD", "livecd.html"),
     ("Browse Code", "http://github.com/greearb/xorp.ct"),
@@ -115,7 +115,7 @@ def write_search_form():
 <input type="submit" value="Google Search" /></td></tr>
 <tr><td align="left" style="font-size:75%">
 <input type="checkbox"  name="sitesearch"
- value="candelatech.com/xorp.ct" checked /> search only XORP.CT<br />
+ value="xorp.org" checked /> search only XORP<br />
 </td></tr></table>
 
 </form>"""
@@ -159,7 +159,7 @@ def write_header(filename, headextras = []):
     open_div("container")
 
     open_div("left")
-    print """<a href="http://www.candelatech.com/xorp.ct"><img src="images/mad/logo-xorp_org.gif" ALT="XORP Logo" border="0"/></a>"""
+    print """<a href="http://www.xorp.org"><img src="images/mad/logo-xorp_org.gif" ALT="XORP Logo" border="0"/></a>"""
     close_div("left")
     open_div("header")
     write_navbar_depth(filename, 1, xorp_main)

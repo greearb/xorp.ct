@@ -47,6 +47,10 @@ use it for multicast routing make sure that the kernel has the
 appropriate support. If you try XORP on another platform, let us know
 how you fare.  See <a href="porting.html">porting</a> if you're
 interested in porting XORP to a new platform.
+<P>
+Recently, support for XORP on Windows was re-added.  See the
+BUILD_NOTES in the xorp/ directory for more information.
+<P>
 
 <a name="compiling"></a><h2>Compiling XORP from source</h2>
 
@@ -157,11 +161,11 @@ a configured interface routes the route will not be installed.
 For protocols that are explicitly aware of interfaces only configured
 interfaces will be used.
 <P>
-Every physical network device in the system is considered to be an
-"interface". Every interface can contain a number of virtual
-interfaces ("vif"s). In the majority of cases the interface name and vif
-name will be identical and will map to the name given to the interface
-by the operating system. A virtual interface is configured with the address
+Every physical and virtual network device in the system is considered to be an
+"interface". Every interface can contain a single virtual interface (VIF).  The VIF structure
+was originally implemented to allow multiple VIFS per interface, but in practice
+that is not supported.  So, have the VIF name be the same as the interface name.
+A virtual interface is configured with the address
 or addresses that should be used. At each level in the configuration
 hierarchy ("interface", "vif" and "address") this part of the configuration
 is implicitly enabled.

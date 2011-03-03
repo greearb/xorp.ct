@@ -10,21 +10,21 @@
       <a href="http://www.candelatech.com/cgi/cr_login.cgi">create an account on candelatech.com</a> or
       just use <pre>user:  guest  password: guest</pre> to log in to the downloads page. </li>
   <li>Boot it up.</li>
-  <li>If you want to use Xorp all by itself, it is installed in /usr/local/xorp.  You
+  <li>If you want to use XORP all by itself, it is installed in /usr/local/xorp.  You
       can create a config file and start it manually:  xorp_rtrmgr -b [cfg-file]</li>
-  <li>Or, you can use LANforge to auto-create Xorp config files and manage xorp
+  <li>Or, you can use LANforge to auto-create Xorp config files and manage XORP
       using the Netsmith feature.  See more instructions below if using this method.</li>
   <li>Profit!</li>
 </ol>
 
 
 <P>
-<h2>Using LANforge and Netsmith to create Xorp routers.</h2>
+<h2>Using LANforge and Netsmith to create XORP routers.</h2>
 <P>
 LANforge is a network testing tool produced by <a href="http://www.candelatech.com">Candela Technologies</a>.
 It can be used for network traffic generation and network emulation (including latency,
 packet loss, bandwidth-constriction, etc).  As part of its virtual-routing feature
-set, it can manage Xorp through its Netsmith GUI widget.  As long as you do not
+set, it can manage XORP through its Netsmith GUI widget.  As long as you do not
 attempt to generate traffic or add network impairment, you do not need any LANforge
 licenses.
 <P>
@@ -43,11 +43,11 @@ licenses.
       the virtual routers.  When creating connections, be sure to skip the 'B'
       ports and the WanLink, otherwise you will need LANforge-ICE emulation licenses
       for the WanLink to function.</li>
-  <li>When satisfied, click Apply and Xorp will be (re)started with the proper config.</li>
+  <li>When satisfied, click Apply and XORP will be (re)started with the proper config.</li>
   <li>The xorp config files are saved in /home/lanforge/vr_conf/ and may be useful as
-      a starting point for more advanced xorp configurations.</li>
+      a starting point for more advanced XORP configurations.</li>
   <li>You may wish to see some of the
       <a href="http://www.candelatech.com/lanforge_v3/cb/lfgui_ice_cookbook.html">LANforge cookbook examples</a>
       for more details.  These examples are tailored to using LANforge, but the ones related to routing
-      will be using Xorp.</li>
+      will be using XORP.</li>
 </ol>
