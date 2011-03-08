@@ -3,7 +3,7 @@
 
 This file contains XORP release notes (most recent releases first).
 
-Release 1.8.3-CT  (Work in Progress)
+Release 1.8.3  (Work in Progress)
 
    *  Change the way VLANs are created.  This changes the config
       file syntax (though the original syntax didn't actually work

@@ -26,3 +26,10 @@ git clone ../ $TMPDIR/xorp.ct.github
 # Build rpms
 rpmbuild -ba $RPMDIR/SPECS/xorp.ct.spec  # building binary and the source
 
+#rpmbuild -bb $RPMDIR/SPECS/xorp.ct.spec  # build just the binary
+#rpmbuild -bs $RPMDIR/SPECS/xorp.ct.spec  # build just the source rpm
+
+# Files will be written something like this:
+#Wrote: /home/greearb/rpmbuild/SRPMS/xorp-1.8.3-1.fc13.src.rpm
+#Wrote: /home/greearb/rpmbuild/RPMS/i686/xorp-1.8.3-1.fc13.i686.rpm
+#Wrote: /home/greearb/rpmbuild/RPMS/i686/xorp-debuginfo-1.8.3-1.fc13.i686.rpm

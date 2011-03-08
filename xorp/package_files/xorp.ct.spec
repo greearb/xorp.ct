@@ -5,17 +5,17 @@
 %define prefixdir   /usr/local/xorp
 
 Summary:          An eXtensible Open Router Platform (XORP)
-Name:             xorp-ct
-Version:          1.8
+Name:             xorp
+Version:          1.8.3
 Release:          1%{?dist}%{?pext}
 License:          GPL
 Group:            System Environment/Daemons
-Source0:          xorp-%{version}-CT.tar.lzma
+Source0:          xorp-%{version}.tar.lzma
 Source1:          xorp.redhat
 Source2:          xorp.sysconfig
 Source3:          xorp.logrotate
 Source4:          xorp.conf
-URL:              http://candelatech.com/xorp-ct/
+URL:              http://www.xorp.org
 Buildroot:        %{_tmppath}/xorp-%{version}-%{release}-root-%(%{__id_u} -n)
 Vendor:           The XORP Team <xorp-users@xorp.org>
 Requires:         traceroute
@@ -141,6 +141,6 @@ fi
 
 
 %changelog
-* Wed Jun 9 2010 Ben Greear <greearb@candelatech.com> ct-1.8-CT
+* Tue Mar 08 2011 Ben Greear <greearb@candelatech.com> 1.8.3
 * Sun Mar 14 2010 Achmad Basuki <abazh@soi.asia> - ct-1.7-WIP.1
 - Initial build of xorp.ct
