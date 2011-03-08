@@ -40,6 +40,9 @@
 #ifdef HAVE_LINUX_IF_VLAN_H
 #include <linux/if_vlan.h>
 #endif
+#ifdef HAVE_NET_IF_VLAN_VAR_H
+#include <net/if_vlan_var.h>
+#endif
 
 #include "fea/ifconfig.hh"
 #include "ifconfig_vlan_set_linux.hh"
@@ -297,7 +300,7 @@ IfConfigVlanSetLinux::add_vlan(const string& parent_ifname,
 				 tmp_vlan_name.c_str(), new_vlan_name,
 				 strerror(errno));
 	    string dummy_error_msg;
-	    delete_vlan(parent_ifname, string(ifreq.ifr_name),
+	    delete_vlan(tmp_vlan_name.c_str(),
 			dummy_error_msg);
 	    return (XORP_ERROR);
 	}
@@ -421,11 +424,10 @@ IfConfigVlanSetLinux::delete_vlan(const string& vlan_name,
     //
     // Delete the VLAN
     //
-    if (delete_vlan(config_iface.ifname(), config_vif.vifname(), error_msg)
+    if (delete_vlan(vlan_name, error_msg)
 	!= XORP_OK) {
-	error_msg = c_format("Failed to delete VLAN %s on interface %s: %s",
-			     config_vif.vifname().c_str(),
-			     config_iface.ifname().c_str(),
+	error_msg = c_format("Failed to delete VLAN %s: %s",
+			     vlan_name.c_str(),
 			     error_msg.c_str());
 	return (XORP_ERROR);
     }
