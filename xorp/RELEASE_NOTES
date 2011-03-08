@@ -5,6 +5,10 @@ This file contains XORP release notes (most recent releases first).
 
 Release 1.8.3-CT  (Work in Progress)
 
+   *  Change the way VLANs are created.  This changes the config
+      file syntax (though the original syntax didn't actually work
+      right..so probably no one is actually using it.)
+
    *  Re-add support for XORP on Microsoft Windows.  Add instructions
       to BUILD_NOTES for cross-compiling with mingw.
 
