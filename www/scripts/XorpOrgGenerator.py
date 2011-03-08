@@ -20,7 +20,7 @@ xorp_links = [
     ("Downloads", "http://github.com/greearb/xorp.ct/downloads"),
     ("Live-CD", "livecd.html"),
     ("Browse Code", "http://github.com/greearb/xorp.ct"),
-#    ("Mirror Sites", "mirrors.html"),
+    ("Old Releases", "releases/old"),
     ("Security Advisories", "advisories.html"),
 
 # --
@@ -39,7 +39,7 @@ xorp_links = [
 #    ("Contributing", "contributing.html"),
 #    ("Developers", "people.html"),
     ("Source Repository", "scm.html"),
-    ("Bug Reporting", "http://github.com/greearb/xorp.ct/issues"),
+    ("Bug Reporting", "bugzilla"),
     ("Build Bot", "http://dmz2.candelatech.com:8010/waterfall"),
 #    ("Operating a mirror", "mirror_operation.html"),
     ("News", "news.html"),
