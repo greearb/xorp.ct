@@ -20,12 +20,10 @@
 
 
 #include "fea/fea_module.h"
-
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/ether_compat.h"
-
 #include "libcomm/comm_api.h"
 
 #ifdef HAVE_SYS_IOCTL_H
@@ -39,7 +37,6 @@
 #endif
 
 #include "fea/ifconfig.hh"
-
 #include "ifconfig_vlan_get_linux.hh"
 
 
@@ -95,6 +92,8 @@ IfConfigVlanGetLinux::start(string& error_msg)
 	    XLOG_FATAL("%s", error_msg.c_str());
 	}
     }
+#else
+    UNUSED(error_msg);
 #endif
 
     _is_running = true;
@@ -105,8 +104,6 @@ IfConfigVlanGetLinux::start(string& error_msg)
 int
 IfConfigVlanGetLinux::stop(string& error_msg)
 {
-    int ret_value4 = XORP_OK;
-
     if (_is_dummy)
 	_is_running = false;
 
@@ -114,6 +111,8 @@ IfConfigVlanGetLinux::stop(string& error_msg)
 	return (XORP_OK);
 
 #if defined(HAVE_VLAN_LINUX) or defined(HAVE_VLAN_BSD)
+    int ret_value4 = XORP_OK;
+
     if (_s4 >= 0) {
 	ret_value4 = comm_close(_s4);
 	_s4 = -1;
@@ -125,6 +124,8 @@ IfConfigVlanGetLinux::stop(string& error_msg)
 
     if (ret_value4 != XORP_OK)
 	return (XORP_ERROR);
+#else
+    UNUSED(error_msg);
 #endif
 
     _is_running = false;
@@ -188,7 +189,7 @@ IfConfigVlanGetLinux::read_config(IfTree& iftree, bool& modified)
 	/** we'll have probed it when we return. */
 	ifp->set_probed_vlan(true);
 
-	uint16_t vlan_id;
+	uint16_t vlan_id = 0xFFFF;
 	string parent_ifname;
 
 #ifdef HAVE_VLAN_BSD

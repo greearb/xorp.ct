@@ -45,26 +45,12 @@
 #include "fea/data_plane/io/io_link_dummy.hh"
 #include "fea/data_plane/io/io_ip_dummy.hh"
 #include "fea/data_plane/io/io_tcpudp_dummy.hh"
-
 #include "fea_data_plane_manager_dummy.hh"
 
 
 //
 // FEA data plane manager class for Dummy FEA.
 //
-
-#if 0
-extern "C" FeaDataPlaneManager* create(FeaNode& fea_node)
-{
-    return (new FeaDataPlaneManagerDummy(fea_node));
-}
-
-extern "C" void destroy(FeaDataPlaneManager* fea_data_plane_manager)
-{
-    delete fea_data_plane_manager;
-}
-#endif // 0
-
 
 FeaDataPlaneManagerDummy::FeaDataPlaneManagerDummy(FeaNode& fea_node)
     : FeaDataPlaneManager(fea_node, "Dummy")

@@ -52,8 +52,6 @@
 // The mechanism to set the information is Linux-specific ioctl(2).
 //
 
-#if defined(HAVE_VLAN_LINUX) or defined(HAVE_VLAN_BSD)
-
 IfConfigVlanSetLinux::IfConfigVlanSetLinux(FeaDataPlaneManager& fea_data_plane_manager,
 					   bool is_dummy)
     : IfConfigVlanSet(fea_data_plane_manager),
@@ -96,6 +94,8 @@ IfConfigVlanSetLinux::start(string& error_msg)
 	    XLOG_FATAL("%s", error_msg.c_str());
 	}
     }
+#else
+    UNUSED(error_msg);
 #endif
     _is_running = true;
 
@@ -105,7 +105,6 @@ IfConfigVlanSetLinux::start(string& error_msg)
 int
 IfConfigVlanSetLinux::stop(string& error_msg)
 {
-    int ret_value4 = XORP_OK;
     if (_is_dummy)
 	_is_running = false;
 
@@ -113,6 +112,7 @@ IfConfigVlanSetLinux::stop(string& error_msg)
 	return (XORP_OK);
 
 #if defined(HAVE_VLAN_LINUX) or defined(HAVE_VLAN_BSD)
+    int ret_value4 = XORP_OK;
     if (_s4 >= 0) {
 	ret_value4 = comm_close(_s4);
 	_s4 = -1;
@@ -124,6 +124,8 @@ IfConfigVlanSetLinux::stop(string& error_msg)
 
     if (ret_value4 != XORP_OK)
 	return (XORP_ERROR);
+#else
+    UNUSED(error_msg);
 #endif
 
     _is_running = false;
@@ -190,6 +192,11 @@ IfConfigVlanSetLinux::config_add_vlan(const IfTreeInterface* system_ifp,
     error_msg = c_format("Unknown virtual device type: %s\n",
 			 config_if.iface_type().c_str());
     return XORP_ERROR;
+#else
+    UNUSED(system_ifp);
+    UNUSED(config_if);
+    UNUSED(error_msg);
+    return XORP_OK;
 #endif
 }
 
@@ -391,6 +398,12 @@ IfConfigVlanSetLinux::add_vlan(const string& parent_ifname,
 	}
 #endif // SIOCSIFNAME
     }
+#else
+    /* Un-supported VLAN platform (Windows??) */
+    UNUSED(parent_ifname);
+    UNUSED(vlan_name);
+    UNUSED(vlan_id);
+    UNUSED(error_msg);
 #endif
 
     return (XORP_OK);
@@ -432,9 +445,11 @@ IfConfigVlanSetLinux::delete_vlan(const string& vlan_name,
 			     vlan_name.c_str(), strerror(errno));
 	return (XORP_ERROR);
     }
+#else
+    /* Un-supported VLAN platform...Windows?? */
+    UNUSED(vlan_name);
+    UNUSED(error_msg);
 #endif
 
     return (XORP_OK);
 }
-
-#endif // HAVE_VLAN_LINUX
