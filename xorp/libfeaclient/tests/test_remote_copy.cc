@@ -22,17 +22,12 @@
 
 
 #include "libfeaclient_module.h"
-
 #include "libxorp/xlog.h"
-
 #include "libxorp/c_format.hh"
 #include "libxorp/eventloop.hh"
-
 #include "libxipc/finder_server.hh"
 #include "libxipc/xrl_std_router.hh"
-
 #include "xrl/targets/test_fea_ifmgr_mirror_base.hh"
-
 #include "ifmgr_atoms.hh"
 #include "ifmgr_cmds.hh"
 #include "ifmgr_cmd_queue.hh"
@@ -198,12 +193,16 @@ populate_iftree(IfMgrIfTree& t)
 	verbose_log("Failed to set pif index\n");
 	return 1;
     }
-    if (IfMgrVifSetIsVlan("if0", "vif0", true).execute(t)== false) {
-	verbose_log("Failed to set VLAN vif\n");
+    if (IfMgrIfSetString("if0", "eth0",  IF_STRING_PARENT_IFNAME).execute(t) == false) {
+	verbose_log("Failed to set VLAN parent ifname\n");
 	return 1;
     }
-    if (IfMgrVifSetVlanId("if0", "vif0", 1234).execute(t)== false) {
-	verbose_log("Failed to set VLAN ID\n");
+    if (IfMgrIfSetString("if0", "VLAN",  IF_STRING_IFTYPE).execute(t) == false) {
+	verbose_log("Failed to set iface-type\n");
+	return 1;
+    }
+    if (IfMgrIfSetString("if0", "1234",  IF_STRING_VID).execute(t) == false) {
+	verbose_log("Failed to set VLAN VID\n");
 	return 1;
     }
 
