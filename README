@@ -17,9 +17,6 @@ USA, and spent some time with the team at XORP, Inc.  It is now maintained
 and improved on a volunteer basis by a core of long-term XORP developers
 and some newer contributors.
 
-XORP.ct is branch of XORP under active development and maintained by
-Candela Technologies, with input from the community.
-
 XORP's primary goal is to be an open platform for networking protocol
 implementations and an alternative to proprietary and closed networking
 products in the marketplace today.
@@ -145,10 +142,10 @@ You may also wish to try this script to create a tar.gz install package:
 In general, configuration and startup of the various XORP processes are
 normally meant to happen via the router manager (rtrmgr), so please
 refer first to the XORP configuration guide:
-http://www.candelatech.com/xorp.ct/getting_started.html
+http://www.xorp.org/getting_started.html
 
 For additional information see the user documentation:
-http://www.candelatech.com/xorp.ct/releases/current/docs/user_manual/user_manual.pdf
+http://www.xorp.org/releases/current/docs/user_manual/user_manual.pdf
 and docs/user_manual.
 
 
@@ -280,13 +277,15 @@ limited interest, or are not relevant to the current release:
 6. Authors
 ==========
 
-The core team currently consists of:
+  * Ben Greear (Current Project Manager)
+  * Pierre Lepropre  (Documentation)
+
+The old core team consisted of:
 
   * Fred Bauer
   * Andrea Bittau
   * Javier Cardona
   * Atanu Ghosh
-  * Ben Greear  (Maintainer of XORP.ct branch)
   * Adam Greenhalgh
   * Mark Handley
   * Orion Hodson
@@ -314,19 +313,20 @@ The core team currently consists of:
     - Vyatta
     - CenGen
     - Candela Technologies (Sponsors Ben Greear)
+    - RUN at University of Liege (hosts & supports the documentation wiki)
 
   * Martin C. Shepherd for the libtecla library (used by the CLI).
 
 8. Additional information
 =========================
 
-  * WWW: http://www.candelatech.com/xorp.ct/
   * WWW: http://www.xorp.org/
 
   * Source code and binary distribution access:
     http://github.com/greearb/xorp.ct
 
-  * XORP Bugzilla database and bug reports: see XORP Web site.
+  * XORP Bugzilla database and bug reports:
+    http://www.xorp.org/bugzilla
 
   * XORP users mailing list: xorp-users@xorp.org
     This list is for general XORP discussion.
