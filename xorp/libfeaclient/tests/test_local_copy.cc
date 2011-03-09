@@ -157,15 +157,15 @@ test_main()
 	verbose_log("Failed to set pif index\n");
 	return 1;
     }
-    if (IfMgrVifSetString("if0", "eth0",  IF_STRING_PARENT_IFNAME).execute(t) == false) {
+    if (IfMgrIfSetString("if0", "eth0",  IF_STRING_PARENT_IFNAME).execute(t) == false) {
 	verbose_log("Failed to set VLAN parent ifname\n");
 	return 1;
     }
-    if (IfMgrVifSetString("if0", "VLAN",  IF_STRING_IFTYPE).execute(t) == false) {
+    if (IfMgrIfSetString("if0", "VLAN",  IF_STRING_IFTYPE).execute(t) == false) {
 	verbose_log("Failed to set iface-type\n");
 	return 1;
     }
-    if (IfMgrVifSetString("if0", "1234",  IF_STRING_VID).execute(t) == false) {
+    if (IfMgrIfSetString("if0", "1234",  IF_STRING_VID).execute(t) == false) {
 	verbose_log("Failed to set VLAN VID\n");
 	return 1;
     }
