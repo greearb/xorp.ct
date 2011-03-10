@@ -1,0 +1,4 @@
+The bgp files were intended for bgp regression tests.  Those tests may
+not be fully functional, but useful to keep the data files in case someone
+feels like fixing bgp regression tests.
+
