@@ -26,6 +26,9 @@
 
 #ifndef	HOST_OS_WINDOWS
 
+#include <pwd.h>
+#include <grp.h>
+
 
 const char* XrlPFUNIXListener::_protocol = "unix";
 
@@ -44,11 +47,22 @@ XrlPFUNIXListener::XrlPFUNIXListener(EventLoop& e, XrlDispatcher* xr)
         xorp_throw(XrlPFConstructorError, comm_get_last_error_str());
     }
 
-    // Make sure socket is read/write by group and owner.
-    if (chmod(path.c_str(), S_ISUID | S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP | S_IROTH ) < 0) {
-	cerr << "ERROR:  Failed chgrp on path: " << path << " error: "
-	     << strerror(errno) << endl;
-	// Carry on, might turn out OK!
+    struct group *grp = getgrnam("xorp");
+    if (grp) {
+	/* Change the group to be 'xorp', leave owner as is. */
+	if (chown(path.c_str(), -1, grp->gr_gid)) {
+	    cerr << "ERROR: Failed chown on path: " << path << " error: " << strerror(errno) << endl;
+	}
+    }
+    else {
+	// Something is wrong, probably no xorp user.  This is not necessarily
+	// a real problem, so don't want to fill up logs.  Might be worth
+	// doing a similar check in xorp_rtrmgr startup and warn once there...
+    }
+
+    /* Owner read/write, group read/write, other read -JC */
+    if (chmod(path.c_str(), S_IWUSR| S_IRUSR| S_IWGRP| S_IRGRP| S_IROTH)) {
+	cerr << "ERROR: Failed chmod on path: " << path << " error: " << strerror(errno) << endl;
     }
 
     _address_slash_port = path;
