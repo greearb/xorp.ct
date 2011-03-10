@@ -1,9 +1,5 @@
-#
-# $XORP$
-#
 
 This directory contains XORP sample configuration files.
-Each configuration file has the minimum set of configuration options
-necessary to run the corresponding module(s)/protocol(s).
+
 See the XORP User Manual for a complete set of all configuration
 options.

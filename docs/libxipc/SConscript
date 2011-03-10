@@ -33,7 +33,10 @@ env.AppendUnique(TEXINPUTS = [
 	env['sourcedir'] + '/../xorp/' + ':',
 	env['sourcedir'] + '/libxipc/' + ':',
 	])
-xi_pdf = env.PDF(env.DVI('xrl_interfaces.tex'))
-xi_ps = env.PostScript(env.DVI('xrl_interfaces.tex'))
 
-Default(lx_pdf, xi_pdf, lx_ps, xi_ps)
+# This breaks for one reason or another. --Ben
+#xi_pdf = env.PDF(env.DVI('xrl_interfaces.tex'))
+#xi_ps = env.PostScript(env.DVI('xrl_interfaces.tex'))
+#Default(lx_pdf, xi_pdf, lx_ps, xi_ps)
+
+Default(lx_pdf, lx_ps)

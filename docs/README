@@ -1,0 +1,10 @@
+
+To build documentation, you first need to install latex:
+
+yum install texlive-latex
+
+
+Then build it with:
+
+scons
+

@@ -25,7 +25,8 @@ xorp_links = [
 
 # --
     ("Documentation", ""),
-    ("Getting Started", "getting_started.html"),
+    ("XORP Wiki", "http://xorp.run.montefiore.ulg.ac.be/start"),
+    ("Getting Started", "http://xorp.run.montefiore.ulg.ac.be/latex2wiki:getting_started"),
     ("User Manual (PDF)", "releases/current/docs/user_manual/user_manual.pdf"),
 #    ("Frequently Asked Questions", "faq.html"),
 #    ("Architecture", "architecture.html"),
