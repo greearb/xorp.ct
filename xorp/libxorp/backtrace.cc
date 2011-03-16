@@ -2,7 +2,7 @@
 /* vim:set sts=4 ts=8: */
 
 /*
- * Copyright (c) 2009 XORP, Inc.
+ * Copyright (c) 2009-2011 XORP, Inc and Others
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License, Version
