@@ -17,7 +17,14 @@
 #
 # COPYRIGHT_HOLDER: The name of the copyright holder
 #
+
+# For files not changed since 2009:
 OLD_COPYRIGHT_HOLDER="XORP, Inc."
+
+# For files already updated to new 'and Others'
+# copyright notice.
+#OLD_COPYRIGHT_HOLDER="XORP, Inc and Others"
+
 COPYRIGHT_HOLDER="XORP, Inc and Others"
 
 #

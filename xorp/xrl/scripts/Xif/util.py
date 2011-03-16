@@ -153,7 +153,7 @@ def standard_preamble(is_header, filename):
  * %s
  * vim:set sts=4 ts=8 ft=cpp:
  *
- * Copyright (c) 2001-2010 XORP, Inc and Others
+ * Copyright (c) 2001-2011 XORP, Inc and Others
  * See the XORP LICENSE.lgpl file for licensing, conditions, and warranties
  * on use.
  *
