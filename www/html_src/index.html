@@ -24,35 +24,52 @@ for XORP.  His XORP.CT tree is now the official XORP code
 base.  This officially 'un-forks' XORP and will allow
 users and contributors to focus on a single code-base.
 <P>
-Key features
-of the 1.8-CT release are:
+XORP 1.8.3 is Released
 
   <ul>
-   <li>Allow OSPF, RIP, BGP, OSLR, and PIM to better handle interfaces
-      being added to and deleted from a running xorp instance via the 'xorpsh' CLI tool.</li>
+    <li>Change the way VLANs are created.  This changes the config
+      file syntax (though the original syntax didn't actually work
+      right..so probably no one is actually using it.)</li>
 
-   <li>PIM: Fix state-machine lockup due to failure to advance state machine in some error cases.</li>
+    <li>Re-add support for XORP on Microsoft Windows.  Add instructions
+      to BUILD_NOTES for cross-compiling with mingw.</li>
 
-   <li>RIP, BGP, PIM: Allow binding the protocol sockets to specific interfaces.</li>
+    <li>Add more options for disabling compile of certain modules.
+      See:  scons --help</li>
 
-   <li>FEA: Support binding to specific interfaces, including multicast protocols.
-      Use Netlink (Linux only) to filter events so that a single instance of
-      xorp pays attention to only it's interfaces.</li>
+    <li>Add support for IPv6 multicast with virtual routing tables.
+      Requires Linux kernel 2.6.35 or higher.</li>
 
-   <li>FEA: Support new Linux kernel API to provide multiple multicast
-     routing tables per kernel instance. This requires kernel 2.6.34
-     and the latest iproute and iptable tools.  These changes are
-     backwards compatible with normal kernels.</li>
+    <li>Support cross-compiling.  See BUILD_NOTES.</li>
 
-   <li>OLSR: Enable building OLSR, support binding to a specific interface.</li>
+    <li>BSD:  Don't crash FEA when interface disappears.</li>
 
-   <li>Support building IPv6 multicast support on Linux.</li>
+    <li>BSD:  Don't fail commit if cannot remove route that doesn't exist.</li>
 
-   <li>Re-enable Microsoft Windows support. IPv6 looks questionable,
-       but it's likely IPv4 works good enough.</li>
+    <li>Add signal handling for more graceful exit.  Helps clean up /var/tmp/xrl.*
+      files and lets valgrind report more useful information.</li>
+
+    <li>timers:  Fix memory leak related to the Heap class.</li>
+
+    <li>BGP:  Fix up tear-down logic to make sure it exits promptly in
+      all cases.</li>
+
+    <li>pim: Fix a recursive delete issue in pim code, exposed by the ability to
+      gracefully shut down processes with SIGTERM.</li>
+
+    <li>rtrmgr:  Allow starting helper processes under valgrind.  Just
+      create a file called XORP_USE_VALGRIND in the working directory.
+      If you want xorp_rtrmgr to use valgrind, you have to start it under
+      valgrind manually.</li>
+
+    <li>FEA:  Properly clean up all sockets and remove them from the eventloop
+      callback when cleaing up io_ip_socket objects.</li>
+
+    <li>firewall:  Support compiling netlink firewall support on Linux, if
+      kernel headers are properly modified to compile with c++.</li>
 
    <li>A more detailed change list list is in Release Notes
-       available at <a href="releases/1.8-CT/docs/RELEASE_NOTES">releases/1.8-CT/docs/RELEASE_NOTES</a>
+       available at <a href="releases/1.8.3/docs/RELEASE_NOTES">releases/1.8.3/docs/RELEASE_NOTES</a>
    </li>
   </ul>
  </p>
@@ -78,18 +95,15 @@ If you have any questions, please feel free to contact us at
 <P>
 Support for cross-compiling XORP to Microsoft
 Windows using the mingw cross-compiler was
-recently added.  The documentation is being moved
-to a wiki,
-and there is an on-going effort to deal better with
-802.1Q VLANs.  XORP 1.8.3 will be released when
-VLANS have been resolved, hopefully by end of March,
-2011.
+recently added.  The documentation was moved
+to a wiki, and VLAN handling was re-worked.
+Asynchronous XRL support should be coming sono.
 <br>
 Get snapshots or check out a live source tree
 on <a href="http://github.com/greearb/xorp.ct">github</a>.
 <P>
 
-<h2>Latest Release: 1.8-CT</h2>
+<h2>Latest Release: 1.8.3</h2>
 
 <p>
 XORP is available for download as a

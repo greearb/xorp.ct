@@ -3,7 +3,7 @@
 
 This file contains XORP release notes (most recent releases first).
 
-Release 1.8.3  (Work in Progress)
+Release 1.8.3 (March 16, 2011)
 
    *  Change the way VLANs are created.  This changes the config
       file syntax (though the original syntax didn't actually work
@@ -54,6 +54,178 @@ Release 1.8.3  (Work in Progress)
 
    *  firewall:  Support compiling netlink firewall support on Linux, if
       kernel headers are properly modified to compile with c++.
+
+
+git shortlog since 1a4cdaa30cec4ab15519859df78a462b7ee2a3e1 (Around 1.8-CT)
+
+Ben Greear (163):
+      Remove some old CVS file tags, update version to 1.8-CT
+      Update copyright script for 2010.
+      Remove some comments, update more strings from 1.7 to 1.8
+      Remove more commented 1.7 strings.
+      Update rls-name and date for tex files.
+      Update copyright for all files touched since 1.7 release.
+      Start updating xorp web page files for XORP.CT.
+      Remove auto-generated html files.
+      VRRP:  Add prefix-length attribute to VRRP user-guide.
+      Update latex docs to point to www.candelatech.com/xorp.ct instead of xorp.org
+      Change some URLs over to www.candelatech.com/xorp.ct
+      docs:  Build .ps targets as well as .pdf
+      docs:  Allow doxygen to create source code docs
+      Fix up source repository link on web page.
+      scons:  Detect lack of openssl/md5.h and exit with warning.
+      scons:  Warn user if libcurses isn't found and exit build process.
+      rtrmgr:  Need to link against libcrypto on Fedora 13.
+      scons:  Warn user and fail if cannot find libcrypto.
+      boost:  Remove boost header requirment.
+      scons:  Tell users how to install libpcap-devel package.
+      www:  Create script to package web page, update some broken URLs.
+      OLSR/BGP:  Allow to not compile OLSR and BGP.
+      Build BGP and OLSR by default.
+      OLSR:  Fix OLSR build when ipv6 is disabled.
+      Allow compiling out VRRP and OSPF.
+      Fix up defaults for protocol enables.
+      MFEA6:  Support IPv6 multicast routing virtual routing tables.
+      Fix 'scons install' when strip=yes:  Cannot strip scripts.
+      rpms:  Fix up rpm-builder script and spec file.
+      scons:  Fix optimize=size compile warnings with -fno-strict-aliasing
+      rip:  Allow disabling compile of RIP, saves around 750k on disk.
+      fea:  Enable disable compile of fea-dummy logic.
+      xorpsh:  Allow disabling compile of xorpsh, saves around 820k on disk.
+      templates:  Don't install templates if their modules are not compiled.
+      clang:  Start making changes to build under clang.
+      clang:  Change some code to keep clang from crashing.
+      clang:  Fix c++ template issues, minimal system builds now.
+      clang:  fix rest of xorp to compile with clang.
+      stl:  Move stl includes to libxorp/xorp.h in preparation to try ustl.
+      ustl:  Link against ustl when that is selected.
+      bgp/ustl:  Enable ustl compile, open-code operator<, operator==.
+      libxorp/ustl:  Change code to work with ustl limitations.
+      cli/ustl:  Update cli for uSTL compile.
+      olsr/ustl:  Work on getting olsr to compile under ustl.
+      fea/ustl:  fea changes to work better with uSTL.
+      ustl:  Get fib2mrib compiling with uSTL.
+      ustl:  Get feaclientlib compiling with uSTL.
+      ustl:  Get libproto compiling with uSTL.
+      ustl:  Modify libxipc to work with uSTL.
+      ustl:  Rest of the uSTL changes.
+      ustl:  Fix build errors when NOT using ustl, introduced by ustl changes.
+      uSTL:  Add ustl patch and instructions for building with uSTL.
+      scons/check:  Fix compile for 'scons check' code.
+      Update buildbot info.
+      Merge branch 'master' of github.com:greearb/xorp.ct
+      Update rls notes for uSTL.
+      Quieten BINDTODEVICE warning when not running as super-user.
+      clang:  Work around clang bug in test harness code.
+      check:  Attempt to fix up bgp test harness to properly show all failed tests.
+      scons-check:  Fix typo introduced by daddy's little helper & friend!
+      tests:  Normalize pass/fail strings for easier post-processing.
+      tests:  Fix build of libxipc stress test tool (disable batching logic)
+      tests:  Exit test_busted fork after completing test.
+      tests:  Make bgp test cases more obvious.
+      test_busted:  Attempt better cleanup if process hangs.
+      bgp:  Fix build when profiling is disabled.  Fix typo in test_busted script.
+      uSTL:  Get slightly closer to building ospf with uSTL
+      test:  Try a little harder to kill hung test programs.
+      cli:  Don't return reference to pointer object.  Makes it too easy to not realize object can be NULL.
+      build:  Pass CXXFLAGS and similar to config process.
+      Update build-notes with cross-compile instructions.
+      curses:  Allow use of EITHER ncurses or curses library.
+      html/docs:  Update web page with build-bot link.
+      bgp:  Don't assert on duplicate attributes.
+      Merge branch 'master' of git@github.com:greearb/xorp.ct
+      cross-compile:  Update notes for cross-compiling ncurses.
+      Add some more cross-compile notes.
+      build:  Fix static build:  scons shared=no
+      Merge branch 'master' of git@github.com:greearb/xorp.ct
+      fea:  Handle funky input from netlink without crashing.
+      buildbot:  Add buildbot master.cfg file.
+      buildbot:  Update README for buildbot server instructions.
+      bsd:  Attempt to make device removal work better on bsd.
+      BSD/fea:  Fix typo in previous attempt.
+      bsd:  Don't fail commit if route removal fails with ESRCH
+      signals:  Add some default signal handler logic.
+      pim:  Use pointers instead of reference objects in class members.
+      signals:  Add signal handling to most other processes.
+      Remove some logging that appears to be breaking the 'scons check' step.
+      Update release notes for BSD fixes and signal handling.
+      debug:  Add debugging to track down buildbot failures.
+      Rename cleanup script so it doesn't kill itself.
+      configs:  Add sample configs for ospf + mcast.
+      bgp:  Bail out of BGP destructor if xrl_router is stuck.
+      signals:  Don't call xlog in signal handler.
+      buildbot:  Tweak cleanup script for better cleanup.
+      valgrind:  Enable running processes under valgrind
+      Update notes for installing proper packages on Ubuntu.
+      xrl:  Chmod xrl file to be g+rwx, u+rwx and suid.
+      bsd:  Enable -Werror compile flag
+      fea:  Remove sockets from eventloop in io-ip-socket destructor.
+      pim:  Fix crash due to calling pure-virtual method.
+      libxorp/heap:  Fix long-standing memory corruption.
+      bgp:  Debugging & decrease timeouts in destructor.
+      Update release notes.
+      Update rls notes.
+      endian:  Minimize use of hand-crafted endian checks.
+      bsd/endian:  Fix up endian logic for systems that don't have <endian.h>
+      Fix cruft left in by last commit.
+      bgp:  Fix another potential hang when shutting down BGP.
+      bgp/socket:  Make BGP error message slightly more useful.
+      livecd:  Update web docs for live-cd.
+      fea/firewall:  Enable firewall support on linux.
+      Update rls notes to note enabling firewall logic.
+      firewall:  Fix suggested code patch for iptables.h
+      ospf:  Remove assertion when FINDER is lost.
+      Update 'save' help text..was talking about 'load' instead.
+      fea/mfea:  Do a better job of cleaning up multicast on reload.
+      pim/igmp:  Fix config-file reload issues.
+      pkg-script:  Update .deb build script for latest version.
+      Rename directory with ":" in name to work better on Windows.
+      mld6igmp:  Try to not send pkts with 0.0.0.0 source IP.
+      vlans:  Create vlans with dev.vid format (eth1.5)
+      fea:  Work around some bugs relating to vifs.
+      compile:  Add checks for existence of CC and CXX compiler.
+      Fix up gcc/g++ check for older Scons.
+      Start working porting to mingw cross-compile to win32 executable.
+      Tweak a few files to aid mingw compile.
+      Re-enable Windows support for Xorp.CT.
+      Add missing files to support Windows.
+      win32:  Fix some path errors, and some fea issues.
+      Fix some non-win32 build breakage introduced in the win32 port.
+      Update notes for building with standard mingw32 packages.
+      More build notes update for win32
+      windows:  Fix build instructions to use normal upstream mingw distribution.
+      html:  Update html slightly, add script to upload.
+      windows:  Default to tcp transport on windows builds
+      windows: Fix typo in windows startup command.
+      html: Update web page to be 'official' xorp page
+      news.html:  Fix typo in web page.
+      vlans: Treat vlans as primary interfaces.
+      html:  Update bug link to point to bugzilla.
+      Merge branch 'master' of github.com:greearb/xorp.ct
+      Update rls notes for VLAN changes.
+      Add example OSPF configuration file for Windows.
+      Fix vlan-related compile on Windows-32.
+      Fix test value related to vlans.
+      Merge branch 'master' of github.com:greearb/xorp.ct
+      Fix vlan related build problems on BSD.
+      Fix up RPM packaging script for upcoming 1.8.3 release.
+      Merge branch 'master' of github.com:greearb/xorp.ct
+      Fix typo related to vlan changes.
+      Update README, remove some xorp.ct stuff.
+      Remove some ancient and un-used stuff.
+      Remove old kdoc cruft, update doxygen.cfg file (remove .ct from project name)
+      Fix more vlan test breakage, seems to complete 'scons check' now.
+      Documentation:  Notes for building latex, update html for wiki.
+      Change xrl pipe group ownership to be xorp
+      Add a README, remove some stale TODO files.
+      www:  Update web page to point to wiki documentation.
+      www:  Remove deprecated mailing lists from web page.
+      Update copyright for changed files.
+      Update copyright for files with 'and Others' copyright.
+
+greearb (1):
+      scons:  Fix openssl/md5.h detection on Fedora core 5.
+
 
 
 Release 1.8-CT  June, 2010
