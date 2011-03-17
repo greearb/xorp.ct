@@ -17,8 +17,8 @@
 
 # These fields are used to build the control file.
 PACKAGE ?= lanforge-xorp
-VERSION = 1.8.2
-LFVER = 5.1.7
+VERSION = 1.8.3
+LFVER = 5.1.9
 ARCH = i386
 SECTION = net
 PRIORITY = optional
@@ -46,7 +46,7 @@ create_deb:
 	echo "#!/bin/bash" > prerm
 	echo "# nothing to do here." >> prerm
 	echo "XORP modular router with improvements to better support LANforge." > description.txt
-	echo "More information:  http://www.candelatech.com/oss/xorp-ct.html" >> description.txt
+	echo "More information:  http://www.xorp.org" >> description.txt
 	chmod a+x preinst prerm postinst
 	make -f Makefile.deb clobber
 	make -f Makefile.deb ARCH=i386 deb

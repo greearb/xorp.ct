@@ -129,7 +129,7 @@ fi
 %files
 %defattr(-,root,root)
 %doc BUGS  BUILD_NOTES ERRATA  LICENSE* 
-%doc README RELEASE_NOTES TODO VERSION
+%doc README RELEASE_NOTES VERSION
 %{_initrddir}/xorp
 %config(noreplace) %{_sysconfdir}/logrotate.d/xorp
 %config(noreplace) %{_sysconfdir}/sysconfig/xorp
