@@ -1,0 +1,6 @@
+XORP is a large application, but it is intended to be portable. The code is primarily C++, with few external dependencies aside from STL. Compilers tested to date have been different versions of GNU g++, mingw, and clang. (Clang/llvm has bugs on some common platforms, but has been made to work in the past.)
+
+A design goal for XORP is placing all system dependencies in the Forwarding Engine Abstraction (FEA) process. To make XORP run on a new platform the FEA must be modified to support it. The bottom end of the FEA talks to the operating system to install routes and use raw sockets. In most cases, it is this bottom end that needs writing or modifying to support a new platform.
+
+Before work on porting the FEA can begin, it will almost certainly be necessary to change the scons allconfig.py script to support the new platform and to make compilation fixes for any differences for the new platform that are not already covered.
+Please post on the xorp-hackers@xorp.org mailing list if you plan to port XORP to a new platform.

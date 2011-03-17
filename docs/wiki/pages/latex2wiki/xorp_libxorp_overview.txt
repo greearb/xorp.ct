@@ -1,0 +1,495 @@
+====== Introduction ======
+The ''libxorp'' library contains a set of classes for basic XORP functionality such as IP addresses and subnets,
+timers, event loops, etc. It is used by virtually every other XORP component, and its main purpose is to
+simplify the implementation of those components.
+
+===== Overview =====
+<note tip>Many of these classes have **test samples** available in ''/xorp/libxorp/tests/'', check them out !</note>
+Currently, the libxorp library contains the following classes and components (in alphabetical order):
+^  Component  ^  Description  ^
+^  asnum.hh | class AsNum: A class for storing an AS number used by protocols such as BGP.|
+^  asyncio.hh | class AsyncFileReader, class AsyncFileWriter: Asynchronous file transfer classes. |
+^  buffer.hh | class Buffer: A class for storing buffered data. |
+^  buffered_asyncio.hh | class BufferedAsyncReader: Buffered asynchronous file reader class. |
+^  c_format.hh | c_format(): A macro that creates a C++ string from a C-style printf(3)-formatted string. |
+^  callback.hh, callback_debug.hh, callback_nodebug.hh, safe_callback_obj.hh | Callback mechanism. |
+^  clock.hh | class SystemClock: A class for providing the interface to obtain the system clock. |
+^  config param.hh | template class ConfigParam: A class for storing a configuration parameter. |
+^  debug.h | Provides facility for generating debug messages. |
+^  ether compat.h | Ethernet manipulation compatibility functions. |
+^  eventloop.hh | class EventLoop: Event loop class for coordinated operations between timers and I/O operations on file descriptors. |
+^  exceptions.hh | Standard XORP C++ exceptions. |
+^  heap.hh | class Heap: Provides Heap data structure. |
+^  ioevents.hh | Enumeration of various event types supported by the I/O callback facade. |
+^  ipnet.hh, ipv4net.hh, ipv6net.hh, ipvxnet.hh | class IPv4Net, class IPv6Net, class IPvXNet: Implementation of classes for basic subnet addresses (for IPv4, IPv6 and dual IPv4/6 address family respectively). |
+^  ipv4.hh, ipv6.hh, ipvx.hh | class IPv4, class IPv6, class IPvX: Implementation of classes for basic IP addresses (for IPv4, IPv6 and dual IPv4/6 address family respectively). |
+^  mac.hh | class Mac: Container for MAC address. |
+^  nexthop.hh | Classes that contain routing next-hop information. |
+^  popen.hh | The interface for the local implementation of popen(2) and pclose(2). |
+^  profile.hh | Implementation of a mechanism for event profiling. |
+^  random.h | Local implementation of random(3). |
+^  range.hh | class U32Range, class IPv4Range, class IPv4Range: A set of classes that implement linear ranges (e.g., integers or addresses). |
+^  ref ptr.hh | template class ref ptr: Reference counted pointer class. |
+^  ref trie.hh | Implementation of a trie to support route lookups. Based on trie.hh, but with reference-counted storage supporting delayed deletion. |
+^  round robin.hh | Round-robin queue implementation. |
+^  run command.hh | class RunCommand: A class for running an external command. |
+^  safe callback obj.hh | class CallbackSafeObject: Implementation of a base class for objects that are callback safe. |
+^  selector.hh | I/O multiplexing interface. |
+^  service.hh | Provides base for asynchronous service classes. |
+^  status codes.h | Process states status codes used by processes when reporting their operational status to the router manager. |
+^  task.hh | class XorpTask: Priority-based task implementation. |
+^  time slice.hh | class TimeSlice: A class for computing whether some processing is taking too long. |
+^  timer.hh | class XorpTimer: XORP timer facility. |
+^  timespent.hh | class TimeSpent: A class used for debugging purpose to find code that has taken too long to execute. |
+^  timeval.hh | class TimeVal: A class for storing time values (similar to struct timeval). |
+^  tlv.hh | class Tlv: Facility for reading and writing TLV (Type-Lenght-Value) records. |
+^  token.hh | Token related definitions. |
+^  transactions.hh | Facility for transaction operations. |
+^  trie.hh | Implementation of a trie to support route lookups. |
+^  utility.h | Contains various mini-utilities (mostly compiler-related helpers). |
+^  utils.hh | Contains various utilities (e.g., to delete a list or array of pointers and the objects pointed to). |
+^  vif.hh | class Vif, class VifAddr: Virtual interface and virtual interface address classes. |
+^  win dispatcher.hh, win io.hh | Windows-specific header files. |
+^  xlog.h | Provides facility for log messages generation. |
+^  xorp.h | The XORP main include file that should be included by all XORP C and C++ files. |
+^  xorpfd.hh | class XorpFd: Implementation of a wrapper class used to encapsulate a file descriptor. |
+
+Each of the components is described in the following section.
+====== Components Description ======
+
+This section contains a brief description of each of the components of the ''libxorp'' library. This description is
+for informative purpose only. The source code for each component is the ultimate source for programming
+reference, and implementation details.
+===== asnum.hh =====
+
+This file contains class AsNum: a class for storing an AS number used by protocols such as BGP. This class
+can be used to store an AS number that can be either 16 or 32 bits. Originally, the AS numbers were defined
+as 16-bit unsigned numbers. Later the “extended” AS numbers were introduced, which are unsigned 32-bit
+numbers.
+===== asyncio.hh =====
+
+This file contains asynchronous file transfer classes. These utilize XORP EventLoop and its SelectorList
+to read or write files asynchronously. The user creates an AsyncFile{Reader,Writer} and adds a buffer for
+reading or writing with add buffer(). A callback provided with each buffer is called every time I/O happens
+on the buffer. Reading or writing only begins when start() is called, and normally continues until there are
+no buffers left.
+From the developer’s point of view, the following classes are of interest: class AsyncFileReader, class
+AsyncFileWriter.
+
+===== buffer.hh =====
+
+This file contains class Buffer: a class for conveniently storing and accessing buffered data. Currently it has
+limited applicability.
+===== buffered_asyncio.hh =====
+This file contains class BufferedAsyncReader: a class for buffered asynchronous file reading. Unlike the
+class AsyncFileReader (see [[latex2wiki:xorp_libxorp_overview#asyncio.hh|asyncio.hh]]) which delivers data whenever it is available, the class BufferedAsyncReader buffers the data and delivers it whenever its size has reached a predefined threshold.
+===== c_format.hh =====
+This file contains ''c_format()'': a macro that creates a C++ string from a C-style printf(3)-formatted string. It
+takes the same arguments as printf(3), but %n is illegal and will cause abort to be called.
+In practice, ''c_format()'' is a nasty macro, but by doing this we can check the compile time arguments are
+sane and the run time arguments.
+
+Pseudo prototype:
+**string c_format(const char* format, ...);**
+===== callback.hh, callback debug.hh, callback nodebug.hh, safe callback obj.hh =====
+These files contain an implementation of a callback mechanism. XORP is an asynchronous programming
+environment and as a result there are many places where callbacks are useful. Callbacks are typically
+invoked to signify the completion or advancement of an asynchronous operation.
+XORP provides a generic and flexible callback interface that utilizes overloaded templatized functions
+for generating callbacks in conjunction with many small templatized classes. Whilst this makes the syntax
+a little unpleasant, it provides a great deal of flexibility.
+XorpCallback objects are objects created by the callback() function which returns a reference pointer to
+a newly created callback object. The callback is invoked by calling the dispatch() method on that object.
+There are two versions of the callback mechanism: debug and non-debug version. The debug version
+includes additional information with each callback (e.g., file name and line number where the callback was
+invoked), records callback tracing events, etc, but creates additional overhead to the system. Non-debug
+callbacks are used by default; the debug callbacks can be enabled by defining DEBUG CALLBACK before
+including callback.hh, or by running ./configure –enable-callback-debug before compiling XORP.
+For more details on the callback mechanism, and for usage examples, see the beginning of callback debug.hh
+or callback nodebug.hh. Note that these files are auto-generated by callback-gen.py (a Python script), therefore they should never be edited.
+===== clock.hh =====
+
+This file contains the implementation of class SystemClock that provides the interface for obtaining the
+system clock.
+===== config_param.hh =====
+
+This file contains the implementation of template class ConfigParam: a class for storing a configuration
+parameter.
+This class can be used to store the value of a configuration parameter. Such parameter has a current and
+a default value. The ConfigParam class has the facility to add a callback that is invoked whenever the value
+of the configuration parameter is changed.
+===== debug.h =====
+
+This file provides facility for debug messages generation. More specifically, it defines the debug_msg(),
+the macro responsible for generating debug messages. It takes the same arguments as printf(3). For example:
+<code cpp>debug_msg("The number is %d\n", 5);</code>
+For more details see the comments inside that file.
+===== ether_compat.h =====
+This file contains Ethernet-related manipulation compatibility functions. For example, it includes the appropriate system files, and declares functions ether_aton() and ether_ntoa() (implemented locally in ether compat.c) if the system is missing the corresponding ether_aton(3) and ether_ntoa(3).
+===== event_loop.hh =====
+
+This file defines class EventLoop. It is used to co-ordinate interactions between a TimerList and a SelectorList for XORP processes. All XorpTimer and select operations should be co-ordinated through this interface.
+
+In [[xorp:writing_a_process|Writing a XORP process]], the event loop for a module is vaguely described as some sort of queue where events can be pushed for "immediate" (ASAP) processing, or delayed, or periodic processing. While this description gives a good insight of its behavior, it surely lacks of precision.
+
+In fact, the ''EventLoop'' class is essentially based on the composition/combination of the three following components:
+  - one ''[[latex2wiki:xorp_libxorp_overview#task.hh|TaskList]]'',
+  - one ''[[latex2wiki:xorp_libxorp_overview#timer.hh|TimerList]]'',
+  - one ''[[latex2wiki:xorp_libxorp_overview#selector.hh|SelectorList]]''.
+
+Each of these is briefly described in their own subsection, to give a deeper insight of what is exactly an event loop in a XORP module.
+
+Since the ''EventLoop'' is somewhat a composite scheduler with three different scheduling algorithms, we need to know how these three algorithms are working together.
+At each iteration of the event loop, //i.e.//, each time the ''run'' method of ''EventLoop'' is called, the scheduler will call the callback method associated to the highest priority task/expired timer/selector. If equality happens, the callback method associated to the **expired timer will always be the winner**. If the highest priority is associated with a task and a selector, priority will be granted alternatively between them.
+===== exceptions.hh =====
+This file contains class XorpException: a base class for XORP C++ exceptions. It contains also all standard
+XORP C++ exceptions. An example of such exception is class InvalidFamily which is thrown if the address
+family is invalid (for example, by an IPvX constructor when invoked with an invalid address family).
+===== heap.hh =====
+This file contains class Heap. The Heap class is used by the TimerList class as it’s priority queue for timers.
+This implementation supports removal of arbitrary objects from the heap, even if they are not located at the
+top.
+===== ioevents.hh =====
+
+This file contains the enumerated IoEventType codes: various event types supported by the I/O callback
+facade. The event types are used by clients when registering interest in I/O events.
+===== ipnet.hh, ipv4net.hh, ipv6net.hh, ipvxnet.hh =====
+These files contain the declaration of the following classes: class IPv4Net, class IPv6Net, class IPvXNet,
+which are classes for basic subnet addresses (for IPv4, IPv6 and dual IPv4/6 address family respectively).
+IPvXNet can be used to store a subnet address that has either IPv4 or IPv6 address family.
+Most of the implementation is contained in file ipnet.hh, which contains a template class IPNet. The
+IPv4Net, IPv6Net, and IPvXNet classes are derived from that template.
+===== ipv4.hh, ipv6.hh, ipvx.hh =====
+These files contain the declaration for the following classes: class IPv4, class IPv6, class IPvX, which are
+classes for basic IP addresses (for IPv4, IPv6 and dual IPv4/6 address family respectively). IPvX can be
+used to store an address that has either IPv4 or IPv6 address family.
+===== mac.hh =====
+This file declares the following class: class Mac. This class is a container for a 48-bit MAC address.
+===== nexthop.hh =====
+This file declares a number of classes that can be used to contain routing next-hop information. For example,
+class NextHop is the generic class for holding information about routing next hops. NextHops can be of
+many types, including immediate neighbors, remote routers (with IBGP), discard or unreachable interfaces,
+encapsulation endpoints, etc. NextHop itself doesn’t really do anything useful, except to provide a generic
+handle for the specialized subclasses. The specialized subclasses are:
+
+  * IPPeerNextHop is for next hops that are local peers.
+  * IPEncapsNextHop is for “next hops” that are non-local, and require encapsulation to reach. An example is the PIM Register Encapsulation.
+  * IPExternalNextHop An IP nexthop that is not an intermediate neighbor.
+  * DiscardNextHop is a discard interface.
+  * UnreachableNextHop is an unreachable interface.
+
+===== popen.hh =====
+This file contains the interface for the local implementation of popen(2) and pclose(2). The corresponding
+local names are popen2() and pclose2() respectively. Unlike the system’s popen(2), the local popen2()
+implementation allows the user to specify the streams where the stdout and stderr of the command will be
+redirected to.
+===== profile.hh =====
+This file implements the mechanism for event profiling. The developer can add profiling entries at various
+places of the program. Each profiling entry has a name and it can be enabled or disabled. In addition, a
+number of strings can be added to each profiling entry, and those strings can be read at some later stage.
+===== random.hh =====
+This file declares the API for the local implementation of random(3).
+===== range.hh =====
+This file implements the following classes: class U32Range, class IPv4Range, class IPv4Range.
+Those classes implement linear ranges X..Y (e.g., for integers or addresses). A linear range is defined
+by its low and high inclusive boundaries. It is the user’s responisibility to ensure that the condition (low ≤ high) always holds.
+===== ref_ptr.hh =====
+This file declares template class ref ptr: reference counted pointer class.
+The ref ptr class is a strong reference class. It maintains a count of how many references to an object exist and releases the memory associated with the object when the reference count reaches zero. The reference pointer can be dereferenced like an ordinary pointer to call methods on the reference counted object.
+At the time of writing the only supported memory management is through the new and delete operators.
+At a future date, this class should support the STL allocator classes or an equivalent to provide greater
+flexibility.
+===== ref_trie.hh =====
+This file implements a trie to support route lookups. The implementation is template-based, and is based
+on the code in trie.hh. From deleloper’s point of view, templates RefTrie, RefTrieNode, RefTriePreOrderIterator, and RefTriePostOrderIterator are the most important. Those templates should be invoked with two classes, the basetype “A” for the search Key (which is a subnet, IPNet<A>), and the Payload.
+RefTrie differs from Trie (and its associated classes) in that the RefTrieNode includes a reference count
+of how many RefTrieIterators are pointing at it. If a RefTrieNode is deleted, but has a non-zero reference
+count, deletion will be delayed until the reference count becomes zero. In this way, additions and deletions to the RefTrie cannot cause a RefTriePreOrderIterator or RefTriePostOrderIterator to reference invalid
+memory, although a deletion and subsequent addition can cause the payload data referenced by an iterator
+to change.
+===== round_robin.hh =====
+This file implements round-robin queue which is used by the priority-based task implementation (see [[latex2wiki:xorp_libxorp_overview#task.hh|task.hh]]). It is used internally by libxorp and shouldn’t be used by the rest of the system.
+===== run_command.hh =====
+This file implements class RunCommand which provides the mechanism for running an external command.
+In addition to the command name and its arguments, the developer can specify three callbacks:
+
+^  Callback  ^  Description  ^
+^  stdout cb | The callback to call when there is data on the standard output.|
+^  stderr cb | The callback to call when there is data on the standard error. |
+^  done cb | The callback to call when the command is completed. |
+
+===== safe_callback_obj.hh =====
+
+This file declares class CallbackSafeObject. Objects that wish to be callback safe should be derived from
+this class. When a CallbackSafeObject is destructed it informs all the callbacks that refer to it that this is the
+case and invalidates (sets to null) the object they point to.
+===== selector.hh =====
+
+This file contains the I/O multiplexing interface. The particular class of interest is class SelectorList.
+A SelectorList provides an entity where callbacks for pending I/O operations on file descriptors may be
+registered. The callbacks are invoked when one of the select methods is called and I/O is pending on the
+particular descriptors.
+
+==== Selector List ====
+<note warning>To expand...</note>
+As explained in the API documentation, this list provides an interface to I/O (with file descriptors) multiplexing. Priorities are associated to the processing of these I/O too.
+
+
+===== service.hh =====
+
+This file declares class ServiceBase. A service is a class that can be started and stopped and would typically
+involve some asynchronous processing to transition between states. The base class provides a state model
+and methods for transitioning between states. Mandatory transition methods, like start and stop, are abstract
+in the base class.
+===== status_codes.h =====
+
+This file contains the enumerated ProcessStatus codes that a XORP process should report to the [[latex2wiki:xorp_rtrmgr|XORP router
+manager (rtrmgr)]]. The file itself contains a detailed explanation of the process states (valid transaction
+between states, triggering events, actions, etc).
+===== task.hh =====
+
+This file declares and implements class class XorpTask. Class XorpTask is used for priority-based tasks.
+Each task can have a priority between PRIORITY HIGHEST and PRIORITY LOWEST. A number of suggested priorities and weights are declared inside that class:
+
+<code cpp>
+class XorpTask {
+public:
+    ...
+
+    //
+    // Task/Timer priorities. Those are suggested values.
+    //
+    static const int PRIORITY_HIGHEST		= 0;
+    static const int PRIORITY_XRL_KEEPALIVE	= 1;
+    static const int PRIORITY_HIGH		= 2;
+    static const int PRIORITY_DEFAULT		= 4;
+    static const int PRIORITY_BACKGROUND	= 7;
+    static const int PRIORITY_LOWEST		= 9;
+    static const int PRIORITY_INFINITY		= 255;
+
+    //
+    // Task/Timer weights. Those are suggested values.
+    //
+    static const int WEIGHT_DEFAULT		= 1;
+
+    ...
+};
+</code>
+
+==== Task List ====
+The ''TaskList'' in XORP is a multitasking scheduler based on priority levels and, between tasks of same priority, weighted executions. That is, between tasks of different priorities, the ones with the higher priority will always be executed first, the other ones will simply wait until higher priority tasks are finished and they actually get the highest priority. Between the tasks of same priority, some could be executed more often than the others by associating to them a bigger weight (a task with a weight of 2 will run twice as much as another with a weight of 1). Be aware that we are speaking about a ratio between number of executions, this is not about computer processing time.
+
+So, a ''XorpTask'' is the combination of:
+  - a callback to the task handler,
+  - a priority,
+  - a weight.
+
+A ''XorpTask'' can be of two types following its usage: one-shot or repeated. A "one-shot" task will obviously be scheduled once, that is, its handler will be called, thanks to the callback, only one time. The repeated task has typically an handler returning a boolean value and the task will be unscheduled only if the returned value is ''false''.
+
+For example, you should read the ''libxorp/tests/test_task.cc'' file which will show you the application of such a ''TaskList''.
+===== time_slice.hh =====
+
+This file declares class TimeSlice. This class can be used to compute whether some processing is taking too
+long time to complete. It is up to the program that uses TimeSlice to check whether the processing is taking
+too long, and suspend processing of that task if necessary.
+===== timer.hh =====
+This file declares the XORP timer facility. The only class of interest from a developer’s point of view is
+class XorpTimer.
+
+==== Timer List ====
+The ''TimerList'' is somewhat similar to a timeline where you can register some events to arise in the future. That is, you add ''XorpTimer'''s with some expiration delay or some periodicity to the ''TimerList''. When a delay expires, the associated callback handler will 'simply' be called (under assumption that another task is not running). To be efficient and have tasks running at times close to their expiration dates, the system should be reactive, //i.e.//, well-dimensioned and executing short tasks.
+
+Note that ''XorpTimer'''s also have an associated priority.  During execution, it may happen that the scheduler has to choose between different tasks associated to expired timers. The most important tasks will be executed first even if it delays the less important ones more.
+
+The ''TimerList'' class offer some methods to add 'one-shot' or periodic ''XorpTimer'''s.
+
+For example on how to use a ''TimerList'', refer to ''libxorp/tests/test_timer.cc''.
+===== time_spent.hh =====
+This files declares and implements class TimeSpent. This class used for debugging purpose to find code that
+has taken too long to execute.
+===== timeval.hh =====
+This file contains implementation of class TimeVal for storing time values (similar to struct timeval). TimeVal
+implements the appropriate constructors and numerous helper methods (e.g., Less-Than and Addition operators, etc).
+===== tlv.hh =====
+This file contains the implementation of class Tlv for reading and writing TLV (Type-Lenght-Value) records
+from/to a file. The records are stored in network byte order format.
+===== token.hh =====
+This file contains various token-related definitions. Token is a sequence of symbols separated from other
+tokens by some pre-defined symbols. In this implementation, the separators are the is space(3) and ’—’
+characters. The facilities in that file are to copy tokens, removing them from a token line, etc. Currently,
+this file is used only by the CLI, therefore in the future it may be moved to the CLI itself.
+===== transactions.hh =====
+This file contains facility for transactions. A transaction consists of a sequence of transaction operations,
+each of which is a command. The TransactionManager class provides a front-end for creating, dispatching,
+and destroying transactions.
+===== trie.hh =====
+This file implements a trie to support route lookups. The implementation is template-based. From deleloper’s
+point of view, templates Trie, TrieNode, TriePreOrderIterator, and TriePostOrderIterator are the most important. Those templates should be invoked with two classes, the basetype “A” for the search Key (which is a subnet, IPNet<A>), and the Payload.
+===== utility.h =====
+This file contains various mini-utilities. Those utilities are mostly compiler-related helpers; e.g., compiletime assertion, UNUSED(var) macro to suppress warnings about unused functions arguments, etc.
+===== utils.hh =====
+This file contains various helper utilities. Currently, the only two utilities are template functions to delete a
+list or array of pointers and the objects pointed to.
+===== vif.hh =====
+This file declares the following classes: class Vif, class VifAddr.
+Class Vif holds information about a virtual interface. A Vif may represent a physical interface, or may
+represent more abstract entities such as the Discard or Unreachable interface, or a VLAN on a physical
+interface. VifAddr holds information about an address of a virtual interface. A virtual interface may have
+more than one VifAddr.
+===== win_dispatcher.hh, win_io.hh =====
+Those are Windows-specific header files which are used internally by libxorp and shouldn’t be used by the
+rest of the system.
+===== xlog.h =====
+This file provides facility for log messages generation, similar to syslog. The log messages may be output
+to multiple output streams simultaneously. Below is a description of how to use the log utility.
+==== XORP_MODULE_NAME ====
+The xlog utility assumes that XORP_MODULE_NAME is defined (per module). To do so, you must
+have in your directory a file like “foo module.h”, and inside it should contain something like:
+
+<code cpp>#define XORP_MODULE_NAME "BGP"</code>
+
+This file then has to be included by each *.c and *.cc file, and **MUST be the first of the included local
+files**.
+==== xlog initialization ====
+Before using the xlog utility, a program MUST initialize it first (think of this as the xlog constructor):
+<code cpp>int xlog_init(const char *process_name, const char *preamble_message);</code>
+Further, if a program tries to use xlog without initializing it first, the program will exit.
+==== Adding output streams ====
+To add output streams, you MUST use one of the following (or both):
+<code cpp>int xlog_add_output(FILE* fp);
+int xlog_add_default_output(void);</code>
+==== Messages verbosity ====
+=== For all messages ===
+To change the verbosity of **all** xlog messages, use:
+<code cpp>xlog_set_verbose(xlog_verbose_t verbose_level);</code>
+where “verbose level” is one of the following (''XLOG_VERBOSE_MAX'' excluded):
+
+<code cpp>
+typedef enum {
+    XLOG_VERBOSE_LOW = 0,       /* 0 */
+    XLOG_VERBOSE_MEDIUM,        /* 1 */
+    XLOG_VERBOSE_HIGH,          /* 2 */
+    XLOG_VERBOSE_MAX
+} xlog_verbose_t;
+</code>
+
+Default value is ''XLOG_VERBOSE_LOW'' (least details). Larger value for “verbose level” adds more
+details to the preamble message (e.g., file name, line number, etc, about the place where the log
+message was initiated).
+Note that the verbosity level of message type ''XLOG_LEVEL_FATAL'' (see below) cannot be changed
+and is always set to the most verbose level (''XLOG_VERBOSE_HIGH'').
+=== For a particular message ===
+To change the verbosity of a particular message type, use:
+<code cpp>void xlog_level_set_verbose(xlog_level_t log_level,
+xlog_verbose_t verbose_level);</code>
+where “log level” is one of the following (''XLOG_LEVEL_MIN'' and ''XLOG_LEVEL_MAX'' excluded):
+
+<code cpp>
+typedef enum {
+    XLOG_LEVEL_MIN = 0,         /* 0 */
+    XLOG_LEVEL_FATAL = 0,       /* 0 */
+    XLOG_LEVEL_ERROR,           /* 1 */
+    XLOG_LEVEL_WARNING,         /* 2 */
+    XLOG_LEVEL_INFO,            /* 3 */
+    XLOG_LEVEL_TRACE,           /* 4 */
+    XLOG_LEVEL_MAX
+} xlog_level_t;
+</code>
+Note that the verbosity level of message type ''XLOG_LEVEL_FATAL'' cannot be changed and is always
+set to the most verbose level (''XLOG_VERBOSE_HIGH'').
+
+==== Starting xlog ====
+To start the xlog utility, you MUST use:
+<code cpp>int xlog_start(void);</code>
+==== Enabling/Disabling a message ====
+To enable or disable a particular message type, use:
+<code cpp>int xlog_enable(xlog_level_t log_level);
+int xlog_disable(xlog_level_t log_level);</code>
+
+By default, all levels are enabled. Note that ''XLOG_LEVEL_FATAL'' cannot be disabled.
+==== Stopping the logging ====
+To stop the **logging**((And not xlog !)), use:
+<code cpp>int xlog_stop(void);</code>
+Later you can restart it again by ''xlog_start()''
+==== Exiting xlog ====
+To gracefully exit the xlog utility, use
+<code cpp>int xlog_exit(void);</code>
+(think of this as the xlog destructor).
+
+
+==== Example ====
+Below is an example of using the XLOG facility:
+<code c> 
+int main(int argc, char *argv[])
+{
+    //
+    // Initialize and start xlog
+    //
+    xlog_init(argv[0], NULL);
+    xlog_set_verbose(XLOG_VERBOSE_LOW);	// Least verbose messages
+    // Increase verbosity of the error messages
+    xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
+    xlog_add_default_output();
+    xlog_start();
+
+    // Do something
+
+    //
+    // Gracefully stop and exit xlog
+    //
+    xlog_stop();
+    xlog_exit();
+
+    exit (0);
+}
+</code>
+
+==== Xlog macros ====
+
+Typically, a developer would use the macros described below to print a message, add an assert statement,
+place a marker, etc. If a macro accepts a message to print, the format of the message is same as printf(3).
+The only difference is that the xlog utility automatically adds ’\n’, (i.e. end-of-line) at the end of each
+string specified by format:
+
+
+^  Macro ^  Description   ^
+^  XLOG_FATAL(const char *format, ...) | Write a FATAL message to the xlog output streams and abort the program. |
+^  XLOG_ERROR(const char *format, ...) | Write an ERROR message to the xlog output streams. |
+^  XLOG_WARNING(const char *format, ...) | Write a WARNING message to the xlog output streams. |
+^  XLOG_INFO(const char *format, ...) | Write an INFO message to the xlog output streams. |
+^  XLOG_TRACE(int cond_boolean, const char *format, ...) | Write a TRACE message to the xlog output stream, but only if cond_boolean is not 0. |
+^  XLOG_ASSERT(assertion) | The XORP replacement for assert(3), except that it cannot be conditionally disabled and logs error messages through the standard xlog mechanism. It calls XLOG_FATAL() if the assertion fails. |
+^  XLOG_UNREACHABLE() | A marker that can be used to indicate code that should never be executed. |
+^  XLOG_UNFINISHED() | A marker that can be used to indicate code that is not yet implemented and hence should not be run. |
+
+===== xorp.h =====
+This is the XORP main include file that should be included by all XORP C and C++ files. This file itself
+includes a number of frequently used system header files, defines several commonly used values, etc.
+
+The only thing important for common users/developers comes from the following excerpt: 
+
+<file c /xorp/libxorp/xorp.h>
+/*
+ * Generic error return codes
+ */
+#ifdef XORP_OK
+#undef XORP_OK
+#endif
+#ifdef XORP_ERROR
+#undef XORP_ERROR
+#endif
+#define XORP_OK		 (0)
+#define XORP_ERROR	(-1)
+</file>
+<note important>Use the generic **XORP_OK** and **XORP_ERROR** error codes as integer return values.</note>
+
+===== xorpfd.h =====
+This file contains the implementation of class XorpFd used to encapsulate a file descriptor.
+It exists because of fundamental differences between UNIX and Windows in terms of how the two
+families of operating systems deal with file descriptors; in most flavours of UNIX, all file descriptors are
+created equal, and may be represented using an ’int’ type which is usually 32 bits wide. In Windows,
+sockets are of type SOCKET, which is a typedef alias of u int; whereas all other system objects are of type
+HANDLE, which in turn is a typedef alias of ’void *’.
+
+
+

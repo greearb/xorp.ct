@@ -1,0 +1,32 @@
+1299098630	77.109.116.217	C	latex2wiki:xorp_libxorp_overview	geddons	created	
+1299235351	77.109.116.217	E	latex2wiki:xorp_libxorp_overview	geddons	First draft.	
+1299236892	77.109.116.217	e	latex2wiki:xorp_libxorp_overview	geddons	[buffered_asyncio.hh] 	
+1299236948	77.109.116.217	e	latex2wiki:xorp_libxorp_overview	geddons	[round_robin.hh] 	
+1299237028	77.109.116.217	e	latex2wiki:xorp_libxorp_overview	geddons	[status_codes.h] 	
+1299362034	77.109.115.245	e	latex2wiki:xorp_libxorp_overview	geddons	[debug.h] cpp language set	
+1299362050	77.109.115.245	e	latex2wiki:xorp_libxorp_overview	geddons	[task.hh] cpp language set	
+1299362064	77.109.115.245	e	latex2wiki:xorp_libxorp_overview	geddons	[XORP_MODULE_NAME] cpp language set	
+1299362101	77.109.115.245	e	latex2wiki:xorp_libxorp_overview	geddons	[xlog initialization] cpp set	
+1299362167	77.109.115.245	e	latex2wiki:xorp_libxorp_overview	geddons	[Adding output streams] cpp set	
+1299362200	77.109.115.245	e	latex2wiki:xorp_libxorp_overview	geddons	[Messages verbosity]  cpp set	
+1299362216	77.109.115.245	e	latex2wiki:xorp_libxorp_overview	geddons	[Starting xlog] cpp set	
+1299362227	77.109.115.245	e	latex2wiki:xorp_libxorp_overview	geddons	[Enabling/Disabling a message] cpp set	
+1299362239	77.109.115.245	e	latex2wiki:xorp_libxorp_overview	geddons	[Stopping the logging] cpp set	
+1299362274	77.109.115.245	e	latex2wiki:xorp_libxorp_overview	geddons	[Exiting xlog] cpp set	
+1299679448	127.0.0.1	E	latex2wiki:xorp_libxorp_overview		external edit	
+1300026147	77.109.116.50	E	latex2wiki:xorp_libxorp_overview	geddons	[xorp.h] XORP_OK & XORP_ERROR	
+1300026168	77.109.116.50	e	latex2wiki:xorp_libxorp_overview	geddons	[xorp.h] 	
+1300051937	77.109.116.50	e	latex2wiki:xorp_libxorp_overview	geddons	[Overview] 	
+1300051970	77.109.116.50	e	latex2wiki:xorp_libxorp_overview	geddons	[c_format.hh] 	
+1300052137	77.109.116.50	e	latex2wiki:xorp_libxorp_overview	geddons	[c_format.hh] prototype	
+1300054298	77.109.116.50	e	latex2wiki:xorp_libxorp_overview	geddons	[Messages verbosity] fixed </code>	
+1300101772	77.109.117.14	E	latex2wiki:xorp_libxorp_overview	geddons	[Introduction] 	
+1300101808	77.109.117.14	e	latex2wiki:xorp_libxorp_overview	geddons	[Introduction] 	
+1300101829	77.109.117.14	E	latex2wiki:xorp_libxorp_overview	geddons	[Overview] 	
+1300102204	77.109.117.14	E	latex2wiki:xorp_libxorp_overview	geddons	[event_loop.hh] 	
+1300102275	77.109.117.14	E	latex2wiki:xorp_libxorp_overview	geddons	[task.hh] 	
+1300102317	77.109.117.14	E	latex2wiki:xorp_libxorp_overview	geddons	[timer.hh] 	
+1300102327	77.109.117.14	e	latex2wiki:xorp_libxorp_overview	geddons	[The Task List] 	
+1300102405	77.109.117.14	E	latex2wiki:xorp_libxorp_overview	geddons	[selector.hh] 	
+1300102468	77.109.117.14	E	latex2wiki:xorp_libxorp_overview	geddons	[event_loop.hh] 	
+1300114932	77.109.117.14	e	latex2wiki:xorp_libxorp_overview	geddons	[c_format.hh] 	

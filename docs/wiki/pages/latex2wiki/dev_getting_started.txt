@@ -1,0 +1,132 @@
+====== High Level Architecture ======
+
+XORP design philosophy is:
+  * modularity
+  * extensibility
+  * performance
+  * robustness
+
+This is achieved by carefully separating functionalities into
+independent modules, and by providing an API for each module.
+
+XORP divides into two subsystems. The higher-level ("user-level")
+subsystem consists of the routing protocols. The lower-level ("kernel")
+manages the forwarding path, and provides APIs for the higher-level to
+access.
+
+User-level XORP uses multi-process architecture with one process per
+routing protocol, and a novel inter-process communication mechanism
+called [[latex2wiki:xrl_interfaces|XRL (XORP Resource Locator)]].
+
+The lower-level subsystem can use traditional UNIX kernel forwarding, or
+Click modular router. The modularity and independency of the lower-level
+from the user-level subsystem allows for its easily replacement with
+other solutions including high-end hardware-based forwarding engines.
+
+
+====== Getting familiar with XORP ======
+
+Here are a few suggested readings, in order:
+
+  - {{:xorp_slides_sophia.pdf|Slides of a brief presentation about XORP}} during the Ecode plenary meeting at INRIA Sophia Antipolis. \\ The first pages should give an overview of what is XORP, and how it globally works. ((Most of the pictures/diagrams come from the [[:start#Design Documentation|XORP Design Documentation]].)) (({{:xorp:201003_-_sophia.tar.gz|Slides source files, courtesy of B. Willemaers.}}))
+  - Read the [[:start#Design Documentation|XORP Design Documentation]], it is suggested to read it in the following order:
+    - [[latex2wiki:design_overview|XORP Design Overview]]
+    - [[latex2wiki:xorp_ipc_lib_overview|XORP Inter-Process Communication Library Overview]]
+    - [[latex2wiki:xrl_interfaces|XRL Interfaces: Specifications and Tools]]
+    - [[latex2wiki:xorp_fea|XORP Forwarding Engine Abstraction]]
+    - [[latex2wiki:xorp_rib|XORP Routing Information Base (RIB) Process]]
+    - [[latex2wiki:xorp_rtrmgr|XORP Router Manager Process (rtrmgr)]]
+    - [[latex2wiki:xorp_libxorp_overview|XORP Libxorp Library Overview]]
+    - [[latex2wiki:introduction_xorp_process|An Introduction to Writing a XORP Process]]
+
+This will take you some time, for sure, but will be of great help when you will plunge into the code...
+
+====== Design Documentation ======
+  - [[latex2wiki:design_overview|XORP Design Overview]]
+  - [[latex2wiki:xorp_ipc_lib_overview|XORP XIPC Inter-Process Communication Library Overview]]
+  - [[latex2wiki:xrl_interfaces|XRL Interfaces: Specifications and Tools]]
+  - [[latex2wiki:xorp_fea|XORP Forwarding Engine Abstraction]]
+  - [[latex2wiki:xorp_rib|XORP Routing Information Base (RIB) Process]]
+  - [[latex2wiki:xorp_rtrmgr|XORP Router Manager Process (rtrmgr)]]
+  - [[latex2wiki:xorp_libxorp_overview|XORP Libxorp Library Overview]]
+  - [[XORP:writing_a_process|An Introduction to Writing a XORP Process.]]
+  - [[latex2wiki:xorp_error_handling|XORP Error Handling]]
+  - [[latex2wiki:xorp_bgp_routing_daemon|XORP BGP Routing Daemon]]
+  - [[latex2wiki:xorp_bgp_test_harness|XORP BGP Test Harness]]
+  - [[latex2wiki:xorp_multicast_routing|XORP Multicast Routing Design Architecture]]
+  - [[latex2wiki:xorp_multicast_fea_abstraction|XORP Multicast Forwarding Engine Abstraction]]
+  - [[latex2wiki:xorp_mld_igmp_daemon|XORP MLD/IGMP Daemon]]
+  - [[latex2wiki:xorp_pim_sm_daemon|XORP PIM-SM Routing Daemon]]
+  - [[latex2wiki:xorp_pim_test_suite|XORP PIM-SM Test Suite]]
+  - [[latex2wiki:porting-xorp|Porting XORP]]
+
+===== API Documentation =====
+[[latex2wiki:xorp_source_documentation|XORP Source code documentation]]
+
+===== Project Management =====
+[[/do_release|How to do a XORP Release]]
+
+
+====== Code structure and documentation ======
+
+===== Main directory =====
+The code is split into several directories, each containing libraries,
+components or implementation of the various XORP modules.  Typically,
+documentation for each of them is available in one or more of the
+following places:
+
+  * The README file in each directory
+  * A high level architecture overview, available in ''docs/<modulename>/''
+  * [[http://www.xorp.org/releases/current/docs/kdoc/html|doxygen-generated documentation]]
+ 
+
+===== Sub-directories =====
+The content of each of the directories is the following:
+
+^  Subdir  ^  Description  ^
+^  xorp/bgp | BGP implementation. |
+^  xorp/cli | CLI (Command-Line Interface) library. It is used by the Router Manager (rtrmgr), and by some of the multicast code (the multicast-specific part of fea, mld6igmp, pim). |
+^  docs | XORP user documentation. |
+^  xorp/etc | Various XORP-related files (e.g., configuration, templates). |
+^  xorp/fea | Forwarding Engine Abstraction. The FEA implements the interface between XORP and the underlying forwarding engine (e.g., the UNIX kernel). It is used both for unicast and multicast. Note that the multicast-specific documentation is in ${XORP}/docs/mfea. |
+^  xorp/fib2mrib | Forwarding Information Base to the Multicast Routing Information Base route propagator. It uses the FEA to obtain the FIB information from the underlying system, and propagates it to the MRIB, so it can be used by multicast routing protocols such as PIM-SM. Typically, it is needed only if the unicast routing protocols run within XORP do not inject routes in the MRIB. |
+^  xorp/libcomm | Communication socket library. |
+^  xorp/libfeaclient | Library that is useful to clients of the FEA. |
+^  xorp/libproto | Abstract protocol library. Used by the following modules/directories: cli, fea, mld6igmp, ospf, pim. |
+^  xorp/libxipc | XRL (XORP Resource Locator) library and XRL-related programs. |
+^  xorp/libxorp | XORP library that contains various basic functionalities such as IP addresses, IP subnets, etc. |
+^  xorp/mld6igmp | Multicast Listen Discovery/Internet Group Management Protocol (MLD/IGMP) implementation. |
+^  xorp/mrt | Various multicast-related code. Used by the following modules/directories: fea, mld6igmp, pim. |
+^  xorp/ospf | Open Shortest Path First implementation. |
+^  xorp/policy | Policy-related library. |
+^  xorp/pim | Protocol Independent Multicast - Sparse Mode (PIM-SM) implementation. |
+^  xorp/rib | Routing Information **B**ase. It is used to store the routing information from various protocols. |
+^  xorp/rip | Routing Information **P**rotocol implementation. |
+^  xorp/rtrmgr | Router Manager. It is used to manage and configure all XORP components. |
+^  xorp/static_routes | Static routes management. It is used to configure static routes. |
+^  xorp/vrrp | Virtual Router Redundancy Protocol implementation. |
+^  xorp/xrl | XRL (XORP Resource Locator) interface. |
+^  The directories listed below contain third-party contributed code which is distributed with each XORP source release.  ||
+^  xorp/contrib | various contributed code. |
+^  xorp/contrib/olsr | RFC 3626 Optimized Link State Routing implementation. Generously funded by CenGen, Inc. |
+^  xorp/contrib/mld6igmp_lite | [[http://tools.ietf.org/html/draft-ietf-mboned-lightweight-igmpv3-mldv2-02 | Implementation of the Lightweight IGMPv3/MLDv2 protocols]] |
+^  The directories listed below contain various information that are of limited interest, or are not relevant to the current release.  ||
+^  devnotes | various notes for the XORP core members. |
+^  utils | Various XORP-related utilities. |
+
+
+===== (Default) Compilation/Installation Paths =====
+
+|                               ^   Directory                    ^
+^  Compiled object files & generated stubs         |  /xorp.ct/xorp/obj/             |
+^  Installation (**installdir**)  |  /usr/local/xorp                |
+^  Binaries                       |  installdir/sbin                |
+^  Configuration file             |  installdir/etc/xorp.conf       |
+^  Modules                        |  installdir/lib/xorp/sbin       |
+^  Commands                       |  installdir/lib/xorp/bin        |
+^  Templates                      |  /xorp.ct/xorp/etc/templates/ \\ and \\ installdir/share/xorp/templates  |
+
+<note tip>The **configuration filepath** won't probably exist at the first installation time. You'll probably need to create it via 
+<code bash>pierre@pierre-T500:/usr/local/xorp$ sudo mkdir etc </code> 
+</note>
+

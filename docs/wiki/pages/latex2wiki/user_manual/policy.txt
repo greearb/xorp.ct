@@ -1,0 +1,742 @@
+====== Policy ======
+
+Policy controls which routes to accept and which routes should be advertised. Moreover, it provides a
+mechanism for modifying route attributes and enables route redistribution which allows routes learned by a
+protocol to be advertised by a different protocol.
+===== Terminology and Concepts =====
+
+A crucial aspect to understand is the difference between import and export policies.
+import filters act upon routes as soon as they are received from a routing protocol. Before a protocol even
+makes a decision on the route, import filter processing will already have taken place. Note that import
+filters may therefore affect the decision process (e.g. by changing the metric).
+export filters act upon routes just before they are advertised by a routing protocol. Only routes which have
+won the decision process (i.e. the ones used in the forwarding plane) will be considered by export
+filters.
+
+Normally policies will operate within a single routing protocol, for example a policy which sets the MED on
+all BGP routes (only BGP is involved). If a policy involves two different protocols, then route redistribution
+will occur “implicitly”.
+
+===== Policy Statement =====
+
+A policy statement is the user definition for a policy. Internally, it contains a list of terms. A term is the
+most atomic unit of execution of a policy. Each single term, if executed, will cause actions to be taken on
+a route. A policy statement should define a logical operation to be run on routes and this operation may
+involve multiple terms, which define simpler and smaller execution steps.
+The overall structure of a policy statement looks as follows:
+<code>
+ policy {
+    policy-statement name {
+      term name {
+      }
+      ...
+      term name {
+      }
+    }
+ }
+</code>
+
+Each term of a policy is executed in order. It is not required that all terms run—it is possible for a term to
+cause the policy to accept or reject the route terminating the overall execution.
+
+==== Term ====
+
+A term is the heart of the policy execution. It specifies how to match routes as they enter the system, as they
+are about to leave and ultimately what actions to perform on them. The structure of a term is as follows:
+<code>
+ term name {
+    from {
+      ...
+    }
+    to {
+      ...
+    }
+    then {
+      ...
+    }
+ }
+</code>
+
+It is possible to omit the from, to and then block. If so, from and to will match all routes traversing
+the filter. An empty then block will run the default action. The default action is to execute the next term /
+policy in the list or accept the route if the last term is being run.
+In general, the from and to block will specify the match conditions on a route and the then block the
+actions to be performed on the route in case of a match.
+
+==== Match Conditions ====
+
+The overall structure of a match condition is: variable, operator, argument. A variable is a route attribute
+such as metric, prefix, next-hop and so on. The operator will specify how this variable is matched. For
+example < may perform a less-than match whereas > may perform a greater-than operation. The argument
+will be the value against which the variable is matched. The overall result is a logical and with the result of
+each statement. An example would be as follows:
+<code>
+ from {
+    protocol: "static"
+    metric < 5
+ }
+ to {
+    neighbor: 10.0.0.1
+ }
+ then {
+    ...
+ }
+</code>
+
+In this example metric is a variable, < an operator and 5 the argument. This will match all static routes
+with a metric less than 5 being advertised to the neighbor 10.0.0.1. Note that the : operator is an alias for
+== when matching (in from and to blocks) which simply means equality.
+
+==== Actions ====
+
+All actions are performed sequentially and have a similar syntax to match conditions. The main difference
+with respect to match conditions is that the operator will normally be assignment and that special commands
+exist. These commands are accept, reject, next term and next policy. If a route is accepted,
+no further terms will be executed and the route will be propagated downstream. If a route is rejected, once
+again no further terms will run, and the route will not be propagated downstream—it will be suppressed
+and dropped. Depending on whether it is an export or import filter, reject will have different semantics. On
+export it will not be advertised and on import it will never be used at all. The next term or policy commands
+will skip evaluation to the next term or policy in the evaluation chain.
+Here is an example of the syntax used when specifying actions:
+<code>
+ from {
+   ...
+ }
+ to {
+   ...
+ }
+ then {
+   metric: 5
+   accept
+ }
+</code>
+
+This term will cause the metric to be set to 5 and no further terms will be executed, because of the accept.
+Note that in the case of then blocks, the : operator is an alias for = which means assignment.
+If neither accept nor reject are specified, the default action will occur. The default action will execute
+the next term or accept the route if the last term has been reached.
+Note that if the then block contains an accept or reject action, all other actions within the then
+block will be executed regardless whether in the configuration they are placed before or after the accept
+or reject statements.
+
+==== Final action ====
+
+A policy statement can also hold one unnamed term that specifies what the final action on a route should
+be. This term contains only a then block that is executed only if reached. This will be the case if previous
+terms do not accept or reject the route, or skip to the next policy. Here is an example of an unnamed term:
+<code>
+ policy {
+    policy-statement bgp {
+      term a {
+        from {
+          med: 1
+        }
+        then {
+          accept
+        }
+      }
+      then {
+        reject
+      }
+    }
+ }
+</code>
+Note the last then block which lives in an unnamed term. If reached, it will reject any routes that were not
+accepted / rejected by the previous terms. Hence it acts as a final action.
+
+===  Policy subroutines ===
+
+It is possible to refer (call) a policy from another one with the use of policy subroutines. This allows
+factoring out common match conditions into a subroutine and referring to them from multiple policies.
+Policy subroutines can only be used as a match condition and hence be present only in from or to term
+blocks. If the policy subroutine rejects the route, then false is returned and route matching fails; true is
+returned otherwise causing a match success. Note that if any actions that modify the route are present in the
+subroutine, they will be executed even if the route is ultimately discarded by the calling policy. That is, if
+the to and from block in the subroutine match the route, the subroutine then block will be executed and it
+may modify the route, even if the caller ultimately decides to reject the route.
+Here is an example of a policy subroutine:
+<code>
+ policy {
+    policy-statement drop-private {
+      term a {
+        from {
+           network4: 10.0.0.0/8
+        }
+        then {
+           reject
+        }
+      }
+    }
+    policy-statement bgp {
+      term start {
+        from {
+           policy: "drop-private"
+           med: 1
+        }
+        then {
+           accept
+        }
+      }
+      term reject {
+        then {
+           reject
+        }
+      }
+    }
+ }
+</code>
+
+This BGP policy will only accept routes that match term start. For that to occur, the drop-private policy
+must return “true”, i.e., it must accept the route. This will only happen if the route is not “private” i.e., not
+10.0.0.0/8 in this case.
+
+==== Applying policies to protocols ====
+
+Once a policy is specified, it must be applied to a protocol. This is achieved via the import or export
+statement depending on the type of policy, within a protocol block. For example:
+<code>
+ protocol {
+    bgp {
+      export: "policy1,policy2,..."
+      import: "drop bad"
+    }
+ }
+</code>
+
+It is possible to have multiple policy statements per protocol such as in the export example above. The
+policies, like terms, will be executed in order. Again, it is possible that not all policies are run—maybe the
+first one will cause an accept or reject.
+
+With BGP, it is possible to apply policies at a per-peer granularity. For example:
+<code>
+ protocol {
+    bgp {
+      peer 192.168.1.1 {
+        import: "accept"
+      }
+      import: "reject"
+    }
+ }
+</code>
+Per-peer policies take precedence over global ones. Thus, the above example would accept all routes from
+peer 192.168.1.1 and reject all other routes.
+
+==== Policy expressions ====
+
+When specifying a policy list to run, it is possible to include a policy expression. A policy expression is a
+boolean expression over one or more policies. Whether a route is accepted or not depends on the outcome
+of the whole expression rather than the individual policies that compose it. Here is an example of a policy
+expression.
+<code>
+ protocol {
+   bgp {
+      import: "(good && allowed),(good || trusted),(!bad),reject"
+   }
+ }
+</code>
+
+A policy expression must be enclosed in parenthesis. The first expression will accept routes that are accepted
+both by the policies good and allowed. The second expression will accept routes accepted by any of the two
+policies in the expression. The third expression will allow only routes rejected by bad. It is possible to mix
+policy expressions and standard policy executions (e.g., reject in our example) when listing policies.
+
+===== Sets =====
+
+Many times it is useful to match against a set of values. For example it is more practical to reference a set of
+prefixes to match against, which may also be used in different policies rather than enumerating the prefixes
+one by one in each policy. This is achieved via sets which contain un-ordered items and no duplicates. Sets
+are declared as follows 1 :
+<code>
+ policy {
+   network4-list name {
+      network 10.0.0.0/8
+      network 192.168.0.0/16
+   }
+   network6-list name {
+      network 2001:DB8:AAAA:20::/64
+      network 2001:DB8:AAAA:30::/64
+   }
+ }
+</code>
+
+Two sets cannot have the same name—else there is no way to reference them within policies. Sets of differ-
+ent types are created in different ways. For example, a set of IPv4 prefixes is created via the network4-list
+directive whereas IPv6 prefixes would be created using network6-list. To reference a set in a policy,
+simply use its name as a text string. For example:
+
+^ Modifier ^ Match effect ^
+^ exact  | An exact match |
+^ longer | A higher number of bits than the netmask specified must match |
+^ orlonger | Exact or longer |
+^ shorter | A lower number of bits than the netmask specified must match |
+^ orshorter | Exact or shorter |
+^  not | Must not match exactly |
+
+<code>
+ policy {
+   network4-list private {
+     network 10.0.0.0/8
+     network 192.168.0.0/16
+   }
+   policy-statement drop-private {
+     term a {
+        from {
+          network4-list: "private"
+        }
+        then {
+          reject
+        }
+     }
+   }
+ }
+</code>
+
+This policy will match when the route is 10.0.0.0/8 or 192.168.0.0/16. In this case the match needs to satisfy
+only one element of the set. This is not always the case. If a route attribute which actually is a set (such
+as BGP communities) was matched against a set the user specifies, depending on the operator, different
+semantics would apply. For example an operator may check that the sets are equal, or that one has to be the
+subset of the other and so on. Obviously in this case each route has a single prefix so the only reasonable
+match would be to check whether that prefix is in the set or not.
+
+Note that it is pure “coincidence” that the directive to match a list of prefixes network4-list is the same
+as the one used to declare the set. It is not a requirement.
+
+====  Network lists ====
+
+A list of IPv4 or IPv6 route prefixes can be specified using the network4-list or network6-list
+directive respectively. In addition to specifying the prefix, each prefix can have a modifier which specifies
+how the prefix is matched. Valid modifiers are listed in Table 11.1 and the default one is exact.
+Here is an example to illustrate the syntax:
+<code>
+ policy {
+   network4-list private {
+     network 10.0.0.0/8 {
+        modifier: "orlonger"
+     }
+   }
+ }
+</code>
+                                                       121
+===== Ranges =====
+
+Certain variables can be matched against linear ranges of their corresponding type. The policy engine
+supports matching against ranges of unsigned integers and IPv4 / IPv6 addresses. Ranges are expressed by
+specifying their lower and upper inclusive boundaries separated by two dots, for example:
+<code>
+ from {
+    nexthop4: 10.0.0.11..10.0.0.15
+    neighbor: 10.0.0.0..10.0.0.255
+    med: 100..200
+ }
+</code>
+
+An abbreviated form of specifying a range containing a single value is allowed, in which case both the lower
+and upper boundary are considered to be equal. Hence, the following two expressions are equivalent:
+<code>
+ from {
+    neighbor: 10.1.2.3
+    med: 100
+ }
+ from {
+    neighbor: 10.1.2.3..10.1.2.3
+    med: 100..100
+ }
+</code>
+
+===== Tracing =====
+
+It is often useful to trace routes going through filters in order to debug policies. Another utility of this
+would be to log specific routes or simply to monitor routes flowing throughout XORP. This functionality is
+achieved via policy tracing.
+
+In order to trace a particular term simply assign an integer to the trace variable in the then block. The
+higher the integer, the more verbose the log message is. Here is an example:
+<code>
+ from {
+    neighbor: 10.0.0.1
+ }
+ then {
+    trace: 3
+ }
+</code>
+
+Assuming this is a BGP import policy, this term would cause all routes learnt from the BGP peer 10.0.0.1
+to be logged verbosely. Currently there is no useful meaning associated with the integral verbosity level
+although 1 normally indicates a single line of log whereas 3 is the most noisy.
+
+Note that only terms which match may be traced—else the then block which sets up the trace will never
+be run! However, it is trivial to put a term which will match everything (empty from and to block) which
+simply enables tracing. This may be necessary if all routes need to be monitored.
+
+===== Route Redistribution =====
+
+Route redistribution is a mechanism for advertising routes learnt via a different protocol. An example would
+be to advertise some static routes using BGP. Another possibility is advertising BGP routes using OSPF
+and so on. The key is that the from block of a term will be matched in the protocol which received
+the route whereas the to block will be matched in the protocol which is advertising the route (doing the
+redistribution). Route redistribution will always be an export policy—the protocol exporting (advertising)
+is the one redistributing. All actions (such as changing the metric) will occur in the protocol doing the
+redistribution.
+
+Here is an example:
+<code>
+ policy {
+   policy-statement "static-to-bgp" {
+      term a {
+        from {
+          protocol: "static"
+          metric: 2
+        }
+        to {
+          neighbor: 10.0.0.1
+        }
+        then {
+          med: 13
+          accept
+        }
+      }
+   }
+ }
+ protocols {
+   bgp {
+      export: "static-to-bgp"
+   }
+ }
+</code>
+
+The policy is applied to BGP as it is doing the redistribution. It is an export policy because it is advertising.
+Since the from block contains a protocol which is not BGP, route redistribution will occur. In this case, all
+static routes with metric 2 will be passed to BGP. Furthermore, as these routes are advertised to the BGP
+peer 10.0.0.1, the MED will be set to 13.
+
+Note that this policy will cause all static routes with metric of 2 to be advertised to all BGP peers—not only
+10.0.0.1. This policy does two things: it sets up the route redistribution, and further more changes the MED
+for a specific peer on those routes. Other peers will receive the static routes with the default MED value.
+In order to prevent other peers receiving static routes, another policy should be appended specifying that all
+static routes with metric of 2 should be rejected. Since this policy is added after the one in the example (in
+the export statement of BGP) the BGP peer 10.0.0.1 will receive the advertisement as no further terms /
+policies will be executed after the accept of the first policy (which matches).
+
+===== Common Directives for all Protocols =====
+
+All protocols have a common set of route attributes which may be matched, modified and actions which
+should take place on a route. These may be found in the template file policy.tp.
+
+====  Match Conditions ====
+The table that follows summarizes the match conditions in a from block for all protocols.
+
+^   Variable ^ Operator ^ Argument type ^  Semantics ^
+^  protocol | : | txt | Matches the protocol via which the route was learnt. Only valid for export policies. Used in route redistribution. |
+^ network4 | : <nowiki>(or ==)</nowiki> | ip4net | Matches the prefix of an IPv4 route. |
+^ | longer <nowiki>(or <)</nowiki> |  | Matches the route with a longer network mask. |
+^ | orlonger <nowiki>(or <=)</nowiki> | | Matches longer or exact route. |
+^ | shorter <nowiki>(or >)</nowiki> | | Matches the route with a shorter netmask. |
+^ | orshorter <nowiki>(or >=)</nowiki> | | Matches shorter or exact route. |
+^ | not <nowiki>(or !=)</nowiki> | | Does not match route. |
+^ network6 | (see above) | ipv6net | Same as IPv4, but for IPv6 prefixes. |
+^ network4-list | : | txt | Matches if the named IPv4 set contains the route. |
+^ network6-list | : | txt | Matches if the named IPv6 set contains the route. |
+^ prefix-length4 | : | u32range | Matches if the IPv4 route has a prefix length within the specified range. |
+^ prefix-length6 | : | u32range | Matches if the IPv6 route has a prefix length within the specified range. |
+^ nexthop4 | : | ipv4range | Matches if the IPv4 next-hop of the route lies within the specified range. |
+^ nexthop6 | : | ipv6range | Matches if the IPv6 next-hop of the route lies within the specified range. |
+^ tag | : | u32range | Matches the route tag. Routes can be arbitrarily tagged (labeled) via policies. |
+^ policy | : | txt | Executes a policy as a subroutine.  If the policy rejects the route, false is returned and no match occurs.\\  Otherwise, true is returned and the match is successful. |
+
+Note that the network4 and prefix-length4 statements are independent and cannot be used together to match, say, all routes within a specific prefix. For example, using both statements network4 = 10.0.0.0/8 and prefix-length4 >= 8 is incorrect if the intent is to match all routes within prefix 10.0.0.0/8. Instead, the network4 <= 10.0.0.0/4 statement alone should be used for that
+purpose. The same applies for the network6 and prefix-length6 statements as well.
+The match conditions for the to block are identical in syntax and semantics as the from block except for
+one case. It is illegal to specify the protocol in the to block. The reason for this is that when a policy is
+bound to a protocol via the export or import statement, that protocol automatically becomes the one
+referenced in the to block. When a BGP export policy is created, the to must be BGP by definition as it is
+doing the advertisement.
+
+====  Actions ====
+
+Common actions to all protocols are summarized in following table.
+
+^ Variable ^ Operator ^ Argument type ^ Semantics ^
+^ accept | none | none | Propagate this route downstream and stop executing all policies associated to this route. |
+^ reject | none | none | Do not propagate this route downstream and stop executing all policies associated to this route. |
+^ next | : | txt | The argument can either be “term” or “policy”.  This will skip evaluation to the next term or policy in the evaluation chain. |
+^ trace | : | u32 | Enable tracing at a specific verbosity level. Currently 1 means a single line of logging and 3 is the most verbose level. |
+^ tag | : | u32 | Tag a route. Routes can have an arbitrary tag for use in policy. The router makes no use of this tag except for mapping it into the OSPF or RIP tags if the protocols advertise tagged routes. |
+^  | add | u32 | Add to the tag. |
+^ | sub | u32 | Subtract from the tag. |
+^ nexthop4 | : | ipv4 | Replaces the IPv4 nexthop. |
+^ nexthop6 | : | ipv6 | Replaces the IPv6 nexthop. |
+^ nexthop4-var | : | txt | Replaces the IPv4 nexthop with a variable. The variable can be self or peer-address indicating either the local or remote address respectively when communicating with a peer. |
+^ nexhop6-var | : | txt | Same as with IPv4 but for IPv6. |
+
+===== BGP =====
+
+BGP supports policy and route redistribution. It can be used both as a source for redistribution (BGP-to-
+something) and as a target (something-to-BGP). The following sections summarize which aspects of BGP
+routes may be matched and what actions may be taken. These are also specified in the bgp.tp template
+file.
+
+The BGP policy engine currently has an interesting feature / bug. An export filter is placed on the RIB
+branch too. Thus, if an export policy rejects all routes, the RIB will never receive these routes and no routes
+will go into the forwarding plane. To avoid this, match neighbor: 0.0.0.0 in the to block and
+accept. The next term could match all and reject. This “feature” is actually useful if you want a BGP
+peering but do not wish to change the routing table.
+
+====   Match Conditions ====
+
+The following table summarizes the match conditions specific to BGP.
+
+^ Variable ^ Operator ^ Argument type  ^ Semantics ^
+^ as-path | : | txt | Matches an AS-Path with a regular expression. |
+^ as-path-list | : | as-path-list | If the set contains a regular expression which matches an AS-Path, then the term matches. |
+^ community | : | txt | Matches against the specified community. |
+^ community-list | : | community-list | If the set contains a community which  matches, then the term matches. |
+^ neighbor | : | ipv4range | In a from block it matches whether the route was learnt from a BGP peer in the specified range. In a to block it matches whether the route is about to be advertised to a BGP peer in the specified range. |
+^ origin  | : | u32 | Matches the origin attribute of the route. 0 stands for IGP, 1 for EGP and 2 for INCOMPLETE. |
+^ med | : | u32range | Matches the MED of the route. |
+^ localpref | : | u32range | Matches the local preference of the route. |
+^ was-aggregated | : | bool | True if this route contributed to origination of an aggregate route. |
+
+==== Actions ====
+
+The following table summarizes the actions specific to BGP.
+
+^ Variable ^ Operator ^ Argument type ^ Semantics ^
+^ as-path-prepend | : | txt | Prepends the specified AS-Path to the one on the route. |
+^ as-path-expand | : | u32 | Prepends the last AS in the path the specified number of times. |
+^ community | : | txt | Sets the community attribute. |
+^ community-add | : | txt | Adds the specified community. |
+^ community-del | : | txt | Deletes the specified community. |
+^ origin | : | u32 | Sets the origin. |
+^ med | : | u32 | Sets the MED. |
+^ | add | | Add to the MED. |
+^ | sub | | Subtract from the MED. |
+^ med-remove | : | bool | Remove MED if present. |
+^ localpref | : | u32 | Sets the localpref. |
+^ | add | | Add to the localpref. |
+^ | sub | | Subtrace from the localpref. |
+^ aggregate-prefix-len | : | u32 | Originate an aggregate route with this prefix length. |
+^ aggregate-brief-mode | : | bool | If true omit AS SET generation in aggregate route. |
+
+===== Static Routes =====
+Static routes support policy and may be used as a source for route redistribution. The table that follows sum-
+marizes the match conditions specific to static routes. These are also specified in the static routes.tp
+template file. Note that the static routes can match only the from block, because then can only be exported.
+
+^ Variable ^ Operator ^ Argument type ^ Semantics ^
+^ metric | : | u32 | Matches the metric of a route. |
+
+===== RIP and RIPng =====
+
+RIP and RIPng support policy and route redistribution. Each of them can be used both as a source for
+redistribution (RIP/RIPng-to-something) and as a target (something-to-RIP/RIPng). The following sections
+summarize which aspects of RIP and RIPng routes may be matched and what actions may be taken. These
+are also specified in the rip.tp and ripng.tp template files.
+
+====  Match Conditions ====
+
+The following table summarizes the match conditions specific to RIP and RIPng.
+
+^ Variable ^ Operator ^ Argument type ^ Semantics ^
+^ metric | : | u32 | Matches the metric of a route. |
+^ tag | : | u32range | Matches the route tag field in a route. |
+
+==== Actions ====
+
+The following table summarizes the actions specific to RIP and RIPng.
+
+^ Variable ^ Operator ^ Argument type ^ Semantics ^
+^ metric | : | u32 | Sets the metric. |
+^ | add | | Add to the metric. |
+^ | sub | | Subtract from the metric. |
+^ tag | : | u32 | Set the route tag field. |
+^ | add | | AAdd to the tag. |
+^ | sub | | Subtract from the tag. |
+
+===== OSPF =====
+O
+SPF supports policy and route redistribution. It can be used both as a source for redistribution (OSPF-
+to-something) and as a target (something-to-OSPF). The following sections summarize which aspects of
+OSPF routes may be matched and what actions may be taken. These are also specified in the ospfv2.tp
+template file.
+
+==== Match Conditions ====
+
+The following table summarizes the match conditions specific to OSPF.
+
+^ Variable ^ Operator ^ Argument type  ^ Semantics ^
+^ metric | : | u32 | Matches metric |
+^ external-type | : | u32  |  Matches an external type 1 or 2 route. |
+^ tag | : | u32range |       Matches tag field in AS-external-LSA. |
+
+====    Actions ====
+
+The table that follows summarizes the actions specific to OSPF.
+<code>
+     Variable               Operator  Argument type      Semantics
+                                            u32          Set the metric.
+     metric                    :
+                                                         Add to the metric.
+                             add
+                                                         Subtract from the metric.
+                             sub
+                                            u32          Sets the external type to 1 or 2.
+     external-type             :
+                                            u32          Set tag field in AS-external-LSA.
+     tag                       :
+                                                         Adds to the tag.
+                             add
+                                                         Subtracts from the tag.
+                             sub
+ </code>
+
+===== Examples =====
+Some common policies are presented in this section for a better understanding of the syntax. Here is a
+simple one:
+<code>
+ policy {
+    policy-statement medout {
+      term a {
+        then {
+          med: 42
+        }
+      }
+    }
+ }
+ protocols {
+    bgp {
+      export: "medout"
+    }
+ }
+</code>
+
+This will cause all routes leaving BGP to have a MED of 42. The whole decision process is unaffected as
+routes come in with their original MED.
+
+If this were used as an import policy, then routes flowing into the decision process would have a modified
+MED. As a consequence, it is also possible that the advertised routes will have a MED of 42, even though it
+is used as an import policy.
+
+Here is a more complicated example:
+<code>
+ policy {
+   policy-statement static-to-bgp {
+     term friend {
+        from {
+          protocol: "static"
+        }
+        to {
+          neighbor: 10.0.0.1
+        }
+        then {
+          med: 1
+          accept
+        }
+     }
+     term metric {
+        from {
+          protocol: "static"
+          metric: 7
+        }
+        to {
+          neighbor: 10.0.0.2
+        }
+        then {
+          trace: 1
+          med: 7
+          accept
+        }
+     }
+     term drop {
+        from {
+          protocol: "static"
+        }
+        then {
+          reject
+        }
+     }
+   }
+ }
+ protocols {
+   bgp {
+     export: "static-to-bgp"
+   }
+ }
+</code>
+
+In this example, all static routes are redistributed to BGP. The BGP peer 10.0.0.1 will receive all of them
+with a MED of 1.
+F
+or some reason, static routes with a metric of 7 are important and they are advertised to the BGP peer
+10.0.0.2 with a MED of 7 and are also logged. Note that 10.0.0.1 will receive these static routes with a
+MED of 1, even if they had a metric of 7.
+
+Finally, all static routes which are now in BGP are dropped on the export path. All other BGP peers will not
+receive any of the static routes.
+
+===== Policy commands =====
+Two classes of policy commands are supported by xorpsh. First, there is a mechanism for testing policies.
+Second, there are commands for showing policy configurations.
+^ Argument ^ Meaning ^
+^ network4-list | Display IPv4 prefix lists. |
+^ network6-list | Display IPv4 prefix lists. |
+^ as-path-list | Display AS path lists. |
+^ community-list | Display BGP community lists. |
+^ policy-statement | Display policy statements.|
+
+====     test policy ====
+
+It is possible to test a routing policy against a route to determine whether it will be accepted and what route
+characteristics will be modified. Here is an example of how one can test the policy import against the prefix
+10.0.0.0/8.
+<code>
+ user@hostname> test policy import 10.0.0.0/8
+ Policy decision: rejected
+</code>
+
+In this case the route was rejected and no modifications occurred to it.
+
+If the policy modifies or matches protocol specific route attributes, we must specify under which protocol to
+run the route. Here is an example.
+<code>
+ user@hostname> test policy import2 10.0.0.0/8 "–protocol=ospf4"
+ Policy decision: accepted
+ Route modifications:
+ tag 123
+</code>
+
+In this case we ran the policy import2 in the context of ospf4. The route was accepted and the tag was
+modified to 123.
+
+If the policy matches protocol specific route attributes, we must supply their value. The general syntax is
+--name=value. As with the protocol directive, the whole argument must be enclosed by quotes. Here is
+an example.
+<code>
+ user@hostname> test policy med1 10.0.0.0/8 "–protocol=bgp –med=1"
+ Policy decision: accepted
+ user@hostname> test policy med1 10.0.0.0/8 "–protocol=bgp –med=2"
+ Policy decision: rejected
+</code>
+
+In this example we ran the route with a med of 1 and 2. The policy only accepts routes with a med of 1
+though. Multiple protocol attributes can be passed as an argument. The route attributes names are the same
+as those used in match conditions in the policy configuration. (Strictly speaking they equal those in the
+policy “var map”, which is initialized in the XORP template files.)
+
+==== show policy ====
+The show policy command show the policy configuration. The command takes an argument indicating
+which part of the configuration to show. Table 11.2 lists the possible arguments.
+For example, to list all configured IPv4 prefix lists one types:
+<code>
+ user@hostname> show policy network4-list
+ test               9.9.0.0/16
+ private            10.0.0.0/8,192.168.0.0/16
+</code>
+
+The name of the list appears on the left and the contents on the right. One can show a specific list by giving
+its name as an additional argument to the command. Here is an example.
+<code>
+ user@hostname> show policy network4-list private
+ 10.0.0.0/8,192.168.0.0/16
+</code>
+
+In this case, only the contents is displayed, without the name.

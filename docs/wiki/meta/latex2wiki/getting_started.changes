@@ -1,0 +1,69 @@
+1299344586	77.109.115.245	C	latex2wiki:getting_started	geddons	created	
+1299344700	77.109.115.245	e	latex2wiki:getting_started	geddons	[Getting started with XORP] 	
+1299346781	77.109.115.245	E	latex2wiki:getting_started	geddons	First draft	
+1299347964	77.109.115.245	e	latex2wiki:getting_started	geddons	Big picture merged	
+1299348587	77.109.115.245	e	latex2wiki:getting_started	geddons	[Introduction] 	
+1299359413	77.109.115.245	e	latex2wiki:getting_started	geddons	[Getting familiar with XORP] Link fixing	
+1299359432	77.109.115.245	e	latex2wiki:getting_started	geddons	[Getting familiar with XORP] Link fixing (2)	
+1299359571	77.109.115.245	e	latex2wiki:getting_started	geddons	[Getting familiar with XORP] Section linking.	
+1299359642	77.109.115.245	e	latex2wiki:getting_started	geddons	[A practical example] 	
+1299361300	77.109.115.245	E	latex2wiki:getting_started	geddons	Getting started fully merged (ECODE/xorp.org)	
+1299361326	77.109.115.245	e	latex2wiki:getting_started	geddons	[Forwarding Engine Abstraction] 	
+1299411429	77.109.115.245	E	latex2wiki:getting_started	geddons	Code structure	
+1299420209	77.109.115.245	e	latex2wiki:getting_started	geddons	[Getting familiar with XORP] 	
+1299420654	77.109.115.245	e	latex2wiki:getting_started	geddons	[What are my options ?] 	
+1299422274	77.109.115.245	E	latex2wiki:getting_started	geddons	Importing and Merging with Ray Soucy's sample file.	
+1299679448	127.0.0.1	E	latex2wiki:getting_started		external edit	
+1299712687	70.89.124.249	E	latex2wiki:getting_started	greearb	[Supported Operating Systems] 	
+1299712852	70.89.124.249	E	latex2wiki:getting_started	greearb	[Main directory] 	
+1299712947	70.89.124.249	E	latex2wiki:getting_started	greearb	[How to compile XORP-1.8 CT on GNU Linux Ubuntu 10.10 64bits] 	
+1299713073	70.89.124.249	E	latex2wiki:getting_started	greearb	[Get the last XORP version on the Github] 	
+1299713114	70.89.124.249	E	latex2wiki:getting_started	greearb	[Compilation & Validation] 	
+1299713644	70.89.124.249	E	latex2wiki:getting_started	greearb	[Running XORP for the first time] 	
+1299713737	70.89.124.249	E	latex2wiki:getting_started	greearb	[Running XORP for the first time] 	
+1299714325	70.89.124.249	E	latex2wiki:getting_started	greearb	[Configuring XORP] 	
+1299714595	70.89.124.249	E	latex2wiki:getting_started	greearb	[What are my options ?] 	
+1299714727	70.89.124.249	E	latex2wiki:getting_started	greearb	[Network interfaces] 	
+1299714813	70.89.124.249	E	latex2wiki:getting_started	greearb	[Multicast Forwarding Engine Abstraction (MFEA)] 	
+1299715025	70.89.124.249	E	latex2wiki:getting_started	greearb	[Routing Information Protocol (RIP)] 	
+1299715090	70.89.124.249	E	latex2wiki:getting_started	greearb	[Open Shortest Path First (OSPF)] 	
+1299715165	70.89.124.249	E	latex2wiki:getting_started	greearb	[Internet Group Management Protocol/Multicast Listener Discovery (IGMP/MLD)] 	
+1299715288	70.89.124.249	E	latex2wiki:getting_started	greearb	[Protocol Independent Multicast - Sparse Mode (PIM-SM)] 	
+1299715883	70.89.124.249	E	latex2wiki:getting_started	greearb	[Interface configurations] 	
+1299716377	70.89.124.249	E	latex2wiki:getting_started	greearb	[Getting familiar with XORP] 	
+1299767751	94.139.56.133	e	latex2wiki:getting_started	geddons	[Compilation & Validation] Specifying scons check as optional explicitely to make the commands noob-proof	
+1299774083	94.139.56.133	e	latex2wiki:getting_started	geddons	[Running XORP for the first time] 	
+1299774916	94.139.56.133	E	latex2wiki:getting_started	geddons	[(Default) Compilation/Installation Paths] 	
+1299775027	94.139.56.133	e	latex2wiki:getting_started	geddons	[Network interfaces] 	
+1299775402	94.139.56.133	e	latex2wiki:getting_started	geddons	[Configuring XORP] Adding -h help stdout	
+1299775475	94.139.56.133	e	latex2wiki:getting_started	geddons	[You're lost or you wanna know more ?] 	
+1299777145	94.139.56.133	e	latex2wiki:getting_started	geddons	[(Default) Compilation/Installation Paths] etc path mkdir fix	
+1299777433	94.139.56.133	e	latex2wiki:getting_started	geddons	[Configuring XORP] fixed default config file path	
+1299777447	94.139.56.133	e	latex2wiki:getting_started	geddons	[Configuring XORP] 	
+1299777465	94.139.56.133	e	latex2wiki:getting_started	geddons	[Configuring XORP] fixing formatting (third time is a charm -_-)	
+1299778993	94.139.56.133	e	latex2wiki:getting_started	geddons	[What are my options ?] Completing infos about template files	
+1299780142	94.139.56.133	e	latex2wiki:getting_started	geddons	[Complete configurations] 	
+1299780457	94.139.56.133	e	latex2wiki:getting_started	geddons	[Configuring XORP] fixed wiki auto-formatting of <filename> => <nowiki> used	
+1299780909	94.139.56.133	e	latex2wiki:getting_started	geddons	[Complete configurations] ip show route & netstat -rn to show routes	
+1299781651	94.139.56.133	E	latex2wiki:getting_started	geddons	Getting started with xorpsh + conclusion	
+1299781922	94.139.56.133	e	latex2wiki:getting_started	geddons	[Conclusion]  Reviewing XORP effects	
+1299794387	94.139.56.133	e	latex2wiki:getting_started	geddons	[Compilation & Validation] 	
+1299799633	70.89.124.249	E	latex2wiki:getting_started	greearb	[First approach of xorpsh] 	
+1300130153	70.89.124.249	E	latex2wiki:getting_started	greearb	[For Developers:  Getting familiar with XORP] 	
+1300130271	70.89.124.249	E	latex2wiki:getting_started	greearb	[Code structure and documentation] 	
+1300130292	70.89.124.249	E	latex2wiki:getting_started	greearb	[Main directory] 	
+1300130314	70.89.124.249	E	latex2wiki:getting_started	greearb	[Sub-directories] 	
+1300130520	70.89.124.249	E	latex2wiki:getting_started	greearb	[Getting XORP] 	
+1300130786	70.89.124.249	E	latex2wiki:getting_started	greearb	[Running XORP for the first time] 	
+1300130984	70.89.124.249	E	latex2wiki:getting_started	greearb	[Installation] 	
+1300131008	70.89.124.249	E	latex2wiki:getting_started	greearb	[(Default) Compilation/Installation Paths] 	
+1300131283	70.89.124.249	E	latex2wiki:getting_started	greearb	[You're lost or you wanna know more ?] 	
+1300131618	70.89.124.249	E	latex2wiki:getting_started	greearb	[What are my options ?] 	
+1300131769	70.89.124.249	E	latex2wiki:getting_started	greearb	[Network interfaces] 	
+1300131898	70.89.124.249	E	latex2wiki:getting_started	greearb	[Routing Information Protocol (RIP)] 	
+1300131955	70.89.124.249	E	latex2wiki:getting_started	greearb	[Open Shortest Path First (OSPF)] 	
+1300132166	70.89.124.249	E	latex2wiki:getting_started	greearb	[Internet Group Management Protocol/Multicast Listener Discovery (IGMP/MLD)] 	
+1300132335	70.89.124.249	E	latex2wiki:getting_started	greearb	[Protocol Independent Multicast - Sparse Mode (PIM-SM)] 	
+1300132442	70.89.124.249	E	latex2wiki:getting_started	greearb	[Interface configurations] 	
+1300132627	70.89.124.249	E	latex2wiki:getting_started	greearb	[Complete configurations] 	
+1300149563	77.109.117.14	e	latex2wiki:getting_started	geddons	[XORP Configuration File] 	

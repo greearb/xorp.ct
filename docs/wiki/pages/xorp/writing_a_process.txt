@@ -1,0 +1,1080 @@
+====== Writing a XORP process ======
+To complete such a task, your best friends will probably be:
+  * [[latex2wiki:introduction_xorp_process|An Introduction to Writing a XORP Process]]
+  * Your favorite book on C++ and, among other things, its parts on multiple inheritance and templates.
+
+If you wanna go fast and dirty, follow this link: [[xorp:module_stub|The Dirty Stub Code]]
+
+To begin with, the organization of [[latex2wiki:introduction_xorp_process|An Introduction to Writing a XORP Process]] is quite good. So, we're gonna reproduce it here and comment it, if needed.
+
+<note warning>At the time of writing, the entire XORP documentation was vastly outdated and deprecated. The former document is particularly affected so don't pay too much attention to every detail of it. You only need to understand the big picture out of it and the remaining explanations will be written here.</note>
+
+<note warning>This page is currently a work in progress. [March 15 2011] It should be better in a couple of days.</note>
+
+
+
+=====Workflow=====
+==== Textual description ====
+
+<note important>All the generated stubs & object files are put in a specific folder (/xorp.ct/xorp/obj/ at the time of writing), as specified in [[latex2wiki:getting_started#Compiling XORP from source|Compiling XORP from source]], with the **exact same architecture than /xorp/**. 
+
+SCons uses the convention that **.os files are object files destined for shared libraries** (that end in .so), while .o files are object files destined for static libraries (that end in .a)((http://mu2e.fnal.gov/public/hep/computing/scons.shtml)). The **.os (and not .so !) files are intermediate files** used by Scons so there is no need to discuss these in the following sections.
+</note>
+
+The whole procedure is quite long and one might get lost because of its complexity. That's why before going any further, here is a quick summary of what's gonna happen:
+  - Xif definition, compilation and complete caller code generation
+    - Definition of your XRL interface //your_interface.xif// in ///xorp/xrl/interfaces//.
+    - There, modifying //SConscript// to include //your_interface.xif// in the building list.
+    - After running the script and recompilation, the **caller code** will automatically be generated in **your_interface_xif.hh** and **your_interface_xif.cc**. Then, they'll be automatically compiled and linked into **libxif_your_interface.so**.
+  - Target definition and partial target code compilation & generation
+    - Definition of your XRL target //your_target.tgt// in ///xorp/xrl/targets//.
+    - There, modifying //SConscript// to include //your_target.tgt// in the building list.
+    - After running the script and recompilation, the **partial target code** will automatically be generated in **your_target.xrls**, **your_target_base.hh** and **your_target_base.cc**. Then, the last two C++ files will be automatically compiled and linked into **libxst_your_target.so**.
+  - Your module creation and caller code implementation
+    - Implementation of your **caller** code in ///xorp/your_module/// by implementing the **XrlYourTargetTargetBase** stub previously generated. Usually, you'll implement a XRL wrapper in **XrlYourTargetNode** which will deal with the XRL requests and transmit them to **YourTargetNode** if necessary.
+    - There, creation of //your_module_module.h// which defines your module name and version and **has to be included at the next step**.
+    - Implementation of your module's **main loop** in ///xorp/your_module/xorp_your_module.cc//, **#including //your_module_module.h//**.
+    - Copy  ///xorp/static_routes/SConscript// and paste it into ///xorp/your_module//. Then, modify it accordingly.
+  - Global modifications to fully integrate your module
+    - Modify the topmost SConscript file in ///xorp// to add **your module subdirectory**.
+    - Re-do the steps described at [[latex2wiki:getting_started#Compiling XORP from source|Compiling XORP from source]] and later.
+
+==== Diagrammatic description ====
+A picture is often worth a thousand words so here is the complete workflow and the final class diagram, explained in the case of a ''hello'' module (see below). The user should refer to these UML-like diagrams as much as possible.
+
+[{{:xorp:howto-activity.png|Workflow activity diagram.}}] [{{:xorp:howto-class.png|Partial class diagram.}}]
+
+===== Xif definition, compilation and complete caller code generation =====
+
+
+====XRL interface====
+At this stage, we suppose you have a good insight of what your XORP module/process will/would be able to do. So, you should be able to write (a draft of) the interface between your module and its user (human, or not), especially:
+  * the commands needed to control and manage your module;
+  * the services offered by your module.
+
+<note tip>
+The XRL Interface files define what **public** methods a module implementing this interface will have to support and deal with. XRL interfaces are defined by a //.xif// file (pronounced dot-ziff). //xif// stands for **X**RL **I**nter**F**ace. 
+</note>
+<note important> 
+All //.xif// files **must reside in** //xorp/xrl/interfaces//, **yours included**.
+</note>
+
+For example, here is one of the simplest **already defined** XRL interfaces, // /xorp/xrl/interfaces/test.xif //:
+<file c test.xif>
+/* $XORP: xorp/xrl/interfaces/test.xif,v 1.2 2006/03/26 23:59:39 pavlin Exp $ */
+
+/*
+ * This is a test file with XRL interface.
+ */
+
+
+interface test/1.0 {
+	/**
+	 * Print "hello world".
+	 */
+	print_hello_world;
+
+	/** 
+	 * Print "hello world" and a user supplied greeting.
+	 *
+	 * @param msg greeting to be printed.
+	 */
+	 print_hello_world_and_message ? msg:txt;
+
+	 /**
+	  * Count number of greetings available.
+	  */
+	 get_greeting_count -> num_msgs:i32;
+
+	 /**
+	  * Get greeting.
+	  *
+	  * @param greeting_num index of greeting.
+	  *
+	  * @param greeting text of greeting.
+	  */
+	 get_greeting ? greeting_num:i32 -> greeting:txt;
+
+	 /**
+	  * Something that always fails.
+	  */
+	 shoot_foot;
+}
+</file>
+
+The format of the file is basically the keyword **interface** followed by **the name and version of this
+particular interface**, followed by a list of XRLs. In this case the name of the interface is ''test'',
+but this __does not have to be the same as the name of the process__. The version number is 1.0.
+
+  * The list of XRLs is demarked by braces { ... }.
+  * One XRL is given per line. Blank lines and comments are allowed.
+  * Comments are Kdoc-style (C-style comments beginning with %%/**%%). Since abstract classes will be generated by processing these XRL interfaces, **comments will be copied**.
+  * Input argument(s) follow(s) the '?' symbol.
+  * Output argument(s) follow(s) the '->' symbol.
+  * An argument is defined by its //name:type// pair.
+  * A backslash before the newline can be used to split a long XRL over multiple lines to aid readability.
+  * Multiple arguments are separated with the '&' symbol For example:
+
+<file c rip.xif>
+interface rip/0.1 {
+    /**
+     * Add an address to run RIP process on.  The addition of address is
+     * not instantaneous, RIP has to instantiate state in the FEA to send
+     * and receive packets.  Once instantiated the address must be
+     * explicitly enabled with set_rip_address_enabled.
+     *
+     * @param ifname the interface that owns vif that has address.
+     * @param vifname virtual interface owning address.
+     * @param addr the address to be added.
+     */
+    add_rip_address ? ifname:txt                                        \
+                    & vifname:txt                                       \
+                    & addr:ipv4;
+(...)
+</file>
+
+Do not worry if you are not sure about which perfect command(s) you should use, it is relatively easy to change, modify or update your XRL interface later.
+
+<note tip>Version numbers are generally increased when a change is made that is not backwards compatible, but the precise
+value has no important meaning.
+</note>
+
+For **pedagogic purposes**, we're gonna work with our own ''hello world'' .xif:
+
+<file c /xorp/xrl/interfaces/hello.xif>
+/*
+ * My hello-world xif !
+ *
+ * @author Pierre LEPROPRE - University of Liège 2011
+ */
+
+/*
+ * Interface name: "hello"
+ * Interface version: "1.0"
+ */
+interface hello/1.0 {
+  /**
+    * Prints "hello world"
+    *
+    */
+    print_hello_world;
+  /**
+    * Get personalized hello.
+    * (because you're worth it)
+    *
+    * @param your_name Give your name to get a free greeting !
+    * @return The personalized text greeting
+    */
+    get_personalized_hello_world ? your_name:txt -> hello:txt;
+    
+}
+</file>
+
+===Types of arguments===
+Here is quite an exhaustive list of all the valid type parameters (comes from ///xorp/xrl/README//, [[latex2wiki:xorp_rtrmgr|XORP Router Manager Process (rtrmgr) documentation]], // /xorp/xrl/scripts/Xif/xiftypes.py // and  ///xorp/ct/xorp/libxipc/xrl_atom.cc//):
+
+
+|                               ^   Description                     ^   Source Keyword      ^
+^  boolean                      |      Boolean - valid values are true and false.  |  bool  |
+^  int32	                |     Signed 32 bit integer       |   i32        |
+^  uint32              |      Unsigned 32 bit integer      |   u32       |
+^  int64                       |   Signed 64 bit integer          |   i64      |
+^  uint64                    |    Unsigned 64 bit integer         |   u64     |
+^  ipv4                       |  An IPv4 address in dotted decimal format.        |  ipv4        |
+^  ipv4net                      |  An IPv4 address and prefix length in the conventional format. E.g.: 1.2.3.4/24.  |  ipv4net    |
+^  ipv6                    |   An IPv6 address in the canonical colon-separated human-readable format.   |  ipv6   |
+^  ipv6net                      |  An IPv6 address and prefix in the conventional format. E.g.: fe80::1/64  |   ipv6net  |
+^  mac                      |  An MAC address in the conventional colon-separated hex format. E.g.: 00:c0:4f:68:8c:58   |  mac        |
+^  text                    |    A String.     |  txt      |
+^  list                      |  A C++ List.          |  list  |
+^  binary                       |  Raw byte data. Can be seen as //vector<uint8_t>//     |  binary       |
+
+====Generating C++ classes for the caller, from XRL interfaces====
+Since version 1.7, XORP has been using ''Scons'' instead of ''Makefile''. So, you have to modify the ''SConscript'' file in the same folder (///xorp/xrl/interfaces//) and add ''//your_interface//.xif'' to the ''xifs'' array, like this:
+
+<code python /xorp/xrl/interfaces/SConscript>
+(...)
+xifs = [
+    'cli_manager.xif',
+    'cli_processor.xif',
+    'common.xif',
+    (...)
+    'your_interface.xif', #your .xif here
+    ]
+(...)
+</code>
+In our pedagogic case, we added ''hello.xif''.
+
+After that, execute the global ''Scons'', recompile XORP (this could take a while the first time...) and then you'll get the corresponding C++ header (''//your_interface//_xif.hh'') and source (''//your_interface//_xif.cc'') files for **the XRL caller**.
+
+<note important>
+In ''//your_interface//_xif.hh/.cc'' files, a client class for your XRL interface is defined.\\
+That is, when you want to make a call to a method of an XRL interface //your_interface/X.Y//, you instantiate the class ''Xrl//YourInterface//V//X//p//Y//Client''.\\
+This class implements several methods to actually perform the XRL. They look like: ''send_//method_from_xif//(//arguments_from_xif//, **callback_function**)''.
+</note>
+
+So, methods from the client class are just similar to the methods defined in the XRL interface, except for the last argument which is an automatically generated **callback**. Remember that blocking calls are proscribed in XORP, so when a module makes a call, it introduces an asynchronous "demand for processing" tied to a uniquely specified callback mechanism. Like this, everything goes smooth and the call does not freeze the module, or XORP...
+
+The boolean value returned by these "send methods" is
+  * //true// if no local error happened. It doesn't mean **yet** that the method performed successfully. Everything now depends on the callbacks values.
+  * //false// if a local error happened.
+
+<note important>When a XRL interface has been defined, all the //XRL caller// codes will be automatically generated once the SCons scripts are consequently modified.</note>
+
+Let's see what happened with our ''hello.xif'':
+<code bash>
+pierre@pierre-T500:~/tfe/xorp.ct/xorp/obj/x86_64-unknown-linux-gnu/xrl/interfaces$ ls -l | grep hello
+-rw-r--r-- 1 pierre pierre    2561 2011-03-10 22:46 hello_xif.cc
+-rw-r--r-- 1 pierre pierre    2113 2011-03-10 22:46 hello_xif.hh
+-rw-r--r-- 1 pierre pierre  372624 2011-03-10 22:46 hello_xif.os
+-rwxr-xr-x 1 pierre pierre  272490 2011-03-10 22:46 libxif_hello.so
+</code>
+
+As previously said: 
+  * **hello_xif.hh** and **hello_xif.cc** have been automatically created;
+  * **hello_xif.os** is a temp file, don't pay attention to it;
+  * **libxif_hello.so** is the linked and compiled library for our interface.
+
+Let's get an in-depth look of the C++ generated files:
+
+<file c++ /xorp/obj/x86_64-unknown-linux-gnu/xrl/interfaces/hello_xif.hh>
+
+/*
+ * obj/x86_64-unknown-linux-gnu/xrl/interfaces/hello_xif.hh
+ * vim:set sts=4 ts=8 ft=cpp:
+ *
+ * Copyright (c) 2001-2010 XORP, Inc and Others
+ * See the XORP LICENSE.lgpl file for licensing, conditions, and warranties
+ * on use.
+ *
+ * DO NOT EDIT THIS FILE - IT IS PROGRAMMATICALLY GENERATED
+ *
+ * Generated by 'clnt-gen'.
+ */
+
+#ifndef __XRL_INTERFACES_HELLO_XIF_HH__
+#define __XRL_INTERFACES_HELLO_XIF_HH__
+
+#undef XORP_LIBRARY_NAME
+#define XORP_LIBRARY_NAME "XifHello"
+
+#include "libxorp/xlog.h"
+#include "libxorp/callback.hh"
+
+#include "libxipc/xrl.hh"
+#include "libxipc/xrl_error.hh"
+#include "libxipc/xrl_sender.hh"
+
+//#include <memory>
+
+class XrlHelloV1p0Client {
+public:
+    XrlHelloV1p0Client(XrlSender* s) : _sender(s) {}
+    virtual ~XrlHelloV1p0Client() {}
+
+    typedef XorpCallback1<void, const XrlError&>::RefPtr PrintHelloWorldCB;
+    /**
+     *  Send Xrl intended to:
+     *
+     *  Prints "hello world"
+     *
+     *  @param dst_xrl_target_name the Xrl target name of the destination.
+     */
+    bool send_print_hello_world(
+	const char*	dst_xrl_target_name,
+	const PrintHelloWorldCB&	cb
+    );
+
+    typedef XorpCallback2<void, const XrlError&, const string*>::RefPtr GetPersonalizedHelloWorldCB;
+    /**
+     *  Send Xrl intended to:
+     *
+     *  Get personalized hello. (because you're worth it)
+     *
+     *  @param dst_xrl_target_name the Xrl target name of the destination.
+     *
+     *  @param your_name Give your name to get a free greeting !
+     */
+    bool send_get_personalized_hello_world(
+	const char*	dst_xrl_target_name,
+	const string&	your_name,
+	const GetPersonalizedHelloWorldCB&	cb
+    );
+
+protected:
+    XrlSender* _sender;
+
+private:
+    static void unmarshall_print_hello_world(
+	const XrlError&	e,
+	XrlArgs*	a,
+	PrintHelloWorldCB		cb
+    );
+
+    static void unmarshall_get_personalized_hello_world(
+	const XrlError&	e,
+	XrlArgs*	a,
+	GetPersonalizedHelloWorldCB		cb
+    );
+
+private:
+    /* Declare cached Xrl pointers */
+    auto_ptr<Xrl> ap_xrl_print_hello_world;
+    auto_ptr<Xrl> ap_xrl_get_personalized_hello_world;
+};
+
+#endif /* __XRL_INTERFACES_HELLO_XIF_HH__ */
+</file>
+
+The corresponding implementation in the ''.cc'' doesn't really matter as it's not exactly user-friendly and automatically generated too. All you have to know is that the code for **calling** is now **complete**.
+===== Target definition and partial target code compilation & generation =====
+====Generating C++ classes for the target, from XRL Interfaces====
+A XORP process/module Programming Interface consists of a set of XRL interfaces. XRL interfaces could indeed be assembled into set of relative interests to form **XRL Targets**.((Often, the Programming Interface for a module is a single XRL Target, or two if the module is differentiated for IPv4 and IPv6. However, the Programming Interface could be formed from multiple targets, even if the interest seems quite limited.))
+
+Such XRL Targets are defined into the ''/xorp/xrl/targets'' folder and look like:
+<code c test.tgt>
+#include "common.xif"
+#include "test.xif"
+
+target test implements		common/0.1,	\
+				test/1.0;
+</code>
+  - Include the needed xif files //à la C(++)//;
+  - **Separate the lines** of implemented interfaces with a backslash character ('\');
+  - Declare which XRL Interfaces the target implements, and which version. The last implemented interface must be followed by a semicolon and not a regular comma as the previous ones.
+
+<note tip>Usually, you will always need to implement the **common** interface which consists in 
+<code c /xorp/xrl/interfaces/common.xif>
+/* $XORP: xorp/xrl/interfaces/common.xif,v 1.3 2003/05/29 21:17:17 mjh Exp $ */
+
+/*
+ * XRL interface common to all XRL target entities.
+ */
+
+#include <xorp_config.h>
+
+interface common/0.1 {
+
+	/** Get name of Xrl Target */
+	get_target_name	-> name:txt;
+
+	/** Get version string from Xrl Target */
+	get_version	-> version:txt;
+
+	/** Get status of Xrl Target */
+	get_status	-> status:u32 & reason:txt;
+
+	/** Request clean shutdown of Xrl Target */
+	shutdown;
+
+	/** Request a startup of Xrl Target */
+	startup;
+}
+</code>
+</note>
+
+Getting back to our ''hello'' example, here is our ''hello.tgt'':
+
+<file c /xorp.ct/xorp/xrl/targets/hello.tgt>
+#include "common.xif"
+#include "hello.xif"
+
+/*
+ * My hello-world tgt !
+ *
+ * @author Pierre LEPROPRE - University of Liège 2011
+ */
+
+/*
+ * This hello target implements
+ * /xorp/xrl/interfaces/common.xif version 0.1 [built-in]
+ * and
+ * /xorp/xrl/interfaces/hello.xif  version 1.0 [our customized .xif]
+ */
+target hello implements     common/0.1,                     \
+                            hello/1.0;
+</file>
+
+
+Once again, you must modify the ''SCons'' script in the ///xorp/xrl/targets// folder. Add ''//your_target//.tgt'' to the ''tgts'' array of ''SConscript'' like this:
+
+<code python /xorp/xrl/targets/SConscript>
+(...)
+tgts = [
+    'cli.tgt',
+    'coord.tgt',
+    'fea.tgt',
+    'your_target.tgt', #your target here. For our customized example, it is 'hello.tgt'
+    ]
+(...)
+</code>
+
+
+Once more, from your ''.tgt'' file, the scons command and recompilation will generate 
+  * ''//your_target//.xrls'', this file simply contains a listing of all the fully expanded XRLs supported by your target. <file c /xorp/obj/.../xrl/targets/hello.xrls>
+/*
+ * obj/x86_64-unknown-linux-gnu/xrl/targets/hello.xrls
+ * vim:set sts=4 ts=8 ft=cpp:
+ *
+ * Copyright (c) 2001-2010 XORP, Inc and Others
+ * See the XORP LICENSE.lgpl file for licensing, conditions, and warranties
+ * on use.
+ *
+ * DO NOT EDIT THIS FILE - IT IS PROGRAMMATICALLY GENERATED
+ *
+ * Generated by 'tgt-gen'.
+ */
+
+/**
+ *  Get name of Xrl Target
+ */
+finder://hello/common/0.1/get_target_name->name:txt
+
+/**
+ *  Get version string from Xrl Target
+ */
+finder://hello/common/0.1/get_version->version:txt
+
+/**
+ *  Get status of Xrl Target
+ */
+finder://hello/common/0.1/get_status->status:u32&reason:txt
+
+/**
+ *  Request clean shutdown of Xrl Target
+ */
+finder://hello/common/0.1/shutdown
+
+/**
+ *  Request a startup of Xrl Target
+ */
+finder://hello/common/0.1/startup
+
+/**
+ *  Prints "hello world"
+ */
+finder://hello/hello/1.0/print_hello_world
+
+/**
+ *  Get personalized hello. (because you're worth it)
+ *
+ *  @param your_name Give your name to get a free greeting !
+ */
+finder://hello/hello/1.0/get_personalized_hello_world?your_name:txt->hello:txt
+</file>
+  * the corresponding C++ header (''//your_target//_base.hh'') stub file <file c++ /xorp.ct/xorp/obj/x86_64-unknown-linux-gnu/xrl/targets/hello_base.hh>
+/*
+ * obj/x86_64-unknown-linux-gnu/xrl/targets/hello_base.hh
+ * vim:set sts=4 ts=8 ft=cpp:
+ *
+ * Copyright (c) 2001-2010 XORP, Inc and Others
+ * See the XORP LICENSE.lgpl file for licensing, conditions, and warranties
+ * on use.
+ *
+ * DO NOT EDIT THIS FILE - IT IS PROGRAMMATICALLY GENERATED
+ *
+ * Generated by 'tgt-gen'.
+ */
+
+
+#ifndef __XRL_TARGETS_HELLO_BASE_HH__
+#define __XRL_TARGETS_HELLO_BASE_HH__
+
+#undef XORP_LIBRARY_NAME
+#define XORP_LIBRARY_NAME "XrlHelloTarget"
+
+#include "libxorp/xlog.h"
+#include "libxipc/xrl_cmd_map.hh"
+
+class XrlHelloTargetBase {
+protected:
+    XrlCmdMap* _cmds;
+
+public:
+    /**
+     * Constructor.
+     *
+     * @param cmds an XrlCmdMap that the commands associated with the target
+     *		   should be added to.  This is typically the XrlRouter
+     *		   associated with the target.
+     */
+    XrlHelloTargetBase(XrlCmdMap* cmds = 0);
+
+    /**
+     * Destructor.
+     *
+     * Dissociates instance commands from command map.
+     */
+    virtual ~XrlHelloTargetBase();
+
+    /**
+     * Set command map.
+     *
+     * @param cmds pointer to command map to associate commands with.  This
+     * argument is typically a pointer to the XrlRouter associated with the
+     * target.
+     *
+     * @return true on success, false if cmds is null or a command map has
+     * already been supplied.
+     */
+    bool set_command_map(XrlCmdMap* cmds);
+
+    /**
+     * Get Xrl instance name associated with command map.
+     */
+    const string& get_name() const { return _cmds->name(); }
+
+    /**
+     * Get version string of instance.
+     */
+    const char* version() const { return "hello/0.0"; }
+
+protected:
+
+    /**
+     *  Pure-virtual function that needs to be implemented to:
+     *
+     *  Get name of Xrl Target
+     */
+    virtual XrlCmdError common_0_1_get_target_name(
+	// Output values,
+	string&	name) = 0;
+
+    /**
+     *  Pure-virtual function that needs to be implemented to:
+     *
+     *  Get version string from Xrl Target
+     */
+    virtual XrlCmdError common_0_1_get_version(
+	// Output values,
+	string&	version) = 0;
+
+    /**
+     *  Pure-virtual function that needs to be implemented to:
+     *
+     *  Get status of Xrl Target
+     */
+    virtual XrlCmdError common_0_1_get_status(
+	// Output values,
+	uint32_t&	status,
+	string&	reason) = 0;
+
+    /**
+     *  Pure-virtual function that needs to be implemented to:
+     *
+     *  Request clean shutdown of Xrl Target
+     */
+    virtual XrlCmdError common_0_1_shutdown() = 0;
+
+    /**
+     *  Pure-virtual function that needs to be implemented to:
+     *
+     *  Request a startup of Xrl Target
+     */
+    virtual XrlCmdError common_0_1_startup() = 0;
+
+    /**
+     *  Pure-virtual function that needs to be implemented to:
+     *
+     *  Prints "hello world"
+     */
+    virtual XrlCmdError hello_1_0_print_hello_world() = 0;
+
+    /**
+     *  Pure-virtual function that needs to be implemented to:
+     *
+     *  Get personalized hello. (because you're worth it)
+     *
+     *  @param your_name Give your name to get a free greeting !
+     */
+    virtual XrlCmdError hello_1_0_get_personalized_hello_world(
+	// Input values,
+	const string&	your_name,
+	// Output values,
+	string&	hello) = 0;
+
+private:
+    const XrlCmdError handle_common_0_1_get_target_name(const XrlArgs& in, XrlArgs* out);
+
+    const XrlCmdError handle_common_0_1_get_version(const XrlArgs& in, XrlArgs* out);
+
+    const XrlCmdError handle_common_0_1_get_status(const XrlArgs& in, XrlArgs* out);
+
+    const XrlCmdError handle_common_0_1_shutdown(const XrlArgs& in, XrlArgs* out);
+
+    const XrlCmdError handle_common_0_1_startup(const XrlArgs& in, XrlArgs* out);
+
+    const XrlCmdError handle_hello_1_0_print_hello_world(const XrlArgs& in, XrlArgs* out);
+
+    const XrlCmdError handle_hello_1_0_get_personalized_hello_world(const XrlArgs& in, XrlArgs* out);
+
+    void add_handlers();
+    void remove_handlers();
+
+    struct handler_table {
+        const char *name;
+        const XrlCmdError (XrlHelloTargetBase::*method)(const XrlArgs&, XrlArgs*);
+    };
+
+    static const struct handler_table handlers[];
+    static const size_t num_handlers;
+};
+
+#endif // __XRL_TARGETS_HELLO_BASE_HH__
+</file>
+  * the corresponding C++ source (''//your_target//_base.**cc**'') stub file with partial target implementation
+  * Then, the last two C++ files will be automatically compiled and linked into //libxst_your_target.so//.
+
+<note tip>XST probably((As it has never been documented so far...)) stands for **X**RL **S**tub **T**arget.</note>
+
+Briefly, here is what you should get:
+<code bash>
+pierre@pierre-T500:~/tfe/xorp.ct/xorp/obj/x86_64-unknown-linux-gnu/xrl/targets$ ls -l | grep hello
+-rw-r--r-- 1 pierre pierre    9332 2011-03-10 23:45 hello_base.cc
+-rw-r--r-- 1 pierre pierre    4157 2011-03-10 23:45 hello_base.hh
+-rw-r--r-- 1 pierre pierre  477408 2011-03-10 23:45 hello_base.os
+-rw-r--r-- 1 pierre pierre    1056 2011-03-10 23:45 hello.xrls
+-rwxr-xr-x 1 pierre pierre  315762 2011-03-10 23:45 libxst_hello.so
+</code>
+
+<note important>
+As the name suggests, ''//your_target//_base.hh/.cc'' defines/implements an (abstract) base class for your XORP module.\\
+That is, when you write a XORP module, it will **//only//** be called through the methods defined in such a class, and obviously inherited and implemented by a class from your module.
+</note>
+
+As the ''hello'' module we're implementing isn't that big and easy to understand, we strongly recommend that you take a look at the ''.hh'' and ''.cc'' files. The most important things to notice are the following:
+
+  - These stubs are already doing all the XRL (un)marshalling for you ! Check all the **handlers** methods: they are already defined and implemented !
+  - ''hello_base.hh'' defines the **Xrl**''Hello''**Target**''Base'' class.
+  - You only need to implement the **protected pure virtual** methods: the rest is already done for you. Check that in the ''.cc'' file if you don't believe us !
+
+
+====Main Loop====
+Well, now, you should have all the stuff needed to communicate with your module, even if it is still imaginary...
+
+So, let's start programming!
+
+We copied portions of the ''static_routes/xorp_static_routes.cc'' file here, with a little simplification and reorganization to help its explanation.((I could have reproduced my ''xorp_vivaldi.cc'' file but since it is quite similar and I suppose you are reading the XORP tutorial in the same time, I prefer to stick at the same file as they.))
+
+First thing to do is to include some files from the XORP library (just take a look at [[latex2wiki:xorp_libxorp_overview|XORP Libxorp Library Overview]] if you need to quickly understand what they do).
+<code cpp static_routes/xorp_static_routes.cc---includes>
+//
+// XORP StaticRoutes module implementation.
+//
+
+#include "static_routes_module.h"
+
+#include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
+#include "libxorp/debug.h"
+#include "libxorp/callback.hh"
+#include "libxorp/eventloop.hh"
+#include "libxorp/exceptions.hh"
+
+#include "xrl_static_routes_node.hh"
+
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
+</code>
+
+Convention indicates that the first of these (static_routes_module.h) is
+a header file defining the module name and version - this information is used by later includes which will
+complain if this information is not available. The content of ''static_routes_module.h'' is very simple. It
+must define ''XORP_MODULE_NAME'' and ''XORP_MODULE_VERSION'':
+
+<code c /xorp/static_routes/static_routes_module.h>
+/*
+ * $XORP: xorp/static_routes/static_routes_module.h,v 1.10 2008/10/02 21:58:29 bms Exp $
+ */
+
+/*
+ * Module definitions.
+ */
+#ifndef __STATIC_ROUTES_STATIC_ROUTES_MODULE_H__
+#define __STATIC_ROUTES_STATIC_ROUTES_MODULE_H__
+
+#ifndef XORP_MODULE_NAME
+#define XORP_MODULE_NAME        "STATIC_ROUTES"
+#endif
+#ifndef XORP_MODULE_VERSION
+#define XORP_MODULE_VERSION     "0.1"
+#endif
+
+#endif /* __STATIC_ROUTES_STATIC_ROUTES_MODULE_H__ */
+</code>
+
+Then we include the functionality from libxorp that we’ll need:
+
+|                              ^   Description                    ^
+^ libxorp/xorp.h  |generic headers that should always be included.  |
+^ libxorp/xlog.h  |XORP logging functionality. The convention is to use XLOG macros to log warnings and error messages, so we can redefine how logging if implemented in future without rewriting the code that uses logging. |
+^ libxorp/debug.h  |XORP debugging functionality.  |
+^ libxorp/callback.hh  |XORP callback templates, needed to pass a handle into event handling code to be called later when an event occurs.  |
+^ libxorp/eventloop.hh  |the main XORP eventloop.  |
+^ libxorp/exceptions.hh  |standard exceptions for standard stuff - useful as a debugging aid.  |
+
+
+I actually removed the management of arguments/options within the ''main()'' function to focus on main subject. So, as you can just read below, this function is quite simple, initializing the ''Finder'' adress (obviously, you need its address since it is the resolver, as you need your DNS address when you are browsing), initializing logging facility (brief explanation is given within [[latex2wiki:xorp_libxorp_overview|XORP Libxorp Library Overview]] at ''xlog.hh'' if you haven't looked at it yet), calls the module main function, waits for its termination, and then closes the logging facility.
+
+<code cpp static_routes/xorp_static_routes.cc---main()>
+int
+main(int argc, char *argv[])
+{
+    string finder_hostname = FinderConstants::FINDER_DEFAULT_HOST().str();
+    uint16_t finder_port = FinderConstants::FINDER_DEFAULT_PORT();
+
+    //
+    // Initialize and start xlog
+    //
+    xlog_init(argv[0], NULL);
+    xlog_set_verbose(XLOG_VERBOSE_LOW);		// Least verbose messages
+    // XXX: verbosity of the error messages temporary increased
+    xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
+    xlog_add_default_output();
+    xlog_start();
+
+    //
+    // Run everything
+    //
+    try {
+	static_routes_main(finder_hostname, finder_port);
+    } catch(...) {
+	xorp_catch_standard_exceptions();
+    }
+
+    //
+    // Gracefully stop and exit xlog
+    //
+    xlog_stop();
+    xlog_exit();
+
+    exit (0);
+}
+</code>
+
+Okay, here is the main dish. In this function, we essentially accomplish three goals:
+  - Creating and starting an XRL Router, that is, an object which will create needed the communication layer to communicate with other modules, i.e., sending and receiving XRLs. It must obviously receive the address of the ''Finder'' to register itself with the latter. This XRL Router is created with the instantiation of the ''XrlStaticRoutesNode'' (which inherits from ''XrlStdRouter'', which inherits from ''XrlRouter''... ''XrlStdRouter'' provides default configuration for ''XrlRouter'' and should be enough for most usages).
+  - Passing parameters to your main object, that is, providing some needed stuff for the good working of your module (here, for example, the names of other needed module as ''fea'' or ''rib'').
+  - Processing the **main loop** of your module. As you can see, the ''Eventloop'' of your module is created early to be passed to the main object of the ''static_route'' module but it runs only **after the XRL router is ready and the module is started**.
+<code cpp static_routes/xorp_static_routes.cc---static_routes_main()>
+static void
+static_routes_main(const string& finder_hostname, uint16_t finder_port)
+{
+    //
+    // Init stuff
+    //
+    EventLoop eventloop;
+
+    //
+    // StaticRoutes node
+    //
+    XrlStaticRoutesNode xrl_static_routes_node(
+	eventloop,
+	"static_routes",
+	finder_hostname,
+	finder_port,
+	"finder",
+	"fea",
+	"rib");
+    wait_until_xrl_router_is_ready(eventloop,
+				   xrl_static_routes_node.xrl_router());
+
+    // Startup
+    xrl_static_routes_node.startup();
+
+    //
+    // Main loop
+    //
+    while (! xrl_static_routes_node.is_done()) {
+	eventloop.run();
+    }
+}
+</code>
+
+====Your module's SConscript====
+
+Copy for example ///xorp/static_routes/SConscript// and paste it into ///xorp/your_module///. Then, modify it accordingly.
+<note warning>Beta version</note>
+
+Let's write a SConscript for some //module// specialized for IPv4 and IPv6. Hereafter, change all occurence of "modulename" with the name of your module.
+<code python /xorp/module/SConscript>
+# Copyright (c) 2009-2010 XORP, Inc and Others
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License, Version 2, June
+# 1991 as published by the Free Software Foundation. Redistribution
+# and/or modification of this program under the terms of any other
+# version of the GNU General Public License is not permitted.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
+# see the GNU General Public License, Version 2, a copy of which can be
+# found in the XORP LICENSE.gpl file.
+#
+# XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+# http://xorp.net
+
+# $XORP$
+
+import os
+Import('env')
+</code>
+If any subdirectory with code source and SConscript exist, just put them here
+<code python>
+subdirs = [
+	'tests',
+	'tools',
+]
+
+SConscript(dirs = subdirs, exports='env')
+
+env = env.Clone()
+is_shared = env.has_key('SHAREDLIBS')
+
+env.AppendUnique(CPPPATH = [
+    '#',
+    '$BUILDDIR',
+    ])
+
+env.PrependUnique(LIBPATH = [
+    '$BUILDDIR/libxorp',
+    '$BUILDDIR/libcomm',
+    '$BUILDDIR/libxipc',
+    '$BUILDDIR/libproto',
+    '$BUILDDIR/libfeaclient',
+    '$BUILDDIR/policy/backend',
+    '$BUILDDIR/policy/common',
+    '$BUILDDIR/xrl/interfaces',
+    '$BUILDDIR/xrl/targets',
+    '$BUILDDIR/mrt',
+    '.'
+    ])
+
+</code>
+Here we define the library used by the module. They are present within the compiled directory:
+  - libxif under xrl/interfaces , make sure to include the appropriate xif libraries (i.e. the ones of the module you are calling).
+  - libxst under xrl/target , with the same consideration.
+  - libxorp under each module directory
+All these libraries are also linked within the lib directory.
+
+However, it is not always that easy to gather and find which libraries you need to include.
+  * The first to include are your own module libraries, for example, 'xorp_modulename', 'xst_modulename_ipv4' and 'xst_modulename_ipv6' (you may want to include them conditionally, as shown here).
+  * After add the xif libraries related to the interfaces used in the module tgt file. Then, add the library from the features you are using (look under the /obj/__../lib directory to see them all). For example, if you are using the fea in any way, add 'xorp_fea_client', 'xif_fea_ifmgr_mirror' and 'xst_fea_ifmgr_mirror'. If in doubt, put the library in the list since all an extra useless library will do is to extend a little the compilation time.
+  * Finally always include 'xorp_ipc','xorp_core', 'xorp_proto' and 'xorp_comm'.
+<code python>
+env.AppendUnique(LIBS = [
+    'xorp_modulename',		# Refers to the library, not the executable.
+    'xst_modulename_ipv4',
+    'xorp_policy_backend',
+    'xorp_policy_common',
+    'xorp_fea_client',
+    'xif_rib',
+    'xif_finder_event_notifier',
+    'xif_fea_ifmgr_mirror',
+    'xst_fea_ifmgr_mirror',
+    'xif_fea_ifmgr_replicator',
+    'xif_fea_rawpkt4',
+    'xorp_ipc',
+    'xorp_core',
+    'xorp_proto',
+    'xorp_comm',
+])
+
+if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
+    env.AppendUnique(LIBS = [
+        'xif_fea_rawpkt6',
+        'xst_modulename_ipv6',
+        ])
+
+env.Replace(RPATH = [
+    env.Literal(env['xorp_module_rpath'])
+])
+</code>
+Put your source files to be compiled in this list (this one comes from the ospf SConscript), except for the one(s) containing a main function. That is, the files of this list will be compiled into a library while the ones with main function will become the executable(s).
+<code python>
+libxorp_modulename_srcs = [
+	     'auth.cc',
+	     'area_router.cc',
+	     'external.cc',
+	     'fletcher_checksum.cc',
+	     'lsa.cc',
+	     'ospf.cc',
+	     'packet.cc',
+	     'peer_manager.cc',
+	     'peer.cc',
+	     'policy_varrw.cc',
+	     'routing_table.cc',
+	     'xrl_io.cc',
+	     'xrl_target.cc',
+	     'vlink.cc'
+             ]
+
+if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
+    libxorp_modulename_srcs.append('xrl_target3.cc')
+
+if not (env.has_key('disable_profile') and env['disable_profile']):
+    env.AppendUnique(LIBS = [
+        'xif_profile_client',
+        ])
+
+if is_shared:
+    libxorp_modulename = env.SharedLibrary(target = 'libmodulename_ospf',
+				     source = libxorp_modulename_srcs,
+				     LIBS = '')
+    if env['rtld_origin']:
+        for obj in libxorp_modulename:
+            env.AddPostAction(libxorp_ospf,
+                env.Symlink(obj.abspath,
+                            os.path.join(env['xorp_alias_libdir'], str(obj))))
+else:
+    libxorp_modulename = env.StaticLibrary(target = 'libxorp_modulename',
+				     source = libxorp_modulename_srcs,
+				     LIBS = '')
+</code>
+Here comes the file with the main function.
+<code python>
+modulename_ipv4srcs = [ 'modulename_ipv4.cc', ]
+modulename_ipv4 = env.Program(target = 'xorp_modulename_ipv4', source = modulename_ipv4srcs)
+env.Alias('install', env.InstallProgram(env['xorp_moduledir'], modulename_ipv4))
+
+if is_shared:
+    env.Alias('install', env.InstallLibrary(env['xorp_libdir'], libxorp_modulename_ipv4))
+</code>
+And here comes the second one if your module has an ipv6 version for the executable.
+<code python>
+if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
+    modulename_ipv6srcs = [ 'modulename_ipv6.cc' ]
+    ospfv3 = env.Program(target = 'xorp_modulename_ipv6', source = modulename_ipv6srcs)
+
+    env.Alias('install', env.InstallProgram(env['xorp_moduledir'], ospfv3))
+    Default(modulename_ipv4, modulename_ipv6)
+else:
+    Default(modulename_ipv4)
+</code>
+
+===== Global modifications to fully integrate your module =====
+====Updating the global SConscript====
+
+Modify the topmost SConscript file in ///xorp// to add your module subdirectory.
+<note important> The path we're actually adding is the **relative path** from ///xorp// to **your module's SConscript file**.</note>
+
+Here, let's assume that our module's SConscript file is located in ///xorp/your_module/SConscript//. See below the modifications:
+
+<code python /xorp/SConscript>
+
+subdirs = [
+    'cli',
+    'libcomm',
+    'libxorp',
+    'libxipc',
+    'libproto',
+    'libfeaclient',
+    'xrl/targets',
+    'xrl/interfaces',
+    #'xrl/tests',               # XXX not in use.
+    'etc/templates',
+    'fea',
+    'fib2mrib',
+    'mld6igmp',
+    'mrt',
+    'pim',
+    'policy',
+    'rib',
+    'rtrmgr',
+    'static_routes',
+    'utils',
+    'eua/tci',
+    'eua/mle_test',
+    'eua/mp_test',
+    'eua/ping_mp',
+    'your_module', #Your module is in /xorp/your_module/
+    ]
+</code>
+====Make use of XRLs====
+[[latex2wiki:introduction_xorp_process|An Introduction to Writing a XORP Process]] continues by explaining how to call XRLs on the RIB. It is a good thing to read. But here, since using XRLs is an intrinsic part of Socket Programming with XORP, you can refer to the [[XORP:socket_programming|related wiki page]].
+
+<note tip>
+Anyway, the complete abstract XRL called for a method in a specific module would be: 
+
+%%finder://target_process_name/interface_name/interface_version/method?param1_name:param1_type=param1_value%%
+
+For the second method of our test interface, in a //test_module//, that'd give:
+
+%%finder://test_module/test/1.0/print_hello_world_and_message?msg:txt=Hello%20World!%%
+</note>
+
+<note warning>FIX ME!</note>
+
+Wanna test an XRL call locally ? Then check that out as an example:
+
+<code C /xorp/etc/templates/eua_ping_mp.tp>
+eua
+{
+        ping_mp
+        {
+                targetname:             txt = "eua_ping_mp";
+                enable:         toggle = false;
+        }
+}
+
+eua
+{
+        ping_mp
+        {
+                %help:          short   "Configure The EUA Ping MP";
+                %modinfo:       provides        eua_ping_mp; /* Need this to avoid a rtrmgr startup error where it can't find the module name*/
+                %modinfo:       path            "xorp_eua_ping_mp";
+                %modinfo:       default_targetname "eua_ping_mp";
+                %modinfo:       startup_method  xrl "$(ping_mp.targetname)/common/0.1/startup";
+                %modinfo:       shutdown_method xrl "$(ping_mp.targetname)/common/0.1/shutdown";
+
+                %mandatory:     $(@.targetname);
+
+                %activate:      xrl "$(ping_mp.targetname)/eua_ping_mp/0.1/start_eua_ping_mp";
+
+                targetname
+                {
+            %user-hidden: "XRL target name";
+            %help:      short "XRL target name";
+            %set:;
+                }
+
+                enable
+          {
+                %help:  short "Enable the EUA Ping MP";
+            %create:;
+                  %set: xrl "$(ping_mp.targetname)/eua_ping_mp/0.1/enable_eua_ping_mp?enable:bool=$(@)";
+                  %delete:      xrl "$(ping_mp.targetname)/eua_ping_mp/0.1/enable_eua_ping_mp?enable:bool=`~$(DEFAULT)`";
+                }
+        }
+}
+</code>
+
+<note tip>Read the [[latex2wiki:xorp_rtrmgr|rtrmgr documentation]] for detailed explanations about the various template commands. </note>
+
+Then, to make the XRL call, check ///xorp/tests/test_call_xrl.py// out.
+
+=====Recap: exhaustive list of used files=====
+<note warning>TODO</note>
+
+=====Designing your module=====
+It is certainly a good thing to start with a sheet of paper and a pen. Just begin by drawing some simple diagrams for your module organization and class hierarchy but keep in mind the following ideas:
+  * **Your module should ideally be totally independent from the world outside XORP.** Among other things, you should avoid to make direct calls to other processes. Inter-Process Calls and/or Remote Process Calls should be done by using exclusively the XRLs. Making use of direct calls to other processes on a computer would actually anchor your module on this particular machine and impair the flexibility of the XORP architecture. If you absolutely need some program running on the computer outside of the XORP world, you could do it and thereby fix your process on this particular computer. However, be careful! In particular, remember that if XORP is distributed on different computers, the "real router" is a set of machines and the information available from the OS in each one is probably incomplete...
+  * **All your I/O should be made through XRLs (and callback responses).** It is a reformulation of the previous point but I think it should be emphasized. So, the XRL Target is your //Checkpoint Charlie//, all your data go and come through it. Keep that in mind while thinking about the path of your data through your class hierarchy.
+  * **Do not make use of multithreading.** By historical choice, XORP is not multithreaded.((When the project started, it seemed to be a good choice but more and more people seem to think it could now actually be useful and simplify the organization by permitting blocking calls and removing callback mechanism.)) So, most of its components are not thread-safe and it would be perilous to take such an approach.
+  * **Make efficient use of the Event Loop.** Most events, such as user actions, packet arrivals or some other inputs, are by nature unpredictable. Remember to process them quickly to keep your module reactive. You can also push [[XORP:event_loop|XORP Timers]] in the event queue, i.e., delayed or periodic events which are your only way to automatize your updates...
+  * **Use Libxorp adequately.** A lot of useful predefined classes are available in libxorp, don't forget to check them out ! A lot of usage sample of these are located in ///xorp/libxorp/tests/ //.
+
+
+=====Pitfalls, hints, advices,...=====
+
+====Pitfall: The class hierarchy====
+Well, between the auto-generated abstract classes you must inherit, the other classes you inherit from to fulfill given contract or to obtain some features or capabilities, it is quite easy to be lost. One of the biggest problem while dealing, or learning to program, with XORP is probably its class organization. So, it is/will be helpful to maintain [[XORP:common_classes|a list of commonly used classes]] with some explanations, "how-to's", etc. In addition, the [[latex2wiki:xorp_libxorp_overview|XORP Libxorp Library Overview]] can already be of some help.
+
+
+====Advice: Write it from scratch!====
+I think it should be far more easier to write your XORP module from scratch than by borrowing some large portions of code from other already implemented modules and then adapt them to fit your needs. It is not so simple to deal with the implementation of other people, especially with a non-sequential design and a quite complicated class organization. From scratch, you will have to build your module one piece at a time, adding one feature or solving one problem at a time. I my humble opinion, that should be easier than to deal with one big rock of complex implementation (you will probably loose some teeth, and waste much time...).
+
+Well, naturally you will find some inspiration within other module implementations but be cautious and try to avoid the more complicated ones as most as possible during your learning phase. The ''static_routes'' module is probably the best place to begin your reading with.

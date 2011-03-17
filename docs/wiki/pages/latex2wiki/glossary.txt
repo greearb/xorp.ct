@@ -1,0 +1,36 @@
+^  Acronym/Concept  ^  Description  ^
+^  AS | see Autonomous System. |
+^  Autonomous System | a routing domain that is under one administrative authority, and which implements its own routing policies. Key concept in BGP. |
+^  BGP | Border Gateway Protocol. |
+^  Bootstrap Router | A PIM-SM router that chooses the RPs for a domain from amongst a set of candidate RPs. |
+^  BSR | See Bootstrap Router. |
+^  Candidate RP | A PIM-SM router that is configured to be a candidate to be an RP. The Bootstrap Router will then choose the RPs from the set of candidates. |
+^  Dynamic Route | A route learned from another router via a routing protocol such as RIP or BGP. |
+^  EGP | see Exterior Gateway Protocol. |
+^  Exterior Gateway Protocol((Should not be confused by the now historic routing protocol with the same name that was specified in RFC 904, and that has
+been replaced by BGP.)) | a routing protocol used to route between Autonomous Systems. The main example is BGP. |
+^  FEA | Forwarding Engine Abstraction |
+^  FIB | Forwarding Information Base |
+^  IGMP | Internet Group Management Protocol. |
+^  IGP | see Interior Gateway Protocol. |
+^  Interior Gateway Protocol | a routing protocol used to route within an Autonomous System. Examples include RIP, OSPF and IS-IS. |
+^  Live CD | A CD-ROM that is bootable. In the context of XORP, the Live CD can be used to produce a low-cost router without needing to install any software. |
+^  MFC | Multicast Forwarding Cache: another name for an entry in the multicast forwarding engine typically used on UNIX systems). |
+^  MFEA| Multicast Forwarding Engine Abstraction |
+^  MLD/IGMP| Multicast Listener Discovery/Internet Group Management Protocol |
+^  MRIB | See Multicast RIB. |
+^  Multicast RIB | the part of the RIB that holds multicast routes. These are not directly used for forwarding, but instead are used by multicast routing protocols such as PIM-SM to perform RPF checks when building the multicast distibution tree. |
+^  OSPF | See Open Shortest Path First. |
+^  Open Shortest Path First | an IGP routing protocol based on a link-state algorithm. Used to route within medium to large networks. |
+^  PIM-SM | Protocol Independent Multicast, Sparse Mode. |
+^  Rendezvous Point | A router used in PIM-SM as part of the rendezvous process by which new senders are grafted on to the multicast tree. |
+^  Reverse Path Forwarding | many multicast routing protocols such as PIM-SM build a multicast distribution tree based on the best route back from each receiver to the source, hence multicast packets will be forwarded along the reverse of the path to the source. |
+^  RIB | See Routing Information Base. |
+^  RIP | Routing Information Protocol. |
+^  Routing Information Base | the collection of routes learned from all the dynamic routing protocols running on the router. Subdivided into a Unicast RIB for unicast routes and a Multicast RIB. |
+^  RP | See Rendezvous Point. |
+^  RPF | See Reverse Path Forwarding. |
+^  Static Route | A route that has been manually configured on the router. |
+^  VRRP | Virtual Router Redundancy Protocol. |
+^  xorpsh | XORP command shell. |
+^  xorp_rtrmgr | XORP router manager process. |

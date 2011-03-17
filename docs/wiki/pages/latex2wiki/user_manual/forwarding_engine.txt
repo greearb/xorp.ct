@@ -1,0 +1,301 @@
+====== Forwarding Engine ======
+===== Terminology and Concepts =====
+
+The forwarding engine is that part of a router that receives packets and forwards them from one interface to
+another. In the case of XORP, the forwarding engine may be the kernel forwarding path on UNIX, [[ http://www.read.cs.ucla.edu/click/ | the Click forwarding path]], or it may reside in external forwarding hardware.
+On any particular router, it might be desirable to enable or disable different parts of the forwarding functionality. For example, a router might only be intended to forward IPv6 packets but not IPv4 packets, or it
+might be intended to forward unicast packets but not multicast packets. Thus XORP provides the ability to
+enable and configure various forwarding functionality.
+In XORP, the term ''fea'' refers to //Forwarding Engine Abstraction// and the term ''mfea'' refers to //Multicast
+Forwarding Engine Abstraction//. The term “abstraction” here refers to a high-level configuration interface
+that should be the same irrespective of whether the forwarding engine is provided in software in the operating
+system kernel or in external forwarding hardware.
+
+===== Configuration of the Forwarding Engine =====
+On a XORP router, forwarding functionality must be explicitly enabled or no packets will be forwarded. Forwarding can be separately enabled for unicast and multicast, and for IPv4 and IPv6. In addition, multicast
+interfaces/vifs need to be explicitly enabled individually, and certain special-purpose forwarding functionality can also be enabled for multicast.
+==== Configuration Syntax ====
+<code>
+fea {
+  targetname: txt
+  unicast-forwarding4 {
+    disable: bool
+    table-id: u32
+    forwarding-entries {
+      retain-on-startup: bool
+      retain-on-shutdown: bool
+    }
+  }
+  unicast-forwarding6 {
+    disable: bool
+    table-id: u32
+    forwarding-entries {
+      retain-on-startup: bool
+      retain-on-shutdown: bool
+    }
+  }
+  click {
+    disable: bool
+    duplicate-routes-to-kernel: bool
+    kernel-click {
+      disable: bool
+      install-on-startup: bool
+      kernel-click-modules: text
+      mount-directory: text
+      kernel-click-config-generator-file: text
+    }
+    user-click {
+      disable: bool
+      command-file: text
+      command-extra-arguments: text
+      command-execute-on-startup: bool
+      control-address: IPv4-addr
+      control-socket-port: uint(1..65535)
+      startup-config-file: text
+      user-click-config-generator-file: text
+    }
+  }
+}
+plumbing {
+  mfea4 {
+    disable: bool
+    interface text {
+      vif text {
+        disable: bool
+      }
+    }
+    interface register vif {
+      vif register vif {
+        disable: bool
+      }
+    }
+    traceoptions {
+      flag all {
+        disable: bool
+      }
+    }
+  }
+  mfea6 {
+    disable: bool
+    interface text {
+      vif text {
+        disable: bool
+      }
+    }
+    interface register vif {
+      vif register vif {
+        disable: bool
+      }
+    }
+    traceoptions {
+      flag {
+        all {
+          disable: bool
+        }
+      }
+    }
+  }
+}
+</code>
+
+^  Keyword<sub>0</sub>  ^  Keyword<sub>1</sub>  ^ Keyword<sub>2</sub>  ^  Keyword<sub>3</sub>  ^  Specifications  ^
+^  fea  ^ ^ ^ | This delimits the configuration for the unicast forwarding engine functionality. The following unicast forwarding engine parameters can be configured: |
+^      ^  targetname  ^  ^  | This is the name for this instance of the forwarding engine abstraction. It defaults to ''fea'', and it is strongly recommended that this default is not overridden under normal usage scenarios. |
+^  unicast-forwarding4  ^  ^  ^ | This directive is used to configure the IPv4 forwarding. |
+^                      ^  disable  ^  ^ | This takes the value ''true'' or ''false'', and disables or enables all IPv4 unicast forwarding on the router. The default is ''false''. |
+^                      ^  table-id  ^ ^ | This specifies the IPv4 unicast forwarding table ID. If it is not configured, the FEA will use the default table ID for the system. Note that not all systems support multiple forwarding tables. Currently, they exist only on Linux (among all systems supported by XORP). |
+^                      ^  forwarding-entries  ^ ^ | This directive is used to configure the properties of the IPv4 forwarding entries. |
+^                      ^                      ^  retain-on-startup  ^ | This takes the value ''true'' or ''false'', and is used to control whether the XORP IPv4 unicast forwarding entries (if there are any left from a previous execution) are removed on startup by the FEA itself. The default is ''false''. |
+^                      ^                      ^  retain-on-shutdown  ^ | This takes the value ''true'' or ''false'', and is used to control whether the XORP IPv4 unicast forwarding entries are removed on shutdown by the FEA itself. The default is ''false''. |
+|Note that the ''retain-on-startup'' and ''retain-on-shutdown'' statements prevent the FEA itself from deleting the forwarding entries and does not prevent the RIB or any of the unicast routing protocols from deleting the entries on shutdown.|||||
+^  unicast-forwarding6  ^                      ^                    ^ | This directive is used to configure the IPv6 forwarding. |
+^                       ^  disable  ^  ^ | This takes the value ''true'' or ''false'', and disables or enables all IPv6 unicast forwarding on the router. The default is ''false''. |
+^                       ^  table-id  ^  ^  | This specifies the IPv4 unicast forwarding table ID. If it is not configured, the FEA will use the default table ID for the system. Note that not all systems support multiple forwarding tables. Currently, they exist only on Linux (among all systems supported by XORP). |
+^                       ^  forwarding-entries  ^ ^ | This directive is used to configure the properties of the IPv6 forwarding entries. |
+^                       ^                      ^  retain-on-startup  ^ | This takes the value ''true'' or ''false'', and is used to control whether the XORP IPv6 unicast forwarding entries (if there are any left from a previous execution) are removed on startup by the FEA itself. The default is ''false''. |
+^                       ^                      ^  retain-on-shutdown  ^ | This takes the value ''true'' or ''false'', and is used to control whether the XORP IPv6 unicast forwarding entries are removed on shutdown by the FEA itself. The default is ''false''. |
+|Note that the ''retain-on-startup'' and ''retain-on-shutdown'' statements prevent the FEA itself from deleting the forwarding entries and does not prevent the RIB or any of the unicast routing protocols from deleting the entries on shutdown.|||||
+^  click  ^  ^  ^ | This directive is used to configure the Click forwarding path. |
+^         ^  disable  ^  ^ | This takes the value ''true'' or ''false'', and disables or enables the Click forwarding path on the router. The default is ''false''. |
+^         ^  duplicate-routes-to-kernel  ^  ^ | This takes the value ''true'' or ''false'', and is used to control whether the XORP routes added to Click should be added to the system kernel as well. The default is ''false''. |
+^         ^  kernel-click                ^  ^ | This directive is used to configure kernel-level Click. |
+^         ^                              ^  disable  ^ | This takes the value ''true'' or ''false'', and disables or enables the kernel-level Click forwarding path on the router. The default is ''false''. |
+^         ^                              ^  install-on-startup  ^ | This takes the value ''true'' or ''false'', and is used to specify whether the kernel-level Click should be installed on startup. The default is ''false''. |
+^         ^                              ^  kernel-click-modules  ^ | This specifies the list of Click modules (separated by ’:’) that should be loaded into the kernel. The default is the list of modules needed by Linux: “/usr/local/click/linuxmodule/proclikefs.o:/usr/local/click/linuxmodule/click.o” For FreeBSD, the only module that is needed is “click.ko” so the list should be like: “/path/to/click.ko”. |
+^         ^                              ^  mount-directory  ^ | This specifies the name of the directory to mount the Click file system on. The default is: “/click”. |
+^         ^                              ^  kernel-click-config-generator-file  ^ | This specifies the name of the program to execute that would generate the kernel-level Click configuration from the XORP configuration. The default is: “/usr/local/xorp/fea/xorp fea click config generator”. |
+^         ^  user-click                  ^   ^ | This directive is used to configure user-level Click.  |
+^         ^                              ^  disable  ^ | This takes the value ''true'' or ''false'', and disables or enables the user-level Click forwarding path on the router. The default is ''false''. |
+^         ^                              ^  command-file  ^ | This specifies the name of the user-level Click binary program to execute. The default is “/usr/local/bin/click”. |
+^         ^                              ^  command-extra-arguments  ^ | This specifies the extra arguments that should be supplied to the user-level Click binary program when executing it. The default is “-R”. Note that it should not contain ''-p <port>'', because it will be in conflict with the FEA’s addition of the same argument. |
+^         ^                              ^  command-execute-on-startup  ^ | This takes the value ''true'' or ''false'', and is used to specify whether the user-level Click binary program should be executed on startup. The default is ''false''. |
+^         ^                              ^  control-address  ^ | This takes an IPv4 address and is used to  specify the address that the user-level Click binary program would be listening on for incoming connections (to control and reconfigure Click). The default is 127.0.0.1. |
+^         ^                              ^  control-socket-port  ^ | This takes an integer in the interval [1..65535] and is used to specify the TCP port number the user-level Click binary program would be listening on for incoming connections (to control and reconfigure Click). The default is 13000. |
+^         ^                              ^  startup-config-file  ^ | This specifies the name of the initial Click configuration file that would loaded on startup. The default is “/dev/null”. |
+^         ^                              ^  user-click-config-generator-file  ^ | This specifies the name of the program to execute that would generate the user-level Click configuration from the XORP configuration. The default is “/usr/local/xorp/fea/xorp fea click config generator”. |
+| Note that it is possible to configure and run both kernel-level and user-level Click. In that case, typically ''kernel-click-config-generator-file'' and ''user-click-config-generator-file'' would point to different generators. Otherwise, a single common generator wouldn’t know whether to generate configuration for kernel-level Click or for user-level Click. |||||
+^  plumbing  ^  ^  ^ | This delimits a part of the router configuration used for the plumbing together of packet forwarding functionality. Multicast forwarding configuration must be part of this grouping. |
+^  mfea4  ^  ^  ^ | This delimits the part of the router configuration related to multicast forwarding of IPv4 packets. The following multicast forwarding parameters can be configured: |
+^         ^  disable  ^  ^ | This takes the value ''true'' or ''false'', and disables or enables all IPv4 multicast forwarding on the router. The default is ''false''. |
+^         ^  interface  ^  ^ | This specifies an interface to be used for multicast IPv4 forwarding. Each interface to be used for multicast forwarding needs to be explicitly listed. \\ In addition to the normal network interfaces, a special-purpose interface called ''register_vif'' needs to be configured for [[latex2wiki:user_manual:pim_sparse_mode|PIM-SM]] to be able to send register-encapsulated packets to the PIM Rendezvous Point. PIM-SM will not work  correctly unless this is configured. The ''register_vif'' interface must be configured with a vif also called ''register_vif''. |
+^         ^  vif  ^  ^ | This specifies a vif to be used for multicast IPv4 forwarding. Each vif to be used for multicast forwarding needs to be explicitly listed. Each vif can take the following parameter.
+^         ^       ^  disable  ^ | This takes the value ''true'' or ''false'', and disables or enables multicast forwarding on this vif. The default is ''false''. |
+^  traceoptions  ^  ^  ^ | This directive delimits the configuration of debugging and tracing options for multicast forwarding. |
+^                ^  flag  ^  ^ | This directive is used to specify which tracing options are enabled. Possible parameters are following. |
+^                ^    ^  all  ^ | This directive specifies that all tracing options should be enabled. Possible parameters are following.|
+^                ^    ^       ^  disable  | The only current possible parameter is ''disable'': This takes the value ''true'' or ''false'', and disables or enables tracing. The default is ''false''. |
+^  mfea6  ^  ^  ^ | This delimits the part of the router configuration related to multicast forwarding of IPv6 packets. The possible parameters are the same as for ''mfea4'', but affect IPv6 multicast forwarding rather than IPv4. |
+
+
+
+
+
+
+
+
+
+
+
+==== Example Configurations ====
+<code>
+fea {
+  unicast-forwarding4 {
+    disable: false
+  }
+  unicast-forwarding6 {
+    disable: true
+  }
+}
+plumbing {
+  mfea4 {
+    disable: false
+    interface dc0 {
+      vif dc0 {
+        disable: false
+      }
+    }
+    interface register_vif {
+      vif register_vif {
+        /* Note: this vif should be always enabled */
+        disable: false
+      }
+    }
+    traceoptions {
+      flag all {
+        disable: false
+      }
+    }
+  }
+  
+  mfea6 {
+    disable: false
+    interface dc0 {
+      vif dc0 {
+        disable: false
+      }
+    }
+    interface register_vif {
+      vif register_vif {
+        /* Note: this vif should be always enabled */
+        disable: false
+      }
+    }
+  }
+}
+</code>
+
+The configuration above enables unicast IPv4 forwarding, but disables IPv6 unicast forwarding.
+In addition, it enables multicast forwarding for IPv4 and IPv6 on interface/vif ''dc0/dc0'', and enables the
+register vif for use by PIM-SM multicast routing.
+
+<code>
+interfaces {
+  interface eth0 {
+    description: "control interface"
+    vif eth0 {
+      address 10.10.10.10 {
+        prefix-length: 24
+        broadcast: 10.10.10.255
+      }
+    }
+    mac: aa:bb:cc:dd:ee:ff
+    mtu: 1500
+  }
+}
+
+fea {
+  unicast-forwarding4 {
+    disable: false
+  }
+  
+  click {
+    disable: false
+    duplicate-routes-to-kernel: false
+    
+    kernel-click {
+      disable: true
+      install-on-startup: true
+      kernel-click-modules: "/path/to/proclikefs.o:/path/to/click.o";
+      mount-directory: "/click"
+      kernel-click-config-generator-file: "/path/to/kernel click config generator"
+    }
+    
+    user-click {
+      disable: false
+      command-file: "/path/to/click"
+      command-extra-arguments: "-R"
+      command-execute-on-startup: true
+      control-address: 127.0.0.1
+      control-socket-port: 13000
+      startup-config-file: "/dev/null"
+      user-click-config-generator-file: "/path/to user click config generator"
+    }
+  }
+}
+</code>
+The configuration above enables configures both kernel-level and user-level Click (eventually on Linux
+given that it contains two kernel Click modules), but enables only user-level Click.
+
+
+
+===== Monitoring the Forwarding Engine =====
+The ''show mfea dataflow'' command can be used to display information about MFEA IPv4 dataflow
+filters:
+<code>
+user@hostname> show mfea dataflow
+Group                                       Source
+224.0.1.20                                  10.2.0.1
+  Measured(Start|Packets|Bytes) Type Thresh(Interval|Packets|Bytes)     Remain
+  1091667269.982158|0|?         <=         210.0|0|?                      202.434319
+  1091667269.984406|?|0         >=         100.0|?|102400                 92.436567
+</code>
+
+Note that the above information is shown only if the filters are kept at user-space. If the filters are kept at
+kernel-space (e.g., in case of UNIX system with advanced multicast API support), then currently xorpsh
+cannot be used to show the information. In that case, the appropriate system command should be used
+instead (e.g., the UNIX ''netstat -gn'' command).
+
+The ''show mfea interface'' command can be used to display information about MFEA IPv4 interfaces:
+<code>
+user@hostname> show mfea interface
+Interface      State     Vif/PifIndex    Addr         Flags
+dc0            UP        0/6             10.4.0.1     MULTICAST BROADCAST KERN_UP
+dc2            UP        1/8             10.3.0.2     MULTICAST BROADCAST KERN_UP
+register_vif   UP        2/6             10.4.0.1     PIM_REGISTER KERN_UP
+</code>
+
+The ''show mfea interface address'' command can be used to display information about MFEA IPv4
+interface addresses:
+
+<code>
+user@hostname> show mfea interface address
+Interface     Addr      Subnet         Broadcast      P2Paddr
+dc0           10.4.0.1  10.4.0.0/24    10.4.0.255     0.0.0.0
+dc2           10.3.0.2  10.3.0.0/24    10.3.0.255     0.0.0.0
+register_vif  10.4.0.1  10.4.0.1/32    10.4.0.1       0.0.0.0
+</code>
+The equivalent commands for IPv6 multicast forwarding are:
+
+  * ''show mfea6 dataflow''
+  * ''show mfea6 interface''
+  * ''show mfea6 interface address''
