@@ -1,0 +1,32 @@
+  * Update version in these files:<code>
+   xorp/VERSION
+   xorp/package_files/xorp.ct.spec
+   README
+   xorp/etc/templates/xorpsh.cmds
+   xorp/Makefile.deb
+   xorp/devnotes/pkg_xorp.bash
+   </code>
+
+  * Update Release Notes:  xorp/RELEASE_NOTES
+    * Generate 'git log' change list.<code>git shortlog [start-git-md5]..HEAD</code>  Add this to RELEASE_NOTES.
+    * Update version & release date.
+
+  * Update copy-right on all files touched since last release.\\ **NOTE: You will need to hand-edit some of the hard-coded things in the update_changed_copyright.bash and update_copyright.sh scripts.  You may need to run it several times with different dates, etc.**  <code>
+      ./xorp/devnotes/update_changed_copyright.bash [start-md5] HEAD
+      </code>
+    
+  * Generate doxygen html:  See docs/kdoc/README.txt
+
+  * Update www/* files with latest release information.
+
+  * Tag xorp git repository with release tag.
+
+  * Build binary .tgz files, rpms, debs, windows zip, source .tgz  Upload them to github and/or web page (TBD).
+
+  * Upload things to web page:
+    * Main HTML docs:
+
+           cd www/
+           ./scripts/publish_html.bash
+
+    * doxygen code in ./tmp/ goes to www.xorp.org/releases/current/docs/

@@ -1,0 +1,78 @@
+[[http://www.xorp.org|{{  http://www.xorp.org/images/mad/logo-xorp_org.gif  }}]]
+====== XORP Documentation Project ======
+It's a **work in progress** - please let us know what additional help you would find useful.
+===== Overview =====
+XORP is an open networking platform that supports OSPF, RIP, BGP,
+OLSR, VRRP, PIM, IGMP (Multicast) and other routing protocols.  Most protocols
+support IPv4 and IPv6 where applicable.  It is known to work on various
+Linux distributions and flavors of BSD.  Support for cross-compiling XORP to Microsoft Windows using the mingw cross-compiler was recently (March 2011) added.
+
+XORP started life as a project at the ICSI Center for Open Networking (ICON)
+at the International Computer Science Institute in Berkeley, California,
+USA, and spent some time with the team at XORP, Inc.  The project maintainer
+is now [[mailto:greearb@candelatech.com | Ben Greear]] from [[http://www.candelatech.com/ | Candela Technologies]] and
+the old XORP.CT code base is now the official development tree.
+
+XORP's primary goal is to be an open platform for networking protocol
+implementations and an alternative to proprietary and closed networking
+products.
+
+===== Getting Started =====
+  - [[latex2wiki:getting_started | Getting Started with XORP]]
+  - [[latex2wiki:user_manual|User Manual]]
+  - [[latex2wiki:dev_getting_started | Getting Started Developing with XORP]]
+  - [[http://www.xorp.org/bugzilla/ | View or Report Bugs]]
+  - [[http://www.xorp.org | Visit XORP Home Page]]
+  - [[latex2wiki:glossary | Glossary]]
+
+
+
+
+
+===== To be merged with the new documentation project =====
+<note warning>It is possible that some ECODE specifics are present in the documents. Nothing important and not much, though. </note>
+====Practical Aspects====
+  - [[latex2wiki:introduction_xorp_process|An Introduction to Writing a XORP Process [IMPORTED and OUTDATED version, kept for safety] ]]
+  - [[xorp:module_stub|The Dirty Stub Code, or the ready to use implementation]]
+  - [[XORP:socket_programming|Socket Programming & XORP.]]
+====An in-depth look====
+  - [[XORP:common_classes|Commonly used class list and explanation]].
+
+====== ECODE Project ======
+<note warning>This section isn't relevant for common XORP Users !</note>
+===== Experimentation =====
+  - [[iLab:VPN|Configure the VPN to IBBT and access iLab.t]]
+
+====== The Community ======
+
+===== Achievements =====
+Please, share your experience with us and feel free to mention what you've accomplished with XORP so far !
+
+[[:community:achievements | Why do you use XORP ?]]
+
+
+===== Mailing lists =====
+^  [[http://mailman.ICSI.Berkeley.edu/mailman/listinfo/xorp-users | XORP users]] |  xorp-users@xorp.org  | This list is for **general** XORP discussion. |
+^  [[http://mailman.ICSI.Berkeley.edu/mailman/listinfo/xorp-hackers | XORP hackers]] |  xorp-hackers@xorp.org  | This list is for XORP **development** discussion. |
+^  [[http://mailman.ICSI.Berkeley.edu/mailman/listinfo/xorp-announce | XORP announcements]] |  xorp-announce@xorp.org  | This list is for XORP **release and milestone announcements**. |
+
+To subscribe, send email to ''xorp-//{users, hackers, announce}//-request@xorp.org'' with
+the word "''subscribe''" (no quotes!) in the subject or the body
+of the email. 
+
+For more subscription options, send the command
+"''help''" instead or you can directly use the links above.
+
+===== About this Wiki =====
+==== Getting Involved ? ====
+
+**Everybody** can read, everyone **registered** can write !
+If you want to join the community: welcome aboard ! A quick registration step will automatically grant you writing access to every part of the wiki((Please, act responsibly :-)))!
+==== Hosting ====
+
+This website is hosted and put at your free disposal thanks to the [[http://www.run.montefiore.ulg.ac.be | Research Unit in Networking (RUN)]] @ [[http://www.ulg.ac.be | University of Liège]].
+It is part of the [[http://www.montefiore.ulg.ac.be | Electrical Engineering and Computer Science Department (Montefiore Institute)]] and of the [[http://www.ulg.ac.be/facsa | Faculty of Applied Sciences]]. 
+
+The unit is headed by Prof. Guy Leduc. Current research in RUN bears on computer networks and more specifically on traffic engineering, MPLS, mobile communication, congestion control, multicast and active/programmable networks. Former research in RUN also focused on models and languages suitable for formal specification, verification, implementation and testing of communicating systems, and especially of real time systems.
+
+[{{http://www.ulg.ac.be/upload/docs/image/gif/2007-11/logo_coul_texte_blason_cadre_72.gif}}] [{{http://www.ingenieurprojets.be/common-images/logo_fsa.gif}}] [{{http://www.montefiore.ulg.ac.be/montefiore3.jpg}}] [{{http://www.run.montefiore.ulg.ac.be/Gif/RUN-logo.gif}}]

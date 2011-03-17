@@ -1,0 +1,31 @@
+======== Documentation ==
+
+As already offered, we suggest that you first read the [[latex2wiki:xorp_libxorp_overview|XORP Libxorp Library Overview]].
+
+<note tip>Many compilable and runnable test snippets are available in ///xorp/libxorp/tests//. </note>
+
+======== Commonly used classes ==
+
+  * [[XORP:common_classes#ServiceBase|ServiceBase]]
+
+<note warning>List done on a case by case scheme, just add the class you want to be explained.</note>
+-----
+
+===== ServiceBase ==
+<note>
+This class provides a base for services within Xorp processes.  A service instance is an entity that can logically started and stopped and typically needs some asynchronous processing in order to start and stop.
+</note>
+
+Such a service can typically be in following states: //TO DO: make a state diagram from these status//
+  * ''SERVICE_READY''
+  * ''SERVICE_STARTING''
+  * ''SERVICE_RUNNING''
+  * ''SERVICE_PAUSING''
+  * ''SERVICE_PAUSED''
+  * ''SERVICE_RESUMING''
+  * ''SERVICE_SHUTTING_DOWN''
+  * ''SERVICE_SHUTDOWN''
+  * ''SERVICE_FAILED''
+
+The status can be retrieved by using the appropriate method from the ''ServiceBase'' class.\\
+Another way is by using and registering a ''ServiceChangeObserverBase'' instance nearby the ''ServiceBase'' instance. In case of status change, the ''status_change'' method of this observer will be executed.

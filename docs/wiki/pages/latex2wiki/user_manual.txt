@@ -1,0 +1,28 @@
+====== Preface ======
+
+This User Manual describes the process of configuring and operating a router running XORP. XORP is a work-in-progress:  Please suggest improvements if you find errors or omissions in user-guide.
+<note>
+The user guide was recently converted to wiki format.  The old PDF version is [[http://www.xorp.org/releases/current/docs/user_manual/user_manual.pdf|here]].
+</note>
+====== Table Of Contents ======
+
+  - [[latex2wiki:user_manual:command_structure|Command Structure]]
+  - [[latex2wiki:user_manual:configuration_overview|Configuration Overview]]
+  - [[latex2wiki:user_manual:network_interfaces|Network Interfaces]]
+  - [[latex2wiki:user_manual:firewall|Firewall]]
+  - [[latex2wiki:user_manual:forwarding_engine|Forwarding Engine]]
+  - [[latex2wiki:user_manual:unicast_routing|Unicast Routing]]
+  - [[latex2wiki:user_manual:static_routes|Static Routes]]
+  - [[latex2wiki:user_manual:rip_and_ripng|RIP and RIPng]]
+  - [[latex2wiki:user_manual:ospfv2_and_ospfv3|OSPFv2 and OSPFv3]]
+  - [[latex2wiki:user_manual:bgp|BGP]]
+  - [[latex2wiki:user_manual:policy|Policy]]
+  - [[latex2wiki:user_manual:vrrp|VRRP]]
+  - [[latex2wiki:user_manual:multicast_routing|Multicast Routing]]
+  - [[latex2wiki:user_manual:igmp_and_mld|IGMP and MLD]]
+  - [[latex2wiki:user_manual:pim_sparse_mode|PIM Sparse-Mode]]
+  - [[latex2wiki:user_manual:multicast_topology_discovery|Multicast Topology Discovery]]
+  - [[latex2wiki:user_manual:user_management|User Management]]
+  - [[latex2wiki:user_manual:diagnostics_and_debugging|Diagnostics and Debugging]]
+
+

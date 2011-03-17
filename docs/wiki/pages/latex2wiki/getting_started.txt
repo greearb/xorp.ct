@@ -1,0 +1,1537 @@
+====== Introduction ======
+This short guide is aimed at people new to XORP understand what XORP does and how to use it.
+The following explanations should be enough for you to launch your XORP for the first time.
+
+====== Getting XORP ======
+There are several ways to try out XORP.
+
+  * [[https://github.com/greearb/xorp.ct/downloads | Download a pre-built release]].
+  * [[http://github.com/greearb/xorp.ct/downloads | Get released source package]] and [[latex2wiki:getting_started#Compiling XORP from source | compile it]].
+  * Get the current source snapshot (''<nowiki>git clone git://github.com/greearb/xorp.ct.git</nowiki>'') and [[latex2wiki:getting_started#Compiling XORP from source | compile it]].
+  * [[http://www.xorp.org/livecd.html | Download a live CD, and try out a pre-compiled release]].
+
+If you want to develop new functionality for XORP, you will need to compile from source, but the live CD provides a way to try XORP out without needing to worry about having the right compilers or operating system installed.
+====== Supported Operating Systems ======
+The main development platform for XORP is Linux.  FreeBSD support should be solid, and Windows support was recently re-added.
+Any modern distribution or flavor of these operating systems should be fine.  Please open a [[http://www.xorp.org/bugzilla|bug]]
+if you find otherwise.
+
+
+
+
+
+====== Compiling XORP from source ======
+===== How to compile XORP on GNU Linux Ubuntu 10.10 64bits =====
+
+Since version 1.7, XORP uses [[http://www.scons.org|SCons]] instead of the traditional Makefiles.
+
+==== Get all the dependencies ====
+<code>
+apt-get install build-essential
+apt-get install git
+apt-get install scons
+apt-get install libboost-all-dev 
+apt-get install libssl-dev
+apt-get install libncurses5-dev
+apt-get install libpcap-dev
+apt-get install traceroute
+</code>
+
+Libboost minimum required version: 1.40
+
+==== Get the last XORP version on the Github ====
+<code>
+git clone git://github.com/greearb/xorp.ct.git
+cd xorp.ct/xorp
+</code>
+
+==== Compilation & Validation ====
+<note important>These steps might take a while... be patient !</note>
+
+<code>
+scons
+scons check
+</code>
+
+<note tip>The last checking step is optional.</note>
+Assuming the compilation completed without errors then the self-tests should have run without errors too.
+<note>You can use ''-j X'' with scons to do multiple parallel builds.
+Ensure that you have X no more than 2x the number of cores in your build machine.</note>
+
+==== Installation ====
+
+The command below will install XORP.  The default location is: /usr/local/xorp
+
+<code>sudo scons install</code>
+
+
+====== Running XORP for the first time ======
+
+XORP tries to hide from the operator the internal structure of the software, so that the operator only needs to know the right commands to use to configure the router. The operator should not need to know that XORP is internally composed of multiple processes, nor what those processes do. All the operator needs to see is a single router configuration file that determines the startup configuration, and a single command line interface that can be used to configure XORP.
+
+There is a single XORP process that manages the whole XORP router - this is called **xorp_rtrmgr** (short for XORP Router Manager). If you built and installed XORP from source using the defaults, the you will have a **/usr/local/xorp/sbin/** directory containing xorp_rtrmgr and xorpsh.
+
+''xorp_rtrmgr'' will expect to find a configuration file in the same directory it is started from. By default this configuration file is called **config.boot**. There are several sample configuration files in the **rtrmgr/config** directory a well as [[http://www.xorp.org/config | online ]].  Please **do not** use these without tailoring the IP addresses, interfaces and routing protocols to match your local network environment. 
+
+You can specify a different filename for the configuration file using the -b command line flag. 
+The -N "no execute" flag will cause xorp_rtrmgr to startup and pretend the router is operating normally, but to not actually start any processes. This can be used to check configuration files.
+
+Typically **xorp_rtrmgr must be run as root**. This is because it starts up processes that need privileged access to insert routes into the forwarding path in the kernel.
+
+To interact with the router via the command line interface, the operator uses the XORP command shell ''xorpsh''.  The default location is: **/usr/local/xorp/sbin/xorpsh**.  The xorpsh tool should be run by a user in the 'xorp' group.  See [[latex2wiki:getting_started#Prepare the system to run xorp|Prepare the system to run xorp]].
+
+The "help" command provides basic online help. It should be noted that command line completion in the xorpsh does greatly simplify configuration.
+
+==== Prepare the system to run xorp ====
+If a user is going to change the configuration of the router (as opposed to simply monitor the router's operation) then **they need to be in the "xorp" Unix group**. 
+On UNIX, only a user who belongs to group ''xorp'' can run xorpsh in configurational mode. Here is what you have to do:
+
+<code>
+sudo groupadd xorp
+sudo usermod -a -G xorp root
+</code>
+
+
+<note important>You **must** execute the former and latter commands as **sudo/root**. The same goes for XORP Router Manager (**xorp_rtrmgr**) and the XORP Shell (**xorpsh**).</note>
+
+
+====== Configuring XORP ======
+A XORP router must be configured to perform the desired operations. The configuration information can be provided in one of the two ways:
+
+  - Use a configuration file when the ''rtrmgr'' is started. By default, the ''rtrmgr'' will load the configuration from file ''installdir/etc/xorp.conf'' in the XORP installation directory. This file can be specified by the <nowiki>"-b <filename>"</nowiki> command line option: <code>xorp_rtrmgr -b my_config.boot</code> See [[http://www.xorp.org/config|www.xorp.org/config]] for some sample configuration files. Note that **these files MUST be modified before use**. 
+  - Use the xorpsh command line interface after the ''rtrmgr'' is started. The xorpsh has to be in configuration mode:
+<code>
+    user@hostname> configure 
+    Entering configuration mode.
+    There are no other users in configuration mode.
+    [edit]
+    user@hostname#
+</code> 
+
+On UNIX, only a user who belongs to group "xorp" can run xorpsh in configuration mode. It should be noted that command line completion in the xorpsh does greatly simplify configuration.
+A mixture of both methods is permissible. For example, a configuration file can also be loaded from within the xorpsh.
+
+<note tip>
+Use a simple configuration file for //xorp_rtrmgr// to start working with XORP. Many samples can be found at http://www.xorp.org/config
+Look at //static.boot//: 
+  * copy it to a permanent location
+  * modify it to suit your needs
+</note>
+
+===== xorp_rtrmgr command line options =====
+xorp_rtrmgr has several configuration options that can help
+a user customize XORP for a particular environment.
+<code bash>
+pierre@pierre-T500:/usr/local/xorp/sbin$ ./xorp_rtrmgr -h
+Usage: xorp_rtrmgr [options]
+Options:
+  -a <allowed host> Host allowed by the finder
+  -b|-c <file> Specify configuration file
+  -C <dir>  Specify operational commands directory
+  -d        Run in daemon mode in background
+  -h        Display this information
+  -i <addr> Set or add an interface run Finder on
+  -L <facility.priority> Log to syslog facility
+  -l <file> Log to file <file>
+  -m <dir>  Specify protocol modules directory
+  -N        Do not execute XRLs and do not start processes
+  -n <allowed net>  Subnet allowed by the finder
+  -P <pid>  Write process ID to file <pid>
+  -p <port> Set port to run Finder on
+  -q <secs> Set forced quit period
+  -r        Restart failed processes (not implemented yet)
+  -t <dir>  Specify templates directory
+  -v        Print verbose information
+Defaults:
+  Configuration file         := /usr/local/xorp/etc/xorp.conf
+  Module directory           := /usr/local/xorp/lib/xorp/sbin
+  Command directory          := /usr/local/xorp/lib/xorp/bin
+  Templates directory        := /usr/local/xorp/share/xorp/templates
+  Execute Xrls               := true
+  Restart failed processes   := false
+  Print verbose information  := false
+</code>
+
+
+
+===== XORP Configuration File =====
+
+The [[latex2wiki:user_manual|User Manual]] has details on each section of the configuration file.  Advanced users may also wish to inspect the **template files** that specify the config file syntax.
+You can find the templates in the source code: ''/xorp.ct/xorp/etc/templates''.
+
+<note tip>
+Each template file is usually divided in two parts: 
+  * configuration options definition, giving you a quick overview of what's possible or not;
+  * configuration options help & properties, providing you with details about every option.
+</note>
+
+For example, this is part of the Interfaces template: ''interfaces.tp''
+
+<file c /xorp.ct/xorp/etc/templates/interfaces.tp>
+/* Here is the raw definition part */
+interfaces {
+    targetname:		txt = "fea";
+    restore-original-config-on-shutdown:	bool = false;
+
+    interface @: txt {
+	description:	txt = "";
+	disable:	toggle = false;
+	enabled:	bool;			/* %deprecated */
+	discard:	toggle = false;
+	unreachable:	toggle = false;
+	management:	toggle = false;
+	mac:		macaddr;
+	mtu:		u32;
+(...)
+}
+
+/* Here is the details part */
+interfaces {
+    %help:	short		"Configure network interfaces";
+    %modinfo:	provides	interfaces;
+    %modinfo:	path		"xorp_fea";
+    %modinfo:	default_targetname "fea";
+    %modinfo:	status_method	xrl "$(interfaces.targetname)/common/0.1/get_status->status:u32&reason:txt";
+    %modinfo:	shutdown_method xrl "$(interfaces.targetname)/common/0.1/shutdown";
+    %modinfo:	startup_method	xrl "$(interfaces.targetname)/ifmgr/0.1/startup_ifmgr";
+    %modinfo:	start_commit	xrl "$(interfaces.targetname)/ifmgr/0.1/start_transaction->tid:u32=$(interfaces.TID)";
+    %modinfo:	end_commit	xrl "$(interfaces.targetname)/ifmgr/0.1/commit_transaction?tid:u32=$(interfaces.TID)";
+(...)
+}
+</file>
+
+
+===== Network interfaces =====
+
+A XORP router will only use interfaces that it has been explicitly configured to use. Even for protocols such as BGP that are agnostic to interfaces, if the next-hop router for a routing entry is not through a configured interface route, the route will not be installed. For protocols that are explicitly aware of interfaces, only configured interfaces will be used.
+Every physical and virtual network device in the system is considered to be an "interface". Every interface can contain a single virtual interface (VIF). **The VIF structure was originally implemented to allow multiple VIFS per interface, but in practice that is not supported.** So, have the VIF name be **the same as the interface name**. A virtual interface is configured with the address or addresses that should be used. At each level in the configuration hierarchy ("interface", "vif" and "address") this part of the configuration is implicitly enabled.
+
+<code>
+interfaces {
+    restore-original-config-on-shutdown: false
+    interface eth0 {
+	description: "data interface"
+	disable: false
+	/* default-system-config */
+	vif eth0 {
+	    disable: false
+	    address 10.10.10.10 {
+		prefix-length: 24
+		broadcast: 10.10.10.255
+		disable: false
+	    }
+/*
+	    address 2001:DB8:10:10:10:10:10:10 {
+		prefix-length: 64
+		disable: false
+	    }
+*/
+	}
+    }
+}
+</code>
+
+If you are configuring an interface that is currently being used by the the system make sure that there is no mismatch in the "address", "prefix-length" and "broadcast" arguments. If the "default-system-config" statement is used, it instructs the FEA that the interface should be configured by using the existing interface information from the underlying system. In that case, the "vif"s and "addresses" must not be configured.
+
+===== Forwarding Engine Abstraction (FEA) =====
+It is a requirement to explicitly enable forwarding for each protocol family.
+<code>
+fea {
+    unicast-forwarding4 {
+        disable: false
+    }
+
+    unicast-forwarding6 {
+        disable: false
+    }
+}
+</code>
+If IPv4 and IPv6 forwarding are required you will require the configuration above.
+Now that we have configured the interfaces and enabled forwarding we need to configure some routing protocols.
+
+===== Protocols =====
+==== Multicast Forwarding Engine Abstraction (MFEA) ====
+The MFEA must be configured if the XORP router is to be used for multicast routing. The MFEA for IPv4 and IPv6 are configured separately.
+In the configuration we must explicitly configure the entity itself, and each "vif". The "traceoptions" section is used to explicitly enable log information that can be used for debugging purpose.
+<code>
+plumbing {
+    mfea4 {
+	disable: false
+	interface eth0 {
+	    vif eth0 {
+		disable: false
+	    }
+	}
+	interface register_vif {
+	    vif register_vif {
+		/* Note: this vif should be always enabled */
+		disable: false
+	    }
+	}
+	traceoptions {
+	    flag all {
+		disable: false
+	    }
+	}
+    }
+}
+
+plumbing {
+    mfea6 {
+	disable: false
+	interface eth0 {
+	    vif eth0 {
+		disable: false
+	    }
+	}
+	interface register_vif {
+	    vif register_vif {
+		/* Note: this vif should be always enabled */
+		disable: false
+	    }
+	}
+	traceoptions {
+	    flag all {
+		disable: false
+	    }
+	}
+    }
+}
+</code>
+Note that the interface/vif named "register_vif" is special. If PIM-SM is configured, then "register_vif" must be enabled in the MFEA.
+
+==== Static Routes ====
+This is the simplest routing protocol in XORP. It allows the installation of unicast or multicast static routes (either IPv4 or IPv6). Note that in case of multicast the routes are installed only in the user-level Multicast Routing Information Base and are used for multicast-specific reverse-path information by multicast routing protocols such as PIM-SM.
+
+<code>
+protocols {
+    static {
+	route 10.20.0.0/16 {
+	    next-hop: 10.10.10.20
+	    metric: 1
+	}
+	mrib-route 10.20.0.0/16 {
+	    next-hop: 10.10.10.30
+	    metric: 1
+	}
+/*
+	route 2001:DB8:AAAA:20::/64 {
+	    next-hop: 2001:DB8:10:10:10:10:10:20
+	    metric: 1
+	}
+	mrib-route 2001:DB8:AAAA:20::/64 {
+	    next-hop: 2001:DB8:10:10:10:10:10:30
+	    metric: 1
+	}
+*/
+    }
+}
+</code>
+==== Routing Information Protocol (RIP) ====
+In order to run RIP it is sufficient to specify the "interfaces", "vif"s and "addresses" on which RIP is enabled. Remember that each "address" must be explicitly configured.
+If you wish to announce routes then it is necessary to "export" the routes that are to be announced. For example, "connected" and "static".
+
+Policy is used to export routes into RIP with the "export" statement.
+<code>
+policy {
+    /* Describe connected routes for redistribution */
+    policy-statement connected {
+	term export {
+	    from {
+		protocol: "connected"
+	    }
+	}
+    }
+}
+
+policy {
+    /* Describe static routes for redistribution */
+    policy-statement static {
+	term export {
+	    from {
+		protocol: "static"
+	    }
+	}
+    }
+}
+
+protocols {
+    rip {
+        /* Redistribute routes for connected interfaces */
+        /*
+        export: "connected"
+        */
+
+        /* Redistribute static routes */
+        /*
+        export: "static"
+        */
+
+        /* Redistribute connected and static routes */
+	export: "connected,static"
+
+        /* Run on specified network interface addresses */
+	interface eth0 {
+	    vif eth0 {
+		address 10.10.10.10 {
+		    disable: false
+		}
+	    }
+	}
+    }
+}
+</code>
+==== Open Shortest Path First (OSPF) ====
+In order to run OSPF Version 2 or 3 the "router-id" must be specified.  It is a unique IPv4 address within the Autonomous System. The smallest IP address of an interface belonging to the router is a good choice.
+OSPF splits networks into areas so an "area" must be configured.
+
+Configure one or more of the routers configured interface/vif/address in this area. In the OSPF Version 3 case an address is not required.
+
+Note: The 4 in "ospf4" refers to the IPv4 address family.
+<code>
+protocols {
+    ospf4 {
+	router-id: 10.10.10.10
+
+	area 0.0.0.0 {
+	    interface eth0 {
+		vif eth0 {
+		    address 10.10.10.10 {
+		    }
+		}
+	    }
+	}
+    }
+}
+</code>
+Note: The 6 in "ospf6" refers to the IPv6 address family. OSPFv3 may run multiple instances of OSPF in the same process, therefore the "ospf6" keyword must be followed by an integer instance ID.
+<code>
+protocols {
+    ospf6 0 {
+	router-id: 10.10.10.10
+
+	area 0.0.0.0 {
+	    interface eth0 {
+		vif eth0 {
+		}
+	    }
+	}
+    }
+}
+</code>
+==== Border Gateway Protocol (BGP) ====
+In order to run BGP the "bgp-id" (BGP Identifier) and "local-as" (Autonomous System number) must be specified.
+The "peer" statement specifies a peering. The argument to the peer statement is the IP address of the peer. The "local-ip" is the IP address that TCP should use. The "as" is the Autonomous System Number of the peer.
+
+<code>
+protocols {
+    bgp {
+	bgp-id: 10.10.10.10
+	local-as: 65002
+
+	peer 10.30.30.30 {
+	    local-ip: 10.10.10.10
+	    as: 65000
+	    next-hop: 10.10.10.20
+/*
+	    local-port: 179
+	    peer-port: 179
+*/
+	    /* holdtime: 120 */
+	    /* disable: false */
+
+	    /* IPv4 unicast is enabled by default */
+	    /* ipv4-unicast: true */
+
+	    /* Optionally enable other AFI/SAFI combinations */
+	    /* ipv4-multicast: true */
+            /* ipv6-unicast: true */
+            /* ipv6-multicast: true */
+	}
+    }
+}
+</code>
+
+==== Internet Group Management Protocol/Multicast Listener Discovery (IGMP/MLD) ====
+IGMP/MLD should be configured if the XORP router is to be used for multicast routing and if we want to track multicast group membership for directly connected subnets. Typically this is the case for a multicast router, therefore it should be enabled. IGMP and MLD are configured separately: IGMP is used for tracking IPv4 multicast members; MLD is used for tracking IPv6 multicast members.
+In the configuration we must explicitly configure each entity and each "vif". The "traceoptions" section is used to explicitly enable log information that can be used for debugging purpose.
+
+<code>
+protocols {
+    igmp {
+	disable: false
+	interface eth0 {
+	    vif eth0 {
+		disable: false
+		/* version: 2 */
+		/* enable-ip-router-alert-option-check: false */
+		/* query-interval: 125 */
+		/* query-last-member-interval: 1 */
+		/* query-response-interval: 10 */
+		/* robust-count: 2 */
+	    }
+	}
+	traceoptions {
+	    flag all {
+		disable: false
+	    }
+	}
+    }
+}
+
+protocols {
+    mld {
+	disable: false
+	interface eth0 {
+	    vif eth0 {
+		disable: false
+		/* version: 1 */
+		/* enable-ip-router-alert-option-check: false */
+		/* query-interval: 125 */
+		/* query-last-member-interval: 1 */
+		/* query-response-interval: 10 */
+		/* robust-count: 2 */
+	    }
+	}
+	traceoptions {
+	    flag all {
+		disable: false
+	    }
+	}
+    }
+}
+</code>
+
+A number of parameters have default values, therefore they don't have to be configured (those parameters are commented-out in the above sample configuration).
+
+^  Parameter  ^  Specification   ^
+^  \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ version | to configure the MLD/IGMP protocol version per virtual interface |
+^  enable-ip-router-alert-option-check | to enable the IP Router Alert option check per virtual interface |
+^  query-interval | to configure (per virtual interface) the interval (in seconds) between general queries sent by the querier |
+^  query-last-member-interval | to configure (per virtual interface) the maximum response time (in seconds) inserted into group-specific queries sent in response to leave group messages. It is also  the interval between group-specific query messages. |
+^  query-response-interval | to configure (per virtual interface) the maximum response time (in seconds) inserted into the periodic general queries |
+^  robust-count | to configure the robustness variable count that allows tuning for the expected packet loss on a subnet |
+
+Note that in case of IGMP each enabled interface must have a valid IPv4 address. In case of MLD each enabled interface must have a valid link-local IPv6 address.
+
+==== Protocol Independent Multicast - Sparse Mode (PIM-SM) ====
+PIM-SM should be configured if the XORP router is to be used for multicast routing in PIM-SM domain. PIM-SM for IPv4 and IPv6 are configured separately. At minimum, the entity itself and the virtual interfaces should be configured, as well as the mechanism for obtaining the Candidate-RP set (either the Bootstrap mechanism, or a static-RP set).
+
+<code>
+protocols {
+    pimsm4 {
+	disable: false
+	interface eth0 {
+	    vif eth0 {
+		disable: false
+		/* enable-ip-router-alert-option-check: false */
+		/* dr-priority: 1 */
+		/* hello-period: 30 */
+		/* hello-triggered-delay: 5 */
+		/* alternative-subnet 10.40.0.0/16 */
+	    }
+	}
+	interface register_vif {
+	    vif register_vif {
+		/* Note: this vif should be always enabled */
+		disable: false
+	    }
+	}
+
+	static-rps {
+	    rp 10.60.0.1 {
+		group-prefix 224.0.0.0/4 {
+		    /* rp-priority: 192 */
+		    /* hash-mask-len: 30 */
+		}
+	    }
+	}
+
+	bootstrap {
+	    disable: false
+	    cand-bsr {
+		scope-zone 224.0.0.0/4 {
+		    /* is-scope-zone: false */
+		    cand-bsr-by-vif-name: "eth0"
+		    /* cand-bsr-by-vif-addr: 10.10.10.10 */
+		    /* bsr-priority: 1 */
+		    /* hash-mask-len: 30 */
+		}
+	    }
+
+	    cand-rp {
+		group-prefix 224.0.0.0/4 {
+		    /* is-scope-zone: false */
+		    cand-rp-by-vif-name: "eth0"
+		    /* cand-rp-by-vif-addr: 10.10.10.10 */
+		    /* rp-priority: 192 */
+		    /* rp-holdtime: 150 */
+		}
+	    }
+	}
+
+	switch-to-spt-threshold {
+	    /* approx. 1K bytes/s (10Kbps) threshold */
+	    disable: false
+	    interval: 100
+	    bytes: 102400
+	}
+
+	traceoptions {
+	    flag all {
+		disable: false
+	    }
+	}
+    }
+}
+
+protocols {
+    pimsm6 {
+	disable: false
+	interface eth0 {
+	    vif eth0 {
+		disable: false
+		/* enable-ip-router-alert-option-check: false */
+		/* dr-priority: 1 */
+		/* hello-period: 30 */
+		/* hello-triggered-delay: 5 */
+		/* alternative-subnet 2001:DB8:40:40::/64 */
+	    }
+	}
+	interface register_vif {
+	    vif register_vif {
+		/* Note: this vif should be always enabled */
+		disable: false
+	    }
+	}
+
+	static-rps {
+	    rp 2001:DB8:50:50:50:50:50:50 {
+		group-prefix ff00::/8 {
+		    /* rp-priority: 192 */
+		    /* hash-mask-len: 126 */
+		}
+	    }
+	}
+
+	bootstrap {
+	    disable: false
+	    cand-bsr {
+		scope-zone ff00::/8 {
+		    /* is-scope-zone: false */
+		    cand-bsr-by-vif-name: "eth0"
+		    /* cand-bsr-by-vif-addr: 2001:DB8:10:10:10:10:10:10 */
+		    /* bsr-priority: 1 */
+		    /* hash-mask-len: 126 */
+		}
+	    }
+
+	    cand-rp {
+		group-prefix ff00::/8 {
+		    /* is-scope-zone: false */
+		    cand-rp-by-vif-name: "eth0"
+		    /* cand-rp-by-vif-addr: 2001:DB8:10:10:10:10:10:10 */
+		    /* rp-priority: 192 */
+		    /* rp-holdtime: 150 */
+		}
+	    }
+	}
+
+	switch-to-spt-threshold {
+	    /* approx. 1K bytes/s (10Kbps) threshold */
+	    disable: false
+	    interval: 100
+	    bytes: 102400
+	}
+
+	traceoptions {
+	    flag all {
+		disable: false
+	    }
+	}
+    }
+}
+</code>
+
+A number of parameters have default values, therefore they don't have to be configured (those parameters are commented-out in the above sample configuration).
+
+Note that the interface/vif named "register_vif" is special If PIM-SM is configured, then "register_vif" must be enabled.
+
+^  Parameter  ^  Specification  ^
+^  enable-ip-router-alert-option-check | to enable the IP Router Alert option check per virtual interface |
+^  dr-priority | To configure the Designated Router priority per virtual interface (note that in case of "register_vif" it is not used) |
+^  hello-period | To configure the PIM Hello messages period (in seconds) per virtual interface. It must be an integer between 1 and 18724 |
+^  hello-triggered-delay | To configure the randomized triggered delay of PIM Hello messages (in seconds) per virtual interface. It must be an integer between 1 and 255 |
+^  alternative-subnet | To add "alternative subnets" to a network interface. For example, if you want to make incoming traffic with a non-local source address appear as it is coming from a local  subnet, then "alternative-subnet" can be used. Typically, this is needed as a work-around solution when we use uni-directional interfaces for receiving traffic (e.g., satellite links). Note: use "alternative-subnet" with extreme care, only if you know what you are really doing! |
+^  is-scope-zone | Used to specify whether a Candidate-BSR "scope-zone" or a Candidate-RP "group-prefix" is scoped. Currently, scoped zones are not well tested, hence it is recommended "scope-zone" is always set to "false". |
+^  hash-mask-len | Should NOT be modified; if you don't know what "hash-mask-len" is used for, don't modify it! |
+^  switch-to-spt-threshold | used to specify the multicast data bandwidth threshold used by the last-hop PIM-SM routers and the RPs to initiate shortest-path switch toward the multicast source. Parameter "interval" is used to specify the periodic measurement interval; parameter "bytes" is used to specify the threshold in number of bytes within the measurement interval. It is recommended that the measurement interval is not too small, and should be on the order of tens of seconds. The smallest accepted value is 3 seconds. If the shortest-path switch should happen right after the first packet is forwarded, then "bytes" should be set to 0. |
+^  \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ traceoptions | Used to explicitly enable log information that can be used for debugging purpose. |
+
+If PIM-SM uses static RPs, those can be configured within the "static-rps" section. For each RP, an "rp" section is needed, and each section should contain the multicast prefix address the static RP is configured with. The RP priority can be modified with the "rp-priority" parameter.
+
+If PIM-SM uses the Bootstrap mechanism to obtain the Candidate-RP set, that can be configured in the "bootstrap" section. If the XORP router is to be used as a Candidate-BSR, this should be specified in the "cand-bsr" section. For a router to be a Candidate-BSR it must advertise for each zone (scoped or non-scoped) the associated multicast prefix address. The "cand-bsr" section should contain "scope-zone" statements for each multicast prefix address. The vif name with the address that is to be used as the Candidate-BSR is specified by the "cand-bsr-by-vif-name" statement. The particular vif's address can be specified by the "cand-bsr-by-vif-addr" statement. If the "cand-bsr-by-vif-addr" statement is omitted, a domain-wide address (if exists) that belongs to that interface is chosen by the router itself. The Candidate-BSR priority can be modified with the "bsr-priority" parameter.
+
+If the XORP router is to be a Candidate-RP, this should be specified in the "cand-rp" section. For a router to be a Candidate-RP it must advertise for each zone (scoped or non-scoped) the associated multicast prefix address. The "cand-rp" section should contain "group-prefix" statements for each multicast prefix address. The vif name with the address that is to be used as the Candidate-RP is specified by the "cand-rp-by-vif-name" statement. The particular vif's address can be specified by the "cand-rp-by-vif-addr" statement. If the "cand-rp-by-vif-addr" statement is omitted, a domain-wide address (if exists) that belongs to that interface is chosen by the router itself. The Candidate-RP priority can be modified with the "rp-priority" parameter; the Candidate-RP holdtime can be modified with the "rp-holdtime" parameter.
+
+Note that in case of PIM-SM for IPv4 each enabled interface must have a valid IPv4 address. In case of PIM-SM for IPv6 each enabled interface must have a valid link-local and a valid domain-wide IPv6 addresses.
+
+==== FIB2MRIB ====
+
+The FIB2MRIB module is used to obtain the Forwarding Information Base information from the underlying system (via the FEA), and to propagate it to the MRIB, so it can be used by multicast routing protocols such as PIM-SM. Typically, it is needed only if the unicast routing protocols (if any) on that router do not inject routes into the MRIB.
+<code>
+protocols {
+    fib2mrib {
+	disable: false
+    }
+}
+</code>
+
+===== Examples =====
+Most of the following content has been generously provided by Ray Soucy @ University of Maine.
+
+==== Interface configurations ====
+=== Importing the system configuration ===
+For XORP to work, you need to define which interfaces the XORP engine will make use of.  Interface configuration can be performed manually, or XORP can import the existing interface configuration from the system using the "''default-system-config''" statement.
+
+For example, to import the configuration for the "lo" loopback interface:
+
+<code>
+interface lo {
+    description: "Loopback"
+    disable: false
+    discard: false
+    unreachable: false
+    management: false
+    default-system-config
+}
+</code>
+
+=== Manual interface configuration ===
+<code>
+interface eth0 {
+    description: "LAN"
+    disable: false
+    discard: false
+    unreachable: false
+    management: false
+    vif eth0 {
+        disable: false
+        address 192.168.0.1 {
+            prefix-length: 24
+            disable: false
+        }
+    }
+}
+</code>
+
+=== VLAN configuration ===
+**VLAN auto-creation was previously broken in XORP**.  To work around this, VLAN interfaces were manually created (using vconfig or 'ip') on the host system and defined as physical interfaces in XORP rather than sub-interface VIF's.  Here is an example using VLANs created outside of XORP:
+
+<code>
+interface eth1 {
+    description: "802.1Q Trunk Port (Native)"
+    disable: false
+    discard: false
+    unreachable: false
+    management: false
+    vif eth0 {
+        disable: false
+    }
+}
+interface "eth1.2" {
+    description: "VLAN 2"
+    disable: false
+    discard: false
+    unreachable: false
+    management: false
+    vif "eth1.2" {
+        disable: false
+        address 192.168.2.1 {
+            prefix-length: 24
+            disable: false
+        }
+    }
+}
+interface "eth1.3" {
+    description: "VLAN 3"
+    disable: false
+    discard: false
+    unreachable: false
+    management: false
+    vif "eth1.3" {
+        disable: false
+        address 192.168.3.1 {
+            prefix-length: 24
+            disable: false
+        }
+    }
+}
+</code>
+
+XORP 1.8.3 now supports creating VLANs internally.  The syntax is:
+<code>
+interface "eth1.3" {
+    description: "VLAN 3"
+    parent-ifname: "eth1"
+    iface-type: "VLAN"
+    vid: "3"
+    vif "eth1.3" {
+        disable: false
+        address 192.168.3.1 {
+            prefix-length: 24
+            disable: false
+        }
+    }
+}
+</code>
+==== Routing Configurations ====
+Here follows some routing-specific parts of configuration for various protocols.
+=== Static routes (static) ===
+<code>
+protocols {
+   static {
+        disable: false
+        route 0.0.0.0/0 {
+            next-hop: 198.51.100.5
+            metric: 1
+        }
+        route 192.0.2.0/24 {
+            next-hop: 203.0.113.2
+            metric: 1
+        }
+    }
+}
+</code>
+=== Routing Information Protocol (RIP) ===
+<code>
+protocols {
+    rip {
+        interface eth0 {
+            vif eth0 {
+                address 198.51.100.6 {
+                    metric: 1
+                    horizon: "split-horizon-poison-reverse"
+                    disable: false
+                    passive: false
+                    accept-non-rip-requests: false
+                    accept-default-route: true
+                    advertise-default-route: false
+                    route-timeout: 180
+                    deletion-delay: 120
+                    triggered-delay: 3
+                    triggered-jitter: 66
+                    update-interval: 30
+                    update-jitter: 16
+                    request-interval: 30
+                    interpacket-delay: 50
+                }
+            }
+        }
+    export: "Route_Export"
+    }
+}
+</code>
+=== Open Shortest Path First (OSPF) ===
+<code>
+protocols {
+    ospf4 {
+        router-id: 198.51.100.6
+        rfc1583-compatibility: false
+        ip-router-alert: false
+        area 0.0.0.10 {
+            area-type: "normal"
+            default-lsa {
+                disable: false
+                metric: 0
+            }
+            interface eth0 {
+                link-type: "broadcast"
+                vif eth0 {
+                    address 198.51.100.6 {
+                        priority: 255
+                        hello-interval: 10
+                        router-dead-interval: 40
+                        interface-cost: 1
+                        retransmit-interval: 5
+                        transit-delay: 1
+                        authentication {
+                            simple-password: "password"
+                        }
+                        disable: false
+                    }
+                }
+            }
+        }
+        export: "Route_Export"
+    }
+}
+</code>
+
+
+==== Complete configurations ====
+=== Static and very basic examples ===
+
+Let's say we're using XORP on a 10.0.2.42/24 address. Our unique (and **default**) route will use the gateway 10.0.2.2
+This is typically the kind of situation you could meet in a SOHO LAN.
+
+Here is the modified ''static.boot'' file:
+
+<code> 
+/* $XORP$ */
+interfaces {
+    interface eth0 {
+	vif eth0 {
+	    address 10.0.2.42 {
+		prefix-length: 24
+		broadcast: 10.0.2.255
+		disable: false
+	    }
+	}
+    }
+}
+
+fea {
+    unicast-forwarding4 {
+	disable: false
+    }
+}
+protocols {
+    static {
+        disable: false
+	route 0.0.0.0/0 {
+            next-hop: 10.0.2.2
+            metric: 1
+	}
+    }
+}
+</code>
+
+Here is an other one. We're going to use both Ethernet and WiFi interfaces as configured by the system running XORP, and not xorp itself. The FEA will be specifically disabled regarding IPv6 routing and our default gateway is a different one.
+
+<code>
+/* $XORP$ */
+
+interfaces {
+    interface wlan0 {
+    	description: "wifi"
+	disable: false
+	discard: false
+	unreachable: false
+        default-system-config {
+    	}
+    }	
+
+    interface eth0 {
+        description: "cabled lan"
+	disable: false
+	discard: false
+	unreachable: false
+	default-system-config {
+	}
+    }
+}
+
+fea {
+    unicast-forwarding4 {
+	disable: false
+    }
+    unicast-forwarding6 {
+        disable: true
+    }
+}
+
+protocols {
+    static {
+        disable: false
+	route 0.0.0.0/0 {
+	    next-hop: 192.168.1.1
+	}
+    }
+}
+</code>
+
+<note tip>Use ''ip route show'' or ''netstat -rn'' to show all of your routes</note>
+
+=== Basic Configuration ===
+Below is an example configuration file.  This configuration defines 2 interfaces and the loopback interface (allowing loopback aliases to be advertised routes).  It also provides a sample policy to restrict the routes advertised so that the Loopback network, RFC 1918 private networks, and default route are not advertised.
+
+<code>
+/*XORP Configuration File, v1.0*/
+protocols {
+    fib2mrib {
+        disable: true
+    }
+}
+policy {
+    policy-statement "Route_Export" {
+        term 10 {
+            from {
+                protocol: "connected"
+                network4-list: "Default_Route"
+            }
+            then {
+                reject {
+                }
+            }
+        }
+        term 20 {
+            from {
+                protocol: "connected"
+                network4-list: "No_Advertise"
+            }
+            then {
+                reject {
+                }
+            }
+        }
+        term 30 {
+            from {
+                protocol: "connected"
+		prefix-length4 < 32..32
+            }
+            then {
+                accept {
+                }
+            }
+        }
+        then {
+            reject {
+            }
+        }
+    }
+    network4-list "No_Advertise" {
+        network 127.0.0.0/8 {
+            modifier: "orlonger"
+        }
+        network 10.0.0.0/8 {
+            modifier: "orlonger"
+        }
+        network 172.16.0.0/12 {
+            modifier: "orlonger"
+        }
+        network 192.168.0.0/16 {
+            modifier: "orlonger"
+        }
+    }
+    network4-list "Default_Route" {
+        network 0.0.0.0/0
+    }
+}
+fea {
+    unicast-forwarding4 {
+        disable: false
+        forwarding-entries {
+            retain-on-startup: true
+            retain-on-shutdown: true
+        }
+    }
+}
+interfaces {
+    restore-original-config-on-shutdown: true
+    interface lo {
+        description: "Loopback"
+        disable: false
+        discard: false
+        unreachable: false
+        management: false
+        default-system-config
+    }
+    interface eth0 {
+        description: "WAN"
+        disable: false
+        discard: false
+        unreachable: false
+        management: false
+        default-system-config
+    }
+    interface eth1 {
+        description: "LAN"
+        disable: false
+        discard: false
+        unreachable: false
+        management: false
+        default-system-config
+    }
+}
+rtrmgr {
+    config-directory: "/home/xorp/"
+    load-file-command: "fetch"
+    load-file-command-args: "-o"
+    load-ftp-command: "fetch"
+    load-ftp-command-args: "-o"
+    load-http-command: "fetch"
+    load-http-command-args: "-o"
+    load-tftp-command: "sh -c 'echo Not implemented 1>&2 && exit 1'"
+    load-tftp-command-args: ""
+    save-file-command: "sh -c 'echo Not implemented 1>&2 && exit 1'"
+    save-file-command-args: ""
+    save-ftp-command: "sh -c 'echo Not implemented 1>&2 && exit 1'"
+    save-ftp-command-args: ""
+    save-http-command: "sh -c 'echo Not implemented 1>&2 && exit 1'"
+    save-http-command-args: ""
+    save-tftp-command: "sh -c 'echo Not implemented 1>&2 && exit 1'"
+    save-tftp-command-args: ""
+}
+</code>
+
+=== Multicast Configuration ===
+
+For IP multicast routing, you need to enable the fib2mrib protocol, create a plumbing configuration block to define the multicast fea (mfea), and enable your desired protocol(s).  In this example we will use PIM-SM, and IGMP, which is they most common configuration.
+
+Note that the "register_vif" interface is created by the pimsm4 process.  You must correctly define pimsm4 for the interface to be available for mfea4 configuration.  Also note that manual address configuration is recommended for interfaces.  The "register_vif" interface must be defined last.
+
+<code>
+/*XORP Configuration File, v1.0*/
+protocols {
+    fib2mrib {
+        disable: false
+    }
+    igmp {
+        disable: true
+        interface eth1 {
+            vif eth1 {
+                disable: true
+                version: 2
+                enable-ip-router-alert-option-check: false
+                query-interval: 125
+                query-last-member-interval: 1
+                query-response-interval: 10
+                robust-count: 2
+            }
+        }
+    }
+    pimsm4 {
+        disable: true
+        interface eth0 {
+            vif eth0 {
+                disable: true
+                dr-priority: 1
+                hello-period: 30
+                hello-triggered-delay: 5
+            }
+        }
+        interface "register_vif" {
+            vif "register_vif" {
+                disable: false
+                dr-priority: 1
+                hello-period: 30
+                hello-triggered-delay: 5
+            }
+        }
+        static-rps {
+            rp 203.0.113.1 {
+                group-prefix 224.0.0.0/4 {
+                    rp-priority: 192
+                    hash-mask-len: 30
+                }
+            }
+        }
+        bootstrap {
+          disable: false
+        }
+    }
+}
+fea {
+    unicast-forwarding4 {
+        disable: false
+        forwarding-entries {
+            retain-on-startup: true
+            retain-on-shutdown: true
+        }
+    }
+}
+interfaces {
+    restore-original-config-on-shutdown: true
+    interface lo {
+        description: "Loopback"
+        disable: false
+        discard: false
+        unreachable: false
+        management: false
+        default-system-config {
+        }
+    }
+    interface eth0 {
+        description: "WAN"
+        disable: false
+        discard: false
+        unreachable: false
+        management: false
+        vif eth0 {
+            disable: false
+            address 198.51.100.6 {
+                prefix-length: 30
+                disable: false
+            }
+        }
+    }
+    interface eth1 {
+        description: "LAN"
+        disable: false
+        discard: false
+        unreachable: false
+        management: false
+        vif eth1 {
+            disable: false
+            address 203.0.113.1 {
+                prefix-length: 24
+                disable: false
+            }
+        }
+    }
+}
+plumbing {
+    mfea4 {
+        disable: false
+        interface eth0 {
+            vif eth0 {
+                disable: false
+            }
+        }
+        interface eth1 {
+            vif eth1 {
+                disable: false
+            }
+        }
+        interface "register_vif" {
+            vif "register_vif" {
+                disable: false
+            }
+        }
+    }
+}
+rtrmgr {
+    config-directory: "/home/xorp/"
+    load-file-command: "fetch"
+    load-file-command-args: "-o"
+    load-ftp-command: "fetch"
+    load-ftp-command-args: "-o"
+    load-http-command: "fetch"
+    load-http-command-args: "-o"
+    load-tftp-command: "sh -c 'echo Not implemented 1>&2 && exit 1'"
+    load-tftp-command-args: ""
+    save-file-command: "sh -c 'echo Not implemented 1>&2 && exit 1'"
+    save-file-command-args: ""
+    save-ftp-command: "sh -c 'echo Not implemented 1>&2 && exit 1'"
+    save-ftp-command-args: ""
+    save-http-command: "sh -c 'echo Not implemented 1>&2 && exit 1'"
+    save-http-command-args: ""
+    save-tftp-command: "sh -c 'echo Not implemented 1>&2 && exit 1'"
+    save-tftp-command-args: ""
+}
+</code>
+
+=== Full example (PIM-SM, OSPF) ===
+<code>
+/*XORP Configuration File, v1.0*/
+protocols {
+    fib2mrib {
+        disable: false
+    }
+    igmp {
+        disable: true
+        interface eth1 {
+            vif eth1 {
+                disable: true
+                version: 2
+                enable-ip-router-alert-option-check: false
+                query-interval: 125
+                query-last-member-interval: 1
+                query-response-interval: 10
+                robust-count: 2
+            }
+        }
+    }
+    pimsm4 {
+        disable: true
+        interface eth0 {
+            vif eth0 {
+                disable: true
+                dr-priority: 1
+                hello-period: 30
+                hello-triggered-delay: 5
+            }
+        }
+        interface "register_vif" {
+            vif "register_vif" {
+                disable: false
+                dr-priority: 1
+                hello-period: 30
+                hello-triggered-delay: 5
+            }
+        }
+        static-rps {
+            rp 203.0.113.1 {
+                group-prefix 224.0.0.0/4 {
+                    rp-priority: 192
+                    hash-mask-len: 30
+                }
+            }
+        }
+        bootstrap {
+            disable: false
+        }
+    }
+    ospf4 {
+        router-id: 198.51.100.6
+        rfc1583-compatibility: false
+        ip-router-alert: false
+        area 0.0.0.10 {
+            area-type: "normal"
+            default-lsa {
+                disable: false
+                metric: 0
+            }
+            interface eth0 {
+                link-type: "broadcast"
+                vif eth0 {
+                    address 198.51.100.6 {
+                        priority: 255
+                        hello-interval: 10
+                        router-dead-interval: 40
+                        interface-cost: 1
+                        retransmit-interval: 5
+                        transit-delay: 1
+                        authentication {
+                            simple-password: "password"
+                        }
+                        disable: false
+                    }
+                }
+            }
+        }
+        export: "Route_Export"
+    }
+    static {
+        disable: false
+        route 0.0.0.0/0 {
+            next-hop: 198.51.100.5
+            metric: 1
+        }
+        route 192.0.2.0/24 {
+            next-hop: 203.0.113.2
+            metric: 1
+        }
+    }
+}
+policy {
+    policy-statement "Route_Export" {
+        term 10 {
+            from {
+                protocol: "connected"
+                network4-list: "Default_Route"
+            }
+            then {
+                reject {
+                }
+            }
+        }
+        term 20 {
+            from {
+                protocol: "connected"
+                network4-list: "No_Advertise"
+            }
+            then {
+                reject {
+                }
+            }
+        }
+        term 30 {
+            from {
+                protocol: "connected"
+		prefix-length4 < 32..32
+            }
+            then {
+                accept {
+                }
+            }
+        }
+        then {
+            reject {
+            }
+        }
+    }
+    network4-list "No_Advertise" {
+        network 127.0.0.0/8 {
+            modifier: "orlonger"
+        }
+        network 10.0.0.0/8 {
+            modifier: "orlonger"
+        }
+        network 172.16.0.0/12 {
+            modifier: "orlonger"
+        }
+        network 192.168.0.0/16 {
+            modifier: "orlonger"
+        }
+    }
+    network4-list "Default_Route" {
+        network 0.0.0.0/0
+    }
+}
+fea {
+    unicast-forwarding4 {
+        disable: false
+        forwarding-entries {
+            retain-on-startup: true
+            retain-on-shutdown: true
+        }
+    }
+}
+interfaces {
+    restore-original-config-on-shutdown: true
+    interface lo {
+        description: "Loopback"
+        disable: false
+        discard: false
+        unreachable: false
+        management: false
+        default-system-config {
+        }
+    }
+    interface eth0 {
+        description: "WAN"
+        disable: false
+        discard: false
+        unreachable: false
+        management: false
+        vif eth0 {
+            disable: false
+            address 198.51.100.6 {
+                prefix-length: 30
+                disable: false
+            }
+        }
+    }
+    interface eth1 {
+        description: "LAN"
+        disable: false
+        discard: false
+        unreachable: false
+        management: false
+        vif eth1 {
+            disable: false
+            address 203.0.113.1 {
+                prefix-length: 24
+                disable: false
+            }
+        }
+    }
+}
+plumbing {
+    mfea4 {
+        disable: false
+        interface eth0 {
+            vif eth0 {
+                disable: false
+            }
+        }
+        interface eth1 {
+            vif eth1 {
+                disable: false
+            }
+        }
+        interface "register_vif" {
+            vif "register_vif" {
+                disable: false
+            }
+        }
+    }
+}
+rtrmgr {
+    config-directory: "/home/xorp/"
+    load-file-command: "fetch"
+    load-file-command-args: "-o"
+    load-ftp-command: "fetch"
+    load-ftp-command-args: "-o"
+    load-http-command: "fetch"
+    load-http-command-args: "-o"
+    load-tftp-command: "sh -c 'echo Not implemented 1>&2 && exit 1'"
+    load-tftp-command-args: ""
+    save-file-command: "sh -c 'echo Not implemented 1>&2 && exit 1'"
+    save-file-command-args: ""
+    save-ftp-command: "sh -c 'echo Not implemented 1>&2 && exit 1'"
+    save-ftp-command-args: ""
+    save-http-command: "sh -c 'echo Not implemented 1>&2 && exit 1'"
+    save-http-command-args: ""
+    save-tftp-command: "sh -c 'echo Not implemented 1>&2 && exit 1'"
+    save-tftp-command-args: ""
+}
+</code>
+
+====== First approach of xorpsh ======
+Now that your ''xorp_rtrmgr'' has been launched you should be able to use and play a little bit with ''xorpsh''.
+First thing to do: launching it and list all the possibilites.
+
+<code>
+pierre@pierre-T500:/usr/local/xorp/sbin$ sudo ./xorpsh 
+[sudo] password for pierre: 
+Welcome to XORP on pierre-T500
+root@pierre-T500> ?
+Possible completions:
+  configure            Switch to configuration mode
+  exit                 Exit this command session
+  help                 Provide help with commands
+  ping                 Ping a hostname or IP address
+  ping6                Ping an IPv6 hostname or IPv6 address
+  quit                 Quit this command session
+  show                 Display information about the system
+  test                 Test operation
+  traceroute           Trace the IP route to a hostname or IP address
+  traceroute6          Trace the IPv6 route to a hostname or IPv6 address
+</code>
+<note important>Notice that ''xorpsh'' was run as **root**. It is only required if you want to go into the **configuration mode**.</note>
+
+Let's get some more help about the configure mode:
+
+<code>
+root@pierre-T500> help ?
+Possible completions:
+  configure            Switch to configuration mode
+  exit                 Exit this command session
+  help                 Provide help with commands
+  ping                 Give help on the "ping" command
+  ping6                Give help on the "ping6" command
+  quit                 Quit this command session
+  show                 Give help on the "show" command
+  test                 Give help on the "test" command
+  traceroute           Give help on the "traceroute" command
+  traceroute6          Give help on the "traceroute6" command
+  |                    Pipe through a command
+  
+root@pierre-T500> help configure
+
+A XORP router has two modes: operational mode and configuration mode.
+Operational mode is used to monitor the state of the router, whereas 
+configuration mode is used to change the configuration of the router.
+
+You are currently in operational mode.
+To switch to configuration mode, use the "configure" command.
+You have to be in the xorp group to be able to use configuration mode.
+
+Optional parameters to configure: 
+    exclusive
+Use "help configure exclusive" for more details.
+</code>
+
+As you can see, ''xorpsh'' is highly intuitive and calling the auto-completion system by typing ''?'' eases the process a lot.
+
+====== Reviewing XORP effects on the running system ======
+To be convinced that XORP is actually running, working and routing within your system, you can check your routing routes. In the following shell excerpt, we have previously used a basic static configuration (see above) with only a default gateway.
+
+<code shell>
+pierre@pierre-T500:/usr/local/xorp/sbin$ ip route show
+192.168.1.0/24 dev wlan0  proto kernel  scope link  src 192.168.1.2  metric 2 
+169.254.0.0/16 dev wlan0  scope link  metric 1000 
+default via 192.168.1.1 dev wlan0  proto xorp  metric 1 notify 
+</code>
+You can see that the last line was indeed added to the system by XORP.
+
+====== Conclusion ======
+After reviewing most of the information here, you should now be able to
+  * Install XORP and configure some of its basics aspects
+  * Look for information within the template files and adjust your configuration files accordingly
+  * Interact with ''xorp_rtrmgr'' thanks to ''xorpsh''
+
+Congratulations ! You're now a XORP user !

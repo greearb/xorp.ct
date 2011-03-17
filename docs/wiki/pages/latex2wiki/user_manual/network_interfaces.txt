@@ -1,0 +1,220 @@
+====== Network Interfaces ======
+===== Network Interfaces Terminology and Concepts =====
+A router receives packets via its network interfaces from its neighboring routers. Some of those packets
+will be destined for the router itself, but most of then will normally be forwarded on via another network
+interface to another router or to locally connected hosts.
+
+There are many different types of network interface, such as Ethernet, ATM, DS3, or ISDN. Sometimes the
+underlying physical interface will need explicit configuration before it can establish a link, and sometimes
+the link requires no configuration. In addition, some network interfaces behave from a routing point of view
+as if they were really multiple interfaces, in that the router may have to forward packets between different
+“channels” on the same interface.
+
+We choose to distinguish in a XORP router between physical interfaces (which we call interfaces, and
+logical interfaces, which we call virtual interfaces or vifs. An example of a interface might be an Ethernet
+card. An example of a vif might be one of many VLANs configured on that Ethernet.
+
+Conceptually, XORP routes packets between vifs. Thus it is also vifs that are given IP addresses. Each interface may contain many vifs. Conversely every vif is always part of an interface, although some interfaces
+such as the loopback interface do not have a physical realisation.
+
+The XORP naming convention for vifs is that they are named as they would be in the underlying forwarding
+path. For example, if the forwarding path is implemented in the FreeBSD kernel, then ''fxp0'' might denote
+a 100-base-T Ethernet vif (with no VLAN). On a router using Linux as the forwarding path, the same vif
+might be called ''eth0''.
+
+If a physical interface cannot support multiple vifs, or if there’s a default vif on a physical interface, then
+the interface name and the vif name will normally be the same. Again, this is determined by the underlying
+forwarding path. A common example would be Ethernet without VLANs, where the interface and vif might
+both be named ''fxp0'' on FreeBSD or both called ''eth0'' on Linux.
+
+===== Configuring Network Interfaces =====
+A XORP router will only use interfaces that it has been explicitly configured to use. For protocols such as
+RIP that are explicitly aware of interfaces, only configured interfaces will be used. Even for protocols such
+as BGP that don’t directly associate peerings with interfaces, if the next-hop router for a routing entry is not
+through a configured interface, the route will not be installed.
+
+==== Configuration Syntax ====
+The available configuration syntax for network interfaces and addresses is as follows.
+<note>Please note that the VLAN configuration has changed in release 1.8.3.  The old vif vlan { } method
+didn't work right anyway, so hopefully the API incompatibility will not be too painful.</note>
+
+<code>
+interfaces {
+  restore-original-config-on-shutdown: bool
+  interface text {
+    description: text
+    mac: macaddr
+    mtu: uint
+    default-system-config
+    disable: bool
+    discard: bool
+    unreachable: bool
+    management: bool
+    parent-ifname: text
+    iface-type: text
+    vid: text
+    vif text {
+      disable: bool
+      address IPv4-addr {
+        prefix-length: int(1..32)
+        broadcast: IPv4-addr
+        destination: IPv4-addr
+        disable: bool
+      }
+      address IPv6-addr {
+        prefix-length: int(1..128)
+        destination: IPv6-addr
+        disable: bool
+      }
+    }
+  }
+}
+</code>
+
+^  Keyword  ^  Description  ^
+^  \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ interfaces | This delimits all the interface configuration information within the XORP configuration file. |
+^  restore-original-config-on-shutdown | This flag enables the restoring of the original network configuration when the FEA is shutdown. If it is set to true, then the restoring is enabled, otherwise is disabled. The default is false (i.e., don’t restore the original network configuration). |
+^  interface | This delimits the configuration for a particular interface. The parameter is the name of the interface, which must correspond to an interface known to the router forwarding path. |
+
+=== Specific interface configuration ===
+For each interface, the following configuration is possible:
+
+^  Keyword  ^  Description  ^
+^  \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ description | This is a human-readable description for the interface. It is primarily used to help the router operator remember which interface serves which purpose. It is optional. |
+^  mac | This allows the MAC address for the interface to be set. MAC addresses on devices such as Ethernets are usually fixed, but in some cases it is possible to override the built-in default MAC address. The format should be in a form appropriate for the interface type. For an Ethernet interface, this would be six colon-separated 8-bit numbers in hexadecimal, such as ''00:0a:59:9a:f2:ba''. |
+^  mtu | This allows the maximum transfer unit (MTU) to be set for the interface as a whole (applying to all VIFs). The value is an integer number of bytes, and should be less than or equal to the largest MTU supported  by the physical device. When forwarding, IPv4 packets larger than the MTU will be fragmented unless they the DF bit set, in which case they will be dropped and an ICMP Packet-too-big message will be returned to the sender. |
+^  default-system-config | Normally all the interfaces, vifs, and addresses on a XORP router will be  configured through the XORP configuration file and command line interface. However, under certain circumstances it is useful to be able to run XORP as a routing daemon without changing the current configuration of interfaces and addresses. This primitive tells XORP to obtain its configuration for this  interface by reading the existing configuration back from the forwarding engine rather than by configuring the forwarding engine. If ''default-system-config'' is used, then the ''vif'' and ''address'' sections must not be  configured. |
+^  disable | This flag disables or enables the interface for routing and forwarding. It takes the value ''true'' or ''false''. Configuring an interface to be disabled has the same effect as removing its configuration, but without losing what the configuration used to be. |
+^  discard | This flag enables an interface to be used as a discard interface. It takes the value ''true'' or ''false''. The default is ''false'' (i.e., the interface is not a discard interface). All traffic sent on such interface will be silently thrown away (i.e., the interface will act as a blackhole). Note that on some systems (e.g., most UNIX systems) we cannot assign the discard property to a physical interface. **Instead, the name of the discard interface should be made-up and should not match the name of an interface that already exists in the system.** |
+^  unreachable | This flag enables an interface to be used as an unreachable interface. It takes the value ''true or false''. The default is ''false'' (i.e., the interface is not an unreachable interface). A packet sent on such interface will be trigger “ICMP destination unreachable” back to the sender. Note that on some systems (e.g., most UNIX systems) we cannot assign the unreachable property to a physical interface. **Instead, the name of the unreachable interface should be made-up and should not match the name of an interface that already exists in the system.** |
+^  management | This flag enables an interface to be used as a management interface. It takes the value ''true'' or ''false''. The default is ''false'' (i.e., the interface is not a management interface). An  interface that is flagged as “management” might be used by some of the protocols for protocol-specific purpose. |
+^  parent-ifname | If this interface is a VLAN, then specify the parent device here, for example: "eth0" |
+^  iface-type | Specifies that this interface is a virtual device.  Currently supported values: "VLAN" |
+^  vid | VLAN ID.  This is the 802.1q VLAN ID for 802.1Q VLANS, for example: "5" |
+^  vif | This configures a vif on the corresponding interface. In some cases this may cause the vif to be created; an example might be an Ethernet VLAN. In other cases this merely denotes the start of the  configuration for the vif. The parameter is the name of the vif, as understood by the router forwarding engine. |
+
+== Vif specific configuration ==
+For each vif, the following configuration is possible:
+^  Keyword   ^  Description  ^
+^  disable | This flag disables or enables the vif for routing and forwarding. It takes the value ''true'' or ''false''. Configuring a vif to be disabled has the same effect as removing its configuration, but without  losing what the configuration used to be. |
+^  address | This specifies a new IP address for this vif. A single vif might have multiple IP addresses, and might have both IPv4 address and IPv6 addresses. The parameter is either an IPv4 or IPv6 address. |
+
+== Address specific configuration ==
+For each address, the following configuration is possible:
+
+^  Keyword  ^  Description  ^
+^  prefix-length | This gives the prefix length of the subnet connected to this interface. For an IPv4 address, prefix-length must be between 4 and 32. For an IPv6 address, prefix-length must be between 8 and 128. This field is mandatory for each address. |
+^  \ \ \ \ \ \ \ broadcast | This gives the subnet broadcast address for the subnet corresponding to the vif address. It is only needed for IPv4 addresses (it is mandatory), and is needed for historical reasons. It takes the form of an IPv4 address. Normally the broadcast address will have the local hosts part of the subnet address set to all ones. For example, with address 10.0.0.0 and prefix-length 20, the broadcast address will have the last 12 bits set to one, and hence will be 10.0.15.255. |
+^  destination | This specifies the destination IP address. It is only relevant for point-to-point interfaces, where the IP addresses at each end of the link need not share an IP subnet. |
+^  disable | This flag disables or enables this IP address on this vif. It takes the value ''true'' or ''false''. Configuring an IP address to be disabled has the same effect as removing its configuration, but without losing what the configuration used to be. |
+==== Example Configurations ====
+We recommend that you select the interfaces that you want to use on your system and configure them as
+below. Interfaces that you do not wish XORP to use for forwarding should be omitted from the configuration.
+
+=== Configuring Interface Addresses ===
+
+<code>
+interfaces {
+  interface dc0 {
+    description: "Ethernet interface"
+    disable: false
+    vif dc0 {
+      disable: false
+      address 10.10.10.10 {
+        prefix-length: 24
+        broadcast: 10.10.10.255
+        disable: false
+      }
+      address 2001:DB8:10:10:10:10:10:10 {
+        prefix-length: 64
+        disable: false
+      }
+    }
+  }
+}
+</code>
+In the example above, the router has only one interface configured. This interface is called ''dc0'', and the vif
+is also called ''dc0''. In this case, this is because this interface is an Ethernet inferface, and VLANs are not
+being used, so the vif is simply the default vif for this interface.
+The vif has both an IPv4 and an IPv6 address configured. The IPv4 address is ''10.10.10.10'', and connects
+to the subnet'' 10.10.10.0/24'' as determined by the prefix-length. Consistent with this, the subnet broadcast
+address is ''10.10.10.255''.
+The IPv6 address has a prefix-length of 64 bits, and does not need (or allow) the broadcast address to be
+explicitly specified.
+In this case, the interface is not a point-to-point interface, so no destination address is specified.
+
+=== Using Pre-Configured Interface Addresses ===
+If the ''default-system-config'' statement is used, as shown in the example belore, it instructs the
+FEA that the interface should be configured by using the existing interface information from the underlying
+system. In that case, the ''vif'' and ''address'' sections must not be configured.
+
+<code>
+interfaces {
+  interface eth0 {
+    description: "data interface"
+    disable: false
+    default-system-config
+  }
+}
+</code>
+
+=== Configure XORP to Create VLANs ===
+<code>
+interfaces {
+  interface eth0.5 {
+    description: "802.1Q VLAN interface on Ethernet interface eth0"
+    parent-ifname: "eth0"
+    iface-type: "VLAN"
+    vid: "5"
+    vif eth0.5 {
+      address 10.10.10.10 {
+        prefix-length: 24
+      }
+    }
+  }
+}
+</code>
+
+In the example above, the router has a VLAN configured on interface eth0. The vlan is called ''eth0.5'' and
+has VLAN ID of 5. The IP address of interface eth0.5 is ''10.10.10.10''.
+
+Note that some of the configuration statements such as ''disable:'' and ''broadcast:'' can be omitted: the
+former has default value of ''false'' while the latter can be calculated internally by XORP from the prefix
+length.
+
+
+===== Monitoring Network Interfaces =====
+The state of a XORP router’s interfaces can be displayed from operational mode using the ''show interfaces''
+command. By itself, ''show interfaces'' will list information about all the interfaces in the router:
+
+<code bash>
+pierre@pierre-T500:/usr/local/xorp/sbin$ sudo ./xorpsh 
+Welcome to XORP on pierre-T500
+root@pierre-T500> show interfaces 
+eth0/eth0: Flags:<NO-CARRIER,ENABLED,BROADCAST,MULTICAST> mtu 1500 speed 1 Gbps
+        physical index 2
+        ether 0:24:7e:11:b5:8f
+wlan0/wlan0: Flags:<ENABLED,BROADCAST,MULTICAST> mtu 1500 speed unknown
+        inet6 fe80::221:6aff:fe6d:b94a prefixlen 64
+        inet 192.168.1.104 subnet 192.168.1.0/24 broadcast 192.168.1.255
+        physical index 3
+        ether 0:21:6a:6d:b9:4a
+</code>
+
+In this case, the router has 1 Ethernet and wifi interfaces, each of which has a single vif. The naming format is //interface/vif//. In older releases, XORP tried to support multiple VIFS per interface.  This did not work in practice, so the vif name should always be the same as the interface name.
+
+To display information about a specific interface, use the ''show interfaces'' <//interface//> command:
+
+<code bash>
+root@pierre-T500> show interfaces wlan0
+wlan0/wlan0: Flags:<ENABLED,BROADCAST,MULTICAST> mtu 1500 speed unknown
+        inet6 fe80::221:6aff:fe6d:b94a prefixlen 64
+        inet 192.168.1.104 subnet 192.168.1.0/24 broadcast 192.168.1.255
+        physical index 3
+        ether 0:21:6a:6d:b9:4a
+</code>
+
+
+
+
+

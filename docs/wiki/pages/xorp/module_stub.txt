@@ -1,0 +1,70 @@
+====== The Dirty Stub Code, or the ready to use implementation ======
+
+The page [[xorp:writing_a_process|Writing a XORP process]] tells you how to write a module from your own, the current page just give you a basic module implementation, if you are lazy, you can just use our Hello World code and adapt it to your needs: {{:xorp:xorp_stub.tar.gz|xorp_stub.tar.gz}}.
+
+<note important>Review carefully the code since there could be small mistakes. If you have problems, compare with one of the default processes</note>
+
+The idea of this page is to provide you a XORP module stub to help you make your first XORP running code in less than one day. We strongly recommend you to read all the XORP documentation however...
+
+The Hello World example is composed of two modules, both implementing a classical Hello World program.
+
+The IDIPS module implements the ''hello_world'' XRL that takes no parameter and returns nothing. It only prints "Hello world" in the terminal of the idips process.
+
+The IDIPS2 module implements the ''hello_world?enable:bool'' XRL that takes one parameter and returns nothing. The particularity of this XRL is that it will call another XRL, the ''hello_world XRL'' from the IDIPS module. Its purpose is to show how to make your modules communicating. If the parameter enable is true, the IDIPS XRL is called, otherwise, nothing happens. The "Hello world" message is printed in the terminal of the idips process, not the idips2 module as idips is called via idips2, it thus shows you exactly where the operations are performed.
+
+To install the two modules, it is simple, extract the directories and files into the XORP source tree. <note important>Take care not to destroy the SConscript's if you have already modified them</note>
+
+To compile: <code>scons</code>
+To install: <code>sudo scons install</code>
+
+You should then have ''/usr/local/xorp'' tree added to you file system.
+
+To start XORP, 
+<code>
+sudo /usr/local/xorp/sbin/xorp_rtrmgr
+sudo /usr/local/xorp/lib/xorp/sbin/xorp_idips
+sudo /usr/local/xorp/lib/xorp/sbin/xorp_idips2
+</code>
+
+Do not forget to start IDIPS and IDIPS2
+
+To test, just execute the ''idips.sh'' script in ''utils'' directory (''sudo sh idips.sh''). This script sends the XRL using the command line tool (you have to compile it first: ''scons libxipc'')
+
+====== Ok, this is cool but what to do now? ======
+
+We will consider only the IDIPS2 module as it is a bit more complicated than IDIPS.
+
+To write your own XRL, modify ''xrl/interfaces/idips2.xif'', then ''idips2/xrl_idips2_node.hh'' and ''idips2/xrl_idips2_node.cc'', 
+
+You only need to look at the code embraces by a line of comments (with DSA written at the beginning of the interesting parts), the rest can be ignored at the beginning.
+
+In ''idips2/xrl_idips2_node.hh'', you only need to define the prototype of the XRLs, the callback functions and the client/target for the external XRLs you want to used.
+
+In ''idips2/xrl_idips2_node.hh'', you implement the XRL and the callback functions. <note important>Do not forget to initialize the clients and targets for external XRLs.</note>
+
+Before compiling, do not forget to add the libraries to use for the external XRLs in the SConscript. Also, do not forget to modify also the 
+SConscript file in the 'targets' directory and in the 'interfaces' directories.
+
+To start, XORP needs a configuration file, here is a configuration that attaches only the loopback to the router, adapat it for your needs
+
+<code>
+interfaces {
+	restore-original-config-on-shutdown: false
+	interface lo {
+		description: "loopback interface"
+		disable: false
+		vif lo {
+			disable: false
+			address 127.0.0.1 {
+				prefix-length: 8
+				broadcast: 127.255.255.255
+				disable: false
+			}
+		}
+	}
+}
+</code>
+
+Enjoy your new toy ;-)
+
+

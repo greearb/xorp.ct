@@ -1,0 +1,86 @@
+====== VRRP ======
+===== VRRP Terminology and Concepts =====
+
+XORP supports Virtual Router Redundancy Protocol (VRRP) version 2 as described in RFC 3768. VRRP
+increases the robustness of networks where a default gateway is defined. Rather than having a single point
+of failure (the default gateway), VRRP allows multiple routers to act as the default gateway. Routers par-
+ticipating in VRRP will elect one master that will act as the default gateway, and the other routers will act
+as a backup. When the master fails, a backup router is elected as the new master. When the original master
+returns to life, it will obtain its role as master again.
+
+To detect the failure of a master, backup routers listen to advertisements that are sent out by the master at a
+periodic interval. To elect a new master, each router is assigned a priority which will indicate the router’s
+preference in becoming a master. A preemption mode is available that will force a backup router to become
+master if another backup router with lower priority is currently acting as a master. Note that the router that
+owns the IP addresses of the VRRP group will always preempt a backup router, regardless of the preemption
+setting.
+
+==== Configuration of VRRP ====
+
+The configuration syntax for XORP VRRP is given below.
+<code>
+ protocols {
+   vrrp {
+     interface: text {
+        vif: text {
+           vrid: int(0..255) {
+             priority: int(1..254)
+             interval: int(1..255)
+             preempt: bool
+             ip IPv4 {
+               prefix-length: int(1..32)
+             }
+             disable: bool
+           }
+        }
+     }
+   }
+ }
+</code>
+
+The parameters are used as follows:
+
+^ Keyword ^ Definition ^
+^ interface, vif | The interface on which to run a VRRP instance. |
+^ vrid | The ID of the VRRP instance. Must be unique per interface. |
+^ priority | The priority of the router. The higher the priority, the more likely this router will become a master when acting as a backup. Priority 255 is reserved for the router that owns the IP addresses of the VRRP group. Priority 0 is reserved as it is used to indicate when a master leaves a VRRP group. The default priority is 100. |
+^ interval | The interval in seconds between VRRP advertisements. The default is 1 second. |
+^ preempt | Whether preemption is used. If preempt is true, when a backup router has higher priority than the current master, it will preempt the master in order to become the new master. Preemption is false by default. Note that a router that owns the IP addresses will preempt a backup router regardless of the setting of this flag. |
+^ ip | The IP addresses associated with this VRRP group. These are the IP addresses that client machines will use as their default gateway. |
+^ prefix-length | The prefix for the IP address associated with this VRRP group. Introduced in release 1.8 |
+^ disable | A flag that can be used to disable or enable this VRRP instance. |
+
+==== Monitoring VRRP ====
+
+One can inspect VRRP’s state with the following command:
+<code>
+ user@hostname> show vrrp
+   Interface               dummy0
+   Vif                     dummy0
+   VRID                    1
+   State                   master
+   Master IP               9.9.9.9
+   Interface               tap3
+   Vif                     tap3
+   VRID                    1
+   State                   initialize
+   Master IP               0.0.0.0
+</code>
+
+The command will show all configured VRRP instances, printing their physical interface, logical interface
+(Vif), the VRID the state and the master’s IP address. The state can be one of three values: initialize,
+master or backup. The initialize state means that VRRP is not running. Reasons for this include the VRRP
+instance being disabled with the disable configuration option, the physical interface being disabled, or
+no IP addresses configured on the interface in which VRRP is supposed to run. When in the initialize state,
+the master’s IP address is undefined. In the backup state, it represents the address of the master according to
+the last advertisement received. In the master state it is the router’s own IP address.
+
+Rather than viewing all configured VRRP instances, one can display the instances configured on a particular
+instance by supplying a physical and logical interface name, or view a particular instance by additionally
+supplying the VRID.
+
+==== Limitations ====
+
+The current implementation has the following known limitations:
+   * Not RFC compliant when a backup router owns only some of the IP addresses. When acting as a backup router, the router must not accept any traffic directed to the IP addresses configured in VRRP. XORP’s implementation though will accept data arriving to any of the router’s configured IP addresses. If any of these are IP addresses configured in VRRP, their traffic will be accepted rather than dropped. Note that if the router owns all IP addresses it will never act as a backup router (by definition). Hence this case occurs only when a backup router owns only some of the IP addresses configured in VRRP.
+   * Only one VRRP instance per interface. Acting as a VRRP router requires listening to a special virtual router MAC address. One of these is defined for each VRID. Running multiple VRRP instances on a single interface implies multiple VRIDs and hence the ability to listen on multiple unicast MAC addresses. We do not support this since only one unicast MAC address can be assigned to a physical network card. An alternative would be to use MAC-VLAN interfaces on Linux.

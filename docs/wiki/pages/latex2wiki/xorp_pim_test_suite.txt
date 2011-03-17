@@ -1,0 +1,1 @@
+[[http://www.xorp.org/releases/1.8-CT/docs/pim_testsuite/pim_testsuite.pdf | XORP PIM-SM Test Suite]]

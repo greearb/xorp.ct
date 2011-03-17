@@ -1,0 +1,450 @@
+====== OSPFv2 and OSPFv3 ======
+===== OSPF Terminology and Concepts =====
+
+OSPF is the Open Shortest Path First protocol, it is one of two principle Interior Gateway Protocols (IGP)
+the other being IS-IS. RIP is also an IGP however OSPF and IS-IS have better scaling properties.
+
+The initial OSPF specification is RFC 2328 OSPF Version 2 or OSPFv2. This specification is specific to
+IPv4. There is a later specification draft-ietf-ospf-ospfv3-update-23.txt OSPF for IPv6, which happens to be
+Version 3 or OSPFv3.
+
+The specifications for OSPFv2 and OSPFv3 are fairly similar the obvious difference is the handing of IPv4
+and IPv6 addresses.
+
+The XORP implementation of OSPF supports both OSPFv2 and OSPFv3.
+
+For consistency with our other protocols OSPFv2 is ospf4 and OPSFv3 is ospf6 in the configuration
+files, the 4 in ospf4 refers to the IPv4 address family and 6 in ospf6 refers to the IPv6 address family.
+
+==== Key OSPF Concepts ====
+
+As an Interior Gateway Protocol OSPF runs within a single Autonomous System. One way that OSPF
+achieves good scaling properties is to allow an AS to be split into distinct regions that OSPF calls areas. The
+areas are structured in a two level hierarchy, area 0.0.0.0 is special and is called the BACKBONE area.
+All other areas must be connected to that BACKBONE either directly or through virtual links.
+
+A fundamental quantity in OSPF that describes topology and routing information is the Link State Advertisement (LSA). Every OSPF router within an area should have exactly the same LSAs in its database. There
+are different type of LSAs the base specification describes Router-LSAs, Network-LSAs, Summary-LSAs
+and AS-external-LSAs.
+
+The OSPF protocol has explicit support for introducing routes from other protocols, these routes are introduced via AS-external-LSAs. For example, routes from a RIP cloud can be introduced into OSPF and will
+appear as AS-external-LSAs.
+
+Areas in OSPF can be one of three different types normal, stub and Not-So-Stubby. The BACKBONE
+is always normal. All LSAs in OSPF are flooded only within an area, the exception is the AS-external-LSA
+that can be flooded between all normal areas.
+
+OSPF routers are categorised into four overlapping categories, an internal router whose interfaces are all in
+one area, an area border router (ABR) that has interfaces in more than one area, a backbone router that has
+an interface to the BACKBONE and an AS boundary router that introduces routes from other protocols.
+
+An AS boundary router can be configured in normal and Not-So-Stubby areas. In a normal area
+the AS boundary router generates an AS-external-LSA that is flooded to all other normal areas. In a
+Not-So-Stubby an AS boundary router generates a Type-7 LSA that may be translated at a area border
+router to an AS-external-LSA, which will be flooded to all normal areas. An AS-external-LSA is never
+flooded into a stub or Not-So-Stubby area. The different types of areas exist to limit the number of
+LSAs in a particular area, for example a stub area may have a small number of internal routes and default
+routes to the ABRs.
+
+===== Standards =====
+
+XORP OSPF complies with the following standards:
+   * RFC 2328: OSPF Version 2
+   * draft-ietf-ospf-ospfv3-update-23.txt OSPF for IPv6
+   * RFC 3101: The OSPF Not-So-Stubby Area (NSSA) Option
+
+===== Configuring OSPF =====
+==== Configuration Syntax ====
+
+The configuration syntax for XORP OSPFv2 is given below.
+<code>
+protocols {
+   ospf4 {
+      targetname: text
+      router-id: IPv4
+      rfc1583-compatibility: bool;
+      ip-router-alert: bool
+      traceoptions {
+        flag {
+           all {
+              disable: bool
+           }
+        }
+      }
+      area IPv4 {
+        area-type: text
+        default-lsa {
+           disable: bool
+           metric: uint(0..0xffffff)
+        }
+        summaries {
+           disable: bool
+        }
+        area-range IPv4Net {
+           advertise: bool
+        }
+        virtual-link IPv4 {
+           transit-area: ipv4
+           hello-interval: uint(1..65535)
+           router-dead-interval: uint(1..65535)
+           retransmit-interval: uint(1..65535)
+           transit-delay: uint(0..3600)
+           authentication {
+              simple-password: text
+              md5 uint(0..255) {
+                 password: text
+                 start-time: text(“YYYY-MM-DD.HH:MM”)
+                 end-time: text(“YYYY-MM-DD.HH:MM”)
+                 max-time-drift: uint(0..65535)
+              }
+           }
+        }
+
+      interface text {
+        link-type: text
+        vif text {
+          address IPv4 {
+            priority: uint(0..255)
+            hello-interval: uint(1..65535)
+            router-dead-interval: uint(1..4294967295)
+            interface-cost: uint(1..65535)
+            retransmit-interval: uint(1..65535)
+            transit-delay: uint(0..3600)
+            authentication {
+               simple-password: text
+               md5 uint(0..255) {
+                  password: text
+                  start-time: text(“YYYY-MM-DD.HH:MM”)
+                  end-time: text(“YYYY-MM-DD.HH:MM”)
+                  max-time-drift: uint(0..65535)
+               }
+            }
+            passive {
+               disable: bool
+               host: bool
+            }
+            neighbor IPv4{
+               router-id: IPv4
+            }
+            disable: bool
+          }
+        }
+      }
+    }
+    import: text
+    export: text
+  }
+}
+</code>
+
+The configuration syntax for XORP OSPFv3 is given below.
+<code>
+protocols {
+  ospf6 {
+    targetname: text
+    router-id: IPv4
+    ip-router-alert: bool
+    traceoptions {
+      flag {
+        all {
+          disable: bool
+        }
+      }
+    }
+    area IPv4 {
+      area-type: text
+      default-lsa {
+        disable: bool
+        metric: uint(0..0xffffff)
+      }
+      summaries {
+        disable: bool
+      }
+      area-range IPv6Net {
+        advertise: bool
+      }
+      virtual-link IPv4 {
+        transit-area: ipv4
+        hello-interval: uint(1..65535)
+        router-dead-interval: uint(1..65535)
+        retransmit-interval: uint(1..65535)
+        transit-delay: uint(0..3600)
+      }
+      interface text {
+        link-type: text
+        vif text {
+          address IPv6 {
+             disable: bool
+          }
+          priority: uint(0..255)
+          hello-interval: uint(1..65535)
+          router-dead-interval: uint(1..4294967295)
+          interface-cost: uint(1..65535)
+          retransmit-interval: uint(1..65535)
+          transit-delay: uint(0..3600)
+          passive: text
+          neighbor IPv4{
+             router-id: IPv4
+          }
+          disable: bool
+          }
+        }
+      }
+    }
+    import: text
+    export: text
+  }
+}
+</code>
+
+The OSPFv2 and OSPFv3 configurations are practically equivalent with the following exceptions:
+   * OSPFv3 does not support authentication in the protocol itself.
+   * OSPFv2 supports a single address per interface/vif, therefore all parameters are set below the address node.
+   * OSPFv2 before release 1.5 the passive keyword was a bool, it is now a directive, previously this would set the interface into lookback and advertise a host route. Since release 1.5 the default behaviour is to advertise the network not the host route.
+   * OSPFv2 supports a configuration option rfc1583-compatibility, which changes the preference rules when choosing among multiple AS-external-LSAs advertising the same destination.
+   * OSPFv3 supports multiple addresses per interface/vif, therefore parameters are set below the vif node.
+   * OSPFv3 does not require any addresses to be configured in which case it will advertise all global addresses configured on the interface/vif. If any addresses are configured in OSPFv3 then only those addresses will be advertised. If it is required that no addresses should be advertised then configuring an address and disabling it, will stop any global addresses being advertised.
+   * OSPFv3 in release 1.4 required that a link local address is configured on any interface/vif on which it is configured to run.
+
+The configuration parameters are used as follows:
+
+^ Keyword ^ Description ^
+^ protocols | This delimits the configuration for all routing protocols in the XORP router configuration.  It is mandatory that OSPF configuration is under the protocols node in the configuration. |
+^ ospf4 | This delimits the OSPFv2 configuration part of the XORP router configuration. |
+^ ospf6 | This delimits the OSPFv3 configuration part of the XORP router configuration. |
+^ targetname | This is the name for this instance of OSPF. It defaults to “ospfv2”, and it is not recommended that this default is overridden under normal usage scenarios. |
+^ router-id | This is a unique four octet ID within the Autonomous System. The numerically smallest IP address of an interface belonging to the router is a good choice. The required format of the router-id is a dotted-decimal IPv4 address. |
+^ ip-router-alert | This takes the value true or false. The default state is false, if set to true the IP router alert option will be placed in all transmitted packets. |
+^ traceoptions | This directive if present will enable all tracing.
+^ area | This delimits an area in which multiple virtual links and interfaces can be configured. The area directive take an area identifier parameter, which by convention is specified as a dotted-decimal IPv4 address. <code>
+        area-type: This is the type of the area, normal, stub or nssa.
+        default-lsa: This directive if present is affective for stub or nssa areas only. If the router is
+             an Area Border Router, then a default-lsa will be introduced into this area.
+    metric: This is the metric in the default-lsa.
+    disable: This takes the value true or false. The default setting is false it can be set to
+        true to disable the sending of the default-lsa. </code> |
+^ summaries | This directive if present is affective for stub or nssa areas only. If the router is an Area Border Router, then this option controls the introduction of Summary-LSAs into the area. <code>
+    disable: This takes the value true or false. The default setting is false it can be set to
+        true to disable the sending of Summary-LSAs. </code> |
+^ area-range | If the router is an Area Border Router the IPv4 network defines how to summarize this area into other areas. <code>
+    advertise: This takes the value true or false. The default setting is true it can be set to
+        false to disable the sending of Summary-LSAs. </code> |
+^ virtual-link | This is the router-id of the router with which a virtual link should be formed. <code>
+   Virtual links can only be configured in the BACKBONE area. The format of the parameter is a
+   dotted-decimal IPv4 address.
+    transit-area: This is the transit area through which the virtual link is formed.
+    hello-interval: This is the time in seconds between sending hello packets.
+    router-dead-interval: This is the time in seconds to wait before considering a neighbor
+        dead. If no hello packets are seen from the neighbor in this time then it is considered
+        dead.
+    retransmit-interval: This is the time in seconds between retransmitting various
+        packets, such as link state update packets or link state request packets.
+    authentication: This directive specifies the authentication mechanism used to authorise
+        OSPF updates sent and received via this vif/address.
+        The authentication is configured by using one of the following mutually-exclusive
+        statements:
+          simple-password: this specifies the password used for plaintext authentication on
+             this vif/address.
+          md5: this specifies an MD5 authentication key. The parameter is the key ID and must be
+             in the interval [0, 255]. The MD5 authentication is configured by using the following
+             statements:
+              password: this specifies the MD5 password for the specific key.
+              start-time: this specifies the start time when the key becomes active. The format
+                is “YYYY-MM-DD.HH:MM”. If it is empty, then the key should become active
+                immediately.
+              end-time: this specifies the end time when the key becomes inactive. The format is
+                “YYYY-MM-DD.HH:MM”. If it is empty, then the key should never expire.
+              max-time-drift: this specifies the maximum time drift (in seconds) among all
+                OSPF routers. The allowed values are in the interval [0, 65535]. If the value is
+                65535, the time drift is unlimited. The purpose of this statement is to decide when to
+                start accepting the MD5 keys in case other routers’s clocks are not synchronized and
+                have started to generate messages with a particular key:
+                  KeyStartAccept = KeyStartGenerate - MaxTimeDrift
+                  KeyStopAccept = KeyStopGenerate + MaxTimeDrift
+            If there are multiple configured keys, among the keys that are valid for message generation
+            the one with the most recent start-time (and the largest key ID as a tie breaker)
+            would be used to generate the messages. </code> |
+^ interface | This specifies a network interface that should be used by OSPF for routing.  The interface must be configured in the interfaces part of the router configuration. <code>
+    link-type: This specifies the type of the link, broadcast, p2p (Point-to-Point) or p2m
+        (Point-to-Multipoint).
+         vif: This specifies a vif that should be used by OSPF for routing. See Chapter 3 for
+            details of vifs.
+              address: This specifies an IPv4 address that should be used by OSPF for routing.
+               OSPF will peer with other routers on this interface/vif using this address. The
+               address must be a valid configured address for this vif.
+               The parameters that can be specified for each address are:
+                 priority: This is the priority used to select the Designated Router on a broadcast
+                  or nbma link-type. The priorities range from 0 to 255. If a value of 0 is chosen
+                  this router will not be a candidate to become the Designated Router
+                 hello-interval: This is the time in seconds between sending hello packets.
+                 router-dead-interval: This is the time in seconds to wait before considering
+                  a neighbor dead. If no hello packets are seen from the neighbor in this time
+                  then it is considered dead.
+                 interface-cost: The cost for this address that is placed in the Router-LSA.
+                 retransmit-interval: This is the time in seconds between retransmitting
+                  various packets, such as link state update packets or link state request packets.
+                 transit-delay: The time to transmit an LSA on this address, this value is
+                  added to the age field of all LSAs.
+                 authentication: This directive specifies the authentication mechanism used
+                  to authorise OSPF updates sent and received via this vif/address.
+                  The authentication is configured by using same configuration statements as those
+                  in case of virtual links (see the virtual-link configuration statement above).
+                 passive: This directive if present enables loopback mode (appeared in release
+                  1.5). Can be explicitly disabled by setting disable to true. The default is to
+                  send a network not a host route, setting host to true will send a host route to
+                  reproduce the pre 1.5 release behaviour.
+                 neighbor: This allows neighbors to be configured for link-types of p2p or
+                  p2m. The parameter is the IPv4 address of the neighbor. The router-id of the
+                  neighbor must also be configured.
+                 disable: This takes the value true or false. The default setting is false
+                  it can be set to true to disable OSPF on this address without removing all the
+                  configuration. </code> |
+
+
+==== Example Configurations ====
+
+<code>
+ protocols {
+   ospf4 {
+     router-id: 10.10.10.10
+     area 0.0.0.0 {
+       interface dc0 {
+          vif dc0 {
+             address 10.10.10.10 {
+             }
+          }
+       }
+     }
+   }
+ }
+</code>
+
+This configuration is an example of the minimal possible configuration. OSPFv2 is running in the BACKBONE
+area, on a single interface/vif the router-id is set to the interface/vif address.
+<code>
+ protocols {
+   ospf6 {
+     router-id: 10.10.10.10
+     area 0.0.0.0 {
+       interface dc0 {
+          vif dc0 {
+          }
+       }
+     }
+   }
+ }
+</code>
+
+This configuration is an example of the minimal possible configuration. OSPFv3 is running in the BACKBONE
+area, on a single interface/vif the router-id is set to an an IPv4 address owned by the router.
+
+===== Clearing OSPF database =====
+
+It may be necessary to drop all adjacencies and clear the OSPF database. After the clear command is run the
+OSPF database will only contain the LSAs of the router itself and all adjacencies will have been removed.
+<code>
+ user@hostname> clear ospf4 database
+ Or:
+ user@hostname> clear ospf6 database
+</code>
+===== Monitoring OSPF =====
+
+On a router running OSPF, the OSPF routing state can be displayed using the show ospf4 or show ospf6
+operational-mode command. Examples are given below of ospf4 commands equivalent ospf6 commands are
+available. Information is available about the per area LSA databases and the status of OSPF adjacencies.
+As always, command completion using <TAB> or ? will display the available sub-commands and parameters:
+<code>
+ user@hostname> show ospf4 ?
+ Possible completions:
+   database                Show LSA database
+   neighbor                Show Neighbors
+   |                       Pipe through a command
+</code>
+
+The show ospf4 database command will display information about the LSAs in the database. Many
+optional parameters are available to narrow the search to specific LSA type or to an area. The optional
+parameter detail will print more information about a LSA. The optional parameter summary prints a
+count of the LSAs.
+<code>
+ user@hostname> show ospf4 database ?
+ Possible completions:
+   <[Enter]>               Execute this command
+   area                    Show LSA database
+   asbrsummary             Show Summary-LSA (AS boundary router) database
+   brief                   Display brief output (default)
+   detail                  Display detailed output
+   external                Show External-LSA database
+   netsummary              Show Summary-LSA (network) database
+   network                 Show Network-LSA database
+   nssa                    Show NSSA-LSA database
+   router                  Show Router-LSA database
+   summary                 Display summary output
+   |                       Pipe through a command
+</code>
+
+The show ospf4 database command with no modifiers will show all LSA types in all areas:
+<code>
+user@hostname> show ospf4 database
+OSPF link state database, Area 0.0.0.0
+Type        ID               Adv Rtr          Seq     Age  Opt   Cksum   Len
+Router *192.150.187.112 192.150.187.112    0x8000018f 1444 0x2   0x9d24  36
+Network 192.150.187.99 192.150.187.99      0x80000054 167  0x22  0x7c63  40
+SummaryN*172.16.0.0       192.150.187.112  0x80000188 1453 0x2   0x9df5  28
+SummaryN*172.16.1.0       192.150.187.112  0x80000188 1453 0x2   0x92ff  28
+SummaryN*172.16.2.0       192.150.187.112  0x80000188 1453 0x2   0x870a  28
+Router   192.150.187.99 192.150.187.99     0x80000e76 167  0x22  0xddf7  36
+Router   192.150.187.5    192.150.187.5    0x800004a6 983  0x2   0x40a8  36
+Router   192.150.187.108 192.150.187.108   0x80000301 598  0x2   0xb9a1  36
+ASExt-2 172.16.0.0        192.150.187.5    0x800003a9 990  0x2   0x77c1  36
+OSPF link state database, Area 0.0.0.13
+Type        ID               Adv Rtr          Seq     Age  Opt   Cksum   Len
+                                                                         36
+Router *192.150.187.112 192.150.187.112    0x80000001 1454 0x2   0x8a03
+SummaryN*192.150.187.0    192.150.187.112  0x80000001 1443 0x2   0x4ef6  28
+SummaryN*172.16.1.0       192.150.187.112  0x80000001 1453 0x2   0xa476  28
+SummaryN*172.16.2.0       192.150.187.112  0x80000001 1453 0x2   0x9980  28
+SummaryR*192.150.187.5    192.150.187.112  0x80000001 1443 0x2   0xbb4   28
+ASExt-2 172.16.0.0        192.150.187.5    0x800003a9 990  0x2   0x77c1  36
+OSPF link state database, Area 0.0.0.2
+Type        ID               Adv Rtr          Seq     Age  Opt   Cksum   Len
+Router *192.150.187.112 192.150.187.112    0x80000001 1454 0x2   0x93f8  36
+SummaryN*192.150.187.0    192.150.187.112  0x80000001 1443 0x2   0x4ef6  28
+SummaryN*172.16.0.0       192.150.187.112  0x80000001 1453 0x2   0xaf6c  28
+SummaryN*172.16.2.0       192.150.187.112  0x80000001 1453 0x2   0x9980  28
+SummaryR*192.150.187.5    192.150.187.112  0x80000001 1443 0x2   0xbb4   28
+ASExt-2 172.16.0.0        192.150.187.5    0x800003a9 990  0x2   0x77c1  36
+OSPF link state database, Area 0.0.0.3
+Type        ID               Adv Rtr          Seq     Age  Opt   Cksum   Len
+Router *192.150.187.112 192.150.187.112    0x80000001 1454 0x2   0x9cee  36
+SummaryN*192.150.187.0    192.150.187.112  0x80000001 1443 0x2   0x4ef6  28
+SummaryN*172.16.0.0       192.150.187.112  0x80000001 1453 0x2   0xaf6c  28
+SummaryN*172.16.1.0       192.150.187.112  0x80000001 1453 0x2   0xa476  28
+SummaryR*192.150.187.5    192.150.187.112  0x80000001 1443 0x2   0xbb4   28
+ASExt-2 172.16.0.0        192.150.187.5    0x800003a9 990  0x2   0x77c1  36
+The show ospf4 neighbor command will show state of adjacencies:
+user@hostname> show ospf4 neighbor
+Address         Interface            State     ID               Pri Dead
+192.150.187.5   fxp0/fxp0            Full      192.150.187.5    150 34
+192.150.187.99 fxp0/fxp0             Full      192.150.187.99   128 34
+192.150.187.108 fxp0/fxp0            TwoWay    192.150.187.108  128 34
+192.150.187.78 fxp0/fxp0             Down      0.0.0.78         0   0
+</code>
+
+The show ospf4 neighbor detail command will show state of adjacencies with extra detail such as
+the Designated Router and the time the adjacency has been up:
+<code>
+ user@hostname> show ospf4 neighbor detail
+ Address         Interface             State     ID              Pri
+ 192.150.187.5   fxp0/fxp0             Full      192.150.187.5   150
+ Area 0.0.0.0,     opt 0x2, DR 192.150.187.99, BDR 192.150.187.5
+ Up 54:09:26,      adjacent 54:09:16
+ 192.150.187.99 fxp0/fxp0              Full      192.150.187.99 128
+ Area 0.0.0.0,     opt 0x2, DR 192.150.187.99, BDR 192.150.187.5
+ Up 54:09:26,      adjacent 54:09:16
+ 192.150.187.108 fxp0/fxp0             TwoWay    192.150.187.108 128
+ Area 0.0.0.0,     opt 0x2, DR 192.150.187.99, BDR 192.150.187.5
+ Up 54:09:26
+ 192.150.187.78 fxp0/fxp0              Down      0.0.0.78        0
+ Area 0.0.0.0,     opt 0,    DR 0.0.0.0,          BDR 0.0.0.0
+ Up 14:47:32
+</code>

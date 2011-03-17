@@ -1,0 +1,18 @@
+a:2:{s:7:"current";a:8:{s:4:"date";a:2:{s:7:"created";i:1268913264;s:8:"modified";i:1268929833;}s:7:"creator";s:16:"Bruno Willemaers";s:11:"last_change";b:0;s:11:"contributor";a:1:{s:4:"will";s:16:"Bruno Willemaers";}s:5:"title";s:13:"Documentation";s:11:"description";a:2:{s:15:"tableofcontents";a:3:{i:0;a:4:{s:3:"hid";s:13:"documentation";s:5:"title";s:13:"Documentation";s:4:"type";s:2:"ul";s:5:"level";i:1;}i:1;a:4:{s:3:"hid";s:21:"commonly_used_classes";s:5:"title";s:21:"Commonly used classes";s:4:"type";s:2:"ul";s:5:"level";i:1;}i:2;a:4:{s:3:"hid";s:11:"servicebase";s:5:"title";s:11:"ServiceBase";s:4:"type";s:2:"ul";s:5:"level";i:2;}}s:8:"abstract";s:255:"As already offered, we suggest that you first read the XORP Libxorp Library Overview.
+
+/xorp/libxorp/tests
+
+	*  ServiceBase
+
+
+
+
+----------
+
+ServiceBase
+
+
+
+
+
+Such a service can typically be in following states: TO DO: make a state diagram from these status";}s:8:"relation";a:2:{s:10:"references";a:2:{s:32:"latex2wiki:xorp_libxorp_overview";b:1;s:19:"xorp:common_classes";b:1;}s:10:"firstimage";s:0:"";}s:8:"internal";a:2:{s:5:"cache";b:1;s:3:"toc";b:1;}}s:10:"persistent";a:4:{s:4:"date";a:2:{s:7:"created";i:1268913264;s:8:"modified";i:1268929833;}s:7:"creator";s:16:"Bruno Willemaers";s:11:"last_change";b:0;s:11:"contributor";a:1:{s:4:"will";s:16:"Bruno Willemaers";}}}

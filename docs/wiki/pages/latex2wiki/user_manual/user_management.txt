@@ -1,0 +1,9 @@
+**User Management**
+
+Currently, XORP does not support user management. If XORP is running on a multi-access UNIX system,
+a user who needs an access to XORP must have an UNIX account on that system.
+
+Any user on a multi-access UNIX system can start and use xorpsh in operational mode. However, only users
+that belong to the “xorp” UNIX group can run xorpsh in configuration mode.
+
+Suggestions for improvement to user management are welcome.

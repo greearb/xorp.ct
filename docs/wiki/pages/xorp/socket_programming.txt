@@ -1,0 +1,475 @@
+======Socket Programming======
+
+=====XRL Interfaces=====
+Socket programming with XORP involves 10 XRL interfaces:
+  * **''fea_rawlink.xif'' and ''fea_rawlink_client.xif'':** Lowest level for sending and receiving packets. Here, //source// and //destination// addresses are MAC addresses.
+  * **''fea_rawpkt4.xif'' and ''fea_rawpkt4_client.xif'':** Interfaces used in "raw" IPv4 communication scheme, //source// and //destination// addresses are IPv4 addresses.
+  * **''fea_rawpkt6.xif'' and ''fea_rawpkt6_client.xif'':** Interfaces used in "raw" IPv6 communication scheme, //source// and //destination// addresses are IPv6 addresses.
+  * **''socket4.xif'' and ''socket4_user.xif'':** Interfaces used for TCP/UDP over IPv4 communication scheme, //source// and //destination// addresses are IPv4 addresses, each one associated with a port number.
+  * **''socket6.xif'' and ''socket6_user.xif'':** Interfaces used for TCP/UDP over IPv6 communication scheme, //source// and //destination// addresses are IPv4 addresses, each one associated with a port number.
+
+''fea_rawlink.xif'', ''fea_rawpkt4/6.xif'' and ''socket4/6.xif'' are all implemented within the Forwarding Engine Abstraction (FEA) module.
+
+Modules which want to use some of the socket must thus implement the appropriate client/user XRL interface. This must be declared in the appropriate target file (a '.tgt'. file within the ''xrl/target'' folder), associated to your module. (See [[XORP:writing_a_process|this page]] for more explanation about XRL Interfaces, auto-generated classes from them, etc.).
+
+=====Example: How to make use of an UDP over IPv4 socket?======
+====Which XRL Interfaces?====
+From the list above, we will use the XRL Interfaces defined in ''socket4.xif'' and ''socket4_user.xif''.
+
+====Socket operations, and sending data====
+Here follows the relevant part of the ''socket4.xif'' about UDP unicast sockets (see the file for complete version, with methods relevant to TCP or multicast too).
+<code c socket4.xif>
+/**
+ * Interface implementing basic IPv4 socket functionality.  This interface
+ * provides methods for creating and binding sockets, sending data on
+ * sockets, and set configuration options on sockets.  It is used together
+ * with socket4_user/0.1:
+ *
+ *    - socket4/0.1	     interface for creating sockets, sending
+ *			     data, setting options, etc.
+ *
+ *    - socket4_user/0.1     interface users of socket4/0.1 should implement
+ *			     to receive data and event notifications.
+ *
+ */
+interface socket4/0.1 {
+
+    /**
+     * Open an UDP socket.
+     *
+     * @param creator the Xrl Target instance name of the socket
+     *        creator.  The named target must implement socket4_user/0.1.
+     *
+     * @param sockid return parameter that contains unique socket ID when
+     *        socket instantiation is successful.
+     */
+    udp_open			? creator:txt				\
+				-> sockid:txt
+
+    /**
+     * Create a bound UDP socket.
+     *
+     * @param creator the Xrl Target instance name of the socket
+     *        creator.  The named target must implement socket4_user/0.1.
+     *
+     * @param local_addr the interface address to bind socket to.
+     *
+     * @param local_port the port to bind socket to.
+     *
+     * @param sockid return parameter that contains unique socket ID when
+     *        socket instantiation is successful.
+     */
+    udp_open_and_bind		? creator:txt				\
+				& local_addr:ipv4			\
+				& local_port:u32			\
+				-> sockid:txt
+
+    /**
+     * Create a bound and connected UDP socket.
+     *
+     * @param creator the Xrl Target instance name of the socket
+     *        creator.  The named target must implement socket4_user/0.1.
+     *
+     * @param local_addr the interface address to bind socket to.
+     *
+     * @param local_port the port to bind socket to.
+     *
+     * @param remote_addr the address to connect to.
+     *
+     * @param remote_port the remote port to connect to.
+     *
+     * @param sockid return parameter that contains unique socket ID when
+     *        socket instantiation is successful.
+     */
+    udp_open_bind_connect	? creator:txt				\
+				& local_addr:ipv4			\
+				& local_port:u32			\
+				& remote_addr:ipv4			\
+				& remote_port:u32			\
+				-> sockid:txt
+
+    /**
+     * Bind a socket.
+     *
+     * @param sockid the socket ID of the socket to bind.
+     *
+     * @param local_addr the interface address to bind socket to.
+     *
+     * @param local_port the port to bind socket to.
+     */
+    bind			? sockid:txt				\
+				& local_addr:ipv4			\
+				& local_port:u32
+
+    /**
+     * Close socket.
+     *
+     * @param sockid unique socket ID of socket to be closed.
+     */
+    close			? sockid:txt
+
+    /**
+     * Enable a UDP socket for datagram reception.
+     *
+     * If a UDP socket has been created without using the usual convenience
+     * XRLs, it is necessary to hook up its FEA internal input path by
+     * calling this XRL. It is similar in intent to tcp_listen, but named
+     * differently as it never uses the listen() socket API.
+     *
+     * @param sockid the unique socket ID of the socket to enable for
+     * datagram reception.
+     */
+    udp_enable_recv		? sockid:txt
+
+    /**
+     * Send data on socket.
+     *
+     * @param sockid unique socket ID.
+     *
+     * @param data block of data to be sent.
+     */
+    send			? sockid:txt				\
+				& data:binary
+
+    /**
+     * Send data on socket to a given destination.  The packet is not
+     * routed as the forwarding engine sending the packet may not have
+     * access to the full routing table.
+     *
+     * @param sockid unique socket ID.
+     *
+     * @param remote_addr destination address for data.
+     *
+     * @param remote_port destination port for data.
+     *
+     * @param data block of data to be sent.
+     */
+    send_to			? sockid:txt				\
+				& remote_addr:ipv4			\
+				& remote_port:u32			\
+				& data:binary
+
+    /**
+     * Set a named socket option with an integer value.
+     *
+     * XXX: The "onesbcast" and "reuseport" options exist to work around
+     * an architectural issue in the BSD IPv4 stack. They SHOULD NOT be
+     * used for new code.
+     *
+     * @param sockid unique socket ID.
+     *
+     * @param optname name of option to be set.  Valid values are:
+     * 		"onesbcast"
+     * 		"receive_broadcast"
+     * 		"reuseport"
+     * 		"send_broadcast"
+     * 		"tos"
+     * 		"ttl"
+     * 		"multicast_loopback"
+     *		"multicast_ttl"
+     *
+     * @param optval integer value of option to be set.
+     *               If value is logically boolean, then zero represents
+     *               'false', and any non-zero value represents 'true'.
+     */
+    set_socket_option		? sockid:txt				\
+				& optname:txt				\
+				& optval:u32
+
+    /**
+     * Set a named socket option with a string value.
+     *
+     * XXX: The "bindtodevice" option exists to workaround an architectural
+     * issue in the Linux IPv4 stack. It SHOULD NOT be used for new code.
+     *
+     * @param sockid unique socket ID.
+     *
+     * @param optname name of option to be set.  Valid values are:
+     * 		"bindtodevice"
+     *
+     * @param optval value of option to be set.
+     */
+    set_socket_option_txt	? sockid:txt				\
+				& optname:txt				\
+				& optval:txt
+}
+</code>
+
+The methods defined in this XRL Interface obviously serve two goals:
+  - socket management,
+  - sending data.
+
+It should be clear that the module which wants to use UDP socket (over IPv4) will be a **client** to this interface. In other words, in the appropriate file of this module, we will:
+  - Include the right header: ''#include "../xrl/interfaces/socket4_xif.hh"''.
+  - Instantiate a client for this XRL interface: ''XrlSocket4V0p1Client client(&_xrl_router);''
+  - Use this client to send requests. A callback method must be passed during the request, this is method which will be called to process the response from the FEA.
+
+Here follows some parts of my code, extracted from my ''PortBase'' class (defined in ''port_base.cc'') and whose goal is to reassemble technical aspects of XORP. So, a ''Port'' class inheriting from ''PortBase'' will not have to deal with the "technical stuff". There are essentially three parts in this portion of code: request UDP socket opening, request UDP socket closure and send data.
+<code cpp port_base.cc>
+#include "xrl/interfaces/socket4_xif.hh"
+
+//
+// Opening operations.
+//
+template <>
+bool PortBase<IPv4>
+::request_udp_open_and_bind()
+{
+    XrlSocket4V0p1Client cl(&_xrl_router);
+    debug_msg("%p: sending udp_open_and_bind\n", this);
+
+    if (_local_port <= 1024 && _local_port != 0) {
+        debug_msg("UDP ports below 1024 are reserved."
+                  " Dynamic port used instead.\n");
+        _local_port = 0;
+    }
+    return cl.send_udp_open_and_bind(_socket_server_name.c_str(), // target: fea
+                                     _xrl_router.instance_name(), // creator: vivaldi4
+                                     _local_address,
+                                     _local_port,
+                                     callback(this,
+                                              &PortBase<IPv4>::udp_open_and_bind_cb));
+}
+
+template <typename A>
+void PortBase<A>
+::udp_open_and_bind_cb(const XrlError & e, const string * psid)
+{
+    if (e != XrlError::OKAY()) {
+        set_status(SERVICE_FAILED, "Failed to open a UDP socket.");
+        return;
+    }
+    _socket_id = *psid;
+
+    set_status(SERVICE_RUNNING);
+    _pending = false;
+}
+
+//
+// Closing operations.
+//
+template <>
+bool PortBase<IPv4>
+::request_close()
+{
+    XrlSocket4V0p1Client cl(&_xrl_router);
+
+    debug_msg("%p: sending close\n", this);
+    bool success = cl.send_close(_socket_server_name.c_str(),
+                                 _socket_id,
+                                 callback(this, &PortBase::close_cb));
+    if (success)
+        _pending = true;
+
+    return success;
+}
+
+template <typename A>
+void
+PortBase<A>
+::close_cb(const XrlError& e)
+{
+    if (e != XrlError::OKAY()) {
+        set_status(SERVICE_FAILED, "Failed to close UDP socket.");
+    }
+
+    _pending = false;
+    debug_msg("%p: socket shutdown complete\n", this);
+    set_status(SERVICE_SHUTDOWN);
+}
+
+
+//
+// Sending operations.
+//
+template <>
+bool PortBase<IPv4>
+::send_to(const IPv4 & dst_address,
+        const uint16_t dst_port,
+        const vector<uint8_t>& payload)
+{
+    if (_pending) {
+        debug_msg("PortOutput %p: send skipped (pending XRL)\n", this);
+        return false;
+    }
+
+    XrlSocket4V0p1Client cl(&_xrl_router);
+
+    bool success = cl.send_send_to(_socket_server_name.c_str(),
+                                   _socket_id,
+                                   dst_address,
+                                   dst_port,
+                                   payload,
+                                   callback(this, &PortBase::send_cb));
+
+    debug_msg("Sent %u bytes to %s:%u from %s:%u\n",
+              XORP_UINT_CAST(payload.size()),
+              cstring(_dst_addr), XORP_UINT_CAST(_dst_port),
+              cstring(_src_addr), XORP_UINT_CAST(_src_port));
+
+    if (success)
+        _pending = true;
+
+    return success;
+}
+
+template <typename A>
+void
+PortBase::send_cb(const XrlError& e)
+{
+    debug_msg("SendCB %s\n", e.str().c_str());
+
+    if (e != XrlError::OKAY()) {
+        XLOG_WARNING("Failed to send datagram.");
+    }
+
+    _pending = false;
+}
+</code>
+
+
+So, now, you can create, manage, close UDP sockets, as well as sending data with them. It is now time to focus on...
+
+
+====Receiving data====
+To be able to receive the relevant datagrams from the previously created socket, the module must implement the XRL interface defined in ''socket4_user.xif''.
+
+Here is the copy of this XRL interface:
+<code c socket4_user.xif>
+/**
+ * Interface that users of socket4/0.1 should implement.
+ *
+ * This interface only contains asynchronous notifications that a socket
+ * user should be interested in, ie data arrived, error occured.
+ */
+interface socket4_user/0.1 {
+    /**
+     * Method invoked by target implementing socket4/0.1 when a packet
+     * arrives from an IPv4 source.
+     *
+     * @param sockid the identifier associated with socket where the event
+     *               occurred.
+     * @param if_name the interface name the packet arrived on, if known.
+     * If unknown, then it is an empty string.
+     * @param vif_name the vif name the packet arrived on, if known.
+     * If unknown, then it is an empty string.
+     * @param src_host the originating host.
+     * @param src_port the originating IP port.
+     * @param data the data received.
+     */
+    recv_event		? sockid:txt					\
+			& if_name: txt					\
+			& vif_name: txt					\
+			& src_host:ipv4					\
+			& src_port:u32					\
+			& data:binary
+
+    /**
+     * Method invoked by target implementing socket4/0.1 when an error occurs.
+     *
+     * @param sockid the identifier associated with socket where the event
+     *               occurred.
+     * @param error a textual description of the error.
+     * @param fatal indication of whether socket is shutdown because of error.
+     */
+    error_event		? sockid:txt					\
+			& error:txt					\
+			& fatal:bool
+}
+</code>
+This interface is quite shorter in regards to the one implemented by the FEA (note that I removed again the methods used only by TCP).
+
+From this interface, a client class is also generated, which will be used by the FEA to send XRLs towards our module. Among these events, the ''recv_event'' is "simply" the forwarding of packet from the FEA to our module.
+
+All we need now is a concrete implementation of this XRL within the module. To do this, a class of the module must simply inherit from the right XRL Target (see [[XORP:writing_a_process|this page]] if you are uneasy with what is a XRL Target).
+
+In the ''xrl/target'' folder, there is a trivial target to use to experiment with the XRL interface defined in ''socket4_user.xif'':
+<code c test_socket4.tgt>
+#include "common.xif"
+#include "socket4_user.xif"
+
+target test_socket4 implements	common/0.1,				\
+				socket4_user/0.1
+</code>
+
+If we keep the interesting parts (non-private, relative to UDP, etc.) of the abstract base class definition generated from this XRL Target, we get:
+<code cpp test_socket4_base.hh>
+/*
+ * Copyright (c) 2001-2009 XORP, Inc.
+ * See the XORP LICENSE.lgpl file for licensing, conditions, and warranties
+ * on use.
+ *
+ * DO NOT EDIT THIS FILE - IT IS PROGRAMMATICALLY GENERATED
+ *
+ * Generated by 'tgt-gen'.
+ */
+
+
+#ifndef __XRL_TARGETS_TEST_SOCKET4_BASE_HH__
+#define __XRL_TARGETS_TEST_SOCKET4_BASE_HH__
+
+#undef XORP_LIBRARY_NAME
+#define XORP_LIBRARY_NAME "XrlTestSocket4Target"
+
+#include "libxorp/xlog.h"
+#include "libxipc/xrl_cmd_map.hh"
+
+class XrlTestSocket4TargetBase {
+    /*
+    Here are mainly defined:
+    - constructor and destructor,
+    - methods from the common XRL interface.
+    */
+
+    /**
+     *  Pure-virtual function that needs to be implemented to:
+     *
+     *  Method invoked by target implementing socket4/0.1 when a packet arrives
+     *  from an IPv4 source.
+     *
+     *  @param sockid the identifier associated with socket where the event
+     *  occurred.
+     *
+     *  @param if_name the interface name the packet arrived on, if known. If
+     *  unknown, then it is an empty string.
+     *
+     *  @param vif_name the vif name the packet arrived on, if known. If
+     *  unknown, then it is an empty string.
+     *
+     *  @param src_host the originating host.
+     *
+     *  @param src_port the originating IP port.
+     *
+     *  @param data the data received.
+     */
+    virtual XrlCmdError socket4_user_0_1_recv_event(
+	// Input values,
+	const string&	sockid,
+	const string&	if_name,
+	const string&	vif_name,
+	const IPv4&	src_host,
+	const uint32_t&	src_port,
+	const vector<uint8_t>&	data) = 0;
+
+    /**
+     *  Pure-virtual function that needs to be implemented to:
+     *
+     *  Method invoked by target implementing socket4/0.1 when an error occurs.
+     *
+     *  @param sockid the identifier associated with socket where the event
+     *  occurred.
+     *
+     *  @param error a textual description of the error.
+     *
+     *  @param fatal indication of whether socket is shutdown because of error.
+     */
+    virtual XrlCmdError socket4_user_0_1_error_event(
+	// Input values,
+	const string&	sockid,
+	const string&	error,
+	const bool&	fatal) = 0;
+
+#endif // __XRL_TARGETS_TEST_SOCKET4_BASE_HH__
+</code>
+
+So, all we need to do to is to actually implement these inherited methods in a class of the module. The data is simply a vector of bytes, just waiting to be analyzed/read/processed by the module.
