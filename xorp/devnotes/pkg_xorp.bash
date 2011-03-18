@@ -72,6 +72,7 @@ wait
 
 echo "Packaging source."
 rm -fr /tmp/xorp-src-git
+(cd ~/git/xorp.ct.github; git pull || echo "ERROR:  Could not pull xorp.ct!")
 git clone ~/git/xorp.ct.github /tmp/xorp-src-git
 cd /tmp/xorp-src-git
 tar -czf $CDDIR/xorp-$VER-src.tar.gz xorp

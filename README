@@ -51,7 +51,7 @@ paper available from http://www.xorp.org/ :
 2. Status
 =========
 
-This is XORP Release 1.8-CT
+This is XORP Release 1.8.3
 
 Supported platforms:
 
@@ -61,6 +61,7 @@ Supported platforms:
   * OpenBSD
   * Mac OS X ???
   * Linux (x86-32, x86-64, Sparc)
+  * Windows (via mingw cross-compile)
 
 See xorp/BUILD_NOTES for OS-specific details, compilation
 information, etc.
@@ -141,41 +142,14 @@ You may also wish to try this script to create a tar.gz install package:
 
 In general, configuration and startup of the various XORP processes are
 normally meant to happen via the router manager (rtrmgr), so please
-refer first to the XORP configuration guide:
-http://www.xorp.org/getting_started.html
-
-For additional information see the user documentation:
-http://www.xorp.org/releases/current/docs/user_manual/user_manual.pdf
-and docs/user_manual.
+refer first to the XORP online documentation linked from:
+http://www.xorp.org
 
 
 4. Code structure and documentation
 ===================================
 
-The code is split into several directories, each containing libraries,
-components or implementation of the various XORP modules.  Typically,
-documentation for each of them is available in one or more of the
-following places:
-
-  * the README file in each directory
-
-  * a high level architecture overview, available in
-
-	docs/<modulename>/
-
-  * kdoc-generated documentation, created with the script
-
-	docs/kdoc/gen-kdoc.sh
-
-    whose output goes into
-
-	docs/kdoc/html/<modulename>/
-
-    with top-level index file in
-
-	docs/kdoc/html/index.html
-
-The content of each of the directories is the following:
+The content of some important directories is listed below:
 
   * xorp/bgp : BGP implementation.
 
@@ -183,7 +157,9 @@ The content of each of the directories is the following:
     It is used by the Router Manager (rtrmgr), and by some of the
     multicast code (the multicast-specific part of fea, mld6igmp, pim).
 
-  * docs : XORP user documentation.
+  * docs : XORP user documentation.  Note that much of this is
+    now on the wiki linked from www.xorp.org.  The latex based documentation
+    is deprecated.
 
   * xorp/etc : Various XORP-related files (e.g., configuration, templates).
 
@@ -264,17 +240,7 @@ limited interest, or are not relevant to the current release:
   * utils : Various XORP-related utilities.
 
 
-5. Future plans
-===============
-
-  * BGP performance improvements, including XRL IPC batching.
-
-  * Bug Fixes
-
-  * [Your project here]
-
-
-6. Authors
+5. Authors & Contributors
 ==========
 
   * Ben Greear (Current Project Manager)
@@ -295,7 +261,7 @@ The old core team consisted of:
   * Bruce M. Simpson
   * Marko Zec
 
-7. Acknowledgments
+6. Acknowledgments
 ==================
 
   * Sponsors (in chronological order, oldest first):
@@ -346,11 +312,3 @@ The old core team consisted of:
     "help" instead, or use the following URL:
     http://mailman.ICSI.Berkeley.edu/mailman/listinfo/xorp-hackers
 
-  * XORP announcements mailing list:  xorp-announce@xorp.org
-    This list is for XORP release and milestone announcements.
-
-    To subscribe, send email to xorp-announce-request@xorp.org with
-    the word "subscribe" (no quotes!) in the subject or the body
-    of the email. For more subscription options, send the command
-    "help" instead, or use the following URL:
-    http://mailman.ICSI.Berkeley.edu/mailman/listinfo/xorp-announce
