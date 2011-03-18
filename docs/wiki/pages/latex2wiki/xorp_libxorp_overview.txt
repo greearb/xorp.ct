@@ -241,6 +241,9 @@ This file declares class ServiceBase. A service is a class that can be started a
 involve some asynchronous processing to transition between states. The base class provides a state model
 and methods for transitioning between states. Mandatory transition methods, like start and stop, are abstract
 in the base class.
+
+As the source file seems to lack of accurate documentation, here is a state diagram of all the permissible transitions and status:
+[{{:latex2wiki:servicestatus.png|State diagram of ServiceStatus}}]
 ===== status_codes.h =====
 
 This file contains the enumerated ProcessStatus codes that a XORP process should report to the [[latex2wiki:xorp_rtrmgr|XORP router

@@ -1,65 +1,3 @@
-1299700946	94.139.56.133	e	start	geddons	[User Manual] Creating User Manual TOC page	
-1299702451	94.139.56.133	E	latex2wiki:user_manual	geddons	TOC creation	
-1299702605	94.139.56.133	C	latex2wiki:user_manual:command_structure	geddons	created	
-1299702611	94.139.56.133	C	latex2wiki:user_manual:configuration_overview	geddons	created	
-1299702615	94.139.56.133	C	latex2wiki:user_manual:network_interfaces	geddons	created	
-1299702619	94.139.56.133	C	latex2wiki:user_manual:firewall	geddons	created	
-1299702625	94.139.56.133	C	latex2wiki:user_manual:forwarding_engine	geddons	created	
-1299702629	94.139.56.133	C	latex2wiki:user_manual:unicast_routing	geddons	created	
-1299702632	94.139.56.133	C	latex2wiki:user_manual:static_routes	geddons	created	
-1299702636	94.139.56.133	C	latex2wiki:user_manual:rip_and_ripng	geddons	created	
-1299702640	94.139.56.133	C	latex2wiki:user_manual:ospfv2_and_ospfv3	geddons	created	
-1299702643	94.139.56.133	C	latex2wiki:user_manual:bgp	geddons	created	
-1299702647	94.139.56.133	C	latex2wiki:user_manual:policy	geddons	created	
-1299702652	94.139.56.133	C	latex2wiki:user_manual:vrrp	geddons	created	
-1299702656	94.139.56.133	C	latex2wiki:user_manual:multicast_routing	geddons	created	
-1299702659	94.139.56.133	C	latex2wiki:user_manual:igmp_and_mld	geddons	created	
-1299702664	94.139.56.133	C	latex2wiki:user_manual:pim_sparse_mode	geddons	created	
-1299702667	94.139.56.133	C	latex2wiki:user_manual:multicast_topology_discovery	geddons	created	
-1299702670	94.139.56.133	C	latex2wiki:user_manual:snmp	geddons	created	
-1299702674	94.139.56.133	C	latex2wiki:user_manual:user_management	geddons	created	
-1299702677	94.139.56.133	C	latex2wiki:user_manual:diagnostics_and_debugging	geddons	created	
-1299702681	94.139.56.133	C	latex2wiki:user_manual:xorp_live_cd	geddons	created	
-1299708578	94.139.56.133	E	latex2wiki:user_manual:command_structure	geddons	first draft	
-1299708713	94.139.56.133	e	latex2wiki:user_manual:command_structure	geddons	[Running xorpsh] ref fixed	
-1299708759	94.139.56.133	e	latex2wiki:user_manual:command_structure	geddons	[Configuration Mode] "\-$" fixed	
-1299708791	94.139.56.133	e	latex2wiki:user_manual:command_structure	geddons	[Setting Configuration Values] "\-$" fixed	
-1299708935	94.139.56.133	e	latex2wiki:user_manual:command_structure	geddons	[Running xorpsh in Non-Interactive Mode] code fixed	
-1299712687	70.89.124.249	E	latex2wiki:getting_started	greearb	[Supported Operating Systems] 	
-1299712852	70.89.124.249	E	latex2wiki:getting_started	greearb	[Main directory] 	
-1299712947	70.89.124.249	E	latex2wiki:getting_started	greearb	[How to compile XORP-1.8 CT on GNU Linux Ubuntu 10.10 64bits] 	
-1299713073	70.89.124.249	E	latex2wiki:getting_started	greearb	[Get the last XORP version on the Github] 	
-1299713114	70.89.124.249	E	latex2wiki:getting_started	greearb	[Compilation & Validation] 	
-1299713644	70.89.124.249	E	latex2wiki:getting_started	greearb	[Running XORP for the first time] 	
-1299713737	70.89.124.249	E	latex2wiki:getting_started	greearb	[Running XORP for the first time] 	
-1299714325	70.89.124.249	E	latex2wiki:getting_started	greearb	[Configuring XORP] 	
-1299714595	70.89.124.249	E	latex2wiki:getting_started	greearb	[What are my options ?] 	
-1299714727	70.89.124.249	E	latex2wiki:getting_started	greearb	[Network interfaces] 	
-1299714813	70.89.124.249	E	latex2wiki:getting_started	greearb	[Multicast Forwarding Engine Abstraction (MFEA)] 	
-1299715025	70.89.124.249	E	latex2wiki:getting_started	greearb	[Routing Information Protocol (RIP)] 	
-1299715090	70.89.124.249	E	latex2wiki:getting_started	greearb	[Open Shortest Path First (OSPF)] 	
-1299715165	70.89.124.249	E	latex2wiki:getting_started	greearb	[Internet Group Management Protocol/Multicast Listener Discovery (IGMP/MLD)] 	
-1299715288	70.89.124.249	E	latex2wiki:getting_started	greearb	[Protocol Independent Multicast - Sparse Mode (PIM-SM)] 	
-1299715883	70.89.124.249	E	latex2wiki:getting_started	greearb	[Interface configurations] 	
-1299716377	70.89.124.249	E	latex2wiki:getting_started	greearb	[Getting familiar with XORP] 	
-1299716664	70.89.124.249	E	start	greearb	[XORP New documentation project] 	
-1299716979	70.89.124.249	E	latex2wiki:user_manual	greearb	[Preface] 	
-1299717321	70.89.124.249	E	latex2wiki:user_manual	greearb	[Table Of Contents] 	
-1299717834	70.89.124.249	E	latex2wiki:user_manual	greearb		
-1299751644	94.139.56.133	D	latex2wiki:user_manual:xorp_live_cd	geddons	deletion	
-1299756681	94.139.56.133	D	latex2wiki:user_manual:snmp	geddons	deletion: SNMP support has disappeared from XORP	
-1299767751	94.139.56.133	e	latex2wiki:getting_started	geddons	[Compilation & Validation] Specifying scons check as optional explicitely to make the commands noob-proof	
-1299773401	94.139.56.133	E	start	geddons	Swapping the "howto" about writing a xorp process.	
-1299773437	94.139.56.133	e	start	geddons	[Practical Aspects] 	
-1299774083	94.139.56.133	e	latex2wiki:getting_started	geddons	[Running XORP for the first time] 	
-1299774916	94.139.56.133	E	latex2wiki:getting_started	geddons	[(Default) Compilation/Installation Paths] 	
-1299775027	94.139.56.133	e	latex2wiki:getting_started	geddons	[Network interfaces] 	
-1299775402	94.139.56.133	e	latex2wiki:getting_started	geddons	[Configuring XORP] Adding -h help stdout	
-1299775475	94.139.56.133	e	latex2wiki:getting_started	geddons	[You're lost or you wanna know more ?] 	
-1299777145	94.139.56.133	e	latex2wiki:getting_started	geddons	[(Default) Compilation/Installation Paths] etc path mkdir fix	
-1299777433	94.139.56.133	e	latex2wiki:getting_started	geddons	[Configuring XORP] fixed default config file path	
-1299777447	94.139.56.133	e	latex2wiki:getting_started	geddons	[Configuring XORP] 	
-1299777465	94.139.56.133	e	latex2wiki:getting_started	geddons	[Configuring XORP] fixing formatting (third time is a charm -_-)	
 1299778993	94.139.56.133	e	latex2wiki:getting_started	geddons	[What are my options ?] Completing infos about template files	
 1299780142	94.139.56.133	e	latex2wiki:getting_started	geddons	[Complete configurations] 	
 1299780457	94.139.56.133	e	latex2wiki:getting_started	geddons	[Configuring XORP] fixed wiki auto-formatting of <filename> => <nowiki> used	
@@ -260,8 +198,9 @@
 1300149563	77.109.117.14	e	latex2wiki:getting_started	geddons	[XORP Configuration File] 	
 1300290316	77.109.117.14	e	xorp:writing_a_process	geddons	[Workflow] activity diagram draft	
 1300291568	77.109.117.14	E	xorp:writing_a_process	geddons	[Workflow] class diagram	
-1299679448	127.0.0.1	E	do_release		external edit	
 1300311415	70.89.124.249	E	do_release	greearb		
 1300313776	70.89.124.249	E	do_release	greearb		
 1300316829	70.89.124.249	E	do_release	greearb		
 1300338474	71.112.48.101	E	do_release	greearb		
+1300369598	77.109.117.14	E	latex2wiki:xorp_libxorp_overview	geddons	[service.hh] 	
+1300401697	70.89.124.249	E	do_release	greearb		

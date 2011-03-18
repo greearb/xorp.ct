@@ -5,6 +5,7 @@
    xorp/etc/templates/xorpsh.cmds
    xorp/Makefile.deb
    xorp/devnotes/pkg_xorp.bash
+   xorp/rtrmgr/master_conf_tree.cc
    </code>
 
   * Update Release Notes:  xorp/RELEASE_NOTES
