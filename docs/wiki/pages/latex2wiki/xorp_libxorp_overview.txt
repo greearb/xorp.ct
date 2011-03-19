@@ -237,12 +237,26 @@ As explained in the API documentation, this list provides an interface to I/O (w
 
 ===== service.hh =====
 
-This file declares class ServiceBase. A service is a class that can be started and stopped and would typically
+This file declares class ''ServiceBase''. A service is a class that can be started and stopped and would typically
 involve some asynchronous processing to transition between states. The base class provides a state model
 and methods for transitioning between states. Mandatory transition methods, like start and stop, are abstract
 in the base class.
 
-As the source file seems to lack of accurate documentation, here is a state diagram of all the permissible transitions and status:
+Such a service can typically be in following states:
+  * ''SERVICE_READY''
+  * ''SERVICE_STARTING''
+  * ''SERVICE_RUNNING''
+  * ''SERVICE_PAUSING''
+  * ''SERVICE_PAUSED''
+  * ''SERVICE_RESUMING''
+  * ''SERVICE_SHUTTING_DOWN''
+  * ''SERVICE_SHUTDOWN''
+  * ''SERVICE_FAILED''
+
+The status can be retrieved by using the appropriate method from the ''ServiceBase'' class.\\
+Another way is by using and registering a ''ServiceChangeObserverBase'' instance nearby the ''ServiceBase'' instance. In case of status change, the ''status_change'' method of this observer will be executed.
+
+Here is a state diagram of all the permissible transitions and status:
 [{{:latex2wiki:servicestatus.png|State diagram of ServiceStatus}}]
 ===== status_codes.h =====
 

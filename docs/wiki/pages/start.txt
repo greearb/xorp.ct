@@ -35,8 +35,6 @@ products.
   - [[latex2wiki:introduction_xorp_process|An Introduction to Writing a XORP Process [IMPORTED and OUTDATED version, kept for safety] ]]
   - [[xorp:module_stub|The Dirty Stub Code, or the ready to use implementation]]
   - [[XORP:socket_programming|Socket Programming & XORP.]]
-====An in-depth look====
-  - [[XORP:common_classes|Commonly used class list and explanation]].
 
 ====== ECODE Project ======
 <note warning>This section isn't relevant for common XORP Users !</note>
