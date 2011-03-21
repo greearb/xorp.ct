@@ -225,27 +225,27 @@ IfConfigVlanSetLinux::add_vlan(const string& parent_ifname,
 
 #ifdef HAVE_VLAN_BSD
     struct ifreq ifreq;
-    struct vlanreq vlanreq;
 
     //
     // Create the VLAN
     //
     do {
-	//
-	// Try to create the VLAN interface by using the user-supplied name
-	//
 	int result;
-	int saved_errno;
 	bool is_same_name = false;
 
-	memset(&ifreq, 0, sizeof(ifreq));
-	strlcpy(ifreq.ifr_name, vlan_name.c_str(), sizeof(ifreq.ifr_name));
-	result = ioctl(_s4, SIOCIFCREATE, &ifreq);
-	saved_errno = errno;
-	if (strncmp(vlan_name.c_str(), ifreq.ifr_name, sizeof(ifreq.ifr_name))
-	    == 0) {
+	// This seems to create the VLAN and set the VID all at once.
+	// The old way of using ioctls to create the VLAN was failing
+	// due to failure to set the VID (EBUSY).
+	string cmd(c_format("ifconfig %s.%hu create",
+			    parent_ifname.c_str(), vlan_id));
+	result = system(cmd.c_str());
+	XLOG_WARNING("Tried to create vlan with command: %s, result: %i",
+		     cmd.c_str(), result);
+	cmd = c_format("%s.%hu", parent_ifname.c_str(), vlan_id);
+	if (strcmp(vlan_name.c_str(), cmd.c_str()) == 0) {
 	    is_same_name = true;
 	}
+
 	if ((result >= 0) && is_same_name) {
 	    break;		// Success
 	}
@@ -255,8 +255,8 @@ IfConfigVlanSetLinux::add_vlan(const string& parent_ifname,
 	// No support for interface renaming, therefore return an error
 	//
 	if (result < 0) {
-	    error_msg = c_format("Cannot create VLAN interface %s: %s",
-				 vlan_name.c_str(), strerror(saved_errno));
+	    error_msg = c_format("Cannot create VLAN interface %s: %s errno: %i",
+				 vlan_name.c_str(), strerror(saved_errno), saved_errno);
 	    return (XORP_ERROR);
 	}
 	// XXX: The created name didn't match
@@ -308,24 +308,6 @@ IfConfigVlanSetLinux::add_vlan(const string& parent_ifname,
 
 	break;
     } while (false);
-
-    //
-    // Configure the VLAN
-    //
-    memset(&ifreq, 0, sizeof(ifreq));
-    strlcpy(ifreq.ifr_name, vlan_name.c_str(), sizeof(ifreq.ifr_name));
-    memset(&vlanreq, 0, sizeof(vlanreq));
-    vlanreq.vlr_tag = vlan_id;
-    strlcpy(vlanreq.vlr_parent, parent_ifname.c_str(),
-	    sizeof(vlanreq.vlr_parent));
-    ifreq.ifr_data = (caddr_t)(&vlanreq);
-    if (ioctl(_s4, SIOCSETVLAN, (caddr_t)&ifreq) < 0) {
-	error_msg = c_format("Cannot configure VLAN interface %s "
-			     "(parent = %s VLAN ID = %u): %s",
-			     vlan_name.c_str(), parent_ifname.c_str(),
-			     vlan_id, strerror(errno));
-	return (XORP_ERROR);
-    }
 
 #elif defined(HAVE_VLAN_LINUX)
 
@@ -419,26 +401,24 @@ IfConfigVlanSetLinux::delete_vlan(const string& vlan_name,
     if (_is_dummy)
 	return XORP_OK;
 
-#ifdef HAVE_VLAN_BSD
-
     //
     // Delete the VLAN
     //
-    if (delete_vlan(vlan_name, error_msg)
-	!= XORP_OK) {
-	error_msg = c_format("Failed to delete VLAN %s: %s",
-			     vlan_name.c_str(),
-			     error_msg.c_str());
-	return (XORP_ERROR);
+
+#ifdef HAVE_VLAN_BSD
+    struct ifreq ifreq;
+    memset(&ifreq, 0, sizeof(ifreq));
+    strlcpy(ifreq.ifr_name, vlan_name.c_str(), sizeof(ifreq.ifr_name));
+    if (ioctl(_s4, SIOCIFDESTROY, &ifreq) < 0) {
+        error_msg = c_format("Cannot destroy VLAN interface %s: %s",
+                             vlan_name.c_str(), strerror(errno));
+        return (XORP_ERROR);
     }
 
 #elif defined(HAVE_VLAN_LINUX)
 
     struct vlan_ioctl_args vlanreq;
 
-    //
-    // Delete the VLAN
-    //
     memset(&vlanreq, 0, sizeof(vlanreq));
     strlcpy(vlanreq.device1, vlan_name.c_str(), sizeof(vlanreq.device1));
     vlanreq.cmd = DEL_VLAN_CMD;

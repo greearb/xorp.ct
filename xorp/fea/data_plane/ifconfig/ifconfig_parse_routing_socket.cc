@@ -627,7 +627,9 @@ rtm_addr_to_fea_cfg(const struct if_msghdr* ifm, IfTree& iftree,
     //
     IfTreeVif* vifp = iftree.find_vif(if_index);
     if (vifp == NULL) {
-	XLOG_FATAL("Could not find vif with index %u in IfTree", if_index);
+	XLOG_WARNING("Could not find vif with index %u in IfTree", if_index);
+	// Maybe it's just already deleted, so don't do anything fatal here.
+	return;
     }
     debug_msg("Address event on interface %s vif %s with interface index %u\n",
 	      vifp->ifname().c_str(), vifp->vifname().c_str(),
