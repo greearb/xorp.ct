@@ -52,9 +52,8 @@ Please, share your experience with us and feel free to mention what you've accom
 ===== Mailing lists =====
 ^  [[http://mailman.ICSI.Berkeley.edu/mailman/listinfo/xorp-users | XORP users]] |  xorp-users@xorp.org  | This list is for **general** XORP discussion. |
 ^  [[http://mailman.ICSI.Berkeley.edu/mailman/listinfo/xorp-hackers | XORP hackers]] |  xorp-hackers@xorp.org  | This list is for XORP **development** discussion. |
-^  [[http://mailman.ICSI.Berkeley.edu/mailman/listinfo/xorp-announce | XORP announcements]] |  xorp-announce@xorp.org  | This list is for XORP **release and milestone announcements**. |
 
-To subscribe, send email to ''xorp-//{users, hackers, announce}//-request@xorp.org'' with
+To subscribe, send email to ''xorp-//{users, hackers}//-request@xorp.org'' with
 the word "''subscribe''" (no quotes!) in the subject or the body
 of the email. 
 

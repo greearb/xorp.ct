@@ -1,45 +1,3 @@
-1299969593	71.112.48.101	E	latex2wiki:user_manual:bgp	greearb	[Example Configurations] 	
-1299969837	71.112.48.101	E	latex2wiki:user_manual:bgp	greearb	[Monitoring BGP] 	
-1299969852	71.112.48.101	E	latex2wiki:user_manual:bgp	greearb	[BGP MIB] 	
-1299972436	71.112.48.101	E	latex2wiki:user_manual:bgp	greearb	[BGP path selection] 	
-1299972465	71.112.48.101	E	latex2wiki:user_manual:bgp	greearb	[Reasons for ignoring a path] 	
-1299972491	71.112.48.101	E	latex2wiki:user_manual:bgp	greearb	[BGP decision process] 	
-1299972631	71.112.48.101	E	latex2wiki:user_manual:ospfv2_and_ospfv3	greearb	[OSPF Terminology and Concepts] 	
-1299972714	71.112.48.101	E	latex2wiki:user_manual:ospfv2_and_ospfv3	greearb	[Key OSPF Concepts] 	
-1299972747	71.112.48.101	E	latex2wiki:user_manual:ospfv2_and_ospfv3	greearb	[Standards] 	
-1299973312	71.112.48.101	E	latex2wiki:user_manual:ospfv2_and_ospfv3	greearb	[Configuration Syntax] 	
-1299973371	71.112.48.101	E	latex2wiki:user_manual:ospfv2_and_ospfv3	greearb	[Example Configurations] 	
-1299973404	71.112.48.101	E	latex2wiki:user_manual:ospfv2_and_ospfv3	greearb	[Clearing OSPF database] 	
-1299973535	71.112.48.101	E	latex2wiki:user_manual:ospfv2_and_ospfv3	greearb	[Monitoring OSPF] 	
-1299973646	71.112.48.101	E	latex2wiki:user_manual:rip_and_ripng	greearb	[Terminology and Concepts] 	
-1299973677	71.112.48.101	E	latex2wiki:user_manual:rip_and_ripng	greearb	[Standards Supported] 	
-1299973706	71.112.48.101	E	latex2wiki:user_manual:rip_and_ripng	greearb	[Configuring RIP] 	
-1299974012	71.112.48.101	E	latex2wiki:user_manual:rip_and_ripng	greearb	[Configuration Syntax] 	
-1299974126	71.112.48.101	E	latex2wiki:user_manual:rip_and_ripng	greearb	[Configuration Syntax] 	
-1299974165	71.112.48.101	E	latex2wiki:user_manual:rip_and_ripng	greearb	[Configuring RIPng] 	
-1299974209	71.112.48.101	E	latex2wiki:user_manual:rip_and_ripng	greearb	[Example Configurations] 	
-1299974284	71.112.48.101	E	latex2wiki:user_manual:rip_and_ripng	greearb	[Monitoring RIP] 	
-1299974371	71.112.48.101	E	latex2wiki:user_manual:static_routes	greearb	[Terminology and Concepts] 	
-1299974390	71.112.48.101	E	latex2wiki:user_manual:static_routes	greearb	[Configuration of Static Routes] 	
-1299974732	71.112.48.101	E	latex2wiki:user_manual:static_routes	greearb	[Configuration Syntax] 	
-1299974769	71.112.48.101	E	latex2wiki:user_manual:static_routes	greearb	[Example Configurations] 	
-1299974932	71.112.48.101	E	latex2wiki:user_manual:static_routes	greearb	[Monitoring Static Routes] 	
-1299975053	71.112.48.101	E	latex2wiki:user_manual:unicast_routing	greearb	[An Overview of Unicast Routing] 	
-1299975164	71.112.48.101	E	latex2wiki:user_manual:unicast_routing	greearb	[Dynamic Routing] 	
-1299975417	71.112.48.101	E	latex2wiki:user_manual:unicast_routing	greearb	[Administrative Distance] 	
-1299975521	71.112.48.101	E	latex2wiki:user_manual:unicast_routing	greearb	[Route Redistribution] 	
-1300008573	77.109.116.50	e	latex2wiki:user_manual:static_routes	geddons	[Terminology and Concepts] line break fix	
-1300008778	77.109.116.50	E	latex2wiki:user_manual:forwarding_engine	geddons	[Terminology and Concepts] 	
-1300008809	77.109.116.50	E	latex2wiki:user_manual:forwarding_engine	geddons	[Configuration of the Forwarding Engine] 	
-1300012118	77.109.116.50	E	latex2wiki:user_manual:forwarding_engine	geddons	[Configuration Syntax] first table draft	
-1300012481	77.109.116.50	E	latex2wiki:user_manual:forwarding_engine	geddons	[Configuration Syntax] final table	
-1300012507	77.109.116.50	e	latex2wiki:user_manual:forwarding_engine	geddons	[Configuration Syntax] 	
-1300012801	77.109.116.50	E	latex2wiki:user_manual:forwarding_engine	geddons	[Example Configurations] 	
-1300013307	77.109.116.50	E	latex2wiki:user_manual:forwarding_engine	geddons	[Monitoring the Forwarding Engine] 	
-1300026147	77.109.116.50	E	latex2wiki:xorp_libxorp_overview	geddons	[xorp.h] XORP_OK & XORP_ERROR	
-1300026168	77.109.116.50	e	latex2wiki:xorp_libxorp_overview	geddons	[xorp.h] 	
-1300027534	77.109.116.50	e	start	geddons	xorp logo	
-1300027652	77.109.116.50	e	start	geddons		
 1300051937	77.109.116.50	e	latex2wiki:xorp_libxorp_overview	geddons	[Overview] 	
 1300051970	77.109.116.50	e	latex2wiki:xorp_libxorp_overview	geddons	[c_format.hh] 	
 1300052137	77.109.116.50	e	latex2wiki:xorp_libxorp_overview	geddons	[c_format.hh] prototype	
@@ -112,3 +70,4 @@
 1300481205	79.132.249.199	E	latex2wiki:xorp_libxorp_overview	geddons	[service.hh] merging with old wiki doc	
 1300481301	79.132.249.199	D	xorp:common_classes	geddons	deletion: merging with xorp doc	
 1300481318	79.132.249.199	E	start	geddons	[An in-depth look] deletion: merged with xorp doc	
+1300622095	79.132.249.199	E	start	geddons	[Mailing lists] Deletion of announce mailing list	
