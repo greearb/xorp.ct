@@ -9,7 +9,8 @@ import os, sys
 import Xif.util
 
 from Xif.util import \
-     joining_csv, csv, cpp_name, cpp_classname, xorp_indent_string, xorp_indent
+     joining_csv, csv, cpp_name, caps_cpp_classname, \
+     cpp_classname, xorp_indent_string, xorp_indent
 
 from Xif.xiftypes import \
      XrlArg, XrlMethod, XrlInterface, XrlTarget
@@ -69,7 +70,7 @@ def target_declare_handler_table(cls):
     s = """
     struct handler_table {
         const char *name;
-        const XrlCmdError (%s::*method)(const XrlArgs&, XrlArgs*);
+        XrlCmdRT (%s::*method)(const XrlArgs&, XrlCmdOT);
     };
 
     static const struct handler_table handlers[];
@@ -123,14 +124,47 @@ def target_virtual_fns(methods):
             args.append(cpa)
         r += csv(args)
 
-        r += ") = 0;\n\n"
+        r += ") = 0;\n"
+
+
+
+        r += "#ifdef XORP_ENABLE_ASYNC_SERVER\n"
+        r += "    typedef\n"
+        r += "    XorpCallback%s<void, const XrlCmdError &" % (len(x.rargs()) + 1)
+        for a in x.rargs():
+            r += ",\n%sconst %s&" % (xorp_indent(2), a.cpp_type())
+        r += ">::RefPtr\n    %sCB;\n" % (caps_cpp_classname(x.name()))
+
+
+
+        r += "    virtual void async_%s\n       (" \
+            % cpp_name(x.name())
+
+        # input args
+        for a in x.args():
+            r += "\n%sconst %s&\t%s," % \
+                  (xorp_indent(2), a.cpp_type(), cpp_name(a.name()))
+
+        r += "\n%s%sCB);\n" % \
+            (xorp_indent(2), caps_cpp_classname(x.name()))
+        r += "#endif\n\n"
+
     return r
 
 def target_declare_handlers(methods):
     s = ""
     for x in methods:
-        s += "    const XrlCmdError handle_%s(const XrlArgs& in, XrlArgs* out);\n\n" \
+        s += "    XrlCmdRT handle_%s(const XrlArgs& in, XrlCmdOT out);\n" \
              % cpp_name(x.name())
+        s += "#ifdef XORP_ENABLE_ASYNC_SERVER\n"
+
+        s += "    void callback_%s\n       (const XrlCmdError &e" \
+            % cpp_name(x.name())
+        for a in x.rargs():
+            s += ",\n%sconst %s& arg_%s" \
+                % (xorp_indent(2), a.cpp_type(), cpp_name(a.name()))
+        s += ",\n        XrlRespCallback);\n"
+        s += "#endif\n\n"
     return s;
 
 def target_declare_handler_hooks():
@@ -159,32 +193,139 @@ def target_handler_hooks(cls, name):
 def target_handler_methods(cls, name, methods):
     s = ""
     for m in methods:
-        s += "const XrlCmdError\n"
-        if len(m.rargs()):
-            argarg = "pxa_outputs"
-        else:
-            argarg = "/* pxa_outputs */"
-        s += "%s::handle_%s(const XrlArgs& xa_inputs, XrlArgs* %s)\n" % \
-             (cls, cpp_name(m.name()), argarg)
+        s += "\n#ifdef XORP_ENABLE_ASYNC_SERVER\n"
+        s += "void\n"
+        s += "%s::callback_%s\n    (const XrlCmdError &e" \
+            % (cls, cpp_name(m.name()))
+        for r in m.rargs():
+            s += ",\n     "
+            s += "const %s& rarg_%s" % (r.cpp_type(), cpp_name(r.name()))
+        s += ",\n     XrlRespCallback c_b)\n"
+        s += "{\n"
+
+        s += \
+"""    if (e != XrlCmdError::OKAY()) {
+	XLOG_WARNING(\"Handling method for %%s failed: %%s\",
+		     \"%s\", e.str().c_str());
+	return c_b->dispatch(e, NULL);
+    } else {
+""" % m.name()
+
+        s += xorp_indent(2) + "XrlArgs out;\n"
+        if m.rargs():
+            s += "\n        /* Marshall return values */\n        try {\n"
+            for r in m.rargs():
+                s += xorp_indent(3) + "out.add(\"%s\", rarg_%s);\n" % \
+                    (r.name(), cpp_name(r.name()))
+            s += \
+"""        } catch (const XrlArgs::XrlAtomFound& ) {
+	    XLOG_FATAL("Duplicate atom name"); /* XXX Should never happen */
+        }
+
+"""
+        s += "        return c_b->dispatch(e, &out);\n    }\n}\n\n"
+
+
+
+
+        s += "\nvoid\n%s::async_%s(" \
+            % (cls, cpp_name(m.name()))
+
+        # input args
+        for a in m.args():
+            s += "\n%sconst %s&\targ_%s," % \
+                (xorp_indent(2), a.cpp_type(), cpp_name(a.name()))
+
+        s += "\n%s%sCB c_b)\n{\n" % \
+            (xorp_indent(2), caps_cpp_classname(m.name()))
+
+	s += "\n    /* Return value declarations */\n"
+	for r in m.rargs():
+            s += "    %s rarg_%s;\n" % (r.cpp_type(), cpp_name(r.name()))
+
+        s += "    XrlCmdError e = %s(" % cpp_name(m.name())
+        sep = ""
+	for r in m.args():
+            s += "%s\n        arg_%s" % (sep, cpp_name(r.name()))
+            sep = ","
+        for r in m.rargs():
+            s += "%s\n        rarg_%s" % (sep, cpp_name(r.name()))
+            sep = ","
+        s += ");\n"
+        s += "    return c_b->dispatch(e"
+	for r in m.rargs():
+            s += ",\n        rarg_%s" % (cpp_name(r.name()))
+            sep = ","
+        s += ");\n"
+        s += "}\n"
+        s += "#endif\n\n"
+
+
+
+        s += "XrlCmdRT\n"
+        s += "%s::handle_%s(const XrlArgs& xa_inputs, XrlCmdOT pxa_outputs)\n" % \
+             (cls, cpp_name(m.name()))
         s += "{"
         s += """
     if (xa_inputs.size() != %d) {
 	XLOG_ERROR(\"Wrong number of arguments (%%u != %%u) handling %%s\",
             XORP_UINT_CAST(%d), XORP_UINT_CAST(xa_inputs.size()), \"%s\");
-	return XrlCmdError::BAD_ARGS();
+	XRL_CMD_RETURN_ERROR(pxa_outputs, XrlCmdError::BAD_ARGS());
     }
 """ % (len(m.args()), len(m.args()), m.name())
 
         if len(m.rargs()):
             s += """
+#ifndef XORP_ENABLE_ASYNC_SERVER
     if (pxa_outputs == 0) {
 	XLOG_FATAL(\"Return list empty\");
 	return XrlCmdError::BAD_ARGS();
     }
+#endif
+
 """
+        if len(m.rargs()) == 0:
+            s += """
+#ifndef XORP_ENABLE_ASYNC_SERVER
+    UNUSED(pxa_outputs);
+#endif
+
+"""
+
+        s += "#ifdef XORP_ENABLE_ASYNC_SERVER\n"
+
+
+        s += xorp_indent(1) + "try {\n"
+        s += xorp_indent(2) + \
+            "%sCB mycb =\n%scallback(this, &%s::callback_%s, pxa_outputs);\n" \
+            % (caps_cpp_classname(m.name()), xorp_indent(3), \
+                   cls, cpp_name(m.name()))
+
+        s += xorp_indent(2) + "async_%s(" % cpp_name(m.name())
+	i = 0
+        for a in m.args():
+            s += "\n" + xorp_indent(3) + \
+                "xa_inputs.get(%d, \"%s\").%s()," \
+                % (i, a.name(), a.accessor())
+            i += 1
+        s += " mycb);\n"
+
+
+	s += \
+"""    } catch (const XrlArgs::BadArgs& e) {
+	XLOG_ERROR(\"Error decoding the arguments: %s\", e.str().c_str());
+	return pxa_outputs->dispatch(XrlCmdError::BAD_ARGS(e.str()), NULL);
+    }
+"""
+
+
+        s += "#else\n"
+
+
     	s += "\n    /* Return value declarations */\n"
     	for r in m.rargs():
-            s += "    %s %s;\n" % (r.cpp_type(), cpp_name(r.name()))
+            s += "    %s r_%s;\n" % (r.cpp_type(), cpp_name(r.name()))
+
 
         s += xorp_indent(1) + "try {\n"
         s += xorp_indent(2) + "XrlCmdError e = %s(" % cpp_name(m.name())
@@ -197,7 +338,7 @@ def target_handler_methods(cls, name, methods):
 	    i += 1
         ret_vals = []
         for r in m.rargs():
-            ret_vals.append("\n" + xorp_indent(3) + "%s" % cpp_name(r.name()))
+            ret_vals.append("\n" + xorp_indent(3) + "r_%s" % cpp_name(r.name()))
         s += csv(get_reqs + ret_vals, ",") + ");\n"
 
         s += \
@@ -218,15 +359,19 @@ def target_handler_methods(cls, name, methods):
         if m.rargs():
             s += "\n    /* Marshall return values */\n    try {\n"
             for r in m.rargs():
-                s += xorp_indent(2) + "%s->add(\"%s\", %s);\n" % \
-                     (argarg, r.name(), cpp_name(r.name()))
+                s += xorp_indent(2) + "pxa_outputs->add(\"%s\", r_%s);\n" % \
+                    (r.name(), cpp_name(r.name()))
             s += \
 """    } catch (const XrlArgs::XrlAtomFound& ) {
 	XLOG_FATAL("Duplicate atom name"); /* XXX Should never happen */
     }
 """
 
-        s += "    return XrlCmdError::OKAY();\n}\n\n"
+        s += "    return XrlCmdError::OKAY();\n"
+
+
+        s += "#endif\n"
+        s += "}\n\n"
     return s
 
 def protect(file):

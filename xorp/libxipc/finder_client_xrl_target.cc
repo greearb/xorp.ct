@@ -85,6 +85,29 @@ FinderClientXrlTarget::finder_client_0_2_remove_xrls_for_target_from_cache(
     return XrlCmdError::OKAY();
 }
 
+#ifdef XORP_ENABLE_ASYNC_SERVER
+void
+FinderClientXrlTarget::async_finder_client_0_2_dispatch_tunneled_xrl(
+    const string&	xrl,
+    FinderClient02DispatchTunneledXrlCB cb)
+{
+    _client->dispatch_tunneled_xrl(xrl,
+				   callback(this,
+					    &FinderClientXrlTarget::dispatch_tunneled_xrl_cb,
+					    cb));
+}
+
+void
+FinderClientXrlTarget::dispatch_tunneled_xrl_cb(
+    const XrlCmdError &e,
+    const XrlArgs *out,
+    FinderClient02DispatchTunneledXrlCB cb) const
+{
+    UNUSED(out);
+    cb->dispatch(XrlCmdError::OKAY(), e.error_code(), e.note());
+}
+#endif
+
 XrlCmdError
 FinderClientXrlTarget::finder_client_0_2_dispatch_tunneled_xrl(
 						const string& xrl,
@@ -92,8 +115,15 @@ FinderClientXrlTarget::finder_client_0_2_dispatch_tunneled_xrl(
 						string&	      xrl_errtxt
 						)
 {
+#ifdef XORP_ENABLE_ASYNC_SERVER
+    UNUSED(xrl);
+    UNUSED(xrl_errno);
+    UNUSED(xrl_errtxt);
+    return XrlCmdError::COMMAND_FAILED("Unreachable");
+#else
     XrlCmdError e = _client->dispatch_tunneled_xrl(xrl);
     xrl_errno  = e.error_code();
     xrl_errtxt = e.note();
     return XrlCmdError::OKAY();
+#endif
 }

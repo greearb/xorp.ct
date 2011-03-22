@@ -123,6 +123,13 @@ protected:
     void response_timeout(uint32_t seqno);
 
 private:
+#ifdef XORP_ENABLE_ASYNC_SERVER
+    void
+    dispatch_xrl_cb(const XrlCmdError &e,
+		    const XrlArgs *reply_args,
+		    uint32_t seqno);
+#endif
+
     class ResponseState {
     public:
 	ResponseState(uint32_t		   seqno,

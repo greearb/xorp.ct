@@ -32,8 +32,43 @@
 #include "xrl.hh"
 #include "xrl_error.hh"
 
+#ifdef XORP_ENABLE_ASYNC_SERVER
+typedef void XrlCmdRT;
+
+#define XRL_CMD_RETURN_ERROR(OUT, ERR)	\
+    do {				\
+	(OUT)->dispatch((ERR), NULL);	\
+	return;				\
+    } while (0)
+
+typedef
+XorpCallback2<void, const XrlCmdError &, const XrlArgs *>::RefPtr
+XrlRespCallback;
+
+typedef XrlRespCallback XrlCmdOT;
+
+#define XRL_CMD_OPT_CALLBACK(V) , const XrlRespCallback& V
+
+typedef
+XorpCallback2<void, const XrlArgs&, XrlRespCallback>::RefPtr XrlRecvCallback;
+
+#else
+
+typedef const XrlCmdError XrlCmdRT;
+
+#define XRL_CMD_RETURN_ERROR(OUT, ERR)	\
+    do {				\
+	return (ERR);			\
+    } while (0)
+
+typedef XrlArgs* XrlCmdOT;
+
+#define XRL_CMD_OPT_CALLBACK(V)
+
 typedef
 XorpCallback2<const XrlCmdError, const XrlArgs&, XrlArgs*>::RefPtr XrlRecvCallback;
+
+#endif
 
 class XrlCmdEntry {
 public:
@@ -45,7 +80,7 @@ public:
 
     const string& name() const { return _name; }
 
-    const XrlCmdError dispatch(const XrlArgs& inputs, XrlArgs* outputs) const {
+    XrlCmdRT dispatch(const XrlArgs& inputs, XrlCmdOT outputs) const {
 	return _cb->dispatch(inputs, outputs);
     }
 

@@ -111,8 +111,9 @@ private:
 		    uint8_t*			buffer,
 		    size_t			buffer_bytes);
 
+    typedef map<uint32_t, ref_ptr<RequestState> > RequestMap;
     void send_request(RequestState*);
-    void dispose_request();
+    void dispose_request(RequestMap::iterator ptr);
 
     void start_keepalives();
     void stop_keepalives();
@@ -129,7 +130,8 @@ private:
     AsyncFileWriter*		  _writer;
 
     list<ref_ptr<RequestState> > _requests_waiting;	// All requests pending
-    list<ref_ptr<RequestState> > _requests_sent;	// All requests pending
+
+    RequestMap			 _requests_sent;	// All requests pending
 
     uint32_t			 _current_seqno;
     size_t			 _active_bytes;

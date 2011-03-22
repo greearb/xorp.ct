@@ -92,6 +92,7 @@ vars.AddVariables(
     BoolVariable('enable_tests',  'Build Test Programs', False),
     BoolVariable('enable_click',  'Build CLICK support', False),
     BoolVariable('enable_fea_dummy',  'Build fea-dummy target', True),
+    BoolVariable('enable_async_server',  'Permit asynchronous method implementations', False),
     BoolVariable('debug_xrldb',  'Build with runtime XRL syntax validation in Router Manager', False),
     EnumVariable('debug', 'Build with debug symbols', 'full',
                  allowed_values=('no', 'yes', 'full', 'override'),
@@ -267,6 +268,7 @@ print 'Enable xorpsh     ', env['enable_xorpsh']
 print 'Enable Test Programs: ', env['enable_tests']
 print 'Enable CLICK:     ', env['enable_click']
 print 'Enable FEA Dummy: ', env['enable_fea_dummy']
+print 'Enable async method impls: ', env['enable_async_server']
 print 'Enable BGP:       ', env['enable_bgp']
 print 'Try Enable BOOST: ', env['enable_boost']
 print 'Try Enable uSTL : ', env['enable_ustl']
@@ -410,6 +412,13 @@ if tst and (tst == "no"):
     env['enable_fea_dummy'] = False
 else:
     env['enable_fea_dummy'] = True
+
+# Default to disabled
+tst = ARGUMENTS.get('enable_async_server', False)
+if tst and (tst == "no"):
+    env['enable_async_server'] = False
+else:
+    env['enable_async_server'] = True
 
 # Default to enabled
 tst = ARGUMENTS.get('enable_bgp', True)
@@ -634,6 +643,10 @@ if not env.GetOption('clean') and \
     tst = ARGUMENTS.get('enable_fea_dummy', True)
     if tst and not (tst == "no"):
         conf.Define('XORP_USE_FEA_DUMMY')
+
+    tst = ARGUMENTS.get('enable_async_server', False)
+    if tst and not (tst == "no"):
+        conf.Define('XORP_ENABLE_ASYNC_SERVER')
 
     if env['enable_xorpsh']:
         conf.Define('XORP_USE_XORPSH')
