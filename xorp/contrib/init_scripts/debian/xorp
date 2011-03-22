@@ -14,8 +14,8 @@
 #                    OSPF, RIP/RIPng, IGMP/MLD and PIM-SM.  
 ### END INIT INFO
 
-PATH=/sbin:/bin:/usr/sbin:/usr/bin
-DAEMON=/usr/sbin/xorp_rtrmgr
+PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/xorp/sbin
+DAEMON=/usr/local/xorp/sbin/xorp_rtrmgr
 DAEMON_WRAPPER=/usr/bin/daemon
 
 NAME=xorp
@@ -23,12 +23,17 @@ PIDFILE=/var/run/$NAME.pid
 DESC="eXtensible Open Router Platform"
 
 test -x $DAEMON || exit 0
-test -x $DAEMON_WRAPPER || exit 0
+
+if [ ! -x $DAEMON_WRAPPER ]
+then
+        echo "ERROR:  daemon program not installed: $DAEMON_WRAPPER"
+        exit 1
+fi
 
 . /lib/lsb/init-functions
 
 RUN="no"
-DAEMON_OPTS=""
+DAEMON_OPTS="-b /etc/xorp.conf"
 # time to wait for daemons death, in seconds
 # don't set it too low or you might not let xorp die gracefully
 DIETIME=10
@@ -37,13 +42,6 @@ LOGFILE_ERR=/var/log/xorp/router.err.log
 # Include xorp defaults if available
 if [ -f /etc/default/xorp ] ; then
 	. /etc/default/xorp
-fi
-
-if [ "x$RUN" != "xyes" ] ; then
-    log_failure_msg "XORP disabled, please adjust the configuration at /etc/xorp/config.boot"
-    log_failure_msg "to your needs and then set RUN to 'yes' in /etc/default/xorp to "
-    log_failure_msg "enable the router manager daemon"
-    exit 1
 fi
 
 set -e
