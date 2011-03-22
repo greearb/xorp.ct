@@ -94,6 +94,138 @@ sudo usermod -a -G xorp root
 
 <note important>You **must** execute the former and latter commands as **sudo/root**. The same goes for XORP Router Manager (**xorp_rtrmgr**) and the XORP Shell (**xorpsh**).</note>
 
+XORP will not start at boot until an init script is created for it.  Because this is installation-specific it is generally left up to the package maintainer (distribution).
+The following example runs XORP as a daemon with a log file in ''var/log/xorp'' an expected configuration file in ''/etc/xorp/config.boot'' and a PID file in ''/var/run/xorp.pid'' and is generally created as ''/etc/init.d/xorp''.
+
+<code>
+#!/bin/bash
+
+function start {
+    # Start XORP in daemon mode
+    /usr/local/xorp/sbin/xorp_rtrmgr -d -P /var/run/xorp.pid -l /var/log/xorp -b /etc/xorp/config.boot
+
+    # Ensure XORP socket permissions are correct (required for XORP 1.7 fixed in 1.8)
+    sleep 1
+    chmod 775 /var/tmp/xrl.*
+    chown root:xorp /var/tmp/xrl.*
+}
+function stop {
+    # Kill the XORP router manager
+    killall -q -9 xorp_rtrmgr
+
+    # Kill any lingering XORP sub-processes (updated for 1.8)
+    killall -q -9 xorp_bgp
+    killall -q -9 xorp_fea
+    killall -q -9 xorp_fea_dummy
+    killall -q -9 xorp_fib2mrib
+    killall -q -9 xorp_igmp
+    killall -q -9 xorp_mld
+    killall -q -9 xorp_olsr4
+    killall -q -9 xorp_ospfv2
+    killall -q -9 xorp_ospfv3
+    killall -q -9 xorp_pimsm4
+    killall -q -9 xorp_pimsm6
+    killall -q -9 xorp_policy
+    killall -q -9 xorp_rib
+    killall -q -9 xorp_rip
+    killall -q -9 xorp_ripng
+    killall -q -9 xorp_static_routes
+    killall -q -9 xorp_vrrp
+
+    # Remove xorp routes from the routing table
+    ip route flush proto xorp
+
+    # Clean up XORP sockets
+    rm /var/tmp/xrl.*
+
+    # Remove PID file
+    rm /var/run/xorp.pid
+}
+function restart {
+    stop
+    sleep 1
+    start
+}
+
+case "$1" in
+    start)
+        echo -n "Starting XORP: "
+        start
+        echo "Done"
+        ;;
+    restart)
+        echo -n "XORP restarting... "
+        restart
+        echo "done"
+        ;;
+    stop)
+        echo -n "Stopping XORP: "
+        stop
+        echo "Done"
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart}"
+        exit 1
+        ;;
+esac
+exit 0
+</code>
+
+A cleaner init script would gracefully shutdown XORP by sending a SIGTERM (default option for the kill tool) to the PID in ''/var/run/xorp.pid'' however this currently triggers some bugs with the shutdown process and may result in deletion of network interface configuration.
+
+On a Debian or Ubuntu based system this init script can be set to start at boot using ''update-rc.d xorp defaults'' once created as ''/etc/init.d/xorp'' and set to be executable using ''chmod +x /etc/init.d/xorp''.
+
+Before XORP will start it needs a valid configuration file.
+
+Here is an example minimal configuration for a Linux system:
+<code>
+/*XORP Configuration File, v1.0*/
+protocols {
+    fib2mrib {
+        disable: true
+    }
+}
+fea {
+    unicast-forwarding4 {
+        disable: false
+        forwarding-entries {
+            retain-on-startup: true
+            retain-on-shutdown: true
+        }
+    }
+}
+interfaces {
+    restore-original-config-on-shutdown: true
+    interface eth0 {
+        description: ""
+        disable: false
+        discard: false
+        unreachable: false
+        management: false
+        default-system-config {
+        }
+    }
+}
+rtrmgr {
+    config-directory: "/etc/xorp/"
+    load-file-command: "fetch"
+    load-file-command-args: "-o"
+    load-ftp-command: "fetch"
+    load-ftp-command-args: "-o"
+    load-http-command: "fetch"
+    load-http-command-args: "-o"
+    load-tftp-command: "sh -c 'echo Not implemented 1>&2 && exit 1'"
+    load-tftp-command-args: ""
+    save-file-command: "sh -c 'echo Not implemented 1>&2 && exit 1'"
+    save-file-command-args: ""
+    save-ftp-command: "sh -c 'echo Not implemented 1>&2 && exit 1'"
+    save-ftp-command-args: ""
+    save-http-command: "sh -c 'echo Not implemented 1>&2 && exit 1'"
+    save-http-command-args: ""
+    save-tftp-command: "sh -c 'echo Not implemented 1>&2 && exit 1'"
+    save-tftp-command-args: ""
+}
+</code>
 
 ====== Configuring XORP ======
 A XORP router must be configured to perform the desired operations. The configuration information can be provided in one of the two ways:

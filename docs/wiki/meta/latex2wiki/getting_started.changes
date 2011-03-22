@@ -67,3 +67,4 @@
 1300132442	70.89.124.249	E	latex2wiki:getting_started	greearb	[Interface configurations] 	
 1300132627	70.89.124.249	E	latex2wiki:getting_started	greearb	[Complete configurations] 	
 1300149563	77.109.117.14	e	latex2wiki:getting_started	geddons	[XORP Configuration File] 	
+1300714861	76.178.231.232	E	latex2wiki:getting_started	rps	[Prepare the system to run xorp] added initial blurb about XORP init script and minimal configuration.	
