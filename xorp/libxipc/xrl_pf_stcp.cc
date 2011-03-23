@@ -130,6 +130,11 @@ public:
 
     void dispatch_request(uint32_t seqno, bool batch, const uint8_t* buffer,
 			  size_t bytes);
+    void transmit_response(const XrlError &e,
+			   const XrlArgs *pResponse,
+			   uint32_t seqno,
+			   bool batch);
+
     void ack_helo(uint32_t seqno);
 
     void read_event(BufferedAsyncReader* 	reader,
@@ -151,8 +156,9 @@ public:
     string toString() const;
 
 private:
-    XrlError do_dispatch(const uint8_t* packed_xrl, size_t packed_xrl_bytes,
-                         XrlArgs& response);
+    XrlDispatcherRT do_dispatch(const uint8_t* packed_xrl,
+				size_t packed_xrl_bytes,
+				XrlDispatcherOT response);
 
     XrlPFSTCPListener& _parent;
     XorpFd _sock;
@@ -251,10 +257,10 @@ STCPRequestHandler::read_event(BufferedAsyncReader*		/* source */,
     _reader.set_trigger_bytes(STCPPacketHeader::header_size());
 }
 
-XrlError
+XrlDispatcherRT
 STCPRequestHandler::do_dispatch(const uint8_t* packed_xrl,
 			        size_t packed_xrl_bytes,
-			        XrlArgs& response)
+			        XrlDispatcherOT response)
 {
     static XrlError e(XrlError::INTERNAL_ERROR().error_code(), "corrupt xrl");
 
@@ -264,18 +270,18 @@ STCPRequestHandler::do_dispatch(const uint8_t* packed_xrl,
     string command;
     size_t cmdsz = Xrl::unpack_command(command, packed_xrl, packed_xrl_bytes);
     if (!cmdsz)
-	return e;
+	XRL_DISPATCHER_RETURN_ERROR(response, e);
 
     XrlDispatcher::XI* xi = d->lookup_xrl(command);
     if (!xi)
-	return e;
+	XRL_DISPATCHER_RETURN_ERROR(response, e);
 
     Xrl& xrl = xi->_xrl;
 
     try {
 	if (xi->_new) {
 	    if (xrl.unpack(packed_xrl, packed_xrl_bytes) != packed_xrl_bytes)
-		return e;
+		XRL_DISPATCHER_RETURN_ERROR(response, e);
 
 	    xi->_new = false;
 	} else {
@@ -283,10 +289,10 @@ STCPRequestHandler::do_dispatch(const uint8_t* packed_xrl,
 	    packed_xrl_bytes -= cmdsz;
 
 	    if (xrl.fill(packed_xrl, packed_xrl_bytes) != packed_xrl_bytes)
-		return e;
+		XRL_DISPATCHER_RETURN_ERROR(response, e);
 	}
     } catch (...) {
-	return e;
+	XRL_DISPATCHER_RETURN_ERROR(response, e);
     }
 
     return d->dispatch_xrl_fast(*xi, response);
@@ -298,10 +304,28 @@ STCPRequestHandler::dispatch_request(uint32_t 		seqno,
 				     const uint8_t* 	packed_xrl,
 				     size_t 		packed_xrl_bytes)
 {
+#ifdef XORP_ENABLE_ASYNC_SERVER
+    do_dispatch(packed_xrl, packed_xrl_bytes,
+		callback(this, &STCPRequestHandler::transmit_response,
+			 seqno, batch));
+#else
     XrlArgs response;
     XrlError e;
 
     e = do_dispatch(packed_xrl, packed_xrl_bytes, response);
+    transmit_response(e, &response, seqno, batch);
+#endif
+}
+
+
+void STCPRequestHandler::transmit_response(const XrlError &e,
+					   const XrlArgs *pResponse,
+					   uint32_t seqno,
+					   bool batch)
+{
+    // Ensure we have a real arguments object to play with.
+    XrlArgs dummy;
+    const XrlArgs &response = pResponse ? *pResponse : dummy;
 
     size_t xrl_response_bytes = response.packed_bytes();
     size_t note_bytes = e.note().size();
@@ -798,7 +822,10 @@ XrlPFSTCPSender::die(const char* reason, bool verbose)
     // the lists of callbacks.
     list<ref_ptr<RequestState> > tmp;
     tmp.splice(tmp.begin(), _requests_waiting);
-    tmp.splice(tmp.begin(), _requests_sent);
+    for (RequestMap::iterator iter = _requests_sent.begin();
+	 iter != _requests_sent.end(); iter++)
+	tmp.push_back(iter->second);
+    _requests_sent.clear();
 
     _active_requests = 0;
     _active_bytes    = 0;
@@ -877,13 +904,13 @@ XrlPFSTCPSender::send_request(RequestState* rs)
 }
 
 void
-XrlPFSTCPSender::dispose_request()
+XrlPFSTCPSender::dispose_request(RequestMap::iterator ptr)
 {
     assert(_requests_sent.empty() == false);
     xassert(_requests_sent.size() + _requests_waiting.size() == _active_requests);
-    _active_bytes -= _requests_sent.front()->size();
+    _active_bytes -= ptr->second->size();
     _active_requests -= 1;
-    _requests_sent.pop_front();
+    _requests_sent.erase(ptr);
     xassert(_requests_waiting.size() == _writer->buffers_remaining());
 }
 
@@ -914,7 +941,7 @@ XrlPFSTCPSender::update_writer(AsyncFileWriter::Event	e,
     }
 
     ref_ptr<RequestState> rrp = _requests_waiting.front();
-    _requests_sent.push_back(rrp);
+    _requests_sent[rrp->seqno()] = rrp;
     _requests_waiting.pop_front();
 }
 
@@ -955,7 +982,8 @@ XrlPFSTCPSender::read_event(BufferedAsyncReader*	/* reader */,
 	return;
     }
 
-    if (sph.seqno() != _requests_sent.front()->seqno()) {
+    RequestMap::iterator stptr = _requests_sent.find(sph.seqno());
+    if (stptr == _requests_sent.end()) {
 	die("Bad sequence number");
 	return;
     }
@@ -963,7 +991,7 @@ XrlPFSTCPSender::read_event(BufferedAsyncReader*	/* reader */,
     if (sph.type() == STCP_PT_HELO_ACK) {
 	debug_msg("Got keep alive ack\n");
 	_keepalive_sent = false;
-	dispose_request();
+	dispose_request(stptr);
 	_reader->dispose(sph.frame_bytes());
 	_reader->set_trigger_bytes(sph.header_size());
 	return;
@@ -996,8 +1024,8 @@ XrlPFSTCPSender::read_event(BufferedAsyncReader*	/* reader */,
     }
 
     // Get ref_ptr to callback from request state and discard the rest
-    XrlPFSender::SendCallback cb = _requests_sent.front()->cb();
-    dispose_request();
+    XrlPFSender::SendCallback cb = stptr->second->cb();
+    dispose_request(stptr);
 
     xassert(_active_requests == _requests_waiting.size() + _requests_sent.size());
 

@@ -97,6 +97,10 @@ FinderMessengerBase::dispatch_xrl(uint32_t seqno, const Xrl& xrl)
     if (manager())
 	manager()->messenger_active_event(this);
     
+#ifdef XORP_ENABLE_ASYNC_SERVER
+    ce->dispatch(xrl.args(),
+		 callback(this, &FinderMessengerBase::dispatch_xrl_cb, seqno));
+#else
     XrlArgs reply_args;
     XrlError e = ce->dispatch(xrl.args(), &reply_args);
     if (XrlCmdError::OKAY() == e) {
@@ -104,11 +108,22 @@ FinderMessengerBase::dispatch_xrl(uint32_t seqno, const Xrl& xrl)
     } else {
 	reply(seqno, e, 0);
     }
+#endif
 
     // Announce we've dispatched xrl
     if (manager())
 	manager()->messenger_inactive_event(this);
 }
+
+#ifdef XORP_ENABLE_ASYNC_SERVER
+void
+FinderMessengerBase::dispatch_xrl_cb(const XrlCmdError &e,
+				     const XrlArgs *reply_args,
+				     uint32_t seqno)
+{
+    reply(seqno, e, XrlCmdError::OKAY() == e ? reply_args : NULL);
+}
+#endif
 
 void
 FinderMessengerBase::unhook_manager()

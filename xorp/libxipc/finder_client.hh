@@ -32,6 +32,7 @@
 #include "finder_messenger.hh"
 
 #include "xrl_pf.hh"
+#include "xrl_cmd_map.hh"
 
 class FinderClientOp;
 class FinderClientObserver;
@@ -76,7 +77,8 @@ public:
     virtual ~FinderClientXrlCommandInterface() {}
     virtual void uncache_xrl(const string& xrl) = 0;
     virtual void uncache_xrls_from_target(const string& target) = 0;
-    virtual XrlCmdError dispatch_tunneled_xrl(const string& xrl) = 0;
+    virtual XrlCmdRT dispatch_tunneled_xrl(const string& xrl
+					   XRL_CMD_OPT_CALLBACK(cb)) = 0;
 };
 
 /**
@@ -312,7 +314,14 @@ protected:
     // FinderClientXrlCommandInterface
     void uncache_xrl(const string& xrl);
     void uncache_xrls_from_target(const string& target);
-    XrlCmdError dispatch_tunneled_xrl(const string& xrl);
+    XrlCmdRT dispatch_tunneled_xrl(const string& xrl
+				   XRL_CMD_OPT_CALLBACK(cb));
+#ifdef XORP_ENABLE_ASYNC_SERVER
+private:
+    void
+    dispatch_tunneled_xrl_cb(const XrlError &e, const XrlArgs *a,
+			     XrlRespCallback cb) const;
+#endif
 
 protected:
     void crank();

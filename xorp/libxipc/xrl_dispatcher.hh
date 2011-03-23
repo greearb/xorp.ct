@@ -25,6 +25,35 @@
 
 #include "xrl_cmd_map.hh"
 
+#ifdef XORP_ENABLE_ASYNC_SERVER
+
+#define XRL_DISPATCHER_RETURN_ERROR(OUT, ERR)	\
+    do {					\
+	(OUT)->dispatch((ERR), NULL);		\
+	return;					\
+    } while (0)
+
+typedef void XrlDispatcherRT;
+
+typedef
+XorpCallback2<void, const XrlError &, const XrlArgs *>::RefPtr
+XrlDispatcherCallback;
+
+typedef XrlDispatcherCallback XrlDispatcherOT;
+
+#else
+
+#define XRL_DISPATCHER_RETURN_ERROR(OUT, ERR)	\
+    do {					\
+	return (ERR);				\
+    } while (0)
+
+
+typedef XrlError XrlDispatcherRT;
+typedef XrlArgs& XrlDispatcherOT;
+
+#endif
+
 class XrlDispatcher : public XrlCmdMap {
 public:
     struct XI {
@@ -41,10 +70,17 @@ public:
     virtual ~XrlDispatcher() {}
 
     virtual XI*	       lookup_xrl(const string& name) const;
-    virtual XrlError   dispatch_xrl(const string& method_name,
-				    const XrlArgs& in,
-				    XrlArgs& out) const;
-    XrlError	       dispatch_xrl_fast(const XI& xi, XrlArgs& out) const;
+    virtual XrlDispatcherRT dispatch_xrl(const string& method_name,
+					 const XrlArgs& in,
+					 XrlDispatcherOT out) const;
+    XrlDispatcherRT    dispatch_xrl_fast(const XI& xi,
+					 XrlDispatcherOT out) const;
+
+#ifdef XORP_ENABLE_ASYNC_SERVER
+private:
+    void dispatch_cb(const XrlCmdError &, const XrlArgs *,
+		     XrlDispatcherCallback resp) const;
+#endif
 };
 
 #endif // __LIBXIPC_XRL_DISPATCHER_HH__

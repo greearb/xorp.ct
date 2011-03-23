@@ -51,20 +51,25 @@ do {									      \
 // ----------------------------------------------------------------------------
 // XrlDispatcher methods
 
-XrlError
+XrlDispatcherRT
 XrlDispatcher::dispatch_xrl(const string&  method_name,
 			    const XrlArgs& inputs,
-			    XrlArgs&       outputs) const
+			    XrlDispatcherOT outputs) const
 {
     const XrlCmdEntry* c = get_handler(method_name.c_str());
     if (c == 0) {
 	trace_xrl_dispatch("dispatch_xrl (invalid) ", method_name);
 	debug_msg("No handler for %s\n", method_name.c_str());
-	return XrlError::NO_SUCH_METHOD();
+	XRL_DISPATCHER_RETURN_ERROR(outputs, XrlError::NO_SUCH_METHOD());
     }
 
     trace_xrl_dispatch("dispatch_xrl (valid) ", method_name);
-    return c->dispatch(inputs, &outputs);
+#ifdef XORP_ENABLE_ASYNC_SERVER
+    XrlCmdOT resp = callback(this, &XrlDispatcher::dispatch_cb, outputs);
+#else
+    XrlCmdOT resp = &outputs;
+#endif
+    return c->dispatch(inputs, resp);
 }
 
 XrlDispatcher::XI*
@@ -77,8 +82,23 @@ XrlDispatcher::lookup_xrl(const string& name) const
     return new XI(c);
 }
 
-XrlError
-XrlDispatcher::dispatch_xrl_fast(const XI& xi, XrlArgs& outputs) const
+XrlDispatcherRT
+XrlDispatcher::dispatch_xrl_fast(const XI& xi, XrlDispatcherOT outputs) const
 {
-    return xi._cmd->dispatch(xi._xrl.args(), &outputs);
+#ifdef XORP_ENABLE_ASYNC_SERVER
+    XrlCmdOT resp = callback(this, &XrlDispatcher::dispatch_cb, outputs);
+#else
+    XrlCmdOT resp = &outputs;
+#endif
+    return xi._cmd->dispatch(xi._xrl.args(), resp);
 }
+
+#ifdef XORP_ENABLE_ASYNC_SERVER
+void
+XrlDispatcher::dispatch_cb(const XrlCmdError &err,
+			   const XrlArgs *outputs,
+			   XrlDispatcherCallback resp) const
+{
+    resp->dispatch(err, outputs);
+}
+#endif

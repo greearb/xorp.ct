@@ -802,6 +802,7 @@ def DoAllConfig(env, conf, host_os):
         print "  socket filtering will not work."
         print "  This is not a real problem, just a small performance"
         print "  loss when using multiple virtual routers on the same system."
+        print "  On Debian:  apt-get install libpcap-dev"
         print "  On Ubuntu:  apt-get install pcap-dev\n"
 
     if not (has_linux_netfilter_ipv4_ip_tables_h or has_linux_netfilter_ipv6_ip6_tables_h):
@@ -834,7 +835,7 @@ def DoAllConfig(env, conf, host_os):
     if not has_libcurses and not has_libncurses and not has_libpdcurses:
         print "\nERROR:  Cannot find required (n)curses or pdcurses library."
         print "  On Fedora/RedHat:  yum install ncurses-devel"
-        print "  On Ubuntu:  apt-get install ncurses-dev"
+        print "  On Debian/Ubuntu:  apt-get install ncurses-dev"
         print "  After install, rm -fr xorp/obj build directory to"
         print "  clear the configure cache before re-building."
         sys.exit(1)
