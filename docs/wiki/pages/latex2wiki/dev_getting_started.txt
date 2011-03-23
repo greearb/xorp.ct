@@ -63,6 +63,9 @@ This will take you some time, for sure, but will be of great help when you will 
 ===== API Documentation =====
 [[latex2wiki:xorp_source_documentation|XORP Source code documentation]]
 
+===== Debugging XORP =====
+[[/debug_xorp|Run XORP Under Valgrind]]
+
 ===== Project Management =====
 [[/do_release|How to do a XORP Release]]
 

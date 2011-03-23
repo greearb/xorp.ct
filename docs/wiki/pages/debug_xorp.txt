@@ -1,0 +1,14 @@
+====== Running XORP under Valgrind ======
+
+Valgrind is a tool that helps track down memory use
+errors, including memory leaks, use-after-free, and use of
+un-initialized memory.
+
+To run XORP under Valgrind, make sure /usr/bin/valgrind
+exists and use commands similar to this: <code>
+
+touch XORP_USE_VALGRIND
+mv valgrind_xorp_rtrmgr.txt.1 valgrind_xorp_rtrmgr.txt.2
+mv valgrind_xorp_rtrmgr.txt valgrind_xorp_rtrmgr.txt.1
+valgrind --log-file=valgrind_xorp_rtrmgr.txt --leak-check=full --track-origins=yes --track-fds=yes xorp_rtrmgr -b /etc/xorp.conf
+</code>

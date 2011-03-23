@@ -2,7 +2,7 @@
 
 This User Manual describes the process of configuring and operating a router running XORP. XORP is a work-in-progress:  Please suggest improvements if you find errors or omissions in user-guide.
 <note>
-The user guide was recently converted to wiki format.  The old PDF version is [[http://www.xorp.org/releases/current/docs/user_manual/user_manual.pdf|here]].
+The user guide was recently converted to wiki format.  The old PDF version is [[http://www.xorp.org/releases/1.8-CT/docs/user_manual/user_manual.pdf|here]].
 </note>
 ====== Table Of Contents ======
 
