@@ -51,25 +51,27 @@ do {									      \
 // ----------------------------------------------------------------------------
 // XrlDispatcher methods
 
-XrlDispatcherRT
+void
 XrlDispatcher::dispatch_xrl(const string&  method_name,
 			    const XrlArgs& inputs,
-			    XrlDispatcherOT outputs) const
+			    XrlDispatcherCallback outputs) const
 {
     const XrlCmdEntry* c = get_handler(method_name.c_str());
     if (c == 0) {
 	trace_xrl_dispatch("dispatch_xrl (invalid) ", method_name);
 	debug_msg("No handler for %s\n", method_name.c_str());
-	XRL_DISPATCHER_RETURN_ERROR(outputs, XrlError::NO_SUCH_METHOD());
+	return outputs->dispatch(XrlError::NO_SUCH_METHOD(), NULL);
     }
 
     trace_xrl_dispatch("dispatch_xrl (valid) ", method_name);
 #ifdef XORP_ENABLE_ASYNC_SERVER
-    XrlCmdOT resp = callback(this, &XrlDispatcher::dispatch_cb, outputs);
-#else
-    XrlCmdOT resp = &outputs;
-#endif
+    XrlRespCallback resp = callback(this, &XrlDispatcher::dispatch_cb, outputs);
     return c->dispatch(inputs, resp);
+#else
+    XrlArgs resp;
+    XrlCmdError e = c->dispatch(inputs, &resp);
+    outputs->dispatch(e, &resp);
+#endif
 }
 
 XrlDispatcher::XI*
@@ -82,18 +84,20 @@ XrlDispatcher::lookup_xrl(const string& name) const
     return new XI(c);
 }
 
-XrlDispatcherRT
-XrlDispatcher::dispatch_xrl_fast(const XI& xi, XrlDispatcherOT outputs) const
+void
+XrlDispatcher::dispatch_xrl_fast(const XI& xi,
+				 XrlDispatcherCallback outputs) const
 {
 #ifdef XORP_ENABLE_ASYNC_SERVER
-    XrlCmdOT resp = callback(this, &XrlDispatcher::dispatch_cb, outputs);
-#else
-    XrlCmdOT resp = &outputs;
-#endif
+    XrlRespCallback resp = callback(this, &XrlDispatcher::dispatch_cb, outputs);
     return xi._cmd->dispatch(xi._xrl.args(), resp);
+#else
+    XrlArgs resp;
+    XrlCmdError e = xi._cmd->dispatch(xi._xrl.args(), &resp);
+    return outputs->dispatch(e, &resp);
+#endif
 }
 
-#ifdef XORP_ENABLE_ASYNC_SERVER
 void
 XrlDispatcher::dispatch_cb(const XrlCmdError &err,
 			   const XrlArgs *outputs,
@@ -101,4 +105,3 @@ XrlDispatcher::dispatch_cb(const XrlCmdError &err,
 {
     resp->dispatch(err, outputs);
 }
-#endif

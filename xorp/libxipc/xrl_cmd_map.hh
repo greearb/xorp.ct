@@ -47,11 +47,6 @@ XrlRespCallback;
 
 typedef XrlRespCallback XrlCmdOT;
 
-#define XRL_CMD_OPT_CALLBACK(V) , const XrlRespCallback& V
-
-typedef
-XorpCallback2<void, const XrlArgs&, XrlRespCallback>::RefPtr XrlRecvCallback;
-
 #else
 
 typedef const XrlCmdError XrlCmdRT;
@@ -63,12 +58,10 @@ typedef const XrlCmdError XrlCmdRT;
 
 typedef XrlArgs* XrlCmdOT;
 
-#define XRL_CMD_OPT_CALLBACK(V)
+#endif
 
 typedef
-XorpCallback2<const XrlCmdError, const XrlArgs&, XrlArgs*>::RefPtr XrlRecvCallback;
-
-#endif
+XorpCallback2<XrlCmdRT, const XrlArgs&, XrlCmdOT>::RefPtr XrlRecvCallback;
 
 class XrlCmdEntry {
 public:

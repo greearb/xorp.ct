@@ -46,23 +46,12 @@ public:
     XrlCmdError finder_client_0_2_remove_xrls_for_target_from_cache(
 							const string& target);
 
-#ifdef XORP_ENABLE_ASYNC_SERVER
-    void async_finder_client_0_2_dispatch_tunneled_xrl(const string&	xrl,
-						       FinderClient02DispatchTunneledXrlCB);
-#endif
     XrlCmdError finder_client_0_2_dispatch_tunneled_xrl(const string& xrl,
 							uint32_t& xrl_errno,
 							string&   xrl_errtxt);
     
 protected:
     FinderClientXrlCommandInterface* _client;
-
-#ifdef XORP_ENABLE_ASYNC_SERVER
-private:
-    void dispatch_tunneled_xrl_cb(const XrlCmdError &e,
-				  const XrlArgs *out,
-				  FinderClient02DispatchTunneledXrlCB cb) const;
-#endif
 };
 
 #endif // __LIBXIPC_FINDER_CLIENT_XRL_TARGET_HH__

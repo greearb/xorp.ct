@@ -650,10 +650,10 @@ XrlRouter::send(const Xrl& xrl, const XrlCallback& user_cb)
     return true;
 }
 
-XrlDispatcherRT
-XrlRouter::dispatch_xrl(const string&	method_name,
-			const XrlArgs&	inputs,
-			XrlDispatcherOT outputs) const
+void
+XrlRouter::dispatch_xrl(const string&	      method_name,
+			const XrlArgs&	      inputs,
+			XrlDispatcherCallback outputs) const
 {
     string resolved_method;
     if (_fc->query_self(method_name, resolved_method) == true) {
@@ -661,7 +661,7 @@ XrlRouter::dispatch_xrl(const string&	method_name,
 	    XrlDispatcher::dispatch_xrl(resolved_method, inputs, outputs);
     }
     debug_msg("Could not find mapping for %s\n", method_name.c_str());
-    XRL_DISPATCHER_RETURN_ERROR(outputs, XrlError::NO_SUCH_METHOD());
+    return outputs->dispatch(XrlError::NO_SUCH_METHOD(), NULL);
 }
 
 XrlDispatcher::XI*

@@ -156,9 +156,9 @@ public:
     string toString() const;
 
 private:
-    XrlDispatcherRT do_dispatch(const uint8_t* packed_xrl,
-				size_t packed_xrl_bytes,
-				XrlDispatcherOT response);
+    void do_dispatch(const uint8_t* packed_xrl,
+		     size_t packed_xrl_bytes,
+		     XrlDispatcherCallback response);
 
     XrlPFSTCPListener& _parent;
     XorpFd _sock;
@@ -257,10 +257,10 @@ STCPRequestHandler::read_event(BufferedAsyncReader*		/* source */,
     _reader.set_trigger_bytes(STCPPacketHeader::header_size());
 }
 
-XrlDispatcherRT
+void
 STCPRequestHandler::do_dispatch(const uint8_t* packed_xrl,
 			        size_t packed_xrl_bytes,
-			        XrlDispatcherOT response)
+			        XrlDispatcherCallback response)
 {
     static XrlError e(XrlError::INTERNAL_ERROR().error_code(), "corrupt xrl");
 
@@ -270,18 +270,18 @@ STCPRequestHandler::do_dispatch(const uint8_t* packed_xrl,
     string command;
     size_t cmdsz = Xrl::unpack_command(command, packed_xrl, packed_xrl_bytes);
     if (!cmdsz)
-	XRL_DISPATCHER_RETURN_ERROR(response, e);
+	return response->dispatch(e, NULL);
 
     XrlDispatcher::XI* xi = d->lookup_xrl(command);
     if (!xi)
-	XRL_DISPATCHER_RETURN_ERROR(response, e);
+	return response->dispatch(e, NULL);
 
     Xrl& xrl = xi->_xrl;
 
     try {
 	if (xi->_new) {
 	    if (xrl.unpack(packed_xrl, packed_xrl_bytes) != packed_xrl_bytes)
-		XRL_DISPATCHER_RETURN_ERROR(response, e);
+		return response->dispatch(e, NULL);
 
 	    xi->_new = false;
 	} else {
@@ -289,10 +289,10 @@ STCPRequestHandler::do_dispatch(const uint8_t* packed_xrl,
 	    packed_xrl_bytes -= cmdsz;
 
 	    if (xrl.fill(packed_xrl, packed_xrl_bytes) != packed_xrl_bytes)
-		XRL_DISPATCHER_RETURN_ERROR(response, e);
+		return response->dispatch(e, NULL);
 	}
     } catch (...) {
-	XRL_DISPATCHER_RETURN_ERROR(response, e);
+	return response->dispatch(e, NULL);
     }
 
     return d->dispatch_xrl_fast(*xi, response);
@@ -304,17 +304,9 @@ STCPRequestHandler::dispatch_request(uint32_t 		seqno,
 				     const uint8_t* 	packed_xrl,
 				     size_t 		packed_xrl_bytes)
 {
-#ifdef XORP_ENABLE_ASYNC_SERVER
     do_dispatch(packed_xrl, packed_xrl_bytes,
 		callback(this, &STCPRequestHandler::transmit_response,
 			 seqno, batch));
-#else
-    XrlArgs response;
-    XrlError e;
-
-    e = do_dispatch(packed_xrl, packed_xrl_bytes, response);
-    transmit_response(e, &response, seqno, batch);
-#endif
 }
 
 
