@@ -9,7 +9,7 @@ To begin with, the organization of [[latex2wiki:introduction_xorp_process|An Int
 
 <note warning>At the time of writing, the entire XORP documentation was vastly outdated and deprecated. The former document is particularly affected so don't pay too much attention to every detail of it. You only need to understand the big picture out of it and the remaining explanations will be written here.</note>
 
-<note warning>This page is currently a work in progress. [March 15 2011] It should be better in a couple of days.</note>
+<note warning>This page is currently a work in progress.</note>
 
 
 
