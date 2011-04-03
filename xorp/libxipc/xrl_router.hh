@@ -176,9 +176,9 @@ protected:
      */
     virtual void finder_ready_event(const string& tgt_name);
 
-    XrlDispatcherRT dispatch_xrl(const string&	 method_name,
-				 const XrlArgs&  inputs,
-				 XrlDispatcherOT outputs) const;
+    void dispatch_xrl(const string&	    method_name,
+		      const XrlArgs&        inputs,
+		      XrlDispatcherCallback outputs) const;
 
     /**
      * Resolve callback (slow path).

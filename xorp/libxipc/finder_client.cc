@@ -961,20 +961,16 @@ FinderClient::uncache_xrls_from_target(const string& target)
 			XORP_UINT_CAST(n), target.c_str());
 }
 
-#ifdef XORP_ENABLE_ASYNC_SERVER
 void
-FinderClient::dispatch_tunneled_xrl_cb(const XrlError &e, const XrlArgs *a,
-				       XrlRespCallback cb) const
+FinderClient::dispatch_tunneled_xrl_cb(const XrlError &e,
+				       const XrlArgs *a) const
 {
     UNUSED(e);
     UNUSED(a);
-    cb->dispatch(XrlCmdError::OKAY(), NULL);
 }
-#endif
 
-XrlCmdRT
-FinderClient::dispatch_tunneled_xrl(const string& xrl_str
-				    XRL_CMD_OPT_CALLBACK(cb))
+XrlCmdError
+FinderClient::dispatch_tunneled_xrl(const string& xrl_str)
 {
     finder_trace_init("dispatch_tunneled_xrl(\"%s\")", xrl_str.c_str());
     Xrl xrl;
@@ -983,29 +979,18 @@ FinderClient::dispatch_tunneled_xrl(const string& xrl_str
 	InstanceList::iterator i = find_instance(xrl.target());
 	if (i == _ids.end()) {
 	    finder_trace_result("target not found");
-	    XRL_CMD_RETURN_ERROR
-		(cb, XrlCmdError::COMMAND_FAILED("target not found"));
+	    return XrlCmdError::COMMAND_FAILED("target not found");
 	}
 
-#ifdef XORP_ENABLE_ASYNC_SERVER
 	XrlDispatcherCallback ret_vals =
-	    callback(this, &FinderClient::dispatch_tunneled_xrl_cb, cb);
-#else
-	XrlArgs ret_vals;
-#endif
+	    callback(this, &FinderClient::dispatch_tunneled_xrl_cb);
 
 	i->dispatcher()->dispatch_xrl(xrl.command(),
 				      xrl.args(), ret_vals);
 	finder_trace_result("success");
-
-#ifdef XORP_ENABLE_ASYNC_SERVER
-	return;
-#else
 	return XrlCmdError::OKAY();
-#endif
     } catch (InvalidString&) {
-	XRL_CMD_RETURN_ERROR
-	    (cb, XrlCmdError::COMMAND_FAILED("Bad Xrl string"));
+	return XrlCmdError::COMMAND_FAILED("Bad Xrl string");
     }
 }
 
