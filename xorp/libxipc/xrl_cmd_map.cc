@@ -28,6 +28,14 @@
 
 #include "xrl_cmd_map.hh"
 
+void
+XrlCmdEntry::invoke_sync(const XrlArgs& in, XrlRespCallback out,
+			 XrlRecvSyncCallback impl)
+{
+    XrlArgs out_args;
+    XrlCmdError e = impl->dispatch(in, &out_args);
+    out->dispatch(e, &out_args);
+}
 
 bool
 XrlCmdMap::add_handler(const XrlCmdEntry& cmd)
@@ -42,7 +50,8 @@ XrlCmdMap::add_handler(const XrlCmdEntry& cmd)
 }
 
 bool
-XrlCmdMap::add_handler(const string& cmd, const XrlRecvCallback& rcb)
+XrlCmdMap::add_handler_internal(const string& cmd,
+				const XrlRecvAsyncCallback& rcb)
 {
     return add_handler(XrlCmdEntry(cmd, rcb));
 }

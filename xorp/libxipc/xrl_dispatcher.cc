@@ -64,14 +64,8 @@ XrlDispatcher::dispatch_xrl(const string&  method_name,
     }
 
     trace_xrl_dispatch("dispatch_xrl (valid) ", method_name);
-#ifdef XORP_ENABLE_ASYNC_SERVER
     XrlRespCallback resp = callback(this, &XrlDispatcher::dispatch_cb, outputs);
     return c->dispatch(inputs, resp);
-#else
-    XrlArgs resp;
-    XrlCmdError e = c->dispatch(inputs, &resp);
-    outputs->dispatch(e, &resp);
-#endif
 }
 
 XrlDispatcher::XI*
@@ -88,14 +82,8 @@ void
 XrlDispatcher::dispatch_xrl_fast(const XI& xi,
 				 XrlDispatcherCallback outputs) const
 {
-#ifdef XORP_ENABLE_ASYNC_SERVER
     XrlRespCallback resp = callback(this, &XrlDispatcher::dispatch_cb, outputs);
     return xi._cmd->dispatch(xi._xrl.args(), resp);
-#else
-    XrlArgs resp;
-    XrlCmdError e = xi._cmd->dispatch(xi._xrl.args(), &resp);
-    return outputs->dispatch(e, &resp);
-#endif
 }
 
 void
