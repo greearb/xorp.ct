@@ -132,7 +132,7 @@ def target_virtual_fns(methods):
         r += "    typedef\n"
         r += "    XorpCallback%s<void, const XrlCmdError &" % (len(x.rargs()) + 1)
         for a in x.rargs():
-            r += ",\n%sconst %s&" % (xorp_indent(2), a.cpp_type())
+            r += ",\n%sconst %s*" % (xorp_indent(2), a.cpp_type())
         r += ">::RefPtr\n    %sCB;\n" % (caps_cpp_classname(x.name()))
 
 
@@ -161,7 +161,7 @@ def target_declare_handlers(methods):
         s += "    void callback_%s\n       (const XrlCmdError &e" \
             % cpp_name(x.name())
         for a in x.rargs():
-            s += ",\n%sconst %s& arg_%s" \
+            s += ",\n%sconst %s* arg_%s" \
                 % (xorp_indent(2), a.cpp_type(), cpp_name(a.name()))
         s += ",\n        XrlRespCallback);\n"
         s += "#endif\n\n"
@@ -199,7 +199,7 @@ def target_handler_methods(cls, name, methods):
             % (cls, cpp_name(m.name()))
         for r in m.rargs():
             s += ",\n     "
-            s += "const %s& rarg_%s" % (r.cpp_type(), cpp_name(r.name()))
+            s += "const %s* rarg_%s" % (r.cpp_type(), cpp_name(r.name()))
         s += ",\n     XrlRespCallback c_b)\n"
         s += "{\n"
 
@@ -215,7 +215,7 @@ def target_handler_methods(cls, name, methods):
         if m.rargs():
             s += "\n        /* Marshall return values */\n        try {\n"
             for r in m.rargs():
-                s += xorp_indent(3) + "out.add(\"%s\", rarg_%s);\n" % \
+                s += xorp_indent(3) + "out.add(\"%s\", *rarg_%s);\n" % \
                     (r.name(), cpp_name(r.name()))
             s += \
 """        } catch (const XrlArgs::XrlAtomFound& ) {
@@ -254,7 +254,7 @@ def target_handler_methods(cls, name, methods):
         s += ");\n"
         s += "    return c_b->dispatch(e"
 	for r in m.rargs():
-            s += ",\n        rarg_%s" % (cpp_name(r.name()))
+            s += ",\n        &rarg_%s" % (cpp_name(r.name()))
             sep = ","
         s += ");\n"
         s += "}\n"
