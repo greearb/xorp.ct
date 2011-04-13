@@ -372,14 +372,15 @@ XrlRouter::finalize()
 }
 
 bool
-XrlRouter::add_handler(const string& cmd, const XrlRecvCallback& rcb)
+XrlRouter::add_handler_internal(const string& cmd,
+				const XrlRecvAsyncCallback& rcb)
 {
     if (finalized()) {
 	XLOG_ERROR("Attempting to add handler after XrlRouter finalized.  Handler = \"%s\"", cmd.c_str());
 	return false;
     }
 
-    return XrlCmdMap::add_handler(cmd, rcb);
+    return XrlCmdMap::add_handler_internal(cmd, rcb);
 }
 
 void

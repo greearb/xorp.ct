@@ -130,7 +130,8 @@ public:
      * @param rcb callback to be dispatched when XRL method is received for
      * invocation.
      */
-    bool add_handler(const string& cmd, const XrlRecvCallback& rcb);
+    bool add_handler_internal(const string& cmd,
+			      const XrlRecvAsyncCallback& rcb);
 
     /**
      * @return EventLoop used by XrlRouter instance.
