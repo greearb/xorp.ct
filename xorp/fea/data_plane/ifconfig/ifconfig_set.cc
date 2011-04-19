@@ -445,6 +445,12 @@ void
 IfConfigSet::push_if_creation(const IfTreeInterface* system_ifp,
 			      IfTreeInterface& config_if)
 {
+    // Only try to create/delete VLAN interfaces.  Could update
+    // this if/when we support Linux VETH, BSD epair, etc.
+    if (!config_if.is_vlan()) {
+	return;
+    }
+
     string error_msg;
 
     IfConfigErrorReporterBase& error_reporter =

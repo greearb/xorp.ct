@@ -410,7 +410,7 @@ IfConfigVlanSetLinux::delete_vlan(const string& vlan_name,
     memset(&ifreq, 0, sizeof(ifreq));
     strlcpy(ifreq.ifr_name, vlan_name.c_str(), sizeof(ifreq.ifr_name));
     if (ioctl(_s4, SIOCIFDESTROY, &ifreq) < 0) {
-        error_msg = c_format("Cannot destroy VLAN interface %s: %s",
+        error_msg = c_format("Cannot destroy BSD VLAN interface %s: %s",
                              vlan_name.c_str(), strerror(errno));
         return (XORP_ERROR);
     }
@@ -423,7 +423,7 @@ IfConfigVlanSetLinux::delete_vlan(const string& vlan_name,
     strlcpy(vlanreq.device1, vlan_name.c_str(), sizeof(vlanreq.device1));
     vlanreq.cmd = DEL_VLAN_CMD;
     if (ioctl(_s4, SIOCSIFVLAN, &vlanreq) < 0) {
-	error_msg = c_format("Cannot destroy VLAN interface %s: %s",
+	error_msg = c_format("Cannot destroy Linux VLAN interface %s: %s",
 			     vlan_name.c_str(), strerror(errno));
 	return (XORP_ERROR);
     }
