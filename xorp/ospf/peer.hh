@@ -86,10 +86,7 @@ class PeerOut {
     /**
      * @return prefix length of this interface.
      */
-    uint16_t get_interface_prefix_length() const {
-	XLOG_ASSERT(0 != _interface_prefix_length || VLINK == _interface);
-	return _interface_prefix_length;
-    }
+    uint16_t get_interface_prefix_length() const;
 
     /**
      * @return mtu of this interface.

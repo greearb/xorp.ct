@@ -158,6 +158,22 @@ PeerOut<A>::set_mask(Peer<A> *peer)
 			       .addr()));
 }
 
+
+template <typename A>
+uint16_t
+PeerOut<A>::get_interface_prefix_length() const {
+    if (0 != _interface_prefix_length || VLINK == _interface) {
+	return _interface_prefix_length;
+    }
+    else {
+	XLOG_WARNING("ERROR:  PeerOut: %s/%s has bad prefix: %i  address: %s\n",
+		     _interface.c_str(), _vif.c_str(),
+		     _interface_prefix_length, _interface_address.str().c_str());
+	XLOG_ASSERT(0 != _interface_prefix_length || VLINK == _interface);
+	return 0;
+    }
+}
+
 template <typename A>
 uint16_t
 PeerOut<A>::get_frame_size() const
