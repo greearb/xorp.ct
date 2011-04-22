@@ -999,10 +999,12 @@ PeerManager<A>::configured_network(const A address) const
 {
     typename map<OspfTypes::PeerID, PeerOut<A> *>::const_iterator i;
     for(i = _peers.begin(); i != _peers.end(); i++) {
-	IPNet<A> net((*i).second->get_interface_address(),
-		     (*i).second->get_interface_prefix_length());
-	if (net.contains(address)) 
-	    return true;
+	if ((*i).second->get_interface_prefix_length() != 0) {
+	    IPNet<A> net((*i).second->get_interface_address(),
+			 (*i).second->get_interface_prefix_length());
+	    if (net.contains(address)) 
+		return true;
+	}
     }
 
     return false;

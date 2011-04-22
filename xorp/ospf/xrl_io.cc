@@ -949,6 +949,7 @@ XrlIO<IPv4>::updates_made()
     const IfMgrIPv4Atom* other_addr_atom;
 
     XLOG_WARNING("XrlIO<IPv4>::updates_made, _iftree:\n%s", _iftree.toString().c_str());
+    XLOG_WARNING("XrlIO<IPv4>::updates_made, ifmgr_iftree:\n%s", ifmgr_iftree().toString().c_str());
 
     //
     // Check whether the old interfaces, vifs and addresses are still there

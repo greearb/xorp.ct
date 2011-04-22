@@ -254,7 +254,7 @@ public:
 			       string& vifname) const;
 
     /*  Print this thing out for debugging purposes. */
-    string toString();
+    string toString() const;
 
 protected:
     IfMap	_interfaces;		// The interface configuration state
