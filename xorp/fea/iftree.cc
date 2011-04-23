@@ -1676,12 +1676,29 @@ IfTree::insert_ifindex(IfTreeInterface* ifp)
 
     iter = _ifindex_map.find(ifp->pif_index());
     if (iter != _ifindex_map.end()) {
-	XLOG_WARNING("_ifindex_map appears corrupted, found iter->second: %p (%d) != ifp: %p for pif_index: %d\n",
+	// OpenBSD has a bad habit of re-using ifindexes if you remove
+	// a virtual device and re-add a new one.  This confuses our
+	// hashing.  This code used to assert, but instead attempt fixup.
+	XLOG_WARNING("iftree: %s  _ifindex_map appears corrupted, found iter->second:"
+		     " %p (%d) != ifp: %p for pif_index: %d\n",
+		     name.c_str(),
 		     iter->second, iter->second->pif_index(), ifp, ifp->pif_index());
+	XLOG_WARNING("existing interface: %s   ifp: %s\n",
+		     iter->second->ifname().c_str(), ifp->ifname().c_str());
 
-	XLOG_ASSERT(iter->second == ifp);
-	iter->second = ifp;
-	return;
+	if (iter->second != ifp) {
+	    IfTreeInterface* tmp = iter->second;
+	    XLOG_WARNING("Deleting interface: %s from tree: %s\n",
+			 tmp->ifname().c_str(), name.c_str());
+	    markIfaceDeleted(tmp);
+	    sendEvent(IFTREE_ERASE_IFACE, tmp);
+	    _interfaces.erase(tmp->ifname());
+	    delete tmp;
+	}
+	else {
+	    // Was a duplicate add..still needs fixing, but perhaps not as critical.
+	    return;
+	}
     }
 
     _ifindex_map[ifp->pif_index()] = ifp;
