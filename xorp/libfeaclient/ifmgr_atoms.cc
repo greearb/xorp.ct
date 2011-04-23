@@ -43,9 +43,9 @@ IfMgrIfTree::find_interface(const string& ifname) const
 
 /*  Print this thing out for debugging purposes. */
 string
-IfMgrIfTree::toString() {
+IfMgrIfTree::toString() const {
     ostringstream oss;
-    IfMgrIfTree::IfMap::iterator ii = interfaces().begin();
+    IfMgrIfTree::IfMap::const_iterator ii = interfaces().begin();
     while (ii != interfaces().end()) {
 	oss << ii->second.toString() << endl;
 	ii++;
