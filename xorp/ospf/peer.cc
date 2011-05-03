@@ -158,6 +158,18 @@ PeerOut<A>::set_mask(Peer<A> *peer)
 			       .addr()));
 }
 
+
+template <typename A>
+uint16_t
+PeerOut<A>::get_interface_prefix_length() const {
+    if (!(0 != _interface_prefix_length || VLINK == _interface)) {
+	XLOG_WARNING("ERROR:  PeerOut: %s/%s has bad prefix: %i  address: %s\n",
+		     _interface.c_str(), _vif.c_str(),
+		     _interface_prefix_length, _interface_address.str().c_str());
+    }
+    return _interface_prefix_length;
+}
+
 template <typename A>
 uint16_t
 PeerOut<A>::get_frame_size() const
@@ -546,6 +558,7 @@ PeerOut<A>::bring_up_peering()
 
     // Get the prefix length.
     A source = get_interface_address();
+    // This is effectively this->set_prefix_length, as it's pass-by-reference.
     if (!_ospf.get_prefix_length(_interface, _vif, source,
 				 _interface_prefix_length)) {
 	XLOG_ERROR("Unable to get prefix length for %s/%s/%s",
@@ -1174,8 +1187,8 @@ Peer<A>::receive(A dst, A src, Packet *packet)
 	switch(_ospf.get_version()) {
 	case OspfTypes::V2: {
 	    const uint16_t plen = get_interface_prefix_length();
-	    if (IPNet<A>(get_interface_address(), plen) != 
-		IPNet<A>(src, plen)) {
+	    if ((plen == 0) ||
+		(IPNet<A>(get_interface_address(), plen) != IPNet<A>(src, plen))) {
 		XLOG_TRACE(_ospf.trace()._input_errors,
 			   "Dropping packet from foreign network %s\n",
 			   cstring(IPNet<A>(src, plen)));

@@ -166,7 +166,7 @@ public:
     /**
      * Destructor.
      */
-    ~IfTree();
+    virtual ~IfTree();
 
     /**
      * Assignment operator.

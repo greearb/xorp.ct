@@ -3,6 +3,26 @@
 
 This file contains XORP release notes (most recent releases first).
 
+
+Release 1.8.4
+
+   *  Add async-XRL support, from Steven Simpson
+
+   *  Fix bug in deleting non-VLAN interface.  Commit would fail
+      because the code would attempt to remove the interface from
+      the kernel and fail.
+
+   *  Fix BSD related crash when adding interface with same ifindex
+      as a previous interface.  OpenBSD has the nasty habit of re-using
+      the ifindex when creating/deleting virtual interfaces.
+
+   *  Fix multicast bug that totally breaks XORP multicast on recent
+      Linux kernels.  The problem is that I chose the wrong default
+      multicast routing table (254, instead of 253 as it should be).
+      So, if users don't specify a routing table, it pokes routes into
+      the wrong table.  This wasn't caught in my testing because I always
+      explicitly set the routing table ID.
+
 Release 1.8.3 (March 16, 2011)
 
    *  Change the way VLANs are created.  This changes the config

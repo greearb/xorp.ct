@@ -101,14 +101,10 @@ bool new_mcast_tables_api = false;
  * here. --Ben
  */
 
-/* NOTE:  This needs to go away as soon as we get the official support
- * merged into the linux kernel.
- */
-
 // Assume supported until we know otherwise.
 bool supports_mcast_tables = true;
 
-#define DFLT_MROUTE_TBL 254  /* 'main' routing table id in Linux */
+#define DFLT_MROUTE_TBL 253  /* 'default' routing table id in Linux */
 
 
 // Support for multiple routing tables.
