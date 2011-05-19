@@ -243,7 +243,7 @@ XrlPort::send_to(const IPv4& dst_addr,
 		 const vector<uint8_t>& payload)
 {
     if (_pending) {
-	debug_msg("Port %p: send skipped (pending XRL)\n", this);
+	XLOG_WARNING("Port %p: send skipped (pending XRL)\n", this);
 	return false;
     }
 
@@ -261,9 +261,6 @@ XrlPort::send_to(const IPv4& dst_addr,
 	      cstring(dst_addr), XORP_UINT_CAST(dst_port),
 	      cstring(_local_addr), XORP_UINT_CAST(_local_port));
 
-    if (success)
-	_pending = true;
-
     return success;
 }
 
@@ -278,7 +275,6 @@ XrlPort::send_cb(const XrlError& e)
 	XLOG_WARNING("Failed to send datagram.");
     }
 
-    _pending = false;
     //this->_user.port_io_send_completion(xe == XrlError::OKAY());
 }
 
