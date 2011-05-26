@@ -93,9 +93,7 @@ public:
     /**
      * Send packet.
      *
-     * Status of instance must be running.  When packet is sent,
-     * the @ref pending() method will return true until the Xrl sending the
-     * packet has completed.
+     * Status of instance must be running, and should not be pending.
      *
      * @param dst_addr address to send packet.
      * @param dst_port port to send packet to.
@@ -106,11 +104,6 @@ public:
     bool send_to(const IPv4& dst_addr,
 	         const uint16_t dst_port,
 	         const vector<uint8_t>& payload);
-
-    /**
-     * @return true if an XRL operation is pending, otherwise false.
-     */
-    inline bool pending() const { return _pending; }
 
     /**
      * @return the name of the socket server in use.
@@ -196,6 +189,7 @@ private:
     uint16_t		_local_port;
     IPv4		_all_nodes_addr;
 
+    /* If true, system is initializing and cannot send normal packets with send_to */
     bool		_pending;
 
     string		_sockid;
