@@ -133,8 +133,79 @@ def target_virtual_fns(methods):
         r += "    XorpCallback%s<void, const XrlCmdError &" % (len(x.rargs()) + 1)
         for a in x.rargs():
             r += ",\n%sconst %s*" % (xorp_indent(2), a.cpp_type())
-        r += ">::RefPtr\n    %sCB;\n" % (caps_cpp_classname(x.name()))
+        r += ">::RefPtr\n    %sRF;\n\n" % (caps_cpp_classname(x.name()))
 
+
+        r += "    class %sCB {\n" % (caps_cpp_classname(x.name()))
+        r += "        %sRF cb;\n\n" % (caps_cpp_classname(x.name()))
+        r += "    public:\n"
+        r += "        operator const %sRF& () const { return cb; }\n" \
+            % (caps_cpp_classname(x.name()))
+        r += "        const %sRF& operator ->() const { return cb; }\n" \
+            % (caps_cpp_classname(x.name()))
+
+        r += "        %sCB(const %sRF& cb)\n" \
+            % (caps_cpp_classname(x.name()), caps_cpp_classname(x.name()))
+        r += "          : cb(cb) { }\n\n"
+
+        r += "        void fail(const XrlCmdError &e)"
+        r += " const { cb->dispatch(e"
+        for a in x.rargs():
+            r += ", NULL"
+        r += "); }\n\n"
+
+        r += "        void respond("
+        sep = ""
+        for a in x.rargs():
+            r += sep
+            sep = ",\n                     "
+            r += "const %s& arg_%s" \
+                % (a.cpp_type(), cpp_name(a.name()))
+        r += ") const {\n"
+        r += "            cb->dispatch(XrlCmdError::OKAY()"
+        for a in x.rargs():
+            r += ",\n                         &arg_%s" \
+                % (cpp_name(a.name()))
+        r += ");\n"
+        r += "        }\n"
+
+        r += "    };\n\n"
+
+
+
+        r += "    struct %sRsp :\n      public %sCB {\n" \
+            % (caps_cpp_classname(x.name()), caps_cpp_classname(x.name()))
+        if x.rargs():
+            r += "        struct args_str {\n"
+            for a in x.rargs():
+                r += "            %s %s;\n" \
+                    % (a.cpp_type(), cpp_name(a.name()))
+            r += "        };\n"
+            r += "\n    private:\n"
+            r += "        args_str args;\n"
+            r += "\n    public:\n"
+
+        r += "        %sRsp(const %sRF& cb)\n" \
+            % (caps_cpp_classname(x.name()), caps_cpp_classname(x.name()))
+        r += "          : %sCB(cb)" % (caps_cpp_classname(x.name()))
+        r += " { }\n\n"
+
+        if x.rargs():
+            r += "        void respond() const {\n"
+            r += "            %sCB::\n" % (caps_cpp_classname(x.name()))
+            r += "            respond("
+            sep = ""
+            for a in x.rargs():
+                r += sep;
+                sep = ",\n                        "
+                r += "args.%s" % (cpp_name(a.name()))
+            r += ");\n"
+            r += "        }\n\n"
+            r += "        args_str* operator ->() {\n"
+            r += "            return &args;\n"
+            r += "        }\n"
+
+        r += "    };\n\n"
 
 
         r += "    virtual void async_%s\n       (" \
@@ -297,7 +368,7 @@ def target_handler_methods(cls, name, methods):
 
         s += xorp_indent(1) + "try {\n"
         s += xorp_indent(2) + \
-            "%sCB mycb =\n%scallback(this, &%s::callback_%s, pxa_outputs);\n" \
+            "%sRF mycb =\n%scallback(this, &%s::callback_%s, pxa_outputs);\n" \
             % (caps_cpp_classname(m.name()), xorp_indent(3), \
                    cls, cpp_name(m.name()))
 
