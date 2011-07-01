@@ -1579,10 +1579,10 @@ RIB<A>::print_rib() const
     while (pair != _tables.end()) {
 	RouteTable<A>* rt = *pair;
 	printf("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n");
-	printf(rt->str().c_str());
+	printf("%s", rt->str().c_str());
 	rt = rt->next_table();
 	while (rt != NULL) {
-	    printf(rt->str().c_str());
+	    printf("%s", rt->str().c_str());
 	    rt = rt->next_table();
 	}
 	++pair;
