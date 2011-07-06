@@ -233,15 +233,6 @@ static uint8_t		ra_opt6[IP6OPT_RTALERT_LEN];
 #endif
 #endif // HAVE_IPV6
 
-// XXX: This is a bit of a dirty hack
-#ifdef HOST_OS_WINDOWS
-#ifdef strerror
-#undef strerror
-#endif
-#define strerror(errnum) win_strerror(GetLastError())
-#endif
-
-
 IoIpSocket::IoIpSocket(FeaDataPlaneManager& fea_data_plane_manager,
 		       const IfTree& ift, int family, uint8_t ip_protocol)
     : IoIp(fea_data_plane_manager, ift, family, ip_protocol),
@@ -374,7 +365,7 @@ IoIpSocket::set_multicast_ttl(int ttl, string& error_msg)
 	if (setsockopt(_proto_socket_out, IPPROTO_IP, IP_MULTICAST_TTL,
 		       XORP_SOCKOPT_CAST(&ip_ttl), sizeof(ip_ttl)) < 0) {
 	    error_msg = c_format("setsockopt(IP_MULTICAST_TTL, %u) failed: %s",
-				 ip_ttl, strerror(errno));
+				 ip_ttl, XSTRERROR);
 	    return (XORP_ERROR);
 	}
     }
@@ -393,7 +384,7 @@ IoIpSocket::set_multicast_ttl(int ttl, string& error_msg)
 	if (setsockopt(_proto_socket_out, IPPROTO_IPV6, IPV6_MULTICAST_HOPS,
 		       XORP_SOCKOPT_CAST(&ip_ttl), sizeof(ip_ttl)) < 0) {
 	    error_msg = c_format("setsockopt(IPV6_MULTICAST_HOPS, %u) failed: %s",
-				 ip_ttl, strerror(errno));
+				 ip_ttl, XSTRERROR);
 	    return (XORP_ERROR);
 	}
 #endif // HAVE_IPV6_MULTICAST
@@ -421,7 +412,7 @@ IoIpSocket::enable_multicast_loopback(bool is_enabled, string& error_msg)
 	if (setsockopt(_proto_socket_out, IPPROTO_IP, IP_MULTICAST_LOOP,
 		       XORP_SOCKOPT_CAST(&loop), sizeof(loop)) < 0) {
 	    error_msg = c_format("setsockopt(IP_MULTICAST_LOOP, %u) failed: %s",
-				 loop, strerror(errno));
+				 loop, XSTRERROR);
 	    return (XORP_ERROR);
 	}
     }
@@ -440,7 +431,7 @@ IoIpSocket::enable_multicast_loopback(bool is_enabled, string& error_msg)
 	if (setsockopt(_proto_socket_out, IPPROTO_IPV6, IPV6_MULTICAST_LOOP,
 		       XORP_SOCKOPT_CAST(&loop6), sizeof(loop6)) < 0) {
 	    error_msg = c_format("setsockopt(IPV6_MULTICAST_LOOP, %u) failed: %s",
-				 loop6, strerror(errno));
+				 loop6, XSTRERROR);
 	    return (XORP_ERROR);
 	}
 #endif // HAVE_IPV6_MULTICAST
@@ -493,7 +484,7 @@ IoIpSocket::set_default_multicast_interface(const string& if_name,
 	if (setsockopt(_proto_socket_out, IPPROTO_IP, IP_MULTICAST_IF,
 		       XORP_SOCKOPT_CAST(&in_addr), sizeof(in_addr)) < 0) {
 	    error_msg = c_format("setsockopt(IP_MULTICAST_IF, %s) failed: %s",
-				 cstring(fa.addr()), strerror(errno));
+				 cstring(fa.addr()), XSTRERROR);
 	    return (XORP_ERROR);
 	}
     }
@@ -512,7 +503,7 @@ IoIpSocket::set_default_multicast_interface(const string& if_name,
 	if (setsockopt(_proto_socket_out, IPPROTO_IPV6, IPV6_MULTICAST_IF,
 		       XORP_SOCKOPT_CAST(&pif_index), sizeof(pif_index)) < 0) {
 	    error_msg = c_format("setsockopt(IPV6_MULTICAST_IF, %s/%s) failed: %s",
-				 if_name.c_str(), vif_name.c_str(), strerror(errno));
+				 if_name.c_str(), vif_name.c_str(), XSTRERROR);
 	    return (XORP_ERROR);
 	}
 #endif // HAVE_IPV6_MULTICAST
@@ -598,7 +589,7 @@ IoIpSocket::join_multicast_group(const string& if_name,
 				 cstring(group),
 				 if_name.c_str(),
 				 vif_name.c_str(),
-				 strerror(errno));
+				 XSTRERROR);
 	    goto out_err;
 	}
 	else {
@@ -627,7 +618,7 @@ IoIpSocket::join_multicast_group(const string& if_name,
 				 cstring(group),
 				 if_name.c_str(),
 				 vif_name.c_str(),
-				 strerror(errno));
+				 XSTRERROR);
 	    goto out_err;
 	}
 	else {
@@ -663,7 +654,7 @@ XorpFd* IoIpSocket::mcast_protocol_fd_in() {
 	_mcast_proto_socket_in = socket(family(), SOCK_RAW, ip_protocol());
 	if (!_mcast_proto_socket_in.is_valid()) {
 	    XLOG_WARNING("Cannot open multicast IP protocol %u raw socket: %s",
-			 ip_protocol(), strerror(errno));
+			 ip_protocol(), XSTRERROR);
 	}
 	else {
 	    string err_msg;
@@ -770,7 +761,7 @@ IoIpSocket::leave_multicast_group(const string& if_name,
 				 cstring(group),
 				 if_name.c_str(),
 				  vif_name.c_str(), (int)(*_proto_socket_in),
-				 strerror(errno));
+				 XSTRERROR);
 	    return (XORP_ERROR);
 	}
 	else {
@@ -799,7 +790,7 @@ IoIpSocket::leave_multicast_group(const string& if_name,
 				 cstring(group),
 				 if_name.c_str(),
 				  vif_name.c_str(), (int)(*_proto_socket_in),
-				 strerror(errno));
+				 XSTRERROR);
 	    return (XORP_ERROR);
 	}
 #endif // HAVE_IPV6_MULTICAST
@@ -831,7 +822,7 @@ XorpFd* IoIpSocket::findOrCreateInputSocket(const string& if_name, const string&
 	*rv = socket(family(), SOCK_RAW, ip_protocol());
 	if (!rv->is_valid()) {
 	    error_msg += c_format("Cannot open IP protocol %u raw socket: %s",
-				  ip_protocol(), strerror(errno));
+				  ip_protocol(), XSTRERROR);
 	    delete rv;
 	    return NULL;
 	}
@@ -852,7 +843,7 @@ XorpFd* IoIpSocket::findOrCreateInputSocket(const string& if_name, const string&
 	if (setsockopt(*rv, SOL_SOCKET, SO_BINDTODEVICE,
 		       vif_name.c_str(), vif_name.size() + 1)) {
 	    error_msg += c_format("ERROR:  IoIpSocket::open_proto_socket, setsockopt (BINDTODEVICE):  failed: %s",
-				  strerror(errno));
+				  XSTRERROR);
 	}
 	else {
 	    XLOG_INFO("Successfully bound socket: %i to interface: %s  input sockets size: %i\n",
@@ -921,7 +912,7 @@ int IoIpSocket::initializeInputSocket(XorpFd* rv, string& error_msg) {
 	    if (setsockopt(*rv, ip_protocol(), ICMP6_FILTER,
 			   XORP_SOCKOPT_CAST(&filter), sizeof(filter)) < 0) {
 		error_msg += c_format("setsockopt(ICMP6_FILTER) failed: %s",
-				      strerror(errno));
+				      XSTRERROR);
 		return XORP_ERROR;
 	    }
 	}
@@ -1033,7 +1024,7 @@ IoIpSocket::open_proto_sockets(string& error_msg)
 	_proto_socket_out = socket(family(), SOCK_RAW, ip_protocol());
 	if (!_proto_socket_out.is_valid()) {
 	    error_msg = c_format("Cannot open IP protocol %u raw socket: %s",
-				 ip_protocol(), strerror(errno));
+				 ip_protocol(), XSTRERROR);
 	    return (XORP_ERROR);
 	}
     }
@@ -1160,7 +1151,7 @@ IoIpSocket::enable_ip_hdr_include(bool is_enabled, string& error_msg)
 		       XORP_SOCKOPT_CAST(&bool_flag),
 		       sizeof(bool_flag)) < 0) {
 	    error_msg = c_format("setsockopt(IP_HDRINCL, %u) failed: %s",
-				 bool_flag, strerror(errno));
+				 bool_flag, XSTRERROR);
 	    return (XORP_ERROR);
 	}
 	_is_ip_hdr_included = is_enabled;
@@ -1199,7 +1190,7 @@ IoIpSocket::enable_recv_pktinfo(XorpFd* input_fd, bool is_enabled, string& error
 	if (setsockopt(*input_fd, IPPROTO_IP, IP_RECVIF,
 		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	    XLOG_ERROR("setsockopt(IP_RECVIF, %u) failed: %s",
-		       bool_flag, strerror(errno));
+		       bool_flag, XSTRERROR);
 	    return (XORP_ERROR);
 	}
 #endif // IP_RECVIF
@@ -1209,7 +1200,7 @@ IoIpSocket::enable_recv_pktinfo(XorpFd* input_fd, bool is_enabled, string& error
 	if (setsockopt(*input_fd, IPPROTO_IP, IP_PKTINFO,
 		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	    XLOG_ERROR("setsockopt(IP_PKTINFO, %u) failed: %s",
-		       bool_flag, strerror(errno));
+		       bool_flag, XSTRERROR);
 	    return (XORP_ERROR);
 	}
 #endif // IP_PKTINFO
@@ -1232,7 +1223,7 @@ IoIpSocket::enable_recv_pktinfo(XorpFd* input_fd, bool is_enabled, string& error
 	if (setsockopt(*input_fd, IPPROTO_IPV6, IPV6_RECVPKTINFO,
 		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	    error_msg = c_format("setsockopt(IPV6_RECVPKTINFO, %u) failed: %s",
-				 bool_flag, strerror(errno));
+				 bool_flag, XSTRERROR);
 	    return (XORP_ERROR);
 	}
 #else
@@ -1240,7 +1231,7 @@ IoIpSocket::enable_recv_pktinfo(XorpFd* input_fd, bool is_enabled, string& error
 	if (setsockopt(*input_fd, IPPROTO_IPV6, IPV6_PKTINFO,
 		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	    error_msg = c_format("setsockopt(IPV6_PKTINFO, %u) failed: %s",
-				 bool_flag, strerror(errno));
+				 bool_flag, XSTRERROR);
 	    return (XORP_ERROR);
 	}
 #endif // ! IPV6_RECVPKTINFO
@@ -1252,7 +1243,7 @@ IoIpSocket::enable_recv_pktinfo(XorpFd* input_fd, bool is_enabled, string& error
 	if (setsockopt(*input_fd, IPPROTO_IPV6, IPV6_RECVHOPLIMIT,
 		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	    error_msg = c_format("setsockopt(IPV6_RECVHOPLIMIT, %u) failed: %s",
-				 bool_flag, strerror(errno));
+				 bool_flag, XSTRERROR);
 	    return (XORP_ERROR);
 	}
 #else
@@ -1260,7 +1251,7 @@ IoIpSocket::enable_recv_pktinfo(XorpFd* input_fd, bool is_enabled, string& error
 	if (setsockopt(*input_fd, IPPROTO_IPV6, IPV6_HOPLIMIT,
 		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	    error_msg = c_format("setsockopt(IPV6_HOPLIMIT, %u) failed: %s",
-				 bool_flag, strerror(errno));
+				 bool_flag, XSTRERROR);
 	    return (XORP_ERROR);
 	}
 #endif
@@ -1273,7 +1264,7 @@ IoIpSocket::enable_recv_pktinfo(XorpFd* input_fd, bool is_enabled, string& error
 	if (setsockopt(*input_fd, IPPROTO_IPV6, IPV6_RECVTCLASS,
 		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	    error_msg = c_format("setsockopt(IPV6_RECVTCLASS, %u) failed: %s",
-				 bool_flag, strerror(errno));
+				 bool_flag, XSTRERROR);
 	    return (XORP_ERROR);
 	}
 #endif // IPV6_RECVTCLASS
@@ -1285,7 +1276,7 @@ IoIpSocket::enable_recv_pktinfo(XorpFd* input_fd, bool is_enabled, string& error
 	if (setsockopt(*input_fd, IPPROTO_IPV6, IPV6_RECVHOPOPTS,
 		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	    error_msg = c_format("setsockopt(IPV6_RECVHOPOPTS, %u) failed: %s",
-				 bool_flag, strerror(errno));
+				 bool_flag, XSTRERROR);
 	    return (XORP_ERROR);
 	}
 #else
@@ -1293,7 +1284,7 @@ IoIpSocket::enable_recv_pktinfo(XorpFd* input_fd, bool is_enabled, string& error
 	if (setsockopt(*input_fd, IPPROTO_IPV6, IPV6_HOPOPTS,
 		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	    error_msg = c_format("setsockopt(IPV6_HOPOPTS, %u) failed: %s",
-				 bool_flag, strerror(errno));
+				 bool_flag, XSTRERROR);
 	    return (XORP_ERROR);
 	}
 #endif
@@ -1306,7 +1297,7 @@ IoIpSocket::enable_recv_pktinfo(XorpFd* input_fd, bool is_enabled, string& error
 	if (setsockopt(*input_fd, IPPROTO_IPV6, IPV6_RECVRTHDR,
 		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	    error_msg = c_format("setsockopt(IPV6_RECVRTHDR, %u) failed: %s",
-				 bool_flag, strerror(errno));
+				 bool_flag, XSTRERROR);
 	    return (XORP_ERROR);
 	}
 #else
@@ -1314,7 +1305,7 @@ IoIpSocket::enable_recv_pktinfo(XorpFd* input_fd, bool is_enabled, string& error
 	if (setsockopt(*input_fd, IPPROTO_IPV6, IPV6_RTHDR,
 		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	    error_msg = c_format("setsockopt(IPV6_RTHDR, %u) failed: %s",
-				 bool_flag, strerror(errno));
+				 bool_flag, XSTRERROR);
 	    return (XORP_ERROR);
 	}
 #endif
@@ -1327,7 +1318,7 @@ IoIpSocket::enable_recv_pktinfo(XorpFd* input_fd, bool is_enabled, string& error
 	if (setsockopt(*input_fd, IPPROTO_IPV6, IPV6_RECVDSTOPTS,
 		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	    error_msg = c_format("setsockopt(IPV6_RECVDSTOPTS, %u) failed: %s",
-				 bool_flag, strerror(errno));
+				 bool_flag, XSTRERROR);
 	    return (XORP_ERROR);
 	}
 #else
@@ -1336,7 +1327,7 @@ IoIpSocket::enable_recv_pktinfo(XorpFd* input_fd, bool is_enabled, string& error
 	if (setsockopt(*input_fd, IPPROTO_IPV6, IPV6_DSTOPTS,
 		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	    error_msg = c_format("setsockopt(IPV6_DSTOPTS, %u) failed: %s",
-				 bool_flag, strerror(errno));
+				 bool_flag, XSTRERROR);
 	    return (XORP_ERROR);
 	}
 #endif
@@ -1467,7 +1458,7 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
 	if (errno == EINTR)
 	    return;		// OK: restart receiving
 	XLOG_ERROR("recvmsg() on socket %s failed: %s",
-		   fd.str().c_str(), strerror(errno));
+		   fd.str().c_str(), XSTRERROR);
 	return;			// Error
     }
 
@@ -1487,7 +1478,7 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
 		  fd.str().c_str(), XORP_INT_CAST(nbytes));
 	if (nbytes < 0) {
 	    XLOG_ERROR("recvfrom() failed: %s fd: %s",
-		       strerror(errno), fd.str().c_str());
+		       XSTRERROR, fd.str().c_str());
 	    return;
 	}
     }
@@ -1517,7 +1508,7 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
 		  fd.str().c_str(), XORP_INT_CAST(nbytes));
 	if (nbytes < 0) {
 	    XLOG_ERROR("lpWSARecvMsg() failed: %s, fd: %s",
-		       strerror(errno), fd.str().c_str());
+		       XSTRERROR, fd.str().c_str());
 	    return;
 	}
     }
@@ -2264,7 +2255,7 @@ IoIpSocket::send_packet(const string& if_name,
 		    < 0) {
 		    error_msg = c_format("setsockopt(IP_OPTIONS, IPOPT_RA) "
 					 "failed: %s",
-					 strerror(errno));
+					 XSTRERROR);
 		    XLOG_ERROR("%s", error_msg.c_str());
 		    return (XORP_ERROR);
 		}
@@ -2300,7 +2291,7 @@ IoIpSocket::send_packet(const string& if_name,
 		     sizeof(sin))
 		< 0) {
 		error_msg = c_format("raw socket bind(%s) failed: %s",
-				     cstring(src_address), strerror(errno));
+				     cstring(src_address), XSTRERROR);
 		XLOG_ERROR("%s", error_msg.c_str());
 		return (XORP_ERROR);
 	    }
@@ -2826,7 +2817,7 @@ IoIpSocket::proto_socket_transmit(const IfTreeInterface* ifp,
 	    // E.g., vif_state_check(family());
 	    //
 	    error_msg = c_format("sendmsg failed, error: %s  socket: %i",
-				 strerror(errno), (int)(_proto_socket_out));
+				 XSTRERROR, (int)(_proto_socket_out));
 	} else {
 	    error_msg = c_format("sendmsg(proto %d size %u from %s to %s "
 				 "on interface %s vif %s) failed: %s",
@@ -2836,7 +2827,7 @@ IoIpSocket::proto_socket_transmit(const IfTreeInterface* ifp,
 				 cstring(dst_address),
 				 ifp->ifname().c_str(),
 				 vifp->vifname().c_str(),
-				 strerror(errno));
+				 XSTRERROR);
 	}
     }
 
