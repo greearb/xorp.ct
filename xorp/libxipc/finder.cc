@@ -880,12 +880,16 @@ Finder::add_class_watch(const string& target,
 	return false;
     }
 
-    if (i->second.add_class_watch(class_to_watch)) {
-	announce_class_instances(target, class_to_watch);
-	return true;
+    if (! i->second.add_class_watch(class_to_watch)) {
+	XLOG_WARNING("WARNING: Class watch already existed in add_class_watch,"
+		     " target: %s  class-to-watch: %s\n",
+		     target.c_str(), class_to_watch.c_str());
+	// Old code returned false, which perculated back up the stack.
+	// Seems we could ignore this since it appears to be there already.
+	// --Ben
     }
-    err_msg += "Class watch already existed.\n";
-    return false;
+    announce_class_instances(target, class_to_watch);
+    return true;
 }
 
 bool
