@@ -825,6 +825,9 @@ def DoAllConfig(env, conf, host_os):
                 print "}"
                 print "\nYou will also want to edit similar code around line 282 of:"
                 print "/usr/include/linux/netfilter_ipv6/ip6_tables.h"
+                print "NOTE:  Recent kernels use struct xt_entry_target for the argument"
+                print "   for these methods, so use that instead of ipt_entry_target if that"
+                print "   is the case for your system."
 
     ##########
     # curses for cli/libtecla
