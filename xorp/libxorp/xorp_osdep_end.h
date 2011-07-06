@@ -79,6 +79,14 @@ char *gai_strerror(int ecode);
 }
 #endif
 
-#endif /* HOST_OS_WINDOWS */
+#define XSTRERROR win_strerror(GetLastError())
+
+/* End of windows code */
+#else
+
+/* Non windows code */
+#define XSTRERROR strerror(errno)
+
+#endif
 
 #endif /* __LIBXORP_XORP_OSDEP_END_H__ */
