@@ -100,7 +100,8 @@ TopologyManager::update_tc_entry(const IPv4& dest_addr,
     TcDestMap::iterator ii = _tc_destinations.find(dest_addr);
     for (; ii != _tc_destinations.end(); ii++) {
 	tcid = (*ii).second;
-	if (_topology[tcid]->lasthop() == origin_addr) {
+	if (_topology[tcid]->destination() == dest_addr &&
+	    _topology[tcid]->lasthop() == origin_addr) {
 	    is_found = true;
 	    break;
 	}
