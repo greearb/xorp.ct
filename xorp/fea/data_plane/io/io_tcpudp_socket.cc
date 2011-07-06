@@ -190,7 +190,7 @@ IoTcpUdpSocket::enable_recv_pktinfo(bool is_enabled, string& error_msg)
 	if (setsockopt(_socket_fd, IPPROTO_IP, IP_RECVIF,
 		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	    XLOG_ERROR("setsockopt(IP_RECVIF, %u) failed: %s",
-		       bool_flag, strerror(errno));
+		       bool_flag, XSTRERROR);
 	    return (XORP_ERROR);
 	}
 #endif // IP_RECVIF
@@ -200,7 +200,7 @@ IoTcpUdpSocket::enable_recv_pktinfo(bool is_enabled, string& error_msg)
 	if (setsockopt(_socket_fd, IPPROTO_IP, IP_PKTINFO,
 		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	    XLOG_ERROR("setsockopt(IP_PKTINFO, %u) failed: %s",
-		       bool_flag, strerror(errno));
+		       bool_flag, XSTRERROR);
 	    return (XORP_ERROR);
 	}
 #endif // IP_PKTINFO
@@ -223,7 +223,7 @@ IoTcpUdpSocket::enable_recv_pktinfo(bool is_enabled, string& error_msg)
 	if (setsockopt(_socket_fd, IPPROTO_IPV6, IPV6_RECVPKTINFO,
 		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	    error_msg = c_format("setsockopt(IPV6_RECVPKTINFO, %u) failed: %s",
-				 bool_flag, strerror(errno));
+				 bool_flag, XSTRERROR);
 	    return (XORP_ERROR);
 	}
 #else
@@ -231,7 +231,7 @@ IoTcpUdpSocket::enable_recv_pktinfo(bool is_enabled, string& error_msg)
 	if (setsockopt(_socket_fd, IPPROTO_IPV6, IPV6_PKTINFO,
 		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	    error_msg = c_format("setsockopt(IPV6_PKTINFO, %u) failed: %s",
-				 bool_flag, strerror(errno));
+				 bool_flag, XSTRERROR);
 	    return (XORP_ERROR);
 	}
 #endif // ! IPV6_RECVPKTINFO
@@ -371,7 +371,7 @@ IoTcpUdpSocket::udp_open_and_bind(const IPvX& local_addr, uint16_t local_port, c
 	    if (setsockopt(_socket_fd, SOL_SOCKET, SO_BINDTODEVICE,
 			   local_dev.c_str(), local_dev.size() + 1)) {
 		XLOG_WARNING("ERROR:  IoTcpUdpSocket::udp_open_and_bind, setsockopt (BINDTODEVICE):  failed: %s",
-			     strerror(errno));
+			     XSTRERROR);
 	    }
 	    else {
 		XLOG_INFO("NOTE:  Successfully bound socket: %i to vif: %s\n",
@@ -1452,7 +1452,7 @@ IoTcpUdpSocket::enable_data_recv(string& error_msg)
 			&ss_len)
 	    != 0) {
 	    error_msg = c_format("Cannot get the peer name: %s",
-				 strerror(errno));
+				 XSTRERROR);
 	    stop(dummy_error_msg);
 	    return (XORP_ERROR);
 	}
@@ -1527,7 +1527,7 @@ IoTcpUdpSocket::accept_io_cb(XorpFd fd, IoEventType io_event_type)
     //
     if (getpeername(accept_fd, sockaddr_storage2sockaddr(&ss), &ss_len) != 0) {
 	error_msg = c_format("Error getting the peer name: %s",
-			     strerror(errno));
+			     XSTRERROR);
 	comm_close(accept_fd);
 	io_tcpudp_receiver()->error_event(error_msg, false);
 	return;
@@ -1686,7 +1686,7 @@ IoTcpUdpSocket::data_io_cb(XorpFd fd, IoEventType io_event_type)
 	if (bytes_recv < 0) {
 	    error_msg = c_format("Error receiving TCP/UDP data on "
 				 "socket %s: %s",
-				 _socket_fd.str().c_str(), strerror(errno));
+				 _socket_fd.str().c_str(), XSTRERROR);
 	    io_tcpudp_receiver()->error_event(error_msg, false);
 	    return;
 	}
@@ -1737,7 +1737,7 @@ IoTcpUdpSocket::data_io_cb(XorpFd fd, IoEventType io_event_type)
 		error_msg = c_format("Error receiving TCP/UDP data on "
 				     "socket %s: %s",
 				     _socket_fd.str().c_str(),
-				     strerror(errno));
+				     XSTRERROR);
 		io_tcpudp_receiver()->error_event(error_msg, false);
 		return;
 	    }
@@ -1798,7 +1798,7 @@ IoTcpUdpSocket::data_io_cb(XorpFd fd, IoEventType io_event_type)
 		error_msg = c_format("Error receiving TCP/UDP data on "
 				     "socket %s: %s",
 				     _socket_fd.str().c_str(),
-				     strerror(errno));
+				     XSTRERROR);
 		io_tcpudp_receiver()->error_event(error_msg, false);
 		return;
 	    }
