@@ -306,11 +306,11 @@ IoIpSocket::IoIpSocket(FeaDataPlaneManager& fea_data_plane_manager,
     _sndmh.msg_control		= (caddr_t)_sndcmsgbuf;
     _rcvmh.msg_controllen	= CMSG_BUF_SIZE;
     _sndmh.msg_controllen	= 0;
+#endif // ! HOST_OS_WINDOWS
 
     XLOG_WARNING("Registering with iftree: %s\n", iftree().getName().c_str());
     // Register interest in interface deletions.
     iftree().registerListener(this);
-#endif // ! HOST_OS_WINDOWS
 }
 
 IoIpSocket::~IoIpSocket()
@@ -662,15 +662,8 @@ XorpFd* IoIpSocket::mcast_protocol_fd_in() {
 	// Try to open the socket.
 	_mcast_proto_socket_in = socket(family(), SOCK_RAW, ip_protocol());
 	if (!_mcast_proto_socket_in.is_valid()) {
-	    char *errstr;
-
-#ifdef HAVE_STRERROR
-	    errstr = strerror(errno);
-#else
-	    errstr = "unknown error";
-#endif
 	    XLOG_WARNING("Cannot open multicast IP protocol %u raw socket: %s",
-				 ip_protocol(), errstr);
+			 ip_protocol(), strerror(errno));
 	}
 	else {
 	    string err_msg;
@@ -837,15 +830,8 @@ XorpFd* IoIpSocket::findOrCreateInputSocket(const string& if_name, const string&
 	rv = new XorpFd();
 	*rv = socket(family(), SOCK_RAW, ip_protocol());
 	if (!rv->is_valid()) {
-	    char *errstr;
-
-#ifdef HAVE_STRERROR
-	    errstr = strerror(errno);
-#else
-	    errstr = "unknown error";
-#endif
 	    error_msg += c_format("Cannot open IP protocol %u raw socket: %s",
-				  ip_protocol(), errstr);
+				  ip_protocol(), strerror(errno));
 	    delete rv;
 	    return NULL;
 	}
@@ -866,12 +852,7 @@ XorpFd* IoIpSocket::findOrCreateInputSocket(const string& if_name, const string&
 	if (setsockopt(*rv, SOL_SOCKET, SO_BINDTODEVICE,
 		       vif_name.c_str(), vif_name.size() + 1)) {
 	    error_msg += c_format("ERROR:  IoIpSocket::open_proto_socket, setsockopt (BINDTODEVICE):  failed: %s",
-#ifdef HAVE_STRERROR
-				  strerror(errno)
-#else
-				  "unknown error"
-#endif 
-		);
+				  strerror(errno));
 	}
 	else {
 	    XLOG_INFO("Successfully bound socket: %i to interface: %s  input sockets size: %i\n",
@@ -1017,7 +998,7 @@ int IoIpSocket::initializeInputSocket(XorpFd* rv, string& error_msg) {
     struct sockaddr_in sin;
     memset(&sin, 0, sizeof(sin));
     sin.sin_family = AF_INET;
-    sin.sin_addr.s_addr = INADDR_ANY;
+    sin.sin_addr.s_addr = htonl(INADDR_ANY);
     
     if (SOCKET_ERROR == bind(*rv, (sockaddr *)&sin,
 			     sizeof(sockaddr_in))) {
@@ -1051,15 +1032,8 @@ IoIpSocket::open_proto_sockets(string& error_msg)
     if (! _proto_socket_out.is_valid()) {
 	_proto_socket_out = socket(family(), SOCK_RAW, ip_protocol());
 	if (!_proto_socket_out.is_valid()) {
-	    char *errstr;
-
-#ifdef HAVE_STRERROR
-	    errstr = strerror(errno);
-#else
-	    errstr = "unknown error";
-#endif
 	    error_msg = c_format("Cannot open IP protocol %u raw socket: %s",
-				 ip_protocol(), errstr);
+				 ip_protocol(), strerror(errno));
 	    return (XORP_ERROR);
 	}
     }
@@ -1512,8 +1486,9 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
 	debug_msg("Read fd %s, %d bytes\n",
 		  fd.str().c_str(), XORP_INT_CAST(nbytes));
 	if (nbytes < 0) {
-	    // XLOG_ERROR("recvfrom() failed: %s", strerror(errno));
-	    return;			// Error
+	    XLOG_ERROR("recvfrom() failed: %s fd: %s",
+		       strerror(errno), fd.str().c_str());
+	    return;
 	}
     }
     break;
@@ -1541,8 +1516,9 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
 	debug_msg("Read fd %s, %d bytes\n",
 		  fd.str().c_str(), XORP_INT_CAST(nbytes));
 	if (nbytes < 0) {
-	    // XLOG_ERROR("lpWSARecvMsg() failed: %s", strerror(errno));
-	    return;			// Error
+	    XLOG_ERROR("lpWSARecvMsg() failed: %s, fd: %s",
+		       strerror(errno), fd.str().c_str());
+	    return;
 	}
     }
     break;
