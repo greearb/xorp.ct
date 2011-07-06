@@ -251,7 +251,7 @@ TopologyManager::apply_tc_ansn(const uint16_t ansn,
 	jj = ii++;
 	OlsrTypes::TopologyID tcid = (*jj).second;
 
-	if (is_seq_newer(_topology[tcid]->seqno(), ansn)) {
+	if ( (*jj).first == origin_addr && _topology[tcid]->seqno() != ansn ) {
 	    // 9.5, 2: If any tuple in the topology set has T_seq > ANSN,
 	    // then the TC message was received out of order and MUST be
 	    // silently discarded.
