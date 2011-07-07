@@ -26,6 +26,8 @@
 
 #ifdef HOST_OS_WINDOWS
 
+#include "win_io.h"
+
 /*
  * Numerous kludges for purging items from the Windows namespace
  * which collide with the XORP namespace exist here.
