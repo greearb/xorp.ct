@@ -42,9 +42,7 @@
 #endif
 
 #include "libcomm/comm_api.h"
-
 #include "fea/iftree.hh"
-
 #include "io_tcpudp_socket.hh"
 
 

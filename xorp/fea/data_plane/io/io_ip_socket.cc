@@ -69,9 +69,7 @@
 #endif
 
 #include "libcomm/comm_api.h"
-
 #include "libproto/packet.hh"
-
 #include "mrt/include/ip_mroute.h"
 
 // XXX: _PIM_VT is needed if we want the extra features of <netinet/pim.h>
