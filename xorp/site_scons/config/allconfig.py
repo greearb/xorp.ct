@@ -788,6 +788,7 @@ def DoAllConfig(env, conf, host_os):
     if not has_libpcap:
         print "\nWARNING:  Libpcap was not detected.\n  VRRP and other protocols may have issues."
         print "  On Fedora/RedHat:  yum install libpcap-devel"
+        print "  On Ubuntu:  apt-get install libpcap-dev"
         print "  After install, rm -fr xorp/obj build directory to"
         print "  clear the configure cache before re-building.\n"
 
@@ -803,7 +804,8 @@ def DoAllConfig(env, conf, host_os):
         print "  This is not a real problem, just a small performance"
         print "  loss when using multiple virtual routers on the same system."
         print "  On Debian:  apt-get install libpcap-dev"
-        print "  On Ubuntu:  apt-get install pcap-dev\n"
+        print "  On Older Ubuntu:  apt-get install pcap-dev\n"
+        print "  On Newer Ubuntu:  apt-get install libpcap-dev\n"
 
     if not (has_linux_netfilter_ipv4_ip_tables_h or has_linux_netfilter_ipv6_ip6_tables_h):
         if not (env.has_key('disable_fw') and env['disable_fw']):
@@ -823,6 +825,9 @@ def DoAllConfig(env, conf, host_os):
                 print "}"
                 print "\nYou will also want to edit similar code around line 282 of:"
                 print "/usr/include/linux/netfilter_ipv6/ip6_tables.h"
+                print "NOTE:  Recent kernels use struct xt_entry_target for the argument"
+                print "   for these methods, so use that instead of ipt_entry_target if that"
+                print "   is the case for your system."
 
     ##########
     # curses for cli/libtecla
