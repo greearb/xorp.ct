@@ -285,8 +285,6 @@ HelloMessage::encode(uint8_t* buf, size_t& len)
     embed_8(&buf[offset], willingness());		// willingness
     offset += sizeof(uint8_t);
 
-    bool haslq = false;
-
     // link tuples
     LinkCode thislc;
     for (LinkBag::iterator ii = _links.begin(); ii != _links.end(); ii++) {
@@ -295,8 +293,9 @@ HelloMessage::encode(uint8_t* buf, size_t& len)
 	if (ii == _links.begin() || (*ii).first != thislc) {
 	    thislc = (*ii).first;   // The link code of the new tuple
 
-	    haslq = lai.has_etx();
 #ifdef DETAILED_DEBUG
+	    bool haslq = lai.has_etx();
+
 	    // Invariant: ETX measurements MUST be present in
 	    // an LQ HELLO message, and MUST NOT be present in a
 	    // legacy HELLO message.
