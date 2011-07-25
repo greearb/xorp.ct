@@ -1349,7 +1349,6 @@ CliClient::process_command(const string& command_line)
     CliCommand *parent_cli_command = current_cli_command();
     CliCommand *child_cli_command = NULL;
     int syntax_error_offset_next = current_cli_prompt().size();
-    int syntax_error_offset_prev = syntax_error_offset_next;
     int i, old_len, new_len;
     vector<string> command_global_name;
     bool found_type_match_cb = false;
@@ -1369,7 +1368,6 @@ CliClient::process_command(const string& command_line)
 	    child_cli_command = parent_cli_command->command_find(token);
 
 	    new_len = token_line.size();
-	    syntax_error_offset_prev = syntax_error_offset_next;
 	    syntax_error_offset_next += old_len - new_len;
 	    old_len = new_len;
 
