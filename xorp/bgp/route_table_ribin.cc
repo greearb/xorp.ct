@@ -173,7 +173,6 @@ RibInTable<A>::add_route(const IPNet<A>& net,
 	// Store it locally.  The BgpTrie will copy it into a ChainedSubnetRoute
 	SubnetRoute<A>* tmp_route = new SubnetRoute<A>(net, pa_list, NULL);
 	tmp_route->set_policytags(policy_tags);
-	A nexthop = fpa_list->nexthop_att()->nexthop();
 	typename BgpTrie<A>::iterator iter =
 	    _route_table->insert(net, *tmp_route);
 	tmp_route->unref();

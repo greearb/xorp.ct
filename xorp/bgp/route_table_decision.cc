@@ -384,15 +384,14 @@ DecisionTable<A>::delete_route(InternalMessage<A> &rtmsg,
 	//send an add for the new winner
 	new_winner->route()->set_is_winner(
 		   igp_distance(new_winner->attributes()->nexthop()));
-	int result;
 	InternalMessage<A> new_rt_msg(new_winner->route(), 
 				      new_winner->attributes(),
 				      new_winner->peer_handler(), 
 				      new_winner->genid());
 	//	if (rtmsg.push())
 	//	    new_rt_msg.set_push();
-	result = this->_next_table->add_route(new_rt_msg, 
-					(BGPRouteTable<A>*)this);
+	this->_next_table->add_route(new_rt_msg, 
+				     (BGPRouteTable<A>*)this);
 	if (delayed_push)
 	    this->_next_table->push((BGPRouteTable<A>*)this);
     }
