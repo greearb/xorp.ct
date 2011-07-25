@@ -737,7 +737,7 @@ usage()
 	    "Detailed output.\n");
     fprintf(stderr, "\t -t                             "
 	    "Terse output.\n");
-    exit(-1);
+    exit(1);
 }
 
 static bool
@@ -807,8 +807,6 @@ main(int argc, char* const argv[])
     xlog_start();
 
     try {
-	bool		do_run 	    = true;
-
 	ShowRoutesOptions sr_opts;
 
 	sr_opts.finder_host = FinderConstants::FINDER_DEFAULT_HOST().str();
@@ -828,16 +826,16 @@ main(int argc, char* const argv[])
 		sr_opts.print_style = PRINT_STYLE_TERSE;
 		break;
 	    case 'F':
-		do_run = parse_finder_args(optarg,
-					   sr_opts.finder_host,
-					   sr_opts.finder_port);
+		if (!parse_finder_args(optarg,
+				       sr_opts.finder_host,
+				       sr_opts.finder_port))
+		    usage();
 		break;
 	    case 'T':
 		sr_opts.xrl_target = optarg;
 		break;
 	    default:
 		usage();
-		do_run = false;
 	    }
 	}
 	argc -= optind;

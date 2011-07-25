@@ -183,9 +183,8 @@ OriginTable<A>::routing_protocol_shutdown()
     // handle the background deletion task.  The DeletionTable will
     // plumb itself in.
     //
-    DeletionTable<A>* dt;
-    dt = new DeletionTable<A>("Delete(" + this->tablename() + ")",
-			      this, old_ip_route_table, _eventloop);
+    new DeletionTable<A>("Delete(" + this->tablename() + ")",
+			 this, old_ip_route_table, _eventloop);
 }
 
 template<class A>
