@@ -18,8 +18,6 @@
 // http://xorp.net
 
 
-
-
 //
 // PIM PIM_REGISTER_STOP messages processing.
 //
@@ -34,27 +32,6 @@
 #include "pim_mre.hh"
 #include "pim_mrt.hh"
 #include "pim_vif.hh"
-
-
-//
-// Exported variables
-//
-
-//
-// Local constants definitions
-//
-
-//
-// Local structures/classes, typedefs and macros
-//
-
-//
-// Local variables
-//
-
-//
-// Local functions prototypes
-//
 
 
 /**
@@ -79,6 +56,7 @@ PimVif::pim_register_stop_recv(PimNbr *pim_nbr,
     uint8_t group_mask_len;
     IPvX source_addr(family()), group_addr(family());
     UNUSED(dst);
+    UNUSED(group_addr_reserved_flags);
 
     //
     // Parse the message
