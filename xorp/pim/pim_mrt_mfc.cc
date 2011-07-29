@@ -470,7 +470,6 @@ PimMrt::signal_dataflow_recv(const IPvX& source_addr,
 			     bool is_leq_upcall)
 {
     PimMre *pim_mre;
-    PimMre *pim_mre_wc;
     PimMre *pim_mre_sg;
     PimMfc *pim_mfc;
     uint32_t lookup_flags
@@ -530,17 +529,21 @@ PimMrt::signal_dataflow_recv(const IPvX& source_addr,
 	break;
     } while (false);
 
+    // TODO:  pim_mre_wc is un-used...need to see if it should be used,
+    // and if not, just delete this code. --Ben
+#if 0
     //
     // Get the (*,G) entry
     //
-    pim_mre_wc = NULL;
+    PimMre *pim_mre_wc = NULL;
     if (pim_mre != NULL) {
 	if (pim_mre->is_wc())
 	    pim_mre_wc = pim_mre;
 	else
 	    pim_mre_wc = pim_mre->wc_entry();
     }
-    
+#endif
+
     if (is_geq_upcall)
 	goto is_geq_upcall_label;
     else

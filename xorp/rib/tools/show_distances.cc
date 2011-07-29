@@ -366,7 +366,7 @@ usage()
 	    "Specify Finder host and port to use.\n");
     fprintf(stderr, "\t -T <targetname>                "
 	    "Specify XrlTarget to query.\n\n");
-    exit(-1);
+    exit(1);
 }
 
 static bool
@@ -436,8 +436,6 @@ main(int argc, char* const argv[])
     xlog_start();
 
     try {
-	bool		do_run 	    = true;
-
 	ShowDistancesOptions sad_opts;
 
 	sad_opts.finder_host = FinderConstants::FINDER_DEFAULT_HOST().str();
@@ -448,16 +446,16 @@ main(int argc, char* const argv[])
 	while ((ch = getopt(argc, argv, "F:T:")) != -1) {
 	    switch (ch) {
 	    case 'F':
-		do_run = parse_finder_args(optarg,
-					   sad_opts.finder_host,
-					   sad_opts.finder_port);
+		if (!parse_finder_args(optarg,
+				       sad_opts.finder_host,
+				       sad_opts.finder_port))
+		    usage();
 		break;
 	    case 'T':
 		sad_opts.xrl_target = optarg;
 		break;
 	    default:
 		usage();
-		do_run = false;
 	    }
 	}
 	argc -= optind;

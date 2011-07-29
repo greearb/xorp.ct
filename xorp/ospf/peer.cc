@@ -4870,13 +4870,13 @@ link_state_acknowledgement_received(LinkStateAcknowledgementPacket *lsap)
 	// exist solely for monitoring. The double lookup is also
 	// unnecessary. A call to compare_all_header_fields is all
 	// that is required.
-	bool found = false;
-	bool partial = false;
+	//bool found = false;
+	//bool partial = false;
 	for (j = _lsa_rxmt.begin(); j != _lsa_rxmt.end(); j++) {
 	    if ((*i) == (*j)->get_header()) {
-		partial = true;
+		//partial = true;
 		if (compare_all_header_fields((*i),(*j)->get_header())) {
-		    found = true;
+		    //found = true;
 		    (*j)->remove_nack(get_neighbour_id());
 		    _lsa_rxmt.erase(j);
 		    break;

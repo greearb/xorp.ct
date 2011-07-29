@@ -35,27 +35,6 @@
 #include "pim_vif.hh"
 
 
-//
-// Exported variables
-//
-
-//
-// Local constants definitions
-//
-
-//
-// Local structures/classes, typedefs and macros
-//
-
-//
-// Local variables
-//
-
-//
-// Local functions prototypes
-//
-
-
 /**
  * PimVif::pim_join_prune_recv:
  * @pim_nbr: The PIM neighbor message originator (or NULL if not a neighbor).
@@ -95,6 +74,7 @@ PimVif::pim_join_prune_recv(PimNbr *pim_nbr, const IPvX& src,
     UNUSED(src);
     UNUSED(dst);
     UNUSED(message_type);
+    UNUSED(group_addr_reserved_flags);
 
     //
     // Parse the message

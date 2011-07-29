@@ -40,27 +40,6 @@
 #include "pim_vif.hh"
 
 
-//
-// Exported variables
-//
-
-//
-// Local constants definitions
-//
-
-//
-// Local structures/classes, typedefs and macros
-//
-
-//
-// Local variables
-//
-
-//
-// Local functions prototypes
-//
-
-
 PimJpHeader::PimJpHeader(PimNode* pim_node)
     : _pim_node(pim_node),
       _family(pim_node->family()),
@@ -341,7 +320,7 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
     uint32_t	lookup_flags = 0, create_flags = 0;
     uint32_t	vif_index;
     uint16_t	holdtime;
-    uint8_t	source_mask_len, group_mask_len;
+    uint8_t	group_mask_len;
     IPvX	source_addr(family()), group_addr(family());
     list<PimJpGroup *>::iterator iter;
     PimMre	*pim_mre;
@@ -399,7 +378,6 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	     iter2 != jp_group->rp()->j_list().end();
 	     ++iter2) {
 	    source_addr		= *iter2;
-	    source_mask_len	= IPvX::addr_bitlen(family());
 	    
 	    if (i_am_target_router)
 		pim_mrt().add_task_receive_join_rp(vif_index, source_addr);
@@ -428,7 +406,6 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	     iter2 != jp_group->rp()->p_list().end();
 	     ++iter2) {
 	    source_addr		= *iter2;
-	    source_mask_len	= IPvX::addr_bitlen(family());
 	    
 	    if (i_am_target_router)
 		pim_mrt().add_task_receive_prune_rp(vif_index, source_addr);
@@ -456,7 +433,6 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	     iter2 != jp_group->wc()->j_list().end();
 	     ++iter2) {
 	    source_addr		= *iter2;
-	    source_mask_len	= IPvX::addr_bitlen(family());
 	    
 	    if (i_am_target_router)
 		pim_mrt().add_task_receive_join_wc(vif_index, group_addr);
@@ -485,7 +461,6 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	     iter2 != jp_group->wc()->p_list().end();
 	     ++iter2) {
 	    source_addr		= *iter2;
-	    source_mask_len	= IPvX::addr_bitlen(family());
 	    
 	    if (i_am_target_router) {
 		pim_mrt().add_task_receive_prune_wc(vif_index, group_addr);
@@ -516,7 +491,6 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	     iter2 != jp_group->sg_rpt()->j_list().end();
 	     ++iter2) {
 	    source_addr		= *iter2;
-	    source_mask_len	= IPvX::addr_bitlen(family());
 	    
 	    if (i_am_target_router) {
 		pim_mrt().add_task_receive_join_sg_rpt(vif_index, source_addr,
@@ -545,7 +519,6 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	     iter2 != jp_group->sg_rpt()->p_list().end();
 	     ++iter2) {
 	    source_addr		= *iter2;
-	    source_mask_len	= IPvX::addr_bitlen(family());
 	    
 	    if (i_am_target_router) {
 		pim_mrt().add_task_receive_prune_sg_rpt(vif_index, source_addr,
@@ -608,7 +581,6 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	     iter2 != jp_group->sg()->j_list().end();
 	     ++iter2) {
 	    source_addr		= *iter2;
-	    source_mask_len	= IPvX::addr_bitlen(family());
 	    
 	    if (i_am_target_router) {
 		pim_mrt().add_task_receive_join_sg(vif_index, source_addr,
@@ -639,7 +611,6 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	     iter2 != jp_group->sg()->p_list().end();
 	     ++iter2) {
 	    source_addr		= *iter2;
-	    source_mask_len	= IPvX::addr_bitlen(family());
 	    
 	    if (i_am_target_router) {
 		pim_mrt().add_task_receive_prune_sg(vif_index, source_addr,

@@ -321,15 +321,11 @@ FaceManager::activate_face(const string& interface, const string& vif)
 {
     debug_msg("Interface %s Vif %s\n", interface.c_str(), vif.c_str());
 
-    OlsrTypes::FaceID faceid;
     try {
-	faceid = get_faceid(interface, vif);
+	get_faceid(interface, vif);
     } catch(...) {
 	return false;
     }
-
-    //recompute_addresses_face(faceid);
-    //Face* face = _faces[faceid];
 
     return true;
 }

@@ -84,6 +84,8 @@ PimVif::pim_assert_recv(PimNbr *pim_nbr,
     AssertMetric	assert_metric(src);
     bool		rpt_bit;
     
+    UNUSED(group_addr_reserved_flags);
+
     //
     // Parse the message
     //

@@ -23,11 +23,9 @@
 // #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "rib_module.h"
-
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
-
 #include "libxipc/xrl_router.hh"
 
 #include "register_server.hh"
@@ -131,15 +129,12 @@ RegisterServer::add_entry_to_queue(const string& module_name,
     debug_msg("REGSERV: add_entry_to_queue\n");
     NotifyQueue* queue;
     map<string, NotifyQueue* >::iterator qmi;
-    bool new_queue;
     
     qmi = _queuemap.find(module_name);
     if (qmi == _queuemap.end()) {
 	_queuemap[module_name] = new NotifyQueue(module_name);
 	queue = _queuemap[module_name];
-	new_queue = true;
     } else {
-	new_queue = false;
 	queue = qmi->second;
     }
     queue->add_entry(e);
