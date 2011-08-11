@@ -28,13 +28,24 @@ SARGS="strip=yes shared=no build=mingw32 STRIP=i686-pc-mingw32-strip \
        RANLIB=i686-pc-mingw32-ranlib  AR=i686-pc-mingw32-ar \
        LD=i686-pc-mingw32-ld"
 
+JNUM=4
+
+if [ "$1 " != " " ]
+    then
+    JNUM=$1
+fi
 
 # Clean up any previous installed xorp code.
 rm -fr /usr/local/xorp
 
 # Build
 echo "Building..."
-scons -j4 $SARGS || exit 1
+scons -j$JNUM $SARGS || exit 1
+
+if [ "$2 " == "b " ]
+    then
+    exit 0
+fi
 
 echo "Installing..."
 scons $SARGS install || exit 2
