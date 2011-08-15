@@ -168,7 +168,7 @@ FibConfigEntrySetIPHelper::add_entry(const FteX& fte)
 	break;
     }
 
-    bool is_existing;
+    bool is_existing = false;
 
     IPAddr tmpdest;
     IPAddr tmpnexthop;
@@ -231,8 +231,9 @@ FibConfigEntrySetIPHelper::add_entry(const FteX& fte)
     }
 
     if (result != NO_ERROR) {
-	XLOG_ERROR("%sIpForwardEntry() failed, error: %s\n",
-		   is_existing ? "Set" : "Create", win_strerror(result));
+	XLOG_ERROR("%sIpForwardEntry() failed, error: %s (network = %s nexthop = %s)\n",
+		   is_existing ? "Set" : "Create", win_strerror(result),
+		   fte.net().str().c_str(), fte.nexthop().str().c_str());
 	return (XORP_ERROR);
     }
 
@@ -366,8 +367,9 @@ FibConfigEntrySetIPHelper::delete_entry(const FteX& fte)
     
     DWORD result = DeleteIpForwardEntry(&ipfwdrow);
     if (result != NO_ERROR) {
-	XLOG_ERROR("DeleteIpForwardEntry() failed, error: %s\n",
-		   win_strerror(result));
+	XLOG_ERROR("DeleteIpForwardEntry() failed, error: %s(%i) (network = %s nexthop = %s)\n",
+		   win_strerror(result), (int)(result),
+		   fte.net().str().c_str(), fte.nexthop().str().c_str());
 	return (XORP_ERROR);
     }
 

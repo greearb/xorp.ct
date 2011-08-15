@@ -860,6 +860,9 @@ int IoIpSocket::initializeInputSocket(XorpFd* rv, string& error_msg) {
     // Set various socket options
     //
 
+    // Make socket non-blocking by default.
+    comm_sock_set_blocking(*rv, COMM_SOCK_NONBLOCKING);
+
     // Lots of input buffering
     if (comm_sock_set_rcvbuf(*rv, SO_RCV_BUF_SIZE_MAX,
 			     SO_RCV_BUF_SIZE_MIN)

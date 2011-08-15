@@ -4,7 +4,7 @@
   <!ENTITY dhfirstname "<firstname>Javier</firstname>">
   <!ENTITY dhsurname   "<surname>Fernandez-Sanguino</surname>">
   <!-- Please adjust the date whenever revising the manpage. -->
-  <!ENTITY dhdate      "<date>August 24th, 2007</date>">
+  <!ENTITY dhdate      "<date>July 25th, 2011</date>">
   <!ENTITY dhsection   "<manvolnum>1</manvolnum>">
   <!ENTITY dhemail     "<email>jfs@debian.org</email>">
   <!ENTITY dhusername  "Javier Fernandez-Sanguino">
@@ -87,7 +87,7 @@
     be permitted to make changes to the running router configuration, that user
     needs to be in the Unix group <command>xorp</command>.</para>
 
-    <para>The Debian package installation automaticall sets up both a xorp user
+    <para>The Debian package installation automatically sets up both a xorp user
     and a xorp group to which this user belongs. However, any user can run the
     <command>&dhcmd;</command> command unless locally restricted by the
     administrator.</para>

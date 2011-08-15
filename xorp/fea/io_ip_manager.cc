@@ -223,10 +223,14 @@ IoIpComm::IoIpComm(IoIpManager& io_ip_manager, const IfTree& iftree,
       _family(family),
       _ip_protocol(ip_protocol)
 {
+    XLOG_WARNING("Creating IoIpComm, family: %i  protocol: %i, tree: %s this: %p\n",
+		 (int)(_family), (int)(_ip_protocol), _iftree.getName().c_str(), this);
 }
 
 IoIpComm::~IoIpComm()
 {
+    XLOG_WARNING("Deleting IoIpComm, family: %i  protocol: %i, iftree: %s this: %p\n",
+		 (int)(_family), (int)(_ip_protocol), _iftree.getName().c_str(), this);
     deallocate_io_ip_plugins();
 
     while (_input_filters.empty() == false) {
@@ -810,6 +814,8 @@ IoIpManager::erase_filters(CommTable& comm_table, FilterBag& filters,
 	// from the table and delete it.
 	//
 	if (io_ip_comm->no_input_filters()) {
+	    XLOG_WARNING("Unregister receiver (erase_filters), protocol: %i\n",
+			 (int)(io_ip_comm->ip_protocol()));
 	    comm_table.erase(io_ip_comm->ip_protocol());
 	    delete io_ip_comm;
 	}
@@ -836,8 +842,8 @@ IoIpManager::send(const string&		if_name,
     // Find the IoIpComm associated with this protocol
     CommTable::iterator cti = comm_table.find(ip_protocol);
     if (cti == comm_table.end()) {
-	error_msg = c_format("Protocol %u is not registered",
-			     XORP_UINT_CAST(ip_protocol));
+	error_msg = c_format("%s: Protocol %u is not registered",
+			     __FUNCTION__, XORP_UINT_CAST(ip_protocol));
 	return (XORP_ERROR);
     }
     IoIpComm* io_ip_comm = cti->second;
@@ -879,6 +885,9 @@ IoIpManager::register_receiver(int		family,
     CommTable::iterator cti = comm_table.find(ip_protocol);
     IoIpComm* io_ip_comm = NULL;
     if (cti == comm_table.end()) {
+	XLOG_WARNING("Creating new receiver, name: %s iface: %s  protocol: %i family: %i\n",
+		     receiver_name.c_str(), if_name.c_str(), (int)(ip_protocol),
+		     family);
 	io_ip_comm = new IoIpComm(*this, iftree(), family, ip_protocol);
 	comm_table[ip_protocol] = io_ip_comm;
     } else {
@@ -949,8 +958,8 @@ IoIpManager::unregister_receiver(int		family,
     //
     CommTable::iterator cti = comm_table.find(ip_protocol);
     if (cti == comm_table.end()) {
-	error_msg = c_format("Protocol %u is not registered",
-			     XORP_UINT_CAST(ip_protocol));
+	error_msg = c_format("%s: Protocol %u is not registered",
+			     __FUNCTION__, XORP_UINT_CAST(ip_protocol));
 	return (XORP_ERROR);
     }
     IoIpComm* io_ip_comm = cti->second;
@@ -987,6 +996,8 @@ IoIpManager::unregister_receiver(int		family,
 	    // from the table and delete it.
 	    //
 	    if (io_ip_comm->no_input_filters()) {
+		XLOG_WARNING("Unregister receiver, protocol: %i family: %i\n",
+			     (int)(ip_protocol), family);
 		comm_table.erase(ip_protocol);
 		delete io_ip_comm;
 	    }
@@ -1131,6 +1142,8 @@ IoIpManager::register_system_multicast_upcall_receiver(
     CommTable::iterator cti = comm_table.find(ip_protocol);
     IoIpComm* io_ip_comm = NULL;
     if (cti == comm_table.end()) {
+	XLOG_WARNING("Creating new mcast protocol: %i family: %i\n",
+		     (int)(ip_protocol), family);
 	io_ip_comm = new IoIpComm(*this, iftree(), family, ip_protocol);
 	comm_table[ip_protocol] = io_ip_comm;
     } else {
@@ -1191,8 +1204,8 @@ IoIpManager::unregister_system_multicast_upcall_receiver(
     //
     CommTable::iterator cti = comm_table.find(ip_protocol);
     if (cti == comm_table.end()) {
-	error_msg = c_format("Protocol %u is not registered",
-			     XORP_UINT_CAST(ip_protocol));
+	error_msg = c_format("%s: Protocol %u is not registered",
+			     __FUNCTION__, XORP_UINT_CAST(ip_protocol));
 	return (XORP_ERROR);
     }
     IoIpComm* io_ip_comm = cti->second;
@@ -1227,6 +1240,8 @@ IoIpManager::unregister_system_multicast_upcall_receiver(
 	    // from the table and delete it.
 	    //
 	    if (io_ip_comm->no_input_filters()) {
+		XLOG_WARNING("Unregister mcast receiver, protocol: %i family: %i\n",
+			     (int)(ip_protocol), family);
 		comm_table.erase(ip_protocol);
 		delete io_ip_comm;
 	    }
