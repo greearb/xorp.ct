@@ -699,10 +699,11 @@ const TimeVal XrlPFSTCPSender::DEFAULT_SENDER_KEEPALIVE_PERIOD = TimeVal(10, 0);
 
 uint32_t XrlPFSTCPSender::_next_uid = 0;
 
-XrlPFSTCPSender::XrlPFSTCPSender(EventLoop& e, const char* addr_slash_port,
+XrlPFSTCPSender::XrlPFSTCPSender(const string& name, EventLoop& e,
+				 const char* addr_slash_port,
 				 TimeVal keepalive_time)
     throw (XrlPFConstructorError)
-    : XrlPFSender(e, addr_slash_port),
+	: XrlPFSender(name, e, addr_slash_port),
       _uid(_next_uid++),
       _keepalive_time(keepalive_time),
       _batching(false)
@@ -711,9 +712,10 @@ XrlPFSTCPSender::XrlPFSTCPSender(EventLoop& e, const char* addr_slash_port,
     construct();
 }
 
-XrlPFSTCPSender::XrlPFSTCPSender(EventLoop* e, const char* addr_slash_port,
+XrlPFSTCPSender::XrlPFSTCPSender(const string& name, EventLoop* e,
+				 const char* addr_slash_port,
 				 TimeVal keepalive_time)
-    : XrlPFSender(*e, addr_slash_port),
+	: XrlPFSender(name, *e, addr_slash_port),
       _uid(_next_uid++), _writer(NULL),
       _keepalive_time(keepalive_time),
       _reader(NULL), _batching(false)

@@ -81,7 +81,7 @@ public:
     XorpCallback2<void, const XrlError&, XrlArgs*>::RefPtr SendCallback;
 
 public:
-    XrlPFSender(EventLoop& e, const char* address);
+    XrlPFSender(const string& name, EventLoop& e, const char* address);
     virtual ~XrlPFSender();
 
     /**
@@ -125,6 +125,7 @@ public:
 protected:
     EventLoop& _eventloop;
     string _address;
+    string _name; // for debugging
 };
 
 #endif // __LIBXIPC_XRL_PF_HH__

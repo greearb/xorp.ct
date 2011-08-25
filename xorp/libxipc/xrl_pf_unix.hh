@@ -44,7 +44,8 @@ private:
 
 class XrlPFUNIXSender : public XrlPFSTCPSender {
 public:
-    XrlPFUNIXSender(EventLoop& e, const char* address = 0);
+    XrlPFUNIXSender(const string& name,
+		    EventLoop& e, const char* address = 0);
 
     const char* protocol() const;
     static const char* protocol_name();

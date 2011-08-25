@@ -71,10 +71,10 @@ private:
  */
 class XrlPFSTCPSender : public XrlPFSender {
 public:
-    XrlPFSTCPSender(EventLoop& e, const char* address = 0,
+    XrlPFSTCPSender(const string& name, EventLoop& e, const char* address = 0,
 	TimeVal keepalive_period = DEFAULT_SENDER_KEEPALIVE_PERIOD)
 	throw (XrlPFConstructorError);
-    XrlPFSTCPSender(EventLoop* e, const char* address = 0,
+    XrlPFSTCPSender(const string& name, EventLoop* e, const char* address = 0,
 	TimeVal keepalive_period = DEFAULT_SENDER_KEEPALIVE_PERIOD);
     virtual ~XrlPFSTCPSender();
 

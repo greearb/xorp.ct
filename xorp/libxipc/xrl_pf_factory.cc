@@ -38,7 +38,8 @@
 // STCP senders with one per sender destination address.
 
 ref_ptr<XrlPFSender>
-XrlPFSenderFactory::create_sender(EventLoop&	eventloop,
+XrlPFSenderFactory::create_sender(const string& name,
+				  EventLoop&	eventloop,
 				  const char*	protocol,
 				  const char*	address)
 {
@@ -47,12 +48,12 @@ XrlPFSenderFactory::create_sender(EventLoop&	eventloop,
     ref_ptr<XrlPFSender> rv;
     try {
 	if (strcmp(XrlPFSTCPSender::protocol_name(), protocol) == 0) {
-	    rv = new XrlPFSTCPSender(eventloop, address);
+	    rv = new XrlPFSTCPSender(name, eventloop, address);
 	    return rv;
 	}
 #ifndef	HOST_OS_WINDOWS
 	if (strcmp(XrlPFUNIXSender::protocol_name(), protocol) == 0) {
-	    rv = new XrlPFUNIXSender(eventloop, address);
+	    rv = new XrlPFUNIXSender(name, eventloop, address);
 	    return rv;
 	}
 #endif
@@ -64,7 +65,7 @@ XrlPFSenderFactory::create_sender(EventLoop&	eventloop,
 }
 
 ref_ptr<XrlPFSender>
-XrlPFSenderFactory::create_sender(EventLoop& eventloop,
+XrlPFSenderFactory::create_sender(const string& name, EventLoop& eventloop,
 				  const char* protocol_colon_address)
 {
     char *colon = strstr(const_cast<char*>(protocol_colon_address), ":");
@@ -76,7 +77,7 @@ XrlPFSenderFactory::create_sender(EventLoop& eventloop,
     }
 
     string protocol(protocol_colon_address, colon - protocol_colon_address);
-    return create_sender(eventloop, protocol.c_str(), colon + 1);
+    return create_sender(name, eventloop, protocol.c_str(), colon + 1);
 }
 
 void
