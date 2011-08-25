@@ -49,6 +49,16 @@ BufferedAsyncReader::~BufferedAsyncReader()
     stop();
 }
 
+string BufferedAsyncReader::toString() const {
+    ostringstream oss;
+    oss << "head_bytes: " << _config.head_bytes << " trigger-bytes: "
+	<< _config.trigger_bytes << " reserve-bytes: "
+	<< _config.reserve_bytes << " fd: " << _fd.str()
+	<< " last_error: " << _last_error << " priority: "
+	<< _priority << endl;
+    return oss.str();
+}
+
 inline void
 BufferedAsyncReader::provision_trigger_bytes()
 {

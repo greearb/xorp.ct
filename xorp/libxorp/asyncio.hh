@@ -207,6 +207,8 @@ public:
      */
     void flush_buffers();
 
+    virtual string toString() const;
+
 protected:
     class BufferInfo :
         public NONCOPYABLE

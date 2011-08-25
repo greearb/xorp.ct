@@ -90,6 +90,7 @@ public:
     const TimeVal&	keepalive_time() const	    { return _keepalive_time; }
     void	        batch_start();
     void	        batch_stop();
+    virtual string toString() const; // for debugging
 
 protected:
     void construct();
