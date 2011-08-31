@@ -468,8 +468,7 @@ XrlRouter::lookup_sender(const Xrl& xrl, FinderDBEntry* dbe)
     // create sender
     while (dbe->xrls().size()) {
 	const Xrl& x = dbe->xrls().front();
-
-	s = XrlPFSenderFactory::create_sender(_e, x.protocol().c_str(),
+	s = XrlPFSenderFactory::create_sender(dbe->key(), _e, x.protocol().c_str(),
 					      x.target().c_str());
 	if (s.get() != 0)
 	    break;

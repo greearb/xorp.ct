@@ -181,6 +181,9 @@ AsyncFileReader::read(XorpFd fd, IoEventType type)
 	if (done == SOCKET_ERROR) {
 	    _last_error = WSAGetLastError();
 	    done = -1;
+	    XLOG_WARNING("read error: _fd: %i  offset: %i  total-len: %i error: %s\n",
+			 (int)(_fd), (int)(head->offset()), (int)(head->buffer_bytes()),
+			 XSTRERROR);
 	} else if (done == 0) {
 	    // Graceful close; make sure complete_transfer() gets this.
 	    debug_msg("graceful close detected\n");
@@ -378,6 +381,16 @@ AsyncFileReader::flush_buffers()
 	delete head;
     }
 }
+
+string AsyncFileReader::toString() const {
+    ostringstream oss;
+    oss << AsyncFileOperator::toString() << " buffers: " << _buffers.size() << endl;
+#ifdef HOST_OS_WINDOWS
+    oss << " disconnect-added: " << _disconnect_added << endl;
+#endif
+    return oss.str();
+}
+
 
 // ----------------------------------------------------------------------------
 // AsyncFileWriter write method and entry hook

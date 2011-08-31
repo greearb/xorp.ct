@@ -140,8 +140,8 @@ XrlPFUNIXListener::decode_address(string& address)
 //
 ////////////////////////
 
-XrlPFUNIXSender::XrlPFUNIXSender(EventLoop& e, const char* addr)
-    : XrlPFSTCPSender(&e, addr)
+XrlPFUNIXSender::XrlPFUNIXSender(const string& name, EventLoop& e, const char* addr)
+	: XrlPFSTCPSender(name, &e, addr)
 {
     string address = addr;
     XrlPFUNIXListener::decode_address(address);

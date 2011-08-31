@@ -19,8 +19,6 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxipc/xrl_pf_factory.hh,v 1.15 2008/10/02 21:57:25 bms Exp $
-
 #ifndef __LIBXIPC_XRL_PF_FACTORY_HH__
 #define __LIBXIPC_XRL_PF_FACTORY_HH__
 
@@ -32,11 +30,12 @@ public:
     static void	 	startup();
     static void	 	shutdown();
 
-    static ref_ptr<XrlPFSender> create_sender(
-        EventLoop& eventloop, const char* proto_colon_addr);
+    static ref_ptr<XrlPFSender> create_sender(const string& name, EventLoop& eventloop,
+					      const char* proto_colon_addr);
 
-    static ref_ptr<XrlPFSender> create_sender(EventLoop& e,
-        const char* protocol, const char* address);
+    static ref_ptr<XrlPFSender> create_sender(const string& name, EventLoop& e,
+					      const char* protocol,
+					      const char* address);
 };
 
 #endif // __LIBXIPC_XRL_PF_FACTORY_HH__

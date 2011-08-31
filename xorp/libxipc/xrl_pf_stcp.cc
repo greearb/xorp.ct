@@ -699,10 +699,11 @@ const TimeVal XrlPFSTCPSender::DEFAULT_SENDER_KEEPALIVE_PERIOD = TimeVal(10, 0);
 
 uint32_t XrlPFSTCPSender::_next_uid = 0;
 
-XrlPFSTCPSender::XrlPFSTCPSender(EventLoop& e, const char* addr_slash_port,
+XrlPFSTCPSender::XrlPFSTCPSender(const string& name, EventLoop& e,
+				 const char* addr_slash_port,
 				 TimeVal keepalive_time)
     throw (XrlPFConstructorError)
-    : XrlPFSender(e, addr_slash_port),
+	: XrlPFSender(name, e, addr_slash_port),
       _uid(_next_uid++),
       _keepalive_time(keepalive_time),
       _batching(false)
@@ -711,9 +712,10 @@ XrlPFSTCPSender::XrlPFSTCPSender(EventLoop& e, const char* addr_slash_port,
     construct();
 }
 
-XrlPFSTCPSender::XrlPFSTCPSender(EventLoop* e, const char* addr_slash_port,
+XrlPFSTCPSender::XrlPFSTCPSender(const string& name, EventLoop* e,
+				 const char* addr_slash_port,
 				 TimeVal keepalive_time)
-    : XrlPFSender(*e, addr_slash_port),
+	: XrlPFSender(name, *e, addr_slash_port),
       _uid(_next_uid++), _writer(NULL),
       _keepalive_time(keepalive_time),
       _reader(NULL), _batching(false)
@@ -1091,6 +1093,29 @@ XrlPFSTCPSender::defer_keepalives()
     }
 }
 
+string XrlPFSTCPSender::toString() const {
+    ostringstream oss;
+    oss << XrlPFSender::toString() << endl;
+    oss << "writer: " << _writer << " uid: " << _uid << " requests-waiting: "
+	<< _requests_waiting.size() << " requests_sent: " << _requests_sent.size()
+	<< " current_seqno: " << _current_seqno << " active_bytes: " << _active_bytes
+	<< "\nactive_requests: " << _active_requests << " keepalive_time: "
+	<< _keepalive_time.str() << " reader: " << _reader << " keepalive_sent: "
+	<< _keepalive_sent << " keepalive_liast_fired: "
+	<< _keepalive_last_fired.str() << "\nprotocol: " << _protocol
+	<< " next_uid: " << _next_uid << " batching: " << _batching
+	<< endl;
+
+    if (_writer) {
+	oss << " writer details: " << _writer->toString() << endl;
+    }
+
+    if (_reader) {
+	oss << " reader details: " << _reader->toString() << endl;
+    }
+    return oss.str();
+}
+
 bool
 XrlPFSTCPSender::send_keepalive()
 {
@@ -1104,6 +1129,8 @@ XrlPFSTCPSender::send_keepalive()
     }
     if (_keepalive_sent == true) {
 	// There's an unack'ed keepalive message.
+	XLOG_ERROR("Un-acked keep-alive message, this:\n%s",
+		   toString().c_str());
 	die("Keepalive timeout");
 	return false;
     }

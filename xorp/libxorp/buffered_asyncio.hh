@@ -139,6 +139,8 @@ public:
      */
     void stop();
 
+    virtual string toString() const;
+
 private:
     BufferedAsyncReader();		// Not directly constructible
 

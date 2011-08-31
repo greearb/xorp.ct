@@ -48,8 +48,8 @@ XrlPFListener::set_dispatcher(const XrlDispatcher* d)
 // ----------------------------------------------------------------------------
 // XrlPFSender
 
-XrlPFSender::XrlPFSender(EventLoop& e, const char* address)
-    : _eventloop(e), _address(address)
+XrlPFSender::XrlPFSender(const string& name, EventLoop& e, const char* address)
+	: _eventloop(e), _address(address), _name(name)
 {
 }
 
@@ -60,6 +60,6 @@ XrlPFSender::~XrlPFSender()
 
 string XrlPFSender::toString() const {
     ostringstream oss;
-    oss << "address: " << _address << " alive: " << alive();
+    oss << _name << ": address: " << _address << " alive: " << alive();
     return oss.str();
 }
