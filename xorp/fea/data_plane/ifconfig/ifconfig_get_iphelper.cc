@@ -199,6 +199,9 @@ IfConfigGetIPHelper::read_config(const IfTree* local_config, IfTree& iftree)
 
 	ifp->set_enabled((curAdapter->OperStatus == IfOperStatusUp));
 
+	XLOG_INFO("ifp->nocarrier: %i  no_carrier: %i\n",
+		  (int)(ifp->no_carrier()), (int)(no_carrier));
+
 	// XXX: vifname == ifname on this platform
 	if (is_newlink)
 	    ifp->add_vif(if_name);

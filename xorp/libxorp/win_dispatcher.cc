@@ -457,16 +457,19 @@ WinDispatcher::wait_and_dispatch(int ms)
     //
     if ((!_polled_pipes.empty()) && (ms > POLLED_INTERVAL_MS || ms < 0))
 	ms = POLLED_INTERVAL_MS;
+    //XLOG_WARNING("win-dispatcher, ms: %i handles-size: %i",
+    //             ms, (int)(_handles.size()));
     if (_handles.empty()) {
 	// We probably don't want to sleep forever with no pending waits,
 	// as Win32 doesn't have the same concept of signals as UNIX does.
 	XLOG_ASSERT(ms != -1);
 	Sleep(ms);
 	retval = WAIT_TIMEOUT;
-    } else { 
+    } else {
 	retval = WaitForMultipleObjects(_handles.size(), &_handles[0],
 					FALSE, ms);
     }
+    //XLOG_WARNING("Done waiting, retval: %i", retval);
     _clock->advance_time();
 
     // Reads need to be handled first because they may come from

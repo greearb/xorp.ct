@@ -96,7 +96,7 @@ public:
 	    uint32_t timeout_s = 0;
 	    timeout_s = strtoul(value, &ep, 10);
 	    if ( !(*value != '\0' && *ep == '\0') &&
-		  (timeout_s <= 0 || timeout_s > 300)) {
+		  (timeout_s <= 0 || timeout_s > 60 * 60 * 24)) {
 		XLOG_ERROR("Invalid \"XORP_LISTENER_KEEPALIVE_TIMEOUT\": %s",
 			   value);
 	    } else {
@@ -124,7 +124,7 @@ public:
 	_writer.stop();
 	debug_msg("STCPRequestHandler (%p) fd = %s\n",
 		  this, _sock.str().c_str());
-	comm_close(_sock);
+	comm_close(_sock.getSocket());
 	_sock.clear();
     }
 
@@ -448,7 +448,7 @@ XrlPFSTCPListener::XrlPFSTCPListener(EventLoop&	    e,
 	xorp_throw(XrlPFConstructorError,
 		   comm_get_last_error_str());
     }
-    if (comm_listen(_sock, COMM_LISTEN_DEFAULT_BACKLOG) != XORP_OK) {
+    if (comm_listen(_sock.getSocket(), COMM_LISTEN_DEFAULT_BACKLOG) != XORP_OK) {
 	xorp_throw(XrlPFConstructorError,
 		   comm_get_last_error_str());
     }
@@ -456,7 +456,7 @@ XrlPFSTCPListener::XrlPFSTCPListener(EventLoop&	    e,
     string addr;
     if (get_local_socket_details(_sock, addr, port) == false) {
 	int err = comm_get_last_error();
-        comm_close(_sock);
+        comm_close(_sock.getSocket());
 	_sock.clear();
         xorp_throw(XrlPFConstructorError, comm_get_error_str(err));
     }
@@ -479,20 +479,20 @@ XrlPFSTCPListener::~XrlPFSTCPListener()
 	// from list
     }
     _eventloop.remove_ioevent_cb(_sock, IOT_ACCEPT);
-    comm_close(_sock);
+    comm_close(_sock.getSocket());
     _sock.clear();
 }
 
 void
 XrlPFSTCPListener::connect_hook(XorpFd fd, IoEventType /* type */)
 {
-    XorpFd cfd = comm_sock_accept(fd);
+    XorpFd cfd = comm_sock_accept(fd.getSocket());
     if (!cfd.is_valid()) {
 	debug_msg("accept failed: %s\n",
 		  comm_get_last_error_str());
 	return;
     }
-    comm_sock_set_blocking(cfd, COMM_SOCK_NONBLOCKING);
+    comm_sock_set_blocking(cfd.getSocket(), COMM_SOCK_NONBLOCKING);
     add_request_handler(new STCPRequestHandler(*this, cfd));
 }
 
@@ -716,9 +716,9 @@ XrlPFSTCPSender::XrlPFSTCPSender(const string& name, EventLoop* e,
 				 const char* addr_slash_port,
 				 TimeVal keepalive_time)
 	: XrlPFSender(name, *e, addr_slash_port),
-      _uid(_next_uid++), _writer(NULL),
-      _keepalive_time(keepalive_time),
-      _reader(NULL), _batching(false)
+	  _uid(_next_uid++), _writer(NULL),
+	  _keepalive_time(keepalive_time),
+	  _reader(NULL), _batching(false)
 {
 }
 
@@ -732,10 +732,10 @@ XrlPFSTCPSender::construct()
 		   c_format("Could not connect to %s\n", address().c_str()));
     }
 
-    if (comm_sock_set_blocking(_sock, 0) != XORP_OK) {
+    if (comm_sock_set_blocking(_sock.getSocket(), 0) != XORP_OK) {
 	debug_msg("failed to go non-blocking.\n");
 	int err = comm_get_last_error();
-	comm_close(_sock);
+	comm_close(_sock.getSocket());
 	_sock.clear();
 	xorp_throw(XrlPFConstructorError,
 		   c_format("Failed to set fd non-blocking: %s\n",
@@ -763,7 +763,7 @@ XrlPFSTCPSender::construct()
 	uint32_t keepalive_s = 0;
 	keepalive_s = strtoul(value, &ep, 10);
 	if ( !(*value != '\0' && *ep == '\0') &&
-	      (keepalive_s <= 0 || keepalive_s > 120)) {
+	      (keepalive_s <= 0 || keepalive_s > 60 * 60 * 24)) {
 	    XLOG_ERROR("Invalid \"XORP_SENDER_KEEPALIVE_TIME\": %s", value);
 	} else {
 	    _keepalive_time = TimeVal(keepalive_s, 0);
@@ -784,7 +784,7 @@ XrlPFSTCPSender::~XrlPFSTCPSender()
     delete _writer;
     _writer = 0;
     if (_sock.is_valid()) {
-	comm_close(_sock);
+	comm_close(_sock.getSocket());
 	_sock.clear();
     }
     debug_msg("~XrlPFSTCPSender (%p)\n", this);
@@ -808,7 +808,7 @@ XrlPFSTCPSender::die(const char* reason, bool verbose)
     delete _writer;
     _writer = 0;
 
-    comm_close(_sock);
+    comm_close(_sock.getSocket());
     _sock.clear();
 
     // Detach all callbacks before attempting to invoke them.
@@ -1095,14 +1095,19 @@ XrlPFSTCPSender::defer_keepalives()
 
 string XrlPFSTCPSender::toString() const {
     ostringstream oss;
+    TimeVal now;
+    _eventloop.current_time(now);
+    TimeVal ago = now;
+    ago -= _keepalive_last_fired;
+
     oss << XrlPFSender::toString() << endl;
     oss << "writer: " << _writer << " uid: " << _uid << " requests-waiting: "
 	<< _requests_waiting.size() << " requests_sent: " << _requests_sent.size()
 	<< " current_seqno: " << _current_seqno << " active_bytes: " << _active_bytes
 	<< "\nactive_requests: " << _active_requests << " keepalive_time: "
 	<< _keepalive_time.str() << " reader: " << _reader << " keepalive_sent: "
-	<< _keepalive_sent << " keepalive_liast_fired: "
-	<< _keepalive_last_fired.str() << "\nprotocol: " << _protocol
+	<< _keepalive_sent << " keepalive_liast_fired: " << _keepalive_last_fired.str()
+	<< " ago: " << ago.str() << "\nprotocol: " << _protocol
 	<< " next_uid: " << _next_uid << " batching: " << _batching
 	<< endl;
 

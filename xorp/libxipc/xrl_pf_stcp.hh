@@ -75,7 +75,7 @@ public:
 	TimeVal keepalive_period = DEFAULT_SENDER_KEEPALIVE_PERIOD)
 	throw (XrlPFConstructorError);
     XrlPFSTCPSender(const string& name, EventLoop* e, const char* address = 0,
-	TimeVal keepalive_period = DEFAULT_SENDER_KEEPALIVE_PERIOD);
+		    TimeVal keepalive_period = DEFAULT_SENDER_KEEPALIVE_PERIOD);
     virtual ~XrlPFSTCPSender();
 
     bool send(const Xrl& 			x,

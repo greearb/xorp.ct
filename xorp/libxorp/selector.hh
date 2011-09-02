@@ -19,14 +19,9 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxorp/selector.hh,v 1.36 2008/11/07 21:52:58 abittau Exp $
 
 #ifndef __LIBXORP_SELECTOR_HH__
 #define __LIBXORP_SELECTOR_HH__
-
-#ifdef HOST_OS_WINDOWS
-#error "This file is not intended to be included on Windows."
-#endif
 
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -38,6 +33,10 @@
 #include <unistd.h>
 #endif
 
+#include "libxorp/xorp.h"
+
+#ifndef USE_WIN_DISPATCHER
+
 #include "callback.hh"
 #include "ioevents.hh"
 #include "task.hh"
@@ -45,6 +44,7 @@
 class ClockBase;
 class SelectorList;
 class TimeVal;
+
 
 /**
  * Selector event type masks.
@@ -279,5 +279,5 @@ private:
     size_t		_descriptor_count;
     bool		_is_debug;
 };
-
+#endif // USE_WIN_DISPATCHER
 #endif // __LIBXORP_SELECTOR_HH__

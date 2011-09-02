@@ -78,7 +78,8 @@ public:
 
     XorpFd(int fd) : _filedesc(fd) {}
 
-    operator int() const	{ return _filedesc; }
+    operator int() const  { return _filedesc; }
+    int getSocket() const { return _filedesc; }
 
     string str() const		{ return c_format("%d", _filedesc); }
 
@@ -120,7 +121,7 @@ private:
 
 	struct sockaddr_storage ss;
 	socklen_t len = sizeof(ss);
-	int ret = getsockname(*this, (struct sockaddr *)&ss, &len);
+	int ret = getsockname(getSocket(), (struct sockaddr *)&ss, &len);
 	if (ret != -1)
 	    return (FDTYPE_SOCKET);
 	else if (GetLastError() == WSAEINVAL)
@@ -171,7 +172,9 @@ public:
 
     operator HANDLE() const { return _filedesc; }
 
-    operator SOCKET() const { return reinterpret_cast<SOCKET>(_filedesc); }
+    operator SOCKET() const { return getSocket(); }
+
+    SOCKET getSocket() const { return reinterpret_cast<SOCKET>(_filedesc); }
 
     void clear() { _filedesc = BAD_XORPFD; _type = FDTYPE_ERROR; }
 

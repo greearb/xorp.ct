@@ -269,7 +269,7 @@ FinderTcpBase::close()
     _writer.stop();
     _reader.flush_buffers();
     _reader.stop();
-    comm_close(_sock);
+    comm_close(_sock.getSocket());
     debug_msg("Closing fd = %s\n", _sock.str().c_str());
     _sock.clear();
     close_event();
@@ -304,7 +304,7 @@ FinderTcpListenerBase::FinderTcpListenerBase(EventLoop& e,
     if (!_lsock.is_valid()) {
 	xorp_throw(InvalidPort, comm_get_last_error_str());
     }
-    if (comm_listen(_lsock, COMM_LISTEN_DEFAULT_BACKLOG) != XORP_OK) {
+    if (comm_listen(_lsock.getSocket(), COMM_LISTEN_DEFAULT_BACKLOG) != XORP_OK) {
 	xorp_throw(InvalidPort, comm_get_last_error_str());
     }
 
@@ -319,7 +319,7 @@ FinderTcpListenerBase::~FinderTcpListenerBase()
     // XXX: duplicate call; set_enabled() will remove callback
     //_e.remove_ioevent_cb(_lsock, IOT_ACCEPT);
     debug_msg("Destructing Listener with fd = %s\n", _lsock.str().c_str());
-    comm_close(_lsock);
+    comm_close(_lsock.getSocket());
 }
 
 void
@@ -354,7 +354,7 @@ FinderTcpListenerBase::connect_hook(XorpFd fd, IoEventType type)
     UNUSED(fd);
     XorpFd sock;
 
-    sock = comm_sock_accept(_lsock);
+    sock = comm_sock_accept(_lsock.getSocket());
     if (!sock.is_valid()) {
 	XLOG_ERROR("accept(): %s", comm_get_last_error_str());
 	return;
@@ -362,7 +362,7 @@ FinderTcpListenerBase::connect_hook(XorpFd fd, IoEventType type)
 
     sockaddr_in name;
     socklen_t namelen = sizeof(name);
-    if (getpeername(sock, reinterpret_cast<sockaddr*>(&name), &namelen) < 0) {
+    if (getpeername(sock.getSocket(), reinterpret_cast<sockaddr*>(&name), &namelen) < 0) {
 	XLOG_ERROR("getpeername(): %s",
 		   comm_get_last_error_str());
 	return;
@@ -371,7 +371,7 @@ FinderTcpListenerBase::connect_hook(XorpFd fd, IoEventType type)
     IPv4 peer(name);
     if (host_is_permitted(peer)) {
 	debug_msg("Created socket %s\n", sock.str().c_str());
-	if (comm_sock_set_blocking(sock, COMM_SOCK_NONBLOCKING) != XORP_OK) {
+	if (comm_sock_set_blocking(sock.getSocket(), COMM_SOCK_NONBLOCKING) != XORP_OK) {
 	    XLOG_WARNING("Failed to set socket non-blocking.");
 	    return;
 	}
@@ -381,6 +381,6 @@ FinderTcpListenerBase::connect_hook(XorpFd fd, IoEventType type)
 	XLOG_WARNING("Rejected connection attempt from %s",
 		     peer.str().c_str());
     }
-    comm_close(sock);
+    comm_close(sock.getSocket());
 }
 

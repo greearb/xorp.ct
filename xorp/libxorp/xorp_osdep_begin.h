@@ -27,6 +27,7 @@
 
 #ifdef HOST_OS_WINDOWS
 
+#define USE_WIN_DISPATCHER 1
 #define	WIN32_LEAN_AND_MEAN		/* Do not include most headers */
 
 #define	_UNICODE			/* Use Unicode APIs */

@@ -9,7 +9,7 @@
 XORP is an open networking platform that supports OSPF, RIP, BGP,
 OLSR, VRRP, PIM, IGMP (Multicast) and other routing protocols.  Most protocols
 support IPv4 and IPv6 where applicable.  It is known to work on various
-Linux distributions and flavors of BSD.  It does not support MS Windows.
+Linux distributions and flavors of BSD.
 
 XORP started life as a project at the ICSI Center for Open Networking (ICON)
 at the International Computer Science Institute in Berkeley, California,
