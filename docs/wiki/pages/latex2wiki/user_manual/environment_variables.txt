@@ -1,0 +1,9 @@
+Several environment variables affect xorp:
+
+^ Variable ^ Definition ^
+^ XORP_SENDER_KEEPALIVE_TIME | XRL keep-alive timer in seconds. |
+^ XORP_LISTENER_KEEPALIVE_TIME | XRL request keep-alive timer in seconds. |
+^ XRLDISPATCHTRACE | Enable XRL dispatcher tracing if this variable is defined. |
+^ XRLTRACE | Enable some xrl debugging messages in the xrl_router logic. |
+^ XORP_FINDER_SERVER_ADDRESS | Determines where xorp xrl finder logic listens. |
+^ XORP_FINDER_SERVER_PORT | Determines where xorp xrl finder logic listens. |

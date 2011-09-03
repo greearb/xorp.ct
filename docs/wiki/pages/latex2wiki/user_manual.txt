@@ -8,6 +8,7 @@ The user guide was recently converted to wiki format.  The old PDF version is [[
 
   - [[latex2wiki:user_manual:command_structure|Command Structure]]
   - [[latex2wiki:user_manual:configuration_overview|Configuration Overview]]
+  - [[latex2wiki:user_manual:environment_variables|Environment Variables]]
   - [[latex2wiki:user_manual:network_interfaces|Network Interfaces]]
   - [[latex2wiki:user_manual:firewall|Firewall]]
   - [[latex2wiki:user_manual:forwarding_engine|Forwarding Engine]]
