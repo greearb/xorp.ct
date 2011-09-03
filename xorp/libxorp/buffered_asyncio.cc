@@ -196,7 +196,7 @@ BufferedAsyncReader::io_event(XorpFd fd, IoEventType type)
 
 #ifdef HOST_OS_WINDOWS
     if (fd.is_socket()) {
-	read_bytes = ::recvfrom(fd, (char *)tail, tail_bytes, 0,
+	read_bytes = ::recvfrom(fd.getSocket(), (char *)tail, tail_bytes, 0,
 		       NULL, 0);
 	_last_error = WSAGetLastError();
 	WSASetLastError(ERROR_SUCCESS);

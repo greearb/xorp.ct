@@ -149,8 +149,9 @@ IfConfigGetIPHelper::read_config(const IfTree* local_config, IfTree& iftree)
 	    continue;
 
 	wcstombs(if_name, curAdapter->FriendlyName, sizeof(if_name));
-	//XLOG_INFO("Found Iface name: %s  idx: %i iftree: %s\n",
-	//	  if_name, (int)(curAdapter->IfIndex), iftree.getName().c_str());
+	XLOG_INFO("Found Iface name: %s  idx: %i iftree: %s oper-status: %i\n",
+		  if_name, (int)(curAdapter->IfIndex), iftree.getName().c_str(),
+		  curAdapter->OperStatus);
 
 	// Name
 	IfTreeInterface* ifp = iftree.find_interface(if_name);
@@ -189,6 +190,7 @@ IfConfigGetIPHelper::read_config(const IfTree* local_config, IfTree& iftree)
 	uint64_t baudrate = 0;
 	if (curAdapter->OperStatus == IfOperStatusUp)
 	    no_carrier = false;
+
 	// TODO: find the baudrate
 	if (is_newlink || no_carrier != ifp->no_carrier())
 	    ifp->set_no_carrier(no_carrier);
@@ -196,6 +198,9 @@ IfConfigGetIPHelper::read_config(const IfTree* local_config, IfTree& iftree)
 	    ifp->set_baudrate(baudrate);
 
 	ifp->set_enabled((curAdapter->OperStatus == IfOperStatusUp));
+
+	XLOG_INFO("ifp->nocarrier: %i  no_carrier: %i\n",
+		  (int)(ifp->no_carrier()), (int)(no_carrier));
 
 	// XXX: vifname == ifname on this platform
 	if (is_newlink)

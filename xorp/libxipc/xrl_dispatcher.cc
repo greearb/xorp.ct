@@ -82,6 +82,7 @@ void
 XrlDispatcher::dispatch_xrl_fast(const XI& xi,
 				 XrlDispatcherCallback outputs) const
 {
+    trace_xrl_dispatch("dispatch_xrl_fast ", xi._xrl.str());
     XrlRespCallback resp = callback(this, &XrlDispatcher::dispatch_cb, outputs);
     return xi._cmd->dispatch(xi._xrl.args(), resp);
 }

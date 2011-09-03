@@ -319,19 +319,27 @@ bool
 XrlIO<IPv4>::is_address_enabled(const string& interface, const string& vif,
 				const IPv4& address) const
 {
-    debug_msg("Interface %s Vif %s Address %s\n", interface.c_str(),
-	      vif.c_str(), cstring(address));
-
-    if (! is_vif_enabled(interface, vif))
+    if (! is_vif_enabled(interface, vif)) {
+	XLOG_INFO("vif %s/%s is not enabled.\n",
+		  interface.c_str(), vif.c_str());
 	return false;
+    }
 
     const IfMgrIPv4Atom* fa = ifmgr_iftree().find_addr(interface,
 						       vif,
 						       address);
-    if (fa == NULL)
+    if (fa == NULL) {
+	XLOG_INFO("Cannot find ipv4 atom: %s/%s addr: %s\n",
+		  interface.c_str(), vif.c_str(), cstring(address));
 	return false;
+    }
 
-    return (fa->enabled());
+    bool rv = fa->enabled();
+    if (!rv) {
+	XLOG_INFO("IPv4 atom: %s/%s addr: %s is not enabled.\n",
+		  interface.c_str(), vif.c_str(), cstring(address));
+    }
+    return rv;
 }
 
 template <>

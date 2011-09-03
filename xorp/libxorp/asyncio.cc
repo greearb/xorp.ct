@@ -176,7 +176,7 @@ AsyncFileReader::read(XorpFd fd, IoEventType type)
 
     switch (fd.type()) {
     case XorpFd::FDTYPE_SOCKET:
-	done = recv((SOCKET)_fd, (char *)(head->buffer() + head->offset()),
+	done = recv(_fd.getSocket(), (char *)(head->buffer() + head->offset()),
 		    head->buffer_bytes() - head->offset(), 0);
 	if (done == SOCKET_ERROR) {
 	    _last_error = WSAGetLastError();
@@ -251,7 +251,7 @@ AsyncFileReader::read(XorpFd fd, IoEventType type)
     //
     if (_fd.is_socket()) {
 	u_long remaining = 0;
-	int result = ioctlsocket(_fd, FIONREAD, &remaining);
+	int result = ioctlsocket(_fd.getSocket(), FIONREAD, &remaining);
 	if (result != SOCKET_ERROR && remaining > 0) {
 	    _deferred_io_task = _eventloop.new_oneoff_task(
 		callback(this, &AsyncFileReader::read, _fd, IOT_READ));
@@ -626,7 +626,7 @@ AsyncFileWriter::write(XorpFd fd, IoEventType type)
 	    dst_addr.copy_out(sin);
 	    sin.sin_port = htons(dst_port);
 
-	    done = ::sendto(_fd, XORP_CONST_BUF_CAST(_iov[0].iov_base),
+	    done = ::sendto(_fd.getSocket(), XORP_CONST_BUF_CAST(_iov[0].iov_base),
 			    _iov[0].iov_len,
 			    flags,
 			    reinterpret_cast<const sockaddr*>(&sin),
@@ -641,7 +641,7 @@ AsyncFileWriter::write(XorpFd fd, IoEventType type)
 	    dst_addr.copy_out(sin6);
 	    sin6.sin6_port = htons(dst_port);
 
-	    done = ::sendto(_fd, XORP_CONST_BUF_CAST(_iov[0].iov_base),
+	    done = ::sendto(_fd.getSocket(), XORP_CONST_BUF_CAST(_iov[0].iov_base),
 			    _iov[0].iov_len,
 			    flags,
 			    reinterpret_cast<const sockaddr*>(&sin6),
@@ -671,7 +671,7 @@ AsyncFileWriter::write(XorpFd fd, IoEventType type)
 	if (fd.is_socket()) {
 	    // Socket handles take non-blocking writes.
 	    // WSASend() approximates writev().
-	    int result = WSASend((SOCKET)_fd, (LPWSABUF)_iov, iov_cnt,
+	    int result = WSASend(_fd.getSocket(), (LPWSABUF)_iov, iov_cnt,
 				 (LPDWORD)&done, 0, NULL, NULL);
 	    _last_error = (result == SOCKET_ERROR) ? WSAGetLastError() : 0;
 	    if (_last_error != 0)

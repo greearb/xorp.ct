@@ -78,7 +78,7 @@ get_local_socket_details(XorpFd fd, string& addr, uint16_t& port)
     socklen_t slen = sizeof(sin);
     sin.sin_family = AF_INET;
 
-    if (getsockname(fd, (sockaddr*)&sin, &slen) < 0) {
+    if (getsockname(fd.getSocket(), (sockaddr*)&sin, &slen) < 0) {
         XLOG_ERROR("getsockname failed: %s", strerror(errno));
 	return false;
     }
@@ -124,7 +124,7 @@ get_remote_socket_details(XorpFd fd, string& addr, string& port)
     socklen_t slen = sizeof(sin);
     sin.sin_family = AF_INET;
 
-    if (getpeername(fd, (sockaddr*)&sin, &slen) < 0) {
+    if (getpeername(fd.getSocket(), (sockaddr*)&sin, &slen) < 0) {
         XLOG_ERROR("getsockname failed: %s", strerror(errno));
 	return false;
     }
@@ -165,17 +165,17 @@ create_connected_tcp4_socket(const string& addr_slash_port)
     }
 
     // Set the receiving socket buffer size in the kernel
-    if (comm_sock_set_rcvbuf(sock, SO_RCV_BUF_SIZE_MAX, SO_RCV_BUF_SIZE_MIN)
+    if (comm_sock_set_rcvbuf(sock.getSocket(), SO_RCV_BUF_SIZE_MAX, SO_RCV_BUF_SIZE_MIN)
 	< SO_RCV_BUF_SIZE_MIN) {
-	comm_close(sock);
+	comm_close(sock.getSocket());
 	sock.clear();
 	return sock;
     }
 
     // Set the sending socket buffer size in the kernel
-    if (comm_sock_set_sndbuf(sock, SO_SND_BUF_SIZE_MAX, SO_SND_BUF_SIZE_MIN)
+    if (comm_sock_set_sndbuf(sock.getSocket(), SO_SND_BUF_SIZE_MAX, SO_SND_BUF_SIZE_MIN)
 	< SO_SND_BUF_SIZE_MIN) {
-	comm_close(sock);
+	comm_close(sock.getSocket());
 	sock.clear();
 	return sock;
     }

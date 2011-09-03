@@ -302,7 +302,6 @@ template <typename A>
 void
 PeerOut<A>::set_link_status(bool state, const char* dbg)
 {
-    debug_msg("state %s  dbg: %s\n", state ? "up" : "down", dbg);
     XLOG_WARNING("Setting PeerOut link status to: %i  dbg: %s  vif: %s  old-status: %i\n",
 		 (int)(state), dbg, get_if_name().c_str(), _link_status);
     _link_status = state;
@@ -316,13 +315,13 @@ PeerOut<A>::peer_change()
     XLOG_WARNING("PeerOut, peer_change on interface: %s  running: %i  status: %i  link-status: %i",
 		 get_if_name().c_str(), (int)(_running), (int)(_status), (int)(_link_status));
     if (_running) {
-	if (false == _status || false == _link_status) {
+	if (!(_status && _link_status)) {
 	    take_down_peering();
 	    _running = false;
 	}
     }
     else {
-	if (true == _status && true == _link_status) {
+	if (_status && _link_status) {
 	    _running = true;
 	    _running = bring_up_peering();
 	}

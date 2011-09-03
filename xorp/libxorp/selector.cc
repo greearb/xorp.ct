@@ -22,10 +22,9 @@
 
 
 #include "libxorp_module.h"
-
 #include "libxorp/xorp.h"
 
-#ifndef HOST_OS_WINDOWS // Entire file is stubbed out on Windows.
+#ifndef USE_WIN_DISPATCHER
 
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
@@ -271,7 +270,7 @@ SelectorList::add_ioevent_cb(XorpFd		fd,
 		   "descriptor (fd = %s)\n", fd.str().c_str());
     }
 
-    if (fd >= _maxfd) {
+    if (fd.getSocket() >= _maxfd) {
 	_maxfd = fd;
 	if ((size_t)fd >= _selector_entries.size()) {
 	    _selector_entries.resize(fd + 32);

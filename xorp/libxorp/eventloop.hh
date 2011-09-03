@@ -19,7 +19,6 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxorp/eventloop.hh,v 1.41 2008/11/08 05:31:25 atanu Exp $
 
 #ifndef __LIBXORP_EVENTLOOP_HH__
 #define __LIBXORP_EVENTLOOP_HH__
@@ -35,7 +34,7 @@
 #include "callback.hh"
 #include "ioevents.hh"
 
-#ifdef HOST_OS_WINDOWS
+#ifdef USE_WIN_DISPATCHER
 #include "win_dispatcher.hh"
 #else
 #include "selector.hh"
@@ -374,7 +373,7 @@ private:
     bool		_is_debug;	// If true, debug enabled
     // Was the last event at this priority a selector or a task.
     bool		_last_ev_type[XorpTask::PRIORITY_INFINITY]; 
-#ifdef HOST_OS_WINDOWS
+#if USE_WIN_DISPATCHER
     WinDispatcher	_win_dispatcher;
 #else
     SelectorList	_selector_list;
