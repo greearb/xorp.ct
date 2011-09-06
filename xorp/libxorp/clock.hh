@@ -49,15 +49,19 @@ public:
  * An implementation of ClockBase that uses the underlying system's
  * 'get current system time' function as it's clock source.
  */
-class SystemClock : public ClockBase {
+class SystemClock : public ClockBase, NONCOPYABLE {
 public:
     SystemClock();
-    ~SystemClock();
+    virtual ~SystemClock();
     void advance_time();
     void current_time(TimeVal& tv);
 
 private:
     TimeVal* _tv;
+
+#ifdef __WIN32__
+    int ms_time_res;
+#endif
 };
 
 #endif // __LIBXORP_CLOCK_HH__

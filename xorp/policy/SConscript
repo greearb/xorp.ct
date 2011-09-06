@@ -76,6 +76,7 @@ if (env.has_key('mingw') and env['mingw']):
         'ws2_32',
         'iphlpapi',
         'regex',
+        'winmm',
         ])
 
     env.Append(LIBS = ['xorp_core'])

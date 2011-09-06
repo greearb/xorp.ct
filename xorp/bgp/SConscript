@@ -46,6 +46,7 @@ if (env.has_key('mingw') and env['mingw']):
         'iphlpapi',
 #        'mprapi',
         'regex',
+        'winmm',
         ])
 
     env.Append(LIBS = ['xorp_core'])
@@ -157,6 +158,7 @@ if (bgp_env.has_key('mingw') and bgp_env['mingw']):
         'iphlpapi',
 #        'mprapi',
         'regex',
+        'winmm',
         ])
 
     bgp_env.Append(LIBS = ['xorp_core', 'crypto', 'ws2_32'])

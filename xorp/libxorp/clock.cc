@@ -19,13 +19,14 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxorp/clock.cc,v 1.9 2008/10/02 21:57:29 bms Exp $
-
 #include "libxorp_module.h"
 #include "xorp.h"
-
 #include "timeval.hh"
 #include "clock.hh"
+
+#ifdef __WIN32__
+#include "mmsystem.h"
+#endif
 
 ClockBase::~ClockBase()
 {
@@ -33,12 +34,26 @@ ClockBase::~ClockBase()
 
 SystemClock::SystemClock()
 {
+#ifdef __WIN32__
+    ms_time_res = -1;
+    for (int i = 1; i<16; i++) {
+	if (timeBeginPeriod(i) == TIMERR_NOERROR) {
+	    ms_time_res = i;
+	    break;
+	}
+    }
+#endif
     _tv = new TimeVal();
     SystemClock::advance_time();
 }
 
 SystemClock::~SystemClock()
 {
+#ifdef __WIN32__
+    if (ms_time_res >= 0) {
+	timeEndPeriod(ms_time_res);
+    }
+#endif
     delete _tv;
 }
 

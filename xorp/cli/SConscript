@@ -63,6 +63,9 @@ env.AppendUnique(LIBS = [
     'xorp_core',
     ])
 
+if (env.has_key('mingw') and env['mingw']):
+    env.AppendUnique(LIBS = [ 'winmm' ])
+
 if not env['disable_libtecla']:
     env.AppendUnique(LIBS = [
         'xorp_tecla',
