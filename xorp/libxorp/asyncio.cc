@@ -305,18 +305,6 @@ AsyncFileReader::start()
 	return false;
     }
 
-#if 0
-    // XXX: comm_sock_is_connected() is cross-reference to libcomm
-    int is_connected = 0;
-    if (_fd.is_socket()) {
-	if ((comm_sock_is_connected(_fd, &is_connected) != XORP_OK)
-	    || (is_connected == 0)) {
-	    debug_msg("Warning: socket %p may have been closed\n",
-		      (HANDLE)_fd);
-	}
-    }
-#endif // 0
-
     EventLoop& e = _eventloop;
     if (e.add_ioevent_cb(_fd, IOT_READ,
 			 callback(this, &AsyncFileReader::read),
@@ -826,18 +814,6 @@ AsyncFileWriter::start()
 	return false;
     }
 
-#if 0
-    // XXX: comm_sock_is_connected() is cross-reference to libcomm
-    int is_connected = 0;
-    if (_fd.is_socket()) {
-	if ((comm_sock_is_connected(_fd, &is_connected) != XORP_OK)
-	    || (is_connected == 0)) {
-	    debug_msg("Warning: socket %p may have been closed\n",
-		      (HANDLE)_fd);
-	}
-    }
-#endif // 0
-
     EventLoop& e = _eventloop;
     if (e.add_ioevent_cb(_fd, IOT_WRITE,
 			 callback(this, &AsyncFileWriter::write),
@@ -845,30 +821,6 @@ AsyncFileWriter::start()
 	XLOG_ERROR("AsyncFileWriter: Failed to add I/O event callback.");
 	return false;
     }
-#ifdef HOST_OS_WINDOWS
-    _disconnect_added = false;
-    // Disable disconnection notification on write end for now.
-    // Don't bitch if we can't add the notification.
-    // it's a no-op to see if we pick them up on the write side...
-    // XXX: If we fail to add a notification it's possible the socket
-    // might already have been closed?
-#if 0
-    if (_fd.is_socket()) {
-	_disconnect_added = e.add_ioevent_cb(
-	    _fd,
-	    IOT_DISCONNECT,
-	    callback(this, &AsyncFileWriter::disconnect),
-	    _priority);
-#if 0
-	if (_disconnect_added == false) {
-	    XLOG_ERROR("AsyncFileWriter: Failed to add I/O event callback.");
-	    _eventloop.remove_ioevent_cb(_fd, IOT_WRITE);
-	    return false;
-	}
-#endif // 0
-    }
-#endif // 0
-#endif // HOST_OS_WINDOWS
 
 #ifdef EDGE_TRIGGERED_WRITES
     _deferred_io_task = _eventloop.new_oneoff_task(
@@ -889,12 +841,6 @@ AsyncFileWriter::stop()
     _deferred_io_task.unschedule();
 #endif // EDGE_TRIGGERED_WRITES
     _eventloop.remove_ioevent_cb(_fd, IOT_WRITE);
-#ifdef HOST_OS_WINDOWS
-    if (_disconnect_added == true) {
-    	_eventloop.remove_ioevent_cb(_fd, IOT_DISCONNECT);
-	_disconnect_added = false;
-    }
-#endif // HOST_OS_WINDOWS
     _running = false;
 }
 

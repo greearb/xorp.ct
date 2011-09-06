@@ -726,8 +726,7 @@ XrlPFSTCPSender::XrlPFSTCPSender(const string& name, EventLoop& e,
     throw (XrlPFConstructorError)
 	: XrlPFSender(name, e, addr_slash_port),
       _uid(_next_uid++),
-      _keepalive_time(keepalive_time),
-      _batching(false)
+      _keepalive_time(keepalive_time)
 {
     _sock = create_connected_tcp4_socket(addr_slash_port);
     construct();
@@ -739,7 +738,7 @@ XrlPFSTCPSender::XrlPFSTCPSender(const string& name, EventLoop* e,
 	: XrlPFSender(name, *e, addr_slash_port),
 	  _uid(_next_uid++), _writer(NULL),
 	  _keepalive_time(keepalive_time),
-	  _reader(NULL), _batching(false)
+	  _reader(NULL)
 {
 }
 
@@ -897,7 +896,7 @@ XrlPFSTCPSender::send(const Xrl&	x,
 	      x.str().c_str());
 
     RequestState* rs = new RequestState(this, _current_seqno++,
-					_batching, x, cb);
+					false, x, cb);
     send_request(rs);
 
     xassert(_requests_waiting.size() + _requests_sent.size() == _active_requests);
@@ -914,7 +913,7 @@ XrlPFSTCPSender::send_request(RequestState* rs)
     _writer->add_buffer(rs->buffer(), rs->size(),
 			callback(this, &XrlPFSTCPSender::update_writer));
 
-    if ((!_batching || rs->is_keepalive()) && _writer->running() == false)
+    if (!_writer->running())
 	_writer->start();
 }
 
@@ -1137,7 +1136,7 @@ string XrlPFSTCPSender::toString() const {
 	<< _keepalive_time.str() << " reader: " << _reader << " keepalive_sent: "
 	<< _keepalive_sent << " keepalive_liast_fired: " << _keepalive_last_fired.str()
 	<< " ago: " << ago.str() << "\nprotocol: " << _protocol
-	<< " next_uid: " << _next_uid << " batching: " << _batching
+	<< " next_uid: " << _next_uid
 	<< endl;
 
     if (_writer) {
@@ -1179,32 +1178,3 @@ XrlPFSTCPSender::send_keepalive()
     return true;
 }
 
-void
-XrlPFSTCPSender::batch_start()
-{
-#if 0
-    _batching = true;
-#else
-    XLOG_UNREACHABLE();
-#endif
-}
-
-void
-XrlPFSTCPSender::batch_stop()
-{
-#if 0
-    _batching = false;
-
-    // If we aint got no requests, we may not be able to signal to the receiver
-    // to stop batching and we could deadlock.  In this case we should probably
-    // send a keep-alive to resume things.  -sorbo
-    XLOG_ASSERT(_requests_waiting.size());
-
-    _requests_waiting.back()->set_batch(false);
-
-    if (_writer->running() == false)
-	_writer->start();
-#else
-    XLOG_UNREACHABLE();
-#endif
-}

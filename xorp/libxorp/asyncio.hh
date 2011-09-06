@@ -433,7 +433,6 @@ protected:
     void disconnect(XorpFd fd, IoEventType type);
 
     XorpTask		_deferred_io_task;
-    bool		_disconnect_added;
 #endif
 };
 
