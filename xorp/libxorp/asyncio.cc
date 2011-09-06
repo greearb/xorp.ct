@@ -155,18 +155,6 @@ AsyncFileReader::read(XorpFd fd, IoEventType type)
     assert(fd == _fd);
     assert(_buffers.empty() == false);
 
-#if 0
-    // XXX: comm_sock_is_connected() is cross-reference to libcomm
-    int is_connected = 0;
-    if (_fd.is_socket()) {
-	if ((comm_sock_is_connected(_fd, &is_connected) != XORP_OK)
-	    || (is_connected == 0)) {
-	    debug_msg("Warning: socket %p may have been closed\n",
-		      (HANDLE)_fd);
-	}
-    }
-#endif // 0
-
     debug_msg("Buffer count %u\n", XORP_UINT_CAST(_buffers.size()));
 
     BufferInfo* head = _buffers.front();
@@ -253,7 +241,7 @@ AsyncFileReader::read(XorpFd fd, IoEventType type)
 	u_long remaining = 0;
 	int result = ioctlsocket(_fd.getSocket(), FIONREAD, &remaining);
 	if (result != SOCKET_ERROR && remaining > 0) {
-	    _deferred_io_task = _eventloop.new_oneoff_task(
+	    _deferred_io_tasks = _eventloop.new_oneoff_task(
 		callback(this, &AsyncFileReader::read, _fd, IOT_READ));
 	    XLOG_ASSERT(_deferred_io_task.scheduled());
 	}
@@ -522,10 +510,6 @@ AsyncFileWriter::disconnect(XorpFd fd, IoEventType type)
     assert(fd.is_valid()); 
     assert(fd.is_socket()); 
     debug_msg("IOT_DISCONNECT close detected (writer side)\n");
-#if 0
-    BufferInfo* head = _buffers.front();
-    head->dispatch_callback(END_OF_FILE);
-#endif // 0
 }
 #endif // HOST_OS_WINDOWS
 
@@ -552,18 +536,6 @@ AsyncFileWriter::write(XorpFd fd, IoEventType type)
     if (_running == false)
 	return;
 #endif
-
-#if 0
-    // XXX: comm_sock_is_connected() is cross-reference to libcomm
-    int is_connected = 0;
-    if (_fd.is_socket()) {
-	if ((comm_sock_is_connected(_fd, &is_connected) != XORP_OK)
-	    || (is_connected == 0)) {
-	    debug_msg("Warning: socket %p may have been closed\n",
-		      (HANDLE)_fd);
-	}
-    }
-#endif // 0
 
     assert(type == IOT_WRITE);
     assert(fd == _fd);
