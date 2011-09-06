@@ -19,7 +19,6 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxipc/xrl_args.hh,v 1.31 2008/10/02 21:57:23 bms Exp $
 
 #ifndef __LIBXIPC_XRL_ARGS_HH__
 #define __LIBXIPC_XRL_ARGS_HH__
@@ -31,8 +30,6 @@
 #include "libxorp/ipv6net.hh"
 #include "libxorp/mac.hh"
 #include "libxorp/exceptions.hh"
-
-
 
 #include "xrl_atom.hh"
 
@@ -334,7 +331,7 @@ protected:
     bool  _have_name;
 };
 
-
+
 // ----------------------------------------------------------------------------
 // Inline methods
 

@@ -62,14 +62,28 @@ static const size_t 	MAX_ACTIVE_REQUESTS  	    = 100;
 
 // The maximum number of XRLs the receiver will dispatch per read event, ie
 // per read() system call.
-static const uint32_t   MAX_XRLS_DISPATCHED	    = 2;
+static const uint32_t   MAX_XRLS_DISPATCHED	    = 100;
 
 // The maximum number of buffers the AsyncFileWriters should coalesce.
 static const uint32_t   MAX_WRITES		    = 16;
 
 #define xassert(x) // An expensive - assert(x)
 
-
+
+
+static class TraceXrl {
+public:
+    TraceXrl() {
+	_do_trace = !(getenv("XRLTRACE") == 0);
+    }
+    bool on() const { return _do_trace; }
+    operator bool() { return _do_trace; }
+
+protected:
+    bool _do_trace;
+} xrl_trace;
+
+
 // ----------------------------------------------------------------------------
 // STCPRequestHandler - created by Listener to manage requests over a
 // connection.  These are allocated on by XrlPFSTCPListener and delete
@@ -230,7 +244,9 @@ STCPRequestHandler::read_event(BufferedAsyncReader*		/* source */,
 	    ack_helo(sph.seqno());
 	    _reader.dispose(sph.frame_bytes());
 	    _reader.set_trigger_bytes(STCPPacketHeader::header_size());
-	    return;
+	    buffer += sph.frame_bytes();
+	    buffer_bytes -= sph.frame_bytes();
+	    continue;
 	} else if (sph.type() != STCP_PT_REQUEST) {
 	    die("Bad packet type");
 	    return;
@@ -269,6 +285,11 @@ STCPRequestHandler::do_dispatch(const uint8_t* packed_xrl,
 
     string command;
     size_t cmdsz = Xrl::unpack_command(command, packed_xrl, packed_xrl_bytes);
+
+    if (xrl_trace.on()) {
+	XLOG_INFO("req-handler rcv, command: %s\n", command.c_str());
+    }
+
     if (!cmdsz)
 	return response->dispatch(e, NULL);
 
@@ -940,11 +961,12 @@ XrlPFSTCPSender::update_writer(AsyncFileWriter::Event	e,
 }
 
 void
-XrlPFSTCPSender::read_event(BufferedAsyncReader*	/* reader */,
+XrlPFSTCPSender::read_event(BufferedAsyncReader* reader,
 			    BufferedAsyncReader::Event	ev,
 			    uint8_t*			buffer,
 			    size_t			buffer_bytes)
 {
+    UNUSED(reader); // not used if debugging is compiled out.
     debug_msg("read event %u (need at least %u)\n",
 		XORP_UINT_CAST(buffer_bytes),
 		XORP_UINT_CAST(STCPPacketHeader::header_size()));
@@ -1043,8 +1065,15 @@ XrlPFSTCPSender::read_event(BufferedAsyncReader*	/* reader */,
     _reader->dispose(sph.frame_bytes());
     _reader->set_trigger_bytes(STCPPacketHeader::header_size());
 
-    // Dispatch Xrl and exit
-    cb->dispatch(xrl_error, xap);
+    if (xap) {
+	if (xrl_trace.on()) {
+	    XLOG_INFO("rcv, bytes-remaining: %i  xrl: %s\n",
+		      reader->available_bytes(), xap->str().c_str());
+	}
+
+	// Dispatch Xrl and exit
+	cb->dispatch(xrl_error, xap);
+    }
 
     debug_msg("Completed\n");
 }

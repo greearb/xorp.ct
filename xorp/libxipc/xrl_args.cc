@@ -22,13 +22,10 @@
 
 
 #include "xrl_module.h"
-
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
-
 #include "libproto/packet.hh"
-
 
 #ifndef XORP_USE_USTL
 #include <stdexcept>
@@ -614,16 +611,16 @@ XrlArgs::size() const
 string
 XrlArgs::str() const
 {
-    string s;
+    ostringstream oss;
 
     const_iterator ai = _args.begin();
     while (ai != _args.end()) {
-        s += ai->str();
+        oss << ai->str();
         ai++;
         if (ai != _args.end())
-            s += string(XrlToken::ARG_ARG_SEP);
+            oss << string(XrlToken::ARG_ARG_SEP);
     }
-    return s;
+    return oss.str();
 }
 
 XrlArgs::XrlArgs(const char* serialized) throw (InvalidString)
