@@ -142,12 +142,11 @@ public:
 	_sock.clear();
     }
 
-    void dispatch_request(uint32_t seqno, bool batch, const uint8_t* buffer,
+    void dispatch_request(uint32_t seqno, const uint8_t* buffer,
 			  size_t bytes);
     void transmit_response(const XrlError &e,
 			   const XrlArgs *pResponse,
-			   uint32_t seqno,
-			   bool batch);
+			   uint32_t seqno);
 
     void ack_helo(uint32_t seqno);
 
@@ -256,7 +255,7 @@ STCPRequestHandler::read_event(BufferedAsyncReader*		/* source */,
 	    uint8_t* xrl_data = buffer;
 	    xrl_data += STCPPacketHeader::header_size() + sph.error_note_bytes();
 	    size_t   xrl_data_bytes = sph.payload_bytes();
-	    dispatch_request(sph.seqno(), sph.batch(),
+	    dispatch_request(sph.seqno(),
 			     xrl_data, xrl_data_bytes);
 	    _reader.dispose(sph.frame_bytes());
 	    buffer += sph.frame_bytes();
@@ -321,20 +320,18 @@ STCPRequestHandler::do_dispatch(const uint8_t* packed_xrl,
 
 void
 STCPRequestHandler::dispatch_request(uint32_t 		seqno,
-				     bool		batch,
 				     const uint8_t* 	packed_xrl,
 				     size_t 		packed_xrl_bytes)
 {
     do_dispatch(packed_xrl, packed_xrl_bytes,
 		callback(this, &STCPRequestHandler::transmit_response,
-			 seqno, batch));
+			 seqno));
 }
 
 
 void STCPRequestHandler::transmit_response(const XrlError &e,
 					   const XrlArgs *pResponse,
-					   uint32_t seqno,
-					   bool batch)
+					   uint32_t seqno)
 {
     // Ensure we have a real arguments object to play with.
     XrlArgs dummy;
@@ -362,13 +359,14 @@ void STCPRequestHandler::transmit_response(const XrlError &e,
 		      xrl_response_bytes);
     }
 
+    if (xrl_trace.on()) {
+	XLOG_INFO("req-handler: %p  adding response buffer to writer.\n",
+		  this);
+    }
     _writer.add_buffer(&r[0], r.size(),
 		       callback(this, &STCPRequestHandler::update_writer));
 
-    debug_msg("about to start_writer (%d)\n", _responses.size() != 0);
-    if (!batch && _writer.running() == false) {
-	_writer.start();
-    }
+    _writer.start();
 }
 
 void
@@ -380,14 +378,16 @@ STCPRequestHandler::ack_helo(uint32_t seqno)
 
     STCPPacketHeader sph(&r[0]);
     sph.initialize(seqno, STCP_PT_HELO_ACK, XrlError::OKAY(), 0);
+    if (xrl_trace.on()) {
+	XLOG_INFO("req-handler: %p  adding ack_helo buffer to writer.\n",
+		  this);
+    }
     _writer.add_buffer(&r[0], r.size(),
 		       callback(this, &STCPRequestHandler::update_writer));
 
     xassert(_writer.buffers_remaining() == _responses.size());
 
-    if (_writer.running() == false) {
-	_writer.start();
-    }
+    _writer.start();
     assert(_responses.empty() || _writer.running());
 }
 
@@ -422,7 +422,7 @@ STCPRequestHandler::update_writer(AsyncFileWriter::Event ev,
 	_responses_size--;
 	xassert(_responses.empty() || _responses.size() == _responses_size);
 	// restart writer if necessary
-	if (_writer.running() == false && _responses.empty() == false)
+	if (!_responses.empty())
 	    _writer.start();
 	return;
     }
@@ -582,7 +582,6 @@ public:
 public:
     RequestState(XrlPFSTCPSender* p,
 		 uint32_t	  sn,
-		 bool		  batch,
 		 const Xrl&	  x,
 		 const Callback&  cb)
 	: _p(p), _sn(sn), _b(_buffer), _cb(cb), _keepalive(false)
@@ -599,7 +598,6 @@ public:
 	// Prepare header
 	STCPPacketHeader sph(_b);
 	sph.initialize(_sn, STCP_PT_REQUEST, XrlError::OKAY(), xrl_bytes);
-	sph.set_batch(batch);
 
 	// Pack XRL data
 	x.pack(_b + header_bytes, xrl_bytes);
@@ -638,12 +636,6 @@ public:
 	return pt == STCP_PT_HELO || pt == STCP_PT_HELO_ACK;
     }
 
-    void set_batch(bool batch)
-    {
-	STCPPacketHeader sph(_b);
-	sph.set_batch(batch);
-    }
-
     ~RequestState()
     {
 	//	debug_msg("~RequestState (%p - seqno %u)\n", this, seqno());
@@ -661,7 +653,7 @@ private:
     bool		_keepalive;
 };
 
-
+
 // ----------------------------------------------------------------------------
 // XrlPFSenderList
 //
@@ -896,7 +888,7 @@ XrlPFSTCPSender::send(const Xrl&	x,
 	      x.str().c_str());
 
     RequestState* rs = new RequestState(this, _current_seqno++,
-					false, x, cb);
+					x, cb);
     send_request(rs);
 
     xassert(_requests_waiting.size() + _requests_sent.size() == _active_requests);
@@ -910,11 +902,14 @@ XrlPFSTCPSender::send_request(RequestState* rs)
     _requests_waiting.push_back(rs);
     _active_bytes += rs->size();
     _active_requests ++;
+    if (xrl_trace.on()) {
+	XLOG_INFO("stcp-sender: %p  send-request %i to writer.\n",
+		  this, rs->seqno());
+    }
     _writer->add_buffer(rs->buffer(), rs->size(),
 			callback(this, &XrlPFSTCPSender::update_writer));
 
-    if (!_writer->running())
-	_writer->start();
+    _writer->start();
 }
 
 void
@@ -1001,6 +996,11 @@ XrlPFSTCPSender::read_event(BufferedAsyncReader* reader,
     if (stptr == _requests_sent.end()) {
 	die("Bad sequence number");
 	return;
+    }
+
+    if (xrl_trace.on()) {
+	XLOG_INFO("stcp-sender %p, read-event %i\n",
+		  this, stptr->second->seqno());
     }
 
     if (sph.type() == STCP_PT_HELO_ACK) {
