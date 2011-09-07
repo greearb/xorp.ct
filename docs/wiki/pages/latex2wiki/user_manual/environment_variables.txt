@@ -5,5 +5,6 @@ Several environment variables affect xorp:
 ^ XORP_LISTENER_KEEPALIVE_TIME | XRL request keep-alive timer in seconds. |
 ^ XRLDISPATCHTRACE | Enable XRL dispatcher tracing if this variable is defined. |
 ^ XRLTRACE | Enable some xrl debugging messages in the xrl_router logic. |
+^ AIOTRACE | Enable some asyncio debugging messages. |
 ^ XORP_FINDER_SERVER_ADDRESS | Determines where xorp xrl finder logic listens. |
 ^ XORP_FINDER_SERVER_PORT | Determines where xorp xrl finder logic listens. |
