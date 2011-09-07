@@ -197,6 +197,8 @@ public:
      */
     int64_t to_ms() const;
 
+    void set_ms(int64_t ms);
+
 #ifdef HOST_OS_WINDOWS
     /**
      * Copy the time value from a FILETIME structure.
@@ -403,19 +405,6 @@ TimeVal::copy_out(timespec& timespec) const
 }
 
 #endif
-
-inline int64_t
-TimeVal::to_ms() const
-{
-    int64_t ms = _usec / 1000;
-    // Round a truncated fraction of <1ms to 1ms, not zero.
-    if (_sec == 0 && ms == 0 && _usec != 0)
-	ms = 1;
-    else {
-	ms += (int64_t)(_sec) * 1000LL;
-    }
-    return (ms);
-}
 
 #ifdef HOST_OS_WINDOWS
 

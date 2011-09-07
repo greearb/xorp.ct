@@ -28,6 +28,26 @@ TimeVal::str() const
 	return c_format("%d.%06d", XORP_INT_CAST(_sec), XORP_INT_CAST(_usec));
 }
 
+int64_t TimeVal::to_ms() const {
+    int64_t ms = _usec / 1000;
+    // Round a truncated fraction of <1ms to 1ms, not zero.
+    if (_sec == 0 && ms == 0 && _usec != 0)
+	ms = 1;
+    else {
+	ms += (int64_t)(_sec) * 1000LL;
+    }
+    return (ms);
+}
+
+void TimeVal::set_ms(int64_t ms) {
+    if (ms == 0) {
+	_sec = _usec = 0;
+    }
+    else {
+	_sec = ms / 1000;
+	_usec = (ms % 1000) * 1000;
+    }
+}
 
 string
 TimeVal::pretty_print() const

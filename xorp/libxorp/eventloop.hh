@@ -70,7 +70,7 @@ public:
     /**
      * Destructor.
      */
-    ~EventLoop();
+    virtual ~EventLoop();
 
     /**
      * Invoke all pending callbacks relating to XorpTimer and file
@@ -361,7 +361,7 @@ public:
     void set_aggressiveness(int num);
 
 private:
-    bool do_work(bool can_block);
+    void do_work();
 
 private:
     ClockBase*		_clock;
