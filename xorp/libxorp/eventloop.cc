@@ -39,20 +39,7 @@ int eventloop_instance_count = 0;
 int xorp_do_run = 1;
 char xorp_sig_msg_buffer[64];
 
-static class TraceEVL {
-public:
-    TraceEVL() {
-	_do_trace = false;
-	const char* elt = getenv("ELOOPTRACE");
-	if (elt)
-	    _do_trace = atoi(elt);
-    }
-    bool on() const { return _do_trace > 0; }
-
-protected:
-    int _do_trace;
-} eloop_trace;
-
+EnvTrace eloop_trace("ELOOPTRACE");
 
 //Trap some common signals to allow graceful exit.
 // NOTE:  Cannot do logging here, that logic is not re-entrant.

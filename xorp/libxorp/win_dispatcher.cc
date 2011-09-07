@@ -37,6 +37,7 @@
 #include "libxorp/win_dispatcher.hh"
 
 
+
 static inline int
 _wsa2ioe(const long wsaevent)
 {
@@ -637,10 +638,22 @@ WinDispatcher::dispatch_sockevent(HANDLE hevent, XorpFd fd)
 			  "callback.\n", itype, fd.str().c_str());
 		continue;
 	    }
-	    //XLOG_INFO("dispatching socket event, fd: %s  type: %i\n",
-	    //          cstring(fd), (int)(type));
+
+	    TimeVal start;
+	    if (eloop_trace.on()) {
+		_clock->advance_time();
+		_clock->current_time(start);
+	    }
 	    jj->second->dispatch(fd, type);
-	    //XLOG_INFO("dispatched...\n");
+	    if (eloop_trace.on()) {
+		TimeVal now;
+		_clock->advance_time();
+		_clock->current_time(now);
+		if (now.to_ms() > start.to_ms() + 1000) {
+		    XLOG_INFO("socket callback took too long to run: %lims, fd: %s  type: %i\n",
+			      (long)(now.to_ms() - start.to_ms()), cstring(fd), (int)(type));
+		}
+	    }
 	}
     }
 }

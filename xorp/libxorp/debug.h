@@ -21,14 +21,28 @@
  * http://xorp.net
  */
 
-/*
- * $XORP: xorp/libxorp/debug.h,v 1.13 2008/10/02 21:57:30 bms Exp $
- */
-
 #ifndef __LIBXORP_DEBUG_H__
 #define __LIBXORP_DEBUG_H__
 
 #include "libxorp/xorp.h"
+
+
+#ifdef __cplusplus
+class EnvTrace {
+public:
+    EnvTrace(const char* e) {
+	_do_trace = 0;
+	const char* elt = getenv(e);
+	if (elt)
+	    _do_trace = atoi(elt);
+    }
+    bool on() const { return _do_trace > 0; }
+    int getTrace() const { return _do_trace; }
+
+protected:
+    int _do_trace;
+};
+#endif
 
 /*
  * This file defines the debug_msg(), the macro responsible for
