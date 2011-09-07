@@ -31,10 +31,6 @@
  * SUCH DAMAGE.
  */
 
-/*
- * $XORP: xorp/libcomm/comm_api.h,v 1.34 2008/09/23 08:06:14 abittau Exp $
- */
-
 #ifndef __LIBCOMM_COMM_API_H__
 #define __LIBCOMM_COMM_API_H__
 
@@ -62,7 +58,7 @@
 #define COMM_SOCK_BLOCKING		1
 #define COMM_SOCK_NONBLOCKING		0
 
-#define COMM_LISTEN_DEFAULT_BACKLOG	5
+#define COMM_LISTEN_DEFAULT_BACKLOG	50
 
 #ifndef AF_LOCAL
 #define AF_LOCAL		AF_UNIX	   /* XXX: AF_UNIX is the older name */

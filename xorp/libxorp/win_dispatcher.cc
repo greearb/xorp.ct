@@ -19,10 +19,8 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxorp/win_dispatcher.cc,v 1.22 2008/10/02 21:57:36 bms Exp $
 
 #include "libxorp/libxorp_module.h"
-
 #include "libxorp/xorp.h"
 
 #ifdef HOST_OS_WINDOWS	    // This entire file is for Windows only.
@@ -254,7 +252,7 @@ bool
 WinDispatcher::add_ioevent_cb(XorpFd fd, IoEventType type, const IoEventCb& cb,
 			     int priority)
 {
-debug_msg("Adding event %d to object %s\n", type, fd.str().c_str());
+    debug_msg("Adding event %d to object %s\n", type, fd.str().c_str());
 
     switch (fd.type()) {
     case XorpFd::FDTYPE_SOCKET:
@@ -459,6 +457,14 @@ WinDispatcher::wait_and_dispatch(int ms)
 	ms = POLLED_INTERVAL_MS;
     //XLOG_WARNING("win-dispatcher, ms: %i handles-size: %i",
     //             ms, (int)(_handles.size()));
+
+    // Seeing weird slownesses on windows..going to cap the timeout and see
+    // if that helps.
+    if (ms > 100)
+	ms = 100;
+    else if (ms < 0)
+	ms = 0;
+
     if (_handles.empty()) {
 	// We probably don't want to sleep forever with no pending waits,
 	// as Win32 doesn't have the same concept of signals as UNIX does.

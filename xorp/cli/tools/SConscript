@@ -47,19 +47,19 @@ env.AppendUnique(LIBS = [
     'xorp_comm',
     ])
 
+if (env.has_key('mingw') and env['mingw']):
+    env.AppendUnique(LIBS = [ 'winmm' ])
+
 if not is_shared:
     env.AppendUnique(LIBS = [
         "crypto",
         ])
 
-    if not (env.has_key('mingw') and env['mingw']):
-        env.AppendUnique(LIBS = [ 'rt' ])
-
-
 if (env.has_key('mingw') and env['mingw']):
     env.AppendUnique(LIBS = [
         'ws2_32',
         'iphlpapi',
+        'winmm',
         ])
     env.Append(LIBS = [
         'xorp_core',

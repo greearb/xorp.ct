@@ -88,8 +88,6 @@ public:
     static const char*  protocol_name()		    { return _protocol; }
     void	        set_keepalive_time(const TimeVal& time);
     const TimeVal&	keepalive_time() const	    { return _keepalive_time; }
-    void	        batch_start();
-    void	        batch_stop();
     virtual string toString() const; // for debugging
 
 protected:
@@ -153,7 +151,6 @@ private:
     // General stuff
     static const char*		 _protocol;
     static uint32_t		 _next_uid;
-    bool			 _batching;
 };
 
 #endif // __LIBXIPC_XRL_PF_STCP_HH__

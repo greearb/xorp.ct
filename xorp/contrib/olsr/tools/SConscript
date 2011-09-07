@@ -65,6 +65,7 @@ if (env.has_key('mingw') and env['mingw']):
         'iphlpapi',
 #        'mprapi',
         'regex',
+        'winmm',
         ])
 
     env.Append(LIBS = ['xorp_core'])

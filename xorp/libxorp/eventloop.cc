@@ -193,9 +193,7 @@ EventLoop::do_work(bool can_block)
     TimeVal t;
     UNUSED(can_block);
 
-    _timer_list.current_time(t);
     _timer_list.get_next_delay(t);
-
     
     // Run timers if they need it.
     if (t == TimeVal::ZERO()) {
@@ -210,7 +208,7 @@ EventLoop::do_work(bool can_block)
 	}
     }
     
-    // If we are trying to shut down..make sure the even loop
+    // If we are trying to shut down..make sure the event loop
     // doesn't hang forever.
     if (!xorp_do_run) {
 	if ((t == TimeVal::MAXIMUM()) ||

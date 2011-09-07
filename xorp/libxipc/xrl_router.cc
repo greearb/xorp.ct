@@ -65,7 +65,7 @@ do {									      \
     if (xrl_trace.on()) XLOG_INFO("%s", string(string(p) + (x).str()).c_str());     \
 } while (0)
 
-
+
 /**
  * Slow-path dispatch state.  Contains information that needs to be held
  * whilst waiting for a finder resolution.

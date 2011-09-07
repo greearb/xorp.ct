@@ -65,6 +65,7 @@ if (env.has_key('mingw') and env['mingw']):
     env.AppendUnique(LIBS = [
         'ws2_32',
         'iphlpapi',
+        'winmm',
         ])
 
     env.Append(LIBS = [

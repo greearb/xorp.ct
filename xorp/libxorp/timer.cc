@@ -198,7 +198,6 @@ TimerList::TimerList(ClockBase* clock)
     assert(the_timerlist == NULL);
     assert(timerlist_instance_count == 0);
 #ifdef HOST_OS_WINDOWS
-    // timeBeginPeriod(1);	// requires WINMM.DLL
     _hirestimer = CreateWaitableTimer(NULL, TRUE, NULL);
     assert(_hirestimer != NULL);
 #endif // HOST_OS_WINDOWS

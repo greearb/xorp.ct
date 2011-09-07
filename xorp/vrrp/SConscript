@@ -67,7 +67,7 @@ if (env.has_key('mingw') and env['mingw']):
         'regex',
         ])
 
-    env.Append(LIBS = ['xorp_core', 'crypto', 'ws2_32', 'iphlpapi'])
+    env.Append(LIBS = ['xorp_core', 'crypto', 'ws2_32', 'iphlpapi', 'winmm'])
 
 
 libxorp_vrrp_srcs = ['arpd.cc',

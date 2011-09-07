@@ -62,14 +62,28 @@ static const size_t 	MAX_ACTIVE_REQUESTS  	    = 100;
 
 // The maximum number of XRLs the receiver will dispatch per read event, ie
 // per read() system call.
-static const uint32_t   MAX_XRLS_DISPATCHED	    = 2;
+static const uint32_t   MAX_XRLS_DISPATCHED	    = 100;
 
 // The maximum number of buffers the AsyncFileWriters should coalesce.
 static const uint32_t   MAX_WRITES		    = 16;
 
 #define xassert(x) // An expensive - assert(x)
 
-
+
+
+static class TraceXrl {
+public:
+    TraceXrl() {
+	_do_trace = !(getenv("XRLTRACE") == 0);
+    }
+    bool on() const { return _do_trace; }
+    operator bool() { return _do_trace; }
+
+protected:
+    bool _do_trace;
+} xrl_trace;
+
+
 // ----------------------------------------------------------------------------
 // STCPRequestHandler - created by Listener to manage requests over a
 // connection.  These are allocated on by XrlPFSTCPListener and delete
@@ -128,12 +142,11 @@ public:
 	_sock.clear();
     }
 
-    void dispatch_request(uint32_t seqno, bool batch, const uint8_t* buffer,
+    void dispatch_request(uint32_t seqno, const uint8_t* buffer,
 			  size_t bytes);
     void transmit_response(const XrlError &e,
 			   const XrlArgs *pResponse,
-			   uint32_t seqno,
-			   bool batch);
+			   uint32_t seqno);
 
     void ack_helo(uint32_t seqno);
 
@@ -230,7 +243,9 @@ STCPRequestHandler::read_event(BufferedAsyncReader*		/* source */,
 	    ack_helo(sph.seqno());
 	    _reader.dispose(sph.frame_bytes());
 	    _reader.set_trigger_bytes(STCPPacketHeader::header_size());
-	    return;
+	    buffer += sph.frame_bytes();
+	    buffer_bytes -= sph.frame_bytes();
+	    continue;
 	} else if (sph.type() != STCP_PT_REQUEST) {
 	    die("Bad packet type");
 	    return;
@@ -240,7 +255,7 @@ STCPRequestHandler::read_event(BufferedAsyncReader*		/* source */,
 	    uint8_t* xrl_data = buffer;
 	    xrl_data += STCPPacketHeader::header_size() + sph.error_note_bytes();
 	    size_t   xrl_data_bytes = sph.payload_bytes();
-	    dispatch_request(sph.seqno(), sph.batch(),
+	    dispatch_request(sph.seqno(),
 			     xrl_data, xrl_data_bytes);
 	    _reader.dispose(sph.frame_bytes());
 	    buffer += sph.frame_bytes();
@@ -269,6 +284,11 @@ STCPRequestHandler::do_dispatch(const uint8_t* packed_xrl,
 
     string command;
     size_t cmdsz = Xrl::unpack_command(command, packed_xrl, packed_xrl_bytes);
+
+    if (xrl_trace.on()) {
+	XLOG_INFO("req-handler rcv, command: %s\n", command.c_str());
+    }
+
     if (!cmdsz)
 	return response->dispatch(e, NULL);
 
@@ -300,20 +320,18 @@ STCPRequestHandler::do_dispatch(const uint8_t* packed_xrl,
 
 void
 STCPRequestHandler::dispatch_request(uint32_t 		seqno,
-				     bool		batch,
 				     const uint8_t* 	packed_xrl,
 				     size_t 		packed_xrl_bytes)
 {
     do_dispatch(packed_xrl, packed_xrl_bytes,
 		callback(this, &STCPRequestHandler::transmit_response,
-			 seqno, batch));
+			 seqno));
 }
 
 
 void STCPRequestHandler::transmit_response(const XrlError &e,
 					   const XrlArgs *pResponse,
-					   uint32_t seqno,
-					   bool batch)
+					   uint32_t seqno)
 {
     // Ensure we have a real arguments object to play with.
     XrlArgs dummy;
@@ -341,13 +359,14 @@ void STCPRequestHandler::transmit_response(const XrlError &e,
 		      xrl_response_bytes);
     }
 
+    if (xrl_trace.on()) {
+	XLOG_INFO("req-handler: %p  adding response buffer to writer.\n",
+		  this);
+    }
     _writer.add_buffer(&r[0], r.size(),
 		       callback(this, &STCPRequestHandler::update_writer));
 
-    debug_msg("about to start_writer (%d)\n", _responses.size() != 0);
-    if (!batch && _writer.running() == false) {
-	_writer.start();
-    }
+    _writer.start();
 }
 
 void
@@ -359,14 +378,16 @@ STCPRequestHandler::ack_helo(uint32_t seqno)
 
     STCPPacketHeader sph(&r[0]);
     sph.initialize(seqno, STCP_PT_HELO_ACK, XrlError::OKAY(), 0);
+    if (xrl_trace.on()) {
+	XLOG_INFO("req-handler: %p  adding ack_helo buffer to writer.\n",
+		  this);
+    }
     _writer.add_buffer(&r[0], r.size(),
 		       callback(this, &STCPRequestHandler::update_writer));
 
     xassert(_writer.buffers_remaining() == _responses.size());
 
-    if (_writer.running() == false) {
-	_writer.start();
-    }
+    _writer.start();
     assert(_responses.empty() || _writer.running());
 }
 
@@ -401,7 +422,7 @@ STCPRequestHandler::update_writer(AsyncFileWriter::Event ev,
 	_responses_size--;
 	xassert(_responses.empty() || _responses.size() == _responses_size);
 	// restart writer if necessary
-	if (_writer.running() == false && _responses.empty() == false)
+	if (!_responses.empty())
 	    _writer.start();
 	return;
     }
@@ -561,7 +582,6 @@ public:
 public:
     RequestState(XrlPFSTCPSender* p,
 		 uint32_t	  sn,
-		 bool		  batch,
 		 const Xrl&	  x,
 		 const Callback&  cb)
 	: _p(p), _sn(sn), _b(_buffer), _cb(cb), _keepalive(false)
@@ -578,7 +598,6 @@ public:
 	// Prepare header
 	STCPPacketHeader sph(_b);
 	sph.initialize(_sn, STCP_PT_REQUEST, XrlError::OKAY(), xrl_bytes);
-	sph.set_batch(batch);
 
 	// Pack XRL data
 	x.pack(_b + header_bytes, xrl_bytes);
@@ -617,12 +636,6 @@ public:
 	return pt == STCP_PT_HELO || pt == STCP_PT_HELO_ACK;
     }
 
-    void set_batch(bool batch)
-    {
-	STCPPacketHeader sph(_b);
-	sph.set_batch(batch);
-    }
-
     ~RequestState()
     {
 	//	debug_msg("~RequestState (%p - seqno %u)\n", this, seqno());
@@ -640,7 +653,7 @@ private:
     bool		_keepalive;
 };
 
-
+
 // ----------------------------------------------------------------------------
 // XrlPFSenderList
 //
@@ -705,8 +718,7 @@ XrlPFSTCPSender::XrlPFSTCPSender(const string& name, EventLoop& e,
     throw (XrlPFConstructorError)
 	: XrlPFSender(name, e, addr_slash_port),
       _uid(_next_uid++),
-      _keepalive_time(keepalive_time),
-      _batching(false)
+      _keepalive_time(keepalive_time)
 {
     _sock = create_connected_tcp4_socket(addr_slash_port);
     construct();
@@ -718,7 +730,7 @@ XrlPFSTCPSender::XrlPFSTCPSender(const string& name, EventLoop* e,
 	: XrlPFSender(name, *e, addr_slash_port),
 	  _uid(_next_uid++), _writer(NULL),
 	  _keepalive_time(keepalive_time),
-	  _reader(NULL), _batching(false)
+	  _reader(NULL)
 {
 }
 
@@ -876,7 +888,7 @@ XrlPFSTCPSender::send(const Xrl&	x,
 	      x.str().c_str());
 
     RequestState* rs = new RequestState(this, _current_seqno++,
-					_batching, x, cb);
+					x, cb);
     send_request(rs);
 
     xassert(_requests_waiting.size() + _requests_sent.size() == _active_requests);
@@ -890,11 +902,14 @@ XrlPFSTCPSender::send_request(RequestState* rs)
     _requests_waiting.push_back(rs);
     _active_bytes += rs->size();
     _active_requests ++;
+    if (xrl_trace.on()) {
+	XLOG_INFO("stcp-sender: %p  send-request %i to writer.\n",
+		  this, rs->seqno());
+    }
     _writer->add_buffer(rs->buffer(), rs->size(),
 			callback(this, &XrlPFSTCPSender::update_writer));
 
-    if ((!_batching || rs->is_keepalive()) && _writer->running() == false)
-	_writer->start();
+    _writer->start();
 }
 
 void
@@ -940,11 +955,12 @@ XrlPFSTCPSender::update_writer(AsyncFileWriter::Event	e,
 }
 
 void
-XrlPFSTCPSender::read_event(BufferedAsyncReader*	/* reader */,
+XrlPFSTCPSender::read_event(BufferedAsyncReader* reader,
 			    BufferedAsyncReader::Event	ev,
 			    uint8_t*			buffer,
 			    size_t			buffer_bytes)
 {
+    UNUSED(reader); // not used if debugging is compiled out.
     debug_msg("read event %u (need at least %u)\n",
 		XORP_UINT_CAST(buffer_bytes),
 		XORP_UINT_CAST(STCPPacketHeader::header_size()));
@@ -980,6 +996,11 @@ XrlPFSTCPSender::read_event(BufferedAsyncReader*	/* reader */,
     if (stptr == _requests_sent.end()) {
 	die("Bad sequence number");
 	return;
+    }
+
+    if (xrl_trace.on()) {
+	XLOG_INFO("stcp-sender %p, read-event %i\n",
+		  this, stptr->second->seqno());
     }
 
     if (sph.type() == STCP_PT_HELO_ACK) {
@@ -1043,8 +1064,15 @@ XrlPFSTCPSender::read_event(BufferedAsyncReader*	/* reader */,
     _reader->dispose(sph.frame_bytes());
     _reader->set_trigger_bytes(STCPPacketHeader::header_size());
 
-    // Dispatch Xrl and exit
-    cb->dispatch(xrl_error, xap);
+    if (xap) {
+	if (xrl_trace.on()) {
+	    XLOG_INFO("rcv, bytes-remaining: %i  xrl: %s\n",
+		      reader->available_bytes(), xap->str().c_str());
+	}
+
+	// Dispatch Xrl and exit
+	cb->dispatch(xrl_error, xap);
+    }
 
     debug_msg("Completed\n");
 }
@@ -1108,7 +1136,7 @@ string XrlPFSTCPSender::toString() const {
 	<< _keepalive_time.str() << " reader: " << _reader << " keepalive_sent: "
 	<< _keepalive_sent << " keepalive_liast_fired: " << _keepalive_last_fired.str()
 	<< " ago: " << ago.str() << "\nprotocol: " << _protocol
-	<< " next_uid: " << _next_uid << " batching: " << _batching
+	<< " next_uid: " << _next_uid
 	<< endl;
 
     if (_writer) {
@@ -1150,32 +1178,3 @@ XrlPFSTCPSender::send_keepalive()
     return true;
 }
 
-void
-XrlPFSTCPSender::batch_start()
-{
-#if 0
-    _batching = true;
-#else
-    XLOG_UNREACHABLE();
-#endif
-}
-
-void
-XrlPFSTCPSender::batch_stop()
-{
-#if 0
-    _batching = false;
-
-    // If we aint got no requests, we may not be able to signal to the receiver
-    // to stop batching and we could deadlock.  In this case we should probably
-    // send a keep-alive to resume things.  -sorbo
-    XLOG_ASSERT(_requests_waiting.size());
-
-    _requests_waiting.back()->set_batch(false);
-
-    if (_writer->running() == false)
-	_writer->start();
-#else
-    XLOG_UNREACHABLE();
-#endif
-}
