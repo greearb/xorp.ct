@@ -6,5 +6,6 @@ Several environment variables affect xorp:
 ^ XRLDISPATCHTRACE | Enable XRL dispatcher tracing if this variable is defined. |
 ^ XRLTRACE | Enable some xrl debugging messages in the xrl_router logic. |
 ^ AIOTRACE | Enable some asyncio debugging messages. |
+^ ELOOPTRACE | Enable some event-loop debugging messages. |
 ^ XORP_FINDER_SERVER_ADDRESS | Determines where xorp xrl finder logic listens. |
 ^ XORP_FINDER_SERVER_PORT | Determines where xorp xrl finder logic listens. |
