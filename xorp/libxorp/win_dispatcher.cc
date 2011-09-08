@@ -37,6 +37,7 @@
 #include "libxorp/win_dispatcher.hh"
 
 
+
 static inline int
 _wsa2ioe(const long wsaevent)
 {
@@ -446,7 +447,8 @@ WinDispatcher::ready()
 void
 WinDispatcher::wait_and_dispatch(int ms)
 {
-    DWORD retval;
+    bool more_to_do = true;
+    bool first = true;
 
     //
     // Wait or sleep. Do not enter a state where APCs may be called;
@@ -455,57 +457,68 @@ WinDispatcher::wait_and_dispatch(int ms)
     //
     if ((!_polled_pipes.empty()) && (ms > POLLED_INTERVAL_MS || ms < 0))
 	ms = POLLED_INTERVAL_MS;
-    //XLOG_WARNING("win-dispatcher, ms: %i handles-size: %i",
-    //             ms, (int)(_handles.size()));
 
-    // Seeing weird slownesses on windows..going to cap the timeout and see
-    // if that helps.
-    if (ms > 100)
-	ms = 100;
-    else if (ms < 0)
+    vector<HANDLE> tmp_handles(_handles);
+    while (more_to_do) {
+	more_to_do = do_wait_and_dispatch(tmp_handles, ms, first);
+
+	// After initial call, do the rest with zero timeout so we
+	// can process the rest of the 'ready' handles.
 	ms = 0;
+	first = false;
+    }
+}
 
-    if (_handles.empty()) {
+/** Returns true if more work to be done. */
+bool
+WinDispatcher::do_wait_and_dispatch(vector<HANDLE>& handles, int ms, bool first) {
+
+    DWORD retval;
+
+    if (handles.empty()) {
 	// We probably don't want to sleep forever with no pending waits,
 	// as Win32 doesn't have the same concept of signals as UNIX does.
-	XLOG_ASSERT(ms != -1);
-	Sleep(ms);
+	if (ms > 0) {
+	    Sleep(ms);
+	}
 	retval = WAIT_TIMEOUT;
     } else {
-	retval = WaitForMultipleObjects(_handles.size(), &_handles[0],
+	retval = WaitForMultipleObjects(handles.size(), &handles[0],
 					FALSE, ms);
     }
     //XLOG_WARNING("Done waiting, retval: %i", retval);
     _clock->advance_time();
 
-    // Reads need to be handled first because they may come from
-    // dying processes picked up by the handle poll.
-    if (!_polled_pipes.empty())
-	dispatch_pipe_reads();
+    if (first) {
+	// Reads need to be handled first because they may come from
+	// dying processes picked up by the handle poll.
+	if (!_polled_pipes.empty())
+	    dispatch_pipe_reads();
+    }
 
     // The order of the if clauses here is important.
     if (retval == WAIT_FAILED) {
 	DWORD lasterr = GetLastError();
-	if (lasterr == ERROR_INVALID_HANDLE && !_handles.empty()) {
+	if (lasterr == ERROR_INVALID_HANDLE && !handles.empty()) {
 	    callback_bad_handle();
 	} else {
 	    // Programming error.
 	    XLOG_FATAL("WaitForMultipleObjects(%d,%p,%d,%d) failed "
 		       "with the error code %lu (%s). "
 		       "Please report this error to the XORP core team.",
-			_handles.empty() ? 0 : _handles.size(),
-			_handles.empty() ? NULL : &_handles[0],
+			handles.empty() ? 0 : handles.size(),
+			handles.empty() ? NULL : &handles[0],
 			FALSE, ms,
 			lasterr, win_strerror(lasterr));
 	}
     } else if (retval == WAIT_TIMEOUT) {
 	// The timeout period elapsed. This is normal. Fall through.
-    } else if (retval <= (WAIT_OBJECT_0 + _handles.size() - 1)) {
+    } else if (retval <= (WAIT_OBJECT_0 + handles.size() - 1)) {
 	//
-	// An object in _handles was signalled. Dispatch its callback.
+	// An object in handles was signalled. Dispatch its callback.
 	// Check if it's an event associated with a socket first.
 	//
-	HANDLE eh = _handles[retval - WAIT_OBJECT_0];
+	HANDLE eh = handles[retval - WAIT_OBJECT_0];
 
 	EventSocketMap::iterator qq = _event_socket_map.find(eh);
 	if (qq != _event_socket_map.end()) {
@@ -517,7 +530,7 @@ WinDispatcher::wait_and_dispatch(int ms)
 	    XLOG_ASSERT(efd.type() != XorpFd::FDTYPE_SOCKET);
 	    XLOG_ASSERT(efd.type() != XorpFd::FDTYPE_PIPE);
 	    IoEventType evtype = (efd.type() == XorpFd::FDTYPE_CONSOLE) ?
-				 IOT_READ : IOT_EXCEPTION;
+		IOT_READ : IOT_EXCEPTION;
 	    IoEventMap::iterator jj =
 		_callback_map.find(IoEventTuple(efd, evtype));
 	    if (jj != _callback_map.end()) {
@@ -526,15 +539,28 @@ WinDispatcher::wait_and_dispatch(int ms)
 		XLOG_ERROR("no callback for object %s", efd.str().c_str());
 	    }
 	}
+
+	if (handles.size() > 1) {
+	    for (vector<HANDLE>::iterator ii = handles.begin();
+		 ii != handles.end(); ++ii) {
+		if (*ii == eh) {
+		    ii = handles.erase(ii);
+		    break;
+		}
+	    }
+	    return true;
+	}
+	return false;
     } else {
 	// Programming error.
 	XLOG_FATAL("WaitForMultipleObjects(%d,%p,%d,%d) returned an "
 		   "unhandled return value %lu. "
 		   "Please report this error to the XORP core team.",
-		   _handles.empty() ? 0 : _handles.size(),
-		   _handles.empty() ? NULL : &_handles[0],
+		   handles.empty() ? 0 : handles.size(),
+		   handles.empty() ? NULL : &handles[0],
 		   FALSE, ms, retval);
     }
+    return false;
 }
 
 void
@@ -612,7 +638,22 @@ WinDispatcher::dispatch_sockevent(HANDLE hevent, XorpFd fd)
 			  "callback.\n", itype, fd.str().c_str());
 		continue;
 	    }
+
+	    TimeVal start;
+	    if (eloop_trace.on()) {
+		_clock->advance_time();
+		_clock->current_time(start);
+	    }
 	    jj->second->dispatch(fd, type);
+	    if (eloop_trace.on()) {
+		TimeVal now;
+		_clock->advance_time();
+		_clock->current_time(now);
+		if (now.to_ms() > start.to_ms() + 1000) {
+		    XLOG_INFO("socket callback took too long to run: %lims, fd: %s  type: %i\n",
+			      (long)(now.to_ms() - start.to_ms()), cstring(fd), (int)(type));
+		}
+	    }
 	}
     }
 }

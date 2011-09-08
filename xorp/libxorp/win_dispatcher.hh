@@ -242,6 +242,10 @@ protected:
     void dispatch_sockevent(HANDLE hevent, XorpFd fd);
 
 private:
+
+    /** Returns true if more work to be done. */
+    bool do_wait_and_dispatch(vector<HANDLE>& handles, int ms, bool first);
+
     bool add_socket_cb(XorpFd& fd, IoEventType type, const IoEventCb& cb,
 		       int priority);
     bool add_handle_cb(XorpFd& fd, IoEventType type, const IoEventCb& cb,

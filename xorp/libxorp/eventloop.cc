@@ -39,6 +39,8 @@ int eventloop_instance_count = 0;
 int xorp_do_run = 1;
 char xorp_sig_msg_buffer[64];
 
+EnvTrace eloop_trace("ELOOPTRACE");
+
 //Trap some common signals to allow graceful exit.
 // NOTE:  Cannot do logging here, that logic is not re-entrant.
 // Copy msg into xorp-sig_msg_buffer instead..main program can check
@@ -166,45 +168,52 @@ EventLoop::run()
     }
 
     // standard eventloop run
-    bool more = do_work(true);
-
-    // Aggressive eventloop runs.  Going through the eventloop from the start is
-    // expensive because we need to call time() and select().  If there's
-    // additional work to do, do it now rather than going through all the
-    // bureaucracy again.  Because we (sometimes) have an outdated time() and
-    // select() we could run low priority tasks instead of higher ones simply
-    // because we don't know about them yet (need to call time or select to
-    // detect them).  For this reason, we only do a few "aggressive" runs.
-    // -sorbo.
-    int agressiveness = _aggressiveness;
-    while (more && agressiveness--)
-	more = do_work(false);
+    do_work();
 
     // select() could cause a large delay and will advance_time.  Re-read
-    // current time.  Maybe we can get rid of advance_time if timeout to select
-    // is small, or get rid of advance_time at the top of event loop.  -sorbo
+    // current time.
     _timer_list.current_time(t);
     _last_ev_run = t.sec();
 }
 
-bool
-EventLoop::do_work(bool can_block)
+void
+EventLoop::do_work()
 {
     TimeVal t;
-    UNUSED(can_block);
+    TimeVal start;
 
     _timer_list.get_next_delay(t);
     
     // Run timers if they need it.
     if (t == TimeVal::ZERO()) {
+	_timer_list.current_time(start);
 	_timer_list.run();
+	if (eloop_trace.on()) {
+	    _timer_list.advance_time();
+	    TimeVal n2;
+	    _timer_list.current_time(n2);
+	    if (n2.to_ms() > start.to_ms() + 20) {
+		XLOG_INFO("timer-list run took too long to run: %lims\n",
+			  (long)(n2.to_ms() - start.to_ms()));
+	    }
+	}
     }
     
     if (!_task_list.empty()) {
+	_timer_list.current_time(start);
 	_task_list.run();
+	if (eloop_trace.on()) {
+	    _timer_list.advance_time();
+	    TimeVal n2;
+	    _timer_list.current_time(n2);
+	    if (n2.to_ms() > start.to_ms() + 20) {
+		XLOG_INFO("task-list run took too long to run: %lims\n",
+			  (long)(n2.to_ms() - start.to_ms()));
+	    }
+	}
 	if (!_task_list.empty()) {
 	    // Run task again as soon as possible.
-	    t = TimeVal::ZERO();
+	    t.set_ms(0);
 	}
     }
     
@@ -217,93 +226,28 @@ EventLoop::do_work(bool can_block)
 	}
     }
 
+    _timer_list.current_time(start);
 #if USE_WIN_DISPATCHER
+
+    // Seeing weird slownesses on windows..going to cap the timeout and see
+    // if that helps.
+    if (t.to_ms() > 100)
+	t.set_ms(100);
+    else if (t.to_ms() < 0)
+	t.set_ms(0);
+
     _win_dispatcher.wait_and_dispatch(t);
 #else
     _selector_list.wait_and_dispatch(t);
 #endif
-    
-    return false; // don't use the 'aggressiveness' logic.
-    
-#if 0
-    int timer_priority	  = XorpTask::PRIORITY_INFINITY;
-    int selector_priority = XorpTask::PRIORITY_INFINITY;
-    int task_priority	  = XorpTask::PRIORITY_INFINITY;
-
-    if (t == TimeVal::ZERO())
-	timer_priority = _timer_list.get_expired_priority();
-
-#ifdef USE_WIN_DISPATCHER
-    if (_win_dispatcher.ready())
-	selector_priority = _win_dispatcher.get_ready_priority();
-#else
-    selector_priority = _selector_list.get_ready_priority(can_block);
-#endif
-
-    if (!_task_list.empty())
-	task_priority = _task_list.get_runnable_priority();
-
-    debug_msg("Priorities: timer = %d selector = %d task = %d\n",
-	      timer_priority, selector_priority, task_priority);
-
-    if ( (timer_priority != XorpTask::PRIORITY_INFINITY)
-	 && (timer_priority <= selector_priority)
-	 && (timer_priority <= task_priority)) {
-
-	// the most important thing to run next is a timer
-	_timer_list.run();
-
-    } else if ( (selector_priority != XorpTask::PRIORITY_INFINITY)
-		&& (selector_priority < task_priority) ) {
-
-	// the most important thing to run next is a selector
-#ifdef USE_WIN_DISPATCHER
-	_win_dispatcher.wait_and_dispatch(t);
-#else
-	_selector_list.wait_and_dispatch(t);
-#endif
-
-    } else if ( (task_priority != XorpTask::PRIORITY_INFINITY)	
-		 && (task_priority < selector_priority) ) {
-		     
-	// the most important thing to run next is a task
-	_task_list.run();
-
-    } else if ( (selector_priority != XorpTask::PRIORITY_INFINITY)
-		&& (task_priority != XorpTask::PRIORITY_INFINITY) ) {
-		    XLOG_ASSERT(selector_priority == task_priority);
-		    XLOG_ASSERT(task_priority < XorpTask::PRIORITY_INFINITY);
-
-		    // There is a task and selector event of the same
-		    // priority to guard against starvation flip
-		    // between the two.
-
-		    if (_last_ev_type[task_priority]) {
-			_task_list.run();
-			_last_ev_type[task_priority] = false;
-		    } else {
-#ifdef USE_WIN_DISPATCHER
-			_win_dispatcher.wait_and_dispatch(t);
-#else
-			_selector_list.wait_and_dispatch(t);
-#endif
-			_last_ev_type[task_priority] = true;
-		    }
-    } else {
-	if (!can_block)
-	    return false;
-
-	// there's nothing immediate to run, so go to sleep until the
-	// next selector or timer goes off
-#ifdef USE_WIN_DISPATCHER
-	_win_dispatcher.wait_and_dispatch(t);
-#else
-	_selector_list.wait_and_dispatch(t);
-#endif
-	// XXX return false if you want to be conservative.  -sorbo.
+    if (eloop_trace.on()) {
+	TimeVal n2;
+	_timer_list.current_time(n2);
+	if (n2.to_ms() > start.to_ms() + t.to_ms() + 20) {
+	    XLOG_INFO("wait-and-dispatch took too long to run: %lims\n",
+		      (long)(n2.to_ms() - start.to_ms()));
+	}
     }
-#endif
-    return true;
 }
 
 bool
