@@ -1763,7 +1763,7 @@ Peer<A>::process_link_state_update_packet(A dst, A src,
 
     XLOG_TRACE(_ospf.trace()._packets,
 	       "link-state-update-pkt: telling neighbour, neigh-size: %i\n",
-	       _neighbours.size());
+	       (int)(_neighbours.size()));
 
     n->link_state_update_received(lsup);
 
@@ -4767,7 +4767,7 @@ Neighbour<A>::link_state_update_received(LinkStateUpdatePacket *lsup)
     XLOG_TRACE(_ospf.trace()._neighbour_events,
 	       "isDR: %i  isBDR: %i isNeighbourDR: %i lsa_rxmit sz: %i  lsaup sz: %i\n",
 	       (int)(is_router_dr), (int)(is_router_bdr), (int)(is_neighbour_dr),
-	       _lsa_rxmt.size(), lsup->get_lsas().size());
+	       (int)(_lsa_rxmt.size()), (int)(lsup->get_lsas().size()));
     
     get_area_router()->
 	receive_lsas(_peer.get_peerid(),

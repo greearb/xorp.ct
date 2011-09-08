@@ -1067,7 +1067,7 @@ XrlPFSTCPSender::read_event(BufferedAsyncReader* reader,
     if (xap) {
 	if (xrl_trace.on()) {
 	    XLOG_INFO("rcv, bytes-remaining: %i  xrl: %s\n",
-		      reader->available_bytes(), xap->str().c_str());
+		      (int)(reader->available_bytes()), xap->str().c_str());
 	}
 
 	// Dispatch Xrl and exit

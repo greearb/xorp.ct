@@ -131,7 +131,7 @@ AsyncFileReader::add_buffer(uint8_t* b, size_t b_bytes, const Callback& cb)
     _buffers.push_back(new BufferInfo(b, b_bytes, cb));
     if (aio_trace.on()) {
 	XLOG_INFO("afr: %p  add_buffer sz: %i  buffers: %i\n",
-		  this, b_bytes, _buffers.size());
+		  this, (int)(b_bytes), (int)(_buffers.size()));
     }
 }
 
@@ -145,7 +145,7 @@ AsyncFileReader::add_buffer_with_offset(uint8_t*	b,
     _buffers.push_back(new BufferInfo(b, b_bytes, off, cb));
     if (aio_trace.on()) {
 	XLOG_INFO("afr: %p  add_buffer_w/offset sz: %i  buffers: %i\n",
-		  this, b_bytes, _buffers.size());
+		  this, (int)(b_bytes), (int)(_buffers.size()));
     }
 }
 
@@ -434,7 +434,7 @@ AsyncFileWriter::add_buffer(const uint8_t*	b,
 #endif // EDGE_TRIGGERED_WRITES
     if (aio_trace.on()) {
 	XLOG_INFO("afw: %p  add_buffer sz: %i  buffers: %i\n",
-		  this, b_bytes, _buffers.size());
+		  this, (int)(b_bytes), (int)(_buffers.size()));
     }
 }
 
@@ -456,7 +456,7 @@ AsyncFileWriter::add_buffer_sendto(const uint8_t*	b,
 #endif // EDGE_TRIGGERED_WRITES
     if (aio_trace.on()) {
 	XLOG_INFO("afw: %p  add_buffer-sendto sz: %i  buffers: %i\n",
-		  this, b_bytes, _buffers.size());
+		  this, (int)(b_bytes), (int)(_buffers.size()));
     }
 }
 
@@ -477,7 +477,7 @@ AsyncFileWriter::add_buffer_with_offset(const uint8_t*	b,
 #endif // EDGE_TRIGGERED_WRITES
     if (aio_trace.on()) {
 	XLOG_INFO("afw: %p  add_buffer-w/offset sz: %i  buffers: %i\n",
-		  this, b_bytes, _buffers.size());
+		  this, (int)(b_bytes), (int)(_buffers.size()));
     }
 }
 
@@ -496,7 +496,7 @@ AsyncFileWriter::add_data(const vector<uint8_t>&	data,
 #endif // EDGE_TRIGGERED_WRITES
     if (aio_trace.on()) {
 	XLOG_INFO("afw: %p  add_data sz: %i  buffers: %i\n",
-		  this, data.size(), _buffers.size());
+		  this, (int)(data.size()), (int)(_buffers.size()));
     }
 }
 
@@ -517,7 +517,7 @@ AsyncFileWriter::add_data_sendto(const vector<uint8_t>&	data,
 #endif // EDGE_TRIGGERED_WRITES
     if (aio_trace.on()) {
 	XLOG_INFO("afw: %p  add_data-sendto sz: %i  buffers: %i\n",
-		  this, data.size(), _buffers.size());
+		  this, (int)(data.size()), (int)(_buffers.size()));
     }
 }
 
