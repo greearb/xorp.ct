@@ -83,10 +83,6 @@ Ospf<A>::receive(const string& interface, const string& vif,
 	      interface.c_str(), vif.c_str(),
 	      dst.str().c_str(), src.str().c_str(),
 	      data, len);
-    debug_msg("Interface %s Vif %s dst %s src %s data %p len %u\n",
-	      interface.c_str(), vif.c_str(),
-	      dst.str().c_str(), src.str().c_str(),
-	      data, len);
 
     Packet *packet;
     try {
@@ -102,7 +98,6 @@ Ospf<A>::receive(const string& interface, const string& vif,
     }
 
     XLOG_TRACE(trace()._packets, "%s\n", cstring(*packet));
-    debug_msg("%s\n", cstring(*packet));
     // We have a packet and its good.
 
     bool packet_accepted = false;

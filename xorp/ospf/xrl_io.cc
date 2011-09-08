@@ -82,6 +82,7 @@ XrlIO<A>::recv(const string& interface,
     // is not const-ified.
     //
     vector<uint8_t> payload_copy(payload);
+    // Actual receive code is in ospf.cc: Ospf<A>::receive
     IO<A>::_receive_cb->dispatch(interface, vif, dst, src, &payload_copy[0],
 				 payload_copy.size());
 }
