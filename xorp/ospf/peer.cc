@@ -355,8 +355,9 @@ bool
 PeerOut<A>::receive(A dst, A src, Packet *packet)
     throw(BadPeer)
 {
-    debug_msg("dst %s src %s %s\n", cstring(dst), cstring(src),
-	      cstring(*packet));
+    XLOG_TRACE(_ospf.trace()._packets,
+	       "peer-out-rcv: dst %s src %s %s\n", cstring(dst), cstring(src),
+	       cstring(*packet));
 
     if (!_running) {
 	// There is a window that may occasionally get hit.
@@ -1140,8 +1141,9 @@ Peer<A>::receive(A dst, A src, Packet *packet)
     // if the packet is freed. A return status of false means free the
     // packet it hasn't been stored.
 
-    debug_msg("dst %s src %s %s\n", cstring(dst), cstring(src),
-	      cstring(*packet));
+    XLOG_TRACE(_ospf.trace()._packets,
+	       "peer-rcv: dst %s src %s %s\n", cstring(dst), cstring(src),
+	       cstring(*packet));
 
     switch(_ospf.get_version()) {
     case OspfTypes::V2:
@@ -1260,6 +1262,7 @@ Peer<A>::receive(A dst, A src, Packet *packet)
 	XLOG_FATAL("Unknown packet type %u", packet->get_type());
     }
 
+    XLOG_TRACE(_ospf.trace()._packets, "Done with receive packet.");
     return false;
 }
 
@@ -1599,7 +1602,9 @@ template <typename A>
 bool
 Peer<A>::process_hello_packet(A dst, A src, HelloPacket *hello)
 {
-    debug_msg("dst %s src %s %s\n",cstring(dst),cstring(src),cstring(*hello));
+    XLOG_TRACE(_ospf.trace()._packets,
+	       "hello-pkt: dst %s src %s %s\n",
+	       cstring(dst),cstring(src),cstring(*hello));
 
     // Sanity check this hello packet.
 
@@ -1682,7 +1687,9 @@ Peer<A>::process_data_description_packet(A dst,
 					 A src,
 					 DataDescriptionPacket *dd)
 {
-    debug_msg("dst %s src %s %s\n",cstring(dst),cstring(src),cstring(*dd));
+    XLOG_TRACE(_ospf.trace()._packets,
+	       "data-desc-pkt: dst %s src %s %s\n",
+	       cstring(dst),cstring(src),cstring(*dd));
 
     Neighbour<A> *n = find_neighbour(src, dd->get_router_id());
 
@@ -1714,7 +1721,9 @@ bool
 Peer<A>::process_link_state_request_packet(A dst, A src,
 					   LinkStateRequestPacket *lsrp)
 {
-    debug_msg("dst %s src %s %s\n",cstring(dst),cstring(src),cstring(*lsrp));
+    XLOG_TRACE(_ospf.trace()._packets,
+	       "link-state-req-pkt: dst %s src %s %s\n",
+	       cstring(dst),cstring(src),cstring(*lsrp));
 
     Neighbour<A> *n = find_neighbour(src, lsrp->get_router_id());
 
@@ -1737,7 +1746,9 @@ bool
 Peer<A>::process_link_state_update_packet(A dst, A src,
 					  LinkStateUpdatePacket *lsup)
 {
-    debug_msg("dst %s src %s %s\n",cstring(dst),cstring(src),cstring(*lsup));
+    XLOG_TRACE(_ospf.trace()._packets,
+	       "link-state-update-pkt: dst %s src %s %s\n",
+	       cstring(dst),cstring(src),cstring(*lsup));
 
     Neighbour<A> *n = find_neighbour(src, lsup->get_router_id());
 
@@ -1750,7 +1761,14 @@ Peer<A>::process_link_state_update_packet(A dst, A src,
 	return false;
     }
 
+    XLOG_TRACE(_ospf.trace()._packets,
+	       "link-state-update-pkt: telling neighbour, neigh-size: %i\n",
+	       (int)(_neighbours.size()));
+
     n->link_state_update_received(lsup);
+
+    XLOG_TRACE(_ospf.trace()._packets,
+	       "link-state-update-pkt: done\n");
     
     return false;	// Never keep a copy of the packet.
 }
@@ -1760,7 +1778,9 @@ bool
 Peer<A>::process_link_state_acknowledgement_packet(A dst, A src,
 				     LinkStateAcknowledgementPacket *lsap)
 {
-    debug_msg("dst %s src %s %s\n",cstring(dst),cstring(src),cstring(*lsap));
+    XLOG_TRACE(_ospf.trace()._packets,
+	       "dst %s src %s %s\n",
+	       cstring(dst),cstring(src),cstring(*lsap));
 
     Neighbour<A> *n = find_neighbour(src, lsap->get_router_id());
 
@@ -4720,12 +4740,6 @@ Neighbour<A>::link_state_update_received(LinkStateUpdatePacket *lsup)
 	       pr_id(get_candidate_id()).c_str(),
 	       pp_state(get_state()).c_str());
 
-    debug_msg("ID = %s interface state <%s> neighbour state <%s> %s\n",
-	      pr_id(get_candidate_id()).c_str(),
-	      Peer<A>::pp_interface_state(_peer.get_state()).c_str(),
-	      pp_state(get_state()).c_str(),
-	      cstring(*lsup));
-
     switch(get_state()) {
     case Down:
     case Attempt:
@@ -4750,8 +4764,10 @@ Neighbour<A>::link_state_update_received(LinkStateUpdatePacket *lsup)
 	is_neighbour_dr = is_neighbour_DR();
     }
 
-    XLOG_TRACE(_ospf.trace()._neighbour_events, "isDR: %i  isBDR: %i isNeighbourDR: %i\n",
-	       (int)(is_router_dr), (int)(is_router_bdr), (int)(is_neighbour_dr));
+    XLOG_TRACE(_ospf.trace()._neighbour_events,
+	       "isDR: %i  isBDR: %i isNeighbourDR: %i lsa_rxmit sz: %i  lsaup sz: %i\n",
+	       (int)(is_router_dr), (int)(is_router_bdr), (int)(is_neighbour_dr),
+	       (int)(_lsa_rxmt.size()), (int)(lsup->get_lsas().size()));
     
     get_area_router()->
 	receive_lsas(_peer.get_peerid(),
@@ -4778,9 +4794,11 @@ Neighbour<A>::link_state_update_received(LinkStateUpdatePacket *lsup)
     // 
     XLOG_TRACE(_ospf.trace()._neighbour_events, "MAX_AGE_IN_DATABASE is not defined.\n");
 
+    int iterations = 0;
  again:
     for (list<Lsa::LsaRef>::iterator i = _lsa_rxmt.begin();
 	 i != _lsa_rxmt.end(); i++) {
+	iterations++;
 	if (!(*i)->maxage())
 	    continue;
 	if ((*i)->max_sequence_number())
@@ -4789,6 +4807,7 @@ Neighbour<A>::link_state_update_received(LinkStateUpdatePacket *lsup)
 	list<Lsa::LsaRef>::const_iterator j;
 	for (j = lsas.begin(); j != lsas.end(); j++) {
 	    // Possibly rewritten
+	    iterations++;
 	    if (*i == *j) {
 		continue;
 	    }
@@ -4811,10 +4830,12 @@ Neighbour<A>::link_state_update_received(LinkStateUpdatePacket *lsup)
     list<Lsa::LsaRef>::const_iterator i;
     list<Lsa_header>::iterator j;
 
+    int iter2 = 0;
     for (i = lsas.begin(); i != lsas.end(); i++) {
 	XLOG_TRACE(_ospf.trace()._neighbour_events, "lsa: %s\n", (*i)->str().c_str());
 	for (j = _ls_request_list.begin(); j != _ls_request_list.end(); j++) {
 	    XLOG_TRACE(_ospf.trace()._neighbour_events, "lsa-req: %s\n", j->str().c_str());
+	    iter2++;
 	    if ((*j) == (*i)->get_header()) {
 		XLOG_TRACE(_ospf.trace()._neighbour_events, "Header matched, erasing j\n");
 		_ls_request_list.erase(j);
@@ -4824,6 +4845,10 @@ Neighbour<A>::link_state_update_received(LinkStateUpdatePacket *lsup)
     }
     if (_ls_request_list.empty())
 	event_loading_done();
+
+    XLOG_TRACE(_ospf.trace()._neighbour_events,
+	       "done w/link-state-ack-rcvd, iterations: %i  iter2: %i\n",
+	       iterations, iter2);
 }
 
 template <typename A>

@@ -870,9 +870,10 @@ PeerManager<A>::transmit(const string& interface, const string& vif,
 			 A dst, A src,
 			 uint8_t* data, uint32_t len)
 {
-    debug_msg("PeerManager::transmit  Interface %s Vif %s data %p len %u  src: %s  dst: %s\n",
-	      interface.c_str(), vif.c_str(), data, len, src.str().c_str(),
-	      dst.str().c_str());
+    XLOG_TRACE(_ospf.trace()._packets,
+	       "PeerManager::transmit  Interface %s Vif %s data %p len %u  src: %s  dst: %s\n",
+	       interface.c_str(), vif.c_str(), data, len, src.str().c_str(),
+	       dst.str().c_str());
 
     if (string(VLINK) == interface) {
 	string interface;
@@ -892,8 +893,9 @@ PeerManager<A>::receive(const string& interface, const string& vif,
 			A dst, A src, Packet *packet)
     throw(BadPeer)
 {
-    debug_msg("Interface %s Vif %s src %s dst %s %s\n", interface.c_str(),
-	      vif.c_str(), cstring(dst), cstring(src), cstring((*packet)));
+    XLOG_TRACE(_ospf.trace()._packets,
+	       "Interface %s Vif %s src %s dst %s %s\n", interface.c_str(),
+	       vif.c_str(), cstring(dst), cstring(src), cstring((*packet)));
 
     OspfTypes::PeerID peerid = get_peerid(interface, vif);
     XLOG_ASSERT(0 != _peers.count(peerid));
