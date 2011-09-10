@@ -157,8 +157,9 @@ static void
 test_xrlerror_note(EventLoop&e, XrlPFSTCPListener& l)
 {
     Xrl x("anywhere", "no_execute");
+    string t("test");
 
-    XrlPFSTCPSender s(e, l.address());
+    XrlPFSTCPSender s(t, e, l.address());
 
     bool done = false;
     s.send(x, false, callback(no_execute_reply_handler, &done));
@@ -202,7 +203,8 @@ run_test()
 			callback(no_execute_recv_handler, NOISE));
 
     XrlPFSTCPListener listener(eventloop, &cmd_dispatcher);
-    XrlPFSTCPSender s(eventloop, listener.address());
+    string test("test");
+    XrlPFSTCPSender s(test, eventloop, listener.address());
     s.set_keepalive_time(KEEPALIVE_TIME);
 
     tracef("listener address: %s\n", listener.address());
@@ -248,7 +250,8 @@ run_no_keepalive_test()
     setenv("XORP_SENDER_KEEPALIVE_TIME", "0", 1);
 
     XrlPFSTCPListener listener(eventloop, &cmd_dispatcher);
-    XrlPFSTCPSender s(eventloop, listener.address());
+    string test("test");
+    XrlPFSTCPSender s(test, eventloop, listener.address());
 
     tracef("listener address: %s\n", listener.address());
 

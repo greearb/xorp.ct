@@ -108,8 +108,6 @@ test_ipvxnet_valid_constructors(TestInfo& test_info)
     // Test values for IPv4 address: "12.34.56.78"
     const char *addr_string4 = "12.34.56.78";
     uint32_t ui = htonl((12 << 24) | (34 << 16) | (56 << 8) | 78);
-    struct in_addr in_addr;
-    in_addr.s_addr = ui;
     struct sockaddr_in sin;
     memset(&sin, 0, sizeof(sin));
 #ifdef HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
