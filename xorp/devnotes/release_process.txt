@@ -1,3 +1,4 @@
+========================================================================
 
 Update version.  This command seems to find at least most of them,
 assuming old version is 1.8.3:
@@ -7,174 +8,32 @@ find . -name "*" -print|grep -v kdoc|grep -v ^./other/|grep -v ^./xorp/obj|grep 
 
 
 ========================================================================
-0500.	TASK: Update the documentation in xorp/docs
-	WHO:  Everyone
-	WHEN: 7 days - 1 day before the release date
-	MISC: - After a document is reviewed, update the Version in the
-	        front page to correspond to the new release version.
-              - Can be omitted for a release candidate.
-	COMMANDS:
- # Commands to verify the Version.
- cd xorp/docs
- egrep "Version .\..}" */*.tex
+
+Update copyright notices.  Might want to do a bit of manual inspection
+to make sure the script works properly:
+
+# That first big ugly md5sum is the starting git tag for this dev period,
+# typically the last commit for the previous release.  Use gitk or similar
+# to figure this out.
+
+./xorp/devnotes/update_changed_copyright.bash 6f0890b35697718e4a48f06c1148792aca1091c8 HEAD 2011
+
+# Inspect changes and commit them.
+
 
 ========================================================================
-0700.	TASK: Send email to xorp-dev@xorp.org to remain everyone about
-	      TODO items before the release
-	WHO:  Release manager
-	WHEN: 1 day before the release date
-	MISC: - Include the list below about tasks for everyone
-	      - Include info about when everyone should stop committing
-		code
+
+Build doxygen source-code docs.
+
+See xorp/docs/kdoc/README.txt
+
 
 ========================================================================
-0720.	TASK: Update XORP_MODULE_VERSION in all foo_module.h files
-	WHO:  Release manager
-	WHEN: 1 day before the release date
-        MISC: - For the time being, do not do this, until we have a
-		better idea about the particular purpose, if any, of
-		XORP_MODULE_VERSION.
+Edit the Web pages in www/html_src/
+  * news.html
+  * index.html
 
-========================================================================
-0730.	TASK: Add a new year to the copyright license (only if
-	      necessary)
-	WHO:  Release manager
-	WHEN: 1 day before the release date
-	MISC: - This affects all files in the following top-level
-                directories: xorp, www, other, data.
-	COMMANDS:
- # Check-out a new copy of all files
- mkdir xorp.tmp
- cd xorp.tmp
- cvs -d cvs.xorp.org:/cvsroot co data
- cvs -d cvs.xorp.org:/cvsroot co other
- cvs -d cvs.xorp.org:/cvsroot co www
- cvs -d cvs.xorp.org:/cvsroot co xorp
 
- # Run the xorp/devnotes/update_copyright.sh script using the old year
- # as an argument. It should be run inside each of the checked-out
- # directories. After that check the modifications and then commit them.
- # The CVS commit message should be something like:
- #   "Update the XORP copyright year to 2009."
- cd data
- ../xorp/devnotes/update_copyright.sh 2008
- cvs diff -u -p | less
- cvs commit
- cd ../other
- ../xorp/devnotes/update_copyright.sh 2008
- cvs diff -u -p | less
- cvs commit
- cd ../www
- # Test whether any auto-generated files might be re-generated
- gmake
- # If any auto-generated files are re-generated, delete them
- # and check-out another copy from CVS.
- ../xorp/devnotes/update_copyright.sh 2008
- cvs diff -u -p | less
- cvs commit
- cd ../xorp
- ../xorp/devnotes/update_copyright.sh 2008
- cvs diff -u -p | less
- cvs commit
-
-========================================================================
-0740.	TASK: Update xorp/docs/kdoc/gen-kdoc.sh
-	WHO:  Release manager
-	WHEN: 1 day before the release date
-	MISC: - If necessary, edit xorp/docs/kdoc/gen-kdoc.sh and add
-		new subdirectories.
-	      - Fix all kdoc-related compilation issues that may be
-		discovered by running the xorp/docs/kdoc/gen-kdoc.sh
-		script.
-	COMMANDS:
- cd xorp/docs/kdoc
- ./gen-kdoc.sh
-
-========================================================================
-0750.	TASK: Update the release version number
-	WHO:  Release manager
-	WHEN: 1 day before the release date
-	COMMANDS:
- # Edit xorp/README
- # Edit xorp/RELEASE_NOTES
- # Edit xorp/VERSION
- # Edit all relevant configure.in (the second argument to AC_INIT())
-        xorp/configure.in
-        xorp/mibs/configure.in
- # Edit xorp/contrib/win32/installer/xorp.nsi and update PRODUCT_VERSION
- # Edit xorp/etc/templates/xorpsh.cmds and update "show version" output.
-
- cd xorp
- ./bootstrap
- cvs commit -m "Prepare XORP for release: update the version number"
-
-========================================================================
-0800.	TASK: Prune old entries in xorp/foo/TODO files
-	WHO:  Everyone
-	WHEN: 1 day before the release date
-
-========================================================================
-0900.	TASK: Update xorp/foo/README files
-	WHO:  Everyone
-	WHEN: 1 day before the release date
-
-========================================================================
-1000.	TASK: Update the status Web page in www/html_src/status.html
-	WHO:  Everyone
-	WHEN: 1 day before the release date
-	MISC: Can be omitted for a release candidate.
-
-========================================================================
-1100.	TASK: Edit the Web pages in www/html_src/
-	WHO:  Release manager
-	WHEN: 1 day before the release date
-	MISC: - Update the documentation index Web page in
-		www/html_src/design_docs.html
-		by modifying the documents version, date and URLs.
-                This can be omitted for a release candidate.
-	      - Add an entry for the new release to
-                www/html_src/downloads.html
-		(set the definition for Release tag to $ReleaseTag as
-		defined later in this document).
-		Move the previous release to the list of earlier releases,
-		and in the process delete its "Overview" URL in the
-		Documentation column.
-		Also, update the status on that page.
-                However, if the new entry is a release candidate, then only
-                uncomment and update the "Release Candidate" section, but
-                keep the original "Latest Release" section.
-                If a real release, then comment-out the "Release Candidate"
-                section.
-	      - Update www/html_src/getting_started.html with information
-		about supported operating systems, compilers,
-		cross-compilation, and XORP configuration.
-                This can be omitted for a release candidate.
-	      - Update www/html_src/index.html
-		Modify all references to the most recent version and
-		its release date, etc.
-                However, if the new entry is a release candidate,
-                uncomment and update the "Release Candidate" section, but
-                keep the original "Latest Release" section.
-	      - If necessary, update www/html_src/license.html with a new
-		copyright year.
-	      - Update www/html_src/livecd.html with information about the
-                XORP Version used in the LiveCD.
-                However, if the new entry is a release candidate,
-                uncomment and update the "Release Candidate" section, but
-                keep the original "Latest Release" section.
-	      - Add a news item to news.html
-	      - If necessary, update www/html_src/porting.html
-                This can be omitted for a release candidate.
-	      - If necessary, update www/html_src/snmp.html
-                This can be omitted for a release candidate.
-	      - Update the date and release version in
-		www/html_src/status.html
-                This can be omitted for a release candidate.
-	      - Edit the following files and remove all temporary notes
-	        about platforms that are supported only in XORP-WIP:
-	        www/html_src/dowloads.html, html_src/getting_started.html
-		and html_src/status.html
-	      - If necessary, update www/html_src/roadmap.html
 
 ========================================================================
 1150.	TASK: Regenerate the Web pages in www

@@ -17,56 +17,29 @@ software forwarding.
 <h2><a name="message">Message to the Community</a></h2>
 
 <p>
-March 2, 2011:  Ben Greear from
-<a href="http://www.candelatech.com/">Candela Technologies</a>
- has been made the new project manager
-for XORP.  His XORP.CT tree is now the official XORP code
-base.  This officially 'un-forks' XORP and will allow
-users and contributors to focus on a single code-base.
-<P>
+September 12, 2011:<br>
 XORP 1.8.4 is Released
 
   <ul>
-    <li>Change the way VLANs are created.  This changes the config
-      file syntax (though the original syntax didn't actually work
-      right..so probably no one is actually using it.)</li>
+    <li>Async XRL support from Steven Simpson.</li>
 
-    <li>Re-add support for XORP on Microsoft Windows.  Add instructions
-      to BUILD_NOTES for cross-compiling with mingw.</li>
+    <li>Fix bug when deleting non-VLAN interfaces.  Commit would fail
+       because the code would attempt to remove the interface from
+       the kernel and fail.</li>
 
-    <li>Add more options for disabling compile of certain modules.
-      See:  scons --help</li>
+    <li>Fix BSD related crash when adding interface with same ifindex
+      as a previous interface.  OpenBSD has the nasty habit of re-using
+      the ifindex when creating/deleting virtual interfaces.</li>
 
-    <li>Add support for IPv6 multicast with virtual routing tables.
-      Requires Linux kernel 2.6.35 or higher.</li>
+    <li>Fix multicast bug that totally breaks XORP multicast on recent
+      Linux kernels.  The problem is that I chose the wrong default
+      multicast routing table (254, instead of 253 as it should be).
+      So, if users don't specify a routing table, it pokes routes into
+      the wrong table.  This wasn't caught in my testing because I always
+      explicitly set the routing table ID.</li>
 
-    <li>Support cross-compiling.  See BUILD_NOTES.</li>
-
-    <li>BSD:  Don't crash FEA when interface disappears.</li>
-
-    <li>BSD:  Don't fail commit if cannot remove route that doesn't exist.</li>
-
-    <li>Add signal handling for more graceful exit.  Helps clean up /var/tmp/xrl.*
-      files and lets valgrind report more useful information.</li>
-
-    <li>timers:  Fix memory leak related to the Heap class.</li>
-
-    <li>BGP:  Fix up tear-down logic to make sure it exits promptly in
-      all cases.</li>
-
-    <li>pim: Fix a recursive delete issue in pim code, exposed by the ability to
-      gracefully shut down processes with SIGTERM.</li>
-
-    <li>rtrmgr:  Allow starting helper processes under valgrind.  Just
-      create a file called XORP_USE_VALGRIND in the working directory.
-      If you want xorp_rtrmgr to use valgrind, you have to start it under
-      valgrind manually.</li>
-
-    <li>FEA:  Properly clean up all sockets and remove them from the eventloop
-      callback when cleaing up io_ip_socket objects.</li>
-
-    <li>firewall:  Support compiling netlink firewall support on Linux, if
-      kernel headers are properly modified to compile with c++.</li>
+    <li>Add some env variable controlled debugging to the libxorp and libxipc
+      logic for better debugging of xrls and the event loop.</li>
 
    <li>A more detailed change list list is in Release Notes
        available at <a href="releases/1.8.4/docs/RELEASE_NOTES">releases/1.8.4/docs/RELEASE_NOTES</a>
@@ -83,7 +56,7 @@ If you have any questions, please feel free to contact us at
 </p>
 <p>
 --The XORP Team<br/>
-<small>March 2, 2011</small>
+<small>September, 2011</small>
 </p>
 
 </div><!-- end of div class="message"-->
@@ -93,11 +66,9 @@ If you have any questions, please feel free to contact us at
 <div id="sidebar">
 <h2>Ongoing Development</h2>
 <P>
-Support for cross-compiling XORP to Microsoft
-Windows using the mingw cross-compiler was
-recently added.  The documentation was moved
-to a wiki, and VLAN handling was re-worked.
-Asynchronous XRL support should be coming sono.
+Optimize Xorp for use on Windows
+(still slow with large OSPF networks...more
+work remains).
 <br>
 Get snapshots or check out a live source tree
 on <a href="http://github.com/greearb/xorp.ct">github</a>.
