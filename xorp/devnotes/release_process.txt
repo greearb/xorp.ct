@@ -1,58 +1,10 @@
 
-This file contains information related to the XORP software release process.
+Update version.  This command seems to find at least most of them,
+assuming old version is 1.8.3:
 
-This information is of primary interest for the release manager.
-However, every developer should read it to become familiar with the release
-process, so the developer can schedule properly his work within the
-release schedule.
+find . -name "*" -print|grep -v kdoc|grep -v ^./other/|grep -v ^./xorp/obj|grep -v ^./www/images|xargs grep "1\.8\.3"
 
-Note that this information is a subject to change.
 
-Steps to perform before and after a software release (note that
-some of the commands like "setenv" and "unsetenv" assume that
-the login shell is csh or tcsh):
-
-========================================================================
-0100.	TASK: Decide the next release date, and the wish-list of the set
-	      of features it should have.
-	WHO:  Everyone
-	WHEN: Approximately one week after the previous release
-	MISC: - Write the wish-list to xorp/devnotes/WORKPLAN
-	        (under section "Next Release")
-
-========================================================================
-0200.	TASK: Status check. If necessary, revise the set of features to
-	      be included in the next release.
-	WHO:  Everyone
-	WHEN: 2-3 weeks before the release date
-
-========================================================================
-0300.	TASK: Stop adding new features.
-	WHO:  Everyone
-	WHEN: 1 week before the release date
-
-========================================================================
-0325.	TASK: Decide the next version number
-	WHO:  All
-	WHEN: 1 week before the release date
-	MISC: - Typically, the numbering increment is like 1.3 -> 1.4,
-		unless there is major change in XORP (e.g., 1.8 -> 2.0)
-              - If this is a release candidate, then the version number
-		has the -RC suffix. E.g., the 1.4 release candidate
-		version number is 1.4-RC
-
-========================================================================
-0350.	TASK: Send email to xorp-mirrors@xorp.org to tell all mirror
-	      administrators to prepare for the forthcoming release
-	      and the result increase in disk space and bandwidth usage.
-	WHO:  Release manager
-	WHEN: 1 week before the release date
-
-========================================================================
-0400.	TASK: Testing (including memory leak checks), final polishing
-	      of the code. 
-	WHO:  Everyone
-	WHEN: 7 days - 1 day before the release date
 
 ========================================================================
 0500.	TASK: Update the documentation in xorp/docs
