@@ -155,7 +155,7 @@
   <refsect1>
     <title>AUTHOR</title>
 
-    <para>XORP is Copyright (c) 2001-2009 XORP, Inc.</para>
+    <para>XORP is Copyright (c) 2001-2011 XORP, Inc and Others</para>
 
     <para>This manual page was written by &dhusername; &dhemail; for
       the &debian; system (but may be used by others). For licensing details
