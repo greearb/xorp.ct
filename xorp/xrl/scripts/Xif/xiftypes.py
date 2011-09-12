@@ -12,7 +12,8 @@ xrl_atom_type = {
     'list' :	('XrlAtomList', 	'list',		'list'),
     'binary' :	('vector<uint8_t>',	'binary',	'binary'),
     'i64' :	('int64_t',		'int64',	'i64'),
-    'u64' :	('uint64_t',		'uint64',	'i64')
+    'u64' :	('uint64_t',		'uint64',	'i64'),
+    'fp64' :	('fp64_t',		'fp64',	        'double')
 }
 
 class XrlArg:

@@ -251,6 +251,18 @@ public:
 
     void get(const char* n, uint64_t& t) const throw (BadArgs);
 
+    /* --- fp64 accessors --- */
+
+    XrlArgs& add_fp64(const char* name, fp64_t v) throw (XrlAtomFound);
+
+    const fp64_t& get_fp64(const char* name) const throw (BadArgs);
+
+    void remove_fp64(const char* name) throw (XrlAtomNotFound);
+
+    XrlArgs& add(const char* n, fp64_t v) throw (XrlAtomFound);
+
+    void get(const char* n, fp64_t& t) const throw (BadArgs);
+
 
     // ... Add your type's add, get, remove functions here ...
 
@@ -513,6 +525,18 @@ inline void
 XrlArgs::get(const char* n, uint64_t& t) const throw (BadArgs)
 {
     t = get_uint64(n);
+}
+
+inline XrlArgs&
+XrlArgs::add(const char* n, fp64_t v) throw (XrlAtomFound)
+{
+    return add_fp64(n, v);
+}
+
+inline void
+XrlArgs::get(const char* n, fp64_t& t) const throw (BadArgs)
+{
+    t = get_fp64(n);
 }
 
 inline const XrlAtom&

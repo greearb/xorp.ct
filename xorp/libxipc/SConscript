@@ -87,6 +87,7 @@ libxipc_sources = [
     'xrl_std_router.cc',
     'xrl_tokens.cc',
     'xuid.cc',				# only for udp (and fea tcpudp mgr)
+    'fp64serial.c',
     ]
 
 # deal with shared objects

@@ -143,6 +143,7 @@ XorpClient::fake_return_args(const string& xrl_return_spec)
 	case xrlatom_binary:
 	case xrlatom_uint64:
 	case xrlatom_int64:
+	case xrlatom_fp64:
 	    XLOG_UNFINISHED();
 	    break;
 	}

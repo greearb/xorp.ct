@@ -242,6 +242,10 @@ test()
 	    test_atom(XrlAtom("test_uint64_value",
 		uint64_t(0xabadc0ffee123456ULL)));
 	    break;
+	case xrlatom_fp64:
+	    test_atom(XrlAtom("test_fp64_value",
+		fp64_t(0.087613017887164087613407)));
+	    break;
 	}
     }
 }

@@ -31,7 +31,7 @@
 #include "libproto/packet.hh"
 
 
-
+#include "fp64serial.h"
 
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -62,6 +62,7 @@ static const char* xrlatom_list_name	= "list";
 static const char* xrlatom_binary_name	= "binary";
 static const char* xrlatom_int64_name	= "i64";
 static const char* xrlatom_uint64_name	= "u64";
+static const char* xrlatom_fp64_name	= "fp64";
 
 static inline void
 do_pack_uint32(const uint32_t u32val, uint8_t* buffer)
@@ -97,6 +98,7 @@ xrlatom_type_name(const XrlAtomType& t)
 	NAME_CASE(xrlatom_binary);
 	NAME_CASE(xrlatom_int64);
 	NAME_CASE(xrlatom_uint64);
+	NAME_CASE(xrlatom_fp64);
 	// ... Your type here ...
     }
     return xrlatom_no_type_name;
@@ -125,6 +127,7 @@ resolve_xrlatom_name(const char* name)
 	    CHECK_NAME(xrlatom_binary);		/* FALLTHRU */
 	    CHECK_NAME(xrlatom_int64);		/* FALLTHRU */
 	    CHECK_NAME(xrlatom_uint64);		/* FALLTHRU */
+	    CHECK_NAME(xrlatom_fp64);		/* FALLTHRU */
 	    // ... Your type here ...
 	case xrlatom_no_type:
 	    break;
@@ -219,6 +222,9 @@ XrlAtom::data_from_c_str(const char* c_str)
 #else
 	_u64val = (uint64_t)strtoull(c_str, (char**)NULL, 10);
 #endif
+	break;
+    case xrlatom_fp64:
+	sscanf(c_str, "%" XORP_SCNgFP64, &_fp64val);
 	break;
 
 	// ... Your types instantiator here ...
@@ -356,6 +362,13 @@ XrlAtom::uint64() const throw (NoData, WrongType)
     return _u64val;
 }
 
+const fp64_t&
+XrlAtom::fp64() const throw (NoData, WrongType)
+{
+    type_and_data_okay(xrlatom_fp64);
+    return _fp64val;
+}
+
 
 // ----------------------------------------------------------------------------
 // XrlAtom dynamic data management functions
@@ -415,6 +428,9 @@ XrlAtom::copy(const XrlAtom& xa)
         case xrlatom_uint64:
             _u64val = xa._u64val;
             break;
+        case xrlatom_fp64:
+            _fp64val = xa._fp64val;
+            break;
 
             // ... Your type's copy operation here ...
         case xrlatom_no_type:
@@ -461,6 +477,7 @@ XrlAtom::discard_dynamic()
 	    break;
         case xrlatom_int64:
         case xrlatom_uint64:
+        case xrlatom_fp64:
 	    break;
 
             // ... Your type should free allocated memory here ...
@@ -608,6 +625,10 @@ XrlAtom::value() const
 		 static_cast<unsigned long long>(_u64val));
 #endif
 	return xrlatom_encode_value(tmp, strlen(tmp));
+    case xrlatom_fp64:
+	snprintf(tmp, sizeof(tmp) / sizeof(tmp[0]),
+		 "%" XORP_PRIAFP64, _fp64val);
+	return xrlatom_encode_value(tmp, strlen(tmp));
 
 	// ... Your type's c_str equivalent here ...
     }
@@ -681,6 +702,9 @@ XrlAtom::operator==(const XrlAtom& other) const
 	    break;
 	case xrlatom_uint64:
 	    mv = (_u64val == other._u64val);
+	    break;
+	case xrlatom_fp64:
+	    mv = (_fp64val == other._fp64val);
 	    break;
 
 	    // ... Your type's equality test here ...
@@ -765,6 +789,7 @@ XrlAtom::packed_bytes() const
 	break;
     case xrlatom_int64:
     case xrlatom_uint64:
+    case xrlatom_fp64:
 	bytes += 8;
 	break;
 
@@ -790,6 +815,7 @@ XrlAtom::packed_bytes_fixed() const
     case xrlatom_boolean:
     case xrlatom_int64:
     case xrlatom_uint64:
+    case xrlatom_fp64:
 	return true;
     case xrlatom_mac:
     case xrlatom_text:
@@ -1169,6 +1195,27 @@ XrlAtom::unpack_uint64(const uint8_t* buf)
 }
 
 size_t
+XrlAtom::pack_fp64(uint8_t* buffer) const
+{
+    uint_fast64_t bytes = fp64enc(_fp64val);
+
+    do_pack_uint32(bytes >> 32, buffer);
+    do_pack_uint32(bytes & 0xFFFFFFFF, &buffer[4]);
+    return sizeof(_fp64val);
+}
+
+size_t
+XrlAtom::unpack_fp64(const uint8_t* buf)
+{
+    uint_fast64_t bytes;
+    bytes = uint_fast64_t(do_unpack_uint32(buf)) << 32;
+    bytes |= do_unpack_uint32(&buf[4]);
+
+    _fp64val = fp64dec(bytes);
+    return sizeof(_fp64val);
+}
+
+size_t
 XrlAtom::pack(uint8_t* buffer, size_t buffer_bytes) const
 {
     size_t pb = packed_bytes();
@@ -1228,6 +1275,9 @@ XrlAtom::pack(uint8_t* buffer, size_t buffer_bytes) const
 	case xrlatom_int64:
 	case xrlatom_uint64:
 	    packed_size += pack_uint64(buffer + packed_size);
+	    break;
+	case xrlatom_fp64:
+	    packed_size += pack_fp64(buffer + packed_size);
 	    break;
 
 	    // ... Your type here ...
@@ -1329,6 +1379,9 @@ XrlAtom::unpack(const uint8_t* buffer, size_t buffer_bytes)
 	case xrlatom_int64:
 	case xrlatom_uint64:
 	    used = unpack_uint64(buffer + unpacked);
+	    break;
+	case xrlatom_fp64:
+	    used = unpack_fp64(buffer + unpacked);
 	    break;
 
 	    // ... Your type here ...
