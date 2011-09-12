@@ -1,7 +1,7 @@
 /* -*-  Mode:C; c-basic-offset:4; tab-width:8; indent-tabs-mode:t -*- */
 /* vim:set sts=4 ts=8: */
 /*
- * Copyright (c) 2001
+ * Copyright (c) 2001-2011 XORP, Inc and Others
  * YOID Project.
  * University of Southern California/Information Sciences Institute.
  * All rights reserved.
