@@ -54,329 +54,72 @@ git shortlog xorp-1.8.3..HEAD
 ========================================================================
 Tag the code for this release:
 
+git tag xorp-1.8.4-rc
+
 
 ========================================================================
-2400.	TASK: Prepare sofware and documentation tarballs for distribution
-	WHO:  Release manager
-	WHEN: Release time
-	COMMANDS:
- # - In the command below, if the new release is, say, 1.4,
- #   then $ReleaseVersion must be 1.4
- #   However, if this is a release candidate, say, 1.4-RC,
- #   then $ReleaseVersion must be 1.4-RC
- # - The release version defined in the first line below
- # - Commands continue from the previous task
- setenv ReleaseVersion `cat xorp/VERSION`
- echo $ReleaseVersion
- mkdir tmp
- cd tmp
- cvs -d cvs.xorp.org:/cvsroot export -r $ReleaseTag xorp
- mv xorp xorp-$ReleaseVersion
- tar zcvf xorp-$ReleaseVersion.tar.gz xorp-$ReleaseVersion
- mv xorp-$ReleaseVersion xorp
- cd xorp/docs/kdoc
- ./gen-kdoc.sh
- tar zcvf html.tar.gz html
- cd ../..
- ./configure
- cd docs
- cp -p ../RELEASE_NOTES .
- cp -p ../BUILD_NOTES .
- cp -p ../LICENSE.other .
- cp -pr ../rtrmgr/config .
- gmake
- gmake
- rm */*.aux */*.bbl */*.blg */*.dvi */*.lof */*.log */*.lot */*.toc
- cd ..
- mv docs docs-$ReleaseVersion
- tar zcvf docs-$ReleaseVersion.tar.gz docs-$ReleaseVersion
- mv docs-$ReleaseVersion docs
- mv docs-$ReleaseVersion.tar.gz ..
- cd ..
+Prepare sofware and documentation tarballs for distribution
+
+Build packages (Ben has a script that does this for his targets).
+
+# Upload files to the web:
+VER=1.8.4
+scp xorp*[1-9].tgz xorp_win32.zip www.candelatech.com:xorp_html/releases/$VER/
+
+# Package up a source tarball:
+tar --exclude xorp/obj -cvzf xorp-$VER-src.tar.gz xorp
+
+scp xorp-$VER-src.tar.gz www.candelatech.com:xorp_html/releases/$VER/
+
+# Build kdocs and package all web-page related stuff
+
+./public_html.bash
+
+# Upload it:
+
+scp xorp_www.tar.bz2 www.candelatech.com:
 
 ========================================================================
-2450.	TASK: Prepare the Live CD ISO image
-	WHO:  Release manager
-	WHEN: Release time
-	COMMANDS:
- # See other/LiveCD/README for instructions.
- # Note that the LiveCD preparation process creates a file named LiveCD.iso,
- # and that file needs to be explicitly compressed by hand:
- #   gzip LiveCD.iso
+Add a Bugzilla "Version" entry for the new version.
+
 
 ========================================================================
-2470.	TASK: Prepare the XORP Installer for Windows
-	WHO:  Release manager
-	WHEN: Release time
-	COMMANDS:
- # - See xorp/devnotes/windows-release-process.txt and
- #   xorp/contrib/win32/installer/README for instructions.
- # - If necessary, list any new files (e.g., new binary files)
- #    that need to be installed.
-
-========================================================================
-2500.	TASK: Copy the tarballs to the Web server
-	WHO:  Release manager
-	WHEN: Release time
-	COMMANDS:
- # Commands continue from TASK 2400: "Prepare sofware and documentation
- # tarballs for distribution".
- scp -p xorp-$ReleaseVersion.tar.gz www.xorp.org:~/
- scp -p docs-$ReleaseVersion.tar.gz www.xorp.org:~/
- ssh www.xorp.org "(echo $ReleaseVersion > _XORP_VERSION)";
- unsetenv ReleaseTag
- unsetenv ReleaseVersion
- # Wait for the previous command to return
- ssh www.xorp.org
- setenv ReleaseVersion `cat _XORP_VERSION`
- echo $ReleaseVersion
- rm _XORP_VERSION
- cd /var/www/xorp.org/xorp-releases
- mkdir $ReleaseVersion
- cd $ReleaseVersion
- mv ~/xorp-$ReleaseVersion.tar.gz .
- mv ~/docs-$ReleaseVersion.tar.gz .
- tar zxvf docs-$ReleaseVersion.tar.gz
- mv docs-$ReleaseVersion docs
-
-========================================================================
-2550.	TASK: Copy the LiveCD ISO image and the Windows binary to the Web
-              server
-	WHO:  Release manager
-	WHEN: Release time
-	COMMANDS:
- # Commands continue from the previous task
- scp -p foo:~/live/cd/location/LiveCD.iso.gz .
- scp -p bar:~/windows/binary/location/xorp-$ReleaseVersion-setup.exe .
-
-========================================================================
-2600.	TASK: Calculate the MD5 checksums and the LiveCD size
-	WHO:  Release manager
-	WHEN: Release time
-	COMMANDS:
- # Commands continue from the previous task
- md5sum LiveCD.iso.gz
- md5sum xorp-$ReleaseVersion.tar.gz
- md5sum xorp-$ReleaseVersion-setup.exe
- ls -lAFgh LiveCD.iso.gz
-
-========================================================================
-2625.	TASK: Update the links in the Web server to the current release
-	WHO:  Release manager
-	WHEN: Release time
-	MISC: Should be omitted for a release candidate.
-	COMMANDS:
- # Commands continue from the previous task
- cd ..
- rm current; ln -s $ReleaseVersion current
-
-========================================================================
-2650.	TASK: Update the Web pages with the MD5 checksums calculated earlier
-	WHO:  Release manager
-	WHEN: Release time
-	MISC: - Update www/html_src/livecd.html with the LiveCD MD5
-		checksum, and the LiveCD size.
-	      - Update www/html_src/download.html with the MD5 checksum
-		of the XORP source code tarball.
-	      - Update www/html_src/download.html with the MD5 checksum
-		of the Windows binary.
-
-========================================================================
-2675.	TASK: Regenerate the Web pages in the www directory
-	WHO:  Release manager
-	WHEN: Release time
-	COMMANDS:
- cd www
- gmake
- gmake check
-	NOTE: the last command may fail with huge number of errors.
-	This is probably because of some configuration requirement
-	to run the "nsgmls" verification program. In the near future
-	the problem will be identified and fixed.
-
-========================================================================
-2700.	TASK: Update the XORP Web page on the main Web server www.xorp.org
-	      from the CVS repository
-	WHO:  Release manager
-	WHEN: Right after the release
-	COMMANDS:
- ssh www.xorp.org
- cd /var/www/xorp.org/www.xorp.org
- cvs update -d -P
-
-========================================================================
-2725.	TASK: Verify that all the links on XORP main Web server www.xorp.org
-	      are valid.
-	WHO:  Release manager
-	WHEN: Right after the release
-	COMMANDS:
-	 # You can use the WDG Link Valet tool for link validation:
-	 # http://www.htmlhelp.com/tools/valet/
-
-========================================================================
-2750.	TASK: Verify that all the HTML on XORP main Web server www.xorp.org
-	      is valid.
-	WHO:  Release manager
-	WHEN: Right after the release
-	COMMANDS:
-	 # You can use the WDG HTML Validator tool:
-	 # http://www.htmlhelp.com/tools/validator/
-
-========================================================================
-2770.	TASK: Add a Bugzilla "Version" entry for the new version.
-	WHO:  Release manager
-	WHEN: Right after the release
-	MISC: - Login to the XORP Bugzilla site, and then click on
-	        "Edit products" (at the bottom of the page)
-	        "Edit product: XORP"
-	        "Edit versions:" (at the bottom of the page)
-	        "Edit version ...: Add a new version"
-	      - Should be omitted for a release candidate.
-
-========================================================================
-2800.	TASK: Send email to xorp-dev@xorp.org that the release process has
-	      completed.
-	WHO:  Release manager
-	WHEN: Right after the release
-
-========================================================================
-2900.	TASK: Send an anouncement email to xorp-announce@xorp.org
-	      (CC to xorp-hackers@xorp.org and xorp-users@xorp.org)
-              about the new release.
-	WHO:  XORP project leader
-	WHEN: Right after the release
-	MISC: If this is a release candidate, then send the email
-              only to xorp-hackers@xorp.org and xorp-users@xorp.org
-
-========================================================================
-2950.	TASK: Update the FreshMeat XORP entry:
+Update the FreshMeat XORP entry:
 	      http://freshmeat.net/projects/xorp/
-	WHO:  Release manager
-	WHEN: Right after the release
-	MISC: - Should be omitted for a release candidate.
-              - Requires login and a password.
 
 ========================================================================
-2955.	TASK: Contact the FreeBSD maintainer of net/xorp to update the
-	      entry:
+Contact the FreeBSD maintainer of net/xorp to update the entry:
 	        http://www.freebsd.org/cgi/cvsweb.cgi/ports/net/xorp/
 	      The maintainer's email address is available from the Makefile:
 	        http://www.freebsd.org/cgi/cvsweb.cgi/ports/net/xorp/Makefile
-	WHO:  Release manager
-	WHEN: Right after the release
-	MISC: Note that currently there is no XORP port entry for FreeBSD,
-	      hence this task applies once the entry has been created.
-	MISC: Should be omitted for a release candidate.
 
 ========================================================================
-2960.	TASK: Contact the NetBSD maintainer of net/xorp to update the
-	      entry:
+Contact the NetBSD maintainer of net/xorp to update the entry:
 	        http://cvsweb.netbsd.org/bsdweb.cgi/pkgsrc/net/xorp/
 	      The maintainer's email address is available from the Makefile:
 	        http://cvsweb.netbsd.org/bsdweb.cgi/pkgsrc/net/xorp/Makefile
 	      If the maintainer's email address is generic, then the following
 	      form can be used to submit the request:
 	        http://www.netbsd.org/cgi-bin/sendpr.cgi?gndb=netbsd
-	WHO:  Release manager
-	WHEN: Right after the release
-	MISC: Should be omitted for a release candidate.
 
 ========================================================================
-2965.	TASK: Contact the OpenBSD maintainer of net/xorp to update the
-	      entry:
+Contact the OpenBSD maintainer of net/xorp to update the entry:
 	        http://www.openbsd.org/cgi-bin/cvsweb/ports/net/xorp/
 	      The maintainer's email address is available from the Makefile:
 	        http://www.openbsd.org/cgi-bin/cvsweb/ports/net/xorp/Makefile
 	      If the maintainer does not reply, then send an email to
 	        ports@openbsd.org
-	WHO:  Release manager
-	WHEN: Right after the release
-	MISC: Should be omitted for a release candidate.
 
 ========================================================================
-2970.	TASK: Update the LinuxLinks XORP entry (if necessary):
+Update the LinuxLinks XORP entry (if necessary):
 	       http://www.linuxlinks.com/
 	       http://www.linuxlinks.com/portal/cgi-bin/modify.cgi
-	WHO:  Release manager
-	WHEN: Right after the release
-	MISC: Should be omitted for a release candidate.
 
 ========================================================================
-2975.	TASK: Update the Wikipedia XORP entry:
+Update the Wikipedia XORP entry:
 	      http://en.wikipedia.org/wiki/XORP
-	WHO:  Release manager or any core developer
-	WHEN: Right after the release
-	MISC: - Should be omitted for a release candidate.
-              - Requires login and a password.
 
 ========================================================================
-2980.	TASK: Update the heise.de XORP entry:
+Update the heise.de XORP entry:
 	      http://www.heise.de/software/default.shtml?prg=42502
-	WHO:  Release manager
-	WHEN: Right after the release
-	MISC: - Should be omitted for a release candidate.
-              - Requires access URL.
 
-========================================================================
-3000.	TASK: Start the XORP tinderbox crontab job (only if it was
-	      stopped earlier)
-	WHO:  XORP tinderbox manager
-	WHEN: Right after the release
-
-========================================================================
-3100.	TASK: Prepare the release notes inside xorp/RELEASE_NOTES for
-	      the next release.
-	WHO:  Release manager
-	WHEN: Right after the release
-	MISC: Should be omitted for a release candidate.
-	COMMANDS:
- # Edit xorp/RELEASE_NOTES:
- # - Copy the release notes from the last release to the top of the file,
- #   update the version and the date (if known).
- # - Delete all particular items for each section, but keep the section
- #   entries.
- # - The new version should have "-WIP" (Work-In-Progress) as a suffix.
- #   If the exact release date is not known, then use "?" or "??" for the
- #   unknown parts of the date.
- # - For example, if the next release would be 1.5, then the release and
- #   the date might look like:
- #      Release 1.5-WIP (2007/??/??)
-
-========================================================================
-3200.	TASK: Update the "Work-In-Progress" version number
-	WHO:  Release manager
-	WHEN: Right after the release
-	MISC: Should be omitted for a release candidate.
-	MISC: The version name should have "-WIP" (Work-In-Progress)
-	      as a suffix. For example, if the next release would be 1.5,
-	      then the version would be "1.5-WIP".
-	COMMANDS:
- # Edit xorp/README
- # Edit xorp/RELEASE_NOTES (or verify that it contains the right version)
- # Edit xorp/VERSION
- # Edit all relevant configure.in (the second argument to AC_INIT())
-        xorp/configure.in
-        xorp/mibs/configure.in
- # Edit xorp/contrib/win32/installer/xorp.nsi and update PRODUCT_VERSION
- # Edit xorp/etc/templates/xorpsh.cmds and update "show version" output.
-
- cd xorp
- ./bootstrap
- cvs commit -m "Updated the Work-In-Progress version number"
-
-========================================================================
-3300.	TASK: Remove the Release Candidate directory from the Web server
-	WHO:  Release manager
-	WHEN: Right after the release
-	MISC: Should be omitted for a release candidate.
-	COMMANDS:
- ssh www.xorp.org
- cd /var/www/xorp.org/xorp-releases
- # Remove the Release Candidate directory (e.g., 1.4-RC)
-
-========================================================================
-3400.	TASK: Jupiter
-	WHO:  Everyone
-	WHEN: Right after the release
-
-========================================================================
