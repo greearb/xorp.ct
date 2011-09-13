@@ -1089,9 +1089,8 @@ packet_decode_bad_packet(TestInfo& info, OspfTypes::Version version,
     initialise_lsa_decoder(version, lsa_decoder);
     initialise_packet_decoder(version, packet_decoder, lsa_decoder);
 
-    Packet *packet;
     try {
-	packet = packet_decoder.decode(ptr, len);
+	packet_decoder.decode(ptr, len);
 	DOUT(info) << "Accepted bad packet (bad)\n";
 	return false;
     } catch(InvalidPacket& e) {
