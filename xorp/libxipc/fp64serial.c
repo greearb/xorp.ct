@@ -1,23 +1,25 @@
-// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
-// vim:set sts=4 ts=8:
+/* -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+ * vim:set sts=4 ts=8: */
 
-// Copyright (c) 2001-2011 XORP, Inc and Others
-//
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License, Version
-// 2.1, June 1999 as published by the Free Software Foundation.
-// Redistribution and/or modification of this program under the terms of
-// any other version of the GNU Lesser General Public License is not
-// permitted.
-//
-// This program is distributed in the hope that it will be useful, but
-// WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
-// see the GNU Lesser General Public License, Version 2.1, a copy of
-// which can be found in the XORP LICENSE.lgpl file.
-//
-// XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
-// http://xorp.net
+/*
+ * Copyright (c) 2001-2011 XORP, Inc and Others
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License, Version
+ * 2.1, June 1999 as published by the Free Software Foundation.
+ * Redistribution and/or modification of this program under the terms of
+ * any other version of the GNU Lesser General Public License is not
+ * permitted.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
+ * see the GNU Lesser General Public License, Version 2.1, a copy of
+ * which can be found in the XORP LICENSE.lgpl file.
+ *
+ * XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ * http://xorp.net
+ */
 
 #include <stdlib.h>
 #include <stdbool.h>
@@ -44,6 +46,48 @@
 /* How much is the exponent biased? */
 #define EXPONENT_BIAS ((EXPONENT_MASK >> 1u) - 1u)
 
+#if __STDC_VERSION__ >= 199901L || \
+    _XOPEN_SOURCE >= 600 || \
+    _ISOC99_SOURCE || \
+    _POSIX_C_SOURCE >= 200112L
+
+/* fpclassify is available. */
+#else
+/* We can't guarantee that fpclassify exists, so define a simple
+   implementation that at least picks out zero. */
+#undef FP_ZERO
+#undef FP_INFINITE
+#undef FP_NAN
+#undef FP_NORMAL
+#undef FP_SUBNORMAL
+#undef fpclassify
+
+#define FP_ZERO      0
+#define FP_INFINITE  1
+#define FP_NAN       2
+#define FP_NORMAL    3
+#define FP_SUBNORMAL 4
+
+#define fpclassify(X) \
+    ((X) == 0.0 ? FP_ZERO :			\
+	(X) >= +XORP_FP64UC(HUGE_VAL) ? FP_INFINITE : \
+	(X) <= -XORP_FP64UC(HUGE_VAL) ? FP_INFINITE : \
+	(X) != (X) ? FP_NAN : \
+     FP_NORMAL)
+#endif
+
+
+#if __STDC_VERSION__ >= 199901L || \
+    _XOPEN_SOURCE >= 600 || _ISOC99_SOURCE || _POSIX_C_SOURCE >= 200112L
+/* signbit is available. */
+#else
+/* We can't guarantee that signbit exists.  Define a simple
+   implementation that probably won't do worse than fail to detect -ve
+   zero. */
+#undef signbit
+#define signbit(X) ((X) < 0)
+
+#endif
 
 uint_fast64_t fp64enc(fp64_t input)
 {
@@ -146,9 +190,18 @@ fp64_t fp64dec(uint_fast64_t bytes)
     neg = (bytes >> SIGN_SHIFT) & SIGN_MASK;
 
     if (u_exp == EXPONENT_MASK) {
-	if (u_mant == 0)
+	if (u_mant == 0) {
+#ifdef INFINITY
 	    return neg ? -INFINITY : +INFINITY;
+#else
+	    return neg ? -XORP_FP64UC(HUGE_VAL) : +XORP_FP64UC(HUGE_VAL);
+#endif
+	}
+#ifdef NAN
 	return NAN;
+#else
+	return HUGE_VAL;
+#endif
     }
 
 
