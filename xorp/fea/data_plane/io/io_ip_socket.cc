@@ -1847,12 +1847,7 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
 
 #else // ! HAVE_RFC3542 (i.e., the old advanced API)
 
-#ifdef HAVE_IPV6_MULTICAST_ROUTING
-		//
-		// TODO: XXX: temporary use HAVE_IPV6_MULTICAST_ROUTING
-		// to conditionally compile, because Linux doesn't
-		// have inet6_option_*
-		//
+#ifdef HAVE_IPV6_OPTION_SPACE
 		uint8_t *tptr = NULL;
 		while (inet6_option_next(cmsgp, &tptr) == 0) {
 		    if (*tptr == IP6OPT_ROUTER_ALERT) {
@@ -1860,7 +1855,7 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
 			break;
 		    }
 		}
-#endif // HAVE_IPV6_MULTICAST_ROUTING
+#endif
 #endif // ! HAVE_RFC3542
 	    }	
 	    break;
@@ -2511,12 +2506,7 @@ IoIpSocket::send_packet(const string& if_name,
 	    }
 	    ctllen += CMSG_SPACE(hbhlen);
 #else
-#ifdef HAVE_IPV6_MULTICAST_ROUTING
-	    //
-	    // TODO: XXX: temporary use HAVE_IPV6_MULTICAST_ROUTING
-	    // to conditionally compile, because Linux doesn't
-	    // have inet6_option_*
-	    //
+#ifdef HAVE_IPV6_OPTION_SPACE
 	    hbhlen = inet6_option_space(sizeof(ra_opt6));
 	    ctllen += hbhlen;
 #endif
@@ -2614,12 +2604,7 @@ IoIpSocket::send_packet(const string& if_name,
 
 #else  // ! HAVE_RFC3542 (i.e., the old advanced API)
 
-#ifdef HAVE_IPV6_MULTICAST_ROUTING
-	    //
-	    // TODO: XXX: temporary use HAVE_IPV6_MULTICAST_ROUTING
-	    // to conditionally compile, because Linux doesn't
-	    // have inet6_option_*
-	    //
+#ifdef HAVE_IPV6_OPTION_SPACE
 	    if (inet6_option_init((void *)cmsgp, &cmsgp, IPV6_HOPOPTS)) {
 		error_msg = c_format("inet6_option_init(IPV6_HOPOPTS) failed");
 		return (XORP_ERROR);
@@ -2630,7 +2615,7 @@ IoIpSocket::send_packet(const string& if_name,
 		return (XORP_ERROR);
 	    }
 	    cmsgp = CMSG_NXTHDR(&_sndmh, cmsgp);
-#endif // HAVE_IPV6_MULTICAST_ROUTING
+#endif
 	    
 #endif // ! HAVE_RFC3542
 	}
