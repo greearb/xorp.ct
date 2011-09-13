@@ -34,127 +34,26 @@ Edit the Web pages in www/html_src/
   * index.html
 
 
-
 ========================================================================
-1150.	TASK: Regenerate the Web pages in www
-	WHO:  Release manager
-	WHEN: 1 day before the release date
-	COMMANDS:
+Regenerate the Web pages in www
+
  cd www
- gmake
- gmake check
-	NOTE: the last command may fail with huge number of errors.
-	This is probably because of some configuration requirement
-	to run the "nsgmls" verification program. In the near future
-	the problem will be identified and fixed.
+ make
+
+
 
 ========================================================================
-1170.	TASK: Update the Web pages in the XORP test Web server
-	http://test.xorp.org/
-	WHO:  Release manager
-	WHEN: 1 day before the release date
-	COMMANDS:
- ssh test.xorp.org
- cd /var/www/xorp.org/test.orp.org
- cvs update -d -P
+Update xorp/RELEASE_NOTES
+
+Edit it manually, and also create git shortlog with command
+similar to:
+
+git shortlog xorp-1.8.3..HEAD
+
 
 ========================================================================
-1180.	TASK: Verify that the Web pages on the test Web server
-	http://test.xorp.org/ are OK.
-	WHO:  Everyone
-	WHEN: 1 day before the release date
+Tag the code for this release:
 
-========================================================================
-1200.	TASK: Update xorp/RELEASE_NOTES
-	WHO:  Everyone
-	WHEN: 1 day before the release date
-	MISC: - Update the release date
-	      - If there are no changes to a module, then just add
-	        "No changes." or "No significant changes."
-
-========================================================================
-1250.	TASK: Update xorp/BUILD_NOTES
-	WHO:  Everyone
-	WHEN: 1 day before the release date
-	MISC: Add/update the information about building XORP on
-              various platforms.
-
-========================================================================
-1270.	TASK: Update xorp/ERRATA
-	WHO:  Everyone
-	WHEN: 1 day before the release date
-	MISC: If there are no known issues for a module, then just add
-	      "No known issues."
-
-========================================================================
-1300.	TASK: Modify the date on the front page on all documents in
-	      xorp/docs to be set to the release date
-	WHO:  Release manager
-	WHEN: 1 day before the release date
-	MISC: Can be omitted for a release candidate.
- # Commands to verify the date.
- cd xorp/docs
- egrep '\\date' */*.tex
-
-========================================================================
-1600.	TASK: Update xorp/README
-	WHO:  Release manager
-	WHEN: 1 day before the release date
-
-========================================================================
-1900.	TASK: Stop the XORP tinderbox crontab job (OPTIONAL)
-	WHO:  XORP tinderbox manager
-	WHEN: 4 hours before intended release time
-
-========================================================================
-2000.	TASK: Send email to xorp-dev@xorp.org that the release process
-	      has started. 
-	WHO:  Release manager
-	WHEN: 2 hours before intended release time
-
-========================================================================
-2200.	TASK: Verify that the code compiles and passes all tests.
-	WHO:  Release manager
-	WHEN: Release time
-	COMMANDS:
- # On each supported platform:
- cvs -d cvs.xorp.org:/cvsroot co xorp
- cvs -d cvs.xorp.org:/cvsroot co data
- cd xorp
- script
- ./configure
- gmake
- gmake check
- # Check the documentation building only on the primary development platform: 
- cd docs
- gmake
- # Note: the source-code compilation and running the tests can be skipped if
- # the XORP tinderbox  has been running for a reasonable amount of time
- # without errors.
-
-========================================================================
-2300.	TASK: Add CVS tag to the source code
-	WHO:  Release manager
-	WHEN: Release time
-	COMMANDS:
- # - In the command below, if the new release is, say, 1.4,
- #   then $ReleaseTag must be RELEASE_1_4
- #   However, if this is a release candidate, say, 1.4-RC,
- #   then $ReleaseTag must be RELEASE_1_4_RC
- # - The release tag is defined in the third command below.
- # - If you make a mistake and you need to re-tag, then use flag -F
- #   after "rtag" to move the tag.
- # - If you make a mistake and you need to delete the tag, then use flag -d
- #   after "rtag".
- mkdir xorp_release.tmp
- cd xorp_release.tmp
- cvs -d cvs.xorp.org:/cvsroot co xorp/VERSION
- setenv ReleaseTag RELEASE_`cat xorp/VERSION | sed 'y/./_/' | sed 'y/-/_/'`
- echo $ReleaseTag
- cvs -d cvs.xorp.org:/cvsroot rtag $ReleaseTag xorp
- cvs -d cvs.xorp.org:/cvsroot rtag $ReleaseTag other
- cvs -d cvs.xorp.org:/cvsroot rtag $ReleaseTag www
- cvs -d cvs.xorp.org:/cvsroot rtag $ReleaseTag data
 
 ========================================================================
 2400.	TASK: Prepare sofware and documentation tarballs for distribution

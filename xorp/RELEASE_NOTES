@@ -26,6 +26,79 @@ Release 1.8.4
    *  Add some env variable controlled debugging to the libxorp and libxipc
       logic for better debugging of xrls and the event loop.
 
+   git shortlog since 1.8.3:
+    Ben Greear (57):
+      www:  Update downloads & release links on web page.
+      vlans:  Don't try to delete interfaces that are not VLANs.
+      Merge ../xorp.ct.dev
+      ospf:  Add debug info around assert in peer.
+      ospf:  Deal better with reloading ospf config files.
+      BSD:  Fix bug with adding new virtual interface.
+      Merge branch 'master' of github.com:greearb/xorp.ct
+      multicast:  Fix critical bug with mcast routing tables in Linux.
+      olsr:  Fix xrl_port pending logic.
+      Fix compile warnings on Ubuntu 11.
+      fea:  All platforms we care about support strerror.
+      libxorp/fea:  Add XSTRERROR macro to provide cross-platform strerror
+      Merge ../xorp.ct.github
+      xrl:  Only warn if trying to register duplicate class-watch.
+      scons: Fix suggested install commands for Ubuntu 11.04
+      scons/firewall:  Fix up kernel header modification msg.
+      fea:  Use XSTRERROR instead of strerror(errno).
+      olsr:  Fix topology search.
+      olsr:  Fix code relating to RFC section 9.5
+      Merge branch 'master' of github.com:greearb/xorp.ct
+      Fix build on windows.
+      fea:  Whitespace cleanup.
+      bgp:  Compile fixes for gcc 4.6
+      cli:  Compile fixes for gcc 4.6
+      olsr:  Compile fixes for gcc 4.6
+      ospf:  Compile fixes for gcc 4.6
+      pim:  Compile fixes for gcc 4.6
+      rib:  Compile fixes for 4.6
+      Update win32_pkg script to build as well.
+      xorpsh manpage typo fixes
+      Fix un-initialized variable in win32 specific code.
+      fea:  Make io_ip_sockets non-blocking by default.
+      fea:  Add logging for register/unregister protocol handlers.
+      Make package script smarter.
+      xrl:  Allow meaningful name to identify xrl senders.
+      fea:  Add some debugging for windows adapters.
+      xrl/fea:  Add some debugging logic.
+      xrl:  Read up to 100 at a time instead of two.
+      xrl:  Remove dead code, some windows xmit, xrl batching.
+      xrl:  Remove more dead code.
+      xrl:  Propagate socket write failures on windows.
+      xrl: Add some debugging for stcp logic.
+      asyncio:  Add some debugging logic for asyncio.
+      time:  Support higher-resolution time-stamps on windows.
+      eventloop:  Clean up event loop slightly, cap wait on MS.
+      event-loop:  Remove dead code, make sure win-dispatcher handles all events.
+      event-loop:  Make environ-trace object generic, warn of slow win-dispatcher callbacks.
+      ospf:  Add/update debug tracing.
+      Fix build on 64-bit systems.
+      Fix enable_tests=True build.
+      Update copyright for recently touched files.
+      Use new perl script to update copyright.
+      Update a few non-standard copyrights.
+      Add perl script to update copyrights.
+      Remove old update_copyright.sh script.
+      Update version to 1.8.4
+      Update html for 1.8.4.
+
+    RUN Admin Team (68):
+      Wiki backup on Wed, 23 Mar 2011 03:00:01 +0100...
+      [snip]
+
+    Steven Simpson (6):
+      Supporting asynchronous method implementations
+      Simplifying (a)synchronous conditional compilation:
+      xrl:  Convert more low-level xrl processing to async handling.
+      Asynchronous callbacks accept argument pointers instead of references:
+      Added helper classes for async responses.
+      Support for IEEE754 binary64 format in XRLs
+
+
 Release 1.8.3 (March 16, 2011)
 
    *  Change the way VLANs are created.  This changes the config
