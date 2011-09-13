@@ -333,7 +333,7 @@ public:
 
     // fp64 constructors
     explicit XrlAtom(const fp64_t& value)
-	: _type(xrlatom_fp64), _have_data(true), _own(true), _u64val(value) {}
+	: _type(xrlatom_fp64), _have_data(true), _own(true), _fp64val(value) {}
 
     XrlAtom(const char* name, fp64_t value) throw (BadName)
 	: _type(xrlatom_fp64), _have_data(true), _own(true), _fp64val(value) {

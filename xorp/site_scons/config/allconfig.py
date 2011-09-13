@@ -563,6 +563,22 @@ def DoAllConfig(env, conf, host_os):
         if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
             conf.Define('HAVE_IPV6_MULTICAST')
 
+    # See if we need -std=gnu99 for fpclassify (math.h)
+    prereq_fpclassify = [ 'math.h' ]
+    fpclassify_includes = []
+    for s in prereq_fpclassify:
+        fpclassify_includes.append("#include <%s>\n" % s)
+    fpclassify_includes = string.join(fpclassify_includes, '')
+    has_fpclassify = conf.CheckDeclaration('fpclassify', fpclassify_includes)
+    if not has_fpclassify:
+        env.AppendUnique(CFLAGS = '-std=gnu99')
+        has_fpclassify = conf.CheckDeclaration('fpclassify', fpclassify_includes)
+        if not has_fpclassify:
+            print "\nERROR:  Cannot find fpclassify, tried -std=gnu99 as well."
+            sys.exit(1)
+        else:
+            print "\nNOTE:  Using -std=gnu99 for fpclassify (math.h)\n"
+
     ##########
     # v4 mforwarding
     
