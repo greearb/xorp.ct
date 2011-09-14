@@ -39,6 +39,7 @@
 
 
 #include "xrl_atom_list.hh"
+#include "fp64.h"
 
 
 enum XrlAtomType {
@@ -56,13 +57,14 @@ enum XrlAtomType {
     xrlatom_binary,
     xrlatom_int64,
     xrlatom_uint64,
+    xrlatom_fp64,
     // ... Your type's unique enumerated name here ...
     // Changing order above will break binary compatibility
     // ...Don't forget to update xrlatom_start and xrlatom_end below...
 
     // Bounds for enumerations
     xrlatom_start = xrlatom_int32,	// First valid enumerated value
-    xrlatom_end   = xrlatom_uint64	// Last valid enumerated value
+    xrlatom_end   = xrlatom_fp64	// Last valid enumerated value
 };
 
 inline XrlAtomType& operator++(XrlAtomType& t)
@@ -329,6 +331,16 @@ public:
     }
 
 
+    // fp64 constructors
+    explicit XrlAtom(const fp64_t& value)
+	: _type(xrlatom_fp64), _have_data(true), _own(true), _fp64val(value) {}
+
+    XrlAtom(const char* name, fp64_t value) throw (BadName)
+	: _type(xrlatom_fp64), _have_data(true), _own(true), _fp64val(value) {
+	set_name(name);
+    }
+
+
     // ... Your type's constructors here ...
 
     // Copy operations
@@ -368,6 +380,7 @@ public:
     const vector<uint8_t>& binary() const throw (NoData, WrongType);
     const int64_t&	   int64() const throw (NoData, WrongType);
     const uint64_t&	   uint64() const throw (NoData, WrongType);
+    const fp64_t&	   fp64() const throw (NoData, WrongType);
 
     // ... Your type's accessor method here ...
 
@@ -392,6 +405,7 @@ public:
     SET(string, _text, &)
     SET(XrlAtomList, _list, &)
     SET(vector<uint8_t>, _binary, &);
+    SET(fp64_t, _fp64val, )
 #undef SET
 
     void set(const IPv4& v) {
@@ -446,6 +460,7 @@ private:
     size_t pack_list(uint8_t* buffer, size_t buffer_bytes) const;
     size_t pack_binary(uint8_t* buffer) const;
     size_t pack_uint64(uint8_t* buffer) const;
+    size_t pack_fp64(uint8_t* buffer) const;
 
     size_t unpack_name(const uint8_t* buffer, size_t buffer_bytes)
 	throw (BadName);
@@ -460,6 +475,7 @@ private:
     size_t unpack_list(const uint8_t* buffer, size_t buffer_bytes);
     size_t unpack_binary(const uint8_t* buffer, size_t buffer_bytes);
     size_t unpack_uint64(const uint8_t* buffer);
+    size_t unpack_fp64(const uint8_t* buffer);
 
 private:
     XrlAtomType	_type;
@@ -479,6 +495,7 @@ private:
 	vector<uint8_t>* _binary;
         int64_t		 _i64val;
         uint64_t	 _u64val;
+        fp64_t	         _fp64val;
 
         // ... Your type here, if it's more than sizeof(uintptr_t) bytes,
 	// use a pointer ...

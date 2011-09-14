@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2009 XORP, Inc.
+// Copyright (c) 2001-2011 XORP, Inc and Others
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License, Version 2, June
@@ -143,6 +143,7 @@ XorpClient::fake_return_args(const string& xrl_return_spec)
 	case xrlatom_binary:
 	case xrlatom_uint64:
 	case xrlatom_int64:
+	case xrlatom_fp64:
 	    XLOG_UNFINISHED();
 	    break;
 	}

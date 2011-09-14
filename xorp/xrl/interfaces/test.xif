@@ -36,4 +36,9 @@ interface test/1.0 {
 	  * Something that always fails.
 	  */
 	 shoot_foot;
+
+	 /**
+	  * Handle IEEE754 binary64 format.
+	  */
+	 float_my_point ? input:fp64 -> output:fp64;
 }

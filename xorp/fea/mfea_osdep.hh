@@ -17,7 +17,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/fea/mfea_osdep.hh,v 1.14 2008/10/02 21:56:50 bms Exp $
 
 #ifndef __FEA_MFEA_OSDEP_HH__
 #define __FEA_MFEA_OSDEP_HH__
@@ -43,14 +42,6 @@
 #include "mrt/include/ip_mroute.h"
 
 #include "mfea_kernel_messages.hh"
-
-//
-// Constants definitions
-//
-
-//
-// Structures, typedefs and macros
-//
 
 //
 // XXX: misc. (eventually) missing definitions

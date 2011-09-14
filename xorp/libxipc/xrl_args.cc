@@ -533,6 +533,34 @@ XrlArgs::remove_uint64(const char* name) throw (XrlAtomNotFound)
 
 
 // ----------------------------------------------------------------------------
+// XrlArgs add/get/remove fp64
+
+XrlArgs&
+XrlArgs::add_fp64(const char* name, fp64_t val) throw (XrlAtomFound)
+{
+    return add(XrlAtom(name, val));
+}
+
+const fp64_t&
+XrlArgs::get_fp64(const char* name) const throw (BadArgs)
+{
+    try {
+	return get(XrlAtom(name, xrlatom_fp64)).fp64();
+    } catch (const XrlAtom::NoData& e) {
+        xorp_throw(BadArgs, e.why());
+    } catch (const XrlAtom::WrongType& e) {
+        xorp_throw(BadArgs, e.why());
+    }
+}
+
+void
+XrlArgs::remove_fp64(const char* name) throw (XrlAtomNotFound)
+{
+    remove(XrlAtom(name, xrlatom_fp64));
+}
+
+
+// ----------------------------------------------------------------------------
 // Append an existing XrlArgs
 
 XrlArgs&

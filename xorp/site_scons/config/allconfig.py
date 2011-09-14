@@ -563,6 +563,22 @@ def DoAllConfig(env, conf, host_os):
         if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
             conf.Define('HAVE_IPV6_MULTICAST')
 
+    # See if we need -std=gnu99 for fpclassify (math.h)
+    prereq_fpclassify = [ 'math.h' ]
+    fpclassify_includes = []
+    for s in prereq_fpclassify:
+        fpclassify_includes.append("#include <%s>\n" % s)
+    fpclassify_includes = string.join(fpclassify_includes, '')
+    has_fpclassify = conf.CheckDeclaration('fpclassify', fpclassify_includes)
+    if not has_fpclassify:
+        env.AppendUnique(CFLAGS = '-std=gnu99')
+        has_fpclassify = conf.CheckDeclaration('fpclassify', fpclassify_includes)
+        if not has_fpclassify:
+            print "\nERROR:  Cannot find fpclassify, tried -std=gnu99 as well."
+            sys.exit(1)
+        else:
+            print "\nNOTE:  Using -std=gnu99 for fpclassify (math.h)\n"
+
     ##########
     # v4 mforwarding
     
@@ -666,6 +682,13 @@ def DoAllConfig(env, conf, host_os):
     if has_linux_mroute6_h:
         prereq_mroute6_h = prereq_linux_mroute6_h
         mroute6_h = linux_mroute6_h
+
+    i6o_includes = []
+    for s in prereq_linux_mroute6_h:
+        i6o_includes.append("#include <%s>\n" % s)
+    i6o_includes.append("#include <%s>\n" % linux_mroute6_h);
+    i6o_includes = string.join(i6o_includes, '')
+    has_inet6_option_space = conf.CheckDeclaration('inet6_option_space', i6o_includes);
     
     # common structs
     mf6cctl2_includes = []
@@ -682,6 +705,12 @@ def DoAllConfig(env, conf, host_os):
     if has_netinet6_ip6_mroute_h or has_linux_mroute6_h:
         if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
             conf.Define('HAVE_IPV6_MULTICAST_ROUTING')
+            if has_inet6_option_space:
+                conf.Define('HAVE_IPV6_OPTION_SPACE')
+            else:
+                if not has_inet6_opt_init:
+                    print "\nWARNING:  inet6_option_* and inet6_opt_* are not supported on this system."
+                    print "  this might cause some problems with IPv6 multicast routing.\n"
 
     has_struct_mif6ctl_vifc_threshold = conf.CheckTypeMember('struct mif6ctl', 'vifc_threshold', includes=mf6cctl2_includes) 
     ##########

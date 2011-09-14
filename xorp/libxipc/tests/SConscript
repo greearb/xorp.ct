@@ -70,6 +70,7 @@ simple_cpp_tests = [
 	'xrl_error',
 	'xrl_parser',
 	'xrl_router',
+	'fp64',
 ]
 
 xrlrcvr_sources = [

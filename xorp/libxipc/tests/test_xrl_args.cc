@@ -1,7 +1,7 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
-// Copyright (c) 2001-2009 XORP, Inc.
+// Copyright (c) 2001-2011 XORP, Inc and Others
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License, Version
@@ -168,7 +168,8 @@ run_serialization_test()
 	XrlAtom("binary_data",	 test_binary),
 	XrlAtom("a_list",	 test_list),
 	XrlAtom("integer64",	 int64_t(-1234567890123456789LL)),
-	XrlAtom("uinteger64",	 uint64_t(0xabadc0ffee123456ULL))
+	XrlAtom("uinteger64",	 uint64_t(0xabadc0ffee123456ULL)),
+	XrlAtom("fp64",	 	 fp64_t(0.087613017887164087613407))
     };
     uint32_t n_test_args = sizeof(test_args) / sizeof(test_args[0]);
 
@@ -211,6 +212,7 @@ run_test()
     al.add_string("bad_karma", "");
     al.add_int64("a_named_int64", int64_t(-98765432101234LL));
     al.add_uint64("a_named_uint64", uint64_t(123456789012345ULL));
+    al.add_fp64("a_named_fp64", fp64_t(0.087613017887164087613407));
 
     XrlAtomList xal;
     xal.append(XrlAtom("first", string("fooo")));
@@ -260,6 +262,7 @@ run_test()
 	al.get_string("bad_karma");
 	al.get_int64("a_named_int64");
 	al.get_uint64("a_named_uint64");
+	al.get_fp64("a_named_fp64");
     } catch (XrlArgs::BadArgs& e) {
 	verbose_log("Error decoding the argument: %s\n", e.str().c_str());
 	return 1;
