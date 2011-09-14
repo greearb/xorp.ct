@@ -5,16 +5,16 @@ It's a **work in progress** - please let us know what additional help you would 
 XORP is an open networking platform that supports OSPF, RIP, BGP,
 OLSR, VRRP, PIM, IGMP (Multicast) and other routing protocols.  Most protocols
 support IPv4 and IPv6 where applicable.  It is known to work on various
-Linux distributions and flavors of BSD.  Support for cross-compiling XORP to Microsoft Windows using the mingw cross-compiler was recently (March 2011) added.
+Linux distributions and flavors of BSD.  Support for cross-compiling XORP to Microsoft [[http://www.bestpills4weightloss.com/purebiotix-review.html|purebiotix weight loss pill review]] Windows using the mingw cross-compiler was recently (March 2011) added.
 
 XORP started life as a project at the ICSI Center for Open Networking (ICON)
 at the International Computer Science Institute in Berkeley, California,
-USA, and spent some time with the team at XORP, Inc.  The project maintainer
+USA, and spent some time with the [[http://www.diamondlinks.net/|link building]] team at XORP, Inc.  The project maintainer
 is now [[mailto:greearb@candelatech.com | Ben Greear]] from [[http://www.candelatech.com/ | Candela Technologies]] and
 the old XORP.CT code base is now the official development tree.
 
 XORP's primary goal is to be an open platform for networking protocol
-implementations and an alternative to proprietary and closed networking
+implementations and an alternative to proprietary and [[http://www.andrewflusche.com/services/spotsylvania-reckless-driving-defense/|Spotsylvania reckless driving]] closed networking
 products.
 
 ===== Getting Started =====
@@ -30,7 +30,8 @@ products.
 
 
 ===== To be merged with the new documentation project =====
-<note warning>It is possible that some ECODE specifics are present in the documents. Nothing important and not much, though. </note>
+<note warning>It is possible that some ECODE specifics are present in the 
+[[http://www.merchantos.com/|point of sale software]] documents. Nothing important and not much, though. </note>
 ====Practical Aspects====
   - [[latex2wiki:introduction_xorp_process|An Introduction to Writing a XORP Process [IMPORTED and OUTDATED version, kept for safety] ]]
   - [[xorp:module_stub|The Dirty Stub Code, or the ready to use implementation]]
