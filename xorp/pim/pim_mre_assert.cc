@@ -37,27 +37,6 @@
 
 
 //
-// Exported variables
-//
-
-//
-// Local constants definitions
-//
-
-//
-// Local structures/classes, typedefs and macros
-//
-
-//
-// Local variables
-//
-
-//
-// Local functions prototypes
-//
-
-
-//
 // Assert state
 //
 // Note: applies only for (*,G) and (S,G)
@@ -78,13 +57,13 @@ PimMre::set_assert_noinfo_state(uint32_t vif_index)
     
     do {
 	if (is_sg()) {
-	    pim_mrt().add_task_assert_state_sg(vif_index,
+	    pim_mrt()->add_task_assert_state_sg(vif_index,
 					       source_addr(),
 					       group_addr());
 	    break;
 	}
 	if (is_wc()) {
-	    pim_mrt().add_task_assert_state_wc(vif_index, group_addr());
+	    pim_mrt()->add_task_assert_state_wc(vif_index, group_addr());
 	    break;
 	}
 	break;
@@ -112,13 +91,13 @@ PimMre::set_i_am_assert_winner_state(uint32_t vif_index)
     
     do {
 	if (is_sg()) {
-	    pim_mrt().add_task_assert_state_sg(vif_index,
+	    pim_mrt()->add_task_assert_state_sg(vif_index,
 					       source_addr(),
 					       group_addr());
 	    break;
 	}
 	if (is_wc()) {
-	    pim_mrt().add_task_assert_state_wc(vif_index, group_addr());
+	    pim_mrt()->add_task_assert_state_wc(vif_index, group_addr());
 	    break;
 	}
 	break;
@@ -146,13 +125,13 @@ PimMre::set_i_am_assert_loser_state(uint32_t vif_index)
     
     do {
 	if (is_sg()) {
-	    pim_mrt().add_task_assert_state_sg(vif_index,
+	    pim_mrt()->add_task_assert_state_sg(vif_index,
 					       source_addr(),
 					       group_addr());
 	    break;
 	}
 	if (is_wc()) {
-	    pim_mrt().add_task_assert_state_wc(vif_index, group_addr());
+	    pim_mrt()->add_task_assert_state_wc(vif_index, group_addr());
 	    break;
 	}
     } while (false);
@@ -556,7 +535,7 @@ PimMre::assert_process_wc(PimVif *pim_vif,
     pim_vif->pim_assert_mre_send(this, IPvX::ZERO(family()), dummy_error_msg);
     //  * Set timer to (Assert_Time - Assert_Override_Interval)
     _assert_timers[vif_index] =
-	pim_node().eventloop().new_oneoff_after(
+	pim_node()->eventloop().new_oneoff_after(
 	    TimeVal(pim_vif->assert_time().get(), 0)
 	    - TimeVal(pim_vif->assert_override_interval().get(), 0),
 	    callback(this, &PimMre::assert_timer_timeout_wc, vif_index));
@@ -574,7 +553,7 @@ PimMre::assert_process_wc(PimVif *pim_vif,
     set_assert_winner_metric_wc(vif_index, new_assert_metric);
     //  * Set timer to Assert_Time
     _assert_timers[vif_index] =
-	pim_node().eventloop().new_oneoff_after(
+	pim_node()->eventloop().new_oneoff_after(
 	    TimeVal(pim_vif->assert_time().get(), 0),
 	    callback(this, &PimMre::assert_timer_timeout_wc, vif_index));
     set_i_am_assert_loser_state(vif_index);
@@ -585,7 +564,7 @@ PimMre::assert_process_wc(PimVif *pim_vif,
     pim_vif->pim_assert_mre_send(this, IPvX::ZERO(family()), dummy_error_msg);
     //  * Set timer to (Assert_Time - Assert_Override_Interval)
     _assert_timers[vif_index] =
-	pim_node().eventloop().new_oneoff_after(
+	pim_node()->eventloop().new_oneoff_after(
 	    TimeVal(pim_vif->assert_time().get(), 0)
 	    - TimeVal(pim_vif->assert_override_interval().get(), 0),
 	    callback(this, &PimMre::assert_timer_timeout_wc, vif_index));
@@ -675,7 +654,7 @@ PimMre::assert_process_sg(PimVif *pim_vif,
     pim_vif->pim_assert_mre_send(this, source_addr(), dummy_error_msg);
     //  * Set timer to (Assert_Time - Assert_Override_Interval)
     _assert_timers[vif_index] =
-	pim_node().eventloop().new_oneoff_after(
+	pim_node()->eventloop().new_oneoff_after(
 	    TimeVal(pim_vif->assert_time().get(), 0)
 	    - TimeVal(pim_vif->assert_override_interval().get(), 0),
 	    callback(this, &PimMre::assert_timer_timeout_sg, vif_index));
@@ -693,7 +672,7 @@ PimMre::assert_process_sg(PimVif *pim_vif,
     set_assert_winner_metric_sg(vif_index, new_assert_metric);
     //  * Set timer to Assert_Time
     _assert_timers[vif_index] =
-	pim_node().eventloop().new_oneoff_after(
+	pim_node()->eventloop().new_oneoff_after(
 	    TimeVal(pim_vif->assert_time().get(), 0),
 	    callback(this, &PimMre::assert_timer_timeout_sg, vif_index));
     set_i_am_assert_loser_state(vif_index);
@@ -711,7 +690,7 @@ PimMre::assert_process_sg(PimVif *pim_vif,
     pim_vif->pim_assert_mre_send(this, source_addr(), dummy_error_msg);
     //  * Set timer to (Assert_Time - Assert_Override_Interval)
     _assert_timers[vif_index] =
-	pim_node().eventloop().new_oneoff_after(
+	pim_node()->eventloop().new_oneoff_after(
 	    TimeVal(pim_vif->assert_time().get(), 0)
 	    - TimeVal(pim_vif->assert_override_interval().get(), 0),
 	    callback(this, &PimMre::assert_timer_timeout_sg, vif_index));
@@ -734,7 +713,7 @@ PimMre::assert_process_sg(PimVif *pim_vif,
     set_assert_winner_metric_sg(vif_index, new_assert_metric);
     //  * Set timer to Assert_Time
     _assert_timers[vif_index] =
-	pim_node().eventloop().new_oneoff_after(
+	pim_node()->eventloop().new_oneoff_after(
 	    TimeVal(pim_vif->assert_time().get(), 0),
 	    callback(this, &PimMre::assert_timer_timeout_sg, vif_index));
     //  * If I is RPF_interface(S)
@@ -773,7 +752,7 @@ PimMre::wrong_iif_data_arrived_wc(PimVif *pim_vif,
     // message per second.
     _asserts_rate_limit.set(vif_index);
     if (! _asserts_rate_limit_timer.scheduled()) {
-	_asserts_rate_limit_timer = pim_node().eventloop().new_oneoff_after(
+	_asserts_rate_limit_timer = pim_node()->eventloop().new_oneoff_after(
 	    TimeVal(1, 0),
 	    callback(this, &PimMre::asserts_rate_limit_timer_timeout));
     }
@@ -808,7 +787,7 @@ PimMre::wrong_iif_data_arrived_sg(PimVif *pim_vif,
     // message per second.
     _asserts_rate_limit.set(vif_index);
     if (! _asserts_rate_limit_timer.scheduled()) {
-	_asserts_rate_limit_timer = pim_node().eventloop().new_oneoff_after(
+	_asserts_rate_limit_timer = pim_node()->eventloop().new_oneoff_after(
 	    TimeVal(1, 0),
 	    callback(this, &PimMre::asserts_rate_limit_timer_timeout));
     }
@@ -904,7 +883,7 @@ PimMre::data_arrived_could_assert(PimVif *pim_vif,
     }
     
     PimMre *pim_mre_wc;
-    pim_mre_wc = pim_mrt().pim_mre_find(src, dst, PIM_MRE_WC, PIM_MRE_WC);
+    pim_mre_wc = pim_mrt()->pim_mre_find(src, dst, PIM_MRE_WC, PIM_MRE_WC);
     if (pim_mre_wc == NULL) {
 	XLOG_ERROR("Internal error lookup/creating PIM multicast routing "
 		   "entry for source = %s group = %s",
@@ -957,7 +936,7 @@ PimMre::data_arrived_could_assert_wc(PimVif *pim_vif,
     }
     //  * Set timer to (Assert_Time - Assert_Override_Interval)
     _assert_timers[vif_index] =
-	pim_node().eventloop().new_oneoff_after(
+	pim_node()->eventloop().new_oneoff_after(
 	    TimeVal(pim_vif->assert_time().get(), 0)
 	    - TimeVal(pim_vif->assert_override_interval().get(), 0),
 	    callback(this, &PimMre::assert_timer_timeout_wc, vif_index));
@@ -1004,7 +983,7 @@ PimMre::data_arrived_could_assert_sg(PimVif *pim_vif,
     }
     //  * Set timer to (Assert_Time - Assert_Override_Interval)
     _assert_timers[vif_index] =
-	pim_node().eventloop().new_oneoff_after(
+	pim_node()->eventloop().new_oneoff_after(
 	    TimeVal(pim_vif->assert_time().get(), 0)
 	    - TimeVal(pim_vif->assert_override_interval().get(), 0),
 	    callback(this, &PimMre::assert_timer_timeout_sg, vif_index));
@@ -1052,7 +1031,7 @@ PimMre::recompute_could_assert_wc()
 	return (false);			// Nothing changed
     
     diff_value = new_value ^ old_value;
-    for (uint32_t i = 0; i < pim_node().maxvifs(); i++) {
+    for (uint32_t i = 0; i < pim_node()->maxvifs(); i++) {
 	if (diff_value.test(i))
 	    process_could_assert_wc(i, new_value.test(i));
     }
@@ -1065,7 +1044,7 @@ PimMre::recompute_could_assert_wc()
 bool
 PimMre::process_could_assert_wc(uint32_t vif_index, bool new_value)
 {
-    PimVif *pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
+    PimVif *pim_vif = pim_mrt()->vif_find_by_vif_index(vif_index);
     string dummy_error_msg;
     
     if (pim_vif == NULL)
@@ -1166,7 +1145,7 @@ PimMre::recompute_could_assert_sg()
 	return (false);			// Nothing changed
     
     diff_value = new_value ^ old_value;
-    for (uint32_t i = 0; i < pim_node().maxvifs(); i++) {
+    for (uint32_t i = 0; i < pim_node()->maxvifs(); i++) {
 	if (diff_value.test(i))
 	    process_could_assert_sg(i, new_value.test(i));
     }
@@ -1179,7 +1158,7 @@ PimMre::recompute_could_assert_sg()
 bool
 PimMre::process_could_assert_sg(uint32_t vif_index, bool new_value)
 {
-    PimVif *pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
+    PimVif *pim_vif = pim_mrt()->vif_find_by_vif_index(vif_index);
     string dummy_error_msg;
     
     if (pim_vif == NULL)
@@ -1218,7 +1197,7 @@ PimMre::process_could_assert_sg(uint32_t vif_index, bool new_value)
 void
 PimMre::assert_timer_timeout_wc(uint32_t vif_index)
 {
-    PimVif *pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
+    PimVif *pim_vif = pim_mrt()->vif_find_by_vif_index(vif_index);
     string dummy_error_msg;
     
     if (pim_vif == NULL)
@@ -1239,7 +1218,7 @@ PimMre::assert_timer_timeout_wc(uint32_t vif_index)
     pim_vif->pim_assert_mre_send(this, IPvX::ZERO(family()), dummy_error_msg);
     //  * Set timer to (Assert_Time - Assert_Override_Interval)
     _assert_timers[vif_index] =
-	pim_node().eventloop().new_oneoff_after(
+	pim_node()->eventloop().new_oneoff_after(
 	    TimeVal(pim_vif->assert_time().get(), 0)
 	    - TimeVal(pim_vif->assert_override_interval().get(), 0),
 	    callback(this, &PimMre::assert_timer_timeout_wc, vif_index));
@@ -1259,7 +1238,7 @@ PimMre::assert_timer_timeout_wc(uint32_t vif_index)
 void
 PimMre::assert_timer_timeout_sg(uint32_t vif_index)
 {
-    PimVif *pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
+    PimVif *pim_vif = pim_mrt()->vif_find_by_vif_index(vif_index);
     string dummy_error_msg;
     
     if (pim_vif == NULL)
@@ -1280,7 +1259,7 @@ PimMre::assert_timer_timeout_sg(uint32_t vif_index)
     pim_vif->pim_assert_mre_send(this, source_addr(), dummy_error_msg);
     //  * Set timer to (Assert_Time - Assert_Override_Interval)
     _assert_timers[vif_index] =
-	pim_node().eventloop().new_oneoff_after(
+	pim_node()->eventloop().new_oneoff_after(
 	    TimeVal(pim_vif->assert_time().get(), 0)
 	    - TimeVal(pim_vif->assert_override_interval().get(), 0),
 	    callback(this, &PimMre::assert_timer_timeout_sg, vif_index));
@@ -1477,7 +1456,7 @@ bool
 PimMre::recompute_assert_winner_nbr_sg_gen_id_changed(uint32_t vif_index,
 						      const IPvX& nbr_addr)
 {
-    PimVif *pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
+    PimVif *pim_vif = pim_mrt()->vif_find_by_vif_index(vif_index);
     
     if (pim_vif == NULL)
 	return (false);
@@ -1508,7 +1487,7 @@ bool
 PimMre::recompute_assert_winner_nbr_wc_gen_id_changed(uint32_t vif_index,
 						      const IPvX& nbr_addr)
 {
-    PimVif *pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
+    PimVif *pim_vif = pim_mrt()->vif_find_by_vif_index(vif_index);
     
     if (pim_vif == NULL)
 	return (false);
@@ -1618,7 +1597,7 @@ PimMre::recompute_assert_tracking_desired_sg()
 	return (false);			// Nothing changed
     
     diff_value = new_value ^ old_value;
-    for (uint32_t i = 0; i < pim_node().maxvifs(); i++) {
+    for (uint32_t i = 0; i < pim_node()->maxvifs(); i++) {
 	if (diff_value.test(i))
 	    process_assert_tracking_desired_sg(i, new_value.test(i));
     }
@@ -1705,7 +1684,7 @@ PimMre::recompute_assert_tracking_desired_wc()
 	return (false);			// Nothing changed
     
     diff_value = new_value ^ old_value;
-    for (uint32_t i = 0; i < pim_node().maxvifs(); i++) {
+    for (uint32_t i = 0; i < pim_node()->maxvifs(); i++) {
 	if (diff_value.test(i))
 	    process_assert_tracking_desired_wc(i, new_value.test(i));
     }
@@ -1760,7 +1739,7 @@ PimMre::spt_assert_metric(uint32_t vif_index) const
     if (! is_sg())
 	return (NULL);
     
-    pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
+    pim_vif = pim_mrt()->vif_find_by_vif_index(vif_index);
     if (pim_vif == NULL)
 	return (NULL);
     
@@ -1785,7 +1764,7 @@ PimMre::rpt_assert_metric(uint32_t vif_index) const
     if (! (is_wc() || is_sg()))
 	return (NULL);
     
-    pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
+    pim_vif = pim_mrt()->vif_find_by_vif_index(vif_index);
     if (pim_vif == NULL)
 	return (NULL);
     

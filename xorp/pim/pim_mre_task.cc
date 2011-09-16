@@ -39,28 +39,7 @@
 #include "pim_node.hh"
 
 
-//
-// Exported variables
-//
-
-//
-// Local constants definitions
-//
-
-//
-// Local structures/classes, typedefs and macros
-//
-
-//
-// Local variables
-//
-
-//
-// Local functions prototypes
-//
-
-
-PimMreTask::PimMreTask(PimMrt& pim_mrt,
+PimMreTask::PimMreTask(PimMrt* pim_mrt,
 		       PimMreTrackState::input_state_t input_state)
     : _pim_mrt(pim_mrt),
       _time_slice(100000, 20),		// 100ms, test every 20th iter
@@ -136,7 +115,7 @@ PimMreTask::PimMreTask(PimMrt& pim_mrt,
       _addr_arg(IPvX::ZERO(family()))
 {
     const PimMreTrackState& pim_mre_track_state
-	= _pim_mrt.pim_mre_track_state();
+	= _pim_mrt->pim_mre_track_state();
     
     // Get the lists of actions
     _action_list_rp = pim_mre_track_state.output_action_rp(input_state);
@@ -191,19 +170,19 @@ PimMreTask::~PimMreTask()
     // Delete the Mrib entries pending deletion
     delete_pointers_list(_mrib_delete_list);
     
-    pim_mrt().delete_task(this);
+    pim_mrt()->delete_task(this);
 }
 
-PimNode&
+PimNode*
 PimMreTask::pim_node() const
 {
-    return (_pim_mrt.pim_node());
+    return _pim_mrt->pim_node();
 }
 
 int
 PimMreTask::family() const
 {
-    return (_pim_mrt.family());
+    return (_pim_mrt->family());
 }
 
 //
@@ -258,7 +237,7 @@ PimMreTask::run_task_rp()
 	// considering the time slice, simply because there is no more than
 	// one (*,*,RP) entry for the particular RP.
 	
-	pim_mre = pim_mrt().pim_mre_find(_rp_addr_rp,
+	pim_mre = pim_mrt()->pim_mre_find(_rp_addr_rp,
 					 IPvX::ZERO(family()),
 					 PIM_MRE_RP,
 					 0);
@@ -278,13 +257,13 @@ PimMreTask::run_task_rp()
 	// Get the iterator boundaries by considering whether
 	// we had to stop processing during an earlier time slice.
 	//
-	rp_iter_end = pim_mrt().pim_mrt_rp().source_by_prefix_end(
+	rp_iter_end = pim_mrt()->pim_mrt_rp().source_by_prefix_end(
 	    _rp_addr_prefix_rp);
 	if (! _is_processing_rp_addr_rp) {
-	    rp_iter_begin = pim_mrt().pim_mrt_rp().source_by_prefix_begin(
+	    rp_iter_begin = pim_mrt()->pim_mrt_rp().source_by_prefix_begin(
 		_rp_addr_prefix_rp);
 	} else {
-	    rp_iter_begin = pim_mrt().pim_mrt_rp().source_by_addr_begin(
+	    rp_iter_begin = pim_mrt()->pim_mrt_rp().source_by_addr_begin(
 		_processing_rp_addr_rp);
 	}
 	
@@ -328,9 +307,9 @@ PimMreTask::run_task_rp()
 	
 	// Prepare the processing of the (*,*,RP) entries for this PimNbr
 	if (! _is_processing_pim_nbr_addr_rp)
-	    pim_node().init_processing_pim_mre_rp(_vif_index, _pim_nbr_addr);
+	    pim_node()->init_processing_pim_mre_rp(_vif_index, _pim_nbr_addr);
 	
-	PimNbr *pim_nbr = pim_node().find_processing_pim_mre_rp(_vif_index,
+	PimNbr *pim_nbr = pim_node()->find_processing_pim_mre_rp(_vif_index,
 								_pim_nbr_addr);
 	if (pim_nbr != NULL) {
 	    
@@ -467,7 +446,7 @@ PimMreTask::run_task_wc()
 	// considering the time slice, simply because in this case there is
 	// only one (*,G) entry.
 	
-	pim_mre = pim_mrt().pim_mre_find(IPvX::ZERO(family()),
+	pim_mre = pim_mrt()->pim_mre_find(IPvX::ZERO(family()),
 					 _group_addr_wc,
 					 PIM_MRE_WC,
 					 0);
@@ -485,7 +464,7 @@ PimMreTask::run_task_wc()
 	// they match to.
 	
 	PimRp *pim_rp;
-	RpTable& rp_table = pim_node().rp_table();
+	RpTable& rp_table = pim_node()->rp_table();
 	
 	// Prepare the processing of the (*,G) entries for this RP address
 	if (! _is_processing_rp_addr_wc) {
@@ -553,13 +532,13 @@ PimMreTask::run_task_wc()
 	// Get the iterator boundaries by considering whether
 	// we had to stop processing during an earlier time slice.
 	//
-	g_iter_end = pim_mrt().pim_mrt_g().group_by_prefix_end(
+	g_iter_end = pim_mrt()->pim_mrt_g().group_by_prefix_end(
 	    _group_addr_prefix_wc);
 	if (! _is_processing_group_addr_wc) {
-	    g_iter_begin = pim_mrt().pim_mrt_g().group_by_prefix_begin(
+	    g_iter_begin = pim_mrt()->pim_mrt_g().group_by_prefix_begin(
 		_group_addr_prefix_wc);
 	} else {
-	    g_iter_begin = pim_mrt().pim_mrt_g().group_by_addr_begin(
+	    g_iter_begin = pim_mrt()->pim_mrt_g().group_by_addr_begin(
 		_processing_group_addr_wc);
 	}
 	
@@ -602,9 +581,9 @@ PimMreTask::run_task_wc()
 	
 	// Prepare the processing of the (*,G) entries for this PimNbr
 	if (! _is_processing_pim_nbr_addr_wc)
-	    pim_node().init_processing_pim_mre_wc(_vif_index, _pim_nbr_addr);
+	    pim_node()->init_processing_pim_mre_wc(_vif_index, _pim_nbr_addr);
 	
-	PimNbr *pim_nbr = pim_node().find_processing_pim_mre_wc(_vif_index,
+	PimNbr *pim_nbr = pim_node()->find_processing_pim_mre_wc(_vif_index,
 								_pim_nbr_addr);
 	if (pim_nbr != NULL) {
 	    
@@ -756,14 +735,14 @@ PimMreTask::run_task_sg_sg_rpt()
 	// XXX: for simplicity, we always perform the (S,G) and/or (S,G,rpt)
 	// actions without considering the time slice, simply because in this
 	// case there are no more than two entries.
-	pim_mre_sg = pim_mrt().pim_mre_find(_source_addr_sg_sg_rpt,
+	pim_mre_sg = pim_mrt()->pim_mre_find(_source_addr_sg_sg_rpt,
 					    _group_addr_sg_sg_rpt,
 					    PIM_MRE_SG,
 					    0);
 	if (pim_mre_sg != NULL)
 	    pim_mre_sg_rpt = pim_mre_sg->sg_rpt_entry();
 	else
-	    pim_mre_sg_rpt = pim_mrt().pim_mre_find(_source_addr_sg_sg_rpt,
+	    pim_mre_sg_rpt = pim_mrt()->pim_mre_find(_source_addr_sg_sg_rpt,
 						    _group_addr_sg_sg_rpt,
 						    PIM_MRE_SG_RPT,
 						    0);
@@ -786,16 +765,16 @@ PimMreTask::run_task_sg_sg_rpt()
 	//
 	PimMrtSg::const_gs_iterator gs_iter, gs_iter_begin, gs_iter_end;
 	
-	gs_iter_end = pim_mrt().pim_mrt_sg().group_by_addr_end(
+	gs_iter_end = pim_mrt()->pim_mrt_sg().group_by_addr_end(
 	    _group_addr_sg_sg_rpt);
 	
 	if (! (_is_processing_sg_source_addr_sg_sg_rpt
 	       || _is_processing_sg_rpt_source_addr_sg_sg_rpt)) {
-	    gs_iter_begin = pim_mrt().pim_mrt_sg().group_by_addr_begin(
+	    gs_iter_begin = pim_mrt()->pim_mrt_sg().group_by_addr_begin(
 		_group_addr_sg_sg_rpt);
 	} else {
 	    if (_is_processing_sg_source_addr_sg_sg_rpt) {
-		gs_iter_begin = pim_mrt().pim_mrt_sg().group_source_by_addr_begin(
+		gs_iter_begin = pim_mrt()->pim_mrt_sg().group_source_by_addr_begin(
 		    _processing_sg_source_addr_sg_sg_rpt,
 		    _group_addr_sg_sg_rpt);
 	    } else {
@@ -831,14 +810,14 @@ PimMreTask::run_task_sg_sg_rpt()
 	// Perform the actions for only those (S,G,rpt) entries that do not
 	// have a corresponding (S,G) entry.
 	//
-	gs_iter_end = pim_mrt().pim_mrt_sg_rpt().group_by_addr_end(
+	gs_iter_end = pim_mrt()->pim_mrt_sg_rpt().group_by_addr_end(
 	    _group_addr_sg_sg_rpt);
 	
 	if (! _is_processing_sg_rpt_source_addr_sg_sg_rpt) {
-	    gs_iter_begin = pim_mrt().pim_mrt_sg_rpt().group_by_addr_begin(
+	    gs_iter_begin = pim_mrt()->pim_mrt_sg_rpt().group_by_addr_begin(
 		_group_addr_sg_sg_rpt);
 	} else {
-	    gs_iter_begin = pim_mrt().pim_mrt_sg_rpt().group_source_by_addr_begin(
+	    gs_iter_begin = pim_mrt()->pim_mrt_sg_rpt().group_source_by_addr_begin(
 		_processing_sg_rpt_source_addr_sg_sg_rpt,
 		_group_addr_sg_sg_rpt);
 	}
@@ -885,16 +864,16 @@ PimMreTask::run_task_sg_sg_rpt()
 	//
 	PimMrtSg::const_sg_iterator sg_iter, sg_iter_begin, sg_iter_end;
 	
-	sg_iter_end = pim_mrt().pim_mrt_sg().source_by_prefix_end(
+	sg_iter_end = pim_mrt()->pim_mrt_sg().source_by_prefix_end(
 	    _source_addr_prefix_sg_sg_rpt);
 	
 	if (! (_is_processing_sg_group_addr_sg_sg_rpt
 	       || _is_processing_sg_rpt_group_addr_sg_sg_rpt)) {
-	    sg_iter_begin = pim_mrt().pim_mrt_sg().source_by_prefix_begin(
+	    sg_iter_begin = pim_mrt()->pim_mrt_sg().source_by_prefix_begin(
 		_source_addr_prefix_sg_sg_rpt);
 	} else {
 	    if (_is_processing_sg_group_addr_sg_sg_rpt) {
-		sg_iter_begin = pim_mrt().pim_mrt_sg().source_group_by_addr_begin(
+		sg_iter_begin = pim_mrt()->pim_mrt_sg().source_group_by_addr_begin(
 		    _processing_sg_source_addr_sg_sg_rpt,
 		    _processing_sg_group_addr_sg_sg_rpt);
 	    } else {
@@ -934,14 +913,14 @@ PimMreTask::run_task_sg_sg_rpt()
 	// Perform the actions for only those (S,G,rpt) entries that do not
 	// have a corresponding (S,G) entry.
 	//
-	sg_iter_end = pim_mrt().pim_mrt_sg_rpt().source_by_prefix_end(
+	sg_iter_end = pim_mrt()->pim_mrt_sg_rpt().source_by_prefix_end(
 	    _source_addr_prefix_sg_sg_rpt);
 	
 	if (! _is_processing_sg_rpt_group_addr_sg_sg_rpt) {
-	    sg_iter_begin = pim_mrt().pim_mrt_sg_rpt().source_by_prefix_begin(
+	    sg_iter_begin = pim_mrt()->pim_mrt_sg_rpt().source_by_prefix_begin(
 		_source_addr_prefix_sg_sg_rpt);
 	} else {
-	    sg_iter_begin = pim_mrt().pim_mrt_sg_rpt().source_group_by_addr_begin(
+	    sg_iter_begin = pim_mrt()->pim_mrt_sg_rpt().source_group_by_addr_begin(
 		_processing_sg_rpt_source_addr_sg_sg_rpt,
 		_processing_sg_rpt_group_addr_sg_sg_rpt);
 	}
@@ -989,7 +968,7 @@ PimMreTask::run_task_sg_sg_rpt()
 	// processing list.
 	
 	PimRp *pim_rp;
-	RpTable& rp_table = pim_node().rp_table();
+	RpTable& rp_table = pim_node()->rp_table();
 	
 	// Prepare the processing of the (S,G) entries for this RP address
 	if (! _is_processing_rp_addr_sg) {
@@ -1093,9 +1072,9 @@ PimMreTask::run_task_sg_sg_rpt()
 	
 	// Prepare the processing of the (S,G) entries for this PimNbr
 	if (! _is_processing_pim_nbr_addr_sg)
-	    pim_node().init_processing_pim_mre_sg(_vif_index, _pim_nbr_addr);
+	    pim_node()->init_processing_pim_mre_sg(_vif_index, _pim_nbr_addr);
 	
-	PimNbr *pim_nbr = pim_node().find_processing_pim_mre_sg(_vif_index,
+	PimNbr *pim_nbr = pim_node()->find_processing_pim_mre_sg(_vif_index,
 								_pim_nbr_addr);
 	if (pim_nbr != NULL) {
 	    
@@ -1133,9 +1112,9 @@ PimMreTask::run_task_sg_sg_rpt()
 
 	// Prepare the processing of the (S,G,rpt) entries for this PimNbr
 	if (! _is_processing_pim_nbr_addr_sg_rpt)
-	    pim_node().init_processing_pim_mre_sg_rpt(_vif_index, _pim_nbr_addr);
+	    pim_node()->init_processing_pim_mre_sg_rpt(_vif_index, _pim_nbr_addr);
 	
-	pim_nbr = pim_node().find_processing_pim_mre_sg_rpt(_vif_index,
+	pim_nbr = pim_node()->find_processing_pim_mre_sg_rpt(_vif_index,
 							    _pim_nbr_addr);
 	if (pim_nbr != NULL) {
 	    
@@ -1310,7 +1289,7 @@ PimMreTask::run_task_mfc()
 	// XXX: for simplicity, we always perform the PimMfc
 	// actions without considering the time slice, simply because in this
 	// case there is no more than one entry.
-	pim_mfc = pim_mrt().pim_mfc_find(_source_addr_mfc,
+	pim_mfc = pim_mrt()->pim_mfc_find(_source_addr_mfc,
 					 _group_addr_mfc,
 					 false);
 	
@@ -1327,14 +1306,14 @@ PimMreTask::run_task_mfc()
 	//
 	PimMrtMfc::const_gs_iterator gs_iter, gs_iter_begin, gs_iter_end;
 	
-	gs_iter_end = pim_mrt().pim_mrt_mfc().group_by_addr_end(
+	gs_iter_end = pim_mrt()->pim_mrt_mfc().group_by_addr_end(
 	    _group_addr_mfc);
 	
 	if (! _is_processing_source_addr_mfc) {
-	    gs_iter_begin = pim_mrt().pim_mrt_mfc().group_by_addr_begin(
+	    gs_iter_begin = pim_mrt()->pim_mrt_mfc().group_by_addr_begin(
 		_group_addr_mfc);
 	} else {
-	    gs_iter_begin = pim_mrt().pim_mrt_mfc().group_source_by_addr_begin(
+	    gs_iter_begin = pim_mrt()->pim_mrt_mfc().group_source_by_addr_begin(
 		_processing_source_addr_mfc,
 		_group_addr_mfc);
 	}
@@ -1372,14 +1351,14 @@ PimMreTask::run_task_mfc()
 	//
 	PimMrtMfc::const_sg_iterator sg_iter, sg_iter_begin, sg_iter_end;
 	
-	sg_iter_end = pim_mrt().pim_mrt_mfc().source_by_prefix_end(
+	sg_iter_end = pim_mrt()->pim_mrt_mfc().source_by_prefix_end(
 	    _source_addr_prefix_mfc);
 	
 	if (! _is_processing_group_addr_mfc) {
-	    sg_iter_begin = pim_mrt().pim_mrt_mfc().source_by_prefix_begin(
+	    sg_iter_begin = pim_mrt()->pim_mrt_mfc().source_by_prefix_begin(
 		_source_addr_prefix_mfc);
 	} else {
-	    sg_iter_begin = pim_mrt().pim_mrt_mfc().source_group_by_addr_begin(
+	    sg_iter_begin = pim_mrt()->pim_mrt_mfc().source_group_by_addr_begin(
 		    _processing_source_addr_mfc,
 		    _processing_group_addr_mfc);
 	}
@@ -1417,7 +1396,7 @@ PimMreTask::run_task_mfc()
 	// XXX: all entries are on the processing list.
 	
 	PimRp *pim_rp;
-	RpTable& rp_table = pim_node().rp_table();
+	RpTable& rp_table = pim_node()->rp_table();
 	
 	// Prepare the processing of the PimMfc entries for this RP address
 	if (! _is_processing_rp_addr_mfc) {
@@ -1610,7 +1589,7 @@ PimMreTask::perform_pim_mfc_actions(const IPvX& source_addr,
 {
     PimMfc *pim_mfc;
     
-    pim_mfc = pim_mrt().pim_mfc_find(source_addr, group_addr, false);
+    pim_mfc = pim_mrt()->pim_mfc_find(source_addr, group_addr, false);
     
     perform_pim_mfc_actions(pim_mfc);
 }

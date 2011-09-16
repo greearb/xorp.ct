@@ -757,7 +757,7 @@ public:
      * 
      * @return a reference to the PIM Multicast Routing Table (@ref PimMrt).
      */
-    PimMrt&	pim_mrt()		{ return (_pim_mrt);		}
+    PimMrt&	pim_mrt()		{ return _pim_mrt;		}
     
     /**
      * Get the table with the Multicast Routing Information Base used by PIM.
@@ -1436,14 +1436,5 @@ private:
     list<PimJpHeader> _test_jp_headers_list; // J/P headers to send test J/P messages
 };
 
-
-//
-// Global variables
-//
-
-
-//
-// Global functions prototypes
-//
 
 #endif // __PIM_PIM_NODE_HH__

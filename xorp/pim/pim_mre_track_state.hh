@@ -17,8 +17,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/pim/pim_mre_track_state.hh,v 1.28 2008/10/02 21:57:53 bms Exp $
-
 
 #ifndef __PIM_PIM_MRE_TRACK_STATE_HH__
 #define __PIM_PIM_MRE_TRACK_STATE_HH__
@@ -28,21 +26,8 @@
 // PIM Multicast Routing Entry state tracking definitions.
 //
 
-
-
-
-
 #include "pim_mre.hh"
 
-
-//
-// Constants definitions
-//
-
-
-//
-// Structures/classes, typedefs and macros
-//
 
 class PimMfc;
 class PimMreAction;
@@ -52,11 +37,11 @@ class PimNbr;
 // State tracking for PIM-specific Multicast Routing Entry
 class PimMreTrackState {
 public:
-    PimMreTrackState(PimMrt& pim_mrt);
+    PimMreTrackState(PimMrt* pim_mrt);
 
     // General info: PimNode, PimMrt, family, etc.
-    PimNode&	pim_node()	const;
-    PimMrt&	pim_mrt()	const	{ return (_pim_mrt);		}
+    PimNode*	pim_node()	const;
+    PimMrt*	pim_mrt()	const	{ return _pim_mrt;		}
     int		family()	const;
     
     void	print_actions_name() const;
@@ -610,7 +595,7 @@ private:
     void	track_state_set_keepalive_timer_sg(list<PimMreAction> action_list);
     
     // Private state
-    PimMrt&	_pim_mrt;		// The PIM MRT
+    PimMrt*	_pim_mrt;		// The PIM MRT
 };
 
 // Class to keep state for taking actions
@@ -652,13 +637,5 @@ private:
     uint32_t	_entry_type;
 };
 
-
-//
-// Global variables
-//
-
-//
-// Global functions prototypes
-//
 
 #endif // __PIM_PIM_MRE_TRACK_STATE_HH__

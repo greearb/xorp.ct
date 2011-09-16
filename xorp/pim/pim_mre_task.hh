@@ -17,8 +17,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/pim/pim_mre_task.hh,v 1.15 2008/10/02 21:57:53 bms Exp $
-
 
 #ifndef __PIM_PIM_MRE_TASK_HH__
 #define __PIM_PIM_MRE_TASK_HH__
@@ -50,12 +48,12 @@ class PimMrt;
 // Task for PIM-specific Multicast Routing Entry
 class PimMreTask {
 public:
-    PimMreTask(PimMrt& pim_mrt, PimMreTrackState::input_state_t input_state);
+    PimMreTask(PimMrt* pim_mrt, PimMreTrackState::input_state_t input_state);
     ~PimMreTask();
     
     // General info: PimNode, PimMrt, family, etc.
-    PimNode&	pim_node()	const;
-    PimMrt&	pim_mrt()	const	{ return (_pim_mrt);		}
+    PimNode*	pim_node()	const;
+    PimMrt*	pim_mrt()	const	{ return _pim_mrt;		}
     int		family()	const;
     
     bool	run_task();
@@ -170,7 +168,7 @@ public:
     
 private:
     // Private state
-    PimMrt&		_pim_mrt;		// The PIM MRT
+    PimMrt* _pim_mrt;		// The PIM MRT
     
     list<PimMreAction>	_action_list_rp; // The list of (*,*,RP) actions
     list<PimMreAction>	_action_list_wc; // The list of (*,G) actions
@@ -291,13 +289,5 @@ private:
     //
     list<Mrib *> _mrib_delete_list;
 };
-
-//
-// Global variables
-//
-
-//
-// Global functions prototypes
-//
 
 #endif // __PIM_PIM_MRE_TASK_HH__

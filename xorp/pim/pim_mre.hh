@@ -17,8 +17,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/pim/pim_mre.hh,v 1.54 2008/10/02 21:57:53 bms Exp $
-
 
 #ifndef __PIM_PIM_MRE_HH__
 #define __PIM_PIM_MRE_HH__
@@ -35,15 +33,6 @@
 #include "pim_mrib_table.hh"
 #include "pim_proto_assert.hh"
 
-
-//
-// Constants definitions
-//
-
-
-//
-// Structures/classes, typedefs and macros
-//
 
 class AssertMetric;
 class PimMre;
@@ -100,16 +89,15 @@ enum {
 // XXX: the source_addr() for (*,*,RP) entry contains the RP address
 class PimMre : public Mre<PimMre> {
 public:
-    PimMre(PimMrt& pim_mrt, const IPvX& source, const IPvX& group);
-    ~PimMre();
+    PimMre(PimMrt* pim_mrt, const IPvX& source, const IPvX& group);
+    virtual ~PimMre();
     
     void	add_pim_mre_lists();
     void	remove_pim_mre_lists();
     
     // General info: PimNode, PimMrt, family, etc.
-    PimNode&	pim_node()	const;
-    PimMrt&	pim_mrt()	const	{ return (_pim_mrt);		}
-    PimMrt&	_pim_mrt;		// The PIM MRT (yuck!)
+    PimNode*	pim_node() const;
+    PimMrt*	pim_mrt()	const	{ return _pim_mrt; }
     int		family()	const;
     uint32_t	pim_register_vif_index() const;
     
@@ -917,14 +905,8 @@ public:
     
 private:
     uint32_t	_flags;			// Various flags (see PIM_MRE_* above)
+    PimMrt*	_pim_mrt;		// The PIM MRT (yuck!)
 };
 
-//
-// Global variables
-//
-
-//
-// Global functions prototypes
-//
 
 #endif // __PIM_PIM_MRE_HH__

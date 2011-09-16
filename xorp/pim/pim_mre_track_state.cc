@@ -60,7 +60,7 @@
 //
 
 
-PimMreTrackState::PimMreTrackState(PimMrt& pim_mrt)
+PimMreTrackState::PimMreTrackState(PimMrt* pim_mrt)
     : _pim_mrt(pim_mrt)
 {
     list<PimMreAction> action_list;
@@ -170,16 +170,16 @@ PimMreTrackState::PimMreTrackState(PimMrt& pim_mrt)
     }
 }
 
-PimNode&
+PimNode*
 PimMreTrackState::pim_node() const
 {
-    return (_pim_mrt.pim_node());
+    return _pim_mrt->pim_node();
 }
 
 int
 PimMreTrackState::family() const
 {
-    return (_pim_mrt.family());
+    return (_pim_mrt->family());
 }
 
 // Return %XORP_OK if the action list has been added, otherwise return %XORP_ERROR.
@@ -3711,7 +3711,7 @@ PimMreAction::perform_action(PimMre& pim_mre, uint32_t vif_index,
 	if (vif_index != Vif::VIF_INDEX_INVALID) {
 	    pim_mre.recompute_my_assert_metric_sg(vif_index);
 	} else {
-	    maxvifs = pim_mre.pim_node().maxvifs();
+	    maxvifs = pim_mre.pim_node()->maxvifs();
     	    for (i = 0; i < maxvifs; i++)
 		pim_mre.recompute_my_assert_metric_sg(i);
 	}
@@ -3721,7 +3721,7 @@ PimMreAction::perform_action(PimMre& pim_mre, uint32_t vif_index,
 	if (vif_index != Vif::VIF_INDEX_INVALID) {
 	    pim_mre.recompute_my_assert_metric_wc(vif_index);
 	} else {
-	    maxvifs = pim_mre.pim_node().maxvifs();
+	    maxvifs = pim_mre.pim_node()->maxvifs();
     	    for (i = 0; i < maxvifs; i++)
 		pim_mre.recompute_my_assert_metric_wc(i);
 	}

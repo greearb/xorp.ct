@@ -52,7 +52,7 @@
 PimNode::PimNode(int family, xorp_module_id module_id,
 		 EventLoop& eventloop)
     : ProtoNode<PimVif>(family, module_id, eventloop),
-      _pim_mrt(*this),
+      _pim_mrt(this),
       _pim_mrib_table(*this),
       _rp_table(*this),
       _pim_scope_zone_table(*this),

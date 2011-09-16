@@ -38,26 +38,6 @@
 #include "pim_vif.hh"
 
 
-//
-// Exported variables
-//
-
-//
-// Local constants definitions
-//
-
-//
-// Local structures/classes, typedefs and macros
-//
-
-//
-// Local variables
-//
-
-//
-// Local functions prototypes
-//
-
 PimNbr *
 PimMre::nbr_mrib_next_hop_rp() const
 {
@@ -110,7 +90,7 @@ PimMre::rpf_interface_rp() const
     //
     // Check if the PimVif is valid and UP
     //
-    pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
+    pim_vif = pim_mrt()->vif_find_by_vif_index(vif_index);
     if ((pim_vif == NULL) || (! pim_vif->is_up()))
 	return (Vif::VIF_INDEX_INVALID);
     
@@ -131,7 +111,7 @@ PimMre::rpf_interface_s() const
     //
     // Check if the PimVif is valid and UP
     //
-    pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
+    pim_vif = pim_mrt()->vif_find_by_vif_index(vif_index);
     if ((pim_vif == NULL) || (! pim_vif->is_up()))
 	return (Vif::VIF_INDEX_INVALID);
     
@@ -215,7 +195,7 @@ PimMre::set_nbr_mrib_next_hop_rp(PimNbr *v)
 	v->add_pim_mre(this);
     }
     if (v == NULL) {
-	pim_node().add_pim_mre_no_pim_nbr(this);
+	pim_node()->add_pim_mre_no_pim_nbr(this);
     }
     
     // Remove from the list of PimMre entries for the old neighbor
@@ -223,7 +203,7 @@ PimMre::set_nbr_mrib_next_hop_rp(PimNbr *v)
 	old_pim_nbr->delete_pim_mre(this);
     }
     if ((old_pim_nbr == NULL) && (! is_pim_nbr_missing())) {
-	pim_node().delete_pim_mre_no_pim_nbr(this);
+	pim_node()->delete_pim_mre_no_pim_nbr(this);
     }
 }
 
@@ -247,7 +227,7 @@ PimMre::set_nbr_mrib_next_hop_s(PimNbr *v)
 	v->add_pim_mre(this);
     }
     if (v == NULL) {
-	pim_node().add_pim_mre_no_pim_nbr(this);
+	pim_node()->add_pim_mre_no_pim_nbr(this);
     }
     
     // Remove from the list of PimMre entries for the old neighbor
@@ -255,7 +235,7 @@ PimMre::set_nbr_mrib_next_hop_s(PimNbr *v)
 	old_pim_nbr->delete_pim_mre(this);
     }
     if ((old_pim_nbr == NULL) && (! is_pim_nbr_missing())) {
-	pim_node().delete_pim_mre_no_pim_nbr(this);
+	pim_node()->delete_pim_mre_no_pim_nbr(this);
     }
 }
 
@@ -279,7 +259,7 @@ PimMre::set_rpfp_nbr_wc(PimNbr *v)
 	v->add_pim_mre(this);
     }
     if (v == NULL) {
-	pim_node().add_pim_mre_no_pim_nbr(this);
+	pim_node()->add_pim_mre_no_pim_nbr(this);
     }
     
     // Remove from the list of PimMre entries for the old neighbor
@@ -287,7 +267,7 @@ PimMre::set_rpfp_nbr_wc(PimNbr *v)
 	old_pim_nbr->delete_pim_mre(this);
     }
     if ((old_pim_nbr == NULL) && (! is_pim_nbr_missing())) {
-	pim_node().delete_pim_mre_no_pim_nbr(this);
+	pim_node()->delete_pim_mre_no_pim_nbr(this);
     }
 }
 
@@ -311,7 +291,7 @@ PimMre::set_rpfp_nbr_sg(PimNbr *v)
 	v->add_pim_mre(this);
     }
     if (v == NULL) {
-	pim_node().add_pim_mre_no_pim_nbr(this);
+	pim_node()->add_pim_mre_no_pim_nbr(this);
     }
     
     // Remove from the list of PimMre entries for the old neighbor
@@ -319,7 +299,7 @@ PimMre::set_rpfp_nbr_sg(PimNbr *v)
 	old_pim_nbr->delete_pim_mre(this);
     }
     if ((old_pim_nbr == NULL) && (! is_pim_nbr_missing())) {
-	pim_node().delete_pim_mre_no_pim_nbr(this);
+	pim_node()->delete_pim_mre_no_pim_nbr(this);
     }
 }
 
@@ -343,7 +323,7 @@ PimMre::set_rpfp_nbr_sg_rpt(PimNbr *v)
 	v->add_pim_mre(this);
     }
     if (v == NULL) {
-	pim_node().add_pim_mre_no_pim_nbr(this);
+	pim_node()->add_pim_mre_no_pim_nbr(this);
     }
     
     // Remove from the list of PimMre entries for the old neighbor
@@ -351,7 +331,7 @@ PimMre::set_rpfp_nbr_sg_rpt(PimNbr *v)
 	old_pim_nbr->delete_pim_mre(this);
     }
     if ((old_pim_nbr == NULL) && (! is_pim_nbr_missing())) {
-	pim_node().delete_pim_mre_no_pim_nbr(this);
+	pim_node()->delete_pim_mre_no_pim_nbr(this);
     }
 }
 
@@ -379,7 +359,7 @@ PimMre::uncond_set_pim_rp(PimRp *v)
     if (! (is_wc() || is_sg() || is_sg_rpt()))
 	return;
     
-    pim_node().rp_table().delete_pim_mre(this);
+    pim_node()->rp_table().delete_pim_mre(this);
     
     _pim_rp = v;
     
@@ -394,12 +374,12 @@ PimMre::uncond_set_pim_rp(PimRp *v)
 	
 	// Set the (*,*,RP) entry
 	if (is_wc() || is_sg() || is_sg_rpt()) {
-	    set_rp_entry(pim_mrt().pim_mre_find(source_addr(), group_addr(),
+	    set_rp_entry(pim_mrt()->pim_mre_find(source_addr(), group_addr(),
 						PIM_MRE_RP, 0));
 	}
     }
     
-    pim_node().rp_table().add_pim_mre(this);
+    pim_node()->rp_table().add_pim_mre(this);
     
     //
     // Perform the appropriate actions when "RP changed" at the (S,G)
@@ -419,7 +399,7 @@ PimMre::compute_rp() const
     if (! (is_wc() || is_sg() || is_sg_rpt()))
 	return (NULL);
     
-    return (pim_node().rp_table().rp_find(group_addr()));
+    return (pim_node()->rp_table().rp_find(group_addr()));
 }
 
 // Used by (*,G)
@@ -523,7 +503,7 @@ PimMre::recompute_mrib_rp_wc()
     set_mrib_rp(new_mrib_rp);
     
     if (old_rpf_interface_rp != new_rpf_interface_rp) {
-	pim_mrt().add_task_assert_rpf_interface_wc(old_rpf_interface_rp,
+	pim_mrt()->add_task_assert_rpf_interface_wc(old_rpf_interface_rp,
 						   group_addr());
     }
 }
@@ -593,7 +573,7 @@ PimMre::recompute_mrib_s_sg()
     set_mrib_s(new_mrib_s);
     
     if (old_rpf_interface_s != new_rpf_interface_s) {
-	pim_mrt().add_task_assert_rpf_interface_sg(old_rpf_interface_s,
+	pim_mrt()->add_task_assert_rpf_interface_sg(old_rpf_interface_s,
 						   source_addr(),
 						   group_addr());
     }
@@ -622,11 +602,11 @@ Mrib *
 PimMre::compute_mrib_rp() const
 {
     if (pim_rp() != NULL) {
-	return (pim_mrt().pim_mrib_table().find(pim_rp()->rp_addr()));
+	return (pim_mrt()->pim_mrib_table().find(pim_rp()->rp_addr()));
     }
     
     if (is_rp()) {
-	return (pim_mrt().pim_mrib_table().find(*rp_addr_ptr()));
+	return (pim_mrt()->pim_mrib_table().find(*rp_addr_ptr()));
     }
     
     return (NULL);
@@ -639,7 +619,7 @@ PimMre::compute_mrib_s() const
     if (! (is_sg() || is_sg_rpt()))
 	return (NULL);
     
-    return (pim_mrt().pim_mrib_table().find(source_addr()));
+    return (pim_mrt()->pim_mrib_table().find(source_addr()));
 }
 
 //
@@ -660,7 +640,7 @@ PimMre::compute_nbr_mrib_next_hop_rp() const
     if (rp_addr_ptr() == NULL)
 	return (NULL);
     
-    return (pim_node().pim_nbr_rpf_find(*rp_addr_ptr(), mrib_rp()));
+    return (pim_node()->pim_nbr_rpf_find(*rp_addr_ptr(), mrib_rp()));
 }
 
 //
@@ -684,17 +664,17 @@ PimMre::compute_nbr_mrib_next_hop_s() const
     //
     // Find the vif toward the destination address
     //
-    PimVif *pim_vif = pim_node().vif_find_by_vif_index(mrib_s()->next_hop_vif_index());
+    PimVif *pim_vif = pim_node()->vif_find_by_vif_index(mrib_s()->next_hop_vif_index());
     
     //
     // If the source is directly connected, return NULL.
     //
     if (pim_vif != NULL) {
-	if (pim_node().is_directly_connected(*pim_vif, source_addr()))
+	if (pim_node()->is_directly_connected(*pim_vif, source_addr()))
 	    return (NULL);
     }
     
-    return (pim_node().pim_nbr_rpf_find(source_addr(), mrib_s()));
+    return (pim_node()->pim_nbr_rpf_find(source_addr(), mrib_s()));
 }
 
 //
@@ -717,7 +697,7 @@ PimMre::compute_rpfp_nbr_wc() const
     next_hop_vif_index = rpf_interface_rp();
     if (next_hop_vif_index == Vif::VIF_INDEX_INVALID)
 	return (NULL);
-    pim_vif = pim_mrt().vif_find_by_vif_index(next_hop_vif_index);
+    pim_vif = pim_mrt()->vif_find_by_vif_index(next_hop_vif_index);
     if (pim_vif == NULL)
 	return (NULL);
     
@@ -754,14 +734,14 @@ PimMre::compute_rpfp_nbr_sg() const
     next_hop_vif_index = rpf_interface_s();
     if (next_hop_vif_index == Vif::VIF_INDEX_INVALID)
 	return (NULL);
-    pim_vif = pim_mrt().vif_find_by_vif_index(next_hop_vif_index);
+    pim_vif = pim_mrt()->vif_find_by_vif_index(next_hop_vif_index);
     if (pim_vif == NULL)
 	return (NULL);
     
     //
     // If the source is directly connected, return NULL.
     //
-    if (pim_node().is_directly_connected(*pim_vif, source_addr()))
+    if (pim_node()->is_directly_connected(*pim_vif, source_addr()))
 	return (NULL);
     
     if (is_i_am_assert_loser_state(next_hop_vif_index)) {
@@ -797,7 +777,7 @@ PimMre::compute_rpfp_nbr_sg_rpt() const
     next_hop_vif_index = rpf_interface_rp();
     if (next_hop_vif_index == Vif::VIF_INDEX_INVALID)
 	return (NULL);
-    pim_vif = pim_mrt().vif_find_by_vif_index(next_hop_vif_index);
+    pim_vif = pim_mrt()->vif_find_by_vif_index(next_hop_vif_index);
     if (pim_vif == NULL)
 	return (NULL);
     
@@ -889,7 +869,7 @@ PimMre::recompute_nbr_mrib_next_hop_rp_rp_changed()
     set_nbr_mrib_next_hop_rp(new_pim_nbr);
     // Set Join Timer to t_periodic
     join_timer() =
-	pim_node().eventloop().new_oneoff_after(
+	pim_node()->eventloop().new_oneoff_after(
 	    TimeVal(join_prune_period, 0),
 	    callback(this, &PimMre::join_timer_timeout));
 }
@@ -928,7 +908,7 @@ PimMre::recompute_nbr_mrib_next_hop_rp_gen_id_changed()
     if (tv_left > t_override) {
 	// Restart the timer with `t_override'
 	join_timer() =
-	    pim_node().eventloop().new_oneoff_after(
+	    pim_node()->eventloop().new_oneoff_after(
 		t_override,
 		callback(this, &PimMre::join_timer_timeout));
     }
@@ -1018,7 +998,7 @@ PimMre::recompute_rpfp_nbr_wc_assert_changed()
     if (tv_left > t_override) {
 	// Restart the timer with `t_override'
 	join_timer() =
-	    pim_node().eventloop().new_oneoff_after(
+	    pim_node()->eventloop().new_oneoff_after(
 		t_override,
 		callback(this, &PimMre::join_timer_timeout));
     }
@@ -1107,7 +1087,7 @@ PimMre::recompute_rpfp_nbr_wc_not_assert_changed()
     set_rpfp_nbr_wc(new_pim_nbr);
     // Set Join Timer to t_periodic
     join_timer() =
-	pim_node().eventloop().new_oneoff_after(
+	pim_node()->eventloop().new_oneoff_after(
 	    TimeVal(join_prune_period, 0),
 	    callback(this, &PimMre::join_timer_timeout));
 }
@@ -1146,7 +1126,7 @@ PimMre::recompute_rpfp_nbr_wc_gen_id_changed()
     if (tv_left > t_override) {
 	// Restart the timer with `t_override'
 	join_timer() =
-	    pim_node().eventloop().new_oneoff_after(
+	    pim_node()->eventloop().new_oneoff_after(
 		t_override,
 		callback(this, &PimMre::join_timer_timeout));
     }
@@ -1195,7 +1175,7 @@ PimMre::recompute_rpfp_nbr_sg_assert_changed()
     if (tv_left > t_override) {
 	// Restart the timer with `t_override'
 	join_timer() =
-	    pim_node().eventloop().new_oneoff_after(
+	    pim_node()->eventloop().new_oneoff_after(
 		t_override,
 		callback(this, &PimMre::join_timer_timeout));
     }
@@ -1269,7 +1249,7 @@ PimMre::recompute_rpfp_nbr_sg_not_assert_changed()
     set_rpfp_nbr_sg(new_pim_nbr);
     // Set Join Timer to t_periodic
     join_timer() =
-	pim_node().eventloop().new_oneoff_after(
+	pim_node()->eventloop().new_oneoff_after(
 	    TimeVal(join_prune_period, 0),
 	    callback(this, &PimMre::join_timer_timeout));
 }
@@ -1308,7 +1288,7 @@ PimMre::recompute_rpfp_nbr_sg_gen_id_changed()
     if (tv_left > t_override) {
 	// Restart the timer with `t_override'
 	join_timer() =
-	    pim_node().eventloop().new_oneoff_after(
+	    pim_node()->eventloop().new_oneoff_after(
 		t_override,
 		callback(this, &PimMre::join_timer_timeout));
     }
@@ -1362,7 +1342,7 @@ PimMre::recompute_rpfp_nbr_sg_rpt_changed()
     if (tv_left > t_override) {
 	// Restart the timer with `t_override'
 	override_timer() =
-	    pim_node().eventloop().new_oneoff_after(
+	    pim_node()->eventloop().new_oneoff_after(
 		t_override,
 		callback(this, &PimMre::override_timer_timeout));
     }
@@ -1397,7 +1377,7 @@ PimMre::recompute_rpfp_nbr_sg_rpt_sg_changed()
     // The (S,G,rpt) routing entry doesn't exist, hence create it
     // and then use it to recompute if RPF'(S,G,rpt) has changed.
     //
-    pim_mre_sg_rpt = pim_mrt().pim_mre_find(source_addr(), group_addr(),
+    pim_mre_sg_rpt = pim_mrt()->pim_mre_find(source_addr(), group_addr(),
 					    PIM_MRE_SG_RPT, PIM_MRE_SG_RPT);
     if (pim_mre_sg_rpt == NULL) {
 	XLOG_UNREACHABLE();
@@ -1424,10 +1404,10 @@ bool
 PimMre::compute_is_directly_connected_s()
 {
     bool v = false;
-    PimVif *pim_vif = pim_mrt().vif_find_by_vif_index(rpf_interface_s());
+    PimVif *pim_vif = pim_mrt()->vif_find_by_vif_index(rpf_interface_s());
 
     if (pim_vif != NULL)
-	v = pim_node().is_directly_connected(*pim_vif, source_addr());
+	v = pim_node()->is_directly_connected(*pim_vif, source_addr());
 
     return (v);
 }

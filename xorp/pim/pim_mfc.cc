@@ -17,8 +17,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-
-
 //
 // PIM Multicast Forwarding Cache handling
 //
@@ -35,28 +33,7 @@
 #include "pim_vif.hh"
 
 
-//
-// Exported variables
-//
-
-//
-// Local constants definitions
-//
-
-//
-// Local structures/classes, typedefs and macros
-//
-
-//
-// Local variables
-//
-
-//
-// Local functions prototypes
-//
-
-
-PimMfc::PimMfc(PimMrt& pim_mrt, const IPvX& source, const IPvX& group)
+PimMfc::PimMfc(PimMrt* pim_mrt, const IPvX& source, const IPvX& group)
     : Mre<PimMfc>(source, group),
     _pim_mrt(pim_mrt),
     _rp_addr(IPvX::ZERO(family())),
@@ -72,23 +49,23 @@ PimMfc::~PimMfc()
     // XXX: don't trigger any communications with the kernel
     // if PimNode's destructor is invoked.
     //
-    if (pim_node().node_status() != PROC_NULL)
+    if (pim_node()->node_status() != PROC_NULL)
 	delete_mfc_from_kernel();
     
     //
     // Remove this entry from the RP table.
     //
-    pim_node().rp_table().delete_pim_mfc(this);
+    pim_node()->rp_table().delete_pim_mfc(this);
     
     //
     // Remove this entry from the PimMrt table.
     //
-    pim_mrt().remove_pim_mfc(this);
+    pim_mrt()->remove_pim_mfc(this);
     
     //
     // Cancel the (S,G) Keepalive Timer
     //
-    PimMre *pim_mre_sg = pim_mrt().pim_mre_find(source_addr(), group_addr(),
+    PimMre *pim_mre_sg = pim_mrt()->pim_mre_find(source_addr(), group_addr(),
 						PIM_MRE_SG, 0);
     if ((pim_mre_sg != NULL) && pim_mre_sg->is_keepalive_timer_running()) {
 	pim_mre_sg->cancel_keepalive_timer();
@@ -96,16 +73,18 @@ PimMfc::~PimMfc()
     }
 }
 
-PimNode&
+PimNode*
 PimMfc::pim_node() const
 {
-    return (_pim_mrt.pim_node());
+    if (_pim_mrt)
+	return _pim_mrt->pim_node();
+    return NULL;
 }
 
 int
 PimMfc::family() const
 {
-    return (_pim_mrt.family());
+    return (_pim_mrt->family());
 }
 
 void
@@ -120,9 +99,9 @@ PimMfc::set_rp_addr(const IPvX& v)
 void
 PimMfc::uncond_set_rp_addr(const IPvX& v)
 {
-    pim_node().rp_table().delete_pim_mfc(this);
+    pim_node()->rp_table().delete_pim_mfc(this);
     _rp_addr = v;
-    pim_node().rp_table().add_pim_mfc(this);
+    pim_node()->rp_table().add_pim_mfc(this);
 }
 
 void
@@ -130,7 +109,7 @@ PimMfc::recompute_rp_mfc()
 {
     IPvX new_rp_addr(IPvX::ZERO(family()));
     
-    PimRp *new_pim_rp = pim_node().rp_table().rp_find(group_addr());
+    PimRp *new_pim_rp = pim_node()->rp_table().rp_find(group_addr());
     
     if (new_pim_rp != NULL)
 	new_rp_addr = new_pim_rp->rp_addr();
@@ -153,7 +132,7 @@ PimMfc::recompute_iif_olist_mfc()
     PimMre *pim_mre, *pim_mre_sg, *pim_mre_sg_rpt;
     
     lookup_flags = PIM_MRE_RP | PIM_MRE_WC | PIM_MRE_SG | PIM_MRE_SG_RPT;
-    pim_mre = pim_mrt().pim_mre_find(source_addr(), group_addr(),
+    pim_mre = pim_mrt()->pim_mre_find(source_addr(), group_addr(),
 				     lookup_flags, 0);
     if (pim_mre == NULL) {
 	//
@@ -265,7 +244,7 @@ PimMfc::recompute_iif_olist_mfc()
 bool
 PimMfc::recompute_update_sptbit_mfc()
 {
-    PimMre *pim_mre_sg = pim_mrt().pim_mre_find(source_addr(), group_addr(),
+    PimMre *pim_mre_sg = pim_mrt()->pim_mre_find(source_addr(), group_addr(),
 						PIM_MRE_SG, 0);
 
     // XXX: no (S,G) entry, hence nothing to update
@@ -310,7 +289,7 @@ PimMfc::recompute_monitoring_switch_to_spt_desired_mfc()
     bool is_spt_switch_desired;
     
     lookup_flags = PIM_MRE_RP | PIM_MRE_WC | PIM_MRE_SG | PIM_MRE_SG_RPT;
-    pim_mre = pim_mrt().pim_mre_find(source_addr(), group_addr(),
+    pim_mre = pim_mrt()->pim_mre_find(source_addr(), group_addr(),
 				     lookup_flags, 0);
     
     if (pim_mre == NULL)
@@ -357,7 +336,7 @@ PimMfc::install_spt_switch_dataflow_monitor_mfc(PimMre *pim_mre)
 	uint32_t lookup_flags;
 	
 	lookup_flags = PIM_MRE_RP | PIM_MRE_WC | PIM_MRE_SG | PIM_MRE_SG_RPT;
-	pim_mre = pim_mrt().pim_mre_find(source_addr(), group_addr(),
+	pim_mre = pim_mrt()->pim_mre_find(source_addr(), group_addr(),
 					 lookup_flags, 0);
 	if (pim_mre == NULL)
 	    return;		// Nothing to install
@@ -413,11 +392,11 @@ PimMfc::install_spt_switch_dataflow_monitor_mfc(PimMre *pim_mre)
     //
     // If necessary, install a new SPT-switch dataflow monitor
     //
-    if (pim_node().is_switch_to_spt_enabled().get()
+    if (pim_node()->is_switch_to_spt_enabled().get()
 	&& (! ((pim_mre_sg != NULL)
 	       && (pim_mre_sg->is_keepalive_timer_running())))) {
-	uint32_t sec = pim_node().switch_to_spt_threshold_interval_sec().get();
-	uint32_t bytes = pim_node().switch_to_spt_threshold_bytes().get();
+	uint32_t sec = pim_node()->switch_to_spt_threshold_interval_sec().get();
+	uint32_t bytes = pim_node()->switch_to_spt_threshold_bytes().get();
 	if (pim_mre->is_monitoring_switch_to_spt_desired_sg(pim_mre_sg)) {
 	    add_dataflow_monitor(sec, 0,
 				 0,		// threshold_packets
@@ -487,9 +466,9 @@ PimMfc::update_mfc(uint32_t new_iif_vif_index, const Mifset& new_olist,
 int
 PimMfc::add_mfc_to_kernel()
 {
-    if (pim_node().is_log_trace()) {
+    if (pim_node()->is_log_trace()) {
 	string res, res2;
-	for (uint32_t i = 0; i < pim_node().maxvifs(); i++) {
+	for (uint32_t i = 0; i < pim_node()->maxvifs(); i++) {
 	    if (olist().test(i))
 		res += "O";
 	    else
@@ -499,7 +478,7 @@ PimMfc::add_mfc_to_kernel()
 	    else
 		res2 += ".";
 	}
-	XLOG_TRACE(pim_node().is_log_trace(),
+	XLOG_TRACE(pim_node()->is_log_trace(),
 		   "Add MFC entry: (%s, %s) iif = %d olist = %s "
 		   "olist_disable_wrongvif = %s",
 		   cstring(source_addr()),
@@ -509,7 +488,7 @@ PimMfc::add_mfc_to_kernel()
 		   res2.c_str());
     }
     
-    if (pim_node().add_mfc_to_kernel(*this) != XORP_OK)
+    if (pim_node()->add_mfc_to_kernel(*this) != XORP_OK)
 	return (XORP_ERROR);
     
     return (XORP_OK);
@@ -518,15 +497,19 @@ PimMfc::add_mfc_to_kernel()
 int
 PimMfc::delete_mfc_from_kernel()
 {
-    if (pim_node().is_log_trace()) {
+    if (!pim_node()) {
+	return XORP_OK;
+    }
+
+    if (pim_node()->is_log_trace()) {
 	string res;
-	for (uint32_t i = 0; i < pim_node().maxvifs(); i++) {
+	for (uint32_t i = 0; i < pim_node()->maxvifs(); i++) {
 	    if (olist().test(i))
 		res += "O";
 	    else
 		res += ".";
 	}
-	XLOG_TRACE(pim_node().is_log_trace(),
+	XLOG_TRACE(pim_node()->is_log_trace(),
 		   "Delete MFC entry: (%s, %s) iif = %d olist = %s",
 		   cstring(source_addr()),
 		   cstring(group_addr()),
@@ -539,7 +522,7 @@ PimMfc::delete_mfc_from_kernel()
     // the deletion of the MFC entry itself will remove all associated
     // dataflow monitors.
     //
-    if (pim_node().delete_mfc_from_kernel(*this) != XORP_OK)
+    if (pim_node()->delete_mfc_from_kernel(*this) != XORP_OK)
 	return (XORP_ERROR);
     
     return (XORP_OK);
@@ -555,7 +538,7 @@ PimMfc::add_dataflow_monitor(uint32_t threshold_interval_sec,
 			     bool is_geq_upcall,
 			     bool is_leq_upcall)
 {
-    XLOG_TRACE(pim_node().is_log_trace(),
+    XLOG_TRACE(pim_node()->is_log_trace(),
 	       "Add dataflow monitor: "
 	       "source = %s group = %s "
 	       "threshold_interval_sec = %d threshold_interval_usec = %d "
@@ -568,7 +551,7 @@ PimMfc::add_dataflow_monitor(uint32_t threshold_interval_sec,
 	       is_threshold_in_packets, is_threshold_in_bytes,
 	       is_geq_upcall, is_leq_upcall);
 
-    if (pim_node().add_dataflow_monitor(source_addr(),
+    if (pim_node()->add_dataflow_monitor(source_addr(),
 					group_addr(),
 					threshold_interval_sec,
 					threshold_interval_usec,
@@ -605,7 +588,7 @@ PimMfc::delete_dataflow_monitor(uint32_t threshold_interval_sec,
 				bool is_geq_upcall,
 				bool is_leq_upcall)
 {
-    XLOG_TRACE(pim_node().is_log_trace(),
+    XLOG_TRACE(pim_node()->is_log_trace(),
 	       "Delete dataflow monitor: "
 	       "source = %s group = %s "
 	       "threshold_interval_sec = %d threshold_interval_usec = %d "
@@ -618,7 +601,7 @@ PimMfc::delete_dataflow_monitor(uint32_t threshold_interval_sec,
 	       is_threshold_in_packets, is_threshold_in_bytes,
 	       is_geq_upcall, is_leq_upcall);
 
-    if (pim_node().delete_dataflow_monitor(source_addr(),
+    if (pim_node()->delete_dataflow_monitor(source_addr(),
 					   group_addr(),
 					   threshold_interval_sec,
 					   threshold_interval_usec,
@@ -648,7 +631,7 @@ PimMfc::delete_dataflow_monitor(uint32_t threshold_interval_sec,
 int
 PimMfc::delete_all_dataflow_monitor()
 {
-    XLOG_TRACE(pim_node().is_log_trace(),
+    XLOG_TRACE(pim_node()->is_log_trace(),
 	       "Delete all dataflow monitors: "
 	       "source = %s group = %s",
 	       cstring(source_addr()), cstring(group_addr()));
@@ -656,8 +639,8 @@ PimMfc::delete_all_dataflow_monitor()
     set_has_idle_dataflow_monitor(false);
     set_has_spt_switch_dataflow_monitor(false);
     
-    if (pim_node().delete_all_dataflow_monitor(source_addr(),
-					       group_addr())
+    if (pim_node()->delete_all_dataflow_monitor(source_addr(),
+						group_addr())
 	!= XORP_OK) {
 	return (XORP_ERROR);
     }
@@ -677,7 +660,7 @@ PimMfc::entry_try_remove()
     
     ret_value = entry_can_remove();
     if (ret_value)
-	pim_mrt().add_task_delete_pim_mfc(this);
+	pim_mrt()->add_task_delete_pim_mfc(this);
     
     return (ret_value);
 }
@@ -696,7 +679,7 @@ PimMfc::entry_can_remove() const
     
     lookup_flags = PIM_MRE_RP | PIM_MRE_WC | PIM_MRE_SG | PIM_MRE_SG_RPT;
     
-    pim_mre = pim_mrt().pim_mre_find(source_addr(), group_addr(),
+    pim_mre = pim_mrt()->pim_mre_find(source_addr(), group_addr(),
 				     lookup_flags, 0);
     if (pim_mre == NULL)
 	return (true);
@@ -711,7 +694,7 @@ PimMfc::remove_pim_mfc_entry_mfc()
 	//
 	// Remove the entry from the PimMrt, and mark it as deletion done
 	//
-	pim_mrt().remove_pim_mfc(this);
+	pim_mrt()->remove_pim_mfc(this);
 	set_is_task_delete_done(true);
     } else {
 	set_is_task_delete_pending(false);

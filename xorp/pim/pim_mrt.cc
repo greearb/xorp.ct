@@ -39,35 +39,14 @@
 #include "pim_vif.hh"
 
 
-//
-// Exported variables
-//
-
-//
-// Local constants definitions
-//
-
-//
-// Local structures/classes, typedefs and macros
-//
-
-//
-// Local variables
-//
-
-//
-// Local functions prototypes
-//
-
-
-PimMrt::PimMrt(PimNode& pim_node)
+PimMrt::PimMrt(PimNode* pim_node)
     : _pim_node(pim_node),
       _pim_mrt_sg(*this),
       _pim_mrt_sg_rpt(*this),
       _pim_mrt_g(*this),
       _pim_mrt_rp(*this),
       _pim_mrt_mfc(*this),
-      _pim_mre_track_state(*this)
+      _pim_mre_track_state(this)
 {
     
 }
@@ -124,37 +103,37 @@ PimMrtMfc::~PimMrtMfc()
 int
 PimMrt::family() const
 {
-    return (pim_node().family());
+    return (pim_node()->family());
 }
 
 PimMribTable&
 PimMrt::pim_mrib_table()
 {
-    return (pim_node().pim_mrib_table());
+    return (pim_node()->pim_mrib_table());
 }
 
 Mifset&
 PimMrt::i_am_dr()
 {
-    return pim_node().pim_vifs_dr();
+    return pim_node()->pim_vifs_dr();
 }
 
 PimVif *
 PimMrt::vif_find_by_vif_index(uint32_t vif_index)
 {
-    return (pim_node().vif_find_by_vif_index(vif_index));
+    return (pim_node()->vif_find_by_vif_index(vif_index));
 }
 
 PimVif *
 PimMrt::vif_find_pim_register()
 {
-    return (pim_node().vif_find_pim_register());
+    return (pim_node()->vif_find_pim_register());
 }
 
 uint32_t
 PimMrt::pim_register_vif_index() const
 {
-    return (pim_node().pim_register_vif_index());
+    return (pim_node()->pim_register_vif_index());
 }
 
 void
@@ -230,7 +209,7 @@ PimMrt::pim_mre_find(const IPvX& source, const IPvX& group,
 		    break;
 	    } else {
 		// XXX: the entry is specified by the group address
-		PimRp *pim_rp = pim_node().rp_table().rp_find(group);
+		PimRp *pim_rp = pim_node()->rp_table().rp_find(group);
 		if (pim_rp != NULL)
 		    pim_mre = _pim_mrt_rp.find(pim_rp->rp_addr(),
 					       IPvX::MULTICAST_BASE(family()));
@@ -255,7 +234,7 @@ PimMrt::pim_mre_find(const IPvX& source, const IPvX& group,
 	    //
 	    
 	    // Create and insert the entry
-	    pim_mre = new PimMre(*this, source, group);
+	    pim_mre = new PimMre(this, source, group);
 	    pim_mre->set_sg(true);
 	    pim_mre = _pim_mrt_sg.insert(pim_mre);
 	    
@@ -283,7 +262,7 @@ PimMrt::pim_mre_find(const IPvX& source, const IPvX& group,
 	    pim_mre->set_rpfp_nbr_sg(pim_mre->compute_rpfp_nbr_sg());
 	    if ((pim_mre->nbr_mrib_next_hop_s() == NULL)
 		|| (pim_mre->rpfp_nbr_sg() == NULL)) {
-		pim_node().add_pim_mre_no_pim_nbr(pim_mre);
+		pim_node()->add_pim_mre_no_pim_nbr(pim_mre);
 	    }
 
 	    // Set source-related state
@@ -303,7 +282,7 @@ PimMrt::pim_mre_find(const IPvX& source, const IPvX& group,
 	    //
 	    
 	    // Create and insert the entry
-	    pim_mre = new PimMre(*this, source, group);
+	    pim_mre = new PimMre(this, source, group);
 	    pim_mre->set_sg_rpt(true);
 	    pim_mre = _pim_mrt_sg_rpt.insert(pim_mre);
 	    
@@ -329,7 +308,7 @@ PimMrt::pim_mre_find(const IPvX& source, const IPvX& group,
 	    pim_mre->set_mrib_s(pim_mre->compute_mrib_s());
 	    pim_mre->set_rpfp_nbr_sg_rpt(pim_mre->compute_rpfp_nbr_sg_rpt());
 	    if (pim_mre->rpfp_nbr_sg_rpt() == NULL) {
-		pim_node().add_pim_mre_no_pim_nbr(pim_mre);
+		pim_node()->add_pim_mre_no_pim_nbr(pim_mre);
 	    }
 
 	    // Set source-related state
@@ -355,7 +334,7 @@ PimMrt::pim_mre_find(const IPvX& source, const IPvX& group,
 	    //
 	    
 	    // Create and insert the entry
-	    pim_mre = new PimMre(*this, IPvX::ZERO(family()), group);
+	    pim_mre = new PimMre(this, IPvX::ZERO(family()), group);
 	    pim_mre->set_wc(true);
 	    pim_mre = _pim_mrt_g.insert(pim_mre);
 	    
@@ -368,7 +347,7 @@ PimMrt::pim_mre_find(const IPvX& source, const IPvX& group,
 	    pim_mre->set_rpfp_nbr_wc(pim_mre->compute_rpfp_nbr_wc());
 	    if ((pim_mre->nbr_mrib_next_hop_rp() == NULL)
 		|| (pim_mre->rpfp_nbr_wc() == NULL)) {
-		pim_node().add_pim_mre_no_pim_nbr(pim_mre);
+		pim_node()->add_pim_mre_no_pim_nbr(pim_mre);
 	    }
 	    
 	    // Add a task to handle any CPU-intensive operations
@@ -387,13 +366,13 @@ PimMrt::pim_mre_find(const IPvX& source, const IPvX& group,
 	    // Create and insert the entry
 	    if (group == IPvX::ZERO(family())) {
 		// XXX: the entry is specified by the RP address
-		pim_mre = new PimMre(*this, source,
+		pim_mre = new PimMre(this, source,
 				     IPvX::MULTICAST_BASE(family()));
 	    } else {
 		// XXX: the entry is specified by the group address
-		PimRp *pim_rp = pim_node().rp_table().rp_find(group);
+		PimRp *pim_rp = pim_node()->rp_table().rp_find(group);
 		if (pim_rp != NULL)
-		    pim_mre = new PimMre(*this, pim_rp->rp_addr(),
+		    pim_mre = new PimMre(this, pim_rp->rp_addr(),
 					 IPvX::MULTICAST_BASE(family()));
 	    }
 	    if (pim_mre == NULL)
@@ -402,7 +381,7 @@ PimMrt::pim_mre_find(const IPvX& source, const IPvX& group,
 	    pim_mre = _pim_mrt_rp.insert(pim_mre);
 	    
 	    // Compute and set the RP-related state
-	    if (pim_node().is_my_addr(*pim_mre->rp_addr_ptr()))
+	    if (pim_node()->is_my_addr(*pim_mre->rp_addr_ptr()))
 		pim_mre->set_i_am_rp(true);
 	    else
 		pim_mre->set_i_am_rp(false);
@@ -411,7 +390,7 @@ PimMrt::pim_mre_find(const IPvX& source, const IPvX& group,
 	    pim_mre->set_mrib_rp(pim_mre->compute_mrib_rp());
 	    pim_mre->set_nbr_mrib_next_hop_rp(pim_mre->compute_nbr_mrib_next_hop_rp());
 	    if (pim_mre->nbr_mrib_next_hop_rp() == NULL) {
-		pim_node().add_pim_mre_no_pim_nbr(pim_mre);
+		pim_node()->add_pim_mre_no_pim_nbr(pim_mre);
 	    }
 	    
 	    // Add a task to handle any CPU-intensive operations
@@ -455,11 +434,11 @@ PimMrt::pim_mfc_find(const IPvX& source, const IPvX& group,
     //
     if (is_creation_allowed) {
 	// Create and insert the entry
-	pim_mfc = new PimMfc(*this, source, group);
+	pim_mfc = new PimMfc(this, source, group);
 	pim_mfc = _pim_mrt_mfc.insert(pim_mfc);
 	
 	// Compute and set the RP-related state
-	PimRp *pim_rp = pim_node().rp_table().rp_find(group);
+	PimRp *pim_rp = pim_node()->rp_table().rp_find(group);
 	if (pim_rp != NULL)
 	    pim_mfc->uncond_set_rp_addr(pim_rp->rp_addr());
 	else
