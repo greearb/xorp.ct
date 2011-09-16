@@ -26,10 +26,9 @@
 //
 // PIM node definition.
 //
+
+
 #include "libxorp/xorp.h"
-
-
-
 #include "libxorp/vif.hh"
 #include "libproto/proto_node.hh"
 #include "libfeaclient/ifmgr_xrl_mirror.hh"
@@ -42,15 +41,6 @@
 #include "pim_scope_zone_table.hh"
 #include "pim_vif.hh"
 
-
-//
-// Constants definitions
-//
-
-
-//
-// Structures/classes, typedefs and macros
-//
 
 class EventLoop;
 class IPvX;
@@ -85,7 +75,10 @@ public:
      * Destructor
      */
     virtual	~PimNode();
-    
+
+    /** Does manual destruction work */
+    virtual void destruct_me();
+
     /**
      * Start the node operation.
      * 

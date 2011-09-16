@@ -93,14 +93,19 @@ XrlPimNode::XrlPimNode(int		family,
     _ifmgr.attach_hint_observer(dynamic_cast<PimNode*>(this));
 }
 
-XrlPimNode::~XrlPimNode()
-{
+void XrlPimNode::destruct_me() {
     shutdown();
 
     _ifmgr.detach_hint_observer(dynamic_cast<PimNode*>(this));
     _ifmgr.unset_observer(dynamic_cast<PimNode*>(this));
 
     delete_pointers_list(_xrl_tasks_queue);
+    PimNode::destruct_me();
+}
+
+XrlPimNode::~XrlPimNode()
+{
+    destruct_me();
 }
 
 int
