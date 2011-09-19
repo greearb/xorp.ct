@@ -258,7 +258,9 @@ PimMre::pim_node() const
 int
 PimMre::family() const
 {
-    return (_pim_mrt->family());
+    assert_not_deleted();
+    _pim_mrt->assert_not_deleted();
+    return _pim_mrt->family();
 }
 
 uint32_t

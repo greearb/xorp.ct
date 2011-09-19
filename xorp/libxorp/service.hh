@@ -19,10 +19,11 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxorp/service.hh,v 1.14 2008/10/02 21:57:33 bms Exp $
 
 #ifndef __LIBXORP_SERVICE_HH__
 #define __LIBXORP_SERVICE_HH__
+
+#include "bug_catcher.hh"
 
 /**
  * Enumeration of states objects derived from ServiceBase may be in.
@@ -78,7 +79,7 @@ class ServiceChangeObserverBase;
  * this class can register for status change notifications in a
  * Service instance by calling @ref set_observer().
  */
-class ServiceBase {
+class ServiceBase : public BugCatcher {
 public:
     ServiceBase(const string& name = "Unknown");
 

@@ -101,7 +101,7 @@ private:
 //
 // PIM-specific Multicast Routing Table
 //
-class PimMrt {
+class PimMrt : public BugCatcher {
 public:
     PimMrt(PimNode* pim_node);
     virtual ~PimMrt();

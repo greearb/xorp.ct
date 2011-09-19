@@ -87,7 +87,7 @@ enum {
 
 // PIM-specific Multicast Routing Entry
 // XXX: the source_addr() for (*,*,RP) entry contains the RP address
-class PimMre : public Mre<PimMre> {
+class PimMre : public Mre<PimMre>, BugCatcher  {
 public:
     PimMre(PimMrt* pim_mrt, const IPvX& source, const IPvX& group);
     virtual ~PimMre();

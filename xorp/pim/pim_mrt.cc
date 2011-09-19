@@ -103,7 +103,7 @@ PimMrtMfc::~PimMrtMfc()
 int
 PimMrt::family() const
 {
-    return (pim_node()->family());
+    return pim_node()->family();
 }
 
 PimMribTable&
