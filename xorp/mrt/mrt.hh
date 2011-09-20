@@ -18,7 +18,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/mrt/mrt.hh,v 1.14 2008/10/02 21:57:45 bms Exp $
 
 #ifndef __MRT_MRT_HH__
 #define __MRT_MRT_HH__
@@ -29,20 +28,10 @@
 //
 
 
-
-
 #include "libxorp/xorp.h"
 #include "libxorp/ipvx.hh"
 #include "libxorp/ipvxnet.hh"
 
-
-//
-// Constants definitions
-//
-
-//
-// Structures/classes, typedefs and macros
-//
 
 /**
  * @short Class to store (S,G) (Source, Group) pair of addresses.
@@ -683,10 +672,8 @@ public:
 	// _sg_table.end() and _gs_table.end() in the Mrt, but here
 	// we don't know those values. Sigh...
 	//
-#if 0
-	_sg_key = NULL;
-	_gs_key = NULL;
-#endif
+	memset(&_sg_key, 0, sizeof(_sg_key));
+	memset(&_gs_key, 0, sizeof(_gs_key));
     }
     
     /**
@@ -750,7 +737,7 @@ public:
      * @return the group-source table for this entry.
      */
     const typename Mrt<E>::gs_iterator& gs_key() const { return (_gs_key); }
-    
+
     /**
      * Convert this entry from binary form to presentation format.
      * 
