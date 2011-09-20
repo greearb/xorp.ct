@@ -188,6 +188,9 @@ public:
     XorpTimer new_oneoff_after_ms(int ms, const OneoffTimerCallback& ocb,
 				  int priority = XorpTask::PRIORITY_DEFAULT);
 
+    /** Remove timer from timer list. */
+    void remove_timer(XorpTimer& t);
+
     /**
      * Add periodic timer to the EventLoop.
      *

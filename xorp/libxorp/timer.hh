@@ -19,7 +19,6 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxorp/timer.hh,v 1.40 2008/10/13 00:45:58 pavlin Exp $
 
 #ifndef __LIBXORP_TIMER_HH__
 #define __LIBXORP_TIMER_HH__
@@ -27,13 +26,9 @@
 #include <assert.h>
 
 
-
-
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
-
-
 
 #include "timeval.hh"
 #include "heap.hh"
@@ -176,7 +171,7 @@ public:
     ~XorpTimer();
 
     XorpTimer& operator=(const XorpTimer&);
-    const TimerNode* node() const { return _node; }
+    TimerNode* node() const { return _node; }
 
 private:
     TimerNode* _node;
@@ -256,6 +251,8 @@ public:
     XorpTimer new_oneoff_after(const TimeVal& wait,
 			       const OneoffTimerCallback& ocb,
 			       int priority = XorpTask::PRIORITY_DEFAULT);
+
+    void remove_timer(XorpTimer& t);
 
     /**
      * Create a XorpTimer that will invoke a callback periodically.

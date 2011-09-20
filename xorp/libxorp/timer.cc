@@ -326,6 +326,12 @@ TimerList::new_oneoff_after(const TimeVal& wait,
     return XorpTimer(n);
 }
 
+void TimerList::remove_timer(XorpTimer& t) {
+    if (t.node())
+	t.node()->unschedule();
+}
+
+
 XorpTimer
 TimerList::new_periodic(const TimeVal& wait,
 			const PeriodicTimerCallback& cb,
