@@ -17,18 +17,13 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/rtrmgr/module_manager.hh,v 1.47 2008/10/02 21:58:23 bms Exp $
 
 #ifndef __RTRMGR_MODULE_MANAGER_HH__
 #define __RTRMGR_MODULE_MANAGER_HH__
 
 
-
-
-
 #include "libxorp/timer.hh"
 #include "libxorp/callback.hh"
-
 #include "generic_module_manager.hh"
 
 class EventLoop;
@@ -58,7 +53,7 @@ public:
     /**
      * The default destructor.
      */
-    ~Module();
+    virtual ~Module();
 
     /**
      * Set new status for the module.
@@ -176,7 +171,7 @@ public:
     /**
      * The default destructor.
      */
-    ~ModuleManager();
+    virtual ~ModuleManager();
 
     /**
      * Create a new module.

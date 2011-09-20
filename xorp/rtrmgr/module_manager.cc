@@ -63,6 +63,7 @@ Module::Module(ModuleManager& mmgr, const string& name, const string& path,
 Module::~Module()
 {
     XLOG_ASSERT(_status == MODULE_NOT_STARTED);
+    _mmgr.eventloop().remove_timer(_shutdown_timer);
 }
 
 void
@@ -363,6 +364,15 @@ ModuleManager::ModuleManager(EventLoop& eventloop, Rtrmgr& rtrmgr,
 ModuleManager::~ModuleManager()
 {
     shutdown();
+
+    // Memory is going away, make sure no modules are active.
+    XLOG_ASSERT(is_shutdown_completed());
+
+    // Delete any remaining process objects.
+    while (!_expath2process.empty()) {
+	delete _expath2process.begin()->second;
+	_expath2process.erase(_expath2process.begin());
+    }
 }
 
 int

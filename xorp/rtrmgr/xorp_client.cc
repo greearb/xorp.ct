@@ -44,6 +44,10 @@ XorpClient::XorpClient(EventLoop& eventloop, XrlRouter& xrl_router)
 {
 }
 
+XorpClient::~XorpClient() {
+    _eventloop.remove_timer(_delay_timer);
+}
+
 void
 XorpClient::send_now(const Xrl& xrl, XrlRouter::XrlCallback cb, 
 		     const string& xrl_return_spec, bool do_exec) 
