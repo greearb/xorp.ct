@@ -17,11 +17,10 @@ xorp_main = [
 xorp_links = [
 # --
     ("Get XORP", ""),
-    ("Downloads", "https://sourceforge.net/projects/xorp/files/xorp/"),
+    ("Download Latest", "releases/current"),
     ("Live-CD", "livecd.html"),
     ("Browse Code", "http://github.com/greearb/xorp.ct"),
-    ("Older Releases", "releases"),
-    ("Beta Releases", "releases/testing"),
+    ("Other Releases", "releases"),
     ("Security Advisories", "advisories.html"),
 
 # --
