@@ -2,6 +2,9 @@
 
 #  Thanks to Achmad Basuki for details and initial spec files.
 
+# NOTE:  You might need to edit ~/.rpmmacros to change the _topdir to be ~/rpmbuild
+#        to have this script work correctly.
+
 set -x
 
 RPMDIR=~/rpmbuild
