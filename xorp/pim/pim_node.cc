@@ -115,8 +115,8 @@ void PimNode::destruct_me() {
 
     delete_all_vifs();
     
-    BUFFER_FREE(_buffer_recv);
-    _buffer_recv = NULL;
+    if (_buffer_recv)
+	BUFFER_FREE(_buffer_recv);
 }
 
 /**

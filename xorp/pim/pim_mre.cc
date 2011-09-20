@@ -39,6 +39,7 @@
 
 PimMre::PimMre(PimMrt* pim_mrt, const IPvX& source, const IPvX& group)
     : Mre<PimMre>(source, group),
+      _pim_mrt(pim_mrt),
       _pim_rp(NULL),
       _mrib_rp(NULL),
       _mrib_s(NULL),
@@ -51,8 +52,7 @@ PimMre::PimMre(PimMrt* pim_mrt, const IPvX& source, const IPvX& group)
       _rp_entry(NULL),
       _sg_sg_rpt_entry(NULL),
       _pmbr_addr(IPvX::ZERO(family())),
-      _flags(0),
-      _pim_mrt(pim_mrt)
+      _flags(0)
 {
     for (size_t i = 0; i < MAX_VIFS; i++)
 	_assert_winner_metrics[i] = NULL;
@@ -258,8 +258,6 @@ PimMre::pim_node() const
 int
 PimMre::family() const
 {
-    assert_not_deleted();
-    _pim_mrt->assert_not_deleted();
     return _pim_mrt->family();
 }
 

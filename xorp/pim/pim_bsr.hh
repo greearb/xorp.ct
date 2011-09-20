@@ -183,7 +183,7 @@ private:
 						// BSR zones
 };
 
-class BsrZone {
+class BsrZone : public BugCatcher {
 public:
     BsrZone(PimBsr& pim_bsr, const BsrZone& bsr_zone);
     BsrZone(PimBsr& pim_bsr, const PimScopeZoneId& zone_id);
