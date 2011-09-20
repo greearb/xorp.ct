@@ -48,7 +48,8 @@ class Packet {
     static const size_t INSTANCE_ID_OFFSET = 14;
 
     Packet(OspfTypes::Version version)
-	: _version(version), _auth_type(0), _instance_id(0)
+	    : _version(version), _valid(false), _router_id(0), _area_id(0),
+	      _auth_type(0), _instance_id(0)
     {
 	memset(&_auth[0], 0, sizeof(_auth));
     }
