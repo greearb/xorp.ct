@@ -22,24 +22,9 @@ to make sure the script works properly:
 
 
 ========================================================================
-
-Build doxygen source-code docs.
-
-See xorp/docs/kdoc/README.txt
-
-
-========================================================================
 Edit the Web pages in www/html_src/
   * news.html
   * index.html
-
-
-========================================================================
-Regenerate the Web pages in www
-
- cd www
- make
-
 
 
 ========================================================================
@@ -49,6 +34,22 @@ Edit it manually, and also create git shortlog with command
 similar to:
 
 git shortlog xorp-1.8.3..HEAD
+
+
+
+========================================================================
+
+Build doxygen source-code docs.
+
+See docs/kdoc/README.txt
+
+
+========================================================================
+Regenerate the Web pages in www
+
+ cd www
+ make
+
 
 
 ========================================================================
@@ -73,7 +74,7 @@ scp xorp-$VER-src.tar.gz www.candelatech.com:xorp_html/releases/$VER/
 
 # Build kdocs and package all web-page related stuff
 
-./public_html.bash
+./publish_html.bash
 
 # Upload it:
 

@@ -85,6 +85,21 @@ Release 1.8.4
       Remove old update_copyright.sh script.
       Update version to 1.8.4
       Update html for 1.8.4.
+      Update release notes with git shortlog.
+      Update release procedures docs, www pkg script.
+      Fix test build failure on F15.
+      Fix compile breakage due to fpnotify.
+      mcast:  Add checks for inet6_option_space
+      pim:  Use pointers instead of references for members.
+      pim:  Attempt manual destruction of pim node.
+      pim: Add some memory debugging.
+      ospf:  Initialize some variables.
+      libxorp:  Allow un-registering timers.
+      mrt:  Initialize iterators to know values.
+      rib:  Fix memory leak in rib.
+      pim:  Fix recently added bugs.
+      rtrmgr:  Remove some timers in destructors.
+      Update copyrights for recently touched files.
 
     RUN Admin Team (68):
       Wiki backup on Wed, 23 Mar 2011 03:00:01 +0100...
@@ -97,6 +112,7 @@ Release 1.8.4
       Asynchronous callbacks accept argument pointers instead of references:
       Added helper classes for async responses.
       Support for IEEE754 binary64 format in XRLs
+      Made fp64 serialization compatible with pre-C99.
 
 
 Release 1.8.3 (March 16, 2011)
