@@ -22,24 +22,9 @@ to make sure the script works properly:
 
 
 ========================================================================
-
-Build doxygen source-code docs.
-
-See xorp/docs/kdoc/README.txt
-
-
-========================================================================
 Edit the Web pages in www/html_src/
   * news.html
   * index.html
-
-
-========================================================================
-Regenerate the Web pages in www
-
- cd www
- make
-
 
 
 ========================================================================
@@ -62,22 +47,16 @@ Prepare sofware and documentation tarballs for distribution
 
 Build packages (Ben has a script that does this for his targets).
 
-# Upload files to the web:
-VER=1.8.4
-scp xorp*[1-9].tgz xorp_win32.zip www.candelatech.com:xorp_html/releases/$VER/
-
-# Package up a source tarball:
-tar --exclude xorp/obj -cvzf xorp-$VER-src.tar.gz xorp
-
-scp xorp-$VER-src.tar.gz www.candelatech.com:xorp_html/releases/$VER/
+# Check the ./publish_html.bash to make sure the CTVER is correct.
 
 # Build kdocs and package all web-page related stuff
 
-./public_html.bash
+./publish_html.bash
 
 # Upload it:
 
 scp xorp_www.tar.bz2 www.candelatech.com:
+
 
 ========================================================================
 Add a Bugzilla "Version" entry for the new version.

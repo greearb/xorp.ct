@@ -25,6 +25,7 @@
 //
 // Copyright (c) 1999-2000 Massachusetts Institute of Technology
 // Copyright (c) 2011-2011 XORP, Inc and Others
+// Copyright (c) 2011-2011 XORP, Inc and Others
 
 
 
@@ -325,6 +326,12 @@ TimerList::new_oneoff_after(const TimeVal& wait,
     n->schedule_after(wait, priority);
     return XorpTimer(n);
 }
+
+void TimerList::remove_timer(XorpTimer& t) {
+    if (t.node())
+	t.node()->unschedule();
+}
+
 
 XorpTimer
 TimerList::new_periodic(const TimeVal& wait,

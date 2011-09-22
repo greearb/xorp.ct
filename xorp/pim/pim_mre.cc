@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2009 XORP, Inc.
+// Copyright (c) 2001-2011 XORP, Inc and Others-2009 XORP, Inc.
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License, Version 2, June
@@ -37,28 +37,7 @@
 #include "pim_vif.hh"
 
 
-//
-// Exported variables
-//
-
-//
-// Local constants definitions
-//
-
-//
-// Local structures/classes, typedefs and macros
-//
-
-//
-// Local variables
-//
-
-//
-// Local functions prototypes
-//
-
-
-PimMre::PimMre(PimMrt& pim_mrt, const IPvX& source, const IPvX& group)
+PimMre::PimMre(PimMrt* pim_mrt, const IPvX& source, const IPvX& group)
     : Mre<PimMre>(source, group),
       _pim_mrt(pim_mrt),
       _pim_rp(NULL),
@@ -113,7 +92,7 @@ PimMre::~PimMre()
     //
     // Remove this entry from the PimMrt table
     //
-    pim_mrt().remove_pim_mre(this);
+    pim_mrt()->remove_pim_mre(this);
 }
 
 //
@@ -131,7 +110,7 @@ PimMre::add_pim_mre_lists()
 	    if (_nbr_mrib_next_hop_rp != NULL) {
 		_nbr_mrib_next_hop_rp->add_pim_mre(this);
 	    } else {
-		pim_node().add_pim_mre_no_pim_nbr(this);
+		pim_node()->add_pim_mre_no_pim_nbr(this);
 	    }
 	    break;
 	}
@@ -141,13 +120,13 @@ PimMre::add_pim_mre_lists()
 	    if (_nbr_mrib_next_hop_rp != NULL) {
 		_nbr_mrib_next_hop_rp->add_pim_mre(this);
 	    } else {
-		pim_node().add_pim_mre_no_pim_nbr(this);
+		pim_node()->add_pim_mre_no_pim_nbr(this);
 	    }
 	    if (_rpfp_nbr_wc != _nbr_mrib_next_hop_rp) {
 		if (_rpfp_nbr_wc != NULL) {
 		    _rpfp_nbr_wc->add_pim_mre(this);
 		} else {
-		    pim_node().add_pim_mre_no_pim_nbr(this);
+		    pim_node()->add_pim_mre_no_pim_nbr(this);
 		}
 	    }
 	    break;
@@ -158,13 +137,13 @@ PimMre::add_pim_mre_lists()
 	    if (_nbr_mrib_next_hop_s != NULL) {
 		_nbr_mrib_next_hop_s->add_pim_mre(this);
 	    } else {
-		pim_node().add_pim_mre_no_pim_nbr(this);
+		pim_node()->add_pim_mre_no_pim_nbr(this);
 	    }
 	    if (_rpfp_nbr_sg != _nbr_mrib_next_hop_s) {
 		if (_rpfp_nbr_sg != NULL) {
 		    _rpfp_nbr_sg->add_pim_mre(this);
 		} else {
-		    pim_node().add_pim_mre_no_pim_nbr(this);
+		    pim_node()->add_pim_mre_no_pim_nbr(this);
 		}
 	    }
 	    break;
@@ -175,7 +154,7 @@ PimMre::add_pim_mre_lists()
 	    if (_rpfp_nbr_sg_rpt != NULL) {
 		_rpfp_nbr_sg_rpt->add_pim_mre(this);
 	    } else {
-		pim_node().add_pim_mre_no_pim_nbr(this);
+		pim_node()->add_pim_mre_no_pim_nbr(this);
 	    }
 	    break;
 	}
@@ -187,7 +166,7 @@ PimMre::add_pim_mre_lists()
     //
     // Add this entry to the RP table
     //
-    pim_node().rp_table().add_pim_mre(this);
+    pim_node()->rp_table().add_pim_mre(this);
 }
 
 //
@@ -205,7 +184,7 @@ PimMre::remove_pim_mre_lists()
 	    if (_nbr_mrib_next_hop_rp != NULL) {
 		_nbr_mrib_next_hop_rp->delete_pim_mre(this);
 	    } else {
-		pim_node().delete_pim_mre_no_pim_nbr(this);
+		pim_node()->delete_pim_mre_no_pim_nbr(this);
 	    }
 	    _nbr_mrib_next_hop_rp = NULL;
 	    break;
@@ -216,13 +195,13 @@ PimMre::remove_pim_mre_lists()
 	    if (_nbr_mrib_next_hop_rp != NULL) {
 		_nbr_mrib_next_hop_rp->delete_pim_mre(this);
 	    } else {
-		pim_node().delete_pim_mre_no_pim_nbr(this);
+		pim_node()->delete_pim_mre_no_pim_nbr(this);
 	    }
 	    if (_rpfp_nbr_wc != _nbr_mrib_next_hop_rp) {
 		if (_rpfp_nbr_wc != NULL) {
 		    _rpfp_nbr_wc->delete_pim_mre(this);
 		} else {
-		    pim_node().delete_pim_mre_no_pim_nbr(this);
+		    pim_node()->delete_pim_mre_no_pim_nbr(this);
 		}
 	    }
 	    _nbr_mrib_next_hop_rp = NULL;
@@ -235,13 +214,13 @@ PimMre::remove_pim_mre_lists()
 	    if (_nbr_mrib_next_hop_s != NULL) {
 		_nbr_mrib_next_hop_s->delete_pim_mre(this);
 	    } else {
-		pim_node().delete_pim_mre_no_pim_nbr(this);
+		pim_node()->delete_pim_mre_no_pim_nbr(this);
 	    }
 	    if (_rpfp_nbr_sg != _nbr_mrib_next_hop_s) {
 		if (_rpfp_nbr_sg != NULL) {
 		    _rpfp_nbr_sg->delete_pim_mre(this);
 		} else {
-		    pim_node().delete_pim_mre_no_pim_nbr(this);
+		    pim_node()->delete_pim_mre_no_pim_nbr(this);
 		}
 	    }
 	    _nbr_mrib_next_hop_s = NULL;
@@ -254,7 +233,7 @@ PimMre::remove_pim_mre_lists()
 	    if (_rpfp_nbr_sg_rpt != NULL) {
 		_rpfp_nbr_sg_rpt->delete_pim_mre(this);
 	    } else {
-		pim_node().delete_pim_mre_no_pim_nbr(this);
+		pim_node()->delete_pim_mre_no_pim_nbr(this);
 	    }
 	    _rpfp_nbr_sg_rpt = NULL;
 	    break;
@@ -267,25 +246,25 @@ PimMre::remove_pim_mre_lists()
     //
     // Remove this entry from the RP table
     //
-    pim_node().rp_table().delete_pim_mre(this);
+    pim_node()->rp_table().delete_pim_mre(this);
 }
 
-PimNode&
+PimNode*
 PimMre::pim_node() const
 {
-    return (_pim_mrt.pim_node());
+    return _pim_mrt->pim_node();
 }
 
 int
 PimMre::family() const
 {
-    return (_pim_mrt.family());
+    return _pim_mrt->family();
 }
 
 uint32_t
 PimMre::pim_register_vif_index() const
 {
-    return (_pim_mrt.pim_register_vif_index());
+    return (_pim_mrt->pim_register_vif_index());
 }
 
 //
@@ -359,7 +338,7 @@ PimMre::set_spt(bool v)
 	_flags &= ~PIM_MRE_SPT;
     }
     
-    pim_mrt().add_task_sptbit_sg(source_addr(), group_addr());
+    pim_mrt()->add_task_sptbit_sg(source_addr(), group_addr());
 }
 
 const IPvX *
@@ -728,12 +707,12 @@ PimMre::set_local_receiver_include(uint32_t vif_index, bool v)
     // Add the task to recompute the effect of this and take actions
     do {
 	if (is_wc()) {
-	    pim_mrt().add_task_local_receiver_include_wc(vif_index,
+	    pim_mrt()->add_task_local_receiver_include_wc(vif_index,
 							 group_addr());
 	    break;
 	}
 	if (is_sg()) {
-	    pim_mrt().add_task_local_receiver_include_sg(vif_index,
+	    pim_mrt()->add_task_local_receiver_include_sg(vif_index,
 							 source_addr(),
 							 group_addr());
 	    break;
@@ -762,7 +741,7 @@ PimMre::set_local_receiver_exclude(uint32_t vif_index, bool v)
     // Add the task to recompute the effect of this and take actions
     do {
 	if (is_sg()) {
-	    pim_mrt().add_task_local_receiver_exclude_sg(vif_index,
+	    pim_mrt()->add_task_local_receiver_exclude_sg(vif_index,
 							 source_addr(),
 							 group_addr());
 	    break;
@@ -791,7 +770,7 @@ PimMre::entry_try_remove()
     
     ret_value = entry_can_remove();
     if (ret_value)
-	pim_mrt().add_task_delete_pim_mre(this);
+	pim_mrt()->add_task_delete_pim_mre(this);
     
     return (ret_value);
 }
@@ -829,7 +808,7 @@ PimMre::entry_can_remove() const
 	if (immediate_olist_rp().any())
 	    return (false);
 	if ((rp_addr_ptr() != NULL)
-	    && pim_node().rp_table().has_rp_addr(*rp_addr_ptr())) {
+	    && pim_node()->rp_table().has_rp_addr(*rp_addr_ptr())) {
 	    return (false);
 	}
     }
@@ -898,7 +877,7 @@ PimMre::start_keepalive_timer()
     
     _flags |= PIM_MRE_KEEPALIVE_TIMER_IS_SET;
     
-    pim_mrt().add_task_keepalive_timer_sg(source_addr(), group_addr());
+    pim_mrt()->add_task_keepalive_timer_sg(source_addr(), group_addr());
 }
 
 // The KeepaliveTimer(S,G)
@@ -927,7 +906,7 @@ PimMre::cancel_keepalive_timer()
 
     _flags &= ~PIM_MRE_KEEPALIVE_TIMER_IS_SET;
     
-    pim_mrt().add_task_keepalive_timer_sg(source_addr(), group_addr());
+    pim_mrt()->add_task_keepalive_timer_sg(source_addr(), group_addr());
 }
 
 // The KeepaliveTimer(S,G)
@@ -980,7 +959,7 @@ PimMre::recompute_set_keepalive_timer_sg()
     // then there is no (S,G) traffic, and therefore the KeepaliveTimer(S,G)
     // does not need to be started.
     //
-    pim_mfc = pim_mrt().pim_mfc_find(source_addr(), group_addr(), false);
+    pim_mfc = pim_mrt()->pim_mfc_find(source_addr(), group_addr(), false);
     if (pim_mfc == NULL)
 	return;
 
@@ -1097,7 +1076,7 @@ PimMre::recompute_set_keepalive_timer_sg()
 const Mifset&
 PimMre::i_am_dr() const
 {
-    return pim_mrt().i_am_dr();
+    return pim_mrt()->i_am_dr();
 }
 
 //
@@ -1260,7 +1239,7 @@ void
 PimMre::add_pim_mre_wc_entry()
 {
     if (is_sg() || is_sg_rpt()) {
-	PimMre *pim_mre_wc = pim_mrt().pim_mre_find(source_addr(),
+	PimMre *pim_mre_wc = pim_mrt()->pim_mre_find(source_addr(),
 						    group_addr(),
 						    PIM_MRE_WC,
 						    0);
@@ -1273,7 +1252,7 @@ PimMre::add_pim_mre_wc_entry()
 	// because an (S,G) or (S,G,rpt) is on those lists regardless
 	// whether it has a matching (*,G) entry.
 	XLOG_ASSERT(pim_mre_wc != NULL);
-	pim_node().rp_table().delete_pim_mre(this);
+	pim_node()->rp_table().delete_pim_mre(this);
 	set_wc_entry(pim_mre_wc);
     }
 }
@@ -1303,7 +1282,7 @@ PimMre::remove_pim_mre_rp_entry()
 	    //
 	    // Remove the entry from the PimMrt, and mark it as deletion done
 	    //
-	    pim_mrt().remove_pim_mre(this);
+	    pim_mrt()->remove_pim_mre(this);
 	    set_is_task_delete_done(true);
 	} else {
 	    set_is_task_delete_pending(false);
@@ -1327,7 +1306,7 @@ PimMre::remove_pim_mre_wc_entry()
 	    //
 	    // Remove the entry from the PimMrt, and mark it as deletion done
 	    //
-	    pim_mrt().remove_pim_mre(this);
+	    pim_mrt()->remove_pim_mre(this);
 	    set_is_task_delete_done(true);
 	} else {
 	    set_is_task_delete_pending(false);
@@ -1337,7 +1316,7 @@ PimMre::remove_pim_mre_wc_entry()
     }
     
     if (is_sg() || is_sg_rpt()) {
-	PimMre *pim_mre_wc = pim_mrt().pim_mre_find(source_addr(),
+	PimMre *pim_mre_wc = pim_mrt()->pim_mre_find(source_addr(),
 						    group_addr(),
 						    PIM_MRE_WC,
 						    0);
@@ -1358,7 +1337,7 @@ PimMre::remove_pim_mre_sg_entry()
 	    //
 	    // Remove the entry from the PimMrt, and mark it as deletion done
 	    //
-	    pim_mrt().remove_pim_mre(this);
+	    pim_mrt()->remove_pim_mre(this);
 	    set_is_task_delete_done(true);
 	} else {
 	    set_is_task_delete_pending(false);
@@ -1368,7 +1347,7 @@ PimMre::remove_pim_mre_sg_entry()
     }
     
     if (is_sg_rpt()) {
-	PimMre *pim_mre_sg = pim_mrt().pim_mre_find(source_addr(),
+	PimMre *pim_mre_sg = pim_mrt()->pim_mre_find(source_addr(),
 						    group_addr(),
 						    PIM_MRE_SG,
 						    0);
@@ -1387,7 +1366,7 @@ PimMre::remove_pim_mre_sg_rpt_entry()
 	    //
 	    // Remove the entry from the PimMrt, and mark it as deletion done
 	    //
-	    pim_mrt().remove_pim_mre(this);
+	    pim_mrt()->remove_pim_mre(this);
 	    set_is_task_delete_done(true);
 	} else {
 	    set_is_task_delete_pending(false);
@@ -1397,7 +1376,7 @@ PimMre::remove_pim_mre_sg_rpt_entry()
     }
     
     if (is_sg()) {
-	PimMre *pim_mre_sg_rpt = pim_mrt().pim_mre_find(source_addr(),
+	PimMre *pim_mre_sg_rpt = pim_mrt()->pim_mre_find(source_addr(),
 							group_addr(),
 							PIM_MRE_SG_RPT,
 							0);

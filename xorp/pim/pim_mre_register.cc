@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2009 XORP, Inc.
+// Copyright (c) 2001-2011 XORP, Inc and Others-2009 XORP, Inc.
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License, Version 2, June
@@ -35,27 +35,6 @@
 #include "pim_mre.hh"
 #include "pim_node.hh"
 #include "pim_vif.hh"
-
-
-//
-// Exported variables
-//
-
-//
-// Local constants definitions
-//
-
-//
-// Local structures/classes, typedefs and macros
-//
-
-//
-// Local variables
-//
-
-//
-// Local functions prototypes
-//
 
 
 // Note: applies for (S,G)
@@ -272,11 +251,11 @@ PimMre::register_stop_timer_timeout()
     set_register_join_pending_state();
     // Stop timer(**) (** The Register-Stop Timer is set to Register_Probe_Time
     register_stop_timer() =
-	pim_node().eventloop().new_oneoff_after(
+	pim_node()->eventloop().new_oneoff_after(
 	    TimeVal(PIM_REGISTER_PROBE_TIME_DEFAULT, 0),
 	    callback(this, &PimMre::register_stop_timer_timeout));
     // Send Null Register
-    pim_vif = pim_node().vif_find_by_vif_index(rpf_interface_s());
+    pim_vif = pim_node()->vif_find_by_vif_index(rpf_interface_s());
     if ((pim_vif != NULL) && pim_vif->is_up() && (rp_addr_ptr() != NULL)) {
 	pim_vif->pim_register_null_send(*rp_addr_ptr(),
 					source_addr(),
@@ -324,7 +303,7 @@ PimMre::receive_register_stop()
     register_probe_tv = TimeVal(PIM_REGISTER_PROBE_TIME_DEFAULT, 0);
     register_stop_tv -= register_probe_tv;
     register_stop_timer() =
-	pim_node().eventloop().new_oneoff_after(
+	pim_node()->eventloop().new_oneoff_after(
 	    register_stop_tv,
 	    callback(this, &PimMre::register_stop_timer_timeout));
     return;
@@ -339,7 +318,7 @@ PimMre::receive_register_stop()
     register_probe_tv = TimeVal(PIM_REGISTER_PROBE_TIME_DEFAULT, 0);
     register_stop_tv -= register_probe_tv;
     register_stop_timer() =
-	pim_node().eventloop().new_oneoff_after(
+	pim_node()->eventloop().new_oneoff_after(
 	    register_stop_tv,
 	    callback(this, &PimMre::register_stop_timer_timeout));
     return;

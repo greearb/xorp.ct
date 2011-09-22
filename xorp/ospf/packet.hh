@@ -1,7 +1,7 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
-// Copyright (c) 2001-2009 XORP, Inc.
+// Copyright (c) 2001-2011 XORP, Inc and Others-2009 XORP, Inc.
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License, Version 2, June
@@ -48,7 +48,8 @@ class Packet {
     static const size_t INSTANCE_ID_OFFSET = 14;
 
     Packet(OspfTypes::Version version)
-	: _version(version), _auth_type(0), _instance_id(0)
+	    : _version(version), _valid(false), _router_id(0), _area_id(0),
+	      _auth_type(0), _instance_id(0)
     {
 	memset(&_auth[0], 0, sizeof(_auth));
     }

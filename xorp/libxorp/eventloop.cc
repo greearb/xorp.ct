@@ -282,6 +282,12 @@ EventLoop::descriptor_count() const
 #endif
 }
 
+/** Remove timer from timer list. */
+void EventLoop::remove_timer(XorpTimer& t) {
+    _timer_list.remove_timer(t);
+}
+
+
 XorpTask
 EventLoop::new_oneoff_task(const OneoffTaskCallback& cb, int priority,
 			   int weight)

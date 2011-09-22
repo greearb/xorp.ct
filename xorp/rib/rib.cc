@@ -294,10 +294,17 @@ RIB<A>::~RIB()
 	delete _tables.front();
 	_tables.pop_front();
     }
+
+    while (! _protocols.empty()) {
+	delete _protocols.begin()->second;
+	_protocols.erase(_protocols.begin());
+    }
+
     while (_vifs.empty() == false) {
 	delete _vifs.begin()->second;
 	_vifs.erase(_vifs.begin());
     }
+
     while (_deleted_vifs.empty() == false) {
 	delete _deleted_vifs.begin()->second;
 	_deleted_vifs.erase(_deleted_vifs.begin());

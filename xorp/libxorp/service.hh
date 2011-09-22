@@ -1,7 +1,7 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
-// Copyright (c) 2001-2009 XORP, Inc.
+// Copyright (c) 2001-2011 XORP, Inc and Others-2009 XORP, Inc.
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License, Version
@@ -19,10 +19,11 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxorp/service.hh,v 1.14 2008/10/02 21:57:33 bms Exp $
 
 #ifndef __LIBXORP_SERVICE_HH__
 #define __LIBXORP_SERVICE_HH__
+
+#include "bug_catcher.hh"
 
 /**
  * Enumeration of states objects derived from ServiceBase may be in.
@@ -78,7 +79,7 @@ class ServiceChangeObserverBase;
  * this class can register for status change notifications in a
  * Service instance by calling @ref set_observer().
  */
-class ServiceBase {
+class ServiceBase : public BugCatcher {
 public:
     ServiceBase(const string& name = "Unknown");
 

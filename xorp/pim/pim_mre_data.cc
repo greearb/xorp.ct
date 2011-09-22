@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2009 XORP, Inc.
+// Copyright (c) 2001-2011 XORP, Inc and Others-2009 XORP, Inc.
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License, Version 2, June
@@ -35,27 +35,6 @@
 #include "pim_mre.hh"
 #include "pim_node.hh"
 #include "pim_vif.hh"
-
-
-//
-// Exported variables
-//
-
-//
-// Local constants definitions
-//
-
-//
-// Local structures/classes, typedefs and macros
-//
-
-//
-// Local variables
-//
-
-//
-// Local functions prototypes
-//
 
 
 // Note: applies only for (S,G)
@@ -121,7 +100,7 @@ bool
 PimMre::is_switch_to_spt_desired_sg(uint32_t measured_interval_sec,
 				    uint32_t measured_bytes) const
 {
-    if (! pim_node().is_switch_to_spt_enabled().get())
+    if (! pim_node()->is_switch_to_spt_enabled().get())
 	return (false);		// SPT-switch disabled
     
     //
@@ -137,9 +116,9 @@ PimMre::is_switch_to_spt_desired_sg(uint32_t measured_interval_sec,
     // the threshold value, and this is within the boundaries of the
     // pre-defined interval.
     //
-    if ((measured_bytes >= pim_node().switch_to_spt_threshold_bytes().get())
+    if ((measured_bytes >= pim_node()->switch_to_spt_threshold_bytes().get())
 	&& (measured_interval_sec
-	    <= pim_node().switch_to_spt_threshold_interval_sec().get())) {
+	    <= pim_node()->switch_to_spt_threshold_interval_sec().get())) {
 	return (true);
     }
     
@@ -167,7 +146,7 @@ PimMre::check_switch_to_spt_sg(const IPvX& src, const IPvX& dst,
 	// restart KeepaliveTimer(S,G);
 	if (pim_mre_sg == NULL) {
 	    // XXX: create the (S,G) entry
-	    pim_mre_sg = pim_node().pim_mrt().pim_mre_find(src, dst,
+	    pim_mre_sg = pim_node()->pim_mrt().pim_mre_find(src, dst,
 							   PIM_MRE_SG,
 							   PIM_MRE_SG);
 	}
@@ -200,7 +179,7 @@ PimMre::set_switch_to_spt_desired_sg(bool v)
     else
 	_flags &= ~PIM_MRE_SWITCH_TO_SPT_DESIRED;
 
-    pim_mrt().add_task_was_switch_to_spt_desired_sg(source_addr(),
+    pim_mrt()->add_task_was_switch_to_spt_desired_sg(source_addr(),
 						    group_addr());
 }
 

@@ -36,33 +36,13 @@
 #include "pim_vif.hh"
 
 
-//
-// Exported variables
-//
-
-//
-// Local constants definitions
-//
-
-//
-// Local structures/classes, typedefs and macros
-//
-
-//
-// Local variables
-//
-
-//
-// Local functions prototypes
-//
-
 int
 PimMrt::signal_message_nocache_recv(const string& src_module_instance_name,
 				    uint32_t vif_index,
 				    const IPvX& src,
 				    const IPvX& dst)
 {
-    XLOG_TRACE(pim_node().is_log_trace(),
+    XLOG_TRACE(pim_node()->is_log_trace(),
 	       "RX NOCACHE signal from %s: vif_index = %d src = %s dst = %s",
 	       src_module_instance_name.c_str(),
 	       vif_index,
@@ -80,7 +60,7 @@ PimMrt::signal_message_wrongvif_recv(const string& src_module_instance_name,
 				     const IPvX& src,
 				     const IPvX& dst)
 {
-    XLOG_TRACE(pim_node().is_log_trace(),
+    XLOG_TRACE(pim_node()->is_log_trace(),
 	       "RX WRONGVIF signal from %s: vif_index = %d src = %s dst = %s",
 	       src_module_instance_name.c_str(),
 	       vif_index,
@@ -106,7 +86,7 @@ PimMrt::signal_message_wholepkt_recv(const string& src_module_instance_name,
     string dummy_error_msg;
     UNUSED(src_module_instance_name);
 
-    XLOG_TRACE(pim_node().is_log_trace(),
+    XLOG_TRACE(pim_node()->is_log_trace(),
 	       "RX WHOLEPKT signal from %s: vif_index = %d "
 	       "src = %s dst = %s len = %u",
 	       src_module_instance_name.c_str(),
@@ -155,7 +135,7 @@ PimMrt::signal_message_wholepkt_recv(const string& src_module_instance_name,
     //
     // Check the interface toward the directly-connected source
     //
-    pim_vif = pim_node().vif_find_by_vif_index(vif_index);
+    pim_vif = pim_node()->vif_find_by_vif_index(vif_index);
     if (! ((pim_vif != NULL) && (pim_vif->is_up()))) {
 	XLOG_WARNING("RX WHOLEPKT signal from %s: vif_index = %d "
 		     "src = %s dst = %s len = %u: "
@@ -169,7 +149,7 @@ PimMrt::signal_message_wholepkt_recv(const string& src_module_instance_name,
     //
     // Send a PIM Register to the RP using the RPF vif toward it
     //
-    pim_vif = pim_node().pim_vif_rpf_find(*rp_addr_ptr);
+    pim_vif = pim_node()->pim_vif_rpf_find(*rp_addr_ptr);
     if (! ((pim_vif != NULL) && (pim_vif->is_up()))) {
 	XLOG_WARNING("RX WHOLEPKT signal from %s: vif_index = %d "
 		     "src = %s dst = %s len = %u: "
@@ -233,7 +213,7 @@ PimMrt::receive_data(uint32_t iif_vif_index, const IPvX& src, const IPvX& dst)
 		}
 	    }
 	}
-	if (pim_node().is_directly_connected(*pim_vif, src)) {
+	if (pim_node()->is_directly_connected(*pim_vif, src)) {
 	    is_directly_connected_s = true;
 	    directly_connected_rpf_interface_s = pim_vif->vif_index();
 	    break;
@@ -437,12 +417,12 @@ PimMrt::receive_data(uint32_t iif_vif_index, const IPvX& src, const IPvX& dst)
     // If necessary, add a dataflow monitor to monitor whether it is
     // time to switch to the SPT.
     //
-    if (pim_node().is_switch_to_spt_enabled().get()
+    if (pim_node()->is_switch_to_spt_enabled().get()
 	&& (pim_mre_wc != NULL)
 	&& (pim_mre_wc->is_monitoring_switch_to_spt_desired_sg(pim_mre_sg))
 	&& (! pim_mfc->has_spt_switch_dataflow_monitor())) {
-	uint32_t sec = pim_node().switch_to_spt_threshold_interval_sec().get();
-	uint32_t bytes = pim_node().switch_to_spt_threshold_bytes().get();
+	uint32_t sec = pim_node()->switch_to_spt_threshold_interval_sec().get();
+	uint32_t bytes = pim_node()->switch_to_spt_threshold_bytes().get();
 	pim_mfc->add_dataflow_monitor(sec, 0,
 				      0,	// threshold_packets
 				      bytes,	// threshold_bytes
@@ -479,7 +459,7 @@ PimMrt::signal_dataflow_recv(const IPvX& source_addr,
     // TODO:  Maybe code should really be using this??
     UNUSED(measured_interval_usec); // in case XLOG_TRACE is compiled out.
     
-    XLOG_TRACE(pim_node().is_log_trace(),
+    XLOG_TRACE(pim_node()->is_log_trace(),
 	       "RX DATAFLOW signal: "
 	       "source = %s group = %s "
 	       "threshold_interval_sec = %u threshold_interval_usec = %u "
@@ -505,7 +485,7 @@ PimMrt::signal_dataflow_recv(const IPvX& source_addr,
     pim_mfc = pim_mfc_find(source_addr, group_addr, false);
     
     if (pim_mfc == NULL) {
-	pim_node().delete_all_dataflow_monitor(source_addr, group_addr);
+	pim_node()->delete_all_dataflow_monitor(source_addr, group_addr);
 	return (XORP_ERROR);	// No such PimMfc entry
     }
     
@@ -563,11 +543,11 @@ PimMrt::signal_dataflow_recv(const IPvX& source_addr,
 	    && (pim_mre->is_monitoring_switch_to_spt_desired_sg(pim_mre_sg)))
 	   && (! ((pim_mre_sg != NULL)
 		  && (pim_mre_sg->is_keepalive_timer_running())))
-	   && pim_node().is_switch_to_spt_enabled().get()
+	   && pim_node()->is_switch_to_spt_enabled().get()
 	   && (is_threshold_in_bytes
-	       && (pim_node().switch_to_spt_threshold_interval_sec().get()
+	       && (pim_node()->switch_to_spt_threshold_interval_sec().get()
 		   == threshold_interval_sec)
-	       && (pim_node().switch_to_spt_threshold_bytes().get()
+	       && (pim_node()->switch_to_spt_threshold_bytes().get()
 		   == threshold_bytes)))) {
 	// This dataflow monitor is not needed, hence delete it.
 	if (pim_mfc->has_spt_switch_dataflow_monitor()) {

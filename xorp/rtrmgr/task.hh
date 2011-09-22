@@ -17,7 +17,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/rtrmgr/task.hh,v 1.43 2008/10/02 21:58:25 bms Exp $
 
 #ifndef __RTRMGR_TASK_HH__
 #define __RTRMGR_TASK_HH__
@@ -78,7 +77,11 @@ class XrlStatusValidation : public Validation {
 public:
     XrlStatusValidation(const string& module_name, const XrlAction& xrl_action,
 			TaskManager& taskmgr);
-    virtual ~XrlStatusValidation() {}
+    virtual ~XrlStatusValidation() {
+	eventloop().remove_timer(_retry_timer);
+	// TODO:  Should remove callbacks pointing to this as well,
+	// but that is a whole other problem...
+    }
 
     void validate(RunShellCommand::ExecId exec_id, CallBack cb);
 

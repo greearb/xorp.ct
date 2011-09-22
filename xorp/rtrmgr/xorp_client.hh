@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2009 XORP, Inc.
+// Copyright (c) 2001-2011 XORP, Inc and Others-2009 XORP, Inc.
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License, Version 2, June
@@ -17,8 +17,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/rtrmgr/xorp_client.hh,v 1.23 2008/10/02 21:58:27 bms Exp $
-
 
 #ifndef __RTRMGR_XORP_CLIENT_HH__
 #define __RTRMGR_XORP_CLIENT_HH__
@@ -34,12 +32,8 @@ class XrlRouter;
 class XorpClient  {
 public:
     XorpClient(EventLoop& eventloop, XrlRouter& xrl_router);
-    ~XorpClient() {};
+    ~XorpClient();
 
-#if 0
-    int send_xrl(const UnexpandedXrl& xrl, string& errmsg,
-		 XrlRouter::XrlCallback cb, bool do_exec);
-#endif
     void send_now(const Xrl& xrl, XrlRouter::XrlCallback cb, 
 		 const string& expected_response, bool do_exec);
     void fake_send_done(string xrl_return_spec, XrlRouter::XrlCallback cb);

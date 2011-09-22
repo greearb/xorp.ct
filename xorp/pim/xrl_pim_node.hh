@@ -69,6 +69,9 @@ public:
 	       const string&	mld6igmp_target);
     virtual ~XrlPimNode();
 
+    /** Does real destruction work. */
+    virtual void destruct_me();
+
     /**
      * Startup the node operation.
      *

@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2009 XORP, Inc.
+// Copyright (c) 2001-2011 XORP, Inc and Others-2009 XORP, Inc.
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License, Version 2, June
@@ -17,8 +17,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/pim/pim_mrt.hh,v 1.24 2008/10/02 21:57:54 bms Exp $
-
 
 #ifndef __PIM_PIM_MRT_HH__
 #define __PIM_PIM_MRT_HH__
@@ -34,14 +32,6 @@
 #include "mrt/mrt.hh"
 #include "pim_mre_track_state.hh"
 
-
-//
-// Constants definitions
-//
-
-//
-// Structures/classes, typedefs and macros
-//
 
 class IPvX;
 class PimMfc;
@@ -111,12 +101,12 @@ private:
 //
 // PIM-specific Multicast Routing Table
 //
-class PimMrt {
+class PimMrt : public BugCatcher {
 public:
-    PimMrt(PimNode& pim_node);
+    PimMrt(PimNode* pim_node);
     virtual ~PimMrt();
     
-    PimNode&	pim_node() const	{ return (_pim_node);		}
+    PimNode*	pim_node() const	{ return (_pim_node);		}
     PimMrtSg&	pim_mrt_sg()		{ return (_pim_mrt_sg);		}
     PimMrtSg&	pim_mrt_sg_rpt()	{ return (_pim_mrt_sg_rpt);	}
     PimMrtG&	pim_mrt_g()		{ return (_pim_mrt_g);		}
@@ -274,7 +264,7 @@ public:
 private:
     void pim_mre_task_timer_timeout();
 
-    PimNode&	_pim_node;	// The PIM node
+    PimNode* _pim_node;	// The PIM node
     
     //
     // The lookup tables
@@ -295,12 +285,5 @@ private:
     XorpTimer	_pim_mre_task_timer;
 };
 
-//
-// Global variables
-//
-
-//
-// Global functions prototypes
-//
 
 #endif // __PIM_PIM_MRT_HH__

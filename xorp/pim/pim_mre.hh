@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2009 XORP, Inc.
+// Copyright (c) 2001-2011 XORP, Inc and Others-2009 XORP, Inc.
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License, Version 2, June
@@ -16,8 +16,6 @@
 // 
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
-
-// $XORP: xorp/pim/pim_mre.hh,v 1.54 2008/10/02 21:57:53 bms Exp $
 
 
 #ifndef __PIM_PIM_MRE_HH__
@@ -35,15 +33,6 @@
 #include "pim_mrib_table.hh"
 #include "pim_proto_assert.hh"
 
-
-//
-// Constants definitions
-//
-
-
-//
-// Structures/classes, typedefs and macros
-//
 
 class AssertMetric;
 class PimMre;
@@ -98,18 +87,17 @@ enum {
 
 // PIM-specific Multicast Routing Entry
 // XXX: the source_addr() for (*,*,RP) entry contains the RP address
-class PimMre : public Mre<PimMre> {
+class PimMre : public Mre<PimMre>, BugCatcher, NONCOPYABLE  {
 public:
-    PimMre(PimMrt& pim_mrt, const IPvX& source, const IPvX& group);
-    ~PimMre();
+    PimMre(PimMrt* pim_mrt, const IPvX& source, const IPvX& group);
+    virtual ~PimMre();
     
     void	add_pim_mre_lists();
     void	remove_pim_mre_lists();
     
     // General info: PimNode, PimMrt, family, etc.
-    PimNode&	pim_node()	const;
-    PimMrt&	pim_mrt()	const	{ return (_pim_mrt);		}
-    PimMrt&	_pim_mrt;		// The PIM MRT (yuck!)
+    PimNode*	pim_node() const;
+    PimMrt*	pim_mrt()	const	{ return _pim_mrt; }
     int		family()	const;
     uint32_t	pim_register_vif_index() const;
     
@@ -146,8 +134,6 @@ public:
     void	recompute_rp_sg();	// Used by (S,G)
     void	recompute_rp_sg_rpt();	// Used by (S,G,rpt)
     //
-    PimRp	*_pim_rp;		// The RP entry
-					// Used by (*,G) (S,G) (S,G,rpt)
     
     //
     // MRIB info
@@ -170,10 +156,6 @@ public:
     void	recompute_mrib_s_sg();		// Used by (S,G)
     void	recompute_mrib_s_sg_rpt();	// Used by (S,G,rpt)
     //
-    Mrib	*_mrib_rp;		// The MRIB info to the RP
-					// Used by all entries
-    Mrib	*_mrib_s;		// The MRIB info to the source
-					// Used by (S,G) (S,G,rpt)
     
     //
     // RPF and RPF' neighbor info
@@ -236,12 +218,6 @@ public:
     bool	compute_is_directly_connected_s();
     // Note: applies for (S,G)
     void	recompute_is_directly_connected_sg();
-    //
-    PimNbr	*_nbr_mrib_next_hop_rp;	// Applies only for (*,*,RP) and (*,G)
-    PimNbr	*_nbr_mrib_next_hop_s;	// Applies only for (S,G)
-    PimNbr	*_rpfp_nbr_wc;		// Applies only for (*,G)
-    PimNbr	*_rpfp_nbr_sg;		// Applies only for (S,G)
-    PimNbr	*_rpfp_nbr_sg_rpt;	// Applies only for (S,G,rpt)
     
     //
     // Related entries: (*,G), (*,*,RP) (may be NULL).
@@ -268,10 +244,6 @@ public:
     void	set_rp_entry(PimMre *v)	{ _rp_entry = v;		}
     void	set_sg_entry(PimMre *v) { _sg_sg_rpt_entry = v;		}
     void	set_sg_rpt_entry(PimMre *v) { _sg_sg_rpt_entry = v;	}
-    //
-    PimMre	*_wc_entry;		// The (*,G) entry
-    PimMre	*_rp_entry;		// The (*,*,RP) entry
-    PimMre	*_sg_sg_rpt_entry;	// The (S,G) or (S,G,rpt) entry
     
     //
     // ASSERT-related route metric and metric preference
@@ -303,8 +275,6 @@ public:
     }
     void	set_local_receiver_include(uint32_t vif_index, bool v);
     void	set_local_receiver_exclude(uint32_t vif_index, bool t);
-    Mifset	_local_receiver_include; // The interfaces with IGMP/MLD6 Join
-    Mifset	_local_receiver_exclude; // The interfaces with IGMP/MLD6 Leave
 
     //
     // JOIN/PRUNE info
@@ -323,9 +293,7 @@ public:
 	return (_join_or_override_timer);
     }
     void	override_timer_timeout();
-    XorpTimer	_join_or_override_timer; // The Join Timer for
-					 // (*,*,RP) (*,G) (S,G);
-					 // Also Override Timer for (S,G,rpt)
+
     // Note: applies only for (*,*,RP)
     void	receive_join_rp(uint32_t vif_index, uint16_t holdtime);
     // Note: applies only for (*,*,RP)
@@ -438,11 +406,6 @@ public:
     const Mifset& downstream_prune_pending_state() const;
     const Mifset& downstream_prune_tmp_state() const;
     const Mifset& downstream_prune_pending_tmp_state() const;
-    Mifset	_downstream_join_state;			// Join state
-    Mifset	_downstream_prune_pending_state;	// Prune-Pending state
-    Mifset	_downstream_prune_state;		// Prune state
-    Mifset	_downstream_tmp_state;			// P' and PP' state
-    Mifset	_downstream_processed_wc_by_sg_rpt; // (S,G,rpt)J/P processed
     
     // Note: applies only for (*,*,RP)
     void	downstream_expiry_timer_timeout_rp(uint32_t vif_index);
@@ -460,8 +423,6 @@ public:
     void	downstream_prune_pending_timer_timeout_sg(uint32_t vif_index);
     // Note: applies only for (S,G,rpt)
     void	downstream_prune_pending_timer_timeout_sg_rpt(uint32_t vif_index);
-    XorpTimer	_downstream_expiry_timers[MAX_VIFS];	// Expiry timers
-    XorpTimer	_downstream_prune_pending_timers[MAX_VIFS]; // Prune-Pending timers
     
     
     //
@@ -558,7 +519,6 @@ public:
     }
     XorpTimer&	register_stop_timer() { return (_register_stop_timer); }
     void	register_stop_timer_timeout();
-    XorpTimer	_register_stop_timer;
     
     
     //
@@ -584,8 +544,6 @@ public:
     const Mifset& i_am_assert_loser_state() const {
 	return (_i_am_assert_loser_state);
     }
-    Mifset	_i_am_assert_winner_state; // The interfaces I am Assert winner
-    Mifset	_i_am_assert_loser_state;  // The interfaces I am Assert loser
     
     // Note: works for (*,G), (S,G), (S,G,rpt)
     const Mifset& i_am_assert_winner_wc() const;
@@ -602,7 +560,6 @@ public:
     // Note: applies only for (S,G) and (S,G,rpt)
     const Mifset& lost_assert_sg_rpt() const;
     
-    XorpTimer	_assert_timers[MAX_VIFS];  // The Assert (winner/loser) timers
     // Note: applies only for (*,G)
     void	assert_timer_timeout_wc(uint32_t vif_index);
     // Note: applies only for (S,G)
@@ -647,8 +604,6 @@ public:
     void	set_assert_tracking_desired_state(uint32_t vif_index, bool v);
     // Note: applies only for (*,G) and (S,G)
     bool	is_assert_tracking_desired_state(uint32_t vif_index) const;
-    Mifset	_assert_tracking_desired_state;	// To store the
-						// AssertTrackingDesired state
     
     // Note: applies only for (*,G) and (S,G)
     const Mifset& could_assert_state() const { return (_could_assert_state); }
@@ -656,7 +611,6 @@ public:
     bool	is_could_assert_state(uint32_t vif_index) const;
     // Note: applies only for (*,G) and (S,G)
     void	set_could_assert_state(uint32_t vif_index, bool v);
-    Mifset	_could_assert_state;	// To store the CouldAssert state
     
     // Note: applies only for (S,G)
     AssertMetric *my_assert_metric_sg(uint32_t vif_index) const;
@@ -668,7 +622,6 @@ public:
     AssertMetric *rpt_assert_metric(uint32_t vif_index) const;
     // Note: applies only for (*,G) and (S,G) (but is used only for (S,G))
     AssertMetric *infinite_assert_metric() const;
-    AssertMetric *_assert_winner_metrics[MAX_VIFS]; // The Assert winner
 						    // metrics array.
     // Note: applies only for (*,G) and (S,G)
     int		assert_process(PimVif *pim_vif, AssertMetric *assert_metric);
@@ -756,9 +709,6 @@ public:
     
     // Assert rate-limiting stuff
     void	asserts_rate_limit_timer_timeout();
-    Mifset	_asserts_rate_limit;	// Bit-flags for Asserts rate limit
-    XorpTimer	_asserts_rate_limit_timer;	// Timer for Asserts rate limit
-						// support
 
     //
     // PMBR info
@@ -770,7 +720,6 @@ public:
     void	set_pmbr_addr(const IPvX& v) { _pmbr_addr = v; }
     void	clear_pmbr_addr() { _pmbr_addr = IPvX::ZERO(family()); }
     bool	is_pmbr_addr_set() const { return (_pmbr_addr != IPvX::ZERO(family())); }
-    IPvX	_pmbr_addr;		// The address of the PMBR
 
     //
     // MISC. info
@@ -916,15 +865,51 @@ public:
     }
     
 private:
+    PimMrt	*_pim_mrt;		// The PIM MRT (yuck!)
+    PimRp	*_pim_rp;		// The RP entry
+					// Used by (*,G) (S,G) (S,G,rpt)
+    Mrib	*_mrib_rp;		// The MRIB info to the RP
+					// Used by all entries
+    Mrib	*_mrib_s;		// The MRIB info to the source
+					// Used by (S,G) (S,G,rpt)
+    //
+    PimNbr	*_nbr_mrib_next_hop_rp;	// Applies only for (*,*,RP) and (*,G)
+    PimNbr	*_nbr_mrib_next_hop_s;	// Applies only for (S,G)
+    PimNbr	*_rpfp_nbr_wc;		// Applies only for (*,G)
+    PimNbr	*_rpfp_nbr_sg;		// Applies only for (S,G)
+    PimNbr	*_rpfp_nbr_sg_rpt;	// Applies only for (S,G,rpt)
+    //
+    PimMre	*_wc_entry;		// The (*,G) entry
+    PimMre	*_rp_entry;		// The (*,*,RP) entry
+    PimMre	*_sg_sg_rpt_entry;	// The (S,G) or (S,G,rpt) entry
+    Mifset	_local_receiver_include; // The interfaces with IGMP/MLD6 Join
+    Mifset	_local_receiver_exclude; // The interfaces with IGMP/MLD6 Leave
+    XorpTimer	_join_or_override_timer; // The Join Timer for
+					 // (*,*,RP) (*,G) (S,G);
+					 // Also Override Timer for (S,G,rpt)
+    Mifset	_downstream_join_state;			// Join state
+    Mifset	_downstream_prune_pending_state;	// Prune-Pending state
+    Mifset	_downstream_prune_state;		// Prune state
+    Mifset	_downstream_tmp_state;			// P' and PP' state
+    Mifset	_downstream_processed_wc_by_sg_rpt; // (S,G,rpt)J/P processed
+    XorpTimer	_downstream_expiry_timers[MAX_VIFS];	// Expiry timers
+    XorpTimer	_downstream_prune_pending_timers[MAX_VIFS]; // Prune-Pending timers
+
+    XorpTimer	_register_stop_timer;
+    Mifset	_i_am_assert_winner_state; // The interfaces I am Assert winner
+    Mifset	_i_am_assert_loser_state;  // The interfaces I am Assert loser
+    XorpTimer	_assert_timers[MAX_VIFS];  // The Assert (winner/loser) timers
+    Mifset	_assert_tracking_desired_state;	// To store the
+						// AssertTrackingDesired state
+    Mifset	_could_assert_state;	// To store the CouldAssert state
+    AssertMetric *_assert_winner_metrics[MAX_VIFS]; // The Assert winner
+    Mifset	_asserts_rate_limit;	// Bit-flags for Asserts rate limit
+    XorpTimer	_asserts_rate_limit_timer;	// Timer for Asserts rate limit
+						// support
+    IPvX	_pmbr_addr;		// The address of the PMBR
+
     uint32_t	_flags;			// Various flags (see PIM_MRE_* above)
 };
 
-//
-// Global variables
-//
-
-//
-// Global functions prototypes
-//
 
 #endif // __PIM_PIM_MRE_HH__

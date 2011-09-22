@@ -19,11 +19,6 @@
  * http://xorp.net
  */
 
-/*
- * $XORP: xorp/pim/pim_proto.h,v 1.27 2008/10/02 21:57:54 bms Exp $
- */
-
-
 #ifndef __PIM_PIM_PROTO_H__
 #define __PIM_PIM_PROTO_H__
 

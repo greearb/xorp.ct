@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2009 XORP, Inc.
+// Copyright (c) 2001-2011 XORP, Inc and Others-2009 XORP, Inc.
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License, Version 2, June
@@ -17,8 +17,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/pim/pim_mfc.hh,v 1.16 2008/10/02 21:57:52 bms Exp $
-
 
 #ifndef __PIM_PIM_MFC_HH__
 #define __PIM_PIM_MFC_HH__
@@ -33,15 +31,6 @@
 #include "mrt/mrt.hh"
 
 
-//
-// Constants definitions
-//
-
-
-//
-// Structures/classes, typedefs and macros
-//
-
 class IPvX;
 class PimMre;
 class PimMrt;
@@ -51,13 +40,13 @@ class PimNode;
 // PIM-specific Multicast Forwarding Cache
 class PimMfc : public Mre<PimMfc> {
 public:
-    PimMfc(PimMrt& pim_mrt, const IPvX& source, const IPvX& group);
-    ~PimMfc();
+    PimMfc(PimMrt* pim_mrt, const IPvX& source, const IPvX& group);
+    virtual ~PimMfc();
 
     // General info: PimNode, PimMrt, family, etc.
-    PimNode&	pim_node()	const;
-    PimMrt&	pim_mrt()	const	{ return (_pim_mrt);		}
-    int		family()	const;
+    PimNode* pim_node()	const;
+    PimMrt* pim_mrt() const { return _pim_mrt; }
+    int family() const;
 
     const IPvX& rp_addr() const { return (_rp_addr); }
     void	set_rp_addr(const IPvX& v);
@@ -157,7 +146,7 @@ public:
     }
     
 private:
-    PimMrt&	_pim_mrt;		// The PIM MRT (yuck!)
+    PimMrt*	_pim_mrt;		// The PIM MRT (yuck!)
     IPvX	_rp_addr;		// The RP address
     uint32_t	_iif_vif_index;		// The incoming interface
     Mifset	_olist;			// The outgoing interfaces
@@ -177,12 +166,5 @@ private:
     uint32_t	_flags;			// Various flags (see PIM_MFC_* above)
 };
 
-//
-// Global variables
-//
-
-//
-// Global functions prototypes
-//
 
 #endif // __PIM_PIM_MFC_HH__

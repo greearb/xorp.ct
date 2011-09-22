@@ -149,6 +149,7 @@ static void pim_main(const string& finder_hostname, uint16_t finder_port) {
     // which throws an exception from deep in glibc and crashes us.
     xrl_pimsm_node4.delete_all_vifs();
     xrl_pimsm_node4.shutdown();
+    xrl_pimsm_node4.destruct_me();
 }
 
 int

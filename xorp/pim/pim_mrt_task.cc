@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2009 XORP, Inc.
+// Copyright (c) 2001-2011 XORP, Inc and Others-2009 XORP, Inc.
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License, Version 2, June
@@ -37,27 +37,6 @@
 #include "pim_vif.hh"
 
 
-//
-// Exported variables
-//
-
-//
-// Local constants definitions
-//
-
-//
-// Local structures/classes, typedefs and macros
-//
-
-//
-// Local variables
-//
-
-//
-// Local functions prototypes
-//
-
-
 void
 PimMrt::add_task(PimMreTask *pim_mre_task)
 {
@@ -68,7 +47,7 @@ PimMrt::add_task(PimMreTask *pim_mre_task)
     //
     // Record if a PimVif is in use by this task
     //
-    pim_vif = pim_node().vif_find_by_vif_index(pim_mre_task->vif_index());
+    pim_vif = pim_node()->vif_find_by_vif_index(pim_mre_task->vif_index());
     if (pim_vif != NULL) {
 	pim_vif->incr_usage_by_pim_mre_task();
     }
@@ -95,7 +74,7 @@ PimMrt::delete_task(PimMreTask *pim_mre_task)
     //
     // Record if a PimVif is not in use anymore by this task
     //
-    pim_vif = pim_node().vif_find_by_vif_index(pim_mre_task->vif_index());
+    pim_vif = pim_node()->vif_find_by_vif_index(pim_mre_task->vif_index());
     if (pim_vif != NULL) {
 	pim_vif->decr_usage_by_pim_mre_task();
     }
@@ -113,7 +92,7 @@ PimMrt::schedule_task()
     if (_pim_mre_task_list.empty())
 	return;		// No tasks to schedule
 
-    _pim_mre_task_timer = pim_node().eventloop().new_oneoff_after(
+    _pim_mre_task_timer = pim_node()->eventloop().new_oneoff_after(
 	TimeVal(0, 1),
 	callback(this, &PimMrt::pim_mre_task_timer_timeout));
 }
@@ -142,7 +121,7 @@ PimMrt::add_task_rp_changed(const IPvX& affected_rp_addr)
     do {
 	// Schedule the RP-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_RP_CHANGED);
 	pim_mre_task->set_rp_addr_rp(affected_rp_addr);
 	
@@ -158,7 +137,7 @@ PimMrt::add_task_mrib_changed(const IPvXNet& modified_prefix_addr)
     do {
 	// Schedule the RP-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_MRIB_RP_CHANGED);
 	pim_mre_task->set_rp_addr_prefix_rp(modified_prefix_addr);
 	
@@ -168,7 +147,7 @@ PimMrt::add_task_mrib_changed(const IPvXNet& modified_prefix_addr)
     do {
 	// Schedule the S-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_MRIB_S_CHANGED);
 	pim_mre_task->set_source_addr_prefix_sg_sg_rpt(modified_prefix_addr);
 	
@@ -199,7 +178,7 @@ PimMrt::add_task_delete_mrib_entries(const list<Mrib *>& mrib_list)
     do {
 	// Schedule the deletion task
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_IN_REMOVE_MISC);
 	pim_mre_task->add_mrib_delete_list(mrib_list);
 	add_task(pim_mre_task);
@@ -215,7 +194,7 @@ PimMrt::add_task_nbr_mrib_next_hop_changed(const IPvXNet& modified_prefix_addr)
     do {
 	// Schedule the RP-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_NBR_MRIB_NEXT_HOP_RP_CHANGED);
 	pim_mre_task->set_rp_addr_prefix_rp(modified_prefix_addr);
 	
@@ -225,7 +204,7 @@ PimMrt::add_task_nbr_mrib_next_hop_changed(const IPvXNet& modified_prefix_addr)
     do {
 	// Schedule the G-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_NBR_MRIB_NEXT_HOP_RP_G_CHANGED);
 	pim_mre_task->set_rp_addr_prefix_rp(modified_prefix_addr);
 	
@@ -235,7 +214,7 @@ PimMrt::add_task_nbr_mrib_next_hop_changed(const IPvXNet& modified_prefix_addr)
     do {
 	// Schedule the S-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_NBR_MRIB_NEXT_HOP_S_CHANGED);
 	pim_mre_task->set_source_addr_prefix_sg_sg_rpt(modified_prefix_addr);
 	
@@ -252,7 +231,7 @@ PimMrt::add_task_nbr_mrib_next_hop_rp_gen_id_changed(const IPvX& rp_addr)
     do {
 	// Schedule the RP-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_NBR_MRIB_NEXT_HOP_RP_GEN_ID_CHANGED);
 	pim_mre_task->set_rp_addr_rp(rp_addr);
 	
@@ -268,7 +247,7 @@ PimMrt::add_task_pim_nbr_changed(uint32_t vif_index, const IPvX& pim_nbr_addr)
     do {
 	// Schedule the (*,*,RP)-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_NBR_MRIB_NEXT_HOP_RP_CHANGED);
 	pim_mre_task->set_pim_nbr_addr_rp(pim_nbr_addr);
 	pim_mre_task->set_vif_index(vif_index);
@@ -279,7 +258,7 @@ PimMrt::add_task_pim_nbr_changed(uint32_t vif_index, const IPvX& pim_nbr_addr)
     do {
 	// Schedule the (*,G)-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_NBR_MRIB_NEXT_HOP_RP_G_CHANGED);
 	pim_mre_task->set_pim_nbr_addr_wc(pim_nbr_addr);
 	pim_mre_task->set_vif_index(vif_index);
@@ -290,7 +269,7 @@ PimMrt::add_task_pim_nbr_changed(uint32_t vif_index, const IPvX& pim_nbr_addr)
     do {
 	// Schedule the (*,G)-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_RPFP_NBR_WC_CHANGED);
 	pim_mre_task->set_pim_nbr_addr_wc(pim_nbr_addr);
 	pim_mre_task->set_vif_index(vif_index);
@@ -301,7 +280,7 @@ PimMrt::add_task_pim_nbr_changed(uint32_t vif_index, const IPvX& pim_nbr_addr)
     do {
 	// Schedule the (S,G)-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_NBR_MRIB_NEXT_HOP_S_CHANGED);
 	pim_mre_task->set_pim_nbr_addr_sg_sg_rpt(pim_nbr_addr);
 	pim_mre_task->set_vif_index(vif_index);
@@ -312,7 +291,7 @@ PimMrt::add_task_pim_nbr_changed(uint32_t vif_index, const IPvX& pim_nbr_addr)
     do {
 	// Schedule the (S,G)-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_RPFP_NBR_SG_CHANGED);
 	pim_mre_task->set_pim_nbr_addr_sg_sg_rpt(pim_nbr_addr);
 	pim_mre_task->set_vif_index(vif_index);
@@ -323,7 +302,7 @@ PimMrt::add_task_pim_nbr_changed(uint32_t vif_index, const IPvX& pim_nbr_addr)
     do {
 	// Schedule the (S,G,rpt)-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_RPFP_NBR_SG_RPT_CHANGED);
 	pim_mre_task->set_pim_nbr_addr_sg_sg_rpt(pim_nbr_addr);
 	pim_mre_task->set_vif_index(vif_index);
@@ -341,7 +320,7 @@ PimMrt::add_task_pim_nbr_gen_id_changed(uint32_t vif_index,
     do {
 	// Schedule the RP-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_NBR_MRIB_NEXT_HOP_RP_GEN_ID_CHANGED);
 	pim_mre_task->set_pim_nbr_addr_rp(pim_nbr_addr);
 	pim_mre_task->set_vif_index(vif_index);
@@ -352,7 +331,7 @@ PimMrt::add_task_pim_nbr_gen_id_changed(uint32_t vif_index,
     do {
 	// Schedule the (*,G)-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_RPFP_NBR_WC_GEN_ID_CHANGED);
 	pim_mre_task->set_pim_nbr_addr_wc(pim_nbr_addr);
 	pim_mre_task->set_vif_index(vif_index);
@@ -363,7 +342,7 @@ PimMrt::add_task_pim_nbr_gen_id_changed(uint32_t vif_index,
     do {
 	// Schedule the (*,G)-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_ASSERT_WINNER_NBR_WC_GEN_ID_CHANGED);
 	pim_mre_task->set_group_addr_prefix_wc(IPvXNet::ip_multicast_base_prefix(family()));
 	pim_mre_task->set_vif_index(vif_index);
@@ -375,7 +354,7 @@ PimMrt::add_task_pim_nbr_gen_id_changed(uint32_t vif_index,
     do {
 	// Schedule the (S,G)-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_RPFP_NBR_SG_GEN_ID_CHANGED);
 	pim_mre_task->set_pim_nbr_addr_sg_sg_rpt(pim_nbr_addr);
 	pim_mre_task->set_vif_index(vif_index);
@@ -386,7 +365,7 @@ PimMrt::add_task_pim_nbr_gen_id_changed(uint32_t vif_index,
     do {
 	// Schedule the (S,G)-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_ASSERT_WINNER_NBR_SG_GEN_ID_CHANGED);
 	pim_mre_task->set_source_addr_prefix_sg_sg_rpt(IPvXNet(family()));
 	pim_mre_task->set_vif_index(vif_index);
@@ -405,7 +384,7 @@ PimMrt::add_task_assert_rpf_interface_wc(uint32_t old_rpf_interface_rp,
     do {
 	// Schedule the (*,G)-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_ASSERT_RPF_INTERFACE_WC_CHANGED);
 	pim_mre_task->set_group_addr_wc(group_addr);
 	pim_mre_task->set_vif_index(old_rpf_interface_rp);
@@ -424,7 +403,7 @@ PimMrt::add_task_assert_rpf_interface_sg(uint32_t old_rpf_interface_s,
     do {
 	// Schedule the (S,G)-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_ASSERT_RPF_INTERFACE_SG_CHANGED);
 	pim_mre_task->set_source_addr_sg_sg_rpt(source_addr);
 	pim_mre_task->set_group_addr_sg_sg_rpt(group_addr);
@@ -443,7 +422,7 @@ PimMrt::add_task_receive_join_rp(uint32_t vif_index, const IPvX& rp_addr)
     do {
 	// Schedule the (*,*,RP)-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_RECEIVE_JOIN_RP);
 	pim_mre_task->set_rp_addr_rp(rp_addr);
 	pim_mre_task->set_vif_index(vif_index);
@@ -460,7 +439,7 @@ PimMrt::add_task_receive_join_wc(uint32_t vif_index, const IPvX& group_addr)
     do {
 	// Schedule the (*,G)-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_RECEIVE_JOIN_WC);
 	pim_mre_task->set_group_addr_wc(group_addr);
 	pim_mre_task->set_vif_index(vif_index);
@@ -479,7 +458,7 @@ PimMrt::add_task_receive_join_sg(uint32_t vif_index,
     do {
 	// Schedule the (S,G)-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_RECEIVE_JOIN_SG);
 	pim_mre_task->set_source_addr_sg_sg_rpt(source_addr);
 	pim_mre_task->set_group_addr_sg_sg_rpt(group_addr);
@@ -499,7 +478,7 @@ PimMrt::add_task_receive_join_sg_rpt(uint32_t vif_index,
     do {
 	// Schedule the (S,G,rpt)-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_RECEIVE_JOIN_SG_RPT);
 	pim_mre_task->set_source_addr_sg_sg_rpt(source_addr);
 	pim_mre_task->set_group_addr_sg_sg_rpt(group_addr);
@@ -517,7 +496,7 @@ PimMrt::add_task_receive_prune_rp(uint32_t vif_index, const IPvX& rp_addr)
     do {
 	// Schedule the (*,*,RP)-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_RECEIVE_PRUNE_RP);
 	pim_mre_task->set_rp_addr_rp(rp_addr);
 	pim_mre_task->set_vif_index(vif_index);
@@ -534,7 +513,7 @@ PimMrt::add_task_receive_prune_wc(uint32_t vif_index, const IPvX& group_addr)
     do {
 	// Schedule the (*,G)-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_RECEIVE_PRUNE_WC);
 	pim_mre_task->set_group_addr_wc(group_addr);
 	pim_mre_task->set_vif_index(vif_index);
@@ -552,7 +531,7 @@ PimMrt::add_task_see_prune_wc(uint32_t vif_index, const IPvX& group_addr,
     do {
 	// Schedule the (*,G)-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_SEE_PRUNE_WC);
 	pim_mre_task->set_group_addr_wc(group_addr);
 	pim_mre_task->set_vif_index(vif_index);
@@ -572,7 +551,7 @@ PimMrt::add_task_receive_prune_sg(uint32_t vif_index,
     do {
 	// Schedule the (S,G)-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_RECEIVE_PRUNE_SG);
 	pim_mre_task->set_source_addr_sg_sg_rpt(source_addr);
 	pim_mre_task->set_group_addr_sg_sg_rpt(group_addr);
@@ -592,7 +571,7 @@ PimMrt::add_task_receive_prune_sg_rpt(uint32_t vif_index,
     do {
 	// Schedule the (S,G,rpt)-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_RECEIVE_PRUNE_SG_RPT);
 	pim_mre_task->set_source_addr_sg_sg_rpt(source_addr);
 	pim_mre_task->set_group_addr_sg_sg_rpt(group_addr);
@@ -611,7 +590,7 @@ PimMrt::add_task_receive_end_of_message_sg_rpt(uint32_t vif_index,
     do {
 	// Schedule the (S,G,rpt)-related changes (for a given group)
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_RECEIVE_END_OF_MESSAGE_SG_RPT);
 	pim_mre_task->set_group_addr_sg_sg_rpt(group_addr);
 	pim_mre_task->set_vif_index(vif_index);
@@ -629,7 +608,7 @@ PimMrt::add_task_downstream_jp_state_rp(uint32_t vif_index,
     do {
 	// Schedule the (*,*,RP)-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_DOWNSTREAM_JP_STATE_RP);
 	pim_mre_task->set_rp_addr_rp(rp_addr);
 	pim_mre_task->set_vif_index(vif_index);
@@ -647,7 +626,7 @@ PimMrt::add_task_downstream_jp_state_wc(uint32_t vif_index,
     do {
 	// Schedule the (*,G)-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_DOWNSTREAM_JP_STATE_WC);
 	pim_mre_task->set_group_addr_wc(group_addr);
 	pim_mre_task->set_vif_index(vif_index);
@@ -666,7 +645,7 @@ PimMrt::add_task_downstream_jp_state_sg(uint32_t vif_index,
     do {
 	// Schedule the (S,G)-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_DOWNSTREAM_JP_STATE_SG);
 	pim_mre_task->set_source_addr_sg_sg_rpt(source_addr);
 	pim_mre_task->set_group_addr_sg_sg_rpt(group_addr);
@@ -686,7 +665,7 @@ PimMrt::add_task_downstream_jp_state_sg_rpt(uint32_t vif_index,
     do {
 	// Schedule the (S,G,rpt)-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_DOWNSTREAM_JP_STATE_SG_RPT);
 	pim_mre_task->set_source_addr_sg_sg_rpt(source_addr);
 	pim_mre_task->set_group_addr_sg_sg_rpt(group_addr);
@@ -705,7 +684,7 @@ PimMrt::add_task_upstream_jp_state_sg(const IPvX& source_addr,
     do {
 	// Schedule the (S,G)-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_UPSTREAM_JP_STATE_SG);
 	pim_mre_task->set_source_addr_sg_sg_rpt(source_addr);
 	pim_mre_task->set_group_addr_sg_sg_rpt(group_addr);
@@ -723,7 +702,7 @@ PimMrt::add_task_local_receiver_include_wc(uint32_t vif_index,
     do {
 	// Schedule the (*,G)-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_LOCAL_RECEIVER_INCLUDE_WC);
 	pim_mre_task->set_group_addr_wc(group_addr);
 	pim_mre_task->set_vif_index(vif_index);
@@ -742,7 +721,7 @@ PimMrt::add_task_local_receiver_include_sg(uint32_t vif_index,
     do {
 	// Schedule the (S,G)-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_LOCAL_RECEIVER_INCLUDE_SG);
 	pim_mre_task->set_source_addr_sg_sg_rpt(source_addr);
 	pim_mre_task->set_group_addr_sg_sg_rpt(group_addr);
@@ -762,7 +741,7 @@ PimMrt::add_task_local_receiver_exclude_sg(uint32_t vif_index,
     do {
 	// Schedule the (S,G)-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_LOCAL_RECEIVER_EXCLUDE_SG);
 	pim_mre_task->set_source_addr_sg_sg_rpt(source_addr);
 	pim_mre_task->set_group_addr_sg_sg_rpt(group_addr);
@@ -780,7 +759,7 @@ PimMrt::add_task_assert_state_wc(uint32_t vif_index, const IPvX& group_addr)
     do {
 	// Schedule the (*,G)-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_ASSERT_STATE_WC);
 	pim_mre_task->set_group_addr_wc(group_addr);
 	pim_mre_task->set_vif_index(vif_index);
@@ -799,7 +778,7 @@ PimMrt::add_task_assert_state_sg(uint32_t vif_index,
     do {
 	// Schedule the (S,G)-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_ASSERT_STATE_SG);
 	pim_mre_task->set_source_addr_sg_sg_rpt(source_addr);
 	pim_mre_task->set_group_addr_sg_sg_rpt(group_addr);
@@ -817,7 +796,7 @@ PimMrt::add_task_i_am_dr(uint32_t vif_index)
     do {
 	// Schedule the (*,*,RP)-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_I_AM_DR);
 	pim_mre_task->set_rp_addr_prefix_rp(IPvXNet(family()));
 	pim_mre_task->set_vif_index(vif_index);
@@ -829,7 +808,7 @@ PimMrt::add_task_i_am_dr(uint32_t vif_index)
 	// Schedule the (*,G)-related changes
 	// XXX: most of processing will be redundant
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_I_AM_DR);
 	pim_mre_task->set_group_addr_prefix_wc(IPvXNet::ip_multicast_base_prefix(family()));
 	pim_mre_task->set_vif_index(vif_index);
@@ -841,7 +820,7 @@ PimMrt::add_task_i_am_dr(uint32_t vif_index)
 	// Schedule the (S,G) and (S,G,rpt)-related changes
 	// XXX: most of processing will be redundant
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_I_AM_DR);
 	pim_mre_task->set_source_addr_prefix_sg_sg_rpt(IPvXNet(family()));
 	pim_mre_task->set_vif_index(vif_index);
@@ -858,7 +837,7 @@ PimMrt::add_task_my_ip_address(uint32_t vif_index)
     do {
 	// Schedule the (*,*,RP)-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_MY_IP_ADDRESS);
 	pim_mre_task->set_rp_addr_prefix_rp(IPvXNet(family()));
 	pim_mre_task->set_vif_index(vif_index);
@@ -870,7 +849,7 @@ PimMrt::add_task_my_ip_address(uint32_t vif_index)
 	// Schedule the (*,G)-related changes
 	// XXX: most of processing will be redundant
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_MY_IP_ADDRESS);
 	pim_mre_task->set_group_addr_prefix_wc(IPvXNet::ip_multicast_base_prefix(family()));
 	pim_mre_task->set_vif_index(vif_index);
@@ -882,7 +861,7 @@ PimMrt::add_task_my_ip_address(uint32_t vif_index)
 	// Schedule the (S,G) and (S,G,rpt)-related changes
 	// XXX: most of processing will be redundant
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_MY_IP_ADDRESS);
 	pim_mre_task->set_source_addr_prefix_sg_sg_rpt(IPvXNet(family()));
 	pim_mre_task->set_vif_index(vif_index);
@@ -899,7 +878,7 @@ PimMrt::add_task_my_ip_subnet_address(uint32_t vif_index)
     do {
 	// Schedule the (*,*,RP)-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_MY_IP_SUBNET_ADDRESS);
 	pim_mre_task->set_rp_addr_prefix_rp(IPvXNet(family()));
 	pim_mre_task->set_vif_index(vif_index);
@@ -911,7 +890,7 @@ PimMrt::add_task_my_ip_subnet_address(uint32_t vif_index)
 	// Schedule the (*,G)-related changes
 	// XXX: most of processing will be redundant
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_MY_IP_SUBNET_ADDRESS);
 	pim_mre_task->set_group_addr_prefix_wc(IPvXNet::ip_multicast_base_prefix(family()));
 	pim_mre_task->set_vif_index(vif_index);
@@ -923,7 +902,7 @@ PimMrt::add_task_my_ip_subnet_address(uint32_t vif_index)
 	// Schedule the (S,G) and (S,G,rpt)-related changes
 	// XXX: most of processing will be redundant
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_MY_IP_SUBNET_ADDRESS);
 	pim_mre_task->set_source_addr_prefix_sg_sg_rpt(IPvXNet(family()));
 	pim_mre_task->set_vif_index(vif_index);
@@ -940,7 +919,7 @@ PimMrt::add_task_spt_switch_threshold_changed()
     do {
 	// Schedule the MFC-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_SPT_SWITCH_THRESHOLD_CHANGED_MFC);
 	pim_mre_task->set_source_addr_prefix_mfc(IPvXNet(family()));
 	
@@ -957,7 +936,7 @@ PimMrt::add_task_was_switch_to_spt_desired_sg(const IPvX& source_addr,
     do {
 	// Schedule the (S,G)-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_WAS_SWITCH_TO_SPT_DESIRED_SG);
 	pim_mre_task->set_source_addr_sg_sg_rpt(source_addr);
 	pim_mre_task->set_group_addr_sg_sg_rpt(group_addr);
@@ -975,7 +954,7 @@ PimMrt::add_task_keepalive_timer_sg(const IPvX& source_addr,
     do {
 	// Schedule the (S,G)-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_KEEPALIVE_TIMER_SG);
 	pim_mre_task->set_source_addr_sg_sg_rpt(source_addr);
 	pim_mre_task->set_group_addr_sg_sg_rpt(group_addr);
@@ -992,7 +971,7 @@ PimMrt::add_task_sptbit_sg(const IPvX& source_addr, const IPvX& group_addr)
     do {
 	// Schedule the (S,G)-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_SPTBIT_SG);
 	pim_mre_task->set_source_addr_sg_sg_rpt(source_addr);
 	pim_mre_task->set_group_addr_sg_sg_rpt(group_addr);
@@ -1012,7 +991,7 @@ PimMrt::add_task_start_vif(uint32_t vif_index)
     do {
 	// Schedule the RP-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_MRIB_RP_CHANGED);
 	pim_mre_task->set_rp_addr_prefix_rp(IPvXNet(family()));
 	pim_mre_task->set_vif_index(vif_index);
@@ -1023,7 +1002,7 @@ PimMrt::add_task_start_vif(uint32_t vif_index)
     do {
 	// Schedule the S-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_MRIB_S_CHANGED);
 	pim_mre_task->set_source_addr_prefix_sg_sg_rpt(IPvXNet(family()));
 	pim_mre_task->set_vif_index(vif_index);
@@ -1037,7 +1016,7 @@ PimMrt::add_task_start_vif(uint32_t vif_index)
     do {
 	// Schedule the (*,*,RP)-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_IN_START_VIF);
 	pim_mre_task->set_rp_addr_prefix_rp(IPvXNet(family()));
 	pim_mre_task->set_vif_index(vif_index);
@@ -1049,7 +1028,7 @@ PimMrt::add_task_start_vif(uint32_t vif_index)
 	// Schedule the (*,G)-related changes
 	// XXX: most of processing will be redundant
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_IN_START_VIF);
 	pim_mre_task->set_group_addr_prefix_wc(IPvXNet::ip_multicast_base_prefix(family()));
 	pim_mre_task->set_vif_index(vif_index);
@@ -1061,7 +1040,7 @@ PimMrt::add_task_start_vif(uint32_t vif_index)
 	// Schedule the (S,G) and (S,G,rpt)-related changes
 	// XXX: most of processing will be redundant
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_IN_START_VIF);
 	pim_mre_task->set_source_addr_prefix_sg_sg_rpt(IPvXNet(family()));
 	pim_mre_task->set_vif_index(vif_index);
@@ -1081,7 +1060,7 @@ PimMrt::add_task_stop_vif(uint32_t vif_index)
     do {
 	// Schedule the RP-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_MRIB_RP_CHANGED);
 	pim_mre_task->set_rp_addr_prefix_rp(IPvXNet(family()));
 	pim_mre_task->set_vif_index(vif_index);
@@ -1092,7 +1071,7 @@ PimMrt::add_task_stop_vif(uint32_t vif_index)
     do {
 	// Schedule the S-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_MRIB_S_CHANGED);
 	pim_mre_task->set_source_addr_prefix_sg_sg_rpt(IPvXNet(family()));
 	pim_mre_task->set_vif_index(vif_index);
@@ -1106,7 +1085,7 @@ PimMrt::add_task_stop_vif(uint32_t vif_index)
     do {
 	// Schedule the (*,*,RP)-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_IN_STOP_VIF);
 	pim_mre_task->set_rp_addr_prefix_rp(IPvXNet(family()));
 	pim_mre_task->set_vif_index(vif_index);
@@ -1118,7 +1097,7 @@ PimMrt::add_task_stop_vif(uint32_t vif_index)
 	// Schedule the (*,G)-related changes
 	// XXX: most of processing will be redundant
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_IN_STOP_VIF);
 	pim_mre_task->set_group_addr_prefix_wc(IPvXNet::ip_multicast_base_prefix(family()));
 	pim_mre_task->set_vif_index(vif_index);
@@ -1130,7 +1109,7 @@ PimMrt::add_task_stop_vif(uint32_t vif_index)
 	// Schedule the (S,G) and (S,G,rpt)-related changes
 	// XXX: most of processing will be redundant
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_IN_STOP_VIF);
 	pim_mre_task->set_source_addr_prefix_sg_sg_rpt(IPvXNet(family()));
 	pim_mre_task->set_vif_index(vif_index);
@@ -1191,7 +1170,7 @@ PimMrt::add_task_add_pim_mre(PimMre *pim_mre)
     do {
 	// Schedule the PimMre-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     input_state);
 	pim_mre_task->add_pim_mre(pim_mre);		// XXX
 	add_task(pim_mre_task);
@@ -1257,7 +1236,7 @@ PimMrt::add_task_delete_pim_mre(PimMre *pim_mre)
     do {
 	// Schedule the PimMre-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     input_state);
 	pim_mre_task->add_pim_mre(pim_mre);		// XXX
 	pim_mre_task->add_pim_mre_delete(pim_mre);	// XXX
@@ -1300,7 +1279,7 @@ PimMrt::add_task_delete_pim_mfc(PimMfc *pim_mfc)
     do {
 	// Schedule the PimMfc-related changes
 	pim_mre_task
-	    = new PimMreTask(*this,
+	    = new PimMreTask(this,
 			     PimMreTrackState::INPUT_STATE_IN_REMOVE_PIM_MFC);
 	pim_mre_task->add_pim_mfc(pim_mfc);		// XXX
 	pim_mre_task->add_pim_mfc_delete(pim_mfc);	// XXX

@@ -52,7 +52,7 @@
 PimNode::PimNode(int family, xorp_module_id module_id,
 		 EventLoop& eventloop)
     : ProtoNode<PimVif>(family, module_id, eventloop),
-      _pim_mrt(*this),
+      _pim_mrt(this),
       _pim_mrib_table(*this),
       _rp_table(*this),
       _pim_scope_zone_table(*this),
@@ -87,15 +87,7 @@ PimNode::PimNode(int family, xorp_module_id module_id,
     set_observer(this);
 }
 
-/**
- * PimNode::~PimNode:
- * @: 
- * 
- * PIM node destructor.
- * 
- **/
-PimNode::~PimNode()
-{
+void PimNode::destruct_me() {
     //
     // Unset myself as an observer when the node status changes
     //
@@ -123,7 +115,20 @@ PimNode::~PimNode()
 
     delete_all_vifs();
     
-    BUFFER_FREE(_buffer_recv);
+    if (_buffer_recv)
+	BUFFER_FREE(_buffer_recv);
+}
+
+/**
+ * PimNode::~PimNode:
+ * @: 
+ * 
+ * PIM node destructor.
+ * 
+ **/
+PimNode::~PimNode()
+{
+    destruct_me();
 }
 
 /**
