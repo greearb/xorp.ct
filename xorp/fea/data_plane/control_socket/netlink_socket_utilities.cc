@@ -20,6 +20,8 @@
 #include <xorp_config.h>
 #ifdef HAVE_NETLINK_SOCKETS
 
+// Uncomment this to have debug_msg() active in this file.
+//#define DEBUG_LOGGING
 
 #include "fea/fea_module.h"
 #include "fea/fibconfig.hh"
@@ -808,9 +810,10 @@ void NlmUtils::nlm_cond_newlink_to_fea_cfg(const IfTree& user_cfg, IfTree& iftre
     }
 
     //XLOG_WARNING("newlink, interface: %s  tree: %s\n", if_name.c_str(), iftree.getName().c_str());
+    debug_msg("newlink, interface: %s  tree: %s\n", if_name.c_str(), iftree.getName().c_str());
 
     if (! user_cfg.find_interface(if_name)) {
-	//XLOG_WARNING("Ignoring interface: %s as it is not found in the local config.\n", if_name.c_str());
+	XLOG_WARNING("Ignoring interface: %s as it is not found in the local config.\n", if_name.c_str());
 	return;
     }
 
@@ -974,6 +977,12 @@ void NlmUtils::nlm_cond_newlink_to_fea_cfg(const IfTree& user_cfg, IfTree& iftre
     debug_msg("vif point_to_point: %s\n", bool_c_str(vifp->point_to_point()));
     debug_msg("vif multicast: %s\n", bool_c_str(vifp->multicast()));
 
+    return;
+#if 0
+    // This logic below adds an IP address for GRE tunnels, and perhaps
+    // similar tunnels.  This causes trouble because that IP information
+    // has nothing to do with actually using this interface.
+
     //
     // Add any interface-specific addresses
     //
@@ -997,6 +1006,7 @@ void NlmUtils::nlm_cond_newlink_to_fea_cfg(const IfTree& user_cfg, IfTree& iftre
     }
     if (! has_lcl_addr)
 	return;			// XXX: nothing more to do
+    debug_msg("IP address before adjust: %s\n", lcl_addr.str().c_str());
     lcl_addr = system_adjust_ipvx_recv(lcl_addr);
     debug_msg("IP address: %s\n", lcl_addr.str().c_str());
 
@@ -1015,6 +1025,7 @@ void NlmUtils::nlm_cond_newlink_to_fea_cfg(const IfTree& user_cfg, IfTree& iftre
 			 vifp->ifname().c_str(), vifp->vifname().c_str(),
 			 error_msg.c_str());
 	}
+	debug_msg("IP Broadcast/peer address: %s\n", peer_addr.str().c_str());
     }
     if (has_peer_addr)
 	XLOG_ASSERT(lcl_addr.af() == peer_addr.af());
@@ -1065,6 +1076,7 @@ void NlmUtils::nlm_cond_newlink_to_fea_cfg(const IfTree& user_cfg, IfTree& iftre
     default:
 	break;
     }
+#endif
 }
 
 void
@@ -1252,6 +1264,7 @@ NlmUtils::nlm_cond_newdeladdr_to_fea_cfg(const IfTree& user_config, IfTree& iftr
 	XLOG_FATAL("Missing local address for interface %s vif %s",
 		   vifp->ifname().c_str(), vifp->vifname().c_str());
     }
+    debug_msg("IP address before adjust: %s\n", lcl_addr.str().c_str());
     lcl_addr = system_adjust_ipvx_recv(lcl_addr);
     debug_msg("IP address: %s\n", lcl_addr.str().c_str());
     
