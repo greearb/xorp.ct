@@ -42,28 +42,6 @@
 #include "mfea_vif.hh"
 
 
-//
-// Exported variables
-//
-
-//
-// Local constants definitions
-//
-
-//
-// Local structures/classes, typedefs and macros
-//
-
-
-//
-// Local variables
-//
-
-//
-// Local functions prototypes
-//
-
-
 /**
  * MfeaNode::MfeaNode:
  * @fea_node: The corresponding FeaNode.
