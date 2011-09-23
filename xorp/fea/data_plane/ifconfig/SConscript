@@ -44,7 +44,6 @@ sources = [
 	'ifconfig_observer_routing_socket.cc',
 	'ifconfig_parse_getifaddrs.cc',
 	'ifconfig_parse_ioctl.cc',
-	'ifconfig_parse_netlink_socket.cc',
 	'ifconfig_parse_routing_socket.cc',
 	'ifconfig_property_bsd.cc',
 	'ifconfig_property_linux.cc',

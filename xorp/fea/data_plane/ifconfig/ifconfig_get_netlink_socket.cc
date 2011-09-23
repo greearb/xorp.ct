@@ -43,6 +43,17 @@
 #include "fea/ifconfig.hh"
 #include "fea/fibconfig.hh"
 #include "ifconfig_get_netlink_socket.hh"
+#include "../control_socket/netlink_socket_utilities.hh"
+
+//
+// Parse information about network interface configuration change from
+// the underlying system.
+//
+// The information to parse is in NETLINK format
+// (e.g., obtained by netlink(7) sockets mechanism).
+//
+// Reading netlink(3) manual page is a good start for understanding this
+//
 
 
 //
@@ -254,6 +265,116 @@ IfConfigGetNetlinkSocket::read_config_one(IfTree& iftree,
 	return (XORP_ERROR);
     }
     return XORP_OK;
+}
+
+int
+IfConfigGetNetlinkSocket::parse_buffer_netlink_socket(IfConfig& ifconfig,
+						      IfTree& iftree,
+						      const vector<uint8_t>& buffer,
+						      bool& modified, int& nl_errno)
+{
+    size_t buffer_bytes = buffer.size();
+    AlignData<struct nlmsghdr> align_data(buffer);
+    const struct nlmsghdr* nlh;
+    bool recognized = false;
+
+    for (nlh = align_data.payload();
+	 NLMSG_OK(nlh, buffer_bytes);
+	 nlh = NLMSG_NEXT(nlh, buffer_bytes)) {
+	void* nlmsg_data = NLMSG_DATA(nlh);
+	
+	//XLOG_WARNING("nlh msg received, type %s(%d) (%d bytes)\n",
+	//	     NlmUtils::nlm_msg_type(nlh->nlmsg_type).c_str(),
+	//	     nlh->nlmsg_type, nlh->nlmsg_len);
+
+	switch (nlh->nlmsg_type) {
+	case NLMSG_ERROR:
+	{
+	    const struct nlmsgerr* err;
+	    
+	    err = reinterpret_cast<const struct nlmsgerr*>(nlmsg_data);
+	    if (nlh->nlmsg_len < NLMSG_LENGTH(sizeof(*err))) {
+		XLOG_ERROR("AF_NETLINK nlmsgerr length error");
+		break;
+	    }
+	    errno = -err->error;
+	    nl_errno = -err->error;
+	    XLOG_ERROR("AF_NETLINK NLMSG_ERROR: %s  msg->len: %u msg->type: %hu(%s) "
+		       " msg->flags: %hu msg->seq: %u  msg->pid: %u",
+		       strerror(errno), err->msg.nlmsg_len, err->msg.nlmsg_type,
+		       NlmUtils::nlm_msg_type(err->msg.nlmsg_type).c_str(),
+		       err->msg.nlmsg_flags, err->msg.nlmsg_seq, err->msg.nlmsg_pid);
+	}
+	break;
+	
+	case NLMSG_DONE:
+	{
+	    if (! recognized)
+		return (XORP_ERROR);
+	    return (XORP_OK);
+	}
+	break;
+	
+	case NLMSG_NOOP:
+	    break;
+	    
+	case RTM_NEWLINK:
+	case RTM_DELLINK:
+	{
+	    const struct ifinfomsg* ifinfomsg;
+	    int rta_len = IFLA_PAYLOAD(nlh);
+	    
+	    if (rta_len < 0) {
+		XLOG_ERROR("AF_NETLINK ifinfomsg length error");
+		break;
+	    }
+	    ifinfomsg = reinterpret_cast<const struct ifinfomsg*>(nlmsg_data);
+	    if (nlh->nlmsg_type == RTM_NEWLINK)
+		NlmUtils::nlm_cond_newlink_to_fea_cfg(ifconfig.user_config(), iftree,
+						      ifinfomsg, rta_len, modified);
+	    else
+		NlmUtils::nlm_dellink_to_fea_cfg(iftree, ifinfomsg, rta_len, modified);
+	    recognized = true;
+	}
+	break;
+	
+	case RTM_NEWADDR:
+	case RTM_DELADDR:
+	{
+	    const struct ifaddrmsg* ifaddrmsg;
+	    int rta_len = IFA_PAYLOAD(nlh);
+	    
+	    if (rta_len < 0) {
+		XLOG_ERROR("AF_NETLINK ifaddrmsg length error");
+		break;
+	    }
+	    ifaddrmsg = reinterpret_cast<const struct ifaddrmsg*>(nlmsg_data);
+	    if (nlh->nlmsg_type == RTM_NEWADDR) {
+		NlmUtils::nlm_cond_newdeladdr_to_fea_cfg(ifconfig.user_config(), iftree,
+							 ifaddrmsg, rta_len, false, modified);
+	    } else {
+		NlmUtils::nlm_cond_newdeladdr_to_fea_cfg(ifconfig.user_config(), iftree,
+							 ifaddrmsg, rta_len, true, modified);
+	    }
+	    recognized = true;
+	}
+	break;
+	
+	default:
+	    debug_msg("Unhandled type %s(%d) (%d bytes)\n",
+		      NlmUtils::nlm_msg_type(nlh->nlmsg_type).c_str(),
+		      nlh->nlmsg_type, nlh->nlmsg_len);
+	    //XLOG_WARNING("Unhandled type %s(%d) (%d bytes)\n",
+	    //	 NlmUtils::nlm_msg_type(nlh->nlmsg_type).c_str(),
+	    //	 nlh->nlmsg_type, nlh->nlmsg_len);
+	    break;
+	}
+    }
+    
+    if (! recognized)
+	return (XORP_ERROR);
+    
+    return (XORP_OK);
 }
 
 
