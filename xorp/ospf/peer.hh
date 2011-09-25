@@ -1657,7 +1657,7 @@ class Neighbour {
     /**
      * Pretty print the neighbour state.
      */
-    static string pp_state(State is);
+    static const char* pp_state(State is);
 
     /**
      * Get state information about this neighbour.

@@ -144,6 +144,29 @@ public:
 				     uint32_t seqno,
 				     int& last_errno,
 				     string& error_msg);
+
+    static int nlm_decode_ipvx_address(int family, const struct rtattr* rtattr,
+				       IPvX& ipvx_addr, bool& is_set, string& error_msg);
+
+
+    static int nlm_decode_ipvx_interface_address(const struct ifinfomsg* ifinfomsg,
+						 const struct rtattr* rtattr,
+						 IPvX& ipvx_addr, bool& is_set,
+						 string& error_msg);
+
+    static void nlm_cond_newlink_to_fea_cfg(const IfTree& user_cfg, IfTree& iftree,
+					    const struct ifinfomsg* ifinfomsg,
+					    int rta_len, bool& modified);
+
+
+    static void nlm_dellink_to_fea_cfg(IfTree& iftree, const struct ifinfomsg* ifinfomsg,
+				       int rta_len, bool& modified);
+
+
+    static void nlm_cond_newdeladdr_to_fea_cfg(const IfTree& user_config, IfTree& iftree,
+					       const struct ifaddrmsg* ifaddrmsg,
+					       int rta_len, bool is_deleted, bool& modified);
+
 };
 
 #endif

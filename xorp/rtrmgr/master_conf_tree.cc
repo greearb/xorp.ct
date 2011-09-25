@@ -71,7 +71,7 @@
 #endif
 
 #define XORP_CONFIG_FORMAT_VERSION		"1.1"
-#define XORP_CONFIG_XORP_VERSION		"1.8.4"
+#define XORP_CONFIG_XORP_VERSION		"1.8.5-WIP"
 
 //
 // The strings that are used to add and delete a load or save file, to

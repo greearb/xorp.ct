@@ -1218,7 +1218,7 @@ PimNode::start_vif(const string& vif_name, string& error_msg)
 	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
-    
+
     if (pim_vif->start(error_msg) != XORP_OK) {
 	error_msg = c_format("Cannot start vif %s: %s",
 			     vif_name.c_str(), error_msg.c_str());

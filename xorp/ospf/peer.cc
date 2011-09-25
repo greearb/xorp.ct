@@ -3556,7 +3556,7 @@ template <> OspfTypes::NeighbourID Neighbour<IPv6>::_ticket =
     OspfTypes::ALLNEIGHBOURS + 1;
 
 template <typename A>
-string
+const char*
 Neighbour<A>::pp_state(State ns)
 {
     switch(ns) {
@@ -3727,7 +3727,7 @@ Neighbour<A>::start_rxmt_timer(uint32_t index, RxmtCallback rcb,
 	       "start_rxmt_timer: %p %s Neighbour: %s  State: %s  %s\n", this,
 	       _peer.get_if_name().c_str(),
 	       pr_id(get_candidate_id()).c_str(),
-	       pp_state(get_state()).c_str(),
+	       pp_state(get_state()),
 	       comment);
     debug_msg("start_rxmt_timer: %p %s %s\n", this, 
 	      _peer.get_if_name().c_str(),
@@ -3759,7 +3759,7 @@ Neighbour<A>::stop_rxmt_timer(uint32_t index, const char *comment)
 	       "stop_rxmt_timer: %p %s index: %i Neighbour: %s  State: %s  %s\n", this,
 	       _peer.get_if_name().c_str(), (int)(index),
 	       pr_id(get_candidate_id()).c_str(),
-	       pp_state(get_state()).c_str(),
+	       pp_state(get_state()),
 	       comment);
 
     debug_msg("stop_rxmt_timer: %p %s %s\n", this,
@@ -3806,7 +3806,7 @@ Neighbour<A>::retransmitter()
 	       (int)(_lsa_rxmt.size()),
 	       _peer.get_if_name().c_str(),
 	       pr_id(get_candidate_id()).c_str(),
-	       pp_state(get_state()).c_str());
+	       pp_state(get_state()));
 
     if (!_ls_request_list.empty()) {
 
@@ -3946,7 +3946,7 @@ Neighbour<A>::send_data_description_packet()
 	       "send_data_description_packet, Interface(%s) Neighbour(%s) State(%s)",
 	       _peer.get_if_name().c_str(),
 	       pr_id(get_candidate_id()).c_str(),
-	       pp_state(get_state()).c_str());
+	       pp_state(get_state()));
 
     _peer.populate_common_header(_data_description_packet);
     switch(get_linktype()) {
@@ -4011,7 +4011,7 @@ Neighbour<A>::start_sending_data_description_packets(const char *event_name,
 	       event_name,
 	       _peer.get_if_name().c_str(),
 	       pr_id(get_candidate_id()).c_str(),
-	       pp_state(get_state()).c_str());
+	       pp_state(get_state()));
 
     // Clear out the request list.
     _ls_request_list.clear();
@@ -4219,12 +4219,12 @@ Neighbour<A>::event_hello_received(HelloPacket *hello)
 	       pr_id(get_candidate_id()).c_str(),
 	       pr_id(hello->get_designated_router()).c_str(),
 	       pr_id(hello->get_backup_designated_router()).c_str(),
-	       pp_state(get_state()).c_str());
+	       pp_state(get_state()));
 
     debug_msg("ID = %s interface state <%s> neighbour state <%s> %s\n",
 	      pr_id(get_candidate_id()).c_str(),
 	      Peer<A>::pp_interface_state(_peer.get_state()).c_str(),
-	      pp_state(get_state()).c_str(),
+	      pp_state(get_state()),
 	      cstring(*hello));
 
     switch(get_state()) {
@@ -4346,12 +4346,12 @@ Neighbour<A>::event_1_way_received()
 	       "Event(1-WayReceived) Interface(%s) Neighbour(%s) State(%s)",
 	       _peer.get_if_name().c_str(),
 	       pr_id(get_candidate_id()).c_str(),
-	       pp_state(get_state()).c_str());
+	       pp_state(get_state()));
 
     switch(get_state()) {
     case Down:
     case Attempt:
-	XLOG_WARNING("Unexpected state %s", pp_state(get_state()).c_str());
+	XLOG_WARNING("Unexpected state %s", pp_state(get_state()));
 	break;
     case Init:
 	// No change
@@ -4376,11 +4376,11 @@ Neighbour<A>::event_2_way_received()
 	       event_name,
 	       _peer.get_if_name().c_str(),
 	       pr_id(get_candidate_id()).c_str(),
-	       pp_state(get_state()).c_str());
+	       pp_state(get_state()));
 
     switch(get_state()) {
     case Down:
-	XLOG_WARNING("Unhandled state %s", pp_state(get_state()).c_str());
+	XLOG_WARNING("Unhandled state %s", pp_state(get_state()));
 	break;
     case Attempt:
 	XLOG_ASSERT(get_linktype() == OspfTypes::NBMA);
@@ -4466,12 +4466,12 @@ Neighbour<A>::data_description_received(DataDescriptionPacket *dd)
 	       "Event(DataDescriptionReceived-pseudo-event) Interface(%s) Neighbour(%s) State(%s)",
 	       _peer.get_if_name().c_str(),
 	       pr_id(get_candidate_id()).c_str(),
-	       pp_state(get_state()).c_str());
+	       pp_state(get_state()));
 
     debug_msg("ID = %s interface state <%s> neighbour state <%s> %s\n",
 	      pr_id(get_candidate_id()).c_str(),
 	      Peer<A>::pp_interface_state(_peer.get_state()).c_str(),
-	      pp_state(get_state()).c_str(),
+	      pp_state(get_state()),
 	      cstring(*dd));
 
     switch(get_state()) {
@@ -4679,12 +4679,12 @@ Neighbour<A>::link_state_request_received(LinkStateRequestPacket *lsrp)
 	       "Event(LinkStateRequestReceived-pseudo-event) Interface(%s) Neighbour(%s) State(%s)",
 	       _peer.get_if_name().c_str(),
 	       pr_id(get_candidate_id()).c_str(),
-	       pp_state(get_state()).c_str());
+	       pp_state(get_state()));
 
     debug_msg("ID = %s interface state <%s> neighbour state <%s> %s\n",
 	      pr_id(get_candidate_id()).c_str(),
 	      Peer<A>::pp_interface_state(_peer.get_state()).c_str(),
-	      pp_state(get_state()).c_str(),
+	      pp_state(get_state()),
 	      cstring(*lsrp));
 
     switch(get_state()) {
@@ -4738,7 +4738,7 @@ Neighbour<A>::link_state_update_received(LinkStateUpdatePacket *lsup)
 	       "Event(LinkStateUpdateReceived-pseudo-event) Interface(%s) Neighbour(%s) State(%s)",
 	       _peer.get_if_name().c_str(),
 	       pr_id(get_candidate_id()).c_str(),
-	       pp_state(get_state()).c_str());
+	       pp_state(get_state()));
 
     switch(get_state()) {
     case Down:
@@ -4860,12 +4860,12 @@ link_state_acknowledgement_received(LinkStateAcknowledgementPacket *lsap)
 	       "Event(LinkStateAcknowledgementReceived-pseudo-event) Interface(%s) Neighbour(%s) State(%s)",
 	       _peer.get_if_name().c_str(),
 	       pr_id(get_candidate_id()).c_str(),
-	       pp_state(get_state()).c_str());
+	       pp_state(get_state()));
 
     debug_msg("ID = %s interface state <%s> neighbour state <%s> %s\n",
 	      pr_id(get_candidate_id()).c_str(),
 	      Peer<A>::pp_interface_state(_peer.get_state()).c_str(),
-	      pp_state(get_state()).c_str(),
+	      pp_state(get_state()),
 	      cstring(*lsap));
 
     switch(get_state()) {
@@ -5212,6 +5212,11 @@ Neighbour<A>::change_state(State state)
     State previous_state = get_state();
     set_state(state);
 
+    XLOG_TRACE(_ospf.trace()._neighbour_events, 
+	       "Neighbour: %s changing state:  %s -> %s",
+	       _peer.get_if_name().c_str(),
+	       pp_state(previous_state), pp_state(state));
+
     if (Full == state || Full == previous_state)
 	_ospf.get_peer_manager().
 	    adjacency_changed(_peer.get_peerid(), get_router_id(),
@@ -5236,12 +5241,7 @@ Neighbour<A>::event_negotiation_done()
 	       "Event(NegotiationDone) Interface(%s) Neighbour(%s) State(%s)",
 	       _peer.get_if_name().c_str(),
 	       pr_id(get_candidate_id()).c_str(),
-	       pp_state(get_state()).c_str());
-
-    debug_msg("ID = %s interface state <%s> neighbour state <%s>\n",
-	      pr_id(get_candidate_id()).c_str(),
-	      Peer<A>::pp_interface_state(_peer.get_state()).c_str(),
-	      pp_state(get_state()).c_str());
+	       pp_state(get_state()));
 
     switch(get_state()) {
     case Down:
@@ -5297,12 +5297,7 @@ Neighbour<A>::event_exchange_done()
 	       "Event(ExchangeDone) Interface(%s) Neighbour(%s) State(%s)",
 	       _peer.get_if_name().c_str(),
 	       pr_id(get_candidate_id()).c_str(),
-	       pp_state(get_state()).c_str());
-
-    debug_msg("ID = %s interface state <%s> neighbour state <%s>\n",
-	      pr_id(get_candidate_id()).c_str(),
-	      Peer<A>::pp_interface_state(_peer.get_state()).c_str(),
-	      pp_state(get_state()).c_str());
+	       pp_state(get_state()));
 
     switch(get_state()) {
     case Down:
@@ -5357,12 +5352,7 @@ Neighbour<A>::event_loading_done()
 	       "Event(LoadingDone) Interface(%s) Neighbour(%s) State(%s)",
 	       _peer.get_if_name().c_str(),
 	       pr_id(get_candidate_id()).c_str(),
-	       pp_state(get_state()).c_str());
-
-    debug_msg("ID = %s interface state <%s> neighbour state <%s>\n",
-	      pr_id(get_candidate_id()).c_str(),
-	      Peer<A>::pp_interface_state(_peer.get_state()).c_str(),
-	      pp_state(get_state()).c_str());
+	       pp_state(get_state()));
 
     switch(get_state()) {
     case Down:
@@ -5396,12 +5386,7 @@ Neighbour<A>::event_kill_neighbour()
 	       "Event(KillNbr) Interface(%s) Neighbour(%s) State(%s)",
 	       _peer.get_if_name().c_str(),
 	       pr_id(get_candidate_id()).c_str(),
-	       pp_state(get_state()).c_str());
-
-    debug_msg("ID = %s interface state <%s> neighbour state <%s>\n",
-	      pr_id(get_candidate_id()).c_str(),
-	      Peer<A>::pp_interface_state(_peer.get_state()).c_str(),
-	      pp_state(get_state()).c_str());
+	       pp_state(get_state()));
 
     switch(get_state()) {
     case Down:
@@ -5428,12 +5413,7 @@ Neighbour<A>::event_adj_ok()
 	       event_name,
 	       _peer.get_if_name().c_str(),
 	       pr_id(get_candidate_id()).c_str(),
-	       pp_state(get_state()).c_str());
-
-    debug_msg("ID = %s interface state <%s> neighbour state <%s>\n",
-	      pr_id(get_candidate_id()).c_str(),
-	      Peer<A>::pp_interface_state(_peer.get_state()).c_str(),
-	      pp_state(get_state()).c_str());
+	       pp_state(get_state()));
 
     switch(get_state()) {
     case Down:
@@ -5466,12 +5446,7 @@ Neighbour<A>::event_inactivity_timer()
 	       "Event(InactivityTimer) Interface(%s) Neighbour(%s) State(%s)",
 	       _peer.get_if_name().c_str(),
 	       pr_id(get_candidate_id()).c_str(),
-	       pp_state(get_state()).c_str());
-
-    debug_msg("ID = %s interface state <%s> neighbour state <%s>\n",
-	      pr_id(get_candidate_id()).c_str(),
-	      Peer<A>::pp_interface_state(_peer.get_state()).c_str(),
-	      pp_state(get_state()).c_str());
+	       pp_state(get_state()));
 
     change_state(Down);
     // The saved hello packet is no longer required as it has timed
@@ -5490,12 +5465,7 @@ Neighbour<A>::event_SequenceNumberMismatch_or_BadLSReq(const char *event_name)
 	       event_name,
 	       _peer.get_if_name().c_str(),
 	       pr_id(get_candidate_id()).c_str(),
-	       pp_state(get_state()).c_str());
-
-    debug_msg("ID = %s interface state <%s> neighbour state <%s>\n",
-	      pr_id(get_candidate_id()).c_str(),
-	      Peer<A>::pp_interface_state(_peer.get_state()).c_str(),
-	      pp_state(get_state()).c_str());
+	       pp_state(get_state()));
 
     switch(get_state()) {
     case Down:
@@ -5505,7 +5475,7 @@ Neighbour<A>::event_SequenceNumberMismatch_or_BadLSReq(const char *event_name)
     case ExStart:
 	XLOG_WARNING("Event %s in state %s not possible",
 		     event_name,
-		     pp_state(get_state()).c_str());
+		     pp_state(get_state()));
 	break;
     case Exchange:
     case Loading:
