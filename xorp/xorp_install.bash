@@ -18,8 +18,21 @@ if [ `pwd` != "/usr/local/xorp" ]
 fi
 
 # Add xorp user and group
+
+#Check for adduser commands
+adduserArgs=""
+if adduser -h | grep ".--system" > /dev/null 2>&1
+then
+        adduserArgs="$adduserArgs --system"
+fi
+
+if adduser -h | grep ".--no-create-home" > /dev/null 2>&1
+then
+        adduserArgs="$adduserArgs --no-create-home"
+fi
+
 echo "Creating xorp user and adding xorp to xorp and root groups..."
-adduser xorp
+adduser $adduserArgs xorp
 usermod -a -G xorp xorp
 usermod -a -G xorp root
 usermod -a -G xorp lanforge
