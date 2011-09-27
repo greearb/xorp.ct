@@ -379,7 +379,7 @@ env['xorp_moduledir']   = env['libdir']  + '/xorp/sbin'	# Protocol modules
 env['xorp_sbindir']     = env['sbindir']		# End-user binaries
 env['xorp_templatedir'] = env['datadir'] + '/templates'
 env['xorp_tooldir']     = env['libdir']  + '/xorp/bin'	# tools/*
-env['xorp_xrlsdir']     = env['datadir'] + '/xorp/xrls'	# *.xrls
+env['xorp_xrlsdir']     = env['datadir'] + '/xrl/targets'	# *.xrls
 env['xorp_sourcedir']   = sourcedir	# rtrmgr/util.cc and xif need this
 
 tst = ARGUMENTS.get('enable_boost', False)
