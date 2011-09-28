@@ -29,6 +29,10 @@
 #include "libxorp/eventloop.hh"
 #include "libxorp/utils.hh"
 
+#ifdef XORP_BUILDINFO
+#include "libxorp/build_info.hh"
+#endif
+
 #include <signal.h>
 
 #ifdef HAVE_NET_IF_H
@@ -708,6 +712,13 @@ main(int argc, char* const argv[])
 	open_logfile();
     if (do_syslog)
 	open_syslog();
+
+#ifdef XORP_BUILDINFO
+    XLOG_INFO("\n\nXORP BuildInfo, git version: %s built: %s\nBy: %s on machine: %s\nRecent git changes:\n%s\n",
+	      BuildInfo::getGitVersion(), BuildInfo::getBuildDate(),
+	      BuildInfo::getBuilder(), BuildInfo::getBuildMachine(),
+	      BuildInfo::getGitLog());
+#endif
 
     //
     // The main procedure

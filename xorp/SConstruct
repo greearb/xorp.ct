@@ -84,6 +84,7 @@ vars.AddVariables(
     BoolVariable('enable_boost',  'Use BOOST', False),
     BoolVariable('enable_ustl',  'Use uSTL', False),
     BoolVariable('enable_bgp',  'Build BGP', True),
+    BoolVariable('enable_buildinfo',  'Build Info, see libxorp/create_buildinfo.sh', True),
     BoolVariable('enable_olsr',  'Build OLSR', True),
     BoolVariable('enable_ospf',  'Build OSPF', True),
     BoolVariable('enable_rip',  'Build RIP', True),
@@ -270,6 +271,7 @@ print 'Enable CLICK:     ', env['enable_click']
 print 'Enable FEA Dummy: ', env['enable_fea_dummy']
 print 'Enable async method impls: ', env['enable_async_server']
 print 'Enable BGP:       ', env['enable_bgp']
+print 'Enable BuildInfo: ', env['enable_buildinfo']
 print 'Try Enable BOOST: ', env['enable_boost']
 print 'Try Enable uSTL : ', env['enable_ustl']
 print 'Disable IPv6:     ', env['disable_ipv6']
@@ -426,6 +428,15 @@ if tst and (tst == "no"):
     env['enable_bgp'] = False
 else:
     env['enable_bgp'] = True
+
+# Default to false
+tst = ARGUMENTS.get('enable_buildinfo', False)
+if tst and (tst == "no"):
+    env['enable_buildinfo'] = False
+else:
+    env['enable_buildinfo'] = True
+    if os.system("./libxorp/create_buildinfo.sh") != 0:
+        exit(1)
 
 # Default to enabled
 tst = ARGUMENTS.get('enable_olsr', True)
@@ -874,6 +885,11 @@ if env['CC'] and env['CC'] == 'clang':
     env.AppendUnique(CXXFLAGS = [
         '-fno-color-diagnostics',
         ])
+
+if env['enable_buildinfo']:
+    env.AppendUnique(CXXFLAGS = [
+        '-DXORP_BUILDINFO',
+        ]);
 
 # NOTE: For GNU STL only at this time.
 if env['debug_stl']:
