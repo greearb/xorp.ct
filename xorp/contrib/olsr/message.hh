@@ -176,7 +176,7 @@ private:
     static const char* linktype_to_str(OlsrTypes::LinkType t);
     static const char* neighbortype_to_str(OlsrTypes::NeighborType t);
 public:
-    LinkCode() {}
+    LinkCode() : _linkcode(OlsrTypes::UNSPEC_LINK) { }
 
     LinkCode(OlsrTypes::NeighborType ntype, OlsrTypes::LinkType ltype)
      throw(BadLinkCode) {
