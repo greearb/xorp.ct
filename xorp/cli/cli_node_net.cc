@@ -54,9 +54,8 @@
 
 #include "cli_client.hh"
 #include "cli_private.hh"
-#ifdef XORP_BUILDINFO
 #include "libxorp/build_info.hh"
-#endif
+
 #ifdef HAVE_ARPA_TELNET_H
 #include <arpa/telnet.h>
 #endif
@@ -563,7 +562,8 @@ CliClient::start_connection(string& error_msg)
 	strncpy(hostname, "xorp", sizeof(hostname) - 1);
     }
     hostname[sizeof(hostname) - 1] = '\0';
-    cli_print(c_format("%s%s\n", XORP_CLI_WELCOME, hostname));
+    cli_print(c_format("Welcome to XORP v%s on %s\n",
+		       BuildInfo::getXorpVersion(), hostname));
 #ifdef XORP_BUILDINFO
     const char* bits = "32-bit";
     if (sizeof(void*) == 8)

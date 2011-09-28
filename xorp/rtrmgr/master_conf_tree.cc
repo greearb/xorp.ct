@@ -27,6 +27,7 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/utils.hh"
+#include "libxorp/build_info.hh"
 
 #ifdef HAVE_GRP_H
 #include <grp.h>
@@ -71,7 +72,6 @@
 #endif
 
 #define XORP_CONFIG_FORMAT_VERSION		"1.1"
-#define XORP_CONFIG_XORP_VERSION		"1.8.5-WIP"
 
 //
 // The strings that are used to add and delete a load or save file, to
@@ -915,7 +915,7 @@ MasterConfigTree::save_to_file(const string& filename, uid_t user_id,
     header += "\n * Configuration format: ";
     header += XORP_CONFIG_FORMAT_VERSION;
     header += "\n * XORP version: ";
-    header += XORP_CONFIG_XORP_VERSION;
+    header += BuildInfo::getXorpVersion();
     header += "\n * Date: ";
     header += xlog_localtime2string();
     header += "\n * Host: ";

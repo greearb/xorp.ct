@@ -826,6 +826,15 @@ else:
         ( 'XRL_PF', ord(xrl_pf_dict[env['transport']]) ),
         ])
 
+# Read our VERSION file and use it's contents to pass the
+# version into the compile process.
+vf = open('VERSION', 'r')
+ver = vf.readline()
+ver = ver.strip()
+env.AppendUnique(CPPDEFINES = [
+        ( 'XORP_VERSION', ver),
+        ])
+
 # Forcibly disable GCC's SSP support., as it may be incompatible
 # with the XORP code base.
 env.AppendUnique(CPPDEFINES = [

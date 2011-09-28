@@ -17,7 +17,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/cli/cli_private.hh,v 1.12 2008/10/02 21:56:30 bms Exp $
 
 
 #ifndef __CLI_CLI_PRIVATE_HH__
@@ -34,7 +33,6 @@
 //
 #define CLI_MAX_CONNECTIONS	129	// XXX: intentionally not 2^n number
 
-#define XORP_CLI_WELCOME "Welcome to XORP on "
 #define XORP_CLI_PROMPT  "Xorp> "
 #define XORP_CLI_PROMPT_ENABLE  "XORP# "
 
@@ -45,17 +43,4 @@
 #define CHAR_TO_META(c) ((c) | 0x080)
 #endif
     
-
-//
-// Structures/classes, typedefs and macros
-//
-
-//
-// Global variables
-//
-
-//
-// Global functions prototypes
-//
-
 #endif // __CLI_CLI_PRIVATE_HH__
