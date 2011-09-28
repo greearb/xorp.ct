@@ -731,9 +731,8 @@ if not env['optimize'] == 'override':
                  'highest': '-O3',
                  'size': '-Os' }
     bigoflag = bigodict[env['optimize']]
-    if not env['optimize'] == 'no':
-        env.AppendUnique(CFLAGS = [ bigoflag ])
-        env.AppendUnique(CXXFLAGS = [ bigoflag ])
+    env.AppendUnique(CFLAGS = [ bigoflag ])
+    env.AppendUnique(CXXFLAGS = [ bigoflag ])
 
     # At least on Fedora 13, -Os breaks build with strict-aliasing
     # warnings.  Code looks right to me, so going to just disable
