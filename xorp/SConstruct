@@ -429,14 +429,21 @@ if tst and (tst == "no"):
 else:
     env['enable_bgp'] = True
 
-# Default to false
-tst = ARGUMENTS.get('enable_buildinfo', False)
+# Default to enabled
+tst = ARGUMENTS.get('enable_buildinfo', True)
 if tst and (tst == "no"):
     env['enable_buildinfo'] = False
 else:
     env['enable_buildinfo'] = True
-    if os.system("./libxorp/create_buildinfo.sh") != 0:
-        exit(1)
+    # Only generate build-info when we're building
+    # the normal build.
+    if (len(COMMAND_LINE_TARGETS) == 0):
+        if not env.GetOption('clean') and \
+               not env.GetOption('help'):
+            if os.system("./libxorp/create_buildinfo.sh") != 0:
+                print "ERROR:  Failed to generate libxorp/build_info.cc."
+                print "You can disable this feature with: enable_buildinfo=no"
+                exit(1)
 
 # Default to enabled
 tst = ARGUMENTS.get('enable_olsr', True)
