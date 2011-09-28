@@ -98,7 +98,7 @@ vars.AddVariables(
     EnumVariable('debug', 'Build with debug symbols', 'full',
                  allowed_values=('no', 'yes', 'full', 'override'),
                  map={}, ignorecase=2),
-    EnumVariable('optimize', 'Build with optimization', 'yes',
+    EnumVariable('optimize', 'Build with optimization', 'full',
                  allowed_values=('no', 'minimal', 'yes', 'full', 'highest',
                                  'size', 'override'),
                  map={}, ignorecase=2),
