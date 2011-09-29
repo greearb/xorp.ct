@@ -308,13 +308,13 @@ get_active_ipv4_addrs(vector<IPv4>& addrs)
     for ( ; ; ) {
 	ifconf.ifc_len = ifnum * sizeof(struct ifreq);
 	if (ifconf.ifc_buf != NULL)
-	    delete[] ifconf.ifc_buf;
-	ifconf.ifc_buf = new char[ifconf.ifc_len];
+	    free(ifconf.ifc_buf);
+	ifconf.ifc_buf = (char*)(malloc(ifconf.ifc_len));
 	if (ioctl(s, SIOCGIFCONF, &ifconf) < 0) {
 	    // Check UNPv1, 2e, pp 435 for an explanation why we need this
 	    if ((errno != EINVAL) || (lastlen != 0)) {
 		XLOG_ERROR("ioctl(SIOCGIFCONF) failed: %s", strerror(errno));
-		delete[] ifconf.ifc_buf;
+		free(ifconf.ifc_buf);
 		comm_close(s);
 		return;
 	    }
@@ -331,7 +331,7 @@ get_active_ipv4_addrs(vector<IPv4>& addrs)
     //
     vector<uint8_t> buffer(ifconf.ifc_len);
     memcpy(&buffer[0], ifconf.ifc_buf, ifconf.ifc_len);
-    delete[] ifconf.ifc_buf;
+    free(ifconf.ifc_buf);
 
     //
     // Parse the interface information
