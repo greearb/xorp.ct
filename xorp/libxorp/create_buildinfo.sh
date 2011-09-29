@@ -11,6 +11,9 @@
 # if the git tag hasn't changed, then do not re-create
 # build_info.cc
 
+# Uses perl, git, date, and uname commands, if available.
+# git history is only available if compiled within a git tree.
+
 cd libxorp
 
 BINFO=build_info.cc
@@ -41,23 +44,74 @@ else
     echo "Creating $BINFO: file doesn't exist yet."
 fi
 
-git log -1 --pretty=format:%h > last_git_md5sum.txt
-
 cat build_info.prefix > $BINFO
-echo "const char* BuildInfo::getBuildMachine() { return \"`uname -mrspn`\"; }" >> $BINFO
+if uname -mrspn > /dev/null 2>&1
+    then
+    echo "const char* BuildInfo::getBuildMachine() { return \"`uname -mrspn`\"; }" >> $BINFO
+else
+    echo "Warning:  uname -mrspn does not function on this system."
+    echo "const char* BuildInfo::getBuildMachine() { return \"Unknown\"; }" >> $BINFO
+fi
 echo "" >> $BINFO
+
 echo "const char* BuildInfo::getBuilder() { return \"${USER}\"; }" >> $BINFO
 echo "" >> $BINFO
-echo "const char* BuildInfo::getBuildDate() { return \"`date`\"; }" >> $BINFO
+
+if date > /dev/null 2>&1
+    then
+    echo "const char* BuildInfo::getBuildDate() { return \"`date`\"; }" >> $BINFO
+else
+    echo "Warning:  'date' does not function on this system."
+    echo "const char* BuildInfo::getBuildDate() { return \"Unknown\"; }" >> $BINFO
+fi
 echo "" >> $BINFO
-echo "const char* BuildInfo::getShortBuildDate() { return \"`date '+%F %H:%M'`\"; }" >> $BINFO
+
+if date '+%F %H:%M' > /dev/null 2>&1
+    then
+    echo "const char* BuildInfo::getShortBuildDate() { return \"`date '+%F %H:%M'`\"; }" >> $BINFO
+else
+    echo "Warning:  date +%F %H:%M does not function on this system."
+    echo "const char* BuildInfo::getShortBuildDate() { return \"Unknown\"; }" >> $BINFO
+fi
 echo "" >> $BINFO
 
 echo "const char* BuildInfo::getGitLog() { return " >> $BINFO
-echo "`git log -3 --abbrev=8 --abbrev-commit --pretty=oneline|perl -n -e'chomp; s/\\\"/\\\\\"/g; print \"\\\"\"; print; print \"\\\n\\\"\n\"'`; }" >> $BINFO
+if which perl > /dev/null 2>&1 && which git > /dev/null 2>&1
+    then
+    if [ -x `which perl`  ] && [ -x `which git` ]
+	then
+	if git log -1 > /dev/null 2>&1
+	    then
+	    echo "`git log -3 --abbrev=8 --abbrev-commit --pretty=oneline|perl -n -e'chomp; s/\\\"/\\\\\"/g; print \"\\\"\"; print; print \"\\\n\\\"\n\"'`; }" >> $BINFO
+
+	else
+	    echo "NOTE:  Not a git repository, no git history in build-info."
+	    echo "\"Cannot detect, not a git repository.\"; }" >> $BINFO
+	fi
+    else
+	echo "NOTE:  No functional perl and/or git, no git history in build-info."
+	echo "\"Cannot detect, perl and/or git is not executable.\"; }" >> $BINFO
+    fi
+else
+    echo "NOTE:  No perl and/or git, no git history in build-info."
+    echo "\"Cannot detect, perl and/or git is not found.\"; }" >> $BINFO
+fi
+echo "" >> $BINFO
+
 
 echo "const char* BuildInfo::getGitVersion() { return " >> $BINFO
-echo "\"`git log -1 --pretty=format:%h`\"; }" >> $BINFO
+if which git > /dev/null 2>&1
+    then
+    if git log -1 > /dev/null 2>&1
+	then
+	git log -1 --pretty=format:%h > last_git_md5sum.txt
+	echo "\"`git log -1 --pretty=format:%h`\"; }" >> $BINFO
+    else
+	echo "\"00000000\"; }" >> $BINFO
+    fi
+else
+    echo "\"00000000\"; }" >> $BINFO
+fi
 
 cd -
 exit 0

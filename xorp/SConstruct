@@ -445,6 +445,10 @@ else:
                 print "You can disable this feature with: enable_buildinfo=no"
                 exit(1)
 
+if env.GetOption('clean'):
+    os.unlink('./libxorp/build_info.cc');
+
+
 # Default to enabled
 tst = ARGUMENTS.get('enable_olsr', True)
 if tst and (tst == "no"):
