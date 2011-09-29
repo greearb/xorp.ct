@@ -739,6 +739,10 @@ ClickSocket::mount_click_file_system(string& error_msg)
     ret_value = mount("none", _kernel_click_mount_directory.c_str(),
 		      CLICK_FILE_SYSTEM_TYPE.c_str(), 0, 0);
 #else // ! HOST_OS_LINUX
+#elif defined(__NetBSD__) && __NetBSD_Version__ >= 499002400
+    ret_value = mount(CLICK_FILE_SYSTEM_TYPE.c_str(),
+		      _kernel_click_mount_directory.c_str(), 0, 0, 0);
+#else
     ret_value = mount(CLICK_FILE_SYSTEM_TYPE.c_str(),
 		      _kernel_click_mount_directory.c_str(), 0, 0);
 #endif // ! HOST_OS_LINUX
