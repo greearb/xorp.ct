@@ -5,8 +5,15 @@ This file contains XORP release notes (most recent releases first).
 
 Release 1.8.5
 
+   *  Fix bad OSPF bug that made neighbours very slow to go to Full
+      state in large and/or lossy OSPF router configurations.
+
    *  Compile in build-information to better track versions in logs and
       bug reports.
+
+   *  Optimize logging to check the log level before doing the work to
+      create the logging messages.  Simplify a lot of the related code.
+      Runtime should be faster, but executable size is slightly larger.
 
 
 Release 1.8.4 (September 20, 2011)
