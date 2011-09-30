@@ -3724,14 +3724,13 @@ Neighbour<A>::start_rxmt_timer(uint32_t index, RxmtCallback rcb,
 			       const char *comment)
 {
     XLOG_TRACE(_ospf.trace()._neighbour_events, 
-	       "start_rxmt_timer: %p %s Neighbour: %s  State: %s  %s\n", this,
-	       _peer.get_if_name().c_str(),
+	       "start_rxmt_timer: %p %s [%i] interval: %lims Neighbour: %s  State: %s  %s\n",
+	       this, _peer.get_if_name().c_str(),
+	       index, (long)(_peer.get_rxmt_interval() * 1000),
 	       pr_id(get_candidate_id()).c_str(),
 	       pp_state(get_state()),
 	       comment);
-    debug_msg("start_rxmt_timer: %p %s %s\n", this, 
-	      _peer.get_if_name().c_str(),
-	      comment);
+
     XLOG_ASSERT(index < TIMERS);
 
     // Any outstanding timers should already have been cancelled.
@@ -4639,7 +4638,6 @@ Neighbour<A>::extract_lsa_headers(DataDescriptionPacket *dd)
 		       "Unknown LS type %u %s", ls_type, cstring(*dd));
 	    event_sequence_number_mismatch();
 	    return false;
-	    break;
 	}
 
 	// Deal with AS-external-LSA's (LS type = 5, 0x4005).
@@ -5293,10 +5291,10 @@ void
 Neighbour<A>::event_exchange_done()
 {
     XLOG_TRACE(_ospf.trace()._neighbour_events, 
-	       "Event(ExchangeDone) Interface(%s) Neighbour(%s) State(%s)",
+	       "Event(ExchangeDone) Interface(%s) Neighbour(%s) State(%s) ls-req-list-size: %i",
 	       _peer.get_if_name().c_str(),
 	       pr_id(get_candidate_id()).c_str(),
-	       pp_state(get_state()));
+	       pp_state(get_state()), (int)(_ls_request_list.size()));
 
     switch(get_state()) {
     case Down:
