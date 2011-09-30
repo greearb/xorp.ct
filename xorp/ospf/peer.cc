@@ -3776,22 +3776,21 @@ Neighbour<A>::stop_rxmt_timer(uint32_t index, const char *comment)
 
 template <typename A>
 void
-Neighbour<A>::restart_retransmitter(const char* message)
+Neighbour<A>::ensure_retransmitter_running(const char* message)
 {
-    if (_rxmt_wrapper[FULL])
-	stop_rxmt_timer(FULL, message);
+    string msg(message);
+    msg += ": ensure_retransmitter_running";
+    if (_rxmt_wrapper[FULL]) {
+	// Timer is already running.  We don't want to stop & restart because
+	// then it will probably fire later than it should.  So, just
+	// return with no changes.
+	return;
+    }
 
     start_rxmt_timer(FULL, callback(this, &Neighbour<A>::retransmitter),
-		     false,
-		     message);
+		     false, msg.c_str());
 }
 
-// template <typename A>
-// void
-// Neighbour<A>::stop_retransmitter()
-// {
-//     stop_rxmt_timer("stop retransmitter");
-// }
 
 template <typename A>
 bool
@@ -5161,7 +5160,7 @@ Neighbour<A>::push_lsas(const char* message)
     // sending. Zap the queue.
     _lsa_queue.clear();
 
-    restart_retransmitter(message);
+    ensure_retransmitter_running(message);
 
     return true;
 }
@@ -5325,7 +5324,7 @@ Neighbour<A>::event_exchange_done()
 	    event_loading_done();
 	    return;
 	}
-	restart_retransmitter("event_exchange_done, state Exchange");
+	ensure_retransmitter_running("event_exchange_done, state Exchange");
 	debug_msg("link state request list count: %d\n",
 		  XORP_INT_CAST(_ls_request_list.size()));
 	break;
