@@ -4785,6 +4785,7 @@ Neighbour<A>::link_state_update_received(LinkStateUpdatePacket *lsup)
     _peer.send_direct_acks(get_neighbour_id(), direct_ack);
     _peer.send_delayed_acks(get_neighbour_id(), delayed_ack);
 
+    int iterations = 0;
 #ifndef	MAX_AGE_IN_DATABASE
     // MaxAge LSAs are in the retransmission list with no connection
     // to the database. The LSAs can either be removed due to an ACK
@@ -4794,7 +4795,6 @@ Neighbour<A>::link_state_update_received(LinkStateUpdatePacket *lsup)
     // 
     XLOG_TRACE(_ospf.trace()._neighbour_events, "MAX_AGE_IN_DATABASE is not defined.\n");
 
-    int iterations = 0;
  again:
     for (list<Lsa::LsaRef>::iterator i = _lsa_rxmt.begin();
 	 i != _lsa_rxmt.end(); i++) {
@@ -4812,7 +4812,7 @@ Neighbour<A>::link_state_update_received(LinkStateUpdatePacket *lsup)
 		continue;
 	    }
 	    if ((*i).get()->get_header() == (*j).get()->get_header()) {
-// 		XLOG_INFO("Same LSA\n%s\n%s", cstring(*(*i)), cstring(*(*j)));
+		//XLOG_INFO("Same LSA\n%s\n%s", cstring(*(*i)), cstring(*(*j)));
 		_lsa_rxmt.erase(i);
 		goto again;
 	    }
@@ -4832,9 +4832,9 @@ Neighbour<A>::link_state_update_received(LinkStateUpdatePacket *lsup)
 
     int iter2 = 0;
     for (i = lsas.begin(); i != lsas.end(); i++) {
-	XLOG_TRACE(_ospf.trace()._neighbour_events, "lsa: %s\n", (*i)->str().c_str());
+	//XLOG_TRACE(_ospf.trace()._neighbour_events, "lsa: %s\n", (*i)->str().c_str());
 	for (j = _ls_request_list.begin(); j != _ls_request_list.end(); j++) {
-	    XLOG_TRACE(_ospf.trace()._neighbour_events, "lsa-req: %s\n", j->str().c_str());
+	    //XLOG_TRACE(_ospf.trace()._neighbour_events, "lsa-req: %s\n", j->str().c_str());
 	    iter2++;
 	    if ((*j) == (*i)->get_header()) {
 		XLOG_TRACE(_ospf.trace()._neighbour_events, "Header matched, erasing j\n");
