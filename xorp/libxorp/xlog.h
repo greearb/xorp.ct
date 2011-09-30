@@ -21,10 +21,6 @@
  * http://xorp.net
  */
 
-/*
- * $XORP: xorp/libxorp/xlog.h,v 1.26 2009/01/23 06:22:39 pavlin Exp $
- */
-
 
 #ifndef __LIBXORP_XLOG_H__
 #define __LIBXORP_XLOG_H__
@@ -88,6 +84,9 @@ typedef enum {
     XLOG_VERBOSE_MAX
 } xlog_verbose_t;
 
+/* Don't modify this directly outside the xlog.[ch] files */
+extern int xlog_level_enabled[XLOG_LEVEL_MAX];
+
 /**
  * The type of add-on functions to process the log messages.
  */
@@ -111,10 +110,13 @@ typedef int (*xlog_output_func_t)(void *obj, xlog_level_t level,
 #else
 #  define _XLOG_MODULE_NAME XORP_MODULE_NAME
 #endif
-#define XLOG_FN(fn, fmt...)						\
-do {									\
-	fn(_XLOG_MODULE_NAME, __LINE__, __FILE__, __FUNCTION__, fmt);	\
-} while (0)
+
+#define XLOG_FN(__log_level, fmt...)					\
+    do {								\
+	if (xlog_level_enabled[__log_level])				\
+	    _xlog_with_level(__log_level, _XLOG_MODULE_NAME, __LINE__,	\
+			     __FILE__, __FUNCTION__, fmt);		\
+    } while (0)
 
 /**
  * Initialize the log utility.
@@ -286,11 +288,8 @@ int	xlog_add_default_output(void);
  */
 int	xlog_remove_default_output(void);
 
-#ifdef L_FATAL
 /**
- * Write a FATAL message to the xlog output streams and aborts the program.
- *
- * Note that FATAL messages cannot be disabled by @ref xlog_disable().
+ * Write a message to the xlog output streams.
  *
  * @param module_name the name of the module this message applies to.
  * @param line the line number in the file this message applies to.
@@ -300,139 +299,66 @@ int	xlog_remove_default_output(void);
  * Note that a trailing newline is added if none is present.
  * @param ... the arguments for @ref format.
  */
-void	xlog_fatal(const char *module_name, 
-		   int line,
-		   const char *file,
-		   const char *function,
-		   const char *format, ...) __printflike(5,6);
-# define XLOG_FATAL(fmt...)	XLOG_FN(xlog_fatal, fmt)
+void _xlog_with_level(int log_level,
+		      const char *module_name,
+		      int line,
+		      const char *file,
+		      const char *function,
+		      const char *format, ...) __printflike(6,7);
+
+#ifdef L_FATAL
+# define XLOG_FATAL(fmt...) \
+    do {							\
+	_xlog_with_level(XLOG_LEVEL_FATAL, _XLOG_MODULE_NAME,	\
+			 __LINE__, __FILE__, __FUNCTION__,	\
+			 fmt);					\
+	assert(0);						\
+    } while (0)
 #else
 # define XLOG_FATAL(fmt...)	assert(0);
-#endif    
+#endif
 
-/**
- * Write an ERROR message to the xlog output streams.
- *
- * @param module_name the name of the module this message applies to.
- * @param line the line number in the file this message applies to.
- * @param file the file name this message applies to.
- * @param function the function name this message applies to.
- * @param format the printf()-style format of the message to write.
- * Note that a trailing newline is added if none is present.
- * @param ... the arguments for @ref format.
- */
-void	xlog_error(const char *module_name,
-		   int line,
-		   const char *file,
-		   const char *function, 
-		   const char *format, ...) __printflike(5,6);
 #ifdef L_ERROR
- #define XLOG_ERROR(fmt...)	XLOG_FN(xlog_error, fmt)
+ #define XLOG_ERROR(fmt...)	XLOG_FN(XLOG_LEVEL_ERROR, fmt)
 #else
  #define XLOG_ERROR(fmt...)	do{}while(0)
 #endif     
 
-/**
- * Write a WARNING message to the xlog output streams.
- *
- * @param module_name the name of the module this message applies to.
- * @param line the line number in the file this message applies to.
- * @param file the file name this message applies to.
- * @param function the function name this message applies to.
- * @param format the printf()-style format of the message to write.
- * Note that a trailing newline is added if none is present.
- * @param ... the arguments for @ref format.
- */
-void	xlog_warning(const char *module_name, 
-		     int line,
-		     const char *file,
-		     const char *function, 
-		     const char *format, ...) __printflike(5,6);
 #ifdef L_WARNING
- #define XLOG_WARNING(fmt...)	XLOG_FN(xlog_warning, fmt)
+ #define XLOG_WARNING(fmt...)	XLOG_FN(XLOG_LEVEL_WARNING, fmt)
 #else
  #define XLOG_WARNING(fmt...)	do{}while(0)
 #endif
 
-/**
- * Write an INFO message to the xlog output streams.
- *
- * @param module_name the name of the module this message applies to.
- * @param line the line number in the file this message applies to.
- * @param file the file name this message applies to.
- * @param function the function name this message applies to.
- * @param format the printf()-style format of the message to write.
- * Note that a trailing newline is added if none is present.
- * @param ... the arguments for @ref format.
- */
-void	xlog_info(const char *module_name, 
-		  int line,
-		  const char *file,
-		  const char *function, 
-		  const char *format, ...) __printflike(5,6);
 #ifdef L_INFO
- #define XLOG_INFO(fmt...)	XLOG_FN(xlog_info, fmt)
+ #define XLOG_INFO(fmt...)	XLOG_FN(XLOG_LEVEL_INFO, fmt)
 #else
  #define XLOG_INFO(fmt...)  do{}while(0)
 #endif
 
 /**
  * Write a message without a preamble to the xlog output streams.
- * Note that this mechanism is a temporary solution for the rtrmgr
- * (see Bugzilla entry 795) and should not be used elsewhere.
- *
- * @param module_name the name of the module this message applies to.
- * @param line the line number in the file this message applies to.
- * @param file the file name this message applies to.
- * @param function the function name this message applies to.
- * @param format the printf()-style format of the message to write.
- * Note that a trailing newline is added if none is present.
- * @param ... the arguments for @ref format.
  */
-void	xlog_rtrmgr_only_no_preamble(const char *module_name,
-				     int line,
-				     const char *file,
-				     const char *function,
-				     const char *format, ...) __printflike(5,6);
 #ifdef L_OTHER
- #define XLOG_RTRMGR_ONLY_NO_PREAMBLE(fmt...)	XLOG_FN(xlog_rtrmgr_only_no_preamble, fmt)
+ #define XLOG_RTRMGR_ONLY_NO_PREAMBLE(fmt...)	XLOG_FN(XLOG_LEVEL_RTRMGR_ONLY_NO_PREAMBLE, fmt)
 #else
  #define XLOG_RTRMGR_ONLY_NO_PREAMBLE(fmt...)	do{}while(0)
 #endif    
 
 #ifdef L_ASSERT
 /**
- * Write a FATAL message to the xlog output streams and aborts the program.
- *
- * @param module_name the name of the module this message applies to.
- * @param line the line number in the file this message applies to.
- * @param file the file name this message applies to.
- * @param function the function name this message applies to.
- * @param failedexpr string containing failed expression.
- */
-void	xlog_assert(const char *module_name,
-		    int line, 
-		    const char *file, 
-		    const char *function,
-		    const char *failedexpr);
-/**
  * XORP replacement for assert(3).
  *
  * Note that it cannot be conditionally disabled and logs error through
  * the standard XLOG mechanism.
- * Calls xlog_assert if assertion fails.
  *
  * @param assertion the assertion condition.
  */
  #define XLOG_ASSERT(assertion)						\
  do {									\
- 	if (!(assertion)) {						\
- 		xlog_assert(_XLOG_MODULE_NAME,				\
- 			    __LINE__, 					\
- 			    __FILE__, 					\
- 			    __FUNCTION__,				\
- 			    #assertion);				\
- 	}								\
+     if (!(assertion)) {						\
+	 XLOG_FATAL(#assertion);					\
+     }									\
  } while (0)
 #else
 # define XLOG_ASSERT(assertion)	assert(assertion)
@@ -483,44 +409,20 @@ void	xlog_assert(const char *module_name,
  *
  *		XLOG_TRACE(cond_variable, "The number is %d", 5);
  *
- * There is some additional unpleasantness in this header for
- * `configure' related magic.
- *
- * The macro CPP_SUPPORTS_VA_ARGS is defined by `configure' tests if the
- * C preprocessor supports macros with variable length arguments.  We
- * use the GNU specific (args...) syntax for variable length arguments
- * as the c9x standard (__VA_ARGS__) breaks when the preprocessor is
- * invoked via g++.
- * TODO: the magic below should be used for the other XLOG_* entries
- * as well.
  */
 #ifdef L_TRACE
-#   ifdef CPP_SUPPORTS_GNU_VA_ARGS
-#	    define XLOG_TRACE(args...)					\
-		_xcond_trace_msg_long(XORP_MODULE_NAME, __FILE__, __LINE__, __FUNCTION__, args)
-#   else
-#	    define XLOG_TRACE						\
-		_xcond_trace_entry(XORP_MODULE_NAME, __FILE__, __LINE__, __FUNCTION__),	\
-		_xcond_trace_msg_short
-#   endif
+#	define XLOG_TRACE(__flg, args...)				\
+    do {								\
+	if (__flg && xlog_level_enabled[XLOG_LEVEL_TRACE]) {							\
+	    _xlog_with_level(XLOG_LEVEL_TRACE, XORP_MODULE_NAME,	\
+			     __LINE__, __FILE__, __FUNCTION__,	\
+			     args);					\
+	}								\
+    } while(0)
 #else
-#	    define XLOG_TRACE(args...) do{} while(0)
+#	define XLOG_TRACE(args...) do{} while(0)
 #endif
 
-/* Function for systems with variable argument macros */
-void	_xcond_trace_msg_long(const char *module_name,
-			      const char *file,
-			      int	  line,
-			      const char *fn,
-			      int	  flag,
-			      const char *format, ...) __printflike(6,7);
-
-/* Functions for systems without variable argument macros */
-void	_xcond_trace_entry(const char *module_name, const char *file,
-			   int line, const char *fn);
-
-void	_xcond_trace_msg_short(int flag,
-			       const char *format, ...) __printflike(2,3);
 
 /**
  * Compute the current local time and return it as a string.

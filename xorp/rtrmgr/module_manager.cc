@@ -753,7 +753,6 @@ ModuleManager::Process::stdout_cb(RunCommand* run_command,
     UNUSED(output);
     XLOG_ASSERT(run_command == _run_command);
     // XXX: output the message from the child process to stdout as-is
-    // XXX: temp, to be removed; see Bugzilla entry 795 */
     XLOG_RTRMGR_ONLY_NO_PREAMBLE("%s", output.c_str());
 }
 
@@ -764,7 +763,6 @@ ModuleManager::Process::stderr_cb(RunCommand* run_command,
     UNUSED(output);
     XLOG_ASSERT(run_command == _run_command);
     // XXX: output the message from the child process to stderr as-is
-    // XXX: temp, to be removed; see Bugzilla entry 795 */
     XLOG_RTRMGR_ONLY_NO_PREAMBLE("%s", output.c_str());
 }
 
