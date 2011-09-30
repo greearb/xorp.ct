@@ -111,14 +111,14 @@ RoutingTable<A>::add_entry(OspfTypes::AreaID area, IPNet<A> net,
     // ID only, so don't make an entry by net, plus there is no way of
     // guaranteeing a unique net as the net will be a link-local address.
     if (rt.get_destination_type() == OspfTypes::Router) {
-	status = _adv.add_entry(area, rt.get_router_id(), rt);
+	string dbg(msg);
+	dbg += ": RT::add_entry";
+	status = _adv.add_entry(area, rt.get_router_id(), rt, dbg.c_str());
 	switch(_ospf.get_version()) {
 	case OspfTypes::V2:
 	    break;
 	case OspfTypes::V3:
-//  	    if (!net.is_valid())
-		return true;
-	    break;
+	    return true;
 	}
     }
 
@@ -146,14 +146,12 @@ RoutingTable<A>::replace_entry(OspfTypes::AreaID area, IPNet<A> net,
     bool status = true;
 
     if (rt.get_destination_type() == OspfTypes::Router) {
-	status = _adv.replace_entry(area, rt.get_router_id(), rt);
+	status = _adv.replace_entry(area, rt.get_router_id(), rt, "RT::replace_entry");
  	switch(_ospf.get_version()) {
  	case OspfTypes::V2:
  	    break;
  	case OspfTypes::V3:
-//  	    if (!net.is_valid())
-		return true;
- 	    break;
+	    return true;
  	}
     }
 
@@ -716,8 +714,9 @@ Adv<A>::clear_area(OspfTypes::AreaID area)
 template <typename A>
 bool
 Adv<A>::add_entry(OspfTypes::AreaID area, uint32_t adv,
-		  const RouteEntry<A>& rt)
+		  const RouteEntry<A>& rt, const char* dbg)
 {
+    UNUSED(dbg); // if logging is compiled out
     debug_msg("Add entry area %s adv %s\n", pr_id(area).c_str(),
 	   pr_id(adv).c_str());
 
@@ -735,7 +734,10 @@ Adv<A>::add_entry(OspfTypes::AreaID area, uint32_t adv,
     XLOG_ASSERT(_adv.end() != i);
     typename AREA::iterator j = i->second.find(adv);
     if (i->second.end() != j) {
-	XLOG_WARNING("An entry with this advertising router already exists %s",
+	XLOG_WARNING("An entry with this advertising router already exists, area:"
+		     " %s  adv: %s dbg: %s existing: %s\nrt->LSA:\n%s",
+		     pr_id(area).c_str(), pr_id(adv).c_str(), dbg,
+		     cstring(*(j->second.get_lsa())),
 		     cstring(*rt.get_lsa()));
 	return false;
     }
@@ -749,8 +751,9 @@ Adv<A>::add_entry(OspfTypes::AreaID area, uint32_t adv,
 template <typename A>
 bool
 Adv<A>::replace_entry(OspfTypes::AreaID area, uint32_t adv,
-		      const RouteEntry<A>& rt)
+		      const RouteEntry<A>& rt, const char* dbg)
 {
+    UNUSED(dbg); // if logging is compiled out
     debug_msg("Add entry area %s adv %s\n", pr_id(area).c_str(),
 	   pr_id(adv).c_str());
 
@@ -758,8 +761,8 @@ Adv<A>::replace_entry(OspfTypes::AreaID area, uint32_t adv,
 		dynamic_cast<SummaryRouterLsa *>(rt.get_lsa().get()));
 
     if (0 == _adv.count(area)) {
-	XLOG_WARNING("There should already be an entry for this area %s",
-		     cstring(*rt.get_lsa()));
+	XLOG_WARNING("There should already be an entry for this area, dbg: %s rt->LSA:\n%s",
+		     dbg, cstring(*rt.get_lsa()));
 	AREA a;
 	a[adv] = rt;
 	_adv[area] = a;
@@ -772,8 +775,8 @@ Adv<A>::replace_entry(OspfTypes::AreaID area, uint32_t adv,
     XLOG_ASSERT(_adv.end() != i);
     typename AREA::iterator j = i->second.find(adv);
     if (i->second.end() == j) {
-	XLOG_WARNING("There should already be an entry with this adv %s",
-		     cstring(*rt.get_lsa()));
+	XLOG_WARNING("There should already be an entry with this adv, dbg: %s rt->LSA:\n%s",
+		     dbg, cstring(*rt.get_lsa()));
 	status = false;
     }
 
