@@ -72,7 +72,7 @@ static void		*xlog_outputs_obj[MAX_XLOG_OUTPUTS];
 static size_t		xlog_output_file_count = 0;
 static size_t		xlog_output_func_count = 0;
 static FILE		*fp_default = NULL;
-static int		xlog_level_enabled[XLOG_LEVEL_MAX];
+int		xlog_level_enabled[XLOG_LEVEL_MAX];
 static xlog_verbose_t	xlog_verbose_level[XLOG_LEVEL_MAX];
 
 /*
@@ -90,22 +90,10 @@ static const char	*xlog_level_names[XLOG_LEVEL_MAX] = {
 			};
 
 
-/* State and functions for systems without varargs preprocessors */
-static const char	*the_module = NULL;
-static const char	*the_file = NULL;
-static int		the_line = 0;
-static const char	*the_func = NULL;
-
 /*
  * Local functions prototypes
  */
 
-static int	xlog_init_lock(void);
-static int	xlog_init_unlock(void);
-static int	xlog_exit_lock(void);
-static int	xlog_exit_unlock(void);
-static int	xlog_write_lock(void);
-static int	xlog_write_unlock(void);
 static void	xlog_record_va(xlog_level_t log_level, const char* module_name,
 			       const char *where, const char* format,
 			       va_list ap);
@@ -139,12 +127,6 @@ xlog_init(const char *argv0, const char *preamble_message)
     if (init_flag)
 	return (-1);
 
-    /* Get the init lock */
-    if (xlog_init_lock() < 0) {
-	fprintf(stderr, "Error obtaining xlog_init_lock()\n");
-	exit (1);
-    }
-
     pid = getpid();
 
     if (process_name_string != NULL) {
@@ -176,9 +158,6 @@ xlog_init(const char *argv0, const char *preamble_message)
 
     init_flag = 1;
 
-    /* Release the init lock */
-    xlog_init_unlock();
-
     return (0);
 }
 
@@ -201,11 +180,6 @@ xlog_exit(void)
 
     if (start_flag)
 	xlog_stop();
-
-    /* Get the exit lock */
-    if (xlog_exit_lock() < 0) {
-	return (-1);
-    }
 
     /* Reset local variables */
     init_flag = 0;
@@ -236,9 +210,6 @@ xlog_exit(void)
     /* XXX: temp, to be removed; see Bugzilla entry 795 */
     xlog_verbose_level[XLOG_LEVEL_RTRMGR_ONLY_NO_PREAMBLE] =
 	XLOG_VERBOSE_RTRMGR_ONLY_NO_PREAMBLE;
-
-    /* Release the exit lock */
-    xlog_exit_unlock();
 
     return (0);
 }
@@ -425,163 +396,19 @@ xlog_level_set_verbose(xlog_level_t log_level, xlog_verbose_t verbose_level)
     xlog_verbose_level[log_level] = verbose_level;
 }
 
-/*
- * Macro function to generate xlog_info, xlog_warning, etc...
- */
-#define xlog_fn(fn, log_level)					\
-void								\
-xlog_##fn (const char *module_name, int line, const char *file, const char *function, const char *fmt, ...) \
-{									\
-    va_list ap;								\
-    char where_buf[8000];						\
-    snprintf(where_buf, sizeof(where_buf), "%s:%d %s",			\
-	     file, line, (function) ? function : "(unknown_func)");	\
-    va_start(ap, fmt);							\
-    xlog_record_va(log_level, module_name, where_buf, fmt, ap);		\
-    va_end(ap);								\
-}
-
-/*
- * Macro function to generate a log function that aborts. E.g.: xlog_fatal
- * XXX: if signal SIGABRT is caught and the signal handler does not return,
- * the program will NOT terminate.
- */
-#define xlog_fn_abort(fn, log_level)					\
-void									\
-xlog_##fn (const char *module_name, int line, const char *file, const char *function, const char *fmt, ...) \
-{									\
-    va_list ap;								\
-    char where_buf[8000];						\
-    snprintf(where_buf, sizeof(where_buf), "+%d %s %s",			\
-		 line, file, (function) ? function : "(unknown_func)");	\
-    va_start(ap, fmt);							\
-    xlog_record_va(log_level, module_name, where_buf, fmt, ap);		\
-    va_end(ap);								\
-    abort();								\
-}
-
-/*
- * Generate the log functions
- */
-#ifdef L_FATAL
-xlog_fn_abort(fatal, 	XLOG_LEVEL_FATAL)
-#endif
-xlog_fn(error, 		XLOG_LEVEL_ERROR)
-xlog_fn(warning,	XLOG_LEVEL_WARNING)
-xlog_fn(info, 		XLOG_LEVEL_INFO)
-/* XXX: temp, to be removed; see Bugzilla entry 795 */
-xlog_fn(rtrmgr_only_no_preamble,	XLOG_LEVEL_RTRMGR_ONLY_NO_PREAMBLE)
-
-#ifdef L_ASSERT
 void
-xlog_assert(const char *module_name, int line, const char *file, const char *function, const char *failedexpr)
+_xlog_with_level(int log_level, const char *module_name, int line, const char *file,
+		 const char *function, const char *fmt, ...)
 {
-#ifdef L_FATAL
-    xlog_fatal(module_name, line, file, function, 
-	       "Assertion (%s) failed", failedexpr);
-#else
-    UNUSED(module_name);
-    UNUSED(line);
-    UNUSED(file);
-    UNUSED(function);
-    UNUSED(failedexpr);
-    assert(0);
-#endif
-}
-#endif
-
-
-/*
- * ****************************************************************************
- * Lock/unlock functions
- *
- * TODO: not implemented yet. Add whatever locks may be needed.
- * ****************************************************************************
- */
-
-/**
- * xlog_init_lock:
- * @void:
- *
- * Obtain a lock needed during initialization of the log utility.
- *
- * Return value: 0 on success, otherwise -1.
- **/
-static int
-xlog_init_lock(void)
-{
-    return (0);
+    va_list ap;
+    static char where_buf[8000]; // we are single threaded, global buffer is good enough.
+    snprintf(where_buf, sizeof(where_buf), "%s:%d %s",
+	     file, line, (function) ? function : "(unknown_func)");
+    va_start(ap, fmt);
+    xlog_record_va(log_level, module_name, where_buf, fmt, ap);
+    va_end(ap);
 }
 
-/**
- * xlog_init_unlock:
- * @void:
- *
- * Release the lock used during initialization of the log utility.
- *
- * Return value: 0 on success, otherwise -1.
- **/
-static int
-xlog_init_unlock(void)
-{
-    return (0);
-}
-
-/**
- * xlog_exit_lock:
- * @void:
- *
- * Obtain a lock needed during exit from the log utility.
- *
- * Return value: 0 on success, otherwise -1.
- **/
-static int
-xlog_exit_lock(void)
-{
-    return (0);
-}
-
-/**
- * xlog_exit_unlock:
- * @void:
- *
- * Release the lock used during exit from the log utility.
- *
- * Return value:
- **/
-static int
-xlog_exit_unlock(void)
-{
-    return (0);
-}
-
-/**
- * xlog_write_lock:
- * @void:
- *
- * Obtain a lock needed during writing of a log message.
- *
- * Return value: 0 on success, otherwise -1.
- **/
-static int
-xlog_write_lock(void)
-{
-    return (0);
-}
-
-/**
- * xlog_write_unlock:
- * @void:
- *
- * Release the lock used during writing of a log message.
- *
- * Return value: 0 on success, otherwise -1.
- **/
-static int
-xlog_write_unlock(void)
-{
-    return (0);
-}
 
 /*
  * ****************************************************************************
@@ -634,7 +461,6 @@ xlog_record_va(xlog_level_t log_level, const char *module_name,
     if (! xlog_level_enabled[log_level])
 	return;			/* The log level is disabled */
 
-    xlog_write_lock();
 #ifdef SIGPIPE
     sigpipe_handler = signal(SIGPIPE, SIG_IGN);
 #endif
@@ -642,45 +468,46 @@ xlog_record_va(xlog_level_t log_level, const char *module_name,
     preamble_lead = (preamble_string) ? preamble_string : "";
     process_name_lead = (process_name_string) ? process_name_string : "";
 
-    /*
-     * Prepare the preamble string to write.
-     * XXX: we need to prepare it once, otherwise the time may be
-     * different when we write to more than one outputs.
-     */
-    switch (xlog_verbose_level[log_level]) {
-    case XLOG_VERBOSE_RTRMGR_ONLY_NO_PREAMBLE:	/* No log information */
-	/* XXX: temp, to be removed; see Bugzilla entry 795 */
+    /* Special case for the pre-amble level */
+    if (log_level == XLOG_LEVEL_RTRMGR_ONLY_NO_PREAMBLE) {
 	x_asprintf(&buf_preamble_ptr, "");
-	break;
-	
-    case XLOG_VERBOSE_LOW:	/* The minimum log information */
-	x_asprintf(&buf_preamble_ptr, "[ %s %s %s %s ] ",
-		   xlog_localtime2string(),
-		   xlog_level_names[log_level],
-		   process_name_lead,
-		   module_name);
-	break;
+    }
+    else {
+	/*
+	 * Prepare the preamble string to write.
+	 * XXX: we need to prepare it once, otherwise the time may be
+	 * different when we write to more than one outputs.
+	 */
+	switch (xlog_verbose_level[log_level]) {
+	case XLOG_VERBOSE_LOW:	/* The minimum log information */
+	    x_asprintf(&buf_preamble_ptr, "[ %s %s %s %s ] ",
+		       xlog_localtime2string(),
+		       xlog_level_names[log_level],
+		       process_name_lead,
+		       module_name);
+	    break;
 
-    case XLOG_VERBOSE_MEDIUM:	/* Add preamble string if non-NULL */
-	x_asprintf(&buf_preamble_ptr, "[ %s %s %s %s %s ] ",
-		   xlog_localtime2string(),
-		   preamble_lead,
-		   xlog_level_names[log_level],
-		   process_name_lead,
-		   module_name);
-	break;
+	case XLOG_VERBOSE_MEDIUM:	/* Add preamble string if non-NULL */
+	    x_asprintf(&buf_preamble_ptr, "[ %s %s %s %s %s ] ",
+		       xlog_localtime2string(),
+		       preamble_lead,
+		       xlog_level_names[log_level],
+		       process_name_lead,
+		       module_name);
+	    break;
 
-    case XLOG_VERBOSE_HIGH:	/* Most verbose */
-    default:
-	x_asprintf(&buf_preamble_ptr, "[ %s %s %s %s:%d %s %s ] ",
-		   xlog_localtime2string(),
-		   preamble_lead,
-		   xlog_level_names[log_level],
-		   process_name_lead,
-		   (int)pid,
-		   module_name,
-		   where);
-	break;
+	case XLOG_VERBOSE_HIGH:	/* Most verbose */
+	default:
+	    x_asprintf(&buf_preamble_ptr, "[ %s %s %s %s:%d %s %s ] ",
+		       xlog_localtime2string(),
+		       preamble_lead,
+		       xlog_level_names[log_level],
+		       process_name_lead,
+		       (int)pid,
+		       module_name,
+		       where);
+	    break;
+	}
     }
 
     /*
@@ -752,7 +579,6 @@ xlog_record_va(xlog_level_t log_level, const char *module_name,
 #ifdef SIGPIPE
     signal(SIGPIPE, sigpipe_handler);
 #endif
-    xlog_write_unlock();
 }
 
 /**
@@ -814,87 +640,6 @@ xlog_flush(FILE* fp)
 	return (0);
     else
 	return (-1);
-}
-
-/**
- * _xcond_trace_msg_long:
- * @module_name: The name of the module this message applies to.
- * @file: The file name where XLOG_TRACE() has occured.
- * @line: The line number where XLOG_TRACE() has occured.
- * @func: The function name where XLOG_TRACE() has occured.
- * @flag: The boolean flag that defines whether the messages should be printed.
- * @fmt: The printf() style format.
- * @:
- *
- * The entry function for XLOG_TRACE(). Used if the compiler supports
- * variable arguments for macros.
- * This function should not be called directly.
- **/
-void
-_xcond_trace_msg_long(const char	*module_name,
-		      const char	*file,
-		      int		line,
-		      const char	*func,
-		      int		flag,
-		      const char	*fmt, ...)
-{
-    if (flag) {
-	va_list ap;
-	char xlog_where_buf[8000];
-
-	/* TODO: use _xcond_trace_entry and _xcond_trace_msg_short instead */
-	snprintf(xlog_where_buf, sizeof(xlog_where_buf), "+%d %s %s", line,
-		 file, (func) ? func : "(unknown_func)");
-	va_start(ap, fmt);
-	xlog_record_va(XLOG_LEVEL_TRACE, module_name, xlog_where_buf, fmt, ap);
-	va_end(ap);
-    }
-}
-
-/**
- * _xcond_trace_entry:
- * @module_name: The name of the module this message applies to.
- * @file: The file name where XLOG_TRACE() has occured.
- * @line: The line number where XLOG_TRACE() has occured.
- * @func: The function name where XLOG_TRACE() has occured.
- *
- * A helper function that sets the file name, line number and function name.
- * Needed if the compiler does not support variable arguments for macros.
- * This function should not be called directly.
- **/
-void
-_xcond_trace_entry(const char *module_name, const char *file,
-		   int line, const char* func)
-{
-    the_module = module_name;
-    the_file = file;
-    the_line = line;
-    the_func = func;
-}
-
-/**
- * _xcond_trace_msg_short:
- * @flag: The boolean flag that defines whether the messages should be printed.
- * @fmt: The printf() style format.
- * @:
- *
- * The entry function for XLOG_TRACE(). Used if the compiler does not support
- * variable arguments for macros.
- * This function should not be called directly.
- **/
-void
-_xcond_trace_msg_short(int flag, const char* fmt, ...)
-{
-    if (flag) {
-	va_list ap;
-	char xlog_where_buf[8000];
-
-	snprintf(xlog_where_buf, sizeof(xlog_where_buf), "+%d %s %s",
-		 the_line, the_file, (the_func) ? the_func : "(unknown_func)");
-	va_start(ap, fmt);
-	xlog_record_va(XLOG_LEVEL_TRACE, the_module, xlog_where_buf, fmt, ap);
-	va_end(ap);
-    }
 }
 
 /*

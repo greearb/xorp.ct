@@ -28,6 +28,7 @@
 #include "libxorp/daemon.h"
 #include "libxorp/eventloop.hh"
 #include "libxorp/utils.hh"
+#include "libxorp/build_info.hh"
 
 #include <signal.h>
 
@@ -708,6 +709,52 @@ main(int argc, char* const argv[])
 	open_logfile();
     if (do_syslog)
 	open_syslog();
+
+#ifdef XORP_BUILDINFO
+    XLOG_INFO("\n\nXORP %s BuildInfo:\ngit version: %s built: %s\nBy: %s on machine: %s\nRecent git changes:\n%s\n",
+	      BuildInfo::getXorpVersion(),
+	      BuildInfo::getGitVersion(), BuildInfo::getBuildDate(),
+	      BuildInfo::getBuilder(), BuildInfo::getBuildMachine(),
+	      BuildInfo::getGitLog());
+#else
+    XLOG_INFO("\n\nXORP %s\n", BuildInfo::getXorpVersion());
+#endif
+
+    // Log our current system, if on unix
+#ifndef __WIN32__
+    string tmp_fname(c_format("/tmp/xorp-tmp-%i.txt", getpid()));
+    string cmd(c_format("uname -a > %s", tmp_fname.c_str()));
+    system(cmd.c_str());
+    ifstream tstf("/etc/issue");
+    if (tstf) {
+	string cmd(c_format("cat /etc/issue >> %s", tmp_fname.c_str()));
+	system(cmd.c_str());
+    }
+    tstf.close();
+    tstf.clear();
+    tstf.open(tmp_fname.c_str());
+    if (tstf) {
+	cmd = "";
+	char tmpb[500];
+	while (tstf) {
+	    tstf.getline(tmpb, 499);
+	    if (tstf.gcount()) {
+		tmpb[tstf.gcount()] = 0;
+		cmd += tmpb;
+	    }
+	    else {
+		break;
+	    }
+	}
+	XLOG_INFO("\nHost Information:\n%s\n\n",
+		  cmd.c_str());
+	tstf.close();
+    }
+    unlink(tmp_fname.c_str());
+#else
+    XLOG_INFO("\nHost Information: Windows\n\n");
+#endif
+    
 
     //
     // The main procedure

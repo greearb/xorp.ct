@@ -3724,14 +3724,13 @@ Neighbour<A>::start_rxmt_timer(uint32_t index, RxmtCallback rcb,
 			       const char *comment)
 {
     XLOG_TRACE(_ospf.trace()._neighbour_events, 
-	       "start_rxmt_timer: %p %s Neighbour: %s  State: %s  %s\n", this,
-	       _peer.get_if_name().c_str(),
+	       "start_rxmt_timer: %p %s [%i] interval: %lims Neighbour: %s  State: %s  %s\n",
+	       this, _peer.get_if_name().c_str(),
+	       index, (long)(_peer.get_rxmt_interval() * 1000),
 	       pr_id(get_candidate_id()).c_str(),
 	       pp_state(get_state()),
 	       comment);
-    debug_msg("start_rxmt_timer: %p %s %s\n", this, 
-	      _peer.get_if_name().c_str(),
-	      comment);
+
     XLOG_ASSERT(index < TIMERS);
 
     // Any outstanding timers should already have been cancelled.
@@ -3776,22 +3775,21 @@ Neighbour<A>::stop_rxmt_timer(uint32_t index, const char *comment)
 
 template <typename A>
 void
-Neighbour<A>::restart_retransmitter(const char* message)
+Neighbour<A>::ensure_retransmitter_running(const char* message)
 {
-    if (_rxmt_wrapper[FULL])
-	stop_rxmt_timer(FULL, message);
+    string msg(message);
+    msg += ": ensure_retransmitter_running";
+    if (_rxmt_wrapper[FULL]) {
+	// Timer is already running.  We don't want to stop & restart because
+	// then it will probably fire later than it should.  So, just
+	// return with no changes.
+	return;
+    }
 
     start_rxmt_timer(FULL, callback(this, &Neighbour<A>::retransmitter),
-		     false,
-		     message);
+		     false, msg.c_str());
 }
 
-// template <typename A>
-// void
-// Neighbour<A>::stop_retransmitter()
-// {
-//     stop_rxmt_timer("stop retransmitter");
-// }
 
 template <typename A>
 bool
@@ -4640,7 +4638,6 @@ Neighbour<A>::extract_lsa_headers(DataDescriptionPacket *dd)
 		       "Unknown LS type %u %s", ls_type, cstring(*dd));
 	    event_sequence_number_mismatch();
 	    return false;
-	    break;
 	}
 
 	// Deal with AS-external-LSA's (LS type = 5, 0x4005).
@@ -4785,6 +4782,7 @@ Neighbour<A>::link_state_update_received(LinkStateUpdatePacket *lsup)
     _peer.send_direct_acks(get_neighbour_id(), direct_ack);
     _peer.send_delayed_acks(get_neighbour_id(), delayed_ack);
 
+    int iterations = 0;
 #ifndef	MAX_AGE_IN_DATABASE
     // MaxAge LSAs are in the retransmission list with no connection
     // to the database. The LSAs can either be removed due to an ACK
@@ -4794,7 +4792,6 @@ Neighbour<A>::link_state_update_received(LinkStateUpdatePacket *lsup)
     // 
     XLOG_TRACE(_ospf.trace()._neighbour_events, "MAX_AGE_IN_DATABASE is not defined.\n");
 
-    int iterations = 0;
  again:
     for (list<Lsa::LsaRef>::iterator i = _lsa_rxmt.begin();
 	 i != _lsa_rxmt.end(); i++) {
@@ -4812,7 +4809,7 @@ Neighbour<A>::link_state_update_received(LinkStateUpdatePacket *lsup)
 		continue;
 	    }
 	    if ((*i).get()->get_header() == (*j).get()->get_header()) {
-// 		XLOG_INFO("Same LSA\n%s\n%s", cstring(*(*i)), cstring(*(*j)));
+		//XLOG_INFO("Same LSA\n%s\n%s", cstring(*(*i)), cstring(*(*j)));
 		_lsa_rxmt.erase(i);
 		goto again;
 	    }
@@ -4832,9 +4829,9 @@ Neighbour<A>::link_state_update_received(LinkStateUpdatePacket *lsup)
 
     int iter2 = 0;
     for (i = lsas.begin(); i != lsas.end(); i++) {
-	XLOG_TRACE(_ospf.trace()._neighbour_events, "lsa: %s\n", (*i)->str().c_str());
+	//XLOG_TRACE(_ospf.trace()._neighbour_events, "lsa: %s\n", (*i)->str().c_str());
 	for (j = _ls_request_list.begin(); j != _ls_request_list.end(); j++) {
-	    XLOG_TRACE(_ospf.trace()._neighbour_events, "lsa-req: %s\n", j->str().c_str());
+	    //XLOG_TRACE(_ospf.trace()._neighbour_events, "lsa-req: %s\n", j->str().c_str());
 	    iter2++;
 	    if ((*j) == (*i)->get_header()) {
 		XLOG_TRACE(_ospf.trace()._neighbour_events, "Header matched, erasing j\n");
@@ -5161,7 +5158,7 @@ Neighbour<A>::push_lsas(const char* message)
     // sending. Zap the queue.
     _lsa_queue.clear();
 
-    restart_retransmitter(message);
+    ensure_retransmitter_running(message);
 
     return true;
 }
@@ -5294,10 +5291,10 @@ void
 Neighbour<A>::event_exchange_done()
 {
     XLOG_TRACE(_ospf.trace()._neighbour_events, 
-	       "Event(ExchangeDone) Interface(%s) Neighbour(%s) State(%s)",
+	       "Event(ExchangeDone) Interface(%s) Neighbour(%s) State(%s) ls-req-list-size: %i",
 	       _peer.get_if_name().c_str(),
 	       pr_id(get_candidate_id()).c_str(),
-	       pp_state(get_state()));
+	       pp_state(get_state()), (int)(_ls_request_list.size()));
 
     switch(get_state()) {
     case Down:
@@ -5325,7 +5322,7 @@ Neighbour<A>::event_exchange_done()
 	    event_loading_done();
 	    return;
 	}
-	restart_retransmitter("event_exchange_done, state Exchange");
+	ensure_retransmitter_running("event_exchange_done, state Exchange");
 	debug_msg("link state request list count: %d\n",
 		  XORP_INT_CAST(_ls_request_list.size()));
 	break;

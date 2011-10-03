@@ -1770,14 +1770,11 @@ class Neighbour {
     void stop_rxmt_timer(uint32_t index, const char *comment);
 
     /**
-     * restart transmitter.
+     * Ensure that the LSA retransmitter is running.
+     * If there is an existing timer, make no changes, otherwise
+     * start a new timer running.
      */
-    void restart_retransmitter(const char* comment);
-
-    /**
-     * Stop the transmitter.
-     */
-//     void stop_retransmitter();
+    void ensure_retransmitter_running(const char* comment);
 
     /**
      * Retransmit link state request and link state update packets.

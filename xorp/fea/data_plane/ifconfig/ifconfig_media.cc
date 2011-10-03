@@ -236,7 +236,7 @@ ifconfig_media_get_link_status(const string& if_name, bool& no_carrier,
 	    uint16_t	reg_num;
 	    uint16_t	val_in;
 	    uint16_t	val_out;
-	};
+	} __attribute__((packed));
 
 	s = socket(AF_INET, SOCK_DGRAM, 0);
 	if (s < 0) {
@@ -250,9 +250,10 @@ ifconfig_media_get_link_status(const string& if_name, bool& no_carrier,
 	    break; //try another method
 	}
 
-	struct mii_data* mii;
-	mii = reinterpret_cast<struct mii_data *>(&ifreq.ifr_addr);
-	mii->reg_num = MII_BMSR;
+	struct mii_data mii;
+	memset(&mii, 0, sizeof(mii));
+	mii.reg_num = MII_BMSR;
+	memcpy(&ifreq.ifr_addr, &mii, sizeof(mii));
 	if (ioctl(s, SIOCGMIIREG, &ifreq) < 0) {
 	    error_msg += c_format("ioctl(SIOCGMIIREG) for interface %s "
 				  "failed: %s\n",
@@ -262,7 +263,8 @@ ifconfig_media_get_link_status(const string& if_name, bool& no_carrier,
 	}
 	close(s);
 
-	int bmsr = mii->val_out;
+	memcpy(&mii, &ifreq.ifr_addr, sizeof(mii));
+	int bmsr = mii.val_out;
 	if (bmsr & MII_BMSR_LINK_VALID)
 	    no_carrier = false;
 	else

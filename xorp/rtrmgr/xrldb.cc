@@ -160,7 +160,7 @@ XRLtarget::str() const
 XRLdb::XRLdb(const string& xrldir, bool verbose) throw (InitError)
     : _verbose(verbose)
 {
-#ifdef VALIDATE_XRLDB
+#ifdef DEBUG_XRLDB
     string errmsg;
     list<string> files;
 
@@ -209,7 +209,7 @@ XRLdb::XRLdb(const string& xrldir, bool verbose) throw (InitError)
 #endif
 }
 
-#ifdef VALIDATE_XRLDB
+#ifdef DEBUG_XRLDB
 bool
 XRLdb::check_xrl_syntax(const string& xrlstr) const
 {

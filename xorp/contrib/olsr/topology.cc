@@ -94,7 +94,7 @@ TopologyManager::update_tc_entry(const IPv4& dest_addr,
 	      XORP_UINT_CAST(ansn),
 	      cstring(vtime));
 
-    OlsrTypes::TopologyID tcid;
+    OlsrTypes::TopologyID tcid = OlsrTypes::UNUSED_TOPOLOGY_ID;
     bool is_found = false;
 
     TcDestMap::iterator ii = _tc_destinations.find(dest_addr);

@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2009 XORP, Inc.
+// Copyright (c) 2001-2011 XORP, Inc and Others
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License, Version 2, June
@@ -13,34 +13,32 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
-// XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
-// http://xorp.net
-
-
-
-#ifndef __CLI_CLI_PRIVATE_HH__
-#define __CLI_CLI_PRIVATE_HH__
-
-
-//
-// CLI implementation-specific definitions.
 //
 
 
-//
-// Constants definitions
-//
-#define CLI_MAX_CONNECTIONS	129	// XXX: intentionally not 2^n number
+#ifndef __XORP_BUILD_INFO_INC__
+#define __XORP_BUILD_INFO_INC__
 
-#define XORP_CLI_PROMPT  "Xorp> "
-#define XORP_CLI_PROMPT_ENABLE  "XORP# "
+class BuildInfo {
+public:
+    /** As in: 1.8.5-WIP */
+#define DEFSTR1(a) #a
+#define DEFSTR(a) DEFSTR1(a)
+    static const char* getXorpVersion() {
+	return DEFSTR(XORP_VERSION);
+    }
 
-#ifndef CHAR_TO_CTRL
-#define CHAR_TO_CTRL(c) ((c) & 0x1f)
+#ifdef XORP_BUILDINFO
+    /** git md5sum for HEAD */
+    static const char* getGitVersion();
+    /** Last 3 git change logs */
+    static const char* getGitLog();
+
+    static const char* getShortBuildDate();
+    static const char* getBuildDate();
+    static const char* getBuilder();
+    static const char* getBuildMachine();
 #endif
-#ifndef CHAR_TO_META
-#define CHAR_TO_META(c) ((c) | 0x080)
+};
+
 #endif
-    
-#endif // __CLI_CLI_PRIVATE_HH__

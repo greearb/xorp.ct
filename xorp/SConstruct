@@ -84,6 +84,7 @@ vars.AddVariables(
     BoolVariable('enable_boost',  'Use BOOST', False),
     BoolVariable('enable_ustl',  'Use uSTL', False),
     BoolVariable('enable_bgp',  'Build BGP', True),
+    BoolVariable('enable_buildinfo',  'Build Info, see libxorp/create_buildinfo.sh', True),
     BoolVariable('enable_olsr',  'Build OLSR', True),
     BoolVariable('enable_ospf',  'Build OSPF', True),
     BoolVariable('enable_rip',  'Build RIP', True),
@@ -97,7 +98,7 @@ vars.AddVariables(
     EnumVariable('debug', 'Build with debug symbols', 'full',
                  allowed_values=('no', 'yes', 'full', 'override'),
                  map={}, ignorecase=2),
-    EnumVariable('optimize', 'Build with optimization', 'yes',
+    EnumVariable('optimize', 'Build with optimization', 'full',
                  allowed_values=('no', 'minimal', 'yes', 'full', 'highest',
                                  'size', 'override'),
                  map={}, ignorecase=2),
@@ -270,6 +271,7 @@ print 'Enable CLICK:     ', env['enable_click']
 print 'Enable FEA Dummy: ', env['enable_fea_dummy']
 print 'Enable async method impls: ', env['enable_async_server']
 print 'Enable BGP:       ', env['enable_bgp']
+print 'Enable BuildInfo: ', env['enable_buildinfo']
 print 'Try Enable BOOST: ', env['enable_boost']
 print 'Try Enable uSTL : ', env['enable_ustl']
 print 'Disable IPv6:     ', env['disable_ipv6']
@@ -379,30 +381,30 @@ env['xorp_moduledir']   = env['libdir']  + '/xorp/sbin'	# Protocol modules
 env['xorp_sbindir']     = env['sbindir']		# End-user binaries
 env['xorp_templatedir'] = env['datadir'] + '/templates'
 env['xorp_tooldir']     = env['libdir']  + '/xorp/bin'	# tools/*
-env['xorp_xrlsdir']     = env['datadir'] + '/xorp/xrls'	# *.xrls
+env['xorp_xrlsdir']     = env['datadir'] + '/xrl/targets'	# *.xrls
 env['xorp_sourcedir']   = sourcedir	# rtrmgr/util.cc and xif need this
 
 tst = ARGUMENTS.get('enable_boost', False)
 if tst and not (tst == "no"):
-    env['enable_boost'] = True;
+    env['enable_boost'] = True
 else:
     env['enable_boost'] = False
 
 tst = ARGUMENTS.get('enable_ustl', False)
 if tst and not (tst == "no"):
-    env['enable_ustl'] = True;
+    env['enable_ustl'] = True
 else:
     env['enable_ustl'] = False
 
 tst = ARGUMENTS.get('enable_tests', False)
 if tst and not (tst == "no"):
-    env['enable_tests'] = True;
+    env['enable_tests'] = True
 else:
     env['enable_tests'] = False
 
 tst = ARGUMENTS.get('enable_click', False)
 if tst and not (tst == "no"):
-    env['enable_click'] = True;
+    env['enable_click'] = True
 else:
     env['enable_click'] = False
 
@@ -426,6 +428,26 @@ if tst and (tst == "no"):
     env['enable_bgp'] = False
 else:
     env['enable_bgp'] = True
+
+# Default to enabled
+tst = ARGUMENTS.get('enable_buildinfo', True)
+if tst and (tst == "no"):
+    env['enable_buildinfo'] = False
+else:
+    env['enable_buildinfo'] = True
+    # Only generate build-info when we're building
+    # the normal build.
+    if (len(COMMAND_LINE_TARGETS) == 0):
+        if not env.GetOption('clean') and \
+               not env.GetOption('help'):
+            if os.system("./libxorp/create_buildinfo.sh") != 0:
+                print "ERROR:  Failed to generate libxorp/build_info.cc."
+                print "You can disable this feature with: enable_buildinfo=no"
+                exit(1)
+
+if env.GetOption('clean'):
+    os.unlink('./libxorp/build_info.cc');
+
 
 # Default to enabled
 tst = ARGUMENTS.get('enable_olsr', True)
@@ -464,67 +486,67 @@ else:
 
 tst = ARGUMENTS.get('disable_ipv6', False)
 if tst and not (tst == "no"):
-    env['disable_ipv6'] = True;
+    env['disable_ipv6'] = True
 else:
     env['disable_ipv6'] = False
 
 tst = ARGUMENTS.get('disable_fw', False)
 if tst and not (tst == "no"):
-    env['disable_fw'] = True;
+    env['disable_fw'] = True
 else:
     env['disable_fw'] = False
 
 tst = ARGUMENTS.get('disable_libtecla', False)
 if tst and not (tst == "no"):
-    env['disable_libtecla'] = True;
+    env['disable_libtecla'] = True
 else:
     env['disable_libtecla'] = False
 
 tst = ARGUMENTS.get('disable_profile', False)
 if tst and not (tst == "no"):
-    env['disable_profile'] = True;
+    env['disable_profile'] = True
 else:
     env['disable_profile'] = False
 
 tst = ARGUMENTS.get('disable_warninglogs', False)
 if tst and not (tst == "no"):
-    env['disable_warninglogs'] = True;
+    env['disable_warninglogs'] = True
 else:
     env['disable_warninglogs'] = False
 
 tst = ARGUMENTS.get('disable_errorlogs', False)
 if tst and not (tst == "no"):
-    env['disable_errorlogs'] = True;
+    env['disable_errorlogs'] = True
 else:
     env['disable_errorlogs'] = False
 
 tst = ARGUMENTS.get('disable_tracelogs', False)
 if tst and not (tst == "no"):
-    env['disable_tracelogs'] = True;
+    env['disable_tracelogs'] = True
 else:
     env['disable_tracelogs'] = False
 
 tst = ARGUMENTS.get('disable_fatallogs', False)
 if tst and not (tst == "no"):
-    env['disable_fatallogs'] = True;
+    env['disable_fatallogs'] = True
 else:
     env['disable_fatallogs'] = False
 
 tst = ARGUMENTS.get('disable_infologs', False)
 if tst and not (tst == "no"):
-    env['disable_infologs'] = True;
+    env['disable_infologs'] = True
 else:
     env['disable_infologs'] = False
 
 tst = ARGUMENTS.get('disable_assertlogs', False)
 if tst and not (tst == "no"):
-    env['disable_assertlogs'] = True;
+    env['disable_assertlogs'] = True
 else:
     env['disable_assertlogs'] = False
 
 tst = ARGUMENTS.get('disable_otherlogs', False)
 if tst and not (tst == "no"):
-    env['disable_otherlogs'] = True;
+    env['disable_otherlogs'] = True
 else:
     env['disable_otherlogs'] = False
 
@@ -574,7 +596,7 @@ if not env.GetOption('clean') and \
     elif fnmatch.fnmatch(host_os, 'mingw32*'):
         osname = "Windows"
         conf.Define('HOST_OS_WINDOWS')
-        env['mingw'] = True;
+        env['mingw'] = True
         env['PROGSUFFIX'] = '.exe'
     elif fnmatch.fnmatch(host_os, 'linux*'):
         osname = "Linux"
@@ -713,9 +735,8 @@ if not env['optimize'] == 'override':
                  'highest': '-O3',
                  'size': '-Os' }
     bigoflag = bigodict[env['optimize']]
-    if not env['optimize'] == 'no':
-        env.AppendUnique(CFLAGS = [ bigoflag ])
-        env.AppendUnique(CXXFLAGS = [ bigoflag ])
+    env.AppendUnique(CFLAGS = [ bigoflag ])
+    env.AppendUnique(CXXFLAGS = [ bigoflag ])
 
     # At least on Fedora 13, -Os breaks build with strict-aliasing
     # warnings.  Code looks right to me, so going to just disable
@@ -808,6 +829,15 @@ else:
         ( 'XRL_PF', ord(xrl_pf_dict[env['transport']]) ),
         ])
 
+# Read our VERSION file and use it's contents to pass the
+# version into the compile process.
+vf = open('VERSION', 'r')
+ver = vf.readline()
+ver = ver.strip()
+env.AppendUnique(CPPDEFINES = [
+        ( 'XORP_VERSION', ver),
+        ])
+
 # Forcibly disable GCC's SSP support., as it may be incompatible
 # with the XORP code base.
 env.AppendUnique(CPPDEFINES = [
@@ -874,6 +904,11 @@ if env['CC'] and env['CC'] == 'clang':
     env.AppendUnique(CXXFLAGS = [
         '-fno-color-diagnostics',
         ])
+
+if env['enable_buildinfo']:
+    env.AppendUnique(CXXFLAGS = [
+        '-DXORP_BUILDINFO',
+        ]);
 
 # NOTE: For GNU STL only at this time.
 if env['debug_stl']:

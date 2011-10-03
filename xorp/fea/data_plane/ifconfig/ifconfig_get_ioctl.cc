@@ -160,7 +160,8 @@ IfConfigGetIoctl::read_config(IfTree& iftree)
 	    return (XORP_ERROR);
 	vector<uint8_t> buffer(ifconf.ifc_len);
 	memcpy(&buffer[0], ifconf.ifc_buf, ifconf.ifc_len);
-	delete[] ifconf.ifc_buf;
+	free(ifconf.ifc_buf);
+	ifconf.ifc_buf = NULL;
 
 	parse_buffer_ioctl(ifconfig(), iftree, AF_INET, buffer);
     }
@@ -174,7 +175,8 @@ IfConfigGetIoctl::read_config(IfTree& iftree)
 	    return (XORP_ERROR);
 	vector<uint8_t> buffer(ifconf.ifc_len);
 	memcpy(&buffer[0], ifconf.ifc_buf, ifconf.ifc_len);
-	delete[] ifconf.ifc_buf;
+	free(ifconf.ifc_buf);
+	ifconf.ifc_buf = NULL;
 
 	parse_buffer_ioctl(ifconfig(), iftree, AF_INET6, buffer);
     }
@@ -211,13 +213,14 @@ ioctl_read_ifconf(int family, ifconf *ifconf)
     for ( ; ; ) {
 	ifconf->ifc_len = ifnum * sizeof(struct ifreq);
 	if (ifconf->ifc_buf != NULL)
-	    delete[] ifconf->ifc_buf;
-	ifconf->ifc_buf = new char[ifconf->ifc_len];
+	    free(ifconf->ifc_buf);
+	ifconf->ifc_buf = (char*)(malloc(ifconf->ifc_len));
 	if (ioctl(s, SIOCGIFCONF, ifconf) < 0) {
 	    // Check UNPv1, 2e, pp 435 for an explanation why we need this
 	    if ((errno != EINVAL) || (lastlen != 0)) {
 		XLOG_ERROR("ioctl(SIOCGIFCONF) failed: %s", strerror(errno));
-		delete[] ifconf->ifc_buf;
+		free(ifconf->ifc_buf);
+		ifconf->ifc_buf = NULL;
 		comm_close(s);
 		return false;
 	    }
