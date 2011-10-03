@@ -43,6 +43,10 @@
 #ifdef HAVE_NET_IF_VLAN_VAR_H
 #include <net/if_vlan_var.h>
 #endif
+#ifdef HAVE_NET_IF_VLANVAR_H
+#include <net/if_vlanvar.h>
+#endif
+
 
 #include "fea/ifconfig.hh"
 #include "ifconfig_vlan_set_linux.hh"
@@ -256,7 +260,7 @@ IfConfigVlanSetLinux::add_vlan(const string& parent_ifname,
 	//
 	if (result < 0) {
 	    error_msg = c_format("Cannot create VLAN interface %s: %s errno: %i",
-				 vlan_name.c_str(), strerror(saved_errno), saved_errno);
+				 vlan_name.c_str(), strerror(errno), errno);
 	    return (XORP_ERROR);
 	}
 	// XXX: The created name didn't match
@@ -265,7 +269,7 @@ IfConfigVlanSetLinux::add_vlan(const string& parent_ifname,
 			     "the created name (%s) doesn't match",
 			     vlan_name.c_str(), ifreq.ifr_name);
 	string dummy_error_msg;
-	delete_vlan(parent_ifname, string(ifreq.ifr_name), dummy_error_msg);
+	delete_vlan(vlan_name, dummy_error_msg);
 	return (XORP_ERROR);
 
 #else // SIOCSIFNAME
