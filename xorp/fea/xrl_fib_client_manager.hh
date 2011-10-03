@@ -46,7 +46,7 @@ public:
 	_fibconfig.add_fib_table_observer(this);
     }
 
-    ~XrlFibClientManager() {
+    virtual ~XrlFibClientManager() {
 	_fibconfig.delete_fib_table_observer(this);
     }
 
