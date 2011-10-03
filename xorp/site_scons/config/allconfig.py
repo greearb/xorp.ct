@@ -765,7 +765,7 @@ def DoAllConfig(env, conf, host_os):
         if not conf.CheckDeclaration('GET_VLAN_VID_CMD', '#include <linux/if_vlan.h>'):
             conf.Define('GET_VLAN_VID_CMD', '9')
     else:
-        if not (env.has_key('mingw') and env['mingw']):
+	if has_net_if_vlanvar_h or has_net_if_vlan_var_h:
             conf.Define('HAVE_VLAN_BSD')
 
     
