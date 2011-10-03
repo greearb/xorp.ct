@@ -664,9 +664,15 @@ XorpFd* IoIpSocket::mcast_protocol_fd_in() {
     }
     return &_mcast_proto_socket_in;
 #else
-    string nll;
-    // Just grabs first and only socket when USE_SOCKET_PER_IFACE is not defined.
-    return findExistingInputSocket(nll, nll);
+    string nll("na");
+    string err_msg;
+    XorpFd* rv;
+    // Just grabs (or creates) first and only socket when USE_SOCKET_PER_IFACE is not defined.
+    rv = findOrCreateInputSocket(nll, nll, err_msg);
+    if (err_msg.size()) {
+        XLOG_WARNING("%s", err_msg.c_str());
+    }
+    return rv;
 #endif
 }
 
