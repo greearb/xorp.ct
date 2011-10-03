@@ -589,14 +589,20 @@ def DoAllConfig(env, conf, host_os):
     if host_os == 'sunos':
         prereq_netinet_ip_mroute_h = ['sys/types.h', 'sys/ioctl.h', 'sys/socket.h', 'sys/time.h', 'inet/ip.h', 'netinet/in.h']
     else:
-        prereq_netinet_ip_mroute_h = ['sys/types.h', 'sys/ioctl.h', 'sys/socket.h', 'sys/time.h', 'net/if.h', 'net/if_var.h', 'net/route.h', 'netinet/in.h']
+        prereq_netinet_ip_mroute_h = ['sys/types.h', 'sys/ioctl.h', 'sys/socket.h', 'sys/time.h', 'net/if.h', 'net/route.h', 'netinet/in.h']
+        if has_net_if_var_h:
+            prereq_netinet_ip_mroute_h.append('net/if_var.h')
+
     netinet_ip_mroute_h = 'netinet/ip_mroute.h'
     has_netinet_ip_mroute_h = conf.CheckHeader(prereq_netinet_ip_mroute_h + [ netinet_ip_mroute_h ])
     if has_netinet_ip_mroute_h:
         prereq_mroute_h = prereq_netinet_ip_mroute_h
         mroute_h = netinet_ip_mroute_h
     
-    prereq_net_ip_mroute_ip_mroute_h = ['sys/types.h', 'sys/ioctl.h', 'sys/socket.h', 'sys/time.h', 'net/if.h', 'net/if_var.h', 'net/route.h', 'netinet/in.h']
+    prereq_net_ip_mroute_ip_mroute_h = ['sys/types.h', 'sys/ioctl.h', 'sys/socket.h', 'sys/time.h', 'net/if.h', 'net/route.h', 'netinet/in.h']
+    if has_net_if_var_h:
+        prereq_net_ip_mroute_ip_mroute_h.append('net/if_var.h')
+
     net_ip_mroute_ip_mroute_h = 'net/ip_mroute/ip_mroute.h'
     has_net_ip_mroute_ip_mroute_h = conf.CheckHeader(prereq_net_ip_mroute_ip_mroute_h + [ net_ip_mroute_ip_mroute_h ])
     if has_net_ip_mroute_ip_mroute_h:
@@ -668,7 +674,9 @@ def DoAllConfig(env, conf, host_os):
     mroute6_h = None
     
     # bsd
-    prereq_netinet6_ip6_mroute_h = ['sys/param.h', 'sys/socket.h', 'sys/time.h', 'net/if.h', 'net/if_var.h', 'net/route.h', 'netinet/in.h']
+    prereq_netinet6_ip6_mroute_h = ['sys/param.h', 'sys/socket.h', 'sys/time.h', 'net/if.h', 'net/route.h', 'netinet/in.h']
+    if has_net_if_var_h:
+        prereq_netinet6_ip6_mroute_h.append('net/if_var.h')
     netinet6_ip6_mroute_h = 'netinet6/ip6_mroute.h'
     has_netinet6_ip6_mroute_h = conf.CheckHeader(prereq_netinet6_ip6_mroute_h + [ netinet6_ip6_mroute_h ])
     if has_netinet6_ip6_mroute_h:
@@ -717,8 +725,16 @@ def DoAllConfig(env, conf, host_os):
     # packet filters
     has_netinet_ip_compat_h = conf.CheckHeader(['sys/types.h', 'netinet/ip_compat.h'])
     has_netinet_ip_fil_h = conf.CheckHeader(['sys/types.h', 'sys/ioctl.h', 'sys/socket.h', 'netinet/in.h', 'netinet/in_systm.h', 'netinet/ip.h', 'netinet/ip_compat.h', 'netinet/ip_fil.h'])
-    has_netinet_ip_fw_h = conf.CheckHeader(['sys/types.h', 'sys/ioctl.h', 'sys/socket.h', 'net/if.h', 'netinet/in.h', 'net/if_var.h', 'netinet/ip_fw.h'])
-    has_net_pfvar_h = conf.CheckHeader(['sys/param.h', 'sys/file.h', 'sys/ioctl.h', 'sys/socket.h', 'net/if.h', 'netinet/in.h', 'net/if_var.h', 'net/pfvar.h'])
+
+    prereq_ip_fw_h = ['sys/types.h', 'sys/ioctl.h', 'sys/socket.h', 'net/if.h', 'netinet/in.h']
+    if has_net_if_var_h:
+        prereq_ip_fw_h.append('net/if_var.h')
+    has_netinet_ip_fw_h = conf.CheckHeader(prereq_ip_fw_h + ['netinet/ip_fw.h'])
+
+    prereq_net_pfvar_h = ['sys/param.h', 'sys/file.h', 'sys/ioctl.h', 'sys/socket.h', 'net/if.h', 'netinet/in.h']
+    if has_net_if_var_h:
+        prereq_net_pfvar_h.append('net/if_var.h')
+    has_net_pfvar_h = conf.CheckHeader(prereq_net_pfvar_h + ['net/pfvar.h'])
 
     # Older linux kernel headers for netfilter wouldn't compile with C++ w/out hacking on the headers themselves.
     has_linux_netfilter_ipv4_ip_tables_h = conf.CheckHeader(['sys/param.h', 'net/if.h', 'netinet/in.h', 'linux/netfilter_ipv4/ip_tables.h'], language = "C++")
