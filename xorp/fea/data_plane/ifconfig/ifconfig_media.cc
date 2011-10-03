@@ -250,6 +250,10 @@ ifconfig_media_get_link_status(const string& if_name, bool& no_carrier,
 	    break; //try another method
 	}
 
+	// NOTE:  We cannot just cast &ifr_addr to an mii
+	// pointer, as it gives strict-aliasing errors on some
+	// compilers when optimization is enabled.  So, copy
+	// around the data instead.
 	struct mii_data mii;
 	memset(&mii, 0, sizeof(mii));
 	mii.reg_num = MII_BMSR;
