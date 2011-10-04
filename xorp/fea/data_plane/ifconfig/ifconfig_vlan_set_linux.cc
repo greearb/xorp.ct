@@ -143,11 +143,15 @@ IfConfigVlanSetLinux::stop(string& error_msg)
 int
 IfConfigVlanSetLinux::config_add_vlan(const IfTreeInterface* system_ifp,
 				      const IfTreeInterface& config_if,
+				      bool& created_if,
 				      string& error_msg)
 {
-    if (_is_dummy)
+    if (_is_dummy) {
+	created_if = true; //all fake anyway
 	return XORP_OK;
+    }
 
+    created_if = false;
 #if defined(HAVE_VLAN_LINUX) or defined(HAVE_VLAN_BSD)
     //
     // Test whether the VLAN already exists
@@ -186,7 +190,7 @@ IfConfigVlanSetLinux::config_add_vlan(const IfTreeInterface* system_ifp,
 	}
 
 	if (add_vlan(config_if.parent_ifname(), config_if.ifname(),
-		     vid, error_msg) != XORP_OK) {
+		     vid, created_if, error_msg) != XORP_OK) {
 	    error_msg = c_format("Failed to add VLAN %i to interface %s: %s",
 				 vid,
 				 config_if.parent_ifname().c_str(),
@@ -222,8 +226,10 @@ int
 IfConfigVlanSetLinux::add_vlan(const string& parent_ifname,
 			       const string& vlan_name,
 			       uint16_t vlan_id,
+			       bool& created_if,
 			       string& error_msg)
 {
+    created_if = true;
     if (_is_dummy)
 	return XORP_OK;
 
@@ -261,6 +267,7 @@ IfConfigVlanSetLinux::add_vlan(const string& parent_ifname,
 	if (result < 0) {
 	    error_msg = c_format("Cannot create VLAN interface %s: %s errno: %i",
 				 vlan_name.c_str(), strerror(errno), errno);
+	    created_if = false;
 	    return (XORP_ERROR);
 	}
 	// XXX: The created name didn't match
@@ -270,6 +277,7 @@ IfConfigVlanSetLinux::add_vlan(const string& parent_ifname,
 			     vlan_name.c_str(), ifreq.ifr_name);
 	string dummy_error_msg;
 	delete_vlan(vlan_name, dummy_error_msg);
+	created_if = false;
 	return (XORP_ERROR);
 
 #else // SIOCSIFNAME
@@ -283,6 +291,7 @@ IfConfigVlanSetLinux::add_vlan(const string& parent_ifname,
 	if (ioctl(_s4, SIOCIFCREATE, &ifreq) < 0) {
 	    error_msg = c_format("Cannot create VLAN interface %s: %s",
 				 tmp_vlan_name.c_str(), strerror(errno));
+	    created_if = false;
 	    return (XORP_ERROR);
 	}
 	//
@@ -306,6 +315,7 @@ IfConfigVlanSetLinux::add_vlan(const string& parent_ifname,
 	    string dummy_error_msg;
 	    delete_vlan(tmp_vlan_name.c_str(),
 			dummy_error_msg);
+	    created_if = false;
 	    return (XORP_ERROR);
 	}
 #endif // SIOCSIFNAME
@@ -328,7 +338,8 @@ IfConfigVlanSetLinux::add_vlan(const string& parent_ifname,
 	error_msg = c_format("Cannot set the VLAN interface name type"
 			     "to VLAN_NAME_TYPE_RAW_PLUS_VID_NO_PAD: %s",
 			     strerror(errno));
-	return (XORP_ERROR);
+	created_if = false;
+	return XORP_ERROR;
     }
 
     //
@@ -340,6 +351,7 @@ IfConfigVlanSetLinux::add_vlan(const string& parent_ifname,
     vlanreq.cmd = ADD_VLAN_CMD;
     errno = 0;
     if (ioctl(_s4, SIOCSIFVLAN, &vlanreq) < 0) {
+	created_if = false;
 	if (errno != EEXIST) {
 	    error_msg = c_format("Cannot create VLAN interface %s "
 				 "(parent = %s VLAN ID = %u): %s",
@@ -364,6 +376,7 @@ IfConfigVlanSetLinux::add_vlan(const string& parent_ifname,
 			     "no support for interface renaming",
 			     vlan_name.c_str(), parent_ifname.c_str(),
 			     vlan_id);
+	created_if = false;
 	return (XORP_ERROR);
 
 #else // SIOCSIFNAME
@@ -383,6 +396,7 @@ IfConfigVlanSetLinux::add_vlan(const string& parent_ifname,
 				 strerror(errno));
 	    string dummy_error_msg;
 	    delete_vlan(tmp_vlan_name, dummy_error_msg);
+	    created_if = false;
 	    return (XORP_ERROR);
 	}
 #endif // SIOCSIFNAME

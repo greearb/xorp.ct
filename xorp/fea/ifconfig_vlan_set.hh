@@ -93,11 +93,13 @@ public:
      * the system.
      * @param config_iface reference to the interface with the information
      * to configure.
+     * @param created_if Did we actually create a new interface in the OS?
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int config_add_vlan(const IfTreeInterface* pulled_ifp,
 				const IfTreeInterface& config_iface,
+				bool& created_if,
 				string& error_msg) = 0;
 
     /**

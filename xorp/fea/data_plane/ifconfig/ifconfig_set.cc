@@ -470,12 +470,21 @@ IfConfigSet::push_if_creation(const IfTreeInterface* system_ifp,
     //
     // Push the VLAN configuration: either add/update or delete it.
     //
-    if (!config_if.is_marked(IfTreeItem::DELETED)) {
-	//
+    if (config_if.is_marked(IfTreeItem::DELETED)) {
+	// Delete the VLAN (only if xorp created it)
+	if (config_if.cr_by_xorp()) {
+	    if (ifconfig_vlan_set->config_delete_vlan(config_if, error_msg) != XORP_OK) {
+		error_msg = c_format("Failed to delete VLAN: %s  reason: %s ",
+				     config_if.ifname().c_str(), error_msg.c_str());
+	    }
+	}
+    }
+    else {
 	// Add/update the VLAN
-	//
+	bool created_if = false;
 	if (ifconfig_vlan_set->config_add_vlan(system_ifp,
 					       config_if,
+					       created_if,
 					       error_msg)
 	    != XORP_OK) {
 	    error_msg = c_format("Failed to add VLAN to "
@@ -483,13 +492,9 @@ IfConfigSet::push_if_creation(const IfTreeInterface* system_ifp,
 				 config_if.ifname().c_str(),
 				 error_msg.c_str());
 	}
-    } else {
-	//
-	// Delete the VLAN
-	//
-	if (ifconfig_vlan_set->config_delete_vlan(config_if, error_msg) != XORP_OK) {
-	    error_msg = c_format("Failed to delete VLAN: %s  reason: %s ",
-				 config_if.ifname().c_str(), error_msg.c_str());
+	else {
+	    if (created_if)
+		config_if.set_cr_by_xorp(true);
 	}
     }
 

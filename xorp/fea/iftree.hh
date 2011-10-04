@@ -612,6 +612,10 @@ public:
 	return rv;
     }
 
+    // This relates to vlans.
+    bool cr_by_xorp() const { return _created_by_xorp; }
+    void set_cr_by_xorp(bool b) { _created_by_xorp = b; }
+
     bool probed_vlan() const { return _probed_vlan; }
     void set_probed_vlan(bool b) { _probed_vlan = b; }
 
@@ -813,6 +817,7 @@ private:
     string _vid;
 
     uint32_t	_pif_index;
+    bool        _created_by_xorp; // for vlans
     bool        _probed_vlan;
     bool 	_enabled;
     bool	_discard;
