@@ -311,10 +311,19 @@ FibConfigEntrySetRoutingSocket::add_entry(const FteX& fte)
     rtm->rtm_seq = rs.seqno();
 
     // Copy the destination, the nexthop, and the netmask addresses
-    fte.net().masked_addr().copy_out(*sin_dst);
-    if (sin_nexthop != NULL)
-	fte_nexthop.copy_out(*sin_nexthop);
-    fte.net().netmask().copy_out(*sin_netmask);
+    if (family == AF_INET) {
+        fte.net().masked_addr().copy_out(*sin_dst);
+        if (sin_nexthop != NULL)
+	    fte_nexthop.copy_out(*sin_nexthop);
+        fte.net().netmask().copy_out(*sin_netmask);
+    }
+    else {
+	// Keep the stupid ipvx.cc code from throwing an exception.
+	fte.net().masked_addr().copy_out(*((struct sockaddr_in6*)(sin_dst)));
+	if (sin_nexthop != NULL)
+	    fte_nexthop.copy_out(*((struct sockaddr_in6*)(sin_nexthop)));
+        fte.net().netmask().copy_out(*((struct sockaddr_in6*)(sin_netmask)));
+    }
 
     if (is_interface_route) {
 	//
