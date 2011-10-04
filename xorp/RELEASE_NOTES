@@ -15,6 +15,10 @@ Release 1.8.5
       create the logging messages.  Simplify a lot of the related code.
       Runtime should be faster, but executable size is slightly larger.
 
+   *  netbsd:  Fix compile on netbsd, properly detect IPv6 Multicast
+      routing support, fix a few bugs related to multicast.  It *might*
+      work now, but seeing spurious failures when trying the MRT6_ADD_MIF
+      call.
 
 Release 1.8.4 (September 20, 2011)
 
