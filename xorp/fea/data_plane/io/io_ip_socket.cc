@@ -831,6 +831,10 @@ XorpFd* IoIpSocket::findOrCreateInputSocket(const string& if_name, const string&
 	    return NULL;
 	}
 	else {
+             XLOG_INFO("Successfully created socket: %i on family: %i  protocol: %i"
+		       " interface: %s  input sockets size: %i\n",
+		       (int)(*rv), (int)(family()), (int)(ip_protocol()),
+		       vif_name.c_str(), (int)(_proto_sockets_in.size()));
 	    _proto_sockets_in[key] = rv;
 	}
 
