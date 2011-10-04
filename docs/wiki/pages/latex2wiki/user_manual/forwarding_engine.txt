@@ -115,7 +115,7 @@ plumbing {
 ^                       ^                      ^  retain-on-startup  ^ | This takes the value ''true'' or ''false'', and is used to control whether the XORP IPv6 unicast forwarding entries (if there are any left from a previous execution) are removed on startup by the FEA itself. The default is ''false''. |
 ^                       ^                      ^  retain-on-shutdown  ^ | This takes the value ''true'' or ''false'', and is used to control whether the XORP IPv6 unicast forwarding entries are removed on shutdown by the FEA itself. The default is ''false''. |
 |Note that the ''retain-on-startup'' and ''retain-on-shutdown'' statements prevent the FEA itself from deleting the forwarding entries and does not prevent the RIB or any of the unicast routing protocols from deleting the entries on shutdown.|||||
-^  click  ^  ^  ^ | This directive is used to configure the Click forwarding path. |
+^  click  ^  ^  ^ | This directive is used to configure the Click forwarding path.  Do NOT even add a click section if your system and xorp is not configured for click.  Otherwise, xorp will fail to start. |
 ^         ^  disable  ^  ^ | This takes the value ''true'' or ''false'', and disables or enables the Click forwarding path on the router. The default is ''false''. |
 ^         ^  duplicate-routes-to-kernel  ^  ^ | This takes the value ''true'' or ''false'', and is used to control whether the XORP routes added to Click should be added to the system kernel as well. The default is ''false''. |
 ^         ^  kernel-click                ^  ^ | This directive is used to configure kernel-level Click. |
