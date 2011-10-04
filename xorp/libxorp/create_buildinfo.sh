@@ -83,7 +83,7 @@ if which sed > /dev/null 2>&1 && which git > /dev/null 2>&1
 	    then
 	    cat >> "${BINFO}" << EOF
 const char* BuildInfo::getGitLog() { return
-`git log -3 --abbrev=8 --abbrev-commit --pretty=oneline | sed -e 's|"|\\\\"|g' -e 's|\(.*\)|"\1\\\n"|'`; }
+`git log -3 --abbrev=8 --abbrev-commit --pretty=oneline | sed -e 's|\\\\|\\\\\\\\|g' -e 's|"|\\\\"|g' -e 's|\(.*\)|"\1\\\n"|'`; }
 
 EOF
 	else
