@@ -282,8 +282,6 @@ IfConfigSetClick::config_vif_begin(const IfTreeInterface* pulled_ifp,
 	vifp->set_loopback(pulled_vifp->loopback());
 	vifp->set_point_to_point(pulled_vifp->point_to_point());
 	vifp->set_multicast(pulled_vifp->multicast());
-	vifp->set_vlan(pulled_vifp->is_vlan());
-	vifp->set_vlan_id(pulled_vifp->vlan_id());
     }
 
     return (XORP_OK);

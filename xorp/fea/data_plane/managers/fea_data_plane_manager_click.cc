@@ -52,18 +52,6 @@
 //   http://www.read.cs.ucla.edu/click/
 //
 
-#if 0
-extern "C" FeaDataPlaneManager* create(FeaNode& fea_node)
-{
-    return (new FeaDataPlaneManagerClick(fea_node));
-}
-
-extern "C" void destroy(FeaDataPlaneManager* fea_data_plane_manager)
-{
-    delete fea_data_plane_manager;
-}
-#endif // 0
-
 
 FeaDataPlaneManagerClick::FeaDataPlaneManagerClick(FeaNode& fea_node)
     : FeaDataPlaneManager(fea_node, "Click"),

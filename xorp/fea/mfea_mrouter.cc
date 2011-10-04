@@ -1389,8 +1389,10 @@ MfeaMrouter::add_multicast_vif(uint32_t vif_index)
 #endif
 	if (setsockopt(_mrouter_socket, IPPROTO_IPV6, MRT6_ADD_MIF,
 		       (void *)&mc, sizeof(mc)) < 0) {
-	    XLOG_ERROR("setsockopt(MRT6_ADD_MIF, vif %s) failed: %s",
-		       mfea_vif->name().c_str(), strerror(errno));
+	    XLOG_ERROR("setsockopt(%i, MRT6_ADD_MIF, vif %s) failed: %s  mifi: %i  flags: 0x%x pifi: %i",
+		       _mrouter_socket.getSocket(),
+		       mfea_vif->name().c_str(), strerror(errno),
+		       (int)(mc.mif6c_mifi), (int)(mc.mif6c_flags), (int)(mc.mif6c_pifi));
 	    return (XORP_ERROR);
 	}
 #endif // HAVE_IPV6_MULTICAST_ROUTING

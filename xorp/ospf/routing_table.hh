@@ -368,7 +368,7 @@ class Adv {
      * @param rt associated routing entry.
      */
     bool add_entry(OspfTypes::AreaID area, uint32_t adv,
-		   const RouteEntry<A>& rt);
+		   const RouteEntry<A>& rt, const char* dbg);
 
     /**
      * Replace entry with new entry keyed on advertising router.
@@ -378,7 +378,7 @@ class Adv {
      * @param rt associated routing entry.
      */
     bool replace_entry(OspfTypes::AreaID area, uint32_t adv,
-		       const RouteEntry<A>& rt);
+		       const RouteEntry<A>& rt, const char* dbg);
 
     /**
      * Lookup an entry by advertising router.

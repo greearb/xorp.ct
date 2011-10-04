@@ -11,7 +11,7 @@
 # if the git tag hasn't changed, then do not re-create
 # build_info.cc
 
-# Uses perl, git, date, and uname commands, if available.
+# Uses sed, git, date, and uname commands, if available.
 # git history is only available if compiled within a git tree.
 
 cd libxorp
@@ -75,28 +75,38 @@ else
 fi
 echo "" >> $BINFO
 
-echo "const char* BuildInfo::getGitLog() { return " >> $BINFO
-if which perl > /dev/null 2>&1 && which git > /dev/null 2>&1
+if which sed > /dev/null 2>&1 && which git > /dev/null 2>&1
     then
-    if [ -x `which perl`  ] && [ -x `which git` ]
+    if [ -x `which sed`  ] && [ -x `which git` ]
 	then
 	if git log -1 > /dev/null 2>&1
 	    then
-	    echo "`git log -3 --abbrev=8 --abbrev-commit --pretty=oneline|perl -n -e'chomp; s/\\\"/\\\\\"/g; print \"\\\"\"; print; print \"\\\n\\\"\n\"'`; }" >> $BINFO
+	    cat >> "${BINFO}" << EOF
+const char* BuildInfo::getGitLog() { return
+`git log -3 --abbrev=8 --abbrev-commit --pretty=oneline | sed -e 's|\\\\|\\\\\\\\|g' -e 's|"|\\\\"|g' -e 's|\(.*\)|"\1\\\n"|'`; }
 
+EOF
 	else
 	    echo "NOTE:  Not a git repository, no git history in build-info."
-	    echo "\"Cannot detect, not a git repository.\"; }" >> $BINFO
+	    cat >> "${BINFO}" << EOF
+const char* BuildInfo::getGitLog() { return "Cannot detect, not a git repository"; }
+
+EOF
 	fi
     else
-	echo "NOTE:  No functional perl and/or git, no git history in build-info."
-	echo "\"Cannot detect, perl and/or git is not executable.\"; }" >> $BINFO
+	echo "NOTE:  No functional sed and/or git, no git history in build-info."
+	cat >> "${BINFO}" << EOF
+const char* BuildInfo::getGitLog() { return "Cannot detect, sed and/or git is not executable"; }
+
+EOF
     fi
 else
-    echo "NOTE:  No perl and/or git, no git history in build-info."
-    echo "\"Cannot detect, perl and/or git is not found.\"; }" >> $BINFO
+    echo "NOTE:  No sed and/or git, no git history in build-info."
+    cat >> "${BINFO}" << EOF
+const char* BuildInfo::getGitLog() { return "Cannot detect, sed and/or git is not available"; }
+
+EOF
 fi
-echo "" >> $BINFO
 
 
 echo "const char* BuildInfo::getGitVersion() { return " >> $BINFO

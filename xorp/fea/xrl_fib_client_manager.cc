@@ -70,7 +70,7 @@ XrlFibClientManager::add_fib_client4(const string& client_target_name,
     // Activate the client
     list<Fte4> fte_list;
     if (_fibconfig.get_table4(fte_list) != XORP_OK) {
-	string error_msg = "Cannot get the IPv4 FIB";
+	static const string error_msg("Cannot get the IPv4 FIB");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     fib_client.activate(fte_list);

@@ -38,6 +38,9 @@
 #ifdef HAVE_NET_IF_VLAN_VAR_H
 #include <net/if_vlan_var.h>
 #endif
+#ifdef HAVE_NET_IF_VLANVAR_H
+#include <net/if_vlanvar.h>
+#endif
 
 #include "fea/ifconfig.hh"
 #include "ifconfig_vlan_get_linux.hh"

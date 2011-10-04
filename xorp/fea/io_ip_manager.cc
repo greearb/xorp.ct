@@ -704,13 +704,15 @@ IoIpComm::first_valid_mcast_protocol_fd_in()
     IoIpPlugins::iterator iter;
     for (iter = _io_ip_plugins.begin(); iter != _io_ip_plugins.end(); ++iter) {
 	IoIp* io_ip = iter->second;
-	xorp_fd = *(io_ip->mcast_protocol_fd_in());
-	if (xorp_fd.is_valid())
-	    return (xorp_fd);
+	XorpFd* xfd = io_ip->mcast_protocol_fd_in();
+	if (xfd && xfd->is_valid()) {
+	    xorp_fd = *xfd;
+	    return xorp_fd;
+	}
     }
 
     // XXX: nothing found
-    return (xorp_fd);
+    return xorp_fd;
 }
 
 // ----------------------------------------------------------------------------
