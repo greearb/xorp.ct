@@ -1689,12 +1689,13 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
 	if (is_datalen_error) {
 	    XLOG_ERROR("proto_socket_read() failed: "
 		       "RX packet size from %s to %s with %d bytes instead of "
-		       "hdr+datalen=%u+%u=%u",
+		       "hdr+datalen=%u+%u=%u, ip_len: %i  ip_len_host: %i",
 		       cstring(src_address), cstring(dst_address),
 		       XORP_INT_CAST(nbytes),
 		       XORP_UINT_CAST(ip_hdr_len),
 		       XORP_UINT_CAST(ip_data_len),
-		       XORP_UINT_CAST(ip_hdr_len + ip_data_len));
+		       XORP_UINT_CAST(ip_hdr_len + ip_data_len),
+		       (int)(ip4.ip_len()), (int)(ip4.ip_len_host()));
 	    return;		// Error
 	}
 
