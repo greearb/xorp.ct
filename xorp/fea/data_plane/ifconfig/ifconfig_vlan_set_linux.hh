@@ -61,31 +61,21 @@ public:
      * If an entry for the same VLAN already exists, is is overwritten
      * with the new information.
      *
-     * @param pulled_ifp pointer to the interface information pulled from
-     * the system.
-     * @param pulled_vifp pointer to the vif information pulled from
-     * the system.
-     * @param config_iface reference to the interface with the information
-     * to configure.
-     * @param config_vif reference to the vif with the information
-     * to configure.
+     * @param system_ifp pointer to the System's vlan interface, or NULL.
+     * @param config_if Configured VLAN interface information.
+     * @param created_if Did we actually create a new interface in the OS?
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int config_add_vlan(const IfTreeInterface* system_ifp,
 				const IfTreeInterface& config_if,
+				bool& created_if,
 				string& error_msg);
 
     /**
      * Delete a VLAN.
      *
-     * @param pulled_ifp pointer to the interface information pulled from
-     * the system.
-     * @param pulled_vifp pointer to the vif information pulled from
-     * the system.
      * @param config_iface reference to the interface with the information
-     * to configure.
-     * @param config_vif reference to the vif with the information
      * to configure.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
@@ -100,12 +90,14 @@ private:
      * @param parent_ifname the parent interface name.
      * @param vlan_name the VLAN vif name.
      * @param vlan_id the VLAN ID.
+     * @param created_if Did we actually create a new interface in the OS?
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int add_vlan(const string& parent_ifname,
 		 const string& vlan_name,
 		 uint16_t vlan_id,
+		 bool& created_if,
 		 string& error_msg);
 
     /**

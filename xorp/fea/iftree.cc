@@ -1780,6 +1780,7 @@ IfTreeInterface::IfTreeInterface(IfTree& iftree, const string& ifname)
       _iftree(iftree),
       _ifname(ifname),
       _pif_index(0),
+      _created_by_xorp(false),
       _probed_vlan(false),
       _enabled(false),
       _discard(false),
