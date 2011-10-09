@@ -6,7 +6,8 @@ This file contains XORP release notes (most recent releases first).
 Release 1.8.5
 
    *  Fix bad OSPF bug that made neighbours very slow to go to Full
-      state in large and/or lossy OSPF router configurations.
+      state in large and/or lossy OSPF router configurations.  Thanks
+      to Iqor for access to test systems and for funding this effort.
 
    *  Compile in build-information to better track versions in logs and
       bug reports.
@@ -18,7 +19,19 @@ Release 1.8.5
    *  netbsd:  Fix compile on netbsd, properly detect IPv6 Multicast
       routing support, fix a few bugs related to multicast.  It *might*
       work now, but seeing spurious failures when trying the MRT6_ADD_MIF
-      call.
+      call.  Thanks to Uwe <6bone@6bone.informatik.uni-leipzig.de> for
+      access to netbsd boxes and testing work.
+
+   *  Fix multicast over GRE tunnels.  Anything else over GRE also has
+      a chance to work now.  Thanks to J G Miller for bug reporting and
+      testing.
+
+   *  ARM:  Fix raw-sockets on some ARM platforms.  The scons checks
+      were lame at best.  They are still suspect, but now unknown will
+      be treated as supporting IPV4 raw input/output.  If we find other
+      systems that do NOT support this (freebsd, netbsd??), we can update
+      the scons accordingly and/or find a way to do the detection more
+      proper.  Thanks to J G Miller for doing tests on his ARM box.
 
 Release 1.8.4 (September 20, 2011)
 

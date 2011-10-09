@@ -226,7 +226,10 @@ def DoAllConfig(env, conf, host_os):
     if has_af_inet and has_sock_raw:
         conf.Define('HAVE_IP_RAW_SOCKETS')
         # TODO:  This needs to be properly detected.
-	if host_os == 'linux-gnu' or host_os == 'openbsd' or host_os == "linux-uclibc":
+        # TODO:  This used to check for bsd and linux in an error prone
+        #        way.  Now, do negative checks, but this could break Solaris
+        #        (or not..no idea if it supports raw or not).
+	if not (env.has_key('mingw') and env['mingw']):
             conf.Define('IPV4_RAW_OUTPUT_IS_RAW')
             conf.Define('IPV4_RAW_INPUT_IS_RAW')
     

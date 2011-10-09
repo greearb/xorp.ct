@@ -112,7 +112,7 @@ MfeaVif::start(string& error_msg)
 	return XORP_OK;
     }
 
-    if (!is_multicast_capable()) {
+    if (!(is_pim_register() || is_multicast_capable())) {
 	wants_to_be_started = true;
 	XLOG_WARNING("WARNING:  Delaying start of mfea-vif: %s because underlying vif is not multicast capable.",
 		     name().c_str());
