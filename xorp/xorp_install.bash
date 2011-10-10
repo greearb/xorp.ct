@@ -21,12 +21,12 @@ fi
 
 #Check for adduser commands
 adduserArgs=""
-if adduser -h | grep ".--system" > /dev/null 2>&1
+if adduser -h 2>&1 | grep ".--system" > /dev/null 2>&1
 then
         adduserArgs="$adduserArgs --system"
 fi
 
-if adduser -h | grep ".--no-create-home" > /dev/null 2>&1
+if adduser -h 2>&1 | grep ".--no-create-home" > /dev/null 2>&1
 then
         adduserArgs="$adduserArgs --no-create-home"
 fi

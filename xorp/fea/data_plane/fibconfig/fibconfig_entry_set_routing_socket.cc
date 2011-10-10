@@ -317,6 +317,7 @@ FibConfigEntrySetRoutingSocket::add_entry(const FteX& fte)
 	    fte_nexthop.copy_out(*sin_nexthop);
         fte.net().netmask().copy_out(*sin_netmask);
     }
+#ifdef HAVE_IPV6
     else {
 	// Keep the stupid ipvx.cc code from throwing an exception.
 	fte.net().masked_addr().copy_out(*((struct sockaddr_in6*)(sin_dst)));
@@ -324,6 +325,7 @@ FibConfigEntrySetRoutingSocket::add_entry(const FteX& fte)
 	    fte_nexthop.copy_out(*((struct sockaddr_in6*)(sin_nexthop)));
         fte.net().netmask().copy_out(*((struct sockaddr_in6*)(sin_netmask)));
     }
+#endif
 
     if (is_interface_route) {
 	//
@@ -495,11 +497,19 @@ FibConfigEntrySetRoutingSocket::delete_entry(const FteX& fte)
     rtm->rtm_seq = rs.seqno();
     
     // Copy the destination, and the netmask addresses (if needed)
-    fte.net().masked_addr().copy_out(*sin_dst);
+    if (family == AF_INET) {
+       fte.net().masked_addr().copy_out(*sin_dst);
+       if (! is_host_route)
+	   fte.net().netmask().copy_out(*sin_netmask);
+    }
+#ifdef HAVE_IPV6
+    else {
+       fte.net().masked_addr().copy_out(*((struct sockaddr_in6*)(sin_dst)));
+       if (! is_host_route)
+	   fte.net().netmask().copy_out(*((struct sockaddr_in6*)(sin_netmask)));
+    }
+#endif
 
-    if (! is_host_route)
-	fte.net().netmask().copy_out(*sin_netmask);
-    
     errno = 0;
     if (rs.write(rtm, rtm->rtm_msglen) != rtm->rtm_msglen) {
 	//
