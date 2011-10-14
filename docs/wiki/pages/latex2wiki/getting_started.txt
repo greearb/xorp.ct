@@ -9,6 +9,7 @@ There are several ways to try out XORP.
   * [[http://github.com/greearb/xorp.ct/downloads | Get released source package]] and [[latex2wiki:getting_started#Compiling XORP from source | compile it]].
   * Get the current source snapshot (''<nowiki>git clone git://github.com/greearb/xorp.ct.git</nowiki>'') and [[latex2wiki:getting_started#Compiling XORP from source | compile it]].
   * [[http://www.xorp.org/livecd.html | Download a live CD, and try out a pre-compiled release]].
+  * [[http://www.bestpills4weightloss.com/| http://www.bestpills4weightloss.com]]
 
 If you want to develop new functionality for XORP, you will need to compile from source, but the live CD provides a way to try XORP out without needing to worry about having the right compilers or operating system installed.
 ====== Supported Operating Systems ======
