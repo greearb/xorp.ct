@@ -65,7 +65,7 @@ For more subscription options, send the command
 ==== Getting Involved ? ====
 
 **Everybody** can read, everyone **registered** can write !
-If you want to join the community: welcome aboard ! A quick registration step will automatically grant you writing access to every part of the wiki((Please, act responsibly :-)))!
+If you want to join the community: welcome aboard ! A quick registration step will automatically grant you writing access to every part of the [[http://www.naturemill.com/| Compost Bin]] wiki((Please, act responsibly :-)))!
 ==== Hosting ====
 
 This website is hosted and put at your free disposal thanks to the [[http://www.run.montefiore.ulg.ac.be | Research Unit in Networking (RUN)]] @ [[http://www.ulg.ac.be | University of Liège]].
