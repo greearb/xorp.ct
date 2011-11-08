@@ -1,4 +1,3 @@
-1300714861	76.178.231.232	E	latex2wiki:getting_started	rps	[Prepare the system to run xorp] added initial blurb about XORP init script and minimal configuration.	
 1300833388	70.89.124.249	E	latex2wiki:user_manual	greearb	[Preface] 	
 1300838078	70.89.124.249	E	latex2wiki:dev_getting_started	greearb	[Project Management] 	
 1300838560	70.89.124.249	C	debug_xorp	greearb	created	
@@ -18,3 +17,4 @@
 1318534865	112.205.235.54	E	latex2wiki:getting_started	spencerkirk		
 1318698393	203.87.208.90	E	start	millkong	[Getting Involved ?] 	
 1320469230	124.6.181.161	e	latex2wiki:introduction_xorp_process	migoy101		
+1320676452	117.197.193.97	E	start	bsen		
