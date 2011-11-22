@@ -1,6 +1,3 @@
-1300833388	70.89.124.249	E	latex2wiki:user_manual	greearb	[Preface] 	
-1300838078	70.89.124.249	E	latex2wiki:dev_getting_started	greearb	[Project Management] 	
-1300838560	70.89.124.249	C	debug_xorp	greearb	created	
 1301757022	77.109.117.113	e	xorp:writing_a_process	geddons	[Writing a XORP process] 	
 1314995612	70.89.124.249	E	latex2wiki:user_manual	greearb	[Table Of Contents] 	
 1314995807	70.89.124.249	C	latex2wiki:user_manual:environment_variables	greearb	created	
@@ -18,3 +15,6 @@
 1318698393	203.87.208.90	E	start	millkong	[Getting Involved ?] 	
 1320469230	124.6.181.161	e	latex2wiki:introduction_xorp_process	migoy101		
 1320676452	117.197.193.97	E	start	bsen		
+1321888520	2001:6a8:2d80:2230:222:68ff:fe15:7e11	R	latex2wiki:getting_started	geddons	old revision restored	1300714861
+1321888529	2001:6a8:2d80:2230:222:68ff:fe15:7e11	R	latex2wiki:introduction_xorp_process	geddons	old revision restored	1299788779
+1321888543	2001:6a8:2d80:2230:222:68ff:fe15:7e11	R	start	geddons	old revision restored	1318698393

@@ -5,7 +5,7 @@ This document is intented for a developer who wishes to write a XORP process, bu
 start. We’ll walk through a simple XORP process, discussing how to define and use XRL interfaces, and
 how the bits fit together.
 This is a first pass at such a document. We’re bound to have missed things that are not obvious when
-you’re starting out. Please provide us feedback as to how much help this [[http://www.diamondlinks.net/|link building]] document is; what really helped,
+you’re starting out. Please provide us feedback as to how much help this document is; what really helped,
 what’s missing, and what isn’t explained properly.
 We’ll assume that you have already reviewed the following four other XORP documentation sections:
 
@@ -87,7 +87,7 @@ The file ''static_routes.xif'' defines all the XRLs that are part of the static 
 These are XRLs that other processes can call on the static routes process.
 The format of the file is basically the keyword interface followed by the name and version of this
 particular interface, followed by a list of XRLs. In this case the name of the interface is static routes,
-but this does not have to be the same as the name of the process. The version [[http://www.valleypistachio.com/|buy pistachios]] number is 0.1. Version
+but this does not have to be the same as the name of the process. The version number is 0.1. Version
 numbers are generally increased when a change is made that is not backwards compatible, but the precise
 value has no important meaning.
 The list of XRLs is demarked by braces {...}, and one XRL is given per line. Blank lines and
