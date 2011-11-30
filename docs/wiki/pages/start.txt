@@ -4,17 +4,17 @@ It's a **work in progress** - please let us know what additional help you would 
 ===== Overview =====
 XORP is an open networking platform that supports OSPF, RIP, BGP,
 OLSR, VRRP, PIM, IGMP (Multicast) and other routing protocols.  Most protocols
-support IPv4 and IPv6 where applicable.  It is known to work on various [[http://tripfoundry.com/|Trip Foundry]]
-Linux distributions and flavors of BSD.  Support for [[http://www.proposable.com|proposal software]] cross-compiling XORP to Microsoft [[http://www.bestpills4weightloss.com/purebiotix-review.html|purebiotix weight loss pill review]] Windows using the mingw cross-compiler was recently (March 2011) added.
+support IPv4 and IPv6 where applicable.  It is known to work on various
+Linux distributions and flavors of BSD.  Support for cross-compiling XORP to Microsoft Windows using the mingw cross-compiler was recently (March 2011) added.
 
 XORP started life as a project at the ICSI Center for Open Networking (ICON)
 at the International Computer Science Institute in Berkeley, California,
-USA, and spent some time with [[http://thebeginnerslens.com/|iphone photography]] the [[http://www.diamondlinks.net/|link building]] team at XORP, Inc.  The project maintainer
+USA, and spent some time with the [[http://www.diamondlinks.net/|link building]] team at XORP, Inc.  The project maintainer
 is now [[mailto:greearb@candelatech.com | Ben Greear]] from [[http://www.candelatech.com/ | Candela Technologies]] and
 the old XORP.CT code base is now the official development tree.
 
 XORP's primary goal is to be an open platform for networking protocol
-implementations and an alternative to proprietary and [[http://www.andrewflusche.com/services/spotsylvania-reckless-driving-defense/|Spotsylvania reckless driving]] closed networking
+implementations and an alternative to proprietary and closed networking
 products.
 
 ===== Getting Started =====
@@ -30,8 +30,7 @@ products.
 
 
 ===== To be merged with the new documentation project =====
-<note warning>It is possible that some ECODE specifics are present in the 
-[[http://www.merchantos.com/|point of sale software]] documents. Nothing important and not much, though. </note>
+<note warning>It is possible that some ECODE specifics are present in the documents. Nothing important and not much, though. </note>
 ====Practical Aspects====
   - [[latex2wiki:introduction_xorp_process|An Introduction to Writing a XORP Process [IMPORTED and OUTDATED version, kept for safety] ]]
   - [[xorp:module_stub|The Dirty Stub Code, or the ready to use implementation]]
@@ -65,7 +64,7 @@ For more subscription options, send the command
 ==== Getting Involved ? ====
 
 **Everybody** can read, everyone **registered** can write !
-If you want to join the community: welcome aboard ! A quick registration step will automatically grant you writing access to every part of the [[http://www.naturemill.com/| Compost Bin]] wiki((Please, act responsibly :-)))!
+If you want to join the community: welcome aboard ! A quick registration step will automatically grant you writing access to every part of the wiki((Please, act responsibly :-)))!
 ==== Hosting ====
 
 This website is hosted and put at your free disposal thanks to the [[http://www.run.montefiore.ulg.ac.be | Research Unit in Networking (RUN)]] @ [[http://www.ulg.ac.be | University of Liège]].
