@@ -840,9 +840,9 @@ env.AppendUnique(CPPDEFINES = [
 
 # Forcibly disable GCC's SSP support., as it may be incompatible
 # with the XORP code base.
-env.AppendUnique(CPPDEFINES = [
-    ( '_FORTIFY_SOURCE', 0 ),
-    ])
+#env.AppendUnique(CPPDEFINES = [
+#    ( '_FORTIFY_SOURCE', 0 ),
+#    ])
 
 if env['enable_boost']:
     # Forcibly disable Boost's thread support; the XORP code base is
