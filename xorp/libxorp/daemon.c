@@ -88,8 +88,11 @@ xorp_daemonize(int nochdir, int noclose)
 		return (-1);
 	}
 
-	if (!nochdir)
-		(void)chdir("/");
+	if (!nochdir) {
+           if (chdir("/") < 0) {
+              perror("chdir");
+           }
+        }
 
 	if (!noclose && (fd = open(_PATH_DEVNULL, O_RDWR, 0)) != -1) {
 		(void)dup2(fd, STDIN_FILENO);

@@ -724,11 +724,15 @@ main(int argc, char* const argv[])
 #ifndef __WIN32__
     string tmp_fname(c_format("/tmp/xorp-tmp-%i.txt", getpid()));
     string cmd(c_format("uname -a > %s", tmp_fname.c_str()));
-    system(cmd.c_str());
+    if (system(cmd.c_str()) < 0) {
+	XLOG_INFO("failed system command: %s\n", cmd.c_str());
+    }
     ifstream tstf("/etc/issue");
     if (tstf) {
 	string cmd(c_format("cat /etc/issue >> %s", tmp_fname.c_str()));
-	system(cmd.c_str());
+	if (system(cmd.c_str()) < 0) {
+	    XLOG_INFO("failed system command: %s\n", cmd.c_str());
+	}
     }
     tstf.close();
     tstf.clear();
