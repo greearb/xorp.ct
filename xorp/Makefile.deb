@@ -17,7 +17,7 @@
 
 # These fields are used to build the control file.
 PACKAGE ?= lanforge-xorp
-VERSION = 1.8.5-WIP
+VERSION = 1.8.5
 LFVER = 5.2.2
 ARCH = i386
 SECTION = net

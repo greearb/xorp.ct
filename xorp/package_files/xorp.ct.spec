@@ -6,7 +6,7 @@
 
 Summary:          An eXtensible Open Router Platform (XORP)
 Name:             xorp
-Version:          1.8.5-WIP
+Version:          1.8.5
 Release:          1%{?dist}%{?pext}
 License:          GPL
 Group:            System Environment/Daemons
@@ -141,6 +141,7 @@ fi
 
 
 %changelog
+* Wed Jan 11 2011 Ben Greear <greearb@candelatech.com> 1.8.5
 * Mon Sep 23 2011 Ben Greear <greearb@candelatech.com> 1.8.5-WIP
 * Mon Sep 20 2011 Ben Greear <greearb@candelatech.com> 1.8.4
 * Tue Mar 16 2011 Ben Greear <greearb@candelatech.com> 1.8.3

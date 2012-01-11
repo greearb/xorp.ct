@@ -33,6 +33,9 @@ Release 1.8.5
       the scons accordingly and/or find a way to do the detection more
       proper.  Thanks to J G Miller for doing tests on his ARM box.
 
+   *  Fix compile on Ubuntu 11.10 (and perhaps other recent systems).
+
+
 Release 1.8.4 (September 20, 2011)
 
    *  Add async-XRL support, from Steven Simpson

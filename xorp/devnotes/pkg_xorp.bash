@@ -3,7 +3,7 @@
 
 # Build XORP binaries and copy them to the right folder.
 
-VER=1.8.5-WIP
+VER=1.8.5
 
 FC5=192.168.100.23  # v-fc5-32
 FC8=192.168.100.24  # v-fc8-32
