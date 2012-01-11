@@ -16,7 +16,7 @@ to make sure the script works properly:
 # typically the last commit for the previous release.  Use gitk or similar
 # to figure this out.
 
-./xorp/devnotes/update_changed_copyright.bash 6f0890b35697718e4a48f06c1148792aca1091c8 HEAD 2011
+./xorp/devnotes/update_changed_copyright.bash 6f0890b35697718e4a48f06c1148792aca1091c8 HEAD 2012
 
 # Inspect changes and commit them.
 
