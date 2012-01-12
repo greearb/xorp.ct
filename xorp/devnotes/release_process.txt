@@ -51,6 +51,10 @@ Build packages (Ben has a script that does this for his targets).
 
 # Build kdocs and package all web-page related stuff
 
+# Clean up .deb stuff
+rm -fr xorp/tmp/
+# Remove any binary .debs in xorp/
+
 ./publish_html.bash
 
 # Upload it:
