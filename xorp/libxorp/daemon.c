@@ -1,7 +1,7 @@
 /* vim:set sts=4 ts=8: */
 
 /*-
- * Copyright (c) 1990, 1993
+ * Copyright (c) 1990-2012 XORP, Inc and Others, 1993
  *	The Regents of the University of California.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -88,8 +88,11 @@ xorp_daemonize(int nochdir, int noclose)
 		return (-1);
 	}
 
-	if (!nochdir)
-		(void)chdir("/");
+	if (!nochdir) {
+           if (chdir("/") < 0) {
+              perror("chdir");
+           }
+        }
 
 	if (!noclose && (fd = open(_PATH_DEVNULL, O_RDWR, 0)) != -1) {
 		(void)dup2(fd, STDIN_FILENO);

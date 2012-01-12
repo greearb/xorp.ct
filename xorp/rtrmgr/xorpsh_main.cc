@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2011 XORP, Inc and Others
+// Copyright (c) 2001-2012 XORP, Inc and Others
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License, Version 2, June
@@ -376,8 +376,11 @@ XorpShell::run(const string& commands, bool exit_on_error)
 		  modified_commands.size(), &written, NULL);
 	    CloseHandle(xorpsh_write_commands_fd);
 #else // ! HOST_OS_WINDOWS
-	    write(xorpsh_write_commands_fd, modified_commands.c_str(),
-		  modified_commands.size());
+	    if (write(xorpsh_write_commands_fd, modified_commands.c_str(),
+		      modified_commands.size()) < 0) {
+		XLOG_ERROR("Failed write to xorpsh-write-cmds-fd: %i (%s)\n",
+			   errno, strerror(errno));
+	    }
 	    close(xorpsh_write_commands_fd);
 #endif // ! HOST_OS_WINDOWS
 	    xorpsh_write_commands_fd.clear();

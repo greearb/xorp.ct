@@ -1,7 +1,7 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
-// Copyright (c) 2001-2011 XORP, Inc and Others
+// Copyright (c) 2001-2012 XORP, Inc and Others
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License, Version 2, June
@@ -724,11 +724,15 @@ main(int argc, char* const argv[])
 #ifndef __WIN32__
     string tmp_fname(c_format("/tmp/xorp-tmp-%i.txt", getpid()));
     string cmd(c_format("uname -a > %s", tmp_fname.c_str()));
-    system(cmd.c_str());
+    if (system(cmd.c_str()) < 0) {
+	XLOG_INFO("failed system command: %s\n", cmd.c_str());
+    }
     ifstream tstf("/etc/issue");
     if (tstf) {
 	string cmd(c_format("cat /etc/issue >> %s", tmp_fname.c_str()));
-	system(cmd.c_str());
+	if (system(cmd.c_str()) < 0) {
+	    XLOG_INFO("failed system command: %s\n", cmd.c_str());
+	}
     }
     tstf.close();
     tstf.clear();

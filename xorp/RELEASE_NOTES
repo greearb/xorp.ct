@@ -33,6 +33,72 @@ Release 1.8.5
       the scons accordingly and/or find a way to do the detection more
       proper.  Thanks to J G Miller for doing tests on his ARM box.
 
+   *  Fix compile on Ubuntu 11.10 (and perhaps other recent systems).
+
+   git shortlog since 1.8.4:
+    Ben Greear (55):
+      Update html, release-process notes.
+      Add some notes in the rpm building script.
+      Update version to 1.8.5-WIP
+      ospf:  Log peer state changes.
+      fea:  Re-arrange netlink parsing logic.
+      fea:  Fix GRE tunnel IP addresses on Linux.
+      multicast:  Don't crash if interface configured for mcast doesn't have MULTICAST flag.
+      Add copyright header to bug_cather.hh
+      build-info:  Support auto-generated build information.
+      build-info:  Defaults to enabled.
+      build-info:  Add xorp version string to xorpsh.
+      build:  Always add bigoflag unless using override.
+      compile:  Use 'full' optimization by default: -O2
+      mii:  Fix strict-aliasing warnings when compilign with -O2
+      olsr:  Fix un-used variable warnings.
+      buildinfo:  Make script deal better with missing perl & git.
+      netbsd:  Fix sockutil.cc build on netbsd.
+      netbsd:  Fix click mount command for netbsd.
+      netbsd:  Fix compile problem in ifconfig_get_ioctl.
+      xlog: Simplify xlog framework.
+      ospf:  Remove some overly verbose trace debugging.
+      ospf:  Set trace logging verbosity to high.
+      ospf:  Fix bad lsa retransmit timer bug.
+      ospf:  Improve some debugging messages.
+      Update release notes for OSPF bug, logging changes.
+      ospf:  Add some debugging for routing-table warnings.
+      netbsd: Fix compile on netbsd.
+      Merge branch 'master' of github.com:greearb/xorp.ct
+      buildinfo:  Use sed instead of perl, should still handle "'s
+      click:  Enable building click.
+      fea:  Add comment to explain strange mii code.
+      fea:  Remove dead code, small tweaks.
+      buildinfo:  Fix missing \ in sed logic.
+      buildinfo:  Fix escaping single backslash     Signed-off-by: Ben Greear <greearb@candelatech.com>
+      Merge branch 'master' of github.com:greearb/xorp.ct
+      fea:  Fix crash when mcast_protocol_fd_in returns NULL.
+      fea: Auto-create mcast socket if none exist.
+      bsd/mcast: Properly detect support for IPv6 multicast routing.
+      bsd: Fix assert when using ipv6 mcast routing.
+      bsd/fea: Add some debugging for ipv6 mcast socket failures.
+      rls-notes:  Note limited netbsd support for ipv6 mcast.     Signed-off-by: Ben Greear <greearb@candelat
+      fea/vlans:  Don't delete vlans unless xorp created them.
+      mfea:  pim_register interfaces are always mcast capable.
+      fea:  Add some extra debugging for errors seen on ARM.
+      install:  Fix install script warnings on Fedora.
+      raw-sockets:  Assume platforms support raw socket input/output.
+      rls-notes:  Add credits, update for GRE tunnels & ARM
+      freebsd: Fix IPv6 address handling.
+      Merge branch 'master' of github.com:greearb/xorp.ct
+      Update LANforge version to 5.2.2 in deb packaging Makefile.
+      Remove the FORTIFY_SOURCE hack.  Breaks Ubuntu 11.10 build.
+      Fix compile on ubuntu 11.10 (check return values of some library calls).
+      Update version to 1.8.5
+      Update copyrights for files changed in the 1.8.5 rls period.
+      Update HTML for rls 1.8.5
+
+    Igor Maravic (4):
+      xorp_install:  Use --system and --no-create-home if supported.
+      Sconstruct:  Remove un-needed semicolons.
+      SConstruct:  Support debug_xrldb=True option.
+      rtrmgr:  Support compiling with debug_xrldb=True option.
+
 Release 1.8.4 (September 20, 2011)
 
    *  Add async-XRL support, from Steven Simpson

@@ -17,32 +17,29 @@ software forwarding.
 <h2><a name="message">Message to the Community</a></h2>
 
 <p>
-September 20, 2011:<br>
-XORP 1.8.4 is Released
+January 11, 2012:<br>
+XORP 1.8.5 is Released
 
   <ul>
-    <li>Async XRL support from Steven Simpson.</li>
+    <li>Fix OSPF bug that caused very long join times on larger
+        systems.</li>
 
-    <li>Fix bug when deleting non-VLAN interfaces.  Commit would fail
-       because the code would attempt to remove the interface from
-       the kernel and fail.</li>
+    <li>Compile in built-information to let user know exact version
+        for any particular build.</li>
 
-    <li>Fix BSD related crash when adding interface with same ifindex
-      as a previous interface.  OpenBSD has the nasty habit of re-using
-      the ifindex when creating/deleting virtual interfaces.</li>
+    <li>Optimize logging (should be faster at runtime, slightly larger
+        binary size.)</li>
 
-    <li>Fix multicast bug that totally breaks XORP multicast on recent
-      Linux kernels.  The problem is that I chose the wrong default
-      multicast routing table (254, instead of 253 as it should be).
-      So, if users don't specify a routing table, it pokes routes into
-      the wrong table.  This wasn't caught in my testing because I always
-      explicitly set the routing table ID.</li>
+    <li>Fix compile and some other bugs on netbsd.</li>
 
-    <li>Add some env variable controlled debugging to the libxorp and libxipc
-      logic for better debugging of xrls and the event loop.</li>
+    <li>Fix multicast over GRE tunnels (and other GRE tunnel bugs).</li>
 
-   <li>A more detailed change list list is in Release Notes
-       available at <a href="releases/1.8.4/docs/RELEASE_NOTES">releases/1.8.4/docs/RELEASE_NOTES</a>
+    <li>Fix ARM platform issues related to raw sockets.</li>
+
+    <li>Fix compile on Ubuntu 11.10.</li>
+
+    <li>A more detailed change list list is in Release Notes
+       available at <a href="releases/1.8.5/docs/RELEASE_NOTES">releases/1.8.5/docs/RELEASE_NOTES</a>
    </li>
   </ul>
  </p>
@@ -74,7 +71,7 @@ Get snapshots or check out a live source tree
 on <a href="http://github.com/greearb/xorp.ct">github</a>.
 <P>
 
-<h2>Latest Release: 1.8.4</h2>
+<h2>Latest Release: 1.8.5</h2>
 
 <p>
 XORP is available for download as a

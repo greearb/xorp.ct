@@ -1,4 +1,4 @@
-#Copyright (c) 2009-2011 XORP, Inc and Others
+#Copyright (c) 2009-2012 XORP, Inc and Others
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License, Version 2, June
@@ -840,9 +840,9 @@ env.AppendUnique(CPPDEFINES = [
 
 # Forcibly disable GCC's SSP support., as it may be incompatible
 # with the XORP code base.
-env.AppendUnique(CPPDEFINES = [
-    ( '_FORTIFY_SOURCE', 0 ),
-    ])
+#env.AppendUnique(CPPDEFINES = [
+#    ( '_FORTIFY_SOURCE', 0 ),
+#    ])
 
 if env['enable_boost']:
     # Forcibly disable Boost's thread support; the XORP code base is
