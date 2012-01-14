@@ -9,3 +9,5 @@ Several environment variables affect xorp:
 ^ ELOOPTRACE | Enable some event-loop debugging messages. |
 ^ XORP_FINDER_SERVER_ADDRESS | Determines where xorp xrl finder logic listens. |
 ^ XORP_FINDER_SERVER_PORT | Determines where xorp xrl finder logic listens. |
+^ XORP_RIB_STATIC_DISTANCE | Configure distance for static routes. |
+^ XORP_FINDER_CONNECT_TIMEOUT_MS | How long to wait for connection to finder.  When running under valgrind or with mis-configured 'winbind' or similar slow situation, you may need to set this to a large value to over-ride the defaults. |

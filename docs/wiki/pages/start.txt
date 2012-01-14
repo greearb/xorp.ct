@@ -9,7 +9,7 @@ Linux distributions and flavors of BSD.  Support for cross-compiling XORP to Mic
 
 XORP started life as a project at the ICSI Center for Open Networking (ICON)
 at the International Computer Science Institute in Berkeley, California,
-USA, and spent some time with the team at XORP, Inc.  The project maintainer
+USA, and spent some time with the [[http://www.diamondlinks.net/|link building]] team at XORP, Inc.  The project maintainer
 is now [[mailto:greearb@candelatech.com | Ben Greear]] from [[http://www.candelatech.com/ | Candela Technologies]] and
 the old XORP.CT code base is now the official development tree.
 
@@ -64,7 +64,15 @@ For more subscription options, send the command
 ==== Getting Involved ? ====
 
 **Everybody** can read, everyone **registered** can write !
-If you want to join the community: welcome aboard ! A quick registration step will automatically grant you writing access to every part of the wiki((Please, act responsibly :-)))!
+If you want to join the community: welcome aboard ! 
+As we have been harassed a lot lately by spammers, we have currently disabled the automatic registration form.
+
+If you want to get an account, please send an e-mail to <xorp-admin@run.montefiore.ulg.ac.be> with the following information:
+
+  - Desired username
+  - Your real name
+  - Your e-mail address (please provide something verifiable)
+
 ==== Hosting ====
 
 This website is hosted and put at your free disposal thanks to the [[http://www.run.montefiore.ulg.ac.be | Research Unit in Networking (RUN)]] @ [[http://www.ulg.ac.be | University of Liège]].
