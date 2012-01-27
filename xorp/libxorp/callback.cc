@@ -35,6 +35,10 @@
 
 #ifdef DEBUG_CALLBACKS
 
+#ifndef XORP_USE_USTL
+#include <stack>
+#endif
+
 #include "libxorp/xlog.h"
 #include "libxorp/callback.hh"
 #include "libxorp/c_format.hh"
