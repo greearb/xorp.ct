@@ -33,6 +33,7 @@ fi
 
 echo "Creating xorp user and adding xorp to xorp and root groups..."
 adduser $adduserArgs xorp
+addgroup --system xorp
 usermod -a -G xorp xorp
 usermod -a -G xorp root
 usermod -a -G xorp lanforge
