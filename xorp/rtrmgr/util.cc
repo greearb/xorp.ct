@@ -38,6 +38,8 @@
 
 static string s_cfg_root;
 static string s_bin_root;
+static string s_template_dir;
+static string s_target_dir;
 static string s_config_file;
 
 /**
@@ -131,6 +133,8 @@ xorp_path_init(const char* argv0)
 	s_bin_root = xr;
 	s_cfg_root = xr;
 	s_config_file = s_cfg_root + "/etc/xorp.conf";
+	s_template_dir = s_cfg_root + "/share/xorp/templates";
+	s_target_dir = s_cfg_root + "/share/xorp/xrl/targets";
 	return;
     }
 
@@ -145,11 +149,15 @@ xorp_path_init(const char* argv0)
     debug_msg("build_root:   %s\n", build_root.c_str());
     if (current_root == build_root) {
 	s_bin_root = build_root;
-	s_cfg_root = xorp_real_path(XORP_SRC_ROOT);
-	s_config_file = s_cfg_root + "/rtrmgr/xorp.conf";
+	s_cfg_root = build_root;
+	s_template_dir = s_cfg_root + "/etc/templates";
+	s_target_dir = s_cfg_root + "/xrl/targets";
+	s_config_file = xorp_real_path(XORP_SRC_ROOT) + "/rtrmgr/config/xorp.conf";
 
 	debug_msg("s_bin_root:   %s\n", s_bin_root.c_str());
 	debug_msg("s_cfg_root:   %s\n", s_cfg_root.c_str());
+	debug_msg("s_template_dir:	%s\n",s_template_dir.c_str());
+	debug_msg("s_target_dir:	%s\n",s_target_dir.c_str());
 	debug_msg("s_config_file:  %s\n", s_config_file.c_str());
 
 	return;
@@ -158,10 +166,14 @@ xorp_path_init(const char* argv0)
     string install_root = xorp_real_path(XORP_INSTALL_ROOT);
     s_bin_root = install_root;
     s_cfg_root = install_root;
+    s_template_dir = s_cfg_root + "/share/xorp/templates";
+    s_target_dir = s_cfg_root + "/share/xorp/xrl/targets";
     s_config_file = s_cfg_root + "/etc/xorp.conf";
 
     debug_msg("s_bin_root:   %s\n", s_bin_root.c_str());
     debug_msg("s_cfg_root:   %s\n", s_cfg_root.c_str());
+    debug_msg("s_template_dir:	%s\n",s_template_dir.c_str());
+    debug_msg("s_target_dir:	%s\n",s_target_dir.c_str());
     debug_msg("s_config_file:  %s\n", s_config_file.c_str());
 }
 
@@ -192,13 +204,13 @@ xorp_command_dir()
 string
 xorp_template_dir()
 {
-    return s_cfg_root + string("/share/xorp/templates");
+    return s_template_dir;
 }
 
 string
 xorp_xrl_targets_dir()
 {
-    return s_cfg_root + string("/share/xorp/xrl/targets");
+    return s_target_dir;
 }
 
 string
