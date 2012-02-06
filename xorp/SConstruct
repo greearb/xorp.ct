@@ -1029,6 +1029,13 @@ if env['rtld_origin']:
 	except:
 		pass
 	env['xorp_alias_tooldir'] = xorp_alias_tooldir
+	#Make subdir  $BUILDDIR/etc/templates for holding template files
+	xorp_alias_templatedir = os.path.join(builddir, 'etc/templates')
+	try:
+		Execute(Mkdir(xorp_alias_templatedir))
+	except:
+		pass
+	env['xorp_alias_templatedir'] = xorp_alias_templatedir
 
 
 if not fnmatch.fnmatch(host_os, 'mingw32*'):
