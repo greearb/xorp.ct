@@ -1008,7 +1008,28 @@ if env.has_key('SHAREDLIBS'):
 	env['xorp_module_rpath'] = os.path.join('\\$$ORIGIN',
 	   os.path.relpath(env.Dir('$xorp_libdir').abspath,
 			   env.Dir('$xorp_moduledir').abspath))
-        
+
+if env['rtld_origin']:
+	#
+	# Build a subdirectories for holding symlinks to modules and command binaries,
+	# so that xorpsh and rtrmngr, about to be built, can be run from inside the BUILDDIR.
+	#
+	# $BUILDIR/lib/bin will contain symlinks to command bins
+	# $BUILDIR/lib/sbin will contain symlinks to module bins
+	#
+	xorp_alias_moduledir = os.path.join(xorp_alias_subdir, 'sbin')
+	xorp_alias_tooldir = os.path.join(xorp_alias_subdir, 'bin')
+	try:
+		Execute(Mkdir(xorp_alias_moduledir))
+	except:
+		pass
+	env['xorp_alias_moduledir'] = xorp_alias_moduledir
+	try:
+		Execute(Mkdir(xorp_alias_tooldir))
+	except:
+		pass
+	env['xorp_alias_tooldir'] = xorp_alias_tooldir
+
 
 if not fnmatch.fnmatch(host_os, 'mingw32*'):
     # Export global symbols as dynamic in executables for runtime backtraces
