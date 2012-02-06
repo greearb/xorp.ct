@@ -82,7 +82,11 @@ showifsrcs = [
     ]
 
 showif = env.Program(target = 'fea_show_interfaces', source = showifsrcs)
-
+if env['rtld_origin']:
+    for obj in showif:
+        env.AddPostAction(showif,
+            env.Symlink(obj.abspath,
+                        os.path.join(env['xorp_alias_tooldir'], str(obj))))
 env.Alias('install', env.InstallProgram(env['xorp_tooldir'], showif))
 
 Default(showif)

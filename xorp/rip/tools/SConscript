@@ -73,7 +73,15 @@ shstatssrcs = [
 
 shpeer = env.Program(target = 'rip_show_peer_stats', source = shpeersrcs)
 shstats = env.Program(target = 'rip_show_stats', source = shstatssrcs)
-
+if env['rtld_origin']:
+    for obj in shpeer:
+        env.AddPostAction(shpeer,
+            env.Symlink(obj.abspath,
+                        os.path.join(env['xorp_alias_tooldir'], str(obj))))
+    for obj in shstats:
+        env.AddPostAction(shstats,
+            env.Symlink(obj.abspath,
+                        os.path.join(env['xorp_alias_tooldir'], str(obj))))
 env.Alias('install', env.InstallProgram(env['xorp_tooldir'], shpeer))
 env.Alias('install', env.InstallProgram(env['xorp_tooldir'], shstats))
 
