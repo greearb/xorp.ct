@@ -121,6 +121,12 @@ libolsrsrcs = [
 
 if is_shared:
     libolsr = env.SharedLibrary(target = 'libolsr', source = libolsrsrcs, LIBS = '')
+    if env['rtld_origin']:
+        for obj in libolsr:
+            env.AddPostAction(libolsr,
+                env.Symlink(obj.abspath,
+                            os.path.join(env['xorp_alias_libdir'], str(obj))))
+
     env.Alias('install',
               env.InstallLibrary(env['xorp_libdir'], libolsr))
 else:
@@ -137,6 +143,12 @@ libolsrxrlsrcs = [
 
 if is_shared:
     libolsrxrl = env.SharedLibrary(target = 'libolsrxrl', source = libolsrxrlsrcs, LIBS = '')
+    if env['rtld_origin']:
+        for obj in libolsrxrl:
+            env.AddPostAction(libolsrxrl,
+                env.Symlink(obj.abspath,
+                            os.path.join(env['xorp_alias_libdir'], str(obj))))
+
     env.Alias('install',
               env.InstallLibrary(env['xorp_libdir'], libolsrxrl))
 else:

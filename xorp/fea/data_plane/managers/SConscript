@@ -45,6 +45,11 @@ if env['enable_fea_dummy']:
 if is_shared:
     libxdpm = env.SharedLibrary(target = 'libxorp_fea_data_plane_managers',
 				source = sources)
+    if env['rtld_origin']:
+        for obj in libxdpm:
+            env.AddPostAction(libxdpm,
+                env.Symlink(obj.abspath,
+                            os.path.join(env['xorp_alias_libdir'], str(obj))))
 else:
     libxdpm = env.StaticLibrary(target = 'libxorp_fea_data_plane_managers',
 				source = sources)

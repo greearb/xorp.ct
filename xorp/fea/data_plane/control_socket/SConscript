@@ -45,6 +45,11 @@ if env['enable_click']:
 if is_shared:
     libxcs = env.SharedLibrary(target = 'libxorp_fea_control_socket',
 			       source = sources)
+    if env['rtld_origin']:
+        for obj in libxcs:
+            env.AddPostAction(libxcs,
+                env.Symlink(obj.abspath,
+                            os.path.join(env['xorp_alias_libdir'], str(obj))))
     env.Alias('install', env.InstallLibrary(env['xorp_libdir'], libxcs))
 else:
     libxcs = env.StaticLibrary(target = 'libxorp_fea_control_socket',
