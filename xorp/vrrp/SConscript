@@ -99,7 +99,11 @@ vrrpsources = [ 'xorp_vrrp.cc' ]
 
 xorp_vrrp = env.Program(target = 'xorp_vrrp',
             source = vrrpsources)
-
+if env['rtld_origin']:
+    for obj in xorp_vrrp:
+        env.AddPostAction(xorp_vrrp,
+            env.Symlink(obj.abspath,
+                os.path.join(env['xorp_alias_moduledir'], str(obj))))
 env.Alias('install', env.InstallProgram(env['xorp_moduledir'], xorp_vrrp))
 if is_shared:
     env.Alias('install', env.InstallLibrary(env['xorp_libdir'], libxorp_vrrp))

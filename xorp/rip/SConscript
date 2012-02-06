@@ -175,6 +175,11 @@ else:
 				      LIBS = '')
 
 rip = e.Program(target = 'xorp_rip', source = ripsrcs)
+if env['rtld_origin']:
+    for obj in rip:
+        env.AddPostAction(rip,
+            env.Symlink(obj.abspath,
+                os.path.join(env['xorp_alias_moduledir'], str(obj))))
 e.Alias('install', e.InstallProgram(e['xorp_moduledir'], rip))
 
 if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
@@ -283,6 +288,11 @@ if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
                                            LIBS = '')
 
     ripng = e.Program(target = 'xorp_ripng', source = ripngsrcs)
+    if env['rtld_origin']:
+        for obj in ripng:
+            env.AddPostAction(ripng,
+                env.Symlink(obj.abspath,
+                    os.path.join(env['xorp_alias_moduledir'], str(obj))))
     e.Alias('install', e.InstallProgram(e['xorp_moduledir'], ripng))
 
     Default(rip, ripng)

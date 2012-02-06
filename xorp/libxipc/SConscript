@@ -245,6 +245,11 @@ call_xrl = env.Program(target = 'call_xrl',
 env.Alias('install', env.InstallProgram('$exec_prefix/sbin/', call_xrl))
 
 if env['enable_tests']:
+    if env['rtld_origin']:
+        for obj in xorp_finder:
+            env.AddPostAction(xorp_finder,
+                env.Symlink(obj.abspath,
+                    os.path.join(env['xorp_alias_moduledir'], str(obj))))
     env.Alias('install', env.InstallProgram(env['xorp_moduledir'], xorp_finder))
     
 Default(libxipc, libfinder, call_xrl, xorp_finder)

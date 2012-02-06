@@ -101,9 +101,19 @@ mldlite = env.Program(target = 'xorp_mld_lite', source = mldlitesrcs)
 
 env.Alias('install',
           env.InstallProgram(env['xorp_moduledir'], igmplite))
+if env['rtld_origin']:
+    for obj in igmplite:
+        env.AddPostAction(igmplite,
+            env.Symlink(obj.abspath,
+                os.path.join(env['xorp_alias_moduledir'], str(obj))))
 
 env.Alias('install',
           env.InstallProgram(env['xorp_moduledir'], mldlite))
+if env['rtld_origin']:
+    for obj in mldlite:
+        env.AddPostAction(mldlite,
+            env.Symlink(obj.abspath,
+                os.path.join(env['xorp_alias_moduledir'], str(obj))))
 
 
 Default(libmld6igmplite, igmplite, mldlite)

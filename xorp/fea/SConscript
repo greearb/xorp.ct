@@ -235,7 +235,11 @@ feasrcs = [
           ]
 
 fea = env.Program(target = 'xorp_fea', source = feasrcs)
-
+if env['rtld_origin']:
+    for obj in fea:
+        env.AddPostAction(fea,
+            env.Symlink(obj.abspath,
+                os.path.join(env['xorp_alias_moduledir'], str(obj))))
 env.Alias('install', env.InstallProgram(env['xorp_moduledir'], fea))
 
 #######################
@@ -252,6 +256,11 @@ if env['enable_fea_dummy']:
         ]
 
     feadummy = env.Program(target = 'xorp_fea_dummy', source = feadummysrcs)
+    if env['rtld_origin']:
+        for obj in feadummy:
+            env.AddPostAction(feadummy,
+                env.Symlink(obj.abspath,
+                            os.path.join(env['xorp_alias_moduledir'], str(obj))))
     env.Alias('install', env.InstallProgram(env['xorp_moduledir'], feadummy))
 
 #######################
