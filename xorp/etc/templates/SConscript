@@ -133,6 +133,26 @@ for tp in tp_raw:
 
 Default(all_tp_raw)
 
+if env['rtld_origin']:
+        template_source_dir = os.path.join(env['xorp_sourcedir'], "etc/templates")
+
+        cmd_files = [c.__add__('.cmds') for c in cmds]
+        for obj in cmd_files:
+		#copy all necessary cmd_files in $BUILDDIR/etc/templates
+		Execute(Copy(os.path.join(env['xorp_alias_templatedir'], str(obj)),
+			os.path.join(template_source_dir, str(obj))))
+
+        tp_files = [t.__add__('.tp') for t in tps]
+        for obj in tp_files:
+		#copy all necessary tp_files in $BUILDDIR/etc/templates
+		Execute(Copy(os.path.join(env['xorp_alias_templatedir'], str(obj)),
+			os.path.join(template_source_dir, str(obj))))
+
+        tp_raw_files = [t.__add__('.tp') for t in tp_raw]
+        for obj in tp_raw_files:
+		#copy all necessary tp_files in $BUILDDIR/etc/templates
+		Execute(Copy(os.path.join(env['xorp_alias_templatedir'], str(obj)),
+			os.path.join(template_source_dir, str(obj))))
 
 e.Alias('install', [
         e.InstallData(env['xorp_templatedir'],
