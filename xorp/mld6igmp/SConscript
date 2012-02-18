@@ -125,6 +125,15 @@ mld = env.Program(target = 'xorp_mld', source = mldsrcs)
 
 env.Alias('install', env.InstallProgram(env['xorp_moduledir'], igmp))
 env.Alias('install', env.InstallProgram(env['xorp_moduledir'], mld))
+if env['rtld_origin']:
+    for obj in igmp:
+        env.AddPostAction(igmp,
+            env.Symlink(obj.abspath,
+                os.path.join(env['xorp_alias_moduledir'], str(obj))))
+    for obj in mld:
+        env.AddPostAction(mld,
+            env.Symlink(obj.abspath,
+                os.path.join(env['xorp_alias_moduledir'], str(obj))))
 if is_shared:
     env.Alias('install', env.InstallLibrary(env['xorp_libdir'], libxorp_mld6igmp))
 

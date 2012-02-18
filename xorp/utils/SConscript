@@ -51,6 +51,11 @@ runit_srcs = [
 runit = env.Program(target = 'runit', source = runit_srcs)
 
 if env['enable_tests']:
+    if env['rtld_origin']:
+        for obj in runit:
+            env.AddPostAction(runit,
+                env.Symlink(obj.abspath,
+                    os.path.join(env['xorp_alias_tooldir'], str(obj))))
     env.Alias('install', env.InstallProgram(env['xorp_tooldir'], runit))
 
 # Install scripts

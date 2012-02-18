@@ -143,7 +143,11 @@ pim4srcs = [
           ]
 
 pim4 = env.Program(target = 'xorp_pimsm4', source = pim4srcs)
-
+if env['rtld_origin']:
+    for obj in pim4:
+        env.AddPostAction(pim4,
+            env.Symlink(obj.abspath,
+                os.path.join(env['xorp_alias_moduledir'], str(obj))))
 env.Alias('install', env.InstallProgram(env['xorp_moduledir'], pim4))
 
 if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
@@ -152,7 +156,11 @@ if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
         ]
 
     pim6 = env.Program(target = 'xorp_pimsm6', source = pim6srcs)
-
+    if env['rtld_origin']:
+        for obj in pim6:
+            env.AddPostAction(pim6,
+                env.Symlink(obj.abspath,
+                    os.path.join(env['xorp_alias_moduledir'], str(obj))))
 
     env.Alias('install', env.InstallProgram(env['xorp_moduledir'], pim6))
 

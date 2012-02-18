@@ -113,6 +113,11 @@ else:
 
 xorp_static_routes = env.Program(target = 'xorp_static_routes',
 				 source = xorp_static_routes_srcs)
+if env['rtld_origin']:
+    for obj in xorp_static_routes:
+        env.AddPostAction(xorp_static_routes,
+            env.Symlink(obj.abspath,
+                os.path.join(env['xorp_alias_moduledir'], str(obj))))
 env.Alias('install', env.InstallProgram(env['xorp_moduledir'], xorp_static_routes))
 
 if is_shared:

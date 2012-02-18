@@ -85,6 +85,12 @@ else:
 
 if is_shared:
     libxorp_tecla = env.SharedLibrary('libxorp_tecla', libtecla_srcs)
+    # build symlink for resolving links whilst in BUILDDIR
+    if env['rtld_origin']:
+        for obj in libxorp_tecla:
+            env.AddPostAction(libxorp_tecla,
+                env.Symlink(obj.abspath,
+                            os.path.join(env['xorp_alias_libdir'], str(obj))))
     env.Alias('install',
               env.InstallLibrary(env['xorp_libdir'], libxorp_tecla))
 else:

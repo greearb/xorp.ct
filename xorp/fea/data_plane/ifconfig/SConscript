@@ -69,6 +69,12 @@ if env['enable_fea_dummy']:
 if is_shared:
     libxifc = env.SharedLibrary(target = 'libxorp_fea_ifconfig',
 				source = sources)
+    if env['rtld_origin']:
+        for obj in libxifc:
+            env.AddPostAction(libxifc,
+                env.Symlink(obj.abspath,
+                            os.path.join(env['xorp_alias_libdir'], str(obj))))
+
     # XXX missing RPATH.
 else:
     libxifc = env.StaticLibrary(target = 'libxorp_fea_ifconfig',

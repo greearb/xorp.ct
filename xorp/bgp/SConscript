@@ -190,6 +190,11 @@ bgpsrcs = [
     ]
 
 bgp = bgp_env.Program(target = 'xorp_bgp', source = bgpsrcs)
+if env['rtld_origin']:
+    for obj in bgp:
+        env.AddPostAction(bgp,
+            env.Symlink(obj.abspath,
+                        os.path.join(env['xorp_alias_moduledir'], str(obj))))
 bgp_env.Alias('install', bgp_env.InstallProgram(bgp_env['xorp_moduledir'], bgp))
 
 

@@ -44,6 +44,12 @@ sources = [
 if is_shared:
     libxfw = env.SharedLibrary(target = 'libxorp_fea_firewall',
 			       source = sources)
+    if env['rtld_origin']:
+        for obj in libxfw:
+            env.AddPostAction(libxfw,
+                env.Symlink(obj.abspath,
+                            os.path.join(env['xorp_alias_libdir'], str(obj))))
+
     env.Alias('install', env.InstallLibrary(env['xorp_libdir'], libxfw))
 else:
     libxfw = env.StaticLibrary(target = 'libxorp_fea_firewall',

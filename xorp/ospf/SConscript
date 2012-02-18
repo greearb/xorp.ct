@@ -129,6 +129,11 @@ else:
 
 ospfv2srcs = [ 'xorp_ospfv2.cc', ]
 ospfv2 = env.Program(target = 'xorp_ospfv2', source = ospfv2srcs)
+if env['rtld_origin']:
+    for obj in ospfv2:
+        env.AddPostAction(ospfv2,
+            env.Symlink(obj.abspath,
+                        os.path.join(env['xorp_alias_moduledir'], str(obj))))
 env.Alias('install', env.InstallProgram(env['xorp_moduledir'], ospfv2))
 
 if is_shared:
@@ -137,7 +142,11 @@ if is_shared:
 if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
     ospfv3srcs = [ 'xorp_ospfv3.cc' ]
     ospfv3 = env.Program(target = 'xorp_ospfv3', source = ospfv3srcs)
-
+    if env['rtld_origin']:
+        for obj in ospfv3:
+            env.AddPostAction(ospfv3,
+                env.Symlink(obj.abspath,
+                            os.path.join(env['xorp_alias_moduledir'], str(obj))))
     env.Alias('install', env.InstallProgram(env['xorp_moduledir'], ospfv3))
     Default(ospfv2, ospfv3)
 else:

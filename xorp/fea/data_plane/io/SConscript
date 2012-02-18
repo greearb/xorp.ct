@@ -45,6 +45,12 @@ if env['enable_fea_dummy']:
 
 if is_shared:
     libxio = env.SharedLibrary(target = 'libxorp_fea_io', source = sources)
+    if env['rtld_origin']:
+        for obj in libxio:
+            env.AddPostAction(libxio,
+                env.Symlink(obj.abspath,
+                            os.path.join(env['xorp_alias_libdir'], str(obj))))
+
     env.Alias('install', env.InstallLibrary(env['xorp_libdir'], libxio))
 else:
     libxio = env.StaticLibrary(target = 'libxorp_fea_io', source = sources)

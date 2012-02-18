@@ -89,6 +89,12 @@ libxorp_cli_srcs = [
 if is_shared:
     libxorp_cli = env.SharedLibrary(target = 'libxorp_cli',
 				    source = libxorp_cli_srcs)
+    # build symlink for resolving links whilst in BUILDDIR
+    if env['rtld_origin']:
+        for obj in libxorp_cli:
+            env.AddPostAction(libxorp_cli,
+                env.Symlink(obj.abspath,
+                            os.path.join(env['xorp_alias_libdir'], str(obj))))
     env.Alias('install',
               env.InstallLibrary(env['xorp_libdir'], libxorp_cli))
 else:

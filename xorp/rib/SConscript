@@ -146,7 +146,11 @@ ribsrcs = [
           ]
 
 rib = env.Program(target = 'xorp_rib', source = ribsrcs)
-
+if env['rtld_origin']:
+    for obj in rib:
+        env.AddPostAction(rib,
+            env.Symlink(obj.abspath,
+                os.path.join(env['xorp_alias_moduledir'], str(obj))))
 env.Alias('install', env.InstallProgram(env['xorp_moduledir'], rib))
 
 if is_shared:
