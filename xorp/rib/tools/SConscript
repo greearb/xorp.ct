@@ -89,11 +89,11 @@ shrtes = env.Program(target = 'rib_show_routes', source = shrtessrcs)
 if env['rtld_origin']:
     for obj in shdist:
         env.AddPostAction(shdist,
-            env.Symlink(obj.abspath,
+            env.Copy(obj.abspath,
                         os.path.join(env['xorp_alias_tooldir'], str(obj))))
     for obj in shrtes:
         env.AddPostAction(shrtes,
-            env.Symlink(obj.abspath,
+            env.Copy(obj.abspath,
                         os.path.join(env['xorp_alias_tooldir'], str(obj))))
 env.Alias('install', env.InstallProgram(env['xorp_tooldir'], shdist))
 env.Alias('install', env.InstallProgram(env['xorp_tooldir'], shrtes))

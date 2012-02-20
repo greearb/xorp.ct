@@ -40,6 +40,7 @@ Help("""
 
 import sys
 import os
+import shutil
 import string
 import subprocess
 import fnmatch
@@ -292,6 +293,15 @@ env['CONFIGUREDIR'] = str(builddir) + os.sep + '.sconf_temp'
 
 SConsEnvironment.Chmod = SCons.Action.ActionFactory(os.chmod,
     lambda dest, mode: 'Chmod("%s", 0%o)' % (dest, mode))
+
+def Copy(src, dest):
+    try:
+        os.unlink(dest)
+    except OSError:
+        pass
+    shutil.copy2(src, dest)
+SConsEnvironment.Copy = SCons.Action.ActionFactory(Copy,
+    lambda src, link_name: 'Copy("%s", to "%s")' % (src, link_name))
 
 def Symlink(src, link_name):
     try:

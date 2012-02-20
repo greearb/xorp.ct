@@ -86,11 +86,11 @@ printdb = env.Program(target = 'olsr_print_databases', source = printdbsrcs)
 if env['rtld_origin']:
     for obj in cleardb:
         env.AddPostAction(cleardb,
-            env.Symlink(obj.abspath,
+            env.Copy(obj.abspath,
                         os.path.join(env['xorp_alias_tooldir'], str(obj))))
     for obj in printdb:
         env.AddPostAction(printdb,
-            env.Symlink(obj.abspath,
+            env.Copy(obj.abspath,
                         os.path.join(env['xorp_alias_tooldir'], str(obj))))
 env.Alias('install', env.InstallProgram(env['xorp_tooldir'], cleardb))
 env.Alias('install', env.InstallProgram(env['xorp_tooldir'], printdb))
