@@ -113,7 +113,7 @@ fib2mribsrcs = [
           ]
 
 fib2mrib = env.Program(target = 'xorp_fib2mrib', source = fib2mribsrcs)
-if env['rtld_origin']:
+if env['enable_builddirrun']:
     for obj in fib2mrib:
         env.AddPostAction(fib2mrib,
             env.Symlink(obj.abspath,

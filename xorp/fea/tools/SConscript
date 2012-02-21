@@ -82,7 +82,7 @@ showifsrcs = [
     ]
 
 showif = env.Program(target = 'fea_show_interfaces', source = showifsrcs)
-if env['rtld_origin']:
+if env['enable_builddirrun']:
     for obj in showif:
         env.AddPostAction(showif,
             env.Copy(obj.abspath,

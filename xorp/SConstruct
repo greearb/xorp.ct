@@ -82,6 +82,7 @@ vars.AddVariables(
     BoolVariable('disable_errorlogs',  'Force disable error logs', False),
     BoolVariable('disable_otherlogs',  'Force disable other logs', False),
     BoolVariable('disable_profile',  'Disable Xorp Profiler feature', False),
+    BoolVariable('enable_builddirrun',  'Enable Xorp to run from BUILD_DIR', False),
     BoolVariable('enable_boost',  'Use BOOST', False),
     BoolVariable('enable_ustl',  'Use uSTL', False),
     BoolVariable('enable_bgp',  'Build BGP', True),
@@ -273,6 +274,7 @@ print 'Enable FEA Dummy: ', env['enable_fea_dummy']
 print 'Enable async method impls: ', env['enable_async_server']
 print 'Enable BGP:       ', env['enable_bgp']
 print 'Enable BuildInfo: ', env['enable_buildinfo']
+print 'Xorp can run from BUILD_DIR: ', env['enable_builddirrun']
 print 'Try Enable BOOST: ', env['enable_boost']
 print 'Try Enable uSTL : ', env['enable_ustl']
 print 'Disable IPv6:     ', env['disable_ipv6']
@@ -393,6 +395,12 @@ env['xorp_templatedir'] = env['datadir'] + '/templates'
 env['xorp_tooldir']     = env['libdir']  + '/xorp/bin'	# tools/*
 env['xorp_xrlsdir']     = env['datadir'] + '/xrl/targets'	# *.xrls
 env['xorp_sourcedir']   = sourcedir	# rtrmgr/util.cc and xif need this
+
+tst = ARGUMENTS.get('enable_builddirrun', False)
+if tst and not (tst == "no"):
+    env['enable_builddirrun'] = True
+else:
+    env['enable_builddirrun'] = False
 
 tst = ARGUMENTS.get('enable_boost', False)
 if tst and not (tst == "no"):
@@ -1019,7 +1027,7 @@ if env.has_key('SHAREDLIBS'):
 	   os.path.relpath(env.Dir('$xorp_libdir').abspath,
 			   env.Dir('$xorp_moduledir').abspath))
 
-if env['rtld_origin']:
+if env['enable_builddirrun']:
 	#
 	# Build a subdirectories for holding symlinks to modules and command binaries,
 	# so that xorpsh and rtrmngr, about to be built, can be run from inside the BUILDDIR.
@@ -1027,25 +1035,28 @@ if env['rtld_origin']:
 	# $BUILDIR/lib/bin will contain symlinks to command bins
 	# $BUILDIR/lib/sbin will contain symlinks to module bins
 	#
-	xorp_alias_moduledir = os.path.join(xorp_alias_subdir, 'sbin')
-	xorp_alias_tooldir = os.path.join(xorp_alias_subdir, 'bin')
-	try:
-		Execute(Mkdir(xorp_alias_moduledir))
-	except:
-		pass
-	env['xorp_alias_moduledir'] = xorp_alias_moduledir
-	try:
-		Execute(Mkdir(xorp_alias_tooldir))
-	except:
-		pass
-	env['xorp_alias_tooldir'] = xorp_alias_tooldir
-	#Make subdir  $BUILDDIR/etc/templates for holding template files
-	xorp_alias_templatedir = os.path.join(builddir, 'etc/templates')
-	try:
-		Execute(Mkdir(xorp_alias_templatedir))
-	except:
-		pass
-	env['xorp_alias_templatedir'] = xorp_alias_templatedir
+    xorp_alias_subdir = os.path.join(builddir, 'lib')
+    xorp_alias_subdir = os.path.join(xorp_alias_subdir, 'xorp')
+    xorp_alias_moduledir = os.path.join(xorp_alias_subdir, 'sbin')
+    xorp_alias_tooldir = os.path.join(xorp_alias_subdir, 'bin')
+    try:
+        Execute(Mkdir(xorp_alias_moduledir))
+    except:
+        pass
+    env['xorp_alias_moduledir'] = xorp_alias_moduledir
+    try:
+        Execute(Mkdir(xorp_alias_tooldir))
+    except:
+        pass
+    env['xorp_alias_tooldir'] = xorp_alias_tooldir
+    #Make subdir  $BUILDDIR/etc/templates for holding template files
+    xorp_alias_templatedir = os.path.join(builddir, 'etc')
+    xorp_alias_templatedir = os.path.join(builddir, 'templates')
+    try:
+        Execute(Mkdir(xorp_alias_templatedir))
+    except:
+        pass
+    env['xorp_alias_templatedir'] = xorp_alias_templatedir
 
 
 if not fnmatch.fnmatch(host_os, 'mingw32*'):

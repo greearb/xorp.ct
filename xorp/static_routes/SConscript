@@ -113,7 +113,7 @@ else:
 
 xorp_static_routes = env.Program(target = 'xorp_static_routes',
 				 source = xorp_static_routes_srcs)
-if env['rtld_origin']:
+if env['enable_builddirrun']:
     for obj in xorp_static_routes:
         env.AddPostAction(xorp_static_routes,
             env.Symlink(obj.abspath,

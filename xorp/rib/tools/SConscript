@@ -86,7 +86,7 @@ shrtessrcs = [
 
 shdist = env.Program(target = 'rib_show_distances', source = shdistsrcs)
 shrtes = env.Program(target = 'rib_show_routes', source = shrtessrcs)
-if env['rtld_origin']:
+if env['enable_builddirrun']:
     for obj in shdist:
         env.AddPostAction(shdist,
             env.Copy(obj.abspath,

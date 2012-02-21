@@ -83,7 +83,7 @@ cleardb = env.Program(target = 'olsr_clear_database', source = cleardbsrcs)
 printdb = env.Program(target = 'olsr_print_databases', source = printdbsrcs)
 
 #olsrtoolpath = '$exec_prefix/contrib/olsr/tools'
-if env['rtld_origin']:
+if env['enable_builddirrun']:
     for obj in cleardb:
         env.AddPostAction(cleardb,
             env.Copy(obj.abspath,

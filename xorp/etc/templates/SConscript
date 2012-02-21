@@ -153,8 +153,9 @@ for tp in tp_raw:
 
 Default(all_tp_raw)
 
-if env['rtld_origin']:
-        template_source_dir = os.path.join(env['xorp_sourcedir'], "etc/templates")
+if env['enable_builddirrun']:
+        template_source_dir = os.path.join(env['xorp_sourcedir'], "etc")
+        template_source_dir = os.path.join(template_source_dir, "templates")
 
         cmd_files = [c.__add__('.cmds') for c in cmds]
         for obj in cmd_files:

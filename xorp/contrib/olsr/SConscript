@@ -162,7 +162,7 @@ olsr4srcs = [
 
 
 olsr4 = env.Program(target = 'xorp_olsr4', source = olsr4srcs)
-if env['rtld_origin']:
+if env['enable_builddirrun']:
     for obj in olsr4:
         env.AddPostAction(olsr4,
             env.Symlink(obj.abspath,

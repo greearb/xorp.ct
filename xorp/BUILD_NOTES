@@ -76,23 +76,18 @@ To compile using uSTL instead of standard STL library:
    eg. "xorp-top-level-directory/obj/<arch>-<os>-<rel>",
    it is necessary to run command:
 
-   scons rtld_origin=true
-
-   By default, rtld_origin is set to "True", so it is enough,
-   to run command:
-
-   scons
+   scons enable_builddirrun=true
 
    Binaries xorp_rtrmgr and xorpsh, will be compiled in directory
    obj/<arch>-<os>-<rel>/rtrmgr.
    Copy of all necessary tool binaries, like "ospf_print_neighbours",
    are placed inside obj/<arch>-<os>-<rel>/lib/xorp/bin.
-   Symbolic links for all libraries, are created in
-   obj/<arch>-<os>-<rel>/lib/xorp/lib.
    Symbolic links for all modules, like "xorp_ospf", are created in
    obj/<arch>-<os>-<rel>/lib/xorp/sbin.
-   This layout of executable binary files, enable us to debug Xorp,
-   more easily.
+   All necessary template files will be copied to
+   obj/<arch>-<os>-<rel>/etc/templates.
+   This layout of executable binary files and template files,
+   enable us to debug Xorp, more easily.
 
    scons disable_ipv6=yes disable_fw=yes disable_warninglogs=yes \
        disable_tracelogs=yes disable_fatallogs=yes disable_infologs=yes \
