@@ -117,12 +117,12 @@ xorp_paths = {
 
 is_shared = env.has_key('SHAREDLIBS')
 if not is_shared:
-    env.AppendUnique(LIBS = [
+    libxorp_rtrmgr_env.AppendUnique(LIBS = [
         "crypto",
         ])
 
     if not (env.has_key('mingw') and env['mingw']):
-        env.AppendUnique(LIBS = [
+        libxorp_rtrmgr_env.AppendUnique(LIBS = [
             "rt",
             ])
 
