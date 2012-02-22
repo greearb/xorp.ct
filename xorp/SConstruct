@@ -397,59 +397,59 @@ env['xorp_xrlsdir']     = env['datadir'] + '/xrl/targets'	# *.xrls
 env['xorp_sourcedir']   = sourcedir	# rtrmgr/util.cc and xif need this
 
 tst = ARGUMENTS.get('enable_builddirrun', False)
-if tst and not (tst == "no"):
+if tst and not ((tst == "no") or (tst == "false")):
     env['enable_builddirrun'] = True
 else:
     env['enable_builddirrun'] = False
 
 tst = ARGUMENTS.get('enable_boost', False)
-if tst and not (tst == "no"):
+if tst and not ((tst == "no") or (tst == "false")):
     env['enable_boost'] = True
 else:
     env['enable_boost'] = False
 
 tst = ARGUMENTS.get('enable_ustl', False)
-if tst and not (tst == "no"):
+if tst and not ((tst == "no") or (tst == "false")):
     env['enable_ustl'] = True
 else:
     env['enable_ustl'] = False
 
 tst = ARGUMENTS.get('enable_tests', False)
-if tst and not (tst == "no"):
+if tst and not ((tst == "no") or (tst == "false")):
     env['enable_tests'] = True
 else:
     env['enable_tests'] = False
 
 tst = ARGUMENTS.get('enable_click', False)
-if tst and not (tst == "no"):
+if tst and not ((tst == "no") or (tst == "false")):
     env['enable_click'] = True
 else:
     env['enable_click'] = False
 
 # Default to enabled
 tst = ARGUMENTS.get('enable_fea_dummy', True)
-if tst and (tst == "no"):
+if tst and ((tst == "no") or (tst == "false")):
     env['enable_fea_dummy'] = False
 else:
     env['enable_fea_dummy'] = True
 
 # Default to disabled
 tst = ARGUMENTS.get('enable_async_server', False)
-if tst and (tst == "no"):
+if tst and ((tst == "no") or (tst == "false")):
     env['enable_async_server'] = False
 else:
     env['enable_async_server'] = True
 
 # Default to enabled
 tst = ARGUMENTS.get('enable_bgp', True)
-if tst and (tst == "no"):
+if tst and ((tst == "no") or (tst == "false")):
     env['enable_bgp'] = False
 else:
     env['enable_bgp'] = True
 
 # Default to enabled
 tst = ARGUMENTS.get('enable_buildinfo', True)
-if tst and (tst == "no"):
+if tst and ((tst == "no") or (tst == "false")):
     env['enable_buildinfo'] = False
 else:
     env['enable_buildinfo'] = True
@@ -469,101 +469,101 @@ if env.GetOption('clean'):
 
 # Default to enabled
 tst = ARGUMENTS.get('enable_olsr', True)
-if tst and (tst == "no"):
+if tst and ((tst == "no") or (tst == "false")):
     env['enable_olsr'] = False
 else:
     env['enable_olsr'] = True
 
 # Default to enabled
 tst = ARGUMENTS.get('enable_ospf', True)
-if tst and (tst == "no"):
+if tst and ((tst == "no") or (tst == "false")):
     env['enable_ospf'] = False
 else:
     env['enable_ospf'] = True
 
 # Default to enabled
 tst = ARGUMENTS.get('enable_rip', True)
-if tst and (tst == "no"):
+if tst and ((tst == "no") or (tst == "false")):
     env['enable_rip'] = False
 else:
     env['enable_rip'] = True
 
 # Default to enabled
 tst = ARGUMENTS.get('enable_vrrp', True)
-if tst and (tst == "no"):
+if tst and ((tst == "no") or (tst == "false")):
     env['enable_vrrp'] = False
 else:
     env['enable_vrrp'] = True
 
 # Default to enabled
 tst = ARGUMENTS.get('enable_xorpsh', True)
-if tst and (tst == "no"):
+if tst and ((tst == "no") or (tst == "false")):
     env['enable_xorpsh'] = False
 else:
     env['enable_xorpsh'] = True
 
 tst = ARGUMENTS.get('disable_ipv6', False)
-if tst and not (tst == "no"):
+if tst and not ((tst == "no") or (tst == "false")):
     env['disable_ipv6'] = True
 else:
     env['disable_ipv6'] = False
 
 tst = ARGUMENTS.get('disable_fw', False)
-if tst and not (tst == "no"):
+if tst and not ((tst == "no") or (tst == "false")):
     env['disable_fw'] = True
 else:
     env['disable_fw'] = False
 
 tst = ARGUMENTS.get('disable_libtecla', False)
-if tst and not (tst == "no"):
+if tst and not ((tst == "no") or (tst == "false")):
     env['disable_libtecla'] = True
 else:
     env['disable_libtecla'] = False
 
 tst = ARGUMENTS.get('disable_profile', False)
-if tst and not (tst == "no"):
+if tst and not ((tst == "no") or (tst == "false")):
     env['disable_profile'] = True
 else:
     env['disable_profile'] = False
 
 tst = ARGUMENTS.get('disable_warninglogs', False)
-if tst and not (tst == "no"):
+if tst and not ((tst == "no") or (tst == "false")):
     env['disable_warninglogs'] = True
 else:
     env['disable_warninglogs'] = False
 
 tst = ARGUMENTS.get('disable_errorlogs', False)
-if tst and not (tst == "no"):
+if tst and not ((tst == "no") or (tst == "false")):
     env['disable_errorlogs'] = True
 else:
     env['disable_errorlogs'] = False
 
 tst = ARGUMENTS.get('disable_tracelogs', False)
-if tst and not (tst == "no"):
+if tst and not ((tst == "no") or (tst == "false")):
     env['disable_tracelogs'] = True
 else:
     env['disable_tracelogs'] = False
 
 tst = ARGUMENTS.get('disable_fatallogs', False)
-if tst and not (tst == "no"):
+if tst and not ((tst == "no") or (tst == "false")):
     env['disable_fatallogs'] = True
 else:
     env['disable_fatallogs'] = False
 
 tst = ARGUMENTS.get('disable_infologs', False)
-if tst and not (tst == "no"):
+if tst and not ((tst == "no") or (tst == "false")):
     env['disable_infologs'] = True
 else:
     env['disable_infologs'] = False
 
 tst = ARGUMENTS.get('disable_assertlogs', False)
-if tst and not (tst == "no"):
+if tst and not ((tst == "no") or (tst == "false")):
     env['disable_assertlogs'] = True
 else:
     env['disable_assertlogs'] = False
 
 tst = ARGUMENTS.get('disable_otherlogs', False)
-if tst and not (tst == "no"):
+if tst and not ((tst == "no") or (tst == "false")):
     env['disable_otherlogs'] = True
 else:
     env['disable_otherlogs'] = False
@@ -677,15 +677,15 @@ if not env.GetOption('clean') and \
     DoAllConfig(env, conf, host_os)
 
     tst = ARGUMENTS.get('enable_click', False)
-    if tst and not (tst == "no"):
+    if tst and not ((tst == "no") or (tst == "false")):
         conf.Define('XORP_USE_CLICK')
 
     tst = ARGUMENTS.get('enable_fea_dummy', True)
-    if tst and not (tst == "no"):
+    if tst and not ((tst == "no") or (tst == "false")):
         conf.Define('XORP_USE_FEA_DUMMY')
 
     tst = ARGUMENTS.get('enable_async_server', False)
-    if tst and not (tst == "no"):
+    if tst and not ((tst == "no") or (tst == "false")):
         conf.Define('XORP_ENABLE_ASYNC_SERVER')
 
     if env['enable_xorpsh']:
