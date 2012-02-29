@@ -38,7 +38,7 @@ env.AppendUnique(LIBPATH = [
     '$BUILDDIR/libproto',
     '$BUILDDIR/xrl/interfaces',
     '$BUILDDIR/xrl/targets',
-    '$BUILDDIR/.',
+    '.',
     ])
 
 env.AppendUnique(LIBS = [
@@ -70,6 +70,10 @@ if (env.has_key('mingw') and env['mingw']):
 
     env.Append(LIBS = ['xorp_core'])
 
+env.Replace(RPATH = [
+    env.Literal(env['xorp_tool_rpath'])
+])
+
 cleardbsrcs = [
 	'clear_database.cc'
     ]
@@ -96,4 +100,3 @@ env.Alias('install', env.InstallProgram(env['xorp_tooldir'], cleardb))
 env.Alias('install', env.InstallProgram(env['xorp_tooldir'], printdb))
 
 Default(cleardb, printdb)
-Default()
