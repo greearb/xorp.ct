@@ -124,10 +124,10 @@ xppeers_srcs = [
 	]
 
 xppeers = env.Program(target = 'bgp_print_peers', source = xppeers_srcs)
-if env['rtld_origin']:
+if env['enable_builddirrun']:
     for obj in xppeers:
         env.AddPostAction(xppeers,
-            env.Symlink(obj.abspath,
+            env.Copy(obj.abspath,
                         os.path.join(env['xorp_alias_tooldir'], str(obj))))
 env.Alias('install',
     env.InstallProgram(env['xorp_tooldir'], xppeers))
@@ -140,10 +140,10 @@ xproutes_srcs = [
 	]
 
 xproutes = env.Program(target = 'bgp_print_routes', source = xproutes_srcs)
-if env['rtld_origin']:
+if env['enable_builddirrun']:
     for obj in xproutes:
         env.AddPostAction(xproutes,
-            env.Symlink(obj.abspath,
+            env.Copy(obj.abspath,
                         os.path.join(env['xorp_alias_tooldir'], str(obj))))
 env.Alias('install', env.InstallProgram(env['xorp_tooldir'], xproutes))
 

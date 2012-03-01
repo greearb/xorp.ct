@@ -81,14 +81,14 @@ sendclisrcs = [
 
 cligen = env.Program(target = 'cli_generic', source = cligensrcs)
 sendcli = env.Program(target = 'cli_send_processor_xrl', source = sendclisrcs)
-if env['rtld_origin']:
+if env['enable_builddirrun']:
     for obj in cligen:
         env.AddPostAction(cligen,
-            env.Symlink(obj.abspath,
+            env.Copy(obj.abspath,
                         os.path.join(env['xorp_alias_tooldir'], str(obj))))
     for obj in sendcli:
         env.AddPostAction(sendcli,
-            env.Symlink(obj.abspath,
+            env.Copy(obj.abspath,
                         os.path.join(env['xorp_alias_tooldir'], str(obj))))
 env.Alias('install', env.InstallProgram(env['xorp_tooldir'], cligen))
 env.Alias('install', env.InstallProgram(env['xorp_tooldir'], sendcli))

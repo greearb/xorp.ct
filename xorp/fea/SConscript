@@ -235,7 +235,7 @@ feasrcs = [
           ]
 
 fea = env.Program(target = 'xorp_fea', source = feasrcs)
-if env['rtld_origin']:
+if env['enable_builddirrun']:
     for obj in fea:
         env.AddPostAction(fea,
             env.Symlink(obj.abspath,
@@ -256,7 +256,7 @@ if env['enable_fea_dummy']:
         ]
 
     feadummy = env.Program(target = 'xorp_fea_dummy', source = feadummysrcs)
-    if env['rtld_origin']:
+    if env['enable_builddirrun']:
         for obj in feadummy:
             env.AddPostAction(feadummy,
                 env.Symlink(obj.abspath,

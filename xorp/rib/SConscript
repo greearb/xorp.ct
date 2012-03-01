@@ -146,7 +146,7 @@ ribsrcs = [
           ]
 
 rib = env.Program(target = 'xorp_rib', source = ribsrcs)
-if env['rtld_origin']:
+if env['enable_builddirrun']:
     for obj in rib:
         env.AddPostAction(rib,
             env.Symlink(obj.abspath,

@@ -95,18 +95,18 @@ printlsas = env.Program(target = 'ospf_print_lsas',
 			source = printlsassrcs)
 printneighbors = env.Program(target = 'ospf_print_neighbours',
 			     source = printneighborssrcs)
-if env['rtld_origin']:
+if env['enable_builddirrun']:
     for obj in cleardb:
         env.AddPostAction(cleardb,
-            env.Symlink(obj.abspath,
+            env.Copy(obj.abspath,
                         os.path.join(env['xorp_alias_tooldir'], str(obj))))
     for obj in printlsas:
         env.AddPostAction(printlsas,
-            env.Symlink(obj.abspath,
+            env.Copy(obj.abspath,
                         os.path.join(env['xorp_alias_tooldir'], str(obj))))
     for obj in printneighbors:
         env.AddPostAction(printneighbors,
-            env.Symlink(obj.abspath,
+            env.Copy(obj.abspath,
                         os.path.join(env['xorp_alias_tooldir'], str(obj))))
 env.Alias('install', env.InstallProgram(env['xorp_tooldir'], cleardb))
 env.Alias('install', env.InstallProgram(env['xorp_tooldir'], printlsas))

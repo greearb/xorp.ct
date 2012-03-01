@@ -96,8 +96,12 @@ if env['enable_xorpsh']:
 def BuildXrlTemplate(target, source, env):
     #    base = tp[:-len('.raw')]
     skip_fw = False
+    skip_click = True
     if (env.has_key('disable_fw') and env['disable_fw']):
         skip_fw = True
+
+    if (env.has_key('enable_click') and env['enable_click']):
+        skip_click = False
 
     sfname = str(source[0])
     
@@ -109,11 +113,27 @@ def BuildXrlTemplate(target, source, env):
     
     if sfname == 'etc/templates/fea.tp.raw':
         ignore_ln = re.compile(".*firewall.*")
+
+        opened_brackets = 0
+        opened_bracket_ln = re.compile(".*{.*")
+        closed_bracket_ln = re.compile(".*}.*")
+        click_ln = re.compile(".*click.*")
+
         for line in ifile.readlines():
-            if not (skip_fw and ignore_ln.match(line)):
-                if line[-1] == "\n":
-                    # trim trailing newline
-                    line = line[0 : -1]
+            if opened_brackets > 0:
+                if opened_bracket_ln.match(line):
+                    opened_brackets += 1
+                if closed_bracket_ln.match(line):
+                    opened_brackets -= 1
+                continue
+            if (skip_fw and ignore_ln.match(line)):
+                continue
+            if (skip_click and click_ln.match(line)):
+                opened_brackets = 1
+                continue
+            if line[-1] == "\n":
+                # trim trailing newline
+                line = line[0 : -1]
                 print >>ofile, "%s" % line
     else:
         return -1 # error
@@ -133,8 +153,9 @@ for tp in tp_raw:
 
 Default(all_tp_raw)
 
-if env['rtld_origin']:
-        template_source_dir = os.path.join(env['xorp_sourcedir'], "etc/templates")
+if env['enable_builddirrun']:
+        template_source_dir = os.path.join(env['xorp_sourcedir'], "etc")
+        template_source_dir = os.path.join(template_source_dir, "templates")
 
         cmd_files = [c.__add__('.cmds') for c in cmds]
         for obj in cmd_files:

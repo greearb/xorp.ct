@@ -190,7 +190,7 @@ bgpsrcs = [
     ]
 
 bgp = bgp_env.Program(target = 'xorp_bgp', source = bgpsrcs)
-if env['rtld_origin']:
+if env['enable_builddirrun']:
     for obj in bgp:
         env.AddPostAction(bgp,
             env.Symlink(obj.abspath,

@@ -136,7 +136,7 @@ else:
 
 policysrcs = [ 'xorp_policy.cc', ]
 policy = env.Program(target = 'xorp_policy', source = policysrcs)
-if env['rtld_origin']:
+if env['enable_builddirrun']:
     for obj in policy:
         env.AddPostAction(policy,
             env.Symlink(obj.abspath,

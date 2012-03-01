@@ -51,7 +51,7 @@ runit_srcs = [
 runit = env.Program(target = 'runit', source = runit_srcs)
 
 if env['enable_tests']:
-    if env['rtld_origin']:
+    if env['enable_builddirrun']:
         for obj in runit:
             env.AddPostAction(runit,
                 env.Symlink(obj.abspath,

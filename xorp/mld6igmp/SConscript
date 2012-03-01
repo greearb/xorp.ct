@@ -125,7 +125,7 @@ mld = env.Program(target = 'xorp_mld', source = mldsrcs)
 
 env.Alias('install', env.InstallProgram(env['xorp_moduledir'], igmp))
 env.Alias('install', env.InstallProgram(env['xorp_moduledir'], mld))
-if env['rtld_origin']:
+if env['enable_builddirrun']:
     for obj in igmp:
         env.AddPostAction(igmp,
             env.Symlink(obj.abspath,
