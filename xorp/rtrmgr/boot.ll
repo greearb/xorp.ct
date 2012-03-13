@@ -288,6 +288,11 @@ RE_ARITH_OPERATOR	[" "]*({RE_BIN_OPERATOR})[" "]*
 	return UINT_VALUE;
 	}
 
+[-][0-9]+	{
+	bootlval = strdup(boottext);
+	return INT_VALUE;
+	}
+
 {RE_IPV4}".."{RE_IPV4}	{
 	bootlval = strdup(boottext);
 	return IPV4RANGE_VALUE;
