@@ -9,16 +9,18 @@
 #undef __unused
 #endif
 
+#define YYSTYPE char*
+
 #include "libxorp/xorp.h"
-#include "y.boot_tab.h"
+#include "y.boot_tab.hh"
 
 #ifdef __xorp_unused
 #define __unused __xorp_unused
 #undef __xorp_unused
 #endif
+
 %}
 	int boot_linenum = 1;
-	extern char* bootlval;
 	string parsebuf;
 	int arith_nesting;
 	bool arith_op_allowed;

@@ -3,6 +3,7 @@
 
 #include <assert.h>
 #include <stdio.h>
+#include <string>
 
 #include <map>
 
@@ -17,6 +18,86 @@
 /* XXX: sigh - -p flag to yacc should do this for us */
 #define yystacksize opcmdstacksize
 #define yysslim opcmdsslim
+
+/**
+ * Forward declarations
+ */
+extern "C" int opcmdparse();
+extern int opcmdlex();
+extern FILE *opcmdin;
+extern int opcmd_linenum;
+
+void opcmderror(const char *s) throw (ParseError);
+void opcmd_warning(const char *s);
+
+static OpCommandList *ocl = NULL;
+static list<string> path_segments;
+static list<list<string> >path_segments_stack;
+static list<OpCommand> op_command_stack;
+static list<string> op_command_tag_help_stack;
+static list<map<string, string> > opt_params_tag_help_stack;
+static list<map<string, string> > tags_stack;
+static bool is_help_tag = false;
+static string help_tag;
+static string help_string;
+
+static string opcmd_filename;
+static string lastsymbol;
+
+/**
+ * Function declarations
+ */
+static string
+strip_quotes_and_empty_space(const string& s);
+
+static void
+resolve_tag(const string& tag, string& value);
+
+static void
+append_path_word(char *s);
+
+static void
+append_path_variable(char *s);
+
+static void
+push_path();
+
+static void
+pop_path();
+
+static void
+add_cmd_module(char *s);
+
+static void
+add_cmd_command(char *s);
+
+static void
+add_cmd_opt_parameter(char *s);
+
+static void
+add_cmd_tag(char *t, char *v);
+
+static void
+add_cmd_help_tag(char *s);
+
+static void
+add_cmd_help_string(char *s);
+
+static void
+set_nomore_mode(bool v);
+
+void
+opcmderror(const char *s) throw (ParseError);
+
+void
+opcmd_warning(const char *s);
+
+int
+init_opcmd_parser(const char *filename, OpCommandList *o);
+
+void
+parse_opcmd() throw (ParseError);
+
 %}
 
 %token UPLEVEL
@@ -123,31 +204,8 @@ syntax_error:		SYNTAX_ERROR { opcmderror("syntax error"); }
 
 %%
 
-extern "C" int opcmdparse();
-extern int opcmdlex();
-extern FILE *opcmdin;
-extern int opcmd_linenum;
-
-void opcmderror(const char *s) throw (ParseError);
-void opcmd_warning(const char *s);
-
-static OpCommandList *ocl = NULL;
-static list<string> path_segments;
-static list<list<string> >path_segments_stack;
-static list<OpCommand> op_command_stack;
-static list<string> op_command_tag_help_stack;
-static list<map<string, string> > opt_params_tag_help_stack;
-static list<map<string, string> > tags_stack;
-static bool is_help_tag = false;
-static string help_tag;
-static string help_string;
-
-static string opcmd_filename;
-static string lastsymbol;
-
-
 // Strip the quotes, the heading and trailing empty space
-static string
+string
 strip_quotes_and_empty_space(const string& s)
 {
     string res;
@@ -167,7 +225,7 @@ strip_quotes_and_empty_space(const string& s)
     return res;
 }
 
-static void
+void
 resolve_tag(const string& tag, string& value)
 {
     map<string, string>& tags = tags_stack.back();
@@ -182,7 +240,7 @@ resolve_tag(const string& tag, string& value)
     value = iter->second;
 }
 
-static void
+void
 append_path_word(char *s)
 {
     string word = s;
@@ -192,7 +250,7 @@ append_path_word(char *s)
     path_segments.push_back(word);
 }
 
-static void
+void
 append_path_variable(char *s)
 {
     string variable = s;
@@ -207,7 +265,7 @@ append_path_variable(char *s)
     path_segments.push_back(variable);
 }
 
-static void
+void
 push_path()
 {
     if (! path_segments_stack.empty()) {
@@ -234,7 +292,7 @@ push_path()
     tags_stack.push_back(dummy_map);
 }
 
-static void
+void
 pop_path()
 {
     string help;
@@ -283,7 +341,7 @@ pop_path()
     tags_stack.pop_back();
 }
 
-static void
+void
 add_cmd_module(char *s)
 {
     string module = s;
@@ -300,7 +358,7 @@ add_cmd_module(char *s)
     op_command.set_module(module);
 }
 
-static void
+void
 add_cmd_command(char *s)
 {
     string command = s;
@@ -404,7 +462,7 @@ add_cmd_command(char *s)
     op_command.set_help_string(help_string);
 }
 
-static void
+void
 add_cmd_opt_parameter(char *s)
 {
     string opt_parameter = s;
@@ -434,7 +492,7 @@ add_cmd_opt_parameter(char *s)
     op_command.add_opt_param(opt_parameter, help_string);
 }
 
-static void
+void
 add_cmd_tag(char *t, char *v)
 {
     string tag = t;
@@ -455,7 +513,7 @@ add_cmd_tag(char *t, char *v)
     tags.insert(make_pair(tag, value));
 }
 
-static void
+void
 add_cmd_help_tag(char *s)
 {
     string tag = s;
@@ -466,7 +524,7 @@ add_cmd_help_tag(char *s)
     is_help_tag = true;
 }
 
-static void
+void
 add_cmd_help_string(char *s)
 {
     string help = s;
@@ -480,11 +538,11 @@ add_cmd_help_string(char *s)
     is_help_tag = false;
 }
 
-static void
+void
 set_nomore_mode(bool v)
 {
     OpCommand& op_command = op_command_stack.back();
-    op_command.set_default_nomore_mode(v);    
+    op_command.set_default_nomore_mode(v);
 }
 
 void

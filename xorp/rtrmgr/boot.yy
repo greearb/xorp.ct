@@ -18,6 +18,49 @@
 /* XXX: sigh - -p flag to yacc should do this for us */
 #define yystacksize bootstacksize
 #define yysslim bootsslim
+
+/**
+ * Forward declarations
+ */
+extern void boot_scan_string(const char *configuration);
+extern int boot_linenum;
+extern "C" int bootparse();
+extern int bootlex();
+
+void booterror(const char *s) throw (ParseError);
+
+static ConfigTree *config_tree = NULL;
+static string boot_filename;
+static string lastsymbol;
+static string node_id;
+
+/**
+ * Function declarations
+ */
+static void
+extend_path(char* segment, int type, const string& node_id_str);
+
+static void
+push_path();
+
+static void
+pop_path();
+
+static void
+terminal(char* value, int type, ConfigOperator op);
+
+void
+booterror(const char *s) throw (ParseError);
+
+int
+init_bootfile_parser(const char *configuration,
+		     const char *filename,
+		     ConfigTree *ct);
+
+void
+parse_bootfile() throw (ParseError);
+
+ConfigOperator boot_lookup_operator(const char* s);
 %}
 
 %token UPLEVEL
@@ -190,20 +233,7 @@ syntax_error:	SYNTAX_ERROR {
 
 %%
 
-extern void boot_scan_string(const char *configuration);
-extern int boot_linenum;
-extern "C" int bootparse();
-extern int bootlex();
-
-void booterror(const char *s) throw (ParseError);
-
-static ConfigTree *config_tree = NULL;
-static string boot_filename;
-static string lastsymbol;
-static string node_id;
-
-
-static void
+void
 extend_path(char* segment, int type, const string& node_id_str)
 {
     lastsymbol = segment;
@@ -221,19 +251,19 @@ extend_path(char* segment, int type, const string& node_id_str)
     }
 }
 
-static void
+void
 push_path()
 {
     config_tree->push_path();
 }
 
-static void
+void
 pop_path()
 {
     config_tree->pop_path();
 }
 
-static void
+void
 terminal(char* value, int type, ConfigOperator op)
 {
     push_path();

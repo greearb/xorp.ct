@@ -9,8 +9,9 @@
 #undef __unused
 #endif
 
+#define YYSTYPE char*
 #include "libxorp/xorp.h"
-#include "y.tplt_tab.h"
+#include "y.tplt_tab.hh"
 
 #ifdef __xorp_unused
 #define __unused __xorp_unused
@@ -18,7 +19,6 @@
 #endif
 %}
 	int tplt_linenum = 1;
-	extern char* tpltlval;
 	string tplt_parsebuf;
 %option noyywrap
 %option nounput

@@ -18,6 +18,68 @@ extern void add_cmd_action_adaptor(const string& cmd,
 /* XXX: sigh, the -p flag to yacc should do this for us */
 #define yystacksize tpltstacksize
 #define yysslim tpltsslim
+
+/**
+ * Forward declarations
+ */
+extern char *lstr;
+extern char *vstr;
+extern char *cstr;
+extern char *sstr;
+extern char *istr;
+extern FILE *tpltin;
+extern int tplt_linenum;
+extern "C" int tpltparse();
+extern int tpltlex();
+
+static TemplateTree* tt = NULL;
+static string tplt_filename;
+static string lastsymbol;
+static int tplt_type;
+static char *tplt_initializer = NULL;
+static string current_cmd;
+static list<string> cmd_list;
+
+/**
+ * Function declarations
+ */
+
+static void
+extend_path(char *segment, bool is_tag);
+
+static void
+push_path();
+
+static void
+pop_path();
+
+static void
+terminal(char *segment);
+
+static void
+add_cmd(char *cmd);
+
+static void
+append_cmd(char *s);
+
+static void
+prepend_cmd(char *s);
+
+static void
+end_cmd();
+
+void
+tplterror(const char *s) throw (ParseError);
+
+int
+init_template_parser(const char *filename, TemplateTree *c);
+
+void
+complete_template_parser();
+
+void
+parse_template() throw (ParseError);
+
 %}
 
 %token UPLEVEL
@@ -291,26 +353,7 @@ syntax_error:	SYNTAX_ERROR {
 
 %%
 
-extern char *lstr;
-extern char *vstr;
-extern char *cstr;
-extern char *sstr;
-extern char *istr;
-extern FILE *tpltin;
-extern int tplt_linenum;
-extern "C" int tpltparse();
-extern int tpltlex();
-
-static TemplateTree* tt = NULL;
-static string tplt_filename;
-static string lastsymbol;
-static int tplt_type;
-static char *tplt_initializer = NULL;
-static string current_cmd;
-static list<string> cmd_list;
-
-
-static void
+void
 extend_path(char *segment, bool is_tag)
 {
     lastsymbol = segment;
@@ -321,7 +364,7 @@ extend_path(char *segment, bool is_tag)
     free(segment);
 }
 
-static void
+void
 push_path()
 {
     tt->push_path(tplt_type, tplt_initializer);
@@ -332,7 +375,7 @@ push_path()
     }
 }
 
-static void
+void
 pop_path()
 {
     tt->pop_path();
@@ -343,7 +386,7 @@ pop_path()
     }
 }
 
-static void
+void
 terminal(char *segment)
 {
     extend_path(segment, false);
@@ -351,7 +394,7 @@ terminal(char *segment)
     pop_path();
 }
 
-static void
+void
 add_cmd(char *cmd)
 {
     lastsymbol = cmd;
@@ -362,7 +405,7 @@ add_cmd(char *cmd)
     cmd_list.clear();
 }
 
-static void
+void
 append_cmd(char *s)
 {
     lastsymbol = s;
@@ -371,7 +414,7 @@ append_cmd(char *s)
     free(s);
 }
 
-static void
+void
 prepend_cmd(char *s)
 {
     lastsymbol = s;
@@ -380,7 +423,7 @@ prepend_cmd(char *s)
     free(s);
 }
 
-static void
+void
 end_cmd()
 {
     add_cmd_action_adaptor(current_cmd, cmd_list, tt);
