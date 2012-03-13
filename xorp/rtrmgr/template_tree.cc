@@ -228,6 +228,12 @@ TemplateTree::new_node(TemplateTreeNode* parent,
     case NODE_UINTRANGE:
 	ttn = new UIntRangeTemplate(*this, parent, path, varname, initializer);
 	break;
+    case NODE_ULONG:
+    ttn = new ULongTemplate(*this, parent, path, varname, initializer);
+    break;
+    case NODE_ULONGRANGE:
+    ttn = new ULongRangeTemplate(*this, parent, path, varname, initializer);
+    break;
     case NODE_INT:
 	ttn = new IntTemplate(*this, parent, path, varname, initializer);
 	break;

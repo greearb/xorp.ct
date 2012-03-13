@@ -291,6 +291,16 @@ RE_URL_SUBDELIMS "!"|"$"|"&"|"'"|"("|")"|"*"|"+"|","|";"|"="
 	return UINT_TYPE;
 	}
 
+"u64range"	{
+	tpltlval = strdup(tplttext);
+	return ULONGRANGE_TYPE;
+	}
+
+"u64"	{
+	tpltlval = strdup(tplttext);
+	return ULONG_TYPE;
+	}
+
 "bool"	{
 	tpltlval = strdup(tplttext);
 	return BOOL_TYPE;

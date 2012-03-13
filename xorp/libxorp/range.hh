@@ -77,7 +77,7 @@ public:
      * Default constructor
      */
     U32Range() 			{ Range<uint32_t>::_low =
-    				   Range<uint32_t>::_high = 0; }
+				   Range<uint32_t>::_high = 0; }
 
     /**
      * Constructor from a string.
@@ -108,6 +108,54 @@ public:
 	return os.str();
     }
 };
+
+/**
+ * @short A linear range class (uint64_t low)..(uint64_t high)
+ *
+ * Inherits from templatized general Range<uint64_t> class.
+ * Provides specialized constructor from string and str() method.
+ */
+class U64Range: public Range<uint64_t> {
+public:
+	/**
+	 * Default constructor
+	 */
+	U64Range()				{ Range<uint64_t>::_low =
+						Range<uint64_t>::_high = 0; }
+
+	/**
+	 * Constructor	from a string.
+	 */
+	U64Range(const char *from_cstr) {
+	string from_string = string(from_cstr);
+	string::size_type delim = from_string.find("..", 0);
+	if (delim == string::npos) {
+	    _low = _high = strtoul(from_cstr, NULL, 10);
+	} else if (delim > 0 && (from_string.length() - delim > 2)) {
+	    _low = strtoul(from_string.substr(0, delim).c_str(), NULL, 10);
+	    _high = strtoul(from_string.substr(delim + 2, from_string.length()).c_str(), NULL, 10);
+	} else {
+	    xorp_throw(InvalidString, "Syntax error");
+	}
+    }
+
+    /**
+     * Convert the range to a human-readable format.
+     *
+     * @return C++ string.
+     */
+    string str() const {
+	ostringstream os;
+	os << _low;
+	if (_low < _high)
+	    os << ".." << _high;
+	return os.str();
+    }
+};
+
+/**
+ * Operators for uint32_t and U32Range
+ */
 
 /**
  * Equality Operator for @ref uint32_t against @ref U32Range operand.
@@ -182,6 +230,83 @@ inline bool operator>=(const uint32_t& lhs, const U32Range& rhs) {
     return (lhs >= rhs.low());
 }
 
+/**
+ * Operators for uint64_t and U64Range
+ */
+
+/**
+ * Equality Operator for @ref uint64_t against @ref U64Range operand.
+ *
+ * @param lhs the left-hand @ref uint64_t type operand.
+ * @param rhs the right-hand @ref U64Range operand.
+ * @return true if the value of the left-hand operand falls inside
+ * the range defined by the right-hand operand.
+ */
+inline bool operator==(const uint64_t& lhs, const U64Range& rhs) {
+    return (lhs >= rhs.low() && lhs <= rhs.high());
+}
+
+
+/**
+ * Non-equality Operator for @ref uint64_t against @ref U64Range operand.
+ *
+ * @param lhs the left-hand @ref uint64_t type operand.
+ * @param rhs the right-hand @ref U64Range operand.
+ * @return true if the value of the left-hand operand falls outside
+ * the range defined by the right-hand operand.
+ */
+inline bool operator!=(const uint64_t& lhs, const U64Range& rhs) {
+    return (lhs < rhs.low() || lhs > rhs.high());
+}
+
+/**
+ * Less-than comparison for @ref uint64_t against @ref U64Range operand.
+ *
+ * @param lhs the left-hand @ref uint64_t type operand.
+ * @param rhs the right-hand @ref U64Range operand.
+ * @return true if the value of the left-hand operand is bellow
+ * the range defined by the right-hand operand.
+ */
+inline bool operator<(const uint64_t& lhs, const U64Range& rhs) {
+    return (lhs < rhs.low());
+}
+
+/**
+ * Less-than or equal comparison for @ref uint64_t against @ref U64Range
+ *
+ * @param lhs the left-hand @ref uint64_t type operand.
+ * @param rhs the right-hand @ref U64Range operand.
+ * @return true if the value of the left-hand operand is bellow or within
+ * the range defined by the right-hand operand.
+ */
+inline bool operator<=(const uint64_t& lhs, const U64Range& rhs) {
+    return (lhs <= rhs.high());
+}
+
+/**
+ * Greater-than comparison for @ref uint64_t against @ref U64Range operand.
+ *
+ * @param lhs the left-hand @ref uint64_t type operand.
+ * @param rhs the right-hand @ref U64Range operand.
+ * @return true if the value of the left-hand operand is above
+ * the range defined by the right-hand operand.
+ */
+inline bool operator>(const uint64_t& lhs, const U64Range& rhs) {
+    return (lhs > rhs.high());
+}
+
+/**
+ * Greater-than or equal comparison for @ref uint64_t against @ref U64Range
+ *
+ * @param lhs the left-hand @ref uint64_t type operand.
+ * @param rhs the right-hand @ref U64Range operand.
+ * @return true if the value of the left-hand operand is above or within
+ * the range defined by the right-hand operand.
+ */
+inline bool operator>=(const uint64_t& lhs, const U64Range& rhs) {
+    return (lhs >= rhs.low());
+}
+
 
 /**
  * @short A linear IPvX class template (IPvX low)..(IPvX high)
@@ -208,7 +333,7 @@ public:
 	else if (delim > 0 && (from_string.length() - delim > 2)) {
 	    Range<T>::_low = T(from_string.substr(0, delim).c_str());
 	    Range<T>::_high = T(from_string.substr(delim + 2,
-	    					   from_string.length())
+						   from_string.length())
 						    .c_str());
 	} else {
 	    xorp_throw(InvalidString, "Syntax error");

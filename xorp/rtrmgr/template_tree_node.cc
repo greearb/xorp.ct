@@ -1544,6 +1544,120 @@ UIntRangeTemplate::type_match(const string& s, string& error_msg) const
 
 
 /**************************************************************************
+ * ULongTemplate
+ **************************************************************************/
+
+ULongTemplate::ULongTemplate(TemplateTree& template_tree,
+			   TemplateTreeNode* parent,
+			   const string& path, const string& varname,
+			   const string& initializer) throw (ParseError)
+    : TemplateTreeNode(template_tree, parent, path, varname)
+{
+    string error_msg;
+
+    if (initializer.empty())
+	return;
+
+    string s = strip_quotes(initializer);
+    if (! type_match(s, error_msg)) {
+	error_msg = c_format("Bad ULong type value \"%s\": %s.",
+			     initializer.c_str(), error_msg.c_str());
+	xorp_throw(ParseError, error_msg);
+    }
+    _default = strtoll(s.c_str(), (char **)NULL, 10);
+    set_has_default();
+}
+
+bool
+ULongTemplate::type_match(const string& orig, string& error_msg) const
+{
+    string s = strip_quotes(orig);
+
+    for (size_t i = 0; i < s.length(); i++) {
+	if (s[i] < '0' || s[i] > '9') {
+	    if (s[i]=='-') {
+		error_msg = "value cannot be negative";
+	    } else if (s[i]=='.') {
+		error_msg = "value must be an integer";
+	    } else {
+		error_msg = "value must be numeric";
+	    }
+	    return false;
+	}
+    }
+    return true;
+}
+
+string
+ULongTemplate::default_str() const
+{
+    return c_format("%lu", _default);
+}
+
+
+/**************************************************************************
+ * ULongRangeTemplate
+ **************************************************************************/
+
+ULongRangeTemplate::ULongRangeTemplate(TemplateTree& template_tree,
+			   TemplateTreeNode* parent,
+			   const string& path, const string& varname,
+			   const string& initializer) throw (ParseError)
+    : TemplateTreeNode(template_tree, parent, path, varname),
+      _default(NULL)
+{
+    string error_msg;
+
+    if (initializer.empty())
+	return;
+
+    try {
+	_default = new U64Range(initializer.c_str());
+    } catch (InvalidString) {
+	error_msg = c_format("Bad U64Range type value \"%s\".",
+			     initializer.c_str());
+	xorp_throw(ParseError, error_msg);
+    }
+    set_has_default();
+}
+
+ULongRangeTemplate::~ULongRangeTemplate()
+{
+    if (_default != NULL)
+	delete _default;
+}
+
+string
+ULongRangeTemplate::default_str() const
+{
+    if (_default != NULL)
+	return _default->str();
+
+    return "";
+}
+
+bool
+ULongRangeTemplate::type_match(const string& s, string& error_msg) const
+{
+    string tmp = strip_quotes(s);
+
+    if (tmp.empty()) {
+	error_msg = "value must be a valid range of unsigned 64-bit integers";
+	return false;
+    }
+
+    try {
+	U64Range* u64range = new U64Range(tmp.c_str());
+	delete u64range;
+    } catch (InvalidString) {
+	error_msg = "value must be a valid range of unsigned 64-bit integers";
+	return false;
+    }
+    return true;
+}
+
+
+/**************************************************************************
  * IntTemplate
  **************************************************************************/
 

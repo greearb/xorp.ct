@@ -93,6 +93,8 @@ parse_template() throw (ParseError);
 %token INT_TYPE
 %token UINT_TYPE
 %token UINTRANGE_TYPE
+%token ULONG_TYPE
+%token ULONGRANGE_TYPE
 %token BOOL_TYPE
 %token TOGGLE_TYPE
 %token IPV4_TYPE
@@ -161,6 +163,8 @@ type:		TEXT_TYPE { tplt_type = NODE_TEXT; }
 		| INT_TYPE { tplt_type = NODE_INT; }
 		| UINT_TYPE { tplt_type = NODE_UINT; }
 		| UINTRANGE_TYPE { tplt_type = NODE_UINTRANGE; }
+		| ULONG_TYPE { tplt_type = NODE_ULONG; }
+		| ULONGRANGE_TYPE { tplt_type = NODE_ULONGRANGE; }
 		| BOOL_TYPE { tplt_type = NODE_BOOL; }
 		| TOGGLE_TYPE { tplt_type = NODE_TOGGLE; }
 		| IPV4_TYPE { tplt_type = NODE_IPV4; }
@@ -190,6 +194,14 @@ init_type:	TEXT_TYPE ASSIGN_DEFAULT STRING {
 		}
 		| UINTRANGE_TYPE ASSIGN_DEFAULT UINTRANGE_VALUE {
 			tplt_type = NODE_UINTRANGE;
+			tplt_initializer = $3;
+		}
+		| ULONG_TYPE ASSIGN_DEFAULT INTEGER_VALUE {
+			tplt_type = NODE_ULONG;
+			tplt_initializer = $3;
+		}
+		| ULONGRANGE_TYPE ASSIGN_DEFAULT UINTRANGE_VALUE {
+			tplt_type = NODE_ULONGRANGE;
 			tplt_initializer = $3;
 		}
 		| BOOL_TYPE ASSIGN_DEFAULT BOOL_VALUE {

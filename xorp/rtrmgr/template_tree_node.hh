@@ -42,22 +42,24 @@ enum TTNodeType {
     NODE_VOID		= 0,
     NODE_TEXT		= 1,
     NODE_UINT		= 2,
-    NODE_INT		= 3,
-    NODE_BOOL		= 4,
-    NODE_TOGGLE		= 4,
-    NODE_IPV4		= 5,
-    NODE_IPV4NET	= 6,
-    NODE_IPV6		= 7,
-    NODE_IPV6NET	= 8,
-    NODE_MACADDR	= 9,
-    NODE_URL_FILE	= 10,
-    NODE_URL_FTP	= 11,
-    NODE_URL_HTTP	= 12,
-    NODE_URL_TFTP	= 13,
-    NODE_ARITH		= 14,
-    NODE_UINTRANGE	= 15,
-    NODE_IPV4RANGE	= 16,
-    NODE_IPV6RANGE	= 17
+    NODE_ULONG		= 3,
+    NODE_INT		= 4,
+    NODE_BOOL		= 5,
+    NODE_TOGGLE		= 5,
+    NODE_IPV4		= 6,
+    NODE_IPV4NET	= 7,
+    NODE_IPV6		= 8,
+    NODE_IPV6NET	= 9,
+    NODE_MACADDR	= 10,
+    NODE_URL_FILE	= 11,
+    NODE_URL_FTP	= 12,
+    NODE_URL_HTTP	= 13,
+    NODE_URL_TFTP	= 14,
+    NODE_ARITH		= 15,
+    NODE_UINTRANGE	= 16,
+    NODE_ULONGRANGE	= 17,
+    NODE_IPV4RANGE	= 18,
+    NODE_IPV6RANGE	= 19
 };
 
 enum TTSortOrder {
@@ -267,6 +269,39 @@ public:
 
 private:
     U32Range* _default;
+};
+
+class ULongTemplate : public TemplateTreeNode {
+public:
+    ULongTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
+		 const string& path, const string& varname,
+		 const string& initializer) throw (ParseError);
+
+    string typestr() const { return string("uint64"); }
+    TTNodeType type() const { return NODE_ULONG; }
+    unsigned int default_value() const { return _default; }
+    string default_str() const;
+    bool type_match(const string& s, string& error_msg) const;
+
+private:
+    uint64_t _default;
+};
+
+class ULongRangeTemplate : public TemplateTreeNode {
+public:
+    ULongRangeTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
+		 const string& path, const string& varname,
+		 const string& initializer) throw (ParseError);
+    ~ULongRangeTemplate();
+
+    string typestr() const { return string("uint64range"); }
+    TTNodeType type() const { return NODE_ULONGRANGE; }
+    U64Range* default_value() const { return _default; }
+    string default_str() const;
+    bool type_match(const string& s, string& error_msg) const;
+
+private:
+    U64Range* _default;
 };
 
 class IntTemplate : public TemplateTreeNode {

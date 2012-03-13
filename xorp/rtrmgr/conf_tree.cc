@@ -289,12 +289,22 @@ ConfigTree::terminal_value(const string& value, int type, ConfigOperator op)
 	    svalue = "true";
 	}
     }
+    /**
+     * If ctn_type() == NODE_ULONG, then
+     * type will be NODE_UINT, because
+     * we read uint64 values just as uint values
+     */
+    if (ctn->type() == NODE_ULONG && type == NODE_UINT)
+		type = NODE_ULONG;
+
     if ((ctn->type() == NODE_TEXT) && (type == NODE_TEXT)) {
 	svalue = unquote(svalue);
     } else if ((ctn->type() == NODE_TEXT) && (type != NODE_TEXT)) {
 	// We'll accept anything as text
-    } else if ((ctn->type() == NODE_UINTRANGE) && (type == NODE_UINT)) {
+    } else if (((ctn->type() == NODE_UINTRANGE) && (type == NODE_UINT)) ||
+			((ctn->type() == NODE_ULONGRANGE) && (type == NODE_ULONG))) {
 	// Expand a single uint to a uintrange
+    // or a single uint64 to uint64range
 	svalue += ".." + value;
     } else if ((ctn->type() == NODE_IPV4RANGE) && (type == NODE_IPV4)) {
 	// Expand a single IPv4 to a ipv4range
@@ -315,6 +325,7 @@ ConfigTree::terminal_value(const string& value, int type, ConfigOperator op)
 	    // Not clear what to do here
 	    break;
 	case NODE_UINT:
+	case NODE_ULONG:
 	    for (size_t i = 0; i < svalue.size(); i++) {
 		if ((svalue[i] < '0') || (svalue[i] > '9')) {
 		    goto parse_error;
