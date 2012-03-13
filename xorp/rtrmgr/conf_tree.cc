@@ -293,9 +293,13 @@ ConfigTree::terminal_value(const string& value, int type, ConfigOperator op)
      * If ctn_type() == NODE_ULONG, then
      * type will be NODE_UINT, because
      * we read uint64 values just as uint values
+     *
+     * Other case is when we read positive integers
      */
     if (ctn->type() == NODE_ULONG && type == NODE_UINT)
 		type = NODE_ULONG;
+    else if (ctn->type() == NODE_INT && type == NODE_UINT)
+		type = NODE_INT;
 
     if ((ctn->type() == NODE_TEXT) && (type == NODE_TEXT)) {
 	svalue = unquote(svalue);
