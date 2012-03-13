@@ -3779,11 +3779,15 @@ Neighbour<A>::ensure_retransmitter_running(const char* message)
 {
     string msg(message);
     msg += ": ensure_retransmitter_running";
-    if (_rxmt_wrapper[FULL]) {
+    if (_rxmt_wrapper[FULL] && _rxmt_timer[FULL].scheduled()) {
 	// Timer is already running.  We don't want to stop & restart because
 	// then it will probably fire later than it should.  So, just
 	// return with no changes.
 	return;
+    }
+    else if (_rxmt_wrapper[FULL]) {
+	// Need to clean up old wrapper before starting new timer.
+	stop_rxmt_timer(FULL, "kill wrapper object before restart");
     }
 
     start_rxmt_timer(FULL, callback(this, &Neighbour<A>::retransmitter),
