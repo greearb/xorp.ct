@@ -1,0 +1,22 @@
+#
+# $XORP$
+#
+
+Clean up the code.
+ Push header inclusion down to individual files.
+ Sort the functions in xorprtm.c somewhat.
+ Do a final pass to clean up function names and style.
+ Do a final indent pass.
+
+Write a GNU makefile for this code.
+Check it into the main repository.
+
+Make 'restart rras' a command line option for loadprotocol.
+Make 'unload protocol' a command line option for loadprotocol.
+
+Tasks depending on Microsoft feedback:
+ Fix route adds so they are pushed to the FIB.
+  Blocked awaiting feedback.
+ Refine and test IPv6 support.
+  Blocked on missing defines in SDK.
+  Blocked awaiting feedback.
