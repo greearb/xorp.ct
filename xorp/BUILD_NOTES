@@ -103,41 +103,17 @@ For various compile options use:  scons --help
 1.2 Generating documentation
 ============================
 
-The documentation for each XORP release is available from the XORP Web
-site. The following procedure can be used to generate the
-documentation directly from the source files.
+The documentation is now in a wiki:
 
-The documentation is now in a separate area of the XORP SVN repository,
-and is no longer part of the source tree itself.
+http://xorp.run.montefiore.ulg.ac.be/start
+http://xorp.run.montefiore.ulg.ac.be/latex2wiki/user_manual
 
-1.2.1. Install TeX and LaTeX
-
-  * FreeBSD
-    cd /usr/ports/print/teTeX
-    make
-    make install
-    # Optionally install the Prosper LaTeX class:
-    cd /usr/ports/textproc/prosper
-    make
-    make install
-
-  * Ubuntu Linux
-    apt-get install texlive
-    apt-get install texlive-latex-extra
-    apt-get install texlive-math-extra
-
-1.2.2. Compile the documentation.
-
-# Note that this must be done directly in the XORP docs directory with the
-# original source files.
-cd /path/to/xorp/docs
-scons
 
 2. Internal tests
 =================
 
-As of September 2009, not all of the regression tests are active in
-the public SVN tree.
+More tests need to be written/enabled, but a fair amount of tests
+are enabled currently.
 
 To run the internal tests, you must have "bash" and "python" installed.
 Note that if the python's executable filename is not "python", then
@@ -153,8 +129,16 @@ in the top-level XORP directory:
 scons check
 
 
-3. OS-specific notes
+3. OS-specific notes  (Might be badly out of date)
 ====================
+
+Older BSD in general:
+
+If you get failures related to y.tplt_tab.hh or similar y.*.hh,
+try enabling the lex hack:
+
+scons enable_lex_hack=true
+
 
 3.1. DragonFlyBSD
 =================
@@ -227,7 +211,6 @@ scons check
       The fix (already in FreeBSD-6.1) is to replace
       u_long with uint32_t inside the body of "struct igmpmsg", and
       then recompile both the FreeBSD kernel and XORP.
-    - The SNMP support inside the "mibs" directory fails to compile.
     - The rest of code compiles with the default compiler, and the internal
       tests appear to succeed:
       gcc (GCC) 3.4.4 [FreeBSD] 20050518
@@ -244,9 +227,6 @@ scons check
       gcc (GCC) 3.4.4 [FreeBSD] 20050518
 
   * FreeBSD-6.1 on amd64
-    - The SNMP support inside the "mibs" directory can be compiled only
-      if the "--enable-shared" flag is used when running "./configure":
-      ./configure --with-snmp --enable-shared
     - The rest of code compiles with the following compilers, and the internal
       tests appear to succeed:
       gcc (GCC) 3.4.4 [FreeBSD] 20050518 (default)
@@ -267,7 +247,6 @@ scons check
 ===========
 
   * NetBSD-2.0, NetBSD-3.0, NetBSD-3.0.1, and NetBSD-3.1
-    - The SNMP support inside the "mibs" directory may fail to compile.
     - The rest of code compiles, and the internal tests appear to succeed:
       gcc (GCC) 3.3.3 (NetBSD nb3 20040520)
     - If the compilation fails with the following error:
@@ -488,8 +467,6 @@ scons check
     - Optionally install the following packages:
       - libpcap0.8-dev
         This package is needed for sending/receiving link layer data frames.
-      - snmpd and libsnmp-dev
-        Those packages are needed for SNMP support.
     - The code compiles, and the internal tests appear to succeed.
     - gcc (GCC) 4.1.2 (Ubuntu 4.1.2-0ubuntu4)
     - Tested on the following architectures: i386, sparc64
@@ -857,8 +834,6 @@ adduser  <username> xorp
 is installed.
 17)sudo apt-get install libssl-dev
 18)sudo apt-get install libpcap0.8-dev [optional]
-19)sudo apt-get install snmpd [optional, but necessary if snmp compilation
-is enabled via configure script]
 20)sudo apt-get install libsnmp-dev [optional, but necessary if snmp
 compilation is enabled via configure script]
 21)sudo apt-get install iptables-dev
