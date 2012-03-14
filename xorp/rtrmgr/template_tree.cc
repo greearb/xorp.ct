@@ -491,6 +491,12 @@ TemplateTree::find_node_by_type(const list<ConfPathSegment>& path_segments)
 	    if (t->type() == type) {
 		matches.push_back(t);
 		continue;
+	    } else if ((t->type() == NODE_ULONG || t->type() == NODE_INT) && type == NODE_UINT) {
+		// u64 values are read as u32 values, because their
+		// regexp is the same.
+		// Same is for the positive int values.
+		matches.push_back(t);
+		continue;
 	    }
 	    //
 	    // XXX: the type check failed.
