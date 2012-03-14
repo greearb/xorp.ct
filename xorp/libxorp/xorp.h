@@ -30,6 +30,10 @@
 #  include <endian.h>
 #endif
 
+#ifdef HAVE_STDBOOL_H
+#  include <stdbool.h>
+#endif
+
 #ifndef BYTE_ORDER
 #ifdef __BYTE_ORDER
 #define BYTE_ORDER	__BYTE_ORDER
@@ -241,11 +245,16 @@ using namespace std::rel_ops;
 #ifdef FALSE
 #undef FALSE
 #endif
-#define FALSE (0)
-#define TRUE (!FALSE)
+#define FALSE 0
+#define TRUE 1
 #endif /* TRUE, FALSE */
+#ifndef HAVE_STDBOOL_H
 #ifndef __cplusplus
-typedef enum { true = TRUE, false = FALSE } bool;
+typedef enum {
+    true = TRUE,
+    false = FALSE
+} bool;
+#endif
 #endif
 typedef bool bool_t;
 

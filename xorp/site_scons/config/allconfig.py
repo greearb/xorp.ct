@@ -90,6 +90,8 @@ def DoAllConfig(env, conf, host_os):
 	    includes += '#include <stdint.h>\n'
 	conf.CheckType(type, includes)
     
+    has_stdbool_h = conf.CheckHeader('stdbool.h')
+
     ##########
     # stdc
     has_stddef_h = conf.CheckHeader('stddef.h')
