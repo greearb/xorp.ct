@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -946,7 +946,7 @@ TemplateTreeNode::find_child_varname_node(const list<string>& var_parts)
 
     // The name might refer to this node
     if (var_parts.size() == 1) {
-	if ((var_parts.front() == "@") 
+	if ((var_parts.front() == "@")
 	    || (var_parts.front() == _segname)
 	    || (var_parts.front() == "<>")
 	    || (var_parts.front() == "#")) {
@@ -1586,7 +1586,7 @@ IntTemplate::type_match(const string& orig, string& error_msg) const
 		error_msg = "value must be an integer";
 	    } else {
 		error_msg = "value must be numeric";
-	    }	    
+	    }
 	    return false;
 	}
     return true;
@@ -1613,7 +1613,7 @@ BoolTemplate::BoolTemplate(TemplateTree& template_tree,
 
     if (initializer.empty())
 	return;
-    
+
     if (! type_match(initializer, error_msg)) {
 	error_msg = c_format("Bad Bool type value \"%s\": %s.",
 			     initializer.c_str(), error_msg.c_str());

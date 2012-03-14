@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -112,7 +112,7 @@ ConfigTree::path_as_segments() const
     ConfigTreeNode* ctn = _current_node;
 
     while (ctn->parent() != NULL) {
-	path_segments.push_front(ConfPathSegment(ctn->segname(), 
+	path_segments.push_front(ConfPathSegment(ctn->segname(),
 						 ctn->type(), ctn->node_id()));
 	ctn = ctn->parent();
     }
@@ -271,7 +271,7 @@ ConfigTree::add_node(const string& segment, int type,
 
 
 void
-ConfigTree::terminal_value(const string& value, int type, ConfigOperator op) 
+ConfigTree::terminal_value(const string& value, int type, ConfigOperator op)
     throw (ParseError)
 {
     string error_msg;
@@ -440,7 +440,7 @@ ConfigTree::find_config_node(const list<string>& path_segments) const
 
 
 string
-ConfigTree::show_subtree(bool show_top, const list<string>& path_segments, 
+ConfigTree::show_subtree(bool show_top, const list<string>& path_segments,
 			 bool numbered, bool suppress_default_values) const
 {
     const ConfigTreeNode *found = find_config_node(path_segments);
@@ -464,7 +464,7 @@ ConfigTree::show_tree(bool numbered) const
     return const_root_node().show_subtree(/* show_top */ false,
 					  /* depth */ 0,
 					  /* indent */ 0,
-					  /* do_indent */ true, 
+					  /* do_indent */ true,
 					  numbered,
 					  /* annotate */ true,
 					  /* suppress_default_values */ false);
@@ -476,7 +476,7 @@ ConfigTree::show_unannotated_tree(bool numbered) const
     return const_root_node().show_subtree(/* show_top */ false,
 					  /* depth */ 0,
 					  /* indent */ 0,
-					  /* do_indent */ true, 
+					  /* do_indent */ true,
 					  numbered,
 					  /* annotate */ false,
 					  /* suppress_default_values */ false);

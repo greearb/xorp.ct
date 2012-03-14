@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -73,7 +73,7 @@ class TemplateTree;
 
 class TemplateTreeNode {
 public:
-    TemplateTreeNode(TemplateTree& template_tree, TemplateTreeNode* parent, 
+    TemplateTreeNode(TemplateTree& template_tree, TemplateTreeNode* parent,
 		     const string& path, const string& varname);
     virtual ~TemplateTreeNode();
 
@@ -115,7 +115,7 @@ public:
 #if 0
     bool check_template_tree(string& error_msg) const;
 #endif
-    bool check_command_tree(const list<string>& commands, 
+    bool check_command_tree(const list<string>& commands,
 			    bool include_intermediate_nodes,
 			    bool include_read_only_nodes,
 			    bool include_permanent_nodes,
@@ -238,8 +238,8 @@ private:
 
 class UIntTemplate : public TemplateTreeNode {
 public:
-    UIntTemplate(TemplateTree& template_tree, TemplateTreeNode* parent, 
-		 const string& path, const string& varname, 
+    UIntTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
+		 const string& path, const string& varname,
 		 const string& initializer) throw (ParseError);
 
     string typestr() const { return string("uint"); }
@@ -254,8 +254,8 @@ private:
 
 class UIntRangeTemplate : public TemplateTreeNode {
 public:
-    UIntRangeTemplate(TemplateTree& template_tree, TemplateTreeNode* parent, 
-		 const string& path, const string& varname, 
+    UIntRangeTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
+		 const string& path, const string& varname,
 		 const string& initializer) throw (ParseError);
     ~UIntRangeTemplate();
 
@@ -271,8 +271,8 @@ private:
 
 class IntTemplate : public TemplateTreeNode {
 public:
-    IntTemplate(TemplateTree& template_tree, TemplateTreeNode* parent, 
-		const string& path, const string& varname, 
+    IntTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
+		const string& path, const string& varname,
 		const string& initializer) throw (ParseError);
     string typestr() const { return string("int"); }
     TTNodeType type() const { return NODE_INT; }
@@ -286,8 +286,8 @@ private:
 
 class ArithTemplate : public TemplateTreeNode {
 public:
-    ArithTemplate(TemplateTree& template_tree, TemplateTreeNode* parent, 
-		  const string& path, const string& varname, 
+    ArithTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
+		  const string& path, const string& varname,
 		  const string& initializer) throw (ParseError);
     string typestr() const { return string("uint"); }
     TTNodeType type() const { return NODE_ARITH; }
@@ -301,8 +301,8 @@ private:
 
 class TextTemplate : public TemplateTreeNode {
 public:
-    TextTemplate(TemplateTree& template_tree, TemplateTreeNode* parent, 
-		 const string& path, const string& varname, 
+    TextTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
+		 const string& path, const string& varname,
 		 const string& initializer) throw (ParseError);
 
     string typestr() const { return string("text"); }
@@ -317,8 +317,8 @@ private:
 
 class BoolTemplate : public TemplateTreeNode {
 public:
-    BoolTemplate(TemplateTree& template_tree, TemplateTreeNode* parent, 
-		 const string& path, const string& varname, 
+    BoolTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
+		 const string& path, const string& varname,
 		 const string& initializer) throw (ParseError);
 
     string typestr() const { return string("bool"); }
@@ -333,7 +333,7 @@ private:
 
 class IPv4Template : public TemplateTreeNode {
 public:
-    IPv4Template(TemplateTree& template_tree, TemplateTreeNode* parent, 
+    IPv4Template(TemplateTree& template_tree, TemplateTreeNode* parent,
 		 const string& path, const string& varname,
 		 const string& initializer) throw (ParseError);
     ~IPv4Template();
@@ -350,8 +350,8 @@ private:
 
 class IPv4NetTemplate : public TemplateTreeNode {
 public:
-    IPv4NetTemplate(TemplateTree& template_tree, TemplateTreeNode* parent, 
-		    const string& path, const string& varname, 
+    IPv4NetTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
+		    const string& path, const string& varname,
 		    const string& initializer) throw (ParseError);
     ~IPv4NetTemplate();
 
@@ -367,8 +367,8 @@ private:
 
 class IPv4RangeTemplate : public TemplateTreeNode {
 public:
-    IPv4RangeTemplate(TemplateTree& template_tree, TemplateTreeNode* parent, 
-		    const string& path, const string& varname, 
+    IPv4RangeTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
+		    const string& path, const string& varname,
 		    const string& initializer) throw (ParseError);
     ~IPv4RangeTemplate();
 
@@ -385,7 +385,7 @@ private:
 class IPv6Template : public TemplateTreeNode {
 public:
     IPv6Template(TemplateTree& template_tree, TemplateTreeNode* parent,
-		 const string& path, const string& varname, 
+		 const string& path, const string& varname,
 		 const string& initializer) throw (ParseError);
     ~IPv6Template();
 
@@ -401,8 +401,8 @@ private:
 
 class IPv6NetTemplate : public TemplateTreeNode {
 public:
-    IPv6NetTemplate(TemplateTree& template_tree, TemplateTreeNode* parent, 
-		    const string& path, const string& varname, 
+    IPv6NetTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
+		    const string& path, const string& varname,
 		    const string& initializer) throw (ParseError);
     ~IPv6NetTemplate();
 
@@ -419,7 +419,7 @@ private:
 class IPv6RangeTemplate : public TemplateTreeNode {
 public:
     IPv6RangeTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
-		 const string& path, const string& varname, 
+		 const string& path, const string& varname,
 		 const string& initializer) throw (ParseError);
     ~IPv6RangeTemplate();
 
@@ -435,8 +435,8 @@ private:
 
 class MacaddrTemplate : public TemplateTreeNode {
 public:
-    MacaddrTemplate(TemplateTree& template_tree, TemplateTreeNode* parent, 
-		    const string& path, const string& varname, 
+    MacaddrTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
+		    const string& path, const string& varname,
 		    const string& initializer) throw (ParseError);
     ~MacaddrTemplate();
 
@@ -452,7 +452,7 @@ private:
 
 class UrlFileTemplate : public TemplateTreeNode {
 public:
-    UrlFileTemplate(TemplateTree& template_tree, TemplateTreeNode* parent, 
+    UrlFileTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
 		    const string& path, const string& varname,
 		    const string& initializer) throw (ParseError);
 
@@ -468,7 +468,7 @@ private:
 
 class UrlFtpTemplate : public TemplateTreeNode {
 public:
-    UrlFtpTemplate(TemplateTree& template_tree, TemplateTreeNode* parent, 
+    UrlFtpTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
 		   const string& path, const string& varname,
 		   const string& initializer) throw (ParseError);
 
@@ -484,7 +484,7 @@ private:
 
 class UrlHttpTemplate : public TemplateTreeNode {
 public:
-    UrlHttpTemplate(TemplateTree& template_tree, TemplateTreeNode* parent, 
+    UrlHttpTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
 		    const string& path, const string& varname,
 		    const string& initializer) throw (ParseError);
 
@@ -500,7 +500,7 @@ private:
 
 class UrlTftpTemplate : public TemplateTreeNode {
 public:
-    UrlTftpTemplate(TemplateTree& template_tree, TemplateTreeNode* parent, 
+    UrlTftpTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
 		    const string& path, const string& varname,
 		    const string& initializer) throw (ParseError);
 

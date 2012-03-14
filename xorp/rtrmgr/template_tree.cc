@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -64,7 +64,7 @@ TemplateTree::~TemplateTree()
     delete _root_node;
 }
 
-bool 
+bool
 TemplateTree::load_template_tree(const string& config_template_dir,
 				 string& error_msg)
 {
@@ -123,9 +123,9 @@ TemplateTree::load_template_tree(const string& config_template_dir,
     return true;
 }
 
-bool 
+bool
 TemplateTree::parse_file(const string& filename,
-			 const string& config_template_dir, string& error_msg) 
+			 const string& config_template_dir, string& error_msg)
 {
     if (init_template_parser(filename.c_str(), this) < 0) {
 	complete_template_parser();
@@ -142,7 +142,7 @@ TemplateTree::parse_file(const string& filename,
     }
     if (_path_segments.size() != 0) {
 	complete_template_parser();
-	error_msg = c_format("File %s is not terminated properly", 
+	error_msg = c_format("File %s is not terminated properly",
 			     filename.c_str());
 	return false;
     }
@@ -443,7 +443,7 @@ TemplateTree::find_node(const list<string>& path_segments) const
 }
 
 const TemplateTreeNode*
-TemplateTree::find_node_by_type(const list<ConfPathSegment>& path_segments) 
+TemplateTree::find_node_by_type(const list<ConfPathSegment>& path_segments)
     const
 {
     TemplateTreeNode* ttn = _root_node;
@@ -490,7 +490,7 @@ TemplateTree::find_node_by_type(const list<ConfPathSegment>& path_segments)
 	    // XXX: the type check failed.
 	    // If there is a matching template node type of type NODE_TEXT,
 	    // then we accept this node.
-	    // 
+	    //
 	    // The upside of this is that we can use a single template
 	    // node like "foo @: txt" that can be used with, say,
 	    // IPv4 or IPv6 addresses, a host name, or any other text string.
