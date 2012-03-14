@@ -13,7 +13,7 @@
 #include "libxorp/xorp.h"
 #include <string.h>
 
-#if defined(HOST_OS_FREEBSD) || defined(HOST_OS_NETBSD)
+#if defined(NEED_LEX_H_HACK)
 extern YYSTYPE opcmdlval;
 #include "y.opcmd_tab.cc.h"
 #else

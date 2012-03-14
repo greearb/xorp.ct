@@ -12,7 +12,7 @@
 #define YYSTYPE char*
 #include "libxorp/xorp.h"
 
-#if defined(HOST_OS_FREEBSD) || defined(HOST_OS_NETBSD)
+#if defined(NEED_LEX_H_HACK)
 extern YYSTYPE tpltlval;
 #include "y.tplt_tab.cc.h"
 #else

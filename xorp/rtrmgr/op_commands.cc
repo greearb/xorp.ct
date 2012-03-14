@@ -48,7 +48,7 @@
 #include "slave_conf_tree.hh"
 #include "template_tree.hh"
 #include "slave_module_manager.hh"
-#if defined(HOST_OS_FREEBSD) || defined(HOST_OS_NETBSD)
+#if defined(NEED_LEX_H_HACK)
 #include "y.opcmd_tab.cc.h"
 #else
 #include "y.opcmd_tab.hh"

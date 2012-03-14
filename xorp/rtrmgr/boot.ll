@@ -13,7 +13,7 @@
 
 #include "libxorp/xorp.h"
 
-#if defined(HOST_OS_FREEBSD) || defined(HOST_OS_NETBSD)
+#if defined(NEED_LEX_H_HACK)
 extern YYSTYPE bootlval;
 #include "y.boot_tab.cc.h"
 #else
