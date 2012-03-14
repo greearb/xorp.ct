@@ -56,9 +56,9 @@
 #include "defs.h"
 #include "utils.h"
 
+#include "bsdroute.h"
+
 #include "xorprtm_internal.h"
 #include "mibmgr.h"
-
-#include "bsdroute.h"
 
 #endif

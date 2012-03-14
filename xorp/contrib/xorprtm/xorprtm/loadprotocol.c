@@ -45,6 +45,8 @@
 
 #include "xorprtm.h"
 
+#include "bsdroute.h"
+
 HRESULT
 add_protocol_to_rras(int family)
 {
