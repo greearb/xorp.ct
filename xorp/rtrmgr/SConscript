@@ -57,10 +57,10 @@ libxorp_rtrmgr_env = env.Clone()
 yacc_env = env.Clone()
 # bison on BSD generates headers files with .h suffix,
 # while on other OSs it generates header files with .hh suffix
-if (env['osname'] == "FreeBSD" or env['osname'] == "NetBSD"):
-	yacc_env.Replace(YACCHXXFILESUFFIX='.h')
-else:
-	yacc_env.Replace(YACCHXXFILESUFFIX='.hh')
+#
+# But, on FreeBSD at least, if you don't do the .hh suffix, it doesn't even
+# build a .h file of any type --Ben
+yacc_env.Replace(YACCHXXFILESUFFIX='.hh')
 
 yacc_env.AppendUnique(YACCFLAGS='-d')
 
