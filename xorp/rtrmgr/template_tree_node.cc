@@ -1591,7 +1591,9 @@ ULongTemplate::type_match(const string& orig, string& error_msg) const
 string
 ULongTemplate::default_str() const
 {
-    return c_format("%lu", _default);
+    ostringstream oss;
+    oss << _default;
+    return oss.str();
 }
 
 
