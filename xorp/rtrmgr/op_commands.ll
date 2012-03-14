@@ -12,7 +12,12 @@
 #define YYSTYPE char*
 #include "libxorp/xorp.h"
 #include <string.h>
+
+#if defined(HOST_OS_FREEBSD) || defined(HOST_OS_NETBSD)
+#include "y.opcmd_tab.h"
+#else
 #include "y.opcmd_tab.hh"
+#endif
 
 #ifdef __xorp_unused
 #define __unused __xorp_unused

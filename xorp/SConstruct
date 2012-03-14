@@ -640,6 +640,9 @@ if not env.GetOption('clean') and \
 	osname = sys.platform.upper()
     conf.Define('HOST_OS_NAME', '"' + osname + '"')
 
+    #export osname - needed for lex and yacc
+    env['osname'] = osname
+
     # toolchain
     conf.Define('CPP_SUPPORTS_C99_VA_ARGS')
     conf.Define('CPP_SUPPORTS_GNU_VA_ARGS')

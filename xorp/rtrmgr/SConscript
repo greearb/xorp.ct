@@ -55,9 +55,14 @@ libxorp_rtrmgr_env = env.Clone()
 
 #Create yacc files
 yacc_env = env.Clone()
-yacc_env.Replace(YACCHXXFILESUFFIX='.hh')
-yacc_env.AppendUnique(YACCFLAGS='-d')
+# bison on BSD generates headers files with .h suffix,
+# while on other OSs it generates header files with .hh suffix
+if (env['osname'] == "FreeBSD" or env['osname'] == "NetBSD"):
+	yacc_env.Replace(YACCHXXFILESUFFIX='.h')
+else:
+	yacc_env.Replace(YACCHXXFILESUFFIX='.hh')
 
+yacc_env.AppendUnique(YACCFLAGS='-d')
 
 tplt_env_y = yacc_env.Clone()
 tplt_env_y.AppendUnique(YACCFLAGS='-ptplt')
