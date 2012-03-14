@@ -14,7 +14,8 @@
 #include <string.h>
 
 #if defined(HOST_OS_FREEBSD) || defined(HOST_OS_NETBSD)
-#include "y.opcmd_tab.h"
+extern YYSTYPE opcmdlval;
+#include "y.opcmd_tab.cc.h"
 #else
 #include "y.opcmd_tab.hh"
 #endif

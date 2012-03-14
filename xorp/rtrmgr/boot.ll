@@ -14,7 +14,8 @@
 #include "libxorp/xorp.h"
 
 #if defined(HOST_OS_FREEBSD) || defined(HOST_OS_NETBSD)
-#include "y.boot_tab.h"
+extern YYSTYPE bootlval;
+#include "y.boot_tab.cc.h"
 #else
 #include "y.boot_tab.hh"
 #endif

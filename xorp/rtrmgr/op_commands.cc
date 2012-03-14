@@ -48,8 +48,11 @@
 #include "slave_conf_tree.hh"
 #include "template_tree.hh"
 #include "slave_module_manager.hh"
+#if defined(HOST_OS_FREEBSD) || defined(HOST_OS_NETBSD)
+#include "y.opcmd_tab.cc.h"
+#else
 #include "y.opcmd_tab.hh"
-
+#endif
 
 #ifdef HOST_OS_WINDOWS
 #ifdef _NO_OLDNAMES

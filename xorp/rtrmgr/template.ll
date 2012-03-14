@@ -13,7 +13,8 @@
 #include "libxorp/xorp.h"
 
 #if defined(HOST_OS_FREEBSD) || defined(HOST_OS_NETBSD)
-#include "y.tplt_tab.h"
+extern YYSTYPE tpltlval;
+#include "y.tplt_tab.cc.h"
 #else
 #include "y.tplt_tab.hh"
 #endif
