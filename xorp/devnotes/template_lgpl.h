@@ -2,7 +2,7 @@
 /* vim:set sts=4 ts=8: */
 
 /*
- * Copyright (c) 2008-2009 XORP, Inc.
+ * Copyright (c) 2008-2012 XORP, Inc and Others
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License, Version
@@ -17,12 +17,6 @@
  * see the GNU Lesser General Public License, Version 2.1, a copy of
  * which can be found in the XORP LICENSE.lgpl file.
  * 
- * XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
- * http://xorp.net
- */
-
-/*
- * $XORP: xorp/devnotes/template_lgpl.h,v 1.1 2008/10/02 21:56:43 bms Exp $
  */
 
 #ifndef __PATH_TO_TEMPLATE_H__
