@@ -9,13 +9,13 @@
 // Redistribution and/or modification of this program under the terms of
 // any other version of the GNU Lesser General Public License is not
 // permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU Lesser General Public License, Version 2.1, a copy of
 // which can be found in the XORP LICENSE.lgpl file.
-// 
+//
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -945,7 +945,7 @@ size_t
 XrlAtom::unpack_ipv6(const uint8_t* buffer)
 {
     uint32_t a[4];
-    
+
     if (_type == xrlatom_no_type) {
 	memcpy(a, buffer, sizeof(a));
 	_ipv6 = new IPv6(a);
@@ -1168,7 +1168,7 @@ XrlAtom::unpack_binary(const uint8_t* buffer, size_t buffer_bytes)
 	_binary = 0;
 	return 0;
     }
-    
+
     if (_type != xrlatom_no_type)
 	delete _binary;
 
