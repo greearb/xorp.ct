@@ -8,13 +8,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -103,7 +103,7 @@ ConfigTreeNode::ConfigTreeNode(bool verbose)
 }
 
 ConfigTreeNode::ConfigTreeNode(const string& nodename,
-			       const string& path, 
+			       const string& path,
 			       const TemplateTreeNode* ttn,
 			       ConfigTreeNode* parent,
 			       const ConfigNodeId& node_id,
@@ -275,7 +275,7 @@ ConfigTreeNode::add_default_children()
 		string name = ttn->segname();
 		string path = _path + " " + name;
 		ConfigTreeNode *new_node = create_node(name, path, ttn,
-						       this, 
+						       this,
 						       ConfigNodeId::ZERO(),
 						       _user_id,
 						       _clientid,
@@ -313,7 +313,7 @@ ConfigTreeNode::check_allowed_value(string& error_msg) const
     return (check_allowed_value(_value, error_msg));
 }
 
-bool 
+bool
 ConfigTreeNode::check_allowed_value(const string& value,
 				    string& error_msg) const
 {
@@ -323,7 +323,7 @@ ConfigTreeNode::check_allowed_value(const string& value,
     return (_template_tree_node->check_allowed_value(value, error_msg));
 }
 
-bool 
+bool
 ConfigTreeNode::check_allowed_operator(const string& value,
 				       string& error_msg) const
 {
@@ -393,7 +393,7 @@ ConfigTreeNode::set_operator_without_verification(ConfigOperator op,
 
 bool
 ConfigTreeNode::merge_deltas(uid_t user_id,
-			     const ConfigTreeNode& delta_node, 
+			     const ConfigTreeNode& delta_node,
 			     bool provisional_change,
 			     bool preserve_node_id,
 			     string& error_msg)
@@ -404,7 +404,7 @@ ConfigTreeNode::merge_deltas(uid_t user_id,
 	XLOG_ASSERT(type() == delta_node.type());
 
 	if (delta_node.is_leaf_value()) {
-	    if (_value != delta_node.value() 
+	    if (_value != delta_node.value()
 		|| _operator != delta_node.get_operator()) {
 		_has_value = true;
 		if (provisional_change) {
@@ -456,7 +456,7 @@ XXXXXXX to be copied to MasterConfigTreeNode
 	 iter != delta_node.const_children().end();
 	 ++iter) {
 	ConfigTreeNode *delta_child = *iter;
-	
+
 	bool delta_child_done = false;
 	list<ConfigTreeNode*>::iterator ci;
 	for (ci = _children.begin(); ci != _children.end(); ++ci) {
@@ -498,7 +498,7 @@ XXXXXXX to be copied to MasterConfigTreeNode
 
 bool
 ConfigTreeNode::merge_deletions(uid_t user_id,
-				const ConfigTreeNode& deletion_node, 
+				const ConfigTreeNode& deletion_node,
 				bool provisional_change,
 				string& error_msg)
 {
@@ -522,7 +522,7 @@ ConfigTreeNode::merge_deletions(uid_t user_id,
 	    return true;
 	}
     }
-    
+
     list<ConfigTreeNode*>::const_iterator iter;
     for (iter = deletion_node.const_children().begin();
 	 iter != deletion_node.const_children().end();
@@ -535,7 +535,7 @@ ConfigTreeNode::merge_deletions(uid_t user_id,
 	    ConfigTreeNode *my_child = *ci;
 	    if (my_child->segname() == deletion_child->segname()) {
 		deletion_child_done = true;
-		bool success = my_child->merge_deletions(user_id, 
+		bool success = my_child->merge_deletions(user_id,
 							 *deletion_child,
 							 provisional_change,
 							 error_msg);
@@ -695,7 +695,7 @@ ConfigTreeNode::discard_changes(int depth, int last_depth)
     if (_template_tree_node != NULL) {
 	if (_existence_committed == false) {
 	    bool show_top = (depth > 0);
-	    result = show_subtree(show_top, depth, /* XXX */ depth * 2, true, 
+	    result = show_subtree(show_top, depth, /* XXX */ depth * 2, true,
 				  /* numbered */ false, false, false);
 	    delete_subtree_silently();
 	    return result;
@@ -709,12 +709,12 @@ ConfigTreeNode::discard_changes(int depth, int last_depth)
 	    _user_id = _committed_user_id;
 	    _modification_time = _committed_modification_time;
 	    result = node_str();
-	    if (is_leaf_value()) 
+	    if (is_leaf_value())
 		result += "\n";
 	    else
 		result += " {\n";
 	    changes_made = true;
-	} 
+	}
     }
 
     list<ConfigTreeNode *>::iterator iter, prev_iter;
@@ -909,7 +909,7 @@ ConfigTreeNode::show_subtree(bool show_top, int depth, int indent,
     if (_template_tree_node != NULL)
 	is_a_tag = is_tag();
 
-    for (int i = 0; i < indent; i++) 
+    for (int i = 0; i < indent; i++)
 	my_in += "  ";
 
     if (is_a_tag && show_top) {
@@ -943,9 +943,9 @@ ConfigTreeNode::show_subtree(bool show_top, int depth, int indent,
 		    break;
 		} while (false);
 	    }
-	    s += my_in + show_node_id(numbered, child_ctn->node_id()) 
+	    s += my_in + show_node_id(numbered, child_ctn->node_id())
 		+ _segname + " " +
-		child_ctn->show_subtree(show_top, depth, indent, false, 
+		child_ctn->show_subtree(show_top, depth, indent, false,
 					numbered, annotate,
 					suppress_default_values);
 	}
@@ -982,7 +982,7 @@ ConfigTreeNode::show_subtree(bool show_top, int depth, int indent,
 	    if ((type() == NODE_TEXT) && is_quotable_string(_segname)) {
 		s += quoted_value(_segname);
 	    } else {
-		s += _segname; 
+		s += _segname;
 	    }
 	}
 	if ((type() != NODE_VOID) && (_has_value)) {
@@ -1017,7 +1017,7 @@ ConfigTreeNode::show_subtree(bool show_top, int depth, int indent,
 	s += " {\n";
 	list<ConfigTreeNode*>::const_iterator iter;
 	for (iter = _children.begin(); iter != _children.end(); ++iter) {
-	    s += (*iter)->show_subtree(true, depth + 1, new_indent, true, 
+	    s += (*iter)->show_subtree(true, depth + 1, new_indent, true,
 				       numbered, annotate,
 				       suppress_default_values);
 	}
@@ -1026,7 +1026,7 @@ ConfigTreeNode::show_subtree(bool show_top, int depth, int indent,
 	new_indent = indent;
 	list<ConfigTreeNode*>::const_iterator iter;
 	for (iter = _children.begin(); iter != _children.end(); ++iter) {
-	    s += (*iter)->show_subtree(true, depth + 1, new_indent, true, 
+	    s += (*iter)->show_subtree(true, depth + 1, new_indent, true,
 				       numbered, annotate,
 				       suppress_default_values);
 	}
@@ -1163,7 +1163,7 @@ ConfigTreeNode::node_str() const
 //
 // TODO: this method is not used. What is the difference between
 // str() and node_str() ??
-// 
+//
 string
 ConfigTreeNode::str() const
 {
@@ -1641,7 +1641,7 @@ ConfigTreeNode::find_varname_node(const string& varname, VarType& type)
 }
 
 ConfigTreeNode*
-ConfigTreeNode::find_parent_varname_node(const list<string>& var_parts, 
+ConfigTreeNode::find_parent_varname_node(const list<string>& var_parts,
 					 VarType& type)
 {
     debug_msg("find parent at node %s\n", _segname.c_str());
@@ -1668,7 +1668,7 @@ ConfigTreeNode::find_parent_varname_node(const list<string>& var_parts,
 }
 
 ConfigTreeNode*
-ConfigTreeNode::find_child_varname_node(const list<string>& var_parts, 
+ConfigTreeNode::find_child_varname_node(const list<string>& var_parts,
 					VarType& type)
 {
     string s;
@@ -1708,9 +1708,9 @@ ConfigTreeNode::find_child_varname_node(const list<string>& var_parts,
     }
 
     if ((var_parts.front() != "@")
-	&& (var_parts.front() != _segname) 
-	&& (var_parts.front() != "<>") 
-	&& (var_parts.front() != "#") 
+	&& (var_parts.front() != _segname)
+	&& (var_parts.front() != "<>")
+	&& (var_parts.front() != "#")
 	&& ((!_has_value) || (var_parts.front() != _value))) {
 	// varname doesn't match us.
 	type = NONE;
@@ -1771,7 +1771,7 @@ ConfigTreeNode::find_child_varname_node(const list<string>& var_parts,
 }
 
 bool
-ConfigTreeNode::split_up_varname(const string& varname, 
+ConfigTreeNode::split_up_varname(const string& varname,
 				       list<string>& var_parts) const
 {
     debug_msg("split up varname >%s<\n", varname.c_str());
@@ -1854,7 +1854,7 @@ ConfigTreeNode::expand_varname_to_matchlist(const vector<string>& parts,
 	XLOG_ASSERT(parts[part] == "*");
 	matches.push_back(_segname);
 	return;
-    } 
+    }
 
     //
     // Search the children. If no more children, return the result so far
@@ -1888,7 +1888,7 @@ ConfigTreeNode::set_variable(const string& varname, const string& value)
 	    // This can't happen
 	    XLOG_UNREACHABLE();
 	    break;
-	case NODE_VALUE: 
+	case NODE_VALUE:
 	    if (node->is_read_only()) {
 		string reason = node->read_only_reason();
 		errmsg = c_format("Attempt to set node \"%s\" "
@@ -1906,13 +1906,13 @@ ConfigTreeNode::set_variable(const string& varname, const string& value)
 		return false;
 	    }
 	    return true;
-	case NODE_OPERATOR: 
+	case NODE_OPERATOR:
 	    errmsg = c_format("Attempt to set variable operator \"%s\" "
 			      "which is the name of a configuration node",
 			      varname.c_str());
 	    XLOG_ERROR("%s", errmsg.c_str());
 	    return false;
-	case NODE_ID: 
+	case NODE_ID:
 	    errmsg = c_format("Attempt to set variable node ID \"%s\" "
 			      "which is not user-settable",
 			      varname.c_str());
@@ -1928,7 +1928,7 @@ ConfigTreeNode::set_variable(const string& varname, const string& value)
 	    node->set_named_value(var_parts.back(), value);
 	    return true;
 	}
-	case TEMPLATE_DEFAULT: 
+	case TEMPLATE_DEFAULT:
 	    // XXX: Ignore, and attempt to set a named variable below.
 	    break;
 	}
@@ -2043,10 +2043,10 @@ ConfigTreeNode::sort_by_template(list<ConfigTreeNode*>& children) const
 #else
     children.sort(CTN_Compare());
 #endif
-} 
+}
 
 string
-ConfigTreeNode::show_node_id(bool numbered, const ConfigNodeId& node_id) const 
+ConfigTreeNode::show_node_id(bool numbered, const ConfigNodeId& node_id) const
 {
     string s;
     if (numbered) {
@@ -2056,7 +2056,7 @@ ConfigTreeNode::show_node_id(bool numbered, const ConfigNodeId& node_id) const
 }
 
 void
-ConfigTreeNode::allocate_unique_node_id() 
+ConfigTreeNode::allocate_unique_node_id()
 {
     ConfigTreeNode *prev = NULL, *next = NULL;
     ConfigTreeNode *effective_parent = _parent;
@@ -2077,7 +2077,7 @@ ConfigTreeNode::allocate_unique_node_id()
     sort_by_template(sorted_children);
     bool found_this = false;
     list<ConfigTreeNode*>::iterator iter;
-    for (iter = sorted_children.begin(); 
+    for (iter = sorted_children.begin();
 	 iter != sorted_children.end();
 	 ++iter) {
 	if ((*iter) == this) {
@@ -2114,7 +2114,7 @@ ConfigTreeNode::allocate_unique_node_id()
 	debug_msg("finding order (phase 2)...\n");
 	list<ConfigTreeNode *> sorted_children = effective_parent->children();
 	sort_by_template(sorted_children);
-	for (iter = sorted_children.begin(); 
+	for (iter = sorted_children.begin();
 	     iter != sorted_children.end();
 	     ++iter) {
 	    if ((*iter) == _parent) {
@@ -2208,7 +2208,7 @@ ConfigTreeNode::update_node_id_position()
 	XLOG_ASSERT(effective_parent != NULL);
 	sorted_children = effective_parent->children();
 	sort_by_template(sorted_children);
-	for (iter = sorted_children.begin(); 
+	for (iter = sorted_children.begin();
 	     iter != sorted_children.end();
 	     ++iter) {
 	    ConfigTreeNode* ctn = *iter;

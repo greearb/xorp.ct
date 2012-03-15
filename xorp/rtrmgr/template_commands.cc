@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -448,7 +448,7 @@ XrlAction::check_xrl_is_valid(const list<string>& action,
 		cleaned_xrl += xrl_str[i];
 		break;
 	    }
-	    if ((xrl_str.size() > i) 
+	    if ((xrl_str.size() > i)
 		&& (xrl_str[i] == '-') && (xrl_str[i+1] == '>')) {
 		/* it's the start of the return spec */
 		cleaned_xrl += xrl_str[i];
@@ -633,7 +633,7 @@ XrlAction::expand_xrl_variables(const TreeNode& tn,
     }
     command = cmd_parts.back();
     cmd_parts.pop_back();
-    
+
     // put the target name back together again
     string target;
     while (!cmd_parts.empty()) {
@@ -647,7 +647,7 @@ XrlAction::expand_xrl_variables(const TreeNode& tn,
     // now process the args.
 
     XrlArgs xrl_args;
-    
+
     list<string>::const_iterator iter;
     for (iter = args.begin(); iter != args.end(); ++iter) {
 
@@ -670,7 +670,7 @@ XrlAction::expand_xrl_variables(const TreeNode& tn,
 	}
 
 	// check that this is a legal XrlAtom type
-	// it really shouldn't be possible for this to fail given 
+	// it really shouldn't be possible for this to fail given
 	// earlier checks
 	XrlAtomType arg_type = XrlAtom::lookup_type(type.c_str());
 	if (arg_type == xrlatom_no_type) {
@@ -679,18 +679,18 @@ XrlAction::expand_xrl_variables(const TreeNode& tn,
 				 _request.c_str(), tn.path().c_str());
 	    return NULL;
 	}
-	
+
 	string expanded_value;
 	if (!expand_vars(tn, value, expanded_value)) {
 	    error_msg = expanded_value;
 	    return NULL;
 	}
 
-	// At this point we've expanded all the variables. 
+	// At this point we've expanded all the variables.
 	// Now it's time to build an XrlAtom
 	try {
 	    debug_msg("Atom: %s\n", expanded_value.c_str());
-	    XrlAtom atom(name, arg_type, 
+	    XrlAtom atom(name, arg_type,
 			 xrlatom_encode_value(expanded_value.c_str(),
 					      expanded_value.size()));
 	    xrl_args.add(atom);
@@ -701,7 +701,7 @@ XrlAction::expand_xrl_variables(const TreeNode& tn,
 	    return NULL;
 	}
     }
-    
+
     // Now we've got a arg list.  Time to build an Xrl
     Xrl* xrl = new Xrl(target, command, xrl_args);
     debug_msg("Xrl expanded to %s\n", xrl->str().c_str());
@@ -1266,7 +1266,7 @@ ProgramAction::affected_module() const
 /***********************************************************************/
 
 Command::Command(TemplateTreeNode& template_tree_node, const string& cmd_name)
-    : BaseCommand(template_tree_node, cmd_name) 
+    : BaseCommand(template_tree_node, cmd_name)
 {
     debug_msg("Command constructor: %s\n", cmd_name.c_str());
 }
@@ -1305,7 +1305,7 @@ Command::add_action(const list<string>& action, const XRLdb* xrldb)
     error_msg = c_format("Unknown action \"%s\". Expected actions: "
 			 "\"%s\", \"%s\".",
 			 action_type.c_str(), "xrl", "program");
-    xorp_throw(ParseError, error_msg);    
+    xorp_throw(ParseError, error_msg);
 }
 
 int
@@ -1552,7 +1552,7 @@ template bool XrlAction::expand_vars<class MasterConfigTreeNode>(
 template bool XrlAction::expand_vars<class TemplateTreeNode>(
     const TemplateTreeNode& ctn,
     const string& value, string& result) const;
-    
+
 
 template int ProgramAction::expand_program_variables<class MasterConfigTreeNode>(
     const MasterConfigTreeNode& ctn,
