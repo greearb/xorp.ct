@@ -38,6 +38,17 @@
 #include "template_tree.hh"
 #include "template_tree_node.hh"
 
+#ifdef HAVE_REGEX_H
+#  include <regex.h>
+#else // ! HAVE_REGEX_H
+#  ifdef HAVE_PCRE_H
+#    include <pcre.h>
+#  endif
+#  ifdef HAVE_PCREPOSIX_H
+#    include <pcreposix.h>
+#  endif
+#endif // ! HAVE_REGEX_H
+
 
 #ifdef HOST_OS_WINDOWS
 #define	stat	_stat
@@ -425,12 +436,33 @@ TemplateTree::find_node(const list<string>& path_segments) const
 	    TemplateTreeNode* t = *ti;
 	    if (t->type() == NODE_VOID)
 		continue;
-	    if ((t->parent() == NULL) || (! t->parent()->is_tag()))
+	    if ((t->parent() == NULL) || (!t->parent()->is_tag()))
 		continue;
 	    if (t->encoded_typestr() == segname) {
 		matches.push_back(t);
 		continue;
 	    }
+
+	    /**
+	     * Check if this segname represents some kind of range.
+	     * If it does, it will match regexp below, and we
+	     * are expecting t->encoded_typestr to be "<uint>" or "<uint64>" or "<int>"
+	     */
+	    regex_t range_reg;
+	    if (regcomp(&range_reg, "[\[][-]{0,1}[0-9]+[.][.][-]{0,1}[0-9]+]",
+		    REG_EXTENDED))
+		XLOG_UNREACHABLE();
+
+	    bool is_range = !regexec(&range_reg, segname.c_str(), 0, 0, 0);
+	    regfree(&range_reg);
+	    if (is_range
+		    && (t->encoded_typestr() == "<uint>"
+			    || t->encoded_typestr() == "<int>"
+			    || t->encoded_typestr() == "<uint64>")) {
+		matches.push_back(t);
+		continue;
+	    }
+
 	    string s;
 	    if (t->type_match(segname, s))
 		matches.push_back(t);

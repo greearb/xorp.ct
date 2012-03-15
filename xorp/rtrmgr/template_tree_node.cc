@@ -1471,7 +1471,7 @@ UIntTemplate::type_match(const string& orig, string& error_msg) const
 	    return false;
 	}
     }
-    return true;
+    return check_allowed_value(orig, error_msg);
 }
 
 string
@@ -1585,7 +1585,7 @@ ULongTemplate::type_match(const string& orig, string& error_msg) const
 	    return false;
 	}
     }
-    return true;
+    return check_allowed_value(orig, error_msg);
 }
 
 string
@@ -1705,7 +1705,7 @@ IntTemplate::type_match(const string& orig, string& error_msg) const
 	    }
 	    return false;
 	}
-    return true;
+    return check_allowed_value(orig, error_msg);
 }
 
 string
