@@ -50,6 +50,28 @@ WinSupport::is_rras_running()
     bool is_installed = false;
     bool is_running = false;
 
+    //
+    // If environment variable XORP_USE_RRAS is not set ,
+    //  then disable feature "xorprtm dll" / "RTMv2"
+    //
+    // I.e. not-developers can be work with XORP on Windows comps with RRAS component
+    // ( RRAS very often not configure as _router_ , usual it simply installed by other MS software )
+    //
+    // Who want use feature "xorprtm dll" / "RTMv2" -- simply set XORP_USE_RRAS=y
+    //
+    //   See:
+    //
+    // http://mailman.icsi.berkeley.edu/pipermail/xorp-hackers/2012-March/003315.html
+    // http://mailman.icsi.berkeley.edu/pipermail/xorp-hackers/2012-March/003317.html
+    //
+    //
+    // TODO: XXX: do feature "xorprtm dll" / "RTMv2" worked stable
+    //
+    const char* pf = getenv("XORP_USE_RRAS");
+    if (pf == NULL) {
+        return (is_running && is_installed);
+    }
+
     SC_HANDLE h_scm = OpenSCManager(NULL, NULL, GENERIC_READ);
     if (h_scm != NULL) {
     	SC_HANDLE h_rras = OpenService(h_scm, RRAS_SERVICE_NAME, GENERIC_READ);
