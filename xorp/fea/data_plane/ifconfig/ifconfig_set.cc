@@ -595,6 +595,21 @@ IfConfigSet::push_vif_address(const IfTreeInterface*	system_ifp,
 	is_add = false;
     }
 
+    if (system_vifp != NULL) {
+	if (system_vifp->point_to_point() != config_addr.point_to_point()) {
+	    error_msg = c_format("Can't set destination address for if: %s vif: %s"
+		    "because it isn't point-to-point interface\n",
+		    system_ifp->ifname().c_str(), system_vifp->vifname().c_str());
+	    goto done;
+	}
+	if (system_vifp->broadcast() != config_addr.broadcast()) {
+	    error_msg = c_format("Can't set broadcast address for if: %s vif: %s"
+		    "because it isn't broadcast capable\n",
+		    system_ifp->ifname().c_str(), system_vifp->vifname().c_str());
+	    goto done;
+	}
+    }
+
     //
     // XXX: If the broadcast address was omitted, recompute and set it here.
     // Note that we recompute it only if the underlying vif is
