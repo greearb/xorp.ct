@@ -222,6 +222,15 @@ ConfigTreeNode::is_same(const ConfigTreeNode& them, bool ignore_node_id) const
 void
 ConfigTreeNode::add_child(ConfigTreeNode* child)
 {
+    map<string, string>::iterator iter;
+
+    iter = _variables.find(child->segname());
+    if (iter != _variables.end()) {
+	debug_msg("Remove conflicting named variable %s on %s",
+		iter->first.c_str(), _segname.c_str());
+	_variables.erase(iter);
+    }
+
     _children.push_back(child);
     list<ConfigTreeNode *> sorted_children = _children;
     sort_by_template(sorted_children);
