@@ -20,10 +20,6 @@
  * http://xorp.net
  */
 
-/*
- * $XORP: xorp/contrib/win32/xorprtm/xorprtm_internal.h,v 1.7 2008/10/02 21:56:41 bms Exp $
- */
-
 #ifndef _CONFIGURATIONENTRY_H_
 #define _CONFIGURATIONENTRY_H_
 

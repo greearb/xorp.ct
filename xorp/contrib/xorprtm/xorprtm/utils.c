@@ -20,8 +20,6 @@
  * http://xorp.net
  */
 
-#ident "$XORP: xorp/contrib/win32/xorprtm/utils.c,v 1.7 2008/10/02 21:56:41 bms Exp $"
-
 /*
  * This file is derived from code which is under the following copyright:
  *

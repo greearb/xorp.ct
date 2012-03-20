@@ -20,10 +20,6 @@
  * http://xorp.net
  */
 
-/*
- * $XORP: xorp/contrib/win32/xorprtm/xorprtm.h,v 1.7 2008/10/02 21:56:41 bms Exp $
- */
-
 #ifndef _XORPRTM_H_
 #define _XORPRTM_H_
 
