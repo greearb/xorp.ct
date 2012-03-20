@@ -26,9 +26,10 @@ interfaces {
 		prefix-length:		u32;
 		broadcast:		ipv4;
 		destination:		ipv4;
-		multicast-capable:	bool;
-		point-to-point:		bool;
-		loopback:		bool;
+		multicast-capable:	toggle = false;
+		point-to-point:		toggle = false;
+		loopback:		toggle = false;
+		broadcast-capable:	toggle = false;
 		disable:		toggle = false;
 		enabled:		bool;	/* %deprecated */
 	    }
@@ -36,9 +37,9 @@ interfaces {
 	    address @: ipv6 {
 		prefix-length:		u32;
 		destination:		ipv6;
-		multicast-capable:	bool;
-		point-to-point:		bool;
-		loopback:		bool;
+		multicast-capable:	toggle = false;
+		point-to-point:		toggle = false;
+		loopback:		toggle = false;
 		disable:		toggle = false;
 		enabled:		bool;	/* %deprecated */
 	    }
@@ -147,6 +148,7 @@ interfaces {
 		%help:	short "Interface-type:  VLAN.";
 		%set:	xrl  "$(interfaces.targetname)/ifmgr/0.1/set_iface_type?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&iface_type:txt=$(@)";
 	}
+
 	vid {
 		%help:	short "Virtual Interface Identifier:  VLAN-ID for VLANs.";
 		%set:	xrl  "$(interfaces.targetname)/ifmgr/0.1/set_vid?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vid:txt=$(@)";
@@ -174,6 +176,7 @@ interfaces {
 		%mandatory:	$(@.prefix-length);
 
 		%create:	xrl "$(interfaces.targetname)/ifmgr/0.1/create_address4?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(@)";
+		%get:		xrl "$(interfaces.targetname)/ifmgr/0.1/get_configured_address_flags4?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(@)->enabled:bool&broadcast:bool=$(@.broadcast-capable)&loopback:bool=$(@.loopback)&point_to_point:bool=$(@.point-to-point)&multicast:bool=$(@.multicast-capable)";
 		%delete:	xrl "$(interfaces.targetname)/ifmgr/0.1/delete_address4?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(@)";
 		%list:		xrl "$(interfaces.targetname)/ifmgr/0.1/get_configured_vif_addresses4?ifname:txt=$(interface.@)&vif:txt->addresses:list";
 
@@ -208,18 +211,19 @@ interfaces {
 		}
 
 		multicast-capable {
-		    %help:	short "Show if the address is multicast capable";
-		    %get:	xrl "$(interfaces.targetname)/ifmgr/0.1/get_configured_address_flags4?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)->enabled:bool&broadcast:bool&loopback:bool&point_to_point:bool&multicast:bool=$(@)";
+		    %help:	short "Show if this is multicast capable vif";
 		}
 
 		point-to-point {
-		    %help:	short "Show if the address is point-to-point";
-		    %get:	xrl "$(interfaces.targetname)/ifmgr/0.1/get_configured_address_flags4?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)->enabled:bool&broadcast:bool&loopback:bool&point_to_point:bool=$(@)&multicast:bool";
+		    %help:	short "Show if this is point-to-point vif";
 		}
 
 		loopback {
-		    %help:	short "Show if this is a loopback address";
-		    %get:	xrl "$(interfaces.targetname)/ifmgr/0.1/get_configured_address_flags4?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)->enabled:bool&broadcast:bool&loopback:bool=$(@)&point_to_point:bool&multicast:bool";
+		    %help:	short "Show if this is a loopback vif";
+		}
+
+		broadcast-capable {
+		    %help:	short "Show if this is a broadcast capable vif";
 		}
 	    }
 
@@ -228,6 +232,7 @@ interfaces {
 		%mandatory:	$(@.prefix-length);
 
 		%create:	xrl "$(interfaces.targetname)/ifmgr/0.1/create_address6?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(@)";
+		%get:		xrl "$(interfaces.targetname)/ifmgr/0.1/get_configured_address_flags6?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(address.@)->enabled:bool&loopback:bool=$(@.loopback)&point_to_point:bool=$(@.point-to-point)&multicast:bool=$(@.multicast-capable)";
 		%delete:	xrl "$(interfaces.targetname)/ifmgr/0.1/delete_address6?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(@)";
 		%list:		xrl "$(interfaces.targetname)/ifmgr/0.1/get_configured_vif_addresses6?ifname:txt=$(interface.@)&vif:txt->addresses:list";
 
@@ -256,18 +261,15 @@ interfaces {
 		}
 
 		multicast-capable {
-		    %help:	short "Show if the address is multicast capable";
-		    %get:	xrl "$(interfaces.targetname)/ifmgr/0.1/get_configured_address_flags6?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(address.@)->enabled:bool&loopback:bool&point_to_point:bool&multicast:bool=$(@)";
+		    %help:	short "Show if this is multicast capable vif";
 		}
 
 		point-to-point {
-		    %help:	short "Show if the address is point-to-point";
-		    %get:	xrl "$(interfaces.targetname)/ifmgr/0.1/get_configured_address_flags6?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(address.@)->enabled:bool&loopback:bool&point_to_point:bool=$(@)&multicast:bool";
+		    %help:	short "Show if this is point-to-point vif";
 		}
 
 		loopback {
-		    %help:	short "Show if this is a loopback address";
-		    %get:	xrl "$(interfaces.targetname)/ifmgr/0.1/get_configured_address_flags6?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(address.@)->enabled:bool&loopback:bool=$(@)&point_to_point:bool&multicast:bool";
+		    %help:	short "Show if this is a loopback vif";
 		}
 	    }
 	}
