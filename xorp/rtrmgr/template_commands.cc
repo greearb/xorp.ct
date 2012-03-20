@@ -1419,6 +1419,11 @@ Command::process_xrl_action_return_arguments(XrlArgs* xrl_args,
 	string value = returned_atom.value();
 	debug_msg("found atom = %s\n", returned_atom.str().c_str());
 	debug_msg("found value = %s\n", value.c_str());
+
+	if (returned_atom.has_fake_args()) {
+	    ctn->value_to_node_existing_value(varname, value);
+	    returned_atom.using_real_args();
+	}
 	ctn->set_variable(varname, value);
     }
 

@@ -126,46 +126,46 @@ XorpClient::fake_return_args(const string& xrl_return_spec)
 	case xrlatom_no_type:
 	    XLOG_UNREACHABLE();
 	case xrlatom_int32:
-	    xargs.add(XrlAtom(atom.name().c_str(), (int32_t)0) );
+	    xargs.add(XrlAtom(atom.name().c_str(), (int32_t)0, true) );
 	    break;
 	case xrlatom_uint32:
-	    xargs.add(XrlAtom(atom.name().c_str(), (uint32_t)0) );
+	    xargs.add(XrlAtom(atom.name().c_str(), (uint32_t)0, true) );
 	    break;
 	case xrlatom_ipv4:
-	    xargs.add(XrlAtom(atom.name().c_str(), IPv4("0.0.0.0")) );
+	    xargs.add(XrlAtom(atom.name().c_str(), IPv4("0.0.0.0"), true) );
 	    break;
 	case xrlatom_ipv4net:
-	    xargs.add(XrlAtom(atom.name().c_str(), IPv4Net("0.0.0.0/0")) );
+	    xargs.add(XrlAtom(atom.name().c_str(), IPv4Net("0.0.0.0/0"), true) );
 	    break;
 	case xrlatom_text:
-	    xargs.add(XrlAtom(atom.name().c_str(), string("")) );
+	    xargs.add(XrlAtom(atom.name().c_str(), string(""), true) );
 	    break;
 	case xrlatom_ipv6:
-	    xargs.add(XrlAtom(atom.name().c_str(), IPv6("::")) );
+	    xargs.add(XrlAtom(atom.name().c_str(), IPv6("::"), true) );
 	    break;
 	case xrlatom_ipv6net:
-	    xargs.add(XrlAtom(atom.name().c_str(), IPv6Net("::/0")) );
+	    xargs.add(XrlAtom(atom.name().c_str(), IPv6Net("::/0"), true) );
 	    break;
 	case xrlatom_mac:
-	    xargs.add(XrlAtom(atom.name().c_str(), Mac("00:00:00:00:00:00")) );
+	    xargs.add(XrlAtom(atom.name().c_str(), Mac("00:00:00:00:00:00"), true) );
 	    break;
 	case xrlatom_list:
-	    xargs.add(XrlAtom(atom.name().c_str(), XrlAtomList()) );
+	    xargs.add(XrlAtom(atom.name().c_str(), XrlAtomList(), true) );
 	    break;
 	case xrlatom_boolean:
-	    xargs.add(XrlAtom(atom.name().c_str(), false) );
+	    xargs.add(XrlAtom(atom.name().c_str(), false, true) );
 	    break;
 	case xrlatom_binary:
-	    xargs.add(XrlAtom(atom.name().c_str(), data, sizeof(data)) );
+	    xargs.add(XrlAtom(atom.name().c_str(), data, sizeof(data), true) );
 	    break;
 	case xrlatom_uint64:
-	    xargs.add(XrlAtom(atom.name().c_str(), (uint64_t)0) );
+	    xargs.add(XrlAtom(atom.name().c_str(), (uint64_t)0, true) );
 	    break;
 	case xrlatom_int64:
-	    xargs.add(XrlAtom(atom.name().c_str(), (int64_t)0) );
+	    xargs.add(XrlAtom(atom.name().c_str(), (int64_t)0, true) );
 	    break;
 	case xrlatom_fp64:
-	    xargs.add(XrlAtom(atom.name().c_str(), (fp64_t)0) );
+	    xargs.add(XrlAtom(atom.name().c_str(), (fp64_t)0, true) );
 	    break;
 	}
     }

@@ -385,6 +385,7 @@ XrlAtom::copy(const XrlAtom& xa)
 
     _type = xa._type;
     _have_data = xa._have_data;
+    _has_fake_args = xa._has_fake_args;
     _own = true;
 
     if (_have_data) {
@@ -483,6 +484,7 @@ XrlAtom::discard_dynamic()
             // ... Your type should free allocated memory here ...
         }
         _have_data = false;
+        _has_fake_args = false;
     }
 }
 
@@ -505,7 +507,8 @@ XrlAtom::str() const
 XrlAtom::XrlAtom(const char* serialized) throw (InvalidString, BadName)
     : _type(xrlatom_no_type),
       _have_data(false),
-      _own(true)
+      _own(true),
+      _has_fake_args(false)
 {
 
     const char *start, *sep;
@@ -547,7 +550,8 @@ XrlAtom::XrlAtom(const string& name, XrlAtomType t,
 		 const string& serialized_data) throw (InvalidString)
     : _type(t),
       _have_data(false),
-      _own(true)
+      _own(true),
+      _has_fake_args(false)
 {
     set_name(name);
     ssize_t bad_pos = data_from_c_str(serialized_data.c_str());
@@ -559,7 +563,8 @@ XrlAtom::XrlAtom(const char* name, XrlAtomType t,
 		 const string& serialized_data) throw (InvalidString)
     : _type(t),
       _have_data(false),
-      _own(true)
+      _own(true),
+      _has_fake_args(false)
 {
     set_name(name);
     ssize_t bad_pos = data_from_c_str(serialized_data.c_str());

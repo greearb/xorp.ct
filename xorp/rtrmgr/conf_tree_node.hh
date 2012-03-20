@@ -174,6 +174,15 @@ public:
     bool has_undeleted_children() const;
     virtual void update_node_id_position();
 
+    /**
+     * This function sets variable value, from it's arguments,
+     * to existing value of node.
+     *
+     * If there is no node defined with varname or node
+     * doesn't have value, variable value stays unchanged.
+     */
+    void value_to_node_existing_value(const string& varname, string& value);
+
 protected:
     bool split_up_varname(const string& varname,
 			  list<string>& var_parts) const;

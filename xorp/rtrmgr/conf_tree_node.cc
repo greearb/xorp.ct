@@ -1866,6 +1866,16 @@ ConfigTreeNode::expand_varname_to_matchlist(const vector<string>& parts,
     }
 }
 
+void
+ConfigTreeNode::value_to_node_existing_value(const string& varname, string& value)
+{
+    VarType type;
+    ConfigTreeNode* node = find_varname_node(varname, type);
+    if (node && node->has_value())
+	value = node->value();
+}
+
+
 bool
 ConfigTreeNode::set_variable(const string& varname, const string& value)
 {
