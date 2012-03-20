@@ -109,6 +109,7 @@ XorpClient::fake_return_args(const string& xrl_return_spec)
     list<string>::const_iterator iter;
     for (iter = args.begin(); iter != args.end(); ++iter) {
 	string::size_type eq = iter->find("=");
+	uint8_t data[] = {0}; //Needed for xrlatom_binary
 	XrlAtom atom;
 
 	debug_msg("ARG: %s\n", iter->c_str());
@@ -140,15 +141,31 @@ XorpClient::fake_return_args(const string& xrl_return_spec)
 	    xargs.add(XrlAtom(atom.name().c_str(), string("")) );
 	    break;
 	case xrlatom_ipv6:
+	    xargs.add(XrlAtom(atom.name().c_str(), IPv6("::")) );
+	    break;
 	case xrlatom_ipv6net:
+	    xargs.add(XrlAtom(atom.name().c_str(), IPv6Net("::/0")) );
+	    break;
 	case xrlatom_mac:
+	    xargs.add(XrlAtom(atom.name().c_str(), Mac("00:00:00:00:00:00")) );
+	    break;
 	case xrlatom_list:
+	    xargs.add(XrlAtom(atom.name().c_str(), XrlAtomList()) );
+	    break;
 	case xrlatom_boolean:
+	    xargs.add(XrlAtom(atom.name().c_str(), false) );
+	    break;
 	case xrlatom_binary:
+	    xargs.add(XrlAtom(atom.name().c_str(), data, sizeof(data)) );
+	    break;
 	case xrlatom_uint64:
+	    xargs.add(XrlAtom(atom.name().c_str(), (uint64_t)0) );
+	    break;
 	case xrlatom_int64:
+	    xargs.add(XrlAtom(atom.name().c_str(), (int64_t)0) );
+	    break;
 	case xrlatom_fp64:
-	    XLOG_UNFINISHED();
+	    xargs.add(XrlAtom(atom.name().c_str(), (fp64_t)0) );
 	    break;
 	}
     }
