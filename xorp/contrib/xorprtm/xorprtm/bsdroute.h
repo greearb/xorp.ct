@@ -20,10 +20,6 @@
  * http://xorp.net
  */
 
-/*
- * $XORP: xorp/contrib/win32/xorprtm/bsdroute.h,v 1.7 2008/10/02 21:56:40 bms Exp $
- */
-
 /*-
  * Copyright (c) 1980, 1986, 1993
  * The Regents of the University of California.  All rights reserved.
@@ -84,8 +80,8 @@ extern "C" {
  */
 
 #define PROTO_IP_XORPRTM PROTO_IP_HELLO
-#define XORPRTM_PROTOCOL_ID    \
- PROTOCOL_ID(PROTO_TYPE_UCAST, PROTO_VENDOR_MS0, PROTO_IP_XORPRTM)
+#define XORPRTM_PROTOCOL_ID						\
+    PROTOCOL_ID(PROTO_TYPE_UCAST, PROTO_VENDOR_MS0, PROTO_IP_XORPRTM)
 
 #define XORPRTM_GLOBAL_CONFIG_ID       1
 
@@ -145,9 +141,9 @@ typedef struct _XORPRTM_MIB_GET_OUTPUT_DATA {
      /* 0x1000000 and up unassigned */
 
 /* Mask of RTF flags that are allowed to be modified by RTM_CHANGE. */
-#define RTF_FMASK \
- (RTF_PROTO1 | RTF_PROTO2 | RTF_PROTO3 | RTF_BLACKHOLE | \
-  RTF_REJECT | RTF_STATIC)
+#define RTF_FMASK						\
+    (RTF_PROTO1 | RTF_PROTO2 | RTF_PROTO3 | RTF_BLACKHOLE |	\
+     RTF_REJECT | RTF_STATIC)
 
 struct rt_metrics {
     DWORD rmx_filler[14]; /* Ignore field names but pad in same way */
@@ -157,19 +153,19 @@ struct rt_metrics {
  * Structures for routing messages.
  */
 struct rt_msghdr {
- USHORT rtm_msglen; /* to skip over non-understood messages */
- BYTE rtm_version; /* future binary compatibility */
- BYTE rtm_type; /* message type */
- USHORT rtm_index; /* index for associated ifp */
- DWORD rtm_flags; /* flags, incl. kern & message, e.g. DONE */
- DWORD rtm_addrs; /* bitmask identifying sockaddrs in msg */
- LONG rtm_pid; /* identify sender */
- LONG rtm_seq; /* for sender to identify action */
- DWORD rtm_errno; /* why failed */
- DWORD rtm_fmask; /* bitmask used in RTM_CHANGE message */
+    USHORT rtm_msglen; /* to skip over non-understood messages */
+    BYTE rtm_version; /* future binary compatibility */
+    BYTE rtm_type; /* message type */
+    USHORT rtm_index; /* index for associated ifp */
+    DWORD rtm_flags; /* flags, incl. kern & message, e.g. DONE */
+    DWORD rtm_addrs; /* bitmask identifying sockaddrs in msg */
+    LONG rtm_pid; /* identify sender */
+    LONG rtm_seq; /* for sender to identify action */
+    DWORD rtm_errno; /* why failed */
+    DWORD rtm_fmask; /* bitmask used in RTM_CHANGE message */
 #define rtm_use rtm_fmask /* deprecated, use rtm_rmx->rmx_pksent */
- DWORD rtm_inits; /* which metrics we are initializing */
- struct rt_metrics rtm_rmx; /* metrics themselves */
+    DWORD rtm_inits; /* which metrics we are initializing */
+    struct rt_metrics rtm_rmx; /* metrics themselves */
 };
 
 #define RTM_VERSION 66 /* Unique to XORP/Win32 */
