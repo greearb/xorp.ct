@@ -21,10 +21,6 @@
  */
 
 /*
- * $XORP: xorp/contrib/win32/xorprtm/mibmgr.h,v 1.7 2008/10/02 21:56:40 bms Exp $
- */
-
-/*
  * This file is derived from code which is under the following copyright:
  *
  * Copyright (c) 1999 - 2000 Microsoft Corporation.
@@ -43,8 +39,8 @@ MM_MibSet (PXORPRTM_MIB_SET_INPUT_DATA    pimsid);
 DWORD
 WINAPI
 MM_MibGet (PXORPRTM_MIB_GET_INPUT_DATA    pimgid,
-    PXORPRTM_MIB_GET_OUTPUT_DATA   pimgod,
-    PULONG                         pulOutputSize,
-    MODE                            mMode);
+	   PXORPRTM_MIB_GET_OUTPUT_DATA   pimgod,
+	   PULONG                         pulOutputSize,
+	   MODE                            mMode);
 
 #endif
