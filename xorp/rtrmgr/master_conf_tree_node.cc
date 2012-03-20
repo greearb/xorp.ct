@@ -8,13 +8,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -44,13 +44,13 @@ MasterConfigTreeNode::MasterConfigTreeNode(bool verbose)
 }
 
 MasterConfigTreeNode::MasterConfigTreeNode(const string& nodename,
-					   const string& path, 
+					   const string& path,
 					   const TemplateTreeNode* ttn,
 					   MasterConfigTreeNode* parent,
 					   const ConfigNodeId& node_id,
 					   uid_t user_id,
 					   bool verbose)
-    : ConfigTreeNode(nodename, path, ttn, parent, node_id, user_id, 
+    : ConfigTreeNode(nodename, path, ttn, parent, node_id, user_id,
 		     /* clientid */ 0, verbose),
       _actions_pending(0),
       _actions_succeeded(true),
@@ -68,8 +68,8 @@ MasterConfigTreeNode::MasterConfigTreeNode(const MasterConfigTreeNode& ctn)
 
 ConfigTreeNode*
 MasterConfigTreeNode::create_node(const string& segment, const string& path,
-				  const TemplateTreeNode* ttn, 
-				  ConfigTreeNode* parent_node, 
+				  const TemplateTreeNode* ttn,
+				  ConfigTreeNode* parent_node,
 				  const ConfigNodeId& node_id,
 				  uid_t user_id,
 				  uint32_t clientid,
@@ -83,7 +83,7 @@ MasterConfigTreeNode::create_node(const string& segment, const string& path,
     if (parent_node != NULL)
 	XLOG_ASSERT(parent != NULL);
 
-    new_node = new MasterConfigTreeNode(segment, path, ttn, parent, 
+    new_node = new MasterConfigTreeNode(segment, path, ttn, parent,
 					node_id, user_id, verbose);
     return reinterpret_cast<ConfigTreeNode*>(new_node);
 }
@@ -316,7 +316,7 @@ MasterConfigTreeNode::find_all_modules(set<string>& all_modules) const
     }
 }
 
-void 
+void
 MasterConfigTreeNode::initialize_commit()
 {
     _actions_pending = 0;
@@ -394,7 +394,7 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
     if (_template_tree_node != NULL) {
 	// Do we have to start any modules to implement this functionality
 	base_cmd = _template_tree_node->const_command("%modinfo");
-	const ModuleCommand* modcmd 
+	const ModuleCommand* modcmd
 	    = dynamic_cast<const ModuleCommand*>(base_cmd);
 	if (modcmd != NULL) {
 	    if (modcmd->start_transaction(*this, task_manager) != XORP_OK) {
@@ -420,7 +420,7 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
 		    // (_value_committed == false)
 		    //
 		    XLOG_ASSERT(_existence_committed);
-		    XLOG_ASSERT(!_value_committed);  
+		    XLOG_ASSERT(!_value_committed);
 		    base_cmd = _template_tree_node->const_command("%delete");
 		    if (base_cmd != NULL) {
 			cmd = reinterpret_cast<const Command*>(base_cmd);
@@ -446,7 +446,7 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
 		base_cmd = _template_tree_node->const_command("%allow");
 		if (base_cmd == NULL) {
 		    // Try allow-range
-		    base_cmd 
+		    base_cmd
 			= _template_tree_node->const_command("%allow-range");
 		}
 		if (base_cmd != NULL) {
@@ -473,7 +473,7 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
 		    }
 		}
 		// Check that the operator is OK
-		base_cmd = 
+		base_cmd =
 		    _template_tree_node->const_command("%allow-operator");
 		if (base_cmd == NULL) {
 		    /* no explicit command, so only ":" is allowed */
@@ -481,7 +481,7 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
 			error_msg = c_format("Bad operator for \"%s\": "
 					     "operator %s was specified, "
 					     "only ':' is allowed\n",
-					     path().c_str(), 
+					     path().c_str(),
 					     operator_to_str(_operator).c_str());
 			error_msg += "No changes have been committed. ";
 			error_msg += "Correct this error and try again.";
@@ -551,7 +551,7 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
 	string child_error_msg;
 	MasterConfigTreeNode *child = (MasterConfigTreeNode*)(*prev_iter);
 	success = child->commit_changes(task_manager, do_commit,
-					depth + 1, last_depth, 
+					depth + 1, last_depth,
 					child_error_msg,
 					needs_activate,
 					needs_update);
@@ -646,7 +646,7 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
     return success;
 }
 
-bool 
+bool
 MasterConfigTreeNode::check_commit_status(string& error_msg) const
 {
     debug_msg("ConfigTreeNode::check_commit_status %s\n",
@@ -664,7 +664,7 @@ MasterConfigTreeNode::check_commit_status(string& error_msg) const
 	    return false;
 	}
 	if (_deleted) {
-	    const BaseCommand* cmd 
+	    const BaseCommand* cmd
 		= _template_tree_node->const_command("%delete");
 	    if (cmd != NULL) {
 		//
@@ -689,7 +689,7 @@ MasterConfigTreeNode::check_commit_status(string& error_msg) const
     return result;
 }
 
-void 
+void
 MasterConfigTreeNode::finalize_commit()
 {
     debug_msg("MasterConfigTreeNode::finalize_commit %s\n",
@@ -705,7 +705,7 @@ MasterConfigTreeNode::finalize_commit()
 	// previously committed (_value_committed == false)
 	//
 	XLOG_ASSERT(_existence_committed);
-	XLOG_ASSERT(!_value_committed);  
+	XLOG_ASSERT(!_value_committed);
 	delete_subtree_silently();
 	// No point in going further
 	return;
@@ -729,7 +729,7 @@ MasterConfigTreeNode::finalize_commit()
     // careful the iterator stays valid.
     //
     list<ConfigTreeNode *>::iterator iter, prev_iter;
-    iter = _children.begin(); 
+    iter = _children.begin();
     while (iter != _children.end()) {
 	prev_iter = iter;
 	++iter;

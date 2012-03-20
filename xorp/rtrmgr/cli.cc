@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -183,7 +183,7 @@ RouterCLI::RouterCLI(XorpShellBase& xorpsh, CliNode& cli_node,
     // internationalization.
     //
     _help_o["configure"] = "Switch to configuration mode";
-    _help_o["configure exclusive"] 
+    _help_o["configure exclusive"]
 	= "Switch to configuration mode, locking out other users";
     _help_o["exit"] = "Exit this command session";
     _help_o["help"] = "Provide help with commands";
@@ -195,7 +195,7 @@ RouterCLI::RouterCLI(XorpShellBase& xorpsh, CliNode& cli_node,
     _help_c["edit"] = "Edit a sub-element";
     _help_c["exit"] = "Exit from this configuration level";
     _help_c["exit configuration-mode"] =  "Exit from configuration mode";
-    _help_c["exit discard"] 
+    _help_c["exit discard"]
 	= "Exit from configuration mode, discarding changes";
     _help_c["help"] = "Provide help with commands";
     _help_c["load"] = "Load configuration from a file";
@@ -582,7 +582,7 @@ RouterCLI::done() const
     return (true);
 }
 
-string 
+string
 RouterCLI::get_help_o(const string& s) const
 {
     map<string,string>::const_iterator i = _help_o.find(s);
@@ -593,7 +593,7 @@ RouterCLI::get_help_o(const string& s) const
 	return i->second;
 }
 
-string 
+string
 RouterCLI::get_help_c(const string& s) const
 {
     map<string,string>::const_iterator i = _help_c.find(s);
@@ -728,7 +728,7 @@ RouterCLI::add_op_mode_commands(CliCommand* com0, string& error_msg)
     return (XORP_OK);
 }
 
-map<string, CliCommandMatch> 
+map<string, CliCommandMatch>
 RouterCLI::op_mode_help(const vector<string>& command_global_name) const
 {
     string command_name;
@@ -1171,7 +1171,7 @@ RouterCLI::config_changed_by_other_user()
 {
     if (! is_config_mode()) {
 	// XXX: we care about the changes only if we are in config mode
-	return;	
+	return;
     }
 
     //
@@ -1748,7 +1748,7 @@ RouterCLI::new_config_user(uid_t user_id)
     string user_name = get_user_name(user_id);
     if (user_name.empty())
 	user_name = c_format("UID:%u", XORP_UINT_CAST(user_id));
-    
+
     string alert = c_format("User %s entered configuration mode\n",
 			    user_name.c_str());
     notify_user(alert, false /* not urgent */);
@@ -1815,7 +1815,7 @@ RouterCLI::op_help_func(const string& ,
     if (i != _help_long_o.end()) {
 	cli_client()->cli_print("\n" + i->second + "\n\n");
 	return (XORP_OK);
-    } 
+    }
 
     //
     // There was no long help description available.  If there's a
@@ -1862,7 +1862,7 @@ RouterCLI::conf_help_func(const string& ,
     if (i != _help_long_c.end()) {
 	cli_client()->cli_print("\n" + i->second + "\n\n");
 	return (XORP_OK);
-    } 
+    }
 
     //
     // There was no long help description available.  If there's a
@@ -2311,7 +2311,7 @@ RouterCLI::text_entry_func(const string& ,
 	    for (cti = ctn->children().begin();
 		 cti != ctn->children().end();  ++cti) {
 		if ((*cti)->segname() == new_path_segments.front()) {
-		    XLOG_TRACE(_verbose, "Found pre-existing node: %s\n", 
+		    XLOG_TRACE(_verbose, "Found pre-existing node: %s\n",
 			       (*cti)->segname().c_str());
 		    ConfigTreeNode *existing_ctn = (*cti);
 		    ctn = (SlaveConfigTreeNode*)(existing_ctn);
@@ -2326,7 +2326,7 @@ RouterCLI::text_entry_func(const string& ,
 	}
 	if (value_expected) {
 	    // We're expecting a value here
-	    if (new_path_segments.front() == "{" 
+	    if (new_path_segments.front() == "{"
 		|| new_path_segments.front() == "}" ) {
 		error_msg = c_format("ERROR: a value for \"%s\" "
 				     "is required.\n",
@@ -2388,13 +2388,13 @@ RouterCLI::text_entry_func(const string& ,
 			error_msg += c_format(" Allowed type(s): %s.",
 					      cand_types.c_str());
 		    }
-		    error_msg += "\n"; 
+		    error_msg += "\n";
 		    cli_client()->cli_print(error_msg);
 		    goto cleanup;
 		}
 		path_segments.push_back(value);
 		XLOG_TRACE(_verbose, "creating node %s\n", value.c_str());
-		ctn = new SlaveConfigTreeNode(value, 
+		ctn = new SlaveConfigTreeNode(value,
 					      makepath(path_segments),
 					      data_ttn, ctn,
 					      ConfigNodeId::ZERO(),
@@ -2492,7 +2492,7 @@ RouterCLI::text_entry_func(const string& ,
 		    cli_client()->cli_print("ERROR: mismatched \"}\".\n");
 		    goto cleanup;
 		}
-		XLOG_TRACE(_verbose, "braces: %u ctn depth: %u ctn: %s\n", 
+		XLOG_TRACE(_verbose, "braces: %u ctn depth: %u ctn: %s\n",
 			   XORP_UINT_CAST(_braces.back()),
 			   ctn->depth(), ctn->segname().c_str());
 		while (ctn->depth() > _braces.back()) {
@@ -2501,7 +2501,7 @@ RouterCLI::text_entry_func(const string& ,
 		    //appropriately before we can handle this correctly.
 		    ctn = ctn->parent();
 		    XLOG_TRACE(_verbose, "jumping out one level\n");
-		    XLOG_TRACE(_verbose, "braces: %u ctn depth: %u ctn: %s\n", 
+		    XLOG_TRACE(_verbose, "braces: %u ctn depth: %u ctn: %s\n",
 			       XORP_UINT_CAST(_braces.back()),
 			       ctn->depth(), ctn->segname().c_str());
 		}
@@ -2566,7 +2566,7 @@ RouterCLI::text_entry_func(const string& ,
 	    }
 
 	    XLOG_TRACE(_verbose, "creating node %s\n", ttn->segname().c_str());
-	    ctn = new SlaveConfigTreeNode(ttn->segname(), 
+	    ctn = new SlaveConfigTreeNode(ttn->segname(),
 					  makepath(path_segments),
 					  ttn, ctn,
 					  ConfigNodeId::ZERO(),
@@ -2654,7 +2654,7 @@ RouterCLI::text_entry_func(const string& ,
     return (XORP_ERROR);
 }
 
-map<string, CliCommandMatch> 
+map<string, CliCommandMatch>
 RouterCLI::text_entry_children_func(const vector<string>& vector_path) const
 {
     string command_name;
@@ -2712,7 +2712,7 @@ RouterCLI::text_entry_children_func(const vector<string>& vector_path) const
     ttn = template_tree()->find_node(path_segments);
     if (ttn != NULL && (! ttn->is_deprecated()) && (! ttn->is_user_hidden())) {
 	list<TemplateTreeNode*>::const_iterator tti;
-	for (tti = ttn->children().begin(); tti != ttn->children().end(); 
+	for (tti = ttn->children().begin(); tti != ttn->children().end();
 	     ++tti) {
 	    const TemplateTreeNode* ttn_child = *tti;
 	    // XXX: ignore deprecated subtrees
@@ -2766,7 +2766,7 @@ RouterCLI::text_entry_children_func(const vector<string>& vector_path) const
 		ccm.set_is_argument_expected(true);
 	    children.insert(make_pair(command_name, ccm));
 	}
-	
+
 	if (ttn->is_leaf_value() && (! ttn->is_tag())
 	    && ttn->allowed_values().empty()
 	    && ttn->allowed_ranges().empty()) {
