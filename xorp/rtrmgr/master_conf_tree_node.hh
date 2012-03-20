@@ -58,6 +58,9 @@ public:
     void find_active_modules(set<string>& active_modules) const;
     void find_all_modules(set<string>& all_modules) const;
 
+    void add_sync_cmd(MasterConfigTreeNode* node, const Command* cmd);
+    bool sync(TaskManager& task_manager);
+
     void initialize_commit();
     bool children_changed();
     bool commit_changes(TaskManager& task_manager, bool do_commit,
@@ -66,6 +69,8 @@ public:
     bool check_commit_status(string& error_msg) const;
     void finalize_commit();
 
+    void increment_actions_pending(const int increment);
+
 
 protected:
 
@@ -73,6 +78,11 @@ protected:
 				// callbacks we expect during a commit
     bool _actions_succeeded;	// Did any action fail during the commit?
     const Command* _cmd_that_failed;
+
+    map<MasterConfigTreeNode*, const Command*> _sync_cmds;	//In this map we store MasterConfigTreeNodes
+								//that have been changed, and that have %get
+								//functions which we use for synchronization.
+								//This map should have elements only for module root node
 
 private:
 };

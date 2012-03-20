@@ -139,6 +139,7 @@ public:
     void set_parent(ConfigTreeNode* parent) { _parent = parent; }
     ConfigTreeNode* parent() { return _parent; }
     const ConfigTreeNode* const_parent() const { return _parent; }
+    ConfigTreeNode* module_root_node();
     list<ConfigTreeNode*>& children() { return _children; }
     const list<ConfigTreeNode*>& const_children() const { return _children; }
     string show_subtree(bool show_top, int depth, int indent, bool do_indent,

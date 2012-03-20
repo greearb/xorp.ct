@@ -1476,6 +1476,7 @@ RouterCLI::add_delete_subtree()
     cmds.push_back("%create");
     cmds.push_back("%activate");
     cmds.push_back("%update");
+    cmds.push_back("%get");
     cmds.push_back("%set");
     cmds.push_back("%delete");
     SlaveConfigTreeNode *current_config_node = config_tree()->find_node(_path);

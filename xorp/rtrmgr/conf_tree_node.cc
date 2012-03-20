@@ -893,6 +893,23 @@ ConfigTreeNode::undelete_subtree()
     }
 }
 
+ConfigTreeNode*
+ConfigTreeNode::module_root_node()
+{
+    /**
+     * Module root node is the node that have modinfo commands defined
+     *
+     * If we are not the module root node,
+     * we recursively check our parent node.
+     */
+    if (_template_tree_node->const_command("%modinfo"))
+	return this;
+
+    XLOG_ASSERT(_parent);
+
+    return _parent->module_root_node();
+}
+
 string
 ConfigTreeNode::show_subtree(bool show_top, int depth, int indent,
 			     bool do_indent, bool numbered, bool annotate,

@@ -174,6 +174,15 @@ MasterConfigTreeNode::find_changed_modules(set<string>& changed_modules) const
 		for (iter = modules.begin(); iter != modules.end(); ++iter)
 		    changed_modules.insert(*iter);
 	    }
+
+	    base_cmd = _template_tree_node->const_command("%get");
+	    if (base_cmd != NULL) {
+		cmd = reinterpret_cast<const Command*>(base_cmd);
+		modules = cmd->affected_modules();
+		for (iter = modules.begin(); iter != modules.end(); ++iter)
+		    changed_modules.insert(*iter);
+	    }
+
 	    base_cmd = _template_tree_node->const_command("%update");
 	    if (base_cmd != NULL) {
 		cmd = reinterpret_cast<const Command*>(base_cmd);
@@ -246,6 +255,14 @@ MasterConfigTreeNode::find_active_modules(set<string>& active_modules) const
 	    for (iter = modules.begin(); iter != modules.end(); ++iter)
 		active_modules.insert(*iter);
 	}
+
+	base_cmd = _template_tree_node->const_command("%get");
+	if (base_cmd != NULL) {
+	    cmd = reinterpret_cast<const Command*>(base_cmd);
+	    modules = cmd->affected_modules();
+	    for (iter = modules.begin(); iter != modules.end(); ++iter)
+		active_modules.insert(*iter);
+	}
     }
 
     //
@@ -301,6 +318,15 @@ MasterConfigTreeNode::find_all_modules(set<string>& all_modules) const
 	    for (iter = modules.begin(); iter != modules.end(); ++iter)
 		all_modules.insert(*iter);
 	}
+
+	base_cmd = _template_tree_node->const_command("%get");
+	if (base_cmd != NULL) {
+	    cmd = reinterpret_cast<const Command*>(base_cmd);
+	    modules = cmd->affected_modules();
+	    for (iter = modules.begin(); iter != modules.end(); ++iter)
+		all_modules.insert(*iter);
+	}
+
 	base_cmd = _template_tree_node->const_command("%set");
 	if (base_cmd != NULL) {
 	    cmd = reinterpret_cast<const Command*>(base_cmd);
@@ -322,6 +348,7 @@ MasterConfigTreeNode::initialize_commit()
     _actions_pending = 0;
     _actions_succeeded = true;
     _cmd_that_failed = NULL;
+    _sync_cmds.clear();
 
     list<ConfigTreeNode *>::iterator iter;
     for (iter = _children.begin(); iter != _children.end(); ++iter) {
@@ -570,6 +597,18 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
 	if (_template_tree_node == NULL)
 	    break;
 
+	// The %get command
+	if (_value_committed == false) {
+	    base_cmd = _template_tree_node->const_command("%get");
+	    if (base_cmd) {
+		debug_msg("found commands: %s. Adding it to sync map\n", cmd->str().c_str());
+		MasterConfigTreeNode* module_root = dynamic_cast<MasterConfigTreeNode*>(this->module_root_node());
+		XLOG_ASSERT(module_root);
+
+		module_root->add_sync_cmd(this, reinterpret_cast<const Command*>(base_cmd));
+	    }
+	}
+
 	// The %activate command
 	if (needs_activate || (_existence_committed == false)) {
 	    base_cmd = _template_tree_node->const_command("%activate");
@@ -633,6 +672,14 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
 		    return false;
 		}
 	    }
+
+	    /**
+	     * Sync CLI DB, with module parameters
+	     */
+	    bool result = this->sync(task_manager);
+
+	    if (!result)
+		return false;
 	}
     }
 
@@ -715,6 +762,7 @@ MasterConfigTreeNode::finalize_commit()
 
 	XLOG_ASSERT(_actions_pending == 0);
 	XLOG_ASSERT(_actions_succeeded);
+	XLOG_ASSERT(_sync_cmds.empty());
 	_existence_committed = true;
 	_value_committed = true;
 	_deleted = false;
@@ -738,4 +786,49 @@ MasterConfigTreeNode::finalize_commit()
     }
 }
 
+void
+MasterConfigTreeNode::increment_actions_pending(const int increment = 1)
+{
+    XLOG_ASSERT(increment >= 0);
+    _actions_pending += increment;
+}
+
+
+void
+MasterConfigTreeNode::add_sync_cmd(MasterConfigTreeNode* node, const Command* cmd)
+{
+    /**
+     * Synchronization should be done ONLY from module root node
+     */
+    XLOG_ASSERT(this == module_root_node());
+
+    if (_sync_cmds.find(this) != _sync_cmds.end())
+	XLOG_UNREACHABLE();
+
+    _sync_cmds[node] = cmd;
+}
+
+bool
+MasterConfigTreeNode::sync(TaskManager& task_manager)
+{
+    XLOG_ASSERT(this == module_root_node());
+    map<MasterConfigTreeNode*, const Command*>::iterator iter;
+
+    for (iter = _sync_cmds.begin(); iter != _sync_cmds.end(); ++iter) {
+	int ret = iter->second->execute(*(iter->first), task_manager);
+	if (ret < 0) {
+	    string error_msg;
+	    error_msg = c_format("Parameter error for \"%s\"\n",
+		    iter->first->path().c_str());
+	    error_msg += "Correct this error and try again.\n";
+	    XLOG_WARNING("%s\n", error_msg.c_str());
+	    _sync_cmds.clear();
+	    return false;
+	}
+	iter->first->increment_actions_pending(ret);
+    }
+
+    _sync_cmds.clear();
+    return true;
+}
 
