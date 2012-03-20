@@ -20,9 +20,6 @@
  * http://xorp.net
  */
 
-/*
- * $XORP: xorp/contrib/win32/xorprtm/rmapi.h,v 1.7 2008/10/02 21:56:40 bms Exp $
- */
 
 #ifndef _RMAPI_H_
 #define _RMAPI_H_
@@ -30,6 +27,6 @@
 DWORD
 APIENTRY
 RegisterProtocol(PMPR_ROUTING_CHARACTERISTICS pRoutingChar,
-    PMPR_SERVICE_CHARACTERISTICS pServiceChar);
+		 PMPR_SERVICE_CHARACTERISTICS pServiceChar);
 
 #endif

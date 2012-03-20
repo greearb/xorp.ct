@@ -20,7 +20,6 @@
  * http://xorp.net
  */
 
-#ident "$XORP: xorp/contrib/win32/xorprtm/rmapi.c,v 1.7 2008/10/02 21:56:40 bms Exp $"
 
 /*
  * This file is derived from code which is under the following copyright:
@@ -223,36 +222,36 @@ InterfaceStatus (
 
     switch (StatusType) {
     case RIS_INTERFACE_ADDRESS_CHANGE:
- TRACE0(ANY, "interface address has changed");
+	TRACE0(ANY, "interface address has changed");
 #ifdef IPV6_DLL
- pbind6 = (PIPV6_ADAPTER_BINDING_INFO) StatusInfo;
- TRACE1(ANY, "%d addresses associated with this adapter",
-        pbind6->AddressCount);
+	pbind6 = (PIPV6_ADAPTER_BINDING_INFO) StatusInfo;
+	TRACE1(ANY, "%d addresses associated with this adapter",
+	       pbind6->AddressCount);
 #else
- pbind = (PIP_ADAPTER_BINDING_INFO) StatusInfo;
- TRACE1(ANY, "%d addresses associated with this adapter",
-        pbind->AddressCount);
+	pbind = (PIP_ADAPTER_BINDING_INFO) StatusInfo;
+	TRACE1(ANY, "%d addresses associated with this adapter",
+	       pbind->AddressCount);
 #endif
 #if 0
- rtm_newaddr(InterfaceIndex, pbind);
+	rtm_newaddr(InterfaceIndex, pbind);
 #endif
  break;
     case RIS_INTERFACE_ENABLED:
- TRACE0(ANY, "interface is enabled");
- break;
+	TRACE0(ANY, "interface is enabled");
+	break;
     case RIS_INTERFACE_DISABLED:
- TRACE0(ANY, "interface is disabled");
- break;
+	TRACE0(ANY, "interface is disabled");
+	break;
     case RIS_INTERFACE_MEDIA_PRESENT:
     case RIS_INTERFACE_MEDIA_ABSENT:
- TRACE1(ANY, "interface link is %s",
-        StatusType == RIS_INTERFACE_MEDIA_PRESENT ? "up" : "down");
- rtm_ifinfo(InterfaceIndex,
-     StatusType == RIS_INTERFACE_MEDIA_PRESENT ? 1 : 0);
- break;
+	TRACE1(ANY, "interface link is %s",
+	       StatusType == RIS_INTERFACE_MEDIA_PRESENT ? "up" : "down");
+	rtm_ifinfo(InterfaceIndex,
+		   StatusType == RIS_INTERFACE_MEDIA_PRESENT ? 1 : 0);
+	break;
     default:
- TRACE1(ANY, "unknown StatusType", StatusType);
- break;
+	TRACE1(ANY, "unknown StatusType", StatusType);
+	break;
     }
 
     TRACE1(LEAVE, "Leaving  InterfaceStatus: %u", dwErr);
@@ -700,11 +699,11 @@ RegisterProtocol(
         }
 
 
- TRACE1(CONFIGURATION, "fSupportedFunctionality is: %08lx",
-  pRoutingChar->fSupportedFunctionality);
+	TRACE1(CONFIGURATION, "fSupportedFunctionality is: %08lx",
+	       pRoutingChar->fSupportedFunctionality);
 
         if  ((pRoutingChar->fSupportedFunctionality & RF_FUNC_FLAGS) !=
-      RF_FUNC_FLAGS) {
+	     RF_FUNC_FLAGS) {
             dwErr = ERROR_NOT_SUPPORTED;
             break;
         }
