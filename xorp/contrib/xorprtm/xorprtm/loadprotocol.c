@@ -20,8 +20,6 @@
  * http://xorp.net
  */
 
-#ident "$XORP: xorp/contrib/win32/xorprtm/loadprotocol.c,v 1.7 2008/10/02 21:56:40 bms Exp $"
-
 /*
  * This file is derived from code which is under the following copyright:
  *
@@ -69,9 +67,9 @@ add_protocol_to_rras(int family)
 
 #ifdef IPV6_DLL
     if (family == AF_INET) {
- pid = PID_IP;
+	pid = PID_IP;
     } else {
- pid = PID_IPV6;
+	pid = PID_IPV6;
     }
 #else
     pid = PID_IP;
@@ -80,8 +78,7 @@ add_protocol_to_rras(int family)
     /* Connect to the server */
     /* ---------------------------------------------------------------- */
     dwErr = MprAdminServerConnect((LPWSTR) pswzServerName, &hMprServer);
-    if (dwErr == ERROR_SUCCESS)
-    {
+    if (dwErr == ERROR_SUCCESS) {
         /* Ok, get the infobase from the server */
         /* ------------------------------------------------------------ */
         dwErr = MprAdminTransportGetInfo(hMprServer,
@@ -91,8 +88,7 @@ add_protocol_to_rras(int family)
                                          NULL,
                                          NULL);
 
-        if (dwErr == ERROR_SUCCESS)
-        {
+        if (dwErr == ERROR_SUCCESS) {
             /* Call MprInfoDuplicate to create a duplicate of */
             /* the infoblock */
             /* -------------------------------------------------------- */
@@ -106,13 +102,11 @@ add_protocol_to_rras(int family)
     /* We also have to open the hMprConfig, but we can ignore the error */
     /* ---------------------------------------------------------------- */
     dwErrT = MprConfigServerConnect((LPWSTR) pswzServerName, &hMprConfig);
-    if (dwErrT == ERROR_SUCCESS)
-    {
+    if (dwErrT == ERROR_SUCCESS) {
         dwErrT = MprConfigTransportGetHandle(hMprConfig, pid, &hTransport);
     }
 
-    if (dwErr != ERROR_SUCCESS)
-    {
+    if (dwErr != ERROR_SUCCESS) {
         /* Ok, try to use the MprConfig calls. */
         /* ------------------------------------------------------------ */
         MprConfigTransportGetInfo(hMprConfig,
@@ -136,8 +130,7 @@ add_protocol_to_rras(int family)
     MprInfoBlockRemove(pHeader, PROTO_IP_XORPRTM, &pNewHeader);
 
     /* Did we remove the block? */
-    if (pNewHeader != NULL)
-    {
+    if (pNewHeader != NULL) {
         /* The block was found and removed, so use the new header. */
         MprInfoDelete(pHeader);
         pHeader = pNewHeader;
@@ -155,8 +148,7 @@ add_protocol_to_rras(int family)
     pHeader = NULL;
 
 
-    if (hMprServer)
-    {
+    if (hMprServer) {
 
         MprAdminTransportSetInfo(hMprServer,
                                  pid,
@@ -166,8 +158,7 @@ add_protocol_to_rras(int family)
                                  0);
     }
 
-    if (hMprConfig && hTransport)
-    {
+    if (hMprConfig && hTransport) {
 
         MprConfigTransportSetInfo(hMprConfig,
                                   hTransport,
@@ -204,15 +195,15 @@ restart_rras()
 
     h_scm = OpenSCManager(NULL, NULL, GENERIC_READ);
     if (h_scm == NULL) {
- return (-1);
+	return (-1);
     }
 
     h_rras = OpenService(h_scm, RRAS_SERVICE_NAME, GENERIC_READ);
     if (h_rras == NULL) {
-     result = GetLastError();
- /*printf("OpenService() failed: %d", result); */
- CloseServiceHandle(h_scm);
- return (-1);
+	result = GetLastError();
+	/*printf("OpenService() failed: %d", result); */
+	CloseServiceHandle(h_scm);
+	return (-1);
     }
 
     fatal = 0;
@@ -220,31 +211,31 @@ restart_rras()
     /*printf("Stoping service \"%s\" ", RRAS_SERVICE_NAME); */
 
     for (tries = 30; tries > 0; tries++) {
- /* Check if the service is running, stopping, or stopped. */
- result = ControlService(h_rras, SERVICE_CONTROL_INTERROGATE, &ss);
- if (result == NO_ERROR) {
-     /* Stopped; carry on */
-     if (ss.dwCurrentState == SERVICE_STOPPED)
-  break;
-     /* Stopping; poll until it's done */
-     if (ss.dwCurrentState == SERVICE_STOP_PENDING) {
-  Sleep(1000);
-  continue;
-     }
- } else if (result == ERROR_SERVICE_NOT_ACTIVE) {
-     break;
- } else {
-     fatal = 1;
-     break;
- }
+	/* Check if the service is running, stopping, or stopped. */
+	result = ControlService(h_rras, SERVICE_CONTROL_INTERROGATE, &ss);
+	if (result == NO_ERROR) {
+	    /* Stopped; carry on */
+	    if (ss.dwCurrentState == SERVICE_STOPPED)
+		break;
+	    /* Stopping; poll until it's done */
+	    if (ss.dwCurrentState == SERVICE_STOP_PENDING) {
+		Sleep(1000);
+		continue;
+	    }
+	} else if (result == ERROR_SERVICE_NOT_ACTIVE) {
+	    break;
+	} else {
+	    fatal = 1;
+	    break;
+	}
 
- result = ControlService(h_rras, SERVICE_CONTROL_STOP, &ss);
- if (result == ERROR_SERVICE_NOT_ACTIVE) {
-     break;
- } else if (result != NO_ERROR) {
-     fatal = 1;
-     break;
- }
+	result = ControlService(h_rras, SERVICE_CONTROL_STOP, &ss);
+	if (result == ERROR_SERVICE_NOT_ACTIVE) {
+	    break;
+	} else if (result != NO_ERROR) {
+	    fatal = 1;
+	    break;
+	}
     }
 
     /* XXX: We should really check to see if it started OK. */
@@ -296,25 +287,25 @@ add_protocol_to_registry(int family)
     HKEY hKey;
 
     result = RegCreateKeyExA(
-  HKEY_LOCAL_MACHINE,
-  family == AF_INET ? HKLM_XORPRTM4_NAME : HKLM_XORPRTM6_NAME,
-  0,
-  NULL,
-  REG_OPTION_NON_VOLATILE,
-  KEY_ALL_ACCESS,
-  NULL,
-  &hKey,
-  NULL);
+	HKEY_LOCAL_MACHINE,
+	family == AF_INET ? HKLM_XORPRTM4_NAME : HKLM_XORPRTM6_NAME,
+	0,
+	NULL,
+	REG_OPTION_NON_VOLATILE,
+	KEY_ALL_ACCESS,
+	NULL,
+	&hKey,
+	NULL);
 
     RegSetValueExA(hKey, "ConfigDll", 0, REG_SZ, DLL_CONFIG_DLL, sizeof(DLL_CONFIG_DLL));
     if (family == AF_INET) {
-     RegSetValueExA(hKey, "ConfigClsId", 0, REG_SZ, DLL_CLSID_IPV4, sizeof(DLL_CLSID_IPV4));
-     RegSetValueExA(hKey, "Title", 0, REG_SZ, DLL_TITLE_IPV4, sizeof(DLL_TITLE_IPV4));
-     RegSetValueExA(hKey, "DllName", 0, REG_SZ, DLL_NAME_IPV4, sizeof(DLL_NAME_IPV4));
+	RegSetValueExA(hKey, "ConfigClsId", 0, REG_SZ, DLL_CLSID_IPV4, sizeof(DLL_CLSID_IPV4));
+	RegSetValueExA(hKey, "Title", 0, REG_SZ, DLL_TITLE_IPV4, sizeof(DLL_TITLE_IPV4));
+	RegSetValueExA(hKey, "DllName", 0, REG_SZ, DLL_NAME_IPV4, sizeof(DLL_NAME_IPV4));
     } else {
-     RegSetValueExA(hKey, "ConfigClsId", 0, REG_SZ, DLL_CLSID_IPV6, sizeof(DLL_CLSID_IPV6));
-     RegSetValueExA(hKey, "Title", 0, REG_SZ, DLL_TITLE_IPV6, sizeof(DLL_TITLE_IPV6));
-     RegSetValueExA(hKey, "DllName", 0, REG_SZ, DLL_NAME_IPV6, sizeof(DLL_NAME_IPV6));
+	RegSetValueExA(hKey, "ConfigClsId", 0, REG_SZ, DLL_CLSID_IPV6, sizeof(DLL_CLSID_IPV6));
+	RegSetValueExA(hKey, "Title", 0, REG_SZ, DLL_TITLE_IPV6, sizeof(DLL_TITLE_IPV6));
+	RegSetValueExA(hKey, "DllName", 0, REG_SZ, DLL_NAME_IPV6, sizeof(DLL_NAME_IPV6));
     }
     RegSetValueExA(hKey, "Flags", 0, REG_DWORD, (BYTE*)&DLL_FLAGS, sizeof(DLL_FLAGS));
     RegSetValueExA(hKey, "ProtocolId", 0, REG_DWORD, (BYTE*)&DLL_PROTO, sizeof(DLL_PROTO));
@@ -325,15 +316,15 @@ add_protocol_to_registry(int family)
  /* XXX: Enable console tracing for debugging. */
 
     result = RegCreateKeyExA(
-  HKEY_LOCAL_MACHINE,
-  family == AF_INET ? HKLM_XORPRTM4_TRACING_NAME : HKLM_XORPRTM6_TRACING_NAME,
-  0,
-  NULL,
-  REG_OPTION_NON_VOLATILE,
-  KEY_ALL_ACCESS,
-  NULL,
-  &hKey,
-  NULL);
+	HKEY_LOCAL_MACHINE,
+	family == AF_INET ? HKLM_XORPRTM4_TRACING_NAME : HKLM_XORPRTM6_TRACING_NAME,
+	0,
+	NULL,
+	REG_OPTION_NON_VOLATILE,
+	KEY_ALL_ACCESS,
+	NULL,
+	&hKey,
+	NULL);
 
     foo = 1;
     RegSetValueExA(hKey, "EnableConsoleTracing", 0, REG_DWORD, (BYTE*)&foo, sizeof(foo));

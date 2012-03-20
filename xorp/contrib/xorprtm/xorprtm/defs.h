@@ -21,10 +21,6 @@
  */
 
 /*
- * $XORP: xorp/contrib/win32/xorprtm/defs.h,v 1.7 2008/10/02 21:56:40 bms Exp $
- */
-
-/*
  * This file is derived from code which is under the following copyright:
  *
  * Copyright (c) 1999 - 2000 Microsoft Corporation.
