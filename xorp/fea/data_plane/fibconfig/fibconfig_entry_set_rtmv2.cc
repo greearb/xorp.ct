@@ -344,6 +344,13 @@ FibConfigEntrySetRtmV2::delete_entry(const FteX& fte)
     // Copy the interface index.
     const IfTree& iftree = fibconfig().merged_config_iftree();
     const IfTreeVif* vifp = iftree.find_vif(fte.ifname(), fte.vifname());
+    if (!vifp) {
+	// Maybe VIF is already deleted or we are not configured to use it.
+	XLOG_WARNING("Trying to delete route for iface: %s on tree: %s, but cannot find iface.  Will continue.\n",
+		     fte.ifname().c_str(), iftree.getName().c_str());
+	return XORP_OK;
+    }
+
     XLOG_ASSERT(vifp != NULL);
     rtm->rtm_index = vifp->pif_index();
     
