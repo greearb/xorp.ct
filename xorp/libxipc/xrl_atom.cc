@@ -9,13 +9,13 @@
 // Redistribution and/or modification of this program under the terms of
 // any other version of the GNU Lesser General Public License is not
 // permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU Lesser General Public License, Version 2.1, a copy of
 // which can be found in the XORP LICENSE.lgpl file.
-// 
+//
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -385,6 +385,7 @@ XrlAtom::copy(const XrlAtom& xa)
 
     _type = xa._type;
     _have_data = xa._have_data;
+    _has_fake_args = xa._has_fake_args;
     _own = true;
 
     if (_have_data) {
@@ -483,6 +484,7 @@ XrlAtom::discard_dynamic()
             // ... Your type should free allocated memory here ...
         }
         _have_data = false;
+        _has_fake_args = false;
     }
 }
 
@@ -505,7 +507,8 @@ XrlAtom::str() const
 XrlAtom::XrlAtom(const char* serialized) throw (InvalidString, BadName)
     : _type(xrlatom_no_type),
       _have_data(false),
-      _own(true)
+      _own(true),
+      _has_fake_args(false)
 {
 
     const char *start, *sep;
@@ -547,7 +550,8 @@ XrlAtom::XrlAtom(const string& name, XrlAtomType t,
 		 const string& serialized_data) throw (InvalidString)
     : _type(t),
       _have_data(false),
-      _own(true)
+      _own(true),
+      _has_fake_args(false)
 {
     set_name(name);
     ssize_t bad_pos = data_from_c_str(serialized_data.c_str());
@@ -559,7 +563,8 @@ XrlAtom::XrlAtom(const char* name, XrlAtomType t,
 		 const string& serialized_data) throw (InvalidString)
     : _type(t),
       _have_data(false),
-      _own(true)
+      _own(true),
+      _has_fake_args(false)
 {
     set_name(name);
     ssize_t bad_pos = data_from_c_str(serialized_data.c_str());
@@ -945,7 +950,7 @@ size_t
 XrlAtom::unpack_ipv6(const uint8_t* buffer)
 {
     uint32_t a[4];
-    
+
     if (_type == xrlatom_no_type) {
 	memcpy(a, buffer, sizeof(a));
 	_ipv6 = new IPv6(a);
@@ -1168,7 +1173,7 @@ XrlAtom::unpack_binary(const uint8_t* buffer, size_t buffer_bytes)
 	_binary = 0;
 	return 0;
     }
-    
+
     if (_type != xrlatom_no_type)
 	delete _binary;
 

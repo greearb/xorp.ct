@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -37,6 +37,17 @@
 #include "template_commands.hh"
 #include "template_tree.hh"
 #include "template_tree_node.hh"
+
+#ifdef HAVE_REGEX_H
+#  include <regex.h>
+#else // ! HAVE_REGEX_H
+#  ifdef HAVE_PCRE_H
+#    include <pcre.h>
+#  endif
+#  ifdef HAVE_PCREPOSIX_H
+#    include <pcreposix.h>
+#  endif
+#endif // ! HAVE_REGEX_H
 
 
 #ifdef HOST_OS_WINDOWS
@@ -64,7 +75,7 @@ TemplateTree::~TemplateTree()
     delete _root_node;
 }
 
-bool 
+bool
 TemplateTree::load_template_tree(const string& config_template_dir,
 				 string& error_msg)
 {
@@ -123,9 +134,9 @@ TemplateTree::load_template_tree(const string& config_template_dir,
     return true;
 }
 
-bool 
+bool
 TemplateTree::parse_file(const string& filename,
-			 const string& config_template_dir, string& error_msg) 
+			 const string& config_template_dir, string& error_msg)
 {
     if (init_template_parser(filename.c_str(), this) < 0) {
 	complete_template_parser();
@@ -142,7 +153,7 @@ TemplateTree::parse_file(const string& filename,
     }
     if (_path_segments.size() != 0) {
 	complete_template_parser();
-	error_msg = c_format("File %s is not terminated properly", 
+	error_msg = c_format("File %s is not terminated properly",
 			     filename.c_str());
 	return false;
     }
@@ -228,6 +239,12 @@ TemplateTree::new_node(TemplateTreeNode* parent,
     case NODE_UINTRANGE:
 	ttn = new UIntRangeTemplate(*this, parent, path, varname, initializer);
 	break;
+    case NODE_ULONG:
+    ttn = new ULongTemplate(*this, parent, path, varname, initializer);
+    break;
+    case NODE_ULONGRANGE:
+    ttn = new ULongRangeTemplate(*this, parent, path, varname, initializer);
+    break;
     case NODE_INT:
 	ttn = new IntTemplate(*this, parent, path, varname, initializer);
 	break;
@@ -419,12 +436,33 @@ TemplateTree::find_node(const list<string>& path_segments) const
 	    TemplateTreeNode* t = *ti;
 	    if (t->type() == NODE_VOID)
 		continue;
-	    if ((t->parent() == NULL) || (! t->parent()->is_tag()))
+	    if ((t->parent() == NULL) || (!t->parent()->is_tag()))
 		continue;
 	    if (t->encoded_typestr() == segname) {
 		matches.push_back(t);
 		continue;
 	    }
+
+	    /**
+	     * Check if this segname represents some kind of range.
+	     * If it does, it will match regexp below, and we
+	     * are expecting t->encoded_typestr to be "<uint>" or "<uint64>" or "<int>"
+	     */
+	    regex_t range_reg;
+	    if (regcomp(&range_reg, "[\[][-]{0,1}[0-9]+[.][.][-]{0,1}[0-9]+]",
+		    REG_EXTENDED))
+		XLOG_UNREACHABLE();
+
+	    bool is_range = !regexec(&range_reg, segname.c_str(), 0, 0, 0);
+	    regfree(&range_reg);
+	    if (is_range
+		    && (t->encoded_typestr() == "<uint>"
+			    || t->encoded_typestr() == "<int>"
+			    || t->encoded_typestr() == "<uint64>")) {
+		matches.push_back(t);
+		continue;
+	    }
+
 	    string s;
 	    if (t->type_match(segname, s))
 		matches.push_back(t);
@@ -443,7 +481,7 @@ TemplateTree::find_node(const list<string>& path_segments) const
 }
 
 const TemplateTreeNode*
-TemplateTree::find_node_by_type(const list<ConfPathSegment>& path_segments) 
+TemplateTree::find_node_by_type(const list<ConfPathSegment>& path_segments)
     const
 {
     TemplateTreeNode* ttn = _root_node;
@@ -485,12 +523,18 @@ TemplateTree::find_node_by_type(const list<ConfPathSegment>& path_segments)
 	    if (t->type() == type) {
 		matches.push_back(t);
 		continue;
+	    } else if ((t->type() == NODE_ULONG || t->type() == NODE_INT) && type == NODE_UINT) {
+		// u64 values are read as u32 values, because their
+		// regexp is the same.
+		// Same is for the positive int values.
+		matches.push_back(t);
+		continue;
 	    }
 	    //
 	    // XXX: the type check failed.
 	    // If there is a matching template node type of type NODE_TEXT,
 	    // then we accept this node.
-	    // 
+	    //
 	    // The upside of this is that we can use a single template
 	    // node like "foo @: txt" that can be used with, say,
 	    // IPv4 or IPv6 addresses, a host name, or any other text string.

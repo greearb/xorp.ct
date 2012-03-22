@@ -9,8 +9,15 @@
 #undef __unused
 #endif
 
+#define YYSTYPE char*
 #include "libxorp/xorp.h"
-#include "y.tplt_tab.h"
+
+#if defined(NEED_LEX_H_HACK)
+extern YYSTYPE tpltlval;
+#include "y.tplt_tab.cc.h"
+#else
+#include "y.tplt_tab.hh"
+#endif
 
 #ifdef __xorp_unused
 #define __unused __xorp_unused
@@ -18,7 +25,6 @@
 #endif
 %}
 	int tplt_linenum = 1;
-	extern char* tpltlval;
 	string tplt_parsebuf;
 %option noyywrap
 %option nounput
@@ -283,6 +289,16 @@ RE_URL_SUBDELIMS "!"|"$"|"&"|"'"|"("|")"|"*"|"+"|","|";"|"="
 "u32"	{
 	tpltlval = strdup(tplttext);
 	return UINT_TYPE;
+	}
+
+"u64range"	{
+	tpltlval = strdup(tplttext);
+	return ULONGRANGE_TYPE;
+	}
+
+"u64"	{
+	tpltlval = strdup(tplttext);
+	return ULONG_TYPE;
 	}
 
 "bool"	{

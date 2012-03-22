@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -144,7 +144,7 @@ CliClient::~CliClient()
     string dummy_error_msg;
 
     stop_connection(dummy_error_msg);
-    
+
     set_log_output(false);
 
     // Remove the input file descriptor from the eventloop
@@ -174,7 +174,7 @@ CliClient::~CliClient()
 
     if (_gl != NULL)
 	_gl = del_GetLine(_gl);
-    
+
     delete_pipe_all();
 }
 
@@ -208,7 +208,7 @@ CliClient::set_log_output(bool v)
 	_is_log_output = false;
 	return (XORP_OK);
     }
-    
+
     // NOTERACHED
     return (XORP_ERROR);
 }
@@ -257,7 +257,7 @@ CliPipe *
 CliClient::add_pipe(const string& pipe_name)
 {
     CliPipe *cli_pipe;
-    
+
     cli_pipe = new CliPipe(pipe_name);
     if (cli_pipe->is_invalid()) {
 	delete cli_pipe;
@@ -266,7 +266,7 @@ CliClient::add_pipe(const string& pipe_name)
     _pipe_list.push_back(cli_pipe);
     cli_pipe->set_cli_client(this);
     set_pipe_mode(true);
-    
+
     return (cli_pipe);
 }
 
@@ -274,18 +274,18 @@ CliPipe *
 CliClient::add_pipe(const string& pipe_name, const list<string>& args_list)
 {
     CliPipe *cli_pipe;
-    
+
     cli_pipe = add_pipe(pipe_name);
     if (cli_pipe == NULL)
 	return (NULL);
-    
+
     // Add the list of arguments
     list<string>::const_iterator iter;
     for (iter = args_list.begin(); iter != args_list.end(); ++iter) {
 	string arg = *iter;
 	cli_pipe->add_pipe_arg(arg);
     }
-    
+
     return (cli_pipe);
 }
 
@@ -315,10 +315,10 @@ void
 CliClient::process_line_through_pipes(string& pipe_line)
 {
     list<CliPipe*>::iterator iter;
-    
+
     if (! is_pipe_mode())
 	return;
-    
+
     for (iter = _pipe_list.begin(); iter != _pipe_list.end(); ++iter) {
 	CliPipe *cli_pipe = *iter;
 	cli_pipe->process_func(pipe_line);
@@ -332,13 +332,13 @@ void
 CliClient::set_page_mode(bool v)
 {
     const char *s;
-    
+
     if (v) {
 	// TRUE
 	if (_is_page_mode)
 	    return;
 	_is_page_mode = v;
-	
+
 	//
 	// Save the key bind commands
 	//
@@ -383,7 +383,7 @@ CliClient::set_page_mode(bool v)
 	    = (s = gl_get_key_binding_action_name(gl(), "^U")) ? (s) : "";
 	_action_name_ctrl_x
 	    = (s = gl_get_key_binding_action_name(gl(), "^X")) ? (s) : "";
-	
+
 	//
 	// Set new binding
 	//
@@ -470,14 +470,14 @@ CliClient::set_page_mode(bool v)
 	    bind_command = "bind ^X user-event4";
 	    gl_configure_getline(gl(), bind_command.c_str(), NULL, NULL);
 	}
-	
+
 	return;
     } else {
 	// FALSE
 	if (! _is_page_mode)
 	    return;
 	_is_page_mode = v;
-	
+
 	//
 	// Restore the key bind commands
 	//
@@ -562,7 +562,7 @@ CliClient::set_page_mode(bool v)
 	    bind_command = "bind ^X " + _action_name_ctrl_x;
 	    gl_configure_getline(gl(), bind_command.c_str(), NULL, NULL);
 	}
-	
+
 	return;
     }
 }
@@ -687,7 +687,7 @@ CliClient::cli_print(const string& msg)
 	is_incomplete_last_line = true;
 	break;
     } while (false);
-    
+
     // Process the data throught the pipe
     pipe_line += _buffer_line;
     _buffer_line = "";
@@ -715,7 +715,7 @@ CliClient::cli_print(const string& msg)
 	pipe_result += pipe_line;
 	pipe_line = "";
     }
-    
+
     // If a terminal connection, add '\r' before each '\n'
     // (unless the previous character to print is indeed '\r').
     pipe_line = "";
@@ -773,12 +773,12 @@ CliClient::cli_print(const string& msg)
 	if (pipe_line.size())
 	    output_string += pipe_line;	// XXX: the remaining partial line
     }
-    
+
     ret_value = output_string.size();
     // if (! (is_page_buffer_mode() && is_page_mode()))
     if (output_string.size())
 	ret_value = fprintf(_output_fd_file, "%s", output_string.c_str());
-    
+
     return (ret_value);
 }
 
@@ -814,7 +814,7 @@ CliClient::process_char_page_mode(uint8_t val)
 {
     string restore_cli_prompt = current_cli_prompt();	// The current prompt
     bool old_page_buffer_mode = is_page_buffer_mode();
-    
+
     //
     // Reset the line and clear the current prompt
     //
@@ -823,8 +823,8 @@ CliClient::process_char_page_mode(uint8_t val)
     set_current_cli_prompt("");
     gl_reset_line(gl());
     cli_flush();
-    
-    
+
+
     //
     // Page commands
     //
@@ -872,7 +872,7 @@ CliClient::process_char_page_mode(uint8_t val)
 	}
 	goto redisplay_screen_label;
     }
-    
+
     //
     // Interrupt the display of output
     //
@@ -886,7 +886,7 @@ CliClient::process_char_page_mode(uint8_t val)
 	}
 	goto exit_page_mode_label;
     }
-    
+
     //
     // Scroll down one line
     //
@@ -904,7 +904,7 @@ CliClient::process_char_page_mode(uint8_t val)
 	}
 	goto redisplay_line_label;
     }
-    
+
     //
     // Scroll down one-half screen
     //
@@ -925,7 +925,7 @@ CliClient::process_char_page_mode(uint8_t val)
 	}
 	goto redisplay_line_label;
     }
-    
+
     //
     // Scroll down one whole screen
     //
@@ -944,7 +944,7 @@ CliClient::process_char_page_mode(uint8_t val)
 	}
 	goto redisplay_line_label;
     }
-    
+
     //
     // Scroll down to the bottom of the output
     //
@@ -953,7 +953,7 @@ CliClient::process_char_page_mode(uint8_t val)
 	set_page_buffer_last_line_n(page_buffer_lines_n());
 	goto redisplay_screen_label;
     }
-    
+
     //
     // Display the output all at once instead of oen screen at a time.
     // (Same as specifying the "| no-more" command.)
@@ -970,7 +970,7 @@ CliClient::process_char_page_mode(uint8_t val)
 	// goto exit_page_mode_label;
 	goto redisplay_line_label;
     }
-    
+
     //
     // Display the previous line of output
     //
@@ -982,7 +982,7 @@ CliClient::process_char_page_mode(uint8_t val)
 	    decr_page_buffer_last_line_n();
 	goto redisplay_screen_label;
     }
-    
+
     //
     // Scroll up one-half screen
     //
@@ -995,7 +995,7 @@ CliClient::process_char_page_mode(uint8_t val)
 	}
 	goto redisplay_screen_label;
     }
-    
+
     //
     // Scroll up one whole screen
     //
@@ -1008,7 +1008,7 @@ CliClient::process_char_page_mode(uint8_t val)
 	}
 	goto redisplay_screen_label;
     }
-    
+
     //
     // Scroll up to the top of the output
     //
@@ -1017,7 +1017,7 @@ CliClient::process_char_page_mode(uint8_t val)
 	set_page_buffer_last_line_n(0);
 	goto redisplay_screen_label;
     }
-    
+
     //
     // Redraw the output of the screen
     //
@@ -1048,9 +1048,9 @@ CliClient::process_char_page_mode(uint8_t val)
 	set_page_buffer_mode(old_page_buffer_mode);
 	goto redisplay_line_label;
     }
-    
+
     goto redisplay_line_label;
-    
+
  exit_page_mode_label:
     reset_page_buffer();
     if (is_interactive())
@@ -1071,7 +1071,7 @@ CliClient::process_char_page_mode(uint8_t val)
 	goto redisplay_screen_label;
     }
     // FALLTHROUGH
-    
+
  redisplay_line_label:
     cli_flush();
     if (is_page_mode()) {
@@ -1096,7 +1096,7 @@ CliClient::post_process_command()
 	// We are waiting for the result; silently return.
 	return;
     }
-    
+
     //
     // Reset the state for the currently executed command
     //
@@ -1108,7 +1108,7 @@ CliClient::post_process_command()
     // Pipe-process the result
     //
     string final_string = "";
-    
+
     cli_print("");		// XXX: EOF: clear-out the pipe
     list<CliPipe*>::iterator iter;
     for (iter = _pipe_list.begin(); iter != _pipe_list.end(); ++iter) {
@@ -1127,10 +1127,10 @@ CliClient::post_process_command()
 	set_hold_mode(false);
     }
     delete_pipe_all();
-    
+
     if (! is_page_mode())
 	reset_page_buffer();
-    
+
     //
     // Page-related state
     //
@@ -1145,7 +1145,7 @@ CliClient::post_process_command()
 	if (is_interactive())
 	    set_nomore_mode(false);
     }
-    
+
     //
     // Reset buffer, cursor, prompt
     //
@@ -1210,7 +1210,7 @@ CliClient::process_char(const string& line, uint8_t val, bool& stop_processing)
 {
     int gl_buff_curpos = gl_get_buff_curpos(gl());
     int ret_value = XORP_OK;
-    
+
     stop_processing = false;
 
     if ((val == '\n') || (val == '\r')) {
@@ -1230,7 +1230,7 @@ CliClient::process_char(const string& line, uint8_t val, bool& stop_processing)
 
 	return (XORP_OK);
     }
-    
+
     if (val == '?') {
 	// Command-line help
 	//set_page_buffer_mode(true);
@@ -1250,7 +1250,7 @@ CliClient::process_char(const string& line, uint8_t val, bool& stop_processing)
 	//set_buff_curpos(0);
 	return (XORP_OK);
     }
-    
+
     //
     // XXX: The (val == ' ') and 'Ctrl-C' cases are handled by the
     // parent function.
@@ -1280,7 +1280,7 @@ CliClient::process_char(const string& line, uint8_t val, bool& stop_processing)
 	return (XORP_ERROR);
     }
     set_buff_curpos(gl_buff_curpos);
-    
+
     return (XORP_OK);
 }
 
@@ -1290,7 +1290,7 @@ CliClient::process_char(const string& line, uint8_t val, bool& stop_processing)
  * @line: The current command line.
  * @word_end: The cursor position.
  * @remove_last_input_char: If true, then remove the last input character.
- * 
+ *
  * Print the help for the same-line command.
  **/
 void
@@ -1300,7 +1300,7 @@ CliClient::command_line_help(const string& line, int word_end,
     CliCommand *curr_cli_command = _current_cli_command;
     set<string> command_help_strings;
     bool is_found = false;
-    
+
     if (remove_last_input_char)
 	word_end--;			// XXX: exclude the '?' character
 
@@ -1327,7 +1327,7 @@ CliClient::command_line_help(const string& line, int word_end,
 	cli_print(c_format("\nsyntax error, command \"%s\" is not recognized.\n",
 			   token_line.c_str()));
     }
-    
+
     gl_redisplay_line(gl());
     if (remove_last_input_char) {
 	// XXX: Move the cursor over the '?'
@@ -1352,7 +1352,7 @@ CliClient::process_command(const string& command_line)
     int i, old_len, new_len;
     vector<string> command_global_name;
     bool found_type_match_cb = false;
-    
+
     token_line = command_line;
     new_len = token_line.size();
     old_len = new_len;
@@ -1383,7 +1383,7 @@ CliClient::process_command(const string& command_line)
 		    command_global_name.push_back(copy_token(token));
 		continue;
 	    }
-	
+
 	    if (parent_cli_command->has_cli_process_callback()) {
 		// The parent command has processing function, so the rest
 		// of the tokens could be arguments for that function
@@ -1395,7 +1395,7 @@ CliClient::process_command(const string& command_line)
 	token_line = copy_token(token) + token_line;
 	break;
     }
-    
+
     if (parent_cli_command->has_cli_process_callback()) {
 	// Process the rest of the tokens as arguments for this function
 	vector<string> args_vector;
@@ -1413,7 +1413,7 @@ CliClient::process_command(const string& command_line)
 		    // We cannot use pipe with this command
 		    goto print_syntax_error_label;
 		}
-		
+
 		// Start of a pipe command
 		is_process_func_arguments = false;
 		is_pipe_command_arguments = false;
@@ -1447,20 +1447,20 @@ CliClient::process_command(const string& command_line)
 	    pipe_command_name = "";
 	    pipe_command_args_list.clear();
 	}
-	
+
 	if (pipe_command_empty) {
 	    // Empty pipe command
 	    parent_cli_command = parent_cli_command->cli_command_pipe();
 	    goto print_syntax_error_label;
 	}
-	
+
 	// Run the command function
 	{
 	    int ret_value;
 	    string final_string = "";
 	    bool is_error = false;
 	    string error_msg;
-	    
+
 	    if (parent_cli_command->default_nomore_mode())
 		set_nomore_mode(true);
 	    list<CliPipe*>::iterator iter;
@@ -1492,7 +1492,7 @@ CliClient::process_command(const string& command_line)
 		set_pipe_mode(old_pipe_mode);
 	    }
 	    final_string = "";
-	    
+
 	    _executed_cli_command = parent_cli_command;
 	    _executed_cli_command_name = command_global_name;
 	    _executed_cli_command_args = args_vector;
@@ -1505,9 +1505,9 @@ CliClient::process_command(const string& command_line)
 	    return (ret_value);
 	}
     }
-    
+
     // The rest of the tokens (if any) cannot be processed as arguments
-    
+
     // Test if we can "cd" to this function.
     token = pop_token(token_line);
     if (token.empty()) {
@@ -1516,10 +1516,10 @@ CliClient::process_command(const string& command_line)
 	    set_current_cli_command(parent_cli_command);
 	    return (XORP_OK);
 	}
-	
+
 	// Error. Will print the list of child commands (done below).
     }
-    
+
  print_syntax_error_label:
     //
     // If there are more tokens, the first one has to be a sub-command.
@@ -1578,7 +1578,7 @@ CliClient::process_command(const string& command_line)
 	cli_print(c_format(" `%s'", child_cli_command->name().c_str()));
     }
     cli_print(".\n");
-    
+
     return (XORP_ERROR);
 }
 
@@ -1645,10 +1645,10 @@ CliClient::command_completion_func(WordCompletion *cpl, void *data,
     CliCommand *curr_cli_command = cli_client->_current_cli_command;
     list<CliCommand *> cli_command_match_list;
     set<string> type_names, no_type_names;
-    
+
     if (cpl == NULL)
 	return (1);
-    
+
     list<CliCommand *>::iterator iter;
     for (iter = curr_cli_command->child_command_list().begin();
 	 iter != curr_cli_command->child_command_list().end();
@@ -1690,7 +1690,7 @@ CliClient::command_completion_func(WordCompletion *cpl, void *data,
 	// Prepare and print the initial message(s)
 	string token_line = string(line, word_end);
 	string token;
-	
+
 	// Get the lastest token
 	do {
 	    string next_token = pop_token(token_line);
@@ -1698,7 +1698,7 @@ CliClient::command_completion_func(WordCompletion *cpl, void *data,
 		break;
 	    token = next_token;
 	} while (true);
-	
+
 	cli_client->cli_print(c_format("\n`%s' is ambiguous.", token.c_str()));
 	cli_client->cli_print("\nPossible completions:");
     } else {
@@ -1706,10 +1706,10 @@ CliClient::command_completion_func(WordCompletion *cpl, void *data,
 	    cli_client->command_line_help(line, word_end, false);
 	}
     }
-    
+
     if (ret_value != 0) {
 	cpl_record_error(cpl, "Not a XORP command!");
     }
-    
+
     return (ret_value);
 }

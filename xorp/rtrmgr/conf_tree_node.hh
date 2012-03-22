@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -54,7 +54,7 @@ class ConfigTreeNode {
 public:
     ConfigTreeNode(bool verbose);
     ConfigTreeNode(const ConfigTreeNode& ctn);
-    ConfigTreeNode(const string& node_name, const string& path, 
+    ConfigTreeNode(const string& node_name, const string& path,
 		   const TemplateTreeNode* ttn, ConfigTreeNode* parent,
 		   const ConfigNodeId& node_id,
 		   uid_t user_id, uint32_t clientid, bool verbose);
@@ -62,14 +62,14 @@ public:
 
     bool operator==(const ConfigTreeNode& them) const;
     bool is_same(const ConfigTreeNode& them, bool ignore_node_id) const;
-    
-    virtual ConfigTreeNode* create_node(const string& segment, 
+
+    virtual ConfigTreeNode* create_node(const string& segment,
 					const string& path,
-					const TemplateTreeNode* ttn, 
-					ConfigTreeNode* parent_node, 
+					const TemplateTreeNode* ttn,
+					ConfigTreeNode* parent_node,
 					const ConfigNodeId& node_id,
-					uid_t user_id, 
-					uint32_t clientid, 
+					uid_t user_id,
+					uint32_t clientid,
 					bool verbose) = 0;
     virtual ConfigTreeNode* create_node(const ConfigTreeNode& ctn) = 0;
 
@@ -93,7 +93,7 @@ public:
 		      bool preserve_node_id,
 		      string& error_msg);
 
-    bool merge_deletions(uid_t user_id, const ConfigTreeNode& deletion_node, 
+    bool merge_deletions(uid_t user_id, const ConfigTreeNode& deletion_node,
 			 bool provisional_change, string& error_msg);
     ConfigTreeNode* find_config_module(const string& module_name);
 
@@ -139,6 +139,7 @@ public:
     void set_parent(ConfigTreeNode* parent) { _parent = parent; }
     ConfigTreeNode* parent() { return _parent; }
     const ConfigTreeNode* const_parent() const { return _parent; }
+    ConfigTreeNode* module_root_node();
     list<ConfigTreeNode*>& children() { return _children; }
     const list<ConfigTreeNode*>& const_children() const { return _children; }
     string show_subtree(bool show_top, int depth, int indent, bool do_indent,
@@ -147,7 +148,7 @@ public:
     void mark_subtree_for_deletion(uid_t user_id);
     void delete_subtree_silently();
     void clone_subtree(const ConfigTreeNode& orig_node);
-    bool retain_different_nodes(const ConfigTreeNode& them, 
+    bool retain_different_nodes(const ConfigTreeNode& them,
 				bool retain_changed_values);
     bool retain_deletion_nodes(const ConfigTreeNode& them,
 			       bool retain_value_changed);
@@ -174,14 +175,23 @@ public:
     bool has_undeleted_children() const;
     virtual void update_node_id_position();
 
+    /**
+     * This function sets variable value, from it's arguments,
+     * to existing value of node.
+     *
+     * If there is no node defined with varname or node
+     * doesn't have value, variable value stays unchanged.
+     */
+    void value_to_node_existing_value(const string& varname, string& value);
+
 protected:
     bool split_up_varname(const string& varname,
 			  list<string>& var_parts) const;
     string join_up_varname(const list<string>& var_parts) const;
-    enum VarType { NONE, NODE_VALUE, NODE_OPERATOR, NODE_ID, 
+    enum VarType { NONE, NODE_VALUE, NODE_OPERATOR, NODE_ID,
 		   NAMED, TEMPLATE_DEFAULT };
     ConfigTreeNode* find_varname_node(const string& varname, VarType& type);
-    const ConfigTreeNode* find_const_varname_node(const string& varname, 
+    const ConfigTreeNode* find_const_varname_node(const string& varname,
 						  VarType& type) const;
     ConfigTreeNode* find_parent_varname_node(const list<string>& var_parts,
 					     VarType& type);

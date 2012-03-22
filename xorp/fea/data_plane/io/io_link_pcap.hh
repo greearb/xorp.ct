@@ -33,7 +33,9 @@
 #include "libxorp/eventloop.hh"
 
 #ifdef HAVE_PCAP_H
+extern "C" {
 #include <pcap.h>
+}
 #endif
 
 #include "fea/io_link.hh"

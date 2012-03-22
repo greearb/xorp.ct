@@ -56,6 +56,21 @@ def DoAllConfig(env, conf, host_os):
         print "  existence of gcc and g++ compilers."
         print "  Will assume the exist and function properly...\n"
 
+    # Check for Flex and Bison
+    if not (env.has_key('LEX') and env['LEX']):
+        print "\nERROR: Cannot find flex."
+        print "  On Ubuntu: sudo apt-get install flex"
+        print "  On Fedora/RedHat: yum install flex"
+        sys.exit(1);
+    print "OK:  flex appears functional."
+
+    if not (env.has_key('YACC') and env['YACC']):
+        print "\nERROR: Cannot find bison."
+        print "  On Ubuntu: sudo apt-get install bison"
+        print "  On Fedora/RedHat: yum install bison"
+        sys.exit(1);
+    print "OK:  bison appears functional."
+
     # Mingw/windows stuff
     has_iphlpapi_h = conf.CheckHeader(['winsock2.h', 'iphlpapi.h'])
     has_routprot_h = conf.CheckHeader('routprot.h')
@@ -75,6 +90,8 @@ def DoAllConfig(env, conf, host_os):
 	    includes += '#include <stdint.h>\n'
 	conf.CheckType(type, includes)
     
+    has_stdbool_h = conf.CheckHeader('stdbool.h')
+
     ##########
     # stdc
     has_stddef_h = conf.CheckHeader('stddef.h')

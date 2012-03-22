@@ -1,6 +1,3 @@
-#
-# $XORP: xorp/devnotes/coding-style.txt,v 1.6 2007/05/23 12:12:33 pavlin Exp $
-#
 
 	Provisional XORP C++ coding style
 
@@ -18,21 +15,20 @@ from our default coding styles that all are equally peturbed.
 
 - FILE PROLOGUES
 
-  Files should have a prologue containing the copyright, a description
-  of what the file does, an RCS version id, and an RCS
-  string/identifier in implementation files that ident(1) can use.
+  Files should have a prologue containing the copyright and a description
+  of what the file does.
 
   We have a standard templates to work from:
-     devnotes/template.hh
-     devnotes/template.cc
-     devnotes/template.h
-     devnotes/template.c
+     devnotes/template*
 
 - INDENTATION
 
   Use 4 spaces per indent level.  Indentation should generally follow
   "gnu".  The default emacs c/c++ style is gnu, can be set with
   M-x c-set-style gnu).
+
+  For Eclipse, see the xorpEclipse.xml file.  It can be loaded by:
+  Window->Preferences->C/C++->Code Style->Import
 
 - BRACES
 
@@ -112,9 +108,7 @@ from our default coding styles that all are equally peturbed.
 
 - TERMINAL WIDTH
 
-  Assume the terminal is 80 characters wide.  Sure there'll be odd
-  times when wraps cannot be avoided, but gratuitous wrapping will
-  give you a "wide boy" reputation.
+  Try to keep lines less than 110 characters when it makes sense.
 
 - CAPITALIZATION
 
@@ -163,12 +157,15 @@ from our default coding styles that all are equally peturbed.
 	const char*
 	LuckyEightBall::speak() const
 	{
-	// blah blah
+	    // blah blah
 	}
 
-- ABBREVIATIONS
+  NOTE:  Truth is, I prefer an alternative to this..so I'll accept
+   either.  --Ben
 
-  Should be avoided, especially in method names.
+	const char* LuckyEightBall::speak() const {
+	    // blah blah
+	}
 
 - INTEGER TYPES
 
@@ -186,20 +183,8 @@ from our default coding styles that all are equally peturbed.
 
 - USE OF EXCEPTIONS AND STANDARD TEMPLATE LIBRARY
 
-  Non-kernel modules should use exceptions and the standard template
-  library where appropriate.
-
-- USE OF AUTOCONF
-
-  We will use GNU autoconf to improve portability. The "xorp_config.h"
-  header file will define symbols specifying system properties that
-  may differ between reasonable Unices. This file is included by
-  "libxorp/xorp.h" which itself includes and defines a number of other
-  useful header files and features. The first file included by any XORP
-  source file should be "libxorp/xorp.h".
-  However, if one of the included header files is the module-specific
-  "foo_module.h" (required by "libxorp/xlog.h"), that file should
-  be included before "libxorp/xorp.h".
+  Please DO NOT use Exceptions unless absolutely necessary.
+  Add proper error checking, logging, and return values instead.
 
 - INCLUDE FILES
 

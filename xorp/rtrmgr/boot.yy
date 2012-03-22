@@ -18,6 +18,49 @@
 /* XXX: sigh - -p flag to yacc should do this for us */
 #define yystacksize bootstacksize
 #define yysslim bootsslim
+
+/**
+ * Forward declarations
+ */
+extern void boot_scan_string(const char *configuration);
+extern int boot_linenum;
+extern "C" int bootparse();
+extern int bootlex();
+
+void booterror(const char *s) throw (ParseError);
+
+static ConfigTree *config_tree = NULL;
+static string boot_filename;
+static string lastsymbol;
+static string node_id;
+
+/**
+ * Function declarations
+ */
+static void
+extend_path(char* segment, int type, const string& node_id_str);
+
+static void
+push_path();
+
+static void
+pop_path();
+
+static void
+terminal(char* value, int type, ConfigOperator op);
+
+void
+booterror(const char *s) throw (ParseError);
+
+int
+init_bootfile_parser(const char *configuration,
+		     const char *filename,
+		     ConfigTree *ct);
+
+void
+parse_bootfile() throw (ParseError);
+
+ConfigOperator boot_lookup_operator(const char* s);
 %}
 
 %token UPLEVEL
@@ -25,6 +68,7 @@
 %token END
 %left ASSIGN_OPERATOR
 %token BOOL_VALUE
+%token INT_VALUE
 %token UINT_VALUE
 %token UINTRANGE_VALUE
 %token IPV4_VALUE
@@ -74,6 +118,7 @@ literals:	literals literal
 		| literal LITERAL { extend_path($2, NODE_TEXT, node_id); }
 		| literal BOOL_VALUE { extend_path($2, NODE_BOOL, node_id); }
 		| literal UINTRANGE_VALUE { extend_path($2, NODE_UINTRANGE, node_id); }
+		| literal INT_VALUE { extend_path($2, NODE_INT, node_id); }
 		| literal UINT_VALUE { extend_path($2, NODE_UINT, node_id); }
 		| literal IPV4RANGE_VALUE { extend_path($2, NODE_IPV4RANGE, node_id); }
 		| literal IPV4_VALUE { extend_path($2, NODE_IPV4, node_id); }
@@ -130,6 +175,10 @@ terminal:	term_literal END {
 		}
 		| term_literal INFIX_OPERATOR UINT_VALUE END {
 			terminal($3, NODE_UINT, boot_lookup_operator($2));
+			free($2);
+		}
+		| term_literal INFIX_OPERATOR INT_VALUE END {
+			terminal($3, NODE_INT, boot_lookup_operator($2));
 			free($2);
 		}
 		| term_literal INFIX_OPERATOR IPV4RANGE_VALUE END {
@@ -190,20 +239,7 @@ syntax_error:	SYNTAX_ERROR {
 
 %%
 
-extern void boot_scan_string(const char *configuration);
-extern int boot_linenum;
-extern "C" int bootparse();
-extern int bootlex();
-
-void booterror(const char *s) throw (ParseError);
-
-static ConfigTree *config_tree = NULL;
-static string boot_filename;
-static string lastsymbol;
-static string node_id;
-
-
-static void
+void
 extend_path(char* segment, int type, const string& node_id_str)
 {
     lastsymbol = segment;
@@ -221,19 +257,19 @@ extend_path(char* segment, int type, const string& node_id_str)
     }
 }
 
-static void
+void
 push_path()
 {
     config_tree->push_path();
 }
 
-static void
+void
 pop_path()
 {
     config_tree->pop_path();
 }
 
-static void
+void
 terminal(char* value, int type, ConfigOperator op)
 {
     push_path();

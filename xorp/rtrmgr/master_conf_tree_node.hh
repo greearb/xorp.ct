@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -37,16 +37,16 @@ class MasterConfigTreeNode : public ConfigTreeNode {
 public:
     MasterConfigTreeNode(bool verbose);
     MasterConfigTreeNode(const MasterConfigTreeNode& ctn);
-    MasterConfigTreeNode(const string& node_name, const string& path, 
-			 const TemplateTreeNode* ttn, 
+    MasterConfigTreeNode(const string& node_name, const string& path,
+			 const TemplateTreeNode* ttn,
 			 MasterConfigTreeNode* parent,
 			 const ConfigNodeId& node_id,
 			 uid_t user_id, bool verbose);
 
-    virtual ConfigTreeNode* create_node(const string& segment, 
+    virtual ConfigTreeNode* create_node(const string& segment,
 					const string& path,
-					const TemplateTreeNode* ttn, 
-					ConfigTreeNode* parent_node, 
+					const TemplateTreeNode* ttn,
+					ConfigTreeNode* parent_node,
 					const ConfigNodeId& node_id,
 					uid_t user_id,
 					uint32_t clientid,
@@ -58,6 +58,9 @@ public:
     void find_active_modules(set<string>& active_modules) const;
     void find_all_modules(set<string>& all_modules) const;
 
+    void add_sync_cmd(MasterConfigTreeNode* node, const Command* cmd);
+    bool sync(TaskManager& task_manager);
+
     void initialize_commit();
     bool children_changed();
     bool commit_changes(TaskManager& task_manager, bool do_commit,
@@ -66,6 +69,8 @@ public:
     bool check_commit_status(string& error_msg) const;
     void finalize_commit();
 
+    void increment_actions_pending(const int increment);
+
 
 protected:
 
@@ -73,6 +78,11 @@ protected:
 				// callbacks we expect during a commit
     bool _actions_succeeded;	// Did any action fail during the commit?
     const Command* _cmd_that_failed;
+
+    map<MasterConfigTreeNode*, const Command*> _sync_cmds;	//In this map we store MasterConfigTreeNodes
+								//that have been changed, and that have %get
+								//functions which we use for synchronization.
+								//This map should have elements only for module root node
 
 private:
 };

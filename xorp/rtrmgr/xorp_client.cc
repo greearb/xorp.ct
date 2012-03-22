@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -38,7 +38,7 @@
 /* XorpClient                                                          */
 /***********************************************************************/
 
-XorpClient::XorpClient(EventLoop& eventloop, XrlRouter& xrl_router) 
+XorpClient::XorpClient(EventLoop& eventloop, XrlRouter& xrl_router)
     : _eventloop(eventloop),
       _xrl_router(xrl_router)
 {
@@ -49,8 +49,8 @@ XorpClient::~XorpClient() {
 }
 
 void
-XorpClient::send_now(const Xrl& xrl, XrlRouter::XrlCallback cb, 
-		     const string& xrl_return_spec, bool do_exec) 
+XorpClient::send_now(const Xrl& xrl, XrlRouter::XrlCallback cb,
+		     const string& xrl_return_spec, bool do_exec)
 {
     if (do_exec) {
 	debug_msg("send_sync before sending\n");
@@ -61,7 +61,7 @@ XorpClient::send_now(const Xrl& xrl, XrlRouter::XrlCallback cb,
 	debug_msg("DUMMY SEND: immediate callback dispatch\n");
 	if (!cb.is_empty()) {
 	    _delay_timer = _eventloop.new_oneoff_after_ms(0,
-				callback(this, &XorpClient::fake_send_done, 
+				callback(this, &XorpClient::fake_send_done,
 					 xrl_return_spec, cb));
 	}
 	debug_msg("send_sync after sending\n");
@@ -71,10 +71,10 @@ XorpClient::send_now(const Xrl& xrl, XrlRouter::XrlCallback cb,
 /**
  * fake_send_done decouples the XRL response callback for debug_mode calls
  * to send_now, so that the callback doesn't happen until after
- * send_now has returned.  
+ * send_now has returned.
  */
 void XorpClient::fake_send_done(string xrl_return_spec,
-				XrlRouter::XrlCallback cb) 
+				XrlRouter::XrlCallback cb)
 {
     XrlArgs args = fake_return_args(xrl_return_spec);
     cb->dispatch(XrlError::OKAY(), &args);
@@ -84,7 +84,7 @@ void XorpClient::fake_send_done(string xrl_return_spec,
  * fake_return_args is purely needed for testing, so that XRLs that
  * should return a value don't completely fail
  */
-XrlArgs 
+XrlArgs
 XorpClient::fake_return_args(const string& xrl_return_spec)
 {
     list<string> args;
@@ -109,6 +109,7 @@ XorpClient::fake_return_args(const string& xrl_return_spec)
     list<string>::const_iterator iter;
     for (iter = args.begin(); iter != args.end(); ++iter) {
 	string::size_type eq = iter->find("=");
+	uint8_t data[] = {0}; //Needed for xrlatom_binary
 	XrlAtom atom;
 
 	debug_msg("ARG: %s\n", iter->c_str());
@@ -125,30 +126,46 @@ XorpClient::fake_return_args(const string& xrl_return_spec)
 	case xrlatom_no_type:
 	    XLOG_UNREACHABLE();
 	case xrlatom_int32:
-	    xargs.add(XrlAtom(atom.name().c_str(), (int32_t)0) );
+	    xargs.add(XrlAtom(atom.name().c_str(), (int32_t)0, true) );
 	    break;
 	case xrlatom_uint32:
-	    xargs.add(XrlAtom(atom.name().c_str(), (uint32_t)0) );
+	    xargs.add(XrlAtom(atom.name().c_str(), (uint32_t)0, true) );
 	    break;
 	case xrlatom_ipv4:
-	    xargs.add(XrlAtom(atom.name().c_str(), IPv4("0.0.0.0")) );
+	    xargs.add(XrlAtom(atom.name().c_str(), IPv4("0.0.0.0"), true) );
 	    break;
 	case xrlatom_ipv4net:
-	    xargs.add(XrlAtom(atom.name().c_str(), IPv4Net("0.0.0.0/0")) );
+	    xargs.add(XrlAtom(atom.name().c_str(), IPv4Net("0.0.0.0/0"), true) );
 	    break;
 	case xrlatom_text:
-	    xargs.add(XrlAtom(atom.name().c_str(), string("")) );
+	    xargs.add(XrlAtom(atom.name().c_str(), string(""), true) );
 	    break;
 	case xrlatom_ipv6:
+	    xargs.add(XrlAtom(atom.name().c_str(), IPv6("::"), true) );
+	    break;
 	case xrlatom_ipv6net:
+	    xargs.add(XrlAtom(atom.name().c_str(), IPv6Net("::/0"), true) );
+	    break;
 	case xrlatom_mac:
+	    xargs.add(XrlAtom(atom.name().c_str(), Mac("00:00:00:00:00:00"), true) );
+	    break;
 	case xrlatom_list:
+	    xargs.add(XrlAtom(atom.name().c_str(), XrlAtomList(), true) );
+	    break;
 	case xrlatom_boolean:
+	    xargs.add(XrlAtom(atom.name().c_str(), false, true) );
+	    break;
 	case xrlatom_binary:
+	    xargs.add(XrlAtom(atom.name().c_str(), data, sizeof(data), true) );
+	    break;
 	case xrlatom_uint64:
+	    xargs.add(XrlAtom(atom.name().c_str(), (uint64_t)0, true) );
+	    break;
 	case xrlatom_int64:
+	    xargs.add(XrlAtom(atom.name().c_str(), (int64_t)0, true) );
+	    break;
 	case xrlatom_fp64:
-	    XLOG_UNFINISHED();
+	    xargs.add(XrlAtom(atom.name().c_str(), (fp64_t)0, true) );
 	    break;
 	}
     }

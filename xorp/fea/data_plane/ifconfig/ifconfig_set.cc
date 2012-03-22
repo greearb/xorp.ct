@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -333,7 +333,7 @@ IfConfigSet::push_config(const IfTree& iftree)
 
     if (error_reporter.error_count() != 0)
 	return (XORP_ERROR);
-    
+
     return (XORP_OK);
 }
 
@@ -593,6 +593,21 @@ IfConfigSet::push_vif_address(const IfTreeInterface*	system_ifp,
 	|| (! config_addr.enabled())) {
 	// XXX: Disabling an address is same as deleting it
 	is_add = false;
+    }
+
+    if (system_vifp != NULL) {
+	if (system_vifp->point_to_point() != config_addr.point_to_point()) {
+	    error_msg = c_format("Can't set destination address for if: %s vif: %s"
+		    "because it isn't point-to-point interface\n",
+		    system_ifp->ifname().c_str(), system_vifp->vifname().c_str());
+	    goto done;
+	}
+	if (system_vifp->broadcast() != config_addr.broadcast()) {
+	    error_msg = c_format("Can't set broadcast address for if: %s vif: %s"
+		    "because it isn't broadcast capable\n",
+		    system_ifp->ifname().c_str(), system_vifp->vifname().c_str());
+	    goto done;
+	}
     }
 
     //

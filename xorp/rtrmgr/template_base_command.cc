@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -37,7 +37,7 @@
 #include "util.hh"
 #include "config_operators.hh"
 
-BaseCommand::BaseCommand(TemplateTreeNode& template_tree_node, 
+BaseCommand::BaseCommand(TemplateTreeNode& template_tree_node,
 			 const string& cmd_name)
     : _template_tree_node(template_tree_node)
 {
@@ -56,7 +56,7 @@ BaseCommand::str() const
     return tmp;
 }
 
-
+
 // ----------------------------------------------------------------------------
 // AllowCommand implementation
 
@@ -66,7 +66,7 @@ AllowCommand::AllowCommand(TemplateTreeNode& template_tree_node,
 {
 }
 
-
+
 // ----------------------------------------------------------------------------
 // AllowOptionsCommand implementation
 
@@ -268,7 +268,7 @@ AllowOptionsCommand::str() const
     return tmp;
 }
 
-
+
 // ----------------------------------------------------------------------------
 // AllowOperatorsCommand implementation
 
@@ -322,7 +322,7 @@ AllowOperatorsCommand::add_action(const list<string>& action)
 	} catch (const ParseError& e) {
 	    error_msg = c_format("%%allow-operator command with invalid "
 				 "operator: %s", op_str.c_str());
-	    xorp_throw(ParseError, error_msg);		 
+	    xorp_throw(ParseError, error_msg);
 	}
 	if (find(_allowed_operators.begin(), _allowed_operators.end(), op)
 	    == _allowed_operators.end()) {
@@ -429,7 +429,7 @@ AllowOperatorsCommand::str() const
     tmp += "\n";
     return tmp;
 }
-
+
 // ----------------------------------------------------------------------------
 // AllowRangeCommand implementation
 

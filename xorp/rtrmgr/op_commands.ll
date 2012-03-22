@@ -9,9 +9,16 @@
 #undef __unused
 #endif
 
+#define YYSTYPE char*
 #include "libxorp/xorp.h"
 #include <string.h>
-#include "y.opcmd_tab.h"
+
+#if defined(NEED_LEX_H_HACK)
+extern YYSTYPE opcmdlval;
+#include "y.opcmd_tab.cc.h"
+#else
+#include "y.opcmd_tab.hh"
+#endif
 
 #ifdef __xorp_unused
 #define __unused __xorp_unused
@@ -19,7 +26,6 @@
 #endif
 %}
 	int opcmd_linenum = 1;
-	extern char* opcmdlval;
 	string opcmd_parsebuf;
 %option noyywrap
 %option nounput

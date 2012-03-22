@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -112,7 +112,7 @@ ConfigTree::path_as_segments() const
     ConfigTreeNode* ctn = _current_node;
 
     while (ctn->parent() != NULL) {
-	path_segments.push_front(ConfPathSegment(ctn->segname(), 
+	path_segments.push_front(ConfPathSegment(ctn->segname(),
 						 ctn->type(), ctn->node_id()));
 	ctn = ctn->parent();
     }
@@ -271,7 +271,7 @@ ConfigTree::add_node(const string& segment, int type,
 
 
 void
-ConfigTree::terminal_value(const string& value, int type, ConfigOperator op) 
+ConfigTree::terminal_value(const string& value, int type, ConfigOperator op)
     throw (ParseError)
 {
     string error_msg;
@@ -289,12 +289,26 @@ ConfigTree::terminal_value(const string& value, int type, ConfigOperator op)
 	    svalue = "true";
 	}
     }
+    /**
+     * If ctn_type() == NODE_ULONG, then
+     * type will be NODE_UINT, because
+     * we read uint64 values just as uint values
+     *
+     * Other case is when we read positive integers
+     */
+    if (ctn->type() == NODE_ULONG && type == NODE_UINT)
+		type = NODE_ULONG;
+    else if (ctn->type() == NODE_INT && type == NODE_UINT)
+		type = NODE_INT;
+
     if ((ctn->type() == NODE_TEXT) && (type == NODE_TEXT)) {
 	svalue = unquote(svalue);
     } else if ((ctn->type() == NODE_TEXT) && (type != NODE_TEXT)) {
 	// We'll accept anything as text
-    } else if ((ctn->type() == NODE_UINTRANGE) && (type == NODE_UINT)) {
+    } else if (((ctn->type() == NODE_UINTRANGE) && (type == NODE_UINT)) ||
+			((ctn->type() == NODE_ULONGRANGE) && (type == NODE_ULONG))) {
 	// Expand a single uint to a uintrange
+    // or a single uint64 to uint64range
 	svalue += ".." + value;
     } else if ((ctn->type() == NODE_IPV4RANGE) && (type == NODE_IPV4)) {
 	// Expand a single IPv4 to a ipv4range
@@ -315,6 +329,7 @@ ConfigTree::terminal_value(const string& value, int type, ConfigOperator op)
 	    // Not clear what to do here
 	    break;
 	case NODE_UINT:
+	case NODE_ULONG:
 	    for (size_t i = 0; i < svalue.size(); i++) {
 		if ((svalue[i] < '0') || (svalue[i] > '9')) {
 		    goto parse_error;
@@ -440,7 +455,7 @@ ConfigTree::find_config_node(const list<string>& path_segments) const
 
 
 string
-ConfigTree::show_subtree(bool show_top, const list<string>& path_segments, 
+ConfigTree::show_subtree(bool show_top, const list<string>& path_segments,
 			 bool numbered, bool suppress_default_values) const
 {
     const ConfigTreeNode *found = find_config_node(path_segments);
@@ -464,7 +479,7 @@ ConfigTree::show_tree(bool numbered) const
     return const_root_node().show_subtree(/* show_top */ false,
 					  /* depth */ 0,
 					  /* indent */ 0,
-					  /* do_indent */ true, 
+					  /* do_indent */ true,
 					  numbered,
 					  /* annotate */ true,
 					  /* suppress_default_values */ false);
@@ -476,7 +491,7 @@ ConfigTree::show_unannotated_tree(bool numbered) const
     return const_root_node().show_subtree(/* show_top */ false,
 					  /* depth */ 0,
 					  /* indent */ 0,
-					  /* do_indent */ true, 
+					  /* do_indent */ true,
 					  numbered,
 					  /* annotate */ false,
 					  /* suppress_default_values */ false);

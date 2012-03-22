@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -115,7 +115,7 @@ MasterConfigTree::MasterConfigTree(const string& config_file,
     string error_msg;
 
     _current_node = &_root_node;
-    _task_manager = new TaskManager(*this, mmgr, xclient, 
+    _task_manager = new TaskManager(*this, mmgr, xclient,
 				    global_do_exec, verbose);
 
 #ifdef HAVE_GRP_H
@@ -294,8 +294,8 @@ MasterConfigTree::config_done(bool success, string error_msg)
 
 ConfigTreeNode*
 MasterConfigTree::create_node(const string& segment, const string& path,
-			      const TemplateTreeNode* ttn, 
-			      ConfigTreeNode* parent_node, 
+			      const TemplateTreeNode* ttn,
+			      ConfigTreeNode* parent_node,
 			      const ConfigNodeId& node_id,
 			      uid_t user_id, bool verbose)
 {
@@ -1169,7 +1169,7 @@ MasterConfigTree::apply_config_commit_changes_cb(bool success,
     _config_tree_copy->diff_configs(*this, delta_tree, deletion_tree);
     deltas = delta_tree.show_unannotated_tree(/*numbered*/ true);
     deletions = deletion_tree.show_unannotated_tree(/*numbered*/ true);
-    
+
     cb->dispatch(success, error_msg, deltas, deletions);
 }
 

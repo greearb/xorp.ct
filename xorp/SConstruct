@@ -82,6 +82,8 @@ vars.AddVariables(
     BoolVariable('disable_errorlogs',  'Force disable error logs', False),
     BoolVariable('disable_otherlogs',  'Force disable other logs', False),
     BoolVariable('disable_profile',  'Disable Xorp Profiler feature', False),
+    BoolVariable('disable_werror',  'Disable -Werror compiler flag', False),
+    BoolVariable('enable_lex_hack',  'Works around lex/yacc issues on FreeBSD', False),
     BoolVariable('enable_builddirrun',  'Enable Xorp to run from BUILD_DIR', False),
     BoolVariable('enable_boost',  'Use BOOST', False),
     BoolVariable('enable_ustl',  'Use uSTL', False),
@@ -281,6 +283,8 @@ print 'Disable IPv6:     ', env['disable_ipv6']
 print 'Disable libtecla: ', env['disable_libtecla']
 print 'Disable Firewall: ', env['disable_fw']
 print 'Disable Profile : ', env['disable_profile']
+print 'Disable -Werror : ', env['disable_werror']
+print 'Enable lex hack : ', env['enable_lex_hack']
 print 'Disable warning logs : ', env['disable_warninglogs']
 print 'Disable error logs : ', env['disable_errorlogs']
 print 'Disable trace logs : ', env['disable_tracelogs']
@@ -526,6 +530,18 @@ if tst and not ((tst == "no") or (tst == "false")):
 else:
     env['disable_profile'] = False
 
+tst = ARGUMENTS.get('disable_werror', False)
+if tst and not ((tst == "no") or (tst == "false")):
+    env['disable_werror'] = True
+else:
+    env['disable_werror'] = False
+
+tst = ARGUMENTS.get('enable_lex_hack', False)
+if tst and not ((tst == "no") or (tst == "false")):
+    env['enable_lex_hack'] = True
+else:
+    env['enable_lex_hack'] = False
+
 tst = ARGUMENTS.get('disable_warninglogs', False)
 if tst and not ((tst == "no") or (tst == "false")):
     env['disable_warninglogs'] = True
@@ -631,6 +647,9 @@ if not env.GetOption('clean') and \
     else:
 	osname = sys.platform.upper()
     conf.Define('HOST_OS_NAME', '"' + osname + '"')
+
+    #export osname - needed for lex and yacc
+    env['osname'] = osname
 
     # toolchain
     conf.Define('CPP_SUPPORTS_C99_VA_ARGS')
@@ -875,6 +894,9 @@ if ((build != "i386-pc-mingw32") and
     (host_cpu == "i686" or
      host_cpu == "i386" or
      host_cpu == "x86_64")):
+    if env['disable_werror']:
+	print "WARNING:  Disabling -Werror on user command."
+    else:
         env.AppendUnique(CFLAGS = [
 	        '-Werror',
 		])
@@ -882,7 +904,7 @@ if ((build != "i386-pc-mingw32") and
 		'-Werror',
 		])
 else:
-	print "WARNING:  Detected funky platform, will not enable -Werror compile option: ", host_cpu
+    print "WARNING:  Detected funky platform, will not enable -Werror compile option: ", host_cpu
 	
 
 # NOTE: gcc specific flags.
@@ -926,6 +948,11 @@ if env['CC'] and env['CC'] == 'clang':
 if env['enable_buildinfo']:
     env.AppendUnique(CXXFLAGS = [
         '-DXORP_BUILDINFO',
+        ]);
+
+if env['enable_lex_hack']:
+    env.AppendUnique(CXXFLAGS = [
+        '-DNEED_LEX_H_HACK',
         ]);
 
 # NOTE: For GNU STL only at this time.

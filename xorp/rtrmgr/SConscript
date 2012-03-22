@@ -30,9 +30,10 @@ SConscript(dirs = subdirs, exports='env')
 env = env.Clone()
 
 env.AppendUnique(CPPPATH = [
-    '#',
-    '$BUILDDIR',
-    ])
+	'.',
+	'$BUILDDIR',
+	env['xorp_sourcedir'],	#this is needed for lex and yacc generated files
+	])
 
 env.PrependUnique(LIBPATH = [
     '$BUILDDIR/libxorp',
@@ -50,20 +51,57 @@ env.PrependUnique(LIBPATH = [
 
 libxorp_rtrmgr_env = env.Clone()
 
-# FIXME generate lex/yacc from source
-# shorthand this plz
-# see http://209.85.229.132/search?q=cache:3j0AsRORc6MJ:https://gforge.inria.fr/plugins/scmsvn/viewcvs.php/scons_util/trunk/src/platform.py%3Frev%3D18%26root%3Dopenalea%26view%3Dmarkup+scons+lexflags+append&cd=2&hl=en&ct=clnk&gl=uk&client=firefox-a
-# ... needs toolchain check for flex 2.5.4 or poss more recent.
-# known to work with freebsd base system flex.
-#tplt_env = env.Clone()
-#tplt_env.AppendUnique(LEXFLAGS='-Ptplt')
-#tplt_env.CXXFile(source='template.ll', target='lex.tplt.cc')
-#boot_env = env.Clone()
-#boot_env.AppendUnique(LEXFLAGS='-Pboot')
-#boot_env.CXXFile(source='boot.ll', target='lex.boot.cc')
-#opcmd_env = env.Clone()
-#opcmd_env.AppendUnique(LEXFLAGS='-Popcmd')
-#opcmd_env.CXXFile(source='op_commands.ll', target='lex.opcmd.cc')
+# Automatically generate flex and yacc files
+
+#Create yacc files
+yacc_env = env.Clone()
+# bison on BSD generates headers files with .h suffix,
+# while on other OSs it generates header files with .hh suffix
+#
+# But, on FreeBSD at least, if you don't do the .hh suffix, it doesn't even
+# build a .h file of any type --Ben
+yacc_env.Replace(YACCHXXFILESUFFIX='.hh')
+
+yacc_env.AppendUnique(YACCFLAGS='-d')
+
+tplt_env_y = yacc_env.Clone()
+tplt_env_y.AppendUnique(YACCFLAGS='-ptplt')
+
+tplt_yacc = tplt_env_y.CXXFile(target='y.tplt_tab.cc',
+				source='template.yy')
+
+boot_env_y = yacc_env.Clone()
+boot_env_y.AppendUnique(YACCFLAGS='-pboot')
+
+boot_yacc = boot_env_y.CXXFile(target='y.boot_tab.cc',
+					source='boot.yy')
+
+opcmd_env_y = yacc_env.Clone()
+opcmd_env_y.AppendUnique(YACCFLAGS='-popcmd')
+
+opcmd_yacc = opcmd_env_y.CXXFile(target='y.opcmd_tab.cc',
+					source='op_commands.yy')
+
+#create lex files
+lex_env = env.Clone()
+
+tplt_env_l = lex_env.Clone()
+tplt_env_l.AppendUnique(LEXFLAGS='-Ptplt')
+
+tplt_lex = tplt_env_l.CXXFile(target='lex.tplt.cc',
+					source='template.ll')
+
+boot_env_l = lex_env.Clone()
+boot_env_l.AppendUnique(LEXFLAGS='-Pboot')
+
+boot_lex = boot_env_l.CXXFile(target='lex.boot.cc',
+					source='boot.ll')
+
+opcmd_env_l = lex_env.Clone()
+opcmd_env_l.AppendUnique(LEXFLAGS='-Popcmd')
+
+opcmd_lex = opcmd_env_l.CXXFile(target='lex.opcmd.cc',
+					source='op_commands.ll')
 
 libxorp_rtrmgr_srcs = [
 	'command_tree.cc',
@@ -72,9 +110,12 @@ libxorp_rtrmgr_srcs = [
 	'config_operators.cc',
 	'generic_module_manager.cc',
 	'glob_win32.c',
-	'lex.boot.cc',
-	'lex.opcmd.cc',
-	'lex.tplt.cc',
+	tplt_lex[0],
+	opcmd_lex[0],
+	boot_lex[0],
+	opcmd_yacc[0],
+	boot_yacc[0],
+	tplt_yacc[0],
 	'master_conf_tree.cc',
 	'master_conf_tree_node.cc',
 	'master_template_tree.cc',
@@ -95,9 +136,6 @@ libxorp_rtrmgr_srcs = [
 	'unexpanded_xrl.cc',
 	'userdb.cc',
 	'xorp_client.cc',
-	'y.boot_tab.cc',
-	'y.opcmd_tab.cc',
-	'y.tplt_tab.cc',
 	]
 
 # Runtime XRL syntax validation for developers.

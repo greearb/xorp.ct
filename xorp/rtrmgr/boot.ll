@@ -9,16 +9,24 @@
 #undef __unused
 #endif
 
+#define YYSTYPE char*
+
 #include "libxorp/xorp.h"
-#include "y.boot_tab.h"
+
+#if defined(NEED_LEX_H_HACK)
+extern YYSTYPE bootlval;
+#include "y.boot_tab.cc.h"
+#else
+#include "y.boot_tab.hh"
+#endif
 
 #ifdef __xorp_unused
 #define __unused __xorp_unused
 #undef __xorp_unused
 #endif
+
 %}
 	int boot_linenum = 1;
-	extern char* bootlval;
 	string parsebuf;
 	int arith_nesting;
 	bool arith_op_allowed;
@@ -278,6 +286,11 @@ RE_ARITH_OPERATOR	[" "]*({RE_BIN_OPERATOR})[" "]*
 [0-9]+	{
 	bootlval = strdup(boottext);
 	return UINT_VALUE;
+	}
+
+[-][0-9]+	{
+	bootlval = strdup(boottext);
+	return INT_VALUE;
 	}
 
 {RE_IPV4}".."{RE_IPV4}	{

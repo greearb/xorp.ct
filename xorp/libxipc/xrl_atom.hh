@@ -9,13 +9,13 @@
 // Redistribution and/or modification of this program under the terms of
 // any other version of the GNU Lesser General Public License is not
 // permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU Lesser General Public License, Version 2.1, a copy of
 // which can be found in the XORP LICENSE.lgpl file.
-// 
+//
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -119,20 +119,20 @@ public:
 	string _name;
     };
 
-    XrlAtom() : _type(xrlatom_no_type), _have_data(false), _own(true) {}
+    XrlAtom() : _type(xrlatom_no_type), _have_data(false), _own(true), _has_fake_args(false) {}
     ~XrlAtom();
 
     // type but no data constructors
     XrlAtom(XrlAtomType t)
-	: _type(t), _have_data(false), _own(true) {}
+	: _type(t), _have_data(false), _own(true), _has_fake_args(false) {}
 
     XrlAtom(const string& name, XrlAtomType t) throw (BadName)
-	: _type(t), _have_data(false), _own(true) {
+	: _type(t), _have_data(false), _own(true), _has_fake_args(false) {
 	set_name(name);
     }
 
     XrlAtom(const char* name, XrlAtomType t) throw (BadName)
-	: _type(t), _have_data(false), _own(true) {
+	: _type(t), _have_data(false), _own(true), _has_fake_args(false) {
 	set_name(name);
     }
 
@@ -153,81 +153,81 @@ public:
 
     // int32 constructors
     explicit XrlAtom(const int32_t& value)
-	: _type(xrlatom_int32), _have_data(true), _own(true), _i32val(value) {}
+	: _type(xrlatom_int32), _have_data(true), _own(true), _has_fake_args(false), _i32val(value) {}
 
-    XrlAtom(const char* name, int32_t value) throw (BadName)
-	: _type(xrlatom_int32), _have_data(true), _own(true) ,_i32val(value) {
+    XrlAtom(const char* name, int32_t value, bool fake_args = false) throw (BadName)
+	: _type(xrlatom_int32), _have_data(true), _own(true), _has_fake_args(fake_args),_i32val(value) {
 	set_name(name);
     }
 
     // bool constructors
     explicit XrlAtom(const bool& value)
 	: _type(xrlatom_boolean), _have_data(true),
-	  _own(true), _boolean(value) {}
+	  _own(true), _has_fake_args(false), _boolean(value) {}
 
-    XrlAtom(const char* name, bool value) throw (BadName)
+    XrlAtom(const char* name, bool value, bool fake_args = false) throw (BadName)
 	: _type(xrlatom_boolean), _have_data(true),
-	  _own(true), _boolean(value) {
+	  _own(true), _has_fake_args(fake_args), _boolean(value) {
 	set_name(name);
     }
 
     // uint32 constructors
     explicit XrlAtom(const uint32_t& value)
-	: _type(xrlatom_uint32), _have_data(true), _own(true), _u32val(value) {}
+	: _type(xrlatom_uint32), _have_data(true), _own(true), _has_fake_args(false), _u32val(value) {}
 
-    XrlAtom(const char* name, uint32_t value) throw (BadName)
-	: _type(xrlatom_uint32), _have_data(true), _own(true), _u32val(value) {
+    XrlAtom(const char* name, uint32_t value, bool fake_args = false) throw (BadName)
+	: _type(xrlatom_uint32), _have_data(true), _own(true), _has_fake_args(fake_args), _u32val(value) {
 	set_name(name);
     }
 
     // ipv4 constructors
     explicit XrlAtom(const IPv4& addr)
-	: _type(xrlatom_ipv4), _have_data(true), _own(true),
+	: _type(xrlatom_ipv4), _have_data(true), _own(true), _has_fake_args(false),
 	  _ipv4(addr) {}
 
-    XrlAtom(const char* name, const IPv4& addr) throw (BadName)
-	: _type(xrlatom_ipv4), _have_data(true), _own(true),
+    XrlAtom(const char* name, const IPv4& addr, bool fake_args = false) throw (BadName)
+	: _type(xrlatom_ipv4), _have_data(true), _own(true), _has_fake_args(fake_args),
 	  _ipv4(addr) {
 	set_name(name);
     }
 
     // ipv4net constructors
     explicit XrlAtom(const IPv4Net& subnet)
-	    : _type(xrlatom_ipv4net), _have_data(true), _own(true),
+	    : _type(xrlatom_ipv4net), _have_data(true), _own(true), _has_fake_args(false),
 	      _ipv4net(subnet) {}
 
-    XrlAtom(const char* name, const IPv4Net& subnet) throw (BadName)
-	    : _type(xrlatom_ipv4net), _have_data(true), _own(true),
+    XrlAtom(const char* name, const IPv4Net& subnet, bool fake_args = false) throw (BadName)
+	    : _type(xrlatom_ipv4net), _have_data(true), _own(true), _has_fake_args(fake_args),
 	      _ipv4net(subnet) {
 	set_name(name);
     }
 
     // ipv6 constructors
     explicit XrlAtom(const IPv6& addr)
-	: _type(xrlatom_ipv6), _have_data(true), _own(true),
+	: _type(xrlatom_ipv6), _have_data(true), _own(true), _has_fake_args(false),
 	_ipv6(new IPv6(addr)) {}
 
     XrlAtom(const char* name, const IPv6& addr) throw (BadName)
-	: _type(xrlatom_ipv6), _have_data(true), _own(true),
+	: _type(xrlatom_ipv6), _have_data(true), _own(true), _has_fake_args(false),
 	  _ipv6(new IPv6(addr)) {
 	set_name(name);
     }
 
     // ipv6 net constructors
     explicit XrlAtom(const IPv6Net& subnet)
-	: _type(xrlatom_ipv6net), _have_data(true), _own(true),
+	: _type(xrlatom_ipv6net), _have_data(true), _own(true), _has_fake_args(false),
 	_ipv6net(new IPv6Net(subnet)) {}
 
-    XrlAtom(const char* name, const IPv6Net& subnet) throw (BadName)
-	: _type(xrlatom_ipv6net), _have_data(true), _own(true),
+    XrlAtom(const char* name, const IPv6Net& subnet, bool fake_args = false) throw (BadName)
+	: _type(xrlatom_ipv6net), _have_data(true), _own(true), _has_fake_args(fake_args),
 	_ipv6net(new IPv6Net(subnet)) {
 	set_name(name);
     }
 
     // IPvX constructors - there is no underlying IPvX type
     // data is cast to IPv4 or IPv6.
-    XrlAtom(const char* name, const IPvX& ipvx) throw (BadName)
-	: _have_data(true), _own(true)
+    XrlAtom(const char* name, const IPvX& ipvx, bool fake_args = false) throw (BadName)
+	: _have_data(true), _own(true), _has_fake_args(fake_args)
     {
 	set_name(name);
 	if (ipvx.is_ipv4()) {
@@ -243,8 +243,8 @@ public:
 
     // IPvXNet constructors - there is no underlying IPvXNet type
     // data is cast to IPv4Net or IPv6Net.
-    XrlAtom(const char* name, const IPvXNet& ipvxnet) throw (BadName)
-	: _have_data(true), _own(true)
+    XrlAtom(const char* name, const IPvXNet& ipvxnet, bool fake_args = false) throw (BadName)
+	: _have_data(true), _own(true), _has_fake_args(fake_args)
     {
 	set_name(name);
 	if (ipvxnet.is_ipv4()) {
@@ -260,83 +260,83 @@ public:
 
     // mac constructors
     explicit XrlAtom(const Mac& mac)
-	: _type(xrlatom_mac), _have_data(true), _own(true),
+	: _type(xrlatom_mac), _have_data(true), _own(true), _has_fake_args(false),
 	_mac(new Mac(mac)) {}
 
-    XrlAtom(const char* name, const Mac& mac) throw (BadName)
-	: _type(xrlatom_mac), _have_data(true), _own(true),
+    XrlAtom(const char* name, const Mac& mac, bool fake_args = false) throw (BadName)
+	: _type(xrlatom_mac), _have_data(true), _own(true), _has_fake_args(fake_args),
 	_mac(new Mac(mac)) {
 	set_name(name);
     }
 
     // text constructors
     explicit XrlAtom(const string& txt)
-	: _type(xrlatom_text), _have_data(true), _own(true),
+	: _type(xrlatom_text), _have_data(true), _own(true), _has_fake_args(false),
         _text(new string(txt)) {}
 
-    XrlAtom(const char* name, const string& txt) throw (BadName)
-	: _type(xrlatom_text), _have_data(true), _own(true),
+    XrlAtom(const char* name, const string& txt, bool fake_args = false) throw (BadName)
+	: _type(xrlatom_text), _have_data(true), _own(true), _has_fake_args(fake_args),
         _text(new string(txt)) {
 	set_name(name);
     }
 
    // list constructors
     explicit XrlAtom(const XrlAtomList& l)
-	: _type(xrlatom_list), _have_data(true), _own(true),
+	: _type(xrlatom_list), _have_data(true), _own(true), _has_fake_args(false),
 	_list(new XrlAtomList(l)) {}
 
-    XrlAtom(const char* name, const XrlAtomList& l) throw (BadName)
-	: _type(xrlatom_list), _have_data(true), _own(true),
+    XrlAtom(const char* name, const XrlAtomList& l, bool fake_args = false) throw (BadName)
+	: _type(xrlatom_list), _have_data(true), _own(true), _has_fake_args(fake_args),
 	_list(new XrlAtomList(l)) {
 	set_name(name);
     }
 
     // binary
     XrlAtom(const char* name, const vector<uint8_t>& data)
-	: _type(xrlatom_binary), _have_data(true), _own(true),
+	: _type(xrlatom_binary), _have_data(true), _own(true), _has_fake_args(false),
 	  _binary(new vector<uint8_t>(data)) {
 	set_name(name);
     }
 
-    XrlAtom(const char* name, const uint8_t* data, size_t data_bytes)
-	: _type(xrlatom_binary), _have_data(true), _own(true),
+    XrlAtom(const char* name, const uint8_t* data, size_t data_bytes, bool fake_args = false)
+	: _type(xrlatom_binary), _have_data(true), _own(true), _has_fake_args(fake_args),
 	  _binary(new vector<uint8_t>(data, data + data_bytes)) {
 	set_name(name);
     }
 
     XrlAtom(const vector<uint8_t>& data)
-	: _type(xrlatom_binary), _have_data(true), _own(true),
+	: _type(xrlatom_binary), _have_data(true), _own(true), _has_fake_args(false),
 	  _binary(new vector<uint8_t>(data)) {}
 
     XrlAtom(const uint8_t* data, size_t data_bytes)
-	: _type(xrlatom_binary), _have_data(true), _own(true),
+	: _type(xrlatom_binary), _have_data(true), _own(true), _has_fake_args(false),
 	  _binary(new vector<uint8_t>(data, data + data_bytes)) {}
 
     // int64 constructors
     explicit XrlAtom(const int64_t& value)
-	: _type(xrlatom_int64), _have_data(true), _own(true), _i64val(value) {}
+	: _type(xrlatom_int64), _have_data(true), _own(true), _has_fake_args(false), _i64val(value) {}
 
-    XrlAtom(const char* name, int64_t value) throw (BadName)
-	: _type(xrlatom_int64), _have_data(true), _own(true), _i64val(value) {
+    XrlAtom(const char* name, int64_t value, bool fake_args = false) throw (BadName)
+	: _type(xrlatom_int64), _have_data(true), _own(true), _has_fake_args(fake_args), _i64val(value) {
 	set_name(name);
     }
 
     // uint64 constructors
     explicit XrlAtom(const uint64_t& value)
-	: _type(xrlatom_uint64), _have_data(true), _own(true), _u64val(value) {}
+	: _type(xrlatom_uint64), _have_data(true), _own(true), _has_fake_args(false), _u64val(value) {}
 
-    XrlAtom(const char* name, uint64_t value) throw (BadName)
-	: _type(xrlatom_uint64), _have_data(true), _own(true), _u64val(value) {
+    XrlAtom(const char* name, uint64_t value, bool fake_args = false) throw (BadName)
+	: _type(xrlatom_uint64), _have_data(true), _own(true), _has_fake_args(fake_args), _u64val(value) {
 	set_name(name);
     }
 
 
     // fp64 constructors
     explicit XrlAtom(const fp64_t& value)
-	: _type(xrlatom_fp64), _have_data(true), _own(true), _fp64val(value) {}
+	: _type(xrlatom_fp64), _have_data(true), _own(true), _has_fake_args(false), _fp64val(value) {}
 
-    XrlAtom(const char* name, fp64_t value) throw (BadName)
-	: _type(xrlatom_fp64), _have_data(true), _own(true), _fp64val(value) {
+    XrlAtom(const char* name, fp64_t value, bool fake_args = false) throw (BadName)
+	: _type(xrlatom_fp64), _have_data(true), _own(true), _has_fake_args(fake_args), _fp64val(value) {
 	set_name(name);
     }
 
@@ -345,7 +345,7 @@ public:
 
     // Copy operations
     XrlAtom(const XrlAtom& x)
-	: _type(xrlatom_no_type), _have_data(false), _own(true) {
+	: _type(xrlatom_no_type), _have_data(false), _own(true), _has_fake_args(false) {
 	copy(x);
     }
     XrlAtom& operator=(const XrlAtom& x) {
@@ -362,7 +362,10 @@ public:
     const string value() const;
 
     const bool&		has_data() const { return _have_data; }
+    const bool&		has_fake_args() const { return _has_fake_args; }
     const XrlAtomType&	type() const { return _type; }
+
+    void using_real_args() { _has_fake_args = false; }
 
     // The following accessors may throw accessor exceptions...
     const bool&		   boolean() const throw (NoData, WrongType);
@@ -482,6 +485,7 @@ private:
     bool	_have_data;
     string	_atom_name;
     bool	_own;
+    bool	_has_fake_args;
 
     union {
 	bool		 _boolean;

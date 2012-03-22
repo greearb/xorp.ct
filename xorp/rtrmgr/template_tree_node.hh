@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -42,22 +42,24 @@ enum TTNodeType {
     NODE_VOID		= 0,
     NODE_TEXT		= 1,
     NODE_UINT		= 2,
-    NODE_INT		= 3,
-    NODE_BOOL		= 4,
-    NODE_TOGGLE		= 4,
-    NODE_IPV4		= 5,
-    NODE_IPV4NET	= 6,
-    NODE_IPV6		= 7,
-    NODE_IPV6NET	= 8,
-    NODE_MACADDR	= 9,
-    NODE_URL_FILE	= 10,
-    NODE_URL_FTP	= 11,
-    NODE_URL_HTTP	= 12,
-    NODE_URL_TFTP	= 13,
-    NODE_ARITH		= 14,
-    NODE_UINTRANGE	= 15,
-    NODE_IPV4RANGE	= 16,
-    NODE_IPV6RANGE	= 17
+    NODE_ULONG		= 3,
+    NODE_INT		= 4,
+    NODE_BOOL		= 5,
+    NODE_TOGGLE		= 5,
+    NODE_IPV4		= 6,
+    NODE_IPV4NET	= 7,
+    NODE_IPV6		= 8,
+    NODE_IPV6NET	= 9,
+    NODE_MACADDR	= 10,
+    NODE_URL_FILE	= 11,
+    NODE_URL_FTP	= 12,
+    NODE_URL_HTTP	= 13,
+    NODE_URL_TFTP	= 14,
+    NODE_ARITH		= 15,
+    NODE_UINTRANGE	= 16,
+    NODE_ULONGRANGE	= 17,
+    NODE_IPV4RANGE	= 18,
+    NODE_IPV6RANGE	= 19
 };
 
 enum TTSortOrder {
@@ -73,7 +75,7 @@ class TemplateTree;
 
 class TemplateTreeNode {
 public:
-    TemplateTreeNode(TemplateTree& template_tree, TemplateTreeNode* parent, 
+    TemplateTreeNode(TemplateTree& template_tree, TemplateTreeNode* parent,
 		     const string& path, const string& varname);
     virtual ~TemplateTreeNode();
 
@@ -115,7 +117,7 @@ public:
 #if 0
     bool check_template_tree(string& error_msg) const;
 #endif
-    bool check_command_tree(const list<string>& commands, 
+    bool check_command_tree(const list<string>& commands,
 			    bool include_intermediate_nodes,
 			    bool include_read_only_nodes,
 			    bool include_permanent_nodes,
@@ -238,8 +240,8 @@ private:
 
 class UIntTemplate : public TemplateTreeNode {
 public:
-    UIntTemplate(TemplateTree& template_tree, TemplateTreeNode* parent, 
-		 const string& path, const string& varname, 
+    UIntTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
+		 const string& path, const string& varname,
 		 const string& initializer) throw (ParseError);
 
     string typestr() const { return string("uint"); }
@@ -254,8 +256,8 @@ private:
 
 class UIntRangeTemplate : public TemplateTreeNode {
 public:
-    UIntRangeTemplate(TemplateTree& template_tree, TemplateTreeNode* parent, 
-		 const string& path, const string& varname, 
+    UIntRangeTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
+		 const string& path, const string& varname,
 		 const string& initializer) throw (ParseError);
     ~UIntRangeTemplate();
 
@@ -269,10 +271,43 @@ private:
     U32Range* _default;
 };
 
+class ULongTemplate : public TemplateTreeNode {
+public:
+    ULongTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
+		 const string& path, const string& varname,
+		 const string& initializer) throw (ParseError);
+
+    string typestr() const { return string("uint64"); }
+    TTNodeType type() const { return NODE_ULONG; }
+    unsigned int default_value() const { return _default; }
+    string default_str() const;
+    bool type_match(const string& s, string& error_msg) const;
+
+private:
+    uint64_t _default;
+};
+
+class ULongRangeTemplate : public TemplateTreeNode {
+public:
+    ULongRangeTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
+		 const string& path, const string& varname,
+		 const string& initializer) throw (ParseError);
+    ~ULongRangeTemplate();
+
+    string typestr() const { return string("uint64range"); }
+    TTNodeType type() const { return NODE_ULONGRANGE; }
+    U64Range* default_value() const { return _default; }
+    string default_str() const;
+    bool type_match(const string& s, string& error_msg) const;
+
+private:
+    U64Range* _default;
+};
+
 class IntTemplate : public TemplateTreeNode {
 public:
-    IntTemplate(TemplateTree& template_tree, TemplateTreeNode* parent, 
-		const string& path, const string& varname, 
+    IntTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
+		const string& path, const string& varname,
 		const string& initializer) throw (ParseError);
     string typestr() const { return string("int"); }
     TTNodeType type() const { return NODE_INT; }
@@ -286,8 +321,8 @@ private:
 
 class ArithTemplate : public TemplateTreeNode {
 public:
-    ArithTemplate(TemplateTree& template_tree, TemplateTreeNode* parent, 
-		  const string& path, const string& varname, 
+    ArithTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
+		  const string& path, const string& varname,
 		  const string& initializer) throw (ParseError);
     string typestr() const { return string("uint"); }
     TTNodeType type() const { return NODE_ARITH; }
@@ -301,8 +336,8 @@ private:
 
 class TextTemplate : public TemplateTreeNode {
 public:
-    TextTemplate(TemplateTree& template_tree, TemplateTreeNode* parent, 
-		 const string& path, const string& varname, 
+    TextTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
+		 const string& path, const string& varname,
 		 const string& initializer) throw (ParseError);
 
     string typestr() const { return string("text"); }
@@ -317,8 +352,8 @@ private:
 
 class BoolTemplate : public TemplateTreeNode {
 public:
-    BoolTemplate(TemplateTree& template_tree, TemplateTreeNode* parent, 
-		 const string& path, const string& varname, 
+    BoolTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
+		 const string& path, const string& varname,
 		 const string& initializer) throw (ParseError);
 
     string typestr() const { return string("bool"); }
@@ -333,7 +368,7 @@ private:
 
 class IPv4Template : public TemplateTreeNode {
 public:
-    IPv4Template(TemplateTree& template_tree, TemplateTreeNode* parent, 
+    IPv4Template(TemplateTree& template_tree, TemplateTreeNode* parent,
 		 const string& path, const string& varname,
 		 const string& initializer) throw (ParseError);
     ~IPv4Template();
@@ -350,8 +385,8 @@ private:
 
 class IPv4NetTemplate : public TemplateTreeNode {
 public:
-    IPv4NetTemplate(TemplateTree& template_tree, TemplateTreeNode* parent, 
-		    const string& path, const string& varname, 
+    IPv4NetTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
+		    const string& path, const string& varname,
 		    const string& initializer) throw (ParseError);
     ~IPv4NetTemplate();
 
@@ -367,8 +402,8 @@ private:
 
 class IPv4RangeTemplate : public TemplateTreeNode {
 public:
-    IPv4RangeTemplate(TemplateTree& template_tree, TemplateTreeNode* parent, 
-		    const string& path, const string& varname, 
+    IPv4RangeTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
+		    const string& path, const string& varname,
 		    const string& initializer) throw (ParseError);
     ~IPv4RangeTemplate();
 
@@ -385,7 +420,7 @@ private:
 class IPv6Template : public TemplateTreeNode {
 public:
     IPv6Template(TemplateTree& template_tree, TemplateTreeNode* parent,
-		 const string& path, const string& varname, 
+		 const string& path, const string& varname,
 		 const string& initializer) throw (ParseError);
     ~IPv6Template();
 
@@ -401,8 +436,8 @@ private:
 
 class IPv6NetTemplate : public TemplateTreeNode {
 public:
-    IPv6NetTemplate(TemplateTree& template_tree, TemplateTreeNode* parent, 
-		    const string& path, const string& varname, 
+    IPv6NetTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
+		    const string& path, const string& varname,
 		    const string& initializer) throw (ParseError);
     ~IPv6NetTemplate();
 
@@ -419,7 +454,7 @@ private:
 class IPv6RangeTemplate : public TemplateTreeNode {
 public:
     IPv6RangeTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
-		 const string& path, const string& varname, 
+		 const string& path, const string& varname,
 		 const string& initializer) throw (ParseError);
     ~IPv6RangeTemplate();
 
@@ -435,8 +470,8 @@ private:
 
 class MacaddrTemplate : public TemplateTreeNode {
 public:
-    MacaddrTemplate(TemplateTree& template_tree, TemplateTreeNode* parent, 
-		    const string& path, const string& varname, 
+    MacaddrTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
+		    const string& path, const string& varname,
 		    const string& initializer) throw (ParseError);
     ~MacaddrTemplate();
 
@@ -452,7 +487,7 @@ private:
 
 class UrlFileTemplate : public TemplateTreeNode {
 public:
-    UrlFileTemplate(TemplateTree& template_tree, TemplateTreeNode* parent, 
+    UrlFileTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
 		    const string& path, const string& varname,
 		    const string& initializer) throw (ParseError);
 
@@ -468,7 +503,7 @@ private:
 
 class UrlFtpTemplate : public TemplateTreeNode {
 public:
-    UrlFtpTemplate(TemplateTree& template_tree, TemplateTreeNode* parent, 
+    UrlFtpTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
 		   const string& path, const string& varname,
 		   const string& initializer) throw (ParseError);
 
@@ -484,7 +519,7 @@ private:
 
 class UrlHttpTemplate : public TemplateTreeNode {
 public:
-    UrlHttpTemplate(TemplateTree& template_tree, TemplateTreeNode* parent, 
+    UrlHttpTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
 		    const string& path, const string& varname,
 		    const string& initializer) throw (ParseError);
 
@@ -500,7 +535,7 @@ private:
 
 class UrlTftpTemplate : public TemplateTreeNode {
 public:
-    UrlTftpTemplate(TemplateTree& template_tree, TemplateTreeNode* parent, 
+    UrlTftpTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
 		    const string& path, const string& varname,
 		    const string& initializer) throw (ParseError);
 
