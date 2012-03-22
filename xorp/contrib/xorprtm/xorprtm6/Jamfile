@@ -9,7 +9,7 @@ SubDir TOP ;
 #QueueUserWorkItem()
 
 CCFLAGS =
-	#-DIPV6_DLL
+	-DIPV6_DLL
 	-DINET6 -D__KAME__
 	-DTEST
 	-DNT -DMPR50
