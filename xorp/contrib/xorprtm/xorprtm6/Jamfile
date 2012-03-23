@@ -9,13 +9,13 @@ SubDir TOP ;
 #QueueUserWorkItem()
 
 CCFLAGS =
- #-DIPV6_DLL
- -DINET6 -D__KAME__
- -DTEST
- -DNT -DMPR50
- -DDEBUG=999
- -D_CRT_SECURE_NO_DEPRECATE
- /Gz ;
+	-DIPV6_DLL
+	-DINET6 -D__KAME__
+	-DTEST
+	-DNT -DMPR50
+	-DDEBUG=999
+	-D_CRT_SECURE_NO_DEPRECATE
+	/Gz ;
 LINKLIBS = rtm.lib rtutils.lib mprapi.lib ws2_32.lib advapi32.lib iphlpapi.lib ;
 
 #
