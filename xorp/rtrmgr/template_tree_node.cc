@@ -1024,6 +1024,29 @@ TemplateTreeNode::find_varname_node(const string& varname)
 	return find_child_varname_node(var_parts, type());
     }
 
+    if (var_parts.back() == "@" && var_parts.size() > 2) {
+	/**
+	 * If we entered here, we want to find children
+	 * of some of our parents
+	 */
+	TTNodeType _type = (_parent && _parent->segname() == "@") ? _parent->type() : NODE_VOID;
+	list<string> parent_node_parts;
+
+	parent_node_parts.push_back(var_parts.front());
+	parent_node_parts.push_back(var_parts.back());
+
+	var_parts.pop_front();
+	var_parts.pop_back();
+	var_parts.push_front("@");
+
+	TemplateTreeNode* parent = find_parent_varname_node(parent_node_parts, _type);
+
+	if (parent) {
+	    return parent->find_child_varname_node(var_parts, parent->type());
+	}
+	return NULL;
+    }
+
     if (var_parts.size() > 1) {
 	TTNodeType _type = (_parent && _parent->segname() == "@") ? _parent->type() : NODE_VOID;
 	// It's a parent node, or a child of a parent node
