@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -45,7 +45,7 @@
 
 /**
  * @short A base class for I/O IP raw socket communication.
- * 
+ *
  * Each protocol 'registers' for I/O and gets assigned one object
  * of this class.
  */
@@ -53,7 +53,7 @@ class IoIpSocket : public IoIp, public IfTreeListener {
 public:
     /**
      * Constructor for a given address family and protocol.
-     * 
+     *
      * @param fea_data_plane_manager the corresponding data plane manager
      * (@ref FeaDataPlaneManager).
      * @param iftree the interface tree to use.
@@ -71,7 +71,7 @@ public:
 
     /**
      * Start operation.
-     * 
+     *
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
@@ -79,7 +79,7 @@ public:
 
     /**
      * Stop operation.
-     * 
+     *
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
@@ -88,7 +88,7 @@ public:
     /**
      * Set the default TTL (or hop-limit in IPv6) for the outgoing multicast
      * packets.
-     * 
+     *
      * @param ttl the desired IP TTL (a.k.a. hop-limit in IPv6) value.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
@@ -110,7 +110,7 @@ public:
 
     /**
      * Set default interface for transmitting multicast packets.
-     * 
+     *
      * @param if_name the name of the interface that would become the default
      * multicast interface.
      * @param vif_name the name of the vif that would become the default
@@ -124,7 +124,7 @@ public:
 
     /**
      * Join a multicast group on an interface.
-     * 
+     *
      * @param if_name the name of the interface to join the multicast group.
      * @param vif_name the name of the vif to join the multicast group.
      * @param group the multicast group to join.
@@ -135,10 +135,10 @@ public:
 				     const string& vif_name,
 				     const IPvX& group,
 				     string& error_msg);
-    
+
     /**
      * Leave a multicast group on an interface.
-     * 
+     *
      * @param if_name the name of the interface to leave the multicast group.
      * @param vif_name the name of the vif to leave the multicast group.
      * @param group the multicast group to leave.
@@ -217,10 +217,10 @@ public:
 private:
     /**
      * Open the protocol sockets.
-     * 
+     *
      * The protocol sockets are specific to the particular protocol of
      * this entry.
-     * 
+     *
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
@@ -238,7 +238,7 @@ private:
 
     /**
      * Close the protocol sockets.
-     * 
+     *
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
@@ -253,7 +253,7 @@ private:
     /**
      * Enable/disable the "Header Included" option (for IPv4) on the outgoing
      * protocol socket.
-     * 
+     *
      * If enabled, the IP header of a raw packet should be created
      * by the application itself, otherwise the kernel will build it.
      * Note: used only for IPv4.
@@ -263,7 +263,7 @@ private:
      * was a flag, so for compatibility reasons we better not set it
      * here; instead, we will use sendmsg() to specify the header's field
      * values.
-     * 
+     *
      * @param is_enabled if true, enable the option, otherwise disable it.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
@@ -273,11 +273,11 @@ private:
     /**
      * Enable/disable receiving information about a packet received on the
      * incoming protocol socket.
-     * 
+     *
      * If enabled, values such as interface index, destination address and
      * IP TTL (a.k.a. hop-limit in IPv6), and hop-by-hop options will be
      * received as well.
-     * 
+     *
      * @param is_enabled if true, set the option, otherwise reset it.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.

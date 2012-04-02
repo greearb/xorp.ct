@@ -8,13 +8,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -141,7 +141,7 @@ typedef char *caddr_t;
 #endif
 
 #define CMSG_DATA(cmsg)		\
-	((unsigned char *)(cmsg) + _ALIGN(sizeof(struct cmsghdr))) 
+	((unsigned char *)(cmsg) + _ALIGN(sizeof(struct cmsghdr)))
 #define CMSG_NXTHDR(mhdr, cmsg)	\
 	(((char *)(cmsg) + _ALIGN((cmsg)->cmsg_len) + \
 		_ALIGN(sizeof(struct cmsghdr)) > \
@@ -247,7 +247,7 @@ IoIpSocket::IoIpSocket(FeaDataPlaneManager& fea_data_plane_manager,
     memcpy(&ra_opt6[2], (caddr_t)&rtalert_code6, sizeof(rtalert_code6));
 #endif // ! HAVE_RFC3542
 #endif // HAVE_IPV6
-    
+
     // Allocate the buffers
     _rcvbuf = new uint8_t[IO_BUF_SIZE];
     _sndbuf = new uint8_t[IO_BUF_SIZE];
@@ -359,7 +359,7 @@ IoIpSocket::set_multicast_ttl(int ttl, string& error_msg)
     case AF_INET:
     {
 	u_char ip_ttl = ttl; // XXX: In IPv4 the value argument is 'u_char'
-	
+
 	if (setsockopt(_proto_socket_out, IPPROTO_IP, IP_MULTICAST_TTL,
 		       XORP_SOCKOPT_CAST(&ip_ttl), sizeof(ip_ttl)) < 0) {
 	    error_msg = c_format("setsockopt(IP_MULTICAST_TTL, %u) failed: %s",
@@ -368,7 +368,7 @@ IoIpSocket::set_multicast_ttl(int ttl, string& error_msg)
 	}
     }
     break;
-    
+
 #ifdef HAVE_IPV6
     case AF_INET6:
     {
@@ -378,7 +378,7 @@ IoIpSocket::set_multicast_ttl(int ttl, string& error_msg)
 	return (XORP_ERROR);
 #else
 	int ip_ttl = ttl;
-	
+
 	if (setsockopt(_proto_socket_out, IPPROTO_IPV6, IPV6_MULTICAST_HOPS,
 		       XORP_SOCKOPT_CAST(&ip_ttl), sizeof(ip_ttl)) < 0) {
 	    error_msg = c_format("setsockopt(IPV6_MULTICAST_HOPS, %u) failed: %s",
@@ -389,13 +389,13 @@ IoIpSocket::set_multicast_ttl(int ttl, string& error_msg)
     }
     break;
 #endif // HAVE_IPV6
-    
+
     default:
 	XLOG_UNREACHABLE();
 	error_msg = c_format("Invalid address family %d", family());
 	return (XORP_ERROR);
     }
-    
+
     return (XORP_OK);
 }
 
@@ -406,7 +406,7 @@ IoIpSocket::enable_multicast_loopback(bool is_enabled, string& error_msg)
     case AF_INET:
     {
 	u_char loop = is_enabled;
-	
+
 	if (setsockopt(_proto_socket_out, IPPROTO_IP, IP_MULTICAST_LOOP,
 		       XORP_SOCKOPT_CAST(&loop), sizeof(loop)) < 0) {
 	    error_msg = c_format("setsockopt(IP_MULTICAST_LOOP, %u) failed: %s",
@@ -415,7 +415,7 @@ IoIpSocket::enable_multicast_loopback(bool is_enabled, string& error_msg)
 	}
     }
     break;
-    
+
 #ifdef HAVE_IPV6
     case AF_INET6:
     {
@@ -425,7 +425,7 @@ IoIpSocket::enable_multicast_loopback(bool is_enabled, string& error_msg)
 	return (XORP_ERROR);
 #else
 	uint loop6 = is_enabled;
-	
+
 	if (setsockopt(_proto_socket_out, IPPROTO_IPV6, IPV6_MULTICAST_LOOP,
 		       XORP_SOCKOPT_CAST(&loop6), sizeof(loop6)) < 0) {
 	    error_msg = c_format("setsockopt(IPV6_MULTICAST_LOOP, %u) failed: %s",
@@ -436,13 +436,13 @@ IoIpSocket::enable_multicast_loopback(bool is_enabled, string& error_msg)
     }
     break;
 #endif // HAVE_IPV6
-    
+
     default:
 	XLOG_UNREACHABLE();
 	error_msg = c_format("Invalid address family %d", family());
 	return (XORP_ERROR);
     }
-    
+
     return (XORP_OK);
 }
 
@@ -487,7 +487,7 @@ IoIpSocket::set_default_multicast_interface(const string& if_name,
 	}
     }
     break;
-    
+
 #ifdef HAVE_IPV6
     case AF_INET6:
     {
@@ -497,7 +497,7 @@ IoIpSocket::set_default_multicast_interface(const string& if_name,
 	return (XORP_ERROR);
 #else
 	u_int pif_index = vifp->pif_index();
-	
+
 	if (setsockopt(_proto_socket_out, IPPROTO_IPV6, IPV6_MULTICAST_IF,
 		       XORP_SOCKOPT_CAST(&pif_index), sizeof(pif_index)) < 0) {
 	    error_msg = c_format("setsockopt(IPV6_MULTICAST_IF, %s/%s) failed: %s",
@@ -508,13 +508,13 @@ IoIpSocket::set_default_multicast_interface(const string& if_name,
     }
     break;
 #endif // HAVE_IPV6
-    
+
     default:
 	XLOG_UNREACHABLE();
 	error_msg = c_format("Invalid address family %d", family());
 	return (XORP_ERROR);
     }
-    
+
     return (XORP_OK);
 }
 
@@ -547,7 +547,7 @@ IoIpSocket::join_multicast_group(const string& if_name,
 	error_msg += em;
 	goto out_err;
     }
-    
+
 #if 0	// TODO: enable or disable the enabled() check?
     if (! vifp->enabled()) {
 	error_msg += c_format("Cannot join group %s on interface %s vif %s: "
@@ -558,7 +558,7 @@ IoIpSocket::join_multicast_group(const string& if_name,
 	goto out_err;
     }
 #endif // 0/1
-    
+
     switch (family()) {
     case AF_INET:
     {
@@ -576,7 +576,7 @@ IoIpSocket::join_multicast_group(const string& if_name,
 	    goto out_err;
 	}
 	const IfTreeAddr4& fa = *(ai->second);
-	
+
 	fa.addr().copy_out(in_addr);
 	group.copy_out(mreq.imr_multiaddr);
 	mreq.imr_interface.s_addr = in_addr.s_addr;
@@ -597,7 +597,7 @@ IoIpSocket::join_multicast_group(const string& if_name,
 	}
     }
     break;
-    
+
 #ifdef HAVE_IPV6
     case AF_INET6:
     {
@@ -607,7 +607,7 @@ IoIpSocket::join_multicast_group(const string& if_name,
 	goto out_err;
 #else
 	struct ipv6_mreq mreq6;
-	
+
 	group.copy_out(mreq6.ipv6mr_multiaddr);
 	mreq6.ipv6mr_interface = vifp->pif_index();
 	if (setsockopt(*_proto_socket_in, IPPROTO_IPV6, IPV6_JOIN_GROUP,
@@ -628,13 +628,13 @@ IoIpSocket::join_multicast_group(const string& if_name,
     }
     break;
 #endif // HAVE_IPV6
-    
+
     default:
 	XLOG_UNREACHABLE();
 	error_msg += c_format("Invalid address family %d", family());
 	goto out_err;
     }
-    
+
     return (XORP_OK);
 
   out_err:
@@ -694,7 +694,7 @@ XorpFd* IoIpSocket::findExistingInputSocket(const string& if_name, const string&
     else {
 	return i->second;
     }
-    
+
 }
 
 
@@ -726,7 +726,7 @@ IoIpSocket::leave_multicast_group(const string& if_name,
 			      vif_name.c_str());
 	return (XORP_ERROR);
     }
-    
+
 #if 0	// TODO: enable or disable the enabled() check?
     if (! vifp->enabled()) {
 	error_msg += c_format("Cannot leave group %s on interface %s vif %s: "
@@ -737,7 +737,7 @@ IoIpSocket::leave_multicast_group(const string& if_name,
 	return (XORP_ERROR);
     }
 #endif // 0/1
-    
+
     switch (family()) {
     case AF_INET:
     {
@@ -775,7 +775,7 @@ IoIpSocket::leave_multicast_group(const string& if_name,
 	}
     }
     break;
-    
+
 #ifdef HAVE_IPV6
     case AF_INET6:
     {
@@ -785,7 +785,7 @@ IoIpSocket::leave_multicast_group(const string& if_name,
 	return (XORP_ERROR);
 #else
 	struct ipv6_mreq mreq6;
-	
+
 	group.copy_out(mreq6.ipv6mr_multiaddr);
 	mreq6.ipv6mr_interface = vifp->pif_index();
 	if (setsockopt(*_proto_socket_in, IPPROTO_IPV6, IPV6_LEAVE_GROUP,
@@ -801,13 +801,13 @@ IoIpSocket::leave_multicast_group(const string& if_name,
     }
     break;
 #endif // HAVE_IPV6
-    
+
     default:
 	XLOG_UNREACHABLE();
 	error_msg += c_format("Invalid address family %d\n", family());
 	return (XORP_ERROR);
     }
-    
+
     return (XORP_OK);
 }
 
@@ -900,9 +900,9 @@ int IoIpSocket::initializeInputSocket(XorpFd* rv, string& error_msg) {
 	// Not supported on mingw, at least...
 	if (ip_protocol() == IPPROTO_ICMPV6) {
 	    struct icmp6_filter filter;
-	    
+
 	    // Pass all ICMPv6 messages
-	    ICMP6_FILTER_SETPASSALL(&filter);    
+	    ICMP6_FILTER_SETPASSALL(&filter);
 
 #ifdef HAVE_IPV6_MULTICAST_ROUTING
 #if 0		// TODO: XXX: used only for multicast routing purpose by MLD
@@ -1001,7 +1001,7 @@ int IoIpSocket::initializeInputSocket(XorpFd* rv, string& error_msg) {
     memset(&sin, 0, sizeof(sin));
     sin.sin_family = AF_INET;
     sin.sin_addr.s_addr = htonl(INADDR_ANY);
-    
+
     if (SOCKET_ERROR == bind(*rv, (sockaddr *)&sin,
 			     sizeof(sockaddr_in))) {
 	XLOG_WARNING("bind() failed: %s\n", win_strerror(GetLastError()));
@@ -1030,7 +1030,7 @@ IoIpSocket::open_proto_sockets(string& error_msg)
     // We will open input sockets as interfaces are registered (due to listening for mcast addrs)
     if (_proto_socket_out.is_valid())
 	return (XORP_OK);
-    
+
     if (! _proto_socket_out.is_valid()) {
 	_proto_socket_out = socket(family(), SOCK_RAW, ip_protocol());
 	if (!_proto_socket_out.is_valid()) {
@@ -1103,7 +1103,7 @@ IoIpSocket::close_proto_sockets(string& error_msg)
 
     map<string, XorpFd*>::iterator i;
     for (i = _proto_sockets_in.begin(); i != _proto_sockets_in.end(); i++) {
-    
+
 	XorpFd* fd = i->second;
 
 	cleanupXorpFd(fd);
@@ -1156,8 +1156,8 @@ IoIpSocket::enable_ip_hdr_include(bool is_enabled, string& error_msg)
     {
 #ifdef IP_HDRINCL
 	// XXX: the setsockopt() argument must be 'int'
-	int bool_flag = is_enabled; 
-	
+	int bool_flag = is_enabled;
+
 	if (setsockopt(_proto_socket_out, IPPROTO_IP, IP_HDRINCL,
 		       XORP_SOCKOPT_CAST(&bool_flag),
 		       sizeof(bool_flag)) < 0) {
@@ -1169,18 +1169,18 @@ IoIpSocket::enable_ip_hdr_include(bool is_enabled, string& error_msg)
 #endif // IP_HDRINCL
     }
     break;
-    
+
 #ifdef HAVE_IPV6
     case AF_INET6:
 	break;		// XXX
 #endif // HAVE_IPV6
-	
+
     default:
 	XLOG_UNREACHABLE();
 	error_msg = c_format("Invalid address family %d", family());
 	return (XORP_ERROR);
     }
-    
+
     return (XORP_OK);
 }
 
@@ -1192,7 +1192,7 @@ IoIpSocket::enable_recv_pktinfo(XorpFd* input_fd, bool is_enabled, string& error
     {
 	// XXX: the setsockopt() argument must be 'int'
 	int bool_flag = is_enabled;
-	
+
 	//
 	// Interface index
 	//
@@ -1225,7 +1225,7 @@ IoIpSocket::enable_recv_pktinfo(XorpFd* input_fd, bool is_enabled, string& error
     {
 	// XXX: the setsockopt() argument must be 'int'
 	int bool_flag = is_enabled;
-	
+
 	//
 	// Interface index and address
 	//
@@ -1246,7 +1246,7 @@ IoIpSocket::enable_recv_pktinfo(XorpFd* input_fd, bool is_enabled, string& error
 	    return (XORP_ERROR);
 	}
 #endif // ! IPV6_RECVPKTINFO
-	
+
 	//
 	// Hop-limit field
 	//
@@ -1267,7 +1267,7 @@ IoIpSocket::enable_recv_pktinfo(XorpFd* input_fd, bool is_enabled, string& error
 	}
 #endif
 #endif // ! IPV6_RECVHOPLIMIT
-	
+
 	//
 	// Traffic class value
 	//
@@ -1279,7 +1279,7 @@ IoIpSocket::enable_recv_pktinfo(XorpFd* input_fd, bool is_enabled, string& error
 	    return (XORP_ERROR);
 	}
 #endif // IPV6_RECVTCLASS
-	
+
 	//
 	// Hop-by-hop options
 	//
@@ -1346,13 +1346,13 @@ IoIpSocket::enable_recv_pktinfo(XorpFd* input_fd, bool is_enabled, string& error
     }
     break;
 #endif // HAVE_IPV6
-    
+
     default:
 	XLOG_UNREACHABLE();
 	error_msg = c_format("Invalid address family %d", family());
 	return (XORP_ERROR);
     }
-    
+
     return (XORP_OK);
 }
 
@@ -1406,10 +1406,10 @@ void IoIpSocket::notifyDeletingVif(const string& ifn, const string& vn) {
 
 	_proto_sockets_in.erase(key);
 	cleanupXorpFd(fd);
-	
+
 	XLOG_INFO("Closed socket: %i on interface: %s:%s because it is being deleted, input sockets count: %i\n",
 		  _fd, ifn.c_str(), vn.c_str(), (int)(_proto_sockets_in.size()));
-	
+
     }
 #else
     UNUSED(ifn);
@@ -1462,7 +1462,7 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
 	XLOG_UNREACHABLE();
 	return;			// Error
     }
-   
+
     // Read from the socket
     nbytes = recvmsg(fd, &_rcvmh, 0);
     if (nbytes < 0) {
@@ -1530,7 +1530,7 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
 	return;			// Error
     }
 #endif // HOST_OS_WINDOWS
-    
+
     //
     // Check whether this is a multicast forwarding related upcall from the
     // system to the user-level.
@@ -1562,7 +1562,7 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
 #endif // HAVE_IPV4_MULTICAST_ROUTING
     }
     break;
-    
+
 #ifdef HAVE_IPV6
     case AF_INET6:
     {
@@ -1571,7 +1571,7 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
 
 #ifdef HAVE_IPV6_MULTICAST_ROUTING
 	if (nbytes < (ssize_t)sizeof(struct mrt6msg)) {
-	    // Probably not a system upcall 
+	    // Probably not a system upcall
 	    break;
 	}
 	struct mrt6msg* mrt6msg;
@@ -1600,12 +1600,12 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
     }
     break;
 #endif // HAVE_IPV6
-    
+
     default:
 	XLOG_UNREACHABLE();
 	return;			// Error
     }
-    
+
     //
     // Not a system upcall. Pass to the registered processing function.
     //
@@ -1620,7 +1620,7 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
     {
 	IpHeader4 ip4(_rcvbuf);
 	bool is_datalen_error = false;
-	
+
 	// Input check
 	if (nbytes < (ssize_t)ip4.size()) {
 	    XLOG_WARNING("proto_socket_read() failed: "
@@ -1641,7 +1641,7 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
 
 	if (ip_tos == IPTOS_PREC_INTERNETCONTROL)
 	    ip_internet_control = true;
-	
+
 	ip_hdr_len  = ip4.ip_header_len();
 #ifdef IPV4_RAW_INPUT_IS_RAW
 	ip_data_len = ip4.ip_len() - ip_hdr_len;
@@ -1740,7 +1740,7 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
 	    }
 	}
 #endif // ! HOST_OS_WINDOWS
-	
+
 	//
 	// Check for Router Alert option
 	//
@@ -1765,15 +1765,15 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
 		test_ip_options_len -= option_len;
 		option_p += option_len;
 	    }
-	    
+
 	    break;
 	} while (false);
     }
     break;
-    
+
 #ifdef HAVE_IPV6
     case AF_INET6:
-    {	
+    {
 	src_address.copy_in(_from6);
 
 #ifndef HOST_OS_WINDOWS
@@ -1797,7 +1797,7 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
 		       XORP_UINT_CAST(sizeof(struct cmsghdr)));
 	    return;		// Error
 	}
-	
+
 	//
 	// Get pif_index, hop limit, Router Alert option, etc.
 	//
@@ -1868,7 +1868,7 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
 		}
 #endif
 #endif // ! HAVE_RFC3542
-	    }	
+	    }
 	    break;
 
 #ifdef IPV6_TCLASS
@@ -1929,12 +1929,12 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
     }
     break;
 #endif // HAVE_IPV6
-    
+
     default:
 	XLOG_UNREACHABLE();
 	return;			// Error
     }
-    
+
     // Various checks
     if (! (src_address.is_unicast() || src_address.is_zero())) {
 	// XXX: Accept zero source addresses because of protocols like IGMPv3
@@ -1993,7 +1993,7 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
 		ifp = iftree().find_interface(vifp->ifname());
 	    break;
 	}
-	
+
 	if (dst_address.is_multicast()) {
 	    iftree().find_interface_vif_same_subnet_or_p2p(src_address, ifp,
 							   vifp);
@@ -2002,7 +2002,7 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
 	}
 	break;
     } while (false);
-    
+
     if ((ifp == NULL) || (vifp == NULL)) {
 	// No vif found. Ignore this packet.
 #ifdef USE_SOCKET_PER_IFACE
@@ -2032,7 +2032,7 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
 	// This vif is down. Silently ignore this packet.
 	return;			// Error
     }
-    
+
     // Process the result
     vector<uint8_t> payload(nbytes - ip_hdr_len);
     memcpy(&payload[0], _rcvbuf + ip_hdr_len, nbytes - ip_hdr_len);
@@ -2326,9 +2326,9 @@ IoIpSocket::send_packet(const string& if_name,
             //     a work-around or not. --Ben
 #ifdef IP_PKTINFO
 	    int ctllen = 0;
-	
+
 	    ctllen = CMSG_SPACE(sizeof(struct in_pktinfo));
-	
+
 	    XLOG_ASSERT(ctllen <= CMSG_BUF_SIZE);   // XXX
 
 #ifndef HOST_OS_WINDOWS
@@ -2339,10 +2339,10 @@ IoIpSocket::send_packet(const string& if_name,
 	    // source IP part.  The pktinfo logic below make sure it uses the correct
 	    // local IP address.  This fixes source-routing problems as well.
 	    // --Ben  Aug 21, 2008
-	
+
 	    _sndmh.msg_controllen = ctllen;
 	    cmsgp = CMSG_FIRSTHDR(&_sndmh);
-	
+
 	    // Add the IPV4_PKTINFO ancillary data
 	    cmsgp->cmsg_len   = CMSG_LEN(sizeof(struct in_pktinfo));
 	    cmsgp->cmsg_level = SOL_IP;
@@ -2490,7 +2490,7 @@ IoIpSocket::send_packet(const string& if_name,
 	// XXX: unlikely IPv4, in IPv6 the 'header' is specified as
 	// ancillary data.
 	//
-	
+
 	//
 	// First, estimate total length of ancillary data
 	//
@@ -2525,7 +2525,7 @@ IoIpSocket::send_packet(const string& if_name,
 	}
 
 	// Space for IPV6_TCLASS
-#ifdef IPV6_TCLASS 
+#ifdef IPV6_TCLASS
 	ctllen += CMSG_SPACE(sizeof(int));
 #endif
 
@@ -2546,7 +2546,7 @@ IoIpSocket::send_packet(const string& if_name,
 	    }
 	    ctllen += CMSG_SPACE(ext_headers_payload[i].size());
 	}
-	
+
 #ifndef HOST_OS_WINDOWS
 	// TODO:  Implement IPv6 Ancillary data on windows/mingw
 	// TODO:  Implement IPV6_HOPLIMIT on windows/mingw??
@@ -2558,7 +2558,7 @@ IoIpSocket::send_packet(const string& if_name,
 	XLOG_ASSERT(ctllen <= CMSG_BUF_SIZE);		// XXX
 	_sndmh.msg_controllen = ctllen;
 	cmsgp = CMSG_FIRSTHDR(&_sndmh);
-	
+
 	// Add the IPV6_PKTINFO ancillary data
 	cmsgp->cmsg_len   = CMSG_LEN(sizeof(struct in6_pktinfo));
 	cmsgp->cmsg_level = IPPROTO_IPV6;
@@ -2587,7 +2587,7 @@ IoIpSocket::send_packet(const string& if_name,
 #ifdef HAVE_RFC3542
 	    int currentlen;
 	    void *hbhbuf, *optp = NULL;
-	    
+
 	    cmsgp->cmsg_len   = CMSG_LEN(hbhlen);
 	    cmsgp->cmsg_level = IPPROTO_IPV6;
 	    cmsgp->cmsg_type  = IPV6_HOPOPTS;
@@ -2627,7 +2627,7 @@ IoIpSocket::send_packet(const string& if_name,
 	    }
 	    cmsgp = CMSG_NXTHDR(&_sndmh, cmsgp);
 #endif
-	    
+
 #endif // ! HAVE_RFC3542
 	}
 
@@ -2640,7 +2640,7 @@ IoIpSocket::send_packet(const string& if_name,
 	int_val = ip_ttl;
 	embed_host_int(CMSG_DATA(cmsgp), int_val);
 	cmsgp = CMSG_NXTHDR(&_sndmh, cmsgp);
-	
+
 	//
 	// Set the TOS
 	//
@@ -2695,7 +2695,7 @@ IoIpSocket::send_packet(const string& if_name,
     }
     break;
 #endif // HAVE_IPV6
-    
+
     default:
 	XLOG_UNREACHABLE();
 	error_msg = c_format("Invalid address family %d", family());
@@ -2780,7 +2780,7 @@ IoIpSocket::proto_socket_transmit(const IfTreeInterface* ifp,
     // Transmit the packet
     //
 
-#ifndef HOST_OS_WINDOWS    
+#ifndef HOST_OS_WINDOWS
 
     // Set some sendmsg()-related fields
     if (_sndmh.msg_controllen == 0)

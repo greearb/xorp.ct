@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -374,7 +374,7 @@ public:
 
     /**
      * Join an IP multicast group.
-     * 
+     *
      * @param if_name the interface through which packets should be accepted.
      * @param vif_name the vif through which packets should be accepted.
      * @param group_address the multicast group address to join.
@@ -390,7 +390,7 @@ public:
 
     /**
      * Leave an IP multicast group.
-     * 
+     *
      * @param if_name the interface through which packets should not be
      * accepted.
      * @param vif_name the vif through which packets should not be accepted.
@@ -407,7 +407,7 @@ public:
 
     /**
      * Leave all IP multicast groups on this interface.
-     * 
+     *
      * @param if_name the interface through which packets should not be
      * accepted.
      * @param vif_name the vif through which packets should not be accepted.
@@ -566,7 +566,7 @@ public:
 			  uint8_t	ip_protocol,
 			  bool		enable_multicast_loopback,
 			  string&	error_msg);
-    
+
     /**
      * Unregister to receive IP packets.
      *
