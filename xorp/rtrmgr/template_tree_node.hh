@@ -194,8 +194,8 @@ protected:
 private:
     bool split_up_varname(const string& varname,
 			  list<string>& var_parts) const;
-    TemplateTreeNode* find_parent_varname_node(const list<string>& var_parts);
-    TemplateTreeNode* find_child_varname_node(const list<string>& var_parts);
+    TemplateTreeNode* find_parent_varname_node(const list<string>& var_parts, const TTNodeType& type);
+    TemplateTreeNode* find_child_varname_node(const list<string>& var_parts, const TTNodeType& type);
 
     TemplateTree&	_template_tree;
 

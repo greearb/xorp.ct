@@ -893,12 +893,13 @@ TemplateTreeNode::find_varname_node(const string& varname)
     }
 
     if (var_parts.front() == "@") {
-	return find_child_varname_node(var_parts);
+	return find_child_varname_node(var_parts, type());
     }
 
     if (var_parts.size() > 1) {
+	TTNodeType _type = (_parent && _parent->segname() == "@") ? _parent->type() : NODE_VOID;
 	// It's a parent node, or a child of a parent node
-	return find_parent_varname_node(var_parts);
+	return find_parent_varname_node(var_parts, _type);
     }
 
     //
@@ -909,7 +910,7 @@ TemplateTreeNode::find_varname_node(const string& varname)
 }
 
 TemplateTreeNode*
-TemplateTreeNode::find_parent_varname_node(const list<string>& var_parts)
+TemplateTreeNode::find_parent_varname_node(const list<string>& var_parts, const TTNodeType& _type)
 {
     if (_parent == NULL) {
 	//
@@ -919,37 +920,42 @@ TemplateTreeNode::find_parent_varname_node(const list<string>& var_parts)
 	list<TemplateTreeNode* >::iterator iter;
 	for (iter = _children.begin(); iter != _children.end(); ++iter) {
 	    TemplateTreeNode* found_child;
-	    found_child = (*iter)->find_child_varname_node(var_parts);
+	    found_child = (*iter)->find_child_varname_node(var_parts, NODE_VOID);
 	    if (found_child != NULL)
 		return found_child;
 	}
 	return NULL;
     }
+
     if (is_tag() || (type() == NODE_VOID)) {
+
 	// When naming a parent node variable, you must start with a tag
 	if (_segname == var_parts.front()) {
 	    // We've found the right place to start
-	    return find_child_varname_node(var_parts);
+	    return find_child_varname_node(var_parts, (type() == NODE_VOID) ? _type : type());
 	}
     }
-
-    return _parent->find_parent_varname_node(var_parts);
+    return _parent->find_parent_varname_node(var_parts,
+	    (_parent && _parent->segname() == "@") ? _parent->type() : _type);
 }
 
 TemplateTreeNode*
-TemplateTreeNode::find_child_varname_node(const list<string>& var_parts)
+TemplateTreeNode::find_child_varname_node(const list<string>& var_parts, const TTNodeType& _type)
 {
     if ((var_parts.front() != "@") && (var_parts.front() != _segname)) {
 	// varname doesn't match us
 	return NULL;
     }
-
     // The name might refer to this node
     if (var_parts.size() == 1) {
 	if ((var_parts.front() == "@")
 	    || (var_parts.front() == _segname)
 	    || (var_parts.front() == "<>")
 	    || (var_parts.front() == "#")) {
+	    if (_type != type() && _segname == "@") {
+		debug_msg("We are searching for node with different type. Skip this node.\n");
+		return NULL;
+	    }
 	    return this;
 	}
     }
@@ -960,6 +966,10 @@ TemplateTreeNode::find_child_varname_node(const list<string>& var_parts)
 	    // The name refers to the default value of this node
 	    if (! has_default())
 		return NULL;	// The template tree node has no default value
+	    if (_type != type() && _segname == "@") {
+		debug_msg("We are searching for node with different type. Skip this node.\n");
+		return NULL;
+	    }
 	    return this;
 	}
     }
@@ -967,6 +977,10 @@ TemplateTreeNode::find_child_varname_node(const list<string>& var_parts)
     // The name might refer to the operator value of this node
     if ((var_parts.size() == 2) && (var_parts.back() == "<>")) {
 	if ((var_parts.front() == "@") || (var_parts.front() == _segname)) {
+	    if (_type != type() && _segname == "@") {
+		debug_msg("We are searching for node with different type. Skip this node.\n");
+		return NULL;
+	    }
 	    return this;
 	}
     }
@@ -974,6 +988,10 @@ TemplateTreeNode::find_child_varname_node(const list<string>& var_parts)
     // The name might refer to the node ID of this node
     if ((var_parts.size() == 2) && (var_parts.back() == "#")) {
 	if ((var_parts.front() == "@") || (var_parts.front() == _segname)) {
+	    if (_type != type() && _segname == "@") {
+		debug_msg("We are searching for node with different type. Skip this node.\n");
+		return NULL;
+	    }
 	    return this;
 	}
     }
@@ -985,7 +1003,7 @@ TemplateTreeNode::find_child_varname_node(const list<string>& var_parts)
     list<TemplateTreeNode* >::iterator iter;
     for (iter = _children.begin(); iter != _children.end(); ++iter) {
 	TemplateTreeNode* found_child;
-	found_child = (*iter)->find_child_varname_node(child_var_parts);
+	found_child = (*iter)->find_child_varname_node(child_var_parts, (type() == NODE_VOID) ? _type : type());
 	if (found_child != NULL)
 	    return found_child;
     }
