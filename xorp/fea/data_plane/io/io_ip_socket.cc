@@ -519,6 +519,38 @@ IoIpSocket::set_default_multicast_interface(const string& if_name,
 }
 
 int
+IoIpSocket::create_input_socket(const string& if_name,
+				const string& vif_name,
+				string& error_msg)
+{
+    error_msg.clear();
+
+    if (!iftree().find_vif(if_name, vif_name)) {
+	error_msg += c_format("Creating of input socket failed: "
+		"interface %s vif %s not found",
+		if_name.c_str(),
+		vif_name.c_str());
+	goto out_err;
+    }
+
+    if (!findOrCreateInputSocket(if_name, vif_name, error_msg)) {
+	string em = c_format("ERROR:  Could not find or create input socket, "
+		"if_name: %s  vif_name: %s  error_msg: %s",
+		if_name.c_str(), vif_name.c_str(), error_msg.c_str());
+	XLOG_WARNING("%s", em.c_str());
+	error_msg += em;
+	goto out_err;
+    }
+    return XORP_OK;
+
+out_err:
+    if (error_msg.size()) {
+	XLOG_ERROR("ERROR in %s: %s", __func__, error_msg.c_str());
+    }
+    return XORP_ERROR;
+}
+
+int
 IoIpSocket::join_multicast_group(const string& if_name,
 				 const string& vif_name,
 				 const IPvX& group,

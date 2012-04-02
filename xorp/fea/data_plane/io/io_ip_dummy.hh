@@ -116,6 +116,18 @@ public:
 						string& error_msg);
 
     /**
+     * Create input socket.
+     *
+     * @param if_name the name of the interface to listen on
+     * @param vif_name the name of the vif to listen on
+     * @error error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR
+     */
+    int		create_input_socket(const string& if_name,
+					const string& vif_name,
+					string& error_msg);
+
+    /**
      * Join a multicast group on an interface.
      *
      * @param if_name the name of the interface to join the multicast group.

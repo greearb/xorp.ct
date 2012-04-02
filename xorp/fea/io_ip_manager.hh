@@ -373,6 +373,17 @@ public:
     virtual void recv_system_multicast_upcall(const vector<uint8_t>& payload);
 
     /**
+     * Create input socket.
+     *
+     * @param if_name the name of the interface to listen on
+     * @param vif_name the name of the vif to listen on
+     * @error error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR
+     */
+    void		create_input_socket(const string& if_name,
+					const string& vif_name);
+
+    /**
      * Join an IP multicast group.
      *
      * @param if_name the interface through which packets should be accepted.

@@ -140,6 +140,25 @@ IoIpDummy::set_default_multicast_interface(const string& if_name,
 }
 
 int
+IoIpDummy::create_input_socket(const string& if_name,
+				const string& vif_name,
+				string& error_msg)
+{
+    const IfTreeVif* vifp;
+
+    // Find the vif
+    vifp = iftree().find_vif(if_name, vif_name);
+    if (vifp == NULL) {
+	error_msg = c_format("Creating input socket failed: "
+			     "interface %s vif %s not found",
+			     if_name.c_str(),
+			     vif_name.c_str());
+	return (XORP_ERROR);
+    }
+    return (XORP_OK);
+}
+
+int
 IoIpDummy::join_multicast_group(const string& if_name,
 				const string& vif_name,
 				const IPvX& group,

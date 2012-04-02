@@ -384,6 +384,58 @@ IoIpComm::recv_system_multicast_upcall(const vector<uint8_t>& payload)
     }
 }
 
+void
+IoIpComm::create_input_socket(const string& if_name,
+				const string& vif_name)
+{
+    bool err = false;
+    string error_msg;
+
+    if (_io_ip_plugins.empty()) {
+	error_msg = c_format("No I/O IP plugin to create input socket "
+		"on interface %s vif %s protocol %u",
+		if_name.c_str(), vif_name.c_str(),
+		_ip_protocol);
+	goto error;
+    }
+
+    //
+    // Check the arguments
+    //
+    if (if_name.empty()) {
+	error_msg = c_format("Cannot create input socket: empty interface name");
+	goto error;
+    }
+    if (vif_name.empty()) {
+	error_msg = c_format("Cannot create input socket on interface %s: "
+		"empty vif name", if_name.c_str());
+	goto error;
+    }
+
+    do {
+	IoIpPlugins::iterator plugin_iter;
+	for (plugin_iter = _io_ip_plugins.begin();
+		plugin_iter != _io_ip_plugins.end(); ++plugin_iter) {
+	    IoIp* io_ip = plugin_iter->second;
+	    if (io_ip->create_input_socket(if_name, vif_name,
+		    error_msg) != XORP_OK) {
+		err = true;
+		if (!error_msg.empty())
+		    error_msg += " ";
+		error_msg += error_msg;
+	    }
+	}
+    } while (0); //dummy loop to avoid compiler warning
+
+    if (err)
+	goto error;
+
+    return;
+error:
+    XLOG_WARNING("%s\n", error_msg.c_str());
+    return;
+}
+
 int
 IoIpComm::join_multicast_group(const string&	if_name,
 			       const string&	vif_name,
@@ -931,6 +983,9 @@ IoIpManager::register_receiver(int		family,
 
     // Add the filter to those associated with receiver_name
     filters.insert(FilterBag::value_type(receiver_name, filter));
+
+    //Create input socket for if vif pair
+    io_ip_comm->create_input_socket(if_name, vif_name);
 
     // Register interest in watching the receiver
     if (_fea_node.fea_io().add_instance_watch(receiver_name, this, error_msg)
