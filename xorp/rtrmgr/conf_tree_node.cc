@@ -666,6 +666,110 @@ ConfigTreeNode::check_config_tree(string& error_msg) const
     }
 
     //
+    // Check if this node should be unique
+    //
+    if ((!deleted()) && (_template_tree_node != NULL) && has_value()
+	    && !_template_tree_node->unique_in_node().empty()) {
+
+	VarType type = NONE;
+	const ConfigTreeNode *varname_node;
+
+	/**
+	 * Find root node in which this node should be unique
+	 */
+	varname_node = find_const_varname_node(_template_tree_node->unique_in_node(), type);
+
+	if (varname_node) {
+	    const list<string> unique_path = _template_tree_node->get_path_to_be_unique_in();
+
+	    list<const ConfigTreeNode*> parent_list;	// Presents list of direct parents of nodes
+							// that should be unique
+
+	    list<string>::const_iterator list_iter;
+	    parent_list.push_front(varname_node);	// If unique_path is empty then we've already
+							// found our direct parent
+
+	    for (list_iter = unique_path.begin();
+		    list_iter != unique_path.end(); ++list_iter) {
+		/**
+		 * In this for loop we are searching for children of nodes from parent_list,
+		 * that match criteria from current element of unique_path list.
+		 *
+		 * Parent list is emptied at the beginning of each iteration,
+		 * and it is going to be filled with all children that match certain criteria.
+		 */
+		list<const ConfigTreeNode*> old_parent_list = parent_list;
+		parent_list.clear();
+
+		const string name = *list_iter;
+		list<const ConfigTreeNode*>::const_iterator iter;
+
+		for (iter = old_parent_list.begin(); iter != old_parent_list.end();
+			++iter) {
+		    const ConfigTreeNode* child = *iter;
+		    list<const ConfigTreeNode*> founded_children;
+
+		    /**
+		     * Children nodes could be matched based on their name (tag nodes),
+		     * or according to their type (children of tag nodes).
+		     */
+		    if (name.find("@:=") != string::npos) {
+			string type_str = name.substr(3);
+			child->get_children_with_type(founded_children, type_str);
+		    } else {
+			child->get_children_with_name(founded_children, name);
+		    }
+		    /**
+		     * Add children to the parent_list
+		     */
+		    parent_list.merge(founded_children);
+		}
+	    }
+
+	    list<const ConfigTreeNode*>::const_iterator iter;
+	    set<string> values_to_check;
+
+	    /**
+	     * Here we actually check if there are two same values in the defined scope
+	     */
+	    for (iter = parent_list.begin();
+		    iter != parent_list.end(); ++iter) {
+		const ConfigTreeNode* parent = *iter;
+		list<const ConfigTreeNode*> founded_children;
+
+		parent->get_children_with_name(founded_children, _segname);
+
+		if (founded_children.size() != 1) {
+		    ostringstream oss;
+		    oss << founded_children.size();
+		    XLOG_ERROR("Found %s occurrences of %s on node %s. Expected 1!\n",
+			    oss.str().c_str(), _segname.c_str(), path().c_str());
+		    return false;
+		}
+		const ConfigTreeNode* child = *(founded_children.begin());
+
+		if (!child->deleted() && child->has_value()) {
+		    string child_value = child->value();
+		    if (values_to_check.find(child_value) != values_to_check.end()) {
+			error_msg = c_format("Node \"%s\"\n must be unique in \"%s\"\n",
+					     _path.c_str(), varname_node->path().c_str());
+			return false;
+		    } else {
+			values_to_check.insert(child_value);
+		    }
+		}
+
+	    }
+	} else {
+	    XLOG_ERROR("There is no node \"%s\"\n in which node \"%s\"\n"
+		    "should be unique\n", _template_tree_node->unique_in_node().c_str(),
+		    path().c_str());
+	    return false;
+	}
+
+    }
+
+    //
     // Verify the allowed configuration values
     //
     if (_template_tree_node != NULL) {
@@ -908,6 +1012,31 @@ ConfigTreeNode::module_root_node()
     XLOG_ASSERT(_parent);
 
     return _parent->module_root_node();
+}
+
+void
+ConfigTreeNode::get_children_with_name(list<const ConfigTreeNode*>& children_ret,
+					const string& name_str) const
+{
+    children_ret.clear();
+    list<ConfigTreeNode*>::const_iterator iter;
+    for (iter = _children.begin(); iter != _children.end(); ++iter) {
+	ConfigTreeNode* child = *iter;
+	if (child->segname() == name_str)
+	    children_ret.push_back(child);
+    }
+}
+void
+ConfigTreeNode::get_children_with_type(list<const ConfigTreeNode*>& children_ret,
+					const string& type_str) const
+{
+    children_ret.clear();
+    list<ConfigTreeNode*>::const_iterator iter;
+    for (iter = _children.begin(); iter != _children.end(); ++iter) {
+	ConfigTreeNode* child = *iter;
+	if (child->typestr() == type_str)
+	    children_ret.push_back(child);
+    }
 }
 
 string

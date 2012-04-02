@@ -112,6 +112,8 @@ public:
     bool is_module_root_node() const;
     bool is_leaf_value() const;
 
+    const list<string>& get_path_to_be_unique_in() const { return _unique_in_path; }
+
     list<ConfigOperator> allowed_operators() const;
 
 #if 0
@@ -137,6 +139,7 @@ public:
     bool verify_variables(const ConfigTreeNode& ctn, string& error_msg) const;
 
     const list<string>& mandatory_config_nodes() const { return _mandatory_config_nodes; }
+    const string& unique_in_node() const { return _unique_in_node; }
     const string& help() const;
     const string& help_long() const;
 
@@ -221,6 +224,9 @@ private:
     string _help_long;
 
     list<string>	_mandatory_config_nodes;
+
+    string		_unique_in_node;
+    list<string>	_unique_in_path;
 
     int _child_number;
 

@@ -141,6 +141,8 @@ public:
     const ConfigTreeNode* const_parent() const { return _parent; }
     ConfigTreeNode* module_root_node();
     list<ConfigTreeNode*>& children() { return _children; }
+    void get_children_with_name(list<const ConfigTreeNode*>& children_ret, const string& name) const;
+    void get_children_with_type(list<const ConfigTreeNode*>& children_ret, const string& typestr) const;
     const list<ConfigTreeNode*>& const_children() const { return _children; }
     string show_subtree(bool show_top, int depth, int indent, bool do_indent,
 			bool numbered, bool annotate,
