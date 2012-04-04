@@ -8,13 +8,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -65,7 +65,7 @@ uint16_t
 ipv6_pseudo_header_checksum(const IPv6& src, const IPv6& dst, size_t len,
 			    uint8_t protocol)
 {
-    uint8_t pseudo_header[16	/* Source address */ 
+    uint8_t pseudo_header[16	/* Source address */
 			  + 16	/* Destination address */
 			  + 4 	/* Upper-layer packet length */
 			  + 3 	/* Zero */
@@ -110,7 +110,7 @@ ipv6_checksum_verify<IPv6>(const IPv6& src, const IPv6& dst,
     memcpy(&temp[0], &data[0], len);
     uint16_t checksum_inpacket = extract_16(&temp[checksum_offset]);
     embed_16(&temp[checksum_offset], 0);
-    uint16_t checksum_computed = 
+    uint16_t checksum_computed =
 	inet_checksum_add(ipv6_pseudo_header_checksum(src, dst, len,
 							   protocol),
 			  checksum(temp, len));
@@ -305,7 +305,7 @@ Packet::decode_standard_header(uint8_t *ptr, size_t& len) throw(InvalidPacket)
     if (0 == checksum_inpacket &&
 	OspfTypes::CRYPTOGRAPHIC_AUTHENTICATION == get_auth_type())
 	return get_standard_header_length();
-    
+
     if (checksum_inpacket != checksum_actual)
 	xorp_throw(InvalidPacket,
 		   c_format("Checksum mismatch expected %#x received %#x",
@@ -338,7 +338,7 @@ Packet::encode_standard_header(uint8_t *ptr, size_t len)
     embed_16(&ptr[Packet::LEN_OFFSET], len);
     embed_32(&ptr[Packet::ROUTER_ID_OFFSET], get_router_id());
     embed_32(&ptr[Packet::AREA_ID_OFFSET], get_area_id());
-    
+
     switch(version) {
     case OspfTypes::V2:
 	embed_16(&ptr[Packet::AUTH_TYPE_OFFSET], get_auth_type());
@@ -363,7 +363,7 @@ Packet::encode_standard_header(uint8_t *ptr, size_t len)
 
 #ifdef	DEBUG_RAW_PACKETS
     debug_msg("\n%s", dump_packet(ptr, len).c_str());
-#endif    
+#endif
 
     return get_standard_header_length();
 }
@@ -372,7 +372,7 @@ string
 Packet::standard() const
 {
     string output;
-    
+
     output = c_format("\tVersion %u\n", get_version());
     output += c_format("\tType %u\n", get_type());
     output += "\tRouter ID " + pr_id(get_router_id()) + "\n";
@@ -478,11 +478,11 @@ PacketDecoder::decode(uint8_t *ptr, size_t len) throw(InvalidPacket)
 	    packet = i->second;
 	break;
     }
-    
+
     if (packet == NULL)
 	xorp_throw(InvalidPacket,
 		   c_format("OSPF Version %u Unknown Type %u", version, type));
-    
+
     return packet->decode(ptr, len);
 }
 
@@ -496,7 +496,7 @@ HelloPacket::decode(uint8_t *ptr, size_t len) const throw(InvalidPacket)
     HelloPacket *packet = new HelloPacket(version);
 
     size_t offset = packet->decode_standard_header(ptr, len);
-    
+
     // Verify that this packet is large enough, up to but not including
     // any neighbours.
     if ((len - offset) < MINIMUM_LENGTH)
@@ -537,7 +537,7 @@ HelloPacket::decode(uint8_t *ptr, size_t len) const throw(InvalidPacket)
 
      packet->set_designated_router(extract_32(&ptr[offset +
 				   HelloPacket::DESIGNATED_ROUTER_OFFSET]));
-     packet->set_backup_designated_router(extract_32(&ptr[offset + 
+     packet->set_backup_designated_router(extract_32(&ptr[offset +
 			    HelloPacket::BACKUP_DESIGNATED_ROUTER_OFFSET]));
 
     // If there is any more space in the packet extract the neighbours.
@@ -607,7 +607,7 @@ HelloPacket::encode(vector<uint8_t>& pkt)
     for(size_t index = 0; i != li.end(); i++, index += 4) {
 	embed_32(&ptr[offset + 20 + index], *i);
     }
-	
+
     if (offset != encode_standard_header(ptr, len)) {
 	XLOG_ERROR("Encode of %s failed", str().c_str());
 	return false;
@@ -625,7 +625,7 @@ HelloPacket::str() const
     // Standard Header
     output += standard() + "\n";
     // Hello Packet Specifics
-    
+
     switch(get_version()) {
     case OspfTypes::V2:
 	output += c_format("\tNetwork Mask %#x\n", get_network_mask());
@@ -650,7 +650,7 @@ HelloPacket::str() const
     for(; i != li.end(); i++) {
 	output += "\n\tNeighbour: " + pr_id(*i);
     }
-    
+
     return output;
 }
 
@@ -665,7 +665,7 @@ DataDescriptionPacket::decode(uint8_t *ptr, size_t len) const throw(InvalidPacke
     DataDescriptionPacket *packet = new DataDescriptionPacket(version);
 
     size_t offset = packet->decode_standard_header(ptr, len);
-    
+
     // Verify that this packet is large enough, up to but not including
     // any neighbours.
     if ((len - offset) < minimum_length())
@@ -776,7 +776,7 @@ DataDescriptionPacket::encode(vector<uint8_t>& pkt)
     for(size_t index = 0; i != li.end(); i++, index += Lsa_header::length()) {
 	(*i).copy_out(&ptr[lsa_offset + index]);
     }
-	
+
     if (offset != encode_standard_header(ptr, len)) {
 	XLOG_ERROR("Encode of %s failed", str().c_str());
 	return false;
@@ -822,7 +822,7 @@ LinkStateRequestPacket::decode(uint8_t *ptr, size_t len) const throw(InvalidPack
     LinkStateRequestPacket *packet = new LinkStateRequestPacket(version);
 
     size_t offset = packet->decode_standard_header(ptr, len);
-    
+
     Ls_request ls(version);
 
     // Verify that this packet is large enough, a standard header plus
@@ -872,7 +872,7 @@ LinkStateRequestPacket::encode(vector<uint8_t>& pkt)
     for(size_t index = 0; i != li.end(); i++, index += ls.length()) {
 	(*i).copy_out(&ptr[offset + index]);
     }
-	
+
     if (offset != encode_standard_header(ptr, len)) {
 	XLOG_ERROR("Encode of %s failed", str().c_str());
 	return false;
@@ -911,7 +911,7 @@ LinkStateUpdatePacket::decode(uint8_t *ptr, size_t len) const throw(InvalidPacke
 							      _lsa_decoder);
 
     size_t offset = packet->decode_standard_header(ptr, len);
-    
+
     // Verify that this packet is large enough to hold the smallest
     // LSA that we are aware of.
     size_t min_length = _lsa_decoder.min_length();
@@ -959,11 +959,11 @@ LinkStateUpdatePacket::encode(vector<uint8_t>& pkt, uint16_t inftransdelay)
     // the packet.
     size_t n_lsas = 0;
     size_t len = offset + 4;	// 4 == # LSAs
-    
+
     list<Lsa::LsaRef> &lsas = get_lsas();
     list<Lsa::LsaRef>::iterator i = lsas.begin();
     for(; i != lsas.end(); i++, n_lsas++) {
-	// Don't encode the LSA it should already be encoded. 
+	// Don't encode the LSA it should already be encoded.
 	// If this is a self originating LSA then we will have encoded
 	// the LSA. If we received it from a neighbour then we are not
 	// supposed to mess with it apart from updating the age field.
@@ -994,12 +994,12 @@ LinkStateUpdatePacket::encode(vector<uint8_t>& pkt, uint16_t inftransdelay)
 	Lsa::update_age_inftransdelay(&ptr[offset], inftransdelay);
 	offset += lsa_len;
     }
-    
+
     if (header_offset != encode_standard_header(ptr, len)) {
 	XLOG_ERROR("Encode of %s failed", str().c_str());
 	return false;
     }
-    
+
     return true;
 }
 
@@ -1030,11 +1030,11 @@ LinkStateAcknowledgementPacket::decode(uint8_t *ptr, size_t len) const
 {
     OspfTypes::Version version = get_version();
 
-    LinkStateAcknowledgementPacket *packet = 
+    LinkStateAcknowledgementPacket *packet =
 	new LinkStateAcknowledgementPacket(version);
 
     size_t offset = packet->decode_standard_header(ptr, len);
-    
+
     // Verify that this packet is large enough to hold the at least
     // one LSA header.
     if ((len - offset) < Lsa_header::length())
@@ -1084,7 +1084,7 @@ LinkStateAcknowledgementPacket::encode(vector<uint8_t>& pkt)
     for(size_t index = 0; i != li.end(); i++, index += Lsa_header::length()) {
 	(*i).copy_out(&ptr[lsa_offset + index]);
     }
-	
+
     if (offset != encode_standard_header(ptr, len)) {
 	XLOG_ERROR("Encode of %s failed", str().c_str());
 	return false;
