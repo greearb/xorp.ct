@@ -288,9 +288,8 @@ Packet::decode_standard_header(uint8_t *ptr, size_t& len) throw(InvalidPacket)
 
     // Extract the checksum and check the packet.
     uint16_t checksum_inpacket = extract_16(&ptr[Packet::CHECKSUM_OFFSET]);
-    // Zero the checksum location.
-    embed_16(&ptr[Packet::CHECKSUM_OFFSET], 0);
-    uint16_t checksum_actual = checksum(ptr, len);
+
+    uint16_t verify_checksum = checksum(ptr, len);
 
     // Restore the zero'd fields.
     switch(version) {
@@ -300,17 +299,22 @@ Packet::decode_standard_header(uint8_t *ptr, size_t& len) throw(InvalidPacket)
     case OspfTypes::V3:
 	break;
     }
-    embed_16(&ptr[Packet::CHECKSUM_OFFSET], checksum_inpacket);
 
     if (0 == checksum_inpacket &&
 	OspfTypes::CRYPTOGRAPHIC_AUTHENTICATION == get_auth_type())
 	return get_standard_header_length();
 
-    if (checksum_inpacket != checksum_actual)
+    if (verify_checksum != 0) {
+	//Calculate valid checksum for debugging purposes
+
+	// Zero the checksum location.
+	embed_16(&ptr[Packet::CHECKSUM_OFFSET], 0);
+	uint16_t checksum_actual = checksum(ptr, len);
 	xorp_throw(InvalidPacket,
 		   c_format("Checksum mismatch expected %#x received %#x",
 			    checksum_actual,
 			    checksum_inpacket));
+    }
 
     // Return the offset at which continued processing can take place.
     return get_standard_header_length();
