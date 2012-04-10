@@ -354,6 +354,9 @@ Configuration::link_sourcematch_code(const Code::Target& target)
     Code* code = new Code();
     code->set_target(target);
 
+    // set accurate redistribution tags
+    code->set_redistribution_tags(_protocol_tags[target.protocol()]);
+
     // only export statements have source match code.
     // go through all of them and link.
     _exports.link_code(*code);
@@ -511,6 +514,9 @@ Configuration::link_code(const Code::Target& target,
     // create new code and set target, so code may be linked properly
     Code* code = new Code();
     code->set_target(target);
+
+    // set accurate redistribution tags
+    code->set_redistribution_tags(_protocol_tags[target.protocol()]);
 
     // link the code
     iemap.link_code(target.protocol(), *code);

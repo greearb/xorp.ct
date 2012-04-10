@@ -256,9 +256,9 @@ PolicyList::link_code(Code& ret)
 
 	CodeList* cl = (*i).second;
 
+	cl->refresh_sm_redistribution_tags(ret);
 	// because of target set in ret, only relevant code will be linked.
 	cl->link_code(ret);
-
     }
 }
 

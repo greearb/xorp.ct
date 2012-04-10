@@ -88,12 +88,17 @@ SourceMatchCodeGenerator::addTerm()
     term->set_target_filter(filter::EXPORT_SOURCEMATCH);
     term->set_referenced_set_names(_code.referenced_set_names());
 
+    //add redistribution tags to code
+    term->set_redistribution_tags(_protocol_tags[_protocol]);
+
     // see if we have code for this target already
     CodeMap::iterator i = _codes.find(_protocol);
 
     // if so link it
     if (i != _codes.end()) {
 	Code* existing = (*i).second;
+
+	existing->refresh_sm_redistribution_tags(*term);
 
 	// link "raw" code
 	string s = _os.str();

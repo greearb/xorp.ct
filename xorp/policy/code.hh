@@ -239,6 +239,25 @@ public:
 	    _redist_tags.insert(tag);
     }
 
+    /**
+     * Sets _redist_tags with provided set
+     *
+     * This function empties _redist_tags and its elements from _all_tags.
+     * @param redist_tags the redistribution tags to add.
+     */
+    void set_redistribution_tags(const TagSet& redist_tags);
+
+    /**
+     * Refreshes redistribution tags if this is code for
+     * EXPORT_SOURCEMATCH filter. Accurate redistribution
+     * tags are provided via Code reference in function argument.
+     *
+     * It also replaces tags inside policy code.
+     *
+     * @param accurate_code Code with accurate redistribution tags.
+     */
+    void refresh_sm_redistribution_tags(const Code& accurate_code);
+
     void add_subr(const string& policy, const string& code);
 
     const SUBR& subr() const;

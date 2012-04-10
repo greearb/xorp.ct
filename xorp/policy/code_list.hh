@@ -61,6 +61,14 @@ public:
     string str() const;
 
     /**
+     * Refresh redistribution tags to all codes with
+     * EXPORT_SOURCEMATCH filter and with the same type as c
+     *
+     * @param c code with accurate redistribution tags
+     */
+    void refresh_sm_redistribution_tags(Code& c);
+
+    /**
      * Links all code in the code list to c.
      * The code is basically added to c.
      *

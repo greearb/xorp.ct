@@ -56,6 +56,14 @@ CodeList::str() const
 }
 
 void
+CodeList::refresh_sm_redistribution_tags(Code& c)
+{
+    for (ListCode::iterator i = _codes.begin(); i != _codes.end(); ++i) {
+	(*i)->refresh_sm_redistribution_tags(c);
+    }
+}
+
+void
 CodeList::link_code(Code& c) const
 {
     // go through all the code we have, and link it to c.

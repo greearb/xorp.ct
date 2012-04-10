@@ -23,6 +23,7 @@
 #include "policy_module.h"
 #include "libxorp/xorp.h"
 #include "policy/common/policy_utils.hh"
+#include "policy/common/elem_set.hh"
 #include "code.hh"
 
 bool
@@ -140,6 +141,52 @@ Code::operator+=(const Code& rhs)
     _subr.insert(rhs._subr.begin(), rhs._subr.end());
 
     return *this;
+}
+
+void
+Code::set_redistribution_tags(const TagSet& redist_tags)
+{
+	TagSet::iterator iter;
+
+	for (iter = _redist_tags.begin(); iter != _redist_tags.end(); ++iter) {
+	    _all_tags.erase(*iter);
+	}
+	_redist_tags.clear();
+
+	_redist_tags = redist_tags;
+	_all_tags.insert(_redist_tags.begin(), _redist_tags.end());
+}
+
+void
+Code::refresh_sm_redistribution_tags(const Code& accurate_code)
+{
+    if (!(_target == accurate_code._target && _target.filter() == filter::EXPORT_SOURCEMATCH))
+	return;
+
+    TagSet::iterator iter;
+
+    if (_redist_tags != accurate_code.redist_tags()) {
+
+	set_redistribution_tags(accurate_code.redist_tags());
+
+	ElemSetU32 element_set;
+	for (set<uint32_t>::const_iterator iter = _redist_tags.begin();
+		iter != _redist_tags.end(); ++iter) {
+	    ElemU32 e(*iter);
+	    element_set.insert(e);
+	}
+
+	string policy_set_str("PUSH set_u32 ");
+	string::size_type position;
+	for (position = _code.find(policy_set_str); position != string::npos;
+		position = _code.find(policy_set_str, position)) {
+	    position += policy_set_str.size();
+	    string::size_type num_chars = _code.find("\n", position) - position;
+
+	    _code.replace(position, num_chars, element_set.str());
+	}
+
+    }
 }
 
 void
