@@ -8,13 +8,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -42,7 +42,7 @@ PolicyRedistTable<A>::PolicyRedistTable(RouteTable<A>* parent, XrlRouter& rtr,
 					bool multicast)
     : RouteTable<A>(table_name),
       _parent(parent),
-      _xrl_router(rtr), 
+      _xrl_router(rtr),
       _eventloop(_xrl_router.eventloop()),
       _redist_map(rmap),
       _redist4_client(&_xrl_router),
@@ -59,7 +59,7 @@ PolicyRedistTable<A>::PolicyRedistTable(RouteTable<A>* parent, XrlRouter& rtr,
 
 template <class A>
 int
-PolicyRedistTable<A>::add_route(const IPRouteEntry<A>& route, 
+PolicyRedistTable<A>::add_route(const IPRouteEntry<A>& route,
 				RouteTable<A>* caller)
 {
     XLOG_ASSERT(caller == _parent);
@@ -79,11 +79,11 @@ PolicyRedistTable<A>::add_route(const IPRouteEntry<A>& route,
     XLOG_ASSERT(next != NULL);
 
     return next->add_route(route, this);
-}				
+}
 
 template <class A>
-int 
-PolicyRedistTable<A>::delete_route(const IPRouteEntry<A>* route, 
+int
+PolicyRedistTable<A>::delete_route(const IPRouteEntry<A>* route,
 				   RouteTable<A>* caller)
 {
     XLOG_ASSERT(caller == _parent);
@@ -107,7 +107,7 @@ PolicyRedistTable<A>::delete_route(const IPRouteEntry<A>* route,
 }
 
 template <class A>
-const IPRouteEntry<A>* 
+const IPRouteEntry<A>*
 PolicyRedistTable<A>::lookup_route(const IPNet<A>& net) const
 {
     XLOG_ASSERT(_parent != NULL);
@@ -117,7 +117,7 @@ PolicyRedistTable<A>::lookup_route(const IPNet<A>& net) const
 
 
 template <class A>
-const IPRouteEntry<A>* 
+const IPRouteEntry<A>*
 PolicyRedistTable<A>::lookup_route(const A& addr) const
 {
     XLOG_ASSERT(_parent != NULL);
@@ -127,7 +127,7 @@ PolicyRedistTable<A>::lookup_route(const A& addr) const
 
 
 template <class A>
-RouteRange<A>* 
+RouteRange<A>*
 PolicyRedistTable<A>::lookup_route_range(const A& addr) const
 {
     XLOG_ASSERT(_parent != NULL);
@@ -138,13 +138,13 @@ PolicyRedistTable<A>::lookup_route_range(const A& addr) const
 
 template <class A>
 void
-PolicyRedistTable<A>::replumb(RouteTable<A>* old_parent, 
+PolicyRedistTable<A>::replumb(RouteTable<A>* old_parent,
 			      RouteTable<A>* new_parent)
 {
     XLOG_ASSERT(old_parent == _parent);
 
     _parent = new_parent;
-}			      
+}
 
 
 template <class A>
@@ -157,7 +157,7 @@ PolicyRedistTable<A>::str() const
 
 template <class A>
 void
-PolicyRedistTable<A>::add_redist(const IPRouteEntry<A>& route, 
+PolicyRedistTable<A>::add_redist(const IPRouteEntry<A>& route,
 				 const Set& protos)
 {
     // send a redistribution request for all protocols in the set.
@@ -184,7 +184,7 @@ PolicyRedistTable<A>::xrl_cb(const XrlError& e, string action) {
     if (e != XrlError::OKAY()) {
 	XLOG_WARNING("Unable to complete XRL: %s", action.c_str());
     }
-}			     
+}
 
 template <>
 void
@@ -246,7 +246,7 @@ PolicyRedistTable<A>::replace_policytags(const IPRouteEntry<A>& route,
         del_redist(route, del_protos);
     if (!add_protos.empty())
 	add_redist(route, add_protos);
-}					 
+}
 
 
 template class PolicyRedistTable<IPv4>;

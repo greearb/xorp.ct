@@ -8,13 +8,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -285,7 +285,7 @@ XrlRibTarget::rib_0_1_add_route4(const string&	protocol,
 	      network.str().c_str(),
 	      nexthop.str().c_str(),
 	      XORP_UINT_CAST(metric));
- 
+
 #ifndef XORP_DISABLE_PROFILE
     if (_rib_manager->profile().enabled(profile_route_ribin)) {
 	_rib_manager->profile().log(profile_route_ribin,
@@ -298,7 +298,7 @@ XrlRibTarget::rib_0_1_add_route4(const string&	protocol,
 					     XORP_UINT_CAST(metric)));
     }
 #endif
-    
+
     if (unicast &&
 	_urib4.add_route(protocol, network, nexthop, "", "", metric, policytags)
 	!= XORP_OK) {
@@ -1012,7 +1012,7 @@ XrlRibTarget::profile_0_1_disable(const string&	pname)
 }
 
 
-XrlCmdError 
+XrlCmdError
 XrlRibTarget::profile_0_1_get_entries(const string& pname,
 				      const string& instance_name)
 {
@@ -1055,7 +1055,7 @@ XrlCmdError
 XrlRibTarget::profile_0_1_list(string& info)
 {
     debug_msg("\n");
-    
+
     info = _rib_manager->profile().get_list();
     return XrlCmdError::OKAY();
 }

@@ -8,13 +8,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -65,12 +65,12 @@ PolicyConnectedTable<A>::~PolicyConnectedTable ()
 
 template <class A>
 int
-PolicyConnectedTable<A>::add_route(const IPRouteEntry<A>& route, 
+PolicyConnectedTable<A>::add_route(const IPRouteEntry<A>& route,
 				RouteTable<A>* caller)
 {
     XLOG_ASSERT(caller == _parent);
 
-    debug_msg("[RIB] PolicyConnectedTable ADD ROUTE: %s\n", 
+    debug_msg("[RIB] PolicyConnectedTable ADD ROUTE: %s\n",
 	      route.str().c_str());
 
 
@@ -80,19 +80,19 @@ PolicyConnectedTable<A>::add_route(const IPRouteEntry<A>& route,
 
     // make a copy so we may modify it
     IPRouteEntry<A> route_copy(*original);
-    do_filtering(route_copy); 
-   
-    
+    do_filtering(route_copy);
+
+
     RouteTable<A>* next = this->next_table();
     XLOG_ASSERT(next);
 
     // Send the possibly modified route down
     return next->add_route(route_copy, this);
-}			
+}
 
 template <class A>
-int 
-PolicyConnectedTable<A>::delete_route(const IPRouteEntry<A>* route, 
+int
+PolicyConnectedTable<A>::delete_route(const IPRouteEntry<A>* route,
 				   RouteTable<A>* caller)
 {
     XLOG_ASSERT(caller == _parent);
@@ -116,14 +116,14 @@ PolicyConnectedTable<A>::delete_route(const IPRouteEntry<A>* route,
 
     // make a copy so we may modify it (e.g., by setting its policy tags)
     IPRouteEntry<A> route_copy(*route);
-    do_filtering(route_copy); 
+    do_filtering(route_copy);
 
     // propagate the delete
     return next->delete_route(&route_copy, this);
 }
 
 template <class A>
-const IPRouteEntry<A>* 
+const IPRouteEntry<A>*
 PolicyConnectedTable<A>::lookup_route(const IPNet<A>& net) const
 {
     XLOG_ASSERT(_parent);
@@ -134,13 +134,13 @@ PolicyConnectedTable<A>::lookup_route(const IPNet<A>& net) const
     // check if we have route [we should have same routes as origin table].
     if (i == _route_table.end())
 	return _parent->lookup_route(net); // should return null probably
-    
+
     return i.payload();
 }
 
 
 template <class A>
-const IPRouteEntry<A>* 
+const IPRouteEntry<A>*
 PolicyConnectedTable<A>::lookup_route(const A& addr) const
 {
     XLOG_ASSERT(_parent);
@@ -157,7 +157,7 @@ PolicyConnectedTable<A>::lookup_route(const A& addr) const
 
 
 template <class A>
-RouteRange<A>* 
+RouteRange<A>*
 PolicyConnectedTable<A>::lookup_route_range(const A& addr) const
 {
     XLOG_ASSERT(_parent);
@@ -169,13 +169,13 @@ PolicyConnectedTable<A>::lookup_route_range(const A& addr) const
 
 template <class A>
 void
-PolicyConnectedTable<A>::replumb(RouteTable<A>* old_parent, 
+PolicyConnectedTable<A>::replumb(RouteTable<A>* old_parent,
 			      RouteTable<A>* new_parent)
 {
     XLOG_ASSERT(old_parent == _parent);
 
     _parent = new_parent;
-}			      
+}
 
 
 template <class A>
@@ -190,7 +190,7 @@ void
 PolicyConnectedTable<A>::push_routes()
 {
     debug_msg("[RIB] PolicyConnectedTable PUSH ROUTES\n");
-    
+
     RouteTable<A>* next = this->next_table();
     XLOG_ASSERT(next);
 
@@ -227,7 +227,7 @@ PolicyConnectedTable<A>::push_routes()
 	IPRouteEntry<A>* route = *i;
 	_route_table.erase(route->net());
 	_route_table.insert(route->net(), route);
-    }	
+    }
 }
 
 
