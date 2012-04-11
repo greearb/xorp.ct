@@ -39,28 +39,38 @@
 namespace policy_utils {
 
 void
+strip_ws(string& in)
+{
+    in.erase(std::remove_if(in.begin(), in.end(), (int(*)(int))isspace), in.end());
+}
+
+void
 str_to_list(const string& in, list<string>& out)
 {
     string::size_type pos1 = 0;	// beginning of token
-    string::size_type pos2 = 0;  // end of token
-    string::size_type len = in.length();
+    string::size_type pos2 = 0;	// end of token
+
+    string in_copy(in);
+    strip_ws(in_copy);
+
+    string::size_type len = in_copy.length();
     string token;
 
     while(pos1 < len) {
 
 	// find delimiter
-        pos2 = in.find(",",pos1);
+        pos2 = in_copy.find(",",pos1);
 
 	// none found, so treat end of string as delim
         if(pos2 == string::npos) {
-                token = in.substr(pos1,len-pos1);
+                token = in_copy.substr(pos1,len-pos1);
 
                 out.push_back(token);
                 return;
         }
 
 	// grab token [delimiter found].
-        token = in.substr(pos1,pos2-pos1);
+        token = in_copy.substr(pos1,pos2-pos1);
         out.push_back(token);
         pos1 = pos2+1;
     }
