@@ -322,6 +322,11 @@ interface rib/0.1 {
 	deregister_interest4 ?  target:txt & addr:ipv4 & prefix_len:u32;
 
 	/**
+	 * Remove protocol's redistribution tags
+	 */
+	remove_policy_redist_tags ? protocol:txt;
+
+	/**
 	 * Add policy tags for a specific protcol in the redistribution map.
 	 *
 	 * @param protocol The destination protocol of the redistribution.

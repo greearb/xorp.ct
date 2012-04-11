@@ -603,6 +603,12 @@ RibManager::reset_filter(const uint32_t& filter)
 }
 
 void
+RibManager::remove_policy_redist_tags(const string& protocol)
+{
+    _policy_redist_map.remove(protocol);
+}
+
+void
 RibManager::insert_policy_redist_tags(const string& protocol,
 				      const PolicyTags& tags)
 {

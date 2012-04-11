@@ -609,6 +609,12 @@ protected:
      */
     XrlCmdError policy_backend_0_1_push_routes();
 
+    /**
+     * Remove protocol's redistribution tags
+     */
+    XrlCmdError rib_0_1_remove_policy_redist_tags(
+	// Input values,
+	const string& protocol);
 
     /**
      * Redistribute to a protocol based on policy-tags.

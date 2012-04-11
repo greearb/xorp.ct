@@ -45,6 +45,13 @@ public:
     ~PolicyRedistMap();
 
     /**
+     * Remove route redistribution for a protocol.
+     *
+     * @param protocol protocol which tags should be removed.
+     */
+    void remove(const string& protocol);
+
+    /**
      * Configure redistribution to a protcol for these tags.
      *
      * @param protocol destination protocol for these tags.

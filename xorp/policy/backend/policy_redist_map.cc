@@ -33,6 +33,12 @@ PolicyRedistMap::~PolicyRedistMap() {
 }
 
 void
+PolicyRedistMap::remove(const string& protocol)
+{
+    _map.erase(protocol);
+}
+
+void
 PolicyRedistMap::insert(const string& protocol, const PolicyTags& tags) {
     PolicyTags* ptags;
 

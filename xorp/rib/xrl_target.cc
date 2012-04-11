@@ -954,6 +954,19 @@ XrlRibTarget::policy_backend_0_1_push_routes()
 }
 
 XrlCmdError
+XrlRibTarget::rib_0_1_remove_policy_redist_tags(const string& protocol)
+{
+    try {
+	_rib_manager->remove_policy_redist_tags(protocol);
+    } catch(const PolicyException& e) {
+	//this should not be posible
+	return XrlCmdError::COMMAND_FAILED("Remove policy redist tags failed: "
+					   + e.str());
+    }
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
 XrlRibTarget::rib_0_1_insert_policy_redist_tags(const string& protocol,
 						const XrlAtomList& policytags)
 {

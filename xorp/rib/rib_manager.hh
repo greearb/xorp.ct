@@ -321,6 +321,14 @@ public:
 
 
     /**
+     * Remove policy-tags for a protocol.
+     *
+     *
+     * @param protocol protocol which tags should be removed.
+     */
+    void remove_policy_redist_tags(const string& protocol);
+
+    /**
      * Insert [old ones are kept] policy-tags for a protocol.
      *
      * All routes which contain at least one of these tags, will be

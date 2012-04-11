@@ -308,8 +308,10 @@ FilterManager::death(const string& protocol)
     delete_queue_protocol(_import_queue,protocol);
     _push_queue.erase(protocol);
 
-    // XXX: might want to delete policytags in rib... but the tagmap in rib is
-    // quite unflexible now.
+    // send out update
+    _rib.send_remove_policy_redist_tags(_rib_name.c_str(),
+		_pmap.xrl_target(protocol),
+		callback(this,&FilterManager::policy_backend_cb));
 
     debug_msg("[POLICY] Protocol death: %s\n",protocol.c_str());
 }
