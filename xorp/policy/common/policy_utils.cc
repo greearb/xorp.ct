@@ -8,13 +8,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -38,7 +38,7 @@
 
 namespace policy_utils {
 
-void 
+void
 str_to_list(const string& in, list<string>& out)
 {
     string::size_type pos1 = 0;	// beginning of token
@@ -58,7 +58,7 @@ str_to_list(const string& in, list<string>& out)
                 out.push_back(token);
                 return;
         }
-	
+
 	// grab token [delimiter found].
         token = in.substr(pos1,pos2-pos1);
         out.push_back(token);
@@ -66,7 +66,7 @@ str_to_list(const string& in, list<string>& out)
     }
 }
 
-void 
+void
 str_to_set(const string& in, set<string>& out)
 {
     list<string> tmp;
@@ -122,7 +122,7 @@ read_file(const string& fname, string& out)
     return;
 }
 
-unsigned 
+unsigned
 count_nl(const char* x)
 {
     const char* end = &x[strlen(x)];
@@ -141,7 +141,7 @@ regex(const string& str, const string& reg)
     // compile the regex
     regex_t re;
     int res = regcomp(&re, reg.c_str(), REG_EXTENDED);
-    
+
     if (res) {
 	char tmp[128];
 	string err;
