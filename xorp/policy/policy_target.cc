@@ -191,8 +191,9 @@ PolicyTarget::death(const string& tclass, const string& /* tinstance */)
     // Remove the "import" and "export" dependencies for the protocol
     string protocol = _pmap.protocol(tclass);
 
-    _conf.clear_imports(protocol);
-    _conf.clear_exports(protocol);
+    //delete all export and import filters
+    update_export(protocol, "", "");
+    update_import(protocol, "", "");
 
     _process_watch.death(tclass);
 }
