@@ -189,10 +189,11 @@ Configuration::update_exports(const string& protocol,
     TagMap::iterator i = _tagmap.find(protocol);
     if(i != _tagmap.end()) {
         TagSet* ts = (*i).second;
+        _tagmap.erase(i);
+
+        clear_protocol_tags(*ts);
 
         delete ts;
-
-	_tagmap.erase(i);
     }
 
     update_ie(protocol, exports, _exports, PolicyList::EXPORT, mod);
@@ -200,6 +201,33 @@ Configuration::update_exports(const string& protocol,
     // other modified targets [such as sourcematch] will be added as compilation
     // proceeds.
     _modified_targets.insert(Code::Target(protocol,filter::EXPORT));
+}
+
+void
+Configuration::clear_protocol_tags(const TagSet& ts)
+{
+    // check if some ts element already exists in _tagmap
+    // if they do, don't remove them from the _protocol_tags
+    TagSet::const_iterator ts_iter;
+    for (ts_iter = ts.begin(); ts_iter != ts.end(); ts_iter++) {
+	bool skip = false;
+
+	for (TagMap::const_iterator iter = _tagmap.begin(); iter != _tagmap.end(); ++iter) {
+	    if (iter->second->find(*ts_iter) != iter->second->end()) {
+		skip = true;
+		break;
+	    }
+	}
+
+	if (!skip) {
+	    map<string, set<uint32_t> >::iterator pt_iter;
+	    for (pt_iter = _protocol_tags.begin(); pt_iter != _protocol_tags.end(); pt_iter++) {
+		pt_iter->second.erase(*ts_iter);
+		if (pt_iter->second.empty())
+		    _protocol_tags.erase(pt_iter);
+	    }
+	}
+    }
 }
 
 void

@@ -318,6 +318,13 @@ public:
      */
     string dump_state(uint32_t id);
 
+    /**
+     * Clear tags specified with ts from _protocol_tags
+     *
+     * @param ts tags to erase from _protocol_tags
+     */
+    void clear_protocol_tags(const TagSet& ts);
+
     void clear_imports(const string& protocol);
     void clear_exports(const string& protocol);
     bool test_policy(const string& policy, const RATTR& attrs, RATTR& mods);
