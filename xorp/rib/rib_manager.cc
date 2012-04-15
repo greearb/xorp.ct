@@ -8,13 +8,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -164,7 +164,7 @@ RibManager::status_updater()
     return ret;
 }
 
-
+
 template <typename A>
 static int
 add_rib_vif(RIB<A>& rib, const string& vifname, const Vif& vif, string& err)
@@ -225,7 +225,7 @@ RibManager::delete_vif(const string& vifname, string& err)
 	);
 }
 
-
+
 template <typename A>
 static int
 set_rib_vif_flags(RIB<A>& rib, const string& vifname, bool is_p2p,
@@ -267,7 +267,7 @@ RibManager::set_vif_flags(const string& vifname,
     return XORP_OK;
 }
 
-
+
 template <typename A>
 int
 add_vif_address_to_ribs(RIB<A>& 	urib,
@@ -330,7 +330,7 @@ RibManager::delete_vif_address(const string& 	vifn,
     return delete_vif_address_from_ribs(_urib4, _mrib4, vifn, addr, err);
 }
 
-
+
 void
 RibManager::make_errors_fatal()
 {
@@ -484,7 +484,7 @@ redist_enable_xrl_output(EventLoop&	eventloop,
 						      cookie)
 		    );
     } else {
-	redist->set_output(new RedistXrlOutput<A>(redist, rtr, 
+	redist->set_output(new RedistXrlOutput<A>(redist, rtr,
 						  profile,
 						  protocol,
 						  to_xrl_target,
@@ -585,7 +585,7 @@ RibManager::push_routes()
     _urib4.push_routes();
     _mrib4.push_routes();
 #ifdef HAVE_IPV6
-    _urib6.push_routes();    
+    _urib6.push_routes();
     _mrib6.push_routes();
 #endif
 }
@@ -603,11 +603,17 @@ RibManager::reset_filter(const uint32_t& filter)
 }
 
 void
+RibManager::remove_policy_redist_tags(const string& protocol)
+{
+    _policy_redist_map.remove(protocol);
+}
+
+void
 RibManager::insert_policy_redist_tags(const string& protocol,
 				      const PolicyTags& tags)
 {
     _policy_redist_map.insert(protocol, tags);
-}				      
+}
 
 void
 RibManager::reset_policy_redist_tags()

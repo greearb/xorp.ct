@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -135,7 +135,26 @@ IoIpDummy::set_default_multicast_interface(const string& if_name,
 
     _default_multicast_interface = if_name;
     _default_multicast_vif = vif_name;
-    
+
+    return (XORP_OK);
+}
+
+int
+IoIpDummy::create_input_socket(const string& if_name,
+				const string& vif_name,
+				string& error_msg)
+{
+    const IfTreeVif* vifp;
+
+    // Find the vif
+    vifp = iftree().find_vif(if_name, vif_name);
+    if (vifp == NULL) {
+	error_msg = c_format("Creating input socket failed: "
+			     "interface %s vif %s not found",
+			     if_name.c_str(),
+			     vif_name.c_str());
+	return (XORP_ERROR);
+    }
     return (XORP_OK);
 }
 
@@ -157,7 +176,7 @@ IoIpDummy::join_multicast_group(const string& if_name,
 			     vif_name.c_str());
 	return (XORP_ERROR);
     }
-    
+
 #if 0	// TODO: enable or disable the enabled() check?
     if (! vifp->enabled()) {
 	error_msg = c_format("Cannot join group %s on interface %s vif %s: "
@@ -194,7 +213,7 @@ IoIpDummy::leave_multicast_group(const string& if_name,
 			     vif_name.c_str());
 	return (XORP_ERROR);
     }
-    
+
 #if 0	// TODO: enable or disable the enabled() check?
     if (! vifp->enabled()) {
 	error_msg = c_format("Cannot leave group %s on interface %s vif %s: "

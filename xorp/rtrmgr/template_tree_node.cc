@@ -55,6 +55,7 @@ TemplateTreeNode::TemplateTreeNode(TemplateTree& template_tree,
       _varname(varname),
       _has_default(false),
       _is_tag(false),
+      _unique_in_node(""),
       _order(ORDER_UNSORTED),
       _verbose(template_tree.verbose()),
       _is_deprecated(false),
@@ -172,6 +173,60 @@ TemplateTreeNode::expand_template_tree(string& error_msg)
     }
 
     //
+    // Mark all referred unique variables
+    //
+    if (!unique_in_node().empty()) {
+	list<string> inverted_path_to_unique;
+	const string& unique_node = unique_in_node();
+	TemplateTreeNode* ttn;
+
+	ttn = find_varname_node(unique_node);
+	if (ttn == NULL) {
+	    error_msg = c_format("Invalid unique-in variable %s: "
+		    "not found", unique_node.c_str());
+	    return (false);
+	}
+
+	//Check if unique-in variable is from the same module as this variable
+	if (ttn->module_name() != module_name()) {
+	    error_msg = c_format("Invalid unique-in variable %s: "
+			    "should be from the module %s as %s",
+			    unique_node.c_str(), module_name().c_str(), _segname.c_str());
+	    return (false);
+	}
+
+	//Check if unique-in variable is parent for this variable
+	TemplateTreeNode* parent = _parent;
+
+	do {
+	    if (!parent) {
+		error_msg = c_format("Invalid unique-in variable %s:\n"
+			"it should be parent (or parent of parent, or parent of parent of parent...) of \"%s\"",
+			unique_node.c_str(), path().c_str());
+		return (false);
+	    }
+	    if (parent == ttn)
+		break;
+
+	    /**
+	     * Fill path to node in which it should be unique
+	     *
+	     * Write names of nodes for tag nodes,
+	     * and write "@:="+type for children of tag nodes
+	     */
+	    if (parent->segname() == "@")
+		inverted_path_to_unique.push_front(
+			parent->segname() + ":=" + parent->typestr());
+	    else
+		inverted_path_to_unique.push_front(parent->segname());
+
+	    parent = parent->parent();
+	} while (true);
+
+	_unique_in_path = inverted_path_to_unique;
+    }
+
+    //
     // Recursively expand all children nodes
     //
     list<TemplateTreeNode*>::iterator iter2;
@@ -239,6 +294,54 @@ TemplateTreeNode::check_template_tree(string& error_msg) const
 	    return false;
 	}
     }
+
+    //
+    // Check all referred unique variables
+    //
+    if (!is_leaf_value() && !unique_in_node().empty()) {
+	error_msg = c_format("Found %%unique-in command in node \"%s\" that "
+		"doesn't expect value",
+		path().c_str());
+	return false;
+    }
+    if (!unique_in_node().empty()) {
+	const string& unique_node = unique_in_node();
+	const TemplateTreeNode* ttn;
+
+	ttn = find_const_varname_node(unique_node);
+	if (ttn == NULL) {
+	    error_msg = c_format("Invalid unique-in variable %s: "
+		    "not found",
+		    unique_node.c_str());
+	    return (false);
+	}
+
+	//Check if unique-in variable is from the same module as this variable
+	if (ttn->module_name() != module_name()) {
+	    error_msg =
+		    c_format("Invalid unique-in variable %s: "
+			    "should be from the module %s as %s",
+			    unique_node.c_str(), module_name().c_str(), _segname.c_str());
+	    return (false);
+	}
+
+	//Check if unique-in variable is parent for this variable
+	TemplateTreeNode* parent = _parent;
+
+	do {
+	    if (!parent) {
+		error_msg = c_format("Invalid unique-in variable %s: "
+			"it should be (grand)parent of %s",
+			unique_node.c_str(), _segname.c_str());
+		return (false);
+	    }
+	    if (parent == ttn)
+		break;
+
+	    parent = parent->parent();
+	} while (true);
+    }
+
 
     //
     // Check specific commands for this node
@@ -355,6 +458,14 @@ TemplateTreeNode::add_cmd(const string& cmd) throw (ParseError)
 	    command = new DummyBaseCommand(*this, cmd);
 	    _cmd_map[cmd] = command;
 	}
+    } else if (cmd == "%unique-in") {
+	if (!is_leaf_value()) {
+	    error_msg = c_format("Invalid command \"%s\".\n", cmd.c_str());
+	    error_msg += "This command only applies to leaf nodes that ";
+	    error_msg += "have values and only if the value is allowed ";
+	    error_msg += "to be changed.\n";
+	    xorp_throw(ParseError, error_msg);
+	}
     } else if (cmd == "%mandatory") {
 	// Nothing to do
     } else {
@@ -362,7 +473,7 @@ TemplateTreeNode::add_cmd(const string& cmd) throw (ParseError)
 	error_msg += "Valid commands are %create, %delete, %set, %unset, ";
 	error_msg += "%get, %default, %modinfo, %activate, %update, %allow, ";
 	error_msg += "%allow-range, %mandatory, %deprecated, %user-hidden, ";
-	error_msg += "%read-only, %permanent, %order\n";
+	error_msg += "%read-only, %permanent, %order, %unique-in\n";
 	xorp_throw(ParseError, error_msg);
     }
 }
@@ -532,6 +643,23 @@ TemplateTreeNode::add_action(const string& cmd,
 		== _mandatory_config_nodes.end()) {
 		_mandatory_config_nodes.push_back(varname);
 	    }
+	}
+    } else if (cmd == "%unique-in") {
+	// Add all new  variables
+	if (action_list.size() == 1) {
+	    list<string>::const_iterator li = action_list.begin();
+	    if (!_unique_in_node.empty()) {
+		error_msg = c_format("There can be only one declaration of %%unique-in argument"
+			"for node. Previous was %s in node \"%s\"",
+			_unique_in_node.c_str(), path().c_str());
+		xorp_throw(ParseError, error_msg);
+	    }
+	    _unique_in_node = *li;
+	} else {
+	    error_msg = c_format("Invalid number of %%unique-in arguments: "
+		    "%u (expected 1)",
+		    XORP_UINT_CAST(action_list.size()));
+	    xorp_throw(ParseError, error_msg);
 	}
     } else {
 	// the master tree will deal with these
@@ -893,12 +1021,36 @@ TemplateTreeNode::find_varname_node(const string& varname)
     }
 
     if (var_parts.front() == "@") {
-	return find_child_varname_node(var_parts);
+	return find_child_varname_node(var_parts, type());
+    }
+
+    if (var_parts.back() == "@" && var_parts.size() > 2) {
+	/**
+	 * If we entered here, we want to find children
+	 * of some of our parents
+	 */
+	TTNodeType _type = (_parent && _parent->segname() == "@") ? _parent->type() : NODE_VOID;
+	list<string> parent_node_parts;
+
+	parent_node_parts.push_back(var_parts.front());
+	parent_node_parts.push_back(var_parts.back());
+
+	var_parts.pop_front();
+	var_parts.pop_back();
+	var_parts.push_front("@");
+
+	TemplateTreeNode* parent = find_parent_varname_node(parent_node_parts, _type);
+
+	if (parent) {
+	    return parent->find_child_varname_node(var_parts, parent->type());
+	}
+	return NULL;
     }
 
     if (var_parts.size() > 1) {
+	TTNodeType _type = (_parent && _parent->segname() == "@") ? _parent->type() : NODE_VOID;
 	// It's a parent node, or a child of a parent node
-	return find_parent_varname_node(var_parts);
+	return find_parent_varname_node(var_parts, _type);
     }
 
     //
@@ -909,7 +1061,7 @@ TemplateTreeNode::find_varname_node(const string& varname)
 }
 
 TemplateTreeNode*
-TemplateTreeNode::find_parent_varname_node(const list<string>& var_parts)
+TemplateTreeNode::find_parent_varname_node(const list<string>& var_parts, const TTNodeType& _type)
 {
     if (_parent == NULL) {
 	//
@@ -919,37 +1071,42 @@ TemplateTreeNode::find_parent_varname_node(const list<string>& var_parts)
 	list<TemplateTreeNode* >::iterator iter;
 	for (iter = _children.begin(); iter != _children.end(); ++iter) {
 	    TemplateTreeNode* found_child;
-	    found_child = (*iter)->find_child_varname_node(var_parts);
+	    found_child = (*iter)->find_child_varname_node(var_parts, NODE_VOID);
 	    if (found_child != NULL)
 		return found_child;
 	}
 	return NULL;
     }
+
     if (is_tag() || (type() == NODE_VOID)) {
+
 	// When naming a parent node variable, you must start with a tag
 	if (_segname == var_parts.front()) {
 	    // We've found the right place to start
-	    return find_child_varname_node(var_parts);
+	    return find_child_varname_node(var_parts, (type() == NODE_VOID) ? _type : type());
 	}
     }
-
-    return _parent->find_parent_varname_node(var_parts);
+    return _parent->find_parent_varname_node(var_parts,
+	    (_parent && _parent->segname() == "@") ? _parent->type() : _type);
 }
 
 TemplateTreeNode*
-TemplateTreeNode::find_child_varname_node(const list<string>& var_parts)
+TemplateTreeNode::find_child_varname_node(const list<string>& var_parts, const TTNodeType& _type)
 {
     if ((var_parts.front() != "@") && (var_parts.front() != _segname)) {
 	// varname doesn't match us
 	return NULL;
     }
-
     // The name might refer to this node
     if (var_parts.size() == 1) {
 	if ((var_parts.front() == "@")
 	    || (var_parts.front() == _segname)
 	    || (var_parts.front() == "<>")
 	    || (var_parts.front() == "#")) {
+	    if (_type != type() && _segname == "@") {
+		debug_msg("We are searching for node with different type. Skip this node.\n");
+		return NULL;
+	    }
 	    return this;
 	}
     }
@@ -960,6 +1117,10 @@ TemplateTreeNode::find_child_varname_node(const list<string>& var_parts)
 	    // The name refers to the default value of this node
 	    if (! has_default())
 		return NULL;	// The template tree node has no default value
+	    if (_type != type() && _segname == "@") {
+		debug_msg("We are searching for node with different type. Skip this node.\n");
+		return NULL;
+	    }
 	    return this;
 	}
     }
@@ -967,6 +1128,10 @@ TemplateTreeNode::find_child_varname_node(const list<string>& var_parts)
     // The name might refer to the operator value of this node
     if ((var_parts.size() == 2) && (var_parts.back() == "<>")) {
 	if ((var_parts.front() == "@") || (var_parts.front() == _segname)) {
+	    if (_type != type() && _segname == "@") {
+		debug_msg("We are searching for node with different type. Skip this node.\n");
+		return NULL;
+	    }
 	    return this;
 	}
     }
@@ -974,6 +1139,10 @@ TemplateTreeNode::find_child_varname_node(const list<string>& var_parts)
     // The name might refer to the node ID of this node
     if ((var_parts.size() == 2) && (var_parts.back() == "#")) {
 	if ((var_parts.front() == "@") || (var_parts.front() == _segname)) {
+	    if (_type != type() && _segname == "@") {
+		debug_msg("We are searching for node with different type. Skip this node.\n");
+		return NULL;
+	    }
 	    return this;
 	}
     }
@@ -985,7 +1154,7 @@ TemplateTreeNode::find_child_varname_node(const list<string>& var_parts)
     list<TemplateTreeNode* >::iterator iter;
     for (iter = _children.begin(); iter != _children.end(); ++iter) {
 	TemplateTreeNode* found_child;
-	found_child = (*iter)->find_child_varname_node(child_var_parts);
+	found_child = (*iter)->find_child_varname_node(child_var_parts, (type() == NODE_VOID) ? _type : type());
 	if (found_child != NULL)
 	    return found_child;
     }

@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -44,7 +44,7 @@ class XorpFd;
 
 /**
  * @short A base class for I/O IP raw communication.
- * 
+ *
  * Each protocol 'registers' for I/O and gets assigned one object
  * of this class.
  */
@@ -52,7 +52,7 @@ class IoIp {
 public:
     /**
      * Constructor for a given address family and protocol.
-     * 
+     *
      * @param fea_data_plane_manager the corresponding data plane manager
      * (@ref FeaDataPlaneManager).
      * @param iftree the interface tree to use.
@@ -91,7 +91,7 @@ public:
 
     /**
      * Get the event loop.
-     * 
+     *
      * @return the event loop.
      */
     EventLoop& eventloop() { return (_eventloop); }
@@ -105,14 +105,14 @@ public:
 
     /**
      * Get the address family.
-     * 
+     *
      * @return the address family.
      */
     virtual int family() const { return (_family); }
 
     /**
      * Get the IP protocol number.
-     * 
+     *
      * @return the IP protocol number.
      */
     virtual uint8_t ip_protocol() const { return (_ip_protocol); }
@@ -155,7 +155,7 @@ public:
     /**
      * Set the default TTL (or hop-limit in IPv6) for the outgoing multicast
      * packets.
-     * 
+     *
      * @param ttl the desired IP TTL (a.k.a. hop-limit in IPv6) value.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
@@ -164,7 +164,7 @@ public:
 
     /**
      * Enable/disable multicast loopback when transmitting multicast packets.
-     * 
+     *
      * If the multicast loopback is enabled, a transmitted multicast packet
      * will be delivered back to this host (assuming the host is a member of
      * the same multicast group).
@@ -178,7 +178,7 @@ public:
 
     /**
      * Set default interface for transmitting multicast packets.
-     * 
+     *
      * @param if_name the name of the interface that would become the default
      * multicast interface.
      * @param vif_name the name of the vif that would become the default
@@ -191,8 +191,20 @@ public:
 						string& error_msg) = 0;
 
     /**
+     * Create input socket.
+     *
+     * @param if_name the name of the interface to listen on
+     * @param vif_name the name of the vif to listen on
+     * @error error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR
+     */
+    virtual int create_input_socket(const string& if_name,
+					const string& vif_name,
+					string& error_msg) = 0;
+
+    /**
      * Join a multicast group on an interface.
-     * 
+     *
      * @param if_name the name of the interface to join the multicast group.
      * @param vif_name the name of the vif to join the multicast group.
      * @param group the multicast group to join.
@@ -206,7 +218,7 @@ public:
 
     /**
      * Leave a multicast group on an interface.
-     * 
+     *
      * @param if_name the name of the interface to leave the multicast group.
      * @param vif_name the name of the vif to leave the multicast group.
      * @param group the multicast group to leave.

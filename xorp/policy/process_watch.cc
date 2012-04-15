@@ -8,13 +8,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -31,14 +31,14 @@
 
 ProcessWatch::ProcessWatch(XrlStdRouter& rtr, ProtocolMap& pmap) :
 		_pmap(pmap),
-		_finder(&rtr), 
+		_finder(&rtr),
 		_instance_name(rtr.instance_name()),
 		_notifier(NULL),
 		_finder_name("finder") // FIXME: hardcoded value
 {
 }
 
-void 
+void
 ProcessWatch::register_cb(const XrlError& err)
 {
     string error_msg;
@@ -50,8 +50,8 @@ ProcessWatch::register_cb(const XrlError& err)
     }
 }
 
-void 
-ProcessWatch::add_interest(const string& proc) 
+void
+ProcessWatch::add_interest(const string& proc)
 {
     // check if we already added interested, if so do nothing
     if (_watching.find(proc) != _watching.end())
@@ -68,8 +68,8 @@ ProcessWatch::add_interest(const string& proc)
 		callback(this,&ProcessWatch::register_cb));
 }
 
-void 
-ProcessWatch::birth(const string& proto) 
+void
+ProcessWatch::birth(const string& proto)
 {
     const string& p = _pmap.protocol(proto);
     _alive.insert(p);
@@ -80,8 +80,8 @@ ProcessWatch::birth(const string& proto)
 
 }
 
-void 
-ProcessWatch::death(const string& proto) 
+void
+ProcessWatch::death(const string& proto)
 {
     const string& p = _pmap.protocol(proto);
     _alive.erase(p);
@@ -90,8 +90,8 @@ ProcessWatch::death(const string& proto)
 	_notifier->death(p);
 }
 
-bool 
-ProcessWatch::alive(const string& proto) 
+bool
+ProcessWatch::alive(const string& proto)
 {
     if (_watching.find(proto) == _watching.end())
 	xorp_throw(PWException, "Not watching protocol: " + proto);
@@ -100,7 +100,7 @@ ProcessWatch::alive(const string& proto)
 }
 
 void
-ProcessWatch::set_notifier(PWNotifier& notifier) 
+ProcessWatch::set_notifier(PWNotifier& notifier)
 {
     // old notifier is lost... it is a feature, not a bug.
     _notifier = &notifier;

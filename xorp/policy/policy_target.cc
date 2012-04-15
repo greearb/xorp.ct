@@ -8,13 +8,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -30,7 +30,7 @@
 string PolicyTarget::policy_target_name = "policy";
 
 PolicyTarget::PolicyTarget(XrlStdRouter& rtr) :
-    _running(true), _commit_delay(2000), 
+    _running(true), _commit_delay(2000),
     _process_watch(rtr, _pmap),
     _conf(_process_watch),
     _filter_manager(_conf.import_filters(),
@@ -102,7 +102,7 @@ PolicyTarget::create_set(const string& name)
 }
 
 void
-PolicyTarget::update_set(const string& type, const string& name, 
+PolicyTarget::update_set(const string& type, const string& name,
 			 const string& element)
 {
     _conf.update_set(type, name, element);
@@ -115,14 +115,14 @@ PolicyTarget::delete_set(const string& name)
 }
 
 void
-PolicyTarget::add_to_set(const string& type, const string& name, 
+PolicyTarget::add_to_set(const string& type, const string& name,
 			 const string& element)
 {
     _conf.add_to_set(type, name, element);
 }
 
 void
-PolicyTarget::delete_from_set(const string& type, const string& name, 
+PolicyTarget::delete_from_set(const string& type, const string& name,
 			      const string& element)
 {
     _conf.delete_from_set(type, name, element);
@@ -191,8 +191,9 @@ PolicyTarget::death(const string& tclass, const string& /* tinstance */)
     // Remove the "import" and "export" dependencies for the protocol
     string protocol = _pmap.protocol(tclass);
 
-    _conf.clear_imports(protocol);
-    _conf.clear_exports(protocol);
+    //delete all export and import filters
+    update_export(protocol, "", "");
+    update_import(protocol, "", "");
 
     _process_watch.death(tclass);
 }
@@ -324,7 +325,7 @@ PolicyTarget::cli_command(const string& cmd)
 {
     string command;
     string arg;
-    
+
     string::size_type i = cmd.find(' ');
     if (i == string::npos)
 	command = cmd;

@@ -8,13 +8,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -91,14 +91,14 @@ public:
     typedef map<string,Code*> CodeMap;
     typedef map<string,TagSet*> TagMap;
 
-   
+
     /**
      * @short Exception thrown on configuration error
      */
     class ConfError : public PolicyException {
     public:
-        ConfError(const char* file, size_t line, const string& init_why = "")   
-            : PolicyException("ConfError", file, line, init_why) {}  
+        ConfError(const char* file, size_t line, const string& init_why = "")
+            : PolicyException("ConfError", file, line, init_why) {}
 
     };
 
@@ -108,7 +108,7 @@ public:
      */
     Configuration(ProcessWatchBase& pw);
     ~Configuration();
-   
+
     /**
      * Throws an exception on failure.
      * Checks for non-existant policy/term conditions.
@@ -136,7 +136,7 @@ public:
                            const uint32_t& block,
 			   const ConfigNodeId& order,
                            const string& statement);
-    
+
     /**
      * Append a term to a policy.
      *
@@ -149,7 +149,7 @@ public:
      */
     void create_term(const string& policy, const ConfigNodeId& order,
 		     const string& term);
-  
+
     /**
      * Throws an exception on failure.
      * Checks if policy already exists.
@@ -157,7 +157,7 @@ public:
      * @param policy policy which should be created.
      */
     void create_policy(const string& policy);
-    
+
     /**
      * Throws an exception on failure.
      * Checks if policy is in use [instantiated by an export/import directive.]
@@ -182,7 +182,7 @@ public:
      * @param set name of the set to be updated.
      * @param elements comma separated elements to be replaced in set.
      */
-    void update_set(const string& type, const string& set, 
+    void update_set(const string& type, const string& set,
 		    const string& elements);
 
     /**
@@ -203,7 +203,7 @@ public:
      * @param name name of the set.
      * @param element the element to add.
      */
-    void add_to_set(const string& type, const string& name, 
+    void add_to_set(const string& type, const string& name,
 		    const string& element);
 
     /**
@@ -216,9 +216,9 @@ public:
      * @param name name of the set.
      * @param element the element to delete.
      */
-    void delete_from_set(const string& type, const string& name, 
+    void delete_from_set(const string& type, const string& name,
 			 const string& element);
-  
+
     /**
      * Throws an exception on failure.
      * Checks if policies exist.
@@ -243,7 +243,7 @@ public:
      * @return string representation of configuration
      */
     string str();
-   
+
     /**
      * Commit all configuration changes.
      * This will compile all needed policies and link them.
@@ -318,6 +318,13 @@ public:
      */
     string dump_state(uint32_t id);
 
+    /**
+     * Clear tags specified with ts from _protocol_tags
+     *
+     * @param ts tags to erase from _protocol_tags
+     */
+    void clear_protocol_tags(const TagSet& ts);
+
     void clear_imports(const string& protocol);
     void clear_exports(const string& protocol);
     bool test_policy(const string& policy, const RATTR& attrs, RATTR& mods);
@@ -365,20 +372,20 @@ private:
      * @param target target for which code should be linked.
      */
     void link_sourcematch_code(const Code::Target& target);
-    
+
     /**
      * Update the policytags used by a protocol.
      *
      * @param protocol protocol for which to update policytags.
      */
     void update_tagmap(const string& protocol);
-  
+
     /**
      * Link code for updated targets.
      */
     void link_code();
 
-    void update_ie(const string& protocol, const POLICIES& policies, 
+    void update_ie(const string& protocol, const POLICIES& policies,
 		   IEMap& iemap, PolicyList::PolicyType pt, const string& mod);
 
     void link_code(const Code::Target& target, IEMap& iemap, CodeMap& codemap);

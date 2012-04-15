@@ -8,13 +8,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -28,13 +28,13 @@
 SourceMatchCodeGenerator::SourceMatchCodeGenerator(uint32_t tagstart,
 						   const VarMap& varmap,
 						   PolicyMap& pmap,
-					map<string, set<uint32_t> > & ptags) 
+					map<string, set<uint32_t> > & ptags)
 	   : CodeGenerator(varmap, pmap), _currtag(tagstart),
 	     _protocol_tags(ptags)
 {
 }
 
-const Element* 
+const Element*
 SourceMatchCodeGenerator::visit_policy(PolicyStatement& policy)
 {
     PolicyStatement::TermContainer& terms = policy.terms();
@@ -78,7 +78,7 @@ SourceMatchCodeGenerator::visit_policy(PolicyStatement& policy)
     return NULL;
 }
 
-void 
+void
 SourceMatchCodeGenerator::addTerm()
 {
     // copy the code for the term
@@ -88,12 +88,17 @@ SourceMatchCodeGenerator::addTerm()
     term->set_target_filter(filter::EXPORT_SOURCEMATCH);
     term->set_referenced_set_names(_code.referenced_set_names());
 
+    //add redistribution tags to code
+    term->set_redistribution_tags(_protocol_tags[_protocol]);
+
     // see if we have code for this target already
     CodeMap::iterator i = _codes.find(_protocol);
 
     // if so link it
     if (i != _codes.end()) {
 	Code* existing = (*i).second;
+
+	existing->refresh_sm_redistribution_tags(*term);
 
 	// link "raw" code
 	string s = _os.str();
@@ -178,7 +183,7 @@ SourceMatchCodeGenerator::do_term(Term& term)
 
 	_protocol_statement = false;
 	(i->second)->accept(*this);
-    
+
         // if it was a protocol statement, no need for "ONFALSE_EXIT", if its
 	// any other statement, then yes. The protocol is not read as a variable
 	// by the backend filters... it is only used by the policy manager.
@@ -187,8 +192,8 @@ SourceMatchCodeGenerator::do_term(Term& term)
     }
 
     // XXX: we can assume _protocol = PROTOCOL IN EXPORT STATEMENT
-    if(_protocol == "") 
-        xorp_throw(NoProtoSpec, "No protocol specified in term " + term.name() + 
+    if(_protocol == "")
+        xorp_throw(NoProtoSpec, "No protocol specified in term " + term.name() +
 		                " in export policy source match");
 
     // ignore any destination block [that is dealt with in the export code
@@ -244,12 +249,12 @@ SourceMatchCodeGenerator::do_term(Term& term)
     _currtag++;
 }
 
-const Element* 
+const Element*
 SourceMatchCodeGenerator::visit_proto(NodeProto& node)
 {
     // check for protocol redifinition
     if(_protocol != "") {
-	ostringstream err; 
+	ostringstream err;
         err << "PROTOCOL REDEFINED FROM " << _protocol << " TO " <<
 	    node.proto() << " AT LINE " << node.line();
         xorp_throw(ProtoRedefined, err.str());
@@ -261,10 +266,10 @@ SourceMatchCodeGenerator::visit_proto(NodeProto& node)
     return NULL;
 }
 
-vector<Code*>& 
+vector<Code*>&
 SourceMatchCodeGenerator::codes()
-{ 
-    return _codes_vect; 
+{
+    return _codes_vect;
 }
 
 const SourceMatchCodeGenerator::Tags&

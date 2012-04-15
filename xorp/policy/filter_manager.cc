@@ -8,13 +8,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -29,28 +29,28 @@
 #include "backend/policytags.hh"
 #include "filter_manager.hh"
 
-FilterManager::FilterManager(const CodeMap& imp, 
-			     const CodeMap& sm, 
+FilterManager::FilterManager(const CodeMap& imp,
+			     const CodeMap& sm,
 			     const CodeMap& exp,
-			     const SetMap& sets, 
-			     const TagMap& tagmap, 
-			     XrlStdRouter& rtr, 
+			     const SetMap& sets,
+			     const TagMap& tagmap,
+			     XrlStdRouter& rtr,
 			     ProcessWatch& pw,
 			     ProtocolMap& pmap) :
 
-	_import(imp), _sourcematch(sm), _export(exp), 
-	_sets(sets), _tagmap(tagmap), 
+	_import(imp), _sourcematch(sm), _export(exp),
+	_sets(sets), _tagmap(tagmap),
 	_eventloop(rtr.eventloop()),
 	_push_timeout(2000),
-	_process_watch(pw), 
-	_policy_backend(&rtr), 
+	_process_watch(pw),
+	_policy_backend(&rtr),
 	_rib(&rtr),
 	_rib_name("rib"), // FIXME: rib name hardcoded
 	_pmap(pmap)
 {
 }
 
-void 
+void
 FilterManager::update_filter(const Code::Target& t)
 {
     switch (t.filter()) {
@@ -68,25 +68,25 @@ FilterManager::update_filter(const Code::Target& t)
     }
 }
 
-void 
+void
 FilterManager::update_import_filter(const string& protocol)
 {
     update_queue(protocol,_import,_import_queue);
 }
-    
-void 
+
+void
 FilterManager::update_sourcematch_filter(const string& protocol)
 {
     update_queue(protocol,_sourcematch,_sourcematch_queue);
 }
 
-void 
+void
 FilterManager::update_export_filter(const string& protocol)
 {
     update_queue(protocol,_export,_export_queue);
 }
 
-void 
+void
 FilterManager::update_tagmap(const string& protocol)
 {
     TagMap::const_iterator i = _tagmap.find(protocol);
@@ -101,7 +101,7 @@ FilterManager::update_tagmap(const string& protocol)
     PolicyTags pt;
 
     for (TagSet::const_iterator iter = ts->begin(); iter != ts->end(); ++iter)
-	pt.insert(*iter);	
+	pt.insert(*iter);
 
     XrlAtomList al = pt.xrl_atomlist();
 
@@ -114,7 +114,7 @@ FilterManager::update_tagmap(const string& protocol)
 	        callback(this,&FilterManager::policy_backend_cb));
 }
 
-void 
+void
 FilterManager::policy_backend_cb(const XrlError& e)
 {
     string error_msg;
@@ -125,10 +125,10 @@ FilterManager::policy_backend_cb(const XrlError& e)
 			     e.str().c_str());
 	XLOG_ERROR("%s", error_msg.c_str());
 //	xorp_throw(FMException, error_msg); // XXX: what else can we do ?
-    }	
+    }
 }
 
-void 
+void
 FilterManager::flush_export_queue()
 {
     debug_msg("[POLICY] Flushing export filter queue...\n");
@@ -148,12 +148,12 @@ FilterManager::flush_export_queue()
 	   _policy_backend.send_reset(_pmap.xrl_target(protocol).c_str(),
 	       filter::EXPORT,callback(this,&FilterManager::policy_backend_cb));
 	}
-	// else configure it	
+	// else configure it
 	else {
-	    _policy_backend.send_configure(_pmap.xrl_target(protocol).c_str(), 
+	    _policy_backend.send_configure(_pmap.xrl_target(protocol).c_str(),
 	        filter::EXPORT, conf,
 	        callback(this, &FilterManager::policy_backend_cb));
-	}       
+	}
 
 	// export filters may change tagmap
 	update_tagmap(protocol);
@@ -165,7 +165,7 @@ FilterManager::flush_export_queue()
     _export_queue.clear();
 }
 
-void 
+void
 FilterManager::flush_queue(ConfQueue& queue, filter::Filter f)
 {
     debug_msg("[POLICY] Flushing %s queue...\n",
@@ -183,10 +183,10 @@ FilterManager::flush_queue(ConfQueue& queue, filter::Filter f)
 	if(!conf.length()) {
 	    _policy_backend.send_reset(_pmap.xrl_target(protocol).c_str(),
 	        f, callback(this,&FilterManager::policy_backend_cb));
-	}	
-	// else configure filter normally.	
+	}
+	// else configure filter normally.
 	else {
-	    _policy_backend.send_configure(_pmap.xrl_target(protocol).c_str(), 
+	    _policy_backend.send_configure(_pmap.xrl_target(protocol).c_str(),
 	        f, conf, callback(this,&FilterManager::policy_backend_cb));
 	}
 	// need to push routes for protocol [filters changed].
@@ -204,7 +204,7 @@ FilterManager::push_routes_now()
 {
     for(set<string>::iterator i = _push_queue.begin();
 	i != _push_queue.end(); ++i) {
-	
+
 	const string& proto = *i;
 
 	debug_msg("[POLICY] Pushing routes for %s\n",
@@ -217,7 +217,7 @@ FilterManager::push_routes_now()
     _push_queue.clear();
 }
 
-void 
+void
 FilterManager::flush_updates_now()
 {
     // flush all queues
@@ -230,7 +230,7 @@ FilterManager::flush_updates_now()
 			callback(this,&FilterManager::push_routes_now));
 }
 
-void 
+void
 FilterManager::flush_updates(uint32_t msec)
 {
     // delayed flush
@@ -238,7 +238,7 @@ FilterManager::flush_updates(uint32_t msec)
 			callback(this,&FilterManager::flush_updates_now));
 }
 
-void 
+void
 FilterManager::birth(const string& protocol)
 {
     debug_msg("[POLICY] Protocol born: %s\n",protocol.c_str());
@@ -248,12 +248,12 @@ FilterManager::birth(const string& protocol)
     update_sourcematch_filter(protocol);
     update_import_filter(protocol);
 
-    
+
     // FIXME: need a mechanism to make routes from RIB reach the new born
     // process. Consider if source match filter was setup before the export
     // filter was alive... the routes will be sitting in the RIB, and never go
     // to the process.
-    
+
     // This is a HACK [as this problem was discovered quite late]. So it looks
     // ugly on purpose.
     CodeMap::const_iterator cmi = _export.find(protocol);
@@ -265,10 +265,10 @@ FilterManager::birth(const string& protocol)
 	    i != export_code->source_protocols().end(); ++i) {
 
 	    const string& push_proto = *i;
-	
+
 	    if(push_proto == protocol)
 		continue;
-	
+
 	    if(!_process_watch.alive(push_proto))
 		continue;
 
@@ -278,12 +278,12 @@ FilterManager::birth(const string& protocol)
 
 	    XLOG_WARNING("XXX HACK: PUSHING ROUTES OF %s FOR %s",
 			 push_proto.c_str(),protocol.c_str());
-	
+
 	    _push_queue.insert(push_proto);
 	}
     }
     // EOH [end of hack]
-  
+
     // perhaps we can delay the flush.  Consider boot-time.  A lot of processes
     // are coming up, so we will always be flushing.  At boot, the commit is
     // delayed by ~2 seconds I think, so if we delay the flush ~2 seconds here
@@ -299,7 +299,7 @@ FilterManager::birth(const string& protocol)
     // rather than overloading the meaning of route push.
 }
 
-void 
+void
 FilterManager::death(const string& protocol)
 {
     // do not send any updates to dead process.
@@ -308,14 +308,16 @@ FilterManager::death(const string& protocol)
     delete_queue_protocol(_import_queue,protocol);
     _push_queue.erase(protocol);
 
-    // XXX: might want to delete policytags in rib... but the tagmap in rib is
-    // quite unflexible now.
+    // send out update
+    _rib.send_remove_policy_redist_tags(_rib_name.c_str(),
+		_pmap.xrl_target(protocol),
+		callback(this,&FilterManager::policy_backend_cb));
 
     debug_msg("[POLICY] Protocol death: %s\n",protocol.c_str());
 }
 
-void 
-FilterManager::delete_queue_protocol(ConfQueue& queue, 
+void
+FilterManager::delete_queue_protocol(ConfQueue& queue,
 				     const string& protocol)
 {
     ConfQueue::iterator i = queue.find(protocol);
@@ -323,11 +325,11 @@ FilterManager::delete_queue_protocol(ConfQueue& queue,
     if(i == queue.end())
 	return;
 
-    queue.erase(i);	    
+    queue.erase(i);
 }
 
-void 
-FilterManager::update_queue(const string& protocol, 
+void
+FilterManager::update_queue(const string& protocol,
 			    const CodeMap& cm,
 			    ConfQueue& queue)
 {

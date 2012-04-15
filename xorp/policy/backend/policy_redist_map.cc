@@ -8,13 +8,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -33,9 +33,15 @@ PolicyRedistMap::~PolicyRedistMap() {
 }
 
 void
+PolicyRedistMap::remove(const string& protocol)
+{
+    _map.erase(protocol);
+}
+
+void
 PolicyRedistMap::insert(const string& protocol, const PolicyTags& tags) {
     PolicyTags* ptags;
-    
+
     Map::iterator i = _map.find(protocol);
 
     // create new policytags [first time we insert]
@@ -44,7 +50,7 @@ PolicyRedistMap::insert(const string& protocol, const PolicyTags& tags) {
 	_map[protocol] = ptags;
 	return;
     }
-    
+
     ptags = (*i).second;
 
     // just append the tags
@@ -62,7 +68,7 @@ PolicyRedistMap::get_protocols(set<string>& out, const PolicyTags& tags) {
 
     // XXX: maybe caller would like to control this
     out.clear();
-    
+
     // go through all our tags.
     for(Map::iterator i = _map.begin(); i != _map.end(); ++i) {
 	PolicyTags* ptags = (*i).second;

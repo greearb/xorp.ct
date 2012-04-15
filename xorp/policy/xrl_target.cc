@@ -8,13 +8,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -32,36 +32,36 @@
 
 using namespace policy_utils;
 
-XrlPolicyTarget::XrlPolicyTarget(XrlStdRouter* r, PolicyTarget& ptarget) : 
+XrlPolicyTarget::XrlPolicyTarget(XrlStdRouter* r, PolicyTarget& ptarget) :
 	    XrlPolicyTargetBase(r),
 	    _policy_target(ptarget)
 {
 }
 
 
-XrlCmdError 
+XrlCmdError
 XrlPolicyTarget::common_0_1_get_target_name(
         // Output values,
-        string& name) 
+        string& name)
 {
     name = PolicyTarget::policy_target_name;
     return XrlCmdError::OKAY();
-}	
+}
 
-XrlCmdError 
+XrlCmdError
 XrlPolicyTarget::common_0_1_get_version(
         // Output values,
         string& version)
 {
     version = "0.1";
     return XrlCmdError::OKAY();
-}	
+}
 
-XrlCmdError 
+XrlCmdError
 XrlPolicyTarget::common_0_1_get_status(
         // Output values,
         uint32_t&       status,
-        string& reason) 
+        string& reason)
 {
     if(_policy_target.running()) {
         status = PROC_READY;
@@ -73,9 +73,9 @@ XrlPolicyTarget::common_0_1_get_status(
     }
 
     return XrlCmdError::OKAY();
-}	
+}
 
-XrlCmdError 
+XrlCmdError
 XrlPolicyTarget::common_0_1_shutdown()
 {
     _policy_target.shutdown();
@@ -83,7 +83,7 @@ XrlPolicyTarget::common_0_1_shutdown()
 }
 
 
-XrlCmdError 
+XrlCmdError
 XrlPolicyTarget::policy_0_1_create_term(const string&   policy,
 					const string&   order,
 				        const string&   term)
@@ -106,9 +106,9 @@ XrlPolicyTarget::policy_0_1_create_term(const string&   policy,
 	return XrlCmdError::COMMAND_FAILED("create_term failed: " + e.str());
     }
     return XrlCmdError::OKAY();
-}	
+}
 
-XrlCmdError 
+XrlCmdError
 XrlPolicyTarget::policy_0_1_delete_term(const string&   policy,
 					const string&   term)
 {
@@ -117,12 +117,12 @@ XrlPolicyTarget::policy_0_1_delete_term(const string&   policy,
     } catch(const PolicyException& e) {
 	return XrlCmdError::COMMAND_FAILED("delete_term failed: " + e.str());
     }
-    
-    return XrlCmdError::OKAY();
-}	
-    
 
-XrlCmdError 
+    return XrlCmdError::OKAY();
+}
+
+
+XrlCmdError
 XrlPolicyTarget::policy_0_1_update_term_block(const string&   policy,
 					      const string&   term,
 					      const uint32_t& block,
@@ -150,12 +150,12 @@ XrlPolicyTarget::policy_0_1_update_term_block(const string&   policy,
     }
 
     return XrlCmdError::OKAY();
-}	
+}
 
-XrlCmdError 
+XrlCmdError
 XrlPolicyTarget::policy_0_1_create_policy(const string&   policy)
 {
-    
+
     try {
 	_policy_target.create_policy(policy);
     } catch(const PolicyException& e) {
@@ -163,9 +163,9 @@ XrlPolicyTarget::policy_0_1_create_policy(const string&   policy)
     }
 
     return XrlCmdError::OKAY();
-}	
+}
 
-XrlCmdError 
+XrlCmdError
 XrlPolicyTarget::policy_0_1_delete_policy(const string&   policy)
 {
 
@@ -176,9 +176,9 @@ XrlPolicyTarget::policy_0_1_delete_policy(const string&   policy)
     }
 
     return XrlCmdError::OKAY();
-}	
+}
 
-XrlCmdError 
+XrlCmdError
 XrlPolicyTarget::policy_0_1_create_set(const string&   set)
 {
 
@@ -189,9 +189,9 @@ XrlPolicyTarget::policy_0_1_create_set(const string&   set)
     }
 
     return XrlCmdError::OKAY();
-}	
+}
 
-XrlCmdError 
+XrlCmdError
 XrlPolicyTarget::policy_0_1_update_set(const string&   type,
 				       const string&   set,
 				       const string&   elements)
@@ -203,9 +203,9 @@ XrlPolicyTarget::policy_0_1_update_set(const string&   type,
     }
 
     return XrlCmdError::OKAY();
-}	
+}
 
-XrlCmdError 
+XrlCmdError
 XrlPolicyTarget::policy_0_1_delete_set(const string&   set)
 {
 
@@ -216,7 +216,7 @@ XrlPolicyTarget::policy_0_1_delete_set(const string&   set)
     }
 
     return XrlCmdError::OKAY();
-}	
+}
 
 XrlCmdError
 XrlPolicyTarget::policy_0_1_add_to_set(
@@ -250,7 +250,7 @@ XrlPolicyTarget::policy_0_1_delete_from_set(
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError 
+XrlCmdError
 XrlPolicyTarget::policy_0_1_done_global_policy_conf()
 {
     try {
@@ -263,22 +263,22 @@ XrlPolicyTarget::policy_0_1_done_global_policy_conf()
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError 
+XrlCmdError
 XrlPolicyTarget::policy_0_1_import(const string&   protocol,
 				   const string&   policies,
-				   const string&   modifier) 
+				   const string&   modifier)
 {
     try {
 	_policy_target.update_import(protocol, policies, modifier);
     } catch (const PolicyException& e) {
-        return XrlCmdError::COMMAND_FAILED("Import of " + protocol + 
+        return XrlCmdError::COMMAND_FAILED("Import of " + protocol +
 					   " failed: " + e.str());
     }
 
     return XrlCmdError::OKAY();
-}	
- 
-XrlCmdError 
+}
+
+XrlCmdError
 XrlPolicyTarget::policy_0_1_export(const string&   protocol,
 				   const string&   policies,
 				   const string&   modifier)
@@ -286,7 +286,7 @@ XrlPolicyTarget::policy_0_1_export(const string&   protocol,
     try {
 	_policy_target.update_export(protocol, policies, modifier);
     } catch (const PolicyException& e) {
-        return XrlCmdError::COMMAND_FAILED("Export of " + protocol + 
+        return XrlCmdError::COMMAND_FAILED("Export of " + protocol +
 					   " failed: " + e.str());
     }
 
@@ -303,7 +303,7 @@ XrlPolicyTarget::policy_0_1_add_varmap(const string& protocol,
     try {
 	_policy_target.add_varmap(protocol, variable, type, access, id);
     } catch(const PolicyException& e) {
-        return XrlCmdError::COMMAND_FAILED("Adding varmap failed for protocol: " 
+        return XrlCmdError::COMMAND_FAILED("Adding varmap failed for protocol: "
 					   + protocol + " var: " + variable
 					   + " :" + e.str());
     }
@@ -312,17 +312,17 @@ XrlPolicyTarget::policy_0_1_add_varmap(const string& protocol,
 
 }
 
-XrlCmdError 
+XrlCmdError
 XrlPolicyTarget::policy_0_1_dump_state(const uint32_t& id, string& state)
 {
     try {
         state = _policy_target.dump_state(id);
     } catch(const PolicyException& e) {
-	return XrlCmdError::COMMAND_FAILED("Unable to dump state, id: " 
+	return XrlCmdError::COMMAND_FAILED("Unable to dump state, id: "
 					   + to_str(id));
     }
     return XrlCmdError::OKAY();
-}	
+}
 
 XrlCmdError
 XrlPolicyTarget::policy_0_1_set_proto_target(const string& protocol,
@@ -333,7 +333,7 @@ XrlPolicyTarget::policy_0_1_set_proto_target(const string& protocol,
 }
 
 
-XrlCmdError 
+XrlCmdError
 XrlPolicyTarget::finder_event_observer_0_1_xrl_target_birth(
 			    const string&   target_class,
 			    const string&   target_instance)
@@ -341,15 +341,15 @@ XrlPolicyTarget::finder_event_observer_0_1_xrl_target_birth(
     try {
 	_policy_target.birth(target_class,target_instance);
     } catch(const PolicyException& e) {
-	return XrlCmdError::COMMAND_FAILED("Birth announce of " + 
+	return XrlCmdError::COMMAND_FAILED("Birth announce of " +
 					   target_class + " failed: " +
 					   e.str());
     }
 
     return XrlCmdError::OKAY();
-}	
+}
 
-XrlCmdError 
+XrlCmdError
 XrlPolicyTarget::finder_event_observer_0_1_xrl_target_death(
 			    const string&   target_class,
 			    const string&   target_instance)
@@ -357,13 +357,13 @@ XrlPolicyTarget::finder_event_observer_0_1_xrl_target_death(
     try {
 	_policy_target.death(target_class,target_instance);
     } catch(const PolicyException& e) {
-	return XrlCmdError::COMMAND_FAILED("Death announce of " + 
+	return XrlCmdError::COMMAND_FAILED("Death announce of " +
 					   target_class + " failed: " +
 					   e.str());
     }
 
     return XrlCmdError::OKAY();
-}	
+}
 
 XrlCmdError
 XrlPolicyTarget::cli_processor_0_1_process_command(
