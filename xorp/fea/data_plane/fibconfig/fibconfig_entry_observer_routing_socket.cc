@@ -90,14 +90,14 @@ FibConfigEntryObserverRoutingSocket::stop(string& error_msg)
 }
 
 void
-FibConfigEntryObserverRoutingSocket::receive_data(const vector<uint8_t>& buffer)
+FibConfigEntryObserverRoutingSocket::receive_data(vector<uint8_t>& buffer)
 {
     // TODO: XXX: PAVPAVPAV: use it?
     UNUSED(buffer);
 }
 
 void
-FibConfigEntryObserverRoutingSocket::routing_socket_data(const vector<uint8_t>& buffer)
+FibConfigEntryObserverRoutingSocket::routing_socket_data(vector<uint8_t>& buffer)
 {
     receive_data(buffer);
 }

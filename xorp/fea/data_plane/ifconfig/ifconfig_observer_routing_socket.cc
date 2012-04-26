@@ -88,7 +88,7 @@ IfConfigObserverRoutingSocket::stop(string& error_msg)
 }
 
 void
-IfConfigObserverRoutingSocket::receive_data(const vector<uint8_t>& buffer)
+IfConfigObserverRoutingSocket::receive_data(vector<uint8_t>& buffer)
 {
     // Pre-processing cleanup
     ifconfig().system_config().finalize_state();
@@ -123,7 +123,7 @@ IfConfigObserverRoutingSocket::receive_data(const vector<uint8_t>& buffer)
 }
 
 void
-IfConfigObserverRoutingSocket::routing_socket_data(const vector<uint8_t>& buffer)
+IfConfigObserverRoutingSocket::routing_socket_data(vector<uint8_t>& buffer)
 {
     receive_data(buffer);
 }

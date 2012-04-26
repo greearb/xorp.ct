@@ -203,7 +203,7 @@ RoutingSocket::force_read(string& error_msg)
 	//
 	// Received message (probably) OK
 	//
-	const struct if_msghdr* mh = &(message[0]);
+	const struct if_msghdr* mh = (const struct if_msghdr*)(&(message[0]));
 	XLOG_ASSERT(mh->ifm_msglen == message.size());
 	XLOG_ASSERT(mh->ifm_msglen == got);
 	last_mh_off = off;
@@ -327,7 +327,7 @@ RoutingSocketReader::receive_data(RoutingSocket& rs, uint32_t seqno,
  * @param buffer the buffer with the received data.
  */
 void
-RoutingSocketReader::routing_socket_data(const vector<uint8_t>& buffer)
+RoutingSocketReader::routing_socket_data(vector<uint8_t>& buffer)
 {
     size_t d = 0, off = 0;
     pid_t my_pid = _rs.pid();
@@ -338,7 +338,7 @@ RoutingSocketReader::routing_socket_data(const vector<uint8_t>& buffer)
     _cache_data.resize(buffer.size());
     while (d < buffer.size()) {
 	const struct rt_msghdr* rtm;
-	rtm = &(buffer[d]);
+	rtm = (const struct rt_msghdr*)(&(buffer[d]));
 	if ((rtm->rtm_pid == my_pid)
 	    && (rtm->rtm_seq == (signed)_cache_seqno)) {
 	    XLOG_ASSERT(buffer.size() - d >= rtm->rtm_msglen);

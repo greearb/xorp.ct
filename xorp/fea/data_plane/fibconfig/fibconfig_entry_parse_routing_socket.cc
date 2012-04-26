@@ -60,11 +60,11 @@ FibConfigEntryGetRoutingSocket::parse_buffer_routing_socket(
     const struct rt_msghdr* rtm;
     size_t offset;
 
-    rtm = &(buffer[0]);
+    rtm = (const struct rt_msghdr*)(&(buffer[0]));
     for (offset = 0; offset < buffer.size(); offset += rtm->rtm_msglen) {
 	bool filter_match = false;
 
-	rtm = &(buffer[offset]);
+	rtm = (const struct rt_msghdr*)(&(buffer[offset]));
 	if (rtm->rtm_version != RTM_VERSION) {
 #if defined(RTM_OVERSION) && defined(HOST_OS_OPENBSD)
 	    //

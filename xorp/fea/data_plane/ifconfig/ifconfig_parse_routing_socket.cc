@@ -213,9 +213,9 @@ IfConfigGetSysctl::parse_buffer_routing_socket(IfConfig& ifconfig,
 
     UNUSED(ifconfig);
 
-    ifm = &(buffer[0]);
+    ifm = (const struct if_msghdr*)(&(buffer[0]));
     for (offset = 0; offset < buffer.size(); offset += ifm->ifm_msglen) {
-	ifm = &(buffer[offset]);
+	ifm = (const struct if_msghdr*)(&(buffer[offset]));
 	if (ifm->ifm_version != RTM_VERSION) {
 #if defined(RTM_OVERSION) && defined(HOST_OS_OPENBSD)
 	    //
