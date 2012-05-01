@@ -127,7 +127,7 @@ UserDB::add_user(uid_t user_id, const string& username, gid_t pw_gid)
 		      XORP_UINT_CAST(grp->gr_gid));
 	    if (pw_gid == (gid_t)grp->gr_gid) {
 		/* is the user's default group is the "xorp" group */
-		debug_msg("user's default groyp is xorp\n");
+		debug_msg("user's default group is xorp\n");
 		newuser->add_acl_capability("config");
 	    } else {
 		/* if not, then check if they're listed in /etc/group as
