@@ -126,8 +126,8 @@ public:
     TrieNode* get_right()			{ return this->_right;  }
     TrieNode* get_parent()			{ return this->_up;   }
     bool has_payload() const			{ return _p != NULL;	}
-    const Payload &const_p() const		{ return *_p;		}
-    Payload &p()    			        { return *_p;		}
+    const Payload &p() const			{ return *_p;		}
+    Payload &p()    				{ return *_p;		}
 
     void set_payload(const Payload& p) {
 	if (_p)
@@ -372,6 +372,12 @@ public:
 	return *this;
     }
 
+    Payload& operator*()		{ return payload(); }
+    const Payload& operator*() const	{ return payload(); }
+
+    Payload* operator->()		{ return &payload(); }
+    const Payload* operator->() const	{ return &payload(); }
+
     Node *cur() const			{ return _cur;		};
 
     bool operator==(const TriePostOrderIterator & x) const {
@@ -380,6 +386,7 @@ public:
 
     bool has_payload() const		{ return _cur->has_payload(); }
     Payload & payload()			{ return _cur->p(); };
+    const Payload & payload() const	{ return _cur->p(); };
     const Key & key() const		{ return _cur->k(); };
 
 private:
@@ -464,6 +471,12 @@ public:
 	return *this;
     }
 
+    Payload& operator*()		{ return payload(); }
+    const Payload& operator*() const	{ return payload(); }
+
+    Payload* operator->()		{ return &payload(); }
+    const Payload* operator->() const	{ return &payload(); }
+
     Node *cur() const			{ return _cur;		};
 
     bool operator==(const TriePreOrderIterator & x) const {
@@ -472,6 +485,7 @@ public:
 
     bool has_payload() const		{ return _cur->has_payload(); }
     Payload & payload()			{ return _cur->p(); };
+    const Payload & payload() const	{ return _cur->p(); };
     const Key & key() const		{ return _cur->k(); };
 
 private:
