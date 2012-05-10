@@ -162,6 +162,7 @@ public:
 private:
     typedef typename ResolvedIPRouteEntry<A>::RouteBackLink ResolvedRouteBackLink;
     typedef typename UnresolvedIPRouteEntry<A>::RouteBackLink UnresolvedRouteBackLink;
+    typedef multimap<const IPRouteEntry<A>*, ResolvedIPRouteEntry<A>* > IGPParentMultiMap;
 
     int delete_ext_route(const IPRouteEntry<A>* route,
 			 bool& is_delete_propagated);
@@ -184,7 +185,7 @@ private:
 
     const ResolvedIPRouteEntry<A>* lookup_next_by_igp_parent(
 	const IPRouteEntry<A>* route,
-	const ResolvedIPRouteEntry<A>* previous);
+	const typename IGPParentMultiMap::iterator& previous);
 
     const IPRouteEntry<A>* lookup_route_in_igp_parent(
 	const IPNet<A>& subnet) const;
@@ -202,7 +203,7 @@ private:
 
     // _ip_igp_parents gives us a fast way of finding a route
     // affected by a change in an igp parent route
-    multimap<const IPRouteEntry<A>*, ResolvedIPRouteEntry<A>* > _ip_igp_parents;
+    IGPParentMultiMap _ip_igp_parents;
 
     // _resolving_routes is a Trie of all the routes that are used to
     // resolve external routes
