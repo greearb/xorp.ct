@@ -461,31 +461,16 @@ ExtIntTable<A>::lookup_by_igp_parent(const IPRouteEntry<A>* route)
 template<class A>
 const ResolvedIPRouteEntry<A>*
 ExtIntTable<A>::lookup_next_by_igp_parent(const IPRouteEntry<A>* route,
-				  const ResolvedIPRouteEntry<A>* previous)
+			const typename IGPParentMultiMap::iterator& previous)
 {
-    debug_msg("lookup_next_by_igp_parent %p -> %s\n",
-	      route, route->net().str().c_str());
+    debug_msg("lookup_next_by_igp_parent %p -> %s, starting from %p -> %s\n",
+	      route, route->net().str().c_str(),
+	      previous->second, previous->second->net().str().c_str());
 
-    //
-    // TODO: if we have a large number of routes with the same IGP parent,
-    // this can be very inefficient.
-    //
-
-    typename ResolvedRouteBackLink::iterator iter;
-    iter = _ip_igp_parents.find(route);
-    while (iter != _ip_igp_parents.end()
-	   && iter->first == route
-	   && iter->second != previous) {
-	++iter;
-    }
-
-    if (iter == _ip_igp_parents.end() || iter->first != route) {
-	debug_msg("Found no more routes with this IGP parent\n");
-	return NULL;
-    }
-
-    ++iter;
-    if (iter == _ip_igp_parents.end() || iter->first != route) {
+    pair<typename IGPParentMultiMap::iterator, typename IGPParentMultiMap::iterator> route_range = _ip_igp_parents.equal_range(route);
+    typename IGPParentMultiMap::iterator iter = previous;
+    if (iter++ == route_range.second ||
+        iter == route_range.second) {
 	debug_msg("Found no more routes with this IGP parent\n");
 	return NULL;
     }
@@ -513,7 +498,7 @@ ExtIntTable<A>::recalculate_nexthops(const IPRouteEntry<A>& new_route)
     debug_msg("old route was: %s\n", old_route->str().c_str());
 
     const ResolvedIPRouteEntry<A>* found;
-    const ResolvedIPRouteEntry<A>* last_not_deleted = NULL;
+    typename IGPParentMultiMap::iterator last_not_deleted = _ip_igp_parents.end();
     const IPRouteEntry<A>* egp_parent;
     found = lookup_by_igp_parent(old_route);
     while (found != NULL) {
@@ -546,10 +531,10 @@ ExtIntTable<A>::recalculate_nexthops(const IPRouteEntry<A>& new_route)
 	    debug_msg("route matched but nexthop didn't: nexthop: %s\n    %s\n",
 		   nexthop.str().c_str(),
 		   found->str().c_str());
-	    last_not_deleted = found;
+	    last_not_deleted = found->backlink();
 	}
 
-	if (last_not_deleted == NULL) {
+	if (last_not_deleted == _ip_igp_parents.end()) {
 	    found = lookup_by_igp_parent(old_route);
 	} else {
 	    found = lookup_next_by_igp_parent(old_route, last_not_deleted);
