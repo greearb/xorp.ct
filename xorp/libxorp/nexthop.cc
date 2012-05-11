@@ -25,10 +25,42 @@
 #include "xorp.h"
 #include "nexthop.hh"
 
+ostream& operator<<(ostream& os, const NextHop& rhs)
+{
+	os << rhs.str() << endl;
+	return os;
+}
+
+string
+NextHop::type_str(int type)
+{
+    static map<int, string> nexthop_names;
+    if (nexthop_names.empty()) {
+	nexthop_names[GENERIC_NEXTHOP] = " ";
+	nexthop_names[PEER_NEXTHOP] = "NH: ";
+	nexthop_names[ENCAPS_NEXTHOP] = "NH-> ";
+	nexthop_names[EXTERNAL_NEXTHOP] = "Ext> ";
+	nexthop_names[DISCARD_NEXTHOP] = "DISCARD ";
+	nexthop_names[UNREACHABLE_NEXTHOP] = "UNREACHABLE ";
+    }
+    map<int, string>::iterator i = nexthop_names.find(type);
+    if (i == nexthop_names.end())
+	return " ";
+    else
+	return i->second;
+}
+
 template<class A>
 IPNextHop<A>::IPNextHop(const A& from_ipaddr)
     : _addr(from_ipaddr)
 {
+}
+
+template<class A>
+string
+IPNextHop<A>::str() const
+{
+    return (NextHop::type_str(type()) + this->_addr.str());
 }
 
 template<class A>
@@ -37,24 +69,10 @@ IPPeerNextHop<A>::IPPeerNextHop(const A& from_ipaddr)
 {
 }
 
-template<class A> string
-IPPeerNextHop<A>::str() const
-{
-    string nh = "NH:";
-    return nh + this->_addr.str();
-}
-
 template<class A>
 IPEncapsNextHop<A>::IPEncapsNextHop(const A& from_ipaddr)
     : IPNextHop<A>(from_ipaddr)
 {
-}
-
-template<class A> string
-IPEncapsNextHop<A>::str() const
-{
-    string enh = "NH->";
-    return enh + this->_addr.str();
 }
 
 template<class A>
@@ -63,34 +81,15 @@ IPExternalNextHop<A>::IPExternalNextHop(const A& from_ipaddr)
 {
 }
 
-template<class A> string
-IPExternalNextHop<A>::str() const
-{
-    return string("Ext>") + this->_addr.str();
-}
-
 DiscardNextHop::DiscardNextHop()
     : NextHop()
 {
-}
-
-string
-DiscardNextHop::str() const
-{
-    return string("DISCARD");
 }
 
 UnreachableNextHop::UnreachableNextHop()
     : NextHop()
 {
 }
-
-string
-UnreachableNextHop::str() const
-{
-    return string("UNREACHABLE");
-}
-
 
 template class IPNextHop<IPv4>;
 template class IPNextHop<IPv6>;
