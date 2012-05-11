@@ -279,6 +279,9 @@ private:
     XorpTimer			_dtimer;
 
     static const IPNet<A> NO_LAST_NET;		// Indicator for last net inval
+#ifndef XORP_USE_USTL
+    static const RedistNetCmp<A> redist_net_cmp;
+#endif
 };
 
 
