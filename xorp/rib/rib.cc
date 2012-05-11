@@ -163,24 +163,6 @@ RIB<A>::get_protocol_admin_distance(const string& protocol_name)
 }
 
 template <typename A>
-inline RibVif*
-RIB<A>::find_vif(const A& addr)
-{
-    map<string, RibVif*>::iterator iter;
-
-    for (iter = _vifs.begin(); iter != _vifs.end(); ++iter) {
-	RibVif* vif = iter->second;
-	if (! vif->is_underlying_vif_up())
-	    continue;		// XXX: ignore vifs that are not up
-	if (vif->is_my_addr(addr))
-	    return vif;
-	if (vif->is_p2p() && vif->is_same_p2p(addr))
-	    return vif;
-    }
-    return NULL;
-}
-
-template <typename A>
 inline IPExternalNextHop<A>*
 RIB<A>::find_external_nexthop(const A& addr)
 {
@@ -563,7 +545,6 @@ template <typename A>
 int
 RIB<A>::delete_vif(const string& vifname)
 {
-    debug_msg("RIB::delete_vif: %s\n", vifname.c_str());
     map<string, RibVif*>::iterator vi = _vifs.find(vifname);
     if (vi == _vifs.end()) {
 	return XORP_ERROR;
@@ -630,13 +611,12 @@ RIB<A>::set_vif_flags(const string& vifname,
 		      bool is_up,
 		      uint32_t mtu)
 {
-    map<string, RibVif*>::iterator vi = _vifs.find(vifname);
-    if (vi == _vifs.end()) {
+    RibVif* vif = find_vif(vifname);
+    if (!vif) {
 	XLOG_ERROR("Attempting to set flags to non-existant Vif \"%s\"",
 		   vifname.c_str());
 	return XORP_ERROR;
     }
-    RibVif* vif = vi->second;
 
     bool old_is_up = vif->is_underlying_vif_up();
 
@@ -701,13 +681,12 @@ RIB<A>::add_vif_address(const string&	vifname,
 			const A&	broadcast_addr,
 			const A&	peer_addr)
 {
-    map<string, RibVif*>::iterator vi = _vifs.find(vifname);
-    if (vi == _vifs.end()) {
+    RibVif* vif = find_vif(vifname);
+    if (!vif) {
 	XLOG_ERROR("Attempting to add address to non-existant Vif \"%s\"",
 		   vifname.c_str());
 	return XORP_ERROR;
     }
-    RibVif* vif = vi->second;
 
     vif->add_address(VifAddr(addr, subnet, broadcast_addr, peer_addr));
 
@@ -722,13 +701,12 @@ int
 RIB<A>::delete_vif_address(const string& vifname,
 			   const A& addr)
 {
-    map<string, RibVif*>::iterator vi = _vifs.find(vifname);
-    if (vi == _vifs.end()) {
+    RibVif* vif = find_vif(vifname);
+    if (!vif) {
 	XLOG_ERROR("Attempting to delete address from non-existant Vif \"%s\"",
 		   vifname.c_str());
 	return XORP_ERROR;
     }
-    RibVif* vif = vi->second;
 
     list<VifAddr>::const_iterator ai;
     for (ai = vif->addr_list().begin(); ai != vif->addr_list().end(); ++ai) {
@@ -805,8 +783,8 @@ RIB<A>::add_route(const string&		tablename,
 	//
 	// Add a route with explicitly specified network interface
 	//
-	map<string, RibVif*>::iterator iter = _vifs.find(vifname);
-	if (iter == _vifs.end()) {
+	RibVif* vif = find_vif(vifname);
+	if (!vif) {
 	    XLOG_ERROR("Attempting to add route to table \"%s\" "
 		       "(prefix %s next-hop %s ifname %s vifname %s): "
 		       "no such network interface",
@@ -815,7 +793,7 @@ RIB<A>::add_route(const string&		tablename,
 		       ifname.c_str(), vifname.c_str());
 	    return XORP_ERROR;
 	}
-	RibVif* vif = iter->second;
+
 	IPNextHop<A>* nexthop = find_or_create_peer_nexthop(nexthop_addr);
 	ot->add_route(IPRouteEntry<A>(net, vif, nexthop, *protocol,
 		      metric, policytags));
@@ -1619,6 +1597,37 @@ RIB<A>::push_routes()
     XLOG_ASSERT(pct != NULL);
 
     pct->push_routes();
+}
+
+template <typename A>
+RibVif*
+RIB<A>::find_vif(const A& addr)
+{
+    debug_msg("RIB::find_vif: %s\n", addr.str().c_str());
+    map<string, RibVif*>::iterator iter;
+
+    for (iter = _vifs.begin(); iter != _vifs.end(); ++iter) {
+	RibVif* vif = iter->second;
+	if (!vif->is_underlying_vif_up())
+	    continue;		// XXX: ignore vifs that are not up
+	if (vif->is_my_addr(addr))
+	    return vif;
+	if (vif->is_p2p() && vif->is_same_p2p(addr))
+	    return vif;
+    }
+    return NULL;
+}
+
+template <typename A>
+RibVif*
+RIB<A>::find_vif(const string& vifname)
+{
+    debug_msg("RIB::find_vif: %s\n", vifname.c_str());
+    map<string, RibVif*>::iterator vi = _vifs.find(vifname);
+    if (vi == _vifs.end()) {
+	return NULL;
+    }
+    return vi->second;
 }
 
 template class RIB<IPv4>;
