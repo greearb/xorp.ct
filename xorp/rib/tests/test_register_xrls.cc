@@ -31,7 +31,7 @@
 
 #include "xrl/targets/ribclient_base.hh"
 
-#include "parser.hh"
+#include "../parser.hh"
 #include "parser_direct_cmds.hh"
 #include "parser_xrl_cmds.hh"
 #include "register_server.hh"
