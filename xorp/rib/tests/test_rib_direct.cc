@@ -29,7 +29,7 @@
 
 #include "libxipc/finder_server.hh"
 
-#include "parser.hh"
+#include "../parser.hh"
 #include "parser_direct_cmds.hh"
 #include "rib_manager.hh"
 #include "rib.hh"
