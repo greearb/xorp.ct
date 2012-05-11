@@ -54,6 +54,9 @@ const IPNet<A> Redistributor<A>::NO_LAST_NET(A::ALL_ONES(),
 					       A::ADDR_BITLEN);
 
 template <typename A>
+const RedistNetCmp<A> Redistributor<A>::redist_net_cmp = RedistNetCmp<A>();
+
+template <typename A>
 Redistributor<A>::Redistributor(EventLoop& 	e,
 				const string& 	n)
     : _e(e), _name(n), _table(0), _output(0), _policy(0),
@@ -229,7 +232,7 @@ Redistributor<A>::RedistEventInterface::did_add(const IPRouteEntry<A>& ipr)
 #ifdef XORP_USE_USTL
 	if (!(net < last)) {
 #else
-	if (RedistNetCmp<A>().operator() (net, last) == false) {
+	if (!redist_net_cmp(net, last)) {
 #endif
 	    return;	// route will be hit later on in dump anyway
 	}
@@ -296,7 +299,7 @@ Redistributor<A>::RedistEventInterface::did_delete(const IPRouteEntry<A>& ipr)
 #ifdef XORP_USE_USTL
 	if (!(net < last)) {
 #else
-	if (RedistNetCmp<A>().operator() (net, last) == false) {
+	if (!redist_net_cmp(net, last)) {
 #endif
 	    return;	// route has not yet been announced so ignore
 	}
