@@ -49,12 +49,9 @@ RedistOutput<A>::~RedistOutput()
 // ----------------------------------------------------------------------------
 // Redistributor<A>
 
-template <>
-const IPv4Net Redistributor<IPv4>::NO_LAST_NET(IPv4::ALL_ONES(),
-					       IPv4::ADDR_BITLEN);
-template <>
-const IPv6Net Redistributor<IPv6>::NO_LAST_NET(IPv6::ALL_ONES(),
-					       IPv6::ADDR_BITLEN);
+template <class A>
+const IPNet<A> Redistributor<A>::NO_LAST_NET(A::ALL_ONES(),
+					       A::ADDR_BITLEN);
 
 template <typename A>
 Redistributor<A>::Redistributor(EventLoop& 	e,
