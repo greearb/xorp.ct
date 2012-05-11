@@ -36,6 +36,7 @@
 
 #include "protocol.hh"
 
+template<class A>
 class RibVif;
 
 /**
@@ -57,10 +58,10 @@ public:
      * @param protocol the routing protocol that originated this route.
      * @param metric the routing protocol metric for this route.
      */
-    RouteEntry(RibVif* vif, NextHop* nexthop, const Protocol& protocol,
+    RouteEntry(RibVif<A>* vif, NextHop* nexthop, const Protocol& protocol,
 		uint32_t metric, const PolicyTags& policytags, const IPNet<A>& net);
 
-    RouteEntry(RibVif* vif, NextHop* nexthop, const Protocol& protocol,
+    RouteEntry(RibVif<A>* vif, NextHop* nexthop, const Protocol& protocol,
 		uint32_t metric, const IPNet<A>& net);
 
     /**
@@ -74,7 +75,7 @@ public:
      * @return the Virtual Interface on which packets matching this
      * routing table entry should be forwarded.
      */
-    RibVif* vif() const { return _vif; }
+    RibVif<A>* vif() const { return _vif; }
 
     /**
      * Get the NextHop router.
@@ -151,7 +152,7 @@ public:
     const PolicyTags& policytags() const { return _policytags; }
 
 protected:
-    RibVif*		_vif;
+    RibVif<A>*		_vif;
     NextHop*		_nexthop;		// The next-hop router
 
     const Protocol&	_protocol;		// The routing protocol that instantiated this route
@@ -183,7 +184,7 @@ public:
      * @param protocol the routing protocol that originated this route.
      * @param metric the routing protocol metric for this route.
      */
-    IPRouteEntry(const IPNet<A>& net, RibVif* vif, IPNextHop<A>* nexthop,
+    IPRouteEntry(const IPNet<A>& net, RibVif<A>* vif, IPNextHop<A>* nexthop,
 		 const Protocol& protocol, uint32_t metric)
 	: RouteEntry<A>(vif, nexthop, protocol, metric, net) {}
 
@@ -199,7 +200,7 @@ public:
      * @param metric the routing protocol metric for this route.
      * @param policytags the policy-tags for this route.
      */
-    IPRouteEntry(const IPNet<A>& net, RibVif* vif, IPNextHop<A>* nexthop,
+    IPRouteEntry(const IPNet<A>& net, RibVif<A>* vif, IPNextHop<A>* nexthop,
 		 const Protocol& protocol, uint32_t metric,
 		 const PolicyTags& policytags)
 	: RouteEntry<A>(vif, nexthop, protocol, metric, policytags, net) {}
@@ -277,7 +278,7 @@ public:
      * nexthop in the egp_parent into a local nexthop.
      * @param egp_parent the orginal route entry with a non-local nexthop.
      */
-    ResolvedIPRouteEntry(const IPNet<A>& net, RibVif* vif, IPNextHop<A>* nexthop,
+    ResolvedIPRouteEntry(const IPNet<A>& net, RibVif<A>* vif, IPNextHop<A>* nexthop,
 			 const Protocol& protocol, uint32_t metric,
 			 const IPRouteEntry<A>* igp_parent,
 			 const IPRouteEntry<A>* egp_parent)

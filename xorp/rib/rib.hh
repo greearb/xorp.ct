@@ -48,6 +48,8 @@
 
 class RegisterServer;
 class RibManager;
+
+template<class A>
 class RibVif;
 
 enum RibTransportType {
@@ -197,7 +199,7 @@ public:
      *
      * @param rib_vif the VIF container that will be destroyed.
      */
-    virtual void destroy_deleted_vif(RibVif* rib_vif);
+    virtual void destroy_deleted_vif(RibVif<A>* rib_vif);
 
     /**
      * Set the vif flags of a configured vif.
@@ -259,7 +261,7 @@ public:
      * (if a point-to-point interface).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int add_connected_route(const RibVif&	vif,
+    int add_connected_route(const RibVif<A>&	vif,
 			    const IPNet<A>&	net,
 			    const A&		nexthop_addr,
 			    const A&		peer_addr);
@@ -273,7 +275,7 @@ public:
      * (if a point-to-point interface).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int delete_connected_route(const RibVif&	vif,
+    int delete_connected_route(const RibVif<A>&	vif,
 			       const IPNet<A>&	net,
 			       const A&		peer_addr);
 
@@ -660,7 +662,7 @@ private:
      * @param addr the IP address to lookup.
      * @return pointer to RibVif on success, NULL otherwise.
      */
-    RibVif* find_vif(const A& addr);
+    RibVif<A>* find_vif(const A& addr);
 
     /**
      * Find the virtual interface associated with vif name
@@ -668,7 +670,7 @@ private:
      * @param vifname the vif name to search for.
      * @return pointer to RibVif on success, NULL otherwise.
      */
-    RibVif* find_vif(const string& vifname);
+    RibVif<A>* find_vif(const string& vifname);
 
     /**
      * Find the IP External Nexthop class instance associated with an IP
@@ -725,8 +727,8 @@ protected:
     list<RouteTable<A>* >		_tables;
     map<string, Protocol* >		_protocols;
     map<string, OriginTable<A>* >	_routing_protocol_instances;
-    map<string, RibVif*>		_vifs;
-    map<string, RibVif*>		_deleted_vifs;
+    map<string, RibVif<A>*>		_vifs;
+    map<string, RibVif<A>*>		_deleted_vifs;
     map<string, uint32_t>		_admin_distances;
     map<A, IPExternalNextHop<A> >	_external_nexthops;
     map<A, IPPeerNextHop<A> >		_peer_nexthops;
@@ -737,22 +739,13 @@ typedef RIB<IPv4> IPv4RIB;
 typedef RIB<IPv6> IPv6RIB;
 #endif
 
+template<class A>
 class RibVif : public Vif {
 public:
-    RibVif(RIB<IPv4>* rib, const Vif& vif)
-	: Vif(vif), _rib4(rib),
-#ifdef HAVE_IPV6
-	  _rib6(NULL),
-#endif
+    RibVif(RIB<A>* rib, const Vif& vif)
+	: Vif(vif), _rib(rib),
 	  _usage_counter(0),
-	  _is_deleted(false)
-    {}
-#ifdef HAVE_IPV6
-    RibVif(RIB<IPv6>* rib, const Vif& vif)
-	: Vif(vif), _rib4(NULL), _rib6(rib), _usage_counter(0),
-	  _is_deleted(false)
-    {}
-#endif
+	  _is_deleted(false) { }
 
     ~RibVif() {}
 
@@ -769,29 +762,13 @@ public:
     void decr_usage_counter() {
 	_usage_counter--;
 	if (_is_deleted && (_usage_counter == 0)) {
-	    if (_rib4 != NULL) {
-		_rib4->destroy_deleted_vif(this);
-		return;
-	    }
-#ifdef HAVE_IPV6
-	    if (_rib6 != NULL) {
-		_rib6->destroy_deleted_vif(this);
-		return;
-	    }
-#endif
+	if (_rib)
+	    _rib->destroy_deleted_vif(this);
 	}
     }
 
 private:
-    //
-    // XXX: This is a hack that we have two RIB pointers, when one should
-    // be sufficient. It is to avoid templatization of this class, otherwise
-    // the generic RouteEntry also needs to become a template.
-    //
-    RIB<IPv4>*	_rib4;
-#ifdef HAVE_IPV6
-    RIB<IPv6>*	_rib6;
-#endif
+    RIB<A>*	_rib;
     uint32_t	_usage_counter;
     bool	_is_deleted;
 };

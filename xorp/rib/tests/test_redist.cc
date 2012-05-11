@@ -277,7 +277,7 @@ test_deterministic()
     IPPeerNextHop<IPv4> nh("22.0.0.1");
     Protocol		protocol("static", IGP, 1);
     Vif			tmp_vif("vif0");
-    RibVif		vif((RIB<IPv4>*)NULL, tmp_vif);
+    RibVif<IPv4>		vif(NULL, tmp_vif);
 
     // Attach redist table
     RedistTable<IPv4> redist_table("StaticRedistTable", &origin);

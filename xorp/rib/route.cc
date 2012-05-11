@@ -31,7 +31,7 @@
 #include "route.hh"
 
 template<class A>
-RouteEntry<A>::RouteEntry(RibVif* vif, NextHop* nexthop, const Protocol& protocol,
+RouteEntry<A>::RouteEntry(RibVif<A>* vif, NextHop* nexthop, const Protocol& protocol,
 		       uint32_t metric, const PolicyTags& policytags, const IPNet<A>& net)
     : _vif(vif), _nexthop(nexthop), _protocol(protocol),
       _admin_distance(UNKNOWN_ADMIN_DISTANCE), _metric(metric),
@@ -42,7 +42,7 @@ RouteEntry<A>::RouteEntry(RibVif* vif, NextHop* nexthop, const Protocol& protoco
 }
 
 template<class A>
-RouteEntry<A>::RouteEntry(RibVif* vif, NextHop* nexthop, const Protocol& protocol,
+RouteEntry<A>::RouteEntry(RibVif<A>* vif, NextHop* nexthop, const Protocol& protocol,
 		       uint32_t metric, const IPNet<A>& net)
     : _vif(vif), _nexthop(nexthop), _protocol(protocol),
       _admin_distance(UNKNOWN_ADMIN_DISTANCE), _metric(metric), _net(net)

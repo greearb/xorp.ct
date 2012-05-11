@@ -457,7 +457,7 @@ RIB<A>::new_origin_table(const string&	tablename,
 
 template <typename A>
 int
-RIB<A>::add_connected_route(const RibVif& vif,
+RIB<A>::add_connected_route(const RibVif<A>& vif,
 			    const IPNet<A>& net,
 			    const A& nexthop_addr,
 			    const A& peer_addr)
@@ -478,7 +478,7 @@ RIB<A>::add_connected_route(const RibVif& vif,
 
 template <typename A>
 int
-RIB<A>::delete_connected_route(const RibVif& vif, const IPNet<A>& net,
+RIB<A>::delete_connected_route(const RibVif<A>& vif, const IPNet<A>& net,
 			       const A& peer_addr)
 {
     delete_route("connected", net);
@@ -494,8 +494,8 @@ template <typename A>
 int
 RIB<A>::new_vif(const string& vifname, const Vif& vif)
 {
-    map<string, RibVif*>::iterator vi;
-    RibVif* new_rib_vif = NULL;
+    typename map<string, RibVif<A>*>::iterator vi;
+    RibVif<A>* new_rib_vif = NULL;
 
     debug_msg("RIB::new_vif: %s\n", vifname.c_str());
     if (_vifs.find(vifname) != _vifs.end())
@@ -513,7 +513,7 @@ RIB<A>::new_vif(const string& vifname, const Vif& vif)
 	new_rib_vif->copy_in(vif);
     } else {
 	// Create a new vif
-	new_rib_vif = new RibVif(this, vif);
+	new_rib_vif = new RibVif<A>(this, vif);
     }
     XLOG_ASSERT(new_rib_vif != NULL);
     _vifs[vifname] = new_rib_vif;
@@ -545,11 +545,11 @@ template <typename A>
 int
 RIB<A>::delete_vif(const string& vifname)
 {
-    map<string, RibVif*>::iterator vi = _vifs.find(vifname);
+    typename map<string, RibVif<A>*>::iterator vi = _vifs.find(vifname);
     if (vi == _vifs.end()) {
 	return XORP_ERROR;
     }
-    RibVif* rib_vif = vi->second;
+    RibVif<A>* rib_vif = vi->second;
 
     if (rib_vif->is_underlying_vif_up()) {
 	//
@@ -590,9 +590,9 @@ RIB<A>::delete_vif(const string& vifname)
 
 template <typename A>
 void
-RIB<A>::destroy_deleted_vif(RibVif* rib_vif)
+RIB<A>::destroy_deleted_vif(RibVif<A>* rib_vif)
 {
-    map<string, RibVif*>::iterator vi = _deleted_vifs.find(rib_vif->name());
+    typename map<string, RibVif<A>*>::iterator vi = _deleted_vifs.find(rib_vif->name());
 
     XLOG_ASSERT(vi != _deleted_vifs.end());
     XLOG_ASSERT(vi->second == rib_vif);
@@ -611,7 +611,7 @@ RIB<A>::set_vif_flags(const string& vifname,
 		      bool is_up,
 		      uint32_t mtu)
 {
-    RibVif* vif = find_vif(vifname);
+    RibVif<A>* vif = find_vif(vifname);
     if (!vif) {
 	XLOG_ERROR("Attempting to set flags to non-existant Vif \"%s\"",
 		   vifname.c_str());
@@ -681,7 +681,7 @@ RIB<A>::add_vif_address(const string&	vifname,
 			const A&	broadcast_addr,
 			const A&	peer_addr)
 {
-    RibVif* vif = find_vif(vifname);
+    RibVif<A>* vif = find_vif(vifname);
     if (!vif) {
 	XLOG_ERROR("Attempting to add address to non-existant Vif \"%s\"",
 		   vifname.c_str());
@@ -701,7 +701,7 @@ int
 RIB<A>::delete_vif_address(const string& vifname,
 			   const A& addr)
 {
-    RibVif* vif = find_vif(vifname);
+    RibVif<A>* vif = find_vif(vifname);
     if (!vif) {
 	XLOG_ERROR("Attempting to delete address from non-existant Vif \"%s\"",
 		   vifname.c_str());
@@ -783,7 +783,7 @@ RIB<A>::add_route(const string&		tablename,
 	//
 	// Add a route with explicitly specified network interface
 	//
-	RibVif* vif = find_vif(vifname);
+	RibVif<A>* vif = find_vif(vifname);
 	if (!vif) {
 	    XLOG_ERROR("Attempting to add route to table \"%s\" "
 		       "(prefix %s next-hop %s ifname %s vifname %s): "
@@ -804,7 +804,7 @@ RIB<A>::add_route(const string&		tablename,
     //
     // Find the vif so we can see if the nexthop is directly connected
     //
-    RibVif* vif = NULL;
+    RibVif<A>* vif = NULL;
     IPNextHop<A>* nexthop = NULL;
     do {
 	//
@@ -1600,14 +1600,14 @@ RIB<A>::push_routes()
 }
 
 template <typename A>
-RibVif*
+RibVif<A>*
 RIB<A>::find_vif(const A& addr)
 {
     debug_msg("RIB::find_vif: %s\n", addr.str().c_str());
-    map<string, RibVif*>::iterator iter;
+    typename map<string, RibVif<A>*>::iterator iter;
 
     for (iter = _vifs.begin(); iter != _vifs.end(); ++iter) {
-	RibVif* vif = iter->second;
+	RibVif<A>* vif = iter->second;
 	if (!vif->is_underlying_vif_up())
 	    continue;		// XXX: ignore vifs that are not up
 	if (vif->is_my_addr(addr))
@@ -1619,11 +1619,11 @@ RIB<A>::find_vif(const A& addr)
 }
 
 template <typename A>
-RibVif*
+RibVif<A>*
 RIB<A>::find_vif(const string& vifname)
 {
     debug_msg("RIB::find_vif: %s\n", vifname.c_str());
-    map<string, RibVif*>::iterator vi = _vifs.find(vifname);
+    typename map<string, RibVif<A>*>::iterator vi = _vifs.find(vifname);
     if (vi == _vifs.end()) {
 	return NULL;
     }

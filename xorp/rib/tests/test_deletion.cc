@@ -49,8 +49,8 @@ main(int /* argc */, char* argv[])
 
     Vif tmp_vif1("vif1");
     Vif tmp_vif2("vif2");
-    RibVif vif1((RIB<IPv4>*)NULL, tmp_vif1);
-    RibVif vif2((RIB<IPv4>*)NULL, tmp_vif2);
+    RibVif<IPv4> vif1(NULL, tmp_vif1);
+    RibVif<IPv4> vif2(NULL, tmp_vif2);
     IPPeerNextHop<IPv4> nh1(IPv4("1.0.0.1"));
     IPPeerNextHop<IPv4> nh2(IPv4("1.0.0.2"));
     Protocol protocol("test", IGP, 0);
