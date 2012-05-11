@@ -765,16 +765,16 @@ XrlRibTarget::rib_0_1_get_protocol_admin_distances(
 
     if (ipv4 && unicast) {
 	// ipv4 unicast
-	map<string, uint32_t>& rad = _urib4.get_protocol_admin_distances();
-	map<string, uint32_t>::iterator iter;
+	const map<string, uint32_t>& rad = _urib4.get_protocol_admin_distances();
+	map<string, uint32_t>::const_iterator iter;
 	for (iter = rad.begin(); iter != rad.end(); ++iter) {
 	    protocols.append(XrlAtom(iter->first));
 	    admin_distances.append(XrlAtom(iter->second));
 	}
     } else if (ipv4 && !unicast) {
 	// ipv4 multicast
-	map<string, uint32_t>& rad = _mrib4.get_protocol_admin_distances();
-	map<string, uint32_t>::iterator iter;
+	const map<string, uint32_t>& rad = _mrib4.get_protocol_admin_distances();
+	map<string, uint32_t>::const_iterator iter;
 	for (iter = rad.begin(); iter != rad.end(); ++iter) {
 	    protocols.append(XrlAtom(iter->first));
 	    admin_distances.append(XrlAtom(iter->second));
@@ -782,16 +782,16 @@ XrlRibTarget::rib_0_1_get_protocol_admin_distances(
 #ifdef HAVE_IPV6
     } else if (!ipv4 && unicast) {
 	// ipv6 unicast
-	map<string, uint32_t>& rad = _urib6.get_protocol_admin_distances();
-	map<string, uint32_t>::iterator iter;
+	const map<string, uint32_t>& rad = _urib6.get_protocol_admin_distances();
+	map<string, uint32_t>::const_iterator iter;
 	for (iter = rad.begin(); iter != rad.end(); ++iter) {
 	    protocols.append(XrlAtom(iter->first));
 	    admin_distances.append(XrlAtom(iter->second));
 	}
     } else if (!ipv4 && !unicast) {
 	// ipv6 multicast
-	map<string, uint32_t>& rad = _mrib6.get_protocol_admin_distances();
-	map<string, uint32_t>::iterator iter;
+	const map<string, uint32_t>& rad = _mrib6.get_protocol_admin_distances();
+	map<string, uint32_t>::const_iterator iter;
 	for (iter = rad.begin(); iter != rad.end(); ++iter) {
 	    protocols.append(XrlAtom(iter->first));
 	    admin_distances.append(XrlAtom(iter->second));
