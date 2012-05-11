@@ -105,7 +105,7 @@ ExtIntTable<A>::add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller)
 	    const IPRouteEntry<A>* nexthop_route;
 	    nexthop_route = lookup_route_in_igp_parent(nexthop_addr);
 	    if (nexthop_route != NULL) {
-		RibVif* vif = nexthop_route->vif();
+		RibVif<A>* vif = nexthop_route->vif();
 		if ((vif != NULL)
 		    && (vif->is_same_subnet(IPvXNet(nexthop_route->net()))
 			|| vif->is_same_p2p(IPvX(nexthop_addr)))) {
@@ -166,7 +166,7 @@ ExtIntTable<A>::add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller)
 		    this->next_table()->delete_route(found, this);
 	    }
 
-	    RibVif* vif = nexthop_route->vif();
+	    RibVif<A>* vif = nexthop_route->vif();
 	    if ((vif != NULL)
 		&& (vif->is_same_subnet(IPvXNet(nexthop_route->net()))
 		    || vif->is_same_p2p(IPvX(nexthop_addr)))) {
