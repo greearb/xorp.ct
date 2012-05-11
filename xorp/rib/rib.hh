@@ -663,6 +663,14 @@ private:
     RibVif* find_vif(const A& addr);
 
     /**
+     * Find the virtual interface associated with vif name
+     *
+     * @param vifname the vif name to search for.
+     * @return pointer to RibVif on success, NULL otherwise.
+     */
+    RibVif* find_vif(const string& vifname);
+
+    /**
      * Find the IP External Nexthop class instance associated with an IP
      * address.
      *
