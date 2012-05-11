@@ -355,9 +355,19 @@ public:
     Profile& profile() {return _profile;}
 
     /**
+     * @return a const reference to the IPv4 unicast RIB.
+     */
+    const RIB<IPv4>& urib4() const { return _urib4; }
+
+    /**
      * @return a reference to the IPv4 unicast RIB.
      */
     RIB<IPv4>& urib4() { return _urib4; }
+
+    /**
+     * @return a const reference to the IPv4 multicast RIB.
+     */
+    const RIB<IPv4>& mrib4() const { return _mrib4; }
 
     /**
      * @return a reference to the IPv4 multicast RIB.
@@ -460,9 +470,19 @@ public:
     RIB<IPv6>& urib6() { return _urib6; }
 
     /**
+     * @return a const reference to the IPv6 unicast RIB.
+     */
+    const RIB<IPv6>& urib6() const { return _urib6; }
+
+    /**
      * @return a reference to the IPv6 multicast RIB.
      */
     RIB<IPv6>& mrib6() { return _mrib6; }
+
+    /**
+     * @return a const reference to the IPv6 multicast RIB.
+     */
+    const RIB<IPv6>& mrib6() const { return _mrib6; }
 
 
 #endif //ipv6
