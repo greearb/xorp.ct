@@ -186,6 +186,8 @@ env = Environment(
 
 prefix = env['prefix']
 
+env['builddir'] = builddir;
+
 print 'Build System Type: ', build
 print 'Host System Type:  ', host
 print 'Source path:       ', sourcedir

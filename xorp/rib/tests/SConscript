@@ -47,6 +47,7 @@ env.AppendUnique(LIBS = [
 	'xorp_rib',
 	#'xorp_rib_xrl', #notyet
 	'xorp_fea_client',
+	'xif_rib',
 	'xif_fea_ifmgr_mirror',
 	'xif_fea_ifmgr_replicator',
 	'xif_fti',
@@ -82,13 +83,47 @@ test_deletion = env.AutoTest(target = 'test_deletion',
                                  'test_deletion.cc',
                                  'rt_tab_expect.cc'
                              ])
+
 test_redist = env.AutoTest(target = 'test_redist',
                            source = 'test_redist.cc')
+
 test_register = env.AutoTest(target = 'test_register',
                              source = [
                                  'test_register.cc',
                                  'dummy_register_server.cc'
                              ])
+
+test_direct = env.AutoTest(target = 'test_rib_direct',
+                             source = [
+                                 'test_rib_direct.cc',
+                                 '../parser.cc',
+                                 'dummy_register_server.cc'
+                             ])
+
+test_xrl = env.AutoTest(target = 'test_rib_xrls',
+                             source = [
+                                 'test_rib_xrls.cc',
+                                 '../parser.cc',
+                                 'dummy_register_server.cc'
+                             ])
+
+if env['enable_tests']:
+    test_source_dir = os.path.join(env['xorp_sourcedir'], "rib")
+    test_source_dir = os.path.join(test_source_dir, "tests")
+
+    test_build_dir = os.path.join(env['builddir'], "rib")
+    test_build_dir = os.path.join(test_build_dir, "tests")
+
+    Execute(Copy(os.path.join(test_build_dir, "commands"),
+               os.path.join(test_source_dir, "commands")))
+
+    Execute(Copy(os.path.join(test_build_dir, "test_rib_direct.sh"),
+               os.path.join(test_source_dir, "test_rib_direct.sh")))
+
+    Execute(Copy(os.path.join(test_build_dir, "test_rib_xrls.sh"),
+               os.path.join(test_source_dir, "test_rib_xrls.sh")))
+
+    Default(test_deletion, test_redist, test_register, test_direct, test_xrl)
 
 # XXX NOTYET: part of compound test, scripting needed.
 #env = env.Clone()

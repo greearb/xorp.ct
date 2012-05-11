@@ -24,7 +24,7 @@
 
 
 
-#include "register_server.hh"
+#include "../register_server.hh"
 
 
 class DummyRegisterServer : public RegisterServer {

@@ -30,7 +30,7 @@
 #include "libxipc/xrl_std_router.hh"
 
 #include "rib_manager.hh"
-#include "parser.hh"
+#include "../parser.hh"
 #include "parser_direct_cmds.hh"
 #include "parser_xrl_cmds.hh"
 #include "dummy_register_server.hh"
