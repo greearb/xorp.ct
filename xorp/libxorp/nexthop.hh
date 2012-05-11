@@ -73,15 +73,19 @@ public:
      *
      * @return the type of the nexthop.  One of:
 <pre>
-   GENERIC_NEXTHOP	0
-   PEER_NEXTHOP		1
-   ENCAPS_NEXTHOP	2
-   EXTERNAL_NEXTHOP	3
-   DISCARD_NEXTHOP	4
-   UNREACHABLE_NEXTHOP	5
+   GENERIC_NEXTHOP		0
+   PEER_NEXTHOP			1
+   ENCAPS_NEXTHOP		2
+   EXTERNAL_NEXTHOP		3
+   DISCARD_NEXTHOP		4
+   UNREACHABLE_NEXTHOP		5
 </pre>
      */
-    virtual int type() = 0;
+protected:
+    static string type_str(int type);
+
+public:
+    virtual int type() const = 0;
 
     /**
      * Convert this nexthop from binary form to presentation format.
@@ -89,7 +93,9 @@ public:
      * @return C++ string with the human-readable ASCII representation
      * of the nexthop.
      */
-    virtual string str() const = 0;
+    virtual string str() const { return type_str(type()); }
+
+    friend ostream& operator<<(ostream& os, const NextHop& rhs);
 };
 
 
@@ -120,8 +126,16 @@ public:
      */
     const A& addr() const { return _addr; }
 
+    /**
+     * Convert this nexthop from binary form to presentation format.
+     *
+     * @return C++ string with the human-readable ASCII representation
+     * of the nexthop.
+     */
+    string str() const;
+
 protected:
-    A _addr;
+    const A _addr;
 };
 
 typedef IPNextHop<IPv4> IPv4NextHop;
@@ -155,15 +169,7 @@ public:
      *
      * @return the nexthop type.  In this case, it is PEER_NEXTHOP.
      */
-    int type() { return PEER_NEXTHOP; }
-
-    /**
-     * Convert this nexthop from binary form to presentation format.
-     *
-     * @return C++ string with the human-readable ASCII representation
-     * of the nexthop.
-     */
-    string str() const;
+    int type() const { return PEER_NEXTHOP; }
 
 private:
 
@@ -196,15 +202,7 @@ public:
      *
      * @return the nexthop type.  In this case, it is ENCAPS_NEXTHOP.
      */
-    int type() { return ENCAPS_NEXTHOP; }
-
-    /**
-     * Convert this nexthop from binary form to presentation format.
-     *
-     * @return C++ string with the human-readable ASCII representation
-     * of the nexthop.
-     */
-    string str() const;
+    int type() const { return ENCAPS_NEXTHOP; }
 
 private:
     //_cached_peer is the cached copy of the local peer we send the
@@ -248,15 +246,7 @@ public:
      *
      * @return the nexthop type.  In this case, it is EXTERNAL_NEXTHOP.
      */
-    int type() { return EXTERNAL_NEXTHOP; }
-
-    /**
-     * Convert this nexthop from binary form to presentation format.
-     *
-     * @return C++ string with the human-readable ASCII representation
-     * of the nexthop.
-     */
-    string str() const;
+    int type() const { return EXTERNAL_NEXTHOP; }
 
 private:
 
@@ -284,15 +274,7 @@ public:
      *
      * @return the nexthop type.  In this case, it is DISCARD_NEXTHOP.
      */
-    int type() { return DISCARD_NEXTHOP; }
-
-    /**
-     * Convert this nexthop from binary form to presentation format.
-     *
-     * @return C++ string with the human-readable ASCII representation
-     * of the nexthop.
-     */
-    string str() const;
+    int type() const { return DISCARD_NEXTHOP; }
 
 private:
 
@@ -316,15 +298,7 @@ public:
      *
      * @return the nexthop type.  In this case, it is UNREACHABLE_NEXTHOP.
      */
-    int type() { return UNREACHABLE_NEXTHOP; }
-
-    /**
-     * Convert this nexthop from binary form to presentation format.
-     *
-     * @return C++ string with the human-readable ASCII representation
-     * of the nexthop.
-     */
-    string str() const;
+    int type() const { return UNREACHABLE_NEXTHOP; }
 
 private:
 
