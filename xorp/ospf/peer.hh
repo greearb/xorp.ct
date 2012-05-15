@@ -329,7 +329,7 @@ class PeerOut {
     /**
      * Set a network to advertise OSPFv3 only.
      */
-    bool add_advertise_net(OspfTypes::AreaID area, A addr, uint32_t prefix);
+    bool add_advertise_net(OspfTypes::AreaID area, A addr, uint32_t prefix, uint16_t interface_cost);
 
     /**
      * Remove all the networks that are being advertised OSPFv3 only.
@@ -1112,7 +1112,7 @@ class Peer {
     /**
      * Set a network to advertise OSPFv3 only.
      */
-    bool add_advertise_net(A addr, uint32_t prefix);
+    bool add_advertise_net(A addr, uint32_t prefix, uint16_t interface_cost);
 
     /**
      * Remove all the networks that are being advertised OSPFv3 only.

@@ -3446,7 +3446,6 @@ AreaRouter<A>::stub_networksV3(bool timer)
 			if (prefix.get_network().masked_addr().
 			    is_linklocal_unicast())
 			    continue;
-			prefix.set_metric(0);
 			prefixes.push_back(prefix);
 		    }
 		}
