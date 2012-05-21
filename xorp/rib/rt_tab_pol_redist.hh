@@ -37,6 +37,83 @@
 #include "xrl/interfaces/policy_redist6_xif.hh"
 
 /**
+ * Wrapper class for Policy Redistribution Client
+ *
+ * It should be templatized for all classes
+ * with which we intend to use PolicyRedistTable class
+ *
+ * PolicyRedistClient specializations should have
+ * functions send_delete_route and send_add_route,
+ * which call the functions of the wrapped class.
+ */
+template<class A>
+class PolicyRedistClient { };
+
+template<>
+class PolicyRedistClient<IPv4> {
+public:
+    PolicyRedistClient(XrlRouter* rtr) : _redist_client(rtr) {}
+
+    bool send_delete_route(const char*	dst_xrl_target_name,
+	const IPv4Net&	network,
+	const bool&	unicast,
+	const bool&	multicast,
+	const XorpCallback1<void, const XrlError&>::RefPtr&	cb)
+    {
+	return this->_redist_client.send_delete_route4(dst_xrl_target_name,
+		network, unicast, multicast, cb);
+    }
+
+    bool send_add_route(const char*	dst_xrl_target_name,
+	const IPv4Net&	network,
+	const bool&	unicast,
+	const bool&	multicast,
+	const IPv4&	nexthop,
+	const uint32_t&	metric,
+	const XrlAtomList&	policytags,
+	const XorpCallback1<void, const XrlError&>::RefPtr&	cb)
+    {
+	return this->_redist_client.send_add_route4(dst_xrl_target_name,
+		network, unicast, multicast, nexthop, metric, policytags, cb);
+    }
+
+protected:
+    XrlPolicyRedist4V0p1Client _redist_client;
+};
+
+template<>
+class PolicyRedistClient<IPv6> {
+public:
+    PolicyRedistClient(XrlRouter* rtr) : _redist_client(rtr) {}
+
+    bool send_delete_route(const char*	dst_xrl_target_name,
+	const IPv6Net&	network,
+	const bool&	unicast,
+	const bool&	multicast,
+	const XorpCallback1<void, const XrlError&>::RefPtr&	cb)
+    {
+	return this->_redist_client.send_delete_route6(dst_xrl_target_name,
+		network, unicast, multicast, cb);
+    }
+
+    bool send_add_route(const char*	dst_xrl_target_name,
+	const IPv6Net&	network,
+	const bool&	unicast,
+	const bool&	multicast,
+	const IPv6&	nexthop,
+	const uint32_t&	metric,
+	const XrlAtomList&	policytags,
+	const XorpCallback1<void, const XrlError&>::RefPtr&	cb)
+    {
+	return this->_redist_client.send_add_route6(dst_xrl_target_name,
+		network, unicast, multicast, nexthop, metric, policytags, cb);
+    }
+
+protected:
+    XrlPolicyRedist6V0p1Client _redist_client;
+};
+
+/**
  * @short This table redistributes routes to protocols according to policytags.
  *
  * Based on the policy-tags in a route, this table will request a protocol to
@@ -120,8 +197,7 @@ private:
 
     PolicyRedistMap&		_redist_map;
 
-    XrlPolicyRedist4V0p1Client	_redist4_client;
-    XrlPolicyRedist6V0p1Client	_redist6_client;
+    PolicyRedistClient<A>	_redist_client;
 
     bool			_multicast;
 };
