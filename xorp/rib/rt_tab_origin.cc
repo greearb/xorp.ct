@@ -129,7 +129,7 @@ OriginTable<A>::delete_route(const IPNet<A>& net)
     typename Trie<A, const IPRouteEntry<A>* >::iterator iter;
     iter = _ip_route_table->lookup_node(net);
     if (iter != _ip_route_table->end()) {
-	const IPRouteEntry<A>* found = iter.payload();
+	const IPRouteEntry<A>* found = *iter;
 	_ip_route_table->erase(net);
 	// Propagate to next table
 	if (this->next_table() != NULL)
@@ -160,7 +160,7 @@ OriginTable<A>::delete_all_routes()
     for (iter = _ip_route_table->begin();
 	 iter != _ip_route_table->end();
 	 ++iter) {
-	delete iter.payload();
+	delete *iter;
     }
     _ip_route_table->delete_all_nodes();
 }
@@ -196,7 +196,7 @@ OriginTable<A>::lookup_route(const IPNet<A>& net) const
     debug_msg("OriginTable: Looking up route %s\n", net.str().c_str());
     typename Trie<A, const IPRouteEntry<A>* >::iterator iter;
     iter = _ip_route_table->lookup_node(net);
-    return (iter == _ip_route_table->end()) ? NULL : iter.payload();
+    return (iter == _ip_route_table->end()) ? NULL : *iter;
 }
 
 template<class A>
@@ -213,7 +213,7 @@ OriginTable<A>::lookup_route(const A& addr) const
     if (iter == _ip_route_table->end()) {
 	debug_msg("No match found\n");
     }
-    return (iter == _ip_route_table->end()) ? NULL : iter.payload();
+    return (iter == _ip_route_table->end()) ? NULL : *iter;
 }
 
 template<class A>
@@ -224,7 +224,7 @@ OriginTable<A>::lookup_route_range(const A& addr) const
     typename Trie<A, const IPRouteEntry<A>* >::iterator iter;
     iter = _ip_route_table->find(addr);
 
-    route = (iter == _ip_route_table->end()) ? NULL : iter.payload();
+    route = (iter == _ip_route_table->end()) ? NULL : *iter;
 
     A bottom_addr, top_addr;
     _ip_route_table->find_bounds(addr, bottom_addr, top_addr);
