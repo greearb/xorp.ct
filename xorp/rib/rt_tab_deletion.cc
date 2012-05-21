@@ -77,7 +77,7 @@ DeletionTable<A>::add_route(const IPRouteEntry<A>& route,
 	// remove the route from our trie, then pass the new route
 	// downstream.
 	//
-	const IPRouteEntry<A>* our_route = iter.payload();
+	const IPRouteEntry<A>* our_route = *iter;
 	_ip_route_table->erase(route.net());
 	this->next_table()->delete_route(our_route, this);
 	delete our_route;
@@ -109,7 +109,7 @@ DeletionTable<A>::delete_all_routes()
     for (iter = _ip_route_table->begin();
 	 iter != _ip_route_table->end();
 	 ++iter) {
-	delete iter.payload();
+	delete *iter;
     }
     _ip_route_table->delete_all_nodes();
 }
@@ -137,7 +137,7 @@ DeletionTable<A>::lookup_route(const IPNet<A>& net) const
 	// still there (for consistency reasons) until we've got round
 	// to telling downstream that they've actually gone.
 	//
-	return (iter == _ip_route_table->end()) ? NULL : iter.payload();
+	return (iter == _ip_route_table->end()) ? NULL : *iter;
     }
 }
 
@@ -159,7 +159,7 @@ DeletionTable<A>::lookup_route(const A& addr) const
 	    // return the more specific route.  If the two are the same
 	    // this is a fatal error.
 	    //
-	    const IPRouteEntry<A>* our_route = iter.payload();
+	    const IPRouteEntry<A>* our_route = *iter;
 	    XLOG_ASSERT(our_route->prefix_len() != parent_route->prefix_len());
 
 	    if (our_route->prefix_len() > parent_route->prefix_len()) {
@@ -177,7 +177,7 @@ DeletionTable<A>::lookup_route(const A& addr) const
     // still there (for consistency reasons) until we've got round
     // to telling downstream that they've actually gone.
     //
-    return (iter == _ip_route_table->end()) ? NULL : iter.payload();
+    return (iter == _ip_route_table->end()) ? NULL : *iter;
 }
 
 template<class A>
@@ -191,7 +191,7 @@ DeletionTable<A>::lookup_route_range(const A& addr) const
     if (iter == _ip_route_table->end())
 	route = NULL;
     else
-	route = iter.payload();
+	route = *iter;
 
     A bottom_addr, top_addr;
     _ip_route_table->find_bounds(addr, bottom_addr, top_addr);
@@ -221,7 +221,7 @@ DeletionTable<A>::background_deletion_pass()
 
     typename Trie<A, const IPRouteEntry<A>* >::iterator iter;
     iter = _ip_route_table->begin();
-    const IPRouteEntry<A>* our_route = iter.payload();
+    const IPRouteEntry<A>* our_route = *iter;
     _ip_route_table->erase(our_route->net());
     this->next_table()->delete_route(our_route, this);
     delete our_route;
