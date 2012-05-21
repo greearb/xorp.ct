@@ -368,7 +368,7 @@ ExtIntTable<A>::lookup_in_resolved_table(const IPNet<A>& net)
     if (iter == _ip_route_table.end())
 	return NULL;
     else
-	return iter.payload();
+	return *iter;
 }
 
 template<class A>
@@ -494,7 +494,7 @@ ExtIntTable<A>::recalculate_nexthops(const IPRouteEntry<A>& new_route)
 	debug_msg("no old route\n");
 	return;
     }
-    old_route = iter.payload();
+    old_route = *iter;
     debug_msg("old route was: %s\n", old_route->str().c_str());
 
     const ResolvedIPRouteEntry<A>* found;
@@ -557,7 +557,7 @@ ExtIntTable<A>::lookup_route(const IPNet<A>& ipv4net) const
 
     iter = _ip_route_table.lookup_node(ipv4net);
     if (iter != _ip_route_table.end()) {
-	return iter.payload();
+	return *iter;
     }
     debug_msg("Not found in resolved table\n");
 #ifdef DEBUG_LOGGING
@@ -596,7 +596,7 @@ ExtIntTable<A>::lookup_route(const A& addr) const
     typename Trie<A, const ResolvedIPRouteEntry<A>* >::iterator trie_iter;
     trie_iter = _ip_route_table.find(addr);
     if (trie_iter != _ip_route_table.end()) {
-	found.push_back(trie_iter.payload());
+	found.push_back(*trie_iter);
     }
 
     int_found = lookup_route_in_igp_parent(addr);
@@ -753,7 +753,7 @@ ExtIntTable<A>::lookup_route_range(const A& addr) const
     if (iter == _ip_route_table.end())
 	route = NULL;
     else
-	route = iter.payload();
+	route = *iter;
 
     A bottom_addr, top_addr;
     _ip_route_table.find_bounds(addr, bottom_addr, top_addr);
