@@ -706,7 +706,8 @@ PeerManager<A>::recompute_addresses_peer(const OspfTypes::PeerID peerid,
     }
 
     set<AddressInfo<A> >& info = _peers[peerid]->get_address_info(area);
-    
+    uint16_t interface_cost = _peers[peerid]->get_interface_cost();
+
     // Unconditionally remove all the global addresses that are being
     // advertised.
     _peers[peerid]->remove_all_nets(area);
@@ -741,7 +742,8 @@ PeerManager<A>::recompute_addresses_peer(const OspfTypes::PeerID peerid,
 		continue;
 	    }
 	    if (!_peers[peerid]->add_advertise_net(area, (*i),
-						   interface_prefix_length)) {
+						   interface_prefix_length,
+						   interface_cost)) {
 		XLOG_WARNING("Unable to advertise %s in Link-LSA\n",
 			     cstring(*i));
 	    }
@@ -751,7 +753,7 @@ PeerManager<A>::recompute_addresses_peer(const OspfTypes::PeerID peerid,
 	for (i = info.begin(); i != info.end(); i++) {
 	    if ((*i)._enabled) {
 		if (!_peers[peerid]->add_advertise_net(area, (*i)._address,
-						      (*i)._prefix)) {
+						       (*i)._prefix, interface_cost)) {
 		    XLOG_WARNING("Unable to advertise %s in Link-LSA\n",
 				 cstring((*i)._address));
 		}

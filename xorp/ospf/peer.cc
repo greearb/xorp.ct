@@ -708,14 +708,14 @@ PeerOut<A>::get_attached_routers(OspfTypes::AreaID area,
 
 template <typename A>
 bool
-PeerOut<A>::add_advertise_net(OspfTypes::AreaID area, A addr, uint32_t prefix)
+PeerOut<A>::add_advertise_net(OspfTypes::AreaID area, A addr, uint32_t prefix, uint16_t interface_cost)
 {
     if (0 == _areas.count(area)) {
 	XLOG_ERROR("Unknown Area %s", pr_id(area).c_str());
 	return false;
     }
 
-    return _areas[area]->add_advertise_net(addr, prefix);
+    return _areas[area]->add_advertise_net(addr, prefix, interface_cost);
 }
 
 template <typename A>
@@ -3222,7 +3222,7 @@ Peer<A>::get_interface_id() const
 
 template <>
 bool
-Peer<IPv4>::add_advertise_net(IPv4 /*addr*/, uint32_t /*prefix_length*/)
+Peer<IPv4>::add_advertise_net(IPv4 /*addr*/, uint32_t /*prefix_length*/, uint16_t /*cost*/)
 {
     XLOG_FATAL("Only IPv6 not IPv4");
 
@@ -3231,7 +3231,7 @@ Peer<IPv4>::add_advertise_net(IPv4 /*addr*/, uint32_t /*prefix_length*/)
 
 template <>
 bool
-Peer<IPv6>::add_advertise_net(IPv6 addr, uint32_t prefix_length)
+Peer<IPv6>::add_advertise_net(IPv6 addr, uint32_t prefix_length, uint16_t interface_cost)
 {
     XLOG_ASSERT(OspfTypes::VirtualLink != get_linktype());
 
@@ -3241,14 +3241,16 @@ Peer<IPv6>::add_advertise_net(IPv6 addr, uint32_t prefix_length)
     if (addr.is_linklocal_unicast())
 	return false;
 
-    IPv6Prefix prefix(_ospf.get_version());
+    IPv6Prefix prefix(_ospf.get_version(), true);
     prefix.set_network(IPNet<IPv6>(addr, prefix_length));
+    prefix.set_metric(interface_cost);
     llsa->get_prefixes().push_back(prefix);
 
     // Add a host route that can be used if necessary to advertise a
     // virtual link endpoint.
-    IPv6Prefix host_prefix(_ospf.get_version());
+    IPv6Prefix host_prefix(_ospf.get_version(), true);
     host_prefix.set_network(IPNet<IPv6>(addr, IPv6::ADDR_BITLEN));
+    host_prefix.set_metric(interface_cost);
     host_prefix.set_la_bit(true);
     llsa->get_prefixes().push_back(host_prefix);
 
