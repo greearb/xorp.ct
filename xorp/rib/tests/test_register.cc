@@ -61,7 +61,6 @@ test_route_range(const string& ipv4,
 		 const string& lower,
 		 const string& upper)
 {
-    RouteRange<IPv4>* rr;
     RibVerifyType verifytype;
 
     if (verifytypestr == "miss")
@@ -77,7 +76,7 @@ test_route_range(const string& ipv4,
 	abort();
     }
 
-    rr = rib_ptr->route_range_lookup(IPv4(ipv4.c_str()));
+    RouteRange<IPv4>* const rr = rib_ptr->route_range_lookup(IPv4(ipv4.c_str()));
     if (verbose)
 	printf("**RouteRange for %s\n", ipv4.c_str());
     if (rr->route() != NULL) {
@@ -137,6 +136,7 @@ test_route_range(const string& ipv4,
 	printf("**should be: %s\n", upper.c_str());
 	abort();
     }
+    delete rr;
     // printf("****PASS****\n");
 }
 
@@ -287,11 +287,12 @@ main (int /* argc */, char* argv[])
 	== XORP_OK) {
 	abort();
     }
+    cout << "Error is expected!" << endl;
     if (rib.route_deregister(IPv4Net("1.0.5.0", 26), string("foo2"))
 	== XORP_OK) {
 	abort();
     }
-
+    cout << "Error is expected!" << endl;
     // Re-register interest
     rreg = rib.route_register(IPv4("1.0.5.1"), string("foo"));
     if (verbose)
