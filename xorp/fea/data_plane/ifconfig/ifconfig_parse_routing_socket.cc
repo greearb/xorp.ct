@@ -206,7 +206,6 @@ IfConfigGetSysctl::parse_buffer_routing_socket(IfConfig& ifconfig,
 					       IfTree& iftree,
 					       const vector<uint8_t>& buffer)
 {
-    AlignData<struct if_msghdr> align_data(buffer);
     bool recognized = false;
     uint32_t if_index_hint = 0;
     const struct if_msghdr* ifm;
@@ -214,9 +213,9 @@ IfConfigGetSysctl::parse_buffer_routing_socket(IfConfig& ifconfig,
 
     UNUSED(ifconfig);
 
-    ifm = align_data.payload();
+    ifm = &(buffer[0]);
     for (offset = 0; offset < buffer.size(); offset += ifm->ifm_msglen) {
-	ifm = align_data.payload_by_offset(offset);
+	ifm = &(buffer[offset]);
 	if (ifm->ifm_version != RTM_VERSION) {
 #if defined(RTM_OVERSION) && defined(HOST_OS_OPENBSD)
 	    //
