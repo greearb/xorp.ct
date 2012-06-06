@@ -47,6 +47,20 @@ ExtIntTable<A>::ExtIntTable(RouteTable<A>* ext_table, RouteTable<A>* int_table)
 }
 
 template<class A>
+ExtIntTable<A>::~ExtIntTable()
+{
+    while (! _ip_unresolved_table.empty()) {
+	delete _ip_unresolved_table.begin()->second;
+	_ip_unresolved_table.erase(_ip_unresolved_table.begin());
+    }
+
+    while (! _ip_route_table.empty()) {
+	delete *_ip_route_table.begin();
+	_ip_route_table.erase(_ip_route_table.begin());
+    }
+}
+
+template<class A>
 int
 ExtIntTable<A>::add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller)
 {
