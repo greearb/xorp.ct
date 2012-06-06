@@ -663,6 +663,8 @@ public:
 #endif // compatibility
     int route_count() const			{ return _payload_count; }
 
+    bool empty() const				{ return (_payload_count == 0); }
+
     void print() const;
 
 private:
