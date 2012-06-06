@@ -23,9 +23,6 @@
 #define __RIB_RIB_HH__
 
 
-
-
-
 #include "libxorp/xorp.h"
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
@@ -369,7 +366,8 @@ public:
     virtual const A& lookup_route(const A& lookupaddr);
 
     /**
-     * Used for debugging only
+     * Used for debugging only,
+     * Caller should free the memory
      */
     virtual RouteRange<A>* route_range_lookup(const A& lookupaddr);
 
@@ -575,7 +573,7 @@ private:
      * @param origin_tablename The name of the origin table.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int add_policy_connected_table(const string& origin_tablename);
+    int add_policy_connected_table(RouteTable<A>* parent);
 
     /**
      * Add a RedistTable behind OriginTable.  This allows routes
@@ -584,7 +582,7 @@ private:
      * @param origin_tablename Name of OriginTable.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int add_redist_table(const string& origin_tablename);
+    int add_redist_table(RouteTable<A>* parent);
 
     /**
      * track_back trough the RouteTables' parent pointers to find the
@@ -614,15 +612,47 @@ private:
     RouteTable<A>* track_forward(RouteTable<A>* rt, int typemask) const;
 
     /**
-     * Find a routing table, given its table name
+     * Find a origin routing table, given its table name
      *
      * @param tablename the name of the table to search for.
      * @return pointer to table if exists, NULL otherwise.
      */
-    RouteTable<A>* find_table(const string& tablename);
+    OriginTable<A>* find_origin_table(const string& tablename);
 
     /**
-     * Find a routing table, given its protocol name and XRL target
+     * Find a IGP origin routing table, given its table name
+     *
+     * @param tablename the name of the table to search for.
+     * @return pointer to table if exists, NULL otherwise.
+     */
+    OriginTable<A>* find_igp_origin_table(const string& tablename);
+
+    /**
+     * Find a EGP origin routing table, given its table name
+     *
+     * @param tablename the name of the table to search for.
+     * @return pointer to table if exists, NULL otherwise.
+     */
+    OriginTable<A>* find_egp_origin_table(const string& tablename);
+
+    /**
+     * Find a merged routing table, given its table name
+     *
+     * @param tablename the name of the table to search for.
+     * @return pointer to table if exists, NULL otherwise.
+     */
+    MergedTable<A>* find_merged_table(const string& tablename);
+
+    /**
+     * Find a redist routing table, given its table name
+     *
+     * @param tablename the name of the table to search for.
+     * @return pointer to table if exists, NULL otherwise.
+     */
+    RedistTable<A>* find_redist_table(const string& tablename);
+
+    /**
+     * Find a origin routing table, given its protocol name and XRL target
      * instance name.
      *
      * @param tablename the name of the protocol to search for.
@@ -635,7 +665,7 @@ private:
 					   const string& target_instance);
 
     /**
-     * Add table to RIB, but don't do any plumbing.
+     * Add origin table to RIB, but don't do any plumbing.
      *
      * It is an error to add the same table twice or multiple tables
      * with the same name.
@@ -644,16 +674,31 @@ private:
      *
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int add_table(RouteTable<A>* table);
+    int add_table(OriginTable<A>* table);
 
     /**
-     * Remove table from RIB, but don't do any unplumbing.
-     * The table is not deleted by this.
+     * Add merged table to RIB, but don't do any plumbing.
      *
-     * @param tablename the name of the table to be removed.
+     * It is an error to add the same table twice or multiple tables
+     * with the same name.
+     *
+     * @param table the table to be added.
+     *
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int remove_table(const string& tablename);
+    int add_table(MergedTable<A>* table);
+
+    /**
+     * Add redist table to RIB, but don't do any plumbing.
+     *
+     * It is an error to add the same table twice or multiple tables
+     * with the same name.
+     *
+     * @param table the table to be added.
+     *
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int add_table(RedistTable<A>* table);
 
     /**
      * Find the virtual interface associated with one of this router's
@@ -714,19 +759,33 @@ private:
     void flush();
 
 protected:
+    typedef map<string, OriginTable<A>* > OriginTableMap;
+    typedef map<string, RedistTable<A>* > RedistTableMap;
+    typedef map<string, MergedTable<A>* > MergedTableMap;
+    typedef map<string, Protocol* > ProtocolMap;
+
     RibManager&		_rib_manager;
     EventLoop&		_eventloop;
     RouteTable<A>*	_final_table;
-    RegisterTable<A>*	_register_table;
 
     bool		_multicast;
     bool		_errors_are_fatal;
 
-    PolicyRedistTable<A>*		_policy_redist_table;
 
-    list<RouteTable<A>* >		_tables;
-    map<string, Protocol* >		_protocols;
-    map<string, OriginTable<A>* >	_routing_protocol_instances;
+
+    OriginTableMap		_igp_origin_tables;
+    OriginTableMap		_egp_origin_tables;
+    MergedTableMap		_merged_tables;
+    RedistTableMap		_redist_tables;
+
+    RegisterTable<A>*		_register_table;
+    PolicyRedistTable<A>*	_policy_redist_table;
+    PolicyConnectedTable<A>*	_policy_connected_table;
+    ExtIntTable<A>*		_ext_int_table;
+
+
+    ProtocolMap				_protocols;
+    OriginTableMap			_routing_protocol_instances;
     map<string, RibVif<A>*>		_vifs;
     map<string, RibVif<A>*>		_deleted_vifs;
     map<string, uint32_t>		_admin_distances;
