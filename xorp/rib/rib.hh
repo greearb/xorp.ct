@@ -536,6 +536,50 @@ public:
 
 private:
     /**
+     * Used to plumb origin table in to the RouteTable tree
+     *
+     * @param ot origin table that we're going to plumb in
+     * @param existing_igp_table first occurrence of IGP origin table in tree
+     * @param existing_egp_table first occurrence of EGP origin table in tree
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int plumb_origin_table(OriginTable<A>*& ot,
+	    OriginTable<A>* existing_igp_table,
+	    OriginTable<A>* existing_egp_table);
+
+    /**
+     * Creates ExtInt table and plumbs OriginTable @ot ahead of it.
+     * It should be called ONLY if are adding EGP table and there are
+     * existing IGP tables but no existing EGP table, or if we're adding
+     * IGP table and there are existing EGP tables but no existing IGP tables
+     *
+     * @param ot OriginTable to plumb in
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int plumb_ahead_of_ext_int(OriginTable<A>*& ot);
+
+    /**
+     * Creates Merged table and plumbs OriginTable @ot ahead of it.
+     * It should be called ONLY if there are both existing EGP table and
+     * existing IGP table.
+     *
+     * @param ot OriginTable to plumb in
+     * @param existing_table existing origin table of the same type
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int plumb_ahead_of_merged(OriginTable<A>*& ot, RouteTable<A>* existing_table);
+
+    /**
+     * Plumbs OriginTable @ot ahead of the currently first RouteTable.
+     * It should be called ONLY if if there aren't existing EGP tables and
+     * existing IGP tables.
+     *
+     * @param ot OriginTable to plumb in
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int plumb_ahead_of_first(OriginTable<A>*& ot);
+
+    /**
      * Used to implement @ref add_igp_table and @ref add_egp_table.
      *
      * @param tablename the routing protocol name.
