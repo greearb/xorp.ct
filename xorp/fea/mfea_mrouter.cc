@@ -1322,7 +1322,7 @@ MfeaMrouter::add_multicast_vif(uint32_t vif_index)
 #else
 #ifdef USE_MULT_MCAST_TABLES
 	struct vifctl_ng vc_ng;
-	struct vifctl& vc = vc_ng.vif;
+	struct vifctl* vcp = &(vc_ng.vif);
 	memset(&vc_ng, 0, sizeof(vc_ng));
 	sopt_arg = &vc_ng;
 	sz = sizeof(vc_ng);
@@ -1333,25 +1333,26 @@ MfeaMrouter::add_multicast_vif(uint32_t vif_index)
 	}
 #else
 	struct vifctl vc;
+	struct vifctl* vcp = &vc;
 	memset(&vc, 0, sizeof(vc));
 	sopt_arg = &vc;
 	sz = sizeof(vc);
 #endif
 
-	vc.vifc_vifi = mfea_vif->vif_index();
+	vcp->vifc_vifi = mfea_vif->vif_index();
 	// XXX: we don't (need to) support VIFF_TUNNEL; VIFF_SRCRT is obsolete
-	vc.vifc_flags = 0;
+	vcp->vifc_flags = 0;
 	if (mfea_vif->is_pim_register())
-	    vc.vifc_flags	|= VIFF_REGISTER;
-	vc.vifc_threshold	= mfea_vif->min_ttl_threshold();
-	vc.vifc_rate_limit	= mfea_vif->max_rate_limit();
+	    vcp->vifc_flags	|= VIFF_REGISTER;
+	vcp->vifc_threshold	= mfea_vif->min_ttl_threshold();
+	vcp->vifc_rate_limit	= mfea_vif->max_rate_limit();
 	
 	if (mfea_vif->addr_ptr() == NULL) {
 	    XLOG_ERROR("add_multicast_vif() failed: vif %s has no address",
 		       mfea_vif->name().c_str());
 	    return (XORP_ERROR);
 	}
-	mfea_vif->addr_ptr()->copy_out(vc.vifc_lcl_addr);
+	mfea_vif->addr_ptr()->copy_out(vcp->vifc_lcl_addr);
 	//
 	// XXX: no need to copy any remote address to vc.vifc_rmt_addr,
 	// because we don't (need to) support IPIP tunnels.
@@ -1446,7 +1447,7 @@ MfeaMrouter::delete_multicast_vif(uint32_t vif_index)
 #ifdef HOST_OS_LINUX
 #ifdef USE_MULT_MCAST_TABLES
 	struct vifctl_ng vc_ng;
-	struct vifctl& vc = vc_ng.vif;
+	struct vifctl* vcp = &(vc_ng.vif);
 	memset(&vc_ng, 0, sizeof(vc_ng));
 	void* sopt_arg = &vc_ng;
 	size_t sz = sizeof(vc_ng);
@@ -1457,11 +1458,12 @@ MfeaMrouter::delete_multicast_vif(uint32_t vif_index)
 	}
 #else
 	struct vifctl vc;
+	struct vifctl* vcp = &vc;
 	memset(&vc, 0, sizeof(vc));
 	void* sopt_arg = &vc;
 	size_t sz = sizeof(vc);
 #endif
-	vc.vifc_vifi = mfea_vif->vif_index();
+	vcp->vifc_vifi = mfea_vif->vif_index();
 	ret_value = setsockopt(_mrouter_socket, IPPROTO_IP, MRT_DEL_VIF,
 			       sopt_arg, sz);
 #else
@@ -1579,7 +1581,7 @@ MfeaMrouter::add_mfc(const IPvX& source, const IPvX& group,
 
 #ifdef USE_MULT_MCAST_TABLES
 	struct mfcctl_ng mc_ng;
-	struct mfcctl& mc = mc_ng.mfc;
+	struct mfcctl* mcp = &(mc_ng.mfc);
 	memset(&mc_ng, 0, sizeof(mc_ng));
 	void* sopt_arg = &mc_ng;
 	size_t sz = sizeof(mc_ng);
@@ -1591,26 +1593,28 @@ MfeaMrouter::add_mfc(const IPvX& source, const IPvX& group,
 #else
 #if defined(HAVE_STRUCT_MFCCTL2) && defined(ENABLE_ADVANCED_MULTICAST_API)
 	struct mfcctl2 mc;
+	struct mfcctl2* mcp = &mc;
 #else
 	struct mfcctl mc;
+	struct mfcctl* mcp = &mc;
 #endif
-	void* sopt_arg = &mc;
+	void* sopt_arg = mcp;
 	size_t sz = sizeof(mc);
 	memset(&mc, 0, sizeof(mc));
 #endif
 	
-	source.copy_out(mc.mfcc_origin);
-	group.copy_out(mc.mfcc_mcastgrp);
-	mc.mfcc_parent = iif_vif_index;
+	source.copy_out(mcp->mfcc_origin);
+	group.copy_out(mcp->mfcc_mcastgrp);
+	mcp->mfcc_parent = iif_vif_index;
 	for (uint32_t i = 0; i < mfea_node().maxvifs(); i++) {
-	    mc.mfcc_ttls[i] = oifs_ttl[i];
+	    mcp->mfcc_ttls[i] = oifs_ttl[i];
 #if defined(HAVE_STRUCT_MFCCTL2_MFCC_FLAGS) && defined(ENABLE_ADVANCED_MULTICAST_API)
-	    mc.mfcc_flags[i] = oifs_flags[i];
+	    mcp->mfcc_flags[i] = oifs_flags[i];
 #endif
 	}
 #if defined(HAVE_STRUCT_MFCCTL2_MFCC_RP) && defined(ENABLE_ADVANCED_MULTICAST_API)
 	if (_mrt_api_mrt_mfc_rp)
-	    rp_addr.copy_out(mc.mfcc_rp);
+	    rp_addr.copy_out(mcp->mfcc_rp);
 #endif
 	
 	if (setsockopt(_mrouter_socket, IPPROTO_IP, MRT_ADD_MFC,
@@ -1707,7 +1711,7 @@ MfeaMrouter::delete_mfc(const IPvX& source, const IPvX& group)
 #else
 #ifdef USE_MULT_MCAST_TABLES
 	struct mfcctl_ng mc_ng;
-	struct mfcctl& mc = mc_ng.mfc;
+	struct mfcctl* mcp = &(mc_ng.mfc);
 	memset(&mc_ng, 0, sizeof(mc_ng));
 	void* sopt_arg = &mc_ng;
 	size_t sz = sizeof(mc_ng);
@@ -1718,12 +1722,13 @@ MfeaMrouter::delete_mfc(const IPvX& source, const IPvX& group)
 	}
 #else
 	struct mfcctl mc;
+	struct mfcctl* mcp = &mc;
 	void* sopt_arg = &mc;
 	size_t sz = sizeof(mc);
 #endif
 
-	source.copy_out(mc.mfcc_origin);
-	group.copy_out(mc.mfcc_mcastgrp);
+	source.copy_out(mcp->mfcc_origin);
+	group.copy_out(mcp->mfcc_mcastgrp);
 	
 	if (setsockopt(_mrouter_socket, IPPROTO_IP, MRT_DEL_MFC,
 		       sopt_arg, sz) < 0) {
@@ -2313,7 +2318,7 @@ MfeaMrouter::get_sg_count(const IPvX& source, const IPvX& group,
 	struct sioc_sg_req_ng sgreq_ng;
 	memset(&sgreq_ng, 0, sizeof(sgreq_ng));
 	sgreq_ng.table_id = getTableId();
-	struct sioc_sg_req& sgreq = (sgreq_ng.req);
+	struct sioc_sg_req* sgreqp = &(sgreq_ng.req);
 	void* o = &sgreq_ng;
 	ioctl_cmd = SIOCGETSGCNT_NG;
 	if (new_mcast_tables_api || !supports_mcast_tables) {
@@ -2322,12 +2327,13 @@ MfeaMrouter::get_sg_count(const IPvX& source, const IPvX& group,
 	}
 #else
 	struct sioc_sg_req sgreq;
+	struct sioc_sg_req* sgreqp = &sgreq;
 	memset(&sgreq, 0, sizeof(sgreq));
 	void* o = &sgreq;
 #endif
 	
-	source.copy_out(sgreq.src);
-	group.copy_out(sgreq.grp);
+	source.copy_out(sgreqp->src);
+	group.copy_out(sgreqp->grp);
 
 	//
 	// XXX: some older mcast code has bug in ip_mroute.c, get_sg_cnt():
@@ -2336,9 +2342,9 @@ MfeaMrouter::get_sg_count(const IPvX& source, const IPvX& group,
 	// TODO: remove the 0xffffffffU check in the future.
 	//
 	if ((ioctl(_mrouter_socket, ioctl_cmd, o) < 0)
-	    || ((sgreq.pktcnt == 0xffffffffU)
-		&& (sgreq.bytecnt == 0xffffffffU)
-		&& (sgreq.wrong_if == 0xffffffffU))) {
+	    || ((sgreqp->pktcnt == 0xffffffffU)
+		&& (sgreqp->bytecnt == 0xffffffffU)
+		&& (sgreqp->wrong_if == 0xffffffffU))) {
 	    XLOG_ERROR("ioctl(SIOCGETSGCNT(%i), (%s %s)) failed: %s",
 		       ioctl_cmd, cstring(source), cstring(group), strerror(errno));
 	    sg_count.set_pktcnt(~0U);
@@ -2346,9 +2352,9 @@ MfeaMrouter::get_sg_count(const IPvX& source, const IPvX& group,
 	    sg_count.set_wrong_if(~0U);
 	    return (XORP_ERROR);
 	}
-	sg_count.set_pktcnt(sgreq.pktcnt);
-	sg_count.set_bytecnt(sgreq.bytecnt);
-	sg_count.set_wrong_if(sgreq.wrong_if);
+	sg_count.set_pktcnt(sgreqp->pktcnt);
+	sg_count.set_bytecnt(sgreqp->bytecnt);
+	sg_count.set_wrong_if(sgreqp->wrong_if);
 #endif // HAVE_IPV4_MULTICAST_ROUTING
     }
     break;
@@ -2428,7 +2434,7 @@ MfeaMrouter::get_vif_count(uint32_t vif_index, VifCount& vif_count)
 	struct sioc_vif_req_ng vreq_ng;
 	memset(&vreq_ng, 0, sizeof(vreq_ng));
 	vreq_ng.table_id = getTableId();
-	struct sioc_vif_req& vreq = (vreq_ng.vif);
+	struct sioc_vif_req* vreqp = &(vreq_ng.vif);
 	void* o = &vreq_ng;
 	ioctl_cmd = SIOCGETVIFCNT_NG;
 	if (new_mcast_tables_api || !supports_mcast_tables) {
@@ -2437,11 +2443,12 @@ MfeaMrouter::get_vif_count(uint32_t vif_index, VifCount& vif_count)
 	}
 #else
 	struct sioc_vif_req vreq;
+	struct sioc_vif_req* vreqp = &vreq;
 	memset(&vreq, 0, sizeof(vreq));
 	void* o = &vreq;
 #endif
 
-	vreq.vifi = mfea_vif->vif_index();
+	vreqp->vifi = mfea_vif->vif_index();
 
 	if (ioctl(_mrouter_socket, ioctl_cmd, o) < 0) {
 	    XLOG_ERROR("ioctl(SIOCGETVIFCNT, vif %s) failed: %s",
@@ -2452,10 +2459,10 @@ MfeaMrouter::get_vif_count(uint32_t vif_index, VifCount& vif_count)
 	    vif_count.set_obytes(~0U);
 	    return (XORP_ERROR);
 	}
-	vif_count.set_icount(vreq.icount);
-	vif_count.set_ocount(vreq.ocount);
-	vif_count.set_ibytes(vreq.ibytes);
-	vif_count.set_obytes(vreq.obytes);
+	vif_count.set_icount(vreqp->icount);
+	vif_count.set_ocount(vreqp->ocount);
+	vif_count.set_ibytes(vreqp->ibytes);
+	vif_count.set_obytes(vreqp->obytes);
 #endif // HAVE_IPV4_MULTICAST_ROUTING
     }
     break;
