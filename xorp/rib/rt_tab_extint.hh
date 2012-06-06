@@ -70,6 +70,11 @@ public:
 		RouteTable<A>* int_table);
 
     /**
+     * ExtInt Destructor
+     */
+    virtual ~ExtIntTable();
+
+    /**
      * An add_route request from a parent table causes a lookup on the
      * other parent table.  If the route is better than the one from the
      * other table, or no route exists in the other table then it is
@@ -163,6 +168,7 @@ private:
     typedef typename ResolvedIPRouteEntry<A>::RouteBackLink ResolvedRouteBackLink;
     typedef typename UnresolvedIPRouteEntry<A>::RouteBackLink UnresolvedRouteBackLink;
     typedef multimap<const IPRouteEntry<A>*, ResolvedIPRouteEntry<A>* > IGPParentMultiMap;
+    typedef map<IPNet<A>, UnresolvedIPRouteEntry<A>* > IpUnresolvedTableMap;
 
     int delete_ext_route(const IPRouteEntry<A>* route,
 			 bool& is_delete_propagated);
@@ -199,7 +205,7 @@ private:
     RouteTable<A>*				_int_table;
     Trie<A, const ResolvedIPRouteEntry<A>* >	_ip_route_table;
     multimap<A, UnresolvedIPRouteEntry<A>* >	_ip_unresolved_nexthops;
-    map<IPNet<A>, UnresolvedIPRouteEntry<A>* >	_ip_unresolved_table;
+    IpUnresolvedTableMap			_ip_unresolved_table;
 
     // _ip_igp_parents gives us a fast way of finding a route
     // affected by a change in an igp parent route
