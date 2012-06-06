@@ -414,9 +414,8 @@ NetlinkSocket::force_recvmsg_flgs(int flags, bool only_kernel_messages,
 	//
 	bool is_end_of_message = true;
 	size_t new_size = off - last_mh_off;
-	AlignData<struct nlmsghdr> align_data(message);
-	const struct nlmsghdr* mh;
-	for (mh = align_data.payload_by_offset(last_mh_off);
+	struct nlmsghdr* mh;
+	for (mh = (struct nlmsghdr*)(&buffer[last_mh_off]);
 	     NLMSG_OK(mh, new_size);
 	     mh = NLMSG_NEXT(mh, new_size)) {
 	    XLOG_ASSERT(mh->nlmsg_len <= buffer.size());
@@ -570,18 +569,17 @@ NetlinkSocketReader::receive_data(NetlinkSocket& ns, uint32_t seqno,
  * @param buffer the buffer with the received data.
  */
 void
-NetlinkSocketReader::netlink_socket_data(const vector<uint8_t>& buffer)
+NetlinkSocketReader::netlink_socket_data(vector<uint8_t>& buffer)
 {
     size_t d = 0, off = 0;
-    AlignData<struct nlmsghdr> align_data(buffer);
 
     //
     // Copy data that has been requested to be cached by setting _cache_seqno
     //
-    _cache_data.resize(buffer.size());
+    _cache_data.reserve(buffer.size());
     while (d < buffer.size()) {
-	const struct nlmsghdr* nlh;
-	nlh = align_data.payload_by_offset(d);
+	struct nlmsghdr* nlh;
+	nlh = (struct nlmsghdr*)(&buffer[d]);
 	if ((nlh->nlmsg_seq == _cache_seqno)
 	    && (nlh->nlmsg_pid == _ns.nl_pid())) {
 	    XLOG_ASSERT(buffer.size() - d >= nlh->nlmsg_len);

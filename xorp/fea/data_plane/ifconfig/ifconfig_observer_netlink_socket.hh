@@ -17,7 +17,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_observer_netlink_socket.hh,v 1.9 2008/10/02 21:57:06 bms Exp $
 
 #ifndef __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_OBSERVER_NETLINK_SOCKET_HH__
 #define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_OBSERVER_NETLINK_SOCKET_HH__
@@ -68,9 +67,9 @@ public:
      * 
      * @param buffer the buffer with the received data.
      */
-    virtual void receive_data(const vector<uint8_t>& buffer);
+    virtual void receive_data(vector<uint8_t>& buffer);
     
-    void netlink_socket_data(const vector<uint8_t>& buffer);
+    void netlink_socket_data(vector<uint8_t>& buffer);
     
 private:
 };

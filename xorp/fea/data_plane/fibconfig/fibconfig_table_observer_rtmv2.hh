@@ -63,7 +63,7 @@ public:
      * 
      * @param buffer the buffer with the received data.
      */
-    virtual void receive_data(const vector<uint8_t>& buffer);
+    virtual void receive_data(vector<uint8_t>& buffer);
 
     virtual int notify_table_id_change(uint32_t new_tbl) {
 	UNUSED(new_tbl);
@@ -77,7 +77,7 @@ private:
 		      FibConfigTableObserverRtmV2& rtmo)
 	    : WinRtmPipeObserver(rs), _af(af), _rtmo(rtmo) {}
     	virtual ~RtmV2Observer() {}
-	void routing_socket_data(const vector<uint8_t>& buffer) {
+	void routing_socket_data(vector<uint8_t>& buffer) {
 	    _rtmo.receive_data(buffer);
 	}
     private:

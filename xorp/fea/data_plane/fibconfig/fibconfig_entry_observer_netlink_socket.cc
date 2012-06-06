@@ -119,14 +119,14 @@ FibConfigEntryObserverNetlinkSocket::stop(string& error_msg)
 }
 
 void
-FibConfigEntryObserverNetlinkSocket::receive_data(const vector<uint8_t>& buffer)
+FibConfigEntryObserverNetlinkSocket::receive_data(vector<uint8_t>& buffer)
 {
     // TODO: XXX: PAVPAVPAV: use it?
     UNUSED(buffer);
 }
 
 void
-FibConfigEntryObserverNetlinkSocket::netlink_socket_data(const vector<uint8_t>& buffer)
+FibConfigEntryObserverNetlinkSocket::netlink_socket_data(vector<uint8_t>& buffer)
 {
     receive_data(buffer);
 }

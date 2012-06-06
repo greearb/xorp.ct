@@ -97,7 +97,7 @@ public:
      */
     static int parse_buffer_netlink_socket(int family, const IfTree& iftree,
 					   list<FteX>& fte_list,
-					   const vector<uint8_t>& buffer,
+					   vector<uint8_t>& buffer,
 					   bool is_nlm_get_only, const FibConfig& fibconfig);
 
     /** Routing table ID that we are interested in might have changed.

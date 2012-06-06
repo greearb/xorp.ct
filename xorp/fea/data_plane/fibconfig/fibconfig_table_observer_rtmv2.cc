@@ -132,7 +132,7 @@ FibConfigTableObserverRtmV2::stop(string& error_msg)
 }
 
 void
-FibConfigTableObserverRtmV2::receive_data(const vector<uint8_t>& buffer)
+FibConfigTableObserverRtmV2::receive_data(vector<uint8_t>& buffer)
 {
     list<FteX> fte_list;
     FibConfigTableGetSysctl::FibMsgSet filter;

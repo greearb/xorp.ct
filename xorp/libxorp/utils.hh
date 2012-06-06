@@ -315,6 +315,7 @@ xorp_leading_zero_count_uint32(uint32_t x)
     return (32 - xorp_bit_count_uint32(x));
 }
 
+#if 0
 /**
  * A template class for aligning buffer data with a particular data type.
  *
@@ -396,5 +397,6 @@ private:
     const void*	_const_data;
     const A*	_payload;
 };
+#endif
 
 #endif // __LIBXORP_UTILS_HH__

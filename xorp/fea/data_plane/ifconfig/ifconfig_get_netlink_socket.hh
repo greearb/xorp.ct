@@ -17,8 +17,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_netlink_socket.hh,v 1.11 2008/10/02 21:57:05 bms Exp $
-
 #ifndef __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_GET_NETLINK_SOCKET_HH__
 #define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_GET_NETLINK_SOCKET_HH__
 
@@ -91,7 +89,7 @@ public:
      * @see IfTree.
      */
     static int parse_buffer_netlink_socket(IfConfig& ifconfig, IfTree& iftree,
-					   const vector<uint8_t>& buffer) {
+					   vector<uint8_t>& buffer) {
 	bool modified = false;
 	int nl_errno = 0;
 	return parse_buffer_netlink_socket(ifconfig, iftree, buffer, modified, nl_errno);
@@ -100,7 +98,7 @@ public:
     /** Same as above, but also return whether or not something was actually modified in iftree.
      */
     static int parse_buffer_netlink_socket(IfConfig& ifconfig, IfTree& iftree,
-					   const vector<uint8_t>& buffer,
+					   vector<uint8_t>& buffer,
 					   bool& modified, int& nl_errno);
     
 private:

@@ -85,8 +85,7 @@ FibConfigEntryObserverDummy::stop(string& error_msg)
 }
 
 void
-FibConfigEntryObserverDummy::receive_data(const vector<uint8_t>& buffer)
+FibConfigEntryObserverDummy::receive_data(vector<uint8_t>& buffer)
 {
-    // TODO: use it?
     UNUSED(buffer);
 }

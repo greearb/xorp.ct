@@ -17,7 +17,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_get_netlink_socket.hh,v 1.9 2008/10/02 21:56:55 bms Exp $
 
 #ifndef __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_ENTRY_GET_NETLINK_SOCKET_HH__
 #define __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_ENTRY_GET_NETLINK_SOCKET_HH__
@@ -113,7 +112,7 @@ public:
      * @see FteX.
      */
     static int parse_buffer_netlink_socket(const IfTree& iftree, FteX& fte,
-					   const vector<uint8_t>& buffer,
+					   vector<uint8_t>& buffer,
 					   bool is_nlm_get_only, const FibConfig& fibconfig);
 
     /** Routing table ID that we are interested in might have changed.

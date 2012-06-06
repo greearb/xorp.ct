@@ -87,10 +87,8 @@ FibConfigEntryObserverIPHelper::stop(string& error_msg)
 }
 
 void
-FibConfigEntryObserverIPHelper::receive_data(const vector<uint8_t>& buffer)
+FibConfigEntryObserverIPHelper::receive_data(vector<uint8_t>& buffer)
 {
-    debug_msg("called\n");
-
     // Do nothing.
     UNUSED(buffer);
 }

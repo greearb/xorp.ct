@@ -54,17 +54,16 @@ FibConfigTableGetNetlinkSocket::parse_buffer_netlink_socket(
     int family,
     const IfTree& iftree,
     list<FteX>& fte_list,
-    const vector<uint8_t>& buffer,
+    vector<uint8_t>& buffer,
     bool is_nlm_get_only, const FibConfig& fibconfig)
 {
     size_t buffer_bytes = buffer.size();
-    AlignData<struct nlmsghdr> align_data(buffer);
-    const struct nlmsghdr* nlh;
+    struct nlmsghdr* nlh;
 
-    for (nlh = align_data.payload();
+    for (nlh = (struct nlmsghdr*)(&buffer[0]);
 	 NLMSG_OK(nlh, buffer_bytes);
-	 nlh = NLMSG_NEXT(const_cast<struct nlmsghdr*>(nlh), buffer_bytes)) {
-	void* nlmsg_data = NLMSG_DATA(const_cast<struct nlmsghdr*>(nlh));
+	 nlh = NLMSG_NEXT(nlh, buffer_bytes)) {
+	void* nlmsg_data = NLMSG_DATA(nlh);
 
 	//XLOG_INFO("nlh->msg-type: %s (%i)",
 	//	  NlmUtils::nlm_msg_type(nlh->nlmsg_type).c_str(),
@@ -108,14 +107,14 @@ FibConfigTableGetNetlinkSocket::parse_buffer_netlink_socket(
 		    break;
 	    }
 
-	    const struct rtmsg* rtmsg;
+	    struct rtmsg* rtmsg;
 	    int rta_len = RTM_PAYLOAD(nlh);
 	    
 	    if (rta_len < 0) {
 		XLOG_ERROR("AF_NETLINK rtmsg length error");
 		break;
 	    }
-	    rtmsg = reinterpret_cast<const struct rtmsg*>(nlmsg_data);
+	    rtmsg = (struct rtmsg*)(nlmsg_data);
 	    if (rtmsg->rtm_family != family)
 		break;
 	    if (rtmsg->rtm_flags & RTM_F_CLONED)

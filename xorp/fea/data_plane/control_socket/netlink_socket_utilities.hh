@@ -99,7 +99,7 @@ public:
      */
     static string nlm_msg_type(uint32_t m);
 
-    static string nlm_print_msg(const vector<uint8_t>& message);
+    static string nlm_print_msg(vector<uint8_t>& message);
 
     /**
      * Get pointers to set of netlink rtattr entries.
@@ -110,8 +110,8 @@ public:
      * @param rta_array_n the maximum number of entries to store
      * in the array.
      */
-    static void get_rtattr(const struct rtattr* rtattr, int rta_len,
-			   const struct rtattr* rta_array[],
+    static void get_rtattr(struct rtattr* rtattr, int rta_len,
+			   struct rtattr* rta_array[],
 			   size_t rta_array_n);
     
     /**
@@ -126,7 +126,7 @@ public:
      */
     static int	nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 				   const struct nlmsghdr* nlh,
-				   const struct rtmsg* rtmsg, int rta_len,
+				   struct rtmsg* rtmsg, int rta_len,
 				   const FibConfig& fibconfig, string& err_msg);
 
     /**
@@ -155,16 +155,16 @@ public:
 						 string& error_msg);
 
     static void nlm_cond_newlink_to_fea_cfg(const IfTree& user_cfg, IfTree& iftree,
-					    const struct ifinfomsg* ifinfomsg,
+					    struct ifinfomsg* ifinfomsg,
 					    int rta_len, bool& modified);
 
 
-    static void nlm_dellink_to_fea_cfg(IfTree& iftree, const struct ifinfomsg* ifinfomsg,
+    static void nlm_dellink_to_fea_cfg(IfTree& iftree, struct ifinfomsg* ifinfomsg,
 				       int rta_len, bool& modified);
 
 
     static void nlm_cond_newdeladdr_to_fea_cfg(const IfTree& user_config, IfTree& iftree,
-					       const struct ifaddrmsg* ifaddrmsg,
+					       struct ifaddrmsg* ifaddrmsg,
 					       int rta_len, bool is_deleted, bool& modified);
 
 };

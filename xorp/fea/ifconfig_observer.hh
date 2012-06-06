@@ -89,7 +89,7 @@ public:
      * 
      * @param buffer the buffer with the received data.
      */
-    virtual void receive_data(const vector<uint8_t>& buffer) = 0;
+    virtual void receive_data(vector<uint8_t>& buffer) = 0;
 
 protected:
     // Misc other state

@@ -209,7 +209,7 @@ public:
      *
      * @param buffer the buffer with the received data.
      */
-    virtual void netlink_socket_data(const vector<uint8_t>& buffer) = 0;
+    virtual void netlink_socket_data(vector<uint8_t>& buffer) = 0;
 
     /**
      * Get NetlinkSocket associated with Observer.
@@ -241,6 +241,7 @@ public:
      * @return a reference to the buffer with the data that was received.
      */
     const vector<uint8_t>& buffer() const { return (_cache_data); }
+    vector<uint8_t>& buffer() { return (_cache_data); }
 
     /**
      * Receive data from the netlink socket.
@@ -251,7 +252,7 @@ public:
      *
      * @param buffer the buffer with the received data.
      */
-    virtual void netlink_socket_data(const vector<uint8_t>& buffer);
+    virtual void netlink_socket_data(vector<uint8_t>& buffer);
 
 private:
     NetlinkSocket&  _ns;

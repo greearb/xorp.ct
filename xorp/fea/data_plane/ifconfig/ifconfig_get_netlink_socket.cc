@@ -270,15 +270,14 @@ IfConfigGetNetlinkSocket::read_config_one(IfTree& iftree,
 int
 IfConfigGetNetlinkSocket::parse_buffer_netlink_socket(IfConfig& ifconfig,
 						      IfTree& iftree,
-						      const vector<uint8_t>& buffer,
+						      vector<uint8_t>& buffer,
 						      bool& modified, int& nl_errno)
 {
     size_t buffer_bytes = buffer.size();
-    AlignData<struct nlmsghdr> align_data(buffer);
-    const struct nlmsghdr* nlh;
+    struct nlmsghdr* nlh;
     bool recognized = false;
 
-    for (nlh = align_data.payload();
+    for (nlh = (struct nlmsghdr*)(&buffer[0]);
 	 NLMSG_OK(nlh, buffer_bytes);
 	 nlh = NLMSG_NEXT(nlh, buffer_bytes)) {
 	void* nlmsg_data = NLMSG_DATA(nlh);
@@ -321,14 +320,14 @@ IfConfigGetNetlinkSocket::parse_buffer_netlink_socket(IfConfig& ifconfig,
 	case RTM_NEWLINK:
 	case RTM_DELLINK:
 	{
-	    const struct ifinfomsg* ifinfomsg;
+	    struct ifinfomsg* ifinfomsg;
 	    int rta_len = IFLA_PAYLOAD(nlh);
 	    
 	    if (rta_len < 0) {
 		XLOG_ERROR("AF_NETLINK ifinfomsg length error");
 		break;
 	    }
-	    ifinfomsg = reinterpret_cast<const struct ifinfomsg*>(nlmsg_data);
+	    ifinfomsg = (struct ifinfomsg*)(nlmsg_data);
 	    if (nlh->nlmsg_type == RTM_NEWLINK)
 		NlmUtils::nlm_cond_newlink_to_fea_cfg(ifconfig.user_config(), iftree,
 						      ifinfomsg, rta_len, modified);
@@ -341,14 +340,14 @@ IfConfigGetNetlinkSocket::parse_buffer_netlink_socket(IfConfig& ifconfig,
 	case RTM_NEWADDR:
 	case RTM_DELADDR:
 	{
-	    const struct ifaddrmsg* ifaddrmsg;
+	    struct ifaddrmsg* ifaddrmsg;
 	    int rta_len = IFA_PAYLOAD(nlh);
 	    
 	    if (rta_len < 0) {
 		XLOG_ERROR("AF_NETLINK ifaddrmsg length error");
 		break;
 	    }
-	    ifaddrmsg = reinterpret_cast<const struct ifaddrmsg*>(nlmsg_data);
+	    ifaddrmsg = (struct ifaddrmsg*)(nlmsg_data);
 	    if (nlh->nlmsg_type == RTM_NEWADDR) {
 		NlmUtils::nlm_cond_newdeladdr_to_fea_cfg(ifconfig.user_config(), iftree,
 							 ifaddrmsg, rta_len, false, modified);

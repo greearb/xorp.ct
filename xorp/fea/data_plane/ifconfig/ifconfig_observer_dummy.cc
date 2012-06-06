@@ -83,8 +83,7 @@ IfConfigObserverDummy::stop(string& error_msg)
 }
 
 void
-IfConfigObserverDummy::receive_data(const vector<uint8_t>& buffer)
+IfConfigObserverDummy::receive_data(vector<uint8_t>& buffer)
 {
-    // TODO: use it?
     UNUSED(buffer);
 }

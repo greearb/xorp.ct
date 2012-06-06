@@ -315,17 +315,16 @@ int
 FibConfigEntryGetNetlinkSocket::parse_buffer_netlink_socket(
     const IfTree& iftree,
     FteX& fte,
-    const vector<uint8_t>& buffer,
+    vector<uint8_t>& buffer,
     bool is_nlm_get_only, const FibConfig& fibconfig)
 {
     size_t buffer_bytes = buffer.size();
-    AlignData<struct nlmsghdr> align_data(buffer);
-    const struct nlmsghdr* nlh;
+    struct nlmsghdr* nlh;
 
-    for (nlh = align_data.payload();
+    for (nlh = (struct nlmsghdr*)(&buffer[0]);
 	 NLMSG_OK(nlh, buffer_bytes);
-	 nlh = NLMSG_NEXT(const_cast<struct nlmsghdr*>(nlh), buffer_bytes)) {
-	void* nlmsg_data = NLMSG_DATA(const_cast<struct nlmsghdr*>(nlh));
+	 nlh = NLMSG_NEXT(nlh, buffer_bytes)) {
+	void* nlmsg_data = NLMSG_DATA(nlh);
 
 	//XLOG_INFO("Received fibconfig netlink msg, type: %i\n",
 	//	  (int)(nlh->nlmsg_type));
@@ -368,14 +367,14 @@ FibConfigEntryGetNetlinkSocket::parse_buffer_netlink_socket(
 		    break;
 	    }
 
-	    const struct rtmsg* rtmsg;
+	    struct rtmsg* rtmsg;
 	    int rta_len = RTM_PAYLOAD(nlh);
 	    
 	    if (rta_len < 0) {
 		XLOG_ERROR("AF_NETLINK rtmsg length error");
 		break;
 	    }
-	    rtmsg = reinterpret_cast<const struct rtmsg*>(nlmsg_data);
+	    rtmsg = (struct rtmsg*)(nlmsg_data);
 	    if (rtmsg->rtm_type == RTN_MULTICAST)
 		break;		// XXX: ignore multicast entries
 	    if (rtmsg->rtm_type == RTN_BROADCAST)

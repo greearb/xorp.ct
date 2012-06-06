@@ -120,7 +120,7 @@ FibConfigTableObserverNetlinkSocket::stop(string& error_msg)
 }
 
 void
-FibConfigTableObserverNetlinkSocket::receive_data(const vector<uint8_t>& buffer)
+FibConfigTableObserverNetlinkSocket::receive_data(vector<uint8_t>& buffer)
 {
     list<FteX> fte_list;
 
@@ -160,7 +160,7 @@ FibConfigTableObserverNetlinkSocket::receive_data(const vector<uint8_t>& buffer)
 }
 
 void
-FibConfigTableObserverNetlinkSocket::netlink_socket_data(const vector<uint8_t>& buffer)
+FibConfigTableObserverNetlinkSocket::netlink_socket_data(vector<uint8_t>& buffer)
 {
     receive_data(buffer);
 }

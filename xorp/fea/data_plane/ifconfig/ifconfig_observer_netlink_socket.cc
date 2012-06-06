@@ -122,7 +122,7 @@ IfConfigObserverNetlinkSocket::stop(string& error_msg)
 }
 
 void
-IfConfigObserverNetlinkSocket::receive_data(const vector<uint8_t>& buffer)
+IfConfigObserverNetlinkSocket::receive_data(vector<uint8_t>& buffer)
 {
     bool modified = false;
     int nl_errno = 0;
@@ -162,7 +162,7 @@ IfConfigObserverNetlinkSocket::receive_data(const vector<uint8_t>& buffer)
 }
 
 void
-IfConfigObserverNetlinkSocket::netlink_socket_data(const vector<uint8_t>& buffer)
+IfConfigObserverNetlinkSocket::netlink_socket_data(vector<uint8_t>& buffer)
 {
     receive_data(buffer);
 }

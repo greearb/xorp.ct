@@ -55,17 +55,16 @@
 //
 
 
-string NlmUtils::nlm_print_msg(const vector<uint8_t>& buffer) {
+string NlmUtils::nlm_print_msg(vector<uint8_t>& buffer) {
     ostringstream oss;
 
     size_t buffer_bytes = buffer.size();
-    AlignData<struct nlmsghdr> align_data(buffer);
-    const struct nlmsghdr* nlh;
+    struct nlmsghdr* nlh;
 
-    for (nlh = align_data.payload();
+    for (nlh = (struct nlmsghdr*)(&buffer[0]);
 	 NLMSG_OK(nlh, buffer_bytes);
-	 nlh = NLMSG_NEXT(const_cast<struct nlmsghdr*>(nlh), buffer_bytes)) {
-	void* nlmsg_data = NLMSG_DATA(const_cast<struct nlmsghdr*>(nlh));
+	 nlh = NLMSG_NEXT(nlh, buffer_bytes)) {
+	void* nlmsg_data = NLMSG_DATA(nlh);
 
 	oss << "type:  " << NlmUtils::nlm_msg_type(nlh->nlmsg_type);
 	
@@ -88,14 +87,14 @@ string NlmUtils::nlm_print_msg(const vector<uint8_t>& buffer) {
 	case RTM_DELROUTE:
 	case RTM_GETROUTE: {
 
-	    const struct rtmsg* rtmsg;
+	    struct rtmsg* rtmsg;
 	    int rta_len = RTM_PAYLOAD(nlh);
 	    
 	    if (rta_len < 0) {
 		XLOG_ERROR("AF_NETLINK rtmsg length error");
 		break;
 	    }
-	    rtmsg = reinterpret_cast<const struct rtmsg*>(nlmsg_data);
+	    rtmsg = (struct rtmsg*)nlmsg_data;
 
 	    oss << " rtm_type: ";
 	    if (rtmsg->rtm_type == RTN_MULTICAST)
@@ -107,23 +106,22 @@ string NlmUtils::nlm_print_msg(const vector<uint8_t>& buffer) {
 	    else
 		oss << (int)(rtmsg->rtm_type);
 		
-	    const struct rtattr *rtattr;
-	    const struct rtattr *rta_array[RTA_MAX + 1];
+	    struct rtattr *rtattr;
+	    struct rtattr *rta_array[RTA_MAX + 1];
 	    int family = rtmsg->rtm_family;
     
 	    //
 	    // Get the attributes
 	    //
 	    memset(rta_array, 0, sizeof(rta_array));
-	    rtattr = RTM_RTA(const_cast<struct rtmsg *>(rtmsg));
-	    NlmUtils::get_rtattr(rtattr, rta_len, rta_array,
-				 sizeof(rta_array) / sizeof(rta_array[0]));
+	    rtattr = RTM_RTA(rtmsg);
+	    get_rtattr(rtattr, rta_len, rta_array,
+		       sizeof(rta_array) / sizeof(rta_array[0]));
 
 	    int rtmt = rtmsg->rtm_table;
 #ifdef HAVE_NETLINK_SOCKET_ATTRIBUTE_RTA_TABLE
 	    if (rta_array[RTA_TABLE] != NULL) {
-		const uint8_t* p = static_cast<const uint8_t *>(
-		    RTA_DATA(const_cast<struct rtattr *>(rta_array[RTA_TABLE])));
+		const uint8_t* p = (const uint8_t*)(RTA_DATA(rta_array[RTA_TABLE]));
 		rtmt = extract_host_int(p);
 	    }
 #endif
@@ -287,13 +285,13 @@ NlmUtils::nlm_msg_type(uint32_t m)
 }
 
 void
-NlmUtils::get_rtattr(const struct rtattr* rtattr, int rta_len,
-		     const struct rtattr* rta_array[], size_t rta_array_n)
+NlmUtils::get_rtattr(struct rtattr* rtattr, int rta_len,
+		     struct rtattr* rta_array[], size_t rta_array_n)
 {
     while (RTA_OK(rtattr, rta_len)) {
 	if (rtattr->rta_type < rta_array_n)
 	    rta_array[rtattr->rta_type] = rtattr;
-	rtattr = RTA_NEXT(const_cast<struct rtattr *>(rtattr), rta_len);
+	rtattr = RTA_NEXT(rtattr, rta_len);
     }
     
     if (rta_len) {
@@ -306,11 +304,11 @@ NlmUtils::get_rtattr(const struct rtattr* rtattr, int rta_len,
 int
 NlmUtils::nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 			     const struct nlmsghdr* nlh,
-			     const struct rtmsg* rtmsg, int rta_len, const FibConfig& fibconfig,
+			     struct rtmsg* rtmsg, int rta_len, const FibConfig& fibconfig,
 			     string& err_msg)
 {
-    const struct rtattr *rtattr;
-    const struct rtattr *rta_array[RTA_MAX + 1];
+    struct rtattr *rtattr;
+    struct rtattr *rta_array[RTA_MAX + 1];
     int if_index = 0;		// XXX: initialized with an invalid value
     bool lookup_ifindex = true;
     string if_name;
@@ -330,9 +328,9 @@ NlmUtils::nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
     // Get the attributes
     //
     memset(rta_array, 0, sizeof(rta_array));
-    rtattr = RTM_RTA(const_cast<struct rtmsg *>(rtmsg));
-    NlmUtils::get_rtattr(rtattr, rta_len, rta_array,
-			 sizeof(rta_array) / sizeof(rta_array[0]));
+    rtattr = RTM_RTA(rtmsg);
+    get_rtattr(rtattr, rta_len, rta_array,
+	       sizeof(rta_array) / sizeof(rta_array[0]));
 
     // Discard the route if we are using a specific table.
     if (fibconfig.unicast_forwarding_table_id_is_configured(family)) {
@@ -340,8 +338,7 @@ NlmUtils::nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 	int rtmt = rtmsg->rtm_table;
 #ifdef HAVE_NETLINK_SOCKET_ATTRIBUTE_RTA_TABLE
 	if (rta_array[RTA_TABLE] != NULL) {
-	    const uint8_t* p = static_cast<const uint8_t *>(
-		RTA_DATA(const_cast<struct rtattr *>(rta_array[RTA_TABLE])));
+	    const uint8_t* p = (const uint8_t*)(RTA_DATA(rta_array[RTA_TABLE]));
 	    rtmt = extract_host_int(p);
 	}
 #endif
@@ -604,7 +601,7 @@ NlmUtils::check_netlink_request(NetlinkSocketReader& ns_reader,
 				string& error_msg)
 {
     size_t buffer_bytes;
-    const struct nlmsghdr* nlh;
+    struct nlmsghdr* nlh;
 
     last_errno = 0;		// XXX: reset the value
 
@@ -614,13 +611,12 @@ NlmUtils::check_netlink_request(NetlinkSocketReader& ns_reader,
     if (ns_reader.receive_data(ns, seqno, error_msg) != XORP_OK)
 	return (XORP_ERROR);
 
-    const vector<uint8_t>& buffer = ns_reader.buffer();
+    vector<uint8_t>& buffer = ns_reader.buffer();
     buffer_bytes = buffer.size();
-    AlignData<struct nlmsghdr> align_data(buffer);
-    for (nlh = align_data.payload();
+    for (nlh = (struct nlmsghdr*)(&buffer[0]);
 	 NLMSG_OK(nlh, buffer_bytes);
-	 nlh = NLMSG_NEXT(const_cast<struct nlmsghdr*>(nlh), buffer_bytes)) {
-	void* nlmsg_data = NLMSG_DATA(const_cast<struct nlmsghdr*>(nlh));
+	 nlh = NLMSG_NEXT(nlh, buffer_bytes)) {
+	void* nlmsg_data = NLMSG_DATA(nlh);
 	
 	switch (nlh->nlmsg_type) {
 	case NLMSG_ERROR:
@@ -753,11 +749,11 @@ int NlmUtils::nlm_decode_ipvx_interface_address(const struct ifinfomsg* ifinfoms
 }
 
 void NlmUtils::nlm_cond_newlink_to_fea_cfg(const IfTree& user_cfg, IfTree& iftree,
-					   const struct ifinfomsg* ifinfomsg,
+					   struct ifinfomsg* ifinfomsg,
 					   int rta_len, bool& modified)
 {
-    const struct rtattr *rtattr;
-    const struct rtattr *rta_array[IFLA_MAX + 1];
+    struct rtattr *rtattr;
+    struct rtattr *rta_array[IFLA_MAX + 1];
     uint32_t if_index = 0;
     string if_name;
     bool is_newlink = false;	// True if really a new link
@@ -1080,11 +1076,11 @@ void NlmUtils::nlm_cond_newlink_to_fea_cfg(const IfTree& user_cfg, IfTree& iftre
 }
 
 void
-NlmUtils::nlm_dellink_to_fea_cfg(IfTree& iftree, const struct ifinfomsg* ifinfomsg,
+NlmUtils::nlm_dellink_to_fea_cfg(IfTree& iftree, struct ifinfomsg* ifinfomsg,
 				 int rta_len, bool& modified)
 {
-    const struct rtattr *rtattr;
-    const struct rtattr *rta_array[IFLA_MAX + 1];
+    struct rtattr *rtattr;
+    struct rtattr *rta_array[IFLA_MAX + 1];
     uint32_t if_index = 0;
     string if_name;
     
@@ -1154,11 +1150,11 @@ NlmUtils::nlm_dellink_to_fea_cfg(IfTree& iftree, const struct ifinfomsg* ifinfom
 
 void
 NlmUtils::nlm_cond_newdeladdr_to_fea_cfg(const IfTree& user_config, IfTree& iftree,
-					 const struct ifaddrmsg* ifaddrmsg,
+					 struct ifaddrmsg* ifaddrmsg,
 					 int rta_len, bool is_deleted, bool& modified)
 {
-    const struct rtattr *rtattr;
-    const struct rtattr *rta_array[IFA_MAX + 1];
+    struct rtattr *rtattr;
+    struct rtattr *rta_array[IFA_MAX + 1];
     uint32_t if_index = 0;
     int family = ifaddrmsg->ifa_family;
     
