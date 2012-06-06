@@ -77,7 +77,7 @@ public:
     }
 
     const IPv4Net& net() const				{
-	return (IPv4Net &)(*this);
+	return (const IPv4Net &)(*this);
     }
 
     string str(string nlri_or_withdraw) const				{

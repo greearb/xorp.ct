@@ -1978,50 +1978,50 @@ PathAttribute::operator<(const PathAttribute& him) const
     // equal sorttypes imply equal types
     switch (type()) {
     case ORIGIN:
-	return ( ((OriginAttribute &)*this).origin() <
-		((OriginAttribute &)him).origin() );
+	return ( ((const OriginAttribute &)*this).origin() <
+		((const OriginAttribute &)him).origin() );
 
     case AS_PATH:
-	return ( ((ASPathAttribute &)*this).as_path() <
-		((ASPathAttribute &)him).as_path() );
+	return ( ((const ASPathAttribute &)*this).as_path() <
+		((const ASPathAttribute &)him).as_path() );
 
     case AS4_PATH:
-	return ( ((AS4PathAttribute &)*this).as_path() <
-		((AS4PathAttribute &)him).as_path() );
+	return ( ((const AS4PathAttribute &)*this).as_path() <
+		((const AS4PathAttribute &)him).as_path() );
 
     case NEXT_HOP:
-	return ( ((NextHopAttribute<IPv4> &)*this).nexthop() <
-		((NextHopAttribute<IPv4> &)him).nexthop() );
+	return ( ((const NextHopAttribute<IPv4> &)*this).nexthop() <
+		((const NextHopAttribute<IPv4> &)him).nexthop() );
 
     case MED:
-	return ( ((MEDAttribute &)*this).med() <
-		((MEDAttribute &)him).med() );
+	return ( ((const MEDAttribute &)*this).med() <
+		((const MEDAttribute &)him).med() );
 
     case LOCAL_PREF:
-	return ( ((LocalPrefAttribute &)*this).localpref() <
-		((LocalPrefAttribute &)him).localpref() );
+	return ( ((const LocalPrefAttribute &)*this).localpref() <
+		((const LocalPrefAttribute &)him).localpref() );
 
     case ATOMIC_AGGREGATE:
 	return false;
 
     case AGGREGATOR:
-	if ( ((AggregatorAttribute &)*this).aggregator_as() 
-	     == ((AggregatorAttribute &)him).aggregator_as() ) {
-	    return ( ((AggregatorAttribute &)*this).route_aggregator() 
-		     < ((AggregatorAttribute &)him).route_aggregator() );
+	if ( ((const AggregatorAttribute &)*this).aggregator_as() 
+	     == ((const AggregatorAttribute &)him).aggregator_as() ) {
+	    return ( ((const AggregatorAttribute &)*this).route_aggregator() 
+		     < ((const AggregatorAttribute &)him).route_aggregator() );
 	} else {
-	    return ( ((AggregatorAttribute &)*this).aggregator_as() 
-		     < ((AggregatorAttribute &)him).aggregator_as() );
+	    return ( ((const AggregatorAttribute &)*this).aggregator_as() 
+		     < ((const AggregatorAttribute &)him).aggregator_as() );
 	}
 
     case AS4_AGGREGATOR:
-	if ( ((AS4AggregatorAttribute &)*this).aggregator_as() 
-	     == ((AS4AggregatorAttribute &)him).aggregator_as() ) {
-	    return ( ((AS4AggregatorAttribute &)*this).route_aggregator() 
-		     < ((AS4AggregatorAttribute &)him).route_aggregator() );
+	if ( ((const AS4AggregatorAttribute &)*this).aggregator_as() 
+	     == ((const AS4AggregatorAttribute &)him).aggregator_as() ) {
+	    return ( ((const AS4AggregatorAttribute &)*this).route_aggregator() 
+		     < ((const AS4AggregatorAttribute &)him).route_aggregator() );
 	} else {
-	    return ( ((AS4AggregatorAttribute &)*this).aggregator_as() 
-		     < ((AS4AggregatorAttribute &)him).aggregator_as() );
+	    return ( ((const AS4AggregatorAttribute &)*this).aggregator_as() 
+		     < ((const AS4AggregatorAttribute &)him).aggregator_as() );
 	}
 
     case COMMUNITY:
@@ -2090,43 +2090,43 @@ PathAttribute::operator==(const PathAttribute& him) const
 	return false;
     switch (type()) {
     case ORIGIN:
-	return ( ((OriginAttribute &)*this).origin() ==
-		((OriginAttribute &)him).origin() );
+	return ( ((const OriginAttribute &)*this).origin() ==
+		((const OriginAttribute &)him).origin() );
 
     case AS_PATH:
-	return ( ((ASPathAttribute &)*this).as_path() ==
-		((ASPathAttribute &)him).as_path() );
+	return ( ((const ASPathAttribute &)*this).as_path() ==
+		((const ASPathAttribute &)him).as_path() );
 
     case AS4_PATH:
-	return ( ((AS4PathAttribute &)*this).as_path() ==
-		((AS4PathAttribute &)him).as_path() );
+	return ( ((const AS4PathAttribute &)*this).as_path() ==
+		((const AS4PathAttribute &)him).as_path() );
 
     case NEXT_HOP:
-	return ( ((NextHopAttribute<IPv4> &)*this).nexthop() ==
-		((NextHopAttribute<IPv4> &)him).nexthop() );
+	return ( ((const NextHopAttribute<IPv4> &)*this).nexthop() ==
+		((const NextHopAttribute<IPv4> &)him).nexthop() );
 
     case MED:
-	return ( ((MEDAttribute &)*this).med() ==
-		((MEDAttribute &)him).med() );
+	return ( ((const MEDAttribute &)*this).med() ==
+		((const MEDAttribute &)him).med() );
 
     case LOCAL_PREF:
-	return ( ((LocalPrefAttribute &)*this).localpref() ==
-		((LocalPrefAttribute &)him).localpref() );
+	return ( ((const LocalPrefAttribute &)*this).localpref() ==
+		((const LocalPrefAttribute &)him).localpref() );
 
     case ATOMIC_AGGREGATE:
 	return true;
 
     case AGGREGATOR:
-	return ( ((AggregatorAttribute &)*this).aggregator_as() 
-		 == ((AggregatorAttribute &)him).aggregator_as()
-		 &&  ((AggregatorAttribute &)*this).route_aggregator() 
-		 == ((AggregatorAttribute &)him).route_aggregator() );
+	return ( ((const AggregatorAttribute &)*this).aggregator_as() 
+		 == ((const AggregatorAttribute &)him).aggregator_as()
+		 &&  ((const AggregatorAttribute &)*this).route_aggregator() 
+		 == ((const AggregatorAttribute &)him).route_aggregator() );
 
     case AS4_AGGREGATOR:
-	return ( ((AS4AggregatorAttribute &)*this).aggregator_as() 
-		 == ((AS4AggregatorAttribute &)him).aggregator_as()
-		 &&  ((AS4AggregatorAttribute &)*this).route_aggregator() 
-		 == ((AS4AggregatorAttribute &)him).route_aggregator() );
+	return ( ((const AS4AggregatorAttribute &)*this).aggregator_as() 
+		 == ((const AS4AggregatorAttribute &)him).aggregator_as()
+		 &&  ((const AS4AggregatorAttribute &)*this).route_aggregator() 
+		 == ((const AS4AggregatorAttribute &)him).route_aggregator() );
 
     case COMMUNITY:
 	// XXX using encode for this is a little inefficient
@@ -2138,8 +2138,8 @@ PathAttribute::operator==(const PathAttribute& him) const
 	return memcmp(mybuf, hisbuf, mybuflen) == 0;
 
     case ORIGINATOR_ID:
-	return ( ((OriginatorIDAttribute &)*this).originator_id()
-		 == ((OriginatorIDAttribute &)him).originator_id() );
+	return ( ((const OriginatorIDAttribute &)*this).originator_id()
+		 == ((const OriginatorIDAttribute &)him).originator_id() );
 
     case CLUSTER_LIST:
 	// XXX using encode for this is a little inefficient
