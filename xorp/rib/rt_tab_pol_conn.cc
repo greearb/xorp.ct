@@ -182,7 +182,15 @@ template <class A>
 string
 PolicyConnectedTable<A>::str() const
 {
-    return "not implement yet";
+    ostringstream oss;
+    oss << "------" << endl;
+    oss << "PolicyConnectedTable" << endl;
+    oss << "parent: " << const_cast< PolicyConnectedTable<A>* >(this)->parent()->tablename() << endl;
+    if (this->next_table())
+	oss << "next table: " << this->next_table()->tablename() << endl;
+    else
+	oss << "no next table" << endl;
+    return oss.str();
 }
 
 template <class A>
