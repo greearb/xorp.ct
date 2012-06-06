@@ -150,7 +150,15 @@ template <class A>
 string
 PolicyRedistTable<A>::str() const
 {
-    return "not implement yet";
+    ostringstream oss;
+    oss << "------" << endl;
+    oss << "PolicyRedistTable" << endl;
+    oss << "parent: " << const_cast<PolicyRedistTable<A>* >(this)->parent()->tablename() << endl;
+    if (this->next_table())
+	oss << "next table: " << this->next_table()->tablename() << endl;
+    else
+	oss << "no next table" << endl;
+    return oss.str();
 }
 
 
