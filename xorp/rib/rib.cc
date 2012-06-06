@@ -1277,9 +1277,164 @@ RIB<A>::add_redist_table(RouteTable<A>* parent)
     return XORP_OK;
 }
 
+template <typename A>
+int
+RIB<A>::plumb_ahead_of_ext_int(OriginTable<A>*& ot)
+{
+    //
+    // We are going to need to create an ExtInt table.
+    //
+    // Find the appropriate existng table to be a parent
+    // of the ExtIntTable.
+    //
+    RouteTable<A>* next_table = track_back(_final_table,
+	    REDIST_TABLE | POLICY_REDIST_TABLE | REGISTER_TABLE);
+    RouteTable<A>* existing_table = next_table->parent();
+    if (ot->protocol_type() == IGP) {
+	_ext_int_table = new ExtIntTable<A>(existing_table, ot);
+    } else {
+	_ext_int_table = new ExtIntTable<A>(ot, existing_table);
+    }
+
+    if (_final_table->type()
+	    & (REDIST_TABLE | POLICY_REDIST_TABLE | REGISTER_TABLE)) {
+	_ext_int_table->set_next_table(next_table);
+	next_table->replumb(existing_table, _ext_int_table);
+    } else {
+	_final_table = _ext_int_table;
+    }
+    return XORP_OK;
+}
+
+template <typename A>
+int
+RIB<A>::plumb_ahead_of_merged(OriginTable<A>*& ot,
+			RouteTable<A>* existing_table)
+{
+    //
+    // We're going to need to create a MergedTable
+    //
+    RouteTable<A>* next_table = existing_table->next_table();
+
+    // Skip past any RedistTables
+    RouteTable<A>* new_prev_table = track_forward(existing_table,
+						  (REDIST_TABLE |
+						   POLICY_CONNECTED_TABLE));
+    if (new_prev_table != existing_table) {
+	existing_table = new_prev_table;
+	next_table = existing_table->next_table();
+    }
+
+    MergedTable<A>* merged_table = new MergedTable<A>(existing_table, ot);
+    if (merged_table == NULL || add_table(merged_table) != XORP_OK) {
+	delete merged_table;
+	return XORP_ERROR;
+    }
+
+    merged_table->set_next_table(next_table);
+    if (next_table != NULL)
+	next_table->replumb(existing_table, merged_table);
+
+    //
+    // It's possible existing_table was the last table - if so, then it
+    // isn't anymore.
+    //
+    if (_final_table == existing_table)
+	_final_table = merged_table;
+
+    return XORP_OK;
+
+}
+
+template <typename A>
+int
+RIB<A>::plumb_ahead_of_first(OriginTable<A>*& ot)
+{
+    //
+    // There are tables, but neither IGP or EGP origin tables
+    // Therefore the final table must be a RedistTable
+    // or a RegisterTable.
+    //
+    if ((_final_table->type() & (REDIST_TABLE | POLICY_REDIST_TABLE | REGISTER_TABLE)) == 0)
+	XLOG_UNREACHABLE();
+
+    //
+    // There may be existing single-parent tables before the
+    // final table such as RegisterTable - track back to be
+    // first of them.
+    //
+    RouteTable<A>* rt = track_back(_final_table,
+				   REDIST_TABLE
+				   | POLICY_REDIST_TABLE
+				   | REGISTER_TABLE);
+
+    //
+    // Plumb our new table in ahead of the first single-parent
+    // table.
+    //
+    rt->replumb(NULL, ot);
+    ot->set_next_table(rt);
+    return XORP_OK;
+
+}
+
+template <typename A>
+int
+RIB<A>::plumb_origin_table(OriginTable<A>*& ot,
+			    OriginTable<A>* existing_igp_table,
+			    OriginTable<A>* existing_egp_table)
+{
+    // XXX: the table was created by new_origin_table() above, so it must exist
+    XLOG_ASSERT(ot != NULL);
+    if (_final_table == ot) {
+	//
+	// This is the first table, so no need to plumb anything.
+	//
+	debug_msg("first table\n");
+	return XORP_OK;
+    }
+
+    //
+    // There are existing tables, so we need to do some plumbing
+    //
+    // Three possibilities:
+    //  1. There are no existing tables of the same protocol type as the protocol type
+    //     of the table that we're plumbing
+    //
+    //     -> Add ExtInt table and plumb the origin table ahead of ext int table
+    //  2. There are both existing EGP and existing IGP tables
+    //
+    //      -> Add Merged table and plumb the origin table ahead of merged table
+    //  3. there aren't existing IGP and existing EGP tables
+    //
+    //      -> Plumb origin table ahead of currently first table
+    //
+
+    //
+    // Depending on which tables already exist, we may need to create
+    // a MergedTable or an ExtInt table.
+    //
+    ProtocolType protocol_type = (ProtocolType) ot->protocol_type();
+    if ((!existing_igp_table && (protocol_type == IGP)) ||
+	(!existing_egp_table && (protocol_type == EGP))) {
+	//
+	// Sanity check: we've found an ExtIntTable, when there
+	// weren't both IGP and EGP tables.
+	//
+	XLOG_ASSERT(!_ext_int_table);
+
+	if (!existing_egp_table && !existing_igp_table)
+	    return plumb_ahead_of_first(ot);
+	else
+	    return plumb_ahead_of_ext_int(ot);
+    } else
+	return plumb_ahead_of_merged(ot, (protocol_type == IGP) ?
+		existing_igp_table : existing_egp_table);
+}
+
 //
 // All the magic is in add_origin_table.
-// TODO: XXX: split into smaller units (??)
+//
 
 template <typename A>
 int
@@ -1290,13 +1445,6 @@ RIB<A>::add_origin_table(const string& tablename,
 {
     debug_msg("add_origin_table %s type: %d\n",
 	      tablename.c_str(), protocol_type);
-
-    bool igp_table_exists = !_igp_origin_tables.empty();
-    OriginTable<A>* existing_igp_table = igp_table_exists ? _igp_origin_tables.begin()->second : NULL;
-    bool egp_table_exists = !_egp_origin_tables.empty();
-    OriginTable<A>* existing_egp_table = egp_table_exists ? _egp_origin_tables.begin()->second : NULL;
-    bool ei_table_exists  = (_ext_int_table != NULL);
-
 
     Protocol* protocol = find_protocol(tablename);
     if (protocol == NULL) {
@@ -1337,159 +1485,33 @@ RIB<A>::add_origin_table(const string& tablename,
 	return XORP_OK;
     }
 
+    //
+    // Find first IGP and EGP origin table
+    // This is needed for plumbing new origin table
+    //
+    OriginTable<A>* existing_igp_table = !_igp_origin_tables.empty() ? _igp_origin_tables.begin()->second : NULL;
+    OriginTable<A>* existing_egp_table = !_egp_origin_tables.empty() ? _egp_origin_tables.begin()->second : NULL;
+
 
     if (new_origin_table(tablename, target_class, target_instance,
-			 get_protocol_admin_distance(tablename),
-			 protocol_type)
-	!= XORP_OK) {
+	    get_protocol_admin_distance(tablename), protocol_type) != XORP_OK) {
 	debug_msg("new_origin_table failed\n");
 	return XORP_ERROR;
     }
 
-    OriginTable<A>* new_table;
     switch (protocol_type) {
     case IGP:
-	new_table = find_igp_origin_table(tablename);
+	ot = find_igp_origin_table(tablename);
 	break;
     case EGP:
-	new_table = find_egp_origin_table(tablename);
+	ot = find_egp_origin_table(tablename);
 	break;
     default:
 	XLOG_UNREACHABLE();
-	break;
+    break;
     }
 
-    // XXX: the table was created by new_origin_table() above, so it must exist
-    XLOG_ASSERT(new_table != NULL);
-    if (_final_table == new_table) {
-	//
-	// This is the first table, so no need to plumb anything.
-	//
-	debug_msg("first table\n");
-	return XORP_OK;
-    }
-
-    //
-    // There are existing tables, so we need to do some plumbing
-    //
-    // Three possibilities:
-    //  1. there are existing EGP tables but no existing IGP table
-    //  2. there are both existing EGP and existing IGP tables
-    //  3. there are existing IGP tables but no existing EGP table
-    //
-    // If we're adding an IGP table:
-    // we can handle 2 and 3 the same, adding a MergedTable, but 1
-    // requires we construct an ExtInt table instead.
-    //
-    // If we're adding an EGP table:
-    // we can handle 1 and 2 the same, adding a MergedTable, but 3
-    // requires we construct an ExtInt table instead.
-    //
-
-    // First step: find out what tables already exist
-
-    //
-    // Depending on which tables already exist, we may need to create
-    // a MergedTable or an ExtInt table.
-    //
-    if ((!igp_table_exists && (protocol_type == IGP)) ||
-	(!egp_table_exists && (protocol_type == EGP))) {
-	//
-	// Sanity check: we've found an ExtIntTable, when there
-	// weren't both IGP and EGP tables.
-	//
-	XLOG_ASSERT(!ei_table_exists);
-
-	if (!egp_table_exists && !igp_table_exists) {
-	    //
-	    // There are tables, but neither IGP or EGP origin tables
-	    // Therefore the final table must be a RedistTable
-	    // or a RegisterTable.
-	    //
-	    if ((_final_table->type() & (REDIST_TABLE | POLICY_REDIST_TABLE | REGISTER_TABLE)) == 0)
-		XLOG_UNREACHABLE();
-
-	    //
-	    // There may be existing single-parent tables before the
-	    // final table such as RegisterTable - track back to be
-	    // first of them.
-	    //
-	    RouteTable<A>* rt = track_back(_final_table,
-					   REDIST_TABLE
-					   | POLICY_REDIST_TABLE
-					   | REGISTER_TABLE);
-
-	    //
-	    // Plumb our new table in ahead of the first single-parent
-	    // table.
-	    //
-	    rt->replumb(NULL, new_table);
-	    new_table->set_next_table(rt);
-	    return XORP_OK;
-	}
-
-	//
-	// We are going to need to create an ExtInt table.
-	//
-	// Find the appropriate existng table to be a parent
-	// of the ExtIntTable.
-	//
-	RouteTable<A>* next_table = track_back(_final_table,
-					       REDIST_TABLE
-					       | POLICY_REDIST_TABLE
-					       | REGISTER_TABLE);
-	RouteTable<A>* existing_table = next_table->parent();
-	if (protocol_type == IGP) {
-	    _ext_int_table = new ExtIntTable<A>(existing_table, new_table);
-	} else {
-	    _ext_int_table = new ExtIntTable<A>(new_table, existing_table);
-	}
-
-	if (_final_table->type() & (REDIST_TABLE | POLICY_REDIST_TABLE |
-				    REGISTER_TABLE)) {
-	    _ext_int_table->set_next_table(next_table);
-	    next_table->replumb(existing_table, _ext_int_table);
-	} else {
-	    _final_table = _ext_int_table;
-	}
-	return XORP_OK;
-    }
-
-    //
-    // We're going to need to create a MergedTable
-    //
-    RouteTable<A>* existing_table = (protocol_type == IGP) ?
-	    existing_igp_table : existing_egp_table;
-    RouteTable<A>* next_table = existing_table->next_table();
-
-    // Skip past any RedistTables
-    RouteTable<A>* new_prev_table = track_forward(existing_table,
-						  (REDIST_TABLE |
-						   POLICY_CONNECTED_TABLE));
-    if (new_prev_table != existing_table) {
-	existing_table = new_prev_table;
-	next_table = existing_table->next_table();
-    }
-
-    MergedTable<A>* merged_table = new MergedTable<A>(existing_table,
-						      new_table);
-    if (merged_table == NULL || add_table(merged_table) != XORP_OK) {
-	delete merged_table;
-	return XORP_ERROR;
-    }
-
-    merged_table->set_next_table(next_table);
-    if (next_table != NULL)
-	next_table->replumb(existing_table, merged_table);
-
-    //
-    // It's possible existing_table was the last table - if so, then it
-    // isn't anymore.
-    //
-    if (_final_table == existing_table)
-	_final_table = merged_table;
-
-    return XORP_OK;
+    return plumb_origin_table(ot, existing_igp_table, existing_egp_table);
 }
 
 template <typename A>
