@@ -44,7 +44,7 @@ pass_fail_handler(const XrlError& e, XrlCompletion* c)
 	*c = XRL_FAILED;
 	cerr << "Xrl Failed: " << e.str() << endl;
     }
-    cout << "PassFailHander " << *c << endl;
+    cout << "PassFailHander " << ((*c > 0) ? "SUCCES" : "FAILED") << endl;
 }
 
 // ----------------------------------------------------------------------------
