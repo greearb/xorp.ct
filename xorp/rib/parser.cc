@@ -38,7 +38,6 @@ Datum*
 Uint32ArgumentParser::parse(const string& str) const
 {
     try {
-	printf(">>>str=%s\n", str.c_str());
 	return new Uint32Datum(str);
     } catch (const InvalidString&) {
 	return NULL;
