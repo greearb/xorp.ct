@@ -158,7 +158,7 @@ public:
      * Destructor
      */
     ~RouteRegister() {
-	_route = reinterpret_cast<const IPRouteEntry<A>* >(0xbad);
+	_route = NULL;
     }
 
     /**
@@ -286,8 +286,7 @@ public:
     /**
      * RegisterTable destructor
      */
-    ~RegisterTable()
-    {}
+    ~RegisterTable();
 
     /**
      * Add a new route to the RIB.  This will be propagated downstream
@@ -417,7 +416,7 @@ private:
     void notify_route_changed(typename Trie<A, RouteRegister<A>* >::iterator trie_iter,
 			      const IPRouteEntry<A>& changed_route);
 
-    map<string, ModuleData>	_module_names;
+    map<string, ModuleData>		_module_names;
     Trie<A, RouteRegister<A>* >		_ipregistry;
     RouteTable<A>*			_parent;
     RegisterServer&			_register_server;

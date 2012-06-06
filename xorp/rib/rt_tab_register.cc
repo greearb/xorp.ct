@@ -31,8 +31,6 @@
 #include "rt_tab_register.hh"
 #include "register_server.hh"
 
-
-
 template<class A>
 int
 RouteRegister<A>::delete_registrant(const ModuleData& module)
@@ -83,6 +81,15 @@ RegisterTable<A>::RegisterTable(const string& tablename,
       _register_server(register_server),
       _multicast(multicast)
 {
+}
+
+template<class A>
+RegisterTable<A>::~RegisterTable()
+{
+    while (!_ipregistry.empty()) {
+	delete (*_ipregistry.begin());
+	_ipregistry.erase(_ipregistry.begin());
+    }
 }
 
 template<class A>
@@ -427,6 +434,7 @@ RegisterTable<A>::register_route_range(const A& addr,
 
     RouteRegister<A>* rreg;
     rreg = add_registration(subnet, rrange->route(), module);
+    delete rrange;
     return rreg;
 }
 
