@@ -415,10 +415,9 @@ NetlinkSocket::force_recvmsg_flgs(int flags, bool only_kernel_messages,
 	bool is_end_of_message = true;
 	size_t new_size = off - last_mh_off;
 	struct nlmsghdr* mh;
-	for (mh = (struct nlmsghdr*)(&buffer[last_mh_off]);
+	for (mh = (struct nlmsghdr*)(&message[last_mh_off]);
 	     NLMSG_OK(mh, new_size);
 	     mh = NLMSG_NEXT(mh, new_size)) {
-	    XLOG_ASSERT(mh->nlmsg_len <= buffer.size());
 	    if ((mh->nlmsg_flags & NLM_F_MULTI)
 		|| _is_multipart_message_read) {
 		is_end_of_message = false;
