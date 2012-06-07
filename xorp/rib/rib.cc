@@ -320,6 +320,7 @@ RIB<A>::RIB(RibTransportType t, RibManager& rib_manager, EventLoop& eventloop)
       _eventloop(eventloop),
       _final_table(NULL),
       _errors_are_fatal(false),
+      _connected_origin_table(NULL),
       _register_table(NULL),
       _policy_redist_table(NULL),
       _policy_connected_table(NULL),
@@ -361,6 +362,11 @@ template <typename A>
 RIB<A>::~RIB()
 {
     //clear all route tables
+
+    // This is going to be released with all igp origin tables
+    // Just set the pointer to NULL here
+    _connected_origin_table = NULL;
+
     while (! _igp_origin_tables.empty()) {
 	delete _igp_origin_tables.begin()->second;
 	_igp_origin_tables.erase(_igp_origin_tables.begin());
@@ -450,6 +456,9 @@ RIB<A>::initialize(RegisterServer& register_server)
     if (add_igp_table("connected", "", "") != XORP_OK) {
 	XLOG_FATAL("Could not add igp table \"connected\" for %s",
 		   name().c_str());
+    } else {
+	_connected_origin_table = find_igp_origin_table("connected");
+	XLOG_ASSERT(_connected_origin_table);
     }
 }
 
@@ -573,11 +582,11 @@ RIB<A>::add_connected_route(const RibVif<A>& vif,
     // XXX: the connected routes are added with the
     // best possible metric (0).
     //
-    add_route("connected", net, nexthop_addr, "", "", 0, PolicyTags());
+    add_route("connected", net, nexthop_addr, "", vif.name(), 0, PolicyTags());
 
     if (vif.is_p2p() && (peer_addr != A::ZERO()) && (! net.contains(peer_addr))) {
 	add_route("connected", IPNet<A>(peer_addr, A::addr_bitlen()),
-		  peer_addr, "", "", 0, PolicyTags());
+		  peer_addr, "", vif.name(), 0, PolicyTags());
     }
 
     return XORP_OK;
@@ -850,6 +859,9 @@ RIB<A>::add_route(const string&		tablename,
 {
     UNUSED(ifname);
 
+    // Sanity check - we should have initialized RIB
+    XLOG_ASSERT(_connected_origin_table);
+
     Protocol* protocol = find_protocol(tablename);
     if (protocol == NULL) {
 	if (_errors_are_fatal) {
@@ -875,7 +887,10 @@ RIB<A>::add_route(const string&		tablename,
 	}
     }
 
-    if (! vifname.empty()) {
+    RibVif<A>* vif = NULL;
+    IPNextHop<A>* nexthop = NULL;
+
+    if (!vifname.empty()) {
 	//
 	// Add a route with explicitly specified network interface
 	//
@@ -898,63 +913,34 @@ RIB<A>::add_route(const string&		tablename,
     }
 
     //
-    // Find the vif so we can see if the nexthop is directly connected
+    // Search for a route to a directly-connected destination
     //
-    RibVif<A>* vif = NULL;
-    IPNextHop<A>* nexthop = NULL;
-    do {
-	//
-	// Search for a route to a directly-connected destination
-	//
-	const IPRouteEntry<A>* re = _final_table->lookup_route(nexthop_addr);
-	if (re != NULL) {
-	    // We found a route for the nexthop
-	    vif = re->vif();
-	    if ((vif != NULL)
-		&& (vif->is_underlying_vif_up())
-		&& (vif->is_same_subnet(IPvXNet(re->net()))
-		    || vif->is_same_p2p(IPvX(nexthop_addr)))) {
-		debug_msg("**directly connected route found for nexthop\n");
-		break;
-	    }
-	}
+    const IPRouteEntry<A>* re = _connected_origin_table->lookup_route(nexthop_addr);
+    if (re != NULL)
+	// We found a route for the nexthop
+	vif = re->vif();
 
-	//
-	// We failed to find a route, or the route wasn't for a
-	// directly-connected destination. One final possibility is that
-	// we are trying to add a route for a directly connected subnet,
-	// so we need to test all the Vifs to see if this is the case.
-	//
-	vif = find_vif(nexthop_addr);
-	debug_msg("Vif %p\n", vif);
-	break;
-    } while (false);
-    if (vif == NULL) {
+    if (vif != NULL)
+	nexthop = find_or_create_peer_nexthop(nexthop_addr);
+    else if (vif == NULL && protocol->protocol_type() == IGP) {
 	debug_msg("**not directly connected route found for nexthop\n");
 	//
 	// XXX: If the route came from an IGP, then we must have
 	// a directly-connected interface toward the next-hop router.
 	//
-	if (protocol->protocol_type() == IGP) {
-	    XLOG_ERROR("Attempting to add IGP route to table \"%s\" "
-		       "(prefix %s next-hop %s): no directly connected "
-		       "interface toward the next-hop router",
-		       tablename.c_str(), net.str().c_str(),
-		       nexthop_addr.str().c_str());
-	    return XORP_ERROR;
-	}
-    }
-    if (vif != NULL) {
-	nexthop = find_or_create_peer_nexthop(nexthop_addr);
-    } else {
+	XLOG_ERROR("Attempting to add IGP route to table \"%s\" "
+		"(prefix %s next-hop %s): no directly connected "
+		"interface toward the next-hop router", tablename.c_str(), net.str().c_str(), nexthop_addr.str().c_str());
+	return XORP_ERROR;
+    } else
 	nexthop = find_or_create_external_nexthop(nexthop_addr);
-    }
+
     XLOG_ASSERT(nexthop->addr() == nexthop_addr);
     //
     // Add the route
     //
-    ot->add_route(IPRouteEntry<A>(net, vif, nexthop, *protocol, metric,
-				  policytags));
+    ot->add_route(IPRouteEntry<A>(net, vif, nexthop, *protocol, metric, policytags));
+
     flush();
     return XORP_OK;
 }
@@ -1707,25 +1693,6 @@ RIB<A>::push_routes()
     XLOG_ASSERT(_policy_connected_table != NULL);
 
     _policy_connected_table->push_routes();
-}
-
-template <typename A>
-RibVif<A>*
-RIB<A>::find_vif(const A& addr)
-{
-    debug_msg("RIB::find_vif: %s\n", addr.str().c_str());
-    typename map<string, RibVif<A>*>::iterator iter;
-
-    for (iter = _vifs.begin(); iter != _vifs.end(); ++iter) {
-	RibVif<A>* vif = iter->second;
-	if (!vif->is_underlying_vif_up())
-	    continue;		// XXX: ignore vifs that are not up
-	if (vif->is_my_addr(addr))
-	    return vif;
-	if (vif->is_p2p() && vif->is_same_p2p(addr))
-	    return vif;
-    }
-    return NULL;
 }
 
 template <typename A>

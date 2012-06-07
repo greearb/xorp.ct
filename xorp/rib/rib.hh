@@ -745,15 +745,6 @@ private:
     int add_table(RedistTable<A>* table);
 
     /**
-     * Find the virtual interface associated with one of this router's
-     * addresses.
-     *
-     * @param addr the IP address to lookup.
-     * @return pointer to RibVif on success, NULL otherwise.
-     */
-    RibVif<A>* find_vif(const A& addr);
-
-    /**
      * Find the virtual interface associated with vif name
      *
      * @param vifname the vif name to search for.
@@ -821,6 +812,10 @@ protected:
     OriginTableMap		_egp_origin_tables;
     MergedTableMap		_merged_tables;
     RedistTableMap		_redist_tables;
+
+    OriginTable<A>*		_connected_origin_table; // Helper to faster resolve if route, that we're adding, is
+							 // directly connected. Shouldn't be freed!!! Instance, that
+							 // is going to be freed is saved in _igp_origin_tables.
 
     RegisterTable<A>*		_register_table;
     PolicyRedistTable<A>*	_policy_redist_table;
