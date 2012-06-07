@@ -58,53 +58,40 @@ OriginTable<A>::~OriginTable()
     delete _ip_route_table;
 }
 
+
 template<class A>
 int
-OriginTable<A>::add_route(const IPRouteEntry<A>& route)
+OriginTable<A>::add_route(IPRouteEntry<A>* route)
 {
     debug_msg("OT[%s]: Adding route %s\n", this->tablename().c_str(),
-	      route.str().c_str());
+	      route->str().c_str());
 
-#if 0
-    //
-    // BGP can send multiple add routes for the same entry without any
-    // corresponding deletes. So if this route is already in the table
-    // remove it.
-    //
-    if (lookup_route(route.net()) != NULL)
-	delete_route(route.net());
-#else
-    if (lookup_route(route.net()) != NULL)
+    if (lookup_route(route->net()) != NULL) {
+	delete route;
 	return XORP_ERROR;
-#endif
-
-    //
-    // The actual map holds pointers, but we also do allocation and
-    // deallocation here. The reason for this is that using the map to
-    // hold objects themselves results in us doing too many copies on
-    // lookup, but we also don't want the table to be referencing
-    // something external that may go away.
-    //
-    IPRouteEntry<A>* routecopy = new IPRouteEntry<A>(route);
-    routecopy->set_admin_distance(_admin_distance);
-
-    // Now add the route to this table
-    debug_msg("BEFORE:\n");
-#ifdef DEBUG_LOGGING
-    _ip_route_table->print();
-#endif
-    _ip_route_table->insert(route.net(), routecopy);
-    debug_msg("AFTER:\n");
-#ifdef DEBUG_LOGGING
-    _ip_route_table->print();
-#endif
-
-    // Propagate to next table
-    if (this->next_table() != NULL) {
-	this->next_table()->add_route(*routecopy,
-			       reinterpret_cast<RouteTable<A>* >(this));
     }
 
+    route->set_admin_distance(_admin_distance);
+
+    // Now add the route to this table
+#ifdef DEBUG_LOGGING
+    debug_msg("BEFORE:\n");
+    _ip_route_table->print();
+#endif
+
+    _ip_route_table->insert(route->net(), route);
+
+
+
+
+    // Propagate to next table
+    if (this->next_table() != NULL)
+	this->next_table()->add_route(*route, this);
+
+#ifdef DEBUG_LOGGING
+    debug_msg("AFTER:\n");
+    _ip_route_table->print();
+#endif
     return XORP_OK;
 }
 

@@ -63,8 +63,8 @@ main(int /* argc */, char* argv[])
     dt.expect_add(route1);
     dt.expect_add(route2);
 
-    ot.add_route(route1);
-    ot.add_route(route2);
+    ot.add_route(new IPRouteEntry<IPv4>(route1));
+    ot.add_route(new IPRouteEntry<IPv4>(route2));
 
     dt.expect_delete(route1);
     dt.expect_delete(route2);
@@ -79,8 +79,8 @@ main(int /* argc */, char* argv[])
     dt.expect_add(route1);
     dt.expect_add(route2);
 
-    ot.add_route(route1);
-    ot.add_route(route2);
+    ot.add_route(new IPRouteEntry<IPv4>(route1));
+    ot.add_route(new IPRouteEntry<IPv4>(route2));
 
     dt.expect_delete(route1);
     dt.expect_delete(route2);
@@ -106,18 +106,19 @@ main(int /* argc */, char* argv[])
     dt.expect_add(route1);
     dt.expect_add(route2);
 
-    ot.add_route(route1);
-    ot.add_route(route2);
+    ot.add_route(new IPRouteEntry<IPv4>(route1));
+    ot.add_route(new IPRouteEntry<IPv4>(route2));
 
     XLOG_ASSERT(dt.parent()->type() == ORIGIN_TABLE);
     ot.routing_protocol_shutdown();
 
     XLOG_ASSERT(dt.parent()->type() == DELETION_TABLE);
     IPRouteEntry<IPv4> route3(net1, &vif2, &nh2, protocol, 101);
+
     dt.expect_delete(route1);
     dt.expect_add(route3);
 
-    ot.add_route(route3);
+    ot.add_route(new IPRouteEntry<IPv4>(route3));
 
     dt.expect_delete(route2);
 
@@ -132,6 +133,8 @@ main(int /* argc */, char* argv[])
 
     dt.expect_delete(route3);
     ot.delete_route(net1);
+
+    printf("-------------------------------------------------------\n");
 
     return 0;
 }
