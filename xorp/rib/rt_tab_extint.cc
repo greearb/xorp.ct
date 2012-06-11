@@ -100,7 +100,7 @@ ExtIntTable<A>::add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller)
 	    // so delete it first.
 	    //
 	    IPNextHop<A>* rt_nexthop;
-	    rt_nexthop = reinterpret_cast<IPNextHop<A>* >(found_egp->nexthop());
+	    rt_nexthop = found_egp->nexthop();
 	    const A& nexthop_addr = rt_nexthop->addr();
 	    const IPRouteEntry<A>* nexthop_route;
 	    nexthop_route = lookup_route_in_igp_parent(nexthop_addr);
@@ -141,7 +141,7 @@ ExtIntTable<A>::add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller)
 	    }
 	}
 
-	rt_nexthop = reinterpret_cast<IPNextHop<A>* >(route.nexthop());
+	rt_nexthop = route.nexthop();
 	A nexthop_addr = rt_nexthop->addr();
 	const IPRouteEntry<A>* nexthop_route;
 	nexthop_route = lookup_route_in_igp_parent(nexthop_addr);
@@ -505,7 +505,7 @@ ExtIntTable<A>::recalculate_nexthops(const IPRouteEntry<A>& new_route)
 	egp_parent = found->egp_parent();
 	XLOG_ASSERT(egp_parent->nexthop()->type() != DISCARD_NEXTHOP);
 	XLOG_ASSERT(egp_parent->nexthop()->type() != UNREACHABLE_NEXTHOP);
-	A nexthop = (reinterpret_cast<IPNextHop<A>* >(egp_parent->nexthop()))->addr();
+	A nexthop = (egp_parent->nexthop())->addr();
 
 	if (new_route.net().contains(nexthop)) {
 	    debug_msg("found route using this nexthop:\n    %s\n",

@@ -58,10 +58,10 @@ public:
      * @param protocol the routing protocol that originated this route.
      * @param metric the routing protocol metric for this route.
      */
-    RouteEntry(RibVif<A>* vif, NextHop* nexthop, const Protocol& protocol,
+    RouteEntry(RibVif<A>* vif, const Protocol& protocol,
 		uint32_t metric, const PolicyTags& policytags, const IPNet<A>& net);
 
-    RouteEntry(RibVif<A>* vif, NextHop* nexthop, const Protocol& protocol,
+    RouteEntry(RibVif<A>* vif, const Protocol& protocol,
 		uint32_t metric, const IPNet<A>& net);
 
     /**
@@ -83,14 +83,7 @@ public:
      * @return the NextHop router to which packets matching this
      * entry should be forwarded.
      */
-    virtual NextHop* nexthop() const { return _nexthop; }
-
-    /**
-     * Set the NextHop router.
-     *
-     * @param v the NextHop router to be set on this route.
-     */
-    void set_nexthop(NextHop* v) { _nexthop = v; }
+    virtual NextHop* nexthop() const = 0;
 
     /**
      * Get the Administrative Distance.
@@ -153,7 +146,6 @@ public:
 
 protected:
     RibVif<A>*		_vif;
-    NextHop*		_nexthop;		// The next-hop router
 
     const Protocol&	_protocol;		// The routing protocol that instantiated this route
 
@@ -186,7 +178,7 @@ public:
      */
     IPRouteEntry(const IPNet<A>& net, RibVif<A>* vif, IPNextHop<A>* nexthop,
 		 const Protocol& protocol, uint32_t metric)
-	: RouteEntry<A>(vif, nexthop, protocol, metric, net) {}
+	: RouteEntry<A>(vif, protocol, metric, net), _nexthop(nexthop) {}
 
     /**
      * Constructor for IPRouteEntry.
@@ -203,7 +195,7 @@ public:
     IPRouteEntry(const IPNet<A>& net, RibVif<A>* vif, IPNextHop<A>* nexthop,
 		 const Protocol& protocol, uint32_t metric,
 		 const PolicyTags& policytags)
-	: RouteEntry<A>(vif, nexthop, protocol, metric, policytags, net) {}
+	: RouteEntry<A>(vif, protocol, metric, policytags, net), _nexthop(nexthop) {}
 
     /**
      * Destructor for Routing Table Entry
@@ -216,7 +208,9 @@ public:
      * @return the NextHop router to which packets matching this
      * entry should be forwarded.
      */
-    IPNextHop<A>* nexthop() const { return dynamic_cast<IPNextHop<A>* >(RouteEntry<A>::_nexthop); }
+    IPNextHop<A>* nexthop() const { return _nexthop; }
+
+    void set_nexthop(IPNextHop<A>* v) { _nexthop = v; }
 
     /**
      * Get the route entry's next-hop router address.
@@ -228,9 +222,8 @@ public:
 	IPNextHop<A>* nh = nexthop();
 	if (nh != NULL)
 	    return nh->addr();
-	else {
+	else
 	    return A::ZERO();
-	}
     }
 
     /**
@@ -239,6 +232,8 @@ public:
      * @return a human readable representation of the route entry.
      */
     string str() const;
+protected:
+    IPNextHop<A>*	_nexthop;
 };
 
 typedef IPRouteEntry<IPv4> IPv4RouteEntry;

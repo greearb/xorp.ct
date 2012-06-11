@@ -714,7 +714,7 @@ XrlRibTarget::rib_0_1_register_interest4(// Input values,
 	metric = rt_reg->route()->metric();
 	base_addr = rt_reg->valid_subnet().masked_addr();
 	prefix_len = real_prefix_len = rt_reg->valid_subnet().prefix_len();
-	NextHop *nh = rt_reg->route()->nexthop();
+	IPNextHop<IPv4>* nh = rt_reg->route()->nexthop();
 	switch (nh->type()) {
 	case GENERIC_NEXTHOP:
 	    // this shouldn't be possible
@@ -722,7 +722,7 @@ XrlRibTarget::rib_0_1_register_interest4(// Input values,
 	case PEER_NEXTHOP:
 	case ENCAPS_NEXTHOP:
 	    resolves = true;
-	    nexthop = ((IPNextHop<IPv4>*)nh)->addr();
+	    nexthop = nh->addr();
 	    real_prefix_len = rt_reg->route()->prefix_len();
 	    break;
 	case EXTERNAL_NEXTHOP:
@@ -1580,7 +1580,7 @@ XrlRibTarget::rib_0_1_register_interest6(// Input values,
 	metric = rt_reg->route()->metric();
 	base_addr = rt_reg->valid_subnet().masked_addr();
 	prefix_len = real_prefix_len = rt_reg->valid_subnet().prefix_len();
-	NextHop *nh = rt_reg->route()->nexthop();
+	IPNextHop<IPv6>* nh = rt_reg->route()->nexthop();
 	switch (nh->type()) {
 	case GENERIC_NEXTHOP:
 	    // this shouldn't be possible
@@ -1588,7 +1588,7 @@ XrlRibTarget::rib_0_1_register_interest6(// Input values,
 	case PEER_NEXTHOP:
 	case ENCAPS_NEXTHOP:
 	    resolves = true;
-	    nexthop = ((IPNextHop<IPv6>*)nh)->addr();
+	    nexthop = nh->addr();
 	    real_prefix_len = rt_reg->route()->prefix_len();
 	    break;
 	case EXTERNAL_NEXTHOP:
