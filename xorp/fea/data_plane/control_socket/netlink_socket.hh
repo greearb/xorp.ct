@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -47,7 +47,7 @@ public:
 
     /**
      * Start the netlink socket operation.
-     * 
+     *
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
@@ -55,7 +55,7 @@ public:
 
     /**
      * Stop the netlink socket operation.
-     * 
+     *
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
@@ -63,41 +63,41 @@ public:
 
     /**
      * Test if the netlink socket is open.
-     * 
+     *
      * This method is needed because NetlinkSocket may fail to open
      * netlink socket during startup.
-     * 
+     *
      * @return true if the netlink socket is open, otherwise false.
      */
     bool is_open() const { return _fd >= 0; }
 
     /**
      * Write data to netlink socket.
-     * 
+     *
      * This method also updates the sequence number associated with
      * this netlink socket.
-     * 
+     *
      * @return the number of bytes which were written, or -1 if error.
      */
     ssize_t write(const void* data, size_t nbytes);
 
     /**
      * Sendto data on netlink socket.
-     * 
+     *
      * This method also updates the sequence number associated with
      * this netlink socket.
-     * 
+     *
      * @return the number of bytes which were written, or -1 if error.
      */
     ssize_t sendto(const void* data, size_t nbytes, int flags,
 		   const struct sockaddr* to, socklen_t tolen);
-    
+
     /**
      * Get the sequence number for next message written into the kernel.
-     * 
+     *
      * The sequence number is derived from the instance number of this netlink
      * socket and a 16-bit counter.
-     * 
+     *
      * @return the sequence number for the next message written into the
      * kernel.
      */
@@ -105,14 +105,14 @@ public:
 
     /**
      * Get cached netlink socket identifier value.
-     * 
+     *
      * @return the cached netlink socket identifier value.
      */
     uint32_t nl_pid() const { return _nl_pid; }
 
     /**
      * Force socket to recvmsg data.
-     * 
+     *
      * This usually is performed after writing a sendmsg() request that the
      * kernel will answer (e.g., after writing a route lookup).
      * Use sparingly, with caution, and at your own risk.
@@ -182,12 +182,12 @@ private:
 
     uint16_t 	 _seqno;	// Seqno of next write()
     uint16_t	 _instance_no;  // Instance number of this netlink socket
-    
+
     static uint16_t _instance_cnt;
     uint32_t	_nl_pid;
 
     uint32_t	_nl_groups;	// The netlink multicast groups to listen for
-    uint32_t _table_id; // routing table.. or 0 if any/all (default behaviour) 
+    uint32_t _table_id; // routing table.. or 0 if any/all (default behaviour)
     bool	_is_multipart_message_read; // If true, expect to read a multipart message
 
     uint32_t   _nlm_count; // keep track of how many msgs received.

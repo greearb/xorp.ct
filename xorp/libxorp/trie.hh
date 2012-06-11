@@ -9,13 +9,13 @@
 // Redistribution and/or modification of this program under the terms of
 // any other version of the GNU Lesser General Public License is not
 // permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU Lesser General Public License, Version 2.1, a copy of
 // which can be found in the XORP LICENSE.lgpl file.
-// 
+//
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -26,7 +26,7 @@
 
 #include "ipnet.hh"
 
-// Macros 
+// Macros
 //#define VALIDATE_XORP_TRIE
 //#define DEBUG_LOGGING
 
@@ -64,7 +64,7 @@
  * a child is attached (left or right) is defined accordingly.
  */
 
-template <class A, class Payload> 
+template <class A, class Payload>
 class TrieNode {
 public:
     typedef IPNet<A> Key;
@@ -80,10 +80,10 @@ public:
     explicit TrieNode(const Key& key, TrieNode* up = 0) :
 	_up(up), _left(0), _right(0), _k(key), _p(0) {}
 
-    ~TrieNode() 				
-    { 
+    ~TrieNode()
+    {
 	if (_p)
-	    delete_payload(_p); 
+	    delete_payload(_p);
     }
 
     /**
@@ -334,14 +334,14 @@ public:
      */
     TriePostOrderIterator(Node *n, const Key &k)		{
 	_root = k;
-	_cur = n; 
+	_cur = n;
 	if (_cur) begin();
     }
 
     /**
-     * move to the starting position according to the visiting order 
+     * move to the starting position according to the visiting order
      */
-    TriePostOrderIterator * begin() { 
+    TriePostOrderIterator * begin() {
 	Node * n = _cur;
 	while (n->get_parent() && _root.contains(n->get_parent()->k()))
 	    n = n->get_parent();
@@ -375,7 +375,7 @@ public:
     Node *cur() const			{ return _cur;		};
 
     bool operator==(const TriePostOrderIterator & x) const {
-	return (_cur == x._cur); 
+	return (_cur == x._cur);
     }
 
     bool has_payload() const		{ return _cur->has_payload(); }
@@ -384,7 +384,7 @@ public:
 
 private:
 
-    bool node_is_left(Node * n) const; 
+    bool node_is_left(Node * n) const;
     void next();
 
     Node	*_cur;
@@ -425,14 +425,14 @@ public:
      */
     TriePreOrderIterator(Node *n, const Key &k)		{
 	_root = k;
-	_cur = n; 
+	_cur = n;
 	if (_cur) begin();
     }
 
     /**
-     * move to the starting position according to the visiting order 
+     * move to the starting position according to the visiting order
      */
-    TriePreOrderIterator * begin() { 
+    TriePreOrderIterator * begin() {
 	while (!_stack.empty()) _stack.pop();
 	while (_cur->get_parent() && _root.contains(_cur->get_parent()->k()))
 	    _cur = _cur->get_parent();
@@ -467,7 +467,7 @@ public:
     Node *cur() const			{ return _cur;		};
 
     bool operator==(const TriePreOrderIterator & x) const {
-	return (_cur == x._cur); 
+	return (_cur == x._cur);
     }
 
     bool has_payload() const		{ return _cur->has_payload(); }
@@ -477,7 +477,7 @@ public:
 private:
 
 
-    bool node_is_left(Node * n) const; 
+    bool node_is_left(Node * n) const;
     void next();
 
     Node	 *_cur;
@@ -529,7 +529,7 @@ public:
     /**
      * delete the node with the given key.
      */
- 
+
     void erase(const Key &k)			{ erase(find(k)); }
 
     /**
@@ -554,7 +554,7 @@ public:
     iterator unbind_root(iterator i) const	{
 	return iterator(i.cur(), _root->k());
     }
-    
+
     /**
      * given a key, returns an iterator to the entry with the
      * longest matching prefix.
@@ -667,7 +667,7 @@ private:
  *
  * @return a pointer to the newly inserted node.
  */
-template <class A, class Payload> 
+template <class A, class Payload>
 TrieNode<A, Payload> *
 TrieNode<A, Payload>::insert(TrieNode **root,
 			     const Key& x,
@@ -836,7 +836,7 @@ TrieNode<A, Payload>::erase()
  * Finds the most specific entry in the subtree rooted at r
  * that contains the desired key and has a Payload
  */
-template <class A, class Payload> 
+template <class A, class Payload>
 TrieNode<A, Payload> *
 TrieNode<A,Payload>::find(const Key &key)
 {
@@ -857,7 +857,7 @@ TrieNode<A,Payload>::find(const Key &key)
 /**
  * See the comment in the class definition.
  */
-template <class A, class Payload> 
+template <class A, class Payload>
 TrieNode<A, Payload> *
 TrieNode<A,Payload>::lower_bound(const Key &key)
 {
@@ -886,7 +886,7 @@ TrieNode<A,Payload>::lower_bound(const Key &key)
 	    return iterator.cur();
 	}
     }
-    
+
     // printf("no exact match\n");
     // No exact match exists.
     // cand holds what would be the parent of the node, if it existed.
@@ -906,7 +906,7 @@ TrieNode<A,Payload>::lower_bound(const Key &key)
 /**
  * Finds the subtree of key.
  */
-template <class A, class Payload> 
+template <class A, class Payload>
 TrieNode<A, Payload> *
 TrieNode<A,Payload>::find_subtree(const Key &key)
 {
@@ -924,8 +924,8 @@ TrieNode<A,Payload>::find_subtree(const Key &key)
     return cand;
 }
 
-template <class A, class Payload> 
-void 
+template <class A, class Payload>
+void
 TrieNode<A,Payload>::print(int indent, const char *msg) const
 {
 #ifdef DEBUG_LOGGING
@@ -946,7 +946,7 @@ TrieNode<A,Payload>::print(int indent, const char *msg) const
     UNUSED(msg);
 }
 
-template <class A, class Payload> 
+template <class A, class Payload>
 string
 TrieNode<A,Payload>::str() const
 {
@@ -961,7 +961,7 @@ TrieNode<A,Payload>::str() const
 }
 
 template <class A, class Payload, class __Iterator>
-void 
+void
 Trie<A,Payload,__Iterator>::print() const
 {
     //this is called print - it should NOT use debug_msg!!!
@@ -976,15 +976,15 @@ Trie<A,Payload,__Iterator>::print() const
 }
 
 template <class A, class Payload>
-bool 
-TriePostOrderIterator<A,Payload>::node_is_left(Node* n) const 
-{ 
-    return n->get_parent() && n  == n->get_parent()->get_left(); 
+bool
+TriePostOrderIterator<A,Payload>::node_is_left(Node* n) const
+{
+    return n->get_parent() && n  == n->get_parent()->get_left();
 }
 
 template <class A, class Payload>
 void
-TriePostOrderIterator<A,Payload>::next() 
+TriePostOrderIterator<A,Payload>::next()
 {
     Node * n = _cur;
     do {
@@ -1010,7 +1010,7 @@ TriePostOrderIterator<A,Payload>::next()
 
 template <class A, class Payload>
 void
-TriePreOrderIterator<A,Payload>::next() 
+TriePreOrderIterator<A,Payload>::next()
 {
     if (_stack.empty()) {
 	_cur = NULL;

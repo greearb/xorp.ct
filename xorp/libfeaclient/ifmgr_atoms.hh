@@ -9,13 +9,13 @@
 // Redistribution and/or modification of this program under the terms of
 // any other version of the GNU Lesser General Public License is not
 // permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU Lesser General Public License, Version 2.1, a copy of
 // which can be found in the XORP LICENSE.lgpl file.
-// 
+//
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -156,10 +156,10 @@ public:
 
     /**
      * Test if an IPv4 address belongs to an interface.
-     * 
+     *
      * If an interface with the address is down, then the address is not
      * considered to belong to that interface.
-     * 
+     *
      * @param addr the address to test.
      * @param ifname the return-by-reference name of the interface
      * the address belongs to, or an empty string.
@@ -171,10 +171,10 @@ public:
 
     /**
      * Test if an IPv6 address belongs to an interface.
-     * 
+     *
      * If an interface with the address is down, then the address is not
      * considered to belong to that interface.
-     * 
+     *
      * @param addr the address to test.
      * @param ifname the return-by-reference name of the interface
      * the address belongs to, or an empty string.
@@ -186,10 +186,10 @@ public:
 
     /**
      * Test if an IPvX address belongs to an interface.
-     * 
+     *
      * If an interface with the address is down, then the address is not
      * considered to belong to that interface.
-     * 
+     *
      * @param addr the address to test.
      * @param ifname the return-by-reference name of the interface
      * the address belongs to, or an empty string.
@@ -201,10 +201,10 @@ public:
 
     /**
      * Test if an IPv4 address is directly connected to an interface.
-     * 
+     *
      * If an interface toward an address is down, then the address is not
      * considered as directly connected.
-     * 
+     *
      * @param addr the address to test.
      * @param ifname the return-by-reference name of the interface toward
      * the address if the address is directly connected otherwise an empty
@@ -219,10 +219,10 @@ public:
 
     /**
      * Test if an IPv6 address is directly connected to an interface.
-     * 
+     *
      * If an interface toward an address is down, then the address is not
      * considered as directly connected.
-     * 
+     *
      * @param addr the address to test.
      * @param ifname the return-by-reference name of the interface toward
      * the address if the address is directly connected otherwise an empty
@@ -237,10 +237,10 @@ public:
 
     /**
      * Test if an IPvX address is directly connected to an interface.
-     * 
+     *
      * If an interface toward an address is down, then the address is not
      * considered as directly connected.
-     * 
+     *
      * @param addr the address to test.
      * @param ifname the return-by-reference name of the interface toward
      * the address if the address is directly connected otherwise an empty
@@ -260,7 +260,7 @@ protected:
     IfMap	_interfaces;		// The interface configuration state
 };
 
-
+
 /**
  * @short Interface configuration atom.
  *
@@ -349,7 +349,7 @@ protected:
     VifMap	_vifs;		// The vif configuration state
 };
 
-
+
 /**
  * @short Virtual Interface configuration atom.
  *
@@ -427,7 +427,7 @@ protected:
     IPv6Map	_ipv6addrs;		// The IPv6 addresses
 };
 
-
+
 /**
  * @short IPv4 configuration atom.
  *
@@ -487,7 +487,7 @@ protected:
     static const IPv4	_ZERO_ADDR;	// IPv4::ZERO() address
 };
 
-
+
 /**
  * @short IPv6 configuration atom.
  *
@@ -542,7 +542,7 @@ protected:
     static const IPv6	_ZERO_ADDR;	// IPv6::ZERO() address
 };
 
-
+
 /**
  * Class specialized to provide a way to find IfMgrIPv{4,6}Atom given
  * IPv{4,6} type.  This is useful for code that is solely interested
@@ -575,7 +575,7 @@ struct IfMgrIP<IPv6>
     typedef IfMgrIPv6Atom Atom;
 };
 
-
+
 // ----------------------------------------------------------------------------
 // Inline IfMgrIfTree methods
 
@@ -585,7 +585,7 @@ IfMgrIfTree::clear()
     _interfaces.clear();
 }
 
-
+
 // ----------------------------------------------------------------------------
 // Inline IfMgrIfAtom methods
 
@@ -603,7 +603,7 @@ IfMgrIfAtom::IfMgrIfAtom(const string& name)
 {
 }
 
-
+
 // ----------------------------------------------------------------------------
 // Inline IfMgrVifAtom methods
 
@@ -672,7 +672,7 @@ IfMgrIPv4Atom::endpoint_addr() const
     return _p2p ? _other_addr : _ZERO_ADDR;
 }
 
-
+
 // ----------------------------------------------------------------------------
 // Inline IfMgrIPv6Atom methods
 

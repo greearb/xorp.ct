@@ -8,13 +8,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -61,7 +61,7 @@ public:
     void replumb(RouteTable<A>* old_parent, RouteTable<A>* new_parent);
     string str() const;
 
-    void xrl_cb(const XrlError&, string); 
+    void xrl_cb(const XrlError&, string);
 
     /**
      * If policy-tags of a route changed, this table will need to figure out
@@ -75,7 +75,7 @@ public:
     void replace_policytags(const IPRouteEntry<A>& route,
                             const PolicyTags& prevtags,
                             RouteTable<A>* caller);
- 
+
 
 private:
     typedef set<string> Set;
@@ -95,7 +95,7 @@ private:
      * @param protos the protocols which should stop advertising the route.
      */
     void del_redist(const IPRouteEntry<A>& route, const Set& protos);
-   
+
     /**
      * Start a route redistribution.
      *
@@ -114,7 +114,7 @@ private:
 
 
     RouteTable<A>*		_parent;
-    
+
     XrlRouter&			_xrl_router;
     EventLoop&			_eventloop;
 

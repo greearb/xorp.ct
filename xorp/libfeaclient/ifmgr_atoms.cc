@@ -9,13 +9,13 @@
 // Redistribution and/or modification of this program under the terms of
 // any other version of the GNU Lesser General Public License is not
 // permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU Lesser General Public License, Version 2.1, a copy of
 // which can be found in the XORP LICENSE.lgpl file.
-// 
+//
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -405,7 +405,7 @@ IfMgrIfTree::is_directly_connected(const IPvX& addr, string& ifname,
     return (false);
 }
 
-
+
 // ----------------------------------------------------------------------------
 // IfMgrIfAtom methods
 
@@ -465,7 +465,7 @@ IfMgrIfAtom::find_vif(const string& vifname)
     return (&vi->second);
 }
 
-
+
 // ----------------------------------------------------------------------------
 // IfMgrVifAtom methods
 
@@ -495,7 +495,7 @@ IfMgrVifAtom::toString() const {
 	<< " loopback: " << _loopback << " pim_register: " << _pim_register << " pif_index: " << _pif_index
 	<< " vif index: " << _vif_index
 	<< endl;
-    
+
     IfMgrVifAtom::IPv4Map::const_iterator ai = ipv4addrs().begin();
     while (ai != ipv4addrs().end()) {
 	oss << "     Addr4: " << ai->second.toString() << endl;
@@ -550,7 +550,7 @@ IfMgrVifAtom::find_addr(const IPv6& addr)
     return (&ai->second);
 }
 
-
+
 // ----------------------------------------------------------------------------
 // IfMgrIPv4Atom methods
 
@@ -582,7 +582,7 @@ IfMgrIPv4Atom::toString() const {
 }
 
 
-
+
 // ----------------------------------------------------------------------------
 // IfMgrIfIPv6Atom methods
 

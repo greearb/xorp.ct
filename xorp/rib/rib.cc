@@ -8,13 +8,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -338,7 +338,7 @@ RIB<A>::initialize(RegisterServer& register_server)
 	XLOG_FATAL("Could not initialize policy redistribution table for %s",
 		   name().c_str());
     }
-    
+
     //
     // XXX: we must initialize the final RedistTable after the
     // RegistTable has been initialized.
@@ -380,7 +380,7 @@ RIB<A>::initialize_policy_redist()
 
     if (_final_table == NULL || _final_table == _register_table)
 	_final_table = _policy_redist_table;
-    
+
     return XORP_OK;
 }
 
@@ -603,7 +603,7 @@ RIB<A>::delete_vif(const string& vifname)
     } else {
 	delete rib_vif;
     }
-    
+
     return XORP_OK;
 }
 
@@ -729,7 +729,7 @@ RIB<A>::delete_vif_address(const string& vifname,
 	return XORP_ERROR;
     }
     RibVif* vif = vi->second;
-    
+
     list<VifAddr>::const_iterator ai;
     for (ai = vif->addr_list().begin(); ai != vif->addr_list().end(); ++ai) {
 	const IPvX& ipvx = ai->addr();
@@ -1191,7 +1191,7 @@ RIB<A>::add_policy_connected_table(const string& parent_tablename)
     if (find_table(PolicyConnectedTable<A>::table_name) != NULL)
 	return XORP_OK;
 
-    PolicyConnectedTable<A>* pt = 
+    PolicyConnectedTable<A>* pt =
 	new PolicyConnectedTable<A>(parent, _rib_manager.policy_filters());
     if (add_table(pt) != XORP_OK) {
 	delete pt;
@@ -1408,7 +1408,7 @@ RIB<A>::add_origin_table(const string& tablename,
 	    return XORP_ERROR;
 	}
 
-	if (_final_table->type() & (REDIST_TABLE | POLICY_REDIST_TABLE | 
+	if (_final_table->type() & (REDIST_TABLE | POLICY_REDIST_TABLE |
 				    REGISTER_TABLE)) {
 	    ei_table->set_next_table(next_table);
 	    next_table->replumb(existing_table, ei_table);

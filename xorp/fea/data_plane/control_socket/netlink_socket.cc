@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -90,7 +90,7 @@ NetlinkSocket::NetlinkSocket(EventLoop& eventloop, uint32_t table_id)
       _is_multipart_message_read(false),
       _nlm_count(0)
 {
-    
+
 }
 
 NetlinkSocket::~NetlinkSocket()
@@ -158,7 +158,7 @@ int NetlinkSocket::bind_table_id() {
 	}; /* bpf instructions */
 	bpf.bf_insns = instructions;
 	bpf.bf_len = 9;
-	
+
 	if (setsockopt(_fd, SOL_SOCKET, SO_ATTACH_FILTER, &bpf, sizeof(bpf)) < 0) {
 	    XLOG_WARNING("Failed to set filter on netlink socket, error: %s\n"
 			 "The program will run fine, but may be slightly less efficient if\n"
@@ -193,7 +193,7 @@ int NetlinkSocket::notify_table_id_change(uint32_t new_tbl) {
     }
     return XORP_OK;
 }
-	
+
 
 int
 NetlinkSocket::start(string& error_msg)
@@ -221,9 +221,9 @@ NetlinkSocket::start(string& error_msg)
     // loss of data from the kernel.
     //
     comm_sock_set_rcvbuf(_fd, SO_RCV_BUF_SIZE_MAX, SO_RCV_BUF_SIZE_MIN);
-    
+
     // TODO: do we want to make the socket non-blocking?
-    
+
     //
     // Bind the socket
     //
@@ -238,7 +238,7 @@ NetlinkSocket::start(string& error_msg)
 	_fd = -1;
 	return (XORP_ERROR);
     }
-    
+
     //
     // Double-check the result socket is AF_NETLINK
     //
@@ -288,7 +288,7 @@ NetlinkSocket::start(string& error_msg)
 	_fd = -1;
 	return (XORP_ERROR);
     }
-    
+
     return (XORP_OK);
 }
 
@@ -302,7 +302,7 @@ NetlinkSocket::stop(string& error_msg)
 	close(_fd);
 	_fd = -1;
     }
-    
+
     return (XORP_OK);
 }
 
@@ -333,11 +333,11 @@ NetlinkSocket::force_recvmsg_flgs(int flags, bool only_kernel_messages,
     struct iovec	iov;
     struct msghdr	msg;
     struct sockaddr_nl	snl;
-    
+
     // Set the socket
     memset(&snl, 0, sizeof(snl));
     snl.nl_family = AF_NETLINK;
-    
+
     // Init the recvmsg() arguments
     iov.iov_base = &buffer[0];
     iov.iov_len = buffer.size();
@@ -348,7 +348,7 @@ NetlinkSocket::force_recvmsg_flgs(int flags, bool only_kernel_messages,
     msg.msg_control = NULL;
     msg.msg_controllen = 0;
     msg.msg_flags = 0;
-    
+
     for ( ; ; ) {
 	ssize_t got;
 	// Find how much data is queued in the first message
@@ -361,11 +361,11 @@ NetlinkSocket::force_recvmsg_flgs(int flags, bool only_kernel_messages,
 		break;		// The buffer is big enough
 	    buffer.resize(buffer.size() + NETLINK_SOCKET_BYTES);
 	} while (true);
-	
+
 	// Re-init the iov argument
 	iov.iov_base = &buffer[0];
 	iov.iov_len = buffer.size();
-	
+
 	got = recvmsg(_fd, &msg, flags);
 	if (got < 0) {
 	    // Nothing to read after all, msg was probably filtered.
@@ -398,7 +398,7 @@ NetlinkSocket::force_recvmsg_flgs(int flags, bool only_kernel_messages,
 	message.resize(message.size() + got);
 	memcpy(&message[off], &buffer[0], got);
 	off += got;
-	
+
 	if ((off - last_mh_off) < (ssize_t)sizeof(struct nlmsghdr)) {
 	    error_msg = c_format("Netlink socket recvmsg failed: "
 				 "message truncated: "
@@ -407,7 +407,7 @@ NetlinkSocket::force_recvmsg_flgs(int flags, bool only_kernel_messages,
 				 XORP_INT_CAST(got),
 				 XORP_UINT_CAST(sizeof(struct nlmsghdr)));
 	    return (XORP_ERROR);
-	}	
+	}
 
 	//
 	// If this is a multipart message, it must be terminated by NLMSG_DONE
@@ -433,7 +433,7 @@ NetlinkSocket::force_recvmsg_flgs(int flags, bool only_kernel_messages,
 
     //XLOG_WARNING("Got a netlink message: %s  nlm_count: %u",
     //	 NlmUtils::nlm_print_msg(message).c_str(), _nlm_count);
-    
+
     //
     // Notify observers
     //

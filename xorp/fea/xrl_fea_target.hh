@@ -8,13 +8,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -73,7 +73,7 @@ public:
 
     /**
      * Startup the service operation.
-     * 
+     *
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		startup();
@@ -101,7 +101,7 @@ public:
 
     /**
      * Get the event loop this service is added to.
-     * 
+     *
      * @return the event loop this service is added to.
      */
     EventLoop&	eventloop() { return (_eventloop); }
@@ -946,7 +946,7 @@ public:
         const string&   ifname,
         const Mac&      mac);
 
-    
+
     XrlCmdError ifmgr_0_1_create_address_atomic(
 	// Input values,
 	const string&   ifname,
@@ -1269,7 +1269,7 @@ public:
 	string&		protocol_origin);
 
     XrlCmdError fti_0_2_have_ipv4(
-	// Output values, 
+	// Output values,
 	bool&	result);
 
     XrlCmdError fti_0_2_get_unicast_forwarding_enabled4(
@@ -1341,7 +1341,7 @@ public:
 
 
     XrlCmdError fti_0_2_have_ipv6(
-	// Output values, 
+	// Output values,
 	bool&	result);
 
     XrlCmdError fti_0_2_get_unicast_forwarding_enabled6(

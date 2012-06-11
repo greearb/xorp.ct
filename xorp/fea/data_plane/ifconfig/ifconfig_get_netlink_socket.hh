@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -46,7 +46,7 @@ public:
 
     /**
      * Start operation.
-     * 
+     *
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
@@ -54,7 +54,7 @@ public:
 
     /**
      * Stop operation.
-     * 
+     *
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
@@ -62,7 +62,7 @@ public:
 
     /**
      * Pull the network interface information from the underlying system.
-     * 
+     *
      * @param iftree the IfTree storage to store the pulled information.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
@@ -78,10 +78,10 @@ public:
     /**
      * Parse information about network interface configuration change from
      * the underlying system.
-     * 
+     *
      * The information to parse is in NETLINK format
      * (e.g., obtained by netlink(7) sockets mechanism).
-     * 
+     *
      * @param ifconfig the IfConfig instance.
      * @param iftree the IfTree storage to store the parsed information.
      * @param buffer the buffer with the data to parse.
