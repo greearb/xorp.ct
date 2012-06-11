@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -105,7 +105,7 @@ protected:
     bool	_flow_controlled;
     bool	_callback_pending;
 };
-
+
 /**
  * Route Redistributor output that sends route add and deletes to
  * remote redistribution target via the redist_transaction{4,6} xrl
@@ -159,7 +159,7 @@ protected:
     size_t	_transaction_size;	// Build-in-progress transaction size
 };
 
-
+
 // ----------------------------------------------------------------------------
 // Globally accessible RedistXrlOutput inline methods
 
@@ -177,7 +177,7 @@ RedistXrlOutput<A>::cookie() const
     return _cookie;
 }
 
-
+
 // ----------------------------------------------------------------------------
 // Protected RedistXrlOutput inline methods
 
@@ -199,7 +199,7 @@ RedistXrlOutput<A>::decr_inflight()
     _inflight--;
 }
 
-
+
 // ----------------------------------------------------------------------------
 // Inline RedistrTransactionXrlOutput methods
 

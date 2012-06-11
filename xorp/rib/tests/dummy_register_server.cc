@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -37,9 +37,9 @@ DummyRegisterServer::DummyRegisterServer()
 }
 
 
-void 
+void
 DummyRegisterServer::send_route_changed(const string& module_name,
-					const IPv4Net& net, 
+					const IPv4Net& net,
 					const IPv4& nexthop,
 					uint32_t metric,
 					uint32_t admin_distance,
@@ -47,14 +47,14 @@ DummyRegisterServer::send_route_changed(const string& module_name,
 					bool multicast)
 {
     string s;
-    
+
     if (verbose) {
 	printf("DummyRegisterServer::send_route_changed module=%s net=%s nexthop=%s, metric=%u admin_distance=%u protocol_origin=%s",
 	       module_name.c_str(), net.str().c_str(), nexthop.str().c_str(),
 	       XORP_UINT_CAST(metric), XORP_UINT_CAST(admin_distance),
 	       protocol_origin.c_str());
     }
-    
+
     s = module_name + " " + net.str() + " " + nexthop.str();
     s += " " + c_format("%u", XORP_UINT_CAST(metric));
     if (multicast) {
@@ -75,12 +75,12 @@ DummyRegisterServer::send_invalidate(const string& module_name,
 				     bool multicast)
 {
     string s;
-    
+
     if (verbose) {
 	printf("DummyRegisterServer::send_invalidate module=%s net=%s ",
 	       module_name.c_str(), net.str().c_str());
     }
-    
+
     s = module_name + " " + net.str();
     if (multicast) {
 	if (verbose)
@@ -96,7 +96,7 @@ DummyRegisterServer::send_invalidate(const string& module_name,
 
 void
 DummyRegisterServer::send_route_changed(const string& module_name,
-					const IPv6Net& net, 
+					const IPv6Net& net,
 					const IPv6& nexthop,
 					uint32_t metric,
 					uint32_t admin_distance,
@@ -104,12 +104,12 @@ DummyRegisterServer::send_route_changed(const string& module_name,
 					bool multicast)
 {
     string s;
-    
+
     printf("DummyRegisterServer::send_route_changed module=%s net=%s nexthop=%s, metric=%u admin_distance=%u protocol_origin=%s",
 	   module_name.c_str(), net.str().c_str(), nexthop.str().c_str(),
 	   XORP_UINT_CAST(metric), XORP_UINT_CAST(admin_distance),
 	   protocol_origin.c_str());
-    
+
     s = module_name + " " + net.str() + " " + nexthop.str();
     s += " " + c_format("%u", XORP_UINT_CAST(metric));
     if (multicast) {
@@ -128,12 +128,12 @@ DummyRegisterServer::send_invalidate(const string& module_name,
 				     bool multicast)
 {
     string s;
-    
+
     if (verbose) {
 	printf("DummyRegisterServer::send_invalidate module=%s net=%s ",
 	       module_name.c_str(), net.str().c_str());
     }
-    
+
     s = module_name + " " + net.str();
     if (multicast) {
 	if (verbose)
@@ -151,7 +151,7 @@ bool
 DummyRegisterServer::verify_invalidated(const string& invalid)
 {
     set<string>::iterator iter;
-    
+
     iter = _invalidated.find(invalid);
     if (iter == _invalidated.end()) {
 	if (verbose)
@@ -169,7 +169,7 @@ bool
 DummyRegisterServer::verify_changed(const string& changed)
 {
     set<string>::iterator iter;
-    
+
     iter = _changed.find(changed);
     if (iter == _changed.end()) {
 	if (verbose)

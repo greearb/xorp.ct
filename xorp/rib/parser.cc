@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -35,7 +35,7 @@
 // Argument Parsing methods
 
 Datum*
-Uint32ArgumentParser::parse(const string& str) const 
+Uint32ArgumentParser::parse(const string& str) const
 {
     try {
 	printf(">>>str=%s\n", str.c_str());
@@ -46,7 +46,7 @@ Uint32ArgumentParser::parse(const string& str) const
 }
 
 Datum*
-StringArgumentParser::parse(const string& str) const 
+StringArgumentParser::parse(const string& str) const
 {
     try {
 	return new StringDatum(str);
@@ -95,7 +95,7 @@ Command::check_syntax()
 }
 
 DatumVariableBinding*
-Command::find_binding(int n) 
+Command::find_binding(int n)
 {
     map<int, DatumVariableBinding* >::iterator mi = _bindings.find(n);
     if (mi == _bindings.end())
@@ -143,7 +143,7 @@ void
 Command::set_arg(int n, Datum* d) throw (Parse_error)
 {
     DatumVariableBinding* b = find_binding(n);
-    if (b == NULL) 
+    if (b == NULL)
 	throw Parse_error(c_format("Argument %d has no variable associated "
 				   "with it", n));
     b->transfer(d);
@@ -174,7 +174,7 @@ Parser::~Parser()
 }
 
 bool
-Parser::add_command(Command* command) 
+Parser::add_command(Command* command)
 {
     const string& s = command->syntax();
     debug_msg("Parser::add_command %s\n", s.c_str());
@@ -195,7 +195,7 @@ Parser::get_argument_parser(const string& name) const
 // Helper functions
 
 static string
-ltrim(const string& s) 
+ltrim(const string& s)
 {
     string::const_iterator i;
     for (i = s.begin(); i != s.end() && xorp_isspace(*i); i++)
@@ -208,16 +208,16 @@ rtrim(const string& s)
 {
     string::const_iterator i, lns = s.begin();
     for (i = s.begin(); i != s.end(); i++) {
-	if (xorp_isspace(*i) == false) 
+	if (xorp_isspace(*i) == false)
 	    lns = i + 1;
     }
     return string(s.begin(), lns);
 }
 
 static string
-single_space(const string& s) 
+single_space(const string& s)
 {
-    if (s.size() == 0) 
+    if (s.size() == 0)
 	return s;
 
     string r;
@@ -229,7 +229,7 @@ single_space(const string& s)
 	    r += string(lt, i + 1);
 	    lt = i + 1;
 	    inspace = true;
-	} 
+	}
 	if (*i != ' ' && inspace == true) {
 	    lt = i;
 	    inspace = false;
@@ -262,7 +262,7 @@ prepare_line(const string& s)
 // ----------------------------------------------------------------------------
 
 int
-Parser::parse(const string& s) const 
+Parser::parse(const string& s) const
 {
     debug_msg("-------------------------------------------------------\n");
     debug_msg("Parser::parse: %s\n", s.c_str());
@@ -310,13 +310,13 @@ Parser::parse(const string& s) const
 		if (d == NULL)
 		    throw Parse_error(words[i]);
 
-		debug_msg("%s = %s\n", 
+		debug_msg("%s = %s\n",
 			  template_words[i].c_str(), words[i].c_str());
 		cmd->set_arg(args_done, d);
 		args_done++;
 		delete d;
 	    }
-	} 
+	}
 	if (args_done != cmd->num_args()) {
 	    throw Parse_error(c_format("Got %d args, expected %d\n",
 				       args_done, cmd->num_args()));
@@ -329,17 +329,17 @@ Parser::parse(const string& s) const
 	cerr << "Parse Error: " << str << "\n";
 	cerr << pe.str() << "\n";
 	exit(1);
-    } 
+    }
     return XORP_OK;
 }
 
-int 
+int
 Parser::split_into_words(const string& str, vector<string>& words) const
 {
     int word = 0;
     int len;
     string tmpstr(str);
-    
+
     try {
 	while (true) {
 	    // Remove leading whitespace

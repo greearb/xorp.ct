@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -1558,10 +1558,10 @@ IfTree::prepare_replacement_state(const IfTree& other)
 
 /**
  * Prune bogus deleted state.
- * 
+ *
  * If an item in the local tree is marked as deleted, but is not
  * in the other tree, then it is removed.
- * 
+ *
  * @param old_iftree the old tree with the state that is used as reference.
  * @return the modified configuration tree.
  */

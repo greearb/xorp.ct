@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -85,7 +85,7 @@ IfConfigGetGetifaddrs::parse_buffer_getifaddrs(IfConfig& ifconfig,
 	    XLOG_ERROR("Ignoring interface with unknown name");
 	    continue;
 	}
-	
+
 	//
 	// Get the interface name
 	//
@@ -102,7 +102,7 @@ IfConfigGetGetifaddrs::parse_buffer_getifaddrs(IfConfig& ifconfig,
 	alias_if_name = string(tmp_if_name);
 	debug_msg("interface: %s\n", if_name.c_str());
 	debug_msg("alias interface: %s\n", alias_if_name.c_str());
-	
+
 	//
 	// Get the physical interface index
 	//
@@ -118,13 +118,13 @@ IfConfigGetGetifaddrs::parse_buffer_getifaddrs(IfConfig& ifconfig,
 	    if (if_index > 0)
 		break;
 #endif // AF_LINK
-	    
+
 #ifdef HAVE_IF_NAMETOINDEX
 	    if_index = if_nametoindex(if_name.c_str());
 	    if (if_index > 0)
 		break;
 #endif // HAVE_IF_NAMETOINDEX
-	    
+
 #ifdef SIOCGIFINDEX
 	    {
 		int s;
@@ -132,7 +132,7 @@ IfConfigGetGetifaddrs::parse_buffer_getifaddrs(IfConfig& ifconfig,
 		memset(&ifridx, 0, sizeof(ifridx));
 		strncpy(ifridx.ifr_name, if_name.c_str(),
 			sizeof(ifridx.ifr_name) - 1);
-	    
+
 		s = socket(AF_INET, SOCK_DGRAM, 0);
 		if (s < 0) {
 		    XLOG_FATAL("Could not initialize IPv4 ioctl() socket");
@@ -152,7 +152,7 @@ IfConfigGetGetifaddrs::parse_buffer_getifaddrs(IfConfig& ifconfig,
 	    if (if_index > 0)
 		break;
 #endif // SIOCGIFINDEX
-	    
+
 	    break;
 	} while (false);
 	if (if_index == 0) {
@@ -161,7 +161,7 @@ IfConfigGetGetifaddrs::parse_buffer_getifaddrs(IfConfig& ifconfig,
 		       if_name.c_str());
 	}
 	debug_msg("interface index: %u\n", if_index);
-	
+
 	//
 	// Add the interface (if a new one)
 	//
@@ -212,7 +212,7 @@ IfConfigGetGetifaddrs::parse_buffer_getifaddrs(IfConfig& ifconfig,
 		memset(&ifridx, 0, sizeof(ifridx));
 		strncpy(ifridx.ifr_name, if_name.c_str(),
 			sizeof(ifridx.ifr_name) - 1);
-	    
+
 		s = socket(AF_INET, SOCK_DGRAM, 0);
 		if (s < 0) {
 		    XLOG_FATAL("Could not initialize IPv4 ioctl() socket");
@@ -232,11 +232,11 @@ IfConfigGetGetifaddrs::parse_buffer_getifaddrs(IfConfig& ifconfig,
 		close(s);
 	    }
 #endif // SIOCGIFHWADDR
-	    
+
 	    break;
 	} while (false);
 	debug_msg("MAC address: %s\n", ifp->mac().str().c_str());
-	
+
 	//
 	// Get the MTU
 	//
@@ -258,7 +258,7 @@ IfConfigGetGetifaddrs::parse_buffer_getifaddrs(IfConfig& ifconfig,
 		}
 	    }
 #endif // AF_LINK
-	    
+
 #ifdef SIOCGIFMTU
 	    {
 		int s;
@@ -284,7 +284,7 @@ IfConfigGetGetifaddrs::parse_buffer_getifaddrs(IfConfig& ifconfig,
 		close(s);
 	    }
 #endif // SIOCGIFMTU
-	    
+
 	    break;
 	} while (false);
 	debug_msg("MTU: %d\n", ifp->mtu());
@@ -333,7 +333,7 @@ IfConfigGetGetifaddrs::parse_buffer_getifaddrs(IfConfig& ifconfig,
 	} while (false);
 	debug_msg("no_carrier: %s\n", bool_c_str(ifp->no_carrier()));
 	debug_msg("baudrate: %u\n", XORP_UINT_CAST(ifp->baudrate()));
-	
+
 	//
 	// Get the flags
 	//
@@ -343,19 +343,19 @@ IfConfigGetGetifaddrs::parse_buffer_getifaddrs(IfConfig& ifconfig,
 	    ifp->set_enabled(flags & IFF_UP);
 	}
 	debug_msg("enabled: %s\n", bool_c_str(ifp->enabled()));
-	
+
 	// XXX: vifname == ifname on this platform
 	if (is_newlink)
 	    ifp->add_vif(alias_if_name);
 	IfTreeVif* vifp = ifp->find_vif(alias_if_name);
 	XLOG_ASSERT(vifp != NULL);
-	
+
 	//
 	// Set the physical interface index for the vif
 	//
 	if (is_newlink || (if_index != vifp->pif_index()))
 	    vifp->set_pif_index(if_index);
-	
+
 	//
 	// Set the vif flags
 	//
@@ -375,13 +375,13 @@ IfConfigGetGetifaddrs::parse_buffer_getifaddrs(IfConfig& ifconfig,
 	debug_msg("vif point_to_point: %s\n",
 		  bool_c_str(vifp->point_to_point()));
 	debug_msg("vif multicast: %s\n", bool_c_str(vifp->multicast()));
-	
+
 	//
 	// Get the IP address, netmask, broadcast address, P2P destination
 	//
 	if (ifa->ifa_addr == NULL)
 	    continue;
-	
+
 	switch (ifa->ifa_addr->sa_family) {
 	case AF_INET:
 	{
@@ -392,20 +392,20 @@ IfConfigGetGetifaddrs::parse_buffer_getifaddrs(IfConfig& ifconfig,
 	    IPv4 peer_addr;
 	    bool has_broadcast_addr = false;
 	    bool has_peer_addr = false;
-	    
+
 	    // Get the IP address
 	    if (ifa->ifa_addr != NULL) {
 		lcl_addr.copy_in(*ifa->ifa_addr);
 	    }
 	    debug_msg("IP address: %s\n", lcl_addr.str().c_str());
-	    
+
 	    // Get the netmask
 	    if (ifa->ifa_netmask != NULL) {
 		const struct sockaddr_in* sin = sockaddr2sockaddr_in(ifa->ifa_netmask);
 		subnet_mask.copy_in(sin->sin_addr);
 	    }
 	    debug_msg("IP netmask: %s\n", subnet_mask.str().c_str());
-	    
+
 	    // Get the broadcast address
 	    if (vifp->broadcast() && (ifa->ifa_broadaddr != NULL)) {
 		const struct sockaddr_in* sin = sockaddr2sockaddr_in(ifa->ifa_broadaddr);
@@ -414,7 +414,7 @@ IfConfigGetGetifaddrs::parse_buffer_getifaddrs(IfConfig& ifconfig,
 		debug_msg("Broadcast address: %s\n",
 			  broadcast_addr.str().c_str());
 	    }
-	    
+
 	    // Get the p2p address
 	    if (vifp->point_to_point() && (ifa->ifa_dstaddr != NULL)) {
 		const struct sockaddr_in* sin = sockaddr2sockaddr_in(ifa->ifa_dstaddr);
@@ -422,9 +422,9 @@ IfConfigGetGetifaddrs::parse_buffer_getifaddrs(IfConfig& ifconfig,
 		has_peer_addr = true;
 		debug_msg("Peer address: %s\n", peer_addr.str().c_str());
 	    }
-	    
+
 	    debug_msg("\n");	// put an empty line between interfaces
-	    
+
 	    // Add the address
 	    vifp->add_addr(lcl_addr);
 	    IfTreeAddr4* ap = vifp->find_addr(lcl_addr);
@@ -438,13 +438,13 @@ IfConfigGetGetifaddrs::parse_buffer_getifaddrs(IfConfig& ifconfig,
 				   && (flags & IFF_POINTOPOINT)
 				   && has_peer_addr);
 	    ap->set_multicast(vifp->multicast() && (flags & IFF_MULTICAST));
-	    
+
 	    ap->set_prefix_len(subnet_mask.mask_len());
 	    if (ap->broadcast())
 		ap->set_bcast(broadcast_addr);
 	    if (ap->point_to_point())
 		ap->set_endpoint(peer_addr);
-	    
+
 	    break;
 	}
 #ifdef HAVE_IPV6
@@ -455,21 +455,21 @@ IfConfigGetGetifaddrs::parse_buffer_getifaddrs(IfConfig& ifconfig,
 	    IPv6 subnet_mask;
 	    IPv6 peer_addr;
 	    bool has_peer_addr = false;
-	    
+
 	    // Get the IP address
 	    if (ifa->ifa_addr != NULL) {
 		lcl_addr.copy_in(*ifa->ifa_addr);
 	    }
 	    lcl_addr = system_adjust_ipv6_recv(lcl_addr);
 	    debug_msg("IP address: %s\n", lcl_addr.str().c_str());
-	    
+
 	    // Get the netmask
 	    if (ifa->ifa_netmask != NULL) {
 		const struct sockaddr_in6* sin6 = sockaddr2sockaddr_in6(ifa->ifa_netmask);
 		subnet_mask.copy_in(sin6->sin6_addr);
 	    }
 	    debug_msg("IP netmask: %s\n", subnet_mask.str().c_str());
-	    
+
 	    // Get the p2p address
 	    // XXX: note that unlike IPv4, here we check whether the
 	    // address family of the destination address is valid.
@@ -481,9 +481,9 @@ IfConfigGetGetifaddrs::parse_buffer_getifaddrs(IfConfig& ifconfig,
 		has_peer_addr = true;
 		debug_msg("Peer address: %s\n", peer_addr.str().c_str());
 	    }
-	    
+
 	    debug_msg("\n");	// put an empty line between interfaces
-	    
+
 	    // Add the address
 	    vifp->add_addr(lcl_addr);
 	    IfTreeAddr6* ap = vifp->find_addr(lcl_addr);
@@ -494,11 +494,11 @@ IfConfigGetGetifaddrs::parse_buffer_getifaddrs(IfConfig& ifconfig,
 				   && (flags & IFF_POINTOPOINT)
 				   && has_peer_addr);
 	    ap->set_multicast(vifp->multicast() && (flags & IFF_MULTICAST));
-	    
+
 	    ap->set_prefix_len(subnet_mask.mask_len());
 	    if (ap->point_to_point())
 		ap->set_endpoint(peer_addr);
-	    
+
 	    //
 	    // TODO: do we need to check the IPv6-specific flags, and ignore
 	    // anycast addresses?
@@ -510,7 +510,7 @@ IfConfigGetGetifaddrs::parse_buffer_getifaddrs(IfConfig& ifconfig,
 	    break;
 	}
     }
-    
+
     return (XORP_OK);
 }
 
