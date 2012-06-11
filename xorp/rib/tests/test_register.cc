@@ -80,15 +80,15 @@ test_route_range(const string& ipv4,
     if (verbose)
 	printf("**RouteRange for %s\n", ipv4.c_str());
     if (rr->route() != NULL) {
-	DiscardNextHop* dnh;
-	dnh = reinterpret_cast<DiscardNextHop* >(rr->route()->nexthop());
+	DiscardNextHop<IPv4>* dnh;
+	dnh = dynamic_cast<DiscardNextHop<IPv4>* >(rr->route()->nexthop());
 	if (verifytype != RibVerifyType(DISCARD) && dnh == NULL) {
 	    printf("**RouteRange for %s\n", ipv4.c_str());
 	    printf("Expected discard route\n");
 	    abort();
 	}
-	UnreachableNextHop* unh;
-	unh = reinterpret_cast<UnreachableNextHop* >(rr->route()->nexthop());
+	UnreachableNextHop<IPv4>* unh;
+	unh = dynamic_cast<UnreachableNextHop<IPv4>* >(rr->route()->nexthop());
 	if (verifytype != RibVerifyType(UNREACHABLE) && unh == NULL) {
 	    printf("**RouteRange for %s\n", ipv4.c_str());
 	    printf("Expected unreachable route\n");

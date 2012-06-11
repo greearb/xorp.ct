@@ -477,7 +477,7 @@ RegisterTable<A>::notify_route_changed(
     const IPRouteEntry<A>& changed_route)
 {
     list<string> module_names	= (*trie_iter)->module_names();
-    NextHop* nexthop		= changed_route.nexthop();
+    IPNextHop<A>* nexthop		= changed_route.nexthop();
     bool resolves		= false;;
     A nexthop_addr;
 
@@ -488,7 +488,7 @@ RegisterTable<A>::notify_route_changed(
     case PEER_NEXTHOP:
     case ENCAPS_NEXTHOP:
 	resolves = true;
-	nexthop_addr = (reinterpret_cast<IPNextHop<A>* >(nexthop))->addr();
+	nexthop_addr = nexthop->addr();
 	break;
     case EXTERNAL_NEXTHOP:
     case DISCARD_NEXTHOP:

@@ -44,10 +44,10 @@ ExpectedRouteChange<A>::matches_add(const IPRouteEntry<A>& route) const
 	return false;
     if (route.net() != _route.net())
 	return false;
-    IPNextHop<A>* expected_nh = dynamic_cast<IPNextHop<A>* >(_route.nexthop());
+    IPNextHop<A>* expected_nh = _route.nexthop();
     XLOG_ASSERT(expected_nh != NULL);
 
-    IPNextHop<A>* actual_nh = dynamic_cast<IPNextHop<A>* >(route.nexthop());
+    IPNextHop<A>* actual_nh = route.nexthop();
     XLOG_ASSERT(actual_nh != NULL);
 
     if ((expected_nh->addr()) != (actual_nh->addr()))
@@ -63,10 +63,10 @@ ExpectedRouteChange<A>::matches_delete(const IPRouteEntry<A>* route) const
 	return false;
     if (route->net() != _route.net())
 	return false;
-    IPNextHop<A>* expected_nh = dynamic_cast<IPNextHop<A>* >(_route.nexthop());
+    IPNextHop<A>* expected_nh = _route.nexthop();
     XLOG_ASSERT(expected_nh != NULL);
 
-    IPNextHop<A>* actual_nh = dynamic_cast<IPNextHop<A>* >(route->nexthop());
+    IPNextHop<A>* actual_nh = route->nexthop();
     XLOG_ASSERT(actual_nh != NULL);
 
     if ((expected_nh->addr()) != (actual_nh->addr()))
