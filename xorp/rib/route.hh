@@ -310,7 +310,7 @@ public:
      *
      * @param backlink the ExtIntTable multimap iterator for this route.
      */
-    void set_backlink(typename RouteBackLink::iterator v);
+    void set_backlink(typename RouteBackLink::iterator v) { _backlink = v; }
 
     /**
      * Get the backlink.
@@ -318,7 +318,7 @@ public:
      *
      * @return the backlink iterator.
      */
-    typename RouteBackLink::iterator backlink() const;
+    typename RouteBackLink::iterator backlink() const { return _backlink; }
 
 private:
     mutable const IPRouteEntry<A>* _igp_parent;
@@ -329,20 +329,6 @@ private:
     // route deletion would be expensive.
     typename RouteBackLink::iterator _backlink;
 };
-
-template <typename A>
-inline void
-ResolvedIPRouteEntry<A>::set_backlink(typename RouteBackLink::iterator v)
-{
-    _backlink = v;
-}
-
-template <typename A>
-inline typename ResolvedIPRouteEntry<A>::RouteBackLink::iterator
-ResolvedIPRouteEntry<A>::backlink() const
-{
-    return _backlink;
-}
 
 typedef ResolvedIPRouteEntry<IPv4> ResolvedIPv4RouteEntry;
 typedef ResolvedIPRouteEntry<IPv6> ResolvedIPv6RouteEntry;
@@ -391,7 +377,7 @@ public:
      *
      * @param backlink the ExtIntTable multimap iterator for this route.
      */
-    void set_backlink(typename RouteBackLink::iterator v);
+    void set_backlink(typename RouteBackLink::iterator v) { _backlink = v; }
 
     /**
      * Get the backlink.
@@ -399,7 +385,7 @@ public:
      *
      * @return the backlink iterator.
      */
-    typename RouteBackLink::iterator backlink() const;
+    typename RouteBackLink::iterator backlink() const { return _backlink; }
 
 private:
     //
@@ -410,20 +396,6 @@ private:
     typename RouteBackLink::iterator	_backlink;
     const IPRouteEntry<A>*		_route;
 };
-
-template <typename A>
-inline void
-UnresolvedIPRouteEntry<A>::set_backlink(typename RouteBackLink::iterator v)
-{
-    _backlink = v;
-}
-
-template <typename A>
-inline typename UnresolvedIPRouteEntry<A>::RouteBackLink::iterator
-UnresolvedIPRouteEntry<A>::backlink() const
-{
-    return _backlink;
-}
 
 typedef UnresolvedIPRouteEntry<IPv4> UnresolvedIPv4RouteEntry;
 typedef UnresolvedIPRouteEntry<IPv6> UnresolvedIPv6RouteEntry;
