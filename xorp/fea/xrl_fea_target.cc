@@ -8,13 +8,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -2519,7 +2519,7 @@ XrlFeaTarget::ifmgr_0_1_delete_address_atomic(
 
     if (add_remove_address(false, ifname, vifname, ip, 0, error_msg) != XORP_OK)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
-    
+
     return XrlCmdError::OKAY();
 }
 
@@ -2535,7 +2535,7 @@ XrlFeaTarget::ifmgr_0_1_create_address_atomic(
 
     if (add_remove_address(true, ifname, vifname, ip, prefix, error_msg) != XORP_OK)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
-    
+
     return XrlCmdError::OKAY();
 }
 
@@ -2593,7 +2593,7 @@ XrlFeaTarget::add_remove_mac(bool add, const string& ifname, const Mac& mac,
     set<Mac>& macs = ifp->macs();
 
     //
-    // This is the real MAC.  
+    // This is the real MAC.
     //
     // XXX: Hopefully the user doesn't change it, otherwise this creates a
     // problem. To avoid the problem, we just need proper datastructures - a
@@ -2843,7 +2843,7 @@ XrlFeaTarget::send_gratuitous_arps(const string& ifname, const Mac& mac,
 	return (XORP_OK);
     }
 
-    for (IfTreeInterface::VifMap::iterator i = ifp->vifs().begin(); 
+    for (IfTreeInterface::VifMap::iterator i = ifp->vifs().begin();
 	 i != ifp->vifs().end(); ++i) {
 
 	const string& vifname = i->first;
@@ -4791,7 +4791,7 @@ XrlFeaTarget::profile_0_1_disable(const string&	pname)
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError 
+XrlCmdError
 XrlFeaTarget::profile_0_1_get_entries(const string& pname,
 				      const string& instance_name)
 {
@@ -4834,7 +4834,7 @@ XrlCmdError
 XrlFeaTarget::profile_0_1_list(string& info)
 {
     debug_msg("\n");
-    
+
     info = _profile.get_list();
     return XrlCmdError::OKAY();
 }

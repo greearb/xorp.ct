@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -75,8 +75,8 @@ RouteRegister<A>::str() const
 }
 
 template<class A>
-RegisterTable<A>::RegisterTable(const string& tablename, 
-			     RegisterServer& register_server, 
+RegisterTable<A>::RegisterTable(const string& tablename,
+			     RegisterServer& register_server,
 			     bool multicast)
     : RouteTable<A>(tablename),
       _parent(NULL),
@@ -86,8 +86,8 @@ RegisterTable<A>::RegisterTable(const string& tablename,
 }
 
 template<class A>
-void 
-RegisterTable<A>::replumb(RouteTable<A>* old_parent, 
+void
+RegisterTable<A>::replumb(RouteTable<A>* old_parent,
 			  RouteTable<A>* new_parent)
 {
     XLOG_ASSERT(_parent == old_parent);
@@ -258,7 +258,7 @@ RegisterTable<A>::add_route(const IPRouteEntry<A>& route,
 
     notify_relevant_modules(true /* it's an add */, route);
 
-    debug_msg("Add route called on register table %s\n", 
+    debug_msg("Add route called on register table %s\n",
 	      this->tablename().c_str());
     return XORP_OK;
 }
@@ -446,7 +446,7 @@ string
 RegisterTable<A>::str() const
 {
     ostringstream oss;
-    
+
     oss << "-------\nRegisterTable: " << this->tablename() << "\n";
     oss << "parent = " << _parent->tablename() << "\n";
     if (this->next_table() == NULL)
@@ -533,9 +533,9 @@ RegisterTable<A>::notify_invalidated(typename Trie<A, RouteRegister<A>* >::itera
 
 template<class A>
 void
-RegisterTable<A>::flush() 
-{ 
-    _register_server.flush(); 
+RegisterTable<A>::flush()
+{
+    _register_server.flush();
 }
 
 

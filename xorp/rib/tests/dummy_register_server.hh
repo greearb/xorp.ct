@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -41,7 +41,7 @@ public:
 			 const IPv4Net& net,
 			 bool multicast);
     void send_route_changed(const string& module_name,
-			    const IPv6Net& net, 
+			    const IPv6Net& net,
 			    const IPv6& nexthop,
 			    uint32_t metric,
 			    uint32_t admin_distance,

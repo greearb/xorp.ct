@@ -9,13 +9,13 @@
 // Redistribution and/or modification of this program under the terms of
 // any other version of the GNU Lesser General Public License is not
 // permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU Lesser General Public License, Version 2.1, a copy of
 // which can be found in the XORP LICENSE.lgpl file.
-// 
+//
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -31,7 +31,7 @@
 
 // NextHop is a generic next hop object.
 // PeerNextHop is for next hops that are local peers.
-// EncapsNextHop is for "next hops" that are non-local, and require 
+// EncapsNextHop is for "next hops" that are non-local, and require
 //  encapsulation to reach.  Eg. PIM Register Encaps.
 // ExternalNextHop An IP nexthop that is not an intermediate neighbor.
 // DiscardNextHop is a discard interface.
@@ -85,7 +85,7 @@ public:
 
     /**
      * Convert this nexthop from binary form to presentation format.
-     * 
+     *
      * @return C++ string with the human-readable ASCII representation
      * of the nexthop.
      */
@@ -95,7 +95,7 @@ public:
 
 /**
  * @short Template class for nexthop information.
- * 
+ *
  * The information contained is the nexthop address.
  */
 template<class A>
@@ -103,7 +103,7 @@ class IPNextHop : public NextHop {
 public:
     /**
      * Constructor from an address.
-     * 
+     *
      * @param from_ipaddr @ref IPv4 or @ref IPv6 or @ref IPvX address
      * to initialize nexthop.
      */
@@ -112,14 +112,14 @@ public:
 #ifdef XORP_USE_USTL
     IPNextHop() { }
 #endif
-    
+
     /**
      * Get the address of the nexthop.
-     * 
+     *
      * @return the address of the nexthop.
      */
     const A& addr() const { return _addr; }
-    
+
 protected:
     A _addr;
 };
@@ -131,7 +131,7 @@ typedef IPNextHop<IPvX> IPvXNextHop;
 
 /**
  * @short A nexthop that is an immediate neighbor.
- * 
+ *
  * Specialization of @ref IPNextHop for gateways that are the immediate
  * neighbors of this router.  Most IGP nexthops should be PeerNextHops.
  */
@@ -140,7 +140,7 @@ class IPPeerNextHop : public IPNextHop<A> {
 public:
     /**
      * Constructor from an address.
-     * 
+     *
      * @param ipv4 @ref IPv4 or @ref IPv6 or @ref IPvX address
      * to initialize nexthop.
      */
@@ -152,21 +152,21 @@ public:
 
     /**
      * Get the type of the nexthop.
-     * 
+     *
      * @return the nexthop type.  In this case, it is PEER_NEXTHOP.
      */
     int type() { return PEER_NEXTHOP; }
 
     /**
      * Convert this nexthop from binary form to presentation format.
-     * 
+     *
      * @return C++ string with the human-readable ASCII representation
      * of the nexthop.
      */
     string str() const;
-    
+
 private:
-    
+
 };
 
 typedef IPPeerNextHop<IPv4> IPv4PeerNextHop;
@@ -176,7 +176,7 @@ typedef IPPeerNextHop<IPvX> IPvXPeerNextHop;
 
 /**
  * @short An IP nexthop that is an encapsulation tunnel.
- * 
+ *
  * Specialization of @ref IPNextHop for gateways that are encapsulation
  * tunnels.
  */
@@ -185,29 +185,29 @@ class IPEncapsNextHop : public IPNextHop<A> {
 public:
     /**
      * Constructor from an address.
-     * 
+     *
      * @param from_addr @ref IPv4 or @ref IPv6 or @ref IPvX address
      * to initialize nexthop.
      */
     IPEncapsNextHop(const A &from_addr);
-    
+
     /**
      * Get the type of the nexthop.
-     * 
+     *
      * @return the nexthop type.  In this case, it is ENCAPS_NEXTHOP.
      */
     int type() { return ENCAPS_NEXTHOP; }
 
     /**
      * Convert this nexthop from binary form to presentation format.
-     * 
+     *
      * @return C++ string with the human-readable ASCII representation
      * of the nexthop.
      */
     string str() const;
-    
+
 private:
-    //_cached_peer is the cached copy of the local peer we send the 
+    //_cached_peer is the cached copy of the local peer we send the
     //encapsulated packet to.
     IPPeerNextHop<A> *_cached_peer;
 };
@@ -219,10 +219,10 @@ typedef IPEncapsNextHop<IPvX> IPvXEncapsNextHop;
 
 /**
  * @short An IP nexthop that is not an intermediate neighbor.
- * 
+ *
  * The nexthop that is a regular router's address, but the router
  * is not one of our immediate neighbors.
- * 
+ *
  * Specialization of @ref IPNextHop for a regular router's address, but
  * the router is not one of our immediate neighbors.  The normal case
  * when this will happen is with IBGP, where the nexthop is either the
@@ -233,7 +233,7 @@ class IPExternalNextHop : public IPNextHop<A> {
 public:
     /**
      * Constructor from an address.
-     * 
+     *
      * @param from_addr @ref IPv4 or @ref IPv6 or @ref IPvX address
      * to initialize nexthop.
      */
@@ -242,24 +242,24 @@ public:
 #ifdef XORP_USE_USTL
     IPExternalNextHop() { }
 #endif
-    
+
     /**
      * Get the type of the nexthop.
-     * 
-     * @return the nexthop type.  In this case, it is EXTERNAL_NEXTHOP.  
+     *
+     * @return the nexthop type.  In this case, it is EXTERNAL_NEXTHOP.
      */
     int type() { return EXTERNAL_NEXTHOP; }
 
     /**
      * Convert this nexthop from binary form to presentation format.
-     * 
+     *
      * @return C++ string with the human-readable ASCII representation
      * of the nexthop.
      */
     string str() const;
-    
+
 private:
-    
+
 };
 
 typedef IPExternalNextHop<IPv4> IPv4ExternalNextHop;
@@ -269,7 +269,7 @@ typedef IPExternalNextHop<IPvX> IPvXExternalNextHop;
 
 /**
  * @short A nexthop that is the discard interface.
- * 
+ *
  * Specialization of @ref NextHop for blackholing traffic efficiently.
  */
 class DiscardNextHop : public NextHop {
@@ -278,29 +278,29 @@ public:
      * Default constructor
      */
     DiscardNextHop();
-    
+
     /**
      * Get the type of the nexthop.
-     * 
+     *
      * @return the nexthop type.  In this case, it is DISCARD_NEXTHOP.
      */
     int type() { return DISCARD_NEXTHOP; }
 
     /**
      * Convert this nexthop from binary form to presentation format.
-     * 
+     *
      * @return C++ string with the human-readable ASCII representation
      * of the nexthop.
      */
     string str() const;
-    
+
 private:
-    
+
 };
 
 /**
  * @short A nexthop that is the unreachable interface.
- * 
+ *
  * Specialization of @ref NextHop for adding routing entries that return
  * ICMP destination unreachable messages.
  */
@@ -310,24 +310,24 @@ public:
      * Default constructor
      */
     UnreachableNextHop();
-    
+
     /**
      * Get the type of the nexthop.
-     * 
+     *
      * @return the nexthop type.  In this case, it is UNREACHABLE_NEXTHOP.
      */
     int type() { return UNREACHABLE_NEXTHOP; }
 
     /**
      * Convert this nexthop from binary form to presentation format.
-     * 
+     *
      * @return C++ string with the human-readable ASCII representation
      * of the nexthop.
      */
     string str() const;
-    
+
 private:
-    
+
 };
 
 #endif // __LIBXORP_NEXTHOP_HH__

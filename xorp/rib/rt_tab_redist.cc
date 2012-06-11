@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -45,7 +45,7 @@ RedistOutput<A>::~RedistOutput()
 {
 }
 
-
+
 // ----------------------------------------------------------------------------
 // Redistributor<A>
 
@@ -207,7 +207,7 @@ Redistributor<A>::dump_a_route()
 	schedule_dump_timer();
 }
 
-
+
 // ----------------------------------------------------------------------------
 // Event Notification handling
 
@@ -460,7 +460,7 @@ RedistTable<A>::delete_route(const IPRouteEntry<A>* r,
     return XORP_OK;
 }
 
-
+
 // ----------------------------------------------------------------------------
 // Standard RouteTable methods, RedistTable punts everything to parent.
 

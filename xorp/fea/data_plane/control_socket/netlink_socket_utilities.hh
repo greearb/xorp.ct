@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -93,7 +93,7 @@ public:
     /**
      * Convert a message type from netlink socket message into
      * human-readable form.
-     * 
+     *
      * @param m message type from netlink socket message.
      * @return human-readable message of the message type.
      */
@@ -103,7 +103,7 @@ public:
 
     /**
      * Get pointers to set of netlink rtattr entries.
-     * 
+     *
      * @param rtattr the pointer to the first rtattr entry.
      * @param rta_len the length of all rtattr entries.
      * @param rta_array the array with the pointers to store the result.
@@ -113,10 +113,10 @@ public:
     static void get_rtattr(struct rtattr* rtattr, int rta_len,
 			   struct rtattr* rta_array[],
 			   size_t rta_array_n);
-    
+
     /**
      * Extract the routing information from netlink message.
-     * 
+     *
      * @param iftree the interface tree to use.
      * @param fte the return-by-reference @ref FteX entry to return the result.
      * @param nlh the netlink message header.
