@@ -140,7 +140,7 @@ ElemNet<A>::ElemNet(const char* str) : Element(_hash), _net(NULL),
     // parse modifier
     string in = str;
 
-    const char* p = strchr(str, ' ');
+    const char* p = strchr(str, '~');
     if (p) {
 	in = in.substr(0, p - str);
 
@@ -189,7 +189,7 @@ ElemNet<A>::str() const
     string str = _net->str();
 
     if (_mod != MOD_NONE) {
-	str += " ";
+	str += "~";
 	str += mod_to_str(_mod);
     }
 
