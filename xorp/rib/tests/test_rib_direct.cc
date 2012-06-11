@@ -90,7 +90,7 @@ parser_main()
     RIB<IPv4> rib(UNICAST, rib_manager, eventloop);
     DummyRegisterServer register_server;
 
-    rib.initialize_register(register_server);
+    rib.initialize(register_server);
 
     wait_until_xrl_router_is_ready(eventloop, xrl_std_router_rib);
 
