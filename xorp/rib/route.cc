@@ -30,16 +30,29 @@
 #include "rib.hh"
 #include "route.hh"
 
-RouteEntry::RouteEntry(RibVif* vif, NextHop* nexthop, const Protocol& protocol,
-		       uint32_t metric)
+template<class A>
+RouteEntry<A>::RouteEntry(RibVif* vif, NextHop* nexthop, const Protocol& protocol,
+		       uint32_t metric, const PolicyTags& policytags, const IPNet<A>& net)
     : _vif(vif), _nexthop(nexthop), _protocol(protocol),
-      _admin_distance(UNKNOWN_ADMIN_DISTANCE), _metric(metric)
+      _admin_distance(UNKNOWN_ADMIN_DISTANCE), _metric(metric),
+      _policytags(policytags), _net(net)
 {
     if (_vif != NULL)
 	_vif->incr_usage_counter();
 }
 
-RouteEntry::~RouteEntry()
+template<class A>
+RouteEntry<A>::RouteEntry(RibVif* vif, NextHop* nexthop, const Protocol& protocol,
+		       uint32_t metric, const IPNet<A>& net)
+    : _vif(vif), _nexthop(nexthop), _protocol(protocol),
+      _admin_distance(UNKNOWN_ADMIN_DISTANCE), _metric(metric), _net(net)
+{
+    if (_vif != NULL)
+	_vif->incr_usage_counter();
+}
+
+template<class A>
+RouteEntry<A>::~RouteEntry()
 {
     if (_vif != NULL)
 	_vif->decr_usage_counter();
@@ -49,14 +62,15 @@ template <class A>
 string
 IPRouteEntry<A>::str() const
 {
-    string dst = (_net.is_valid()) ? _net.str() : string("NULL");
-    string vif = (_vif) ? string(_vif->name()) : string("NULL");
+    string dst = (RouteEntry<A>::_net.is_valid()) ? RouteEntry<A>::_net.str() : string("NULL");
+    string vif = (RouteEntry<A>::_vif) ? string(RouteEntry<A>::_vif->name()) : string("NULL");
     return string("Dst: ") + dst + string(" Vif: ") + vif +
-	string(" NextHop: ") + _nexthop->str() +
-	string(" Metric: ") + c_format("%d", _metric) +
-	string(" Protocol: ") + _protocol.name() +
-	string(" PolicyTags: ") + _policytags.str();
+	string(" NextHop: ") + RouteEntry<A>::_nexthop->str() +
+	string(" Metric: ") + c_format("%d", RouteEntry<A>::_metric) +
+	string(" Protocol: ") + RouteEntry<A>::_protocol.name() +
+	string(" PolicyTags: ") + RouteEntry<A>::_policytags.str();
 }
 
 template class IPRouteEntry<IPv4>;
 template class IPRouteEntry<IPv6>;
+
