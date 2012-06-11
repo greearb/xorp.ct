@@ -321,8 +321,8 @@ public:
     typename RouteBackLink::iterator backlink() const { return _backlink; }
 
 private:
-    mutable const IPRouteEntry<A>* _igp_parent;
-    mutable const IPRouteEntry<A>* _egp_parent;
+    const IPRouteEntry<A>* _igp_parent;
+    const IPRouteEntry<A>* _egp_parent;
 
     // _backlink is used for removing the corresponding entry from the
     // RouteTable's map that is indexed by igp_parent.  Without it,
