@@ -81,13 +81,15 @@ IPExternalNextHop<A>::IPExternalNextHop(const A& from_ipaddr)
 {
 }
 
-DiscardNextHop::DiscardNextHop()
-    : NextHop()
+template <class A>
+DiscardNextHop<A>::DiscardNextHop()
+    : IPNextHop<A>(A::ZERO())
 {
 }
 
-UnreachableNextHop::UnreachableNextHop()
-    : NextHop()
+template <class A>
+UnreachableNextHop<A>::UnreachableNextHop()
+    : IPNextHop<A>(A::ZERO())
 {
 }
 

@@ -262,7 +262,8 @@ typedef IPExternalNextHop<IPvX> IPvXExternalNextHop;
  *
  * Specialization of @ref NextHop for blackholing traffic efficiently.
  */
-class DiscardNextHop : public NextHop {
+template <class A>
+class DiscardNextHop : public IPNextHop<A> {
 public:
     /**
      * Default constructor
@@ -286,7 +287,8 @@ private:
  * Specialization of @ref NextHop for adding routing entries that return
  * ICMP destination unreachable messages.
  */
-class UnreachableNextHop : public NextHop {
+template <class A>
+class UnreachableNextHop : public IPNextHop<A> {
 public:
     /**
      * Default constructor

@@ -955,7 +955,7 @@ RIB<A>::verify_route(const A& lookup_addr,
 #ifdef notyet
     // 3a. Check for discard (blackhole) routes.
     // XXX: re->vif() must be non-NULL and valid. Revisit this in future.
-    DiscardNextHop* dnh = dynamic_cast<DiscardNextHop*>(re->nexthop());
+    DiscardNextHop<A>* dnh = dynamic_cast<DiscardNextHop<A>*>(re->nexthop());
     if (matchtype == RibVerifyType(DISCARD)) {
 	if (dnh == NULL) {
 	    debug_msg("Next hop is not a DiscardNextHop");
@@ -967,7 +967,7 @@ RIB<A>::verify_route(const A& lookup_addr,
     }
     // 3b. Check for unreachable routes.
     // XXX: re->vif() must be non-NULL and valid. Revisit this in future.
-    UnreachableNextHop* unh = dynamic_cast<UnreachableNextHop*>(re->nexthop());
+    UnreachableNextHop<A>* unh = dynamic_cast<UnreachableNextHop<A>*>(re->nexthop());
     if (matchtype == RibVerifyType(UNREACHABLE)) {
 	if (unh == NULL) {
 	    debug_msg("Next hop is not an UnreachableNextHop");
@@ -980,7 +980,7 @@ RIB<A>::verify_route(const A& lookup_addr,
 #endif
 
     // 4. Check for protocol level routes (specifically IP).
-    IPNextHop<A>* route_nexthop = dynamic_cast<IPNextHop<A>* >(re->nexthop());
+    IPNextHop<A>* route_nexthop = re->nexthop();
     if (route_nexthop == NULL) {
 	debug_msg("Next hop is not an IPNextHop\n");
 	return XORP_ERROR;
@@ -1029,19 +1029,19 @@ RIB<A>::lookup_route(const A& lookupaddr)
 	return A::ZERO();
 
 #ifdef notyet
-    DiscardNextHop* discard_nexthop =
-	dynamic_cast<DiscardNextHop* >(re->nexthop());
+    DiscardNextHop<A>* discard_nexthop =
+	dynamic_cast<DiscardNextHop<A>* >(re->nexthop());
     // Case 2a: Discard route. Return the loopback address.
     if (discard_nexthop != NULL)
 	return A::LOOPBACK();
 
-    UnreachableNextHop* unreachable_nexthop =
-	dynamic_cast<UnreachableNextHop* >(re->nexthop());
+    UnreachableNextHop<A>* unreachable_nexthop =
+	dynamic_cast<UnreachableNextHop<A>* >(re->nexthop());
     // Case 2b: Unreachable route. Return the loopback address.
     if (unreachable_nexthop != NULL)
 	return A::LOOPBACK();
 
-    IPNextHop<A>* ip_nexthop = dynamic_cast<IPNextHop<A>* >(re->nexthop());
+    IPNextHop<A>* ip_nexthop = re->nexthop();
     // Case 3: IP protocol route. Return the nexthop address.
     if (ip_nexthop != NULL)
 	return ip_nexthop->addr();
@@ -1050,7 +1050,7 @@ RIB<A>::lookup_route(const A& lookupaddr)
     return A::ZERO();
 #else
     // Default: Assume the route points to a resolved IPNextHop.
-    IPNextHop<A>* route_nexthop = static_cast<IPNextHop<A>* >(re->nexthop());
+    IPNextHop<A>* route_nexthop = re->nexthop();
     return route_nexthop->addr();
 #endif
 }

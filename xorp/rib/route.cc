@@ -31,9 +31,9 @@
 #include "route.hh"
 
 template<class A>
-RouteEntry<A>::RouteEntry(RibVif<A>* vif, NextHop* nexthop, const Protocol& protocol,
+RouteEntry<A>::RouteEntry(RibVif<A>* vif, const Protocol& protocol,
 		       uint32_t metric, const PolicyTags& policytags, const IPNet<A>& net)
-    : _vif(vif), _nexthop(nexthop), _protocol(protocol),
+    : _vif(vif), _protocol(protocol),
       _admin_distance(UNKNOWN_ADMIN_DISTANCE), _metric(metric),
       _policytags(policytags), _net(net)
 {
@@ -42,9 +42,9 @@ RouteEntry<A>::RouteEntry(RibVif<A>* vif, NextHop* nexthop, const Protocol& prot
 }
 
 template<class A>
-RouteEntry<A>::RouteEntry(RibVif<A>* vif, NextHop* nexthop, const Protocol& protocol,
+RouteEntry<A>::RouteEntry(RibVif<A>* vif, const Protocol& protocol,
 		       uint32_t metric, const IPNet<A>& net)
-    : _vif(vif), _nexthop(nexthop), _protocol(protocol),
+    : _vif(vif), _protocol(protocol),
       _admin_distance(UNKNOWN_ADMIN_DISTANCE), _metric(metric), _net(net)
 {
     if (_vif != NULL)
@@ -68,7 +68,7 @@ IPRouteEntry<A>::str() const
     string dst = (RouteEntry<A>::_net.is_valid()) ? RouteEntry<A>::_net.str() : string("NULL");
     string vif = (RouteEntry<A>::_vif) ? string(RouteEntry<A>::_vif->name()) : string("NULL");
     return string("Dst: ") + dst + string(" Vif: ") + vif +
-	string(" NextHop: ") + RouteEntry<A>::_nexthop->str() +
+	string(" NextHop: ") + _nexthop->str() +
 	string(" Metric: ") + c_format("%d", RouteEntry<A>::_metric) +
 	string(" Protocol: ") + RouteEntry<A>::_protocol.name() +
 	string(" PolicyTags: ") + RouteEntry<A>::_policytags.str();
