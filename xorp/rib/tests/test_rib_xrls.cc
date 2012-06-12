@@ -45,6 +45,7 @@ public:
 		 XrlRibV0p1Client& xrl_client,
 		 RIB<IPv4>&	   rib,
 		 XrlCompletion&    cv) {
+	add_command(new XrlInterfaceRouteAddCommand(e, xrl_client, cv));
 	add_command(new XrlRouteAddCommand(e, xrl_client, cv));
 	add_command(new XrlRouteDeleteCommand(e, xrl_client, cv));
 	add_command(new XrlAddIGPTableCommand(e, xrl_client, cv));

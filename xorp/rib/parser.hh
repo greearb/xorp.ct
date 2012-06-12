@@ -304,6 +304,25 @@ protected:
     string _t2;
 };
 
+class InterfaceRouteAddCommand : public Command {
+public:
+    InterfaceRouteAddCommand() : Command("interface_route add ~String ~String ~IPv4Net ~IPv4 ~Uint32", 5) {
+	bind_string(0, _tablename);
+	bind_string(1, _vif_name);
+	bind_ipv4net(2, _net);
+	bind_ipv4(3, _nexthop);
+	bind_uint32(4, _metric);
+    }
+    virtual int execute() = 0;
+
+protected:
+    string	_tablename;
+    string 	_vif_name;
+    IPv4Net	_net;
+    IPv4	_nexthop;
+    uint32_t	_metric;
+};
+
 class RouteAddCommand : public Command {
 public:
     RouteAddCommand() : Command("route add ~String ~IPv4Net ~IPv4 ~Uint32", 4) {
