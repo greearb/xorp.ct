@@ -56,6 +56,7 @@ RibParser::RibParser(RIB<IPv4>& rib)
     add_command(new DirectLoopbackVifCommand(_rib));
 
     add_command(new DirectRouteAddCommand(_rib));
+    add_command(new DirectInterfaceRouteAddCommand(_rib));
     add_command(new DirectRouteDeleteCommand(_rib));
     add_command(new DirectRouteVifAddCommand(_rib));
 

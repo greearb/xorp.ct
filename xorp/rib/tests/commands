@@ -25,11 +25,19 @@ add_igp_table rip
 #
 #redistribute enable ospf ebgp
 #
-#routes for connected subnets
-#     cmd   table     subnet     nexthop
-route add connected 10.0.0.0/24 10.0.0.1 0
-route add connected 10.0.1.0/24 10.0.1.1 0
-route add connected 10.0.2.0/24 10.0.2.1 0
+
+#test adding/deleting of interface routes that aren't from
+#the same subnet as vif on which they're added
+interface_route add ospf de1 192.168.156.0/24 192.168.156.1 10
+route verify ip 192.168.156.2 de1 192.168.156.1 10
+route delete ospf 192.168.156.0/24
+route verify miss 192.168.156.2 de1 192.168.156.1 10
+
+interface_route add ospf de0 192.168.175.0/24 0.0.0.0 10
+route verify ip 192.168.175.2 de0 0.0.0.0 10
+route delete ospf 192.168.175.0/24
+route verify miss 192.168.175.2 de0 0.0.0.0 10
+
 #
 #add a default route to the discard interface
 #route add connected 0.0.0.0/0 0.0.0.0 0
