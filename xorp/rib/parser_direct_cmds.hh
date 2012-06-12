@@ -42,6 +42,22 @@ private:
     RIB<IPv4>& _rib;
 };
 
+class DirectInterfaceRouteAddCommand : public InterfaceRouteAddCommand {
+public:
+    DirectInterfaceRouteAddCommand(RIB<IPv4>& rib)
+	: InterfaceRouteAddCommand(), _rib(rib) {}
+    int execute() {
+	cout << "InterfaceRouteAddCommand::execute " << _tablename << " ";
+	cout << "Vif " << _vif_name << " ";
+	cout << _net.str() << " " << _nexthop.str() << " "
+	     << c_format("%u", XORP_UINT_CAST(_metric)) << "\n";
+	return _rib.add_route(_tablename, _net, _nexthop, "", _vif_name,
+			      _metric, PolicyTags());
+    }
+private:
+    RIB<IPv4>& _rib;
+};
+
 class DirectRouteAddCommand : public RouteAddCommand {
 public:
     DirectRouteAddCommand(RIB<IPv4>& rib)
