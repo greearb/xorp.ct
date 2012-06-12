@@ -8,13 +8,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -105,7 +105,7 @@ private:
 class Uint32ArgumentParser : public ArgumentParser {
 public:
     Uint32ArgumentParser() : ArgumentParser("~Uint32") {}
-    Datum* parse(const string& str) const; 
+    Datum* parse(const string& str) const;
 };
 
 class StringArgumentParser : public ArgumentParser {
@@ -132,7 +132,7 @@ public:
     ~Parser();
     int parse(const string& str) const;
     bool add_command(Command* command);
-    bool add_argtype(ArgumentParser* arg); 
+    bool add_argtype(ArgumentParser* arg);
 
 private:
     ArgumentParser* get_argument_parser(const string& name) const;
@@ -223,7 +223,7 @@ private:
 
 class Command {
 public:
-    Command(const string& cmd_syntax, int nargs) : 
+    Command(const string& cmd_syntax, int nargs) :
 	_syntax(cmd_syntax), _nargs(nargs), _last_arg(-1) { check_syntax(); }
     virtual ~Command();
     virtual int execute() = 0;
@@ -235,7 +235,7 @@ public:
 protected:
     //
     // Abort if number of args in syntax string does not matches
-    //  number given. 
+    //  number given.
     //
     void check_syntax();
 
