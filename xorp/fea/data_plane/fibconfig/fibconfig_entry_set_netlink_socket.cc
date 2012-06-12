@@ -442,7 +442,7 @@ FibConfigEntrySetNetlinkSocket::delete_entry(const FteX& fte)
     rtmsg->rtm_src_len = 0;
     rtmsg->rtm_tos = 0;
     rtmsg->rtm_protocol = RTPROT_XORP;		// Mark this as a XORP route
-    rtmsg->rtm_scope = RT_SCOPE_UNIVERSE;
+    rtmsg->rtm_scope = RT_SCOPE_NOWHERE;
     rtmsg->rtm_type = RTN_UNICAST;
     rtmsg->rtm_flags = RTM_F_NOTIFY;
 
