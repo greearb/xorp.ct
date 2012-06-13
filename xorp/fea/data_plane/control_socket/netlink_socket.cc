@@ -575,7 +575,27 @@ NetlinkSocketReader::netlink_socket_data(vector<uint8_t>& buffer)
     //
     // Copy data that has been requested to be cached by setting _cache_seqno
     //
-    _cache_data.reserve(buffer.size());
+    // TODO:  It seems like we could use reserve instead of resize below, but
+    // if we do, then parsing netlink messages breaks for this config file:
+    // (vmnet1 does not exist when xorp is started in this case.)
+    /*
+interfaces {
+        interface "eth2" {
+                disable: false
+                default-system-config
+        }
+        interface "vmnet1" {
+                disable: false
+                default-system-config
+        }
+}
+fea {
+        unicast-forwarding4 {
+                disable: false
+        }
+}
+    */
+    _cache_data.resize(buffer.size());
     while (d < buffer.size()) {
 	struct nlmsghdr* nlh;
 	nlh = (struct nlmsghdr*)(&buffer[d]);
