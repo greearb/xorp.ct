@@ -8,13 +8,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -80,10 +80,10 @@ public:
 
     /**
      * Merge this entry with another entry.
-     * 
+     *
      * Replace route with the entry from rr if it is better, (XXX why ?)
      * shrink the intervals if the other one is smaller.
-     * 
+     *
      * @param his_rr the entry to merge with.
      */
     void merge(const RouteRange* his_rr)	{
@@ -183,7 +183,7 @@ public:
     RouteTable* next_table()			{ return _next_table; }
     const RouteTable* next_table() const	{ return _next_table; }
 
-    // this call should be received and dealt with by the PolicyRedistTable. 
+    // this call should be received and dealt with by the PolicyRedistTable.
     virtual void replace_policytags(const IPRouteEntry<A>& route,
 				    const PolicyTags& prevtags,
 				    RouteTable* caller);

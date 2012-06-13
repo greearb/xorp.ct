@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -84,7 +84,7 @@ FibConfigEntrySetNetlinkSocket::start(string& error_msg)
 
     if (NetlinkSocket::start(error_msg) != XORP_OK)
 	return (XORP_ERROR);
-    
+
     _is_running = true;
 
     return (XORP_OK);
@@ -108,7 +108,7 @@ int
 FibConfigEntrySetNetlinkSocket::add_entry4(const Fte4& fte)
 {
     FteX ftex(fte);
-    
+
     return (add_entry(ftex));
 }
 
@@ -116,7 +116,7 @@ int
 FibConfigEntrySetNetlinkSocket::delete_entry4(const Fte4& fte)
 {
     FteX ftex(fte);
-    
+
     return (delete_entry(ftex));
 }
 
@@ -124,7 +124,7 @@ int
 FibConfigEntrySetNetlinkSocket::add_entry6(const Fte6& fte)
 {
     FteX ftex(fte);
-    
+
     return (add_entry(ftex));
 }
 
@@ -132,7 +132,7 @@ int
 FibConfigEntrySetNetlinkSocket::delete_entry6(const Fte6& fte)
 {
     FteX ftex(fte);
-    
+
     return (delete_entry(ftex));
 }
 
@@ -201,7 +201,7 @@ FibConfigEntrySetNetlinkSocket::add_entry(const FteX& fte)
     rtmsg->rtm_src_len = 0;
     rtmsg->rtm_tos = 0;
     rtmsg->rtm_protocol = RTPROT_XORP;		// Mark this as a XORP route
-    rtmsg->rtm_scope = RT_SCOPE_UNIVERSE;
+    rtmsg->rtm_scope = RT_SCOPE_LINK;
     rtmsg->rtm_type = RTN_UNICAST;
     rtmsg->rtm_flags = RTM_F_NOTIFY;
 
@@ -248,6 +248,7 @@ FibConfigEntrySetNetlinkSocket::add_entry(const FteX& fte)
 	data = static_cast<uint8_t*>(RTA_DATA(rtattr));
 	fte.nexthop().copy_out(data);
 	nlh->nlmsg_len = NLMSG_ALIGN(nlh->nlmsg_len) + rta_len;
+	rtmsg->rtm_scope = RT_SCOPE_UNIVERSE;
     }
 
     // Get the interface index, if it exists
@@ -356,7 +357,7 @@ FibConfigEntrySetNetlinkSocket::add_entry(const FteX& fte)
     // XXX: the Linux kernel doesn't keep the admin distance, hence
     // we don't add it.
     //
-    
+
     string error_msg;
     int last_errno = 0;
     if (ns.sendto(&buffer, nlh->nlmsg_len, 0,
@@ -441,7 +442,7 @@ FibConfigEntrySetNetlinkSocket::delete_entry(const FteX& fte)
     rtmsg->rtm_src_len = 0;
     rtmsg->rtm_tos = 0;
     rtmsg->rtm_protocol = RTPROT_XORP;		// Mark this as a XORP route
-    rtmsg->rtm_scope = RT_SCOPE_UNIVERSE;
+    rtmsg->rtm_scope = RT_SCOPE_NOWHERE;
     rtmsg->rtm_type = RTN_UNICAST;
     rtmsg->rtm_flags = RTM_F_NOTIFY;
 

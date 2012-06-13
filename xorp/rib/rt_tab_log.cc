@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -43,10 +43,10 @@ LogTable<A>::~LogTable()
 }
 
 template<typename A>
-uint32_t 
-LogTable<A>::update_number() const 
-{ 
-    return _update_number; 
+uint32_t
+LogTable<A>::update_number() const
+{
+    return _update_number;
 }
 
 template<typename A>
@@ -116,7 +116,7 @@ LogTable<A>::str() const
     return s;
 }
 
-
+
 // ----------------------------------------------------------------------------
 
 template <typename A>
@@ -167,7 +167,7 @@ OstreamLogTable<A>::str() const
 template class OstreamLogTable<IPv4>;
 template class OstreamLogTable<IPv6>;
 
-
+
 // ----------------------------------------------------------------------------
 #include "rib_module.h"
 #include "libxorp/xlog.h"
@@ -227,7 +227,7 @@ XLogTraceTable<A>::str() const
 template class XLogTraceTable<IPv4>;
 template class XLogTraceTable<IPv6>;
 
-
+
 // ----------------------------------------------------------------------------
 
 #ifndef DEBUG_LOGGING

@@ -9,13 +9,13 @@
 // Redistribution and/or modification of this program under the terms of
 // any other version of the GNU Lesser General Public License is not
 // permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU Lesser General Public License, Version 2.1, a copy of
 // which can be found in the XORP LICENSE.lgpl file.
-// 
+//
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -57,7 +57,7 @@ void incr_failures()		{ s_failures++; }
 
 /**
  * Print program info to output stream.
- * 
+ *
  * @param stream the output stream the print the program info to.
  */
 static void
@@ -73,7 +73,7 @@ print_program_info(FILE *stream)
 
 /**
  * Print program usage information to the stderr.
- * 
+ *
  * @param progname the name of the program.
  */
 static void
@@ -97,7 +97,7 @@ test_vif_addr_valid_constructors()
     VifAddr vif_addr1(IPvX("11.11.11.11"));
     verbose_match(vif_addr1.str(),
 		  "addr: 11.11.11.11 subnet: 0.0.0.0/0 broadcast: 0.0.0.0 peer: 0.0.0.0");
-    
+
     //
     // Constructor for a given address, and its associated addresses.
     //
@@ -107,7 +107,7 @@ test_vif_addr_valid_constructors()
 		      IPvX("0.0.0.0"));
     verbose_match(vif_addr2.str(),
 		  "addr: 22.22.22.22 subnet: 22.22.22.0/24 broadcast: 22.22.22.255 peer: 0.0.0.0");
-    
+
     VifAddr vif_addr3(IPvX("33.33.33.33"),
 		      IPvXNet("0.0.0.0/0"),
 		      IPvX("0.0.0.0"),
@@ -145,27 +145,27 @@ test_vif_addr_methods()
 		       IPvXNet("0.0.0.0/0"),
 		       IPvX("0.0.0.0"),
 		       IPvX("33.33.33.44"));
-    
+
     //
     // Get the interface address.
     //
     verbose_match(vif_addr_a.addr().str(), "11.11.11.11");
-    
+
     //
     // Get the subnet address.
     //
     verbose_match(vif_addr_a.subnet_addr().str(), "11.11.11.0/24");
-    
+
     //
     // Get the broadcast address.
     //
     verbose_match(vif_addr_a.broadcast_addr().str(), "11.11.11.255");
-    
+
     //
     // Get the peer address.
     //
     verbose_match(vif_addr_c.peer_addr().str(), "33.33.33.44");
-    
+
     //
     // Set the interface address.
     //
@@ -189,7 +189,7 @@ test_vif_addr_methods()
     //
     vif_addr_c.set_peer_addr(IPvX("33.33.33.55"));
     verbose_match(vif_addr_c.peer_addr().str(), "33.33.33.55");
-    
+
     //
     // Test whether is the same interface address.
     //
@@ -198,7 +198,7 @@ test_vif_addr_methods()
 
     verbose_assert(! vif_addr_b.is_my_addr(IPvX("22.22.22.33")),
 		   "is_my_addr()");
-    
+
     //
     // Test whether a subnet address is a subset of my subnet address.
     //
@@ -210,13 +210,13 @@ test_vif_addr_methods()
 
     verbose_assert(! vif_addr_b.is_same_subnet(IPvXNet("22.22.33.0/24")),
 		   "is_same_subnet(IPvXNet)");
-    
+
     //
     // Test whether an address belongs to my subnet.
     //
     verbose_assert(vif_addr_b.is_same_subnet(IPvX("22.22.22.33")),
 		   "is_same_subnet(IPvX)");
-    
+
     verbose_assert(! vif_addr_b.is_same_subnet(IPvX("22.22.33.33")),
 		   "is_same_subnet(IPvX)");
 }
@@ -235,13 +235,13 @@ test_vif_addr_operators()
 		       IPvXNet("22.22.22.0/24"),
 		       IPvX("22.22.22.255"),
 		       IPvX("0.0.0.0"));
-    
+
     //
     // Equality Operator
     //
     verbose_assert(vif_addr_a == vif_addr_a, "operator==");
     verbose_assert(!(vif_addr_a == vif_addr_b), "operator==");
-    
+
     //
     // Not-Equal Operator
     //
@@ -258,7 +258,7 @@ test_vif_valid_constructors()
     Vif vif1("vif1");
     Vif vif2("vif2", "ifname2");
     Vif vif3(vif2);
-    
+
     UNUSED(vif1);
     UNUSED(vif2);
     UNUSED(vif3);
@@ -282,24 +282,24 @@ void
 test_vif_methods()
 {
     Vif vif1("vif1", "ifname1");
-    
+
     //
     // Get the vif name.
     //
     verbose_match(vif1.name(), "vif1");
-    
+
     //
     // Get the name of the physical interface associated with vif.
     //
     verbose_match(vif1.ifname(), "ifname1");
-    
+
     //
     // Set the name of the physical interface associated with vif.
     //
     vif1.set_ifname("ifname1_1");
     verbose_match(vif1.ifname(), "ifname1_1");
     vif1.set_ifname("ifname1");
-    
+
     //
     // Set and get the physical interface index.
     //
@@ -311,7 +311,7 @@ test_vif_methods()
     //
     vif1.set_vif_index(2);
     verbose_assert(vif1.vif_index() == 2, "vif_index()");
-    
+
     //
     // Test if this vif is a PIM Register interface.
     //
@@ -319,7 +319,7 @@ test_vif_methods()
     verbose_assert(vif1.is_pim_register(), "is_pim_register()");
     vif1.set_pim_register(false);
     verbose_assert(! vif1.is_pim_register(), "is_pim_register()");
-    
+
     //
     // Test if this vif is a point-to-point interface.
     //
@@ -383,7 +383,7 @@ test_vif_methods()
     verbose_assert(vif1.is_broadcast_capable(), "is_broadcast_capable()");
     vif1.set_broadcast_capable(false);
     verbose_assert(! vif1.is_broadcast_capable(), "is_broadcast_capable()");
-    
+
     //
     // Test if the underlying vif is UP.
     //
@@ -397,14 +397,14 @@ test_vif_methods()
     //
     vif1.set_mtu(2000);
     verbose_assert(vif1.mtu() == 2000, "mtu()");
-    
+
     //
     // Get the default list of all addresses for this vif.
     //
     list<VifAddr> addr_list;
     addr_list = vif1.addr_list();
     verbose_assert(addr_list.size() == 0, "default addr_list()");
-    
+
     //
     // Get the first vif address when no addresses were added.
     //
@@ -435,12 +435,12 @@ test_vif_manipulate_address()
 		       IPvXNet("0.0.0.0/0"),
 		       IPvX("0.0.0.0"),
 		       IPvX("33.33.33.44"));
-    
+
     //
     // Assign vif capabilities
     //
     vif1.set_broadcast_capable(true);
-    
+
     //
     // Add a VifAddr address to the interface.
     //
@@ -451,7 +451,7 @@ test_vif_manipulate_address()
     verbose_assert(vif1.addr_list().size() == 1, "addr_list()");
     verbose_assert(vif1.addr_ptr() != NULL, "addr_ptr()");
     verbose_assert(*vif1.addr_ptr() == vif_addr_a.addr(), "addr_ptr()");
-    
+
     //
     // Add an IPvX address and all related information to the interface.
     //
@@ -470,7 +470,7 @@ test_vif_manipulate_address()
     verbose_assert(vif1.addr_list().size() == 2, "addr_list()");
     verbose_assert(vif1.addr_ptr() != NULL, "addr_ptr()");
     verbose_assert(*vif1.addr_ptr() == vif_addr_a.addr(), "addr_ptr()");
-    
+
     //
     // Add an IPvX address to the interface.
     //
@@ -483,7 +483,7 @@ test_vif_manipulate_address()
     verbose_assert(vif1.addr_list().size() == 3, "addr_list()");
     verbose_assert(vif1.addr_ptr() != NULL, "addr_ptr()");
     verbose_assert(*vif1.addr_ptr() == vif_addr_a.addr(), "addr_ptr()");
-    
+
     //
     // Delete an IPvX address from the interface.
     //
@@ -494,7 +494,7 @@ test_vif_manipulate_address()
     verbose_assert(vif1.addr_list().size() == 2, "addr_list()");
     verbose_assert(vif1.addr_ptr() != NULL, "addr_ptr()");
     verbose_assert(*vif1.addr_ptr() == vif_addr_a.addr(), "addr_ptr()");
-    
+
     //
     // Find a VifAddr that corresponds to an IPvX address.
     //
@@ -502,19 +502,19 @@ test_vif_manipulate_address()
 		   "find_address()");
     verbose_assert(*vif1.find_address(vif_addr_a.addr()) == vif_addr_a,
 		   "find_address()");
-    
+
     //
     // Test if an IPvX address belongs to this vif.
     //
     verbose_assert(vif1.is_my_addr(vif_addr_a.addr()), "is_my_addr()");
     verbose_assert(! vif1.is_my_addr(vif_addr_c.addr()), "is_my_addr()");
-    
+
     //
     // Test if an VifAddr is belongs to this vif.
     //
     verbose_assert(vif1.is_my_vif_addr(vif_addr_a), "is_my_vif_addr()");
     verbose_assert(! vif1.is_my_vif_addr(vif_addr_c), "is_my_vif_addr()");
-    
+
     //
     // Test if a subnet address is a subset of one of the subnet
     // addresses of this vif.
@@ -547,14 +547,14 @@ test_vif_manipulate_address()
     // Restore the vif capabilities
     vif1.set_broadcast_capable(true);
     vif1.set_p2p(false);
-    
+
     //
     // Assign vif capabilities
     //
     vif1.set_broadcast_capable(false);
     vif1.set_p2p(true);
     vif1.add_address(vif_addr_c);
-    
+
     //
     // Test if a given address belongs to the same point-to-point link
     // as this vif.
@@ -589,13 +589,13 @@ test_vif_operators()
 		       IPvXNet("22.22.22.0/24"),
 		       IPvX("22.22.22.255"),
 		       IPvX("0.0.0.0"));
-    
+
     //
     // Equality Operator
     //
     verbose_assert(vif1 == vif1, "operator==");
     verbose_assert(!(vif1 == vif2), "operator==");
-    
+
     //
     // Not-Equal Operator
     //
@@ -620,7 +620,7 @@ int
 main(int argc, char * const argv[])
 {
     int ret_value = 0;
-    
+
     //
     // Initialize and start xlog
     //
@@ -630,7 +630,7 @@ main(int argc, char * const argv[])
     xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
     xlog_add_default_output();
     xlog_start();
-    
+
     int ch;
     while ((ch = getopt(argc, argv, "hv")) != -1) {
 	switch (ch) {
@@ -651,32 +651,32 @@ main(int argc, char * const argv[])
     }
     argc -= optind;
     argv += optind;
-    
+
     XorpUnexpectedHandler x(xorp_unexpected_handler);
     try {
 	test_vif_addr_valid_constructors();
 	test_vif_addr_invalid_constructors();
 	test_vif_addr_methods();
 	test_vif_addr_operators();
-	
+
 	test_vif_valid_constructors();
 	test_vif_invalid_constructors();
 	test_vif_methods();
 	test_vif_manipulate_address();
 	test_vif_operators();
-	
+
 	ret_value = failures() ? 1 : 0;
     } catch (...) {
 	// Internal error
 	xorp_print_standard_exceptions();
 	ret_value = 2;
     }
-    
+
     //
     // Gracefully stop and exit xlog
     //
     xlog_stop();
     xlog_exit();
-    
+
     return (ret_value);
 }

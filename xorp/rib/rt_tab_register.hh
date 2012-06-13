@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -34,7 +34,7 @@ class RegisterServer;
 
 /**
  * Holds information about an XRL module that requested to be
- * notified about a change.  
+ * notified about a change.
  */
 class ModuleData {
 public:
@@ -42,7 +42,7 @@ public:
      * ModuleData Constructor
      *
      * @param modulename the XRL target name of the module that
-     * requested notification about a route change.  
+     * requested notification about a route change.
      */
     ModuleData(const string& modulename)
 	: _modulename(modulename), _is_set(false)	{ }
@@ -67,7 +67,7 @@ public:
 
     /**
      * Clear state indicating the XRL module needs to be notified about
-     * a change.  
+     * a change.
      */
     void clear() const 				{ _is_set = false;	}
 
@@ -82,10 +82,10 @@ public:
 
     /**
      * Comparison operator for ModuleData class.
-     * 
+     *
      * Two ModuleData instances are considered equal if they refer
      * to the same XRL target, irrespective of the state of their flags.
-     * 
+     *
      * @param other the right-hand operand to compare against.
      * @return true if the left-hand operand is considered equal to the
      * right-hand operand (i.e., if both operands refer to the same XRL
@@ -97,10 +97,10 @@ public:
 
     /**
      * Less-than operator for ModuleData class.
-     * 
+     *
      * This is needed so that ModuleData instances can be stored in
-     * some STL containers.  
-     * 
+     * some STL containers.
+     *
      * @param other the right-hand operand to compare against.
      * @return true if the left-hand operand is considered smaller than the
      * right-hand operand.
@@ -117,7 +117,7 @@ private:
 /**
  * @short RouteRegister stores a registration of interest in a subset
  * of a route.
- * 
+ *
  * A RouteRegister instance is used to store the registration of
  * interest in a route.  Suppose there are two overlapping routes:
  * 1.0.0.0/16 and 1.0.1.0/24.  Now a routing protocol "bgp" expresses
@@ -147,7 +147,7 @@ public:
      * @param module the ModuleData instance refering to the routing
      * protocol that registered interest.
      */
-    RouteRegister(const IPNet<A>& valid_subnet, 
+    RouteRegister(const IPNet<A>& valid_subnet,
 		  const IPRouteEntry<A>* route,
 		  const ModuleData& module)
 	: _valid_subnet(valid_subnet), _route(route) {
@@ -155,10 +155,10 @@ public:
     }
 
     /**
-     * Destructor 
+     * Destructor
      */
     ~RouteRegister() {
-	_route = reinterpret_cast<const IPRouteEntry<A>* >(0xbad);
+	_route = NULL;
     }
 
     /**
@@ -192,7 +192,7 @@ public:
     /**
      * mark_modules is called when the routing information matching
      * this registration changes.  It marks the original instances of
-     * the ModuleData as needing nitification.  
+     * the ModuleData as needing nitification.
      */
     void mark_modules() const {
 	map<string, ModuleData>::const_iterator i;
@@ -257,7 +257,7 @@ private:
  *
  * It's purpose is to track route changes that affect specific
  * addresses in which routing protocols have expressed an interest,
- * and to notify these routing protocols of any changes.  
+ * and to notify these routing protocols of any changes.
  */
 template<class A>
 class RegisterTable : public RouteTable<A> {
@@ -286,8 +286,7 @@ public:
     /**
      * RegisterTable destructor
      */
-    ~RegisterTable()
-    {}
+    ~RegisterTable();
 
     /**
      * Add a new route to the RIB.  This will be propagated downstream
@@ -315,7 +314,7 @@ public:
 
     /**
      * Lookup a route in the RIB.  This request will be propagated to
-     * the parent table unchanged.  
+     * the parent table unchanged.
      */
     const IPRouteEntry<A>* lookup_route(const IPNet<A>& net) const {
 	    return _parent->lookup_route(net);
@@ -323,7 +322,7 @@ public:
 
     /**
      * Lookup a route in the RIB.  This request will be propagated to
-     * the parent table unchanged.  
+     * the parent table unchanged.
      */
     const IPRouteEntry<A>* lookup_route(const A& addr) const {
 	    return _parent->lookup_route(addr);
@@ -340,7 +339,7 @@ public:
 
     /**
      * Replumb to replace the old parent of this table with a new parent.
-     * 
+     *
      * @param old_parent the parent RouteTable being replaced (must be
      * the same as the existing parent).
      * @param new_parent the new parent RouteTable.
@@ -400,10 +399,10 @@ public:
 
     /**
      * Cause the register server to push out queued changes to the
-     * routing protocols.  
+     * routing protocols.
      */
     void flush();
-    
+
 private:
     RouteRegister<A>* add_registration(const IPNet<A>& net,
 				       const IPRouteEntry<A>* route,
@@ -417,7 +416,7 @@ private:
     void notify_route_changed(typename Trie<A, RouteRegister<A>* >::iterator trie_iter,
 			      const IPRouteEntry<A>& changed_route);
 
-    map<string, ModuleData>	_module_names;
+    map<string, ModuleData>		_module_names;
     Trie<A, RouteRegister<A>* >		_ipregistry;
     RouteTable<A>*			_parent;
     RegisterServer&			_register_server;

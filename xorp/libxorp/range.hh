@@ -76,8 +76,17 @@ public:
     /**
      * Default constructor
      */
-    U32Range() 			{ Range<uint32_t>::_low =
-				   Range<uint32_t>::_high = 0; }
+    U32Range() { Range<uint32_t>::_low = Range<uint32_t>::_high = 0; }
+
+    /**
+     * Constructor from two values.
+     */
+    U32Range(const uint32_t& low, const uint32_t& high) : Range<uint32_t>(low, high) {}
+
+    /**
+     * Constructor from a single value.
+     */
+    explicit U32Range(const uint32_t& value) : Range<uint32_t>(value) {}
 
     /**
      * Constructor from a string.
@@ -118,15 +127,31 @@ public:
 class U64Range: public Range<uint64_t> {
 public:
 	/**
-	 * Default constructor
-	 */
-	U64Range()				{ Range<uint64_t>::_low =
-						Range<uint64_t>::_high = 0; }
+     * Default constructor
+     */
+    U64Range() { Range<uint64_t>::_low = Range<uint64_t>::_high = 0; }
 
-	/**
-	 * Constructor	from a string.
-	 */
-	U64Range(const char *from_cstr) {
+    /**
+     * Constructor from two values.
+     */
+    U64Range(const uint64_t& low, const uint64_t& high) : Range<uint64_t>(low, high) { }
+
+    /**
+     * Constructor from a single value.
+     */
+    explicit U64Range(const uint64_t& value) : Range<uint64_t>(value) { }
+
+    /**
+     * Constructor from a U32Range class (this enables us to use implicit conversion
+     * from U32Range to U64Range in operators)
+     */
+    U64Range(const U32Range& range) : Range<uint64_t>((uint64_t) range.low(), (uint64_t) range.high()) { }
+
+    /**
+     * Constructor	from a string.
+     */
+    U64Range(const char *from_cstr)
+    {
 	string from_string = string(from_cstr);
 	string::size_type delim = from_string.find("..", 0);
 	if (delim == string::npos) {
@@ -321,6 +346,16 @@ public:
      * Default constructor
      */
     IPvXRange()			{}
+
+    /**
+     * Constructor from two values.
+     */
+    IPvXRange(const T& low, const T& high) : Range<T>(low, high) { }
+
+    /**
+     * Constructor from a single value.
+     */
+    explicit IPvXRange(const T& value) : Range<T>(value) { }
 
     /**
      * Constructor from a string.

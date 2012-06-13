@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -29,7 +29,7 @@
 
 #include "libxipc/finder_server.hh"
 
-#include "parser.hh"
+#include "../parser.hh"
 #include "parser_direct_cmds.hh"
 #include "rib_manager.hh"
 #include "rib.hh"
@@ -56,6 +56,7 @@ RibParser::RibParser(RIB<IPv4>& rib)
     add_command(new DirectLoopbackVifCommand(_rib));
 
     add_command(new DirectRouteAddCommand(_rib));
+    add_command(new DirectInterfaceRouteAddCommand(_rib));
     add_command(new DirectRouteDeleteCommand(_rib));
     add_command(new DirectRouteVifAddCommand(_rib));
 
@@ -90,7 +91,7 @@ parser_main()
     RIB<IPv4> rib(UNICAST, rib_manager, eventloop);
     DummyRegisterServer register_server;
 
-    rib.initialize_register(register_server);
+    rib.initialize(register_server);
 
     wait_until_xrl_router_is_ready(eventloop, xrl_std_router_rib);
 

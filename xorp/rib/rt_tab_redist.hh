@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -45,7 +45,7 @@ struct RedistNetCmp {
 };
 #endif
 
-
+
 /**
  * @short RouteTable used to redistribute routes.
  *
@@ -135,7 +135,7 @@ protected:
     list<Redistributor<A>*> _outputs;
 };
 
-
+
 
 /**
  * Controller class that takes routes from RedistTable and passes them
@@ -279,9 +279,12 @@ private:
     XorpTimer			_dtimer;
 
     static const IPNet<A> NO_LAST_NET;		// Indicator for last net inval
+#ifndef XORP_USE_USTL
+    static const RedistNetCmp<A> redist_net_cmp;
+#endif
 };
 
-
+
 
 /**
  * Base class for propagaing output of route add and delete messages.
@@ -320,7 +323,7 @@ private:
     Redistributor<A>* _r;
 };
 
-
+
 // ----------------------------------------------------------------------------
 // Inline RedistTable methods
 

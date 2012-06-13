@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -194,7 +194,7 @@ IfConfigGetNetlinkSocket::read_config_one(IfTree& iftree,
     struct sockaddr_nl	snl;
     struct ifinfomsg*	ifinfomsg;
     NetlinkSocket&	ns = *this;
-    
+
     //XLOG_WARNING("read_config_one:  tree: %s  ifname: %s  if_index: %i\n",
     //		 iftree.getName().c_str(), ifname, if_index);
 
@@ -213,7 +213,7 @@ IfConfigGetNetlinkSocket::read_config_one(IfTree& iftree,
     snl.nl_family = AF_NETLINK;
     snl.nl_pid    = 0;		// nl_pid = 0 if destination is the kernel
     snl.nl_groups = 0;
-	    
+
     //
     // Set the request for network interfaces
     //
@@ -239,7 +239,7 @@ IfConfigGetNetlinkSocket::read_config_one(IfTree& iftree,
     ifinfomsg->ifi_index = if_index;
     ifinfomsg->ifi_flags = 0;
     ifinfomsg->ifi_change = 0xffffffff;
-    
+
     if (ns.sendto(&buffer, nlh->nlmsg_len, 0,
 		  reinterpret_cast<struct sockaddr*>(&snl),
 		  sizeof(snl))
@@ -281,7 +281,7 @@ IfConfigGetNetlinkSocket::parse_buffer_netlink_socket(IfConfig& ifconfig,
 	 NLMSG_OK(nlh, buffer_bytes);
 	 nlh = NLMSG_NEXT(nlh, buffer_bytes)) {
 	void* nlmsg_data = NLMSG_DATA(nlh);
-	
+
 	//XLOG_WARNING("nlh msg received, type %s(%d) (%d bytes)\n",
 	//	     NlmUtils::nlm_msg_type(nlh->nlmsg_type).c_str(),
 	//	     nlh->nlmsg_type, nlh->nlmsg_len);
@@ -290,7 +290,7 @@ IfConfigGetNetlinkSocket::parse_buffer_netlink_socket(IfConfig& ifconfig,
 	case NLMSG_ERROR:
 	{
 	    const struct nlmsgerr* err;
-	    
+
 	    err = reinterpret_cast<const struct nlmsgerr*>(nlmsg_data);
 	    if (nlh->nlmsg_len < NLMSG_LENGTH(sizeof(*err))) {
 		XLOG_ERROR("AF_NETLINK nlmsgerr length error");
@@ -305,7 +305,7 @@ IfConfigGetNetlinkSocket::parse_buffer_netlink_socket(IfConfig& ifconfig,
 		       err->msg.nlmsg_flags, err->msg.nlmsg_seq, err->msg.nlmsg_pid);
 	}
 	break;
-	
+
 	case NLMSG_DONE:
 	{
 	    if (! recognized)
@@ -313,16 +313,16 @@ IfConfigGetNetlinkSocket::parse_buffer_netlink_socket(IfConfig& ifconfig,
 	    return (XORP_OK);
 	}
 	break;
-	
+
 	case NLMSG_NOOP:
 	    break;
-	    
+
 	case RTM_NEWLINK:
 	case RTM_DELLINK:
 	{
 	    struct ifinfomsg* ifinfomsg;
 	    int rta_len = IFLA_PAYLOAD(nlh);
-	    
+
 	    if (rta_len < 0) {
 		XLOG_ERROR("AF_NETLINK ifinfomsg length error");
 		break;
@@ -336,13 +336,13 @@ IfConfigGetNetlinkSocket::parse_buffer_netlink_socket(IfConfig& ifconfig,
 	    recognized = true;
 	}
 	break;
-	
+
 	case RTM_NEWADDR:
 	case RTM_DELADDR:
 	{
 	    struct ifaddrmsg* ifaddrmsg;
 	    int rta_len = IFA_PAYLOAD(nlh);
-	    
+
 	    if (rta_len < 0) {
 		XLOG_ERROR("AF_NETLINK ifaddrmsg length error");
 		break;
@@ -358,7 +358,7 @@ IfConfigGetNetlinkSocket::parse_buffer_netlink_socket(IfConfig& ifconfig,
 	    recognized = true;
 	}
 	break;
-	
+
 	default:
 	    debug_msg("Unhandled type %s(%d) (%d bytes)\n",
 		      NlmUtils::nlm_msg_type(nlh->nlmsg_type).c_str(),
@@ -369,10 +369,10 @@ IfConfigGetNetlinkSocket::parse_buffer_netlink_socket(IfConfig& ifconfig,
 	    break;
 	}
     }
-    
+
     if (! recognized)
 	return (XORP_ERROR);
-    
+
     return (XORP_OK);
 }
 
@@ -391,7 +391,7 @@ IfConfigGetNetlinkSocket::read_config_all(IfTree& iftree)
     struct ifinfomsg*	ifinfomsg;
     struct ifaddrmsg*	ifaddrmsg;
     NetlinkSocket&	ns = *this;
-    
+
     //
     // Set the request. First the socket, then the request itself.
     //
@@ -399,13 +399,13 @@ IfConfigGetNetlinkSocket::read_config_all(IfTree& iftree)
     // then a request for the IPv4 addresses, and then a request
     // for the IPv6 addresses.
     //
-    
+
     // Set the socket
     memset(&snl, 0, sizeof(snl));
     snl.nl_family = AF_NETLINK;
     snl.nl_pid    = 0;		// nl_pid = 0 if destination is the kernel
     snl.nl_groups = 0;
-    
+
     //
     // Set the request for network interfaces
     //
@@ -421,7 +421,7 @@ IfConfigGetNetlinkSocket::read_config_all(IfTree& iftree)
     ifinfomsg->ifi_index = 0;
     ifinfomsg->ifi_flags = 0;
     ifinfomsg->ifi_change = 0xffffffff;
-    
+
     if (ns.sendto(&buffer, nlh->nlmsg_len, 0,
 		  reinterpret_cast<struct sockaddr*>(&snl),
 		  sizeof(snl))
@@ -457,7 +457,7 @@ IfConfigGetNetlinkSocket::read_config_all(IfTree& iftree)
     //
     list<uint32_t> if_index_list;
     uint32_t if_index;
-    
+
     IfTree::IfMap::const_iterator if_iter;
     for (if_iter = iftree.interfaces().begin();
 	 if_iter != iftree.interfaces().end();
@@ -472,7 +472,7 @@ IfConfigGetNetlinkSocket::read_config_all(IfTree& iftree)
 	    if_index_list.push_back(if_index);
 	}
     }
-    
+
     //
     // Send requests for the addresses of each interface we just found
     //
@@ -481,7 +481,7 @@ IfConfigGetNetlinkSocket::read_config_all(IfTree& iftree)
 	 if_index_iter != if_index_list.end();
 	 ++if_index_iter) {
 	if_index = *if_index_iter;
-	
+
 	//
 	// Set the request for IPv4 addresses
 	//
@@ -499,7 +499,7 @@ IfConfigGetNetlinkSocket::read_config_all(IfTree& iftree)
 	    ifaddrmsg->ifa_flags = 0;
 	    ifaddrmsg->ifa_scope = 0;
 	    ifaddrmsg->ifa_index = if_index;
-	
+
 	    if (ns.sendto(&buffer, nlh->nlmsg_len, 0,
 			  reinterpret_cast<struct sockaddr*>(&snl),
 			  sizeof(snl))
@@ -553,7 +553,7 @@ IfConfigGetNetlinkSocket::read_config_all(IfTree& iftree)
 	    ifaddrmsg->ifa_flags = 0;
 	    ifaddrmsg->ifa_scope = 0;
 	    ifaddrmsg->ifa_index = if_index;
-	
+
 	    if (ns.sendto(&buffer, nlh->nlmsg_len, 0,
 			  reinterpret_cast<struct sockaddr*>(&snl),
 			  sizeof(snl))
@@ -601,7 +601,7 @@ IfConfigGetNetlinkSocket::read_config_all(IfTree& iftree)
 	if (ifconfig_vlan_get->pull_config(iftree, modified) != XORP_OK)
 	    return (XORP_ERROR);
     }
-    
+
     return (XORP_OK);
 }//read_config_all
 
@@ -623,7 +623,7 @@ IfConfigGetNetlinkSocket::read_config(const IfTree* local_cfg, IfTree& iftree)
     struct sockaddr_nl	snl;
     struct ifaddrmsg*	ifaddrmsg;
     NetlinkSocket&	ns = *this;
-    
+
     //
     // Set the request. First the socket, then the request itself.
     //
@@ -631,7 +631,7 @@ IfConfigGetNetlinkSocket::read_config(const IfTree* local_cfg, IfTree& iftree)
     // then a request for the IPv4 addresses, and then a request
     // for the IPv6 addresses.
     //
-    
+
     IfTree::IfMap::const_iterator if_iter;
     for (if_iter = local_cfg->interfaces().begin();
 	 if_iter != local_cfg->interfaces().end();
@@ -651,7 +651,7 @@ IfConfigGetNetlinkSocket::read_config(const IfTree* local_cfg, IfTree& iftree)
     //
     list<uint32_t> if_index_list;
     uint32_t if_index;
-    
+
     for (if_iter = iftree.interfaces().begin();
 	 if_iter != iftree.interfaces().end();
 	 ++if_iter) {
@@ -671,7 +671,7 @@ IfConfigGetNetlinkSocket::read_config(const IfTree* local_cfg, IfTree& iftree)
     snl.nl_family = AF_NETLINK;
     snl.nl_pid    = 0;		// nl_pid = 0 if destination is the kernel
     snl.nl_groups = 0;
-	    
+
     //
     // Send requests for the addresses of each interface we just found
     //
@@ -680,7 +680,7 @@ IfConfigGetNetlinkSocket::read_config(const IfTree* local_cfg, IfTree& iftree)
 	 if_index_iter != if_index_list.end();
 	 ++if_index_iter) {
 	if_index = *if_index_iter;
-	
+
 	//
 	// Set the request for IPv4 addresses
 	//
@@ -698,7 +698,7 @@ IfConfigGetNetlinkSocket::read_config(const IfTree* local_cfg, IfTree& iftree)
 	    ifaddrmsg->ifa_flags = 0;
 	    ifaddrmsg->ifa_scope = 0;
 	    ifaddrmsg->ifa_index = if_index;
-	
+
 	    if (ns.sendto(&buffer, nlh->nlmsg_len, 0,
 			  reinterpret_cast<struct sockaddr*>(&snl),
 			  sizeof(snl))
@@ -752,7 +752,7 @@ IfConfigGetNetlinkSocket::read_config(const IfTree* local_cfg, IfTree& iftree)
 	    ifaddrmsg->ifa_flags = 0;
 	    ifaddrmsg->ifa_scope = 0;
 	    ifaddrmsg->ifa_index = if_index;
-	
+
 	    if (ns.sendto(&buffer, nlh->nlmsg_len, 0,
 			  reinterpret_cast<struct sockaddr*>(&snl),
 			  sizeof(snl))
@@ -800,8 +800,8 @@ IfConfigGetNetlinkSocket::read_config(const IfTree* local_cfg, IfTree& iftree)
 	if (ifconfig_vlan_get->pull_config(iftree, modified) != XORP_OK)
 	    return (XORP_ERROR);
     }
-    
+
     return (XORP_OK);
 }
-    
+
 #endif // HAVE_NETLINK_SOCKETS

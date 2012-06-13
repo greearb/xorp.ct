@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -44,10 +44,10 @@ ExpectedRouteChange<A>::matches_add(const IPRouteEntry<A>& route) const
 	return false;
     if (route.net() != _route.net())
 	return false;
-    IPNextHop<A>* expected_nh = dynamic_cast<IPNextHop<A>* >(_route.nexthop());
+    IPNextHop<A>* expected_nh = _route.nexthop();
     XLOG_ASSERT(expected_nh != NULL);
 
-    IPNextHop<A>* actual_nh = dynamic_cast<IPNextHop<A>* >(route.nexthop());
+    IPNextHop<A>* actual_nh = route.nexthop();
     XLOG_ASSERT(actual_nh != NULL);
 
     if ((expected_nh->addr()) != (actual_nh->addr()))
@@ -63,10 +63,10 @@ ExpectedRouteChange<A>::matches_delete(const IPRouteEntry<A>* route) const
 	return false;
     if (route->net() != _route.net())
 	return false;
-    IPNextHop<A>* expected_nh = dynamic_cast<IPNextHop<A>* >(_route.nexthop());
+    IPNextHop<A>* expected_nh = _route.nexthop();
     XLOG_ASSERT(expected_nh != NULL);
 
-    IPNextHop<A>* actual_nh = dynamic_cast<IPNextHop<A>* >(route->nexthop());
+    IPNextHop<A>* actual_nh = route->nexthop();
     XLOG_ASSERT(actual_nh != NULL);
 
     if ((expected_nh->addr()) != (actual_nh->addr()))
@@ -87,7 +87,7 @@ ExpectedRouteChange<A>::str() const
     return s;
 }
 
-
+
 /*--------------------------------------------------------------------*/
 
 template<class A>
