@@ -384,6 +384,10 @@ public:
 	return (_cur == x._cur);
     }
 
+    bool operator!=(const TriePostOrderIterator & x) const {
+	return (_cur != x._cur);
+    }
+
     bool has_payload() const		{ return _cur->has_payload(); }
     Payload & payload()			{ return _cur->p(); };
     const Payload & payload() const	{ return _cur->p(); };
@@ -481,6 +485,10 @@ public:
 
     bool operator==(const TriePreOrderIterator & x) const {
 	return (_cur == x._cur);
+    }
+
+    bool operator!=(const TriePreOrderIterator & x) const {
+	return (_cur != x._cur);
     }
 
     bool has_payload() const		{ return _cur->has_payload(); }
