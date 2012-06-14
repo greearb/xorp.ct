@@ -78,6 +78,14 @@ public:
     const IPRouteEntry<A>* route() const	{ return _route;	}
     const IPNet<A>& net() const			{ return _route->net();	}
 
+    string str() const	{
+	ostringstream oss;
+	oss << "RouteRange: " << endl;
+	oss << "Top - " << _top.str() << endl;
+	oss << "Bottom - " << _bottom.str() << endl;
+	return oss.str();
+    }
+
     /**
      * Merge this entry with another entry.
      *
