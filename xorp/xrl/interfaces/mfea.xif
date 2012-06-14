@@ -1,4 +1,3 @@
-/* $XORP: xorp/xrl/interfaces/mfea.xif,v 1.9 2007/05/19 01:52:48 pavlin Exp $ */
 
 #include <xorp_config.h>
 

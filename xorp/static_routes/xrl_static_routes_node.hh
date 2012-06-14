@@ -18,7 +18,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/static_routes/xrl_static_routes_node.hh,v 1.26 2008/10/02 21:58:29 bms Exp $
 
 #ifndef __STATIC_ROUTES_XRL_STATIC_ROUTES_NODE_HH__
 #define __STATIC_ROUTES_XRL_STATIC_ROUTES_NODE_HH__
@@ -29,9 +28,7 @@
 //
 
 #include "libxipc/xrl_std_router.hh"
-
 #include "libfeaclient/ifmgr_xrl_mirror.hh"
-
 #include "xrl/interfaces/finder_event_notifier_xif.hh"
 #include "xrl/interfaces/rib_xif.hh"
 #include "xrl/targets/static_routes_base.hh"
@@ -208,6 +205,38 @@ protected:
 	const bool&	multicast,
 	const IPv6Net&	network,
 	const IPv6&	nexthop);
+
+    /**
+     * Add/replace/delete multicast routes (not MRIB)
+     *
+     * @param mcast_addr  Multicast-address to be routed.
+     *
+     * @param input_if  Input interface name.
+     *
+     * @param input_ip  Input interface IP address.
+     *
+     * @param output_ifs Output interface name(s).  Space-separated list.
+     */
+    XrlCmdError static_routes_0_1_add_mcast_route4(
+        // Input values,
+        const IPv4&     mcast_addr,
+        const string&   input_if,
+        const IPv4&     input_ip,
+        const string&   output_ifs);
+
+    XrlCmdError static_routes_0_1_replace_mcast_route4(
+        // Input values,
+        const IPv4&     mcast_addr,
+        const string&   input_if,
+        const IPv4&     input_ip,
+        const string&   output_ifs);
+    XrlCmdError static_routes_0_1_delete_mcast_route4(
+        // Input values,
+        const IPv4&     mcast_addr,
+        const string&   input_if,
+        const IPv4&     input_ip,
+        const string&   output_ifs);
+
 
     /**
      *  Add/replace/delete a backup static route.

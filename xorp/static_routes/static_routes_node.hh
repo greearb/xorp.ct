@@ -18,8 +18,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/static_routes/static_routes_node.hh,v 1.32 2008/10/02 21:58:29 bms Exp $
-
 #ifndef __STATIC_ROUTES_STATIC_ROUTES_NODE_HH__
 #define __STATIC_ROUTES_STATIC_ROUTES_NODE_HH__
 
@@ -29,12 +27,9 @@
 //
 
 
-
 #include "libxorp/service.hh"
 #include "libxorp/status_codes.h"
-
 #include "libfeaclient/ifmgr_xrl_mirror.hh"
-
 #include "policy/backend/policytags.hh"
 #include "policy/backend/policy_filters.hh"
 
@@ -596,6 +591,20 @@ public:
 		      const IPv6& nexthop, const string& ifname,
 		      const string& vifname, bool is_backup_route,
 		      string& error_msg);
+
+
+    int add_mcast_route4(const IPv4& mcast_addr, const string& input_if,
+			 const IPv4& input_ip, const string& output_ifs,
+			 string& error_msg);
+
+    int replace_mcast_route4(const IPv4& mcast_addr, const string& input_if,
+			     const IPv4& input_ip, const string& output_ifs,
+			     string& error_msg);
+
+    int delete_mcast_route4(const IPv4& mcast_addr, const string& input_if,
+			    const IPv4& input_ip, const string& output_ifs,
+			    string& error_msg);
+
 
     /**
      * Find a route from the routing table.

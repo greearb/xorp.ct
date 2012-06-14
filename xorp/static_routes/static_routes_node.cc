@@ -670,6 +670,42 @@ StaticRoutesNode::delete_route6(bool unicast, bool multicast,
     return (delete_route(static_route, error_msg));
 }
 
+int StaticRoutesNode::add_mcast_route4(const IPv4& mcast_addr, const string& input_if,
+				       const IPv4& input_ip, const string& output_ifs,
+				       string& error_msg) {
+    UNUSED(mcast_addr);
+    UNUSED(input_if);
+    UNUSED(input_ip);
+    UNUSED(output_ifs);
+    UNUSED(error_msg);
+    return XORP_OK; // TODO, implement this
+}
+
+int StaticRoutesNode::replace_mcast_route4(const IPv4& mcast_addr, const string& input_if,
+					   const IPv4& input_ip, const string& output_ifs,
+					   string& error_msg) {
+    UNUSED(mcast_addr);
+    UNUSED(input_if);
+    UNUSED(input_ip);
+    UNUSED(output_ifs);
+    UNUSED(error_msg);
+    return XORP_OK; // TODO, implement this
+}
+
+
+int StaticRoutesNode::delete_mcast_route4(const IPv4& mcast_addr, const string& input_if,
+					  const IPv4& input_ip, const string& output_ifs,
+					  string& error_msg) {
+    UNUSED(mcast_addr);
+    UNUSED(input_if);
+    UNUSED(input_ip);
+    UNUSED(output_ifs);
+    UNUSED(error_msg);
+    return XORP_OK; // TODO, implement this
+}
+
+
+
 /**
  * Find a route from the routing table.
  *
