@@ -423,16 +423,20 @@ RegisterTable<A>::register_route_range(const A& addr,
 {
     debug_msg("*****\nRRR: register_route_range: %s\n", addr.str().c_str());
     RouteRange<A>* rrange;
+    RouteRegister<A>* rreg;
+    IPNet<A> subnet;
 
     rrange = lookup_route_range(addr);
-    IPNet<A> subnet = rrange->minimal_subnet();
-    debug_msg("RRR: minimal subnet = %s\n", subnet.str().c_str());
-    if (rrange->route() == NULL)
-	debug_msg("RRR: no matching route\n");
-    else
-	debug_msg("RRR: route = %s\n", rrange->route()->str().c_str());
 
-    RouteRegister<A>* rreg;
+    if (rrange->route() == NULL) {
+	subnet = IPNet<A>(addr, (uint8_t)addr.addr_bitlen());
+	debug_msg("RRR: no matching route\n");
+    } else {
+	subnet = rrange->minimal_subnet();
+	debug_msg("RRR: route = %s\n", rrange->route()->str().c_str());
+    }
+
+    debug_msg("RRR: minimal subnet = %s\n", subnet.str().c_str());
     rreg = add_registration(subnet, rrange->route(), module);
     delete rrange;
     return rreg;
