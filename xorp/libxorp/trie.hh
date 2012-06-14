@@ -669,7 +669,8 @@ public:
     }
 
 #endif // compatibility
-    int route_count() const			{ return _payload_count; }
+    int route_count() const			{ return static_cast<int>(_payload_count); }
+    size_t size() const				{ return _payload_count; }
 
     bool empty() const				{ return (_payload_count == 0); }
 
@@ -682,7 +683,7 @@ private:
     }
 
     Node	*_root;
-    int		_payload_count;
+    size_t	_payload_count;
 };
 
 
