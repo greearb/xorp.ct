@@ -35,12 +35,83 @@
 
 class EventLoop;
 
+
+class StaticRouteBase {
+protected:
+    enum RouteType { IDLE_ROUTE, ADD_ROUTE, REPLACE_ROUTE, DELETE_ROUTE };
+    RouteType	_route_type;
+    bool	_is_ignored;	// True if the route is to be ignored
+
+public:
+
+    StaticRouteBase() : _route_type(IDLE_ROUTE), _is_ignored(false) { }
+    virtual ~StaticRouteBase() { }
+
+    /**
+     * Test if this is a route to add.
+     *
+     * @return true if this is a route to add, otherwise false.
+     */
+    bool is_add_route() const { return (_route_type == ADD_ROUTE); }
+
+    /**
+     * Test if this is a replacement route.
+     *
+     * @return true if this is a replacement route, otherwise false.
+     */
+    bool is_replace_route() const { return (_route_type == REPLACE_ROUTE); }
+
+    /**
+     * Test if this is a route to delete.
+     *
+     * @return true if this is a route to delete, otherwise false.
+     */
+    bool is_delete_route() const { return (_route_type == DELETE_ROUTE); }
+
+    /**
+     * Set the type of this route to "a route to add".
+     */
+    void set_add_route() { _route_type = ADD_ROUTE; }
+
+    /**
+     * Set the type of this route to "a replacement route".
+     */
+    void set_replace_route() { _route_type = REPLACE_ROUTE; }
+
+    /**
+     * Set the type of this route to "a route to delete".
+     */
+    void set_delete_route() { _route_type = DELETE_ROUTE; }
+
+
+    /**
+     * Test if the route is to be ignored.
+     *
+     * This method is used only for internal purpose when passing the route
+     * around.
+     *
+     * @return true if the route is to be ignored, otherwise false.
+     */
+    bool is_ignored() const { return _is_ignored; }
+
+    /**
+     * Set whether the route is to be ignored.
+     *
+     * This method is used only for internal purpose when passing the route
+     * around.
+     *
+     * @param v true if the route is to be ignored, otherwise false.
+     */
+    void set_ignored(bool v) { _is_ignored = v; }
+
+};
+
 /**
  * @short A StaticRoute helper class.
  * 
  * This class is used to store a routing entry.
  */
-class StaticRoute {
+class StaticRoute : public StaticRouteBase {
 public:
     /**
      * Constructor for a given IPv4 static route.
@@ -63,12 +134,11 @@ public:
 		const IPv4Net& network, const IPv4& nexthop,
 		const string& ifname, const string& vifname,
 		uint32_t metric, bool is_backup_route)
-	: _unicast(unicast), _multicast(multicast),
-	  _network(network), _nexthop(nexthop),
-	  _ifname(ifname), _vifname(vifname),
-	  _metric(metric), _is_backup_route(is_backup_route),
-	  _route_type(IDLE_ROUTE), _is_ignored(false),
-	  _is_filtered(false), _is_accepted_by_nexthop(false) {}
+	    : _unicast(unicast), _multicast(multicast),
+	      _network(network), _nexthop(nexthop),
+	      _ifname(ifname), _vifname(vifname),
+	      _metric(metric), _is_backup_route(is_backup_route),
+	      _is_filtered(false), _is_accepted_by_nexthop(false) {}
 
 #ifdef XORP_USE_USTL
     StaticRoute() { }
@@ -95,12 +165,11 @@ public:
 		const IPv6Net& network, const IPv6& nexthop,
 		const string& ifname, const string& vifname,
 		uint32_t metric, bool is_backup_route)
-	: _unicast(unicast), _multicast(multicast),
-	  _network(network), _nexthop(nexthop),
-	  _ifname(ifname), _vifname(vifname),
-	  _metric(metric), _is_backup_route(is_backup_route),
-	  _route_type(IDLE_ROUTE), _is_ignored(false),
-	  _is_filtered(false), _is_accepted_by_nexthop(false) {}
+	    : _unicast(unicast), _multicast(multicast),
+	      _network(network), _nexthop(nexthop),
+	      _ifname(ifname), _vifname(vifname),
+	      _metric(metric), _is_backup_route(is_backup_route),
+	      _is_filtered(false), _is_accepted_by_nexthop(false) {}
 
     /**
      * Equality Operator
@@ -226,42 +295,6 @@ public:
     bool is_backup_route() const { return _is_backup_route; }
 
     /**
-     * Test if this is a route to add.
-     * 
-     * @return true if this is a route to add, otherwise false.
-     */
-    bool is_add_route() const { return (_route_type == ADD_ROUTE); }
-
-    /**
-     * Test if this is a replacement route.
-     * 
-     * @return true if this is a replacement route, otherwise false.
-     */
-    bool is_replace_route() const { return (_route_type == REPLACE_ROUTE); }
-
-    /**
-     * Test if this is a route to delete.
-     * 
-     * @return true if this is a route to delete, otherwise false.
-     */
-    bool is_delete_route() const { return (_route_type == DELETE_ROUTE); }
-
-    /**
-     * Set the type of this route to "a route to add".
-     */
-    void set_add_route() { _route_type = ADD_ROUTE; }
-
-    /**
-     * Set the type of this route to "a replacement route".
-     */
-    void set_replace_route() { _route_type = REPLACE_ROUTE; }
-
-    /**
-     * Set the type of this route to "a route to delete".
-     */
-    void set_delete_route() { _route_type = DELETE_ROUTE; }
-
-    /**
      * Test if the route is interface-specific (e.g., if the interface
      * is explicitly specified).
      * 
@@ -277,26 +310,6 @@ public:
      * @return true if the route entry is valid, otherwise false.
      */
     bool is_valid_entry(string& error_msg) const;
-
-    /**
-     * Test if the route is to be ignored.
-     * 
-     * This method is used only for internal purpose when passing the route
-     * around.
-     * 
-     * @return true if the route is to be ignored, otherwise false.
-     */
-    bool is_ignored() const { return _is_ignored; }
-
-    /**
-     * Set whether the route is to be ignored.
-     * 
-     * This method is used only for internal purpose when passing the route
-     * around.
-     * 
-     * @param v true if the route is to be ignored, otherwise false.
-     */
-    void set_ignored(bool v) { _is_ignored = v; }
 
     /**
      * @return policy-tags for this route.
@@ -354,14 +367,41 @@ private:
     string	_vifname;
     uint32_t	_metric;
     bool	_is_backup_route;
-    enum RouteType { IDLE_ROUTE, ADD_ROUTE, REPLACE_ROUTE, DELETE_ROUTE };
-    RouteType	_route_type;
-    bool	_is_ignored;	// True if the route is to be ignored
     bool	_is_filtered;	// True if rejected by a policy filter
     bool	_is_accepted_by_nexthop; // True if the route is accepted based on its next-hop information
     PolicyTags	_policytags;
 };
 
+
+class McastRoute : public StaticRouteBase {
+protected:
+    IPvX _mcast_addr;
+    string _ifname; // assume vifname == ifname
+    IPvX _input_ip;
+    string _output_ifs; // assume vifname == ifname
+
+public:
+    McastRoute() { };
+    McastRoute(const IPvX& addr, const string& ifname, const IPvX& input_ip,
+	       const string& output_ifs) :
+	    _mcast_addr(addr), _ifname(ifname), _input_ip(input_ip),
+	    _output_ifs(output_ifs) { }
+
+    bool operator==(const McastRoute& other) const {
+	if (this == &other)
+	    return true;
+	return (_mcast_addr == other._mcast_addr &&
+		_ifname == other._ifname &&
+		_input_ip == other._input_ip &&
+		_output_ifs == other._output_ifs);
+    }
+
+    const IPvX& mcast_addr() const { return _mcast_addr; }
+    const string& ifname() const { return _ifname; }
+    const string& vifname() const { return ifname(); }
+    const IPvX& input_ip() const { return _input_ip; }
+    const string& output_ifs() const { return _output_ifs; }
+};
 
 /**
  * @short The StaticRoutes node class.
@@ -812,6 +852,7 @@ private:
      * @param static_route the route with the information about the change.
      */
     virtual void inform_rib_route_change(const StaticRoute& static_route) = 0;
+    virtual void inform_rib_route_change(const McastRoute& static_route) = 0;
 
     /**
      * Cancel a pending request to inform the RIB about a route change.
@@ -822,6 +863,7 @@ private:
      * @param static_route the route with the request that would be canceled.
      */
     virtual void cancel_rib_route_change(const StaticRoute& static_route) = 0;
+    virtual void cancel_rib_route_change(const McastRoute& static_route) = 0;
 
     /**
      * Update a route received from the user configuration.
@@ -857,6 +899,7 @@ private:
      * @param r route which should be updated in the RIB.
      */
     void inform_rib(const StaticRoute& r);
+    void inform_rib(const McastRoute& route);
 
     /**
      * Set the node status.
@@ -881,6 +924,8 @@ private:
     // The winning routes
     map<IPvXNet, StaticRoute>	_winning_routes_unicast;
     map<IPvXNet, StaticRoute>	_winning_routes_multicast;
+
+    map<IPvX, McastRoute> _mcast_routes;
 
     //
     // Status-related state

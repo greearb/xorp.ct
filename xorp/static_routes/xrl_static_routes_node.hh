@@ -528,11 +528,13 @@ private:
     void finder_deregister_interest_rib_cb(const XrlError& xrl_error);
     void send_rib_add_tables();
     void rib_client_send_add_igp_table4_cb(const XrlError& xrl_error);
+    void rib_client_send_add_mcast_table4_cb(const XrlError& xrl_error);
 #ifdef HAVE_IPV6
     void rib_client_send_add_igp_table6_cb(const XrlError& xrl_error);
 #endif
     void send_rib_delete_tables();
     void rib_client_send_delete_igp_table4_cb(const XrlError& xrl_error);
+    void rib_client_send_delete_mcast_table4_cb(const XrlError& xrl_error);
 #ifdef HAVE_IPV6
     void rib_client_send_delete_igp_table6_cb(const XrlError& xrl_error);
 #endif
@@ -543,6 +545,7 @@ private:
      * @param static_route the route with the information about the change.
      */
     void inform_rib_route_change(const StaticRoute& static_route);
+    void inform_rib_route_change(const McastRoute& static_route);
 
     /**
      * Cancel a pending request to inform the RIB about a route change.
@@ -550,9 +553,13 @@ private:
      * @param static_route the route with the request that would be canceled.
      */
     void cancel_rib_route_change(const StaticRoute& static_route);
+    void cancel_rib_route_change(const McastRoute& static_route);
 
     void send_rib_route_change();
     void send_rib_route_change_cb(const XrlError& xrl_error);
+
+    void send_rib_mroute_change();
+    void send_rib_mroute_change_cb(const XrlError& xrl_error);
 
     EventLoop&		_eventloop;
     XrlRibV0p1Client	_xrl_rib_client;
@@ -563,6 +570,8 @@ private:
     IfMgrXrlMirror	_ifmgr;
     list<StaticRoute>	_inform_rib_queue;
     XorpTimer		_inform_rib_queue_timer;
+    list<McastRoute>	_inform_rib_mqueue;
+    XorpTimer		_inform_rib_mqueue_timer;
     XrlFinderEventNotifierV0p1Client	_xrl_finder_client;
 
     static const TimeVal RETRY_TIMEVAL;
@@ -581,12 +590,14 @@ private:
     bool		_is_rib_registering;
     bool		_is_rib_deregistering;
     bool		_is_rib_igp_table4_registered;
+    bool		_is_rib_mcast_table4_registered;
 #ifdef HAVE_IPV6
     bool		_is_rib_igp_table6_registered;
 #endif
     XorpTimer		_rib_register_startup_timer;
     XorpTimer		_rib_register_shutdown_timer;
     XorpTimer		_rib_igp_table_registration_timer;
+    XorpTimer		_rib_mcast_table_registration_timer;
 };
 
 #endif // __STATIC_ROUTES_XRL_STATIC_ROUTES_NODE_HH__

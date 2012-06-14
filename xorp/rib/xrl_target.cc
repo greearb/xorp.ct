@@ -190,6 +190,7 @@ XrlRibTarget::rib_0_1_add_igp_table4(const string&	protocol,
     return XrlCmdError::OKAY();
 }
 
+
 XrlCmdError
 XrlRibTarget::rib_0_1_delete_igp_table4(const string&	protocol,
 				     const string&	target_class,
@@ -215,6 +216,80 @@ XrlRibTarget::rib_0_1_delete_igp_table4(const string&	protocol,
 
     return XrlCmdError::OKAY();
 }
+
+XrlCmdError
+XrlRibTarget::rib_0_1_delete_mcast_table4(const string&	protocol,
+					  const string&	target_class,
+					  const string&	target_instance)
+{
+    UNUSED(protocol);
+    UNUSED(target_class);
+    UNUSED(target_instance);
+    // TODO:  Implement
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRibTarget::rib_0_1_add_mcast_table4(const string&	protocol,
+				       const string&	target_class,
+				       const string&	target_instance)
+{
+    UNUSED(protocol);
+    UNUSED(target_class);
+    UNUSED(target_instance);
+    // TODO:  Implement
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRibTarget::rib_0_1_add_mcast_route4(const string&	protocol,
+				       const IPv4&	mcast_addr,
+				       const string&   input_if,
+				       const IPv4&     input_ip,
+				       const string&   output_ifs)
+{
+    UNUSED(protocol);
+    UNUSED(mcast_addr);
+    UNUSED(input_if);
+    UNUSED(input_ip);
+    UNUSED(output_ifs);
+    // TODO:  Implement
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRibTarget::rib_0_1_replace_mcast_route4(const string& protocol,
+					   const IPv4&	 mcast_addr,
+					   const string& input_if,
+					   const IPv4&   input_ip,
+					   const string& output_ifs)
+{
+    UNUSED(protocol);
+    UNUSED(mcast_addr);
+    UNUSED(input_if);
+    UNUSED(input_ip);
+    UNUSED(output_ifs);
+    // TODO:  Implement
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRibTarget::rib_0_1_delete_mcast_route4(const string&	protocol,
+					  const IPv4&	mcast_addr,
+					  const string&   input_if,
+					  const IPv4&     input_ip,
+					  const string&   output_ifs)
+{
+    UNUSED(protocol);
+    UNUSED(mcast_addr);
+    UNUSED(input_if);
+    UNUSED(input_ip);
+    UNUSED(output_ifs);
+    // TODO:  Implement
+    return XrlCmdError::OKAY();
+}
+
+
 
 XrlCmdError
 XrlRibTarget::rib_0_1_add_egp_table4(const string&	protocol,
