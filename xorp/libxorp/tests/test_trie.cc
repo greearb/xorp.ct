@@ -9,13 +9,13 @@
 // Redistribution and/or modification of this program under the terms of
 // any other version of the GNU Lesser General Public License is not
 // permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU Lesser General Public License, Version 2.1, a copy of
 // which can be found in the XORP LICENSE.lgpl file.
-// 
+//
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -124,7 +124,7 @@ void test_upper_bound(IPv4 test_addr, IPv4 test_answer) {
 	print_passed(result.str());
     } else {
 	print_failed("");
-	printf("answer should be %s, result was %s\n", 
+	printf("answer should be %s, result was %s\n",
 	       test_answer.str().c_str(), result.str().c_str());
 	trie.print();
 	abort();
@@ -142,7 +142,7 @@ void test_lower_bound(IPv4 test_addr, IPv4 test_answer) {
 	print_passed(result.str());
     } else {
 	print_failed("");
-	printf("Fail: answer should be %s, result was %s\n", 
+	printf("Fail: answer should be %s, result was %s\n",
 	       test_answer.str().c_str(), result.str().c_str());
 	trie.print();
 	abort();
@@ -202,7 +202,7 @@ void test_upper_bound6(IPv6 test_addr, IPv6 test_answer) {
 	print_passed(result.str());
     } else {
 	print_failed("");
-	printf("Fail: answer should be %s, result was %s\n", 
+	printf("Fail: answer should be %s, result was %s\n",
 	       test_answer.str().c_str(), result.str().c_str());
 	trie.print();
 	abort();
@@ -216,13 +216,13 @@ test_find_subtree()
     printf("Find subtree\n");
 
     Trie<IPv4, string> trie_subtree;
-    
+
     IPv4Net n1(IPv4("169.229.0.136"), 29);
     trie_subtree.insert(n1, "169.229.0.136/29");
 
     IPv4Net n2(IPv4("192.150.187.0"), 25);
     trie_subtree.insert(n2, "192.150.187.0/25");
- 
+
     IPv4Net n3(IPv4("192.168.254.2"), 32);
     trie_subtree.insert(n3, "192.168.254.2/32");
 
@@ -407,7 +407,7 @@ int main() {
     IPv4Net n9(IPv4("1.2.2.0"), 24);
     trie.insert(n9, &d9);
     trie.print();
-    
+
     trie.erase(n9);
 
     trie.erase(n2);
@@ -460,7 +460,7 @@ int main() {
     test_lower_bound(IPv4("1.0.0.1"), IPv4("0.0.0.0"));
     test_upper_bound(IPv4("1.3.128.1"), IPv4("255.255.255.255"));
     test_upper_bound(IPv4("1.2.2.1"), IPv4("1.2.2.255"));
-    
+
     trie.print();
     Trie<IPv4, IPv4RouteEntry*>::iterator iter;
     IPv4Net subroot(IPv4("1.2.0.0"), 21);
@@ -498,7 +498,7 @@ int main() {
 	iter++;
     }
 
-    
+
     trie.insert(n10, &d10);
     trie.insert(n1, &d1);
     trie.insert(n9, &d9);
@@ -516,7 +516,7 @@ int main() {
 	iter++;
     }
 
-    //-------------------------------------------------------    
+    //-------------------------------------------------------
 
     printf("Test replacement of interior node\n");
 
@@ -525,13 +525,13 @@ int main() {
     trie.insert(n13, &d13);
     trie.print();
 
-    //-------------------------------------------------------    
+    //-------------------------------------------------------
     printf("==================\nTest of begin()\n");
     trie.erase(n11);
     trie.erase(n10);
     trie.print();
 
-    //-------------------------------------------------------    
+    //-------------------------------------------------------
     printf("==================\nTest of lower_bound()\n");
     trie.print();
     iter = trie.lower_bound(n1); /*1.2.1.0/24*/
@@ -543,23 +543,23 @@ int main() {
     iter = trie.lower_bound(n13); /*1.2.2.0/23*/
     assert(iter.key() == n13);
 
-    iter = trie.lower_bound(IPNet<IPv4>("1.2.1.128/25")); 
+    iter = trie.lower_bound(IPNet<IPv4>("1.2.1.128/25"));
     assert(iter.key() == n1); /*1.2.1.0/24*/
 
-    iter = trie.lower_bound(IPNet<IPv4>("1.2.4.128/25")); 
+    iter = trie.lower_bound(IPNet<IPv4>("1.2.4.128/25"));
     assert(iter == trie.end());
 
-    iter = trie.lower_bound(IPNet<IPv4>("1.2.1.0/23")); 
+    iter = trie.lower_bound(IPNet<IPv4>("1.2.1.0/23"));
     assert(iter.key() == n9); /*1.2.2.0/24*/
 
-    iter = trie.lower_bound(IPNet<IPv4>("1.0.0.0/24")); 
+    iter = trie.lower_bound(IPNet<IPv4>("1.0.0.0/24"));
     if (iter != trie.end())
 	printf("iter.key = %s\n", iter.key().str().c_str());
     else
 	printf("iter = end\n");
     assert(iter.key() == n1); /*1.2.1.0/24*/
 
-    //-------------------------------------------------------    
+    //-------------------------------------------------------
 
     printf("Test /32 prefix works\n");
 
@@ -579,7 +579,7 @@ int main() {
     // inserting a list of unsorted subnets and check that the iterator
     // retrieves them in the proper order.
 
-    Trie<IPv4, IPv4RouteEntry*, TriePreOrderIterator<IPv4, IPv4RouteEntry*> > 
+    Trie<IPv4, IPv4RouteEntry*, TriePreOrderIterator<IPv4, IPv4RouteEntry*> >
 	preotrie;
     const char * subnets[] = {  "1.2.0.0/16",
 				"1.2.0.0/20",
@@ -611,7 +611,7 @@ int main() {
     printf("adding n20: %s route: %p\n", n20.str().c_str(), &d20);
     preotrie.insert(n20, &d20);
 
-    //-------------------------------------------------------    
+    //-------------------------------------------------------
     printf("-----------\n");
     printf("Test of prefix increment (++ti)\n");
     printf("-----------\n");
@@ -636,11 +636,11 @@ int main() {
     }
     print_passed("");
 
-    //-------------------------------------------------------    
+    //-------------------------------------------------------
     printf("-----------\n");
     printf("Test of postfix increment (ti++)\n");
     printf("-----------\n");
-    subnetidx = 0;     
+    subnetidx = 0;
     for (ti = preotrie.begin() ; ti != preotrie.end() ; ++ti) {
         printf("*** node: %-26s %s\n",
                ti.cur()->k().str().c_str(),
