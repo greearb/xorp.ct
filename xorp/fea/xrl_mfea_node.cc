@@ -1254,6 +1254,11 @@ XrlMfeaNode::mfea_0_1_add_mfc4_str(
 {
     string error_msg;
 
+    XLOG_INFO("received mfea add-mfc command, input: %s  mcast-addr: %s  ifname: %s  output_ifs: %s\n",
+	      source_address.str().c_str(),
+	      group_address.str().c_str(),
+	      iif_ifname.c_str(),
+	      oif_ifnames.c_str());
     //
     // Verify the address family
     //

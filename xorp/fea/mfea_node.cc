@@ -1822,15 +1822,52 @@ int MfeaNode::add_mfc_str(const string& module_instance_name,
 			  const string& iif_name,
 			  const string& oif_names,
 			  string& error_msg) {
-    // TODO:  Convert strings to mfc binary stuff and pass to
+    int rv;
+    uint32_t iif_vif_index;
+
+    // Convert strings to mfc binary stuff and pass to
     // add_mfc()
-    UNUSED(module_instance_name);
-    UNUSED(source);
-    UNUSED(group);
-    UNUSED(iif_name);
-    UNUSED(oif_names);
-    UNUSED(error_msg);
-    return XORP_OK;
+    MfeaVif *mfea_vif = vif_find_by_name(iif_name);
+    if (!mfea_vif) {
+	error_msg = "Could not find iif-interface: " + iif_name;
+	return XORP_ERROR;
+    }
+    iif_vif_index = mfea_vif->vif_index();
+
+    Mifset oiflist;
+    Mifset oiflist_disable_wrongvif;
+    istringstream iss(oif_names);
+    string t;
+    while (!(iss.eof() || iss.fail())) {
+	iss >> t;
+	if (t.size() == 0)
+	    break;
+	mfea_vif = vif_find_by_name(t);
+	if (!mfea_vif) {
+	    error_msg = "Could not find oif-interface: " + t;
+	    return XORP_ERROR;
+	}
+	uint32_t vi = mfea_vif->vif_index();
+	if (vi < MAX_VIFS) {
+	    oiflist.set(vi);
+	}
+	else {
+	    error_msg = c_format("Vif %s has invalid vif_index: %u",
+				 mfea_vif->ifname().c_str(), vi);
+	    return XORP_ERROR;
+	}
+    }
+
+    IPvX rp_addr;
+
+    rv = add_mfc(module_instance_name, source, group,
+		 iif_vif_index, oiflist,
+		 oiflist_disable_wrongvif,
+		 MAX_VIFS, rp_addr);
+    if (rv != XORP_OK) {
+	error_msg = "call to add_mfc failed";
+    }
+    return rv;
 }
 
 /**
@@ -1852,15 +1889,21 @@ int MfeaNode::add_mfc_str(const string& module_instance_name,
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-MfeaNode::add_mfc(const string& , // module_instance_name,
+MfeaNode::add_mfc(const string& module_instance_name,
 		  const IPvX& source, const IPvX& group,
 		  uint32_t iif_vif_index, const Mifset& oiflist,
 		  const Mifset& oiflist_disable_wrongvif,
 		  uint32_t max_vifs_oiflist,
 		  const IPvX& rp_addr)
 {
+    UNUSED(module_instance_name);
+
     uint8_t oifs_ttl[MAX_VIFS];
     uint8_t oifs_flags[MAX_VIFS];
+
+    XLOG_INFO("MFEA add_mfc, module: %s  source: %s  group: %s",
+	      module_instance_name.c_str(), source.str().c_str(),
+	      group.str().c_str());
     
     if (max_vifs_oiflist > MAX_VIFS)
 	return (XORP_ERROR);

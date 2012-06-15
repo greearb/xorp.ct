@@ -2326,6 +2326,11 @@ XrlStaticRoutesNode::send_mfea_mfc_change()
     // Send the appropriate XRL
     //
     if (static_route.is_add_route() || static_route.is_replace_route()) {
+	XLOG_INFO("sending mfea add-mfc command, input: %s  mcast-addr: %s  ifname: %s  output_ifs: %s\n",
+		  static_route.input_ip().str().c_str(),
+		  static_route.mcast_addr().str().c_str(),
+		  static_route.ifname().c_str(),
+		  static_route.output_ifs().c_str());
 	success = _xrl_mfea_client.send_add_mfc4_str(
 	    _mfea_target.c_str(),
 	    StaticRoutesNode::protocol_name(),
@@ -2383,7 +2388,7 @@ XrlStaticRoutesNode::send_mfea_mfc_change_cb(const XrlError& xrl_error)
 	// If a command failed because the other side rejected it,
 	// then print an error and send the next one.
 	//
-	XLOG_ERROR("Cannot %s an mcast-routing entry with the RIB: %s",
+	XLOG_ERROR("Cannot %s an mcast-routing entry with the MFEA: %s",
 		   (_inform_mfea_queue.front().is_add_route())? "add"
 		   : (_inform_mfea_queue.front().is_replace_route())? "replace"
 		   : "delete",
@@ -2401,7 +2406,7 @@ XrlStaticRoutesNode::send_mfea_mfc_change_cb(const XrlError& xrl_error)
 	// Probably we caught it here because of event reordering.
 	// In some cases we print an error. In other cases our job is done.
 	//
-	XLOG_ERROR("Cannot %s an mcast-routing entry with the RIB: %s",
+	XLOG_ERROR("Cannot %s an mcast-routing entry with the MFEA: %s",
 		   (_inform_mfea_queue.front().is_add_route())? "add"
 		   : (_inform_mfea_queue.front().is_replace_route())? "replace"
 		   : "delete",

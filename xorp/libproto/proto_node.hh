@@ -24,9 +24,6 @@
 #define __LIBPROTO_PROTO_NODE_HH__
 
 
-
-
-
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/callback.hh"

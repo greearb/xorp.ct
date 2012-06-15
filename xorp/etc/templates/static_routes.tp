@@ -25,7 +25,7 @@ protocols {
 	    }
 	}
 
-	mcast-route @: ipv4net {
+	mcast-route @: ipv4 {
 	    input_if:		txt;
 	    input_ip:		ipv4;
 	    output_ifs:		txt;
@@ -289,13 +289,13 @@ protocols {
 	    }
 	}
 
-	mcast-route @: ipv4net {
+	mcast-route @: ipv4 {
 	    %help:	short "Configure a static Multicast route";
-	    %mandatory:	$(@.input_if), $(@.input_ip), $(@.output_ifs)
+	    %mandatory:	$(@.input_if), $(@.input_ip), $(@.output_ifs);
 
-	    %create:	xrl "$(static.targetname)/static_routes/0.1/add_mcast_route4?mcast_addr:ipv4=$(@)&input_if:txt=$(@.input_if)&input_ip:ipv4=$(@.input_ip)&output_ifs:txt=$(@)";
-	    %update:	xrl "$(static.targetname)/static_routes/0.1/replace_mcast_route4?mcast_addr:ipv4=$(@)&input_if:txt=$(@.input_if)&input_ip:ipv4=$(@.input_ip)&output_ifs:txt=$(@)";
-	    %delete:	xrl "$(static.targetname)/static_routes/0.1/delete_mcast_route4?mcast_addr:ipv4=$(@)&input_if:txt=$(@.input_if)&input_ip:ipv4=$(@.input_ip)&output_ifs:txt=$(@)";
+	    %create:	xrl "$(static.targetname)/static_routes/0.1/add_mcast_route4?mcast_addr:ipv4=$(@)&input_if:txt=$(@.input_if)&input_ip:ipv4=$(@.input_ip)&output_ifs:txt=$(@.output_ifs)";
+	    %update:	xrl "$(static.targetname)/static_routes/0.1/replace_mcast_route4?mcast_addr:ipv4=$(@)&input_if:txt=$(@.input_if)&input_ip:ipv4=$(@.input_ip)&output_ifs:txt=$(@.output_ifs)";
+	    %delete:	xrl "$(static.targetname)/static_routes/0.1/delete_mcast_route4?mcast_addr:ipv4=$(@)&input_if:txt=$(@.input_if)&input_ip:ipv4=$(@.input_ip)&output_ifs:txt=$(@.output_ifs)";
 
 	    input_if {
 		%help:	short "Configure the input interface";
