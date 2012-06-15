@@ -617,7 +617,7 @@ private:
      * @param static_route the route with the information about the change.
      */
     void inform_rib_route_change(const StaticRoute& static_route);
-    void inform_rib_route_change(const McastRoute& static_route);
+
 
     /**
      * Cancel a pending request to inform the RIB about a route change.
@@ -625,13 +625,15 @@ private:
      * @param static_route the route with the request that would be canceled.
      */
     void cancel_rib_route_change(const StaticRoute& static_route);
-    void cancel_rib_route_change(const McastRoute& static_route);
+
+    void inform_mfea_mfc_change(const McastRoute& static_route);
+    void cancel_mfea_mfc_change(const McastRoute& static_route);
 
     void send_rib_route_change();
     void send_rib_route_change_cb(const XrlError& xrl_error);
 
-    void send_rib_mroute_change();
-    void send_rib_mroute_change_cb(const XrlError& xrl_error);
+    void send_mfea_mfc_change();
+    void send_mfea_mfc_change_cb(const XrlError& xrl_error);
 
     EventLoop&		_eventloop;
     XrlRibV0p1Client	_xrl_rib_client;
@@ -644,8 +646,8 @@ private:
     IfMgrXrlMirror	_ifmgr;
     list<StaticRoute>	_inform_rib_queue;
     XorpTimer		_inform_rib_queue_timer;
-    list<McastRoute>	_inform_rib_mqueue;
-    XorpTimer		_inform_rib_mqueue_timer;
+    list<McastRoute>	_inform_mfea_queue;
+    XorpTimer		_inform_mfea_queue_timer;
     XrlFinderEventNotifierV0p1Client	_xrl_finder_client;
 
     static const TimeVal RETRY_TIMEVAL;

@@ -2025,16 +2025,31 @@ XrlStaticRoutesNode::inform_rib_route_change(const StaticRoute& static_route)
 }
 
 void
-XrlStaticRoutesNode::inform_rib_route_change(const McastRoute& static_route)
+XrlStaticRoutesNode::inform_mfea_mfc_change(const McastRoute& static_route)
 {
     // Add the request to the queue
-    _inform_rib_mqueue.push_back(static_route);
+    _inform_mfea_queue.push_back(static_route);
 
     // If the queue was empty before, start sending the routes
-    if (_inform_rib_mqueue.size() == 1) {
-	send_rib_mroute_change();
+    if (_inform_mfea_queue.size() == 1) {
+	send_mfea_mfc_change();
     }
 }
+
+void
+XrlStaticRoutesNode::cancel_mfea_mfc_change(const McastRoute& static_route)
+{
+    list<McastRoute>::iterator iter;
+
+    for (iter = _inform_mfea_queue.begin();
+	 iter != _inform_mfea_queue.end();
+	 ++iter) {
+	McastRoute& tmp_static_route = *iter;
+	if (tmp_static_route == static_route)
+	    tmp_static_route.set_ignored(true);
+    }
+}
+
 
 /**
  * Cancel a pending request to inform the RIB about a route change.
@@ -2050,20 +2065,6 @@ XrlStaticRoutesNode::cancel_rib_route_change(const StaticRoute& static_route)
 	 iter != _inform_rib_queue.end();
 	 ++iter) {
 	StaticRoute& tmp_static_route = *iter;
-	if (tmp_static_route == static_route)
-	    tmp_static_route.set_ignored(true);
-    }
-}
-
-void
-XrlStaticRoutesNode::cancel_rib_route_change(const McastRoute& static_route)
-{
-    list<McastRoute>::iterator iter;
-
-    for (iter = _inform_rib_mqueue.begin();
-	 iter != _inform_rib_mqueue.end();
-	 ++iter) {
-	McastRoute& tmp_static_route = *iter;
 	if (tmp_static_route == static_route)
 	    tmp_static_route.set_ignored(true);
     }
@@ -2290,7 +2291,7 @@ XrlStaticRoutesNode::send_rib_route_change()
 
 
 void
-XrlStaticRoutesNode::send_rib_mroute_change()
+XrlStaticRoutesNode::send_mfea_mfc_change()
 {
     bool success = true;
 
@@ -2299,23 +2300,24 @@ XrlStaticRoutesNode::send_rib_mroute_change()
 
     do {
 	// Pop-up all routes that are to be ignored
-	if (_inform_rib_mqueue.empty())
+	if (_inform_mfea_queue.empty())
 	    return;		// No more route changes to send
 
-	McastRoute& tmp_static_route = _inform_rib_mqueue.front();
+	McastRoute& tmp_static_route = _inform_mfea_queue.front();
 	if (tmp_static_route.is_ignored()) {
-	    _inform_rib_mqueue.pop_front();
+	    _inform_mfea_queue.pop_front();
 	    continue;
 	}
 	break;
     } while (true);
 
-    McastRoute& static_route = _inform_rib_mqueue.front();
+    McastRoute& static_route = _inform_mfea_queue.front();
 
     //
-    // Check whether we have already registered with the RIB
+    // Check whether we have already registered with the MFEA
     //
     if (! _is_mfea_registered) {
+	mfea_register_startup();
 	success = false;
 	goto start_timer_label;
     }
@@ -2331,7 +2333,7 @@ XrlStaticRoutesNode::send_rib_mroute_change()
 	    static_route.mcast_addr().get_ipv4(),
 	    static_route.ifname(),
 	    static_route.output_ifs(),
-	    callback(this, &XrlStaticRoutesNode::send_rib_mroute_change_cb));
+	    callback(this, &XrlStaticRoutesNode::send_mfea_mfc_change_cb));
 	if (success)
 	    return;
     }
@@ -2342,7 +2344,7 @@ XrlStaticRoutesNode::send_rib_mroute_change()
 	    StaticRoutesNode::protocol_name(),
 	    static_route.input_ip().get_ipv4(),
 	    static_route.mcast_addr().get_ipv4(),
-	    callback(this, &XrlStaticRoutesNode::send_rib_mroute_change_cb));
+	    callback(this, &XrlStaticRoutesNode::send_mfea_mfc_change_cb));
 	if (success)
 	    return;
     }
@@ -2358,11 +2360,89 @@ XrlStaticRoutesNode::send_rib_mroute_change()
 		   : "delete",
 		   static_route.mcast_addr().str().c_str());
     start_timer_label:
-	_inform_rib_mqueue_timer = _eventloop.new_oneoff_after(
+	_inform_mfea_queue_timer = _eventloop.new_oneoff_after(
 	    RETRY_TIMEVAL,
-	    callback(this, &XrlStaticRoutesNode::send_rib_mroute_change));
+	    callback(this, &XrlStaticRoutesNode::send_mfea_mfc_change));
     }
 }
+
+void
+XrlStaticRoutesNode::send_mfea_mfc_change_cb(const XrlError& xrl_error)
+{
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then send the next route change
+	//
+	_inform_mfea_queue.pop_front();
+	send_mfea_mfc_change();
+	break;
+
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it,
+	// then print an error and send the next one.
+	//
+	XLOG_ERROR("Cannot %s an mcast-routing entry with the RIB: %s",
+		   (_inform_mfea_queue.front().is_add_route())? "add"
+		   : (_inform_mfea_queue.front().is_replace_route())? "replace"
+		   : "delete",
+		   xrl_error.str().c_str());
+	_inform_mfea_queue.pop_front();
+	send_mfea_mfc_change();
+	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+    case SEND_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the Finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("Cannot %s an mcast-routing entry with the RIB: %s",
+		   (_inform_mfea_queue.front().is_add_route())? "add"
+		   : (_inform_mfea_queue.front().is_replace_route())? "replace"
+		   : "delete",
+		   xrl_error.str().c_str());
+	_inform_mfea_queue.pop_front();
+	send_mfea_mfc_change();
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _inform_mfea_queue_timer.scheduled()) {
+	    XLOG_ERROR("Failed to %s an mcast-routing entry with the RIB: %s. "
+		       "Will try again.",
+		       (_inform_mfea_queue.front().is_add_route())? "add"
+		       : (_inform_mfea_queue.front().is_replace_route())? "replace"
+		       : "delete",
+		       xrl_error.str().c_str());
+	    _inform_mfea_queue_timer = _eventloop.new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlStaticRoutesNode::send_mfea_mfc_change));
+	}
+	break;
+    }
+}
+
+
 
 void
 XrlStaticRoutesNode::send_rib_route_change_cb(const XrlError& xrl_error)
@@ -2435,82 +2515,6 @@ XrlStaticRoutesNode::send_rib_route_change_cb(const XrlError& xrl_error)
 	    _inform_rib_queue_timer = _eventloop.new_oneoff_after(
 		RETRY_TIMEVAL,
 		callback(this, &XrlStaticRoutesNode::send_rib_route_change));
-	}
-	break;
-    }
-}
-
-void
-XrlStaticRoutesNode::send_rib_mroute_change_cb(const XrlError& xrl_error)
-{
-    switch (xrl_error.error_code()) {
-    case OKAY:
-	//
-	// If success, then send the next route change
-	//
-	_inform_rib_mqueue.pop_front();
-	send_rib_mroute_change();
-	break;
-
-    case COMMAND_FAILED:
-	//
-	// If a command failed because the other side rejected it,
-	// then print an error and send the next one.
-	//
-	XLOG_ERROR("Cannot %s an mcast-routing entry with the RIB: %s",
-		   (_inform_rib_mqueue.front().is_add_route())? "add"
-		   : (_inform_rib_mqueue.front().is_replace_route())? "replace"
-		   : "delete",
-		   xrl_error.str().c_str());
-	_inform_rib_mqueue.pop_front();
-	send_rib_mroute_change();
-	break;
-
-    case NO_FINDER:
-    case RESOLVE_FAILED:
-    case SEND_FAILED:
-	//
-	// A communication error that should have been caught elsewhere
-	// (e.g., by tracking the status of the Finder and the other targets).
-	// Probably we caught it here because of event reordering.
-	// In some cases we print an error. In other cases our job is done.
-	//
-	XLOG_ERROR("Cannot %s an mcast-routing entry with the RIB: %s",
-		   (_inform_rib_mqueue.front().is_add_route())? "add"
-		   : (_inform_rib_mqueue.front().is_replace_route())? "replace"
-		   : "delete",
-		   xrl_error.str().c_str());
-	_inform_rib_mqueue.pop_front();
-	send_rib_mroute_change();
-	break;
-
-    case BAD_ARGS:
-    case NO_SUCH_METHOD:
-    case INTERNAL_ERROR:
-	//
-	// An error that should happen only if there is something unusual:
-	// e.g., there is XRL mismatch, no enough internal resources, etc.
-	// We don't try to recover from such errors, hence this is fatal.
-	//
-	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
-	break;
-
-    case REPLY_TIMED_OUT:
-    case SEND_FAILED_TRANSIENT:
-	//
-	// If a transient error, then start a timer to try again
-	// (unless the timer is already running).
-	//
-	if (! _inform_rib_mqueue_timer.scheduled()) {
-	    XLOG_ERROR("Failed to %s an mcast-routing entry with the RIB: %s. "
-		       "Will try again.",
-		       (_inform_rib_mqueue.front().is_add_route())? "add"
-		       : (_inform_rib_mqueue.front().is_replace_route())? "replace"
-		       : "delete",
-		       xrl_error.str().c_str());
-	    _inform_rib_mqueue_timer = _eventloop.new_oneoff_after(
-		RETRY_TIMEVAL,
-		callback(this, &XrlStaticRoutesNode::send_rib_mroute_change));
 	}
 	break;
     }

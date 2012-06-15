@@ -533,7 +533,7 @@ StaticRoutesNode::updates_made()
 	McastRoute& orig_route = *(*mpending_iter);
 	McastRoute copy_route = orig_route;
 	copy_route.set_add_route();
-	inform_rib(copy_route);
+	inform_mfea(copy_route);
     }
 
     //
@@ -545,7 +545,7 @@ StaticRoutesNode::updates_made()
 	McastRoute& orig_route = *(*mpending_iter);
 	McastRoute copy_route = orig_route;
 	copy_route.set_replace_route();
-	inform_rib(copy_route);
+	inform_mfea(copy_route);
     }
 
     //
@@ -555,10 +555,10 @@ StaticRoutesNode::updates_made()
 	 mpending_iter != delete_mroutes.end();
 	 ++mpending_iter) {
 	McastRoute& orig_route = *(*mpending_iter);
-	cancel_rib_route_change(orig_route);
+	cancel_mfea_mfc_change(orig_route);
 	McastRoute copy_route = orig_route;
 	copy_route.set_delete_route();
-	inform_rib(copy_route);
+	inform_mfea(copy_route);
     }
 }
 
@@ -795,7 +795,7 @@ int StaticRoutesNode::add_mcast_route4(const IPv4& mcast_addr, const string& inp
 	_mcast_routes[mcast_addr] = mr;
 	McastRoute copy_route = mr;
 	copy_route.set_add_route();
-	inform_rib(copy_route);
+	inform_mfea(copy_route);
     }
     else {
 	error_msg.append("Mcast-Route: " + mcast_addr.str() + " already exists!\n");
@@ -822,7 +822,7 @@ int StaticRoutesNode::replace_mcast_route4(const IPv4& mcast_addr, const string&
 
     McastRoute copy_route = mr;
     copy_route.set_replace_route();
-    inform_rib(copy_route);
+    inform_mfea(copy_route);
 
     return XORP_OK;
 }
@@ -839,7 +839,7 @@ int StaticRoutesNode::delete_mcast_route4(const IPv4& mcast_addr, const string& 
 
 	McastRoute mr(mcast_addr, input_if, input_ip, output_ifs);
 	mr.set_delete_route();
-	inform_rib(mr);
+	inform_mfea(mr);
     }
 
     return XORP_OK;
@@ -1474,12 +1474,12 @@ StaticRoutesNode::inform_rib(const StaticRoute& route)
 
 
 void
-StaticRoutesNode::inform_rib(const McastRoute& route)
+StaticRoutesNode::inform_mfea(const McastRoute& route)
 {
     if (! is_enabled())
 	return;
 
-    inform_rib_route_change(route);
+    inform_mfea_mfc_change(route);
 }
 
 /**

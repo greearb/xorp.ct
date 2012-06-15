@@ -852,7 +852,6 @@ private:
      * @param static_route the route with the information about the change.
      */
     virtual void inform_rib_route_change(const StaticRoute& static_route) = 0;
-    virtual void inform_rib_route_change(const McastRoute& static_route) = 0;
 
     /**
      * Cancel a pending request to inform the RIB about a route change.
@@ -863,7 +862,10 @@ private:
      * @param static_route the route with the request that would be canceled.
      */
     virtual void cancel_rib_route_change(const StaticRoute& static_route) = 0;
-    virtual void cancel_rib_route_change(const McastRoute& static_route) = 0;
+
+    virtual void inform_mfea_mfc_change(const McastRoute& static_route) = 0;
+    virtual void cancel_mfea_mfc_change(const McastRoute& static_route) = 0;
+    void inform_mfea(const McastRoute& route);
 
     /**
      * Update a route received from the user configuration.
@@ -899,7 +901,6 @@ private:
      * @param r route which should be updated in the RIB.
      */
     void inform_rib(const StaticRoute& r);
-    void inform_rib(const McastRoute& route);
 
     /**
      * Set the node status.
