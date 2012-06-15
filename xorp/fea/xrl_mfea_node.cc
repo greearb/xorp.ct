@@ -1244,6 +1244,38 @@ XrlMfeaNode::mfea_0_1_add_mfc4(
 }
 
 XrlCmdError
+XrlMfeaNode::mfea_0_1_add_mfc4_str(
+    // Input values,
+    const string&	xrl_sender_name,
+    const IPv4&		source_address,
+    const IPv4&		group_address,
+    const string&       iif_ifname,
+    const string&       oif_ifnames)
+{
+    string error_msg;
+
+    //
+    // Verify the address family
+    //
+    if (! MfeaNode::is_ipv4()) {
+	error_msg = c_format("Received protocol message with "
+			     "invalid address family: IPv4");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    if (MfeaNode::add_mfc_str(xrl_sender_name,
+			      IPvX(source_address), IPvX(group_address),
+			      iif_ifname, oif_ifnames, error_msg) != XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    //
+    // Success
+    //
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
 XrlMfeaNode::mfea_0_1_delete_mfc4(
     // Input values, 
     const string&	xrl_sender_name, 

@@ -31,6 +31,7 @@
 #include "libfeaclient/ifmgr_xrl_mirror.hh"
 #include "xrl/interfaces/finder_event_notifier_xif.hh"
 #include "xrl/interfaces/rib_xif.hh"
+#include "xrl/interfaces/mfea_xif.hh"
 #include "xrl/targets/static_routes_base.hh"
 
 #include "static_routes_node.hh"
@@ -49,8 +50,9 @@ public:
 			uint16_t	finder_port,
 			const string&	finder_target,
 			const string&	fea_target,
-			const string&	rib_target);
-    ~XrlStaticRoutesNode();
+			const string&	rib_target,
+			const string&	mfea_target);
+    virtual ~XrlStaticRoutesNode();
 
     /**
      * Startup the node operation.
@@ -471,6 +473,73 @@ protected:
 	// Input values,
 	const bool&	enable);
 
+    XrlCmdError mfea_client_0_1_recv_kernel_signal_message4(
+	// Input values,
+	const string&,
+	const uint32_t&,
+	const string&,
+	const uint32_t&,
+	const IPv4&,
+	const IPv4&,
+	const vector<uint8_t>&) {
+	return XrlCmdError::OKAY();
+    }
+
+    XrlCmdError mfea_client_0_1_recv_dataflow_signal4(
+	// Input values,
+	const string&,
+	const IPv4&,
+	const IPv4&,
+	const uint32_t&,
+	const uint32_t&,
+	const uint32_t&,
+	const uint32_t&,
+	const uint32_t&,
+	const uint32_t&,
+	const uint32_t&,
+	const uint32_t&,
+	const bool&,
+	const bool&,
+	const bool&,
+	const bool&) {
+	return XrlCmdError::OKAY();
+    }
+
+
+#ifdef HAVE_IPV6
+    XrlCmdError mfea_client_0_1_recv_kernel_signal_message6(
+	// Input values,
+	const string&,
+	const uint32_t&,
+	const string&,
+	const uint32_t&,
+	const IPv6&,
+	const IPv6&,
+	const vector<uint8_t>&) {
+	return XrlCmdError::OKAY();
+    }
+
+    XrlCmdError mfea_client_0_1_recv_dataflow_signal6(
+	// Input values,
+	const string&,
+	const IPv6&,
+	const IPv6&,
+	const uint32_t&,
+	const uint32_t&,
+	const uint32_t&,
+	const uint32_t&,
+	const uint32_t&,
+	const uint32_t&,
+	const uint32_t&,
+	const uint32_t&,
+	const bool&,
+	const bool&,
+	const bool&,
+	const bool&) {
+	return XrlCmdError::OKAY();
+    }
+#endif
+
     /**
      * Configure a policy filter.
      *
@@ -522,19 +591,22 @@ private:
     void fea_register_shutdown();
     void finder_deregister_interest_fea_cb(const XrlError& xrl_error);
 
+    void mfea_register_startup();
+    void finder_register_interest_mfea_cb(const XrlError& xrl_error);
+    void mfea_register_shutdown();
+    void finder_deregister_interest_mfea_cb(const XrlError& xrl_error);
+
     void rib_register_startup();
     void finder_register_interest_rib_cb(const XrlError& xrl_error);
     void rib_register_shutdown();
     void finder_deregister_interest_rib_cb(const XrlError& xrl_error);
     void send_rib_add_tables();
     void rib_client_send_add_igp_table4_cb(const XrlError& xrl_error);
-    void rib_client_send_add_mcast_table4_cb(const XrlError& xrl_error);
 #ifdef HAVE_IPV6
     void rib_client_send_add_igp_table6_cb(const XrlError& xrl_error);
 #endif
     void send_rib_delete_tables();
     void rib_client_send_delete_igp_table4_cb(const XrlError& xrl_error);
-    void rib_client_send_delete_mcast_table4_cb(const XrlError& xrl_error);
 #ifdef HAVE_IPV6
     void rib_client_send_delete_igp_table6_cb(const XrlError& xrl_error);
 #endif
@@ -563,9 +635,11 @@ private:
 
     EventLoop&		_eventloop;
     XrlRibV0p1Client	_xrl_rib_client;
+    XrlMfeaV0p1Client	_xrl_mfea_client;
     const string	_finder_target;
     const string	_fea_target;
     const string	_rib_target;
+    const string	_mfea_target;
 
     IfMgrXrlMirror	_ifmgr;
     list<StaticRoute>	_inform_rib_queue;
@@ -590,14 +664,20 @@ private:
     bool		_is_rib_registering;
     bool		_is_rib_deregistering;
     bool		_is_rib_igp_table4_registered;
-    bool		_is_rib_mcast_table4_registered;
+
+    bool		_is_mfea_alive;
+    bool		_is_mfea_registered;
+    bool		_is_mfea_registering;
+    bool		_is_mfea_deregistering;
+    XorpTimer		_mfea_register_startup_timer;
+    XorpTimer		_mfea_register_shutdown_timer;
+
 #ifdef HAVE_IPV6
     bool		_is_rib_igp_table6_registered;
 #endif
     XorpTimer		_rib_register_startup_timer;
     XorpTimer		_rib_register_shutdown_timer;
     XorpTimer		_rib_igp_table_registration_timer;
-    XorpTimer		_rib_mcast_table_registration_timer;
 };
 
 #endif // __STATIC_ROUTES_XRL_STATIC_ROUTES_NODE_HH__

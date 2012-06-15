@@ -17,8 +17,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/fea/mfea_node.hh,v 1.51 2008/10/02 21:56:49 bms Exp $
-
 
 #ifndef __FEA_MFEA_NODE_HH__
 #define __FEA_MFEA_NODE_HH__
@@ -586,6 +584,13 @@ public:
 			const Mifset& oiflist_disable_wrongvif,
 			uint32_t max_vifs_oiflist,
 			const IPvX& rp_addr);
+
+    int		add_mfc_str(const string& module_instance_name,
+			    const IPvX& source,
+			    const IPvX& group,
+			    const string& iif_name,
+			    const string& oif_names,
+			    string& error_msg);
     
     /**
      * Delete Multicast Forwarding Cache (MFC) from the kernel.

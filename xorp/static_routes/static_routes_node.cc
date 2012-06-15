@@ -121,6 +121,9 @@ StaticRoutesNode::shutdown()
     //
     rib_register_shutdown();
 
+    // De-register with the MFEA
+    rib_register_shutdown();
+
     //
     // De-register with the FEA
     //

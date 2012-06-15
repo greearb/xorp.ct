@@ -364,6 +364,14 @@ protected:
 	const uint32_t&	max_vifs_oiflist, 
 	const IPv4&	rp_address);
 
+    XrlCmdError mfea_0_1_add_mfc4_str(
+	// Input values,
+	const string&	xrl_sender_name,
+	const IPv4&	source_address,
+	const IPv4&	group_address,
+	const string&   iif_ifname,
+	const string&   oif_ifnames);
+
     XrlCmdError mfea_0_1_delete_mfc4(
 	// Input values, 
 	const string&	xrl_sender_name, 

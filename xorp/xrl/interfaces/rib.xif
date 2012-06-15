@@ -68,7 +68,7 @@ interface rib/0.1 {
 	delete_egp_table4	? protocol:txt				\
 				& target_class:txt & target_instance:txt\
 				& unicast:bool & multicast:bool;
-
+/*
 	add_mcast_table4	? protocol:txt				\
 				& target_class:txt & target_instance:txt;
 	delete_mcast_table4	? protocol:txt				\
@@ -80,6 +80,7 @@ interface rib/0.1 {
 				& input_ip:ipv4 & output_ifs:txt;
 	delete_mcast_route4	? protocol:txt & mcast_addr:ipv4 & input_if:txt \
 				& input_ip:ipv4 & output_ifs:txt;
+*/
 
 	/**
 	 * Add/replace/delete a route.

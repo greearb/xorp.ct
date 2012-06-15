@@ -1816,10 +1816,27 @@ MfeaNode::signal_dataflow_message_recv(const IPvX& source, const IPvX& group,
     return (XORP_OK);
 }
 
+int MfeaNode::add_mfc_str(const string& module_instance_name,
+			  const IPvX& source,
+			  const IPvX& group,
+			  const string& iif_name,
+			  const string& oif_names,
+			  string& error_msg) {
+    // TODO:  Convert strings to mfc binary stuff and pass to
+    // add_mfc()
+    UNUSED(module_instance_name);
+    UNUSED(source);
+    UNUSED(group);
+    UNUSED(iif_name);
+    UNUSED(oif_names);
+    UNUSED(error_msg);
+    return XORP_OK;
+}
+
 /**
  * MfeaNode::add_mfc:
  * @module_instance_name: The module instance name of the protocol that adds
- * the MFC.
+ *       the MFC.
  * @source: The source address.
  * @group: The group address.
  * @iif_vif_index: The vif index of the incoming interface.
@@ -1827,7 +1844,7 @@ MfeaNode::signal_dataflow_message_recv(const IPvX& source, const IPvX& group,
  * @oiflist_disable_wrongvif: The bitset with the outgoing interfaces to
  * disable the WRONGVIF signal.
  * @max_vifs_oiflist: The number of vifs covered by @oiflist
- * or @oiflist_disable_wrongvif.
+ *        or @oiflist_disable_wrongvif.
  * @rp_addr: The RP address.
  * 
  * Add Multicast Forwarding Cache (MFC) to the kernel.

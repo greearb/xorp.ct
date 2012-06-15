@@ -39,16 +39,19 @@ XrlStaticRoutesNode::XrlStaticRoutesNode(EventLoop&	eventloop,
 					 uint16_t	finder_port,
 					 const string&	finder_target,
 					 const string&	fea_target,
-					 const string&	rib_target)
+					 const string&	rib_target,
+					 const string& mfea_target)
     : StaticRoutesNode(eventloop),
       XrlStdRouter(eventloop, class_name.c_str(), finder_hostname.c_str(),
 		   finder_port),
       XrlStaticRoutesTargetBase(&xrl_router()),
       _eventloop(eventloop),
       _xrl_rib_client(&xrl_router()),
+      _xrl_mfea_client(&xrl_router()),
       _finder_target(finder_target),
       _fea_target(fea_target),
       _rib_target(rib_target),
+      _mfea_target(mfea_target),
       _ifmgr(eventloop, fea_target.c_str(), xrl_router().finder_address(),
 	     xrl_router().finder_port()),
       _xrl_finder_client(&xrl_router()),
@@ -62,7 +65,8 @@ XrlStaticRoutesNode::XrlStaticRoutesNode(EventLoop&	eventloop,
       _is_rib_registering(false),
       _is_rib_deregistering(false),
       _is_rib_igp_table4_registered(false),
-      _is_rib_mcast_table4_registered(false)
+      _is_mfea_alive(false),
+      _is_mfea_registered(false)
 #ifdef HAVE_IPV6
       , _is_rib_igp_table6_registered(false)
 #endif
@@ -223,6 +227,208 @@ XrlStaticRoutesNode::finder_register_interest_fea_cb(const XrlError& xrl_error)
     }
 }
 
+
+//
+// Register with the MFEA
+//
+void
+XrlStaticRoutesNode::mfea_register_startup()
+{
+    bool success;
+
+    _mfea_register_startup_timer.unschedule();
+    _mfea_register_shutdown_timer.unschedule();
+
+    if (! _is_finder_alive)
+	return;		// The Finder is dead
+
+    if (_is_mfea_registered)
+	return;		// Already registered
+
+    _is_fea_registering = true;
+
+    //
+    // Register interest in the FEA with the Finder
+    //
+    success = _xrl_finder_client.send_register_class_event_interest(
+	_finder_target.c_str(), xrl_router().instance_name(), _mfea_target,
+	callback(this, &XrlStaticRoutesNode::finder_register_interest_mfea_cb));
+
+    if (! success) {
+	//
+	// If an error, then start a timer to try again.
+	//
+	_mfea_register_startup_timer = _eventloop.new_oneoff_after(
+	    RETRY_TIMEVAL,
+	    callback(this, &XrlStaticRoutesNode::mfea_register_startup));
+	return;
+    }
+}
+
+void
+XrlStaticRoutesNode::finder_register_interest_mfea_cb(const XrlError& xrl_error)
+{
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	_is_mfea_registering = false;
+	_is_mfea_registered = true;
+	break;
+
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
+	XLOG_FATAL("Cannot register interest in Finder events: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+    case SEND_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the Finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _mfea_register_startup_timer.scheduled()) {
+	    XLOG_ERROR("Failed to register interest in Finder events: %s. "
+		       "Will try again.",
+		       xrl_error.str().c_str());
+	    _mfea_register_startup_timer = _eventloop.new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlStaticRoutesNode::mfea_register_startup));
+	}
+	break;
+    }
+}
+
+//
+// De-register with the RIB
+//
+void
+XrlStaticRoutesNode::mfea_register_shutdown()
+{
+    bool success;
+
+    _mfea_register_startup_timer.unschedule();
+    _mfea_register_shutdown_timer.unschedule();
+
+    if (! _is_finder_alive)
+	return;		// The Finder is dead
+
+    if (! _is_mfea_alive)
+	return;		// The MFEA is not there anymore
+
+    if (! _is_mfea_registered)
+	return;		// Not registered
+
+    if (! _is_mfea_deregistering) {
+	StaticRoutesNode::incr_shutdown_requests_n();
+	_is_mfea_deregistering = true;
+    }
+
+    success = _xrl_finder_client.send_deregister_class_event_interest(
+	_finder_target.c_str(), xrl_router().instance_name(), _mfea_target,
+	callback(this, &XrlStaticRoutesNode::finder_deregister_interest_mfea_cb));
+
+    if (! success) {
+	//
+	// If an error, then start a timer to try again.
+	//
+	_mfea_register_shutdown_timer = _eventloop.new_oneoff_after(
+	    RETRY_TIMEVAL,
+	    callback(this, &XrlStaticRoutesNode::mfea_register_shutdown));
+	return;
+    }
+}
+
+void
+XrlStaticRoutesNode::finder_deregister_interest_mfea_cb(
+    const XrlError& xrl_error)
+{
+    switch (xrl_error.error_code()) {
+    case OKAY:
+	//
+	// If success, then we are done
+	//
+	_is_mfea_deregistering = false;
+	_is_mfea_registered = false;
+	break;
+
+    case COMMAND_FAILED:
+	//
+	// If a command failed because the other side rejected it, this is
+	// fatal.
+	//
+	XLOG_FATAL("Cannot deregister interest in Finder events: %s",
+		   xrl_error.str().c_str());
+	break;
+
+    case NO_FINDER:
+    case RESOLVE_FAILED:
+    case SEND_FAILED:
+	//
+	// A communication error that should have been caught elsewhere
+	// (e.g., by tracking the status of the Finder and the other targets).
+	// Probably we caught it here because of event reordering.
+	// In some cases we print an error. In other cases our job is done.
+	//
+	_is_mfea_deregistering = false;
+	_is_mfea_registered = false;
+	break;
+
+    case BAD_ARGS:
+    case NO_SUCH_METHOD:
+    case INTERNAL_ERROR:
+	//
+	// An error that should happen only if there is something unusual:
+	// e.g., there is XRL mismatch, no enough internal resources, etc.
+	// We don't try to recover from such errors, hence this is fatal.
+	//
+	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
+	break;
+
+    case REPLY_TIMED_OUT:
+    case SEND_FAILED_TRANSIENT:
+	//
+	// If a transient error, then start a timer to try again
+	// (unless the timer is already running).
+	//
+	if (! _mfea_register_shutdown_timer.scheduled()) {
+	    XLOG_ERROR("Failed to deregister interest in Finder events: %s. "
+		       "Will try again.",
+		       xrl_error.str().c_str());
+	    _mfea_register_shutdown_timer = _eventloop.new_oneoff_after(
+		RETRY_TIMEVAL,
+		callback(this, &XrlStaticRoutesNode::mfea_register_shutdown));
+	}
+	break;
+    }
+}
+
+
 //
 // De-register with the FEA
 //
@@ -357,8 +563,6 @@ XrlStaticRoutesNode::rib_register_startup()
     if (! _is_rib_registering) {
 	if (! _is_rib_igp_table4_registered)
 	    StaticRoutesNode::incr_startup_requests_n();
-	if (! _is_rib_mcast_table4_registered)
-	    StaticRoutesNode::incr_startup_requests_n();
 #ifdef HAVE_IPV6
 	if (! _is_rib_igp_table6_registered)
 	    StaticRoutesNode::incr_startup_requests_n();
@@ -448,6 +652,7 @@ XrlStaticRoutesNode::finder_register_interest_rib_cb(const XrlError& xrl_error)
     }
 }
 
+
 //
 // De-register with the RIB
 //
@@ -470,8 +675,6 @@ XrlStaticRoutesNode::rib_register_shutdown()
 
     if (! _is_rib_deregistering) {
 	if (_is_rib_igp_table4_registered)
-	    StaticRoutesNode::incr_shutdown_requests_n();
-	if (_is_rib_mcast_table4_registered)
 	    StaticRoutesNode::incr_shutdown_requests_n();
 #ifdef HAVE_IPV6
 	if (_is_rib_igp_table6_registered)
@@ -593,21 +796,6 @@ XrlStaticRoutesNode::send_rib_add_tables()
 	goto start_timer_label;
     }
 
-    if (! _is_rib_mcast_table4_registered) {
-	success = _xrl_rib_client.send_add_mcast_table4(
-	    _rib_target.c_str(),
-	    StaticRoutesNode::protocol_name(),
-	    xrl_router().class_name(),
-	    xrl_router().instance_name(),
-	    callback(this,
-		     &XrlStaticRoutesNode::rib_client_send_add_mcast_table4_cb));
-	if (success)
-	    return;
-	XLOG_ERROR("Failed to register IPv4 MCAST table with the RIB. "
-		   "Will try again.");
-	goto start_timer_label;
-    }
-
 #ifdef HAVE_IPV6
     if (! _is_rib_igp_table6_registered) {
 	success = _xrl_rib_client.send_add_igp_table6(
@@ -695,70 +883,6 @@ XrlStaticRoutesNode::rib_client_send_add_igp_table4_cb(
 		       "Will try again.",
 		       xrl_error.str().c_str());
 	    _rib_igp_table_registration_timer = _eventloop.new_oneoff_after(
-		RETRY_TIMEVAL,
-		callback(this, &XrlStaticRoutesNode::send_rib_add_tables));
-	}
-	break;
-    }
-}
-
-void
-XrlStaticRoutesNode::rib_client_send_add_mcast_table4_cb(
-    const XrlError& xrl_error)
-{
-    switch (xrl_error.error_code()) {
-    case OKAY:
-	//
-	// If success, then we are done
-	//
-	_is_rib_mcast_table4_registered = true;
-	send_rib_add_tables();
-	StaticRoutesNode::decr_startup_requests_n();
-	break;
-
-    case COMMAND_FAILED:
-	//
-	// If a command failed because the other side rejected it, this is
-	// fatal.
-	//
-	XLOG_FATAL("Cannot add IPv4 MCAST table to the RIB: %s",
-		   xrl_error.str().c_str());
-	break;
-
-    case NO_FINDER:
-    case RESOLVE_FAILED:
-    case SEND_FAILED:
-	//
-	// A communication error that should have been caught elsewhere
-	// (e.g., by tracking the status of the Finder and the other targets).
-	// Probably we caught it here because of event reordering.
-	// In some cases we print an error. In other cases our job is done.
-	//
-	XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
-	break;
-
-    case BAD_ARGS:
-    case NO_SUCH_METHOD:
-    case INTERNAL_ERROR:
-	//
-	// An error that should happen only if there is something unusual:
-	// e.g., there is XRL mismatch, no enough internal resources, etc.
-	// We don't try to recover from such errors, hence this is fatal.
-	//
-	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
-	break;
-
-    case REPLY_TIMED_OUT:
-    case SEND_FAILED_TRANSIENT:
-	//
-	// If a transient error, then start a timer to try again
-	// (unless the timer is already running).
-	//
-	if (! _rib_mcast_table_registration_timer.scheduled()) {
-	    XLOG_ERROR("Failed to add IPv4 MCAST table to the RIB: %s. "
-		       "Will try again.",
-		       xrl_error.str().c_str());
-	    _rib_mcast_table_registration_timer = _eventloop.new_oneoff_after(
 		RETRY_TIMEVAL,
 		callback(this, &XrlStaticRoutesNode::send_rib_add_tables));
 	}
@@ -860,21 +984,6 @@ XrlStaticRoutesNode::send_rib_delete_tables()
 	}
     }
 
-    if (_is_rib_mcast_table4_registered) {
-	bool success4;
-	success4 = _xrl_rib_client.send_delete_mcast_table4(
-	    _rib_target.c_str(),
-	    StaticRoutesNode::protocol_name(),
-	    xrl_router().class_name(),
-	    xrl_router().instance_name(),
-	    callback(this, &XrlStaticRoutesNode::rib_client_send_delete_mcast_table4_cb));
-	if (success4 != true) {
-	    XLOG_ERROR("Failed to deregister IPv4 MCAST table with the RIB. "
-		       "Will give up.");
-	    success = false;
-	}
-    }
-
 #ifdef HAVE_IPV6
     if (_is_rib_igp_table6_registered) {
 	bool success6;
@@ -954,70 +1063,6 @@ XrlStaticRoutesNode::rib_client_send_delete_igp_table4_cb(
 	//
 	if (! _rib_register_shutdown_timer.scheduled()) {
 	    XLOG_ERROR("Failed to deregister IPv4 IGP table with the RIB: %s. "
-		       "Will try again.",
-		       xrl_error.str().c_str());
-	    _rib_register_shutdown_timer = _eventloop.new_oneoff_after(
-		RETRY_TIMEVAL,
-		callback(this, &XrlStaticRoutesNode::rib_register_shutdown));
-	}
-	break;
-    }
-}
-
-void
-XrlStaticRoutesNode::rib_client_send_delete_mcast_table4_cb(
-    const XrlError& xrl_error)
-{
-    switch (xrl_error.error_code()) {
-    case OKAY:
-	//
-	// If success, then we are done
-	//
-	_is_rib_mcast_table4_registered = false;
-	StaticRoutesNode::decr_shutdown_requests_n();
-	break;
-
-    case COMMAND_FAILED:
-	//
-	// If a command failed because the other side rejected it, this is
-	// fatal.
-	//
-	XLOG_FATAL("Cannot deregister IPv4 MCAST table with the RIB: %s",
-		   xrl_error.str().c_str());
-	break;
-
-    case NO_FINDER:
-    case RESOLVE_FAILED:
-    case SEND_FAILED:
-	//
-	// A communication error that should have been caught elsewhere
-	// (e.g., by tracking the status of the Finder and the other targets).
-	// Probably we caught it here because of event reordering.
-	// In some cases we print an error. In other cases our job is done.
-	//
-	_is_rib_mcast_table4_registered = false;
-	StaticRoutesNode::decr_shutdown_requests_n();
-	break;
-
-    case BAD_ARGS:
-    case NO_SUCH_METHOD:
-    case INTERNAL_ERROR:
-	//
-	// An error that should happen only if there is something unusual:
-	// e.g., there is XRL mismatch, no enough internal resources, etc.
-	// We don't try to recover from such errors, hence this is fatal.
-	//
-	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
-	break;
-
-    case REPLY_TIMED_OUT:
-    case SEND_FAILED_TRANSIENT:
-	//
-	// If a transient error, then start a timer to try again
-	// (unless the timer is already running).
-	//
-	if (! _rib_register_shutdown_timer.scheduled()) {
-	    XLOG_ERROR("Failed to deregister IPv4 MCAST table with the RIB: %s. "
 		       "Will try again.",
 		       xrl_error.str().c_str());
 	    _rib_register_shutdown_timer = _eventloop.new_oneoff_after(
@@ -1199,6 +1244,10 @@ XrlStaticRoutesNode::finder_event_observer_0_1_xrl_target_birth(
 	send_rib_add_tables();
     }
 
+    if (target_class == _mfea_target) {
+	_is_mfea_alive = true;
+    }
+
     return XrlCmdError::OKAY();
     UNUSED(target_instance);
 }
@@ -1231,6 +1280,16 @@ XrlStaticRoutesNode::finder_event_observer_0_1_xrl_target_death(
 		   target_instance.c_str());
 	_is_rib_alive = false;
 	do_shutdown = true;
+    }
+
+    if (target_class == _mfea_target) {
+	// If it was never started (by us), then ignore.
+	if (_is_mfea_alive) {
+	    XLOG_ERROR("MFEA (instance %s) has died, shutting down.",
+		       target_instance.c_str());
+	    do_shutdown = true;
+	    _is_mfea_alive = false;
+	}
     }
 
     if (do_shutdown)
@@ -2256,7 +2315,7 @@ XrlStaticRoutesNode::send_rib_mroute_change()
     //
     // Check whether we have already registered with the RIB
     //
-    if (! _is_rib_mcast_table4_registered) {
+    if (! _is_mfea_registered) {
 	success = false;
 	goto start_timer_label;
     }
@@ -2264,26 +2323,13 @@ XrlStaticRoutesNode::send_rib_mroute_change()
     //
     // Send the appropriate XRL
     //
-    if (static_route.is_add_route()) {
-	success = _xrl_rib_client.send_add_mcast_route4(
-	    _rib_target.c_str(),
+    if (static_route.is_add_route() || static_route.is_replace_route()) {
+	success = _xrl_mfea_client.send_add_mfc4_str(
+	    _mfea_target.c_str(),
 	    StaticRoutesNode::protocol_name(),
+	    static_route.input_ip().get_ipv4(),
 	    static_route.mcast_addr().get_ipv4(),
 	    static_route.ifname(),
-	    static_route.input_ip().get_ipv4(),
-	    static_route.output_ifs(),
-	    callback(this, &XrlStaticRoutesNode::send_rib_mroute_change_cb));
-	if (success)
-	    return;
-    }
-
-    if (static_route.is_replace_route()) {
-	success = _xrl_rib_client.send_replace_mcast_route4(
-	    _rib_target.c_str(),
-	    StaticRoutesNode::protocol_name(),
-	    static_route.mcast_addr().get_ipv4(),
-	    static_route.ifname(),
-	    static_route.input_ip().get_ipv4(),
 	    static_route.output_ifs(),
 	    callback(this, &XrlStaticRoutesNode::send_rib_mroute_change_cb));
 	if (success)
@@ -2291,13 +2337,11 @@ XrlStaticRoutesNode::send_rib_mroute_change()
     }
 
     if (static_route.is_delete_route()) {
-	success = _xrl_rib_client.send_delete_mcast_route4(
-	    _rib_target.c_str(),
+	success = _xrl_mfea_client.send_delete_mfc4(
+	    _mfea_target.c_str(),
 	    StaticRoutesNode::protocol_name(),
-	    static_route.mcast_addr().get_ipv4(),
-	    static_route.ifname(),
 	    static_route.input_ip().get_ipv4(),
-	    static_route.output_ifs(),
+	    static_route.mcast_addr().get_ipv4(),
 	    callback(this, &XrlStaticRoutesNode::send_rib_mroute_change_cb));
 	if (success)
 	    return;
