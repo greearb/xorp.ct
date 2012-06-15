@@ -196,15 +196,15 @@ public:
     IPRouteEntry(const IPNet<A>& net, RibVif<A>* vif, IPNextHop<A>* nexthop,
 		 Protocol* protocol, uint32_t metric,
 		 const PolicyTags& policytags)
-	: RouteEntry<A>(vif, protocol, metric, policytags, net), _nexthop(nexthop) {}
+	: RouteEntry<A>(vif, protocol, metric, policytags, net), _nexthop(nexthop) { }
 
     IPRouteEntry(const IPRouteEntry<A>& r);
-    IPRouteEntry& operator=(const IPRouteEntry<A>& r);
+    IPRouteEntry<A>& operator=(const IPRouteEntry<A>& rhs);
 
     /**
      * Destructor for Routing Table Entry
      */
-    virtual ~IPRouteEntry() {}
+    virtual ~IPRouteEntry() { delete _nexthop; }
 
     /**
      * Get the NextHop router.
@@ -214,8 +214,6 @@ public:
      */
     IPNextHop<A>* nexthop() const { return _nexthop; }
 
-    void set_nexthop(IPNextHop<A>* v) { _nexthop = v; }
-
     /**
      * Get the route entry's next-hop router address.
      *
@@ -223,9 +221,8 @@ public:
      * next-hop router, then the return value is IPv4#ZERO() or IPv6#ZERO().
      */
     const A& nexthop_addr() const {
-	IPNextHop<A>* nh = nexthop();
-	if (nh != NULL)
-	    return nh->addr();
+	if (_nexthop != NULL)
+	    return _nexthop->addr();
 	else
 	    return A::ZERO();
     }

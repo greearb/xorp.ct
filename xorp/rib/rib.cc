@@ -252,56 +252,16 @@ RIB<A>::get_protocol_admin_distance(const string& protocol_name)
 
 template <typename A>
 inline IPExternalNextHop<A>*
-RIB<A>::find_external_nexthop(const A& addr)
+RIB<A>::create_external_nexthop(const A& addr)
 {
-    typename map<A, IPExternalNextHop<A> >::iterator mi;
-
-    mi = _external_nexthops.find(addr);
-    if (mi == _external_nexthops.end())
-	return NULL;
-    return &mi->second;
+    return new IPExternalNextHop<A>(addr);
 }
 
 template <typename A>
 inline IPPeerNextHop<A>*
-RIB<A>::find_peer_nexthop(const A& addr)
+RIB<A>::create_peer_nexthop(const A& addr)
 {
-    typename map<A, IPPeerNextHop<A> >::iterator mi;
-
-    mi = _peer_nexthops.find(addr);
-    if (mi == _peer_nexthops.end())
-	return NULL;
-    return &mi->second;
-}
-
-template <typename A>
-inline IPExternalNextHop<A>*
-RIB<A>::find_or_create_external_nexthop(const A& addr)
-{
-    IPExternalNextHop<A>* nexthop = find_external_nexthop(addr);
-    if (nexthop != NULL)
-	return nexthop;
-
-    typedef map<A, IPExternalNextHop<A> > C;	// for convenience
-    typename C::value_type vt(addr, IPExternalNextHop<A>(addr));
-    typename C::iterator iter;
-    iter = _external_nexthops.insert(_external_nexthops.end(), vt);
-    return &iter->second;
-}
-
-template <typename A>
-inline IPPeerNextHop<A>*
-RIB<A>::find_or_create_peer_nexthop(const A& addr)
-{
-    IPPeerNextHop<A>* nexthop = find_peer_nexthop(addr);
-    if (nexthop != NULL)
-	return nexthop;
-
-    typedef map<A, IPPeerNextHop<A> > C;		// for convenience
-    typename C::value_type vt(addr, addr);
-    typename C::iterator iter;
-    iter = _peer_nexthops.insert(_peer_nexthops.end(), vt);
-    return &iter->second;
+    return new IPPeerNextHop<A>(addr);
 }
 
 // ----------------------------------------------------------------------------
@@ -909,7 +869,7 @@ RIB<A>::add_route(const string&		tablename,
 	    return XORP_ERROR;
 	}
 
-	IPNextHop<A>* nexthop = find_or_create_peer_nexthop(nexthop_addr);
+	IPNextHop<A>* nexthop = create_peer_nexthop(nexthop_addr);
 	ot->add_route(new IPRouteEntry<A>(net, vif, nexthop, protocol,
 		      metric, policytags));
 	flush();
@@ -925,7 +885,7 @@ RIB<A>::add_route(const string&		tablename,
 	vif = re->vif();
 
     if (vif != NULL)
-	nexthop = find_or_create_peer_nexthop(nexthop_addr);
+	nexthop = create_peer_nexthop(nexthop_addr);
     else if (vif == NULL && protocol->protocol_type() == IGP) {
 	debug_msg("**not directly connected route found for nexthop\n");
 	//
@@ -937,7 +897,7 @@ RIB<A>::add_route(const string&		tablename,
 		"interface toward the next-hop router", tablename.c_str(), net.str().c_str(), nexthop_addr.str().c_str());
 	return XORP_ERROR;
     } else
-	nexthop = find_or_create_external_nexthop(nexthop_addr);
+	nexthop = create_external_nexthop(nexthop_addr);
 
     XLOG_ASSERT(nexthop->addr() == nexthop_addr);
     //

@@ -290,17 +290,17 @@ test_deterministic()
 
     // Add some initial routes
     origin.add_route(new IPRouteEntry<IPv4>("10.0.0.0/8",
-					&vif, &nh, &protocol, 10));
+					&vif, nh.get_copy(), &protocol, 10));
     origin.add_route(new IPRouteEntry<IPv4>("10.3.0.0/16",
-					&vif, &nh, &protocol, 10));
+					&vif, nh.get_copy(), &protocol, 10));
     origin.add_route(new IPRouteEntry<IPv4>("10.5.0.0/16",
-					&vif, &nh, &protocol, 10));
+					&vif, nh.get_copy(), &protocol, 10));
     origin.add_route(new IPRouteEntry<IPv4>("10.6.0.0/16",
-					&vif, &nh, &protocol, 10));
+					&vif, nh.get_copy(), &protocol, 10));
     origin.add_route(new IPRouteEntry<IPv4>("10.3.128.0/17",
-					&vif, &nh, &protocol, 10));
+					&vif, nh.get_copy(), &protocol, 10));
     origin.add_route(new IPRouteEntry<IPv4>("10.3.192.0/18",
-					&vif, &nh, &protocol, 10));
+					&vif, nh.get_copy(), &protocol, 10));
 
     verbose_log("RedistTable index size = %u\n",
 		XORP_UINT_CAST(redist_table.route_index().size()));
@@ -315,38 +315,38 @@ test_deterministic()
     XorpTimer a0 = e.new_oneoff_after_ms(1250,
 			callback(&add_route_after_current<IPv4>,
 				 &origin, output,
-				 new IPRouteEntry<IPv4>("10.4.0.0/16", &vif, &nh,
-							&protocol, 10)));
+				 new IPRouteEntry<IPv4>("10.4.0.0/16", &vif, nh.get_copy(),
+						    &protocol, 10)));
     // And two routes before
     XorpTimer a1 = e.new_oneoff_after_ms(1500,
 			callback(&add_route_before_current<IPv4>,
 				 &origin, output,
-				 new IPRouteEntry<IPv4>("10.1.0.0/16", &vif, &nh,
-							&protocol, 10)));
+				 new IPRouteEntry<IPv4>("10.1.0.0/16", &vif, nh.get_copy(),
+						    &protocol, 10)));
 
     XorpTimer a2 = e.new_oneoff_after_ms(1750,
 			callback(&add_route_before_current<IPv4>,
 				 &origin, output,
-				 new IPRouteEntry<IPv4>("10.2.0.0/16", &vif, &nh,
-							&protocol, 10)));
+				 new IPRouteEntry<IPv4>("10.2.0.0/16", &vif, nh.get_copy(),
+						    &protocol, 10)));
 
     // Delete first route
     XorpTimer d1 = e.new_oneoff_after_ms(2250,
 			callback(&delete_route_before_current<IPv4>,
 				 &origin, output,
-				 IPRouteEntry<IPv4>("10.0.0.0/8", &vif, &nh,
+				 IPRouteEntry<IPv4>("10.0.0.0/8", &vif, nh.get_copy(),
 						    &protocol, 10)));
     // Delete current route
     XorpTimer d2 = e.new_oneoff_after_ms(2500,
 			callback(&delete_route_before_current<IPv4>,
 				 &origin, output,
-				 IPRouteEntry<IPv4>("10.4.0.0/16", &vif, &nh,
+				 IPRouteEntry<IPv4>("10.4.0.0/16", &vif, nh.get_copy(),
 						    &protocol, 10)));
     // Delete last route
     XorpTimer d3 = e.new_oneoff_after_ms(2750,
 			callback(&delete_route_before_current<IPv4>,
 				 &origin, output,
-				 IPRouteEntry<IPv4>("10.3.192.0/18", &vif, &nh,
+				 IPRouteEntry<IPv4>("10.3.192.0/18", &vif, nh.get_copy(),
 						    &protocol, 10)));
 
     bool done = false;
@@ -364,16 +364,16 @@ test_deterministic()
 
     // Expect updates after dump to be propagated immediately.
     add_route_before_current<IPv4>(&origin, output,
-				  new IPRouteEntry<IPv4>("1.1.0.0/9", &vif, &nh,
-							 &protocol, 10));
+				  new IPRouteEntry<IPv4>("1.1.0.0/9", &vif, nh.get_copy(),
+						     &protocol, 10));
 
     add_route_before_current<IPv4>(&origin, output,
-				   new IPRouteEntry<IPv4>("20.1.127.0/24", &vif, &nh,
-							  &protocol, 10));
+				   new IPRouteEntry<IPv4>("20.1.127.0/24", &vif, nh.get_copy(),
+						      &protocol, 10));
 
     delete_route_before_current<IPv4>(&origin, output,
 				      IPRouteEntry<IPv4>("20.1.127.0/24",
-							 &vif, &nh,
+							 &vif, nh.get_copy(),
 							 &protocol, 10));
 
     // Expect output route index to still match the redist table index.

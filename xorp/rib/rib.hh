@@ -753,40 +753,28 @@ private:
     RibVif<A>* find_vif(const string& vifname);
 
     /**
-     * Find the IP External Nexthop class instance associated with an IP
-     * address.
-     *
-     * @param addr the IP address of the nexthop router.
-     * @return pointer to external next hop if it exists, NULL otherwise.
-     */
-    IPExternalNextHop<A>* find_external_nexthop(const A& addr);
-
-    /**
-     * Find the IP Peer Nexthop class instance associated with an IP
-     * address.
-     *
-     * @param addr the IP address of the nexthop router.
-     * @return pointer to peer next hop if it exists, NULL otherwise.
-     */
-    IPPeerNextHop<A>* find_peer_nexthop(const A& addr);
-
-    /**
-     * Find or create the IP External Nexthop class instance
+     * Create the IP External Nexthop class instance
      * associated with an IP address.
+     *
+     * IPRouteEntry IS RESPONSIBLE for freeing
+     * allocated memory for IPExternalNextHop.
      *
      * @param addr the IP address of the nexthop router.
      * @return the IPExternalNextHop class instance for @ref addr
      */
-    IPExternalNextHop<A>* find_or_create_external_nexthop(const A& addr);
+    IPExternalNextHop<A>* create_external_nexthop(const A& addr);
 
     /**
      * Find or create the IP Peer Nexthop class instance
      * associated with an IP address.
      *
+     * IPRouteEntry IS RESPONSIBLE for freeing
+     * allocated memory for IPPeerNextHop.
+     *
      * @param addr the IP address of the nexthop router.
      * @return the IPPeerNextHop class instance for @ref addr.
      */
-    IPPeerNextHop<A>* find_or_create_peer_nexthop(const A& addr);
+    IPPeerNextHop<A>* create_peer_nexthop(const A& addr);
 
     /**
      * Flush out routing table changes to other processes.

@@ -91,21 +91,20 @@ template class RouteEntry<IPv4>;
 template class RouteEntry<IPv6>;
 
 template <class A>
+IPRouteEntry<A>::IPRouteEntry(const IPRouteEntry& ipr)
+    : RouteEntry<A>(ipr), _nexthop(ipr.nexthop()->get_copy()) { }
+
+template <class A>
 string
 IPRouteEntry<A>::str() const
 {
     string dst = (RouteEntry<A>::_net.is_valid()) ? RouteEntry<A>::_net.str() : string("NULL");
     string vif = (RouteEntry<A>::_vif) ? string(RouteEntry<A>::_vif->name()) : string("NULL");
     return string("Dst: ") + dst + string(" Vif: ") + vif +
-	string(" NextHop: ") + _nexthop->str() +
+	string(" NextHop: ") + (_nexthop ? _nexthop->str() : "no next hop") +
 	string(" Metric: ") + c_format("%d", RouteEntry<A>::_metric) +
 	string(" Protocol: ") + RouteEntry<A>::_protocol->name() +
 	string(" PolicyTags: ") + RouteEntry<A>::_policytags.str();
-}
-
-template<class A>
-IPRouteEntry<A>::IPRouteEntry(const IPRouteEntry<A>& r) : RouteEntry<A>(r) {
-    _nexthop = r._nexthop;
 }
 
 template<class A>
@@ -113,7 +112,7 @@ IPRouteEntry<A>& IPRouteEntry<A>::operator=(const IPRouteEntry<A>& r) {
     if (this == &r)
 	return *this;
     RouteEntry<A>::operator=(r);
-    _nexthop = r._nexthop;
+    _nexthop = r._nexthop->get_copy();
     return *this;
 }
 

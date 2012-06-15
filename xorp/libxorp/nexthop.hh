@@ -115,6 +115,8 @@ public:
      */
     IPNextHop(const A &from_ipaddr);
 
+    virtual ~IPNextHop() { }
+
 #ifdef XORP_USE_USTL
     IPNextHop() { }
 #endif
@@ -133,6 +135,13 @@ public:
      * of the nexthop.
      */
     string str() const;
+
+    /**
+     * Returns pointer to copy of IPNextHop
+     *
+     * Callers ARE RESPONSIBLE for freeing the memory
+     */
+    virtual IPNextHop* get_copy() = 0;
 
 protected:
     const A _addr;
@@ -171,6 +180,8 @@ public:
      */
     int type() const { return PEER_NEXTHOP; }
 
+    IPPeerNextHop* get_copy() { return new IPPeerNextHop<A>(*this); }
+
 private:
 
 };
@@ -203,6 +214,8 @@ public:
      * @return the nexthop type.  In this case, it is ENCAPS_NEXTHOP.
      */
     int type() const { return ENCAPS_NEXTHOP; }
+
+    IPEncapsNextHop* get_copy() { return new IPEncapsNextHop<A>(*this); }
 
 private:
     //_cached_peer is the cached copy of the local peer we send the
@@ -248,6 +261,8 @@ public:
      */
     int type() const { return EXTERNAL_NEXTHOP; }
 
+    IPExternalNextHop* get_copy() { return new IPExternalNextHop<A>(*this); }
+
 private:
 
 };
@@ -277,6 +292,8 @@ public:
      */
     int type() const { return DISCARD_NEXTHOP; }
 
+    DiscardNextHop* get_copy() { return new DiscardNextHop<A>(*this); }
+
 private:
 
 };
@@ -301,6 +318,8 @@ public:
      * @return the nexthop type.  In this case, it is UNREACHABLE_NEXTHOP.
      */
     int type() const { return UNREACHABLE_NEXTHOP; }
+
+    UnreachableNextHop* get_copy() { return new UnreachableNextHop<A>(*this); }
 
 private:
 

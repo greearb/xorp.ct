@@ -221,7 +221,10 @@ ExtIntTable<A>::resolve_and_store_route(const IPRouteEntry<A>& route,
     ResolvedIPRouteEntry<A>* resolved_route;
     resolved_route = new ResolvedIPRouteEntry<A>(route.net(),
 						 nexthop_route->vif(),
-						 nexthop_route->nexthop(),
+						 // IPRouteEntry will free memory for the nexthop.
+						 // That's why we pass copy of NextHop pointer
+						 // instead of pointer!
+						 nexthop_route->nexthop()->get_copy(),
 						 route.protocol(),
 						 route.metric(),
 						 nexthop_route,
