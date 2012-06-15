@@ -229,6 +229,9 @@ test_find_subtree()
     IPv4Net n4(IPv4("192.168.254.3"), 32);
     trie_subtree.insert(n4, "192.168.254.3/32");
 
+    IPv4Net n5(IPv4("192.168.254.4"), 32);
+    trie_subtree.insert(n5, "192.168.254.4/32");
+
     trie_subtree.print();
 
     IPv4Net nsearch1(IPv4("192.150.187.248"), 29);
@@ -241,8 +244,8 @@ test_find_subtree()
 	abort();
     }
 
-    IPv4Net n5(IPv4("192.150.187.248"), 29);
-    trie_subtree.insert(n5, "192.150.187.248/29");
+    IPv4Net n6(IPv4("192.150.187.248"), 29);
+    trie_subtree.insert(n6, "192.150.187.248/29");
 
     IPv4Net nsearch2(IPv4("192.150.187.0"), 25);
     trie_subtree.erase(n2);
@@ -253,6 +256,70 @@ test_find_subtree()
     for( ;iter != trie_subtree.end(); iter++) {
 	print_failed("");
 	printf("subtree = %s\n", iter.payload().c_str());
+	abort();
+    }
+
+    IPv4Net nsearchReally(IPv4("192.168.254.0"), 24);
+    iter = trie_subtree.search_subtree(nsearchReally);
+    int i = 0;
+    printf("--- Results for %s\n", nsearchReally.str().c_str());
+    for( ; iter != trie_subtree.end(); iter++) {
+	i++;
+	printf("subtree = %s\n", iter.payload().c_str());
+    }
+    printf("---\n");
+
+    if (i != 3) {
+	print_failed("");
+	printf("We expected three entries to be found and we found %d", i);
+	abort();
+    }
+
+    IPv4Net nsearchReally2(IPv4("192.0.0.0"), 8);
+    iter = trie_subtree.search_subtree(nsearchReally2);
+
+    printf("--- Results for %s\n", nsearchReally2.str().c_str());
+    for(i = 0; iter != trie_subtree.end(); iter++) {
+	i++;
+	printf("subtree = %s\n", iter.payload().c_str());
+    }
+    printf("---\n");
+
+    if (i != 4) {
+	print_failed("");
+	printf("We expected four entries to be found and we found %d", i);
+	abort();
+    }
+
+    IPv4Net nsearchReally3(IPv4("192.168.254.0"), 30);
+    iter = trie_subtree.search_subtree(nsearchReally3);
+
+    printf("--- Results for %s\n", nsearchReally3.str().c_str());
+    for(i = 0; iter != trie_subtree.end(); iter++) {
+	i++;
+	printf("subtree = %s\n", iter.payload().c_str());
+    }
+    printf("---\n");
+
+    if (i != 2) {
+	print_failed("");
+	printf("We expected two entries to be found and we found %d", i);
+	abort();
+    }
+
+    IPv4Net nsearchReally4(IPv4("192.168.254.4"), 31);
+    iter = trie_subtree.search_subtree(nsearchReally4);
+
+    printf("--- Results for %s\n", nsearchReally4.str().c_str());
+    for(i = 0; iter != trie_subtree.end(); iter++) {
+	i++;
+	printf("subtree = %s\n", iter.payload().c_str());
+    }
+    printf("---\n");
+
+    if (i != 1) {
+	print_failed("");
+	printf("We expected one entrie to be found and we found %d", i);
 	abort();
     }
 

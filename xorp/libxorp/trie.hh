@@ -930,13 +930,24 @@ TrieNode<A,Payload>::find_subtree(const Key &key)
     TrieNode *cand = r && key.contains(r->_k) ? r : NULL;
 
     for ( ; r && r->_k.contains(key) ; ) {
-	if (key.contains(r->_k))
-	    cand = r;		// we have a candidate.
+	if (key.contains(r->_k)) {
+	    cand = r;			// we have a candidate.
+	    break;			// and we don't need to search any more!
+	}
 	if (r->_left && r->_left->_k.contains(key))
 	    r = r->_left;
-	else			// should check that right contains(key), but
-	    r = r->_right;	// the loop condition will do it for us.
+	else if (r->_right && r->_right->_k.contains(key))
+	    r = r->_right;
+	else if (r->_left && key.contains(r->_left->_k)) {
+	    cand = r->_left;
+	    break;
+	} else if (r->_right && key.contains(r->_right->_k)) {
+	    cand = r->_right;
+	    break;
+	} else
+	    break;
     }
+
     return cand;
 }
 
