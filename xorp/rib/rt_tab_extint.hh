@@ -152,12 +152,26 @@ public:
     TableType type() const	{ return EXTINT_TABLE; }
 
     /**
-     * replumb the parent tables, so that new_parent replaces old_parent
+     * Set new parent
      *
      * @param old_parent the old parent table.
      * @param new_parent the new parent table.
      */
     void replumb(RouteTable<A>* old_parent, RouteTable<A>* new_parent);
+
+    /**
+     * Set new external parent
+     *
+     * @param new_ext_parent the new external parent table.
+     */
+    void replumb_external(RouteTable<A>* new_ext_parent);
+
+    /**
+     * Set new internal parent
+     *
+     * @param new_int_parent the new external parent table.
+     */
+    void replumb_internal(RouteTable<A>* new_int_parent);
 
     /**
      * Render this ExtIntTable as a string for debugging purposes.
