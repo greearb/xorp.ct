@@ -116,6 +116,7 @@ public:
     const IPRouteEntry<A>* lookup_route(const A& addr) const;
     RouteRange<A>* lookup_route_range(const A& addr) const;
     TableType type() const { return REDIST_TABLE; }
+    const RouteTable<A>* parent() const { return _parent; }
     RouteTable<A>* parent() { return _parent; }
     void replumb(RouteTable<A>* old_parent, RouteTable<A>* new_parent);
     string str() const;

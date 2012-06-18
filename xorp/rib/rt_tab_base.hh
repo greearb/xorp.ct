@@ -181,6 +181,7 @@ public:
 
     // parent is only supposed to be called on single-parent tables
     virtual RouteTable* parent() { XLOG_UNREACHABLE(); return NULL; }
+    virtual const RouteTable* parent() const { XLOG_UNREACHABLE(); return NULL; }
 
     virtual TableType type() const = 0;
     virtual void replumb(RouteTable* old_parent, RouteTable* new_parent) = 0;

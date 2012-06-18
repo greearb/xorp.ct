@@ -349,6 +349,7 @@ public:
     /**
      * @return the parent @ref RouteTable of this RegisterTable.
      */
+    const RouteTable<A>* parent() const		{ return _parent;	}
     RouteTable<A>* parent()			{ return _parent;	}
 
     /**

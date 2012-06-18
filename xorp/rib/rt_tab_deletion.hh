@@ -143,6 +143,7 @@ public:
     string str() const;
 
     RouteTable<A>* parent() { return _parent; }
+    const RouteTable<A>* parent() const { return _parent; }
 
 private:
     RouteTable<A>*	_parent;

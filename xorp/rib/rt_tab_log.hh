@@ -53,6 +53,7 @@ public:
     RouteRange<A>* lookup_route_range(const A& addr) const;
     TableType type() const { return LOG_TABLE; }
     RouteTable<A>* parent() { return _parent; }
+    const RouteTable<A>* parent() const { return _parent; }
     void replumb(RouteTable<A>* old_parent, RouteTable<A>* new_parent);
     string str() const;
 
