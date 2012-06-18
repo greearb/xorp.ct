@@ -930,21 +930,17 @@ XrlMfeaNode::mfea_0_1_add_mfc6(
 			  IPvX(source_address), IPvX(group_address),
 			  iif_vif_index, mifset, mifset_disable_wrongvif,
 			  max_vifs_oiflist,
-			  IPvX(rp_address))
+			  IPvX(rp_address), error_msg, true)
 	!= XORP_OK) {
-	// TODO: must find-out and return the reason for failure
-	error_msg = c_format("Cannot add MFC for "
-			     "source %s and group %s "
-			     "with iif_vif_index = %u",
-			     source_address.str().c_str(),
-			     group_address.str().c_str(),
-			     XORP_UINT_CAST(iif_vif_index));
+	error_msg += c_format("Cannot add MFC for "
+			      "source %s and group %s "
+			      "with iif_vif_index = %u",
+			      source_address.str().c_str(),
+			      group_address.str().c_str(),
+			      XORP_UINT_CAST(iif_vif_index));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
-    //
-    // Success
-    //
     return XrlCmdError::OKAY();
 }
 
@@ -967,19 +963,16 @@ XrlMfeaNode::mfea_0_1_delete_mfc6(
     }
 
     if (MfeaNode::delete_mfc(xrl_sender_name,
-			     IPvX(source_address), IPvX(group_address))
+			     IPvX(source_address), IPvX(group_address),
+			     error_msg, true)
 	!= XORP_OK) {
-	// TODO: must find-out and return the reason for failure
-	error_msg = c_format("Cannot delete MFC for "
-			     "source %s and group %s",
-			     source_address.str().c_str(),
-			     group_address.str().c_str());
+	error_msg += c_format("Cannot delete MFC for "
+			      "source %s and group %s",
+			      source_address.str().c_str(),
+			      group_address.str().c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
-    //
-    // Success
-    //
     return XrlCmdError::OKAY();
 }
 
@@ -1225,21 +1218,17 @@ XrlMfeaNode::mfea_0_1_add_mfc4(
 			  IPvX(source_address), IPvX(group_address),
 			  iif_vif_index, mifset, mifset_disable_wrongvif,
 			  max_vifs_oiflist,
-			  IPvX(rp_address))
+			  IPvX(rp_address), error_msg, true)
 	!= XORP_OK) {
-	// TODO: must find-out and return the reason for failure
-	error_msg = c_format("Cannot add MFC for "
-			     "source %s and group %s "
-			     "with iif_vif_index = %u",
-			     source_address.str().c_str(),
-			     group_address.str().c_str(),
-			     XORP_UINT_CAST(iif_vif_index));
+	error_msg += c_format("Cannot add MFC for "
+			      "source %s and group %s "
+			      "with iif_vif_index = %u",
+			      source_address.str().c_str(),
+			      group_address.str().c_str(),
+			      XORP_UINT_CAST(iif_vif_index));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
-    //
-    // Success
-    //
     return XrlCmdError::OKAY();
 }
 
@@ -1254,7 +1243,8 @@ XrlMfeaNode::mfea_0_1_add_mfc4_str(
 {
     string error_msg;
 
-    XLOG_INFO("received mfea add-mfc command, input: %s  mcast-addr: %s  ifname: %s  output_ifs: %s\n",
+    XLOG_INFO("received mfea add-mfc command, sender-name: %s input: %s  mcast-addr: %s  ifname: %s  output_ifs: %s\n",
+	      xrl_sender_name.c_str(),
 	      source_address.str().c_str(),
 	      group_address.str().c_str(),
 	      iif_ifname.c_str(),
@@ -1270,13 +1260,10 @@ XrlMfeaNode::mfea_0_1_add_mfc4_str(
 
     if (MfeaNode::add_mfc_str(xrl_sender_name,
 			      IPvX(source_address), IPvX(group_address),
-			      iif_ifname, oif_ifnames, error_msg) != XORP_OK) {
+			      iif_ifname, oif_ifnames, error_msg, true) != XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
-    //
-    // Success
-    //
     return XrlCmdError::OKAY();
 }
 
@@ -1299,19 +1286,16 @@ XrlMfeaNode::mfea_0_1_delete_mfc4(
     }
 
     if (MfeaNode::delete_mfc(xrl_sender_name,
-			     IPvX(source_address), IPvX(group_address))
+			     IPvX(source_address), IPvX(group_address),
+			     error_msg, true)
 	!= XORP_OK) {
-	// TODO: must find-out and return the reason for failure
-	error_msg = c_format("Cannot delete MFC for "
-			     "source %s and group %s",
-			     source_address.str().c_str(),
-			     group_address.str().c_str());
+	error_msg += c_format("Cannot delete MFC for "
+			      "source %s and group %s",
+			      source_address.str().c_str(),
+			      group_address.str().c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
-    //
-    // Success
-    //
     return XrlCmdError::OKAY();
 }
 
@@ -1472,8 +1456,9 @@ XrlMfeaNode::mfea_0_1_start_vif(
 {
     string error_msg;
     
-    if (MfeaNode::start_vif(vif_name, error_msg) != XORP_OK)
+    if (MfeaNode::start_vif(vif_name, error_msg) != XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
     
     return XrlCmdError::OKAY();
 }
