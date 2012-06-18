@@ -395,15 +395,14 @@ template <typename A>
 void
 RIB<A>::initialize(RegisterServer& register_server)
 {
-    if (initialize_register(register_server) != XORP_OK) {
-	XLOG_FATAL("Could not initialize register table for %s",
-		   name().c_str());
-    }
+    // Unconditionally plumb ExtInt table if it doesn't exist
+    // All wining IGP, EGP and overall routes are cached in ExtInt table,
+    // so we could perform faster lookup
+    initialize_ext_int();
 
-    if (initialize_policy_redist() != XORP_OK) {
-	XLOG_FATAL("Could not initialize policy redistribution table for %s",
-		   name().c_str());
-    }
+    initialize_register(register_server);
+
+    initialize_policy_redist();
 
     //
     // XXX: we must initialize the final RedistTable after the
@@ -428,22 +427,15 @@ template <typename A>
 int
 RIB<A>::initialize_policy_redist()
 {
-    if (_register_table == NULL) {
-	XLOG_ERROR("Register table is not yet initialized");
-	return XORP_ERROR;
-    }
-
-    if (_policy_redist_table != NULL) {
-	return XORP_OK;	// done already
-    }
+    XLOG_ASSERT(_register_table != NULL && _policy_redist_table == NULL);
 
     _policy_redist_table =
 	new PolicyRedistTable<A>(_register_table, _rib_manager.xrl_router(),
 				 _rib_manager.policy_redist_map(),
 				 _multicast);
 
-    if (_final_table == NULL || _final_table == _register_table)
-	_final_table = _policy_redist_table;
+    XLOG_ASSERT(_final_table == _register_table);
+    _final_table = _policy_redist_table;
 
     return XORP_OK;
 }
@@ -452,17 +444,12 @@ template <typename A>
 int
 RIB<A>::initialize_redist_all(const string& all)
 {
-    if (_policy_redist_table == NULL) {
-	XLOG_ERROR("Policy redist table is not yet initialized");
-	return XORP_ERROR;
-    }
+    XLOG_ASSERT(_policy_redist_table != NULL);
 
-    if (find_redist_table(redist_tablename(all)) != NULL) {
-	return XORP_OK;		// RedistTable already exists, no sweat
-    }
+    XLOG_ASSERT(find_redist_table(redist_tablename(all)) == NULL);
 
-    RedistTable<A>* r;
-    r = new RedistTable<A>(redist_tablename(all), _policy_redist_table);
+    RedistTable<A>* r = new RedistTable<A>(redist_tablename(all), _policy_redist_table);
+
     if (add_table(r) != XORP_OK) {
 	delete r;
 	return XORP_ERROR;
@@ -471,8 +458,24 @@ RIB<A>::initialize_redist_all(const string& all)
     //
     // Set the RedistTable as the final table
     //
-    if (_final_table == NULL || _final_table == _policy_redist_table)
-	_final_table = r;
+    XLOG_ASSERT(_final_table == _policy_redist_table);
+    _final_table = r;
+
+    return XORP_OK;
+}
+
+
+template <typename A>
+int
+RIB<A>::initialize_ext_int()
+{
+    XLOG_ASSERT(!_ext_int_table);
+
+    _ext_int_table = new ExtIntTable<A>(NULL, NULL);
+
+    XLOG_ASSERT(_final_table == NULL);
+
+    _final_table = _ext_int_table;
 
     return XORP_OK;
 }
@@ -481,22 +484,16 @@ template <typename A>
 int
 RIB<A>::initialize_register(RegisterServer& register_server)
 {
-    if (_register_table != NULL) {
-	XLOG_WARNING("Register table already initialized.");
-	return XORP_ERROR;
-    }
+    XLOG_ASSERT(!_register_table);
 
-    RegisterTable<A>* rt;
-    rt = new RegisterTable<A>("RegisterTable", register_server, _multicast);
+    _register_table = new RegisterTable<A>("RegisterTable", register_server, _multicast);
 
-    _register_table = rt;
+    XLOG_ASSERT(_final_table == _ext_int_table);
 
-    if (_final_table == NULL) {
-	_final_table = _register_table;
-    } else {
-	_final_table->replumb(NULL, _register_table);
-	_register_table->set_next_table(_final_table);
-    }
+    _register_table->replumb(NULL, _final_table);
+    _final_table->set_next_table(_register_table);
+    _final_table = _register_table;
+
     return XORP_OK;
 }
 
@@ -516,9 +513,7 @@ RIB<A>::new_origin_table(const string&	tablename,
 	return XORP_ERROR;
     }
 
-    if (_final_table == NULL) {
-	_final_table = ot;
-    }
+    XLOG_ASSERT(_final_table);
 
     //
     // Store the XRL target instance, so we know which OriginTable to
@@ -1229,30 +1224,22 @@ RIB<A>::add_redist_table(RouteTable<A>* parent)
 
 template <typename A>
 int
-RIB<A>::plumb_ahead_of_ext_int(OriginTable<A>*& ot)
+RIB<A>::plumb_ahead_of_ext_int(OriginTable<A>*& ot, const ProtocolType& type)
 {
-    //
-    // We are going to need to create an ExtInt table.
-    //
-    // Find the appropriate existng table to be a parent
-    // of the ExtIntTable.
-    //
-    RouteTable<A>* next_table = track_back(_final_table,
-	    REDIST_TABLE | POLICY_REDIST_TABLE | REGISTER_TABLE);
-    RouteTable<A>* existing_table = next_table->parent();
-    if (ot->protocol_type() == IGP) {
-	_ext_int_table = new ExtIntTable<A>(existing_table, ot);
-    } else {
-	_ext_int_table = new ExtIntTable<A>(ot, existing_table);
+    XLOG_ASSERT(_ext_int_table);
+
+    switch (type) {
+    case IGP:
+	_ext_int_table->replumb_internal(ot);
+	break;
+    case EGP:
+	_ext_int_table->replumb_external(ot);
+	break;
+    default:
+	XLOG_UNREACHABLE();
+	break;
     }
 
-    if (_final_table->type()
-	    & (REDIST_TABLE | POLICY_REDIST_TABLE | REGISTER_TABLE)) {
-	_ext_int_table->set_next_table(next_table);
-	next_table->replumb(existing_table, _ext_int_table);
-    } else {
-	_final_table = _ext_int_table;
-    }
     return XORP_OK;
 }
 
@@ -1298,66 +1285,24 @@ RIB<A>::plumb_ahead_of_merged(OriginTable<A>*& ot,
 
 template <typename A>
 int
-RIB<A>::plumb_ahead_of_first(OriginTable<A>*& ot)
-{
-    //
-    // There are tables, but neither IGP or EGP origin tables
-    // Therefore the final table must be a RedistTable
-    // or a RegisterTable.
-    //
-    if ((_final_table->type() & (REDIST_TABLE | POLICY_REDIST_TABLE | REGISTER_TABLE)) == 0)
-	XLOG_UNREACHABLE();
-
-    //
-    // There may be existing single-parent tables before the
-    // final table such as RegisterTable - track back to be
-    // first of them.
-    //
-    RouteTable<A>* rt = track_back(_final_table,
-				   REDIST_TABLE
-				   | POLICY_REDIST_TABLE
-				   | REGISTER_TABLE);
-
-    //
-    // Plumb our new table in ahead of the first single-parent
-    // table.
-    //
-    rt->replumb(NULL, ot);
-    ot->set_next_table(rt);
-    return XORP_OK;
-
-}
-
-template <typename A>
-int
 RIB<A>::plumb_origin_table(OriginTable<A>*& ot,
 			    OriginTable<A>* existing_igp_table,
 			    OriginTable<A>* existing_egp_table)
 {
     // XXX: the table was created by new_origin_table() above, so it must exist
-    XLOG_ASSERT(ot != NULL);
-    if (_final_table == ot) {
-	//
-	// This is the first table, so no need to plumb anything.
-	//
-	debug_msg("first table\n");
-	return XORP_OK;
-    }
+    XLOG_ASSERT(ot != NULL && _final_table != ot);
 
     //
     // There are existing tables, so we need to do some plumbing
     //
-    // Three possibilities:
+    // Two possibilities:
     //  1. There are no existing tables of the same protocol type as the protocol type
     //     of the table that we're plumbing
     //
-    //     -> Add ExtInt table and plumb the origin table ahead of ext int table
+    //     -> Plumb the origin table ahead of ext int table
     //  2. There are both existing EGP and existing IGP tables
     //
     //      -> Add Merged table and plumb the origin table ahead of merged table
-    //  3. there aren't existing IGP and existing EGP tables
-    //
-    //      -> Plumb origin table ahead of currently first table
     //
 
     //
@@ -1366,18 +1311,9 @@ RIB<A>::plumb_origin_table(OriginTable<A>*& ot,
     //
     ProtocolType protocol_type = (ProtocolType) ot->protocol_type();
     if ((!existing_igp_table && (protocol_type == IGP)) ||
-	(!existing_egp_table && (protocol_type == EGP))) {
-	//
-	// Sanity check: we've found an ExtIntTable, when there
-	// weren't both IGP and EGP tables.
-	//
-	XLOG_ASSERT(!_ext_int_table);
-
-	if (!existing_egp_table && !existing_igp_table)
-	    return plumb_ahead_of_first(ot);
-	else
-	    return plumb_ahead_of_ext_int(ot);
-    } else
+	(!existing_egp_table && (protocol_type == EGP)))
+	return plumb_ahead_of_ext_int(ot, protocol_type);
+    else
 	return plumb_ahead_of_merged(ot, (protocol_type == IGP) ?
 		existing_igp_table : existing_egp_table);
 }
@@ -1441,7 +1377,6 @@ RIB<A>::add_origin_table(const string& tablename,
     //
     OriginTable<A>* existing_igp_table = !_igp_origin_tables.empty() ? _igp_origin_tables.begin()->second : NULL;
     OriginTable<A>* existing_egp_table = !_egp_origin_tables.empty() ? _egp_origin_tables.begin()->second : NULL;
-
 
     if (new_origin_table(tablename, target_class, target_instance,
 	    get_protocol_admin_distance(tablename), protocol_type) != XORP_OK) {

@@ -152,6 +152,13 @@ public:
     int initialize_register(RegisterServer& register_server);
 
     /**
+     * Initialize the RIB's ExtIntTable.
+     *
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int initialize_ext_int();
+
+    /**
      * Add a new OriginTable.  Use is deprecated, except in test suites.
      *
      * @see OriginTable
@@ -548,15 +555,14 @@ private:
 	    OriginTable<A>* existing_egp_table);
 
     /**
-     * Creates ExtInt table and plumbs OriginTable @ot ahead of it.
-     * It should be called ONLY if are adding EGP table and there are
-     * existing IGP tables but no existing EGP table, or if we're adding
-     * IGP table and there are existing EGP tables but no existing IGP tables
+     * Plumbs OriginTable @ot ahead of ExtInt table.
+     * It should be called ONLY if are adding first origin table of some
+     * protocol type (IGP or EGP)
      *
      * @param ot OriginTable to plumb in
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int plumb_ahead_of_ext_int(OriginTable<A>*& ot);
+    int plumb_ahead_of_ext_int(OriginTable<A>*& ot, const ProtocolType& type);
 
     /**
      * Creates Merged table and plumbs OriginTable @ot ahead of it.
@@ -568,16 +574,6 @@ private:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int plumb_ahead_of_merged(OriginTable<A>*& ot, RouteTable<A>* existing_table);
-
-    /**
-     * Plumbs OriginTable @ot ahead of the currently first RouteTable.
-     * It should be called ONLY if if there aren't existing EGP tables and
-     * existing IGP tables.
-     *
-     * @param ot OriginTable to plumb in
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int plumb_ahead_of_first(OriginTable<A>*& ot);
 
     /**
      * Used to implement @ref add_igp_table and @ref add_egp_table.
