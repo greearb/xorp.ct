@@ -510,6 +510,11 @@ RedistTable<A>::str() const
 	}
     }
 
+    if (this->parent())
+	s += "parent = " + this->parent()->tablename() + "\n";
+    else
+	s += "no parent table\n";
+
     if (this->next_table() == NULL) {
 	s += "no next table\n";
     } else {
