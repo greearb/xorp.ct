@@ -1516,12 +1516,13 @@ RIB<A>::track_forward(RouteTable<A>* rt, int typemask) const
 #ifdef DEBUG_LOGGING
 template <class A>
 struct print_from_pair {
-    print_from_pair() {}
+    print_from_pair(string s = "###"): _separator(s) {}
     void operator() (const pair<const string, A*>& table_pair) const {
-	cout << table_pair.second->str() << "###" << endl;
+	cout << table_pair.second->str() << _separator << endl;
     }
+protected:
+    string _separator;
 };
-
 #endif
 
 template <typename A>
@@ -1569,7 +1570,7 @@ RIB<A>::print_rib() const
 
     cout << "Protocols: " << endl;
     for_each(_protocols.begin(), _protocols.end(),
-	print_from_pair<Protocol >());
+	print_from_pair<Protocol >(","));
     cout << endl;
     cout << "**************************************************************" << endl;
 #endif // DEBUG_LOGGING
