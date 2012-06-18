@@ -1844,16 +1844,23 @@ int MfeaNode::add_mfc_str(const string& module_instance_name,
 			  const IPvX& group,
 			  const string& iif_name,
 			  const string& oif_names,
+			  uint32_t distance,
 			  string& error_msg, bool check_stored_routes) {
     int rv;
     uint32_t iif_vif_index;
 
-    XLOG_INFO("MFEA add_mfc_str, module: %s  source: %s  group: %s check-stored-routes: %i",
+    XLOG_INFO("MFEA add_mfc_str, module: %s  source: %s  group: %s check-stored-routes: %i distance: %u",
 	      module_instance_name.c_str(), source.str().c_str(),
-	      group.str().c_str(), (int)(check_stored_routes));
+	      group.str().c_str(), (int)(check_stored_routes), distance);
+
+    if (distance >= MAX_MFEA_DISTANCE) {
+	error_msg += c_format("distance is above maximimum: %u >= %u\n",
+			      distance, MAX_MFEA_DISTANCE);
+	return XORP_ERROR;
+    }
 
     if (check_stored_routes) {
-	MfeaRouteStorage mrs(0, module_instance_name, source,
+	MfeaRouteStorage mrs(distance, module_instance_name, source,
 			     group, iif_name, oif_names);
 	routes[mrs.distance][mrs.getHash()] = mrs;
 
@@ -1921,7 +1928,7 @@ int MfeaNode::add_mfc_str(const string& module_instance_name,
     rv = add_mfc(module_instance_name, source, group,
 		 iif_vif_index, oiflist,
 		 oiflist_disable_wrongvif,
-		 MAX_VIFS, rp_addr, error_msg, false);
+		 MAX_VIFS, rp_addr, distance, error_msg, false);
     if (rv != XORP_OK) {
 	error_msg = "call to add_mfc failed";
     }
@@ -1952,15 +1959,22 @@ MfeaNode::add_mfc(const string& module_instance_name,
 		  uint32_t iif_vif_index, const Mifset& oiflist,
 		  const Mifset& oiflist_disable_wrongvif,
 		  uint32_t max_vifs_oiflist,
-		  const IPvX& rp_addr, string& error_msg,
+		  const IPvX& rp_addr, uint32_t distance,
+		  string& error_msg,
 		  bool check_stored_routes)
 {
     uint8_t oifs_ttl[MAX_VIFS];
     uint8_t oifs_flags[MAX_VIFS];
 
-    XLOG_INFO("MFEA add_mfc, module: %s  source: %s  group: %s check-stored-routes: %i",
+    XLOG_INFO("MFEA add_mfc, module: %s  source: %s  group: %s check-stored-routes: %i distance: %u",
 	      module_instance_name.c_str(), source.str().c_str(),
-	      group.str().c_str(), (int)(check_stored_routes));
+	      group.str().c_str(), (int)(check_stored_routes), distance);
+
+    if (distance >= MAX_MFEA_DISTANCE) {
+	error_msg += c_format("distance is above maximimum: %u >= %u\n",
+			      distance, MAX_MFEA_DISTANCE);
+	return XORP_ERROR;
+    }
 
     if (max_vifs_oiflist > MAX_VIFS) {
 	error_msg += c_format("max-vifs-oiflist: %u > MAX_VIFS: %u\n",
@@ -1981,7 +1995,7 @@ MfeaNode::add_mfc(const string& module_instance_name,
     }
 
     if (check_stored_routes) {
-	MfeaRouteStorage mrs(1, module_instance_name, source,
+	MfeaRouteStorage mrs(distance, module_instance_name, source,
 			     group, iif_vif_index, oiflist,
 			     oiflist_disable_wrongvif, max_vifs_oiflist,
 			     rp_addr);
@@ -2145,13 +2159,13 @@ MfeaNode::delete_mfc(const string& module_instance_name,
 				 iter->second.iif_vif_index,
 				 iter->second.oiflist, iter->second.oiflist_disable_wrongvif,
 				 iter->second.max_vifs_oiflist, iter->second.rp_addr,
-				 error_msg, false);
+				 iter->second.distance, error_msg, false);
 		}
 		else {
 		    rv = add_mfc_str(iter->second.module_instance_name,
 				     iter->second.source, iter->second.group,
 				     iter->second.iif_name, iter->second.oif_names,
-				     error_msg, false);
+				     iter->second.distance, error_msg, false);
 		}
 		break;
 	    }

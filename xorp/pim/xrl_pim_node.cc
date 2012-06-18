@@ -1656,6 +1656,7 @@ XrlPimNode::send_add_delete_mfc()
 		oiflist_disable_wrongvif_vector,
 		max_vifs_oiflist,
 		rp_addr.get_ipv4(),
+		1, /* default distance is 1 for PIM */
 		callback(this, &XrlPimNode::mfea_client_send_add_delete_mfc_cb));
 	    if (success)
 		return;
@@ -1673,6 +1674,7 @@ XrlPimNode::send_add_delete_mfc()
 		oiflist_disable_wrongvif_vector,
 		max_vifs_oiflist,
 		rp_addr.get_ipv6(),
+		1, /* default distance is 1 for PIM */
 		callback(this, &XrlPimNode::mfea_client_send_add_delete_mfc_cb));
 	    if (success)
 		return;

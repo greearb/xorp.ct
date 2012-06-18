@@ -29,6 +29,7 @@ protocols {
 	    input_if:		txt;
 	    input_ip:		ipv4;
 	    output_ifs:		txt;
+	    distance:		u32 = 0;
 	}
 
 	route4 @: ipv4net {			/* %deprecated */
@@ -293,9 +294,9 @@ protocols {
 	    %help:	short "Configure a static Multicast route";
 	    %mandatory:	$(@.input_if), $(@.input_ip), $(@.output_ifs);
 
-	    %create:	xrl "$(static.targetname)/static_routes/0.1/add_mcast_route4?mcast_addr:ipv4=$(@)&input_if:txt=$(@.input_if)&input_ip:ipv4=$(@.input_ip)&output_ifs:txt=$(@.output_ifs)";
-	    %update:	xrl "$(static.targetname)/static_routes/0.1/replace_mcast_route4?mcast_addr:ipv4=$(@)&input_if:txt=$(@.input_if)&input_ip:ipv4=$(@.input_ip)&output_ifs:txt=$(@.output_ifs)";
-	    %delete:	xrl "$(static.targetname)/static_routes/0.1/delete_mcast_route4?mcast_addr:ipv4=$(@)&input_if:txt=$(@.input_if)&input_ip:ipv4=$(@.input_ip)&output_ifs:txt=$(@.output_ifs)";
+	    %create:	xrl "$(static.targetname)/static_routes/0.1/add_mcast_route4?mcast_addr:ipv4=$(@)&input_if:txt=$(@.input_if)&input_ip:ipv4=$(@.input_ip)&output_ifs:txt=$(@.output_ifs)&distance:u32=$(@.distance)";
+	    %update:	xrl "$(static.targetname)/static_routes/0.1/replace_mcast_route4?mcast_addr:ipv4=$(@)&input_if:txt=$(@.input_if)&input_ip:ipv4=$(@.input_ip)&output_ifs:txt=$(@.output_ifs))&distance:u32=$(@.distance)";
+	    %delete:	xrl "$(static.targetname)/static_routes/0.1/delete_mcast_route4?mcast_addr:ipv4=$(@)&input_ip:ipv4=$(@.input_ip)";
 
 	    input_if {
 		%help:	short "Configure the input interface";
@@ -309,6 +310,12 @@ protocols {
 
 	    output_ifs {
 		%help:	short "Configure the input output interface(s)";
+		%set:;
+	    }
+
+	    distance {
+		%help:	short "Configure the routing distance.  Lower value wins";
+		%allow-range: $(@) "0" "7" %help: "The routing distance";
 		%set:;
 	    }
 	}

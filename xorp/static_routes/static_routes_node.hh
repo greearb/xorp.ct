@@ -379,13 +379,17 @@ protected:
     string _ifname; // assume vifname == ifname
     IPvX _input_ip;
     string _output_ifs; // assume vifname == ifname
+    uint32_t _distance;
 
 public:
     McastRoute() { };
     McastRoute(const IPvX& addr, const string& ifname, const IPvX& input_ip,
-	       const string& output_ifs) :
+	       const string& output_ifs, uint32_t distance) :
 	    _mcast_addr(addr), _ifname(ifname), _input_ip(input_ip),
-	    _output_ifs(output_ifs) { }
+	    _output_ifs(output_ifs), _distance(distance) { }
+
+    McastRoute(const IPvX& addr, const IPvX& input_ip) :
+	    _mcast_addr(addr), _input_ip(input_ip) { }
 
     bool operator==(const McastRoute& other) const {
 	if (this == &other)
@@ -393,7 +397,8 @@ public:
 	return (_mcast_addr == other._mcast_addr &&
 		_ifname == other._ifname &&
 		_input_ip == other._input_ip &&
-		_output_ifs == other._output_ifs);
+		_output_ifs == other._output_ifs &&
+		_distance == other._distance);
     }
 
     const IPvX& mcast_addr() const { return _mcast_addr; }
@@ -401,6 +406,7 @@ public:
     const string& vifname() const { return ifname(); }
     const IPvX& input_ip() const { return _input_ip; }
     const string& output_ifs() const { return _output_ifs; }
+    const uint32_t& distance() const { return _distance; }
 };
 
 /**
@@ -635,14 +641,13 @@ public:
 
     int add_mcast_route4(const IPv4& mcast_addr, const string& input_if,
 			 const IPv4& input_ip, const string& output_ifs,
-			 string& error_msg);
+			 uint32_t distance, string& error_msg);
 
     int replace_mcast_route4(const IPv4& mcast_addr, const string& input_if,
 			     const IPv4& input_ip, const string& output_ifs,
-			     string& error_msg);
+			     uint32_t distance, string& error_msg);
 
-    int delete_mcast_route4(const IPv4& mcast_addr, const string& input_if,
-			    const IPv4& input_ip, const string& output_ifs,
+    int delete_mcast_route4(const IPv4& mcast_addr, const IPv4& input_ip,
 			    string& error_msg);
 
 

@@ -68,7 +68,8 @@ interface mfea/0.1 {
 			& oiflist:binary				\
 			& oiflist_disable_wrongvif:binary		\
 			& max_vifs_oiflist:u32				\
-			& rp_address:ipv4;
+			& rp_address:ipv4				\
+			& distance:u32;
 	delete_mfc4	? xrl_sender_name:txt				\
 			& source_address:ipv4 & group_address:ipv4;
 
@@ -79,7 +80,8 @@ interface mfea/0.1 {
 			& source_address:ipv4 				\
 			& group_address:ipv4				\
 			& iif_name:txt					\
-			& oif_names:txt;
+			& oif_names:txt					\
+			& distance:u32;
 	
 	/**
 	 * Add/delete a dataflow monitor with the MFEA.
@@ -201,7 +203,8 @@ interface mfea/0.1 {
 			& oiflist:binary				\
 			& oiflist_disable_wrongvif:binary		\
 			& max_vifs_oiflist:u32				\
-			& rp_address:ipv6;
+			& rp_address:ipv6				\
+			& distance:u32;
 	delete_mfc6	? xrl_sender_name:txt				\
 			& source_address:ipv6 & group_address:ipv6;
 	add_dataflow_monitor6	? xrl_sender_name:txt			\

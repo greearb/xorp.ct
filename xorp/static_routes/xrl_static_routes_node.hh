@@ -224,21 +224,20 @@ protected:
         const IPv4&     mcast_addr,
         const string&   input_if,
         const IPv4&     input_ip,
-        const string&   output_ifs);
+        const string&   output_ifs,
+	const uint32_t& distance);
 
     XrlCmdError static_routes_0_1_replace_mcast_route4(
         // Input values,
         const IPv4&     mcast_addr,
         const string&   input_if,
         const IPv4&     input_ip,
-        const string&   output_ifs);
+        const string&   output_ifs,
+	const uint32_t& distance);
     XrlCmdError static_routes_0_1_delete_mcast_route4(
         // Input values,
         const IPv4&     mcast_addr,
-        const string&   input_if,
-        const IPv4&     input_ip,
-        const string&   output_ifs);
-
+        const IPv4&     input_ip);
 
     /**
      *  Add/replace/delete a backup static route.

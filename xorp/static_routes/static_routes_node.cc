@@ -788,10 +788,10 @@ StaticRoutesNode::delete_route6(bool unicast, bool multicast,
 
 int StaticRoutesNode::add_mcast_route4(const IPv4& mcast_addr, const string& input_if,
 				       const IPv4& input_ip, const string& output_ifs,
-				       string& error_msg) {
+				       uint32_t distance, string& error_msg) {
     map<IPvX, McastRoute>::const_iterator iter = _mcast_routes.find(mcast_addr);
     if (iter == _mcast_routes.end()) {
-	McastRoute mr(mcast_addr, input_if, input_ip, output_ifs);
+	McastRoute mr(mcast_addr, input_if, input_ip, output_ifs, distance);
 	_mcast_routes[mcast_addr] = mr;
 	McastRoute copy_route = mr;
 	copy_route.set_add_route();
@@ -806,10 +806,10 @@ int StaticRoutesNode::add_mcast_route4(const IPv4& mcast_addr, const string& inp
 
 int StaticRoutesNode::replace_mcast_route4(const IPv4& mcast_addr, const string& input_if,
 					   const IPv4& input_ip, const string& output_ifs,
-					   string& error_msg) {
+					   uint32_t distance, string& error_msg) {
     UNUSED(error_msg);
 
-    McastRoute mr(mcast_addr, input_if, input_ip, output_ifs);
+    McastRoute mr(mcast_addr, input_if, input_ip, output_ifs, distance);
     map<IPvX, McastRoute>::const_iterator iter = _mcast_routes.find(mcast_addr);
     if (iter == _mcast_routes.end()) {
 	if (iter->second == mr) {
@@ -828,8 +828,7 @@ int StaticRoutesNode::replace_mcast_route4(const IPv4& mcast_addr, const string&
 }
 
 
-int StaticRoutesNode::delete_mcast_route4(const IPv4& mcast_addr, const string& input_if,
-					  const IPv4& input_ip, const string& output_ifs,
+int StaticRoutesNode::delete_mcast_route4(const IPv4& mcast_addr, const IPv4& input_ip,
 					  string& error_msg) {
     UNUSED(error_msg);
 
@@ -837,7 +836,7 @@ int StaticRoutesNode::delete_mcast_route4(const IPv4& mcast_addr, const string& 
     if (iter != _mcast_routes.end()) {
 	_mcast_routes.erase(mcast_addr);
 
-	McastRoute mr(mcast_addr, input_if, input_ip, output_ifs);
+	McastRoute mr(mcast_addr, input_ip);
 	mr.set_delete_route();
 	inform_mfea(mr);
     }

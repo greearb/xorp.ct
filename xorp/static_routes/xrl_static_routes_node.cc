@@ -1478,10 +1478,11 @@ XrlCmdError XrlStaticRoutesNode::static_routes_0_1_add_mcast_route4(
     const IPv4&     mcast_addr,
     const string&   input_if,
     const IPv4&     input_ip,
-    const string&   output_ifs)
+    const string&   output_ifs,
+    const uint32_t& distance)
 {
     string error_msg;
-    if (StaticRoutesNode::add_mcast_route4(mcast_addr, input_if, input_ip, output_ifs, error_msg) != XORP_OK) {
+    if (StaticRoutesNode::add_mcast_route4(mcast_addr, input_if, input_ip, output_ifs, distance, error_msg) != XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     return XrlCmdError::OKAY();
@@ -1492,10 +1493,11 @@ XrlCmdError XrlStaticRoutesNode::static_routes_0_1_replace_mcast_route4(
     const IPv4&     mcast_addr,
     const string&   input_if,
     const IPv4&     input_ip,
-    const string&   output_ifs)
+    const string&   output_ifs,
+    const uint32_t& distance)
 {
     string error_msg;
-    if (StaticRoutesNode::replace_mcast_route4(mcast_addr, input_if, input_ip, output_ifs, error_msg) != XORP_OK) {
+    if (StaticRoutesNode::replace_mcast_route4(mcast_addr, input_if, input_ip, output_ifs, distance, error_msg) != XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     return XrlCmdError::OKAY();
@@ -1505,12 +1507,10 @@ XrlCmdError XrlStaticRoutesNode::static_routes_0_1_replace_mcast_route4(
 XrlCmdError XrlStaticRoutesNode::static_routes_0_1_delete_mcast_route4(
         // Input values,
     const IPv4&     mcast_addr,
-    const string&   input_if,
-    const IPv4&     input_ip,
-    const string&   output_ifs)
+    const IPv4&     input_ip)
 {
     string error_msg;
-    if (StaticRoutesNode::delete_mcast_route4(mcast_addr, input_if, input_ip, output_ifs, error_msg) != XORP_OK) {
+    if (StaticRoutesNode::delete_mcast_route4(mcast_addr, input_ip, error_msg) != XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     return XrlCmdError::OKAY();
@@ -2338,6 +2338,7 @@ XrlStaticRoutesNode::send_mfea_mfc_change()
 	    static_route.mcast_addr().get_ipv4(),
 	    static_route.ifname(),
 	    static_route.output_ifs(),
+	    static_route.distance(),
 	    callback(this, &XrlStaticRoutesNode::send_mfea_mfc_change_cb));
 	if (success)
 	    return;

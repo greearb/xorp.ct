@@ -895,7 +895,8 @@ XrlMfeaNode::mfea_0_1_add_mfc6(
     const vector<uint8_t>& oiflist, 
     const vector<uint8_t>& oiflist_disable_wrongvif, 
     const uint32_t&	max_vifs_oiflist, 
-    const IPv6&		rp_address)
+    const IPv6&		rp_address,
+    const uint32_t&     distance)
 {
     string error_msg;
     Mifset mifset;
@@ -930,7 +931,7 @@ XrlMfeaNode::mfea_0_1_add_mfc6(
 			  IPvX(source_address), IPvX(group_address),
 			  iif_vif_index, mifset, mifset_disable_wrongvif,
 			  max_vifs_oiflist,
-			  IPvX(rp_address), error_msg, true)
+			  IPvX(rp_address), distance, error_msg, true)
 	!= XORP_OK) {
 	error_msg += c_format("Cannot add MFC for "
 			      "source %s and group %s "
@@ -1183,7 +1184,8 @@ XrlMfeaNode::mfea_0_1_add_mfc4(
     const vector<uint8_t>& oiflist, 
     const vector<uint8_t>& oiflist_disable_wrongvif, 
     const uint32_t&	max_vifs_oiflist, 
-    const IPv4&		rp_address)
+    const IPv4&		rp_address,
+    const uint32_t&      distance)
 {
     string error_msg;
     Mifset mifset;
@@ -1218,7 +1220,7 @@ XrlMfeaNode::mfea_0_1_add_mfc4(
 			  IPvX(source_address), IPvX(group_address),
 			  iif_vif_index, mifset, mifset_disable_wrongvif,
 			  max_vifs_oiflist,
-			  IPvX(rp_address), error_msg, true)
+			  IPvX(rp_address), distance, error_msg, true)
 	!= XORP_OK) {
 	error_msg += c_format("Cannot add MFC for "
 			      "source %s and group %s "
@@ -1239,7 +1241,8 @@ XrlMfeaNode::mfea_0_1_add_mfc4_str(
     const IPv4&		source_address,
     const IPv4&		group_address,
     const string&       iif_ifname,
-    const string&       oif_ifnames)
+    const string&       oif_ifnames,
+    const uint32_t&      distance)
 {
     string error_msg;
 
@@ -1260,7 +1263,7 @@ XrlMfeaNode::mfea_0_1_add_mfc4_str(
 
     if (MfeaNode::add_mfc_str(xrl_sender_name,
 			      IPvX(source_address), IPvX(group_address),
-			      iif_ifname, oif_ifnames, error_msg, true) != XORP_OK) {
+			      iif_ifname, oif_ifnames, distance, error_msg, true) != XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 

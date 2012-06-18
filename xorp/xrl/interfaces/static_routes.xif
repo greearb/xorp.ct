@@ -49,9 +49,9 @@ interface static_routes/0.1 {
 	/**
 	 * Add/replace/delete multicast routes
 	 */
-	add_mcast_route4 ? mcast_addr:ipv4 & input_if:txt & input_ip:ipv4 & output_ifs:txt;
-	replace_mcast_route4 ? mcast_addr:ipv4 & input_if:txt & input_ip:ipv4 & output_ifs:txt;
-	delete_mcast_route4 ? mcast_addr:ipv4 & input_if:txt & input_ip:ipv4 & output_ifs:txt;
+	add_mcast_route4 ? mcast_addr:ipv4 & input_if:txt & input_ip:ipv4 & output_ifs:txt & distance:u32;
+	replace_mcast_route4 ? mcast_addr:ipv4 & input_if:txt & input_ip:ipv4 & output_ifs:txt & distance:u32;
+	delete_mcast_route4 ? mcast_addr:ipv4 & input_ip:ipv4;
 
 	/**
 	 * Add/replace/delete a backup static route.

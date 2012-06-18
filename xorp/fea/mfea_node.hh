@@ -621,7 +621,8 @@ public:
 		uint32_t iif_vif_index, const Mifset& oiflist,
 		const Mifset& oiflist_disable_wrongvif,
 		uint32_t max_vifs_oiflist,
-		const IPvX& rp_addr, string& error_msg,
+		const IPvX& rp_addr, uint32_t distance,
+		string& error_msg,
 		bool check_stored_routes);
 
     int	add_mfc_str(const string& module_instance_name,
@@ -629,6 +630,7 @@ public:
 		    const IPvX& group,
 		    const string& iif_name,
 		    const string& oif_names,
+		    uint32_t distance,
 		    string& error_msg, bool check_stored_routes);
     
     /**
