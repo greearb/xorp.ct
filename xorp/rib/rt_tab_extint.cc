@@ -68,6 +68,8 @@ ExtIntTable<A>::add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller)
 {
     debug_msg("EIT[%s]: Adding route %s\n", this->tablename().c_str(),
 	   route.str().c_str());
+    XLOG_ASSERT(this->next_table());
+
     if (_int_table && caller == _int_table) {
 	XLOG_ASSERT(route.nexthop()->type() != EXTERNAL_NEXTHOP);
 	// The new route comes from the IGP table
@@ -98,8 +100,7 @@ ExtIntTable<A>::add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller)
 
 	_wining_routes.insert(route.net(), &route);
 
-	if (this->next_table() != NULL)
-	    this->next_table()->add_route(route, this);
+	this->next_table()->add_route(route, this);
 
 	if (_ext_table) {
 	    // Does this cause any previously resolved nexthops to resolve
@@ -140,14 +141,12 @@ ExtIntTable<A>::add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller)
 		// Delete the IGP route that has worse admin distance
 		_wining_routes.erase(found->net());
 
-		if (this->next_table() != NULL)
-		    this->next_table()->delete_route(found, this);
+		this->next_table()->delete_route(found, this);
 	    }
 
 	    _wining_routes.insert(route.net(), &route);
 
-	    if (this->next_table() != NULL)
-		this->next_table()->add_route(route, this);
+	    this->next_table()->add_route(route, this);
 	    return XORP_OK;
 	} else {
 	    IPNextHop<A>* rt_nexthop = route.nexthop();
@@ -172,8 +171,7 @@ ExtIntTable<A>::add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller)
 		    // Delete the IGP route that has worse admin distance
 		    _wining_routes.erase(found->net());
 
-		    if (this->next_table() != NULL)
-			this->next_table()->delete_route(found, this);
+		    this->next_table()->delete_route(found, this);
 		}
 
 		debug_msg("nexthop resolved to \n   %s\n", nexthop_route->str().c_str());
@@ -185,8 +183,7 @@ ExtIntTable<A>::add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller)
 
 		_wining_routes.insert(resolved_route->net(), resolved_route);
 
-		if (this->next_table() != NULL)
-		    this->next_table()->add_route(*resolved_route, this);
+		this->next_table()->add_route(*resolved_route, this);
 
 		return XORP_OK;
 	    }
@@ -236,6 +233,7 @@ ExtIntTable<A>::delete_route(const IPRouteEntry<A>* route,
 			     RouteTable<A>* caller)
 {
     debug_msg("ExtIntTable::delete_route %s\n", route->str().c_str());
+    XLOG_ASSERT(this->next_table());
 
     if (_int_table && caller == _int_table) {
 	debug_msg("  called from _int_table\n");
@@ -269,8 +267,7 @@ ExtIntTable<A>::delete_route(const IPRouteEntry<A>* route,
 		// Propagate the delete next
 		_wining_routes.erase(found->net());
 
-		if (this->next_table() != NULL)
-		    this->next_table()->delete_route(found, this);
+		this->next_table()->delete_route(found, this);
 
 		// Now delete the local resolved copy, and reinstantiate it
 		const IPRouteEntry<A>* egp_parent = found->egp_parent();
@@ -362,10 +359,8 @@ ExtIntTable<A>::delete_ext_route(const IPRouteEntry<A>* route,
 	// Propagate the delete next
 	_wining_routes.erase(found->net());
 
-	if (this->next_table() != NULL) {
-	    this->next_table()->delete_route(found, this);
-	    is_delete_propagated = true;
-	}
+	this->next_table()->delete_route(found, this);
+	is_delete_propagated = true;
 
 	// Now delete the locally modified copy
 	delete found;
@@ -375,10 +370,8 @@ ExtIntTable<A>::delete_ext_route(const IPRouteEntry<A>* route,
 	if (delete_unresolved_nexthop(route) == false) {
 	    _wining_routes.erase(route->net());
 
-	    if (this->next_table() != NULL) {
-		this->next_table()->delete_route(route, this);
-		is_delete_propagated = true;
-	    }
+	    this->next_table()->delete_route(route, this);
+	    is_delete_propagated = true;
 	}
     }
 
@@ -556,8 +549,7 @@ ExtIntTable<A>::recalculate_nexthops(const IPRouteEntry<A>& new_route)
 	    // Propagate the delete next
 	    _wining_routes.erase(found->net());
 
-	    if (this->next_table() != NULL)
-		this->next_table()->delete_route(found, this);
+	    this->next_table()->delete_route(found, this);
 
 	    // Now delete the local resolved copy, and reinstantiate it
 	    delete found;
