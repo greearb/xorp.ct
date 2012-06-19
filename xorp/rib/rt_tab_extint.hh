@@ -183,6 +183,7 @@ private:
     typedef typename UnresolvedIPRouteEntry<A>::RouteBackLink UnresolvedRouteBackLink;
     typedef multimap<const IPNet<A>, ResolvedIPRouteEntry<A>* > IGPParentMultiMap;
     typedef map<IPNet<A>, UnresolvedIPRouteEntry<A>* > IpUnresolvedTableMap;
+    typedef Trie<A, const IPRouteEntry<A>* > RouteTrie;
 
     int delete_ext_route(const IPRouteEntry<A>* route,
 			 bool& is_delete_propagated);
@@ -217,7 +218,7 @@ private:
 
     RouteTable<A>*				_ext_table;
     RouteTable<A>*				_int_table;
-    Trie<A, const ResolvedIPRouteEntry<A>* >	_ip_route_table;
+    Trie<A, const ResolvedIPRouteEntry<A>* >	_ip_resolved_table;
     multimap<A, UnresolvedIPRouteEntry<A>* >	_ip_unresolved_nexthops;
     IpUnresolvedTableMap			_ip_unresolved_table;
 
@@ -227,7 +228,13 @@ private:
 
     // _resolving_routes is a Trie of all the routes that are used to
     // resolve external routes
-    Trie<A, const IPRouteEntry<A>* > _resolving_routes;
+    RouteTrie _resolving_routes;
+
+    // Tries where we cache wining IGP, EGP and overall routes
+    RouteTrie _wining_igp_routes;
+    RouteTrie _wining_egp_routes;   // Here, all wining EGP routes will be stored
+				    //(resolved, unresolved and connected)
+    RouteTrie _wining_routes;	    // Overall wining routes!
 };
 
 #endif // __RIB_RT_TAB_EXTINT_HH__
