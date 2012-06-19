@@ -244,6 +244,8 @@ public:
 		lo = x->high(); ++lo;
 		hi = n->_right->low(); --hi;
 	    } else if (a <= n->_right->_k.top_addr()) {	// case 4:
+		if (n->_left && a > n->_left->_k.top_addr())
+		    lo = n->_left->high(); ++lo;
 		n = n->_right; // and continue
 	    } else {					// case 5:
 		lo = n->_right->high(); ++lo;
