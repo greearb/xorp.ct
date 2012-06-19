@@ -79,7 +79,7 @@ private:
     void do_filtering(IPRouteEntry<A>& r);
 
 
-    typedef Trie<A, const IPRouteEntry<A>*> RouteContainer;
+    typedef Trie<A, IPRouteEntry<A>* > RouteContainer;
 
 
     RouteTable<A>*	_parent;

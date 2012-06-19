@@ -78,16 +78,13 @@ PolicyConnectedTable<A>::add_route(const IPRouteEntry<A>& route,
     IPRouteEntry<A>* original = new IPRouteEntry<A>(route);
     _route_table.insert(original->net(), original);
 
-    // make a copy so we may modify it
-    IPRouteEntry<A> route_copy(*original);
-    do_filtering(route_copy);
-
+    do_filtering(*original);
 
     RouteTable<A>* next = this->next_table();
     XLOG_ASSERT(next);
 
     // Send the possibly modified route down
-    return next->add_route(route_copy, this);
+    return next->add_route(*original, this);
 }
 
 template <class A>
@@ -107,19 +104,19 @@ PolicyConnectedTable<A>::delete_route(const IPRouteEntry<A>* route,
 
     XLOG_ASSERT(i != _route_table.end());
 
-    const IPRouteEntry<A>* re = *i;
+    IPRouteEntry<A>* re = *i;
     _route_table.erase(route->net());
-    delete re;
 
     RouteTable<A>* next = this->next_table();
     XLOG_ASSERT(next);
 
-    // make a copy so we may modify it (e.g., by setting its policy tags)
-    IPRouteEntry<A> route_copy(*route);
-    do_filtering(route_copy);
+    do_filtering(*re);
 
     // propagate the delete
-    return next->delete_route(&route_copy, this);
+    int ret = next->delete_route(re, this);
+    delete re;
+
+    return ret;
 }
 
 template <class A>
@@ -133,7 +130,7 @@ PolicyConnectedTable<A>::lookup_route(const IPNet<A>& net) const
 
     // check if we have route [we should have same routes as origin table].
     if (i == _route_table.end())
-	return _parent->lookup_route(net); // should return null probably
+	return NULL;
 
     return *i;
 }
@@ -150,7 +147,7 @@ PolicyConnectedTable<A>::lookup_route(const A& addr) const
 
     // same as above
     if (i == _route_table.end())
-	return _parent->lookup_route(addr); // return null
+	return NULL;
 
     return *i;
 }
@@ -202,39 +199,17 @@ PolicyConnectedTable<A>::push_routes()
     RouteTable<A>* next = this->next_table();
     XLOG_ASSERT(next);
 
-    vector<IPRouteEntry<A>*> new_routes;
-
     // XXX: not a background task
     // go through original routes and refilter them
     for (typename RouteContainer::iterator i = _route_table.begin();
 	i != _route_table.end(); ++i) {
 
-	const IPRouteEntry<A>* prev = *i;
+	IPRouteEntry<A>* prev = *i;
 
-	// make a copy so filter may [possibly] modify it
-	const IPRouteEntry<A>* orig = _parent->lookup_route(prev->net());
-	IPRouteEntry<A>* copy = new IPRouteEntry<A>(*orig);
-
-	do_filtering(*copy);
+	do_filtering(*prev);
 
 	// only policytags may change
-	next->replace_policytags(*copy, prev->policytags(), this);
-
-	// delete old route
-	delete prev;
-
-	// keep the new route so we may re-store it after this iteration
-	new_routes.push_back(copy);
-    }
-
-    // store all new routes
-    for (typename vector<IPRouteEntry<A>*>::iterator i = new_routes.begin();
-	i != new_routes.end(); ++i) {
-
-	// replace route
-	IPRouteEntry<A>* route = *i;
-	_route_table.erase(route->net());
-	_route_table.insert(route->net(), route);
+	next->replace_policytags(*prev, prev->policytags(), this);
     }
 }
 
