@@ -540,11 +540,14 @@ public:
     iterator insert(const Key & net, const Payload& p) {
 	bool replaced = false;
 	Node *out = Node::insert(&_root, net, p, replaced);
-	if (replaced) {
-	    fprintf(stderr, "overwriting a full node"); //XXX
-	} else {
+	if (!replaced) {
 	    _payload_count++;
 	}
+#ifdef DEBUG_LOGGING
+	else {
+	    fprintf(stderr, "overwriting a full node"); //XXX
+	}
+#endif
 	return iterator(out);
     }
 
