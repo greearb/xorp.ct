@@ -80,45 +80,61 @@ test_route_range(const string& ipv4,
     if (verbose)
 	printf("**RouteRange for %s\n", ipv4.c_str());
     if (rr->route() != NULL) {
-	DiscardNextHop* dnh;
-	dnh = reinterpret_cast<DiscardNextHop* >(rr->route()->nexthop());
-	if (verifytype != RibVerifyType(DISCARD) && dnh == NULL) {
-	    printf("**RouteRange for %s\n", ipv4.c_str());
-	    printf("Expected discard route\n");
-	    abort();
-	}
-	UnreachableNextHop* unh;
-	unh = reinterpret_cast<UnreachableNextHop* >(rr->route()->nexthop());
-	if (verifytype != RibVerifyType(UNREACHABLE) && unh == NULL) {
-	    printf("**RouteRange for %s\n", ipv4.c_str());
-	    printf("Expected unreachable route\n");
-	    abort();
-	}
-	if (rr->route()->vif() == NULL) {
-	    printf("BAD Vif NULL != \"%s\"\n", vifname.c_str());
-	    abort();
-	} else if (rr->route()->vif()->name() != vifname) {
-	    printf("**RouteRange for %s\n", ipv4.c_str());
-	    printf("BAD Vif \"%s\" != \"%s\"\n",
-		   rr->route()->vif()->name().c_str(),
-		   vifname.c_str()
-		   );
-	    abort();
-	}
-	IPNextHop<IPv4>* nh;
-	nh = reinterpret_cast<IPNextHop<IPv4>* >(rr->route()->nexthop());
-	if (nh->addr().str() != nexthop) {
-	    printf("**RouteRange for %s\n", ipv4.c_str());
-	    printf("Found Nexthop: %s\n", nh->addr().str().c_str());
-	    printf("BAD Nexthop\n");
-	    printf("Got: %s\n", nh->addr().str().c_str());
-	    printf("Should be: %s\n", nexthop.c_str());
-	    abort();
-	}
+	do {
+	    if (verifytype == RibVerifyType(MISS)) {
+		printf("**RouteRange for %s\n", ipv4.c_str());
+		printf("Expected the miss, got the route\n");
+		abort();
+	    }
+
+	    DiscardNextHop<IPv4>* dnh;
+	    dnh = dynamic_cast<DiscardNextHop<IPv4>*>(rr->route()->nexthop());
+	    if (verifytype == RibVerifyType(DISCARD) && dnh == NULL) {
+		printf("**RouteRange for %s\n", ipv4.c_str());
+		printf("Expected discard route\n");
+		abort();
+	    } else if (verifytype == RibVerifyType(DISCARD) && dnh != NULL)
+		break;
+
+	    UnreachableNextHop<IPv4>* unh;
+	    unh = dynamic_cast<UnreachableNextHop<IPv4>*>(rr->route()->nexthop());
+	    if (verifytype == RibVerifyType(UNREACHABLE) && unh == NULL) {
+		printf("**RouteRange for %s\n", ipv4.c_str());
+		printf("Expected unreachable route\n");
+		abort();
+	    } else if (verifytype == RibVerifyType(UNREACHABLE) && unh != NULL)
+		break;
+
+	    if (rr->route()->vif() == NULL) {
+		printf("BAD Vif NULL != \"%s\"\n", vifname.c_str());
+		abort();
+	    } else if (rr->route()->vif()->name() != vifname) {
+		printf("**RouteRange for %s\n", ipv4.c_str());
+		printf("BAD Vif \"%s\" != \"%s\"\n",
+			rr->route()->vif()->name().c_str(), vifname.c_str());
+		abort();
+	    }
+
+	    if (verifytype != RibVerifyType(IP)) {
+		printf("Something is wrong!!!\n");
+		printf("Expected to verify IP type, but got %s!\n", verifytypestr.c_str());
+		abort();
+	    }
+	    IPNextHop<IPv4>* nh;
+	    nh = rr->route()->nexthop();
+	    if (nh->addr().str() != nexthop) {
+		printf("**RouteRange for %s\n", ipv4.c_str());
+		printf("Found Nexthop: %s\n", nh->addr().str().c_str());
+		printf("BAD Nexthop\n");
+		printf("Got: %s\n", nh->addr().str().c_str());
+		printf("Should be: %s\n", nexthop.c_str());
+		abort();
+	    }
+	} while (false);
     } else {
 	if (verifytype != RibVerifyType(MISS)) {
 	    printf("**RouteRange for %s\n", ipv4.c_str());
-	    printf("Expected route miss, got a route\n");
+	    printf("Didn't got a route, didn't expect the miss\n");
 	    abort();
 	}
     }

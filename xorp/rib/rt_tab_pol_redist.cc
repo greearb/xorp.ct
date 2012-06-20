@@ -45,8 +45,7 @@ PolicyRedistTable<A>::PolicyRedistTable(RouteTable<A>* parent, XrlRouter& rtr,
       _xrl_router(rtr),
       _eventloop(_xrl_router.eventloop()),
       _redist_map(rmap),
-      _redist4_client(&_xrl_router),
-      _redist6_client(&_xrl_router),
+      _redist_client(&_xrl_router),
       _multicast(multicast)
 {
     if (_parent->next_table() != NULL) {
@@ -151,7 +150,15 @@ template <class A>
 string
 PolicyRedistTable<A>::str() const
 {
-    return "not implement yet";
+    ostringstream oss;
+    oss << "------" << endl;
+    oss << "PolicyRedistTable" << endl;
+    oss << "parent: " << const_cast<PolicyRedistTable<A>* >(this)->parent()->tablename() << endl;
+    if (this->next_table())
+	oss << "next table: " << this->next_table()->tablename() << endl;
+    else
+	oss << "no next table" << endl;
+    return oss.str();
 }
 
 
@@ -186,37 +193,37 @@ PolicyRedistTable<A>::xrl_cb(const XrlError& e, string action) {
     }
 }
 
-template <>
+template <class A>
 void
-PolicyRedistTable<IPv4>::add_redist(const IPRouteEntry<IPv4>& route,
+PolicyRedistTable<A>::add_redist(const IPRouteEntry<A>& route,
 				    const string& proto)
 {
-    string error = "add_route4 for " + proto + " route: " + route.str();
+    string error = "add_route for " + A::ip_version_str() + " " + proto + " route: " + route.str();
 
-    debug_msg("[RIB] PolicyRedistTable add_redist IPv4 %s to %s\n",
-	      route.str().c_str(), proto.c_str());
+    debug_msg("[RIB] PolicyRedistTable add_redist %s %s to %s\n",
+	A::ip_version_str().c_str(), route.str().c_str(), proto.c_str());
 
-    _redist4_client.send_add_route4(proto.c_str(), route.net(),
+    _redist_client.send_add_route(proto.c_str(), route.net(),
 				    !_multicast, _multicast, // XXX
 				    route.nexthop_addr(), route.metric(),
 				    route.policytags().xrl_atomlist(),
-				    callback(this, &PolicyRedistTable<IPv4>::xrl_cb, error));
+				    callback(this, &PolicyRedistTable<A>::xrl_cb, error));
 }
 
 
-template <>
+template <class A>
 void
-PolicyRedistTable<IPv4>::del_redist(const IPRouteEntry<IPv4>& route,
+PolicyRedistTable<A>::del_redist(const IPRouteEntry<A>& route,
 				    const string& proto)
 {
-    string error = "del_route4 for " + proto + " route: " + route.str();
+    string error = "del_route for " + A::ip_version_str() + " " + proto + " route: " + route.str();
 
-    debug_msg("[RIB] PolicyRedistTable del_redist IPv4 %s to %s\n",
-	      route.str().c_str(), proto.c_str());
+    debug_msg("[RIB] PolicyRedistTable del_redist %s %s to %s\n",
+	A::ip_version_str().c_str(), route.str().c_str(), proto.c_str());
 
-    _redist4_client.send_delete_route4(proto.c_str(), route.net(),
+    _redist_client.send_delete_route(proto.c_str(), route.net(),
 				       !_multicast, _multicast,	// XXX
-				       callback(this, &PolicyRedistTable<IPv4>::xrl_cb, error));
+				       callback(this, &PolicyRedistTable<A>::xrl_cb, error));
 }
 
 
@@ -250,39 +257,4 @@ PolicyRedistTable<A>::replace_policytags(const IPRouteEntry<A>& route,
 
 
 template class PolicyRedistTable<IPv4>;
-
-
-template <>
-void
-PolicyRedistTable<IPv6>::add_redist(const IPRouteEntry<IPv6>& route,
-				    const string& proto)
-{
-    string error = "add_route6 for " + proto + " route: " + route.str();
-
-    debug_msg("[RIB] PolicyRedistTable add_redist IPv6 %s to %s\n",
-	      route.str().c_str(), proto.c_str());
-
-    _redist6_client.send_add_route6(proto.c_str(), route.net(),
-				    !_multicast, _multicast, // XXX: mutex ?
-				    route.nexthop_addr(), route.metric(),
-				    route.policytags().xrl_atomlist(),
-				    callback(this, &PolicyRedistTable<IPv6>::xrl_cb, error));
-}
-
-
-template <>
-void
-PolicyRedistTable<IPv6>::del_redist(const IPRouteEntry<IPv6>& route,
-				    const string& proto)
-{
-    string error = "del_route6 for " + proto + " route: " + route.str();
-
-    debug_msg("[RIB] PolicyRedistTable del_redist IPv6 %s to %s\n",
-	      route.str().c_str(), proto.c_str());
-
-    _redist6_client.send_delete_route6(proto.c_str(), route.net(),
-				       !_multicast, _multicast, // XXX: mutex ?
-				       callback(this, &PolicyRedistTable<IPv6>::xrl_cb, error));
-}
-
 template class PolicyRedistTable<IPv6>;

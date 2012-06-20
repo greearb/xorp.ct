@@ -69,11 +69,15 @@ public:
     /**
      * Add a route to the OriginTable.  The route must not already be
      * in the OriginTable.
+     * Route is passed to add_route as pointer to avoid unnecessary
+     * calling of IPRouteEntry<A> constructors.
+     * OriginTable IS RESPONSIBLE for freeing the memory of the passed pointer.
+     * Callers MUST NOT free, or change the memory of pointer after it was passed to this function!
      *
-     * @param route the route entry to be added.
+     * @param route the pointer to route entry to be added.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int add_route(const IPRouteEntry<A>& route);
+    int add_route(IPRouteEntry<A>* route);
 
     /**
      * Generic @ref RouteTable method that is not used on OriginTable.

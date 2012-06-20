@@ -340,8 +340,21 @@ policy {
 
 	    modifier {
 		%help: short "Set prefix modifier";
+		%allow: $(@) ":" %help: "Exact";
+		%allow: $(@) "==" %help: "Exact";
+		%allow: $(@) "exact" %help: "Exact";
+		%allow: $(@) "!=" %help: "Not";
+		%allow: $(@) "not" %help: "Not";
+		%allow: $(@) ">=" %help: "Or shorter";
+		%allow: $(@) "orshorter" %help: "Or shorter";
+		%allow: $(@) ">" %help: "Shorter";
+		%allow: $(@) "shorter" %help: "Shorter";
+		%allow: $(@) "<" %help: "Longer";
+		%allow: $(@) "longer" %help: "Longer";
+		%allow: $(@) "<=" %help: "Or longer";
+		%allow: $(@) "orlonger" %help: "Or longer";
 		%set: xrl "$(policy.targetname)/policy/0.1/delete_from_set?type:txt=set_ipv4net&set:txt=$(network4-list.@)&element:txt=$(network.@)";
-		%set: xrl "$(policy.targetname)/policy/0.1/add_to_set?type:txt=set_ipv4net&set:txt=$(network4-list.@)&element:txt=$(network.@) $(@)";
+		%set: xrl "$(policy.targetname)/policy/0.1/add_to_set?type:txt=set_ipv4net&set:txt=$(network4-list.@)&element:txt=$(network.@)~$(@)";
 		%delete: xrl "$(policy.targetname)/policy/0.1/delete_from_set?type:txt=set_ipv4net&set:txt=$(network4-list.@)&element:txt=$(network.@)";
 		%delete: xrl "$(policy.targetname)/policy/0.1/add_to_set?type:txt=set_ipv4net&set:txt=$(network4-list.@)&element:txt=$(network.@)";
 	    }
@@ -366,8 +379,21 @@ policy {
 
 	    modifier {
 		%help: short "Set prefix modifier";
+		%allow: $(@) ":" %help: "Exact";
+		%allow: $(@) "==" %help: "Exact";
+		%allow: $(@) "exact" %help: "Exact";
+		%allow: $(@) "!=" %help: "Not";
+		%allow: $(@) "not" %help: "Not";
+		%allow: $(@) ">=" %help: "Or shorter";
+		%allow: $(@) "orshorter" %help: "Or shorter";
+		%allow: $(@) ">" %help: "Shorter";
+		%allow: $(@) "shorter" %help: "Shorter";
+		%allow: $(@) "<" %help: "Longer";
+		%allow: $(@) "longer" %help: "Longer";
+		%allow: $(@) "<=" %help: "Or longer";
+		%allow: $(@) "orlonger" %help: "Or longer";
 		%set: xrl "$(policy.targetname)/policy/0.1/delete_from_set?type:txt=set_ipv6net&set:txt=$(network6-list.@)&element:txt=$(network.@)";
-		%set: xrl "$(policy.targetname)/policy/0.1/add_to_set?type:txt=set_ipv6net&set:txt=$(network6-list.@)&element:txt=$(network.@) $(@)";
+		%set: xrl "$(policy.targetname)/policy/0.1/add_to_set?type:txt=set_ipv6net&set:txt=$(network6-list.@)&element:txt=$(network.@)~$(@)";
 		%delete: xrl "$(policy.targetname)/policy/0.1/delete_from_set?type:txt=set_ipv6net&set:txt=$(network6-list.@)&element:txt=$(network.@)";
 		%delete: xrl "$(policy.targetname)/policy/0.1/add_to_set?type:txt=set_ipv6net&set:txt=$(network6-list.@)&element:txt=$(network.@)";
 	    }

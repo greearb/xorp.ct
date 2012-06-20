@@ -36,6 +36,7 @@
 
 #include "protocol.hh"
 
+template<class A>
 class RibVif;
 
 /**
@@ -44,6 +45,7 @@ class RibVif;
  * This is the base class from which RIB routing table entries are derived.
  * It's not useful by itself.
  */
+template<class A>
 class RouteEntry {
 public:
     /**
@@ -56,8 +58,11 @@ public:
      * @param protocol the routing protocol that originated this route.
      * @param metric the routing protocol metric for this route.
      */
-    RouteEntry(RibVif* vif, NextHop* nexthop, const Protocol& protocol,
-	       uint32_t metric);
+    RouteEntry(RibVif<A>* vif, const Protocol& protocol,
+		uint32_t metric, const PolicyTags& policytags, const IPNet<A>& net);
+
+    RouteEntry(RibVif<A>* vif, const Protocol& protocol,
+		uint32_t metric, const IPNet<A>& net);
 
     /**
      * Destructor
@@ -70,7 +75,7 @@ public:
      * @return the Virtual Interface on which packets matching this
      * routing table entry should be forwarded.
      */
-    RibVif* vif() const { return _vif; }
+    RibVif<A>* vif() const { return _vif; }
 
     /**
      * Get the NextHop router.
@@ -78,14 +83,7 @@ public:
      * @return the NextHop router to which packets matching this
      * entry should be forwarded.
      */
-    NextHop* nexthop() const { return _nexthop; }
-
-    /**
-     * Set the NextHop router.
-     *
-     * @param v the NextHop router to be set on this route.
-     */
-    void set_nexthop(NextHop* v) { _nexthop = v; }
+    virtual NextHop* nexthop() const = 0;
 
     /**
      * Get the Administrative Distance.
@@ -132,13 +130,29 @@ public:
      */
     uint32_t metric() const { return _metric; }
 
+    virtual const IPNet<A>& net() const { return _net; };
+
+    size_t prefix_len() const  { return _net.prefix_len(); };
+
+    virtual const A& nexthop_addr() const = 0;
+
+    /**
+     * Get the policy-tags for this route.
+     *
+     * @return the policy-tags for this route.
+     */
+    PolicyTags& policytags() { return _policytags; }
+    const PolicyTags& policytags() const { return _policytags; }
+
 protected:
-    RibVif*		_vif;
-    NextHop*		_nexthop;		// The next-hop router
-    // The routing protocol that instantiated this route
-    const Protocol&	_protocol;
+    RibVif<A>*		_vif;
+
+    const Protocol&	_protocol;		// The routing protocol that instantiated this route
+
     uint16_t		_admin_distance;	// Lower is better
     uint32_t		_metric;		// Lower is better
+    PolicyTags		_policytags;		// Tags used for policy route redistribution
+    const IPNet<A>	_net;			// The route entry's subnet address
 };
 
 /**
@@ -149,7 +163,7 @@ protected:
  * the IPv4 class or the IPv6 class.
  */
 template <class A>
-class IPRouteEntry : public RouteEntry {
+class IPRouteEntry : public RouteEntry<A> {
 public:
     /**
      * Constructor for IPRouteEntry.
@@ -162,9 +176,9 @@ public:
      * @param protocol the routing protocol that originated this route.
      * @param metric the routing protocol metric for this route.
      */
-    IPRouteEntry(const IPNet<A>& net, RibVif* vif, NextHop* nexthop,
+    IPRouteEntry(const IPNet<A>& net, RibVif<A>* vif, IPNextHop<A>* nexthop,
 		 const Protocol& protocol, uint32_t metric)
-	: RouteEntry(vif, nexthop, protocol, metric), _net(net) {}
+	: RouteEntry<A>(vif, protocol, metric, net), _nexthop(nexthop) {}
 
     /**
      * Constructor for IPRouteEntry.
@@ -178,30 +192,25 @@ public:
      * @param metric the routing protocol metric for this route.
      * @param policytags the policy-tags for this route.
      */
-    IPRouteEntry(const IPNet<A>& net, RibVif* vif, NextHop* nexthop,
+    IPRouteEntry(const IPNet<A>& net, RibVif<A>* vif, IPNextHop<A>* nexthop,
 		 const Protocol& protocol, uint32_t metric,
 		 const PolicyTags& policytags)
-	: RouteEntry(vif, nexthop, protocol, metric), _net(net),
-	  _policytags(policytags) {}
+	: RouteEntry<A>(vif, protocol, metric, policytags, net), _nexthop(nexthop) {}
 
     /**
      * Destructor for Routing Table Entry
      */
-    ~IPRouteEntry() {}
+    virtual ~IPRouteEntry() {}
 
     /**
-     * Get the route entry's subnet addres.
+     * Get the NextHop router.
      *
-     * @return the route entry's subnet address.
+     * @return the NextHop router to which packets matching this
+     * entry should be forwarded.
      */
-    const IPNet<A>& net() const { return _net; }
+    IPNextHop<A>* nexthop() const { return _nexthop; }
 
-    /**
-     * Get the prefix length of the route entry's subnet address.
-     *
-     * @return the prefix length (in bits) of the route entry's subnet address.
-     */
-    size_t prefix_len() const { return _net.prefix_len(); }
+    void set_nexthop(IPNextHop<A>* v) { _nexthop = v; }
 
     /**
      * Get the route entry's next-hop router address.
@@ -210,21 +219,12 @@ public:
      * next-hop router, then the return value is IPv4#ZERO() or IPv6#ZERO().
      */
     const A& nexthop_addr() const {
-	IPNextHop<A>* nh = reinterpret_cast<IPNextHop<A>* >(nexthop());
+	IPNextHop<A>* nh = nexthop();
 	if (nh != NULL)
 	    return nh->addr();
-	else {
+	else
 	    return A::ZERO();
-	}
     }
-
-    /**
-     * Get the policy-tags for this route.
-     *
-     * @return the policy-tags for this route.
-     */
-    PolicyTags& policytags() { return _policytags; }
-    const PolicyTags& policytags() const { return _policytags; }
 
     /**
      * Get the route entry as a string for debugging purposes.
@@ -232,10 +232,8 @@ public:
      * @return a human readable representation of the route entry.
      */
     string str() const;
-
 protected:
-    IPNet<A> _net;		// The route entry's subnet address
-    PolicyTags _policytags;	// Tags used for policy route redistribution
+    IPNextHop<A>*	_nexthop;
 };
 
 typedef IPRouteEntry<IPv4> IPv4RouteEntry;
@@ -275,7 +273,7 @@ public:
      * nexthop in the egp_parent into a local nexthop.
      * @param egp_parent the orginal route entry with a non-local nexthop.
      */
-    ResolvedIPRouteEntry(const IPNet<A>& net, RibVif* vif, NextHop* nexthop,
+    ResolvedIPRouteEntry(const IPNet<A>& net, RibVif<A>* vif, IPNextHop<A>* nexthop,
 			 const Protocol& protocol, uint32_t metric,
 			 const IPRouteEntry<A>* igp_parent,
 			 const IPRouteEntry<A>* egp_parent)

@@ -50,6 +50,37 @@ pass_fail_handler(const XrlError& e, XrlCompletion* c)
 // ----------------------------------------------------------------------------
 // XRL Commands (NB fewer than number of direct commands)
 
+class XrlInterfaceRouteAddCommand : public InterfaceRouteAddCommand {
+public:
+    XrlInterfaceRouteAddCommand(EventLoop&	 e,
+		       XrlRibV0p1Client& xrl_client,
+		       XrlCompletion&	 completion)
+	: InterfaceRouteAddCommand(),
+ 	  _eventloop(e), _xrl_client(xrl_client), _completion(completion) {}
+
+    int execute() {
+	cout << "InterfaceRouteAddCommand::execute " << _tablename << " " << _vif_name << " " << _net.str()
+	     << " " << _nexthop.str() << endl;
+
+	_completion = XRL_PENDING;
+	bool unicast = true, multicast = false;
+
+	PolicyTags pt;
+
+	_xrl_client.send_add_interface_route4(
+	    "rib", _tablename, unicast, multicast, _net, _nexthop, "", _vif_name, _metric,
+	    pt.xrl_atomlist(),	// XXX: no policy
+	    callback(&pass_fail_handler, &_completion));
+
+	return _completion;
+    }
+
+private:
+    EventLoop&	      _eventloop;
+    XrlRibV0p1Client& _xrl_client;
+    XrlCompletion&    _completion;
+};
+
 class XrlRouteAddCommand : public RouteAddCommand {
 public:
     XrlRouteAddCommand(EventLoop&	 e,

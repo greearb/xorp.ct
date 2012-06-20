@@ -47,6 +47,20 @@ ExtIntTable<A>::ExtIntTable(RouteTable<A>* ext_table, RouteTable<A>* int_table)
 }
 
 template<class A>
+ExtIntTable<A>::~ExtIntTable()
+{
+    while (! _ip_unresolved_table.empty()) {
+	delete _ip_unresolved_table.begin()->second;
+	_ip_unresolved_table.erase(_ip_unresolved_table.begin());
+    }
+
+    while (! _ip_route_table.empty()) {
+	delete *_ip_route_table.begin();
+	_ip_route_table.erase(_ip_route_table.begin());
+    }
+}
+
+template<class A>
 int
 ExtIntTable<A>::add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller)
 {
@@ -100,12 +114,12 @@ ExtIntTable<A>::add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller)
 	    // so delete it first.
 	    //
 	    IPNextHop<A>* rt_nexthop;
-	    rt_nexthop = reinterpret_cast<IPNextHop<A>* >(found_egp->nexthop());
+	    rt_nexthop = found_egp->nexthop();
 	    const A& nexthop_addr = rt_nexthop->addr();
 	    const IPRouteEntry<A>* nexthop_route;
 	    nexthop_route = lookup_route_in_igp_parent(nexthop_addr);
 	    if (nexthop_route != NULL) {
-		RibVif* vif = nexthop_route->vif();
+		RibVif<A>* vif = nexthop_route->vif();
 		if ((vif != NULL)
 		    && (vif->is_same_subnet(IPvXNet(nexthop_route->net()))
 			|| vif->is_same_p2p(IPvX(nexthop_addr)))) {
@@ -141,7 +155,7 @@ ExtIntTable<A>::add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller)
 	    }
 	}
 
-	rt_nexthop = reinterpret_cast<IPNextHop<A>* >(route.nexthop());
+	rt_nexthop = route.nexthop();
 	A nexthop_addr = rt_nexthop->addr();
 	const IPRouteEntry<A>* nexthop_route;
 	nexthop_route = lookup_route_in_igp_parent(nexthop_addr);
@@ -166,7 +180,7 @@ ExtIntTable<A>::add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller)
 		    this->next_table()->delete_route(found, this);
 	    }
 
-	    RibVif* vif = nexthop_route->vif();
+	    RibVif<A>* vif = nexthop_route->vif();
 	    if ((vif != NULL)
 		&& (vif->is_same_subnet(IPvXNet(nexthop_route->net()))
 		    || vif->is_same_p2p(IPvX(nexthop_addr)))) {
@@ -368,7 +382,7 @@ ExtIntTable<A>::lookup_in_resolved_table(const IPNet<A>& net)
     if (iter == _ip_route_table.end())
 	return NULL;
     else
-	return iter.payload();
+	return *iter;
 }
 
 template<class A>
@@ -494,7 +508,7 @@ ExtIntTable<A>::recalculate_nexthops(const IPRouteEntry<A>& new_route)
 	debug_msg("no old route\n");
 	return;
     }
-    old_route = iter.payload();
+    old_route = *iter;
     debug_msg("old route was: %s\n", old_route->str().c_str());
 
     const ResolvedIPRouteEntry<A>* found;
@@ -505,7 +519,7 @@ ExtIntTable<A>::recalculate_nexthops(const IPRouteEntry<A>& new_route)
 	egp_parent = found->egp_parent();
 	XLOG_ASSERT(egp_parent->nexthop()->type() != DISCARD_NEXTHOP);
 	XLOG_ASSERT(egp_parent->nexthop()->type() != UNREACHABLE_NEXTHOP);
-	A nexthop = (reinterpret_cast<IPNextHop<A>* >(egp_parent->nexthop()))->addr();
+	A nexthop = (egp_parent->nexthop())->addr();
 
 	if (new_route.net().contains(nexthop)) {
 	    debug_msg("found route using this nexthop:\n    %s\n",
@@ -557,7 +571,7 @@ ExtIntTable<A>::lookup_route(const IPNet<A>& ipv4net) const
 
     iter = _ip_route_table.lookup_node(ipv4net);
     if (iter != _ip_route_table.end()) {
-	return iter.payload();
+	return *iter;
     }
     debug_msg("Not found in resolved table\n");
 #ifdef DEBUG_LOGGING
@@ -596,7 +610,7 @@ ExtIntTable<A>::lookup_route(const A& addr) const
     typename Trie<A, const ResolvedIPRouteEntry<A>* >::iterator trie_iter;
     trie_iter = _ip_route_table.find(addr);
     if (trie_iter != _ip_route_table.end()) {
-	found.push_back(trie_iter.payload());
+	found.push_back(*trie_iter);
     }
 
     int_found = lookup_route_in_igp_parent(addr);
@@ -753,7 +767,7 @@ ExtIntTable<A>::lookup_route_range(const A& addr) const
     if (iter == _ip_route_table.end())
 	route = NULL;
     else
-	route = iter.payload();
+	route = *iter;
 
     A bottom_addr, top_addr;
     _ip_route_table.find_bounds(addr, bottom_addr, top_addr);

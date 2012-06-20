@@ -57,7 +57,7 @@ PolicyConnectedTable<A>::~PolicyConnectedTable ()
 {
     for (typename RouteContainer::iterator i = _route_table.begin();
 	i != _route_table.end(); ++i) {
-	delete i.payload();
+	delete *i;
     }
 
     _route_table.delete_all_nodes();
@@ -107,7 +107,7 @@ PolicyConnectedTable<A>::delete_route(const IPRouteEntry<A>* route,
 
     XLOG_ASSERT(i != _route_table.end());
 
-    const IPRouteEntry<A>* re = i.payload();
+    const IPRouteEntry<A>* re = *i;
     _route_table.erase(route->net());
     delete re;
 
@@ -135,7 +135,7 @@ PolicyConnectedTable<A>::lookup_route(const IPNet<A>& net) const
     if (i == _route_table.end())
 	return _parent->lookup_route(net); // should return null probably
 
-    return i.payload();
+    return *i;
 }
 
 
@@ -152,7 +152,7 @@ PolicyConnectedTable<A>::lookup_route(const A& addr) const
     if (i == _route_table.end())
 	return _parent->lookup_route(addr); // return null
 
-    return i.payload();
+    return *i;
 }
 
 
@@ -182,7 +182,15 @@ template <class A>
 string
 PolicyConnectedTable<A>::str() const
 {
-    return "not implement yet";
+    ostringstream oss;
+    oss << "------" << endl;
+    oss << "PolicyConnectedTable" << endl;
+    oss << "parent: " << const_cast< PolicyConnectedTable<A>* >(this)->parent()->tablename() << endl;
+    if (this->next_table())
+	oss << "next table: " << this->next_table()->tablename() << endl;
+    else
+	oss << "no next table" << endl;
+    return oss.str();
 }
 
 template <class A>
@@ -201,7 +209,7 @@ PolicyConnectedTable<A>::push_routes()
     for (typename RouteContainer::iterator i = _route_table.begin();
 	i != _route_table.end(); ++i) {
 
-	const IPRouteEntry<A>* prev = i.payload();
+	const IPRouteEntry<A>* prev = *i;
 
 	// make a copy so filter may [possibly] modify it
 	const IPRouteEntry<A>* orig = _parent->lookup_route(prev->net());
