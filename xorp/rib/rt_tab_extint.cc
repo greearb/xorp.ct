@@ -234,7 +234,7 @@ ExtIntTable<A>::resolve_and_store_route(const IPRouteEntry<A>& route,
     }
 
     typename ResolvedRouteBackLink::iterator backlink;
-    backlink = _ip_igp_parents.insert(make_pair(nexthop_route,
+    backlink = _ip_igp_parents.insert(make_pair(nexthop_route->net(),
 						resolved_route));
     resolved_route->set_backlink(backlink);
 
@@ -267,7 +267,7 @@ ExtIntTable<A>::delete_route(const IPRouteEntry<A>* route,
 	}
 
 	const ResolvedIPRouteEntry<A>* found;
-	found = lookup_by_igp_parent(route);
+	found = lookup_by_igp_parent(route->net());
 
 	if (found != NULL) {
 	    _resolving_routes.erase(route->net());
@@ -288,7 +288,7 @@ ExtIntTable<A>::delete_route(const IPRouteEntry<A>* route,
 	    egp_parent = found->egp_parent();
 	    delete found;
 	    add_route(*egp_parent, _ext_table);
-	    found = lookup_by_igp_parent(route);
+	    found = lookup_by_igp_parent(route->net());
 	}
 
 	// Propagate the original delete
@@ -344,7 +344,7 @@ ExtIntTable<A>::delete_ext_route(const IPRouteEntry<A>* route,
 
 	// Delete the route's IGP parent from _resolving_routes if
 	// no-one is using it anymore
-	if (lookup_by_igp_parent(found->igp_parent()) == NULL) {
+	if (lookup_by_igp_parent(found->igp_parent()->net()) == NULL) {
 	    _resolving_routes.erase(found->igp_parent()->net());
 	}
 
@@ -455,33 +455,33 @@ ExtIntTable<A>::delete_unresolved_nexthop(const IPRouteEntry<A>* route)
 
 template<class A>
 const ResolvedIPRouteEntry<A>*
-ExtIntTable<A>::lookup_by_igp_parent(const IPRouteEntry<A>* route)
+ExtIntTable<A>::lookup_by_igp_parent(const IPNet<A>& route_net)
 {
-    debug_msg("lookup_by_igp_parent %p -> %s\n",
-	      route, route->net().str().c_str());
+    debug_msg("lookup_by_igp_parent %s\n",
+	      route_net.str().c_str());
 
     typename ResolvedRouteBackLink::iterator iter;
-    iter = _ip_igp_parents.find(route);
+    iter = _ip_igp_parents.find(route_net);
     if (iter == _ip_igp_parents.end()) {
 	debug_msg("Found no routes with this IGP parent\n");
 	return NULL;
     } else {
-	debug_msg("Found route with IGP parent %p:\n    %s\n",
-		  route, (iter->second)->str().c_str());
+	debug_msg("Found route with IGP parent %s:\n    %s\n",
+		  route_net.str().c_str(), (iter->second)->str().c_str());
 	return iter->second;
     }
 }
 
 template<class A>
 const ResolvedIPRouteEntry<A>*
-ExtIntTable<A>::lookup_next_by_igp_parent(const IPRouteEntry<A>* route,
+ExtIntTable<A>::lookup_next_by_igp_parent(const IPNet<A>& route_net,
 			const typename IGPParentMultiMap::iterator& previous)
 {
-    debug_msg("lookup_next_by_igp_parent %p -> %s, starting from %p -> %s\n",
-	      route, route->net().str().c_str(),
+    debug_msg("lookup_next_by_igp_parent %s, starting from %p -> %s\n",
+	      route_net.str().c_str(),
 	      previous->second, previous->second->net().str().c_str());
 
-    pair<typename IGPParentMultiMap::iterator, typename IGPParentMultiMap::iterator> route_range = _ip_igp_parents.equal_range(route);
+    pair<typename IGPParentMultiMap::iterator, typename IGPParentMultiMap::iterator> route_range = _ip_igp_parents.equal_range(route_net);
     typename IGPParentMultiMap::iterator iter = previous;
     if (iter++ == route_range.second ||
         iter == route_range.second) {
@@ -489,8 +489,8 @@ ExtIntTable<A>::lookup_next_by_igp_parent(const IPRouteEntry<A>* route,
 	return NULL;
     }
 
-    debug_msg("Found next route with IGP parent %p:\n    %s\n",
-	      route, (iter->second)->str().c_str());
+    debug_msg("Found next route with IGP parent %s:\n    %s\n",
+	      route_net.str().c_str(), (iter->second)->str().c_str());
     return iter->second;
 }
 
@@ -514,7 +514,7 @@ ExtIntTable<A>::recalculate_nexthops(const IPRouteEntry<A>& new_route)
     const ResolvedIPRouteEntry<A>* found;
     typename IGPParentMultiMap::iterator last_not_deleted = _ip_igp_parents.end();
     const IPRouteEntry<A>* egp_parent;
-    found = lookup_by_igp_parent(old_route);
+    found = lookup_by_igp_parent(old_route->net());
     while (found != NULL) {
 	egp_parent = found->egp_parent();
 	XLOG_ASSERT(egp_parent->nexthop()->type() != DISCARD_NEXTHOP);
@@ -530,7 +530,7 @@ ExtIntTable<A>::recalculate_nexthops(const IPRouteEntry<A>& new_route)
 
 	    // Delete the route's IGP parent from _resolving_routes if
 	    // no-one's using it anymore
-	    if (lookup_by_igp_parent(found->igp_parent()) == NULL) {
+	    if (lookup_by_igp_parent(found->igp_parent()->net()) == NULL) {
 		_resolving_routes.erase(found->igp_parent()->net());
 	    }
 
@@ -549,9 +549,9 @@ ExtIntTable<A>::recalculate_nexthops(const IPRouteEntry<A>& new_route)
 	}
 
 	if (last_not_deleted == _ip_igp_parents.end()) {
-	    found = lookup_by_igp_parent(old_route);
+	    found = lookup_by_igp_parent(old_route->net());
 	} else {
-	    found = lookup_next_by_igp_parent(old_route, last_not_deleted);
+	    found = lookup_next_by_igp_parent(old_route->net(), last_not_deleted);
 	}
     }
     debug_msg("done recalculating nexthops\n------------------------------------------------\n");

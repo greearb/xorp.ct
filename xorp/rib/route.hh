@@ -256,7 +256,7 @@ typedef IPRouteEntry<IPv6> IPv6RouteEntry;
 template <class A>
 class ResolvedIPRouteEntry : public IPRouteEntry<A> {
 public:
-    typedef multimap<const IPRouteEntry<A>* , ResolvedIPRouteEntry<A>* > RouteBackLink;
+    typedef multimap<const IPNet<A> , ResolvedIPRouteEntry<A>* > RouteBackLink;
 
 public:
     /**

@@ -167,7 +167,7 @@ public:
 private:
     typedef typename ResolvedIPRouteEntry<A>::RouteBackLink ResolvedRouteBackLink;
     typedef typename UnresolvedIPRouteEntry<A>::RouteBackLink UnresolvedRouteBackLink;
-    typedef multimap<const IPRouteEntry<A>*, ResolvedIPRouteEntry<A>* > IGPParentMultiMap;
+    typedef multimap<const IPNet<A>, ResolvedIPRouteEntry<A>* > IGPParentMultiMap;
     typedef map<IPNet<A>, UnresolvedIPRouteEntry<A>* > IpUnresolvedTableMap;
 
     int delete_ext_route(const IPRouteEntry<A>* route,
@@ -187,10 +187,10 @@ private:
     void recalculate_nexthops(const IPRouteEntry<A>& route);
 
     const ResolvedIPRouteEntry<A>* lookup_by_igp_parent(
-	const IPRouteEntry<A>* route);
+	const IPNet<A>& route_net);
 
     const ResolvedIPRouteEntry<A>* lookup_next_by_igp_parent(
-	const IPRouteEntry<A>* route,
+	const IPNet<A>& route_net,
 	const typename IGPParentMultiMap::iterator& previous);
 
     const IPRouteEntry<A>* lookup_route_in_igp_parent(
