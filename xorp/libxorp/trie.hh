@@ -867,13 +867,13 @@ TrieNode<A, Payload>::erase()
  * that contains the desired key and has a Payload
  */
 template <class A, class Payload>
-TrieNode<A, Payload> *
+inline TrieNode<A, Payload> *
 TrieNode<A,Payload>::find(const Key &key)
 {
     TrieNode * cand = NULL;
     TrieNode * r = this;
 
-    for ( ; r && r->_k.contains(key) ; ) {
+    while(r && r->_k.contains(key)) {
 	if (r->_p)
 	    cand = r;		// we have a candidate.
 	if (r->_left && r->_left->_k.contains(key))

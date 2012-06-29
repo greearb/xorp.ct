@@ -8,13 +8,13 @@
 // Redistribution and/or modification of this program under the terms of
 // any other version of the GNU Lesser General Public License is not
 // permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU Lesser General Public License, Version 2.1, a copy of
 // which can be found in the XORP LICENSE.lgpl file.
-// 
+//
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -327,67 +327,6 @@ IPv6::operator>>(uint32_t rs) const
     tmp_addr[3] = htonl(tmp_addr[3]);
 
     return IPv6(tmp_addr);
-}
-
-bool
-IPv6::operator<(const IPv6& other) const
-{
-    int i;
-    x_static_assert(sizeof(_addr) == 16);
-
-    for (i = 0; i < 3; i++) {	// XXX: Loop ends intentionally at 3 not 4
-	if (_addr[i] != other._addr[i])
-	    break;
-    }
-    return ntohl(_addr[i]) < ntohl(other._addr[i]);
-}
-
-bool
-IPv6::operator==(const IPv6& other) const
-{
-    return ((_addr[0] == other._addr[0])
-	    && (_addr[1] == other._addr[1])
-	    && (_addr[2] == other._addr[2])
-	    && (_addr[3] == other._addr[3]));
-}
-
-bool
-IPv6::operator!=(const IPv6& other) const
-{
-    return ((_addr[0] != other._addr[0])
-	    || (_addr[1] != other._addr[1])
-	    || (_addr[2] != other._addr[2])
-	    || (_addr[3] != other._addr[3]));
-}
-
-IPv6&
-IPv6::operator--()
-{
-    for (int i = 3; i >= 0; i--) {
-	if (_addr[i] == 0) {
-	    _addr[i] = 0xffffffffU;
-	} else {
-	    uint32_t tmp_addr = ntohl(_addr[i]) - 1;
-	    _addr[i] = htonl(tmp_addr);
-	    return *this;
-	}
-    }
-    return *this;
-}
-
-IPv6&
-IPv6::operator++()
-{
-    for (int i = 3; i >= 0; i--) {
-	if (_addr[i] == 0xffffffffU) {
-	    _addr[i] = 0;
-	} else {
-	    uint32_t tmp_addr = ntohl(_addr[i]) + 1;
-	    _addr[i] = htonl(tmp_addr);
-	    return *this;
-	}
-    }
-    return *this;
 }
 
 static uint32_t
