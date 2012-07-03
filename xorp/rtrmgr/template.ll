@@ -268,102 +268,82 @@ RE_URL_SUBDELIMS "!"|"$"|"&"|"'"|"("|")"|"*"|"+"|","|";"|"="
 	}
 
 "->"	{
-	tpltlval = strdup(tplttext);
 	return RETURN;
 	}
 
 "txt"	{
-	tpltlval = strdup(tplttext);
 	return TEXT_TYPE;
 	}
 
 "i32"	{
-	tpltlval = strdup(tplttext);
 	return INT_TYPE;
 	}
 
 "u32range"	{
-	tpltlval = strdup(tplttext);
 	return UINTRANGE_TYPE;
 	}
 
 "u32"	{
-	tpltlval = strdup(tplttext);
 	return UINT_TYPE;
 	}
 
 "u64range"	{
-	tpltlval = strdup(tplttext);
 	return ULONGRANGE_TYPE;
 	}
 
 "u64"	{
-	tpltlval = strdup(tplttext);
 	return ULONG_TYPE;
 	}
 
 "bool"	{
-	tpltlval = strdup(tplttext);
 	return BOOL_TYPE;
 	}
 
 "toggle"	{
-	tpltlval = strdup(tplttext);
 	return TOGGLE_TYPE;
 	}
 
 "ipv4range"	{
-	tpltlval = strdup(tplttext);
 	return IPV4RANGE_TYPE;
 	}
 
 "ipv4"	{
-	tpltlval = strdup(tplttext);
 	return IPV4_TYPE;
 	}
 
 "ipv4net"	{
-	tpltlval = strdup(tplttext);
 	return IPV4NET_TYPE;
 	}
 
 "ipv6range"	{
-	tpltlval = strdup(tplttext);
 	return IPV6RANGE_TYPE;
 	}
 
 "ipv6"	{
-	tpltlval = strdup(tplttext);
 	return IPV6_TYPE;
 	}
 
 "ipv6net"	{
-	tpltlval = strdup(tplttext);
 	return IPV6NET_TYPE;
 	}
 
 "macaddr"	{
-	tpltlval = strdup(tplttext);
 	return MACADDR_TYPE;
 	}
 
 "url_file"	{
-	tpltlval = strdup(tplttext);
 	return URL_FILE_TYPE;
 	}
 
 "url_ftp"	{
-	tpltlval = strdup(tplttext);
 	return URL_FTP_TYPE;
 	}
 
 "url_http"	{
-	tpltlval = strdup(tplttext);
 	return URL_HTTP_TYPE;
 	}
 
 "url_tftp"	{
-	tpltlval = strdup(tplttext);
 	return URL_TFTP_TYPE;
 	}
 
