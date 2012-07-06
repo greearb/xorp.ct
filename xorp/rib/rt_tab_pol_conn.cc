@@ -55,11 +55,6 @@ PolicyConnectedTable<A>::PolicyConnectedTable (RouteTable<A>* parent,
 template <class A>
 PolicyConnectedTable<A>::~PolicyConnectedTable ()
 {
-    for (typename RouteContainer::iterator i = _route_table.begin();
-	i != _route_table.end(); ++i) {
-	delete *i;
-    }
-
     _route_table.delete_all_nodes();
 }
 
@@ -75,7 +70,7 @@ PolicyConnectedTable<A>::add_route(const IPRouteEntry<A>& route,
 
 
     // store original
-    IPRouteEntry<A>* original = new IPRouteEntry<A>(route);
+    IPRouteEntry<A>* original = const_cast<IPRouteEntry<A>* >(&route);
     _route_table.insert(original->net(), original);
 
     do_filtering(*original);
@@ -114,7 +109,6 @@ PolicyConnectedTable<A>::delete_route(const IPRouteEntry<A>* route,
 
     // propagate the delete
     int ret = next->delete_route(re, this);
-    delete re;
 
     return ret;
 }
