@@ -276,11 +276,11 @@ public:
      */
     ResolvedIPRouteEntry(const IPNet<A>& net, RibVif<A>* vif, IPNextHop<A>* nexthop,
 			 Protocol* protocol, uint32_t metric,
-			 const IPRouteEntry<A>* igp_parent,
+			 const IPRouteEntry<A>* resolving_parent,
 			 const IPRouteEntry<A>* egp_parent)
 	: IPRouteEntry<A>(net, vif, nexthop, protocol, metric, PolicyTags()),
-	_igp_parent(igp_parent),
-	_egp_parent(egp_parent) { }
+	  _resolving_parent(resolving_parent),
+	  _egp_parent(egp_parent) { }
 
     ResolvedIPRouteEntry(const ResolvedIPRouteEntry<A>& r);
     ResolvedIPRouteEntry& operator=(const ResolvedIPRouteEntry<A>& r);
@@ -291,7 +291,7 @@ public:
      * @return the IGP parent route entry that was used to resolve the
      * EGP parent route entry's non-local nexthop into a local nexthop.
      */
-    const IPRouteEntry<A>* igp_parent() const { return _igp_parent; }
+    const IPRouteEntry<A>* resolving_parent() const { return _resolving_parent; }
 
     /**
      * Get the EGP parent.
@@ -323,7 +323,7 @@ public:
     typename RouteBackLink::iterator backlink() const { return _backlink; }
 
 private:
-    const IPRouteEntry<A>* _igp_parent;
+    const IPRouteEntry<A>* _resolving_parent;
     const IPRouteEntry<A>* _egp_parent;
 
     // _backlink is used for removing the corresponding entry from the

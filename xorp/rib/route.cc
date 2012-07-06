@@ -119,7 +119,7 @@ IPRouteEntry<A>& IPRouteEntry<A>::operator=(const IPRouteEntry<A>& r) {
 
 template<class A>
 ResolvedIPRouteEntry<A>::ResolvedIPRouteEntry(const ResolvedIPRouteEntry<A>& r) : IPRouteEntry<A>(r) {
-    _igp_parent = r._igp_parent;
+    _resolving_parent = r._resolving_parent;
     _egp_parent = r._egp_parent;
     _backlink = r._backlink;
 }
@@ -129,7 +129,7 @@ ResolvedIPRouteEntry<A>& ResolvedIPRouteEntry<A>::operator=(const ResolvedIPRout
     if (this == &r)
 	return *this;
     IPRouteEntry<A>::operator=(r);
-    _igp_parent = r._igp_parent;
+    _resolving_parent = r._resolving_parent;
     _egp_parent = r._egp_parent;
     _backlink = r._backlink;
     return *this;
