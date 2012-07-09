@@ -17,8 +17,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/fea/mfea_node.hh,v 1.51 2008/10/02 21:56:49 bms Exp $
-
 
 #ifndef __FEA_MFEA_NODE_HH__
 #define __FEA_MFEA_NODE_HH__
@@ -47,6 +45,44 @@ class FeaNode;
 class MfeaVif;
 class SgCount;
 class VifCount;
+
+
+class MfeaRouteStorage {
+public:
+    uint32_t distance; // lower is higer priority.
+    bool is_binary;
+
+    string module_instance_name;
+    IPvX source;
+    IPvX group;
+
+    // String based route
+    string iif_name;
+    string oif_names;
+
+    // Binary based route
+    uint32_t iif_vif_index;
+    Mifset oiflist;
+    Mifset oiflist_disable_wrongvif;
+    uint32_t max_vifs_oiflist;
+    IPvX rp_addr;
+
+    MfeaRouteStorage(uint32_t d, const string module_name, const IPvX& _source,
+		     const IPvX& _group, const string& _iif_name, const string& _oif_names);
+
+    MfeaRouteStorage(uint32_t d, const string module_name, const IPvX& _source,
+		     const IPvX& _group, uint32_t iif_vif_idx,
+		     const Mifset& _oiflist, const Mifset& _oif_disable_wrongvif,
+		     uint32_t max_vifs, const IPvX& _rp_addr);
+
+    MfeaRouteStorage(const MfeaRouteStorage& o);
+    MfeaRouteStorage();
+
+    bool isBinary() const { return is_binary; }
+
+    string getHash() { return source.str() + ":" + group.str(); }
+};
+
 
 /**
  * @short The MFEA node class.
@@ -580,12 +616,22 @@ public:
      * 
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		add_mfc(const string& module_instance_name,
-			const IPvX& source, const IPvX& group,
-			uint32_t iif_vif_index, const Mifset& oiflist,
-			const Mifset& oiflist_disable_wrongvif,
-			uint32_t max_vifs_oiflist,
-			const IPvX& rp_addr);
+    int	add_mfc(const string& module_instance_name,
+		const IPvX& source, const IPvX& group,
+		uint32_t iif_vif_index, const Mifset& oiflist,
+		const Mifset& oiflist_disable_wrongvif,
+		uint32_t max_vifs_oiflist,
+		const IPvX& rp_addr, uint32_t distance,
+		string& error_msg,
+		bool check_stored_routes);
+
+    int	add_mfc_str(const string& module_instance_name,
+		    const IPvX& source,
+		    const IPvX& group,
+		    const string& iif_name,
+		    const string& oif_names,
+		    uint32_t distance,
+		    string& error_msg, bool check_stored_routes);
     
     /**
      * Delete Multicast Forwarding Cache (MFC) from the kernel.
@@ -601,8 +647,9 @@ public:
      * 
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		delete_mfc(const string& module_instance_name,
-			   const IPvX& source, const IPvX& group);
+    int	delete_mfc(const string& module_instance_name,
+		   const IPvX& source, const IPvX& group,
+		   string& error_msg, bool check_stored_routes);
     
     /**
      * Add a dataflow monitor entry.
@@ -853,6 +900,13 @@ private:
     //
     IfTree			_mfea_iftree;
     IfConfigUpdateReplicator	_mfea_iftree_update_replicator;
+
+    // Store desired routes.  This is a cheap way of doing some of the
+    // RIB logic, but for mcast routes.
+    // Lower distance means higher priority.
+    // key is:  source:group, ie:  192.168.1.1:226.0.0.1
+#define MAX_MFEA_DISTANCE 8
+    map<string, MfeaRouteStorage> routes[MAX_MFEA_DISTANCE];
 
     //
     // Debug and test-related state
