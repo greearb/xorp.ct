@@ -51,7 +51,11 @@ public:
 
     void expect_add(const IPRouteEntry<A>& route);
     void expect_delete(const IPRouteEntry<A>& route);
+    int add_igp_route(const IPRouteEntry<A>& route) { return this->add_route(route); }
+    int add_egp_route(const IPRouteEntry<A>& route) { return this->add_route(route); }
     int add_route(const IPRouteEntry<A>& route);
+    int delete_igp_route(const IPRouteEntry<A>* route) { return this->delete_route(route); }
+    int delete_egp_route(const IPRouteEntry<A>* route) { return this->delete_route(route); }
     int delete_route(const IPRouteEntry<A>* route);
     const IPRouteEntry<A>* lookup_route(const IPNet<A>& net) const;
     const IPRouteEntry<A>* lookup_route(const A& addr) const;

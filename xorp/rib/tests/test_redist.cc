@@ -273,7 +273,8 @@ test_deterministic()
     EventLoop e;
 
     // Create an OriginTable
-    OriginTable<IPv4> 	origin("static", 1, IGP, e);
+    TypedOriginTable<IPv4, IGP> typed_origin("static", 1, e);
+    OriginTable<IPv4>& origin = typed_origin;
     IPPeerNextHop<IPv4> nh("22.0.0.1");
     Protocol		protocol("static", IGP, 1);
     Vif			tmp_vif("vif0");

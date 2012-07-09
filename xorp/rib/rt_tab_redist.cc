@@ -398,8 +398,8 @@ RedistTable<A>::redistributor(const string& name)
 }
 
 template <typename A>
-int
-RedistTable<A>::add_route(const IPRouteEntry<A>& route)
+void
+RedistTable<A>::generic_add_route(const IPRouteEntry<A>& route)
 {
     typename RouteIndex::iterator rci = _rt_index.find(route.net());
     XLOG_ASSERT(rci == _rt_index.end());
@@ -412,15 +412,33 @@ RedistTable<A>::add_route(const IPRouteEntry<A>& route)
 	i++;	// XXX for safety increment iterator before prodding output
 	r->redist_event().did_add(route);
     }
+}
+
+template <typename A>
+int
+RedistTable<A>::add_igp_route(const IPRouteEntry<A>& route)
+{
+    this->generic_add_route(route);
 
     if (this->next_table())
-	return this->next_table()->add_route(route);
+	return this->next_table()->add_igp_route(route);
     return XORP_OK;
 }
 
 template <typename A>
 int
-RedistTable<A>::delete_route(const IPRouteEntry<A>* r)
+RedistTable<A>::add_egp_route(const IPRouteEntry<A>& route)
+{
+    this->generic_add_route(route);
+
+    if (this->next_table())
+	return this->next_table()->add_egp_route(route);
+    return XORP_OK;
+}
+
+template <typename A>
+void
+RedistTable<A>::generic_delete_route(const IPRouteEntry<A>* r)
 {
     const IPRouteEntry<A>& route = *r;
 
@@ -448,9 +466,28 @@ RedistTable<A>::delete_route(const IPRouteEntry<A>* r)
 	i++;	// XXX for safety increment iterator before prodding output
 	r->redist_event().did_delete(route);
     }
+}
+
+template <typename A>
+int
+RedistTable<A>::delete_igp_route(const IPRouteEntry<A>* r)
+{
+    this->generic_delete_route(r);
 
     if (this->next_table())
-	return this->next_table()->delete_route(r);
+	return this->next_table()->delete_igp_route(r);
+
+    return XORP_OK;
+}
+
+template <typename A>
+int
+RedistTable<A>::delete_egp_route(const IPRouteEntry<A>* r)
+{
+    this->generic_delete_route(r);
+
+    if (this->next_table())
+	return this->next_table()->delete_egp_route(r);
 
     return XORP_OK;
 }

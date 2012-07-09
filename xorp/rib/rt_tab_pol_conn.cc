@@ -58,8 +58,8 @@ PolicyConnectedTable<A>::~PolicyConnectedTable ()
 }
 
 template <class A>
-int
-PolicyConnectedTable<A>::add_route(const IPRouteEntry<A>& route)
+void
+PolicyConnectedTable<A>::generic_add_route(const IPRouteEntry<A>& route)
 {
     debug_msg("[RIB] PolicyConnectedTable ADD ROUTE: %s\n",
 	      route.str().c_str());
@@ -69,41 +69,68 @@ PolicyConnectedTable<A>::add_route(const IPRouteEntry<A>& route)
     _route_table.insert(original->net(), original);
 
     do_filtering(*original);
-
-    RouteTable<A>* next = this->next_table();
-    XLOG_ASSERT(next);
-
-    // Send the possibly modified route down
-    return next->add_route(*original);
 }
 
 template <class A>
 int
-PolicyConnectedTable<A>::delete_route(const IPRouteEntry<A>* route)
+PolicyConnectedTable<A>::add_igp_route(const IPRouteEntry<A>& route)
+{
+    this->generic_add_route(route);
+
+    XLOG_ASSERT(this->next_table());
+
+    // Send the possibly modified route down
+    return this->next_table()->add_igp_route(route);
+}
+
+template <class A>
+int
+PolicyConnectedTable<A>::add_egp_route(const IPRouteEntry<A>& route)
+{
+    this->generic_add_route(route);
+
+    XLOG_ASSERT(this->next_table());
+
+    // Send the possibly modified route down
+    return this->next_table()->add_egp_route(route);
+}
+
+template <class A>
+void
+PolicyConnectedTable<A>::generic_delete_route(const IPRouteEntry<A>* route)
 {
     XLOG_ASSERT(route != NULL);
 
     debug_msg("[RIB] PolicyConnectedTable DELETE ROUTE: %s\n",
 	      route->str().c_str());
 
-    // delete our copy
-    typename RouteContainer::iterator i;
-    i = _route_table.lookup_node(route->net());
+    XLOG_ASSERT(_route_table.lookup_node(route->net()) != _route_table.end());
 
-    XLOG_ASSERT(i != _route_table.end());
-
-    IPRouteEntry<A>* re = *i;
     _route_table.erase(route->net());
 
-    RouteTable<A>* next = this->next_table();
-    XLOG_ASSERT(next);
+    do_filtering(*(const_cast<IPRouteEntry<A>* >(route)));
+}
 
-    do_filtering(*re);
+template <class A>
+int
+PolicyConnectedTable<A>::delete_igp_route(const IPRouteEntry<A>* route)
+{
+    this->generic_delete_route(route);
 
+    XLOG_ASSERT(this->next_table());
     // propagate the delete
-    int ret = next->delete_route(re);
+    return this->next_table()->delete_igp_route(route);
+}
 
-    return ret;
+template <class A>
+int
+PolicyConnectedTable<A>::delete_egp_route(const IPRouteEntry<A>* route)
+{
+    this->generic_delete_route(route);
+
+    XLOG_ASSERT(this->next_table());
+    // propagate the delete
+    return this->next_table()->delete_egp_route(route);
 }
 
 template <class A>

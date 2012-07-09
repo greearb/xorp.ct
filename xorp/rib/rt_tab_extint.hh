@@ -81,7 +81,9 @@ public:
      * @param caller the parent table sending the new route.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int add_route(const IPRouteEntry<A>& route);
+    int add_igp_route(const IPRouteEntry<A>& route);
+
+    int add_egp_route(const IPRouteEntry<A>& route);
 
     /**
      * An delete_route request from a parent table also causes a
@@ -95,7 +97,9 @@ public:
      * @param caller the parent table sending the delete_route.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int delete_route(const IPRouteEntry<A>* route);
+    int delete_igp_route(const IPRouteEntry<A>* route);
+
+    int delete_egp_route(const IPRouteEntry<A>* route);
 
     /**
      * Lookup a specific subnet.  The lookup will first look in the
@@ -215,6 +219,9 @@ private:
     const IPRouteEntry<A>* masked_route(const IPRouteEntry<A>* route);
 
     void delete_resolved_routes(const IPRouteEntry<A>* route);
+
+    int add_direct_egp_route(const IPRouteEntry<A>& route);
+    int add_indirect_egp_route(const IPRouteEntry<A>& route);
 
     AdminDistanceSet _igp_ad_set;
     AdminDistanceSet _egp_ad_set;

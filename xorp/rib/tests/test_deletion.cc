@@ -44,7 +44,7 @@ main(int /* argc */, char* argv[])
     xlog_add_default_output();
     xlog_start();
     EventLoop eventloop;
-    OriginTable<IPv4> ot("origin", 1, IGP, eventloop);
+    TypedOriginTable<IPv4, IGP> ot("origin", 1, eventloop);
     ExpectTable<IPv4> dt("expect", &ot);
 
     Vif tmp_vif1("vif1");

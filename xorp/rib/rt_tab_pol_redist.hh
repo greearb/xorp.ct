@@ -128,8 +128,11 @@ public:
     PolicyRedistTable(RouteTable<A>* parent, XrlRouter& rtr, PolicyRedistMap&,
 		      bool multicast);
 
-    int add_route(const IPRouteEntry<A>& router);
-    int delete_route(const IPRouteEntry<A>* route);
+    int add_igp_route(const IPRouteEntry<A>& router);
+    int add_egp_route(const IPRouteEntry<A>& router);
+    int delete_igp_route(const IPRouteEntry<A>* route);
+    int delete_egp_route(const IPRouteEntry<A>* route);
+
     const IPRouteEntry<A>* lookup_route(const IPNet<A>& net) const;
     const IPRouteEntry<A>* lookup_route(const A& addr) const;
     RouteRange<A>* lookup_route_range(const A& addr) const;
@@ -189,6 +192,9 @@ private:
      * @param proto protocol which should stop advertising the route.
      */
     void del_redist(const IPRouteEntry<A>& route, const string& proto);
+
+    void generic_add_route(const IPRouteEntry<A>& router);
+    void generic_delete_route(const IPRouteEntry<A>* route);
 
 
     RouteTable<A>*		_parent;

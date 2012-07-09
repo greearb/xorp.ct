@@ -165,9 +165,11 @@ public:
     RouteTable(const string& name) : _tablename(name), _next_table(NULL) {}
     virtual ~RouteTable();
 
-    virtual int add_route(const IPRouteEntry<A>& route) = 0;
+    virtual int add_igp_route(const IPRouteEntry<A>& route) = 0;
+    virtual int add_egp_route(const IPRouteEntry<A>& route) = 0;
 
-    virtual int delete_route(const IPRouteEntry<A>* route) = 0;
+    virtual int delete_igp_route(const IPRouteEntry<A>* route) = 0;
+    virtual int delete_egp_route(const IPRouteEntry<A>* route) = 0;
 
     virtual const IPRouteEntry<A>* lookup_route(const IPNet<A>& net) const = 0;
 

@@ -476,8 +476,18 @@ RIB<A>::new_origin_table(const string&	tablename,
 			 uint16_t	admin_distance,
 			 ProtocolType	protocol_type)
 {
-    OriginTable<A>* ot = new OriginTable<A>(tablename, admin_distance,
-					    protocol_type, _eventloop);
+    OriginTable<A>* ot = NULL;
+    switch (protocol_type) {
+    case IGP:
+	ot = new TypedOriginTable<A, IGP>(tablename, admin_distance, _eventloop);
+	break;
+    case EGP:
+	ot = new TypedOriginTable<A, EGP>(tablename, admin_distance, _eventloop);
+	break;
+    default:
+	XLOG_UNREACHABLE();
+	break;
+    }
     if (ot == NULL || add_table(ot) != XORP_OK) {
 	XLOG_WARNING("Could not add origin table %s", tablename.c_str());
 	delete ot;

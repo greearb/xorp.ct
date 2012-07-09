@@ -288,29 +288,11 @@ public:
      */
     ~RegisterTable();
 
-    /**
-     * Add a new route to the RIB.  This will be propagated downstream
-     * to the next table, but may also cause the RegisterTable to
-     * invalidate a RouteRegister because the new route overlaps an
-     * existing registration.
-     *
-     * @param route the new route.
-     * @param caller this must be this table's parent table.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int add_route(const IPRouteEntry<A>& route);
+    int add_igp_route(const IPRouteEntry<A>& route);
+    int add_egp_route(const IPRouteEntry<A>& route);
 
-    /**
-     * Delete a route from the RIB.  This will be propagated
-     * downstream to the next table, but may also cause the
-     * RegisterTable to invalidate a RouteRegister referencing this
-     * route.
-     *
-     * @param route the route being deleted.
-     * @param caller this must be this table's parent table.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int delete_route(const IPRouteEntry<A>* route);
+    int delete_igp_route(const IPRouteEntry<A>* route);
+    int delete_egp_route(const IPRouteEntry<A>* route);
 
     /**
      * Lookup a route in the RIB.  This request will be propagated to
@@ -352,7 +334,9 @@ public:
      * Print the contents of this RegisterTable as a string for
      * debugging purposes.
      */
+#ifdef DEBUG_LOGGING
     void print();
+#endif
 
     // Stuff specific to a Register Table
 
@@ -409,6 +393,24 @@ private:
     void notify_invalidated(typename Trie<A, RouteRegister<A>* >::iterator trie_iter);
     void notify_route_changed(typename Trie<A, RouteRegister<A>* >::iterator trie_iter,
 			      const IPRouteEntry<A>& changed_route);
+
+    /**
+     * Invalidate a RouteRegister referencing this
+     * route.
+     *
+     * @param route the new route.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    void generic_add_route(const IPRouteEntry<A>& route);
+
+    /**
+     * Invalidate a RouteRegister referencing this
+     * route.
+     *
+     * @param route the route being deleted.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    void generic_delete_route(const IPRouteEntry<A>* route);
 
     map<string, ModuleData>		_module_names;
     Trie<A, RouteRegister<A>* >		_ipregistry;

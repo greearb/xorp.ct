@@ -56,8 +56,8 @@ PolicyRedistTable<A>::PolicyRedistTable(RouteTable<A>* parent, XrlRouter& rtr,
 }
 
 template <class A>
-int
-PolicyRedistTable<A>::add_route(const IPRouteEntry<A>& route)
+void
+PolicyRedistTable<A>::generic_add_route(const IPRouteEntry<A>& route)
 {
     debug_msg("[RIB] PolicyRedistTable ADD ROUTE: %s\n",
 	      route.str().c_str());
@@ -69,16 +69,33 @@ PolicyRedistTable<A>::add_route(const IPRouteEntry<A>& route)
     // if there are any, then redistribute
     if (!protos.empty())
 	add_redist(route, protos);
-
-    RouteTable<A>* next = this->next_table();
-    XLOG_ASSERT(next != NULL);
-
-    return next->add_route(route);
 }
 
 template <class A>
 int
-PolicyRedistTable<A>::delete_route(const IPRouteEntry<A>* route)
+PolicyRedistTable<A>::add_igp_route(const IPRouteEntry<A>& route)
+{
+    this->generic_add_route(route);
+
+    XLOG_ASSERT(this->next_table() != NULL);
+
+    return this->next_table()->add_igp_route(route);
+}
+
+template <class A>
+int
+PolicyRedistTable<A>::add_egp_route(const IPRouteEntry<A>& route)
+{
+    this->generic_add_route(route);
+
+    XLOG_ASSERT(this->next_table() != NULL);
+
+    return this->next_table()->add_egp_route(route);
+}
+
+template <class A>
+void
+PolicyRedistTable<A>::generic_delete_route(const IPRouteEntry<A>* route)
 {
     XLOG_ASSERT(route != NULL);
 
@@ -92,11 +109,28 @@ PolicyRedistTable<A>::delete_route(const IPRouteEntry<A>* route)
     // if there are any, stop redistributing
     if (!protos.empty())
 	del_redist(*route, protos);
+}
 
-    RouteTable<A>* next = this->next_table();
-    XLOG_ASSERT(next != NULL);
+template <class A>
+int
+PolicyRedistTable<A>::delete_igp_route(const IPRouteEntry<A>* route)
+{
+    this->generic_delete_route(route);
 
-    return next->delete_route(route);
+    XLOG_ASSERT(this->next_table() != NULL);
+
+    return this->next_table()->delete_igp_route(route);
+}
+
+template <class A>
+int
+PolicyRedistTable<A>::delete_egp_route(const IPRouteEntry<A>* route)
+{
+    this->generic_delete_route(route);
+
+    XLOG_ASSERT(this->next_table() != NULL);
+
+    return this->next_table()->delete_egp_route(route);
 }
 
 template <class A>

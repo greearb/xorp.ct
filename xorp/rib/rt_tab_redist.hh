@@ -110,8 +110,11 @@ public:
     //
     // Standard RouteTable methods
     //
-    int add_route(const IPRouteEntry<A>& route);
-    int delete_route(const IPRouteEntry<A>* route);
+    int add_igp_route(const IPRouteEntry<A>& route);
+    int add_egp_route(const IPRouteEntry<A>& route);
+    int delete_igp_route(const IPRouteEntry<A>* route);
+    int delete_egp_route(const IPRouteEntry<A>* route);
+
     const IPRouteEntry<A>* lookup_route(const IPNet<A>& net) const { return _parent->lookup_route(net); }
     const IPRouteEntry<A>* lookup_route(const A& addr) const { return _parent->lookup_route(addr); }
     RouteRange<A>* lookup_route_range(const A& addr) const { return _parent->lookup_route_range(addr); }
@@ -134,6 +137,9 @@ protected:
 					// table has been plumbed in.
     RouteIndex		_rt_index;
     list<Redistributor<A>*> _outputs;
+
+    void generic_add_route(const IPRouteEntry<A>& route);
+    void generic_delete_route(const IPRouteEntry<A>* route);
 };
 
 
