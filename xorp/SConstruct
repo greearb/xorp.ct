@@ -83,6 +83,7 @@ vars.AddVariables(
     BoolVariable('disable_otherlogs',  'Force disable other logs', False),
     BoolVariable('disable_profile',  'Disable Xorp Profiler feature', False),
     BoolVariable('disable_werror',  'Disable -Werror compiler flag', False),
+    BoolVariable('disable_assert',  'Force disabling assertions - use with caution', False),
     BoolVariable('enable_lex_hack',  'Works around lex/yacc issues on FreeBSD', False),
     BoolVariable('enable_builddirrun',  'Enable Xorp to run from BUILD_DIR', False),
     BoolVariable('enable_boost',  'Use BOOST', False),
@@ -298,6 +299,7 @@ print 'Disable fatal logs : ', env['disable_fatallogs']
 print 'Disable info logs : ', env['disable_infologs']
 print 'Disable assert logs : ', env['disable_assertlogs']
 print 'Disable other logs : ', env['disable_otherlogs']
+print 'Disable assert: ', env['disable_assert']
 
 
 env['CONFIGURELOG'] = str(builddir) + os.sep + 'config.log'
@@ -603,6 +605,20 @@ if tst and not ((tst == "no") or (tst == "false")):
     env['disable_otherlogs'] = True
 else:
     env['disable_otherlogs'] = False
+
+tst = ARGUMENTS.get('disable_assert', False)
+if tst and not ((tst == "no") or (tst == "false")):
+    env['disable_assert'] = True
+    env['disable_werror'] = True
+    env['disable_otherlogs'] = True
+    env['disable_assertlogs'] = True
+    env['disable_infologs'] = True
+    env['disable_fatallogs'] = True
+    env['disable_tracelogs'] = True
+    env['disable_errorlogs'] = True
+    env['disable_warninglogs'] = True
+else:
+    env['disable_assert'] = False
 
 ########## start configure magic
 
