@@ -309,15 +309,7 @@ ExtIntTable<A>::resolve_and_store_route(const IPRouteEntry<A>& route,
 					const IPRouteEntry<A>* nexthop_route)
 {
     ResolvedIPRouteEntry<A>* resolved_route;
-    resolved_route = new ResolvedIPRouteEntry<A>(route.net(),
-						 nexthop_route->vif(),
-						 // IPRouteEntry will free memory for the nexthop.
-						 // That's why we pass copy of NextHop pointer
-						 // instead of pointer!
-						 nexthop_route->nexthop()->get_copy(),
-						 route.protocol(),
-						 route.metric(),
-						 nexthop_route,
+    resolved_route = new ResolvedIPRouteEntry<A>(nexthop_route,
 						 &route);
     resolved_route->set_admin_distance(route.admin_distance());
     _ip_resolved_table.insert(resolved_route->net(), resolved_route);

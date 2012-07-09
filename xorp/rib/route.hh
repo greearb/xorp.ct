@@ -278,11 +278,10 @@ public:
      * nexthop in the egp_parent into a local nexthop.
      * @param egp_parent the orginal route entry with a non-local nexthop.
      */
-    ResolvedIPRouteEntry(const IPNet<A>& net, RibVif<A>* vif, IPNextHop<A>* nexthop,
-			 Protocol* protocol, uint32_t metric,
-			 const IPRouteEntry<A>* resolving_parent,
+    ResolvedIPRouteEntry(const IPRouteEntry<A>* resolving_parent,
 			 const IPRouteEntry<A>* egp_parent)
-	: IPRouteEntry<A>(net, vif, nexthop, protocol, metric, PolicyTags()),
+	: IPRouteEntry<A>(egp_parent->net(), resolving_parent->vif(),
+		resolving_parent->nexthop()->get_copy(), egp_parent->protocol(), egp_parent->metric(), PolicyTags()),
 	  _resolving_parent(resolving_parent),
 	  _egp_parent(egp_parent) { }
 
