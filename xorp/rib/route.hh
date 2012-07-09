@@ -233,8 +233,12 @@ public:
      * @return a human readable representation of the route entry.
      */
     string str() const;
+    void* operator new(size_t size);
+    void operator delete(void* ptr);
 protected:
     IPNextHop<A>*	_nexthop;
+private:
+    static MemoryPool<IPRouteEntry<A> >& memory_pool();
 };
 
 typedef IPRouteEntry<IPv4> IPv4RouteEntry;
@@ -322,7 +326,12 @@ public:
      */
     typename RouteBackLink::iterator backlink() const { return _backlink; }
 
+    void* operator new(size_t size);
+    void operator delete(void* ptr);
+
 private:
+    static MemoryPool<ResolvedIPRouteEntry<A> >& memory_pool();
+
     const IPRouteEntry<A>* _resolving_parent;
     const IPRouteEntry<A>* _egp_parent;
 
@@ -389,7 +398,11 @@ public:
      */
     typename RouteBackLink::iterator backlink() const { return _backlink; }
 
+    void* operator new(size_t size);
+    void operator delete(void* ptr);
+
 private:
+    static MemoryPool<UnresolvedIPRouteEntry<A> >& memory_pool();
     //
     // _backlink is used for removing the corresponding entry from the
     // RouteTable's map that is indexed by the unresolved nexthop.

@@ -28,6 +28,7 @@
 #include "ipv4.hh"
 #include "ipv6.hh"
 #include "ipvx.hh"
+#include "memory_pool.hh"
 
 // NextHop is a generic next hop object.
 // PeerNextHop is for next hops that are local peers.
@@ -182,8 +183,11 @@ public:
 
     IPPeerNextHop* get_copy() { return new IPPeerNextHop<A>(*this); }
 
-private:
+    void* operator new(size_t size);
+    void operator delete(void* ptr);
 
+private:
+    static MemoryPool<IPPeerNextHop<A> >& memory_pool();
 };
 
 typedef IPPeerNextHop<IPv4> IPv4PeerNextHop;
@@ -263,8 +267,11 @@ public:
 
     IPExternalNextHop* get_copy() { return new IPExternalNextHop<A>(*this); }
 
-private:
+    void* operator new(size_t size);
+    void operator delete(void* ptr);
 
+private:
+    static MemoryPool<IPExternalNextHop<A> >& memory_pool();
 };
 
 typedef IPExternalNextHop<IPv4> IPv4ExternalNextHop;

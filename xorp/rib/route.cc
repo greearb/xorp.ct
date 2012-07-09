@@ -108,6 +108,75 @@ IPRouteEntry<A>::str() const
 }
 
 template<class A>
+void*
+IPRouteEntry<A>::operator new(size_t/* size*/)
+{
+    return memory_pool().alloc();
+}
+
+template<class A>
+void
+IPRouteEntry<A>::operator delete(void* ptr)
+{
+    memory_pool().free(ptr);
+}
+
+template<class A>
+inline
+MemoryPool<IPRouteEntry<A> >&
+IPRouteEntry<A>::memory_pool()
+{
+    static MemoryPool<IPRouteEntry<A> > mp;
+    return mp;
+}
+
+template<class A>
+void*
+ResolvedIPRouteEntry<A>::operator new(size_t/* size*/)
+{
+    return memory_pool().alloc();
+}
+
+template<class A>
+void
+ResolvedIPRouteEntry<A>::operator delete(void* ptr)
+{
+    memory_pool().free(ptr);
+}
+
+template<class A>
+inline
+MemoryPool<ResolvedIPRouteEntry<A> >&
+ResolvedIPRouteEntry<A>::memory_pool()
+{
+    static MemoryPool<ResolvedIPRouteEntry<A> > mp;
+    return mp;
+}
+
+template<class A>
+void*
+UnresolvedIPRouteEntry<A>::operator new(size_t/* size*/)
+{
+    return memory_pool().alloc();
+}
+
+template<class A>
+void
+UnresolvedIPRouteEntry<A>::operator delete(void* ptr)
+{
+    memory_pool().free(ptr);
+}
+
+template<class A>
+inline
+MemoryPool<UnresolvedIPRouteEntry<A> >&
+UnresolvedIPRouteEntry<A>::memory_pool()
+{
+    static MemoryPool<UnresolvedIPRouteEntry<A> > mp;
+    return mp;
+}
+
+template<class A>
 IPRouteEntry<A>& IPRouteEntry<A>::operator=(const IPRouteEntry<A>& r) {
     if (this == &r)
 	return *this;
@@ -138,4 +207,10 @@ ResolvedIPRouteEntry<A>& ResolvedIPRouteEntry<A>::operator=(const ResolvedIPRout
 
 template class IPRouteEntry<IPv4>;
 template class IPRouteEntry<IPv6>;
+
+template class ResolvedIPRouteEntry<IPv4>;
+template class ResolvedIPRouteEntry<IPv6>;
+
+template class UnresolvedIPRouteEntry<IPv4>;
+template class UnresolvedIPRouteEntry<IPv6>;
 
