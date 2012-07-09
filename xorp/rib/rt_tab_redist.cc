@@ -349,7 +349,7 @@ RedistTable<A>::RedistTable(const string& tablename,
 {
     if (_parent->next_table()) {
 	this->set_next_table(_parent->next_table());
-	this->next_table()->replumb(_parent, this);
+	this->next_table()->set_parent(this);
     }
     _parent->set_next_table(this);
 }
@@ -399,10 +399,8 @@ RedistTable<A>::redistributor(const string& name)
 
 template <typename A>
 int
-RedistTable<A>::add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller)
+RedistTable<A>::add_route(const IPRouteEntry<A>& route)
 {
-    XLOG_ASSERT(caller == _parent);
-
     typename RouteIndex::iterator rci = _rt_index.find(route.net());
     XLOG_ASSERT(rci == _rt_index.end());
 
@@ -416,17 +414,14 @@ RedistTable<A>::add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller)
     }
 
     if (this->next_table())
-	return this->next_table()->add_route(route, this);
+	return this->next_table()->add_route(route);
     return XORP_OK;
 }
 
 template <typename A>
 int
-RedistTable<A>::delete_route(const IPRouteEntry<A>* r,
-			     RouteTable<A>* caller)
+RedistTable<A>::delete_route(const IPRouteEntry<A>* r)
 {
-    XLOG_ASSERT(caller == _parent);
-
     const IPRouteEntry<A>& route = *r;
 
     debug_msg("delete_route for %s\n", route.net().str().c_str());
@@ -455,7 +450,7 @@ RedistTable<A>::delete_route(const IPRouteEntry<A>* r,
     }
 
     if (this->next_table())
-	return this->next_table()->delete_route(r, this);
+	return this->next_table()->delete_route(r);
 
     return XORP_OK;
 }
@@ -463,35 +458,6 @@ RedistTable<A>::delete_route(const IPRouteEntry<A>* r,
 
 // ----------------------------------------------------------------------------
 // Standard RouteTable methods, RedistTable punts everything to parent.
-
-template <typename A>
-const IPRouteEntry<A>*
-RedistTable<A>::lookup_route(const IPNet<A>& net) const
-{
-    return _parent->lookup_route(net);
-}
-
-template <typename A>
-const IPRouteEntry<A>*
-RedistTable<A>::lookup_route(const A& addr) const
-{
-    return _parent->lookup_route(addr);
-}
-
-template <typename A>
-RouteRange<A>*
-RedistTable<A>::lookup_route_range(const A& addr) const
-{
-    return _parent->lookup_route_range(addr);
-}
-
-template <typename A>
-void
-RedistTable<A>::replumb(RouteTable<A>* old_parent, RouteTable<A>* new_parent)
-{
-    XLOG_ASSERT(old_parent == _parent);
-    _parent = new_parent;
-}
 
 template <typename A>
 string

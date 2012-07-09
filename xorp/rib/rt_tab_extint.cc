@@ -28,23 +28,18 @@
 #include "rib.hh"
 #include "rt_tab_extint.hh"
 
-template <typename A>
-inline static string
-make_extint_name(const RouteTable<A>* e, const RouteTable<A>* i)
+template<class A>
+inline const string&
+ExtIntTable<A>::ext_int_name()
 {
-    return string("Ext:(" + (e ? e->tablename() : "NULL") + ")Int:(" + (i ? i->tablename() : "NULL") + ")");
+    static string EXT_INT_NAME(c_format("ExtInt Table IPv%d", A::ip_version()));
+    return EXT_INT_NAME;
 }
 
 template<class A>
-ExtIntTable<A>::ExtIntTable(RouteTable<A>* ext_table, RouteTable<A>* int_table)
-    : RouteTable<A>(make_extint_name(ext_table, int_table)),
-      _ext_table(ext_table), _int_table(int_table)
+ExtIntTable<A>::ExtIntTable()
+    : RouteTable<A>(ext_int_name())
 {
-    if (_ext_table)
-	_ext_table->set_next_table(this);
-    if (_int_table)
-	_int_table->set_next_table(this);
-
     debug_msg("New ExtInt: %s\n", this->tablename().c_str());
 }
 
@@ -60,25 +55,125 @@ ExtIntTable<A>::~ExtIntTable()
 	delete *_ip_resolved_table.begin();
 	_ip_resolved_table.erase(_ip_resolved_table.begin());
     }
+
+    _igp_ad_set.clear();
+    _egp_ad_set.clear();
+
+    _all_tables.clear();
 }
 
 template<class A>
 int
-ExtIntTable<A>::add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller)
+ExtIntTable<A>::change_admin_distance(OriginTable<A>* ot, uint32_t ad)
+{
+    XLOG_ASSERT(ot && ot->route_count() == 0);
+    switch (ot->protocol_type()) {
+    case IGP:
+	if (_igp_ad_set.find(ot->admin_distance()) == _igp_ad_set.end()) {
+	    return XORP_ERROR;
+	}
+	_igp_ad_set.erase(ot->admin_distance());
+	_igp_ad_set.insert(ad);
+	break;
+    case EGP:
+	if (_egp_ad_set.find(ot->admin_distance()) == _egp_ad_set.end()) {
+	    return XORP_ERROR;
+	}
+	_egp_ad_set.erase(ot->admin_distance());
+	_egp_ad_set.insert(ad);
+	break;
+    default:
+	XLOG_ERROR("OriginTable for unrecognized protocol received!\n");
+	return XORP_ERROR;
+    }
+    XLOG_ASSERT(_all_tables.find(ot->admin_distance()) != _all_tables.end() &&
+		    _all_tables.find(ot->admin_distance())->second == ot);
+    _all_tables.erase(ot->admin_distance());
+    _all_tables[ad] = ot;
+
+    /* Change the AD of OriginTable */
+    ot->change_admin_distance(ad);
+    return XORP_OK;
+}
+
+template<class A>
+int
+ExtIntTable<A>::add_protocol_table(OriginTable<A>* new_table)
+{
+    switch (new_table->protocol_type()) {
+    case IGP:
+	XLOG_ASSERT(_igp_ad_set.find(new_table->admin_distance()) == _igp_ad_set.end());
+	_igp_ad_set.insert(new_table->admin_distance());
+	break;
+    case EGP:
+	XLOG_ASSERT(_egp_ad_set.find(new_table->admin_distance()) == _egp_ad_set.end());
+	_egp_ad_set.insert(new_table->admin_distance());
+	break;
+    default:
+	XLOG_ERROR("OriginTable for unrecognized protocol received!\n");
+	return XORP_ERROR;
+    }
+    XLOG_ASSERT(_all_tables.find(new_table->admin_distance()) == _all_tables.end());
+    _all_tables[new_table->admin_distance()] = new_table;
+    new_table->set_next_table(this);
+    return XORP_OK;
+}
+
+template<class A>
+bool
+ExtIntTable<A>::best_igp_route(const IPRouteEntry<A>& route)
+{
+    typename RouteTrie::iterator iter = _wining_igp_routes.lookup_node(route.net());
+    if (iter == _wining_igp_routes.end()) {
+	_wining_igp_routes.insert(route.net(), &route);
+	return true;
+    } else if ((*iter)->admin_distance() > route.admin_distance()) {
+	this->delete_route(*iter);
+	_wining_igp_routes.insert(route.net(), &route);
+	return true;
+    } else if ((*iter)->admin_distance() == route.admin_distance()) {
+	// It's best IGP Route, but it wasn't overall best route when we added it first time
+	return true;
+    }
+    return false;
+}
+
+template<class A>
+bool
+ExtIntTable<A>::best_egp_route(const IPRouteEntry<A>& route)
+{
+    typename RouteTrie::iterator iter = _wining_egp_routes.lookup_node(route.net());
+    if (iter == _wining_egp_routes.end()) {
+	_wining_egp_routes.insert(route.net(), &route);
+	return true;
+    } else if ((*iter)->admin_distance() > route.admin_distance()) {
+	this->delete_route(*iter);
+	_wining_egp_routes.insert(route.net(), &route);
+	return true;
+    } else if ((*iter)->admin_distance() == route.admin_distance()) {
+	// It's best EGP Route, but it wasn't overall best route when we added it first time
+	return true;
+    }
+    return false;
+}
+
+template<class A>
+int
+ExtIntTable<A>::add_route(const IPRouteEntry<A>& route)
 {
     debug_msg("EIT[%s]: Adding route %s\n", this->tablename().c_str(),
 	   route.str().c_str());
-    XLOG_ASSERT(this->next_table());
 
-    if (_int_table && caller == _int_table) {
+    if (_igp_ad_set.find(route.admin_distance()) != _igp_ad_set.end()) {
 	XLOG_ASSERT(route.nexthop()->type() != EXTERNAL_NEXTHOP);
 	// The new route comes from the IGP table
 	debug_msg("route comes from IGP\n");
-	// If it came here, it must be the wining IGP route.
-	// Insert it in wining IGP trie
-	_wining_igp_routes.insert(route.net(), &route);
 
-	if (_ext_table) {
+	// Is it the best IGP route?
+	if (!best_igp_route(route))
+	    return XORP_ERROR;
+
+	if (!_egp_ad_set.empty()) {
 	    // Try to find existing EGP routes, that are installed
 	    // We're looking for EGP route in all wining routes.
 	    // We can look here, because no IGP route that matches this subnet
@@ -87,22 +182,21 @@ ExtIntTable<A>::add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller)
 	    // It should have been deleted. We check for that in the XLOG_ASSERT
 	    const IPRouteEntry<A>* found = lookup_route(route.net());
 	    if (found != NULL) {
-		if (found->admin_distance() < route.admin_distance()) {
-		    // The admin distance of the existing IGP route is better
+		if (found->admin_distance() < route.admin_distance())
+		    // The admin distance of the existing EGP route is better
 		    return XORP_ERROR;
-		} else {
-		    XLOG_ASSERT(found->admin_distance() != route.admin_distance());
-		    bool delete_is_propagated(false);
-		    this->delete_ext_route(found, delete_is_propagated);
-		}
+
+		XLOG_ASSERT(found->admin_distance() != route.admin_distance());
+
+		this->delete_ext_route(found);
 	    }
 	}
 
 	_wining_routes.insert(route.net(), &route);
 
-	this->next_table()->add_route(route, this);
+	this->next_table()->add_route(route);
 
-	if (_ext_table) {
+	if (!_egp_ad_set.empty()) {
 	    // Does this cause any previously resolved nexthops to resolve
 	    // differently?
 	    recalculate_nexthops(route);
@@ -113,46 +207,45 @@ ExtIntTable<A>::add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller)
 
 	return XORP_OK;
 
-    } else if (_ext_table && caller == _ext_table) {
+    } else if (_egp_ad_set.find(route.admin_distance()) != _egp_ad_set.end()) {
 	// The new route comes from the EGP table
 	debug_msg("route comes from EGP\n");
-	// If it came here, it must be the wining EGP route.
-	// Insert it in wining EGP trie
-	_wining_egp_routes.insert(route.net(), &route);
 
-	const IPRouteEntry<A>* found = lookup_route_in_igp_parent(route.net());
+	// Is it the best EGP route?
+	if (!best_egp_route(route))
+	    return XORP_ERROR;
 
-	if (found != NULL) {
-	    if (found->admin_distance() < route.admin_distance()) {
-		// The admin distance of the existing IGP route is better
-		return XORP_ERROR;
-	    }
-	}
+	const IPRouteEntry<A>* found = lookup_route(route.net());
+
+	if (found && (found->admin_distance() < route.admin_distance()))
+	    return XORP_ERROR;
+
+	XLOG_ASSERT(found ? (found->admin_distance() != route.admin_distance()) : true);
 
 	if (route.nexthop()->type() == PEER_NEXTHOP) {
 	    //
 	    // Despite it coming from the Ext table, the nexthop is
 	    // directly connected.  Just propagate it.
 	    //
-
 	    debug_msg("nexthop %s was directly connected\n", route.nexthop()->addr().str().c_str());
 
 	    if (found != NULL) {
 		// Delete the IGP route that has worse admin distance
 		_wining_routes.erase(found->net());
 
-		this->next_table()->delete_route(found, this);
+		this->next_table()->delete_route(found);
 	    }
 
 	    _wining_routes.insert(route.net(), &route);
 
-	    this->next_table()->add_route(route, this);
+	    this->next_table()->add_route(route);
+
 	    return XORP_OK;
 	} else {
 	    IPNextHop<A>* rt_nexthop = route.nexthop();
 
 	    const IPRouteEntry<A>* nexthop_route =
-		    lookup_route_in_igp_parent(rt_nexthop->addr());
+		    lookup_winning_igp_route(rt_nexthop->addr());
 	    if (nexthop_route == NULL) {
 		// Store the fact that this was unresolved for later
 		debug_msg("nexthop %s was unresolved\n", rt_nexthop->addr().str().c_str());
@@ -171,7 +264,7 @@ ExtIntTable<A>::add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller)
 		    // Delete the IGP route that has worse admin distance
 		    _wining_routes.erase(found->net());
 
-		    this->next_table()->delete_route(found, this);
+		    this->next_table()->delete_route(found);
 		}
 
 		debug_msg("nexthop resolved to \n   %s\n", nexthop_route->str().c_str());
@@ -183,7 +276,7 @@ ExtIntTable<A>::add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller)
 
 		_wining_routes.insert(resolved_route->net(), resolved_route);
 
-		this->next_table()->add_route(*resolved_route, this);
+		this->next_table()->add_route(*resolved_route);
 
 		return XORP_OK;
 	    }
@@ -192,6 +285,7 @@ ExtIntTable<A>::add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller)
 	XLOG_FATAL("ExtIntTable::add_route called from a class that "
 		   "isn't a component of this override table");
     }
+
     return XORP_OK;
 }
 
@@ -227,69 +321,131 @@ ExtIntTable<A>::resolve_and_store_route(const IPRouteEntry<A>& route,
     return resolved_route;
 }
 
+template <class A>
+bool
+ExtIntTable<A>::deleting_best_igp_route(const IPRouteEntry<A>* route)
+{
+    typename RouteTrie::iterator iter = _wining_igp_routes.lookup_node(route->net());
+    if (iter != _wining_igp_routes.end()) {
+	if ((*iter)->admin_distance() != route->admin_distance())
+	    return false;
+	else {
+	    _wining_igp_routes.erase(route->net());
+	    return true;
+	}
+    }
+    return false;
+}
+
+template <class A>
+bool
+ExtIntTable<A>::deleting_best_egp_route(const IPRouteEntry<A>* route)
+{
+    typename RouteTrie::iterator iter = _wining_egp_routes.lookup_node(route->net());
+    if (iter != _wining_egp_routes.end()) {
+	if ((*iter)->admin_distance() != route->admin_distance())
+	    return false;
+	else {
+	    _wining_egp_routes.erase(route->net());
+	    return true;
+	}
+    }
+    return false;
+}
+
+template <class A>
+const IPRouteEntry<A>*
+ExtIntTable<A>::masked_route(const IPRouteEntry<A>* route)
+{
+    typename RouteTableMap::iterator border = _all_tables.find(route->admin_distance());
+    const IPRouteEntry<A>* found = NULL;
+    XLOG_ASSERT(border != _all_tables.end());
+    for (typename RouteTableMap::iterator iter = border; iter != _all_tables.end(); ++iter) {
+	found = iter->second->lookup_route(route->net());
+	if (found)
+	    return found;
+    }
+    return found;
+}
+
+template <class A>
+void
+ExtIntTable<A>::delete_resolved_routes(const IPRouteEntry<A>* route)
+{
+    const ResolvedIPRouteEntry<A>* found_resolved
+	= lookup_by_igp_parent(route->net());
+
+    if (found_resolved)
+	_resolving_routes.erase(route->net());
+
+    while (found_resolved) {
+	debug_msg("found route using this nexthop:\n    %s\n", found_resolved->str().c_str());
+	// Erase from table first to prevent lookups on this entry
+	_ip_resolved_table.erase(found_resolved->net());
+	_ip_resolving_parents.erase(found_resolved->backlink());
+
+	// Propagate the delete next
+	_wining_routes.erase(found_resolved->net());
+
+	this->next_table()->delete_route(found_resolved);
+
+	// Now delete the local resolved copy, and reinstantiate it
+	const IPRouteEntry<A>* egp_parent = found_resolved->egp_parent();
+	delete found_resolved;
+
+	// egp_parent route is one of the wining EGP routes.
+	// Re-adding will overwrite it the in trie
+	// That's no problem because we're overwriting
+	// old pointer with the existing pointer.
+	// That way we don't have any memory leaking.
+
+	add_route(*egp_parent);
+	found_resolved = lookup_by_igp_parent(route->net());
+    }
+}
+
 template<class A>
 int
-ExtIntTable<A>::delete_route(const IPRouteEntry<A>* route,
-			     RouteTable<A>* caller)
+ExtIntTable<A>::delete_route(const IPRouteEntry<A>* route)
 {
+
     debug_msg("ExtIntTable::delete_route %s\n", route->str().c_str());
     XLOG_ASSERT(this->next_table());
 
-    if (_int_table && caller == _int_table) {
+    if (_igp_ad_set.find(route->admin_distance()) != _igp_ad_set.end()) {
 	debug_msg("  called from _int_table\n");
 	// If it came here, than we're certainly deleting wining IGP route
-	_wining_igp_routes.erase(route->net());
-	const IPRouteEntry<A>* found_egp_route = NULL;
 
-	if (_ext_table) {
-	    found_egp_route = lookup_route_in_egp_parent(route->net());
+	if (!deleting_best_igp_route(route))
+	    return XORP_ERROR;
 
-	    if (found_egp_route != NULL) {
-		if (found_egp_route->admin_distance() < route->admin_distance()) {
-		    // The admin distance of the existing EGP route is better
+	const IPRouteEntry<A>* found_route = NULL;
+
+	if (!_egp_ad_set.empty()) {
+	    found_route = lookup_route(route->net());
+
+	    if (found_route != NULL) {
+		if (found_route->admin_distance() == route->admin_distance())
+		    // This route was the best route overall
+		    found_route = NULL;
+		else {
+		    // Our route wasn't the best route overall
+		    XLOG_ASSERT(found_route->admin_distance() < route->admin_distance());
 		    return XORP_ERROR;
 		}
 	    }
 
-	    const ResolvedIPRouteEntry<A>* found
-		= lookup_by_igp_parent(route->net());
-
-	    if (found != NULL) {
-		_resolving_routes.erase(route->net());
-	    }
-
-	    while (found != NULL) {
-		debug_msg("found route using this nexthop:\n    %s\n", found->str().c_str());
-		// Erase from table first to prevent lookups on this entry
-		_ip_resolved_table.erase(found->net());
-		_ip_resolving_parents.erase(found->backlink());
-
-		// Propagate the delete next
-		_wining_routes.erase(found->net());
-
-		this->next_table()->delete_route(found, this);
-
-		// Now delete the local resolved copy, and reinstantiate it
-		const IPRouteEntry<A>* egp_parent = found->egp_parent();
-		delete found;
-
-		// egp_parent route is one of the wining EGP routes.
-		// Re-adding will overwrite it the in trie
-		// That's no problem because we're overwriting
-		// old pointer with the existing pointer.
-		// That way we don't have any memory leaking.
-
-		add_route(*egp_parent, _ext_table);
-		found = lookup_by_igp_parent(route->net());
-	    }
+	    delete_resolved_routes(route);
 	}
 
 	// Propagate the original delete
 	_wining_routes.erase(route->net());
 
-	this->next_table()->delete_route(route, this);
+	this->next_table()->delete_route(route);
 
-	if (_ext_table && found_egp_route) {
+	found_route = masked_route(route);
+
+	if (!_egp_ad_set.empty() && found_route) {
 	    // It is possible the internal route had masked an external one.
 
 	    // found_egp_route route is one of the wining EGP routes.
@@ -297,27 +453,30 @@ ExtIntTable<A>::delete_route(const IPRouteEntry<A>* route,
 	    // That's no problem because we're overwriting
 	    // old pointer with the existing pointer.
 	    // That way we don't have any memory leaking.
-
-	    add_route(*found_egp_route, _ext_table);
+	    add_route(*found_route);
 	}
 
-    } else if (_ext_table && caller == _ext_table) {
+    } else if (_egp_ad_set.find(route->admin_distance()) != _egp_ad_set.end()) {
 	debug_msg("  called from _ext_table\n");
-	// If it came here, than we're certainly deleting wining EGP route
-	_wining_egp_routes.erase(route->net());
-	const IPRouteEntry<A>* found_igp_route =
-		lookup_route_in_igp_parent(route->net());
 
-	if (found_igp_route != NULL) {
-	    if (found_igp_route->admin_distance() < route->admin_distance()) {
-		// The admin distance of the existing IGP route is better
-		return XORP_ERROR;
+	if (!deleting_best_egp_route(route))
+	    return XORP_ERROR;
+
+	const IPRouteEntry<A>* found_route = lookup_route(route->net());
+
+	if (found_route != NULL) {
+	    if (found_route->admin_distance() == route->admin_distance())
+		found_route = NULL;
+	    else if (found_route->admin_distance() < route->admin_distance()) {
+		//Our route wasn't the best overall
+		delete_ext_route(route, false);
+		return XORP_OK;
 	    }
 	}
 
-	bool is_delete_propagated = false;
-	this->delete_ext_route(route, is_delete_propagated);
-	if (is_delete_propagated && found_igp_route) {
+	found_route = masked_route(route);
+
+	if (this->delete_ext_route(route) && found_route) {
 	    // It is possible the external route had masked an internal one.
 
 	    // found_igp_route route is one of the wining IGP routes.
@@ -325,24 +484,23 @@ ExtIntTable<A>::delete_route(const IPRouteEntry<A>* route,
 	    // That's no problem because we're overwriting
 	    // old pointer with the existing pointer.
 	    // That way we don't have any memory leaking.
-
-	    add_route(*found_igp_route, _int_table);
+	    add_route(*found_route);
 	}
     } else {
 	XLOG_FATAL("ExtIntTable::delete_route called from a class that "
 		   "isn't a component of this override table\n");
     }
+
     return XORP_OK;
 }
 
 template<class A>
-int
-ExtIntTable<A>::delete_ext_route(const IPRouteEntry<A>* route,
-				 bool& is_delete_propagated)
+bool
+ExtIntTable<A>::delete_ext_route(const IPRouteEntry<A>* route, bool winning_route)
 {
     const ResolvedIPRouteEntry<A>* found;
 
-    is_delete_propagated = false;
+    bool is_delete_propagated = false;
 
     found = lookup_in_resolved_table(route->net());
     if (found != NULL) {
@@ -352,30 +510,30 @@ ExtIntTable<A>::delete_ext_route(const IPRouteEntry<A>* route,
 
 	// Delete the route's IGP parent from _resolving_routes if
 	// no-one is using it anymore
-	if (lookup_by_igp_parent(found->resolving_parent()->net()) == NULL) {
+	if (lookup_by_igp_parent(found->resolving_parent()->net()) == NULL)
 	    _resolving_routes.erase(found->resolving_parent()->net());
+
+	if (winning_route == true) {
+	    // Propagate the delete next
+	    _wining_routes.erase(found->net());
+
+	    this->next_table()->delete_route(found);
+	    is_delete_propagated = true;
 	}
-
-	// Propagate the delete next
-	_wining_routes.erase(found->net());
-
-	this->next_table()->delete_route(found, this);
-	is_delete_propagated = true;
 
 	// Now delete the locally modified copy
 	delete found;
-    } else {
+    } else if (!delete_unresolved_nexthop(route) && winning_route) {
 	// Propagate the delete only if the route wasn't found in
-	// the unresolved nexthops table.
-	if (delete_unresolved_nexthop(route) == false) {
-	    _wining_routes.erase(route->net());
+	// the unresolved nexthops table and if it was the winning route.
+	// Propagate the delete next
+	_wining_routes.erase(route->net());
 
-	    this->next_table()->delete_route(route, this);
-	    is_delete_propagated = true;
-	}
+	this->next_table()->delete_route(route);
+	is_delete_propagated = true;
     }
 
-    return XORP_OK;
+    return is_delete_propagated;
 }
 
 template<class A>
@@ -394,7 +552,6 @@ template<class A>
 void
 ExtIntTable<A>::resolve_unresolved_nexthops(const IPRouteEntry<A>& nexthop_route)
 {
-    XLOG_ASSERT(_ext_table);
     typename multimap<A, UnresolvedIPRouteEntry<A>* >::iterator rpair, nextpair;
 
     A unresolved_nexthop, new_subnet;
@@ -432,7 +589,7 @@ ExtIntTable<A>::resolve_unresolved_nexthops(const IPRouteEntry<A>& nexthop_route
 	    // That way we don't have any memory leaking.
 
 	    // Reinstantiate the resolved route
-	    add_route(*unresolved_route, _ext_table);
+	    add_route(*unresolved_route);
 
 	    rpair = nextpair;
 	} else {
@@ -510,7 +667,6 @@ template<class A>
 void
 ExtIntTable<A>::recalculate_nexthops(const IPRouteEntry<A>& new_route)
 {
-    XLOG_ASSERT(_ext_table);
     debug_msg("recalculate_nexthops: %s\n", new_route.str().c_str());
 
     const IPRouteEntry<A>* old_route;
@@ -549,7 +705,7 @@ ExtIntTable<A>::recalculate_nexthops(const IPRouteEntry<A>& new_route)
 	    // Propagate the delete next
 	    _wining_routes.erase(found->net());
 
-	    this->next_table()->delete_route(found, this);
+	    this->next_table()->delete_route(found);
 
 	    // Now delete the local resolved copy, and reinstantiate it
 	    delete found;
@@ -560,7 +716,7 @@ ExtIntTable<A>::recalculate_nexthops(const IPRouteEntry<A>& new_route)
 	    // old pointer with the existing pointer.
 	    // That way we don't have any memory leaking.
 
-	    add_route(*egp_parent, _ext_table);
+	    add_route(*egp_parent);
 	} else {
 	    debug_msg("route matched but nexthop didn't: nexthop: %s\n    %s\n",
 		    (egp_parent->nexthop())->addr().str().c_str(),
@@ -595,7 +751,7 @@ ExtIntTable<A>::lookup_route(const A& addr) const
 
 template<class A>
 inline const IPRouteEntry<A>*
-ExtIntTable<A>::lookup_route_in_igp_parent(const IPNet<A>& ipnet) const
+ExtIntTable<A>::lookup_winning_igp_route(const IPNet<A>& ipnet) const
 {
     typename RouteTrie::iterator iter = _wining_igp_routes.lookup_node(ipnet);
     return ((iter == _wining_igp_routes.end()) ? NULL : *iter);
@@ -603,7 +759,7 @@ ExtIntTable<A>::lookup_route_in_igp_parent(const IPNet<A>& ipnet) const
 
 template<class A>
 inline const IPRouteEntry<A>*
-ExtIntTable<A>::lookup_route_in_igp_parent(const A& addr) const
+ExtIntTable<A>::lookup_winning_igp_route(const A& addr) const
 {
     typename RouteTrie::iterator iter = _wining_igp_routes.find(addr);
     return ((iter == _wining_igp_routes.end()) ? NULL : *iter);
@@ -611,7 +767,7 @@ ExtIntTable<A>::lookup_route_in_igp_parent(const A& addr) const
 
 template<class A>
 inline const IPRouteEntry<A>*
-ExtIntTable<A>::lookup_route_in_egp_parent(const IPNet<A>& ipnet) const
+ExtIntTable<A>::lookup_winning_egp_route(const IPNet<A>& ipnet) const
 {
     typename RouteTrie::iterator iter = _wining_egp_routes.lookup_node(ipnet);
     return ((iter == _wining_egp_routes.end()) ? NULL : *iter);
@@ -619,43 +775,10 @@ ExtIntTable<A>::lookup_route_in_egp_parent(const IPNet<A>& ipnet) const
 
 template<class A>
 inline const IPRouteEntry<A>*
-ExtIntTable<A>::lookup_route_in_egp_parent(const A& addr) const
+ExtIntTable<A>::lookup_winning_egp_route(const A& addr) const
 {
     typename RouteTrie::iterator iter = _wining_egp_routes.find(addr);
     return ((iter == _wining_egp_routes.end()) ? NULL : *iter);
-}
-
-template<class A>
-void
-ExtIntTable<A>::replumb(RouteTable<A>* old_parent, RouteTable<A>* new_parent)
-{
-    XLOG_ASSERT(old_parent);
-    if (old_parent == _int_table)
-	replumb_internal(new_parent);
-    else if (old_parent == _ext_table)
-	replumb_external(new_parent);
-}
-
-template<class A>
-inline void
-ExtIntTable<A>::replumb_external(RouteTable<A>* new_ext_parent)
-{
-    debug_msg("ExtIntTable::replumb_external\n");
-    _ext_table = new_ext_parent;
-    _ext_table->set_next_table(this);
-    this->set_tablename(make_extint_name(_ext_table, _int_table));
-    debug_msg("ExtIntTable: now called \"%s\"\n", this->tablename().c_str());
-}
-
-template<class A>
-inline void
-ExtIntTable<A>::replumb_internal(RouteTable<A>* new_int_parent)
-{
-    debug_msg("ExtIntTable::replumb_internal\n");
-    _int_table = new_int_parent;
-    _int_table->set_next_table(this);
-    this->set_tablename(make_extint_name(_ext_table, _int_table));
-    debug_msg("ExtIntTable: now called \"%s\"\n", this->tablename().c_str());
 }
 
 template<class A>
@@ -680,8 +803,18 @@ ExtIntTable<A>::str() const
     string s;
 
     s = "-------\nExtIntTable: " + this->tablename() + "\n";
-    s += "_ext_table = " + (_ext_table ? _ext_table->tablename() : "NULL") + "\n";
-    s += "_int_table = " + (_int_table ? _int_table->tablename() : "NULL") + "\n";
+    s += "_int_tables:\n";
+    for (typename AdminDistanceSet::const_iterator iter = _igp_ad_set.begin(); iter != _igp_ad_set.end(); ++iter) {
+	s += c_format("AD: %d \n", *iter);
+	typename RouteTableMap::const_iterator rt_iter = _all_tables.find(*iter);
+	s += rt_iter->second->str() + "\n";
+    }
+    s += "_ext_tables:\n";
+    for (typename AdminDistanceSet::const_iterator iter = _egp_ad_set.begin(); iter != _egp_ad_set.end(); ++iter) {
+	s += c_format("AD: %d \n", *iter);
+	typename RouteTableMap::const_iterator rt_iter = _all_tables.find(*iter);
+	s += rt_iter->second->str() + "\n";
+    }
     if (this->next_table() == NULL)
 	s += "no next table\n";
     else

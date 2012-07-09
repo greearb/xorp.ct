@@ -63,11 +63,8 @@ public:
     /**
      * ExtIntTable Constructor.
      *
-     * @param ext_table parent RouteTables supplying EGP routes.
-     * @param int_table parent RouteTables supplying IGP routes.
      */
-    ExtIntTable(RouteTable<A>* ext_table,
-		RouteTable<A>* int_table);
+    ExtIntTable();
 
     /**
      * ExtInt Destructor
@@ -84,7 +81,7 @@ public:
      * @param caller the parent table sending the new route.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller);
+    int add_route(const IPRouteEntry<A>& route);
 
     /**
      * An delete_route request from a parent table also causes a
@@ -98,7 +95,7 @@ public:
      * @param caller the parent table sending the delete_route.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int delete_route(const IPRouteEntry<A>* route, RouteTable<A>* caller);
+    int delete_route(const IPRouteEntry<A>* route);
 
     /**
      * Lookup a specific subnet.  The lookup will first look in the
@@ -152,26 +149,18 @@ public:
     TableType type() const	{ return EXTINT_TABLE; }
 
     /**
-     * Set new parent
+     * Changes the admin distance of the OriginTable and replumbs it.
      *
-     * @param old_parent the old parent table.
-     * @param new_parent the new parent table.
+     * @return XORP_OK on success, otherwise XORP_ERROR
      */
-    void replumb(RouteTable<A>* old_parent, RouteTable<A>* new_parent);
+    int change_admin_distance(OriginTable<A>* ot, uint32_t ad);
 
     /**
-     * Set new external parent
+     * Adds new RouteTable to the map
      *
-     * @param new_ext_parent the new external parent table.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    void replumb_external(RouteTable<A>* new_ext_parent);
-
-    /**
-     * Set new internal parent
-     *
-     * @param new_int_parent the new external parent table.
-     */
-    void replumb_internal(RouteTable<A>* new_int_parent);
+    int add_protocol_table(OriginTable<A>* new_table);
 
     /**
      * Render this ExtIntTable as a string for debugging purposes.
@@ -184,9 +173,10 @@ private:
     typedef multimap<const IPNet<A>, ResolvedIPRouteEntry<A>* > ResolvingParentMultiMap;
     typedef map<IPNet<A>, UnresolvedIPRouteEntry<A>* > IpUnresolvedTableMap;
     typedef Trie<A, const IPRouteEntry<A>* > RouteTrie;
+    typedef map<uint16_t, RouteTable<A>* > RouteTableMap;
+    typedef set<uint16_t> AdminDistanceSet;
 
-    int delete_ext_route(const IPRouteEntry<A>* route,
-			 bool& is_delete_propagated);
+    bool delete_ext_route(const IPRouteEntry<A>* route, bool winning_route = true);
 
     const ResolvedIPRouteEntry<A>* lookup_in_resolved_table(
 	const IPNet<A>& ipv4net);
@@ -208,16 +198,28 @@ private:
 	const IPNet<A>& route_net,
 	const typename ResolvingParentMultiMap::iterator& previous);
 
-    const IPRouteEntry<A>* lookup_route_in_igp_parent(
+    const IPRouteEntry<A>* lookup_winning_igp_route(
 	const IPNet<A>& subnet) const;
-    const IPRouteEntry<A>* lookup_route_in_igp_parent(const A& addr) const;
+    const IPRouteEntry<A>* lookup_winning_igp_route(const A& addr) const;
 
-    const IPRouteEntry<A>* lookup_route_in_egp_parent(
+    const IPRouteEntry<A>* lookup_winning_egp_route(
 	const IPNet<A>& subnet) const;
-    const IPRouteEntry<A>* lookup_route_in_egp_parent(const A& addr) const;
+    const IPRouteEntry<A>* lookup_winning_egp_route(const A& addr) const;
 
-    RouteTable<A>*				_ext_table;
-    RouteTable<A>*				_int_table;
+    bool best_igp_route(const IPRouteEntry<A>& route);
+    bool best_egp_route(const IPRouteEntry<A>& route);
+
+    bool deleting_best_igp_route(const IPRouteEntry<A>* route);
+    bool deleting_best_egp_route(const IPRouteEntry<A>* route);
+
+    const IPRouteEntry<A>* masked_route(const IPRouteEntry<A>* route);
+
+    void delete_resolved_routes(const IPRouteEntry<A>* route);
+
+    AdminDistanceSet _igp_ad_set;
+    AdminDistanceSet _egp_ad_set;
+
+    RouteTableMap _all_tables;
     Trie<A, const ResolvedIPRouteEntry<A>* >	_ip_resolved_table;
     multimap<A, UnresolvedIPRouteEntry<A>* >	_ip_unresolved_nexthops;
     IpUnresolvedTableMap			_ip_unresolved_table;
@@ -235,6 +237,8 @@ private:
     RouteTrie _wining_egp_routes;   // Here, all wining EGP routes will be stored
 				    //(resolved, unresolved and connected)
     RouteTrie _wining_routes;	    // Overall wining routes!
+
+    static const string& ext_int_name();
 };
 
 #endif // __RIB_RT_TAB_EXTINT_HH__

@@ -298,7 +298,7 @@ public:
      * @param caller this must be this table's parent table.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller);
+    int add_route(const IPRouteEntry<A>& route);
 
     /**
      * Delete a route from the RIB.  This will be propagated
@@ -310,7 +310,7 @@ public:
      * @param caller this must be this table's parent table.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int delete_route(const IPRouteEntry<A>* route, RouteTable<A>* caller);
+    int delete_route(const IPRouteEntry<A>* route);
 
     /**
      * Lookup a route in the RIB.  This request will be propagated to
@@ -336,15 +336,6 @@ public:
     RouteRange<A>* lookup_route_range(const A& addr) const {
 	    return _parent->lookup_route_range(addr);
     }
-
-    /**
-     * Replumb to replace the old parent of this table with a new parent.
-     *
-     * @param old_parent the parent RouteTable being replaced (must be
-     * the same as the existing parent).
-     * @param new_parent the new parent RouteTable.
-     */
-    void replumb(RouteTable<A>* old_parent, RouteTable<A>* new_parent);
 
     /**
      * @return the parent @ref RouteTable of this RegisterTable.
@@ -397,6 +388,8 @@ public:
      * @return the table type (@ref TableType).
      */
     TableType type() const	{ return REGISTER_TABLE; }
+
+    void set_parent(RouteTable<A>* new_parent);
 
     /**
      * Cause the register server to push out queued changes to the

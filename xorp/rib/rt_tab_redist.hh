@@ -110,15 +110,15 @@ public:
     //
     // Standard RouteTable methods
     //
-    int add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller);
-    int delete_route(const IPRouteEntry<A>* route, RouteTable<A>* caller);
-    const IPRouteEntry<A>* lookup_route(const IPNet<A>& net) const;
-    const IPRouteEntry<A>* lookup_route(const A& addr) const;
-    RouteRange<A>* lookup_route_range(const A& addr) const;
+    int add_route(const IPRouteEntry<A>& route);
+    int delete_route(const IPRouteEntry<A>* route);
+    const IPRouteEntry<A>* lookup_route(const IPNet<A>& net) const { return _parent->lookup_route(net); }
+    const IPRouteEntry<A>* lookup_route(const A& addr) const { return _parent->lookup_route(addr); }
+    RouteRange<A>* lookup_route_range(const A& addr) const { return _parent->lookup_route_range(addr); }
     TableType type() const { return REDIST_TABLE; }
     const RouteTable<A>* parent() const { return _parent; }
     RouteTable<A>* parent() { return _parent; }
-    void replumb(RouteTable<A>* old_parent, RouteTable<A>* new_parent);
+    void set_parent(RouteTable<A>* new_parent) { _parent = new_parent; }
     string str() const;
 
     /**

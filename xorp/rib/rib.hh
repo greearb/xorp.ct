@@ -33,7 +33,6 @@
 #include "route.hh"
 #include "rt_tab_base.hh"
 #include "rt_tab_origin.hh"
-#include "rt_tab_merged.hh"
 #include "rt_tab_extint.hh"
 #include "rt_tab_redist.hh"
 #include "rt_tab_pol_redist.hh"
@@ -176,7 +175,7 @@ public:
     int new_origin_table(const string&	tablename,
 			 const string&	target_class,
 			 const string&	target_instance,
-			 uint32_t	admin_distance,
+			 uint16_t	admin_distance,
 			 ProtocolType	protocol_type);
 
     /**
@@ -550,30 +549,7 @@ private:
      * @param existing_egp_table first occurrence of EGP origin table in tree
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int plumb_origin_table(OriginTable<A>*& ot,
-	    OriginTable<A>* existing_igp_table,
-	    OriginTable<A>* existing_egp_table);
-
-    /**
-     * Plumbs OriginTable @ot ahead of ExtInt table.
-     * It should be called ONLY if are adding first origin table of some
-     * protocol type (IGP or EGP)
-     *
-     * @param ot OriginTable to plumb in
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int plumb_ahead_of_ext_int(OriginTable<A>*& ot, const ProtocolType& type);
-
-    /**
-     * Creates Merged table and plumbs OriginTable @ot ahead of it.
-     * It should be called ONLY if there are both existing EGP table and
-     * existing IGP table.
-     *
-     * @param ot OriginTable to plumb in
-     * @param existing_table existing origin table of the same type
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int plumb_ahead_of_merged(OriginTable<A>*& ot, RouteTable<A>* existing_table);
+    int plumb_origin_table(OriginTable<A>*& ot);
 
     /**
      * Used to implement @ref add_igp_table and @ref add_egp_table.
@@ -625,33 +601,6 @@ private:
     int add_redist_table(RouteTable<A>* parent);
 
     /**
-     * track_back trough the RouteTables' parent pointers to find the
-     * last (i.e, nearest the OriginTable) table that matches the mask
-     * in @ref typemask.  If the table given by @ref rt doesn't match
-     * the mask, return it anyway.  If a table has more than one
-     * parent, then this is an error.
-     *
-     * @param rt the routing table to start with.
-     * @param typemask the bitwise-or of the routing table types that
-     * we may track back through.
-     * @return the last matching table, or @ref rt if rt itself doesn't match.
-     */
-    RouteTable<A>* track_back(RouteTable<A>* rt, int typemask) const;
-
-    /**
-     * track_forward trough the RouteTables' child pointers to find
-     * the last able that matches the mask in @ref typemask.
-     * Unlike track_back, if @ref rt doesn't match, but the next does,
-     * the track forward anyway.
-     *
-     * @param rt the routing table to start with.
-     * @param typemask the bitwise-or of the routing table types that
-     * we may track forward through.
-     * @return the last matching table.
-     */
-    RouteTable<A>* track_forward(RouteTable<A>* rt, int typemask) const;
-
-    /**
      * Find a origin routing table, given its table name
      *
      * @param tablename the name of the table to search for.
@@ -674,14 +623,6 @@ private:
      * @return pointer to table if exists, NULL otherwise.
      */
     OriginTable<A>* find_egp_origin_table(const string& tablename);
-
-    /**
-     * Find a merged routing table, given its table name
-     *
-     * @param tablename the name of the table to search for.
-     * @return pointer to table if exists, NULL otherwise.
-     */
-    MergedTable<A>* find_merged_table(const string& tablename);
 
     /**
      * Find a redist routing table, given its table name
@@ -715,18 +656,6 @@ private:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int add_table(OriginTable<A>* table);
-
-    /**
-     * Add merged table to RIB, but don't do any plumbing.
-     *
-     * It is an error to add the same table twice or multiple tables
-     * with the same name.
-     *
-     * @param table the table to be added.
-     *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int add_table(MergedTable<A>* table);
 
     /**
      * Add redist table to RIB, but don't do any plumbing.
@@ -780,7 +709,6 @@ private:
 protected:
     typedef map<string, OriginTable<A>* > OriginTableMap;
     typedef map<string, RedistTable<A>* > RedistTableMap;
-    typedef map<string, MergedTable<A>* > MergedTableMap;
     typedef map<string, Protocol* > ProtocolMap;
 
     RibManager&		_rib_manager;
@@ -794,7 +722,6 @@ protected:
 
     OriginTableMap		_igp_origin_tables;
     OriginTableMap		_egp_origin_tables;
-    MergedTableMap		_merged_tables;
     RedistTableMap		_redist_tables;
 
     OriginTable<A>*		_connected_origin_table; // Helper to faster resolve if route, that we're adding, is

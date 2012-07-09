@@ -34,7 +34,7 @@
 //
 template<class A>
 OriginTable<A>::OriginTable(const string&	tablename,
-			    uint32_t		admin_distance,
+			    uint16_t		admin_distance,
 			    ProtocolType	protocol_type,
 			    EventLoop&		eventloop)
     : RouteTable<A>(tablename),
@@ -64,10 +64,10 @@ int
 OriginTable<A>::add_route(IPRouteEntry<A>* route)
 {
     debug_msg("OT[%s]: Adding route %s\n", this->tablename().c_str(),
-	      route->str().c_str());
+	    route->str().c_str());
 
     if (lookup_route(route->net()) != NULL) {
-	delete route;
+	delete (route);
 	return XORP_ERROR;
     }
 
@@ -81,26 +81,15 @@ OriginTable<A>::add_route(IPRouteEntry<A>* route)
 
     _ip_route_table->insert(route->net(), route);
 
-
-
-
     // Propagate to next table
     if (this->next_table() != NULL)
-	this->next_table()->add_route(*route, this);
+	this->next_table()->add_route(*route);
 
 #ifdef DEBUG_LOGGING
     debug_msg("AFTER:\n");
     _ip_route_table->print();
 #endif
     return XORP_OK;
-}
-
-template<class A>
-int
-OriginTable<A>::add_route(const IPRouteEntry<A>&, RouteTable<A>*)
-{
-    XLOG_UNREACHABLE();
-    return XORP_ERROR;
 }
 
 template<class A>
@@ -120,7 +109,7 @@ OriginTable<A>::delete_route(const IPNet<A>& net)
 	_ip_route_table->erase(net);
 	// Propagate to next table
 	if (this->next_table() != NULL)
-	    this->next_table()->delete_route(found, this);
+	    this->next_table()->delete_route(found);
 
 	// Finally we're done, and can cleanup
 	delete found;
@@ -128,14 +117,6 @@ OriginTable<A>::delete_route(const IPNet<A>& net)
     }
     XLOG_ERROR("OT: attempt to delete a route that doesn't exist: %s",
 	       net.str().c_str());
-    return XORP_ERROR;
-}
-
-template<class A>
-int
-OriginTable<A>::delete_route(const IPRouteEntry<A>*, RouteTable<A>*)
-{
-    XLOG_UNREACHABLE();
     return XORP_ERROR;
 }
 

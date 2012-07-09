@@ -64,7 +64,7 @@ public:
      * @param caller the caller route table.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller);
+    int add_route(const IPRouteEntry<A>& route);
 
     /**
      * Delete a route.  This route MUST NOT be in the DeletionTable trie.
@@ -73,7 +73,7 @@ public:
      * @param caller the caller route table.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int delete_route(const IPRouteEntry<A>* route, RouteTable<A>* caller);
+    int delete_route(const IPRouteEntry<A>* route);
 
     /**
      * Delete all the routes that are in this DeletionTable.  The
@@ -135,7 +135,7 @@ public:
     /**
      * Change the parent of this route table.
      */
-    void replumb(RouteTable<A>* old_parent, RouteTable<A>* new_parent);
+    void set_parent(RouteTable<A>* new_parent);
 
     /**
      * Render the DeletionTable as a string for debugging purposes.

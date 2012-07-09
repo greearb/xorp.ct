@@ -50,19 +50,15 @@ PolicyRedistTable<A>::PolicyRedistTable(RouteTable<A>* parent, XrlRouter& rtr,
 {
     if (_parent->next_table() != NULL) {
         this->set_next_table(_parent->next_table());
-
-        this->next_table()->replumb(_parent, this);
+        this->next_table()->set_parent(this);
     }
     _parent->set_next_table(this);
 }
 
 template <class A>
 int
-PolicyRedistTable<A>::add_route(const IPRouteEntry<A>& route,
-				RouteTable<A>* caller)
+PolicyRedistTable<A>::add_route(const IPRouteEntry<A>& route)
 {
-    XLOG_ASSERT(caller == _parent);
-
     debug_msg("[RIB] PolicyRedistTable ADD ROUTE: %s\n",
 	      route.str().c_str());
 
@@ -77,15 +73,13 @@ PolicyRedistTable<A>::add_route(const IPRouteEntry<A>& route,
     RouteTable<A>* next = this->next_table();
     XLOG_ASSERT(next != NULL);
 
-    return next->add_route(route, this);
+    return next->add_route(route);
 }
 
 template <class A>
 int
-PolicyRedistTable<A>::delete_route(const IPRouteEntry<A>* route,
-				   RouteTable<A>* caller)
+PolicyRedistTable<A>::delete_route(const IPRouteEntry<A>* route)
 {
-    XLOG_ASSERT(caller == _parent);
     XLOG_ASSERT(route != NULL);
 
     debug_msg("[RIB] PolicyRedistTable DELETE ROUTE: %s\n",
@@ -102,7 +96,7 @@ PolicyRedistTable<A>::delete_route(const IPRouteEntry<A>* route,
     RouteTable<A>* next = this->next_table();
     XLOG_ASSERT(next != NULL);
 
-    return next->delete_route(route, this);
+    return next->delete_route(route);
 }
 
 template <class A>
@@ -137,11 +131,8 @@ PolicyRedistTable<A>::lookup_route_range(const A& addr) const
 
 template <class A>
 void
-PolicyRedistTable<A>::replumb(RouteTable<A>* old_parent,
-			      RouteTable<A>* new_parent)
+PolicyRedistTable<A>::set_parent(RouteTable<A>* new_parent)
 {
-    XLOG_ASSERT(old_parent == _parent);
-
     _parent = new_parent;
 }
 

@@ -94,10 +94,8 @@ RegisterTable<A>::~RegisterTable()
 
 template<class A>
 void
-RegisterTable<A>::replumb(RouteTable<A>* old_parent,
-			  RouteTable<A>* new_parent)
+RegisterTable<A>::set_parent(RouteTable<A>* new_parent)
 {
-    XLOG_ASSERT(_parent == old_parent);
     _parent = new_parent;
 }
 
@@ -252,16 +250,14 @@ RegisterTable<A>::notify_relevant_modules(bool add,
 
 template<class A>
 int
-RegisterTable<A>::add_route(const IPRouteEntry<A>& route,
-			    RouteTable<A>* caller)
+RegisterTable<A>::add_route(const IPRouteEntry<A>& route)
 {
     debug_msg("RegisterTable<A>::add_route %s\n", route.str().c_str());
     debug_msg("Before:\n");
     print();
-    XLOG_ASSERT(caller == _parent);
 
     if (this->next_table() != NULL)
-	this->next_table()->add_route(route, this);
+	this->next_table()->add_route(route);
 
     notify_relevant_modules(true /* it's an add */, route);
 
@@ -272,16 +268,14 @@ RegisterTable<A>::add_route(const IPRouteEntry<A>& route,
 
 template<class A>
 int
-RegisterTable<A>::delete_route(const IPRouteEntry<A>* route,
-			       RouteTable<A>* caller)
+RegisterTable<A>::delete_route(const IPRouteEntry<A>* route)
 {
     debug_msg("[REGT]: delete_route: %p\n%s\n", route, route->str().c_str());
     debug_msg("Before:\n");
     print();
-    XLOG_ASSERT(caller == _parent);
 
     if (this->next_table() != NULL)
-	this->next_table()->delete_route(route, this);
+	this->next_table()->delete_route(route);
 
     notify_relevant_modules(false /* it's a delete */, *route);
     debug_msg("Delete route called on register table\n");
@@ -469,7 +463,7 @@ RegisterTable<A>::str() const
 }
 
 template<class A>
-void
+inline void
 RegisterTable<A>::print()
 {
 #ifdef DEBUG_LOGGING

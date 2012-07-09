@@ -46,8 +46,7 @@ PolicyConnectedTable<A>::PolicyConnectedTable (RouteTable<A>* parent,
 {
     if (_parent->next_table()) {
 	this->set_next_table(_parent->next_table());
-
-	this->next_table()->replumb(_parent, this);
+	this->next_table()->set_parent(this);
     }
     _parent->set_next_table(this);
 }
@@ -60,14 +59,10 @@ PolicyConnectedTable<A>::~PolicyConnectedTable ()
 
 template <class A>
 int
-PolicyConnectedTable<A>::add_route(const IPRouteEntry<A>& route,
-				RouteTable<A>* caller)
+PolicyConnectedTable<A>::add_route(const IPRouteEntry<A>& route)
 {
-    XLOG_ASSERT(caller == _parent);
-
     debug_msg("[RIB] PolicyConnectedTable ADD ROUTE: %s\n",
 	      route.str().c_str());
-
 
     // store original
     IPRouteEntry<A>* original = const_cast<IPRouteEntry<A>* >(&route);
@@ -79,15 +74,13 @@ PolicyConnectedTable<A>::add_route(const IPRouteEntry<A>& route,
     XLOG_ASSERT(next);
 
     // Send the possibly modified route down
-    return next->add_route(*original, this);
+    return next->add_route(*original);
 }
 
 template <class A>
 int
-PolicyConnectedTable<A>::delete_route(const IPRouteEntry<A>* route,
-				   RouteTable<A>* caller)
+PolicyConnectedTable<A>::delete_route(const IPRouteEntry<A>* route)
 {
-    XLOG_ASSERT(caller == _parent);
     XLOG_ASSERT(route != NULL);
 
     debug_msg("[RIB] PolicyConnectedTable DELETE ROUTE: %s\n",
@@ -108,7 +101,7 @@ PolicyConnectedTable<A>::delete_route(const IPRouteEntry<A>* route,
     do_filtering(*re);
 
     // propagate the delete
-    int ret = next->delete_route(re, this);
+    int ret = next->delete_route(re);
 
     return ret;
 }
@@ -160,11 +153,8 @@ PolicyConnectedTable<A>::lookup_route_range(const A& addr) const
 
 template <class A>
 void
-PolicyConnectedTable<A>::replumb(RouteTable<A>* old_parent,
-			      RouteTable<A>* new_parent)
+PolicyConnectedTable<A>::set_parent(RouteTable<A>* new_parent)
 {
-    XLOG_ASSERT(old_parent == _parent);
-
     _parent = new_parent;
 }
 

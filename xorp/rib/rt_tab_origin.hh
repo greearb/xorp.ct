@@ -58,7 +58,7 @@ public:
      * @param protocol_type the routing protocol type (@ref ProtocolType).
      * @param eventloop the main event loop.
      */
-    OriginTable(const string& tablename, uint32_t admin_distance,
+    OriginTable(const string& tablename, uint16_t admin_distance,
 		ProtocolType protocol_type, EventLoop& eventloop);
 
     /**
@@ -79,11 +79,7 @@ public:
      */
     int add_route(IPRouteEntry<A>* route);
 
-    /**
-     * Generic @ref RouteTable method that is not used on OriginTable.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int add_route(const IPRouteEntry<A>&, RouteTable<A>* );
+    int add_route(const IPRouteEntry<A>&) { return XORP_ERROR; }
 
     /**
      * Delete a route from the OriginTable.
@@ -93,11 +89,7 @@ public:
      */
     int delete_route(const IPNet<A>& net);
 
-    /**
-     * Generic @ref RouteTable method that is not used on OriginTable.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int delete_route(const IPRouteEntry<A>* , RouteTable<A>* );
+    int delete_route(const IPRouteEntry<A>*) { return XORP_ERROR; }
 
     /**
      * Delete all the routes that are in this OriginTable.  The
@@ -152,7 +144,7 @@ public:
     /**
      * @return the default administrative distance for this OriginTable
      */
-    uint32_t admin_distance() const	{ return _admin_distance; }
+    uint16_t admin_distance() const	{ return _admin_distance; }
 
     /**
      * @return the routing protocol type (@ref ProtocolType).
@@ -163,11 +155,6 @@ public:
      * @return the table type (@ref TableType).
      */
     TableType type() const		{ return ORIGIN_TABLE; }
-
-    /**
-     * Generic @ref RouteTable method that is not used on OriginTable.
-     */
-    void replumb(RouteTable<A>* , RouteTable<A>* ) {}
 
     /**
      * Render the OriginTable as a string for debugging purposes
@@ -191,7 +178,7 @@ public:
     const RouteContainer& route_container() const;
 
 private:
-    uint32_t		_admin_distance;	// 0 .. 255
+    uint16_t		_admin_distance;	// 0 .. 255
     ProtocolType 	_protocol_type;	// IGP or EGP
     EventLoop&   	_eventloop;
     RouteContainer*	_ip_route_table;

@@ -52,15 +52,15 @@ public:
     PolicyConnectedTable(RouteTable<A>* parent, PolicyFilters& pfs);
     ~PolicyConnectedTable();
 
-    int add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller);
-    int delete_route(const IPRouteEntry<A>* route, RouteTable<A>* caller);
+    int add_route(const IPRouteEntry<A>& route);
+    int delete_route(const IPRouteEntry<A>* route);
     const IPRouteEntry<A>* lookup_route(const IPNet<A>& net) const;
     const IPRouteEntry<A>* lookup_route(const A& addr) const;
     RouteRange<A>* lookup_route_range(const A& addr) const;
     TableType type() const { return POLICY_CONNECTED_TABLE; }
     const RouteTable<A>* parent() const { return _parent; }
     RouteTable<A>* parent() { return _parent; }
-    void replumb(RouteTable<A>* old_parent, RouteTable<A>* new_parent);
+    void set_parent(RouteTable<A>* new_parent);
     string str() const;
 
     /**

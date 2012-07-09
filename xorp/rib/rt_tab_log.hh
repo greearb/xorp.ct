@@ -46,15 +46,15 @@ public:
     LogTable(const string& tablename, RouteTable<A>* parent);
     ~LogTable();
 
-    int add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller);
-    int delete_route(const IPRouteEntry<A>* , RouteTable<A>* caller);
+    int add_route(const IPRouteEntry<A>& route);
+    int delete_route(const IPRouteEntry<A>*);
     const IPRouteEntry<A>* lookup_route(const IPNet<A>& net) const;
     const IPRouteEntry<A>* lookup_route(const A& addr) const;
     RouteRange<A>* lookup_route_range(const A& addr) const;
     TableType type() const { return LOG_TABLE; }
     RouteTable<A>* parent() { return _parent; }
     const RouteTable<A>* parent() const { return _parent; }
-    void replumb(RouteTable<A>* old_parent, RouteTable<A>* new_parent);
+    void set_parent(RouteTable<A>* new_parent);
     string str() const;
 
     uint32_t update_number() const;
@@ -79,8 +79,8 @@ public:
     OstreamLogTable(const string& 	tablename,
 		    RouteTable<A>*	parent,
 		    ostream& 		out);
-    int add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller);
-    int delete_route(const IPRouteEntry<A>* , RouteTable<A>* caller);
+    int add_route(const IPRouteEntry<A>& route);
+    int delete_route(const IPRouteEntry<A>*);
     string str() const;
 
 private:
@@ -100,11 +100,9 @@ public:
     XLogTraceTable(const string& 	tablename,
 		   RouteTable<A>* 	parent);
 
-    int add_route(const IPRouteEntry<A>& 	route,
-		  RouteTable<A>* 		caller);
+    int add_route(const IPRouteEntry<A>& 	route);
 
-    int delete_route(const IPRouteEntry<A>* 	proute,
-		     RouteTable<A>* 		caller);
+    int delete_route(const IPRouteEntry<A>* 	proute);
 
     string str() const;
 };
@@ -121,11 +119,9 @@ public:
     DebugMsgLogTable(const string& 	tablename,
 		     RouteTable<A>* 	parent);
 
-    int add_route(const IPRouteEntry<A>& 	route,
-		  RouteTable<A>* 		caller);
+    int add_route(const IPRouteEntry<A>& 	route);
 
-    int delete_route(const IPRouteEntry<A>* 	proute,
-		     RouteTable<A>* 		caller);
+    int delete_route(const IPRouteEntry<A>* 	proute);
 
     string str() const;
 };

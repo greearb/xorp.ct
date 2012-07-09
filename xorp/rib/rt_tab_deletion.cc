@@ -44,7 +44,7 @@ DeletionTable<A>::DeletionTable(const string& tablename,
 {
     XLOG_ASSERT(_parent != NULL);
     this->set_next_table(_parent->next_table());
-    this->next_table()->replumb(parent, this);
+    this->next_table()->set_parent(this);
     parent->set_next_table(this);
 
     // Callback immediately, but after network events or expired timers
@@ -63,11 +63,8 @@ DeletionTable<A>::~DeletionTable()
 
 template<class A>
 int
-DeletionTable<A>::add_route(const IPRouteEntry<A>& route,
-			    RouteTable<A>* caller)
+DeletionTable<A>::add_route(const IPRouteEntry<A>& route)
 {
-    XLOG_ASSERT(caller == _parent);
-
     typename Trie<A, const IPRouteEntry<A>* >::iterator iter;
     iter = _ip_route_table->lookup_node(route.net());
     if (iter != _ip_route_table->end()) {
@@ -79,26 +76,23 @@ DeletionTable<A>::add_route(const IPRouteEntry<A>& route,
 	//
 	const IPRouteEntry<A>* our_route = *iter;
 	_ip_route_table->erase(route.net());
-	this->next_table()->delete_route(our_route, this);
+	this->next_table()->delete_route(our_route);
 	delete our_route;
     }
 
-    return this->next_table()->add_route(route, this);
+    return this->next_table()->add_route(route);
 }
 
 template<class A>
 int
-DeletionTable<A>::delete_route(const IPRouteEntry<A>* route,
-			       RouteTable<A>* caller)
+DeletionTable<A>::delete_route(const IPRouteEntry<A>* route)
 {
-    XLOG_ASSERT(caller == _parent);
-
     // The route MUST NOT be in our trie.
     typename Trie<A, const IPRouteEntry<A>* >::iterator iter;
     iter = _ip_route_table->lookup_node(route->net());
     XLOG_ASSERT(iter == _ip_route_table->end());
 
-    return this->next_table()->delete_route(route, this);
+    return this->next_table()->delete_route(route);
 }
 
 template<class A>
@@ -223,7 +217,7 @@ DeletionTable<A>::background_deletion_pass()
     iter = _ip_route_table->begin();
     const IPRouteEntry<A>* our_route = *iter;
     _ip_route_table->erase(our_route->net());
-    this->next_table()->delete_route(our_route, this);
+    this->next_table()->delete_route(our_route);
     delete our_route;
 
     // Callback immediately, but after network events or expired timers
@@ -237,15 +231,14 @@ void
 DeletionTable<A>::unplumb_self()
 {
     _parent->set_next_table(this->next_table());
-    this->next_table()->replumb(this, _parent);
+    this->next_table()->set_parent(_parent);
     delete this;
 }
 
 template<class A>
 void
-DeletionTable<A>::replumb(RouteTable<A>* old_parent, RouteTable<A>* new_parent)
+DeletionTable<A>::set_parent(RouteTable<A>* new_parent)
 {
-    XLOG_ASSERT(_parent == old_parent);
     _parent = new_parent;
 }
 

@@ -103,20 +103,6 @@ RIB<A>::find_egp_origin_table(const string& tablename)
 }
 
 template <typename A>
-inline MergedTable<A>*
-RIB<A>::find_merged_table(const string& tablename)
-{
-    typename MergedTableMap::iterator li;
-
-    li = _merged_tables.find(tablename);
-
-    if (li == _merged_tables.end())
-	return NULL;
-
-    return li->second;
-}
-
-template <typename A>
 inline RedistTable<A>*
 RIB<A>::find_redist_table(const string& tablename)
 {
@@ -202,19 +188,6 @@ RIB<A>::add_table(RedistTable<A>* table)
 }
 
 template <typename A>
-inline int
-RIB<A>::add_table(MergedTable<A>* table)
-{
-    const string& tablename = table->tablename();
-    if (find_merged_table(tablename) != NULL) {
-	XLOG_WARNING("add_table: table %s already exists", tablename.c_str());
-	return XORP_ERROR;
-    }
-    _merged_tables[tablename] = table;
-    return XORP_OK;
-}
-
-template <typename A>
 int
 RIB<A>::set_protocol_admin_distance(const string& protocol_name,
 				    const uint32_t& admin_distance)
@@ -228,7 +201,10 @@ RIB<A>::set_protocol_admin_distance(const string& protocol_name,
 		       protocol_name.c_str());
 	    return XORP_ERROR;
         } else if (NULL != ot && ot->route_count() == 0) {
-            ot->change_admin_distance(admin_distance);
+            int ret;
+            ret = _ext_int_table->change_admin_distance(ot, admin_distance);
+            if (ret == XORP_ERROR)
+        	return XORP_ERROR;
 	}
     }
     _admin_distances[protocol_name] = admin_distance;
@@ -329,6 +305,9 @@ RIB<A>::~RIB()
     // Just set the pointer to NULL here
     _connected_origin_table = NULL;
 
+    delete _ext_int_table;
+    _ext_int_table = NULL;
+
     while (! _igp_origin_tables.empty()) {
 	delete _igp_origin_tables.begin()->second;
 	_igp_origin_tables.erase(_igp_origin_tables.begin());
@@ -344,11 +323,6 @@ RIB<A>::~RIB()
 	_redist_tables.erase(_redist_tables.begin());
     }
 
-    while (! _merged_tables.empty()) {
-	delete _merged_tables.begin()->second;
-	_merged_tables.erase(_merged_tables.begin());
-    }
-
     delete _register_table;
     _register_table = NULL;
 
@@ -357,9 +331,6 @@ RIB<A>::~RIB()
 
     delete _policy_redist_table;
     _policy_redist_table = NULL;
-
-    delete _ext_int_table;
-    _ext_int_table = NULL;
 
     while (! _protocols.empty()) {
 	delete _protocols.begin()->second;
@@ -471,7 +442,7 @@ RIB<A>::initialize_ext_int()
 {
     XLOG_ASSERT(!_ext_int_table);
 
-    _ext_int_table = new ExtIntTable<A>(NULL, NULL);
+    _ext_int_table = new ExtIntTable<A>();
 
     XLOG_ASSERT(_final_table == NULL);
 
@@ -490,7 +461,7 @@ RIB<A>::initialize_register(RegisterServer& register_server)
 
     XLOG_ASSERT(_final_table == _ext_int_table);
 
-    _register_table->replumb(NULL, _final_table);
+    _register_table->set_parent(_final_table);
     _final_table->set_next_table(_register_table);
     _final_table = _register_table;
 
@@ -502,7 +473,7 @@ int
 RIB<A>::new_origin_table(const string&	tablename,
 			 const string&	target_class,
 			 const string&	target_instance,
-			 uint32_t	admin_distance,
+			 uint16_t	admin_distance,
 			 ProtocolType	protocol_type)
 {
     OriginTable<A>* ot = new OriginTable<A>(tablename, admin_distance,
@@ -1135,10 +1106,10 @@ RIB<A>::add_igp_table(const string& tablename,
 	delete_origin_table(tablename, target_class, target_instance);
 	return r;
     }
-    RedistTable<A>* rt = find_redist_table(redist_tablename(tablename));
-    XLOG_ASSERT(rt != NULL);
 
     if (tablename == "connected") {
+	RedistTable<A>* rt = find_redist_table(redist_tablename(tablename));
+	XLOG_ASSERT(rt != NULL);
 	r = add_policy_connected_table(rt);
 	if (r != XORP_OK) {
 	    delete_origin_table(tablename, target_class, target_instance);
@@ -1164,19 +1135,6 @@ RIB<A>::add_egp_table(const string& tablename,
 	return r;
     }
 
-#if 0
-    // XXX For now we unconditionally plumb a RedistTable behind each
-    // OriginTable.  We need this because the RedistTable needs to
-    // track the routes within the OriginTable in order to be able to
-    // render a dump when another protocol requests redistribution.
-    r = add_redist_table(tablename);
-    if (r != XORP_OK) {
-	delete_origin_table(tablename, target_class, target_instance);
-	return r;
-    }
-    RouteTable<A>* rt = find_table(redist_tablename(tablename));
-    XLOG_ASSERT(rt != NULL);
-#endif
     return r;
 }
 
@@ -1224,98 +1182,12 @@ RIB<A>::add_redist_table(RouteTable<A>* parent)
 
 template <typename A>
 int
-RIB<A>::plumb_ahead_of_ext_int(OriginTable<A>*& ot, const ProtocolType& type)
-{
-    XLOG_ASSERT(_ext_int_table);
-
-    switch (type) {
-    case IGP:
-	_ext_int_table->replumb_internal(ot);
-	break;
-    case EGP:
-	_ext_int_table->replumb_external(ot);
-	break;
-    default:
-	XLOG_UNREACHABLE();
-	break;
-    }
-
-    return XORP_OK;
-}
-
-template <typename A>
-int
-RIB<A>::plumb_ahead_of_merged(OriginTable<A>*& ot,
-			RouteTable<A>* existing_table)
-{
-    //
-    // We're going to need to create a MergedTable
-    //
-    RouteTable<A>* next_table = existing_table->next_table();
-
-    // Skip past any RedistTables
-    RouteTable<A>* new_prev_table = track_forward(existing_table,
-						  (REDIST_TABLE |
-						   POLICY_CONNECTED_TABLE));
-    if (new_prev_table != existing_table) {
-	existing_table = new_prev_table;
-	next_table = existing_table->next_table();
-    }
-
-    MergedTable<A>* merged_table = new MergedTable<A>(existing_table, ot);
-    if (merged_table == NULL || add_table(merged_table) != XORP_OK) {
-	delete merged_table;
-	return XORP_ERROR;
-    }
-
-    merged_table->set_next_table(next_table);
-    if (next_table != NULL)
-	next_table->replumb(existing_table, merged_table);
-
-    //
-    // It's possible existing_table was the last table - if so, then it
-    // isn't anymore.
-    //
-    if (_final_table == existing_table)
-	_final_table = merged_table;
-
-    return XORP_OK;
-
-}
-
-template <typename A>
-int
-RIB<A>::plumb_origin_table(OriginTable<A>*& ot,
-			    OriginTable<A>* existing_igp_table,
-			    OriginTable<A>* existing_egp_table)
+RIB<A>::plumb_origin_table(OriginTable<A>*& ot)
 {
     // XXX: the table was created by new_origin_table() above, so it must exist
     XLOG_ASSERT(ot != NULL && _final_table != ot);
 
-    //
-    // There are existing tables, so we need to do some plumbing
-    //
-    // Two possibilities:
-    //  1. There are no existing tables of the same protocol type as the protocol type
-    //     of the table that we're plumbing
-    //
-    //     -> Plumb the origin table ahead of ext int table
-    //  2. There are both existing EGP and existing IGP tables
-    //
-    //      -> Add Merged table and plumb the origin table ahead of merged table
-    //
-
-    //
-    // Depending on which tables already exist, we may need to create
-    // a MergedTable or an ExtInt table.
-    //
-    ProtocolType protocol_type = (ProtocolType) ot->protocol_type();
-    if ((!existing_igp_table && (protocol_type == IGP)) ||
-	(!existing_egp_table && (protocol_type == EGP)))
-	return plumb_ahead_of_ext_int(ot, protocol_type);
-    else
-	return plumb_ahead_of_merged(ot, (protocol_type == IGP) ?
-		existing_igp_table : existing_egp_table);
+    return _ext_int_table->add_protocol_table(ot);
 }
 
 //
@@ -1371,13 +1243,6 @@ RIB<A>::add_origin_table(const string& tablename,
 	return XORP_OK;
     }
 
-    //
-    // Find first IGP and EGP origin table
-    // This is needed for plumbing new origin table
-    //
-    OriginTable<A>* existing_igp_table = !_igp_origin_tables.empty() ? _igp_origin_tables.begin()->second : NULL;
-    OriginTable<A>* existing_egp_table = !_egp_origin_tables.empty() ? _egp_origin_tables.begin()->second : NULL;
-
     if (new_origin_table(tablename, target_class, target_instance,
 	    get_protocol_admin_distance(tablename), protocol_type) != XORP_OK) {
 	debug_msg("new_origin_table failed\n");
@@ -1396,7 +1261,7 @@ RIB<A>::add_origin_table(const string& tablename,
     break;
     }
 
-    return plumb_origin_table(ot, existing_igp_table, existing_egp_table);
+    return plumb_origin_table(ot);
 }
 
 template <typename A>
@@ -1467,52 +1332,6 @@ RIB<A>::target_death(const string& target_class,
     }
 }
 
-//
-// Given a single-parent table, track back to the last matching table
-// before this one.
-//
-template <typename A>
-RouteTable<A>*
-RIB<A>::track_back(RouteTable<A>* rt, int typemask) const
-{
-    if (rt == NULL || (rt->type() & typemask) == 0) {
-	return rt;
-    }
-
-    for (RouteTable<A>* parent = rt->parent();
-	 parent && (parent->type() & typemask);
-	 parent = rt->parent()) {
-	rt = parent;
-    }
-    return rt;
-}
-
-//
-// Track forward to the last matching table, or return this table if
-// the next table doesn't match.
-//
-template <typename A>
-RouteTable<A>*
-RIB<A>::track_forward(RouteTable<A>* rt, int typemask) const
-{
-    RouteTable<A>* next;
-    if (NULL == rt)
-	// XXX: not the same test as track back (deliberate ?)
-	return rt;
-
-    next = rt->next_table();
-
-    while (next != NULL) {
-	if ((next->type() & typemask) != 0) {
-	    rt = next;
-	    next = rt->next_table();
-	} else
-	    return rt;
-    }
-
-    return rt;
-}
-
 #ifdef DEBUG_LOGGING
 template <class A>
 struct print_from_pair {
@@ -1533,11 +1352,6 @@ RIB<A>::print_rib() const
     cout << "**************************************************************" << endl;
     cout << "Redist table count " << _redist_tables.size() << endl;
     for_each(_redist_tables.begin(), _redist_tables.end(),
-	print_from_pair<RouteTable<A> >());
-
-    cout << "==============================================================" << endl;
-    cout << "Merged table count " << _merged_tables.size()  << endl;
-    for_each(_merged_tables.begin(), _merged_tables.end(),
 	print_from_pair<RouteTable<A> >());
 
     cout << "==============================================================" << endl;

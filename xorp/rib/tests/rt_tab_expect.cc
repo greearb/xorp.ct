@@ -126,10 +126,8 @@ ExpectTable<A>::expect_delete(const IPRouteEntry<A>& route)
 
 template<class A>
 int
-ExpectTable<A>::add_route(const IPRouteEntry<A>& 	route,
-			  RouteTable<A>* 		caller)
+ExpectTable<A>::add_route(const IPRouteEntry<A>&	route)
 {
-    XLOG_ASSERT(caller == _parent);
     debug_msg("DT[%s]: Adding route %s\n", this->tablename().c_str(),
 	      route.str().c_str());
     if (_expected_route_changes.empty()) {
@@ -148,10 +146,8 @@ ExpectTable<A>::add_route(const IPRouteEntry<A>& 	route,
 
 template<class A>
 int
-ExpectTable<A>::delete_route(const IPRouteEntry<A>* 	route,
-			  RouteTable<A>* 		caller)
+ExpectTable<A>::delete_route(const IPRouteEntry<A>* 	route)
 {
-    XLOG_ASSERT(caller == _parent);
     debug_msg("DT[%s]: Deleting route %s\n", this->tablename().c_str(),
 	      route->str().c_str());
     if (_expected_route_changes.empty()) {
@@ -184,10 +180,8 @@ ExpectTable<A>::lookup_route(const A& addr) const
 
 template<class A>
 void
-ExpectTable<A>::replumb(RouteTable<A>* old_parent,
-		       RouteTable<A>* new_parent)
+ExpectTable<A>::set_parent(RouteTable<A>* new_parent)
 {
-    XLOG_ASSERT(_parent == old_parent);
     _parent = new_parent;
 }
 

@@ -165,11 +165,9 @@ public:
     RouteTable(const string& name) : _tablename(name), _next_table(NULL) {}
     virtual ~RouteTable();
 
-    virtual int add_route(const IPRouteEntry<A>& route,
-			  RouteTable*		 caller) = 0;
+    virtual int add_route(const IPRouteEntry<A>& route) = 0;
 
-    virtual int delete_route(const IPRouteEntry<A>* route,
-			     RouteTable*	    caller) = 0;
+    virtual int delete_route(const IPRouteEntry<A>* route) = 0;
 
     virtual const IPRouteEntry<A>* lookup_route(const IPNet<A>& net) const = 0;
 
@@ -179,14 +177,11 @@ public:
 
     virtual void set_next_table(RouteTable* next_table);
 
-    // parent is only supposed to be called on single-parent tables
-    virtual RouteTable* parent() { XLOG_UNREACHABLE(); return NULL; }
-    virtual const RouteTable* parent() const { XLOG_UNREACHABLE(); return NULL; }
-
     virtual TableType type() const = 0;
-    virtual void replumb(RouteTable* old_parent, RouteTable* new_parent) = 0;
     virtual string str() const = 0;
     virtual void flush() {}
+
+    virtual void set_parent(RouteTable<A>*) {}
 
     const string& tablename() const		{ return _tablename; }
     RouteTable* next_table()			{ return _next_table; }
