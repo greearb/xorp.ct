@@ -31,7 +31,7 @@
 #include "libxorp/callback.hh"
 #include "libxorp/eventloop.hh"
 #include "libxorp/exceptions.hh"
-
+#include "libproto/proto_unit.hh"
 #include "xrl_static_routes_node.hh"
 
 #ifdef HAVE_GETOPT_H
@@ -106,7 +106,8 @@ static_routes_main(const string& finder_hostname, uint16_t finder_port) {
 	finder_port,
 	"finder",
 	"fea",
-	"rib");
+	"rib",
+	xorp_module_name(AF_INET, XORP_MODULE_MFEA));
     wait_until_xrl_router_is_ready(eventloop,
 				   xrl_static_routes_node.xrl_router());
 

@@ -121,6 +121,9 @@ StaticRoutesNode::shutdown()
     //
     rib_register_shutdown();
 
+    // De-register with the MFEA
+    rib_register_shutdown();
+
     //
     // De-register with the FEA
     //
@@ -306,6 +309,7 @@ StaticRoutesNode::updates_made()
     StaticRoutesNode::Table::iterator route_iter;
     list<StaticRoute *> add_routes, replace_routes, delete_routes;
     list<StaticRoute *>::iterator pending_iter;
+    list<McastRoute *>::iterator mpending_iter;
 
     for (route_iter = _static_routes.begin();
 	 route_iter != _static_routes.end();
@@ -395,6 +399,80 @@ StaticRoutesNode::updates_made()
 	}
     }
 
+    // Deal with mcast-routes
+    list<McastRoute *> add_mroutes, replace_mroutes, delete_mroutes;
+    map<IPvX, McastRoute>::iterator mroute_iter;
+    for (mroute_iter = _mcast_routes.begin();
+	 mroute_iter != _mcast_routes.end();
+	 ++mroute_iter) {
+	McastRoute& static_route = mroute_iter->second;
+	bool is_old_up = false;
+	bool is_new_up = false;
+	string old_ifname, old_vifname, new_ifname, new_vifname;
+
+	//
+	// Calculate whether the interface was UP before and now.
+	//
+	const IfMgrIfAtom* if_atom;
+	const IfMgrVifAtom* vif_atom;
+
+	if_atom = _iftree.find_interface(static_route.ifname());
+	vif_atom = _iftree.find_vif(static_route.ifname(),
+				    static_route.vifname());
+	if ((if_atom != NULL) && (if_atom->enabled())
+	    && (! if_atom->no_carrier())
+	    && (vif_atom != NULL) && (vif_atom->enabled())) {
+	    is_old_up = true;
+	}
+
+	if_atom = ifmgr_iftree().find_interface(static_route.ifname());
+	vif_atom = ifmgr_iftree().find_vif(static_route.ifname(),
+					   static_route.vifname());
+	if ((if_atom != NULL) && (if_atom->enabled())
+	    && (! if_atom->no_carrier())
+	    && (vif_atom != NULL) && (vif_atom->enabled())) {
+	    is_new_up = true;
+	}
+
+	if ((is_old_up == is_new_up)
+	    && (old_ifname == new_ifname)
+	    && (old_vifname == new_vifname)) {
+	    continue;			// Nothing changed
+	}
+
+	if ((! is_old_up) && (! is_new_up)) {
+	    //
+	    // The interface is still down, so nothing to do
+	    //
+	    continue;
+	}
+	if ((! is_old_up) && (is_new_up)) {
+	    //
+	    // The interface is now up, hence add the route
+	    //
+	    add_mroutes.push_back(&static_route);
+	    continue;
+	}
+	if ((is_old_up) && (! is_new_up)) {
+	    //
+	    // The interface went down, hence cancel all pending requests,
+	    // and withdraw the route.
+	    //
+	    delete_mroutes.push_back(&static_route);
+	    continue;
+	}
+	if (is_old_up && is_new_up) {
+	    //
+	    // The interface remains up, hence probably the interface or
+	    // the vif name has changed.
+	    // Delete the route and then add it again so the information
+	    // in the RIB will be updated.
+	    //
+	    replace_mroutes.push_back(&static_route);
+	    continue;
+	}
+    }
+
     //
     // Update the local copy of the interface tree
     //
@@ -443,6 +521,44 @@ StaticRoutesNode::updates_made()
 	prepare_route_for_transmission(orig_route, copy_route);
 	copy_route.set_delete_route();
 	inform_rib(copy_route);
+    }
+
+
+    //
+    // Process all pending "add mroute" requests
+    //
+    for (mpending_iter = add_mroutes.begin();
+	 mpending_iter != add_mroutes.end();
+	 ++pending_iter) {
+	McastRoute& orig_route = *(*mpending_iter);
+	McastRoute copy_route = orig_route;
+	copy_route.set_add_route();
+	inform_mfea(copy_route);
+    }
+
+    //
+    // Process all pending "replace mroute" requests
+    //
+    for (mpending_iter = replace_mroutes.begin();
+	 mpending_iter != replace_mroutes.end();
+	 ++mpending_iter) {
+	McastRoute& orig_route = *(*mpending_iter);
+	McastRoute copy_route = orig_route;
+	copy_route.set_replace_route();
+	inform_mfea(copy_route);
+    }
+
+    //
+    // Process all pending "delete mroute" requests
+    //
+    for (mpending_iter = delete_mroutes.begin();
+	 mpending_iter != delete_mroutes.end();
+	 ++mpending_iter) {
+	McastRoute& orig_route = *(*mpending_iter);
+	cancel_mfea_mfc_change(orig_route);
+	McastRoute copy_route = orig_route;
+	copy_route.set_delete_route();
+	inform_mfea(copy_route);
     }
 }
 
@@ -669,6 +785,65 @@ StaticRoutesNode::delete_route6(bool unicast, bool multicast,
 
     return (delete_route(static_route, error_msg));
 }
+
+int StaticRoutesNode::add_mcast_route4(const IPv4& mcast_addr, const string& input_if,
+				       const IPv4& input_ip, const string& output_ifs,
+				       uint32_t distance, string& error_msg) {
+    map<IPvX, McastRoute>::const_iterator iter = _mcast_routes.find(mcast_addr);
+    if (iter == _mcast_routes.end()) {
+	McastRoute mr(mcast_addr, input_if, input_ip, output_ifs, distance);
+	_mcast_routes[mcast_addr] = mr;
+	McastRoute copy_route = mr;
+	copy_route.set_add_route();
+	inform_mfea(copy_route);
+    }
+    else {
+	error_msg.append("Mcast-Route: " + mcast_addr.str() + " already exists!\n");
+	return XORP_ERROR;
+    }
+    return XORP_OK;
+}
+
+int StaticRoutesNode::replace_mcast_route4(const IPv4& mcast_addr, const string& input_if,
+					   const IPv4& input_ip, const string& output_ifs,
+					   uint32_t distance, string& error_msg) {
+    UNUSED(error_msg);
+
+    McastRoute mr(mcast_addr, input_if, input_ip, output_ifs, distance);
+    map<IPvX, McastRoute>::const_iterator iter = _mcast_routes.find(mcast_addr);
+    if (iter == _mcast_routes.end()) {
+	if (iter->second == mr) {
+	    // no changes
+	    return XORP_OK;
+	}
+    }
+    _mcast_routes.erase(mcast_addr);
+    _mcast_routes[mcast_addr] = mr;
+
+    McastRoute copy_route = mr;
+    copy_route.set_replace_route();
+    inform_mfea(copy_route);
+
+    return XORP_OK;
+}
+
+
+int StaticRoutesNode::delete_mcast_route4(const IPv4& mcast_addr, const IPv4& input_ip,
+					  string& error_msg) {
+    UNUSED(error_msg);
+
+    map<IPvX, McastRoute>::const_iterator iter = _mcast_routes.find(mcast_addr);
+    if (iter != _mcast_routes.end()) {
+	_mcast_routes.erase(mcast_addr);
+
+	McastRoute mr(mcast_addr, input_ip);
+	mr.set_delete_route();
+	inform_mfea(mr);
+    }
+
+    return XORP_OK;
+}
+
 
 /**
  * Find a route from the routing table.
@@ -1294,6 +1469,16 @@ StaticRoutesNode::inform_rib(const StaticRoute& route)
     //
     if (do_inform)
 	inform_rib_route_change(modified_route);
+}
+
+
+void
+StaticRoutesNode::inform_mfea(const McastRoute& route)
+{
+    if (! is_enabled())
+	return;
+
+    inform_mfea_mfc_change(route);
 }
 
 /**

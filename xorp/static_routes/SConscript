@@ -51,6 +51,7 @@ env.AppendUnique(LIBS = [
     'xst_fea_ifmgr_mirror',
     'xst_static_routes',
     'xif_rib',
+    'xif_mfea',
     'xif_finder_event_notifier',
     'xorp_policy_backend',
     'xorp_policy_common',
