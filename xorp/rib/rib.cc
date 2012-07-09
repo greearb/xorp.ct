@@ -31,30 +31,6 @@
 #include "rib.hh"
 
 
-// ----------------------------------------------------------------------------
-// Inline table utility methods
-
-template <typename A>
-struct table_has_name {
-    table_has_name(const string& name) : _n(name) {}
-    bool operator() (const RouteTable<A>* rt) const {
-	return rt->tablename() == _n;
-    }
-private:
-    const string& _n;
-};
-
-template <typename A, typename T>
-struct table_has_name_and_type {
-    table_has_name_and_type(const string& name) : _n(name) {}
-    bool operator() (const RouteTable<A>* rt) const {
-	const T* t = dynamic_cast<const T*>(rt);
-	return (t != 0) && (rt->tablename() == _n);
-    }
-private:
-    const string& _n;
-};
-
 template <typename A>
 inline OriginTable<A>*
 RIB<A>::find_origin_table(const string& tablename)
