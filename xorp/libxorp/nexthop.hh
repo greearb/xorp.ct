@@ -142,7 +142,6 @@ public:
      *
      * Callers ARE RESPONSIBLE for freeing the memory
      */
-    virtual IPNextHop* get_copy() = 0;
 
 protected:
     const A _addr;
@@ -219,7 +218,6 @@ public:
      */
     int type() const { return ENCAPS_NEXTHOP; }
 
-    IPEncapsNextHop* get_copy() { return new IPEncapsNextHop<A>(*this); }
 
 private:
     //_cached_peer is the cached copy of the local peer we send the
@@ -299,7 +297,6 @@ public:
      */
     int type() const { return DISCARD_NEXTHOP; }
 
-    DiscardNextHop* get_copy() { return new DiscardNextHop<A>(*this); }
 
 private:
 
@@ -326,7 +323,6 @@ public:
      */
     int type() const { return UNREACHABLE_NEXTHOP; }
 
-    UnreachableNextHop* get_copy() { return new UnreachableNextHop<A>(*this); }
 
 private:
 

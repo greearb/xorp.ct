@@ -33,6 +33,18 @@
 
 #include "protocol.hh"
 
+#ifdef USE_BOOST
+
+#include <boost/shared_ptr.hpp>
+#define smart_ptr boost::shared_ptr
+
+#else
+
+#include "libxorp/ref_ptr.hh"
+#define smart_ptr ref_ptr
+
+#endif
+
 template<class A>
 class RibVif;
 
@@ -62,6 +74,10 @@ public:
     RouteEntry(RibVif<A>* vif, Protocol* protocol,
 		uint32_t metric, const IPNet<A>& net,
 		uint16_t admin_distance = UNKNOWN_ADMIN_DISTANCE);
+
+    RouteEntry(RibVif<A>* vif, Protocol* protocol,
+		uint32_t metric, smart_ptr<PolicyTags>& policytags,
+		const IPNet<A>& net, uint16_t admin_distance = UNKNOWN_ADMIN_DISTANCE);
 
     RouteEntry(const RouteEntry<A>& r);
 
@@ -144,8 +160,10 @@ public:
      *
      * @return the policy-tags for this route.
      */
-    PolicyTags& policytags() { return _policytags; }
-    const PolicyTags& policytags() const { return _policytags; }
+    PolicyTags& policytags() { return *_policytags; }
+    const PolicyTags& policytags() const { return *_policytags; }
+
+    smart_ptr<PolicyTags>& policytags_shared() { return _policytags; }
 
 protected:
     RibVif<A>* _vif;
@@ -154,7 +172,7 @@ protected:
 
     uint16_t	_admin_distance;	// Lower is better
     uint32_t	_metric;		// Lower is better
-    PolicyTags	_policytags;		// Tags used for policy route redistribution
+    smart_ptr<PolicyTags> _policytags;	// Tags used for policy route redistribution
     IPNet<A>	_net;			// The route entry's subnet address
 };
 
@@ -200,13 +218,17 @@ public:
 		 const PolicyTags& policytags)
 	: RouteEntry<A>(vif, protocol, metric, policytags, net), _nexthop(nexthop) { XLOG_ASSERT(nexthop); }
 
-    IPRouteEntry(const IPRouteEntry<A>& r);
+    IPRouteEntry(const IPNet<A>& net, RibVif<A>* vif,
+	smart_ptr<IPNextHop<A> >& nexthop, Protocol* protocol, uint32_t metric,
+	smart_ptr<PolicyTags>& policytags, uint16_t admin_distance)
+	: RouteEntry<A>(vif, protocol, metric, policytags, net, admin_distance), _nexthop(nexthop) { }
+
     IPRouteEntry<A>& operator=(const IPRouteEntry<A>& rhs);
 
     /**
      * Destructor for Routing Table Entry
      */
-    virtual ~IPRouteEntry() { delete _nexthop; }
+    virtual ~IPRouteEntry() { }
 
     /**
      * Get the NextHop router.
@@ -214,7 +236,9 @@ public:
      * @return the NextHop router to which packets matching this
      * entry should be forwarded.
      */
-    IPNextHop<A>* nexthop() const { return _nexthop; }
+    IPNextHop<A>* nexthop() const { return _nexthop.get(); }
+
+    smart_ptr<IPNextHop<A> >& nexthop_shared() { return _nexthop; }
 
     /**
      * Get the route entry's next-hop router address.
@@ -233,7 +257,7 @@ public:
     void* operator new(size_t size);
     void operator delete(void* ptr);
 protected:
-    IPNextHop<A>*	_nexthop;
+    smart_ptr<IPNextHop<A> > _nexthop;
 private:
     static MemoryPool<IPRouteEntry<A> >& memory_pool();
 };
@@ -278,7 +302,10 @@ public:
     ResolvedIPRouteEntry(const IPRouteEntry<A>* resolving_parent,
 			 const IPRouteEntry<A>* egp_parent)
 	: IPRouteEntry<A>(egp_parent->net(), resolving_parent->vif(),
-		resolving_parent->nexthop()->get_copy(), egp_parent->protocol(), egp_parent->metric(), PolicyTags()),
+		const_cast<IPRouteEntry<A>*>(resolving_parent)->nexthop_shared(),
+		egp_parent->protocol(), egp_parent->metric(),
+		const_cast<IPRouteEntry<A>*>(egp_parent)->policytags_shared(),
+		egp_parent->admin_distance()),
 	  _resolving_parent(resolving_parent),
 	  _egp_parent(egp_parent) { }
 
