@@ -56,10 +56,12 @@ public:
      * @param metric the routing protocol metric for this route.
      */
     RouteEntry(RibVif<A>* vif, Protocol* protocol,
-		uint32_t metric, const PolicyTags& policytags, const IPNet<A>& net);
+		uint32_t metric, const PolicyTags& policytags,
+		const IPNet<A>& net, uint16_t admin_distance = UNKNOWN_ADMIN_DISTANCE);
 
     RouteEntry(RibVif<A>* vif, Protocol* protocol,
-		uint32_t metric, const IPNet<A>& net);
+		uint32_t metric, const IPNet<A>& net,
+		uint16_t admin_distance = UNKNOWN_ADMIN_DISTANCE);
 
     RouteEntry(const RouteEntry<A>& r);
 

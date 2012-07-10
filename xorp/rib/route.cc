@@ -32,9 +32,9 @@
 
 template<class A>
 RouteEntry<A>::RouteEntry(RibVif<A>* vif, Protocol* protocol,
-		       uint32_t metric, const PolicyTags& policytags, const IPNet<A>& net)
+		       uint32_t metric, const PolicyTags& policytags, const IPNet<A>& net, uint16_t admin_distance)
     : _vif(vif), _protocol(protocol),
-      _admin_distance(UNKNOWN_ADMIN_DISTANCE), _metric(metric),
+      _admin_distance(admin_distance), _metric(metric),
       _policytags(policytags), _net(net)
 {
     if (_vif != NULL)
@@ -43,9 +43,9 @@ RouteEntry<A>::RouteEntry(RibVif<A>* vif, Protocol* protocol,
 
 template<class A>
 RouteEntry<A>::RouteEntry(RibVif<A>* vif, Protocol* protocol,
-		       uint32_t metric, const IPNet<A>& net)
+		       uint32_t metric, const IPNet<A>& net, uint16_t admin_distance)
     : _vif(vif), _protocol(protocol),
-      _admin_distance(UNKNOWN_ADMIN_DISTANCE), _metric(metric), _net(net)
+      _admin_distance(admin_distance), _metric(metric), _net(net)
 {
     if (_vif != NULL)
 	_vif->incr_usage_counter();
