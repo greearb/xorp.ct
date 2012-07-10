@@ -181,7 +181,7 @@ public:
      */
     IPRouteEntry(const IPNet<A>& net, RibVif<A>* vif, IPNextHop<A>* nexthop,
 		 Protocol* protocol, uint32_t metric)
-	: RouteEntry<A>(vif, protocol, metric, net), _nexthop(nexthop) {}
+	: RouteEntry<A>(vif, protocol, metric, net), _nexthop(nexthop) { XLOG_ASSERT(nexthop); }
 
     /**
      * Constructor for IPRouteEntry.
@@ -198,7 +198,7 @@ public:
     IPRouteEntry(const IPNet<A>& net, RibVif<A>* vif, IPNextHop<A>* nexthop,
 		 Protocol* protocol, uint32_t metric,
 		 const PolicyTags& policytags)
-	: RouteEntry<A>(vif, protocol, metric, policytags, net), _nexthop(nexthop) { }
+	: RouteEntry<A>(vif, protocol, metric, policytags, net), _nexthop(nexthop) { XLOG_ASSERT(nexthop); }
 
     IPRouteEntry(const IPRouteEntry<A>& r);
     IPRouteEntry<A>& operator=(const IPRouteEntry<A>& rhs);
@@ -222,12 +222,7 @@ public:
      * @return the route entry's next-hop router address. If there is no
      * next-hop router, then the return value is IPv4#ZERO() or IPv6#ZERO().
      */
-    const A& nexthop_addr() const {
-	if (_nexthop != NULL)
-	    return _nexthop->addr();
-	else
-	    return A::ZERO();
-    }
+    const A& nexthop_addr() const { return _nexthop->addr(); }
 
     /**
      * Get the route entry as a string for debugging purposes.
