@@ -171,19 +171,11 @@ public:
     virtual int delete_igp_route(const IPRouteEntry<A>* route) = 0;
     virtual int delete_egp_route(const IPRouteEntry<A>* route) = 0;
 
-    virtual const IPRouteEntry<A>* lookup_route(const IPNet<A>& net) const = 0;
-
-    virtual const IPRouteEntry<A>* lookup_route(const A& addr) const = 0;
-
-    virtual RouteRange<A>* lookup_route_range(const A& addr) const = 0;
-
     virtual void set_next_table(RouteTable* next_table);
 
     virtual TableType type() const = 0;
     virtual string str() const = 0;
     virtual void flush() {}
-
-    virtual void set_parent(RouteTable<A>*) {}
 
     const string& tablename() const		{ return _tablename; }
     RouteTable* next_table()			{ return _next_table; }
@@ -191,8 +183,7 @@ public:
 
     // this call should be received and dealt with by the PolicyRedistTable.
     virtual void replace_policytags(const IPRouteEntry<A>& route,
-				    const PolicyTags& prevtags,
-				    RouteTable* caller);
+				    const PolicyTags& prevtags);
 
 protected:
     void set_tablename(const string& s) { _tablename = s; }

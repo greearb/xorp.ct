@@ -92,7 +92,7 @@ ExpectedRouteChange<A>::str() const
 
 template<class A>
 ExpectTable<A>::ExpectTable(const string&   tablename,
-			       RouteTable<A>*  parent)
+			       OriginTable<A>*  parent)
     : RouteTable<A>(tablename)
 {
     _parent = parent;
@@ -168,28 +168,22 @@ template<class A>
 const IPRouteEntry<A>*
 ExpectTable<A>::lookup_route(const IPNet<A>& net) const
 {
-    return _parent->lookup_route(net);
+    return _parent->lookup_ip_route(net);
 }
 
 template<class A>
 const IPRouteEntry<A>*
 ExpectTable<A>::lookup_route(const A& addr) const
 {
-    return _parent->lookup_route(addr);
+    return _parent->lookup_ip_route(addr);
 }
 
 template<class A>
 void
 ExpectTable<A>::set_parent(RouteTable<A>* new_parent)
 {
-    _parent = new_parent;
-}
-
-template<class A>
-RouteRange<A>*
-ExpectTable<A>::lookup_route_range(const A& addr) const
-{
-    return _parent->lookup_route_range(addr);
+    _parent = dynamic_cast<OriginTable<A>* >(new_parent);
+    XLOG_ASSERT(_parent);
 }
 
 template<class A> string

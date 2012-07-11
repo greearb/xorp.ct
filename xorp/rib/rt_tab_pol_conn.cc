@@ -42,13 +42,12 @@ const string PolicyConnectedTable<A>::table_name = "policy-connected-table";
 template <class A>
 PolicyConnectedTable<A>::PolicyConnectedTable (RouteTable<A>* parent,
 					       PolicyFilters& pfs)
-    : RouteTable<A>(table_name), _parent(parent), _policy_filters(pfs)
+    : RouteTable<A>(table_name), _policy_filters(pfs)
 {
-    if (_parent->next_table()) {
-	this->set_next_table(_parent->next_table());
-	this->next_table()->set_parent(this);
+    if (parent->next_table()) {
+	this->set_next_table(parent->next_table());
     }
-    _parent->set_next_table(this);
+    parent->set_next_table(this);
 }
 
 template <class A>
@@ -134,66 +133,12 @@ PolicyConnectedTable<A>::delete_egp_route(const IPRouteEntry<A>* route)
 }
 
 template <class A>
-const IPRouteEntry<A>*
-PolicyConnectedTable<A>::lookup_route(const IPNet<A>& net) const
-{
-    XLOG_ASSERT(_parent);
-
-    typename RouteContainer::iterator i;
-    i = _route_table.lookup_node(net);
-
-    // check if we have route [we should have same routes as origin table].
-    if (i == _route_table.end())
-	return NULL;
-
-    return *i;
-}
-
-
-template <class A>
-const IPRouteEntry<A>*
-PolicyConnectedTable<A>::lookup_route(const A& addr) const
-{
-    XLOG_ASSERT(_parent);
-
-    typename RouteContainer::iterator i;
-    i = _route_table.find(addr);
-
-    // same as above
-    if (i == _route_table.end())
-	return NULL;
-
-    return *i;
-}
-
-
-template <class A>
-RouteRange<A>*
-PolicyConnectedTable<A>::lookup_route_range(const A& addr) const
-{
-    XLOG_ASSERT(_parent);
-
-    // XXX: no policy tags in ranges for now
-    return _parent->lookup_route_range(addr);
-}
-
-
-template <class A>
-void
-PolicyConnectedTable<A>::set_parent(RouteTable<A>* new_parent)
-{
-    _parent = new_parent;
-}
-
-
-template <class A>
 string
 PolicyConnectedTable<A>::str() const
 {
     ostringstream oss;
     oss << "------" << endl;
     oss << "PolicyConnectedTable" << endl;
-    oss << "parent: " << const_cast< PolicyConnectedTable<A>* >(this)->parent()->tablename() << endl;
     if (this->next_table())
 	oss << "next table: " << this->next_table()->tablename() << endl;
     else
@@ -220,7 +165,7 @@ PolicyConnectedTable<A>::push_routes()
 	do_filtering(*prev);
 
 	// only policytags may change
-	next->replace_policytags(*prev, prev->policytags(), this);
+	next->replace_policytags(*prev, prev->policytags());
     }
 }
 

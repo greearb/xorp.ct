@@ -194,7 +194,7 @@ Redistributor<A>::dump_a_route()
     }
 
     // Lookup route and announce it via output
-    const IPRouteEntry<A>* ipr = _table->lookup_route(*ci);
+    const IPRouteEntry<A>* ipr = _table->lookup_ip_route(*ci);
     XLOG_ASSERT(ipr != 0);
     if (policy_accepts(*ipr))
 	_output->add_route(*ipr);
@@ -345,13 +345,12 @@ Redistributor<A>::OutputEventInterface::fatal_error()
 template <typename A>
 RedistTable<A>::RedistTable(const string& tablename,
 			    RouteTable<A>* parent)
-    : RouteTable<A>(tablename), _parent(parent)
+    : RouteTable<A>(tablename)
 {
-    if (_parent->next_table()) {
-	this->set_next_table(_parent->next_table());
-	this->next_table()->set_parent(this);
+    if (parent->next_table()) {
+	this->set_next_table(parent->next_table());
     }
-    _parent->set_next_table(this);
+    parent->set_next_table(this);
 }
 
 template <typename A>
@@ -384,6 +383,14 @@ RedistTable<A>::remove_redistributor(Redistributor<A>* r)
 }
 
 template <typename A>
+const IPRouteEntry<A>*
+RedistTable<A>::lookup_ip_route(const IPNet<A>& net) const
+{
+    typename IPRouteTrie::iterator iter = _ip_route_table.lookup_node(net);
+    return (iter == _ip_route_table.end()) ? NULL : *iter;
+}
+
+template <typename A>
 Redistributor<A>*
 RedistTable<A>::redistributor(const string& name)
 {
@@ -401,10 +408,10 @@ template <typename A>
 void
 RedistTable<A>::generic_add_route(const IPRouteEntry<A>& route)
 {
-    typename RouteIndex::iterator rci = _rt_index.find(route.net());
-    XLOG_ASSERT(rci == _rt_index.end());
+    XLOG_ASSERT(_rt_index.find(route.net()) == _rt_index.end());
 
     _rt_index.insert(route.net());
+    _ip_route_table.insert(route.net(), &route);
 
     typename list<Redistributor<A>*>::iterator i = _outputs.begin();
     while (i != _outputs.end()) {
@@ -438,13 +445,11 @@ RedistTable<A>::add_egp_route(const IPRouteEntry<A>& route)
 
 template <typename A>
 void
-RedistTable<A>::generic_delete_route(const IPRouteEntry<A>* r)
+RedistTable<A>::generic_delete_route(const IPRouteEntry<A>* route)
 {
-    const IPRouteEntry<A>& route = *r;
+    debug_msg("delete_route for %s\n", route->net().str().c_str());
 
-    debug_msg("delete_route for %s\n", route.net().str().c_str());
-
-    typename RouteIndex::iterator rci = _rt_index.find(route.net());
+    typename RouteIndex::iterator rci = _rt_index.find(route->net());
     XLOG_ASSERT(rci != _rt_index.end());
 
     typename list<Redistributor<A>*>::iterator i;
@@ -454,17 +459,18 @@ RedistTable<A>::generic_delete_route(const IPRouteEntry<A>* r)
     while (i != _outputs.end()) {
 	Redistributor<A>* r = *i;
 	i++;	// XXX for safety increment iterator before prodding output
-	r->redist_event().will_delete(route);
+	r->redist_event().will_delete(*route);
     }
 
     _rt_index.erase(rci);
+    _ip_route_table.erase(route->net());
 
     // Announce delete as fait accompli
     i = _outputs.begin();
     while (i != _outputs.end()) {
 	Redistributor<A>* r = *i;
 	i++;	// XXX for safety increment iterator before prodding output
-	r->redist_event().did_delete(route);
+	r->redist_event().did_delete(*route);
     }
 }
 
@@ -512,11 +518,6 @@ RedistTable<A>::str() const
 	    ++i;
 	}
     }
-
-    if (this->parent())
-	s += "parent = " + this->parent()->tablename() + "\n";
-    else
-	s += "no parent table\n";
 
     if (this->next_table() == NULL) {
 	s += "no next table\n";

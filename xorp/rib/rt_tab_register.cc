@@ -94,7 +94,7 @@ RegisterTable<A>::~RegisterTable()
 
 template<class A>
 void
-RegisterTable<A>::set_parent(RouteTable<A>* new_parent)
+RegisterTable<A>::set_parent(ExtIntTable<A>* new_parent)
 {
     _parent = new_parent;
 }

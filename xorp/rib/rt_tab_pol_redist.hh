@@ -133,13 +133,7 @@ public:
     int delete_igp_route(const IPRouteEntry<A>* route);
     int delete_egp_route(const IPRouteEntry<A>* route);
 
-    const IPRouteEntry<A>* lookup_route(const IPNet<A>& net) const;
-    const IPRouteEntry<A>* lookup_route(const A& addr) const;
-    RouteRange<A>* lookup_route_range(const A& addr) const;
     TableType type() const { return POLICY_REDIST_TABLE; }
-    const RouteTable<A>* parent() const { return _parent; }
-    RouteTable<A>* parent() { return _parent; }
-    void set_parent(RouteTable<A>* new_parent);
     string str() const;
 
     void xrl_cb(const XrlError&, string);
@@ -154,8 +148,7 @@ public:
      * @param caller the table which invoked this method.
      */
     void replace_policytags(const IPRouteEntry<A>& route,
-                            const PolicyTags& prevtags,
-                            RouteTable<A>* caller);
+                            const PolicyTags& prevtags);
 
 
 private:
@@ -196,8 +189,6 @@ private:
     void generic_add_route(const IPRouteEntry<A>& router);
     void generic_delete_route(const IPRouteEntry<A>* route);
 
-
-    RouteTable<A>*		_parent;
 
     XrlRouter&			_xrl_router;
     EventLoop&			_eventloop;

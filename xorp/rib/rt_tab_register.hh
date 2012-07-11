@@ -27,7 +27,7 @@
 
 #include "libxorp/debug.h"
 
-#include "rt_tab_base.hh"
+#include "rt_tab_extint.hh"
 
 
 class RegisterServer;
@@ -295,35 +295,11 @@ public:
     int delete_egp_route(const IPRouteEntry<A>* route);
 
     /**
-     * Lookup a route in the RIB.  This request will be propagated to
-     * the parent table unchanged.
-     */
-    const IPRouteEntry<A>* lookup_route(const IPNet<A>& net) const {
-	    return _parent->lookup_route(net);
-    }
-
-    /**
-     * Lookup a route in the RIB.  This request will be propagated to
-     * the parent table unchanged.
-     */
-    const IPRouteEntry<A>* lookup_route(const A& addr) const {
-	    return _parent->lookup_route(addr);
-    }
-
-    /**
      * Lookup a route_range in the RIB.  This request will be
      * propagated to the parent table unchanged.  It is not expected
      * this will be called, but not prohibited.
      */
-    RouteRange<A>* lookup_route_range(const A& addr) const {
-	    return _parent->lookup_route_range(addr);
-    }
-
-    /**
-     * @return the parent @ref RouteTable of this RegisterTable.
-     */
-    const RouteTable<A>* parent() const		{ return _parent;	}
-    RouteTable<A>* parent()			{ return _parent;	}
+    RouteRange<A>* lookup_route_range(const A& addr) const { return _parent->lookup_route_range(addr); }
 
     /**
      * @return this RegisterTable as a string for debugging purposes.
@@ -373,7 +349,7 @@ public:
      */
     TableType type() const	{ return REGISTER_TABLE; }
 
-    void set_parent(RouteTable<A>* new_parent);
+    void set_parent(ExtIntTable<A>* new_parent);
 
     /**
      * Cause the register server to push out queued changes to the
@@ -414,7 +390,7 @@ private:
 
     map<string, ModuleData>		_module_names;
     Trie<A, RouteRegister<A>* >		_ipregistry;
-    RouteTable<A>*			_parent;
+    ExtIntTable<A>*			_parent;
     RegisterServer&			_register_server;
     bool				_multicast;  // true if a multicast rib
 };

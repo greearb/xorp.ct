@@ -44,7 +44,6 @@ DeletionTable<A>::DeletionTable(const string& tablename,
 {
     XLOG_ASSERT(_parent != NULL);
     this->set_next_table(_parent->next_table());
-    this->next_table()->set_parent(this);
     parent->set_next_table(this);
 }
 
@@ -134,102 +133,6 @@ DeletionTable<A>::delete_all_routes()
 }
 
 template<class A>
-const IPRouteEntry<A>*
-DeletionTable<A>::lookup_route(const IPNet<A>& net) const
-{
-    const IPRouteEntry<A>* parent_route = _parent->lookup_route(net);
-
-    typename RouteTrie::iterator iter;
-    iter = _ip_route_table->lookup_node(net);
-
-    if (parent_route != NULL) {
-	//
-	// If we succeeded in looking up the route in the parent table,
-	// then the route MUST NOT be in our deletion table.
-	//
-	XLOG_ASSERT(iter == _ip_route_table->end());
-	return parent_route;
-    } else {
-	//
-	// While we hold routes to be deleted, we haven't told anyone
-	// downstream they've gone yet.  We have to pretend they're
-	// still there (for consistency reasons) until we've got round
-	// to telling downstream that they've actually gone.
-	//
-	return (iter == _ip_route_table->end()) ? NULL : *iter;
-    }
-}
-
-template<class A>
-const IPRouteEntry<A>*
-DeletionTable<A>::lookup_route(const A& addr) const
-{
-    const IPRouteEntry<A>* parent_route = _parent->lookup_route(addr);
-
-    typename RouteTrie::iterator iter;
-    iter = _ip_route_table->find(addr);
-
-    if (parent_route != NULL) {
-	if (iter == _ip_route_table->end()) {
-	    return parent_route;
-	} else {
-	    //
-	    // Both our parent and ourselves have a route.  We need to
-	    // return the more specific route.  If the two are the same
-	    // this is a fatal error.
-	    //
-	    const IPRouteEntry<A>* our_route = *iter;
-	    XLOG_ASSERT(our_route->prefix_len() != parent_route->prefix_len());
-
-	    if (our_route->prefix_len() > parent_route->prefix_len()) {
-		return our_route;
-	    } else {
-		return parent_route;
-	    }
-	}
-	XLOG_UNREACHABLE();
-    }
-
-    //
-    // While we hold routes to be deleted, we haven't told anyone
-    // downstream they've gone yet.  We have to pretend they're
-    // still there (for consistency reasons) until we've got round
-    // to telling downstream that they've actually gone.
-    //
-    return (iter == _ip_route_table->end()) ? NULL : *iter;
-}
-
-template<class A>
-RouteRange<A>*
-DeletionTable<A>::lookup_route_range(const A& addr) const
-{
-    const IPRouteEntry<A>* route;
-    typename RouteTrie::iterator iter;
-    iter = _ip_route_table->find(addr);
-
-    if (iter == _ip_route_table->end())
-	route = NULL;
-    else
-	route = *iter;
-
-    A bottom_addr, top_addr;
-    _ip_route_table->find_bounds(addr, bottom_addr, top_addr);
-    RouteRange<A>* rr = new RouteRange<A>(addr, route, top_addr, bottom_addr);
-    debug_msg("Deletion Table: %s returning lower bound for %s of %s\n",
-	      this->tablename().c_str(), addr.str().c_str(),
-	      bottom_addr.str().c_str());
-    debug_msg("Deletion Table: %s returning upper bound for %s of %s\n",
-	      this->tablename().c_str(), addr.str().c_str(),
-	      top_addr.str().c_str());
-
-    // Merge our own route range with that of our parent.
-    RouteRange<A>* parent_rr = _parent->lookup_route_range(addr);
-    rr->merge(parent_rr);
-    delete parent_rr;
-    return rr;
-}
-
-template<class A>
 void
 DeletionTable<A>::background_deletion_pass()
 {
@@ -253,7 +156,6 @@ void
 DeletionTable<A>::unplumb_self()
 {
     _parent->set_next_table(this->next_table());
-    this->next_table()->set_parent(_parent);
     delete this;
 }
 

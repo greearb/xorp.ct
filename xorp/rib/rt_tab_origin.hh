@@ -112,7 +112,7 @@ public:
      * @param net the subnet to look up.
      * @return a pointer to the route entry if it exists, NULL otherwise.
      */
-    const IPRouteEntry<A>* lookup_route(const IPNet<A>& net) const;
+    const IPRouteEntry<A>* lookup_ip_route(const IPNet<A>& net) const;
 
     /**
      * Lookup an IP address to get the most specific (longest prefix
@@ -122,21 +122,7 @@ public:
      * @return a pointer to the most specific route entry if any entry
      * matches, NULL otherwise.
      */
-    const IPRouteEntry<A>* lookup_route(const A& addr) const;
-
-    /**
-     * Lookup an IP addressto get the most specific (longest prefix
-     * length) route in the OriginTable that matches this address,
-     * along with the RouteRange information for this address and
-     * route.
-     *
-     * @see RouteRange
-     * @param addr the IP address to look up.
-     * @return a pointer to a RouteRange class instance containing the
-     * relevant answer.  It is up to the recipient of this pointer to
-     * free the associated memory.
-     */
-    RouteRange<A>* lookup_route_range(const A& addr) const;
+    const IPRouteEntry<A>* lookup_ip_route(const A& addr) const;
 
     /**
     * Changes the admin distance
@@ -183,7 +169,7 @@ protected:
     uint16_t		_admin_distance;	// 0 .. 255
     //
     EventLoop&   	_eventloop;
-    RouteTrie*	_ip_route_table;
+    RouteTrie*		_ip_route_table;
     uint32_t	 	_gen;
 
     virtual int generic_delete_route(const IPRouteEntry<A>*) = 0;

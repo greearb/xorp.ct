@@ -22,7 +22,7 @@
 #ifndef __RIB_RT_TAB_EXTINT_HH__
 #define __RIB_RT_TAB_EXTINT_HH__
 
-#include "rt_tab_base.hh"
+#include "rt_tab_origin.hh"
 
 
 /**
@@ -177,7 +177,7 @@ private:
     typedef multimap<const IPNet<A>, ResolvedIPRouteEntry<A>* > ResolvingParentMultiMap;
     typedef map<IPNet<A>, UnresolvedIPRouteEntry<A>* > IpUnresolvedTableMap;
     typedef Trie<A, const IPRouteEntry<A>* > RouteTrie;
-    typedef map<uint16_t, RouteTable<A>* > RouteTableMap;
+    typedef map<uint16_t, OriginTable<A>* > RouteTableMap;
     typedef set<uint16_t> AdminDistanceSet;
 
     bool delete_ext_route(const IPRouteEntry<A>* route, bool winning_route = true);

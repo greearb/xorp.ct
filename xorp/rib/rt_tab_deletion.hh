@@ -86,40 +86,6 @@ public:
     void delete_all_routes();
 
     /**
-     * Lookup a specific subnet to see if it is in this DeletionTable
-     * or the upstream tables.
-     *
-     * @param net the subnet to look up.
-     * @return a pointer to the route entry if it exists, NULL otherwise.
-     */
-    const IPRouteEntry<A>* lookup_route(const IPNet<A>& net) const;
-
-    /**
-     * Lookup an IP address to get the most specific (longest prefix
-     * length) route in the DeletionTable or the upstream tables that
-     * matches this address.
-     *
-     * @param addr the IP address to look up.
-     * @return a pointer to the most specific route entry if any entry
-     * matches, NULL otherwise.
-     */
-    const IPRouteEntry<A>* lookup_route(const A& addr) const;
-
-    /**
-     * Lookup an IP addressto get the most specific (longest prefix
-     * length) route in the union of the DeletionTable and the
-     * upstream tables that matches this address, along with the
-     * RouteRange information for this address and route.
-     *
-     * @see RouteRange
-     * @param addr the IP address to look up.
-     * @return a pointer to a RouteRange class instance containing the
-     * relevant answer.  It is up to the recipient of this pointer to
-     * free the associated memory.
-     */
-    RouteRange<A>* lookup_route_range(const A& addr) const;
-
-    /**
      * Delete a route, and reschedule background_deletion_pass again
      * on a zero-second timer until all the routes have been deleted
      */

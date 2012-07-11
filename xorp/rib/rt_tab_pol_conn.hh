@@ -56,13 +56,9 @@ public:
     int delete_igp_route(const IPRouteEntry<A>* route);
     int add_egp_route(const IPRouteEntry<A>& route);
     int delete_egp_route(const IPRouteEntry<A>* route);
-    const IPRouteEntry<A>* lookup_route(const IPNet<A>& net) const;
-    const IPRouteEntry<A>* lookup_route(const A& addr) const;
-    RouteRange<A>* lookup_route_range(const A& addr) const;
+
     TableType type() const { return POLICY_CONNECTED_TABLE; }
-    const RouteTable<A>* parent() const { return _parent; }
-    RouteTable<A>* parent() { return _parent; }
-    void set_parent(RouteTable<A>* new_parent);
+
     string str() const;
 
     /**
@@ -86,8 +82,6 @@ private:
 
     typedef Trie<A, IPRouteEntry<A>* > RouteContainer;
 
-
-    RouteTable<A>*	_parent;
 
     RouteContainer	_route_table;	// Copy of routes
 					// we have this so we may push routes.

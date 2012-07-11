@@ -437,8 +437,8 @@ RIB<A>::initialize_register(RegisterServer& register_server)
 
     XLOG_ASSERT(_final_table == _ext_int_table);
 
-    _register_table->set_parent(_final_table);
-    _final_table->set_next_table(_register_table);
+    _register_table->set_parent(_ext_int_table);
+    _ext_int_table->set_next_table(_register_table);
     _final_table = _register_table;
 
     return XORP_OK;
@@ -831,7 +831,7 @@ RIB<A>::add_route(const string&		tablename,
     //
     // Search for a route to a directly-connected destination
     //
-    const IPRouteEntry<A>* re = _connected_origin_table->lookup_route(nexthop_addr);
+    const IPRouteEntry<A>* re = _connected_origin_table->lookup_ip_route(nexthop_addr);
     if (re != NULL)
 	// We found a route for the nexthop
 	vif = re->vif();
@@ -924,7 +924,7 @@ RIB<A>::verify_route(const A& lookup_addr,
 
     // 1. Check for an expected route miss.
     // 2. Check table entry validity and existence.
-    re = _final_table->lookup_route(lookup_addr);
+    re = _ext_int_table->lookup_route(lookup_addr);
     if (re == NULL || re->vif() == NULL) {
 	if (matchtype == RibVerifyType(MISS)) {
 	    debug_msg("****ROUTE MISS SUCCESSFULLY VERIFIED****\n");
@@ -1009,7 +1009,7 @@ RIB<A>::lookup_route(const A& lookupaddr)
 {
     debug_msg("looking up %s\n", lookupaddr.str().c_str());
 
-    const IPRouteEntry<A>* re = _final_table->lookup_route(lookupaddr);
+    const IPRouteEntry<A>* re = _ext_int_table->lookup_route(lookupaddr);
     // Case 1: Route miss. Return the null IP address.
     // Vif cannot be NULL for a valid route.
     if (re == NULL || re->vif() == NULL)
@@ -1046,7 +1046,7 @@ template <typename A>
 RouteRange<A>*
 RIB<A>::route_range_lookup(const A& lookupaddr)
 {
-    return _final_table->lookup_route_range(lookupaddr);
+    return _ext_int_table->lookup_route_range(lookupaddr);
 }
 
 template <typename A>

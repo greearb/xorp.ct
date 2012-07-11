@@ -367,7 +367,7 @@ ExtIntTable<A>::masked_route(const IPRouteEntry<A>* route)
     const IPRouteEntry<A>* found = NULL;
     XLOG_ASSERT(border != _all_tables.end());
     for (typename RouteTableMap::iterator iter = ++border; iter != _all_tables.end(); ++iter) {
-	found = iter->second->lookup_route(route->net());
+	found = iter->second->lookup_ip_route(route->net());
 	if (found)
 	    return found;
     }

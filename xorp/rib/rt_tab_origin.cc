@@ -63,7 +63,7 @@ OriginTable<A>::add_route(IPRouteEntry<A>* route)
     debug_msg("OT[%s]: Adding route %s\n", this->tablename().c_str(),
 	    route->str().c_str());
 
-    if (lookup_route(route->net()) != NULL) {
+    if (lookup_ip_route(route->net()) != NULL) {
 	delete (route);
 	return XORP_ERROR;
     }
@@ -143,53 +143,27 @@ OriginTable<A>::routing_protocol_shutdown()
 
 template<class A>
 const IPRouteEntry<A>*
-OriginTable<A>::lookup_route(const IPNet<A>& net) const
+OriginTable<A>::lookup_ip_route(const IPNet<A>& net) const
 {
     debug_msg("------------------\nlookup_route in table %s\n",
 	this->tablename().c_str());
     debug_msg("OriginTable: Looking up route %s\n", net.str().c_str());
-    typename RouteTrie::iterator iter;
-    iter = _ip_route_table->lookup_node(net);
+    typename RouteTrie::iterator iter = _ip_route_table->lookup_node(net);
     return (iter == _ip_route_table->end()) ? NULL : *iter;
 }
 
 template<class A>
 const IPRouteEntry<A>*
-OriginTable<A>::lookup_route(const A& addr) const
+OriginTable<A>::lookup_ip_route(const A& addr) const
 {
     debug_msg("------------------\nlookup_route in table %s\n",
 	this->tablename().c_str());
     debug_msg("OriginTable (%u): Looking up route for addr %s\n",
 	      XORP_UINT_CAST(_admin_distance), addr.str().c_str());
 
-    typename RouteTrie::iterator iter;
-    iter = _ip_route_table->find(addr);
-    if (iter == _ip_route_table->end()) {
-	debug_msg("No match found\n");
-    }
+    typename RouteTrie::iterator iter = _ip_route_table->find(addr);
+
     return (iter == _ip_route_table->end()) ? NULL : *iter;
-}
-
-template<class A>
-RouteRange<A>*
-OriginTable<A>::lookup_route_range(const A& addr) const
-{
-    const IPRouteEntry<A>* route;
-    typename RouteTrie::iterator iter;
-    iter = _ip_route_table->find(addr);
-
-    route = (iter == _ip_route_table->end()) ? NULL : *iter;
-
-    A bottom_addr, top_addr;
-    _ip_route_table->find_bounds(addr, bottom_addr, top_addr);
-    RouteRange<A>* rr = new RouteRange<A>(addr, route, top_addr, bottom_addr);
-    debug_msg("Origin Table: %s returning lower bound for %s of %s\n",
-	      this->tablename().c_str(), addr.str().c_str(),
-	      bottom_addr.str().c_str());
-    debug_msg("Origin Table: %s returning upper bound for %s of %s\n",
-	      this->tablename().c_str(), addr.str().c_str(),
-	      top_addr.str().c_str());
-    return rr;
 }
 
 template<class A>
