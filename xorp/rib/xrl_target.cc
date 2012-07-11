@@ -714,7 +714,7 @@ XrlRibTarget::rib_0_1_register_interest4(// Input values,
 	metric = rt_reg->route()->metric();
 	base_addr = rt_reg->valid_subnet().masked_addr();
 	prefix_len = real_prefix_len = rt_reg->valid_subnet().prefix_len();
-	NextHop *nh = rt_reg->route()->nexthop();
+	IPNextHop<IPv4>* nh = rt_reg->route()->nexthop();
 	switch (nh->type()) {
 	case GENERIC_NEXTHOP:
 	    // this shouldn't be possible
@@ -722,7 +722,7 @@ XrlRibTarget::rib_0_1_register_interest4(// Input values,
 	case PEER_NEXTHOP:
 	case ENCAPS_NEXTHOP:
 	    resolves = true;
-	    nexthop = ((IPNextHop<IPv4>*)nh)->addr();
+	    nexthop = nh->addr();
 	    real_prefix_len = rt_reg->route()->prefix_len();
 	    break;
 	case EXTERNAL_NEXTHOP:
@@ -765,16 +765,16 @@ XrlRibTarget::rib_0_1_get_protocol_admin_distances(
 
     if (ipv4 && unicast) {
 	// ipv4 unicast
-	map<string, uint32_t>& rad = _urib4.get_protocol_admin_distances();
-	map<string, uint32_t>::iterator iter;
+	const map<string, uint32_t>& rad = _urib4.get_protocol_admin_distances();
+	map<string, uint32_t>::const_iterator iter;
 	for (iter = rad.begin(); iter != rad.end(); ++iter) {
 	    protocols.append(XrlAtom(iter->first));
 	    admin_distances.append(XrlAtom(iter->second));
 	}
     } else if (ipv4 && !unicast) {
 	// ipv4 multicast
-	map<string, uint32_t>& rad = _mrib4.get_protocol_admin_distances();
-	map<string, uint32_t>::iterator iter;
+	const map<string, uint32_t>& rad = _mrib4.get_protocol_admin_distances();
+	map<string, uint32_t>::const_iterator iter;
 	for (iter = rad.begin(); iter != rad.end(); ++iter) {
 	    protocols.append(XrlAtom(iter->first));
 	    admin_distances.append(XrlAtom(iter->second));
@@ -782,16 +782,16 @@ XrlRibTarget::rib_0_1_get_protocol_admin_distances(
 #ifdef HAVE_IPV6
     } else if (!ipv4 && unicast) {
 	// ipv6 unicast
-	map<string, uint32_t>& rad = _urib6.get_protocol_admin_distances();
-	map<string, uint32_t>::iterator iter;
+	const map<string, uint32_t>& rad = _urib6.get_protocol_admin_distances();
+	map<string, uint32_t>::const_iterator iter;
 	for (iter = rad.begin(); iter != rad.end(); ++iter) {
 	    protocols.append(XrlAtom(iter->first));
 	    admin_distances.append(XrlAtom(iter->second));
 	}
     } else if (!ipv4 && !unicast) {
 	// ipv6 multicast
-	map<string, uint32_t>& rad = _mrib6.get_protocol_admin_distances();
-	map<string, uint32_t>::iterator iter;
+	const map<string, uint32_t>& rad = _mrib6.get_protocol_admin_distances();
+	map<string, uint32_t>::const_iterator iter;
 	for (iter = rad.begin(); iter != rad.end(); ++iter) {
 	    protocols.append(XrlAtom(iter->first));
 	    admin_distances.append(XrlAtom(iter->second));
@@ -1580,7 +1580,7 @@ XrlRibTarget::rib_0_1_register_interest6(// Input values,
 	metric = rt_reg->route()->metric();
 	base_addr = rt_reg->valid_subnet().masked_addr();
 	prefix_len = real_prefix_len = rt_reg->valid_subnet().prefix_len();
-	NextHop *nh = rt_reg->route()->nexthop();
+	IPNextHop<IPv6>* nh = rt_reg->route()->nexthop();
 	switch (nh->type()) {
 	case GENERIC_NEXTHOP:
 	    // this shouldn't be possible
@@ -1588,7 +1588,7 @@ XrlRibTarget::rib_0_1_register_interest6(// Input values,
 	case PEER_NEXTHOP:
 	case ENCAPS_NEXTHOP:
 	    resolves = true;
-	    nexthop = ((IPNextHop<IPv6>*)nh)->addr();
+	    nexthop = nh->addr();
 	    real_prefix_len = rt_reg->route()->prefix_len();
 	    break;
 	case EXTERNAL_NEXTHOP:

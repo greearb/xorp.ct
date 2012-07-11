@@ -8,13 +8,13 @@
 // Redistribution and/or modification of this program under the terms of
 // any other version of the GNU Lesser General Public License is not
 // permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU Lesser General Public License, Version 2.1, a copy of
 // which can be found in the XORP LICENSE.lgpl file.
-// 
+//
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -294,7 +294,7 @@ protected:
     uint64_t	_baudrate;
 };
 
-
+
 /**
  * @short Base class for virtual interface state manipulation commands.
  */
@@ -366,7 +366,7 @@ protected:
     uint16_t	_vlan_id;
 };
 
-
+
 
 
 /**
@@ -839,7 +839,7 @@ protected:
     IPv4	_endpoint_addr;
 };
 
-
+
 
 #ifdef HAVE_IPV6
 
@@ -1039,7 +1039,7 @@ protected:
 };
 #endif
 
-
+
 /**
  * @short Base class for configuration events.
  *

@@ -17,7 +17,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/fea/fibconfig_entry_observer.hh,v 1.12 2008/10/02 21:56:45 bms Exp $
 
 #ifndef __FEA_FIBCONFIG_ENTRY_OBSERVER_HH__
 #define __FEA_FIBCONFIG_ENTRY_OBSERVER_HH__
@@ -92,7 +91,7 @@ public:
      * 
      * @param buffer the buffer with the received data.
      */
-    virtual void receive_data(const vector<uint8_t>& buffer) = 0;
+    virtual void receive_data(vector<uint8_t>& buffer) = 0;
 
     /** Routing table ID that we are interested in might have changed.  Maybe something
      * can filter on this for increased efficiency.

@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -37,6 +37,22 @@ public:
 	// IGP or an EGP, because we do the plumbing explicitly.  So it's
 	// safe to just say it's an IGP, even if its not.
 	return _rib.new_origin_table(_tablename, "", "", _admin_distance, IGP);
+    }
+private:
+    RIB<IPv4>& _rib;
+};
+
+class DirectInterfaceRouteAddCommand : public InterfaceRouteAddCommand {
+public:
+    DirectInterfaceRouteAddCommand(RIB<IPv4>& rib)
+	: InterfaceRouteAddCommand(), _rib(rib) {}
+    int execute() {
+	cout << "InterfaceRouteAddCommand::execute " << _tablename << " ";
+	cout << "Vif " << _vif_name << " ";
+	cout << _net.str() << " " << _nexthop.str() << " "
+	     << c_format("%u", XORP_UINT_CAST(_metric)) << "\n";
+	return _rib.add_route(_tablename, _net, _nexthop, "", _vif_name,
+			      _metric, PolicyTags());
     }
 private:
     RIB<IPv4>& _rib;

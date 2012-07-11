@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -79,7 +79,7 @@ private:
     uint32_t		_attempts;
 };
 
-
+
 // ----------------------------------------------------------------------------
 // Task declarations
 
@@ -148,7 +148,7 @@ private:
     uint32_t  _p_ms;
 };
 
-
+
 // ----------------------------------------------------------------------------
 // AddRoute implementation
 
@@ -233,7 +233,7 @@ AddRoute<A>::dispatch_complete(const XrlError& xe)
     this->signal_fatal_failure();
 }
 
-
+
 // ----------------------------------------------------------------------------
 // DeleteRoute implementation
 
@@ -319,7 +319,7 @@ DeleteRoute<A>::dispatch_complete(const XrlError& xe)
     this->signal_fatal_failure();
 }
 
-
+
 // ----------------------------------------------------------------------------
 // StartingRouteDump implementation
 
@@ -376,7 +376,7 @@ StartingRouteDump<A>::dispatch_complete(const XrlError& xe)
     this->signal_fatal_failure();
 }
 
-
+
 // ----------------------------------------------------------------------------
 // FinishingRouteDump implementation
 
@@ -433,7 +433,7 @@ FinishingRouteDump<A>::dispatch_complete(const XrlError& xe)
     this->signal_fatal_failure();
 }
 
-
+
 // ----------------------------------------------------------------------------
 // Pause implementation
 
@@ -460,7 +460,7 @@ Pause<A>::expire()
     this->signal_complete_ok();
 }
 
-
+
 // ----------------------------------------------------------------------------
 // RedistXrlOutput implementation
 
@@ -472,7 +472,7 @@ RedistXrlOutput<A>::RedistXrlOutput(Redistributor<A>*	redistributor,
 				    const string&	xrl_target_name,
 				    const IPNet<A>&	network_prefix,
 				    const string&	cookie)
-    : RedistOutput<A>(redistributor), _xrl_router(xrl_router), 
+    : RedistOutput<A>(redistributor), _xrl_router(xrl_router),
       _profile(profile),
       _from_protocol(from_protocol), _target_name(xrl_target_name),
       _network_prefix(network_prefix), _cookie(cookie), _queued(0),
@@ -511,7 +511,7 @@ RedistXrlOutput<A>::add_route(const IPRouteEntry<A>& ipr)
     PROFILE(if (_profile.enabled(profile_route_rpc_in))
 		_profile.log(profile_route_rpc_in,
 			     c_format("add %s", ipr.net().str().c_str())));
-    
+
     enqueue_task(new AddRoute<A>(this, ipr));
     if (_queued == 1)
 	start_next_task();
@@ -617,7 +617,7 @@ RedistXrlOutput<A>::task_failed_fatally(RedistXrlTask<A>* task)
     this->announce_fatal_error();
 }
 
-
+
 // ----------------------------------------------------------------------------
 // RedistTransactionXrlOutput Commands
 
@@ -676,7 +676,7 @@ public:
     void dispatch_complete(const XrlError& xe);
 };
 
-
+
 // ----------------------------------------------------------------------------
 // AddTransactionRoute implementation
 
@@ -697,7 +697,7 @@ AddTransactionRoute<IPv4>::dispatch(XrlRouter& xrl_router, Profile& profile)
 #ifndef XORP_DISABLE_PROFILE
     if (profile.enabled(profile_route_rpc_out))
 	profile.log(profile_route_rpc_out,
-		     c_format("add %s %s %s %u", 
+		     c_format("add %s %s %s %u",
 			      p->xrl_target_name().c_str(),
 			      _net.str().c_str(),
 			      _nexthop.str().c_str(),
@@ -734,7 +734,7 @@ AddTransactionRoute<IPv6>::dispatch(XrlRouter& xrl_router, Profile& profile)
 #ifndef XORP_DISABLE_PROFILE
     if (profile.enabled(profile_route_rpc_out))
 	profile.log(profile_route_rpc_out,
-		     c_format("add %s %s %s %u", 
+		     c_format("add %s %s %s %u",
 			      p->xrl_target_name().c_str(),
 			      _net.str().c_str(),
 			      _nexthop.str().c_str(),
@@ -754,7 +754,7 @@ AddTransactionRoute<IPv6>::dispatch(XrlRouter& xrl_router, Profile& profile)
 	);
 }
 
-
+
 // ----------------------------------------------------------------------------
 // DeleteTransactionRoute implementation
 
@@ -775,7 +775,7 @@ DeleteTransactionRoute<IPv4>::dispatch(XrlRouter& xrl_router, Profile& profile)
 #ifndef XORP_DISABLE_PROFILE
     if (profile.enabled(profile_route_rpc_out))
 	profile.log(profile_route_rpc_out,
-		     c_format("delete %s %s", 
+		     c_format("delete %s %s",
 			      p->xrl_target_name().c_str(),
 			      _net.str().c_str()));
 #else
@@ -810,7 +810,7 @@ DeleteTransactionRoute<IPv6>::dispatch(XrlRouter& xrl_router, Profile& profile)
 #ifndef XORP_DISABLE_PROFILE
     if (profile.enabled(profile_route_rpc_out))
 	profile.log(profile_route_rpc_out,
-		     c_format("delete %s %s", 
+		     c_format("delete %s %s",
 			      p->xrl_target_name().c_str(),
 			      _net.str().c_str()));
 #else
@@ -828,7 +828,7 @@ DeleteTransactionRoute<IPv6>::dispatch(XrlRouter& xrl_router, Profile& profile)
 	);
 }
 
-
+
 // ----------------------------------------------------------------------------
 // StartTransaction implementation
 
@@ -893,7 +893,7 @@ StartTransaction<A>::dispatch_complete(const XrlError& xe, const uint32_t* tid)
     this->signal_fatal_failure();
 }
 
-
+
 // ----------------------------------------------------------------------------
 // CommitTransaction implementation
 
@@ -956,7 +956,7 @@ CommitTransaction<A>::dispatch_complete(const XrlError& xe)
     this->signal_fatal_failure();
 }
 
-
+
 // ----------------------------------------------------------------------------
 // AbortTransaction implementation
 
@@ -1019,7 +1019,7 @@ AbortTransaction<A>::dispatch_complete(const XrlError& xe)
     this->signal_fatal_failure();
 }
 
-
+
 // ----------------------------------------------------------------------------
 // RedistTransactionXrlOutput implementation
 
@@ -1143,7 +1143,7 @@ RedistTransactionXrlOutput<A>::task_completed(Task* task)
     }
 }
 
-
+
 // ----------------------------------------------------------------------------
 // Instantiations
 

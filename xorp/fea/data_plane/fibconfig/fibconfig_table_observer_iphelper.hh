@@ -59,7 +59,7 @@ public:
      * 
      * @param buffer the buffer with the received data.
      */
-    virtual void receive_data(const vector<uint8_t>& buffer);
+    virtual void receive_data(vector<uint8_t>& buffer);
 
     virtual int notify_table_id_change(uint32_t new_tbl) {
 	UNUSED(new_tbl);

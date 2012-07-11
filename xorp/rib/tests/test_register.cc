@@ -8,13 +8,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -61,7 +61,6 @@ test_route_range(const string& ipv4,
 		 const string& lower,
 		 const string& upper)
 {
-    RouteRange<IPv4>* rr;
     RibVerifyType verifytype;
 
     if (verifytypestr == "miss")
@@ -77,49 +76,65 @@ test_route_range(const string& ipv4,
 	abort();
     }
 
-    rr = rib_ptr->route_range_lookup(IPv4(ipv4.c_str()));
+    RouteRange<IPv4>* const rr = rib_ptr->route_range_lookup(IPv4(ipv4.c_str()));
     if (verbose)
 	printf("**RouteRange for %s\n", ipv4.c_str());
     if (rr->route() != NULL) {
-	DiscardNextHop* dnh;
-	dnh = reinterpret_cast<DiscardNextHop* >(rr->route()->nexthop());
-	if (verifytype != RibVerifyType(DISCARD) && dnh == NULL) {
-	    printf("**RouteRange for %s\n", ipv4.c_str());
-	    printf("Expected discard route\n");
-	    abort();
-	}
-	UnreachableNextHop* unh;
-	unh = reinterpret_cast<UnreachableNextHop* >(rr->route()->nexthop());
-	if (verifytype != RibVerifyType(UNREACHABLE) && unh == NULL) {
-	    printf("**RouteRange for %s\n", ipv4.c_str());
-	    printf("Expected unreachable route\n");
-	    abort();
-	}
-	if (rr->route()->vif() == NULL) {
-	    printf("BAD Vif NULL != \"%s\"\n", vifname.c_str());
-	    abort();
-	} else if (rr->route()->vif()->name() != vifname) {
-	    printf("**RouteRange for %s\n", ipv4.c_str());
-	    printf("BAD Vif \"%s\" != \"%s\"\n",
-		   rr->route()->vif()->name().c_str(),
-		   vifname.c_str()
-		   );
-	    abort();
-	}
-	IPNextHop<IPv4>* nh;
-	nh = reinterpret_cast<IPNextHop<IPv4>* >(rr->route()->nexthop());
-	if (nh->addr().str() != nexthop) {
-	    printf("**RouteRange for %s\n", ipv4.c_str());
-	    printf("Found Nexthop: %s\n", nh->addr().str().c_str());
-	    printf("BAD Nexthop\n");
-	    printf("Got: %s\n", nh->addr().str().c_str());
-	    printf("Should be: %s\n", nexthop.c_str());
-	    abort();
-	}
+	do {
+	    if (verifytype == RibVerifyType(MISS)) {
+		printf("**RouteRange for %s\n", ipv4.c_str());
+		printf("Expected the miss, got the route\n");
+		abort();
+	    }
+
+	    DiscardNextHop<IPv4>* dnh;
+	    dnh = dynamic_cast<DiscardNextHop<IPv4>*>(rr->route()->nexthop());
+	    if (verifytype == RibVerifyType(DISCARD) && dnh == NULL) {
+		printf("**RouteRange for %s\n", ipv4.c_str());
+		printf("Expected discard route\n");
+		abort();
+	    } else if (verifytype == RibVerifyType(DISCARD) && dnh != NULL)
+		break;
+
+	    UnreachableNextHop<IPv4>* unh;
+	    unh = dynamic_cast<UnreachableNextHop<IPv4>*>(rr->route()->nexthop());
+	    if (verifytype == RibVerifyType(UNREACHABLE) && unh == NULL) {
+		printf("**RouteRange for %s\n", ipv4.c_str());
+		printf("Expected unreachable route\n");
+		abort();
+	    } else if (verifytype == RibVerifyType(UNREACHABLE) && unh != NULL)
+		break;
+
+	    if (rr->route()->vif() == NULL) {
+		printf("BAD Vif NULL != \"%s\"\n", vifname.c_str());
+		abort();
+	    } else if (rr->route()->vif()->name() != vifname) {
+		printf("**RouteRange for %s\n", ipv4.c_str());
+		printf("BAD Vif \"%s\" != \"%s\"\n",
+			rr->route()->vif()->name().c_str(), vifname.c_str());
+		abort();
+	    }
+
+	    if (verifytype != RibVerifyType(IP)) {
+		printf("Something is wrong!!!\n");
+		printf("Expected to verify IP type, but got %s!\n", verifytypestr.c_str());
+		abort();
+	    }
+	    IPNextHop<IPv4>* nh;
+	    nh = rr->route()->nexthop();
+	    if (nh->addr().str() != nexthop) {
+		printf("**RouteRange for %s\n", ipv4.c_str());
+		printf("Found Nexthop: %s\n", nh->addr().str().c_str());
+		printf("BAD Nexthop\n");
+		printf("Got: %s\n", nh->addr().str().c_str());
+		printf("Should be: %s\n", nexthop.c_str());
+		abort();
+	    }
+	} while (false);
     } else {
 	if (verifytype != RibVerifyType(MISS)) {
 	    printf("**RouteRange for %s\n", ipv4.c_str());
-	    printf("Expected route miss, got a route\n");
+	    printf("Didn't got a route, didn't expect the miss\n");
 	    abort();
 	}
     }
@@ -137,6 +152,7 @@ test_route_range(const string& ipv4,
 	printf("**should be: %s\n", upper.c_str());
 	abort();
     }
+    delete rr;
     // printf("****PASS****\n");
 }
 
@@ -203,11 +219,11 @@ main (int /* argc */, char* argv[])
     verify_route("10.0.1.4", "vif1", "10.0.1.1", 0, RibVerifyType(IP));
     verify_route("10.0.2.4", "vif2", "10.0.2.1", 0, RibVerifyType(IP));
 
-    rib.add_route("static", IPv4Net("1.0.0.0", 16), IPv4("10.0.0.2"), 
+    rib.add_route("static", IPv4Net("1.0.0.0", 16), IPv4("10.0.0.2"),
 		  "", "", 0, PolicyTags());
-    rib.add_route("static", IPv4Net("1.0.3.0", 24), IPv4("10.0.1.2"), 
+    rib.add_route("static", IPv4Net("1.0.3.0", 24), IPv4("10.0.1.2"),
 		  "", "", 1, PolicyTags());
-    rib.add_route("static", IPv4Net("1.0.9.0", 24), IPv4("10.0.2.2"), 
+    rib.add_route("static", IPv4Net("1.0.9.0", 24), IPv4("10.0.2.2"),
 		  "", "", 2, PolicyTags());
 
     verify_route("1.0.5.4", "vif0", "10.0.0.2", 0, RibVerifyType(IP));
@@ -221,24 +237,24 @@ main (int /* argc */, char* argv[])
 		     "9.255.255.255");
 
     // Add a route to another IGP table
-    rib.add_route("ospf", IPv4Net("1.0.6.0", 24), IPv4("10.0.2.2"), 
+    rib.add_route("ospf", IPv4Net("1.0.6.0", 24), IPv4("10.0.2.2"),
 		  "", "", 3, PolicyTags());
     test_route_range("1.0.4.1", "ip", "vif0", "10.0.0.2", "1.0.4.0", "1.0.5.255");
     test_route_range("1.0.8.1", "ip", "vif0", "10.0.0.2", "1.0.7.0", "1.0.8.255");
     test_route_range("1.0.6.1", "ip", "vif2", "10.0.2.2", "1.0.6.0", "1.0.6.255");
 
     // Add an EGP route
-    rib.add_route("ebgp", IPv4Net("5.0.5.0", 24), IPv4("1.0.3.1"), 
+    rib.add_route("ebgp", IPv4Net("5.0.5.0", 24), IPv4("1.0.3.1"),
 		  "", "", 4, PolicyTags());
     test_route_range("5.0.5.1", "ip", "vif1", "10.0.1.2", "5.0.5.0", "5.0.5.255");
     test_route_range("2.0.0.1", "miss", "lo0", "0.0.0.0", "1.1.0.0", "5.0.4.255");
 
-    rib.add_route("ebgp", IPv4Net("1.0.0.0", 20), IPv4("1.0.6.1"), 
+    rib.add_route("ebgp", IPv4Net("1.0.0.0", 20), IPv4("1.0.6.1"),
 		  "", "", 5, PolicyTags());
     test_route_range("1.0.5.1", "ip", "vif2", "10.0.2.2", "1.0.4.0", "1.0.5.255");
     test_route_range("1.0.6.1", "ip", "vif2", "10.0.2.2", "1.0.6.0", "1.0.6.255");
 
-    rib.add_route("ospf", IPv4Net("1.0.5.64", 26), IPv4("10.0.1.2"), 
+    rib.add_route("ospf", IPv4Net("1.0.5.64", 26), IPv4("10.0.1.2"),
 		  "", "", 6, PolicyTags());
     test_route_range("1.0.5.1", "ip", "vif2", "10.0.2.2", "1.0.4.0", "1.0.5.63");
 
@@ -264,7 +280,7 @@ main (int /* argc */, char* argv[])
 
 
     // Add a route that should have no effect
-    rib.add_route("ospf", IPv4Net("1.0.11.0", 24), IPv4("10.0.1.2"), 
+    rib.add_route("ospf", IPv4Net("1.0.11.0", 24), IPv4("10.0.1.2"),
 		  "", "", 1, PolicyTags());
     if (verbose)
 	printf("##########################\n");
@@ -272,7 +288,7 @@ main (int /* argc */, char* argv[])
 	abort();
 
     // Add a route that should cause both registrations to be invalidated
-    rib.add_route("ospf", IPv4Net("1.0.5.0", 24), IPv4("10.0.1.2"), 
+    rib.add_route("ospf", IPv4Net("1.0.5.0", 24), IPv4("10.0.1.2"),
 		  "", "", 1, PolicyTags());
     if (!register_server.verify_invalidated("foo 1.0.5.0/26 mcast:false"))
 	abort();
@@ -287,11 +303,12 @@ main (int /* argc */, char* argv[])
 	== XORP_OK) {
 	abort();
     }
+    cout << "Error is expected!" << endl;
     if (rib.route_deregister(IPv4Net("1.0.5.0", 26), string("foo2"))
 	== XORP_OK) {
 	abort();
     }
-
+    cout << "Error is expected!" << endl;
     // Re-register interest
     rreg = rib.route_register(IPv4("1.0.5.1"), string("foo"));
     if (verbose)
@@ -318,9 +335,9 @@ main (int /* argc */, char* argv[])
 	abort();
 
     // Test registration where the address doesn't resolve
-    rib.add_route("ospf", IPv4Net("1.0.11.0", 24), IPv4("10.0.1.2"), 
+    rib.add_route("ospf", IPv4Net("1.0.11.0", 24), IPv4("10.0.1.2"),
 		  "", "", 1, PolicyTags());
-    rib.add_route("ospf", IPv4Net("1.0.5.0", 24), IPv4("10.0.1.2"), 
+    rib.add_route("ospf", IPv4Net("1.0.5.0", 24), IPv4("10.0.1.2"),
 		  "", "", 1, PolicyTags());
     rib.delete_route("ebgp", IPv4Net("1.0.0.0", 20));
     rib.delete_route("static", IPv4Net("1.0.0.0", 16));
@@ -342,7 +359,7 @@ main (int /* argc */, char* argv[])
     if (verbose)
 	printf("%s\n", rreg->str().c_str());
 
-    rib.add_route("ospf", IPv4Net("1.0.6.0", 24), IPv4("10.0.2.2"), 
+    rib.add_route("ospf", IPv4Net("1.0.6.0", 24), IPv4("10.0.2.2"),
 		  "", "", 3, PolicyTags());
     if (!register_server.verify_invalidated("foo 1.0.6.0/23 mcast:false"))
 	abort();

@@ -89,7 +89,7 @@ IfConfigObserverIPHelper::stop(string& error_msg)
 }
 
 void
-IfConfigObserverIPHelper::receive_data(const vector<uint8_t>& buffer)
+IfConfigObserverIPHelper::receive_data(vector<uint8_t>& buffer)
 {
     UNUSED(buffer);
 }

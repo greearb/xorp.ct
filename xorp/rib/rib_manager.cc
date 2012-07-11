@@ -166,8 +166,8 @@ RibManager::status_updater()
 
 
 template <typename A>
-static int
-add_rib_vif(RIB<A>& rib, const string& vifname, const Vif& vif, string& err)
+int
+RibManager::add_rib_vif(RIB<A>& rib, const string& vifname, const Vif& vif, string& err)
 {
     int result = rib.new_vif(vifname, vif);
     if (result != XORP_OK) {
@@ -196,8 +196,8 @@ RibManager::new_vif(const string& vifname, const Vif& vif, string& err)
 }
 
 template <typename A>
-static int
-delete_rib_vif(RIB<A>& rib, const string& vifname, string& err)
+int
+RibManager::delete_rib_vif(RIB<A>& rib, const string& vifname, string& err)
 {
     int result = rib.delete_vif(vifname);
     if (result != XORP_OK) {
@@ -227,8 +227,8 @@ RibManager::delete_vif(const string& vifname, string& err)
 
 
 template <typename A>
-static int
-set_rib_vif_flags(RIB<A>& rib, const string& vifname, bool is_p2p,
+int
+RibManager::set_rib_vif_flags(RIB<A>& rib, const string& vifname, bool is_p2p,
 		  bool is_loopback, bool is_multicast, bool is_broadcast,
 		  bool is_up, uint32_t mtu, string& err)
 {
@@ -270,7 +270,7 @@ RibManager::set_vif_flags(const string& vifname,
 
 template <typename A>
 int
-add_vif_address_to_ribs(RIB<A>& 	urib,
+RibManager::add_vif_address_to_ribs(RIB<A>& 	urib,
 			RIB<A>& 	mrib,
 			const string&	vifn,
 			const A& 	addr,
@@ -293,7 +293,7 @@ add_vif_address_to_ribs(RIB<A>& 	urib,
 
 template <typename A>
 int
-delete_vif_address_from_ribs(RIB<A>& 		urib,
+RibManager::delete_vif_address_from_ribs(RIB<A>& 		urib,
 			     RIB<A>& 		mrib,
 			     const string&	vifn,
 			     const A& 		addr,
@@ -410,9 +410,8 @@ RibManager::target_death(const string& target_class,
 #endif
 }
 
-static inline
 string
-make_redist_name(const string& xrl_target, const string& cookie,
+RibManager::make_redist_name(const string& xrl_target, const string& cookie,
 		 bool is_xrl_transaction_output)
 {
     string redist_name = xrl_target + ":" + cookie;
@@ -426,8 +425,8 @@ make_redist_name(const string& xrl_target, const string& cookie,
 }
 
 template <typename A>
-static int
-redist_enable_xrl_output(EventLoop&	eventloop,
+int
+RibManager::redist_enable_xrl_output(EventLoop&	eventloop,
 			 XrlRouter&	rtr,
 			 Profile&	profile,
 			 RIB<A>&	rib,
@@ -497,8 +496,8 @@ redist_enable_xrl_output(EventLoop&	eventloop,
 }
 
 template <typename A>
-static int
-redist_disable_xrl_output(RIB<A>& rib,
+int
+RibManager::redist_disable_xrl_output(RIB<A>& rib,
 			  const string& to_xrl_target,
 			  const string& proto,
 			  const string& cookie,

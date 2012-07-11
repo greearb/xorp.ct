@@ -8,13 +8,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -35,6 +35,83 @@
 
 #include "xrl/interfaces/policy_redist4_xif.hh"
 #include "xrl/interfaces/policy_redist6_xif.hh"
+
+/**
+ * Wrapper class for Policy Redistribution Client
+ *
+ * It should be templatized for all classes
+ * with which we intend to use PolicyRedistTable class
+ *
+ * PolicyRedistClient specializations should have
+ * functions send_delete_route and send_add_route,
+ * which call the functions of the wrapped class.
+ */
+template<class A>
+class PolicyRedistClient { };
+
+template<>
+class PolicyRedistClient<IPv4> {
+public:
+    PolicyRedistClient(XrlRouter* rtr) : _redist_client(rtr) {}
+
+    bool send_delete_route(const char*	dst_xrl_target_name,
+	const IPv4Net&	network,
+	const bool&	unicast,
+	const bool&	multicast,
+	const XorpCallback1<void, const XrlError&>::RefPtr&	cb)
+    {
+	return this->_redist_client.send_delete_route4(dst_xrl_target_name,
+		network, unicast, multicast, cb);
+    }
+
+    bool send_add_route(const char*	dst_xrl_target_name,
+	const IPv4Net&	network,
+	const bool&	unicast,
+	const bool&	multicast,
+	const IPv4&	nexthop,
+	const uint32_t&	metric,
+	const XrlAtomList&	policytags,
+	const XorpCallback1<void, const XrlError&>::RefPtr&	cb)
+    {
+	return this->_redist_client.send_add_route4(dst_xrl_target_name,
+		network, unicast, multicast, nexthop, metric, policytags, cb);
+    }
+
+protected:
+    XrlPolicyRedist4V0p1Client _redist_client;
+};
+
+template<>
+class PolicyRedistClient<IPv6> {
+public:
+    PolicyRedistClient(XrlRouter* rtr) : _redist_client(rtr) {}
+
+    bool send_delete_route(const char*	dst_xrl_target_name,
+	const IPv6Net&	network,
+	const bool&	unicast,
+	const bool&	multicast,
+	const XorpCallback1<void, const XrlError&>::RefPtr&	cb)
+    {
+	return this->_redist_client.send_delete_route6(dst_xrl_target_name,
+		network, unicast, multicast, cb);
+    }
+
+    bool send_add_route(const char*	dst_xrl_target_name,
+	const IPv6Net&	network,
+	const bool&	unicast,
+	const bool&	multicast,
+	const IPv6&	nexthop,
+	const uint32_t&	metric,
+	const XrlAtomList&	policytags,
+	const XorpCallback1<void, const XrlError&>::RefPtr&	cb)
+    {
+	return this->_redist_client.send_add_route6(dst_xrl_target_name,
+		network, unicast, multicast, nexthop, metric, policytags, cb);
+    }
+
+protected:
+    XrlPolicyRedist6V0p1Client _redist_client;
+};
 
 /**
  * @short This table redistributes routes to protocols according to policytags.
@@ -61,7 +138,7 @@ public:
     void replumb(RouteTable<A>* old_parent, RouteTable<A>* new_parent);
     string str() const;
 
-    void xrl_cb(const XrlError&, string); 
+    void xrl_cb(const XrlError&, string);
 
     /**
      * If policy-tags of a route changed, this table will need to figure out
@@ -75,7 +152,7 @@ public:
     void replace_policytags(const IPRouteEntry<A>& route,
                             const PolicyTags& prevtags,
                             RouteTable<A>* caller);
- 
+
 
 private:
     typedef set<string> Set;
@@ -95,7 +172,7 @@ private:
      * @param protos the protocols which should stop advertising the route.
      */
     void del_redist(const IPRouteEntry<A>& route, const Set& protos);
-   
+
     /**
      * Start a route redistribution.
      *
@@ -114,14 +191,13 @@ private:
 
 
     RouteTable<A>*		_parent;
-    
+
     XrlRouter&			_xrl_router;
     EventLoop&			_eventloop;
 
     PolicyRedistMap&		_redist_map;
 
-    XrlPolicyRedist4V0p1Client	_redist4_client;
-    XrlPolicyRedist6V0p1Client	_redist6_client;
+    PolicyRedistClient<A>	_redist_client;
 
     bool			_multicast;
 };

@@ -355,9 +355,19 @@ public:
     Profile& profile() {return _profile;}
 
     /**
+     * @return a const reference to the IPv4 unicast RIB.
+     */
+    const RIB<IPv4>& urib4() const { return _urib4; }
+
+    /**
      * @return a reference to the IPv4 unicast RIB.
      */
     RIB<IPv4>& urib4() { return _urib4; }
+
+    /**
+     * @return a const reference to the IPv4 multicast RIB.
+     */
+    const RIB<IPv4>& mrib4() const { return _mrib4; }
 
     /**
      * @return a reference to the IPv4 multicast RIB.
@@ -460,14 +470,57 @@ public:
     RIB<IPv6>& urib6() { return _urib6; }
 
     /**
+     * @return a const reference to the IPv6 unicast RIB.
+     */
+    const RIB<IPv6>& urib6() const { return _urib6; }
+
+    /**
      * @return a reference to the IPv6 multicast RIB.
      */
     RIB<IPv6>& mrib6() { return _mrib6; }
+
+    /**
+     * @return a const reference to the IPv6 multicast RIB.
+     */
+    const RIB<IPv6>& mrib6() const { return _mrib6; }
 
 
 #endif //ipv6
 
 private:
+
+    template<typename A>
+    static int add_rib_vif(RIB<A>& rib, const string& vifname, const Vif& vif, string& err);
+
+    template<typename A>
+    static int delete_rib_vif(RIB<A>& rib, const string& vifname, string& err);
+
+    template<typename A>
+    static int set_rib_vif_flags(RIB<A>& rib, const string& vifname, bool is_p2p,
+	bool is_loopback, bool is_multicast, bool is_broadcast, bool is_up, uint32_t mtu,
+	string& err);
+
+    template<typename A>
+    static int add_vif_address_to_ribs(RIB<A>& urib, RIB<A>& mrib, const string& vifn,
+	const A& addr, const IPNet<A>& subnet, const A& broadcast_addr, const A& peer_addr,
+	string& err);
+
+    template<typename A>
+    static int delete_vif_address_from_ribs(RIB<A>& urib, RIB<A>& mrib, const string& vifn,
+	const A& addr, string& err);
+
+    static string make_redist_name(const string& xrl_target, const string& cookie,
+    		 bool is_xrl_transaction_output);
+
+    template <typename A>
+    static int redist_enable_xrl_output(EventLoop& eventloop, XrlRouter& rtr, Profile& profile,
+	RIB<A>& rib, const string& to_xrl_target, const string& proto, const IPNet<A>& network_prefix,
+	const string& cookie, bool is_xrl_transaction_output);
+
+    template <typename A>
+    static int redist_disable_xrl_output(RIB<A>& rib, const string& to_xrl_target, const string& proto,
+	const string& cookie, bool is_xrl_transaction_output);
+
     ProcessStatus       _status_code;
     string              _status_reason;
     EventLoop&		_eventloop;		// The event loop to use

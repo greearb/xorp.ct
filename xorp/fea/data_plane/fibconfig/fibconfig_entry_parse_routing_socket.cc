@@ -57,15 +57,14 @@ FibConfigEntryGetRoutingSocket::parse_buffer_routing_socket(
     const vector<uint8_t>& buffer,
     FibMsgSet filter)
 {
-    AlignData<struct rt_msghdr> align_data(buffer);
     const struct rt_msghdr* rtm;
     size_t offset;
 
-    rtm = align_data.payload();
+    rtm = (const struct rt_msghdr*)(&(buffer[0]));
     for (offset = 0; offset < buffer.size(); offset += rtm->rtm_msglen) {
 	bool filter_match = false;
 
-	rtm = align_data.payload_by_offset(offset);
+	rtm = (const struct rt_msghdr*)(&(buffer[offset]));
 	if (rtm->rtm_version != RTM_VERSION) {
 #if defined(RTM_OVERSION) && defined(HOST_OS_OPENBSD)
 	    //

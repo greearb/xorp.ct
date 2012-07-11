@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -379,7 +379,7 @@ public:
     // Minimum and maximum MTU (as defined in RFC 791 and RFC 1191)
     static const uint32_t MIN_MTU = 68;
     static const uint32_t MAX_MTU = 65536;
-    
+
     bool dispatch() {
 	IfTreeInterface* fi = interface();
 	if (fi == NULL)
@@ -387,7 +387,7 @@ public:
 
 	if (_mtu < MIN_MTU || _mtu > MAX_MTU)
 	    return (false);
-	
+
 	fi->set_mtu(_mtu);
 	return (true);
     }
@@ -833,7 +833,7 @@ public:
 	  _prefix_len(prefix_len) {}
 
     static const uint32_t MAX_PREFIX_LEN = 32;
-    
+
     bool dispatch() {
 	IfTreeAddr4* fa = addr();
 	if (fa == NULL || _prefix_len > MAX_PREFIX_LEN)
@@ -984,7 +984,7 @@ public:
 	  _prefix_len(prefix_len) {}
 
     static const uint32_t MAX_PREFIX_LEN = 128;
-    
+
     bool dispatch() {
 	IfTreeAddr6* fa = addr();
 	if (fa == NULL || _prefix_len > MAX_PREFIX_LEN)

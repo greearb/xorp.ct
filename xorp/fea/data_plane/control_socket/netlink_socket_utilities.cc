@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -55,25 +55,24 @@
 //
 
 
-string NlmUtils::nlm_print_msg(const vector<uint8_t>& buffer) {
+string NlmUtils::nlm_print_msg(vector<uint8_t>& buffer) {
     ostringstream oss;
 
     size_t buffer_bytes = buffer.size();
-    AlignData<struct nlmsghdr> align_data(buffer);
-    const struct nlmsghdr* nlh;
+    struct nlmsghdr* nlh;
 
-    for (nlh = align_data.payload();
+    for (nlh = (struct nlmsghdr*)(&buffer[0]);
 	 NLMSG_OK(nlh, buffer_bytes);
-	 nlh = NLMSG_NEXT(const_cast<struct nlmsghdr*>(nlh), buffer_bytes)) {
-	void* nlmsg_data = NLMSG_DATA(const_cast<struct nlmsghdr*>(nlh));
+	 nlh = NLMSG_NEXT(nlh, buffer_bytes)) {
+	void* nlmsg_data = NLMSG_DATA(nlh);
 
 	oss << "type:  " << NlmUtils::nlm_msg_type(nlh->nlmsg_type);
-	
+
 	// Decode a few further.
 	switch (nlh->nlmsg_type) {
 	case NLMSG_ERROR: {
 	    const struct nlmsgerr* err;
-	    
+
 	    err = reinterpret_cast<const struct nlmsgerr*>(nlmsg_data);
 	    if (nlh->nlmsg_len < NLMSG_LENGTH(sizeof(*err))) {
 		XLOG_ERROR("AF_NETLINK nlmsgerr length error");
@@ -83,19 +82,19 @@ string NlmUtils::nlm_print_msg(const vector<uint8_t>& buffer) {
 	    oss << "  AF_NETLINK NLMSG_ERROR message: " << strerror(errno) << endl;
 	    break;
 	}
-	
+
 	case RTM_NEWROUTE:
 	case RTM_DELROUTE:
 	case RTM_GETROUTE: {
 
-	    const struct rtmsg* rtmsg;
+	    struct rtmsg* rtmsg;
 	    int rta_len = RTM_PAYLOAD(nlh);
-	    
+
 	    if (rta_len < 0) {
 		XLOG_ERROR("AF_NETLINK rtmsg length error");
 		break;
 	    }
-	    rtmsg = reinterpret_cast<const struct rtmsg*>(nlmsg_data);
+	    rtmsg = (struct rtmsg*)nlmsg_data;
 
 	    oss << " rtm_type: ";
 	    if (rtmsg->rtm_type == RTN_MULTICAST)
@@ -106,24 +105,23 @@ string NlmUtils::nlm_print_msg(const vector<uint8_t>& buffer) {
 		oss << "UNICAST";
 	    else
 		oss << (int)(rtmsg->rtm_type);
-		
-	    const struct rtattr *rtattr;
-	    const struct rtattr *rta_array[RTA_MAX + 1];
+
+	    struct rtattr *rtattr;
+	    struct rtattr *rta_array[RTA_MAX + 1];
 	    int family = rtmsg->rtm_family;
-    
+
 	    //
 	    // Get the attributes
 	    //
 	    memset(rta_array, 0, sizeof(rta_array));
-	    rtattr = RTM_RTA(const_cast<struct rtmsg *>(rtmsg));
-	    NlmUtils::get_rtattr(rtattr, rta_len, rta_array,
-				 sizeof(rta_array) / sizeof(rta_array[0]));
+	    rtattr = RTM_RTA(rtmsg);
+	    get_rtattr(rtattr, rta_len, rta_array,
+		       sizeof(rta_array) / sizeof(rta_array[0]));
 
 	    int rtmt = rtmsg->rtm_table;
 #ifdef HAVE_NETLINK_SOCKET_ATTRIBUTE_RTA_TABLE
 	    if (rta_array[RTA_TABLE] != NULL) {
-		const uint8_t* p = static_cast<const uint8_t *>(
-		    RTA_DATA(const_cast<struct rtattr *>(rta_array[RTA_TABLE])));
+		const uint8_t* p = (const uint8_t*)(RTA_DATA(rta_array[RTA_TABLE]));
 		rtmt = extract_host_int(p);
 	    }
 #endif
@@ -142,7 +140,7 @@ string NlmUtils::nlm_print_msg(const vector<uint8_t>& buffer) {
 		oss << " dest: " << dst_addr.str() << "/" << (int)(rtmsg->rtm_dst_len);
 	    }
 
-    
+
 	    if (rta_array[RTA_GATEWAY] != NULL) {
 		nexthop_addr.copy_in(family, (uint8_t *)RTA_DATA(const_cast<struct rtattr *>(rta_array[RTA_GATEWAY])));
 		oss << " nexthop: " << nexthop_addr.str();
@@ -153,7 +151,7 @@ string NlmUtils::nlm_print_msg(const vector<uint8_t>& buffer) {
 		oss << " proto: XORP";
 	    else
 		oss << " proto: " << rtmsg->rtm_protocol;
-	    
+
 	    // Get the interface index
 	    if (rta_array[RTA_OIF] != NULL) {
 		const uint8_t* p = static_cast<const uint8_t *>(
@@ -168,7 +166,7 @@ string NlmUtils::nlm_print_msg(const vector<uint8_t>& buffer) {
 	    }
 	    oss << endl;
 	}
-	
+
 	default:
 	    // ignore
 	    oss << endl;
@@ -287,15 +285,15 @@ NlmUtils::nlm_msg_type(uint32_t m)
 }
 
 void
-NlmUtils::get_rtattr(const struct rtattr* rtattr, int rta_len,
-		     const struct rtattr* rta_array[], size_t rta_array_n)
+NlmUtils::get_rtattr(struct rtattr* rtattr, int rta_len,
+		     struct rtattr* rta_array[], size_t rta_array_n)
 {
     while (RTA_OK(rtattr, rta_len)) {
 	if (rtattr->rta_type < rta_array_n)
 	    rta_array[rtattr->rta_type] = rtattr;
-	rtattr = RTA_NEXT(const_cast<struct rtattr *>(rtattr), rta_len);
+	rtattr = RTA_NEXT(rtattr, rta_len);
     }
-    
+
     if (rta_len) {
 	XLOG_WARNING("get_rtattr() failed: AF_NETLINK deficit in rtattr: "
 		     "%d rta_len remaining",
@@ -306,21 +304,21 @@ NlmUtils::get_rtattr(const struct rtattr* rtattr, int rta_len,
 int
 NlmUtils::nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 			     const struct nlmsghdr* nlh,
-			     const struct rtmsg* rtmsg, int rta_len, const FibConfig& fibconfig,
+			     struct rtmsg* rtmsg, int rta_len, const FibConfig& fibconfig,
 			     string& err_msg)
 {
-    const struct rtattr *rtattr;
-    const struct rtattr *rta_array[RTA_MAX + 1];
+    struct rtattr *rtattr;
+    struct rtattr *rta_array[RTA_MAX + 1];
     int if_index = 0;		// XXX: initialized with an invalid value
     bool lookup_ifindex = true;
     string if_name;
     string vif_name;
     int family = fte.nexthop().af();
     bool is_deleted = false;
-    
+
     // Reset the result
     fte.zero();
-    
+
     // Test if this entry was deleted
     if (nlh->nlmsg_type == RTM_DELROUTE)
 	is_deleted = true;
@@ -330,9 +328,9 @@ NlmUtils::nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
     // Get the attributes
     //
     memset(rta_array, 0, sizeof(rta_array));
-    rtattr = RTM_RTA(const_cast<struct rtmsg *>(rtmsg));
-    NlmUtils::get_rtattr(rtattr, rta_len, rta_array,
-			 sizeof(rta_array) / sizeof(rta_array[0]));
+    rtattr = RTM_RTA(rtmsg);
+    get_rtattr(rtattr, rta_len, rta_array,
+	       sizeof(rta_array) / sizeof(rta_array[0]));
 
     // Discard the route if we are using a specific table.
     if (fibconfig.unicast_forwarding_table_id_is_configured(family)) {
@@ -340,8 +338,7 @@ NlmUtils::nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 	int rtmt = rtmsg->rtm_table;
 #ifdef HAVE_NETLINK_SOCKET_ATTRIBUTE_RTA_TABLE
 	if (rta_array[RTA_TABLE] != NULL) {
-	    const uint8_t* p = static_cast<const uint8_t *>(
-		RTA_DATA(const_cast<struct rtattr *>(rta_array[RTA_TABLE])));
+	    const uint8_t* p = (const uint8_t*)(RTA_DATA(rta_array[RTA_TABLE]));
 	    rtmt = extract_host_int(p);
 	}
 #endif
@@ -468,14 +465,14 @@ NlmUtils::nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 	    return (XORP_ERROR);
 	}
     }
-    
+
     //
     // Get the next-hop router address
     //
     if (rta_array[RTA_GATEWAY] != NULL) {
 	nexthop_addr.copy_in(family, (uint8_t *)RTA_DATA(const_cast<struct rtattr *>(rta_array[RTA_GATEWAY])));
     }
-    
+
     //
     // Get the destination mask length
     //
@@ -582,7 +579,7 @@ NlmUtils::nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 	fte.mark_deleted();
 
     //XLOG_INFO("get_fte_cfg, route: %s", fte.str().c_str());
-    
+
     return (XORP_OK);
 }
 
@@ -604,7 +601,7 @@ NlmUtils::check_netlink_request(NetlinkSocketReader& ns_reader,
 				string& error_msg)
 {
     size_t buffer_bytes;
-    const struct nlmsghdr* nlh;
+    struct nlmsghdr* nlh;
 
     last_errno = 0;		// XXX: reset the value
 
@@ -614,14 +611,13 @@ NlmUtils::check_netlink_request(NetlinkSocketReader& ns_reader,
     if (ns_reader.receive_data(ns, seqno, error_msg) != XORP_OK)
 	return (XORP_ERROR);
 
-    const vector<uint8_t>& buffer = ns_reader.buffer();
+    vector<uint8_t>& buffer = ns_reader.buffer();
     buffer_bytes = buffer.size();
-    AlignData<struct nlmsghdr> align_data(buffer);
-    for (nlh = align_data.payload();
+    for (nlh = (struct nlmsghdr*)(&buffer[0]);
 	 NLMSG_OK(nlh, buffer_bytes);
-	 nlh = NLMSG_NEXT(const_cast<struct nlmsghdr*>(nlh), buffer_bytes)) {
-	void* nlmsg_data = NLMSG_DATA(const_cast<struct nlmsghdr*>(nlh));
-	
+	 nlh = NLMSG_NEXT(nlh, buffer_bytes)) {
+	void* nlmsg_data = NLMSG_DATA(nlh);
+
 	switch (nlh->nlmsg_type) {
 	case NLMSG_ERROR:
 	{
@@ -641,7 +637,7 @@ NlmUtils::check_netlink_request(NetlinkSocketReader& ns_reader,
 	    return (XORP_ERROR);
 	}
 	break;
-	
+
 	case NLMSG_DONE:
 	{
 	    // End-of-message, and no ACK was received: error.
@@ -753,21 +749,21 @@ int NlmUtils::nlm_decode_ipvx_interface_address(const struct ifinfomsg* ifinfoms
 }
 
 void NlmUtils::nlm_cond_newlink_to_fea_cfg(const IfTree& user_cfg, IfTree& iftree,
-					   const struct ifinfomsg* ifinfomsg,
+					   struct ifinfomsg* ifinfomsg,
 					   int rta_len, bool& modified)
 {
-    const struct rtattr *rtattr;
-    const struct rtattr *rta_array[IFLA_MAX + 1];
+    struct rtattr *rtattr;
+    struct rtattr *rta_array[IFLA_MAX + 1];
     uint32_t if_index = 0;
     string if_name;
     bool is_newlink = false;	// True if really a new link
-    
+
     // The attributes
     memset(rta_array, 0, sizeof(rta_array));
     rtattr = IFLA_RTA(ifinfomsg);
     get_rtattr(rtattr, rta_len, rta_array,
 	       sizeof(rta_array) / sizeof(rta_array[0]));
-    
+
     //
     // Get the interface name
     //
@@ -818,7 +814,7 @@ void NlmUtils::nlm_cond_newlink_to_fea_cfg(const IfTree& user_cfg, IfTree& iftre
     }
 
     modified = true; // this is just for optimization..so if we somehow don't modify things, it's not a big deal.
-    
+
     //
     // Get the interface index
     //
@@ -829,7 +825,7 @@ void NlmUtils::nlm_cond_newlink_to_fea_cfg(const IfTree& user_cfg, IfTree& iftre
 		   if_name.c_str());
     }
     debug_msg("interface index: %d\n", if_index);
-    
+
     //
     // Add the interface (if a new one)
     //
@@ -872,13 +868,13 @@ void NlmUtils::nlm_cond_newlink_to_fea_cfg(const IfTree& user_cfg, IfTree& iftre
 	}
     }
     debug_msg("MAC address: %s\n", ifp->mac().str().c_str());
-    
+
     //
     // Get the MTU
     //
     if (rta_array[IFLA_MTU] != NULL) {
 	unsigned int mtu;
-	
+
 	XLOG_ASSERT(RTA_PAYLOAD(rta_array[IFLA_MTU]) == sizeof(mtu));
 	mtu = *reinterpret_cast<unsigned int*>(RTA_DATA(const_cast<struct rtattr*>(rta_array[IFLA_MTU])));
 	if (is_newlink || (mtu != ifp->mtu()))
@@ -909,7 +905,7 @@ void NlmUtils::nlm_cond_newlink_to_fea_cfg(const IfTree& user_cfg, IfTree& iftre
 	    ifp->set_mtu(mtu);
     }
     debug_msg("MTU: %u\n", ifp->mtu());
-    
+
     //
     // Get the flags
     //
@@ -951,13 +947,13 @@ void NlmUtils::nlm_cond_newlink_to_fea_cfg(const IfTree& user_cfg, IfTree& iftre
 	ifp->add_vif(if_name);
     IfTreeVif* vifp = ifp->find_vif(if_name);
     XLOG_ASSERT(vifp != NULL);
-    
+
     //
     // Set the physical interface index for the vif
     //
     if (is_newlink || (if_index != vifp->pif_index()))
 	vifp->set_pif_index(if_index);
-    
+
     //
     // Set the vif flags
     //
@@ -1080,20 +1076,20 @@ void NlmUtils::nlm_cond_newlink_to_fea_cfg(const IfTree& user_cfg, IfTree& iftre
 }
 
 void
-NlmUtils::nlm_dellink_to_fea_cfg(IfTree& iftree, const struct ifinfomsg* ifinfomsg,
+NlmUtils::nlm_dellink_to_fea_cfg(IfTree& iftree, struct ifinfomsg* ifinfomsg,
 				 int rta_len, bool& modified)
 {
-    const struct rtattr *rtattr;
-    const struct rtattr *rta_array[IFLA_MAX + 1];
+    struct rtattr *rtattr;
+    struct rtattr *rta_array[IFLA_MAX + 1];
     uint32_t if_index = 0;
     string if_name;
-    
+
     // The attributes
     memset(rta_array, 0, sizeof(rta_array));
     rtattr = IFLA_RTA(ifinfomsg);
     get_rtattr(rtattr, rta_len, rta_array,
 	       sizeof(rta_array) / sizeof(rta_array[0]));
-    
+
     //
     // Get the interface name
     //
@@ -1121,7 +1117,7 @@ NlmUtils::nlm_dellink_to_fea_cfg(IfTree& iftree, const struct ifinfomsg* ifinfom
     }
 
     XLOG_WARNING("dellink, interface: %s  tree: %s\n", if_name.c_str(), iftree.getName().c_str());
-    
+
     //
     // Get the interface index
     //
@@ -1132,7 +1128,7 @@ NlmUtils::nlm_dellink_to_fea_cfg(IfTree& iftree, const struct ifinfomsg* ifinfom
 		   if_name.c_str());
     }
     debug_msg("Deleting interface index: %u\n", if_index);
-    
+
     //
     // Delete the interface and vif
     //
@@ -1154,14 +1150,14 @@ NlmUtils::nlm_dellink_to_fea_cfg(IfTree& iftree, const struct ifinfomsg* ifinfom
 
 void
 NlmUtils::nlm_cond_newdeladdr_to_fea_cfg(const IfTree& user_config, IfTree& iftree,
-					 const struct ifaddrmsg* ifaddrmsg,
+					 struct ifaddrmsg* ifaddrmsg,
 					 int rta_len, bool is_deleted, bool& modified)
 {
-    const struct rtattr *rtattr;
-    const struct rtattr *rta_array[IFA_MAX + 1];
+    struct rtattr *rtattr;
+    struct rtattr *rta_array[IFA_MAX + 1];
     uint32_t if_index = 0;
     int family = ifaddrmsg->ifa_family;
-    
+
     //
     // Test the family
     //
@@ -1176,7 +1172,7 @@ NlmUtils::nlm_cond_newdeladdr_to_fea_cfg(const IfTree& user_config, IfTree& iftr
 	debug_msg("Ignoring address of family %d\n", family);
 	return;
     }
-    
+
     // The attributes
     memset(rta_array, 0, sizeof(rta_array));
     rtattr = IFA_RTA(ifaddrmsg);
@@ -1191,7 +1187,7 @@ NlmUtils::nlm_cond_newdeladdr_to_fea_cfg(const IfTree& user_config, IfTree& iftr
 	XLOG_FATAL("Could not add or delete address for interface "
 		   "with unknown index");
     }
-    
+
     //
     // Locate the vif to pin data on
     //
@@ -1267,11 +1263,11 @@ NlmUtils::nlm_cond_newdeladdr_to_fea_cfg(const IfTree& user_config, IfTree& iftr
     debug_msg("IP address before adjust: %s\n", lcl_addr.str().c_str());
     lcl_addr = system_adjust_ipvx_recv(lcl_addr);
     debug_msg("IP address: %s\n", lcl_addr.str().c_str());
-    
+
     // Get the netmask
     subnet_mask = IPvX::make_prefix(family, ifaddrmsg->ifa_prefixlen);
     debug_msg("IP netmask: %s\n", subnet_mask.str().c_str());
-    
+
     // Get the broadcast address
     if (vifp->broadcast()) {
 	switch (family) {
@@ -1292,14 +1288,14 @@ NlmUtils::nlm_cond_newdeladdr_to_fea_cfg(const IfTree& user_config, IfTree& iftr
 	case AF_INET6:
 	    break;	// IPv6 doesn't have the idea of broadcast
 #endif // HAVE_IPV6
-	    
+
 	default:
 	    XLOG_UNREACHABLE();
 	    break;
 	}
 	debug_msg("Broadcast address: %s\n", broadcast_addr.str().c_str());
     }
-    
+
     // Get the p2p address
     if (vifp->point_to_point()) {
 	if ((rta_array[IFA_ADDRESS] != NULL) && !is_ifa_address_reassigned) {
@@ -1317,9 +1313,9 @@ NlmUtils::nlm_cond_newdeladdr_to_fea_cfg(const IfTree& user_config, IfTree& iftr
 	}
 	debug_msg("Peer address: %s\n", peer_addr.str().c_str());
     }
-    
+
     debug_msg("\n");		// put an empty line between interfaces
-    
+
     // Add or delete the address
     switch (family) {
     case AF_INET:
@@ -1332,17 +1328,17 @@ NlmUtils::nlm_cond_newdeladdr_to_fea_cfg(const IfTree& user_config, IfTree& iftr
 	ap->set_loopback(vifp->loopback());
 	ap->set_point_to_point(vifp->point_to_point() && has_peer_addr);
 	ap->set_multicast(vifp->multicast());
-	
+
 	ap->set_prefix_len(subnet_mask.mask_len());
 	if (ap->broadcast())
 	    ap->set_bcast(broadcast_addr.get_ipv4());
 	if (ap->point_to_point())
 	    ap->set_endpoint(peer_addr.get_ipv4());
-	
+
 	// Mark as deleted if necessary
 	if (is_deleted)
 	    ap->mark(IfTreeItem::DELETED);
-	
+
 	break;
     }
 #ifdef HAVE_IPV6
@@ -1355,15 +1351,15 @@ NlmUtils::nlm_cond_newdeladdr_to_fea_cfg(const IfTree& user_config, IfTree& iftr
 	ap->set_loopback(vifp->loopback());
 	ap->set_point_to_point(vifp->point_to_point());
 	ap->set_multicast(vifp->multicast());
-	
+
 	ap->set_prefix_len(subnet_mask.mask_len());
 	if (ap->point_to_point())
 	    ap->set_endpoint(peer_addr.get_ipv6());
-	
+
 	// Mark as deleted if necessary
 	if (is_deleted)
 	    ap->mark(IfTreeItem::DELETED);
-	
+
 	break;
     }
 #endif // HAVE_IPV6

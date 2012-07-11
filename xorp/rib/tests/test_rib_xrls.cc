@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -30,7 +30,7 @@
 #include "libxipc/xrl_std_router.hh"
 
 #include "rib_manager.hh"
-#include "parser.hh"
+#include "../parser.hh"
 #include "parser_direct_cmds.hh"
 #include "parser_xrl_cmds.hh"
 #include "dummy_register_server.hh"
@@ -45,6 +45,7 @@ public:
 		 XrlRibV0p1Client& xrl_client,
 		 RIB<IPv4>&	   rib,
 		 XrlCompletion&    cv) {
+	add_command(new XrlInterfaceRouteAddCommand(e, xrl_client, cv));
 	add_command(new XrlRouteAddCommand(e, xrl_client, cv));
 	add_command(new XrlRouteDeleteCommand(e, xrl_client, cv));
 	add_command(new XrlAddIGPTableCommand(e, xrl_client, cv));

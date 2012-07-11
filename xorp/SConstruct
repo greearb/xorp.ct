@@ -142,7 +142,7 @@ if build_alias == None:
     build_alias = tgt_guess()
 build = tgt_canonicalize(build_alias)
 (build_cpu, build_vendor, build_os) = build.split('-', 2)
-    
+
 host_alias = ARGUMENTS.get('host', None)
 if host_alias == None:
     host_alias = build_alias
@@ -185,6 +185,8 @@ env = Environment(
 		  variables = vars)
 
 prefix = env['prefix']
+
+env['builddir'] = builddir;
 
 print 'Build System Type: ', build
 print 'Host System Type:  ', host
@@ -327,7 +329,7 @@ def InstallProgram(env, dest, files, perm = 0755):
 	env.AddPostAction(i, env.Chmod(str(i), perm))
 	if env['strip']:
 	    env.AddPostAction(i, Action("$STRIP $TARGET"))
-    return obj 
+    return obj
 SConsEnvironment.InstallProgram = InstallProgram
 
 def InstallScript(env, dest, files, perm = 0555):
@@ -337,7 +339,7 @@ def InstallScript(env, dest, files, perm = 0555):
     obj = env.Install(dest, files)
     for i in obj:
 	env.AddPostAction(i, env.Chmod(str(i), perm))
-    return obj 
+    return obj
 SConsEnvironment.InstallScript = InstallScript
 
 def InstallLibrary(env, dest, files, perm = 0644):
@@ -616,7 +618,7 @@ if not env.GetOption('clean') and \
 
     conf = env.Configure(config_h = str(builddir) + '/xorp_config.h',
 			 log_file = str(builddir) + '/config.log',
-			 custom_tests = my_custom_tests) 
+			 custom_tests = my_custom_tests)
 
     ##########
     # target os
@@ -670,7 +672,7 @@ if not env.GetOption('clean') and \
         if  not conf.CheckBoost(require_version='1.34'):
             print "Boost version check for 1.34 failed, disabling boost support.\n"
             env['enable_boost'] = False
-        
+
         #conf.CheckBoostLibrary('system')
         #conf.CheckBoostLibrary('date_time')
         #conf.CheckBoostLibrary('iostreams')
@@ -818,7 +820,7 @@ and shared libraries. This is UNSUPPORTED, and probably will not link.
         disabling gprof profiling and/or shared libraries.  If the compile works, then
         you can ignore this warning.
         """
-        
+
     # Full use of profiling may require more than one flag, so Split() them.
     pgdict = {'no': '',
               'gprof': '-pg',
@@ -905,7 +907,7 @@ if ((build != "i386-pc-mingw32") and
 		])
 else:
     print "WARNING:  Detected funky platform, will not enable -Werror compile option: ", host_cpu
-	
+
 
 # NOTE: gcc specific flags.
 env.AppendUnique(CFLAGS = [

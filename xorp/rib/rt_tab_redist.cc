@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -45,16 +45,16 @@ RedistOutput<A>::~RedistOutput()
 {
 }
 
-
+
 // ----------------------------------------------------------------------------
 // Redistributor<A>
 
-template <>
-const IPv4Net Redistributor<IPv4>::NO_LAST_NET(IPv4::ALL_ONES(),
-					       IPv4::ADDR_BITLEN);
-template <>
-const IPv6Net Redistributor<IPv6>::NO_LAST_NET(IPv6::ALL_ONES(),
-					       IPv6::ADDR_BITLEN);
+template <class A>
+const IPNet<A> Redistributor<A>::NO_LAST_NET(A::ALL_ONES(),
+					       A::ADDR_BITLEN);
+
+template <typename A>
+const RedistNetCmp<A> Redistributor<A>::redist_net_cmp = RedistNetCmp<A>();
 
 template <typename A>
 Redistributor<A>::Redistributor(EventLoop& 	e,
@@ -207,7 +207,7 @@ Redistributor<A>::dump_a_route()
 	schedule_dump_timer();
 }
 
-
+
 // ----------------------------------------------------------------------------
 // Event Notification handling
 
@@ -232,7 +232,7 @@ Redistributor<A>::RedistEventInterface::did_add(const IPRouteEntry<A>& ipr)
 #ifdef XORP_USE_USTL
 	if (!(net < last)) {
 #else
-	if (RedistNetCmp<A>().operator() (net, last) == false) {
+	if (!redist_net_cmp(net, last)) {
 #endif
 	    return;	// route will be hit later on in dump anyway
 	}
@@ -299,7 +299,7 @@ Redistributor<A>::RedistEventInterface::did_delete(const IPRouteEntry<A>& ipr)
 #ifdef XORP_USE_USTL
 	if (!(net < last)) {
 #else
-	if (RedistNetCmp<A>().operator() (net, last) == false) {
+	if (!redist_net_cmp(net, last)) {
 #endif
 	    return;	// route has not yet been announced so ignore
 	}
@@ -460,7 +460,7 @@ RedistTable<A>::delete_route(const IPRouteEntry<A>* r,
     return XORP_OK;
 }
 
-
+
 // ----------------------------------------------------------------------------
 // Standard RouteTable methods, RedistTable punts everything to parent.
 

@@ -162,7 +162,7 @@ public:
      *
      * @param buffer the buffer with the received data.
      */
-    virtual void routing_socket_data(const vector<uint8_t>& buffer) = 0;
+    virtual void routing_socket_data(vector<uint8_t>& buffer) = 0;
 
     /**
      * Get RoutingSocket associated with Observer.
@@ -204,7 +204,7 @@ public:
      *
      * @param buffer the buffer with the received data.
      */
-    virtual void routing_socket_data(const vector<uint8_t>& buffer);
+    virtual void routing_socket_data(vector<uint8_t>& buffer);
 
 private:
     RoutingSocket&  _rs;

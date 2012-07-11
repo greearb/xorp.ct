@@ -9,13 +9,13 @@
 // Redistribution and/or modification of this program under the terms of
 // any other version of the GNU Lesser General Public License is not
 // permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU Lesser General Public License, Version 2.1, a copy of
 // which can be found in the XORP LICENSE.lgpl file.
-// 
+//
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -55,7 +55,7 @@ public:
     /**
      * Constructor for a given type for exception, file name,
      * and file line number.
-     * 
+     *
      * @param init_what the type of exception.
      * @param file the file name where the exception was thrown.
      * @param line the line in @ref file where the exception was thrown.
@@ -69,14 +69,14 @@ public:
 
     /**
      * Get the type of this exception.
-     * 
+     *
      * @return the string with the type of this exception.
      */
     const string& what() const { return _what; }
 
     /**
      * Get the location for throwing an exception.
-     * 
+     *
      * @return the string with the location (file name and file line number)
      * for throwing an exception.
      */
@@ -84,14 +84,14 @@ public:
 
     /**
      * Get the reason for throwing an exception.
-     * 
+     *
      * @return the string with the reason for throwing an exception.
      */
     virtual const string why() const;
 
     /**
      * Convert this exception from binary form to presentation format.
-     * 
+     *
      * @return C++ string with the human-readable ASCII representation
      * of the exception.
      */
@@ -111,18 +111,18 @@ public:
     /**
      * Constructor for a given type for exception, file name,
      * file line number, and a reason.
-     * 
+     *
      * @param init_what the type of exception.
      * @param file the file name where the exception was thrown.
      * @param line the line in @ref file where the exception was thrown.
      * @param init_why the reason for the exception that was thrown.
      */
-    XorpReasonedException(const char* init_what, const char* file, 
+    XorpReasonedException(const char* init_what, const char* file,
 			  size_t line, const string& init_why);
 
     /**
      * Get the reason for throwing an exception.
-     * 
+     *
      * @return the string with the reason for throwing an exception.
      */
     const string why() const;
@@ -222,7 +222,7 @@ void xorp_catch_standard_exceptions();
 /**
  * Print diagnostic message if exception is derived from @ref XorpException or
  * from standard exceptions.
- * 
+ *
  * Note that unlike @ref xorp_catch_standard_exceptions(), the program
  * does NOT terminate.
  */
@@ -239,7 +239,7 @@ void xorp_unexpected_handler();
 /**
  * XorpUnexpectedHandler installs the xorp_unexpected_handler when
  * instantiated and re-installed the previous handler when
- * uninstantiated. 
+ * uninstantiated.
  */
 class XorpUnexpectedHandler {
 public:

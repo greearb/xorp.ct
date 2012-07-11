@@ -91,7 +91,7 @@ FibConfigTableObserverRoutingSocket::stop(string& error_msg)
 }
 
 void
-FibConfigTableObserverRoutingSocket::receive_data(const vector<uint8_t>& buffer)
+FibConfigTableObserverRoutingSocket::receive_data(vector<uint8_t>& buffer)
 {
     list<FteX> fte_list;
     FibConfigTableGetSysctl::FibMsgSet filter;
@@ -131,7 +131,7 @@ FibConfigTableObserverRoutingSocket::receive_data(const vector<uint8_t>& buffer)
 }
 
 void
-FibConfigTableObserverRoutingSocket::routing_socket_data(const vector<uint8_t>& buffer)
+FibConfigTableObserverRoutingSocket::routing_socket_data(vector<uint8_t>& buffer)
 {
     receive_data(buffer);
 }

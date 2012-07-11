@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -93,30 +93,30 @@ public:
     /**
      * Convert a message type from netlink socket message into
      * human-readable form.
-     * 
+     *
      * @param m message type from netlink socket message.
      * @return human-readable message of the message type.
      */
     static string nlm_msg_type(uint32_t m);
 
-    static string nlm_print_msg(const vector<uint8_t>& message);
+    static string nlm_print_msg(vector<uint8_t>& message);
 
     /**
      * Get pointers to set of netlink rtattr entries.
-     * 
+     *
      * @param rtattr the pointer to the first rtattr entry.
      * @param rta_len the length of all rtattr entries.
      * @param rta_array the array with the pointers to store the result.
      * @param rta_array_n the maximum number of entries to store
      * in the array.
      */
-    static void get_rtattr(const struct rtattr* rtattr, int rta_len,
-			   const struct rtattr* rta_array[],
+    static void get_rtattr(struct rtattr* rtattr, int rta_len,
+			   struct rtattr* rta_array[],
 			   size_t rta_array_n);
-    
+
     /**
      * Extract the routing information from netlink message.
-     * 
+     *
      * @param iftree the interface tree to use.
      * @param fte the return-by-reference @ref FteX entry to return the result.
      * @param nlh the netlink message header.
@@ -126,7 +126,7 @@ public:
      */
     static int	nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 				   const struct nlmsghdr* nlh,
-				   const struct rtmsg* rtmsg, int rta_len,
+				   struct rtmsg* rtmsg, int rta_len,
 				   const FibConfig& fibconfig, string& err_msg);
 
     /**
@@ -155,16 +155,16 @@ public:
 						 string& error_msg);
 
     static void nlm_cond_newlink_to_fea_cfg(const IfTree& user_cfg, IfTree& iftree,
-					    const struct ifinfomsg* ifinfomsg,
+					    struct ifinfomsg* ifinfomsg,
 					    int rta_len, bool& modified);
 
 
-    static void nlm_dellink_to_fea_cfg(IfTree& iftree, const struct ifinfomsg* ifinfomsg,
+    static void nlm_dellink_to_fea_cfg(IfTree& iftree, struct ifinfomsg* ifinfomsg,
 				       int rta_len, bool& modified);
 
 
     static void nlm_cond_newdeladdr_to_fea_cfg(const IfTree& user_config, IfTree& iftree,
-					       const struct ifaddrmsg* ifaddrmsg,
+					       struct ifaddrmsg* ifaddrmsg,
 					       int rta_len, bool is_deleted, bool& modified);
 
 };

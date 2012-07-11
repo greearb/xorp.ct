@@ -8,13 +8,13 @@
 // Redistribution and/or modification of this program under the terms of
 // any other version of the GNU Lesser General Public License is not
 // permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU Lesser General Public License, Version 2.1, a copy of
 // which can be found in the XORP LICENSE.lgpl file.
-// 
+//
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -29,110 +29,110 @@
 #endif
 
 
-XorpException::XorpException(const char* init_what, 
-			     const char* file, 
-			     size_t line) 
-    : _what(init_what), _file(file), _line(line) 
+XorpException::XorpException(const char* init_what,
+			     const char* file,
+			     size_t line)
+    : _what(init_what), _file(file), _line(line)
 {
 }
 
-XorpException::~XorpException() 
+XorpException::~XorpException()
 {
 }
 
-const string 
-XorpException::where() const 
-{ 
-    return c_format("line %u of %s", XORP_UINT_CAST(_line), _file); 
+const string
+XorpException::where() const
+{
+    return c_format("line %u of %s", XORP_UINT_CAST(_line), _file);
 }
 
-const string 
-XorpException::why() const 
-{ 
-    return "Not specified"; 
+const string
+XorpException::why() const
+{
+    return "Not specified";
 }
 
-string 
-XorpException::str() const 
+string
+XorpException::str() const
 {
     return what() + " from " + where() + ": " + why();
 }
 
 XorpReasonedException::XorpReasonedException(const char* init_what,
-					     const char* file, 
-					     size_t line, 
-					     const string& init_why) 
-    : XorpException(init_what, file, line), _why(init_why) 
+					     const char* file,
+					     size_t line,
+					     const string& init_why)
+    : XorpException(init_what, file, line), _why(init_why)
 {
 }
 
 const string
 XorpReasonedException::why() const
 {
-    return ( _why.size() != 0 ) ? _why : string("Not specified"); 
+    return ( _why.size() != 0 ) ? _why : string("Not specified");
 }
 
-InvalidString::InvalidString(const char* file, 
-			     size_t line, 
+InvalidString::InvalidString(const char* file,
+			     size_t line,
 			     const string& init_why)
-    : XorpReasonedException("InvalidString", file, line, init_why) 
+    : XorpReasonedException("InvalidString", file, line, init_why)
 {
 }
 
-InvalidAddress::InvalidAddress(const char* file, 
-			       size_t line, 
+InvalidAddress::InvalidAddress(const char* file,
+			       size_t line,
 			       const string& init_why)
-    : XorpReasonedException("InvalidAddress", file, line, init_why) 
+    : XorpReasonedException("InvalidAddress", file, line, init_why)
 {
 }
 
-InvalidPort::InvalidPort(const char* file, 
-			 size_t line, 
+InvalidPort::InvalidPort(const char* file,
+			 size_t line,
 			 const string& init_why)
-    : XorpReasonedException("InvalidPort", file, line, init_why) 
+    : XorpReasonedException("InvalidPort", file, line, init_why)
 {
 }
 
 InvalidCast::InvalidCast(const char* file,
-			 size_t line, 
-			 const string& init_why) 
-    : XorpReasonedException("XorpCast", file, line, init_why) 
+			 size_t line,
+			 const string& init_why)
+    : XorpReasonedException("XorpCast", file, line, init_why)
 {
 }
 
-InvalidBufferOffset::InvalidBufferOffset(const char* file, 
+InvalidBufferOffset::InvalidBufferOffset(const char* file,
 					 size_t line,
 					 const string& init_why)
-    : XorpReasonedException("XorpInvalidBufferOffset", file, line, init_why) 
+    : XorpReasonedException("XorpInvalidBufferOffset", file, line, init_why)
 {
 }
 
-InvalidFamily::InvalidFamily(const char* file, 
-			     size_t line, 
-			     int af) 
-    : XorpException("XorpInvalidFamily", file, line), _af(af) 
+InvalidFamily::InvalidFamily(const char* file,
+			     size_t line,
+			     int af)
+    : XorpException("XorpInvalidFamily", file, line), _af(af)
 {
-} 
+}
 
-const string 
-InvalidFamily::why() const 
-{ 
+const string
+InvalidFamily::why() const
+{
     return c_format("Unknown IP family - %d", _af);
 }
 
 InvalidPacket::InvalidPacket(const char* file,
 			     size_t line,
 			     const string& init_why)
-    : XorpReasonedException("XorpInvalidPacket", file, line, init_why) 
+    : XorpReasonedException("XorpInvalidPacket", file, line, init_why)
 {
 }
 
 
-InvalidNetmaskLength::InvalidNetmaskLength(const char* file, 
-					   size_t line, 
-					   int netmask_length) 
-    : XorpException("XorpInvalidNetmaskLength", file, line), 
-      _netmask_length (netmask_length) 
+InvalidNetmaskLength::InvalidNetmaskLength(const char* file,
+					   size_t line,
+					   int netmask_length)
+    : XorpException("XorpInvalidNetmaskLength", file, line),
+      _netmask_length (netmask_length)
 {
     // There was a case where fea was crashing due to un-caught exception.
     // Somehow, no useful info was being printed other than the exception
@@ -142,11 +142,11 @@ InvalidNetmaskLength::InvalidNetmaskLength(const char* file,
     cerr << "Creating InvalidNetmaskLength exception, file: "
      << file << ":" << line << " netmask_length: " << netmask_length
      << endl;
-} 
+}
 
-const string 
-InvalidNetmaskLength::why() const 
-{ 
+const string
+InvalidNetmaskLength::why() const
+{
     return c_format("Invalid netmask length - %d", _netmask_length);
 }
 
@@ -165,10 +165,10 @@ xorp_print_standard_exceptions() {
     try {
 	throw;	// Re-throw so we can inspect exception type
     } catch (const XorpException& xe) {
-	cerr << xe.what() << " from " << xe.where() << " -> " 
+	cerr << xe.what() << " from " << xe.where() << " -> "
 	     << xe.why()  << "\n";
     } catch (const exception& e) {
-	cerr << "Standard exception: " 
+	cerr << "Standard exception: "
 	     << e.what() << " (name = \"" <<  typeid(e).name() << "\")\n";
     }
 }
@@ -191,8 +191,8 @@ xorp_unexpected_handler(void) {
 void foo() {
     // do some stuff that happens to throw the non-descript exception
     // let's say invalid characters are "la-la"
-    xorp_throw(XorpInvalidString, 
-	       xorp_format_string("invalid characters occurred \"%s\"", 
+    xorp_throw(XorpInvalidString,
+	       xorp_format_string("invalid characters occurred \"%s\"",
 				  "la-la"));
 }
 
@@ -206,7 +206,7 @@ int main() {
     } catch (...) {
 	xorp_catch_standard_exceptions();
     }
-    
+
     return 0;
 }
 

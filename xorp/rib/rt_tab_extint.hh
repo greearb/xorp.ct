@@ -7,13 +7,13 @@
 // 1991 as published by the Free Software Foundation. Redistribution
 // and/or modification of this program under the terms of any other
 // version of the GNU General Public License is not permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU General Public License, Version 2, a copy of which can be
 // found in the XORP LICENSE.gpl file.
-// 
+//
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -68,6 +68,11 @@ public:
      */
     ExtIntTable(RouteTable<A>* ext_table,
 		RouteTable<A>* int_table);
+
+    /**
+     * ExtInt Destructor
+     */
+    virtual ~ExtIntTable();
 
     /**
      * An add_route request from a parent table causes a lookup on the
@@ -162,6 +167,8 @@ public:
 private:
     typedef typename ResolvedIPRouteEntry<A>::RouteBackLink ResolvedRouteBackLink;
     typedef typename UnresolvedIPRouteEntry<A>::RouteBackLink UnresolvedRouteBackLink;
+    typedef multimap<const IPNet<A>, ResolvedIPRouteEntry<A>* > IGPParentMultiMap;
+    typedef map<IPNet<A>, UnresolvedIPRouteEntry<A>* > IpUnresolvedTableMap;
 
     int delete_ext_route(const IPRouteEntry<A>* route,
 			 bool& is_delete_propagated);
@@ -180,11 +187,11 @@ private:
     void recalculate_nexthops(const IPRouteEntry<A>& route);
 
     const ResolvedIPRouteEntry<A>* lookup_by_igp_parent(
-	const IPRouteEntry<A>* route);
+	const IPNet<A>& route_net);
 
     const ResolvedIPRouteEntry<A>* lookup_next_by_igp_parent(
-	const IPRouteEntry<A>* route,
-	const ResolvedIPRouteEntry<A>* previous);
+	const IPNet<A>& route_net,
+	const typename IGPParentMultiMap::iterator& previous);
 
     const IPRouteEntry<A>* lookup_route_in_igp_parent(
 	const IPNet<A>& subnet) const;
@@ -198,11 +205,11 @@ private:
     RouteTable<A>*				_int_table;
     Trie<A, const ResolvedIPRouteEntry<A>* >	_ip_route_table;
     multimap<A, UnresolvedIPRouteEntry<A>* >	_ip_unresolved_nexthops;
-    map<IPNet<A>, UnresolvedIPRouteEntry<A>* >	_ip_unresolved_table;
+    IpUnresolvedTableMap			_ip_unresolved_table;
 
     // _ip_igp_parents gives us a fast way of finding a route
     // affected by a change in an igp parent route
-    multimap<const IPRouteEntry<A>*, ResolvedIPRouteEntry<A>* > _ip_igp_parents;
+    IGPParentMultiMap _ip_igp_parents;
 
     // _resolving_routes is a Trie of all the routes that are used to
     // resolve external routes

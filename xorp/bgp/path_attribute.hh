@@ -17,7 +17,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/bgp/path_attribute.hh,v 1.54 2008/12/11 21:05:59 mjh Exp $
 
 #ifndef __BGP_PATH_ATTRIBUTE_HH__
 #define __BGP_PATH_ATTRIBUTE_HH__
@@ -364,6 +363,8 @@ public:
     }
 
     A& nexthop() 			{ return _next_hop; }
+    const A& nexthop() const { return _next_hop; }
+
     // This method is for use in MPReachNLRIAttribute only.
     void set_nexthop(const A& n) 		{ _next_hop = n; }
 

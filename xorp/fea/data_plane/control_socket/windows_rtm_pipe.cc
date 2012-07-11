@@ -237,8 +237,7 @@ WinRtmPipe::force_read(string& error_msg)
 	//
 	// Received message (probably) OK
 	//
-	AlignData<struct if_msghdr> align_data(message);
-	const struct if_msghdr* mh = align_data.payload();
+	const struct if_msghdr* mh = (const struct if_msghdr*)(&(message[0]));
 	XLOG_ASSERT(mh->ifm_msglen == message.size());
 	XLOG_ASSERT(mh->ifm_msglen == nbytes);
 	last_mh_off = off;

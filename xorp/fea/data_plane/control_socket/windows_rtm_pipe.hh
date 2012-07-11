@@ -153,7 +153,7 @@ public:
      *
      * @param buffer the buffer with the received data.
      */
-    virtual void routing_socket_data(const vector<uint8_t>& buffer) = 0;
+    virtual void routing_socket_data(vector<uint8_t>& buffer) = 0;
 
     /**
      * Get WinRtmPipe associated with Observer.

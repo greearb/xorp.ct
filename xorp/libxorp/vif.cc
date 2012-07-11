@@ -8,13 +8,13 @@
 // Redistribution and/or modification of this program under the terms of
 // any other version of the GNU Lesser General Public License is not
 // permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU Lesser General Public License, Version 2.1, a copy of
 // which can be found in the XORP LICENSE.lgpl file.
-// 
+//
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -77,7 +77,7 @@ VifAddr::str() const
     ostringstream oss;
     oss << "addr: " << _addr.str() << " subnet: " << _subnet_addr.str()
 	<< " broadcast: " << _broadcast_addr.str() << " peer: " << _peer_addr.str();
-    
+
     return oss.str();
 }
 
@@ -137,7 +137,7 @@ Vif::Vif(const Vif& vif)
 //
 Vif::~Vif()
 {
-    
+
 }
 
 //
@@ -148,7 +148,7 @@ string
 Vif::str() const
 {
     string r;
-    
+
     // The vif name
     r += "Vif[";
     r += _name;
@@ -159,14 +159,14 @@ Vif::str() const
     r += c_format("%d", pif_index());
     r += " vif_index: ";
     r += c_format("%d", vif_index());
-    
+
     // The list of addresses
     list<VifAddr>::const_iterator iter;
     for (iter = _addr_list.begin(); iter != _addr_list.end(); ++iter) {
 	r += " ";
 	r += iter->str();
     }
-    
+
     // The flags
     r += " Flags:";
     if (is_p2p())
@@ -188,7 +188,7 @@ Vif::str() const
     if (is_underlying_vif_up())
 	r += " UNDERLYING_VIF_UP";
     r += c_format(" MTU: %u", XORP_UINT_CAST(mtu()));
-    
+
     return r;
 }
 
@@ -215,13 +215,13 @@ const IPvX *
 Vif::addr_ptr() const
 {
     list<VifAddr>::const_iterator iter;
-    
+
     for (iter = _addr_list.begin(); iter != _addr_list.end(); ++iter) {
 	const VifAddr *vif_addr = &(*iter);
 	if (vif_addr->addr().is_unicast())
 	    return (&vif_addr->addr());
     }
-    
+
     return (NULL);
 }
 
@@ -230,7 +230,7 @@ Vif::add_address(const VifAddr& vif_addr)
 {
     if (is_my_vif_addr(vif_addr))
 	return (XORP_ERROR);
-    
+
     _addr_list.push_back(vif_addr);
     return (XORP_OK);
 }
@@ -255,14 +255,14 @@ int
 Vif::delete_address(const IPvX& ipvx_addr)
 {
     list<VifAddr>::iterator iter;
-    
+
     for (iter = _addr_list.begin(); iter != _addr_list.end(); ++iter) {
 	if ((iter)->is_my_addr(ipvx_addr)) {
 	    _addr_list.erase(iter);
 	    return (XORP_OK);
 	}
     }
-    
+
     return (XORP_ERROR);
 }
 
@@ -270,13 +270,13 @@ VifAddr *
 Vif::find_address(const IPvX& ipvx_addr)
 {
     list<VifAddr>::iterator iter;
-    
+
     for (iter = _addr_list.begin(); iter != _addr_list.end(); ++iter) {
 	if ((iter)->is_my_addr(ipvx_addr)) {
 	    return &(*iter);
 	}
     }
-    
+
     return (NULL);
 }
 
@@ -284,13 +284,13 @@ const VifAddr *
 Vif::find_address(const IPvX& ipvx_addr) const
 {
     list<VifAddr>::const_iterator iter;
-    
+
     for (iter = _addr_list.begin(); iter != _addr_list.end(); ++iter) {
 	if ((iter)->is_my_addr(ipvx_addr)) {
 	    return &(*iter);
 	}
     }
-    
+
     return (NULL);
 }
 
@@ -298,13 +298,13 @@ bool
 Vif::is_my_addr(const IPvX& ipvx_addr) const
 {
     list<VifAddr>::const_iterator iter;
-    
+
     for (iter = _addr_list.begin(); iter != _addr_list.end(); ++iter) {
 	if ((iter)->is_my_addr(ipvx_addr)) {
 	    return (true);
 	}
     }
-    
+
     return (false);
 }
 
@@ -312,13 +312,13 @@ bool
 Vif::is_my_vif_addr(const VifAddr& vif_addr) const
 {
     list<VifAddr>::const_iterator iter;
-    
+
     for (iter = _addr_list.begin(); iter != _addr_list.end(); ++iter) {
 	const VifAddr& tmp_vif_addr = *iter;
 	if (tmp_vif_addr == vif_addr)
 	    return (true);
     }
-    
+
     return (false);
 }
 
@@ -326,16 +326,16 @@ bool
 Vif::is_same_subnet(const IPvXNet& ipvxnet) const
 {
     list<VifAddr>::const_iterator iter;
-    
+
     if (is_pim_register())
 	return (false);
-    
+
     for (iter = _addr_list.begin(); iter != _addr_list.end(); ++iter) {
 	if ((iter)->is_same_subnet(ipvxnet)) {
 	    return (true);
 	}
     }
-    
+
     return (false);
 }
 
@@ -343,16 +343,16 @@ bool
 Vif::is_same_subnet(const IPvX& ipvx_addr) const
 {
     list<VifAddr>::const_iterator iter;
-    
+
     if (is_pim_register())
 	return (false);
-    
+
     for (iter = _addr_list.begin(); iter != _addr_list.end(); ++iter) {
 	if ((iter)->is_same_subnet(ipvx_addr)) {
 	    return (true);
 	}
     }
-    
+
     return (false);
 }
 
@@ -360,16 +360,16 @@ bool
 Vif::is_same_p2p(const IPvX& ipvx_addr) const
 {
     list<VifAddr>::const_iterator iter;
-    
+
     if (is_pim_register() || (! is_p2p()))
 	return (false);
-    
+
     for (iter = _addr_list.begin(); iter != _addr_list.end(); ++iter) {
 	if ((iter)->is_my_addr(ipvx_addr)
 	    || ((iter)->peer_addr() == ipvx_addr)) {
 	    return (true);
 	}
     }
-    
+
     return (false);
 }
