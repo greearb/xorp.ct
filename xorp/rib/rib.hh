@@ -172,11 +172,11 @@ public:
      * @param protocol_type the routing protocol type (@ref ProtocolType).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
+    template <ProtocolType  protocol_type>
     int new_origin_table(const string&	tablename,
 			 const string&	target_class,
 			 const string&	target_instance,
-			 uint16_t	admin_distance,
-			 ProtocolType	protocol_type);
+			 uint16_t	admin_distance);
 
     /**
      * Inform the RIB about the existence of a Virtual Interface.
@@ -562,10 +562,10 @@ private:
      * @param protocol_type the routing protocol type (@ref ProtocolType).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
+    template <ProtocolType  protocol_type>
     int add_origin_table(const string& tablename,
 			 const string& target_class,
-			 const string& target_instance,
-			 ProtocolType  protocol_type);
+			 const string& target_instance);
 
     /**
      * Used to implement @ref delete_igp_table and @ref delete_egp_table.
@@ -607,6 +607,9 @@ private:
      * @return pointer to table if exists, NULL otherwise.
      */
     OriginTable<A>* find_origin_table(const string& tablename);
+
+    template <ProtocolType protocol_type>
+    OriginTable<A>* find_origin_table_smart(const string& tablename);
 
     /**
      * Find a IGP origin routing table, given its table name

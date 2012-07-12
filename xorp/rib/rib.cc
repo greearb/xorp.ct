@@ -51,6 +51,20 @@ RIB<A>::find_origin_table(const string& tablename)
 }
 
 template <typename A>
+template <ProtocolType protocol_type>
+inline OriginTable<A>*
+RIB<A>::find_origin_table_smart(const string& tablename)
+{
+    switch (protocol_type) {
+    case IGP:
+	return find_igp_origin_table(tablename);
+    case EGP:
+	return find_egp_origin_table(tablename);
+    }
+    return NULL;
+}
+
+template <typename A>
 inline OriginTable<A>*
 RIB<A>::find_igp_origin_table(const string& tablename)
 {
@@ -445,25 +459,17 @@ RIB<A>::initialize_register(RegisterServer& register_server)
 }
 
 template <typename A>
+template <ProtocolType	protocol_type>
 int
 RIB<A>::new_origin_table(const string&	tablename,
 			 const string&	target_class,
 			 const string&	target_instance,
-			 uint16_t	admin_distance,
-			 ProtocolType	protocol_type)
+			 uint16_t	admin_distance)
 {
     OriginTable<A>* ot = NULL;
-    switch (protocol_type) {
-    case IGP:
-	ot = new TypedOriginTable<A, IGP>(tablename, admin_distance, _eventloop);
-	break;
-    case EGP:
-	ot = new TypedOriginTable<A, EGP>(tablename, admin_distance, _eventloop);
-	break;
-    default:
-	XLOG_UNREACHABLE();
-	break;
-    }
+
+    ot = new TypedOriginTable<A, protocol_type>(tablename, admin_distance, _eventloop);
+
     if (ot == NULL || add_table(ot) != XORP_OK) {
 	XLOG_WARNING("Could not add origin table %s", tablename.c_str());
 	delete ot;
@@ -1079,7 +1085,7 @@ RIB<A>::add_igp_table(const string& tablename,
 		      const string& target_instance)
 {
     debug_msg("add_igp_table %s\n", tablename.c_str());
-    int r = add_origin_table(tablename, target_class, target_instance, IGP);
+    int r = add_origin_table<IGP>(tablename, target_class, target_instance);
     if (r != XORP_OK)
 	return r;
 
@@ -1116,7 +1122,7 @@ RIB<A>::add_egp_table(const string& tablename,
 		      const string& target_instance)
 {
     debug_msg("add_egp_table %s\n", tablename.c_str());
-    int r = add_origin_table(tablename, target_class, target_instance, EGP);
+    int r = add_origin_table<EGP>(tablename, target_class, target_instance);
     if (r != XORP_OK) {
 	return r;
     }
@@ -1181,11 +1187,11 @@ RIB<A>::plumb_origin_table(OriginTable<A>*& ot)
 //
 
 template <typename A>
+template <ProtocolType protocol_type>
 int
 RIB<A>::add_origin_table(const string& tablename,
 			 const string& target_class,
-			 const string& target_instance,
-			 ProtocolType protocol_type)
+			 const string& target_instance)
 {
     debug_msg("add_origin_table %s type: %d\n",
 	      tablename.c_str(), protocol_type);
@@ -1200,17 +1206,7 @@ RIB<A>::add_origin_table(const string& tablename,
 
     // Check if table exists and check type if so
     OriginTable<A>* ot = NULL;
-    switch (protocol_type) {
-    case IGP:
-	ot = find_igp_origin_table(tablename);
-	break;
-    case EGP:
-	ot = find_egp_origin_table(tablename);
-	break;
-    default:
-	XLOG_UNREACHABLE();
-	break;
-    }
+    ot = find_origin_table_smart<protocol_type>(tablename);
 
     if (ot != NULL) {
 	//
@@ -1229,23 +1225,13 @@ RIB<A>::add_origin_table(const string& tablename,
 	return XORP_OK;
     }
 
-    if (new_origin_table(tablename, target_class, target_instance,
-	    get_protocol_admin_distance(tablename), protocol_type) != XORP_OK) {
+    if (new_origin_table<protocol_type>(tablename, target_class, target_instance,
+	    get_protocol_admin_distance(tablename)) != XORP_OK) {
 	debug_msg("new_origin_table failed\n");
 	return XORP_ERROR;
     }
 
-    switch (protocol_type) {
-    case IGP:
-	ot = find_igp_origin_table(tablename);
-	break;
-    case EGP:
-	ot = find_egp_origin_table(tablename);
-	break;
-    default:
-	XLOG_UNREACHABLE();
-    break;
-    }
+    ot = find_origin_table_smart<protocol_type>(tablename);
 
     return plumb_origin_table(ot);
 }
