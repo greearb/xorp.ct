@@ -25,6 +25,8 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 
+#include "protocol.hh"
+
 #include "rt_tab_origin.hh"
 #include "rt_tab_deletion.hh"
 

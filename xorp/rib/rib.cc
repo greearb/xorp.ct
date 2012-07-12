@@ -127,12 +127,12 @@ template <typename A>
 Protocol*
 RIB<A>::find_protocol(const string& protocol)
 {
-    typename map<string, Protocol* >::iterator mi = _protocols.find(protocol);
+    OriginTable<A>* ot = find_origin_table(protocol);
 
-    if (mi == _protocols.end()) {
-	return NULL;
-    }
-    return mi->second;
+    if (ot)
+	return &(ot->protocol());
+
+    return NULL;
 }
 
 template <typename A>
@@ -322,11 +322,6 @@ RIB<A>::~RIB()
     delete _policy_redist_table;
     _policy_redist_table = NULL;
 
-    while (! _protocols.empty()) {
-	delete _protocols.begin()->second;
-	_protocols.erase(_protocols.begin());
-    }
-
     while (_vifs.empty() == false) {
 	delete _vifs.begin()->second;
 	_vifs.erase(_vifs.begin());
@@ -343,11 +338,13 @@ list<string>
 RIB<A>::registered_protocol_names() const
 {
     list<string> names;
-    map<string, Protocol* >::const_iterator iter;
+    typename OriginTableMap::const_iterator iter;
 
-    for (iter = _protocols.begin(); iter != _protocols.end(); ++iter) {
+    for (iter = _igp_origin_tables.begin(); iter != _igp_origin_tables.end(); ++iter)
 	names.push_back(iter->first);
-    }
+
+    for (iter = _egp_origin_tables.begin(); iter != _egp_origin_tables.end(); ++iter)
+	names.push_back(iter->first);
 
     return (names);
 }
@@ -784,19 +781,6 @@ RIB<A>::add_route(const string&		tablename,
     // Sanity check - we should have initialized RIB
     XLOG_ASSERT(_connected_origin_table);
 
-    Protocol* protocol = find_protocol(tablename);
-    if (protocol == NULL) {
-	if (_errors_are_fatal) {
-	    XLOG_FATAL("Attempting to add route with unknown protocol \"%s\".",
-		       tablename.c_str());
-	} else {
-	    XLOG_ERROR("Attempting to add route with unknown protocol \"%s\".",
-		       tablename.c_str());
-
-	    return XORP_ERROR;
-	}
-    }
-
     OriginTable<A>* ot = find_origin_table(tablename);
     if (ot == NULL) {
 	if (_errors_are_fatal) {
@@ -808,6 +792,7 @@ RIB<A>::add_route(const string&		tablename,
 	    return XORP_ERROR;
 	}
     }
+    const Protocol& protocol = ot->protocol();
 
     RibVif<A>* vif = NULL;
     IPNextHop<A>* nexthop = NULL;
@@ -828,8 +813,7 @@ RIB<A>::add_route(const string&		tablename,
 	}
 
 	IPNextHop<A>* nexthop = create_peer_nexthop(nexthop_addr);
-	ot->add_route(new IPRouteEntry<A>(net, vif, nexthop, protocol,
-		      metric, policytags));
+	ot->add_route(new IPRouteEntry<A>(net, vif, nexthop, &protocol, metric, policytags));
 	flush();
 	return XORP_OK;
     }
@@ -844,7 +828,7 @@ RIB<A>::add_route(const string&		tablename,
 
     if (vif != NULL)
 	nexthop = create_peer_nexthop(nexthop_addr);
-    else if (vif == NULL && protocol->protocol_type() == IGP) {
+    else if (vif == NULL && ot->protocol_type() == IGP) {
 	debug_msg("**not directly connected route found for nexthop\n");
 	//
 	// XXX: If the route came from an IGP, then we must have
@@ -861,7 +845,7 @@ RIB<A>::add_route(const string&		tablename,
     //
     // Add the route
     //
-    ot->add_route(new IPRouteEntry<A>(net, vif, nexthop, protocol, metric, policytags));
+    ot->add_route(new IPRouteEntry<A>(net, vif, nexthop, &protocol, metric, policytags));
 
     flush();
     return XORP_OK;
@@ -1196,19 +1180,12 @@ RIB<A>::add_origin_table(const string& tablename,
     debug_msg("add_origin_table %s type: %d\n",
 	      tablename.c_str(), protocol_type);
 
-    Protocol* protocol = find_protocol(tablename);
-    if (protocol == NULL) {
-	protocol = new Protocol(tablename, protocol_type, 0);
-	_protocols[tablename] = protocol;
-    } else {
-	protocol->increment_genid();
-    }
-
     // Check if table exists and check type if so
     OriginTable<A>* ot = NULL;
     ot = find_origin_table_smart<protocol_type>(tablename);
 
     if (ot != NULL) {
+	ot->protocol().increment_genid();
 	//
 	// Table already exists, hence use it.
 	//
@@ -1354,11 +1331,6 @@ RIB<A>::print_rib() const
 
     cout << "==============================================================" << endl;
 
-    cout << "Protocols: " << endl;
-    for_each(_protocols.begin(), _protocols.end(),
-	print_from_pair<Protocol >(","));
-    cout << endl;
-    cout << "**************************************************************" << endl;
 #endif // DEBUG_LOGGING
 }
 

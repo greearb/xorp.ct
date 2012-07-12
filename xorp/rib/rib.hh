@@ -712,7 +712,6 @@ private:
 protected:
     typedef map<string, OriginTable<A>* > OriginTableMap;
     typedef map<string, RedistTable<A>* > RedistTableMap;
-    typedef map<string, Protocol* > ProtocolMap;
 
     RibManager&		_rib_manager;
     EventLoop&		_eventloop;
@@ -737,7 +736,6 @@ protected:
     ExtIntTable<A>*		_ext_int_table;
 
 
-    ProtocolMap				_protocols;
     OriginTableMap			_routing_protocol_instances;
     map<string, RibVif<A>*>		_vifs;
     map<string, RibVif<A>*>		_deleted_vifs;

@@ -67,15 +67,15 @@ public:
      * @param protocol the routing protocol that originated this route.
      * @param metric the routing protocol metric for this route.
      */
-    RouteEntry(RibVif<A>* vif, Protocol* protocol,
+    RouteEntry(RibVif<A>* vif, const Protocol* protocol,
 		uint32_t metric, const PolicyTags& policytags,
 		const IPNet<A>& net, uint16_t admin_distance = UNKNOWN_ADMIN_DISTANCE);
 
-    RouteEntry(RibVif<A>* vif, Protocol* protocol,
+    RouteEntry(RibVif<A>* vif, const Protocol* protocol,
 		uint32_t metric, const IPNet<A>& net,
 		uint16_t admin_distance = UNKNOWN_ADMIN_DISTANCE);
 
-    RouteEntry(RibVif<A>* vif, Protocol* protocol,
+    RouteEntry(RibVif<A>* vif, const Protocol* protocol,
 		uint32_t metric, smart_ptr<PolicyTags>& policytags,
 		const IPNet<A>& net, uint16_t admin_distance = UNKNOWN_ADMIN_DISTANCE);
 
@@ -128,7 +128,7 @@ public:
      * @return the routing protocol that originated this route.
      * @see Protocol.
      */
-    Protocol* protocol() const { return _protocol; }
+    const Protocol* protocol() const { return _protocol; }
 
     /**
      * Display the route for debugging purposes.
@@ -168,7 +168,7 @@ public:
 protected:
     RibVif<A>* _vif;
 
-    Protocol* _protocol;		// The routing protocol that instantiated this route
+    const Protocol* _protocol;		// The routing protocol that instantiated this route
 
     uint16_t	_admin_distance;	// Lower is better
     uint32_t	_metric;		// Lower is better
@@ -198,7 +198,7 @@ public:
      * @param metric the routing protocol metric for this route.
      */
     IPRouteEntry(const IPNet<A>& net, RibVif<A>* vif, IPNextHop<A>* nexthop,
-		 Protocol* protocol, uint32_t metric)
+		 const Protocol* protocol, uint32_t metric)
 	: RouteEntry<A>(vif, protocol, metric, net), _nexthop(nexthop) { XLOG_ASSERT(nexthop); }
 
     /**
@@ -214,12 +214,12 @@ public:
      * @param policytags the policy-tags for this route.
      */
     IPRouteEntry(const IPNet<A>& net, RibVif<A>* vif, IPNextHop<A>* nexthop,
-		 Protocol* protocol, uint32_t metric,
+		 const Protocol* protocol, uint32_t metric,
 		 const PolicyTags& policytags)
 	: RouteEntry<A>(vif, protocol, metric, policytags, net), _nexthop(nexthop) { XLOG_ASSERT(nexthop); }
 
     IPRouteEntry(const IPNet<A>& net, RibVif<A>* vif,
-	smart_ptr<IPNextHop<A> >& nexthop, Protocol* protocol, uint32_t metric,
+	smart_ptr<IPNextHop<A> >& nexthop, const Protocol* protocol, uint32_t metric,
 	smart_ptr<PolicyTags>& policytags, uint16_t admin_distance)
 	: RouteEntry<A>(vif, protocol, metric, policytags, net, admin_distance), _nexthop(nexthop) { }
 

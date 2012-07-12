@@ -53,7 +53,7 @@ main(int /* argc */, char* argv[])
     RibVif<IPv4> vif2(NULL, tmp_vif2);
     IPPeerNextHop<IPv4> nh1(IPv4("1.0.0.1"));
     IPPeerNextHop<IPv4> nh2(IPv4("1.0.0.2"));
-    Protocol protocol("test", IGP, 0);
+    Protocol protocol("test", IGP);
     IPv4Net net1("10.0.1.0/24");
     IPv4Net net2("10.0.2.0/24");
 

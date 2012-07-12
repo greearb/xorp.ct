@@ -138,6 +138,8 @@ public:
      * @return the routing protocol type (@ref ProtocolType).
      */
     virtual int protocol_type() const = 0;
+    virtual const Protocol& protocol() const = 0;
+    virtual Protocol& protocol() = 0;
 
     /**
      * @return the table type (@ref TableType).
@@ -184,35 +186,39 @@ template <class A>
 class TypedOriginTable<A, IGP> : public OriginTable<A> {
 public:
     TypedOriginTable(const string& tablename, uint16_t admin_distance, EventLoop& eventloop) :
-	OriginTable<A>(tablename, admin_distance, eventloop), _protocol_type(IGP) {}
+	OriginTable<A>(tablename, admin_distance, eventloop), _protocol(tablename, IGP) {}
     ~TypedOriginTable() {}
 
     int generic_add_route(const IPRouteEntry<A>& route) { return this->next_table()->add_igp_route(route); }
     int generic_delete_route(const IPRouteEntry<A>* route) { return this->next_table()->delete_igp_route(route); }
 
-    int protocol_type() const { return _protocol_type;}
+    int protocol_type() const { return _protocol.protocol_type();}
+    const Protocol& protocol() const { return _protocol;}
+    Protocol& protocol() { return _protocol;}
 
 protected:
     void allocate_deletion_table(typename OriginTable<A>::RouteTrie* ip_route_trie);
 
-    ProtocolType 	_protocol_type;	// IGP or EGP
+    Protocol	_protocol;	// IGP or EGP
 };
 
 template <class A>
 class TypedOriginTable<A, EGP> : public OriginTable<A> {
 public:
     TypedOriginTable(const string& tablename, uint16_t admin_distance, EventLoop& eventloop) :
-	OriginTable<A>(tablename, admin_distance, eventloop), _protocol_type(EGP) {}
+	OriginTable<A>(tablename, admin_distance, eventloop), _protocol(tablename, EGP) {}
     ~TypedOriginTable() {}
 
     int generic_add_route(const IPRouteEntry<A>& route) { return this->next_table()->add_egp_route(route); }
     int generic_delete_route(const IPRouteEntry<A>* route) { return this->next_table()->delete_egp_route(route); }
 
-    int protocol_type() const { return _protocol_type;}
+    int protocol_type() const { return _protocol.protocol_type();}
+    const Protocol& protocol() const { return _protocol;}
+    Protocol& protocol() { return _protocol;}
 protected:
     void allocate_deletion_table(typename OriginTable<A>::RouteTrie* ip_route_trie);
 
-    ProtocolType 	_protocol_type;	// IGP or EGP
+    Protocol	_protocol;	// IGP or EGP
 };
 
 template <class A>

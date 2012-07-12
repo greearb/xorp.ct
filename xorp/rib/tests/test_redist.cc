@@ -276,7 +276,9 @@ test_deterministic()
     TypedOriginTable<IPv4, IGP> typed_origin("static", 1, e);
     OriginTable<IPv4>& origin = typed_origin;
     IPPeerNextHop<IPv4> nh("22.0.0.1");
-    Protocol		protocol("static", IGP, 1);
+    Protocol&	protocol = typed_origin.protocol();
+    protocol.increment_genid();
+
     Vif			tmp_vif("vif0");
     RibVif<IPv4>		vif(NULL, tmp_vif);
 

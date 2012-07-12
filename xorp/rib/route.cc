@@ -31,7 +31,7 @@
 #include "route.hh"
 
 template<class A>
-RouteEntry<A>::RouteEntry(RibVif<A>* vif, Protocol* protocol,
+RouteEntry<A>::RouteEntry(RibVif<A>* vif, const Protocol* protocol,
 		       uint32_t metric, const PolicyTags& policytags, const IPNet<A>& net, uint16_t admin_distance)
     : _vif(vif), _protocol(protocol),
       _admin_distance(admin_distance), _metric(metric),
@@ -42,8 +42,8 @@ RouteEntry<A>::RouteEntry(RibVif<A>* vif, Protocol* protocol,
 }
 
 template<class A>
-RouteEntry<A>::RouteEntry(RibVif<A>* vif, Protocol* protocol,
-		       uint32_t metric, const IPNet<A>& net, uint16_t admin_distance)
+RouteEntry<A>::RouteEntry(RibVif<A>* vif, const Protocol* protocol,
+			uint32_t metric, const IPNet<A>& net, uint16_t admin_distance)
     : _vif(vif), _protocol(protocol),
       _admin_distance(admin_distance), _metric(metric),
       _policytags(new PolicyTags()), _net(net)
@@ -53,12 +53,12 @@ RouteEntry<A>::RouteEntry(RibVif<A>* vif, Protocol* protocol,
 }
 
 template<class A>
-RouteEntry<A>::RouteEntry(RibVif<A>* vif, Protocol* protocol,
-		uint32_t metric, smart_ptr<PolicyTags>& policytags,
-		const IPNet<A>& net, uint16_t admin_distance)
-		: _vif(vif), _protocol(protocol),
-		  _admin_distance(admin_distance), _metric(metric),
-		  _policytags(policytags), _net(net)
+RouteEntry<A>::RouteEntry(RibVif<A>* vif, const Protocol* protocol,
+			uint32_t metric, smart_ptr<PolicyTags>& policytags,
+			const IPNet<A>& net, uint16_t admin_distance)
+    : _vif(vif), _protocol(protocol),
+      _admin_distance(admin_distance), _metric(metric),
+      _policytags(policytags), _net(net)
 {
     if (_vif != NULL)
 	_vif->incr_usage_counter();
