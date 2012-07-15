@@ -1,4 +1,3 @@
-/* $XORP: xorp/xrl/interfaces/static_routes.xif,v 1.4 2007/01/23 01:57:38 pavlin Exp $ */
 
 /*
  * Static Routes XRL interface.
@@ -46,6 +45,13 @@ interface static_routes/0.1 {
 
 	delete_route6	? unicast:bool & multicast:bool & network:ipv6net \
 			& nexthop:ipv6;
+
+	/**
+	 * Add/replace/delete multicast routes
+	 */
+	add_mcast_route4 ? mcast_addr:ipv4 & input_if:txt & input_ip:ipv4 & output_ifs:txt & distance:u32;
+	replace_mcast_route4 ? mcast_addr:ipv4 & input_if:txt & input_ip:ipv4 & output_ifs:txt & distance:u32;
+	delete_mcast_route4 ? mcast_addr:ipv4 & input_ip:ipv4;
 
 	/**
 	 * Add/replace/delete a backup static route.

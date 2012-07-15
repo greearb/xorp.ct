@@ -18,7 +18,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/static_routes/xrl_static_routes_node.hh,v 1.26 2008/10/02 21:58:29 bms Exp $
 
 #ifndef __STATIC_ROUTES_XRL_STATIC_ROUTES_NODE_HH__
 #define __STATIC_ROUTES_XRL_STATIC_ROUTES_NODE_HH__
@@ -29,11 +28,10 @@
 //
 
 #include "libxipc/xrl_std_router.hh"
-
 #include "libfeaclient/ifmgr_xrl_mirror.hh"
-
 #include "xrl/interfaces/finder_event_notifier_xif.hh"
 #include "xrl/interfaces/rib_xif.hh"
+#include "xrl/interfaces/mfea_xif.hh"
 #include "xrl/targets/static_routes_base.hh"
 
 #include "static_routes_node.hh"
@@ -52,8 +50,9 @@ public:
 			uint16_t	finder_port,
 			const string&	finder_target,
 			const string&	fea_target,
-			const string&	rib_target);
-    ~XrlStaticRoutesNode();
+			const string&	rib_target,
+			const string&	mfea_target);
+    virtual ~XrlStaticRoutesNode();
 
     /**
      * Startup the node operation.
@@ -208,6 +207,37 @@ protected:
 	const bool&	multicast,
 	const IPv6Net&	network,
 	const IPv6&	nexthop);
+
+    /**
+     * Add/replace/delete multicast routes (not MRIB)
+     *
+     * @param mcast_addr  Multicast-address to be routed.
+     *
+     * @param input_if  Input interface name.
+     *
+     * @param input_ip  Input interface IP address.
+     *
+     * @param output_ifs Output interface name(s).  Space-separated list.
+     */
+    XrlCmdError static_routes_0_1_add_mcast_route4(
+        // Input values,
+        const IPv4&     mcast_addr,
+        const string&   input_if,
+        const IPv4&     input_ip,
+        const string&   output_ifs,
+	const uint32_t& distance);
+
+    XrlCmdError static_routes_0_1_replace_mcast_route4(
+        // Input values,
+        const IPv4&     mcast_addr,
+        const string&   input_if,
+        const IPv4&     input_ip,
+        const string&   output_ifs,
+	const uint32_t& distance);
+    XrlCmdError static_routes_0_1_delete_mcast_route4(
+        // Input values,
+        const IPv4&     mcast_addr,
+        const IPv4&     input_ip);
 
     /**
      *  Add/replace/delete a backup static route.
@@ -442,6 +472,73 @@ protected:
 	// Input values,
 	const bool&	enable);
 
+    XrlCmdError mfea_client_0_1_recv_kernel_signal_message4(
+	// Input values,
+	const string&,
+	const uint32_t&,
+	const string&,
+	const uint32_t&,
+	const IPv4&,
+	const IPv4&,
+	const vector<uint8_t>&) {
+	return XrlCmdError::OKAY();
+    }
+
+    XrlCmdError mfea_client_0_1_recv_dataflow_signal4(
+	// Input values,
+	const string&,
+	const IPv4&,
+	const IPv4&,
+	const uint32_t&,
+	const uint32_t&,
+	const uint32_t&,
+	const uint32_t&,
+	const uint32_t&,
+	const uint32_t&,
+	const uint32_t&,
+	const uint32_t&,
+	const bool&,
+	const bool&,
+	const bool&,
+	const bool&) {
+	return XrlCmdError::OKAY();
+    }
+
+
+#ifdef HAVE_IPV6
+    XrlCmdError mfea_client_0_1_recv_kernel_signal_message6(
+	// Input values,
+	const string&,
+	const uint32_t&,
+	const string&,
+	const uint32_t&,
+	const IPv6&,
+	const IPv6&,
+	const vector<uint8_t>&) {
+	return XrlCmdError::OKAY();
+    }
+
+    XrlCmdError mfea_client_0_1_recv_dataflow_signal6(
+	// Input values,
+	const string&,
+	const IPv6&,
+	const IPv6&,
+	const uint32_t&,
+	const uint32_t&,
+	const uint32_t&,
+	const uint32_t&,
+	const uint32_t&,
+	const uint32_t&,
+	const uint32_t&,
+	const uint32_t&,
+	const bool&,
+	const bool&,
+	const bool&,
+	const bool&) {
+	return XrlCmdError::OKAY();
+    }
+#endif
+
     /**
      * Configure a policy filter.
      *
@@ -493,6 +590,11 @@ private:
     void fea_register_shutdown();
     void finder_deregister_interest_fea_cb(const XrlError& xrl_error);
 
+    void mfea_register_startup();
+    void finder_register_interest_mfea_cb(const XrlError& xrl_error);
+    void mfea_register_shutdown();
+    void finder_deregister_interest_mfea_cb(const XrlError& xrl_error);
+
     void rib_register_startup();
     void finder_register_interest_rib_cb(const XrlError& xrl_error);
     void rib_register_shutdown();
@@ -515,6 +617,7 @@ private:
      */
     void inform_rib_route_change(const StaticRoute& static_route);
 
+
     /**
      * Cancel a pending request to inform the RIB about a route change.
      *
@@ -522,18 +625,28 @@ private:
      */
     void cancel_rib_route_change(const StaticRoute& static_route);
 
+    void inform_mfea_mfc_change(const McastRoute& static_route);
+    void cancel_mfea_mfc_change(const McastRoute& static_route);
+
     void send_rib_route_change();
     void send_rib_route_change_cb(const XrlError& xrl_error);
 
+    void send_mfea_mfc_change();
+    void send_mfea_mfc_change_cb(const XrlError& xrl_error);
+
     EventLoop&		_eventloop;
     XrlRibV0p1Client	_xrl_rib_client;
+    XrlMfeaV0p1Client	_xrl_mfea_client;
     const string	_finder_target;
     const string	_fea_target;
     const string	_rib_target;
+    const string	_mfea_target;
 
     IfMgrXrlMirror	_ifmgr;
     list<StaticRoute>	_inform_rib_queue;
     XorpTimer		_inform_rib_queue_timer;
+    list<McastRoute>	_inform_mfea_queue;
+    XorpTimer		_inform_mfea_queue_timer;
     XrlFinderEventNotifierV0p1Client	_xrl_finder_client;
 
     static const TimeVal RETRY_TIMEVAL;
@@ -552,6 +665,14 @@ private:
     bool		_is_rib_registering;
     bool		_is_rib_deregistering;
     bool		_is_rib_igp_table4_registered;
+
+    bool		_is_mfea_alive;
+    bool		_is_mfea_registered;
+    bool		_is_mfea_registering;
+    bool		_is_mfea_deregistering;
+    XorpTimer		_mfea_register_startup_timer;
+    XorpTimer		_mfea_register_shutdown_timer;
+
 #ifdef HAVE_IPV6
     bool		_is_rib_igp_table6_registered;
 #endif

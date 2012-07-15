@@ -18,13 +18,11 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/rib/xrl_target.hh,v 1.38 2008/10/02 21:58:14 bms Exp $
 
 #ifndef __RIB_XRL_TARGET_HH__
 #define __RIB_XRL_TARGET_HH__
 
 #include "libxipc/xrl_router.hh"
-
 #include "xrl/targets/rib_base.hh"
 
 #include "rib.hh"
@@ -207,6 +205,43 @@ protected:
 	const string&	target_instance,
 	const bool&	unicast,
 	const bool&	multicast);
+
+
+    XrlCmdError rib_0_1_add_mcast_table4(
+	// Input values,
+	const string&	protocol,
+	const string&	target_class,
+	const string&	target_instance);
+
+    XrlCmdError rib_0_1_delete_mcast_table4(
+	// Input values,
+	const string&	protocol,
+	const string&	target_class,
+	const string&	target_instance);
+
+    XrlCmdError rib_0_1_add_mcast_route4(
+	// Input values,
+	const string&	protocol,
+	const IPv4&	mcast_addr,
+	const string&   input_if,
+	const IPv4&     input_ip,
+	const string&   output_ifs);
+
+    XrlCmdError rib_0_1_replace_mcast_route4(
+	// Input values,
+	const string&	protocol,
+	const IPv4&	mcast_addr,
+	const string&   input_if,
+	const IPv4&     input_ip,
+	const string&   output_ifs);
+
+    XrlCmdError rib_0_1_delete_mcast_route4(
+	// Input values,
+	const string&	protocol,
+	const IPv4&	mcast_addr,
+	const string&   input_if,
+	const IPv4&     input_ip,
+	const string&   output_ifs);
 
     /**
      *  Add/replace/delete a route.

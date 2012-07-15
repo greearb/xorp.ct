@@ -1,11 +1,12 @@
-/* $XORP: xorp/xrl/targets/static_routes.tgt,v 1.4 2007/05/31 19:02:28 pavlin Exp $ */
 
 #include "common.xif"
 #include "finder_event_observer.xif"
 #include "policy_backend.xif"
 #include "static_routes.xif"
+#include "mfea_client.xif"
 
 target static_routes implements	common/0.1,				\
 				finder_event_observer/0.1,		\
 				policy_backend/0.1,			\
+				mfea_client/0.1,			\
 				static_routes/0.1;

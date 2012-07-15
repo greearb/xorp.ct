@@ -17,9 +17,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/fea/xrl_fea_node.hh,v 1.15 2008/10/02 21:56:50 bms Exp $
-
-
 #ifndef __FEA_XRL_FEA_NODE_HH__
 #define __FEA_XRL_FEA_NODE_HH__
 
@@ -29,9 +26,7 @@
 //
 
 #include "libxorp/xorp.h"
-
 #include "libxipc/xrl_std_router.hh"
-
 #include "cli/xrl_cli_node.hh"
 
 #include "fea_node.hh"

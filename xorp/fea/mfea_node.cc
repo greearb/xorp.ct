@@ -42,6 +42,29 @@
 #include "mfea_vif.hh"
 
 
+MfeaRouteStorage::MfeaRouteStorage(uint32_t d, const string module_name, const IPvX& _source,
+				   const IPvX& _group, const string& _iif_name, const string& _oif_names) :
+	distance(d), is_binary(false), module_instance_name(module_name), source(_source),
+	group(_group), iif_name(_iif_name), oif_names(_oif_names) { }
+
+MfeaRouteStorage::MfeaRouteStorage(uint32_t d, const string module_name, const IPvX& _source,
+				   const IPvX& _group, uint32_t iif_vif_idx,
+				   const Mifset& _oiflist, const Mifset& _oif_disable_wrongvif,
+				   uint32_t max_vifs, const IPvX& _rp_addr) :
+	distance(d), is_binary(true), module_instance_name(module_name), source(_source),
+	group(_group), iif_vif_index(iif_vif_idx), oiflist(_oiflist),
+	oiflist_disable_wrongvif(_oif_disable_wrongvif), max_vifs_oiflist(max_vifs),
+	rp_addr(_rp_addr) { }
+
+MfeaRouteStorage::MfeaRouteStorage(const MfeaRouteStorage& o) :
+	distance(o.distance), is_binary(true), module_instance_name(o.module_instance_name),
+	source(o.source), group(o.group), iif_name(o.iif_name),
+	oif_names(o.oif_names), iif_vif_index(o.iif_vif_index),
+	oiflist(o.oiflist), oiflist_disable_wrongvif(o.oiflist_disable_wrongvif),
+	max_vifs_oiflist(o.max_vifs_oiflist), rp_addr(o.rp_addr) { }
+
+MfeaRouteStorage::MfeaRouteStorage() : distance(0), is_binary(false), max_vifs_oiflist(0) { }
+
 /**
  * MfeaNode::MfeaNode:
  * @fea_node: The corresponding FeaNode.
@@ -1816,10 +1839,106 @@ MfeaNode::signal_dataflow_message_recv(const IPvX& source, const IPvX& group,
     return (XORP_OK);
 }
 
+int MfeaNode::add_mfc_str(const string& module_instance_name,
+			  const IPvX& source,
+			  const IPvX& group,
+			  const string& iif_name,
+			  const string& oif_names,
+			  uint32_t distance,
+			  string& error_msg, bool check_stored_routes) {
+    int rv;
+    uint32_t iif_vif_index;
+
+    XLOG_INFO("MFEA add_mfc_str, module: %s  source: %s  group: %s check-stored-routes: %i distance: %u",
+	      module_instance_name.c_str(), source.str().c_str(),
+	      group.str().c_str(), (int)(check_stored_routes), distance);
+
+    if (distance >= MAX_MFEA_DISTANCE) {
+	error_msg += c_format("distance is above maximimum: %u >= %u\n",
+			      distance, MAX_MFEA_DISTANCE);
+	return XORP_ERROR;
+    }
+
+    if (check_stored_routes) {
+	MfeaRouteStorage mrs(distance, module_instance_name, source,
+			     group, iif_name, oif_names);
+	routes[mrs.distance][mrs.getHash()] = mrs;
+
+	// If any lower distance routes are already in place, do nothing and
+	// return.
+	if (mrs.distance > 0) {
+	    for (unsigned int i = mrs.distance - 1; i > 0; i--) {
+		map<string, MfeaRouteStorage>::const_iterator iter = routes[i].find(mrs.getHash());
+		if (iter != routes[i].end()) {
+		    XLOG_INFO("Lower-distance mfea route exists, distance: %i source: %s  group: %s",
+			      i, source.str().c_str(), group.str().c_str());
+		    return XORP_OK;
+		}
+	    }
+	}
+
+	// If any higher distance routes are already in place, remove them from kernel.
+	for (unsigned int i = mrs.distance + 1; i<MAX_MFEA_DISTANCE; i++) {
+	    map<string, MfeaRouteStorage>::const_iterator iter = routes[i].find(mrs.getHash());
+	    if (iter != routes[i].end()) {
+		XLOG_INFO("Removing higher-distance mfea route, distance: %i source: %s  group: %s",
+			  i, source.str().c_str(), group.str().c_str());
+		delete_mfc(iter->second.module_instance_name, iter->second.source,
+			   iter->second.group, error_msg, false);
+		break;
+	    }
+	}
+    }
+
+    // Convert strings to mfc binary stuff and pass to
+    // add_mfc()
+    MfeaVif *mfea_vif = vif_find_by_name(iif_name);
+    if (!mfea_vif) {
+	error_msg = "Could not find iif-interface: " + iif_name;
+	return XORP_ERROR;
+    }
+    iif_vif_index = mfea_vif->vif_index();
+
+    Mifset oiflist;
+    Mifset oiflist_disable_wrongvif;
+    istringstream iss(oif_names);
+    string t;
+    while (!(iss.eof() || iss.fail())) {
+	iss >> t;
+	if (t.size() == 0)
+	    break;
+	mfea_vif = vif_find_by_name(t);
+	if (!mfea_vif) {
+	    error_msg = "Could not find oif-interface: " + t;
+	    return XORP_ERROR;
+	}
+	uint32_t vi = mfea_vif->vif_index();
+	if (vi < MAX_VIFS) {
+	    oiflist.set(vi);
+	}
+	else {
+	    error_msg = c_format("Vif %s has invalid vif_index: %u",
+				 mfea_vif->ifname().c_str(), vi);
+	    return XORP_ERROR;
+	}
+    }
+
+    IPvX rp_addr;
+
+    rv = add_mfc(module_instance_name, source, group,
+		 iif_vif_index, oiflist,
+		 oiflist_disable_wrongvif,
+		 MAX_VIFS, rp_addr, distance, error_msg, false);
+    if (rv != XORP_OK) {
+	error_msg = "call to add_mfc failed";
+    }
+    return rv;
+}
+
 /**
  * MfeaNode::add_mfc:
  * @module_instance_name: The module instance name of the protocol that adds
- * the MFC.
+ *       the MFC.
  * @source: The source address.
  * @group: The group address.
  * @iif_vif_index: The vif index of the incoming interface.
@@ -1827,7 +1946,7 @@ MfeaNode::signal_dataflow_message_recv(const IPvX& source, const IPvX& group,
  * @oiflist_disable_wrongvif: The bitset with the outgoing interfaces to
  * disable the WRONGVIF signal.
  * @max_vifs_oiflist: The number of vifs covered by @oiflist
- * or @oiflist_disable_wrongvif.
+ *        or @oiflist_disable_wrongvif.
  * @rp_addr: The RP address.
  * 
  * Add Multicast Forwarding Cache (MFC) to the kernel.
@@ -1835,24 +1954,78 @@ MfeaNode::signal_dataflow_message_recv(const IPvX& source, const IPvX& group,
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-MfeaNode::add_mfc(const string& , // module_instance_name,
+MfeaNode::add_mfc(const string& module_instance_name,
 		  const IPvX& source, const IPvX& group,
 		  uint32_t iif_vif_index, const Mifset& oiflist,
 		  const Mifset& oiflist_disable_wrongvif,
 		  uint32_t max_vifs_oiflist,
-		  const IPvX& rp_addr)
+		  const IPvX& rp_addr, uint32_t distance,
+		  string& error_msg,
+		  bool check_stored_routes)
 {
     uint8_t oifs_ttl[MAX_VIFS];
     uint8_t oifs_flags[MAX_VIFS];
-    
-    if (max_vifs_oiflist > MAX_VIFS)
-	return (XORP_ERROR);
+
+    XLOG_INFO("MFEA add_mfc, module: %s  source: %s  group: %s check-stored-routes: %i distance: %u",
+	      module_instance_name.c_str(), source.str().c_str(),
+	      group.str().c_str(), (int)(check_stored_routes), distance);
+
+    if (distance >= MAX_MFEA_DISTANCE) {
+	error_msg += c_format("distance is above maximimum: %u >= %u\n",
+			      distance, MAX_MFEA_DISTANCE);
+	return XORP_ERROR;
+    }
+
+    if (max_vifs_oiflist > MAX_VIFS) {
+	error_msg += c_format("max-vifs-oiflist: %u > MAX_VIFS: %u\n",
+			      max_vifs_oiflist, MAX_VIFS);
+	return XORP_ERROR;
+    }
     
     // Check the iif
-    if (iif_vif_index == Vif::VIF_INDEX_INVALID)
-	return (XORP_ERROR);
-    if (iif_vif_index >= max_vifs_oiflist)
-	return (XORP_ERROR);
+    if (iif_vif_index == Vif::VIF_INDEX_INVALID) {
+	error_msg += "iif_vif_index is VIF_INDEX_INVALID\n";
+	return XORP_ERROR;
+    }
+
+    if (iif_vif_index >= max_vifs_oiflist) {
+	error_msg += c_format("iif_vif_index: %u >= max-vifs-oiflist: %u\n",
+			      iif_vif_index, max_vifs_oiflist);
+	return XORP_ERROR;
+    }
+
+    if (check_stored_routes) {
+	MfeaRouteStorage mrs(distance, module_instance_name, source,
+			     group, iif_vif_index, oiflist,
+			     oiflist_disable_wrongvif, max_vifs_oiflist,
+			     rp_addr);
+	routes[mrs.distance][mrs.getHash()] = mrs;
+
+	// If any lower distance routes are already in place, do nothing and
+	// return.
+	if (mrs.distance > 0) {
+	    for (unsigned int i = mrs.distance - 1; i > 0; i--) {
+		map<string, MfeaRouteStorage>::const_iterator iter = routes[i].find(mrs.getHash());
+		if (iter != routes[i].end()) {
+		    XLOG_INFO("Lower-distance mfea route exists, distance: %i source: %s  group: %s",
+			      i, source.str().c_str(), group.str().c_str());
+		    return XORP_OK;
+		}
+	    }
+	}
+
+	// If any higher distance routes are already in place, remove them from kernel.
+	for (unsigned int i = mrs.distance + 1; i<MAX_MFEA_DISTANCE; i++) {
+	    map<string, MfeaRouteStorage>::const_iterator iter = routes[i].find(mrs.getHash());
+	    if (iter != routes[i].end()) {
+		XLOG_INFO("Removing higher-distance mfea route, distance: %i source: %s  group: %s",
+			  i, source.str().c_str(), group.str().c_str());
+		delete_mfc(iter->second.module_instance_name, iter->second.source,
+			   iter->second.group, error_msg, false);
+		break;
+	    }
+	}
+    }
     
     //
     // Reset the initial values
@@ -1889,9 +2062,10 @@ MfeaNode::add_mfc(const string& , // module_instance_name,
 	    case AF_INET6:
 	    {
 #ifndef HAVE_IPV6_MULTICAST_ROUTING
-		XLOG_ERROR("add_mfc() failed: "
-			   "IPv6 multicast routing not supported");
-		return (XORP_ERROR);
+		string em = "add_mfc() failed: IPv6 multicast routing not supported\n";
+		error_msg += em;
+		XLOG_ERROR(em);
+		return XORP_ERROR;
 #else
 #if defined(MRT6_MFC_FLAGS_DISABLE_WRONGVIF) && defined(ENABLE_ADVANCED_MULTICAST_API)
 		oifs_flags[i] |= MRT6_MFC_FLAGS_DISABLE_WRONGVIF;
@@ -1911,10 +2085,11 @@ MfeaNode::add_mfc(const string& , // module_instance_name,
     if (_mfea_mrouter.add_mfc(source, group, iif_vif_index, oifs_ttl,
 			      oifs_flags, rp_addr)
 	!= XORP_OK) {
-	return (XORP_ERROR);
+	error_msg += "mfea_mrouter add_mfc failed.\n";
+	return XORP_ERROR;
     }
     
-    return (XORP_OK);
+    return XORP_OK;
 }
 
 /**
@@ -1930,19 +2105,74 @@ MfeaNode::add_mfc(const string& , // module_instance_name,
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-MfeaNode::delete_mfc(const string& , // module_instance_name,
-		     const IPvX& source, const IPvX& group)
+MfeaNode::delete_mfc(const string& module_instance_name,
+		     const IPvX& source, const IPvX& group,
+		     string& error_msg, bool check_stored_routes)
 {
-    if (_mfea_mrouter.delete_mfc(source, group) != XORP_OK) {
-	return (XORP_ERROR);
+    bool do_rem_route = true;
+    int rv;
+    string hash = source.str() + ":" + group.str();
+
+    XLOG_INFO("delete-mfc, module: %s  source: %s  group: %s  check-stored-routes: %i\n",
+	      module_instance_name.c_str(), source.str().c_str(),
+	      group.str().c_str(), (int)(check_stored_routes));
+
+    if (check_stored_routes) {
+	// find existing route by instance-name.
+	for (unsigned int i = 0; i<MAX_MFEA_DISTANCE; i++) {
+	    map<string, MfeaRouteStorage>::iterator iter = routes[i].find(hash);
+	    if (iter != routes[i].end()) {
+		// Found something to delete..see if it belongs to us?
+		if (iter->second.module_instance_name == module_instance_name) {
+		    // Yep, that's us.
+		    routes[i].erase(hash);
+		    goto check_remove_route;
+		}
+		else {
+		    // was some other protocol's route.  Don't mess with this,
+		    // and don't remove anything from the kernel.
+		    do_rem_route = false;
+		}
+	    }
+	}
     }
+
+  check_remove_route:
+
+    if (! do_rem_route) {
+	return XORP_OK;
+    }
+
+    rv = _mfea_mrouter.delete_mfc(source, group);
     
-    //
-    // XXX: Remove all corresponding dataflow entries
-    //
+    // Remove all corresponding dataflow entries
     mfea_dft().delete_entry(source, group);
-    
-    return (XORP_OK);
+
+    if (check_stored_routes) {
+	// Now, see if we have any higher-distance routes to add.
+	for (unsigned int i = 0; i<MAX_MFEA_DISTANCE; i++) {
+	    map<string, MfeaRouteStorage>::iterator iter = routes[i].find(hash);
+	    if (iter != routes[i].end()) {
+		if (iter->second.isBinary()) {
+		    rv = add_mfc(iter->second.module_instance_name,
+				 iter->second.source, iter->second.group,
+				 iter->second.iif_vif_index,
+				 iter->second.oiflist, iter->second.oiflist_disable_wrongvif,
+				 iter->second.max_vifs_oiflist, iter->second.rp_addr,
+				 iter->second.distance, error_msg, false);
+		}
+		else {
+		    rv = add_mfc_str(iter->second.module_instance_name,
+				     iter->second.source, iter->second.group,
+				     iter->second.iif_name, iter->second.oif_names,
+				     iter->second.distance, error_msg, false);
+		}
+		break;
+	    }
+	}
+    }
+
+    return rv;
 }
 
 /**

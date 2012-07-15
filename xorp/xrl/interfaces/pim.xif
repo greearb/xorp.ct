@@ -1,5 +1,3 @@
-/* $XORP: xorp/xrl/interfaces/pim.xif,v 1.24 2007/07/12 21:35:29 pavlin Exp $ */
-
 /*
  * Protocol Independent Multicast XRL interface.
  */

@@ -269,7 +269,8 @@ protected:
 	const vector<uint8_t>&	oiflist, 
 	const vector<uint8_t>&	oiflist_disable_wrongvif, 
 	const uint32_t&	max_vifs_oiflist, 
-	const IPv6&	rp_address);
+	const IPv6&	rp_address,
+	const uint32_t& distance);
 
     XrlCmdError mfea_0_1_delete_mfc6(
 	// Input values, 
@@ -359,13 +360,23 @@ protected:
 	const IPv4&	source_address, 
 	const IPv4&	group_address, 
 	const uint32_t&	iif_vif_index, 
-	const vector<uint8_t>&	oiflist, 
-	const vector<uint8_t>&	oiflist_disable_wrongvif, 
-	const uint32_t&	max_vifs_oiflist, 
-	const IPv4&	rp_address);
+	const vector<uint8_t>&	oiflist,
+	const vector<uint8_t>&	oiflist_disable_wrongvif,
+	const uint32_t&	max_vifs_oiflist,
+	const IPv4&	rp_address,
+	const uint32_t& distance);
+
+    XrlCmdError mfea_0_1_add_mfc4_str(
+	// Input values,
+	const string&	xrl_sender_name,
+	const IPv4&	source_address,
+	const IPv4&	group_address,
+	const string&   iif_ifname,
+	const string&   oif_ifnames,
+	const uint32_t& distance);
 
     XrlCmdError mfea_0_1_delete_mfc4(
-	// Input values, 
+	// Input values,
 	const string&	xrl_sender_name, 
 	const IPv4&	source_address, 
 	const IPv4&	group_address);
