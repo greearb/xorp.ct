@@ -2064,7 +2064,7 @@ MfeaNode::add_mfc(const string& module_instance_name,
 #ifndef HAVE_IPV6_MULTICAST_ROUTING
 		string em = "add_mfc() failed: IPv6 multicast routing not supported\n";
 		error_msg += em;
-		XLOG_ERROR(em);
+		XLOG_ERROR(em.c_str());
 		return XORP_ERROR;
 #else
 #if defined(MRT6_MFC_FLAGS_DISABLE_WRONGVIF) && defined(ENABLE_ADVANCED_MULTICAST_API)
