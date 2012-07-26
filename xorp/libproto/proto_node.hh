@@ -510,7 +510,7 @@ public:
      * @return the virtual interface with name @ref name if found,
      * otherwise NULL.
      */
-    const Vif *configured_vif_find_by_name(const string& name) const;
+    Vif *configured_vif_find_by_name(const string& name);
 
     /**
      * Get the node status (see @ref ProcessStatus).
@@ -1240,16 +1240,16 @@ ProtoNode<V>::set_config_vif_flags(const string& vif_name,
 }
 
 template<class V>
-inline const Vif *
-ProtoNode<V>::configured_vif_find_by_name(const string& name) const
+inline Vif *
+ProtoNode<V>::configured_vif_find_by_name(const string& name)
 {
-    map<string, Vif>::const_iterator iter;
+    map<string, Vif>::iterator iter;
 
     iter = _configured_vifs.find(name);
     if (iter != _configured_vifs.end())
 	return (&iter->second);
 
-    return (NULL);
+    return NULL;
 }
 
 //
