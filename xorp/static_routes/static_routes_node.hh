@@ -104,6 +104,7 @@ public:
      */
     void set_ignored(bool v) { _is_ignored = v; }
 
+    virtual string str() const;
 };
 
 /**
@@ -391,15 +392,7 @@ public:
     McastRoute(const IPvX& addr, const IPvX& input_ip) :
 	    _mcast_addr(addr), _input_ip(input_ip) { }
 
-    bool operator==(const McastRoute& other) const {
-	if (this == &other)
-	    return true;
-	return (_mcast_addr == other._mcast_addr &&
-		_ifname == other._ifname &&
-		_input_ip == other._input_ip &&
-		_output_ifs == other._output_ifs &&
-		_distance == other._distance);
-    }
+    bool operator==(const McastRoute& other) const;
 
     const IPvX& mcast_addr() const { return _mcast_addr; }
     const string& ifname() const { return _ifname; }
@@ -407,6 +400,8 @@ public:
     const IPvX& input_ip() const { return _input_ip; }
     const string& output_ifs() const { return _output_ifs; }
     const uint32_t& distance() const { return _distance; }
+
+    string str() const;
 };
 
 /**
@@ -868,9 +863,9 @@ private:
      */
     virtual void cancel_rib_route_change(const StaticRoute& static_route) = 0;
 
-    virtual void inform_mfea_mfc_change(const McastRoute& static_route) = 0;
+    virtual void inform_mfea_mfc_change(const McastRoute& static_route, const char* dbg) = 0;
     virtual void cancel_mfea_mfc_change(const McastRoute& static_route) = 0;
-    void inform_mfea(const McastRoute& route);
+    void inform_mfea(const McastRoute& route, const char* dbg);
 
     /**
      * Update a route received from the user configuration.

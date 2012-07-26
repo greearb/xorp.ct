@@ -625,7 +625,7 @@ private:
      */
     void cancel_rib_route_change(const StaticRoute& static_route);
 
-    void inform_mfea_mfc_change(const McastRoute& static_route);
+    void inform_mfea_mfc_change(const McastRoute& static_route, const char* dbg);
     void cancel_mfea_mfc_change(const McastRoute& static_route);
 
     void send_rib_route_change();

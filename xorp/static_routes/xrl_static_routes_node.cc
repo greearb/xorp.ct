@@ -2025,13 +2025,31 @@ XrlStaticRoutesNode::inform_rib_route_change(const StaticRoute& static_route)
 }
 
 void
-XrlStaticRoutesNode::inform_mfea_mfc_change(const McastRoute& static_route)
+XrlStaticRoutesNode::inform_mfea_mfc_change(const McastRoute& static_route,
+					    const char* dbg)
 {
     // Add the request to the queue
+    // If one already exists, delete it and add the new one.
+    UNUSED(dbg);
+
+    list<McastRoute>::iterator iter;
+    bool was_empty = _inform_mfea_queue.empty();
+
+    for (iter = _inform_mfea_queue.begin();
+	 iter != _inform_mfea_queue.end(); ) {
+	McastRoute& tmp_static_route = *iter;
+	if (tmp_static_route == static_route)
+	    iter = _inform_mfea_queue.erase(iter);
+	else
+	    iter++;
+    }
+
+    //XLOG_INFO("mfea-queue, push-back, dbg: %s  route: %s\n",
+    //      dbg, static_route.str().c_str());
     _inform_mfea_queue.push_back(static_route);
 
     // If the queue was empty before, start sending the routes
-    if (_inform_mfea_queue.size() == 1) {
+    if (was_empty) {
 	send_mfea_mfc_change();
     }
 }

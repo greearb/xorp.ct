@@ -529,11 +529,11 @@ StaticRoutesNode::updates_made()
     //
     for (mpending_iter = add_mroutes.begin();
 	 mpending_iter != add_mroutes.end();
-	 ++pending_iter) {
+	 ++mpending_iter) {
 	McastRoute& orig_route = *(*mpending_iter);
 	McastRoute copy_route = orig_route;
 	copy_route.set_add_route();
-	inform_mfea(copy_route);
+	inform_mfea(copy_route, "updates-made, add-mroute requests");
     }
 
     //
@@ -545,7 +545,7 @@ StaticRoutesNode::updates_made()
 	McastRoute& orig_route = *(*mpending_iter);
 	McastRoute copy_route = orig_route;
 	copy_route.set_replace_route();
-	inform_mfea(copy_route);
+	inform_mfea(copy_route, "updates-made, replace-mroute requests");
     }
 
     //
@@ -558,7 +558,7 @@ StaticRoutesNode::updates_made()
 	cancel_mfea_mfc_change(orig_route);
 	McastRoute copy_route = orig_route;
 	copy_route.set_delete_route();
-	inform_mfea(copy_route);
+	inform_mfea(copy_route, "updates-made, delete-mroute requests");
     }
 }
 
@@ -795,7 +795,7 @@ int StaticRoutesNode::add_mcast_route4(const IPv4& mcast_addr, const string& inp
 	_mcast_routes[mcast_addr] = mr;
 	McastRoute copy_route = mr;
 	copy_route.set_add_route();
-	inform_mfea(copy_route);
+	inform_mfea(copy_route, "add-mcast-route4");
     }
     else {
 	error_msg.append("Mcast-Route: " + mcast_addr.str() + " already exists!\n");
@@ -822,7 +822,7 @@ int StaticRoutesNode::replace_mcast_route4(const IPv4& mcast_addr, const string&
 
     McastRoute copy_route = mr;
     copy_route.set_replace_route();
-    inform_mfea(copy_route);
+    inform_mfea(copy_route, "replace-mcast-route4");
 
     return XORP_OK;
 }
@@ -838,7 +838,7 @@ int StaticRoutesNode::delete_mcast_route4(const IPv4& mcast_addr, const IPv4& in
 
 	McastRoute mr(mcast_addr, input_ip);
 	mr.set_delete_route();
-	inform_mfea(mr);
+	inform_mfea(mr, "delete-mcase-route4");
     }
 
     return XORP_OK;
@@ -1473,12 +1473,12 @@ StaticRoutesNode::inform_rib(const StaticRoute& route)
 
 
 void
-StaticRoutesNode::inform_mfea(const McastRoute& route)
+StaticRoutesNode::inform_mfea(const McastRoute& route, const char* dbg)
 {
     if (! is_enabled())
 	return;
 
-    inform_mfea_mfc_change(route);
+    inform_mfea_mfc_change(route, dbg);
 }
 
 /**
@@ -1535,4 +1535,38 @@ StaticRoutesNode::do_filtering(StaticRoute& route)
 	// FIXME: What do we do ?
 	XLOG_UNFINISHED();
     }
+}
+
+string StaticRouteBase::str() const {
+    ostringstream oss;
+    oss << "RouteType: ";
+    switch (_route_type) {
+    case IDLE_ROUTE: oss << "IDLE "; break;
+    case ADD_ROUTE: oss << "ADD "; break;
+    case REPLACE_ROUTE: oss << "REPLACE "; break;
+    case DELETE_ROUTE: oss << "DELETE "; break;
+    default: oss << "UNKNOWN(" << _route_type << ") "; break;
+    }
+    oss << " ignored: " << _is_ignored;
+    return oss.str();
+}
+
+string McastRoute::str() const {
+    ostringstream oss;
+    oss << StaticRouteBase::str() << endl;
+    oss << "mcast-addr: " << _mcast_addr.str() << " ifname: " << _ifname
+	<< " input-ip: " << _input_ip.str() << " output-ifs: " << _output_ifs
+	<< " distance: " << _distance;
+    return oss.str();
+}
+
+bool McastRoute::operator==(const McastRoute& other) const {
+    if (this == &other)
+	return true;
+    return (_route_type == other._route_type && // from base class
+	    _mcast_addr == other._mcast_addr &&
+	    _ifname == other._ifname &&
+	    _input_ip == other._input_ip &&
+	    _output_ifs == other._output_ifs &&
+	    _distance == other._distance);
 }
