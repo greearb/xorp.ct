@@ -461,13 +461,16 @@ MfeaNode::vif_update(const string&	ifname,
 {
     IfTreeInterface* mfea_ifp;
     IfTreeVif* mfea_vifp = NULL;
-    const Vif* node_vif = NULL;
+    Vif* node_vif = NULL;
     bool is_up;
     uint32_t vif_index = Vif::VIF_INDEX_INVALID;
     string error_msg;
 
     switch (update) {
     case CREATED:
+	//XLOG_INFO("MfeaNode: vif_updated:  Created: %s/%s\n",
+	//	  ifname.c_str(), vifname.c_str());
+
 	// Update the MFEA iftree
 	mfea_ifp = _mfea_iftree.find_interface(ifname);
 	if (mfea_ifp == NULL) {
@@ -482,6 +485,8 @@ MfeaNode::vif_update(const string&	ifname,
 
 	node_vif = configured_vif_find_by_name(ifname);
 	if (node_vif == NULL) {
+	    //XLOG_INFO("MfeaNode: vif_updated:  Created, node_vif was NULL: %s/%s\n",
+	    //	      ifname.c_str(), vifname.c_str());
 	    vif_index = find_unused_config_vif_index();
 	    XLOG_ASSERT(vif_index != Vif::VIF_INDEX_INVALID);
 	    if (ProtoNode<MfeaVif>::add_config_vif(vifname, vif_index,
@@ -493,12 +498,26 @@ MfeaNode::vif_update(const string&	ifname,
 		return;
 	    }
 	}
-	break;					// FALLTHROUGH
+	else {
+	    //XLOG_INFO("MfeaNode: vif_updated:  Created, node_vif exists: %s/%s\n%s",
+	    //	      ifname.c_str(), vifname.c_str(), node_vif->str().c_str());
+	    // Deal with invalid vif-index (maybe device was configured but not
+	    //  actually present)
+	    if (node_vif->vif_index() ==  Vif::VIF_INDEX_INVALID) {
+		vif_index = find_unused_config_vif_index();
+		XLOG_INFO("Assigning new vif_index: %i to vif: %s/%s\n",
+			  vif_index, ifname.c_str(), vifname.c_str());
+		XLOG_ASSERT(vif_index != Vif::VIF_INDEX_INVALID);
+		node_vif->set_vif_index(vif_index);
+	    }
+	    vif_index = node_vif->vif_index();
+	}
+	break;
 
     case DELETED:
 	// Update the MFEA iftree
-	XLOG_ERROR("vif_updated:  Delete: %s/%s\n",
-		   ifname.c_str(), vifname.c_str());
+	//XLOG_INFO("vif_updated:  vif_updated: Delete: %s/%s\n",
+	//  ifname.c_str(), vifname.c_str());
 
 	// Unregister protocols on this VIF
 	unregister_protocols_for_vif(ifname, vifname);
@@ -518,6 +537,9 @@ MfeaNode::vif_update(const string&	ifname,
 	return;
 
     case CHANGED:
+	//XLOG_INFO("MfeaNode: vif_updated: Changed vif: %s/%s\n",
+	//	  ifname.c_str(), vifname.c_str());
+
 	mfea_vifp = _mfea_iftree.find_vif(ifname, vifname);
 	if (mfea_vifp == NULL) {
 	    XLOG_WARNING("Got update for vif not in the MFEA tree: %s/%s",
@@ -1204,17 +1226,17 @@ MfeaNode::start_vif(const string& vif_name, string& error_msg)
 {
     MfeaVif *mfea_vif = vif_find_by_name(vif_name);
     if (mfea_vif == NULL) {
-	error_msg = c_format("Cannot start vif %s: no such vif",
+	error_msg = c_format("MfeaNode: Cannot start vif %s: no such vif",
 			     vif_name.c_str());
 	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
+	return XORP_ERROR;
     }
     
     if (mfea_vif->start(error_msg) != XORP_OK) {
-	error_msg = c_format("Cannot start vif %s: %s",
+	error_msg = c_format("MfeaNode: Cannot start vif %s: %s",
 			     vif_name.c_str(), error_msg.c_str());
 	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
+	return XORP_ERROR;
     }
     
     // XXX: add PIM Register vif (if needed)
