@@ -130,6 +130,9 @@ public:
      */
     uint8_t	ip_protocol_number() const;
 
+    /**  Will create dummy VIF if needed (and if possible) */
+    Mld6igmpVif* find_or_create_vif(const string& vif_name, string& error_msg);
+
     /**
      * Install a new MLD/IGMP vif.
      * 

@@ -725,17 +725,47 @@ int
 Mld6igmpNode::add_vif(const string& vif_name, uint32_t vif_index,
 		      string& error_msg)
 {
-    Mld6igmpVif *mld6igmp_vif = vif_find_by_vif_index(vif_index);
-    
-    if ((mld6igmp_vif != NULL) && (mld6igmp_vif->name() == vif_name)) {
-	return XORP_OK; // Already have this vif
+    Mld6igmpVif *mvif;
+    bool fake = false;
+
+    if (vif_index <= 0) {
+	// Well now...this interface must not currently exist.
+	// We need to fake out an index
+	vif_index = 100;
+
+	while (true) {
+	    mvif = vif_find_by_vif_index(vif_index);
+	    if (mvif == NULL)
+		break;
+	    vif_index++;
+	}
+	fake = true;
     }
-    
+
+    mvif = vif_find_by_vif_index(vif_index);
+    if (mvif) {
+	if (mvif->name() == vif_name) {
+	    return XORP_OK; // already have this vif
+	}
+
+	if (mvif->is_fake()) {
+	    adjust_fake_vif(mvif, vif_index);
+	}
+	else {
+	    // This is bad..we have vif_index clash.
+	    error_msg = c_format("Cannot add vif %s: internal error, vif_index: %i",
+				 vif_name.c_str(), vif_index);
+	    XLOG_ERROR("%s", error_msg.c_str());
+	    return XORP_ERROR;
+	}
+    }
+
     //
     // Create a new Vif
     //
     Vif vif(vif_name);
     vif.set_vif_index(vif_index);
+    vif.set_is_fake(fake);
     return add_vif(vif, error_msg);
 }
 
@@ -783,7 +813,7 @@ Mld6igmpNode::set_vif_flags(const string& vif_name,
 {
     bool is_changed = false;
     
-    Mld6igmpVif *mld6igmp_vif = vif_find_by_name(vif_name);
+    Mld6igmpVif *mld6igmp_vif = find_or_create_vif(vif_name, error_msg);
     if (mld6igmp_vif == NULL) {
 	error_msg = c_format("Cannot set flags vif %s: no such vif",
 			     vif_name.c_str());
@@ -836,7 +866,7 @@ Mld6igmpNode::add_vif_addr(const string& vif_name,
 			   const IPvX& peer_addr,
 			   string& error_msg)
 {
-    Mld6igmpVif *mld6igmp_vif = vif_find_by_name(vif_name);
+    Mld6igmpVif *mld6igmp_vif = find_or_create_vif(vif_name, error_msg);
     if (mld6igmp_vif == NULL) {
 	error_msg = c_format("Cannot add address on vif %s: no such vif",
 			     vif_name.c_str());
@@ -923,12 +953,12 @@ Mld6igmpNode::delete_vif_addr(const string& vif_name,
 			      const IPvX& addr,
 			      string& error_msg)
 {
-    Mld6igmpVif *mld6igmp_vif = vif_find_by_name(vif_name);
+    Mld6igmpVif *mld6igmp_vif = find_or_create_vif(vif_name, error_msg);
     if (mld6igmp_vif == NULL) {
 	error_msg = c_format("Cannot delete address on vif %s: no such vif",
 			     vif_name.c_str());
 	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
+	return XORP_ERROR;
     }
     
     const VifAddr *tmp_vif_addr = mld6igmp_vif->find_address(addr);
@@ -994,6 +1024,45 @@ Mld6igmpNode::delete_vif_addr(const string& vif_name,
     return (XORP_OK);
 }
 
+Mld6igmpVif*
+Mld6igmpNode::find_or_create_vif(const string& vif_name, string& error_msg) {
+    Mld6igmpVif* mvif = vif_find_by_name(vif_name);
+    int if_index = 0;
+    errno = 0;
+
+    if (mvif == NULL) {
+#ifdef HAVE_IF_NAMETOINDEX
+	if_index = if_nametoindex(vif_name.c_str());
+#endif
+	add_vif(vif_name, if_index, error_msg);
+	mvif = vif_find_by_name(vif_name);
+    }
+    else {
+	// If it's fake..then might need to fix things up.
+	if (mvif->is_fake()) {
+#ifdef HAVE_IF_NAMETOINDEX
+	    if_index = if_nametoindex(vif_name.c_str());
+#endif
+	    if (if_index > 0) {
+		// It went real..fix up underlying logic.
+		Mld6igmpVif* fake_vif = vif_find_by_vif_index(if_index);
+		if (fake_vif) {
+		    // Move any fake with our real ifindex out of the way.
+		    adjust_fake_vif(fake_vif, if_index);
+		}
+
+		ProtoNode<Mld6igmpVif>::delete_vif(mvif);
+		XLOG_INFO("Setting formerly fake mvif: %s  to real ifindex: %i",
+			  mvif->name().c_str(), if_index);
+		mvif->set_vif_index(if_index);
+		mvif->set_is_fake(false);
+		ProtoNode<Mld6igmpVif>::add_vif(mvif);
+	    }
+	}
+    }
+    return mvif;
+}
+
 /**
  * Mld6igmpNode::enable_vif:
  * @vif_name: The name of the vif to enable.
@@ -1006,36 +1075,15 @@ Mld6igmpNode::delete_vif_addr(const string& vif_name,
 int
 Mld6igmpNode::enable_vif(const string& vif_name, string& error_msg)
 {
-    Mld6igmpVif *mld6igmp_vif = vif_find_by_name(vif_name);
-    if (mld6igmp_vif == NULL) {
-	// Seems we have some sort of race...it's asked to be enabled before it is
-	// created on config-file reload.
-	// For now, create it manually.
-	// TODO:  Fix enable-vif on cfg-file load.
-	// NOTE:  pim has similar issue and similar fixup code.
-	error_msg = c_format("Mld6igmpNode:  Cannot enable vif %s: no such vif (will attempt to create it))",
-			     vif_name.c_str());
-	XLOG_ERROR("%s", error_msg.c_str());
+    Mld6igmpVif *mld6igmp_vif = find_or_create_vif(vif_name, error_msg);
 
-	int if_index = -1;
-	errno = 0;
-#ifdef HAVE_IF_NAMETOINDEX
-	if_index = if_nametoindex(vif_name.c_str());
-#endif
-        if (if_index < 0) {
-	    XLOG_ERROR("Could not convert vif_name to ifindex: %s  possible error: %s\n",
-		       vif_name.c_str(), strerror(errno));
-	    return XORP_ERROR;
-	}
-	else {
-	    add_vif(vif_name, if_index, error_msg);
-	    mld6igmp_vif = vif_find_by_name(vif_name);
-	}
+    if (mld6igmp_vif) {
+	mld6igmp_vif->enable();
+        return XORP_OK;
     }
-    
-    mld6igmp_vif->enable();
-    
-    return (XORP_OK);
+    else {
+	return XORP_ERROR;
+    }
 }
 
 /**
@@ -1077,7 +1125,7 @@ Mld6igmpNode::disable_vif(const string& vif_name, string& error_msg)
 int
 Mld6igmpNode::start_vif(const string& vif_name, string& error_msg)
 {
-    Mld6igmpVif *mld6igmp_vif = vif_find_by_name(vif_name);
+    Mld6igmpVif *mld6igmp_vif = find_or_create_vif(vif_name, error_msg);
     if (mld6igmp_vif == NULL) {
 	error_msg = c_format("Cannot start vif %s: no such vif",
 			     vif_name.c_str());

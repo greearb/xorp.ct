@@ -165,7 +165,9 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int add_vif(V *vif);
-    
+
+    void adjust_fake_vif(V *vif, int not_this_ifindex);
+
     /**
      * Delete a virtual interface.
      * 
@@ -803,6 +805,29 @@ ProtoNode<V>::vif_find_same_subnet_or_p2p(const IPvX& ipaddr_test) const
     }
     
     return (NULL);
+}
+
+
+template<class V>
+inline void
+ProtoNode<V>::adjust_fake_vif(V *vif, int not_this_ifindex) {
+    // Remove old vif, find a *new* fake ifindex, and re-add it.
+    XLOG_ASSERT(vif->is_fake());
+
+    XLOG_INFO("adjusting fake vif ifindex: %s  ignore-idx: %i",
+	      vif->name().c_str(), not_this_ifindex);
+    ProtoNode<V>::delete_vif(vif);
+    int i = 100;
+    while (true) {
+	if (i != not_this_ifindex) {
+	    vif = vif_find_by_vif_index(i);
+	    if (vif == NULL)
+		break;
+	}
+	i++;
+    }
+    vif->set_vif_index(i);
+    ProtoNode<V>::add_vif(vif);
 }
 
 template<class V>
