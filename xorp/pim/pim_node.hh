@@ -157,6 +157,8 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		add_vif(const Vif& vif, string& error_msg);
+
+    PimVif* find_or_create_vif(const string& vif_name, string& error_msg);
     
     /**
      * Install a new PIM vif.
