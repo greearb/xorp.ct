@@ -817,7 +817,7 @@ ProtoNode<V>::adjust_fake_vif(V *vif, int not_this_ifindex) {
     XLOG_INFO("adjusting fake vif ifindex: %s  ignore-idx: %i",
 	      vif->name().c_str(), not_this_ifindex);
     ProtoNode<V>::delete_vif(vif);
-    int i = 100;
+    int i = 1;
     while (true) {
 	if (i != not_this_ifindex) {
 	    vif = vif_find_by_vif_index(i);
