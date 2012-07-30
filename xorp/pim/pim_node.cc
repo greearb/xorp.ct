@@ -804,7 +804,7 @@ PimNode::add_vif(const string& vif_name, uint32_t vif_index, string& error_msg)
     if (vif_index <= 0) {
 	// Well now...this interface must not currently exist.
 	// We need to fake out an index
-	vif_index = 100;
+	vif_index = 1;
 
 	while (true) {
 	    mvif = vif_find_by_vif_index(vif_index);
