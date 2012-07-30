@@ -449,6 +449,24 @@ PimNode::updates_made()
 	    set_config_pif_index(ifmgr_vif_name,
 				 ifmgr_vif.pif_index(),
 				 error_msg);
+
+	    if (node_vif->vif_index() != ifmgr_vif.vif_index()) {
+		XLOG_INFO("Vif-index changed, node-vif: %s  ifmgr-vif: %s",
+			  node_vif->str().c_str(), ifmgr_vif.toString().c_str());
+		// It went real..fix up underlying logic.
+		PimVif* fake_vif = vif_find_by_vif_index(ifmgr_vif.vif_index());
+		if (fake_vif) {
+		    // Move any fake with our real ifindex out of the way.
+		    adjust_fake_vif(fake_vif, ifmgr_vif.vif_index());
+		}
+
+		ProtoNode<PimVif>::delete_vif((PimVif*)(node_vif));
+		XLOG_INFO("Setting formerly fake node_vif: %s  to real ifindex: %i",
+			  node_vif->name().c_str(), ifmgr_vif.vif_index());
+		node_vif->set_vif_index(ifmgr_vif.vif_index());
+		node_vif->set_is_fake(false);
+		ProtoNode<PimVif>::add_vif((PimVif*)(node_vif));
+	    }
 	
 	    //
 	    // Update the vif flags
@@ -1184,38 +1202,10 @@ PimNode::enable_vif(const string& vif_name, string& error_msg)
 PimVif*
 PimNode::find_or_create_vif(const string& vif_name, string& error_msg) {
     PimVif* mvif = vif_find_by_name(vif_name);
-    int if_index = 0;
-    errno = 0;
 
     if (mvif == NULL) {
-#ifdef HAVE_IF_NAMETOINDEX
-	if_index = if_nametoindex(vif_name.c_str());
-#endif
-	add_vif(vif_name, if_index, error_msg);
+	add_vif(vif_name, 0, error_msg);
 	mvif = vif_find_by_name(vif_name);
-    }
-    else {
-	// If it's fake..then might need to fix things up.
-	if (mvif->is_fake()) {
-#ifdef HAVE_IF_NAMETOINDEX
-	    if_index = if_nametoindex(vif_name.c_str());
-#endif
-	    if (if_index > 0) {
-		// It went real..fix up underlying logic.
-		PimVif* fake_vif = vif_find_by_vif_index(if_index);
-		if (fake_vif) {
-		    // Move any fake with our real ifindex out of the way.
-		    adjust_fake_vif(fake_vif, if_index);
-		}
-
-		ProtoNode<PimVif>::delete_vif(mvif);
-		XLOG_INFO("Setting formerly fake mvif: %s  to real ifindex: %i",
-			  mvif->name().c_str(), if_index);
-		mvif->set_vif_index(if_index);
-		mvif->set_is_fake(false);
-		ProtoNode<PimVif>::add_vif(mvif);
-	    }
-	}
     }
     return mvif;
 }
@@ -1420,6 +1410,9 @@ PimNode::disable_all_vifs()
 void
 PimNode::delete_all_vifs()
 {
+    XLOG_INFO("pim-node: %p  start of delete-all vifs, size: %i\n",
+	      this, (int)(proto_vifs().size()));
+
     list<string> vif_names;
     vector<PimVif *>::iterator iter;
 
@@ -1449,6 +1442,9 @@ PimNode::delete_all_vifs()
 	    XLOG_ERROR("%s", error_msg.c_str());
 	}
     }
+
+    XLOG_INFO("pim-node: %p  end of delete-all vifs, size: %i\n",
+	      this, (int)(proto_vifs().size()));
 }
 
 /**

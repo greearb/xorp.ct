@@ -139,6 +139,9 @@ static void pim_main(const string& finder_hostname, uint16_t finder_port) {
 	eventloop.run();
     }
 
+    XLOG_INFO("Winding down pimsm, do-run: %i  node.is_done: %i\n",
+	      xorp_do_run, xrl_pimsm_node4.is_done());
+
     while (xrl_pimsm_node4.xrl_router().pending()) {
 	eventloop.run();
     }
@@ -147,9 +150,17 @@ static void pim_main(const string& finder_hostname, uint16_t finder_port) {
     // will attempt the same, but that will cause some recursive cleanup
     // that ends up calling a pure virtual on the xlr_pim_node logic,
     // which throws an exception from deep in glibc and crashes us.
+    XLOG_INFO("Before delete-all-vifs, size: %i\n",
+	      (int)(xrl_pimsm_node4.proto_vifs().size()));
     xrl_pimsm_node4.delete_all_vifs();
+    XLOG_INFO("Before shutdown, size: %i\n",
+	      (int)(xrl_pimsm_node4.proto_vifs().size()));
     xrl_pimsm_node4.shutdown();
+    XLOG_INFO("Before destruct_me, size: %i\n",
+	      (int)(xrl_pimsm_node4.proto_vifs().size()));
     xrl_pimsm_node4.destruct_me();
+    XLOG_INFO("After destruct_me, size: %i\n",
+	      (int)(xrl_pimsm_node4.proto_vifs().size()));
 }
 
 int
