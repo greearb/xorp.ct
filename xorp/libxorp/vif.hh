@@ -358,6 +358,9 @@ public:
      */
     bool	is_underlying_vif_up() const { return _is_underlying_vif_up; }
 
+    /* Is this thing just a dummy, and not really in the OS currently? */
+    bool	is_fake() const { return _is_fake; }
+
     /**
      * Get the MTU of the vif.
      *
@@ -440,6 +443,8 @@ public:
      * otherwise the underlying vif status is set to DOWN.
      */
     void	set_underlying_vif_up(bool v)	{ _is_underlying_vif_up = v; }
+
+    void	set_is_fake(bool v)	{ _is_fake = v; }
 
     /**
      * Set the MTU of the vif.
@@ -581,6 +586,7 @@ private:
     bool	_is_multicast_capable;	// Multicast-capable interface
     bool	_is_broadcast_capable;	// Broadcast-capable interface
     bool	_is_underlying_vif_up;	// True if underlying vif is up
+    bool	_is_fake;;		// True if VIF is dummy (not in OS currently)
     uint32_t	_mtu;			// The MTU of the vif
 
     list<VifAddr> _addr_list;		// The list of addresses for this vif

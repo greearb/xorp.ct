@@ -449,6 +449,24 @@ PimNode::updates_made()
 	    set_config_pif_index(ifmgr_vif_name,
 				 ifmgr_vif.pif_index(),
 				 error_msg);
+
+	    if (node_vif->vif_index() != ifmgr_vif.vif_index()) {
+		XLOG_INFO("Vif-index changed, node-vif: %s  ifmgr-vif: %s",
+			  node_vif->str().c_str(), ifmgr_vif.toString().c_str());
+		// It went real..fix up underlying logic.
+		PimVif* fake_vif = vif_find_by_vif_index(ifmgr_vif.vif_index());
+		if (fake_vif) {
+		    // Move any fake with our real ifindex out of the way.
+		    adjust_fake_vif(fake_vif, ifmgr_vif.vif_index());
+		}
+
+		ProtoNode<PimVif>::delete_vif((PimVif*)(node_vif));
+		XLOG_INFO("Setting formerly fake node_vif: %s  to real ifindex: %i",
+			  node_vif->name().c_str(), ifmgr_vif.vif_index());
+		node_vif->set_vif_index(ifmgr_vif.vif_index());
+		node_vif->set_is_fake(false);
+		ProtoNode<PimVif>::add_vif((PimVif*)(node_vif));
+	    }
 	
 	    //
 	    // Update the vif flags
@@ -780,10 +798,39 @@ PimNode::add_vif(const Vif& vif, string& error_msg)
 int
 PimNode::add_vif(const string& vif_name, uint32_t vif_index, string& error_msg)
 {
-    PimVif *pim_vif = vif_find_by_vif_index(vif_index);
-    
-    if ((pim_vif != NULL) && (pim_vif->name() == vif_name)) {
-	return (XORP_OK);		// Already have this vif
+    PimVif *mvif;
+    bool fake = false;
+
+    if (vif_index <= 0) {
+	// Well now...this interface must not currently exist.
+	// We need to fake out an index
+	vif_index = 1;
+
+	while (true) {
+	    mvif = vif_find_by_vif_index(vif_index);
+	    if (mvif == NULL)
+		break;
+	    vif_index++;
+	}
+	fake = true;
+    }
+
+    mvif = vif_find_by_vif_index(vif_index);
+    if (mvif) {
+	if (mvif->name() == vif_name) {
+	    return XORP_OK; // already have this vif
+	}
+
+	if (mvif->is_fake()) {
+	    adjust_fake_vif(mvif, vif_index);
+	}
+	else {
+	    // This is bad..we have vif_index clash.
+	    error_msg = c_format("Cannot add vif %s: internal error, vif_index: %i",
+				 vif_name.c_str(), vif_index);
+	    XLOG_ERROR("%s", error_msg.c_str());
+	    return XORP_ERROR;
+	}
     }
 
     //
@@ -791,6 +838,7 @@ PimNode::add_vif(const string& vif_name, uint32_t vif_index, string& error_msg)
     //
     Vif vif(vif_name);
     vif.set_vif_index(vif_index);
+    vif.set_is_fake(fake);
     return add_vif(vif, error_msg);
 }
 
@@ -842,7 +890,7 @@ PimNode::set_vif_flags(const string& vif_name,
 {
     bool is_changed = false;
     
-    PimVif *pim_vif = vif_find_by_name(vif_name);
+    PimVif *pim_vif = find_or_create_vif(vif_name, error_msg);
     if (pim_vif == NULL) {
 	error_msg = c_format("Cannot set flags vif %s: no such vif",
 			     vif_name.c_str());
@@ -900,7 +948,7 @@ PimNode::add_vif_addr(const string& vif_name,
 		      bool& should_send_hello,
 		      string &error_msg)
 {
-    PimVif *pim_vif = vif_find_by_name(vif_name);
+    PimVif *pim_vif = find_or_create_vif(vif_name, error_msg);
 
     should_send_hello = false;
 
@@ -1140,36 +1188,26 @@ PimNode::delete_vif_addr(const string& vif_name,
 int
 PimNode::enable_vif(const string& vif_name, string& error_msg)
 {
-    PimVif *pim_vif = vif_find_by_name(vif_name);
-    if (pim_vif == NULL) {
-	// Seems we have some sort of race...it's asked to be enabled before it is
-	// created on config-file reload.
-	// For now, create it manually.
-	// TODO:  Fix enable-vif on cfg-file load.
-	// NOTE:  mld6igmp has similar issue and similar work-around.
-	error_msg = c_format("PimNode:  Cannot enable vif %s: no such vif (will try to create one)",
-			     vif_name.c_str());
-	XLOG_ERROR("%s", error_msg.c_str());
+    PimVif *pim_vif = find_or_create_vif(vif_name, error_msg);
 
-	int if_index = -1;
-	errno = 0;
-#ifdef HAVE_IF_NAMETOINDEX
-	if_index = if_nametoindex(vif_name.c_str());
-#endif
-        if (if_index < 0) {
-	    XLOG_ERROR("Could not convert vif_name to ifindex: %s  possible error: %s\n",
-		       vif_name.c_str(), strerror(errno));
-	    return XORP_ERROR;
-	}
-	else {
-	    add_vif(vif_name, if_index, error_msg);
-	    pim_vif = vif_find_by_name(vif_name);
-	}
+    if (pim_vif) {
+	pim_vif->enable();
+	return XORP_OK;
     }
-    
-    pim_vif->enable();
-    
-    return XORP_OK;
+    else {
+	return XORP_ERROR;
+    }
+}
+
+PimVif*
+PimNode::find_or_create_vif(const string& vif_name, string& error_msg) {
+    PimVif* mvif = vif_find_by_name(vif_name);
+
+    if (mvif == NULL) {
+	add_vif(vif_name, 0, error_msg);
+	mvif = vif_find_by_name(vif_name);
+    }
+    return mvif;
 }
 
 /**
@@ -1372,6 +1410,9 @@ PimNode::disable_all_vifs()
 void
 PimNode::delete_all_vifs()
 {
+    XLOG_INFO("pim-node: %p  start of delete-all vifs, size: %i\n",
+	      this, (int)(proto_vifs().size()));
+
     list<string> vif_names;
     vector<PimVif *>::iterator iter;
 
@@ -1401,6 +1442,9 @@ PimNode::delete_all_vifs()
 	    XLOG_ERROR("%s", error_msg.c_str());
 	}
     }
+
+    XLOG_INFO("pim-node: %p  end of delete-all vifs, size: %i\n",
+	      this, (int)(proto_vifs().size()));
 }
 
 /**

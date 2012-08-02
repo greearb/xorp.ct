@@ -107,6 +107,7 @@ Vif::Vif(const string& vifname, const string& ifname)
     set_multicast_capable(false);
     set_broadcast_capable(false);
     set_underlying_vif_up(false);
+    set_is_fake(false);
     set_mtu(0);
 }
 
@@ -129,6 +130,7 @@ Vif::Vif(const Vif& vif)
     set_multicast_capable(vif.is_multicast_capable());
     set_broadcast_capable(vif.is_broadcast_capable());
     set_underlying_vif_up(vif.is_underlying_vif_up());
+    set_is_fake(vif.is_fake());
     set_mtu(vif.mtu());
 }
 
@@ -187,6 +189,8 @@ Vif::str() const
 	r += " MANAGEMENT";
     if (is_underlying_vif_up())
 	r += " UNDERLYING_VIF_UP";
+    if (is_fake())
+	r += " FAKE";
     r += c_format(" MTU: %u", XORP_UINT_CAST(mtu()));
 
     return r;
@@ -208,6 +212,7 @@ Vif::operator==(const Vif& other) const
 	    && (is_multicast_capable() == other.is_multicast_capable())
 	    && (is_broadcast_capable() == other.is_broadcast_capable())
 	    && (is_underlying_vif_up() == other.is_underlying_vif_up())
+	    && (is_fake() == other.is_fake())
 	    && (mtu() == other.mtu()));
 }
 
