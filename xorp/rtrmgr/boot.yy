@@ -141,7 +141,7 @@ long_nodegroup:	UPLEVEL statements DOWNLEVEL { pop_path(); }
 		;
 
 statements:	/* empty string */
-		| statement statements
+		| statements statement
 		;
 
 statement:	terminal
