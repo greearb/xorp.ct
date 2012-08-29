@@ -19,11 +19,9 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxorp/vif.hh,v 1.23 2008/10/02 21:57:36 bms Exp $
 
 #ifndef __LIBXORP_VIF_HH__
 #define __LIBXORP_VIF_HH__
-
 
 
 #include "xorp.h"
