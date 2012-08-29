@@ -179,6 +179,30 @@ private:
     IPvX	_peer_addr;			// Peer address (on p2p links)
 };
 
+
+class VifPermInfo {
+public:
+    VifPermInfo(const string& n, bool start, bool enable)
+	    : vif_name(n), should_start(start), should_enable(enable) { }
+    VifPermInfo() : should_start(false), should_enable(false) { }
+    VifPermInfo(const VifPermInfo& p)
+	    : vif_name(p.vif_name), should_start(p.should_start), should_enable(p.should_enable) { }
+
+    VifPermInfo& operator=(const VifPermInfo& p) {
+	if (this != &p) {
+	    vif_name = p.vif_name;
+	    should_start = p.should_start;
+	    should_enable = p.should_enable;
+	}
+	return *this;
+    }
+
+    string vif_name; // name of VIF in question
+    bool should_start; // Want to be started if possible
+    bool should_enable; // Want to be enabled if possible
+};
+
+
 /**
  * @short Virtual Interface class.
  *

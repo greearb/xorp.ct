@@ -36,7 +36,7 @@
 #include "pim_vif.hh"
 
 
-map<string, PvifPermInfo> perm_info;
+map<string, VifPermInfo> perm_info;
 
 /**
  * PimVif::PimVif:
@@ -144,7 +144,7 @@ PimVif::PimVif(PimNode* pim_node, const Vif& vif)
       _usage_by_pim_mre_task(0)
 {
     // Check our wants-to-be-running list
-    map<string, PvifPermInfo>::iterator i = perm_info.find(name());
+    map<string, VifPermInfo>::iterator i = perm_info.find(name());
     if (i != perm_info.end()) {
 	wants_to_be_started = i->second.should_start;
     }
@@ -257,7 +257,7 @@ PimVif::pim_mrt() const
 void PimVif::notifyUpdated() {
     int perm_started = -1;
     if (!wants_to_be_started) {
-	map<string, PvifPermInfo>::iterator i = perm_info.find(name());
+	map<string, VifPermInfo>::iterator i = perm_info.find(name());
 	if (i != perm_info.end()) {
 	    perm_started = i->second.should_start;
 	}
@@ -295,7 +295,7 @@ PimVif::start(string& error_msg, const char* dbg)
 	      name().c_str(), (int)(is_enabled()), (int)(is_up()), (int)(is_pending_up()),
 	      dbg);
 
-    map<string, PvifPermInfo>::iterator i = perm_info.find(name());
+    map<string, VifPermInfo>::iterator i = perm_info.find(name());
 
     if (! is_enabled()) {
 	if (i != perm_info.end()) {
@@ -316,7 +316,7 @@ PimVif::start(string& error_msg, const char* dbg)
 	i->second.should_start = true;
     }
     else {
-	PvifPermInfo pi(name(), true, false);
+	VifPermInfo pi(name(), true, false);
 	perm_info[name()] = pi;
     }
 
@@ -437,7 +437,7 @@ PimVif::stop(string& error_msg, bool stay_down, const char* dbg)
 
     if (stay_down) {
 	// Remove from our wants-to-be-running list
-	map<string, PvifPermInfo>::iterator i = perm_info.find(name());
+	map<string, VifPermInfo>::iterator i = perm_info.find(name());
 	if (i != perm_info.end()) {
 	    i->second.should_start = false;
 	}

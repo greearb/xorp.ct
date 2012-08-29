@@ -46,29 +46,7 @@ class PimNbr;
 class PimNode;
 
 
-class PvifPermInfo {
-public:
-    PvifPermInfo(const string& n, bool start, bool enable)
-	    : vif_name(n), should_start(start), should_enable(enable) { }
-    PvifPermInfo() : should_start(false), should_enable(false) { }
-    PvifPermInfo(const PvifPermInfo& p)
-	    : vif_name(p.vif_name), should_start(p.should_start), should_enable(p.should_enable) { }
-
-    PvifPermInfo& operator=(const PvifPermInfo& p) {
-	if (this != &p) {
-	    vif_name = p.vif_name;
-	    should_start = p.should_start;
-	    should_enable = p.should_enable;
-	}
-	return *this;
-    }
-
-    string vif_name; // name of VIF in question
-    bool should_start; // Want to be started if possible
-    bool should_enable; // Want to be enabled if possible
-};
-
-extern map<string, PvifPermInfo> perm_info;
+extern map<string, VifPermInfo> perm_info;
 
 
 /**
