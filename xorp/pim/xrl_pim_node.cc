@@ -2234,12 +2234,11 @@ XrlPimNode::mld6igmp_client_send_add_delete_protocol_mld6igmp_cb(
 
     case COMMAND_FAILED:
 	//
-	// These errors can be caused by VIFs suddenly dissappearing.  For now,
-	// register failure is still considered fatal.
-	//
+	// These errors can be caused by VIFs suddenly dissappearing (or
+	// not existing to begin with).
 	if (is_add) {
-	    XLOG_FATAL("Cannot register with the MLD6IGMP: %s",
-		       xrl_error.str().c_str());
+	    XLOG_WARNING("Cannot register with the MLD6IGMP: %s",
+			 xrl_error.str().c_str());
 	}
 	else {
 	    XLOG_WARNING("Cannot deregister with the MLD6IGMP: %s",
