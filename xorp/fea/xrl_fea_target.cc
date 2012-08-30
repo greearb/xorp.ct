@@ -3696,6 +3696,10 @@ XrlFeaTarget::raw_packet4_0_1_send(
     vector<uint8_t> ext_headers_type_vector;
     vector<vector<uint8_t> > ext_headers_payload_vector;
 
+    //XLOG_INFO("FEA::send_raw pkt on %s/%s. from: %s to: %s",
+    //      if_name.c_str(), vif_name.c_str(),
+    //      src_address.str().c_str(), dst_address.str().c_str());
+
     if (_io_ip_manager.send(if_name, vif_name, IPvX(src_address),
 			    IPvX(dst_address), ip_protocol, ip_ttl, ip_tos,
 			    ip_router_alert, ip_internet_control,

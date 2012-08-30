@@ -415,11 +415,25 @@ def DoAllConfig(env, conf, host_os):
         prereq_netinet_ip_h.append('netinet/in.h')
     if has_netinet_in_systm_h:
 	prereq_netinet_ip_h.append('netinet/in_systm.h')
+    prereq_mreqn_h = prereq_netinet_ip_h
     has_netinet_ip_h = conf.CheckHeader(prereq_netinet_ip_h + ['netinet/ip.h'])
+    if has_netinet_ip_h:
+         prereq_mreqn_h.append('netinet/ip.h');
 
     has_netinet_tcp_h = conf.CheckHeader(['sys/param.h', 'sys/socket.h', 'netinet/in.h', 'netinet/in_systm.h', 'netinet/ip.h', 'netinet/tcp.h'])
     has_netinet_igmp_h = conf.CheckHeader(['sys/types.h', 'netinet/in.h', 'netinet/igmp.h'])
     has_netinet_ether_h = conf.CheckHeader('netinet/ether.h')
+
+    # Check for ip_mreqn struct.
+    mreqn_header_includes = []
+    for s in prereq_mreqn_h:
+        mreqn_header_includes.append("#include <%s>\n" % s)
+    mreqn_header_includes = string.join(mreqn_header_includes, '')
+    has_struct_ip_mreqn = conf.CheckType('struct ip_mreqn', includes=mreqn_header_includes)
+    if not has_struct_ip_mreqn:
+        print "\nWARNING: No struct ip_mreqn found.  Each interface must"
+        print "  have a unique IP address or IP multicast (at least) will not"
+        print "  be transmitted on the correct interface."
 
     # Header file <netinet/if_ether.h> might need <sys/types.h>, 
     # <sys/socket.h>, <net/if.h>, and/or <netinet/in.h>

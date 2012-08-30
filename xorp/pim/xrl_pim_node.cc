@@ -2385,9 +2385,9 @@ XrlPimNode::send_protocol_message()
     entry = dynamic_cast<SendProtocolMessage*>(xrl_task_base);
     XLOG_ASSERT(entry != NULL);
 
-    //XLOG_ERROR("XrlPimNode::send_protocol_message interface/vif %s/%s. ",
-    //       entry->if_name().c_str(),
-    //       entry->vif_name().c_str());
+    //XLOG_INFO("XrlPimNode::send_protocol_message interface/vif %s/%s. from: %s to: %s",
+    //      entry->if_name().c_str(), entry->vif_name().c_str(),
+    //      entry->src_address().str().c_str(), entry->dst_address().str().c_str());
 
     //
     // Check whether we have already registered with the FEA
