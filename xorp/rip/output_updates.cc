@@ -78,11 +78,12 @@ OutputUpdates<A>::output_packet()
 						origin, r->tag(),
 						r->policytags());
 
-	bool accepted = this->do_filtering(copy);
-	if (!accepted) {
-	    delete copy;
-	    continue;
-	}
+	// Policy EXPORT filtering was done here.
+	// It's moved to RouteDB<A>::do_filtering.
+	// This was done because EXPORT filter could possibly change route metric,
+	// and thus make it lower then RIP_INFINITY
+	// Routes with cost > RIP_INFINTY would never come here, because they would be filtered out in RouteDB<A>::update_route
+	// - IMAR
 
 	rpa.packet_add_route(copy->net(), copy->nexthop(), copy->cost(), r->tag());
 	added_routes.insert(r);

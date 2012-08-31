@@ -50,15 +50,13 @@ OutputTable<A>::output_packet()
 	// or set cost to infinity...
 	// or depending on poison-reverse / horizon settings
 	//
-	if (r->filtered()) {
+	if (r->filtered())
 	    continue;
-	}    
 
 	pair<A,uint16_t> p = this->_port.route_policy(*r);
 
-	if (p.second > RIP_INFINITY) {
+	if (p.second > RIP_INFINITY)
 	    continue;
-	}
 
 	RouteEntryOrigin<A>* origin = NULL;	// XXX
 	string ifname, vifname;		// XXX: not set, because not needed
@@ -68,11 +66,12 @@ OutputTable<A>::output_packet()
 					        origin, r->tag(),
 						r->policytags());
 	
-	bool accepted = this->do_filtering(copy);
-	if (!accepted) {
-	    delete copy;
-	    continue;
-	}
+	// Policy EXPORT filtering was done here.
+	// It's moved to RouteDB<A>::do_filtering.
+	// This was done because EXPORT filter could possibly change route metric,
+	// and thus make it lower then RIP_INFINITY.
+	// Routes with cost > RIP_INFINTY would never come here, because they would be filtered out in RouteDB<A>::update_route
+	// - IMAR
 
 	rpa.packet_add_route(copy->net(), copy->nexthop(), copy->cost(), copy->tag());
 

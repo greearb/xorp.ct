@@ -213,7 +213,7 @@ public:
      * @param r route to filter.
      * @return true if route was accepted, false otherwise.
      */
-    bool do_filtering(Route* r);
+    bool do_filtering(Route* r, uint32_t& cost);
 
     Trace& trace() { return _trace; }
 
