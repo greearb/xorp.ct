@@ -71,6 +71,8 @@ namespace {
 "SUBR_START"			{ return YY_SUBR_START; }
 "SUBR_END"			{ return YY_SUBR_END; }
 
+"<<"		{ return YY_LSHIFT; }
+">>"		{ return YY_RSHIFT; }
 "=="		{ return YY_EQ; }
 "!="		{ return YY_NE; }
 "<"		{ return YY_LT; }
@@ -80,6 +82,10 @@ namespace {
 "+"		{ return YY_ADD; }
 "\-"		{ return YY_SUB; }
 "*"		{ return YY_MUL; }
+"/"		{ return YY_DIV; }
+"&"		{ return YY_BITAND; }
+"|"		{ return YY_BITOR; }
+"^"		{ return YY_BITXOR; }
 
 "\n"		{ _parser_lineno++; return YY_NEWLINE; }
 

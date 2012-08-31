@@ -834,7 +834,7 @@ policy {
 		}
 		med {
 		    %help: short "Set the BGP MED attribute";
-		    %allow-operator: ":" "=" "sub" "add";
+		    %allow-operator: ":" "=" "sub" "add" "mul" "div" "lshift" "rshift" "bit_and" "bit_or" "bit_xor" "+=" "-=" "*=" "/=" "<<=" ">>=" "&=" "|=" "^=";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=med $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
 		}
@@ -845,7 +845,7 @@ policy {
 		}
 		localpref {
 		    %help: short "Set the local preference";
-		    %allow-operator: ":" "=" "sub" "add";
+		    %allow-operator: ":" "=" "sub" "add" "mul" "div" "lshift" "rshift" "bit_and" "bit_or" "bit_xor" "+=" "-=" "*=" "/=" "<<=" ">>=" "&=" "|=" "^=";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=localpref $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
 		}

@@ -139,6 +139,8 @@ RE_IPV6NET      {RE_IPV6}\/{RE_IPV6_PREFIXLEN}
 			return YY_EQ;
 		}
 
+"<<"	return YY_LSHIFT;
+">>"	return YY_RSHIFT;
 "("		return YY_LPAR;
 ")"		return YY_RPAR;
 "=="		return YY_EQ;
@@ -153,9 +155,20 @@ RE_IPV6NET      {RE_IPV6}\/{RE_IPV6_PREFIXLEN}
 "="		return YY_ASSIGN;
 "+="		return YY_PLUS_EQUALS;
 "-="		return YY_MINUS_EQUALS;
+"*="		return YY_MUL_EQUALS;
+"/="		return YY_DIV_EQUALS;
+"<<="		return YY_LSHIFT_EQUALS;
+">>="		return YY_RSHIFT_EQUALS;
+"&="		return YY_BITAND_EQUALS;
+"|="		return YY_BITOR_EQUALS;
+"^="		return YY_BITXOR_EQUALS;
 "||"		return YY_OR;
 "&&"		return YY_AND;
 "!"		return YY_NOT;
+"/"		return YY_DIV;
+"&"		return YY_BITAND;
+"|"		return YY_BITOR;
+"^"		return YY_BITXOR;
 
 "exact"		return YY_IPNET_EQ;
 "longer"	return YY_IPNET_LT;
@@ -168,6 +181,13 @@ RE_IPV6NET      {RE_IPV6}\/{RE_IPV6_PREFIXLEN}
 "not"		return YY_NOT;
 "add"		return YY_PLUS_EQUALS;
 "sub"		return YY_MINUS_EQUALS;
+"mul"		return YY_MUL_EQUALS;
+"div"		return YY_DIV_EQUALS;
+"lshift"	return YY_LSHIFT_EQUALS;
+"rshift"	return YY_RSHIFT_EQUALS;
+"bit_and"	return YY_BITAND_EQUALS;
+"bit_or"	return YY_BITOR_EQUALS;
+"bit_xor"	return YY_BITXOR_EQUALS;
 "head"		return YY_HEAD;
 "ctr"		return YY_CTR;
 "ne_int"	return YY_NE_INT;

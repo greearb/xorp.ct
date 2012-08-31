@@ -109,6 +109,12 @@ DEFINE_BINOP_BOOL(op_ge, >=)
 DEFINE_BINOP(op_add,+)
 DEFINE_BINOP(op_sub,-)
 DEFINE_BINOP(op_mul,*)
+DEFINE_BINOP(op_div,/)
+DEFINE_BINOP(op_lshift,<<)
+DEFINE_BINOP(op_rshift,>>)
+DEFINE_BINOP(op_bit_and,&);
+DEFINE_BINOP(op_bit_or,|);
+DEFINE_BINOP(op_bit_xor,^);
 
 // Operations for which .val() is not needed. [operation performed on element
 // itself].
@@ -457,6 +463,12 @@ do {									\
     ADD_BINOP(arg,arg,arg,op_add,Add);					\
     ADD_BINOP(arg,arg,arg,op_sub,Sub);					\
     ADD_BINOP(arg,arg,arg,op_mul,Mul);					\
+    ADD_BINOP(arg,arg,arg,op_div,Div);					\
+    ADD_BINOP(arg,arg,arg,op_lshift,LShift);				\
+    ADD_BINOP(arg,arg,arg,op_rshift,RShift);				\
+    ADD_BINOP(arg,arg,arg,op_bit_and,BitAnd);				\
+    ADD_BINOP(arg,arg,arg,op_bit_or,BitOr);				\
+    ADD_BINOP(arg,arg,arg,op_bit_xor,BitXor);					\
 } while (0)
 
     disp.add<ElemBool,&operations::op_not>(OpNot());

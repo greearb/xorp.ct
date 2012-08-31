@@ -35,6 +35,8 @@ static ElementFactory	_ef;
 %token YY_EQ YY_NE YY_LT YY_GT YY_LE YY_GE
 %token YY_NOT YY_AND YY_OR YY_XOR YY_HEAD YY_CTR YY_NE_INT
 %token YY_ADD YY_SUB YY_MUL
+%token YY_DIV YY_LSHIFT YY_RSHIFT
+%token YY_BITAND YY_BITOR YY_BITXOR
 %token YY_ONFALSE_EXIT
 %token YY_REGEX
 %token YY_LOAD YY_STORE
@@ -169,6 +171,12 @@ statement:
 	| YY_ADD	{ _yy_instructions->push_back(new NaryInstr(new OpAdd)); }
 	| YY_SUB	{ _yy_instructions->push_back(new NaryInstr(new OpSub)); }
 	| YY_MUL	{ _yy_instructions->push_back(new NaryInstr(new OpMul)); }
+	| YY_DIV	{ _yy_instructions->push_back(new NaryInstr(new OpDiv)); }
+	| YY_LSHIFT	{ _yy_instructions->push_back(new NaryInstr(new OpLShift)); }
+	| YY_RSHIFT	{ _yy_instructions->push_back(new NaryInstr(new OpRShift)); }
+	| YY_BITAND	{ _yy_instructions->push_back(new NaryInstr(new OpBitAnd)); }
+	| YY_BITOR	{ _yy_instructions->push_back(new NaryInstr(new OpBitOr)); }
+	| YY_BITXOR	{ _yy_instructions->push_back(new NaryInstr(new OpBitXor)); }
 	| YY_HEAD	{ _yy_instructions->push_back(new NaryInstr(new OpHead));}
 	| YY_CTR	{ _yy_instructions->push_back(new NaryInstr(new OpCtr));}
 	| YY_NE_INT	{ _yy_instructions->push_back(new NaryInstr(new OpNEInt));}
