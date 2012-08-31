@@ -1174,15 +1174,6 @@ MfeaNode::delete_vif(const string& vif_name, string& error_msg)
 int
 MfeaNode::enable_vif(const string& vif_name, string& error_msg)
 {
-    MfeaVif *mfea_vif = vif_find_by_name(vif_name);
-    if (mfea_vif == NULL) {
-	error_msg = c_format("MfeaNode:  Cannot enable vif %s: no such vif",
-			     vif_name.c_str());
-	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
-    }
-    
-    mfea_vif->enable("MfeaNote::enable_vif");
     // Check our wants-to-be-running list
     map<string, VifPermInfo>::iterator i = perm_info.find(vif_name);
     if (i != perm_info.end()) {
@@ -1192,6 +1183,16 @@ MfeaNode::enable_vif(const string& vif_name, string& error_msg)
 	VifPermInfo pv(vif_name, false, true);
 	perm_info[vif_name] = pv;
     }
+
+    MfeaVif *mfea_vif = vif_find_by_name(vif_name);
+    if (mfea_vif == NULL) {
+	error_msg = c_format("MfeaNode:  Cannot enable vif %s: no such vif",
+			     vif_name.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
+	return (XORP_ERROR);
+    }
+    
+    mfea_vif->enable("MfeaNote::enable_vif");
 
     return XORP_OK;
 }
@@ -1241,6 +1242,16 @@ MfeaNode::disable_vif(const string& vif_name, string& error_msg)
 int
 MfeaNode::start_vif(const string& vif_name, string& error_msg)
 {
+    // Check our wants-to-be-running list
+    map<string, VifPermInfo>::iterator i = perm_info.find(vif_name);
+    if (i != perm_info.end()) {
+	i->second.should_start = true;
+    }
+    else {
+	VifPermInfo pv(vif_name, true, false);
+	perm_info[vif_name] = pv;
+    }
+
     MfeaVif *mfea_vif = vif_find_by_name(vif_name);
     if (mfea_vif == NULL) {
 	error_msg = c_format("MfeaNode: Cannot start vif %s: no such vif",
@@ -1259,7 +1270,7 @@ MfeaNode::start_vif(const string& vif_name, string& error_msg)
     // XXX: add PIM Register vif (if needed)
     add_pim_register_vif();
 
-    return (XORP_OK);
+    return XORP_OK;
 }
 
 /**
