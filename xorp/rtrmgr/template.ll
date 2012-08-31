@@ -29,6 +29,7 @@ extern YYSTYPE tpltlval;
 %option noyywrap
 %option nounput
 %option never-interactive
+%x one_liner
 %x comment
 %x string
 
@@ -506,6 +507,17 @@ RE_URL_SUBDELIMS "!"|"$"|"&"|"'"|"("|")"|"*"|"+"|","|";"|"="
 <comment>\n		tplt_linenum++;
 
 <comment>"*"+"/"	BEGIN(INITIAL);
+
+"%%"				BEGIN(one_liner);
+
+<one_liner>[^\n]*	/* eat up everything, except new line*/
+
+<one_liner>\n	{
+				tplt_linenum++;
+				BEGIN(INITIAL);
+				}
+
+
 
 .	{
 	/* everything else is a syntax error */

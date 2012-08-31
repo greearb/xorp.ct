@@ -33,6 +33,7 @@ extern YYSTYPE bootlval;
 %option noyywrap
 %option nounput
 %option never-interactive
+%x one_liner
 %x comment
 %x string
 %x arith
@@ -452,6 +453,15 @@ RE_ARITH_OPERATOR	[" "]*({RE_BIN_OPERATOR})[" "]*
 <comment>\n		boot_linenum++;
 
 <comment>"*"+"/"	BEGIN(INITIAL);
+
+"%%"				BEGIN(one_liner);
+
+<one_liner>[^\n]*	/* eat up everything, except new line*/
+
+<one_liner>\n	{
+				boot_linenum++;
+				BEGIN(INITIAL);
+				}
 
 .	{
 	/* everything else is a syntax error */
