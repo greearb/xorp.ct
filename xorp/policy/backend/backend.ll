@@ -5,12 +5,18 @@
 
 #include "libxorp/xorp.h"
 #include "policy/common/policy_utils.hh"
-#include "policy_backend_parser.hh"
-#include "yacc.yy_policy_backend_parser.cc.h"
+#include "policy/backend/policy_backend_parser.hh"
 
-#define yyparse yy_policy_backend_parserparse
-#define yyerror yy_policy_backend_parsererror
-#define yylval yy_policy_backend_parserlval
+#if defined(NEED_LEX_H_HACK)
+extern YYSTYPE tpltlval;
+#include "y.policy_backend_parser_tab.cc.h"
+#else
+#include "y.policy_backend_parser_tab.hh"
+#endif
+
+#define yyparse policy_backend_parserparse
+#define yyerror policy_backend_parsererror
+#define yylval policy_backend_parserlval
 
 using namespace policy_utils;
 using namespace policy_backend_parser;
@@ -28,13 +34,13 @@ SUBR*			policy_backend_parser::_yy_subr;
 namespace {
 	string _last_error;
 	unsigned _parser_lineno;
-}	
+}
 
 %}
 %option noyywrap
 %option nounput
-%option prefix="yy_policy_backend_parser"
-%option outfile="lex.yy_policy_backend_parser.cc"
+%option prefix="policy_backend_parser"
+%option outfile="lex.policy_backend_parser.cc"
 %option never-interactive
 %x STR
 %%
@@ -79,19 +85,19 @@ namespace {
 
 [[:blank:]]+	/* eat blanks */
 
-[^\"[:blank:]\n]+	{	
+[^\"[:blank:]\n]+	{
 			yylval.c_str = strdup(yytext);
-		  	return YY_ARG;
-			}  
+			return YY_ARG;
+			}
 
 \"		BEGIN(STR);
 
 <STR>\"		BEGIN(INITIAL);
 
 <STR>[^\"]+	{ yylval.c_str = strdup(yytext);
-	 	  _parser_lineno += count_nl(yytext);	
+		  _parser_lineno += count_nl(yytext);
 		  return YY_ARG;
-		}  
+		}
 
 %%
 
@@ -137,7 +143,7 @@ policy_backend_parser::policy_backend_parse(vector<PolicyInstr*>& outpolicies,
 		// get rid of temporary parse object not yet bound to policies
 		delete_vector(_yy_terms);
 	        delete_vector(_yy_instructions);
-	} 
+	}
 	// good parse
 	else {
 		// all terms should be bound to policies
@@ -150,4 +156,4 @@ policy_backend_parser::policy_backend_parse(vector<PolicyInstr*>& outpolicies,
 	}
 
 	return res;
-} 
+}
