@@ -4,15 +4,21 @@
 #include <string>
 #include <sstream>
 
-#include "policy_module.h"
+#include "policy/policy_module.h"
 #include "libxorp/xorp.h"
 #include "policy/common/policy_utils.hh"
-#include "policy_parser.hh"
-#include "yacc.yy_policy_parser.cc.h"
+#include "policy/policy_parser.hh"
 
-#define yylval yy_policy_parserlval
-#define yyerror yy_policy_parsererror
-#define yyparse yy_policy_parserparse
+#if defined(NEED_LEX_H_HACK)
+extern YYSTYPE tpltlval;
+#include "y.policy_parser_tab.cc.h"
+#else
+#include "y.policy_parser_tab.hh"
+#endif
+
+#define yylval policy_parserlval
+#define yyerror policy_parsererror
+#define yyparse policy_parserparse
 
 void yyerror(const char *m);
 extern int yyparse(void);
@@ -31,8 +37,8 @@ namespace {
 
 %}
 
-%option prefix="yy_policy_parser"
-%option outfile="lex.yy_policy_parser.cc"
+%option prefix="policy_parser"
+%option outfile="lex.policy_parser.cc"
 %option noyywrap
 %option nounput
 %option never-interactive
@@ -63,33 +69,33 @@ RE_IPV6NET      {RE_IPV6}\/{RE_IPV6_PREFIXLEN}
 
 [[:digit:]]+".."[[:digit:]]+	{ yylval.c_str = strdup(yytext);
 		  return YY_UINTRANGE;
-		}  
+		}
 
 [[:digit:]]+	{ yylval.c_str = strdup(yytext);
 		  return YY_UINT;
-		}  
+		}
 
 -[[:digit:]]+	{ yylval.c_str = strdup(yytext);
 		  return YY_INT;
-		}  
+		}
 
 "true"		{ yylval.c_str = strdup(yytext);
 		  return YY_BOOL;
-		}  
+		}
 
 "false"		{ yylval.c_str = strdup(yytext);
 		  return YY_BOOL;
-		}  
+		}
 
 \"|\'		BEGIN(STR);
 
 <STR>\"|\'	BEGIN(INITIAL);
-		
-<STR>[^\"\']+	{ yylval.c_str = strdup(yytext); 
+
+<STR>[^\"\']+	{ yylval.c_str = strdup(yytext);
 		  _parser_lineno += policy_utils::count_nl(yytext);
 		  /* XXX: a string can be started with " but terminated with '
 		   * and vice versa...
-		   */ 
+		   */
 		  return YY_STR;
 		}
 
@@ -108,7 +114,7 @@ RE_IPV6NET      {RE_IPV6}\/{RE_IPV6_PREFIXLEN}
 		  return YY_IPV4NET;
 		}
 
-		
+
 {RE_IPV6}".."{RE_IPV6}	{
 		  yylval.c_str = strdup(yytext);
 		  return YY_IPV6RANGE;
@@ -128,14 +134,14 @@ RE_IPV6NET      {RE_IPV6}\/{RE_IPV6_PREFIXLEN}
 		  // the colon is an alias for asignment in action and equality
 		  // in the source / dest blocks.
 		  if (_block == Term::ACTION)
-		  	return YY_ASSIGN;
+			return YY_ASSIGN;
 		  else
-		  	return YY_EQ;
+			return YY_EQ;
 		}
 
 "("		return YY_LPAR;
 ")"		return YY_RPAR;
-"=="		return YY_EQ; 
+"=="		return YY_EQ;
 "!="		return YY_NE;
 "<="		return YY_LE;
 ">="		return YY_GE;
@@ -176,10 +182,10 @@ RE_IPV6NET      {RE_IPV6}\/{RE_IPV6_PREFIXLEN}
 
 [[:alpha:]][[:alnum:]_-]*		{ yylval.c_str = strdup(yytext);
 					  return YY_ID;
-					}  
+					}
 
 ;		return YY_SEMICOLON;
-		  
+
 [[:blank:]]+	/* eat blanks */
 
 "\n"		_parser_lineno++;
@@ -201,8 +207,8 @@ void yyerror(const char *m)
 }
 
 // Everything is put in the lexer because of YY_BUFFER_STATE...
-int 
-policy_parser::policy_parse(vector<Node*>& outnodes, const Term::BLOCKS& block, 
+int
+policy_parser::policy_parse(vector<Node*>& outnodes, const Term::BLOCKS& block,
 			    const string& conf, string& outerr)
 {
 
@@ -214,9 +220,9 @@ policy_parser::policy_parse(vector<Node*>& outnodes, const Term::BLOCKS& block,
 	_block = block;
 
         int res = yyparse();
-        
+
         yy_delete_buffer(yybuffstate);
         outerr = _last_error;
-        
+
         return res;
 }
