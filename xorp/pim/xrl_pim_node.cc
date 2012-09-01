@@ -2234,12 +2234,11 @@ XrlPimNode::mld6igmp_client_send_add_delete_protocol_mld6igmp_cb(
 
     case COMMAND_FAILED:
 	//
-	// These errors can be caused by VIFs suddenly dissappearing.  For now,
-	// register failure is still considered fatal.
-	//
+	// These errors can be caused by VIFs suddenly dissappearing (or
+	// not existing to begin with).
 	if (is_add) {
-	    XLOG_FATAL("Cannot register with the MLD6IGMP: %s",
-		       xrl_error.str().c_str());
+	    XLOG_WARNING("Cannot register with the MLD6IGMP: %s",
+			 xrl_error.str().c_str());
 	}
 	else {
 	    XLOG_WARNING("Cannot deregister with the MLD6IGMP: %s",
@@ -2385,9 +2384,9 @@ XrlPimNode::send_protocol_message()
     entry = dynamic_cast<SendProtocolMessage*>(xrl_task_base);
     XLOG_ASSERT(entry != NULL);
 
-    //XLOG_ERROR("XrlPimNode::send_protocol_message interface/vif %s/%s. ",
-    //       entry->if_name().c_str(),
-    //       entry->vif_name().c_str());
+    //XLOG_INFO("XrlPimNode::send_protocol_message interface/vif %s/%s. from: %s to: %s",
+    //      entry->if_name().c_str(), entry->vif_name().c_str(),
+    //      entry->src_address().str().c_str(), entry->dst_address().str().c_str());
 
     //
     // Check whether we have already registered with the FEA

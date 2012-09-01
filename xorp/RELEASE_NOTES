@@ -3,6 +3,27 @@
 
 This file contains XORP release notes (most recent releases first).
 
+Release 1.8.6
+
+   *  Improve handling of interfaces that appear and dissappear in
+      IGMP, MFEA and PIM.
+
+   *  Add support for static MCAST routes.
+
+   *  Routing table (RIB) performance improvements and bug fixes.
+
+   *  OSPF v6 route cost fix.
+
+   *  Policy fixes related to protocol death and route distribution.
+
+   *  XRL bug fixes, support for int64 types.
+
+   *  Some BSD fixes, but still issues on at least some versions.
+
+   *  Remove auto-generated lex/yacc files, and instead build them
+      at compile-time.
+
+
 Release 1.8.5
 
    *  Fix bad OSPF bug that made neighbours very slow to go to Full

@@ -465,8 +465,6 @@ IoIpSocket::set_default_multicast_interface(const string& if_name,
     switch (family()) {
     case AF_INET:
     {
-	struct in_addr in_addr;
-
 	// Find the first address
 	IfTreeVif::IPv4Map::const_iterator ai = vifp->ipv4addrs().begin();
 	if (ai == vifp->ipv4addrs().end()) {
@@ -476,7 +474,25 @@ IoIpSocket::set_default_multicast_interface(const string& if_name,
 				 if_name.c_str(), vif_name.c_str());
 	    return (XORP_ERROR);
 	}
+
 	const IfTreeAddr4& fa = *(ai->second);
+
+#ifdef HAVE_STRUCT_IP_MREQN
+	struct ip_mreqn mreqn;
+	memset(&mreqn, 0, sizeof(mreqn));
+
+	fa.addr().copy_out(mreqn.imr_address);
+	mreqn.imr_ifindex = vifp->pif_index();
+	if (setsockopt(_proto_socket_out, IPPROTO_IP, IP_MULTICAST_IF,
+		       XORP_SOCKOPT_CAST(&mreqn), sizeof(mreqn)) < 0) {
+	    error_msg = c_format("setsockopt(IP_MULTICAST_IF, %s %i) failed: %s",
+				 cstring(fa.addr()), vifp->pif_index(),
+				 XSTRERROR);
+	    return XORP_ERROR;
+	}
+#else
+	struct in_addr in_addr;
+	memset(&in_addr, 0, sizeof(in_addr));
 
 	fa.addr().copy_out(in_addr);
 	if (setsockopt(_proto_socket_out, IPPROTO_IP, IP_MULTICAST_IF,
@@ -485,6 +501,7 @@ IoIpSocket::set_default_multicast_interface(const string& if_name,
 				 cstring(fa.addr()), XSTRERROR);
 	    return (XORP_ERROR);
 	}
+#endif
     }
     break;
 

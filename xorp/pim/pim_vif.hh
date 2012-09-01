@@ -17,8 +17,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/pim/pim_vif.hh,v 1.48 2008/10/02 21:57:55 bms Exp $
-
 
 #ifndef __PIM_PIM_VIF_HH__
 #define __PIM_PIM_VIF_HH__
@@ -27,8 +25,6 @@
 //
 // PIM virtual interface definition.
 //
-
-
 
 
 #include "libxorp/config_param.hh"
@@ -42,20 +38,15 @@
 #include "pim_proto_join_prune_message.hh"
 
 
-//
-// Constants definitions
-//
-
-//
-// Structures/classes, typedefs and macros
-//
-
 class AssertMetric;
 class BsrZone;
 class PimJpGroup;
 class PimJpHeader;
 class PimNbr;
 class PimNode;
+
+
+extern map<string, VifPermInfo> perm_info;
 
 
 /**
@@ -98,7 +89,7 @@ public:
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		start(string& error_msg);
+    int start(string& error_msg, const char* dbg);
     
     /**  Attempt deferred start.
      */
@@ -114,9 +105,11 @@ public:
      * PimVif::final_stop() is called to complete the job.
      * 
      * @param error_msg the error message (if error).
+     * @param stay_down  Should we stay stopped even if conditions improve later?
+     * @param dbg  Debugging info about why this method was called.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		stop(string& error_msg);
+    int stop(string& error_msg, bool stay_down, const char* dbg);
     
     /**
      * Completely stop PIM on a single virtual interface.
@@ -134,7 +127,7 @@ public:
      * 
      * If an unit is not enabled, it cannot be start, or pending-start.
      */
-    void	enable();
+    void enable(const char* dbg);
     
     /**
      * Disable PIM on a single virtual interface.
@@ -142,7 +135,7 @@ public:
      * If an unit is disabled, it cannot be start or pending-start.
      * If the unit was runnning, it will be stop first.
      */
-    void	disable();
+    void disable(const char* dbg);
     
     /**
      * Receive a protocol message.

@@ -1112,7 +1112,7 @@ PimNode::delete_vif_addr(const string& vif_name,
     if (old_vif_is_up) {
 	if (pim_vif->primary_addr() == addr) {
 	    string dummy_error_msg;
-	    pim_vif->stop(dummy_error_msg);
+	    pim_vif->stop(dummy_error_msg, false, "primary addr deleted");
 	}
     }
 
@@ -1140,16 +1140,16 @@ PimNode::delete_vif_addr(const string& vif_name,
 	}
 	if (pim_vif->primary_addr().is_zero()
 	    || pim_vif->domain_wide_addr().is_zero()) {
-	    pim_vif->stop(dummy_error_msg);
+	    pim_vif->stop(dummy_error_msg, false, "del-addr, new addr is zero");
 	    break;
 	}
 	if (old_primary_addr == pim_vif->primary_addr())
-	    break;		// Nothing changed
+	    break; // Nothing changed
 
 	// Conditionally restart the interface
-	pim_vif->stop(dummy_error_msg);
+	pim_vif->stop(dummy_error_msg, false, "del-addr: stop before possible restart");
 	if (old_vif_is_up)
-	    pim_vif->start(dummy_error_msg);
+	    pim_vif->start(dummy_error_msg, " restart after del-addr");
 	break;
     } while (false);
 
@@ -1191,7 +1191,18 @@ PimNode::enable_vif(const string& vif_name, string& error_msg)
     PimVif *pim_vif = find_or_create_vif(vif_name, error_msg);
 
     if (pim_vif) {
-	pim_vif->enable();
+	pim_vif->enable("PimNode::enable_vif");
+
+	// Check our wants-to-be-running list
+	map<string, VifPermInfo>::iterator i = perm_info.find(vif_name);
+	if (i != perm_info.end()) {
+	    i->second.should_enable = true;
+	}
+	else {
+	    VifPermInfo pv(vif_name, false, true);
+	    perm_info[vif_name] = pv;
+	}
+
 	return XORP_OK;
     }
     else {
@@ -1222,6 +1233,13 @@ PimNode::find_or_create_vif(const string& vif_name, string& error_msg) {
 int
 PimNode::disable_vif(const string& vif_name, string& error_msg)
 {
+
+    // Check our wants-to-be-running list
+    map<string, VifPermInfo>::iterator i = perm_info.find(vif_name);
+    if (i != perm_info.end()) {
+	i->second.should_enable = false;
+    }
+
     PimVif *pim_vif = vif_find_by_name(vif_name);
     if (pim_vif == NULL) {
 	error_msg = c_format("Cannot disable vif %s: no such vif",
@@ -1232,7 +1250,7 @@ PimNode::disable_vif(const string& vif_name, string& error_msg)
 	return XORP_OK;
     }
     
-    pim_vif->disable();
+    pim_vif->disable("PimNode::disable_vif");
     
     return (XORP_OK);
 }
@@ -1257,7 +1275,7 @@ PimNode::start_vif(const string& vif_name, string& error_msg)
 	return (XORP_ERROR);
     }
 
-    if (pim_vif->start(error_msg) != XORP_OK) {
+    if (pim_vif->start(error_msg, "PimNode::start_vif") != XORP_OK) {
 	error_msg = c_format("Cannot start vif %s: %s",
 			     vif_name.c_str(), error_msg.c_str());
 	XLOG_ERROR("%s", error_msg.c_str());
@@ -1287,7 +1305,7 @@ PimNode::stop_vif(const string& vif_name, string& error_msg)
 	return XORP_OK;
     }
     
-    if (pim_vif->stop(error_msg) != XORP_OK) {
+    if (pim_vif->stop(error_msg, true, "PimNode::stop_vif") != XORP_OK) {
 	error_msg = c_format("Cannot stop vif %s: %s",
 			     vif_name.c_str(), error_msg.c_str());
 	XLOG_ERROR("%s", error_msg.c_str());

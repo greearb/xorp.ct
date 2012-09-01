@@ -97,6 +97,7 @@ vars.AddVariables(
     BoolVariable('enable_tests',  'Build Test Programs', False),
     BoolVariable('enable_click',  'Build CLICK support', False),
     BoolVariable('enable_fea_dummy',  'Build fea-dummy target', True),
+    BoolVariable('enable_viff_use_ifindex',  'Use VIFF_USE_IFINDEX feature in Linux kernel 2.6.31+', False),
     BoolVariable('enable_async_server',  'Permit asynchronous method implementations', False),
     BoolVariable('debug_xrldb',  'Build with runtime XRL syntax validation in Router Manager', False),
     EnumVariable('debug', 'Build with debug symbols', 'full',
@@ -275,6 +276,7 @@ print 'Enable xorpsh     ', env['enable_xorpsh']
 print 'Enable Test Programs: ', env['enable_tests']
 print 'Enable CLICK:     ', env['enable_click']
 print 'Enable FEA Dummy: ', env['enable_fea_dummy']
+print 'Enable VIFF_USE_IFINDEX: ', env['enable_viff_use_ifindex']
 print 'Enable async method impls: ', env['enable_async_server']
 print 'Enable BGP:       ', env['enable_bgp']
 print 'Enable BuildInfo: ', env['enable_buildinfo']
@@ -445,6 +447,13 @@ if tst and ((tst == "no") or (tst == "false")):
     env['enable_async_server'] = False
 else:
     env['enable_async_server'] = True
+
+# Default to disabled
+tst = ARGUMENTS.get('enable_viff_use_ifindex', False)
+if tst and ((tst == "no") or (tst == "false")):
+    env['enable_viff_use_ifindex'] = False
+else:
+    env['enable_viff_use_ifindex'] = True
 
 # Default to enabled
 tst = ARGUMENTS.get('enable_bgp', True)
@@ -704,6 +713,10 @@ if not env.GetOption('clean') and \
     tst = ARGUMENTS.get('enable_fea_dummy', True)
     if tst and not ((tst == "no") or (tst == "false")):
         conf.Define('XORP_USE_FEA_DUMMY')
+
+    tst = ARGUMENTS.get('enable_viff_use_ifindex', False)
+    if tst and not ((tst == "no") or (tst == "false")):
+        conf.Define('XORP_USE_VIFF_USE_IFINDEX')
 
     tst = ARGUMENTS.get('enable_async_server', False)
     if tst and not ((tst == "no") or (tst == "false")):

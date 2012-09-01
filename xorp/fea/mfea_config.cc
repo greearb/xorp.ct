@@ -183,7 +183,7 @@ MfeaNode::set_config_all_vifs_done(string& error_msg)
 		if (ipvx == old_primary_addr) {
 		    // Stop the vif if the primary address is deleted
 		    if (old_vif_is_up)
-			node_vif->stop(dummy_error_msg);
+			node_vif->stop(dummy_error_msg, false, "primary addr deleted");
 		}
 		node_vif->delete_address(ipvx);
 	    }
@@ -196,18 +196,21 @@ MfeaNode::set_config_all_vifs_done(string& error_msg)
 	do {
 	    string dummy_error_msg;
 	    if (node_vif->addr_ptr() == NULL) {
-		node_vif->stop(dummy_error_msg);
+		node_vif->stop(dummy_error_msg, false, "null addr ptr");
 		break;
 	    }
 	    if (old_primary_addr == *node_vif->addr_ptr())
 		break;		// Nothing changed
 
 	    // Conditionally restart the interface
-	    node_vif->stop(dummy_error_msg);
+	    node_vif->stop(dummy_error_msg, false, "del-addr, stop before possible restart");
 	    if (old_vif_is_up)
-		node_vif->start(dummy_error_msg);
+		node_vif->start(dummy_error_msg, "restart after del-addr");
 	    break;
 	} while (false);
+
+	// Notify updated...underlying vif enabled or similar might have changed.
+	node_vif->notifyUpdated();
     }
 
     //

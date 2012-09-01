@@ -36,6 +36,8 @@
 #include "pim_vif.hh"
 
 
+map<string, VifPermInfo> perm_info;
+
 /**
  * PimVif::PimVif:
  * @pim_node: The PIM node this interface belongs to.
@@ -141,7 +143,15 @@ PimVif::PimVif(PimNode* pim_node, const Vif& vif)
       //
       _usage_by_pim_mre_task(0)
 {
-    wants_to_be_started = false;
+    // Check our wants-to-be-running list
+    map<string, VifPermInfo>::iterator i = perm_info.find(name());
+    if (i != perm_info.end()) {
+	wants_to_be_started = i->second.should_start;
+    }
+    else {
+	wants_to_be_started = false;
+    }
+
     _buffer_send = BUFFER_MALLOC(BUF_SIZE_DEFAULT);
     _buffer_send_hello = BUFFER_MALLOC(BUF_SIZE_DEFAULT);
     _buffer_send_bootstrap = BUFFER_MALLOC(BUF_SIZE_DEFAULT);
@@ -165,7 +175,7 @@ PimVif::~PimVif()
 {
     string error_msg;
 
-    stop(error_msg);
+    stop(error_msg, false, "destructing pimvif");
     
     BUFFER_FREE(_buffer_send);
     BUFFER_FREE(_buffer_send_hello);
@@ -245,9 +255,19 @@ PimVif::pim_mrt() const
 
 /** System detected some change.  */
 void PimVif::notifyUpdated() {
-    if (wants_to_be_started) {
+    int perm_started = -1;
+    if (!wants_to_be_started) {
+	map<string, VifPermInfo>::iterator i = perm_info.find(name());
+	if (i != perm_info.end()) {
+	    perm_started = i->second.should_start;
+	}
+    }
+
+    XLOG_INFO("notifyUpdated, vif: %s  wants-to-be-started: %i, perm-should-start: %i",
+	      name().c_str(), (int)(wants_to_be_started), perm_started);
+    if (wants_to_be_started || (perm_started == 1)) {
 	string err_msg;
-	int rv = start(err_msg);
+	int rv = start(err_msg, "notifyUpdated, wants to be started");
 	if (rv == XORP_OK) {
 	    XLOG_WARNING("notifyUpdated, successfully started pim_vif: %s",
 			 name().c_str());
@@ -269,13 +289,36 @@ void PimVif::notifyUpdated() {
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-PimVif::start(string& error_msg)
+PimVif::start(string& error_msg, const char* dbg)
 {
+    XLOG_INFO("%s:  start called, is_enabled: %i  is-up: %i  is-pending-up: %i, dbg: %s\n",
+	      name().c_str(), (int)(is_enabled()), (int)(is_up()), (int)(is_pending_up()),
+	      dbg);
+
+    map<string, VifPermInfo>::iterator i = perm_info.find(name());
+
+    if (! is_enabled()) {
+	if (i != perm_info.end()) {
+	    if (i->second.should_enable) {
+		enable("start, should_enable");
+	    }
+	}
+    }
+
     if (! is_enabled())
-	return (XORP_OK);
+	return XORP_OK;
 
     if (is_up() || is_pending_up())
 	return (XORP_OK);
+
+    // Add to our wants-to-be-running list
+    if (i != perm_info.end()) {
+	i->second.should_start = true;
+    }
+    else {
+	VifPermInfo pi(name(), true, false);
+	perm_info[name()] = pi;
+    }
 
     if (! is_underlying_vif_up()) {
 	wants_to_be_started = true;
@@ -386,10 +429,22 @@ PimVif::start(string& error_msg)
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-PimVif::stop(string& error_msg)
+PimVif::stop(string& error_msg, bool stay_down, const char* dbg)
 {
     int ret_value = XORP_OK;
-    wants_to_be_started = false; //it worked
+
+    wants_to_be_started = false;
+
+    if (stay_down) {
+	// Remove from our wants-to-be-running list
+	map<string, VifPermInfo>::iterator i = perm_info.find(name());
+	if (i != perm_info.end()) {
+	    i->second.should_start = false;
+	}
+    }
+
+    XLOG_INFO("%s:  stop called, stay_down: %i dbg: %s\n",
+	      name().c_str(), (int)(stay_down), dbg);
 
     if (is_down())
 	return (XORP_OK);
@@ -528,12 +583,12 @@ PimVif::final_stop(string& error_msg)
  * If an unit is not enabled, it cannot be start, or pending-start.
  */
 void
-PimVif::enable()
+PimVif::enable(const char* dbg)
 {
     ProtoUnit::enable();
 
-    XLOG_INFO("Interface enabled: %s%s",
-	      this->str().c_str(), flags_string().c_str());
+    XLOG_INFO("Interface enabled: %s%s, dbg: %s",
+	      this->str().c_str(), flags_string().c_str(), dbg);
 }
 
 /**
@@ -543,15 +598,15 @@ PimVif::enable()
  * If the unit was runnning, it will be stop first.
  */
 void
-PimVif::disable()
+PimVif::disable(const char* dbg)
 {
     string error_msg;
 
-    stop(error_msg);
+    stop(error_msg, true, "disable called");
     ProtoUnit::disable();
 
-    XLOG_INFO("Interface disabled: %s%s",
-	      this->str().c_str(), flags_string().c_str());
+    XLOG_INFO("Interface disabled: %s%s, dbg: %s",
+	      this->str().c_str(), flags_string().c_str(), dbg);
 }
 
 /**

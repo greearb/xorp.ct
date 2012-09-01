@@ -1001,7 +1001,7 @@ Mld6igmpNode::delete_vif_addr(const string& vif_name,
     if (old_vif_is_up) {
 	if (mld6igmp_vif->primary_addr() == addr) {
 	    string dummy_error_msg;
-	    mld6igmp_vif->stop(dummy_error_msg);
+	    mld6igmp_vif->stop(dummy_error_msg, false, "primary addr deleted");
 	}
     }
 
@@ -1026,16 +1026,16 @@ Mld6igmpNode::delete_vif_addr(const string& vif_name,
 		       mld6igmp_vif->name().c_str(), error_msg.c_str());
 	}
 	if (mld6igmp_vif->primary_addr().is_zero()) {
-	    mld6igmp_vif->stop(dummy_error_msg);
+	    mld6igmp_vif->stop(dummy_error_msg, false, "del-addr, enw addr is zero");
 	    break;
 	}
 	if (old_primary_addr == mld6igmp_vif->primary_addr())
-	    break;		// Nothing changed
+	    break; // Nothing changed
 
 	// Conditionally restart the interface
-	mld6igmp_vif->stop(dummy_error_msg);
+	mld6igmp_vif->stop(dummy_error_msg, false, "dela-addr, stop before possible restart");
 	if (old_vif_is_up)
-	    mld6igmp_vif->start(dummy_error_msg);
+	    mld6igmp_vif->start(dummy_error_msg, "restart after del-addr");
 	break;
     } while (false);
 
@@ -1068,7 +1068,16 @@ Mld6igmpNode::enable_vif(const string& vif_name, string& error_msg)
     Mld6igmpVif *mld6igmp_vif = find_or_create_vif(vif_name, error_msg);
 
     if (mld6igmp_vif) {
-	mld6igmp_vif->enable();
+	mld6igmp_vif->enable("Mld6igmpNode::enable_vif");
+	// Check our wants-to-be-running list
+	map<string, VifPermInfo>::iterator i = perm_info.find(vif_name);
+	if (i != perm_info.end()) {
+	    i->second.should_enable = true;
+	}
+	else {
+	    VifPermInfo pv(vif_name, false, true);
+	    perm_info[vif_name] = pv;
+	}
         return XORP_OK;
     }
     else {
@@ -1088,6 +1097,12 @@ Mld6igmpNode::enable_vif(const string& vif_name, string& error_msg)
 int
 Mld6igmpNode::disable_vif(const string& vif_name, string& error_msg)
 {
+    // Check our wants-to-be-running list
+    map<string, VifPermInfo>::iterator i = perm_info.find(vif_name);
+    if (i != perm_info.end()) {
+	i->second.should_enable = false;
+    }
+
     Mld6igmpVif *mld6igmp_vif = vif_find_by_name(vif_name);
     if (mld6igmp_vif == NULL) {
 	error_msg = c_format("Cannot disable vif %s: no such vif",
@@ -1098,7 +1113,7 @@ Mld6igmpNode::disable_vif(const string& vif_name, string& error_msg)
 	return XORP_OK;
     }
     
-    mld6igmp_vif->disable();
+    mld6igmp_vif->disable("Mld6igmpNode::disable_vif");
     
     return (XORP_OK);
 }
@@ -1123,7 +1138,7 @@ Mld6igmpNode::start_vif(const string& vif_name, string& error_msg)
 	return (XORP_ERROR);
     }
     
-    if (mld6igmp_vif->start(error_msg) != XORP_OK) {
+    if (mld6igmp_vif->start(error_msg, "Mld6igmpNode::start_vif") != XORP_OK) {
 	error_msg = c_format("Cannot start vif %s: %s",
 			     vif_name.c_str(), error_msg.c_str());
 	XLOG_ERROR("%s", error_msg.c_str());
@@ -1155,7 +1170,7 @@ Mld6igmpNode::stop_vif(const string& vif_name, string& error_msg)
 	return XORP_OK;
     }
     
-    if (mld6igmp_vif->stop(error_msg) != XORP_OK) {
+    if (mld6igmp_vif->stop(error_msg, true, "Mld6igmpNode::stop_vif") != XORP_OK) {
 	error_msg = c_format("Cannot stop vif %s: %s",
 			     vif_name.c_str(), error_msg.c_str());
 	XLOG_ERROR("%s", error_msg.c_str());

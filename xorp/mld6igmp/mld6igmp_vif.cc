@@ -18,8 +18,6 @@
 // http://xorp.net
 
 
-
-
 //
 // MLD6IGMP virtual interfaces implementation.
 //
@@ -32,6 +30,9 @@
 #include "libxorp/ipvx.hh"
 #include "libproto/checksum.h"
 #include "mld6igmp_vif.hh"
+
+
+map<string, VifPermInfo> perm_info;
 
 
 /**
@@ -72,7 +73,15 @@ Mld6igmpVif::Mld6igmpVif(Mld6igmpNode& mld6igmp_node, const Vif& vif)
       _dummy_flag(false)
 {
     XLOG_ASSERT(proto_is_igmp() || proto_is_mld6());
-    wants_to_be_started = false;
+
+    // Check our wants-to-be-running list
+    map<string, VifPermInfo>::iterator i = perm_info.find(name());
+    if (i != perm_info.end()) {
+	wants_to_be_started = i->second.should_start;
+    }
+    else {
+	wants_to_be_started = false;
+    }
 
     //
     // TODO: when more things become classes, most of this init should go away
@@ -114,7 +123,7 @@ Mld6igmpVif::~Mld6igmpVif()
 {
     string error_msg;
 
-    stop(error_msg);
+    stop(error_msg, false, "destructing igmp vif");
     _group_records.delete_payload_and_clear();
     
     BUFFER_FREE(_buffer_send);
@@ -187,9 +196,20 @@ Mld6igmpVif::proto_is_ssm() const
 
 /** System detected some change.  */
 void Mld6igmpVif::notifyUpdated() {
-    if (wants_to_be_started) {
+    int perm_started = -1;
+    if (!wants_to_be_started) {
+	map<string, VifPermInfo>::iterator i = perm_info.find(name());
+	if (i != perm_info.end()) {
+	    perm_started = i->second.should_start;
+	}
+    }
+
+    XLOG_INFO("notifyUpdated, vif: %s  wants-to-be-started: %i, perm-should-start: %i",
+	      name().c_str(), (int)(wants_to_be_started), perm_started);
+
+    if (wants_to_be_started || (perm_started == 1)) {
 	string err_msg;
-	int rv = start(err_msg);
+	int rv = start(err_msg, "notifyUpdated, wants to be started");
 	if (rv == XORP_OK) {
 	    XLOG_WARNING("notifyUpdated, successfully started mld6igmp_vif: %s",
 			 name().c_str());
@@ -211,15 +231,38 @@ void Mld6igmpVif::notifyUpdated() {
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-Mld6igmpVif::start(string& error_msg)
+Mld6igmpVif::start(string& error_msg, const char* dbg)
 {
-    string dummy_error_msg;
+    string dummy_error_msg; // TODO:  Remove?
+
+    XLOG_INFO("%s:  start called, is_enabled: %i  is-up: %i  is-pending-up: %i, dbg: %s\n",
+	      name().c_str(), (int)(is_enabled()), (int)(is_up()), (int)(is_pending_up()),
+	      dbg);
+
+    map<string, VifPermInfo>::iterator i = perm_info.find(name());
+
+    if (! is_enabled()) {
+	if (i != perm_info.end()) {
+	    if (i->second.should_enable) {
+		enable("start, should_enable");
+	    }
+	}
+    }
 
     if (! is_enabled())
-	return (XORP_OK);
+	return XORP_OK;
 
     if (is_up() || is_pending_up())
 	return (XORP_OK);
+
+    // Add to our wants-to-be-running list
+    if (i != perm_info.end()) {
+	i->second.should_start = true;
+    }
+    else {
+	VifPermInfo pi(name(), true, false);
+	perm_info[name()] = pi;
+    }
 
     if (! is_underlying_vif_up()) {
 	wants_to_be_started = true;
@@ -333,10 +376,22 @@ Mld6igmpVif::start(string& error_msg)
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-Mld6igmpVif::stop(string& error_msg)
+Mld6igmpVif::stop(string& error_msg, bool stay_down, const char* dbg)
 {
     int ret_value = XORP_OK;
+
     wants_to_be_started = false;
+
+    if (stay_down) {
+	// Remove from our wants-to-be-running list
+	map<string, VifPermInfo>::iterator i = perm_info.find(name());
+	if (i != perm_info.end()) {
+	    i->second.should_start = false;
+	}
+    }
+
+    XLOG_INFO("%s:  stop called, stay_down: %i dbg: %s\n",
+	      name().c_str(), (int)(stay_down), dbg);
 
     if (is_down())
 	return (XORP_OK);
@@ -428,12 +483,12 @@ Mld6igmpVif::stop(string& error_msg)
  * If an unit is not enabled, it cannot be start, or pending-start.
  */
 void
-Mld6igmpVif::enable()
+Mld6igmpVif::enable(const char* dbg)
 {
     ProtoUnit::enable();
 
-    XLOG_INFO("Interface enabled: %s%s",
-	      this->str().c_str(), flags_string().c_str());
+    XLOG_INFO("Interface enabled: %s%s, dbg: %s",
+	      this->str().c_str(), flags_string().c_str(), dbg);
 }
 
 /**
@@ -443,15 +498,15 @@ Mld6igmpVif::enable()
  * If the unit was runnning, it will be stop first.
  */
 void
-Mld6igmpVif::disable()
+Mld6igmpVif::disable(const char* dbg)
 {
     string error_msg;
 
-    stop(error_msg);
+    stop(error_msg, true, "disable called");
     ProtoUnit::disable();
 
-    XLOG_INFO("Interface disabled: %s%s",
-	      this->str().c_str(), flags_string().c_str());
+    XLOG_INFO("Interface disabled: %s%s, dbg: %s",
+	      this->str().c_str(), flags_string().c_str(), dbg);
 }
 
 /**

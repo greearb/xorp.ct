@@ -1344,15 +1344,30 @@ MfeaMrouter::add_multicast_vif(uint32_t vif_index)
 	vcp->vifc_flags = 0;
 	if (mfea_vif->is_pim_register())
 	    vcp->vifc_flags	|= VIFF_REGISTER;
+	    
 	vcp->vifc_threshold	= mfea_vif->min_ttl_threshold();
 	vcp->vifc_rate_limit	= mfea_vif->max_rate_limit();
-	
-	if (mfea_vif->addr_ptr() == NULL) {
-	    XLOG_ERROR("add_multicast_vif() failed: vif %s has no address",
-		       mfea_vif->name().c_str());
-	    return (XORP_ERROR);
+
+#ifdef XORP_USE_VIFF_USE_IFINDEX
+	// NOTE:  This will break on un-patched kernels earlier than
+	// 2.6.31 or so.  See:  http://patchwork.ozlabs.org/patch/33723/
+	// You have to enable this with "scons enable_viff_use_ifindex=true"
+	// since I see no way to auto-detect if a kernel supports this feature
+	// or not. --Ben
+	if (! mfea_vif->is_pim_register()) {
+	    vcp->vifc_flags = VIFF_USE_IFINDEX;
+	    vcp->vifc_lcl_ifindex = mfea_vif->pif_index();
+	} else
+#endif
+	{
+	    if (mfea_vif->addr_ptr() == NULL) {
+		XLOG_ERROR("add_multicast_vif() failed: vif %s has no address",
+			   mfea_vif->name().c_str());
+		return (XORP_ERROR);
+	    }
+	    mfea_vif->addr_ptr()->copy_out(vcp->vifc_lcl_addr);
 	}
-	mfea_vif->addr_ptr()->copy_out(vcp->vifc_lcl_addr);
+
 	//
 	// XXX: no need to copy any remote address to vc.vifc_rmt_addr,
 	// because we don't (need to) support IPIP tunnels.

@@ -29,6 +29,7 @@
 #include "libxorp/vif.hh"
 #include "libproto/proto_unit.hh"
 
+extern map<string, VifPermInfo> perm_info;
 
 class MfeaNode;
 
@@ -66,22 +67,24 @@ public:
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		start(string& error_msg);
+    int start(string& error_msg, const char* dbg);
     
     /**
      * Stop MFEA on a single virtual interface.
-     * 
+     * @param stay_down  Should we stay stopped even if conditions improve later?
+     * @param dbg  Debugging info about why this method was called.
      * @param error_msg the error message (if error).
+     
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		stop(string& error_msg);
+    int stop(string& error_msg, bool stay_down, const char* dbg);
 
     /**
      * Enable MFEA on a single virtual interface.
      * 
      * If an unit is not enabled, it cannot be start, or pending-start.
      */
-    void	enable();
+    void enable(const char* dbg);
     
     /**
      * Disable MFEA on a single virtual interface.
@@ -89,7 +92,7 @@ public:
      * If an unit is disabled, it cannot be start or pending-start.
      * If the unit was runnning, it will be stop first.
      */
-    void	disable();
+    void disable(const char* dbg);
 
     /** System detected some change.  */
     void notifyUpdated();
