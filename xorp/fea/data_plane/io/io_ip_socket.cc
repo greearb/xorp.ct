@@ -575,6 +575,7 @@ IoIpSocket::join_multicast_group(const string& if_name,
 {
     const IfTreeVif* vifp;
     XorpFd* _proto_socket_in = NULL;
+    int retry_count = 0;
 
     // Find the vif
     vifp = iftree().find_vif(if_name, vif_name);
@@ -639,17 +640,22 @@ IoIpSocket::join_multicast_group(const string& if_name,
 	mreq.imr_interface.s_addr = in_addr.s_addr;
 #endif
 
+      retry_v4:
 	if (setsockopt(*_proto_socket_in, IPPROTO_IP, IP_ADD_MEMBERSHIP,
 		       XORP_SOCKOPT_CAST(&mreq), sizeof(mreq)) < 0) {
-	    error_msg += c_format("Cannot join group %s on interface %s vif %s: %s",
-				 cstring(group),
-				 if_name.c_str(),
-				 vif_name.c_str(),
-				 XSTRERROR);
+	    error_msg += c_format("Cannot join IPv4 group %s on interface %s/%s, pif-idx %i, fa: %s, try: %i: %s",
+				 cstring(group), if_name.c_str(), vif_name.c_str(),
+				  vifp->pif_index(), fa.str().c_str(), retry_count,
+				  XSTRERROR);
+	    if (retry_count == 0) {
+		retry_count++;
+		leave_multicast_group(if_name, vif_name, group, error_msg);
+		goto retry_v4;
+	    }
 	    goto out_err;
 	}
 	else {
-	    XLOG_INFO("Joined IPv4 group: %s on interface %s vif %s  socket: %i",
+	    XLOG_INFO("Joined IPv4 group: %s on interface %s/%s  socket: %i",
 		      cstring(group), if_name.c_str(), vif_name.c_str(),
 		      (int)(*_proto_socket_in));
 	}
@@ -670,10 +676,8 @@ IoIpSocket::join_multicast_group(const string& if_name,
 	mreq6.ipv6mr_interface = vifp->pif_index();
 	if (setsockopt(*_proto_socket_in, IPPROTO_IPV6, IPV6_JOIN_GROUP,
 		       XORP_SOCKOPT_CAST(&mreq6), sizeof(mreq6)) < 0) {
-	    error_msg += c_format("Cannot join group %s on interface %s vif %s: %s",
-				 cstring(group),
-				 if_name.c_str(),
-				 vif_name.c_str(),
+	    error_msg += c_format("Cannot join IPv6 group %s on interface %s/%s: %s",
+				 cstring(group), if_name.c_str(), vif_name.c_str(),
 				 XSTRERROR);
 	    goto out_err;
 	}
