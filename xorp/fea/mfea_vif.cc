@@ -124,7 +124,7 @@ MfeaVif::start(string& error_msg, const char* dbg)
 	return XORP_OK;
 
     if (is_up() || is_pending_up())
-	return (XORP_OK);
+	return XORP_OK;
 
     // Add to our wants-to-be-running list
     if (i != perm_info.end()) {
@@ -166,7 +166,7 @@ MfeaVif::start(string& error_msg, const char* dbg)
     
     if (mfea_node().add_multicast_vif(vif_index()) != XORP_OK) {
 	error_msg = "cannot add the multicast vif to the kernel";
-	return (XORP_ERROR);
+	return XORP_ERROR;
     }
 
     XLOG_INFO("Interface started: %s%s",

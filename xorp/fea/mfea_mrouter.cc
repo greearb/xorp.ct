@@ -1363,7 +1363,7 @@ MfeaMrouter::add_multicast_vif(uint32_t vif_index)
 	    if (mfea_vif->addr_ptr() == NULL) {
 		XLOG_ERROR("add_multicast_vif() failed: vif %s has no address",
 			   mfea_vif->name().c_str());
-		return (XORP_ERROR);
+		return XORP_ERROR;
 	    }
 	    mfea_vif->addr_ptr()->copy_out(vcp->vifc_lcl_addr);
 	}
@@ -1374,10 +1374,11 @@ MfeaMrouter::add_multicast_vif(uint32_t vif_index)
 	//
 	if (setsockopt(_mrouter_socket, IPPROTO_IP, MRT_ADD_VIF,
 		       sopt_arg, sz) < 0) {
-	    XLOG_ERROR("setsockopt(MRT_ADD_VIF, vif %s) failed: %s  sz: %i",
-		       mfea_vif->name().c_str(), strerror(errno),
-		       (int)(sz));
-	    return (XORP_ERROR);
+	    XLOG_ERROR("setsockopt(MRT_ADD_VIF, vif %s) failed: %s  sz: %i, ifindex: %i addr: %s",
+		       mfea_vif->name().c_str(), XSTRERROR,
+		       (int)(sz), mfea_vif->pif_index(),
+		       mfea_vif->addr_ptr() ? mfea_vif->addr_ptr()->str().c_str() : "NULL");
+	    return XORP_ERROR;
 	}
 #endif // HAVE_IPV4_MULTICAST_ROUTING
     }

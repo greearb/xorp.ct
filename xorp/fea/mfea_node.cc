@@ -643,7 +643,7 @@ MfeaNode::vifaddr4_update(const string&	ifname,
 	}
 	mfea_vifp->add_addr(addr);
 
-	break;					// FALLTHROUGH
+	break; // FALLTHROUGH
 
     case DELETED:
 	// Update the MFEA iftree
@@ -766,6 +766,11 @@ MfeaNode::vifaddr4_update(const string&	ifname,
 	XLOG_ERROR("Cannot add address %s to vif %s from the set of "
 		   "configured vifs: %s",
 		   addr.str().c_str(), vifname.c_str(), error_msg.c_str());
+    }
+
+    MfeaVif *mfea_vif = vif_find_by_name(vifname);
+    if (mfea_vif) {
+	mfea_vif->notifyUpdated();
     }
 }
 
@@ -919,6 +924,11 @@ MfeaNode::vifaddr6_update(const string&	ifname,
 	XLOG_ERROR("Cannot add address %s to vif %s from the set of "
 		   "configured vifs: %s",
 		   addr.str().c_str(), vifname.c_str(), error_msg.c_str());
+    }
+
+    MfeaVif *mfea_vif = vif_find_by_name(vifname);
+    if (mfea_vif) {
+	mfea_vif->notifyUpdated();
     }
 }
 #endif
