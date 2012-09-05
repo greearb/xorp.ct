@@ -46,7 +46,44 @@ class PimNbr;
 class PimNode;
 
 
-extern map<string, VifPermInfo> perm_info;
+struct PVifPermInfo : public VifPermInfo {
+public:
+    bool set_dr_priority;
+    uint32_t dr_priority;
+
+    PVifPermInfo() : VifPermInfo() {
+	init();
+    }
+
+    PVifPermInfo(const string& n, bool start, bool enable) : VifPermInfo(n, start, enable) {
+	init();
+    }
+
+    PVifPermInfo(const PVifPermInfo& p)
+	    : VifPermInfo(p) {
+	set_dr_priority = p.set_dr_priority;
+	dr_priority = p.dr_priority;
+    }
+
+    virtual ~PVifPermInfo() { }
+
+    void init() {
+	set_dr_priority = false;
+	dr_priority = 0;
+    }
+
+    PVifPermInfo& operator=(const PVifPermInfo& p) {
+	if (this != &p) {
+	    VifPermInfo::operator=(p);
+	    set_dr_priority = p.set_dr_priority;
+	    dr_priority = p.dr_priority;
+	}
+	return *this;
+    }
+};
+	
+
+extern map<string, PVifPermInfo> perm_info;
 
 
 /**

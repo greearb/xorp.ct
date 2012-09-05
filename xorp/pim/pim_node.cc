@@ -1194,12 +1194,12 @@ PimNode::enable_vif(const string& vif_name, string& error_msg)
 	pim_vif->enable("PimNode::enable_vif");
 
 	// Check our wants-to-be-running list
-	map<string, VifPermInfo>::iterator i = perm_info.find(vif_name);
+	map<string, PVifPermInfo>::iterator i = perm_info.find(vif_name);
 	if (i != perm_info.end()) {
 	    i->second.should_enable = true;
 	}
 	else {
-	    VifPermInfo pv(vif_name, false, true);
+	    PVifPermInfo pv(vif_name, false, true);
 	    perm_info[vif_name] = pv;
 	}
 
@@ -1235,7 +1235,7 @@ PimNode::disable_vif(const string& vif_name, string& error_msg)
 {
 
     // Check our wants-to-be-running list
-    map<string, VifPermInfo>::iterator i = perm_info.find(vif_name);
+    map<string, PVifPermInfo>::iterator i = perm_info.find(vif_name);
     if (i != perm_info.end()) {
 	i->second.should_enable = false;
     }

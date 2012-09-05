@@ -36,7 +36,7 @@
 #include "pim_vif.hh"
 
 
-map<string, VifPermInfo> perm_info;
+map<string, PVifPermInfo> perm_info;
 
 /**
  * PimVif::PimVif:
@@ -144,7 +144,7 @@ PimVif::PimVif(PimNode* pim_node, const Vif& vif)
       _usage_by_pim_mre_task(0)
 {
     // Check our wants-to-be-running list
-    map<string, VifPermInfo>::iterator i = perm_info.find(name());
+    map<string, PVifPermInfo>::iterator i = perm_info.find(name());
     if (i != perm_info.end()) {
 	wants_to_be_started = i->second.should_start;
     }
@@ -257,7 +257,7 @@ PimVif::pim_mrt() const
 void PimVif::notifyUpdated() {
     int perm_started = -1;
     if (!wants_to_be_started) {
-	map<string, VifPermInfo>::iterator i = perm_info.find(name());
+	map<string, PVifPermInfo>::iterator i = perm_info.find(name());
 	if (i != perm_info.end()) {
 	    perm_started = i->second.should_start;
 	}
@@ -295,7 +295,7 @@ PimVif::start(string& error_msg, const char* dbg)
 	      name().c_str(), (int)(is_enabled()), (int)(is_up()), (int)(is_pending_up()),
 	      dbg);
 
-    map<string, VifPermInfo>::iterator i = perm_info.find(name());
+    map<string, PVifPermInfo>::iterator i = perm_info.find(name());
 
     if (! is_enabled()) {
 	if (i != perm_info.end()) {
@@ -316,7 +316,7 @@ PimVif::start(string& error_msg, const char* dbg)
 	i->second.should_start = true;
     }
     else {
-	VifPermInfo pi(name(), true, false);
+	PVifPermInfo pi(name(), true, false);
 	perm_info[name()] = pi;
     }
 
@@ -377,6 +377,13 @@ PimVif::start(string& error_msg, const char* dbg)
 			     name().c_str());
 	return (XORP_ERROR);
     }
+
+    // See pim_config, PimNode::set_vif_dr_priority
+    if (i != perm_info.end()) {
+	if (i->second.set_dr_priority) {
+	    dr_priority().set(i->second.dr_priority);
+	}
+    }    
     
     if (! is_pim_register()) {    
 	//
@@ -437,7 +444,7 @@ PimVif::stop(string& error_msg, bool stay_down, const char* dbg)
 
     if (stay_down) {
 	// Remove from our wants-to-be-running list
-	map<string, VifPermInfo>::iterator i = perm_info.find(name());
+	map<string, PVifPermInfo>::iterator i = perm_info.find(name());
 	if (i != perm_info.end()) {
 	    i->second.should_start = false;
 	}

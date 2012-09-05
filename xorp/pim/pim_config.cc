@@ -19,13 +19,6 @@
 
 
 
-
-//
-// TODO: a temporary solution for various PIM configuration
-//
-
-
-
 #include "pim_module.h"
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
@@ -530,10 +523,21 @@ PimNode::set_vif_dr_priority(const string& vif_name, uint32_t dr_priority,
     if (pim_vif == NULL) {
 	end_config(error_msg);
 	error_msg = c_format("Cannot set DR priority for vif %s: "
-			     "no such vif",
+			     "no such vif, will continue.",
 			     vif_name.c_str());
-	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
+	XLOG_INFO("%s", error_msg.c_str());
+	map<string, PVifPermInfo>::iterator i = perm_info.find(vif_name);
+	if (i != perm_info.end()) {
+	    i->second.dr_priority = dr_priority;
+	    i->second.set_dr_priority = true;
+	}
+	else {
+	    PVifPermInfo pi(vif_name, true, false);
+	    pi.dr_priority = dr_priority;
+	    pi.set_dr_priority = true;
+	    perm_info[vif_name] = pi;
+	}
+	return XORP_OK;
     }
     
     pim_vif->dr_priority().set(dr_priority);
@@ -566,8 +570,13 @@ PimNode::reset_vif_dr_priority(const string& vif_name, string& error_msg)
 	error_msg = c_format("Cannot reset DR priority for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
+	XLOG_INFO("%s", error_msg.c_str());
+	map<string, PVifPermInfo>::iterator i = perm_info.find(vif_name);
+	if (i != perm_info.end()) {
+	    i->second.dr_priority = 0;
+	    i->second.set_dr_priority = false;
+	}
+	return XORP_ERROR;
     }
     
     pim_vif->dr_priority().reset();
