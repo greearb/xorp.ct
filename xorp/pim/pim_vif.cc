@@ -288,9 +288,7 @@ void PimVif::notifyUpdated() {
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
-int
-PimVif::start(string& error_msg, const char* dbg)
-{
+int PimVif::start(string& error_msg, const char* dbg) {
     XLOG_INFO("%s:  start called, is_enabled: %i  is-up: %i  is-pending-up: %i, dbg: %s\n",
 	      name().c_str(), (int)(is_enabled()), (int)(is_up()), (int)(is_pending_up()),
 	      dbg);
@@ -309,7 +307,7 @@ PimVif::start(string& error_msg, const char* dbg)
 	return XORP_OK;
 
     if (is_up() || is_pending_up())
-	return (XORP_OK);
+	return XORP_OK;
 
     // Add to our wants-to-be-running list
     if (i != perm_info.end()) {
@@ -329,7 +327,7 @@ PimVif::start(string& error_msg, const char* dbg)
 
     if (! (is_pim_register() || is_multicast_capable())) {
 	wants_to_be_started = true;
-	XLOG_WARNING("WARNING:  Delaying start of pim-vif: %s because underlying vif is not multicast capable.",
+	XLOG_WARNING("Delaying start of pim-vif: %s because underlying vif is not multicast capable.",
 		     name().c_str());
 	return XORP_OK;
     }
@@ -340,11 +338,16 @@ PimVif::start(string& error_msg, const char* dbg)
     //
     if (is_loopback()) {
 	error_msg = "pim-vif: Loopback interfaces cannot be used for multicast.";
-	return (XORP_ERROR);
+	return XORP_ERROR;
     }
 
-    if (update_primary_and_domain_wide_address(error_msg) != XORP_OK)
-	return (XORP_ERROR);
+    if (update_primary_and_domain_wide_address(error_msg) != XORP_OK) {
+	// try later
+	wants_to_be_started = true;
+	XLOG_WARNING("Delaying start of pim-vif: %s because address is not yet valid.",
+		     name().c_str());
+	return XORP_OK;
+    }
 
     if (ProtoUnit::start() != XORP_OK) {
 	error_msg = "internal error";
@@ -362,7 +365,7 @@ PimVif::start(string& error_msg, const char* dbg)
 	error_msg = c_format("cannot register as a receiver on vif %s "
 			     "with the kernel",
 			     name().c_str());
-	return (XORP_ERROR);
+	return XORP_ERROR;
     }
 
     //
@@ -422,7 +425,7 @@ PimVif::start(string& error_msg, const char* dbg)
 	      this->str().c_str(), flags_string().c_str());
 
     wants_to_be_started = false; //it worked
-    return (XORP_OK);
+    return XORP_OK;
 }
 
 /**
