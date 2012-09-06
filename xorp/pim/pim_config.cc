@@ -183,7 +183,7 @@ PimNode::get_vif_proto_version(const string& vif_name, int& proto_version,
 
 int PimNode::do_set_val(VarE var, const string& vif_name, int val, string& error_msg) {
     PimVif *pim_vif = vif_find_by_name(vif_name);
-    int rv = XORP_ERROR;
+    int rv = XORP_OK;
     
     if (start_config(error_msg) != XORP_OK)
 	return XORP_ERROR;

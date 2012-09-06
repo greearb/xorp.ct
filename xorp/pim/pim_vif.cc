@@ -213,8 +213,7 @@ PimVif::PimVif(PimNode* pim_node, const Vif& vif)
  * PIM protocol vif destructor.
  * 
  **/
-PimVif::~PimVif()
-{
+PimVif::~PimVif() {
     string error_msg;
 
     stop(error_msg, false, "destructing pimvif");
@@ -233,30 +232,36 @@ PimVif::~PimVif()
 }
 
 void PimVif::check_restart_elect(string& error_msg) {
-    if (! is_pim_register()) {
-	// Send immediately a Hello message with the new value
-	pim_hello_send(error_msg);
-	
-	// (Re)elect the DR
-	pim_dr_elect();
+    if (is_up() || is_pending_down()) {
+	if (! is_pim_register()) {
+	    // Send immediately a Hello message with the new value
+	    pim_hello_send(error_msg);
+	    
+	    // (Re)elect the DR
+	    pim_dr_elect();
+	}
     }
 }
 
 void PimVif::check_hello_send(string& error_msg) {
-    if (! is_pim_register()) {
-	// Send immediately a Hello message with the new value
-	pim_hello_send(error_msg);
+    if (is_up() || is_pending_down()) {
+	if (! is_pim_register()) {
+	    // Send immediately a Hello message with the new value
+	    pim_hello_send(error_msg);
+	}
     }
 }
 
 void PimVif::check_restart_hello(string& error_msg) {
-    if (! is_pim_register()) {
-	//
-	// Send immediately a Hello message, and schedule the next one
-	// at random in the interval [0, hello_period)
-	//
-	pim_hello_send(error_msg);
-	hello_timer_start_random(hello_period().get(), 0);
+    if (is_up() || is_pending_down()) {
+	if (! is_pim_register()) {
+	    //
+	    // Send immediately a Hello message, and schedule the next one
+	    // at random in the interval [0, hello_period)
+	    //
+	    pim_hello_send(error_msg);
+	    hello_timer_start_random(hello_period().get(), 0);
+	}
     }
 }
 
@@ -714,10 +719,11 @@ PimVif::pim_send(const IPvX& src, const IPvX& dst,
     int ttl = MINTTL;
     bool ip_internet_control = true;	// XXX: might be overwritten below
 
-    if (! (is_up() || is_pending_down())) {
+    if (!(is_up() || is_pending_down())) {
 	error_msg += "Interface: " + name() + " is down or pending down when trying pim_send\n";
-	debug_msg("Vif %s is currently down\n", name().c_str());
-	return (XORP_ERROR);
+	XLOG_ERROR("Vif %s is not in proper state to send, is-up: %i  pending-down: %i\n",
+		   name().c_str(), is_up(), is_pending_down());
+	return XORP_ERROR;
     }
 
     //

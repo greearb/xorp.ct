@@ -619,12 +619,6 @@ PimVif::pim_hello_send(string& error_msg)
     buffer_t *buffer = buffer_send_prepare(_buffer_send_hello);
     uint16_t propagation_delay_tbit;
     
-#if 0
-    // XXX: enable if for any reason sending Hello messages is not desirable
-    set_should_send_pim_hello(false);    
-    return (XORP_OK);
-#endif
-    
     // Holdtime option
     BUFFER_PUT_HOST_16(PIM_HELLO_HOLDTIME_OPTION, buffer);
     BUFFER_PUT_HOST_16(PIM_HELLO_HOLDTIME_LENGTH, buffer);
@@ -662,6 +656,7 @@ PimVif::pim_hello_send(string& error_msg)
 	    address_list.push_back(vif_addr.addr());
 	}
     } while (false);
+
     if (address_list.size() > 0) {
 	size_t length;
 	list<IPvX>::iterator iter;
@@ -674,7 +669,7 @@ PimVif::pim_hello_send(string& error_msg)
 	    PUT_ENCODED_UNICAST_ADDR(family(), addr, buffer);
 	}
     }
-    
+
     return pim_send(primary_addr(), IPvX::PIM_ROUTERS(family()),
 		    PIM_HELLO, buffer, error_msg);
     
