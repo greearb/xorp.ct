@@ -1284,7 +1284,7 @@ PimNode::disable_vif(const string& vif_name, string& error_msg)
 int
 PimNode::start_vif(const string& vif_name, string& error_msg)
 {
-    PimVif *pim_vif = vif_find_by_name(vif_name);
+    PimVif *pim_vif = find_or_create_vif(vif_name, error_msg);
     if (pim_vif == NULL) {
 	error_msg = c_format("Cannot start vif %s: no such vif",
 			     vif_name.c_str());
