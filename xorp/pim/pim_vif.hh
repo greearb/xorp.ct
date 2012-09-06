@@ -49,6 +49,8 @@ class PimNode;
 struct PVifPermInfo : public VifPermInfo {
 public:
     bool set_dr_priority;
+    bool set_hello_period;
+    uint16_t hello_period;
     uint32_t dr_priority;
 
     PVifPermInfo() : VifPermInfo() {
@@ -63,6 +65,8 @@ public:
 	    : VifPermInfo(p) {
 	set_dr_priority = p.set_dr_priority;
 	dr_priority = p.dr_priority;
+	hello_period = p.hello_period;
+	set_hello_period = p.set_hello_period;
     }
 
     virtual ~PVifPermInfo() { }
@@ -70,6 +74,8 @@ public:
     void init() {
 	set_dr_priority = false;
 	dr_priority = 0;
+	set_hello_period = false;
+	hello_period = 0;
     }
 
     PVifPermInfo& operator=(const PVifPermInfo& p) {
@@ -77,6 +83,8 @@ public:
 	    VifPermInfo::operator=(p);
 	    set_dr_priority = p.set_dr_priority;
 	    dr_priority = p.dr_priority;
+	    hello_period = p.hello_period;
+	    set_hello_period = p.set_hello_period;
 	}
 	return *this;
     }

@@ -322,7 +322,7 @@ PimNode::get_vif_hello_period(const string& vif_name, uint16_t& hello_period,
 	error_msg = c_format("Cannot get Hello period for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
-	return (XORP_ERROR);
+	return XORP_ERROR;
     }
     
     hello_period = pim_vif->hello_period().get();
@@ -345,8 +345,19 @@ PimNode::set_vif_hello_period(const string& vif_name, uint16_t hello_period,
 	error_msg = c_format("Cannot set Hello period for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
+	XLOG_INFO("%s", error_msg.c_str());
+	map<string, PVifPermInfo>::iterator i = perm_info.find(vif_name);
+	if (i != perm_info.end()) {
+	    i->second.hello_period = hello_period;
+	    i->second.set_hello_period = true;
+	}
+	else {
+	    PVifPermInfo pi(vif_name, false, false);
+	    pi.hello_period = hello_period;
+	    pi.set_hello_period = true;
+	    perm_info[vif_name] = pi;
+	}
+	return XORP_OK;
     }
     
     pim_vif->hello_period().set(hello_period);
@@ -532,7 +543,7 @@ PimNode::set_vif_dr_priority(const string& vif_name, uint32_t dr_priority,
 	    i->second.set_dr_priority = true;
 	}
 	else {
-	    PVifPermInfo pi(vif_name, true, false);
+	    PVifPermInfo pi(vif_name, false, false);
 	    pi.dr_priority = dr_priority;
 	    pi.set_dr_priority = true;
 	    perm_info[vif_name] = pi;

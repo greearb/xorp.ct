@@ -383,6 +383,9 @@ PimVif::start(string& error_msg, const char* dbg)
 	if (i->second.set_dr_priority) {
 	    dr_priority().set(i->second.dr_priority);
 	}
+	if (i->second.set_hello_period) {
+	    hello_period().set(i->second.hello_period);
+	}
     }    
     
     if (! is_pim_register()) {    
