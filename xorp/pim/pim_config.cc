@@ -181,62 +181,239 @@ PimNode::get_vif_proto_version(const string& vif_name, int& proto_version,
     return (XORP_OK);
 }
 
-int
-PimNode::set_vif_proto_version(const string& vif_name, int proto_version,
-			       string& error_msg)
-{
+int PimNode::do_set_val(VarE var, const string& vif_name, int val, string& error_msg) {
     PimVif *pim_vif = vif_find_by_name(vif_name);
+    int rv = XORP_ERROR;
     
     if (start_config(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-    
+	return XORP_ERROR;
+
+    map<string, PVifPermInfo>::iterator i = perm_info.find(vif_name);
+    if (i == perm_info.end()) {
+	PVifPermInfo pi(vif_name, false, false);
+	perm_info[vif_name] = pi;
+	i = perm_info.find(vif_name);
+    }
+
+    // Cache our values in permanent structure.
+#define SET_PERM_VAL(a)				\
+    i->second.a = val;				\
+    i->second.vset.a = true;			\
+    i->second.vreset.a = false;
+
+    if (i != perm_info.end()) {
+	switch (var) {
+	case PROTO_VERSION:
+	    SET_PERM_VAL(proto_version);
+	    break;
+	case HELLO_TRIGGERED_DELAY:
+	    SET_PERM_VAL(hello_triggered_delay);
+	    break;
+	case HELLO_PERIOD:
+	    SET_PERM_VAL(hello_period);
+	    break;
+	case HELLO_HOLDTIME:
+	    SET_PERM_VAL(hello_holdtime);
+	    break;
+	case DR_PRIORITY:
+	    SET_PERM_VAL(dr_priority);
+	    break;
+	case PROPAGATION_DELAY:
+	    SET_PERM_VAL(propagation_delay);
+	    break;
+	case OVERRIDE_INTERVAL:
+	    SET_PERM_VAL(override_interval);
+	    break;
+	case TRACKING_DISABLED:
+	    SET_PERM_VAL(tracking_disabled);
+	    break;
+	case ACCEPT_NOHELLO:
+	    SET_PERM_VAL(accept_nohello);
+	    break;
+	case JOIN_PRUNE_PERIOD:
+	    SET_PERM_VAL(join_prune_period);
+	    break;
+	    
+	};//switch
+    }
+#undef SET_PERM_VAL
+
     if (pim_vif == NULL) {
 	end_config(error_msg);
-	error_msg = c_format("Cannot set protocol version for vif %s: "
-			     "no such vif",
-			     vif_name.c_str());
-	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
+	error_msg = c_format("Cannot set value: %s for vif %s: No such vif",
+			     str(var), vif_name.c_str());
+	XLOG_INFO("%s", error_msg.c_str());
+	return XORP_OK;
     }
     
-    if (pim_vif->set_proto_version(proto_version) != XORP_OK) {
-	end_config(error_msg);
-	error_msg = c_format("Cannot set protocol version for vif %s: "
-			     "invalid protocol version %d",
-			     vif_name.c_str(), proto_version);
-	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
-    }
+    switch (var) {
+    case PROTO_VERSION:
+	rv = pim_vif->set_proto_version(val, error_msg);
+	break;
+    case HELLO_TRIGGERED_DELAY:
+	pim_vif->hello_triggered_delay().set(val);
+	rv = XORP_OK;
+	break;
+
+    case HELLO_PERIOD:
+	pim_vif->hello_period().set(val);
+	pim_vif->check_restart_hello(error_msg);
+	break;
+    case HELLO_HOLDTIME:
+	pim_vif->hello_holdtime().set(val);
+	pim_vif->check_restart_hello(error_msg);
+	break;
+
+    case DR_PRIORITY:
+	pim_vif->dr_priority().set(val);
+	pim_vif->check_restart_elect(error_msg);
+	break;
+
+    case PROPAGATION_DELAY:
+	pim_vif->propagation_delay().set(val);
+	pim_vif->check_hello_send(error_msg);
+	break;
+
+    case OVERRIDE_INTERVAL:
+	pim_vif->override_interval().set(val);
+	pim_vif->check_hello_send(error_msg);
+	break;
+
+    case TRACKING_DISABLED:
+	pim_vif->is_tracking_support_disabled().set(val);
+	pim_vif->check_hello_send(error_msg);
+	break;
+
+    case ACCEPT_NOHELLO:
+	if (val && (! pim_vif->is_p2p())) {
+	    XLOG_WARNING("Accepting no-Hello neighbors should not be enabled "
+			 "on non-point-to-point interfaces");
+	}
     
+	pim_vif->accept_nohello_neighbors().set(val);
+	break;
+
+    case JOIN_PRUNE_PERIOD:
+	pim_vif->join_prune_period().set(val);
+	break;
+
+    }//switch
+
+
     if (end_config(error_msg) != XORP_OK)
-	return (XORP_ERROR);
+	return XORP_ERROR;
     
-    return (XORP_OK);
+    return rv;
 }
 
-int
-PimNode::reset_vif_proto_version(const string& vif_name, string& error_msg)
-{
+int PimNode::do_reset_val(VarE var, const string& vif_name, string& error_msg) {
     PimVif *pim_vif = vif_find_by_name(vif_name);
     
     if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
-    
+
+    // Cache our values in permanent structure
+    map<string, PVifPermInfo>::iterator i = perm_info.find(vif_name);
+    if (i == perm_info.end()) {
+	PVifPermInfo pi(vif_name, false, false);
+	perm_info[vif_name] = pi;
+	i = perm_info.find(vif_name);
+    }
+
+#define RESET_PERM_VAL(a)				\
+    i->second.vset.a = false;				\
+    i->second.vreset.a = true;
+
+    if (i != perm_info.end()) {
+	switch (var) {
+	case PROTO_VERSION:
+	    RESET_PERM_VAL(proto_version);
+	    break;
+	case HELLO_TRIGGERED_DELAY:
+	    RESET_PERM_VAL(hello_triggered_delay);
+	    break;
+	case HELLO_PERIOD:
+	    RESET_PERM_VAL(hello_period);
+	    break;
+	case HELLO_HOLDTIME:
+	    RESET_PERM_VAL(hello_holdtime);
+	    break;
+	case DR_PRIORITY:
+	    RESET_PERM_VAL(dr_priority);
+	    break;
+	case PROPAGATION_DELAY:
+	    RESET_PERM_VAL(propagation_delay);
+	    break;
+	case OVERRIDE_INTERVAL:
+	    RESET_PERM_VAL(override_interval);
+	    break;
+	case TRACKING_DISABLED:
+	    RESET_PERM_VAL(tracking_disabled);
+	    break;
+	case ACCEPT_NOHELLO:
+	    RESET_PERM_VAL(accept_nohello);
+	    break;
+	case JOIN_PRUNE_PERIOD:
+	    RESET_PERM_VAL(join_prune_period);
+	    break;
+	};//switch
+    }
+#undef RESET_PERM_VAL
+
     if (pim_vif == NULL) {
 	end_config(error_msg);
-	error_msg = c_format("Cannot reset protocol version for vif %s: "
-			     "no such vif",
-			     vif_name.c_str());
-	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
+	error_msg = c_format("Cannot reset value: %s for vif %s: No such vif",
+			     str(var), vif_name.c_str());
+	XLOG_INFO("%s", error_msg.c_str());
+	return XORP_OK;
     }
+
+    // vif exists, go do the work.
+    switch (var) {
+    case PROTO_VERSION:
+	pim_vif->set_proto_version(pim_vif->proto_version_default(), error_msg);
+	break;
+    case HELLO_TRIGGERED_DELAY:
+	pim_vif->hello_triggered_delay().reset();
+	break;
+    case HELLO_PERIOD:
+	pim_vif->hello_period().reset();
+	pim_vif->check_restart_hello(error_msg);
+	break;
+    case HELLO_HOLDTIME:
+	pim_vif->hello_holdtime().reset();
+	pim_vif->check_restart_hello(error_msg);
+	break;
+    case DR_PRIORITY:
+	pim_vif->dr_priority().reset();
+	pim_vif->check_restart_elect(error_msg);
+	break;
+    case PROPAGATION_DELAY:
+	pim_vif->propagation_delay().reset();
+	pim_vif->check_hello_send(error_msg);
+	break;
+    case OVERRIDE_INTERVAL:
+	pim_vif->override_interval().reset();
+	pim_vif->check_hello_send(error_msg);
+	break;
+    case TRACKING_DISABLED:
+	pim_vif->is_tracking_support_disabled().reset();
+	pim_vif->check_hello_send(error_msg);
+	break;
+    case ACCEPT_NOHELLO:
+	pim_vif->accept_nohello_neighbors().reset();
+	break;
+    case JOIN_PRUNE_PERIOD:
+	pim_vif->join_prune_period().reset();
+	break;
+
+    }//switch
     
-    pim_vif->set_proto_version(pim_vif->proto_version_default());
-    
+    // And finish up.
     if (end_config(error_msg) != XORP_OK)
-	return (XORP_ERROR);
+	return XORP_ERROR;
     
-    return (XORP_OK);
+    return XORP_OK;
 }
 
 int
@@ -254,59 +431,6 @@ PimNode::get_vif_hello_triggered_delay(const string& vif_name,
     }
     
     hello_triggered_delay = pim_vif->hello_triggered_delay().get();
-    
-    return (XORP_OK);
-}
-
-int
-PimNode::set_vif_hello_triggered_delay(const string& vif_name,
-				       uint16_t hello_triggered_delay,
-				       string& error_msg)
-{
-    PimVif *pim_vif = vif_find_by_name(vif_name);
-    
-    if (start_config(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-    
-    if (pim_vif == NULL) {
-	end_config(error_msg);
-	error_msg = c_format("Cannot set Hello triggered delay for vif %s: "
-			     "no such vif",
-			     vif_name.c_str());
-	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
-    }
-    
-    pim_vif->hello_triggered_delay().set(hello_triggered_delay);
-    
-    if (end_config(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-    
-    return (XORP_OK);
-}
-
-int
-PimNode::reset_vif_hello_triggered_delay(const string& vif_name,
-					 string& error_msg)
-{
-    PimVif *pim_vif = vif_find_by_name(vif_name);
-    
-    if (start_config(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-    
-    if (pim_vif == NULL) {
-	end_config(error_msg);
-	error_msg = c_format("Cannot reset Hello triggered delay for vif %s: "
-			     "no such vif",
-			     vif_name.c_str());
-	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
-    }
-    
-    pim_vif->hello_triggered_delay().reset();
-    
-    if (end_config(error_msg) != XORP_OK)
-	return (XORP_ERROR);
     
     return (XORP_OK);
 }
@@ -331,88 +455,6 @@ PimNode::get_vif_hello_period(const string& vif_name, uint16_t& hello_period,
 }
 
 int
-PimNode::set_vif_hello_period(const string& vif_name, uint16_t hello_period,
-			      string& error_msg)
-{
-    PimVif *pim_vif = vif_find_by_name(vif_name);
-    string dummy_error_msg;
-    
-    if (start_config(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-    
-    if (pim_vif == NULL) {
-	end_config(error_msg);
-	error_msg = c_format("Cannot set Hello period for vif %s: "
-			     "no such vif",
-			     vif_name.c_str());
-	XLOG_INFO("%s", error_msg.c_str());
-	map<string, PVifPermInfo>::iterator i = perm_info.find(vif_name);
-	if (i != perm_info.end()) {
-	    i->second.hello_period = hello_period;
-	    i->second.set_hello_period = true;
-	}
-	else {
-	    PVifPermInfo pi(vif_name, false, false);
-	    pi.hello_period = hello_period;
-	    pi.set_hello_period = true;
-	    perm_info[vif_name] = pi;
-	}
-	return XORP_OK;
-    }
-    
-    pim_vif->hello_period().set(hello_period);
-
-    if (! pim_vif->is_pim_register()) {
-	//
-	// Send immediately a Hello message, and schedule the next one
-	// at random in the interval [0, hello_period)
-	//
-	pim_vif->pim_hello_send(dummy_error_msg);
-	pim_vif->hello_timer_start_random(pim_vif->hello_period().get(), 0);
-    }
-    
-    if (end_config(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-    
-    return (XORP_OK);
-}
-
-int
-PimNode::reset_vif_hello_period(const string& vif_name, string& error_msg)
-{
-    PimVif *pim_vif = vif_find_by_name(vif_name);
-    string dummy_error_msg;
-    
-    if (start_config(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-    
-    if (pim_vif == NULL) {
-	end_config(error_msg);
-	error_msg = c_format("Cannot reset Hello period for vif %s: "
-			     "no such vif",
-			     vif_name.c_str());
-	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
-    }
-    
-    pim_vif->hello_period().reset();
-    
-    if (! pim_vif->is_pim_register()) {
-	//
-	// Send immediately a Hello message, and schedule the next one
-	// at random in the interval [0, hello_period)
-	//
-	pim_vif->pim_hello_send(dummy_error_msg);
-	pim_vif->hello_timer_start_random(pim_vif->hello_period().get(), 0);
-    }
-    
-    if (end_config(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-    
-    return (XORP_OK);
-}
-
-int
 PimNode::get_vif_hello_holdtime(const string& vif_name,
 				uint16_t& hello_holdtime,
 				string& error_msg)
@@ -432,78 +474,6 @@ PimNode::get_vif_hello_holdtime(const string& vif_name,
 }
 
 int
-PimNode::set_vif_hello_holdtime(const string& vif_name,
-				uint16_t hello_holdtime,
-				string& error_msg)
-{
-    PimVif *pim_vif = vif_find_by_name(vif_name);
-    string dummy_error_msg;
-    
-    if (start_config(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-    
-    if (pim_vif == NULL) {
-	end_config(error_msg);
-	error_msg = c_format("Cannot set Hello holdtime for vif %s: "
-			     "no such vif",
-			     vif_name.c_str());
-	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
-    }
-    
-    pim_vif->hello_holdtime().set(hello_holdtime);
-    
-    if (! pim_vif->is_pim_register()) {
-	//
-	// Send immediately a Hello message, and schedule the next one
-	// at random in the interval [0, hello_period)
-	//
-	pim_vif->pim_hello_send(dummy_error_msg);
-	pim_vif->hello_timer_start_random(pim_vif->hello_period().get(), 0);
-    }
-    
-    if (end_config(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-    
-    return (XORP_OK);
-}
-
-int
-PimNode::reset_vif_hello_holdtime(const string& vif_name, string& error_msg)
-{
-    PimVif *pim_vif = vif_find_by_name(vif_name);
-    string dummy_error_msg;
-    
-    if (start_config(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-    
-    if (pim_vif == NULL) {
-	end_config(error_msg);
-	error_msg = c_format("Cannot reset Hello holdtime for vif %s: "
-			     "no such vif",
-			     vif_name.c_str());
-	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
-    }
-    
-    pim_vif->hello_holdtime().reset();
-    
-    if (! pim_vif->is_pim_register()) {
-	//
-	// Send immediately a Hello message, and schedule the next one
-	// at random in the interval [0, hello_period)
-	//
-	pim_vif->pim_hello_send(dummy_error_msg);
-	pim_vif->hello_timer_start_random(pim_vif->hello_period().get(), 0);
-    }
-    
-    if (end_config(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-    
-    return (XORP_OK);
-}
-
-int
 PimNode::get_vif_dr_priority(const string& vif_name, uint32_t& dr_priority,
 			     string& error_msg)
 {
@@ -517,91 +487,6 @@ PimNode::get_vif_dr_priority(const string& vif_name, uint32_t& dr_priority,
     }
     
     dr_priority = pim_vif->dr_priority().get();
-    
-    return (XORP_OK);
-}
-
-int
-PimNode::set_vif_dr_priority(const string& vif_name, uint32_t dr_priority,
-			     string& error_msg)
-{
-    PimVif *pim_vif = vif_find_by_name(vif_name);
-    string dummy_error_msg;
-    
-    if (start_config(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-    
-    if (pim_vif == NULL) {
-	end_config(error_msg);
-	error_msg = c_format("Cannot set DR priority for vif %s: "
-			     "no such vif, will continue.",
-			     vif_name.c_str());
-	XLOG_INFO("%s", error_msg.c_str());
-	map<string, PVifPermInfo>::iterator i = perm_info.find(vif_name);
-	if (i != perm_info.end()) {
-	    i->second.dr_priority = dr_priority;
-	    i->second.set_dr_priority = true;
-	}
-	else {
-	    PVifPermInfo pi(vif_name, false, false);
-	    pi.dr_priority = dr_priority;
-	    pi.set_dr_priority = true;
-	    perm_info[vif_name] = pi;
-	}
-	return XORP_OK;
-    }
-    
-    pim_vif->dr_priority().set(dr_priority);
-    
-    if (! pim_vif->is_pim_register()) {
-	// Send immediately a Hello message with the new value
-	pim_vif->pim_hello_send(dummy_error_msg);
-	
-	// (Re)elect the DR
-	pim_vif->pim_dr_elect();
-    }
-    
-    if (end_config(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-    
-    return (XORP_OK);
-}
-
-int
-PimNode::reset_vif_dr_priority(const string& vif_name, string& error_msg)
-{
-    PimVif *pim_vif = vif_find_by_name(vif_name);
-    string dummy_error_msg;
-    
-    if (start_config(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-    
-    if (pim_vif == NULL) {
-	end_config(error_msg);
-	error_msg = c_format("Cannot reset DR priority for vif %s: "
-			     "no such vif",
-			     vif_name.c_str());
-	XLOG_INFO("%s", error_msg.c_str());
-	map<string, PVifPermInfo>::iterator i = perm_info.find(vif_name);
-	if (i != perm_info.end()) {
-	    i->second.dr_priority = 0;
-	    i->second.set_dr_priority = false;
-	}
-	return XORP_ERROR;
-    }
-    
-    pim_vif->dr_priority().reset();
-    
-    if (! pim_vif->is_pim_register()) {
-	// Send immediately a Hello message with the new value
-	pim_vif->pim_hello_send(dummy_error_msg);
-	
-	// (Re)elect the DR
-	pim_vif->pim_dr_elect();
-    }
-    
-    if (end_config(error_msg) != XORP_OK)
-	return (XORP_ERROR);
     
     return (XORP_OK);
 }
@@ -626,70 +511,6 @@ PimNode::get_vif_propagation_delay(const string& vif_name,
 }
 
 int
-PimNode::set_vif_propagation_delay(const string& vif_name,
-				   uint16_t propagation_delay,
-				   string& error_msg)
-{
-    PimVif *pim_vif = vif_find_by_name(vif_name);
-    string dummy_error_msg;
-    
-    if (start_config(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-    
-    if (pim_vif == NULL) {
-	end_config(error_msg);
-	error_msg = c_format("Cannot set Propagation delay for vif %s: "
-			     "no such vif",
-			     vif_name.c_str());
-	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
-    }
-    
-    pim_vif->propagation_delay().set(propagation_delay);
-    
-    if (! pim_vif->is_pim_register()) {
-	// Send immediately a Hello message with the new value
-	pim_vif->pim_hello_send(dummy_error_msg);
-    }
-    
-    if (end_config(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-    
-    return (XORP_OK);
-}
-
-int
-PimNode::reset_vif_propagation_delay(const string& vif_name, string& error_msg)
-{
-    PimVif *pim_vif = vif_find_by_name(vif_name);
-    string dummy_error_msg;
-    
-    if (start_config(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-    
-    if (pim_vif == NULL) {
-	end_config(error_msg);
-	error_msg = c_format("Cannot reset Propagation delay for vif %s: "
-			     "no such vif",
-			     vif_name.c_str());
-	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
-    }
-    
-    pim_vif->propagation_delay().reset();
-    
-    if (! pim_vif->is_pim_register()) {
-	// Send immediately a Hello message with the new value
-	pim_vif->pim_hello_send(dummy_error_msg);
-    }
-    
-    if (end_config(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-    
-    return (XORP_OK);
-}
-
-int
 PimNode::get_vif_override_interval(const string& vif_name,
 				   uint16_t& override_interval,
 				   string& error_msg)
@@ -708,69 +529,6 @@ PimNode::get_vif_override_interval(const string& vif_name,
     return (XORP_OK);
 }
 
-int
-PimNode::set_vif_override_interval(const string& vif_name,
-				   uint16_t override_interval,
-				   string& error_msg)
-{
-    PimVif *pim_vif = vif_find_by_name(vif_name);
-    string dummy_error_msg;
-    
-    if (start_config(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-    
-    if (pim_vif == NULL) {
-	end_config(error_msg);
-	error_msg = c_format("Cannot set Override interval for vif %s: "
-			     "no such vif",
-			     vif_name.c_str());
-	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
-    }
-    
-    pim_vif->override_interval().set(override_interval);
-    
-    if (! pim_vif->is_pim_register()) {
-	// Send immediately a Hello message with the new value
-	pim_vif->pim_hello_send(dummy_error_msg);
-    }
-    
-    if (end_config(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-    
-    return (XORP_OK);
-}
-
-int
-PimNode::reset_vif_override_interval(const string& vif_name, string& error_msg)
-{
-    PimVif *pim_vif = vif_find_by_name(vif_name);
-    string dummy_error_msg;
-    
-    if (start_config(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-    
-    if (pim_vif == NULL) {
-	end_config(error_msg);
-	error_msg = c_format("Cannot reset Override interval for vif %s: "
-			     "no such vif",
-			     vif_name.c_str());
-	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
-    }
-    
-    pim_vif->override_interval().reset();
-    
-    if (! pim_vif->is_pim_register()) {
-	// Send immediately a Hello message with the new value
-	pim_vif->pim_hello_send(dummy_error_msg);
-    }
-    
-    if (end_config(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-    
-    return (XORP_OK);
-}
 
 int
 PimNode::get_vif_is_tracking_support_disabled(const string& vif_name,
@@ -787,71 +545,6 @@ PimNode::get_vif_is_tracking_support_disabled(const string& vif_name,
     }
     
     is_tracking_support_disabled = pim_vif->is_tracking_support_disabled().get();
-    
-    return (XORP_OK);
-}
-
-int
-PimNode::set_vif_is_tracking_support_disabled(const string& vif_name,
-					      bool is_tracking_support_disabled,
-					      string& error_msg)
-{
-    PimVif *pim_vif = vif_find_by_name(vif_name);
-    string dummy_error_msg;
-    
-    if (start_config(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-    
-    if (pim_vif == NULL) {
-	end_config(error_msg);
-	error_msg = c_format("Cannot set Tracking support disabled flag for vif %s: "
-			     "no such vif",
-			     vif_name.c_str());
-	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
-    }
-    
-    pim_vif->is_tracking_support_disabled().set(is_tracking_support_disabled);
-    
-    if (! pim_vif->is_pim_register()) {
-	// Send immediately a Hello message with the new value
-	pim_vif->pim_hello_send(dummy_error_msg);
-    }
-    
-    if (end_config(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-    
-    return (XORP_OK);
-}
-
-int
-PimNode::reset_vif_is_tracking_support_disabled(const string& vif_name,
-						string& error_msg)
-{
-    PimVif *pim_vif = vif_find_by_name(vif_name);
-    string dummy_error_msg;
-    
-    if (start_config(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-    
-    if (pim_vif == NULL) {
-	end_config(error_msg);
-	error_msg = c_format("Cannot reset Tracking support disabled flag for vif %s: "
-			     "no such vif",
-			     vif_name.c_str());
-	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
-    }
-    
-    pim_vif->is_tracking_support_disabled().reset();
-    
-    if (! pim_vif->is_pim_register()) {
-	// Send immediately a Hello message with the new value
-	pim_vif->pim_hello_send(dummy_error_msg);
-    }
-    
-    if (end_config(error_msg) != XORP_OK)
-	return (XORP_ERROR);
     
     return (XORP_OK);
 }
@@ -875,63 +568,6 @@ PimNode::get_vif_accept_nohello_neighbors(const string& vif_name,
     return (XORP_OK);
 }
 
-int
-PimNode::set_vif_accept_nohello_neighbors(const string& vif_name,
-					  bool accept_nohello_neighbors,
-					  string& error_msg)
-{
-    PimVif *pim_vif = vif_find_by_name(vif_name);
-    
-    if (start_config(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-    
-    if (pim_vif == NULL) {
-	end_config(error_msg);
-	error_msg = c_format("Cannot set Accept nohello neighbors flag for vif %s: "
-			     "no such vif",
-			     vif_name.c_str());
-	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
-    }
-    
-    if (accept_nohello_neighbors && (! pim_vif->is_p2p())) {
-	XLOG_WARNING("Accepting no-Hello neighbors should not be enabled "
-	    "on non-point-to-point interfaces");
-    }
-    
-    pim_vif->accept_nohello_neighbors().set(accept_nohello_neighbors);
-    
-    if (end_config(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-    
-    return (XORP_OK);
-}
-
-int
-PimNode::reset_vif_accept_nohello_neighbors(const string& vif_name,
-					    string& error_msg)
-{
-    PimVif *pim_vif = vif_find_by_name(vif_name);
-    
-    if (start_config(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-    
-    if (pim_vif == NULL) {
-	end_config(error_msg);
-	error_msg = c_format("Cannot reset Accept nohello neighbors flag for vif %s: "
-			     "no such vif",
-			     vif_name.c_str());
-	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
-    }
-    
-    pim_vif->accept_nohello_neighbors().reset();
-    
-    if (end_config(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-    
-    return (XORP_OK);
-}
 
 int
 PimNode::get_vif_join_prune_period(const string& vif_name,
@@ -951,59 +587,7 @@ PimNode::get_vif_join_prune_period(const string& vif_name,
     
     return (XORP_OK);
 }
-
-int
-PimNode::set_vif_join_prune_period(const string& vif_name,
-				   uint16_t join_prune_period,
-				   string& error_msg)
-{
-    PimVif *pim_vif = vif_find_by_name(vif_name);
     
-    if (start_config(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-    
-    if (pim_vif == NULL) {
-	end_config(error_msg);
-	error_msg = c_format("Cannot set Join/Prune period for vif %s: "
-			     "no such vif",
-			     vif_name.c_str());
-	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
-    }
-    
-    pim_vif->join_prune_period().set(join_prune_period);
-    
-    if (end_config(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-    
-    return (XORP_OK);
-}
-
-int
-PimNode::reset_vif_join_prune_period(const string& vif_name, string& error_msg)
-{
-    PimVif *pim_vif = vif_find_by_name(vif_name);
-    
-    if (start_config(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-    
-    if (pim_vif == NULL) {
-	end_config(error_msg);
-	error_msg = c_format("Cannot reset Join/Prune period for vif %s: "
-			     "no such vif",
-			     vif_name.c_str());
-	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
-    }
-    
-    pim_vif->join_prune_period().reset();
-    
-    if (end_config(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-    
-    return (XORP_OK);
-}
-
 int
 PimNode::get_switch_to_spt_threshold(bool& is_enabled,
 				     uint32_t& interval_sec,

@@ -46,12 +46,43 @@ class PimNbr;
 class PimNode;
 
 
+struct PVifSet {
+public:
+    bool proto_version;
+    bool hello_triggered_delay;
+    bool hello_period;
+    bool hello_holdtime;
+    bool dr_priority;
+    bool propagation_delay;
+    bool override_interval;
+    bool tracking_disabled;
+    bool accept_nohello;
+    bool join_prune_period;
+
+    PVifSet() { init(); }
+
+    void init() {
+	proto_version = hello_triggered_delay = hello_period = hello_holdtime = dr_priority =
+	    propagation_delay = override_interval = tracking_disabled = accept_nohello =
+	    join_prune_period = false;
+    }
+};
+
 struct PVifPermInfo : public VifPermInfo {
 public:
-    bool set_dr_priority;
-    bool set_hello_period;
+    int proto_version;
+    uint16_t hello_triggered_delay;
     uint16_t hello_period;
+    uint16_t hello_holdtime;
     uint32_t dr_priority;
+    uint16_t propagation_delay;
+    uint16_t override_interval;
+    bool tracking_disabled;
+    bool accept_nohello;
+    uint16_t join_prune_period;
+
+    PVifSet vset;
+    PVifSet vreset;
 
     PVifPermInfo() : VifPermInfo() {
 	init();
@@ -63,33 +94,56 @@ public:
 
     PVifPermInfo(const PVifPermInfo& p)
 	    : VifPermInfo(p) {
-	set_dr_priority = p.set_dr_priority;
-	dr_priority = p.dr_priority;
+	vset = p.vset;
+	vreset = p.vreset;
+	proto_version = p.proto_version;
+	hello_triggered_delay = p.hello_triggered_delay;
 	hello_period = p.hello_period;
-	set_hello_period = p.set_hello_period;
+	hello_holdtime = p.hello_holdtime;
+	dr_priority = p.dr_priority;
+	propagation_delay = p.propagation_delay;
+	override_interval = p.override_interval;
+	tracking_disabled = p.tracking_disabled;
+	accept_nohello = p.accept_nohello;
+	join_prune_period = p.join_prune_period;
     }
 
     virtual ~PVifPermInfo() { }
 
     void init() {
-	set_dr_priority = false;
-	dr_priority = 0;
-	set_hello_period = false;
+	vset.init();
+	vreset.init();
+	proto_version = 0;
+	hello_triggered_delay = 0;
 	hello_period = 0;
+	hello_holdtime = 0;
+	dr_priority = 0;
+	propagation_delay = 0;
+	override_interval = 0;
+	tracking_disabled = false;
+	accept_nohello = false;
+	join_prune_period = 0;
     }
 
     PVifPermInfo& operator=(const PVifPermInfo& p) {
 	if (this != &p) {
 	    VifPermInfo::operator=(p);
-	    set_dr_priority = p.set_dr_priority;
-	    dr_priority = p.dr_priority;
+	    vset = p.vset;
+	    vreset = p.vreset;
+	    proto_version = p.proto_version;
+	    hello_triggered_delay = p.hello_triggered_delay;
 	    hello_period = p.hello_period;
-	    set_hello_period = p.set_hello_period;
+	    hello_holdtime = p.hello_holdtime;
+	    dr_priority = p.dr_priority;
+	    propagation_delay = p.propagation_delay;
+	    override_interval = p.override_interval;
+	    tracking_disabled = p.tracking_disabled;
+	    accept_nohello = p.accept_nohello;
+	    join_prune_period = p.join_prune_period;
 	}
 	return *this;
     }
-};
-	
+};	
 
 extern map<string, PVifPermInfo> perm_info;
 
@@ -126,7 +180,7 @@ public:
      * @param proto_version the protocol version to set.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		set_proto_version(int proto_version);
+    int set_proto_version(int proto_version, string& error_msg);
     
     /**
      *  Start PIM on a single virtual interface.
@@ -225,6 +279,13 @@ public:
      */
     PimNbr&	pim_nbr_me()		{ return (_pim_nbr_me);		}
     
+
+    /** Restarts hello if we are not a pim-register vif */
+    void check_restart_hello(string& error_msg);
+    void check_restart_elect(string& error_msg);
+    void check_hello_send(string& error_msg);
+
+
     /**
      * Start the PIM Hello operation.
      */
@@ -722,13 +783,5 @@ private:
 					  uint8_t group_mask_len);
     bool wants_to_be_started; // as soon as we can, ie if the interface appears.
 };
-
-//
-// Global variables
-//
-
-//
-// Global functions prototypes
-//
 
 #endif // __PIM_PIM_VIF_HH__

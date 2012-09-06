@@ -38,6 +38,23 @@
 #include "pim_vif.hh"
 
 
+const char* str(VarE v) {
+    switch (v) {
+    case PROTO_VERSION: return "PROTO_VERSION";
+    case HELLO_TRIGGERED_DELAY: return "HELLO_TRIGGERED_DELAY";
+    case HELLO_PERIOD: return "HELLO_PERIOD";
+    case HELLO_HOLDTIME: return "HELLO_HOLDTIME";
+    case DR_PRIORITY: return "DR_PRIORITY";
+    case PROPAGATION_DELAY: return "PROPAGATION_DELAY";
+    case OVERRIDE_INTERVAL: return "OVERRIDE_INTERVAL";
+    case TRACKING_DISABLED: return "TRACKING_DISABLED";
+    case ACCEPT_NOHELLO: return "ACCEPT_NOHELLO";
+    case JOIN_PRUNE_PERIOD: return "JOIN_PRUNE_PERIOD";
+    default:
+	return "UNKNOWN/DEFAULT/BUG";
+    }
+}
+
 /**
  * PimNode::PimNode:
  * @family: The address family (%AF_INET or %AF_INET6

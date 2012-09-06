@@ -143,15 +143,6 @@ PimVif::PimVif(PimNode* pim_node, const Vif& vif)
       //
       _usage_by_pim_mre_task(0)
 {
-    // Check our wants-to-be-running list
-    map<string, PVifPermInfo>::iterator i = perm_info.find(name());
-    if (i != perm_info.end()) {
-	wants_to_be_started = i->second.should_start;
-    }
-    else {
-	wants_to_be_started = false;
-    }
-
     _buffer_send = BUFFER_MALLOC(BUF_SIZE_DEFAULT);
     _buffer_send_hello = BUFFER_MALLOC(BUF_SIZE_DEFAULT);
     _buffer_send_bootstrap = BUFFER_MALLOC(BUF_SIZE_DEFAULT);
@@ -160,7 +151,58 @@ PimVif::PimVif(PimNode* pim_node, const Vif& vif)
     set_proto_version_default(PIM_VERSION_DEFAULT);
     
     set_default_config();
-    
+
+    // Check for any cached configuration.
+    map<string, PVifPermInfo>::iterator i = perm_info.find(name());
+    if (i != perm_info.end()) {
+#define SET_LOCAL(a)					\
+	if (i->second.vset.a) {				\
+	    a().set(i->second.a);			\
+	}
+	wants_to_be_started = i->second.should_start;
+	if (i->second.vset.proto_version) {
+	    string error_msg;
+	    set_proto_version(i->second.proto_version, error_msg);
+	}
+	SET_LOCAL(hello_triggered_delay);
+	SET_LOCAL(hello_period);
+	SET_LOCAL(dr_priority);
+	SET_LOCAL(propagation_delay);
+	SET_LOCAL(override_interval);
+	if (i->second.vset.tracking_disabled) {
+	    is_tracking_support_disabled().set(i->second.tracking_disabled);
+	}
+	if (i->second.vset.accept_nohello) {
+	    accept_nohello_neighbors().set(i->second.accept_nohello);
+	}
+	SET_LOCAL(join_prune_period);
+#undef SET_LOCAL
+#define RESET_LOCAL(a)						\
+	if (i->second.vreset.a) {				\
+	    a().reset();					\
+	}
+	if (i->second.vreset.proto_version) {
+	    string error_msg;
+	    set_proto_version(proto_version_default(), error_msg);
+	}
+	RESET_LOCAL(hello_triggered_delay);
+	RESET_LOCAL(hello_period);
+	RESET_LOCAL(dr_priority);
+	RESET_LOCAL(propagation_delay);
+	RESET_LOCAL(override_interval);
+	if (i->second.vreset.tracking_disabled) {
+	    is_tracking_support_disabled().reset();
+	}
+	if (i->second.vreset.accept_nohello) {
+	    accept_nohello_neighbors().reset();
+	}
+	RESET_LOCAL(join_prune_period);
+#undef RESET_LOCAL
+    }
+    else {
+	wants_to_be_started = false;
+    }
+   
     set_should_send_pim_hello(true);
 }
 
@@ -190,6 +232,34 @@ PimVif::~PimVif()
     }
 }
 
+void PimVif::check_restart_elect(string& error_msg) {
+    if (! is_pim_register()) {
+	// Send immediately a Hello message with the new value
+	pim_hello_send(error_msg);
+	
+	// (Re)elect the DR
+	pim_dr_elect();
+    }
+}
+
+void PimVif::check_hello_send(string& error_msg) {
+    if (! is_pim_register()) {
+	// Send immediately a Hello message with the new value
+	pim_hello_send(error_msg);
+    }
+}
+
+void PimVif::check_restart_hello(string& error_msg) {
+    if (! is_pim_register()) {
+	//
+	// Send immediately a Hello message, and schedule the next one
+	// at random in the interval [0, hello_period)
+	//
+	pim_hello_send(error_msg);
+	hello_timer_start_random(hello_period().get(), 0);
+    }
+}
+
 /**
  * PimVif::set_default_config:
  * @: 
@@ -200,7 +270,8 @@ void
 PimVif::set_default_config()
 {
     // Protocol version
-    set_proto_version(proto_version_default());
+    string error_msg;
+    set_proto_version(proto_version_default(), error_msg);
     
     // Hello-related configurable parameters
     hello_triggered_delay().reset();
@@ -229,14 +300,17 @@ PimVif::set_default_config()
  * Return value: %XORP_OK is @proto_version is valid, otherwise %XORP_ERROR.
  **/
 int
-PimVif::set_proto_version(int proto_version)
+PimVif::set_proto_version(int proto_version, string& error_msg)
 {
-    if ((proto_version < PIM_VERSION_MIN) || (proto_version > PIM_VERSION_MAX))
-	return (XORP_ERROR);
+    if ((proto_version < PIM_VERSION_MIN) || (proto_version > PIM_VERSION_MAX)) {
+	error_msg.append(c_format("Proto version %i out of bounds, min: %i  max: %i\n",
+				  proto_version, PIM_VERSION_MIN, PIM_VERSION_MAX));
+	return XORP_ERROR;
+    }
     
     ProtoUnit::set_proto_version(proto_version);
     
-    return (XORP_OK);
+    return XORP_OK;
 }
 
 /**
@@ -351,9 +425,9 @@ int PimVif::start(string& error_msg, const char* dbg) {
 
     if (ProtoUnit::start() != XORP_OK) {
 	error_msg = "internal error";
-	return (XORP_ERROR);
+	return XORP_ERROR;
     }
-    
+
     //
     // Register as a receiver with the kernel
     //
@@ -381,16 +455,6 @@ int PimVif::start(string& error_msg, const char* dbg) {
 	return (XORP_ERROR);
     }
 
-    // See pim_config, PimNode::set_vif_dr_priority
-    if (i != perm_info.end()) {
-	if (i->second.set_dr_priority) {
-	    dr_priority().set(i->second.dr_priority);
-	}
-	if (i->second.set_hello_period) {
-	    hello_period().set(i->second.hello_period);
-	}
-    }    
-    
     if (! is_pim_register()) {    
 	//
 	// Join the appropriate multicast groups: ALL-PIM-ROUTERS
