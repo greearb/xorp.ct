@@ -543,10 +543,8 @@ IoIpSocket::create_input_socket(const string& if_name,
     error_msg.clear();
 
     if (!iftree().find_vif(if_name, vif_name)) {
-	error_msg += c_format("Creating of input socket failed: "
-		"interface %s vif %s not found",
-		if_name.c_str(),
-		vif_name.c_str());
+	error_msg += c_format("Creating of input socket failed: vif: %s/%s not found",
+			      if_name.c_str(), vif_name.c_str());
 	goto out_err;
     }
 

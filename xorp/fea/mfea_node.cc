@@ -1198,8 +1198,8 @@ MfeaNode::enable_vif(const string& vif_name, string& error_msg)
     if (mfea_vif == NULL) {
 	error_msg = c_format("MfeaNode:  Cannot enable vif %s: no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
+	XLOG_INFO("%s", error_msg.c_str());
+	return XORP_OK; // will start later
     }
     
     mfea_vif->enable("MfeaNote::enable_vif");
@@ -1266,8 +1266,8 @@ MfeaNode::start_vif(const string& vif_name, string& error_msg)
     if (mfea_vif == NULL) {
 	error_msg = c_format("MfeaNode: Cannot start vif %s: no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR("%s", error_msg.c_str());
-	return XORP_ERROR;
+	XLOG_INFO("%s", error_msg.c_str());
+	return XORP_OK; // will start later
     }
     
     if (mfea_vif->start(error_msg, "MfeaNode::start_vif") != XORP_OK) {

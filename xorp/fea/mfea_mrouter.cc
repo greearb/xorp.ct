@@ -1489,9 +1489,10 @@ MfeaMrouter::delete_multicast_vif(uint32_t vif_index)
 #endif
 
 	if (ret_value < 0) {
-	    XLOG_ERROR("setsockopt(MRT_DEL_VIF, vif %s) failed: %s",
-		       mfea_vif->name().c_str(), strerror(errno));
-	    return (XORP_ERROR);
+	    XLOG_WARNING("setsockopt(MRT_DEL_VIF, %s (%i)) failed: %s",
+			 mfea_vif->name().c_str(), mfea_vif->vif_index(),
+			 XSTRERROR);
+	    return XORP_ERROR;
 	}
 #endif // HAVE_IPV4_MULTICAST_ROUTING
     }
@@ -1503,7 +1504,7 @@ MfeaMrouter::delete_multicast_vif(uint32_t vif_index)
 #ifndef HAVE_IPV6_MULTICAST_ROUTING
 	XLOG_ERROR("delete_multicast_vif() failed: "
 		   "IPv6 multicast routing not supported");
-	return (XORP_ERROR);
+	return XORP_ERROR;
 #else
 	int ret_value = -1;
 
@@ -1511,9 +1512,10 @@ MfeaMrouter::delete_multicast_vif(uint32_t vif_index)
 	ret_value = setsockopt(_mrouter_socket, IPPROTO_IPV6, MRT6_DEL_MIF,
 			       (void *)&vifi, sizeof(vifi));
 	if (ret_value < 0) {
-	    XLOG_ERROR("setsockopt(MRT6_DEL_MIF, vif %s) failed: %s",
-		       mfea_vif->name().c_str(), strerror(errno));
-	    return (XORP_ERROR);
+	    XLOG_WARNING("setsockopt(MRT6_DEL_MIF, %s (%i)) failed: %s",
+			 mfea_vif->name().c_str(), mfea_vif->vif_index(),
+			 XSTRERROR);
+	    return XORP_ERROR;
 	}
 #endif // HAVE_IPV6_MULTICAST_ROUTING
     }
@@ -1522,10 +1524,10 @@ MfeaMrouter::delete_multicast_vif(uint32_t vif_index)
     
     default:
 	XLOG_UNREACHABLE();
-	return (XORP_ERROR);
+	return XORP_ERROR;
     }
     
-    return (XORP_OK);
+    return XORP_OK;
 }
 
 

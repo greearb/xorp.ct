@@ -330,11 +330,9 @@ VifManager::updates_made()
 	const IfMgrIfAtom& ifmgr_iface = ifmgr_iface_iter->second;
 	const string& ifmgr_iface_name = ifmgr_iface.name();
 	if (_iftree.find_vif(ifmgr_iface_name, ifmgr_iface_name) == NULL) {
-	    if (_rib_manager->delete_vif(ifmgr_iface_name, error_msg)
-		!= XORP_OK) {
-		XLOG_ERROR("Cannot delete vif %s from the set of configured "
-			   "vifs: %s",
-			   ifmgr_iface_name.c_str(), error_msg.c_str());
+	    if (_rib_manager->delete_vif(ifmgr_iface_name, error_msg) != XORP_OK) {
+		XLOG_WARNING("Cannot delete vif %s from the set of configured vifs: %s",
+			     ifmgr_iface_name.c_str(), error_msg.c_str());
 	    }
 	}
     }

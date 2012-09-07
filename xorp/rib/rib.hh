@@ -189,7 +189,7 @@ public:
      * @param vifname the name of the VIF, as previously indicated by new_vif.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int delete_vif(const string& vifname);
+    virtual int delete_vif(const string& vifname, string& error_msg);
 
     /**
      * Destroy a VIF container for a VIF that no longer exists.
