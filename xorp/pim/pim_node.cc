@@ -761,7 +761,7 @@ PimNode::add_vif(const Vif& vif, string& error_msg)
 	XLOG_ERROR("%s", error_msg.c_str());
 	
 	delete pim_vif;
-	return (XORP_ERROR);
+	return XORP_ERROR;
     }
     
     // Set the PIM Register vif index if needed
@@ -794,12 +794,12 @@ PimNode::add_vif(const Vif& vif, string& error_msg)
 	XLOG_ERROR("Error updating primary and domain-wide addresses "
 		   "for vif %s: %s",
 		   pim_vif->name().c_str(), error_msg.c_str());
-	return (XORP_ERROR);
+	return XORP_ERROR;
     } while (false);
 
     XLOG_INFO("Interface added: %s", pim_vif->str().c_str());
     
-    return (XORP_OK);
+    return XORP_OK;
 }
 
 /**
@@ -1286,10 +1286,10 @@ PimNode::start_vif(const string& vif_name, string& error_msg)
 {
     PimVif *pim_vif = find_or_create_vif(vif_name, error_msg);
     if (pim_vif == NULL) {
-	error_msg = c_format("Cannot start vif %s: no such vif",
-			     vif_name.c_str());
+	error_msg.append(c_format("Cannot start vif %s: cannot find or create vif",
+				  vif_name.c_str()));
 	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
+	return XORP_ERROR;
     }
 
     if (pim_vif->start(error_msg, "PimNode::start_vif") != XORP_OK) {
