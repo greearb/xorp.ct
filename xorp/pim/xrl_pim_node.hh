@@ -2324,12 +2324,12 @@ private:
 	      _vif_name(vif_name),
 	      _ip_protocol(ip_protocol),
 	      _group_address(group_address),
-	      _is_join(is_join) {}
+	      _is_join(is_join), _retries(0) {}
 
-	void		dispatch() {
+	void dispatch() {
 	    _xrl_pim_node.send_join_leave_multicast_group();
 	}
-	const char*	operation_name() const {
+	const char* operation_name() const {
 	    return ((_is_join)? "join" : "leave");
 	}
 	const string&	if_name() const { return _if_name; }
@@ -2337,6 +2337,8 @@ private:
 	uint8_t		ip_protocol() const { return _ip_protocol; }
 	const IPvX&	group_address() const { return _group_address; }
 	bool		is_join() const { return _is_join; }
+	int retries() const { return _retries; }
+	void set_retries(int i) { _retries = i; }
 
     private:
 	string		_if_name;
@@ -2344,6 +2346,7 @@ private:
 	uint8_t		_ip_protocol;
 	IPvX		_group_address;
 	bool		_is_join;
+	int _retries;
     };
 
     /**

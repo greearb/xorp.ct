@@ -1543,11 +1543,28 @@ XrlPimNode::fea_client_send_join_leave_multicast_group_cb(
     case COMMAND_FAILED:
 	//
 	// If a command failed because the other side rejected it, this is
-	// fatal.
+	// bad, but maybe we can retry....
 	//
-	XLOG_WARNING("Cannot %s a multicast group with the FEA: %s",
-		   entry->operation_name(),
-		   xrl_error.str().c_str());
+	XLOG_WARNING("Cannot %s a multicast group with the FEA, retries: %i: %s",
+		     entry->operation_name(), entry->retries(),
+		     xrl_error.str().c_str());
+	if (entry->is_join()) {
+	    // Need to retry this later
+	    if (entry->retries() > 1) {
+		// tell perm logic to retry
+		PimVif *pim_vif = PimNode::vif_find_by_name(entry->vif_name());
+		if (pim_vif) {
+		    pim_vif->setNeedsJoin(true);
+		}
+	    }
+	    else {
+		// Just retry..maybe things are better now
+		XLOG_WARNING("Will retry failed XRL...\n");
+		entry->set_retries(entry->retries() + 1);
+		retry_xrl_task();
+		return;
+	    }
+	}
 	break;
 
     case NO_FINDER:

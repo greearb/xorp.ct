@@ -190,6 +190,10 @@ public:
      */
     int start(string& error_msg, const char* dbg);
     
+    /** Try to join the PIM routers mcast group. */
+    int try_join(string& error_msg);
+    void setNeedsJoin(bool v) { needs_join = v; }
+
     /**  Attempt deferred start.
      */
     void notifyUpdated();
@@ -782,6 +786,7 @@ private:
 					  const IPvX& group_addr,
 					  uint8_t group_mask_len);
     bool wants_to_be_started; // as soon as we can, ie if the interface appears.
+    bool needs_join; // Need to (re)join the pim mcast group?
 };
 
 #endif // __PIM_PIM_VIF_HH__

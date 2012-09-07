@@ -152,6 +152,8 @@ PimVif::PimVif(PimNode* pim_node, const Vif& vif)
     
     set_default_config();
 
+    needs_join = false;
+
     // Check for any cached configuration.
     map<string, PVifPermInfo>::iterator i = perm_info.find(name());
     if (i != perm_info.end()) {
@@ -335,6 +337,8 @@ PimVif::pim_mrt() const
 /** System detected some change.  */
 void PimVif::notifyUpdated() {
     int perm_started = -1;
+    string err_msg;
+
     if (!wants_to_be_started) {
 	map<string, PVifPermInfo>::iterator i = perm_info.find(name());
 	if (i != perm_info.end()) {
@@ -345,7 +349,6 @@ void PimVif::notifyUpdated() {
     XLOG_INFO("notifyUpdated, vif: %s  wants-to-be-started: %i, perm-should-start: %i",
 	      name().c_str(), (int)(wants_to_be_started), perm_started);
     if (wants_to_be_started || (perm_started == 1)) {
-	string err_msg;
 	int rv = start(err_msg, "notifyUpdated, wants to be started");
 	if (rv == XORP_OK) {
 	    XLOG_WARNING("notifyUpdated, successfully started pim_vif: %s",
@@ -356,8 +359,31 @@ void PimVif::notifyUpdated() {
 			 name().c_str(), err_msg.c_str());
 	}
     }
+    else {
+	// Maybe we need to (re)join?
+	if (needs_join) {
+	    needs_join = false; // assume good things
+	    try_join(err_msg);
+	}
+    }
 }
 
+int PimVif::try_join(string& error_msg) {
+    // Join the appropriate multicast groups: ALL-PIM-ROUTERS
+    const IPvX group = IPvX::PIM_ROUTERS(family());
+    if (pim_node()->join_multicast_group(name(), name(),
+					 pim_node()->ip_protocol_number(),
+					 group)
+	!= XORP_OK) {
+	// NOTE:  This can still fail, but we don't notice until later
+	// when we get the XRL callback response back.  Will do fixup then
+	// as needed.
+	error_msg = c_format("cannot join group %s on vif %s",
+			     cstring(group), name().c_str());
+	return XORP_ERROR;
+    }
+    return XORP_OK;
+}
 
 /**
  * PimVif::start:
@@ -399,7 +425,7 @@ int PimVif::start(string& error_msg, const char* dbg) {
 
     if (! is_underlying_vif_up()) {
 	wants_to_be_started = true;
-	XLOG_WARNING("WARNING:  Delaying start of pim-vif: %s because underlying vif is not up.",
+	XLOG_WARNING("Delaying start of pim-vif: %s because underlying vif is not up.",
 		     name().c_str());
 	return XORP_OK;
     }
@@ -460,19 +486,11 @@ int PimVif::start(string& error_msg, const char* dbg) {
 	return (XORP_ERROR);
     }
 
-    if (! is_pim_register()) {    
-	//
-	// Join the appropriate multicast groups: ALL-PIM-ROUTERS
-	//
-	const IPvX group = IPvX::PIM_ROUTERS(family());
-	if (pim_node()->join_multicast_group(name(),
-					    name(),
-					    pim_node()->ip_protocol_number(),
-					    group)
-	    != XORP_OK) {
-	    error_msg = c_format("cannot join group %s on vif %s",
-				 cstring(group), name().c_str());
-	    return (XORP_ERROR);
+    if (! is_pim_register()) {
+	needs_join = false;
+	if (try_join(error_msg) != XORP_OK) {
+	    XLOG_WARNING("%s", error_msg.c_str());
+	    needs_join = true;
 	}
 	
 	pim_hello_start();
