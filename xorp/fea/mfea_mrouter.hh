@@ -207,7 +207,7 @@ public:
      * @param vif_index the vif index of the virtual interface to add.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int	add_multicast_vif(uint32_t vif_index);
+    int	add_multicast_vif(uint32_t vif_index, string& error_msg);
     
     /**
      * Delete a virtual multicast interface from the kernel.

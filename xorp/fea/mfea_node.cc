@@ -2483,13 +2483,13 @@ MfeaNode::delete_all_dataflow_monitor(const string& , // module_instance_name,
  * Return value: %XORP_OK on success, othewise %XORP_ERROR.
  **/
 int
-MfeaNode::add_multicast_vif(uint32_t vif_index)
+MfeaNode::add_multicast_vif(uint32_t vif_index, string& error_msg)
 {
-    if (_mfea_mrouter.add_multicast_vif(vif_index) != XORP_OK) {
-	return (XORP_ERROR);
+    if (_mfea_mrouter.add_multicast_vif(vif_index, error_msg) != XORP_OK) {
+	return XORP_ERROR;
     }
     
-    return (XORP_OK);
+    return XORP_OK;
 }
 
 /**

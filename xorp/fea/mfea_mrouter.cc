@@ -1300,12 +1300,14 @@ MfeaMrouter::stop_pim(string& error_msg)
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-MfeaMrouter::add_multicast_vif(uint32_t vif_index)
+MfeaMrouter::add_multicast_vif(uint32_t vif_index, string& error_msg)
 {
     MfeaVif *mfea_vif = mfea_node().vif_find_by_vif_index(vif_index);
     
-    if (mfea_vif == NULL)
-	return (XORP_ERROR);
+    if (mfea_vif == NULL) {
+	error_msg = c_format("Could not find vif: %i\n", vif_index);
+	return XORP_ERROR;
+    }
 
     void* sopt_arg = NULL;
     size_t sz = 0;
@@ -1316,9 +1318,8 @@ MfeaMrouter::add_multicast_vif(uint32_t vif_index)
 #ifndef HAVE_IPV4_MULTICAST_ROUTING
 	UNUSED(sz);
 	UNUSED(sopt_arg);
-	XLOG_ERROR("add_multicast_vif() failed: "
-		   "IPv4 multicast routing not supported");
-	return (XORP_ERROR);
+	error_msg = "add_multicast_vif() failed: IPv4 multicast routing not supported";
+	return XORP_ERROR;
 #else
 #ifdef USE_MULT_MCAST_TABLES
 	struct vifctl_ng vc_ng;
@@ -1361,8 +1362,8 @@ MfeaMrouter::add_multicast_vif(uint32_t vif_index)
 #endif
 	{
 	    if (mfea_vif->addr_ptr() == NULL) {
-		XLOG_ERROR("add_multicast_vif() failed: vif %s has no address",
-			   mfea_vif->name().c_str());
+		error_msg = c_format("add_multicast_vif() by-addr failed: vif %s has no address",
+				     mfea_vif->name().c_str());
 		return XORP_ERROR;
 	    }
 	    mfea_vif->addr_ptr()->copy_out(vcp->vifc_lcl_addr);
@@ -1374,10 +1375,10 @@ MfeaMrouter::add_multicast_vif(uint32_t vif_index)
 	//
 	if (setsockopt(_mrouter_socket, IPPROTO_IP, MRT_ADD_VIF,
 		       sopt_arg, sz) < 0) {
-	    XLOG_ERROR("setsockopt(MRT_ADD_VIF, vif %s) failed: %s  sz: %i, ifindex: %i addr: %s",
-		       mfea_vif->name().c_str(), XSTRERROR,
-		       (int)(sz), mfea_vif->pif_index(),
-		       mfea_vif->addr_ptr() ? mfea_vif->addr_ptr()->str().c_str() : "NULL");
+	    error_msg = c_format("setsockopt(MRT_ADD_VIF, vif %s) failed: %s  sz: %i, ifindex: %i addr: %s",
+				 mfea_vif->name().c_str(), XSTRERROR,
+				 (int)(sz), mfea_vif->pif_index(),
+				 mfea_vif->addr_ptr() ? mfea_vif->addr_ptr()->str().c_str() : "NULL");
 	    return XORP_ERROR;
 	}
 #endif // HAVE_IPV4_MULTICAST_ROUTING
@@ -1388,9 +1389,8 @@ MfeaMrouter::add_multicast_vif(uint32_t vif_index)
     case AF_INET6:
     {
 #ifndef HAVE_IPV6_MULTICAST_ROUTING
-	XLOG_ERROR("add_multicast_vif() failed: "
-		   "IPv6 multicast routing not supported");
-	return (XORP_ERROR);
+	error_msg = "add_multicast_vif() failed: IPv6 multicast routing not supported";
+	return XORP_ERROR;
 #else
 	struct mif6ctl mc;
 	
@@ -1399,18 +1399,18 @@ MfeaMrouter::add_multicast_vif(uint32_t vif_index)
 	mc.mif6c_flags = 0;
 	if (mfea_vif->is_pim_register())
 	    mc.mif6c_flags |= MIFF_REGISTER;
-	mc.mif6c_pifi = mfea_vif->pif_index();
+ 	mc.mif6c_pifi = mfea_vif->pif_index();
 #ifdef HAVE_STRUCT_MIF6CTL_VIFC_THRESHOLD /* BSD does not, it seems, newer Linux does */
 	mc.vifc_threshold = mfea_vif->min_ttl_threshold();
 	mc.vifc_rate_limit = mfea_vif->max_rate_limit();
 #endif
 	if (setsockopt(_mrouter_socket, IPPROTO_IPV6, MRT6_ADD_MIF,
 		       (void *)&mc, sizeof(mc)) < 0) {
-	    XLOG_ERROR("setsockopt(%i, MRT6_ADD_MIF, vif %s) failed: %s  mifi: %i  flags: 0x%x pifi: %i",
-		       _mrouter_socket.getSocket(),
-		       mfea_vif->name().c_str(), strerror(errno),
-		       (int)(mc.mif6c_mifi), (int)(mc.mif6c_flags), (int)(mc.mif6c_pifi));
-	    return (XORP_ERROR);
+	    error_msg = c_format("setsockopt(%i, MRT6_ADD_MIF, vif %s) failed: %s  mifi: %i  flags: 0x%x pifi: %i",
+				 _mrouter_socket.getSocket(),
+				 mfea_vif->name().c_str(), strerror(errno),
+				 (int)(mc.mif6c_mifi), (int)(mc.mif6c_flags), (int)(mc.mif6c_pifi));
+	    return XORP_ERROR;
 	}
 #endif // HAVE_IPV6_MULTICAST_ROUTING
     }
@@ -1419,10 +1419,10 @@ MfeaMrouter::add_multicast_vif(uint32_t vif_index)
     
     default:
 	XLOG_UNREACHABLE();
-	return (XORP_ERROR);
+	return XORP_ERROR;
     }
     
-    return (XORP_OK);
+    return XORP_OK;
 }
 
 
