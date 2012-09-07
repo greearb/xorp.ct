@@ -421,6 +421,9 @@ XrlPimNode::send_register_unregister_interest()
     entry = dynamic_cast<RegisterUnregisterInterest*>(xrl_task_base);
     XLOG_ASSERT(entry != NULL);
 
+    string eop(entry->operation_name());
+    string et(entry->target_name());
+
     if (entry->is_register()) {
 	// Register interest
 	success = _xrl_finder_client.send_register_class_event_interest(
@@ -437,12 +440,14 @@ XrlPimNode::send_register_unregister_interest()
 	//
 	// If an error, then try again
 	//
-	XLOG_ERROR("Failed to %s register interest in %s with the Finder. "
-		   "Will try again.",
-		   entry->operation_name(),
-		   entry->target_name().c_str());
+	XLOG_ERROR("Failed to %s interest in %s with the Finder. Will try again.",
+		   eop.c_str(), et.c_str());
 	retry_xrl_task();
 	return;
+    }
+    else {
+	XLOG_INFO("Successfully sent %s interest in %s with the Finder.",
+		  eop.c_str(), et.c_str());
     }
 }
 
