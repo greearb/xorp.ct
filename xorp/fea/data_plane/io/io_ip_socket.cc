@@ -611,7 +611,11 @@ IoIpSocket::join_multicast_group(const string& if_name,
     switch (family()) {
     case AF_INET:
     {
+#ifdef HAVE_STRUCT_IP_MREQN
+	struct ip_mreqn mreq;
+#else
 	struct ip_mreq mreq;
+#endif
 	struct in_addr in_addr;
 
 	// Find the first address
@@ -628,7 +632,12 @@ IoIpSocket::join_multicast_group(const string& if_name,
 
 	fa.addr().copy_out(in_addr);
 	group.copy_out(mreq.imr_multiaddr);
+#ifdef HAVE_STRUCT_IP_MREQN
+	mreq.imr_address.s_addr = in_addr.s_addr;
+	mreq.imr_ifindex = vifp->pif_index();
+#else
 	mreq.imr_interface.s_addr = in_addr.s_addr;
+#endif
 
 	if (setsockopt(*_proto_socket_in, IPPROTO_IP, IP_ADD_MEMBERSHIP,
 		       XORP_SOCKOPT_CAST(&mreq), sizeof(mreq)) < 0) {
@@ -790,7 +799,12 @@ IoIpSocket::leave_multicast_group(const string& if_name,
     switch (family()) {
     case AF_INET:
     {
+#ifdef HAVE_STRUCT_IP_MREQN
+	struct ip_mreqn mreq;
+#else
 	struct ip_mreq mreq;
+#endif
+
 	struct in_addr in_addr;
 
 	// Find the first address
@@ -807,7 +821,13 @@ IoIpSocket::leave_multicast_group(const string& if_name,
 
 	fa.addr().copy_out(in_addr);
 	group.copy_out(mreq.imr_multiaddr);
+#ifdef HAVE_STRUCT_IP_MREQN
+	mreq.imr_address.s_addr = in_addr.s_addr;
+	mreq.imr_ifindex = vifp->pif_index();
+#else
 	mreq.imr_interface.s_addr = in_addr.s_addr;
+#endif
+
 	if (setsockopt(*_proto_socket_in, IPPROTO_IP, IP_DROP_MEMBERSHIP,
 		       XORP_SOCKOPT_CAST(&mreq), sizeof(mreq)) < 0) {
 	    error_msg += c_format("Cannot leave group %s on interface %s vif %s socket: %i: %s\n",
