@@ -124,7 +124,7 @@ MfeaVif::start(string& error_msg, const char* dbg)
 	return XORP_OK;
 
     if (is_up() || is_pending_up())
-	return (XORP_OK);
+	return XORP_OK;
 
     // Add to our wants-to-be-running list
     if (i != perm_info.end()) {
@@ -138,14 +138,14 @@ MfeaVif::start(string& error_msg, const char* dbg)
     if (! is_underlying_vif_up()) {
 	// Start us later.
 	wants_to_be_started = true;
-	XLOG_WARNING("WARNING:  Delaying start of mfea-vif: %s because underlying vif is not up.",
+	XLOG_WARNING("Delaying start of mfea-vif: %s because underlying vif is not up.",
 		     name().c_str());
 	return XORP_OK;
     }
 
     if (!(is_pim_register() || is_multicast_capable())) {
 	wants_to_be_started = true;
-	XLOG_WARNING("WARNING:  Delaying start of mfea-vif: %s because underlying vif is not multicast capable.",
+	XLOG_WARNING("Delaying start of mfea-vif: %s because underlying vif is not multicast capable.",
 		     name().c_str());
 	return XORP_OK;
     }
@@ -161,12 +161,14 @@ MfeaVif::start(string& error_msg, const char* dbg)
 
     if (ProtoUnit::start() != XORP_OK) {
 	error_msg = "internal error";
-	return (XORP_ERROR);
+	return XORP_ERROR;
     }
     
-    if (mfea_node().add_multicast_vif(vif_index()) != XORP_OK) {
-	error_msg = "cannot add the multicast vif to the kernel";
-	return (XORP_ERROR);
+    if (mfea_node().add_multicast_vif(vif_index(), error_msg) != XORP_OK) {
+	wants_to_be_started = true;
+	XLOG_WARNING("Delaying start of mfea-vif: %s, could not add mcast vif: %s",
+		     name().c_str(), error_msg.c_str());
+	return XORP_OK;
     }
 
     XLOG_INFO("Interface started: %s%s",
@@ -193,11 +195,7 @@ void MfeaVif::notifyUpdated() {
     if (wants_to_be_started || (perm_started == 1)) {
 	string err_msg;
 	int rv = start(err_msg, "notifyUpdated");
-	if (rv == XORP_OK) {
-	    XLOG_WARNING("notifyUpdated, successfully started mfea_vif: %s",
-			 name().c_str());
-	}
-	else {
+	if (rv != XORP_OK) {
 	    XLOG_WARNING("notifyUpdated, tried to start vif: %s, but failed: %s",
 			 name().c_str(), err_msg.c_str());
 	}

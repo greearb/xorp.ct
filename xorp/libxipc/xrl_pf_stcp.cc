@@ -213,7 +213,9 @@ STCPRequestHandler::read_event(BufferedAsyncReader*		/* source */,
 			       size_t   			buffer_bytes)
 {
     if (ev == BufferedAsyncReader::OS_ERROR) {
-	XLOG_ERROR("Read failed (error = %d)\n", _reader.error());
+	XLOG_ERROR("Read failed (error = %d (%s), reader: %s)\n",
+		   _reader.error(), strerror(_reader.error()),
+		   _reader.toString().c_str());
 	die("read error");
 	return;
     }

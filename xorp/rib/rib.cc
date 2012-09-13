@@ -659,10 +659,12 @@ RIB<A>::new_vif(const string& vifname, const Vif& vif)
 
 template <typename A>
 int
-RIB<A>::delete_vif(const string& vifname)
+RIB<A>::delete_vif(const string& vifname, string& err_msg)
 {
     typename map<string, RibVif<A>*>::iterator vi = _vifs.find(vifname);
     if (vi == _vifs.end()) {
+	err_msg.append(c_format("RIB: %s  Cannot delete vif: %s, does not exist.\n",
+				name().c_str(), vifname.c_str()));
 	return XORP_ERROR;
     }
     RibVif<A>* rib_vif = vi->second;

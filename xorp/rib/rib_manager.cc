@@ -199,17 +199,7 @@ template <typename A>
 int
 RibManager::delete_rib_vif(RIB<A>& rib, const string& vifname, string& err)
 {
-    int result = rib.delete_vif(vifname);
-    if (result != XORP_OK) {
-	if (err.empty()) {
-	    err = c_format("Failed to delete VIF \"%s\" from %s",
-			   vifname.c_str(), rib.name().c_str());
-	} else {
-	    err += c_format(", and failed to delete VIF \"%s\" from %s",
-			    vifname.c_str(), rib.name().c_str());
-	}
-    }
-    return result;
+    return rib.delete_vif(vifname, err);
 }
 
 int

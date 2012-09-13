@@ -475,8 +475,7 @@ MfeaNode::vif_update(const string&	ifname,
 	// Update the MFEA iftree
 	mfea_ifp = _mfea_iftree.find_interface(ifname);
 	if (mfea_ifp == NULL) {
-	    XLOG_WARNING("Got update for vif on interface not in the MFEA tree: "
-			 "%s/%s",
+	    XLOG_WARNING("Got update for vif on interface not in the MFEA tree: %s/%s",
 			 ifname.c_str(), vifname.c_str());
 	    return;
 	}
@@ -493,8 +492,7 @@ MfeaNode::vif_update(const string&	ifname,
 	    if (ProtoNode<MfeaVif>::add_config_vif(vifname, vif_index,
 						   error_msg)
 		!= XORP_OK) {
-		XLOG_ERROR("Cannot add vif %s to the set of configured "
-			   "vifs: %s",
+		XLOG_ERROR("Cannot add vif %s to the set of configured vifs: %s",
 			   vifname.c_str(), error_msg.c_str());
 		return;
 	    }
@@ -504,7 +502,7 @@ MfeaNode::vif_update(const string&	ifname,
 	    //	      ifname.c_str(), vifname.c_str(), node_vif->str().c_str());
 	    // Deal with invalid vif-index (maybe device was configured but not
 	    //  actually present)
-	    if (node_vif->vif_index() ==  Vif::VIF_INDEX_INVALID) {
+	    if (node_vif->vif_index() == Vif::VIF_INDEX_INVALID) {
 		vif_index = find_unused_config_vif_index();
 		XLOG_INFO("Assigning new vif_index: %i to vif: %s/%s\n",
 			  vif_index, ifname.c_str(), vifname.c_str());
@@ -548,7 +546,7 @@ MfeaNode::vif_update(const string&	ifname,
 	    return;
 	}
 	vif_index = mfea_vifp->vif_index();
-	break;					// FALLTHROUGH
+	break; // FALLTHROUGH
     }//switch
 
     //
@@ -556,8 +554,7 @@ MfeaNode::vif_update(const string&	ifname,
     //
     const IfTreeInterface* ifp = observed_iftree().find_interface(ifname);
     if (ifp == NULL) {
-	XLOG_WARNING("Got update for vif on interface not in the FEA tree: "
-		     "%s/%s",
+	XLOG_WARNING("Got update for vif on interface not in the FEA tree: %s/%s",
 		     ifname.c_str(), vifname.c_str());
 	return;
     }
@@ -572,7 +569,12 @@ MfeaNode::vif_update(const string&	ifname,
     // Update the MFEA iftree
     //
     XLOG_ASSERT(mfea_vifp != NULL);
-    XLOG_ASSERT(vif_index != Vif::VIF_INDEX_INVALID);
+    if (vif_index == Vif::VIF_INDEX_INVALID) {
+	XLOG_ERROR("Got update (%i) for vif, vif_index is invalid, vif: %s/%s:  %s  vifp: %s\n",
+		   update, ifname.c_str(), vifname.c_str(), mfea_vifp->str().c_str(),
+		   vifp->str().c_str());
+	XLOG_ASSERT(vif_index != Vif::VIF_INDEX_INVALID);
+    }
     mfea_vifp->copy_state(*vifp);
     mfea_vifp->set_vif_index(vif_index);
     _mfea_iftree_update_replicator.vif_update(ifname, vifname, update);
@@ -643,7 +645,7 @@ MfeaNode::vifaddr4_update(const string&	ifname,
 	}
 	mfea_vifp->add_addr(addr);
 
-	break;					// FALLTHROUGH
+	break; // FALLTHROUGH
 
     case DELETED:
 	// Update the MFEA iftree
@@ -766,6 +768,11 @@ MfeaNode::vifaddr4_update(const string&	ifname,
 	XLOG_ERROR("Cannot add address %s to vif %s from the set of "
 		   "configured vifs: %s",
 		   addr.str().c_str(), vifname.c_str(), error_msg.c_str());
+    }
+
+    MfeaVif *mfea_vif = vif_find_by_name(vifname);
+    if (mfea_vif) {
+	mfea_vif->notifyUpdated();
     }
 }
 
@@ -919,6 +926,11 @@ MfeaNode::vifaddr6_update(const string&	ifname,
 	XLOG_ERROR("Cannot add address %s to vif %s from the set of "
 		   "configured vifs: %s",
 		   addr.str().c_str(), vifname.c_str(), error_msg.c_str());
+    }
+
+    MfeaVif *mfea_vif = vif_find_by_name(vifname);
+    if (mfea_vif) {
+	mfea_vif->notifyUpdated();
     }
 }
 #endif
@@ -1188,8 +1200,8 @@ MfeaNode::enable_vif(const string& vif_name, string& error_msg)
     if (mfea_vif == NULL) {
 	error_msg = c_format("MfeaNode:  Cannot enable vif %s: no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
+	XLOG_INFO("%s", error_msg.c_str());
+	return XORP_OK; // will start later
     }
     
     mfea_vif->enable("MfeaNote::enable_vif");
@@ -1256,8 +1268,8 @@ MfeaNode::start_vif(const string& vif_name, string& error_msg)
     if (mfea_vif == NULL) {
 	error_msg = c_format("MfeaNode: Cannot start vif %s: no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR("%s", error_msg.c_str());
-	return XORP_ERROR;
+	XLOG_INFO("%s", error_msg.c_str());
+	return XORP_OK; // will start later
     }
     
     if (mfea_vif->start(error_msg, "MfeaNode::start_vif") != XORP_OK) {
@@ -2471,13 +2483,13 @@ MfeaNode::delete_all_dataflow_monitor(const string& , // module_instance_name,
  * Return value: %XORP_OK on success, othewise %XORP_ERROR.
  **/
 int
-MfeaNode::add_multicast_vif(uint32_t vif_index)
+MfeaNode::add_multicast_vif(uint32_t vif_index, string& error_msg)
 {
-    if (_mfea_mrouter.add_multicast_vif(vif_index) != XORP_OK) {
-	return (XORP_ERROR);
+    if (_mfea_mrouter.add_multicast_vif(vif_index, error_msg) != XORP_OK) {
+	return XORP_ERROR;
     }
     
-    return (XORP_OK);
+    return XORP_OK;
 }
 
 /**

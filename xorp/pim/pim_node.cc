@@ -38,6 +38,23 @@
 #include "pim_vif.hh"
 
 
+const char* str(VarE v) {
+    switch (v) {
+    case PROTO_VERSION: return "PROTO_VERSION";
+    case HELLO_TRIGGERED_DELAY: return "HELLO_TRIGGERED_DELAY";
+    case HELLO_PERIOD: return "HELLO_PERIOD";
+    case HELLO_HOLDTIME: return "HELLO_HOLDTIME";
+    case DR_PRIORITY: return "DR_PRIORITY";
+    case PROPAGATION_DELAY: return "PROPAGATION_DELAY";
+    case OVERRIDE_INTERVAL: return "OVERRIDE_INTERVAL";
+    case TRACKING_DISABLED: return "TRACKING_DISABLED";
+    case ACCEPT_NOHELLO: return "ACCEPT_NOHELLO";
+    case JOIN_PRUNE_PERIOD: return "JOIN_PRUNE_PERIOD";
+    default:
+	return "UNKNOWN/DEFAULT/BUG";
+    }
+}
+
 /**
  * PimNode::PimNode:
  * @family: The address family (%AF_INET or %AF_INET6
@@ -744,7 +761,7 @@ PimNode::add_vif(const Vif& vif, string& error_msg)
 	XLOG_ERROR("%s", error_msg.c_str());
 	
 	delete pim_vif;
-	return (XORP_ERROR);
+	return XORP_ERROR;
     }
     
     // Set the PIM Register vif index if needed
@@ -777,12 +794,12 @@ PimNode::add_vif(const Vif& vif, string& error_msg)
 	XLOG_ERROR("Error updating primary and domain-wide addresses "
 		   "for vif %s: %s",
 		   pim_vif->name().c_str(), error_msg.c_str());
-	return (XORP_ERROR);
+	return XORP_ERROR;
     } while (false);
 
     XLOG_INFO("Interface added: %s", pim_vif->str().c_str());
     
-    return (XORP_OK);
+    return XORP_OK;
 }
 
 /**
@@ -1194,12 +1211,12 @@ PimNode::enable_vif(const string& vif_name, string& error_msg)
 	pim_vif->enable("PimNode::enable_vif");
 
 	// Check our wants-to-be-running list
-	map<string, VifPermInfo>::iterator i = perm_info.find(vif_name);
+	map<string, PVifPermInfo>::iterator i = perm_info.find(vif_name);
 	if (i != perm_info.end()) {
 	    i->second.should_enable = true;
 	}
 	else {
-	    VifPermInfo pv(vif_name, false, true);
+	    PVifPermInfo pv(vif_name, false, true);
 	    perm_info[vif_name] = pv;
 	}
 
@@ -1235,7 +1252,7 @@ PimNode::disable_vif(const string& vif_name, string& error_msg)
 {
 
     // Check our wants-to-be-running list
-    map<string, VifPermInfo>::iterator i = perm_info.find(vif_name);
+    map<string, PVifPermInfo>::iterator i = perm_info.find(vif_name);
     if (i != perm_info.end()) {
 	i->second.should_enable = false;
     }
@@ -1267,22 +1284,22 @@ PimNode::disable_vif(const string& vif_name, string& error_msg)
 int
 PimNode::start_vif(const string& vif_name, string& error_msg)
 {
-    PimVif *pim_vif = vif_find_by_name(vif_name);
+    PimVif *pim_vif = find_or_create_vif(vif_name, error_msg);
     if (pim_vif == NULL) {
-	error_msg = c_format("Cannot start vif %s: no such vif",
-			     vif_name.c_str());
+	error_msg.append(c_format("Cannot start vif %s: cannot find or create vif",
+				  vif_name.c_str()));
 	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
+	return XORP_ERROR;
     }
 
     if (pim_vif->start(error_msg, "PimNode::start_vif") != XORP_OK) {
 	error_msg = c_format("Cannot start vif %s: %s",
 			     vif_name.c_str(), error_msg.c_str());
 	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
+	return XORP_ERROR;
     }
     
-    return (XORP_OK);
+    return XORP_OK;
 }
 
 /**

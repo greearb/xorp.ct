@@ -421,6 +421,9 @@ XrlPimNode::send_register_unregister_interest()
     entry = dynamic_cast<RegisterUnregisterInterest*>(xrl_task_base);
     XLOG_ASSERT(entry != NULL);
 
+    string eop(entry->operation_name());
+    string et(entry->target_name());
+
     if (entry->is_register()) {
 	// Register interest
 	success = _xrl_finder_client.send_register_class_event_interest(
@@ -437,12 +440,14 @@ XrlPimNode::send_register_unregister_interest()
 	//
 	// If an error, then try again
 	//
-	XLOG_ERROR("Failed to %s register interest in %s with the Finder. "
-		   "Will try again.",
-		   entry->operation_name(),
-		   entry->target_name().c_str());
+	XLOG_ERROR("Failed to %s interest in %s with the Finder. Will try again.",
+		   eop.c_str(), et.c_str());
 	retry_xrl_task();
 	return;
+    }
+    else {
+	XLOG_INFO("Successfully sent %s interest in %s with the Finder.",
+		  eop.c_str(), et.c_str());
     }
 }
 
@@ -1538,11 +1543,28 @@ XrlPimNode::fea_client_send_join_leave_multicast_group_cb(
     case COMMAND_FAILED:
 	//
 	// If a command failed because the other side rejected it, this is
-	// fatal.
+	// bad, but maybe we can retry....
 	//
-	XLOG_WARNING("Cannot %s a multicast group with the FEA: %s",
-		   entry->operation_name(),
-		   xrl_error.str().c_str());
+	XLOG_WARNING("Cannot %s a multicast group with the FEA, retries: %i: %s",
+		     entry->operation_name(), entry->retries(),
+		     xrl_error.str().c_str());
+	if (entry->is_join()) {
+	    // Need to retry this later
+	    if (entry->retries() > 1) {
+		// tell perm logic to retry
+		PimVif *pim_vif = PimNode::vif_find_by_name(entry->vif_name());
+		if (pim_vif) {
+		    pim_vif->setNeedsJoin(true);
+		}
+	    }
+	    else {
+		// Just retry..maybe things are better now
+		XLOG_WARNING("Will retry failed XRL...\n");
+		entry->set_retries(entry->retries() + 1);
+		retry_xrl_task();
+		return;
+	    }
+	}
 	break;
 
     case NO_FINDER:

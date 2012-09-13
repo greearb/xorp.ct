@@ -49,6 +49,23 @@ class PimMrt;
 class PimNbr;
 class PimVif;
 
+
+/** If you add to this, adjust the strings in pim_node.cc */
+enum VarE {
+    PROTO_VERSION,
+    HELLO_TRIGGERED_DELAY,
+    HELLO_PERIOD,
+    HELLO_HOLDTIME,
+    DR_PRIORITY,
+    PROPAGATION_DELAY,
+    OVERRIDE_INTERVAL,
+    TRACKING_DISABLED,
+    ACCEPT_NOHELLO,
+    JOIN_PRUNE_PERIOD
+};
+
+const char* str(VarE v);
+
 /**
  * @short The PIM node class.
  * 
@@ -897,114 +914,85 @@ public:
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		get_vif_proto_version(const string& vif_name,
-				      int& proto_version,
-				      string& error_msg);
-    
-    /**
-     * Set the protocol version on an interface.
-     * 
-     * @param vif_name the name of the vif to set the protocol version of.
-     * @param proto_version the new protocol version.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		set_vif_proto_version(const string& vif_name,
-				      int proto_version,
-				      string& error_msg);
-    
-    /**
-     * Reset the protocol version on an interface to its default value.
-     * 
-     * @param vif_name the name of the vif to reset the protocol version of
-     * to its default value.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		reset_vif_proto_version(const string& vif_name,
-					string& error_msg);
+    int	get_vif_proto_version(const string& vif_name, int& proto_version, string& error_msg);
+    int get_vif_hello_triggered_delay(const string& vif_name, uint16_t& hello_triggered_delay, string& error_msg);
+    int	get_vif_hello_period(const string& vif_name, uint16_t& hello_period, string& error_msg);
+    int	get_vif_hello_holdtime(const string& vif_name, uint16_t& hello_holdtime, string& error_msg);
+    int get_vif_dr_priority(const string& vif_name, uint32_t& dr_priority, string& error_msg);
+    int get_vif_propagation_delay(const string&	vif_name, uint16_t& propagation_delay, string& error_msg);
+    int get_vif_override_interval(const string&	vif_name, uint16_t& override_interval, string& error_msg);
+    int	get_vif_is_tracking_support_disabled(const string& vif_name, bool& is_tracking_support_disabled, string& error_msg);
+    int	get_vif_accept_nohello_neighbors(const string& vif_name, bool& accept_nohello_neighbors, string& error_msg);
+    int	get_vif_join_prune_period(const string&	vif_name, uint16_t& join_prune_period, string& error_msg);
 
-    //
-    int		get_vif_hello_triggered_delay(const string& vif_name,
-					      uint16_t& hello_triggered_delay,
-					      string& error_msg);
-    int		set_vif_hello_triggered_delay(const string& vif_name,
-					      uint16_t hello_triggered_delay,
-					      string& error_msg);
-    int		reset_vif_hello_triggered_delay(const string& vif_name,
-						string& error_msg);
-    //
-    int		get_vif_hello_period(const string& vif_name,
-				     uint16_t& hello_period,
-				     string& error_msg);
-    int		set_vif_hello_period(const string& vif_name,
-				     uint16_t hello_period,
-				     string& error_msg);
-    int		reset_vif_hello_period(const string& vif_name,
-				       string& error_msg);
-    //
-    int		get_vif_hello_holdtime(const string& vif_name,
-				       uint16_t& hello_holdtime,
-				       string& error_msg);
-    int		set_vif_hello_holdtime(const string& vif_name,
-				       uint16_t	hello_holdtime,
-				       string& error_msg);
-    int		reset_vif_hello_holdtime(const string& vif_name,
-					 string& error_msg);
-    //
-    int		get_vif_dr_priority(const string& vif_name,
-				    uint32_t& dr_priority,
-				    string& error_msg);
-    int		set_vif_dr_priority(const string& vif_name,
-				    uint32_t dr_priority,
-				    string& error_msg);
-    int		reset_vif_dr_priority(const string& vif_name,
-				      string& error_msg);
-    //
-    int		get_vif_propagation_delay(const string&	vif_name,
-					  uint16_t& propagation_delay,
-					  string& error_msg);
-    int		set_vif_propagation_delay(const string&	vif_name,
-					  uint16_t propagation_delay,
-					  string& error_msg);
-    int		reset_vif_propagation_delay(const string& vif_name,
-					    string& error_msg);
-    //
-    int		get_vif_override_interval(const string&	vif_name,
-					  uint16_t& override_interval,
-					  string& error_msg);
-    int		set_vif_override_interval(const string&	vif_name,
-					  uint16_t override_interval,
-					  string& error_msg);
-    int		reset_vif_override_interval(const string& vif_name,
-					    string& error_msg);
-    //
-    int		get_vif_is_tracking_support_disabled(const string& vif_name,
-						     bool& is_tracking_support_disabled,
-						     string& error_msg);
-    int		set_vif_is_tracking_support_disabled(const string& vif_name,
-						     bool is_tracking_support_disabled,
-						     string& error_msg);
-    int		reset_vif_is_tracking_support_disabled(const string& vif_name,
-						       string& error_msg);
-    //
-    int		get_vif_accept_nohello_neighbors(const string& vif_name,
-						 bool& accept_nohello_neighbors,
-						 string& error_msg);
-    int		set_vif_accept_nohello_neighbors(const string& vif_name,
-						 bool accept_nohello_neighbors,
-						 string& error_msg);
-    int		reset_vif_accept_nohello_neighbors(const string& vif_name,
-						   string& error_msg);
-    //
-    int		get_vif_join_prune_period(const string&	vif_name,
-					  uint16_t& join_prune_period,
-					  string& error_msg);
-    int		set_vif_join_prune_period(const string&	vif_name,
-					  uint16_t join_prune_period,
-					  string& error_msg);
-    int		reset_vif_join_prune_period(const string& vif_name,
-					    string& error_msg);
+    /** Helper method to set values. */
+    int do_set_val(VarE var, const string& vif_name, int v, string& error_msg);
+    /** Helper method to reset values. */
+    int do_reset_val(VarE var, const string& vif_name, string& error_msg);
+    
+    int reset_vif_proto_version(const string& vif_name, string& error_msg) {
+	return do_reset_val(PROTO_VERSION, vif_name, error_msg);
+    }
+    int reset_vif_hello_triggered_delay(const string& vif_name, string& error_msg) {
+	return do_reset_val(HELLO_TRIGGERED_DELAY, vif_name, error_msg);
+    }
+    int reset_vif_hello_period(const string& vif_name, string& error_msg) {
+	return do_reset_val(HELLO_PERIOD, vif_name, error_msg);
+    }
+    int reset_vif_hello_holdtime(const string& vif_name, string& error_msg) {
+	return do_reset_val(HELLO_HOLDTIME, vif_name, error_msg);
+    }
+    int	reset_vif_dr_priority(const string& vif_name, string& error_msg) {
+	return do_reset_val(DR_PRIORITY, vif_name, error_msg);
+    }
+    int	reset_vif_propagation_delay(const string& vif_name, string& error_msg) {
+	return do_reset_val(PROPAGATION_DELAY, vif_name, error_msg);
+    }
+    int	reset_vif_override_interval(const string& vif_name, string& error_msg) {
+	return do_reset_val(OVERRIDE_INTERVAL, vif_name, error_msg);
+    }
+    int reset_vif_is_tracking_support_disabled(const string& vif_name, string& error_msg) {
+	return do_reset_val(TRACKING_DISABLED, vif_name, error_msg);
+    }	
+    int	reset_vif_accept_nohello_neighbors(const string& vif_name, string& error_msg) {
+	return do_reset_val(ACCEPT_NOHELLO, vif_name, error_msg);
+    }
+    int reset_vif_join_prune_period(const string& vif_name, string& error_msg) {
+	return do_reset_val(JOIN_PRUNE_PERIOD, vif_name, error_msg);
+    }	
+
+
+    int set_vif_proto_version(const string& vif_name, int proto_version, string& error_msg) {
+	return do_set_val(PROTO_VERSION, vif_name, proto_version, error_msg);
+    }
+    int set_vif_hello_triggered_delay(const string& vif_name, uint16_t hello_triggered_delay, string& error_msg) {
+	return do_set_val(HELLO_TRIGGERED_DELAY, vif_name, hello_triggered_delay, error_msg);
+    }
+    int set_vif_hello_period(const string& vif_name, uint16_t hello_period, string& error_msg) {
+	return do_set_val(HELLO_PERIOD, vif_name, hello_period, error_msg);
+    }
+    int set_vif_hello_holdtime(const string& vif_name, uint16_t	hello_holdtime, string& error_msg) {
+	return do_set_val(HELLO_HOLDTIME, vif_name, hello_holdtime, error_msg);
+    }
+    int	set_vif_dr_priority(const string& vif_name, uint32_t dr_priority, string& error_msg) {
+	return do_set_val(DR_PRIORITY, vif_name, dr_priority, error_msg);
+    }
+    int	set_vif_propagation_delay(const string&	vif_name, uint16_t propagation_delay, string& error_msg) {
+	return do_set_val(PROPAGATION_DELAY, vif_name, propagation_delay, error_msg);
+    }
+    int	set_vif_override_interval(const string&	vif_name, uint16_t override_interval, string& error_msg) {
+	return do_set_val(OVERRIDE_INTERVAL, vif_name, override_interval, error_msg);
+    }
+    int	set_vif_is_tracking_support_disabled(const string& vif_name, bool is_tracking_support_disabled, string& error_msg) {
+	return do_set_val(TRACKING_DISABLED, vif_name, is_tracking_support_disabled, error_msg);
+    }
+    int	set_vif_accept_nohello_neighbors(const string& vif_name, bool accept_nohello_neighbors, string& error_msg) {
+	return do_set_val(ACCEPT_NOHELLO, vif_name, accept_nohello_neighbors, error_msg);
+    }
+    int set_vif_join_prune_period(const string&	vif_name, uint16_t join_prune_period, string& error_msg) {
+	return do_set_val(JOIN_PRUNE_PERIOD, vif_name, join_prune_period, error_msg);
+    }
+
     //
     int		get_switch_to_spt_threshold(bool& is_enabled,
 					    uint32_t& interval_sec,

@@ -1460,8 +1460,8 @@ XrlMfeaNode::mfea_0_1_start_vif(
     string error_msg;
     
     if (MfeaNode::start_vif(vif_name, error_msg) != XORP_OK) {
-        XLOG_ERROR("Mfea, start vif failed.  Allowing commit to succeed anyway, error: %s\n", error_msg.c_str());
-	//return XrlCmdError::COMMAND_FAILED(error_msg);
+        XLOG_ERROR("Mfea, start vif failed.  Error: %s\n", error_msg.c_str());
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
     return XrlCmdError::OKAY();

@@ -36,7 +36,7 @@
 #include "pim_vif.hh"
 
 
-map<string, VifPermInfo> perm_info;
+map<string, PVifPermInfo> perm_info;
 
 /**
  * PimVif::PimVif:
@@ -143,15 +143,6 @@ PimVif::PimVif(PimNode* pim_node, const Vif& vif)
       //
       _usage_by_pim_mre_task(0)
 {
-    // Check our wants-to-be-running list
-    map<string, VifPermInfo>::iterator i = perm_info.find(name());
-    if (i != perm_info.end()) {
-	wants_to_be_started = i->second.should_start;
-    }
-    else {
-	wants_to_be_started = false;
-    }
-
     _buffer_send = BUFFER_MALLOC(BUF_SIZE_DEFAULT);
     _buffer_send_hello = BUFFER_MALLOC(BUF_SIZE_DEFAULT);
     _buffer_send_bootstrap = BUFFER_MALLOC(BUF_SIZE_DEFAULT);
@@ -160,7 +151,60 @@ PimVif::PimVif(PimNode* pim_node, const Vif& vif)
     set_proto_version_default(PIM_VERSION_DEFAULT);
     
     set_default_config();
-    
+
+    needs_join = false;
+
+    // Check for any cached configuration.
+    map<string, PVifPermInfo>::iterator i = perm_info.find(name());
+    if (i != perm_info.end()) {
+#define SET_LOCAL(a)					\
+	if (i->second.vset.a) {				\
+	    a().set(i->second.a);			\
+	}
+	wants_to_be_started = i->second.should_start;
+	if (i->second.vset.proto_version) {
+	    string error_msg;
+	    set_proto_version(i->second.proto_version, error_msg);
+	}
+	SET_LOCAL(hello_triggered_delay);
+	SET_LOCAL(hello_period);
+	SET_LOCAL(dr_priority);
+	SET_LOCAL(propagation_delay);
+	SET_LOCAL(override_interval);
+	if (i->second.vset.tracking_disabled) {
+	    is_tracking_support_disabled().set(i->second.tracking_disabled);
+	}
+	if (i->second.vset.accept_nohello) {
+	    accept_nohello_neighbors().set(i->second.accept_nohello);
+	}
+	SET_LOCAL(join_prune_period);
+#undef SET_LOCAL
+#define RESET_LOCAL(a)						\
+	if (i->second.vreset.a) {				\
+	    a().reset();					\
+	}
+	if (i->second.vreset.proto_version) {
+	    string error_msg;
+	    set_proto_version(proto_version_default(), error_msg);
+	}
+	RESET_LOCAL(hello_triggered_delay);
+	RESET_LOCAL(hello_period);
+	RESET_LOCAL(dr_priority);
+	RESET_LOCAL(propagation_delay);
+	RESET_LOCAL(override_interval);
+	if (i->second.vreset.tracking_disabled) {
+	    is_tracking_support_disabled().reset();
+	}
+	if (i->second.vreset.accept_nohello) {
+	    accept_nohello_neighbors().reset();
+	}
+	RESET_LOCAL(join_prune_period);
+#undef RESET_LOCAL
+    }
+    else {
+	wants_to_be_started = false;
+    }
+   
     set_should_send_pim_hello(true);
 }
 
@@ -171,8 +215,7 @@ PimVif::PimVif(PimNode* pim_node, const Vif& vif)
  * PIM protocol vif destructor.
  * 
  **/
-PimVif::~PimVif()
-{
+PimVif::~PimVif() {
     string error_msg;
 
     stop(error_msg, false, "destructing pimvif");
@@ -190,6 +233,40 @@ PimVif::~PimVif()
     }
 }
 
+void PimVif::check_restart_elect(string& error_msg) {
+    if (is_up() || is_pending_down()) {
+	if (! is_pim_register()) {
+	    // Send immediately a Hello message with the new value
+	    pim_hello_send(error_msg);
+	    
+	    // (Re)elect the DR
+	    pim_dr_elect();
+	}
+    }
+}
+
+void PimVif::check_hello_send(string& error_msg) {
+    if (is_up() || is_pending_down()) {
+	if (! is_pim_register()) {
+	    // Send immediately a Hello message with the new value
+	    pim_hello_send(error_msg);
+	}
+    }
+}
+
+void PimVif::check_restart_hello(string& error_msg) {
+    if (is_up() || is_pending_down()) {
+	if (! is_pim_register()) {
+	    //
+	    // Send immediately a Hello message, and schedule the next one
+	    // at random in the interval [0, hello_period)
+	    //
+	    pim_hello_send(error_msg);
+	    hello_timer_start_random(hello_period().get(), 0);
+	}
+    }
+}
+
 /**
  * PimVif::set_default_config:
  * @: 
@@ -200,7 +277,8 @@ void
 PimVif::set_default_config()
 {
     // Protocol version
-    set_proto_version(proto_version_default());
+    string error_msg;
+    set_proto_version(proto_version_default(), error_msg);
     
     // Hello-related configurable parameters
     hello_triggered_delay().reset();
@@ -229,14 +307,17 @@ PimVif::set_default_config()
  * Return value: %XORP_OK is @proto_version is valid, otherwise %XORP_ERROR.
  **/
 int
-PimVif::set_proto_version(int proto_version)
+PimVif::set_proto_version(int proto_version, string& error_msg)
 {
-    if ((proto_version < PIM_VERSION_MIN) || (proto_version > PIM_VERSION_MAX))
-	return (XORP_ERROR);
+    if ((proto_version < PIM_VERSION_MIN) || (proto_version > PIM_VERSION_MAX)) {
+	error_msg.append(c_format("Proto version %i out of bounds, min: %i  max: %i\n",
+				  proto_version, PIM_VERSION_MIN, PIM_VERSION_MAX));
+	return XORP_ERROR;
+    }
     
     ProtoUnit::set_proto_version(proto_version);
     
-    return (XORP_OK);
+    return XORP_OK;
 }
 
 /**
@@ -256,8 +337,10 @@ PimVif::pim_mrt() const
 /** System detected some change.  */
 void PimVif::notifyUpdated() {
     int perm_started = -1;
+    string err_msg;
+
     if (!wants_to_be_started) {
-	map<string, VifPermInfo>::iterator i = perm_info.find(name());
+	map<string, PVifPermInfo>::iterator i = perm_info.find(name());
 	if (i != perm_info.end()) {
 	    perm_started = i->second.should_start;
 	}
@@ -266,7 +349,6 @@ void PimVif::notifyUpdated() {
     XLOG_INFO("notifyUpdated, vif: %s  wants-to-be-started: %i, perm-should-start: %i",
 	      name().c_str(), (int)(wants_to_be_started), perm_started);
     if (wants_to_be_started || (perm_started == 1)) {
-	string err_msg;
 	int rv = start(err_msg, "notifyUpdated, wants to be started");
 	if (rv == XORP_OK) {
 	    XLOG_WARNING("notifyUpdated, successfully started pim_vif: %s",
@@ -277,8 +359,31 @@ void PimVif::notifyUpdated() {
 			 name().c_str(), err_msg.c_str());
 	}
     }
+    else {
+	// Maybe we need to (re)join?
+	if (needs_join) {
+	    needs_join = false; // assume good things
+	    try_join(err_msg);
+	}
+    }
 }
 
+int PimVif::try_join(string& error_msg) {
+    // Join the appropriate multicast groups: ALL-PIM-ROUTERS
+    const IPvX group = IPvX::PIM_ROUTERS(family());
+    if (pim_node()->join_multicast_group(name(), name(),
+					 pim_node()->ip_protocol_number(),
+					 group)
+	!= XORP_OK) {
+	// NOTE:  This can still fail, but we don't notice until later
+	// when we get the XRL callback response back.  Will do fixup then
+	// as needed.
+	error_msg = c_format("cannot join group %s on vif %s",
+			     cstring(group), name().c_str());
+	return XORP_ERROR;
+    }
+    return XORP_OK;
+}
 
 /**
  * PimVif::start:
@@ -288,14 +393,12 @@ void PimVif::notifyUpdated() {
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
-int
-PimVif::start(string& error_msg, const char* dbg)
-{
+int PimVif::start(string& error_msg, const char* dbg) {
     XLOG_INFO("%s:  start called, is_enabled: %i  is-up: %i  is-pending-up: %i, dbg: %s\n",
 	      name().c_str(), (int)(is_enabled()), (int)(is_up()), (int)(is_pending_up()),
 	      dbg);
 
-    map<string, VifPermInfo>::iterator i = perm_info.find(name());
+    map<string, PVifPermInfo>::iterator i = perm_info.find(name());
 
     if (! is_enabled()) {
 	if (i != perm_info.end()) {
@@ -309,27 +412,27 @@ PimVif::start(string& error_msg, const char* dbg)
 	return XORP_OK;
 
     if (is_up() || is_pending_up())
-	return (XORP_OK);
+	return XORP_OK;
 
     // Add to our wants-to-be-running list
     if (i != perm_info.end()) {
 	i->second.should_start = true;
     }
     else {
-	VifPermInfo pi(name(), true, false);
+	PVifPermInfo pi(name(), true, false);
 	perm_info[name()] = pi;
     }
 
     if (! is_underlying_vif_up()) {
 	wants_to_be_started = true;
-	XLOG_WARNING("WARNING:  Delaying start of pim-vif: %s because underlying vif is not up.",
+	XLOG_WARNING("Delaying start of pim-vif: %s because underlying vif is not up.",
 		     name().c_str());
 	return XORP_OK;
     }
 
     if (! (is_pim_register() || is_multicast_capable())) {
 	wants_to_be_started = true;
-	XLOG_WARNING("WARNING:  Delaying start of pim-vif: %s because underlying vif is not multicast capable.",
+	XLOG_WARNING("Delaying start of pim-vif: %s because underlying vif is not multicast capable.",
 		     name().c_str());
 	return XORP_OK;
     }
@@ -340,17 +443,22 @@ PimVif::start(string& error_msg, const char* dbg)
     //
     if (is_loopback()) {
 	error_msg = "pim-vif: Loopback interfaces cannot be used for multicast.";
-	return (XORP_ERROR);
+	return XORP_ERROR;
     }
 
-    if (update_primary_and_domain_wide_address(error_msg) != XORP_OK)
-	return (XORP_ERROR);
+    if (update_primary_and_domain_wide_address(error_msg) != XORP_OK) {
+	// try later
+	wants_to_be_started = true;
+	XLOG_WARNING("Delaying start of pim-vif: %s because address is not yet valid.",
+		     name().c_str());
+	return XORP_OK;
+    }
 
     if (ProtoUnit::start() != XORP_OK) {
 	error_msg = "internal error";
-	return (XORP_ERROR);
+	return XORP_ERROR;
     }
-    
+
     //
     // Register as a receiver with the kernel
     //
@@ -362,7 +470,7 @@ PimVif::start(string& error_msg, const char* dbg)
 	error_msg = c_format("cannot register as a receiver on vif %s "
 			     "with the kernel",
 			     name().c_str());
-	return (XORP_ERROR);
+	return XORP_ERROR;
     }
 
     //
@@ -377,20 +485,12 @@ PimVif::start(string& error_msg, const char* dbg)
 			     name().c_str());
 	return (XORP_ERROR);
     }
-    
-    if (! is_pim_register()) {    
-	//
-	// Join the appropriate multicast groups: ALL-PIM-ROUTERS
-	//
-	const IPvX group = IPvX::PIM_ROUTERS(family());
-	if (pim_node()->join_multicast_group(name(),
-					    name(),
-					    pim_node()->ip_protocol_number(),
-					    group)
-	    != XORP_OK) {
-	    error_msg = c_format("cannot join group %s on vif %s",
-				 cstring(group), name().c_str());
-	    return (XORP_ERROR);
+
+    if (! is_pim_register()) {
+	needs_join = false;
+	if (try_join(error_msg) != XORP_OK) {
+	    XLOG_WARNING("%s", error_msg.c_str());
+	    needs_join = true;
 	}
 	
 	pim_hello_start();
@@ -412,7 +512,7 @@ PimVif::start(string& error_msg, const char* dbg)
 	      this->str().c_str(), flags_string().c_str());
 
     wants_to_be_started = false; //it worked
-    return (XORP_OK);
+    return XORP_OK;
 }
 
 /**
@@ -437,7 +537,7 @@ PimVif::stop(string& error_msg, bool stay_down, const char* dbg)
 
     if (stay_down) {
 	// Remove from our wants-to-be-running list
-	map<string, VifPermInfo>::iterator i = perm_info.find(name());
+	map<string, PVifPermInfo>::iterator i = perm_info.find(name());
 	if (i != perm_info.end()) {
 	    i->second.should_start = false;
 	}
@@ -637,10 +737,11 @@ PimVif::pim_send(const IPvX& src, const IPvX& dst,
     int ttl = MINTTL;
     bool ip_internet_control = true;	// XXX: might be overwritten below
 
-    if (! (is_up() || is_pending_down())) {
+    if (!(is_up() || is_pending_down())) {
 	error_msg += "Interface: " + name() + " is down or pending down when trying pim_send\n";
-	debug_msg("Vif %s is currently down\n", name().c_str());
-	return (XORP_ERROR);
+	XLOG_ERROR("Vif %s is not in proper state to send, is-up: %i  pending-down: %i\n",
+		   name().c_str(), is_up(), is_pending_down());
+	return XORP_ERROR;
     }
 
     //
