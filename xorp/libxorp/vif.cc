@@ -114,8 +114,7 @@ Vif::Vif(const string& vifname, const string& ifname)
 //
 // Vif copy constructor
 //
-Vif::Vif(const Vif& vif)
-{
+Vif::Vif(const Vif& vif) : BugCatcher(vif) {
     _name = vif.name();
     _ifname = vif.ifname();
     set_pif_index(vif.pif_index());

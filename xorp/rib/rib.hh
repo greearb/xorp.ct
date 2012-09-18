@@ -845,7 +845,7 @@ public:
 	  _usage_counter(0),
 	  _is_deleted(false) { }
 
-    ~RibVif() {}
+    virtual ~RibVif() {}
 
     size_t copy_in(const Vif& from_vif) {
 	Vif* to_vif = this;
@@ -855,19 +855,20 @@ public:
 
     void set_deleted(bool v) { _is_deleted = v; }
 
-    uint32_t usage_counter() const { return (_usage_counter); }
+    int32_t usage_counter() const { return (_usage_counter); }
     void incr_usage_counter() { _usage_counter++; }
     void decr_usage_counter() {
 	_usage_counter--;
+	assert(_usage_counter >= 0);
 	if (_is_deleted && (_usage_counter == 0)) {
-	if (_rib)
-	    _rib->destroy_deleted_vif(this);
+	    if (_rib)
+		_rib->destroy_deleted_vif(this);
 	}
     }
 
 private:
     RIB<A>*	_rib;
-    uint32_t	_usage_counter;
+    int	_usage_counter;
     bool	_is_deleted;
 };
 

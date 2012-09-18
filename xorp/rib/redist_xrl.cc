@@ -161,7 +161,7 @@ AddRoute<A>::AddRoute(RedistXrlOutput<A>* parent, const IPRouteEntry<A>& ipr)
       _vifname(ipr.vif()->name()),
       _metric(ipr.metric()),
       _admin_distance(ipr.admin_distance()),
-      _protocol_origin(ipr.protocol().name())
+      _protocol_origin(ipr.protocol()->name())
 {
 }
 
@@ -247,7 +247,7 @@ DeleteRoute<A>::DeleteRoute(RedistXrlOutput<A>* parent,
       _vifname(ipr.vif()->name()),
       _metric(ipr.metric()),
       _admin_distance(ipr.admin_distance()),
-      _protocol_origin(ipr.protocol().name())
+      _protocol_origin(ipr.protocol()->name())
 {
 }
 
@@ -1049,7 +1049,7 @@ RedistTransactionXrlOutput<A>::add_route(const IPRouteEntry<A>& ipr)
     PROFILE(if (this->_profile.enabled(profile_route_rpc_in))
 		this->_profile.log(profile_route_rpc_in,
 				   c_format("add %s %s %s %u",
-					    ipr.protocol().name().c_str(),
+					    ipr.protocol()->name().c_str(),
 					    ipr.net().str().c_str(),
 					    ipr.nexthop()->str().c_str(),
 					    XORP_UINT_CAST(ipr.metric()))));
@@ -1080,7 +1080,7 @@ RedistTransactionXrlOutput<A>::delete_route(const IPRouteEntry<A>& ipr)
     PROFILE(if (this->_profile.enabled(profile_route_rpc_in))
 		this->_profile.log(profile_route_rpc_in,
 				   c_format("add %s %s",
-					    ipr.protocol().name().c_str(),
+					    ipr.protocol()->name().c_str(),
 					    ipr.net().str().c_str())));
 
     bool no_running_tasks = (this->_queued == 0);

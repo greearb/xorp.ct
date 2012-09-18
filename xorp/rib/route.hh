@@ -18,12 +18,9 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/rib/route.hh,v 1.29 2008/10/02 21:58:12 bms Exp $
 
 #ifndef __RIB_ROUTE_HH__
 #define __RIB_ROUTE_HH__
-
-
 
 
 #include "libxorp/xorp.h"
@@ -58,11 +55,15 @@ public:
      * @param protocol the routing protocol that originated this route.
      * @param metric the routing protocol metric for this route.
      */
-    RouteEntry(RibVif<A>* vif, const Protocol& protocol,
+    RouteEntry(RibVif<A>* vif, Protocol* protocol,
 		uint32_t metric, const PolicyTags& policytags, const IPNet<A>& net);
 
-    RouteEntry(RibVif<A>* vif, const Protocol& protocol,
+    RouteEntry(RibVif<A>* vif, Protocol* protocol,
 		uint32_t metric, const IPNet<A>& net);
+
+    RouteEntry(const RouteEntry<A>& r);
+
+    RouteEntry& operator=(const RouteEntry<A>& r);
 
     /**
      * Destructor
@@ -109,7 +110,7 @@ public:
      * @return the routing protocol that originated this route.
      * @see Protocol.
      */
-    const Protocol& protocol() const { return _protocol; }
+    Protocol* protocol() const { return _protocol; }
 
     /**
      * Display the route for debugging purposes.
@@ -145,14 +146,14 @@ public:
     const PolicyTags& policytags() const { return _policytags; }
 
 protected:
-    RibVif<A>*		_vif;
+    RibVif<A>* _vif;
 
-    const Protocol&	_protocol;		// The routing protocol that instantiated this route
+    Protocol* _protocol;		// The routing protocol that instantiated this route
 
-    uint16_t		_admin_distance;	// Lower is better
-    uint32_t		_metric;		// Lower is better
-    PolicyTags		_policytags;		// Tags used for policy route redistribution
-    const IPNet<A>	_net;			// The route entry's subnet address
+    uint16_t	_admin_distance;	// Lower is better
+    uint32_t	_metric;		// Lower is better
+    PolicyTags	_policytags;		// Tags used for policy route redistribution
+    IPNet<A>	_net;			// The route entry's subnet address
 };
 
 /**
@@ -177,7 +178,7 @@ public:
      * @param metric the routing protocol metric for this route.
      */
     IPRouteEntry(const IPNet<A>& net, RibVif<A>* vif, IPNextHop<A>* nexthop,
-		 const Protocol& protocol, uint32_t metric)
+		 Protocol* protocol, uint32_t metric)
 	: RouteEntry<A>(vif, protocol, metric, net), _nexthop(nexthop) {}
 
     /**
@@ -193,9 +194,12 @@ public:
      * @param policytags the policy-tags for this route.
      */
     IPRouteEntry(const IPNet<A>& net, RibVif<A>* vif, IPNextHop<A>* nexthop,
-		 const Protocol& protocol, uint32_t metric,
+		 Protocol* protocol, uint32_t metric,
 		 const PolicyTags& policytags)
 	: RouteEntry<A>(vif, protocol, metric, policytags, net), _nexthop(nexthop) {}
+
+    IPRouteEntry(const IPRouteEntry<A>& r);
+    IPRouteEntry& operator=(const IPRouteEntry<A>& r);
 
     /**
      * Destructor for Routing Table Entry
@@ -274,12 +278,15 @@ public:
      * @param egp_parent the orginal route entry with a non-local nexthop.
      */
     ResolvedIPRouteEntry(const IPNet<A>& net, RibVif<A>* vif, IPNextHop<A>* nexthop,
-			 const Protocol& protocol, uint32_t metric,
+			 Protocol* protocol, uint32_t metric,
 			 const IPRouteEntry<A>* igp_parent,
 			 const IPRouteEntry<A>* egp_parent)
 	: IPRouteEntry<A>(net, vif, nexthop, protocol, metric, PolicyTags()),
 	_igp_parent(igp_parent),
 	_egp_parent(egp_parent) { }
+
+    ResolvedIPRouteEntry(const ResolvedIPRouteEntry<A>& r);
+    ResolvedIPRouteEntry& operator=(const ResolvedIPRouteEntry<A>& r);
 
     /**
      * Get the igp_parent.

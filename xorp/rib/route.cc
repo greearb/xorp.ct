@@ -31,7 +31,7 @@
 #include "route.hh"
 
 template<class A>
-RouteEntry<A>::RouteEntry(RibVif<A>* vif, const Protocol& protocol,
+RouteEntry<A>::RouteEntry(RibVif<A>* vif, Protocol* protocol,
 		       uint32_t metric, const PolicyTags& policytags, const IPNet<A>& net)
     : _vif(vif), _protocol(protocol),
       _admin_distance(UNKNOWN_ADMIN_DISTANCE), _metric(metric),
@@ -42,13 +42,42 @@ RouteEntry<A>::RouteEntry(RibVif<A>* vif, const Protocol& protocol,
 }
 
 template<class A>
-RouteEntry<A>::RouteEntry(RibVif<A>* vif, const Protocol& protocol,
+RouteEntry<A>::RouteEntry(RibVif<A>* vif, Protocol* protocol,
 		       uint32_t metric, const IPNet<A>& net)
     : _vif(vif), _protocol(protocol),
       _admin_distance(UNKNOWN_ADMIN_DISTANCE), _metric(metric), _net(net)
 {
     if (_vif != NULL)
 	_vif->incr_usage_counter();
+}
+
+template<class A>
+RouteEntry<A>::RouteEntry(const RouteEntry& r) {
+    _vif = r._vif;
+    if (_vif)
+	_vif->incr_usage_counter();
+    _protocol = r._protocol;
+    _admin_distance = r._admin_distance;
+    _metric = r._metric;
+    _policytags = r._policytags;
+    _net = r._net;
+}
+
+template<class A>
+RouteEntry<A>& RouteEntry<A>::operator=(const RouteEntry<A>& r) {
+    if (this == &r)
+	return *this;
+    if (_vif)
+	_vif->decr_usage_counter();
+    _vif = r._vif;
+    if (_vif)
+	_vif->incr_usage_counter();
+    _protocol = r._protocol;
+    _admin_distance = r._admin_distance;
+    _metric = r._metric;
+    _policytags = r._policytags;
+    _net = r._net;
+    return *this;
 }
 
 template<class A>
@@ -70,9 +99,43 @@ IPRouteEntry<A>::str() const
     return string("Dst: ") + dst + string(" Vif: ") + vif +
 	string(" NextHop: ") + _nexthop->str() +
 	string(" Metric: ") + c_format("%d", RouteEntry<A>::_metric) +
-	string(" Protocol: ") + RouteEntry<A>::_protocol.name() +
+	string(" Protocol: ") + RouteEntry<A>::_protocol->name() +
 	string(" PolicyTags: ") + RouteEntry<A>::_policytags.str();
 }
+
+template<class A>
+IPRouteEntry<A>::IPRouteEntry(const IPRouteEntry<A>& r) : RouteEntry<A>(r) {
+    _nexthop = r._nexthop;
+}
+
+template<class A>
+IPRouteEntry<A>& IPRouteEntry<A>::operator=(const IPRouteEntry<A>& r) {
+    if (this == &r)
+	return *this;
+    RouteEntry<A>::operator=(r);
+    _nexthop = r._nexthop;
+    return *this;
+}
+
+
+template<class A>
+ResolvedIPRouteEntry<A>::ResolvedIPRouteEntry(const ResolvedIPRouteEntry<A>& r) : IPRouteEntry<A>(r) {
+    _igp_parent = r._igp_parent;
+    _egp_parent = r._egp_parent;
+    _backlink = r._backlink;
+}
+
+template<class A>
+ResolvedIPRouteEntry<A>& ResolvedIPRouteEntry<A>::operator=(const ResolvedIPRouteEntry<A>& r) {
+    if (this == &r)
+	return *this;
+    IPRouteEntry<A>::operator=(r);
+    _igp_parent = r._igp_parent;
+    _egp_parent = r._egp_parent;
+    _backlink = r._backlink;
+    return *this;
+}
+
 
 template class IPRouteEntry<IPv4>;
 template class IPRouteEntry<IPv6>;

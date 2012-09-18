@@ -908,7 +908,7 @@ RIB<A>::add_route(const string&		tablename,
 	}
 
 	IPNextHop<A>* nexthop = find_or_create_peer_nexthop(nexthop_addr);
-	ot->add_route(new IPRouteEntry<A>(net, vif, nexthop, *protocol,
+	ot->add_route(new IPRouteEntry<A>(net, vif, nexthop, protocol,
 		      metric, policytags));
 	flush();
 	return XORP_OK;
@@ -941,7 +941,7 @@ RIB<A>::add_route(const string&		tablename,
     //
     // Add the route
     //
-    ot->add_route(new IPRouteEntry<A>(net, vif, nexthop, *protocol, metric, policytags));
+    ot->add_route(new IPRouteEntry<A>(net, vif, nexthop, protocol, metric, policytags));
 
     flush();
     return XORP_OK;
