@@ -1025,10 +1025,10 @@ XrlStaticRoutesNode::rib_client_send_delete_igp_table4_cb(
     case COMMAND_FAILED:
 	//
 	// If a command failed because the other side rejected it, this is
-	// fatal.
-	//
-	XLOG_FATAL("Cannot deregister IPv4 IGP table with the RIB: %s",
-		   xrl_error.str().c_str());
+	// bad, but perhaps not worth fatal if we just failed a delete.
+	// Maybe it was already gone for some reason...
+	XLOG_WARNING("Cannot deregister IPv4 IGP table with the RIB: %s",
+		     xrl_error.str().c_str());
 	break;
 
     case NO_FINDER:
@@ -1090,9 +1090,8 @@ XrlStaticRoutesNode::rib_client_send_delete_igp_table6_cb(
     case COMMAND_FAILED:
 	//
 	// If a command failed because the other side rejected it, this is
-	// fatal.
-	//
-	XLOG_FATAL("Cannot deregister IPv6 IGP table with the RIB: %s",
+	// bad, but maybe not fatal.
+	XLOG_WARNING("Cannot deregister IPv6 IGP table with the RIB: %s",
 		   xrl_error.str().c_str());
 	break;
 

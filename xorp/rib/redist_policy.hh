@@ -152,7 +152,7 @@ class IsOfProtocol : public RedistPolicy<A>
 public:
     IsOfProtocol(const Protocol& p) : _protocol(p) {}
     bool accept(const IPRouteEntry<A>& ipr) const {
-	return ipr.protocol() == _protocol;
+	return *(ipr.protocol()) == _protocol;
     }
 private:
     Protocol _protocol;

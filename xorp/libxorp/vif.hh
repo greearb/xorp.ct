@@ -29,6 +29,7 @@
 #include "ipv6.hh"
 #include "ipvx.hh"
 #include "ipvxnet.hh"
+#include "bug_catcher.hh"
 
 /**
  * @short Virtual interface address class.
@@ -211,7 +212,7 @@ public:
  * entities such as the Discard or Unreachable interface, or a VLAN
  * on a physical interface.
  */
-class Vif {
+class Vif : public BugCatcher {
 public:
     /**
      * Constructor for a given virtual interface name.

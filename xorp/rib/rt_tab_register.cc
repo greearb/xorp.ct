@@ -509,7 +509,7 @@ RegisterTable<A>::notify_route_changed(
     } else {
 	uint32_t metric = changed_route.metric();
 	uint32_t admin_distance = changed_route.admin_distance();
-	const string& protocol_origin = changed_route.protocol().name();
+	const string& protocol_origin = changed_route.protocol()->name();
 	list<string>::const_iterator iter;
 	for (iter = module_names.begin(); iter != module_names.end(); ++iter) {
 	    _register_server.send_route_changed(
