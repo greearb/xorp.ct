@@ -10,7 +10,6 @@
 #include "policy/policy_parser.hh"
 
 #if defined(NEED_LEX_H_HACK)
-extern YYSTYPE tpltlval;
 #include "y.policy_parser_tab.cc.h"
 #else
 #include "y.policy_parser_tab.hh"
