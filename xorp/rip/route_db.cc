@@ -185,7 +185,7 @@ RouteDB<A>::set_expiry_timer(Route* r)
 
 template <typename A>
 bool
-RouteDB<A>::do_filtering(Route* r)
+RouteDB<A>::do_filtering(Route* r, uint32_t& cost)
 {
     try {
 	RIPVarRW<A> varrw(*r);
@@ -199,19 +199,44 @@ RouteDB<A>::do_filtering(Route* r)
 	bool accepted = _policy_filters.run_filter(filter::IMPORT, varrw);
 
 	if (!accepted)
-	    return false;
+	    goto exit;
 
-	RIPVarRW<A> varrw2(*r);
+	do {
+	    RIPVarRW<A> varrw2(*r);
 
-	debug_msg("[RIP] Running source match filter on route %s\n",
+	    debug_msg("[RIP] Running source match filter on route %s\n",
 		  r->net().str().c_str());
-	XLOG_TRACE(trace()._routes,
+	    XLOG_TRACE(trace()._routes,
 		  "Running source match filter on route %s\n",
 		  r->net().str().c_str());
 
-	_policy_filters.run_filter(filter::EXPORT_SOURCEMATCH, varrw2);
+	    accepted = _policy_filters.run_filter(filter::EXPORT_SOURCEMATCH, varrw2);
+	} while(0);
 
-	return true;
+	if (!accepted)
+	    goto exit;
+
+	do {
+	    RIPVarRW<A> varrw3(*r);
+
+	    debug_msg("[RIP] Running export filter on route: %s\n",
+		  r->net().str().c_str());
+	    XLOG_TRACE(trace()._routes,
+		  "Running export filter on route %s\n",
+		  r->net().str().c_str());
+
+	    accepted = _policy_filters.run_filter(filter::EXPORT, varrw3);
+	} while(0);
+
+exit:
+	cost = r->cost();
+	if (r->cost() > RIP_INFINITY) {
+		r->set_cost(RIP_INFINITY);
+		cost = r->cost();
+		accepted = false;
+	}
+
+	return accepted;
     } catch(const PolicyException& e) {
 	XLOG_FATAL("PolicyException: %s", e.str().c_str());
 	XLOG_UNFINISHED();
@@ -237,10 +262,6 @@ RouteDB<A>::update_route(const Net&		net,
 	return false;
     }
 
-    if (cost > RIP_INFINITY) {
-	cost = RIP_INFINITY;
-    }
-
     //
     // Update steps, based on RFC2453 pp. 26-28
     //
@@ -252,11 +273,7 @@ RouteDB<A>::update_route(const Net&		net,
 
 	// Route does not appear in table so it needs to be
 	// created if peer does not have an entry for it or
-	// resurrected if it does.  But first this...
-	if (cost == RIP_INFINITY) {
-	    // Don't bother adding a route for unreachable net
-	    return false;
-	}
+	// resurrected if it does.
 
 	// Create route if necessary
 	r = o->find_route(net);
@@ -270,10 +287,10 @@ RouteDB<A>::update_route(const Net&		net,
 	    
 	    XLOG_ASSERT(ok);
 	    
-	    bool accepted = do_filtering(r);
+	    bool accepted = do_filtering(r, cost);
 	    r->set_filtered(!accepted);
 
-	    if (!accepted)
+	    if (!accepted || cost == RIP_INFINITY)
 		return false;
 
 	    _uq->push_back(r);
@@ -287,8 +304,11 @@ RouteDB<A>::update_route(const Net&		net,
 	XLOG_ASSERT(ok);
 
 	// XXX: this is wrong
-	bool accepted = do_filtering(r);
+	bool accepted = do_filtering(r, cost);
 	r->set_filtered(!accepted);
+
+	if (cost == RIP_INFINITY)
+	    return false;
 
 	if (accepted)
 	    updated = true;
@@ -302,7 +322,7 @@ RouteDB<A>::update_route(const Net&		net,
 						 cost, no_origin, tag,
 						 policytags);
     // XXX: lost origin
-    bool accepted = do_filtering(new_route);
+    bool accepted = do_filtering(new_route, cost);
 
     // XXX: this whole section of code is too entangled.
     if (r->origin() == o) {

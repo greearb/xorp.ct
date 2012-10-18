@@ -30,6 +30,7 @@ extern YYSTYPE opcmdlval;
 %option noyywrap
 %option nounput
 %option never-interactive
+%x one_liner
 %x comment
 %x string
 
@@ -150,6 +151,15 @@ extern YYSTYPE opcmdlval;
 <comment>\n		opcmd_linenum++;
 
 <comment>"*"+"/"	BEGIN(INITIAL);
+
+"%%"				BEGIN(one_liner);
+
+<one_liner>[^\n]*	/* eat up everything, except new line*/
+
+<one_liner>\n	{
+				opcmd_linenum++;
+				BEGIN(INITIAL);
+				}
 
 .	{
 	/* everything else is a syntax error */

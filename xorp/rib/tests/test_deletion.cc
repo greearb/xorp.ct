@@ -57,8 +57,8 @@ main(int /* argc */, char* argv[])
     IPv4Net net1("10.0.1.0/24");
     IPv4Net net2("10.0.2.0/24");
 
-    IPRouteEntry<IPv4> route1(net1, &vif1, &nh1, protocol, 100);
-    IPRouteEntry<IPv4> route2(net2, &vif1, &nh1, protocol, 100);
+    IPRouteEntry<IPv4> route1(net1, &vif1, &nh1, &protocol, 100);
+    IPRouteEntry<IPv4> route2(net2, &vif1, &nh1, &protocol, 100);
 
     dt.expect_add(route1);
     dt.expect_add(route2);
@@ -113,7 +113,7 @@ main(int /* argc */, char* argv[])
     ot.routing_protocol_shutdown();
 
     XLOG_ASSERT(dt.parent()->type() == DELETION_TABLE);
-    IPRouteEntry<IPv4> route3(net1, &vif2, &nh2, protocol, 101);
+    IPRouteEntry<IPv4> route3(net1, &vif2, &nh2, &protocol, 101);
 
     dt.expect_delete(route1);
     dt.expect_add(route3);

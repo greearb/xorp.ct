@@ -129,14 +129,6 @@ protected:
 
     void incr_packets_sent()			{ _pkts_out++; }
 
-    /**
-     * Policy filters the route.
-     *
-     * @param r route to filter.
-     * @return true if the route was accepted, false otherwise.
-     */
-    bool do_filtering(RouteEntry<A>* r);
-
 protected:
     EventLoop&		_e;
     Port<A>&		_port;	    // Port associated with output
@@ -188,27 +180,6 @@ inline uint32_t
 OutputBase<A>::interpacket_gap_ms() const
 {
     return _port.constants().interpacket_delay_ms();
-}
-
-
-template <typename A>
-bool
-OutputBase<A>::do_filtering(RouteEntry<A>* route)
-{
-    try {
-	RIPVarRW<A> varrw(*route);
-	
-	debug_msg("[RIP] Running export filter on route: %s\n",
-		  route->net().str().c_str());
-
-	bool accepted = _policy_filters.run_filter(filter::EXPORT,
-						   varrw);
-
-	return accepted;
-    } catch(const PolicyException& e) {
-	XLOG_FATAL("PolicyException: %s", e.str().c_str());
-	XLOG_UNFINISHED();
-    }
 }
 
 #endif // __RIP_OUTPUT_HH__

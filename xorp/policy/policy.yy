@@ -10,12 +10,12 @@
 
 #include <vector>
 
-#include "policy_module.h"
+#include "policy/policy_module.h"
 #include "libxorp/xorp.h"
 #include "policy/common/element.hh"
 #include "policy/common/element_factory.hh"
 #include "policy/common/operator.hh"
-#include "policy_parser.hh"
+#include "policy/policy_parser.hh"
 
 extern int  yylex(void);
 extern void yyerror(const char *m);
@@ -32,16 +32,19 @@ static ElementFactory _ef;
 	BinOper*	op;
 };
 
-%token <c_str> YY_BOOL YY_INT YY_UINT YY_UINTRANGE YY_STR YY_ID 
+%token <c_str> YY_BOOL YY_INT YY_UINT YY_UINTRANGE YY_STR YY_ID
 %token <c_str> YY_IPV4 YY_IPV4RANGE YY_IPV4NET YY_IPV6 YY_IPV6RANGE YY_IPV6NET
 %token YY_SEMICOLON YY_LPAR YY_RPAR YY_ASSIGN YY_SET YY_REGEX
 %token YY_ACCEPT YY_REJECT YY_PROTOCOL YY_NEXT YY_POLICY YY_PLUS_EQUALS
+%token YY_MUL_EQUALS YY_DIV_EQUALS YY_LSHIFT_EQUALS YY_RSHIFT_EQUALS
+%token YY_BITAND_EQUALS YY_BITOR_EQUALS YY_BITXOR_EQUALS
 %token YY_MINUS_EQUALS YY_TERM
 
 %left YY_NOT YY_AND YY_XOR YY_OR YY_HEAD YY_CTR YY_NE_INT
 %left YY_EQ YY_NE YY_LE YY_GT YY_LT YY_GE
 %left YY_IPNET_EQ YY_IPNET_LE YY_IPNET_GT YY_IPNET_LT YY_IPNET_GE
-%left YY_ADD YY_SUB
+%left YY_ADD YY_SUB YY_DIV YY_LSHIFT YY_RSHIFT
+%left YY_BITAND YY_BITOR YY_BITXOR
 %left YY_MUL
 
 %type <node> actionstatement action boolstatement boolexpr expr assignexpr
@@ -50,13 +53,13 @@ static ElementFactory _ef;
 
 statement:
 	  statement actionstatement { _parser_nodes->push_back($2); }
-	| statement boolstatement { _parser_nodes->push_back($2); }  
+	| statement boolstatement { _parser_nodes->push_back($2); }
 	| /* empty */
 	;
 
 actionstatement:
 	  action YY_SEMICOLON { $$ = $1; }
-	; 
+	;
 
 action:
 	  assignexpr
@@ -77,6 +80,13 @@ assignop:
 	  YY_ASSIGN		{ $$ = NULL; }
 	| YY_PLUS_EQUALS	{ $$ = new OpAdd; }
 	| YY_MINUS_EQUALS	{ $$ = new OpSub; }
+	| YY_MUL_EQUALS	{ $$ = new OpMul; }
+	| YY_DIV_EQUALS	{ $$ = new OpDiv; }
+	| YY_LSHIFT_EQUALS	{ $$ = new OpLShift; }
+	| YY_RSHIFT_EQUALS	{ $$ = new OpRShift; }
+	| YY_BITAND_EQUALS	{ $$ = new OpBitAnd; }
+	| YY_BITOR_EQUALS	{ $$ = new OpBitOr; }
+	| YY_BITXOR_EQUALS	{ $$ = new OpBitXor; }
 	;
 
 boolstatement:
@@ -93,7 +103,7 @@ boolexpr:
 
 	| expr YY_EQ expr { $$ = new NodeBin(new OpEq,$1,$3,_parser_lineno); }
 	| expr YY_NE expr { $$ = new NodeBin(new OpNe,$1,$3,_parser_lineno); }
-	
+
 	| expr YY_LT expr { $$ = new NodeBin(new OpLt,$1,$3,_parser_lineno); }
 	| expr YY_GT expr { $$ = new NodeBin(new OpGt,$1,$3,_parser_lineno); }
 	| expr YY_LE expr { $$ = new NodeBin(new OpLe,$1,$3,_parser_lineno); }
@@ -109,18 +119,24 @@ boolexpr:
 	| expr YY_NE_INT expr { $$ = new NodeBin(new OpNEInt, $1, $3, _parser_lineno); }
 
 	| YY_LPAR boolexpr YY_RPAR { $$ = $2; }
-	
+
 	| expr YY_REGEX expr    { $$ = new NodeBin(new OpRegex, $1, $3, _parser_lineno); }
 	;
 
-expr:	
+expr:
 	  expr YY_ADD expr { $$ = new NodeBin(new OpAdd,$1,$3,_parser_lineno); }
 	| expr YY_SUB expr { $$ = new NodeBin(new OpSub,$1,$3,_parser_lineno); }
 	| expr YY_MUL expr { $$ = new NodeBin(new OpMul,$1,$3,_parser_lineno); }
+	| expr YY_DIV expr { $$ = new NodeBin(new OpDiv,$1,$3,_parser_lineno); }
+	| expr YY_LSHIFT expr { $$ = new NodeBin(new OpLShift,$1,$3,_parser_lineno); }
+	| expr YY_RSHIFT expr { $$ = new NodeBin(new OpRShift,$1,$3,_parser_lineno); }
+	| expr YY_BITAND expr { $$ = new NodeBin(new OpBitAnd,$1,$3,_parser_lineno); }
+	| expr YY_BITOR expr { $$ = new NodeBin(new OpBitOr,$1,$3,_parser_lineno); }
+	| expr YY_BITXOR expr { $$ = new NodeBin(new OpBitXor,$1,$3,_parser_lineno); }
 
 	| YY_HEAD expr { $$ = new NodeUn(new OpHead, $2, _parser_lineno); }
 	| YY_CTR expr expr { $$ = new NodeBin(new OpCtr, $2, $3, _parser_lineno); }
-	
+
 	| YY_LPAR expr YY_RPAR { $$ = $2; }
 
 	| YY_STR { $$ = new NodeElem(_ef.create(ElemStr::id,$1),_parser_lineno); free($1); }

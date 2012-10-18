@@ -32,6 +32,7 @@ is_shared = env.has_key('SHAREDLIBS')
 env.AppendUnique(CPPPATH = [
     '#',
     '$BUILDDIR',
+    env['xorp_sourcedir'],	#this is needed for lex and yacc generated files
     ])
 
 env.PrependUnique(LIBPATH = [
@@ -85,7 +86,36 @@ env.Replace(RPATH = [
     env.Literal(env['xorp_module_rpath'])
 ])
 
+# Automatically generate flex and yacc files
+
+#Create yacc files
+yacc_env = env.Clone()
+
+# bison on BSD generates headers files with .h suffix,
+# while on other OSs it generates header files with .hh suffix
+#
+# But, on FreeBSD at least, if you don't do the .hh suffix, it doesn't even
+# build a .h file of any type --Ben
+yacc_env.Replace(YACCHXXFILESUFFIX='.hh')
+
+yacc_env.AppendUnique(YACCFLAGS='-d')
+
+yacc_env.AppendUnique(YACCFLAGS='-ppolicy_parser')
+
+policy_yacc = yacc_env.CXXFile(target='y.policy_parser_tab.cc',
+				source='policy.yy')
+
+#create lex files
+lex_env = env.Clone()
+
+lex_env.AppendUnique(LEXFLAGS='-Ppolicy_parser')
+
+policy_lex = lex_env.CXXFile(target='lex.policy_parser.cc',
+					source='policy.ll')
+
 libxorp_policy_srcs = [
+     policy_lex[0],
+     policy_yacc[0],
      'code.cc',
      'code_generator.cc',
      'code_list.cc',
@@ -111,8 +141,6 @@ libxorp_policy_srcs = [
      'visitor_semantic.cc',
      'visitor_test.cc',
      'xrl_target.cc',
-     'yacc.yy_policy_parser.cc',
-     'lex.yy_policy_parser.cc'
      ]
 
 ######

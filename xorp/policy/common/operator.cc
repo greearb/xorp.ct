@@ -40,6 +40,12 @@ Oper::Hash OpGe::_hash	    = HASH_OP_GE;
 Oper::Hash OpAdd::_hash	    = HASH_OP_ADD;
 Oper::Hash OpSub::_hash	    = HASH_OP_SUB;
 Oper::Hash OpMul::_hash	    = HASH_OP_MUL;
+Oper::Hash OpDiv::_hash	    = HASH_OP_DIV;
+Oper::Hash OpLShift::_hash  = HASH_OP_LSHIFT;
+Oper::Hash OpRShift::_hash  = HASH_OP_RSHIFT;
+Oper::Hash OpBitAnd::_hash  = HASH_OP_BITAND;
+Oper::Hash OpBitOr::_hash   = HASH_OP_BITOR;
+Oper::Hash OpBitXor::_hash   = HASH_OP_BITXOR;
 
 Oper::Hash OpRegex::_hash   = HASH_OP_REGEX;
 Oper::Hash OpCtr::_hash	    = HASH_OP_CTR;

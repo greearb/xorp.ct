@@ -339,7 +339,7 @@ policy {
 	    then {
 		metric {
 		    %help: short "Set the metric value";
-		    %allow-operator: ":" "=" "sub" "add";
+		    %allow-operator: ":" "=" "sub" "add" "mul" "div" "lshift" "rshift" "bit_and" "bit_or" "bit_xor" "+=" "-=" "*=" "/=" "<<=" ">>=" "&=" "|=" "^=";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=metric $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
 		}

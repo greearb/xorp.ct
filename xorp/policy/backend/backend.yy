@@ -9,10 +9,10 @@
 #include "policy/common/varrw.hh"
 #include "policy/common/element_factory.hh"
 #include "policy/common/operator.hh"
-#include "policy_backend_parser.hh"
-#include "instruction.hh"
-#include "term_instr.hh"
-#include "policy_instr.hh"
+#include "policy/backend/policy_backend_parser.hh"
+#include "policy/backend/instruction.hh"
+#include "policy/backend/term_instr.hh"
+#include "policy/backend/policy_instr.hh"
 
 extern int  yylex(void);
 extern void yyerror(const char*);
@@ -35,6 +35,8 @@ static ElementFactory	_ef;
 %token YY_EQ YY_NE YY_LT YY_GT YY_LE YY_GE
 %token YY_NOT YY_AND YY_OR YY_XOR YY_HEAD YY_CTR YY_NE_INT
 %token YY_ADD YY_SUB YY_MUL
+%token YY_DIV YY_LSHIFT YY_RSHIFT
+%token YY_BITAND YY_BITOR YY_BITXOR
 %token YY_ONFALSE_EXIT
 %token YY_REGEX
 %token YY_LOAD YY_STORE
@@ -47,14 +49,14 @@ static ElementFactory	_ef;
 program:
 	  program policy { _yy_policies->push_back($2); }
 	| program subroutine
-	| program set  
+	| program set
 	| /* empty */
 	;
 
 set:
-	  YY_SET YY_ARG YY_ARG YY_ARG YY_NEWLINE 
+	  YY_SET YY_ARG YY_ARG YY_ARG YY_NEWLINE
 	  {
-	  	// XXX: doesn't delete old
+		// XXX: doesn't delete old
 		(*_yy_sets)[$3] = _ef.create($2, $4);
 		free($2); free($3); free($4);
 	  }
@@ -86,16 +88,16 @@ policy:	  YY_POLICY_START YY_ARG YY_NEWLINE terms YY_POLICY_END YY_NEWLINE
 
 terms:
 	  terms YY_TERM_START YY_ARG YY_NEWLINE statements YY_TERM_END YY_NEWLINE {
-	  
+
 			TermInstr* ti = new TermInstr($3,_yy_instructions);
 			_yy_instructions = new vector<Instruction*>();
 			_yy_terms->push_back(ti);
 			free($3);
 			}
-	| /* empty */		
+	| /* empty */
 	;
 
-statements: 
+statements:
 	  statements statement YY_NEWLINE
 	| /* empty */
 	;
@@ -103,15 +105,15 @@ statements:
 
 statement:
 	  YY_PUSH YY_ARG YY_ARG {
-	  			Instruction* i = new Push(_ef.create($2,$3));
+				Instruction* i = new Push(_ef.create($2,$3));
 				_yy_instructions->push_back(i);
-	  			free($2); free($3);
-	  			}
+				free($2); free($3);
+				}
 	| YY_PUSH_SET YY_ARG	{
 				_yy_instructions->push_back(new PushSet($2));
 				free($2);
 				}
-	
+
 	| YY_ONFALSE_EXIT	{
 				_yy_instructions->push_back(new OnFalseExit());
 				}
@@ -169,6 +171,12 @@ statement:
 	| YY_ADD	{ _yy_instructions->push_back(new NaryInstr(new OpAdd)); }
 	| YY_SUB	{ _yy_instructions->push_back(new NaryInstr(new OpSub)); }
 	| YY_MUL	{ _yy_instructions->push_back(new NaryInstr(new OpMul)); }
+	| YY_DIV	{ _yy_instructions->push_back(new NaryInstr(new OpDiv)); }
+	| YY_LSHIFT	{ _yy_instructions->push_back(new NaryInstr(new OpLShift)); }
+	| YY_RSHIFT	{ _yy_instructions->push_back(new NaryInstr(new OpRShift)); }
+	| YY_BITAND	{ _yy_instructions->push_back(new NaryInstr(new OpBitAnd)); }
+	| YY_BITOR	{ _yy_instructions->push_back(new NaryInstr(new OpBitOr)); }
+	| YY_BITXOR	{ _yy_instructions->push_back(new NaryInstr(new OpBitXor)); }
 	| YY_HEAD	{ _yy_instructions->push_back(new NaryInstr(new OpHead));}
 	| YY_CTR	{ _yy_instructions->push_back(new NaryInstr(new OpCtr));}
 	| YY_NE_INT	{ _yy_instructions->push_back(new NaryInstr(new OpNEInt));}

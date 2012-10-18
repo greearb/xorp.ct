@@ -33,6 +33,7 @@ extern YYSTYPE bootlval;
 %option noyywrap
 %option nounput
 %option never-interactive
+%x one_liner
 %x comment
 %x string
 %x arith
@@ -242,8 +243,8 @@ RE_URL_SUBDELIMS "!"|"$"|"&"|"'"|"("|")"|"*"|"+"|","|";"|"="
  */
 RE_COMPARATOR		"<"|">"|("<"+"=")|(">"+"=")|("="+"=")|("!"+"=")
 RE_IPNET_COMPARATOR	"exact"|"not"|"shorter"|"orshorter"|"longer"|"orlonger"
-RE_BIN_OPERATOR		"+"|"-"|"*"|"/"
-RE_MODIFIER		":"|"add"|"sub"|"set"|"del"|"="
+RE_BIN_OPERATOR		"+"|"-"|"*"|"/"|"<<"|">>"|"&"|"^"|"|"
+RE_MODIFIER		":"|"add"|"sub"|"mul"|"div"|"lshift"|"rshift"|"bit_and"|"bit_or"|"bit_xor"|"set"|"del"|"="|"+="|"-="|"*="|"/="|"<<="|">>="|"&="|"|="|"^="
 RE_INFIX_OPERATOR	{RE_COMPARATOR}|{RE_IPNET_COMPARATOR}|{RE_BIN_OPERATOR}|{RE_MODIFIER}
 RE_ARITH_OPERATOR	[" "]*({RE_BIN_OPERATOR})[" "]*
 
@@ -452,6 +453,15 @@ RE_ARITH_OPERATOR	[" "]*({RE_BIN_OPERATOR})[" "]*
 <comment>\n		boot_linenum++;
 
 <comment>"*"+"/"	BEGIN(INITIAL);
+
+"%%"				BEGIN(one_liner);
+
+<one_liner>[^\n]*	/* eat up everything, except new line*/
+
+<one_liner>\n	{
+				boot_linenum++;
+				BEGIN(INITIAL);
+				}
 
 .	{
 	/* everything else is a syntax error */
