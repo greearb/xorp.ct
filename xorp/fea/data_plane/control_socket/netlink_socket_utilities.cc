@@ -809,7 +809,7 @@ void NlmUtils::nlm_cond_newlink_to_fea_cfg(const IfTree& user_cfg, IfTree& iftre
     debug_msg("newlink, interface: %s  tree: %s\n", if_name.c_str(), iftree.getName().c_str());
 
     if (! user_cfg.find_interface(if_name)) {
-	XLOG_WARNING("Ignoring interface: %s as it is not found in the local config.\n", if_name.c_str());
+	debug_msg("Ignoring interface: %s as it is not found in the local config.\n", if_name.c_str());
 	return;
     }
 
