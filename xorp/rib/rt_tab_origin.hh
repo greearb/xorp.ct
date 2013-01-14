@@ -145,6 +145,11 @@ public:
     RouteRange<A>* lookup_route_range(const A& addr) const;
 
     /**
+    * Changes the admin distance
+    **/
+    void change_admin_distance( uint32_t ad ){ _admin_distance = ad; }
+
+    /**
      * @return the default administrative distance for this OriginTable
      */
     uint32_t admin_distance() const	{ return _admin_distance; }

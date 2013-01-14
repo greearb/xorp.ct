@@ -6,6 +6,8 @@ protocols {
 	bgp-id: ipv4;
 	local-as: txt;
 	enable-4byte-as-numbers: bool = false;
+	internal-distance: u32;
+	external-distance: u32;
 
 	route-reflector {
 	    cluster-id: ipv4;
@@ -165,6 +167,18 @@ protocols {
 	    %help: short "XRL target name";
 	    %set:;
 	}
+
+	internal-distance {
+            %help:      short "Administrative Distance for IBGP";
+            %allow-range: $(@) "0" "255" %help: "Administrative Distance for IBGP";
+            %set:       xrl "rib/rib/0.1/set_protocol_admin_distance?protocol:txt=ibgp&ipv4:bool=true&ipv6:bool=false&unicast:bool=true&multicast:bool=false&admin_distance:u32=$(@)";
+        }
+
+	external-distance {
+            %help:      short "Administrative Distance for EBGP";
+            %allow-range: $(@) "0" "255" %help: "Administrative Distance for EBGP";
+            %set:       xrl "rib/rib/0.1/set_protocol_admin_distance?protocol:txt=ebgp&ipv4:bool=true&ipv6:bool=false&unicast:bool=true&multicast:bool=false&admin_distance:u32=$(@)";
+        }
 
     %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=network4&type:txt=ipv4net&access:txt=r&id:u32=10";
     %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=network6&type:txt=ipv6net&access:txt=r&id:u32=12";

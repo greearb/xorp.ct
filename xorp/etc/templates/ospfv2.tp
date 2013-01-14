@@ -6,6 +6,7 @@ protocols {
 	router-id: ipv4;
 	rfc1583-compatibility: bool = false;
 	ip-router-alert: bool = false;
+	distance: u32;
 
 	traceoptions {
 	    flag {
@@ -162,6 +163,12 @@ transmitted packets";
 	    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_ip_router_alert?ip_router_alert:bool=$(@)";
 	    %delete: xrl "$(ospf4.targetname)/ospfv2/0.1/set_ip_router_alert?ip_router_alert:bool=$(DEFAULT)";
 	}
+
+	distance {
+            %help:      short "Administrative Distance for OSPF";
+            %allow-range: $(@) "0" "255" %help: "Administrative Distance for OSPF";
+            %set:       xrl "rib/rib/0.1/set_protocol_admin_distance?protocol:txt=ospf&ipv4:bool=true&ipv6:bool=false&unicast:bool=true&multicast:bool=false&admin_distance:u32=$(@)";
+        }
 
 	area @: ipv4 {
 	    %help: short "The OSPF area to which the attached network belongs";
