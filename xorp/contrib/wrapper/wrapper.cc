@@ -24,6 +24,7 @@
 #include "libxorp/status_codes.h"
 #include "libxorp/service.hh"
 #include "libxorp/eventloop.hh"
+#include "libcomm/comm_api.h"
 
 
 Wrapper::Wrapper(EventLoop& eventloop, IO* io)
@@ -169,6 +170,9 @@ bool Wrapper::wait_for_cmd()
                 fprintf(stderr, "Wrapper: Error calling bind()\n");
                 return false;
             }
+
+            comm_sock_set_blocking(listen_sock, false);
+
             if ( listen(listen_sock, LISTENQLEN) < 0 ) {
                 fprintf(stderr, "Wrapper: Error calling listen()\n");
                 return false;
@@ -180,14 +184,14 @@ bool Wrapper::wait_for_cmd()
         if (!conn_ready) {
             _status = WAITTING;
             /*  Wait for a connection, then accept() it  */
-            while (!socketselect(listen_sock,45000)) {
+            while (!socketselect(listen_sock, 45000)) {
                 try {
                     _eventloop.run();
                 } catch(...) {
                     xorp_catch_standard_exceptions();
                 }
             }
-            if ( (conn_sock = accept4(listen_sock, NULL, NULL,SOCK_NONBLOCK) ) < 0 ) {
+            if ( (conn_sock = accept(listen_sock, NULL, NULL) ) < 0 ) {
                 fprintf(stderr, "ECHOSERV: Error calling accept()\n");
                 return false;
             }
