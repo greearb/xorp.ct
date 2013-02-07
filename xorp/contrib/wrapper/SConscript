@@ -1,0 +1,147 @@
+# Copyright (c) 2009-2011 XORP, Inc and Others
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License, Version 2, June
+# 1991 as published by the Free Software Foundation. Redistribution
+# and/or modification of this program under the terms of any other
+# version of the GNU General Public License is not permitted.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
+# see the GNU General Public License, Version 2, a copy of which can be
+# found in the XORP LICENSE.gpl file.
+#
+# XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+# http://xorp.net
+
+# $XORP$
+
+# FIXME: tests
+
+import os
+Import('env')
+
+env = env.Clone()
+
+try:
+    env['CFLAGS'].remove('-Werror')
+except ValueError:
+    pass
+
+is_shared = env.has_key('SHAREDLIBS')
+
+env.AppendUnique(CPPPATH = [
+    '#',
+    '$BUILDDIR',
+    ])
+
+env.AppendUnique(LIBPATH = [
+    '$BUILDDIR/libxorp',
+    '$BUILDDIR/libcomm',
+    '$BUILDDIR/libxipc',
+    '$BUILDDIR/libproto',
+    '$BUILDDIR/libfeaclient',
+    '$BUILDDIR/policy/backend',
+    '$BUILDDIR/policy/common',
+    '$BUILDDIR/xrl/interfaces',
+    '$BUILDDIR/xrl/targets',
+    '$BUILDDIR/mrt',
+    '.'
+    ])
+
+env.AppendUnique(LIBS = [
+    'wrapper',
+    'wrapperxrl',
+    'xst_wrapper4',
+    'xorp_policy_backend',
+    'xorp_policy_common',
+    'xorp_fea_client',
+    'xif_rib',
+    'xif_socket4',
+    'xif_finder_event_notifier',
+    'xif_fea_ifmgr_mirror',
+    'xif_fea_ifmgr_replicator',
+    'xif_profile_client',
+    'xif_fea_rawpkt4',
+    'xst_fea_ifmgr_mirror',
+    'xorp_ipc',
+    'xorp_core',
+    'xorp_proto',
+    'xorp_comm',
+])
+
+if not is_shared:
+    env.AppendUnique(LIBS = [
+        "crypto",
+        ])
+
+    if not (env.has_key('mingw') and env['mingw']):
+        env.AppendUnique(LIBS = [
+            "rt",
+            ])
+
+if (env.has_key('mingw') and env['mingw']):
+    env.AppendUnique(LIBS = [
+        'ws2_32',
+        'iphlpapi',
+#        'mprapi',
+        'regex',
+        'winmm',
+        ])
+
+    env.Append(LIBS = ['xorp_core'])
+
+if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
+    env.AppendUnique(LIBS = [
+        'xif_fea_rawpkt6',
+        ])
+
+
+env.Replace(RPATH = [
+    env.Literal(env['xorp_module_rpath'])
+])
+
+### libwrapper
+
+libwrappersrcs = [
+	'wrapper.cc',
+	'wrapperpolicy.cc',
+	]
+
+if is_shared:
+    libwrapper = env.SharedLibrary(target = 'libwrapper', source = libwrappersrcs, LIBS = '')
+    env.Alias('install',
+              env.InstallLibrary(env['xorp_libdir'], libwrapper))
+else:
+    libwrapper = env.StaticLibrary(target = 'libwrapper', source = libwrappersrcs, LIBS = '')
+
+### libwrapperxrl
+
+libwrapperxrlsrcs = [
+	'xorp_io.cc',
+	'xorp_wrapper4.cc',
+	]
+
+if is_shared:
+    libwrapperxrl = env.SharedLibrary(target = 'libwrapperxrl', source = libwrapperxrlsrcs, LIBS = '')
+    env.Alias('install',
+              env.InstallLibrary(env['xorp_libdir'], libwrapperxrl))
+else:
+    libwrapperxrl = env.StaticLibrary(target = 'libwrapperxrl', source = libwrapperxrlsrcs, LIBS = '')
+
+### wrapper4
+
+wrapper4srcs = [
+	'wrappermain.cc',
+	]
+
+
+wrapper4 = env.Program(target = 'xorp_wrapper4', source = wrapper4srcs)
+
+env.Alias('install', env.InstallProgram(env['xorp_moduledir'], wrapper4))
+env.Alias('install', env.InstallProgram(env['xorp_moduledir'], 'xorp_wrapper_launch'))
+env.Alias('install', env.InstallProgram(env['xorp_moduledir'], 'xorp_wrapper_shutdown'))
+
+
+Default(libwrapper, libwrapperxrl, wrapper4)

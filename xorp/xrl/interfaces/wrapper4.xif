@@ -1,0 +1,73 @@
+/* $XORP$ */
+/* vim:set sts=4 ts=8 sw=4 syntax=c: */
+
+/*
+** Wrapper for IPv4 -- protocol XRL interface.
+*/
+
+interface wrapper4/0.1 {
+
+    /*
+     * Routing process variables.
+     */
+
+    /**
+     * Get admin distance.
+     */
+    get_admin_distance -> admin:u32;
+
+    /**
+     * Set admin distance.
+     */
+    set_admin_distance ? admin:u32;
+
+    /**
+     * Get Wrapper main address.
+     */
+    get_main_address -> addr:ipv4;
+
+    /**
+     * Set Wrapper main address.
+     */
+    set_main_address ? addr:ipv4;
+
+   /**
+    * Reset connection to xopr
+    */
+   restart;
+
+
+    /*
+     * Interface properties.
+     */
+
+    /**
+     * Get the list of interfaces currently configured for Wrapper.
+     *
+     * Return a list of u32 type values. Each value is an internal
+     * ID that can be used with the get_interface_info XRL.
+     */
+    get_interface_list -> interfaces:list<u32>;
+
+    /**
+     * Get the per-interface information for the given interface.
+     *
+     * @param faceid interface ID returned by get_interface_list.
+     * @param ifname the name of the interface.
+     * @param vifname the name of the vif.
+     * @param local_addr the IPv4 address where Wrapper is listening.
+     * @param local_port the UDP port where Wrapper is listening.
+     * @param all_nodes_addr the IPv4 address where Wrapper sends packets.
+     * @param all_nodes_port the UDP port where Wrapper sends packets.
+     */
+    get_interface_info ? faceid:u32             \
+        ->                                      \
+        ifname:txt                              \
+        & vifname:txt                           \
+        & local_addr:ipv4                       \
+        & local_port:u32                        \
+        & all_nodes_addr:ipv4                   \
+        & all_nodes_port:u32;
+
+
+}

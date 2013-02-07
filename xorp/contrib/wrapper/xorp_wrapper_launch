@@ -1,0 +1,41 @@
+#!/bin/bash
+
+LOG=/var/log/xorp_wrapper.log
+LOGOUT=/var/log/xorp_wrapper.out
+LOGERR=/var/log/xorp_wrapper.err
+
+echo "`date` Starting $0" >> $LOG
+echo "`date` Args: $@" >> $LOG
+
+if [ ! -e /var/run/wrapper ]; then
+    mkdir /var/run/wrapper
+fi
+
+TEMP=`getopt -o d:n:o:p: -- "$@"`
+if [ $? != 0 ] ; then echo "Error parsing options..." >> $LOG ; exit 1 ; fi
+eval set -- "$TEMP"
+
+PROGNAME=""
+PROGPATH=""
+PROGOPTS=""
+DoDebug=""
+
+while true; do
+    case "$1" in
+        -d) DoDebug=$2; shift 2;;
+        -n) PROGNAME=$2; shift 2;;
+        -o) PROGOPTS=$2; shift 2;;
+        -p) PROGPATH=$2; shift 2;;
+        --) shift; break;;
+        *) echo "Invalid option '$1'" >> $LOG; exit 1;;
+    esac
+done
+
+echo "LD_PRELOAD=/usr/local/lib/libxorp-wrapper.so $PROGNAME $PROGOPTS" >> $LOG
+
+if [ $DoDebug = false ]; then
+  LD_PRELOAD=/usr/local/lib/libxorp-wrapper.so $PROGNAME $PROGOPTS > $LOGOUT 2> $LOGERR &
+
+  PID=$!
+  echo $PID > /var/run/wrapper/$PROGNAME.pid
+fi

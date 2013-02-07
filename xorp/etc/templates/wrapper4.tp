@@ -1,0 +1,184 @@
+/* vim:set syntax=c: */
+
+/* XORP template */
+
+/* Declaration */
+protocols {
+    wrapper4 {
+        targetname: txt = "wrapper4";
+	main-address: ipv4; 
+	server-port: u32 = 34567;
+        admin-distance: u32;
+
+        application @: txt {
+            cmd: txt;
+            path: txt = "";
+            opts: txt = "";
+	    debug: txt = "false";
+        }
+        import: txt;
+        export: txt;
+    }
+}
+
+policy {
+    policy-statement @: txt {
+        term @: txt {
+            from {
+                metric:             u32range;
+                vtype:              u32;
+                originator:         ipv4range;
+                dest-main-address:  ipv4range;
+            }
+            to {
+                metric:             u32range;
+                vtype:              u32;
+                originator:         ipv4range;
+                dest-main-address:  ipv4range;
+            }
+            then {
+                metric:             u32;
+            }
+        }
+    }
+}
+
+/* Definition */
+protocols {
+    wrapper4 {
+        %modinfo: provides wrapper4;
+        %modinfo: depends rib;
+        %modinfo: depends fea;
+	%modinfo: depends policy;
+        %modinfo: path "xorp_wrapper4";
+        %modinfo: default_targetname "wrapper4";
+        %modinfo: status_method xrl "$(wrapper4.targetname)/common/0.1/get_status->status:u32&reason:txt"; 
+        %modinfo: shutdown_method xrl "$(wrapper4.targetname)/common/0.1/shutdown";
+
+        %help:    short "Configure the Wraper IPv4 protocol";
+
+        %mandatory: $(@.targetname);
+        %mandatory: $(@.main-address); 
+        %mandatory: $(@.admin-distance);
+
+        targetname {
+            %user-hidden: "XRL target name";
+            %help:  short "XRL target name";
+            %set:;
+        }
+
+        main-address {
+            %help: short "A unique IPv4 address idenfies wrapper";
+            %help: long "This address uniquely identifies the wrapper";
+            %get: xrl "$(wrapper4.targetname)/wrapper4/0.1/get_main_address->addr:ipv4"; 
+            %set: xrl "$(wrapper4.targetname)/wrapper4/0.1/set_main_address?addr:ipv4=$(@)";
+        }
+
+       admin-distance {
+            %help: short "xorp admin distance for wrapper";
+            %get: xrl "$(wrapper4.targetname)/wrapper4/0.1/get_admin_distance->admin:u32";
+            %set: xrl "$(wrapper4.targetname)/wrapper4/0.1/set_admin_distance?admin:u32=$(@)";
+        }
+
+	server-port {
+            %help: short "TCP port that wrapper client can connect to";
+	}
+
+        TID {
+            %user-hidden: "Transaction ID";
+            %create:;
+        }
+
+        application @ {
+            %mandatory: $(@.cmd);
+            %activate: program "/usr/local/xorp/lib/xorp/sbin/xorp_wrapper_launch $(@) -n \"$(@.cmd)\" -p \"$(@.path)\" -o \"$(@.opts)\" -d \"$(@.debug)\" ";
+        }
+ 
+        import {
+            %help: short "Import policy";
+            %delete: xrl "$(policy.targetname)/policy/0.1/import?protocol:txt=wrapper4&policies:txt=&modifier:txt=";
+            %set: xrl "$(policy.targetname)/policy/0.1/import?protocol:txt=wrapper4&policies:txt=$(@)&modifier:txt=";
+        }
+
+        export {
+            %help: short "Export policy";
+            %delete: xrl "$(policy.targetname)/policy/0.1/export?protocol:txt=wrapper4&policies:txt=&modifier:txt=";
+            %set: xrl "$(policy.targetname)/policy/0.1/export?protocol:txt=wrapper4&policies:txt=$(@)&modifier:txt=";
+        }
+    }
+}
+
+policy {
+    %create: xrl "$(policy.targetname)/policy/0.1/set_proto_target?protocol:txt=wrapper4&target:txt=wrapper4";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=wrapper4&variable:txt=network4&type:txt=ipv4net&access:txt=r&id:u32=10";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=wrapper4&variable:txt=nexthop4&type:txt=ipv4nexthop&access:txt=rw&id:u32=11";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=wrapper4&variable:txt=metric&type:txt=u32&access:txt=rw&id:u32=12";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=wrapper4&variable:txt=vtype&type:txt=u32&access:txt=r&id:u32=13";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=wrapper4&variable:txt=originator&type:txt=ipv4&access:txt=r&id:u32=14";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=wrapper4&variable:txt=dest-main-addr&type:txt=ipv4&access:txt=r&id:u32=15";
+
+    policy-statement @: txt {
+        term @: txt {
+            from {
+                metric {
+                    %help: short "Metric value";
+                    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
+                    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=metric $(<>) $(@);";
+                    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
+                }
+                vtype {
+                    %help: short "Type of WRAPPER route";
+                    %allow-operator: ":" "==" "!=";
+                    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=vtype $(<>) $(@);";
+                    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
+                }
+                originator {
+                    %help: short "Originator of WRAPPER route";
+                    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
+                    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=originator $(<>) $(@);";
+                    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
+                }
+                dest-main-address {
+                    %help: short "Main address of WRAPPER destination";
+                    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
+                    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=dest-main-address $(<>) $(@);";
+                    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
+                }
+            }
+            to {
+                metric {
+                    %help: short "Metric value";
+                    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
+                    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=metric $(<>) $(@);";
+                    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
+                }
+                vtype {
+                    %help: short "Type of WRAPPER route";
+                    %allow-operator: ":" "==" "!=";
+                    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=vtype $(<>) $(@);";
+                    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
+                }
+                originator {
+                    %help: short "Originator of WRAPPER route";
+                    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
+                    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=originator $(<>) $(@);";
+                    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
+                }
+                dest-main-address {
+                    %help: short "Main address of WRAPPER destination";
+                    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
+                    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=dest-main-address $(<>) $(@);";
+                    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
+                }
+            }
+            then {
+                metric {
+                    %help: short "Set the metric value";
+                    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=metric $(<>) $(@);";
+                    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
+                }
+            }
+        }
+    }
+}
+

@@ -1,0 +1,3 @@
+#!/bin/bash
+
+# Wrapper client will automatically quit when server quits so nothing need to do
