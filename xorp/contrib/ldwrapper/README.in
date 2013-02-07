@@ -1,0 +1,62 @@
+Installation
+========================================================
+
+Installing
+    - extract source archive file
+        - 'tar xzf ldwrapper-@PACKAGE_VERSION@.tar.gz'
+        - 'cd ldwrapper-@PACKAGE_VERSION@'
+    - configure the package
+        - './configure 
+    - compile
+        - 'make'
+    - install
+        - 'sudo make install'
+
+Configuration
+==========================================================
+    Support BMF
+    - edit xorp configuration
+        interfaces {
+            interface bmf0 {
+                default-system-config
+            }
+        }
+
+    Configuration must be stored in /etc/xorp/wrapper4.conf
+    Example:
+	ServerPort  = 34567
+	PortMapping  {
+	    698 = 51698		# olsr main port
+	    50698 = 51699   	# bmf port
+	}
+
+Running
+==========================================================
+    XORP with Wrapper must be installed to use the LDWrapper
+    Xorp integration
+    - Just start XORP, wrapper will be started automatically
+
+
+Features
+==========================================================
+  - Zero configuration for olsrd
+  - Support the Basic Multicast Forwarding (BMF) Plugin
+  - Support route redistribution
+
+
+Others
+===========================================================
+Issues
+    please configure all nodes in one network
+
+Distributing
+    - archiving source
+        - 'make dist'
+    - source is in ldwrapper-@PACKAGE_VERSION@.tar.gz
+
+
+ldwrapper-@PACKAGE_VERSION@ release notes
+
+
+
+
