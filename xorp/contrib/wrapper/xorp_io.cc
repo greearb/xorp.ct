@@ -216,28 +216,28 @@ XrlIO::wshutdown()
 void
 XrlIO::callbackI(const XrlError &e)
 {
-    (_wrapper->*wrapper_callback)(e,NULL,0);
+    (_wrapper->*wrapper_callback)(e, NULL, 0);
 }
 
 void
 XrlIO::callbackIPv4(const XrlError &e, const IPv4 *data)
 {
-    (_wrapper->*wrapper_callback)(e,(void *)((data->str()).c_str()),(data->str().length()+1));
+    (_wrapper->*wrapper_callback)(e, data->str().c_str(), data->str().length() + 1);
 }
 
 void
 XrlIO::callbackStr(const XrlError &e, const string data)
 {
-    (_wrapper->*wrapper_callback)(e,(void *)(data.c_str()),data.length()+1);
+    (_wrapper->*wrapper_callback)(e, data.c_str(), data.length()+1);
 }
 
 void
 XrlIO::callbackStrP(const XrlError &e, const string *data)
 {
     if (data==NULL)
-        (_wrapper->*wrapper_callback)(e,NULL,0);
+        (_wrapper->*wrapper_callback)(e, NULL, 0);
     else {
-        (_wrapper->*wrapper_callback)(e,(void *)(data->c_str()),data->length()+1);
+        (_wrapper->*wrapper_callback)(e, data->c_str(), data->length()+1);
     }
 }
 

@@ -61,14 +61,14 @@ bool Wrapper::socketselect(int fd, int delay)
 bool Wrapper::sendData(wrapperData_t * data)
 {
     if (!conn_ready) return true;
-    int tlen = data->data_len+sizeof(wrapperData_t)+sizeof(uint32_t);
-    uint32_t nlen = htonl(data->data_len+sizeof(wrapperData_t));
+    int tlen = data->data_len + sizeof(wrapperData_t) + sizeof(uint32_t);
+    uint32_t nlen = htonl(data->data_len + sizeof(wrapperData_t));
     int lockret = pthread_mutex_lock(&mutex);
     if (lockret==0) {
-        memcpy((void *)_buffer,(void *)(&nlen),sizeof(uint32_t));
-        memcpy((void *)(_buffer+sizeof(uint32_t)),(void *)data,sizeof(wrapperData_t));
-        if (data->data_len>0)
-            memcpy((void *)(_buffer+sizeof(uint32_t)+sizeof(wrapperData_t)),data->data,data->data_len);
+        memcpy(_buffer, &nlen, sizeof(nlen));
+        memcpy(_buffer + sizeof(nlen), data, sizeof(*data));
+        if (data->data_len > 0)
+            memcpy(_buffer + sizeof(nlen) + sizeof(*data), data->data, data->data_len);
         try {
             if (send(conn_sock, _buffer, tlen, 0) != tlen) {
                 lockret = pthread_mutex_unlock(&mutex);
@@ -326,8 +326,8 @@ void Wrapper::udp_recv(xrl_recv_udp_t * udpdata)
     back.data = buf;
     back.data_len = sizeof(xrl_recv_udp_t)+udpdata->data_len;
 
-    memcpy((void *)buf,(void *)udpdata, sizeof(xrl_recv_udp_t));
-    memcpy((void *)(buf+ sizeof(xrl_recv_udp_t)),(void *)udpdata->data,udpdata->data_len);
+    memcpy(buf, udpdata, sizeof(xrl_recv_udp_t));
+    memcpy(buf + sizeof(xrl_recv_udp_t), udpdata->data, udpdata->data_len);
 
 //    fprintf(stderr,"udp recv: len %u\n", back.data_len);
     sendData(&back);
