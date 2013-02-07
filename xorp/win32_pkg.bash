@@ -56,7 +56,7 @@
 #
 
 # mingw cross-compile arguments
-SARGS="strip=yes shared=no build=mingw32 STRIP=i686-pc-mingw32-strip \
+SARGS="enable_wrapper=no strip=yes shared=no build=mingw32 STRIP=i686-pc-mingw32-strip \
        CC=i686-pc-mingw32-gcc CXX=i686-pc-mingw32-g++ \
        RANLIB=i686-pc-mingw32-ranlib  AR=i686-pc-mingw32-ar \
        LD=i686-pc-mingw32-ld"
