@@ -77,6 +77,9 @@ if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
 if env['enable_olsr']:
     tgts.append('olsr4.tgt')
 
+if env['enable_wrapper']:
+    tgts.append('wrapper4.tgt')
+
 if env['enable_ospf']:
     tgts.append('ospfv2.tgt')
 

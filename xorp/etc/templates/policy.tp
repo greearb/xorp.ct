@@ -103,6 +103,7 @@ policy {
 		    %allow: $(@) "rip" %help: "RIP routes";
 		    %allow: $(@) "ripng" %help: "RIPng routes";
 		    %allow: $(@) "static" %help: "Static routes";
+                    %allow: $(@) "wrapper4" %help: "Wrapper IPv4 routes";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=protocol $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
 		}
