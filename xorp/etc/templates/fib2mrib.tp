@@ -5,6 +5,7 @@ protocols {
 	targetname:	txt = "fib2mrib";
 	disable:	toggle = false;
 	enabled:	bool;		/* %deprecated */
+	distance: 	u32;
     }
 }
 
@@ -54,6 +55,12 @@ protocols {
 	    %create:;
 	    %set:	xrl "$(fib2mrib.targetname)/fib2mrib/0.1/enable_fib2mrib?enable:bool=$(@)";
 	}
+
+	distance {
+            %help:      short "Administrative Distance for FIB2MRIB";
+            %allow-range: $(@) "0" "255" %help: "Administrative Distance for FIB2MRIB";
+            %set:       xrl "rib/rib/0.1/set_protocol_admin_distance?protocol:txt=fib2mrib&ipv4:bool=true&ipv6:bool=false&unicast:bool=true&multicast:bool=false&admin_distance:u32=$(@)";
+        }
     }
 }
 

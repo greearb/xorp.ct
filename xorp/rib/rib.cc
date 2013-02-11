@@ -222,11 +222,13 @@ RIB<A>::set_protocol_admin_distance(const string& protocol_name,
     map<string, uint32_t>::iterator mi = _admin_distances.find(protocol_name);
     if (mi != _admin_distances.end()) {
 	OriginTable<A>* ot = find_origin_table(protocol_name);
-	if (NULL != ot) {
+	if (NULL != ot && ot->route_count() > 0) {
 	    XLOG_ERROR("May not set an admin distance for protocol \"%s\", "
-		       "which has already instantiated an origin table.",
+		       "which has already instantiated an origin table and contains routes.",
 		       protocol_name.c_str());
 	    return XORP_ERROR;
+        } else if (NULL != ot && ot->route_count() == 0) {
+            ot->change_admin_distance(admin_distance);
 	}
     }
     _admin_distances[protocol_name] = admin_distance;

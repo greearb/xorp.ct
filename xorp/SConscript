@@ -45,6 +45,9 @@ subdirs = [
 if env['enable_olsr']:
     subdirs.append('contrib/olsr')
 
+if env['enable_wrapper']:
+    subdirs.append('contrib/wrapper')
+
 if env['enable_bgp']:
     subdirs.append('bgp')
 

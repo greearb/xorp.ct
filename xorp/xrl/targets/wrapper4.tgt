@@ -1,0 +1,18 @@
+/* $XORP$ */
+
+#include "common.xif"
+#include "finder_event_observer.xif"
+#include "policy_backend.xif"
+#include "policy_redist4.xif"
+#include "profile.xif"
+#include "wrapper4.xif"
+#include "socket4_user.xif"
+
+target wrapper4 implements common/0.1,                             \
+                        finder_event_observer/0.1,              \
+                        socket4_user/0.1,                       \
+                        policy_backend/0.1,                     \
+                        policy_redist4/0.1,                     \
+                        profile/0.1,                            \
+                        wrapper4/0.1;
+

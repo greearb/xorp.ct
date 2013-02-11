@@ -7,6 +7,7 @@
 protocols {
     rip {
 	targetname: txt = "rip";
+	distance: u32;
 	traceoptions {
 	    flag {
 		all {
@@ -94,6 +95,12 @@ protocols {
 	    %help:	short "XRL target name";
 	    %set:;
 	}
+
+	distance {
+	    %help:      short "Administrative Distance for RIP";
+	    %allow-range: $(@) "0" "255" %help: "Administrative Distance for RIP";
+	    %set:       xrl "rib/rib/0.1/set_protocol_admin_distance?protocol:txt=rip&ipv4:bool=true&ipv6:bool=false&unicast:bool=true&multicast:bool=false&admin_distance:u32=$(@)";
+        }
 
 	traceoptions {
 	    %help:	short "Configure the tracing options";

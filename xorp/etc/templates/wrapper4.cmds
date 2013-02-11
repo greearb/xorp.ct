@@ -1,0 +1,18 @@
+/* XORP template */
+
+show wrapper4 {
+    %command: "" %help: "Display information about Wrappe IPV4";
+    %module: wrappr4;
+}
+
+show wrapper4 restart {
+    %command: "restart" %help: "Reset tables";
+    %module: wrapper4;
+}
+
+show route table ipv4 unicast wrapper {
+    %command: "rib_show_routes ribin $4 $5 $6" %help: HELP;
+    %module: rib;
+    %tag: HELP "Show IPv4 wrapper routes";
+}
+
