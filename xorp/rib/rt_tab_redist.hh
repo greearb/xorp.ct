@@ -112,8 +112,8 @@ public:
     //
     int add_igp_route(const IPRouteEntry<A>& route);
     int add_egp_route(const IPRouteEntry<A>& route);
-    int delete_igp_route(const IPRouteEntry<A>* route);
-    int delete_egp_route(const IPRouteEntry<A>* route);
+    int delete_igp_route(const IPRouteEntry<A>* route, bool b);
+    int delete_egp_route(const IPRouteEntry<A>* route, bool b);
 
     const IPRouteEntry<A>* lookup_ip_route(const IPNet<A>& net) const;
 

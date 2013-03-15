@@ -70,7 +70,7 @@ DeletionTable<A>::add_igp_route(const IPRouteEntry<A>& route)
 	//
 	const IPRouteEntry<A>* our_route = *iter;
 	_ip_route_table->erase(route.net());
-	this->next_table()->delete_igp_route(our_route);
+	this->next_table()->delete_igp_route(our_route, true);
 	delete our_route;
     }
 
@@ -92,7 +92,7 @@ DeletionTable<A>::add_egp_route(const IPRouteEntry<A>& route)
 	//
 	const IPRouteEntry<A>* our_route = *iter;
 	_ip_route_table->erase(route.net());
-	this->next_table()->delete_egp_route(our_route);
+	this->next_table()->delete_egp_route(our_route, true);
 	delete our_route;
     }
 
@@ -101,22 +101,22 @@ DeletionTable<A>::add_egp_route(const IPRouteEntry<A>& route)
 
 template<class A>
 int
-DeletionTable<A>::delete_igp_route(const IPRouteEntry<A>* route)
+DeletionTable<A>::delete_igp_route(const IPRouteEntry<A>* route, bool b)
 {
     // The route MUST NOT be in our trie.
     XLOG_ASSERT(_ip_route_table->lookup_node(route->net()) == _ip_route_table->end());
 
-    return this->next_table()->delete_igp_route(route);
+    return this->next_table()->delete_igp_route(route, b);
 }
 
 template<class A>
 int
-DeletionTable<A>::delete_egp_route(const IPRouteEntry<A>* route)
+DeletionTable<A>::delete_egp_route(const IPRouteEntry<A>* route, bool b)
 {
     // The route MUST NOT be in our trie.
     XLOG_ASSERT(_ip_route_table->lookup_node(route->net()) == _ip_route_table->end());
 
-    return this->next_table()->delete_egp_route(route);
+    return this->next_table()->delete_egp_route(route, b);
 }
 
 template<class A>

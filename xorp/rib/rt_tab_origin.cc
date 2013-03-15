@@ -83,7 +83,7 @@ OriginTable<A>::add_route(IPRouteEntry<A>* route)
 
 template<class A>
 int
-OriginTable<A>::delete_route(const IPNet<A>& net)
+OriginTable<A>::delete_route(const IPNet<A>& net, bool b)
 {
     debug_msg("OT[%s]: Deleting route %s\n", this->tablename().c_str(),
 	   net.str().c_str());
@@ -98,7 +98,7 @@ OriginTable<A>::delete_route(const IPNet<A>& net)
 	_ip_route_table->erase(net);
 	// Propagate to next table
 	XLOG_ASSERT(this->next_table() != NULL);
-	this->generic_delete_route(found);
+	this->generic_delete_route(found, b);
 
 	// Finally we're done, and can cleanup
 	delete found;

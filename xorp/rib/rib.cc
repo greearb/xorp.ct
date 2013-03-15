@@ -867,7 +867,7 @@ RIB<A>::replace_route(const string&	tablename,
     if (NULL == ot)
 	return XORP_ERROR; // Table is not an origin table
 
-    int response = ot->delete_route(net);
+    int response = ot->delete_route(net, true);
     if (response != XORP_OK)
 	return response;
 
@@ -911,6 +911,7 @@ RIB<A>::verify_route(const A& lookup_addr,
 		     RibVerifyType matchtype)
 {
     const IPRouteEntry<A>* re;
+    int return_value = (matchtype == RibVerifyType(MISS) ? XORP_OK : XORP_ERROR);
 
     // 1. Check for an expected route miss.
     // 2. Check table entry validity and existence.
@@ -965,7 +966,7 @@ RIB<A>::verify_route(const A& lookup_addr,
 	debug_msg("NextHop: Exp: %s != Got: %s\n",
 		  nexthop_addr.str().c_str(),
 		  route_nexthop->addr().str().c_str());
-	return XORP_ERROR;
+	return return_value;
     } else {
 	debug_msg("NextHop: Exp: %s != Got: %s\n",
 		  nexthop_addr.str().c_str(),
@@ -974,7 +975,7 @@ RIB<A>::verify_route(const A& lookup_addr,
     if (ifname != re->vif()->name()) {
 	XLOG_ERROR("Interface \"%s\" does not match expected \"%s\".",
 		   re->vif()->str().c_str(), ifname.c_str());
-	return XORP_ERROR;
+	return return_value;
     } else {
 	debug_msg("Ifname: Exp: %s == Got: %s\n",
 		  ifname.c_str(),
@@ -983,11 +984,15 @@ RIB<A>::verify_route(const A& lookup_addr,
     if (metric != re->metric()) {
 	XLOG_ERROR("Metric \"%u\" does not match expected \"%u\".",
 		   XORP_UINT_CAST(re->metric()), XORP_UINT_CAST(metric));
-	return XORP_ERROR;
+	return return_value;
     } else {
 	debug_msg("Metric: Exp: %u == Got: %u\n",
 		  XORP_UINT_CAST(metric),
 		  XORP_UINT_CAST(re->metric()));
+    }
+    if (matchtype == RibVerifyType(MISS)) {
+	XLOG_ERROR("****We got valid IP route, but we expected MISS****\n");
+	return XORP_ERROR;
     }
     debug_msg("****IP ROUTE SUCCESSFULLY VERIFIED****\n");
     return XORP_OK;

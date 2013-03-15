@@ -476,24 +476,24 @@ RedistTable<A>::generic_delete_route(const IPRouteEntry<A>* route)
 
 template <typename A>
 int
-RedistTable<A>::delete_igp_route(const IPRouteEntry<A>* r)
+RedistTable<A>::delete_igp_route(const IPRouteEntry<A>* r, bool b)
 {
     this->generic_delete_route(r);
 
     if (this->next_table())
-	return this->next_table()->delete_igp_route(r);
+	return this->next_table()->delete_igp_route(r, b);
 
     return XORP_OK;
 }
 
 template <typename A>
 int
-RedistTable<A>::delete_egp_route(const IPRouteEntry<A>* r)
+RedistTable<A>::delete_egp_route(const IPRouteEntry<A>* r, bool b)
 {
     this->generic_delete_route(r);
 
     if (this->next_table())
-	return this->next_table()->delete_egp_route(r);
+	return this->next_table()->delete_egp_route(r, b);
 
     return XORP_OK;
 }

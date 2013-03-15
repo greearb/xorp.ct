@@ -97,9 +97,11 @@ public:
      * @param caller the parent table sending the delete_route.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int delete_igp_route(const IPRouteEntry<A>* route);
+    int delete_igp_route(const IPRouteEntry<A>* route, bool b);
 
-    int delete_egp_route(const IPRouteEntry<A>* route);
+    int delete_best_igp_route(const IPRouteEntry<A>* route, bool b);
+
+    int delete_egp_route(const IPRouteEntry<A>* route, bool b);
 
     /**
      * Lookup a specific subnet.  The lookup will first look in the
@@ -206,19 +208,15 @@ private:
 	const IPNet<A>& subnet) const;
     const IPRouteEntry<A>* lookup_winning_igp_route(const A& addr) const;
 
-    const IPRouteEntry<A>* lookup_winning_egp_route(
-	const IPNet<A>& subnet) const;
-    const IPRouteEntry<A>* lookup_winning_egp_route(const A& addr) const;
-
     bool best_igp_route(const IPRouteEntry<A>& route);
-    bool best_egp_route(const IPRouteEntry<A>& route);
 
     bool deleting_best_igp_route(const IPRouteEntry<A>* route);
-    bool deleting_best_egp_route(const IPRouteEntry<A>* route);
 
     const IPRouteEntry<A>* masked_route(const IPRouteEntry<A>* route);
 
-    void delete_resolved_routes(const IPRouteEntry<A>* route);
+    void delete_resolved_routes(const IPRouteEntry<A>* route, bool b);
+
+    void create_unresolved_route(const IPRouteEntry<A>& route);
 
     int add_direct_egp_route(const IPRouteEntry<A>& route);
     int add_indirect_egp_route(const IPRouteEntry<A>& route);
@@ -241,8 +239,6 @@ private:
 
     // Tries where we cache wining IGP, EGP and overall routes
     RouteTrie _wining_igp_routes;
-    RouteTrie _wining_egp_routes;   // Here, all wining EGP routes will be stored
-				    //(resolved, unresolved and connected)
     RouteTrie _wining_routes;	    // Overall wining routes!
 
     static const string& ext_int_name();

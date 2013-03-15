@@ -111,24 +111,24 @@ PolicyRedistTable<A>::generic_delete_route(const IPRouteEntry<A>* route)
 
 template <class A>
 int
-PolicyRedistTable<A>::delete_igp_route(const IPRouteEntry<A>* route)
+PolicyRedistTable<A>::delete_igp_route(const IPRouteEntry<A>* route, bool b)
 {
     this->generic_delete_route(route);
 
     XLOG_ASSERT(this->next_table() != NULL);
 
-    return this->next_table()->delete_igp_route(route);
+    return this->next_table()->delete_igp_route(route, b);
 }
 
 template <class A>
 int
-PolicyRedistTable<A>::delete_egp_route(const IPRouteEntry<A>* route)
+PolicyRedistTable<A>::delete_egp_route(const IPRouteEntry<A>* route, bool b)
 {
     this->generic_delete_route(route);
 
     XLOG_ASSERT(this->next_table() != NULL);
 
-    return this->next_table()->delete_egp_route(route);
+    return this->next_table()->delete_egp_route(route, b);
 }
 
 template <class A>

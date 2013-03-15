@@ -72,11 +72,11 @@ public:
      * Delete a route.  This route MUST NOT be in the DeletionTable trie.
      *
      * @param route the route entry to be deleted.
-     * @param caller the caller route table.
+     * @param b determines if the better route is coming right after deleting route
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int delete_igp_route(const IPRouteEntry<A>* route);
-    int delete_egp_route(const IPRouteEntry<A>* route);
+    int delete_igp_route(const IPRouteEntry<A>* route, bool b = false);
+    int delete_egp_route(const IPRouteEntry<A>* route, bool b = false);
 
     /**
      * Delete all the routes that are in this DeletionTable.  The

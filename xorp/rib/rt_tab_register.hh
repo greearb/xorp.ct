@@ -291,8 +291,8 @@ public:
     int add_igp_route(const IPRouteEntry<A>& route);
     int add_egp_route(const IPRouteEntry<A>& route);
 
-    int delete_igp_route(const IPRouteEntry<A>* route);
-    int delete_egp_route(const IPRouteEntry<A>* route);
+    int delete_igp_route(const IPRouteEntry<A>* route, bool);
+    int delete_egp_route(const IPRouteEntry<A>* route, bool);
 
     /**
      * Lookup a route_range in the RIB.  This request will be

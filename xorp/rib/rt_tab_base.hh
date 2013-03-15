@@ -168,8 +168,8 @@ public:
     virtual int add_igp_route(const IPRouteEntry<A>& route) = 0;
     virtual int add_egp_route(const IPRouteEntry<A>& route) = 0;
 
-    virtual int delete_igp_route(const IPRouteEntry<A>* route) = 0;
-    virtual int delete_egp_route(const IPRouteEntry<A>* route) = 0;
+    virtual int delete_igp_route(const IPRouteEntry<A>* route, bool b = false) = 0;
+    virtual int delete_egp_route(const IPRouteEntry<A>* route, bool b = false) = 0;
 
     virtual void set_next_table(RouteTable* next_table);
 

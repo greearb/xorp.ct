@@ -88,10 +88,10 @@ public:
      * @param net the subnet of the route entry to be deleted.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int delete_route(const IPNet<A>& net);
+    virtual int delete_route(const IPNet<A>& net, bool b = false);
 
-    int delete_igp_route(const IPRouteEntry<A>*) { return XORP_ERROR; };
-    int delete_egp_route(const IPRouteEntry<A>*) { return XORP_ERROR; };
+    int delete_igp_route(const IPRouteEntry<A>*, bool) { return XORP_ERROR; };
+    int delete_egp_route(const IPRouteEntry<A>*, bool) { return XORP_ERROR; };
 
     /**
      * Delete all the routes that are in this OriginTable.  The
@@ -174,7 +174,7 @@ protected:
     RouteTrie*		_ip_route_table;
     uint32_t	 	_gen;
 
-    virtual int generic_delete_route(const IPRouteEntry<A>*) = 0;
+    virtual int generic_delete_route(const IPRouteEntry<A>*, bool) = 0;
     virtual int generic_add_route(const IPRouteEntry<A>&) = 0;
     virtual void allocate_deletion_table(RouteTrie* ip_route_trie) = 0;
 };
@@ -190,7 +190,10 @@ public:
     ~TypedOriginTable() {}
 
     int generic_add_route(const IPRouteEntry<A>& route) { return this->next_table()->add_igp_route(route); }
-    int generic_delete_route(const IPRouteEntry<A>* route) { return this->next_table()->delete_igp_route(route); }
+    int generic_delete_route(const IPRouteEntry<A>* route, bool b)
+    {
+	return this->next_table()->delete_igp_route(route, b);
+    }
 
     int protocol_type() const { return _protocol.protocol_type();}
     const Protocol& protocol() const { return _protocol;}
@@ -210,7 +213,10 @@ public:
     ~TypedOriginTable() {}
 
     int generic_add_route(const IPRouteEntry<A>& route) { return this->next_table()->add_egp_route(route); }
-    int generic_delete_route(const IPRouteEntry<A>* route) { return this->next_table()->delete_egp_route(route); }
+    int generic_delete_route(const IPRouteEntry<A>* route, bool b)
+    {
+	return this->next_table()->delete_egp_route(route, b);
+    }
 
     int protocol_type() const { return _protocol.protocol_type();}
     const Protocol& protocol() const { return _protocol;}

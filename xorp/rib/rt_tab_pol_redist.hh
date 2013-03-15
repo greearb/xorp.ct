@@ -130,8 +130,8 @@ public:
 
     int add_igp_route(const IPRouteEntry<A>& router);
     int add_egp_route(const IPRouteEntry<A>& router);
-    int delete_igp_route(const IPRouteEntry<A>* route);
-    int delete_egp_route(const IPRouteEntry<A>* route);
+    int delete_igp_route(const IPRouteEntry<A>* route, bool);
+    int delete_egp_route(const IPRouteEntry<A>* route, bool);
 
     TableType type() const { return POLICY_REDIST_TABLE; }
     string str() const;

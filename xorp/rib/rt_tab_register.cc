@@ -288,10 +288,10 @@ RegisterTable<A>::generic_delete_route(const IPRouteEntry<A>* route)
 
 template<class A>
 int
-RegisterTable<A>::delete_igp_route(const IPRouteEntry<A>* route)
+RegisterTable<A>::delete_igp_route(const IPRouteEntry<A>* route, bool b)
 {
     XLOG_ASSERT(this->next_table() != NULL);
-    this->next_table()->delete_igp_route(route);
+    this->next_table()->delete_igp_route(route, b);
 
     this->generic_delete_route(route);
     return XORP_OK;
@@ -299,10 +299,10 @@ RegisterTable<A>::delete_igp_route(const IPRouteEntry<A>* route)
 
 template<class A>
 int
-RegisterTable<A>::delete_egp_route(const IPRouteEntry<A>* route)
+RegisterTable<A>::delete_egp_route(const IPRouteEntry<A>* route, bool b)
 {
     XLOG_ASSERT(this->next_table() != NULL);
-    this->next_table()->delete_egp_route(route);
+    this->next_table()->delete_egp_route(route, b);
 
     this->generic_delete_route(route);
     return XORP_OK;
