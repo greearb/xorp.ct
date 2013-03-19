@@ -8,13 +8,13 @@
 // Redistribution and/or modification of this program under the terms of
 // any other version of the GNU Lesser General Public License is not
 // permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU Lesser General Public License, Version 2.1, a copy of
 // which can be found in the XORP LICENSE.lgpl file.
-// 
+//
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -219,12 +219,6 @@ IPv4::operator>>(uint32_t right_shift) const
     return IPv4(htonl(tmp_addr));
 }
 
-bool
-IPv4::operator<(const IPv4& other) const
-{
-    return ntohl(_addr) < ntohl(other._addr);
-}
-
 IPv4
 IPv4::make_prefix(uint32_t mask_len) throw (InvalidNetmaskLength)
 {
@@ -249,22 +243,6 @@ IPv4::mask_len() const
 	}
     }
     return ctr;
-}
-
-IPv4&
-IPv4::operator--()
-{
-    uint32_t tmp_addr = ntohl(_addr) - 1;
-    _addr = htonl(tmp_addr);
-    return *this;
-}
-
-IPv4&
-IPv4::operator++()
-{
-    uint32_t tmp_addr = ntohl(_addr) + 1;
-    _addr = htonl(tmp_addr);
-    return *this;
 }
 
 string

@@ -31,21 +31,34 @@
 #include "route.hh"
 
 template<class A>
-RouteEntry<A>::RouteEntry(RibVif<A>* vif, Protocol* protocol,
-		       uint32_t metric, const PolicyTags& policytags, const IPNet<A>& net)
+RouteEntry<A>::RouteEntry(RibVif<A>* vif, const Protocol* protocol,
+		       uint32_t metric, const PolicyTags& policytags, const IPNet<A>& net, uint16_t admin_distance)
     : _vif(vif), _protocol(protocol),
-      _admin_distance(UNKNOWN_ADMIN_DISTANCE), _metric(metric),
-      _policytags(policytags), _net(net)
+      _admin_distance(admin_distance), _metric(metric),
+      _policytags(new PolicyTags(policytags)), _net(net)
 {
     if (_vif != NULL)
 	_vif->incr_usage_counter();
 }
 
 template<class A>
-RouteEntry<A>::RouteEntry(RibVif<A>* vif, Protocol* protocol,
-		       uint32_t metric, const IPNet<A>& net)
+RouteEntry<A>::RouteEntry(RibVif<A>* vif, const Protocol* protocol,
+			uint32_t metric, const IPNet<A>& net, uint16_t admin_distance)
     : _vif(vif), _protocol(protocol),
-      _admin_distance(UNKNOWN_ADMIN_DISTANCE), _metric(metric), _net(net)
+      _admin_distance(admin_distance), _metric(metric),
+      _policytags(new PolicyTags()), _net(net)
+{
+    if (_vif != NULL)
+	_vif->incr_usage_counter();
+}
+
+template<class A>
+RouteEntry<A>::RouteEntry(RibVif<A>* vif, const Protocol* protocol,
+			uint32_t metric, smart_ptr<PolicyTags>& policytags,
+			const IPNet<A>& net, uint16_t admin_distance)
+    : _vif(vif), _protocol(protocol),
+      _admin_distance(admin_distance), _metric(metric),
+      _policytags(policytags), _net(net)
 {
     if (_vif != NULL)
 	_vif->incr_usage_counter();
@@ -100,12 +113,76 @@ IPRouteEntry<A>::str() const
 	string(" NextHop: ") + _nexthop->str() +
 	string(" Metric: ") + c_format("%d", RouteEntry<A>::_metric) +
 	string(" Protocol: ") + RouteEntry<A>::_protocol->name() +
-	string(" PolicyTags: ") + RouteEntry<A>::_policytags.str();
+	string(" PolicyTags: ") + RouteEntry<A>::_policytags->str();
 }
 
 template<class A>
-IPRouteEntry<A>::IPRouteEntry(const IPRouteEntry<A>& r) : RouteEntry<A>(r) {
-    _nexthop = r._nexthop;
+void*
+IPRouteEntry<A>::operator new(size_t/* size*/)
+{
+    return memory_pool().alloc();
+}
+
+template<class A>
+void
+IPRouteEntry<A>::operator delete(void* ptr)
+{
+    memory_pool().free(ptr);
+}
+
+template<class A>
+inline
+MemoryPool<IPRouteEntry<A> >&
+IPRouteEntry<A>::memory_pool()
+{
+    static MemoryPool<IPRouteEntry<A> > mp;
+    return mp;
+}
+
+template<class A>
+void*
+ResolvedIPRouteEntry<A>::operator new(size_t/* size*/)
+{
+    return memory_pool().alloc();
+}
+
+template<class A>
+void
+ResolvedIPRouteEntry<A>::operator delete(void* ptr)
+{
+    memory_pool().free(ptr);
+}
+
+template<class A>
+inline
+MemoryPool<ResolvedIPRouteEntry<A> >&
+ResolvedIPRouteEntry<A>::memory_pool()
+{
+    static MemoryPool<ResolvedIPRouteEntry<A> > mp;
+    return mp;
+}
+
+template<class A>
+void*
+UnresolvedIPRouteEntry<A>::operator new(size_t/* size*/)
+{
+    return memory_pool().alloc();
+}
+
+template<class A>
+void
+UnresolvedIPRouteEntry<A>::operator delete(void* ptr)
+{
+    memory_pool().free(ptr);
+}
+
+template<class A>
+inline
+MemoryPool<UnresolvedIPRouteEntry<A> >&
+UnresolvedIPRouteEntry<A>::memory_pool()
+{
+    static MemoryPool<UnresolvedIPRouteEntry<A> > mp;
+    return mp;
 }
 
 template<class A>
@@ -120,7 +197,7 @@ IPRouteEntry<A>& IPRouteEntry<A>::operator=(const IPRouteEntry<A>& r) {
 
 template<class A>
 ResolvedIPRouteEntry<A>::ResolvedIPRouteEntry(const ResolvedIPRouteEntry<A>& r) : IPRouteEntry<A>(r) {
-    _igp_parent = r._igp_parent;
+    _resolving_parent = r._resolving_parent;
     _egp_parent = r._egp_parent;
     _backlink = r._backlink;
 }
@@ -130,7 +207,7 @@ ResolvedIPRouteEntry<A>& ResolvedIPRouteEntry<A>::operator=(const ResolvedIPRout
     if (this == &r)
 	return *this;
     IPRouteEntry<A>::operator=(r);
-    _igp_parent = r._igp_parent;
+    _resolving_parent = r._resolving_parent;
     _egp_parent = r._egp_parent;
     _backlink = r._backlink;
     return *this;
@@ -139,4 +216,10 @@ ResolvedIPRouteEntry<A>& ResolvedIPRouteEntry<A>::operator=(const ResolvedIPRout
 
 template class IPRouteEntry<IPv4>;
 template class IPRouteEntry<IPv6>;
+
+template class ResolvedIPRouteEntry<IPv4>;
+template class ResolvedIPRouteEntry<IPv6>;
+
+template class UnresolvedIPRouteEntry<IPv4>;
+template class UnresolvedIPRouteEntry<IPv6>;
 

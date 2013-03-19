@@ -53,7 +53,7 @@ public:
      * protocol goes down and comes up, the genid should be
      * incremented).
      */
-    Protocol(const string& name, ProtocolType protocol_type, uint32_t genid);
+    Protocol(const string& name, ProtocolType protocol_type);
 
     /**
      * @return the protocol type.

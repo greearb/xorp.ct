@@ -30,6 +30,7 @@
 
 #include "parser.hh"
 
+static uint32_t MAX_WORDS = 20;
 
 // ----------------------------------------------------------------------------
 // Argument Parsing methods
@@ -275,14 +276,14 @@ Parser::parse(const string& s) const
     debug_msg("Best match: %s\n", rpair->first.c_str());
     Command* cmd = rpair->second;
 
-    vector<string> words(10);
+    vector<string> words(MAX_WORDS);
     int wcount = split_into_words(str, words);
 
     // Accept empty lines
     if (wcount == 0)
 	return XORP_OK;
 
-    vector<string> template_words(10);
+    vector<string> template_words(MAX_WORDS);
     int twcount = split_into_words(rpair->first, template_words);
 
     try {
@@ -355,6 +356,7 @@ Parser::split_into_words(const string& str, vector<string>& words) const
 		break;
 	}
     } catch (out_of_range) {
+	throw Parse_error("Max Word limit is reached\n");
     }
     return word;
 }

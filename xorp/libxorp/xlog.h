@@ -345,6 +345,9 @@ void _xlog_with_level(int log_level,
  #define XLOG_RTRMGR_ONLY_NO_PREAMBLE(fmt...)	do{}while(0)
 #endif    
 
+#ifdef NO_ASSERT
+#define XLOG_ASSERT(assertion) do {} while(0)
+#else
 #ifdef L_ASSERT
 /**
  * XORP replacement for assert(3).
@@ -362,7 +365,8 @@ void _xlog_with_level(int log_level,
  } while (0)
 #else
 # define XLOG_ASSERT(assertion)	assert(assertion)
-#endif
+#endif /* L_ASSERT */
+#endif /* NO_ASSERT */
 
 /**
  * A marker that can be used to indicate code that should never be executed.

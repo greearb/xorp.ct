@@ -28,6 +28,7 @@
 #include "ipv4.hh"
 #include "ipv6.hh"
 #include "ipvx.hh"
+#include "memory_pool.hh"
 
 // NextHop is a generic next hop object.
 // PeerNextHop is for next hops that are local peers.
@@ -115,6 +116,8 @@ public:
      */
     IPNextHop(const A &from_ipaddr);
 
+    virtual ~IPNextHop() { }
+
 #ifdef XORP_USE_USTL
     IPNextHop() { }
 #endif
@@ -133,6 +136,12 @@ public:
      * of the nexthop.
      */
     string str() const;
+
+    /**
+     * Returns pointer to copy of IPNextHop
+     *
+     * Callers ARE RESPONSIBLE for freeing the memory
+     */
 
 protected:
     const A _addr;
@@ -171,8 +180,13 @@ public:
      */
     int type() const { return PEER_NEXTHOP; }
 
-private:
+    IPPeerNextHop* get_copy() { return new IPPeerNextHop<A>(*this); }
 
+    void* operator new(size_t size);
+    void operator delete(void* ptr);
+
+private:
+    static MemoryPool<IPPeerNextHop<A> >& memory_pool();
 };
 
 typedef IPPeerNextHop<IPv4> IPv4PeerNextHop;
@@ -203,6 +217,7 @@ public:
      * @return the nexthop type.  In this case, it is ENCAPS_NEXTHOP.
      */
     int type() const { return ENCAPS_NEXTHOP; }
+
 
 private:
     //_cached_peer is the cached copy of the local peer we send the
@@ -248,8 +263,13 @@ public:
      */
     int type() const { return EXTERNAL_NEXTHOP; }
 
-private:
+    IPExternalNextHop* get_copy() { return new IPExternalNextHop<A>(*this); }
 
+    void* operator new(size_t size);
+    void operator delete(void* ptr);
+
+private:
+    static MemoryPool<IPExternalNextHop<A> >& memory_pool();
 };
 
 typedef IPExternalNextHop<IPv4> IPv4ExternalNextHop;
@@ -277,6 +297,7 @@ public:
      */
     int type() const { return DISCARD_NEXTHOP; }
 
+
 private:
 
 };
@@ -301,6 +322,7 @@ public:
      * @return the nexthop type.  In this case, it is UNREACHABLE_NEXTHOP.
      */
     int type() const { return UNREACHABLE_NEXTHOP; }
+
 
 private:
 

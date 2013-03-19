@@ -52,14 +52,13 @@ public:
     PolicyConnectedTable(RouteTable<A>* parent, PolicyFilters& pfs);
     ~PolicyConnectedTable();
 
-    int add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller);
-    int delete_route(const IPRouteEntry<A>* route, RouteTable<A>* caller);
-    const IPRouteEntry<A>* lookup_route(const IPNet<A>& net) const;
-    const IPRouteEntry<A>* lookup_route(const A& addr) const;
-    RouteRange<A>* lookup_route_range(const A& addr) const;
+    int add_igp_route(const IPRouteEntry<A>& route);
+    int delete_igp_route(const IPRouteEntry<A>* route, bool b);
+    int add_egp_route(const IPRouteEntry<A>& route);
+    int delete_egp_route(const IPRouteEntry<A>* route, bool b);
+
     TableType type() const { return POLICY_CONNECTED_TABLE; }
-    RouteTable<A>* parent() { return _parent; }
-    void replumb(RouteTable<A>* old_parent, RouteTable<A>* new_parent);
+
     string str() const;
 
     /**
@@ -77,11 +76,12 @@ private:
      */
     void do_filtering(IPRouteEntry<A>& r);
 
+    void generic_add_route(const IPRouteEntry<A>& route);
+    void generic_delete_route(const IPRouteEntry<A>* route);
 
-    typedef Trie<A, const IPRouteEntry<A>*> RouteContainer;
 
+    typedef Trie<A, IPRouteEntry<A>* > RouteContainer;
 
-    RouteTable<A>*	_parent;
 
     RouteContainer	_route_table;	// Copy of routes
 					// we have this so we may push routes.
