@@ -35,6 +35,9 @@ PolicyRedistMap::~PolicyRedistMap() {
 void
 PolicyRedistMap::remove(const string& protocol)
 {
+    Map::iterator i = _map.find(protocol);
+    if (i != _map.end())
+	delete i->second;
     _map.erase(protocol);
 }
 

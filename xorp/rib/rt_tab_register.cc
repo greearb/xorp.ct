@@ -94,10 +94,8 @@ RegisterTable<A>::~RegisterTable()
 
 template<class A>
 void
-RegisterTable<A>::replumb(RouteTable<A>* old_parent,
-			  RouteTable<A>* new_parent)
+RegisterTable<A>::set_parent(ExtIntTable<A>* new_parent)
 {
-    XLOG_ASSERT(_parent == old_parent);
     _parent = new_parent;
 }
 
@@ -251,43 +249,62 @@ RegisterTable<A>::notify_relevant_modules(bool add,
 }
 
 template<class A>
+void
+RegisterTable<A>::generic_add_route(const IPRouteEntry<A>& route)
+{
+    notify_relevant_modules(true /* it's an add */, route);
+}
+
+template<class A>
 int
-RegisterTable<A>::add_route(const IPRouteEntry<A>& route,
-			    RouteTable<A>* caller)
+RegisterTable<A>::add_igp_route(const IPRouteEntry<A>& route)
 {
     debug_msg("RegisterTable<A>::add_route %s\n", route.str().c_str());
-    debug_msg("Before:\n");
-    print();
-    XLOG_ASSERT(caller == _parent);
+    XLOG_ASSERT(this->next_table() != NULL);
+    this->next_table()->add_igp_route(route);
 
-    if (this->next_table() != NULL)
-	this->next_table()->add_route(route, this);
-
-    notify_relevant_modules(true /* it's an add */, route);
-
-    debug_msg("Add route called on register table %s\n",
-	      this->tablename().c_str());
+    this->generic_add_route(route);
     return XORP_OK;
 }
 
 template<class A>
 int
-RegisterTable<A>::delete_route(const IPRouteEntry<A>* route,
-			       RouteTable<A>* caller)
+RegisterTable<A>::add_egp_route(const IPRouteEntry<A>& route)
 {
-    debug_msg("[REGT]: delete_route: %p\n%s\n", route, route->str().c_str());
-    debug_msg("Before:\n");
-    print();
-    XLOG_ASSERT(caller == _parent);
+    debug_msg("RegisterTable<A>::add_route %s\n", route.str().c_str());
+    XLOG_ASSERT(this->next_table() != NULL);
+    this->next_table()->add_egp_route(route);
 
-    if (this->next_table() != NULL)
-	this->next_table()->delete_route(route, this);
+    this->generic_add_route(route);
+    return XORP_OK;
+}
 
+template<class A>
+void
+RegisterTable<A>::generic_delete_route(const IPRouteEntry<A>* route)
+{
     notify_relevant_modules(false /* it's a delete */, *route);
-    debug_msg("Delete route called on register table\n");
-    debug_msg("After:\n");
-    print();
+}
 
+template<class A>
+int
+RegisterTable<A>::delete_igp_route(const IPRouteEntry<A>* route, bool b)
+{
+    XLOG_ASSERT(this->next_table() != NULL);
+    this->next_table()->delete_igp_route(route, b);
+
+    this->generic_delete_route(route);
+    return XORP_OK;
+}
+
+template<class A>
+int
+RegisterTable<A>::delete_egp_route(const IPRouteEntry<A>* route, bool b)
+{
+    XLOG_ASSERT(this->next_table() != NULL);
+    this->next_table()->delete_egp_route(route, b);
+
+    this->generic_delete_route(route);
     return XORP_OK;
 }
 
@@ -313,7 +330,9 @@ RegisterTable<A>::add_registration(const IPNet<A>& net,
     RouteRegister<A>* rr;
     if (iter == _ipregistry.end()) {
 	// No existing registry for this subnet
+#ifdef DEBUG_LOGGING
 	print();
+#endif
 	if (route != NULL) {
 	    debug_msg("[REGT] Add registration for net %s "
 		      "route %s module %s\n",
@@ -349,7 +368,9 @@ RegisterTable<A>::add_registration(const IPNet<A>& net,
 
 	rr = new RouteRegister<A>(net, route, module);
 	_ipregistry.insert(net, rr);
+#ifdef DEBUG_LOGGING
 	print();
+#endif
     } else {
 	rr = *iter;
 	rr->add_registrant(module);
@@ -423,16 +444,20 @@ RegisterTable<A>::register_route_range(const A& addr,
 {
     debug_msg("*****\nRRR: register_route_range: %s\n", addr.str().c_str());
     RouteRange<A>* rrange;
+    RouteRegister<A>* rreg;
+    IPNet<A> subnet;
 
     rrange = lookup_route_range(addr);
-    IPNet<A> subnet = rrange->minimal_subnet();
-    debug_msg("RRR: minimal subnet = %s\n", subnet.str().c_str());
-    if (rrange->route() == NULL)
-	debug_msg("RRR: no matching route\n");
-    else
-	debug_msg("RRR: route = %s\n", rrange->route()->str().c_str());
 
-    RouteRegister<A>* rreg;
+    if (rrange->route() == NULL) {
+	subnet = IPNet<A>(addr, (uint8_t)addr.addr_bitlen());
+	debug_msg("RRR: no matching route\n");
+    } else {
+	subnet = rrange->minimal_subnet();
+	debug_msg("RRR: route = %s\n", rrange->route()->str().c_str());
+    }
+
+    debug_msg("RRR: minimal subnet = %s\n", subnet.str().c_str());
     rreg = add_registration(subnet, rrange->route(), module);
     delete rrange;
     return rreg;
@@ -464,19 +489,19 @@ RegisterTable<A>::str() const
     return oss.str();
 }
 
+#ifdef DEBUG_LOGGING
 template<class A>
-void
+inline void
 RegisterTable<A>::print()
 {
-#ifdef DEBUG_LOGGING
     debug_msg("%s\n", str().c_str());
     typename Trie<A, RouteRegister<A>* >::iterator iter;
     for (iter = _ipregistry.begin(); iter != _ipregistry.end(); ++iter) {
 	debug_msg("----\n");
 	debug_msg("%s\n", (*iter)->str().c_str());
     }
-#endif
 }
+#endif
 
 template<class A>
 void

@@ -22,7 +22,7 @@
 #ifndef __RIB_RT_TAB_EXTINT_HH__
 #define __RIB_RT_TAB_EXTINT_HH__
 
-#include "rt_tab_base.hh"
+#include "rt_tab_origin.hh"
 
 
 /**
@@ -63,11 +63,8 @@ public:
     /**
      * ExtIntTable Constructor.
      *
-     * @param ext_table parent RouteTables supplying EGP routes.
-     * @param int_table parent RouteTables supplying IGP routes.
      */
-    ExtIntTable(RouteTable<A>* ext_table,
-		RouteTable<A>* int_table);
+    ExtIntTable();
 
     /**
      * ExtInt Destructor
@@ -84,7 +81,9 @@ public:
      * @param caller the parent table sending the new route.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller);
+    int add_igp_route(const IPRouteEntry<A>& route);
+
+    int add_egp_route(const IPRouteEntry<A>& route);
 
     /**
      * An delete_route request from a parent table also causes a
@@ -98,7 +97,11 @@ public:
      * @param caller the parent table sending the delete_route.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int delete_route(const IPRouteEntry<A>* route, RouteTable<A>* caller);
+    int delete_igp_route(const IPRouteEntry<A>* route, bool b);
+
+    int delete_best_igp_route(const IPRouteEntry<A>* route, bool b);
+
+    int delete_egp_route(const IPRouteEntry<A>* route, bool b);
 
     /**
      * Lookup a specific subnet.  The lookup will first look in the
@@ -152,12 +155,18 @@ public:
     TableType type() const	{ return EXTINT_TABLE; }
 
     /**
-     * replumb the parent tables, so that new_parent replaces old_parent
+     * Changes the admin distance of the OriginTable and replumbs it.
      *
-     * @param old_parent the old parent table.
-     * @param new_parent the new parent table.
+     * @return XORP_OK on success, otherwise XORP_ERROR
      */
-    void replumb(RouteTable<A>* old_parent, RouteTable<A>* new_parent);
+    int change_admin_distance(OriginTable<A>* ot, uint32_t ad);
+
+    /**
+     * Adds new RouteTable to the map
+     *
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int add_protocol_table(OriginTable<A>* new_table);
 
     /**
      * Render this ExtIntTable as a string for debugging purposes.
@@ -167,11 +176,13 @@ public:
 private:
     typedef typename ResolvedIPRouteEntry<A>::RouteBackLink ResolvedRouteBackLink;
     typedef typename UnresolvedIPRouteEntry<A>::RouteBackLink UnresolvedRouteBackLink;
-    typedef multimap<const IPNet<A>, ResolvedIPRouteEntry<A>* > IGPParentMultiMap;
+    typedef multimap<const IPNet<A>, ResolvedIPRouteEntry<A>* > ResolvingParentMultiMap;
     typedef map<IPNet<A>, UnresolvedIPRouteEntry<A>* > IpUnresolvedTableMap;
+    typedef Trie<A, const IPRouteEntry<A>* > RouteTrie;
+    typedef map<uint16_t, OriginTable<A>* > RouteTableMap;
+    typedef set<uint16_t> AdminDistanceSet;
 
-    int delete_ext_route(const IPRouteEntry<A>* route,
-			 bool& is_delete_propagated);
+    bool delete_ext_route(const IPRouteEntry<A>* route, bool winning_route = true);
 
     const ResolvedIPRouteEntry<A>* lookup_in_resolved_table(
 	const IPNet<A>& ipv4net);
@@ -191,29 +202,46 @@ private:
 
     const ResolvedIPRouteEntry<A>* lookup_next_by_igp_parent(
 	const IPNet<A>& route_net,
-	const typename IGPParentMultiMap::iterator& previous);
+	const typename ResolvingParentMultiMap::iterator& previous);
 
-    const IPRouteEntry<A>* lookup_route_in_igp_parent(
+    const IPRouteEntry<A>* lookup_winning_igp_route(
 	const IPNet<A>& subnet) const;
-    const IPRouteEntry<A>* lookup_route_in_igp_parent(const A& addr) const;
+    const IPRouteEntry<A>* lookup_winning_igp_route(const A& addr) const;
 
-    const IPRouteEntry<A>* lookup_route_in_egp_parent(
-	const IPNet<A>& subnet) const;
-    const IPRouteEntry<A>* lookup_route_in_egp_parent(const A& addr) const;
+    bool best_igp_route(const IPRouteEntry<A>& route);
 
-    RouteTable<A>*				_ext_table;
-    RouteTable<A>*				_int_table;
-    Trie<A, const ResolvedIPRouteEntry<A>* >	_ip_route_table;
+    bool deleting_best_igp_route(const IPRouteEntry<A>* route);
+
+    const IPRouteEntry<A>* masked_route(const IPRouteEntry<A>* route);
+
+    void delete_resolved_routes(const IPRouteEntry<A>* route, bool b);
+
+    void create_unresolved_route(const IPRouteEntry<A>& route);
+
+    int add_direct_egp_route(const IPRouteEntry<A>& route);
+    int add_indirect_egp_route(const IPRouteEntry<A>& route);
+
+    AdminDistanceSet _igp_ad_set;
+    AdminDistanceSet _egp_ad_set;
+
+    RouteTableMap _all_tables;
+    Trie<A, const ResolvedIPRouteEntry<A>* >	_ip_resolved_table;
     multimap<A, UnresolvedIPRouteEntry<A>* >	_ip_unresolved_nexthops;
     IpUnresolvedTableMap			_ip_unresolved_table;
 
     // _ip_igp_parents gives us a fast way of finding a route
     // affected by a change in an igp parent route
-    IGPParentMultiMap _ip_igp_parents;
+    ResolvingParentMultiMap _ip_resolving_parents;
 
     // _resolving_routes is a Trie of all the routes that are used to
     // resolve external routes
-    Trie<A, const IPRouteEntry<A>* > _resolving_routes;
+    RouteTrie _resolving_routes;
+
+    // Tries where we cache wining IGP, EGP and overall routes
+    RouteTrie _wining_igp_routes;
+    RouteTrie _wining_routes;	    // Overall wining routes!
+
+    static const string& ext_int_name();
 };
 
 #endif // __RIB_RT_TAB_EXTINT_HH__

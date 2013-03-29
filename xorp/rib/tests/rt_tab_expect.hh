@@ -23,6 +23,7 @@
 #define __RIB_RT_TAB_EXPECT_HH__
 
 #include "rt_tab_base.hh"
+#include "rt_tab_origin.hh"
 
 template<class A> class ExpectedRouteChange;
 
@@ -42,7 +43,7 @@ template<class A> class ExpectedRouteChange;
 template<class A>
 class ExpectTable : public RouteTable<A> {
 public:
-    ExpectTable(const string& tablename, RouteTable<A>* parent);
+    ExpectTable(const string& tablename, OriginTable<A>* parent);
     ~ExpectTable();
 
     const list<ExpectedRouteChange<A> >& expected_route_changes() const {
@@ -51,18 +52,23 @@ public:
 
     void expect_add(const IPRouteEntry<A>& route);
     void expect_delete(const IPRouteEntry<A>& route);
-    int add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller);
-    int delete_route(const IPRouteEntry<A>* route, RouteTable<A>* caller);
+    int add_igp_route(const IPRouteEntry<A>& route) { return this->add_route(route); }
+    int add_egp_route(const IPRouteEntry<A>& route) { return this->add_route(route); }
+    int add_route(const IPRouteEntry<A>& route);
+    int delete_igp_route(const IPRouteEntry<A>* route, bool) { return this->delete_route(route); }
+    int delete_egp_route(const IPRouteEntry<A>* route, bool) { return this->delete_route(route); }
+    int delete_route(const IPRouteEntry<A>* route);
     const IPRouteEntry<A>* lookup_route(const IPNet<A>& net) const;
     const IPRouteEntry<A>* lookup_route(const A& addr) const;
-    RouteRange<A>* lookup_route_range(const A& addr) const;
+
     TableType type() const { return EXPECT_TABLE; }
     RouteTable<A>* parent() { return _parent; }
-    void replumb(RouteTable<A>* old_parent, RouteTable<A>* new_parent);
+    const RouteTable<A>* parent() const { return _parent; }
+    void set_parent(RouteTable<A>* new_parent);
     string str() const;
 
 private:
-    RouteTable<A>*			_parent;
+    OriginTable<A>*			_parent;
     list<ExpectedRouteChange<A> >	_expected_route_changes;
 };
 

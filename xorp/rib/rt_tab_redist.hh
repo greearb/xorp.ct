@@ -110,14 +110,15 @@ public:
     //
     // Standard RouteTable methods
     //
-    int add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller);
-    int delete_route(const IPRouteEntry<A>* route, RouteTable<A>* caller);
-    const IPRouteEntry<A>* lookup_route(const IPNet<A>& net) const;
-    const IPRouteEntry<A>* lookup_route(const A& addr) const;
-    RouteRange<A>* lookup_route_range(const A& addr) const;
+    int add_igp_route(const IPRouteEntry<A>& route);
+    int add_egp_route(const IPRouteEntry<A>& route);
+    int delete_igp_route(const IPRouteEntry<A>* route, bool b);
+    int delete_egp_route(const IPRouteEntry<A>* route, bool b);
+
+    const IPRouteEntry<A>* lookup_ip_route(const IPNet<A>& net) const;
+
     TableType type() const { return REDIST_TABLE; }
-    RouteTable<A>* parent() { return _parent; }
-    void replumb(RouteTable<A>* old_parent, RouteTable<A>* new_parent);
+
     string str() const;
 
     /**
@@ -127,12 +128,14 @@ public:
     const RouteIndex& route_index() const { return _rt_index; }
 
 protected:
-    RouteTable<A>*	_parent;	// Immediately upstream table.  May
-					// differ from _from_table if a
-					// Deletion table or another redist
-					// table has been plumbed in.
+    typedef Trie<A, const IPRouteEntry<A>* > IPRouteTrie;
+
     RouteIndex		_rt_index;
     list<Redistributor<A>*> _outputs;
+    IPRouteTrie		_ip_route_table;
+
+    void generic_add_route(const IPRouteEntry<A>& route);
+    void generic_delete_route(const IPRouteEntry<A>* route);
 };
 
 
@@ -264,6 +267,7 @@ private:
     friend class OutputEventInterface;
 
 private:
+
     EventLoop&			_e;
     string			_name;
     RedistTable<A>*		_table;

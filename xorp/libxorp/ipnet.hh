@@ -9,13 +9,13 @@
 // Redistribution and/or modification of this program under the terms of
 // any other version of the GNU Lesser General Public License is not
 // permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU Lesser General Public License, Version 2.1, a copy of
 // which can be found in the XORP LICENSE.lgpl file.
-// 
+//
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -104,8 +104,8 @@ public:
      * right-hand operand.
      */
     bool operator==(const IPNet& other) const {
-	return ((prefix_len() == other.prefix_len()) &&
-		(masked_addr() == other.masked_addr()));
+	return ((_prefix_len == other._prefix_len) &&
+		(_masked_addr == other._masked_addr));
     }
 
     /**
@@ -456,7 +456,8 @@ private:
 /* ------------------------------------------------------------------------- */
 /* Deferred method definitions */
 
-template <class A> bool
+template <class A>
+inline bool
 IPNet<A>::operator<(const IPNet& other) const
 {
 #if 1
@@ -548,23 +549,38 @@ IPNet<A>::is_overlap(const IPNet<A>& other) const
     return (other.masked_addr() == masked_addr());
 }
 
-template <class A> bool
+template <>
+inline bool
+IPNet<IPv4>::contains(const IPv4& addr) const
+{
+    return addr.mask_by_prefix_len_uint(_prefix_len) == _masked_addr.addr();
+}
+
+template <>
+inline bool
+IPNet<IPv6>::contains(const IPv6& addr) const
+{
+    uint32_t prefixed_addr[4];
+    addr.mask_by_prefix_len_uint(_prefix_len, prefixed_addr);
+    return ((prefixed_addr[0] == _masked_addr.addr()[0])
+	    && (prefixed_addr[1] == _masked_addr.addr()[1])
+	    && (prefixed_addr[2] == _masked_addr.addr()[2])
+	    && (prefixed_addr[3] == _masked_addr.addr()[3]));
+}
+
+template <class A>
+inline bool
 IPNet<A>::contains(const IPNet<A>& other) const
 {
-    if (masked_addr().af() != other.masked_addr().af())
-	return (false);
-
-    if (prefix_len() > other.prefix_len()) {
+    if (_prefix_len > other._prefix_len)
 	// I have smaller prefix size, hence I don't contain other.
 	return (false);
-    }
-    if (prefix_len() < other.prefix_len()) {
-	// I have bigger prefix size
-	IPNet other_masked(other.masked_addr(), prefix_len());
-	return (other_masked.masked_addr() == masked_addr());
-    }
-    // Same prefix size
-    return (other.masked_addr() == masked_addr());
+
+    if (_prefix_len == other._prefix_len)
+	return (other._masked_addr == _masked_addr);
+
+    // I have bigger prefix size
+    return (contains(other._masked_addr));
 }
 
 template <class A> void
@@ -591,7 +607,8 @@ IPNet<A>::initialize_from_string(const char *cp)
     _masked_addr = A(addr.c_str()).mask_by_prefix_len(_prefix_len);
 }
 
-template <class A> IPNet<A>&
+template <class A>
+inline IPNet<A>&
 IPNet<A>::operator--()
 {
     _masked_addr = _masked_addr >> (_masked_addr.addr_bitlen() - _prefix_len);
@@ -600,7 +617,8 @@ IPNet<A>::operator--()
     return (*this);
 }
 
-template <class A> IPNet<A>&
+template <class A>
+inline IPNet<A>&
 IPNet<A>::operator++()
 {
     _masked_addr = _masked_addr >> (_masked_addr.addr_bitlen() - _prefix_len);

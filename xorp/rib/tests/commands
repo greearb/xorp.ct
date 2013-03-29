@@ -98,6 +98,27 @@ route verify ip 192.150.187.1 de1 10.0.1.2 5
 #delete the static and check it reverts to the ospf route
 route delete static 192.150.187.0/24
 route verify ip 192.150.187.1 de0 10.0.0.2 5
+
+route add ebgp 176.16.128.0/28 10.0.0.100 10
+route verify ip 176.16.128.1 de0 10.0.0.100 10
+
+vif Ethernet de3 176.16.128.2 28
+route verify ip 176.16.128.1 de3 176.16.128.2 0
+
+route delete ebgp 176.16.128.0/28
+route verify ip 176.16.128.1 de3 176.16.128.2 0
+
+route add rip 147.91.8.0/24 176.16.128.1 10
+route verify ip 147.91.8.1 de3 176.16.128.1 10
+
+route add ebgp 147.91.8.0/24 192.150.187.1 7
+route verify ip 147.91.8.1 de0 10.0.0.2 7
+
+route delete ebgp 147.91.8.0/24
+route verify ip 147.91.8.1 de3 176.16.128.1 10
+
+route delete rip 147.91.8.0/24
+route verify miss 147.91.8.1 lo0 0.0.0.0 0
 #
 #-------------------------------------------------------------------
 #Now add an EBGP route
@@ -430,3 +451,4 @@ route add rip 10.20.30.0/24 10.0.0.2 2
 route add ebgp 10.20.30.0/24 9.9.9.9 0
 route delete ebgp 10.20.30.0/24
 route add ebgp 10.20.30.0/24 9.9.9.9 0
+route verify ip 10.20.30.1 de0 10.0.0.2 2

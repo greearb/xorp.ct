@@ -92,7 +92,7 @@ ExpectedRouteChange<A>::str() const
 
 template<class A>
 ExpectTable<A>::ExpectTable(const string&   tablename,
-			       RouteTable<A>*  parent)
+			       OriginTable<A>*  parent)
     : RouteTable<A>(tablename)
 {
     _parent = parent;
@@ -126,10 +126,8 @@ ExpectTable<A>::expect_delete(const IPRouteEntry<A>& route)
 
 template<class A>
 int
-ExpectTable<A>::add_route(const IPRouteEntry<A>& 	route,
-			  RouteTable<A>* 		caller)
+ExpectTable<A>::add_route(const IPRouteEntry<A>&	route)
 {
-    XLOG_ASSERT(caller == _parent);
     debug_msg("DT[%s]: Adding route %s\n", this->tablename().c_str(),
 	      route.str().c_str());
     if (_expected_route_changes.empty()) {
@@ -148,10 +146,8 @@ ExpectTable<A>::add_route(const IPRouteEntry<A>& 	route,
 
 template<class A>
 int
-ExpectTable<A>::delete_route(const IPRouteEntry<A>* 	route,
-			  RouteTable<A>* 		caller)
+ExpectTable<A>::delete_route(const IPRouteEntry<A>* 	route)
 {
-    XLOG_ASSERT(caller == _parent);
     debug_msg("DT[%s]: Deleting route %s\n", this->tablename().c_str(),
 	      route->str().c_str());
     if (_expected_route_changes.empty()) {
@@ -172,30 +168,22 @@ template<class A>
 const IPRouteEntry<A>*
 ExpectTable<A>::lookup_route(const IPNet<A>& net) const
 {
-    return _parent->lookup_route(net);
+    return _parent->lookup_ip_route(net);
 }
 
 template<class A>
 const IPRouteEntry<A>*
 ExpectTable<A>::lookup_route(const A& addr) const
 {
-    return _parent->lookup_route(addr);
+    return _parent->lookup_ip_route(addr);
 }
 
 template<class A>
 void
-ExpectTable<A>::replumb(RouteTable<A>* old_parent,
-		       RouteTable<A>* new_parent)
+ExpectTable<A>::set_parent(RouteTable<A>* new_parent)
 {
-    XLOG_ASSERT(_parent == old_parent);
-    _parent = new_parent;
-}
-
-template<class A>
-RouteRange<A>*
-ExpectTable<A>::lookup_route_range(const A& addr) const
-{
-    return _parent->lookup_route_range(addr);
+    _parent = dynamic_cast<OriginTable<A>* >(new_parent);
+    XLOG_ASSERT(_parent);
 }
 
 template<class A> string

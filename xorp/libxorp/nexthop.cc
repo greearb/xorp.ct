@@ -70,6 +70,29 @@ IPPeerNextHop<A>::IPPeerNextHop(const A& from_ipaddr)
 }
 
 template<class A>
+void*
+IPPeerNextHop<A>::operator new(size_t/* size*/)
+{
+    return memory_pool().alloc();
+}
+
+template<class A>
+void
+IPPeerNextHop<A>::operator delete(void* ptr)
+{
+    memory_pool().free(ptr);
+}
+
+template<class A>
+inline
+MemoryPool<IPPeerNextHop<A> >&
+IPPeerNextHop<A>::memory_pool()
+{
+    static MemoryPool<IPPeerNextHop<A> > mp;
+    return mp;
+}
+
+template<class A>
 IPEncapsNextHop<A>::IPEncapsNextHop(const A& from_ipaddr)
     : IPNextHop<A>(from_ipaddr)
 {
@@ -79,6 +102,29 @@ template<class A>
 IPExternalNextHop<A>::IPExternalNextHop(const A& from_ipaddr)
     : IPNextHop<A>(from_ipaddr)
 {
+}
+
+template<class A>
+void*
+IPExternalNextHop<A>::operator new(size_t/* size*/)
+{
+    return memory_pool().alloc();
+}
+
+template<class A>
+void
+IPExternalNextHop<A>::operator delete(void* ptr)
+{
+    memory_pool().free(ptr);
+}
+
+template<class A>
+inline
+MemoryPool<IPExternalNextHop<A> >&
+IPExternalNextHop<A>::memory_pool()
+{
+    static MemoryPool<IPExternalNextHop<A> > mp;
+    return mp;
 }
 
 template <class A>

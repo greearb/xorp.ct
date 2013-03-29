@@ -33,6 +33,18 @@
 
 #include "protocol.hh"
 
+#ifdef USE_BOOST
+
+#include <boost/shared_ptr.hpp>
+#define smart_ptr boost::shared_ptr
+
+#else
+
+#include "libxorp/ref_ptr.hh"
+#define smart_ptr ref_ptr
+
+#endif
+
 template<class A>
 class RibVif;
 
@@ -55,11 +67,17 @@ public:
      * @param protocol the routing protocol that originated this route.
      * @param metric the routing protocol metric for this route.
      */
-    RouteEntry(RibVif<A>* vif, Protocol* protocol,
-		uint32_t metric, const PolicyTags& policytags, const IPNet<A>& net);
+    RouteEntry(RibVif<A>* vif, const Protocol* protocol,
+		uint32_t metric, const PolicyTags& policytags,
+		const IPNet<A>& net, uint16_t admin_distance = UNKNOWN_ADMIN_DISTANCE);
 
-    RouteEntry(RibVif<A>* vif, Protocol* protocol,
-		uint32_t metric, const IPNet<A>& net);
+    RouteEntry(RibVif<A>* vif, const Protocol* protocol,
+		uint32_t metric, const IPNet<A>& net,
+		uint16_t admin_distance = UNKNOWN_ADMIN_DISTANCE);
+
+    RouteEntry(RibVif<A>* vif, const Protocol* protocol,
+		uint32_t metric, smart_ptr<PolicyTags>& policytags,
+		const IPNet<A>& net, uint16_t admin_distance = UNKNOWN_ADMIN_DISTANCE);
 
     RouteEntry(const RouteEntry<A>& r);
 
@@ -110,7 +128,7 @@ public:
      * @return the routing protocol that originated this route.
      * @see Protocol.
      */
-    Protocol* protocol() const { return _protocol; }
+    const Protocol* protocol() const { return _protocol; }
 
     /**
      * Display the route for debugging purposes.
@@ -142,17 +160,19 @@ public:
      *
      * @return the policy-tags for this route.
      */
-    PolicyTags& policytags() { return _policytags; }
-    const PolicyTags& policytags() const { return _policytags; }
+    PolicyTags& policytags() { return *_policytags; }
+    const PolicyTags& policytags() const { return *_policytags; }
+
+    smart_ptr<PolicyTags>& policytags_shared() { return _policytags; }
 
 protected:
     RibVif<A>* _vif;
 
-    Protocol* _protocol;		// The routing protocol that instantiated this route
+    const Protocol* _protocol;		// The routing protocol that instantiated this route
 
     uint16_t	_admin_distance;	// Lower is better
     uint32_t	_metric;		// Lower is better
-    PolicyTags	_policytags;		// Tags used for policy route redistribution
+    smart_ptr<PolicyTags> _policytags;	// Tags used for policy route redistribution
     IPNet<A>	_net;			// The route entry's subnet address
 };
 
@@ -178,8 +198,8 @@ public:
      * @param metric the routing protocol metric for this route.
      */
     IPRouteEntry(const IPNet<A>& net, RibVif<A>* vif, IPNextHop<A>* nexthop,
-		 Protocol* protocol, uint32_t metric)
-	: RouteEntry<A>(vif, protocol, metric, net), _nexthop(nexthop) {}
+		 const Protocol* protocol, uint32_t metric)
+	: RouteEntry<A>(vif, protocol, metric, net), _nexthop(nexthop) { XLOG_ASSERT(nexthop); }
 
     /**
      * Constructor for IPRouteEntry.
@@ -194,17 +214,21 @@ public:
      * @param policytags the policy-tags for this route.
      */
     IPRouteEntry(const IPNet<A>& net, RibVif<A>* vif, IPNextHop<A>* nexthop,
-		 Protocol* protocol, uint32_t metric,
+		 const Protocol* protocol, uint32_t metric,
 		 const PolicyTags& policytags)
-	: RouteEntry<A>(vif, protocol, metric, policytags, net), _nexthop(nexthop) {}
+	: RouteEntry<A>(vif, protocol, metric, policytags, net), _nexthop(nexthop) { XLOG_ASSERT(nexthop); }
 
-    IPRouteEntry(const IPRouteEntry<A>& r);
-    IPRouteEntry& operator=(const IPRouteEntry<A>& r);
+    IPRouteEntry(const IPNet<A>& net, RibVif<A>* vif,
+	smart_ptr<IPNextHop<A> >& nexthop, const Protocol* protocol, uint32_t metric,
+	smart_ptr<PolicyTags>& policytags, uint16_t admin_distance)
+	: RouteEntry<A>(vif, protocol, metric, policytags, net, admin_distance), _nexthop(nexthop) { }
+
+    IPRouteEntry<A>& operator=(const IPRouteEntry<A>& rhs);
 
     /**
      * Destructor for Routing Table Entry
      */
-    virtual ~IPRouteEntry() {}
+    virtual ~IPRouteEntry() { }
 
     /**
      * Get the NextHop router.
@@ -212,9 +236,9 @@ public:
      * @return the NextHop router to which packets matching this
      * entry should be forwarded.
      */
-    IPNextHop<A>* nexthop() const { return _nexthop; }
+    IPNextHop<A>* nexthop() const { return _nexthop.get(); }
 
-    void set_nexthop(IPNextHop<A>* v) { _nexthop = v; }
+    smart_ptr<IPNextHop<A> >& nexthop_shared() { return _nexthop; }
 
     /**
      * Get the route entry's next-hop router address.
@@ -222,13 +246,7 @@ public:
      * @return the route entry's next-hop router address. If there is no
      * next-hop router, then the return value is IPv4#ZERO() or IPv6#ZERO().
      */
-    const A& nexthop_addr() const {
-	IPNextHop<A>* nh = nexthop();
-	if (nh != NULL)
-	    return nh->addr();
-	else
-	    return A::ZERO();
-    }
+    const A& nexthop_addr() const { return _nexthop->addr(); }
 
     /**
      * Get the route entry as a string for debugging purposes.
@@ -236,8 +254,12 @@ public:
      * @return a human readable representation of the route entry.
      */
     string str() const;
+    void* operator new(size_t size);
+    void operator delete(void* ptr);
 protected:
-    IPNextHop<A>*	_nexthop;
+    smart_ptr<IPNextHop<A> > _nexthop;
+private:
+    static MemoryPool<IPRouteEntry<A> >& memory_pool();
 };
 
 typedef IPRouteEntry<IPv4> IPv4RouteEntry;
@@ -277,13 +299,15 @@ public:
      * nexthop in the egp_parent into a local nexthop.
      * @param egp_parent the orginal route entry with a non-local nexthop.
      */
-    ResolvedIPRouteEntry(const IPNet<A>& net, RibVif<A>* vif, IPNextHop<A>* nexthop,
-			 Protocol* protocol, uint32_t metric,
-			 const IPRouteEntry<A>* igp_parent,
+    ResolvedIPRouteEntry(const IPRouteEntry<A>* resolving_parent,
 			 const IPRouteEntry<A>* egp_parent)
-	: IPRouteEntry<A>(net, vif, nexthop, protocol, metric, PolicyTags()),
-	_igp_parent(igp_parent),
-	_egp_parent(egp_parent) { }
+	: IPRouteEntry<A>(egp_parent->net(), resolving_parent->vif(),
+		const_cast<IPRouteEntry<A>*>(resolving_parent)->nexthop_shared(),
+		egp_parent->protocol(), egp_parent->metric(),
+		const_cast<IPRouteEntry<A>*>(egp_parent)->policytags_shared(),
+		egp_parent->admin_distance()),
+	  _resolving_parent(resolving_parent),
+	  _egp_parent(egp_parent) { }
 
     ResolvedIPRouteEntry(const ResolvedIPRouteEntry<A>& r);
     ResolvedIPRouteEntry& operator=(const ResolvedIPRouteEntry<A>& r);
@@ -294,7 +318,7 @@ public:
      * @return the IGP parent route entry that was used to resolve the
      * EGP parent route entry's non-local nexthop into a local nexthop.
      */
-    const IPRouteEntry<A>* igp_parent() const { return _igp_parent; }
+    const IPRouteEntry<A>* resolving_parent() const { return _resolving_parent; }
 
     /**
      * Get the EGP parent.
@@ -325,8 +349,13 @@ public:
      */
     typename RouteBackLink::iterator backlink() const { return _backlink; }
 
+    void* operator new(size_t size);
+    void operator delete(void* ptr);
+
 private:
-    const IPRouteEntry<A>* _igp_parent;
+    static MemoryPool<ResolvedIPRouteEntry<A> >& memory_pool();
+
+    const IPRouteEntry<A>* _resolving_parent;
     const IPRouteEntry<A>* _egp_parent;
 
     // _backlink is used for removing the corresponding entry from the
@@ -392,7 +421,11 @@ public:
      */
     typename RouteBackLink::iterator backlink() const { return _backlink; }
 
+    void* operator new(size_t size);
+    void operator delete(void* ptr);
+
 private:
+    static MemoryPool<UnresolvedIPRouteEntry<A> >& memory_pool();
     //
     // _backlink is used for removing the corresponding entry from the
     // RouteTable's map that is indexed by the unresolved nexthop.

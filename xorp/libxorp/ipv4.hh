@@ -9,13 +9,13 @@
 // Redistribution and/or modification of this program under the terms of
 // any other version of the GNU Lesser General Public License is not
 // permitted.
-// 
+//
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
 // see the GNU Lesser General Public License, Version 2.1, a copy of
 // which can be found in the XORP LICENSE.lgpl file.
-// 
+//
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
@@ -612,6 +612,8 @@ public:
      */
     static IPv4 make_prefix(uint32_t mask_len) throw (InvalidNetmaskLength);
 
+    static uint32_t make_prefix_uint(uint32_t mask_len) throw (InvalidNetmaskLength);
+
     /**
      * Make an IPv4 address prefix.
      *
@@ -622,6 +624,11 @@ public:
     IPv4 mask_by_prefix_len(uint32_t mask_len) const
 	throw (InvalidNetmaskLength) {
 	return (*this) & make_prefix(mask_len);
+    }
+
+    uint32_t mask_by_prefix_len_uint(uint32_t mask_len) const
+	throw (InvalidNetmaskLength) {
+	return this->_addr & make_prefix_uint(mask_len);
     }
 
     /**
@@ -748,6 +755,31 @@ IPv4::bits(uint32_t lsb, uint32_t len) const
 }
 
 inline uint32_t
+IPv4::make_prefix_uint(uint32_t mask_len) throw (InvalidNetmaskLength)
+{
+    if (mask_len > 32)
+	xorp_throw(InvalidNetmaskLength, mask_len);
+    uint32_t m = (mask_len == 0) ? 0 : ((~0U) << (32 - mask_len));
+    return htonl(m);
+}
+
+inline IPv4&
+IPv4::operator--()
+{
+    uint32_t tmp_addr = ntohl(_addr) - 1;
+    _addr = htonl(tmp_addr);
+    return *this;
+}
+
+inline IPv4&
+IPv4::operator++()
+{
+    uint32_t tmp_addr = ntohl(_addr) + 1;
+    _addr = htonl(tmp_addr);
+    return *this;
+}
+
+inline uint32_t
 IPv4::bit_count() const
 {
     // XXX: no need for ntohl()
@@ -758,6 +790,12 @@ inline uint32_t
 IPv4::leading_zero_count() const
 {
     return (xorp_leading_zero_count_uint32(ntohl(_addr)));
+}
+
+inline bool
+IPv4::operator<(const IPv4& other) const
+{
+    return ntohl(_addr) < ntohl(other._addr);
 }
 
 struct IPv4Constants {

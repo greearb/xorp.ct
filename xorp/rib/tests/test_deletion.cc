@@ -44,7 +44,7 @@ main(int /* argc */, char* argv[])
     xlog_add_default_output();
     xlog_start();
     EventLoop eventloop;
-    OriginTable<IPv4> ot("origin", 1, IGP, eventloop);
+    TypedOriginTable<IPv4, IGP> ot("origin", 1, eventloop);
     ExpectTable<IPv4> dt("expect", &ot);
 
     Vif tmp_vif1("vif1");
@@ -53,12 +53,12 @@ main(int /* argc */, char* argv[])
     RibVif<IPv4> vif2(NULL, tmp_vif2);
     IPPeerNextHop<IPv4> nh1(IPv4("1.0.0.1"));
     IPPeerNextHop<IPv4> nh2(IPv4("1.0.0.2"));
-    Protocol protocol("test", IGP, 0);
+    Protocol protocol("test", IGP);
     IPv4Net net1("10.0.1.0/24");
     IPv4Net net2("10.0.2.0/24");
 
-    IPRouteEntry<IPv4> route1(net1, &vif1, &nh1, &protocol, 100);
-    IPRouteEntry<IPv4> route2(net2, &vif1, &nh1, &protocol, 100);
+    IPRouteEntry<IPv4> route1(net1, &vif1, nh1.get_copy(), &protocol, 100);
+    IPRouteEntry<IPv4> route2(net2, &vif1, nh1.get_copy(), &protocol, 100);
 
     dt.expect_add(route1);
     dt.expect_add(route2);
@@ -85,13 +85,12 @@ main(int /* argc */, char* argv[])
     dt.expect_delete(route1);
     dt.expect_delete(route2);
 
-    XLOG_ASSERT(dt.parent()->type() == ORIGIN_TABLE);
     ot.routing_protocol_shutdown();
 
     // Validate that a deletion table got added
-    XLOG_ASSERT(dt.parent()->type() == DELETION_TABLE);
-    while (dt.parent()->type() != ORIGIN_TABLE) {
-	XLOG_ASSERT(dt.parent()->type() == DELETION_TABLE);
+    XLOG_ASSERT(dt.parent()->next_table()->type() == DELETION_TABLE);
+    while (dt.parent()->next_table()->type() != EXPECT_TABLE) {
+	XLOG_ASSERT(dt.parent()->next_table()->type() == DELETION_TABLE);
 	eventloop.run();
     }
     XLOG_ASSERT(dt.expected_route_changes().empty());
@@ -109,11 +108,10 @@ main(int /* argc */, char* argv[])
     ot.add_route(new IPRouteEntry<IPv4>(route1));
     ot.add_route(new IPRouteEntry<IPv4>(route2));
 
-    XLOG_ASSERT(dt.parent()->type() == ORIGIN_TABLE);
     ot.routing_protocol_shutdown();
 
-    XLOG_ASSERT(dt.parent()->type() == DELETION_TABLE);
-    IPRouteEntry<IPv4> route3(net1, &vif2, &nh2, &protocol, 101);
+    XLOG_ASSERT(dt.parent()->next_table()->type() == DELETION_TABLE);
+    IPRouteEntry<IPv4> route3(net1, &vif2, nh2.get_copy(), &protocol, 101);
 
     dt.expect_delete(route1);
     dt.expect_add(route3);
@@ -122,14 +120,12 @@ main(int /* argc */, char* argv[])
 
     dt.expect_delete(route2);
 
-    XLOG_ASSERT(dt.parent()->type() == DELETION_TABLE);
-    while (dt.parent()->type() != ORIGIN_TABLE) {
-	XLOG_ASSERT(dt.parent()->type() == DELETION_TABLE);
+    XLOG_ASSERT(dt.parent()->next_table()->type() == DELETION_TABLE);
+    while (dt.parent()->next_table()->type() != EXPECT_TABLE) {
+	XLOG_ASSERT(dt.parent()->next_table()->type() == DELETION_TABLE);
 	eventloop.run();
     }
     XLOG_ASSERT(dt.expected_route_changes().empty());
-
-    XLOG_ASSERT(dt.parent()->type() == ORIGIN_TABLE);
 
     dt.expect_delete(route3);
     ot.delete_route(net1);

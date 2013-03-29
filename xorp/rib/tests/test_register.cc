@@ -346,10 +346,13 @@ main (int /* argc */, char* argv[])
 	abort();
 
     // Register interest in all three non-existent ranges
-    rreg = rib.route_register(IPv4("1.0.0.1"), string("foo"));
+    rreg = rib.route_register(IPv4("1.0.6.1"), string("foo"));
     if (verbose)
 	printf("%s\n", rreg->str().c_str());
-    rreg = rib.route_register(IPv4("1.0.6.1"), string("foo"));
+    rreg = rib.route_register(IPv4("1.0.6.128"), string("foo"));
+    if (verbose)
+	printf("%s\n", rreg->str().c_str());
+    rreg = rib.route_register(IPv4("1.0.0.1"), string("foo"));
     if (verbose)
 	printf("%s\n", rreg->str().c_str());
     rreg = rib.route_register(IPv4("1.0.7.1"), string("foo2"));
@@ -359,12 +362,15 @@ main (int /* argc */, char* argv[])
     if (verbose)
 	printf("%s\n", rreg->str().c_str());
 
-    rib.add_route("ospf", IPv4Net("1.0.6.0", 24), IPv4("10.0.2.2"),
+    rib.add_route("ospf", IPv4Net("1.0.6.0", 23), IPv4("10.0.2.2"),
 		  "", "", 3, PolicyTags());
-    if (!register_server.verify_invalidated("foo 1.0.6.0/23 mcast:false"))
+    if (!register_server.verify_invalidated("foo 1.0.6.1/32 mcast:false"))
 	abort();
-    if (!register_server.verify_invalidated("foo2 1.0.6.0/23 mcast:false"))
-	abort();
+    if (!register_server.verify_invalidated("foo 1.0.6.128/32 mcast:false"))
+    	abort();
+    if (!register_server.verify_invalidated("foo2 1.0.7.1/32 mcast:false"))
+    	abort();
+    // There shouldn't be any more invalidated or changed entries
     if (!register_server.verify_no_info())
 	abort();
     //

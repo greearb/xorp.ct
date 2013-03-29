@@ -498,6 +498,8 @@ def DoAllConfig(env, conf, host_os):
             conf.Define('L_OTHER')
     if not (env.has_key('disable_fatallogs') and env['disable_fatallogs']):
             conf.Define('L_FATAL')
+    if (env.has_key('disable_assert') and env['disable_assert']):
+            conf.Define('NO_ASSERT')
 
     ##########
     # v6 stack
