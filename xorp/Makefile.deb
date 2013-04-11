@@ -18,8 +18,12 @@
 # These fields are used to build the control file.
 PACKAGE ?= lanforge-xorp
 VERSION = 1.8.6-WIP
-LFVER = 5.2.8
+LFVER = 5.2.9
 ARCH = i386
+OSVER         := $(shell uname -m)
+ifeq "${OSVER}" "x86_64"
+	ARCH = amd64
+endif
 SECTION = net
 PRIORITY = optional
 MAINTAINER = Ben Greear <greearb@candelatech.com>
@@ -49,13 +53,13 @@ create_deb:
 	echo "More information:  http://www.xorp.org" >> description.txt
 	chmod a+x preinst prerm postinst
 	make -f Makefile.deb clobber
-	make -f Makefile.deb ARCH=i386 deb
-	mv tmp/$(PACKAGE)_$(VERSION)_i386.deb ./
-	cp $(PACKAGE)_$(VERSION)_i386.deb /mnt/d2/pub/candela_cdrom.${LFVER}/debs/dists/candela/multiverse/binary-i386/
+	make -f Makefile.deb ARCH=${ARCH} deb
+	mv tmp/$(PACKAGE)_$(VERSION)_${ARCH}.deb ./
+	cp $(PACKAGE)_$(VERSION)_${ARCH}.deb /mnt/d2/pub/candela_cdrom.${LFVER}/debs/dists/candela/multiverse/binary-${ARCH}/
 	@echo ""
 	@echo "On a Ubunto machine:"
-	@echo "cd /mnt/d2/pub/candela_cdrom.${LFVER}/debs"
-	@echo "dpkg-scanpackages . /dev/null | gzip -9c > dists/candela/multiverse/binary-i386/Packages.gz"
+	@echo "cd /mnt/d2/pub/candela_cdrom.${LFVER}/debs/candela/multiverse/binary-${ARCH}/"
+	@echo "dpkg-scanpackages . /dev/null | gzip -9c > dists/candela/multiverse/binary-${ARCH}/Packages.gz"
 	@echo "apt-get update"
 	@echo "apt-get install $(PACKAGE)"
 
