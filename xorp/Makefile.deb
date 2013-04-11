@@ -57,9 +57,9 @@ create_deb:
 	mv tmp/$(PACKAGE)_$(VERSION)_${ARCH}.deb ./
 	cp $(PACKAGE)_$(VERSION)_${ARCH}.deb /mnt/d2/pub/candela_cdrom.${LFVER}/debs/dists/candela/multiverse/binary-${ARCH}/
 	@echo ""
-	@echo "On a Ubunto machine:"
-	@echo "cd /mnt/d2/pub/candela_cdrom.${LFVER}/debs/candela/multiverse/binary-${ARCH}/"
-	@echo "dpkg-scanpackages . /dev/null | gzip -9c > dists/candela/multiverse/binary-${ARCH}/Packages.gz"
+	@echo "On an Ubuntu machine:"
+	@echo "cd /mnt/d2/pub/candela_cdrom.${LFVER}/debs/dists/candela/multiverse/binary-${ARCH}/"
+	@echo "dpkg-scanpackages . /dev/null | gzip -9c > Packages.gz"
 	@echo "apt-get update"
 	@echo "apt-get install $(PACKAGE)"
 
