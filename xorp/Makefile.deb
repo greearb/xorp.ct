@@ -35,16 +35,13 @@ PACKAGE_DIR ?= tmp
 create_deb:
 	echo "#!/bin/bash" > preinst
 	echo "set -x" >> preinst
-	echo "adduser xorp || true" >> preinst
+	echo "adduser --disabled-password --gecos \"xorp\" xorp || true" >> preinst
 	echo "adduser xorp xorp || true" >> preinst
-	# I compile xorp on FC5, and it has a hard dependency on libpcap.0.9.4 and libcrypto.so.6
-	# Fake out the link here so that it will start OK.  This works on Ubuntu 8.0.4, no idea
-	# if it will work elsewhere. --Ben
-	#echo "if [ ! -f /usr/lib/libpcap.so.0.9.4 ]; then ln -s /usr/lib/libpcap.so.0.9.* /usr/lib/libpcap.so.0.9.4; fi" >> preinst
         # For Ubuntu 8.10, and compiling on FC8, we need a slightly different hack.
 	echo "if [ ! -f /usr/lib/libpcap.so.0.9 ]; then ln -s /usr/lib/libpcap.so.0.9.8 /usr/lib/libpcap.so.0.9; fi" >> preinst
 	echo "if [ ! -f /lib/libtinfo.so.5 ]; then ln -s /lib/libncurses.so.5 /lib/libtinfo.so.5; fi" >> preinst
 	echo "if [ ! -f /usr/lib/libcrypto.so.6 ]; then ln -s /usr/lib/libcrypto.so.0.9.* /usr/lib/libcrypto.so.6; fi" >> preinst
+	echo "exit 0" >> preinst
 	echo "#!/bin/bash" > postinst
 	echo "echo \"Xorp is installed in /usr/local/xorp.\"" >> postinst
 	echo "#!/bin/bash" > prerm
