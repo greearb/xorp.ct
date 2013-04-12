@@ -53,6 +53,7 @@ create_deb:
 	make -f Makefile.deb ARCH=${ARCH} deb
 	mv tmp/$(PACKAGE)_$(VERSION)_${ARCH}.deb ./
 	cp $(PACKAGE)_$(VERSION)_${ARCH}.deb /mnt/d2/pub/candela_cdrom.${LFVER}/debs/dists/candela/multiverse/binary-${ARCH}/
+	cp $(PACKAGE)_$(VERSION)_${ARCH}.deb /mnt/d2/pub/candela_cdrom.${LFVER}/
 	@echo ""
 	@echo "On an Ubuntu machine:"
 	@echo "cd /mnt/d2/pub/candela_cdrom.${LFVER}/debs/dists/candela/multiverse/binary-${ARCH}/"
@@ -61,12 +62,12 @@ create_deb:
 	@echo "apt-get install $(PACKAGE)"
 
 
-# This assumes a 'make' has already happened, and that make install will deposit files in /usr/local/xorp
-# This most likely will have to be run as root user.
+# This assumes a 'scons install' has already happened, and that properly installed
+# files in are in /usr/local/xorp
 ${PACKAGE_DIR}/data:
 	rm -rf $@
 	mkdir -p $@/usr/local/
-	(make install; cd /usr/local; find xorp -name "*" -print|xargs strip; \
+	(cd /usr/local; find xorp -name "*" -print|xargs strip; \
          tar -cvzf /tmp/xorp.tgz xorp)
 	(cd $@/usr/local; tar -xvzf /tmp/xorp.tgz)
 
