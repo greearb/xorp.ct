@@ -51,25 +51,23 @@ LogTable<A>::update_number() const
 
 template<typename A>
 int
-LogTable<A>::add_route(const IPRouteEntry<A>& 	route,
-		       RouteTable<A>* 		caller)
+LogTable<A>::add_route(const IPRouteEntry<A>& 	route)
 {
     _update_number++;
     RouteTable<A>* n = this->next_table();
     if (n != NULL) {
-	return n->add_route(route, caller);
+	return n->add_route(route);
     }
     return XORP_OK;
 }
 
 template<typename A>
 int
-LogTable<A>::delete_route(const IPRouteEntry<A>* route,
-			  RouteTable<A>* 	 caller)
+LogTable<A>::delete_route(const IPRouteEntry<A>* route)
 {
     RouteTable<A>* n = this->next_table();
     if (n != NULL) {
-	return n->delete_route(route, caller);
+	return n->delete_route(route);
     }
     _update_number++;
     return XORP_OK;
@@ -91,13 +89,9 @@ LogTable<A>::lookup_route(const A& addr) const
 
 template<typename A>
 void
-LogTable<A>::replumb(RouteTable<A>* old_parent,
-		     RouteTable<A>* new_parent)
+LogTable<A>::set_parent(RouteTable<A>* new_parent)
 {
-    XLOG_ASSERT(_parent == old_parent);
     _parent = new_parent;
-
-    // XXX _parent->set_next_table???
 }
 
 template<typename A>
@@ -129,27 +123,25 @@ OstreamLogTable<A>::OstreamLogTable(const string&	tablename,
 
 template <typename A>
 int
-OstreamLogTable<A>::add_route(const IPRouteEntry<A>& 	route,
-			      RouteTable<A>* 		caller)
+OstreamLogTable<A>::add_route(const IPRouteEntry<A>& 	route)
 {
     _o << this->update_number() << (const char*)(" Add: ") << route.str()
        << (const char*)(" Return: ");
-    int s = LogTable<A>::add_route(route, caller);
+    int s = LogTable<A>::add_route(route);
     _o << s << endl;
     return s;
 }
 
 template <typename A>
 int
-OstreamLogTable<A>::delete_route(const IPRouteEntry<A>* 	route,
-				 RouteTable<A>* 		caller)
+OstreamLogTable<A>::delete_route(const IPRouteEntry<A>* 	route)
 {
     if (route != NULL) {
 	_o << this->update_number() << (const char*)(" Delete: ") << route->str()
 	   << (const char*)(" Return: ");
     }
 
-    int s = LogTable<A>::delete_route(route, caller);
+    int s = LogTable<A>::delete_route(route);
 
     if (route != NULL) {
 	_o << s << endl;
@@ -182,13 +174,12 @@ XLogTraceTable<A>::XLogTraceTable(const string&	tablename,
 
 template <typename A>
 int
-XLogTraceTable<A>::add_route(const IPRouteEntry<A>& 	route,
-			      RouteTable<A>* 		caller)
+XLogTraceTable<A>::add_route(const IPRouteEntry<A>& 	route)
 {
     string msg = c_format("%u Add: %s Return: ",
 			  XORP_UINT_CAST(this->update_number()),
 			  route.str().c_str());
-    int s = LogTable<A>::add_route(route, caller);
+    int s = LogTable<A>::add_route(route);
     msg += c_format("%d\n", s);
     XLOG_TRACE(true, "%s", msg.c_str());
 
@@ -197,8 +188,7 @@ XLogTraceTable<A>::add_route(const IPRouteEntry<A>& 	route,
 
 template <typename A>
 int
-XLogTraceTable<A>::delete_route(const IPRouteEntry<A>* 	route,
-				RouteTable<A>* 		caller)
+XLogTraceTable<A>::delete_route(const IPRouteEntry<A>* 	route)
 {
     string msg;
 
@@ -208,7 +198,7 @@ XLogTraceTable<A>::delete_route(const IPRouteEntry<A>* 	route,
 		       route->str().c_str());
     }
 
-    int s = LogTable<A>::delete_route(route, caller);
+    int s = LogTable<A>::delete_route(route);
 
     if (route != NULL) {
 	msg += c_format("%d\n", s);
@@ -246,13 +236,12 @@ DebugMsgLogTable<A>::DebugMsgLogTable(const string&	tablename,
 
 template <typename A>
 int
-DebugMsgLogTable<A>::add_route(const IPRouteEntry<A>& 	route,
-			      RouteTable<A>* 		caller)
+DebugMsgLogTable<A>::add_route(const IPRouteEntry<A>& 	route)
 {
     string msg = c_format("%u Add: %s Return: ",
 			  XORP_UINT_CAST(this->update_number()),
 			  route.str().c_str());
-    int s = LogTable<A>::add_route(route, caller);
+    int s = LogTable<A>::add_route(route);
     msg += c_format("%d\n", s);
     debug_msg("%s", msg.c_str());
 
@@ -261,8 +250,7 @@ DebugMsgLogTable<A>::add_route(const IPRouteEntry<A>& 	route,
 
 template <typename A>
 int
-DebugMsgLogTable<A>::delete_route(const IPRouteEntry<A>* 	route,
-				RouteTable<A>* 		caller)
+DebugMsgLogTable<A>::delete_route(const IPRouteEntry<A>* 	route)
 {
     string msg;
 
@@ -272,7 +260,7 @@ DebugMsgLogTable<A>::delete_route(const IPRouteEntry<A>* 	route,
 		       route->str().c_str());
     }
 
-    int s = LogTable<A>::delete_route(route, caller);
+    int s = LogTable<A>::delete_route(route);
 
     if (route != NULL) {
 	msg += c_format("%d\n", s);

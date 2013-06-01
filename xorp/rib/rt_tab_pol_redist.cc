@@ -41,28 +41,22 @@ PolicyRedistTable<A>::PolicyRedistTable(RouteTable<A>* parent, XrlRouter& rtr,
 					PolicyRedistMap& rmap,
 					bool multicast)
     : RouteTable<A>(table_name),
-      _parent(parent),
       _xrl_router(rtr),
       _eventloop(_xrl_router.eventloop()),
       _redist_map(rmap),
       _redist_client(&_xrl_router),
       _multicast(multicast)
 {
-    if (_parent->next_table() != NULL) {
-        this->set_next_table(_parent->next_table());
-
-        this->next_table()->replumb(_parent, this);
+    if (parent->next_table() != NULL) {
+        this->set_next_table(parent->next_table());
     }
-    _parent->set_next_table(this);
+    parent->set_next_table(this);
 }
 
 template <class A>
-int
-PolicyRedistTable<A>::add_route(const IPRouteEntry<A>& route,
-				RouteTable<A>* caller)
+void
+PolicyRedistTable<A>::generic_add_route(const IPRouteEntry<A>& route)
 {
-    XLOG_ASSERT(caller == _parent);
-
     debug_msg("[RIB] PolicyRedistTable ADD ROUTE: %s\n",
 	      route.str().c_str());
 
@@ -73,19 +67,34 @@ PolicyRedistTable<A>::add_route(const IPRouteEntry<A>& route,
     // if there are any, then redistribute
     if (!protos.empty())
 	add_redist(route, protos);
-
-    RouteTable<A>* next = this->next_table();
-    XLOG_ASSERT(next != NULL);
-
-    return next->add_route(route, this);
 }
 
 template <class A>
 int
-PolicyRedistTable<A>::delete_route(const IPRouteEntry<A>* route,
-				   RouteTable<A>* caller)
+PolicyRedistTable<A>::add_igp_route(const IPRouteEntry<A>& route)
 {
-    XLOG_ASSERT(caller == _parent);
+    this->generic_add_route(route);
+
+    XLOG_ASSERT(this->next_table() != NULL);
+
+    return this->next_table()->add_igp_route(route);
+}
+
+template <class A>
+int
+PolicyRedistTable<A>::add_egp_route(const IPRouteEntry<A>& route)
+{
+    this->generic_add_route(route);
+
+    XLOG_ASSERT(this->next_table() != NULL);
+
+    return this->next_table()->add_egp_route(route);
+}
+
+template <class A>
+void
+PolicyRedistTable<A>::generic_delete_route(const IPRouteEntry<A>* route)
+{
     XLOG_ASSERT(route != NULL);
 
     debug_msg("[RIB] PolicyRedistTable DELETE ROUTE: %s\n",
@@ -98,53 +107,29 @@ PolicyRedistTable<A>::delete_route(const IPRouteEntry<A>* route,
     // if there are any, stop redistributing
     if (!protos.empty())
 	del_redist(*route, protos);
-
-    RouteTable<A>* next = this->next_table();
-    XLOG_ASSERT(next != NULL);
-
-    return next->delete_route(route, this);
 }
 
 template <class A>
-const IPRouteEntry<A>*
-PolicyRedistTable<A>::lookup_route(const IPNet<A>& net) const
+int
+PolicyRedistTable<A>::delete_igp_route(const IPRouteEntry<A>* route, bool b)
 {
-    XLOG_ASSERT(_parent != NULL);
+    this->generic_delete_route(route);
 
-    return _parent->lookup_route(net);
+    XLOG_ASSERT(this->next_table() != NULL);
+
+    return this->next_table()->delete_igp_route(route, b);
 }
-
 
 template <class A>
-const IPRouteEntry<A>*
-PolicyRedistTable<A>::lookup_route(const A& addr) const
+int
+PolicyRedistTable<A>::delete_egp_route(const IPRouteEntry<A>* route, bool b)
 {
-    XLOG_ASSERT(_parent != NULL);
+    this->generic_delete_route(route);
 
-    return _parent->lookup_route(addr);
+    XLOG_ASSERT(this->next_table() != NULL);
+
+    return this->next_table()->delete_egp_route(route, b);
 }
-
-
-template <class A>
-RouteRange<A>*
-PolicyRedistTable<A>::lookup_route_range(const A& addr) const
-{
-    XLOG_ASSERT(_parent != NULL);
-
-    return _parent->lookup_route_range(addr);
-}
-
-
-template <class A>
-void
-PolicyRedistTable<A>::replumb(RouteTable<A>* old_parent,
-			      RouteTable<A>* new_parent)
-{
-    XLOG_ASSERT(old_parent == _parent);
-
-    _parent = new_parent;
-}
-
 
 template <class A>
 string
@@ -153,7 +138,6 @@ PolicyRedistTable<A>::str() const
     ostringstream oss;
     oss << "------" << endl;
     oss << "PolicyRedistTable" << endl;
-    oss << "parent: " << const_cast<PolicyRedistTable<A>* >(this)->parent()->tablename() << endl;
     if (this->next_table())
 	oss << "next table: " << this->next_table()->tablename() << endl;
     else
@@ -230,11 +214,8 @@ PolicyRedistTable<A>::del_redist(const IPRouteEntry<A>& route,
 template <class A>
 void
 PolicyRedistTable<A>::replace_policytags(const IPRouteEntry<A>& route,
-					 const PolicyTags& prevtags,
-					 RouteTable<A>* caller)
+					 const PolicyTags& prevtags)
 {
-    XLOG_ASSERT(caller == _parent);
-
     set<string> del_protos;
     set<string> add_protos;
 

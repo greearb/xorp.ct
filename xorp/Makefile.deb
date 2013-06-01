@@ -18,8 +18,12 @@
 # These fields are used to build the control file.
 PACKAGE ?= lanforge-xorp
 VERSION = 1.8.6-WIP
-LFVER = 5.2.7
+LFVER = 5.2.9
 ARCH = i386
+OSVER         := $(shell uname -m)
+ifeq "${OSVER}" "x86_64"
+	ARCH = amd64
+endif
 SECTION = net
 PRIORITY = optional
 MAINTAINER = Ben Greear <greearb@candelatech.com>
@@ -31,16 +35,13 @@ PACKAGE_DIR ?= tmp
 create_deb:
 	echo "#!/bin/bash" > preinst
 	echo "set -x" >> preinst
-	echo "adduser xorp || true" >> preinst
+	echo "adduser --disabled-password --gecos \"xorp\" xorp || true" >> preinst
 	echo "adduser xorp xorp || true" >> preinst
-	# I compile xorp on FC5, and it has a hard dependency on libpcap.0.9.4 and libcrypto.so.6
-	# Fake out the link here so that it will start OK.  This works on Ubuntu 8.0.4, no idea
-	# if it will work elsewhere. --Ben
-	#echo "if [ ! -f /usr/lib/libpcap.so.0.9.4 ]; then ln -s /usr/lib/libpcap.so.0.9.* /usr/lib/libpcap.so.0.9.4; fi" >> preinst
         # For Ubuntu 8.10, and compiling on FC8, we need a slightly different hack.
 	echo "if [ ! -f /usr/lib/libpcap.so.0.9 ]; then ln -s /usr/lib/libpcap.so.0.9.8 /usr/lib/libpcap.so.0.9; fi" >> preinst
 	echo "if [ ! -f /lib/libtinfo.so.5 ]; then ln -s /lib/libncurses.so.5 /lib/libtinfo.so.5; fi" >> preinst
 	echo "if [ ! -f /usr/lib/libcrypto.so.6 ]; then ln -s /usr/lib/libcrypto.so.0.9.* /usr/lib/libcrypto.so.6; fi" >> preinst
+	echo "exit 0" >> preinst
 	echo "#!/bin/bash" > postinst
 	echo "echo \"Xorp is installed in /usr/local/xorp.\"" >> postinst
 	echo "#!/bin/bash" > prerm
@@ -49,23 +50,24 @@ create_deb:
 	echo "More information:  http://www.xorp.org" >> description.txt
 	chmod a+x preinst prerm postinst
 	make -f Makefile.deb clobber
-	make -f Makefile.deb ARCH=i386 deb
-	mv tmp/$(PACKAGE)_$(VERSION)_i386.deb ./
-	cp $(PACKAGE)_$(VERSION)_i386.deb /mnt/d2/pub/candela_cdrom.${LFVER}/debs/dists/candela/multiverse/binary-i386/
+	make -f Makefile.deb ARCH=${ARCH} deb
+	mv tmp/$(PACKAGE)_$(VERSION)_${ARCH}.deb ./
+	cp $(PACKAGE)_$(VERSION)_${ARCH}.deb /mnt/d2/pub/candela_cdrom.${LFVER}/debs/dists/candela/multiverse/binary-${ARCH}/
+	cp $(PACKAGE)_$(VERSION)_${ARCH}.deb /mnt/d2/pub/candela_cdrom.${LFVER}/
 	@echo ""
-	@echo "On a Ubunto machine:"
-	@echo "cd /mnt/d2/pub/candela_cdrom.${LFVER}/debs"
-	@echo "dpkg-scanpackages . /dev/null | gzip -9c > dists/candela/multiverse/binary-i386/Packages.gz"
+	@echo "On an Ubuntu machine:"
+	@echo "cd /mnt/d2/pub/candela_cdrom.${LFVER}/debs/dists/candela/multiverse/binary-${ARCH}/"
+	@echo "dpkg-scanpackages . /dev/null | gzip -9c > Packages.gz"
 	@echo "apt-get update"
 	@echo "apt-get install $(PACKAGE)"
 
 
-# This assumes a 'make' has already happened, and that make install will deposit files in /usr/local/xorp
-# This most likely will have to be run as root user.
+# This assumes a 'scons install' has already happened, and that properly installed
+# files in are in /usr/local/xorp
 ${PACKAGE_DIR}/data:
 	rm -rf $@
 	mkdir -p $@/usr/local/
-	(make install; cd /usr/local; find xorp -name "*" -print|xargs strip; \
+	(cd /usr/local; find xorp -name "*" -print|xargs strip; \
          tar -cvzf /tmp/xorp.tgz xorp)
 	(cd $@/usr/local; tar -xvzf /tmp/xorp.tgz)
 

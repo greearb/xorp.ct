@@ -28,11 +28,10 @@
 #include "protocol.hh"
 
 
-Protocol::Protocol(const string& name, ProtocolType protocol_type,
-		   uint32_t genid)
+Protocol::Protocol(const string& name, ProtocolType protocol_type)
     : _name(name),
       _protocol_type(protocol_type),
-      _genid(genid)
+      _genid(0)
 {
 
 }

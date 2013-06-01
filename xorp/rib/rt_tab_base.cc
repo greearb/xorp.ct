@@ -43,12 +43,10 @@ RouteTable<A>::set_next_table(RouteTable<A>* next_table)
 template <typename A>
 void
 RouteTable<A>::replace_policytags(const IPRouteEntry<A>& route,
-				  const PolicyTags& prevtags,
-				  RouteTable* caller)
+				  const PolicyTags& prevtags)
 {
     XLOG_ASSERT(_next_table);
-    UNUSED(caller);
-    _next_table->replace_policytags(route, prevtags, this);
+    _next_table->replace_policytags(route, prevtags);
 }
 
 

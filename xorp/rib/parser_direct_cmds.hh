@@ -36,7 +36,7 @@ public:
 	// On the context of this test code, we don't care whether it's an
 	// IGP or an EGP, because we do the plumbing explicitly.  So it's
 	// safe to just say it's an IGP, even if its not.
-	return _rib.new_origin_table(_tablename, "", "", _admin_distance, IGP);
+	return _rib.new_origin_table<IGP>(_tablename, "", "", _admin_distance);
     }
 private:
     RIB<IPv4>& _rib;

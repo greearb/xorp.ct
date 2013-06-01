@@ -78,6 +78,14 @@ public:
     const IPRouteEntry<A>* route() const	{ return _route;	}
     const IPNet<A>& net() const			{ return _route->net();	}
 
+    string str() const	{
+	ostringstream oss;
+	oss << "RouteRange: " << endl;
+	oss << "Top - " << _top.str() << endl;
+	oss << "Bottom - " << _bottom.str() << endl;
+	return oss.str();
+    }
+
     /**
      * Merge this entry with another entry.
      *
@@ -157,25 +165,15 @@ public:
     RouteTable(const string& name) : _tablename(name), _next_table(NULL) {}
     virtual ~RouteTable();
 
-    virtual int add_route(const IPRouteEntry<A>& route,
-			  RouteTable*		 caller) = 0;
+    virtual int add_igp_route(const IPRouteEntry<A>& route) = 0;
+    virtual int add_egp_route(const IPRouteEntry<A>& route) = 0;
 
-    virtual int delete_route(const IPRouteEntry<A>* route,
-			     RouteTable*	    caller) = 0;
-
-    virtual const IPRouteEntry<A>* lookup_route(const IPNet<A>& net) const = 0;
-
-    virtual const IPRouteEntry<A>* lookup_route(const A& addr) const = 0;
-
-    virtual RouteRange<A>* lookup_route_range(const A& addr) const = 0;
+    virtual int delete_igp_route(const IPRouteEntry<A>* route, bool b = false) = 0;
+    virtual int delete_egp_route(const IPRouteEntry<A>* route, bool b = false) = 0;
 
     virtual void set_next_table(RouteTable* next_table);
 
-    // parent is only supposed to be called on single-parent tables
-    virtual RouteTable* parent() { XLOG_UNREACHABLE(); return NULL; }
-
     virtual TableType type() const = 0;
-    virtual void replumb(RouteTable* old_parent, RouteTable* new_parent) = 0;
     virtual string str() const = 0;
     virtual void flush() {}
 
@@ -185,8 +183,7 @@ public:
 
     // this call should be received and dealt with by the PolicyRedistTable.
     virtual void replace_policytags(const IPRouteEntry<A>& route,
-				    const PolicyTags& prevtags,
-				    RouteTable* caller);
+				    const PolicyTags& prevtags);
 
 protected:
     void set_tablename(const string& s) { _tablename = s; }

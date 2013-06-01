@@ -25,6 +25,8 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 
+#include "protocol.hh"
+
 #include "rt_tab_origin.hh"
 #include "rt_tab_deletion.hh"
 
@@ -34,19 +36,16 @@
 //
 template<class A>
 OriginTable<A>::OriginTable(const string&	tablename,
-			    uint32_t		admin_distance,
-			    ProtocolType	protocol_type,
+			    uint16_t		admin_distance,
 			    EventLoop&		eventloop)
     : RouteTable<A>(tablename),
       _admin_distance(admin_distance),
-      _protocol_type(protocol_type),
       _eventloop(eventloop),
       _gen(0)
 {
     XLOG_ASSERT(admin_distance <= 255);
-    XLOG_ASSERT((protocol_type == IGP) || (protocol_type == EGP));
 
-    _ip_route_table = new Trie<A, const IPRouteEntry<A>* >();
+    _ip_route_table = new RouteTrie();
     _gen++;
 }
 
@@ -64,48 +63,27 @@ int
 OriginTable<A>::add_route(IPRouteEntry<A>* route)
 {
     debug_msg("OT[%s]: Adding route %s\n", this->tablename().c_str(),
-	      route->str().c_str());
+	    route->str().c_str());
 
-    if (lookup_route(route->net()) != NULL) {
-	delete route;
+    if (lookup_ip_route(route->net()) != NULL) {
+	delete (route);
 	return XORP_ERROR;
     }
 
     route->set_admin_distance(_admin_distance);
 
-    // Now add the route to this table
-#ifdef DEBUG_LOGGING
-    debug_msg("BEFORE:\n");
-    _ip_route_table->print();
-#endif
-
     _ip_route_table->insert(route->net(), route);
 
-
-
-
     // Propagate to next table
-    if (this->next_table() != NULL)
-	this->next_table()->add_route(*route, this);
+    XLOG_ASSERT(this->next_table() != NULL);
+    this->generic_add_route(*route);
 
-#ifdef DEBUG_LOGGING
-    debug_msg("AFTER:\n");
-    _ip_route_table->print();
-#endif
     return XORP_OK;
 }
 
 template<class A>
 int
-OriginTable<A>::add_route(const IPRouteEntry<A>&, RouteTable<A>*)
-{
-    XLOG_UNREACHABLE();
-    return XORP_ERROR;
-}
-
-template<class A>
-int
-OriginTable<A>::delete_route(const IPNet<A>& net)
+OriginTable<A>::delete_route(const IPNet<A>& net, bool b)
 {
     debug_msg("OT[%s]: Deleting route %s\n", this->tablename().c_str(),
 	   net.str().c_str());
@@ -113,14 +91,14 @@ OriginTable<A>::delete_route(const IPNet<A>& net)
     _ip_route_table->print();
 #endif
 
-    typename Trie<A, const IPRouteEntry<A>* >::iterator iter;
+    typename RouteTrie::iterator iter;
     iter = _ip_route_table->lookup_node(net);
     if (iter != _ip_route_table->end()) {
 	const IPRouteEntry<A>* found = *iter;
 	_ip_route_table->erase(net);
 	// Propagate to next table
-	if (this->next_table() != NULL)
-	    this->next_table()->delete_route(found, this);
+	XLOG_ASSERT(this->next_table() != NULL);
+	this->generic_delete_route(found, b);
 
 	// Finally we're done, and can cleanup
 	delete found;
@@ -132,18 +110,10 @@ OriginTable<A>::delete_route(const IPNet<A>& net)
 }
 
 template<class A>
-int
-OriginTable<A>::delete_route(const IPRouteEntry<A>*, RouteTable<A>*)
-{
-    XLOG_UNREACHABLE();
-    return XORP_ERROR;
-}
-
-template<class A>
 void
 OriginTable<A>::delete_all_routes()
 {
-    typename Trie<A, const IPRouteEntry<A>* >::iterator iter;
+    typename RouteTrie::iterator iter;
     for (iter = _ip_route_table->begin();
 	 iter != _ip_route_table->end();
 	 ++iter) {
@@ -162,67 +132,40 @@ OriginTable<A>::routing_protocol_shutdown()
     // upstream tables to query whether trie has changed.
     //
 
-    Trie<A, const IPRouteEntry<A>* >* old_ip_route_table = _ip_route_table;
-    _ip_route_table = new Trie<A, const IPRouteEntry<A>* >();
+    RouteTrie* old_ip_route_table = _ip_route_table;
+    _ip_route_table = new RouteTrie();
 
     //
     // Pass our entire routing table into a DeletionTable, which will
     // handle the background deletion task.  The DeletionTable will
     // plumb itself in.
     //
-    new DeletionTable<A>("Delete(" + this->tablename() + ")",
-			 this, old_ip_route_table, _eventloop);
+    this->allocate_deletion_table(old_ip_route_table);
 }
 
 template<class A>
 const IPRouteEntry<A>*
-OriginTable<A>::lookup_route(const IPNet<A>& net) const
+OriginTable<A>::lookup_ip_route(const IPNet<A>& net) const
 {
     debug_msg("------------------\nlookup_route in table %s\n",
 	this->tablename().c_str());
     debug_msg("OriginTable: Looking up route %s\n", net.str().c_str());
-    typename Trie<A, const IPRouteEntry<A>* >::iterator iter;
-    iter = _ip_route_table->lookup_node(net);
+    typename RouteTrie::iterator iter = _ip_route_table->lookup_node(net);
     return (iter == _ip_route_table->end()) ? NULL : *iter;
 }
 
 template<class A>
 const IPRouteEntry<A>*
-OriginTable<A>::lookup_route(const A& addr) const
+OriginTable<A>::lookup_ip_route(const A& addr) const
 {
     debug_msg("------------------\nlookup_route in table %s\n",
 	this->tablename().c_str());
     debug_msg("OriginTable (%u): Looking up route for addr %s\n",
 	      XORP_UINT_CAST(_admin_distance), addr.str().c_str());
 
-    typename Trie<A, const IPRouteEntry<A>* >::iterator iter;
-    iter = _ip_route_table->find(addr);
-    if (iter == _ip_route_table->end()) {
-	debug_msg("No match found\n");
-    }
+    typename RouteTrie::iterator iter = _ip_route_table->find(addr);
+
     return (iter == _ip_route_table->end()) ? NULL : *iter;
-}
-
-template<class A>
-RouteRange<A>*
-OriginTable<A>::lookup_route_range(const A& addr) const
-{
-    const IPRouteEntry<A>* route;
-    typename Trie<A, const IPRouteEntry<A>* >::iterator iter;
-    iter = _ip_route_table->find(addr);
-
-    route = (iter == _ip_route_table->end()) ? NULL : *iter;
-
-    A bottom_addr, top_addr;
-    _ip_route_table->find_bounds(addr, bottom_addr, top_addr);
-    RouteRange<A>* rr = new RouteRange<A>(addr, route, top_addr, bottom_addr);
-    debug_msg("Origin Table: %s returning lower bound for %s of %s\n",
-	      this->tablename().c_str(), addr.str().c_str(),
-	      bottom_addr.str().c_str());
-    debug_msg("Origin Table: %s returning upper bound for %s of %s\n",
-	      this->tablename().c_str(), addr.str().c_str(),
-	      top_addr.str().c_str());
-    return rr;
 }
 
 template<class A>
@@ -232,7 +175,7 @@ OriginTable<A>::str() const
     string s;
 
     s = "-------\nOriginTable: " + this->tablename() + "\n" +
-    	( _protocol_type == IGP ? "IGP\n" : "EGP\n" ) ;
+	( this->protocol_type() == IGP ? "IGP\n" : "EGP\n" ) ;
     if (this->next_table() == NULL)
 	s += "no next table\n";
     else
@@ -240,8 +183,29 @@ OriginTable<A>::str() const
     return s;
 }
 
+template <class A>
+void
+TypedOriginTable<A, IGP>::allocate_deletion_table(typename OriginTable<A>::RouteTrie* ip_route_trie)
+{
+    new TypedDeletionTable<A, IGP>("Delete(" + this->tablename() + ")", this,
+	    ip_route_trie, this->_eventloop);
+}
+
+template <class A>
+void
+TypedOriginTable<A, EGP>::allocate_deletion_table(typename OriginTable<A>::RouteTrie* ip_route_trie)
+{
+    new TypedDeletionTable<A, EGP>("Delete(" + this->tablename() + ")", this,
+	    ip_route_trie, this->_eventloop);
+}
+
 template class OriginTable<IPv4>;
 typedef OriginTable<IPv4> IPv4OriginTable;
 
 template class OriginTable<IPv6>;
 typedef OriginTable<IPv6> IPv6OriginTable;
+
+template class TypedOriginTable<IPv4, IGP>;
+template class TypedOriginTable<IPv4, EGP>;
+template class TypedOriginTable<IPv6, IGP>;
+template class TypedOriginTable<IPv6, EGP>;

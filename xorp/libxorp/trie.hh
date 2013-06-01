@@ -244,6 +244,8 @@ public:
 		lo = x->high(); ++lo;
 		hi = n->_right->low(); --hi;
 	    } else if (a <= n->_right->_k.top_addr()) {	// case 4:
+		if (n->_left && a > n->_left->_k.top_addr())
+		    lo = n->_left->high(); ++lo;
 		n = n->_right; // and continue
 	    } else {					// case 5:
 		lo = n->_right->high(); ++lo;
@@ -384,6 +386,10 @@ public:
 	return (_cur == x._cur);
     }
 
+    bool operator!=(const TriePostOrderIterator & x) const {
+	return (_cur != x._cur);
+    }
+
     bool has_payload() const		{ return _cur->has_payload(); }
     Payload & payload()			{ return _cur->p(); };
     const Payload & payload() const	{ return _cur->p(); };
@@ -483,6 +489,10 @@ public:
 	return (_cur == x._cur);
     }
 
+    bool operator!=(const TriePreOrderIterator & x) const {
+	return (_cur != x._cur);
+    }
+
     bool has_payload() const		{ return _cur->has_payload(); }
     Payload & payload()			{ return _cur->p(); };
     const Payload & payload() const	{ return _cur->p(); };
@@ -532,11 +542,14 @@ public:
     iterator insert(const Key & net, const Payload& p) {
 	bool replaced = false;
 	Node *out = Node::insert(&_root, net, p, replaced);
-	if (replaced) {
-	    fprintf(stderr, "overwriting a full node"); //XXX
-	} else {
+	if (!replaced) {
 	    _payload_count++;
 	}
+#ifdef DEBUG_LOGGING
+	else {
+	    fprintf(stderr, "overwriting a full node"); //XXX
+	}
+#endif
 	return iterator(out);
     }
 
@@ -661,7 +674,8 @@ public:
     }
 
 #endif // compatibility
-    int route_count() const			{ return _payload_count; }
+    int route_count() const			{ return static_cast<int>(_payload_count); }
+    size_t size() const				{ return _payload_count; }
 
     bool empty() const				{ return (_payload_count == 0); }
 
@@ -674,7 +688,7 @@ private:
     }
 
     Node	*_root;
-    int		_payload_count;
+    size_t	_payload_count;
 };
 
 
@@ -853,13 +867,13 @@ TrieNode<A, Payload>::erase()
  * that contains the desired key and has a Payload
  */
 template <class A, class Payload>
-TrieNode<A, Payload> *
+inline TrieNode<A, Payload> *
 TrieNode<A,Payload>::find(const Key &key)
 {
     TrieNode * cand = NULL;
     TrieNode * r = this;
 
-    for ( ; r && r->_k.contains(key) ; ) {
+    while(r && r->_k.contains(key)) {
 	if (r->_p)
 	    cand = r;		// we have a candidate.
 	if (r->_left && r->_left->_k.contains(key))
@@ -930,13 +944,24 @@ TrieNode<A,Payload>::find_subtree(const Key &key)
     TrieNode *cand = r && key.contains(r->_k) ? r : NULL;
 
     for ( ; r && r->_k.contains(key) ; ) {
-	if (key.contains(r->_k))
-	    cand = r;		// we have a candidate.
+	if (key.contains(r->_k)) {
+	    cand = r;			// we have a candidate.
+	    break;			// and we don't need to search any more!
+	}
 	if (r->_left && r->_left->_k.contains(key))
 	    r = r->_left;
-	else			// should check that right contains(key), but
-	    r = r->_right;	// the loop condition will do it for us.
+	else if (r->_right && r->_right->_k.contains(key))
+	    r = r->_right;
+	else if (r->_left && key.contains(r->_left->_k)) {
+	    cand = r->_left;
+	    break;
+	} else if (r->_right && key.contains(r->_right->_k)) {
+	    cand = r->_right;
+	    break;
+	} else
+	    break;
     }
+
     return cand;
 }
 

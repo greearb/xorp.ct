@@ -194,7 +194,7 @@ Redistributor<A>::dump_a_route()
     }
 
     // Lookup route and announce it via output
-    const IPRouteEntry<A>* ipr = _table->lookup_route(*ci);
+    const IPRouteEntry<A>* ipr = _table->lookup_ip_route(*ci);
     XLOG_ASSERT(ipr != 0);
     if (policy_accepts(*ipr))
 	_output->add_route(*ipr);
@@ -345,13 +345,12 @@ Redistributor<A>::OutputEventInterface::fatal_error()
 template <typename A>
 RedistTable<A>::RedistTable(const string& tablename,
 			    RouteTable<A>* parent)
-    : RouteTable<A>(tablename), _parent(parent)
+    : RouteTable<A>(tablename)
 {
-    if (_parent->next_table()) {
-	this->set_next_table(_parent->next_table());
-	this->next_table()->replumb(_parent, this);
+    if (parent->next_table()) {
+	this->set_next_table(parent->next_table());
     }
-    _parent->set_next_table(this);
+    parent->set_next_table(this);
 }
 
 template <typename A>
@@ -384,6 +383,14 @@ RedistTable<A>::remove_redistributor(Redistributor<A>* r)
 }
 
 template <typename A>
+const IPRouteEntry<A>*
+RedistTable<A>::lookup_ip_route(const IPNet<A>& net) const
+{
+    typename IPRouteTrie::iterator iter = _ip_route_table.lookup_node(net);
+    return (iter == _ip_route_table.end()) ? NULL : *iter;
+}
+
+template <typename A>
 Redistributor<A>*
 RedistTable<A>::redistributor(const string& name)
 {
@@ -398,15 +405,13 @@ RedistTable<A>::redistributor(const string& name)
 }
 
 template <typename A>
-int
-RedistTable<A>::add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller)
+void
+RedistTable<A>::generic_add_route(const IPRouteEntry<A>& route)
 {
-    XLOG_ASSERT(caller == _parent);
-
-    typename RouteIndex::iterator rci = _rt_index.find(route.net());
-    XLOG_ASSERT(rci == _rt_index.end());
+    XLOG_ASSERT(_rt_index.find(route.net()) == _rt_index.end());
 
     _rt_index.insert(route.net());
+    _ip_route_table.insert(route.net(), &route);
 
     typename list<Redistributor<A>*>::iterator i = _outputs.begin();
     while (i != _outputs.end()) {
@@ -414,24 +419,37 @@ RedistTable<A>::add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller)
 	i++;	// XXX for safety increment iterator before prodding output
 	r->redist_event().did_add(route);
     }
+}
+
+template <typename A>
+int
+RedistTable<A>::add_igp_route(const IPRouteEntry<A>& route)
+{
+    this->generic_add_route(route);
 
     if (this->next_table())
-	return this->next_table()->add_route(route, this);
+	return this->next_table()->add_igp_route(route);
     return XORP_OK;
 }
 
 template <typename A>
 int
-RedistTable<A>::delete_route(const IPRouteEntry<A>* r,
-			     RouteTable<A>* caller)
+RedistTable<A>::add_egp_route(const IPRouteEntry<A>& route)
 {
-    XLOG_ASSERT(caller == _parent);
+    this->generic_add_route(route);
 
-    const IPRouteEntry<A>& route = *r;
+    if (this->next_table())
+	return this->next_table()->add_egp_route(route);
+    return XORP_OK;
+}
 
-    debug_msg("delete_route for %s\n", route.net().str().c_str());
+template <typename A>
+void
+RedistTable<A>::generic_delete_route(const IPRouteEntry<A>* route)
+{
+    debug_msg("delete_route for %s\n", route->net().str().c_str());
 
-    typename RouteIndex::iterator rci = _rt_index.find(route.net());
+    typename RouteIndex::iterator rci = _rt_index.find(route->net());
     XLOG_ASSERT(rci != _rt_index.end());
 
     typename list<Redistributor<A>*>::iterator i;
@@ -441,21 +459,41 @@ RedistTable<A>::delete_route(const IPRouteEntry<A>* r,
     while (i != _outputs.end()) {
 	Redistributor<A>* r = *i;
 	i++;	// XXX for safety increment iterator before prodding output
-	r->redist_event().will_delete(route);
+	r->redist_event().will_delete(*route);
     }
 
     _rt_index.erase(rci);
+    _ip_route_table.erase(route->net());
 
     // Announce delete as fait accompli
     i = _outputs.begin();
     while (i != _outputs.end()) {
 	Redistributor<A>* r = *i;
 	i++;	// XXX for safety increment iterator before prodding output
-	r->redist_event().did_delete(route);
+	r->redist_event().did_delete(*route);
     }
+}
+
+template <typename A>
+int
+RedistTable<A>::delete_igp_route(const IPRouteEntry<A>* r, bool b)
+{
+    this->generic_delete_route(r);
 
     if (this->next_table())
-	return this->next_table()->delete_route(r, this);
+	return this->next_table()->delete_igp_route(r, b);
+
+    return XORP_OK;
+}
+
+template <typename A>
+int
+RedistTable<A>::delete_egp_route(const IPRouteEntry<A>* r, bool b)
+{
+    this->generic_delete_route(r);
+
+    if (this->next_table())
+	return this->next_table()->delete_egp_route(r, b);
 
     return XORP_OK;
 }
@@ -463,35 +501,6 @@ RedistTable<A>::delete_route(const IPRouteEntry<A>* r,
 
 // ----------------------------------------------------------------------------
 // Standard RouteTable methods, RedistTable punts everything to parent.
-
-template <typename A>
-const IPRouteEntry<A>*
-RedistTable<A>::lookup_route(const IPNet<A>& net) const
-{
-    return _parent->lookup_route(net);
-}
-
-template <typename A>
-const IPRouteEntry<A>*
-RedistTable<A>::lookup_route(const A& addr) const
-{
-    return _parent->lookup_route(addr);
-}
-
-template <typename A>
-RouteRange<A>*
-RedistTable<A>::lookup_route_range(const A& addr) const
-{
-    return _parent->lookup_route_range(addr);
-}
-
-template <typename A>
-void
-RedistTable<A>::replumb(RouteTable<A>* old_parent, RouteTable<A>* new_parent)
-{
-    XLOG_ASSERT(old_parent == _parent);
-    _parent = new_parent;
-}
 
 template <typename A>
 string

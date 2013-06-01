@@ -27,7 +27,7 @@
 
 #include "libxorp/debug.h"
 
-#include "rt_tab_base.hh"
+#include "rt_tab_extint.hh"
 
 
 class RegisterServer;
@@ -288,68 +288,18 @@ public:
      */
     ~RegisterTable();
 
-    /**
-     * Add a new route to the RIB.  This will be propagated downstream
-     * to the next table, but may also cause the RegisterTable to
-     * invalidate a RouteRegister because the new route overlaps an
-     * existing registration.
-     *
-     * @param route the new route.
-     * @param caller this must be this table's parent table.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller);
+    int add_igp_route(const IPRouteEntry<A>& route);
+    int add_egp_route(const IPRouteEntry<A>& route);
 
-    /**
-     * Delete a route from the RIB.  This will be propagated
-     * downstream to the next table, but may also cause the
-     * RegisterTable to invalidate a RouteRegister referencing this
-     * route.
-     *
-     * @param route the route being deleted.
-     * @param caller this must be this table's parent table.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int delete_route(const IPRouteEntry<A>* route, RouteTable<A>* caller);
-
-    /**
-     * Lookup a route in the RIB.  This request will be propagated to
-     * the parent table unchanged.
-     */
-    const IPRouteEntry<A>* lookup_route(const IPNet<A>& net) const {
-	    return _parent->lookup_route(net);
-    }
-
-    /**
-     * Lookup a route in the RIB.  This request will be propagated to
-     * the parent table unchanged.
-     */
-    const IPRouteEntry<A>* lookup_route(const A& addr) const {
-	    return _parent->lookup_route(addr);
-    }
+    int delete_igp_route(const IPRouteEntry<A>* route, bool);
+    int delete_egp_route(const IPRouteEntry<A>* route, bool);
 
     /**
      * Lookup a route_range in the RIB.  This request will be
      * propagated to the parent table unchanged.  It is not expected
      * this will be called, but not prohibited.
      */
-    RouteRange<A>* lookup_route_range(const A& addr) const {
-	    return _parent->lookup_route_range(addr);
-    }
-
-    /**
-     * Replumb to replace the old parent of this table with a new parent.
-     *
-     * @param old_parent the parent RouteTable being replaced (must be
-     * the same as the existing parent).
-     * @param new_parent the new parent RouteTable.
-     */
-    void replumb(RouteTable<A>* old_parent, RouteTable<A>* new_parent);
-
-    /**
-     * @return the parent @ref RouteTable of this RegisterTable.
-     */
-    RouteTable<A>* parent()			{ return _parent;	}
+    RouteRange<A>* lookup_route_range(const A& addr) const { return _parent->lookup_route_range(addr); }
 
     /**
      * @return this RegisterTable as a string for debugging purposes.
@@ -360,7 +310,9 @@ public:
      * Print the contents of this RegisterTable as a string for
      * debugging purposes.
      */
+#ifdef DEBUG_LOGGING
     void print();
+#endif
 
     // Stuff specific to a Register Table
 
@@ -397,6 +349,8 @@ public:
      */
     TableType type() const	{ return REGISTER_TABLE; }
 
+    void set_parent(ExtIntTable<A>* new_parent);
+
     /**
      * Cause the register server to push out queued changes to the
      * routing protocols.
@@ -416,9 +370,27 @@ private:
     void notify_route_changed(typename Trie<A, RouteRegister<A>* >::iterator trie_iter,
 			      const IPRouteEntry<A>& changed_route);
 
+    /**
+     * Invalidate a RouteRegister referencing this
+     * route.
+     *
+     * @param route the new route.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    void generic_add_route(const IPRouteEntry<A>& route);
+
+    /**
+     * Invalidate a RouteRegister referencing this
+     * route.
+     *
+     * @param route the route being deleted.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    void generic_delete_route(const IPRouteEntry<A>* route);
+
     map<string, ModuleData>		_module_names;
     Trie<A, RouteRegister<A>* >		_ipregistry;
-    RouteTable<A>*			_parent;
+    ExtIntTable<A>*			_parent;
     RegisterServer&			_register_server;
     bool				_multicast;  // true if a multicast rib
 };
