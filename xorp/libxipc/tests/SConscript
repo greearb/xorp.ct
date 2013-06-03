@@ -15,7 +15,6 @@
 # XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 # http://xorp.net
 
-# $XORP$
 
 import os
 Import("env")
@@ -48,6 +47,12 @@ env.AppendUnique(LIBS = [
     'libxst_test_xrls',
     'libxif_test_xrls',
     ])
+
+if not is_shared:
+    if not (env.has_key('mingw') and env['mingw']):
+        env.AppendUnique(LIBS = [
+            "rt",
+            ])
 
 # Missing:
 # test_finder_deaths.sh
