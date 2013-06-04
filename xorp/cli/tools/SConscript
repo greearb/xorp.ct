@@ -50,8 +50,12 @@ if (env.has_key('mingw') and env['mingw']):
     env.AppendUnique(LIBS = [ 'winmm' ])
 
 if not is_shared:
+    if not (env.has_key('mingw') and env['mingw']):
+        env.AppendUnique(LIBS = [
+            "rt",
+        ])
+
     env.AppendUnique(LIBS = [
-        "rt",
         "crypto",
         ])
 
