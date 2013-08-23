@@ -11,3 +11,4 @@ Several environment variables affect xorp:
 ^ XORP_FINDER_SERVER_PORT | Determines where xorp xrl finder logic listens. |
 ^ XORP_RIB_STATIC_DISTANCE | Configure distance for static routes. |
 ^ XORP_FINDER_CONNECT_TIMEOUT_MS | How long to wait for connection to finder.  When running under valgrind or with mis-configured 'winbind' or similar slow situation, you may need to set this to a large value to over-ride the defaults. |
+^ XORP_USE_RRAS | Specific for Windows. Set only, if You planning use XORP feature "xorprtm dll" / "RTMv2" on computer with RRAS and installed and configured "xorprtm4.dll" and( or) "xorprtm6.dll". See more info in source code directory "xorp/contrib/xorprtm". |
