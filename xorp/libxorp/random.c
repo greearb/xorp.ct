@@ -380,15 +380,12 @@ xorp_srandomdev()
 		 */
 #else
 		struct timeval tv;
-		unsigned long junk = 0;
-		unsigned long junk_seed[2];
-
-		/*
-		 * XXX: We need "junk_seed" to set the "junk" value to avoid
-		 * compiler warning about using an uninitialized variable.
-		 */
-		memset(&junk_seed[0], 0, sizeof(junk_seed[0]));
-		junk = junk_seed[1];
+		unsigned long junk;
+		// Newer compilers don't like reading un-initialized values..and I'm not
+		// sure how random that is to begin with.  Use a heap address instead.
+		void* mbuf = malloc(1);
+		junk = (unsigned long)(mbuf);
+		free(mbuf);
 		gettimeofday(&tv, NULL);
 		xorp_srandom((getpid() << 16) ^ tv.tv_sec ^ tv.tv_usec ^ junk);
 #endif
