@@ -25,7 +25,9 @@ cp xorp_install.bash /usr/local/xorp/
 chmod a+x /usr/local/xorp/xorp_install.bash
 
 PWD=$(pwd)
-userdir=$(expr match "$PWD" '\(/home/[0-Z]*/\).*')
+# The line below will not work on Fedora 19, maybe elsewhere.
+#userdir=$(expr match "$PWD" '\(/home/[0-Z]*/\).*')
+[[ $PWD =~ (/home/[0-Z]*/).* ]] && userdir=${BASH_REMATCH[1]}
 
 if [ "_$userdir" == "_" ]
 then
