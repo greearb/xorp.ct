@@ -28,6 +28,11 @@ SConscript(dirs = subdirs, exports='env')
 
 env = env.Clone()
 
+# Fedora 19 has broken-ish lex...work around it for now.
+env.AppendUnique(CCFLAGS = [
+    '-Wno-sign-compare',
+    ])
+
 env.AppendUnique(CPPPATH = [
 	'.',
 	'$BUILDDIR',
