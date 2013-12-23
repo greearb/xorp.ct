@@ -81,7 +81,6 @@ private:
 	    _rtmo.receive_data(buffer);
 	}
     private:
-	int _af;
     	FibConfigTableObserverRtmV2& _rtmo;
     };
 
