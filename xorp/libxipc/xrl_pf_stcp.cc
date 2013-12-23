@@ -586,7 +586,7 @@ public:
 		 uint32_t	  sn,
 		 const Xrl&	  x,
 		 const Callback&  cb)
-	: _p(p), _sn(sn), _b(_buffer), _cb(cb), _keepalive(false)
+	: _p(p), _sn(sn), _b(_buffer), _cb(cb)
     {
 	size_t header_bytes = STCPPacketHeader::header_size();
 	size_t xrl_bytes = x.packed_bytes();
@@ -609,7 +609,7 @@ public:
     }
 
     RequestState(XrlPFSTCPSender* p, uint32_t sn)
-	: _p(p), _sn(sn), _b(_buffer), _keepalive(true)
+	: _p(p), _sn(sn), _b(_buffer)
     {
 	size_t header_bytes = STCPPacketHeader::header_size();
 
