@@ -60,7 +60,7 @@ def parse_cpp_hash(line):
     if p:
         groups = p.groups()
         line, file, flag = groups
-        if flag == '':
+        if flag == '' or flag == '3':
             flag = "1"
     else:
 	return 0
