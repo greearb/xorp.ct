@@ -163,8 +163,6 @@ private:
      */
     int ifmgr_shutdown();
 
-    XrlRouter&		_xrl_router;
-    EventLoop&		_eventloop;
     RibManager*		_rib_manager;
 
     IfMgrXrlMirror	_ifmgr;
