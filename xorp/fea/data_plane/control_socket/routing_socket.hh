@@ -143,8 +143,6 @@ private:
 
     static uint16_t _instance_cnt;
     static pid_t    _pid;
-
-    friend class RoutingSocketPlumber; // class that hooks observers in and out
 };
 
 class RoutingSocketObserver {
