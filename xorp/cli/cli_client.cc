@@ -1021,7 +1021,7 @@ CliClient::process_char_page_mode(uint8_t val)
     //
     // Redraw the output of the screen
     //
-    if ((val == CHAR_TO_CTRL('l'))) {
+    if (val == CHAR_TO_CTRL('l')) {
     redisplay_screen_label:
 	size_t i, start_window_line = 0;
 	set_page_buffer_mode(false);
