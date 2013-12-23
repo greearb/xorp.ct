@@ -652,7 +652,6 @@ private:
     uint8_t		_buffer[256];	// XXX important performance parameter
     uint32_t		_size;
     Callback		_cb;
-    bool		_keepalive;
 };
 
 
