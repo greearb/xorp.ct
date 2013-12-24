@@ -437,7 +437,9 @@ private:
     // Original state from the underlying system before the MFEA was started
     //
     bool	_multicast_forwarding_enabled;
+#ifdef USE_MULT_MCAST_TABLES
     const FibConfig& _fibconfig;
+#endif
 };
 
 /**
