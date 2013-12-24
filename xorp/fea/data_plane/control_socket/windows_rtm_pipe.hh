@@ -29,7 +29,7 @@
 #include "libxorp/exceptions.hh"
 
 class WinRtmPipeObserver;
-struct WinRtmPipePlumber;
+class WinRtmPipePlumber;
 
 /**
  * WinRtmPipe class opens a routing socket and forwards data arriving
