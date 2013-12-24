@@ -121,7 +121,9 @@ public:
 #endif
 
 private:
+#if defined(HAVE_PROC_LINUX) && defined(HAVE_IOCTL_SIOCGIFCONF)
     IfConfigGetIoctl*	_ifconfig_get_ioctl;
+#endif
 };
 
 #endif // __FEA_DATA_PLANE_MANAGERS_FEA_DATA_PLANE_MANAGER_LINUX_HH__
