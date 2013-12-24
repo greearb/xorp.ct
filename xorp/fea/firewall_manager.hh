@@ -364,7 +364,6 @@ private:
      */
     void generate_token();
 
-    FeaNode&				_fea_node;
     EventLoop&				_eventloop;
     const IfTree&			_iftree;
 
