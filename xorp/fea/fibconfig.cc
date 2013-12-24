@@ -44,8 +44,7 @@
 
 FibConfig::FibConfig(FeaNode& fea_node, const IfTree& system_config_iftree,
 		     const IfTree& merged_config_iftree)
-    : _fea_node(fea_node),
-      _eventloop(fea_node.eventloop()),
+    : _eventloop(fea_node.eventloop()),
 #ifndef XORP_DISABLE_PROFILE
       _profile(fea_node.profile()),
 #endif
