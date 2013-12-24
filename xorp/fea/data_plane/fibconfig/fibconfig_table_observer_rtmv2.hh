@@ -75,7 +75,7 @@ private:
     public:
     	RtmV2Observer(WinRtmPipe& rs, int af,
 		      FibConfigTableObserverRtmV2& rtmo)
-	    : WinRtmPipeObserver(rs), _af(af), _rtmo(rtmo) {}
+	    : WinRtmPipeObserver(rs), _rtmo(rtmo) {}
     	virtual ~RtmV2Observer() {}
 	void routing_socket_data(vector<uint8_t>& buffer) {
 	    _rtmo.receive_data(buffer);
