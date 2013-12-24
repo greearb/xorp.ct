@@ -31,7 +31,7 @@
 
 
 class RoutingSocketObserver;
-struct RoutingSocketPlumber;
+class RoutingSocketPlumber;
 
 /**
  * RoutingSocket class opens a routing socket and forwards data arriving

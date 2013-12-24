@@ -239,7 +239,7 @@ RoutingSocket::io_event(XorpFd fd, IoEventType type)
 // Observe routing sockets activity
 //
 
-struct RoutingSocketPlumber {
+class RoutingSocketPlumber {
     typedef RoutingSocket::ObserverList ObserverList;
 
     static void
