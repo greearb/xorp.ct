@@ -455,7 +455,6 @@ private:
 		       const IfTree& old_system_config,
 		       string& error_msg);
 
-    FeaNode&			_fea_node;
     EventLoop&			_eventloop;
     NexthopPortMapper&		_nexthop_port_mapper;
     IfConfigTransactionManager* _itm;	// The interface transaction manager
