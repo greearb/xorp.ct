@@ -241,7 +241,7 @@ RoutingSocket::io_event(XorpFd fd, IoEventType type)
 
 class RoutingSocketPlumber {
     typedef RoutingSocket::ObserverList ObserverList;
-
+    public:
     static void
     plumb(RoutingSocket& r, RoutingSocketObserver* o)
     {
