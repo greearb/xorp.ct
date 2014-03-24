@@ -275,6 +275,15 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 	}
     } while (false);
     
+    // Create an (S,G) entry to send JOIN
+    if (pim_mre_sg == NULL) {
+        pim_mre_sg = pim_node()->pim_mrt().pim_mre_find(inner_src,
+                                                       inner_dst,
+                                                       PIM_MRE_SG,
+                                                       PIM_MRE_SG);
+        pim_mre_sg->set_spt(true);
+    }
+
     is_sptbit_set = false;
     if ((pim_mre_sg != NULL) && pim_mre_sg->is_spt())
 	is_sptbit_set = true;
@@ -318,13 +327,8 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 	sent_register_stop = true;
     }
     if (is_sptbit_set || pim_mre->is_switch_to_spt_desired_sg(0, 0)) {
-	// Create an (S,G) entry that will keep the Keepalive Timer running
-	if (pim_mre_sg == NULL) {
-	    pim_mre_sg = pim_node()->pim_mrt().pim_mre_find(inner_src,
-							   inner_dst,
-							   PIM_MRE_SG,
-							   PIM_MRE_SG);
-	}
+	// Use (S,G) entry to keep the Keepalive Timer running
+	// This implicitly also sends a JOIN towards S.
 	if (sent_register_stop) {
 	    // "restart KeepaliveTimer(S,G) to RP_Keepalive_Period"
 	    keepalive_timer_sec = PIM_RP_KEEPALIVE_PERIOD_DEFAULT;
