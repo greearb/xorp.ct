@@ -897,7 +897,7 @@ PimVif::pim_send(const IPvX& src, const IPvX& dst,
     BUFFER_COPYPUT_INET_CKSUM(cksum, buffer, 2);	// XXX: the checksum
 
     XLOG_TRACE(pim_node()->is_log_trace(),
-              "pim_send: TX %s from %s to %s on vif %s",
+              "TX %s from %s to %s on vif %s",
               PIMTYPE2ASCII(message_type),
               cstring(src),
               cstring(dst),
