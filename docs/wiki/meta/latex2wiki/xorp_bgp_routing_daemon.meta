@@ -3,4 +3,4 @@ point for software developers wishing to modify this software.
 A router running BGP takes routes from peer routers, filters them, decides which of the alternative routes
 is the best, and passes the winner on to the other peers, possibly applying filters before passing the route on.
 Our chosen architecture for our BGP implementation emphasizes extensibility and the separable testing
-of subsyste…";}s:8:"internal";a:2:{s:5:"cache";b:1;s:3:"toc";b:1;}s:8:"relation";a:1:{s:10:"firstimage";s:0:"";}}s:10:"persistent";a:5:{s:4:"date";a:2:{s:7:"created";i:1299098684;s:8:"modified";i:1299261673;}s:7:"creator";s:15:"Pierre Lepropre";s:11:"last_change";b:0;s:11:"contributor";a:1:{s:7:"geddons";s:15:"Pierre Lepropre";}s:4:"user";s:0:"";}}
+of subsyste…";}s:8:"relation";a:2:{s:5:"media";a:1:{s:21:"latex2wiki:policy.pdf";b:1;}s:10:"firstimage";s:0:"";}s:8:"internal";a:2:{s:5:"cache";b:1;s:3:"toc";b:1;}}s:10:"persistent";a:5:{s:4:"date";a:2:{s:7:"created";i:1299098684;s:8:"modified";i:1299261673;}s:7:"creator";s:15:"Pierre Lepropre";s:11:"last_change";b:0;s:11:"contributor";a:1:{s:7:"geddons";s:15:"Pierre Lepropre";}s:4:"user";s:0:"";}}
