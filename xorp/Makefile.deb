@@ -18,7 +18,7 @@
 # These fields are used to build the control file.
 PACKAGE ?= lanforge-xorp
 VERSION = 1.8.6-WIP
-LFVER = 5.2.9
+LFVER = 5.2.10
 ARCH = i386
 OSVER         := $(shell uname -m)
 ifeq "${OSVER}" "x86_64"
@@ -52,8 +52,8 @@ create_deb:
 	make -f Makefile.deb clobber
 	make -f Makefile.deb ARCH=${ARCH} deb
 	mv tmp/$(PACKAGE)_$(VERSION)_${ARCH}.deb ./
-	cp $(PACKAGE)_$(VERSION)_${ARCH}.deb /mnt/d2/pub/candela_cdrom.${LFVER}/debs/dists/candela/multiverse/binary-${ARCH}/
-	cp $(PACKAGE)_$(VERSION)_${ARCH}.deb /mnt/d2/pub/candela_cdrom.${LFVER}/
+	#cp $(PACKAGE)_$(VERSION)_${ARCH}.deb /mnt/d2/pub/candela_cdrom.${LFVER}/debs/dists/candela/multiverse/binary-${ARCH}/
+	#cp $(PACKAGE)_$(VERSION)_${ARCH}.deb /mnt/d2/pub/candela_cdrom.${LFVER}/
 	@echo ""
 	@echo "On an Ubuntu machine:"
 	@echo "cd /mnt/d2/pub/candela_cdrom.${LFVER}/debs/dists/candela/multiverse/binary-${ARCH}/"

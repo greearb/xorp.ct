@@ -15,7 +15,6 @@
 # XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 # http://xorp.net
 
-# $XORP$
 
 import os
 Import('env')
@@ -28,6 +27,11 @@ subdirs = [
 SConscript(dirs = subdirs, exports='env')
 
 env = env.Clone()
+
+# Fedora 19 has broken-ish lex...work around it for now.
+env.AppendUnique(CCFLAGS = [
+    '-Wno-sign-compare',
+    ])
 
 env.AppendUnique(CPPPATH = [
 	'.',
@@ -202,6 +206,12 @@ rtrmgr_env.AppendUnique(LIBS = [
     'crypto'  # Required on Fedora 13.
 ])
 
+if not is_shared:
+    if not (env.has_key('mingw') and env['mingw']):
+        rtrmgr_env.AppendUnique(LIBS = [
+            "rt",
+            ])
+
 if (rtrmgr_env.has_key('mingw') and rtrmgr_env['mingw']):
     rtrmgr_env.AppendUnique(LIBS = [
         'ws2_32',
@@ -259,6 +269,13 @@ if env['enable_xorpsh']:
             'curses'
             ])
 
+    if not is_shared:
+        if not (env.has_key('mingw') and env['mingw']):
+            xorpsh_env.AppendUnique(LIBS = [
+                "rt",
+                "crypto",
+                ])
+
     if (xorpsh_env.has_key('mingw') and xorpsh_env['mingw']):
         xorpsh_env.AppendUnique(LIBS = [
             'ws2_32',
@@ -294,6 +311,13 @@ if not (env.has_key('disable_profile') and env['disable_profile']):
         'xorp_comm',
         'xorp_core'
         ])
+
+    if not is_shared:
+        if not (env.has_key('mingw') and env['mingw']):
+            profiler_env.AppendUnique(LIBS = [
+                "rt",
+                "crypto",
+                ])
 
     if (profiler_env.has_key('mingw') and profiler_env['mingw']):
         profiler_env.AppendUnique(LIBS = [

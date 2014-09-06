@@ -24,6 +24,11 @@ env = env.Clone()
 
 is_shared = env.has_key('SHAREDLIBS')
 
+# Fedora 19 has broken-ish lex...work around it for now.
+env.AppendUnique(CCFLAGS = [
+    '-Wno-sign-compare',
+    ])
+
 env.AppendUnique(CPPPATH = [ '#' ])
 
 # Automatically generate flex and yacc files

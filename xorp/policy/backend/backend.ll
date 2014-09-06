@@ -111,7 +111,7 @@ void yyerror(const char *m)
         ostringstream oss;
 
         oss << "Error on line " <<  _parser_lineno << " near (";
-        for(int i = 0; i < yyleng; i++)
+        for(yy_size_t i = 0; i < yyleng; i++)
                 oss << yytext[i];
         oss << "): " << m;
 

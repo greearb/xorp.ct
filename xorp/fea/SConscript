@@ -70,9 +70,9 @@ libxfdp_srcs = [
 libxorp_fea_linkorder = [
     'xorp_fea_data_plane_managers',
     'xorp_fea_fibconfig',
-    'xorp_fea_ifconfig',
     'xorp_fea_io',
     'xorp_fea_control_socket',
+    'xorp_fea_ifconfig',
     ]
 
 if not is_shared:
