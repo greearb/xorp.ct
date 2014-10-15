@@ -27,8 +27,24 @@
 
 #ifdef HOST_OS_WINDOWS
 
+#include <winuser.h>
 #include "win_io.h"
 
+/* This should be in winuser.h, from what I can tell, but it is not
+ * working on Fedora-17.
+ */
+#ifndef VK_SPACE
+#define VK_SPACE 0x20
+#define VK_TAB 0x09
+#define VK_RETURN 0x0D
+#define VK_BACK 0x08
+#define VK_DELETE 0x2E
+#define VK_HOME 0x24
+#define VK_LEFT 0x25
+#define VK_UP 0x26
+#define VK_RIGHT 0x27
+#define VK_DOWN 0x28
+#endif
 
 /* Size of the statically allocated win_strerror() buffer. */
 #define WIN_STRERROR_BUF_SIZE 1024

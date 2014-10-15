@@ -35,6 +35,7 @@
 
 #include <mprapi.h>
 #include <routprot.h>
+#include <winsvc.h>
 
 #ifndef RRAS_SERVICE_NAME
 #define RRAS_SERVICE_NAME TEXT("RemoteAccess")

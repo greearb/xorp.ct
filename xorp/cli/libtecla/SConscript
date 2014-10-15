@@ -43,7 +43,6 @@ env['CPPDEFINES'] = {
     'HAVE_INTTYPES_H': 1,
     'HAVE_STDINT_H': 1,
     'HAVE_UNISTD_H': 1,
-    'HAVE_SELECT_H': 1,
     'HAVE_TERMINFO_H': 1,
     }
 

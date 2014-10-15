@@ -66,6 +66,10 @@
 #ifdef HOST_OS_WINDOWS
 #include <mswsock.h>
 #include "libxorp/win_io.h"
+#include <ws2tcpip.h>
+// NOTE:  Seems windows uses a typedef of struct in_pktinfo ... IN_PKTINFO
+// Not sure how to use that properly though, the obvious thing to me just did
+// not compile.
 #endif
 
 #include "libcomm/comm_api.h"
@@ -2395,6 +2399,7 @@ IoIpSocket::send_packet(const string& if_name,
 	else {
             // NOTE:  BSD doesn't seem to support in_pktinfo...not sure if this needs
             //     a work-around or not. --Ben
+#ifndef HOST_OS_WINDOWS
 #ifdef IP_PKTINFO
 	    int ctllen = 0;
 
@@ -2402,7 +2407,6 @@ IoIpSocket::send_packet(const string& if_name,
 
 	    XLOG_ASSERT(ctllen <= CMSG_BUF_SIZE);   // XXX
 
-#ifndef HOST_OS_WINDOWS
 	    struct cmsghdr *cmsgp;
 	    struct in_pktinfo *sndpktinfo;
 
@@ -2434,6 +2438,7 @@ IoIpSocket::send_packet(const string& if_name,
 	// First, estimate total length of ancillary data
 	//
 
+#ifndef HOST_OS_WINDOWS
 	// Space for IP_PKTINFO
 #ifdef IP_PKTINFO
 	ctllen += CMSG_SPACE(sizeof(struct in_pktinfo));
@@ -2443,7 +2448,6 @@ IoIpSocket::send_packet(const string& if_name,
 	// Now setup the ancillary data
 	//
 	XLOG_ASSERT(ctllen <= CMSG_BUF_SIZE);		// XXX
-#ifndef HOST_OS_WINDOWS
 	_sndmh.msg_controllen = ctllen;
 	cmsgp = CMSG_FIRSTHDR(&_sndmh);
 #endif
@@ -2566,6 +2570,7 @@ IoIpSocket::send_packet(const string& if_name,
 	// First, estimate total length of ancillary data
 	//
 
+#ifndef HOST_OS_WINDOWS
 	// Space for IPV6_PKTINFO
 	ctllen += CMSG_SPACE(sizeof(struct in6_pktinfo));
 
@@ -2618,7 +2623,6 @@ IoIpSocket::send_packet(const string& if_name,
 	    ctllen += CMSG_SPACE(ext_headers_payload[i].size());
 	}
 
-#ifndef HOST_OS_WINDOWS
 	// TODO:  Implement IPv6 Ancillary data on windows/mingw
 	// TODO:  Implement IPV6_HOPLIMIT on windows/mingw??
 	// TODO:  Implement IPV6_RTHDR, DSTOPS on windows/mingw??

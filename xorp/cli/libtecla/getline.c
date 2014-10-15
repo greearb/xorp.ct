@@ -50,10 +50,12 @@
 #ifdef HAVE_SELECT
 #include <sys/select.h>
 #include <sys/time.h>
-#include <sys/types.h>
 #endif
 
+#include <sys/types.h>
+
 #ifdef __MINGW32__
+#define sigset_t _sigset_t
 #define sigsetjmp setjmp
 #define siglongjmp longjmp
 #define sigjmp_buf jmp_buf

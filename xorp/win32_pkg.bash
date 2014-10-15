@@ -56,10 +56,17 @@
 #
 
 # mingw cross-compile arguments
-SARGS="enable_wrapper=no strip=yes shared=no build=mingw32 STRIP=i686-pc-mingw32-strip \
-       CC=i686-pc-mingw32-gcc CXX=i686-pc-mingw32-g++ \
-       RANLIB=i686-pc-mingw32-ranlib  AR=i686-pc-mingw32-ar \
-       LD=i686-pc-mingw32-ld"
+#SARGS="enable_wrapper=no strip=yes shared=no build=mingw32 STRIP=i686-pc-mingw32-strip \
+#       CC=i686-pc-mingw32-gcc CXX=i686-pc-mingw32-g++ \
+#       RANLIB=i686-pc-mingw32-ranlib  AR=i686-pc-mingw32-ar \
+#       LD=i686-pc-mingw32-ld"
+
+MINGW_PRE=i686-w64
+
+SARGS="enable_wrapper=no strip=yes shared=no build=mingw32 STRIP=${MINGW_PRE}-mingw32-strip \
+       CC=${MINGW_PRE}-mingw32-gcc CXX=${MINGW_PRE}-mingw32-g++ \
+       RANLIB=${MINGW_PRE}-mingw32-ranlib  AR=${MINGW_PRE}-mingw32-ar \
+       LD=${MINGW_PRE}-mingw32-ld"
 
 JNUM=4
 
@@ -85,13 +92,13 @@ scons $SARGS install || exit 2
 
 echo "Copy some files..."
 # Copy some run-time libraries to the xorp dir for packaging
-cp /usr/i686-pc-mingw32/sys-root/mingw/bin/zlib1.dll /usr/local/xorp/sbin/ || exit 4
-cp /usr/i686-pc-mingw32/sys-root/mingw/bin/libgcc_s_sjlj-1.dll /usr/local/xorp/sbin/ || exit 5
-cp /usr/i686-pc-mingw32/sys-root/mingw/bin/libgnurx-0.dll /usr/local/xorp/sbin/ || exit 6
-cp /usr/i686-pc-mingw32/sys-root/mingw/bin/libcrypto-10.dll /usr/local/xorp/sbin/ || exit 7
-if [ -f /usr/i686-pc-mingw32/sys-root/mingw/bin/libstdc++-6.dll ]
+cp /usr/${MINGW_PRE}-mingw32/sys-root/mingw/bin/zlib1.dll /usr/local/xorp/sbin/ || exit 4
+cp /usr/${MINGW_PRE}-mingw32/sys-root/mingw/bin/libgcc_s_sjlj-1.dll /usr/local/xorp/sbin/ || exit 5
+cp /usr/${MINGW_PRE}-mingw32/sys-root/mingw/bin/libgnurx-0.dll /usr/local/xorp/sbin/ || exit 6
+cp /usr/${MINGW_PRE}-mingw32/sys-root/mingw/bin/libcrypto-10.dll /usr/local/xorp/sbin/ || exit 7
+if [ -f /usr/${MINGW_PRE}-mingw32/sys-root/mingw/bin/libstdc++-6.dll ]
     then
-    cp /usr/i686-pc-mingw32/sys-root/mingw/bin/libstdc++-6.dll /usr/local/xorp/sbin/ || exit 8
+    cp /usr/${MINGW_PRE}-mingw32/sys-root/mingw/bin/libstdc++-6.dll /usr/local/xorp/sbin/ || exit 8
 fi
 
 

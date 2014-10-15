@@ -162,6 +162,12 @@ public:
      : _filedesc(reinterpret_cast<HANDLE>(l)), _type(get_type())
     {}
 
+#ifdef HOST_OS_WINDOWS
+    XorpFd(intptr_t l)
+     : _filedesc(reinterpret_cast<HANDLE>(l)), _type(get_type())
+    {}
+#endif
+
     XorpFd(SOCKET s)
      : _filedesc(reinterpret_cast<HANDLE>(s)), _type(FDTYPE_SOCKET)
     {}

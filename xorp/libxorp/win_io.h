@@ -21,10 +21,6 @@
  * http://xorp.net
  */
 
-/*
- * $XORP: xorp/libxorp/win_io.h,v 1.10 2008/10/02 21:57:37 bms Exp $
- */
-
 #ifndef __LIBXORP_WIN_IO_H__
 #define __LIBXORP_WIN_IO_H__
 

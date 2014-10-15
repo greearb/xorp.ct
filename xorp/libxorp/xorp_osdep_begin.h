@@ -35,7 +35,8 @@
 
 #define	FD_SETSIZE	1024		/* Default is 64, use BSD default */
 
-#define	WINVER		0x502		/* Windows Server 2003 target */
+#define	WINVER		0x0502		/* Windows Server 2003 target */
+#define MPR50           1
 #define	_WIN32_WINNT	0x502
 
 /*
