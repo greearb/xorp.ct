@@ -194,7 +194,7 @@ XrlPortIO<IPv6>::request_open_bind_socket()
 #ifdef HAVE_IPV6
     XrlSocket6V0p1Client cl(&_xr);
     return cl.send_udp_open_and_bind(
-	_ss.c_str(), _xr.instance_name(), IPv6::ANY(),
+	_ss.c_str(), _xr.instance_name(), address(),
 	RIP_AF_CONSTANTS<IPv6>::IP_PORT, vifname(), 1,
 	callback(this, &XrlPortIO<IPv6>::open_bind_socket_cb)
 	);
