@@ -314,10 +314,14 @@ comm_sock_bind4(xsock_t sock, const struct in_addr *my_addr,
 		   (my_addr)? inet_ntoa(*my_addr) : "ANY",
 		   ntohs(my_port),
 		   comm_get_error_str(comm_get_last_error()));
-	return (XORP_ERROR);
+	return XORP_ERROR;
+    }
+    else {
+	XLOG_INFO("Bound socket (family = %d, my_addr = %s, my_port = %d)",
+		  family, (my_addr)? inet_ntoa(*my_addr) : "ANY", ntohs(my_port));
     }
 
-    return (XORP_OK);
+    return XORP_OK;
 }
 
 int
@@ -346,27 +350,32 @@ comm_sock_bind6(xsock_t sock, const struct in6_addr *my_addr,
 	memcpy(&sin6_addr.sin6_addr, my_addr, sizeof(sin6_addr.sin6_addr));
     else
 	memcpy(&sin6_addr.sin6_addr, &in6addr_any, sizeof(sin6_addr.sin6_addr));
-    if (IN6_IS_ADDR_LINKLOCAL(&sin6_addr.sin6_addr))
-	sin6_addr.sin6_scope_id = my_ifindex;
-    else
-	sin6_addr.sin6_scope_id = 0;
+
+    sin6_addr.sin6_scope_id = my_ifindex;
 
     if (bind(sock, (struct sockaddr *)&sin6_addr, sizeof(sin6_addr)) < 0) {
 	_comm_set_serrno();
 	XLOG_ERROR("Error binding socket (family = %d, "
-		   "my_addr = %s, my_port = %d): %s",
+		   "my_addr = %s, my_port = %d scope: %d): %s",
 		   family,
 		   (my_addr)?
 		   inet_ntop(family, my_addr, addr_str_255, sizeof(addr_str_255))
 		   : "ANY",
-		   ntohs(my_port), comm_get_error_str(comm_get_last_error()));
+		   ntohs(my_port), sin6_addr.sin6_scope_id,
+		   comm_get_error_str(comm_get_last_error()));
 	return (XORP_ERROR);
     }
+    else {
+	XLOG_INFO("Bound socket (family = %d, my_addr = %s, my_port = %d scope: %d)",
+		  family,
+		  (my_addr) ? inet_ntop(family, my_addr, addr_str_255, sizeof(addr_str_255)) : "ANY",
+		  ntohs(my_port), sin6_addr.sin6_scope_id);
+    }
 
-    return (XORP_OK);
+    return XORP_OK;
 #else /* ! HAVE_IPV6 */
     comm_sock_no_ipv6("comm_sock_bind6", sock, my_addr, my_ifindex, my_port);
-    return (XORP_ERROR);
+    return XORP_ERROR;
 #endif /* ! HAVE_IPV6 */
 }
 
