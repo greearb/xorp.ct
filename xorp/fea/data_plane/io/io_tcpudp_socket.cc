@@ -72,18 +72,58 @@ find_pif_index_by_addr(const IfTree& iftree, const IPvX& local_addr,
     if (iftree.find_interface_vif_by_addr(local_addr, ifp, vifp) != true) {
 	error_msg = c_format("Local IP address %s was not found",
 			     local_addr.str().c_str());
-	return (0);
+	return 0;
     }
-    XLOG_ASSERT(vifp != NULL);
+
     pif_index = vifp->pif_index();
     if (pif_index == 0) {
 	error_msg = c_format("Could not find physical interface index for "
 			     "IP address %s",
 			     local_addr.str().c_str());
-	return (0);
+	return 0;
     }
 
-    return (pif_index);
+    return pif_index;
+}
+
+static uint32_t
+find_pif_index_by_name(const IfTree& iftree, const string& ifname, string& error_msg)
+{
+    const IfTreeVif* vifp = NULL;
+    uint32_t pif_index = 0;
+
+    // Find the physical interface index
+    vifp = iftree.find_vif(ifname, ifname);
+    if (!vifp) {
+	error_msg = c_format("VIF %s was not found", ifname.c_str());
+	return 0;
+    }
+
+    pif_index = vifp->pif_index();
+    if (pif_index == 0) {
+	error_msg = c_format("Could not find physical interface index for "
+			     "dev %s",
+			     ifname.c_str());
+	return 0;
+    }
+
+    return pif_index;
+}
+
+int find_best_pif_idx(const IfTree& iftree, const string& ifname,
+		      const IPvX& local_addr, string& error_msg, uint32_t& pif_index)
+{
+    // Find the physical interface index for link-local addresses
+    if (ifname.size()) {
+	pif_index = find_pif_index_by_name(iftree, ifname, error_msg);
+    }
+    if ((pif_index == 0) && local_addr.is_linklocal_unicast()) {
+	pif_index = find_pif_index_by_addr(iftree, local_addr, error_msg);
+	if (pif_index == 0) {
+	    return XORP_ERROR;
+	}
+    }
+    return XORP_OK;
 }
 #endif // HAVE_IPV6
 
@@ -364,21 +404,6 @@ IoTcpUdpSocket::udp_open_and_bind(const IPvX& local_addr, uint16_t local_port, c
 	local_addr.copy_out(local_in_addr);
 	_socket_fd = comm_bind_udp4(&local_in_addr, htons(local_port),
 				    COMM_SOCK_NONBLOCKING, reuse_addr);
-#ifdef SO_BINDTODEVICE
-	if (local_dev.size()) {
-	    if (setsockopt(_socket_fd, SOL_SOCKET, SO_BINDTODEVICE,
-			   local_dev.c_str(), local_dev.size() + 1)) {
-		XLOG_WARNING("ERROR:  IoTcpUdpSocket::udp_open_and_bind, setsockopt (BINDTODEVICE):  failed: %s",
-			     XSTRERROR);
-	    }
-	    else {
-		XLOG_INFO("NOTE:  Successfully bound socket: %i to vif: %s\n",
-			  (int)(_socket_fd), local_dev.c_str());
-	    }
-	}
-#else
-	UNUSED(local_dev);
-#endif
 	break;
     }
 #ifdef HAVE_IPV6
@@ -387,13 +412,8 @@ IoTcpUdpSocket::udp_open_and_bind(const IPvX& local_addr, uint16_t local_port, c
 	struct in6_addr local_in6_addr;
 	uint32_t pif_index = 0;
 
-	// Find the physical interface index for link-local addresses
-	if (local_addr.is_linklocal_unicast()) {
-	    pif_index = find_pif_index_by_addr(iftree(), local_addr,
-					       error_msg);
-	    if (pif_index == 0)
-		return (XORP_ERROR);
-	}
+	if (find_best_pif_idx(iftree(), local_dev, local_addr, error_msg, pif_index) == XORP_ERROR)
+	    return XORP_ERROR;
 
 	local_addr.copy_out(local_in6_addr);
 	_socket_fd = comm_bind_udp6(&local_in6_addr, pif_index,
@@ -412,6 +432,22 @@ IoTcpUdpSocket::udp_open_and_bind(const IPvX& local_addr, uint16_t local_port, c
 			     comm_get_last_error_str());
 	return (XORP_ERROR);
     }
+
+#ifdef SO_BINDTODEVICE
+    if (local_dev.size()) {
+	if (setsockopt(_socket_fd, SOL_SOCKET, SO_BINDTODEVICE,
+		       local_dev.c_str(), local_dev.size() + 1)) {
+	    XLOG_WARNING("ERROR:  IoTcpUdpSocket::udp_open_and_bind, setsockopt (BINDTODEVICE):  failed: %s",
+			 XSTRERROR);
+	}
+	else {
+	    XLOG_INFO("NOTE:  Successfully bound socket: %i to vif: %s\n",
+		      (int)(_socket_fd), local_dev.c_str());
+	}
+    }
+#else
+    UNUSED(local_dev);
+#endif
 
     return (enable_data_recv(error_msg));
 }
