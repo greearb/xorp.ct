@@ -186,34 +186,52 @@ template <typename A>
 bool
 is_port_for<A>::operator() (Port<A>*& p)
 {
+    PortIOBase<A>* 	io  = p->io_handler();
+    XrlPortIO<A>* 	xio = dynamic_cast<XrlPortIO<A>*>(io);
+    bool rv;
+
+    if (xio == 0) {
+	//XLOG_INFO("is_port_for, xio is NULL.\n");
+	return false;
+    }
+
     //
     // Perform address family specific check for source address being
     // link-local.  For IPv4 the concept does not exist, for IPv6
     // check if origin is link local.
     //
     if (link_addr_valid() == false) {
+	//XLOG_INFO("is_port_for: %s, link-addr-valid == false.\n", xio->ifname().c_str());
 	return false;
     }
 
-    PortIOBase<A>* 	io  = p->io_handler();
-    XrlPortIO<A>* 	xio = dynamic_cast<XrlPortIO<A>*>(io);
-    if (xio == 0)
-	return false;
-
     // If another socket, ignore
-    if (xio->socket_id() != *_psid)
+    if (xio->socket_id() != *_psid) {
+	//XLOG_INFO("is_port_for: %s socket mismatch: %s %s\n",
+	//	  xio->ifname().c_str(), xio->socket_id().c_str(), _psid->c_str());
 	return false;
+    }
 
     // If our packet, ignore
-    if (xio->address() == *_pa)
+    if (xio->address() == *_pa) {
+	//XLOG_INFO("is_port_for: %s address mismatch: %s %s\n",
+	//	  xio->ifname().c_str(), xio->address().str().c_str(),
+	//	  _pa->str().c_str());
 	return false;
+    }
 
     // Check the incoming interface and vif name (if known)
     if ((! _ifname->empty()) && (! _vifname->empty())) {
-	if (xio->ifname() != *_ifname)
+	if (xio->ifname() != *_ifname) {
+	    //XLOG_INFO("is_port_for: %s ifname mismatch: %s\n",
+	    //      xio->ifname().c_str(), _ifname->c_str());
 	    return false;
-	if (xio->vifname() != *_vifname)
+	}
+	if (xio->vifname() != *_vifname) {
+	    //XLOG_INFO("is_port_for: %s vifname mismatch: %s %s\n",
+	    //      xio->ifname().c_str(), xio->vifname().c_str(), _vifname->c_str());
 	    return false;
+	}
     }
 
     //
@@ -228,17 +246,29 @@ is_port_for<A>::operator() (Port<A>*& p)
 				   xio->address());
 
     if (ifa == 0) {
+	//XLOG_INFO("is_port_for: %s  ifa == 0\n",
+	//	  xio->ifname().c_str());
 	return false;
     }
     if (ifa->has_endpoint()) {
-	return ifa->endpoint_addr() == *_pa;
+	rv = ifa->endpoint_addr() == *_pa;
+	if (!rv) {
+	    //XLOG_INFO("is_port_for: %s  has-endpoint failed\n",
+	    //      xio->ifname().c_str());
+	}
+	return rv;
     }
 
     IPNet<A> n(ifa->addr(), ifa->prefix_len());
-    return n.contains(*_pa);
+    rv = n.contains(*_pa);
+    if (!rv) {
+	//XLOG_INFO("is_port_for: %s  subnet-contains failed, n: %s  adddr: %s/%d\n",
+	//  xio->ifname().c_str(), n.str().c_str(), ifa->addr().str().c_str(),
+	//  ifa->prefix_len());
+    }
+    return rv;
 }
 
-
 // ----------------------------------------------------------------------------
 // XrlPortManager
 
