@@ -673,10 +673,10 @@ RouteDB<A>::add_rib_route(const Net& net, const Addr& nexthop,
 			  uint32_t cost, uint32_t tag, RouteOrigin* origin,
 			  const PolicyTags& policytags)
 {
-    debug_msg("[RIP] adding RIB route %s\n",net.str().c_str());
     XLOG_TRACE(trace()._routes,
-			  "adding RIB route %s\n",net.str().c_str());
-  
+	       "adding RIB route %s nexthop: %s ifname: %s cost: %d tag: %d\n",
+	       net.str().c_str(), nexthop.str().c_str(), ifname.c_str(), cost, tag);
+
     _rib_origin = origin;
          
     typename RouteContainerNoRef::iterator i = _rib_routes.find(net);
@@ -700,10 +700,6 @@ template <typename A>
 void
 RouteDB<A>::delete_rib_route(const Net& net)
 {
-    debug_msg("[RIP] deleting RIB route %s\n",net.str().c_str());
-    XLOG_TRACE(trace()._routes,
-			  "deleting RIB route %s\n",net.str().c_str());
-
     typename RouteContainerNoRef::iterator i = _rib_routes.find(net);
 
     if (i == _rib_routes.end())
@@ -711,12 +707,14 @@ RouteDB<A>::delete_rib_route(const Net& net)
 
     Route* r = (*i).second;
 
+    XLOG_TRACE(trace()._routes,
+	       "deleting RIB route, net %s rt: %s\n",
+	       net.str().c_str(), r->str().c_str());
     delete r;
 
     _rib_routes.erase(i);
 }
 
-
 // ----------------------------------------------------------------------------
 // Instantiations
 

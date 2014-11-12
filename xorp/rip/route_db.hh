@@ -18,19 +18,12 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/rip/route_db.hh,v 1.31 2008/10/29 21:59:39 andrewma Exp $
-
 #ifndef __RIP_ROUTE_DB_HH__
 #define __RIP_ROUTE_DB_HH__
 
 #include "libxorp/xorp.h"
 #include "libxorp/ref_ptr.hh"
-
-
-
-
 #include "policy/backend/policy_filters.hh"
-
 #include "route_entry.hh"
 #include "trace.hh"
 

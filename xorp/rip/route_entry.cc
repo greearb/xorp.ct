@@ -89,6 +89,17 @@ RouteEntry<A>::~RouteEntry()
 }
 
 template <typename A>
+string
+RouteEntry<A>::str() const {
+    ostringstream oss;
+    oss << " net: " << _net.str() << " nexthop: " << _nh.str() << " vif: " << _ifname << ":" << _vifname
+	<< " cost: " << _cost << " tag: " << _tag << " refcnt: " << _ref_cnt
+	<< " policytags: " << _policytags.str() << " filtered: " << _filtered << flush;
+    return oss.str();
+}
+
+
+template <typename A>
 bool
 RouteEntry<A>::set_nexthop(const A& nh)
 {

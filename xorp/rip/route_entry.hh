@@ -18,7 +18,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/rip/route_entry.hh,v 1.23 2008/10/02 21:58:17 bms Exp $
 
 #ifndef __RIP_ROUTE_ENTRY_HH__
 #define __RIP_ROUTE_ENTRY_HH__
@@ -26,9 +25,6 @@
 #include "libxorp/xorp.h"
 #include "libxorp/ipnet.hh"
 #include "libxorp/timer.hh"
-
-
-
 #include "policy/backend/policytags.hh"
 
 template<typename A> class RouteEntryOrigin;
@@ -226,6 +222,8 @@ public:
      */
     void set_filtered(bool v)			{ _filtered = v;    }
 
+    string str() const;
+
 private:
     friend class RouteEntryRef<A>;
     void ref()				{ _ref_cnt++; }
@@ -252,7 +250,6 @@ protected:
     bool	_filtered;
 };
 
-
 /**
  * @short RouteEntry reference class.
  *
@@ -380,7 +377,5 @@ protected:
 private:
     bool	_is_rib_origin;		// True if the origin is RIB
 };
-
-
 
 #endif // __RIP_ROUTE_ENTRY_HH__
