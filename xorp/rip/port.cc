@@ -1014,7 +1014,7 @@ Port<IPv4>::parse_response(const Addr&				src_addr,
 		record_bad_route(why, src_addr, src_port, p);
 		continue;
 	    } else if (accept_default_route() == false) {
-		why = c_format("Default route");
+		why = c_format("Default IPv4 route (and accept-DR is not set)");
 		record_bad_route(why, src_addr, src_port, p);
 		continue;
 	    }
@@ -1209,7 +1209,7 @@ Port<IPv6>::parse_response(const Addr&				src_addr,
 		record_bad_route(why, src_addr, src_port, p);
 		continue;
 	    } else if (accept_default_route() == false) {
-		why = c_format("Default route");
+		why = c_format("Default IPv6 route (and accept-DR is not set)");
 		record_bad_route(why, src_addr, src_port, p);
 		continue;
 	    }
