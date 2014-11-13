@@ -40,7 +40,6 @@ XrlCliNode::XrlCliNode(EventLoop&	eventloop,
     : XrlStdRouter(eventloop, class_name.c_str(), finder_hostname.c_str(),
 		   finder_port),
     XrlCliTargetBase(&xrl_router()),
-      _eventloop(eventloop),
       _cli_node(cli_node),
       _xrl_cli_processor_client(&xrl_router()),
       _is_finder_alive(false)

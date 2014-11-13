@@ -241,7 +241,6 @@ private:
 
     CliNode&	cli_node() const { return (_cli_node); }
 
-    EventLoop&		_eventloop;
     CliNode&		_cli_node;
 
     XrlCliProcessorV0p1Client _xrl_cli_processor_client;
