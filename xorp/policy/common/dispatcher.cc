@@ -104,7 +104,7 @@ Element*
 Dispatcher::run(const Oper& op, unsigned argc, const Element** argv) const
 {
     XLOG_ASSERT(op.arity() == argc);
-
+    Element* rv;
     unsigned int key = op.hash();
     XLOG_ASSERT(key);
 
@@ -138,8 +138,6 @@ Dispatcher::run(const Oper& op, unsigned argc, const Element** argv) const
 	return operations::ctr(es, *(argv[0]));
     }
 
-    XLOG_WARNING("running operation: %s  key: %d\n", op.str().c_str(), key);
-
     XLOG_ASSERT(key < DISPATCHER_MAP_SZ);
 
     // find function
@@ -152,15 +150,21 @@ Dispatcher::run(const Oper& op, unsigned argc, const Element** argv) const
 		logRun(op, argc, argv, key, "funct.un is NULL");
 		XLOG_ASSERT(funct.un);
 	    }
-	    return funct.un(*(argv[0]));
+	    rv = funct.un(*(argv[0]));
+	    //XLOG_WARNING("running unary operation: %s  key: %d arg: %s result: %s\n",
+	    //	 op.str().c_str(), key, argv[0]->dbgstr().c_str(), rv->dbgstr().c_str());
+	    return rv;
 	
 	case 2:
 	    if (!funct.bin) {
 		logRun(op, argc, argv, key, "funct.bin is NULL");
 		XLOG_ASSERT(funct.bin);
 	    }
-	    return funct.bin(*(argv[1]),*(argv[0]));
-
+	    rv = funct.bin(*(argv[1]), *(argv[0]));
+	    //XLOG_WARNING("running binary operation: %s  key: %d left-arg1: %s  right: %s result: %s\n",
+	    //	 op.str().c_str(), key, argv[1]->dbgstr().c_str(), argv[0]->dbgstr().c_str(),
+	    //	 rv->dbgstr().c_str());
+	    return rv;
 	// the infrastructure is ready however.
 	default:
 	    xorp_throw(OpNotFound, "Operations of arity: " +
