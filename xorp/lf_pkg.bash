@@ -19,6 +19,11 @@ echo -n " 2"
 sleep 1
 echo " 1"
 sleep 1
+
+# Disable GCC colors
+GCC_COLORS=
+export GCC_COLORS
+
 scons -j8 $SCONS_ARGS || exit 1
 scons -j8 $SCONS_ARGS install || exit 1
 cp xorp_install.bash /usr/local/xorp/
