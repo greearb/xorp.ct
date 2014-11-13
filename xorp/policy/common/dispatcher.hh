@@ -18,15 +18,9 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/policy/common/dispatcher.hh,v 1.15 2008/10/02 21:58:06 bms Exp $
 
 #ifndef __POLICY_COMMON_DISPATCHER_HH__
 #define __POLICY_COMMON_DISPATCHER_HH__
-
-
-
-
-
 
 #include "policy/policy_module.h"
 #include "libxorp/xlog.h"
@@ -72,25 +66,24 @@ public:
      * @param op binary operation to be registered.
      */
     template<class L, class R, Element* (*funct)(const L&,const R&)>
-    void add(const BinOper& op)
-    {
-        // XXX: do it in a better way
-        L arg1;
-        R arg2;
+    void add(const BinOper& op) {
+	// XXX: do it in a better way
+	L arg1;
+	R arg2;
 
 	const Element* args[] = { &arg1, &arg2 };
 
-        Key key = makeKey(op, 2, args);
+	unsigned int key = makeKey(op, 2, args);
 
-        struct Local {
-            static Element* Trampoline(const Element& left, const Element& right)
-	    {
-                return funct(static_cast<const L&>(left),
-                             static_cast<const R&>(right));
-            }
-        };
+	struct Local {
+	    static Element* Trampoline(const Element& left, const Element& right) {
+		return funct(static_cast<const L&>(left),
+			     static_cast<const R&>(right));
+	    }
+	};
 
-        _map[key].bin = &Local::Trampoline;
+	_map[key].bin = &Local::Trampoline;
+	logAdd(op, key, &arg1, &arg2);
     }
 
     /**
@@ -101,23 +94,28 @@ public:
      * @param op unary operation to be registered.
      */
     template<class T, Element* (*funct)(const T&)>
-    void add(const UnOper& op)
-    {
+    void add(const UnOper& op) {
 	// XXX: ugly
 	T arg;
-
 	const Element* args[] = { &arg };
 
-        Key key = makeKey(op, 1, args);
+	unsigned int key = makeKey(op, 1, args);
 
-        struct Local {
+	struct Local {
 	    static Element* Trampoline(const Element& arg) {
-                return funct(static_cast<const T&>(arg));
-            }
-        };
+		return funct(static_cast<const T&>(arg));
+	    }
+	};
 
-        _map[key].un = &Local::Trampoline;
+	_map[key].un = &Local::Trampoline;
+
+	logAdd(op, key, &arg, NULL);
     }
+
+    /* NOTE:  add() is called before logging framework is online. */
+    void logAdd(const Oper& op, unsigned int k, const Element* e1, const Element* e2) const;
+
+    void logRun(const Oper& op, unsigned argc, const Element** argv, int key, const char* dbg) const;
 
     /**
      * Execute an n-ary operation.
@@ -158,9 +156,6 @@ private:
     // Callback for unary operation
     typedef Element* (*CB_un)(const Element&);
 
-    // Key which relates to a callback
-    typedef unsigned Key;
-
     // A key relates to either a binary (x)or unary operation.
     typedef union {
 	CB_un un;
@@ -168,7 +163,7 @@ private:
     } Value;
 
     // Hashtable would be better
-    typedef map<Key,Value> Map;
+    typedef map<unsigned int, Value> Map;
 
     /**
      * Create a key for the callback table based on operation and arguments.
@@ -177,27 +172,7 @@ private:
      * @param op requested operation.
      * @param args the arguments for the operation.
      */
-    Key makeKey(const Oper& op, unsigned argc, const Element** argv) const
-    {
-	XLOG_ASSERT(op.arity() == argc);
-	XLOG_ASSERT(argc <= 2);
-
-	unsigned key = 0;
-
-	key |= op.hash();
-	XLOG_ASSERT(key);
-
-	for (unsigned i = 0; i < argc; i++) {
-	    const Element* arg = argv[i];
-	    unsigned eh = arg->hash();
-
-	    XLOG_ASSERT(eh);
-
-	    key |= eh << (5*(i+1));
-	}
-
-	return key;
-    }
+    unsigned int makeKey(const Oper& op, unsigned argc, const Element** argv) const;
 
     // XXX: definition moved in header file to allow compilation on 2.95.x
     /**
@@ -208,18 +183,12 @@ private:
      * @param op operation to perform.
      * @param args the arguments of the operation.
      */
-    Value lookup(const Oper& op, unsigned argc, const Element** argv) const
-    {
-	XLOG_ASSERT(op.arity() == argc);
-
-        // find callback
-        Key key = makeKey(op, argc, argv);
-        return _map[key];
-    }
+    Value lookup(const Oper& op, unsigned argc, const Element** argv) const;
 
     // Only one global map. Creating multiple dispatcher is thus harmless.
     // However, we may not have different dispatchers.
-    static Value _map[32768];
+#define DISPATCHER_MAP_SZ 32768
+    static Value _map[DISPATCHER_MAP_SZ];
 };
 
 #endif // __POLICY_COMMON_DISPATCHER_HH__

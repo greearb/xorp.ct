@@ -40,6 +40,12 @@ public:
 
     const char* type() const { return "filter"; }
 
+    string dbgstr() const {
+	ostringstream oss;
+	oss << "ElemFilter: hash: " << (int)(hash()) << flush;
+	return oss.str();
+    }
+
 private:
     RefPf _pf;
 };

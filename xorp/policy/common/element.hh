@@ -18,7 +18,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/policy/common/element.hh,v 1.17 2008/10/02 21:58:06 bms Exp $
 
 #ifndef __POLICY_COMMON_ELEMENT_HH__
 #define __POLICY_COMMON_ELEMENT_HH__
@@ -102,6 +101,12 @@ public:
 	return policy_utils::to_str(_val);
     }
 
+    string dbgstr() const {
+	ostringstream oss;
+	oss << "ElemInt32: hash: " << (int)(hash()) << " val: " << _val << " id: " << id << flush;
+	return oss.str();
+    }
+
     /**
      * @return value of the element.
      */
@@ -138,6 +143,12 @@ public:
 	return policy_utils::to_str(_val);
     }
 
+    string dbgstr() const {
+	ostringstream oss;
+	oss << "ElemU32: hash: " << (int)(hash()) << " val: " << _val << " id: " << id << flush;
+	return oss.str();
+    }
+
     uint32_t val() const { return _val; }
     const char* type() const { return id; }
 
@@ -167,6 +178,12 @@ public:
     string str() const;			// in element.cc
     uint32_t val() const { return _val; }
     const char* type() const { return id; }
+
+    string dbgstr() const {
+	ostringstream oss;
+	oss << "ElemCom32: hash: " << (int)(hash()) << " val: " << _val << " id: " << id << flush;
+	return oss.str();
+    }
 
     bool operator==(const ElemCom32& rhs) const { return _val == rhs._val; }
     bool operator<(const ElemCom32& rhs) const { return _val < rhs._val; }
@@ -199,6 +216,12 @@ public:
     string str() const { return _val; }
     string val() const { return _val; }
     const char* type() const { return id; }
+
+    string dbgstr() const {
+	ostringstream oss;
+	oss << "ElemStr: hash: " << (int)(hash()) << " val: " << _val << " id: " << id << flush;
+	return oss.str();
+    }
 
     bool operator==(const ElemStr& rhs) const { return _val == rhs._val; }
     bool operator<(const ElemStr& rhs) const { return _val < rhs._val; }
@@ -234,6 +257,12 @@ public:
 	else
 	    return "false";
     }	    
+
+    string dbgstr() const {
+	ostringstream oss;
+	oss << "ElemBool: hash: " << (int)(hash()) << " val: " << _val << " id: " << id << flush;
+	return oss.str();
+    }
 
     bool val() const { return _val; }
     const char* type() const { return id; }
@@ -322,6 +351,12 @@ public:
      * @return string representation of element.
      */
     string str() const { return _val.str(); }
+
+    string dbgstr() const {
+	ostringstream oss;
+	oss << "wrapped: hash: " << (int)(hash()) << " val: " << _val.str() << " id: " << id << flush;
+	return oss.str();
+    }
 
     /**
      * @return the actual object of the class being wrapped.
@@ -412,6 +447,12 @@ public:
      */
     string str() const { return _val->str(); }
 
+    string dbgstr() const {
+	ostringstream oss;
+	oss << "wrapped-ref: hash: " << (int)(hash()) << " val: " << _val->str() << " id: " << id << flush;
+	return oss.str();
+    }
+
     /**
      * @return the actual object of the class being wrapped.
      */
@@ -464,6 +505,18 @@ public:
     bool	operator<(const ElemNet<A>& rhs) const;
     bool	operator==(const ElemNet<A>& rhs) const;
 
+    string dbgstr() const {
+	ostringstream oss;
+	oss << "ElemNet: hash: " << (int)(hash()) << " id: " << id << " mod: " << (int)(_mod);
+	if (_net) {
+	    oss << " net: " << _net->str();
+	}
+	if (_op) {
+	    oss << " op: " << _op->str();
+	}
+	return oss.str();
+    }
+
 #ifdef XORP_USE_USTL
     ElemNet& operator=(const ElemNet<A>& rhs) {
 	if (this != &rhs) {
@@ -510,6 +563,12 @@ public:
     Var		var() const;
     const A&	addr() const;
     const A&	val() const; // for relop compatibility
+
+    string dbgstr() const {
+	ostringstream oss;
+	oss << "ElemNextHop: hash: " << (int)(hash()) << " id: " << id << " var: " << (int)(_var) << " addr: " << _addr.str();
+	return oss.str();
+    }
 
 private:
     Var	_var;

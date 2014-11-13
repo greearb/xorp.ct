@@ -18,7 +18,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/policy/common/elem_null.hh,v 1.10 2008/10/02 21:58:06 bms Exp $
 
 #ifndef __POLICY_COMMON_ELEM_NULL_HH__
 #define __POLICY_COMMON_ELEM_NULL_HH__
@@ -45,6 +44,12 @@ public:
     ElemNull(const char* /* c_str */) : Element(_hash) {}
                 
     string str() const { return "null"; }
+
+    string dbgstr() const {
+	ostringstream oss;
+	oss << "ElemNull, hash: " << (int)(hash()) << " id: " << id;
+	return oss.str();
+    }
 
     const char* type() const { return id; }
 };

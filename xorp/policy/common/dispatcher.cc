@@ -40,26 +40,87 @@ Dispatcher::Dispatcher()
 {
 }
 
+unsigned int Dispatcher::makeKey(const Oper& op, unsigned argc, const Element** argv) const
+{
+    XLOG_ASSERT(op.arity() == argc);
+    XLOG_ASSERT(argc <= 2);
+
+    unsigned int key = op.hash();
+    XLOG_ASSERT(key);
+
+    for (unsigned i = 0; i < argc; i++) {
+	const Element* arg = argv[i];
+	unsigned int eh = arg->hash();
+
+	XLOG_ASSERT(eh);
+	key |= eh << (5*(i+1));
+    }
+
+    XLOG_ASSERT(key < DISPATCHER_MAP_SZ);
+    return key;
+}
+
+Dispatcher::Value Dispatcher::lookup(const Oper& op, unsigned argc, const Element** argv) const
+{
+    XLOG_ASSERT(op.arity() == argc);
+
+    // find callback
+    unsigned int key = makeKey(op, argc, argv);
+    return _map[key];
+}
+
+/* NOTE:  add() is called before logging framework is online. */
+void Dispatcher::logAdd(const Oper& op, unsigned int k, const Element* arg1, const Element* arg2) const {
+// Enable this if debugging is needed.
+#if 0
+    printf("Adding operator: %s to dispatcher map[%d] %p %p\n",
+	   op.str().c_str(), k, arg1, arg2);
+    if (arg1) {
+	printf("arg1: %s\n", arg1->dbgstr().c_str());
+    }
+    if (arg2) {
+	printf("arg2: %s\n", arg2->dbgstr().c_str());
+    }
+#else
+    UNUSED(op);
+    UNUSED(k);
+    UNUSED(arg1);
+    UNUSED(arg2);
+#endif
+}
+
+void Dispatcher::logRun(const Oper& op, unsigned argc, const Element** argv, int key, const char* dbg) const {
+    /* We are about to crash, make sure this goes out immediately. */
+    printf("operation: %s  key: %d  argc: %d  dbg: %s\n",
+	   op.str().c_str(), key, argc, dbg);
+    for (unsigned int i = 0; i<argc; i++) {
+	const Element* arg = argv[i];
+	printf("argv[%d]: %s\n", i, arg->dbgstr().c_str());
+    }
+}
+
+/* If argc is 2, then argv[1] is left, argv[0] is right argument. */
 Element*
 Dispatcher::run(const Oper& op, unsigned argc, const Element** argv) const
 {
     XLOG_ASSERT(op.arity() == argc);
 
-    unsigned key = 0;
-    key |= op.hash();
+    unsigned int key = op.hash();
     XLOG_ASSERT(key);
 
     // check for null arguments and special case them: return null
     for (unsigned i = 0; i < argc; i++) {
     
 	const Element* arg = argv[i];
-	unsigned char h = arg->hash();
+	unsigned int h = arg->hash();
 
 	XLOG_ASSERT(h);
 
-	if(h == ElemNull::_hash)
+	if (h == ElemNull::_hash)
 	    return new ElemNull();
 
+	// NOTE:  Args are backwards from how makeKey goes, but code
+	// must be kept in sync if makeKey changes.
 	key |= h << (5*(argc-i));
     }
 
@@ -77,17 +138,27 @@ Dispatcher::run(const Oper& op, unsigned argc, const Element** argv) const
 	return operations::ctr(es, *(argv[0]));
     }
 
+    XLOG_WARNING("running operation: %s  key: %d\n", op.str().c_str(), key);
+
+    XLOG_ASSERT(key < DISPATCHER_MAP_SZ);
+
     // find function
     Value funct = _map[key];
 
     // expand args and execute function
-    switch(argc) {
+    switch (argc) {
 	case 1:
-	    XLOG_ASSERT(funct.un);
+	    if (!funct.un) {
+		logRun(op, argc, argv, key, "funct.un is NULL");
+		XLOG_ASSERT(funct.un);
+	    }
 	    return funct.un(*(argv[0]));
 	
 	case 2:
-	    XLOG_ASSERT(funct.bin);
+	    if (!funct.bin) {
+		logRun(op, argc, argv, key, "funct.bin is NULL");
+		XLOG_ASSERT(funct.bin);
+	    }
 	    return funct.bin(*(argv[1]),*(argv[0]));
 
 	// the infrastructure is ready however.

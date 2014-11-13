@@ -18,14 +18,12 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/policy/common/elem_set.hh,v 1.14 2008/10/02 21:58:06 bms Exp $
 
 #ifndef __POLICY_COMMON_ELEM_SET_HH__
 #define __POLICY_COMMON_ELEM_SET_HH__
 
 #include "element_base.hh"
 #include "element.hh"
-
 
 
 class ElemSet : public Element {
@@ -216,6 +214,8 @@ public:
     const_iterator end() const;
 
     const char* type() const;
+
+    string dbgstr() const;
 
 private:
     Set _val;

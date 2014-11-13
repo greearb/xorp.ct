@@ -18,7 +18,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/policy/common/element_base.hh,v 1.10 2008/10/02 21:58:06 bms Exp $
 
 #ifndef __POLICY_COMMON_ELEMENT_BASE_HH__
 #define __POLICY_COMMON_ELEMENT_BASE_HH__
@@ -46,6 +45,9 @@ public:
      * @return string representation of the element.
      */
     virtual string str() const = 0;
+
+    /* Print out debugging info for this element. */
+    virtual string dbgstr() const = 0;
 
     /**
      * @return string representation of element type.

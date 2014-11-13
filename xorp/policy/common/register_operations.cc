@@ -21,9 +21,6 @@
 
 
 #include "libxorp/xorp.h"
-
-
-
 #include "register_operations.hh"
 #include "dispatcher.hh"
 #include "element.hh"
@@ -596,7 +593,8 @@ do {                                                                    \
     ADD_RELOP(ElemIPv6);
     ADD_RELOP2(ElemIPv6,ElemIPv6Range);
 //    ADD_SETBINOP(ElemIPv6);
-   
+    ADD_ALL_RELOP2(ElemIPv6NextHop, ElemIPv6Range);
+
     // IPV6NET
     ADD_EQOP(ElemIPv6Net);
     ADD_EQOP2(ElemIPv6Net,ElemU32Range);

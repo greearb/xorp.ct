@@ -21,9 +21,6 @@
 
 
 #include "libxorp/xorp.h"
-
-
-
 #include "elem_set.hh"
 #include "policy_utils.hh"
 
@@ -72,6 +69,16 @@ ElemSetAny<T>::str() const
     s.erase(s.length()-1);
 
     return s;
+}
+
+template <class T>
+string ElemSetAny<T>::dbgstr() const {
+    ostringstream oss;
+    oss << "ElemSetAny: id: " << id << "hash: " << (int)(hash()) << " vals: ";
+    for (typename Set::const_iterator i = _val.begin(); i != _val.end(); ++i) {
+	oss << (*i).str();
+    }
+    return oss.str();
 }
 
 template <class T>
