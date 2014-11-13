@@ -239,9 +239,9 @@ RoutingSocket::io_event(XorpFd fd, IoEventType type)
 // Observe routing sockets activity
 //
 
-struct RoutingSocketPlumber {
+class RoutingSocketPlumber {
     typedef RoutingSocket::ObserverList ObserverList;
-
+    public:
     static void
     plumb(RoutingSocket& r, RoutingSocketObserver* o)
     {
