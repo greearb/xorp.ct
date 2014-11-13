@@ -190,11 +190,9 @@ RouteDB<A>::do_filtering(Route* r, uint32_t& cost)
     try {
 	RIPVarRW<A> varrw(*r);
 
-	debug_msg("[RIP] Running import filter on route %s\n",
-		  r->net().str().c_str());
 	XLOG_TRACE(trace()._routes,
-			"Running import filter on route %s\n",
-			r->net().str().c_str());
+		   "Running import filter on route %s\n",
+		   r->str().c_str());
 
 	bool accepted = _policy_filters.run_filter(filter::IMPORT, varrw);
 
@@ -204,11 +202,9 @@ RouteDB<A>::do_filtering(Route* r, uint32_t& cost)
 	do {
 	    RIPVarRW<A> varrw2(*r);
 
-	    debug_msg("[RIP] Running source match filter on route %s\n",
-		  r->net().str().c_str());
 	    XLOG_TRACE(trace()._routes,
-		  "Running source match filter on route %s\n",
-		  r->net().str().c_str());
+		       "Running source match filter on route %s\n",
+		       r->net().str().c_str());
 
 	    accepted = _policy_filters.run_filter(filter::EXPORT_SOURCEMATCH, varrw2);
 	} while(0);
@@ -219,11 +215,9 @@ RouteDB<A>::do_filtering(Route* r, uint32_t& cost)
 	do {
 	    RIPVarRW<A> varrw3(*r);
 
-	    debug_msg("[RIP] Running export filter on route: %s\n",
-		  r->net().str().c_str());
 	    XLOG_TRACE(trace()._routes,
-		  "Running export filter on route %s\n",
-		  r->net().str().c_str());
+		       "Running export filter on route %s\n",
+		       r->net().str().c_str());
 
 	    accepted = _policy_filters.run_filter(filter::EXPORT, varrw3);
 	} while(0);
@@ -236,6 +230,8 @@ exit:
 		accepted = false;
 	}
 
+	XLOG_TRACE(trace()._routes, "do-filtering: returning, accepted: %d  cost: %d\n",
+		   (int)(accepted), cost);
 	return accepted;
     } catch(const PolicyException& e) {
 	XLOG_FATAL("PolicyException: %s", e.str().c_str());
