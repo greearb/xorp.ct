@@ -62,8 +62,7 @@ map_changes(const IfTreeItem::State&		fci,
 }
 
 IfConfig::IfConfig(FeaNode& fea_node)
-    : _fea_node(fea_node),
-      _eventloop(fea_node.eventloop()),
+    : _eventloop(fea_node.eventloop()),
       _nexthop_port_mapper(fea_node.nexthop_port_mapper()),
       _itm(NULL),
       //_live_config("live-config"),
