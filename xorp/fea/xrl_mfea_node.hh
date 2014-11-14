@@ -581,7 +581,6 @@ private:
     
     int family() const { return (MfeaNode::family()); }
 
-    EventLoop&			_eventloop;
     const string		_finder_target;
 
     XrlMfeaClientV0p1Client	_xrl_mfea_client_client;
