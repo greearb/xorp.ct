@@ -132,8 +132,6 @@ private:
      */
     int ifmgr_shutdown();
 
-    EventLoop&		_eventloop;
-
     IfMgrXrlMirror	_ifmgr;
 
     //

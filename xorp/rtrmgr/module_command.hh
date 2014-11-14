@@ -87,7 +87,6 @@ private:
     Action*		_status_method;
     Action*		_startup_method;
     Action*		_shutdown_method;
-    bool		_execute_done;
     bool		_verbose;	// Set to true if output is verbose
 };
 

@@ -73,15 +73,14 @@ public:
 private:
     class RtmV2Observer : public WinRtmPipeObserver {
     public:
-    	RtmV2Observer(WinRtmPipe& rs, int af,
+	RtmV2Observer(WinRtmPipe& rs,
 		      FibConfigTableObserverRtmV2& rtmo)
-	    : WinRtmPipeObserver(rs), _af(af), _rtmo(rtmo) {}
+	    : WinRtmPipeObserver(rs), _rtmo(rtmo) {}
     	virtual ~RtmV2Observer() {}
 	void routing_socket_data(vector<uint8_t>& buffer) {
 	    _rtmo.receive_data(buffer);
 	}
     private:
-	int _af;
     	FibConfigTableObserverRtmV2& _rtmo;
     };
 

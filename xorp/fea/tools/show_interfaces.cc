@@ -39,7 +39,6 @@ InterfaceMonitor::InterfaceMonitor(EventLoop&		eventloop,
 				   uint16_t		finder_port,
 				   const string&	fea_target)
     : ServiceBase(class_name),
-      _eventloop(eventloop),
       _ifmgr(eventloop, fea_target.c_str(), finder_hostname.c_str(),
 	     finder_port),
       _startup_requests_n(0),

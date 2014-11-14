@@ -72,7 +72,6 @@ ModuleCommand::ModuleCommand(TemplateTree& template_tree,
       _status_method(NULL),
       _startup_method(NULL),
       _shutdown_method(NULL),
-      _execute_done(false),
       _verbose(template_tree.verbose())
 {
     XLOG_ASSERT(cmd_name == "%modinfo");

@@ -741,7 +741,6 @@ protected:
     Trie6	_trie6;		// IPv6 trie (used for testing purpose)
     
 private:
-    FeaNode&				_fea_node;
     EventLoop&				_eventloop;
 #ifndef XORP_DISABLE_PROFILE
     Profile&				_profile;
