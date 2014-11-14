@@ -287,9 +287,9 @@ WinRtmPipe::io_event(XorpFd fd, IoEventType type)
 // Observe routing sockets activity
 //
 
-struct WinRtmPipePlumber {
+class WinRtmPipePlumber {
     typedef WinRtmPipe::ObserverList ObserverList;
-
+    public:
     static void
     plumb(WinRtmPipe& r, WinRtmPipeObserver* o)
     {
