@@ -60,11 +60,11 @@ FibConfigTableObserverRtmV2::FibConfigTableObserverRtmV2(FeaDataPlaneManager& fe
     }
 
     _rs4 = new WinRtmPipe(fea_data_plane_manager.eventloop());
-    _rso4 = new RtmV2Observer(*_rs4, AF_INET, *this);
+    _rso4 = new RtmV2Observer(*_rs4, *this);
 
 #ifdef HAVE_IPV6
     _rs6 = new WinRtmPipe(fea_data_plane_manager.eventloop());
-    _rso6 = new RtmV2Observer(*_rs6, AF_INET6, *this);
+    _rso6 = new RtmV2Observer(*_rs6, *this);
 #endif
 }
 
