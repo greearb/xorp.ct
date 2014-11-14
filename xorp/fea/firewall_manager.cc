@@ -36,8 +36,7 @@
 
 FirewallManager::FirewallManager(FeaNode&	fea_node,
 				 const IfTree&	iftree)
-    : _fea_node(fea_node),
-      _eventloop(fea_node.eventloop()),
+    : _eventloop(fea_node.eventloop()),
       _iftree(iftree),
       _ftm(NULL),
       _next_token(0),

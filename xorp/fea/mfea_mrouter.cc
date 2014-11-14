@@ -201,7 +201,10 @@ MfeaMrouter::MfeaMrouter(MfeaNode& mfea_node, const FibConfig& fibconfig)
       _mrt_api_mrt_mfc_flags_border_vif(false),
       _mrt_api_mrt_mfc_rp(false),
       _mrt_api_mrt_mfc_bw_upcall(false),
-      _multicast_forwarding_enabled(false), _fibconfig(fibconfig)
+      _multicast_forwarding_enabled(false)
+#ifdef USE_MULT_MCAST_TABLES
+      ,_fibconfig(fibconfig)
+#endif
 {
     string error_msg;
 
