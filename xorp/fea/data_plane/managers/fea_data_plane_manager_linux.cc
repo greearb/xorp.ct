@@ -71,8 +71,10 @@ extern "C" void destroy(FeaDataPlaneManager* fea_data_plane_manager)
 
 
 FeaDataPlaneManagerLinux::FeaDataPlaneManagerLinux(FeaNode& fea_node)
-    : FeaDataPlaneManager(fea_node, "Linux"),
-      _ifconfig_get_ioctl(NULL)
+    : FeaDataPlaneManager(fea_node, "Linux")
+#if defined(HAVE_PROC_LINUX) && defined(HAVE_IOCTL_SIOCGIFCONF)
+      ,_ifconfig_get_ioctl(NULL)
+#endif
 {
 }
 
