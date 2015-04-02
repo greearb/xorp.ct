@@ -53,7 +53,7 @@ then
     mkdir -p ${userdir}tmp
 fi
 
-if uname -a|grep i386
+if uname -a|grep -e i386 -e armv7l
 then
     if tar -cvzf ${userdir}tmp/xorp_32${DBG}.tgz xorp
     then
