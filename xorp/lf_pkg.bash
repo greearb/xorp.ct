@@ -31,12 +31,14 @@ chmod a+x /usr/local/xorp/xorp_install.bash
 
 PWD=$(pwd)
 # The line below will not work on Fedora 19, maybe elsewhere.
-#userdir=$(expr match "$PWD" '\(/home/[0-Z]*/\).*')
-[[ $PWD =~ (/home/[0-Z]*/).* ]] && userdir=${BASH_REMATCH[1]}
+#userdir=$(expr match "$PWD" '\(/home/[0-z]*/\).*')
+reg='(/home/[0-z]*/).*'
+[[ $PWD =~ $reg ]] && userdir=${BASH_REMATCH[1]}
 
 if [ "_$userdir" == "_" ]
 then
-    userdir = "./"
+    echo "Could not find user-dir, pwd: $PWD  Will use ./ for user-dir"
+    userdir="./"
 fi
 
 cd /usr/local
