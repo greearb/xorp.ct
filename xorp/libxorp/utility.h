@@ -38,7 +38,8 @@
  * in the function definition.
  */
 #ifndef UNUSED
-#define UNUSED(var)	x_static_assert(sizeof(var) != 0)
+//#define UNUSED(var)	x_static_assert(sizeof(var) != 0)
+#define UNUSED(var)	(void)(var)
 #endif /* UNUSED */
 
 #ifdef __cplusplus

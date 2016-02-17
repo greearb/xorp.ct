@@ -36,7 +36,7 @@ namespace {
 
 template <class T>
 void
-out_of_range(const string& msg, const T& x)
+xorp_out_of_range(const string& msg, const T& x)
 {
     ostringstream oss;
 
@@ -64,7 +64,7 @@ Vrrp::Vrrp(VrrpVif& vif, EventLoop& e, uint32_t vrid)
       //, _arpd(_vif)
 {
     if (_vrid < 1 || _vrid > 255)
-	out_of_range("VRID out of range", _vrid);
+	xorp_out_of_range("VRID out of range", _vrid);
 
     char tmp[sizeof "ff:ff:ff:ff:ff:ff"];
 
@@ -94,7 +94,7 @@ void
 Vrrp::set_priority(uint32_t priority)
 {
     if (priority == PRIORITY_LEAVE || priority >= PRIORITY_OWN)
-	out_of_range("priority out of range", priority);
+	xorp_out_of_range("priority out of range", priority);
 
     _priority = priority;
 

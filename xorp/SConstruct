@@ -971,9 +971,12 @@ env.AppendUnique(CXXFLAGS = [
     '-Wpointer-arith',
     '-Wcast-align',
     '-Woverloaded-virtual',
-    '-ftemplate-depth-25',
     '-pipe',
     ])
+
+# This used to be in the CXXFlags above, but it started breaking
+# in Fedora-23.  Looks like a useless flag anyway to me. --Ben
+#    '-ftemplate-depth-25',
 
 # Colors screw up display when showing xemacs (my fav editor), so
 # disable them here if we are using clang.
