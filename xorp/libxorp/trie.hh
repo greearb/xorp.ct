@@ -19,7 +19,6 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxorp/trie.hh,v 1.29 2008/10/02 21:57:36 bms Exp $
 
 #ifndef __LIBXORP_TRIE_HH__
 #define __LIBXORP_TRIE_HH__
@@ -244,8 +243,10 @@ public:
 		lo = x->high(); ++lo;
 		hi = n->_right->low(); --hi;
 	    } else if (a <= n->_right->_k.top_addr()) {	// case 4:
-		if (n->_left && a > n->_left->_k.top_addr())
-		    lo = n->_left->high(); ++lo;
+		if (n->_left && a > n->_left->_k.top_addr()) {
+		    lo = n->_left->high();
+		    ++lo;
+		}
 		n = n->_right; // and continue
 	    } else {					// case 5:
 		lo = n->_right->high(); ++lo;

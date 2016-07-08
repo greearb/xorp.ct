@@ -97,7 +97,7 @@ public:
     /**
      * Get number of packets placed on packet queue for output.
      */
-    void packets_sent() const			{ return _pkts_out; }
+     uint32_t packets_sent() const			{ return _pkts_out; }
 
 protected:
     /**
