@@ -297,9 +297,10 @@ RibInTable<A>::lookup_route(const IPNet<A> &net, uint32_t& genid,
 	    new FastPathAttributeList<A>(pa_list);
 	fpa_list_ref = fpa_list;
 	return &(iter.payload());
-    } else
+    } else {
 	fpa_list_ref = NULL;
 	return NULL;
+    }
 }
 
 template<class A>
