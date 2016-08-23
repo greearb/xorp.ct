@@ -99,7 +99,7 @@ def declare_unmarshall(method_name):
 
 def declare_xrl_auto_ptr(method_name):
     xrl_ptr_name = "ap_xrl_%s" % method_name
-    s = xorp_indent(1) + "auto_ptr<Xrl> %s;\n" % xrl_ptr_name
+    s = xorp_indent(1) + "unique_ptr<Xrl> %s;\n" % xrl_ptr_name
     return s
 
 def implement_unmarshall(cls, method_no, method):

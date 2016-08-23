@@ -1356,10 +1356,6 @@ string
 RefTrieNode<A, Payload>::str() const
 {
     string s;
-    if (this == NULL) {
-	s = "NULL";
-	return s;
-    }
     s = c_format("key: %s ", _k.str().c_str());
     if (_p)
 	s += "PL";

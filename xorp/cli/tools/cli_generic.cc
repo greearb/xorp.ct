@@ -220,6 +220,7 @@ CliGeneric::add_arg(const string& arg)
     _last->assign(result.str());
 }
 
+#if 0
 string
 CliGeneric::str() const
 {
@@ -231,6 +232,7 @@ CliGeneric::str() const
 
     return oss.str();
 }
+#endif
 
 void
 CliGeneric::own()

@@ -892,6 +892,7 @@ void cfc_set_check_fn(CplFileConf *cfc, CplCheckFn *chk_fn, void *chk_data)
  */
 CPL_CHECK_FN(cpl_check_exe)
 {
+   (void)data; /* stop compiler warning */
   return _pu_path_is_exe(pathname);
 }
 

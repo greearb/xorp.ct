@@ -69,7 +69,7 @@ PolicyTable<A>::do_filtering(InternalMessage<A>& rtmsg,
 			     bool no_modify) const
 {
     if (!_enable_filtering) {
-	return &rtmsg;
+	return true;
     }
 
     _varrw->attach_route(rtmsg, no_modify);

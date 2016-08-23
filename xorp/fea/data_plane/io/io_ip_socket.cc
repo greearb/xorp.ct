@@ -2368,10 +2368,9 @@ IoIpSocket::send_packet(const string& if_name,
 	    //
 	    struct sockaddr_in sin;
 	    src_address.copy_out(sin);
-	    if (bind(_proto_socket_out,
-		     reinterpret_cast<struct sockaddr*>(&sin),
-		     sizeof(sin))
-		< 0) {
+	    if (::bind(_proto_socket_out,
+		       reinterpret_cast<struct sockaddr*>(&sin),
+		       sizeof(sin)) < 0) {
 		error_msg = c_format("raw socket bind(%s) failed: %s",
 				     cstring(src_address), XSTRERROR);
 		XLOG_ERROR("%s", error_msg.c_str());
