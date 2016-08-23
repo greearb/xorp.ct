@@ -26,6 +26,11 @@
 
 #include "xorp_config.h"
 
+#if __GNUC__ < 6
+#define unique_ptr auto_ptr
+#endif
+
+
 #ifdef HAVE_ENDIAN_H
 #  include <endian.h>
 #endif
