@@ -587,8 +587,10 @@ public:
      * given a key, returns an iterator to the entry with the
      * longest matching prefix.
      */
-    iterator find(const Key &k) const		{
-	return iterator(_root->find(k));
+    iterator find(const Key &k) const {
+	if (_root)
+	    return iterator(_root->find(k));
+	return end();
     }
 
     /**
@@ -623,7 +625,7 @@ public:
      *
      */
     iterator lookup_node(const Key & k) const	{
-	Node *n = _root->find(k);
+	Node *n = (_root) ? _root->find(k) : NULL;
 	return (n && n->k() == k) ? iterator(n) : end();
     }
 
@@ -632,7 +634,7 @@ public:
      * the key passed as parameter.
      */
     iterator search_subtree(const Key &key) const {
-	return iterator(_root->find_subtree(key), key);
+	return (_root) ? iterator(_root->find_subtree(key), key) : end();
     }
 
     /**
@@ -648,7 +650,7 @@ public:
 
 	Key x(key.masked_addr(), key.prefix_len() - 1);
 
-	return iterator(_root->find(x));
+	return (_root) ? iterator(_root->find(x)) : end();
     }
 
     /**
