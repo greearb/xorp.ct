@@ -1124,7 +1124,7 @@ xlog_parse_syslog_spec(const char *syslogspec, int *facility, int *priority)
 
     *facility = xfacility;
 
-    if (priname != NULL && ++priname != '\0') {
+    if (priname != NULL && (*(++priname) != '\0')) {
 	    xpriority = -1;
 	    for (i = 0, sc = &prioritynames[0]; sc->c_val != -1; ++sc, ++i) {
 		if (0 == strcasecmp(sc->c_name, priname)) {
