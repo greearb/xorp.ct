@@ -1,0 +1,3059 @@
+From 4ccd6e5c9625b5200a795ea707aeecd1a23b9c43 Mon Sep 17 00:00:00 2001
+From: Ben Greear <greearb@candelatech.com>
+Date: Fri, 15 Sep 2017 17:12:46 -0700
+Subject: [PATCH 27/33] Remove exceptions from ospf
+
+More to go
+
+Signed-off-by: Ben Greear <greearb@candelatech.com>
+---
+ xorp/ospf/lsa.cc              | 920 +++++++++++++++++++++++-------------------
+ xorp/ospf/lsa.hh              |  86 ++--
+ xorp/ospf/ospf.cc             | 214 +++++-----
+ xorp/ospf/packet.cc           | 297 ++++++++------
+ xorp/ospf/packet.hh           |  35 +-
+ xorp/ospf/peer.cc             |  10 +-
+ xorp/ospf/peer.hh             |   2 +-
+ xorp/ospf/peer_manager.cc     | 120 +++---
+ xorp/ospf/peer_manager.hh     |  24 +-
+ xorp/ospf/tools/print_lsas.cc |   9 +-
+ 10 files changed, 934 insertions(+), 783 deletions(-)
+
+diff --git a/xorp/ospf/lsa.cc b/xorp/ospf/lsa.cc
+index 44be4c2..2f8916e 100644
+--- a/xorp/ospf/lsa.cc
++++ b/xorp/ospf/lsa.cc
+@@ -80,30 +80,27 @@ compute_checksum(uint8_t *buf, size_t len, size_t offset)
+ 
+ /**
+  * Get the length of this LSA and verify that the length is smaller
+- * than the buffer and large enough to be a valid LSA. Otherwise throw
+- * an exception. Don't modify the value if its greater than the
+- * buffer.
++ * than the buffer and large enough to be a valid LSA. Return error (0)
++ * Don't modify the value if its greater than the buffer.
+  */
+-inline
+ size_t
+ get_lsa_len_from_header(const char *caller, uint8_t *buf, size_t len,
+-			size_t min_len)
+-    throw(InvalidPacket)
++			size_t min_len, string& err)
+ {
+     size_t tlen = Lsa_header::get_lsa_len_from_buffer(buf);
+     if (tlen > len) {
+-	xorp_throw(InvalidPacket,
+-		   c_format("%s header len %u larger than buffer %u",
+-			    caller,
+-			    XORP_UINT_CAST(tlen),
+-			    XORP_UINT_CAST(len)));
++	err += c_format("%s header len %u larger than buffer %u",
++			caller,
++			XORP_UINT_CAST(tlen),
++			XORP_UINT_CAST(len));
++	return 0;
+     } else if(tlen < min_len) {
+-	xorp_throw(InvalidPacket,
+-		   c_format("%s header len %u smaller than minimum LSA "
+-			    "of this type %u",
+-			    caller,
+-			    XORP_UINT_CAST(tlen),
+-			    XORP_UINT_CAST(min_len)));
++	err += c_format("%s header len %u smaller than minimum LSA "
++			"of this type %u",
++			caller,
++			XORP_UINT_CAST(tlen),
++			XORP_UINT_CAST(min_len));
++	return 0;
+     } else {
+ 	len = tlen;
+     }
+@@ -117,8 +114,8 @@ Lsa_header::get_lsa_len_from_buffer(uint8_t *ptr)
+     return extract_16(&ptr[18]);
+ }
+ 
+-void
+-Lsa_header::decode(Lsa_header& header, uint8_t *ptr) const throw(InvalidPacket)
++bool
++Lsa_header::decode(Lsa_header& header, uint8_t *ptr, string& err) const
+ {
+     OspfTypes::Version version = get_version();
+ 
+@@ -142,7 +139,8 @@ Lsa_header::decode(Lsa_header& header, uint8_t *ptr) const throw(InvalidPacket)
+     header.set_ls_checksum(extract_16(&ptr[16]));
+     header.set_length(get_lsa_len_from_buffer(&ptr[0]));
+ 
+-//     return header;
++    UNUSED(err);
++    return !header.invalid();
+ }
+ 
+ /**
+@@ -150,18 +148,18 @@ Lsa_header::decode(Lsa_header& header, uint8_t *ptr) const throw(InvalidPacket)
+  * enough space by calling the length() method.
+  */
+ Lsa_header
+-Lsa_header::decode(uint8_t *ptr) const throw(InvalidPacket)
++Lsa_header::decode(uint8_t *ptr, string& err)
+ {
+      Lsa_header header(get_version());
+-     decode(header, ptr);
++     decode(header, ptr, err);
+ 
+      return header;
+ }
+ 
+-void
+-Lsa_header::decode_inline(uint8_t *ptr) throw(InvalidPacket)
++bool
++Lsa_header::decode_inline(uint8_t *ptr, string& err)
+ {
+-    decode(*this, ptr);
++    return decode(*this, ptr, err);
+ }
+ 
+ /**
+@@ -338,7 +336,7 @@ Lsa::set_ls_age(uint16_t age)
+  * enough space by calling the length() method.
+  */
+ Ls_request
+-Ls_request::decode(uint8_t *ptr) throw(InvalidPacket)
++Ls_request::decode(uint8_t *ptr, string& err)
+ {
+     OspfTypes::Version version = get_version();
+ 
+@@ -356,6 +354,7 @@ Ls_request::decode(uint8_t *ptr) throw(InvalidPacket)
+     header.set_link_state_id(extract_32(&ptr[4]));
+     header.set_advertising_router(extract_32(&ptr[8]));
+ 
++    UNUSED(err);
+     return header;
+ }
+ 
+@@ -441,36 +440,39 @@ LsaDecoder::register_unknown_decoder(Lsa *lsa)
+ }
+ 
+ Lsa::LsaRef
+-LsaDecoder::decode(uint8_t *ptr, size_t& len) const throw(InvalidPacket)
++LsaDecoder::decode(uint8_t *ptr, size_t& len, string& err) const
+ {
+     OspfTypes::Version version = get_version();
+     Lsa_header header(version);
+ 
+-    if (len < header.length())
+-	xorp_throw(InvalidPacket,
+-		   c_format("LSA too short %u, must be at least %u",
+-			    XORP_UINT_CAST(len),
+-			    XORP_UINT_CAST(header.length())));
++    if (len < header.length()) {
++	err += c_format("LSA too short %u, must be at least %u",
++			XORP_UINT_CAST(len),
++			XORP_UINT_CAST(header.length()));
++	return NULL;
++    }
+ 
+     // XXX
+     // The LSA header is going to be decoder here and again in the
+     // actual LSA code. Could consider passing in the already decoded header.
+-    header.decode_inline(ptr);
++    header.decode_inline(ptr, err);
++    if (header.invalid())
++	return NULL;
+ 
+     map<uint16_t, Lsa *>::const_iterator i;
+     uint16_t type = header.get_ls_type();
+     i = _lsa_decoders.find(type);
+     if (i == _lsa_decoders.end()) {
+-	if (0 != _unknown_lsa_decoder)
+-	    return _unknown_lsa_decoder->decode(ptr, len);
+-	xorp_throw(InvalidPacket,
+-		   c_format("OSPF Version %u Unknown LSA Type %#x",
+-			    version, type));
++	if (_unknown_lsa_decoder)
++	    return _unknown_lsa_decoder->decode(ptr, len, err);
++	err += c_format("OSPF Version %u Unknown LSA Type %#x",
++			version, type);
++	return NULL;
+     }
+     
+     Lsa *lsa = i->second;
+ 
+-    return lsa->decode(ptr, len);
++    return lsa->decode(ptr, len, err);
+ }
+ 
+ /* IPv6Prefix */
+@@ -485,8 +487,7 @@ IPv6Prefix::length() const
+ 
+ IPv6Prefix
+ IPv6Prefix::decode(uint8_t *ptr, size_t& len, uint8_t prefixlen,
+-		   uint8_t option) const
+-    throw(InvalidPacket)
++		   uint8_t option, string& err) const
+ {
+     OspfTypes::Version version = get_version();
+     XLOG_ASSERT(OspfTypes::V3 == version);
+@@ -496,15 +497,19 @@ IPv6Prefix::decode(uint8_t *ptr, size_t& len, uint8_t prefixlen,
+     
+     uint8_t addr[IPv6::ADDR_BYTELEN];
+     uint32_t bytes = bytes_per_prefix(prefixlen);
+-    if (bytes > sizeof(addr)) 
+-	xorp_throw(InvalidPacket,
+-		   c_format("Prefix length %u larger than %u", bytes,
+-			    XORP_UINT_CAST(sizeof(addr))));
++    if (bytes > sizeof(addr)) {
++	prefix.set_invalid(true);
++	err += c_format("Prefix length %u larger than %u", bytes,
++			XORP_UINT_CAST(sizeof(addr)));
++	return prefix;
++    }
+ 
+-    if (bytes > len)
+-	xorp_throw(InvalidPacket,
+-		   c_format("Prefix length %u larger than packet %u", bytes,
+-			    XORP_UINT_CAST(len)));
++    if (bytes > len) {
++	prefix.set_invalid(true);
++	err += c_format("Prefix length %u larger than packet %u", bytes,
++			XORP_UINT_CAST(len));
++	return prefix;
++    }
+ 
+     memset(&addr[0], 0, IPv6::ADDR_BYTELEN);
+     memcpy(&addr[0], ptr, bytes);
+@@ -574,21 +579,21 @@ RouterLink::length() const
+ }
+ 
+ RouterLink
+-RouterLink::decode(uint8_t *ptr, size_t& len) const throw(InvalidPacket)
++RouterLink::decode(uint8_t *ptr, size_t& len, string& err)
+ {
+-    if (len < length())
+-	xorp_throw(InvalidPacket,
+-		   c_format("RouterLink too short %u, must be at least %u",
+-			    XORP_UINT_CAST(len),
+-			    XORP_UINT_CAST(length())));
+-
+     OspfTypes::Version version = get_version();
+ 
+     RouterLink link(version);
+-
+     uint8_t type;
+     uint8_t tos_number = 0;
+ 
++    if (len < length()) {
++	err += c_format("RouterLink too short %u, must be at least %u",
++			XORP_UINT_CAST(len),
++			XORP_UINT_CAST(length()));
++	goto out_err;
++    }
++
+     switch (version) {
+     case OspfTypes::V2:
+ 	link.set_link_id(extract_32(&ptr[0]));
+@@ -609,10 +614,9 @@ RouterLink::decode(uint8_t *ptr, size_t& len) const throw(InvalidPacket)
+ 	    link.set_type(vlink);
+ 	    break;
+ 	default:
+-	    xorp_throw(InvalidPacket,
+-		   c_format("RouterLink illegal type should be 0..4 not %u",
+-			    XORP_UINT_CAST(type)));
+-		break;
++	    err += c_format("RouterLink illegal type should be 0..4 not %u",
++			    XORP_UINT_CAST(type));
++	    goto out_err;
+ 	}
+ 	link.set_metric(extract_16(&ptr[10]));
+ 	// XXX - This LSA may be carrying more metric info for other
+@@ -634,10 +638,9 @@ RouterLink::decode(uint8_t *ptr, size_t& len) const throw(InvalidPacket)
+ 	    link.set_type(vlink);
+ 	    break;
+ 	default:
+-	    xorp_throw(InvalidPacket,
+-	    c_format("RouterLink illegal type should be 1,2 or 4 not %u",
+-			    XORP_UINT_CAST(type)));
+-		break;
++	    err += c_format("RouterLink illegal type should be 1,2 or 4 not %u",
++			    XORP_UINT_CAST(type));
++	    goto out_err;
+ 	}
+ 	if (0 != ptr[1])
+ 	    XLOG_INFO("RouterLink field that should be zero is %u", ptr[1]);
+@@ -651,6 +654,10 @@ RouterLink::decode(uint8_t *ptr, size_t& len) const throw(InvalidPacket)
+     len = length() + tos_number * 4;
+ 
+     return link;
++
++  out_err:
++    link.set_invalid(true);
++    return link;
+ }
+ 
+ /**
+@@ -758,36 +765,40 @@ RouterLink::str() const
+ }
+ 
+ Lsa::LsaRef
+-UnknownLsa::decode(uint8_t *buf, size_t& len) const throw(InvalidPacket)
++UnknownLsa::decode(uint8_t *buf, size_t& len, string& err) const
+ {
+     OspfTypes::Version version = get_version();
+ 
+     size_t header_length = _header.length();
+     size_t required = header_length + min_length();
+ 
+-    if (len < required)
+-	xorp_throw(InvalidPacket,
+-		   c_format("Unknown-LSA too short %u, must be at least %u",
+-			    XORP_UINT_CAST(len),
+-			    XORP_UINT_CAST(required)));
++    if (len < required) {
++	err += c_format("Unknown-LSA too short %u, must be at least %u",
++			XORP_UINT_CAST(len),
++			XORP_UINT_CAST(required));
++	return NULL;
++    }
+ 
+-    // This guy throws an exception of there is a problem.
+-    len = get_lsa_len_from_header("Unknown-LSA", buf, len, required);
++    len = get_lsa_len_from_header("Unknown-LSA", buf, len, required, err);
++    if (len == 0)
++	return NULL;
+ 
+     // Verify the checksum.
+-    if (!verify_checksum(buf + 2, len - 2, 16 - 2))
+-	xorp_throw(InvalidPacket, c_format("LSA Checksum failed"));
++    if (!verify_checksum(buf + 2, len - 2, 16 - 2)) {
++	err += "LSA Checksum failed";
++	return NULL;
++    }
+ 
+     UnknownLsa *lsa = 0;
+-    try {
+-	lsa = new UnknownLsa(version, buf, len);
+ 
+-	// Decode the LSA Header.
+-	lsa->_header.decode_inline(buf);
+-	
+-    } catch(InvalidPacket& e) {
++    lsa = new UnknownLsa(version, buf, len);
++
++    // Decode the LSA Header.
++    lsa->_header.decode_inline(buf, err);
++
++    if (lsa->invalid() || lsa->_header.invalid()) {
+ 	delete lsa;
+-	throw e;
++	return NULL;
+     }
+ 
+     return Lsa::LsaRef(lsa);
+@@ -815,82 +826,94 @@ UnknownLsa::str() const
+ }
+ 
+ Lsa::LsaRef
+-RouterLsa::decode(uint8_t *buf, size_t& len) const throw(InvalidPacket)
++RouterLsa::decode(uint8_t *buf, size_t& len, string& err) const
+ {
+     OspfTypes::Version version = get_version();
+ 
++    RouterLsa *lsa = NULL;
+     size_t header_length = _header.length();
+     size_t required = header_length + min_length();
++    size_t nlinks = 0;	// Number of Links OSPFv2 Only
++    uint8_t flag;
++
++    if (len < required) {
++	err += c_format("Router-LSA too short %u, must be at least %u",
++			XORP_UINT_CAST(len),
++			XORP_UINT_CAST(required));
++	goto out;
++    }
+ 
+-    if (len < required)
+-	xorp_throw(InvalidPacket,
+-		   c_format("Router-LSA too short %u, must be at least %u",
+-			    XORP_UINT_CAST(len),
+-			    XORP_UINT_CAST(required)));
+-
+-    // This guy throws an exception of there is a problem.
+-    len = get_lsa_len_from_header("Router-LSA", buf, len, required);
++    len = get_lsa_len_from_header("Router-LSA", buf, len, required, err);
++    if (len == 0)
++	goto out;
+ 
+     // Verify the checksum.
+-    if (!verify_checksum(buf + 2, len - 2, 16 - 2))
+-	xorp_throw(InvalidPacket, c_format("LSA Checksum failed"));
++    if (!verify_checksum(buf + 2, len - 2, 16 - 2)) {
++	err += "LSA Checksum failed";
++	goto out;
++    }
+ 
+-    RouterLsa *lsa = 0;
+-    try {
+-	lsa = new RouterLsa(version, buf, len);
+-	size_t nlinks = 0;	// Number of Links OSPFv2 Only
++    lsa = new RouterLsa(version, buf, len);
+ 
+-	// Decode the LSA Header.
+-	lsa->_header.decode_inline(buf);
+-	
+-	uint8_t flag = buf[header_length];
+-	switch(version) {
+-	case OspfTypes::V2:
+-	    lsa->set_nt_bit(flag & 0x10);
+-	    lsa->set_v_bit(flag & 0x4);
+-	    lsa->set_e_bit(flag & 0x2);
+-	    lsa->set_b_bit(flag & 0x1);
+-	    nlinks = extract_16(&buf[header_length + 2]);
+-	    break;
+-	case OspfTypes::V3:
+-	    lsa->set_nt_bit(flag & 0x10);
+-	    lsa->set_w_bit(flag & 0x8);
+-	    lsa->set_v_bit(flag & 0x4);
+-	    lsa->set_e_bit(flag & 0x2);
+-	    lsa->set_b_bit(flag & 0x1);
+-	    lsa->set_options(extract_24(&buf[header_length + 1]));
+-	    break;
+-	}
++    // Decode the LSA Header.
++    lsa->_header.decode_inline(buf, err);
++    if (lsa->_header.invalid())
++	goto out;
++
++    flag = buf[header_length];
++    switch(version) {
++    case OspfTypes::V2:
++	lsa->set_nt_bit(flag & 0x10);
++	lsa->set_v_bit(flag & 0x4);
++	lsa->set_e_bit(flag & 0x2);
++	lsa->set_b_bit(flag & 0x1);
++	nlinks = extract_16(&buf[header_length + 2]);
++	break;
++    case OspfTypes::V3:
++	lsa->set_nt_bit(flag & 0x10);
++	lsa->set_w_bit(flag & 0x8);
++	lsa->set_v_bit(flag & 0x4);
++	lsa->set_e_bit(flag & 0x2);
++	lsa->set_b_bit(flag & 0x1);
++	lsa->set_options(extract_24(&buf[header_length + 1]));
++	break;
++    }
+ 
++    {
+ 	// Extract the router links
+ 	RouterLink rl(version);
+ 	uint8_t *start = &buf[header_length + 4];
+ 	uint8_t *end = &buf[len];
+ 	while(start < end) {
+ 	    size_t link_len = end - start;
+-	    lsa->get_router_links().push_back(rl.decode(start, link_len));
++	    RouterLink r2 = rl.decode(start, link_len, err);
++	    if (r2.invalid())
++		goto out;
++	    lsa->get_router_links().push_back(r2);
+ 	    XLOG_ASSERT(0 != link_len);
+ 	    start += link_len;
+ 	}
++    }
+ 
+-	switch(version) {
+-	case OspfTypes::V2:
+-	    if (nlinks != lsa->get_router_links().size())
+-		xorp_throw(InvalidPacket,
+-			   c_format(
+-				    "Router-LSA mismatch in router links"
+-				    " expected %u received %u",
+-				    XORP_UINT_CAST(nlinks),
+-				    XORP_UINT_CAST(lsa->
+-						   get_router_links().size())));
+-	    break;
+-	case OspfTypes::V3:
+-	    break;
++    switch(version) {
++    case OspfTypes::V2:
++	if (nlinks != lsa->get_router_links().size()) {
++	    err += c_format("Router-LSA mismatch in router links"
++			    " expected %u received %u",
++			    XORP_UINT_CAST(nlinks),
++			    XORP_UINT_CAST(lsa->get_router_links().size()));
++	    lsa->set_invalid(true);
++	    goto out;
+ 	}
++	break;
++    case OspfTypes::V3:
++	break;
++    }
+ 
+-    } catch(InvalidPacket& e) {
++  out:
++    if (lsa && lsa->invalid()) {
+ 	delete lsa;
+-	throw e;
++	lsa = NULL;
+     }
+ 
+     return Lsa::LsaRef(lsa);
+@@ -1010,55 +1033,67 @@ RouterLsa::str() const
+ }
+ 
+ Lsa::LsaRef
+-NetworkLsa::decode(uint8_t *buf, size_t& len) const throw(InvalidPacket)
++NetworkLsa::decode(uint8_t *buf, size_t& len, string& err) const
+ {
+     OspfTypes::Version version = get_version();
+ 
++    NetworkLsa *lsa = NULL;
+     size_t header_length = _header.length();
+     size_t required = header_length + min_length();
++    uint8_t *start = 0;
+ 
+-    if (len < required)
+-	xorp_throw(InvalidPacket,
+-		   c_format("Network-LSA too short %u, must be at least %u",
+-			    XORP_UINT_CAST(len),
+-			    XORP_UINT_CAST(required)));
++    if (len < required) {
++	err += c_format("Network-LSA too short %u, must be at least %u",
++			XORP_UINT_CAST(len),
++			XORP_UINT_CAST(required));
++	goto out;
++    }
+ 
+-    // This guy throws an exception of there is a problem.
+-    len = get_lsa_len_from_header("Network-LSA", buf, len, required);
++    len = get_lsa_len_from_header("Network-LSA", buf, len, required, err);
++    if (len == 0)
++	goto out;
+ 
+     // Verify the checksum.
+-    if (!verify_checksum(buf + 2, len - 2, 16 - 2))
+-	xorp_throw(InvalidPacket, c_format("LSA Checksum failed"));
++    if (!verify_checksum(buf + 2, len - 2, 16 - 2)) {
++	err += "LSA Checksum failed";
++	goto out;
++    }
+ 
+-    NetworkLsa *lsa = 0;
+-    try {
+-	lsa = new NetworkLsa(version, buf, len);
++    lsa = new NetworkLsa(version, buf, len);
+ 
+-	// Decode the LSA Header.
+-	lsa->_header.decode_inline(buf);
+-	uint8_t *start = 0;
+-	switch(version) {
+-	case OspfTypes::V2:
+-	    lsa->set_network_mask(extract_32(&buf[header_length]));
+-	    start = &buf[header_length + 4];
+-	    break;
+-	case OspfTypes::V3:
+-	    lsa->set_options(extract_24(&buf[header_length + 1]));
+-	    start = &buf[header_length + 4];
+-	    break;
+-	}
++    // Decode the LSA Header.
++    lsa->_header.decode_inline(buf, err);
++    if (lsa->_header.invalid())
++	goto out;
++
++    switch(version) {
++    case OspfTypes::V2:
++	lsa->set_network_mask(extract_32(&buf[header_length]));
++	start = &buf[header_length + 4];
++	break;
++    case OspfTypes::V3:
++	lsa->set_options(extract_24(&buf[header_length + 1]));
++	start = &buf[header_length + 4];
++	break;
++    }
+ 
++    {
+ 	uint8_t *end = &buf[len];
+ 	while(start < end) {
+-	    if (!(start < end))
+-		xorp_throw(InvalidPacket, c_format("Network-LSA too short"));
++	    if (!(start < end)) {
++		err += "Network-LSA too short";
++		lsa->set_invalid(true);
++		goto out;
++	    }
+ 	    lsa->get_attached_routers().push_back(extract_32(start));
+ 	    start += 4;
+ 	}
++    }
+ 
+-    } catch(InvalidPacket& e) {
++  out:
++    if (lsa && lsa->invalid()) {
+ 	delete lsa;
+-	throw e;
++	lsa = NULL;
+     }
+ 
+     return Lsa::LsaRef(lsa);
+@@ -1166,58 +1201,72 @@ NetworkLsa::str() const
+ }
+ 
+ Lsa::LsaRef
+-SummaryNetworkLsa::decode(uint8_t *buf, size_t& len) const throw(InvalidPacket)
++SummaryNetworkLsa::decode(uint8_t *buf, size_t& len, string& err) const
+ {
+     OspfTypes::Version version = get_version();
+ 
++    SummaryNetworkLsa *lsa = NULL;
+     size_t header_length = _header.length();
+     size_t required = header_length + min_length();
+ 
+-    if (len < required)
+-	xorp_throw(InvalidPacket,
+-		   c_format("Summary-LSA too short %u, must be at least %u",
+-			    XORP_UINT_CAST(len),
+-			    XORP_UINT_CAST(required)));
++    if (len < required) {
++	err += c_format("Summary-LSA too short %u, must be at least %u",
++			XORP_UINT_CAST(len),
++			XORP_UINT_CAST(required));
++	goto out;
++    }
+ 
+-    // This guy throws an exception of there is a problem.
+-    len = get_lsa_len_from_header("Summary-LSA", buf, len, required);
++    len = get_lsa_len_from_header("Summary-LSA", buf, len, required, err);
++    if (len == 0)
++	goto out;
+ 
+     // Verify the checksum.
+-    if (!verify_checksum(buf + 2, len - 2, 16 - 2))
+-	xorp_throw(InvalidPacket, c_format("LSA Checksum failed"));
++    if (!verify_checksum(buf + 2, len - 2, 16 - 2)) {
++	err += "LSA Checksum failed";
++	goto out;
++    }
+ 
+-    SummaryNetworkLsa *lsa = 0;
+-    try {
+-	lsa = new SummaryNetworkLsa(version, buf, len);
+ 
+-	// Decode the LSA Header.
+-	lsa->_header.decode_inline(buf);
+-	switch(version) {
+-	case OspfTypes::V2:
+-	    lsa->set_network_mask(extract_32(&buf[header_length]));
+-	    lsa->set_metric(extract_24(&buf[header_length + 5]));
+-	    break;
+-	case OspfTypes::V3:
+-	    lsa->set_metric(extract_24(&buf[header_length + 1]));
+-	    IPv6Prefix prefix(version);
+-	    size_t space = len - IPV6_PREFIX_OFFSET;
+-	    IPv6Prefix prefix_decoder(version);
+-	    prefix = prefix_decoder.decode(&buf[header_length + 8],
+-					   space,
+-					   buf[header_length + 4],
+-					   buf[header_length + 5]);
+-	    size_t space_left = (len - (IPV6_PREFIX_OFFSET + space));
+-	    if (0 != space_left) 
+-		xorp_throw(InvalidPacket,
+-			   c_format("Space left in LSA %u bytes",
+-				    XORP_UINT_CAST(space_left)));
+-	    lsa->set_ipv6prefix(prefix);
+-	    break;
++    lsa = new SummaryNetworkLsa(version, buf, len);
++
++    // Decode the LSA Header.
++    lsa->_header.decode_inline(buf, err);
++    if (lsa->_header.invalid())
++	goto out;
++    switch(version) {
++    case OspfTypes::V2:
++	lsa->set_network_mask(extract_32(&buf[header_length]));
++	lsa->set_metric(extract_24(&buf[header_length + 5]));
++	break;
++    case OspfTypes::V3: {
++	lsa->set_metric(extract_24(&buf[header_length + 1]));
++	IPv6Prefix prefix(version);
++	size_t space = len - IPV6_PREFIX_OFFSET;
++	IPv6Prefix prefix_decoder(version);
++	prefix = prefix_decoder.decode(&buf[header_length + 8],
++				       space,
++				       buf[header_length + 4],
++				       buf[header_length + 5], err);
++	if (prefix.invalid()) {
++	    lsa->set_invalid(true);
++	    goto out;
++	}
++	size_t space_left = (len - (IPV6_PREFIX_OFFSET + space));
++	if (0 != space_left) {
++	    err += c_format("Space left in LSA %u bytes",
++			    XORP_UINT_CAST(space_left));
++	    lsa->set_invalid(true);
++	    goto out;
+ 	}
++	lsa->set_ipv6prefix(prefix);
++	break;
++    }
++    }
+ 
+-    } catch(InvalidPacket& e) {
++  out:
++    if (lsa && lsa->invalid()) {
+ 	delete lsa;
+-	throw e;
++	lsa = NULL;
+     }
+ 
+     return Lsa::LsaRef(lsa);
+@@ -1310,47 +1359,53 @@ SummaryNetworkLsa::str() const
+ }
+ 
+ Lsa::LsaRef
+-SummaryRouterLsa::decode(uint8_t *buf, size_t& len) const throw(InvalidPacket)
++SummaryRouterLsa::decode(uint8_t *buf, size_t& len, string& err) const
+ {
+     OspfTypes::Version version = get_version();
+ 
++    SummaryRouterLsa *lsa = NULL;
+     size_t header_length = _header.length();
+     size_t required = header_length + min_length();
+ 
+-    if (len < required)
+-	xorp_throw(InvalidPacket,
+-		   c_format("Summary-LSA too short %u, must be at least %u",
+-			    XORP_UINT_CAST(len),
+-			    XORP_UINT_CAST(required)));
++    if (len < required) {
++	err += c_format("Summary-LSA too short %u, must be at least %u",
++			XORP_UINT_CAST(len),
++			XORP_UINT_CAST(required));
++	goto out;
++    }
+ 
+-    // This guy throws an exception of there is a problem.
+-    len = get_lsa_len_from_header("Summary-LSA", buf, len, required);
++    len = get_lsa_len_from_header("Summary-LSA", buf, len, required, err);
++    if (len == 0)
++	goto out;
+ 
+     // Verify the checksum.
+-    if (!verify_checksum(buf + 2, len - 2, 16 - 2))
+-	xorp_throw(InvalidPacket, c_format("LSA Checksum failed"));
++    if (!verify_checksum(buf + 2, len - 2, 16 - 2)) {
++	err += "LSA Checksum failed";
++	goto out;
++    }
+ 
+-    SummaryRouterLsa *lsa = 0;
+-    try {
+-	lsa = new SummaryRouterLsa(version, buf, len);
++    lsa = new SummaryRouterLsa(version, buf, len);
+ 
+-	// Decode the LSA Header.
+-	lsa->_header.decode_inline(buf);
+-	switch(version) {
+-	case OspfTypes::V2:
+-	    lsa->set_network_mask(extract_32(&buf[header_length]));
+-	    lsa->set_metric(extract_24(&buf[header_length + 5]));
+-	    break;
+-	case OspfTypes::V3:
+-	    lsa->set_options(extract_24(&buf[header_length + 1]));
+-	    lsa->set_metric(extract_24(&buf[header_length + 5]));
+-	    lsa->set_destination_id(extract_32(&buf[header_length + 8]));
+-	    break;
+-	}
++    // Decode the LSA Header.
++    lsa->_header.decode_inline(buf, err);
++    if (lsa->_header.invalid())
++	goto out;
++    switch(version) {
++    case OspfTypes::V2:
++	lsa->set_network_mask(extract_32(&buf[header_length]));
++	lsa->set_metric(extract_24(&buf[header_length + 5]));
++	break;
++    case OspfTypes::V3:
++	lsa->set_options(extract_24(&buf[header_length + 1]));
++	lsa->set_metric(extract_24(&buf[header_length + 5]));
++	lsa->set_destination_id(extract_32(&buf[header_length + 8]));
++	break;
++    }
+ 
+-    } catch(InvalidPacket& e) {
++  out:
++    if (lsa && lsa->invalid()) {
+ 	delete lsa;
+-	throw e;
++	lsa = NULL;
+     }
+ 
+     return Lsa::LsaRef(lsa);
+@@ -1445,93 +1500,107 @@ SummaryRouterLsa::str() const
+ }
+ 
+ Lsa::LsaRef
+-ASExternalLsa::decode(uint8_t *buf, size_t& len) const throw(InvalidPacket)
++ASExternalLsa::decode(uint8_t *buf, size_t& len, string& err) const
+ {
+     OspfTypes::Version version = get_version();
+ 
++    ASExternalLsa *lsa = NULL;
+     size_t header_length = _header.length();
+     size_t required = header_length + min_length();
++    uint8_t flag;
++
++    if (len < required) {
++	err += c_format("AS-External-LSA too short %u, "
++			"must be at least %u",
++			XORP_UINT_CAST(len),
++			XORP_UINT_CAST(required));
++	goto out;
++    }
+ 
+-    if (len < required)
+-	xorp_throw(InvalidPacket,
+-		   c_format("AS-External-LSA too short %u, "
+-			    "must be at least %u",
+-			    XORP_UINT_CAST(len),
+-			    XORP_UINT_CAST(required)));
+-
+-    // This guy throws an exception of there is a problem.
+-    len = get_lsa_len_from_header("AS-External-LSA", buf, len, required);
++    len = get_lsa_len_from_header("AS-External-LSA", buf, len, required, err);
++    if (len == 0)
++	goto out;
+ 
+     // Verify the checksum.
+-    if (!verify_checksum(buf + 2, len - 2, 16 - 2))
+-	xorp_throw(InvalidPacket, c_format("LSA Checksum failed"));
++    if (!verify_checksum(buf + 2, len - 2, 16 - 2)) {
++	err += "LSA Checksum failed";
++	goto out;
++    }
+ 
+-    ASExternalLsa *lsa = 0;
+-    try {
+-	// lsa = new this(version, buf, len);
+-	lsa = donew(version, buf, len);
++    // lsa = new this(version, buf, len);
++    lsa = donew(version, buf, len);
+ 
+-	// Decode the LSA Header.
+-	lsa->_header.decode_inline(buf);
+-	uint8_t flag;
+-	switch(version) {
+-	case OspfTypes::V2: {
+-	    lsa->set_network_mask(extract_32(&buf[header_length]));
+-	    flag = buf[header_length + 4];
+-	    lsa->set_e_bit(flag & 0x80);
+-	    lsa->set_metric(extract_24(&buf[header_length + 5]));
+-	    IPv4 forwarding_address;
+-	    forwarding_address.copy_in(&buf[header_length + 8]);
+-	    lsa->set_forwarding_address_ipv4(forwarding_address);
+-	    lsa->set_external_route_tag(extract_32(&buf[header_length + 12]));
++    // Decode the LSA Header.
++    lsa->_header.decode_inline(buf, err);
++    if (lsa->_header.invalid())
++	goto out;
++    switch(version) {
++    case OspfTypes::V2: {
++	lsa->set_network_mask(extract_32(&buf[header_length]));
++	flag = buf[header_length + 4];
++	lsa->set_e_bit(flag & 0x80);
++	lsa->set_metric(extract_24(&buf[header_length + 5]));
++	IPv4 forwarding_address;
++	forwarding_address.copy_in(&buf[header_length + 8]);
++	lsa->set_forwarding_address_ipv4(forwarding_address);
++	lsa->set_external_route_tag(extract_32(&buf[header_length + 12]));
++	break;
++    }
++    case OspfTypes::V3:
++	flag = buf[header_length];
++	lsa->set_e_bit(flag & 0x4);
++	lsa->set_f_bit(flag & 0x2);
++	lsa->set_t_bit(flag & 0x1);
++	lsa->set_metric(extract_24(&buf[header_length + 1]));
++	lsa->set_referenced_ls_type(extract_16(&buf[header_length + 6]));
++	size_t space = len - IPV6_PREFIX_OFFSET;
++	IPv6Prefix prefix_decoder(version);
++	IPv6Prefix p6 = prefix_decoder.decode(&buf[header_length + 8],
++					      space,
++					      buf[header_length + 4],
++					      buf[header_length + 5], err);
++	if (p6.invalid()) {
++	    lsa->set_invalid(true);
++	    goto out;
+ 	}
+-	    break;
+-	case OspfTypes::V3:
+-	    flag = buf[header_length];
+-	    lsa->set_e_bit(flag & 0x4);
+-	    lsa->set_f_bit(flag & 0x2);
+-	    lsa->set_t_bit(flag & 0x1);
+-	    lsa->set_metric(extract_24(&buf[header_length + 1]));
+- 	    lsa->set_referenced_ls_type(extract_16(&buf[header_length + 6]));
+-	    size_t space = len - IPV6_PREFIX_OFFSET;
+-	    IPv6Prefix prefix_decoder(version);
+-	    lsa->set_ipv6prefix(prefix_decoder.decode(&buf[header_length + 8],
+-						      space,
+-						      buf[header_length + 4],
+-						      buf[header_length + 5]));
+-	    size_t index = header_length + 8 + space;
+-	    if (lsa->get_f_bit()) {
+-		if (index + IPv6::ADDR_BYTELEN > len)
+-		    xorp_throw(InvalidPacket,
+-			       c_format("AS-External-LSA"
+-					" bit F set, packet too short"));
+-		IPv6 address;
+-		address.copy_in(&buf[index]);
+-		lsa->set_forwarding_address_ipv6(address);
+-		index += IPv6::ADDR_BYTELEN;
++	lsa->set_ipv6prefix(p6);
++
++	size_t index = header_length + 8 + space;
++	if (lsa->get_f_bit()) {
++	    if (index + IPv6::ADDR_BYTELEN > len) {
++		err += "AS-External-LSA bit F set, packet too short";
++		lsa->set_invalid(true);
++		goto out;
+ 	    }
+-	    if (lsa->get_t_bit()) {
+-		if (index + 4 > len)
+-		    xorp_throw(InvalidPacket,
+-			       c_format("AS-External-LSA"
+-					" bit T set, packet too short"));
+-		lsa->set_external_route_tag(extract_32(&buf[index]));
+-		index += 4;
++	    IPv6 address;
++	    address.copy_in(&buf[index]);
++	    lsa->set_forwarding_address_ipv6(address);
++	    index += IPv6::ADDR_BYTELEN;
++	}
++	if (lsa->get_t_bit()) {
++	    if (index + 4 > len) {
++		err += "AS-External-LSA bit T set, packet too short";
++		lsa->set_invalid(true);
++		goto out;
+ 	    }
+-	    if (0 != lsa->get_referenced_ls_type()) {
+-		if (index + 4 > len)
+-		    xorp_throw(InvalidPacket,
+-			       c_format("AS-External-LSA"
+-					" Referenced LS Type set, "
+-					"packet too short"));
+-		lsa->set_referenced_link_state_id(extract_32(&buf[index]));
++	    lsa->set_external_route_tag(extract_32(&buf[index]));
++	    index += 4;
++	}
++	if (0 != lsa->get_referenced_ls_type()) {
++	    if (index + 4 > len) {
++		err += "AS-External-LSA Referenced LS Type set, packet too short";
++		lsa->set_invalid(true);
++		goto out;
+ 	    }
+-	    break;
++	    lsa->set_referenced_link_state_id(extract_32(&buf[index]));
+ 	}
++	break;
++    }
+ 
+-    } catch(InvalidPacket& e) {
++  out:
++    if (lsa && lsa->invalid()) {
+ 	delete lsa;
+-	throw e;
++	lsa = NULL;
+     }
+ 
+     return Lsa::LsaRef(lsa);
+@@ -1736,71 +1805,90 @@ ASExternalLsa::str() const
+ }
+ 
+ Lsa::LsaRef
+-LinkLsa::decode(uint8_t *buf, size_t& len) const throw(InvalidPacket)
++LinkLsa::decode(uint8_t *buf, size_t& len, string& err) const
+ {
+     OspfTypes::Version version = get_version();
+     XLOG_ASSERT(OspfTypes::V3 == version);
+ 
++    LinkLsa *lsa = NULL;
+     size_t header_length = _header.length();
+     size_t required = header_length + min_length();
++    uint8_t *start = 0;
++    IPv6 address;
++    size_t prefix_num;
++    uint8_t *end;
++    IPv6Prefix decoder(version);
++
++    if (len < required) {
++	err += c_format("Link-LSA too short %u, must be at least %u",
++			XORP_UINT_CAST(len),
++			XORP_UINT_CAST(required));
++	goto out;
++    }
+ 
+-    if (len < required)
+-	xorp_throw(InvalidPacket,
+-		   c_format("Link-LSA too short %u, must be at least %u",
+-			    XORP_UINT_CAST(len),
+-			    XORP_UINT_CAST(required)));
+-
+-    // This guy throws an exception of there is a problem.
+-    len = get_lsa_len_from_header("Link-LSA", buf, len, required);
++    len = get_lsa_len_from_header("Link-LSA", buf, len, required, err);
++    if (len == 0)
++	goto out;
+ 
+     // Verify the checksum.
+-    if (!verify_checksum(buf + 2, len - 2, 16 - 2))
+-	xorp_throw(InvalidPacket, c_format("LSA Checksum failed"));
+-
+-    LinkLsa *lsa = 0;
+-    try {
+-	lsa = new LinkLsa(version, buf, len);
+-
+-	// Decode the LSA Header.
+-	lsa->_header.decode_inline(buf);
+-	uint8_t *start = 0;
+-
+-	lsa->set_rtr_priority(extract_8(&buf[header_length + 0]));
+-	lsa->set_options(extract_24(&buf[header_length + 1]));
+-	IPv6 address;
+-	address.copy_in(&buf[header_length + 4]);
+-	lsa->set_link_local_address(address);
+-	size_t prefix_num = extract_32(&buf[header_length + 4 +
+-					    IPv6::ADDR_BYTELEN]);
++    if (!verify_checksum(buf + 2, len - 2, 16 - 2)) {
++	err += "LSA Checksum failed";
++	goto out;
++    }
+ 
+-	start = &buf[header_length + 4 + IPv6::ADDR_BYTELEN + 4];
+-	uint8_t *end = &buf[len];
+-	IPv6Prefix decoder(version);
+-	while(start < end) {
+-	    if (!(start + 2 < end))
+-		xorp_throw(InvalidPacket, c_format("Link-LSA too short"));
+-	    size_t space = end - (start + 4);
+-	    IPv6Prefix prefix = decoder.decode(start + 4, space,
+-					       extract_8(start),
+-					       extract_8(start + 1));
+- 	    lsa->get_prefixes().push_back(prefix);
+-	    start += (space + 4);
+-	    if (0 == --prefix_num) {
+-		if (start != end)
+-		    xorp_throw(InvalidPacket,
+-			       c_format("Link-LSA # prefixes read data left"));
+-		break;
++    lsa = new LinkLsa(version, buf, len);
++
++    // Decode the LSA Header.
++    lsa->_header.decode_inline(buf, err);
++    if (lsa->_header.invalid())
++	goto out;
++
++    lsa->set_rtr_priority(extract_8(&buf[header_length + 0]));
++    lsa->set_options(extract_24(&buf[header_length + 1]));
++    address.copy_in(&buf[header_length + 4]);
++    lsa->set_link_local_address(address);
++    prefix_num = extract_32(&buf[header_length + 4 + IPv6::ADDR_BYTELEN]);
++
++    start = &buf[header_length + 4 + IPv6::ADDR_BYTELEN + 4];
++    end = &buf[len];
++    while(start < end) {
++	if (!(start + 2 < end)) {
++	    err += "Link-LSA too short";
++	    lsa->set_invalid(true);
++	    goto out;
++	}
++	size_t space = end - (start + 4);
++	IPv6Prefix prefix = decoder.decode(start + 4, space,
++					   extract_8(start),
++					   extract_8(start + 1), err);
++	if (prefix.invalid()) {
++	    lsa->set_invalid(true);
++	    goto out;
++	}
++	lsa->get_prefixes().push_back(prefix);
++	start += (space + 4);
++	if (0 == --prefix_num) {
++	    if (start != end) {
++		err += "Link-LSA # prefixes read data left";
++		lsa->set_invalid(true);
++		goto out;
+ 	    }
++	    break;
+ 	}
+-	if (0 != prefix_num)
+-	    if (start != end)
+-		xorp_throw(InvalidPacket,
+-			   c_format("Link-LSA # %d left buffer depleted",
+-				    XORP_UINT_CAST(prefix_num)));
+-
+-    } catch(InvalidPacket& e) {
++    }
++    if (0 != prefix_num) {
++	if (start != end) {
++	    err += c_format("Link-LSA # %d left buffer depleted",
++			    XORP_UINT_CAST(prefix_num));
++	    lsa->set_invalid(true);
++	    goto out;
++	}
++    }
++    
++  out:
++    if (lsa && lsa->invalid()) {
+ 	delete lsa;
+-	throw e;
++	lsa = NULL;
+     }
+ 
+     return Lsa::LsaRef(lsa);
+@@ -1881,75 +1969,91 @@ LinkLsa::str() const
+ }
+ 
+ Lsa::LsaRef
+-IntraAreaPrefixLsa::decode(uint8_t *buf, size_t& len) const 
+-    throw(InvalidPacket)
++IntraAreaPrefixLsa::decode(uint8_t *buf, size_t& len, string& err) const
+ {
+     OspfTypes::Version version = get_version();
+     XLOG_ASSERT(OspfTypes::V3 == version);
+ 
++    IntraAreaPrefixLsa *lsa = NULL;
+     size_t header_length = _header.length();
+     size_t required = header_length + min_length();
++    uint8_t *start;
++    size_t prefix_num;
++    uint8_t *end;
++    IPv6Prefix decoder(version, true);
++
++    if (len < required) {
++	err += c_format("Intra-Area-Prefix-LSA too short %u, "
++			"must be at least %u",
++			XORP_UINT_CAST(len),
++			XORP_UINT_CAST(required));
++	goto out;
++    }
+ 
+-    if (len < required)
+-	xorp_throw(InvalidPacket,
+-		   c_format("Intra-Area-Prefix-LSA too short %u, "
+-			    "must be at least %u",
+-			    XORP_UINT_CAST(len),
+-			    XORP_UINT_CAST(required)));
+-
+-    // This guy throws an exception of there is a problem.
+-    len = get_lsa_len_from_header("Intra-Area-Prefix-LSA", buf, len, required);
++    len = get_lsa_len_from_header("Intra-Area-Prefix-LSA", buf, len, required, err);
++    if (len == 0)
++	goto out;
+ 
+     // Verify the checksum.
+-    if (!verify_checksum(buf + 2, len - 2, 16 - 2))
+-	xorp_throw(InvalidPacket, c_format("LSA Checksum failed"));
+-
+-    IntraAreaPrefixLsa *lsa = 0;
+-    try {
+-	lsa = new IntraAreaPrefixLsa(version, buf, len);
+-
+-	// Decode the LSA Header.
+-	lsa->_header.decode_inline(buf);
+-	uint8_t *start = 0;
+-
+-	size_t prefix_num = extract_16(&buf[header_length]);
+-	lsa->set_referenced_ls_type(extract_16(&buf[header_length + 2]));
+-	lsa->set_referenced_link_state_id(extract_32(&buf[header_length + 4]));
+-	lsa->set_referenced_advertising_router(extract_32(&buf[header_length +
+-							       8]));
++    if (!verify_checksum(buf + 2, len - 2, 16 - 2)) {
++	err += "LSA Checksum failed";
++	goto out;
++    }
+ 
+-	start = &buf[header_length + 2 + 2 + 4 + 4];
+-	uint8_t *end = &buf[len];
+-	IPv6Prefix decoder(version, true);
+-	while(start < end) {
+-	    if (!(start + 2 < end))
+-		xorp_throw(InvalidPacket, c_format("Intra-Area-Prefix-LSA "
+-						   "too short"));
+-	    size_t space = end - (start + 4);
+-	    IPv6Prefix prefix = decoder.decode(start + 4, space,
+-					       extract_8(start),
+-					       extract_8(start + 1));
+-	    prefix.set_metric(extract_16(start + 2));
+- 	    lsa->get_prefixes().push_back(prefix);
+-	    start += (space + 4);
+-	    if (0 == --prefix_num) {
+-		if (start != end)
+-		    xorp_throw(InvalidPacket,
+-			       c_format("Intra-Area-Prefix-LSA # prefixes "
+-					"read data left"));
+-		break;
++    lsa = new IntraAreaPrefixLsa(version, buf, len);
++
++    // Decode the LSA Header.
++    lsa->_header.decode_inline(buf, err);
++    if (lsa->_header.invalid())
++	goto out;
++
++    prefix_num = extract_16(&buf[header_length]);
++    lsa->set_referenced_ls_type(extract_16(&buf[header_length + 2]));
++    lsa->set_referenced_link_state_id(extract_32(&buf[header_length + 4]));
++    lsa->set_referenced_advertising_router(extract_32(&buf[header_length + 8]));
++
++    start = &buf[header_length + 2 + 2 + 4 + 4];
++    end = &buf[len];
++    while(start < end) {
++	if (!(start + 2 < end)) {
++	    err += "Intra-Area-Prefix-LSA too short";
++	    lsa->set_invalid(true);
++	    goto out;
++	}
++	size_t space = end - (start + 4);
++	IPv6Prefix prefix = decoder.decode(start + 4, space,
++					   extract_8(start),
++					   extract_8(start + 1), err);
++	if (prefix.invalid()) {
++	    lsa->set_invalid(true);
++	    goto out;
++	}
++	prefix.set_metric(extract_16(start + 2));
++	lsa->get_prefixes().push_back(prefix);
++	start += (space + 4);
++	if (0 == --prefix_num) {
++	    if (start != end) {
++		err += "Intra-Area-Prefix-LSA # prefixes read data left";
++		lsa->set_invalid(true);
++		goto out;
+ 	    }
++	    break;
+ 	}
+-	if (0 != prefix_num)
+-	    if (start != end)
+-		xorp_throw(InvalidPacket,
+-			   c_format("Intra-Area-Prefix-LSA # %d left "
+-				    "buffer depleted",
+-				    XORP_UINT_CAST(prefix_num)));
+-
+-    } catch(InvalidPacket& e) {
++    }
++    if (0 != prefix_num) {
++	if (start != end) {
++	    err += c_format("Intra-Area-Prefix-LSA # %d left "
++			    "buffer depleted",
++			    XORP_UINT_CAST(prefix_num));
++	    lsa->set_invalid(true);
++	    goto out;
++	}
++    }
++
++  out:
++    if (lsa && lsa->invalid()) {
+ 	delete lsa;
+-	throw e;
++	lsa = NULL;
+     }
+ 
+     return Lsa::LsaRef(lsa);
+diff --git a/xorp/ospf/lsa.hh b/xorp/ospf/lsa.hh
+index bab9579..e69fd28 100644
+--- a/xorp/ospf/lsa.hh
++++ b/xorp/ospf/lsa.hh
+@@ -17,7 +17,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/ospf/lsa.hh,v 1.113 2008/10/02 21:57:47 bms Exp $
+ 
+ #ifndef __OSPF_LSA_HH__
+ #define __OSPF_LSA_HH__
+@@ -26,7 +25,7 @@
+  * LSA Header. Common header for all LSAs.
+  * Never store or pass a pointer, just deal with it inline.
+  */
+-class Lsa_header {
++class Lsa_header : public Invalid {
+  public:
+     Lsa_header(OspfTypes::Version version) :
+ 	_version(version), _LS_age(0), _options(0), _ls_type(0),
+@@ -35,7 +34,7 @@ class Lsa_header {
+ 	_ls_checksum(0), _length(0)
+     {}
+ 
+-    Lsa_header(const Lsa_header& rhs) {
++    Lsa_header(const Lsa_header& rhs) : Invalid(rhs) {
+ 	copy(rhs);
+     }
+ 
+@@ -58,6 +57,7 @@ class Lsa_header {
+ 	lsa_copy(_ls_sequence_number);
+ 	lsa_copy(_ls_checksum);
+ 	lsa_copy(_length);
++	set_invalid(rhs.invalid());
+     }
+ #undef	lsa_copy
+ 
+@@ -74,12 +74,12 @@ class Lsa_header {
+     /**
+      * Decode a LSA header and return a LSA header inline not a pointer.
+      */
+-    Lsa_header decode(uint8_t *ptr) const throw(InvalidPacket);
++    Lsa_header decode(uint8_t *ptr, string& err);
+ 
+     /**
+      * Decode this lsa header in this context.
+      */
+-    void decode_inline(uint8_t *ptr) throw(InvalidPacket);
++    bool decode_inline(uint8_t *ptr, string& err);
+ 
+     /**
+      * Copy a wire format representation to the pointer provided.
+@@ -181,7 +181,7 @@ class Lsa_header {
+     string str() const;
+ 
+  private:
+-    void decode(Lsa_header& header, uint8_t *ptr) const throw(InvalidPacket);
++    bool decode(Lsa_header& header, uint8_t *ptr, string& err) const;
+ 
+     OspfTypes::Version _version;
+     uint16_t 	_LS_age;
+@@ -262,7 +262,7 @@ compare_all_header_fields(const Lsa_header& lhs, const Lsa_header& rhs)
+  *
+  * A generic LSA. All actual LSAs should be derived from this LSA.
+  */
+-class Lsa {
++class Lsa : public Invalid {
+  public:
+     /**
+      * A reference counted pointer to an LSA which will be
+@@ -339,8 +339,7 @@ class Lsa {
+      *
+      * @return A reference to an LSA that manages its own memory.
+      */
+-    virtual LsaRef decode(uint8_t *buf, size_t& len) const 
+-	throw(InvalidPacket) = 0;
++    virtual LsaRef decode(uint8_t *buf, size_t& len, string& err) const = 0;
+ 
+     /**
+      * Encode an LSA for transmission.
+@@ -606,6 +605,10 @@ class Lsa {
+      */
+     virtual string str() const = 0;
+ 
++    virtual bool invalid() const {
++	return (Invalid::invalid() || _header.invalid());
++    }
++
+     /**
+      * Add the LSA type bindings.
+      */
+@@ -695,7 +698,7 @@ class LsaDecoder {
+      *
+      * @return A reference to an LSA that manages its own memory.
+      */
+-    Lsa::LsaRef decode(uint8_t *ptr, size_t& len) const throw(InvalidPacket);
++    Lsa::LsaRef decode(uint8_t *ptr, size_t& len, string& err) const;
+ 
+     /**
+      * @return The length of the smallest LSA that can be decoded.
+@@ -753,7 +756,7 @@ class LsaDecoder {
+  * RFC 2470 A.4.1 IPv6 Prefix Representation
+  * OSPFv3 only
+  */
+-class IPv6Prefix {
++class IPv6Prefix : public Invalid {
+ public:
+     static const uint8_t NU_bit = 0x1;
+     static const uint8_t LA_bit = 0x2;
+@@ -768,7 +771,7 @@ public:
+     }
+ 
+     IPv6Prefix(const IPv6Prefix& rhs)
+-	: _version(rhs._version), _use_metric(rhs._use_metric)
++	    : Invalid(rhs), _version(rhs._version), _use_metric(rhs._use_metric)
+     {
+ 	copy(rhs);
+     }
+@@ -786,6 +789,7 @@ public:
+ 	ipv6prefix_copy(_network);
+ 	ipv6prefix_copy(_metric);
+ 	ipv6prefix_copy(_prefix_options);
++	set_invalid(rhs.invalid());
+     }
+ #undef	ipv6prefix_copy
+ 
+@@ -806,8 +810,7 @@ public:
+      * @return A IPv6Prefix.
+      */
+     IPv6Prefix decode(uint8_t *ptr, size_t& len, uint8_t prefixlen,
+-		      uint8_t option) const
+-	throw(InvalidPacket);
++		      uint8_t option, string& err) const;
+ 
+     /**
+      * Copy a wire format representation to the pointer provided.
+@@ -897,6 +900,10 @@ public:
+      */
+     string str() const;
+ 
++    virtual bool invalid() const {
++	return (Invalid::invalid() || _network.invalid());
++    }
++
+ private:
+     const OspfTypes::Version _version;
+     const bool _use_metric;
+@@ -909,7 +916,7 @@ private:
+ /**
+  * Defines a link/interface, carried in a RouterLsa.
+  */
+-class RouterLink {
++class RouterLink : public Invalid {
+  public:
+     enum Type {
+ 	p2p = 1,	// Point-to-point connection to another router
+@@ -924,7 +931,7 @@ class RouterLink {
+ 	  _neighbour_router_id(0)
+     {}
+ 
+-    RouterLink(const RouterLink& rhs) : _version(rhs._version) {
++    RouterLink(const RouterLink& rhs) : Invalid(rhs), _version(rhs._version) {
+ 	copy(rhs);
+     }
+ 
+@@ -951,6 +958,7 @@ class RouterLink {
+ 	    routerlink_copy(_neighbour_router_id);
+ 	    break;
+ 	}
++	set_invalid(rhs.invalid());
+     }
+ #undef	routerlink_copy
+     
+@@ -989,8 +997,7 @@ class RouterLink {
+      *
+      * @return A RouterLink.
+      */
+-    RouterLink
+-    decode(uint8_t *ptr, size_t& len) const throw(InvalidPacket);
++    RouterLink decode(uint8_t *ptr, size_t& len, string& err);
+     
+     /**
+      * Copy a wire format representation to the pointer provided.
+@@ -1156,7 +1163,7 @@ public:
+      *
+      * @return A reference to an LSA that manages its own memory.
+      */
+-    LsaRef decode(uint8_t *buf, size_t& len) const throw(InvalidPacket);
++    LsaRef decode(uint8_t *buf, size_t& len, string& err) const;
+ 
+     bool encode();
+ 
+@@ -1223,7 +1230,7 @@ class RouterLsa : public Lsa {
+      *
+      * @return A reference to an LSA that manages its own memory.
+      */
+-    LsaRef decode(uint8_t *buf, size_t& len) const throw(InvalidPacket);
++    LsaRef decode(uint8_t *buf, size_t& len, string& err) const;
+ 
+     bool encode();
+ 
+@@ -1363,7 +1370,7 @@ class NetworkLsa : public Lsa {
+      *
+      * @return A reference to an LSA that manages its own memory.
+      */
+-    LsaRef decode(uint8_t *buf, size_t& len) const throw(InvalidPacket);
++    LsaRef decode(uint8_t *buf, size_t& len, string& err) const;
+ 
+     bool encode();
+ 
+@@ -1467,7 +1474,7 @@ class SummaryNetworkLsa : public Lsa {
+      *
+      * @return A reference to an LSA that manages its own memory.
+      */
+-    LsaRef decode(uint8_t *buf, size_t& len) const throw(InvalidPacket);
++    LsaRef decode(uint8_t *buf, size_t& len, string& err) const;
+ 
+     bool encode();
+ 
+@@ -1510,7 +1517,11 @@ class SummaryNetworkLsa : public Lsa {
+      * Generate a printable representation.
+      */
+     string str() const;
+-    
++
++    virtual bool invalid() const {
++	return (Invalid::invalid() || _ipv6prefix.invalid());
++    }
++
+  private:
+     uint32_t _metric;
+     uint32_t _network_mask;		// OSPFv2 only.
+@@ -1570,7 +1581,7 @@ class SummaryRouterLsa : public Lsa {
+      *
+      * @return A reference to an LSA that manages its own memory.
+      */
+-    LsaRef decode(uint8_t *buf, size_t& len) const throw(InvalidPacket);
++    LsaRef decode(uint8_t *buf, size_t& len, string& err) const;
+ 
+     bool encode();
+ 
+@@ -1696,7 +1707,7 @@ class ASExternalLsa : public Lsa {
+      *
+      * @return A reference to an LSA that manages its own memory.
+      */
+-    LsaRef decode(uint8_t *buf, size_t& len) const throw(InvalidPacket);
++    LsaRef decode(uint8_t *buf, size_t& len, string& err) const;
+ 
+     bool encode();
+ 
+@@ -1875,7 +1886,12 @@ class ASExternalLsa : public Lsa {
+      * Generate a printable representation.
+      */
+     string str() const;
+-    
++
++    virtual bool invalid() const {
++	return (Invalid::invalid() || _ipv6prefix.invalid() || _forwarding_address.invalid()
++		|| _forwarding_address_ipv4.invalid() || _forwarding_address_ipv6.invalid());
++    }
++
+  private:
+     uint32_t _network_mask;		// OSPFv2 only.
+     bool _e_bit;
+@@ -1991,7 +2007,7 @@ public:
+      *
+      * @return A reference to an LSA that manages its own memory.
+      */
+-    LsaRef decode(uint8_t *buf, size_t& len) const throw(InvalidPacket);
++    LsaRef decode(uint8_t *buf, size_t& len, string& err) const;
+ 
+     bool encode();
+ 
+@@ -2040,7 +2056,11 @@ public:
+      * Generate a printable representation.
+      */
+     string str() const;
+-    
++
++    virtual bool invalid() const {
++	return (Invalid::invalid() || _link_local_address.invalid());
++    }
++
+ private:
+     uint8_t _rtr_priority;
+     uint32_t _options;
+@@ -2086,7 +2106,7 @@ public:
+      *
+      * @return A reference to an LSA that manages its own memory.
+      */
+-    LsaRef decode(uint8_t *buf, size_t& len) const throw(InvalidPacket);
++    LsaRef decode(uint8_t *buf, size_t& len, string& err) const;
+ 
+     bool encode();
+ 
+@@ -2188,7 +2208,7 @@ class LsaTransmit : class Transmit {
+  * Link State Request as sent in a Link State Request Packet.
+  * Never store or pass a pointer, just deal with it inline.
+  */
+-class Ls_request {
++class Ls_request : public Invalid {
+  public:
+     Ls_request(OspfTypes::Version version) :
+ 	_version(version),  _ls_type(0),_link_state_id(0),
+@@ -2201,7 +2221,7 @@ class Ls_request {
+ 	_advertising_router(advertising_router)
+     {}
+     
+-    Ls_request(const Ls_request& rhs) {
++    Ls_request(const Ls_request& rhs) : Invalid(rhs) {
+ 	copy(rhs);
+     }
+ 
+@@ -2219,6 +2239,7 @@ class Ls_request {
+ 	ls_copy(_ls_type);
+ 	ls_copy(_link_state_id);
+ 	ls_copy(_advertising_router);
++	set_invalid(rhs.invalid());
+     }
+ #undef	ls_copy
+     
+@@ -2230,8 +2251,7 @@ class Ls_request {
+     /**
+      * Decode a Link State Request and return value inline not a pointer.
+      */
+-    Ls_request
+-    decode(uint8_t *ptr) throw(InvalidPacket);
++    Ls_request decode(uint8_t *ptr, string& err);
+ 
+     /**
+      * Copy a wire format representation to the pointer provided.
+diff --git a/xorp/ospf/ospf.cc b/xorp/ospf/ospf.cc
+index fc422a8..9fe791a 100644
+--- a/xorp/ospf/ospf.cc
++++ b/xorp/ospf/ospf.cc
+@@ -85,15 +85,20 @@ Ospf<A>::receive(const string& interface, const string& vif,
+ 	      data, len);
+ 
+     Packet *packet;
+-    try {
+-	// If the transport is IPv6 then the checksum verification has
+-	// to include the pseudo header. In the IPv4 case this
+-	// function is a noop.
+-	ipv6_checksum_verify<A>(src, dst, data, len, Packet::CHECKSUM_OFFSET,
+-				_io->get_ip_protocol_number());
+-	packet = _packet_decoder.decode(data, len);
+-    } catch(InvalidPacket& e) {
+-	XLOG_ERROR("%s", cstring(e));
++    string err;
++
++    // If the transport is IPv6 then the checksum verification has
++    // to include the pseudo header. In the IPv4 case this
++    // function is a noop.
++    if (!ipv6_checksum_verify<A>(src, dst, data, len, Packet::CHECKSUM_OFFSET,
++				 _io->get_ip_protocol_number(), err)) {
++	XLOG_ERROR("%s", err.c_str());
++	return;
++    }
++
++    packet = _packet_decoder.decode(data, len, err);
++    if (!packet) {
++	XLOG_ERROR("%s", err.c_str());
+ 	return;
+     }
+ 
+@@ -101,11 +106,10 @@ Ospf<A>::receive(const string& interface, const string& vif,
+     // We have a packet and its good.
+ 
+     bool packet_accepted = false;
+-    try {
+-	packet_accepted = _peer_manager.receive(interface, vif, dst, src,
+-						packet);
+-    } catch(BadPeer& e) {
+-	XLOG_ERROR("%s", cstring(e));
++    packet_accepted = _peer_manager.receive(interface, vif, dst, src,
++					    packet, err);
++    if (err.size()) {
++	XLOG_ERROR("%s", err.c_str());
+     }
+ 
+     if (!packet_accepted)
+@@ -300,31 +304,31 @@ Ospf<A>::transmit(const string& interface, const string& vif,
+ 	      interface.c_str(), vif.c_str(), ttl, data, len);
+     debug_msg("Interface %s Vif %s ttl %d data %p len %u\n",
+ 	      interface.c_str(), vif.c_str(), ttl, data, len);
++    string err;
+ 
+     // If the transport is IPv6 then the checksum has to include the
+     // pseudo header. In the IPv4 case this function is a noop.
+-    ipv6_checksum_apply<A>(src, dst, data, len, Packet::CHECKSUM_OFFSET,
+-			   _io->get_ip_protocol_number());
++    if (!ipv6_checksum_apply<A>(src, dst, data, len, Packet::CHECKSUM_OFFSET,
++				_io->get_ip_protocol_number(), err)) {
++	XLOG_ERROR("%s", err.c_str());
++	return false;
++    }
+ 
+     if (trace()._packets) {
+-	try {
+-	    // Decode the packet in order to pretty print it.
+-	    Packet *packet = _packet_decoder.decode(data, len);
++	// Decode the packet in order to pretty print it.
++	Packet *packet = _packet_decoder.decode(data, len, err);
++	if (packet) {
+ 	    XLOG_TRACE(trace()._packets, "Transmit: %s\n", cstring(*packet));
+ 	    delete packet;
+-	} catch(InvalidPacket& e) {
+-	    XLOG_TRACE(trace()._packets, "Unable to decode packet\n");
+ 	}
+     }
+ 
+ #ifdef	DEBUG_LOGGING
+-    try {
+-	// Decode the packet in order to pretty print it.
+-	Packet *packet = _packet_decoder.decode(data, len);
++    // Decode the packet in order to pretty print it.
++    Packet *packet = _packet_decoder.decode(data, len, err);
++    if (packet) {
+ 	debug_msg("Transmit: %s\n", cstring(*packet));
+ 	delete packet;
+-    } catch(InvalidPacket& e) {
+-	debug_msg("Unable to decode packet\n");
+     }
+ #endif
+ 
+@@ -337,14 +341,14 @@ Ospf<A>::set_hello_interval(const string& interface, const string& vif,
+ 			    OspfTypes::AreaID area,
+ 			    uint16_t hello_interval)
+ {
+-    try {
+-	_peer_manager.set_hello_interval(_peer_manager.
+-					 get_peerid(interface, vif),
+-					 area, hello_interval);
+-    } catch(BadPeer& e) {
+-	XLOG_ERROR("%s", cstring(e));
++    string err;
++    OspfTypes::PeerID pid = _peer_manager.get_peerid(interface, vif, err);
++    if (pid == OspfTypes::ALLPEERS) {
++	XLOG_ERROR("%s", err.c_str());
+ 	return false;
+     }
++
++    _peer_manager.set_hello_interval(pid, area, hello_interval);
+     return true;
+ }
+ 
+@@ -355,13 +359,14 @@ Ospf<A>::set_options(const string& interface, const string& vif,
+ 		     OspfTypes::AreaID area,
+ 		     uint32_t options)
+ {
+-    try {
+-	_peer_manager.set_options(_peer_manager.get_peerid(interface, vif),
+-				  area, options);
+-    } catch(BadPeer& e) {
+-	XLOG_ERROR("%s", cstring(e));
++    string err;
++    OspfTypes::PeerID pid = _peer_manager.get_peerid(interface, vif, err);
++    if (pid == OspfTypes::ALLPEERS) {
++	XLOG_ERROR("%s", err.c_str());
+ 	return false;
+     }
++
++    _peer_manager.set_options(pid, area, options);
+     return true;
+ }
+ #endif
+@@ -370,10 +375,9 @@ template <typename A>
+ bool
+ Ospf<A>::create_virtual_link(OspfTypes::RouterID rid)
+ {
+-    try {
+-	_peer_manager.create_virtual_link(rid);
+-    } catch(BadPeer& e) {
+-	XLOG_ERROR("%s", cstring(e));
++    string err;
++    if (!_peer_manager.create_virtual_link(rid, err)) {
++	XLOG_ERROR("%s", err.c_str());
+ 	return false;
+     }
+     return true;
+@@ -383,13 +387,7 @@ template <typename A>
+ bool
+ Ospf<A>::delete_virtual_link(OspfTypes::RouterID rid)
+ {
+-    try {
+-	_peer_manager.delete_virtual_link(rid);
+-    } catch(BadPeer& e) {
+-	XLOG_ERROR("%s", cstring(e));
+-	return false;
+-    }
+-    return true;
++    return _peer_manager.delete_virtual_link(rid);
+ }
+ 
+ template <typename A>
+@@ -397,13 +395,7 @@ bool
+ Ospf<A>::transit_area_virtual_link(OspfTypes::RouterID rid,
+ 				   OspfTypes::AreaID transit_area)
+ {
+-    try {
+-	_peer_manager.transit_area_virtual_link(rid, transit_area);
+-    } catch(BadPeer& e) {
+-	XLOG_ERROR("%s", cstring(e));
+-	return false;
+-    }
+-    return true;
++    return _peer_manager.transit_area_virtual_link(rid, transit_area);
+ }
+     
+ template <typename A>
+@@ -412,14 +404,14 @@ Ospf<A>::set_router_priority(const string& interface, const string& vif,
+ 			     OspfTypes::AreaID area,
+ 			     uint8_t priority)
+ {
+-    try {
+-	_peer_manager.set_router_priority(_peer_manager.
+-					  get_peerid(interface, vif),
+-					  area, priority);
+-    } catch(BadPeer& e) {
+-	XLOG_ERROR("%s", cstring(e));
++    string err;
++    OspfTypes::PeerID pid = _peer_manager.get_peerid(interface, vif, err);
++    if (pid == OspfTypes::ALLPEERS) {
++	XLOG_ERROR("%s", err.c_str());
+ 	return false;
+     }
++
++    _peer_manager.set_router_priority(pid, area, priority);
+     return true;
+ }
+ 
+@@ -429,14 +421,14 @@ Ospf<A>::set_router_dead_interval(const string& interface, const string& vif,
+ 			 OspfTypes::AreaID area,
+ 			 uint32_t router_dead_interval)
+ {
+-    try {
+-	_peer_manager.set_router_dead_interval(_peer_manager.
+-					       get_peerid(interface,vif),
+-					       area, router_dead_interval);
+-    } catch(BadPeer& e) {
+-	XLOG_ERROR("%s", cstring(e));
++    string err;
++    OspfTypes::PeerID pid = _peer_manager.get_peerid(interface, vif, err);
++    if (pid == OspfTypes::ALLPEERS) {
++	XLOG_ERROR("%s", err.c_str());
+ 	return false;
+     }
++
++    _peer_manager.set_router_dead_interval(pid, area, router_dead_interval);
+     return true;
+ }
+ 
+@@ -446,14 +438,14 @@ Ospf<A>::set_interface_cost(const string& interface, const string& vif,
+ 			    OspfTypes::AreaID area,
+ 			    uint16_t interface_cost)
+ {
+-    try {
+-	_peer_manager.set_interface_cost(_peer_manager.
+-					 get_peerid(interface,vif),
+-					 area, interface_cost);
+-    } catch(BadPeer& e) {
+-	XLOG_ERROR("%s", cstring(e));
++    string err;
++    OspfTypes::PeerID pid = _peer_manager.get_peerid(interface, vif, err);
++    if (pid == OspfTypes::ALLPEERS) {
++	XLOG_ERROR("%s", err.c_str());
+ 	return false;
+     }
++
++    _peer_manager.set_interface_cost(pid, area, interface_cost);
+     return true;
+ }
+ 
+@@ -468,14 +460,14 @@ Ospf<A>::set_retransmit_interval(const string& interface, const string& vif,
+ 	return false;
+     }
+ 
+-    try {
+-	_peer_manager.set_retransmit_interval(_peer_manager.
+-					      get_peerid(interface,vif),
+-					      area, retransmit_interval);
+-    } catch(BadPeer& e) {
+-	XLOG_ERROR("%s", cstring(e));
++    string err;
++    OspfTypes::PeerID pid = _peer_manager.get_peerid(interface, vif, err);
++    if (pid == OspfTypes::ALLPEERS) {
++	XLOG_ERROR("%s", err.c_str());
+ 	return false;
+     }
++
++    _peer_manager.set_retransmit_interval(pid, area, retransmit_interval);
+     return true;
+ }
+ 
+@@ -490,14 +482,14 @@ Ospf<A>::set_inftransdelay(const string& interface, const string& vif,
+ 	return false;
+     }
+ 
+-    try {
+-	_peer_manager.set_inftransdelay(_peer_manager.
+-					get_peerid(interface,vif),
+-					area, inftransdelay);
+-    } catch(BadPeer& e) {
+-	XLOG_ERROR("%s", cstring(e));
++    string err;
++    OspfTypes::PeerID pid = _peer_manager.get_peerid(interface, vif, err);
++    if (pid == OspfTypes::ALLPEERS) {
++	XLOG_ERROR("%s", err.c_str());
+ 	return false;
+     }
++
++    _peer_manager.set_inftransdelay(pid, area, inftransdelay);
+     return true;
+ }
+ 
+@@ -509,15 +501,11 @@ Ospf<A>::set_simple_authentication_key(const string&		interface,
+ 				       const string&		password,
+ 				       string&			error_msg)
+ {
+-    OspfTypes::PeerID peerid;
+-
+-    try {
+-	peerid = _peer_manager.get_peerid(interface, vif);
+-    } catch(BadPeer& e) {
+-	error_msg = e.str();
++    OspfTypes::PeerID peerid = _peer_manager.get_peerid(interface, vif, error_msg);
++    if (peerid == OspfTypes::ALLPEERS) {
+ 	XLOG_ERROR("%s", error_msg.c_str());
+ 	return false;
+-    } 
++    }
+ 
+     if (_peer_manager.set_simple_authentication_key(peerid, area,
+ 						    password, error_msg)
+@@ -536,15 +524,11 @@ Ospf<A>::delete_simple_authentication_key(const string&		interface,
+ 					  OspfTypes::AreaID	area,
+ 					  string&		error_msg)
+ {
+-    OspfTypes::PeerID peerid;
+-
+-    try {
+-	peerid = _peer_manager.get_peerid(interface, vif);
+-    } catch(BadPeer& e) {
+-	error_msg = e.str();
++    OspfTypes::PeerID peerid = _peer_manager.get_peerid(interface, vif, error_msg);
++    if (peerid == OspfTypes::ALLPEERS) {
+ 	XLOG_ERROR("%s", error_msg.c_str());
+ 	return false;
+-    } 
++    }
+ 
+     if (_peer_manager.delete_simple_authentication_key(peerid, area, error_msg)
+ 	!= true) {
+@@ -568,15 +552,11 @@ Ospf<A>::set_md5_authentication_key(const string&	interface,
+ 				    string&		error_msg)
+ 
+ {
+-    OspfTypes::PeerID peerid;
+-
+-    try {
+-	peerid = _peer_manager.get_peerid(interface, vif);
+-    } catch(BadPeer& e) {
+-	error_msg = e.str();
++    OspfTypes::PeerID peerid = _peer_manager.get_peerid(interface, vif, error_msg);
++    if (peerid == OspfTypes::ALLPEERS) {
+ 	XLOG_ERROR("%s", error_msg.c_str());
+ 	return false;
+-    } 
++    }
+ 
+     if (_peer_manager.set_md5_authentication_key(peerid, area, key_id,
+ 						 password, start_timeval,
+@@ -598,15 +578,11 @@ Ospf<A>::delete_md5_authentication_key(const string&		interface,
+ 				       uint8_t			key_id,
+ 				       string&			error_msg)
+ {
+-    OspfTypes::PeerID peerid;
+-
+-    try {
+-	peerid = _peer_manager.get_peerid(interface, vif);
+-    } catch(BadPeer& e) {
+-	error_msg = e.str();
++    OspfTypes::PeerID peerid = _peer_manager.get_peerid(interface, vif, error_msg);
++    if (peerid == OspfTypes::ALLPEERS) {
+ 	XLOG_ERROR("%s", error_msg.c_str());
+ 	return false;
+-    } 
++    }
+ 
+     if (_peer_manager.delete_md5_authentication_key(peerid, area, key_id,
+ 						    error_msg)
+@@ -623,14 +599,14 @@ bool
+ Ospf<A>::set_passive(const string& interface, const string& vif,
+ 		     OspfTypes::AreaID area, bool passive, bool host)
+ {
+-    try {
+-	_peer_manager.set_passive(_peer_manager.
+-				  get_peerid(interface,vif),
+-				  area, passive, host);
+-    } catch(BadPeer& e) {
+-	XLOG_ERROR("%s", cstring(e));
++    string err;
++    OspfTypes::PeerID pid = _peer_manager.get_peerid(interface, vif, err);
++    if (pid == OspfTypes::ALLPEERS) {
++	XLOG_ERROR("%s", err.c_str());
+ 	return false;
+     }
++
++    _peer_manager.set_passive(pid, area, passive, host);
+     return true;
+ }
+ 
+diff --git a/xorp/ospf/packet.cc b/xorp/ospf/packet.cc
+index af29f94..70eb590 100644
+--- a/xorp/ospf/packet.cc
++++ b/xorp/ospf/packet.cc
+@@ -82,27 +82,28 @@ ipv6_pseudo_header_checksum(const IPv6& src, const IPv6& dst, size_t len,
+ }
+ 
+ template <>
+-void
++bool
+ ipv6_checksum_verify<IPv6>(const IPv6& src, const IPv6& dst,
+ 			   const uint8_t *data, size_t len,
+ 			   size_t checksum_offset,
+-			   uint8_t protocol) throw(InvalidPacket)
++			   uint8_t protocol, string& err)
+ {
+     debug_msg("src %s dst data %p %s len %u chsum offset %u protocol %u\n",
+ 	      cstring(src), cstring(dst),
+ 	      data, XORP_UINT_CAST(len), XORP_UINT_CAST(checksum_offset),
+ 	      protocol);
+ 
+-    if (len < checksum_offset)
+-	xorp_throw(InvalidPacket,
+-		   c_format("Checksum offset %u greater than packet length %u",
+-			    XORP_UINT_CAST(checksum_offset),
+-			    XORP_UINT_CAST(len)));
++    if (len < checksum_offset) {
++	err += c_format("Checksum offset %u greater than packet length %u",
++			XORP_UINT_CAST(checksum_offset),
++			XORP_UINT_CAST(len));
++	return false;
++    }
+ 
+     if (0 == inet_checksum_add(ipv6_pseudo_header_checksum(src, dst, len,
+ 							   protocol),
+ 			       checksum(const_cast<uint8_t *>(data), len)))
+-	return;
++	return true;
+ 
+     // If we get here there is a problem with the checksum. Compute
+     // the expected checksum to aid in debugging.
+@@ -116,61 +117,69 @@ ipv6_checksum_verify<IPv6>(const IPv6& src, const IPv6& dst,
+ 			  checksum(temp, len));
+     delete []temp;
+ 						 ;
+-    if (checksum_inpacket != checksum_computed)
+-	xorp_throw(InvalidPacket,
+-		   c_format("Checksum mismatch expected %#x received %#x",
+-			    checksum_computed,
+-			    checksum_inpacket));
++    if (checksum_inpacket != checksum_computed) {
++	err += c_format("Checksum mismatch expected %#x received %#x",
++			checksum_computed,
++			checksum_inpacket);
++	return false;
++    }
++    return true;
+ }
+ 
+ template <>
+-void
++bool
+ ipv6_checksum_verify<IPv4>(const IPv4& src, const IPv4& dst,
+ 			   const uint8_t *data, size_t len,
+ 			   size_t checksum_offset,
+-			   uint8_t protocol) throw(InvalidPacket)
++			   uint8_t protocol, string& err)
+ {
+     debug_msg("src %s dst data %p %s len %u chsum offset %u protocol %u\n",
+ 	      cstring(src), cstring(dst),
+ 	      data, XORP_UINT_CAST(len), XORP_UINT_CAST(checksum_offset),
+ 	      protocol);
++    UNUSED(err);
++    return true;
+ }
+ 
+ template <>
+-void
++bool
+ ipv6_checksum_apply<IPv6>(const IPv6& src, const IPv6& dst,
+ 			  uint8_t *data, size_t len,
+ 			  size_t checksum_offset,
+-			  uint8_t protocol) throw(InvalidPacket)
++			  uint8_t protocol, string& err)
+ {
+     debug_msg("src %s dst data %p %s len %u chsum offset %u protocol %u\n",
+ 	      cstring(src), cstring(dst),
+ 	      data, XORP_UINT_CAST(len), XORP_UINT_CAST(checksum_offset),
+ 	      protocol);
+ 
+-    if (len < checksum_offset)
+-	xorp_throw(InvalidPacket,
+-		   c_format("Checksum offset %u greater than packet length %u",
+-			    XORP_UINT_CAST(checksum_offset),
+-			    XORP_UINT_CAST(len)));
++    if (len < checksum_offset) {
++	err += c_format("Checksum offset %u greater than packet length %u",
++			XORP_UINT_CAST(checksum_offset),
++			XORP_UINT_CAST(len));
++	return false;
++    }
+ 
+     embed_16(&data[checksum_offset],
+ 	     inet_checksum_add(ipv6_pseudo_header_checksum(src, dst, len,
+ 							   protocol),
+ 			       checksum(data, len)));
++    return true;
+ }
+ 
+ template <>
+-void
++bool
+ ipv6_checksum_apply<IPv4>(const IPv4& src, const IPv4& dst,
+ 			  uint8_t *data, size_t len,
+ 			  size_t checksum_offset,
+-			  uint8_t protocol) throw(InvalidPacket)
++			  uint8_t protocol, string& err)
+ {
+     debug_msg("src %s dst data %p %s len %u chsum offset %u protocol %u\n",
+ 	      cstring(src), cstring(dst),
+ 	      data, XORP_UINT_CAST(len), XORP_UINT_CAST(checksum_offset),
+ 	      protocol);
++    UNUSED(err);
++    return true;
+ }
+ 
+ #ifdef	DEBUG_RAW_PACKETS
+@@ -193,7 +202,7 @@ dump_packet(uint8_t *ptr, size_t len)
+ /* Packet */
+ 
+ size_t
+-Packet::decode_standard_header(uint8_t *ptr, size_t& len) throw(InvalidPacket)
++Packet::decode_standard_header(uint8_t *ptr, size_t& len, string& err)
+ {
+     debug_msg("ptr %p len %u\n", ptr, XORP_UINT_CAST(len));
+ #ifdef	DEBUG_RAW_PACKETS
+@@ -206,11 +215,12 @@ Packet::decode_standard_header(uint8_t *ptr, size_t& len) throw(InvalidPacket)
+ 
+     // Make sure that at least two bytes have been extracted:
+     // Version and Type fields.
+-    if (len < 2)
+-	xorp_throw(InvalidPacket,
+-		   c_format("Packet too short %u, must be at least %u",
+-			    XORP_UINT_CAST(len),
+-			    XORP_UINT_CAST(2)));
++    if (len < 2) {
++	err += c_format("Packet too short %u, must be at least %u",
++			XORP_UINT_CAST(len),
++			XORP_UINT_CAST(2));
++	return 0;
++    }
+ 
+     OspfTypes::Version version;
+     switch(ptr[0]) {
+@@ -221,33 +231,36 @@ Packet::decode_standard_header(uint8_t *ptr, size_t& len) throw(InvalidPacket)
+ 	version = OspfTypes::V3;
+ 	break;
+     default:
+-	xorp_throw(InvalidPacket,
+-		   c_format("Version mismatch expected %u received %u",
+-			    get_version(),
+-			    ptr[Packet::VERSION_OFFSET] & 0xff));
+-	break;
++	err += c_format("Version mismatch expected %u received %u",
++			get_version(),
++			ptr[Packet::VERSION_OFFSET] & 0xff);
++	return 0;
+     }
+ 
+-    if (ptr[1] != get_type())
+-	xorp_throw(InvalidPacket,
+-		   c_format("Type mismatch expected %u received %u",
+-			    get_type(),
+-			    ptr[Packet::TYPE_OFFSET]));
++    if (ptr[1] != get_type()) {
++	err += c_format("Type mismatch expected %u received %u",
++			get_type(),
++			ptr[Packet::TYPE_OFFSET]);
++	return 0;
++    }
+ 
+     // Make sure that at least the standard header length is present.
+     switch(version) {
+     case OspfTypes::V2:
+-	if (len < STANDARD_HEADER_V2)
+-	    xorp_throw(InvalidPacket,
+-		       c_format("Packet too short %u, must be at least %u",
+-				XORP_UINT_CAST(len),
+-				XORP_UINT_CAST(STANDARD_HEADER_V2)));
++	if (len < STANDARD_HEADER_V2) {
++	    err += c_format("Packet too short %u, must be at least %u",
++			    XORP_UINT_CAST(len),
++			    XORP_UINT_CAST(STANDARD_HEADER_V2));
++	    return 0;
++	}
++	break;
+     case OspfTypes::V3:
+-	if (len < STANDARD_HEADER_V3)
+-	    xorp_throw(InvalidPacket,
+-		       c_format("Packet too short %u, must be at least %u",
+-				XORP_UINT_CAST(len),
+-				XORP_UINT_CAST(STANDARD_HEADER_V3)));
++	if (len < STANDARD_HEADER_V3) {
++	    err += c_format("Packet too short %u, must be at least %u",
++			    XORP_UINT_CAST(len),
++			    XORP_UINT_CAST(STANDARD_HEADER_V3));
++	    return 0;
++	}
+     }
+ 
+     // Verify that the length in the packet and the length of received
+@@ -255,11 +268,12 @@ Packet::decode_standard_header(uint8_t *ptr, size_t& len) throw(InvalidPacket)
+     uint32_t packet_length = extract_16(&ptr[Packet::LEN_OFFSET]);
+     if (packet_length != len) {
+ 	// If the frame is too small complain.
+-	if (len < packet_length)
+-	    xorp_throw(InvalidPacket,
+-		       c_format("Packet length expected %u received %u",
++	if (len < packet_length) {
++	    err += c_format("Packet length expected %u received %u",
+ 			    packet_length,
+-			    XORP_UINT_CAST(len)));
++			    XORP_UINT_CAST(len));
++	    return 0;
++	}
+ 	// "Be liberal in what you accept, and conservative in what you send."
+ 	// -- Jon Postel
+ 	len = packet_length;	// Drop the length and continue.
+@@ -310,10 +324,10 @@ Packet::decode_standard_header(uint8_t *ptr, size_t& len) throw(InvalidPacket)
+ 	// Zero the checksum location.
+ 	embed_16(&ptr[Packet::CHECKSUM_OFFSET], 0);
+ 	uint16_t checksum_actual = checksum(ptr, len);
+-	xorp_throw(InvalidPacket,
+-		   c_format("Checksum mismatch expected %#x received %#x",
+-			    checksum_actual,
+-			    checksum_inpacket));
++	err += c_format("Checksum mismatch expected %#x received %#x",
++			checksum_actual,
++			checksum_inpacket);
++	return 0;
+     }
+ 
+     // Return the offset at which continued processing can take place.
+@@ -442,15 +456,16 @@ PacketDecoder::register_decoder(Packet *packet)
+ }
+ 
+ Packet *
+-PacketDecoder::decode(uint8_t *ptr, size_t len) throw(InvalidPacket)
++PacketDecoder::decode(uint8_t *ptr, size_t len, string& err)
+ {
+     // Make sure that at least two bytes have been extracted:
+     // Version and Type fields.
+-    if (len < 2)
+-	xorp_throw(InvalidPacket,
+-		   c_format("Packet too short %u, must be at least %u",
+-			    XORP_UINT_CAST(len),
+-			    XORP_UINT_CAST(Packet::TYPE_OFFSET)));
++    if (len < 2) {
++	err += c_format("Packet too short %u, must be at least %u",
++			XORP_UINT_CAST(len),
++			XORP_UINT_CAST(Packet::TYPE_OFFSET));
++	return NULL;
++    }
+ 
+     OspfTypes::Version version;
+     switch(ptr[Packet::VERSION_OFFSET]) {
+@@ -461,10 +476,9 @@ PacketDecoder::decode(uint8_t *ptr, size_t len) throw(InvalidPacket)
+ 	version = OspfTypes::V3;
+ 	break;
+     default:
+-	xorp_throw(InvalidPacket,
+-		   c_format("Unknown OSPF Version %u",
+-			    ptr[Packet::VERSION_OFFSET] & 0xff));
+-	break;
++	err += c_format("Unknown OSPF Version %u",
++			ptr[Packet::VERSION_OFFSET] & 0xff);
++	return NULL;
+     }
+ 
+     map<OspfTypes::Type , Packet *>::iterator i;
+@@ -483,31 +497,38 @@ PacketDecoder::decode(uint8_t *ptr, size_t len) throw(InvalidPacket)
+ 	break;
+     }
+ 
+-    if (packet == NULL)
+-	xorp_throw(InvalidPacket,
+-		   c_format("OSPF Version %u Unknown Type %u", version, type));
++    if (packet == NULL) {
++	err += c_format("OSPF Version %u Unknown Type %u", version, type);
++	return NULL;
++    }
+ 
+-    return packet->decode(ptr, len);
++    return packet->decode(ptr, len, err);
+ }
+ 
+ /* HelloPacket */
+ 
+ Packet *
+-HelloPacket::decode(uint8_t *ptr, size_t len) const throw(InvalidPacket)
++HelloPacket::decode(uint8_t *ptr, size_t len, string& err) const
+ {
+     OspfTypes::Version version = get_version();
+ 
+     HelloPacket *packet = new HelloPacket(version);
+ 
+-    size_t offset = packet->decode_standard_header(ptr, len);
++    size_t offset = packet->decode_standard_header(ptr, len, err);
++    if (offset == 0) {
++	delete packet;
++	return NULL;
++    }
+ 
+     // Verify that this packet is large enough, up to but not including
+     // any neighbours.
+-    if ((len - offset) < MINIMUM_LENGTH)
+-	xorp_throw(InvalidPacket,
+-		   c_format("Packet too short %u, must be at least %u",
+-			    XORP_UINT_CAST(len),
+-			    XORP_UINT_CAST(offset + MINIMUM_LENGTH)));
++    if ((len - offset) < MINIMUM_LENGTH) {
++	delete packet;
++	err += c_format("Packet too short %u, must be at least %u",
++			XORP_UINT_CAST(len),
++			XORP_UINT_CAST(offset + MINIMUM_LENGTH));
++	return NULL;
++    }
+ 
+ #ifdef	DEBUG_RAW_PACKETS
+     debug_msg("\n%s", dump_packet(ptr, len).c_str());
+@@ -662,21 +683,27 @@ HelloPacket::str() const
+ /* Database Description packet */
+ 
+ Packet *
+-DataDescriptionPacket::decode(uint8_t *ptr, size_t len) const throw(InvalidPacket)
++DataDescriptionPacket::decode(uint8_t *ptr, size_t len, string& err) const
+ {
+     OspfTypes::Version version = get_version();
+ 
+     DataDescriptionPacket *packet = new DataDescriptionPacket(version);
+ 
+-    size_t offset = packet->decode_standard_header(ptr, len);
++    size_t offset = packet->decode_standard_header(ptr, len, err);
++    if (offset == 0) {
++	delete packet;
++	return NULL;
++    }
+ 
+     // Verify that this packet is large enough, up to but not including
+     // any neighbours.
+-    if ((len - offset) < minimum_length())
+-	xorp_throw(InvalidPacket,
+-		   c_format("Packet too short %u, must be at least %u",
+-			    XORP_UINT_CAST(len),
+-			    XORP_UINT_CAST(offset + minimum_length())));
++    if ((len - offset) < minimum_length()) {
++	delete packet;
++	err += c_format("Packet too short %u, must be at least %u",
++			XORP_UINT_CAST(len),
++			XORP_UINT_CAST(offset + minimum_length()));
++	return NULL;
++    }
+ 
+ #ifdef	DEBUG_RAW_PACKETS
+     debug_msg("\n%s", dump_packet(ptr, len).c_str());
+@@ -720,9 +747,12 @@ DataDescriptionPacket::decode(uint8_t *ptr, size_t len) const throw(InvalidPacke
+ 
+     // XXX - Should we be checking for multiples of 20 here?
+     for(int i = 0; i < lsas; i++) {
+-	packet->get_lsa_headers().
+-	    push_back(lsa_header.decode(&ptr[lsa_offset +
+-					     i*lsa_header.length()]));
++	Lsa_header d = lsa_header.decode(&ptr[lsa_offset + i*lsa_header.length()], err);
++	if (d.invalid()) {
++	    delete packet;
++	    return NULL;
++	}
++	packet->get_lsa_headers().push_back(d);
+     }
+ 
+     return packet;
+@@ -819,23 +849,29 @@ DataDescriptionPacket::str() const
+ /* Link State Request Packet */
+ 
+ Packet *
+-LinkStateRequestPacket::decode(uint8_t *ptr, size_t len) const throw(InvalidPacket)
++LinkStateRequestPacket::decode(uint8_t *ptr, size_t len, string& err) const
+ {
+     OspfTypes::Version version = get_version();
+ 
+     LinkStateRequestPacket *packet = new LinkStateRequestPacket(version);
+ 
+-    size_t offset = packet->decode_standard_header(ptr, len);
++    size_t offset = packet->decode_standard_header(ptr, len, err);
++    if (offset == 0) {
++	delete packet;
++	return NULL;
++    }
+ 
+     Ls_request ls(version);
+ 
+     // Verify that this packet is large enough, a standard header plus
+     // at least one request
+-    if ((len - offset) < ls.length())
+-	xorp_throw(InvalidPacket,
+-		   c_format("Packet too short %u, must be at least %u",
+-			    XORP_UINT_CAST(len),
+-			    XORP_UINT_CAST(offset + ls.length())));
++    if ((len - offset) < ls.length()) {
++	err += c_format("Packet too short %u, must be at least %u",
++			XORP_UINT_CAST(len),
++			XORP_UINT_CAST(offset + ls.length()));
++	delete packet;
++	return NULL;
++    }
+ 
+ #ifdef	DEBUG_RAW_PACKETS
+     debug_msg("\n%s", dump_packet(ptr, len).c_str());
+@@ -846,8 +882,12 @@ LinkStateRequestPacket::decode(uint8_t *ptr, size_t len) const throw(InvalidPack
+ 
+     // XXX - Should we be checking for multiples of 12 here?
+     for(int i = 0; i < requests; i++) {
+-	packet->get_ls_request().
+-	    push_back(ls.decode(&ptr[offset + i * ls.length()]));
++	Ls_request r = ls.decode(&ptr[offset + i * ls.length()], err);
++	if (r.invalid()) {
++	    delete packet;
++	    return NULL;
++	}
++	packet->get_ls_request().push_back(r);
+     }
+ 
+     return packet;
+@@ -907,24 +947,30 @@ LinkStateRequestPacket::str() const
+ /* Link State Update Packet */
+ 
+ Packet *
+-LinkStateUpdatePacket::decode(uint8_t *ptr, size_t len) const throw(InvalidPacket)
++LinkStateUpdatePacket::decode(uint8_t *ptr, size_t len, string& err) const
+ {
+     OspfTypes::Version version = get_version();
+ 
+     LinkStateUpdatePacket *packet = new LinkStateUpdatePacket(version,
+ 							      _lsa_decoder);
+ 
+-    size_t offset = packet->decode_standard_header(ptr, len);
++    size_t offset = packet->decode_standard_header(ptr, len, err);
++    if (offset == 0) {
++	delete packet;
++	return NULL;
++    }
+ 
+     // Verify that this packet is large enough to hold the smallest
+     // LSA that we are aware of.
+     size_t min_length = _lsa_decoder.min_length();
+ 
+-    if ((len - offset) < min_length)
+-	xorp_throw(InvalidPacket,
+-		   c_format("Packet too short %u, must be at least %u",
+-			    XORP_UINT_CAST(len),
+-			    XORP_UINT_CAST(offset + min_length)));
++    if ((len - offset) < min_length) {
++	err += c_format("Packet too short %u, must be at least %u",
++			XORP_UINT_CAST(len),
++			XORP_UINT_CAST(offset + min_length));
++	delete packet;
++	return NULL;
++    }
+ 
+ #ifdef	DEBUG_RAW_PACKETS
+     debug_msg("\n%s", dump_packet(ptr, len).c_str());
+@@ -937,11 +983,14 @@ LinkStateUpdatePacket::decode(uint8_t *ptr, size_t len) const throw(InvalidPacke
+ 
+     size_t lsa_length;
+ 
+-    // If anything goes wrong the decoder will throw an exception.
+     for(size_t i = 0; i < n_lsas; i++) {
+ 	lsa_length = len - offset;
+-	packet->get_lsas().
+-	    push_back(_lsa_decoder.decode(&ptr[offset], lsa_length));
++	Lsa::LsaRef r = _lsa_decoder.decode(&ptr[offset], lsa_length, err);
++	if (r.is_empty() || r->invalid()) {
++	    delete packet;
++	    return NULL;
++	}
++	packet->get_lsas().push_back(r);
+ 	offset += lsa_length;
+     }
+ 
+@@ -1029,23 +1078,27 @@ LinkStateUpdatePacket::str() const
+ /* Link State Acknowledgement Packet */
+ 
+ Packet *
+-LinkStateAcknowledgementPacket::decode(uint8_t *ptr, size_t len) const
+-    throw(InvalidPacket)
++LinkStateAcknowledgementPacket::decode(uint8_t *ptr, size_t len, string& err) const
+ {
+     OspfTypes::Version version = get_version();
+ 
+-    LinkStateAcknowledgementPacket *packet =
+-	new LinkStateAcknowledgementPacket(version);
++    LinkStateAcknowledgementPacket *packet = new LinkStateAcknowledgementPacket(version);
+ 
+-    size_t offset = packet->decode_standard_header(ptr, len);
++    size_t offset = packet->decode_standard_header(ptr, len, err);
++    if (offset == 0) {
++	delete packet;
++	return NULL;
++    }
+ 
+     // Verify that this packet is large enough to hold the at least
+     // one LSA header.
+-    if ((len - offset) < Lsa_header::length())
+-	xorp_throw(InvalidPacket,
+-		   c_format("Packet too short %u, must be at least %u",
+-			    XORP_UINT_CAST(len),
+-			    XORP_UINT_CAST(offset + Lsa_header::length())));
++    if ((len - offset) < Lsa_header::length()) {
++	err += c_format("Packet too short %u, must be at least %u",
++			XORP_UINT_CAST(len),
++			XORP_UINT_CAST(offset + Lsa_header::length()));
++	delete packet;
++	return NULL;
++    }
+ 
+ #ifdef	DEBUG_RAW_PACKETS
+     debug_msg("\n%s", dump_packet(ptr, len).c_str());
+@@ -1058,8 +1111,12 @@ LinkStateAcknowledgementPacket::decode(uint8_t *ptr, size_t len) const
+ 
+     // XXX - Should we be checking for multiples of 20 here?
+     for(int i = 0; i < lsas; i++) {
+-	packet->get_lsa_headers().
+-	    push_back(lsa_header.decode(&ptr[offset + i*lsa_header.length()]));
++	Lsa_header r = lsa_header.decode(&ptr[offset + i*lsa_header.length()], err);
++	if (r.invalid()) {
++	    delete packet;
++	    return NULL;
++	}
++	packet->get_lsa_headers().push_back(r);
+     }
+ 
+     return packet;
+diff --git a/xorp/ospf/packet.hh b/xorp/ospf/packet.hh
+index 9a200ff..09017b4 100644
+--- a/xorp/ospf/packet.hh
++++ b/xorp/ospf/packet.hh
+@@ -18,7 +18,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/ospf/packet.hh,v 1.44 2008/10/02 21:57:48 bms Exp $
+ 
+ #ifndef __OSPF_PACKET_HH__
+ #define __OSPF_PACKET_HH__
+@@ -68,14 +67,13 @@ class Packet {
+      *
+      * @return the offset where the specific header starts.
+      */
+-    size_t decode_standard_header(uint8_t *ptr, size_t& len) throw(InvalidPacket);
++    size_t decode_standard_header(uint8_t *ptr, size_t& len, string& err);
+ 
+     /**
+      * Decode the packet.
+      * The returned packet must be free'd.
+      */
+-    virtual Packet *decode(uint8_t *ptr, size_t len)
+-	const throw(InvalidPacket) = 0;
++    virtual Packet *decode(uint8_t *ptr, size_t len, string& err) const = 0;
+ 
+     /**
+      * Encode standard header.
+@@ -266,7 +264,7 @@ class PacketDecoder {
+      *
+      * @return a packet structure, which must be free'd
+      */
+-    Packet *decode(uint8_t *ptr, size_t len) throw(InvalidPacket);
++    Packet *decode(uint8_t *ptr, size_t len, string& err);
+  private:
+     map<OspfTypes::Type , Packet *> _ospfv2;	// OSPFv2 Packet decoders
+     map<OspfTypes::Type , Packet *> _ospfv3;	// OSPFv3 Packet decoders
+@@ -309,7 +307,7 @@ class HelloPacket : public Packet {
+ 
+     OspfTypes::Type get_type() const { return 1; }
+ 
+-    Packet *decode(uint8_t *ptr, size_t len) const throw(InvalidPacket);
++    Packet *decode(uint8_t *ptr, size_t len, string& err) const;
+ 
+     /**
+      * Encode the packet.
+@@ -465,7 +463,7 @@ class DataDescriptionPacket : public Packet {
+ 	return 0;
+     }
+ 
+-    Packet *decode(uint8_t *ptr, size_t len) const throw(InvalidPacket);
++    Packet *decode(uint8_t *ptr, size_t len, string& err) const;
+ 
+     /**
+      * Encode the packet.
+@@ -573,7 +571,7 @@ class LinkStateRequestPacket : public Packet {
+ 
+     OspfTypes::Type get_type() const { return 3; }
+ 
+-    Packet *decode(uint8_t *ptr, size_t len) const throw(InvalidPacket);
++    Packet *decode(uint8_t *ptr, size_t len, string& err) const;
+ 
+     /**
+      * Encode the packet.
+@@ -606,7 +604,7 @@ class LinkStateUpdatePacket : public Packet {
+ 
+     OspfTypes::Type get_type() const { return 4; }
+ 
+-    Packet *decode(uint8_t *ptr, size_t len) const throw(InvalidPacket);
++    Packet *decode(uint8_t *ptr, size_t len, string& err) const;
+ 
+     /**
+      * Encode the packet.
+@@ -654,7 +652,7 @@ class LinkStateAcknowledgementPacket : public Packet {
+ 
+     OspfTypes::Type get_type() const { return 5; }
+ 
+-    Packet *decode(uint8_t *ptr, size_t len) const throw(InvalidPacket);
++    Packet *decode(uint8_t *ptr, size_t len, string& err) const;
+ 
+     /**
+      * Encode the packet.
+@@ -800,8 +798,7 @@ class Options {
+ };
+ 
+ /**
+- * Verify the checksum of an IPv6 PDU, throw an exception if the
+- * checksum doesn't match.
++ * Verify the checksum of an IPv6 PDU
+  *
+  * In IPv6 the payload is not checksummed it is up to the protocol to
+  * checksum its own payload. The checksum includes a pseduo header
+@@ -815,15 +812,13 @@ class Options {
+  * @param protocol protocol number.
+  */
+ template <typename A> 
+-void
++bool
+ ipv6_checksum_verify(const A& src, const A& dst,
+ 		     const uint8_t *data, size_t len,
+-		     size_t checksum_offset, uint8_t protocol)
+-    throw(InvalidPacket);
++		     size_t checksum_offset, uint8_t protocol, string& err);
+ 
+ /**
+- * Compute the IPv6 checksum and apply it to the packet provided. If
+- * the checksum_offset is outside the packet then an exception is thrown.
++ * Compute the IPv6 checksum and apply it to the packet provided.
+  *
+  * In IPv6 the payload is not checksummed it is up to the protocol to
+  * checksum its own payload. The checksum includes a pseduo header
+@@ -837,10 +832,8 @@ ipv6_checksum_verify(const A& src, const A& dst,
+  * @param protocol protocol number.
+  */
+ template <typename A> 
+-void
++bool
+ ipv6_checksum_apply(const A& src, const A& dst,
+ 		    uint8_t *data, size_t len,
+-		    size_t checksum_offset, uint8_t protocol)
+-    throw(InvalidPacket);
+-
++		    size_t checksum_offset, uint8_t protocol, string& err);
+ #endif // __OSPF_PACKET_HH__
+diff --git a/xorp/ospf/peer.cc b/xorp/ospf/peer.cc
+index 530af89..41d7073 100644
+--- a/xorp/ospf/peer.cc
++++ b/xorp/ospf/peer.cc
+@@ -352,8 +352,7 @@ PeerOut<A>::transmit(typename Transmit<A>::TransmitRef tr)
+ 
+ template <typename A>
+ bool
+-PeerOut<A>::receive(A dst, A src, Packet *packet)
+-    throw(BadPeer)
++PeerOut<A>::receive(A dst, A src, Packet *packet, string& err)
+ {
+     XLOG_TRACE(_ospf.trace()._packets,
+ 	       "peer-out-rcv: dst %s src %s %s\n", cstring(dst), cstring(src),
+@@ -372,9 +371,10 @@ PeerOut<A>::receive(A dst, A src, Packet *packet)
+ 	    return _ospf.get_peer_manager().
+ 		receive_virtual_link(dst, src, packet);
+ 	}
+-	xorp_throw(BadPeer, c_format("Area %s not handled by %s/%s",
+-				     pr_id(packet->get_area_id()).c_str(),
+-				     _interface.c_str(), _vif.c_str()));
++	err += c_format("Area %s not handled by %s/%s",
++			pr_id(packet->get_area_id()).c_str(),
++			_interface.c_str(), _vif.c_str());
++	return false;
+     }
+ 
+     switch(_ospf.get_version()) {
+diff --git a/xorp/ospf/peer.hh b/xorp/ospf/peer.hh
+index 02373bf..0d5772f 100644
+--- a/xorp/ospf/peer.hh
++++ b/xorp/ospf/peer.hh
+@@ -199,7 +199,7 @@ class PeerOut {
+     /**
+      * Packets for this peer are received here.
+      */
+-    bool receive(A dst, A src, Packet *packet) throw(BadPeer);
++    bool receive(A dst, A src, Packet *packet, string& err);
+ 
+     /**
+      * Send this LSA directly to the neighbour. Do not place on
+diff --git a/xorp/ospf/peer_manager.cc b/xorp/ospf/peer_manager.cc
+index cf143e2..6bab11f 100644
+--- a/xorp/ospf/peer_manager.cc
++++ b/xorp/ospf/peer_manager.cc
+@@ -35,14 +35,7 @@
+ #include "libxorp/status_codes.h"
+ #include "libxorp/service.hh"
+ #include "libxorp/eventloop.hh"
+-
+-
+-
+-
+-
+-
+ #include "libproto/spt.hh"
+-
+ #include "ospf.hh"
+ #include "packet.hh"
+ #include "delay_queue.hh"
+@@ -375,15 +368,15 @@ PeerManager<A>::get_neighbour_info(OspfTypes::NeighbourID nid,
+ 
+ template <typename A>
+ OspfTypes::PeerID
+-PeerManager<A>::create_peerid(const string& interface, const string& vif)
+-    throw(BadPeer)
++PeerManager<A>::create_peerid(const string& interface, const string& vif, string& err)
+ {
+     debug_msg("Interface %s Vif %s\n", interface.c_str(), vif.c_str());
+     string concat = interface + "/" + vif;
+ 
+-    if (0 != _pmap.count(concat))
+-	xorp_throw(BadPeer,
+-		   c_format("Mapping for %s already exists", concat.c_str()));
++    if (0 != _pmap.count(concat)) {
++	err += c_format("Mapping for %s already exists", concat.c_str());
++	return OspfTypes::ALLPEERS; /* invalid */
++    }
+ 			    
+     OspfTypes::PeerID peerid = _next_peerid++;
+     _pmap[concat] = peerid;
+@@ -393,15 +386,15 @@ PeerManager<A>::create_peerid(const string& interface, const string& vif)
+ 
+ template <typename A>
+ OspfTypes::PeerID
+-PeerManager<A>::get_peerid(const string& interface, const string& vif)
+-    throw(BadPeer)
++PeerManager<A>::get_peerid(const string& interface, const string& vif, string& err)
+ {
+     debug_msg("Interface %s Vif %s\n", interface.c_str(), vif.c_str());
+     string concat = interface + "/" + vif;
+ 
+-    if (0 == _pmap.count(concat))
+-	xorp_throw(BadPeer, 
+-		   c_format("No mapping for %s exists", concat.c_str()));
++    if (0 == _pmap.count(concat)) {
++	err += c_format("No mapping for %s exists", concat.c_str());
++	return OspfTypes::ALLPEERS; /* invalid */
++    }
+ 			    
+     return _pmap[concat];
+ }
+@@ -428,18 +421,19 @@ PeerManager<A>::get_interface_vif_by_peerid(OspfTypes::PeerID peerid,
+ }
+ 
+ template <typename A>
+-void
+-PeerManager<A>::destroy_peerid(const string& interface, const string& vif)
+-    throw(BadPeer)
++bool
++PeerManager<A>::destroy_peerid(const string& interface, const string& vif, string& err)
+ {
+     debug_msg("Interface %s Vif %s\n", interface.c_str(), vif.c_str());
+     string concat = interface + "/" + vif;
+ 
+-    if (0 == _pmap.count(concat))
+-	xorp_throw(BadPeer, 
+-		   c_format("No mapping for %s exists", concat.c_str()));
++    if (0 == _pmap.count(concat)) {
++	err += c_format("No mapping for %s exists", concat.c_str());
++	return false;
++    }
+ 			    
+     _pmap.erase(_pmap.find(concat));
++    return true;
+ }
+ 
+ template <typename A>
+@@ -471,8 +465,7 @@ OspfTypes::PeerID
+ PeerManager<A>::create_peer(const string& interface, const string& vif,
+ 			    A source,
+ 			    OspfTypes::LinkType linktype, 
+-			    OspfTypes::AreaID area)
+-    throw(BadPeer)
++			    OspfTypes::AreaID area, string& err)
+ {
+     debug_msg("Interface %s Vif %s source net %s linktype %u area %s\n",
+ 	      interface.c_str(), vif.c_str(),
+@@ -481,13 +474,17 @@ PeerManager<A>::create_peer(const string& interface, const string& vif,
+     AreaRouter<A> *area_router = get_area_router(area);
+ 
+     // Verify that this area is known.
+-    if (0 == area_router)
+-	xorp_throw(BadPeer, 
+-		   c_format("Unknown Area %s", pr_id(area).c_str()));
++    if (0 == area_router) {
++	err += c_format("Unknown Area %s", pr_id(area).c_str());
++	return OspfTypes::ALLPEERS; /* invalid */
++    }
+ 
+-    OspfTypes::PeerID peerid = create_peerid(interface, vif);
+ 
+-    // If we got this far create_peerid did not throw an exception so
++    OspfTypes::PeerID peerid = create_peerid(interface, vif, err);
++    if (peerid == OspfTypes::ALLPEERS)
++	return peerid;
++
++    // If we got this far create_peerid did not return an error
+     // this interface/vif is unique.
+ 
+     _peers[peerid] = new PeerOut<A>(_ospf, interface, vif, peerid,
+@@ -594,8 +591,12 @@ PeerManager<A>::add_address_peer(const string& interface, const string& vif,
+ 	return false;
+     }
+ 
+-    // An exception will be thrown if there is a problem.
+-    OspfTypes::PeerID peerid = get_peerid(interface, vif);
++    string err;
++    OspfTypes::PeerID peerid = get_peerid(interface, vif, err);
++    if (peerid == OspfTypes::ALLPEERS) {
++	XLOG_WARNING("%s", err.c_str());
++	return false;
++    }
+ 
+     set<AddressInfo<A> >& info = _peers[peerid]->get_address_info(area);
+ 
+@@ -669,8 +670,12 @@ PeerManager<A>::activate_peer(const string& interface, const string& vif,
+     debug_msg("interface %s vif %s area %s\n", interface.c_str(),
+ 	      vif.c_str(), pr_id(area).c_str());
+ 
+-    // An exception will be thrown if there is a problem.
+-    OspfTypes::PeerID peerid = get_peerid(interface, vif);
++    string err;
++    OspfTypes::PeerID peerid = get_peerid(interface, vif, err);
++    if (peerid == OspfTypes::ALLPEERS) {
++	XLOG_WARNING("%s", err.c_str());
++	return false;
++    }
+ 
+     recompute_addresses_peer(peerid, area);
+ 
+@@ -773,13 +778,12 @@ PeerManager<A>::vif_status_change(const string& interface, const string& vif,
+     XLOG_WARNING("interface %s vif %s state %s\n",
+ 		 interface.c_str(), vif.c_str(), bool_c_str(state));
+ 
+-    OspfTypes::PeerID peerid;
+-
+     // All interface/vif/address changes on the host come through
+     // here, ignore the changes that are not for OSPF.
+-    try {
+-	peerid = get_peerid(interface, vif);
+-    } catch(...) {
++    string err;
++    OspfTypes::PeerID peerid = get_peerid(interface, vif, err);
++    if (peerid == OspfTypes::ALLPEERS) {
++	XLOG_WARNING("%s", err.c_str());
+ 	return;
+     }
+ 
+@@ -803,13 +807,12 @@ PeerManager<A>::address_status_change(const string& interface,
+ 	      interface.c_str(), vif.c_str(), cstring(source),
+ 	      bool_c_str(state));
+ 
+-    OspfTypes::PeerID peerid;
+-
+     // All interface/vif/address changes on the host come through
+     // here, ignore the changes that are not for OSPF.
+-    try {
+-	peerid = get_peerid(interface, vif);
+-    } catch(...) {
++    string err;
++    OspfTypes::PeerID peerid = get_peerid(interface, vif, err);
++    if (peerid == OspfTypes::ALLPEERS) {
++	XLOG_WARNING("%s", err.c_str());
+ 	return;
+     }
+ 
+@@ -892,16 +895,18 @@ PeerManager<A>::transmit(const string& interface, const string& vif,
+ template <typename A>
+ bool
+ PeerManager<A>::receive(const string& interface, const string& vif,
+-			A dst, A src, Packet *packet)
+-    throw(BadPeer)
++			A dst, A src, Packet *packet, string& err)
+ {
+     XLOG_TRACE(_ospf.trace()._packets,
+ 	       "Interface %s Vif %s src %s dst %s %s\n", interface.c_str(),
+ 	       vif.c_str(), cstring(dst), cstring(src), cstring((*packet)));
+ 
+-    OspfTypes::PeerID peerid = get_peerid(interface, vif);
++    OspfTypes::PeerID peerid = get_peerid(interface, vif, err);
++    if (peerid == OspfTypes::ALLPEERS)
++	return false;
++
+     XLOG_ASSERT(0 != _peers.count(peerid));
+-    return _peers[peerid]->receive(dst, src, packet);
++    return _peers[peerid]->receive(dst, src, packet, err);
+ }
+ 
+ template <typename A>
+@@ -1199,7 +1204,7 @@ PeerManager<A>::refresh_router_lsas() const
+ 
+ template <typename A>
+ bool
+-PeerManager<A>::create_virtual_peer(OspfTypes::RouterID rid)
++PeerManager<A>::create_virtual_peer(OspfTypes::RouterID rid, string& err)
+ {
+     string ifname;
+     string vifname;
+@@ -1210,11 +1215,10 @@ PeerManager<A>::create_virtual_peer(OspfTypes::RouterID rid)
+     }
+ 
+     OspfTypes::PeerID peerid;
+-    try {
+-	peerid = create_peer(ifname, vifname, A::ZERO(),
+-			     OspfTypes::VirtualLink, OspfTypes::BACKBONE);
+-    } catch(XorpException& e) {
+-	XLOG_ERROR("%s", cstring(e));
++    peerid = create_peer(ifname, vifname, A::ZERO(),
++			 OspfTypes::VirtualLink, OspfTypes::BACKBONE, err);
++    if (peerid == OspfTypes::ALLPEERS) {
++	XLOG_ERROR("%s", err.c_str());
+ 	return false;
+     }
+ 
+@@ -1275,7 +1279,7 @@ PeerManager<A>::virtual_link_endpoint(OspfTypes::AreaID area) const
+ 
+ template <typename A> 
+ bool
+-PeerManager<A>::create_virtual_link(OspfTypes::RouterID rid)
++PeerManager<A>::create_virtual_link(OspfTypes::RouterID rid, string& err)
+ {
+     XLOG_TRACE(_ospf.trace()._virtual_link,
+ 	       "Create virtual link rid %s\n", pr_id(rid).c_str());
+@@ -1283,7 +1287,7 @@ PeerManager<A>::create_virtual_link(OspfTypes::RouterID rid)
+     if (!_vlink.create_vlink(rid))
+ 	return false;
+ 
+-    return create_virtual_peer(rid);
++    return create_virtual_peer(rid, err);
+ }
+ 
+ template <typename A> 
+@@ -1461,9 +1465,9 @@ PeerManager<A>::receive_virtual_link(A dst, A src, Packet *packet)
+     if (OspfTypes::ALLPEERS == peerid)
+ 	return false;
+     XLOG_ASSERT(0 != _peers.count(peerid));
+-    return _peers[peerid]->receive(dst, src, packet);
+ 
+-    return false;
++    string err;
++    return _peers[peerid]->receive(dst, src, packet, err);
+ }
+ 
+ template <typename A> 
+diff --git a/xorp/ospf/peer_manager.hh b/xorp/ospf/peer_manager.hh
+index ea49024..0a72c71 100644
+--- a/xorp/ospf/peer_manager.hh
++++ b/xorp/ospf/peer_manager.hh
+@@ -18,7 +18,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/ospf/peer_manager.hh,v 1.100 2008/10/02 21:57:48 bms Exp $
+ 
+ #ifndef __OSPF_PEER_MANAGER_HH__
+ #define __OSPF_PEER_MANAGER_HH__
+@@ -137,10 +136,8 @@ class PeerManager {
+ 
+     /**
+      * Convert an interface/vif to a PeerID.
+-     * Throw an exception if no mapping is found.
+      */
+-    OspfTypes::PeerID get_peerid(const string& interface, const string& vif) 
+-	throw(BadPeer);
++    OspfTypes::PeerID get_peerid(const string& interface, const string& vif, string& err);
+ 
+     /**
+      * Given a PeerID convert it back to an interface and vif.
+@@ -165,13 +162,12 @@ class PeerManager {
+      * @param linktype broadcast or point-2-point, etc...
+      * @param area ID of area
+      *
+-     * @return PeerID on success otherwise throw an exception.
++     * @return PeerID on success otherwise ALLPEERS
+      */
+     OspfTypes::PeerID create_peer(const string& interface, const string& vif,
+ 				  A source,
+ 				  OspfTypes::LinkType linktype,
+-				  OspfTypes::AreaID area)
+-	throw(BadPeer);
++				  OspfTypes::AreaID area, string& err);
+ 	
+     /**
+      * Delete a peer.
+@@ -275,8 +271,7 @@ class PeerManager {
+      * @return true if the packet is now owned by the peer manager.
+      */
+     bool receive(const string& interface, const string& vif, A dst, A src,
+-		 Packet *packet)
+-	throw(BadPeer);
++		 Packet *packet, string& err);
+ 
+     /**
+      * Drop all adjacencies and hence clear database.
+@@ -452,7 +447,7 @@ class PeerManager {
+     /**
+      * Create a virtual link peer.
+      */
+-    bool create_virtual_peer(OspfTypes::RouterID rid);
++    bool create_virtual_peer(OspfTypes::RouterID rid, string& err);
+ 
+     /**
+      * Delete a virtual link peer.
+@@ -471,7 +466,7 @@ class PeerManager {
+      *
+      * @param rid neighbours router ID.
+      */
+-    bool create_virtual_link(OspfTypes::RouterID rid);
++    bool create_virtual_link(OspfTypes::RouterID rid, string& err);
+ 
+     /**
+      * Attach this transit area to the neighbours router ID  (Configuration).
+@@ -852,16 +847,13 @@ class PeerManager {
+      * Generate PeerID.
+      * Internally we want to deal with peers as simple IDs not
+      * interface/vif.
+-     * Throw an exception a mapping already exists.
+      */
+-    OspfTypes::PeerID create_peerid(const string& interface, const string& vif)
+-	throw(BadPeer);
++    OspfTypes::PeerID create_peerid(const string& interface, const string& vif, string& err);
+ 
+     /**
+      * Get rid of this mapping.
+      */
+-    void destroy_peerid(const string& interface, const string& vif)
+-	throw(BadPeer);
++    bool destroy_peerid(const string& interface, const string& vif, string& err);
+ 
+     /**
+      * @return true if this route is a candidate for summarisation.
+diff --git a/xorp/ospf/tools/print_lsas.cc b/xorp/ospf/tools/print_lsas.cc
+index 5eb4ddf..f3d2917 100644
+--- a/xorp/ospf/tools/print_lsas.cc
++++ b/xorp/ospf/tools/print_lsas.cc
+@@ -195,6 +195,7 @@ private:
+ 		  const bool *toohigh,
+ 		  const bool *self,
+ 		  const vector<uint8_t>* lsa) {
++	string err;
+ 	if (XrlError::OKAY() != error) {
+ 	    XLOG_WARNING("Attempt to get lsa failed");
+ 	    _done = true;
+@@ -203,8 +204,12 @@ private:
+ 	}
+ 	if (*valid) {
+ 	    size_t len = lsa->size();
+-	    Lsa::LsaRef lsar = _lsa_decoder.
+-		decode(const_cast<uint8_t *>(&(*lsa)[0]), len);
++	    Lsa::LsaRef lsar = _lsa_decoder.decode(const_cast<uint8_t *>(&(*lsa)[0]), len, err);
++	    if (lsar.is_empty()) {
++		_done = true;
++		_fail = true;
++		return;
++	    }
+ 	    lsar->set_self_originating(*self);
+ 	    _lsas.push_back(lsar);
+ 	}
+-- 
+2.7.5
+

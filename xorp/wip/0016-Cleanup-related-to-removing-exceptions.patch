@@ -1,0 +1,531 @@
+From f4d0bc00f6127859c82ada41f627b85114da72b9 Mon Sep 17 00:00:00 2001
+From: Ben Greear <greearb@candelatech.com>
+Date: Fri, 8 Sep 2017 13:48:06 -0700
+Subject: [PATCH 16/33] Cleanup related to removing exceptions.
+
+Signed-off-by: Ben Greear <greearb@candelatech.com>
+---
+ xorp/libxipc/tests/test_xrl_parser.cc | 113 ++++++++++++++++------------------
+ xorp/libxipc/xrl_args.hh              |   2 -
+ xorp/libxipc/xrl_atom.cc              |  38 ++++++------
+ xorp/libxipc/xrl_atom.hh              |   6 +-
+ xorp/libxipc/xrl_atom_list.cc         |   4 +-
+ xorp/libxipc/xrl_parser_input.cc      |  31 +++++-----
+ xorp/libxipc/xrl_parser_input.hh      |  36 +++--------
+ xorp/libxorp/ipv4.hh                  |   4 +-
+ xorp/xrl/scripts/tgt-gen              |   9 +--
+ 9 files changed, 100 insertions(+), 143 deletions(-)
+
+diff --git a/xorp/libxipc/tests/test_xrl_parser.cc b/xorp/libxipc/tests/test_xrl_parser.cc
+index f11aa62..eaf458f 100644
+--- a/xorp/libxipc/tests/test_xrl_parser.cc
++++ b/xorp/libxipc/tests/test_xrl_parser.cc
+@@ -38,70 +38,63 @@ static uint32_t
+ parse_buffer(XrlParser& p)
+ {
+     uint32_t errcnt = 0;
+-    try {
+-	while (p.start_next() == true) {
+-	    string protocol, target, command;
+-	    XrlArgs args;
+-	    list<XrlAtomSpell> spells;
+-	    list<XrlAtomSpell> rspec;
+-
+-	    try {
+-		cout << string(80, '-') << endl;
+-		cout << "Input:    " << QUOT << p.input() << QUOT << endl;
+-		cout << string(80, '=') << endl;
+-		p.get(protocol, target, command, args, spells);
+-
+-		cout << "Protocol: " << QUOT << protocol  << QUOT << endl
+-		     << "Target:   " << QUOT << target    << QUOT << endl
+-		     << "Command:  " << QUOT << command   << QUOT << endl;
+-
+-		if (!args.empty()) {
+-		    cout << "Arguments: " << endl;
+-		    for (XrlArgs::const_iterator i = args.begin();
+-			 i != args.end(); i++) {
+-			cout << "\t" << i->str() << endl;
+-		    }
+-		}
+-
+-		if (!spells.empty()) {
+-		    cout << "Input variable assignments: " << endl;
+-		    for (list<XrlAtomSpell>::const_iterator si = spells.begin();
+-			 si != spells.end(); si++) {
+-			cout << "\t"
+-			     << si->atom().str() << " - " << si->spell()
+-			     << endl;
+-		    }
+-		}
+-		if (p.get_return_specs(rspec)) {
+-		    cout << "Return Specification:" << endl;
+-		    for (list<XrlAtomSpell>::const_iterator si = rspec.begin();
+-			 si != rspec.end(); si++) {
+-			cout << "\t"
+-			     << si->atom().str() << " - " << si->spell()
+-			     << endl;
+-		    }
+-		}
+-	    } catch (const XrlParseError& xpe) {
+-		cout << string(79, '-') << endl;
+-		cout << xpe.pretty_print() << "\n";
+-		cout << string(79, '=') << endl;
+-		cout << "Attempting resync...";
+-		if (p.resync())
+-		    cout << "okay";
+-		else
+-		    cout << "fail";
+-		cout << endl;
+-		errcnt++;
++
++    while (p.start_next() == true) {
++	string protocol, target, command;
++	XrlArgs args;
++	list<XrlAtomSpell> spells;
++	list<XrlAtomSpell> rspec;
++
++	cout << string(80, '-') << endl;
++	cout << "Input:    " << QUOT << p.input() << QUOT << endl;
++	cout << string(80, '=') << endl;
++	p.get(protocol, target, command, args, spells);
++
++	cout << "Protocol: " << QUOT << protocol  << QUOT << endl
++	     << "Target:   " << QUOT << target    << QUOT << endl
++	     << "Command:  " << QUOT << command   << QUOT << endl;
++	
++	if (!args.empty()) {
++	    cout << "Arguments: " << endl;
++	    for (XrlArgs::const_iterator i = args.begin();
++		 i != args.end(); i++) {
++		cout << "\t" << i->str() << endl;
++	    }
++	}
++
++	if (!spells.empty()) {
++	    cout << "Input variable assignments: " << endl;
++	    for (list<XrlAtomSpell>::const_iterator si = spells.begin();
++		 si != spells.end(); si++) {
++		cout << "\t"
++		     << si->atom().str() << " - " << si->spell()
++		     << endl;
++	    }
++	}
++	if (p.get_return_specs(rspec)) {
++	    cout << "Return Specification:" << endl;
++	    for (list<XrlAtomSpell>::const_iterator si = rspec.begin();
++		 si != rspec.end(); si++) {
++		cout << "\t"
++		     << si->atom().str() << " - " << si->spell()
++		     << endl;
+ 	    }
+-	    cout << endl;
+-	    flush(cout);
+ 	}
+-    } catch (const XrlParserInputException& xe) {
+-	cout << string(79, '!') << endl;
+-	cout << "Parser input failed: " << endl << xe.str() << endl;
+-	cout << p.parser_input().stack_trace() << endl;
++    } catch (const XrlParseError& xpe) {
++	cout << string(79, '-') << endl;
++	cout << xpe.pretty_print() << "\n";
++	cout << string(79, '=') << endl;
++	cout << "Attempting resync...";
++	if (p.resync())
++	    cout << "okay";
++	else
++	    cout << "fail";
++	cout << endl;
+ 	errcnt++;
+     }
++    cout << endl;
++    flush(cout);
++
+     return errcnt;
+ }
+ 
+diff --git a/xorp/libxipc/xrl_args.hh b/xorp/libxipc/xrl_args.hh
+index 5ab67af..2c78169 100644
+--- a/xorp/libxipc/xrl_args.hh
++++ b/xorp/libxipc/xrl_args.hh
+@@ -33,8 +33,6 @@
+ 
+ #include "xrl_atom.hh"
+ 
+-static XrlAtom bad_atom;
+-
+ class XrlArgs {
+ public:
+     typedef vector<XrlAtom>	    ATOMS;
+diff --git a/xorp/libxipc/xrl_atom.cc b/xorp/libxipc/xrl_atom.cc
+index 435ac10..ce66f90 100644
+--- a/xorp/libxipc/xrl_atom.cc
++++ b/xorp/libxipc/xrl_atom.cc
+@@ -64,6 +64,8 @@ static const char* xrlatom_int64_name	= "i64";
+ static const char* xrlatom_uint64_name	= "u64";
+ static const char* xrlatom_fp64_name	= "fp64";
+ 
++XrlAtom bad_atom;
++
+ static inline void
+ do_pack_uint32(const uint32_t u32val, uint8_t* buffer)
+ {
+@@ -113,21 +115,21 @@ resolve_xrlatom_name(const char* name)
+     for (XrlAtomType t = xrlatom_start; t <= xrlatom_end;
+ 	 t = XrlAtomType(t + 1)) {
+ 	switch (t) {
+-#define CHECK_NAME(x) case (x) : if (strcmp(name, x##_name) == 0) return x;
+-	    CHECK_NAME(xrlatom_int32);		/* FALLTHRU */
+-	    CHECK_NAME(xrlatom_uint32);		/* FALLTHRU */
+-	    CHECK_NAME(xrlatom_ipv4);		/* FALLTHRU */
+-	    CHECK_NAME(xrlatom_ipv4net);	/* FALLTHRU */
+-	    CHECK_NAME(xrlatom_ipv6);		/* FALLTHRU */
+-	    CHECK_NAME(xrlatom_ipv6net);	/* FALLTHRU */
+-	    CHECK_NAME(xrlatom_mac);		/* FALLTHRU */
+-	    CHECK_NAME(xrlatom_text);		/* FALLTHRU */
+-	    CHECK_NAME(xrlatom_list);		/* FALLTHRU */
+-	    CHECK_NAME(xrlatom_boolean);	/* FALLTHRU */
+-	    CHECK_NAME(xrlatom_binary);		/* FALLTHRU */
+-	    CHECK_NAME(xrlatom_int64);		/* FALLTHRU */
+-	    CHECK_NAME(xrlatom_uint64);		/* FALLTHRU */
+-	    CHECK_NAME(xrlatom_fp64);		/* FALLTHRU */
++#define CHECK_NAME(x) case (x) : if (strcmp(name, x##_name) == 0) return x; __attribute__ ((fallthrough));
++	    CHECK_NAME(xrlatom_int32);		/* Fall through */
++	    CHECK_NAME(xrlatom_uint32);		/* Fall Through */
++	    CHECK_NAME(xrlatom_ipv4);		/* Fall Through */
++	    CHECK_NAME(xrlatom_ipv4net);	/* Fall Through */
++	    CHECK_NAME(xrlatom_ipv6);		/* Fall Through */
++	    CHECK_NAME(xrlatom_ipv6net);	/* Fall Through */
++	    CHECK_NAME(xrlatom_mac);		/* Fall Through */
++	    CHECK_NAME(xrlatom_text);		/* Fall Through */
++	    CHECK_NAME(xrlatom_list);		/* Fall Through */
++	    CHECK_NAME(xrlatom_boolean);	/* Fall Through */
++	    CHECK_NAME(xrlatom_binary);		/* Fall Through */
++	    CHECK_NAME(xrlatom_int64);		/* Fall Through */
++	    CHECK_NAME(xrlatom_uint64);		/* Fall Through */
++	    CHECK_NAME(xrlatom_fp64);		/* Fall Through */
+ 	    // ... Your type here ...
+ 	case xrlatom_no_type:
+ 	    break;
+@@ -750,9 +752,7 @@ XrlAtom::packed_bytes() const
+ 	return bytes;
+     }
+ 
+-    x_static_assert(sizeof(IPv4) == 4);
+     x_static_assert(sizeof(IPv6) == 16);
+-    x_static_assert(sizeof(IPv4Net) == sizeof(IPv4) + 4);
+     x_static_assert(sizeof(IPv6Net) == sizeof(IPv6) + 4);
+ 
+     switch (_type) {
+@@ -1017,9 +1017,9 @@ XrlAtom::unpack_mac(const uint8_t* buffer, size_t buffer_bytes)
+     else
+ 	_mac->copy_in(s.c_str());
+ 
+-    _invalid = _mac.invalid();
++    _invalid = _mac->invalid();
+     if (_invalid) {
+-	_mac = 0;
++	_mac = NULL;
+ 	return 0;
+     }
+     return sizeof(len) + len;
+diff --git a/xorp/libxipc/xrl_atom.hh b/xorp/libxipc/xrl_atom.hh
+index 8285107..9be938d 100644
+--- a/xorp/libxipc/xrl_atom.hh
++++ b/xorp/libxipc/xrl_atom.hh
+@@ -33,10 +33,6 @@
+ #include "libxorp/ipvx.hh"
+ #include "libxorp/ipvxnet.hh"
+ #include "libxorp/mac.hh"
+-
+-
+-
+-
+ #include "xrl_atom_list.hh"
+ #include "fp64.h"
+ 
+@@ -498,4 +494,6 @@ protected:
+     string	_spell;
+ };
+ 
++extern XrlAtom bad_atom;
++
+ #endif // __LIBXIPC_XRL_ATOM_HH__
+diff --git a/xorp/libxipc/xrl_atom_list.cc b/xorp/libxipc/xrl_atom_list.cc
+index be12726..16ec812 100644
+--- a/xorp/libxipc/xrl_atom_list.cc
++++ b/xorp/libxipc/xrl_atom_list.cc
+@@ -85,8 +85,8 @@ XrlAtomList::get(size_t itemno) const
+     return *ci;
+ 
+   error:
+-    XrlAtom.set_invalid(true);
+-    return XrlAtom::bad_atom;
++    bad_atom.set_invalid(true);
++    return bad_atom;
+ }
+ 
+ void
+diff --git a/xorp/libxipc/xrl_parser_input.cc b/xorp/libxipc/xrl_parser_input.cc
+index d542a69..9e63cab 100644
+--- a/xorp/libxipc/xrl_parser_input.cc
++++ b/xorp/libxipc/xrl_parser_input.cc
+@@ -23,10 +23,9 @@
+ 
+ #include "xrl_module.h"
+ #include "libxorp/xorp.h"
+-
++#include "libxorp/xlog.h"
+ #include "libxorp/c_format.hh"
+ #include "libxorp/utils.hh"
+-
+ #include "xrl_parser_input.hh"
+ 
+ // CPP # directives that are supported here
+@@ -41,7 +40,6 @@ XrlParserFileInput::eof() const
+ 
+ bool
+ XrlParserFileInput::slurp_line(string& line)
+-    throw (XrlParserInputException)
+ {
+     // Check if we need to step down a stack level
+     if (stack_top().input()->eof()) {
+@@ -104,12 +102,13 @@ chomp(const string& input, const string& exclude = string(" \t"))
+ string
+ XrlParserFileInput::try_include(string::const_iterator& begin,
+ 				 const string::const_iterator& end)
+-    throw (XrlParserInputException)
+ {
+     static const string h("#include");
+     for (string::const_iterator hi = h.begin(); hi != h.end(); hi++, begin++) {
+-	if (begin == end || *begin != *hi)
+-	    xorp_throw(XrlParserInputException, "Unsupported # directive");
++	if (begin == end || *begin != *hi) {
++	    XLOG_WARNING("Unsupported # directive");
++	    return "";
++	}
+     }
+ 
+     // Okay found include directive skip space
+@@ -140,15 +139,16 @@ XrlParserFileInput::try_include(string::const_iterator& begin,
+     }
+ 
+     if (fn_end >= end) {
+-	xorp_throw(XrlParserInputException, "Malformed #include directive");
++	XLOG_WARNING("Malformed #include directive");
++	return "";
+     }
+ 
+     // Check for junk following end of filename
+ 
+     for (string::const_iterator junk = fn_end + 1; junk < end; junk++) {
+ 	if (!xorp_isspace(*junk)) {
+-	    xorp_throw (XrlParserInputException,
+-			"Junk following filename in #include directive");
++	    XLOG_WARNING("Junk following filename in #include directive");
++	    return "";
+ 	}
+     }
+ 
+@@ -171,7 +171,6 @@ XrlParserFileInput::stack_trace() const
+ 
+ ifstream*
+ XrlParserFileInput::path_open_input(const char* filename)
+-    throw (XrlParserInputException)
+ {
+     // XXX We could check for recursive includes here
+     
+@@ -212,8 +211,8 @@ XrlParserFileInput::path_open_input(const char* filename)
+ 	    delete pif;
+ 	}
+     }
+-    xorp_throw(XrlParserInputException, c_format("Could not open \"%s\": %s",
+-					  filename, strerror(errno)));
++    XLOG_WARNING("Could not open \"%s\": %s",
++		 filename, strerror(errno));
+     return 0;
+ }
+ 
+@@ -224,7 +223,6 @@ XrlParserFileInput::close_input(istream* pif)
+ }
+ 
+ XrlParserFileInput::XrlParserFileInput(istream* input, const char* fname)
+-    throw (XrlParserInputException)
+     :  _own_bottom(false), _current_mode(NORMAL)
+ {
+     initialize_path();
+@@ -233,7 +231,6 @@ XrlParserFileInput::XrlParserFileInput(istream* input, const char* fname)
+ }
+ 
+ XrlParserFileInput::XrlParserFileInput(const char* fname)
+-    throw (XrlParserInputException)
+     :  _own_bottom(true), _current_mode(NORMAL)
+ {
+     initialize_path();
+@@ -260,10 +257,10 @@ XrlParserFileInput::initialize_path()
+ 
+ void
+ XrlParserFileInput::push_stack(const FileState& fs)
+-    throw (XrlParserInputException)
+ {
+     if (fs.input()->good() == false) {
+-	xorp_throw (XrlParserInputException, "Bad ifstream, rejected by stack");
++	XLOG_WARNING("Bad ifstream, rejected by stack");
++	return;
+     }
+     _stack.push_back(fs);
+ }
+@@ -292,7 +289,7 @@ XrlParserFileInput::stack_depth() const
+  * line data, false otherwise.
+  */
+ bool
+-XrlParserFileInput::getline(string& line) throw (XrlParserInputException)
++XrlParserFileInput::getline(string& line)
+ {
+     line.clear();
+ 
+diff --git a/xorp/libxipc/xrl_parser_input.hh b/xorp/libxipc/xrl_parser_input.hh
+index 598506f..154e899 100644
+--- a/xorp/libxipc/xrl_parser_input.hh
++++ b/xorp/libxipc/xrl_parser_input.hh
+@@ -19,17 +19,10 @@
+ // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/libxipc/xrl_parser_input.hh,v 1.12 2008/10/02 21:57:24 bms Exp $
+ 
+ #ifndef __LIBXIPC_XRL_PARSER_INPUT_HH__
+ #define __LIBXIPC_XRL_PARSER_INPUT_HH__
+ 
+-
+-
+-
+-
+-
+-
+ #include "libxorp/xorp.h"
+ #include "libxorp/exceptions.hh"
+ 
+@@ -65,14 +58,6 @@ public:
+     virtual ~XrlParserInput() {};
+ };
+ 
+-/**
+- * @short Exception class used by @ref XrlParserInput difficulties.
+- */
+-
+-struct XrlParserInputException : public XorpReasonedException {
+-    XrlParserInputException(const char* file, int line, const string& reason)
+-	: XorpReasonedException("XrlParserInputException", file, line, reason) {}
+-};
+ 
+ /** XrlParserFileInput class reads lines from a data source, strips out
+  *  comments and handles continuation characters.  It is similar to the
+@@ -86,25 +71,22 @@ public:
+      *
+      * @param input input file stream.
+      * @param fname filename.
+-     * @throws XrlParserInputException if input file stream is not good().
+      */
+-    XrlParserFileInput(istream* input, const char* fname = "")
+-	throw (XrlParserInputException);
++    XrlParserFileInput(istream* input, const char* fname = "");
+ 
+-    XrlParserFileInput(const char* filename)
+-	throw (XrlParserInputException);
++    XrlParserFileInput(const char* filename);
+ 
+     ~XrlParserFileInput();
+ 
+     bool eof() const;
+-    bool getline(string& line) throw (XrlParserInputException);
++    bool getline(string& line);
+     string stack_trace() const;
+ 
+     /** @return include path preprocessor looks for files in. */
+     list<string>& path() { return _path; }
+ 
+ protected:
+-    bool slurp_line(string& line) throw (XrlParserInputException);
++    bool slurp_line(string& line);
+ 
+     struct FileState {
+ 	FileState(istream* input, const char* fname) :
+@@ -122,22 +104,18 @@ protected:
+ 	int	    _line;
+     };
+     /** Push FileState onto stack
+-     * @throws XrlParserInputException if input file stream is not good();
+      */
+-    void push_stack(const FileState& fs)
+-	throw (XrlParserInputException);
++    void push_stack(const FileState& fs);
+ 
+     void pop_stack();
+     FileState& stack_top();
+     size_t stack_depth() const;
+ 
+-    ifstream* path_open_input(const char* filename)
+-	throw (XrlParserInputException);
++    ifstream* path_open_input(const char* filename);
+     void close_input(istream* pif);
+ 
+     string try_include(string::const_iterator& begin,
+-		       const string::const_iterator& end)
+-	throw (XrlParserInputException);
++		       const string::const_iterator& end);
+     void initialize_path();
+ 
+     vector<FileState>	_stack;
+diff --git a/xorp/libxorp/ipv4.hh b/xorp/libxorp/ipv4.hh
+index 57a5678..d6971db 100644
+--- a/xorp/libxorp/ipv4.hh
++++ b/xorp/libxorp/ipv4.hh
+@@ -736,11 +736,11 @@ public:
+      */
+     static const uint32_t ADDR_BYTELEN = ADDR_BITLEN / 8;
+ 
+-    bool invalid() const { return _invalid; }
++    virtual bool invalid() const { return _invalid; }
+ 
+ private:
+     uint32_t _addr;		// The address value (in network-order)
+-    uint8_t _invalid;
++    bool _invalid;
+ };
+ 
+ inline uint32_t
+diff --git a/xorp/xrl/scripts/tgt-gen b/xorp/xrl/scripts/tgt-gen
+index 468c50c..fb7aaa2 100755
+--- a/xorp/xrl/scripts/tgt-gen
++++ b/xorp/xrl/scripts/tgt-gen
+@@ -288,12 +288,8 @@ def target_handler_methods(cls, name, methods):
+             for r in m.rargs():
+                 s += xorp_indent(3) + "out.add(\"%s\", *rarg_%s);\n" % \
+                     (r.name(), cpp_name(r.name()))
+-            s += \
+-"""
+-        s += "        return c_b->dispatch(e, &out);\n    }\n}\n\n"
+-
+-
+ 
++        s += "        return c_b->dispatch(e, &out);\n    }\n}\n\n"
+ 
+         s += "\nvoid\n%s::async_%s(" \
+             % (cls, cpp_name(m.name()))
+@@ -413,12 +409,9 @@ def target_handler_methods(cls, name, methods):
+             for r in m.rargs():
+                 s += xorp_indent(2) + "pxa_outputs->add(\"%s\", r_%s);\n" % \
+                     (r.name(), cpp_name(r.name()))
+-            s += \
+-"""
+ 
+         s += "    return XrlCmdError::OKAY();\n"
+ 
+-
+         s += "#endif\n"
+         s += "}\n\n"
+     return s
+-- 
+2.7.5
+

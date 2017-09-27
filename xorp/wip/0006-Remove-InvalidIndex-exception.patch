@@ -1,0 +1,116 @@
+From 25016711ef00470537005a3d229dbd56c7b49098 Mon Sep 17 00:00:00 2001
+From: Ben Greear <greearb@candelatech.com>
+Date: Fri, 8 Sep 2017 10:46:41 -0700
+Subject: [PATCH 06/33] Remove InvalidIndex exception.
+
+Signed-off-by: Ben Greear <greearb@candelatech.com>
+---
+ xorp/libxipc/xrl_atom.hh      |  2 ++
+ xorp/libxipc/xrl_atom_list.cc | 17 +++++++++++------
+ xorp/libxipc/xrl_atom_list.hh | 11 ++---------
+ 3 files changed, 15 insertions(+), 15 deletions(-)
+
+diff --git a/xorp/libxipc/xrl_atom.hh b/xorp/libxipc/xrl_atom.hh
+index add645a..0999e06 100644
+--- a/xorp/libxipc/xrl_atom.hh
++++ b/xorp/libxipc/xrl_atom.hh
+@@ -81,6 +81,8 @@ protected:
+     bool _invalid;
+ public:
+     XrlAtomBase() { _invalid = false; }
++    virtual bool invalid() const { return _invalid; }
++    virtual void set_invalid(bool v) { _invalid = v; }
+ };
+ 
+ class XrlAtom : public XrlAtomBase {
+diff --git a/xorp/libxipc/xrl_atom_list.cc b/xorp/libxipc/xrl_atom_list.cc
+index 6dc655b..b526dcc 100644
+--- a/xorp/libxipc/xrl_atom_list.cc
++++ b/xorp/libxipc/xrl_atom_list.cc
+@@ -67,37 +67,42 @@ XrlAtomList::do_append(const XrlAtom& xa)
+ }
+ 
+ const XrlAtom&
+-XrlAtomList::get(size_t itemno) const throw (InvalidIndex)
++XrlAtomList::get(size_t itemno) const
+ {
+     list<XrlAtom>::const_iterator ci = _list.begin();
+     size_t size = _size;
+ 
+     if (ci == _list.end() || size == 0) {
+-	xorp_throw(InvalidIndex, "Index out of range: empty list.");
++	goto error;
+     }
+     while (itemno != 0) {
+ 	++ci;
+ 	if (ci == _list.end() || size-- == 0) {
+-	    xorp_throw(InvalidIndex, "Index out of range.");
++	    goto error;
+ 	}
+ 	itemno--;
+     }
+     return *ci;
++
++  error:
++    XtrlAtom bad;
++    bad.set_invalid(true);
++    return bad;
+ }
+ 
+ void
+-XrlAtomList::remove(size_t itemno) throw (InvalidIndex)
++XrlAtomList::remove(size_t itemno)
+ {
+     list<XrlAtom>::iterator i = _list.begin();
+     size_t size = _size;
+ 
+     if (i == _list.end() || size == 0) {
+-	xorp_throw(InvalidIndex, "Index out of range: empty list.");
++	return;
+     }
+     while (itemno != 0) {
+ 	i++;
+ 	if (i == _list.end() || size-- == 0) {
+-	    xorp_throw(InvalidIndex, "Index out of range.");
++	    return;
+ 	}
+ 	itemno--;
+     }
+diff --git a/xorp/libxipc/xrl_atom_list.hh b/xorp/libxipc/xrl_atom_list.hh
+index bef150b..b870639 100644
+--- a/xorp/libxipc/xrl_atom_list.hh
++++ b/xorp/libxipc/xrl_atom_list.hh
+@@ -38,13 +38,6 @@ class XrlAtom;
+ */
+ class XrlAtomList {
+ public:
+-    struct InvalidIndex : public XorpReasonedException {
+-	InvalidIndex(const char* file, size_t line, const string& init_why)
+-	    : XorpReasonedException("InvalidIndex", file, line, init_why)
+-	{}
+-    };
+-
+-public:
+     XrlAtomList();
+ 
+     /**
+@@ -67,14 +60,14 @@ public:
+      * @param itemno the index of the atom in the list.
+      * @return the itemno - 1 XrlAtom in the list.
+      */
+-    const XrlAtom& get(size_t itemno) const throw (InvalidIndex);
++    const XrlAtom& get(size_t itemno) const;
+ 
+     /**
+      * Removes an XrlAtom from list.
+      *
+      * @param itemno the index of the atom in the list to be removed.
+      */
+-    void remove(size_t itemno) throw (InvalidIndex);
++    void remove(size_t itemno);
+ 
+     /**
+      * @return number of XrlAtoms in the list.
+-- 
+2.7.5
+

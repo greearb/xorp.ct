@@ -1,0 +1,266 @@
+From 13dc2f2308e2283a1b285afe6213481b79f57010 Mon Sep 17 00:00:00 2001
+From: Ben Greear <greearb@candelatech.com>
+Date: Fri, 8 Sep 2017 10:30:34 -0700
+Subject: [PATCH 04/33] Remove InvalidCast exception.
+
+And fix a few broken things from previous commits.
+
+Signed-off-by: Ben Greear <greearb@candelatech.com>
+---
+ xorp/libxorp/exceptions.cc |  7 -------
+ xorp/libxorp/exceptions.hh |  8 --------
+ xorp/libxorp/ipv4.hh       |  3 +--
+ xorp/libxorp/ipvx.cc       |  6 +++---
+ xorp/libxorp/ipvx.hh       | 22 +++++++++++-----------
+ xorp/libxorp/ipvxnet.hh    |  8 ++++----
+ xorp/libxorp/range.hh      |  8 ++++++--
+ 7 files changed, 25 insertions(+), 37 deletions(-)
+
+diff --git a/xorp/libxorp/exceptions.cc b/xorp/libxorp/exceptions.cc
+index 0177cad..dcff7b3 100644
+--- a/xorp/libxorp/exceptions.cc
++++ b/xorp/libxorp/exceptions.cc
+@@ -86,13 +86,6 @@ InvalidPort::InvalidPort(const char* file,
+ {
+ }
+ 
+-InvalidCast::InvalidCast(const char* file,
+-			 size_t line,
+-			 const string& init_why)
+-    : XorpReasonedException("XorpCast", file, line, init_why)
+-{
+-}
+-
+ InvalidBufferOffset::InvalidBufferOffset(const char* file,
+ 					 size_t line,
+ 					 const string& init_why)
+diff --git a/xorp/libxorp/exceptions.hh b/xorp/libxorp/exceptions.hh
+index b5570b3..798dc4f 100644
+--- a/xorp/libxorp/exceptions.hh
++++ b/xorp/libxorp/exceptions.hh
+@@ -151,14 +151,6 @@ public:
+ };
+ 
+ /**
+- * @short A standard XORP exception that is thrown if a cast is invalid.
+- */
+-class InvalidCast : public XorpReasonedException {
+-public:
+-    InvalidCast(const char* file, size_t line, const string& init_why = "");
+-};
+-
+-/**
+  * @short A standard XORP exception that is thrown if a buffer ofset is
+  * invalid.
+  */
+diff --git a/xorp/libxorp/ipv4.hh b/xorp/libxorp/ipv4.hh
+index 1eda239..57a5678 100644
+--- a/xorp/libxorp/ipv4.hh
++++ b/xorp/libxorp/ipv4.hh
+@@ -505,8 +505,7 @@ public:
+      * @return address size in number of octets.
+      */
+     static size_t addr_bytelen() {
+-	x_static_assert(sizeof(IPv4) == sizeof(uint32_t));
+-	return sizeof(IPv4);
++	return 4;
+     }
+ 
+     /**
+diff --git a/xorp/libxorp/ipvx.cc b/xorp/libxorp/ipvx.cc
+index 58c61e5..9d9fc57 100644
+--- a/xorp/libxorp/ipvx.cc
++++ b/xorp/libxorp/ipvx.cc
+@@ -157,7 +157,7 @@ IPvX::operator~() const
+ }
+ 
+ IPvX
+-IPvX::operator|(const IPvX& other) const throw (InvalidCast)
++IPvX::operator|(const IPvX& other) const
+ {
+     if (is_ipv4()) {
+ 	return get_ipv4() | other.get_ipv4();
+@@ -167,7 +167,7 @@ IPvX::operator|(const IPvX& other) const throw (InvalidCast)
+ }
+ 
+ IPvX
+-IPvX::operator&(const IPvX& other) const throw (InvalidCast)
++IPvX::operator&(const IPvX& other) const
+ {
+     if (is_ipv4()) {
+ 	return get_ipv4() & other.get_ipv4();
+@@ -177,7 +177,7 @@ IPvX::operator&(const IPvX& other) const throw (InvalidCast)
+ }
+ 
+ IPvX
+-IPvX::operator^(const IPvX& other) const throw (InvalidCast)
++IPvX::operator^(const IPvX& other) const
+ {
+     if (is_ipv4()) {
+ 	return get_ipv4() ^ other.get_ipv4();
+diff --git a/xorp/libxorp/ipvx.hh b/xorp/libxorp/ipvx.hh
+index 46f60f8..cb4f55e 100644
+--- a/xorp/libxorp/ipvx.hh
++++ b/xorp/libxorp/ipvx.hh
+@@ -305,7 +305,7 @@ public:
+      * @param other the right-hand operand to OR with.
+      * @return bitwise OR of two addresses.
+      */
+-    IPvX operator|(const IPvX& other) const throw (InvalidCast);
++    IPvX operator|(const IPvX& other);
+ 
+     /**
+      * AND Operator
+@@ -313,7 +313,7 @@ public:
+      * @param other the right-hand operand to AND with.
+      * @return bitwise AND of two addresses.
+      */
+-    IPvX operator&(const IPvX& other) const throw (InvalidCast);
++    IPvX operator&(const IPvX& other);
+ 
+     /**
+      * XOR Operator
+@@ -321,7 +321,7 @@ public:
+      * @param other the right-hand operand to XOR with.
+      * @return bitwize eXclusive-OR of two addresses.
+      */
+-    IPvX operator^(const IPvX& other) const throw (InvalidCast);
++    IPvX operator^(const IPvX& other);
+ 
+     /**
+      * Operator <<
+@@ -757,14 +757,14 @@ public:
+      *
+      * @return IPv4 address contained with IPvX structure.
+      */
+-    IPv4 get_ipv4() const throw (InvalidCast);
++    IPv4 get_ipv4() const;
+ 
+     /**
+      * Get IPv6 address.
+      *
+      * @return IPv6 address contained with IPvX structure.
+      */
+-    IPv6 get_ipv6() const throw (InvalidCast);
++    IPv6 get_ipv6() const;
+ 
+     /**
+      * Assign address value to an IPv4 address.
+@@ -772,7 +772,7 @@ public:
+      * @param to_ipv4 IPv4 address to be assigned IPv4 value contained
+      * within this address.
+      */
+-    void get(IPv4& to_ipv4) const throw (InvalidCast) {
++    void get(IPv4& to_ipv4) const {
+ 	to_ipv4 = get_ipv4();
+     }
+ 
+@@ -782,7 +782,7 @@ public:
+      * @param to_ipv6 IPv6 address to be assigned IPv4 value contained
+      * within this address.
+      */
+-    void get(IPv6& to_ipv6) const throw (InvalidCast) {
++    void get(IPv6& to_ipv6) const {
+ 	to_ipv6 = get_ipv6();
+     }
+ 
+@@ -864,19 +864,19 @@ private:
+ };
+ 
+ inline IPv4
+-IPvX::get_ipv4() const throw (InvalidCast)
++IPvX::get_ipv4() const
+ {
+     if (_af == AF_INET)
+ 	return IPv4(_addr[0]);
+-    xorp_throw(InvalidCast, "Miscast as IPv4");
++    XLOG_ASSERT(0);
+ }
+ 
+ inline IPv6
+-IPvX::get_ipv6() const throw (InvalidCast)
++IPvX::get_ipv6() const
+ {
+     if (_af == AF_INET6)
+ 	return IPv6(&_addr[0]);
+-    xorp_throw(InvalidCast, "Miscast as IPv6");
++    XLOG_ASSERT(0);
+ }
+ 
+ inline uint32_t
+diff --git a/xorp/libxorp/ipvxnet.hh b/xorp/libxorp/ipvxnet.hh
+index b3727d7..ec765a2 100644
+--- a/xorp/libxorp/ipvxnet.hh
++++ b/xorp/libxorp/ipvxnet.hh
+@@ -163,7 +163,7 @@ public:
+      *
+      * @return IPv4Net subnet contained with IPvXNet structure.
+      */
+-    IPv4Net get_ipv4net() const 	throw (InvalidCast) {
++    IPv4Net get_ipv4net() const {
+     	return IPv4Net(masked_addr().get_ipv4(), prefix_len());
+     }
+ 
+@@ -172,7 +172,7 @@ public:
+      *
+      * @return IPv6Net subnet contained with IPvXNet structure.
+      */
+-    IPv6Net get_ipv6net() const 	throw (InvalidCast) {
++    IPv6Net get_ipv6net() const {
+     	return IPv6Net(masked_addr().get_ipv6(), prefix_len());
+     }
+ 
+@@ -182,7 +182,7 @@ public:
+      * @param to_ipv4net IPv4Net subnet to be assigned IPv4Net value contained
+      * within this subnet.
+      */
+-    void get(IPv4Net& to_ipv4net) const throw (InvalidCast) {
++    void get(IPv4Net& to_ipv4net) const {
+ 	to_ipv4net = get_ipv4net();
+     }
+ 
+@@ -192,7 +192,7 @@ public:
+      * @param to_ipv6net IPv6Net subnet to be assigned IPv6Net value contained
+      * within this subnet.
+      */
+-    void get(IPv6Net& to_ipv6net) const throw (InvalidCast) {
++    void get(IPv6Net& to_ipv6net) const {
+ 	to_ipv6net = get_ipv6net();
+     }
+ 
+diff --git a/xorp/libxorp/range.hh b/xorp/libxorp/range.hh
+index 7797764..a545130 100644
+--- a/xorp/libxorp/range.hh
++++ b/xorp/libxorp/range.hh
+@@ -22,6 +22,9 @@
+ #ifndef __LIBXORP_RANGE_HH__
+ #define __LIBXORP_RANGE_HH__
+ 
++#include "libxorp_module.h"
++#include "xlog.h"
++
+ class IPv4;
+ class IPv6;
+ 
+@@ -56,7 +59,8 @@ public:
+ 
+     const T& low() const { return _low; }
+     const T& high() const { return _high; }
+-    bool invalid() const { return _invalid; }
++    virtual bool invalid() const { return _invalid; }
++
+ protected:
+     T _low;
+     T _high;
+@@ -371,7 +375,7 @@ public:
+ 						   from_string.length())
+ 						    .c_str());
+ 	} else {
+-	    _invalid = true;
++	    Range<T>::_invalid = true;
+ 	    XLOG_WARNING("Syntax error: %s", from_cstr);
+ 	}
+     }
+-- 
+2.7.5
+

@@ -1,0 +1,226 @@
+From 781ef5b171bdcdbda941274df209e068334b44b0 Mon Sep 17 00:00:00 2001
+From: Ben Greear <greearb@candelatech.com>
+Date: Mon, 18 Sep 2017 12:07:11 -0700
+Subject: [PATCH 28/33] Remove more ospf exceptions.
+
+---
+ xorp/ospf/xrl_target.cc  | 51 ++++++++++++++++++----------------------
+ xorp/ospf/xrl_target3.cc | 61 ++++++++++++++++++++++++------------------------
+ 2 files changed, 54 insertions(+), 58 deletions(-)
+
+diff --git a/xorp/ospf/xrl_target.cc b/xorp/ospf/xrl_target.cc
+index 37d4249..d891f3b 100644
+--- a/xorp/ospf/xrl_target.cc
++++ b/xorp/ospf/xrl_target.cc
+@@ -175,12 +175,7 @@ XrlOspfV2Target::policy_backend_0_1_reset(const uint32_t& filter)
+ {
+     debug_msg("policy filter reset: %u\n", filter);
+ 
+-    try {
+-	_ospf.reset_filter(filter);
+-    } catch(const PolicyException& e){ 
+-	return XrlCmdError::COMMAND_FAILED("Filter reset failed: " +
+-					   e.str());
+-    }
++    _ospf.reset_filter(filter);
+ 
+     return XrlCmdError::OKAY();
+ }
+@@ -331,12 +326,10 @@ XrlOspfV2Target::ospfv2_0_1_create_peer(const string& ifname,
+     if (!status)
+ 	return XrlCmdError::COMMAND_FAILED("Unrecognised type " + type);
+ 
+-    try {
+-	_ospf.get_peer_manager().create_peer(ifname, vifname, addr,
+-					     linktype, area);
+-    } catch(XorpException& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
+-    }
++    string err;
++    if (!_ospf.get_peer_manager().create_peer(ifname, vifname, addr,
++					      linktype, area, err))
++	return XrlCmdError::COMMAND_FAILED(err);
+ 
+     return XrlCmdError::OKAY();
+ }
+@@ -348,11 +341,12 @@ XrlOspfV2Target::ospfv2_0_1_delete_peer(const string& ifname,
+     debug_msg("interface %s vif %s\n", ifname.c_str(), vifname.c_str());
+ 
+     OspfTypes::PeerID peerid;
+-    try {
+-	peerid = _ospf.get_peer_manager().get_peerid(ifname, vifname);
+-    } catch(XorpException& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
++    string err;
++    peerid = _ospf.get_peer_manager().get_peerid(ifname, vifname, err);
++    if (peerid == OspfTypes::ALLPEERS) {
++	return XrlCmdError::COMMAND_FAILED(err);
+     }
++
+     if (!_ospf.get_peer_manager().delete_peer(peerid))
+ 	return XrlCmdError::COMMAND_FAILED("Failed to delete peer");
+ 
+@@ -368,11 +362,12 @@ XrlOspfV2Target::ospfv2_0_1_set_peer_state(const string& ifname,
+ 	      vifname.c_str(), bool_c_str(enable));
+ 
+     OspfTypes::PeerID peerid;
+-    try {
+-	peerid = _ospf.get_peer_manager().get_peerid(ifname, vifname);
+-    } catch(XorpException& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
++    string err;
++    peerid = _ospf.get_peer_manager().get_peerid(ifname, vifname, err);
++    if (peerid == OspfTypes::ALLPEERS) {
++	return XrlCmdError::COMMAND_FAILED(err);
+     }
++
+     if (!_ospf.get_peer_manager().set_state_peer(peerid, enable))
+ 	return XrlCmdError::COMMAND_FAILED("Failed to set peer state");
+ 
+@@ -393,10 +388,10 @@ XrlOspfV2Target::ospfv2_0_1_add_neighbour(const string&	ifname,
+ 	      cstring(neighbour_address),pr_id(rid).c_str());
+ 
+     OspfTypes::PeerID peerid;
+-    try {
+-	peerid = _ospf.get_peer_manager().get_peerid(ifname, vifname);
+-    } catch(XorpException& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
++    string err;
++    peerid = _ospf.get_peer_manager().get_peerid(ifname, vifname, err);
++    if (peerid == OspfTypes::ALLPEERS) {
++	return XrlCmdError::COMMAND_FAILED(err);
+     }
+     if (!_ospf.get_peer_manager().add_neighbour(peerid, area,
+ 						neighbour_address,
+@@ -421,10 +416,10 @@ XrlOspfV2Target::ospfv2_0_1_remove_neighbour(const string& ifname,
+ 	      cstring(neighbour_address),pr_id(rid).c_str());
+ 
+     OspfTypes::PeerID peerid;
+-    try {
+-	peerid = _ospf.get_peer_manager().get_peerid(ifname, vifname);
+-    } catch(XorpException& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
++    string err;
++    peerid = _ospf.get_peer_manager().get_peerid(ifname, vifname, err);
++    if (peerid == OspfTypes::ALLPEERS) {
++	return XrlCmdError::COMMAND_FAILED(err);
+     }
+     if (!_ospf.get_peer_manager().remove_neighbour(peerid, area,
+ 						   neighbour_address,
+diff --git a/xorp/ospf/xrl_target3.cc b/xorp/ospf/xrl_target3.cc
+index de14603..68275c4 100644
+--- a/xorp/ospf/xrl_target3.cc
++++ b/xorp/ospf/xrl_target3.cc
+@@ -325,12 +325,13 @@ XrlOspfV3Target::ospfv3_0_1_create_peer(const string& ifname,
+     if (!status)
+ 	return XrlCmdError::COMMAND_FAILED("Unrecognised type " + type);
+ 
+-    try {
+-	_ospf_ipv6.get_peer_manager().create_peer(ifname, vifname,
+-						  IPv6::ZERO(),
+-						  linktype, area);
+-    } catch(XorpException& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
++    OspfTypes::PeerID peerid;
++    string err;
++    peerid = _ospf_ipv6.get_peer_manager().create_peer(ifname, vifname,
++						       IPv6::ZERO(),
++						       linktype, area, err);
++    if (peerid == OspfTypes::ALLPEERS) {
++	return XrlCmdError::COMMAND_FAILED(err);
+     }
+ 
+     return XrlCmdError::OKAY();
+@@ -343,10 +344,10 @@ XrlOspfV3Target::ospfv3_0_1_delete_peer(const string& ifname,
+     debug_msg("interface %s vif %s\n", ifname.c_str(), vifname.c_str());
+ 
+     OspfTypes::PeerID peerid;
+-    try {
+-	peerid = _ospf_ipv6.get_peer_manager().get_peerid(ifname, vifname);
+-    } catch(XorpException& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
++    string err;
++    peerid = _ospf_ipv6.get_peer_manager().get_peerid(ifname, vifname, err);
++    if (peerid == OspfTypes::ALLPEERS) {
++	return XrlCmdError::COMMAND_FAILED(err);
+     }
+     if (!_ospf_ipv6.get_peer_manager().delete_peer(peerid))
+ 	return XrlCmdError::COMMAND_FAILED("Failed to delete peer");
+@@ -364,10 +365,10 @@ XrlOspfV3Target::ospfv3_0_1_set_peer_state(const string& ifname,
+ 	      vifname.c_str(), bool_c_str(enable));
+ 
+     OspfTypes::PeerID peerid;
+-    try {
+-	peerid = _ospf_ipv6.get_peer_manager().get_peerid(ifname, vifname);
+-    } catch(XorpException& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
++    string err;
++    peerid = _ospf_ipv6.get_peer_manager().get_peerid(ifname, vifname, err);
++    if (peerid == OspfTypes::ALLPEERS) {
++	return XrlCmdError::COMMAND_FAILED(err);
+     }
+     if (!_ospf_ipv6.get_peer_manager().set_state_peer(peerid, enable))
+ 	return XrlCmdError::COMMAND_FAILED("Failed to set peer state");
+@@ -403,10 +404,10 @@ XrlOspfV3Target::ospfv3_0_1_remove_address_peer(const string& ifname,
+ 	      vifname.c_str(), pr_id(area).c_str(), cstring(addr));
+ 
+     OspfTypes::PeerID peerid;
+-    try {
+-	peerid = _ospf_ipv6.get_peer_manager().get_peerid(ifname, vifname);
+-    } catch(XorpException& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
++    string err;
++    peerid = _ospf_ipv6.get_peer_manager().get_peerid(ifname, vifname, err);
++    if (peerid == OspfTypes::ALLPEERS) {
++	return XrlCmdError::COMMAND_FAILED(err);
+     }
+     if (!_ospf_ipv6.get_peer_manager().remove_address_peer(peerid, area, addr))
+ 	return XrlCmdError::COMMAND_FAILED("Failed to remove address");
+@@ -427,10 +428,10 @@ XrlOspfV3Target::ospfv3_0_1_set_address_state_peer(const string& ifname,
+ 	      cstring(addr), bool_c_str(enable));
+ 
+     OspfTypes::PeerID peerid;
+-    try {
+-	peerid = _ospf_ipv6.get_peer_manager().get_peerid(ifname, vifname);
+-    } catch(XorpException& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
++    string err;
++    peerid = _ospf_ipv6.get_peer_manager().get_peerid(ifname, vifname, err);
++    if (peerid == OspfTypes::ALLPEERS) {
++	return XrlCmdError::COMMAND_FAILED(err);
+     }
+     if (!_ospf_ipv6.get_peer_manager().
+ 	set_address_state_peer(peerid, area, addr, enable))
+@@ -485,10 +486,10 @@ XrlOspfV3Target::ospfv3_0_1_add_neighbour(const string&	ifname,
+ 	      cstring(neighbour_address),pr_id(rid).c_str());
+ 
+     OspfTypes::PeerID peerid;
+-    try {
+-	peerid = _ospf_ipv6.get_peer_manager().get_peerid(ifname, vifname);
+-    } catch(XorpException& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
++    string err;
++    peerid = _ospf_ipv6.get_peer_manager().get_peerid(ifname, vifname, err);
++    if (peerid == OspfTypes::ALLPEERS) {
++	return XrlCmdError::COMMAND_FAILED(err);
+     }
+     if (!_ospf_ipv6.get_peer_manager().add_neighbour(peerid, area,
+ 						     neighbour_address,
+@@ -513,10 +514,10 @@ XrlOspfV3Target::ospfv3_0_1_remove_neighbour(const string& ifname,
+ 	      cstring(neighbour_address),pr_id(rid).c_str());
+ 
+     OspfTypes::PeerID peerid;
+-    try {
+-	peerid = _ospf_ipv6.get_peer_manager().get_peerid(ifname, vifname);
+-    } catch(XorpException& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
++    string err;
++    peerid = _ospf_ipv6.get_peer_manager().get_peerid(ifname, vifname, err);
++    if (peerid == OspfTypes::ALLPEERS) {
++	return XrlCmdError::COMMAND_FAILED(err);
+     }
+     if (!_ospf_ipv6.get_peer_manager().remove_neighbour(peerid, area,
+ 							neighbour_address,
+-- 
+2.7.5
+

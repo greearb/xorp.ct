@@ -1,0 +1,5335 @@
+From 254479b564be269ae5c30b1d2fa1c6c906107359 Mon Sep 17 00:00:00 2001
+From: Ben Greear <greearb@candelatech.com>
+Date: Tue, 12 Sep 2017 18:03:08 -0700
+Subject: [PATCH 22/33] More exception removal code.
+
+Gah, this is taking forever!
+---
+ xorp/bgp/peer.cc                         |  53 +++--
+ xorp/libproto/config_node_id.hh          |  14 +-
+ xorp/libxorp/profile.hh                  |   7 +-
+ xorp/libxorp/range.hh                    |  16 +-
+ xorp/policy/configuration.cc             |   9 +-
+ xorp/policy/configuration.hh             |   5 +-
+ xorp/policy/policy_target.cc             |   6 +-
+ xorp/policy/policy_target.hh             |   5 +-
+ xorp/policy/xrl_target.cc                |  18 +-
+ xorp/rib/profile_vars.cc                 |   3 +-
+ xorp/rib/redist_xrl.cc                   |  26 +--
+ xorp/rib/redist_xrl.hh                   |   1 -
+ xorp/rib/xrl_target.cc                   | 100 ++++++----
+ xorp/rtrmgr/boot.yy                      | 145 ++++++++------
+ xorp/rtrmgr/cli.cc                       |  28 ++-
+ xorp/rtrmgr/cli.hh                       |  11 +-
+ xorp/rtrmgr/conf_tree.cc                 | 107 +++++-----
+ xorp/rtrmgr/conf_tree.hh                 |  20 +-
+ xorp/rtrmgr/conf_tree_node.cc            |   4 +-
+ xorp/rtrmgr/config_operators.cc          |   8 +-
+ xorp/rtrmgr/config_operators.hh          |   3 +-
+ xorp/rtrmgr/main_rtrmgr.cc               | 152 ++++++++-------
+ xorp/rtrmgr/master_conf_tree.cc          |  19 +-
+ xorp/rtrmgr/master_conf_tree.hh          |   4 +-
+ xorp/rtrmgr/master_conf_tree_node.cc     |   2 -
+ xorp/rtrmgr/master_template_tree.cc      |  16 +-
+ xorp/rtrmgr/master_template_tree.hh      |   8 +-
+ xorp/rtrmgr/master_template_tree_node.cc |  21 +-
+ xorp/rtrmgr/master_template_tree_node.hh |  11 +-
+ xorp/rtrmgr/module_command.cc            | 202 ++++++++++---------
+ xorp/rtrmgr/module_command.hh            |   5 +-
+ xorp/rtrmgr/op_commands.cc               |  13 +-
+ xorp/rtrmgr/op_commands.hh               |  10 +-
+ xorp/rtrmgr/op_commands.yy               |  33 ++--
+ xorp/rtrmgr/slave_conf_tree.cc           |  15 +-
+ xorp/rtrmgr/slave_conf_tree.hh           |   9 +-
+ xorp/rtrmgr/task.cc                      |   8 +-
+ xorp/rtrmgr/template.yy                  |  95 +++++----
+ xorp/rtrmgr/template_base_command.cc     |  83 ++++----
+ xorp/rtrmgr/template_base_command.hh     |  13 +-
+ xorp/rtrmgr/template_commands.cc         | 111 +++++++----
+ xorp/rtrmgr/template_commands.hh         |  16 +-
+ xorp/rtrmgr/template_tree.cc             | 109 ++++++-----
+ xorp/rtrmgr/template_tree.hh             |  24 +--
+ xorp/rtrmgr/template_tree_node.cc        | 325 ++++++++++++++-----------------
+ xorp/rtrmgr/template_tree_node.hh        |  59 +++---
+ xorp/rtrmgr/xorpsh_base.hh               |   2 +-
+ xorp/rtrmgr/xorpsh_main.cc               | 131 +++++++------
+ xorp/rtrmgr/xorpsh_main.hh               |   8 +-
+ xorp/rtrmgr/xrl_xorpsh_interface.cc      |   6 +-
+ 50 files changed, 1065 insertions(+), 1034 deletions(-)
+
+diff --git a/xorp/bgp/peer.cc b/xorp/bgp/peer.cc
+index 56fb49c..7ec353b 100644
+--- a/xorp/bgp/peer.cc
++++ b/xorp/bgp/peer.cc
+@@ -1272,33 +1272,27 @@ BGPPeer::event_open(const XorpFd sock)
+ }
+ 
+ void
+-BGPPeer::check_open_packet(const OpenPacket *p) throw(CorruptMessage)
++BGPPeer::check_open_packet(const OpenPacket *p, CorruptMessage& m)
+ {
+     if (p->Version() != BGPVERSION) {
+ 	static uint8_t data[2];
+ 	embed_16(data, BGPVERSION);
+-	xorp_throw(CorruptMessage,
+-		   c_format("Unsupported BGPVERSION %d", p->Version()),
+-		   OPENMSGERROR, UNSUPVERNUM, &data[0], sizeof(data));
++	INVALID_BGP(OPENMSGERR, UNSUPVERNUM, "Unsupported BGPVERSION %d", p->Version());
+     }
+ 
+     if (p->as() != _peerdata->as()) {
+ 	debug_msg("**** Peer has %s, should have %s ****\n",
+ 		  p->as().str().c_str(),
+ 		  _peerdata->as().str().c_str());
+-	xorp_throw(CorruptMessage,
+-		   c_format("Wrong AS %s expecting %s",
+-			    p->as().str().c_str(),
+-			    _peerdata->as().str().c_str()),
+-		   OPENMSGERROR, BADASPEER);
++	INVALID_BGP(OPENMSGERROR, BADASPEER, "Wrong AS %s expecting %s",
++		    p->as().str().c_str(),
++		    _peerdata->as().str().c_str());
+     }
+ 
+     // Must be a valid unicast IP host address.
+     if (!p->id().is_unicast() || p->id().is_zero()) {
+-	xorp_throw(CorruptMessage,
+-		   c_format("Not a valid unicast IP host address %s",
+-			    p->id().str().c_str()),
+-		   OPENMSGERROR, BADBGPIDENT);
++	INVALID_BGP(OPENMSGERROR, BADBGPIDENT, "Not a valid unicast IP host address %s",
++		    p->id().str().c_str());
+     }
+ 
+     // This has to be a valid IPv4 address.
+@@ -1309,9 +1303,8 @@ BGPPeer::check_open_packet(const OpenPacket *p) throw(CorruptMessage)
+     // check the received parameters
+ #if	0
+     if (_peerdata->unsupported_parameters() == true)
+-	xorp_throw(CorruptMessage,
+-		   c_format("Unsupported parameters"),
+-		   OPENMSGERROR, UNSUPOPTPAR);
++	INVALID_BGP(OPENMSGERROR, UNSUPOPTPAR,
++		   c_format("Unsupported parameters"));
+ #endif
+     /*
+      * Set the holdtime and keepalive times.
+@@ -1327,9 +1320,7 @@ BGPPeer::check_open_packet(const OpenPacket *p) throw(CorruptMessage)
+      */
+     uint16_t hold_secs = p->HoldTime();
+     if (hold_secs == 1 || hold_secs == 2)
+-	xorp_throw(CorruptMessage,
+-		   c_format("Illegal holdtime value %d secs", hold_secs),
+-		   OPENMSGERROR, UNACCEPTHOLDTIME);
++	INVALID_BGP(OPENMSGERROR, UNACCEPTHOLDTIME, "Illegal holdtime value %d secs", hold_secs);
+ 
+     if (_peerdata->get_configured_hold_time() < hold_secs)
+ 	hold_secs = _peerdata->get_configured_hold_time();
+@@ -2608,16 +2599,19 @@ AcceptSession::get_message_accept(BGPPacket::Status status,
+ 
+     const uint8_t* marker = buf + BGPPacket::MARKER_OFFSET;
+     uint8_t type = extract_8(buf + BGPPacket::TYPE_OFFSET);
+-    try {
+-	/*
+-	** Check the Marker, total waste of time as it never contains
+-	** anything of interest.
+-	*/
+-	if (0 != memcmp(const_cast<uint8_t *>(&BGPPacket::Marker[0]),
+-			marker, BGPPacket::MARKER_SIZE)) {
+-	    xorp_throw(CorruptMessage,"Bad Marker", MSGHEADERERR, CONNNOTSYNC);
+-	}
+-	
++
++    CorruptMessage m;
++
++    /*
++    ** Check the Marker, total waste of time as it never contains
++    ** anything of interest.
++    */
++    if (0 != memcmp(const_cast<uint8_t *>(&BGPPacket::Marker[0]),
++		    marker, BGPPacket::MARKER_SIZE)) {
++	INVALID_BGP(MSGHEADERERR, CANNOTSYNC, "Bad Marker");
++    }
++
++TODO
+ 	switch (type) {
+ 	case MESSAGETYPEOPEN: {
+ 	    debug_msg("OPEN Packet RECEIVED\n");
+@@ -2627,7 +2621,6 @@ AcceptSession::get_message_accept(BGPPacket::Status status,
+ 			       peerdata()->iptuple().str().c_str(),
+ 			       cstring(pac)));
+ 
+-	    // All decode errors should throw a CorruptMessage.
+ 	    debug_msg("%s", pac.str().c_str());
+ 	    // want unified decode call. now need to get peerdata out.
+ // 	    _peerdata->dump_peer_data();
+diff --git a/xorp/libproto/config_node_id.hh b/xorp/libproto/config_node_id.hh
+index 2d17f94..2358657 100644
+--- a/xorp/libproto/config_node_id.hh
++++ b/xorp/libproto/config_node_id.hh
+@@ -63,8 +63,8 @@ public:
+      *
+      * @param s the initialization string.
+      */
+-    explicit ConfigNodeId(const string& s) {
+-	copy_in(s);
++    explicit ConfigNodeId(const string& s, string& err) {
++	copy_in(s, err);
+     }
+ 
+ #ifdef XORP_USE_USTL
+@@ -91,7 +91,7 @@ public:
+      * @param from_string the string to copy the node ID from.
+      * @return the number of copied octets.
+      */
+-    size_t copy_in(const string& from_string);
++    size_t copy_in(const string& from_string, string& err);
+ 
+     /**
+      * Equality Operator
+@@ -365,7 +365,7 @@ private:
+ };
+ 
+ inline size_t
+-ConfigNodeId::copy_in(const string& from_string)
++ConfigNodeId::copy_in(const string& from_string, string& err)
+ {
+     string::size_type space, ix;
+     string s = from_string;
+@@ -380,7 +380,7 @@ ConfigNodeId::copy_in(const string& from_string)
+ 
+     space = s.find(' ');
+     if ((space == string::npos) || (space == 0) || (space >= s.size() - 1)) {
+-	XLOG_WARNING("Bad ConfigNodeId \"%s\"", s.c_str());
++	err += c_format("Bad ConfigNodeId \"%s\"", s.c_str());
+ 	set_invalid(true);
+ 	return 0;
+     }
+@@ -391,14 +391,14 @@ ConfigNodeId::copy_in(const string& from_string)
+     //
+     for (ix = 0; ix < space; ix++) {
+ 	if (! xorp_isdigit(s[ix])) {
+-	    XLOG_WARNING("Bad ConfigNodeId \"%s\"", s.c_str());
++	    err = c_format("Bad ConfigNodeId \"%s\"", s.c_str());
+ 	    set_invalid(true);
+ 	    return 0;
+ 	}
+     }
+     for (ix = space + 1; ix < s.size(); ix++) {
+ 	if (! xorp_isdigit(s[ix])) {
+-	    XLOG_WARNING("Bad ConfigNodeId \"%s\"", s.c_str());
++	    err = c_format("Bad ConfigNodeId \"%s\"", s.c_str());
+ 	    set_invalid(true);
+ 	    return 0;
+ 	}
+diff --git a/xorp/libxorp/profile.hh b/xorp/libxorp/profile.hh
+index ddae911..2745e1a 100644
+--- a/xorp/libxorp/profile.hh
++++ b/xorp/libxorp/profile.hh
+@@ -19,7 +19,6 @@
+ // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/libxorp/profile.hh,v 1.18 2008/10/02 21:57:32 bms Exp $
+ 
+ #ifndef __LIBXORP_PROFILE_HH__
+ #define __LIBXORP_PROFILE_HH__
+@@ -126,6 +125,12 @@ class Profile {
+ 	return i->second->enabled();
+     }
+ 
++    /* Ignore any error messages */
++    bool log_ne(const string& pname, string comment) {
++	string e;
++	return log(pname, comment, e);
++    }
++
+     /**
+      * Add an entry to the profile log.
+      */
+diff --git a/xorp/libxorp/range.hh b/xorp/libxorp/range.hh
+index a545130..acddf0a 100644
+--- a/xorp/libxorp/range.hh
++++ b/xorp/libxorp/range.hh
+@@ -36,17 +36,18 @@ class IPv6;
+  * (_low <= _high) always holds!
+  */
+ template <class T>
+-class Range {
++class Range : public Invalid {
+ public:
+     /**
+      * Default constructor
+      */
+-    Range() { _invalid = false; }
++    Range() { }
++    virtual ~Range() { }
+ 
+     /**
+      * Constructor from a single value.
+      */
+-    explicit Range(T value) { _low = _high = value; _invalid = false; }
++    explicit Range(T value) { _low = _high = value; }
+ 
+     /**
+      * Constructor from two values.
+@@ -54,17 +55,14 @@ public:
+     explicit Range(T low, T high) {
+ 	_low = low;
+ 	_high = high;
+-	_invalid = false;
+     }
+ 
+     const T& low() const { return _low; }
+     const T& high() const { return _high; }
+-    virtual bool invalid() const { return _invalid; }
+ 
+ protected:
+     T _low;
+     T _high;
+-    bool _invalid;
+ };
+ 
+ /**
+@@ -102,7 +100,7 @@ public:
+ 	    _low = strtoul(from_string.substr(0, delim).c_str(), NULL, 10);
+ 	    _high = strtoul(from_string.substr(delim + 2, from_string.length()).c_str(), NULL, 10);
+ 	} else {
+-	    _invalid = true;
++	    set_invalid(true);
+ 	    XLOG_WARNING("Syntax error: %s", from_cstr);
+ 	}
+     }
+@@ -163,7 +161,7 @@ public:
+ 	    _low = strtoul(from_string.substr(0, delim).c_str(), NULL, 10);
+ 	    _high = strtoul(from_string.substr(delim + 2, from_string.length()).c_str(), NULL, 10);
+ 	} else {
+-	    _invalid = true;
++	    set_invalid(true);
+ 	    XLOG_WARNING("Syntax error: %s", from_cstr);
+ 	}
+     }
+@@ -375,7 +373,7 @@ public:
+ 						   from_string.length())
+ 						    .c_str());
+ 	} else {
+-	    Range<T>::_invalid = true;
++	    Invalid::set_invalid(true);
+ 	    XLOG_WARNING("Syntax error: %s", from_cstr);
+ 	}
+     }
+diff --git a/xorp/policy/configuration.cc b/xorp/policy/configuration.cc
+index d6736bc..1386a99 100644
+--- a/xorp/policy/configuration.cc
++++ b/xorp/policy/configuration.cc
+@@ -93,21 +93,22 @@ Configuration::update_term_block(const string& policy,
+     }
+ }
+ 
+-void
++bool
+ Configuration::create_term(const string& policy, const ConfigNodeId& order,
+-			   const string& term)
++			   const string& term, string& err)
+ {
+     PolicyStatement& ps = _policies.find(policy);
+ 
+     if (ps.term_exists(term)) {
+-	xorp_throw(ConfError,
+-		   "Term " + term + " exists already in policy " + policy);
++	err += "Term " + term + " exists already in policy " + policy;
++	return false;
+     }
+ 
+     Term* t = new Term(term);
+ 
+     ps.add_term(order, t);
+     policy_modified(policy);
++    return true;
+ }
+ 
+ void
+diff --git a/xorp/policy/configuration.hh b/xorp/policy/configuration.hh
+index 61f474f..4d3ec47 100644
+--- a/xorp/policy/configuration.hh
++++ b/xorp/policy/configuration.hh
+@@ -18,7 +18,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/policy/configuration.hh,v 1.20 2008/10/02 21:57:58 bms Exp $
+ 
+ #ifndef __POLICY_CONFIGURATION_HH__
+ #define __POLICY_CONFIGURATION_HH__
+@@ -147,8 +146,8 @@ public:
+      * @param order node ID with position of term.
+      * @param term term name which should be created.
+      */
+-    void create_term(const string& policy, const ConfigNodeId& order,
+-		     const string& term);
++    bool create_term(const string& policy, const ConfigNodeId& order,
++		     const string& term, string& err);
+ 
+     /**
+      * Throws an exception on failure.
+diff --git a/xorp/policy/policy_target.cc b/xorp/policy/policy_target.cc
+index 76f6daa..a967e63 100644
+--- a/xorp/policy/policy_target.cc
++++ b/xorp/policy/policy_target.cc
+@@ -60,11 +60,11 @@ PolicyTarget::shutdown()
+ }
+ 
+ 
+-void
++bool
+ PolicyTarget::create_term(const string& policy, const ConfigNodeId& order,
+-			  const string& term)
++			  const string& term, string& err)
+ {
+-    _conf.create_term(policy, order, term);
++    return _conf.create_term(policy, order, term, err);
+ }
+ 
+ void
+diff --git a/xorp/policy/policy_target.hh b/xorp/policy/policy_target.hh
+index 3c1a655..88c266f 100644
+--- a/xorp/policy/policy_target.hh
++++ b/xorp/policy/policy_target.hh
+@@ -18,7 +18,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/policy/policy_target.hh,v 1.19 2008/10/02 21:57:59 bms Exp $
+ 
+ #ifndef __POLICY_POLICY_TARGET_HH__
+ #define __POLICY_POLICY_TARGET_HH__
+@@ -67,8 +66,8 @@ public:
+      * @param order node ID with position of term.
+      * @param term name of term to create.
+      */
+-    void create_term(const string& policy, const ConfigNodeId& order,
+-		     const string& term);
++    bool create_term(const string& policy, const ConfigNodeId& order,
++		     const string& term, string& err);
+ 
+     /**
+      * Attempts to delete a term.
+diff --git a/xorp/policy/xrl_target.cc b/xorp/policy/xrl_target.cc
+index 8623b85..ffcd5b9 100644
+--- a/xorp/policy/xrl_target.cc
++++ b/xorp/policy/xrl_target.cc
+@@ -89,20 +89,19 @@ XrlPolicyTarget::policy_0_1_create_term(const string&   policy,
+ 				        const string&   term)
+ {
+     ConfigNodeId config_node_id(ConfigNodeId::ZERO());
++    string err;
+ 
+-    config_node_id.copy_in(order);
++    config_node_id.copy_in(order, err);
+     if (config_node_id.invalid()) {
+         return XrlCmdError::COMMAND_FAILED("Create of policy " + policy
+ 					   + " term " + term + " failed "
+ 					   + "because of invalid node ID "
+-					   + "\"" + order + "\" : ");
++					   + "\"" + order + "\" : " + err);
+     }
+ 
+-    try {
+-	_policy_target.create_term(policy, config_node_id, term);
+-    } catch(const PolicyException& e) {
+-	return XrlCmdError::COMMAND_FAILED("create_term failed: " + e.str());
+-    }
++    if (!_policy_target.create_term(policy, config_node_id, term, err))
++	return XrlCmdError::COMMAND_FAILED("create_term failed: " + err);
++
+     return XrlCmdError::OKAY();
+ }
+ 
+@@ -128,13 +127,14 @@ XrlPolicyTarget::policy_0_1_update_term_block(const string&   policy,
+ 					      const string&   statement)
+ {
+     ConfigNodeId config_node_id(ConfigNodeId::ZERO());
++    string err;
+ 
+-    config_node_id.copy_in(order);
++    config_node_id.copy_in(order, err);
+     if (config_node_id.invalid()) {
+         return XrlCmdError::COMMAND_FAILED("Update of policy " + policy
+ 					   + " term " + term + " failed "
+ 					   + "because of invalid node ID "
+-					   + "\"" + order + "\" : ");
++					   + "\"" + order + "\" : " + err);
+     }
+     try {
+ 	_policy_target.update_term_block(policy, term, block, config_node_id,
+diff --git a/xorp/rib/profile_vars.cc b/xorp/rib/profile_vars.cc
+index dd6b919..22b7eb3 100644
+--- a/xorp/rib/profile_vars.cc
++++ b/xorp/rib/profile_vars.cc
+@@ -40,7 +40,8 @@ struct profile_vars {
+ void
+ initialize_profiling_variables(Profile& p)
+ {
++    string e;
+     for (size_t i = 0; i < sizeof(profile_vars) / sizeof(struct profile_vars);
+ 	 i++)
+-	p.create(profile_vars[i].var, profile_vars[i].comment);
++	p.create(profile_vars[i].var, profile_vars[i].comment, e);
+ }
+diff --git a/xorp/rib/redist_xrl.cc b/xorp/rib/redist_xrl.cc
+index d862315..813f049 100644
+--- a/xorp/rib/redist_xrl.cc
++++ b/xorp/rib/redist_xrl.cc
+@@ -171,8 +171,8 @@ AddRoute<IPv4>::dispatch(XrlRouter& xrl_router, Profile& profile)
+ {
+ #ifndef XORP_DISABLE_PROFILE
+     if (profile.enabled(profile_route_rpc_out))
+-	profile.log(profile_route_rpc_out,
+-		    c_format("add %s", _net.str().c_str()));
++	profile.log_ne(profile_route_rpc_out,
++		       c_format("add %s", _net.str().c_str()));
+ #else
+     UNUSED(profile);
+ #endif
+@@ -194,7 +194,7 @@ AddRoute<IPv6>::dispatch(XrlRouter& xrl_router, Profile& profile)
+ {
+ #ifndef XORP_DISABLE_PROFILE
+     if (profile.enabled(profile_route_rpc_out))
+-	profile.log(profile_route_rpc_out,
++	profile.log_ne(profile_route_rpc_out,
+ 		    c_format("add %s", _net.str().c_str()));
+ #else
+     UNUSED(profile);
+@@ -257,7 +257,7 @@ DeleteRoute<IPv4>::dispatch(XrlRouter& xrl_router, Profile& profile)
+ {
+ #ifndef XORP_DISABLE_PROFILE
+     if (profile.enabled(profile_route_rpc_out))
+-	profile.log(profile_route_rpc_out,
++	profile.log_ne(profile_route_rpc_out,
+ 		    c_format("delete %s", _net.str().c_str()));
+ #else
+     UNUSED(profile);
+@@ -281,7 +281,7 @@ DeleteRoute<IPv6>::dispatch(XrlRouter& xrl_router, Profile& profile)
+ {
+ #ifndef XORP_DISABLE_PROFILE
+     if (profile.enabled(profile_route_rpc_out))
+-	profile.log(profile_route_rpc_out,
++	profile.log_ne(profile_route_rpc_out,
+ 		    c_format("delete %s", _net.str().c_str()));
+ #else
+     UNUSED(profile);
+@@ -509,7 +509,7 @@ RedistXrlOutput<A>::add_route(const IPRouteEntry<A>& ipr)
+ 	return;		// The target is not interested in this route
+ 
+     PROFILE(if (_profile.enabled(profile_route_rpc_in))
+-		_profile.log(profile_route_rpc_in,
++		_profile.log_ne(profile_route_rpc_in,
+ 			     c_format("add %s", ipr.net().str().c_str())));
+ 
+     enqueue_task(new AddRoute<A>(this, ipr));
+@@ -525,7 +525,7 @@ RedistXrlOutput<A>::delete_route(const IPRouteEntry<A>& ipr)
+ 	return;		// The target is not interested in this route
+ 
+     PROFILE(if (_profile.enabled(profile_route_rpc_in))
+-		_profile.log(profile_route_rpc_in,
++		_profile.log_ne(profile_route_rpc_in,
+ 			     c_format("delete %s", ipr.net().str().c_str())));
+ 
+     enqueue_task(new DeleteRoute<A>(this, ipr));
+@@ -696,7 +696,7 @@ AddTransactionRoute<IPv4>::dispatch(XrlRouter& xrl_router, Profile& profile)
+ 
+ #ifndef XORP_DISABLE_PROFILE
+     if (profile.enabled(profile_route_rpc_out))
+-	profile.log(profile_route_rpc_out,
++	profile.log_ne(profile_route_rpc_out,
+ 		     c_format("add %s %s %s %u",
+ 			      p->xrl_target_name().c_str(),
+ 			      _net.str().c_str(),
+@@ -733,7 +733,7 @@ AddTransactionRoute<IPv6>::dispatch(XrlRouter& xrl_router, Profile& profile)
+ 
+ #ifndef XORP_DISABLE_PROFILE
+     if (profile.enabled(profile_route_rpc_out))
+-	profile.log(profile_route_rpc_out,
++	profile.log_ne(profile_route_rpc_out,
+ 		     c_format("add %s %s %s %u",
+ 			      p->xrl_target_name().c_str(),
+ 			      _net.str().c_str(),
+@@ -774,7 +774,7 @@ DeleteTransactionRoute<IPv4>::dispatch(XrlRouter& xrl_router, Profile& profile)
+ 
+ #ifndef XORP_DISABLE_PROFILE
+     if (profile.enabled(profile_route_rpc_out))
+-	profile.log(profile_route_rpc_out,
++	profile.log_ne(profile_route_rpc_out,
+ 		     c_format("delete %s %s",
+ 			      p->xrl_target_name().c_str(),
+ 			      _net.str().c_str()));
+@@ -809,7 +809,7 @@ DeleteTransactionRoute<IPv6>::dispatch(XrlRouter& xrl_router, Profile& profile)
+ 
+ #ifndef XORP_DISABLE_PROFILE
+     if (profile.enabled(profile_route_rpc_out))
+-	profile.log(profile_route_rpc_out,
++	profile.log_ne(profile_route_rpc_out,
+ 		     c_format("delete %s %s",
+ 			      p->xrl_target_name().c_str(),
+ 			      _net.str().c_str()));
+@@ -1047,7 +1047,7 @@ void
+ RedistTransactionXrlOutput<A>::add_route(const IPRouteEntry<A>& ipr)
+ {
+     PROFILE(if (this->_profile.enabled(profile_route_rpc_in))
+-		this->_profile.log(profile_route_rpc_in,
++		this->_profile.log_ne(profile_route_rpc_in,
+ 				   c_format("add %s %s %s %u",
+ 					    ipr.protocol()->name().c_str(),
+ 					    ipr.net().str().c_str(),
+@@ -1078,7 +1078,7 @@ void
+ RedistTransactionXrlOutput<A>::delete_route(const IPRouteEntry<A>& ipr)
+ {
+     PROFILE(if (this->_profile.enabled(profile_route_rpc_in))
+-		this->_profile.log(profile_route_rpc_in,
++		this->_profile.log_ne(profile_route_rpc_in,
+ 				   c_format("add %s %s",
+ 					    ipr.protocol()->name().c_str(),
+ 					    ipr.net().str().c_str())));
+diff --git a/xorp/rib/redist_xrl.hh b/xorp/rib/redist_xrl.hh
+index 74feeda..6ec259b 100644
+--- a/xorp/rib/redist_xrl.hh
++++ b/xorp/rib/redist_xrl.hh
+@@ -17,7 +17,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/rib/redist_xrl.hh,v 1.18 2008/10/02 21:58:11 bms Exp $
+ 
+ #ifndef __RIB_REDIST_XRL_HH__
+ #define __RIB_REDIST_XRL_HH__
+diff --git a/xorp/rib/xrl_target.cc b/xorp/rib/xrl_target.cc
+index a380dbf..c2db486 100644
+--- a/xorp/rib/xrl_target.cc
++++ b/xorp/rib/xrl_target.cc
+@@ -352,6 +352,8 @@ XrlRibTarget::rib_0_1_add_route4(const string&	protocol,
+ 				 const uint32_t& metric,
+ 				 const XrlAtomList& policytags)
+ {
++    string err;
++
+     debug_msg("add_route4 protocol: %s unicast: %s multicast: %s "
+ 	      "network %s nexthop %s metric %u\n",
+ 	      protocol.c_str(),
+@@ -370,25 +372,25 @@ XrlRibTarget::rib_0_1_add_route4(const string&	protocol,
+ 					     multicast ? "m" : "",
+ 					     network.str().c_str(),
+ 					     nexthop.str().c_str(),
+-					     XORP_UINT_CAST(metric)));
++					     XORP_UINT_CAST(metric)), err);
+     }
+ #endif
+ 
+     if (unicast &&
+ 	_urib4.add_route(protocol, network, nexthop, "", "", metric, policytags)
+ 	!= XORP_OK) {
+-	string err = c_format("Could not add IPv4 route "
+-			      "net %s, nexthop: %s to unicast RIB",
+-			      network.str().c_str(), nexthop.str().c_str());
++	err += c_format("Could not add IPv4 route "
++			"net %s, nexthop: %s to unicast RIB\n",
++			network.str().c_str(), nexthop.str().c_str());
+ 	return XrlCmdError::COMMAND_FAILED(err);
+     }
+ 
+     if (multicast &&
+ 	_mrib4.add_route(protocol, network, nexthop, "", "", metric, policytags)
+ 	!= XORP_OK) {
+-	string err = c_format("Could not add IPv4 route "
+-			      "net %s, nexthop: %s to multicast RIB",
+-			      network.str().c_str(), nexthop.str().c_str());
++	err += c_format("Could not add IPv4 route "
++			"net %s, nexthop: %s to multicast RIB",
++			network.str().c_str(), nexthop.str().c_str());
+ 	return XrlCmdError::COMMAND_FAILED(err);
+     }
+ 
+@@ -404,6 +406,8 @@ XrlRibTarget::rib_0_1_replace_route4(const string&	protocol,
+ 				     const uint32_t&	metric,
+ 				     const XrlAtomList& policytags)
+ {
++    string err;
++
+     debug_msg("replace_route4 protocol: %s unicast: %s multicast: %s "
+ 	      "network %s nexthop %s metric %u\n",
+ 	      protocol.c_str(),
+@@ -422,7 +426,7 @@ XrlRibTarget::rib_0_1_replace_route4(const string&	protocol,
+ 					     multicast ? "m" : "",
+ 					     network.str().c_str(),
+ 					     nexthop.str().c_str(),
+-					     XORP_UINT_CAST(metric)));
++					     XORP_UINT_CAST(metric)), err);
+     }
+ #endif
+ 
+@@ -430,7 +434,7 @@ XrlRibTarget::rib_0_1_replace_route4(const string&	protocol,
+ 	_urib4.replace_route(protocol, network, nexthop, "", "",
+ 					metric, policytags)
+ 	!= XORP_OK) {
+-	string err = "Could not replace IPv4 route in unicast RIB";
++	err += "Could not replace IPv4 route in unicast RIB";
+ 	return XrlCmdError::COMMAND_FAILED(err);
+     }
+ 
+@@ -438,7 +442,7 @@ XrlRibTarget::rib_0_1_replace_route4(const string&	protocol,
+ 	_mrib4.replace_route(protocol, network, nexthop, "", "",
+ 					metric, policytags)
+ 	!= XORP_OK) {
+-	string err = "Could not replace IPv4 route in multicast RIB";
++	err += "Could not replace IPv4 route in multicast RIB";
+ 	return XrlCmdError::COMMAND_FAILED(err);
+     }
+ 
+@@ -451,6 +455,8 @@ XrlRibTarget::rib_0_1_delete_route4(const string&	protocol,
+ 				    const bool&		multicast,
+ 				    const IPv4Net&	network)
+ {
++    string err;
++
+     debug_msg("delete_route4 protocol: %s unicast: %s multicast: %s "
+ 	      "network %s\n",
+ 	      protocol.c_str(),
+@@ -465,17 +471,17 @@ XrlRibTarget::rib_0_1_delete_route4(const string&	protocol,
+ 					     protocol.c_str(),
+ 					     unicast ? "u" : "",
+ 					     multicast ? "m" : "",
+-					     network.str().c_str()));
++					     network.str().c_str()), err);
+     }
+ #endif
+ 
+     if (unicast && _urib4.delete_route(protocol, network) != XORP_OK) {
+-	string err = "Could not delete IPv4 route from unicast RIB";
++	err = "Could not delete IPv4 route from unicast RIB\n";
+ 	return XrlCmdError::COMMAND_FAILED(err);
+     }
+ 
+     if (multicast && _mrib4.delete_route(protocol, network) != XORP_OK) {
+-	string err = "Could not delete IPv4 route from multicast RIB";
++	err += "Could not delete IPv4 route from multicast RIB\n";
+ 	return XrlCmdError::COMMAND_FAILED(err);
+     }
+ 
+@@ -493,6 +499,8 @@ XrlRibTarget::rib_0_1_add_interface_route4(const string&	protocol,
+ 					   const uint32_t&	metric,
+ 					   const XrlAtomList&	policytags)
+ {
++    string err;
++
+     debug_msg("add_interface_route4 protocol: %s unicast: %s multicast: %s "
+ 	      "network %s nexthop %s ifname %s vifname %s metric %u\n",
+ 	      protocol.c_str(),
+@@ -515,7 +523,7 @@ XrlRibTarget::rib_0_1_add_interface_route4(const string&	protocol,
+ 					     nexthop.str().c_str(),
+ 					     ifname.c_str(),
+ 					     vifname.c_str(),
+-					     XORP_UINT_CAST(metric)));
++					     XORP_UINT_CAST(metric)), err);
+     }
+ #endif
+ 
+@@ -523,7 +531,7 @@ XrlRibTarget::rib_0_1_add_interface_route4(const string&	protocol,
+ 	_urib4.add_route(protocol, network, nexthop, ifname, vifname, metric,
+ 			 policytags)
+ 	!= XORP_OK) {
+-	string err = "Could not add IPv4 interface route to unicast RIB";
++	err += "Could not add IPv4 interface route to unicast RIB\n";
+ 	return XrlCmdError::COMMAND_FAILED(err);
+     }
+ 
+@@ -531,7 +539,7 @@ XrlRibTarget::rib_0_1_add_interface_route4(const string&	protocol,
+ 	_mrib4.add_route(protocol, network, nexthop, ifname, vifname, metric,
+ 			 policytags)
+ 	!= XORP_OK) {
+-	string err = "Could not add IPv4 interface route to multicast RIB";
++	err += "Could not add IPv4 interface route to multicast RIB\n";
+ 	return XrlCmdError::COMMAND_FAILED(err);
+     }
+ 
+@@ -549,6 +557,8 @@ XrlRibTarget::rib_0_1_replace_interface_route4(const string&	    protocol,
+ 					       const uint32_t&	    metric,
+ 					       const XrlAtomList&   policytags)
+ {
++    string err;
++
+     debug_msg("replace_interface_route4 protocol: %s unicast: %s multicast: %s "
+ 	      "network %s nexthop %s ifname %s vifname %s metric %u\n",
+ 	      protocol.c_str(),
+@@ -571,7 +581,7 @@ XrlRibTarget::rib_0_1_replace_interface_route4(const string&	    protocol,
+ 					     nexthop.str().c_str(),
+ 					     ifname.c_str(),
+ 					     vifname.c_str(),
+-					     XORP_UINT_CAST(metric)));
++					     XORP_UINT_CAST(metric)), err);
+     }
+ #endif
+ 
+@@ -579,7 +589,7 @@ XrlRibTarget::rib_0_1_replace_interface_route4(const string&	    protocol,
+ 	_urib4.replace_route(protocol, network, nexthop, ifname, vifname,
+ 			     metric, policytags)
+ 	!= XORP_OK) {
+-	string err = "Could not replace IPv4 interface route in unicast RIB";
++	err += "Could not replace IPv4 interface route in unicast RIB\n";
+ 	return XrlCmdError::COMMAND_FAILED(err);
+     }
+ 
+@@ -587,7 +597,7 @@ XrlRibTarget::rib_0_1_replace_interface_route4(const string&	    protocol,
+ 	_mrib4.replace_route(protocol, network, nexthop, ifname, vifname,
+ 			     metric, policytags)
+ 	!= XORP_OK) {
+-	string err = "Could not replace IPv4 interface route in multicast RIB";
++	err += "Could not replace IPv4 interface route in multicast RIB\n";
+ 	return XrlCmdError::COMMAND_FAILED(err);
+     }
+ 
+@@ -1083,9 +1093,9 @@ XrlRibTarget::profile_0_1_enable(const string& pname)
+ XrlCmdError
+ XrlRibTarget::profile_0_1_disable(const string&	pname)
+ {
+-    debug_msg("disable profile variable %s\n", pname.c_str());
+     string e;
+-    if (!_rib_manager->profile().disable(pname, e);
++    debug_msg("disable profile variable %s\n", pname.c_str());
++    if (!_rib_manager->profile().disable(pname, e))
+ 	return XrlCmdError::COMMAND_FAILED(e);
+ 
+     return XrlCmdError::OKAY();
+@@ -1252,6 +1262,8 @@ XrlRibTarget::rib_0_1_add_route6(const string&	protocol,
+ 				 const uint32_t& metric,
+ 				 const XrlAtomList& policytags)
+ {
++    string err;
++
+     debug_msg("add_route6 protocol: %s unicast: %s multicast: %s "
+ 	      "network %s nexthop %s metric %u\n",
+ 	      protocol.c_str(),
+@@ -1270,7 +1282,7 @@ XrlRibTarget::rib_0_1_add_route6(const string&	protocol,
+ 					     multicast ? "m" : "",
+ 					     network.str().c_str(),
+ 					     nexthop.str().c_str(),
+-					     XORP_UINT_CAST(metric)));
++					     XORP_UINT_CAST(metric)), err);
+     }
+ #endif
+ 
+@@ -1278,9 +1290,9 @@ XrlRibTarget::rib_0_1_add_route6(const string&	protocol,
+ 	_urib6.add_route(protocol, network, nexthop, "", "", metric,
+ 			 policytags)
+ 	!= XORP_OK) {
+-	string err = c_format("Could not add IPv6 route "
+-			      "net %s, nexthop: %s to unicast RIB",
+-			      network.str().c_str(), nexthop.str().c_str());
++	err += c_format("Could not add IPv6 route "
++			"net %s, nexthop: %s to unicast RIB\n",
++			network.str().c_str(), nexthop.str().c_str());
+ 	return XrlCmdError::COMMAND_FAILED(err);
+     }
+ 
+@@ -1288,9 +1300,9 @@ XrlRibTarget::rib_0_1_add_route6(const string&	protocol,
+ 	_mrib6.add_route(protocol, network, nexthop, "", "", metric,
+ 			 policytags)
+ 	!= XORP_OK) {
+-	string err = c_format("Could not add IPv6 route "
+-			      "net %s, nexthop: %s to multicast RIB",
+-			      network.str().c_str(), nexthop.str().c_str());
++	err += c_format("Could not add IPv6 route "
++			"net %s, nexthop: %s to multicast RIB\n",
++			network.str().c_str(), nexthop.str().c_str());
+ 	return XrlCmdError::COMMAND_FAILED(err);
+     }
+ 
+@@ -1306,6 +1318,8 @@ XrlRibTarget::rib_0_1_replace_route6(const string&	protocol,
+ 				     const uint32_t&	metric,
+ 				     const XrlAtomList& policytags)
+ {
++    string err;
++
+     debug_msg("replace_route6 protocol: %s unicast: %s multicast: %s "
+ 	      "network %s nexthop %s metric %u\n",
+ 	      protocol.c_str(),
+@@ -1324,7 +1338,7 @@ XrlRibTarget::rib_0_1_replace_route6(const string&	protocol,
+ 					     multicast ? "m" : "",
+ 					     network.str().c_str(),
+ 					     nexthop.str().c_str(),
+-					     XORP_UINT_CAST(metric)));
++					     XORP_UINT_CAST(metric)), err);
+     }
+ #endif
+ 
+@@ -1332,7 +1346,7 @@ XrlRibTarget::rib_0_1_replace_route6(const string&	protocol,
+ 	_urib6.replace_route(protocol, network, nexthop, "", "", metric,
+ 			     policytags)
+ 	!= XORP_OK) {
+-	string err = "Could not replace IPv6 route in unicast RIB";
++	err += "Could not replace IPv6 route in unicast RIB\n";
+ 	return XrlCmdError::COMMAND_FAILED(err);
+     }
+ 
+@@ -1340,7 +1354,7 @@ XrlRibTarget::rib_0_1_replace_route6(const string&	protocol,
+ 	_mrib6.replace_route(protocol, network, nexthop, "", "", metric,
+ 			     policytags)
+ 	!= XORP_OK) {
+-	string err = "Could not add IPv6 route in multicast RIB";
++	err += "Could not add IPv6 route in multicast RIB\n";
+ 	return XrlCmdError::COMMAND_FAILED(err);
+     }
+ 
+@@ -1353,6 +1367,8 @@ XrlRibTarget::rib_0_1_delete_route6(const string&	protocol,
+ 				    const bool&		multicast,
+ 				    const IPv6Net&	network)
+ {
++    string err;
++
+     debug_msg("delete_route6 protocol: %s unicast: %s multicast: %s "
+ 	      "network %s\n",
+ 	      protocol.c_str(),
+@@ -1367,17 +1383,17 @@ XrlRibTarget::rib_0_1_delete_route6(const string&	protocol,
+ 					     protocol.c_str(),
+ 					     unicast ? "u" : "",
+ 					     multicast ? "m" : "",
+-					     network.str().c_str()));
++					     network.str().c_str()), err);
+     }
+ #endif
+ 
+     if (unicast && _urib6.delete_route(protocol, network) != XORP_OK) {
+-	string err = "Could not delete IPv6 route from unicast RIB";
++	err += "Could not delete IPv6 route from unicast RIB\n";
+ 	return XrlCmdError::COMMAND_FAILED(err);
+     }
+ 
+     if (multicast && _mrib6.delete_route(protocol, network) != XORP_OK) {
+-	string err = "Could not delete IPv6 route from multicast RIB";
++	err += "Could not delete IPv6 route from multicast RIB\n";
+ 	return XrlCmdError::COMMAND_FAILED(err);
+     }
+ 
+@@ -1395,6 +1411,8 @@ XrlRibTarget::rib_0_1_add_interface_route6(const string&	protocol,
+ 					   const uint32_t&	metric,
+ 					   const XrlAtomList&	policytags)
+ {
++    string err;
++
+     debug_msg("add_interface_route6 protocol: %s unicast: %s multicast: %s "
+ 	      "network %s nexthop %s ifname %s vifname %s metric %u\n",
+ 	      protocol.c_str(),
+@@ -1417,7 +1435,7 @@ XrlRibTarget::rib_0_1_add_interface_route6(const string&	protocol,
+ 					     nexthop.str().c_str(),
+ 					     ifname.c_str(),
+ 					     vifname.c_str(),
+-					     XORP_UINT_CAST(metric)));
++					     XORP_UINT_CAST(metric)), err);
+     }
+ #endif
+ 
+@@ -1425,7 +1443,7 @@ XrlRibTarget::rib_0_1_add_interface_route6(const string&	protocol,
+ 	_urib6.add_route(protocol, network, nexthop, ifname, vifname,
+ 					metric, policytags)
+ 	!= XORP_OK) {
+-	string err = "Could not add IPv6 interface route to unicast RIB";
++	err += "Could not add IPv6 interface route to unicast RIB\n";
+ 	return XrlCmdError::COMMAND_FAILED(err);
+     }
+ 
+@@ -1433,7 +1451,7 @@ XrlRibTarget::rib_0_1_add_interface_route6(const string&	protocol,
+ 	_mrib6.add_route(protocol, network, nexthop, ifname, vifname, metric,
+ 					policytags)
+ 	!= XORP_OK) {
+-	string err = "Could not add IPv6 interface route to multicast RIB";
++	err += "Could not add IPv6 interface route to multicast RIB\n";
+ 	return XrlCmdError::COMMAND_FAILED(err);
+     }
+ 
+@@ -1451,6 +1469,8 @@ XrlRibTarget::rib_0_1_replace_interface_route6(const string&	    protocol,
+ 					       const uint32_t&	    metric,
+ 					       const XrlAtomList&   policytags)
+ {
++    string err;
++
+     debug_msg("replace_interface_route6 protocol: %s unicast: %s multicast: %s "
+ 	      "network %s nexthop %s ifname %s vifname %s metric %u\n",
+ 	      protocol.c_str(),
+@@ -1473,7 +1493,7 @@ XrlRibTarget::rib_0_1_replace_interface_route6(const string&	    protocol,
+ 					     nexthop.str().c_str(),
+ 					     ifname.c_str(),
+ 					     vifname.c_str(),
+-					     XORP_UINT_CAST(metric)));
++					     XORP_UINT_CAST(metric)), err);
+     }
+ #endif
+ 
+@@ -1481,7 +1501,7 @@ XrlRibTarget::rib_0_1_replace_interface_route6(const string&	    protocol,
+ 	_urib6.replace_route(protocol, network, nexthop, ifname, vifname,
+ 			     metric, policytags)
+ 	!= XORP_OK) {
+-	string err = "Could not replace IPv6 interface route in unicast RIB";
++	err += "Could not replace IPv6 interface route in unicast RIB\n";
+ 	return XrlCmdError::COMMAND_FAILED(err);
+     }
+ 
+@@ -1489,7 +1509,7 @@ XrlRibTarget::rib_0_1_replace_interface_route6(const string&	    protocol,
+ 	_mrib6.replace_route(protocol, network, nexthop, ifname, vifname,
+ 			     metric, policytags)
+ 	!= XORP_OK) {
+-	string err = "Could not replace IPv6 interface route in multicast RIB";
++	err += "Could not replace IPv6 interface route in multicast RIB\n";
+ 	return XrlCmdError::COMMAND_FAILED(err);
+     }
+ 
+diff --git a/xorp/rtrmgr/boot.yy b/xorp/rtrmgr/boot.yy
+index bf567b5..b795333 100644
+--- a/xorp/rtrmgr/boot.yy
++++ b/xorp/rtrmgr/boot.yy
+@@ -27,38 +27,45 @@ extern int boot_linenum;
+ extern "C" int bootparse();
+ extern int bootlex();
+ 
+-void booterror(const char *s) throw (ParseError);
++void booterror(const char *s);
+ 
+ static ConfigTree *config_tree = NULL;
+ static string boot_filename;
+ static string lastsymbol;
+ static string node_id;
++static string boot_errmsg;
++
++
++#define yy_extend_path(s,t,n) do { if (!_extend_path(s,t,n)) { yyresult = -1; goto yyreturn; } } while (0)
+ 
+ /**
+  * Function declarations
+  */
+-static void
+-extend_path(char* segment, int type, const string& node_id_str);
++static bool
++_extend_path(char* segment, int type, const string& node_id_str);
+ 
+-static void
++static bool
+ push_path();
+ 
+ static void
+ pop_path();
+ 
+-static void
+-terminal(char* value, int type, ConfigOperator op);
++
++#define terminal(v,t,o) do { if (!_terminal(v,t,o)) { yyresult = -1; goto yyreturn; } } while (0)
++
++static bool
++_terminal(char* value, int type, ConfigOperator op);
+ 
+ void
+-booterror(const char *s) throw (ParseError);
++booterror(const char *s);
+ 
+ int
+ init_bootfile_parser(const char *configuration,
+ 		     const char *filename,
+ 		     ConfigTree *ct);
+ 
+-void
+-parse_bootfile() throw (ParseError);
++bool
++parse_bootfile(string& err);
+ 
+ ConfigOperator boot_lookup_operator(const char* s);
+ %}
+@@ -101,36 +108,36 @@ definition:	long_nodename nodegroup
+ 		| short_nodename long_nodegroup
+ 		;
+ 
+-short_nodename:	literal { push_path(); }
++short_nodename:	literal { if (!push_path()) { yyresult = -1; goto yyreturn; } }
+ 		;
+ 
+-long_nodename:	literals { push_path(); }
++long_nodename:	literals { if (!push_path()) { yyresult = -1; goto yyreturn; } }
+ 		;
+ 
+-literal:	LITERAL { node_id = ""; extend_path($1, NODE_VOID, node_id); }
++literal:	LITERAL { node_id = ""; yy_extend_path($1, NODE_VOID, node_id); }
+ 		| CONFIG_NODE_ID LITERAL { node_id = $1;
+ 					   free($1);
+-					   extend_path($2, NODE_VOID, node_id); }
++					   yy_extend_path($2, NODE_VOID, node_id); }
+ 		;
+ 
+ literals:	literals literal
+-		| literal STRING { extend_path($2, NODE_TEXT, node_id); }
+-		| literal LITERAL { extend_path($2, NODE_TEXT, node_id); }
+-		| literal BOOL_VALUE { extend_path($2, NODE_BOOL, node_id); }
+-		| literal UINTRANGE_VALUE { extend_path($2, NODE_UINTRANGE, node_id); }
+-		| literal INT_VALUE { extend_path($2, NODE_INT, node_id); }
+-		| literal UINT_VALUE { extend_path($2, NODE_UINT, node_id); }
+-		| literal IPV4RANGE_VALUE { extend_path($2, NODE_IPV4RANGE, node_id); }
+-		| literal IPV4_VALUE { extend_path($2, NODE_IPV4, node_id); }
+-		| literal IPV4NET_VALUE { extend_path($2, NODE_IPV4NET, node_id); }
+-		| literal IPV6RANGE_VALUE { extend_path($2, NODE_IPV6RANGE, node_id); }
+-		| literal IPV6_VALUE { extend_path($2, NODE_IPV6, node_id); }
+-		| literal IPV6NET_VALUE { extend_path($2, NODE_IPV6NET, node_id); }
+-		| literal MACADDR_VALUE { extend_path($2, NODE_MACADDR, node_id); }
+-		| literal URL_FILE_VALUE { extend_path($2, NODE_URL_FILE, node_id); }
+-		| literal URL_FTP_VALUE { extend_path($2, NODE_URL_FTP, node_id); }
+-		| literal URL_HTTP_VALUE { extend_path($2, NODE_URL_HTTP, node_id); }
+-		| literal URL_TFTP_VALUE { extend_path($2, NODE_URL_TFTP, node_id); }
++		| literal STRING { yy_extend_path($2, NODE_TEXT, node_id); }
++		| literal LITERAL { yy_extend_path($2, NODE_TEXT, node_id); }
++		| literal BOOL_VALUE { yy_extend_path($2, NODE_BOOL, node_id); }
++		| literal UINTRANGE_VALUE { yy_extend_path($2, NODE_UINTRANGE, node_id); }
++		| literal INT_VALUE { yy_extend_path($2, NODE_INT, node_id); }
++		| literal UINT_VALUE { yy_extend_path($2, NODE_UINT, node_id); }
++		| literal IPV4RANGE_VALUE { yy_extend_path($2, NODE_IPV4RANGE, node_id); }
++		| literal IPV4_VALUE { yy_extend_path($2, NODE_IPV4, node_id); }
++		| literal IPV4NET_VALUE { yy_extend_path($2, NODE_IPV4NET, node_id); }
++		| literal IPV6RANGE_VALUE { yy_extend_path($2, NODE_IPV6RANGE, node_id); }
++		| literal IPV6_VALUE { yy_extend_path($2, NODE_IPV6, node_id); }
++		| literal IPV6NET_VALUE { yy_extend_path($2, NODE_IPV6NET, node_id); }
++		| literal MACADDR_VALUE { yy_extend_path($2, NODE_MACADDR, node_id); }
++		| literal URL_FILE_VALUE { yy_extend_path($2, NODE_URL_FILE, node_id); }
++		| literal URL_FTP_VALUE { yy_extend_path($2, NODE_URL_FTP, node_id); }
++		| literal URL_HTTP_VALUE { yy_extend_path($2, NODE_URL_HTTP, node_id); }
++		| literal URL_TFTP_VALUE { yy_extend_path($2, NODE_URL_TFTP, node_id); }
+ 		;
+ 
+ nodegroup:	long_nodegroup
+@@ -152,10 +159,10 @@ statement:	terminal
+ emptystatement:	END
+ 		;
+ 
+-term_literal:	LITERAL { node_id = ""; extend_path($1, NODE_VOID, node_id); }
++term_literal:	LITERAL { node_id = ""; yy_extend_path($1, NODE_VOID, node_id); }
+ 		| CONFIG_NODE_ID LITERAL { node_id = $1;
+ 					   free($1);
+-					   extend_path($2, NODE_VOID, node_id);}
++					   yy_extend_path($2, NODE_VOID, node_id);}
+ 		;
+ 
+ terminal:	term_literal END {
+@@ -233,34 +240,42 @@ terminal:	term_literal END {
+ 
+ syntax_error:	SYNTAX_ERROR {
+ 			booterror("syntax error");
++			yyresult = -1;
++			goto yyreturn;
+ 		}
+ 		;
+ 
+ 
+ %%
+ 
+-void
+-extend_path(char* segment, int type, const string& node_id_str)
++bool
++_extend_path(char* segment, int type, const string& node_id_str)
+ {
++    string err;
++
+     lastsymbol = segment;
+ 
+     string segment_copy = segment;
+     free(segment);
+ 
+-    ConfigNodeId config_node_id(node_id_str);
++    ConfigNodeId config_node_id(node_id_str, err);
+     if (!config_node_id.invalid()) {
+ 	config_tree->extend_path(segment_copy, type, config_node_id);
+     } else {
+ 	string s = c_format("Invalid config tree node ID: %s",
+-	    e.str().c_str());
++	    err.c_str());
++	boot_errmsg = "";
+ 	booterror(s.c_str());
++	err = boot_errmsg;
++        return false;
+     }
++    return true;
+ }
+ 
+-void
++bool
+ push_path()
+ {
+-    config_tree->push_path();
++    return config_tree->push_path(boot_errmsg);
+ }
+ 
+ void
+@@ -269,33 +284,39 @@ pop_path()
+     config_tree->pop_path();
+ }
+ 
+-void
+-terminal(char* value, int type, ConfigOperator op)
++
++bool
++_terminal(char* value, int type, ConfigOperator op)
+ {
+-    push_path();
++    if (!push_path()) {
++        free(value);
++        return false;
++    }
+ 
+     lastsymbol = value;
+ 
+-    config_tree->terminal_value(string(value), type, op);
++    if (!config_tree->terminal_value(string(value), type, op, boot_errmsg)) {
++        free(value);
++        return false;
++    }
+     free(value);
+     pop_path();
++    return true;
+ }
+ 
+ void
+-booterror(const char *s) throw (ParseError)
++booterror(const char *s)
+ {
+     string errmsg;
+-
+     if (! boot_filename.empty()) {
+-	errmsg = c_format("PARSE ERROR [Config File %s, line %d]: %s",
+-			  boot_filename.c_str(),
+-			  boot_linenum, s);
++	errmsg += c_format("PARSE ERROR [Config File %s, line %d]: %s",
++			   boot_filename.c_str(),
++			   boot_linenum, s);
+     } else {
+-	errmsg = c_format("PARSE ERROR [line %d]: %s", boot_linenum, s);
++	errmsg += c_format("PARSE ERROR [line %d]: %s", boot_linenum, s);
+     }
+-    errmsg += c_format("; Last symbol parsed was \"%s\"", lastsymbol.c_str());
+-
+-    xorp_throw(ParseError, errmsg);
++    errmsg += c_format("; Last symbol parsed was \"%s\"\n", lastsymbol.c_str());
++    boot_errmsg += errmsg;
+ }
+ 
+ int
+@@ -310,11 +331,16 @@ init_bootfile_parser(const char *configuration,
+     return 0;
+ }
+ 
+-void
+-parse_bootfile() throw (ParseError)
++bool
++parse_bootfile(string& err)
+ {
+-    if (bootparse() != 0)
++    if (bootparse() != 0) {
++	boot_errmsg = "";
+ 	booterror("unknown error");
++	err = boot_errmsg;
++        return false;
++    }
++    return true;
+ }
+ 
+ ConfigOperator boot_lookup_operator(const char* s)
+@@ -341,14 +367,13 @@ ConfigOperator boot_lookup_operator(const char* s)
+     ConfigOperator op;
+     string str = s1;
+     free(s1);
+-    try {
+-        op = lookup_operator(str);
++    string errmsg;
++    op = lookup_operator(str, errmsg);
++    if (op != OP_INVALID) {
+ 	return op;
+-    } catch (const ParseError& pe) {
+-        string errmsg = pe.why();
++    } else {
+ 	errmsg += c_format("\n[Line %d]\n", boot_linenum);
+ 	errmsg += c_format("Last symbol parsed was \"%s\"", lastsymbol.c_str());
+-	xorp_throw(ParseError, errmsg);
++	return op;
+     }
+-    XLOG_UNREACHABLE();
+ }
+diff --git a/xorp/rtrmgr/cli.cc b/xorp/rtrmgr/cli.cc
+index a44a49d..85ceb4e 100644
+--- a/xorp/rtrmgr/cli.cc
++++ b/xorp/rtrmgr/cli.cc
+@@ -100,7 +100,7 @@ const string RouterCLI::DEFAULT_XORP_PROMPT_CONFIGURATION = "XORP# ";
+ 
+ RouterCLI::RouterCLI(XorpShellBase& xorpsh, CliNode& cli_node,
+ 		     XorpFd cli_client_input_fd, XorpFd cli_client_output_fd,
+-		     bool verbose) throw (InitError)
++		     bool verbose, string& error_msg)
+     : _xorpsh(xorpsh),
+       _cli_node(cli_node),
+       _cli_client_ptr(NULL),
+@@ -112,8 +112,6 @@ RouterCLI::RouterCLI(XorpShellBase& xorpsh, CliNode& cli_node,
+       _changes_made(false),
+       _op_mode_cmd(NULL)
+ {
+-    string error_msg;
+-
+     //
+     // Set the operational and configuration mode prompts to be
+     // "user@hostname> " and "user@hostname# " respectively.
+@@ -175,7 +173,8 @@ RouterCLI::RouterCLI(XorpShellBase& xorpsh, CliNode& cli_node,
+ 					   error_msg);
+     if (_cli_client_ptr == NULL) {
+ 	error_msg = c_format("Cannot add CliClient: %s", error_msg.c_str());
+-	xorp_throw(InitError, error_msg);
++	set_invalid(true);
++	return;
+     }
+ 
+     //
+@@ -2126,9 +2125,8 @@ RouterCLI::extract_leaf_node_operator_and_value(const TemplateTreeNode& ttn,
+ 	// An operator followed by a value
+ 	operator_str = argv[0];
+ 	value = argv[1];
+-	try {
+-	    node_operator = lookup_operator(operator_str);
+-	} catch (const ParseError& e) {
++	node_operator = lookup_operator(operator_str, error_msg);
++	if (node_operator == OP_INVALID) {
+ 	    is_error = true;
+ 	    break;
+ 	}
+@@ -2154,18 +2152,18 @@ RouterCLI::extract_leaf_node_operator_and_value(const TemplateTreeNode& ttn,
+ 		operators_str += " ";
+ 	    operators_str += operator_to_str(*operator_iter);
+ 	}
+-	error_msg = c_format("should take one %soperator [%s] followed by "
+-			     "one argument of type \"%s\"",
+-			     (is_assign_operator_allowed)? "optional " : "",
+-			     operators_str.c_str(),
+-			     ttn.typestr().c_str());
++	error_msg += c_format("should take one %soperator [%s] followed by "
++			      "one argument of type \"%s\"\n",
++			      (is_assign_operator_allowed)? "optional " : "",
++			      operators_str.c_str(),
++			      ttn.typestr().c_str());
+ 	return (XORP_ERROR);
+     }
+ 
+     if (ttn.type_match(value, error_msg) == false) {
+-	error_msg = c_format("argument \"%s\" is not a valid \"%s\": %s",
+-			     value.c_str(), ttn.typestr().c_str(),
+-			     error_msg.c_str());
++	error_msg += c_format("argument \"%s\" is not a valid \"%s\": %s\n",
++			      value.c_str(), ttn.typestr().c_str(),
++			      error_msg.c_str());
+ 	return (XORP_ERROR);
+     }
+ 
+diff --git a/xorp/rtrmgr/cli.hh b/xorp/rtrmgr/cli.hh
+index 4f73852..9af0974 100644
+--- a/xorp/rtrmgr/cli.hh
++++ b/xorp/rtrmgr/cli.hh
+@@ -17,20 +17,13 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/rtrmgr/cli.hh,v 1.55 2008/10/02 21:58:22 bms Exp $
+ 
+ #ifndef __RTRMGR_CLI_HH__
+ #define __RTRMGR_CLI_HH__
+ 
+-
+-
+-
+-
+ #include "libxipc/xrl_error.hh"
+-
+ #include "cli/cli_node.hh"
+ #include "cli/cli_client.hh"
+-
+ #include "config_operators.hh"
+ #include "rtrmgr_error.hh"
+ 
+@@ -57,11 +50,11 @@ enum CliModeType {
+     CLI_MODE_TEXTENTRY		= 3
+ };
+ 
+-class RouterCLI : public NONCOPYABLE {
++class RouterCLI : public NONCOPYABLE, public Invalid {
+ public:
+     RouterCLI(XorpShellBase& xorpsh, CliNode& cli_node,
+ 	      XorpFd cli_client_input_fd, XorpFd cli_client_output_fd,
+-	      bool verbose) throw (InitError);
++	      bool verbose, string& err);
+     virtual ~RouterCLI();
+ 
+     bool done() const;
+diff --git a/xorp/rtrmgr/conf_tree.cc b/xorp/rtrmgr/conf_tree.cc
+index 17dcaf1..3df1a68 100644
+--- a/xorp/rtrmgr/conf_tree.cc
++++ b/xorp/rtrmgr/conf_tree.cc
+@@ -35,8 +35,8 @@
+ 
+ extern int init_bootfile_parser(const char* configuration,
+ 				const char* filename, ConfigTree* ct);
+-extern void parse_bootfile() throw (ParseError);
+-extern int booterror(const char* s) throw (ParseError);
++extern bool parse_bootfile(string& err);
++extern int booterror(const char* s);
+ 
+ /*************************************************************************
+  * Config File class
+@@ -67,13 +67,9 @@ bool
+ ConfigTree::parse(const string& configuration, const string& config_file,
+ 		  string& error_msg)
+ {
+-    try {
+-	init_bootfile_parser(configuration.c_str(), config_file.c_str(), this);
+-	parse_bootfile();
++    init_bootfile_parser(configuration.c_str(), config_file.c_str(), this);
++    if (parse_bootfile(error_msg))
+ 	return true;
+-    } catch (const ParseError& pe) {
+-	error_msg = pe.why();
+-    }
+ 
+     return false;
+ }
+@@ -169,8 +165,8 @@ ConfigTree::pop_path()
+     }
+ }
+ 
+-void
+-ConfigTree::push_path()
++bool
++ConfigTree::push_path(string& err)
+ {
+     string path = current_path_as_string();
+     string nodename = _path_segments.back().segname();
+@@ -184,16 +180,17 @@ ConfigTree::push_path()
+ 
+     list<ConfPathSegment>::const_iterator iter;
+     for (iter = _path_segments.begin(); iter != _path_segments.end(); ++iter) {
+-	add_node(iter->segname(), iter->type(), iter->node_id());
++	if (!add_node(iter->segname(), iter->type(), iter->node_id(), err))
++	    return false;
+     }
+ 
+     _path_segments.clear();
++    return true;
+ }
+ 
+-void
++bool
+ ConfigTree::add_node(const string& segment, int type,
+-		     const ConfigNodeId& node_id)
+-    throw (ParseError)
++		     const ConfigNodeId& node_id, string& err)
+ {
+     list<ConfigTreeNode*>::const_iterator iter;
+     ConfigTreeNode *found = NULL;
+@@ -207,9 +204,12 @@ ConfigTree::add_node(const string& segment, int type,
+ 	// segment is actually a value.
+ 	//
+ 	if (_current_node->is_leaf_value()) {
+-	    terminal_value(segment, _current_node->type(), OP_ASSIGN);
++	    if (!terminal_value(segment, _current_node->type(), OP_ASSIGN, err)) {
++		return false;
++	    }
+ 	} else {
+ 	    booterror("Invalid child node");
++	    return false;
+ 	}
+ 
+ 	//
+@@ -222,7 +222,7 @@ ConfigTree::add_node(const string& segment, int type,
+ 	_segment_lengths.pop_front();
+ 	segments_to_pop--;
+ 	_segment_lengths.push_front(segments_to_pop);
+-	return;
++	return true;
+     }
+ 
+     iter = _current_node->children().begin();
+@@ -238,8 +238,8 @@ ConfigTree::add_node(const string& segment, int type,
+ 		// correct way to step past such a node would be
+ 		// through a call to add_node().
+ 		//
+-		string err = "Need to qualify type of " + segment + "\n";
+-		xorp_throw(ParseError, err);
++		err += "Need to qualify type of " + segment + "\n";
++		return false;
+ 	    }
+ 	    found = *iter;
+ 	}
+@@ -253,6 +253,7 @@ ConfigTree::add_node(const string& segment, int type,
+ 	const TemplateTreeNode* ttn = find_template_by_type(path_segments);
+ 	if (ttn == NULL) {
+ 	    booterror("No template found in template map");
++	    return false;
+ 	}
+ 
+ 	string path = current_path_as_string();
+@@ -267,18 +268,17 @@ ConfigTree::add_node(const string& segment, int type,
+ 			    /* user_id */ 0, _verbose);
+ 	_current_node = found;
+     }
++    return true;
+ }
+ 
+ 
+-void
+-ConfigTree::terminal_value(const string& value, int type, ConfigOperator op)
+-    throw (ParseError)
++bool
++ConfigTree::terminal_value(const string& value, int type, ConfigOperator op, string& error_msg)
+ {
+-    string error_msg;
+-
+     string path(current_path_as_string());
+     string svalue = value;
+     ConfigTreeNode *ctn = _current_node;
++    string e; // dummy error msg
+ 
+     XLOG_ASSERT(ctn != NULL);
+ 
+@@ -297,18 +297,18 @@ ConfigTree::terminal_value(const string& value, int type, ConfigOperator op)
+      * Other case is when we read positive integers
+      */
+     if (ctn->type() == NODE_ULONG && type == NODE_UINT)
+-		type = NODE_ULONG;
++	type = NODE_ULONG;
+     else if (ctn->type() == NODE_INT && type == NODE_UINT)
+-		type = NODE_INT;
++	type = NODE_INT;
+ 
+     if ((ctn->type() == NODE_TEXT) && (type == NODE_TEXT)) {
+ 	svalue = unquote(svalue);
+     } else if ((ctn->type() == NODE_TEXT) && (type != NODE_TEXT)) {
+ 	// We'll accept anything as text
+     } else if (((ctn->type() == NODE_UINTRANGE) && (type == NODE_UINT)) ||
+-			((ctn->type() == NODE_ULONGRANGE) && (type == NODE_ULONG))) {
++	       ((ctn->type() == NODE_ULONGRANGE) && (type == NODE_ULONG))) {
+ 	// Expand a single uint to a uintrange
+-    // or a single uint64 to uint64range
++	// or a single uint64 to uint64range
+ 	svalue += ".." + value;
+     } else if ((ctn->type() == NODE_IPV4RANGE) && (type == NODE_IPV4)) {
+ 	// Expand a single IPv4 to a ipv4range
+@@ -353,40 +353,40 @@ ConfigTree::terminal_value(const string& value, int type, ConfigOperator op)
+ 	    if (svalue == "true" || svalue == "false" || svalue == "")
+ 		break;
+ 	    goto parse_error;
+-	case NODE_IPV4:
++	case NODE_IPV4: {
+ 	    IPv4 a(svalue.c_str());
+ 	    if (a.invalid())
+ 		goto parse_error;
+-	    }
+ 	    break;
+-	case NODE_IPV4NET:
++	}
++	case NODE_IPV4NET: {
+ 	    IPv4Net a(svalue.c_str());
+-	    if (a.invalid()) {
++	    if (a.invalid())
+ 		goto parse_error;
+-	    }
+ 	    break;
+-	case NODE_IPV6:
++	}
++	case NODE_IPV6: {
+ 	    IPv6 a(svalue.c_str());
+-	    if (a.invalid()) {
++	    if (a.invalid())
+ 		goto parse_error;
+-	    }
+ 	    break;
+-	case NODE_IPV6NET:
++	}
++	case NODE_IPV6NET: {
+ 	    IPv6Net a(svalue.c_str());
+-	    if (a.invalid()) {
++	    if (a.invalid())
+ 		goto parse_error;
+-	    }
+ 	    break;
+-	case NODE_MACADDR:
++	}
++	case NODE_MACADDR: {
+ 	    Mac a(svalue.c_str());
+-	    if (a.invalid()) {
++	    if (a.invalid())
+ 		goto parse_error;
+-	    }
+ 	    break;
++	}
+ 	case NODE_URL_FILE:
+ 	case NODE_URL_FTP:
+ 	case NODE_URL_HTTP:
+-	case NODE_URL_TFTP:
++        case NODE_URL_TFTP:
+ 	    // TODO: we cannot do easily a secondary parsing of URLs
+ 	    break;
+ 	default:
+@@ -397,6 +397,7 @@ ConfigTree::terminal_value(const string& value, int type, ConfigOperator op)
+ 	error_msg = "\"" + path + "\" has type " + ctn->typestr() +
+ 	    ", and value " + svalue + " is not a valid " + ctn->typestr();
+ 	booterror(error_msg.c_str());
++	return false;
+     }
+ 
+     if (ctn->is_read_only()
+@@ -404,24 +405,28 @@ ConfigTree::terminal_value(const string& value, int type, ConfigOperator op)
+ 	&& (! ctn->is_default_value(svalue))) {
+ 	error_msg = "\"" + path + "\" is read-only node";
+ 	booterror(error_msg.c_str());
++	return false;
+     }
+ 
+     if (ctn->set_value(svalue, /* userid */ 0, error_msg) != true) {
+ 	error_msg = c_format("Cannot set the value of \"%s\": %s",
+ 			     path.c_str(), error_msg.c_str());
+ 	booterror(error_msg.c_str());
++	return false;
+     }
+     if (ctn->set_operator(op, /* userid */ 0, error_msg) != true) {
+ 	error_msg = c_format("Cannot set the operator for \"%s\": %s",
+ 			     path.c_str(), error_msg.c_str());
+ 	booterror(error_msg.c_str());
++	return false;
+     }
+-    return;
++    return true;
+ 
+- parse_error:
++  parse_error:
+     error_msg = "\"" + path + "\" has type " + ctn->typestr() +
+ 	", and value " + svalue + " is not a valid " + ctn->typestr();
+     booterror(error_msg.c_str());
++    return false;
+ }
+ 
+ const ConfigTreeNode*
+@@ -521,12 +526,15 @@ ConfigTree::apply_deltas(uid_t user_id, const string& deltas,
+ 			 bool provisional_change, bool preserve_node_id,
+ 			 string& response)
+ {
++    string err;
+     XLOG_TRACE(_verbose, "CT apply_deltas %u %s\n",
+ 	       XORP_UINT_CAST(user_id), deltas.c_str());
+ 
+-    ConfigTree* delta_tree = create_tree(_template_tree, _verbose);
+-    if (delta_tree->parse(deltas, "", response) == false)
++    ConfigTree* delta_tree = create_tree(_template_tree, _verbose, err);
++    if (delta_tree->invalid() || delta_tree->parse(deltas, "", response) == false) {
++	delete delta_tree;
+ 	return false;
++    }
+ 
+     debug_msg("Delta tree:\n");
+     debug_msg("%s", delta_tree->tree_str().c_str());
+@@ -545,12 +553,15 @@ bool
+ ConfigTree::apply_deletions(uid_t user_id, const string& deletions,
+ 			    bool provisional_change, string& response)
+ {
++    string err;
+     XLOG_TRACE(_verbose, "CT apply_deletions %u %s\n",
+ 	       XORP_UINT_CAST(user_id), deletions.c_str());
+ 
+-    ConfigTree *deletion_tree = create_tree(_template_tree, _verbose);
+-    if (deletion_tree->parse(deletions, "", response) == false)
++    ConfigTree *deletion_tree = create_tree(_template_tree, _verbose, err);
++    if (deletion_tree->invalid() || deletion_tree->parse(deletions, "", response) == false) {
++	delete deletion_tree;
+ 	return false;
++    }
+ 
+     debug_msg("Deletion tree:\n");
+     debug_msg("%s", deletion_tree->tree_str().c_str());
+diff --git a/xorp/rtrmgr/conf_tree.hh b/xorp/rtrmgr/conf_tree.hh
+index c59b199..6381b2d 100644
+--- a/xorp/rtrmgr/conf_tree.hh
++++ b/xorp/rtrmgr/conf_tree.hh
+@@ -17,18 +17,13 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/rtrmgr/conf_tree.hh,v 1.36 2008/10/02 21:58:22 bms Exp $
+ 
+ #ifndef __RTRMGR_CONF_TREE_HH__
+ #define __RTRMGR_CONF_TREE_HH__
+ 
+ 
+ 
+-
+-
+-
+ #include "libproto/config_node_id.hh"
+-
+ #include "conf_tree_node.hh"
+ #include "rtrmgr_error.hh"
+ #include "xorp_client.hh"
+@@ -56,7 +51,7 @@ private:
+     ConfigNodeId	_node_id;
+ };
+ 
+-class ConfigTree {
++class ConfigTree : public Invalid {
+ public:
+     ConfigTree(TemplateTree *tt, bool verbose);
+     virtual ~ConfigTree();
+@@ -66,23 +61,22 @@ public:
+ #endif
+     bool parse(const string& configuration, const string& config_file,
+ 	       string& error_msg);
+-    void push_path();
++    bool push_path(string& error_msg);
+     void extend_path(const string& segment, int type,
+ 		     const ConfigNodeId& node_id);
+     void pop_path();
+-    void add_node(const string& nodename, int type,
+-		  const ConfigNodeId& node_id) 
+-	throw (ParseError);
++    bool add_node(const string& nodename, int type,
++		  const ConfigNodeId& node_id, string& err);
+     virtual ConfigTreeNode* create_node(const string& segment, 
+ 					const string& path,
+ 					const TemplateTreeNode* ttn, 
+ 					ConfigTreeNode* parent_node, 
+ 					const ConfigNodeId& node_id,
+ 					uid_t user_id, bool verbose) = 0;
+-    virtual ConfigTree* create_tree(TemplateTree *tt, bool verbose) = 0;
+-    void terminal_value(const string& value,
++    virtual ConfigTree* create_tree(TemplateTree *tt, bool verbose, string& err) = 0;
++    bool terminal_value(const string& value,
+ 			int type, 
+-			ConfigOperator op) throw (ParseError);
++			ConfigOperator op, string& err);
+     list<ConfPathSegment> path_as_segments() const;
+     const TemplateTreeNode* 
+         find_template(const list<string>& path_segments) const;
+diff --git a/xorp/rtrmgr/conf_tree_node.cc b/xorp/rtrmgr/conf_tree_node.cc
+index ec2b649..4d88206 100644
+--- a/xorp/rtrmgr/conf_tree_node.cc
++++ b/xorp/rtrmgr/conf_tree_node.cc
+@@ -22,12 +22,10 @@
+ 
+ //#define DEBUG_LOGGING
+ #include "rtrmgr_module.h"
+-
+ #include "libxorp/xorp.h"
+ #include "libxorp/xlog.h"
+ #include "libxorp/debug.h"
+ #include "libxorp/utils.hh"
+-
+ #include "command_tree.hh"
+ #include "conf_tree_node.hh"
+ #include "module_command.hh"
+@@ -36,7 +34,7 @@
+ #include "util.hh"
+ 
+ 
+-extern int booterror(const char *s) throw (ParseError);
++extern int booterror(const char *s, string& err);
+ 
+ bool
+ CTN_Compare::operator() (ConfigTreeNode* a, ConfigTreeNode *b)
+diff --git a/xorp/rtrmgr/config_operators.cc b/xorp/rtrmgr/config_operators.cc
+index 2df51bb..01f981b 100644
+--- a/xorp/rtrmgr/config_operators.cc
++++ b/xorp/rtrmgr/config_operators.cc
+@@ -98,12 +98,14 @@ operator_to_str(ConfigOperator op)
+ 	return string("^=");
+     case OP_DEL:
+ 	return string("del");
++    case OP_INVALID:
++	return string("INVALID");
+     }
+     XLOG_UNREACHABLE();
+ }
+ 
+ ConfigOperator
+-lookup_operator(const string& s) throw (ParseError)
++lookup_operator(const string& s, string& err)
+ {
+     if (s == "==") {
+ 	return OP_EQ;
+@@ -176,6 +178,6 @@ lookup_operator(const string& s) throw (ParseError)
+     //
+     // Invalid operator string
+     //
+-    string error_msg = c_format("Bad operator: %s", s.c_str());
+-    xorp_throw(ParseError, error_msg);
++    err += c_format("Bad operator: %s\n", s.c_str());
++    return OP_INVALID;
+ }
+diff --git a/xorp/rtrmgr/config_operators.hh b/xorp/rtrmgr/config_operators.hh
+index 9a9fdd8..6f63501 100644
+--- a/xorp/rtrmgr/config_operators.hh
++++ b/xorp/rtrmgr/config_operators.hh
+@@ -65,10 +65,11 @@ enum ConfigOperator {
+     OP_BITXOR,
+     OP_BITXOR_EQ,
+     OP_DEL,
++    OP_INVALID,
+     MAX_MODIFIER	= OP_DEL
+ };
+ 
+ extern string operator_to_str(ConfigOperator op);
+-extern ConfigOperator lookup_operator(const string& s) throw (ParseError);
++extern ConfigOperator lookup_operator(const string& s, string& err);
+ 
+ #endif // __RTRMGR_CONFIG_OPERATORS_HH__
+diff --git a/xorp/rtrmgr/main_rtrmgr.cc b/xorp/rtrmgr/main_rtrmgr.cc
+index 1e25822..4340de8 100644
+--- a/xorp/rtrmgr/main_rtrmgr.cc
++++ b/xorp/rtrmgr/main_rtrmgr.cc
+@@ -159,18 +159,18 @@ display_defaults()
+ // the following two functions are an ugly hack to cause the C code in
+ // the parser to call methods on the right version of the TemplateTree
+ 
+-void
+-add_cmd_adaptor(char *cmd, TemplateTree* tt) throw (ParseError)
++bool
++add_cmd_adaptor(char *cmd, TemplateTree* tt, string& err)
+ {
+-    ((MasterTemplateTree*)tt)->add_cmd(cmd);
++    return ((MasterTemplateTree*)tt)->add_cmd(cmd, err);
+ }
+ 
+ 
+-void
++bool
+ add_cmd_action_adaptor(const string& cmd, const list<string>& action,
+-		       TemplateTree* tt) throw (ParseError)
++		       TemplateTree* tt, string& err)
+ {
+-    ((MasterTemplateTree*)tt)->add_cmd_action(cmd, action);
++    return ((MasterTemplateTree*)tt)->add_cmd_action(cmd, action, err);
+ }
+ 
+ Rtrmgr::Rtrmgr(const string& module_dir, 
+@@ -307,80 +307,87 @@ Rtrmgr::run()
+     ModuleManager mmgr(eventloop, *this, _do_restart, _verbose,
+ 		       xorp_binary_root_dir(), module_dir);
+ 
+-    try {
+-	//
+-	// Read the router startup configuration file,
+-	// start the processes required, and initialize them.
+-	//
+-	RandomGen randgen;
+-	UserDB userdb(_verbose);
++    string err;
++
++    //
++    // Read the router startup configuration file,
++    // start the processes required, and initialize them.
++    //
++    RandomGen randgen;
++    UserDB userdb(_verbose);
+ 
+-	userdb.load_password_file();
+-	_xrt = new XrlRtrmgrInterface(xrl_router, userdb, eventloop, 
+-				      randgen, *this);
++    userdb.load_password_file();
++    _xrt = new XrlRtrmgrInterface(xrl_router, userdb, eventloop, 
++				  randgen, *this);
+ 
+-	wait_until_xrl_router_is_ready(eventloop, xrl_router);
++    wait_until_xrl_router_is_ready(eventloop, xrl_router);
+ 
+ #if 0
+-	// Let the module manager know how to send XRLs to xorpsh
+-	mmgr.set_xrl_interface(_xrt);
++    // Let the module manager know how to send XRLs to xorpsh
++    mmgr.set_xrl_interface(_xrt);
+ #endif
+ 
+-	_mct = new MasterConfigTree(config_file, tt, mmgr, xclient, _do_exec,
+-				    _verbose);
+-	if (_daemon_mode) {
+-	    _mct->set_task_completed(callback(this, &Rtrmgr::daemonize));
+-	}
+-	//
+-	// XXX: note that theoretically we may receive an XRL before
+-	// we call XrlRtrmgrInterface::set_master_config_tree()
+-	// or ModuleManager::set_master_config_tree() below.
+-	// For now we ignore that possibility...
+-	//
+-	_xrt->set_master_config_tree(_mct);
+-	mmgr.set_master_config_tree(_mct);
+-
+-	// For testing purposes, rtrmgr can terminate itself after some time.
+-	XorpTimer quit_timer;
+-	if (_quit_time > 0) {
+-	    quit_timer =
+-		eventloop.new_oneoff_after_ms(_quit_time * 1000,
+-					      callback(dflt_sig_handler, SIGTERM));
+-	}
++    XorpTimer quit_timer;
+ 
+-	_ready = true;
+-	//
+-	// Loop while handling configuration events and signals
+-	//
+-	while (xorp_do_run) {
+-	    fflush(stdout);
+-	    eventloop.run();
+-	    if (_mct->config_failed())
+-		xorp_do_run = 0;
+-	}
++    _mct = new MasterConfigTree(config_file, tt, mmgr, xclient, _do_exec,
++				_verbose, err);
++    if (_mct->invalid())
++	goto error;
++
++    if (_daemon_mode) {
++	_mct->set_task_completed(callback(this, &Rtrmgr::daemonize));
++    }
++    //
++    // XXX: note that theoretically we may receive an XRL before
++    // we call XrlRtrmgrInterface::set_master_config_tree()
++    // or ModuleManager::set_master_config_tree() below.
++    // For now we ignore that possibility...
++    //
++    _xrt->set_master_config_tree(_mct);
++    mmgr.set_master_config_tree(_mct);
++
++    // For testing purposes, rtrmgr can terminate itself after some time.
++    if (_quit_time > 0) {
++	quit_timer =
++	    eventloop.new_oneoff_after_ms(_quit_time * 1000,
++					  callback(dflt_sig_handler, SIGTERM));
++    }
++
++    _ready = true;
++    //
++    // Loop while handling configuration events and signals
++    //
++    while (xorp_do_run) {
+ 	fflush(stdout);
+-	_ready = false;
++	eventloop.run();
++	if (_mct->config_failed())
++	    xorp_do_run = 0;
++    }
++    fflush(stdout);
++    _ready = false;
+ 
+-	//
+-	// Shutdown everything
+-	//
++    //
++    // Shutdown everything
++    //
+ 
+-	// Delete the configuration
+-	_mct->delete_entire_config();
++    // Delete the configuration
++    _mct->delete_entire_config();
+ 
+-	// Wait until changes due to deleting config have finished
+-	// being applied.
+-	while (eventloop.events_pending() && (_mct->commit_in_progress())) {
+-	    eventloop.run();
+-	}
+-	delete _mct;
+-	_mct = NULL;
+-    } catch (const InitError& e) {
+-	XLOG_ERROR("rtrmgr shutting down due to an init error: %s",
+-		   e.why().c_str());
+-	errcode = 1;
++    // Wait until changes due to deleting config have finished
++    // being applied.
++    while (eventloop.events_pending() && (_mct->commit_in_progress())) {
++	eventloop.run();
+     }
++    delete _mct;
++    _mct = NULL;
++    goto shutdown;
++
++  error:
++    XLOG_ERROR("rtrmgr shutting down due to an init error: %s",
++	       err.c_str());
++    errcode = 1;
+ 
++shutdown:
+     // Shut down child processes that haven't already been shutdown
+     mmgr.shutdown();
+ 
+@@ -558,7 +565,7 @@ main(int argc, char* const argv[])
+ 	case 'd':
+ 	    daemon_mode = true;    // XXX must come before other options?
+ 	    break;
+-	case 'a':
++	case 'a': {
+ 	    //
+ 	    // User is specifying an IPv4 address to accept finder
+ 	    // connections from.
+@@ -572,6 +579,7 @@ main(int argc, char* const argv[])
+ 		cleanup_and_exit(1);
+ 	    }
+ 	    break;
++	}
+ 	case 'C':
+ 	    command_dir = optarg;
+ 	    break;
+@@ -586,12 +594,12 @@ main(int argc, char* const argv[])
+ 	case 'm':
+ 	    module_dir = optarg;
+ 	    break;
+-	case 'n':
++	case 'n': {
+ 	    //
+ 	    // User is specifying a network address to accept finder
+ 	    // connections from.
+ 	    //
+-	    IP4Net n(optarg);
++	    IPv4Net n(optarg);
+ 	    if (!n.invalid()) {
+ 		add_permitted_net(n);
+ 	    } else {
+@@ -600,6 +608,7 @@ main(int argc, char* const argv[])
+ 		cleanup_and_exit(1);
+ 	    }
+ 	    break;
++	}
+ 	case 't':
+ 	    template_dir = optarg;
+ 	    break;
+@@ -643,7 +652,7 @@ main(int argc, char* const argv[])
+ 		cleanup_and_exit(1);
+ 	    }
+ 	    break;
+-	case 'i':
++	case 'i': {
+ 	    //
+ 	    // User is specifying which interface to bind finder to
+ 	    //
+@@ -664,6 +673,7 @@ main(int argc, char* const argv[])
+ 		cleanup_and_exit(1);
+ 	    }
+ 	    break;
++	}
+ 	case 'h':
+ 	    /* FALLTHROUGH */
+ 	case '?':
+diff --git a/xorp/rtrmgr/master_conf_tree.cc b/xorp/rtrmgr/master_conf_tree.cc
+index b6b8dc0..3b39d19 100644
+--- a/xorp/rtrmgr/master_conf_tree.cc
++++ b/xorp/rtrmgr/master_conf_tree.cc
+@@ -94,7 +94,7 @@ MasterConfigTree::MasterConfigTree(const string& config_file,
+ 				   ModuleManager& mmgr,
+ 				   XorpClient& xclient,
+ 				   bool global_do_exec,
+-				   bool verbose) throw (InitError)
++				   bool verbose, string& error_msg)
+     : ConfigTree(tt, verbose),
+       _root_node(verbose),
+       _commit_in_progress(false),
+@@ -112,7 +112,6 @@ MasterConfigTree::MasterConfigTree(const string& config_file,
+       _config_tree_copy(NULL)
+ {
+     string configuration;
+-    string error_msg;
+ 
+     _current_node = &_root_node;
+     _task_manager = new TaskManager(*this, mmgr, xclient,
+@@ -131,11 +130,13 @@ MasterConfigTree::MasterConfigTree(const string& config_file,
+ #endif
+ 
+     if (read_file(configuration, config_file, error_msg) != true) {
+-	xorp_throw(InitError, error_msg);
++	set_invalid(true);
++	return;
+     }
+ 
+     if (parse(configuration, config_file, error_msg) != true) {
+-	xorp_throw(InitError, error_msg);
++	set_invalid(true);
++	return;
+     }
+ 
+     //
+@@ -145,7 +146,8 @@ MasterConfigTree::MasterConfigTree(const string& config_file,
+     add_default_children();
+ 
+     if (root_node().check_config_tree(error_msg) != true) {
+-	xorp_throw(InitError, error_msg);
++	set_invalid(true);
++	return;
+     }
+ 
+     //
+@@ -188,11 +190,10 @@ MasterConfigTree::operator=(const MasterConfigTree& orig_tree)
+ }
+ 
+ ConfigTree*
+-MasterConfigTree::create_tree(TemplateTree *tt, bool verbose)
++MasterConfigTree::create_tree(TemplateTree *tt, bool verbose, string& err)
+ {
+-    MasterConfigTree *mct;
+-    mct = new MasterConfigTree(tt, verbose);
+-    return mct;
++    UNUSED(err);
++    return new MasterConfigTree(tt, verbose);
+ }
+ 
+ 
+diff --git a/xorp/rtrmgr/master_conf_tree.hh b/xorp/rtrmgr/master_conf_tree.hh
+index a332698..5b920b3 100644
+--- a/xorp/rtrmgr/master_conf_tree.hh
++++ b/xorp/rtrmgr/master_conf_tree.hh
+@@ -43,7 +43,7 @@ class MasterConfigTree : public ConfigTree {
+ public:
+     MasterConfigTree(const string& config_file, MasterTemplateTree* tt,
+ 		     ModuleManager& mmgr, XorpClient& xclient,
+-		     bool global_do_exec, bool verbose) throw (InitError);
++		     bool global_do_exec, bool verbose, string& err);
+     MasterConfigTree(TemplateTree* tt, bool verbose);
+     MasterConfigTree& operator=(const MasterConfigTree& orig_tree);
+     ~MasterConfigTree();
+@@ -62,7 +62,7 @@ public:
+ 					ConfigTreeNode* parent_node, 
+ 					const ConfigNodeId& node_id,
+ 					uid_t user_id, bool verbose);
+-    virtual ConfigTree* create_tree(TemplateTree *tt, bool verbose);
++    virtual ConfigTree* create_tree(TemplateTree *tt, bool verbose, string& err);
+ 
+     void commit_changes_pass1(CallBack cb);
+     void commit_pass1_done(bool success, string errmsg);
+diff --git a/xorp/rtrmgr/master_conf_tree_node.cc b/xorp/rtrmgr/master_conf_tree_node.cc
+index 8393a78..1846748 100644
+--- a/xorp/rtrmgr/master_conf_tree_node.cc
++++ b/xorp/rtrmgr/master_conf_tree_node.cc
+@@ -32,8 +32,6 @@
+ #include "util.hh"
+ 
+ 
+-extern int booterror(const char *s) throw (ParseError);
+-
+ MasterConfigTreeNode::MasterConfigTreeNode(bool verbose)
+     : ConfigTreeNode(verbose),
+       _actions_pending(0),
+diff --git a/xorp/rtrmgr/master_template_tree.cc b/xorp/rtrmgr/master_template_tree.cc
+index d9520da..85fede3 100644
+--- a/xorp/rtrmgr/master_template_tree.cc
++++ b/xorp/rtrmgr/master_template_tree.cc
+@@ -20,7 +20,6 @@
+ 
+ 
+ #include "rtrmgr_module.h"
+-
+ #include "libxorp/xorp.h"
+ #include "libxorp/xlog.h"
+ #include "libxorp/debug.h"
+@@ -37,7 +36,7 @@
+ 
+ MasterTemplateTree::MasterTemplateTree(const string& xorp_root_dir,
+ 				       XRLdb* xrldb,
+-				       bool verbose) throw (InitError)
++				       bool verbose)
+     : TemplateTree(xorp_root_dir, verbose),
+       _xrldb(xrldb)
+ {
+@@ -76,18 +75,17 @@ MasterTemplateTree::check_master_template_tree(string& error_msg)
+     return root_node()->check_master_template_tree(error_msg);
+ }
+ 
+-void
+-MasterTemplateTree::add_cmd(char* cmd) throw (ParseError)
++bool
++MasterTemplateTree::add_cmd(char* cmd, string& err)
+ {
+     MasterTemplateTreeNode *n = (MasterTemplateTreeNode*)_current_node;
+-    n->add_cmd(string(cmd), *this);
++    return n->add_cmd(string(cmd), *this, err);
+ }
+ 
+-void
++bool
+ MasterTemplateTree::add_cmd_action(const string& cmd, 
+-				   const list<string>& action)
+-    throw (ParseError)
++				   const list<string>& action, string& err)
+ {
+     MasterTemplateTreeNode *n = (MasterTemplateTreeNode*)_current_node;
+-    n->add_action(cmd, action, _xrldb);
++    return n->add_action(cmd, action, _xrldb, err);
+ }
+diff --git a/xorp/rtrmgr/master_template_tree.hh b/xorp/rtrmgr/master_template_tree.hh
+index 4a0c697..15c289e 100644
+--- a/xorp/rtrmgr/master_template_tree.hh
++++ b/xorp/rtrmgr/master_template_tree.hh
+@@ -17,7 +17,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/rtrmgr/master_template_tree.hh,v 1.11 2008/10/02 21:58:23 bms Exp $
+ 
+ #ifndef __RTRMGR_MASTER_TEMPLATE_TREE_HH__
+ #define __RTRMGR_MASTER_TEMPLATE_TREE_HH__
+@@ -35,14 +34,13 @@ class MasterTemplateTree : public TemplateTree {
+ public:
+     MasterTemplateTree(const string& xorp_root_dir,
+ 		       XRLdb* xrldb,
+-		       bool verbose)  throw (InitError);
++		       bool verbose);
+ 
+     bool load_template_tree(const string& config_template_dir,
+ 			    string& error_msg);
+ 
+-    void add_cmd(char* cmd) throw (ParseError);
+-    void add_cmd_action(const string& cmd, const list<string>& action)
+-	throw (ParseError);
++    bool add_cmd(char* cmd, string& err);
++    bool add_cmd_action(const string& cmd, const list<string>& action, string& err);
+     const XRLdb* xrldb() const { return _xrldb; }
+ 
+     const MasterTemplateTreeNode* find_node(const list<string>& path_segments) 
+diff --git a/xorp/rtrmgr/master_template_tree_node.cc b/xorp/rtrmgr/master_template_tree_node.cc
+index 85e3738..19757bf 100644
+--- a/xorp/rtrmgr/master_template_tree_node.cc
++++ b/xorp/rtrmgr/master_template_tree_node.cc
+@@ -20,7 +20,6 @@
+ 
+ 
+ #include "rtrmgr_module.h"
+-
+ #include "libxorp/xorp.h"
+ #include "libxorp/xlog.h"
+ #include "libxorp/debug.h"
+@@ -40,9 +39,8 @@
+ #include "util.hh"
+ 
+ 
+-void
+-MasterTemplateTreeNode::add_cmd(const string& cmd, TemplateTree& tt)
+-    throw (ParseError)
++bool
++MasterTemplateTreeNode::add_cmd(const string& cmd, TemplateTree& tt, string& err)
+ {
+     BaseCommand* command;
+     map<string, BaseCommand*>::iterator iter;
+@@ -69,14 +67,15 @@ MasterTemplateTreeNode::add_cmd(const string& cmd, TemplateTree& tt)
+ 	    _cmd_map[cmd] = command;
+ 	}
+     } else {
+-	TemplateTreeNode::add_cmd(cmd);
++	return TemplateTreeNode::add_cmd(cmd, err);
+     }
++    return true;
+ }
+ 
+-void
++bool
+ MasterTemplateTreeNode::add_action(const string& cmd,
+ 				   const list<string>& action_list,
+-				   const XRLdb* xrldb) throw (ParseError)
++				   const XRLdb* xrldb, string& err)
+ {
+     BaseCommand* command;
+     map<string, BaseCommand*>::iterator iter;
+@@ -86,8 +85,7 @@ MasterTemplateTreeNode::add_action(const string& cmd,
+ 	XLOG_ASSERT(iter != _cmd_map.end());
+ 	command = iter->second;
+ 	ModuleCommand* module_command = dynamic_cast<ModuleCommand*>(command);
+-	XLOG_ASSERT(module_command != NULL);
+-	module_command->add_action(action_list, xrldb);
++	return module_command->add_action(action_list, xrldb, err);
+     } else if ((cmd == "%create")
+ 	       || (cmd == "%activate")
+ 	       || (cmd == "%update")
+@@ -101,9 +99,9 @@ MasterTemplateTreeNode::add_action(const string& cmd,
+ 	XLOG_ASSERT(iter != _cmd_map.end());
+ 	command = iter->second;
+ 	Command* regular_command = dynamic_cast<Command*>(command);
+-	regular_command->add_action(action_list, xrldb);
++	return regular_command->add_action(action_list, xrldb, err);
+     } else {
+-	TemplateTreeNode::add_action(cmd, action_list);
++	return TemplateTreeNode::add_action(cmd, action_list, err);
+     }
+ }
+ 
+@@ -119,7 +117,6 @@ MasterTemplateTreeNode::expand_master_template_tree(string& error_msg)
+     if (cmd_iter != _cmd_map.end()) {
+ 	BaseCommand* command = cmd_iter->second;
+ 	ModuleCommand* module_command = dynamic_cast<ModuleCommand*>(command);
+-	XLOG_ASSERT(module_command != NULL);
+ 	if (module_command->expand_actions(error_msg) != true)
+ 	    return (false);
+     }
+diff --git a/xorp/rtrmgr/master_template_tree_node.hh b/xorp/rtrmgr/master_template_tree_node.hh
+index 002f889..c815717 100644
+--- a/xorp/rtrmgr/master_template_tree_node.hh
++++ b/xorp/rtrmgr/master_template_tree_node.hh
+@@ -17,17 +17,12 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/rtrmgr/master_template_tree_node.hh,v 1.11 2008/10/02 21:58:23 bms Exp $
+ 
+ #ifndef __RTRMGR_MASTER_TEMPLATE_TREE_NODE_HH__
+ #define __RTRMGR_MASTER_TEMPLATE_TREE_NODE_HH__
+ 
+ 
+ 
+-
+-
+-
+-
+ #include "template_tree_node.hh"
+ 
+ class MasterTemplateTreeNode : public TemplateTreeNode {
+@@ -39,9 +34,9 @@ public:
+ 	: TemplateTreeNode(template_tree, parent, path, varname)
+     {}
+ 
+-    void add_cmd(const string& cmd, TemplateTree& tt) throw (ParseError);
+-    void add_action(const string& cmd, const list<string>& action_list,
+-		    const XRLdb* xrldb) throw (ParseError);
++    bool add_cmd(const string& cmd, TemplateTree& tt, string& err);
++    bool add_action(const string& cmd, const list<string>& action_list,
++		    const XRLdb* xrldb, string& err);
+     bool expand_master_template_tree(string& error_msg);
+     bool check_master_template_tree(string& error_msg) const;
+ 
+diff --git a/xorp/rtrmgr/module_command.cc b/xorp/rtrmgr/module_command.cc
+index bbe78af..8dc6e9f 100644
+--- a/xorp/rtrmgr/module_command.cc
++++ b/xorp/rtrmgr/module_command.cc
+@@ -40,26 +40,26 @@
+ #include "xrldb.hh"
+ #endif
+ 
+-static string
+-strip_quotes(const string& command, const string& value) throw (ParseError)
++static bool
++strip_quotes(const string& command, const string& value, string& error_msg, string& rv)
+ {
+-    string error_msg;
+     size_t old_size = value.size();
+     string tmp_value = unquote(value);
+ 
+     if (tmp_value.size() != old_size && tmp_value.size() != old_size - 2) {
+-	error_msg = c_format("subcommand %s has invalid argument: %s",
+-			     command.c_str(), value.c_str());
+-	xorp_throw(ParseError, error_msg);
++	error_msg += c_format("subcommand %s has invalid argument: %s\n",
++			      command.c_str(), value.c_str());
++	return false;
+     }
+ 
+     if (unquote(tmp_value).empty()) {
+-	error_msg = c_format("subcommand %s has empty argument",
+-			     command.c_str());
+-	xorp_throw(ParseError, error_msg);
++	error_msg += c_format("subcommand %s has empty argument\n",
++			      command.c_str());
++	return false;
+     }
+ 
+-    return tmp_value;
++    rv = tmp_value;
++    return true;
+ }
+ 
+ ModuleCommand::ModuleCommand(TemplateTree& template_tree,
+@@ -91,9 +91,8 @@ ModuleCommand::~ModuleCommand()
+ 	delete _shutdown_method;
+ }
+ 
+-void
+-ModuleCommand::add_action(const list<string>& action, const XRLdb* xrldb)
+-    throw (ParseError)
++bool
++ModuleCommand::add_action(const list<string>& action, const XRLdb* xrldb, string& err)
+ {
+     size_t expected_action_size = 2;
+ 
+@@ -101,7 +100,8 @@ ModuleCommand::add_action(const list<string>& action, const XRLdb* xrldb)
+     // Check the subcommand size
+     //
+     if (action.size() < expected_action_size) {
+-	xorp_throw(ParseError, "too few parameters to %modinfo");
++	err += "too few parameters to %modinfo\n";
++	return false;
+     }
+     string subcommand = action.front();
+     if ((subcommand == "start_commit")
+@@ -112,10 +112,12 @@ ModuleCommand::add_action(const list<string>& action, const XRLdb* xrldb)
+ 	expected_action_size = 3;
+     }
+     if (action.size() > expected_action_size) {
+-	xorp_throw(ParseError, "too many parameters to %modinfo");
++	err += "too many parameters to %modinfo\n";
++	return false;
+     }
+     if (action.size() < expected_action_size) {
+-	xorp_throw(ParseError, "too few parameters to %modinfo");
++	err += "too few parameters to %modinfo\n";
++	return false;
+     }
+ 
+     typedef list<string>::const_iterator CI;
+@@ -124,30 +126,37 @@ ModuleCommand::add_action(const list<string>& action, const XRLdb* xrldb)
+     ++ptr;
+     string value = *ptr;
+     if (cmd == "provides") {
+-	_module_name = strip_quotes(cmd, value);
++	if (!strip_quotes(cmd, value, err, _module_name))
++	    return false;
+ 	_tt.register_module(_module_name, this);
+ 	template_tree_node().set_subtree_module_name(_module_name);
+     } else if (cmd == "depends") {
+ 	if (_module_name.empty()) {
+-	    xorp_throw(ParseError,
+-		       "\"depends\" must be preceded by \"provides\"");
++	    err +=  "\"depends\" must be preceded by \"provides\"\n";
++	    return false;
+ 	}
+-	_depends.push_back(strip_quotes(cmd, value));
++	string c;
++	if (!strip_quotes(cmd, value, err, c))
++	    return false;
++	_depends.push_back(c);
+     } else if (cmd == "path") {
+ 	if (_module_name == "") {
+-	    xorp_throw(ParseError,
+-		       "\"path\" must be preceded by \"provides\"");
++	    err += "\"path\" must be preceded by \"provides\"\n";
++	    return false;
+ 	}
+ 	if (_module_exec_path != "") {
+-	    xorp_throw(ParseError, "duplicate \"path\" subcommand");
++	    err += "duplicate \"path\" subcommand";
++	    return false;
+ 	}
+-	_module_exec_path = strip_quotes(cmd, value);
++	if (!strip_quotes(cmd, value, err, _module_exec_path))
++	    return false;
+     } else if (cmd == "default_targetname") {
+ 	if (_module_name == "") {
+-	    xorp_throw(ParseError,
+-		       "\"default_targetname\" must be preceded by \"provides\"");
++	    err += "\"default_targetname\" must be preceded by \"provides\"\n";
++	    return false;
+ 	}
+-	_default_target_name = strip_quotes(cmd, value);
++	if (!strip_quotes(cmd, value, err, _default_target_name))
++	    return false;
+ 	template_tree_node().set_subtree_default_target_name(_default_target_name);
+     } else if (cmd == "start_commit") {
+ 	debug_msg("start_commit:\n");
+@@ -158,94 +167,95 @@ ModuleCommand::add_action(const list<string>& action, const XRLdb* xrldb)
+ 
+ 	list<string> newaction = action;
+ 	newaction.pop_front();
+-	do {
+-	    if (newaction.front() == "xrl") {
+-		_start_commit = new XrlAction(template_tree_node(), newaction,
+-					      xrldb);
+-		break;
+-	    }
+-	    if (newaction.front() == "program") {
+-		_start_commit = new ProgramAction(template_tree_node(),
+-						  newaction);
+-		break;
+-	    }
++
++	if (newaction.front() == "xrl") {
++	    _start_commit = new XrlAction(template_tree_node(), newaction,
++					  xrldb, err);
++	}
++	else if (newaction.front() == "program") {
++	    _start_commit = new ProgramAction(template_tree_node(),
++					      newaction, err);
++	}
++	else {
+ 	    _start_commit = new Action(template_tree_node(), newaction);
+-	    break;
+-	} while (false);
++	}
++	if (_start_commit->invalid())
++	    return false;
+     } else if (cmd == "end_commit") {
+ 	list<string> newaction = action;
+ 	newaction.pop_front();
+-	do {
+-	    if (newaction.front() == "xrl") {
+-		_end_commit = new XrlAction(template_tree_node(), newaction,
+-					    xrldb);
+-		break;
+-	    }
+-	    if (newaction.front() == "program") {
+-		_end_commit = new ProgramAction(template_tree_node(),
+-						newaction);
+-		break;
+-	    }
++
++	if (newaction.front() == "xrl") {
++	    _end_commit = new XrlAction(template_tree_node(), newaction,
++					xrldb, err);
++	}
++	else if (newaction.front() == "program") {
++	    _end_commit = new ProgramAction(template_tree_node(),
++					    newaction, err);
++	}
++	else {
+ 	    _end_commit = new Action(template_tree_node(), newaction);
+-	    break;
+-	} while (false);
++	}
++	if (_end_commit->invalid())
++	    return false;
+     } else if (cmd == "status_method") {
+ 	list<string> newaction = action;
+ 	newaction.pop_front();
+-	do {
+-	    if (newaction.front() == "xrl") {
+-		_status_method = new XrlAction(template_tree_node(), newaction,
+-					       xrldb);
+-		break;
+-	    }
+-	    if (newaction.front() == "program") {
+-		_status_method = new ProgramAction(template_tree_node(),
+-						   newaction);
+-		break;
+-	    }
++
++	if (newaction.front() == "xrl") {
++	    _status_method = new XrlAction(template_tree_node(), newaction,
++					   xrldb, err);
++	}
++	else if (newaction.front() == "program") {
++	    _status_method = new ProgramAction(template_tree_node(),
++					       newaction, err);
++	}
++	else {
+ 	    _status_method = new Action(template_tree_node(), newaction);
+-	    break;
+-	} while (false);
++	}
++	if (_status_method->invalid())
++	    return false;
+     } else if (cmd == "startup_method") {
+ 	list<string> newaction = action;
+ 	newaction.pop_front();
+-	do {
+-	    if (newaction.front() == "xrl") {
+-		_startup_method = new XrlAction(template_tree_node(),
+-						newaction,
+-						xrldb);
+-		break;
+-	    }
+-	    if (newaction.front() == "program") {
+-		_startup_method = new ProgramAction(template_tree_node(),
+-						    newaction);
+-		break;
+-	    }
++
++	if (newaction.front() == "xrl") {
++	    _startup_method = new XrlAction(template_tree_node(),
++					    newaction,
++					    xrldb, err);
++	}
++	else if (newaction.front() == "program") {
++	    _startup_method = new ProgramAction(template_tree_node(),
++						newaction, err);
++	}
++	else {
+ 	    _startup_method = new Action(template_tree_node(), newaction);
+-	    break;
+-	} while (false);
++	}
++	if (_startup_method->invalid())
++	    return false;
+     } else if (cmd == "shutdown_method") {
+ 	list<string> newaction = action;
+ 	newaction.pop_front();
+-	do {
+-	    if (newaction.front() == "xrl") {
+-		_shutdown_method = new XrlAction(template_tree_node(),
+-						 newaction,
+-						 xrldb);
+-		break;
+-	    }
+-	    if (newaction.front() == "program") {
+-		_shutdown_method = new ProgramAction(template_tree_node(),
+-						     newaction);
+-		break;
+-	    }
++
++	if (newaction.front() == "xrl") {
++	    _shutdown_method = new XrlAction(template_tree_node(),
++					     newaction,
++					     xrldb, err);
++	}
++	else if (newaction.front() == "program") {
++	    _shutdown_method = new ProgramAction(template_tree_node(),
++						 newaction, err);
++	}
++	else {
+ 	    _shutdown_method = new Action(template_tree_node(), newaction);
+-	    break;
+-	} while (false);
++	}
++	if (_shutdown_method->invalid())
++	    return false;
+     } else {
+-	string err = "invalid subcommand \"" + cmd + "\" to %modinfo";
+-	xorp_throw(ParseError, err);
++	err += "invalid subcommand \"" + cmd + "\" to %modinfo\n";
++	return false;
+     }
++    return true;
+ }
+ 
+ bool
+diff --git a/xorp/rtrmgr/module_command.hh b/xorp/rtrmgr/module_command.hh
+index 0c47cf6..1fb75db 100644
+--- a/xorp/rtrmgr/module_command.hh
++++ b/xorp/rtrmgr/module_command.hh
+@@ -17,7 +17,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/rtrmgr/module_command.hh,v 1.29 2008/10/02 21:58:23 bms Exp $
+ 
+ #ifndef __RTRMGR_MODULE_COMMAND_HH__
+ #define __RTRMGR_MODULE_COMMAND_HH__
+@@ -38,8 +37,8 @@ public:
+ 		  const string& cmd_name);
+     ~ModuleCommand();
+ 
+-    void add_action(const list<string>& action,
+-		    const XRLdb* xrldb) throw (ParseError);
++    bool add_action(const list<string>& action,
++		    const XRLdb* xrldb, string& err);
+     virtual bool expand_actions(string& error_msg);
+     virtual bool check_referred_variables(string& error_msg) const;
+ 
+diff --git a/xorp/rtrmgr/op_commands.cc b/xorp/rtrmgr/op_commands.cc
+index 285fcfe..08c3013 100644
+--- a/xorp/rtrmgr/op_commands.cc
++++ b/xorp/rtrmgr/op_commands.cc
+@@ -63,7 +63,7 @@
+ #endif
+ 
+ extern int init_opcmd_parser(const char *filename, OpCommandList *o);
+-extern void parse_opcmd() throw (ParseError);
++extern bool parse_opcmd(string& err);
+ extern int opcmderror(const char *s);
+ 
+ OpInstance::OpInstance(EventLoop&			eventloop,
+@@ -567,15 +567,13 @@ OpCommandList::OpCommandList(const TemplateTree* tt, SlaveModuleManager& mmgr)
+ 
+ OpCommandList::OpCommandList(const string& config_template_dir,
+ 			     const TemplateTree* tt,
+-			     SlaveModuleManager& mmgr) throw (InitError)
++			     SlaveModuleManager& mmgr, string& errmsg)
+     : _running_op_instances_n(0),
+       _template_tree(tt),
+       _mmgr(mmgr)
+ {
+-    string errmsg;
+-
+     if (read_templates(config_template_dir, errmsg) != XORP_OK)
+-	xorp_throw(InitError, errmsg);
++	set_invalid(true);
+ }
+ 
+ OpCommandList::~OpCommandList()
+@@ -629,11 +627,8 @@ OpCommandList::read_templates(const string& config_template_dir,
+ 			      config_template_dir.c_str());
+ 	    return (XORP_ERROR);
+ 	}
+-	try {
+-	    parse_opcmd();
+-	} catch (const ParseError& pe) {
++	if (!parse_opcmd(errmsg)) {
+ 	    globfree(&pglob);
+-	    errmsg = pe.why();
+ 	    return (XORP_ERROR);
+ 	}
+ 	if (_path_segments.size() != 0) {
+diff --git a/xorp/rtrmgr/op_commands.hh b/xorp/rtrmgr/op_commands.hh
+index aa67936..00b871a 100644
+--- a/xorp/rtrmgr/op_commands.hh
++++ b/xorp/rtrmgr/op_commands.hh
+@@ -17,17 +17,11 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/rtrmgr/op_commands.hh,v 1.43 2008/10/02 21:58:24 bms Exp $
+-
+ #ifndef __RTRMGR_OP_COMMAND_HH__
+ #define __RTRMGR_OP_COMMAND_HH__
+ 
+ 
+-
+-
+-
+ #include "libxorp/asyncio.hh"
+-
+ #include "cli.hh"
+ #include "rtrmgr_error.hh"
+ 
+@@ -182,11 +176,11 @@ private:
+     bool		_default_nomore_mode; // True if "no-more" (i.e., unpaged) mode is default
+ };
+ 
+-class OpCommandList {
++class OpCommandList : public Invalid {
+ public:
+     OpCommandList(const TemplateTree* tt, SlaveModuleManager& mmgr);
+     OpCommandList(const string& config_template_dir, const TemplateTree* tt,
+-		  SlaveModuleManager& mmgr) throw (InitError);
++		  SlaveModuleManager& mmgr, string& err);
+     ~OpCommandList();
+ 
+     bool done() const;
+diff --git a/xorp/rtrmgr/op_commands.yy b/xorp/rtrmgr/op_commands.yy
+index 63cdfa1..d8be4e4 100644
+--- a/xorp/rtrmgr/op_commands.yy
++++ b/xorp/rtrmgr/op_commands.yy
+@@ -27,7 +27,7 @@ extern int opcmdlex();
+ extern FILE *opcmdin;
+ extern int opcmd_linenum;
+ 
+-void opcmderror(const char *s) throw (ParseError);
++void opcmderror(const char *s, string& errmsg);
+ void opcmd_warning(const char *s);
+ 
+ static OpCommandList *ocl = NULL;
+@@ -44,6 +44,8 @@ static string help_string;
+ static string opcmd_filename;
+ static string lastsymbol;
+ 
++static string op_errmsg;
++
+ /**
+  * Function declarations
+  */
+@@ -87,7 +89,7 @@ static void
+ set_nomore_mode(bool v);
+ 
+ void
+-opcmderror(const char *s) throw (ParseError);
++opcmderror(const char *s);
+ 
+ void
+ opcmd_warning(const char *s);
+@@ -95,8 +97,8 @@ opcmd_warning(const char *s);
+ int
+ init_opcmd_parser(const char *filename, OpCommandList *o);
+ 
+-void
+-parse_opcmd() throw (ParseError);
++bool
++parse_opcmd(string& errmsg);
+ 
+ %}
+ 
+@@ -545,16 +547,11 @@ set_nomore_mode(bool v)
+     op_command.set_default_nomore_mode(v);
+ }
+ 
+-void
+-opcmderror(const char *s) throw (ParseError)
++void opcmderror(const char *s)
+ {
+-    string errmsg;
+-
+-    errmsg = c_format("PARSE ERROR [Operational Command File: %s line %d]: %s",
++    op_errmsg += c_format("PARSE ERROR [Operational Command File: %s line %d]: %s",
+ 		      opcmd_filename.c_str(), opcmd_linenum, s);
+-    errmsg += c_format("; Last symbol parsed was \"%s\"", lastsymbol.c_str());
+-
+-    xorp_throw(ParseError, errmsg);
++    op_errmsg += c_format("; Last symbol parsed was \"%s\"", lastsymbol.c_str());
+ }
+ 
+ void
+@@ -581,9 +578,15 @@ init_opcmd_parser(const char *filename, OpCommandList *o)
+     return 0;
+ }
+ 
+-void
+-parse_opcmd() throw (ParseError)
++bool
++parse_opcmd(string& err)
+ {
+-    if (opcmdparse() != 0)
++    op_errmsg = "";
++    if (opcmdparse() != 0) {
++	err += "unknown error\n";
+ 	opcmderror("unknown error");
++	err += op_errmsg;
++	return false;
++    }
++    return true;
+ }
+diff --git a/xorp/rtrmgr/slave_conf_tree.cc b/xorp/rtrmgr/slave_conf_tree.cc
+index aaf1564..ab083e0 100644
+--- a/xorp/rtrmgr/slave_conf_tree.cc
++++ b/xorp/rtrmgr/slave_conf_tree.cc
+@@ -35,8 +35,6 @@
+ #include "util.hh"
+ 
+ 
+-extern int booterror(const char *s) throw (ParseError);
+-
+ /*************************************************************************
+  * Slave Config Tree class
+  *************************************************************************/
+@@ -57,7 +55,7 @@ SlaveConfigTree::SlaveConfigTree(const string& configuration,
+ 				 TemplateTree* tt,
+ 				 XorpClient& xclient,
+ 				 uint32_t clientid,
+-				 bool verbose) throw (InitError)
++				 bool verbose, string& errmsg)
+     : ConfigTree(tt, verbose),
+       _root_node(verbose),
+       _xclient(xclient),
+@@ -66,20 +64,17 @@ SlaveConfigTree::SlaveConfigTree(const string& configuration,
+ {
+     _current_node = &_root_node;
+ 
+-    string errmsg;
+-
+     if (parse(configuration, "", errmsg) != true) {
+-	xorp_throw(InitError, errmsg);
++	set_invalid(true);
++	return;
+     }
+ 
+     _root_node.mark_subtree_as_committed();
+ }
+ 
+-ConfigTree* SlaveConfigTree::create_tree(TemplateTree *tt, bool verbose)
++ConfigTree* SlaveConfigTree::create_tree(TemplateTree *tt, bool verbose, string& err)
+ {
+-    SlaveConfigTree *mct;
+-    mct = new SlaveConfigTree("", tt, _xclient, _clientid, verbose);
+-    return mct;
++    return new SlaveConfigTree("", tt, _xclient, _clientid, verbose, err);
+ }
+ 
+ ConfigTreeNode*
+diff --git a/xorp/rtrmgr/slave_conf_tree.hh b/xorp/rtrmgr/slave_conf_tree.hh
+index e0b932f..0637d6b 100644
+--- a/xorp/rtrmgr/slave_conf_tree.hh
++++ b/xorp/rtrmgr/slave_conf_tree.hh
+@@ -17,16 +17,11 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/rtrmgr/slave_conf_tree.hh,v 1.31 2008/10/02 21:58:24 bms Exp $
+ 
+ #ifndef __RTRMGR_SLAVE_CONF_FILE_HH__
+ #define __RTRMGR_SLAVE_CONF_FILE_HH__
+ 
+ 
+-
+-
+-
+-
+ #include "conf_tree.hh"
+ #include "slave_conf_tree_node.hh"
+ #include "slave_module_manager.hh"
+@@ -125,14 +120,14 @@ public:
+     SlaveConfigTree(XorpClient& xclient, bool verbose);
+     SlaveConfigTree(const string& configuration, TemplateTree *tt,
+ 		    XorpClient& xclient, uint32_t clientid, 
+-		    bool verbose) throw (InitError);
++		    bool verbose, string& err);
+     virtual ConfigTreeNode* create_node(const string& segment, 
+ 					const string& path,
+ 					const TemplateTreeNode* ttn, 
+ 					ConfigTreeNode* parent_node, 
+ 					const ConfigNodeId& node_id,
+ 					uid_t user_id, bool verbose);
+-    virtual ConfigTree* create_tree(TemplateTree *tt, bool verbose);
++    virtual ConfigTree* create_tree(TemplateTree *tt, bool verbose, string& err);
+ 
+ 
+     bool parse(const string& configuration, const string& config_file,
+diff --git a/xorp/rtrmgr/task.cc b/xorp/rtrmgr/task.cc
+index ec10afd..4a7a465 100644
+--- a/xorp/rtrmgr/task.cc
++++ b/xorp/rtrmgr/task.cc
+@@ -171,13 +171,13 @@ void
+ XrlStatusValidation::xrl_done(const XrlError& e, XrlArgs* xrl_args)
+ {
+     switch (e.error_code()) {
+-    case OKAY:
++    case OKAY: {
+ 	ProcessStatus status;
+ 	status = static_cast<ProcessStatus>(xrl_args->get_uint32("status"));
+ 	string reason(xrl_args->get_string("reason"));
+ 	handle_status_response(status, reason);
+ 	break;
+-
++    }
+     case BAD_ARGS:
+     case COMMAND_FAILED:
+     case NO_SUCH_METHOD:
+@@ -640,13 +640,13 @@ void
+ XrlStatusShutdownValidation::xrl_done(const XrlError& e, XrlArgs* xrl_args)
+ {
+     switch (e.error_code()) {
+-    case OKAY:
++    case OKAY: {
+ 	ProcessStatus status;
+ 	status = static_cast<ProcessStatus>(xrl_args->get_uint32("status"));
+ 	string reason(xrl_args->get_string("reason"));
+ 	handle_status_response(status, reason);
+ 	break;
+-
++    }
+     case BAD_ARGS:
+     case NO_SUCH_METHOD:
+     case COMMAND_FAILED:
+diff --git a/xorp/rtrmgr/template.yy b/xorp/rtrmgr/template.yy
+index b02b5bc..cdb01ab 100644
+--- a/xorp/rtrmgr/template.yy
++++ b/xorp/rtrmgr/template.yy
+@@ -10,10 +10,10 @@
+ 
+ #include "template_tree_node.hh"
+ #include "template_tree.hh"
+-extern void add_cmd_adaptor(char *cmd, TemplateTree* tt) throw (ParseError);
+-extern void add_cmd_action_adaptor(const string& cmd,
++extern bool add_cmd_adaptor(char *cmd, TemplateTree* tt, string& err);
++extern bool add_cmd_action_adaptor(const string& cmd,
+ 				   const list<string>& action,
+-				   TemplateTree* tt) throw (ParseError);
++				   TemplateTree* tt, string& err);
+ 
+ /* XXX: sigh, the -p flag to yacc should do this for us */
+ #define yystacksize tpltstacksize
+@@ -35,6 +35,7 @@ extern int tpltlex();
+ static TemplateTree* tt = NULL;
+ static string tplt_filename;
+ static string lastsymbol;
++static string tplt_errmsg;
+ static int tplt_type;
+ static char *tplt_initializer = NULL;
+ static string current_cmd;
+@@ -47,16 +48,14 @@ static list<string> cmd_list;
+ static void
+ extend_path(char *segment, bool is_tag);
+ 
+-static void
+-push_path();
++static bool push_path();
+ 
+-static void
++static bool
+ pop_path();
+ 
+-static void
+-terminal(char *segment);
++static bool terminal(char *segment);
+ 
+-static void
++static bool
+ add_cmd(char *cmd);
+ 
+ static void
+@@ -65,11 +64,12 @@ append_cmd(char *s);
+ static void
+ prepend_cmd(char *s);
+ 
+-static void
+-end_cmd();
++#define end_cmd() do { if (!_end_cmd()) { yyresult = -1; goto yyreturn; } } while (0)
++static bool
++_end_cmd();
+ 
+ void
+-tplterror(const char *s) throw (ParseError);
++tplterror(const char *s);
+ 
+ int
+ init_template_parser(const char *filename, TemplateTree *c);
+@@ -77,8 +77,7 @@ init_template_parser(const char *filename, TemplateTree *c);
+ void
+ complete_template_parser();
+ 
+-void
+-parse_template() throw (ParseError);
++bool parse_template(string& err);
+ 
+ %}
+ 
+@@ -140,8 +139,8 @@ input:		/* empty */
+ definition:	nodename nodegroup
+ 		;
+ 
+-nodename:	literals { push_path(); }
+-		| named_literal { push_path(); }
++nodename:	literals { if (!push_path()) { yyresult = -1; goto yyreturn;} }
++		| named_literal { if (!push_path()) { yyresult = -1; goto yyreturn;} }
+ 		;
+ 
+ named_literal:	LITERAL VARDEF {
+@@ -258,7 +257,7 @@ init_type:	TEXT_TYPE ASSIGN_DEFAULT STRING {
+ 		}
+ 		;
+ 
+-nodegroup:	UPLEVEL statements DOWNLEVEL { pop_path(); }
++nodegroup:	UPLEVEL statements DOWNLEVEL { if (!pop_path()) { yyresult = -1; goto yyreturn; } }
+ 		;
+ 
+ statements:	/* empty string */
+@@ -274,10 +273,10 @@ terminal:	default_terminal
+ 		| regular_terminal
+ 		;
+ 
+-regular_terminal:	LITERAL COLON type END { terminal($1); }
++regular_terminal:	LITERAL COLON type END { if (!terminal($1)) { yyresult = -1; goto yyreturn; } }
+ 		;
+ 
+-default_terminal:	LITERAL COLON init_type END { terminal($1); }
++default_terminal:	LITERAL COLON init_type END { if (!terminal($1)) { yyresult = -1; goto yyreturn; } }
+ 		;
+ 
+ command:	cmd_val
+@@ -290,7 +289,7 @@ cmd_val:	command_name COLON cmd_list END
+ cmd_default:	command_name COLON END { end_cmd(); }
+ 		;
+ 
+-command_name:	COMMAND { add_cmd($1); }
++command_name:	COMMAND { if (!add_cmd($1)) { yyresult = -1; goto yyreturn; } }
+ 		;
+ 
+ cmd_list:	cmd
+@@ -359,6 +358,8 @@ list_of_cmd_strings:
+ 
+ syntax_error:	SYNTAX_ERROR {
+ 			tplterror("syntax error");
++			yyresult = -1;
++			goto yyreturn;
+ 		}
+ 		;
+ 
+@@ -376,45 +377,52 @@ extend_path(char *segment, bool is_tag)
+     free(segment);
+ }
+ 
+-void
+-push_path()
++bool push_path()
+ {
+-    tt->push_path(tplt_type, tplt_initializer);
++    if (!tt->push_path(tplt_type, tplt_initializer, tplt_errmsg))
++	return false;
+     tplt_type = NODE_VOID;
+     if (tplt_initializer != NULL) {
+ 	free(tplt_initializer);
+ 	tplt_initializer = NULL;
+     }
++    return true;
+ }
+ 
+-void
++bool
+ pop_path()
+ {
+-    tt->pop_path();
++    bool rv = tt->pop_path(tplt_errmsg);
+     tplt_type = NODE_VOID;
+     if (tplt_initializer != NULL) {
+ 	free(tplt_initializer);
+ 	tplt_initializer = NULL;
+     }
++    return rv;
+ }
+ 
+-void
+-terminal(char *segment)
++bool terminal(char *segment)
+ {
+     extend_path(segment, false);
+-    push_path();
++    if (!push_path())
++        return false;
+     pop_path();
++    return true;
+ }
+ 
+-void
++bool
+ add_cmd(char *cmd)
+ {
+     lastsymbol = cmd;
+ 
+-    add_cmd_adaptor(cmd, tt);
++    if (!add_cmd_adaptor(cmd, tt, tplt_errmsg)) {
++        free(cmd);
++        return false;
++    }
+     current_cmd = cmd;
+     free(cmd);
+     cmd_list.clear();
++    return true;
+ }
+ 
+ void
+@@ -435,23 +443,24 @@ prepend_cmd(char *s)
+     free(s);
+ }
+ 
+-void
+-end_cmd()
++bool
++_end_cmd()
+ {
+-    add_cmd_action_adaptor(current_cmd, cmd_list, tt);
++    if (!add_cmd_action_adaptor(current_cmd, cmd_list, tt, tplt_errmsg))
++        return false;
+     cmd_list.clear();
++    return true;
+ }
+ 
+ void
+-tplterror(const char *s) throw (ParseError)
++tplterror(const char *s)
+ {
+     string errmsg;
+ 
+-    errmsg = c_format("PARSE ERROR [Template File: %s line %d]: %s",
+-		      tplt_filename.c_str(), tplt_linenum, s);
++    errmsg += c_format("PARSE ERROR [Template File: %s line %d]: %s",
++			      tplt_filename.c_str(), tplt_linenum, s);
+     errmsg += c_format("; Last symbol parsed was \"%s\"", lastsymbol.c_str());
+-
+-    xorp_throw(ParseError, errmsg);
++    tplt_errmsg += errmsg;
+ }
+ 
+ int
+@@ -477,9 +486,13 @@ complete_template_parser()
+         fclose(tpltin);
+ }
+ 
+-void
+-parse_template() throw (ParseError)
++bool parse_template(string& err)
+ {
+-    if (tpltparse() != 0)
++    if (tpltparse() != 0) {
++	tplt_errmsg = "";
+ 	tplterror("unknown error");
++	err += tplt_errmsg;
++        return false;
++    }
++    return true;
+ }
+diff --git a/xorp/rtrmgr/template_base_command.cc b/xorp/rtrmgr/template_base_command.cc
+index 62de9b6..3da800c 100644
+--- a/xorp/rtrmgr/template_base_command.cc
++++ b/xorp/rtrmgr/template_base_command.cc
+@@ -126,10 +126,9 @@ AllowOptionsCommand::check_referred_variables(string& error_msg) const
+     return (true);
+ }
+ 
+-void
+-AllowOptionsCommand::add_action(const list<string>& action) throw (ParseError)
++bool
++AllowOptionsCommand::add_action(const list<string>& action, string& err)
+ {
+-    string error_msg;
+     string new_varname, new_value, new_help_keyword, new_help_str;
+     size_t expected_parameters_n = 4;
+     list<string> unparsed_action = action;
+@@ -138,11 +137,11 @@ AllowOptionsCommand::add_action(const list<string>& action) throw (ParseError)
+     // Check the number of parameters
+     //
+     if (action.size() != expected_parameters_n) {
+-	error_msg = c_format("%%allow command with invalid number of "
+-			     "parameters: %u (expected %u)",
+-			     XORP_UINT_CAST(action.size()),
+-			     XORP_UINT_CAST(expected_parameters_n));
+-	xorp_throw(ParseError, error_msg);
++	err += c_format("%%allow command with invalid number of "
++			"parameters: %u (expected %u)\n",
++			XORP_UINT_CAST(action.size()),
++			XORP_UINT_CAST(expected_parameters_n));
++	return false;
+     }
+ 
+     //
+@@ -161,10 +160,10 @@ AllowOptionsCommand::add_action(const list<string>& action) throw (ParseError)
+     // Verify all parameters
+     //
+     if (new_help_keyword != "%help") {
+-	error_msg = c_format("Invalid %%allow argument: %s "
+-			     "(expected \"%%help:\")",
+-			     new_help_keyword.c_str());
+-	xorp_throw(ParseError, error_msg);
++	err += c_format("Invalid %%allow argument: %s "
++			"(expected \"%%help:\")",
++			new_help_keyword.c_str());
++	return false;
+     }
+ 
+     //
+@@ -183,6 +182,7 @@ AllowOptionsCommand::add_action(const list<string>& action) throw (ParseError)
+ 
+     // XXX: insert the new pair even if we overwrite an existing one
+     filter.insert(make_pair(new_value, new_help_str));
++    return true;
+ }
+ 
+ bool
+@@ -292,22 +292,20 @@ AllowOperatorsCommand::check_referred_variables(string& error_msg) const
+     return (true);	// XXX: nothing to do
+ }
+ 
+-void
+-AllowOperatorsCommand::add_action(const list<string>& action)
+-    throw (ParseError)
++bool
++AllowOperatorsCommand::add_action(const list<string>& action, string& err)
+ {
+-    string error_msg;
+     size_t min_expected_parameters_n = 1;
+ 
+     //
+     // Check the number of parameters
+     //
+     if (action.size() < min_expected_parameters_n) {
+-	error_msg = c_format("%%allow-operator command with invalid number of "
+-			     "parameters: %u (expected at least %u)",
+-			     XORP_UINT_CAST(action.size()),
+-			     XORP_UINT_CAST(min_expected_parameters_n));
+-	xorp_throw(ParseError, error_msg);
++	err += c_format("%%allow-operator command with invalid number of "
++			"parameters: %u (expected at least %u)\n",
++			XORP_UINT_CAST(action.size()),
++			XORP_UINT_CAST(min_expected_parameters_n));
++	return false;
+     }
+ 
+     //
+@@ -317,18 +315,19 @@ AllowOperatorsCommand::add_action(const list<string>& action)
+     for (iter = action.begin(); iter != action.end(); ++iter) {
+ 	ConfigOperator op;
+ 	string op_str = unquote(*iter);
+-	try {
+-	    op = lookup_operator(op_str);
+-	} catch (const ParseError& e) {
+-	    error_msg = c_format("%%allow-operator command with invalid "
+-				 "operator: %s", op_str.c_str());
+-	    xorp_throw(ParseError, error_msg);
++
++	op = lookup_operator(op_str, err);
++	if (op == OP_INVALID) {
++	    err += c_format("%%allow-operator command with invalid "
++			    "operator: %s\n", op_str.c_str());
++	    return false;
+ 	}
+ 	if (find(_allowed_operators.begin(), _allowed_operators.end(), op)
+ 	    == _allowed_operators.end()) {
+ 	    _allowed_operators.push_back(op);
+ 	}
+     }
++    return true;
+ }
+ 
+ bool
+@@ -353,10 +352,8 @@ AllowOperatorsCommand::verify_variable_by_value(const ConfigTreeNode& ctn,
+     ConfigOperator op;
+     string op_str = unquote(value);
+ 
+-    try {
+-	op = lookup_operator(op_str);
+-    } catch (const ParseError& e) {
+-	error_msg = c_format("Invalid operator: %s", op_str.c_str());
++    op = lookup_operator(op_str, error_msg);
++    if (op == OP_INVALID) {
+ 	return (false);
+     }
+ 
+@@ -491,10 +488,9 @@ AllowRangeCommand::check_referred_variables(string& error_msg) const
+     return (true);
+ }
+ 
+-void
+-AllowRangeCommand::add_action(const list<string>& action) throw (ParseError)
++bool
++AllowRangeCommand::add_action(const list<string>& action, string& err)
+ {
+-    string error_msg;
+     string new_varname, new_lower_str, new_upper_str;
+     string new_help_keyword, new_help_str;
+     size_t expected_parameters_n = 5;
+@@ -505,11 +501,11 @@ AllowRangeCommand::add_action(const list<string>& action) throw (ParseError)
+     // Check the number of parameters
+     //
+     if (action.size() != expected_parameters_n) {
+-	error_msg = c_format("%%allow-range command with invalid number of "
+-			     "parameters: %u (expected %u)",
+-			     XORP_UINT_CAST(action.size()),
+-			     XORP_UINT_CAST(expected_parameters_n));
+-	xorp_throw(ParseError, error_msg);
++	err += c_format("%%allow-range command with invalid number of "
++			"parameters: %u (expected %u)\n",
++			XORP_UINT_CAST(action.size()),
++			XORP_UINT_CAST(expected_parameters_n));
++	return false;
+     }
+ 
+     //
+@@ -530,10 +526,10 @@ AllowRangeCommand::add_action(const list<string>& action) throw (ParseError)
+     // Verify all parameters
+     //
+     if (new_help_keyword != "%help") {
+-	error_msg = c_format("Invalid %%allow-range argument: %s "
+-			     "(expected \"%%help:\")",
+-			     new_help_keyword.c_str());
+-	xorp_throw(ParseError, error_msg);
++	err += c_format("Invalid %%allow-range argument: %s "
++			"(expected \"%%help:\")\n",
++			new_help_keyword.c_str());
++	return false;
+     }
+ 
+     //
+@@ -559,6 +555,7 @@ AllowRangeCommand::add_action(const list<string>& action) throw (ParseError)
+ 
+     // XXX: insert the new pair even if we overwrite an existing one
+     filter.insert(make_pair(new_range, new_help_str));
++    return true;
+ }
+ 
+ bool
+diff --git a/xorp/rtrmgr/template_base_command.hh b/xorp/rtrmgr/template_base_command.hh
+index afffc62..3a8d21e 100644
+--- a/xorp/rtrmgr/template_base_command.hh
++++ b/xorp/rtrmgr/template_base_command.hh
+@@ -17,16 +17,11 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/rtrmgr/template_base_command.hh,v 1.13 2008/10/02 21:58:25 bms Exp $
+ 
+ #ifndef __RTRMGR_TEMPLATE_BASE_COMMAND_HH__
+ #define __RTRMGR_TEMPLATE_BASE_COMMAND_HH__
+ 
+ 
+-
+-
+-
+-
+ #include "libxorp/callback.hh"
+ #include "rtrmgr_error.hh"
+ #include "config_operators.hh"
+@@ -76,7 +71,7 @@ class AllowCommand : public BaseCommand {
+ public:
+     AllowCommand(TemplateTreeNode& template_tree_node, const string& cmd_name);
+ 
+-    virtual void add_action(const list<string>& action) throw (ParseError) = 0;
++    virtual bool add_action(const list<string>& action, string& err) = 0;
+     virtual bool verify_variables(const ConfigTreeNode& ctn,
+ 				  string& error_msg) const = 0;
+ 
+@@ -90,7 +85,7 @@ public:
+ 
+     virtual bool expand_actions(string& error_msg);
+     virtual bool check_referred_variables(string& error_msg) const;
+-    virtual void add_action(const list<string>& action) throw (ParseError);
++    virtual bool add_action(const list<string>& action, string& err);
+     virtual bool verify_variables(const ConfigTreeNode& 	ctn,
+ 				  string& error_msg) const;
+ 
+@@ -108,7 +103,7 @@ public:
+ 
+     virtual bool expand_actions(string& error_msg);
+     virtual bool check_referred_variables(string& error_msg) const;
+-    virtual void add_action(const list<string>& action) throw (ParseError);
++    virtual bool add_action(const list<string>& action, string& err_msg);
+     virtual bool verify_variables(const ConfigTreeNode& 	ctn,
+ 				  string& error_msg) const;
+     virtual bool verify_variable_by_value(const ConfigTreeNode& ctn,
+@@ -130,7 +125,7 @@ public:
+ 
+     virtual bool expand_actions(string& error_msg);
+     virtual bool check_referred_variables(string& error_msg) const;
+-    virtual void add_action(const list<string>& action) throw (ParseError);
++    virtual bool add_action(const list<string>& action, string& err_msg);
+     virtual bool verify_variables(const ConfigTreeNode& ctn,
+ 				  string& error_msg) const;
+ 
+diff --git a/xorp/rtrmgr/template_commands.cc b/xorp/rtrmgr/template_commands.cc
+index 337018c..e57db9f 100644
+--- a/xorp/rtrmgr/template_commands.cc
++++ b/xorp/rtrmgr/template_commands.cc
+@@ -164,8 +164,7 @@ Action::check_referred_variables(string& error_msg) const
+ /***********************************************************************/
+ 
+ XrlAction::XrlAction(TemplateTreeNode& template_tree_node,
+-		     const list<string>& action, const XRLdb* xrldb)
+-    throw (ParseError)
++		     const list<string>& action, const XRLdb* xrldb, string& err)
+     : Action(template_tree_node, action),
+       _xrldb(0)
+ {
+@@ -194,8 +193,11 @@ XrlAction::XrlAction(TemplateTreeNode& template_tree_node,
+ 
+     // Trim off the "xrl" command part
+     xrl_parts.pop_front();
+-    if (xrl_parts.empty())
+-	xorp_throw(ParseError, "bad XrlAction syntax");
++    if (xrl_parts.empty()) {
++	set_invalid(true);
++	err += "bad XrlAction syntax";
++	return;
++    }
+ 
+     bool request_done = false;
+     size_t seg_count = 0;
+@@ -221,8 +223,11 @@ XrlAction::XrlAction(TemplateTreeNode& template_tree_node,
+ 	if (start != string::npos) {
+ 	    debug_msg("found return spec\n");
+ 	    string::size_type orig_start = orig_segment.find("->");
+-	    if (request_done)
+-		xorp_throw(ParseError, "Two responses in one XRL");
++	    if (request_done) {
++		set_invalid(true);
++		err += "Two responses in one XRL";
++		return;
++	    }
+ 	    request_done = true;
+ 	    _request += segment.substr(0, start);
+ 	    if (orig_start != 0)
+@@ -820,7 +825,7 @@ XrlAction::affected_module() const
+ /***********************************************************************/
+ 
+ ProgramAction::ProgramAction(TemplateTreeNode& template_tree_node,
+-			     const list<string>& action) throw (ParseError)
++			     const list<string>& action, string& err)
+     : Action(template_tree_node, action)
+ {
+     list<string> program_parts = _split_cmd;
+@@ -841,8 +846,11 @@ ProgramAction::ProgramAction(TemplateTreeNode& template_tree_node,
+ 
+     // Trim off the "program" command part
+     program_parts.pop_front();
+-    if (program_parts.empty())
+-	xorp_throw(ParseError, "bad ProgramAction syntax");
++    if (program_parts.empty()) {
++	set_invalid(true);
++	err += "bad ProgramAction syntax\n";
++	return;
++    }
+ 
+     bool request_done = false;
+     size_t seg_count = 0;
+@@ -868,8 +876,11 @@ ProgramAction::ProgramAction(TemplateTreeNode& template_tree_node,
+ 	if (start != string::npos) {
+ 	    debug_msg("found return spec\n");
+ 	    string::size_type orig_start = orig_segment.find("->");
+-	    if (request_done)
+-		xorp_throw(ParseError, "Two responses in one program");
++	    if (request_done) {
++		set_invalid(true);
++		err += "Two responses in one program\n";
++		return;
++	    }
+ 	    request_done = true;
+ 	    _request += segment.substr(0, start);
+ 	    if (orig_start != 0)
+@@ -905,11 +916,18 @@ ProgramAction::ProgramAction(TemplateTreeNode& template_tree_node,
+ 	part1 = strip_empty_spaces(part1);
+ 	part2 = strip_empty_spaces(part2);
+ 	if (part2.find("&") != string::npos) {
+-	    xorp_throw(ParseError,
+-		       "Too many components in the program response");
++	    set_invalid(true);
++	    err += "Too many components in the program response";
++	    return;
++	}
++	if (!parse_program_response(part1, err)) {
++	    set_invalid(true);
++	    return;
++	}
++	if (!parse_program_response(part2, err)) {
++	    set_invalid(true);
++	    return;
+ 	}
+-	parse_program_response(part1);
+-	parse_program_response(part2);
+     }
+ 
+     // Print debug output
+@@ -954,18 +972,18 @@ ProgramAction::expand_action(string& error_msg)
+     return true;
+ }
+ 
+-void
+-ProgramAction::parse_program_response(const string& part) throw (ParseError)
++bool
++ProgramAction::parse_program_response(const string& part, string& err)
+ {
+     string::size_type pos;
+ 
+     if (part.empty())
+-	return;
++	return true;
+ 
+     pos = part.find("=");
+     if (pos == string::npos) {
+-	xorp_throw(ParseError,
+-		   "Missing '=' in program response specification");
++	err += "Missing '=' in program response specification\n";
++	return false;
+     }
+ 
+     string l, r;
+@@ -973,27 +991,28 @@ ProgramAction::parse_program_response(const string& part) throw (ParseError)
+     r = part.substr(pos + 1);
+ 
+     if ((l != "stdout") && (l != "stderr")) {
+-	string error_msg = c_format("Unrecognized keyword in program "
+-				    "response specification: %s", l.c_str());
+-	xorp_throw(ParseError, error_msg);
++	err += c_format("Unrecognized keyword in program "
++			"response specification: %s\n", l.c_str());
++	return false;
+     }
+ 
+     if (l == "stdout") {
+ 	if (! _stdout_variable_name.empty()) {
+-	    xorp_throw(ParseError,
+-		       "Repeated \"stdout\" keyword in program response "
+-		       "specification");
++	    err += "Repeated \"stdout\" keyword in program response "
++		"specification\n";
++	    return false;
+ 	}
+ 	_stdout_variable_name = r;
+     }
+     if (l == "stderr") {
+ 	if (! _stderr_variable_name.empty()) {
+-	    xorp_throw(ParseError,
+-		       "Repeated \"stderr\" keyword in program response "
+-		       "specification");
++	    err += "Repeated \"stderr\" keyword in program response "
++		"specification\n";
++	    return false;
+ 	}
+ 	_stderr_variable_name = r;
+     }
++    return true;
+ }
+ 
+ bool
+@@ -1279,33 +1298,41 @@ Command::~Command()
+     }
+ }
+ 
+-void
+-Command::add_action(const list<string>& action, const XRLdb* xrldb)
+-    throw (ParseError)
++bool
++Command::add_action(const list<string>& action, const XRLdb* xrldb, string& error_msg)
+ {
+     string action_type;
+-    string error_msg;
+ 
+     if (action.empty())
+-	return;		// XXX: no action to perform
++	return true;		// XXX: no action to perform
+ 
+     action_type = action.front();
+ 
+     if (action_type == "xrl") {
+-	_actions.push_back(new XrlAction(_template_tree_node, action, xrldb));
+-	return;
++	XrlAction* a = new XrlAction(_template_tree_node, action, xrldb, error_msg);
++	if (a->invalid()) {
++	    delete a;
++	    return false;
++	}
++	_actions.push_back(a);
++	return true;
+     }
+ 
+     if (action_type == "program") {
+-	_actions.push_back(new ProgramAction(_template_tree_node, action));
+-	return;
++	ProgramAction* a = new ProgramAction(_template_tree_node, action, error_msg);
++	if (a->invalid()) {
++	    delete a;
++	    return false;
++	}
++	_actions.push_back(a);
++	return true;
+     }
+ 
+     // Unknown action
+-    error_msg = c_format("Unknown action \"%s\". Expected actions: "
+-			 "\"%s\", \"%s\".",
+-			 action_type.c_str(), "xrl", "program");
+-    xorp_throw(ParseError, error_msg);
++    error_msg += c_format("Unknown action \"%s\". Expected actions: "
++			  "\"%s\", \"%s\".\n",
++			  action_type.c_str(), "xrl", "program");
++    return false;
+ }
+ 
+ int
+diff --git a/xorp/rtrmgr/template_commands.hh b/xorp/rtrmgr/template_commands.hh
+index e8f49aa..e54b164 100644
+--- a/xorp/rtrmgr/template_commands.hh
++++ b/xorp/rtrmgr/template_commands.hh
+@@ -17,19 +17,14 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/rtrmgr/template_commands.hh,v 1.39 2008/10/02 21:58:25 bms Exp $
+ 
+ #ifndef __RTRMGR_TEMPLATE_COMMANDS_HH__
+ #define __RTRMGR_TEMPLATE_COMMANDS_HH__
+ 
+ 
+ 
+-
+-
+-
+ #include "libxorp/callback.hh"
+ #include "libxorp/run_command.hh"
+-
+ #include "template_base_command.hh"
+ #include "master_conf_tree_node.hh"
+ #include "rtrmgr_error.hh"
+@@ -38,7 +33,7 @@
+ class XorpClient;
+ class XRLdb;
+ 
+-class Action {
++class Action : public Invalid {
+ public:
+     Action(TemplateTreeNode& template_tree_node, const list<string>& action);
+     virtual ~Action() {};
+@@ -61,7 +56,7 @@ protected:
+ class XrlAction : public Action {
+ public:
+     XrlAction(TemplateTreeNode& template_tree_node, const list<string>& action,
+-	      const XRLdb* xrldb) throw (ParseError);
++	      const XRLdb* xrldb, string& err);
+ 
+     virtual bool expand_action(string& error_msg);
+     int execute(const MasterConfigTreeNode& ctn, TaskManager& task_manager,
+@@ -98,7 +93,7 @@ private:
+ class ProgramAction : public Action {
+ public:
+     ProgramAction(TemplateTreeNode& template_tree_node,
+-		  const list<string>& action) throw (ParseError);
++		  const list<string>& action, string& err);
+ 
+     virtual bool expand_action(string& error_msg);
+     int execute(const MasterConfigTreeNode&	ctn,
+@@ -115,7 +110,7 @@ public:
+ 
+ private:
+     bool check_program_is_valid(const list<string>& action, string& error_msg);
+-    void parse_program_response(const string& part) throw (ParseError);
++    bool parse_program_response(const string& part, string& err);
+ 
+     string		_module_name;
+     list<string>	_split_request;
+@@ -131,8 +126,7 @@ public:
+     Command(TemplateTreeNode& template_tree_node, const string& cmd_name);
+     virtual ~Command();
+ 
+-    void add_action(const list<string>& action, const XRLdb* xrldb)
+-	throw (ParseError);
++    bool add_action(const list<string>& action, const XRLdb* xrldb, string& err);
+     int execute(MasterConfigTreeNode& ctn, TaskManager& task_manager) const;
+     void xrl_action_complete(const XrlError& err,
+ 			     XrlArgs* xrl_args,
+diff --git a/xorp/rtrmgr/template_tree.cc b/xorp/rtrmgr/template_tree.cc
+index b7cbfb4..9da666d 100644
+--- a/xorp/rtrmgr/template_tree.cc
++++ b/xorp/rtrmgr/template_tree.cc
+@@ -57,10 +57,10 @@
+ 
+ extern int init_template_parser(const char* filename, TemplateTree* c);
+ extern void complete_template_parser();
+-extern void parse_template() throw (ParseError);
++extern bool parse_template(string& err);
+ 
+ TemplateTree::TemplateTree(const string& xorp_root_dir,
+-			   bool verbose) throw (InitError)
++			   bool verbose)
+ 	: _root_node(NULL),
+ 	  _current_node(NULL),
+ 	  _xorp_root_dir(xorp_root_dir),
+@@ -144,11 +144,8 @@ TemplateTree::parse_file(const string& filename,
+ 			     config_template_dir.c_str());
+ 	return false;
+     }
+-    try {
+-	parse_template();
+-    } catch (const ParseError& pe) {
++    if (!parse_template(error_msg)) {
+ 	complete_template_parser();
+-	error_msg = pe.why();
+ 	return false;
+     }
+     if (_path_segments.size() != 0) {
+@@ -187,11 +184,12 @@ TemplateTree::extend_path(const string& segment, bool is_tag)
+     _path_segments.push_back(PathSegment(segment, is_tag));
+ }
+ 
+-void
+-TemplateTree::pop_path() throw (ParseError)
++bool
++TemplateTree::pop_path(string& err)
+ {
+     if (_segment_lengths.empty()) {
+-	xorp_throw(ParseError, "Mismatched braces");
++	err += "Mismatched braces\n";
++	return false;
+     }
+ 
+     size_t segments_to_pop = _segment_lengths.front();
+@@ -200,6 +198,7 @@ TemplateTree::pop_path() throw (ParseError)
+     for (size_t i = 0; i < segments_to_pop; i++) {
+ 	_current_node = _current_node->parent();
+     }
++    return true;
+ }
+ 
+ string
+@@ -222,7 +221,7 @@ TemplateTree::path_as_string()
+ TemplateTreeNode*
+ TemplateTree::new_node(TemplateTreeNode* parent,
+ 		       const string& path, const string& varname,
+-		       int type, const string& initializer)
++		       int type, const string& initializer, string& err)
+ {
+     TemplateTreeNode* ttn;
+ 
+@@ -231,61 +230,61 @@ TemplateTree::new_node(TemplateTreeNode* parent,
+ 	ttn = new TemplateTreeNode(*this, parent, path, varname);
+ 	break;
+     case NODE_TEXT:
+-	ttn = new TextTemplate(*this, parent, path, varname, initializer);
++	ttn = new TextTemplate(*this, parent, path, varname, initializer, err);
+ 	break;
+     case NODE_UINT:
+-	ttn = new UIntTemplate(*this, parent, path, varname, initializer);
++	ttn = new UIntTemplate(*this, parent, path, varname, initializer, err);
+ 	break;
+     case NODE_UINTRANGE:
+-	ttn = new UIntRangeTemplate(*this, parent, path, varname, initializer);
++	ttn = new UIntRangeTemplate(*this, parent, path, varname, initializer, err);
+ 	break;
+     case NODE_ULONG:
+-    ttn = new ULongTemplate(*this, parent, path, varname, initializer);
+-    break;
++	ttn = new ULongTemplate(*this, parent, path, varname, initializer, err);
++	break;
+     case NODE_ULONGRANGE:
+-    ttn = new ULongRangeTemplate(*this, parent, path, varname, initializer);
+-    break;
++	ttn = new ULongRangeTemplate(*this, parent, path, varname, initializer, err);
++	break;
+     case NODE_INT:
+-	ttn = new IntTemplate(*this, parent, path, varname, initializer);
++	ttn = new IntTemplate(*this, parent, path, varname, initializer, err);
+ 	break;
+     case NODE_BOOL:
+-	ttn = new BoolTemplate(*this, parent, path, varname, initializer);
++	ttn = new BoolTemplate(*this, parent, path, varname, initializer, err);
+ 	break;
+     case NODE_IPV4:
+-	ttn = new IPv4Template(*this, parent, path, varname, initializer);
++	ttn = new IPv4Template(*this, parent, path, varname, initializer, err);
+ 	break;
+     case NODE_IPV4NET:
+-	ttn = new IPv4NetTemplate(*this, parent, path, varname, initializer);
++	ttn = new IPv4NetTemplate(*this, parent, path, varname, initializer, err);
+ 	break;
+     case NODE_IPV4RANGE:
+-	ttn = new IPv4RangeTemplate(*this, parent, path, varname, initializer);
++	ttn = new IPv4RangeTemplate(*this, parent, path, varname, initializer, err);
+ 	break;
+     case NODE_IPV6:
+-	ttn = new IPv6Template(*this, parent, path, varname, initializer);
++	ttn = new IPv6Template(*this, parent, path, varname, initializer, err);
+ 	break;
+     case NODE_IPV6NET:
+-	ttn = new IPv6NetTemplate(*this, parent, path, varname, initializer);
++	ttn = new IPv6NetTemplate(*this, parent, path, varname, initializer, err);
+ 	break;
+     case NODE_IPV6RANGE:
+-	ttn = new IPv6RangeTemplate(*this, parent, path, varname, initializer);
++	ttn = new IPv6RangeTemplate(*this, parent, path, varname, initializer, err);
+ 	break;
+     case NODE_MACADDR:
+-	ttn = new MacaddrTemplate(*this, parent, path, varname, initializer);
++	ttn = new MacaddrTemplate(*this, parent, path, varname, initializer, err);
+ 	break;
+     case NODE_URL_FILE:
+-	ttn = new UrlFileTemplate(*this, parent, path, varname, initializer);
++	ttn = new UrlFileTemplate(*this, parent, path, varname, initializer, err);
+ 	break;
+     case NODE_URL_FTP:
+-	ttn = new UrlFtpTemplate(*this, parent, path, varname, initializer);
++	ttn = new UrlFtpTemplate(*this, parent, path, varname, initializer, err);
+ 	break;
+     case NODE_URL_HTTP:
+-	ttn = new UrlHttpTemplate(*this, parent, path, varname, initializer);
++	ttn = new UrlHttpTemplate(*this, parent, path, varname, initializer, err);
+ 	break;
+     case NODE_URL_TFTP:
+-	ttn = new UrlTftpTemplate(*this, parent, path, varname, initializer);
++	ttn = new UrlTftpTemplate(*this, parent, path, varname, initializer, err);
+ 	break;
+     case NODE_ARITH:
+-	ttn = new ArithTemplate(*this, parent, path, varname, initializer);
++	ttn = new ArithTemplate(*this, parent, path, varname, initializer, err);
+ 	break;
+     default:
+ 	XLOG_UNREACHABLE();
+@@ -293,8 +292,8 @@ TemplateTree::new_node(TemplateTreeNode* parent,
+     return ttn;
+ }
+ 
+-void
+-TemplateTree::push_path(int type, char* cinit)
++bool
++TemplateTree::push_path(int type, char* cinit, string& err)
+ {
+     list<PathSegment>::const_iterator iter;
+     iter = _path_segments.begin();
+@@ -303,21 +302,26 @@ TemplateTree::push_path(int type, char* cinit)
+     if (len > 0) {
+ 	for (size_t i = 0; i < len - 1; i++) {
+ 	    // Add all except the last segment
+-	    add_untyped_node(iter->segname(), iter->is_tag());
++	    if (!add_untyped_node(iter->segname(), iter->is_tag(), err)) {
++		return false;
++	    }
+ 	    ++iter;
+ 	}
+     }
+-    add_node(iter->segname(), type, cinit);
++
++    if (!add_node(iter->segname(), type, cinit, err))
++	return false;
+ 
+     _segment_lengths.push_front(len);
+ 
+     while (_path_segments.size() > 0)
+ 	_path_segments.pop_front();
++
++    return true;
+ }
+ 
+-void
+-TemplateTree::add_untyped_node(const string& segment, bool is_tag)
+-    throw (ParseError)
++bool
++TemplateTree::add_untyped_node(const string& segment, bool is_tag, string& err)
+ {
+     TemplateTreeNode* found = NULL;
+ 
+@@ -335,8 +339,8 @@ TemplateTree::add_untyped_node(const string& segment, bool is_tag)
+ 		// correct way to step past such a node would be
+ 		// through a call to add_node .
+ 		//
+-		string err = "Need to qualify type of " + segment + "\n";
+-		xorp_throw(ParseError, err);
++		err += "Need to qualify type of " + segment + "\n";
++		return false;
+ 	    }
+ 	    found = *iter;
+ 	}
+@@ -350,10 +354,11 @@ TemplateTree::add_untyped_node(const string& segment, bool is_tag)
+ 	    found->set_tag();
+ 	_current_node = found;
+     }
++    return true;
+ }
+ 
+-void
+-TemplateTree::add_node(const string& segment, int type, char* cinit)
++bool
++TemplateTree::add_node(const string& segment, int type, char* cinit, string& err)
+ {
+     string varname = _path_segments.back().segname();
+ 
+@@ -398,9 +403,14 @@ TemplateTree::add_node(const string& segment, int type, char* cinit)
+     if (found != NULL) {
+ 	_current_node = found;
+     } else {
+-	found = new_node(_current_node, segment, varname, type, initializer);
++	found = new_node(_current_node, segment, varname, type, initializer, err);
++	if (found->invalid()) {
++	    delete found;
++	    return false;
++	}
+ 	_current_node = found;
+     }
++    return true;
+ }
+ 
+ const TemplateTreeNode*
+@@ -559,17 +569,16 @@ TemplateTree::find_node_by_type(const list<ConfPathSegment>& path_segments)
+     return ttn;
+ }
+ 
+-void
+-TemplateTree::add_cmd(char* cmd) throw (ParseError)
++bool
++TemplateTree::add_cmd(char* cmd, string& err)
+ {
+-    _current_node->add_cmd(string(cmd));
++    return _current_node->add_cmd(string(cmd), err);
+ }
+ 
+-void
+-TemplateTree::add_cmd_action(const string& cmd, const list<string>& action)
+-    throw (ParseError)
++bool
++TemplateTree::add_cmd_action(const string& cmd, const list<string>& action, string& err)
+ {
+-    _current_node->add_action(cmd, action);
++    return _current_node->add_action(cmd, action, err);
+ }
+ 
+ void
+diff --git a/xorp/rtrmgr/template_tree.hh b/xorp/rtrmgr/template_tree.hh
+index 5f6f2a6..fec1de8 100644
+--- a/xorp/rtrmgr/template_tree.hh
++++ b/xorp/rtrmgr/template_tree.hh
+@@ -17,16 +17,11 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/rtrmgr/template_tree.hh,v 1.27 2008/10/02 21:58:25 bms Exp $
+ 
+ #ifndef __RTRMGR_TEMPLATE_TREE_HH__
+ #define __RTRMGR_TEMPLATE_TREE_HH__
+ 
+ 
+-
+-
+-
+-
+ #include "path_segment.hh"
+ #include "rtrmgr_error.hh"
+ #include "xorp_client.hh"
+@@ -36,10 +31,10 @@ class ModuleCommand;
+ class TemplateTreeNode;
+ class ConfPathSegment;
+ 
+-class TemplateTree {
++class TemplateTree : public Invalid {
+ public:
+     TemplateTree(const string& xorp_root_dir,
+-		 bool verbose)  throw (InitError);
++		 bool verbose);
+     virtual ~TemplateTree();
+     
+     bool load_template_tree(const string& config_template_dir,
+@@ -48,17 +43,16 @@ public:
+ 		    const string& config_template_dir, string& error_msg);
+     
+     void extend_path(const string& segment, bool is_tag);
+-    void pop_path() throw (ParseError);
+-    void push_path(int type, char* initializer);
+-    void add_untyped_node(const string& segment, bool is_tag) throw (ParseError);
+-    void add_node(const string& segment, int type, char* initializer);
++    bool pop_path(string& err);
++    bool push_path(int type, char* initializer, string& err);
++    bool add_untyped_node(const string& segment, bool is_tag, string& err);
++    bool add_node(const string& segment, int type, char* initializer, string& err);
+     const TemplateTreeNode* find_node(const list<string>& path_segments) const;
+     const TemplateTreeNode* 
+         find_node_by_type(const list<ConfPathSegment>& path_segments) const;
+     string path_as_string();
+-    void add_cmd(char* cmd) throw (ParseError);
+-    void add_cmd_action(const string& cmd, const list<string>& action)
+-	throw (ParseError);
++    bool add_cmd(char* cmd, string& err);
++    bool add_cmd_action(const string& cmd, const list<string>& action, string& err);
+     string tree_str() const;
+     void register_module(const string& name, ModuleCommand* mc);
+     ModuleCommand* find_module(const string& name);
+@@ -72,7 +66,7 @@ protected:
+ 			       const string& path,
+ 			       const string& varname,
+ 			       int type,
+-			       const string& initializer);
++			       const string& initializer, string& err);
+ 
+     bool expand_template_tree(string& error_msg);
+     bool check_template_tree(string& error_msg);
+diff --git a/xorp/rtrmgr/template_tree_node.cc b/xorp/rtrmgr/template_tree_node.cc
+index f495961..0c04f40 100644
+--- a/xorp/rtrmgr/template_tree_node.cc
++++ b/xorp/rtrmgr/template_tree_node.cc
+@@ -20,7 +20,6 @@
+ 
+ 
+ #include "rtrmgr_module.h"
+-
+ #include "libxorp/xorp.h"
+ #include "libxorp/xlog.h"
+ #include "libxorp/debug.h"
+@@ -376,10 +375,9 @@ TemplateTreeNode::add_child(TemplateTreeNode* child)
+     _children.push_back(child);
+ }
+ 
+-void
+-TemplateTreeNode::add_cmd(const string& cmd) throw (ParseError)
++bool
++TemplateTreeNode::add_cmd(const string& cmd, string& error_msg)
+ {
+-    string error_msg;
+     BaseCommand* command;
+ 
+     if (cmd == "%modinfo") {
+@@ -416,10 +414,10 @@ TemplateTreeNode::add_cmd(const string& cmd) throw (ParseError)
+     } else if (cmd == "%read-only") {
+ 	// XXX: only leaf nodes should have %read-only command
+ 	if (! is_leaf_value()) {
+-	    error_msg = c_format("Invalid command \"%s\".\n", cmd.c_str());
++	    error_msg += c_format("Invalid command \"%s\".\n", cmd.c_str());
+ 	    error_msg += "This command only applies to leaf nodes that have ";
+ 	    error_msg += "values.\n";
+-	    xorp_throw(ParseError, error_msg);
++	    return false;
+ 	}
+ 	_is_read_only = true;
+ 	_is_permanent = true;	// XXX: read-only also implies permanent node
+@@ -442,11 +440,11 @@ TemplateTreeNode::add_cmd(const string& cmd) throw (ParseError)
+ 	if (cmd == "%set") {
+ 	    // XXX: only leaf nodes should have %set command
+ 	    if (! is_leaf_value()) {
+-		error_msg = c_format("Invalid command \"%s\".\n", cmd.c_str());
++		error_msg += c_format("Invalid command \"%s\".\n", cmd.c_str());
+ 		error_msg += "This command only applies to leaf nodes that ";
+ 		error_msg += "have values and only if the value is allowed ";
+ 		error_msg += "to be changed.\n";
+-		xorp_throw(ParseError, error_msg);
++		return false;
+ 	    }
+ 	}
+ 
+@@ -460,22 +458,23 @@ TemplateTreeNode::add_cmd(const string& cmd) throw (ParseError)
+ 	}
+     } else if (cmd == "%unique-in") {
+ 	if (!is_leaf_value()) {
+-	    error_msg = c_format("Invalid command \"%s\".\n", cmd.c_str());
++	    error_msg += c_format("Invalid command \"%s\".\n", cmd.c_str());
+ 	    error_msg += "This command only applies to leaf nodes that ";
+ 	    error_msg += "have values and only if the value is allowed ";
+ 	    error_msg += "to be changed.\n";
+-	    xorp_throw(ParseError, error_msg);
++	    return false;
+ 	}
+     } else if (cmd == "%mandatory") {
+ 	// Nothing to do
+     } else {
+-	error_msg = c_format("Invalid command \"%s\".\n", cmd.c_str());
++	error_msg += c_format("Invalid command \"%s\".\n", cmd.c_str());
+ 	error_msg += "Valid commands are %create, %delete, %set, %unset, ";
+ 	error_msg += "%get, %default, %modinfo, %activate, %update, %allow, ";
+ 	error_msg += "%allow-range, %mandatory, %deprecated, %user-hidden, ";
+ 	error_msg += "%read-only, %permanent, %order, %unique-in\n";
+-	xorp_throw(ParseError, error_msg);
++	return false;
+     }
++    return true;
+ }
+ 
+ set<string>
+@@ -490,14 +489,12 @@ TemplateTreeNode::commands() const
+     return cmds;
+ }
+ 
+-void
++bool
+ TemplateTreeNode::add_action(const string& cmd,
+-			     const list<string>& action_list)
+-    throw (ParseError)
++			     const list<string>& action_list, string& error_msg)
+ {
+     BaseCommand* command;
+     map<string, BaseCommand*>::iterator iter;
+-    string error_msg;
+ 
+     if (cmd == "%modinfo") {
+ 	// only the Master tree cares about this
+@@ -506,22 +503,22 @@ TemplateTreeNode::add_action(const string& cmd,
+ 	XLOG_ASSERT(iter != _cmd_map.end());
+ 	command = iter->second;
+ 	AllowCommand* allow_command = dynamic_cast<AllowCommand*>(command);
+-	XLOG_ASSERT(allow_command != NULL);
+-	allow_command->add_action(action_list);
++	if (!allow_command->add_action(action_list, error_msg))
++	    return false;
+     } else if (cmd == "%allow-range") {
+ 	iter = _cmd_map.find("%allow-range");
+ 	XLOG_ASSERT(iter != _cmd_map.end());
+ 	command = iter->second;
+ 	AllowCommand* allow_command = dynamic_cast<AllowCommand*>(command);
+-	XLOG_ASSERT(allow_command != NULL);
+-	allow_command->add_action(action_list);
++	if (!allow_command->add_action(action_list, error_msg))
++	    return false;
+     } else if (cmd == "%allow-operator") {
+ 	iter = _cmd_map.find("%allow-operator");
+ 	XLOG_ASSERT(iter != _cmd_map.end());
+ 	command = iter->second;
+ 	AllowCommand* allow_command = dynamic_cast<AllowCommand*>(command);
+-	XLOG_ASSERT(allow_command != NULL);
+-	allow_command->add_action(action_list);
++	if (!allow_command->add_action(action_list, error_msg))
++	    return false;
+     } else if (cmd == "%help") {
+ 	if (action_list.size() == 2) {
+ 	    list<string>::const_iterator li = action_list.begin();
+@@ -533,16 +530,16 @@ TemplateTreeNode::add_action(const string& cmd,
+ 	    } else if (action_list.front() == "long") {
+ 		_help_long = help;
+ 	    } else {
+-		error_msg = c_format("Invalid %%help descriptor %s: "
+-				     "\"short\" or \"long\" expectted",
+-				     action_list.front().c_str());
+-		xorp_throw(ParseError, error_msg);
++		error_msg += c_format("Invalid %%help descriptor %s: "
++				      "\"short\" or \"long\" expectted\n",
++				      action_list.front().c_str());
++		return false;
+ 	    }
+ 	} else {
+-	    error_msg = c_format("Invalid number of %%help arguments: "
+-				 "%u (expected 2)",
+-				 XORP_UINT_CAST(action_list.size()));
+-	    xorp_throw(ParseError, error_msg);
++	    error_msg += c_format("Invalid number of %%help arguments: "
++				  "%u (expected 2)\n",
++				  XORP_UINT_CAST(action_list.size()));
++	    return false;
+ 	}
+     } else if (cmd == "%deprecated") {
+ 	if (action_list.size() == 1) {
+@@ -556,10 +553,10 @@ TemplateTreeNode::add_action(const string& cmd,
+ 		_parent->set_deprecated_reason(reason);
+ 	    }
+ 	} else {
+-	    error_msg = c_format("Invalid number of %%deprecated arguments: "
+-				 "%u (expected 1)",
+-				 XORP_UINT_CAST(action_list.size()));
+-	    xorp_throw(ParseError, error_msg);
++	    error_msg += c_format("Invalid number of %%deprecated arguments: "
++				  "%u (expected 1)\n",
++				  XORP_UINT_CAST(action_list.size()));
++	    return false;
+ 	}
+     } else if (cmd == "%user-hidden") {
+ 	if (action_list.size() == 1) {
+@@ -573,10 +570,10 @@ TemplateTreeNode::add_action(const string& cmd,
+ 		_parent->set_user_hidden_reason(reason);
+ 	    }
+ 	} else {
+-	    error_msg = c_format("Invalid number of %%user-hidden arguments: "
+-				 "%u (expected 1)",
+-				 XORP_UINT_CAST(action_list.size()));
+-	    xorp_throw(ParseError, error_msg);
++	    error_msg += c_format("Invalid number of %%user-hidden arguments: "
++				  "%u (expected 1)\n",
++				  XORP_UINT_CAST(action_list.size()));
++	    return false;
+ 	}
+     } else if (cmd == "%read-only") {
+ 	if (action_list.size() == 1) {
+@@ -587,10 +584,10 @@ TemplateTreeNode::add_action(const string& cmd,
+ 	    _read_only_reason = reason;
+ 	    _is_permanent = true; // XXX: read-only also implies permanent node
+ 	} else {
+-	    error_msg = c_format("Invalid number of %%user-hidden arguments: "
+-				 "%u (expected 1)",
+-				 XORP_UINT_CAST(action_list.size()));
+-	    xorp_throw(ParseError, error_msg);
++	    error_msg += c_format("Invalid number of %%user-hidden arguments: "
++				  "%u (expected 1)\n",
++				  XORP_UINT_CAST(action_list.size()));
++	    return false;
+ 	}
+     } else if (cmd == "%permanent") {
+ 	if (action_list.size() == 1) {
+@@ -600,10 +597,10 @@ TemplateTreeNode::add_action(const string& cmd,
+ 	    _is_permanent = true;
+ 	    _permanent_reason = reason;
+ 	} else {
+-	    error_msg = c_format("Invalid number of %%permanent arguments: "
+-				 "%u (expected 1)",
+-				 XORP_UINT_CAST(action_list.size()));
+-	    xorp_throw(ParseError, error_msg);
++	    error_msg += c_format("Invalid number of %%permanent arguments: "
++				  "%u (expected 1)\n",
++				  XORP_UINT_CAST(action_list.size()));
++	    return false;
+ 	}
+     } else if (cmd == "%order") {
+ 	if (action_list.size() == 1) {
+@@ -616,10 +613,10 @@ TemplateTreeNode::add_action(const string& cmd,
+ 	    } else if (*li == "sorted-alphabetic") {
+ 		order = ORDER_SORTED_ALPHABETIC;
+ 	    } else {
+-		error_msg = c_format("Bad %%order specification in template "
+-				     "file ignored - should be unsorted, "
+-				     "sorted-numeric, or sorted-alphabetic");
+-		xorp_throw(ParseError, error_msg);
++		error_msg += c_format("Bad %%order specification in template "
++				      "file ignored - should be unsorted, "
++				      "sorted-numeric, or sorted-alphabetic\n");
++		return false;
+ 	    }
+ 	    set_order(order);
+ 
+@@ -627,10 +624,10 @@ TemplateTreeNode::add_action(const string& cmd,
+ 		_parent->set_order(order);
+ 	    }
+ 	} else {
+-	    error_msg = c_format("Invalid number of %%order arguments: "
+-				 "%u (expected 1)",
+-				 XORP_UINT_CAST(action_list.size()));
+-	    xorp_throw(ParseError, error_msg);
++	    error_msg += c_format("Invalid number of %%order arguments: "
++				  "%u (expected 1)\n",
++				  XORP_UINT_CAST(action_list.size()));
++	    return false;
+ 	}
+     } else if (cmd == "%mandatory") {
+ 	// Add all new mandatory variables
+@@ -649,21 +646,22 @@ TemplateTreeNode::add_action(const string& cmd,
+ 	if (action_list.size() == 1) {
+ 	    list<string>::const_iterator li = action_list.begin();
+ 	    if (!_unique_in_node.empty()) {
+-		error_msg = c_format("There can be only one declaration of %%unique-in argument"
+-			"for node. Previous was %s in node \"%s\"",
+-			_unique_in_node.c_str(), path().c_str());
+-		xorp_throw(ParseError, error_msg);
++		error_msg += c_format("There can be only one declaration of %%unique-in argument"
++				      "for node. Previous was %s in node \"%s\"\n",
++				      _unique_in_node.c_str(), path().c_str());
++		return false;
+ 	    }
+ 	    _unique_in_node = *li;
+ 	} else {
+-	    error_msg = c_format("Invalid number of %%unique-in arguments: "
+-		    "%u (expected 1)",
+-		    XORP_UINT_CAST(action_list.size()));
+-	    xorp_throw(ParseError, error_msg);
++	    error_msg += c_format("Invalid number of %%unique-in arguments: "
++				  "%u (expected 1)\n",
++				  XORP_UINT_CAST(action_list.size()));
++	    return false;
+ 	}
+     } else {
+ 	// the master tree will deal with these
+     }
++    return true;
+ }
+ 
+ map<string, string>
+@@ -1529,19 +1527,18 @@ TemplateTreeNode::check_variable_name(const vector<string>& parts,
+ TextTemplate::TextTemplate(TemplateTree& template_tree,
+ 			   TemplateTreeNode* parent,
+ 			   const string& path, const string& varname,
+-			   const string& initializer) throw (ParseError)
++			   const string& initializer, string& error_msg)
+     : TemplateTreeNode(template_tree, parent, path, varname),
+       _default("")
+ {
+-    string error_msg;
+-
+     if (initializer.empty())
+ 	return;
+ 
+     if (! type_match(initializer, error_msg)) {
+-	error_msg = c_format("Bad Text type value \"%s\": %s.",
+-			     initializer.c_str(), error_msg.c_str());
+-	xorp_throw(ParseError, error_msg);
++	error_msg += c_format("Bad Text type value \"%s\": %s.\n",
++			      initializer.c_str(), error_msg.c_str());
++	set_invalid(true);
++	return;
+     }
+ 
+     string s = strip_quotes(initializer);
+@@ -1567,19 +1564,18 @@ TextTemplate::type_match(const string&, string&) const
+ ArithTemplate::ArithTemplate(TemplateTree& template_tree,
+ 			     TemplateTreeNode* parent,
+ 			     const string& path, const string& varname,
+-			     const string& initializer) throw (ParseError)
++			     const string& initializer, string& error_msg)
+     : TemplateTreeNode(template_tree, parent, path, varname),
+       _default("")
+ {
+-    string error_msg;
+-
+     if (initializer.empty())
+ 	return;
+ 
+     if (! type_match(initializer, error_msg)) {
+-	error_msg = c_format("Bad arith type value \"%s\": %s.",
+-			     initializer.c_str(), error_msg.c_str());
+-	xorp_throw(ParseError, error_msg);
++	error_msg += c_format("Bad arith type value \"%s\": %s.\n",
++			      initializer.c_str(), error_msg.c_str());
++	set_invalid(true);
++	return;
+     }
+ 
+     string s = strip_quotes(initializer);
+@@ -1605,19 +1601,18 @@ ArithTemplate::type_match(const string&, string&) const
+ UIntTemplate::UIntTemplate(TemplateTree& template_tree,
+ 			   TemplateTreeNode* parent,
+ 			   const string& path, const string& varname,
+-			   const string& initializer) throw (ParseError)
++			   const string& initializer, string& error_msg)
+     : TemplateTreeNode(template_tree, parent, path, varname)
+ {
+-    string error_msg;
+-
+     if (initializer.empty())
+ 	return;
+ 
+     string s = strip_quotes(initializer);
+     if (! type_match(s, error_msg)) {
+-	error_msg = c_format("Bad UInt type value \"%s\": %s.",
+-			     initializer.c_str(), error_msg.c_str());
+-	xorp_throw(ParseError, error_msg);
++	error_msg += c_format("Bad UInt type value \"%s\": %s.\n",
++			      initializer.c_str(), error_msg.c_str());
++	set_invalid(true);
++	return;
+     }
+     _default = strtoll(s.c_str(), (char **)NULL, 10);
+     set_has_default();
+@@ -1655,14 +1650,12 @@ UIntTemplate::default_str() const
+  **************************************************************************/
+ 
+ UIntRangeTemplate::UIntRangeTemplate(TemplateTree& template_tree,
+-			   TemplateTreeNode* parent,
+-			   const string& path, const string& varname,
+-			   const string& initializer) throw (ParseError)
++				     TemplateTreeNode* parent,
++				     const string& path, const string& varname,
++				     const string& initializer, string& error_msg)
+     : TemplateTreeNode(template_tree, parent, path, varname),
+       _default(NULL)
+ {
+-    string error_msg;
+-
+     if (initializer.empty())
+ 	return;
+ 
+@@ -1670,9 +1663,8 @@ UIntRangeTemplate::UIntRangeTemplate(TemplateTree& template_tree,
+     if (_default->invalid()) {
+ 	delete _default;
+ 	_default = NULL;
+-	XLOG_WARNING("Bad U32Range type value \"%s\".",
+-		     initializer.c_str());
+-	xorp_throw(ParseError, error_msg);
++	error_msg += c_format("Bad U32Range type value \"%s\".\n", initializer.c_str());
++	set_invalid(true);
+     }
+     set_has_default();
+ }
+@@ -1716,13 +1708,11 @@ UIntRangeTemplate::type_match(const string& s, string& error_msg) const
+  **************************************************************************/
+ 
+ ULongTemplate::ULongTemplate(TemplateTree& template_tree,
+-			   TemplateTreeNode* parent,
+-			   const string& path, const string& varname,
+-			   const string& initializer) throw (ParseError)
++			     TemplateTreeNode* parent,
++			     const string& path, const string& varname,
++			     const string& initializer, string& error_msg)
+     : TemplateTreeNode(template_tree, parent, path, varname)
+ {
+-    string error_msg;
+-
+     if (initializer.empty())
+ 	return;
+ 
+@@ -1730,7 +1720,8 @@ ULongTemplate::ULongTemplate(TemplateTree& template_tree,
+     if (! type_match(s, error_msg)) {
+ 	error_msg = c_format("Bad ULong type value \"%s\": %s.",
+ 			     initializer.c_str(), error_msg.c_str());
+-	xorp_throw(ParseError, error_msg);
++	set_invalid(true);
++	return;
+     }
+     _default = strtoll(s.c_str(), (char **)NULL, 10);
+     set_has_default();
+@@ -1770,14 +1761,12 @@ ULongTemplate::default_str() const
+  **************************************************************************/
+ 
+ ULongRangeTemplate::ULongRangeTemplate(TemplateTree& template_tree,
+-			   TemplateTreeNode* parent,
+-			   const string& path, const string& varname,
+-			   const string& initializer) throw (ParseError)
++				       TemplateTreeNode* parent,
++				       const string& path, const string& varname,
++				       const string& initializer, string& error_msg)
+     : TemplateTreeNode(template_tree, parent, path, varname),
+       _default(NULL)
+ {
+-    string error_msg;
+-
+     if (initializer.empty())
+ 	return;
+ 
+@@ -1785,9 +1774,10 @@ ULongRangeTemplate::ULongRangeTemplate(TemplateTree& template_tree,
+     if (_default->invalid()) {
+ 	delete _default;
+ 	_default = NULL;
+-	error_msg = c_format("Bad U64Range type value \"%s\".",
+-			     initializer.c_str());
+-	xorp_throw(ParseError, error_msg);
++	error_msg += c_format("Bad U64Range type value \"%s\".",
++			      initializer.c_str());
++	set_invalid(true);
++	return;
+     }
+     set_has_default();
+ }
+@@ -1833,11 +1823,9 @@ ULongRangeTemplate::type_match(const string& s, string& error_msg) const
+ IntTemplate::IntTemplate(TemplateTree& template_tree,
+ 			 TemplateTreeNode* parent,
+ 			 const string& path, const string& varname,
+-			 const string& initializer) throw (ParseError)
++			 const string& initializer, string& error_msg)
+     : TemplateTreeNode(template_tree, parent, path, varname)
+ {
+-    string error_msg;
+-
+     if (initializer.empty())
+ 	return;
+ 
+@@ -1845,7 +1833,8 @@ IntTemplate::IntTemplate(TemplateTree& template_tree,
+     if (! type_match(s, error_msg)) {
+ 	error_msg = c_format("Bad Int type value \"%s\": %s.",
+ 			     initializer.c_str(), error_msg.c_str());
+-	xorp_throw(ParseError, error_msg);
++	set_invalid(true);
++	return;
+     }
+     _default = strtoll(s.c_str(), (char **)NULL, 10);
+     set_has_default();
+@@ -1889,18 +1878,17 @@ IntTemplate::default_str() const
+ BoolTemplate::BoolTemplate(TemplateTree& template_tree,
+ 			   TemplateTreeNode* parent,
+ 			   const string& path, const string& varname,
+-			   const string& initializer) throw (ParseError)
++			   const string& initializer, string& error_msg)
+     : TemplateTreeNode(template_tree, parent, path, varname)
+ {
+-    string error_msg;
+-
+     if (initializer.empty())
+ 	return;
+ 
+     if (! type_match(initializer, error_msg)) {
+ 	error_msg = c_format("Bad Bool type value \"%s\": %s.",
+ 			     initializer.c_str(), error_msg.c_str());
+-	xorp_throw(ParseError, error_msg);
++	set_invalid(true);
++	return;
+     }
+     if (initializer == string("false"))
+ 	_default = false;
+@@ -1937,22 +1925,21 @@ BoolTemplate::default_str() const
+ IPv4Template::IPv4Template(TemplateTree& template_tree,
+ 			   TemplateTreeNode* parent,
+ 			   const string& path, const string& varname,
+-			   const string& initializer) throw (ParseError)
++			   const string& initializer, string& error_msg)
+     : TemplateTreeNode(template_tree, parent, path, varname),
+       _default(NULL)
+ {
+-    string error_msg;
+-
+     if (initializer.empty())
+ 	return;
+ 
+     _default = new IPv4(initializer.c_str());
+-    if (_default.invalid()) {
+-	error_msg = c_format("Bad IPv4 type value \"%s\".",
+-			     initializer.c_str());
++    if (_default->invalid()) {
++	error_msg += c_format("Bad IPv4 type value \"%s\".",
++			      initializer.c_str());
+ 	delete _default;
+ 	_default = NULL;
+-	xorp_throw(ParseError, error_msg);
++	set_invalid(true);
++	return;
+     }
+     set_has_default();
+ }
+@@ -1998,12 +1985,10 @@ IPv4Template::type_match(const string& s, string& error_msg) const
+ IPv4NetTemplate::IPv4NetTemplate(TemplateTree& template_tree,
+ 				 TemplateTreeNode* parent,
+ 				 const string& path, const string& varname,
+-				 const string& initializer) throw (ParseError)
++				 const string& initializer, string& error_msg)
+     : TemplateTreeNode(template_tree, parent, path, varname),
+       _default(NULL)
+ {
+-    string error_msg;
+-
+     if (initializer.empty())
+ 	return;
+ 
+@@ -2011,9 +1996,10 @@ IPv4NetTemplate::IPv4NetTemplate(TemplateTree& template_tree,
+     if (_default->invalid()) {
+ 	delete _default;
+ 	_default = NULL;
+-	error_msg = c_format("Bad IPv4Net type value \"%s\".",
++	error_msg = c_format("Bad IPv4Net type value \"%s\".\n",
+ 			     initializer.c_str());
+-	xorp_throw(ParseError, error_msg);
++	set_invalid(true);
++	return;
+     }
+     set_has_default();
+ }
+@@ -2065,24 +2051,23 @@ IPv4NetTemplate::type_match(const string& s, string& error_msg) const
+  **************************************************************************/
+ 
+ IPv4RangeTemplate::IPv4RangeTemplate(TemplateTree& template_tree,
+-				 TemplateTreeNode* parent,
+-				 const string& path, const string& varname,
+-				 const string& initializer) throw (ParseError)
++				     TemplateTreeNode* parent,
++				     const string& path, const string& varname,
++				     const string& initializer, string& error_msg)
+     : TemplateTreeNode(template_tree, parent, path, varname),
+       _default(NULL)
+ {
+-    string error_msg;
+-
+     if (initializer.empty())
+ 	return;
+ 
+     _default = new IPv4Range(initializer.c_str());
+     if (_default->invalid()) {
+-	error_msg = c_format("Bad IPv4Range type value \"%s\".",
+-			     initializer.c_str());
++	error_msg += c_format("Bad IPv4Range type value \"%s\".",
++			      initializer.c_str());
+ 	delete _default;
+ 	_default = NULL;
+-	xorp_throw(ParseError, error_msg);
++	set_invalid(true);
++	return;
+     }
+     set_has_default();
+ }
+@@ -2128,22 +2113,21 @@ IPv4RangeTemplate::type_match(const string& s, string& error_msg) const
+ IPv6Template::IPv6Template(TemplateTree& template_tree,
+ 			   TemplateTreeNode* parent,
+ 			   const string& path, const string& varname,
+-			   const string& initializer) throw (ParseError)
++			   const string& initializer, string& error_msg)
+     : TemplateTreeNode(template_tree, parent, path, varname),
+       _default(NULL)
+ {
+-    string error_msg;
+-
+     if (initializer.empty())
+ 	return;
+ 
+     _default = new IPv6(initializer.c_str());
+     if (_default->invalid()) {
+-	error_msg = c_format("Bad IPv6 type value \"%s\".",
+-			     initializer.c_str());
++	error_msg += c_format("Bad IPv6 type value \"%s\".\n",
++			      initializer.c_str());
+ 	delete _default;
+ 	_default = NULL;
+-	xorp_throw(ParseError, error_msg);
++	set_invalid(true);
++	return;
+     }
+     set_has_default();
+ }
+@@ -2189,22 +2173,21 @@ IPv6Template::type_match(const string& s, string& error_msg) const
+ IPv6NetTemplate::IPv6NetTemplate(TemplateTree& template_tree,
+ 				 TemplateTreeNode* parent,
+ 				 const string& path, const string& varname,
+-				 const string& initializer) throw (ParseError)
++				 const string& initializer, string& error_msg)
+     : TemplateTreeNode(template_tree, parent, path, varname),
+       _default(NULL)
+ {
+-    string error_msg;
+-
+     if (initializer.empty())
+ 	return;
+ 
+     _default = new IPv6Net(initializer.c_str());
+     if (_default->invalid()) {
+-	error_msg = c_format("Bad IPv6Net type value \"%s\".",
+-			     initializer.c_str());
++	error_msg += c_format("Bad IPv6Net type value \"%s\".\n",
++			      initializer.c_str());
+ 	delete _default;
+ 	_default = NULL;
+-	xorp_throw(ParseError, error_msg);
++	set_invalid(true);
++	return;
+     }
+     set_has_default();
+ }
+@@ -2258,24 +2241,23 @@ IPv6NetTemplate::type_match(const string& s, string& error_msg) const
+  **************************************************************************/
+ 
+ IPv6RangeTemplate::IPv6RangeTemplate(TemplateTree& template_tree,
+-				 TemplateTreeNode* parent,
+-				 const string& path, const string& varname,
+-				 const string& initializer) throw (ParseError)
++				     TemplateTreeNode* parent,
++				     const string& path, const string& varname,
++				     const string& initializer, string& error_msg)
+     : TemplateTreeNode(template_tree, parent, path, varname),
+       _default(NULL)
+ {
+-    string error_msg;
+-
+     if (initializer.empty())
+ 	return;
+ 
+     _default = new IPv6Range(initializer.c_str());
+     if (_default->invalid()) {
+-	error_msg = c_format("Bad IPv6Range type value \"%s\".",
+-			     initializer.c_str());
++	error_msg += c_format("Bad IPv6Range type value \"%s\".\n",
++			      initializer.c_str());
+ 	delete _default;
+ 	_default = NULL;
+-	xorp_throw(ParseError, error_msg);
++	set_invalid(true);
++	return;
+     }
+     set_has_default();
+ }
+@@ -2321,22 +2303,21 @@ IPv6RangeTemplate::type_match(const string& s, string& error_msg) const
+ MacaddrTemplate::MacaddrTemplate(TemplateTree& template_tree,
+ 				 TemplateTreeNode* parent,
+ 				 const string& path, const string& varname,
+-				 const string& initializer) throw (ParseError)
++				 const string& initializer, string& error_msg)
+     : TemplateTreeNode(template_tree, parent, path, varname),
+       _default(NULL)
+ {
+-    string error_msg;
+-
+     if (initializer.empty())
+ 	return;
+ 
+     _default = new Mac(initializer.c_str());
+     if (_default->invalid()) {
+-	error_msg = c_format("Bad MacAddr type value \"%s\".",
+-			     initializer.c_str());
+-	delete _invalid;
+-	_invalid = NULL;
+-	xorp_throw(ParseError, error_msg);
++	error_msg += c_format("Bad MacAddr type value \"%s\".\n",
++			      initializer.c_str());
++	delete _default;
++	_default = NULL;
++	set_invalid(true);
++	return;
+     }
+     set_has_default();
+ }
+@@ -2384,19 +2365,18 @@ MacaddrTemplate::type_match(const string& s, string& error_msg) const
+ UrlFileTemplate::UrlFileTemplate(TemplateTree& template_tree,
+ 				 TemplateTreeNode* parent,
+ 				 const string& path, const string& varname,
+-				 const string& initializer) throw (ParseError)
++				 const string& initializer, string& error_msg)
+     : TemplateTreeNode(template_tree, parent, path, varname),
+       _default("")
+ {
+-    string error_msg;
+-
+     if (initializer.empty())
+ 	return;
+ 
+     if (! type_match(initializer, error_msg)) {
+ 	error_msg = c_format("Bad UrlFile type value \"%s\": %s.",
+ 			     initializer.c_str(), error_msg.c_str());
+-	xorp_throw(ParseError, error_msg);
++	set_invalid(true);
++	return;
+     }
+ 
+     string s = strip_quotes(initializer);
+@@ -2422,19 +2402,18 @@ UrlFileTemplate::type_match(const string&, string&) const
+ UrlFtpTemplate::UrlFtpTemplate(TemplateTree& template_tree,
+ 			       TemplateTreeNode* parent,
+ 			       const string& path, const string& varname,
+-			       const string& initializer) throw (ParseError)
++			       const string& initializer, string& error_msg)
+     : TemplateTreeNode(template_tree, parent, path, varname),
+       _default("")
+ {
+-    string error_msg;
+-
+     if (initializer.empty())
+ 	return;
+ 
+     if (! type_match(initializer, error_msg)) {
+ 	error_msg = c_format("Bad UrlFtp type value \"%s\": %s.",
+ 			     initializer.c_str(), error_msg.c_str());
+-	xorp_throw(ParseError, error_msg);
++	set_invalid(true);
++	return;
+     }
+ 
+     string s = strip_quotes(initializer);
+@@ -2460,19 +2439,18 @@ UrlFtpTemplate::type_match(const string&, string&) const
+ UrlHttpTemplate::UrlHttpTemplate(TemplateTree& template_tree,
+ 				 TemplateTreeNode* parent,
+ 				 const string& path, const string& varname,
+-				 const string& initializer) throw (ParseError)
++				 const string& initializer, string& error_msg)
+     : TemplateTreeNode(template_tree, parent, path, varname),
+       _default("")
+ {
+-    string error_msg;
+-
+     if (initializer.empty())
+ 	return;
+ 
+     if (! type_match(initializer, error_msg)) {
+ 	error_msg = c_format("Bad UrlHttp type value \"%s\": %s.",
+ 			     initializer.c_str(), error_msg.c_str());
+-	xorp_throw(ParseError, error_msg);
++	set_invalid(true);
++	return;
+     }
+ 
+     string s = strip_quotes(initializer);
+@@ -2498,19 +2476,18 @@ UrlHttpTemplate::type_match(const string&, string&) const
+ UrlTftpTemplate::UrlTftpTemplate(TemplateTree& template_tree,
+ 				 TemplateTreeNode* parent,
+ 				 const string& path, const string& varname,
+-				 const string& initializer) throw (ParseError)
++				 const string& initializer, string& error_msg)
+     : TemplateTreeNode(template_tree, parent, path, varname),
+       _default("")
+ {
+-    string error_msg;
+-
+     if (initializer.empty())
+ 	return;
+ 
+     if (! type_match(initializer, error_msg)) {
+ 	error_msg = c_format("Bad UrlTftp type value \"%s\": %s.",
+ 			     initializer.c_str(), error_msg.c_str());
+-	xorp_throw(ParseError, error_msg);
++	set_invalid(true);
++	return;
+     }
+ 
+     string s = strip_quotes(initializer);
+diff --git a/xorp/rtrmgr/template_tree_node.hh b/xorp/rtrmgr/template_tree_node.hh
+index 0f44485..5e047ba 100644
+--- a/xorp/rtrmgr/template_tree_node.hh
++++ b/xorp/rtrmgr/template_tree_node.hh
+@@ -17,19 +17,13 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.54 2008/10/02 21:58:25 bms Exp $
+ 
+ #ifndef __RTRMGR_TEMPLATE_TREE_NODE_HH__
+ #define __RTRMGR_TEMPLATE_TREE_NODE_HH__
+ 
+ 
+ 
+-
+-
+-
+-
+ #include "libxorp/mac.hh"
+-
+ #include "config_operators.hh"
+ #include "rtrmgr_error.hh"
+ #include "xorp_client.hh"
+@@ -73,7 +67,7 @@ class CommandTree;
+ class ConfigTreeNode;
+ class TemplateTree;
+ 
+-class TemplateTreeNode {
++class TemplateTreeNode : public Invalid {
+ public:
+     TemplateTreeNode(TemplateTree& template_tree, TemplateTreeNode* parent,
+ 		     const string& path, const string& varname);
+@@ -83,9 +77,8 @@ public:
+     bool check_template_tree(string& error_msg) const;
+ 
+     virtual TTNodeType type() const { return NODE_VOID; }
+-    void add_cmd(const string& cmd) throw (ParseError);
+-    void add_action(const string& cmd, const list<string>& action_list)
+-	throw (ParseError);
++    bool add_cmd(const string& cmd, string& err);
++    bool add_action(const string& cmd, const list<string>& action_list, string& err);
+ 
+     map<string, string> create_variable_map(const list<string>& segments) const;
+ 
+@@ -248,7 +241,7 @@ class UIntTemplate : public TemplateTreeNode {
+ public:
+     UIntTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
+ 		 const string& path, const string& varname,
+-		 const string& initializer) throw (ParseError);
++		 const string& initializer, string& err);
+ 
+     string typestr() const { return string("uint"); }
+     TTNodeType type() const { return NODE_UINT; }
+@@ -263,8 +256,8 @@ private:
+ class UIntRangeTemplate : public TemplateTreeNode {
+ public:
+     UIntRangeTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
+-		 const string& path, const string& varname,
+-		 const string& initializer) throw (ParseError);
++		      const string& path, const string& varname,
++		      const string& initializer, string& err);
+     ~UIntRangeTemplate();
+ 
+     string typestr() const { return string("uintrange"); }
+@@ -280,8 +273,8 @@ private:
+ class ULongTemplate : public TemplateTreeNode {
+ public:
+     ULongTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
+-		 const string& path, const string& varname,
+-		 const string& initializer) throw (ParseError);
++		  const string& path, const string& varname,
++		  const string& initializer, string& err);
+ 
+     string typestr() const { return string("uint64"); }
+     TTNodeType type() const { return NODE_ULONG; }
+@@ -296,8 +289,8 @@ private:
+ class ULongRangeTemplate : public TemplateTreeNode {
+ public:
+     ULongRangeTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
+-		 const string& path, const string& varname,
+-		 const string& initializer) throw (ParseError);
++		       const string& path, const string& varname,
++		       const string& initializer, string& err);
+     ~ULongRangeTemplate();
+ 
+     string typestr() const { return string("uint64range"); }
+@@ -314,7 +307,7 @@ class IntTemplate : public TemplateTreeNode {
+ public:
+     IntTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
+ 		const string& path, const string& varname,
+-		const string& initializer) throw (ParseError);
++		const string& initializer, string& err);
+     string typestr() const { return string("int"); }
+     TTNodeType type() const { return NODE_INT; }
+     int default_value() const { return _default; }
+@@ -329,7 +322,7 @@ class ArithTemplate : public TemplateTreeNode {
+ public:
+     ArithTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
+ 		  const string& path, const string& varname,
+-		  const string& initializer) throw (ParseError);
++		  const string& initializer, string& err);
+     string typestr() const { return string("uint"); }
+     TTNodeType type() const { return NODE_ARITH; }
+     string default_value() const { return _default; }
+@@ -344,7 +337,7 @@ class TextTemplate : public TemplateTreeNode {
+ public:
+     TextTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
+ 		 const string& path, const string& varname,
+-		 const string& initializer) throw (ParseError);
++		 const string& initializer, string& err);
+ 
+     string typestr() const { return string("text"); }
+     TTNodeType type() const { return NODE_TEXT; }
+@@ -360,7 +353,7 @@ class BoolTemplate : public TemplateTreeNode {
+ public:
+     BoolTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
+ 		 const string& path, const string& varname,
+-		 const string& initializer) throw (ParseError);
++		 const string& initializer, string& err);
+ 
+     string typestr() const { return string("bool"); }
+     TTNodeType type() const { return NODE_BOOL; }
+@@ -376,7 +369,7 @@ class IPv4Template : public TemplateTreeNode {
+ public:
+     IPv4Template(TemplateTree& template_tree, TemplateTreeNode* parent,
+ 		 const string& path, const string& varname,
+-		 const string& initializer) throw (ParseError);
++		 const string& initializer, string& err);
+     ~IPv4Template();
+ 
+     string typestr() const { return string("IPv4"); }
+@@ -393,7 +386,7 @@ class IPv4NetTemplate : public TemplateTreeNode {
+ public:
+     IPv4NetTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
+ 		    const string& path, const string& varname,
+-		    const string& initializer) throw (ParseError);
++		    const string& initializer, string& err);
+     ~IPv4NetTemplate();
+ 
+     string typestr() const { return string("IPv4Net"); }
+@@ -409,8 +402,8 @@ private:
+ class IPv4RangeTemplate : public TemplateTreeNode {
+ public:
+     IPv4RangeTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
+-		    const string& path, const string& varname,
+-		    const string& initializer) throw (ParseError);
++		      const string& path, const string& varname,
++		      const string& initializer, string& err);
+     ~IPv4RangeTemplate();
+ 
+     string typestr() const { return string("IPv4Range"); }
+@@ -427,7 +420,7 @@ class IPv6Template : public TemplateTreeNode {
+ public:
+     IPv6Template(TemplateTree& template_tree, TemplateTreeNode* parent,
+ 		 const string& path, const string& varname,
+-		 const string& initializer) throw (ParseError);
++		 const string& initializer, string& err);
+     ~IPv6Template();
+ 
+     string typestr() const { return string("IPv6"); }
+@@ -444,7 +437,7 @@ class IPv6NetTemplate : public TemplateTreeNode {
+ public:
+     IPv6NetTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
+ 		    const string& path, const string& varname,
+-		    const string& initializer) throw (ParseError);
++		    const string& initializer, string& err);
+     ~IPv6NetTemplate();
+ 
+     string typestr() const { return string("IPv6Net"); }
+@@ -461,7 +454,7 @@ class IPv6RangeTemplate : public TemplateTreeNode {
+ public:
+     IPv6RangeTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
+ 		 const string& path, const string& varname,
+-		 const string& initializer) throw (ParseError);
++		      const string& initializer, string& err);
+     ~IPv6RangeTemplate();
+ 
+     string typestr() const { return string("IPv6Range"); }
+@@ -478,7 +471,7 @@ class MacaddrTemplate : public TemplateTreeNode {
+ public:
+     MacaddrTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
+ 		    const string& path, const string& varname,
+-		    const string& initializer) throw (ParseError);
++		    const string& initializer, string& err);
+     ~MacaddrTemplate();
+ 
+     string typestr() const { return string("macaddr"); }
+@@ -495,7 +488,7 @@ class UrlFileTemplate : public TemplateTreeNode {
+ public:
+     UrlFileTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
+ 		    const string& path, const string& varname,
+-		    const string& initializer) throw (ParseError);
++		    const string& initializer, string& err);
+ 
+     string typestr() const { return string("URL_FILE"); }
+     TTNodeType type() const { return NODE_URL_FILE; }
+@@ -511,7 +504,7 @@ class UrlFtpTemplate : public TemplateTreeNode {
+ public:
+     UrlFtpTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
+ 		   const string& path, const string& varname,
+-		   const string& initializer) throw (ParseError);
++		   const string& initializer, string& err);
+ 
+     string typestr() const { return string("URL_FTP"); }
+     TTNodeType type() const { return NODE_URL_FTP; }
+@@ -527,7 +520,7 @@ class UrlHttpTemplate : public TemplateTreeNode {
+ public:
+     UrlHttpTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
+ 		    const string& path, const string& varname,
+-		    const string& initializer) throw (ParseError);
++		    const string& initializer, string& err);
+ 
+     string typestr() const { return string("URL_HTTP"); }
+     TTNodeType type() const { return NODE_URL_HTTP; }
+@@ -543,7 +536,7 @@ class UrlTftpTemplate : public TemplateTreeNode {
+ public:
+     UrlTftpTemplate(TemplateTree& template_tree, TemplateTreeNode* parent,
+ 		    const string& path, const string& varname,
+-		    const string& initializer) throw (ParseError);
++		    const string& initializer, string& err);
+ 
+     string typestr() const { return string("URL_TFTP"); }
+     TTNodeType type() const { return NODE_URL_TFTP; }
+diff --git a/xorp/rtrmgr/xorpsh_base.hh b/xorp/rtrmgr/xorpsh_base.hh
+index e0a7ab4..4bace9c 100644
+--- a/xorp/rtrmgr/xorpsh_base.hh
++++ b/xorp/rtrmgr/xorpsh_base.hh
+@@ -36,7 +36,7 @@ class TemplateTree;
+  * It is used as a base class by other classes (e.g., @ref XorpShell)
+  * which contain the real implementation.
+  */
+-class XorpShellBase {
++class XorpShellBase : public Invalid {
+ public:
+     typedef XorpCallback1<void, const XrlError&>::RefPtr GENERIC_CALLBACK;
+     typedef XorpCallback2<void, bool, string>::RefPtr CallBack;
+diff --git a/xorp/rtrmgr/xorpsh_main.cc b/xorp/rtrmgr/xorpsh_main.cc
+index 2224951..df4f875 100644
+--- a/xorp/rtrmgr/xorpsh_main.cc
++++ b/xorp/rtrmgr/xorpsh_main.cc
+@@ -108,18 +108,18 @@ wait_for_xrl_router_ready(EventLoop& eventloop, XrlRouter& xrl_router,
+ // the following two functions are an ugly hack to cause the C code in
+ // the parser to call methods on the right version of the TemplateTree
+ 
+-void
+-add_cmd_adaptor(char *cmd, TemplateTree* tt) throw (ParseError)
++bool
++add_cmd_adaptor(char *cmd, TemplateTree* tt, string& err)
+ {
+-    tt->add_cmd(cmd);
++    return tt->add_cmd(cmd, err);
+ }
+ 
+ 
+-void
++bool
+ add_cmd_action_adaptor(const string& cmd, const list<string>& action,
+-		       TemplateTree* tt) throw (ParseError)
++		       TemplateTree* tt, string& err)
+ {
+-    tt->add_cmd_action(cmd, action);
++    return tt->add_cmd_action(cmd, action, err);
+ }
+ 
+ // ----------------------------------------------------------------------------
+@@ -129,7 +129,7 @@ XorpShell::XorpShell(EventLoop& eventloop,
+ 		     const string& IPCname,
+ 		     const string& xorp_root_dir,
+ 		     const string& config_template_dir,
+-		     bool verbose) throw (InitError)
++		     bool verbose, string& error_msg)
+     : XrlStdRouter(eventloop, IPCname.c_str()),
+       _eventloop(eventloop),
+       _xrl_router(*this),
+@@ -150,8 +150,6 @@ XorpShell::XorpShell(EventLoop& eventloop,
+       _mode(MODE_INITIALIZING),
+       _xorpsh_interface(&_xrl_router, *this)
+ {
+-    string error_msg;
+-
+     //
+     // Print various information
+     //
+@@ -165,17 +163,16 @@ XorpShell::XorpShell(EventLoop& eventloop,
+     // Read the router config template files
+     _tt = new TemplateTree(xorp_root_dir, _verbose);
+     if (!_tt->load_template_tree(config_template_dir, error_msg)) {
+-	xorp_throw(InitError, error_msg);
++	set_invalid(true);
++	return;
+     }
+ 
+     debug_msg("%s", _tt->tree_str().c_str());
+ 
+     // Read the router operational template files
+-    try {
+-	_ocl = new OpCommandList(config_template_dir.c_str(), _tt, _mmgr);
+-    } catch (const InitError& e) {
+-	xorp_throw(InitError, e.why());
+-    }
++    _ocl = new OpCommandList(config_template_dir.c_str(), _tt, _mmgr, error_msg);
++    if (_ocl->invalid())
++	set_invalid(true);
+ }
+ 
+ XorpShell::~XorpShell()
+@@ -201,11 +198,10 @@ XorpShell::~XorpShell()
+ #endif // ! HOST_OS_WINDOWS
+ }
+ 
+-void
+-XorpShell::run(const string& commands, bool exit_on_error)
++bool
++XorpShell::run(const string& commands, bool exit_on_error, string& error_msg)
+ {
+     bool success;
+-    string error_msg;
+     XorpFd xorpsh_input_fd;
+     XorpFd xorpsh_output_fd;
+     XorpFd xorpsh_write_commands_fd;
+@@ -225,7 +221,7 @@ XorpShell::run(const string& commands, bool exit_on_error)
+ 	if (pipe(pipedesc) != 0) {
+ 	    error_msg = c_format("Cannot create an internal pipe: %s",
+ 				 strerror(errno));
+-	    xorp_throw(InitError, error_msg);
++	    return false;
+ 	}
+ 	// xorpsh_write_commands_fd = pipedesc[1];
+ 	_fddesc[0] = xorpsh_input_fd = pipedesc[0];
+@@ -242,7 +238,7 @@ XorpShell::run(const string& commands, bool exit_on_error)
+ 	== false) {
+ 	// RtrMgr contains finder
+ 	error_msg = c_format("Failed to connect to the router manager");
+-	xorp_throw(InitError, error_msg);
++	return false;
+     }
+     _is_connected_to_finder = true;
+ 
+@@ -261,7 +257,7 @@ XorpShell::run(const string& commands, bool exit_on_error)
+     if (! success) {
+ 	error_msg = c_format("Failed to send a registration request to the "
+ 			     "router manager");
+-	xorp_throw(InitError, error_msg);
++	return false;
+     }
+     _mode = MODE_AUTHENTICATING;
+     while (_authfile.empty()) {
+@@ -307,7 +303,7 @@ XorpShell::run(const string& commands, bool exit_on_error)
+     if (! success) {
+ 	error_msg = c_format("Failed to send an authentication request to the "
+ 			     "router manager");
+-	xorp_throw(InitError, error_msg);
++	return false;
+     }
+ 
+     while (!_xrl_generic_done) {
+@@ -335,32 +331,19 @@ XorpShell::run(const string& commands, bool exit_on_error)
+     XLOG_TRACE(_verbose,
+ 	       "==========================================================\n");
+ 
+-    try {
+-	_ct = new SlaveConfigTree(_configuration, _tt, _xclient, _clientid,
+-				  _verbose);
+-
+-	_ocl->set_slave_config_tree(_ct);
+-
+-	// Start up the CLI
+-	_cli_node.enable();
+-	_router_cli = new RouterCLI(*this, _cli_node, xorpsh_input_fd,
+-				    xorpsh_output_fd, _verbose);
+-    } catch (const InitError& e) {
+-	error_msg = c_format("Shutting down due to a parse error: %s",
+-			     e.why().c_str());
+-
+-	_xrl_generic_done = false;
+-	success = _rtrmgr_client.send_unregister_client(
+-	    "rtrmgr",
+-	    _authtoken,
+-	    callback(this, &XorpShell::generic_done));
+-	_mode = MODE_SHUTDOWN;
+-	// Run the event loop to cause the unregister to be sent
+-	while (success && ! _xrl_generic_done) {
+-	    _eventloop.run();
+-	}
+-	xorp_throw(InitError, error_msg);
+-    }
++    _ct = new SlaveConfigTree(_configuration, _tt, _xclient, _clientid,
++			      _verbose, error_msg);
++    if (_ct->invalid())
++	goto error;
++
++    _ocl->set_slave_config_tree(_ct);
++
++    // Start up the CLI
++    _cli_node.enable();
++    _router_cli = new RouterCLI(*this, _cli_node, xorpsh_input_fd,
++				xorpsh_output_fd, _verbose, error_msg);
++    if (_router_cli->invalid())
++	goto error;
+ 
+     //
+     // Write the commands to one end of the pipe
+@@ -405,6 +388,22 @@ XorpShell::run(const string& commands, bool exit_on_error)
+     while (success && ! _xrl_generic_done) {
+ 	_eventloop.run();
+     }
++    return true;
++
++  error:
++    error_msg += c_format("Shutting down due to a parse error.\n");
++
++    _xrl_generic_done = false;
++    success = _rtrmgr_client.send_unregister_client(
++	"rtrmgr",
++	_authtoken,
++	callback(this, &XorpShell::generic_done));
++    _mode = MODE_SHUTDOWN;
++    // Run the event loop to cause the unregister to be sent
++    while (success && ! _xrl_generic_done) {
++	_eventloop.run();
++    }
++    return false;
+ }
+ 
+ bool
+@@ -638,14 +637,14 @@ XorpShell::load_lock_achieved(const XrlError& e, const bool* locked,
+     }
+ }
+ 
+-void
++bool
+ XorpShell::config_changed(uid_t user_id, const string& deltas,
+-			  const string& deletions)
++			  const string& deletions, string& err_msg)
+ {
+ #if 0
+     if (_mode == MODE_COMMITTING) {
+ 	// This is the response back to our own request
+-	return;
++	return true;
+     }
+ #endif
+     if (_mode == MODE_INITIALIZING) {
+@@ -653,7 +652,7 @@ XorpShell::config_changed(uid_t user_id, const string& deltas,
+ 	XLOG_ASSERT(deletions == "");
+ 	_configuration = deltas;
+ 	_got_config = true;
+-	return;
++	return true;
+     }
+ 
+     string response;
+@@ -680,7 +679,7 @@ XorpShell::config_changed(uid_t user_id, const string& deltas,
+ 
+     if (_mode == MODE_LOADING) {
+ 	// No need to notify, as the change was caused by us.
+-	return;
++	return true;
+     }
+ 
+ #ifdef HOST_OS_WINDOWS
+@@ -698,7 +697,7 @@ XorpShell::config_changed(uid_t user_id, const string& deltas,
+ 
+     if (_mode == MODE_COMMITTING) {
+ 	// This is the response back to our own request
+-	return;
++	return true;
+     }
+ 
+     //
+@@ -708,16 +707,21 @@ XorpShell::config_changed(uid_t user_id, const string& deltas,
+ 	username + "\n";
+     if (! deltas.empty()) {
+ 	alert += "DELTAS:\n";
+-	SlaveConfigTree sct(deltas, _tt, _xclient, _clientid, false);
++	SlaveConfigTree sct(deltas, _tt, _xclient, _clientid, false, err_msg);
++	if (sct.invalid())
++	    return false;
+ 	alert += sct.show_tree(false);
+     }
+     if (! deletions.empty()) {
+ 	alert += "DELETIONS:\n";
+-	SlaveConfigTree sct(deletions, _tt, _xclient, _clientid, false);
++	SlaveConfigTree sct(deletions, _tt, _xclient, _clientid, false, err_msg);
++	if (sct.invalid())
++	    return false;
+ 	alert += sct.show_tree(false);
+     }
+     _router_cli->notify_user(alert, true);
+     _router_cli->config_changed_by_other_user();
++    return true;
+ }
+ 
+ void 
+@@ -820,6 +824,7 @@ main(int argc, char *argv[])
+     int errcode = 0;
+     string commands;
+     bool exit_on_error = false;
++    string err;
+ 
+     //
+     // Initialize and start xlog
+@@ -889,17 +894,17 @@ main(int argc, char *argv[])
+     }
+     hostname[sizeof(hostname) - 1] = '\0';
+ 
+-    try {
++    {
+ 	EventLoop eventloop;
+ 	string xname = "xorpsh" + c_format("-%d-%s", XORP_INT_CAST(getpid()),
+ 					   hostname);
+ 	XorpShell xorpsh(eventloop, xname, xorp_binary_root_dir(),
+-			 template_dir, verbose);
+-	xorpsh.run(commands, exit_on_error);
+-    } catch (const InitError& e) {
+-	XLOG_ERROR("xorpsh exiting due to an init error: %s", e.why().c_str());
+-	errcode = 1;
+-	goto cleanup;
++			 template_dir, verbose, err);
++	if (xorpsh.invalid() || !xorpsh.run(commands, exit_on_error, err)) {
++	    XLOG_ERROR("xorpsh exiting due to an init error: %s", err.c_str());
++	    errcode = 1;
++	    goto cleanup;
++	}
+     }
+ 
+  cleanup:
+diff --git a/xorp/rtrmgr/xorpsh_main.hh b/xorp/rtrmgr/xorpsh_main.hh
+index bcf7776..3b94c48 100644
+--- a/xorp/rtrmgr/xorpsh_main.hh
++++ b/xorp/rtrmgr/xorpsh_main.hh
+@@ -48,10 +48,10 @@ public:
+ 	      const string& IPCname, 
+ 	      const string& xorp_root_dir,
+ 	      const string& config_template_dir, 
+-	      bool verbose) throw (InitError);
++	      bool verbose, string& err);
+     ~XorpShell();
+ 
+-    void run(const string& command, bool exit_on_error);
++    bool run(const string& command, bool exit_on_error, string& err);
+     bool done() const;
+ 
+ 
+@@ -100,8 +100,8 @@ public:
+ 			    const string filename,
+ 			    GENERIC_CALLBACK cb);
+ 
+-    void config_changed(uid_t user_id, const string& deltas, 
+-			const string& deletions);
++    bool config_changed(uid_t user_id, const string& deltas, 
++			const string& deletions, string& err);
+ 
+     void module_status_change(const string& module_name, 
+ 			      GenericModule::ModuleStatus status);
+diff --git a/xorp/rtrmgr/xrl_xorpsh_interface.cc b/xorp/rtrmgr/xrl_xorpsh_interface.cc
+index 8789529..5c6185e 100644
+--- a/xorp/rtrmgr/xrl_xorpsh_interface.cc
++++ b/xorp/rtrmgr/xrl_xorpsh_interface.cc
+@@ -117,11 +117,13 @@ XrlXorpshInterface::rtrmgr_client_0_2_config_changed(// Input values,
+ 						     const string& deltas, 
+ 						     const string& deletions)
+ {
++    string err;
+     XLOG_TRACE(_verbose,
+ 	       "config changed: user_id: %u\nDELTAS:\n%sDELETIONS:\n%s\n",
+ 	       XORP_UINT_CAST(user_id), deltas.c_str(), deletions.c_str());
+-    _xorpsh.config_changed(user_id, deltas, deletions);
+-    return XrlCmdError::OKAY();
++    if (_xorpsh.config_changed(user_id, deltas, deletions, err))
++	return XrlCmdError::OKAY();
++    return XrlCmdError::COMMAND_FAILED(err);
+ }
+ 
+ XrlCmdError 
+-- 
+2.7.5
+

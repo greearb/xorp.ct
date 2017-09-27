@@ -1,0 +1,265 @@
+From b2e3a6b0d47290dfdf9b9711430a47589d92ab98 Mon Sep 17 00:00:00 2001
+From: Ben Greear <greearb@candelatech.com>
+Date: Fri, 8 Sep 2017 12:18:48 -0700
+Subject: [PATCH 12/33] Remove InvalidAddress exception.
+
+Signed-off-by: Ben Greear <greearb@candelatech.com>
+---
+ xorp/libxipc/finder_main.cc          | 4 ----
+ xorp/libxipc/finder_server.cc        | 4 ++--
+ xorp/libxipc/finder_server.hh        | 5 ++---
+ xorp/libxipc/finder_tcp.cc           | 4 ++--
+ xorp/libxipc/finder_tcp.hh           | 3 +--
+ xorp/libxipc/finder_tcp_messenger.cc | 2 +-
+ xorp/libxipc/finder_tcp_messenger.hh | 3 +--
+ xorp/libxipc/xrl_router.cc           | 7 +------
+ xorp/libxipc/xrl_router.hh           | 6 ++----
+ xorp/libxorp/exceptions.cc           | 7 -------
+ xorp/libxorp/exceptions.hh           | 8 --------
+ 11 files changed, 12 insertions(+), 41 deletions(-)
+
+diff --git a/xorp/libxipc/finder_main.cc b/xorp/libxipc/finder_main.cc
+index 75b8371..00e0142 100644
+--- a/xorp/libxipc/finder_main.cc
++++ b/xorp/libxipc/finder_main.cc
+@@ -195,10 +195,6 @@ finder_main(int argc, char* const argv[])
+ 	XLOG_ERROR("%s: a finder may already be running.\n",
+ 		   i.why().c_str());
+ 	exit(-1);
+-    } catch (const InvalidAddress& i) {
+-	XLOG_ERROR("Invalid finder server adddress: %s.\n",
+-		   i.why().c_str());
+-	exit(-1);
+     } catch (...) {
+ 	xorp_catch_standard_exceptions();
+     }
+diff --git a/xorp/libxipc/finder_server.cc b/xorp/libxipc/finder_server.cc
+index a7d0b11..e8090aa 100644
+--- a/xorp/libxipc/finder_server.cc
++++ b/xorp/libxipc/finder_server.cc
+@@ -27,7 +27,7 @@
+ FinderServer::FinderServer(EventLoop& e,
+ 			   IPv4	      default_interface,
+ 			   uint16_t   default_port)
+-    throw (InvalidAddress, InvalidPort)
++    throw (InvalidPort)
+     : _e(e), _f(e), _fxt(_f)
+ {
+     char* value;
+@@ -90,7 +90,7 @@ FinderServer::~FinderServer()
+ 
+ bool
+ FinderServer::add_binding(IPv4 addr, uint16_t port)
+-    throw (InvalidAddress, InvalidPort)
++    throw (InvalidPort)
+ {
+     Listeners::const_iterator i = _listeners.begin();
+     while (i != _listeners.end()) {
+diff --git a/xorp/libxipc/finder_server.hh b/xorp/libxipc/finder_server.hh
+index 441627c..66dcd7e 100644
+--- a/xorp/libxipc/finder_server.hh
++++ b/xorp/libxipc/finder_server.hh
+@@ -19,7 +19,6 @@
+ // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/libxipc/finder_server.hh,v 1.20 2008/10/02 21:57:20 bms Exp $
+ 
+ #ifndef __LIBXIPC_FINDER_SERVER_HH__
+ #define __LIBXIPC_FINDER_SERVER_HH__
+@@ -51,7 +50,7 @@ public:
+      * Constructor
+      */
+     FinderServer(EventLoop& e, IPv4 default_interface, uint16_t default_port)
+-	throw (InvalidAddress, InvalidPort);
++	throw (InvalidPort);
+ 
+     /**
+      * Destructor
+@@ -65,7 +64,7 @@ public:
+      * instantiated.
+      */
+     bool add_binding(IPv4 addr, uint16_t port)
+-	throw (InvalidAddress, InvalidPort);
++	throw (InvalidPort);
+ 
+     /**
+      * Remove an interface binding that was added by calling add_binding.
+diff --git a/xorp/libxipc/finder_tcp.cc b/xorp/libxipc/finder_tcp.cc
+index 99186a8..eb0f195 100644
+--- a/xorp/libxipc/finder_tcp.cc
++++ b/xorp/libxipc/finder_tcp.cc
+@@ -288,7 +288,7 @@ FinderTcpListenerBase::FinderTcpListenerBase(EventLoop& e,
+ 					     IPv4	interface,
+ 					     uint16_t	port,
+ 					     bool	en)
+-    throw (InvalidAddress, InvalidPort)
++    throw (InvalidPort)
+     : _e(e), _en(false), _addr(interface), _port(port)
+ {
+     comm_init();
+@@ -297,7 +297,7 @@ FinderTcpListenerBase::FinderTcpListenerBase(EventLoop& e,
+     if_ia.s_addr = interface.addr();
+ 
+     if (is_ip_configured(if_ia) == false && interface != IPv4::ANY()) {
+-	xorp_throw(InvalidAddress, "Not a configured IPv4 address");
++	XLOG_FATAL("Not a configured IPv4 address");
+     }
+ 
+     _lsock = comm_bind_tcp4(&if_ia, htons(port), COMM_SOCK_NONBLOCKING);
+diff --git a/xorp/libxipc/finder_tcp.hh b/xorp/libxipc/finder_tcp.hh
+index 017f74a..46b35f0 100644
+--- a/xorp/libxipc/finder_tcp.hh
++++ b/xorp/libxipc/finder_tcp.hh
+@@ -19,7 +19,6 @@
+ // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/libxipc/finder_tcp.hh,v 1.25 2008/10/02 21:57:20 bms Exp $
+ 
+ #ifndef __LIBXIPC_FINDER_TCP_HH__
+ #define __LIBXIPC_FINDER_TCP_HH__
+@@ -139,7 +138,7 @@ public:
+ 			  IPv4		iface,
+ 			  uint16_t	port,
+ 			  bool		en = true)
+-	throw (InvalidAddress, InvalidPort);
++	throw (InvalidPort);
+ 
+     virtual ~FinderTcpListenerBase();
+ 
+diff --git a/xorp/libxipc/finder_tcp_messenger.cc b/xorp/libxipc/finder_tcp_messenger.cc
+index f788010..1cf1aa7 100644
+--- a/xorp/libxipc/finder_tcp_messenger.cc
++++ b/xorp/libxipc/finder_tcp_messenger.cc
+@@ -241,7 +241,7 @@ FinderTcpListener::FinderTcpListener(EventLoop&		     e,
+ 				     IPv4		     interface,
+ 				     uint16_t		     port,
+ 				     bool		     en)
+-    throw (InvalidAddress, InvalidPort)
++    throw (InvalidPort)
+     : FinderTcpListenerBase(e, interface, port, en), _mm(mm), _cmds(cmds)
+ {
+ }
+diff --git a/xorp/libxipc/finder_tcp_messenger.hh b/xorp/libxipc/finder_tcp_messenger.hh
+index d7081b0..43cb034 100644
+--- a/xorp/libxipc/finder_tcp_messenger.hh
++++ b/xorp/libxipc/finder_tcp_messenger.hh
+@@ -19,7 +19,6 @@
+ // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/libxipc/finder_tcp_messenger.hh,v 1.23 2008/10/02 21:57:21 bms Exp $
+ 
+ #ifndef __LIBXIPC_FINDER_TCP_MESSENGER_HH__
+ #define __LIBXIPC_FINDER_TCP_MESSENGER_HH__
+@@ -94,7 +93,7 @@ public:
+ 		      IPv4 iface,
+ 		      uint16_t port,
+ 		      bool enabled = true)
+-	throw (InvalidAddress, InvalidPort);
++	throw (InvalidPort);
+ 
+     virtual ~FinderTcpListener();
+ 
+diff --git a/xorp/libxipc/xrl_router.cc b/xorp/libxipc/xrl_router.cc
+index 5616798..1635ec3 100644
+--- a/xorp/libxipc/xrl_router.cc
++++ b/xorp/libxipc/xrl_router.cc
+@@ -87,18 +87,15 @@ protected:
+     XrlRouter::XrlCallback	_xcb;
+ };
+ 
+-
+ //
+ // This is scatty and temporary
+ //
+ static IPv4
+ finder_host(const char* host)
+-    throw (InvalidAddress)
+ {
+     in_addr ia;
+     if (address_lookup(host, ia) == false) {
+-	xorp_throw(InvalidAddress,
+-		   c_format("Could resolve finder host %s\n", host));
++	XLOG_FATAL("Could resolve finder host %s\n", host);
+     }
+     return IPv4(ia);
+ }
+@@ -236,7 +233,6 @@ XrlRouter::XrlRouter(EventLoop&  e,
+ 		     const char* class_name,
+ 		     const char* finder_addr,
+ 		     uint16_t	 finder_port)
+-    throw (InvalidAddress)
+     : XrlDispatcher(class_name), _e(e), _finalized(false)
+ {
+     IPv4 finder_ip;
+@@ -256,7 +252,6 @@ XrlRouter::XrlRouter(EventLoop&  e,
+ 		     const char* class_name,
+ 		     IPv4 	 finder_ip,
+ 		     uint16_t	 finder_port)
+-    throw (InvalidAddress)
+     : XrlDispatcher(class_name), _e(e), _finalized(false)
+ {
+     if (0 == finder_port)
+diff --git a/xorp/libxipc/xrl_router.hh b/xorp/libxipc/xrl_router.hh
+index 0679bf1..f3dd514 100644
+--- a/xorp/libxipc/xrl_router.hh
++++ b/xorp/libxipc/xrl_router.hh
+@@ -53,14 +53,12 @@ public:
+     XrlRouter(EventLoop&	e,
+ 	      const char*	class_name,
+ 	      const char*	finder_address,
+-	      uint16_t		finder_port)
+-	throw (InvalidAddress);
++	      uint16_t		finder_port);
+ 
+     XrlRouter(EventLoop&	e,
+ 	      const char*	class_name,
+ 	      IPv4		finder_address,
+-	      uint16_t		finder_port)
+-	throw (InvalidAddress);
++	      uint16_t		finder_port);
+ 
+     virtual ~XrlRouter();
+ 
+diff --git a/xorp/libxorp/exceptions.cc b/xorp/libxorp/exceptions.cc
+index dcff7b3..60972b8 100644
+--- a/xorp/libxorp/exceptions.cc
++++ b/xorp/libxorp/exceptions.cc
+@@ -72,13 +72,6 @@ XorpReasonedException::why() const
+     return ( _why.size() != 0 ) ? _why : string("Not specified");
+ }
+ 
+-InvalidAddress::InvalidAddress(const char* file,
+-			       size_t line,
+-			       const string& init_why)
+-    : XorpReasonedException("InvalidAddress", file, line, init_why)
+-{
+-}
+-
+ InvalidPort::InvalidPort(const char* file,
+ 			 size_t line,
+ 			 const string& init_why)
+diff --git a/xorp/libxorp/exceptions.hh b/xorp/libxorp/exceptions.hh
+index 798dc4f..08a2ddd 100644
+--- a/xorp/libxorp/exceptions.hh
++++ b/xorp/libxorp/exceptions.hh
+@@ -135,14 +135,6 @@ protected:
+ // Standard XORP exceptions
+ 
+ /**
+- * @short A standard XORP exception that is thrown if an address is invalid.
+- */
+-class InvalidAddress : public XorpReasonedException {
+-public:
+-    InvalidAddress(const char* file, size_t line, const string& init_why = "");
+-};
+-
+-/**
+  * @short A standard XORP exception that is thrown if a port is invalid.
+  */
+ class InvalidPort : public XorpReasonedException {
+-- 
+2.7.5
+

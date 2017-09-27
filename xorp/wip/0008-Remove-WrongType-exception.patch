@@ -1,0 +1,593 @@
+From 10d099efd29dc699a4a6706aabe0d958adcc6e80 Mon Sep 17 00:00:00 2001
+From: Ben Greear <greearb@candelatech.com>
+Date: Fri, 8 Sep 2017 11:22:23 -0700
+Subject: [PATCH 08/33] Remove WrongType exception.
+
+Signed-off-by: Ben Greear <greearb@candelatech.com>
+---
+ xorp/libxipc/finder_client.cc       |   6 --
+ xorp/libxipc/xrl_args.cc            | 122 +++++++++---------------------------
+ xorp/libxipc/xrl_atom.cc            |  74 +++++++++++-----------
+ xorp/libxipc/xrl_atom.hh            |  69 +++++---------------
+ xorp/rtrmgr/cli.cc                  |  19 +++---
+ xorp/xrl/scripts/Xif/thrifttypes.py |   3 +-
+ 6 files changed, 91 insertions(+), 202 deletions(-)
+
+diff --git a/xorp/libxipc/finder_client.cc b/xorp/libxipc/finder_client.cc
+index 081464a..c107329 100644
+--- a/xorp/libxipc/finder_client.cc
++++ b/xorp/libxipc/finder_client.cc
+@@ -312,12 +312,6 @@ public:
+ 		_qcb->dispatch(XrlError::RESOLVE_FAILED(), 0);
+ 		client().notify_done(this);
+ 		return;
+-	    } catch (const XrlAtom::WrongType&) {
+-		finder_trace_result("failed (corrupt response)");
+-		_rt.erase(rt_entry);
+-		_qcb->dispatch(XrlError::RESOLVE_FAILED(), 0);
+-		client().notify_done(this);
+-		return;
+ 	    }
+ 	}
+ 	finder_trace_result("okay");
+diff --git a/xorp/libxipc/xrl_args.cc b/xorp/libxipc/xrl_args.cc
+index d66d290..83bcb65 100644
+--- a/xorp/libxipc/xrl_args.cc
++++ b/xorp/libxipc/xrl_args.cc
+@@ -116,8 +116,6 @@ XrlArgs::get_bool(const char* name) const throw (BadArgs)
+ 	return get(XrlAtom(name, xrlatom_boolean)).boolean();
+     } catch (const XrlAtom::NoData& e) {
+         xorp_throw(BadArgs, e.why());
+-    } catch (const XrlAtom::WrongType& e) {
+-        xorp_throw(BadArgs, e.why());
+     }
+ }
+ 
+@@ -143,8 +141,6 @@ XrlArgs::get_int32(const char* name) const throw (BadArgs)
+ 	return get(XrlAtom(name, xrlatom_int32)).int32();
+     } catch (const XrlAtom::NoData& e) {
+         xorp_throw(BadArgs, e.why());
+-    } catch (const XrlAtom::WrongType& e) {
+-        xorp_throw(BadArgs, e.why());
+     }
+ }
+ 
+@@ -170,8 +166,6 @@ XrlArgs::get_uint32(const char* name) const throw (BadArgs)
+ 	return get(XrlAtom(name, xrlatom_uint32)).uint32();
+     } catch (const XrlAtom::NoData& e) {
+         xorp_throw(BadArgs, e.why());
+-    } catch (const XrlAtom::WrongType& e) {
+-        xorp_throw(BadArgs, e.why());
+     }
+ }
+ 
+@@ -197,8 +191,6 @@ XrlArgs::get_ipv4(const char* name) const throw (BadArgs)
+ 	return get(XrlAtom(name, xrlatom_ipv4)).ipv4();
+     } catch (const XrlAtom::NoData& e) {
+         xorp_throw(BadArgs, e.why());
+-    } catch (const XrlAtom::WrongType& e) {
+-        xorp_throw(BadArgs, e.why());
+     }
+ }
+ 
+@@ -224,8 +216,6 @@ XrlArgs::get_ipv4net(const char* name) const throw (BadArgs)
+ 	return get(XrlAtom(name, xrlatom_ipv4net)).ipv4net();
+     } catch (const XrlAtom::NoData& e) {
+         xorp_throw(BadArgs, e.why());
+-    } catch (const XrlAtom::WrongType& e) {
+-        xorp_throw(BadArgs, e.why());
+     }
+ }
+ 
+@@ -251,8 +241,6 @@ XrlArgs::get_ipv6(const char* name) const throw (BadArgs)
+ 	return get(XrlAtom(name, xrlatom_ipv6)).ipv6();
+     } catch (const XrlAtom::NoData& e) {
+         xorp_throw(BadArgs, e.why());
+-    } catch (const XrlAtom::WrongType& e) {
+-        xorp_throw(BadArgs, e.why());
+     }
+ }
+ 
+@@ -278,8 +266,6 @@ XrlArgs::get_ipv6net(const char* name) const throw (BadArgs)
+ 	return get(XrlAtom(name, xrlatom_ipv6net)).ipv6net();
+     } catch (const XrlAtom::NoData& e) {
+         xorp_throw(BadArgs, e.why());
+-    } catch (const XrlAtom::WrongType& e) {
+-        xorp_throw(BadArgs, e.why());
+     }
+ }
+ 
+@@ -301,21 +287,17 @@ XrlArgs::add_ipvx(const char* name, const IPvX& val) throw (XrlAtomFound)
+ }
+ 
+ const IPvX
+-XrlArgs::get_ipvx(const char* name) const throw (BadArgs)
++XrlArgs::get_ipvx(const char* name) const;
+ {
+-    try {
+-	return get(XrlAtom(name, xrlatom_ipv4)).ipv4();
+-    } catch (const XrlAtom::NoData& e) {
+-        xorp_throw(BadArgs, e.why());
+-    } catch (const XrlAtom::WrongType&) {
+-	try {
+-	    return get(XrlAtom(name, xrlatom_ipv6)).ipv6();
+-	} catch (const XrlAtom::WrongType& e) {
+-	    xorp_throw(BadArgs, e.why());
+-	}
++    XrlAtom a(name, xrlatom_ipv4);
++    if (a.invalid()) {
++	XrlAtom b(name, xrlatom_ipv6);
++	XLOG_ASSERT(!b.invalid());
++	return get(b).ipv6();
++    }
++    else {
++	return get(a).ipv4;
+     }
+-    xorp_throw(BadArgs, c_format("Unknown error for atom name %s", name));
+-    XLOG_UNREACHABLE();
+ }
+ 
+ void
+@@ -342,19 +324,15 @@ XrlArgs::add_ipvxnet(const char* name, const IPvXNet& val) throw (XrlAtomFound)
+ const IPvXNet
+ XrlArgs::get_ipvxnet(const char* name) const throw (BadArgs)
+ {
+-    try {
+-	return get(XrlAtom(name, xrlatom_ipv4net)).ipv4net();
+-    } catch (const XrlAtom::NoData& e) {
+-        xorp_throw(BadArgs, e.why());
+-    } catch (const XrlAtom::WrongType&) {
+-	try {
+-	    return get(XrlAtom(name, xrlatom_ipv6net)).ipv6net();
+-	} catch (const XrlAtom::WrongType& e) {
+-	    xorp_throw(BadArgs, e.why());
+-	}
++    XrlAtom a(name, xrlatom_ipv4net);
++    if (a.invalid()) {
++	XrlAtom b(name, xrlatom_ipv6net);
++	XLOG_ASSERT(!b.invalid());
++	return get(b).ipv6net();
++    }
++    else {
++	return get(a).ipv4net;
+     }
+-    xorp_throw(BadArgs, c_format("Unknown error for atom name %s", name));
+-    XLOG_UNREACHABLE();
+ }
+ 
+ void
+@@ -379,13 +357,7 @@ XrlArgs::add_mac(const char* name, const Mac& val) throw (XrlAtomFound)
+ const Mac&
+ XrlArgs::get_mac(const char* name) const throw (BadArgs)
+ {
+-    try {
+-	return get(XrlAtom(name, xrlatom_mac)).mac();
+-    } catch (const XrlAtom::NoData& e) {
+-        xorp_throw(BadArgs, e.why());
+-    } catch (const XrlAtom::WrongType& e) {
+-        xorp_throw(BadArgs, e.why());
+-    }
++    return get(XrlAtom(name, xrlatom_mac)).mac();
+ }
+ 
+ void
+@@ -404,15 +376,9 @@ XrlArgs::add_string(const char* name, const string& val) throw (XrlAtomFound)
+ }
+ 
+ const string&
+-XrlArgs::get_string(const char* name) const throw (BadArgs)
++XrlArgs::get_string(const char* name) const
+ {
+-    try {
+-	return get(XrlAtom(name, xrlatom_text)).text();
+-    } catch (const XrlAtom::NoData& e) {
+-        xorp_throw(BadArgs, e.why());
+-    } catch (const XrlAtom::WrongType& e) {
+-        xorp_throw(BadArgs, e.why());
+-    }
++    return get(XrlAtom(name, xrlatom_text)).text();
+ }
+ 
+ void
+@@ -432,15 +398,9 @@ XrlArgs::add_list(const char* name, const XrlAtomList& val)
+ }
+ 
+ const XrlAtomList&
+-XrlArgs::get_list(const char* name) const throw (BadArgs)
++XrlArgs::get_list(const char* name) const
+ {
+-    try {
+-	return get(XrlAtom(name, xrlatom_list)).list();
+-    } catch (const XrlAtom::NoData& e) {
+-        xorp_throw(BadArgs, e.why());
+-    } catch (const XrlAtom::WrongType& e) {
+-        xorp_throw(BadArgs, e.why());
+-    }
++    return get(XrlAtom(name, xrlatom_list)).list();
+ }
+ 
+ void
+@@ -460,15 +420,9 @@ XrlArgs::add_binary(const char* name, const vector<uint8_t>& val)
+ }
+ 
+ const vector<uint8_t>&
+-XrlArgs::get_binary(const char* name) const throw (BadArgs)
++XrlArgs::get_binary(const char* name) const
+ {
+-    try {
+-	return get(XrlAtom(name, xrlatom_binary)).binary();
+-    } catch (const XrlAtom::NoData& e) {
+-        xorp_throw(BadArgs, e.why());
+-    } catch (const XrlAtom::WrongType& e) {
+-        xorp_throw(BadArgs, e.why());
+-    }
++    return get(XrlAtom(name, xrlatom_binary)).binary();
+ }
+ 
+ void
+@@ -489,13 +443,7 @@ XrlArgs::add_int64(const char* name, int64_t val) throw (XrlAtomFound)
+ const int64_t&
+ XrlArgs::get_int64(const char* name) const throw (BadArgs)
+ {
+-    try {
+-	return get(XrlAtom(name, xrlatom_int64)).int64();
+-    } catch (const XrlAtom::NoData& e) {
+-        xorp_throw(BadArgs, e.why());
+-    } catch (const XrlAtom::WrongType& e) {
+-        xorp_throw(BadArgs, e.why());
+-    }
++    return get(XrlAtom(name, xrlatom_int64)).int64();
+ }
+ 
+ void
+@@ -514,15 +462,9 @@ XrlArgs::add_uint64(const char* name, uint64_t val) throw (XrlAtomFound)
+ }
+ 
+ const uint64_t&
+-XrlArgs::get_uint64(const char* name) const throw (BadArgs)
++XrlArgs::get_uint64(const char* name) const
+ {
+-    try {
+-	return get(XrlAtom(name, xrlatom_uint64)).uint64();
+-    } catch (const XrlAtom::NoData& e) {
+-        xorp_throw(BadArgs, e.why());
+-    } catch (const XrlAtom::WrongType& e) {
+-        xorp_throw(BadArgs, e.why());
+-    }
++    return get(XrlAtom(name, xrlatom_uint64)).uint64();
+ }
+ 
+ void
+@@ -542,15 +484,9 @@ XrlArgs::add_fp64(const char* name, fp64_t val) throw (XrlAtomFound)
+ }
+ 
+ const fp64_t&
+-XrlArgs::get_fp64(const char* name) const throw (BadArgs)
++XrlArgs::get_fp64(const char* name) const
+ {
+-    try {
+-	return get(XrlAtom(name, xrlatom_fp64)).fp64();
+-    } catch (const XrlAtom::NoData& e) {
+-        xorp_throw(BadArgs, e.why());
+-    } catch (const XrlAtom::WrongType& e) {
+-        xorp_throw(BadArgs, e.why());
+-    }
++    return get(XrlAtom(name, xrlatom_fp64)).fp64();
+ }
+ 
+ void
+diff --git a/xorp/libxipc/xrl_atom.cc b/xorp/libxipc/xrl_atom.cc
+index 18820ad..d305232 100644
+--- a/xorp/libxipc/xrl_atom.cc
++++ b/xorp/libxipc/xrl_atom.cc
+@@ -243,132 +243,132 @@ XrlAtom::~XrlAtom()
+ // ----------------------------------------------------------------------------
+ // XrlAtom accessor functions
+ 
+-inline void
+-XrlAtom::type_and_data_okay(const XrlAtomType& t) const
+-    throw (NoData, WrongType) {
++inline bool
++XrlAtom::type_and_data_okay(const XrlAtomType& t) const {
+     if (_type != t)
+-        xorp_throw(WrongType, t, _type);
++	return false;
+     if (_have_data == false)
+-        xorp_throw(NoData, name());
++        return false;
++    return true;
+ }
+ 
+ const bool&
+-XrlAtom::boolean() const throw (NoData, WrongType)
++XrlAtom::boolean() const;
+ {
+-    type_and_data_okay(xrlatom_boolean);
++    XLOG_ASSERT(type_and_data_okay(xrlatom_boolean));
+     return _boolean;
+ }
+ 
+ const int32_t&
+-XrlAtom::int32() const throw (NoData, WrongType)
++XrlAtom::int32() const
+ {
+-    type_and_data_okay(xrlatom_int32);
++    XLOG_ASSERT(type_and_data_okay(xrlatom_int32));
+     return _i32val;
+ }
+ 
+ const uint32_t&
+-XrlAtom::uint32() const throw (NoData, WrongType)
++XrlAtom::uint32() const
+ {
+-    type_and_data_okay(xrlatom_uint32);
++    XLOG_ASSERT(type_and_data_okay(xrlatom_uint32));
+     return _u32val;
+ }
+ 
+ const IPv4&
+-XrlAtom::ipv4() const throw (NoData, WrongType)
++XrlAtom::ipv4() const
+ {
+-    type_and_data_okay(xrlatom_ipv4);
++    XLOG_ASSERT(type_and_data_okay(xrlatom_ipv4));
+     return _ipv4;
+ }
+ 
+ const IPv4Net&
+-XrlAtom::ipv4net() const throw (NoData, WrongType)
++XrlAtom::ipv4net() const
+ {
+-    type_and_data_okay(xrlatom_ipv4net);
++    XLOG_ASSERT(type_and_data_okay(xrlatom_ipv4net));
+     return _ipv4net;
+ }
+ 
+ const IPv6&
+-XrlAtom::ipv6() const throw (NoData, WrongType)
++XrlAtom::ipv6() const
+ {
+-    type_and_data_okay(xrlatom_ipv6);
++    XLOG_ASSERT(type_and_data_okay(xrlatom_ipv6));
+     return *_ipv6;
+ }
+ 
+ const IPv6Net&
+-XrlAtom::ipv6net() const throw (NoData, WrongType)
++XrlAtom::ipv6net() const
+ {
+-    type_and_data_okay(xrlatom_ipv6net);
++    XLOG_ASSERT(type_and_data_okay(xrlatom_ipv6net));
+     return *_ipv6net;
+ }
+ 
+ const IPvX
+-XrlAtom::ipvx() const throw (NoData, WrongType)
++XrlAtom::ipvx() const
+ {
+     if (_type == xrlatom_ipv4) {
+ 	return ipv4();
+     } else {
+-	assert(_type == xrlatom_ipv6);
++	XLOG_ASSERT(_type == xrlatom_ipv6);
+ 	return ipv6();
+     }
+ }
+ 
+ const IPvXNet
+-XrlAtom::ipvxnet() const throw (NoData, WrongType)
++XrlAtom::ipvxnet() const
+ {
+     if (_type == xrlatom_ipv4net) {
+ 	return ipv4net();
+     } else {
+-	assert(_type == xrlatom_ipv6);
++	XLOG_ASSERT(_type == xrlatom_ipv6);
+ 	return ipv6net();
+     }
+ }
+ 
+ const Mac&
+-XrlAtom::mac() const throw (NoData, WrongType)
++XrlAtom::mac() const
+ {
+-    type_and_data_okay(xrlatom_mac);
++    XLOG_ASSERT(type_and_data_okay(xrlatom_mac));
+     return *_mac;
+ }
+ 
+ const string&
+-XrlAtom::text() const throw (NoData, WrongType)
++XrlAtom::text() const
+ {
+-    type_and_data_okay(xrlatom_text);
++    XLOG_ASSERT(type_and_data_okay(xrlatom_text));
+     return *_text;
+ }
+ 
+ const XrlAtomList&
+-XrlAtom::list() const throw (NoData, WrongType)
++XrlAtom::list() const
+ {
+-    type_and_data_okay(xrlatom_list);
++    XLOG_ASSERT(type_and_data_okay(xrlatom_list));
+     return *_list;
+ }
+ 
+ const vector<uint8_t>&
+-XrlAtom::binary() const throw (NoData, WrongType)
++XrlAtom::binary() const
+ {
+-    type_and_data_okay(xrlatom_binary);
++    XLOG_ASSERT(type_and_data_okay(xrlatom_binary));
+     return *_binary;
+ }
+ 
+ const int64_t&
+-XrlAtom::int64() const throw (NoData, WrongType)
++XrlAtom::int64() const
+ {
+-    type_and_data_okay(xrlatom_int64);
++    XLOG_ASSERT(type_and_data_okay(xrlatom_int64));
+     return _i64val;
+ }
+ 
+ const uint64_t&
+-XrlAtom::uint64() const throw (NoData, WrongType)
++XrlAtom::uint64() const
+ {
+-    type_and_data_okay(xrlatom_uint64);
++    XLOG_ASSERT(type_and_data_okay(xrlatom_uint64));
+     return _u64val;
+ }
+ 
+ const fp64_t&
+-XrlAtom::fp64() const throw (NoData, WrongType)
++XrlAtom::fp64() const
+ {
+-    type_and_data_okay(xrlatom_fp64);
++    XLOG_ASSERT(type_and_data_okay(xrlatom_fp64));
+     return _fp64val;
+ }
+ 
+diff --git a/xorp/libxipc/xrl_atom.hh b/xorp/libxipc/xrl_atom.hh
+index da34d1a..4f1267f 100644
+--- a/xorp/libxipc/xrl_atom.hh
++++ b/xorp/libxipc/xrl_atom.hh
+@@ -87,40 +87,6 @@ public:
+ 
+ class XrlAtom : public XrlAtomBase {
+ public:
+-    // Exceptions
+-    struct NoData : public XorpException {
+-	NoData(const char* file, int line, const string& name) :
+-	    XorpException("XrlAtom::NoData", file, line),
+-	_name(name) {}
+-
+-	const string why() const {
+-	    return c_format("Atom name %s has no data", _name.c_str());
+-	}
+-
+-    private:
+-	string _name;
+-    };
+-
+-    struct WrongType : public XorpException {
+-	WrongType(const char* file, int line,
+-		  const XrlAtomType& actual, const XrlAtomType& expected) :
+-	    XorpException("XrlAtom::WrongType", file, line),
+-	    _actual(actual), _expected(expected) {}
+-
+-	const string why() const {
+-	    return c_format("Atom type %s (%d) expected %s (%d)",
+-			    xrlatom_type_name(_actual), _actual,
+-			    xrlatom_type_name(_expected), _expected);
+-	}
+-    private:
+-	XrlAtomType _actual;
+-	XrlAtomType _expected;
+-    };
+-
+-    private:
+-	string _name;
+-    };
+-
+     XrlAtom() : _type(xrlatom_no_type), _have_data(false), _own(true), _has_fake_args(false) {}
+     ~XrlAtom();
+ 
+@@ -368,22 +334,22 @@ public:
+     void using_real_args() { _has_fake_args = false; }
+ 
+     // The following accessors may throw accessor exceptions...
+-    const bool&		   boolean() const throw (NoData, WrongType);
+-    const int32_t&	   int32() const throw (NoData, WrongType);
+-    const uint32_t&	   uint32() const throw (NoData, WrongType);
+-    const IPv4&		   ipv4() const throw (NoData, WrongType);
+-    const IPv4Net&         ipv4net() const throw (NoData, WrongType);
+-    const IPv6&		   ipv6() const throw (NoData, WrongType);
+-    const IPv6Net&	   ipv6net() const throw (NoData, WrongType);
+-    const IPvX		   ipvx() const throw (NoData, WrongType);
+-    const IPvXNet	   ipvxnet() const throw (NoData, WrongType);
+-    const Mac&		   mac() const throw (NoData, WrongType);
+-    const string&	   text() const throw (NoData, WrongType);
+-    const XrlAtomList&	   list() const throw (NoData, WrongType);
+-    const vector<uint8_t>& binary() const throw (NoData, WrongType);
+-    const int64_t&	   int64() const throw (NoData, WrongType);
+-    const uint64_t&	   uint64() const throw (NoData, WrongType);
+-    const fp64_t&	   fp64() const throw (NoData, WrongType);
++    const bool&		   boolean() const;
++    const int32_t&	   int32() const;
++    const uint32_t&	   uint32() const;
++    const IPv4&		   ipv4() const;
++    const IPv4Net&         ipv4net() const;
++    const IPv6&		   ipv6() const;
++    const IPv6Net&	   ipv6net() const;
++    const IPvX		   ipvx() const;
++    const IPvXNet	   ipvxnet() const;
++    const Mac&		   mac() const;
++    const string&	   text() const;
++    const XrlAtomList&	   list() const;
++    const vector<uint8_t>& binary() const;
++    const int64_t&	   int64() const;
++    const uint64_t&	   uint64() const;
++    const fp64_t&	   fp64() const;
+ 
+     // ... Your type's accessor method here ...
+ 
+@@ -444,8 +410,7 @@ private:
+ 
+     void discard_dynamic();
+     void abandon_data();
+-    void type_and_data_okay(const XrlAtomType& t) const
+-	throw (NoData, WrongType);
++    bool WARN_UNUSED type_and_data_okay(const XrlAtomType& t) const;
+ 
+     void set_name(const char *n);
+     static XrlAtomType resolve_type_c_str(const char*);
+diff --git a/xorp/rtrmgr/cli.cc b/xorp/rtrmgr/cli.cc
+index adcb019..a44a49d 100644
+--- a/xorp/rtrmgr/cli.cc
++++ b/xorp/rtrmgr/cli.cc
+@@ -1720,18 +1720,13 @@ RouterCLI::got_config_users(const XrlError& e, const XrlAtomList* users)
+ 	for (size_t i = 0; i < nusers; i++) {
+ 	    XrlAtom a;
+ 	    a = users->get(i);
+-	    try {
+-		uid_t uid = a.uint32();
+-		// Only include me if I'm in the list more than once.
+-		if (uid == getuid() && doneme == false)
+-		    doneme = true;
+-		else
+-		    _config_mode_users.push_back(uid);
+-	    }
+-	    catch (const XrlAtom::WrongType& wt) {
+-		// This had better not happen
+-		XLOG_FATAL("Internal Error");
+-	    }
++
++	    uid_t uid = a.uint32();
++	    // Only include me if I'm in the list more than once.
++	    if (uid == getuid() && doneme == false)
++		doneme = true;
++	    else
++		_config_mode_users.push_back(uid);
+ 	}
+     }
+     reset_path();
+diff --git a/xorp/xrl/scripts/Xif/thrifttypes.py b/xorp/xrl/scripts/Xif/thrifttypes.py
+index 9f18420..1ec8d28 100644
+--- a/xorp/xrl/scripts/Xif/thrifttypes.py
++++ b/xorp/xrl/scripts/Xif/thrifttypes.py
+@@ -304,8 +304,7 @@ def recv_list(a, fname):
+ # If no elements are present, just write no members.
+ # Indent the if() / for() block marshal-out code.
+ # We'll assume the code has filled out the list w/o introducing
+-# any heterogenous members. If not, this generated shim will
+-# throw a WrongType exception in the XrlAtom code.
++# any heterogenous members. If not, it will probably assert.
+ #
+ # XXX Special case. This requires the arg object as a parameter.
+ #
+-- 
+2.7.5
+

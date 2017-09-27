@@ -1,0 +1,1032 @@
+From 5ebbd1e922f6a90a866e18948d111e4bc2eaf108 Mon Sep 17 00:00:00 2001
+From: Ben Greear <greearb@candelatech.com>
+Date: Fri, 8 Sep 2017 14:55:26 -0700
+Subject: [PATCH 17/33] More cleanup related to removing exceptions.
+
+Signed-off-by: Ben Greear <greearb@candelatech.com>
+---
+ xorp/libxipc/xrl_atom.cc    |   3 -
+ xorp/libxipc/xrl_parser.cc  | 207 ++++++++++++++++++++++++++++----------------
+ xorp/libxipc/xrl_parser.hh  |  29 ++++---
+ xorp/libxipc/xrl_pf.hh      |   8 --
+ xorp/libxipc/xrl_pf_stcp.cc |  18 ++--
+ xorp/libxipc/xrl_pf_stcp.hh |   6 +-
+ xorp/libxipc/xrl_pf_unix.cc |  19 ++--
+ xorp/libxorp/ipv6.cc        |   7 ++
+ xorp/libxorp/ipv6.hh        |   8 +-
+ xorp/libxorp/ipvx.cc        |  12 ++-
+ xorp/libxorp/ipvx.hh        |   8 +-
+ xorp/libxorp/mac.cc         |   5 +-
+ xorp/rtrmgr/xrldb.cc        |  54 ++++++------
+ 13 files changed, 224 insertions(+), 160 deletions(-)
+
+diff --git a/xorp/libxipc/xrl_atom.cc b/xorp/libxipc/xrl_atom.cc
+index ce66f90..7da25db 100644
+--- a/xorp/libxipc/xrl_atom.cc
++++ b/xorp/libxipc/xrl_atom.cc
+@@ -752,9 +752,6 @@ XrlAtom::packed_bytes() const
+ 	return bytes;
+     }
+ 
+-    x_static_assert(sizeof(IPv6) == 16);
+-    x_static_assert(sizeof(IPv6Net) == sizeof(IPv6) + 4);
+-
+     switch (_type) {
+     case xrlatom_no_type:
+ 	break;
+diff --git a/xorp/libxipc/xrl_parser.cc b/xorp/libxipc/xrl_parser.cc
+index 3564b8a..cc7db12 100644
+--- a/xorp/libxipc/xrl_parser.cc
++++ b/xorp/libxipc/xrl_parser.cc
+@@ -22,9 +22,6 @@
+ 
+ 
+ #include <stdio.h>
+-
+-
+-
+ #include "xrl_module.h"
+ #include "libxorp/xorp.h"
+ #include "libxorp/c_format.hh"
+@@ -144,11 +141,13 @@ skip_xrl_plain_chars(const string& input, string::const_iterator& sci)
+ 
+ static inline char
+ c_escape_to_char(const string& input,
+-		 string::const_iterator sci) {
++		 string::const_iterator sci, XrlParseError& err) {
+ 
+-    if (sci == input.end())
+-	throw XrlParseError(input, sci,
++    if (sci == input.end()) {
++	err = XrlParseError(input, sci,
+ 			    "Unterminated escape sequence");
++	return 0;
++    }
+ 
+     switch (*sci) {
+ 	// --- C character escape sequences ----
+@@ -175,8 +174,10 @@ c_escape_to_char(const string& input,
+ 	// ---- Hex value to be interpreted ----
+     case 'x': {
+ 	sci++;
+-	if (sci == input.end())
+-	    throw XrlParseError(input, sci, "Unexpected end of input.");
++	if (sci == input.end()) {
++	    err = XrlParseError(input, sci, "Unexpected end of input.");
++	    return 0;
++	}
+ 	char v = 0;
+ 	for (int n = 0; sci != input.end() && n < 2 && xorp_isxdigit(*sci);
+ 	     n++, sci++) {
+@@ -189,8 +190,9 @@ c_escape_to_char(const string& input,
+ 	// ---- Octal value to be interpreted ----
+     case '9': // Invalid values
+     case '8':
+-	throw XrlParseError(input, sci,
++	err = XrlParseError(input, sci,
+ 			    c_format("%c is not an octal character.", *sci));
++	return 0;
+     case '7': // Can have upto 3 octal chars...
+     case '6':
+     case '5':
+@@ -244,7 +246,7 @@ skip_one_char(const string&, string::const_iterator* sci)
+ }
+ 
+ static inline void
+-skip_cplusplus_comments(const string& s, string::const_iterator& sci)
++skip_cplusplus_comments(const string& s, string::const_iterator& sci, XrlParseError& err)
+ {
+     assert(*sci == '/');
+     sci++;
+@@ -265,7 +267,8 @@ skip_cplusplus_comments(const string& s, string::const_iterator& sci)
+ 	    prev = *sci;
+ 	    sci++;
+ 	}
+-	throw XrlParseError(s, sci_start, "Unterminated comment.");
++	err = XrlParseError(s, sci_start, "Unterminated comment.");
++	return;
+     } else if (*sci == '/') {
+ 	// it's a C++ style comment
+ 	skip_to_next_line(s, sci);
+@@ -277,7 +280,7 @@ skip_cplusplus_comments(const string& s, string::const_iterator& sci)
+ }
+ 
+ static inline void
+-skip_comments_and_blanks(const string& s, string::const_iterator& sci)
++skip_comments_and_blanks(const string& s, string::const_iterator& sci, XrlParseError& err)
+ {
+     for (;;) {
+ 	skip_past_blanks(s, sci);
+@@ -285,7 +288,9 @@ skip_comments_and_blanks(const string& s, string::const_iterator& sci)
+ 	    break;
+ 	}
+ 	if (*sci == '/') {
+-	    skip_cplusplus_comments(s, sci);
++	    skip_cplusplus_comments(s, sci, err);
++	    if (err.has_error())
++		return;
+ 	    continue;
+ 	}
+ 	skip_to_next_line(s, sci);
+@@ -294,7 +299,7 @@ skip_comments_and_blanks(const string& s, string::const_iterator& sci)
+ 
+ static inline void
+ get_single_quoted_value(const string& s, string::const_iterator& sci,
+-			string& token)
++			string& token, XrlParseError& err)
+ {
+     assert(*sci == '\'');
+ 
+@@ -304,7 +309,8 @@ get_single_quoted_value(const string& s, string::const_iterator& sci,
+     string::const_iterator sci_start = sci;
+     advance_to_char(s, sci, '\'');
+     if (sci == s.end()) {
+-	throw XrlParseError(s, sci_start, "Unterminated single quote.");
++	err = XrlParseError(s, sci_start, "Unterminated single quote.");
++	return;
+     }
+     token = string(sci_start, sci);
+     sci++;
+@@ -313,7 +319,7 @@ get_single_quoted_value(const string& s, string::const_iterator& sci,
+ static inline void
+ get_double_quoted_value(const string& input,
+ 			string::const_iterator& sci,
+-			string& token)
++			string& token, XrlParseError& err)
+ {
+     assert(*sci == '\"');
+ 
+@@ -329,18 +335,22 @@ get_double_quoted_value(const string& input,
+ 	if (*sci == '\\') {
+ 	    sci++;
+ 	    if (sci == input.end()) {
+-		throw XrlParseError(input, sci,
++		err = XrlParseError(input, sci,
+ 				    "Unterminated double quote");
++		return;
+ 	    }
+-	    char c = c_escape_to_char(input, sci);
++	    char c = c_escape_to_char(input, sci, err);
++	    if (err.has_error())
++		return;
+ 	    token.append(1, c);
+ 	}
+ 	if (*sci == '\"')
+ 	    break;
+-	if (sci == input.end())
+-	    throw XrlParseError(input, sci,
++	if (sci == input.end()) {
++	    err = XrlParseError(input, sci,
+ 				"Unterminated double quote");
+-
++	    return;
++	}
+     }
+     sci++;
+ }
+@@ -386,23 +396,27 @@ get_protocol_target_and_command(const string& input,
+ 				string::const_iterator& sci,
+ 				string& protocol,
+ 				string& target,
+-				string& command)
++				string& command, XrlParseError& err)
+ {
+     string::const_iterator start = sci;
+ 
+     // Get target i.e. the bit like finder:// entity bit of xrl
+     while (sci != input.end() && isxrlplain(*sci))
+ 	sci++;
+-    if (string(sci, sci + 3) != string("://"))
+-	throw XrlParseError(input, sci, "Expected to find a ://");
++    if (string(sci, sci + 3) != string("://")) {
++	err = XrlParseError(input, sci, "Expected to find a ://");
++	return;
++    }
+     protocol = string(start, sci);
+     sci += 3;
+     start = sci;
+     while (sci != input.end() && !(xorp_isspace(*sci) && iscrlf(*sci)) &&
+ 	   *sci != '/')
+ 	sci++;
+-    if (*sci != '/')
+-	throw XrlParseError(input, sci, "Expected to find a /");
++    if (*sci != '/') {
++	err = XrlParseError(input, sci, "Expected to find a /");
++	return;
++    }
+     target = string(start, sci);
+ 
+     // Get method - everything from end of target to beginning of arguments
+@@ -421,8 +435,6 @@ get_protocol_target_and_command(const string& input,
+ 	sci--;
+ 
+     command = string(start, sci);
+-
+-    return;
+ }
+ 
+ static void
+@@ -433,7 +445,7 @@ push_atoms_and_spells(XrlArgs* args,
+ 		      const string::const_iterator& value_start,
+ 		      const string& atom_name,
+ 		      const string& atom_type,
+-		      const string& atom_value) {
++		      const string& atom_value, XrlParseError& err) {
+     XrlAtomType t = XrlAtom::lookup_type(atom_type);
+     if (atom_value.empty()) {
+ 	if (args)
+@@ -444,10 +456,12 @@ push_atoms_and_spells(XrlArgs* args,
+ 	if (args)
+ 	    args->add(XrlAtom(atom_name, t));
+ 
+-	if (spells == 0)
+-	    throw XrlParseError(input, value_start,
++	if (spells == 0) {
++	    err = XrlParseError(input, value_start,
+ 				"Found a spell character without a spell"
+ 				"list to store information.");
++	    return;
++	}
+ 
+ 	// This v ugly to have here - want to check for duplicate
+ 	// atom name or variable name.
+@@ -456,19 +470,23 @@ push_atoms_and_spells(XrlArgs* args,
+ 	    if (i->atom_name() == atom_name) {
+ 		string e = c_format("Duplicate atom name - \"%s\".",
+ 				    atom_name.c_str());
+-		throw XrlParseError(input, atom_start, e);
++		err = XrlParseError(input, atom_start, e);
++		return;
+ 	    }
+ 	    if (i->spell() == atom_value) {
+ 		string e = c_format("Duplicate variable name - \"%s\".",
+ 				    atom_value.c_str());
+-		throw XrlParseError(input, value_start, e);
++		err = XrlParseError(input, value_start, e);
++		return;
+ 	    }
+ 	}
+ 	spells->push_back(XrlAtomSpell(atom_name, t, atom_value));
+     } else {
+-	if (args == 0)
+-	    throw XrlParseError(input, value_start,
++	if (args == 0) {
++	    err = XrlParseError(input, value_start,
+ 				"Atom cannot be specified here");
++	    return;
++	}
+ 	args->add(XrlAtom(atom_name, t, atom_value));
+     }
+ }
+@@ -477,13 +495,14 @@ push_atoms_and_spells(XrlArgs* args,
+ // XrlParser
+ 
+ bool
+-XrlParser::start_next() throw (XrlParserInputException)
++XrlParser::start_next()
+ {
+     _input.clear();
+ 
+     while (_xpi.getline(_input) == true) {
+ 	// Ignore blank lines and CPP directives (at least for time being).
+-	if (_input.size() > 0 && _input[0] != '#') break;
++	if (_input.size() > 0 && _input[0] != '#')
++	    break;
+     }
+     _pos = _input.begin();
+     return (_input.size() > 0);
+@@ -494,10 +513,14 @@ XrlParser::parse_atoms_and_spells(XrlArgs* args,
+ 				  list<XrlAtomSpell>* spells)
+ {
+     assert(_pos < _input.end());
+-    skip_comments_and_blanks(_input, _pos);
++    skip_comments_and_blanks(_input, _pos, _parse_error);
++    if (_parse_error.has_error())
++	return false;
+     while (_pos != _input.end() && !iscrlf(*_pos) && !xorp_isspace(*_pos)) {
+ 	assert(_pos < _input.end());
+-	skip_comments_and_blanks(_input, _pos);
++	skip_comments_and_blanks(_input, _pos, _parse_error);
++	if (_parse_error.has_error())
++	    return false;
+ 
+ 	string atom_name;
+ 	string::const_iterator atom_start, token_start;
+@@ -505,20 +528,29 @@ XrlParser::parse_atoms_and_spells(XrlArgs* args,
+ 	atom_start = token_start = _pos;
+ 	while (_pos != _input.end() && isxrlplain(*_pos))
+ 	    _pos++;
+-	if (token_start == _pos)
+-	    throw XrlParseError(_input, _pos, "Expected a name");
++	if (token_start == _pos) {
++	    _parse_error = XrlParseError(_input, _pos, "Expected a name");
++	    return false;
++	}
+ 	assert(_pos < _input.end());
+ 	atom_name = string(token_start, _pos);
+-	if (!XrlAtom::valid_name(atom_name))
+-	    throw XrlParseError(_input, token_start,
+-				c_format("%s is not a valid name",
+-					 atom_name.c_str()));
++	if (!XrlAtom::valid_name(atom_name)) {
++	    _parse_error = XrlParseError(_input, token_start,
++					 c_format("%s is not a valid name",
++						  atom_name.c_str()));
++	    return false;
++	}
+ 
+-	skip_comments_and_blanks(_input, _pos);
++	skip_comments_and_blanks(_input, _pos, _parse_error);
++	if (_parse_error.has_error())
++	    return false;
+ 	string atom_type;
+ 	if (_pos != _input.end() && *_pos == ':') {
+ 	    _pos++;
+-	    skip_comments_and_blanks(_input, _pos);
++	    skip_comments_and_blanks(_input, _pos, _parse_error);
++	    if (_parse_error.has_error())
++		return false;
++
+ 	    token_start = _pos;
+ 	    char prev = '\0';
+ 	    while (_pos != _input.end() && isxrlplain(*_pos)) {
+@@ -532,43 +564,62 @@ XrlParser::parse_atoms_and_spells(XrlArgs* args,
+ 		_pos--;
+ 	    }
+ 
+-	    if (_pos == token_start)
+-		throw XrlParseError(_input, _pos, "Expected a type");
++	    if (_pos == token_start) {
++		_parse_error = XrlParseError(_input, _pos, "Expected a type");
++		return false;
++}
+ 	    atom_type = string(token_start, _pos);
+-	    if (!XrlAtom::valid_type(atom_type))
+-		throw XrlParseError(_input, token_start,
+-				    c_format("%s is not a valid type",
+-					     atom_type.c_str()));
++	    if (!XrlAtom::valid_type(atom_type)) {
++		_parse_error =  XrlParseError(_input, token_start,
++					      c_format("%s is not a valid type",
++						       atom_type.c_str()));
++		return false;
++	    }
+ 	    assert(_pos <= _input.end());
+ 	} else {
+-	    throw XrlParseError(_input, _pos, "Expected :<type> argument");
++	    _parse_error = XrlParseError(_input, _pos, "Expected :<type> argument");
++	    return false;
+ 	}
+ 
+-	skip_comments_and_blanks(_input, _pos);
++	skip_comments_and_blanks(_input, _pos, _parse_error);
++	if (_parse_error.has_error())
++	    return false;
+ 	assert(_pos <= _input.end());
+ 	string atom_value;
+ 	if (_pos != _input.end() && *_pos == '=') {
+ 	    _pos++;
+-	    skip_comments_and_blanks(_input, _pos);
++	    skip_comments_and_blanks(_input, _pos, _parse_error);
++	    if (_parse_error.has_error())
++		return false;
+ 	    token_start = _pos;
+ 	    assert(_pos <= _input.end());
+ 	    if (*_pos == '\'') {
+-		get_single_quoted_value(_input, _pos, atom_value);
++		get_single_quoted_value(_input, _pos, atom_value, _parse_error);
++		if (_parse_error.has_error())
++		    return false;
+ 		atom_value = xrlatom_encode_value(atom_value);
+ 	    } else if (*_pos == '\"') {
+-		get_double_quoted_value(_input, _pos, atom_value);
++		get_double_quoted_value(_input, _pos, atom_value, _parse_error);
++		if (_parse_error.has_error())
++		    return false;
+ 		atom_value = xrlatom_encode_value(atom_value);
+ 	    } else {
+ 		get_unquoted_value(_input, _pos, atom_value);
+ 	    }
+-	    if (atom_value.empty())
+-		throw XrlParseError(_input, _pos, "Expected a value");
+-	    skip_comments_and_blanks(_input, _pos);
++	    if (atom_value.empty()) {
++		_parse_error = XrlParseError(_input, _pos, "Expected a value");
++		return false;
++	    }
++	    skip_comments_and_blanks(_input, _pos, _parse_error);
++	    if (_parse_error.has_error())
++		return false;
+ 	}
+ 	assert(_pos <= _input.end());
+ 	push_atoms_and_spells(args, spells,
+ 			      _input, atom_start, token_start,
+-			      atom_name, atom_type, atom_value);
++			      atom_name, atom_type, atom_value, _parse_error);
++	if (_parse_error.has_error())
++	    return false;
+ 	if (_pos != _input.end() && *_pos == '&')
+ 	    _pos++;
+ 	else
+@@ -581,9 +632,11 @@ XrlParser::parse_atoms_and_spells(XrlArgs* args,
+ bool
+ XrlParser::get(string& protocol, string& target, string& command,
+ 	       XrlArgs* args,
+-	       list<XrlAtomSpell>* spells) throw (XrlParseError) {
++	       list<XrlAtomSpell>* spells) {
+ 
+-    skip_comments_and_blanks(_input, _pos);
++    skip_comments_and_blanks(_input, _pos, _parse_error);
++    if (_parse_error.has_error())
++	return false;
+     if (finished()) {
+ 	return false;
+     }
+@@ -595,8 +648,13 @@ XrlParser::get(string& protocol, string& target, string& command,
+ 
+     assert(spells == 0 || spells->empty());
+ 
+-    get_protocol_target_and_command(_input, _pos, protocol, target, command);
+-    skip_comments_and_blanks(_input, _pos);
++    get_protocol_target_and_command(_input, _pos, protocol, target, command, _parse_error);
++    if (_parse_error.has_error())
++	return false;
++
++    skip_comments_and_blanks(_input, _pos, _parse_error);
++    if (_parse_error.has_error())
++	return false;
+ 
+     if (_pos == _input.end()) {
+ 	return true;
+@@ -604,8 +662,9 @@ XrlParser::get(string& protocol, string& target, string& command,
+     if (*_pos == '?') {
+ 	_pos++;
+ 	if (_pos == _input.end()) {
+-	    throw XrlParseError(_input, _pos,
+-				"Expected to find atom or spell");
++	    _parse_error = XrlParseError(_input, _pos,
++					 "Expected to find atom or spell");
++	    return false;
+ 	}
+ 	parse_atoms_and_spells(args, spells);
+     }
+@@ -614,7 +673,7 @@ XrlParser::get(string& protocol, string& target, string& command,
+ }
+ 
+ bool
+-XrlParser::get(string& r) throw (XrlParseError)
++XrlParser::get(string& r)
+ {
+     string protocol, target, command;
+     XrlArgs args;
+@@ -632,7 +691,6 @@ XrlParser::get(string&  protocol,
+ 	       string&  target,
+ 	       string&  command,
+ 	       XrlArgs& args)
+-    throw (XrlParseError)
+ {
+     return get(protocol, target, command, &args, 0);
+ }
+@@ -643,7 +701,6 @@ XrlParser::get(string&		   protocol,
+ 	       string&		   command,
+ 	       XrlArgs&		   args,
+ 	       list<XrlAtomSpell>& spells)
+-    throw (XrlParseError)
+ {
+     return get(protocol, target, command, &args, &spells);
+ }
+@@ -653,7 +710,9 @@ XrlParser::get_return_specs(list<XrlAtomSpell>& spells)
+ {
+     spells.clear();
+ 
+-    skip_comments_and_blanks(_input, _pos);
++    skip_comments_and_blanks(_input, _pos, _parse_error);
++    if (_parse_error.has_error())
++	return false;
+     if (_pos == _input.end()) {
+ 	// There is no return spec
+ 	return false;
+@@ -662,7 +721,9 @@ XrlParser::get_return_specs(list<XrlAtomSpell>& spells)
+     if (string(_pos, _pos + 2) != string("->"))
+ 	return false;
+     _pos += 2;
+-    skip_comments_and_blanks(_input, _pos);
++    skip_comments_and_blanks(_input, _pos, _parse_error);
++    if (_parse_error.has_error())
++	return false;
+ 
+     parse_atoms_and_spells(0, &spells);
+ 
+diff --git a/xorp/libxipc/xrl_parser.hh b/xorp/libxipc/xrl_parser.hh
+index ec4d469..eed17f0 100644
+--- a/xorp/libxipc/xrl_parser.hh
++++ b/xorp/libxipc/xrl_parser.hh
+@@ -19,7 +19,6 @@
+ // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/libxipc/xrl_parser.hh,v 1.12 2008/10/02 21:57:24 bms Exp $
+ 
+ #ifndef __LIBXIPC_XRL_PARSER_HH__
+ #define __LIBXIPC_XRL_PARSER_HH__
+@@ -49,8 +48,16 @@ public:
+ 
+     string pretty_print(size_t termwidth = 80u) const;
+ 
++    bool has_error() const { return _reason.size(); }
++
++    void clear() {
++	_input = "";
++	_offset = 0;
++	_reason = "";
++    }
++
+ protected:
+-    const string    _input;
++    string    _input;
+     size_t	    _offset;
+     string 	    _reason;
+ 
+@@ -69,7 +76,7 @@ public:
+     /** Starts new parsing cycle.
+      * @return true upon success, false if there is no more data
+      */
+-    bool start_next() throw (XrlParserInputException);
++    bool start_next();
+ 
+     /** Check if input is exhausted.
+      *  @return true if input is exhausted, false otherwise.
+@@ -79,17 +86,15 @@ public:
+     bool get(string&  protocol,
+ 	     string&  target,
+ 	     string&  command,
+-	     XrlArgs& args)
+-	throw (XrlParseError);
++	     XrlArgs& args);
+ 
+     bool get(string& protocol,
+ 	     string& target,
+ 	     string& command,
+ 	     XrlArgs& args,
+-	     list<XrlAtomSpell>& spells)
+-	throw (XrlParseError);
++	     list<XrlAtomSpell>& spells);
+ 
+-    bool get(string& xrl_c_str) throw (XrlParseError);
++    bool get(string& xrl_c_str);
+ 
+     bool get_return_specs(list<XrlAtomSpell>& spells);
+ 
+@@ -105,14 +110,17 @@ public:
+ 
+     const XrlParserInput& parser_input() const;
+ 
++    void clear_errors() { _parse_error.clear(); }
++    bool has_parse_error() const { return _parse_error.has_error(); }
++    XrlParseError& getParseError() { return _parse_error; }
++
+ protected:
+ 
+     bool get(string& 		 protocol,
+ 	     string& 		 target,
+ 	     string& 		 command,
+ 	     XrlArgs*		 args,
+-	     list<XrlAtomSpell>* spells)
+-	throw (XrlParseError);
++	     list<XrlAtomSpell>* spells);
+ 
+     bool parse_atoms_and_spells(XrlArgs*	    args,
+ 				list<XrlAtomSpell>* spells);
+@@ -120,6 +128,7 @@ protected:
+     XrlParserInput&	   _xpi;
+     string		   _input;
+     string::const_iterator _pos;
++    XrlParseError _parse_error;
+ };
+ 
+ #endif // __LIBXIPC_XRL_PARSER_HH__
+diff --git a/xorp/libxipc/xrl_pf.hh b/xorp/libxipc/xrl_pf.hh
+index 260dd07..77ebd45 100644
+--- a/xorp/libxipc/xrl_pf.hh
++++ b/xorp/libxipc/xrl_pf.hh
+@@ -37,14 +37,6 @@ class XrlError;
+ class XrlArgs;
+ class XrlDispatcher;
+ 
+-class XrlPFConstructorError : public XorpReasonedException
+-{
+-public:
+-    XrlPFConstructorError(const char* file, size_t line, const string& reason)
+-	: XorpReasonedException("XrlPFConstructorError", file, line, reason)
+-    {}
+-};
+-
+ class XrlPFListener
+ {
+ public:
+diff --git a/xorp/libxipc/xrl_pf_stcp.cc b/xorp/libxipc/xrl_pf_stcp.cc
+index 464945b..b6db63e 100644
+--- a/xorp/libxipc/xrl_pf_stcp.cc
++++ b/xorp/libxipc/xrl_pf_stcp.cc
+@@ -461,19 +461,16 @@ STCPRequestHandler::response_pending() const
+ XrlPFSTCPListener::XrlPFSTCPListener(EventLoop&	    e,
+ 				     XrlDispatcher* x,
+ 				     uint16_t	    port)
+-    throw (XrlPFConstructorError)
+     : XrlPFListener(e, x), _address_slash_port()
+ {
+     in_addr myaddr = get_preferred_ipv4_addr();
+ 
+     _sock = comm_bind_tcp4(&myaddr, port, COMM_SOCK_NONBLOCKING);
+     if (!_sock.is_valid()) {
+-	xorp_throw(XrlPFConstructorError,
+-		   comm_get_last_error_str());
++	XLOG_FATAL(comm_get_last_error_str());
+     }
+     if (comm_listen(_sock.getSocket(), COMM_LISTEN_DEFAULT_BACKLOG) != XORP_OK) {
+-	xorp_throw(XrlPFConstructorError,
+-		   comm_get_last_error_str());
++	XLOG_FATAL(comm_get_last_error_str());
+     }
+ 
+     string addr;
+@@ -481,7 +478,7 @@ XrlPFSTCPListener::XrlPFSTCPListener(EventLoop&	    e,
+ 	int err = comm_get_last_error();
+         comm_close(_sock.getSocket());
+ 	_sock.clear();
+-        xorp_throw(XrlPFConstructorError, comm_get_error_str(err));
++	XLOG_FATAL(comm_get_error_str(err));
+     }
+ 
+     _address_slash_port = address_slash_port(addr, port);
+@@ -716,7 +713,6 @@ uint32_t XrlPFSTCPSender::_next_uid = 0;
+ XrlPFSTCPSender::XrlPFSTCPSender(const string& name, EventLoop& e,
+ 				 const char* addr_slash_port,
+ 				 TimeVal keepalive_time)
+-    throw (XrlPFConstructorError)
+ 	: XrlPFSender(name, e, addr_slash_port),
+       _uid(_next_uid++),
+       _keepalive_time(keepalive_time)
+@@ -741,8 +737,7 @@ XrlPFSTCPSender::construct()
+     debug_msg("stcp sender (%p) fd = %s\n", this, _sock.str().c_str());
+     if (!_sock.is_valid()) {
+ 	debug_msg("failed to connect to %s\n", address().c_str());
+-	xorp_throw(XrlPFConstructorError,
+-		   c_format("Could not connect to %s\n", address().c_str()));
++	XLOG_FATAL("Could not connect to %s\n", address().c_str());
+     }
+ 
+     if (comm_sock_set_blocking(_sock.getSocket(), 0) != XORP_OK) {
+@@ -750,9 +745,8 @@ XrlPFSTCPSender::construct()
+ 	int err = comm_get_last_error();
+ 	comm_close(_sock.getSocket());
+ 	_sock.clear();
+-	xorp_throw(XrlPFConstructorError,
+-		   c_format("Failed to set fd non-blocking: %s\n",
+-			    comm_get_error_str(err)));
++	XLOG_FATAL("Failed to set fd non-blocking: %s\n",
++		   comm_get_error_str(err));
+     }
+ 
+     _reader = new BufferedAsyncReader(_eventloop, _sock, 4 * 65536,
+diff --git a/xorp/libxipc/xrl_pf_stcp.hh b/xorp/libxipc/xrl_pf_stcp.hh
+index 33664a9..83be558 100644
+--- a/xorp/libxipc/xrl_pf_stcp.hh
++++ b/xorp/libxipc/xrl_pf_stcp.hh
+@@ -40,8 +40,7 @@ class RequestState;
+  */
+ class XrlPFSTCPListener : public XrlPFListener {
+ public:
+-    XrlPFSTCPListener(EventLoop& e, XrlDispatcher* xr = 0, uint16_t port = 0)
+-	throw (XrlPFConstructorError);
++    XrlPFSTCPListener(EventLoop& e, XrlDispatcher* xr = 0, uint16_t port = 0);
+     virtual ~XrlPFSTCPListener();
+ 
+     virtual const char* address() const	 { return _address_slash_port.c_str(); }
+@@ -72,8 +71,7 @@ private:
+ class XrlPFSTCPSender : public XrlPFSender {
+ public:
+     XrlPFSTCPSender(const string& name, EventLoop& e, const char* address = 0,
+-	TimeVal keepalive_period = DEFAULT_SENDER_KEEPALIVE_PERIOD)
+-	throw (XrlPFConstructorError);
++	TimeVal keepalive_period = DEFAULT_SENDER_KEEPALIVE_PERIOD);
+     XrlPFSTCPSender(const string& name, EventLoop* e, const char* address = 0,
+ 		    TimeVal keepalive_period = DEFAULT_SENDER_KEEPALIVE_PERIOD);
+     virtual ~XrlPFSTCPSender();
+diff --git a/xorp/libxipc/xrl_pf_unix.cc b/xorp/libxipc/xrl_pf_unix.cc
+index b58b5f0..40bf377 100644
+--- a/xorp/libxipc/xrl_pf_unix.cc
++++ b/xorp/libxipc/xrl_pf_unix.cc
+@@ -38,13 +38,14 @@ XrlPFUNIXListener::XrlPFUNIXListener(EventLoop& e, XrlDispatcher* xr)
+     string path = get_sock_path();
+ 
+     _sock = comm_bind_unix(path.c_str(), COMM_SOCK_NONBLOCKING);
+-    if (!_sock.is_valid())
+-	xorp_throw(XrlPFConstructorError, comm_get_last_error_str());
++    if (!_sock.is_valid()) {
++	XLOG_FATAL(comm_get_last_error_str());
++    }
+ 
+     if (comm_listen(_sock, COMM_LISTEN_DEFAULT_BACKLOG) != XORP_OK) {
+ 	comm_close(_sock);
+ 	_sock.clear();
+-        xorp_throw(XrlPFConstructorError, comm_get_last_error_str());
++        XLOG_FATAL(comm_get_last_error_str());
+     }
+ 
+     struct group *grp = getgrnam("xorp");
+@@ -81,8 +82,9 @@ XrlPFUNIXListener::get_sock_path()
+     string err;
+ 
+     FILE* f = xorp_make_temporary_file("/var/tmp", "xrl", path, err);
+-    if (!f)
+-	xorp_throw(XrlPFConstructorError, err);
++    if (!f) {
++	XLOG_FATAL(err.c_str());
++    }
+ 
+     fclose(f);
+ 
+@@ -149,8 +151,7 @@ XrlPFUNIXSender::XrlPFUNIXSender(const string& name, EventLoop& e, const char* a
+     _sock = comm_connect_unix(address.c_str(), COMM_SOCK_NONBLOCKING);
+ 
+     if (!_sock.is_valid())
+-	xorp_throw(XrlPFConstructorError,
+-		   c_format("Could not connect to %s\n", address.c_str()));
++	XLOG_FATAL("Could not connect to %s\n", address.c_str());
+ 
+     // Set the receiving socket buffer size in the kernel
+     if (comm_sock_set_rcvbuf(_sock, SO_RCV_BUF_SIZE_MAX, SO_RCV_BUF_SIZE_MIN)
+@@ -158,7 +159,7 @@ XrlPFUNIXSender::XrlPFUNIXSender(const string& name, EventLoop& e, const char* a
+         comm_close(_sock);
+         _sock.clear();
+ 
+-	xorp_throw(XrlPFConstructorError, "Can't set receive buffer size");
++	XLOG_FATAL("Can't set receive buffer size");
+     }
+     
+     // Set the sending socket buffer size in the kernel
+@@ -167,7 +168,7 @@ XrlPFUNIXSender::XrlPFUNIXSender(const string& name, EventLoop& e, const char* a
+         comm_close(_sock);
+         _sock.clear();
+ 
+-	xorp_throw(XrlPFConstructorError, "Can't set send buffer size");
++	XLOG_FATAL("Can't set send buffer size");
+     }
+ 
+     construct();
+diff --git a/xorp/libxorp/ipv6.cc b/xorp/libxorp/ipv6.cc
+index 39b6490..5a1e88a 100644
+--- a/xorp/libxorp/ipv6.cc
++++ b/xorp/libxorp/ipv6.cc
+@@ -39,6 +39,7 @@
+ 
+ IPv6::IPv6(const uint8_t* from_uint8)
+ {
++    _invalid = false;
+     memcpy(_addr, from_uint8, sizeof(_addr));
+ }
+ 
+@@ -48,15 +49,18 @@ IPv6::IPv6(const uint32_t* from_uint32)
+     _addr[1] = from_uint32[1];
+     _addr[2] = from_uint32[2];
+     _addr[3] = from_uint32[3];
++    _invalid = false;
+ }
+ 
+ IPv6::IPv6(const in6_addr& from_in6_addr)
+ {
++    _invalid = false;
+     memcpy(_addr, &from_in6_addr, sizeof(_addr));
+ }
+ 
+ IPv6::IPv6(const sockaddr& sa)
+ {
++    _invalid = false;
+     XLOG_ASSERT(sa.sa_family == AF_INET6);
+     const sockaddr_in6* sin6 = sockaddr2sockaddr_in6(&sa);
+     memcpy(_addr, sin6->sin6_addr.s6_addr, sizeof(_addr));
+@@ -64,6 +68,7 @@ IPv6::IPv6(const sockaddr& sa)
+ 
+ IPv6::IPv6(const sockaddr_storage& ss)
+ {
++    _invalid = false;
+     XLOG_ASSERT(ss.ss_family == AF_INET6);
+     const sockaddr* sa = sockaddr_storage2sockaddr(&ss);
+     const sockaddr_in6* sin6 = sockaddr2sockaddr_in6(sa);
+@@ -72,12 +77,14 @@ IPv6::IPv6(const sockaddr_storage& ss)
+ 
+ IPv6::IPv6(const sockaddr_in6& sin6)
+ {
++    _invalid = false;
+     XLOG_ASSERT(sin6.sin6_family == AF_INET6);
+     memcpy(_addr, sin6.sin6_addr.s6_addr, sizeof(_addr));
+ }
+ 
+ IPv6::IPv6(const char* from_cstring)
+ {
++    _invalid = false;
+     if (from_cstring == NULL) {
+ 	_invalid = true;
+ 	return;
+diff --git a/xorp/libxorp/ipv6.hh b/xorp/libxorp/ipv6.hh
+index 1086595..b8a7937 100644
+--- a/xorp/libxorp/ipv6.hh
++++ b/xorp/libxorp/ipv6.hh
+@@ -50,7 +50,7 @@ public:
+      *
+      * The address value is initialized to IN6ADDR_ANY.
+      */
+-    IPv6() { _addr[0] = _addr[1] = _addr[2] = _addr[3] = 0; }
++    IPv6() { _addr[0] = _addr[1] = _addr[2] = _addr[3] = 0; _invalid = false; }
+ 
+     /**
+      * Constructor from a (uint8_t *) memory pointer.
+@@ -459,8 +459,7 @@ public:
+      * @return address size in number of octets.
+      */
+     static size_t addr_bytelen() {
+-	x_static_assert(sizeof(IPv6) == 4 * sizeof(uint32_t));
+-	return sizeof(IPv6);
++	return 4 * sizeof(uint32_t);
+     }
+ 
+     /**
+@@ -627,8 +626,11 @@ public:
+      */
+     static const uint32_t ADDR_BYTELEN = ADDR_BITLEN / 8;
+ 
++    bool invalid() const { return _invalid; }
++
+ private:
+     uint32_t _addr[4];		// The address value (in network-order)
++    bool _invalid;
+ };
+ 
+ inline uint32_t
+diff --git a/xorp/libxorp/ipvx.cc b/xorp/libxorp/ipvx.cc
+index 9d9fc57..a94bb56 100644
+--- a/xorp/libxorp/ipvx.cc
++++ b/xorp/libxorp/ipvx.cc
+@@ -72,9 +72,8 @@ IPvX::IPvX(int family, const uint8_t *from_uint8)
+ 
+ IPvX::IPvX(const IPv4& ipv4)
+ {
+-    _invalid = false;
+-    x_static_assert(sizeof(_addr) >= sizeof(IPv4));
+-    x_static_assert(sizeof(IPv4) == 4);
++    _invalid = ipv4.invalid();
++    x_static_assert(sizeof(_addr) >= 4);
+ 
+     _af = AF_INET;
+     memset(_addr, 0, sizeof(_addr));
+@@ -83,12 +82,11 @@ IPvX::IPvX(const IPv4& ipv4)
+ 
+ IPvX::IPvX(const IPv6& ipv6)
+ {
+-    _invalid = false;
+-    x_static_assert(sizeof(_addr) >= sizeof(IPv6));
+-    x_static_assert(sizeof(IPv6) == 16);
++    _invalid = ipv6.invalid();
++    x_static_assert(sizeof(_addr) >= 16);
+ 
+     _af = AF_INET6;
+-    memcpy(_addr, &ipv6, 16);
++    memcpy(_addr, ipv6.addr(), 16);
+ }
+ 
+ IPvX::IPvX(const in_addr& from_in_addr)
+diff --git a/xorp/libxorp/ipvx.hh b/xorp/libxorp/ipvx.hh
+index cb4f55e..0b2c40d 100644
+--- a/xorp/libxorp/ipvx.hh
++++ b/xorp/libxorp/ipvx.hh
+@@ -305,7 +305,7 @@ public:
+      * @param other the right-hand operand to OR with.
+      * @return bitwise OR of two addresses.
+      */
+-    IPvX operator|(const IPvX& other);
++    IPvX operator|(const IPvX& other) const;
+ 
+     /**
+      * AND Operator
+@@ -313,7 +313,7 @@ public:
+      * @param other the right-hand operand to AND with.
+      * @return bitwise AND of two addresses.
+      */
+-    IPvX operator&(const IPvX& other);
++    IPvX operator&(const IPvX& other) const;
+ 
+     /**
+      * XOR Operator
+@@ -321,7 +321,7 @@ public:
+      * @param other the right-hand operand to XOR with.
+      * @return bitwize eXclusive-OR of two addresses.
+      */
+-    IPvX operator^(const IPvX& other);
++    IPvX operator^(const IPvX& other) const;
+ 
+     /**
+      * Operator <<
+@@ -858,8 +858,8 @@ private:
+     friend class IPv4;
+     friend class IPv6;
+ 
+-    uint32_t _addr[4];	// Underlay address value for casting to IPv4 and IPv6
+     int _af;		// The address family AF_INET or AF_INET6
++    uint32_t _addr[4];	// Underlay address value for casting to IPv4 and IPv6
+     bool _invalid;
+ };
+ 
+diff --git a/xorp/libxorp/mac.cc b/xorp/libxorp/mac.cc
+index f1e802e..82d623d 100644
+--- a/xorp/libxorp/mac.cc
++++ b/xorp/libxorp/mac.cc
+@@ -21,8 +21,9 @@
+ 
+ 
+ #include "libxorp/xorp.h"
+-#include "libxorp/ether_compat.h" 
+-
++#include "libxorp/ether_compat.h"
++#include "libxorp/libxorp_module.h"
++#include "libxorp/xlog.h"
+ #include "mac.hh"
+ 
+ 
+diff --git a/xorp/rtrmgr/xrldb.cc b/xorp/rtrmgr/xrldb.cc
+index 481e91a..ef6632d 100644
+--- a/xorp/rtrmgr/xrldb.cc
++++ b/xorp/rtrmgr/xrldb.cc
+@@ -93,40 +93,44 @@ XRLtarget::XRLtarget(const string& xrlfilename, bool verbose)
+ 	XrlArgs rargs;
+ 	list<XrlAtomSpell> rspec;
+ 
+-	try {
+-	    if (parser.get(s)) {
+-		debug_msg("Xrl %s\n", s.c_str());
+-		if (parser.get_return_specs(rspec)) {
+-		    debug_msg("Return Spec:\n");
+-		    list<XrlAtomSpell>::const_iterator si;
+-		    for (si = rspec.begin(); si != rspec.end(); si++) {
+-			rargs.add(si->atom());
+-			debug_msg("\t -> %s - %s\n",
+-				  si->atom().str().c_str(),
+-				  si->spell().c_str());
+-		    }
+-		} else {
+-		    debug_msg("No return spec for XRL %s\n", s.c_str());
+-		}
+-		Xrl xrl(s.c_str());
+-		if (xrl.invalid()) {
+-		    XLOG_ERROR("Could not create xrl: %s", s.c_str());
+-		}
+-		else {
+-		    _xrlspecs.push_back(XrlSpec(xrl, rargs, _verbose));
++	parser.clear_errors();
++
++	if (parser.get(s)) {
++	    debug_msg("Xrl %s\n", s.c_str());
++	    if (parser.get_return_specs(rspec)) {
++		debug_msg("Return Spec:\n");
++		list<XrlAtomSpell>::const_iterator si;
++		for (si = rspec.begin(); si != rspec.end(); si++) {
++		    rargs.add(si->atom());
++		    debug_msg("\t -> %s - %s\n",
++			      si->atom().str().c_str(),
++			      si->spell().c_str());
+ 		}
++	    } else {
++		debug_msg("No return spec for XRL %s\n", s.c_str());
++	    }
++	    Xrl xrl(s.c_str());
++	    if (xrl.invalid()) {
++		XLOG_ERROR("Could not create xrl: %s", s.c_str());
+ 	    }
+-	} catch (const XrlParseError& xpe) {
++	    else {
++		_xrlspecs.push_back(XrlSpec(xrl, rargs, _verbose));
++	    }
++	}
++
++	if (parser.has_parse_error()) {
++	    XrlParseError& xpe = parser.getParseError();
+ 	    s = string(79, '-') + "\n";
+ 	    s += xpe.pretty_print() + "\n";
+ 	    s += string(79, '=') + "\n"; 
+ 	    s += "Attempting resync...";
+-	    if (parser.resync()) 
+-		s += "okay"; 
+-	    else 
++	    if (parser.resync())
++		s += "okay";
++	    else
+ 		s += "fail";
+ 	    s += "\n";
+ 	    XLOG_ERROR("%s", s.c_str());
++	    parser.clear_errors();
+ 	}
+     }
+ }
+-- 
+2.7.5
+

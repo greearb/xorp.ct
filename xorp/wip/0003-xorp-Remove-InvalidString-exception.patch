@@ -1,0 +1,5999 @@
+From c0128e372a316a6494a180aedba1f6db17add9ef Mon Sep 17 00:00:00 2001
+From: Ben Greear <greearb@candelatech.com>
+Date: Fri, 8 Sep 2017 09:52:19 -0700
+Subject: [PATCH 03/33] xorp:  Remove InvalidString exception.
+
+Latest gcc doesn't like exceptions anymore.
+
+Signed-off-by: Ben Greear <greearb@candelatech.com>
+---
+ xorp/bgp/aspath.cc                              | 102 +++--
+ xorp/bgp/aspath.hh                              |  19 +-
+ xorp/bgp/harness/command.cc                     |  99 +++--
+ xorp/bgp/harness/command.hh                     |  16 +-
+ xorp/bgp/harness/peer.cc                        | 527 +++++++++++++-----------
+ xorp/bgp/harness/peer.hh                        |  41 +-
+ xorp/bgp/local_data.hh                          |   1 -
+ xorp/bgp/peer.hh                                |   1 -
+ xorp/bgp/xrl_target.cc                          |  20 +-
+ xorp/contrib/mld6igmp_lite/mld6igmp_node_cli.cc |   7 +-
+ xorp/contrib/olsr/test_args.hh                  |  79 +---
+ xorp/contrib/olsr/test_simulator.cc             | 344 ++++++++--------
+ xorp/fea/tests/test_fea_rawlink.cc              |   5 +-
+ xorp/fea/tests/test_xrl_sockets4_tcp.cc         |   5 +-
+ xorp/fea/tests/test_xrl_sockets4_udp.cc         |   5 +-
+ xorp/libproto/config_node_id.hh                 |  20 +-
+ xorp/libproto/tests/test_config_node_id.cc      |  49 ---
+ xorp/libxipc/call_xrl.cc                        |  94 ++---
+ xorp/libxipc/finder_client.cc                   |   6 +-
+ xorp/libxipc/finder_main.cc                     |  30 +-
+ xorp/libxipc/finder_msgs.cc                     |  20 +-
+ xorp/libxipc/finder_msgs.hh                     |  11 +-
+ xorp/libxipc/finder_server.cc                   |   9 +-
+ xorp/libxipc/finder_tcp_messenger.cc            |  12 +-
+ xorp/libxipc/finder_xrl_target.cc               |  39 +-
+ xorp/libxipc/tests/test_finder_events.cc        |   5 +-
+ xorp/libxipc/tests/test_xrl.cc                  |  29 +-
+ xorp/libxipc/xrl.cc                             |  32 +-
+ xorp/libxipc/xrl.hh                             |   4 +-
+ xorp/libxipc/xrl_args.cc                        |   7 +-
+ xorp/libxipc/xrl_args.hh                        |  11 +-
+ xorp/libxipc/xrl_atom.cc                        |  66 +--
+ xorp/libxipc/xrl_atom.hh                        |  50 +--
+ xorp/libxipc/xrl_router.cc                      |  47 +--
+ xorp/libxipc/xuid.cc                            |  13 +-
+ xorp/libxipc/xuid.hh                            |   5 +-
+ xorp/libxorp/asnum.hh                           |  22 +-
+ xorp/libxorp/exceptions.cc                      |  16 -
+ xorp/libxorp/exceptions.hh                      |   8 -
+ xorp/libxorp/ipnet.hh                           |  23 +-
+ xorp/libxorp/ipv4.cc                            |  41 +-
+ xorp/libxorp/ipv4.hh                            |  11 +-
+ xorp/libxorp/ipv6.cc                            |  15 +-
+ xorp/libxorp/ipv6.hh                            |   2 +-
+ xorp/libxorp/ipvx.cc                            |  25 +-
+ xorp/libxorp/ipvx.hh                            |   4 +-
+ xorp/libxorp/ipvxnet.hh                         |  17 +-
+ xorp/libxorp/mac.cc                             |  30 +-
+ xorp/libxorp/mac.hh                             |   8 +-
+ xorp/libxorp/range.hh                           |  21 +-
+ xorp/libxorp/tests/test_mac.cc                  |  19 +-
+ xorp/libxorp/tests/test_test_main.cc            |  26 --
+ xorp/libxorp/xorp.h                             |   1 +
+ xorp/mld6igmp/mld6igmp_node_cli.cc              |   6 +-
+ xorp/ospf/tests/test_args.hh                    |  42 --
+ xorp/ospf/tests/test_build_lsa.cc               |  99 +++--
+ xorp/ospf/tests/test_routing_interactive.cc     | 118 +++---
+ xorp/pim/pim_node_cli.cc                        |  59 ++-
+ xorp/policy/xrl_target.cc                       |  10 +-
+ xorp/rib/parser.cc                              |  28 +-
+ xorp/rib/parser.hh                              |  13 +-
+ xorp/rtrmgr/boot.yy                             |   6 +-
+ xorp/rtrmgr/conf_tree.cc                        |  25 +-
+ xorp/rtrmgr/main_rtrmgr.cc                      |  20 +-
+ xorp/rtrmgr/template_commands.cc                |  12 +-
+ xorp/rtrmgr/template_tree_node.cc               | 121 +++---
+ xorp/rtrmgr/unexpanded_xrl.cc                   |   7 +-
+ xorp/rtrmgr/xrldb.cc                            |  39 +-
+ 68 files changed, 1370 insertions(+), 1354 deletions(-)
+
+diff --git a/xorp/bgp/aspath.cc b/xorp/bgp/aspath.cc
+index 94e841c..06514b8 100644
+--- a/xorp/bgp/aspath.cc
++++ b/xorp/bgp/aspath.cc
+@@ -397,11 +397,12 @@ AS4Segment::encode(size_t &len, uint8_t *data) const
+  *  blank spaces " " can appear at any point in the string. 
+  */
+ 
+-ASPath::ASPath(const char *as_path) throw(InvalidString)
++ASPath::ASPath(const char *as_path)
+ {
+     debug_msg("ASPath(%s) constructor called\n", as_path);
+     _num_segments = 0;
+     _path_len = 0;
++    _invalid = false;
+ 
+     // make a copy removing all spaces from the string.
+ 
+@@ -435,89 +436,109 @@ ASPath::ASPath(const char *as_path) throw(InvalidString)
+ 		// push previous thing and start a new one
+ 		add_segment(seg);
+ 		seg.clear();
+-	    } else if (seg.type() != AS_NONE) // nested, invalid
+-		xorp_throw(InvalidString,
+-		       c_format("Illegal character: <%c> %s",
+-				c, path.c_str()));
++	    } else if (seg.type() != AS_NONE) { // nested, invalid
++		_invalid = true;
++		XLOG_ERROR("Illegal character: <%c> %s",
++			   c, path.c_str());
++		return;
++	    }
+ 	    seg.set_type(AS_SEQUENCE);
+ 	} else if (c == ']') {
+ 	    if (seg.type() == AS_SEQUENCE) {
+ 		// push previous thing and start a new one
+ 		add_segment(seg);
+ 		seg.clear();
+-	    } else
+-		xorp_throw(InvalidString,
+-		       c_format("Illegal character: <%c> %s",
+-				c, path.c_str()));
++	    } else {
++		_invalid = true;
++		XORP_ERROR("Illegal character: <%c> %s",
++			   c, path.c_str());
++		return;
++	    }
+ 	} else if (c == '{') {
+ 	    if (seg.type() == AS_SEQUENCE) {
+ 		// push previous thing and start a new one
+ 		add_segment(seg);
+ 		seg.clear();
+-	    } else if (seg.type() != AS_NONE) // nested, invalid
+-		xorp_throw(InvalidString,
+-		       c_format("Illegal character: <%c> %s",
+-				c, path.c_str()));
++	    } else if (seg.type() != AS_NONE) { // nested, invalid
++		_invalid = true;
++		XLOG_ERROR("Illegal character: <%c> %s",
++			   c, path.c_str());
++		return;
++	    }
+ 	    seg.set_type(AS_SET);
+ 	} else if (c == '}') {
+ 	    if (seg.type() == AS_SET) {
+ 		// push previous thing and start a new one
+ 		add_segment(seg);
+ 		seg.clear();
+-	    } else
+-		xorp_throw(InvalidString,
+-		       c_format("Illegal character: <%c> %s",
+-				c, path.c_str()));
++	    } else {
++		_invalid = true;
++		XLOG_ERROR("Illegal character: <%c> %s",
++			   c, path.c_str());
++		return;
++	    }
+ 	} else if (c == '(') {
+ 	    if (seg.type() == AS_SEQUENCE) {
+ 		// push previous thing and start a new one
+ 		add_segment(seg);
+ 		seg.clear();
+-	    } else if (seg.type() != AS_NONE) // nested, invalid
+-		xorp_throw(InvalidString,
+-		       c_format("Illegal character: <%c> %s",
+-				c, path.c_str()));
++	    } else if (seg.type() != AS_NONE) { // nested, invalid
++		_invalid = true;
++		XLOG_ERROR("Illegal character: <%c> %s",
++			   c, path.c_str());
++		return;
++	    }
+ 	    seg.set_type(AS_CONFED_SEQUENCE);
+ 	} else if (c == ')') {
+ 	    if (seg.type() == AS_CONFED_SEQUENCE) {
+ 		// push previous thing and start a new one
+ 		add_segment(seg);
+ 		seg.clear();
+-	    } else
+-		xorp_throw(InvalidString,
+-		       c_format("Illegal character: <%c> %s",
+-				c, path.c_str()));
++	    } else {
++		_invalid = true;
++		XLOG_ERROR("Illegal character: <%c> %s",
++			   c, path.c_str());
++		return;
++	    }
+ 	} else if (c == '<') {
+ 	    if (seg.type() == AS_SEQUENCE) {
+ 		// push previous thing and start a new one
+ 		add_segment(seg);
+ 		seg.clear();
+-	    } else if (seg.type() != AS_NONE) // nested, invalid
+-		xorp_throw(InvalidString,
+-		       c_format("Illegal character: <%c> %s",
+-				c, path.c_str()));
++	    } else if (seg.type() != AS_NONE) { // nested, invalid
++		_invalid = true;
++		XLOG_ERROR("Illegal character: <%c> %s",
++			   c, path.c_str());
++		return;
++	    }
+ 	    seg.set_type(AS_CONFED_SET);
+ 	} else if (c == '>') {
+ 	    if (seg.type() == AS_CONFED_SET) {
+ 		// push previous thing and start a new one
+ 		add_segment(seg);
+ 		seg.clear();
+-	    } else
+-		xorp_throw(InvalidString,
+-		       c_format("Illegal character: <%c> %s",
+-				c, path.c_str()));
++	    } else {
++		_invalid = true;
++		XLOG_ERROR("Illegal character: <%c> %s",
++			   c, path.c_str());
++		return;
++	    }
+ 	} else if (c == ',') {
+ 	} else if (c == ' ' || c == '\t') {
+-	} else
+-	    xorp_throw(InvalidString,
+-		       c_format("Illegal character: <%c> %s",
+-				c, path.c_str()));
++	} else {
++	    _invalid = true;
++	    XLOG_ERROR("Illegal character: <%c> %s",
++		       c, path.c_str());
++	    return;
++	}
+     }
+     if (seg.type() == AS_SEQUENCE)	// close existing seg.
+ 	add_segment(seg);
+-    else if (seg.type() == AS_SET)
+-	xorp_throw(InvalidString,
+-		       c_format("Unterminated ASSet: %s", path.c_str()));
++    else if (seg.type() == AS_SET) {
++	_invalid = true;
++	XLOG_ERROR("Unterminated ASSet: %s", path.c_str());
++	return;
++    }
+     debug_msg("end of ASPath()\n");
+ }
+ 
+@@ -551,6 +572,7 @@ ASPath::ASPath(const ASPath &asp1, const ASPath &asp2)
+ {
+     _num_segments = 0;
+     _path_len = 0;
++    _invalid = asp1._invalid | asp2.invalid;
+ 
+     size_t curseg;
+     size_t matchelem = 0;
+diff --git a/xorp/bgp/aspath.hh b/xorp/bgp/aspath.hh
+index 2e09144..0366956 100644
+--- a/xorp/bgp/aspath.hh
++++ b/xorp/bgp/aspath.hh
+@@ -18,8 +18,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/bgp/aspath.hh,v 1.34 2008/10/02 21:56:14 bms Exp $
+-
+ #ifndef __BGP_ASPATH_HH__
+ #define __BGP_ASPATH_HH__
+ 
+@@ -129,7 +127,7 @@ public:
+     /**
+      * Constructor of an empty ASSegment
+      */
+-    ASSegment(ASPathSegType t = AS_NONE) : _type(t)	{
++    ASSegment(ASPathSegType t = AS_NONE) : _type(t), _invalid(0) {
+     }
+ 
+     /**
+@@ -140,6 +138,7 @@ public:
+      * _type is d[0], l is d[1], entries follow.
+      */
+     ASSegment(const uint8_t* d) throw(CorruptMessage)	{
++	_invalid = 0;
+ 	decode(d);
+     }
+ 
+@@ -147,7 +146,7 @@ public:
+      * Copy constructor
+      */
+     ASSegment(const ASSegment& a) :
+-	_type(a._type), _aslist(a._aslist)		{}
++	    _type(a._type), _aslist(a._aslist), _invalid(a._invalid)		{}
+ 
+     /**
+      * The destructor has nothing to do, the underlying container will
+@@ -279,8 +278,11 @@ public:
+      */
+     bool two_byte_compatible() const;
+ 
++    bool invalid() const { return _invalid; }
++
+ protected:
+     ASPathSegType	_type;
++    uint8_t             _invalid;
+     ASLIST		_aslist;
+ };
+ 
+@@ -330,7 +332,7 @@ public:
+      * Initialize from a string in the format
+      *		1,2,(3,4,5),6,7,8,(9,10,11),12,13
+      */
+-    ASPath(const char *as_path) throw(InvalidString);
++    ASPath(const char *as_path);
+ 
+     /**
+      * construct from received data
+@@ -381,7 +383,6 @@ public:
+ 	    return (*iter);
+         }
+ 	XLOG_FATAL("Segment %u doesn't exist.", (uint32_t)n);
+-	xorp_throw(InvalidString, "segment invalid n\n");
+     }
+ 
+     size_t num_segments() const			{ return _num_segments; }
+@@ -451,6 +452,8 @@ public:
+      */
+     void merge_as4_path(AS4Path& as4_path);
+ 
++    bool invalid() const { return _invalid; }
++
+ protected:
+     /**
+      * internal representation
+@@ -458,7 +461,7 @@ protected:
+     list <ASSegment>	_segments;
+     size_t		_num_segments;
+     size_t		_path_len;
+-
++    uint8_t             _invalid;
+ private:
+     /**
+      * populate an ASPath from received data. Only used in the constructor.
+@@ -478,7 +481,7 @@ public:
+      * Initialize from a string in the format
+      *		3.1,2,(3,10.4,5),6,7,8,(9,10,11),12,13
+      */
+-    AS4Path(const char *as_path) throw(InvalidString) 
++    AS4Path(const char *as_path)
+ 	: ASPath(as_path)
+     {};
+ 
+diff --git a/xorp/bgp/harness/command.cc b/xorp/bgp/harness/command.cc
+index bdf3ce9..c5016e6 100644
+--- a/xorp/bgp/harness/command.cc
++++ b/xorp/bgp/harness/command.cc
+@@ -58,10 +58,11 @@ Command::load_command_map()
+ 						  &Command::initialise));
+ }
+ 
+-void
+-Command::command(const string& line) throw(InvalidString)
++int
++Command::command(const string& line)
+ {
+     debug_msg("command: %s\n", line.c_str());
++    _invalid = false;
+ 
+     /*
+     ** Split the line into words split on spaces.
+@@ -69,16 +70,22 @@ Command::command(const string& line) throw(InvalidString)
+     vector<string> v;
+     tokenize(line, v);
+ 
+-    if(v.empty())
+-	xorp_throw(InvalidString, "Empty command");
++    if (v.empty()) {
++	_invalid = true;
++	return -1;
++    }
+ 
+     StringCommandMap::iterator cur  = _commands.find(v[0].c_str());
+    
+-    if(_commands.end() == cur)
+-	xorp_throw(InvalidString, c_format("Unknown command: %s",
+-					   v[0].c_str()));
++    if(_commands.end() == cur) {
++	XLOG_ERROR("Unknown command: %s",
++		   v[0].c_str());
++	_invalid = true;
++	return -1;
++    }
+ 
+     cur->second.dispatch(this, line, v);
++    return 0;
+ }
+ 
+ void
+@@ -224,15 +231,18 @@ Command::datain_closed(const string&  peer, const uint32_t& genid)
+ /*
+ ** All commands to peers are channelled through here.
+ */
+-void
++int
+ Command::peer(const string& line, const vector<string>& words)
+-    throw(InvalidString)
+ {
++    _invalid = 0;
++
+     debug_msg("peer: %s\n", line.c_str());
+ 
+-    if(1 == words.size())
+-	xorp_throw(InvalidString, 
+-		   c_format("Insufficient arguments: %s",  line.c_str()));
++    if (1 == words.size()) {
++	_invalid = 1;
++	XLOG_ERROR("Insufficient arguments: %s",  line.c_str());
++	return -1;
++    }
+ 
+     /*
+     ** This pointer must be valid. If we are in the command table
+@@ -264,9 +274,11 @@ Command::peer(const string& line, const vector<string>& words)
+     } else if ("dump" == command) {
+ 	p->dump(line, words);
+     } else {
+-	xorp_throw(InvalidString, 
+-		   c_format("Unrecognized command: %s",  command.c_str()));
++	XLOG_ERROR("Unrecognized command: %s",  command.c_str());
++	_invalid = true;
++	return -1;
+     }
++    return 0;
+ }
+ 
+ /*
+@@ -303,19 +315,22 @@ Command::reset(const string& /*line*/, const vector<string>& /*v*/)
+ **
+ ** The host and port number of the BGP process that is being tested.
+ */
+-void
++int
+ Command::target(const string& line, const vector<string>& v)
+-    throw(InvalidString)
+ {
++    _invalid = false;
+     debug_msg("target: %s\n", line.c_str());
+ 
+-    if(3 != v.size())
+-	xorp_throw(InvalidString, 
+-		   c_format("\"target hostname port\" expected got \"%s\"", 
+-			    line.c_str()));
++    if(3 != v.size()) {
++	_invalid = true;
++	XLOG_ERROR("\"target hostname port\" expected got \"%s\"", 
++		   line.c_str());
++	return -1;
++    }
+ 
+     _target_hostname = v[1];
+     _target_port = v[2];
++    return 0;
+ }
+ 
+ /*
+@@ -324,17 +339,18 @@ Command::target(const string& line, const vector<string>& v)
+ **
+ ** Attach to or create test peers.
+ */
+-void
++int
+ Command::initialise(const string& line, const vector<string>& v)
+-    throw(InvalidString)
+ {
++    _invalid = false;
+     debug_msg("target: %s\n", line.c_str());
+ 
+-    if(3 != v.size())
+-	xorp_throw(InvalidString, 
+-		   c_format("\"initialise attach/create peer\" expected got \"%s\"", 
+-			    line.c_str()));
+-
++    if(3 != v.size()) {
++	XLOG_ERROR("\"initialise attach/create peer\" expected got \"%s\"", 
++		   line.c_str());
++	_invalid = true;
++	return -1;
++    }
+     
+     const char *peername = v[2].c_str();
+ 
+@@ -351,27 +367,35 @@ Command::initialise(const string& line, const vector<string>& v)
+     if(cur != _peers.end())
+ 	 debug_msg("Peer name %s\n", peername);
+ 
+-    if(_peers.end() != cur)
+-	xorp_throw(InvalidString, c_format("This peer already exists: %s",
+-					   peername));
++    if(_peers.end() != cur) {
++	XLOG_ERROR("This peer already exists: %s",
++		   peername);
++	_invalid = true;
++	return -1;
++    }
+ 
+     /*
+     ** This peer name will be added to the command name map, verify
+     ** that we don't already have a command with this name.
+     */
+     StringCommandMap::iterator com  = _commands.find(peername);
+-    if(_commands.end() != com)
+-	xorp_throw(InvalidString, c_format("Peername command clash: %s",
+-					   peername));
++    if(_commands.end() != com) {
++	XLOG_ERROR("Peername command clash: %s",
++		   peername);
++	_invalid = true;
++	return -1;
++    }
+ 
+     if(v[1] == "attach") {
+ 	/* FINE */
+     } else if(v[1] == "create") {
+ 	XLOG_FATAL("initialise create not currently supported");
+-    } else
+-	xorp_throw(InvalidString,
+-		   c_format("Only attach/create allowed not: %s",
+-					   v[3].c_str()));
++    } else {
++	XLOG_ERROR("Only attach/create allowed not: %s",
++		   v[3].c_str());
++	_invalid = true;
++	return -1;
++    }
+ 
+     /*
+     ** If we got here we are attaching.
+@@ -385,6 +409,7 @@ Command::initialise(const string& line, const vector<string>& v)
+ 				  string(peername)));
+ 
+     _init_count++;
++    return 0;
+ }
+ 
+ void
+diff --git a/xorp/bgp/harness/command.hh b/xorp/bgp/harness/command.hh
+index e7b3b52..d655305 100644
+--- a/xorp/bgp/harness/command.hh
++++ b/xorp/bgp/harness/command.hh
+@@ -17,7 +17,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/bgp/harness/command.hh,v 1.18 2008/10/02 21:56:26 bms Exp $
+ 
+ #ifndef __BGP_HARNESS_COMMAND_HH__
+ #define __BGP_HARNESS_COMMAND_HH__
+@@ -45,7 +44,7 @@ public:
+     /*
+     ** Accept a command for the coordinating process.
+     */
+-    void command(const string& line) throw(InvalidString);
++    int WARN_UNUSED command(const string& line);
+ 
+     /*
+     ** Show the status of the peers.
+@@ -70,15 +69,15 @@ public:
+     /*
+     ** All commands to peers sent through here.
+     */
+-    void peer(const string& line, const vector<string>& v) 
+-	throw(InvalidString);
++    int WARN_UNUSED peer(const string& line, const vector<string>& v);
+ 
+     void reset(const string& line, const vector<string>& v);
+-    void target(const string& line, const vector<string>& v) 
+-	throw(InvalidString);
+-    void initialise(const string& line, const vector<string>& v) 
+-	throw(InvalidString);
++    int WARN_UNUSED target(const string& line, const vector<string>& v);
++    int WARN_UNUSED initialise(const string& line, const vector<string>& v);
+     void initialise_callback(const XrlError& error, string peername);
++
++    bool invalid() const { return _invalid; }
++
+ private:
+     EventLoop& _eventloop;
+     XrlStdRouter& _xrlrouter;
+@@ -86,6 +85,7 @@ private:
+ 
+     uint32_t _init_count;	// Number of initialisations with
+ 				// test_peers currently in progress.
++    uint8_t _invalid;
+ 
+     /*
+     ** Supported commands.
+diff --git a/xorp/bgp/harness/peer.cc b/xorp/bgp/harness/peer.cc
+index dcaa1bf..d5a5ead 100644
+--- a/xorp/bgp/harness/peer.cc
++++ b/xorp/bgp/harness/peer.cc
+@@ -243,7 +243,6 @@ Peer::pending()
+ 
+ void 
+ Peer::listen(const string& /*line*/, const vector<string>& /*words*/)
+-	throw(InvalidString)
+ {
+     /* Connect the test peer to the target BGP */
+     debug_msg("About to listen on: %s\n", _peername.c_str());
+@@ -268,7 +267,6 @@ Peer::listen(const string& /*line*/, const vector<string>& /*words*/)
+ 
+ void 
+ Peer::connect(const string& /*line*/, const vector<string>& /*words*/)
+-	throw(InvalidString)
+ {
+     /* Connect the test peer to the target BGP */
+     debug_msg("About to connect to: %s\n", _peername.c_str());
+@@ -293,7 +291,6 @@ Peer::connect(const string& /*line*/, const vector<string>& /*words*/)
+ 
+ void 
+ Peer::disconnect(const string& /*line*/, const vector<string>& /*words*/)
+-	throw(InvalidString)
+ {
+     /* Disconnect the test peer from the target BGP */
+     debug_msg("About to disconnect from: %s\n", _peername.c_str());
+@@ -313,9 +310,8 @@ Peer::disconnect(const string& /*line*/, const vector<string>& /*words*/)
+ ** peer1 establish active <true/false> AS <asnum>
+ **
+ */
+-void
++int
+ Peer::establish(const string& line, const vector<string>& words)
+-    throw(InvalidString)
+ {
+     debug_msg("About to establish a connection %s\n", _peername.c_str());
+ 
+@@ -329,10 +325,11 @@ Peer::establish(const string& line, const vector<string>& words)
+     */
+     string as = "";
+     size_t size = words.size();
+-    if(0 != (size % 2))
+-	xorp_throw(InvalidString,
+-		   c_format("Incorrect number of arguments:\n[%s]",
+-			    line.c_str()));
++    if(0 != (size % 2)) {
++	XLOG_ERROR("Incorrect number of arguments:\n[%s]",
++		   line.c_str());
++	return -1;
++    }
+ 
+     for(size_t i = 2; i < words.size(); i += 2) {
+ 	debug_msg("name: %s value: %s\n",
+@@ -344,10 +341,11 @@ Peer::establish(const string& line, const vector<string>& words)
+ 		active = true;
+ 	    else if("false" == aarg)
+ 		active = false;
+-	    else
+-		xorp_throw(InvalidString, 
+-			   c_format("Illegal argument to active: <%s>\n[%s]",
+-				    aarg.c_str(), line.c_str()));
++	    else {
++		XLOG_ERROR("Illegal argument to active: <%s>\n[%s]",
++			   aarg.c_str(), line.c_str());
++		return -1;
++	    }
+ 	} else if("AS" == words[i]) {
+ 	    as = words[i + 1];
+ 	} else if("keepalive" == words[i]) {
+@@ -356,10 +354,11 @@ Peer::establish(const string& line, const vector<string>& words)
+ 		_keepalive = true;
+ 	    else if("false" == kaarg)
+ 		_keepalive = false;
+-	    else
+-		xorp_throw(InvalidString, 
+-			   c_format("Illegal argument to keepalive: <%s>\n[%s]",
+-				    kaarg.c_str(), line.c_str()));
++	    else {
++		XLOG_ERROR("Illegal argument to keepalive: <%s>\n[%s]",
++			   kaarg.c_str(), line.c_str());
++		return -1;
++	    }
+ 	} else if("holdtime" == words[i]) {
+ 	    _holdtime = atoi(words[i + 1].c_str());
+ 	} else if("id" == words[i]) {
+@@ -370,10 +369,11 @@ Peer::establish(const string& line, const vector<string>& words)
+ 		_ipv6 = true;
+ 	    else if("false" == ipv6arg)
+ 		_ipv6 = false;
+-	    else
+-		xorp_throw(InvalidString, 
+-			   c_format("Illegal argument to ipv6: <%s>\n[%s]",
+-				    ipv6arg.c_str(), line.c_str()));
++	    else {
++		XLOG_ERROR("Illegal argument to ipv6: <%s>\n[%s]",
++			   ipv6arg.c_str(), line.c_str());
++		return -1;
++	    }
+ 	} else if("use_4byte_asnums" == words[i]) {
+ 	    string use4bytearg = words[i+1];
+ 	    if("true" == use4bytearg) {
+@@ -382,42 +382,46 @@ Peer::establish(const string& line, const vector<string>& words)
+ 	    } else if("false" == use4bytearg) {
+ 		_localdata->set_use_4byte_asnums(false);
+ 		_peerdata->set_use_4byte_asnums(true);
+-	    } else
+-		xorp_throw(InvalidString, 
+-			   c_format("Illegal argument to use_4byte_asnums: <%s>\n[%s]",
+-				    use4bytearg.c_str(), line.c_str()));
+-	} else
+-	    xorp_throw(InvalidString, 
+-		       c_format("Illegal argument to establish: <%s>\n[%s]",
+-				words[i].c_str(), line.c_str()));
++	    } else {
++		XLOG_ERROR("Illegal argument to use_4byte_asnums: <%s>\n[%s]",
++			   use4bytearg.c_str(), line.c_str());
++		return -1;
++	    }
++	} else {
++	    XLOG_ERROR("Illegal argument to establish: <%s>\n[%s]",
++		       words[i].c_str(), line.c_str());
++	    return -1;
++	}
+     }
+ 
+-    if("" == as)
+-	xorp_throw(InvalidString,
+-		   c_format("No AS number specified:\n[%s]", line.c_str()));
++    if("" == as) {
++	XLOG_ERROR("No AS number specified:\n[%s]", line.c_str());
++	return -1;
++    }
+ 
+     _as = AsNum(as);
+ 
+     if(!active) {
+ 	_passive = true;
+ 	listen(line, words);
+-	return;
++	return 0;
+     }
+ 
+     connect(line, words);
+ 
+     send_open();
++    return 0;
+ }
+ 
+-void
++int
+ Peer::send(const string& line, const vector<string>& words)
+-    throw(InvalidString)
+ {
+     size_t size = words.size();
+-    if(size < 3)
+-	xorp_throw(InvalidString,
+-		   c_format("Insufficient number of arguments:\n[%s]",
+-			    line.c_str()));
++    if(size < 3) {
++	XLOG_ERROR("Insufficient number of arguments:\n[%s]",
++		   line.c_str());
++	return -1;
++    }
+ 
+     const char PACKET[] = "packet";
+     const char DUMP[] = "dump";
+@@ -426,11 +430,11 @@ Peer::send(const string& line, const vector<string>& words)
+     } else if(DUMP == words[2]) {
+ 	send_dump(line, words);
+     } else {
+-	xorp_throw(InvalidString,
+-		   c_format(
+-		   "Second argument should be %s or %s not <%s>\n[%s]",
+-		   PACKET, DUMP, words[2].c_str(), line.c_str()));
++	XLOG_ERROR("Second argument should be %s or %s not <%s>\n[%s]",
++		   PACKET, DUMP, words[2].c_str(), line.c_str());
++	return -1;
+     }
++    return 0;
+ }
+ 
+ /**
+@@ -465,9 +469,8 @@ class Corrupt  {
+ **
+ ** See the packet method for the rest of the commands
+ */
+-void
++int
+ Peer::send_packet(const string& line, const vector<string>& words)
+-    throw(InvalidString)
+ {
+     size_t size = words.size();
+     uint32_t word = 3;
+@@ -478,14 +481,14 @@ Peer::send_packet(const string& line, const vector<string>& words)
+ 	// packet.
+ 	while (word + 2 < size) {
+ 	    if (!xorp_isdigit(words[word][0])) {
+-		xorp_throw(InvalidString,
+-			   c_format("Should be an offset not %s\n[%s]",
+-				    words[word].c_str(), line.c_str()));
++		XLOG_ERROR("Should be an offset not %s\n[%s]",
++			   words[word].c_str(), line.c_str());
++		return -1;
+ 	    }
+ 	    if (!xorp_isdigit(words[word + 1][0])) {
+-		xorp_throw(InvalidString,
+-			   c_format("Should be a value not %s\n[%s]",
+-				    words[word + 1].c_str(), line.c_str()));
++		XLOG_ERROR("Should be a value not %s\n[%s]",
++			   words[word + 1].c_str(), line.c_str());
++		return -1;
+ 	    }
+ 
+ 	    _corrupt.push_back(Corrupt(atoi(words[word].c_str()),
+@@ -507,11 +510,12 @@ Peer::send_packet(const string& line, const vector<string>& words)
+     if (!_corrupt.empty()) {
+ 	list<Corrupt>::const_iterator i;
+ 	for (i = _corrupt.begin(); i != _corrupt.end(); i++) {
+-	    if (i->offset() >= len)
+-		xorp_throw(InvalidString,
+-			   c_format("Offset %u larger than packet %u\n[%s]",
+-				    i->offset(), XORP_UINT_CAST(len),
+-				    line.c_str()));
++	    if (i->offset() >= len) {
++		XLOG_ERROR("Offset %u larger than packet %u\n[%s]",
++			   i->offset(), XORP_UINT_CAST(len),
++			   line.c_str());
++		return -1;
++	    }
+ 	    buf[i->offset()] = i->val();
+ 	}
+     }
+@@ -535,6 +539,7 @@ Peer::send_packet(const string& line, const vector<string>& words)
+ 
+     _busy++;
+     send_message(buf, len, callback(this, &Peer::xrl_callback, "send packet"));
++    return 0;
+ }
+ 
+ struct mrt_header {
+@@ -715,33 +720,36 @@ mrtd_table_file_read(FILE *fp, size_t& len)
+ ** peer send dump mrtd update fname <count>
+ ** 0    1    2    3    4      5	    6
+ */
+-void
++int
+ Peer::send_dump(const string& line, const vector<string>& words)
+-    throw(InvalidString)
+ {
+-    if(6 != words.size() && 7 != words.size())
+-	xorp_throw(InvalidString,
+-		   c_format("Incorrect number of arguments:\n[%s]",
+-			    line.c_str()));
++    if(6 != words.size() && 7 != words.size()) {
++	XLOG_ERROR("Incorrect number of arguments:\n[%s]",
++		   line.c_str());
++	return -1;
++    }
+ 
+     const char MRTD[] = "mrtd";
+-    if(MRTD != words[3])
+-	xorp_throw(InvalidString,
+-		   c_format("Third argument should be %s not <%s>\n[%s]",
+-			    MRTD, words[3].c_str(), line.c_str()));
++    if(MRTD != words[3]) {
++	XLOG_ERROR("Third argument should be %s not <%s>\n[%s]",
++		   MRTD, words[3].c_str(), line.c_str());
++	return -1;
++    }
+ 
+     const char UPDATE[] = "update";
+-    if(UPDATE != words[4])
+-	xorp_throw(InvalidString,
+-		   c_format("Fourth argument should be %s not <%s>\n[%s]",
+-			    UPDATE, words[4].c_str(), line.c_str()));
++    if(UPDATE != words[4]) {
++	XLOG_ERROR("Fourth argument should be %s not <%s>\n[%s]",
++		   UPDATE, words[4].c_str(), line.c_str());
++	return -1;
++    }
+ 
+     string fname = words[5];
+     FILE *fp = fopen(fname.c_str(), "r");
+-    if(0 == fp)
+-	xorp_throw(InvalidString,
+-		   c_format("fopen of %s failed: %s\n[%s]",
+-			    fname.c_str(), strerror(errno), line.c_str()));
++    if(0 == fp) {
++	XLOG_ERROR("fopen of %s failed: %s\n[%s]",
++		   fname.c_str(), strerror(errno), line.c_str());
++	return -1;
++    }
+ 
+     size_t packets_to_send = 0;
+     if(7 == words.size()) 
+@@ -755,6 +763,7 @@ Peer::send_dump(const string& line, const vector<string>& words)
+     */
+     send_dump_callback(XrlError::OKAY(), fp, 0, packets_to_send,
+ 		       "mrtd_traffic_send");
++    return 0;
+ }
+ 
+ void
+@@ -801,13 +810,13 @@ Peer::send_dump_callback(const XrlError& error, FILE *fp,
+     fclose(fp);
+ }
+ 
+-void
++int
+ Peer::trie(const string& line, const vector<string>& words)
+-    throw(InvalidString)
+ {
+-    if(words.size() < 4)
+-	xorp_throw(InvalidString,
+-		   c_format("Insufficient arguments:\n[%s]", line.c_str()));
++    if(words.size() < 4) {
++	XLOG_ERROR("Insufficient arguments:\n[%s]", line.c_str());
++	return -1;
++    }
+ 
+     /*
+     ** Each peer holds two tries. One holds updates sent the other
+@@ -819,44 +828,48 @@ Peer::trie(const string& line, const vector<string>& words)
+ 	op = &_trie_sent;
+     } else if("recv" == words[2]) {
+ 	op = &_trie_recv;
+-    } else
+-	xorp_throw(InvalidString,
+-		   c_format("\"sent\" or \"recv\" accepted not <%s>\n[%s]",
+-			    words[2].c_str(), line.c_str()));
++    } else {
++	XLOG_ERROR("\"sent\" or \"recv\" accepted not <%s>\n[%s]",
++		   words[2].c_str(), line.c_str());
++	return -1;
++    }
+ 
+     /*
+     ** The only operation currently supported is lookup
+     */
+-    if("lookup" != words[3])
+-	xorp_throw(InvalidString,
+-		   c_format("\"lookup\" expected not <%s>\n[%s]",
+-			    words[3].c_str(), line.c_str()));
+-
+-    if(words.size() < 5)
+-	xorp_throw(InvalidString,
+-		   c_format("No arguments for \"lookup\"\n[%s]",
+-			    line.c_str()));
++    if("lookup" != words[3]) {
++	XLOG_ERROR("\"lookup\" expected not <%s>\n[%s]",
++		   words[3].c_str(), line.c_str());
++	return -1;
++    }
++
++    if(words.size() < 5) {
++	XLOG_ERROR("No arguments for \"lookup\"\n[%s]",
++		   line.c_str());
++	return -1;
++    }
+ 	
+     const UpdatePacket *bgpupdate = op->lookup(words[4]);
+     if(0 == bgpupdate) {
+ 	if((words.size() == 6) && ("not" == words[5]))
+-	    return;
+-	xorp_throw(InvalidString,
+-		   c_format("Lookup failed [%s]", line.c_str()));
++	    return 0;
++	XLOG_ERROR("Lookup failed [%s]", line.c_str());
++	return -1;
+     }
+ 
+-    if((words.size() == 6) && ("not" == words[5]))
+-	xorp_throw(InvalidString,
+-		   c_format("Lookup failed entry exists [%s]", line.c_str()));
++    if((words.size() == 6) && ("not" == words[5])) {
++	XLOG_ERROR("Lookup failed entry exists [%s]", line.c_str());
++	return -1;
++    }
+ 
+     debug_msg("Found: %s\n", bgpupdate->str().c_str());
+     
+     size_t size = words.size();
+-    if(0 == (size % 2))
+-	xorp_throw(InvalidString,
+-		   c_format("Incorrect number of arguments:\n[%s]",
+-			    line.c_str()));
+-
++    if(0 == (size % 2)) {
++	XLOG_ERROR("Incorrect number of arguments:\n[%s]",
++		   line.c_str());
++	return -1;
++    }
+ 
+     for(size_t i = 5; i < size; i += 2) {
+ 	debug_msg("attribute: %s value: %s\n",
+@@ -872,47 +885,52 @@ Peer::trie(const string& line, const vector<string>& words)
+ 	    const ASPath *aspath = 0;
+ 	    if (palist->aspath_att())
+ 		aspath = &(palist->aspath());
+-	    else
+-		xorp_throw(InvalidString, 
+-			   c_format("NO AS Path associated with route\n[%s]",
+-				    line.c_str())); 
++	    else {
++		XLOG_ERROR("NO AS Path associated with route\n[%s]",
++			   line.c_str());
++		return -1;
++	    }
+ 		
+ 	    string aspath_search;
+ 	    if("empty" != words[i + 1])
+ 		aspath_search = words[i + 1];
+ 
+-	    if(*aspath != ASPath(aspath_search.c_str()))
+-		xorp_throw(InvalidString, 
+-			   c_format("Looking for Path: <%s> Found: <%s>\n[%s]",
+-				    words[i + 1].c_str(),
+-				    aspath->str().c_str(),
+-				    line.c_str())); 
+-	} else
+-	    xorp_throw(InvalidString, 
+-		       c_format("Illegal attribute: <%s>\n[%s]",
+-				words[i].c_str(), line.c_str()));
++	    if(*aspath != ASPath(aspath_search.c_str())) {
++		XLOG_ERROR("Looking for Path: <%s> Found: <%s>\n[%s]",
++			   words[i + 1].c_str(),
++			   aspath->str().c_str(),
++			   line.c_str());
++		return -1;
++	    }
++	} else {
++	    XLOG_ERROR("Illegal attribute: <%s>\n[%s]",
++		       words[i].c_str(), line.c_str());
++	    return -1;
++	}
+     }
++    return 0;
+ }
+ 
+ /*
+ ** peer expect packet ...
+ ** 0    1      2
+ */
+-void
++int
+ Peer::expect(const string& line, const vector<string>& words)
+-    throw(InvalidString)
+ {
+-    if(words.size() < 3)
+-	xorp_throw(InvalidString,
+-		   c_format("Insufficient arguments:\n[%s]", line.c_str()));
++    if(words.size() < 3) {
++	XLOG_ERROR("Insufficient arguments:\n[%s]", line.c_str());
++	return -1;
++    }
+ 
+     if("packet" == words[2]) {
+ 	_expect._list.push_back(packet(line, words, 3));
+-    } else
+-	xorp_throw(InvalidString,
+-		   c_format(
+-			    "\"packet\" accepted not <%s>\n[%s]",
+-			    words[2].c_str(), line.c_str()));
++    } else {
++	XLOG_ERROR("\"packet\" accepted not <%s>\n[%s]",
++		   words[2].c_str(), line.c_str());
++	return -1;
++    }
++    return 0;
+ }
+ 
+ /*
+@@ -931,54 +949,59 @@ Peer::expect(const string& line, const vector<string>& words)
+ ** peer assert idle
+ ** 0    1      2
+ */
+-void
++int
+ Peer::assertX(const string& line, const vector<string>& words)
+-    throw(InvalidString)
+ {
+-    if(words.size() < 3)
+-	xorp_throw(InvalidString,
+-		   c_format("Insufficient arguments:\n[%s]", line.c_str()));
++    if(words.size() < 3) {
++	XLOG_ERROR("Insufficient arguments:\n[%s]", line.c_str());
++	return -1;
++    }
+ 
+     if("queue" == words[2]) {
+-	if(!_expect._ok)
+-	    xorp_throw(InvalidString,
+-	       c_format("Expect queue violated\nExpect: %sReceived: %s",
+-			_expect._list.front()->str().c_str(),
+-			_expect._bad->str().c_str()));
++	if(!_expect._ok) {
++	    XLOG_ERROR("Expect queue violated\nExpect: %sReceived: %s",
++		       _expect._list.front()->str().c_str(),
++		       _expect._bad->str().c_str());
++	    return -1;
++	}
+ 	switch(words.size()) {
+ 	case 3:
+ 	    break;
+ 	case 4:
+ 	    if(static_cast<unsigned int>(atoi(words[3].c_str())) !=
+-	       _expect._list.size())
+-		xorp_throw(InvalidString, 
+-			   c_format("Expected list size to be %d actual %u",
+-				    atoi(words[3].c_str()),
+-				    XORP_UINT_CAST(_expect._list.size())));
++	       _expect._list.size()) {
++		XLOG_ERROR("Expected list size to be %d actual %u",
++			   atoi(words[3].c_str()),
++			   XORP_UINT_CAST(_expect._list.size()));
++		return -1;
++	    }
+ 	    break;
+ 	default:
+-	    xorp_throw(InvalidString, 
+-		   c_format("Illegal number of arguments to \"queue\"\n[%s]",
+-			    line.c_str()));
+-	    break;
++	    XLOG_ERROR("Illegal number of arguments to \"queue\"\n[%s]",
++		       line.c_str());
++	    return -1;
+ 	}
+     } else if("connected" == words[2]) {
+-	if(!_connected)
+-	    xorp_throw(InvalidString,
+-		       c_format("No TCP session established"));
++	if(!_connected) {
++	    XLOG_ERROR("No TCP session established");
++	    return -1;
++	}
+     } else if("established" == words[2]) {
+-	if(!_established)
+-	    xorp_throw(InvalidString,
+-		       c_format("No BGP session established"));
++	if(!_established) {
++	    XLOG_ERROR("No BGP session established");
++	    return -1;
++	}
+     } else if("idle" == words[2]) {
+-	if(_connected)
+-	    xorp_throw(InvalidString,
+-		       c_format("Session established"));
+-    } else
+-	xorp_throw(InvalidString,
+-		   c_format(
+-		   "\"queue\" \"established\" \"idle\"accepted not <%s>\n[%s]",
+-		   words[2].c_str(), line.c_str()));
++	if(_connected) {
++	    XLOG_ERROR("Session established");
++	    return -1;
++	}
++    } else {
++	XLOG_ERROR("\"queue\" \"established\" \"idle\"accepted not <%s>\n[%s]",
++		   words[2].c_str(), line.c_str());
++	return -1;
++    }
++    return 0;
+ }
+ 
+ void
+@@ -1212,14 +1235,14 @@ text_replay_dump(const UpdatePacket* p,
+ ** 	<traffic/routeview/replay/debug> <fname>
+ ** 	5				  6
+ */
+-void
++int
+ Peer::dump(const string& line, const vector<string>& words)
+-    throw(InvalidString)
+ {
+     
+-    if(words.size() < 6)
+-	xorp_throw(InvalidString,
+-		   c_format("Insufficient arguments:\n[%s]", line.c_str()));
++    if(words.size() < 6) {
++	XLOG_ERROR("Insufficient arguments:\n[%s]", line.c_str());
++	return -1;
++    }
+ 
+     /*
+     ** Each peer holds two tries. One holds updates sent the other
+@@ -1234,30 +1257,33 @@ Peer::dump(const string& line, const vector<string>& words)
+     } else if("recv" == words[2]) {
+ 	op = &_trie_recv;
+ 	dumper = &_traffic_recv;
+-    } else
+-	xorp_throw(InvalidString,
+-		   c_format("\"sent\" or \"recv\" accepted not <%s>\n[%s]",
+-			    words[2].c_str(), line.c_str()));
++    } else {
++	XLOG_ERROR("\"sent\" or \"recv\" accepted not <%s>\n[%s]",
++		   words[2].c_str(), line.c_str());
++	return -1;
++    }
+ 
+     bool mrtd;
+     if("mrtd" == words[3]) {
+ 	mrtd = true;
+     } else if("text" == words[3]) {
+ 	mrtd = false;
+-    } else
+-	xorp_throw(InvalidString,
+-		   c_format("\"mrtd\" or \"text\" accepted not <%s>\n[%s]",
+-			    words[3].c_str(), line.c_str()));
++    } else {
++	XLOG_ERROR("\"mrtd\" or \"text\" accepted not <%s>\n[%s]",
++		   words[3].c_str(), line.c_str());
++	return -1;
++    }
+ 
+     bool ipv4 = true;
+     if("ipv4" == words[4]) {
+ 	ipv4 = true;
+     } else if("ipv6" == words[4]) {
+ 	ipv4 = false;
+-    } else
+-	xorp_throw(InvalidString,
+-		   c_format("\"ipv4\" or \"ipv6\" accepted not <%s>\n[%s]",
+-			    words[4].c_str(), line.c_str()));
++    } else {
++	XLOG_ERROR("\"ipv4\" or \"ipv6\" accepted not <%s>\n[%s]",
++		   words[4].c_str(), line.c_str());
++	return -1;
++    }
+     
+     string filename;
+     if(words.size() == 7)
+@@ -1275,8 +1301,8 @@ Peer::dump(const string& line, const vector<string>& words)
+     	char tmpexp[MAXPATHLEN];
+     	size_t size = GetTempPathA(sizeof(tmpexp), tmpexp);
+     	if (size == 0 || size >= sizeof(tmpexp)) {
+-		xorp_throw(InvalidString,
+-        	   c_format("Internal error during tmpdir expansion"));
++	    XLOG_ERROR("Internal error during tmpdir expansion");
++	    return -1;
+ 	}
+ 	filename.replace(0, strlen(tmpdirprefix), string(tmpexp));
+     }
+@@ -1294,8 +1320,8 @@ Peer::dump(const string& line, const vector<string>& words)
+ 			       (const BGPPeerData*)_peerdata);
+     } else if("routeview" == words[5]) {
+ 	if("" == filename) {
+-	    xorp_throw(InvalidString,
+-		       c_format("no filename provided\n[%s]", line.c_str()));
++	    XLOG_ERROR("no filename provided\n[%s]", line.c_str());
++	    return -1;
+ 	}
+ 	int sequence = 0;
+ 	if(ipv4) {
+@@ -1317,8 +1343,8 @@ Peer::dump(const string& line, const vector<string>& words)
+ 	}
+     } else if("replay" == words[5]) {
+ 	if("" == filename) {
+-	    xorp_throw(InvalidString,
+-		       c_format("no filename provided\n[%s]", line.c_str()));
++	    XLOG_ERROR("no filename provided\n[%s]", line.c_str());
++	    return -1;
+ 	}
+ 	Trie::ReplayWalker rw;
+ 	if(mrtd)
+@@ -1328,8 +1354,8 @@ Peer::dump(const string& line, const vector<string>& words)
+ 	op->replay_walk(rw, _peerdata);
+     } else if("debug" == words[5]) {
+ 	if("" == filename) {
+-	    xorp_throw(InvalidString,
+-		       c_format("no filename provided\n[%s]", line.c_str()));
++	    XLOG_ERROR("no filename provided\n[%s]", line.c_str());
++	    return -1;
+ 	}
+ 	if(ipv4) {
+ 	    Trie::TreeWalker_ipv4 tw_ipv4;
+@@ -1348,11 +1374,12 @@ Peer::dump(const string& line, const vector<string>& words)
+ 		tw_ipv6 = callback(text_debug_dump<IPv6>, filename);
+ 	    op->tree_walk_table(tw_ipv6);
+ 	}
+-    } else
+-	xorp_throw(InvalidString,
+-		   c_format(
+-"\"traffic\" or \"routeview\" or \"replay\" or \"debug\" accepted not <%s>\n[%s]",
+-			    words[5].c_str(), line.c_str()));
++    } else {
++	XLOG_ERROR("\"traffic\" or \"routeview\" or \"replay\" or \"debug\" accepted not <%s>\n[%s]",
++		   words[5].c_str(), line.c_str());
++	return -1;
++    }
++    return 0;
+ }
+ 
+ bool
+@@ -1706,7 +1733,7 @@ public:
+     ** The attr string should be a comma separated list of numbers.
+     */
+ 
+-    AnyAttribute(const char *attr) throw(InvalidString)
++    AnyAttribute(const char *attr)
+ 	// In order to protect against accidents in the BGP code,
+ 	// PathAttribute does not have a default constructor. However,
+ 	// we need to manipulate a PathAttribute so pass in a valid
+@@ -1766,8 +1793,7 @@ const uint8_t AnyAttribute::_valid[] = {0x80|0x40, 255, 1, 1};
+ ** an array.
+ */
+ PathAttribute *
+-Peer::path_attribute(const char *) 
+-    const throw(InvalidString)
++Peer::path_attribute(const char *)
+ {
+     const uint8_t path[] = {0x80|0x40, 255, 1, 1};
+     uint16_t max_len = sizeof(path);
+@@ -1793,9 +1819,10 @@ community_interpret(const string& community)
+ 	return CommunityAttribute::NO_ADVERTISE;
+     else if ("NO_EXPORT_SUBCONFED" == community)
+ 	return CommunityAttribute::NO_EXPORT_SUBCONFED;
+-    else
+-	xorp_throw(InvalidString,
+-		   c_format("Invalid community name %s", community.c_str()));
++    else {
++	XLOG_ERROR("Invalid community name %s", community.c_str());
++	return CommunityAttribute::NO_EXPORT;
++    }
+ 
+     return val;
+ }
+@@ -1806,8 +1833,7 @@ community_interpret(const string& community)
+ ** that has been created.
+ */
+ const BGPPacket *
+-Peer::packet(const string& line, const vector<string>& words, int index)
+-    const throw(InvalidString)
++Peer::packet(const string& line, const vector<string>& words, int index) const
+ {
+     BGPPacket *pac = 0;
+ 
+@@ -1823,19 +1849,20 @@ Peer::packet(const string& line, const vector<string>& words, int index)
+ 	    break;
+ 	default: {
+ 	    int errlen = words.size() - (index + 3);
+-	    if (errlen < 1)
+-		xorp_throw(InvalidString,
+-			   c_format(
+-			   "Incorrect number of arguments to notify:\n[%s]",
+-			   line.c_str()));
++	    if (errlen < 1) {
++		XLOG_ERROR("Incorrect number of arguments to notify:\n[%s]",
++			   line.c_str());
++		return NULL;
++	    }
++
+ 	    uint8_t buf[errlen];
+ 	    for (int i=0; i< errlen; i++) {
+ 		int value = atoi(words[index + 3 + i].c_str());
+-		if (value < 0 || value > 255)
+-		    xorp_throw(InvalidString,
+-			       c_format(
+-			       "Incorrect byte value to notify:\n[%s]",
+-			       line.c_str()));
++		if (value < 0 || value > 255) {
++		    XLOG_ERROR("Incorrect byte value to notify:\n[%s]",
++			       line.c_str());
++		    return NULL;
++		}
+ 			
+ 		buf[i] = (uint8_t)value;
+ 		pac = new NotificationPacket(atoi(words[index+1].c_str()),
+@@ -1847,10 +1874,11 @@ Peer::packet(const string& line, const vector<string>& words, int index)
+     } else if("update" == words[index]) {
+ 	size_t size = words.size();
+ #if 0
+-	if(0 != ((size - (index + 1)) % 2))
+-	    xorp_throw(InvalidString,
+-	       c_format("Incorrect number of arguments to update:\n[%s]",
+-				line.c_str()));
++	if(0 != ((size - (index + 1)) % 2)) {
++	    XLOG_ERROR("Incorrect number of arguments to update:\n[%s]",
++		       line.c_str());
++	    return NULL;
++	}
+ #endif
+ 	UpdatePacket *bgpupdate = new UpdatePacket();
+ 	MPReachNLRIAttribute<IPv6> mpipv6_nlri(SAFI_UNICAST);
+@@ -1927,10 +1955,12 @@ Peer::packet(const string& line, const vector<string>& words, int index)
+ 	    } else if("pathattr" == words[i]) {
+ 		AnyAttribute aa(words[i+1].c_str());
+ 		bgpupdate->add_pathatt(aa);
+-	    } else
+-		xorp_throw(InvalidString, 
+-		       c_format("Illegal argument to update: <%s>\n[%s]",
+-				words[i].c_str(), line.c_str()));
++	    } else {
++		XLOG_ERROR("Illegal argument to update: <%s>\n[%s]",
++			   words[i].c_str(), line.c_str());
++		delete bgpupdate;
++		return NULL;
++	    }
+ 	}
+ 	if(!mpipv6_nlri.nlri_list().empty()) {
+  	    //XXX mpipv6_nlri.encode(); //don't think we still need this
+@@ -1950,10 +1980,11 @@ Peer::packet(const string& line, const vector<string>& words, int index)
+ 	pac = bgpupdate;
+     } else if("open" == words[index]) {
+ 	size_t size = words.size();
+-	if(0 != ((size - (index + 1)) % 2))
+-	    xorp_throw(InvalidString,
+-	       c_format("Incorrect number of arguments to open:\n[%s]",
+-				line.c_str()));
++	if(0 != ((size - (index + 1)) % 2)) {
++	    XLOG_ERROR("Incorrect number of arguments to open:\n[%s]",
++		       line.c_str());
++	    return NULL;
++	}
+ 
+ 	string asnum;
+ 	string bgpid;
+@@ -1975,31 +2006,32 @@ Peer::packet(const string& line, const vector<string>& words, int index)
+ 		afi = words[i + 1];
+ 	    } else if("safi" == words[i]) {
+ 		safi = words[i + 1];
+-	    } else 
+-		xorp_throw(InvalidString, 
+-		       c_format("Illegal argument to open: <%s>\n[%s]",
+-				words[i].c_str(), line.c_str()));
++	    } else {
++		XLOG_ERROR("Illegal argument to open: <%s>\n[%s]",
++			   words[i].c_str(), line.c_str());
++		return NULL;
++	    }
+ 	}
+ 
+ 	if("" == asnum) {
+-	    xorp_throw(InvalidString,
+-	       c_format("AS number not supplied to open:\n[%s]",
+-				line.c_str()));
++	    XLOG_ERROR("AS number not supplied to open:\n[%s]",
++		       line.c_str());
++	    return NULL;
+ 	}
+ 	if("" == bgpid) {
+-	    xorp_throw(InvalidString,
+-	       c_format("BGP ID not supplied to open:\n[%s]",
+-				line.c_str()));
++	    XLOG_ERROR("BGP ID not supplied to open:\n[%s]",
++		       line.c_str());
++	    return NULL;
+ 	}
+ 	if("" == holdtime) {
+-	    xorp_throw(InvalidString,
+-	       c_format("Holdtime not supplied to open:\n[%s]",
+-				line.c_str()));
++	    XLOG_ERROR("Holdtime not supplied to open:\n[%s]",
++		       line.c_str());
++	    return NULL;
+ 	}
+ 	if(("" != afi && "" == safi) || ("" == afi && "" != safi)) {
+-	    xorp_throw(InvalidString,
+-	       c_format("Both AFI and SAFI must be set/not set to open:\n[%s]",
+-				line.c_str()));
++	    XLOG_ERROR("Both AFI and SAFI must be set/not set to open:\n[%s]",
++		       line.c_str());
++	    return NULL;
+ 	}
+ 
+  	OpenPacket *open = new OpenPacket(AsNum(
+@@ -2016,18 +2048,19 @@ Peer::packet(const string& line, const vector<string>& words, int index)
+ 	pac = open;
+     } else if("keepalive" == words[index]) {
+ 	pac = new KeepAlivePacket();
+-    } else
+-	xorp_throw(InvalidString,
+-		   c_format("\"notify\" or"
+-			    " \"update\" or"
+-			    " \"open\" or"
+-			    " \"keepalive\" accepted"
+-			    " not <%s>\n[%s]",
+-			    words[index].c_str(), line.c_str()));
++    } else {
++	XLOG_ERROR("\"notify\" or"
++		   " \"update\" or"
++		   " \"open\" or"
++		   " \"keepalive\" accepted"
++		   " not <%s>\n[%s]",
++		   words[index].c_str(), line.c_str());
++	return NULL;
+   } catch(CorruptMessage c) {
+-       xorp_throw(InvalidString, c_format("Unable to construct packet "
+-					"%s\n[%s])", c.why().c_str(),
+-					line.c_str()));
++	XLOG_ERROR("Unable to construct packet "
++		   "%s\n[%s])", c.why().c_str(),
++		   line.c_str());
++	return NULL;
+   }
+ 	
+   debug_msg("%s\n", pac->str().c_str());
+diff --git a/xorp/bgp/harness/peer.hh b/xorp/bgp/harness/peer.hh
+index caea816..d49fa1d 100644
+--- a/xorp/bgp/harness/peer.hh
++++ b/xorp/bgp/harness/peer.hh
+@@ -17,8 +17,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/bgp/harness/peer.hh,v 1.26 2008/10/02 21:56:26 bms Exp $
+-
+ #ifndef __BGP_HARNESS_PEER_HH__
+ #define __BGP_HARNESS_PEER_HH__
+ 
+@@ -60,38 +58,27 @@ public:
+ 
+     bool pending();
+ 
+-    void listen(const string& line, const vector<string>& words)
+-	throw(InvalidString);
+-
+-    void connect(const string& line, const vector<string>& words)
+-	throw(InvalidString);
++    void listen(const string& line, const vector<string>& words);
+ 
+-    void disconnect(const string& line, const vector<string>& words)
+-	throw(InvalidString);
++    void connect(const string& line, const vector<string>& words);
+ 
+-    void establish(const string& line, const vector<string>& words)
+-	throw(InvalidString);
++    void disconnect(const string& line, const vector<string>& words);
+ 
+-    void send(const string& line, const vector<string>& words)
+-	throw(InvalidString);
++    int WARN_UNUSED establish(const string& line, const vector<string>& words);
+ 
+-    void send_packet(const string& line, const vector<string>& words)
+-	throw(InvalidString);
++    int WARN_UNUSED send(const string& line, const vector<string>& words);
++    
++    int WARN_UNUSED send_packet(const string& line, const vector<string>& words);
+ 
+-    void send_dump(const string& line, const vector<string>& words)
+-	throw(InvalidString);
++    int WARN_UNUSED send_dump(const string& line, const vector<string>& words);
+ 
+-    void trie(const string& line, const vector<string>& words)
+-	throw(InvalidString);
++    int WARN_UNUSED trie(const string& line, const vector<string>& words);
+ 
+-    void expect(const string& line, const vector<string>& words)
+-	throw(InvalidString);
++    int WARN_UNUSED expect(const string& line, const vector<string>& words);
+ 
+-    void assertX(const string& line, const vector<string>& words)
+-	throw(InvalidString);
++    int WARN_UNUSED assertX(const string& line, const vector<string>& words);
+ 
+-    void dump(const string& line, const vector<string>& words)
+-	throw(InvalidString);
++    int WARN_UNUSED dump(const string& line, const vector<string>& words);
+ 
+     void check_expect(BGPPacket *rec);
+ 
+@@ -103,9 +90,9 @@ public:
+     void datain_error(const string& reason);
+     void datain_closed();
+ 
+-    PathAttribute *path_attribute(const char *)	const throw(InvalidString);
++    PathAttribute *path_attribute(const char *)	const;
+     const BGPPacket *packet(const string& line, const vector<string>& words,
+-			    int index) const throw(InvalidString);
++			    int index);
+ protected:
+     typedef XorpCallback1<void, const XrlError&>::RefPtr SMCB;
+     SMCB _smcb;
+diff --git a/xorp/bgp/local_data.hh b/xorp/bgp/local_data.hh
+index f20b30d..81bc0b0 100644
+--- a/xorp/bgp/local_data.hh
++++ b/xorp/bgp/local_data.hh
+@@ -17,7 +17,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/bgp/local_data.hh,v 1.25 2008/10/02 21:56:16 bms Exp $
+ 
+ #ifndef __BGP_LOCAL_DATA_HH__
+ #define __BGP_LOCAL_DATA_HH__
+diff --git a/xorp/bgp/peer.hh b/xorp/bgp/peer.hh
+index b229bf2..220dc34 100644
+--- a/xorp/bgp/peer.hh
++++ b/xorp/bgp/peer.hh
+@@ -17,7 +17,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/bgp/peer.hh,v 1.53 2008/11/08 06:14:37 mjh Exp $
+ 
+ #ifndef __BGP_PEER_HH__
+ #define __BGP_PEER_HH__
+diff --git a/xorp/bgp/xrl_target.cc b/xorp/bgp/xrl_target.cc
+index c91b157..b3579b2 100644
+--- a/xorp/bgp/xrl_target.cc
++++ b/xorp/bgp/xrl_target.cc
+@@ -119,11 +119,11 @@ XrlBgpTarget::bgp_0_3_local_config(
+ 	return XrlCmdError::COMMAND_FAILED("Attempt to reconfigure BGP denied.");
+ 
+     _use_4byte_asnums = use_4byte_asnums;
+-    try {
+-	_as = AsNum(as);
+-    } catch(InvalidString &e) {
++
++    _as = AsNum(as);
++    if (_as.as4() == AsNum::AS_INVALID)
+ 	return XrlCmdError::COMMAND_FAILED(e.str());
+-    }
++
+     _bgp.local_config(_as.as4(), id, use_4byte_asnums);
+ 
+     _awaiting_config = false;
+@@ -144,11 +144,9 @@ XrlBgpTarget::bgp_0_3_set_local_as(
+ //     if(!_awaiting_as)
+ // 	return XrlCmdError::COMMAND_FAILED("Attempt to reconfigure BGP AS");
+ 
+-    try {
+-	_as = AsNum(as);
+-    } catch(InvalidString &e) {
++    _as = AsNum(as);
++    if (_as.as4() == AsNum::AS_INVALID)
+ 	return XrlCmdError::COMMAND_FAILED(e.str());
+-    }
+     _awaiting_as = false;
+     if(!_awaiting_as && !_awaiting_bgp_id && !_awaiting_4byte_asnums) {
+ 	_bgp.local_config(_as.as4(), _id, _use_4byte_asnums);
+@@ -225,11 +223,7 @@ XrlBgpTarget::bgp_0_3_set_confederation_identifier(const string& as,
+ {
+     debug_msg("as %s disable %s\n", as.c_str(), bool_c_str(disable));
+ 
+-    try {
+-	_bgp.set_confederation_identifier(AsNum(as).as4(), disable);
+-    } catch(InvalidString &e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
+-    }
++    _bgp.set_confederation_identifier(AsNum(as).as4(), disable);
+ 
+     return XrlCmdError::OKAY();
+ }
+diff --git a/xorp/contrib/mld6igmp_lite/mld6igmp_node_cli.cc b/xorp/contrib/mld6igmp_lite/mld6igmp_node_cli.cc
+index ca0c465..332e591 100644
+--- a/xorp/contrib/mld6igmp_lite/mld6igmp_node_cli.cc
++++ b/xorp/contrib/mld6igmp_lite/mld6igmp_node_cli.cc
+@@ -334,8 +334,9 @@ Mld6igmpNodeCli::cli_show_mld6igmp_group(const vector<string>& argv)
+     
+     // Check the (optional) arguments, and create an array of groups to test
+     for (size_t i = 0; i < argv.size(); i++) {
+-	try {
+-	    IPvX g(argv[i].c_str());
++
++	IPvX g(argv[i].c_str());
++	if (! g.invalid()) {
+ 	    if (g.af() != family()) {
+ 		cli_print(c_format("ERROR: Address with invalid address family: %s\n",
+ 				   argv[i].c_str()));
+@@ -347,7 +348,7 @@ Mld6igmpNodeCli::cli_show_mld6igmp_group(const vector<string>& argv)
+ 		return (XORP_ERROR);
+ 	    }
+ 	    groups.push_back(g);
+-	} catch (InvalidString) {
++	}
+ 	    cli_print(c_format("ERROR: Invalid IP address: %s\n",
+ 			       argv[i].c_str()));
+ 	    return (XORP_ERROR);
+diff --git a/xorp/contrib/olsr/test_args.hh b/xorp/contrib/olsr/test_args.hh
+index 3d1f071..4d5c144 100644
+--- a/xorp/contrib/olsr/test_args.hh
++++ b/xorp/contrib/olsr/test_args.hh
+@@ -18,7 +18,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/contrib/olsr/test_args.hh,v 1.3 2008/10/02 21:56:35 bms Exp $
+ 
+ #ifndef __OSPF_TEST_ARGS_HH__
+ #define __OSPF_TEST_ARGS_HH__
+@@ -68,21 +67,19 @@ class Args {
+  *
+  * @param word the word to evaluate.
+  * @return a number.
+- * @throw InvalidString if invalid syntax.
+  */
+ inline
+-uint32_t
+-get_number(const string& word)
+-    throw(InvalidString)
++int
++get_number(const string& word, uint32_t& val)
+ {
+     char *endptr;
+     
+     uint32_t number = strtoul(word.c_str(), &endptr, 0);
+     if (0 != *endptr)
+-	xorp_throw(InvalidString,
+-		   c_format("<%s> is not a number", word.c_str()));
++	return -1;
+ 
+-    return number;
++    val = number;
++    return 0;
+ }
+ 
+ /**
+@@ -90,21 +87,12 @@ get_number(const string& word)
+  *
+  * @param word the word to evaluate.
+  * @return an IPv4 host address.
+- * @throw InvalidString if invalid syntax.
+  */
+ inline
+ IPv4
+ get_ipv4(const string& word)
+-    throw(InvalidString)
+ {
+-    IPv4 addr;
+-    try {
+-	addr = IPv4(word.c_str());
+-    } catch (...) {
+-	xorp_throw(InvalidString,
+-		   c_format("<%s> is not an IPv4 address", word.c_str()));
+-    }
+-
++    IPv4 addr(word.c_str());
+     return addr;
+ }
+ 
+@@ -113,22 +101,12 @@ get_ipv4(const string& word)
+  *
+  * @param word the word to evaluate.
+  * @return an IPv4 network address.
+- * @throw InvalidString if invalid syntax.
+  */
+ inline
+ IPv4Net
+ get_ipv4_net(const string& word)
+-    throw(InvalidString)
+ {
+-    IPv4Net v4net;
+-    try {
+-	v4net = IPv4Net(word.c_str());
+-    } catch (...) {
+-	xorp_throw(InvalidString,
+-		   c_format("<%s> is not an IPv4 network address",
+-			    word.c_str()));
+-    }
+-
++    IPv4Net v4net(word.c_str());
+     return v4net;
+ }
+ 
+@@ -137,34 +115,22 @@ get_ipv4_net(const string& word)
+  *
+  * @param word the word to evaluate.
+  * @return a boolean value.
+- * @throw InvalidString if invalid syntax.
+  */
+ inline
+ bool
+ get_bool(const string& word)
+-    throw(InvalidString)
+ {
+-    bool value = false;
++    uint32_t value = false;
+ 
+-    try {
+-	int i_value = get_number(word);
+-	if (i_value == 1) {
+-	    value = true;
+-	} else if (i_value == 1) {
+-	    value = false;
+-	}
+-    } catch (InvalidString is) {
++    if (get_number(word, value) >= 0) {
++	value = !!value;
++    }
++    else {
+ 	if (0 == strcasecmp(word.c_str(), "true")) {
+ 	    value = true;
+-	} else if (0 == strcasecmp(word.c_str(), "false")) {
+-	    value = false;
+-	} else {
+-	    // re-throw exception with appropriate error message
+-	    xorp_throw(InvalidString,
+-		       c_format("<%s> is not a boolean", word.c_str()));
+ 	}
++	// else false
+     }
+-
+     return value;
+ }
+ 
+@@ -174,35 +140,26 @@ get_bool(const string& word)
+  * @param args the argument structure to retreive the word from.
+  * @param word the word to evaluate.
+  * @return
+- * @throw InvalidString if invalid syntax.
+  */
+ inline
+ string
+ get_next_word(Args& args, const string& varname)
+-    throw(InvalidString)
+ {
+     string var;
+-    if (!args.get_next(var))
+-	xorp_throw(InvalidString,
+-		   c_format("No argument to %s. [%s]",
+-			    varname.c_str(),
+-			    args.original_line().c_str()));
+-
++    args.get_next(var);
+     return var;
+ }
+ 
+ inline
+-uint32_t
+-get_next_number(Args& args, const string& varname)
+-    throw(InvalidString)
++int
++get_next_number(Args& args, const string& varname, uint32_t& val)
+ {
+-    return get_number(get_next_word(args, varname));
++    return get_number(get_next_word(args, varname), val);
+ }
+ 
+ inline
+ IPv4
+ get_next_ipv4(Args& args, const string& varname)
+-    throw(InvalidString)
+ {
+     return get_ipv4(get_next_word(args, varname));
+ }
+@@ -210,7 +167,6 @@ get_next_ipv4(Args& args, const string& varname)
+ inline
+ IPv4Net
+ get_next_ipv4_net(Args& args, const string& varname)
+-    throw(InvalidString)
+ {
+     return get_ipv4_net(get_next_word(args, varname));
+ }
+@@ -218,7 +174,6 @@ get_next_ipv4_net(Args& args, const string& varname)
+ inline
+ bool
+ get_next_bool(Args& args, const string& varname)
+-    throw(InvalidString)
+ {
+     return get_bool(get_next_word(args, varname));
+ }
+diff --git a/xorp/contrib/olsr/test_simulator.cc b/xorp/contrib/olsr/test_simulator.cc
+index d0e7879..1191bcd 100644
+--- a/xorp/contrib/olsr/test_simulator.cc
++++ b/xorp/contrib/olsr/test_simulator.cc
+@@ -723,7 +723,7 @@ class Simulator {
+     Simulator(bool verbose, int verbose_level);
+     ~Simulator();
+ 
+-    bool cmd(Args& args) throw(InvalidString);
++    bool cmd(Args& args);
+ 
+     /**
+      * @short Wait @param secs in EventLoop, whilst running other
+@@ -1845,7 +1845,6 @@ Links::remove_all_links_for_addr(const IPv4& link_addr)
+ 
+ bool
+ Simulator::cmd(Args& args)
+-    throw(InvalidString)
+ {
+     string word;
+ 
+@@ -1874,10 +1873,10 @@ Simulator::cmd(Args& args)
+ 	    IPv4 main_addr = get_next_ipv4(args, "dump_routing_table");
+ 
+ 	    if (! nodes().dump_routing_table(main_addr)) {
+-		xorp_throw(InvalidString,
+-			   c_format("Failed to dump table for node <%s> [%s]",
+-				    cstring(main_addr),
+-				    args.original_line().c_str()));
++		XLOG_ERROR("Failed to dump table for node <%s> [%s]",
++			   cstring(main_addr),
++			   args.original_line().c_str());
++		return false;
+ 	    }
+ 
+ 	} else if ("add_link" == word) {
+@@ -1887,11 +1886,11 @@ Simulator::cmd(Args& args)
+ 	    IPv4 right_addr = get_next_ipv4(args, "add_link");
+ 
+ 	    if (! links().add_link(left_addr, right_addr)) {
+-		xorp_throw(InvalidString,
+-			   c_format("Failed to create link %s %s [%s]",
+-				    cstring(left_addr),
+-				    cstring(right_addr),
+-				    args.original_line().c_str()));
++		XLOG_ERROR("Failed to create link %s %s [%s]",
++			   cstring(left_addr),
++			   cstring(right_addr),
++			   args.original_line().c_str());
++		return false;
+ 	    }
+ 
+ 	} else if ("remove_all_links" == word) {
+@@ -1907,11 +1906,11 @@ Simulator::cmd(Args& args)
+ 	    IPv4 right_addr = get_next_ipv4(args, "remove_link");
+ 
+ 	    if (! links().remove_link(left_addr, right_addr)) {
+-		xorp_throw(InvalidString,
+-			   c_format("Failed to remove link %s %s [%s]",
+-				    cstring(left_addr),
+-				    cstring(right_addr),
+-				    args.original_line().c_str()));
++		XLOG_ERROR("Failed to remove link %s %s [%s]",
++			   cstring(left_addr),
++			   cstring(right_addr),
++			   args.original_line().c_str());
++		return false;
+ 	    }
+ 
+ 	} else if ("create" == word) {
+@@ -1924,19 +1923,18 @@ Simulator::cmd(Args& args)
+ 	    addrs.push_back(main_addr);
+ 
+ 	    do {
+-		IPv4 addr;
+-		try {
+-		    addrs.push_back(get_next_ipv4(args, "create"));
+-		} catch (InvalidString is) {
++		IPv4 addr = get_next_ipv4(args, "create");
++		if (addr.invalid())
+ 		    break;
+-		}
++
++		addrs.push_back(addr);
+ 	    } while (true);
+ 
+ 	    if (! nodes().create_node(addrs)) {
+-		xorp_throw(InvalidString,
+-			   c_format("Failed to create node <%s> [%s]",
+-				    cstring(addrs[0]),
+-				    args.original_line().c_str()));
++		XLOG_ERROR("Failed to create node <%s> [%s]",
++			   cstring(addrs[0]),
++			   args.original_line().c_str());
++		return false;
+ 	    }
+ 
+ 	} else if ("destroy" == word) {
+@@ -1945,10 +1943,10 @@ Simulator::cmd(Args& args)
+ 	    IPv4 main_addr = get_next_ipv4(args, "destroy");
+ 
+ 	    if (! nodes().destroy_node(main_addr)) {
+-		xorp_throw(InvalidString,
+-			   c_format("Failed to destroy node <%s> [%s]",
+-				    cstring(main_addr),
+-				    args.original_line().c_str()));
++		XLOG_ERROR("Failed to destroy node <%s> [%s]",
++			   cstring(main_addr),
++			   args.original_line().c_str());
++		return false;
+ 	    }
+ 
+ 	} else if ("face_up" == word) {
+@@ -1957,10 +1955,10 @@ Simulator::cmd(Args& args)
+ 	    IPv4 link_addr = get_next_ipv4(args, "face_up");
+ 
+ 	    if (! nodes().configure_address(link_addr)) {
+-		xorp_throw(InvalidString,
+-			   c_format("Failed to configure address <%s> [%s]",
+-				    cstring(link_addr),
+-				    args.original_line().c_str()));
++		XLOG_ERROR("Failed to configure address <%s> [%s]",
++			   cstring(link_addr),
++			   args.original_line().c_str());
++		return false;
+ 	    }
+ 
+ 	} else if ("face_down" == word) {
+@@ -1969,10 +1967,10 @@ Simulator::cmd(Args& args)
+ 	    IPv4 link_addr = get_next_ipv4(args, "face_down");
+ 
+ 	    if (! nodes().unconfigure_address(link_addr)) {
+-		xorp_throw(InvalidString,
+-			   c_format("Failed to unconfigure address <%s> [%s]",
+-				    cstring(link_addr),
+-				    args.original_line().c_str()));
++		XLOG_ERROR("Failed to unconfigure address <%s> [%s]",
++			   cstring(link_addr),
++			   args.original_line().c_str());
++		return false;
+ 	    }
+ 
+ 	} else if ("set_default_hello_interval" == word) {
+@@ -2024,9 +2022,9 @@ Simulator::cmd(Args& args)
+ 	    int value = get_next_number(args, "set_hello_interval");
+ 
+ 	    if (! nodes().set_hello_interval(main_addr, value)) {
+-		xorp_throw(InvalidString,
+-			   c_format("Failed to set hello interval [%s]",
+-				    args.original_line().c_str()));
++		XLOG_ERROR("Failed to set hello interval [%s]",
++			   args.original_line().c_str());
++		return false;
+ 	    }
+ 
+ 	} else if ("set_mpr_coverage" == word) {
+@@ -2036,11 +2034,11 @@ Simulator::cmd(Args& args)
+ 	    int value = get_next_number(args, "set_mpr_coverage");
+ 
+ 	    if (! nodes().set_mpr_coverage(main_addr, value)) {
+-		xorp_throw(InvalidString,
+-			   c_format("Failed to set coverage <%s> <%d> [%s]",
+-				    cstring(main_addr),
+-				    value,
+-				    args.original_line().c_str()));
++		XLOG_ERROR("Failed to set coverage <%s> <%d> [%s]",
++			   cstring(main_addr),
++			   value,
++			   args.original_line().c_str());
++		return false;
+ 	    }
+ 
+ 	} else if ("set_mid_interval" == word) {
+@@ -2050,9 +2048,9 @@ Simulator::cmd(Args& args)
+ 	    int value = get_next_number(args, "set_mid_interval");
+ 
+ 	    if (! nodes().set_mid_interval(main_addr, value)) {
+-		xorp_throw(InvalidString,
+-			   c_format("Failed to set mid interval [%s]",
+-				    args.original_line().c_str()));
++		XLOG_ERROR("Failed to set mid interval [%s]",
++			   args.original_line().c_str());
++		return false;
+ 	    }
+ 
+ 	} else if ("set_refresh_interval" == word) {
+@@ -2062,9 +2060,9 @@ Simulator::cmd(Args& args)
+ 	    int value = get_next_number(args, "set_refresh_interval");
+ 
+ 	    if (! nodes().set_refresh_interval(main_addr, value)) {
+-		xorp_throw(InvalidString,
+-			   c_format("Failed to set refresh interval [%s]",
+-				    args.original_line().c_str()));
++		XLOG_WARNNG("Failed to set refresh interval [%s]",
++			    args.original_line().c_str());
++		return false;
+ 	    }
+ 
+ 	} else if ("set_tc_interval" == word) {
+@@ -2074,9 +2072,9 @@ Simulator::cmd(Args& args)
+ 	    int value = get_next_number(args, "set_tc_interval");
+ 
+ 	    if (! nodes().set_tc_interval(main_addr, value)) {
+-		xorp_throw(InvalidString,
+-			   c_format("Failed to set TC interval [%s]",
+-				    args.original_line().c_str()));
++		XLOG_WARNING("Failed to set TC interval [%s]",
++			     args.original_line().c_str());
++		return false;
+ 	    }
+ 
+ 	} else if ("set_willingness" == word) {
+@@ -2086,11 +2084,11 @@ Simulator::cmd(Args& args)
+ 	    int value = get_next_number(args, "set_willingness");
+ 
+ 	    if (! nodes().set_willingness(main_addr, value)) {
+-		xorp_throw(InvalidString,
+-			   c_format("Failed to set willingness <%s> <%d> [%s]",
+-				    cstring(main_addr),
+-				    value,
+-				    args.original_line().c_str()));
++		XLOG_ERROR("Failed to set willingness <%s> <%d> [%s]",
++			   cstring(main_addr),
++			   value,
++			   args.original_line().c_str());
++		return false;
+ 	    }
+ 
+ 	} else if ("select" == word) {
+@@ -2099,19 +2097,19 @@ Simulator::cmd(Args& args)
+ 	    IPv4 main_addr = get_next_ipv4(args, "select");
+ 
+ 	    if (! nodes().select_node(main_addr)) {
+-		xorp_throw(InvalidString,
+-			   c_format("Failed to select node <%s> [%s]",
+-				    cstring(main_addr),
+-				    args.original_line().c_str()));
++		XLOG_WARNING("Failed to select node <%s> [%s]",
++			     cstring(main_addr),
++			     args.original_line().c_str());
++		return false;
+ 	    }
+ 
+ 	} else if ("verify_all_link_state_empty" == word) {
+ 	    // CMD: verify_all_link_state_empty
+ 
+ 	    if (! nodes().verify_all_link_state_empty()) {
+-		xorp_throw(InvalidString,
+-			   "Failed to verify that link-state "
++		XLOG_WARNING("Failed to verify that link-state "
+ 			   "databases are empty at every node.");
++		return false;
+ 	    }
+ 
+ 	} else if ("verify_n1" == word) {
+@@ -2121,10 +2119,10 @@ Simulator::cmd(Args& args)
+ 	    bool value = get_next_bool(args, "verify_n1");
+ 
+ 	    if (! nodes().verify_n1(n1_addr, value)) {
+-		xorp_throw(InvalidString,
+-			   c_format("Failed to verify neighbor <%s> [%s]",
+-				    cstring(n1_addr),
+-				    args.original_line().c_str()));
++		XLOG_WARNING("Failed to verify neighbor <%s> [%s]",
++			     cstring(n1_addr),
++			     args.original_line().c_str());
++		return false;
+ 	    }
+ 
+ 	} else if ("verify_n2" == word) {
+@@ -2134,10 +2132,10 @@ Simulator::cmd(Args& args)
+ 	    bool value = get_next_bool(args, "verify_n1");
+ 
+ 	    if (! nodes().verify_n2(n2_addr, value)) {
+-		xorp_throw(InvalidString,
+-			   c_format("Failed to verify two-hop <%s> [%s]",
+-				    cstring(n2_addr),
+-				    args.original_line().c_str()));
++		XLOG_WARNING("Failed to verify two-hop <%s> [%s]",
++			     cstring(n2_addr),
++			     args.original_line().c_str());
++		return false;
+ 	    }
+ 
+ 	} else if ("verify_is_mpr" == word) {
+@@ -2146,9 +2144,9 @@ Simulator::cmd(Args& args)
+ 	    bool expected_mpr_state = get_next_bool(args, "verify_is_mpr");
+ 
+ 	    if (! nodes().verify_is_mpr(expected_mpr_state)) {
+-		xorp_throw(InvalidString,
+-			   c_format("Failed to verify MPR status [%s]",
+-				    args.original_line().c_str()));
++		XLOG_WARNING("Failed to verify MPR status [%s]",
++			     args.original_line().c_str());
++		return false;
+ 	    }
+ 
+ 	} else if ("verify_mpr_set" == word) {
+@@ -2159,11 +2157,11 @@ Simulator::cmd(Args& args)
+ 
+ 	    vector<IPv4> mpr_addrs;
+ 	    do {
+-		try {
+-		    IPv4 addr = get_next_ipv4(args, "verify_mpr_set");
++		IPv4 addr = get_next_ipv4(args, "verify_mpr_set");
++		if (!addr.invalid()) {
+ 		    mpr_addrs.push_back(addr);
+ 		    has_addrs = true;
+-		} catch (InvalidString is) {
++		} else {
+ 		    // If we already saw addresses, OK to stop parsing.
+ 		    if (has_addrs)
+ 			break;
+@@ -2173,22 +2171,24 @@ Simulator::cmd(Args& args)
+ 		    string emptyword = get_next_word(args, "verify_mpr_set");
+ 		    if ("empty" == emptyword)
+ 			break;
+-		    else
+-			throw;
++		    else {
++			XLOG_WARNING("cannot parse ipv4 addr");
++			return false;
++		    }
+ 		}
+ 	    } while (true);
+ 
+ 	    // has_addrs is false if and only if "empty" was specified.
+ 	    if (has_addrs && mpr_addrs.empty()) {
+-		    xorp_throw(InvalidString,
+-			       c_format("No valid addresses [%s]",
+-					args.original_line().c_str()));
++		XLOG_WARNING("No valid addresses [%s]",
++			     args.original_line().c_str());
++		return false;
+ 	    }
+ 
+ 	    if (! nodes().verify_mpr_set(mpr_addrs)) {
+-		xorp_throw(InvalidString,
+-			   c_format("Failed to verify MPR set [%s]",
+-				    args.original_line().c_str()));
++		XLOG_WARNING("Failed to verify MPR set [%s]",
++			     args.original_line().c_str());
++		return -1;
+ 	    }
+ 
+ 	} else if ("verify_mpr_selector_set" == word) {
+@@ -2199,11 +2199,12 @@ Simulator::cmd(Args& args)
+ 
+ 	    vector<IPv4> mprs_addrs;
+ 	    do {
+-		try {
+-		    IPv4 addr = get_next_ipv4(args, "verify_mpr_selector_set");
++		IPv4 addr = get_next_ipv4(args, "verify_mpr_selector_set");
++		if (!addr.invalid()) {
+ 		    mprs_addrs.push_back(addr);
+ 		    has_addrs = true;
+-		} catch (InvalidString is) {
++		}
++		else {
+ 		    // If we already saw addresses, OK to stop parsing.
+ 		    if (has_addrs)
+ 			break;
+@@ -2214,22 +2215,24 @@ Simulator::cmd(Args& args)
+ 						     "verify_mpr_selector_set");
+ 		    if ("empty" == emptyword)
+ 			break;
+-		    else
+-			throw;
++		    else {
++			XLOG_WARNING("cannot parse ip addrs");
++			return false;
++		    }
+ 		}
+ 	    } while (true);
+ 
+ 	    // has_addrs is false if and only if "empty" was specified.
+ 	    if (has_addrs && mprs_addrs.empty()) {
+-		    xorp_throw(InvalidString,
+-			       c_format("No valid addresses [%s]",
+-					args.original_line().c_str()));
++		XLOG_WARNING("No valid addresses [%s]",
++			     args.original_line().c_str());
++		return false;
+ 	    }
+ 
+ 	    if (! nodes().verify_mpr_selector_set(mprs_addrs)) {
+-		xorp_throw(InvalidString,
+-			   c_format("Failed to verify MPR selector set [%s]",
+-				    args.original_line().c_str()));
++		XLOG_WARNING("Failed to verify MPR selector set [%s]",
++			     args.original_line().c_str());
++		return false;
+ 	    }
+ 
+ 	} else if ("verify_routing_table_size" == word) {
+@@ -2238,10 +2241,10 @@ Simulator::cmd(Args& args)
+ 	    int expected = get_next_number(args, "verify_routing_table_size");
+ 
+ 	    if (! nodes().verify_routing_table_size(expected)) {
+-		xorp_throw(InvalidString,
+-			   c_format("Failed to verify table size <%d> [%s]",
+-				    expected,
+-				    args.original_line().c_str()));
++		XLOG_WARNING("Failed to verify table size <%d> [%s]",
++			     expected,
++			     args.original_line().c_str());
++		return false;
+ 	    }
+ 
+ 	} else if ("verify_routing_entry" == word) {
+@@ -2252,9 +2255,9 @@ Simulator::cmd(Args& args)
+ 	    int metric = get_next_number(args, "verify_routing_entry");
+ 
+ 	    if (! nodes().verify_routing_entry(dest, nexthop, metric)) {
+-		xorp_throw(InvalidString,
+-			   c_format("Failed to verify table entry [%s]",
+-				    args.original_line().c_str()));
++		XLOG_WARNING("Failed to verify table entry [%s]",
++				    args.original_line().c_str());
++		return false;
+ 	    }
+ 
+ 	} else if ("verify_mid_node_count" == word) {
+@@ -2263,10 +2266,10 @@ Simulator::cmd(Args& args)
+ 	    int expected = get_next_number(args, "verify_mid_node_count");
+ 
+ 	    if (! nodes().verify_mid_node_count(expected)) {
+-		xorp_throw(InvalidString,
+-			   c_format("Failed to verify MID count <%d> [%s]",
+-				    expected,
+-				    args.original_line().c_str()));
++		XLOG_WARNING("Failed to verify MID count <%d> [%s]",
++			     expected,
++			     args.original_line().c_str());
++		return false;
+ 	    }
+ 
+ 	} else if ("verify_mid_node_addrs" == word) {
+@@ -2278,11 +2281,12 @@ Simulator::cmd(Args& args)
+ 	    bool has_addrs = false;	// true if second form of command.
+ 	    vector<IPv4> mid_addrs;
+ 	    do {
+-		try {
+-		    IPv4 addr = get_next_ipv4(args, "verify_mid_node_addrs");
++		IPv4 addr = get_next_ipv4(args, "verify_mid_node_addrs");
++		if (!addr.invalid()) {
+ 		    mid_addrs.push_back(addr);
+ 		    has_addrs = true;
+-		} catch (InvalidString is) {
++		}
++		else {
+ 		    // If we already saw addresses, OK to stop parsing.
+ 		    if (has_addrs)
+ 			break;
+@@ -2293,22 +2297,24 @@ Simulator::cmd(Args& args)
+ 						     "verify_mid_node_addrs");
+ 		    if ("empty" == emptyword)
+ 			break;
+-		    else
+-			throw;
++		    else {
++			XLOG_WARNING("could not parse mid-node addrs");
++			return false;
++		    }
+ 		}
+ 	    } while (true);
+ 
+ 	    // has_addrs is false if and only if "empty" was specified.
+ 	    if (has_addrs && mid_addrs.empty()) {
+-		    xorp_throw(InvalidString,
+-			       c_format("No valid addresses [%s]",
+-					args.original_line().c_str()));
++		XLOG_WARNING("No valid addresses [%s]",
++			     args.original_line().c_str());
++		return false;
+ 	    }
+ 
+ 	    if (! nodes().verify_mid_node_addrs(mid_origin, mid_addrs)) {
+-		xorp_throw(InvalidString,
+-			   c_format("Failed to verify MID node [%s]",
+-				    args.original_line().c_str()));
++		XLOG_WARNING("Failed to verify MID node [%s]",
++			     args.original_line().c_str());
++		return false;
+ 	    }
+ 
+ 	} else if ("verify_mid_distance" == word) {
+@@ -2320,9 +2326,9 @@ Simulator::cmd(Args& args)
+ 
+ 	    if (! nodes().verify_mid_address_distance(origin, iface_addr,
+ 						      distance)) {
+-		xorp_throw(InvalidString,
+-			   c_format("Failed to verify MID distance [%s]",
+-				    args.original_line().c_str()));
++		XLOG_WARNING("Failed to verify MID distance [%s]",
++			     args.original_line().c_str());
++		return false;
+ 	    }
+ 
+ 	} else if ("verify_tc_origin_count" == word) {
+@@ -2331,9 +2337,9 @@ Simulator::cmd(Args& args)
+ 	    int count = get_next_number(args, "verify_tc_origin_count");
+ 
+ 	    if (! nodes().verify_tc_origin_count(count)) {
+-		xorp_throw(InvalidString,
+-			   c_format("Failed to verify TC origin count [%s]",
+-				    args.original_line().c_str()));
++		XLOG_WARNING("Failed to verify TC origin count [%s]",
++			     args.original_line().c_str());
++		return false;
+ 	    }
+ 
+ 	} else if ("verify_tc_ans" == word) {
+@@ -2346,11 +2352,12 @@ Simulator::cmd(Args& args)
+ 	    vector<IPv4> addrs;
+ 	    bool has_addrs = false;	// true if second form of command.
+ 	    do {
+-		try {
+-		    IPv4 addr = get_next_ipv4(args, "verify_tc_ans");
++		IPv4 addr = get_next_ipv4(args, "verify_tc_ans");
++		if (!addr.invalid()) {
+ 		    addrs.push_back(addr);
+ 		    has_addrs = true;
+-		} catch (InvalidString is) {
++		}
++		else {
+ 		    // If we already saw addresses, OK to stop parsing.
+ 		    if (has_addrs)
+ 			break;
+@@ -2361,15 +2368,17 @@ Simulator::cmd(Args& args)
+ 						     "verify_tc_ans");
+ 		    if ("empty" == emptyword)
+ 			break;
+-		    else
+-			throw;
++		    else {
++			XLOG_WARNING("failed to parse tc-ans addrs");
++			return false;
++		    }
+ 		}
+ 	    } while (true);
+ 
+ 	    if (! nodes().verify_tc_ans(origin, ansn, addrs)) {
+-		xorp_throw(InvalidString,
+-			   c_format("Failed to verify TC advertised set [%s]",
+-				    args.original_line().c_str()));
++		XLOG_WARNING("Failed to verify TC advertised set [%s]",
++			     args.original_line().c_str());
++		return false;
+ 	    }
+ 
+ 	} else if ("verify_tc_origin_seen" == word) {
+@@ -2379,9 +2388,9 @@ Simulator::cmd(Args& args)
+ 	    bool value = get_next_bool(args, "verify_tc_origin_seen");
+ 
+ 	    if (! nodes().verify_tc_origin_seen(origin, value)) {
+-		xorp_throw(InvalidString,
+-			   c_format("Failed to verify TC origin seen [%s]",
+-				    args.original_line().c_str()));
++		XLOG_WARNING("Failed to verify TC origin seen [%s]",
++			     args.original_line().c_str());
++		return false;
+ 	    }
+ 
+ 	} else if ("verify_tc_distance" == word) {
+@@ -2392,9 +2401,9 @@ Simulator::cmd(Args& args)
+ 	    uint16_t distance = get_next_number(args, "verify_tc_distance");
+ 
+ 	    if (! nodes().verify_tc_distance(origin, addr, distance)) {
+-		xorp_throw(InvalidString,
+-			   c_format("Failed to verify TC distance [%s]",
+-				    args.original_line().c_str()));
++		XLOG_WARNING("Failed to verify TC distance [%s]",
++			     args.original_line().c_str());
++		return false;
+ 	    }
+ 
+ 	} else if ("verify_tc_destination" == word) {
+@@ -2404,9 +2413,9 @@ Simulator::cmd(Args& args)
+ 	    size_t count = get_next_number(args, "verify_tc_destination");
+ 
+ 	    if (! nodes().verify_tc_destination(addr, count)) {
+-		xorp_throw(InvalidString,
+-			   c_format("Failed to verify TC destination [%s]",
+-				    args.original_line().c_str()));
++		XLOG_WARNING("Failed to verify TC destination [%s]",
++			     args.original_line().c_str());
++		return false;
+ 	    }
+ 
+ 	} else if ("verify_hna_entry" == word) {
+@@ -2416,9 +2425,9 @@ Simulator::cmd(Args& args)
+ 	    IPv4 origin = get_next_ipv4(args, "verify_hna_entry");
+ 
+ 	    if (! nodes().verify_hna_entry(dest, origin)) {
+-		xorp_throw(InvalidString,
+-			   c_format("Failed to verify HNA entry [%s]",
+-				    args.original_line().c_str()));
++		XLOG_WARNING("Failed to verify HNA entry [%s]",
++			     args.original_line().c_str());
++		return false;
+ 	    }
+ 
+ 	} else if ("verify_hna_distance" == word) {
+@@ -2429,9 +2438,9 @@ Simulator::cmd(Args& args)
+ 	    uint16_t distance = get_next_number(args, "verify_hna_distance");
+ 
+ 	    if (! nodes().verify_hna_distance(dest, origin, distance)) {
+-		xorp_throw(InvalidString,
+-			   c_format("Failed to verify HNA distance [%s]",
+-				    args.original_line().c_str()));
++		XLOG_WARNING("Failed to verify HNA distance [%s]",
++			     args.original_line().c_str());
++		return false;
+ 	    }
+ 
+ 	} else if ("verify_hna_entry_count" == word) {
+@@ -2440,9 +2449,9 @@ Simulator::cmd(Args& args)
+ 	    int count = get_next_number(args, "verify_hna_entry_count");
+ 
+ 	    if (! nodes().verify_hna_entry_count(count)) {
+-		xorp_throw(InvalidString,
+-			   c_format("Failed to verify HNA entry count [%s]",
+-				    args.original_line().c_str()));
++		XLOG_WARNING("Failed to verify HNA entry count [%s]",
++			     args.original_line().c_str());
++		return false;
+ 	    }
+ 
+ 	} else if ("verify_hna_origin_count" == word) {
+@@ -2451,9 +2460,9 @@ Simulator::cmd(Args& args)
+ 	    int count = get_next_number(args, "verify_hna_origin_count");
+ 
+ 	    if (! nodes().verify_hna_origin_count(count)) {
+-		xorp_throw(InvalidString,
+-			   c_format("Failed to verify HNA origin count [%s]",
+-				    args.original_line().c_str()));
++		XLOG_WARNING("Failed to verify HNA origin count [%s]",
++			     args.original_line().c_str());
++		return false;
+ 	    }
+ 
+ 	} else if ("verify_hna_dest_count" == word) {
+@@ -2462,9 +2471,9 @@ Simulator::cmd(Args& args)
+ 	    int count = get_next_number(args, "verify_hna_dest_count");
+ 
+ 	    if (! nodes().verify_hna_dest_count(count)) {
+-		xorp_throw(InvalidString,
+-			   c_format("Failed to verify HNA prefix count [%s]",
+-				    args.original_line().c_str()));
++		XLOG_WARNING("Failed to verify HNA prefix count [%s]",
++			     args.original_line().c_str());
++		return false;
+ 	    }
+ 
+ 	} else if ("originate_hna" == word) {
+@@ -2473,9 +2482,9 @@ Simulator::cmd(Args& args)
+ 	    IPv4Net dest = get_next_ipv4_net(args, "originate_hna");
+ 
+ 	    if (! nodes().originate_hna(dest)) {
+-		xorp_throw(InvalidString,
+-			   c_format("Failed to originate HNA [%s]",
+-				    args.original_line().c_str()));
++		XLOG_WARNING("Failed to originate HNA [%s]",
++			     args.original_line().c_str());
++		return false;
+ 	    }
+ 
+ 	} else if ("withdraw_hna" == word) {
+@@ -2484,9 +2493,9 @@ Simulator::cmd(Args& args)
+ 	    IPv4Net dest = get_next_ipv4_net(args, "withdraw_hna");
+ 
+ 	    if (! nodes().withdraw_hna(dest)) {
+-		xorp_throw(InvalidString,
+-			   c_format("Failed to withdraw HNA [%s]",
+-				    args.original_line().c_str()));
++		XLOG_WARNING("Failed to withdraw HNA [%s]",
++				    args.original_line().c_str());
++		return false;
+ 	    }
+ 
+ 	} else if ("wait" == word) {
+@@ -2496,9 +2505,10 @@ Simulator::cmd(Args& args)
+ 	    wait(secs);
+ 
+ 	} else {
+-	    xorp_throw(InvalidString, c_format("Unknown command <%s>. [%s]",
+-					   word.c_str(),
+-					   args.original_line().c_str()))
++	    XLOG_WARNING("Unknown command <%s>. [%s]",
++			 word.c_str(),
++			 args.original_line().c_str());
++	    return false;
+ 	}
+     }
+ 
+diff --git a/xorp/fea/tests/test_fea_rawlink.cc b/xorp/fea/tests/test_fea_rawlink.cc
+index 77b7fd6..1aa0bcc 100644
+--- a/xorp/fea/tests/test_fea_rawlink.cc
++++ b/xorp/fea/tests/test_fea_rawlink.cc
+@@ -745,9 +745,8 @@ parse_finder_arg(const char* host_colon_port,
+ 	finder_port = FinderConstants::FINDER_DEFAULT_PORT();
+     }
+ 
+-    try {
+-	finder_addr = IPv4(finder_host.c_str());
+-    } catch (const InvalidString& ) {
++    finder_addr = IPv4(finder_host.c_str());
++    if (finder_addr.invalid()) {
+ 	// host string may need resolving
+ 	in_addr ia;
+ 	if (address_lookup(finder_host, ia) == false) {
+diff --git a/xorp/fea/tests/test_xrl_sockets4_tcp.cc b/xorp/fea/tests/test_xrl_sockets4_tcp.cc
+index fc5e63a..1815c44 100644
+--- a/xorp/fea/tests/test_xrl_sockets4_tcp.cc
++++ b/xorp/fea/tests/test_xrl_sockets4_tcp.cc
+@@ -1209,9 +1209,8 @@ parse_finder_arg(const char* host_colon_port,
+ 	finder_port = FinderConstants::FINDER_DEFAULT_PORT();
+     }
+ 
+-    try {
+-	finder_addr = IPv4(finder_host.c_str());
+-    } catch (const InvalidString& ) {
++    finder_addr = IPv4(finder_host.c_str());
++    if (finder_addr.invalid()) {
+ 	// host string may need resolving
+ 	in_addr ia;
+ 	if (address_lookup(finder_host, ia) == false) {
+diff --git a/xorp/fea/tests/test_xrl_sockets4_udp.cc b/xorp/fea/tests/test_xrl_sockets4_udp.cc
+index 73052bd..db5d5bd 100644
+--- a/xorp/fea/tests/test_xrl_sockets4_udp.cc
++++ b/xorp/fea/tests/test_xrl_sockets4_udp.cc
+@@ -594,9 +594,8 @@ parse_finder_arg(const char* host_colon_port,
+ 	finder_port = FinderConstants::FINDER_DEFAULT_PORT();
+     }
+ 
+-    try {
+-	finder_addr = IPv4(finder_host.c_str());
+-    } catch (const InvalidString& ) {
++    finder_addr = IPv4(finder_host.c_str());
++    if (finder_addr.invalid()) {
+ 	// host string may need resolving
+ 	in_addr ia;
+ 	if (address_lookup(finder_host, ia) == false) {
+diff --git a/xorp/libproto/config_node_id.hh b/xorp/libproto/config_node_id.hh
+index 67357d0..b378b60 100644
+--- a/xorp/libproto/config_node_id.hh
++++ b/xorp/libproto/config_node_id.hh
+@@ -19,8 +19,6 @@
+ // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/libproto/config_node_id.hh,v 1.12 2008/10/02 21:57:17 bms Exp $
+-
+ 
+ #ifndef __LIBPROTO_CONFIG_NODE_ID_HH__
+ #define __LIBPROTO_CONFIG_NODE_ID_HH__
+@@ -65,7 +63,7 @@ public:
+      *
+      * @param s the initialization string.
+      */
+-    explicit ConfigNodeId(const string& s) throw (InvalidString) {
++    explicit ConfigNodeId(const string& s) {
+ 	copy_in(s);
+     }
+ 
+@@ -93,7 +91,7 @@ public:
+      * @param from_string the string to copy the node ID from.
+      * @return the number of copied octets.
+      */
+-    size_t copy_in(const string& from_string) throw (InvalidString);
++    size_t copy_in(const string& from_string);
+ 
+     /**
+      * Equality Operator
+@@ -367,7 +365,7 @@ private:
+ };
+ 
+ inline size_t
+-ConfigNodeId::copy_in(const string& from_string) throw (InvalidString)
++ConfigNodeId::copy_in(const string& from_string)
+ {
+     string::size_type space, ix;
+     string s = from_string;
+@@ -380,8 +378,8 @@ ConfigNodeId::copy_in(const string& from_string) throw (InvalidString)
+ 
+     space = s.find(' ');
+     if ((space == string::npos) || (space == 0) || (space >= s.size() - 1)) {
+-	xorp_throw(InvalidString,
+-		   c_format("Bad ConfigNodeId \"%s\"", s.c_str()));
++	XLOG_WARNING("Bad ConfigNodeId \"%s\"", s.c_str());
++	return 0;
+     }
+ 
+     //
+@@ -390,14 +388,14 @@ ConfigNodeId::copy_in(const string& from_string) throw (InvalidString)
+     //
+     for (ix = 0; ix < space; ix++) {
+ 	if (! xorp_isdigit(s[ix])) {
+-	    xorp_throw(InvalidString,
+-		       c_format("Bad ConfigNodeId \"%s\"", s.c_str()));
++	    XLOG_WARNING("Bad ConfigNodeId \"%s\"", s.c_str());
++	    return 0;
+ 	}
+     }
+     for (ix = space + 1; ix < s.size(); ix++) {
+ 	if (! xorp_isdigit(s[ix])) {
+-	    xorp_throw(InvalidString,
+-		       c_format("Bad ConfigNodeId \"%s\"", s.c_str()));
++	    XLOG_WARNING("Bad ConfigNodeId \"%s\"", s.c_str());
++	    return 0;
+ 	}
+     }
+ 
+diff --git a/xorp/libproto/tests/test_config_node_id.cc b/xorp/libproto/tests/test_config_node_id.cc
+index 4b5d83d..2ab7e7d 100644
+--- a/xorp/libproto/tests/test_config_node_id.cc
++++ b/xorp/libproto/tests/test_config_node_id.cc
+@@ -183,30 +183,6 @@ test_config_node_id_valid_constructors()
+ }
+ 
+ /**
+- * Test ConfigNodeId invalid constructors.
+- */
+-void
+-test_config_node_id_invalid_constructors()
+-{
+-    // Invalid test values for node ID and node position: "A" and "B"
+-    const string invalid_config_node_id_string = "A B";
+-
+-    //
+-    // Constructor from an invalid init string.
+-    //
+-    try {
+-	// Invalid init string
+-	ConfigNodeId config_node_id(invalid_config_node_id_string);
+-	verbose_log("Cannot catch invalid ConfigNodeId string \"A B\" : FAIL\n");
+-	incr_failures();
+-	UNUSED(config_node_id);
+-    } catch (const InvalidString& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-}
+-
+-/**
+  * Test ConfigNodeId valid copy in/out methods.
+  */
+ void
+@@ -225,31 +201,6 @@ test_config_node_id_valid_copy_in_out()
+ }
+ 
+ /**
+- * Test ConfigNodeId invalid copy in/out methods.
+- */
+-void
+-test_config_node_id_invalid_copy_in_out()
+-{
+-    // Invalid test values for node ID and node position: "A" and "B"
+-    const string invalid_config_node_id_string = "A B";
+-
+-    //
+-    // Constructor from an invalid init string.
+-    //
+-    try {
+-	// Invalid init string
+-	ConfigNodeId config_node_id(0, 0);
+-	config_node_id.copy_in(invalid_config_node_id_string);
+-	verbose_log("Cannot catch invalid ConfigNodeId string \"A B\" : FAIL\n");
+-	incr_failures();
+-	UNUSED(config_node_id);
+-    } catch (const InvalidString& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-}
+-
+-/**
+  * Test ConfigNodeId operators.
+  */
+ void
+diff --git a/xorp/libxipc/call_xrl.cc b/xorp/libxipc/call_xrl.cc
+index 99ee766..156d900 100644
+--- a/xorp/libxipc/call_xrl.cc
++++ b/xorp/libxipc/call_xrl.cc
+@@ -89,62 +89,62 @@ void usage()
+ static int
+ call_xrl(EventLoop& e, XrlRouter& router, const char* request)
+ {
+-    try {
+-	Xrl x(request);
+ 
+-	int tries;
+-	bool done, resolve_failed;
++    Xrl x(request);
++    if (x.invalid()) {
++	cerr << "bad request in call-xrl: " << request << endl;
++	return BADXRL;
++    }
+ 
+-	tries = 0;
+-	done = false;
+-	resolve_failed = true;
++    int tries;
++    bool done, resolve_failed;
+ 
+-	while (xorp_do_run && done == false && tries <= retry_count) {
+-	    resolve_failed = false;
+-	    router.send(x, callback(&response_handler,
+-				    &done,
+-				    &resolve_failed,
+-				    &x));
+-	    
+-	    bool timed_out = false;
+-	    XorpTimer timeout = e.set_flag_after_ms(wait_time, &timed_out);
+-	    while (xorp_do_run && timed_out == false && done == false) {
+-		// NB we don't test for resolve failed here because if
+-		// resolved failed we want to wait before retrying.
+-		e.run();
+-	    }
+-	    tries++;
++    tries = 0;
++    done = false;
++    resolve_failed = true;
+ 
+-	    if (resolve_failed) {
+-		sleep(1);
+-		continue;
+-	    }
++    while (xorp_do_run && done == false && tries <= retry_count) {
++	resolve_failed = false;
++	router.send(x, callback(&response_handler,
++				&done,
++				&resolve_failed,
++				&x));
+ 	    
+-	    if (timed_out) {
+-		XLOG_WARNING("request: %s no response waited %d ms", request,
+-			     wait_time);
+-		continue;
+-	    }
+-
+-	    if (router.connected() == false) {
+-		XLOG_ERROR("Lost connection to finder\n");
+-		xorp_do_run = 0;
+-		break;
+-	    }
+-	}//while
++	bool timed_out = false;
++	XorpTimer timeout = e.set_flag_after_ms(wait_time, &timed_out);
++	while (xorp_do_run && timed_out == false && done == false) {
++	    // NB we don't test for resolve failed here because if
++	    // resolved failed we want to wait before retrying.
++	    e.run();
++	}
++	tries++;
+ 
+ 	if (resolve_failed) {
+-	    XLOG_WARNING("request: %s resolve failed", request);
++	    sleep(1);
++	    continue;
+ 	}
+-	
+- 	if (false == done && true == resolve_failed)
+-	    XLOG_WARNING("request: %s failed after %d retries",
+-			 request, retry_count);
+-	return done == true ? OK : NOCALLBACK;
+-    } catch(const InvalidString& s) {
+-	cerr << s.str() << endl;
+-	return BADXRL;
++	    
++	if (timed_out) {
++	    XLOG_WARNING("request: %s no response waited %d ms", request,
++			 wait_time);
++	    continue;
++	}
++
++	if (router.connected() == false) {
++	    XLOG_ERROR("Lost connection to finder\n");
++	    xorp_do_run = 0;
++	    break;
++	}
++    }//while
++
++    if (resolve_failed) {
++	XLOG_WARNING("request: %s resolve failed", request);
+     }
++	
++    if (false == done && true == resolve_failed)
++	XLOG_WARNING("request: %s failed after %d retries",
++		     request, retry_count);
++    return done == true ? OK : NOCALLBACK;
+ }
+ 
+ static void
+diff --git a/xorp/libxipc/finder_client.cc b/xorp/libxipc/finder_client.cc
+index 2cc8822..081464a 100644
+--- a/xorp/libxipc/finder_client.cc
++++ b/xorp/libxipc/finder_client.cc
+@@ -974,8 +974,8 @@ FinderClient::dispatch_tunneled_xrl(const string& xrl_str)
+ {
+     finder_trace_init("dispatch_tunneled_xrl(\"%s\")", xrl_str.c_str());
+     Xrl xrl;
+-    try {
+-	xrl = Xrl(xrl_str.c_str());
++    xrl = Xrl(xrl_str.c_str());
++    if (!xrl.invalid()) {
+ 	InstanceList::iterator i = find_instance(xrl.target());
+ 	if (i == _ids.end()) {
+ 	    finder_trace_result("target not found");
+@@ -989,7 +989,7 @@ FinderClient::dispatch_tunneled_xrl(const string& xrl_str)
+ 				      xrl.args(), ret_vals);
+ 	finder_trace_result("success");
+ 	return XrlCmdError::OKAY();
+-    } catch (InvalidString&) {
++    } else {
+ 	return XrlCmdError::COMMAND_FAILED("Bad Xrl string");
+     }
+ }
+diff --git a/xorp/libxipc/finder_main.cc b/xorp/libxipc/finder_main.cc
+index bfb8a93..75b8371 100644
+--- a/xorp/libxipc/finder_main.cc
++++ b/xorp/libxipc/finder_main.cc
+@@ -85,25 +85,28 @@ finder_main(int argc, char* const argv[])
+     int ch;
+     while ((ch = getopt(argc, argv, "a:i:n:p:hv")) != -1) {
+ 	switch (ch) {
+-	case 'a':
++	case 'a': {
+ 	    //
+ 	    // User is specifying an IPv4 address to accept finder
+ 	    // connections from.
+ 	    //
+-	    try {
+-		add_permitted_host(IPv4(optarg));
+-	    } catch (const InvalidString&) {
++	    IPv4 v4(optarg);
++	    if (!v4.invalid()) {
++		add_permitted_host(v4);
++	    }
++	    else {
+ 		fprintf(stderr, "%s is not a valid IPv4 address.\n", optarg);
+ 		usage();
+ 		exit(-1);
+ 	    }
+ 	    break;
+-	case 'i':
++	}
++	case 'i': {
+ 	    //
+ 	    // User is specifying which interface to bind finder to
+ 	    //
+-	    try {
+-		IPv4 bind_addr = IPv4(optarg);
++	    IPv4 bind_addr = IPv4(optarg);
++	    if (!bind_addr.invalid()) {
+ 		in_addr ina;
+ 		bind_addr.copy_out(ina);
+ 		if (is_ip_configured(ina) == false) {
+@@ -113,26 +116,29 @@ finder_main(int argc, char* const argv[])
+ 		    exit(-1);
+ 		}
+ 		bind_addrs.push_back(bind_addr);
+-	    } catch (const InvalidString&) {
++	    } else {
+ 		fprintf(stderr, "%s is not a valid interface address.\n",
+ 			optarg);
+ 		usage();
+ 		exit(-1);
+ 	    }
+ 	    break;
+-	case 'n':
++	}
++	case 'n': {
+ 	    //
+ 	    // User is specifying a network address to accept finder
+ 	    // connections from.
+ 	    //
+-	    try {
+-		add_permitted_net(IPv4Net(optarg));
+-	    } catch (const InvalidString&) {
++	    IPv4 v4(optarg);
++	    if (!v4.invalid()) {
++		add_permitted_net(v4);
++	    } else {
+ 		fprintf(stderr, "%s is not a valid IPv4 network.\n", optarg);
+ 		usage();
+ 		exit(-1);
+ 	    }
+ 	    break;
++	}
+ 	case 'p':
+ 	    bind_port = static_cast<uint16_t>(atoi(optarg));
+ 	    if (bind_port == 0) {
+diff --git a/xorp/libxipc/finder_msgs.cc b/xorp/libxipc/finder_msgs.cc
+index 0060c4f..f2553be 100644
+--- a/xorp/libxipc/finder_msgs.cc
++++ b/xorp/libxipc/finder_msgs.cc
+@@ -180,16 +180,15 @@ ParsedFinderMessageBase::~ParsedFinderMessageBase()
+ uint32_t FinderXrlMessage::c_seqno = 1001;
+ 
+ FinderXrlMessage::FinderXrlMessage(const Xrl& xrl)
+-    : FinderMessageBase(c_seqno, c_type), _seqno(c_seqno++)
++	: FinderMessageBase(c_seqno, c_type), _seqno(c_seqno++), _invalid(false)
+ {
+     _rendered += c_format(c_msg_template, xrl.str().c_str());
+ }
+ 
+ ParsedFinderXrlMessage::ParsedFinderXrlMessage(const char* data)
+-    throw (BadFinderMessageFormat, WrongFinderMessageType, InvalidString)
+-    : ParsedFinderMessageBase(data, FinderXrlMessage::c_type)
++    throw (BadFinderMessageFormat, WrongFinderMessageType)
++	: ParsedFinderMessageBase(data, FinderXrlMessage::c_type), _invalid(false)
+ {
+-    // The following may throw an invalid string exception
+     _xrl = new Xrl(data + bytes_parsed());
+ }
+ 
+@@ -225,9 +224,10 @@ FinderXrlResponse::FinderXrlResponse(uint32_t	     seqno,
+ }
+ 
+ ParsedFinderXrlResponse::ParsedFinderXrlResponse(const char* data)
+-    throw (BadFinderMessageFormat, WrongFinderMessageType, InvalidString)
+-    : ParsedFinderMessageBase(data, FinderXrlResponse::c_type), _xrl_args(0)
++    throw (BadFinderMessageFormat, WrongFinderMessageType)
++	: ParsedFinderMessageBase(data, FinderXrlResponse::c_type), _xrl_args(0)
+ {
++    _invalid = false;
+     data += bytes_parsed();
+     char* p0 = strstr(const_cast<char*>(data), "/");
+     char* p1 = strstr(const_cast<char*>(data), "\n");
+@@ -243,13 +243,17 @@ ParsedFinderXrlResponse::ParsedFinderXrlResponse(const char* data)
+     }
+ 
+     if (XrlError::known_code(code) == false) {
+-	xorp_throw(InvalidString, "Unknown Xrl error code");
++	_invalid = true;
++	XLOG_WARNING("Unknown Xrl error code");
++	return;
+     }
+ 
+     string note;
+     if (p0 + 2 < p1 &&
+ 	xrlatom_decode_value(p0 + 2, p1 - p0 - 2, note) >= 0) {
+-	xorp_throw(InvalidString, "Code not decode XrlError note.");    
++	XLOG_WARNING("Code not decode XrlError note.");
++	_invalid = true;
++	return;
+     }
+ 
+     _xrl_error = XrlError(XrlErrorCode(code), note);
+diff --git a/xorp/libxipc/finder_msgs.hh b/xorp/libxipc/finder_msgs.hh
+index d54be0e..9030327 100644
+--- a/xorp/libxipc/finder_msgs.hh
++++ b/xorp/libxipc/finder_msgs.hh
+@@ -153,18 +153,19 @@ public:
+      *
+      * @throws BadFinderMessageFormat when bad packet data received.
+      * @throws WrongFinderMessageType if message is not a Finder Xrl message.
+-     * @throws InvalidString if the data within the Xrl Message could not be
+-     *         rendered as an Xrl.
+      */
+     ParsedFinderXrlMessage(const char* data)
+-	throw (BadFinderMessageFormat, WrongFinderMessageType, InvalidString);
++	throw (BadFinderMessageFormat, WrongFinderMessageType);
+ 
+     ~ParsedFinderXrlMessage();
+ 
+     const Xrl& xrl() const { return *_xrl; }
+ 
++    bool invalid() const { return (_invalid || (_xrl & _xrl->invalid())); }
++
+ private:
+     Xrl* _xrl;
++    bool _invalid;
+ };
+ 
+ /**
+@@ -179,11 +180,9 @@ public:
+      * @throws BadFinderMessageFormat when bad packet data received.
+      * @throws WrongFinderMessageType if message is not a Finder Xrl Response
+      *         Message.
+-     * @throws InvalidString if the data within the Xrl Response
+-     *         message could not be rendered as an Xrl.
+      */
+     ParsedFinderXrlResponse(const char* data)
+-	throw (BadFinderMessageFormat, WrongFinderMessageType, InvalidString);
++	throw (BadFinderMessageFormat, WrongFinderMessageType);
+ 
+     ~ParsedFinderXrlResponse();
+     
+diff --git a/xorp/libxipc/finder_server.cc b/xorp/libxipc/finder_server.cc
+index bb5a0cc..a7d0b11 100644
+--- a/xorp/libxipc/finder_server.cc
++++ b/xorp/libxipc/finder_server.cc
+@@ -37,18 +37,17 @@ FinderServer::FinderServer(EventLoop& e,
+     // Set the finder server address from the environment variable if it is set
+     value = getenv("XORP_FINDER_SERVER_ADDRESS");
+     if (value != NULL) {
+-	try {
+-	    IPv4 ipv4(value);
++	IPv4 ipv4(value);
++	if (!ipv4.invalid()) {
+ 	    if (! ipv4.is_unicast()) {
+ 		XLOG_ERROR("Failed to change the Finder server address to %s",
+ 			   ipv4.str().c_str());
+ 	    } else {
+ 		finder_addr = ipv4;
+ 	    }
+-	} catch (const InvalidString& e) {
+-	    UNUSED(e);
++	} else {
+ 	    XLOG_ERROR("Invalid \"XORP_FINDER_SERVER_ADDRESS\": %s",
+-		       e.str().c_str());
++		       value);
+ 	}
+     }
+ 
+diff --git a/xorp/libxipc/finder_tcp_messenger.cc b/xorp/libxipc/finder_tcp_messenger.cc
+index ebe70aa..f788010 100644
+--- a/xorp/libxipc/finder_tcp_messenger.cc
++++ b/xorp/libxipc/finder_tcp_messenger.cc
+@@ -73,15 +73,21 @@ FinderTcpMessenger::read_event(int	      errval,
+     try {
+ 	try {
+ 	    ParsedFinderXrlMessage fm(s.c_str());
++	    if (fm.invalid()) {
++		ex = "Invalid string";
++		goto err;
++	    }
+ 	    dispatch_xrl(fm.seqno(), fm.xrl());
+ 	    return true;
+ 	} catch (const WrongFinderMessageType&) {
+ 	    ParsedFinderXrlResponse fm(s.c_str());
++	    if (fm.invalid()) {
++		ex = "Invalid response string";
++		goto err;
++	    }
+ 	    dispatch_xrl_response(fm.seqno(), fm.xrl_error(), fm.xrl_args());
+ 	    return true;
+ 	}
+-    } catch (const InvalidString& e) {
+-	ex = e.str();
+     } catch (const BadFinderMessageFormat& e) {
+ 	ex = e.str();
+     } catch (const WrongFinderMessageType& e) {
+@@ -91,6 +97,8 @@ FinderTcpMessenger::read_event(int	      errval,
+     } catch (...) {
+ 	ex = "Unexpected ?";
+     }
++
++  err:
+     XLOG_ERROR("Got exception %s, closing connection", ex.c_str());
+     close();
+     return false;
+diff --git a/xorp/libxipc/finder_xrl_target.cc b/xorp/libxipc/finder_xrl_target.cc
+index bf827fc..bee8a26 100644
+--- a/xorp/libxipc/finder_xrl_target.cc
++++ b/xorp/libxipc/finder_xrl_target.cc
+@@ -225,9 +225,8 @@ FinderXrlTarget::finder_0_2_add_xrl(const string& xrl,
+ 		      protocol_args.c_str());
+ 
+     // Construct unresolved Xrl
+-    try {
+-	u = Xrl(xrl.c_str());
+-    } catch (InvalidString&) {
++    u = Xrl(xrl.c_str());
++    if (u.invalid()) {
+ 	finder_trace_result("fail (bad xrl).");
+ 	return XrlCmdError::COMMAND_FAILED("Invalid xrl string");
+     }
+@@ -236,8 +235,7 @@ FinderXrlTarget::finder_0_2_add_xrl(const string& xrl,
+     // unresolved Xrl
+     if (false == _finder.active_messenger_represents_target(u.target())) {
+ 	finder_trace_result("fail (inappropriate message source).");
+-	return
+-	    XrlCmdError::COMMAND_FAILED(restricted_target_message(u.target()));
++	return XrlCmdError::COMMAND_FAILED(restricted_target_message(u.target()));
+     }
+ 
+     // Construct resolved Xrl, appended string should very hard to guess :-)
+@@ -261,9 +259,8 @@ FinderXrlTarget::finder_0_2_remove_xrl(const string&	xrl)
+     finder_trace_init("remove_xrl(\"%s\")", xrl.c_str());
+ 
+     // Construct Xrl
+-    try {
+-	u = Xrl(xrl.c_str());
+-    } catch (InvalidString&) {
++    u = Xrl(xrl.c_str());
++    if (u.invalid()) {
+ 	finder_trace_result("fail (bad xrl).");
+ 	return XrlCmdError::COMMAND_FAILED("Invalid xrl string");
+     }
+@@ -271,15 +268,13 @@ FinderXrlTarget::finder_0_2_remove_xrl(const string&	xrl)
+     // Check active messenger is responsible for target described in Xrl
+     if (false == _finder.active_messenger_represents_target(u.target())) {
+ 	finder_trace_result("fail (inappropriate message source).");
+-	return
+-	    XrlCmdError::COMMAND_FAILED(restricted_target_message(u.target()));
++	return XrlCmdError::COMMAND_FAILED(restricted_target_message(u.target()));
+     }
+ 
+     // Unregister Xrl
+     if (false == _finder.remove_resolutions(u.target(), u.str())) {
+ 	finder_trace_result("fail (xrl does not exist).");
+-	return
+-	    XrlCmdError::COMMAND_FAILED(restricted_target_message(u.target()));
++	return XrlCmdError::COMMAND_FAILED(restricted_target_message(u.target()));
+     }
+     finder_trace_result("okay");
+     return XrlCmdError::OKAY();
+@@ -296,9 +291,8 @@ FinderXrlTarget::finder_0_2_resolve_xrl(const string&	xrl,
+     //
+     // Construct Xrl
+     //
+-    try {
+-	u = Xrl(xrl.c_str());
+-    } catch (InvalidString&) {
++    u = Xrl(xrl.c_str());
++    if (u.invalid()) {
+ 	finder_trace_result("fail (bad xrl).");
+ 	return XrlCmdError::COMMAND_FAILED("Invalid xrl string");
+     }
+@@ -308,9 +302,8 @@ FinderXrlTarget::finder_0_2_resolve_xrl(const string&	xrl,
+     //
+     const string& instance = _finder.primary_instance(u.target());
+     if (u.target() != instance) {
+-	try {
+-	    u = Xrl(u.protocol(), instance, u.command());
+-	} catch (InvalidString&) {
++	u = Xrl(u.protocol(), instance, u.command());
++	if (u.invalid()) {
+ 	    finder_trace_result("fail (bad class to instance mapping).");
+ 	    return XrlCmdError::COMMAND_FAILED("Invalid xrl string");
+ 	}
+@@ -338,13 +331,17 @@ FinderXrlTarget::finder_0_2_resolve_xrl(const string&	xrl,
+     Finder::Resolveables::const_iterator ci = resolutions->begin();
+     while (resolutions->end() != ci) {
+ 	string s;
+-	try {
+-	    s = Xrl(ci->c_str()).str();
+-	} catch (const InvalidString& ) {
++	Xrl xx(ci->c_str());
++	if (xx.invalid()) {
+ 	    finder_trace_result("fail (does not resolve as an xrl).");
+ 	    XLOG_ERROR("Resolved something that did not look an xrl: \"%s\"\n",
+ 		       ci->c_str());
++	    return XrlCmdError::COMMAND_FAILED("Xrl format is invalid: " + ci);
+ 	}
++	else {
++	    s = xx.str();
++	}
++
+ 	resolved_xrls.append(XrlAtom(s));
+ 	++ci;
+     }
+diff --git a/xorp/libxipc/tests/test_finder_events.cc b/xorp/libxipc/tests/test_finder_events.cc
+index 6ecaf60..3cad492 100644
+--- a/xorp/libxipc/tests/test_finder_events.cc
++++ b/xorp/libxipc/tests/test_finder_events.cc
+@@ -888,9 +888,8 @@ parse_finder_arg(const char* host_colon_port,
+ 	finder_port = FinderConstants::FINDER_DEFAULT_PORT();
+     }
+ 
+-    try {
+-	finder_addr = IPv4(finder_host.c_str());
+-    } catch (const InvalidString& ) {
++    finder_addr = IPv4(finder_host.c_str());
++    if (finder_addr.invalid()) {
+ 	// host string may need resolving
+ 	in_addr ia;
+ 	if (address_lookup(finder_host, ia) == false) {
+diff --git a/xorp/libxipc/tests/test_xrl.cc b/xorp/libxipc/tests/test_xrl.cc
+index 55d6577..4d9c7ac 100644
+--- a/xorp/libxipc/tests/test_xrl.cc
++++ b/xorp/libxipc/tests/test_xrl.cc
+@@ -135,27 +135,30 @@ run_test()
+ 	    }
+ 
+ 
+-	    try {
+-		failure = false;
+-		Xrl x("some target", "take an argument");
+-		x.args().add(tests[i].arg);
+-		x.args().add(tests[j].arg);
+-
+-		Xrl sx(x.str().c_str());
+-		string nom = string(tests[i].testname) + string(" + ") +
+-		    string(tests[j].testname);
+-		failure = xrl_test(nom.c_str(), x, sx);
+-		failures += (failure) ? 1 : 0;
+-	    } catch (const InvalidString&) {
++	    failure = false;
++	    Xrl x("some target", "take an argument");
++	    x.args().add(tests[i].arg);
++	    x.args().add(tests[j].arg);
++
++	    Xrl sx(x.str().c_str());
++	    string nom = string(tests[i].testname) + string(" + ") +
++		string(tests[j].testname);
++	    failure = xrl_test(nom.c_str(), x, sx);
++	    failures += (failure) ? 1 : 0;
++
++	    if (x.invalid() || sx.invalid()) {
+ 		cout << "invalid string (" << i << ", " << j << ")" << endl;
+ 		failures++;
+ 		break;
+-	    } catch (const XrlArgs::XrlAtomFound&) {
++	    }
++#if 0
++	    catch (const XrlArgs::XrlAtomFound&) {
+ 		cout << "Adding same argument twice ("
+ 		     << tests[i].testname << ", " << tests[j].testname << ")"
+ 		     << endl;
+ 		failures++;
+ 	    }
++#endif
+ 	}
+     }
+     return failures;
+diff --git a/xorp/libxipc/xrl.cc b/xorp/libxipc/xrl.cc
+index b0f0c47..c069584 100644
+--- a/xorp/libxipc/xrl.cc
++++ b/xorp/libxipc/xrl.cc
+@@ -51,7 +51,7 @@ Xrl::parse_xrl_path(const char* c_str)
+     // Extract Target
+     sep = strstr(start, XrlToken::TGT_CMD_SEP);
+     if (0 == sep)
+-	xorp_throw0(InvalidString);
++	return NULL; // invalid
+     _target = string(start, sep - start);
+     start = sep + TOKEN_BYTES(XrlToken::TGT_CMD_SEP) - 1;
+ 
+@@ -60,7 +60,7 @@ Xrl::parse_xrl_path(const char* c_str)
+     if (sep == 0) {
+ 	_command = string(start);
+ 	if (_command.size() == 0) {
+-	    xorp_throw0(InvalidString);
++	    return NULL;
+ 	}
+ 	return 0;
+     }
+@@ -85,7 +85,7 @@ Xrl::Xrl(const string&	target,
+ 	 const XrlArgs&	args)
+     : _protocol(_finder_protocol), _target(target), _command(command),
+       _args(args), _sna_atom(NULL), _packed_bytes(0), _argp(&_args),
+-      _to_finder(-1), _resolved(false)
++      _to_finder(-1), _resolved(false), _invalid(false)
+ {
+ }
+ 
+@@ -94,7 +94,7 @@ Xrl::Xrl(const string& protocol,
+ 	 const string& command)
+     : _protocol(protocol), _target(protocol_target), _command(command),
+       _sna_atom(NULL), _packed_bytes(0), _argp(&_args), _to_finder(-1),
+-      _resolved(false)
++      _resolved(false), _invalid(false)
+ {
+ }
+ 
+@@ -102,7 +102,7 @@ Xrl::Xrl(const string& target,
+ 	 const string& command)
+     : _protocol(_finder_protocol), _target(target), _command(command),
+       _sna_atom(NULL), _packed_bytes(0), _argp(&_args), _to_finder(-1),
+-      _resolved(false)
++      _resolved(false), _invalid(false)
+ {
+ }
+ 
+@@ -110,33 +110,34 @@ Xrl::Xrl(const char* target,
+ 	 const char* command)
+ 	: _protocol(_finder_protocol), _target(target), _command(command),
+ 	  _sna_atom(NULL), _packed_bytes(0), _argp(&_args), _to_finder(-1),
+-	  _resolved(false)
++	  _resolved(false), _invalid(false)
+ {
+ }
+ 
+-Xrl::Xrl(const char* c_str) throw (InvalidString) 
++Xrl::Xrl(const char* c_str)
+         : _sna_atom(NULL), _packed_bytes(0), _argp(&_args),
+-	  _to_finder(-1), _resolved(false)
++	  _to_finder(-1), _resolved(false), _invalid(false)
+ {
+-    if (0 == c_str)
+-	xorp_throw0(InvalidString);
++    if (0 == c_str) {
++	_invalid = true;
++	return;
++    }
+ 
+     const char* start = parse_xrl_path(c_str);
+ 
+     // Extract Arguments and pass to XrlArgs string constructor
+     if (0 != start && *start != '\0') {
+-	try {
+-	    _args = XrlArgs(start);
+-	} catch (const InvalidString& is) {
++	_args = XrlArgs(start);
++	if (_args.invalid()) {
+ 	    debug_msg("Failed to restore xrl args:\n\t\"%s\"", start);
+-	    throw is;
++	    _invalid = true;
+ 	}
+     }
+ }
+ 
+ Xrl::Xrl() 
+     : _sna_atom(0), _packed_bytes(0), _argp(&_args), _to_finder(-1),
+-      _resolved(false)
++      _resolved(false), _invalid(false)
+ {
+ }
+ 
+@@ -167,6 +168,7 @@ Xrl::copy(const Xrl& x)
+     _to_finder	    = x._to_finder;
+     _resolved	    = x._resolved;
+     _resolved_sender	    = x._resolved_sender;
++    _invalid = x._invalid;
+ }
+ 
+ Xrl::~Xrl()
+diff --git a/xorp/libxipc/xrl.hh b/xorp/libxipc/xrl.hh
+index 7f2383e..4d22daa 100644
+--- a/xorp/libxipc/xrl.hh
++++ b/xorp/libxipc/xrl.hh
+@@ -76,7 +76,7 @@ public:
+     /**
+      * Construct an Xrl object from the string representation of Xrl.
+      */
+-    Xrl(const char* xrl_c_str) throw (InvalidString);
++    Xrl(const char* xrl_c_str);
+ 
+     Xrl();
+ 
+@@ -180,6 +180,7 @@ public:
+ 
+     void set_target(const char* target);
+ 
++    bool invalid() const { return _invalid; }
+ private:
+     const char* parse_xrl_path(const char* xrl_path);
+     void        clear_cache();
+@@ -190,6 +191,7 @@ private:
+     string		_protocol;
+     string		_target;
+     string		_command;
++    bool _invalid;
+ 
+     // XXX we got a const problem.  Factor out all cached stuff into a struct
+     // and make that mutable.
+diff --git a/xorp/libxipc/xrl_args.cc b/xorp/libxipc/xrl_args.cc
+index 0a3ef81..d66d290 100644
+--- a/xorp/libxipc/xrl_args.cc
++++ b/xorp/libxipc/xrl_args.cc
+@@ -651,10 +651,11 @@ XrlArgs::str() const
+     return oss.str();
+ }
+ 
+-XrlArgs::XrlArgs(const char* serialized) throw (InvalidString)
++XrlArgs::XrlArgs(const char* serialized)
+ 		: _have_name(false)
+ {
+     string s(serialized);
++    _invalid = false;
+ 
+     for (string::iterator start = s.begin(); start < s.end(); start++) {
+ 	string::iterator end = find(start, s.end(), XrlToken::ARG_ARG_SEP[0]);
+@@ -665,13 +666,13 @@ XrlArgs::XrlArgs(const char* serialized) throw (InvalidString)
+ 	} catch (const XrlAtomFound& /*xaf*/) {
+ 	    string tmp("Duplicate Atom found: ");
+ 	    tmp += tok;
+-	    xorp_throw(InvalidString, tmp);
++	    _invalid = true;
++	    return;
+ 	}
+ 	start = end;
+     }
+ }
+ 
+-
+ // ----------------------------------------------------------------------------
+ // Byte serialization methods
+ 
+diff --git a/xorp/libxipc/xrl_args.hh b/xorp/libxipc/xrl_args.hh
+index 2975cdf..98172eb 100644
+--- a/xorp/libxipc/xrl_args.hh
++++ b/xorp/libxipc/xrl_args.hh
+@@ -43,8 +43,8 @@ public:
+     // Exceptions
+     struct BadArgs : public XorpException {
+ 	BadArgs(const char* file, int line, const string& reason) :
+-	    XorpException("XrlArgs::BadArgs", file, line),
+-	_reason(reason) {}
++		XorpException("XrlArgs::BadArgs", file, line),
++		_reason(reason) {}
+ 	const string why() const { return (_reason); }
+     private:
+ 	string _reason;
+@@ -53,8 +53,8 @@ public:
+     class XrlAtomFound { };
+ 
+ public:
+-    XrlArgs() : _have_name(false) {}
+-    explicit XrlArgs(const char* str) throw (InvalidString);
++    XrlArgs() : _have_name(false), _invalid(false) {}
++    explicit XrlArgs(const char* str);
+ 
+     ~XrlArgs() {}
+ 
+@@ -336,11 +336,14 @@ public:
+     template <class T>
+     void set_arg(int idx, const T& arg);
+ 
++    bool invalid() const { return _invalid; }
++
+ protected:
+     void check_not_found(const XrlAtom &xa) throw (XrlAtomFound);
+ 
+     ATOMS _args;
+     bool  _have_name;
++    bool _invalid;
+ };
+ 
+ 
+diff --git a/xorp/libxipc/xrl_atom.cc b/xorp/libxipc/xrl_atom.cc
+index e8a892b..e584238 100644
+--- a/xorp/libxipc/xrl_atom.cc
++++ b/xorp/libxipc/xrl_atom.cc
+@@ -144,13 +144,15 @@ resolve_xrlatom_name(const char* name)
+ ssize_t
+ XrlAtom::data_from_c_str(const char* c_str)
+ {
++    _invalid = false;
+     // Handle binary data type differently to avoid unnecessary copying.
+     if (_type == xrlatom_binary) {
+ 	_binary = new vector<uint8_t>();
+ 	ssize_t bad_pos = xrlatom_decode_value(c_str, strlen(c_str), *_binary);
+ 	if (bad_pos >= 0) {
+ 	    delete _binary;
+-	    xorp_throw0(InvalidString);
++	    _invalid = true;
++	    return;
+ 	}
+ 	_have_data = true;
+ 	return -1;
+@@ -159,7 +161,8 @@ XrlAtom::data_from_c_str(const char* c_str)
+     string decoded;
+     ssize_t bad_pos = xrlatom_decode_value(c_str, strlen(c_str), decoded);
+     if (bad_pos >= 0) {
+-	xorp_throw0(InvalidString);
++	_invalid = true;
++	return;
+     }
+     c_str = decoded.c_str();
+     _have_data = true;
+@@ -504,11 +507,12 @@ XrlAtom::str() const
+ 		    type_name());
+ }
+ 
+-XrlAtom::XrlAtom(const char* serialized) throw (InvalidString, BadName)
++XrlAtom::XrlAtom(const char* serialized) throw (BadName)
+     : _type(xrlatom_no_type),
+       _have_data(false),
+       _own(true),
+-      _has_fake_args(false)
++      _has_fake_args(false),
++      _invalid(false)
+ {
+ 
+     const char *start, *sep;
+@@ -529,38 +533,44 @@ XrlAtom::XrlAtom(const char* serialized) throw (InvalidString, BadName)
+     if (0 == sep) {
+ 	_type = resolve_type_c_str(start);
+ 	_have_data = false;
+-	if (_type == xrlatom_no_type)
+-	    xorp_throw(InvalidString,
+-		       c_format("xrlatom bad type: \"%s\"", start));
++	if (_type == xrlatom_no_type) {
++	    XLOG_WARNING("xrlatom bad type: \"%s\"", start);
++	    _invalid = true;
++	    return;
++	}
+     } else {
+ 	_type = resolve_type_c_str(string(start, sep).c_str());
+-	if (xrlatom_no_type == _type)
+-	    xorp_throw(InvalidString,
+-		       c_format("xrlatom bad type: \"%s\"",
+-				string(start, sep).c_str()));
++	if (xrlatom_no_type == _type) {
++	    XLOG_WARNING("xrlatom bad type: \"%s\"",
++			 string(start, sep).c_str());
++	    _invalid = true;
++	    return;
++	}
+ 	start = sep + TOKEN_BYTES(XrlToken::ARG_TV_SEP) - 1;
+ 	// Get Data
+ 	ssize_t bad_pos = data_from_c_str(start);
+-	if (bad_pos >= 0)
+-	    xorp_throw0(InvalidString);
++	if (bad_pos >= 0) {
++	    _invalid = true;
++	}
+     }
+ }
+ 
+ XrlAtom::XrlAtom(const string& name, XrlAtomType t,
+-		 const string& serialized_data) throw (InvalidString)
++		 const string& serialized_data)
+     : _type(t),
+       _have_data(false),
+       _own(true),
+-      _has_fake_args(false)
++      _has_fake_args(false),
++      _invalid(false)
+ {
+     set_name(name);
+     ssize_t bad_pos = data_from_c_str(serialized_data.c_str());
+     if (bad_pos >= 0)
+-	xorp_throw0(InvalidString);
++	_invalid = true;
+ }
+ 
+ XrlAtom::XrlAtom(const char* name, XrlAtomType t,
+-		 const string& serialized_data) throw (InvalidString)
++		 const string& serialized_data)
+     : _type(t),
+       _have_data(false),
+       _own(true),
+@@ -569,7 +579,7 @@ XrlAtom::XrlAtom(const char* name, XrlAtomType t,
+     set_name(name);
+     ssize_t bad_pos = data_from_c_str(serialized_data.c_str());
+     if (bad_pos >= 0)
+-	xorp_throw0(InvalidString);
++	_invalid = true;
+ }
+ 
+ const string
+@@ -1011,21 +1021,19 @@ XrlAtom::unpack_mac(const uint8_t* buffer, size_t buffer_bytes)
+ 	return 0;
+     }
+     const char* text = reinterpret_cast<const char*>(buffer + sizeof(len));
+-    try {
+-	string s(text, len);
+ 
+-	if (_type == xrlatom_no_type)
+-	    _mac = new Mac(s.c_str());
+-	else
+-	    _mac->copy_in(s.c_str());
+-    }
+-    catch (const InvalidString&) {
++    string s(text, len);
++
++    if (_type == xrlatom_no_type)
++	_mac = new Mac(s.c_str());
++    else
++	_mac->copy_in(s.c_str());
++
++    _invalid = _mac.invalid();
++    if (_invalid) {
+ 	_mac = 0;
+ 	return 0;
+     }
+-    catch (...) {
+-	abort();
+-    }
+     return sizeof(len) + len;
+ }
+ 
+diff --git a/xorp/libxipc/xrl_atom.hh b/xorp/libxipc/xrl_atom.hh
+index 7dc7a80..add645a 100644
+--- a/xorp/libxipc/xrl_atom.hh
++++ b/xorp/libxipc/xrl_atom.hh
+@@ -19,7 +19,6 @@
+ // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/libxipc/xrl_atom.hh,v 1.23 2008/10/30 20:49:07 pavlin Exp $
+ 
+ #ifndef __LIBXIPC_XRL_ATOM_HH__
+ #define __LIBXIPC_XRL_ATOM_HH__
+@@ -77,7 +76,14 @@ inline XrlAtomType& operator++(XrlAtomType& t)
+  */
+ const char* xrlatom_type_name(const XrlAtomType&);
+ 
+-class XrlAtom {
++class XrlAtomBase {
++protected:
++    bool _invalid;
++public:
++    XrlAtomBase() { _invalid = false; }
++};
++
++class XrlAtom : public XrlAtomBase {
+ public:
+     // Exceptions
+     struct NoData : public XorpException {
+@@ -124,23 +130,21 @@ public:
+ 
+     // type but no data constructors
+     XrlAtom(XrlAtomType t)
+-	: _type(t), _have_data(false), _own(true), _has_fake_args(false) {}
++	    : _type(t), _have_data(false), _own(true), _has_fake_args(false) {}
+ 
+     XrlAtom(const string& name, XrlAtomType t) throw (BadName)
+-	: _type(t), _have_data(false), _own(true), _has_fake_args(false) {
++	    : _type(t), _have_data(false), _own(true), _has_fake_args(false) {
+ 	set_name(name);
+     }
+ 
+     XrlAtom(const char* name, XrlAtomType t) throw (BadName)
+-	: _type(t), _have_data(false), _own(true), _has_fake_args(false) {
++	    : _type(t), _have_data(false), _own(true), _has_fake_args(false) {
+ 	set_name(name);
+     }
+ 
+-    XrlAtom(const string& name, XrlAtomType t, const string& serialized_data)
+-	throw (InvalidString);
++    XrlAtom(const string& name, XrlAtomType t, const string& serialized_data);
+ 
+-    XrlAtom(const char* name, XrlAtomType t, const string& serialized_data)
+-	throw (InvalidString);
++    XrlAtom(const char* name, XrlAtomType t, const string& serialized_data);
+ 
+     /**
+      * Construct an XrlAtom from it's serialized character representation.
+@@ -149,14 +153,14 @@ public:
+      * XrlAtom(const string&).
+      *
+      */
+-    explicit XrlAtom(const char*) throw (InvalidString, BadName);
++    explicit XrlAtom(const char*) throw (BadName);
+ 
+     // int32 constructors
+     explicit XrlAtom(const int32_t& value)
+-	: _type(xrlatom_int32), _have_data(true), _own(true), _has_fake_args(false), _i32val(value) {}
++	    : _type(xrlatom_int32), _have_data(true), _own(true), _has_fake_args(false), _i32val(value) {}
+ 
+     XrlAtom(const char* name, int32_t value, bool fake_args = false) throw (BadName)
+-	: _type(xrlatom_int32), _have_data(true), _own(true), _has_fake_args(fake_args),_i32val(value) {
++	    : _type(xrlatom_int32), _have_data(true), _own(true), _has_fake_args(fake_args),_i32val(value) {
+ 	set_name(name);
+     }
+ 
+@@ -173,10 +177,10 @@ public:
+ 
+     // uint32 constructors
+     explicit XrlAtom(const uint32_t& value)
+-	: _type(xrlatom_uint32), _have_data(true), _own(true), _has_fake_args(false), _u32val(value) {}
++	    : _type(xrlatom_uint32), _have_data(true), _own(true), _has_fake_args(false), _u32val(value) {}
+ 
+     XrlAtom(const char* name, uint32_t value, bool fake_args = false) throw (BadName)
+-	: _type(xrlatom_uint32), _have_data(true), _own(true), _has_fake_args(fake_args), _u32val(value) {
++	    : _type(xrlatom_uint32), _have_data(true), _own(true), _has_fake_args(fake_args), _u32val(value) {
+ 	set_name(name);
+     }
+ 
+@@ -205,7 +209,7 @@ public:
+     // ipv6 constructors
+     explicit XrlAtom(const IPv6& addr)
+ 	: _type(xrlatom_ipv6), _have_data(true), _own(true), _has_fake_args(false),
+-	_ipv6(new IPv6(addr)) {}
++	  _ipv6(new IPv6(addr)) {}
+ 
+     XrlAtom(const char* name, const IPv6& addr) throw (BadName)
+ 	: _type(xrlatom_ipv6), _have_data(true), _own(true), _has_fake_args(false),
+@@ -216,18 +220,18 @@ public:
+     // ipv6 net constructors
+     explicit XrlAtom(const IPv6Net& subnet)
+ 	: _type(xrlatom_ipv6net), _have_data(true), _own(true), _has_fake_args(false),
+-	_ipv6net(new IPv6Net(subnet)) {}
++	  _ipv6net(new IPv6Net(subnet)) {}
+ 
+     XrlAtom(const char* name, const IPv6Net& subnet, bool fake_args = false) throw (BadName)
+ 	: _type(xrlatom_ipv6net), _have_data(true), _own(true), _has_fake_args(fake_args),
+-	_ipv6net(new IPv6Net(subnet)) {
++	  _ipv6net(new IPv6Net(subnet)) {
+ 	set_name(name);
+     }
+ 
+     // IPvX constructors - there is no underlying IPvX type
+     // data is cast to IPv4 or IPv6.
+     XrlAtom(const char* name, const IPvX& ipvx, bool fake_args = false) throw (BadName)
+-	: _have_data(true), _own(true), _has_fake_args(fake_args)
++	    : _have_data(true), _own(true), _has_fake_args(fake_args)
+     {
+ 	set_name(name);
+ 	if (ipvx.is_ipv4()) {
+@@ -244,7 +248,7 @@ public:
+     // IPvXNet constructors - there is no underlying IPvXNet type
+     // data is cast to IPv4Net or IPv6Net.
+     XrlAtom(const char* name, const IPvXNet& ipvxnet, bool fake_args = false) throw (BadName)
+-	: _have_data(true), _own(true), _has_fake_args(fake_args)
++	    : _have_data(true), _own(true), _has_fake_args(fake_args)
+     {
+ 	set_name(name);
+ 	if (ipvxnet.is_ipv4()) {
+@@ -261,22 +265,22 @@ public:
+     // mac constructors
+     explicit XrlAtom(const Mac& mac)
+ 	: _type(xrlatom_mac), _have_data(true), _own(true), _has_fake_args(false),
+-	_mac(new Mac(mac)) {}
++	  _mac(new Mac(mac)) {}
+ 
+     XrlAtom(const char* name, const Mac& mac, bool fake_args = false) throw (BadName)
+ 	: _type(xrlatom_mac), _have_data(true), _own(true), _has_fake_args(fake_args),
+-	_mac(new Mac(mac)) {
++	  _mac(new Mac(mac)) {
+ 	set_name(name);
+     }
+ 
+     // text constructors
+     explicit XrlAtom(const string& txt)
+ 	: _type(xrlatom_text), _have_data(true), _own(true), _has_fake_args(false),
+-        _text(new string(txt)) {}
++	  _text(new string(txt)) {}
+ 
+     XrlAtom(const char* name, const string& txt, bool fake_args = false) throw (BadName)
+ 	: _type(xrlatom_text), _have_data(true), _own(true), _has_fake_args(fake_args),
+-        _text(new string(txt)) {
++	  _text(new string(txt)) {
+ 	set_name(name);
+     }
+ 
+diff --git a/xorp/libxipc/xrl_router.cc b/xorp/libxipc/xrl_router.cc
+index 1286692..5616798 100644
+--- a/xorp/libxipc/xrl_router.cc
++++ b/xorp/libxipc/xrl_router.cc
+@@ -156,36 +156,34 @@ XrlRouter::initialize(const char* class_name,
+     // Set the finder client address from the environment variable if it is set
+     value = getenv("XORP_FINDER_CLIENT_ADDRESS");
+     if (value != NULL) {
+-	try {
+-	    struct in_addr addr;
+-	    IPv4 ipv4(value);
++	struct in_addr addr;
++	IPv4 ipv4(value);
++	if (!ipv4.invalid()) {
+ 	    ipv4.copy_out(addr);
+ 	    if (set_preferred_ipv4_addr(addr) != true) {
+ 		XLOG_ERROR("Failed to change the Finder client address to %s",
+ 			   ipv4.str().c_str());
+ 	    }
+-	} catch (const InvalidString& e) {
+-	    UNUSED(e);
++	} else {
+ 	    XLOG_ERROR("Invalid \"XORP_FINDER_CLIENT_ADDRESS\": %s",
+-		       e.str().c_str());
++		       value);
+ 	}
+     }
+ 
+     // Set the finder server address from the environment variable if it is set
+     value = getenv("XORP_FINDER_SERVER_ADDRESS");
+     if (value != NULL) {
+-	try {
+-	    IPv4 ipv4(value);
++	IPv4 ipv4(value);
++	if (!ipv4.invalid()) {
+ 	    if (! ipv4.is_unicast()) {
+ 		XLOG_ERROR("Failed to change the Finder server address to %s",
+ 			   ipv4.str().c_str());
+ 	    } else {
+ 		finder_addr = ipv4;
+ 	    }
+-	} catch (const InvalidString& e) {
+-	    UNUSED(e);
++	} else {
+ 	    XLOG_ERROR("Invalid \"XORP_FINDER_SERVER_ADDRESS\": %s",
+-		       e.str().c_str());
++		       value);
+ 	}
+     }
+ 
+@@ -398,19 +396,18 @@ XrlRouter::send_resolved(const Xrl&		xrl,
+ 			 const XrlCallback&	cb,
+ 			 bool  direct_call)
+ {
+-    try {
+-	ref_ptr<XrlPFSender> s = lookup_sender(xrl, const_cast<FinderDBEntry*>(dbe));
+-	if (!s.get()) {
+-	    // Notify Finder client that result was bad.
+-	    _fc->uncache_result(dbe);
+-
+-	    // Coerce finder client to check with Finder.
+-	    return send(xrl, cb);
+-	}
+-
+-	const Xrl& x = dbe->xrls().front();
+-    	x.set_args(xrl);
++    ref_ptr<XrlPFSender> s = lookup_sender(xrl, const_cast<FinderDBEntry*>(dbe));
++    if (!s.get()) {
++	// Notify Finder client that result was bad.
++	_fc->uncache_result(dbe);
++	
++	// Coerce finder client to check with Finder.
++	return send(xrl, cb);
++    }
+ 
++    const Xrl& x = dbe->xrls().front();
++    x.set_args(xrl);
++    if (!x.invalid()) {
+ 	trace_xrl("Sending ", x);
+ 	// NOTE:  using s.get below breaks ref counting, but can't figure out WTF the
+ 	// callback template magic is to make it work with a ref-ptr.  Either way, it appears
+@@ -418,9 +415,7 @@ XrlRouter::send_resolved(const Xrl&		xrl,
+ 	return s->send(x, direct_call,
+ 		       callback(this, &XrlRouter::send_callback,
+ 				s.get(), cb));
+-
+-	cb->dispatch(XrlError(SEND_FAILED, "sender not instantiated"), 0);
+-    } catch (const InvalidString&) {
++    } else {
+ 	cb->dispatch(XrlError(INTERNAL_ERROR, "bad factory arguments"), 0);
+     }
+     return false;
+diff --git a/xorp/libxipc/xuid.cc b/xorp/libxipc/xuid.cc
+index 27df87a..0bded86 100644
+--- a/xorp/libxipc/xuid.cc
++++ b/xorp/libxipc/xuid.cc
+@@ -74,6 +74,7 @@ XUID::initialize()
+ {
+     static TimeVal last;	// last time clock reading value
+     static uint16_t ticks;	// number of ticks with same clock reading
++    _invalid = false;
+ 
+     // Component 1: Local IPv4 Address - returned in network order
+     uint32_t hid = local_ip4_addr();
+@@ -108,17 +109,21 @@ XUID::initialize()
+ 
+ static const uint32_t XUID_CSTR_BYTES = (32 + 3);
+ 
+-XUID::XUID(const string& s) throw (InvalidString)
++XUID::XUID(const string& s)
+ {
++    _invalid = false;
+     x_static_assert(sizeof(_data) == 16);
+     x_static_assert(sizeof(_data[0]) == 4);
+ 
+-    if (s.size() < XUID_CSTR_BYTES)
+-	throw InvalidString();
++    if (s.size() < XUID_CSTR_BYTES) {
++	_invalid = true;
++	return;
++    }
+ 
+     if (sscanf(s.c_str(), sfmt, &_data[0], &_data[1], &_data[2], &_data[3])
+ 	!= 4) {
+-            throw InvalidString();
++	_invalid = true;
++	return;
+     }
+     for (int i = 0; i < 4; i++) {
+ 	_data[i] = htonl(_data[i]);
+diff --git a/xorp/libxipc/xuid.hh b/xorp/libxipc/xuid.hh
+index 8a963de..6624df8 100644
+--- a/xorp/libxipc/xuid.hh
++++ b/xorp/libxipc/xuid.hh
+@@ -28,8 +28,7 @@
+ 
+ class XUID {
+ public:
+-    class InvalidString {};
+-    XUID(const string&) throw (class InvalidString);
++    XUID(const string&);
+ 
+     // an XUID can be explicitly constructed
+     XUID() { initialize(); }
+@@ -41,8 +40,10 @@ public:
+     bool operator<(const XUID&) const;
+ 
+     string str() const;
++    bool invalid() const { return _invalid; }
+ private:
+     uint32_t _data[4];		// Internal representation is network ordered
++    bool _invalid;
+ };
+ 
+ #endif // __LIBXIPC_XUID_HH__
+diff --git a/xorp/libxorp/asnum.hh b/xorp/libxorp/asnum.hh
+index 8d854c4..a59809f 100644
+--- a/xorp/libxorp/asnum.hh
++++ b/xorp/libxorp/asnum.hh
+@@ -112,31 +112,28 @@ public:
+      * range 1-65535, or as two decimal numbers x.y, where x and y are
+      * in the range 0-65535 
+      */
+-    explicit AsNum(const string& as_str) throw(InvalidString) {
++    explicit AsNum(const string& as_str) {
+ 	bool four_byte = false;
+ 	bool seen_digit = false;
+ 	for (uint32_t i = 0; i < as_str.size(); i++) {
+ 	    if (as_str[i] == '.') {
+ 		if (four_byte || seen_digit == false) {
+ 		    // more than one dot, or no number before the first dot.
+-		    xorp_throw(InvalidString, c_format("Bad AS number \"%s\"",
+-						       as_str.c_str()));
++		    goto fail;
+ 		} else {
+ 		    four_byte = true;
+ 		    seen_digit = false;
+ 		}
+ 	    } else if (!isdigit(as_str[i])) {
+ 		// got some disallowed character
+-		xorp_throw(InvalidString, c_format("Bad AS number \"%s\"",
+-						   as_str.c_str()));
++		goto fail;
+ 	    } else {
+ 		seen_digit = true;
+ 	    }
+ 	}
+ 	if (seen_digit == false) {
+ 	    // either no digit here, or no digit after the dot
+-	    xorp_throw(InvalidString, c_format("Bad AS number \"%s\"",
+-					       as_str.c_str()));
++	    goto fail;
+ 	}
+ 	
+ 	// got here, so the text is in the right format
+@@ -144,8 +141,7 @@ public:
+ 	    _as = atoi(as_str.c_str());
+ 	    if (_as < 1 || _as > 65535) {
+ 		// out of range
+-		xorp_throw(InvalidString, c_format("Bad AS number \"%s\"",
+-					       as_str.c_str()));
++		goto fail;
+ 	    }
+ 	} else {
+ 	    uint32_t upper = strtoul(as_str.c_str(), NULL, 10);
+@@ -153,11 +149,15 @@ public:
+ 				     NULL, 10);
+ 	    if  (upper > 65535 || lower > 65535) {
+ 		// out of range
+-		xorp_throw(InvalidString, c_format("Bad AS number \"%s\"",
+-					       as_str.c_str()));
++		goto fail;
+ 	    }
+ 	    _as = (upper << 16) | lower;
+ 	}
++	return;
++      fail:
++	_as = AS_INVALID;
++	XLOG_WARN("Bad AS number \"%s\"",
++		  as_str.c_str());
+     }
+ 
+ 
+diff --git a/xorp/libxorp/exceptions.cc b/xorp/libxorp/exceptions.cc
+index 9bf352f..0177cad 100644
+--- a/xorp/libxorp/exceptions.cc
++++ b/xorp/libxorp/exceptions.cc
+@@ -72,13 +72,6 @@ XorpReasonedException::why() const
+     return ( _why.size() != 0 ) ? _why : string("Not specified");
+ }
+ 
+-InvalidString::InvalidString(const char* file,
+-			     size_t line,
+-			     const string& init_why)
+-    : XorpReasonedException("InvalidString", file, line, init_why)
+-{
+-}
+-
+ InvalidAddress::InvalidAddress(const char* file,
+ 			       size_t line,
+ 			       const string& init_why)
+@@ -152,18 +145,9 @@ xorp_unexpected_handler(void) {
+ 
+ #include <bitset>
+ 
+-void foo() {
+-    // do some stuff that happens to throw the non-descript exception
+-    // let's say invalid characters are "la-la"
+-    xorp_throw(XorpInvalidString,
+-	       xorp_format_string("invalid characters occurred \"%s\"",
+-				  "la-la"));
+-}
+-
+ int main() {
+     XorpUnexpectedHandler x(xorp_unexpected_handler);
+     try {
+-	foo();		// will throw a XorpInvalidString
+ 	bitset<8> bs;
+ 	bs.set(1000);	// will throw out_of_range("bitset");
+ 	foo();
+diff --git a/xorp/libxorp/exceptions.hh b/xorp/libxorp/exceptions.hh
+index 70e6add..b5570b3 100644
+--- a/xorp/libxorp/exceptions.hh
++++ b/xorp/libxorp/exceptions.hh
+@@ -135,14 +135,6 @@ protected:
+ // Standard XORP exceptions
+ 
+ /**
+- * @short A standard XORP exception that is thrown if a string is invalid.
+- */
+-class InvalidString : public XorpReasonedException {
+-public:
+-    InvalidString(const char* file, size_t line, const string& init_why = "");
+-};
+-
+-/**
+  * @short A standard XORP exception that is thrown if an address is invalid.
+  */
+ class InvalidAddress : public XorpReasonedException {
+diff --git a/xorp/libxorp/ipnet.hh b/xorp/libxorp/ipnet.hh
+index 9be62da..9f48858 100644
+--- a/xorp/libxorp/ipnet.hh
++++ b/xorp/libxorp/ipnet.hh
+@@ -72,7 +72,6 @@ public:
+      * and prefix length.
+      */
+     IPNet(const char *from_cstring)
+-	throw (InvalidString)
+     {
+ 	initialize_from_string(from_cstring);
+     }
+@@ -455,8 +454,7 @@ public:
+     }
+ 
+ private:
+-    void initialize_from_string(const char *s)
+-	throw (InvalidString);
++    void initialize_from_string(const char *s);
+ 
+     A		_masked_addr;
+     uint8_t	_prefix_len;
+@@ -595,18 +593,25 @@ IPNet<A>::contains(const IPNet<A>& other) const
+ 
+ template <class A> void
+ IPNet<A>::initialize_from_string(const char *cp)
+-    throw (InvalidString)
+ {
+     char *slash = strrchr(const_cast<char*>(cp), '/');
+-    if (slash == 0)
+-	xorp_throw(InvalidString, "Missing slash");
++    if (slash == 0) {
++	XLOG_WARNING("Missing slash: %s", cp);
++	_invalid = true;
++	return;
++    }
+ 
+-    if (*(slash + 1) == 0)
+-	xorp_throw(InvalidString, "Missing prefix length");
++    if (*(slash + 1) == 0) {
++	XLOG_WARNING("Missing prefix length: %s", cp);
++	_invalid = true;
++	return;
++    }
+     char *n = slash + 1;
+     while (*n != 0) {
+ 	if (*n < '0' || *n > '9') {
+-	    xorp_throw(InvalidString, "Bad prefix length");
++	    XLOG_WARNING("Bad prefix length: %s", cp);
++	    _invalid = true;
++	    return;
+ 	}
+ 	n++;
+     }
+diff --git a/xorp/libxorp/ipv4.cc b/xorp/libxorp/ipv4.cc
+index c3ca765..be8ebcb 100644
+--- a/xorp/libxorp/ipv4.cc
++++ b/xorp/libxorp/ipv4.cc
+@@ -40,40 +40,57 @@
+ IPv4::IPv4(const uint8_t *from_uint8)
+ {
+     memcpy(&_addr, from_uint8, sizeof(_addr));
++    _invalid = false;
+ }
+ 
+ IPv4::IPv4(const in_addr& from_in_addr)
+ {
+     _addr = from_in_addr.s_addr;
++    _invalid = false;
+ }
+ 
+ IPv4::IPv4(const sockaddr& sa)
+ {
+-    XLOG_ASSERT(sa.sa_family == AF_INET);
+-    const sockaddr_in* sin = sockaddr2sockaddr_in(&sa);
+-    _addr = sin->sin_addr.s_addr;
++    if (sa.sa_family != AF_INET) {
++	_invalid = true;
++    }
++    else {
++	_invalid = false;
++	const sockaddr_in* sin = sockaddr2sockaddr_in(&sa);
++	_addr = sin->sin_addr.s_addr;
++    }
+ }
+ 
+ IPv4::IPv4(const sockaddr_storage& ss)
+ {
+-    XLOG_ASSERT(ss.ss_family == AF_INET);
+-    const sockaddr* sa = sockaddr_storage2sockaddr(&ss);
+-    const sockaddr_in* sin = sockaddr2sockaddr_in(sa);
+-    _addr = sin->sin_addr.s_addr;
++    if (ss.ss_family != AF_INET) {
++	_invalid = true;
++    }
++    else {
++	_invalid = false;
++	const sockaddr* sa = sockaddr_storage2sockaddr(&ss);
++	const sockaddr_in* sin = sockaddr2sockaddr_in(sa);
++	_addr = sin->sin_addr.s_addr;
++    }
+ }
+ 
+ IPv4::IPv4(const sockaddr_in& sin)
+ {
+-    XLOG_ASSERT(sin.sin_family == AF_INET);
+-    _addr = sin.sin_addr.s_addr;
++    if (sin.sin_family != AF_INET) {
++	_invalid = true;
++    }
++    else {
++	_invalid = false;
++	_addr = sin.sin_addr.s_addr;
++    }
+ }
+ 
+-IPv4::IPv4(const char *from_cstring) throw (InvalidString)
++IPv4::IPv4(const char *from_cstring)
+ {
+     if (from_cstring == NULL)
+-	xorp_throw(InvalidString, "Null value" );
++	_invalid = true;
+     if (inet_pton(AF_INET, from_cstring, &_addr) <= 0)
+-	xorp_throw(InvalidString, c_format("Bad IPv4 \"%s\"", from_cstring));
++	_invalid = true;
+ }
+ 
+ /**
+diff --git a/xorp/libxorp/ipv4.hh b/xorp/libxorp/ipv4.hh
+index 85241bf..1eda239 100644
+--- a/xorp/libxorp/ipv4.hh
++++ b/xorp/libxorp/ipv4.hh
+@@ -49,21 +49,21 @@ public:
+      *
+      * The address value is initialized to INADDR_ANY.
+      */
+-    IPv4() { _addr = 0; }
++    IPv4() { _addr = 0; _invalid = false; }
+ 
+     /**
+      * Constructor from another IPv4 address.
+      *
+      * @param ipv4 the IPv4 address to assign the address value from.
+      */
+-    IPv4(const IPv4& ipv4) : _addr(ipv4._addr) {}
++    IPv4(const IPv4& ipv4) : _addr(ipv4._addr), _invalid(ipv4._invalid) {}
+ 
+     /**
+      * Constructor from an integer value.
+      *
+      * @param value 32-bit unsigned integer to assign to the address.
+      */
+-    explicit IPv4(uint32_t value)    { _addr = value; }
++    explicit IPv4(uint32_t value)    { _addr = value; _invalid = false; }
+ 
+     /**
+      * Constructor from a (uint8_t *) memory pointer.
+@@ -107,7 +107,7 @@ public:
+      * @param from_cstring C-style string in the IPv4 dotted decimal
+      * human-readable format used for initialization.
+      */
+-    IPv4(const char *from_string) throw (InvalidString);
++    IPv4(const char *from_string);
+ 
+     /**
+      * Copy the IPv4 raw address to specified memory location.
+@@ -737,8 +737,11 @@ public:
+      */
+     static const uint32_t ADDR_BYTELEN = ADDR_BITLEN / 8;
+ 
++    bool invalid() const { return _invalid; }
++
+ private:
+     uint32_t _addr;		// The address value (in network-order)
++    uint8_t _invalid;
+ };
+ 
+ inline uint32_t
+diff --git a/xorp/libxorp/ipv6.cc b/xorp/libxorp/ipv6.cc
+index 2044d6d..39b6490 100644
+--- a/xorp/libxorp/ipv6.cc
++++ b/xorp/libxorp/ipv6.cc
+@@ -76,12 +76,17 @@ IPv6::IPv6(const sockaddr_in6& sin6)
+     memcpy(_addr, sin6.sin6_addr.s6_addr, sizeof(_addr));
+ }
+ 
+-IPv6::IPv6(const char* from_cstring) throw (InvalidString)
++IPv6::IPv6(const char* from_cstring)
+ {
+-    if (from_cstring == NULL)
+-	xorp_throw(InvalidString, "Null value" );
+-    if (inet_pton(AF_INET6, from_cstring, &_addr[0]) <= 0)
+-	xorp_throw(InvalidString, c_format("Bad IPv6 \"%s\"", from_cstring));
++    if (from_cstring == NULL) {
++	_invalid = true;
++	return;
++    }
++    if (inet_pton(AF_INET6, from_cstring, &_addr[0]) <= 0) {
++	XLOG_WARNING("Bad IPv6 \"%s\"", from_cstring);
++	_invalid = true;
++	return;
++    }
+ }
+ 
+ /**
+diff --git a/xorp/libxorp/ipv6.hh b/xorp/libxorp/ipv6.hh
+index 2f4f539..1086595 100644
+--- a/xorp/libxorp/ipv6.hh
++++ b/xorp/libxorp/ipv6.hh
+@@ -102,7 +102,7 @@ public:
+      * @param from_cstring C-style string in the IPv6 canonical human-readable.
+      * format used for initialization.
+      */
+-    IPv6(const char *from_cstring) throw (InvalidString);
++    IPv6(const char *from_cstring);
+ 
+     /**
+      * Copy the IPv6 raw address to specified memory location.
+diff --git a/xorp/libxorp/ipvx.cc b/xorp/libxorp/ipvx.cc
+index 88dabb9..58c61e5 100644
+--- a/xorp/libxorp/ipvx.cc
++++ b/xorp/libxorp/ipvx.cc
+@@ -44,14 +44,17 @@
+ IPvX::IPvX()
+     : _af(AF_INET)
+ {
++    _invalid = false;
+     memset(_addr, 0, sizeof(_addr));
+ }
+ 
+ // Construct an IN_ADDR_ANY address of @family.
+ IPvX::IPvX(int family)
+ {
+-    if ((family != AF_INET) && (family != AF_INET6))
+-	XLOG_ASSERT(0);
++    _invalid = false;
++    if ((family != AF_INET) && (family != AF_INET6)) {
++	_invalid = true;
++    }
+ 
+     _af = family;
+     memset(_addr, 0, sizeof(_addr));
+@@ -61,6 +64,7 @@ IPvX::IPvX(int family)
+ // memory.
+ IPvX::IPvX(int family, const uint8_t *from_uint8)
+ {
++    _invalid = false;
+     _af = family;
+     memset(_addr, 0, sizeof(_addr));
+     memcpy(_addr, from_uint8, addr_bytelen());
+@@ -68,6 +72,7 @@ IPvX::IPvX(int family, const uint8_t *from_uint8)
+ 
+ IPvX::IPvX(const IPv4& ipv4)
+ {
++    _invalid = false;
+     x_static_assert(sizeof(_addr) >= sizeof(IPv4));
+     x_static_assert(sizeof(IPv4) == 4);
+ 
+@@ -78,6 +83,7 @@ IPvX::IPvX(const IPv4& ipv4)
+ 
+ IPvX::IPvX(const IPv6& ipv6)
+ {
++    _invalid = false;
+     x_static_assert(sizeof(_addr) >= sizeof(IPv6));
+     x_static_assert(sizeof(IPv6) == 16);
+ 
+@@ -87,46 +93,53 @@ IPvX::IPvX(const IPv6& ipv6)
+ 
+ IPvX::IPvX(const in_addr& from_in_addr)
+ {
++    _invalid = false;
+     copy_in(AF_INET, reinterpret_cast<const uint8_t *>(&from_in_addr));
+ }
+ 
+ IPvX::IPvX(const in6_addr& from_in6_addr)
+ {
++    _invalid = false;
+     copy_in(AF_INET6, reinterpret_cast<const uint8_t *>(&from_in6_addr));
+ }
+ 
+ IPvX::IPvX(const sockaddr& from_sockaddr)
+ {
++    _invalid = false;
+     copy_in(from_sockaddr);
+ }
+ 
+ IPvX::IPvX(const sockaddr_storage& from_sockaddr_storage)
+ {
++    _invalid = false;
+     copy_in(from_sockaddr_storage);
+ }
+ 
+ IPvX::IPvX(const sockaddr_in& from_sockaddr_in)
+ {
++    _invalid = false;
+     copy_in(from_sockaddr_in);
+ }
+ 
+ IPvX::IPvX(const sockaddr_in6& from_sockaddr_in6)
+ {
++    _invalid = false;
+     copy_in(from_sockaddr_in6);
+ }
+ 
+-IPvX::IPvX(char const *from_cstring) throw (InvalidString)
++IPvX::IPvX(char const *from_cstring)
+ {
++    _invalid = false;
+     memset(_addr, 0, sizeof(_addr));
+     if (from_cstring == NULL) {
+-	xorp_throw(InvalidString, "Null value");
++	_invalid = true;
+     } else if (inet_pton(AF_INET, from_cstring, _addr) > 0) {
+ 	_af = AF_INET;
+     } else if (inet_pton(AF_INET6, from_cstring, _addr) > 0) {
+ 	_af = AF_INET6;
+     } else {
+-	xorp_throw(InvalidString,
+-		   c_format("Bad IPvX \"%s\"", from_cstring));
++	_invalid = true;
++	XLOG_WARNING("Bad IPvX \"%s\"", from_cstring);
+     }
+ }
+ 
+diff --git a/xorp/libxorp/ipvx.hh b/xorp/libxorp/ipvx.hh
+index d734e94..46f60f8 100644
+--- a/xorp/libxorp/ipvx.hh
++++ b/xorp/libxorp/ipvx.hh
+@@ -135,7 +135,7 @@ public:
+      * @param from_cstring C-style string in the IPv4 dotted decimal
+      * or IPv6 canonical human-readable format used for initialization.
+      */
+-    IPvX(const char *from_cstring) throw (InvalidString);
++    IPvX(const char *from_cstring);
+ 
+     /**
+      * Copy the IPvX raw address to specified memory location.
+@@ -853,12 +853,14 @@ public:
+     static const IPvX& CLASS_C_BASE(int family);
+     static const IPvX& EXPERIMENTAL_BASE(int family);
+ 
++    bool invalid() const { return _invalid; }
+ private:
+     friend class IPv4;
+     friend class IPv6;
+ 
+     uint32_t _addr[4];	// Underlay address value for casting to IPv4 and IPv6
+     int _af;		// The address family AF_INET or AF_INET6
++    bool _invalid;
+ };
+ 
+ inline IPv4
+diff --git a/xorp/libxorp/ipvxnet.hh b/xorp/libxorp/ipvxnet.hh
+index 1d82a8e..b3727d7 100644
+--- a/xorp/libxorp/ipvxnet.hh
++++ b/xorp/libxorp/ipvxnet.hh
+@@ -52,18 +52,25 @@ IPNet<IPvX>::IPNet(const IPvX& ipvx, uint8_t prefix_len)
+ template <>
+ inline void
+ IPNet<IPvX>::initialize_from_string(const char *cp)
+-    throw (InvalidString)
+ {
++    _invalid = false;
+     char *slash = strrchr(const_cast<char*>(cp), '/');
+-    if (slash == 0) xorp_throw(InvalidString, "Missing slash");
++    if (slash == 0) {
++	_invalid = true;
++	return;
++    }
+ 
+-    if (*(slash + 1) == 0)
+-	xorp_throw(InvalidString, "Missing prefix length");
++    if (*(slash + 1) == 0) {
++	_invalid = true;
++	XLOG_WARNING("Missing prefix length: %s", cp);
++	return;
++    }
+     _prefix_len = atoi(slash + 1);
+ 
+     string addr = string(cp, slash - cp);
+ 
+     _masked_addr = IPvX(addr.c_str()).mask_by_prefix_len(_prefix_len);
++    _invalid = _masked_addr.invalid();
+ }
+ 
+ /**
+@@ -123,7 +130,7 @@ public:
+      * and prefix length.
+      * Examples: "12.34.56/24", "1234:5678/32::"
+      */
+-    IPvXNet(const char *cp) throw (InvalidString)
++    IPvXNet(const char *cp)
+ 	: BaseIPvXNet(cp) {}
+ 
+     /**
+diff --git a/xorp/libxorp/mac.cc b/xorp/libxorp/mac.cc
+index 562ff69..f1e802e 100644
+--- a/xorp/libxorp/mac.cc
++++ b/xorp/libxorp/mac.cc
+@@ -28,26 +28,31 @@
+ 
+ Mac::Mac()
+ {
++    _invalid = false;
+     memset(_addr, 0, sizeof(_addr));
+ }
+ 
+ Mac::Mac(const uint8_t* from_uint8)
+ {
++    _invalid = false;
+     copy_in(from_uint8);
+ }
+ 
+-Mac::Mac(const char* from_cstring) throw (InvalidString)
++Mac::Mac(const char* from_cstring)
+ {
++    _invalid = false;
+     copy_in(from_cstring);
+ }
+ 
+ Mac::Mac(const struct ether_addr& from_ether_addr)
+ {
++    _invalid = false;
+     copy_in(from_ether_addr);
+ }
+ 
+ Mac::Mac(const struct sockaddr& from_sockaddr)
+ {
++    _invalid = false;
+     copy_in(from_sockaddr);
+ }
+ 
+@@ -105,18 +110,24 @@ Mac::copy_in(const struct sockaddr& from_sockaddr)
+ }
+ 
+ size_t
+-Mac::copy_in(const char* from_cstring) throw (InvalidString)
++Mac::copy_in(const char* from_cstring)
+ {
+     const struct ether_addr* eap;
++    _invalid = false;
+ 
+-    if (from_cstring == NULL)
+-	xorp_throw(InvalidString, "Null value");
++    if (from_cstring == NULL) {
++	_invalid = true;
++	return 0;
++    }
+ 
+ #ifdef HAVE_ETHER_ATON_R
+     struct ether_addr ea;
+ 
+-    if (ether_aton_r(from_cstring, &ea) == NULL)
+-	xorp_throw(InvalidString, c_format("Bad Mac \"%s\"", from_cstring));
++    if (ether_aton_r(from_cstring, &ea) == NULL) {
++	_invalid = true;
++	XLOG_WARNING("Bad Mac \"%s\"", from_cstring);
++	return 0;
++    }
+     eap = &ea;
+ 
+ #else // ! HAVE_ETHER_ATON_R
+@@ -127,8 +138,11 @@ Mac::copy_in(const char* from_cstring) throw (InvalidString)
+     // is broken (missing "const" in the argument).
+     //
+     eap = ether_aton(const_cast<char *>(from_cstring));
+-    if (eap == NULL)
+-	xorp_throw(InvalidString, c_format("Bad Mac \"%s\"", from_cstring));
++    if (eap == NULL) {
++	_invalid = true;
++	XLOG_WARNING("Bad Mac \"%s\"", from_cstring);
++	return 0;
++    }
+ #endif // ! HAVE_ETHER_ATON_R
+ 
+     return (copy_in(*eap));
+diff --git a/xorp/libxorp/mac.hh b/xorp/libxorp/mac.hh
+index 0c1ed95..a84fae3 100644
+--- a/xorp/libxorp/mac.hh
++++ b/xorp/libxorp/mac.hh
+@@ -52,9 +52,8 @@ public:
+      *
+      * @param from_cstring C-style string of the form XX:XX:XX:XX:XX:XX
+      * where X represents a hex-digit.
+-     * @throws InvalidString if string passed does not match expected format.
+      */
+-    Mac(const char* from_cstring) throw (InvalidString);
++    Mac(const char* from_cstring);
+ 
+     /**
+      * Constructor from ether_addr structure.
+@@ -126,9 +125,8 @@ public:
+      *
+      * @param from_cstring C-style string of the form XX:XX:XX:XX:XX:XX
+      * where X represents a hex-digit.
+-     * @throws InvalidString if string passed does not match expected format.
+      */
+-    size_t copy_in(const char* from_cstring) throw (InvalidString);
++    size_t copy_in(const char* from_cstring);
+ 
+     /**
+      * Less-Than Operator
+@@ -234,8 +232,10 @@ public:
+     static const Mac& GMRP_MULTICAST();
+     static const Mac& GVRP_MULTICAST();
+ 
++    bool invalid() const { return _invalid; }
+ private:
+     uint8_t	_addr[ADDR_BYTELEN];	// The address value (in network-order)
++    bool _invalid;
+ };
+ 
+ struct MacConstants {
+diff --git a/xorp/libxorp/range.hh b/xorp/libxorp/range.hh
+index dbe7353..7797764 100644
+--- a/xorp/libxorp/range.hh
++++ b/xorp/libxorp/range.hh
+@@ -19,13 +19,9 @@
+ // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/libxorp/range.hh,v 1.11 2008/10/02 21:57:32 bms Exp $
+-
+ #ifndef __LIBXORP_RANGE_HH__
+ #define __LIBXORP_RANGE_HH__
+ 
+-
+-
+ class IPv4;
+ class IPv6;
+ 
+@@ -42,12 +38,12 @@ public:
+     /**
+      * Default constructor
+      */
+-    Range() 			{}
++    Range() { _invalid = false; }
+ 
+     /**
+      * Constructor from a single value.
+      */
+-    explicit Range(T value)	{ _low = _high = value; }
++    explicit Range(T value) { _low = _high = value; _invalid = false; }
+ 
+     /**
+      * Constructor from two values.
+@@ -55,14 +51,16 @@ public:
+     explicit Range(T low, T high) {
+ 	_low = low;
+ 	_high = high;
++	_invalid = false;
+     }
+ 
+     const T& low() const { return _low; }
+     const T& high() const { return _high; }
+-
++    bool invalid() const { return _invalid; }
+ protected:
+     T _low;
+     T _high;
++    bool _invalid;
+ };
+ 
+ /**
+@@ -100,7 +98,8 @@ public:
+ 	    _low = strtoul(from_string.substr(0, delim).c_str(), NULL, 10);
+ 	    _high = strtoul(from_string.substr(delim + 2, from_string.length()).c_str(), NULL, 10);
+ 	} else {
+-	    xorp_throw(InvalidString, "Syntax error");
++	    _invalid = true;
++	    XLOG_WARNING("Syntax error: %s", from_cstr);
+ 	}
+     }
+ 
+@@ -160,7 +159,8 @@ public:
+ 	    _low = strtoul(from_string.substr(0, delim).c_str(), NULL, 10);
+ 	    _high = strtoul(from_string.substr(delim + 2, from_string.length()).c_str(), NULL, 10);
+ 	} else {
+-	    xorp_throw(InvalidString, "Syntax error");
++	    _invalid = true;
++	    XLOG_WARNING("Syntax error: %s", from_cstr);
+ 	}
+     }
+ 
+@@ -371,7 +371,8 @@ public:
+ 						   from_string.length())
+ 						    .c_str());
+ 	} else {
+-	    xorp_throw(InvalidString, "Syntax error");
++	    _invalid = true;
++	    XLOG_WARNING("Syntax error: %s", from_cstr);
+ 	}
+     }
+ 
+diff --git a/xorp/libxorp/tests/test_mac.cc b/xorp/libxorp/tests/test_mac.cc
+index 979e6fb..543c952 100644
+--- a/xorp/libxorp/tests/test_mac.cc
++++ b/xorp/libxorp/tests/test_mac.cc
+@@ -167,15 +167,14 @@ test_mac_invalid_constructors(TestInfo& test_info)
+     //
+     // Constructor from an invalid address string.
+     //
+-    try {
+-	// Invalid address string
+-	Mac mac("hello");
++    // Invalid address string
++    Mac mac("hello");
++    if (!mac.invalid()) {
+ 	verbose_log("Cannot catch invalid Mac address \"hello\" : FAIL\n");
+ 	incr_failures();
+-	UNUSED(mac);
+-    } catch (const InvalidString& e) {
++    } else {
+ 	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
++	verbose_log("invalid-mac : OK\n");
+     }
+ 
+     return (! failures());
+@@ -276,14 +275,14 @@ test_mac_invalid_copy_in_out(TestInfo& test_info)
+     //
+     // Copy-in from invalid string.
+     //
+-    try {
+-	Mac mac;
++    Mac mac;
++    if (!mac.invalid()) {
+ 	mac.copy_in("hello");
+ 	verbose_log("Cannot catch invalid Mac address \"hello\" : FAIL\n");
+ 	incr_failures();
+-    } catch (const InvalidString& e) {
++    } else {
+ 	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
++	verbose_log("invalid-mac-copy-in : OK\n");
+     }
+ 
+     return (! failures());
+diff --git a/xorp/libxorp/tests/test_test_main.cc b/xorp/libxorp/tests/test_test_main.cc
+index 40e3772..ab81e37 100644
+--- a/xorp/libxorp/tests/test_test_main.cc
++++ b/xorp/libxorp/tests/test_test_main.cc
+@@ -70,30 +70,6 @@ test4(TestInfo& info, const char *mess)
+     return true;
+ }
+ 
+-bool
+-test5(TestInfo& info, bool exception)
+-{
+-    DOUT(info) << info.test_name() << " Test will " <<
+-	    (exception ? "throw exception" : "succeed") << endl;
+-
+-    if (exception)
+-	xorp_throw(InvalidString, "Hello");
+-
+-    return true;
+-}
+-
+-bool
+-test6(TestInfo& info, bool exception)
+-{
+-    DOUT(info) << info.test_name() << " Test will " <<
+-	    (exception ? "throw exception" : "succeed") << endl;
+-
+-    if (exception)
+-	throw("Unexpected exception");
+-
+-    return true;
+-}
+-
+ int
+ main(int argc, char **argv)
+ {
+@@ -129,8 +105,6 @@ main(int argc, char **argv)
+ 	{"test2", callback(test2)},
+ 	{"test3", callback(test3, fail)},
+ 	{"test4", callback(test4, mess.c_str())},
+-	{"test5", callback(test5, exception)},
+-	{"test6", callback(test6, unexpected)},
+     };
+ 
+     try {
+diff --git a/xorp/libxorp/xorp.h b/xorp/libxorp/xorp.h
+index 86c1f3e..84cf726 100644
+--- a/xorp/libxorp/xorp.h
++++ b/xorp/libxorp/xorp.h
+@@ -84,6 +84,7 @@
+ #endif /* ! __BYTE_ORDER */
+ #endif /* ! BYTE_ORDER */
+ 
++#define WARN_UNUSED __attribute__((warn_unused_result))
+ 
+ #ifdef __cplusplus
+ #  ifdef XORP_USE_USTL
+diff --git a/xorp/mld6igmp/mld6igmp_node_cli.cc b/xorp/mld6igmp/mld6igmp_node_cli.cc
+index b51ab2d..5f2ef2e 100644
+--- a/xorp/mld6igmp/mld6igmp_node_cli.cc
++++ b/xorp/mld6igmp/mld6igmp_node_cli.cc
+@@ -328,8 +328,8 @@ Mld6igmpNodeCli::cli_show_mld6igmp_group(const vector<string>& argv)
+     
+     // Check the (optional) arguments, and create an array of groups to test
+     for (size_t i = 0; i < argv.size(); i++) {
+-	try {
+-	    IPvX g(argv[i].c_str());
++	IPvX g(argv[i].c_str());
++	if (!g.invalid()) {
+ 	    if (g.af() != family()) {
+ 		cli_print(c_format("ERROR: Address with invalid address family: %s\n",
+ 				   argv[i].c_str()));
+@@ -341,7 +341,7 @@ Mld6igmpNodeCli::cli_show_mld6igmp_group(const vector<string>& argv)
+ 		return (XORP_ERROR);
+ 	    }
+ 	    groups.push_back(g);
+-	} catch (InvalidString) {
++	} else {
+ 	    cli_print(c_format("ERROR: Invalid IP address: %s\n",
+ 			       argv[i].c_str()));
+ 	    return (XORP_ERROR);
+diff --git a/xorp/ospf/tests/test_args.hh b/xorp/ospf/tests/test_args.hh
+index fd87b8a..4c2604c 100644
+--- a/xorp/ospf/tests/test_args.hh
++++ b/xorp/ospf/tests/test_args.hh
+@@ -18,7 +18,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/ospf/test_args.hh,v 1.6 2008/10/02 21:57:49 bms Exp $
+ 
+ #ifndef __OSPF_TEST_ARGS_HH__
+ #define __OSPF_TEST_ARGS_HH__
+@@ -63,46 +62,5 @@ class Args {
+ };
+ 
+ 
+-/**
+- * Get a number in base 8,10 or 16.
+- */
+-inline
+-uint32_t
+-get_number(const string& word) throw(InvalidString)
+-{
+-    char *endptr;
+-    
+-    uint32_t number = strtoul(word.c_str(), &endptr, 0);
+-    if (0 != *endptr)
+-	xorp_throw(InvalidString,
+-		   c_format("<%s> is not a number", word.c_str()));
+-
+-    return number;
+-}
+-
+-/**
+- * Get the next word throw an exception if its not present.
+- */
+-inline
+-string
+-get_next_word(Args& args, const string& varname) throw(InvalidString)
+-{
+-    string var;
+-    if (!args.get_next(var))
+-	xorp_throw(InvalidString,
+-		   c_format("No argument to %s. [%s]",
+-			    varname.c_str(),
+-			    args.original_line().c_str()));
+-
+-    return var;
+-}
+-
+-inline
+-uint32_t
+-get_next_number(Args& args, const string& varname) throw(InvalidString)
+-{
+-    return get_number(get_next_word(args, varname));
+-}
+-
+ 
+ #endif // __OSPF_TEST_ARGS_HH__
+diff --git a/xorp/ospf/tests/test_build_lsa.cc b/xorp/ospf/tests/test_build_lsa.cc
+index 4c6e1a6..06f023f 100644
+--- a/xorp/ospf/tests/test_build_lsa.cc
++++ b/xorp/ospf/tests/test_build_lsa.cc
+@@ -44,7 +44,7 @@ BuildLsa::generate(Args& args)
+ {
+     string word;
+     if (!args.get_next(word))
+-	return 0;
++	return NULL;
+     
+     Lsa *lsa = 0;
+     if ("RouterLsa" == word) {
+@@ -64,9 +64,10 @@ BuildLsa::generate(Args& args)
+     } else if ("IntraAreaPrefixLsa" == word) {
+ 	lsa = intra_area_prefix_lsa(args);
+     } else {
+-	xorp_throw(InvalidString, c_format("Unknown LSA name <%s>. [%s]",
+-					   word.c_str(),
+-					   args.original_line().c_str()))
++	XLOG_WARNING("Unknown LSA name <%s>. [%s]",
++		     word.c_str(),
++		     args.original_line().c_str());
++	return NULL;
+     }
+ 	
+     return lsa;
+@@ -103,12 +104,11 @@ BuildLsa::get_options(Lsa *lsa)
+ 	if (getit<LinkLsa>(lsa, _version, options))
+ 	    return options;
+ 
+-	xorp_throw(InvalidString,
+-		   c_format("%s LSA does not have an options field (get)",
+-			    lsa->name()));
+-    }
+-	break;
++	XLOG_WARNING("%s LSA does not have an options field (get)",
++		     lsa->name());
++	return options;
+     }
++    }/* switch */
+ 
+     return Options(_version, 0);
+ }
+@@ -142,13 +142,12 @@ BuildLsa::set_options(Lsa *lsa, Options& options)
+ 	    return;
+ 	if (setit<LinkLsa>(lsa, options))
+ 	    return;
+-
+-	xorp_throw(InvalidString,
+-		   c_format("%s LSA does not have an options field (set)",
+-			    lsa->name()));
+-    }
++	XLOG_WARNING("%s LSA does not have an options field (set)",
++		     lsa->name());
++	return;
+ 	break;
+     }
++    }/* switch */
+ }
+ 
+ bool
+@@ -164,9 +163,11 @@ BuildLsa::common_header(Lsa *lsa, const string& word, Args& args)
+ 
+     if ("age" == word) {
+ 	string age;
+-	if (!args.get_next(age))
+-	    xorp_throw(InvalidString, c_format("No argument to age. [%s]",
+-					       args.original_line().c_str()));
++	if (!args.get_next(age)) {
++	    XLOG_WARNING("No argument to age. [%s]",
++			 args.original_line().c_str());
++	    return false;
++	}
+ 	
+ 	lsa->get_header().set_ls_age(get_number(age)); 
+     } else if ("V6-bit" == word) {
+@@ -279,9 +280,11 @@ BuildLsa::router_lsa(Args& args)
+ 	} else if ("bit-B" == word) {
+ 	    lsa->set_b_bit(true);
+ 	} else {
+-	    xorp_throw(InvalidString, c_format("Unknown option <%s>. [%s]",
+-					       word.c_str(),
+-					       args.original_line().c_str()));
++	    delete lsa;
++	    XLOG_WARNING("Unknown option <%s>. [%s]",
++			 word.c_str(),
++			 args.original_line().c_str());
++	    return NULL;
+ 	}
+     }
+ 
+@@ -303,9 +306,11 @@ BuildLsa::network_lsa(Args& args)
+ 	    lsa->get_attached_routers().
+ 		push_back(set_id(get_next_word(args, word).c_str()));
+ 	} else {
+-	    xorp_throw(InvalidString, c_format("Unknown option <%s>. [%s]",
+-					       word.c_str(),
+-					       args.original_line().c_str()));
++	    delete lsa;
++	    XLOG_WARNING("Unknown option <%s>. [%s]",
++			 word.c_str(),
++			 args.original_line().c_str());
++	    return NULL;
+ 	}
+     }
+ 
+@@ -358,9 +363,11 @@ BuildLsa::summary_network_lsa(Args& args)
+ 	} else if ("IPv6Prefix" == word) {	// OSPFv3
+ 	    lsa->set_ipv6prefix(ipv6prefix(args));
+ 	} else {
+-	    xorp_throw(InvalidString, c_format("Unknown option <%s>. [%s]",
+-					       word.c_str(),
+-					       args.original_line().c_str()));
++	    delete lsa;
++	    XLOG_WARNING("Unknown option <%s>. [%s]",
++			 word.c_str(),
++			 args.original_line().c_str());
++	    return NULL;
+ 	}
+     }
+ 
+@@ -383,9 +390,11 @@ BuildLsa::summary_router_lsa(Args& args)
+ 	} else if ("drid" == word) {	// OSPFv3
+  	    lsa->set_destination_id(set_id(get_next_word(args, word).c_str()));
+ 	} else {
+-	    xorp_throw(InvalidString, c_format("Unknown option <%s>. [%s]",
+-					       word.c_str(),
+-					       args.original_line().c_str()));
++	    delete lsa;
++	    XLOG_WARNING("Unknown option <%s>. [%s]",
++			 word.c_str(),
++			 args.original_line().c_str());
++	    return NULL;
+ 	}
+     }
+ 
+@@ -425,9 +434,11 @@ BuildLsa::as_external_lsa(Args& args)
+ 	    lsa->set_referenced_link_state_id(set_id(get_next_word(args, word)
+ 						     .c_str()));
+ 	} else {
+-	    xorp_throw(InvalidString, c_format("Unknown option <%s>. [%s]",
+-					       word.c_str(),
+-					       args.original_line().c_str()));
++	    delete lsa;
++	    XLOG_WARNING("Unknown option <%s>. [%s]",
++			 word.c_str(),
++			 args.original_line().c_str());
++	    return NULL;
+ 	}
+     }
+ 
+@@ -467,9 +478,11 @@ BuildLsa::type_7_lsa(Args& args)
+ 	    lsa->set_referenced_link_state_id(set_id(get_next_word(args, word)
+ 						     .c_str()));
+ 	} else {
+-	    xorp_throw(InvalidString, c_format("Unknown option <%s>. [%s]",
+-					       word.c_str(),
+-					       args.original_line().c_str()));
++	    delete lsa;
++	    XLOG_WARNING("Unknown option <%s>. [%s]",
++			 word.c_str(),
++			 args.original_line().c_str());
++	    return NULL;
+ 	}
+     }
+ 
+@@ -492,9 +505,11 @@ BuildLsa::link_lsa(Args& args)	// OSPFv3 only
+ 	} else if ("IPv6Prefix" == word) {
+ 	    lsa->get_prefixes().push_back(ipv6prefix(args));
+ 	} else {
+-	    xorp_throw(InvalidString, c_format("Unknown option <%s>. [%s]",
+-					       word.c_str(),
+-					       args.original_line().c_str()));
++	    delete lsa;
++	    XLOG_WARNING("Unknown option <%s>. [%s]",
++			 word.c_str(),
++			 args.original_line().c_str());
++	    return NULL;
+ 	}
+     }
+ 
+@@ -531,9 +546,11 @@ BuildLsa::intra_area_prefix_lsa(Args& args)	// OSPFv3 only
+ 	} else if ("IPv6Prefix" == word) {
+ 	    lsa->get_prefixes().push_back(ipv6prefix(args, true));
+ 	} else {
+-	    xorp_throw(InvalidString, c_format("Unknown option <%s>. [%s]",
+-					       word.c_str(),
+-					       args.original_line().c_str()));
++	    delete lsa;
++	    XLOG_WARNING("Unknown option <%s>. [%s]",
++			 word.c_str(),
++			 args.original_line().c_str());
++	    return NULL;
+ 	}
+     }
+ 
+diff --git a/xorp/ospf/tests/test_routing_interactive.cc b/xorp/ospf/tests/test_routing_interactive.cc
+index ed7f720..10105e8 100644
+--- a/xorp/ospf/tests/test_routing_interactive.cc
++++ b/xorp/ospf/tests/test_routing_interactive.cc
+@@ -55,7 +55,7 @@ class Routing {
+     /**
+      * Send a command to route tester.
+      */
+-    bool cmd(Args& args) throw(InvalidString);
++    bool cmd(Args& args);
+ 
+ 
+  private:
+@@ -73,11 +73,12 @@ class Routing {
+     AreaRouter<A> *get_area_router(Args& args) {
+ 	PeerManager<A>& pm = _ospf.get_peer_manager();
+ 	AreaRouter<A> *area_router = pm.get_area_router(_selected_area);
+-	if (0 == area_router)
+-	    xorp_throw(InvalidString,
+-		       c_format("Invalid area <%s> [%s]",
+-				pr_id(_selected_area).c_str(),
+-				args.original_line().c_str()));
++	if (!area_router) {
++	    XLOG_WARNING("Invalid area <%s> [%s]",
++			 pr_id(_selected_area).c_str(),
++			 args.original_line().c_str());
++	    return NULL;
++	}
+ 	return area_router;
+     }
+ };
+@@ -97,7 +98,7 @@ Routing<A>::Routing(OspfTypes::Version version,
+ 
+ template <typename A>
+ bool 
+-Routing<A>::cmd(Args& args) throw(InvalidString)
++Routing<A>::cmd(Args& args)
+ {
+     string word;
+     while (args.get_next(word)) {
+@@ -121,27 +122,30 @@ Routing<A>::cmd(Args& args) throw(InvalidString)
+ 	    word = get_next_word(args, "area_type");
+ 	    OspfTypes::AreaType area_type =
+ 		from_string_to_area_type(word, okay);
+-	    if (!okay)
+-		xorp_throw(InvalidString,
+-			   c_format("<%s> is not a valid area type",
+-				    word.c_str()));
++	    if (!okay) {
++		XLOG_WARNING("<%s> is not a valid area type",
++			     word.c_str());
++		return false;
++	    }
+ 	    if (!pm.create_area_router(area, area_type,
+-				       false /* !permissive*/))
+-		xorp_throw(InvalidString,
+-			   c_format("Failed to create area <%s> [%s]",
+-				    pr_id(area).c_str(),
+-				    args.original_line().c_str()));
++				       false /* !permissive*/)) {
++		XLOG_WARNING("Failed to create area <%s> [%s]",
++			     pr_id(area).c_str(),
++			     args.original_line().c_str());
++		return false;
++	    }
+ 	    
+ 	} else if ("select" == word) {
+ 	    // CMD: select <area id>
+ 	    OspfTypes::AreaID area = 
+ 		set_id(get_next_word(args, "select").c_str());
+ 	    PeerManager<A>& pm = _ospf.get_peer_manager();
+-	    if (0 == pm.get_area_router(area))
+-		xorp_throw(InvalidString,
+-			   c_format("Invalid area <%s> [%s]",
+-				    pr_id(area).c_str(),
+-				    args.original_line().c_str()));
++	    if (0 == pm.get_area_router(area)) {
++		XLOG_WARNING("Invalid area <%s> [%s]",
++			     pr_id(area).c_str(),
++			     args.original_line().c_str());
++		return false;
++	    }
+ 	    _selected_area = area;
+ 	} else if ("replace" == word) {
+ 	    // CMD: replace <LSA>
+@@ -149,10 +153,12 @@ Routing<A>::cmd(Args& args) throw(InvalidString)
+ 	    AreaRouter<A> *area_router = get_area_router(args);
+ 	    BuildLsa blsa(_version);
+ 	    Lsa *lsa = blsa.generate(args);
+-	    if (0 == lsa)
+-		xorp_throw(InvalidString,
+-			   c_format("Couldn't form a LSA [%s]",
+-				    args.original_line().c_str()));
++	    if (!lsa) {
++		XLOG_WARNING("Couldn't form a LSA [%s]",
++			     args.original_line().c_str());
++		return false;
++	    }
++
+ 	    Lsa::LsaRef lsar(lsa);
+ 	    lsar->set_self_originating(true);
+ 	    area_router->testing_replace_router_lsa(lsar);
+@@ -161,10 +167,11 @@ Routing<A>::cmd(Args& args) throw(InvalidString)
+ 	    AreaRouter<A> *area_router = get_area_router(args);
+ 	    BuildLsa blsa(_version);
+ 	    Lsa *lsa = blsa.generate(args);
+-	    if (0 == lsa)
+-		xorp_throw(InvalidString,
+-			   c_format("Couldn't form a LSA [%s]",
+-				    args.original_line().c_str()));
++	    if (!lsa) {
++		XLOG_WARNING("Couldn't form a LSA [%s]",
++			     args.original_line().c_str());
++		return false;
++	    }
+ 	    Lsa::LsaRef lsar(lsa);
+ 	    area_router->testing_add_lsa(lsar);
+ 	} else if ("compute" == word) {
+@@ -173,11 +180,12 @@ Routing<A>::cmd(Args& args) throw(InvalidString)
+ 		set_id(get_next_word(args, "compute").c_str());
+ 	    PeerManager<A>& pm = _ospf.get_peer_manager();
+ 	    AreaRouter<A> *area_router = pm.get_area_router(area);
+-	    if (0 == area_router)
+-		xorp_throw(InvalidString,
+-			   c_format("Invalid area <%s> [%s]",
+-				    pr_id(area).c_str(),
+-				    args.original_line().c_str()));
++	    if (!area_router) {
++		XLOG_WARNING("Invalid area <%s> [%s]",
++			     pr_id(area).c_str(),
++			     args.original_line().c_str());
++		return false;
++	    }
+ 	    if (_info.verbose())
+ 		area_router->testing_print_link_state_database();
+  	    area_router->testing_routing_total_recompute();
+@@ -186,22 +194,24 @@ Routing<A>::cmd(Args& args) throw(InvalidString)
+ 	    OspfTypes::AreaID area =
+ 		set_id(get_next_word(args, "destroy").c_str());
+ 	    PeerManager<A>& pm = _ospf.get_peer_manager();
+-	    if (!pm.destroy_area_router(area))
+-		xorp_throw(InvalidString,
+-			   c_format("Failed to delete area <%s> [%s]",
+-				    pr_id(area).c_str(),
+-				    args.original_line().c_str()));
++	    if (!pm.destroy_area_router(area)) {
++		XLOG_WARNING("Failed to delete area <%s> [%s]",
++			     pr_id(area).c_str(),
++			     args.original_line().c_str());
++		return false;
++	    }
+ 	} else if ("verify_routing_table_size" == word) {
+ 	    // CMD: verify_routing_table_size <count>
+ 	    uint32_t expected_count = 
+ 		get_next_number(args, "verify_routing_table_size");
+ 	    uint32_t actual_count = _io.routing_table_size();
+-	    if (expected_count != actual_count)
+-		xorp_throw(InvalidString,
+-			   c_format("Routing table size expected %d actual %d"
+-				    " [%s]",
+-				    expected_count, actual_count,
+-				    args.original_line().c_str()));
++	    if (expected_count != actual_count) {
++		XLOG_WARNING("Routing table size expected %d actual %d"
++			     " [%s]",
++			     expected_count, actual_count,
++			     args.original_line().c_str());
++		return false;
++	    }
+ 	} else if ("verify_routing_entry" == word) {
+ 	    // CMD: verify_routing_entry <net> <nexthop> <metric> <equal> <discard>
+ 	    IPNet<A> net(get_next_word(args, "verify_routing_entry").c_str());
+@@ -211,15 +221,17 @@ Routing<A>::cmd(Args& args) throw(InvalidString)
+ 		== "true" ? true : false;
+ 	    bool discard = get_next_word(args, "verify_routing_entry") == 
+ 		"true" ? true : false;
+-	    if (!_io.routing_table_verify(net, nexthop, metric, equal,discard))
+-		xorp_throw(InvalidString,
+-			   c_format("Matching routing table entry not found"
+-				    " [%s]",
+-				    args.original_line().c_str()));
++	    if (!_io.routing_table_verify(net, nexthop, metric, equal,discard)) {
++		XLOG_WARNING("Matching routing table entry not found"
++			     " [%s]",
++			     args.original_line().c_str());
++		return false;
++	    }
+ 	} else {
+-	    xorp_throw(InvalidString, c_format("Unknown command <%s>. [%s]",
+-					   word.c_str(),
+-					   args.original_line().c_str()))
++	    XLOG_WARNING("Unknown command <%s>. [%s]",
++			 word.c_str(),
++			 args.original_line().c_str());
++	    return false;
+ 	}
+     }
+ 
+diff --git a/xorp/pim/pim_node_cli.cc b/xorp/pim/pim_node_cli.cc
+index da6aa38..1dc54be 100644
+--- a/xorp/pim/pim_node_cli.cc
++++ b/xorp/pim/pim_node_cli.cc
+@@ -266,8 +266,8 @@ PimNodeCli::cli_show_pim_bootstrap(const vector<string>& argv)
+     
+     // Check the optional arguments
+     if (argv.size()) {
+-	try {
+-	    zone_id = PimScopeZoneId(argv[0].c_str(), false);
++	zone_id = PimScopeZoneId(argv[0].c_str(), false);
++	if (!zone_id.invalid()) {
+ 	    is_zone_id_set = true;
+ 	    if (zone_id.scope_zone_prefix().masked_addr().af() != family()) {
+ 		cli_print(c_format("ERROR: Address with invalid address family: %s\n",
+@@ -279,7 +279,7 @@ PimNodeCli::cli_show_pim_bootstrap(const vector<string>& argv)
+ 		if (argv[1] == "scoped")
+ 		    zone_id = PimScopeZoneId(argv[0].c_str(), true);
+ 	    }
+-	} catch (InvalidString) {
++	} else {
+ 	    cli_print(c_format("ERROR: Invalid zone ID address: %s\n",
+ 			       argv[0].c_str()));
+ 	    return (XORP_ERROR);
+@@ -481,8 +481,8 @@ PimNodeCli::cli_show_pim_bootstrap_rps(const vector<string>& argv)
+     
+     // Check the optional argument
+     if (argv.size()) {
+-	try {
+-	    zone_id = PimScopeZoneId(argv[0].c_str(), false);
++	zone_id = PimScopeZoneId(argv[0].c_str(), false);
++	if (!zone_id.invalid()) {
+ 	    is_zone_id_set = true;
+ 	    if (zone_id.scope_zone_prefix().masked_addr().af() != family()) {
+ 		cli_print(c_format("ERROR: Address with invalid address family: %s\n",
+@@ -494,7 +494,7 @@ PimNodeCli::cli_show_pim_bootstrap_rps(const vector<string>& argv)
+ 		if (argv[1] == "scoped")
+ 		    zone_id = PimScopeZoneId(argv[0].c_str(), true);
+ 	    }
+-	} catch (InvalidString) {
++	} else {
+ 	    cli_print(c_format("ERROR: Invalid zone ID address: %s\n",
+ 			       argv[0].c_str()));
+ 	    return (XORP_ERROR);
+@@ -775,13 +775,11 @@ PimNodeCli::cli_show_pim_join(const vector<string>& argv)
+     
+     // Check the optional argument
+     if (argv.size()) {
+-	try {
+-	    group_range = IPvXNet(argv[0].c_str());
+-	} catch (InvalidString) {
+-	    try {
+-		group_range = IPvXNet(IPvX(argv[0].c_str()),
+-				      IPvX::addr_bitlen(family()));
+-	    } catch (InvalidString) {
++	group_range = IPvXNet(argv[0].c_str());
++	if (group_range.invalid()) {
++	    group_range = IPvXNet(IPvX(argv[0].c_str()),
++				  IPvX::addr_bitlen(family()));
++	    if (group_range.invalid()) {
+ 		cli_print(c_format("ERROR: Invalid group range address: %s\n",
+ 				   argv[0].c_str()));
+ 		return (XORP_ERROR);
+@@ -812,13 +810,11 @@ PimNodeCli::cli_show_pim_join_all(const vector<string>& argv)
+     
+     // Check the optional argument
+     if (argv.size()) {
+-	try {
+-	    group_range = IPvXNet(argv[0].c_str());
+-	} catch (InvalidString) {
+-	    try {
+-		group_range = IPvXNet(IPvX(argv[0].c_str()),
+-				      IPvX::addr_bitlen(family()));
+-	    } catch (InvalidString) {
++	group_range = IPvXNet(argv[0].c_str());
++	if (group_range.invalid()) {
++	    group_range = IPvXNet(IPvX(argv[0].c_str()),
++				  IPvX::addr_bitlen(family()));
++	    if (group_range.invalid()) {
+ 		cli_print(c_format("ERROR: Invalid group range address: %s\n",
+ 				   argv[0].c_str()));
+ 		return (XORP_ERROR);
+@@ -849,13 +845,11 @@ PimNodeCli::cli_show_pim_mfc(const vector<string>& argv)
+     
+     // Check the optional argument
+     if (argv.size()) {
+-	try {
+-	    group_range = IPvXNet(argv[0].c_str());
+-	} catch (InvalidString) {
+-	    try {
+-		group_range = IPvXNet(IPvX(argv[0].c_str()),
+-				      IPvX::addr_bitlen(family()));
+-	    } catch (InvalidString) {
++	group_range = IPvXNet(argv[0].c_str());
++	if (group_range.invalid()) {
++	    group_range = IPvXNet(IPvX(argv[0].c_str()),
++				  IPvX::addr_bitlen(family()));
++	    if (group_range.invalid()) {
+ 		cli_print(c_format("ERROR: Invalid group range address: %s\n",
+ 				   argv[0].c_str()));
+ 		return (XORP_ERROR);
+@@ -1337,9 +1331,8 @@ PimNodeCli::cli_show_pim_mrib(const vector<string>& argv)
+     // Check the optional argument
+     if (argv.size()) {
+ 	dest_address_name = argv[0];
+-	try {
+-	    dest_address = IPvX(dest_address_name.c_str());
+-	} catch (InvalidString) {
++	dest_address = IPvX(dest_address_name.c_str());
++	if (dest_address.invalid()) {
+ 	    cli_print(c_format("ERROR: Invalid destination address: %s\n",
+ 			       dest_address_name.c_str()));
+ 	    return (XORP_ERROR);
+@@ -1411,8 +1404,8 @@ PimNodeCli::cli_show_pim_rps(const vector<string>& argv)
+     
+     // Check the optional argument
+     if (argv.size()) {
+-	try {
+-	    IPvX group_addr(argv[0].c_str());
++	IPvX group_addr(argv[0].c_str());
++	if (!group_addr.invalid()) {
+ 	    if (group_addr.af() != family()) {
+ 		cli_print(c_format("ERROR: Address with invalid address family: %s\n",
+ 				   argv[0].c_str()));
+@@ -1427,7 +1420,7 @@ PimNodeCli::cli_show_pim_rps(const vector<string>& argv)
+ 				   cstring(group_addr)));
+ 		return (XORP_ERROR);
+ 	    }
+-	} catch (InvalidString) {
++	} else {
+ 	    cli_print(c_format("ERROR: Invalid group address: %s\n",
+ 			       argv[0].c_str()));
+ 	    return (XORP_ERROR);
+diff --git a/xorp/policy/xrl_target.cc b/xorp/policy/xrl_target.cc
+index 18823db..7f0f6c0 100644
+--- a/xorp/policy/xrl_target.cc
++++ b/xorp/policy/xrl_target.cc
+@@ -90,9 +90,8 @@ XrlPolicyTarget::policy_0_1_create_term(const string&   policy,
+ {
+     ConfigNodeId config_node_id(ConfigNodeId::ZERO());
+ 
+-    try {
+-	config_node_id.copy_in(order);
+-    } catch (const InvalidString& e) {
++    config_node_id.copy_in(order);
++    if (config_node_id.invalid()) {
+         return XrlCmdError::COMMAND_FAILED("Create of policy " + policy
+ 					   + " term " + term + " failed "
+ 					   + "because of invalid node ID "
+@@ -131,9 +130,8 @@ XrlPolicyTarget::policy_0_1_update_term_block(const string&   policy,
+ {
+     ConfigNodeId config_node_id(ConfigNodeId::ZERO());
+ 
+-    try {
+-	config_node_id.copy_in(order);
+-    } catch (const InvalidString& e) {
++    config_node_id.copy_in(order);
++    if (config_node_id.invalid()) {
+         return XrlCmdError::COMMAND_FAILED("Update of policy " + policy
+ 					   + " term " + term + " failed "
+ 					   + "because of invalid node ID "
+diff --git a/xorp/rib/parser.cc b/xorp/rib/parser.cc
+index fa766f9..4f96660 100644
+--- a/xorp/rib/parser.cc
++++ b/xorp/rib/parser.cc
+@@ -38,41 +38,45 @@ static uint32_t MAX_WORDS = 20;
+ Datum*
+ Uint32ArgumentParser::parse(const string& str) const
+ {
+-    try {
+-	return new Uint32Datum(str);
+-    } catch (const InvalidString&) {
++    Datum* d = new Uint32Datum(str);
++    if (d->invalid()) {
++	delete d;
+ 	return NULL;
+     }
++    return d;
+ }
+ 
+ Datum*
+ StringArgumentParser::parse(const string& str) const
+ {
+-    try {
+-	return new StringDatum(str);
+-    } catch (const InvalidString&) {
++    Datum* d = new StringDatum(str);
++    if (d->invalid()) {
++	delete d;
+ 	return NULL;
+     }
++    return d;
+ }
+ 
+ Datum*
+ IPv4ArgumentParser::parse(const string& str) const
+ {
+-    try {
+-	return new IPv4Datum(str);
+-    } catch (const InvalidString&) {
++    Datum* d = new IPv4Datum(str);
++    if (d->invalid()) {
++	delete d;
+ 	return NULL;
+     }
++    return d;
+ }
+ 
+ Datum*
+ IPv4NetArgumentParser::parse(const string& str) const
+ {
+-    try {
+-	return new IPv4NetDatum(str);
+-    } catch (const InvalidString&) {
++    Datum* d = new IPv4NetDatum(str);
++    if (d->invalid()) {
++	delete d;
+ 	return NULL;
+     }
++    return d;
+ }
+ 
+ // ----------------------------------------------------------------------------
+diff --git a/xorp/rib/parser.hh b/xorp/rib/parser.hh
+index b5b6686..36f016a 100644
+--- a/xorp/rib/parser.hh
++++ b/xorp/rib/parser.hh
+@@ -41,7 +41,12 @@ class Command;
+  */
+ class Datum {
+ public:
++    Datum() { _invalid = false; }
+     virtual ~Datum() {}
++    virtual bool invalid() const { return _invalid; }
++
++protected:
++    bool _invaild;
+ };
+ 
+ class Uint32Datum : public Datum {
+@@ -49,8 +54,10 @@ public:
+     Uint32Datum(const string& s) {
+ 	_n = 0;
+ 	for (size_t i = 0; i < s.size(); i++) {
+-	    if (!xorp_isdigit(s[i]))
+-		xorp_throw0(InvalidString);
++	    if (!xorp_isdigit(s[i])) {
++		_invalid = true;
++		return;
++	    }
+ 	    _n *= 10;
+ 	    _n += s[i] - '0';
+ 	}
+@@ -74,6 +81,7 @@ class IPv4Datum : public Datum {
+ public:
+     IPv4Datum(const string& s) : _ipv4(s.c_str()) {}
+     const IPv4& get() const { return _ipv4; }
++    virtual bool invalid() const { return _invalid || _ipv4.invalid(); }
+ 
+ protected:
+     const IPv4 _ipv4;
+@@ -83,6 +91,7 @@ class IPv4NetDatum : public Datum {
+ public:
+     IPv4NetDatum(const string& s) : _ipv4net(s.c_str()) {}
+     const IPv4Net& get() const { return _ipv4net; }
++    virtual bool invalid() const { return _invalid || _ipv4net.invalid(); }
+ 
+ protected:
+     const IPv4Net _ipv4net;
+diff --git a/xorp/rtrmgr/boot.yy b/xorp/rtrmgr/boot.yy
+index dffb438..bf567b5 100644
+--- a/xorp/rtrmgr/boot.yy
++++ b/xorp/rtrmgr/boot.yy
+@@ -247,10 +247,10 @@ extend_path(char* segment, int type, const string& node_id_str)
+     string segment_copy = segment;
+     free(segment);
+ 
+-    try {
+-	ConfigNodeId config_node_id(node_id_str);
++    ConfigNodeId config_node_id(node_id_str);
++    if (!config_node_id.invalid()) {
+ 	config_tree->extend_path(segment_copy, type, config_node_id);
+-    } catch (const InvalidString& e) {
++    } else {
+ 	string s = c_format("Invalid config tree node ID: %s",
+ 	    e.str().c_str());
+ 	booterror(s.c_str());
+diff --git a/xorp/rtrmgr/conf_tree.cc b/xorp/rtrmgr/conf_tree.cc
+index f74430c..17dcaf1 100644
+--- a/xorp/rtrmgr/conf_tree.cc
++++ b/xorp/rtrmgr/conf_tree.cc
+@@ -354,37 +354,32 @@ ConfigTree::terminal_value(const string& value, int type, ConfigOperator op)
+ 		break;
+ 	    goto parse_error;
+ 	case NODE_IPV4:
+-	    try {
+-		IPv4(svalue.c_str());
+-	    } catch (InvalidString) {
++	    IPv4 a(svalue.c_str());
++	    if (a.invalid())
+ 		goto parse_error;
+ 	    }
+ 	    break;
+ 	case NODE_IPV4NET:
+-	    try {
+-		IPv4Net(svalue.c_str());
+-	    } catch (InvalidString) {
++	    IPv4Net a(svalue.c_str());
++	    if (a.invalid()) {
+ 		goto parse_error;
+ 	    }
+ 	    break;
+ 	case NODE_IPV6:
+-	    try {
+-		IPv6(svalue.c_str());
+-	    } catch (InvalidString) {
++	    IPv6 a(svalue.c_str());
++	    if (a.invalid()) {
+ 		goto parse_error;
+ 	    }
+ 	    break;
+ 	case NODE_IPV6NET:
+-	    try {
+-		IPv6Net(svalue.c_str());
+-	    } catch (InvalidString) {
++	    IPv6Net a(svalue.c_str());
++	    if (a.invalid()) {
+ 		goto parse_error;
+ 	    }
+ 	    break;
+ 	case NODE_MACADDR:
+-	    try {
+-		Mac(svalue.c_str());
+-	    } catch (InvalidString) {
++	    Mac a(svalue.c_str());
++	    if (a.invalid()) {
+ 		goto parse_error;
+ 	    }
+ 	    break;
+diff --git a/xorp/rtrmgr/main_rtrmgr.cc b/xorp/rtrmgr/main_rtrmgr.cc
+index d15c220..21e7cd1 100644
+--- a/xorp/rtrmgr/main_rtrmgr.cc
++++ b/xorp/rtrmgr/main_rtrmgr.cc
+@@ -572,9 +572,10 @@ main(int argc, char* const argv[])
+ 	    // User is specifying an IPv4 address to accept finder
+ 	    // connections from.
+ 	    //
+-	    try {
+-		add_permitted_host(IPv4(optarg));
+-	    } catch (const InvalidString&) {
++	    IPv4 v4(optarg);
++	    if (!v4.invalid()) {
++		add_permitted_host(v4);
++	    } else {
+ 		fprintf(stderr, "%s is not a valid IPv4 address.\n", optarg);
+ 		usage(argv[0]);
+ 		cleanup_and_exit(1);
+@@ -599,9 +600,10 @@ main(int argc, char* const argv[])
+ 	    // User is specifying a network address to accept finder
+ 	    // connections from.
+ 	    //
+-	    try {
+-		add_permitted_net(IPv4Net(optarg));
+-	    } catch (const InvalidString&) {
++	    IP4Net n(optarg);
++	    if (!n.invalid()) {
++		add_permitted_net(n);
++	    } else {
+ 		fprintf(stderr, "%s is not a valid IPv4 network.\n", optarg);
+ 		usage(argv[0]);
+ 		cleanup_and_exit(1);
+@@ -654,8 +656,8 @@ main(int argc, char* const argv[])
+ 	    //
+ 	    // User is specifying which interface to bind finder to
+ 	    //
+-	    try {
+-		IPv4 bind_addr = IPv4(optarg);
++	    IPv4 bind_addr(optarg);
++	    if (!bind_addr.invalid()) {
+ 		in_addr ina;
+ 		bind_addr.copy_out(ina);
+ 		if (is_ip_configured(ina) == false) {
+@@ -665,7 +667,7 @@ main(int argc, char* const argv[])
+ 		    cleanup_and_exit(1);
+ 		}
+ 		bind_addrs.push_back(bind_addr);
+-	    } catch (const InvalidString&) {
++	    } else {
+ 		fprintf(stderr, "%s is not a valid interface address.\n",
+ 			optarg);
+ 		cleanup_and_exit(1);
+diff --git a/xorp/rtrmgr/template_commands.cc b/xorp/rtrmgr/template_commands.cc
+index 00422bd..1c1618f 100644
+--- a/xorp/rtrmgr/template_commands.cc
++++ b/xorp/rtrmgr/template_commands.cc
+@@ -688,13 +688,13 @@ XrlAction::expand_xrl_variables(const TreeNode& tn,
+ 
+ 	// At this point we've expanded all the variables.
+ 	// Now it's time to build an XrlAtom
+-	try {
+-	    debug_msg("Atom: %s\n", expanded_value.c_str());
+-	    XrlAtom atom(name, arg_type,
+-			 xrlatom_encode_value(expanded_value.c_str(),
+-					      expanded_value.size()));
++	debug_msg("Atom: %s\n", expanded_value.c_str());
++	XrlAtom atom(name, arg_type,
++		     xrlatom_encode_value(expanded_value.c_str(),
++					  expanded_value.size()));
++	if (!atom.invalid()) {
+ 	    xrl_args.add(atom);
+-	} catch (InvalidString) {
++	} else {
+ 	    error_msg = c_format("Bad xrl arg \"%s\" "
+ 				 "associated with node \"%s\"",
+ 				 name.c_str(), tn.path().c_str());
+diff --git a/xorp/rtrmgr/template_tree_node.cc b/xorp/rtrmgr/template_tree_node.cc
+index 285cbe0..f495961 100644
+--- a/xorp/rtrmgr/template_tree_node.cc
++++ b/xorp/rtrmgr/template_tree_node.cc
+@@ -1666,11 +1666,12 @@ UIntRangeTemplate::UIntRangeTemplate(TemplateTree& template_tree,
+     if (initializer.empty())
+ 	return;
+ 
+-    try {
+-	_default = new U32Range(initializer.c_str());
+-    } catch (InvalidString) {
+-	error_msg = c_format("Bad U32Range type value \"%s\".",
+-			     initializer.c_str());
++    _default = new U32Range(initializer.c_str());
++    if (_default->invalid()) {
++	delete _default;
++	_default = NULL;
++	XLOG_WARNING("Bad U32Range type value \"%s\".",
++		     initializer.c_str());
+ 	xorp_throw(ParseError, error_msg);
+     }
+     set_has_default();
+@@ -1701,10 +1702,8 @@ UIntRangeTemplate::type_match(const string& s, string& error_msg) const
+ 	return false;
+     }
+ 
+-    try {
+-	U32Range* u32range = new U32Range(tmp.c_str());
+-	delete u32range;
+-    } catch (InvalidString) {
++    U32Range u32range(tmp.c_str());
++    if (u32range.invalid()) {
+ 	error_msg = "value must be a valid range of unsigned 32-bit integers";
+ 	return false;
+     }
+@@ -1782,9 +1781,10 @@ ULongRangeTemplate::ULongRangeTemplate(TemplateTree& template_tree,
+     if (initializer.empty())
+ 	return;
+ 
+-    try {
+-	_default = new U64Range(initializer.c_str());
+-    } catch (InvalidString) {
++    _default = new U64Range(initializer.c_str());
++    if (_default->invalid()) {
++	delete _default;
++	_default = NULL;
+ 	error_msg = c_format("Bad U64Range type value \"%s\".",
+ 			     initializer.c_str());
+ 	xorp_throw(ParseError, error_msg);
+@@ -1817,10 +1817,8 @@ ULongRangeTemplate::type_match(const string& s, string& error_msg) const
+ 	return false;
+     }
+ 
+-    try {
+-	U64Range* u64range = new U64Range(tmp.c_str());
+-	delete u64range;
+-    } catch (InvalidString) {
++    U64Range u64range(tmp.c_str());
++    if (u64range.invalid()) {
+ 	error_msg = "value must be a valid range of unsigned 64-bit integers";
+ 	return false;
+     }
+@@ -1948,11 +1946,12 @@ IPv4Template::IPv4Template(TemplateTree& template_tree,
+     if (initializer.empty())
+ 	return;
+ 
+-    try {
+-	_default = new IPv4(initializer.c_str());
+-    } catch (InvalidString) {
++    _default = new IPv4(initializer.c_str());
++    if (_default.invalid()) {
+ 	error_msg = c_format("Bad IPv4 type value \"%s\".",
+ 			     initializer.c_str());
++	delete _default;
++	_default = NULL;
+ 	xorp_throw(ParseError, error_msg);
+     }
+     set_has_default();
+@@ -1983,10 +1982,8 @@ IPv4Template::type_match(const string& s, string& error_msg) const
+ 	return false;
+     }
+ 
+-    try {
+-	IPv4* ipv4 = new IPv4(tmp.c_str());
+-	delete ipv4;
+-    } catch (InvalidString) {
++    IPv4 ipv4(tmp.c_str());
++    if (ipv4.invalid()) {
+ 	error_msg = "value must be an IP address in dotted decimal form";
+ 	return false;
+     }
+@@ -2010,9 +2007,10 @@ IPv4NetTemplate::IPv4NetTemplate(TemplateTree& template_tree,
+     if (initializer.empty())
+ 	return;
+ 
+-    try {
+-	_default = new IPv4Net(initializer.c_str());
+-    } catch (InvalidString) {
++    _default = new IPv4Net(initializer.c_str());
++    if (_default->invalid()) {
++	delete _default;
++	_default = NULL;
+ 	error_msg = c_format("Bad IPv4Net type value \"%s\".",
+ 			     initializer.c_str());
+ 	xorp_throw(ParseError, error_msg);
+@@ -2045,8 +2043,8 @@ IPv4NetTemplate::type_match(const string& s, string& error_msg) const
+ 	return false;
+     }
+ 
+-    try {
+-	IPv4Net ipv4net = IPv4Net(tmp.c_str());
++    IPv4Net ipv4net(tmp.c_str());
++    if (!ipv4net.invalid()) {
+ 	string::size_type slash = tmp.find('/');
+ 	XLOG_ASSERT(slash != string::npos);
+ 	IPv4 ipv4(tmp.substr(0, slash).c_str());
+@@ -2054,7 +2052,7 @@ IPv4NetTemplate::type_match(const string& s, string& error_msg) const
+ 	    error_msg = "there is a mismatch between the masked address value and the prefix length";
+ 	    return false;
+ 	}
+-    } catch (InvalidString) {
++    } else {
+ 	error_msg = "value must be an IPv4 subnet in address/prefix-length form";
+ 	return false;
+     }
+@@ -2078,11 +2076,12 @@ IPv4RangeTemplate::IPv4RangeTemplate(TemplateTree& template_tree,
+     if (initializer.empty())
+ 	return;
+ 
+-    try {
+-	_default = new IPv4Range(initializer.c_str());
+-    } catch (InvalidString) {
++    _default = new IPv4Range(initializer.c_str());
++    if (_default->invalid()) {
+ 	error_msg = c_format("Bad IPv4Range type value \"%s\".",
+ 			     initializer.c_str());
++	delete _default;
++	_default = NULL;
+ 	xorp_throw(ParseError, error_msg);
+     }
+     set_has_default();
+@@ -2113,10 +2112,8 @@ IPv4RangeTemplate::type_match(const string& s, string& error_msg) const
+ 	return false;
+     }
+ 
+-    try {
+-	IPv4Range* ipv4range = new IPv4Range(tmp.c_str());
+-	delete ipv4range;
+-    } catch (InvalidString) {
++    IPv4Range ipv4range(tmp.c_str());
++    if (ipv4range.invalid()) {
+ 	error_msg = "invalid format";
+ 	return false;
+     }
+@@ -2140,11 +2137,12 @@ IPv6Template::IPv6Template(TemplateTree& template_tree,
+     if (initializer.empty())
+ 	return;
+ 
+-    try {
+-	_default = new IPv6(initializer.c_str());
+-    } catch (InvalidString) {
++    _default = new IPv6(initializer.c_str());
++    if (_default->invalid()) {
+ 	error_msg = c_format("Bad IPv6 type value \"%s\".",
+ 			     initializer.c_str());
++	delete _default;
++	_default = NULL;
+ 	xorp_throw(ParseError, error_msg);
+     }
+     set_has_default();
+@@ -2175,10 +2173,8 @@ IPv6Template::type_match(const string& s, string& error_msg) const
+ 	return false;
+     }
+ 
+-    try {
+-	IPv6* ipv6 = new IPv6(tmp.c_str());
+-	delete ipv6;
+-    } catch (InvalidString) {
++    IPv6 ipv6(tmp.c_str());
++    if (ipv6.invalid()) {
+ 	error_msg = "value must be an IPv6 address";
+ 	return false;
+     }
+@@ -2202,11 +2198,12 @@ IPv6NetTemplate::IPv6NetTemplate(TemplateTree& template_tree,
+     if (initializer.empty())
+ 	return;
+ 
+-    try {
+-	_default = new IPv6Net(initializer.c_str());
+-    } catch (InvalidString) {
++    _default = new IPv6Net(initializer.c_str());
++    if (_default->invalid()) {
+ 	error_msg = c_format("Bad IPv6Net type value \"%s\".",
+ 			     initializer.c_str());
++	delete _default;
++	_default = NULL;
+ 	xorp_throw(ParseError, error_msg);
+     }
+     set_has_default();
+@@ -2238,8 +2235,8 @@ IPv6NetTemplate::type_match(const string& s, string& error_msg) const
+ 	return false;
+     }
+ 
+-    try {
+-	IPv6Net ipv6net = IPv6Net(tmp.c_str());
++    IPv6Net ipv6net(tmp.c_str());
++    if (!ipv6net.invalid()) {
+ 	string::size_type slash = tmp.find('/');
+ 	XLOG_ASSERT(slash != string::npos);
+ 	IPv6 ipv6(tmp.substr(0, slash).c_str());
+@@ -2247,7 +2244,7 @@ IPv6NetTemplate::type_match(const string& s, string& error_msg) const
+ 	    error_msg = "there is a mismatch between the masked address value and the prefix length";
+ 	    return false;
+ 	}
+-    } catch (InvalidString) {
++    } else {
+ 	error_msg = "value must be an IPv6 subnet in address/prefix-length "
+ 	    "form";
+ 	return false;
+@@ -2272,11 +2269,12 @@ IPv6RangeTemplate::IPv6RangeTemplate(TemplateTree& template_tree,
+     if (initializer.empty())
+ 	return;
+ 
+-    try {
+-	_default = new IPv6Range(initializer.c_str());
+-    } catch (InvalidString) {
++    _default = new IPv6Range(initializer.c_str());
++    if (_default->invalid()) {
+ 	error_msg = c_format("Bad IPv6Range type value \"%s\".",
+ 			     initializer.c_str());
++	delete _default;
++	_default = NULL;
+ 	xorp_throw(ParseError, error_msg);
+     }
+     set_has_default();
+@@ -2307,10 +2305,8 @@ IPv6RangeTemplate::type_match(const string& s, string& error_msg) const
+ 	return false;
+     }
+ 
+-    try {
+-	IPv6Range* ipv6range = new IPv6Range(tmp.c_str());
+-	delete ipv6range;
+-    } catch (InvalidString) {
++    IPv6Range ipv6range(tmp.c_str());
++    if (ipv6range.invalid()) {
+ 	error_msg = "invalid format";
+ 	return false;
+     }
+@@ -2334,11 +2330,12 @@ MacaddrTemplate::MacaddrTemplate(TemplateTree& template_tree,
+     if (initializer.empty())
+ 	return;
+ 
+-    try {
+-	_default = new Mac(initializer.c_str());
+-    } catch (InvalidString) {
++    _default = new Mac(initializer.c_str());
++    if (_default->invalid()) {
+ 	error_msg = c_format("Bad MacAddr type value \"%s\".",
+ 			     initializer.c_str());
++	delete _invalid;
++	_invalid = NULL;
+ 	xorp_throw(ParseError, error_msg);
+     }
+     set_has_default();
+@@ -2370,10 +2367,8 @@ MacaddrTemplate::type_match(const string& s, string& error_msg) const
+ 	return false;
+     }
+ 
+-    try {
+-	Mac* mac = new Mac(tmp.c_str());
+-	delete mac;
+-    } catch (InvalidString) {
++    Mac mac(tmp.c_str());
++    if (mac.invalid()) {
+ 	error_msg = "value must be an MAC address (six hex digits separated "
+ 	    "by colons)";
+ 	return false;
+diff --git a/xorp/rtrmgr/unexpanded_xrl.cc b/xorp/rtrmgr/unexpanded_xrl.cc
+index fa07b6c..593485d 100644
+--- a/xorp/rtrmgr/unexpanded_xrl.cc
++++ b/xorp/rtrmgr/unexpanded_xrl.cc
+@@ -66,10 +66,11 @@ UnexpandedXrl::expand(string& errmsg) const
+ 	return NULL;
+     }
+     debug_msg("XRL expanded to %s\n", request.c_str());
+-    try {
+-	_xrl = new Xrl(request.c_str());
+-    } catch (const InvalidString& e) {
++    _xrl = new Xrl(request.c_str());
++    if (_xrl->invalid()) {
+ 	debug_msg("Failed to initialize XRL: %s\n", e.why().c_str());
++	delete _xrl;
++	_xrl = NULL;
+ 	return NULL;
+     }
+ #endif
+diff --git a/xorp/rtrmgr/xrldb.cc b/xorp/rtrmgr/xrldb.cc
+index 8f882b6..481e91a 100644
+--- a/xorp/rtrmgr/xrldb.cc
++++ b/xorp/rtrmgr/xrldb.cc
+@@ -109,7 +109,12 @@ XRLtarget::XRLtarget(const string& xrlfilename, bool verbose)
+ 		    debug_msg("No return spec for XRL %s\n", s.c_str());
+ 		}
+ 		Xrl xrl(s.c_str());
+-		_xrlspecs.push_back(XrlSpec(xrl, rargs, _verbose));
++		if (xrl.invalid()) {
++		    XLOG_ERROR("Could not create xrl: %s", s.c_str());
++		}
++		else {
++		    _xrlspecs.push_back(XrlSpec(xrl, rargs, _verbose));
++		}
+ 	    }
+ 	} catch (const XrlParseError& xpe) {
+ 	    s = string(79, '-') + "\n";
+@@ -122,8 +127,6 @@ XRLtarget::XRLtarget(const string& xrlfilename, bool verbose)
+ 		s += "fail";
+ 	    s += "\n";
+ 	    XLOG_ERROR("%s", s.c_str());
+-	} catch (const InvalidString& is) {
+-	    XLOG_ERROR("%s\n", is.str().c_str());
+ 	}
+     }
+ }
+@@ -215,20 +218,22 @@ XRLdb::check_xrl_syntax(const string& xrlstr) const
+ {
+     debug_msg("XRLdb: checking xrl syntax: %s\n", xrlstr.c_str());
+ 
+-    try {
+-	string::size_type start = xrlstr.find("->");
+-	string rspec;
+-	string xrlspec;
+-	if (start == string::npos) {
+-	    rspec.empty();
+-	    xrlspec = xrlstr;
+-	} else {
+-	    xrlspec = xrlstr.substr(0, start);
+-	    rspec = xrlstr.substr(start+2, xrlstr.size()-(start+2));
+-	}
+-	Xrl test_xrl(xrlspec.c_str());
+-	XrlArgs test_atoms(rspec.c_str());
+-    } catch (const InvalidString&) {
++    string::size_type start = xrlstr.find("->");
++    string rspec;
++    string xrlspec;
++    if (start == string::npos) {
++	rspec.empty();
++	xrlspec = xrlstr;
++    } else {
++	xrlspec = xrlstr.substr(0, start);
++	rspec = xrlstr.substr(start+2, xrlstr.size()-(start+2));
++    }
++    Xrl test_xrl(xrlspec.c_str());
++    if (test_xrl.invalid()) {
++	return false;
++    }
++    XrlArgs test_atoms(rspec.c_str());
++    if (test_antoms.invalid()) {
+ 	return false;
+     }
+     return true;
+-- 
+2.7.5
+

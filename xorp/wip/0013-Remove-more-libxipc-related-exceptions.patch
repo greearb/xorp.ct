@@ -1,0 +1,364 @@
+From 9e91e36fb53e0b37dee1a9e24c69f931a455ea9b Mon Sep 17 00:00:00 2001
+From: Ben Greear <greearb@candelatech.com>
+Date: Fri, 8 Sep 2017 12:39:11 -0700
+Subject: [PATCH 13/33] Remove more libxipc related exceptions.
+
+Signed-off-by: Ben Greear <greearb@candelatech.com>
+---
+ xorp/libxipc/finder_msgs.cc            | 47 +++++++++++++++++-----------------
+ xorp/libxipc/finder_msgs.hh            | 41 ++++++++---------------------
+ xorp/libxipc/finder_tcp_messenger.cc   | 33 +++++-------------------
+ xorp/libxipc/tests/test_finder_msgs.cc | 35 +++++--------------------
+ xorp/xrl/scripts/clnt-gen              |  4 +--
+ xorp/xrl/scripts/tgt-gen               |  2 +-
+ 6 files changed, 49 insertions(+), 113 deletions(-)
+
+diff --git a/xorp/libxipc/finder_msgs.cc b/xorp/libxipc/finder_msgs.cc
+index f2553be..f5cb5ab 100644
+--- a/xorp/libxipc/finder_msgs.cc
++++ b/xorp/libxipc/finder_msgs.cc
+@@ -93,56 +93,58 @@ skip_text(const char*& buf, const char* to_skip)
+ }
+ 
+ ParsedFinderMessageBase::ParsedFinderMessageBase(const char* data, char type)
+-    throw (BadFinderMessageFormat, WrongFinderMessageType)
+ {
+     const char* pos = data;
++    _invalid = false;
+ 
+     // Version number checking
+     if (skip_text(pos, FMC_PREAMBLE) == false) {
+-	xorp_throw(BadFinderMessageFormat,
+-		   "Corrupt header field label: bad protocol");
++	XLOG_WARNING("Corrupt header field label: bad protocol");
++	_invalid = true;
+     }
+ 
+     const char* end = line_end(pos);
+     if (end - pos < 3) {
+-	xorp_throw(BadFinderMessageFormat,
+-		   "bad version number");
++	XLOG_WARNING("bad version number");
++	_invalid = true;
+     }
+     
+     int major, minor;
+     major = *pos - '0';
+     pos ++;
+     if (skip_text(pos, FMC_VERSION_SEP) == false) {
+-	xorp_throw(BadFinderMessageFormat,
+-		   "Corrupt header field: major/minor separator");
++	XLOG_WARNING("Corrupt header field: major/minor separator");
++	_invalid = true;
+     }
+     
+     minor = *pos - '0';
+     if (major != FINDER_PROTOCOL_MAJOR_VERSION ||
+ 	minor != FINDER_PROTOCOL_MINOR_VERSION) {
+-	xorp_throw(BadFinderMessageFormat, "Mismatched protocol version");
++	XLOG_WARNING("Mismatched protocol version");
++	_invalid = true;
+     }
+     pos++;
+ 
+     // Msg type checking and extraction
+     if (skip_text(pos, FMC_MSG_TYPE) == false) {
+-	xorp_throw(BadFinderMessageFormat,
+-		   "Corrupt header field label: message type");
++	XLOG_WARNING("Corrupt header field label: message type");
++	_invalid = true;
+     }
+     end = line_end(pos);
+     if (end - pos != 1) {
+-	xorp_throw(BadFinderMessageFormat,
+-		   "Corrupt header field: fat message type");
++	XLOG_WARNING("Corrupt header field: fat message type");
++	_invalid = true;
+     }
+     _type = *pos;
+-    if (_type != type) 
+-	xorp_throw0(WrongFinderMessageType);
++    if (_type != type) {
++	_invalid = true;
++    }
+     pos++;
+ 
+     // Seq no checking and extraction
+     if (skip_text(pos, FMC_SEQ_NO) == false) {
+-	xorp_throw(BadFinderMessageFormat,
+-		   "Corrupt header field label: sequence number");
++	_invalid = true;
++	XLOG_WARNING("Corrupt header field label: sequence number");
+     }
+     end = line_end(pos);
+     
+@@ -154,14 +156,14 @@ ParsedFinderMessageBase::ParsedFinderMessageBase(const char* data, char type)
+     }
+ 
+     if (pos != end) {
+-	xorp_throw(BadFinderMessageFormat,
+-		   "Corrupt header field: sequence number");
++	_invalid = true;
++	XLOG_WARNING("Corrupt header field: sequence number");
+     }
+ 
+     // Message data checking
+     if (skip_text(pos, FMC_MSG_DATA) == false) {
+-	xorp_throw(BadFinderMessageFormat,
+-		   "Corrupt header field label: message data");
++	XLOG_WARNING("Corrupt header field label: message data");
++	_invalid = true;
+     }
+     end = line_end(pos);
+     
+@@ -186,7 +188,6 @@ FinderXrlMessage::FinderXrlMessage(const Xrl& xrl)
+ }
+ 
+ ParsedFinderXrlMessage::ParsedFinderXrlMessage(const char* data)
+-    throw (BadFinderMessageFormat, WrongFinderMessageType)
+ 	: ParsedFinderMessageBase(data, FinderXrlMessage::c_type), _invalid(false)
+ {
+     _xrl = new Xrl(data + bytes_parsed());
+@@ -224,7 +225,6 @@ FinderXrlResponse::FinderXrlResponse(uint32_t	     seqno,
+ }
+ 
+ ParsedFinderXrlResponse::ParsedFinderXrlResponse(const char* data)
+-    throw (BadFinderMessageFormat, WrongFinderMessageType)
+ 	: ParsedFinderMessageBase(data, FinderXrlResponse::c_type), _xrl_args(0)
+ {
+     _invalid = false;
+@@ -232,7 +232,8 @@ ParsedFinderXrlResponse::ParsedFinderXrlResponse(const char* data)
+     char* p0 = strstr(const_cast<char*>(data), "/");
+     char* p1 = strstr(const_cast<char*>(data), "\n");
+     if (p0 == 0 || p1 == 0) {
+-	xorp_throw(BadFinderMessageFormat, "XrlError not present");
++	_invalid = true;
++	XLOG_WARNING("XrlError not present");
+     }
+ 
+     uint32_t code = 0;
+diff --git a/xorp/libxipc/finder_msgs.hh b/xorp/libxipc/finder_msgs.hh
+index 9030327..86d1d5b 100644
+--- a/xorp/libxipc/finder_msgs.hh
++++ b/xorp/libxipc/finder_msgs.hh
+@@ -94,24 +94,6 @@ protected:
+ };
+ 
+ /**
+- * Exception for badly formatted message data.
+- */
+-struct BadFinderMessageFormat : public XorpReasonedException {
+-    BadFinderMessageFormat(const char* file, size_t line, const string& why)
+-	: XorpReasonedException("BadFinderMessageFormat", file, line, why)
+-    {}
+-};
+-
+-/**
+- * Exception for mismatched finder message type.
+- */
+-struct WrongFinderMessageType : public XorpException {
+-    WrongFinderMessageType(const char* file, size_t line)
+-	: XorpException("WrongFinderMessageType", file, line)
+-    {}
+-};
+-
+-/**
+  * Base class for parsed Finder Messages.
+  */
+ class ParsedFinderMessageBase {
+@@ -124,13 +106,13 @@ public:
+      * representation and provides accessors to these values.
+      *
+      */
+-    ParsedFinderMessageBase(const char* data, char type)
+-	throw (BadFinderMessageFormat, WrongFinderMessageType);
++    ParsedFinderMessageBase(const char* data, char type);
+ 
+     virtual ~ParsedFinderMessageBase();
+     
+     uint32_t seqno() const { return _seqno; }
+     char type() const { return _type; }
++    virtual bool invalid() const { return _invalid; }
+ 
+ protected:
+     uint32_t bytes_parsed() const { return _bytes_parsed; }
+@@ -140,6 +122,11 @@ protected:
+     uint32_t _bytes_parsed;
+ 
+     static const char* c_msg_template;
++
++    bool _invalid;
++
++private:
++    ParsedFinderMessageBase(); /* disable default constructor */
+ };
+ 
+ /**
+@@ -151,21 +138,17 @@ public:
+      * Constructor for received Xrl messages.
+      * Attempts to extract Xrl from data.
+      *
+-     * @throws BadFinderMessageFormat when bad packet data received.
+-     * @throws WrongFinderMessageType if message is not a Finder Xrl message.
+      */
+-    ParsedFinderXrlMessage(const char* data)
+-	throw (BadFinderMessageFormat, WrongFinderMessageType);
++    ParsedFinderXrlMessage(const char* data);
+ 
+     ~ParsedFinderXrlMessage();
+ 
+     const Xrl& xrl() const { return *_xrl; }
+ 
+-    bool invalid() const { return (_invalid || (_xrl & _xrl->invalid())); }
++    virtual bool invalid() const { return (ParsedFinderMessageBase::invalid() || (_xrl && _xrl->invalid())); }
+ 
+ private:
+     Xrl* _xrl;
+-    bool _invalid;
+ };
+ 
+ /**
+@@ -177,12 +160,8 @@ public:
+      * Constructor for received Xrl Response messages.
+      * Attempts to extract Xrl Reponse from data.
+      *
+-     * @throws BadFinderMessageFormat when bad packet data received.
+-     * @throws WrongFinderMessageType if message is not a Finder Xrl Response
+-     *         Message.
+      */
+-    ParsedFinderXrlResponse(const char* data)
+-	throw (BadFinderMessageFormat, WrongFinderMessageType);
++    ParsedFinderXrlResponse(const char* data);
+ 
+     ~ParsedFinderXrlResponse();
+     
+diff --git a/xorp/libxipc/finder_tcp_messenger.cc b/xorp/libxipc/finder_tcp_messenger.cc
+index 1cf1aa7..35432bc 100644
+--- a/xorp/libxipc/finder_tcp_messenger.cc
++++ b/xorp/libxipc/finder_tcp_messenger.cc
+@@ -70,33 +70,14 @@ FinderTcpMessenger::read_event(int	      errval,
+     string s((const char*)(data), data_bytes);
+ 
+     string ex;
+-    try {
+-	try {
+-	    ParsedFinderXrlMessage fm(s.c_str());
+-	    if (fm.invalid()) {
+-		ex = "Invalid string";
+-		goto err;
+-	    }
+-	    dispatch_xrl(fm.seqno(), fm.xrl());
+-	    return true;
+-	} catch (const WrongFinderMessageType&) {
+-	    ParsedFinderXrlResponse fm(s.c_str());
+-	    if (fm.invalid()) {
+-		ex = "Invalid response string";
+-		goto err;
+-	    }
+-	    dispatch_xrl_response(fm.seqno(), fm.xrl_error(), fm.xrl_args());
+-	    return true;
+-	}
+-    } catch (const BadFinderMessageFormat& e) {
+-	ex = e.str();
+-    } catch (const WrongFinderMessageType& e) {
+-	ex = e.str();
+-    } catch (const XorpException& e) {
+-	ex = e.str();
+-    } catch (...) {
+-	ex = "Unexpected ?";
++
++    ParsedFinderXrlMessage fm(s.c_str());
++    if (fm.invalid()) {
++	ex = "Invalid string";
++	goto err;
+     }
++    dispatch_xrl(fm.seqno(), fm.xrl());
++    return true;
+ 
+   err:
+     XLOG_ERROR("Got exception %s, closing connection", ex.c_str());
+diff --git a/xorp/libxipc/tests/test_finder_msgs.cc b/xorp/libxipc/tests/test_finder_msgs.cc
+index 7ee4e28..9168d8d 100644
+--- a/xorp/libxipc/tests/test_finder_msgs.cc
++++ b/xorp/libxipc/tests/test_finder_msgs.cc
+@@ -75,36 +75,13 @@ enum MsgType {
+ static bool
+ test_parser(const string& msg, MsgType e)
+ {
+-    try {
+-	ParsedFinderXrlMessage p(msg.c_str());
+-	verbose_log("Got Xrl message (seqno = %u)\n",
+-		    XORP_UINT_CAST(p.seqno()));
+-    } catch (const WrongFinderMessageType&) {
+-	if (e == XRL_MSG) {
+-	    verbose_log("Expected Xrl message, but got:\n%s\n", msg.c_str());
+-	    return false;
+-	}
+-    } catch (const XorpException& xe) {
+-	verbose_log("\nGot exception %s from \n\"%s\"\n",
+-		    xe.str().c_str(), msg.c_str());
+-	return false;
+-    }
++    ParsedFinderXrlMessage p(msg.c_str());
++    verbose_log("Got Xrl message (seqno = %u)\n",
++		XORP_UINT_CAST(p.seqno()));
+ 
+-    try {
+-	ParsedFinderXrlResponse p(msg.c_str());
+-	verbose_log("Got Xrl Response message (seqno = %u)\n",
+-		    XORP_UINT_CAST(p.seqno()));
+-    } catch (const WrongFinderMessageType&) {
+-	if (e == XRL_RESPONSE_MSG) {
+-	    verbose_log("Unexpected XrlResponse message, but got:\n%s\n",
+-			msg.c_str());
+-	    return false;
+-	}
+-    } catch (const XorpException& xe) {
+-	verbose_log("\nGot exception %s from \n\"%s\"\n",
+-		    xe.str().c_str(), msg.c_str());
+-	return false;
+-    }
++    ParsedFinderXrlResponse p(msg.c_str());
++    verbose_log("Got Xrl Response message (seqno = %u)\n",
++		XORP_UINT_CAST(p.seqno()));
+ 
+     return true;
+ }
+diff --git a/xorp/xrl/scripts/clnt-gen b/xorp/xrl/scripts/clnt-gen
+index 8b43352..901d233 100755
+--- a/xorp/xrl/scripts/clnt-gen
++++ b/xorp/xrl/scripts/clnt-gen
+@@ -122,7 +122,7 @@ def implement_unmarshall(cls, method_no, method):
+     s += "\tcb->dispatch(e%s);\n" % fail_args
+     s += "\treturn;\n"
+     s += "    } else if (a && a->size() != %d) {\n" % len(method.rargs())
+-    s += "\tXLOG_ERROR(\"Wrong number of arguments (%%u != %%u)\", XORP_UINT_CAST(a->size()), XORP_UINT_CAST(%d));\n" % len(method.rargs())
++    s += "\tXLOG_ERROR(\"Wrong number of arguments (clnt-gen) (%%u != %%u)\", XORP_UINT_CAST(a->size()), XORP_UINT_CAST(%d));\n" % len(method.rargs())
+     s += "\tcb->dispatch(XrlError::BAD_ARGS()%s);\n" % fail_args
+     s += "\treturn;\n"
+     s += "    }\n"
+@@ -135,8 +135,6 @@ def implement_unmarshall(cls, method_no, method):
+         for r in method.rargs():
+             s += "\ta->get(\"%s\", %s);\n" % (r.name(), cpp_name(r.name()))
+ 
+-        s += "    }\n"
+-
+     v = []
+     for r in method.rargs():
+         v.append("&%s" % cpp_name(r.name()))
+diff --git a/xorp/xrl/scripts/tgt-gen b/xorp/xrl/scripts/tgt-gen
+index f47a192..468c50c 100755
+--- a/xorp/xrl/scripts/tgt-gen
++++ b/xorp/xrl/scripts/tgt-gen
+@@ -335,7 +335,7 @@ def target_handler_methods(cls, name, methods):
+         s += "{"
+         s += """
+     if (xa_inputs.size() != %d) {
+-	XLOG_ERROR(\"Wrong number of arguments (%%u != %%u) handling %%s\",
++	XLOG_ERROR(\"Wrong number of arguments (tgt-gen) (%%u != %%u) handling %%s\",
+             XORP_UINT_CAST(%d), XORP_UINT_CAST(xa_inputs.size()), \"%s\");
+ 	XRL_CMD_RETURN_ERROR(pxa_outputs, XrlCmdError::BAD_ARGS());
+     }
+-- 
+2.7.5
+

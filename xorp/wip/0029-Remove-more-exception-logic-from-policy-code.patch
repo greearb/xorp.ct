@@ -1,0 +1,6068 @@
+From 157761b830b80cd5847633f9037a93822aa166d1 Mon Sep 17 00:00:00 2001
+From: Ben Greear <greearb@candelatech.com>
+Date: Wed, 20 Sep 2017 04:56:50 -0700
+Subject: [PATCH 29/33] Remove more exception logic from policy code.
+
+---
+ xorp/fea/tools/show_interfaces.cc          |  12 ++-
+ xorp/fea/tools/show_interfaces.hh          |   4 +-
+ xorp/fib2mrib/fib2mrib_node.cc             | 131 ++++++++++++++-----------
+ xorp/fib2mrib/fib2mrib_node.hh             |  19 ++--
+ xorp/fib2mrib/fib2mrib_varrw.cc            |  12 +--
+ xorp/fib2mrib/fib2mrib_varrw.hh            |   3 +-
+ xorp/fib2mrib/xrl_fib2mrib_node.cc         |  26 +++--
+ xorp/libfeaclient/ifmgr_xrl_mirror.cc      |  22 +++--
+ xorp/libfeaclient/ifmgr_xrl_mirror.hh      |   4 +-
+ xorp/mld6igmp/mld6igmp_node.cc             |  10 +-
+ xorp/mld6igmp/mld6igmp_node.hh             |   2 +-
+ xorp/pim/pim_node.cc                       |  10 +-
+ xorp/pim/pim_node.hh                       |   2 +-
+ xorp/policy/backend/backend.yy             |  19 +++-
+ xorp/policy/backend/filter_base.hh         |   5 +-
+ xorp/policy/backend/instr_visitor.hh       |  21 ++--
+ xorp/policy/backend/instruction.hh         |   2 -
+ xorp/policy/backend/instruction_base.hh    |  12 +--
+ xorp/policy/backend/iv_exec.cc             | 130 ++++++++++++++++---------
+ xorp/policy/backend/iv_exec.hh             |  41 +++-----
+ xorp/policy/backend/policy_filter.cc       |  25 +++--
+ xorp/policy/backend/policy_filter.hh       |  14 +--
+ xorp/policy/backend/policy_filters.cc      |  48 +++++----
+ xorp/policy/backend/policy_filters.hh      |  16 +--
+ xorp/policy/backend/policytags.cc          |  21 ++--
+ xorp/policy/backend/policytags.hh          |  19 +---
+ xorp/policy/backend/set_manager.cc         |  20 ++--
+ xorp/policy/backend/set_manager.hh         |  12 +--
+ xorp/policy/backend/single_varrw.cc        |  29 +++---
+ xorp/policy/backend/single_varrw.hh        |  20 +---
+ xorp/policy/backend/version_filter.cc      |  41 ++++----
+ xorp/policy/backend/version_filter.hh      |   4 +-
+ xorp/policy/code_generator.cc              | 102 ++++++++++++-------
+ xorp/policy/code_generator.hh              |  46 +++------
+ xorp/policy/common/dispatcher.cc           |  66 ++++++++-----
+ xorp/policy/common/dispatcher.hh           | 106 ++++++++++++++++----
+ xorp/policy/common/elem_null.hh            |   2 +-
+ xorp/policy/common/elem_set.cc             |  14 ++-
+ xorp/policy/common/elem_set.hh             |   4 +-
+ xorp/policy/common/element.cc              |  58 ++++++-----
+ xorp/policy/common/element.hh              |  80 ++++++---------
+ xorp/policy/common/element_base.cc         |   7 +-
+ xorp/policy/common/element_base.hh         |   4 +-
+ xorp/policy/common/element_factory.cc      |  10 +-
+ xorp/policy/common/element_factory.hh      |  21 +---
+ xorp/policy/common/policy_exception.hh     |  55 -----------
+ xorp/policy/common/policy_utils.cc         |  21 ++--
+ xorp/policy/common/policy_utils.hh         |  18 +---
+ xorp/policy/common/register_elements.cc    |   4 +-
+ xorp/policy/common/register_operations.cc  |  51 +++++-----
+ xorp/policy/common/register_operations.hh  |   3 +-
+ xorp/policy/common/varrw.cc                |  24 +++--
+ xorp/policy/common/varrw.hh                |  10 +-
+ xorp/policy/configuration.cc               |  83 +++++++++-------
+ xorp/policy/configuration.hh               |  26 +----
+ xorp/policy/dependency.cc                  |  26 ++---
+ xorp/policy/dependency.hh                  |  20 ----
+ xorp/policy/filter_manager.hh              |  10 --
+ xorp/policy/node_base.hh                   |  10 +-
+ xorp/policy/policy.yy                      |  29 +++---
+ xorp/policy/policy_map.cc                  |   8 +-
+ xorp/policy/policy_map.hh                  |  15 +--
+ xorp/policy/policy_statement.cc            |  22 ++---
+ xorp/policy/policy_statement.hh            |  16 +--
+ xorp/policy/policy_target.cc               |  37 ++++---
+ xorp/policy/policy_target.hh               |   4 +-
+ xorp/policy/process_watch.cc               |   9 +-
+ xorp/policy/process_watch.hh               |  12 +--
+ xorp/policy/semantic_varrw.cc              |  19 ++--
+ xorp/policy/semantic_varrw.hh              |  16 +--
+ xorp/policy/set_map.cc                     |  53 +++++-----
+ xorp/policy/set_map.hh                     |  15 +--
+ xorp/policy/source_match_code_generator.cc |  17 ++--
+ xorp/policy/source_match_code_generator.hh |  25 -----
+ xorp/policy/term.cc                        |  45 +++++----
+ xorp/policy/term.hh                        |  25 ++---
+ xorp/policy/test_varrw.cc                  |  15 ++-
+ xorp/policy/test_varrw.hh                  |   2 +-
+ xorp/policy/tests/file_varrw.hh            |   1 -
+ xorp/policy/var_map.cc                     |  64 ++++++------
+ xorp/policy/var_map.hh                     |  27 ++----
+ xorp/policy/visitor.hh                     |  26 ++---
+ xorp/policy/visitor_dep.cc                 |  30 +++---
+ xorp/policy/visitor_dep.hh                 |  16 +--
+ xorp/policy/visitor_semantic.cc            | 151 +++++++++++++++--------------
+ xorp/policy/visitor_semantic.hh            |  35 +++----
+ xorp/policy/visitor_test.cc                |  47 +++++----
+ xorp/policy/visitor_test.hh                |   3 +-
+ xorp/policy/xorp_policy.cc                 |   3 -
+ 89 files changed, 1179 insertions(+), 1245 deletions(-)
+ delete mode 100644 xorp/policy/common/policy_exception.hh
+
+diff --git a/xorp/fea/tools/show_interfaces.cc b/xorp/fea/tools/show_interfaces.cc
+index 876a939..afbfcdb 100644
+--- a/xorp/fea/tools/show_interfaces.cc
++++ b/xorp/fea/tools/show_interfaces.cc
+@@ -239,13 +239,17 @@ InterfaceMonitor::tree_complete()
+     //
+     // XXX: we use same actions when the tree is completed or updates are made
+     //
+-    updates_made();
++    string err;
++    if (!updates_made(err)) {
++	XLOG_WARNING("tree-complete, updates-made failed: %s\n", err.c_str());
++    }
+ }
+ 
+-void
+-InterfaceMonitor::updates_made()
++bool
++InterfaceMonitor::updates_made(string& err)
+ {
+-
++    UNUSED(err);
++    return true;
+ }
+ 
+ int
+diff --git a/xorp/fea/tools/show_interfaces.hh b/xorp/fea/tools/show_interfaces.hh
+index 487ad7b..35653d5 100644
+--- a/xorp/fea/tools/show_interfaces.hh
++++ b/xorp/fea/tools/show_interfaces.hh
+@@ -17,14 +17,12 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/fea/tools/show_interfaces.hh,v 1.11 2008/10/02 21:57:13 bms Exp $
+ 
+ #ifndef __FEA_TOOLS_SHOW_INTERFACES_HH__
+ #define __FEA_TOOLS_SHOW_INTERFACES_HH__
+ 
+ 
+ #include "libxorp/service.hh"
+-
+ #include "libfeaclient/ifmgr_xrl_mirror.hh"
+ 
+ 
+@@ -84,7 +82,7 @@ protected:
+     // IfMgrHintObserver methods
+     //
+     void tree_complete();
+-    void updates_made();
++    bool updates_made(string& err);
+ 
+     void incr_startup_requests_n();
+     void decr_startup_requests_n();
+diff --git a/xorp/fib2mrib/fib2mrib_node.cc b/xorp/fib2mrib/fib2mrib_node.cc
+index 67ffefa..0d6923c 100644
+--- a/xorp/fib2mrib/fib2mrib_node.cc
++++ b/xorp/fib2mrib/fib2mrib_node.cc
+@@ -297,11 +297,14 @@ Fib2mribNode::tree_complete()
+     //
+     // XXX: we use same actions when the tree is completed or updates are made
+     //
+-    updates_made();
++    string err;
++    if (!updates_made(err)) {
++	XLOG_WARNING("tree-complete, updates-made failed: %s\n", err.c_str());
++    }
+ }
+ 
+-void
+-Fib2mribNode::updates_made()
++bool
++Fib2mribNode::updates_made(string& err)
+ {
+     multimap<IPvXNet, Fib2mribRoute>::iterator route_iter;
+     list<Fib2mribRoute *> add_routes, replace_routes, delete_routes;
+@@ -410,7 +413,8 @@ Fib2mribNode::updates_made()
+ 	 ++pending_iter) {
+ 	Fib2mribRoute& orig_route = *(*pending_iter);
+ 	Fib2mribRoute copy_route = orig_route;
+-	prepare_route_for_transmission(orig_route, copy_route);
++	if (!prepare_route_for_transmission(orig_route, copy_route, err))
++	    return false;
+ 	copy_route.set_add_route();
+ 	inform_rib(copy_route);
+     }
+@@ -424,11 +428,13 @@ Fib2mribNode::updates_made()
+ 	Fib2mribRoute& orig_route = *(*pending_iter);
+ 	Fib2mribRoute copy_route = orig_route;
+ 	// First delete the route, then add the route
+-	prepare_route_for_transmission(orig_route, copy_route);
++	if (!prepare_route_for_transmission(orig_route, copy_route, err))
++	    return false;
+ 	copy_route.set_delete_route();
+ 	inform_rib(copy_route);
+ 	copy_route = orig_route;
+-	prepare_route_for_transmission(orig_route, copy_route);
++	if (!prepare_route_for_transmission(orig_route, copy_route, err))
++	    return false;
+ 	copy_route.set_add_route();
+ 	inform_rib(copy_route);
+     }
+@@ -442,10 +448,12 @@ Fib2mribNode::updates_made()
+ 	Fib2mribRoute& orig_route = *(*pending_iter);
+ 	cancel_rib_route_change(orig_route);
+ 	Fib2mribRoute copy_route = orig_route;
+-	prepare_route_for_transmission(orig_route, copy_route);
++	if (!prepare_route_for_transmission(orig_route, copy_route, err))
++	    return false;
+ 	copy_route.set_delete_route();
+ 	inform_rib(copy_route);
+     }
++    return true;
+ }
+ 
+ /**
+@@ -457,19 +465,22 @@ Fib2mribNode::updates_made()
+  *
+  * @param enable if true then enable node operation, otherwise disable it.
+  */
+-void
+-Fib2mribNode::set_enabled(bool enable)
++bool
++Fib2mribNode::set_enabled(bool enable, string& err)
+ {
+     if (enable == is_enabled())
+-	return;			// XXX: nothing changed
++	return true; // XXX: nothing changed
+ 
+     if (enable) {
+ 	_is_enabled = true;
+-	push_pull_rib_routes(true);
++	if (!push_pull_rib_routes(true, err))
++	    return false;
+     } else {
+-	push_pull_rib_routes(false);
++	if (!push_pull_rib_routes(false, err))
++	    return false;
+ 	_is_enabled = false;
+     }
++    return true;
+ }
+ 
+ /**
+@@ -720,7 +731,9 @@ Fib2mribNode::add_route(const Fib2mribRoute& fib2mrib_route,
+     //
+     Fib2mribRoute& orig_route = iter->second;
+     Fib2mribRoute copy_route = orig_route;
+-    prepare_route_for_transmission(orig_route, copy_route);
++    if (!prepare_route_for_transmission(orig_route, copy_route, error_msg)) {
++	return XORP_ERROR;
++    }
+ 
+     //
+     // Inform the RIB about the change
+@@ -807,7 +820,8 @@ Fib2mribNode::replace_route(const Fib2mribRoute& fib2mrib_route,
+ 	// Create a copy of the route and inform the RIB if necessary
+ 	//
+ 	Fib2mribRoute copy_route = orig_route;
+-	prepare_route_for_transmission(orig_route, copy_route);
++	if (!prepare_route_for_transmission(orig_route, copy_route, error_msg))
++	    return XORP_ERROR;
+ 
+ 	//
+ 	// XXX: If necessary, change the type of the route.
+@@ -910,7 +924,8 @@ Fib2mribNode::delete_route(const Fib2mribRoute& fib2mrib_route,
+ 
+ 	bool was_accepted = orig_route.is_accepted_by_rib();
+ 	Fib2mribRoute copy_route = orig_route;
+-	prepare_route_for_transmission(orig_route, copy_route);
++	if (!prepare_route_for_transmission(orig_route, copy_route, error_msg))
++	    return XORP_ERROR;
+ 	_fib2mrib_routes.erase(route_to_delete_iter);
+ 
+ 	copy_route.set_delete_route();
+@@ -957,19 +972,19 @@ Fib2mribRoute::is_accepted_by_rib() const
+     return (is_accepted_by_nexthop() && (! is_filtered()));
+ }
+ 
+-void
+-Fib2mribNode::configure_filter(const uint32_t& filter, const string& conf)
++bool
++Fib2mribNode::configure_filter(const uint32_t& filter, const string& conf, string& err)
+ {
+-    _policy_filters.configure(filter, conf);
++    return _policy_filters.configure(filter, conf, err);
+ }
+ 
+-void
+-Fib2mribNode::reset_filter(const uint32_t& filter) {
+-    _policy_filters.reset(filter);
++bool
++Fib2mribNode::reset_filter(const uint32_t& filter, string& err) {
++    return _policy_filters.reset(filter, err);
+ }
+ 
+-void
+-Fib2mribNode::push_routes()
++bool
++Fib2mribNode::push_routes(string& err)
+ {
+     multimap<IPvXNet, Fib2mribRoute>::iterator iter;
+ 
+@@ -984,7 +999,8 @@ Fib2mribNode::push_routes()
+ 	// Create a copy of the route and inform the RIB if necessary
+ 	//
+ 	Fib2mribRoute copy_route = orig_route;
+-	prepare_route_for_transmission(orig_route, copy_route);
++	if (!prepare_route_for_transmission(orig_route, copy_route, err))
++	    return false;
+ 
+ 	//
+ 	// XXX: If necessary, change the type of the route.
+@@ -1009,10 +1025,10 @@ Fib2mribNode::push_routes()
+ 	//
+ 	inform_rib(copy_route);
+     }
++    return true;
+ }
+ 
+-void
+-Fib2mribNode::push_pull_rib_routes(bool is_push)
++bool Fib2mribNode::push_pull_rib_routes(bool is_push, string& err)
+ {
+     multimap<IPvXNet, Fib2mribRoute>::iterator iter;
+ 
+@@ -1025,7 +1041,8 @@ Fib2mribNode::push_pull_rib_routes(bool is_push)
+ 	// Create a copy of the route and inform the RIB if necessary
+ 	//
+ 	Fib2mribRoute copy_route = orig_route;
+-	prepare_route_for_transmission(orig_route, copy_route);
++	if (!prepare_route_for_transmission(orig_route, copy_route, err))
++	    return false;
+ 
+ 	//
+ 	// XXX: Only routes that are accepted by RIB should be added or deleted
+@@ -1044,6 +1061,7 @@ Fib2mribNode::push_pull_rib_routes(bool is_push)
+ 	//
+ 	inform_rib(copy_route);
+     }
++    return true;
+ }
+ 
+ bool
+@@ -1074,9 +1092,9 @@ Fib2mribNode::is_accepted_by_nexthop(const Fib2mribRoute& route) const
+     return (false);
+ }
+ 
+-void
++bool
+ Fib2mribNode::prepare_route_for_transmission(Fib2mribRoute& orig_route,
+-					     Fib2mribRoute& copy_route)
++					     Fib2mribRoute& copy_route, string& err)
+ {
+     //
+     // We do not want to modify original route, so we may re-filter routes on
+@@ -1085,7 +1103,11 @@ Fib2mribNode::prepare_route_for_transmission(Fib2mribRoute& orig_route,
+     copy_route = orig_route;
+ 
+     // Do policy filtering and other acceptance tests
+-    bool filtered = (! do_filtering(copy_route));
++    bool ok;
++    bool filtered = (! do_filtering(copy_route, err, ok));
++    if (!ok)
++	return false;
++
+     bool accepted_by_nexthop = is_accepted_by_nexthop(copy_route);
+     copy_route.set_filtered(filtered);
+     copy_route.set_accepted_by_nexthop(accepted_by_nexthop);
+@@ -1093,6 +1115,7 @@ Fib2mribNode::prepare_route_for_transmission(Fib2mribRoute& orig_route,
+     // Tag the original route
+     orig_route.set_filtered(filtered);
+     orig_route.set_accepted_by_nexthop(accepted_by_nexthop);
++    return true;
+ }
+ 
+ void
+@@ -1240,39 +1263,35 @@ Fib2mribNode::update_route(const IfMgrIfTree& iftree, Fib2mribRoute& route)
+ }
+ 
+ bool
+-Fib2mribNode::do_filtering(Fib2mribRoute& route)
++Fib2mribNode::do_filtering(Fib2mribRoute& route, string& err, bool& ok)
+ {
+-    try {
+-	Fib2mribVarRW varrw(route);
+-
+-	// Import filtering
+-	bool accepted;
++    Fib2mribVarRW varrw(route);
++    ok = true;
+ 
+-	debug_msg("[FIB2MRIB] Running filter: %s on route: %s\n",
+-		  filter::filter2str(filter::IMPORT),
+-		  route.network().str().c_str());
+-	accepted = _policy_filters.run_filter(filter::IMPORT, varrw);
++    // Import filtering
++    bool accepted;
+ 
+-	route.set_filtered(!accepted);
++    debug_msg("[FIB2MRIB] Running filter: %s on route: %s\n",
++	      filter::filter2str(filter::IMPORT),
++	      route.network().str().c_str());
++    accepted = _policy_filters.run_filter(filter::IMPORT, varrw, err, ok);
++    if (!ok)
++	return false;
+ 
+-	// Route Rejected 
+-	if (!accepted) 
+-	    return accepted;
++    route.set_filtered(!accepted);
+ 
+-	Fib2mribVarRW varrw2(route);
++    // Route Rejected 
++    if (!accepted) 
++	return accepted;
+ 
+-	// Export source-match filtering
+-	debug_msg("[FIB2MRIB] Running filter: %s on route: %s\n",
+-		  filter::filter2str(filter::EXPORT_SOURCEMATCH),
+-		  route.network().str().c_str());
++    Fib2mribVarRW varrw2(route);
+ 
+-	_policy_filters.run_filter(filter::EXPORT_SOURCEMATCH, varrw2);
++    // Export source-match filtering
++    debug_msg("[FIB2MRIB] Running filter: %s on route: %s\n",
++	      filter::filter2str(filter::EXPORT_SOURCEMATCH),
++	      route.network().str().c_str());
+ 
+-	return accepted;
+-    } catch(const PolicyException& e) {
+-	XLOG_FATAL("PolicyException: %s", e.str().c_str());
++    _policy_filters.run_filter(filter::EXPORT_SOURCEMATCH, varrw2, err, ok);
+ 
+-	// FIXME: What do we do ?
+-	XLOG_UNFINISHED();
+-    }
++    return accepted;
+ }
+diff --git a/xorp/fib2mrib/fib2mrib_node.hh b/xorp/fib2mrib/fib2mrib_node.hh
+index 69c78e6..4a02811 100644
+--- a/xorp/fib2mrib/fib2mrib_node.hh
++++ b/xorp/fib2mrib/fib2mrib_node.hh
+@@ -17,7 +17,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/fib2mrib/fib2mrib_node.hh,v 1.25 2008/10/02 21:57:14 bms Exp $
+ 
+ #ifndef __FIB2MRIB_FIB2MRIB_NODE_HH__
+ #define __FIB2MRIB_FIB2MRIB_NODE_HH__
+@@ -431,7 +430,7 @@ public:
+      *
+      * @param enable if true then enable node operation, otherwise disable it.
+      */
+-    void	set_enabled(bool enable);
++    bool set_enabled(bool enable, string& err);
+ 
+     /**
+      * Add an IPv4 route.
+@@ -589,26 +588,26 @@ public:
+      * @param filter identifier of filter to configure.
+      * @param conf configuration of the filter.
+      */
+-    void configure_filter(const uint32_t& filter, const string& conf);
++    bool configure_filter(const uint32_t& filter, const string& conf, string& err);
+ 
+     /**
+      * Reset a policy filter.
+      *
+      * @param filter identifier of filter to reset.
+      */
+-    void reset_filter(const uint32_t& filter);
++    bool reset_filter(const uint32_t& filter, string& err);
+ 
+     /**
+      * Push all the routes through the policy filters for re-filtering.
+      */
+-    void push_routes();
++    bool push_routes(string& err);
+ 
+     /**
+      * Push or pull all the routes to/from the RIB.
+      *
+      * @param is_push if true, then push the routes, otherwise pull them
+      */
+-    void push_pull_rib_routes(bool is_push);
++    bool push_pull_rib_routes(bool is_push, string& err);
+ 
+ 
+ protected:
+@@ -616,7 +615,7 @@ protected:
+     // IfMgrHintObserver methods
+     //
+     void tree_complete();
+-    void updates_made();
++    bool updates_made(string& err);
+ 
+     void incr_startup_requests_n();
+     void decr_startup_requests_n();
+@@ -727,8 +726,8 @@ private:
+      * @param copy_route the copy of the original route prepared for
+      * transmission to the RIB.
+      */
+-    void prepare_route_for_transmission(Fib2mribRoute& orig_route,
+-					Fib2mribRoute& copy_route);
++    bool prepare_route_for_transmission(Fib2mribRoute& orig_route,
++					Fib2mribRoute& copy_route, string& err);
+ 
+     /**
+      * Inform the RIB about a route change.
+@@ -781,7 +780,7 @@ private:
+      * @param route route to filter.
+      * @return true if route was accepted by policy filter, otherwise false.
+      */
+-    bool do_filtering(Fib2mribRoute& route);
++    bool do_filtering(Fib2mribRoute& route, string& err, bool& ok);
+ 
+     /**
+      * Test whether a route is accepted based on its next-hop information.
+diff --git a/xorp/fib2mrib/fib2mrib_varrw.cc b/xorp/fib2mrib/fib2mrib_varrw.cc
+index ffde344..41461e5 100644
+--- a/xorp/fib2mrib/fib2mrib_varrw.cc
++++ b/xorp/fib2mrib/fib2mrib_varrw.cc
+@@ -34,17 +34,17 @@ Fib2mribVarRW::Fib2mribVarRW(Fib2mribRoute& route)
+ }
+ 
+ void
+-Fib2mribVarRW::start_read()
++Fib2mribVarRW::start_read(string& err)
+ {
+     initialize(_route.policytags());
+ 
+     if (_is_ipv4) {
+ 	initialize(VAR_NETWORK4,
+ 		   _ef.create(ElemIPv4Net::id,
+-			      _route.network().str().c_str()));
++			      _route.network().str().c_str(), err));
+ 	initialize(VAR_NEXTHOP4,
+ 		   _ef.create(ElemIPv4NextHop::id,
+-			      _route.nexthop().str().c_str()));
++			      _route.nexthop().str().c_str(), err));
+ 	
+ 	initialize(VAR_NETWORK6, NULL);
+ 	initialize(VAR_NEXTHOP6, NULL);
+@@ -53,10 +53,10 @@ Fib2mribVarRW::start_read()
+     if (_is_ipv6) {
+ 	initialize(VAR_NETWORK6,
+ 		   _ef.create(ElemIPv6Net::id,
+-			      _route.network().str().c_str()));
++			      _route.network().str().c_str(), err));
+ 	initialize(VAR_NEXTHOP6,
+ 		   _ef.create(ElemIPv6NextHop::id,
+-			      _route.nexthop().str().c_str()));
++			      _route.nexthop().str().c_str(), err));
+ 
+ 	initialize(VAR_NETWORK4, NULL);
+ 	initialize(VAR_NEXTHOP4, NULL);
+@@ -66,7 +66,7 @@ Fib2mribVarRW::start_read()
+ 
+     oss << _route.metric();
+ 
+-    initialize(VAR_METRIC, _ef.create(ElemU32::id, oss.str().c_str()));
++    initialize(VAR_METRIC, _ef.create(ElemU32::id, oss.str().c_str(), err));
+ }
+ 
+ void
+diff --git a/xorp/fib2mrib/fib2mrib_varrw.hh b/xorp/fib2mrib/fib2mrib_varrw.hh
+index adc0555..8b7b41a 100644
+--- a/xorp/fib2mrib/fib2mrib_varrw.hh
++++ b/xorp/fib2mrib/fib2mrib_varrw.hh
+@@ -18,7 +18,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/fib2mrib/fib2mrib_varrw.hh,v 1.10 2008/10/02 21:57:14 bms Exp $
+ 
+ #ifndef __FIB2MRIB_FIB2MRIB_VARRW_HH__
+ #define __FIB2MRIB_FIB2MRIB_VARRW_HH__
+@@ -46,7 +45,7 @@ public:
+     Fib2mribVarRW(Fib2mribRoute& route);
+ 
+     // SingleVarRW inteface:
+-    void     start_read();
++    void     start_read(string& err);
+     void     single_write(const Id& id, const Element& e);
+     Element* single_read(const Id& id);   
+ 
+diff --git a/xorp/fib2mrib/xrl_fib2mrib_node.cc b/xorp/fib2mrib/xrl_fib2mrib_node.cc
+index 4b3dbe9..0b2ab92 100644
+--- a/xorp/fib2mrib/xrl_fib2mrib_node.cc
++++ b/xorp/fib2mrib/xrl_fib2mrib_node.cc
+@@ -1468,7 +1468,9 @@ XrlFib2mribNode::fib2mrib_0_1_enable_fib2mrib(
+     // Input values,
+     const bool&	enable)
+ {
+-    Fib2mribNode::set_enabled(enable);
++    string err;
++    if (!Fib2mribNode::set_enabled(enable, err))
++	return XrlCmdError::COMMAND_FAILED(err);
+ 
+     return XrlCmdError::OKAY();
+ }
+@@ -1842,24 +1844,18 @@ XrlCmdError
+ XrlFib2mribNode::policy_backend_0_1_configure(const uint32_t& filter,
+ 					      const string& conf)
+ {
+-    try {
+-	Fib2mribNode::configure_filter(filter, conf);
+-    } catch(const PolicyException& e) {
+-	return XrlCmdError::COMMAND_FAILED("Filter configure failed: " +
+-					   e.str());
+-    }
++    string err;
++    if (!Fib2mribNode::configure_filter(filter, conf, err))
++	return XrlCmdError::COMMAND_FAILED("Filter configure failed: " + err);
+     return XrlCmdError::OKAY();
+ }
+ 
+ XrlCmdError
+ XrlFib2mribNode::policy_backend_0_1_reset(const uint32_t& filter)
+ {
+-    try {
+-	Fib2mribNode::reset_filter(filter);
+-    } catch(const PolicyException& e) {
+-	// Will never happen... but for the future...
+-	return XrlCmdError::COMMAND_FAILED("Filter reset failed: " + e.str());
+-    }
++    string err;
++    if (!Fib2mribNode::reset_filter(filter, err))
++	return XrlCmdError::COMMAND_FAILED(err);
+     
+     return XrlCmdError::OKAY();
+ }
+@@ -1867,7 +1863,9 @@ XrlFib2mribNode::policy_backend_0_1_reset(const uint32_t& filter)
+ XrlCmdError
+ XrlFib2mribNode::policy_backend_0_1_push_routes()
+ {
+-    Fib2mribNode::push_routes(); 
++    string err;
++    if (!Fib2mribNode::push_routes(err))
++	return XrlCmdError::COMMAND_FAILED(err);
+     return XrlCmdError::OKAY();
+ }
+ 
+diff --git a/xorp/libfeaclient/ifmgr_xrl_mirror.cc b/xorp/libfeaclient/ifmgr_xrl_mirror.cc
+index 149daeb..b958d36 100644
+--- a/xorp/libfeaclient/ifmgr_xrl_mirror.cc
++++ b/xorp/libfeaclient/ifmgr_xrl_mirror.cc
+@@ -941,8 +941,11 @@ IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_hint_tree_complete()
+ XrlCmdError
+ IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_hint_updates_made()
+ {
+-    if (_hint_observer)
+-	_hint_observer->updates_made();
++    if (_hint_observer) {
++	string err;
++	if (!_hint_observer->updates_made(err))
++	    return XrlCmdError::COMMAND_FAILED(err);
++    }
+     return XrlCmdError::OKAY();
+ }
+ 
+@@ -1156,20 +1159,22 @@ IfMgrXrlMirror::delay_updates(const TimeVal& delay)
+     _updates_delay = delay;
+ }
+ 
+-void
+-IfMgrXrlMirror::updates_made()
++bool
++IfMgrXrlMirror::updates_made(string& err)
+ {
+     if (_updates_delay.is_zero()) {
+ 	do_updates();
+-	return;
++	return true;
+     }
+ 
+     if (_updates_timer.scheduled())
+-	return;
++	return true;
+ 
+     _updates_timer = _e.new_oneoff_after(
+ 	_updates_delay,
+ 	callback(this, &IfMgrXrlMirror::do_updates));
++    UNUSED(err);
++    return true;
+ }
+ 
+ void
+@@ -1183,7 +1188,10 @@ IfMgrXrlMirror::do_updates()
+     list<IfMgrHintObserver*>::const_iterator ci;
+     for (ci = _hint_observers.begin(); ci != _hint_observers.end(); ++ci) {
+ 	IfMgrHintObserver* ho = *ci;
+-	ho->updates_made();
++	string err;
++	if (!ho->updates_made(err)) {
++	    XLOG_WARNING("updates-made failed: %s\n", err.c_str());
++	}
+     }
+ }
+ 
+diff --git a/xorp/libfeaclient/ifmgr_xrl_mirror.hh b/xorp/libfeaclient/ifmgr_xrl_mirror.hh
+index 1754c23..d0b09bc 100644
+--- a/xorp/libfeaclient/ifmgr_xrl_mirror.hh
++++ b/xorp/libfeaclient/ifmgr_xrl_mirror.hh
+@@ -60,7 +60,7 @@ class IfMgrHintObserver {
+ public:
+     virtual ~IfMgrHintObserver() = 0;
+     virtual void tree_complete() = 0;
+-    virtual void updates_made() = 0;
++    virtual bool updates_made(string& er) = 0;
+ };
+ 
+ /**
+@@ -183,7 +183,7 @@ protected:
+ 
+ protected:
+     void tree_complete();
+-    void updates_made();
++    bool updates_made(string& err);
+ 
+ protected:
+     void register_cb(const XrlError& e);
+diff --git a/xorp/mld6igmp/mld6igmp_node.cc b/xorp/mld6igmp/mld6igmp_node.cc
+index 9b54672..c2942f6 100644
+--- a/xorp/mld6igmp/mld6igmp_node.cc
++++ b/xorp/mld6igmp/mld6igmp_node.cc
+@@ -347,14 +347,15 @@ Mld6igmpNode::tree_complete()
+     //
+     // XXX: we use same actions when the tree is completed or updates are made
+     //
+-    updates_made();
++    string err;
++    if (!updates_made(err))
++	XLOG_WARNING("tree-comple, updates-made error: %s\n", err.c_str());
+ }
+ 
+-void
+-Mld6igmpNode::updates_made()
++bool
++Mld6igmpNode::updates_made(string& error_msg)
+ {
+     map<string, Vif>::iterator mld6igmp_vif_iter;
+-    string error_msg;
+ 
+     //
+     // Update the local copy of the interface tree
+@@ -677,6 +678,7 @@ Mld6igmpNode::updates_made()
+     
+     // Done
+     set_config_all_vifs_done(error_msg);
++    return true;
+ }
+ 
+ /**
+diff --git a/xorp/mld6igmp/mld6igmp_node.hh b/xorp/mld6igmp/mld6igmp_node.hh
+index 1736c4c..a08454a 100644
+--- a/xorp/mld6igmp/mld6igmp_node.hh
++++ b/xorp/mld6igmp/mld6igmp_node.hh
+@@ -825,7 +825,7 @@ protected:
+     // IfMgrHintObserver methods
+     //
+     void tree_complete();
+-    void updates_made();
++    bool updates_made(string& err);
+ 
+ private:
+     /**
+diff --git a/xorp/pim/pim_node.cc b/xorp/pim/pim_node.cc
+index 2ede2fe..e675169 100644
+--- a/xorp/pim/pim_node.cc
++++ b/xorp/pim/pim_node.cc
+@@ -405,14 +405,15 @@ PimNode::tree_complete()
+     //
+     // XXX: we use same actions when the tree is completed or updates are made
+     //
+-    updates_made();
++    string err;
++    if (!updates_made(err))
++	XLOG_WARNING("tree-complete, updates-made error: %s\n", err.c_str());
+ }
+ 
+-void
+-PimNode::updates_made()
++bool
++PimNode::updates_made(string& error_msg)
+ {
+     map<string, Vif>::iterator pim_vif_iter;
+-    string error_msg;
+ 
+     //
+     // Update the local copy of the interface tree
+@@ -735,6 +736,7 @@ PimNode::updates_made()
+     
+     // Done
+     set_config_all_vifs_done(error_msg);
++    return true;
+ }
+ 
+ /**
+diff --git a/xorp/pim/pim_node.hh b/xorp/pim/pim_node.hh
+index 2bc61cf..f3f1e80 100644
+--- a/xorp/pim/pim_node.hh
++++ b/xorp/pim/pim_node.hh
+@@ -1304,7 +1304,7 @@ protected:
+     // IfMgrHintObserver methods
+     //
+     void tree_complete();
+-    void updates_made();
++    bool updates_made(string& err);
+ 
+ private:
+     /**
+diff --git a/xorp/policy/backend/backend.yy b/xorp/policy/backend/backend.yy
+index 6f5b825..77df0f1 100644
+--- a/xorp/policy/backend/backend.yy
++++ b/xorp/policy/backend/backend.yy
+@@ -19,6 +19,7 @@ extern void yyerror(const char*);
+ 
+ using namespace policy_backend_parser;
+ 
++static string policy_err;
+ static ElementFactory	_ef;
+ 
+ %}
+@@ -57,7 +58,12 @@ set:
+ 	  YY_SET YY_ARG YY_ARG YY_ARG YY_NEWLINE
+ 	  {
+ 		// XXX: doesn't delete old
+-		(*_yy_sets)[$3] = _ef.create($2, $4);
++		policy_err = "";
++		(*_yy_sets)[$3] = _ef.create($2, $4, policy_err);
++		if (policy_err.size()) {
++			XLOG_WARNING("Policy parsing of set failed: %s\n", policy_err.c_str());
++			// not sure how to recover here... --Ben
++		}
+ 		free($2); free($3); free($4);
+ 	  }
+ 	;
+@@ -105,8 +111,15 @@ statements:
+ 
+ statement:
+ 	  YY_PUSH YY_ARG YY_ARG {
+-				Instruction* i = new Push(_ef.create($2,$3));
+-				_yy_instructions->push_back(i);
++				policy_err = "";
++				Instruction* i = new Push(_ef.create($2,$3, policy_err));
++				if (policy_err.size()) {
++					XLOG_ERROR("Bad policy statement: %s\n", policy_err.c_str());
++					delete i;
++				}
++				else {
++					_yy_instructions->push_back(i);
++				}
+ 				free($2); free($3);
+ 				}
+ 	| YY_PUSH_SET YY_ARG	{
+diff --git a/xorp/policy/backend/filter_base.hh b/xorp/policy/backend/filter_base.hh
+index bf4170b..3d8fefc 100644
+--- a/xorp/policy/backend/filter_base.hh
++++ b/xorp/policy/backend/filter_base.hh
+@@ -18,7 +18,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/policy/backend/filter_base.hh,v 1.6 2008/10/02 21:58:03 bms Exp $
+ 
+ #ifndef __POLICY_BACKEND_FILTER_BASE_HH__
+ #define __POLICY_BACKEND_FILTER_BASE_HH__
+@@ -38,7 +37,7 @@ public:
+      *
+      * @param str filter configuration.
+      */
+-    virtual void configure(const string& str) = 0;
++    virtual bool configure(const string& str, string& err) = 0;
+ 
+     /**
+      * Reset the filter.
+@@ -55,7 +54,7 @@ public:
+      * @return true if the route is accepted, false otherwise.
+      * @param varrw the VarRW associated with the route being filtered.
+      */
+-    virtual bool acceptRoute(VarRW& varrw) = 0;
++    virtual bool acceptRoute(VarRW& varrw, string& err, bool& ok) = 0;
+ };
+ 
+ #endif // __POLICY_BACKEND_FILTER_BASE_HH__
+diff --git a/xorp/policy/backend/instr_visitor.hh b/xorp/policy/backend/instr_visitor.hh
+index d0d8b91..a4982c5 100644
+--- a/xorp/policy/backend/instr_visitor.hh
++++ b/xorp/policy/backend/instr_visitor.hh
+@@ -18,7 +18,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/policy/backend/instr_visitor.hh,v 1.10 2008/10/02 21:58:03 bms Exp $
+ 
+ #ifndef __POLICY_BACKEND_INSTR_VISITOR_HH__
+ #define __POLICY_BACKEND_INSTR_VISITOR_HH__
+@@ -44,16 +43,16 @@ class InstrVisitor {
+ public:
+     virtual ~InstrVisitor() {}
+ 
+-    virtual void visit(Push&) = 0;
+-    virtual void visit(PushSet&) = 0;
+-    virtual void visit(OnFalseExit&) = 0;
+-    virtual void visit(Load&) = 0;
+-    virtual void visit(Store&) = 0;
+-    virtual void visit(Accept&) = 0;
+-    virtual void visit(Reject&) = 0;
+-    virtual void visit(NaryInstr&) = 0;
+-    virtual void visit(Next&) = 0;
+-    virtual void visit(Subr&) = 0;
++    virtual bool visit(Push&, string& err) = 0;
++    virtual bool visit(PushSet&, string& err) = 0;
++    virtual bool visit(OnFalseExit&, string& err) = 0;
++    virtual bool visit(Load&, string& err) = 0;
++    virtual bool visit(Store&, string& err) = 0;
++    virtual bool visit(Accept&, string& err) = 0;
++    virtual bool visit(Reject&, string& err) = 0;
++    virtual bool visit(NaryInstr&, string& err) = 0;
++    virtual bool visit(Next&, string& err) = 0;
++    virtual bool visit(Subr&, string& err) = 0;
+ };
+ 
+ #endif // __POLICY_BACKEND_INSTR_VISITOR_HH__
+diff --git a/xorp/policy/backend/instruction.hh b/xorp/policy/backend/instruction.hh
+index 08c7910..1b31c12 100644
+--- a/xorp/policy/backend/instruction.hh
++++ b/xorp/policy/backend/instruction.hh
+@@ -18,7 +18,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/policy/backend/instruction.hh,v 1.14 2008/10/02 21:58:03 bms Exp $
+ 
+ #ifndef __POLICY_BACKEND_INSTRUCTION_HH__
+ #define __POLICY_BACKEND_INSTRUCTION_HH__
+@@ -38,7 +37,6 @@
+ 
+ #include "policy/common/element_base.hh"
+ #include "policy/common/operator_base.hh"
+-#include "policy/common/policy_exception.hh"
+ #include "policy/common/varrw.hh"
+ 
+ #include "instr_visitor.hh"
+diff --git a/xorp/policy/backend/instruction_base.hh b/xorp/policy/backend/instruction_base.hh
+index 36c36f5..3c9281e 100644
+--- a/xorp/policy/backend/instruction_base.hh
++++ b/xorp/policy/backend/instruction_base.hh
+@@ -18,8 +18,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/policy/backend/instruction_base.hh,v 1.8 2008/10/02 21:58:03 bms Exp $
+-
+ #ifndef __POLICY_BACKEND_INSTRUCTION_BASE_HH__
+ #define __POLICY_BACKEND_INSTRUCTION_BASE_HH__
+ 
+@@ -40,13 +38,13 @@ public:
+      *
+      * @param v visitor to use on instruction.
+      */
+-    virtual void accept(InstrVisitor& v) = 0;
++    virtual bool accept(InstrVisitor& v, string& err) = 0;
+ };
+ 
+ // macro ugliness to make instruction visitable [usable by visitor].
+-#define INSTR_VISITABLE() \
+-void accept(InstrVisitor& v) { \
+-    v.visit(*this); \
+-}
++#define INSTR_VISITABLE()			  \
++    bool accept(InstrVisitor& v, string& err) {   \
++	return v.visit(*this, err);		  \
++    }
+ 
+ #endif // __POLICY_BACKEND_INSTRUCTION_BASE_HH__
+diff --git a/xorp/policy/backend/iv_exec.cc b/xorp/policy/backend/iv_exec.cc
+index 0049cda..035592c 100644
+--- a/xorp/policy/backend/iv_exec.cc
++++ b/xorp/policy/backend/iv_exec.cc
+@@ -53,8 +53,8 @@ IvExec::~IvExec()
+     delete [] _stack_bottom;
+ }
+ 
+-IvExec::FlowAction 
+-IvExec::run(VarRW* varrw)
++IvExec::FlowAction
++IvExec::run(VarRW* varrw, string& err)
+ {
+     _varrw     = varrw;
+     _did_trace = false;
+@@ -73,7 +73,9 @@ IvExec::run(VarRW* varrw)
+ 
+     // execute all policies
+     for (int i = _policy_count-1; i>= 0; --i) {
+-	FlowAction fa = runPolicy(*_policies[i]);
++	FlowAction fa = runPolicy(*_policies[i], err);
++	if (fa == FA_INVALID)
++	    return fa;
+ 
+ 	// if a policy rejected/accepted a route then terminate.
+ 	if (fa != DEFAULT) {
+@@ -86,7 +88,8 @@ IvExec::run(VarRW* varrw)
+ 	_os << "Outcome of whole filter: " << fa2str(ret) << endl;
+ 
+     // important because varrw may hold pointers to trash elements
+-    _varrw->sync();
++    if (!_varrw->sync(err))
++	ret = FA_INVALID;
+ 
+     clear_trash();
+ 
+@@ -94,7 +97,7 @@ IvExec::run(VarRW* varrw)
+ }
+ 
+ IvExec::FlowAction 
+-IvExec::runPolicy(PolicyInstr& pi)
++IvExec::runPolicy(PolicyInstr& pi, string& err)
+ {
+     TermInstr** terms  = pi.terms();
+     int termc	       = pi.termc();
+@@ -124,7 +127,10 @@ IvExec::runPolicy(PolicyInstr& pi)
+ 
+     // run all terms
+     for (int i = 0; i < termc ; ++i) {
+-	FlowAction fa = runTerm(*terms[i]);
++	FlowAction fa = runTerm(*terms[i], err);
++	if (fa == FA_INVALID) {
++	    return fa;
++	}
+ 
+ 	// if term accepted/rejected route, then terminate.
+ 	if (fa != DEFAULT) {
+@@ -147,7 +153,7 @@ IvExec::runPolicy(PolicyInstr& pi)
+ }
+ 
+ IvExec::FlowAction 
+-IvExec::runTerm(TermInstr& ti)
++IvExec::runTerm(TermInstr& ti, string& err)
+ {
+ 
+     // we just started
+@@ -170,7 +176,10 @@ IvExec::runTerm(TermInstr& ti)
+ 	if (_profiler)
+ 	    _profiler->start();
+ #endif
+-	(instr[i])->accept(*this);
++	bool rv = (instr[i])->accept(*this, err);
++	if (!rv) {
++	    return FA_INVALID;
++	}
+ 
+ #ifndef XORP_DISABLE_PROFILE
+ 	if (_profiler)
+@@ -188,8 +197,7 @@ IvExec::runTerm(TermInstr& ti)
+     return _fa;
+ }
+ 
+-void 
+-IvExec::visit(Push& p)
++bool IvExec::visit(Push& p, string& err)
+ {
+     const Element& e = p.elem();
+     // node owns element [no need to trash]
+@@ -199,29 +207,35 @@ IvExec::visit(Push& p)
+     
+     if(_do_trace)
+ 	_os << "PUSH " << e.type() << " " << e.str() << endl;
++    UNUSED(err);
++    return true;
+ }
+ 
+-void 
+-IvExec::visit(PushSet& ps)
++bool IvExec::visit(PushSet& ps, string& err)
+ {
+     string name = ps.setid();
+-    const Element& s = _sman->getSet(name);
++    const Element* s = _sman->getSet(name, err);
++    if (!s)
++	return false;
+ 
+     // set manager owns set [no need to trash]
+     _stackptr++;
+     XLOG_ASSERT(_stackptr < _stackend);
+-    *_stackptr = &s;
++    *_stackptr = s;
+ 
+     if(_do_trace)
+-	_os << "PUSH_SET " << s.type() << " " << name
+-	     << ": " << s.str() << endl;
++	_os << "PUSH_SET " << s->type() << " " << name
++	     << ": " << s->str() << endl;
++    UNUSED(err);
++    return true;
+ }
+ 
+-void 
+-IvExec::visit(OnFalseExit& /* x */)
++bool IvExec::visit(OnFalseExit& /* x */, string& err)
+ {
+-    if (_stackptr < _stack)
+-	xorp_throw(RuntimeError, "Got empty stack on ON_FALSE_EXIT");
++    if (_stackptr < _stack) {
++	err += "Got empty stack on ON_FALSE_EXIT";
++	return false;
++    }
+ 
+     // we expect a bool at the top.
+     const ElemBool* t = dynamic_cast<const ElemBool*>(*_stackptr);
+@@ -232,12 +246,13 @@ IvExec::visit(OnFalseExit& /* x */)
+ 	    if(_do_trace)
+ 		_os << "GOT NULL ON TOP OF STACK, GOING TO NEXT TERM" << endl;
+ 	    _finished = true;
+-	    return;
++	    return true;
+         }
+ 
+ 	// if it is anything else, its an error
+         else {
+-	   xorp_throw(RuntimeError, "Expected bool on top of stack instead: ");
++	    err += "Expected bool on top of stack instead\n";
++	    return false;
+ 	}
+ 	    
+     }
+@@ -255,27 +270,32 @@ IvExec::visit(OnFalseExit& /* x */)
+ 
+     if(_do_trace)
+ 	_os << "ONFALSE_EXIT: " << t->str() << endl;
++    return true;
+ }
+ 
+-void 
+-IvExec::visit(Load& l)
++bool IvExec::visit(Load& l, string& err)
+ {
+-    const Element& x = _varrw->read_trace(l.var());
++    const Element* x = _varrw->read_trace(l.var(), err);
++    if (!x)
++	return false;
+ 
+     if (_do_trace)
+-	_os << "LOAD " << l.var() << ": " << x.str() << endl;
++	_os << "LOAD " << l.var() << ": " << x->str() << endl;
+ 
+     // varrw owns element [do not trash]
+     _stackptr++;
+     XLOG_ASSERT(_stackptr < _stackend);
+-    *_stackptr = &x;
++    *_stackptr = x;
++
++    return true;
+ }
+ 
+-void 
+-IvExec::visit(Store& s)
++bool IvExec::visit(Store& s, string& err)
+ {
+-    if (_stackptr < _stack)
+-	xorp_throw(RuntimeError, "Stack empty on assign of " + s.var());
++    if (_stackptr < _stack) {
++	err += "Stack empty on assign of " + s.var();
++	return false;
++    }
+ 
+     const Element* arg = *_stackptr;
+     _stackptr--;
+@@ -285,31 +305,33 @@ IvExec::visit(Store& s)
+ 	if (_do_trace)
+ 	    _os << "STORE NULL [treated as NOP]" << endl;
+ 
+-	return;
++	return true;
+     }
+ 
+     // we still own the element.
+     // if it had to be trashed, it would have been trashed on creation, so do
+     // NOT trash now. And yes, it likely is an element we do not have to
+     // trash anyway.
+-    _varrw->write_trace(s.var(), *arg);
++    if (!_varrw->write_trace(s.var(), *arg, err))
++	return false;
+ 
+     if (_do_trace)
+ 	_os << "STORE " << s.var() << ": " << arg->str() << endl;
++    return true;
+ }
+ 
+-void 
+-IvExec::visit(Accept& /* a */)
++bool IvExec::visit(Accept& /* a */, string& err)
+ {
+     // ok we like the route, so exit all execution
+     _finished = true;
+     _fa = ACCEPT;
+     if(_do_trace)
+ 	_os << "ACCEPT" << endl;
++    UNUSED(err);
++    return true;
+ }
+ 
+-void
+-IvExec::visit(Next& next)
++bool IvExec::visit(Next& next, string& err)
+ {
+     _finished = true;
+     _ctr_flow = next.flow();
+@@ -327,10 +349,11 @@ IvExec::visit(Next& next)
+ 	    break;
+ 	}
+     }
++    UNUSED(err);
++    return true;
+ }
+ 
+-void 
+-IvExec::visit(Reject& /* r */)
++bool IvExec::visit(Reject& /* r */, string& err)
+ {
+     // we don't like it, get out of here.
+     _finished = true;
+@@ -338,17 +361,21 @@ IvExec::visit(Reject& /* r */)
+ 
+     if(_do_trace)
+ 	_os << "REJECT" << endl;
++    UNUSED(err);
++    return true;
+ }
+ 
+-void
+-IvExec::visit(NaryInstr& nary)
++bool IvExec::visit(NaryInstr& nary, string& err)
+ {
+     unsigned arity = nary.op().arity();
+ 
+     XLOG_ASSERT((_stackptr - arity + 1) >= _stack);
+ 
+     // execute the operation
+-    Element* r = _disp.run(nary.op(), arity, _stackptr - arity + 1);
++    Element* r = _disp.run(nary.op(), arity, _stackptr - arity + 1, err);
++    if (!r) {
++	return false;
++    }
+     if (arity)
+ 	_stackptr -= arity -1;
+     else
+@@ -370,10 +397,11 @@ IvExec::visit(NaryInstr& nary)
+     // output trace
+     if (_do_trace)
+ 	_os << nary.op().str() << endl;
++    UNUSED(err);
++    return true;
+ }
+ 
+-void
+-IvExec::clear_trash()
++void IvExec::clear_trash()
+ {
+     for (unsigned i = 0; i< _trashc; i++)
+ 	delete _trash[i];
+@@ -393,6 +421,9 @@ IvExec::fa2str(const FlowAction& fa)
+ 	
+ 	case DEFAULT:
+ 	    return "Default action";
++
++	case FA_INVALID:
++	    return "FA_INVALID";
+     }
+ 
+     return "Unknown";
+@@ -445,8 +476,7 @@ IvExec::tracelog()
+     return _os.str();
+ }
+ 
+-void
+-IvExec::visit(Subr& sub)
++bool IvExec::visit(Subr& sub, string& err)
+ {
+     SUBR::iterator i = _subr->find(sub.target());
+     XLOG_ASSERT(i != _subr->end());
+@@ -459,7 +489,9 @@ IvExec::visit(Subr& sub)
+     FlowAction old_fa = _fa;
+     bool old_finished = _finished;
+ 
+-    FlowAction fa = runPolicy(*policy);
++    FlowAction fa = runPolicy(*policy, err);
++    if (fa == FA_INVALID)
++	return false;
+ 
+     _fa       = old_fa;
+     _finished = old_finished;
+@@ -473,6 +505,7 @@ IvExec::visit(Subr& sub)
+ 	break;
+ 
+     case REJ:
++    case FA_INVALID:
+ 	result = false;
+ 	break;
+     }
+@@ -486,6 +519,9 @@ IvExec::visit(Subr& sub)
+     _trash[_trashc] = e;
+     _trashc++;
+     XLOG_ASSERT(_trashc < _trashs);
++
++    UNUSED(err);
++    return true;
+ }
+ 
+ void
+diff --git a/xorp/policy/backend/iv_exec.hh b/xorp/policy/backend/iv_exec.hh
+index c550b51..0bf23e9 100644
+--- a/xorp/policy/backend/iv_exec.hh
++++ b/xorp/policy/backend/iv_exec.hh
+@@ -27,7 +27,6 @@
+ 
+ #include "policy/common/dispatcher.hh"
+ #include "policy/common/varrw.hh"
+-#include "policy/common/policy_exception.hh"
+ #ifndef XORP_DISABLE_PROFILE
+ #include "policy_profiler.hh"
+ #endif
+@@ -57,18 +56,8 @@ public:
+     enum FlowAction {
+ 	ACCEPT,
+ 	REJ,
+-	DEFAULT
+-    };
+-
+-    /**
+-     * @short Run time errors, such as doing unsupported operations.
+-     *
+-     * The semantic check should get rid of these.
+-     */
+-    class RuntimeError : public PolicyException {
+-    public:
+-	RuntimeError(const char* file, size_t line, const string& init_why = "")
+-	    : PolicyException("RuntimeError", file, line, init_why) {}  
++	DEFAULT,
++	FA_INVALID
+     };
+ 
+     IvExec();
+@@ -80,64 +69,64 @@ public:
+     /**
+      * Execute the policies.
+      */
+-    FlowAction run(VarRW* varrw);
++    FlowAction run(VarRW* varrw, string& err);
+ 
+     /**
+      * Execute a policy.
+      *
+      * @param pi policy to execute
+      */
+-    FlowAction runPolicy(PolicyInstr& pi);
++    FlowAction runPolicy(PolicyInstr& pi, string& err);
+ 
+     /**
+      * Execute a term.
+      *
+      * @param ti term to execute.
+      */
+-    FlowAction runTerm(TermInstr& ti);
++    FlowAction runTerm(TermInstr& ti, string& err);
+ 
+     /**
+      * @param p push to execute.
+      */
+-    void visit(Push& p);
++    bool visit(Push& p, string& err);
+ 
+     /**
+      * @param ps push of a set to execute.
+      */
+-    void visit(PushSet& ps);
++    bool visit(PushSet& ps, string& err);
+     
+     /**
+      * @param x OnFalseExit to execute.
+      */
+-    void visit(OnFalseExit& x);
++    bool visit(OnFalseExit& x, string& err);
+ 
+     /**
+      * @param l Load to execute.
+      */
+-    void visit(Load& l);
++    bool visit(Load& l, string& err);
+ 
+     /**
+      * @param s Store to execute.
+      */
+-    void visit(Store& s);
++    bool visit(Store& s, string& err);
+ 
+     /**
+      * @param a accept the route.
+      */
+-    void visit(Accept& a);
++    bool visit(Accept& a, string& err);
+     
+     /**
+      * @param r reject the route.
+      */
+-    void visit(Reject& r);
++    bool visit(Reject& r, string& err);
+ 
+     /**
+      * @param nary N-ary instruction to execute.
+      */
+-    void visit(NaryInstr& nary);
++    bool visit(NaryInstr& nary, string& err);
+ 
+-    void visit(Next& next);
+-    void visit(Subr& sub);
++    bool visit(Next& next, string& err);
++    bool visit(Subr& sub, string& err);
+ 
+     /**
+      * @return String representation of flow action.
+diff --git a/xorp/policy/backend/policy_filter.cc b/xorp/policy/backend/policy_filter.cc
+index e20b669..b82e50a 100644
+--- a/xorp/policy/backend/policy_filter.cc
++++ b/xorp/policy/backend/policy_filter.cc
+@@ -41,12 +41,11 @@ PolicyFilter::PolicyFilter() : _policies(NULL),
+     _exec.set_set_manager(&_sman);
+ }
+ 
+-void PolicyFilter::configure(const string& str) 
++bool PolicyFilter::configure(const string& str, string& err) 
+ {
+     vector<PolicyInstr*>* policies = new vector<PolicyInstr*>();
+     map<string,Element*>* sets = new map<string,Element*>();
+     SUBR* subr = new SUBR;
+-    string err;
+ 
+     // do the actual parsing
+     if (policy_backend_parse(*policies, *sets, *subr, str, err)) {
+@@ -56,7 +55,7 @@ void PolicyFilter::configure(const string& str)
+ 	clear_map(*subr);
+ 	delete sets;
+ 	delete subr;
+-	xorp_throw(ConfError, err);
++	return false;
+     }
+ 
+     // properly erase old conf
+@@ -68,6 +67,7 @@ void PolicyFilter::configure(const string& str)
+     _sman.replace_sets(sets);
+     _exec.set_policies(_policies);
+     _exec.set_subr(_subr);
++    return true;
+ }
+ 
+ PolicyFilter::~PolicyFilter()
+@@ -92,9 +92,10 @@ void PolicyFilter::reset()
+     _sman.clear();
+ }
+ 
+-bool PolicyFilter::acceptRoute(VarRW& varrw)
++bool PolicyFilter::acceptRoute(VarRW& varrw, string& err, bool& ok)
+ {
+     bool default_action = true;
++    ok = true;
+ 
+     // no configuration done yet.
+     if (!_policies) {
+@@ -102,7 +103,10 @@ bool PolicyFilter::acceptRoute(VarRW& varrw)
+ 	// filter] performed a write for some reason.  If we return without
+ 	// syncing, it might be a problem [i.e. when using singlevarrw which
+ 	// will perform the write only on sync!]
+-	varrw.sync();
++	if (!varrw.sync(err)) {
++	    ok = false;
++	    return false;
++	}
+ 	return default_action;
+     }	
+ 
+@@ -112,7 +116,11 @@ bool PolicyFilter::acceptRoute(VarRW& varrw)
+ #endif
+ 
+     // run policies
+-    IvExec::FlowAction fa = _exec.run(&varrw);
++    IvExec::FlowAction fa = _exec.run(&varrw, err);
++    if (fa == IvExec::FA_INVALID) {
++	ok = false;
++	return false;
++    }
+ 
+     // print any trace data...
+     uint32_t level = varrw.trace();
+@@ -135,6 +143,10 @@ bool PolicyFilter::acceptRoute(VarRW& varrw)
+ 		case IvExec::ACCEPT:
+ 		    trace += ": accepted";
+ 		    break;
++
++		case IvExec::FA_INVALID:
++		    trace += ": FA_INVALID";
++		    break;
+ 	    }
+ 	}
+ 
+@@ -155,6 +167,7 @@ bool PolicyFilter::acceptRoute(VarRW& varrw)
+     // decide what to do
+     switch (fa) {
+         case IvExec::REJ:
++        case IvExec::FA_INVALID:
+ 	    return false;
+ 
+         case IvExec::DEFAULT:
+diff --git a/xorp/policy/backend/policy_filter.hh b/xorp/policy/backend/policy_filter.hh
+index 20aa85b..5f8bba3 100644
+--- a/xorp/policy/backend/policy_filter.hh
++++ b/xorp/policy/backend/policy_filter.hh
+@@ -29,7 +29,6 @@
+ 
+ 
+ #include "policy/common/varrw.hh"
+-#include "policy/common/policy_exception.hh"
+ #include "policy_instr.hh"
+ #include "set_manager.hh"
+ #include "filter_base.hh"
+@@ -46,15 +45,6 @@ class PolicyFilter :
+     public FilterBase
+ {
+ public:
+-    /**
+-     * @short Exception thrown on configuration error.
+-     */
+-    class ConfError : public PolicyException {
+-    public:
+-        ConfError(const char* file, size_t line, const string& init_why = "")
+-            : PolicyException("ConfError", file, line, init_why) {}   
+-    };
+-
+     PolicyFilter();
+     ~PolicyFilter();
+     
+@@ -63,7 +53,7 @@ public:
+      *
+      * @param str filter configuration.
+      */
+-    void configure(const string& str);
++    bool configure(const string& str, string& err);
+ 
+     /**
+      * Reset the filter.
+@@ -80,7 +70,7 @@ public:
+      * @return true if the route is accepted, false otherwise.
+      * @param varrw the VarRW associated with the route being filtered.
+      */
+-    bool acceptRoute(VarRW& varrw);
++    bool acceptRoute(VarRW& varrw, string& err, bool& ok);
+ 
+ #ifndef XORP_DISABLE_PROFILE
+     void set_profiler_exec(PolicyProfiler* profiler);
+diff --git a/xorp/policy/backend/policy_filters.cc b/xorp/policy/backend/policy_filters.cc
+index 7dc7a8e..bd50bcb 100644
+--- a/xorp/policy/backend/policy_filters.cc
++++ b/xorp/policy/backend/policy_filters.cc
+@@ -45,38 +45,50 @@ PolicyFilters::~PolicyFilters()
+ }
+ 
+ bool
+-PolicyFilters::run_filter(const uint32_t& ftype, VarRW& varrw)
++PolicyFilters::run_filter(const uint32_t& ftype, VarRW& varrw, string& err, bool& ok)
+ {
+-    FilterBase& pf = whichFilter(ftype);
+-    return pf.acceptRoute(varrw);
++    FilterBase* pf = whichFilter(ftype, err, ok);
++    if (pf)
++	return pf->acceptRoute(varrw, err, ok);
++    return false;
+ }
+ 
+-void
+-PolicyFilters::configure(const uint32_t& ftype, const string& conf)
++bool
++PolicyFilters::configure(const uint32_t& ftype, const string& conf, string& err)
+ {
+-    FilterBase& pf = whichFilter(ftype);
+-    pf.configure(conf);
++    bool ok;
++    FilterBase* pf = whichFilter(ftype, err, ok);
++    if (pf)
++	return pf->configure(conf, err);
++    return false;
+ }
+ 
+-void
+-PolicyFilters::reset(const uint32_t& ftype)
++bool
++PolicyFilters::reset(const uint32_t& ftype, string& err)
+ {
+-    FilterBase& pf = whichFilter(ftype);
+-    pf.reset();
++    bool ok;
++    FilterBase* pf = whichFilter(ftype, err, ok);
++    if (pf) {
++	pf->reset();
++	return true;
++    }
++    return false;
+ }
+ 
+-FilterBase& 
+-PolicyFilters::whichFilter(const uint32_t& ftype)
++FilterBase*
++PolicyFilters::whichFilter(const uint32_t& ftype, string& err, bool& ok)
+ {
++    ok = true;
+     switch(ftype) {
+ 	case 1:
+-	    return *_import_filter;
++	    return _import_filter;
+ 	case 2:
+-	    return *_export_sm_filter;
++	    return _export_sm_filter;
+ 	case 4:
+-	    return *_export_filter;
++	    return _export_filter;
+ 	
+     }
+-    xorp_throw(PolicyFiltersErr, 
+-	       "Unknown filter: " + policy_utils::to_str(ftype));
++    err += "Unknown filter: " + policy_utils::to_str(ftype);
++    ok = false;
++    return NULL;
+ }
+diff --git a/xorp/policy/backend/policy_filters.hh b/xorp/policy/backend/policy_filters.hh
+index 19a7d4d..89d7783 100644
+--- a/xorp/policy/backend/policy_filters.hh
++++ b/xorp/policy/backend/policy_filters.hh
+@@ -28,7 +28,6 @@
+ #include "policy_filter.hh"
+ #include "policy/common/filter.hh"
+ #include "policy/common/varrw.hh"
+-#include "policy/common/policy_exception.hh"
+ 
+ /**
+  * @short A container for all policy filters a protocol should support.
+@@ -41,13 +40,6 @@ class PolicyFilters :
+     public NONCOPYABLE
+ {
+ public:
+-    class PolicyFiltersErr : public PolicyException {
+-    public:
+-        PolicyFiltersErr(const char* file, size_t line, 
+-			   const string& init_why = "")   
+-	: PolicyException("PolicyFiltersErr", file, line, init_why) {}  
+-    };
+-
+     PolicyFilters();
+     PolicyFilters(FilterBase* im, FilterBase* sm, FilterBase* ex);
+     virtual ~PolicyFilters();
+@@ -61,7 +53,7 @@ public:
+      * @param type which filter should be executed.
+      * @param varrw the VarRW associated with the route to be filtered.
+      */
+-    bool run_filter(const uint32_t& type, VarRW& varrw);
++    bool run_filter(const uint32_t& type, VarRW& varrw, string& err, bool& ok);
+ 
+     /**
+      * Configure a filter.
+@@ -71,14 +63,14 @@ public:
+      * @param type the filter to configure.
+      * @param conf the configuration of the filter.
+      */
+-    void configure(const uint32_t& type, const string& conf);
++    bool configure(const uint32_t& type, const string& conf, string& err);
+ 
+     /**
+      * Reset a filter.
+      *
+      * @param type the filter to reset.
+      */
+-    void reset(const uint32_t& type);
++    bool reset(const uint32_t& type, string& err);
+ 
+ private:
+     /**
+@@ -89,7 +81,7 @@ private:
+      * @return filter to execute.
+      * @param ftype integral filter identifier.
+      */
+-    FilterBase&   whichFilter(const uint32_t& ftype);
++    FilterBase*   whichFilter(const uint32_t& ftype, string& err, bool& ok);
+ 
+ private:
+     FilterBase*   _import_filter;
+diff --git a/xorp/policy/backend/policytags.cc b/xorp/policy/backend/policytags.cc
+index 8ba1d7f..21c84ad 100644
+--- a/xorp/policy/backend/policytags.cc
++++ b/xorp/policy/backend/policytags.cc
+@@ -31,7 +31,7 @@ PolicyTags::PolicyTags() : _tag(0)
+ {
+ }
+ 
+-PolicyTags::PolicyTags(const XrlAtomList& alist) : _tag(0)
++PolicyTags::PolicyTags(const XrlAtomList& alist, string& err) : _tag(0)
+ {
+     // first is always tag
+     XLOG_ASSERT(alist.size() > 0);
+@@ -41,8 +41,11 @@ PolicyTags::PolicyTags(const XrlAtomList& alist) : _tag(0)
+ 	const XrlAtom& atom = alist.get(i);
+ 
+ 	// only support u32's
+-	if (atom.type() != xrlatom_uint32)
+-	    xorp_throw(PolicyTagsError, "XrlAtomList does not contain uint32's");
++	if (atom.type() != xrlatom_uint32) {
++	    set_invalid(true);
++	    err += "XrlAtomList does not contain uint32's";
++	    return;
++	}
+ 
+ 	uint32_t val = atom.uint32();
+ 
+@@ -56,14 +59,15 @@ PolicyTags::PolicyTags(const XrlAtomList& alist) : _tag(0)
+     }
+ }
+ 
+-void
+-PolicyTags::set_ptags(const Element& element)
++bool
++PolicyTags::set_ptags(const Element& element, string& err)
+ {
+     // we only support set elements
+     const ElemSetU32* es = dynamic_cast<const ElemSetU32*>(&element);
+-    if (!es)
+-	xorp_throw(PolicyTagsError, 
+-		   string("Element is not a set: ") + element.type());
++    if (!es) {
++	err += string("Element is not a set: ") + element.type();
++	return false;
++    }
+ 
+     _tags.clear();
+ 
+@@ -75,6 +79,7 @@ PolicyTags::set_ptags(const Element& element)
+ 	// insert.
+ 	_tags.insert(x.val());
+     }
++    return true;
+ }
+ 
+ string
+diff --git a/xorp/policy/backend/policytags.hh b/xorp/policy/backend/policytags.hh
+index e5aeec1..03083e4 100644
+--- a/xorp/policy/backend/policytags.hh
++++ b/xorp/policy/backend/policytags.hh
+@@ -18,14 +18,11 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/policy/backend/policytags.hh,v 1.9 2008/10/02 21:58:04 bms Exp $
+-
+ #ifndef __POLICY_BACKEND_POLICYTAGS_HH__
+ #define __POLICY_BACKEND_POLICYTAGS_HH__
+ 
+ 
+ 
+-#include "policy/common/policy_exception.hh"
+ #include "policy/common/element_base.hh"
+ #include "libxipc/xrl_atom_list.hh"
+ 
+@@ -38,19 +35,9 @@
+  * need to be tagged in the source protocol, so the export filter may match
+  * against tags.
+  */
+-class PolicyTags {
++class PolicyTags : public Invalid {
+ public:
+     /**
+-     * @short Exception thrown on failed initialization of tags.
+-     */
+-    class PolicyTagsError : public PolicyException {
+-    public:
+-        PolicyTagsError(const char* file, size_t line, 
+-			const string& init_why = "")   
+-	: PolicyException("PolicyTagsError", file, line, init_why) {} 
+-    };
+-
+-    /**
+      * Empty policytags may be safely created. No exception thrown
+      */
+     PolicyTags();
+@@ -61,7 +48,7 @@ public:
+      *
+      * @param xrlatoms list of xrlatom_uint32 atoms to initialize from.
+      */
+-    PolicyTags(const XrlAtomList& xrlatoms);
++    PolicyTags(const XrlAtomList& xrlatoms, string& err);
+ 
+     /**
+      * @return string representation of policytags.
+@@ -83,7 +70,7 @@ public:
+ 
+     Element* element_tag() const;
+     void     set_tag(const Element& e);
+-    void     set_ptags(const Element& e);
++    bool set_ptags(const Element& e, string& err);
+ 
+     /**
+      * Convert to XrlAtomList of xrlatom_uint32's
+diff --git a/xorp/policy/backend/set_manager.cc b/xorp/policy/backend/set_manager.cc
+index 6527d1c..c4113e9 100644
+--- a/xorp/policy/backend/set_manager.cc
++++ b/xorp/policy/backend/set_manager.cc
+@@ -32,18 +32,20 @@ SetManager::~SetManager() {
+     clear();
+ }
+ 
+-const Element&
+-SetManager::getSet(const string& setid) const {
+-    if(!_sets)
+-	xorp_throw(SetNotFound, "No sets initialized");
++const Element*
++SetManager::getSet(const string& setid, string& err) const {
++    if(!_sets) {
++	err += "No sets initialized";
++	return NULL;
++    }
+ 
+     SetMap::iterator i = _sets->find(setid);
+-    if(i == _sets->end())
+-        xorp_throw(SetNotFound, "Set not found: " + setid);
+-
+-    Element* e = (*i).second;
++    if(i == _sets->end()) {
++	err += "Set not found: " + setid;
++	return NULL;
++    }
+ 
+-    return *e;
++    return (*i).second;
+ }
+ 
+ void
+diff --git a/xorp/policy/backend/set_manager.hh b/xorp/policy/backend/set_manager.hh
+index 8c1c9cc..80b956a 100644
+--- a/xorp/policy/backend/set_manager.hh
++++ b/xorp/policy/backend/set_manager.hh
+@@ -29,7 +29,6 @@
+ 
+ 
+ #include "policy/common/element_base.hh"
+-#include "policy/common/policy_exception.hh"
+ 
+ /**
+  * @short Class that owns all sets. It resolves set names to ElemSet's.
+@@ -44,15 +43,6 @@ class SetManager :
+ public:
+     typedef map<string,Element*> SetMap;
+ 
+-    /**
+-     * @short Exception thrown when a set with an unknown name is requested.
+-     */
+-    class SetNotFound : public PolicyException {
+-    public:
+-        SetNotFound(const char* file, size_t line, const string& init_why = "")   
+-	  : PolicyException("SetNotFound", file, line, init_why) {}  
+-    };
+-
+     SetManager();
+     ~SetManager();
+ 
+@@ -62,7 +52,7 @@ public:
+      * @return the ElemSet requested.
+      * @param setid name of set wanted.
+      */
+-    const Element& getSet(const string& setid) const;
++    const Element* getSet(const string& setid, string& err) const;
+    
+     /**
+      * Resplace all sets with the given ones.
+diff --git a/xorp/policy/backend/single_varrw.cc b/xorp/policy/backend/single_varrw.cc
+index 5cf3cc7..38d6354 100644
+--- a/xorp/policy/backend/single_varrw.cc
++++ b/xorp/policy/backend/single_varrw.cc
+@@ -38,8 +38,8 @@ SingleVarRW::~SingleVarRW()
+         delete _trash[i];
+ }
+ 
+-const Element&
+-SingleVarRW::read(const Id& id)
++const Element*
++SingleVarRW::read(const Id& id, string& err)
+ {
+     // Maybe there was a write before a read for this variable, if so, just
+     // return the value... no need to bother the client.
+@@ -50,7 +50,7 @@ SingleVarRW::read(const Id& id)
+ 
+ 	// if it's the first read, inform the client.
+ 	if(!_did_first_read) {
+-	    start_read();
++	    start_read(err);
+ 	    _did_first_read = true;
+ 
+ 	    // try again, old clients initialize on start_read()
+@@ -70,23 +70,26 @@ SingleVarRW::read(const Id& id)
+ 
+ 	// out of luck...
+ 	if(!e)
+-	    xorp_throw(SingleVarRWErr, "Unable to read variable " + id);
++	    err += "Unable to read variable " + id;
+     }
+ 
+-    return *e;
++    return e;
+ }
+ 
+-void
+-SingleVarRW::write(const Id& id, const Element& e)
++bool
++SingleVarRW::write(const Id& id, const Element& e, string& err)
+ {
+     // XXX no paranoid checks on what we write
+ 
+     _elems[id] = &e;
+     _modified[id] = true;
++
++    UNUSED(err);
++    return true;
+ }
+ 
+-void
+-SingleVarRW::sync()
++bool
++SingleVarRW::sync(string& err)
+ {
+     bool first = true;
+ 
+@@ -96,19 +99,20 @@ SingleVarRW::sync()
+ 	    continue;
+ 
+ 	const Element* e = _elems[i];
+-	XLOG_ASSERT(e);
+ 	_modified[i] = false;
+ 
+ 	if (first) {
+ 	    // alert derived class we are committing
+-	    start_write();
++	    if (!start_write(err))
++		return false;
+ 	    first = false;
+ 	}
+ 
+ 	if (_pt) {
+ 	    switch (i) {
+ 	    case VAR_POLICYTAGS:
+-		_pt->set_ptags(*e);
++		if (!_pt->set_ptags(*e, err))
++		    return false;		
+ 		continue;
+ 
+ 	    case VAR_TAG:
+@@ -130,6 +134,7 @@ SingleVarRW::sync()
+     for (unsigned i = 0; i < _trashc; i++)
+         delete _trash[i];
+     _trashc = 0;
++    return true;
+ }
+ 
+ void
+diff --git a/xorp/policy/backend/single_varrw.hh b/xorp/policy/backend/single_varrw.hh
+index 4feb804..09da926 100644
+--- a/xorp/policy/backend/single_varrw.hh
++++ b/xorp/policy/backend/single_varrw.hh
+@@ -46,16 +46,6 @@ class SingleVarRW :
+     public VarRW
+ {
+ public:
+-    /**
+-     * @short Exception thrown on error, such as reading unsupported variable.
+-     */
+-    class SingleVarRWErr : public PolicyException {
+-    public:
+-	SingleVarRWErr(const char* file, size_t line, 
+-		       const string& init_why = "")   
+-            : PolicyException("SingleVarRWErr", file, line, init_why) {} 
+-    };
+-
+     SingleVarRW();
+     virtual ~SingleVarRW();
+ 
+@@ -65,7 +55,7 @@ public:
+      * @return variable requested.
+      * @param id identifier of variable to be read.
+      */
+-    const Element& read(const Id& id);
++    const Element* read(const Id& id, string& err);
+ 
+     /**
+      * Implementation of VarRW write.
+@@ -73,7 +63,7 @@ public:
+      * @param id identifier of variable to be written to.
+      * @param e value of variable to be written to.
+      */
+-    void write(const Id& id, const Element& e);
++    bool write(const Id& id, const Element& e, string& err);
+ 
+     /**
+      * Implementation of VarRW sync.
+@@ -83,7 +73,7 @@ public:
+      *
+      * trash is also emptied upon completion.
+      */
+-    void sync();
++    bool sync(string& err);
+ 
+     // XXX: be smart: register callback for element writing
+     /**
+@@ -106,13 +96,13 @@ public:
+      * If any reads are performed, this is a marker which informs the derived
+      * class that reads will now start.
+      */
+-    virtual void start_read() {} 
++    virtual void start_read(string& err) { UNUSED(err); } 
+ 
+     /**
+      * If any writes were performed, this is a marker which informs the derived
+      * class that writes will start.
+      */
+-    virtual void start_write() {}
++    virtual bool start_write(string& err) { UNUSED(err); return true; }
+ 
+     /**
+      * Write of a variable. The write MUST be performed now, as the element
+diff --git a/xorp/policy/backend/version_filter.cc b/xorp/policy/backend/version_filter.cc
+index 64d44b5..d888acc 100644
+--- a/xorp/policy/backend/version_filter.cc
++++ b/xorp/policy/backend/version_filter.cc
+@@ -44,22 +44,18 @@ VersionFilter::~VersionFilter()
+ {
+ }
+ 
+-void
+-VersionFilter::configure(const string& conf)
++bool
++VersionFilter::configure(const string& conf, string& err)
+ {
+     PolicyFilter* pf = new PolicyFilter();
+ 
+-    try {
+-	pf->configure(conf);
+-    // XXX: programming question:
+-    // Since i'm deleting pf... do i need to copy the exception [i.e. not ref to
+-    // exception?]
+-    } catch(PolicyException e) {
++    if (!pf->configure(conf, err)) {
+ 	delete pf;
+-	throw e;
++	return false;
+     }
+     
+     _filter = RefPf(pf);
++    return true;
+ }
+ 
+ void
+@@ -72,32 +68,31 @@ VersionFilter::reset()
+ }
+ 
+ bool
+-VersionFilter::acceptRoute(VarRW& varrw)
++VersionFilter::acceptRoute(VarRW& varrw, string& err, bool& ok)
+ {
++    ok = true;
+     // get the associated filter
+     RefPf filter;
+-    try {    
+-	const ElemFilter& ef = dynamic_cast<const ElemFilter&>(varrw.read(_fname));
+-	filter = ef.val();
+-    } catch(const bad_cast& exp) {
+-	const Element& e = varrw.read(_fname);
+-	UNUSED(e); // in case XLOG_FATAL is compiled out.
+-
+-	XLOG_FATAL("Reading %d but didn't get ElemFilter! Got %s: (%s)", 
+-		   _fname, e.type(), e.str().c_str());
+-	xorp_throw(PolicyException, "Reading filter but didn't get ElemFilter!");
++    const ElemFilter* ef = static_cast<const ElemFilter*>(varrw.read(_fname, err));
++    if (!ef) {
++	ok = false;
++	return false;
+     }
++    filter = ef->val();
+ 
+     // filter exists... run it
+     if(!filter.is_empty())
+-	return filter->acceptRoute(varrw);
++	return filter->acceptRoute(varrw, err, ok);
+ 
+     // assign it latest filter
+     ElemFilter cur(_filter);
+     // XXX for some reason varrw.write(_fname, ElemFilter(_filter)) won't
+     // work... i thought it would create a tmp var on the stack...
+-    varrw.write(_fname, cur);
++    if (!varrw.write(_fname, cur, err)) {
++	ok = false;
++	return false;
++    }
+ 
+     XLOG_ASSERT(!_filter.is_empty());
+-    return _filter->acceptRoute(varrw);
++    return _filter->acceptRoute(varrw, err, ok);
+ }
+diff --git a/xorp/policy/backend/version_filter.hh b/xorp/policy/backend/version_filter.hh
+index ca5751b..e51d166 100644
+--- a/xorp/policy/backend/version_filter.hh
++++ b/xorp/policy/backend/version_filter.hh
+@@ -55,7 +55,7 @@ public:
+      *
+      * @param str filter configuration.
+      */
+-    void configure(const string& str);
++    bool configure(const string& str, string& err);
+ 
+     /**
+      * Reset the filter.
+@@ -72,7 +72,7 @@ public:
+      * @return true if the route is accepted, false otherwise.
+      * @param varrw the VarRW associated with the route being filtered.
+      */
+-    bool acceptRoute(VarRW& varrw);
++    bool acceptRoute(VarRW& varrw, string& err, bool& ok);
+ 
+ private:
+     RefPf _filter;
+diff --git a/xorp/policy/code_generator.cc b/xorp/policy/code_generator.cc
+index 5db1751..5f26e53 100644
+--- a/xorp/policy/code_generator.cc
++++ b/xorp/policy/code_generator.cc
+@@ -56,7 +56,7 @@ CodeGenerator::~CodeGenerator()
+ }
+ 
+ const Element* 
+-CodeGenerator::visit_policy(PolicyStatement& policy)
++CodeGenerator::visit_policy(PolicyStatement& policy, string& err, bool& ok)
+ {
+     PolicyStatement::TermContainer& terms = policy.terms();
+ 
+@@ -64,7 +64,7 @@ CodeGenerator::visit_policy(PolicyStatement& policy)
+     for (PolicyStatement::TermContainer::iterator i = terms.begin(); 
+ 	 i != terms.end(); ++i) {
+ 	
+-	(i->second)->accept(*this);
++	(i->second)->accept(*this, err, ok);
+     }	    
+ 
+     ostringstream oss;
+@@ -79,25 +79,29 @@ CodeGenerator::visit_policy(PolicyStatement& policy)
+ }
+ 
+ const Element* 
+-CodeGenerator::visit_term(Term& term)
++CodeGenerator::visit_term(Term& term, string& err, bool& ok)
+ {
++    ok = true;
+     Term::Nodes& source = term.source_nodes();
+     Term::Nodes& dest = term.dest_nodes();
+     Term::Nodes& actions = term.action_nodes();
+-
+     Term::Nodes::iterator i;
+ 
+     _os << "TERM_START " << term.name() << endl ;
+ 
+     // do the source block
+     for(i = source.begin(); i != source.end(); ++i) {
+-	(i->second)->accept(*this);
++	(i->second)->accept(*this, err, ok);
++	if (!ok)
++	    return NULL;
+         _os << "ONFALSE_EXIT" << endl;
+     }
+ 
+     // Import policies should not have a dest block
+     if(!dest.empty()) {
+-	xorp_throw(CodeGeneratorErr, "Term " + term.name() + " has a dest part!");
++	err += "Term " + term.name() + " has a dest part!";
++	ok = false;
++	return NULL;
+     }
+ 
+     //
+@@ -107,42 +111,54 @@ CodeGenerator::visit_term(Term& term)
+     for(i = actions.begin(); i != actions.end(); ++i) {
+ 	if ((i->second)->is_accept_or_reject())
+ 	    continue;
+-        (i->second)->accept(*this);
++        (i->second)->accept(*this, err, ok);
++	if (!ok)
++	    return NULL;
+     }
+     for(i = actions.begin(); i != actions.end(); ++i) {
+-	if ((i->second)->is_accept_or_reject())
+-	    (i->second)->accept(*this);
++	if ((i->second)->is_accept_or_reject()) {
++	    (i->second)->accept(*this, err, ok);
++	    if (!ok)
++		return NULL;
++	}
+     }
+ 
+     _os << "TERM_END\n";
+     return NULL;
+-
+ }
+     
+ const Element* 
+-CodeGenerator::visit(NodeUn& node)
++CodeGenerator::visit(NodeUn& node, string& err, bool& ok)
+ {
+-    node.node().accept(*this);
++    node.node().accept(*this, err, ok);
++    if (!ok)
++	return NULL;
+ 
+     _os << node.op().str() << endl;
+     return NULL;
+ }
+ 
+ const Element* 
+-CodeGenerator::visit(NodeBin& node)
++CodeGenerator::visit(NodeBin& node, string& err, bool& ok)
+ {
+     // reverse order, so they can be popped in correct order
+-    node.right().accept(*this);
+-    node.left().accept(*this);
++    node.right().accept(*this, err, ok);
++    if (!ok)
++	return NULL;
++    node.left().accept(*this, err, ok);
++    if (!ok)
++	return NULL;
+ 
+     _os << node.op().str() << endl;
+     return NULL;
+ }
+ 
+ const Element* 
+-CodeGenerator::visit(NodeAssign& node)
++CodeGenerator::visit(NodeAssign& node, string& err, bool& ok)
+ {
+-    node.rvalue().accept(*this);
++    node.rvalue().accept(*this, err, ok);
++    if (!ok)
++	return NULL;
+ 
+     VarRW::Id id = _varmap.var2id(protocol(), node.varid());
+ 
+@@ -160,52 +176,64 @@ CodeGenerator::visit(NodeAssign& node)
+ }
+ 
+ const Element* 
+-CodeGenerator::visit(NodeElem& node)
++CodeGenerator::visit(NodeElem& node, string& err, bool& ok)
+ {
+     _os << "PUSH " << node.val().type() << " " << 
+ 	"\"" << node.val().str() << "\"" << endl;
++    UNUSED(err);
++    UNUSED(ok);
+     return NULL;	
+ }
+ 
+ const Element* 
+-CodeGenerator::visit(NodeVar& node)
++CodeGenerator::visit(NodeVar& node, string& err, bool& ok)
+ {
+     VarRW::Id id = _varmap.var2id(protocol(), node.val());
+ 
+     _os << "LOAD " << id << endl;
++    UNUSED(err);
++    UNUSED(ok);
+     return NULL;
+ }
+ 
+ const Element* 
+-CodeGenerator::visit(NodeSet& node)
++CodeGenerator::visit(NodeSet& node, string& err, bool& ok)
+ {
+     _os << "PUSH_SET " << node.setid() << endl;
+     _code.add_referenced_set_name(node.setid());
++    UNUSED(err);
++    UNUSED(ok);
+     return NULL;
+ }
+ 
+ const Element* 
+-CodeGenerator::visit(NodeAccept& /* node */)
++CodeGenerator::visit(NodeAccept& /* node */, string& err, bool& ok)
+ {
+     _os << "ACCEPT" << endl;
++    UNUSED(err);
++    UNUSED(ok);
+     return NULL;
+ }
+ 
+ const Element* 
+-CodeGenerator::visit(NodeReject& /* node */)
++CodeGenerator::visit(NodeReject& /* node */, string& err, bool& ok)
+ {
+     _os << "REJECT" << endl;
++    UNUSED(err);
++    UNUSED(ok);
+     return NULL;
+ }
+ 
+ const Element* 
+-CodeGenerator::visit_proto(NodeProto& node)
++CodeGenerator::visit_proto(NodeProto& node, string& err, bool& ok)
+ {
+-    ostringstream err;
++    ostringstream _err;
+ 
+     // import policies may not have protocol set.
+-    err << "INVALID protocol statement in line " << node.line() << endl;
+-    xorp_throw(CodeGeneratorErr, err.str());
++    _err << "INVALID protocol statement in line " << node.line() << endl;
++    err = _err.str();
++    ok = false;
++    return NULL;
+ }
+ 
+ const Code&
+@@ -215,21 +243,21 @@ CodeGenerator::code()
+ }
+ 
+ const Element*
+-CodeGenerator::visit(PolicyStatement& ps)
++CodeGenerator::visit(PolicyStatement& ps, string& err, bool& ok)
+ {
+-    return visit_policy(ps);
++    return visit_policy(ps, err, ok);
+ }
+ 
+ const Element*
+-CodeGenerator::visit(Term& term)
++CodeGenerator::visit(Term& term, string& err, bool& ok)
+ {
+-    return visit_term(term);
++    return visit_term(term, err, ok);
+ }
+ 
+ const Element*
+-CodeGenerator::visit(NodeProto& proto)
++CodeGenerator::visit(NodeProto& proto, string& err, bool& ok)
+ {
+-    return visit_proto(proto);
++    return visit_proto(proto, err, ok);
+ }
+ 
+ const string&
+@@ -239,7 +267,7 @@ CodeGenerator::protocol()
+ }
+ 
+ const Element*
+-CodeGenerator::visit(NodeNext& next)
++CodeGenerator::visit(NodeNext& next, string& err, bool& ok)
+ {
+     _os << "NEXT ";
+ 
+@@ -255,11 +283,13 @@ CodeGenerator::visit(NodeNext& next)
+ 
+     _os << endl;
+ 
++    UNUSED(err);
++    UNUSED(ok);
+     return NULL;
+ }
+ 
+ const Element*
+-CodeGenerator::visit(NodeSubr& node)
++CodeGenerator::visit(NodeSubr& node, string& err, bool& ok)
+ {
+     string policy       = node.policy();
+     PolicyStatement& ps = _pmap.find(policy);
+@@ -270,7 +300,9 @@ CodeGenerator::visit(NodeSubr& node)
+ 
+     bool subr = _subr;
+     _subr = true;
+-    visit(ps);
++    visit(ps, err, ok);
++    if (!ok)
++	return NULL;
+     _subr = subr;
+ 
+     string code = _code.code();
+diff --git a/xorp/policy/code_generator.hh b/xorp/policy/code_generator.hh
+index 539ba03..29bbec2 100644
+--- a/xorp/policy/code_generator.hh
++++ b/xorp/policy/code_generator.hh
+@@ -27,7 +27,6 @@
+ 
+ 
+ #include "policy/common/varrw.hh"
+-#include "policy/common/policy_exception.hh"
+ #include "var_map.hh"
+ #include "visitor.hh"
+ #include "code.hh"
+@@ -41,19 +40,6 @@
+  */
+ class CodeGenerator : public Visitor {
+ public:
+-    /**
+-     * @short Exception thrown if code generation fails.
+-     *
+-     * This may occur for example, if an import policy has a dest part. The
+-     * semantic check should however get rid of all errors.
+-     */
+-    class CodeGeneratorErr : public PolicyException {
+-    public:
+-        CodeGeneratorErr(const char* file, size_t line, 
+-			 const string& init_why = "")
+-            : PolicyException("CodeGeneratorErr", file, line, init_why) {}   
+-    };
+-
+     // used by source match code generator.
+     CodeGenerator(const VarMap& varmap, PolicyMap& pmap);
+ 
+@@ -79,19 +65,19 @@ public:
+ 
+     virtual ~CodeGenerator();
+ 
+-    const Element* visit(NodeUn& node);
+-    const Element* visit(NodeBin& node);
+-    const Element* visit(NodeAssign& node);
+-    const Element* visit(NodeElem& node);
+-    const Element* visit(NodeVar& node);
+-    const Element* visit(NodeSet& node);
+-    const Element* visit(NodeAccept& node);
+-    const Element* visit(NodeReject& node);
+-    const Element* visit(PolicyStatement& policy); 
+-    const Element* visit(Term& policy); 
+-    const Element* visit(NodeProto& policy); 
+-    const Element* visit(NodeNext& node);
+-    const Element* visit(NodeSubr& node);
++    const Element* visit(NodeUn& node, string& err, bool& ok);
++    const Element* visit(NodeBin& node, string& err, bool& ok);
++    const Element* visit(NodeAssign& node, string& err, bool& ok);
++    const Element* visit(NodeElem& node, string& err, bool& ok);
++    const Element* visit(NodeVar& node, string& err, bool& ok);
++    const Element* visit(NodeSet& node, string& err, bool& ok);
++    const Element* visit(NodeAccept& node, string& err, bool& ok);
++    const Element* visit(NodeReject& node, string& err, bool& ok);
++    const Element* visit(PolicyStatement& policy, string& err, bool& ok);
++    const Element* visit(Term& policy, string& err, bool& ok);
++    const Element* visit(NodeProto& policy, string& err, bool& ok);
++    const Element* visit(NodeNext& node, string& err, bool& ok);
++    const Element* visit(NodeSubr& node, string& err, bool& ok);
+ 
+     /**
+      * @return code generated.
+@@ -101,9 +87,9 @@ public:
+ protected:
+     // may not overload virtual functions =(
+     // yes it is a triple dispatch... but we will get there eventually =D
+-    virtual const Element* visit_policy(PolicyStatement& policy);
+-    virtual const Element* visit_term(Term& term);
+-    virtual const Element* visit_proto(NodeProto& node);
++    virtual const Element* visit_policy(PolicyStatement& policy, string& err, bool& ok);
++    virtual const Element* visit_term(Term& term, string& err, bool& ok);
++    virtual const Element* visit_proto(NodeProto& node, string& err, bool& ok);
+     virtual const string&  protocol();
+ 
+     Code	    _code;
+diff --git a/xorp/policy/common/dispatcher.cc b/xorp/policy/common/dispatcher.cc
+index 1a734c3..b76324f 100644
+--- a/xorp/policy/common/dispatcher.cc
++++ b/xorp/policy/common/dispatcher.cc
+@@ -34,7 +34,7 @@
+ #include "register_operations.hh"
+ 
+ // init static members
+-Dispatcher::Value Dispatcher::_map[32768];
++Dispatcher::ValueHolder Dispatcher::_map[32768];
+ 
+ Dispatcher::Dispatcher()
+ {
+@@ -60,7 +60,7 @@ unsigned int Dispatcher::makeKey(const Oper& op, unsigned argc, const Element**
+     return key;
+ }
+ 
+-Dispatcher::Value Dispatcher::lookup(const Oper& op, unsigned argc, const Element** argv) const
++Dispatcher::ValueHolder Dispatcher::lookup(const Oper& op, unsigned argc, const Element** argv) const
+ {
+     XLOG_ASSERT(op.arity() == argc);
+ 
+@@ -101,12 +101,13 @@ void Dispatcher::logRun(const Oper& op, unsigned argc, const Element** argv, int
+ 
+ /* If argc is 2, then argv[1] is left, argv[0] is right argument. */
+ Element*
+-Dispatcher::run(const Oper& op, unsigned argc, const Element** argv) const
++Dispatcher::run(const Oper& op, unsigned argc, const Element** argv, string& err) const
+ {
+     XLOG_ASSERT(op.arity() == argc);
+     Element* rv;
+     unsigned int key = op.hash();
+     XLOG_ASSERT(key);
++    bool ok = true;
+ 
+     // check for null arguments and special case them: return null
+     for (unsigned i = 0; i < argc; i++) {
+@@ -128,73 +129,88 @@ Dispatcher::run(const Oper& op, unsigned argc, const Element** argv) const
+     if (argc == 2 && typeid(op) == typeid(OpCtr)) {
+ 	string arg1type = argv[1]->type();
+ 
+-	if (arg1type != ElemStr::id)
+-	    xorp_throw(OpNotFound,
+-		       "First argument of ctr must be txt type, but is: " 
+-		       + arg1type);
++	if (arg1type != ElemStr::id) {
++	    err += "First argument of ctr must be txt type, but is: " 
++		+ arg1type;
++	    return NULL;
++	}
+ 
+ 	const ElemStr& es = dynamic_cast<const ElemStr&>(*argv[1]);
+ 
+-	return operations::ctr(es, *(argv[0]));
++	return operations::ctr(es, *(argv[0]), err);
+     }
+ 
+     XLOG_ASSERT(key < DISPATCHER_MAP_SZ);
+ 
+     // find function
+-    Value funct = _map[key];
++    ValueHolder funct = _map[key];
+ 
+     // expand args and execute function
+     switch (argc) {
+ 	case 1:
+-	    if (!funct.un) {
++	    if (!funct.v_u.un) {
+ 		logRun(op, argc, argv, key, "funct.un is NULL");
+-		XLOG_ASSERT(funct.un);
++		XLOG_ASSERT(0);
+ 	    }
+-	    rv = funct.un(*(argv[0]));
++	    rv = funct.v_u.un(*(argv[0]));
+ 	    //XLOG_WARNING("running unary operation: %s  key: %d arg: %s result: %s\n",
+ 	    //	 op.str().c_str(), key, argv[0]->dbgstr().c_str(), rv->dbgstr().c_str());
+ 	    return rv;
+ 	
+ 	case 2:
+-	    if (!funct.bin) {
+-		logRun(op, argc, argv, key, "funct.bin is NULL");
+-		XLOG_ASSERT(funct.bin);
++	    if (!funct.v_u.bin_) {
++		logRun(op, argc, argv, key, "funct.bin_ is NULL");
++		XLOG_ASSERT(0);
++	    }
++	    switch (funct.type) {
++	    case BIN_:
++		rv = funct.v_u.bin_(*(argv[1]), *(argv[0]));
++		break;
++	    case BIN_E:
++		rv = funct.v_u.bin_e(*(argv[1]), *(argv[0]), err);
++		break;
++	    case BIN_EB:
++		rv = funct.v_u.bin_eb(*(argv[1]), *(argv[0]), err, ok);
++		break;
++	    default:
++		XLOG_FATAL("Invalid type: %d\n", funct.type);
++	    }
++	    if (!ok) {
++		delete rv;
++		return NULL;
+ 	    }
+-	    rv = funct.bin(*(argv[1]), *(argv[0]));
+ 	    //XLOG_WARNING("running binary operation: %s  key: %d left-arg1: %s  right: %s result: %s\n",
+ 	    //	 op.str().c_str(), key, argv[1]->dbgstr().c_str(), argv[0]->dbgstr().c_str(),
+ 	    //	 rv->dbgstr().c_str());
+ 	    return rv;
+-	// the infrastructure is ready however.
++
+ 	default:
+-	    xorp_throw(OpNotFound, "Operations of arity: " +
+-		       policy_utils::to_str(argc) + 
+-		       " not supported");
++	    err += "Operations of arity: " + policy_utils::to_str(argc) + " not supported";
++	    return NULL;
+     }
+-    // unreach
+ }
+ 
+ 
+ Element* 
+-Dispatcher::run(const UnOper& op, const Element& arg) const
++Dispatcher::run(const UnOper& op, const Element& arg, string& err) const
+ {
+     static const Element* argv[1];
+ 
+     argv[0] = &arg;
+     // execute generic run
+ 
+-    return run(op, 1, argv);
++    return run(op, 1, argv, err);
+ }
+ 
+ Element* 
+ Dispatcher::run(const BinOper& op, 
+ 		const Element& left, 
+-		const Element& right) const
++		const Element& right, string& err) const
+ {
+     static const Element* argv[2];
+ 
+     argv[0] = &right;
+     argv[1] = &left;
+ 
+-    return run(op, 2, argv);
++    return run(op, 2, argv, err);
+ }
+diff --git a/xorp/policy/common/dispatcher.hh b/xorp/policy/common/dispatcher.hh
+index 6014288..3a2761f 100644
+--- a/xorp/policy/common/dispatcher.hh
++++ b/xorp/policy/common/dispatcher.hh
+@@ -27,7 +27,6 @@
+ #include "element_base.hh"
+ #include "operator_base.hh"
+ #include "register_operations.hh"
+-#include "policy_exception.hh"
+ 
+ /**
+  * @short Link between elements and operations. Executes operations on elments.
+@@ -47,15 +46,34 @@ public:
+     Dispatcher();
+ 
+     /**
+-     * @short Exception thrown if no operation is found for given arguments.
++     * Method to register a binary operation callback with dispatcher.
+      *
+-     * If there is no combination for the given operation and element types.
++     * @param L concrete class of first argument
++     * @param R concrete class of second argument
++     * @param funct function to be called to perform operation.
++     * @param op binary operation to be registered.
+      */
+-    class OpNotFound : public PolicyException {
+-    public:
+-	OpNotFound(const char* file, size_t line, const string& init_why = "")   
+-	    : PolicyException("OpNotFound", file, line, init_why) {}
+-    };
++    template<class L, class R, Element* (*funct)(const L&,const R&)>
++    void add(const BinOper& op) {
++	// XXX: do it in a better way
++	L arg1;
++	R arg2;
++
++	const Element* args[] = { &arg1, &arg2 };
++
++	unsigned int key = makeKey(op, 2, args);
++
++	struct Local {
++	    static Element* Trampoline(const Element& left, const Element& right) {
++		return funct(static_cast<const L&>(left),
++			     static_cast<const R&>(right));
++	    }
++	};
++
++	_map[key].v_u.bin_ = &Local::Trampoline;
++	_map[key].type = BIN_;
++	logAdd(op, key, &arg1, &arg2);
++    }
+ 
+     /**
+      * Method to register a binary operation callback with dispatcher.
+@@ -65,7 +83,7 @@ public:
+      * @param funct function to be called to perform operation.
+      * @param op binary operation to be registered.
+      */
+-    template<class L, class R, Element* (*funct)(const L&,const R&)>
++    template<class L, class R, Element* (*funct)(const L&,const R&,string& err)>
+     void add(const BinOper& op) {
+ 	// XXX: do it in a better way
+ 	L arg1;
+@@ -76,13 +94,44 @@ public:
+ 	unsigned int key = makeKey(op, 2, args);
+ 
+ 	struct Local {
+-	    static Element* Trampoline(const Element& left, const Element& right) {
++	    static Element* Trampoline(const Element& left, const Element& right, string& err) {
+ 		return funct(static_cast<const L&>(left),
+-			     static_cast<const R&>(right));
++			     static_cast<const R&>(right), err);
+ 	    }
+ 	};
+ 
+-	_map[key].bin = &Local::Trampoline;
++	_map[key].v_u.bin_e = &Local::Trampoline;
++	_map[key].type = BIN_E;
++	logAdd(op, key, &arg1, &arg2);
++    }
++
++    /**
++     * Method to register a binary operation callback with dispatcher.
++     *
++     * @param L concrete class of first argument
++     * @param R concrete class of second argument
++     * @param funct function to be called to perform operation.
++     * @param op binary operation to be registered.
++     */
++    template<class L, class R, Element* (*funct)(const L&,const R&,string& err,bool& ok)>
++    void add(const BinOper& op) {
++	// XXX: do it in a better way
++	L arg1;
++	R arg2;
++
++	const Element* args[] = { &arg1, &arg2 };
++
++	unsigned int key = makeKey(op, 2, args);
++
++	struct Local {
++	    static Element* Trampoline(const Element& left, const Element& right, string& err, bool& ok) {
++		return funct(static_cast<const L&>(left),
++			     static_cast<const R&>(right), err, ok);
++	    }
++	};
++
++	_map[key].v_u.bin_eb = &Local::Trampoline;
++	_map[key].type = BIN_EB;
+ 	logAdd(op, key, &arg1, &arg2);
+     }
+ 
+@@ -107,7 +156,7 @@ public:
+ 	    }
+ 	};
+ 
+-	_map[key].un = &Local::Trampoline;
++	_map[key].v_u.un = &Local::Trampoline;
+ 
+ 	logAdd(op, key, &arg, NULL);
+     }
+@@ -126,7 +175,7 @@ public:
+      * @param op operation to dispatch.
+      * @param args arguments of operation.
+      */
+-    Element* run(const Oper& op, unsigned argc, const Element** argv) const;
++    Element* run(const Oper& op, unsigned argc, const Element** argv, string& err) const;
+ 
+     /**
+      * Execute an unary operation.
+@@ -135,7 +184,7 @@ public:
+      * @param op Operation to perform.
+      * @param arg Argument of operation.
+      */
+-    Element* run(const UnOper& op, const Element& arg) const;
++    Element* run(const UnOper& op, const Element& arg, string& err) const;
+     
+     /**
+      * Execute a binary operation.
+@@ -147,10 +196,12 @@ public:
+      */
+     Element* run(const BinOper& op, 
+ 		 const Element& left, 
+-		 const Element& right) const;
++		 const Element& right, string& err) const;
+ 
+ private:
+     // Callback for binary operation
++    typedef Element* (*CB_bin_eb)(const Element&, const Element&, string& err, bool& ok);
++    typedef Element* (*CB_bin_e)(const Element&, const Element&, string& err);
+     typedef Element* (*CB_bin)(const Element&, const Element&);
+     
+     // Callback for unary operation
+@@ -159,11 +210,24 @@ private:
+     // A key relates to either a binary (x)or unary operation.
+     typedef union {
+ 	CB_un un;
+-        CB_bin bin;
++        CB_bin bin_;
++	CB_bin_e bin_e;
++	CB_bin_eb bin_eb;
+     } Value;
+ 
++    enum ValueBinType {
++	BIN_,
++	BIN_E,
++	BIN_EB
++    };
++
++    struct ValueHolder {
++	ValueBinType type;
++	Value v_u;
++    };
++
+     // Hashtable would be better
+-    typedef map<unsigned int, Value> Map;
++    typedef map<unsigned int, ValueHolder> Map;
+ 
+     /**
+      * Create a key for the callback table based on operation and arguments.
+@@ -183,12 +247,12 @@ private:
+      * @param op operation to perform.
+      * @param args the arguments of the operation.
+      */
+-    Value lookup(const Oper& op, unsigned argc, const Element** argv) const;
++    ValueHolder lookup(const Oper& op, unsigned argc, const Element** argv) const;
+ 
+     // Only one global map. Creating multiple dispatcher is thus harmless.
+     // However, we may not have different dispatchers.
+-#define DISPATCHER_MAP_SZ 32768
+-    static Value _map[DISPATCHER_MAP_SZ];
++#define DISPATCHER_MAP_SZ 32768 /* TODO-BEN:  Uses lots of RAM!! */
++    static ValueHolder _map[DISPATCHER_MAP_SZ];
+ };
+ 
+ #endif // __POLICY_COMMON_DISPATCHER_HH__
+diff --git a/xorp/policy/common/elem_null.hh b/xorp/policy/common/elem_null.hh
+index ffe871d..178870c 100644
+--- a/xorp/policy/common/elem_null.hh
++++ b/xorp/policy/common/elem_null.hh
+@@ -41,7 +41,7 @@ public:
+     static Hash _hash;
+             
+     ElemNull() : Element(_hash) {}
+-    ElemNull(const char* /* c_str */) : Element(_hash) {}
++    ElemNull(const char* /* c_str */, string&) : Element(_hash) {}
+                 
+     string str() const { return "null"; }
+ 
+diff --git a/xorp/policy/common/elem_set.cc b/xorp/policy/common/elem_set.cc
+index f67e408..5c0db0f 100644
+--- a/xorp/policy/common/elem_set.cc
++++ b/xorp/policy/common/elem_set.cc
+@@ -26,12 +26,13 @@
+ 
+ 
+ template <class T>
+-ElemSetAny<T>::ElemSetAny(const Set& val) : ElemSet(_hash), _val(val) 
++ElemSetAny<T>::ElemSetAny(const Set& val, string& err) : ElemSet(_hash), _val(val) 
+ {
++    UNUSED(err);
+ }
+ 
+ template <class T>
+-ElemSetAny<T>::ElemSetAny(const char* c_str) : ElemSet(_hash)
++ElemSetAny<T>::ElemSetAny(const char* c_str, string& err) : ElemSet(_hash)
+ {
+     if (!c_str)
+ 	return;
+@@ -42,8 +43,15 @@ ElemSetAny<T>::ElemSetAny(const char* c_str) : ElemSet(_hash)
+ 
+     for (set<string>::iterator i = s.begin(); i != s.end(); ++i) {
+ 	const char* str = (*i).c_str();
+-	_val.insert(T(str));
++	T t(str, err);
++	if (t.invalid()) {
++	    set_invalid(true);
++	}
++	else {
++	    _val.insert(t);
++	}
+     }
++    UNUSED(err);
+ }
+ 
+ template <class T>
+diff --git a/xorp/policy/common/elem_set.hh b/xorp/policy/common/elem_set.hh
+index 13f0328..1da8c40 100644
+--- a/xorp/policy/common/elem_set.hh
++++ b/xorp/policy/common/elem_set.hh
+@@ -50,12 +50,12 @@ public:
+     static const char* id;
+     static Hash _hash;
+ 
+-    ElemSetAny(const Set& val);
++    ElemSetAny(const Set& val, string& err);
+ 
+     /**
+      * @param c_str initialize from string in the form element1,element2,...
+      */
+-    ElemSetAny(const char* c_str);
++    ElemSetAny(const char* c_str, string& err);
+     ElemSetAny();
+ 
+     /**
+diff --git a/xorp/policy/common/element.cc b/xorp/policy/common/element.cc
+index a09a417..ceed8d2 100644
+--- a/xorp/policy/common/element.cc
++++ b/xorp/policy/common/element.cc
+@@ -24,7 +24,6 @@
+ #include "elem_null.hh"
+ #include "elem_filter.hh"
+ #include "elem_bgp.hh"
+-#include "policy_exception.hh"
+ #include "operator.hh"
+ 
+ // Initialization of static members.
+@@ -81,7 +80,7 @@ static struct { string text; uint32_t value; } com_aliases[] = {
+  *  "N:"  -> ((uint16_t) N) << 16
+  *  "N:M" -> (((uint16_t) N) << 16) + (uint16_t) M
+  */
+-ElemCom32::ElemCom32(const char* c_str) : Element(_hash) {
++ElemCom32::ElemCom32(const char* c_str, string& err) : Element(_hash) {
+     // Semantic checker needs this
+     if(c_str == NULL) {
+ 	_val = 0;
+@@ -95,9 +94,11 @@ ElemCom32::ElemCom32(const char* c_str) : Element(_hash) {
+ 	uint32_t msw, lsw;
+ 	msw = strtoul(c_str, NULL, 0);
+ 	lsw = strtoul(++colon, NULL, 0);
+-	if (msw > 0xffff || lsw > 0xffff)
+-	    xorp_throw(PolicyException, "uint16_t overflow for community " +
+-		       string(c_str));
++	if (msw > 0xffff || lsw > 0xffff) {
++	    err += "uint16_t overflow for community " + string(c_str);
++	    set_invalid(true);
++	    return;
++	}
+ 	_val = (msw << 16) + lsw;
+     } else {
+ 	string x = string(c_str);
+@@ -128,12 +129,11 @@ ElemNet<A>::ElemNet() : Element(_hash), _net(NULL), _mod(MOD_NONE), _op(NULL)
+ }
+ 
+ template<class A>
+-ElemNet<A>::ElemNet(const char* str) : Element(_hash), _net(NULL),
+-				       _mod(MOD_NONE), _op(NULL)
++ElemNet<A>::ElemNet(const char* str, string& err) : Element(_hash), _net(NULL),
++						    _mod(MOD_NONE), _op(NULL)
+ {
+     if (!str) {
+ 	_net = new A();
+-
+ 	return;
+     }
+ 
+@@ -144,18 +144,20 @@ ElemNet<A>::ElemNet(const char* str) : Element(_hash), _net(NULL),
+     if (p) {
+ 	in = in.substr(0, p - str);
+ 
+-	_mod = str_to_mod(++p);
++	_mod = str_to_mod(++p, err);
++	if (_mod == MOD_INVALID) {
++	    set_invalid(true);
++	    return;
++	}
+     }
+ 
+     // parse net
+-    try {
+-	    _net = new A(in.c_str());
+-    } catch(...) {
++    _net = new A(in.c_str());
++    if (_net->invalid()) {
++	set_invalid(true);
+ 	ostringstream oss;
+-
+ 	oss << "Can't init " << id << " using " << in;
+-
+-	xorp_throw(PolicyException, oss.str());
++	err += oss.str();
+     }
+ }
+ 
+@@ -226,7 +228,7 @@ ElemNet<A>::operator==(const ElemNet<A>& rhs) const
+ 
+ template<class A>
+ typename ElemNet<A>::Mod
+-ElemNet<A>::str_to_mod(const char* p)
++ElemNet<A>::str_to_mod(const char* p, string& err)
+ {
+     string in = p;
+ 
+@@ -249,13 +251,9 @@ ElemNet<A>::str_to_mod(const char* p)
+ 	return MOD_EXACT;
+ 
+     } else {
+-	string err = "Can't parse modifier: " + in;
+-
+-	xorp_throw(PolicyException, err);
++	err += "Can't parse modifier: " + in;
++	return MOD_INVALID;
+     }
+-
+-    // unreach
+-    abort();
+ }
+ 
+ template<class A>
+@@ -283,10 +281,11 @@ ElemNet<A>::mod_to_str(Mod mod)
+ 
+     case MOD_NOT:
+ 	return "!=";
+-    }
+ 
+-    // unreach
+-    abort();
++    case MOD_INVALID:
++	break;
++    }
++    return "MOD_INVALID";
+ }
+ 
+ template<class A>
+@@ -328,6 +327,9 @@ ElemNet<A>::op() const
+     case MOD_ORLONGER:
+ 	_op = &LE;
+ 	break;
++    case MOD_INVALID:
++	XLOG_FATAL("Invalid mod");
++	break;
+     }
+ 
+     XLOG_ASSERT(_op);
+@@ -347,7 +349,7 @@ ElemNextHop<A>::ElemNextHop(const A& nh) : Element(_hash), _var(VAR_NONE),
+ }
+ 
+ template <class A>
+-ElemNextHop<A>::ElemNextHop(const char* in) : Element(_hash), _var(VAR_NONE)
++ElemNextHop<A>::ElemNextHop(const char* in, string& err) : Element(_hash), _var(VAR_NONE)
+ {
+     if (!in)
+ 	return;
+@@ -373,6 +375,10 @@ ElemNextHop<A>::ElemNextHop(const char* in) : Element(_hash), _var(VAR_NONE)
+ 	_var = VAR_NONE;
+ 	_addr = A(in);
+     }
++    if (_addr.invalid()) {
++	err += string("Could not parse address: ") + in + "\n";
++	set_invalid(true);
++    }
+ }
+ 
+ template <class A>
+diff --git a/xorp/policy/common/element.hh b/xorp/policy/common/element.hh
+index cafb847..47ebae6 100644
+--- a/xorp/policy/common/element.hh
++++ b/xorp/policy/common/element.hh
+@@ -29,7 +29,6 @@
+ #include "libxorp/ipv4net.hh"
+ #include "libxorp/ipv6net.hh"
+ #include "element_base.hh"
+-#include "policy_exception.hh"
+ #include "policy_utils.hh"
+ #include "policy/policy_module.h"
+ #include "operator_base.hh"
+@@ -84,12 +83,13 @@ public:
+      *
+      * @param c_str initialize via string, or assign default value if null.
+      */
+-    ElemInt32(const char* c_str) : Element(_hash)
++    ElemInt32(const char* c_str, string& err) : Element(_hash)
+     {
+ 	if (c_str)
+ 	    _val = strtol(c_str,NULL,10);
+ 	else
+ 	    _val = 0;
++	UNUSED(err);
+     }
+ 
+     ElemInt32(const int32_t val) : Element(_hash), _val(val) {}
+@@ -128,15 +128,16 @@ public:
+ 
+     ElemU32() : Element(_hash) {}
+ 
+-    ElemU32(const char* c_str) : Element(_hash)
++    ElemU32(const char* c_str, string& err) : Element(_hash)
+     {
+ 	if (c_str)
+ 	    _val = strtoul(c_str,NULL,10); 
+ 	else
+ 	    _val = 0;
++	UNUSED(err);
+     }
+ 
+-    ElemU32(const uint32_t val) : Element(_hash), _val(val) {}
++    ElemU32(const uint32_t val) : Element(_hash), _val(val) { }
+ 
+     string str() const
+     {
+@@ -172,7 +173,7 @@ public:
+     static Hash _hash;
+ 
+     ElemCom32() : Element(_hash) {}
+-    ElemCom32(const char*);		// in element.cc
++    ElemCom32(const char*, string& err); // in element.cc
+     ElemCom32(const uint32_t val) : Element(_hash), _val(val) {}
+ 
+     string str() const;			// in element.cc
+@@ -203,12 +204,13 @@ public:
+ 
+     ElemStr() : Element(_hash) {}
+ 
+-    ElemStr(const char* val) : Element(_hash)
++    ElemStr(const char* val, string& err) : Element(_hash)
+     {
+ 	if (val)
+ 	    _val = val;
+ 	else
+ 	    _val = "";
++	UNUSED(err);
+     }
+ 
+     ElemStr(const string& str) : Element(_hash), _val(str) {}
+@@ -240,12 +242,13 @@ public:
+ 
+     ElemBool() : Element(_hash) {}
+ 
+-    ElemBool(const char* c_str) : Element(_hash)
++    ElemBool(const char* c_str, string& err) : Element(_hash)
+     {
+ 	if (c_str && (strcmp(c_str,"true") == 0) )
+ 	    _val = true;
+ 	else
+ 	    _val = false;
++	UNUSED(err);
+     }
+ 
+     ElemBool(const bool val) : Element(_hash), _val(val) {}
+@@ -284,17 +287,6 @@ private:
+ template<class T>
+ class ElemAny : public Element {
+ public:
+-    
+-    /**
+-     * @short exception thrown if c-stype string initialization fails.
+-     */
+-    class ElemInitError : public PolicyException {
+-    public:
+-	ElemInitError(const char* file, size_t line, const string& init_why = "")   
+-	    : PolicyException("ElemInitError", file, line, init_why) {}  
+-    };
+-
+-
+     static const char* id;
+     static Hash _hash;
+ 
+@@ -306,19 +298,18 @@ public:
+      * it is caught and an ElemInitError exception is thrown. The original
+      * exception is lost.
+      */
+-    ElemAny(const char* c_str) : Element(_hash), _val()
++    ElemAny(const char* c_str, string& err) : Element(_hash), _val()
+     {
+ 	if (c_str) {
+-	    try {
+-		_val = T(c_str);
+-	    } catch (...) {
+-		string err = "Unable to initialize element of type ";
++	    _val = T(c_str);
++	    if (_val.invalid()) {
++		set_invalid(true);
++		err += "Unable to initialize element of type ";
+ 		err += id;
+ 		err += " with ";
+ 		err += c_str;
+-
+-		xorp_throw(ElemInitError, err);
+-
++		err += "\n";
++		return;
+ 	    }
+ 	    
+ 	}
+@@ -372,16 +363,6 @@ private:
+ template<class T>
+ class ElemRefAny : public Element {
+ public:
+-    /**
+-     * @short exception thrown if c-stype string initialization fails.
+-     */
+-    class ElemInitError : public PolicyException {
+-    public:
+-	ElemInitError(const char* file, size_t line, const string& init_why = "")   
+-	    : PolicyException("ElemInitError", file, line, init_why) {}
+-    };
+-
+-    
+     static const char* id;
+     static Hash _hash;
+ 
+@@ -396,22 +377,20 @@ public:
+      * it is caught and an ElemInitError exception is thrown. The original
+      * exception is lost.
+      */
+-    ElemRefAny(const char* c_str) : Element(_hash), _val(NULL), _free(false)
++    ElemRefAny(const char* c_str, string& err) : Element(_hash), _val(NULL), _free(false)
+     {
+         if (c_str) {
+-            try {
+-                _val = new T(c_str);
+-                _free = true;
+-            } catch(...) {
+-                string err = "Unable to initialize element of type ";
++	    _val = new T(c_str);
++	    _free = true;
++	    if (_val->invalid()) {
++		set_invalid(true);
++                err += "Unable to initialize element of type ";
+                 err += id;
+                 err += " with ";
+                 err += c_str;
+-
+-                xorp_throw(ElemInitError, err);
+-
++		err += "\n";
++		return;
+             }
+-
+         }
+ 	// else leave it to the default value
+ 	else {
+@@ -483,14 +462,15 @@ public:
+ 	MOD_ORSHORTER,
+ 	MOD_LONGER,
+ 	MOD_ORLONGER,
+-	MOD_NOT
++	MOD_NOT,
++	MOD_INVALID
+     };
+ 
+     static const char*	id;
+     static Hash		_hash;
+ 
+     ElemNet();
+-    ElemNet(const char*);
++    ElemNet(const char*, string& err);
+     ElemNet(const A&);
+     ElemNet(const ElemNet<A>&);	    // copyable
+     ~ElemNet();
+@@ -498,7 +478,7 @@ public:
+     string	    str() const;
+     const char*	    type() const;
+     const A&	    val() const;
+-    static Mod	    str_to_mod(const char* p);
++    static Mod	    str_to_mod(const char* p, string& err);
+     static string   mod_to_str(Mod mod);
+     BinOper&	    op() const;
+ 
+@@ -554,7 +534,7 @@ public:
+     static const char*	id;
+     static Hash		_hash;
+ 
+-    ElemNextHop(const char*);
++    ElemNextHop(const char*, string& err);
+     ElemNextHop();
+     ElemNextHop(const A& nh);
+ 
+diff --git a/xorp/policy/common/element_base.cc b/xorp/policy/common/element_base.cc
+index 0e7a134..79a75a9 100644
+--- a/xorp/policy/common/element_base.cc
++++ b/xorp/policy/common/element_base.cc
+@@ -24,7 +24,6 @@
+ #include "libxorp/xorp.h"
+ #include "element_base.hh"
+ #include "libxorp/xlog.h"
+-#include "policy_exception.hh"
+ #include "element.hh"
+ 
+ Element::~Element()
+@@ -33,9 +32,9 @@ Element::~Element()
+ 
+ Element::Element(Hash hash) : _refcount(1), _hash(hash)
+ {
+-    if (_hash >= HASH_ELEM_MAX)
+-        xorp_throw(PolicyException,
+-                   "Too many elems for dispatcher---find a better hashing mechanism\n");
++    if (_hash >= HASH_ELEM_MAX) {
++	XLOG_FATAL("Too many elems for dispatcher---find a better hashing mechanism\n");
++    }
+ }
+ 
+ // TODO do a proper refcount implementation, factory, object reuse, etc.
+diff --git a/xorp/policy/common/element_base.hh b/xorp/policy/common/element_base.hh
+index a15f3c6..2063924 100644
+--- a/xorp/policy/common/element_base.hh
++++ b/xorp/policy/common/element_base.hh
+@@ -22,7 +22,7 @@
+ #ifndef __POLICY_COMMON_ELEMENT_BASE_HH__
+ #define __POLICY_COMMON_ELEMENT_BASE_HH__
+ 
+-
++#include <libxorp/exceptions.hh>
+ 
+ /**
+  * @short Basic object type used by policy engine.
+@@ -30,7 +30,7 @@
+  * This element hierarchy is similar to XrlAtom's but exclusive to policy
+  * components.
+  */
+-class Element {
++class Element : public Invalid {
+ public:
+     typedef unsigned char Hash;
+ 
+diff --git a/xorp/policy/common/element_factory.cc b/xorp/policy/common/element_factory.cc
+index fbf4f5a..e9523a2 100644
+--- a/xorp/policy/common/element_factory.cc
++++ b/xorp/policy/common/element_factory.cc
+@@ -45,16 +45,18 @@ ElementFactory::add(const string& key, Callback cb)
+ }
+ 
+ Element* 
+-ElementFactory::create(const string& key, const char* arg)
++ElementFactory::create(const string& key, const char* arg, string& err)
+ {
+     Map::iterator i = _map.find(key);
+ 
+     // No way of creating element
+-    if(i == _map.end())
+-	xorp_throw(UnknownElement, key);
++    if(i == _map.end()) {
++       err += "Unknown Element: " + key;
++       return NULL;
++    }
+ 
+     // execute the callback
+-    return (i->second)(arg);
++    return (i->second)(arg, err);
+ }
+ 
+ bool
+diff --git a/xorp/policy/common/element_factory.hh b/xorp/policy/common/element_factory.hh
+index 5501b03..ec0d381 100644
+--- a/xorp/policy/common/element_factory.hh
++++ b/xorp/policy/common/element_factory.hh
+@@ -29,7 +29,6 @@
+ #include "register_elements.hh"
+ #include "element_base.hh"
+ #include "elem_set.hh"
+-#include "policy_exception.hh"
+ 
+ /**
+  * @short A factory for creating elements based on their type.
+@@ -48,7 +47,7 @@
+ class ElementFactory {
+ public:
+     // Function called to create element
+-    typedef Element* (*Callback)(const char*);
++    typedef Element* (*Callback)(const char*, string& err);
+     
+     // Container which maps a key to a callback. May consider using a hash table.
+     typedef map<string,Callback> Map;
+@@ -56,26 +55,12 @@ public:
+     ElementFactory();
+ 
+     /**
+-     * @short Exception thrown if an Unknown element is being created.
+-     *
+-     * When creating an element of a type which has no registered creation
+-     * callback with the factory.
+-     */
+-    class UnknownElement : public PolicyException {
+-    public:
+-	UnknownElement(const char* file, size_t line, 
+-		       const string& init_why = "")   
+-            : PolicyException("UnknownElement", file, line, 
+-			      "ElementFactory: unable to create unknown element: " + init_why) {}  
+-    };
+-
+-    /**
+      * Register a callback with the factory.
+      *
+      * @param key the element id/type. Must be unique.
+      * @param cb function to be called when the element must be created.
+      */
+-    void add(const string& key, Callback cb); 
++    void add(const string& key, Callback cb);
+ 
+     /**
+      * Create an element.
+@@ -84,7 +69,7 @@ public:
+      * @param key the type of element that needs to be created.
+      * @param arg initial value of element. If null, a default is assigned.
+      */
+-    Element* create(const string& key, const char* arg);
++    Element* create(const string& key, const char* arg, string& err);
+ 
+     /**
+      * Checks whether a type exists.
+diff --git a/xorp/policy/common/policy_exception.hh b/xorp/policy/common/policy_exception.hh
+deleted file mode 100644
+index 0a27c03..0000000
+--- a/xorp/policy/common/policy_exception.hh
++++ /dev/null
+@@ -1,55 +0,0 @@
+-// vim:set sts=4 ts=8:
+-
+-// Copyright (c) 2001-2011 XORP, Inc and Others
+-//
+-// This program is free software; you can redistribute it and/or modify
+-// it under the terms of the GNU General Public License, Version 2, June
+-// 1991 as published by the Free Software Foundation. Redistribution
+-// and/or modification of this program under the terms of any other
+-// version of the GNU General Public License is not permitted.
+-// 
+-// This program is distributed in the hope that it will be useful, but
+-// WITHOUT ANY WARRANTY; without even the implied warranty of
+-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
+-// see the GNU General Public License, Version 2, a copy of which can be
+-// found in the XORP LICENSE.gpl file.
+-// 
+-// XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+-// http://xorp.net
+-
+-// $XORP: xorp/policy/common/policy_exception.hh,v 1.8 2008/10/02 21:58:07 bms Exp $
+-
+-#ifndef __POLICY_COMMON_POLICY_EXCEPTION_HH__
+-#define __POLICY_COMMON_POLICY_EXCEPTION_HH__
+-
+-
+-#include "libxorp/exceptions.hh"
+-
+-
+-/**
+- * @short Base class for all policy exceptions.
+- *
+- * All policy exceptions have a string representing the error.
+- */
+-/**
+- * @short Base class for all policy exceptions.
+- *
+- * All policy exceptions have a string representing the error.
+- */
+-class PolicyException : public XorpReasonedException {
+-public:
+-    /**
+-     * @param reason the error message
+-     */
+-    PolicyException(const char* file, size_t line, 
+-			const string& init_why = "")   
+-      : XorpReasonedException("PolicyException", file, line, init_why) {} 
+-
+-    PolicyException(const char* type, const char* file, size_t line, 
+-			const string& init_why = "")   
+-      : XorpReasonedException(type, file, line, init_why) {} 
+-    virtual ~PolicyException() {}
+-};
+-
+-
+-#endif // __POLICY_COMMON_POLICY_EXCEPTION_HH__
+diff --git a/xorp/policy/common/policy_utils.cc b/xorp/policy/common/policy_utils.cc
+index 2536868..8274b1e 100644
+--- a/xorp/policy/common/policy_utils.cc
++++ b/xorp/policy/common/policy_utils.cc
+@@ -91,21 +91,18 @@ str_to_set(const string& in, set<string>& out)
+ 	out.insert(*i);
+ }
+ 
+-void
+-read_file(const string& fname, string& out)
++bool
++read_file(const string& fname, string& out, string& err)
+ {
+     char buff[4096];
+     int rd;
+ 
+-    string err;
+-
+     // open file
+     FILE* f = fopen(fname.c_str(),"r");
+     if(!f) {
+         err += "Unable to open file " + fname + ": ";
+         err += strerror(errno);
+-
+-        xorp_throw(PolicyUtilsErr, err);
++	return false;
+     }
+ 
+     buff[0] = 0;
+@@ -120,7 +117,7 @@ read_file(const string& fname, string& out)
+             err += strerror(errno);
+ 
+             fclose(f);
+-            xorp_throw(PolicyUtilsErr, err);
++            return false;
+         }
+ 
+ 	// append to content of file to out
+@@ -129,7 +126,7 @@ read_file(const string& fname, string& out)
+     }
+ 
+     fclose(f);
+-    return;
++    return true;
+ }
+ 
+ unsigned
+@@ -146,15 +143,15 @@ count_nl(const char* x)
+ }
+ 
+ bool
+-regex(const string& str, const string& reg)
++regex(const string& str, const string& reg, string& err, bool& ok)
+ {
+     // compile the regex
++    ok = true;
+     regex_t re;
+     int res = regcomp(&re, reg.c_str(), REG_EXTENDED);
+ 
+     if (res) {
+ 	char tmp[128];
+-	string err;
+ 
+ 	regerror(res, &re, tmp, sizeof(tmp));
+ 	regfree(&re);
+@@ -162,8 +159,8 @@ regex(const string& str, const string& reg)
+ 	err = "Unable to compile regex (" + reg;
+ 	err += "): ";
+ 	err += tmp;
+-
+-	xorp_throw(PolicyUtilsErr, err);
++	ok = false;
++	return false;
+     }
+ 
+     // execute the regex [XXX: check for errors!!]
+diff --git a/xorp/policy/common/policy_utils.hh b/xorp/policy/common/policy_utils.hh
+index 6ebca90..d1d66d6 100644
+--- a/xorp/policy/common/policy_utils.hh
++++ b/xorp/policy/common/policy_utils.hh
+@@ -24,26 +24,12 @@
+ #define __POLICY_COMMON_POLICY_UTILS_HH__
+ 
+ 
+-
+-#include "policy_exception.hh"
+-
+-
+ /**
+  * Some generic utility functions used by different policy components.
+  */
+ namespace policy_utils {
+ 
+ /**
+- * @short Generic exception for errors
+- */
+-class PolicyUtilsErr : public PolicyException {
+-public:
+-    PolicyUtilsErr(const char* file, size_t line, const string& init_why = "")   
+-        : PolicyException("PolicyUtilsErr", file, line, init_why) {}
+-};
+-
+-
+-/**
+  * Deletes a vector by deleting objects and deleting the vector itself.
+  * It checks if objects are null and skips them if so. Also checks if vector
+  * itself is null.
+@@ -162,7 +148,7 @@ to_str(T x) {
+  * @param fname filename to read.
+  * @param out output string which will be filled with file content.
+  */
+-void read_file(const string& fname, string& out);
++bool read_file(const string& fname, string& out, string& err);
+ 
+ /**
+  * Count the occurences of newlines in the c-style string.
+@@ -179,7 +165,7 @@ unsigned count_nl(const char* x);
+  * @param reg regular expression used for matching.
+  * @return true if string matches regular expression
+  */
+-bool regex(const string& str, const string& reg);
++bool regex(const string& str, const string& reg, string& err, bool& ok);
+ 
+ };
+ 
+diff --git a/xorp/policy/common/register_elements.cc b/xorp/policy/common/register_elements.cc
+index 97ac518..0326366 100644
+--- a/xorp/policy/common/register_elements.cc
++++ b/xorp/policy/common/register_elements.cc
+@@ -62,9 +62,9 @@ RegisterElements::register_element()
+     static ElementFactory ef;
+ 
+     struct Local {
+-	static Element* create(const char* x)
++	static Element* create(const char* x, string& err)
+ 	{
+-	    return new T(x);
++	    return new T(x, err);
+ 	}
+     };
+ 
+diff --git a/xorp/policy/common/register_operations.cc b/xorp/policy/common/register_operations.cc
+index 9eb5a95..a998cb6 100644
+--- a/xorp/policy/common/register_operations.cc
++++ b/xorp/policy/common/register_operations.cc
+@@ -82,14 +82,14 @@ return_bool(bool x)
+     return r;
+ }
+ 
+-#define DEFINE_BINOP_BOOL(name, op) \
+-template<class Unused, class Left, class Right> \
+-Element* name(const Left& x, const Right& y) \
+-{ \
+-    bool val = x.val() op y.val(); \
+-    \
+-    return return_bool(val); \
+-}
++#define DEFINE_BINOP_BOOL(name, op)					\
++    template<class Unused, class Left, class Right>			\
++    Element* name(const Left& x, const Right& y)			\
++    {									\
++	bool val = x.val() op y.val();					\
++									\
++	return return_bool(val);					\
++    }
+ 
+ DEFINE_BINOP_BOOL(op_and, &&)
+ DEFINE_BINOP_BOOL(op_or, ||)
+@@ -250,34 +250,34 @@ str_mul(const ElemStr& left, const ElemU32& right)
+ }
+ 
+ Element* 
+-ctr_base(const ElemStr& type, const string& arg_str)
++ctr_base(const ElemStr& type, const string& arg_str, string& err)
+ {
+     ElementFactory ef;
+ 
+-    return ef.create(type.val(), arg_str.c_str());
++    return ef.create(type.val(), arg_str.c_str(), err);
+ }
+ 
+ Element* 
+-ctr(const ElemStr& type, const Element& arg)
++ctr(const ElemStr& type, const Element& arg, string& err)
+ {
+-    return ctr_base(type, arg.str());
++    return ctr_base(type, arg.str(), err);
+ }
+ 
+ template <class T>
+ Element* 
+-ctr(const ElemStr& type, const T& arg)
++ctr(const ElemStr& type, const T& arg, string& err)
+ {
+-    return ctr_base(type, arg.str());
++    return ctr_base(type, arg.str(), err);
+ }
+ 
+ Element*
+-str_regex(const ElemStr& left, const ElemStr& right)
++str_regex(const ElemStr& left, const ElemStr& right, string& err, bool& ok)
+ {
+-    return new ElemBool(policy_utils::regex(left.val(), right.val()));
++    return new ElemBool(policy_utils::regex(left.val(), right.val(), err, ok));
+ }
+ 
+ Element*
+-str_setregex(const ElemStr& left, const ElemSetStr& right)
++str_setregex(const ElemStr& left, const ElemSetStr& right, string& err, bool& ok)
+ {
+     string str = left.val();
+ 
+@@ -286,7 +286,7 @@ str_setregex(const ElemStr& left, const ElemSetStr& right)
+     for (ElemSetStr::const_iterator i = right.begin(); i != right.end(); ++i) {
+ 	const ElemStr& re = *i;
+ 
+-	if (policy_utils::regex(str, re.val()))
++	if (policy_utils::regex(str, re.val(), err, ok))
+ 	    return new ElemBool(true);
+     }
+ 
+@@ -328,13 +328,13 @@ aspath_contains(const ElemASPath& left, const ElemU32& right)
+ }
+ 
+ Element*
+-aspath_regex(const ElemASPath& left, const ElemStr& right)
++aspath_regex(const ElemASPath& left, const ElemStr& right, string& err, bool& ok)
+ {
+-    return new ElemBool(policy_utils::regex(left.val().short_str(), right.val()));
++    return new ElemBool(policy_utils::regex(left.val().short_str(), right.val(), err, ok));
+ }
+ 
+ Element*
+-aspath_regex(const ElemASPath& left, const ElemSetStr& right)
++aspath_regex(const ElemASPath& left, const ElemSetStr& right, string& err, bool& ok)
+ {
+     string str = left.val().short_str();
+ 
+@@ -343,7 +343,7 @@ aspath_regex(const ElemASPath& left, const ElemSetStr& right)
+     for (ElemSetStr::const_iterator i = right.begin(); i != right.end(); ++i) {
+ 	const ElemStr& re = *i;
+ 
+-	if (policy_utils::regex(str, re.val()))
++	if (policy_utils::regex(str, re.val(), err, ok))
+ 	    return new ElemBool(true);
+     }
+ 
+@@ -357,14 +357,15 @@ net_match(const ElemNet<A>& left, const ElemNet<A>& right)
+     static Dispatcher d;
+     Element* r;
+ 
+-    r = d.run(right.op(), left, right);
++    string err;
++    r = d.run(right.op(), left, right, err);
+ 
+     if (r == &_true)
+ 	return true;
+     else if (r == &_false)
+ 	return false;
+     else
+-	abort();
++	XLOG_FATAL("Bad net-match, err: %s\n", err.c_str());
+ }
+ 
+ template<class A>
+@@ -407,7 +408,7 @@ RegisterOperations::RegisterOperations()
+ 
+ #define ADD_BINOP(result,left,right,funct,oper)				\
+ do {									\
+-	disp.add<left,right,&funct<result,left,right> >(Op##oper());	\
++    disp.add<left,right,&funct<result,left,right> >(Op##oper());	\
+ } while (0)
+ 
+ // EQUAL AND NOT EQUAL
+diff --git a/xorp/policy/common/register_operations.hh b/xorp/policy/common/register_operations.hh
+index e76640d..9aa82f8 100644
+--- a/xorp/policy/common/register_operations.hh
++++ b/xorp/policy/common/register_operations.hh
+@@ -18,7 +18,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/policy/common/register_operations.hh,v 1.8 2008/10/02 21:58:07 bms Exp $
+ 
+ #ifndef __POLICY_COMMON_REGISTER_OPERATIONS_HH__
+ #define __POLICY_COMMON_REGISTER_OPERATIONS_HH__
+@@ -50,7 +49,7 @@ namespace operations {
+  * @param arg the string representation of value.
+  * @return element of wanted type representing arg.
+  */
+-Element* ctr(const ElemStr& type, const Element& arg);
++Element* ctr(const ElemStr& type, const Element& arg, string& err);
+ 
+ }
+ 
+diff --git a/xorp/policy/common/varrw.cc b/xorp/policy/common/varrw.cc
+index b00ae9e..3ca41f2 100644
+--- a/xorp/policy/common/varrw.cc
++++ b/xorp/policy/common/varrw.cc
+@@ -37,19 +37,21 @@ VarRW::~VarRW()
+ {
+ }
+ 
+-const Element&
+-VarRW::read_trace(const Id& id)
++const Element*
++VarRW::read_trace(const Id& id, string& err)
+ {
+-    const Element& e = read(id);
++    const Element* e = read(id, err);
++    if (!e)
++	return e;
+ 
+     if (_do_trace)
+-	_tracelog << "Read " << id << ": " << e.str() << endl;
++	_tracelog << "Read " << id << ": " << e->str() << endl;
+ 
+     return e;
+ }
+ 
+-void
+-VarRW::write_trace(const Id& id, const Element& e)
++bool
++VarRW::write_trace(const Id& id, const Element& e, string& err)
+ {
+     if (_do_trace)
+ 	_tracelog << "Write " << id << ": " << e.str() << endl;
+@@ -61,10 +63,10 @@ VarRW::write_trace(const Id& id, const Element& e)
+ 	const ElemU32& u32 = dynamic_cast<const ElemU32&>(e);
+ 	_trace = u32.val();
+ 
+-	return;
++	return true;
+     }
+ 
+-    write(id, e);
++    return write(id, e, err);
+ }
+ 
+ uint32_t
+@@ -97,7 +99,9 @@ VarRW::enable_trace(bool on)
+     _do_trace = on;
+ }
+ 
+-void
+-VarRW::sync()
++bool
++VarRW::sync(string& err)
+ {
++    UNUSED(err);
++    return true;
+ }
+diff --git a/xorp/policy/common/varrw.hh b/xorp/policy/common/varrw.hh
+index 5b0eb6a..f2a8b83 100644
+--- a/xorp/policy/common/varrw.hh
++++ b/xorp/policy/common/varrw.hh
+@@ -71,7 +71,7 @@ public:
+      * @param id The variable that is being requested [such as metric].
+      *
+      */
+-    virtual const Element& read(const Id& id) = 0;
++    virtual const Element* read(const Id& id, string& err) = 0;
+ 
+     /**
+      * Write a variable to a route.
+@@ -82,7 +82,7 @@ public:
+      * @param e Value that must be written to the variable.
+      *
+      */
+-    virtual void write(const Id& id, const Element& e) = 0;
++    virtual bool write(const Id& id, const Element& e, string& err) = 0;
+ 
+     /**
+      * VarRW must perform all pending writes to the route now.
+@@ -94,7 +94,7 @@ public:
+      * All pointers to elements [by write] may become invalid after a sync.
+      *
+      */
+-    virtual void sync();
++    virtual bool sync(string& err);
+ 
+     /**
+      * Enable/disable generating trace strings / output.
+@@ -109,7 +109,7 @@ public:
+      * @param id variable to read.
+      * @return variable desired.
+      */
+-    const Element& read_trace(const Id& id); 
++    const Element* read_trace(const Id& id, string& err);
+ 
+     /**
+      * Support for tracing writes.  Executor will call this.
+@@ -118,7 +118,7 @@ public:
+      * @ param id variable to write to.
+      * @param e value to write.
+      */
+-    void write_trace(const Id& id, const Element& e);
++    bool write_trace(const Id& id, const Element& e, string& err);
+ 
+     /**
+      * Obtain the final trace value.  Should be called after executing the
+diff --git a/xorp/policy/configuration.cc b/xorp/policy/configuration.cc
+index 1386a99..87bc925 100644
+--- a/xorp/policy/configuration.cc
++++ b/xorp/policy/configuration.cc
+@@ -61,35 +61,35 @@ Configuration::find_term(const string& policy, const string& term)
+     return ps.find_term(term);
+ }
+ 
+-void
+-Configuration::delete_term(const string& policy, const string& term)
++bool
++Configuration::delete_term(const string& policy, const string& term, string& err)
+ {
+     PolicyStatement& ps = _policies.find(policy);
+ 
+     if (ps.delete_term(term)) {
+ 	// policy needs to be re-compiled [will do so on commit]
+ 	policy_modified(policy);
+-
+-        return;
++        return true;
+     }
+ 
+-    xorp_throw(ConfError, "TERM NOT FOUND " + policy + " " + term);
++    err += "TERM NOT FOUND " + policy + " " + term;
++    return false;
+ }
+ 
+-void
++bool
+ Configuration::update_term_block(const string& policy,
+                                  const string& term,
+ 	                         const uint32_t& block,
+ 				 const ConfigNodeId& order,
+-		                 const string& statement)
++		                 const string& statement, string& err)
+ {
+     Term& t = find_term(policy,term);
+     try {
+ 	t.set_block(block, order, statement);
+ 	policy_modified(policy);
+     } catch (const Term::term_syntax_error& e) {
+-        string err = "In policy " + policy + ": " + e.why();
+-        xorp_throw(ConfError, err);
++        err += "In policy " + policy + ": " + e.why();
++        return false;
+     }
+ }
+ 
+@@ -165,26 +165,31 @@ Configuration::delete_from_set(const string& type, const string& set,
+     _sets.delete_from_set(type, set, element, _modified_policies);
+ }
+ 
+-void
++bool
+ Configuration::update_imports(const string& protocol, const POLICIES& imports,
+-			      const string& mod)
++			      const string& mod, string& err)
+ {
+     // check if protocol exists
+-    if (!_varmap.protocol_known(protocol))
+-	xorp_throw(ConfError, "imports: Protocol " + protocol + " unknown");
++    if (!_varmap.protocol_known(protocol)) {
++	err += "imports: Protocol " + protocol + " unknown";
++	return false;
++    }
+ 
+     update_ie(protocol, imports, _imports, PolicyList::IMPORT, mod);
+     _modified_targets.insert(Code::Target(protocol, filter::IMPORT));
++    return true;
+ }
+ 
+-void
++bool
+ Configuration::update_exports(const string& protocol,
+ 			      const POLICIES& exports,
+-			      const string& mod)
++			      const string& mod, string& err)
+ {
+     // check if protocol exists
+-    if(!_varmap.protocol_known(protocol))
+-	xorp_throw(ConfError, "exports: Protocol " + protocol + " unknown");
++    if(!_varmap.protocol_known(protocol)) {
++	err += "exports: Protocol " + protocol + " unknown";
++	return false;
++    }
+ 
+     // XXX: if conf fails we lost tagmap
+     TagMap::iterator i = _tagmap.find(protocol);
+@@ -202,6 +207,7 @@ Configuration::update_exports(const string& protocol,
+     // other modified targets [such as sourcematch] will be added as compilation
+     // proceeds.
+     _modified_targets.insert(Code::Target(protocol,filter::EXPORT));
++    return true;
+ }
+ 
+ void
+@@ -231,23 +237,28 @@ Configuration::clear_protocol_tags(const TagSet& ts)
+     }
+ }
+ 
+-void
+-Configuration::clear_imports(const string& protocol)
++bool
++Configuration::clear_imports(const string& protocol, string& err)
+ {
+     // check if protocol exists
+-    if (!_varmap.protocol_known(protocol))
+-	xorp_throw(ConfError, "imports: Protocol " + protocol + " unknown");
++    if (!_varmap.protocol_known(protocol)) {
++	err += "imports: Protocol " + protocol + " unknown";
++	return false;
++    }
+ 
+     _imports.clear(_modified_targets);
+     _modified_targets.insert(Code::Target(protocol, filter::IMPORT));
++    return true;
+ }
+ 
+-void
+-Configuration::clear_exports(const string& protocol)
++bool
++Configuration::clear_exports(const string& protocol, string& err)
+ {
+     // check if protocol exists
+-    if (!_varmap.protocol_known(protocol))
+-	xorp_throw(ConfError, "imports: Protocol " + protocol + " unknown");
++    if (!_varmap.protocol_known(protocol)) {
++	err += "imports: Protocol " + protocol + " unknown";
++	return false;
++    }
+ 
+     _exports.clear(_modified_targets);
+     _modified_targets.insert(Code::Target(protocol, filter::EXPORT));
+@@ -478,10 +489,10 @@ Configuration::commit(uint32_t msec)
+     _filter_manager->flush_updates(msec);
+ }
+ 
+-void
++bool
+ Configuration::add_varmap(const string& protocol, const string& variable,
+ 			  const string& type, const string& access,
+-			  const VarRW::Id& id)
++			  const VarRW::Id& id, string& err)
+ {
+     // figure out access...
+     VarMap::Access acc = VarMap::READ;
+@@ -492,13 +503,15 @@ Configuration::add_varmap(const string& protocol, const string& variable,
+ 	acc = VarMap::READ;
+     else if (access == "w")
+ 	acc = VarMap::WRITE;
+-    else
+-	xorp_throw(PolicyException,
+-		   "Unknown access (" + access + ") for protocol: "
+-		   + protocol + " variable: " + variable);
++    else {
++	err += "Unknown access (" + access + ") for protocol: "
++	    + protocol + " variable: " + variable;
++	return false;
++    }
+ 
+     _varmap.add_protocol_variable(protocol,
+ 		  new VarMap::Variable(variable, type, acc, id));
++    return true;
+ }
+ 
+ void
+@@ -581,8 +594,9 @@ Configuration::codemap_str(CodeMap& cm)
+ }
+ 
+ string
+-Configuration::dump_state(uint32_t id)
++Configuration::dump_state(uint32_t id, bool& ok)
+ {
++    ok = true;
+     switch(id) {
+ 	// dump policies
+ 	case 0:
+@@ -599,8 +613,9 @@ Configuration::dump_state(uint32_t id)
+ 	    return _sets.str();
+ 	    break;
+ 
+-	default:
+-	    xorp_throw(PolicyException, "Unknown state id: " + to_str(id));
++        default:
++	    ok = false;
++	    return "Unknown state id: " + to_str(id);
+     }
+ }
+ 
+diff --git a/xorp/policy/configuration.hh b/xorp/policy/configuration.hh
+index 4d3ec47..e033f98 100644
+--- a/xorp/policy/configuration.hh
++++ b/xorp/policy/configuration.hh
+@@ -22,10 +22,6 @@
+ #ifndef __POLICY_CONFIGURATION_HH__
+ #define __POLICY_CONFIGURATION_HH__
+ 
+-
+-
+-#include "policy/common/policy_exception.hh"
+-
+ #include "process_watch_base.hh"
+ #include "set_map.hh"
+ #include "policy_map.hh"
+@@ -90,18 +86,6 @@ public:
+     typedef map<string,Code*> CodeMap;
+     typedef map<string,TagSet*> TagMap;
+ 
+-
+-    /**
+-     * @short Exception thrown on configuration error
+-     */
+-    class ConfError : public PolicyException {
+-    public:
+-        ConfError(const char* file, size_t line, const string& init_why = "")
+-            : PolicyException("ConfError", file, line, init_why) {}
+-
+-    };
+-
+-
+     /**
+      * @param a process watcher used to initialize the VarMap.
+      */
+@@ -115,7 +99,7 @@ public:
+      * @param policy policy in which term should be deleted.
+      * @param term term to delete.
+      */
+-    void delete_term(const string& policy, const string& term);
++    bool delete_term(const string& policy, const string& term, string& err);
+ 
+     /**
+      * Update the source/dest/action block of a term.
+@@ -225,8 +209,8 @@ public:
+      * @param protocol name of protocol which should have imports updated.
+      * @param imports list of policy-names.
+      */
+-    void update_imports(const string& protocol, const POLICIES& imports,
+-		        const string& mod);
++    bool update_imports(const string& protocol, const POLICIES& imports,
++		        const string& mod, string& err);
+ 
+     /**
+      * Throws an exception on failure.
+@@ -324,8 +308,8 @@ public:
+      */
+     void clear_protocol_tags(const TagSet& ts);
+ 
+-    void clear_imports(const string& protocol);
+-    void clear_exports(const string& protocol);
++    bool clear_imports(const string& protocol, string& err);
++    bool clear_exports(const string& protocol, string& err);
+     bool test_policy(const string& policy, const RATTR& attrs, RATTR& mods);
+     void show(const string& type, const string& name, RESOURCES& res);
+     void show_sets(const string& type, const string& name, RESOURCES& res);
+diff --git a/xorp/policy/dependency.cc b/xorp/policy/dependency.cc
+index ee0647a..f578528 100644
+--- a/xorp/policy/dependency.cc
++++ b/xorp/policy/dependency.cc
+@@ -75,14 +75,15 @@ Dependency<T>::create(const string& objectname, T* object)
+ }
+ 
+ template <class T>
+-void
+-Dependency<T>::remove(const string& objectname)
++bool
++Dependency<T>::remove(const string& objectname, string& err)
+ {
+     typename Map::iterator i = _map.find(objectname);
+ 
+-    if (i == _map.end())
+-	xorp_throw(DependencyError,
+-		   "Dependency remove: Cannot find object " + objectname);
++    if (i == _map.end()) {
++	err += "Dependency remove: Cannot find object " + objectname;
++	return false;
++    }
+ 	
+     Pair* p = (*i).second;
+ 
+@@ -97,7 +98,8 @@ Dependency<T>::remove(const string& objectname)
+ 	for (DependencyList::iterator j = s.begin(); j != s.end(); ++j)
+ 	    oss << *j << " ";
+ 		
+-	xorp_throw(DependencyError, oss.str());
++	err += oss.str();
++	return false;
+     }
+ 
+     // delete object
+@@ -107,6 +109,7 @@ Dependency<T>::remove(const string& objectname)
+     delete p;
+ 
+     _map.erase(i);
++    return true;
+ }
+ 
+ template <class T>
+@@ -201,7 +204,7 @@ typename Dependency<T>::ObjPair
+ Dependency<T>::next(typename Map::const_iterator& i) const
+ {
+     if (i == _map.end())
+-        xorp_throw(DependencyError, "No more objects");
++	XLOG_FATAL("No more objects");
+ 	
+     Pair* p = (*i).second;
+ 	
+@@ -229,13 +232,14 @@ Dependency<T>::keys(KEYS& out) const
+ 
+ template <class T>
+ typename Dependency<T>::Pair*
+-Dependency<T>::findDepend(const string& objectname) const
++Dependency<T>::findDepend(const string& objectname, string& err) const
+ {
+     typename Map::const_iterator i = _map.find(objectname);
+ 
+-    if (i == _map.end())
+-	xorp_throw(DependencyError,
+-		   "Dependency: Cannot find object of name " + objectname);
++    if (i == _map.end()) {
++	err += "Dependency: Cannot find object of name " + objectname;
++	return NULL;
++    }
+ 
+     return (*i).second;    
+ }
+diff --git a/xorp/policy/dependency.hh b/xorp/policy/dependency.hh
+index 79c88cb..545db19 100644
+--- a/xorp/policy/dependency.hh
++++ b/xorp/policy/dependency.hh
+@@ -25,14 +25,6 @@
+ 
+ 
+ 
+-
+-
+-
+-
+-
+-
+-#include "policy/common/policy_exception.hh"
+-
+ /**
+  * @short A class which relates objects and handles dependencies between them.
+  *
+@@ -70,18 +62,6 @@ public:
+ 	ObjPair(const string& n, const T& o) : name(n), object(o) {}
+     };
+    
+-    /**
+-     * @short Exception thrown if an illegal action is requested.
+-     *
+-     * Such as deleting an object which has a non empty dependency list.
+-     */
+-    class DependencyError : public PolicyException {
+-    public:
+-        DependencyError(const char* file, size_t line, 
+-			const string& init_why = "")
+-	: PolicyException("DependencyError", file, line, init_why) {} 
+-    };
+-
+     Dependency();
+     ~Dependency();
+ 
+diff --git a/xorp/policy/filter_manager.hh b/xorp/policy/filter_manager.hh
+index e53c363..f420c4a 100644
+--- a/xorp/policy/filter_manager.hh
++++ b/xorp/policy/filter_manager.hh
+@@ -23,7 +23,6 @@
+ #ifndef __POLICY_FILTER_MANAGER_HH__
+ #define __POLICY_FILTER_MANAGER_HH__
+ 
+-#include "policy/common/policy_exception.hh"
+ #include "policy/common/filter.hh"
+ #include "xrl/interfaces/policy_backend_xif.hh"
+ #include "xrl/interfaces/rib_xif.hh"
+@@ -54,15 +53,6 @@ public:
+     typedef map<string,TagSet*> TagMap;
+ 
+     /**
+-     * @short Exception thrown on error. Such as xrl failure.
+-     */
+-    class FMException : public PolicyException {
+-    public:
+-        FMException(const char* file, size_t line, const string& init_why = "")
+-            : PolicyException("FMException", file, line, init_why) {}  
+-    };
+-
+-    /**
+      * The FilterManager closely works with the Configuration class. Maybe in
+      * the future holding a reference the Configuration class, instead of the
+      * internal components may be a better solution.
+diff --git a/xorp/policy/node_base.hh b/xorp/policy/node_base.hh
+index b2cc186..59632e4 100644
+--- a/xorp/policy/node_base.hh
++++ b/xorp/policy/node_base.hh
+@@ -52,7 +52,7 @@ public:
+      * @param v visit node with this pattern.
+      * @return element at the end of node evaluation.
+      */
+-    virtual const Element* accept(Visitor& v) =0;
++    virtual const Element* accept(Visitor& v, string& err, bool& ok) =0;
+ 
+     /**
+      * Test whether this is a "protocol" statement.
+@@ -73,9 +73,9 @@ private:
+ };
+ 
+ // macro ugliness for visitor implemntation.
+-#define DEFINE_VISITABLE() \
+-const Element* accept(Visitor& visitor) { \
+-    return visitor.visit(*this); \
+-}
++#define DEFINE_VISITABLE()						\
++    const Element* accept(Visitor& visitor, string& err, bool& ok) {	\
++	return visitor.visit(*this, err, ok);				\
++    }
+ 
+ #endif // __POLICY_NODE_BASE_HH__
+diff --git a/xorp/policy/policy.yy b/xorp/policy/policy.yy
+index 10ac8d8..73ceaf6 100644
+--- a/xorp/policy/policy.yy
++++ b/xorp/policy/policy.yy
+@@ -22,8 +22,15 @@ extern void yyerror(const char *m);
+ 
+ using namespace policy_parser;
+ 
++string policy_err;
+ static ElementFactory _ef;
+ 
++void check_err() {
++    if (policy_err.size()) {
++        yyerror(policy_err.c_str());
++    }
++}
++
+ %}
+ 
+ %union {
+@@ -139,18 +146,18 @@ expr:
+ 
+ 	| YY_LPAR expr YY_RPAR { $$ = $2; }
+ 
+-	| YY_STR { $$ = new NodeElem(_ef.create(ElemStr::id,$1),_parser_lineno); free($1); }
+-	| YY_UINT { $$ = new NodeElem(_ef.create(ElemU32::id,$1),_parser_lineno); free($1);}
+-	| YY_UINTRANGE { $$ = new NodeElem(_ef.create(ElemU32Range::id,$1),_parser_lineno); free($1);}
+-	| YY_INT { $$ = new NodeElem(_ef.create(ElemInt32::id,$1),_parser_lineno); free($1);}
+-	| YY_BOOL { $$ = new NodeElem(_ef.create(ElemBool::id,$1),_parser_lineno); free($1);}
++	| YY_STR { policy_err=""; $$ = new NodeElem(_ef.create(ElemStr::id,$1,policy_err),_parser_lineno); free($1); check_err(); }
++	| YY_UINT { policy_err=""; $$ = new NodeElem(_ef.create(ElemU32::id,$1,policy_err),_parser_lineno); free($1); check_err(); }
++	| YY_UINTRANGE { policy_err=""; $$ = new NodeElem(_ef.create(ElemU32Range::id,$1,policy_err),_parser_lineno); free($1); check_err(); }
++	| YY_INT { policy_err=""; $$ = new NodeElem(_ef.create(ElemInt32::id,$1,policy_err),_parser_lineno); free($1); check_err(); }
++	| YY_BOOL { policy_err=""; $$ = new NodeElem(_ef.create(ElemBool::id,$1,policy_err),_parser_lineno); free($1); check_err(); }
+ 	| YY_ID	{ $$ = new NodeVar($1,_parser_lineno); free($1); }
+ 	| YY_SET YY_ID { $$ = new NodeSet($2,_parser_lineno); free($2); }
+-	| YY_IPV4 { $$ = new NodeElem(_ef.create(ElemIPv4::id,$1),_parser_lineno); free($1); }
+-	| YY_IPV4RANGE { $$ = new NodeElem(_ef.create(ElemIPv4Range::id,$1),_parser_lineno); free($1); }
+-	| YY_IPV6 { $$ = new NodeElem(_ef.create(ElemIPv6::id,$1),_parser_lineno); free($1); }
+-	| YY_IPV6RANGE { $$ = new NodeElem(_ef.create(ElemIPv6Range::id,$1),_parser_lineno); free($1); }
+-	| YY_IPV4NET { $$ = new NodeElem(_ef.create(ElemIPv4Net::id,$1),_parser_lineno); free($1); }
+-	| YY_IPV6NET { $$ = new NodeElem(_ef.create(ElemIPv6Net::id,$1),_parser_lineno); free($1); }
++	| YY_IPV4 { policy_err=""; $$ = new NodeElem(_ef.create(ElemIPv4::id,$1,policy_err),_parser_lineno); free($1); check_err(); }
++	| YY_IPV4RANGE { policy_err=""; $$ = new NodeElem(_ef.create(ElemIPv4Range::id,$1,policy_err),_parser_lineno); free($1); check_err(); }
++	| YY_IPV6 { policy_err=""; $$ = new NodeElem(_ef.create(ElemIPv6::id,$1,policy_err),_parser_lineno); free($1); check_err(); }
++	| YY_IPV6RANGE { policy_err=""; $$ = new NodeElem(_ef.create(ElemIPv6Range::id,$1,policy_err),_parser_lineno); free($1); check_err(); }
++	| YY_IPV4NET { policy_err=""; $$ = new NodeElem(_ef.create(ElemIPv4Net::id,$1,policy_err),_parser_lineno); free($1); check_err(); }
++	| YY_IPV6NET { policy_err=""; $$ = new NodeElem(_ef.create(ElemIPv6Net::id,$1,policy_err),_parser_lineno); free($1); check_err(); }
+         ;
+ %%
+diff --git a/xorp/policy/policy_map.cc b/xorp/policy/policy_map.cc
+index 560a065..cf330ae 100644
+--- a/xorp/policy/policy_map.cc
++++ b/xorp/policy/policy_map.cc
+@@ -37,16 +37,16 @@ PolicyMap::exists(const string& name)
+     return _deps.exists(name);
+ }
+ 
+-void 
+-PolicyMap::create(const string& name,SetMap& smap)
++bool PolicyMap::create(const string& name,SetMap& smap, string& err)
+ {
+     PolicyStatement* ps = new PolicyStatement(name, smap, *this);
+ 
+     if (!_deps.create(name,ps)) {
+ 	delete ps;
+-	xorp_throw(PolicyMapError,
+-		   "Can't create policy " + name + " : already exists");
++	err += "Can't create policy " + name + " : already exists";
++	return false;
+     }
++    return true;
+ }
+ 
+ void 
+diff --git a/xorp/policy/policy_map.hh b/xorp/policy/policy_map.hh
+index f26e1d0..9928a96 100644
+--- a/xorp/policy/policy_map.hh
++++ b/xorp/policy/policy_map.hh
+@@ -24,9 +24,6 @@
+ #define __POLICY_POLICY_MAP_HH__
+ 
+ 
+-
+-
+-#include "policy/common/policy_exception.hh"
+ #include "policy_statement.hh"
+ #include "dependency.hh"
+ 
+@@ -40,16 +37,6 @@ public:
+     typedef Dependency<PolicyStatement>::KEYS    KEYS;
+ 
+     /**
+-     * @short Exception thrown on errors such as when a policy is not found.
+-     */
+-    class PolicyMapError : public PolicyException {
+-    public:
+-        PolicyMapError(const char* file, size_t line, 
+-		       const string& init_why = "")   
+-	: PolicyException("PolicyMapError", file, line, init_why) {}   
+-    };
+-
+-    /**
+      * Find a policy.
+      *
+      * Throws an exception if not found.
+@@ -75,7 +62,7 @@ public:
+      * @param name name of policy.
+      * @param smap SetMap used for updating dependencies.
+      */
+-    void create(const string& name, SetMap& smap);
++    bool create(const string& name, SetMap& smap, string& err);
+ 
+     /**
+      * Attempts to delete a policy.
+diff --git a/xorp/policy/policy_statement.cc b/xorp/policy/policy_statement.cc
+index d4ffa11..6074017 100644
+--- a/xorp/policy/policy_statement.cc
++++ b/xorp/policy/policy_statement.cc
+@@ -47,13 +47,13 @@ PolicyStatement::~PolicyStatement()
+     }
+ }
+    
+-void 
+-PolicyStatement::add_term(const ConfigNodeId& order, Term* term)
++bool
++PolicyStatement::add_term(const ConfigNodeId& order, Term* term, string& err)
+ {
+     if ((_terms.find(order) != _terms.end())
+         || (find_out_of_order_term(order) != _out_of_order_terms.end())) {
+-	xorp_throw(PolicyException,
+-		   "Term already present in position: " + order.str());
++	err += "Term already present in position: " + order.str();
++	return false;
+     }
+ 
+     pair<TermContainer::iterator, bool> res;
+@@ -64,7 +64,7 @@ PolicyStatement::add_term(const ConfigNodeId& order, Term* term)
+ 	// order. Add it to the list of entries that need to be added later.
+ 	//
+ 	_out_of_order_terms.push_back(make_pair(order, term));
+-	return;
++	return true;
+     }
+ 
+     //
+@@ -90,6 +90,7 @@ PolicyStatement::add_term(const ConfigNodeId& order, Term* term)
+ 	if (! entry_added)
+ 	    break;
+     }
++    return true;
+ }
+ 
+ PolicyStatement::TermContainer::iterator 
+@@ -124,8 +125,8 @@ PolicyStatement::get_term_iter(const string& name) const
+     return i;
+ }
+ 
+-Term& 
+-PolicyStatement::find_term(const string& name) const 
++Term*
++PolicyStatement::find_term(const string& name, string& err) const
+ {
+     TermContainer::const_iterator i = get_term_iter(name);
+     if(i == _terms.end()) {
+@@ -136,12 +137,11 @@ PolicyStatement::find_term(const string& name) const
+ 	    return *t;
+ 	}
+ 
+-	xorp_throw(PolicyStatementErr,
+-		   "Term " + name + " not found in policy " + _name);
++	err += "Term " + name + " not found in policy " + _name;
++	return NULL;
+     }
+ 
+-    Term* t = i->second;
+-    return *t;    
++    return i->second;
+ }
+ 
+ bool 
+diff --git a/xorp/policy/policy_statement.hh b/xorp/policy/policy_statement.hh
+index 265eb6c..3d1a4de 100644
+--- a/xorp/policy/policy_statement.hh
++++ b/xorp/policy/policy_statement.hh
+@@ -30,9 +30,6 @@
+ 
+ 
+ #include "libproto/config_node_id.hh"
+-
+-#include "policy/common/policy_exception.hh"
+-
+ #include "set_map.hh"
+ #include "term.hh"
+ 
+@@ -46,17 +43,6 @@ class PolicyStatement :
+     public NONCOPYABLE
+ {
+ public:
+-    /**
+-     * @short Exception thrown on error such as when no term is found.
+-     */
+-    class PolicyStatementErr : public PolicyException {
+-    public:
+-        PolicyStatementErr(const char* file, size_t line, 
+-			   const string& init_why = "")   
+-	: PolicyException("PolicyStatementErr", file, line, init_why) {}  
+-    };
+-
+-    
+     typedef ConfigNodeIdMap<Term*> TermContainer;
+ 
+     /**
+@@ -83,7 +69,7 @@ public:
+      * @return term requested.
+      * @param name name of term to find.
+      */
+-    Term& find_term(const string& name) const;
++    Term* find_term(const string& name, string& err) const;
+ 
+     /**
+      * Checks if a term already exists.
+diff --git a/xorp/policy/policy_target.cc b/xorp/policy/policy_target.cc
+index a967e63..d31ae54 100644
+--- a/xorp/policy/policy_target.cc
++++ b/xorp/policy/policy_target.cc
+@@ -205,19 +205,23 @@ PolicyTarget::set_proto_target(const string& protocol, const string& target)
+ }
+ 
+ string
+-PolicyTarget::test_policy(const string& args)
++PolicyTarget::test_policy(const string& args, bool& ok)
+ {
+     string policy;
+     string prefix;
+     string attributes;
+ 
++    ok = true;
++
+     // We receive the following string:
+     // policyname prefix [route attributes]
+ 
+     // parse policy
+     string::size_type i = args.find(' ', 0);
+-    if (i == string::npos)
+-	xorp_throw(PolicyException, "No policy specified");
++    if (i == string::npos) {
++	ok = false;
++	return "No policy specified";
++    }
+ 
+     policy = args.substr(0, i);
+ 
+@@ -235,8 +239,10 @@ PolicyTarget::test_policy(const string& args)
+ 	if (args.find('"') == j) {
+ 	    string tmp("\"");
+ 	    string::size_type k = args.find_last_of(tmp);
+-	    if (j == k || k != (args.length() - 1))
+-	        xorp_throw(PolicyException, "Missing last quote");
++	    if (j == k || k != (args.length() - 1)) {
++		ok = false;
++		return "Missing last quote";
++	    }
+ 
+ 	    j++;
+ 	    attributes = args.substr(j, k - j);
+@@ -290,8 +296,8 @@ PolicyTarget::test_policy(const string& policy, const RATTR& attrs, RATTR& mods)
+     return _conf.test_policy(policy, attrs, mods);
+ }
+ 
+-void
+-PolicyTarget::parse_attributes(const string& attr, RATTR& out)
++bool
++PolicyTarget::parse_attributes(const string& attr, RATTR& out, string& err)
+ {
+     // format: --attributename=value
+     string::size_type i = 0;
+@@ -302,8 +308,10 @@ PolicyTarget::parse_attributes(const string& attr, RATTR& out)
+ 
+ 	// name
+ 	i = attr.find('=', j);
+-	if (i == string::npos)
+-	    xorp_throw(PolicyException, "Need a value in attribute list");
++	if (i == string::npos) {
++	    err +="Need a value in attribute list";
++	    return false;
++	}
+ 
+ 	string name = attr.substr(j, i - j);
+ 
+@@ -318,14 +326,17 @@ PolicyTarget::parse_attributes(const string& attr, RATTR& out)
+ 
+ 	out[name] = value;
+     }
++    return true;
+ }
+ 
+ string
+-PolicyTarget::cli_command(const string& cmd)
++PolicyTarget::cli_command(const string& cmd, bool& ok)
+ {
+     string command;
+     string arg;
+ 
++    ok = true;
++
+     string::size_type i = cmd.find(' ');
+     if (i == string::npos)
+ 	command = cmd;
+@@ -338,8 +349,10 @@ PolicyTarget::cli_command(const string& cmd)
+ 	return test_policy(arg);
+     else if (command.compare("show") == 0)
+ 	return show(arg);
+-    else
+-	xorp_throw(PolicyException, "Unknown command");
++    else {
++	ok = false;
++	return "Unknown command";
++    }
+ }
+ 
+ string
+diff --git a/xorp/policy/policy_target.hh b/xorp/policy/policy_target.hh
+index 88c266f..813b6c0 100644
+--- a/xorp/policy/policy_target.hh
++++ b/xorp/policy/policy_target.hh
+@@ -249,8 +249,8 @@ public:
+      */
+     void set_proto_target(const string& protocol, const string& target);
+ 
+-    string cli_command(const string& command);
+-    string test_policy(const string& arg);
++    string cli_command(const string& command, bool& ok);
++    string test_policy(const string& arg, bool& ok);
+     string show(const string& arg);
+     void   show(const string& type, const string& name, RESOURCES& res);
+     bool   test_policy(const string& policy, const string& prefix,
+diff --git a/xorp/policy/process_watch.cc b/xorp/policy/process_watch.cc
+index 8f4823a..638a8a9 100644
+--- a/xorp/policy/process_watch.cc
++++ b/xorp/policy/process_watch.cc
+@@ -91,10 +91,13 @@ ProcessWatch::death(const string& proto)
+ }
+ 
+ bool
+-ProcessWatch::alive(const string& proto)
++ProcessWatch::alive(const string& proto, string& err, bool& ok)
+ {
+-    if (_watching.find(proto) == _watching.end())
+-	xorp_throw(PWException, "Not watching protocol: " + proto);
++    ok = true;
++    if (_watching.find(proto) == _watching.end()) {
++	ok = false;
++	err += "Not watching protocol: " + proto;
++    }
+ 
+     return _alive.find(proto) != _alive.end();
+ }
+diff --git a/xorp/policy/process_watch.hh b/xorp/policy/process_watch.hh
+index a52791c..3da917f 100644
+--- a/xorp/policy/process_watch.hh
++++ b/xorp/policy/process_watch.hh
+@@ -23,7 +23,6 @@
+ #ifndef __POLICY_PROCESS_WATCH_HH__
+ #define __POLICY_PROCESS_WATCH_HH__
+ 
+-#include "policy/common/policy_exception.hh"
+ #include "libxipc/xrl_std_router.hh"
+ #include "xrl/interfaces/finder_event_notifier_xif.hh"
+ #include "process_watch_base.hh"
+@@ -44,15 +43,6 @@
+ class ProcessWatch : public ProcessWatchBase {
+ public:
+     /**
+-     * @short Exception thrown on error, such as Xrl failure.
+-     */
+-    class PWException : public PolicyException {
+-    public:
+-        PWException(const char* file, size_t line, const string& init_why = "")   
+-            : PolicyException("PWException", file, line, init_why) {} 
+-    };
+-
+-    /**
+      * @param rtr Xrl router to use.
+      * @param pmap protocol map.
+      */
+@@ -93,7 +83,7 @@ public:
+      * @return true if protocol is alive, false otherwise.
+      * @param proto protocol for which status is requested.
+      */
+-    bool alive(const string& proto);
++    bool alive(const string& proto, string& err, bool& ok);
+ 
+     /**
+      * Set an object which will receive birth/death notifications.
+diff --git a/xorp/policy/semantic_varrw.cc b/xorp/policy/semantic_varrw.cc
+index 37d5d11..c6e8c70 100644
+--- a/xorp/policy/semantic_varrw.cc
++++ b/xorp/policy/semantic_varrw.cc
+@@ -21,11 +21,8 @@
+ 
+ 
+ #include "policy_module.h"
+-
+ #include "libxorp/xorp.h"
+-
+ #include "policy/common/policy_utils.hh"
+-
+ #include "semantic_varrw.hh"
+ 
+ 
+@@ -38,18 +35,17 @@ SemanticVarRW::~SemanticVarRW() {
+     policy_utils::clear_container(_trash);
+ }
+ 
+-const Element& 
+-SemanticVarRW::read(const Id& id) {
++const Element*
++SemanticVarRW::read(const Id& id, string& err) {
+     const VarMap::Variable& var = _vars.variable(_protocol,id);
+ 
+     Element* e =  _ef.create(var.type,NULL);
+ 
+     _trash.insert(e);
+-    return *e;
++    return e;
+ }
+ 
+-void 
+-SemanticVarRW::write(const Id& id, const Element& elem) {
++bool SemanticVarRW::write(const Id& id, const Element& elem, string& _err) {
+     // this will throw exception on unknown variable
+     const VarMap::Variable& var = _vars.variable(_protocol,id);
+ 
+@@ -57,7 +53,8 @@ SemanticVarRW::write(const Id& id, const Element& elem) {
+     if(!var.writable()) {
+ 	ostringstream err;
+ 	err <<"Trying to write on read-only variable " << (int)(id);
+-        xorp_throw(var_error, err.str());
++        _err = err;
++	return false;
+     }    
+ 
+     // type checking
+@@ -67,8 +64,10 @@ SemanticVarRW::write(const Id& id, const Element& elem) {
+         err << "Trying to assign value of type " << elem.type() << " to " <<
+ 	var.type << " variable " << id;
+ 
+-        xorp_throw(var_error, err.str());
++        _err = err;
++	return false;
+     }
++    return true;
+ }
+ 
+ void 
+diff --git a/xorp/policy/semantic_varrw.hh b/xorp/policy/semantic_varrw.hh
+index da6f6bc..7e83f50 100644
+--- a/xorp/policy/semantic_varrw.hh
++++ b/xorp/policy/semantic_varrw.hh
+@@ -30,7 +30,6 @@
+ #include "policy/common/varrw.hh"
+ #include "policy/common/element_base.hh"
+ #include "policy/common/element_factory.hh"
+-#include "policy/common/policy_exception.hh"
+ 
+ #include "var_map.hh"
+ 
+@@ -51,15 +50,6 @@ class SemanticVarRW :
+ {
+ public:
+     /**
+-     * @short Exception thrown on illegal variable use.
+-     */
+-    class var_error : public PolicyException {
+-    public:
+-        var_error(const char* file, size_t line, const string& init_why = "")   
+-            : PolicyException("var_error", file, line, init_why) {}  
+-    };
+-   
+-    /**
+      * @param vars the VarMap to use.
+      */
+     SemanticVarRW(VarMap& vars);
+@@ -75,7 +65,7 @@ public:
+      * @return dummy element initialized to a default value.
+      * @param id name of variable.
+      */
+-    const Element& read(const Id& id);
++    const Element* read(const Id& id, string& err);
+ 
+     /**
+      * VarRW write interface.
+@@ -87,14 +77,14 @@ public:
+      * @param id name of variable.
+      * @param elem value of variable.
+      */
+-    void write(const Id& id, const Element& elem);
++    bool write(const Id& id, const Element& elem, string& err);
+ 
+     /**
+      * VarRW sync interface.
+      *
+      * Does garbage collection.
+      */
+-    void sync();
++    bool sync(string& err);
+ 
+     /**
+      * Change the protocol being simulated.
+diff --git a/xorp/policy/set_map.cc b/xorp/policy/set_map.cc
+index 6fa3d86..726bf05 100644
+--- a/xorp/policy/set_map.cc
++++ b/xorp/policy/set_map.cc
+@@ -30,13 +30,16 @@ SetMap::getSet(const string& name) const
+     return _deps.find(name);
+ }
+ 
+-void
+-SetMap::create(const string& name)
++bool
++SetMap::create(const string& name, string& err)
+ {
+     // initially, set is empty [null object is fine].
+     Element* e = NULL;
+-    if(!_deps.create(name,e))
+-	xorp_throw(SetMapError, "Can't create set " + name + " : exists");
++    if(!_deps.create(name, e)) {
++	err += "Can't create set " + name + " : exists";
++	return false;
++    }
++    return true;
+ }
+ 
+ void 
+@@ -59,9 +62,9 @@ SetMap::delete_set(const string& name)
+     _deps.remove(name);
+ }
+ 
+-void
++bool
+ SetMap::add_to_set(const string& type, const string& name,
+-		   const string& element, set<string>& modified)
++		   const string& element, set<string>& modified, string& err)
+ {
+     Element* e = _deps.find_ptr(name);
+ 
+@@ -74,12 +77,12 @@ SetMap::add_to_set(const string& type, const string& name,
+ 
+     // Check the element type
+     if (type != string(e->type())) {
+-	string error_msg = c_format("Can't add to set %s: type mismatch "
+-				    "(received %s expected %s)",
+-				    name.c_str(),
+-				    type.c_str(),
+-				    e->type());
+-	xorp_throw(SetMapError, error_msg);
++	err += c_format("Can't add to set %s: type mismatch "
++			"(received %s expected %s)",
++			name.c_str(),
++			type.c_str(),
++			e->type());
++	return false;
+     }
+ 
+     // Get a string with the existing elements and add the new element
+@@ -89,31 +92,30 @@ SetMap::add_to_set(const string& type, const string& name,
+     elements += element;
+ 
+     update_set(type, name, elements, modified);
++    return true;
+ }
+ 
+-void
++bool
+ SetMap::delete_from_set(const string& type, const string& name,
+-			const string& element, set<string>& modified)
++			const string& element, set<string>& modified, string& err)
+ {
+     Element* e = _deps.find_ptr(name);
+ 
+     // Find the element
+     if (e == NULL) {
+-	string error_msg = c_format("Can't delete from set %s: not found",
+-				    name.c_str());
+-	xorp_throw(SetMapError, error_msg);
+-	return;
++	err += c_format("Can't delete from set %s: not found",
++			name.c_str());
++	return false;
+     }
+ 
+     // Check the element type
+     if (type != string(e->type())) {
+-	string error_msg = c_format("Can't delete from set %s: type mismatch "
+-				    "(received %s expected %s)",
+-				    name.c_str(),
+-				    type.c_str(),
+-				    e->type());
+-	xorp_throw(SetMapError, error_msg);
+-	return;
++	err += c_format("Can't delete from set %s: type mismatch "
++			"(received %s expected %s)",
++			name.c_str(),
++			type.c_str(),
++			e->type());
++	return false;
+     }
+ 
+     // Delete element
+@@ -127,6 +129,7 @@ SetMap::delete_from_set(const string& type, const string& name,
+ 
+     // sort out dependencies
+     _deps.get_deps(name, modified);
++    return true;
+ }
+ 
+ void 
+diff --git a/xorp/policy/set_map.hh b/xorp/policy/set_map.hh
+index 0ca9dc9..469d780 100644
+--- a/xorp/policy/set_map.hh
++++ b/xorp/policy/set_map.hh
+@@ -27,7 +27,6 @@
+ 
+ 
+ #include "policy/common/element_factory.hh"
+-#include "policy/common/policy_exception.hh"
+ #include "dependency.hh"
+ 
+ typedef vector<string>	SETS;
+@@ -41,16 +40,6 @@ typedef vector<string>	SETS;
+ class SetMap {
+ public:
+     /**
+-     * @short Exception thrown on error, such as deleting a set in use.
+-     */
+-    class SetMapError : public PolicyException {
+-    public:
+-        SetMapError(const char* file, size_t line, const string& init_why = "")
+-            : PolicyException("SetMapError", file, line, init_why) {}  
+-
+-    };
+-
+-    /**
+      * Throws exception if set is not found.
+      *
+      * @return set requested.
+@@ -116,10 +105,10 @@ public:
+      * @param element the element to delete.
+      * @param modified set filled with policies which are now modified.
+      */
+-    void delete_from_set(const string& type,
++    bool delete_from_set(const string& type,
+ 			 const string& name,
+ 			 const string& element,
+-			 set<string>& modified);
++			 set<string>& modified, string& err);
+ 
+     /**
+      * Add a dependency of a policy using a set.
+diff --git a/xorp/policy/source_match_code_generator.cc b/xorp/policy/source_match_code_generator.cc
+index 3d7a537..1aa6361 100644
+--- a/xorp/policy/source_match_code_generator.cc
++++ b/xorp/policy/source_match_code_generator.cc
+@@ -149,8 +149,8 @@ SourceMatchCodeGenerator::visit_term(Term& term)
+     return NULL;
+ }
+ 
+-void
+-SourceMatchCodeGenerator::do_term(Term& term)
++bool
++SourceMatchCodeGenerator::do_term(Term& term, string& err)
+ {
+     Term::Nodes& source = term.source_nodes();
+ 
+@@ -192,9 +192,11 @@ SourceMatchCodeGenerator::do_term(Term& term)
+     }
+ 
+     // XXX: we can assume _protocol = PROTOCOL IN EXPORT STATEMENT
+-    if(_protocol == "")
+-        xorp_throw(NoProtoSpec, "No protocol specified in term " + term.name() +
+-		                " in export policy source match");
++    if(_protocol == "") {
++	err += "No protocol specified in term " + term.name() +
++	    " in export policy source match";
++	return false;
++    }
+ 
+     // ignore any destination block [that is dealt with in the export code
+     // generator]
+@@ -209,7 +211,7 @@ SourceMatchCodeGenerator::do_term(Term& term)
+ 	    n->accept(*this);
+ 	}
+ 
+-	return;
++	return true;
+     }
+ 
+     //
+@@ -247,6 +249,7 @@ SourceMatchCodeGenerator::do_term(Term& term)
+ 
+     // FIXME: integer overflow
+     _currtag++;
++    return true;
+ }
+ 
+ const Element*
+@@ -257,7 +260,7 @@ SourceMatchCodeGenerator::visit_proto(NodeProto& node)
+ 	ostringstream err;
+         err << "PROTOCOL REDEFINED FROM " << _protocol << " TO " <<
+ 	    node.proto() << " AT LINE " << node.line();
+-        xorp_throw(ProtoRedefined, err.str());
++        XLOG_FATAL(err.str().c_str());
+     }
+ 
+     // define protocol
+diff --git a/xorp/policy/source_match_code_generator.hh b/xorp/policy/source_match_code_generator.hh
+index c1a9b1a..1e88c08 100644
+--- a/xorp/policy/source_match_code_generator.hh
++++ b/xorp/policy/source_match_code_generator.hh
+@@ -24,12 +24,6 @@
+ #define __POLICY_SOURCE_MATCH_CODE_GENERATOR_HH__
+ 
+ 
+-
+-
+-
+-
+-#include "policy/common/policy_exception.hh"
+-
+ #include "code_generator.hh"
+ 
+ /**
+@@ -51,25 +45,6 @@ public:
+     typedef vector<Taginfo> Tags;
+ 
+     /**
+-     * @short Exception thrown if no protocol was specified in source block.
+-     */
+-    class NoProtoSpec : public PolicyException {
+-    public:
+-        NoProtoSpec(const char* file, size_t line, const string& init_why = "")
+-            : PolicyException("NoProtoSpec", file, line, init_why) {} 
+-    };
+-
+-    /**
+-     * @short Exception thrown if protocol was re-defined in source block.
+-     */
+-    class ProtoRedefined : public PolicyException {
+-    public:
+-        ProtoRedefined(const char* file, size_t line, const string& init_why = "")
+-            : PolicyException("ProtoRedefined", file, line, init_why) {} 
+-    };
+-
+-
+-    /**
+      * @param tagstart the first policy tag available.
+      * @param varmap the varmap.
+      */
+diff --git a/xorp/policy/term.cc b/xorp/policy/term.cc
+index 01e9ff1..00712f3 100644
+--- a/xorp/policy/term.cc
++++ b/xorp/policy/term.cc
+@@ -71,18 +71,19 @@ Term::set_term_end()
+     }
+ }
+ 
+-void
++bool
+ Term::set_block(const uint32_t& block, const ConfigNodeId& order,
+-		const string& statement)
++		const string& statement, string& err)
+ {
+     if (block >= LAST_BLOCK) {
+-	xorp_throw(term_syntax_error, "Unknown block: " + to_str(block));
++	err += "Unknown block: " + to_str(block);
++	return false;
+     }
+ 
+     // check if we want to delete
+     if (statement.empty()) {
+ 	del_block(block, order);
+-	return;
++	return true;
+     }
+ 
+     // check that position is empty... 
+@@ -107,8 +108,8 @@ Term::set_block(const uint32_t& block, const ConfigNodeId& order,
+ 	// The alternative solution would be to avoid node/action duplication
+ 	// in the rtrmgr templates.
+ 	//
+-	xorp_throw(term_syntax_error,
+-		   "A statement is already present in position: " + to_str(order));
++	err += "A statement is already present in position: " + to_str(order);
++	return false;
+ #endif // 0
+     }
+ 
+@@ -119,11 +120,12 @@ Term::set_block(const uint32_t& block, const ConfigNodeId& order,
+     // cast should be safe... because of check earlier in method.
+     Parser::Nodes* nodes = parser.parse(static_cast<BLOCKS>(block), statement);
+     if (!nodes) {
+-	string err = parser.last_error();
++	string _err = parser.last_error();
+ 	// XXX convert block from int to string... [human readable]
+-	xorp_throw(term_syntax_error, "Syntax error in term " + _name + 
+-				" block " + block2str(block) + " statement=("
+-				+ statement + "): " + err);
++	err += "Syntax error in term " + _name + 
++	    " block " + block2str(block) + " statement=("
++	    + statement + "): " + _err;
++	return false;
+     }
+     XLOG_ASSERT(nodes->size() == 1); // XXX a single statement!
+ 
+@@ -135,7 +137,7 @@ Term::set_block(const uint32_t& block, const ConfigNodeId& order,
+ 	// order. Add it to the list of entries that need to be added later.
+ 	//
+ 	_out_of_order_nodes[block].push_back(make_pair(order, nodes->front()));
+-	return;
++	return true;
+     }
+ 
+     //
+@@ -161,10 +163,11 @@ Term::set_block(const uint32_t& block, const ConfigNodeId& order,
+ 	if (! entry_added)
+ 	    break;
+     }
++    return true;
+ }
+ 
+-void
+-Term::del_block(const uint32_t& block, const ConfigNodeId& order)
++bool
++Term::del_block(const uint32_t& block, const ConfigNodeId& order, string& err)
+ {
+     XLOG_ASSERT (block < LAST_BLOCK);
+ 
+@@ -173,7 +176,7 @@ Term::del_block(const uint32_t& block, const ConfigNodeId& order)
+     Nodes::iterator i = conf_block.find(order);
+     if (i != conf_block.end()) {
+ 	conf_block.erase(i);
+-	return;
++	return true;
+     }
+ 
+     // Try to delete from the list of out-of-order nodes
+@@ -181,7 +184,7 @@ Term::del_block(const uint32_t& block, const ConfigNodeId& order)
+     iter = find_out_of_order_node(block, order);
+     if (iter != _out_of_order_nodes[block].end()) {
+ 	_out_of_order_nodes[block].erase(iter);
+-	return;
++	return true;
+     }
+ 
+ #if 0
+@@ -195,16 +198,17 @@ Term::del_block(const uint32_t& block, const ConfigNodeId& order)
+     // The alternative solution would be to avoid node/action duplication
+     // in the rtrmgr templates.
+     //
+-    xorp_throw(term_syntax_error,
+-	       "Want to delete an empty position: " + order.str());
++    err += "Want to delete an empty position: " + order.str();
++    return false;
+ #endif // 0
++    return true;
+ }
+ 
+-void
+-Term::set_block_end(uint32_t block)
++bool Term::set_block_end(uint32_t block, string& err) 
+ {
+     if (block >= LAST_BLOCK) {
+-	xorp_throw(term_syntax_error, "Unknown block: " + to_str(block));
++	err += "Unknown block: " + to_str(block);
++	return false;
+     }
+ 
+     Nodes& conf_block = *_block_nodes[block];
+@@ -273,6 +277,7 @@ Term::set_block_end(uint32_t block)
+ 	    break;
+ 	}
+     }
++    return true;
+ }
+ 
+ list<pair<ConfigNodeId, Node*> >::iterator
+diff --git a/xorp/policy/term.hh b/xorp/policy/term.hh
+index 8d3d098..ba0fdea 100644
+--- a/xorp/policy/term.hh
++++ b/xorp/policy/term.hh
+@@ -29,9 +29,6 @@
+ 
+ 
+ #include "libproto/config_node_id.hh"
+-
+-#include "policy/common/policy_exception.hh"
+-
+ #include "node_base.hh"
+ 
+ /**
+@@ -58,16 +55,6 @@ public:
+     typedef ConfigNodeIdMap<Node*> Nodes;
+ 
+     /**
+-     * @short Exception thrown on a syntax error while parsing configuration.
+-     */
+-    class term_syntax_error :  public PolicyException {
+-    public:
+-        term_syntax_error(const char* file, size_t line, 
+-			  const string& init_why = "")   
+-            : PolicyException("term_syntax_error", file, line, init_why) {}  
+-    };
+-
+-    /**
+      * @param name term name.
+      */
+     Term(const string& name);
+@@ -90,8 +77,8 @@ public:
+      * @param order node ID with position of term.
+      * @param statement the statement to insert.
+      */
+-    void set_block(const uint32_t& block, const ConfigNodeId& order,
+-		   const string& statement);
++    bool set_block(const uint32_t& block, const ConfigNodeId& order,
++		   const string& statement, string& err);
+ 
+     /**
+      * Deletes statements in the location specified by order and block.
+@@ -99,7 +86,7 @@ public:
+      * @param block the block to update (0:source, 1:dest, 2:action).
+      * @param order node ID with position of term.
+      */
+-    void del_block(const uint32_t& block, const ConfigNodeId& order);
++    bool del_block(const uint32_t& block, const ConfigNodeId& order, string& err);
+ 
+     /**
+      * Perform operations at the end of the block.
+@@ -107,15 +94,15 @@ public:
+      * @param block the block to perform operations on
+      * (0:source, 1:dest, 2:action).
+      */
+-    void set_block_end(uint32_t block);
++    bool set_block_end(uint32_t block, string& err);
+ 
+     /**
+      * Visitor implementation.
+      *
+      * @param v visitor used to visit this term.
+      */
+-    const Element* accept(Visitor& v) {
+-	return v.visit(*this);
++    const Element* accept(Visitor& v, string& err, bool& ok) {
++	return v.visit(*this, err, ok);
+     }
+ 
+     /**
+diff --git a/xorp/policy/test_varrw.cc b/xorp/policy/test_varrw.cc
+index 911028b..eb3bace 100644
+--- a/xorp/policy/test_varrw.cc
++++ b/xorp/policy/test_varrw.cc
+@@ -23,18 +23,17 @@
+ #include "policy_module.h"
+ #include "libxorp/xorp.h"
+ #include "test_varrw.hh"
+-#include "common/policy_exception.hh"
+ 
+-const Element& 
+-TestVarRW::read(const Id& id) {
++const Element*
++TestVarRW::read(const Id& id, string& err) {
+     ELEM::iterator i = _elem.find(id);
+ 
+-    if (i == _elem.end())
+-	xorp_throw(PolicyException, "Reading uninitialized attribute");
++    if (i == _elem.end()) {
++	err += "Reading uninitialized attribute";
++	return NULL;
++    }
+ 
+-    const Element* e = i->second;
+-
+-    return *e;
++    return = i->second;
+ }
+ 
+ void 
+diff --git a/xorp/policy/test_varrw.hh b/xorp/policy/test_varrw.hh
+index a16b8e6..f546f07 100644
+--- a/xorp/policy/test_varrw.hh
++++ b/xorp/policy/test_varrw.hh
+@@ -29,7 +29,7 @@
+ 
+ class TestVarRW : public VarRW {
+ public:
+-    const Element& read(const Id& id);
++    const Element* read(const Id& id, string& err);
+     void  write(const Id& id, const Element& elem);
+ 
+ private:
+diff --git a/xorp/policy/tests/file_varrw.hh b/xorp/policy/tests/file_varrw.hh
+index 5d7c776..33e8ea6 100644
+--- a/xorp/policy/tests/file_varrw.hh
++++ b/xorp/policy/tests/file_varrw.hh
+@@ -24,7 +24,6 @@
+ #define __POLICY_TEST_FILE_VARRW_HH__
+ 
+ #include "policy/common/varrw.hh"
+-#include "policy/common/policy_exception.hh"
+ #include "policy/common/element_factory.hh"
+ 
+ 
+diff --git a/xorp/policy/var_map.cc b/xorp/policy/var_map.cc
+index dcd9387..ff64fa9 100644
+--- a/xorp/policy/var_map.cc
++++ b/xorp/policy/var_map.cc
+@@ -33,21 +33,21 @@
+ 
+ using namespace policy_utils;
+ 
+-const VarMap::VariableMap&
+-VarMap::variablemap(const string& protocol) const
++const VarMap::VariableMap*
++VarMap::variablemap(const string& protocol, string& err) const
+ {
+ 
+     ProtoMap::const_iterator i = _protocols.find(protocol);
+-    if(i == _protocols.end()) 
+-	xorp_throw(VarMapErr, "Unknown protocol: " + protocol);
+-
+-    const VariableMap* vm = (*i).second;
++    if(i == _protocols.end()) {
++	err += "Unknown protocol: " + protocol;
++	return NULL;
++    }
+ 
+-    return *vm;
++    return (*i).second;
+ }
+ 
+-const VarMap::Variable&
+-VarMap::variable(const string& protocol, const VarRW::Id& varname) const
++const VarMap::Variable*
++VarMap::variable(const string& protocol, const VarRW::Id& varname, string& err) const
+ {
+     const VariableMap& vmap = variablemap(protocol);
+ 
+@@ -57,12 +57,11 @@ VarMap::variable(const string& protocol, const VarRW::Id& varname) const
+ 	ostringstream oss;
+ 
+ 	oss << "Unknown variable: " << varname << " in protocol " << protocol;
+-	xorp_throw(VarMapErr, oss.str());
++	err += oss.str();
++	return NULL;
+     }			
+ 
+-    const Variable* v = (*i).second;
+-
+-    return *v;
++    return (*i).second;
+ }
+ 
+ 
+@@ -92,8 +91,8 @@ VarMap::protocol_known(const string& protocol)
+     return _protocols.find(protocol) != _protocols.end();
+ }
+ 
+-void 
+-VarMap::add_variable(VariableMap& vm, Variable* var)
++bool
++VarMap::add_variable(VariableMap& vm, Variable* var, string& err)
+ {
+     VariableMap::iterator i = vm.find(var->id);
+ 
+@@ -106,14 +105,16 @@ VarMap::add_variable(VariableMap& vm, Variable* var)
+ 	ostringstream oss;
+ 	oss << "Variable " << var->id << " exists already";
+ 	delete var;
+-	xorp_throw(VarMapErr, oss.str());
++	err += oss.str();
++	return false;
+     }	
+     
+     vm[var->id] = var;
++    return true;
+ }
+ 
+-void 
+-VarMap::add_protocol_variable(const string& protocol, Variable* var)
++bool
++VarMap::add_protocol_variable(const string& protocol, Variable* var, string& err)
+ {
+ 
+     debug_msg("[POLICY] VarMap adding proto: %s, var: %s, type: %s, R/W: %d, ID: %d\n",
+@@ -126,7 +127,8 @@ VarMap::add_protocol_variable(const string& protocol, Variable* var)
+ 	oss << "Unable to create element of type: " << var->type
+ 	    << " in proto: " << protocol << " varname: " << var->name;
+ 	delete var;    
+-	xorp_throw(VarMapErr, oss.str());
++	err += oss.str();
++	return false;
+     }
+ 
+     ProtoMap::iterator iter = _protocols.find(protocol);
+@@ -152,21 +154,23 @@ VarMap::add_protocol_variable(const string& protocol, Variable* var)
+         vm = (*iter).second;
+ 
+     add_variable(*vm, var);
+-
++    return true;
+ }
+ 
+-void
+-VarMap::add_metavariable(Variable* v)
++bool
++VarMap::add_metavariable(Variable* v, string& err)
+ {
+     if (_metavars.find(v->id) != _metavars.end()) {
+ 	ostringstream oss;
+ 
+ 	oss << "Metavar: " << v->id << " exists already" << endl;
+ 	delete v;
+-	xorp_throw(VarMapErr, oss.str());
++	err += oss.str();
++	return false;
+     }
+ 
+     _metavars[v->id] = v;
++    return true;
+ }
+ 
+ string
+@@ -197,12 +201,16 @@ VarMap::str()
+ }
+ 
+ VarRW::Id
+-VarMap::var2id(const string& protocol, const string& varname) const
++VarMap::var2id(const string& protocol, const string& varname, string& err, bool& ok) const
+ {
++    ok = true;
+     ProtoMap::const_iterator i = _protocols.find(protocol);
+ 
+-    if (i == _protocols.end())
+-	xorp_throw(VarMapErr, "Unknown protocol: " + protocol);
++    if (i == _protocols.end()) {
++	err += "Unknown protocol: " + protocol;
++	ok = false;
++	return 0;
++    }
+ 
+     const VariableMap* vm = i->second;
+ 
+@@ -214,5 +222,7 @@ VarMap::var2id(const string& protocol, const string& varname) const
+ 	    return v->id;
+     }
+ 
+-    xorp_throw(VarMapErr, "Unknown variable: " + varname);
++    err += "Unknown variable: " + varname;
++    ok = false;
++    return 0;
+ }
+diff --git a/xorp/policy/var_map.hh b/xorp/policy/var_map.hh
+index eade579..e8b1238 100644
+--- a/xorp/policy/var_map.hh
++++ b/xorp/policy/var_map.hh
+@@ -24,13 +24,7 @@
+ #define __POLICY_VAR_MAP_HH__
+ 
+ 
+-
+-
+-
+-
+-#include "policy/common/policy_exception.hh"
+ #include "policy/common/varrw.hh"
+-
+ #include "process_watch.hh"
+ 
+ /**
+@@ -47,15 +41,6 @@ class VarMap :
+ {
+ public:
+     /**
+-     * @short Exception thrown on VarMap errors such as on unknown variables.
+-     */
+-    class VarMapErr : public PolicyException {
+-    public:
+-        VarMapErr(const char* file, size_t line, const string& init_why = "")   
+-            : PolicyException("VarMapErr", file, line, init_why) {} 
+-    };
+-
+-    /**
+      * A variable may be READ [readonly] or READ_WRITE [read/write].
+      */
+     enum Access {
+@@ -114,8 +99,8 @@ public:
+      * @param protocol protocol of variable interested in.
+      * @param varname name of variable interested in.
+      */
+-    const Variable& variable(const string& protocol, 
+-			     const VarRW::Id& varname) const;
++    const Variable* variable(const string& protocol, 
++			     const VarRW::Id& varname, string& err) const;
+ 
+     VarRW::Id var2id(const string& protocol, const string& varname) const;
+ 
+@@ -141,7 +126,7 @@ public:
+      * @param protocol protocol for which variable should be added.
+      * @param var the variable to add.  Do not delete.
+      */
+-    void add_protocol_variable(const string& protocol, Variable* var);
++    bool add_protocol_variable(const string& protocol, Variable* var, string& err);
+ 
+     
+     /**
+@@ -157,7 +142,7 @@ private:
+      *
+      * @param var the variable to add.  Watch out for clashes and don't delete.
+      */
+-    void add_metavariable(Variable *var);
++    bool add_metavariable(Variable *var, string& err);
+ 
+     /**
+      * Add a variable to a specific protocol.
+@@ -165,7 +150,7 @@ private:
+      * @param vm VariableMap where variable should be added.
+      * @param var the variable to add.  Do not delete.
+      */
+-    void add_variable(VariableMap& vm, Variable* var);
++    bool add_variable(VariableMap& vm, Variable* var, string& err);
+ 
+     /**
+      * A VariableMap relates a variable name to its Variable information [access
+@@ -176,7 +161,7 @@ private:
+      * @return variable map for requested protocol.
+      * @param protocol protocol name for which variable map is requested.
+      */
+-    const VariableMap& variablemap(const string& protocol) const;
++    const VariableMap* variablemap(const string& protocol, string& err) const;
+ 
+     ProtoMap _protocols;
+     ProcessWatchBase& _process_watch;
+diff --git a/xorp/policy/visitor.hh b/xorp/policy/visitor.hh
+index 407e487..2d218f0 100644
+--- a/xorp/policy/visitor.hh
++++ b/xorp/policy/visitor.hh
+@@ -52,19 +52,19 @@ class Visitor {
+ public:
+     virtual ~Visitor() {}
+ 
+-    virtual const Element* visit(NodeUn&) = 0;
+-    virtual const Element* visit(NodeBin&) = 0;
+-    virtual const Element* visit(NodeVar&) = 0;
+-    virtual const Element* visit(NodeAssign&) = 0;
+-    virtual const Element* visit(NodeSet&) = 0;
+-    virtual const Element* visit(NodeAccept&) = 0;
+-    virtual const Element* visit(NodeReject&) = 0;
+-    virtual const Element* visit(Term&) = 0;
+-    virtual const Element* visit(PolicyStatement&) = 0;
+-    virtual const Element* visit(NodeElem&) = 0;
+-    virtual const Element* visit(NodeProto&) = 0;
+-    virtual const Element* visit(NodeNext&) = 0;
+-    virtual const Element* visit(NodeSubr&) = 0;
++    virtual const Element* visit(NodeUn&, string& err, bool& ok) = 0;
++    virtual const Element* visit(NodeBin&, string& err, bool& ok) = 0;
++    virtual const Element* visit(NodeVar&, string& err, bool& ok) = 0;
++    virtual const Element* visit(NodeAssign&, string& err, bool& ok) = 0;
++    virtual const Element* visit(NodeSet&, string& err, bool& ok) = 0;
++    virtual const Element* visit(NodeAccept&, string& err, bool& ok) = 0;
++    virtual const Element* visit(NodeReject&, string& err, bool& ok) = 0;
++    virtual const Element* visit(Term&, string& err, bool& ok) = 0;
++    virtual const Element* visit(PolicyStatement&, string& err, bool& ok) = 0;
++    virtual const Element* visit(NodeElem&, string& err, bool& ok) = 0;
++    virtual const Element* visit(NodeProto&, string& err, bool& ok) = 0;
++    virtual const Element* visit(NodeNext&, string& err, bool& ok) = 0;
++    virtual const Element* visit(NodeSubr&, string& err, bool& ok) = 0;
+ };
+ 
+ #endif // __POLICY_VISITOR_HH__
+diff --git a/xorp/policy/visitor_dep.cc b/xorp/policy/visitor_dep.cc
+index 4c403e7..83fa47c 100644
+--- a/xorp/policy/visitor_dep.cc
++++ b/xorp/policy/visitor_dep.cc
+@@ -75,36 +75,36 @@ VisitorDep::visit(Term& term)
+ }
+ 
+ const Element* 
+-VisitorDep::visit(NodeSet& node)
++VisitorDep::visit(NodeSet& node, string& err, bool& ok)
+ {
+     // see if set exists
+-    try {
+-	_setmap.getSet(node.setid());
++    _setmap.getSet(node.setid());
++
++    // track sets this policy uses
++    _sets.insert(node.setid());
+ 
+-	// track sets this policy uses
+-	_sets.insert(node.setid());
+-    } 
+     // it doesn't
+-    catch(const PolicyException& e) {	
+-        ostringstream error;
+-        error << "Set not found: " << node.setid() << " at line " << node.line();
+-    
+-        xorp_throw(sem_error, error.str());
+-    }
++    //catch(const PolicyException& e) {	
++    //    ostringstream error;
++    //    error << "Set not found: " << node.setid() << " at line " << node.line();
++    // 
++    //    xorp_throw(sem_error, error.str());
++    //}
+     return NULL;
+ }
+ 
+ const Element*
+-VisitorDep::visit(NodeSubr& node)
++VisitorDep::visit(NodeSubr& node, string& err, bool& ok)
+ {
++    ok = true;
+     string policy = node.policy();
+ 
+     if (!_pmap.exists(policy)) {
+ 	ostringstream err;
+ 
+ 	err << "Policy not found: " << policy << " at line " << node.line();
+-
+-	xorp_throw(sem_error, err.str());
++	ok = false;
++	return NULL;
+     }
+ 
+     _policies.insert(policy);
+diff --git a/xorp/policy/visitor_dep.hh b/xorp/policy/visitor_dep.hh
+index 0011abe..9327c88 100644
+--- a/xorp/policy/visitor_dep.hh
++++ b/xorp/policy/visitor_dep.hh
+@@ -23,9 +23,6 @@
+ #ifndef __POLICY_VISITOR_DEP_HH__
+ #define __POLICY_VISITOR_DEP_HH__
+ 
+-
+-
+-#include "policy/common/policy_exception.hh"
+ #include "visitor.hh"
+ #include "set_map.hh"
+ #include "policy_map.hh"
+@@ -40,15 +37,6 @@
+ class VisitorDep : public Visitor {
+ public:
+     /**
+-     * @short Semantic error thrown if set is not found.
+-     */
+-    class sem_error : public PolicyException {
+-    public:
+-        sem_error(const char* file, size_t line, const string& init_why = "")   
+-            : PolicyException("sem_error", file, line, init_why) {} 
+-    };
+-
+-    /**
+      * @param setmap The setmap used.
+      */
+     VisitorDep(SetMap& setmap, PolicyMap& pmap);
+@@ -59,13 +47,13 @@ public:
+     const Element* visit(NodeBin& node);
+     const Element* visit(NodeAssign& node);
+     const Element* visit(NodeVar& node);
+-    const Element* visit(NodeSet& node);
++    const Element* visit(NodeSet& node, string& err);
+     const Element* visit(NodeElem& node);
+     const Element* visit(NodeAccept& node);
+     const Element* visit(NodeReject& node);
+     const Element* visit(NodeProto& node);
+     const Element* visit(NodeNext& node);
+-    const Element* visit(NodeSubr& node);
++    const Element* visit(NodeSubr& node, string& err, bool& ok);
+ 
+     /**
+      * @return the sets used by the policy.
+diff --git a/xorp/policy/visitor_semantic.cc b/xorp/policy/visitor_semantic.cc
+index ee38be5..95b9040 100644
+--- a/xorp/policy/visitor_semantic.cc
++++ b/xorp/policy/visitor_semantic.cc
+@@ -68,8 +68,9 @@ VisitorSemantic::do_policy_statement(PolicyStatement& policy)
+ }
+ 
+ const Element* 
+-VisitorSemantic::visit(Term& term)
++VisitorSemantic::visit(Term& term, string& err, bool& ok)
+ {
++    ok = true;
+     Term::Nodes& source = term.source_nodes();
+     Term::Nodes& dest = term.dest_nodes();
+     Term::Nodes& actions = term.action_nodes();
+@@ -99,18 +100,19 @@ VisitorSemantic::visit(Term& term)
+ 	// Currently, allow empty source blocks... which means:
+ 	// if something manages to get to the export filter, then match it.
+ 	if (!empty_source) {
+-	    string err = "No protocol specified in source match of export policy";
+-
++	    err += "No protocol specified in source match of export policy";
+ 	    err += " in term: " + term.name();
+-
+-	    xorp_throw(sem_error, err);
++	    ok = false;
++	    return NULL;
+ 	}
+     }
+ 
+     // import policies should not have dest blocks
+     if (_ptype == IMPORT && !(dest.empty())) {
+-	xorp_throw(sem_error, "Invalid use of dest in import policy in term " + 
+-		   term.name());
++	ok = false;
++	err += "Invalid use of dest in import policy in term " + 
++	    term.name();
++	return NULL;
+     }
+ 
+     // check dest block
+@@ -127,29 +129,29 @@ VisitorSemantic::visit(Term& term)
+ }
+     
+ const Element* 
+-VisitorSemantic::visit(NodeUn& node)
++VisitorSemantic::visit(NodeUn& node, string& err, bool& ok)
+ {
++    ok = true;
+     // check argument
+     const Element* arg = node.node().accept(*this);
+ 
+     Element* res;
+    
+     // see if we may execute unary operation
+-    try {
+-	res = _disp.run(node.op(),*arg);
++    res = _disp.run(node.op(),*arg);
+ 
+-	if (res->refcount() == 1)
+-	    _trash.insert(res);
++    if (res->refcount() == 1)
++	_trash.insert(res);
++
++    return res;
+ 
+-	return res;
+-    } 
+     // we can't
+-    catch (const PolicyException& e) {
+-	ostringstream error;
++    //catch (const PolicyException& e) {
++	//ostringstream error;
+ 
+-	error << "Invalid unop " << e.str() << " at line " << node.line();
+-	xorp_throw(sem_error, error.str());
+-    }
++	//error << "Invalid unop " << e.str() << " at line " << node.line();
++	//xorp_throw(sem_error, error.str());
++    //}
+ }
+ 
+ const Element* 
+@@ -164,85 +166,88 @@ VisitorSemantic::visit(NodeBin& node)
+ 
+ const Element*
+ VisitorSemantic::do_bin(const Element& left, const Element& right,
+-			const BinOper& op, const Node& node)
++			const BinOper& op, const Node& node, string& err, bool& ok)
+ {
++    ok = true;
+     // see if we may execute bin operation.
+-    try {
+-	Element* res = _disp.run(op, left, right);
++    Element* res = _disp.run(op, left, right);
+ 
+-	if (res->refcount() == 1)
+-	    _trash.insert(res);
++    if (res->refcount() == 1)
++	_trash.insert(res);
+ 
+-	return res;
+-    }
++    return res;
+     // nope
+-    catch (const PolicyException& e) {
+-        ostringstream error;
++    //catch (const PolicyException& e) {
++    //    ostringstream error;
+ 
+-        error << "Invalid binop " << e.str() << " at line " << node.line();
++    //    error << "Invalid binop " << e.str() << " at line " << node.line();
+     
+-        xorp_throw(sem_error, error.str());
+-    }
++      //  xorp_throw(sem_error, error.str());
++    //}
++    return NULL;
+ }
+ 
+ const Element* 
+-VisitorSemantic::visit(NodeAssign& node)
++VisitorSemantic::visit(NodeAssign& node, string& err, bool& ok)
+ {
+     // check argument
++    ok = true;
+     const Element* rvalue = node.rvalue().accept(*this);
+ 
+     // try assignment
+-    try {
+-	VarRW::Id id = _varmap.var2id(semantic_protocol(), node.varid());
++    VarRW::Id id = _varmap.var2id(semantic_protocol(), node.varid());
+ 
+-	// see if there's a modifier to the assignment
+-	if (node.mod()) {
+-	    const Element* left = &_varrw.read(id);
++    // see if there's a modifier to the assignment
++    if (node.mod()) {
++	const Element* left = &_varrw.read(id);
+ 
+-	    rvalue = do_bin(*left, *rvalue, *node.mod(), node);
+-	}
++	rvalue = do_bin(*left, *rvalue, *node.mod(), node);
++    }
+ 
+-	_varrw.write(id, *rvalue);
+-    } catch (SemanticVarRW::var_error e) {
+-        ostringstream error;
++    _varrw.write(id, *rvalue);
++//} catch (SemanticVarRW::var_error e) {
++//        ostringstream error;
+ 
+-        error << e.str() << " at line " << node.line();
++  //      error << e.str() << " at line " << node.line();
+ 
+-        xorp_throw(sem_error, error.str());
+-    }
++    //    xorp_throw(sem_error, error.str());
++    //}
+     return NULL;
+ }
+ 
+ const Element* 
+-VisitorSemantic::visit(NodeVar& node)
++VisitorSemantic::visit(NodeVar& node, string& err, bool& ok)
+ {
+     // try reading a variable
+-    try {
+-	VarRW::Id id = _varmap.var2id(semantic_protocol(), node.val());
+-	return &_varrw.read(id);
+-    } catch(SemanticVarRW::var_error e) {
+-        ostringstream error;
++    ok = true;
++    VarRW::Id id = _varmap.var2id(semantic_protocol(), node.val());
++    return &_varrw.read(id);
++//} catch(SemanticVarRW::var_error e) {
++  //      ostringstream error;
+ 
+-        error << e.str() << " at line " << node.line();
++    //    error << e.str() << " at line " << node.line();
+     
+-        xorp_throw(sem_error, error.str());
+-    }
++      //  xorp_throw(sem_error, error.str());
++    //}
++    return NULL;
+ }
+     
+ const Element* 
+-VisitorSemantic::visit(NodeSet& node)
++VisitorSemantic::visit(NodeSet& node, string& err, bool& ok)
+ {
++    ok = true;
++
+     // try getting a set [setdep should have caught there errors]
+-    try {
+-	const Element& e = _setmap.getSet(node.setid());
+-	_sets.insert(node.setid());
+-	return &e;
+-    } catch(const PolicyException& e) {
+-        ostringstream error;
+-        error << "Set not found: " << node.setid() << " at line " << node.line();
++    const Element& e = _setmap.getSet(node.setid());
++    _sets.insert(node.setid());
++    return &e;
++//} catch(const PolicyException& e) {
++  //      ostringstream error;
++    //    error << "Set not found: " << node.setid() << " at line " << node.line();
+     
+-        xorp_throw(sem_error, error.str());
+-    }
++      //  xorp_throw(sem_error, error.str());
++    //}
++    return NULL;
+ }
+ 
+ const Element* 
+@@ -266,16 +271,17 @@ VisitorSemantic::visit(NodeReject& /* node */)
+ }
+ 
+ const Element* 
+-VisitorSemantic::visit(NodeProto& node)
++VisitorSemantic::visit(NodeProto& node, string& err, bool& ok)
+ {
+-    ostringstream err;
++    ostringstream _err;
+ 
+     // import policies may not use protocol directive
+     if(_ptype == IMPORT) {
+-	err << "May not define protocol for import policy at line " <<
+-        node.line();
++	_err << "May not define protocol for import policy at line " << node.line();
+         
+-        xorp_throw(sem_error, err.str());
++        ok = false;
++	err += _err.str();
++	return NULL;
+     }
+ 
+     string proto = node.proto();
+@@ -283,10 +289,11 @@ VisitorSemantic::visit(NodeProto& node)
+ 
+     // check for redifinition in same term.
+     if(_current_protocol != "") {
+-        err << "Redifinition of protocol from " << _current_protocol << 
++        _err << "Redifinition of protocol from " << _current_protocol << 
+ 	    " to " << proto << " at line " << node.line();
+-    
+-        xorp_throw(sem_error, err.str());
++	ok = false;
++	err += _err.str();
++	return NULL;
+     }
+ 
+     // do the switch
+diff --git a/xorp/policy/visitor_semantic.hh b/xorp/policy/visitor_semantic.hh
+index 1d839cf..d2091fb 100644
+--- a/xorp/policy/visitor_semantic.hh
++++ b/xorp/policy/visitor_semantic.hh
+@@ -54,15 +54,6 @@ public:
+     };
+ 
+     /**
+-     * @short Exception thrown on a semantic error
+-     */
+-    class sem_error : public PolicyException {
+-    public:
+-        sem_error(const char* file, size_t line, const string& init_why = "")
+-            : PolicyException("sem_error", file, line, init_why) {}
+-    };
+-
+-    /**
+      * @param varrw semantic VarRW used to simulate a protocol.
+      * @param varmap the varmap.
+      * @param setmap the SetMap to check if sets exist.
+@@ -73,19 +64,19 @@ public:
+     VisitorSemantic(SemanticVarRW& varrw, VarMap& varmap, SetMap& setmap,
+ 		    PolicyMap& pmap, const string& protocol, PolicyType ptype);
+ 
+-    const Element* visit(PolicyStatement& policy);
+-    const Element* visit(Term& term);
+-    const Element* visit(NodeUn& node);
+-    const Element* visit(NodeBin& node);
+-    const Element* visit(NodeAssign& node);
+-    const Element* visit(NodeVar& node);
+-    const Element* visit(NodeSet& node);
+-    const Element* visit(NodeElem& node);
+-    const Element* visit(NodeAccept& node);
+-    const Element* visit(NodeReject& node);
+-    const Element* visit(NodeProto& node);
+-    const Element* visit(NodeNext& node);
+-    const Element* visit(NodeSubr& node);
++    const Element* visit(PolicyStatement& policy, string& err, bool& ok);
++    const Element* visit(Term& term, string& err, bool& ok);
++    const Element* visit(NodeUn& node, string& err, bool& ok);
++    const Element* visit(NodeBin& node, string& err, bool& ok);
++    const Element* visit(NodeAssign& node, string& err, bool& ok);
++    const Element* visit(NodeVar& node, string& err, bool& ok);
++    const Element* visit(NodeSet& node, string& err, bool& ok);
++    const Element* visit(NodeElem& node, string& err, bool& ok);
++    const Element* visit(NodeAccept& node, string& err, bool& ok);
++    const Element* visit(NodeReject& node, string& err, bool& ok);
++    const Element* visit(NodeProto& node, string& err, bool& ok);
++    const Element* visit(NodeNext& node, string& err, bool& ok);
++    const Element* visit(NodeSubr& node, string& err, bool& ok);
+ 
+     /**
+      * @return sets used by the policy.
+diff --git a/xorp/policy/visitor_test.cc b/xorp/policy/visitor_test.cc
+index 651dd9c..2c665a9 100644
+--- a/xorp/policy/visitor_test.cc
++++ b/xorp/policy/visitor_test.cc
+@@ -295,35 +295,30 @@ VisitorTest::change_protocol(const string& protocol)
+     _current_protocol = protocol;
+ }
+ 
+-const Element&
+-VisitorTest::read(const string& id)
++const Element*
++VisitorTest::read(const string& id, string& err)
+ {
+-    try {
+-	Id i = var2id(id);
+-
+-	const Element& e = _varrw->read(i);
+-
+-	return e;
+-    } catch (const PolicyException& e) {
+-	ostringstream oss;
++    Id i = var2id(id);
+ 
+-	oss << "Can't read uninitialized attribute " << id;
+-
+-	xorp_throw(PolicyException, oss.str());
+-    }
++    const Element& e = _varrw->read(i, err);
++    return e;
+ }
+ 
+-void
+-VisitorTest::write(const string& id, const Element& e)
++bool
++VisitorTest::write(const string& id, const Element& e, string& err)
+ {
+     const Variable& v = var2variable(id);
+ 
+     // XXX perhaps we should do a semantic check before a test run...
+-    if (!v.writable())
+-	xorp_throw(PolicyException, "writing a read-only variable");
++    if (!v.writable()) {
++	err += "writing a read-only variable";
++	return false;
++    }
+ 
+-    if (v.type != e.type())
+-	xorp_throw(PolicyException, "type mismatch on write");
++    if (v.type != e.type()) {
++	err += "type mismatch on write";
++	return false;
++    }
+ 
+     _varrw->write(v.id, e);
+ 
+@@ -338,8 +333,8 @@ VisitorTest::var2id(const string& var)
+     return v.id;
+ }
+ 
+-const VisitorTest::Variable&
+-VisitorTest::var2variable(const string& var)
++const VisitorTest::Variable*
++VisitorTest::var2variable(const string& var, string& err)
+ {
+     string protocol = _current_protocol;
+ 
+@@ -350,12 +345,14 @@ VisitorTest::var2variable(const string& var)
+ 	    protocol = "bgp";
+     }
+ 
+-    if (protocol.empty())
+-	xorp_throw(PolicyException, "Provide a protocol name");
++    if (protocol.empty()) {
++	err += "Provide a protocol name";
++	return NULL;
++    }
+ 
+     Id id = _vm.var2id(protocol, var);
+ 
+-    return _vm.variable(protocol, id);
++    return &_vm.variable(protocol, id);
+ }
+ 
+ bool
+diff --git a/xorp/policy/visitor_test.hh b/xorp/policy/visitor_test.hh
+index be25e7a..5ab9410 100644
+--- a/xorp/policy/visitor_test.hh
++++ b/xorp/policy/visitor_test.hh
+@@ -18,7 +18,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/policy/visitor_test.hh,v 1.4 2008/10/02 21:58:02 bms Exp $
+ 
+ #ifndef __POLICY_VISITOR_TEST_HH__
+ #define __POLICY_VISITOR_TEST_HH__
+@@ -67,7 +66,7 @@ private:
+     void	    write(const string& id, const Element& e);
+     void	    change_protocol(const string& protocol);
+     Id		    var2id(const string& var);
+-    const Variable& var2variable(const string& var);
++    const Variable* var2variable(const string& var, string& err);
+     bool	    match(const Element* e);
+ 
+     SetMap&		_sm;
+diff --git a/xorp/policy/xorp_policy.cc b/xorp/policy/xorp_policy.cc
+index 6b0bbd6..034812b 100644
+--- a/xorp/policy/xorp_policy.cc
++++ b/xorp/policy/xorp_policy.cc
+@@ -22,10 +22,7 @@
+ 
+ #include "policy_module.h"
+ #include "libxorp/xorp.h"
+-
+-#include "policy/common/policy_exception.hh"
+ #include "policy/common/policy_utils.hh"
+-
+ #include "xrl_target.hh"
+ 
+ 
+-- 
+2.7.5
+

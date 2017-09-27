@@ -1,0 +1,728 @@
+From 2244ed3fd9c17570bf3836f8c4bedd63c2f15cca Mon Sep 17 00:00:00 2001
+From: Ben Greear <greearb@candelatech.com>
+Date: Fri, 8 Sep 2017 12:08:12 -0700
+Subject: [PATCH 11/33] Remove BadArgs exception.
+
+Signed-off-by: Ben Greear <greearb@candelatech.com>
+---
+ xorp/libxipc/finder_client.cc         |  14 +----
+ xorp/libxipc/tests/test_xrl_args.cc   |  44 +++++---------
+ xorp/libxipc/tests/test_xrl_router.cc |  12 ++--
+ xorp/libxipc/xrl_args.cc              |  62 ++++++--------------
+ xorp/libxipc/xrl_args.hh              | 106 +++++++++++++++-------------------
+ xorp/xrl/scripts/clnt-gen             |   7 +--
+ xorp/xrl/scripts/tgt-gen              |  19 +-----
+ 7 files changed, 90 insertions(+), 174 deletions(-)
+
+diff --git a/xorp/libxipc/finder_client.cc b/xorp/libxipc/finder_client.cc
+index c107329..ab67c34 100644
+--- a/xorp/libxipc/finder_client.cc
++++ b/xorp/libxipc/finder_client.cc
+@@ -302,17 +302,9 @@ public:
+ 	}
+ 
+ 	for (size_t i = 0; i < al->size(); i++) {
+-	    try {
+-		debug_msg("Adding resolved \"%s\"\n",
+-			  al->get(i).text().c_str());
+-		rt_entry->second.values().push_back(al->get(i).text());
+-	    } catch (const XrlAtom::NoData&) {
+-		finder_trace_result("failed (corrupt response)");
+-		_rt.erase(rt_entry);
+-		_qcb->dispatch(XrlError::RESOLVE_FAILED(), 0);
+-		client().notify_done(this);
+-		return;
+-	    }
++	    debug_msg("Adding resolved \"%s\"\n",
++		      al->get(i).text().c_str());
++	    rt_entry->second.values().push_back(al->get(i).text());
+ 	}
+ 	finder_trace_result("okay");
+ 	_qcb->dispatch(e, &rt_entry->second);
+diff --git a/xorp/libxipc/tests/test_xrl_args.cc b/xorp/libxipc/tests/test_xrl_args.cc
+index cab6bd7..fbac99c 100644
+--- a/xorp/libxipc/tests/test_xrl_args.cc
++++ b/xorp/libxipc/tests/test_xrl_args.cc
+@@ -237,36 +237,22 @@ run_test()
+ 	atom.has_data(); // No-op
+     }
+ 
+-    try {
+-	al.get_uint32("only_uint");
+-    } catch (const XrlArgs::BadArgs &e) {
+-	verbose_log("Error decoding the argument: %s\n", e.str().c_str());
+-	return 1;
+-    } catch (...) {
+-	verbose_log("Unanticipated exception.");
+-	return 1;
+-    }
++    al.get_ipv4("a_named_ipv4");
++    al.get_ipv4net("a_named_ipv4net");
++    al.get_ipv6("a_named_ipv6");
++    al.get_ipv6net("a_named_ipv6net");
++    al.get_int32("first_int");
++    al.get_int32("second_int");
++    al.get_uint32("only_uint");
++    al.get_string("a_named_string");
++    al.get_mac("a_named_mac");
++    al.get_string(0);
++    al.get_string("");
++    al.get_string("bad_karma");
++    al.get_int64("a_named_int64");
++    al.get_uint64("a_named_uint64");
++    al.get_fp64("a_named_fp64");
+ 
+-    try {
+-	al.get_ipv4("a_named_ipv4");
+-	al.get_ipv4net("a_named_ipv4net");
+-	al.get_ipv6("a_named_ipv6");
+-	al.get_ipv6net("a_named_ipv6net");
+-	al.get_int32("first_int");
+-	al.get_int32("second_int");
+-	al.get_uint32("only_uint");
+-	al.get_string("a_named_string");
+-	al.get_mac("a_named_mac");
+-	al.get_string(0);
+-	al.get_string("");
+-	al.get_string("bad_karma");
+-	al.get_int64("a_named_int64");
+-	al.get_uint64("a_named_uint64");
+-	al.get_fp64("a_named_fp64");
+-    } catch (XrlArgs::BadArgs& e) {
+-	verbose_log("Error decoding the argument: %s\n", e.str().c_str());
+-	return 1;
+-    }
+     return 0;
+ }
+ 
+diff --git a/xorp/libxipc/tests/test_xrl_router.cc b/xorp/libxipc/tests/test_xrl_router.cc
+index 87a7fa2..41c0dec 100644
+--- a/xorp/libxipc/tests/test_xrl_router.cc
++++ b/xorp/libxipc/tests/test_xrl_router.cc
+@@ -82,14 +82,10 @@ got_integer(const XrlError&	e,
+     if (e != XrlError::OKAY())
+ 	exit_on_xrlerror(e, __FILE__, __LINE__);
+ 
+-    try {
+-	int32_t the_int = response->get_int32("the_number");
+-	if (the_int != 5) {
+-	    fprintf(stderr, "Corrupt integer argument.");
+-	    exit(-1);
+-	}
+-    } catch (const XrlArgs::BadArgs& e) {
+-	printf("Error decoding the argument: %s\n", e.str().c_str());
++    int32_t the_int = response->get_int32("the_number");
++    if (the_int != 5) {
++	fprintf(stderr, "Corrupt integer argument.");
++	exit(-1);
+     }
+ 
+     // Eg we can iterate through the argument list
+diff --git a/xorp/libxipc/xrl_args.cc b/xorp/libxipc/xrl_args.cc
+index e331331..f703515 100644
+--- a/xorp/libxipc/xrl_args.cc
++++ b/xorp/libxipc/xrl_args.cc
+@@ -107,13 +107,9 @@ XrlArgs::add_bool(const char* name, bool val)
+ }
+ 
+ const bool&
+-XrlArgs::get_bool(const char* name) const throw (BadArgs)
++XrlArgs::get_bool(const char* name) const
+ {
+-    try {
+-	return get(XrlAtom(name, xrlatom_boolean)).boolean();
+-    } catch (const XrlAtom::NoData& e) {
+-        xorp_throw(BadArgs, e.why());
+-    }
++    return get(XrlAtom(name, xrlatom_boolean)).boolean();
+ }
+ 
+ void
+@@ -132,13 +128,9 @@ XrlArgs::add_int32(const char* name, int32_t val)
+ }
+ 
+ const int32_t&
+-XrlArgs::get_int32(const char* name) const throw (BadArgs)
++XrlArgs::get_int32(const char* name) const
+ {
+-    try {
+-	return get(XrlAtom(name, xrlatom_int32)).int32();
+-    } catch (const XrlAtom::NoData& e) {
+-        xorp_throw(BadArgs, e.why());
+-    }
++    return get(XrlAtom(name, xrlatom_int32)).int32();
+ }
+ 
+ void
+@@ -157,13 +149,9 @@ XrlArgs::add_uint32(const char* name, uint32_t val)
+ }
+ 
+ const uint32_t&
+-XrlArgs::get_uint32(const char* name) const throw (BadArgs)
++XrlArgs::get_uint32(const char* name) const
+ {
+-    try {
+-	return get(XrlAtom(name, xrlatom_uint32)).uint32();
+-    } catch (const XrlAtom::NoData& e) {
+-        xorp_throw(BadArgs, e.why());
+-    }
++    return get(XrlAtom(name, xrlatom_uint32)).uint32();
+ }
+ 
+ void
+@@ -182,13 +170,9 @@ XrlArgs::add_ipv4(const char* name, const IPv4& val)
+ }
+ 
+ const IPv4&
+-XrlArgs::get_ipv4(const char* name) const throw (BadArgs)
++XrlArgs::get_ipv4(const char* name) const
+ {
+-    try {
+-	return get(XrlAtom(name, xrlatom_ipv4)).ipv4();
+-    } catch (const XrlAtom::NoData& e) {
+-        xorp_throw(BadArgs, e.why());
+-    }
++    return get(XrlAtom(name, xrlatom_ipv4)).ipv4();
+ }
+ 
+ void
+@@ -207,13 +191,9 @@ XrlArgs::add_ipv4net(const char* name, const IPv4Net& val)
+ }
+ 
+ const IPv4Net&
+-XrlArgs::get_ipv4net(const char* name) const throw (BadArgs)
++XrlArgs::get_ipv4net(const char* name) const
+ {
+-    try {
+-	return get(XrlAtom(name, xrlatom_ipv4net)).ipv4net();
+-    } catch (const XrlAtom::NoData& e) {
+-        xorp_throw(BadArgs, e.why());
+-    }
++    return get(XrlAtom(name, xrlatom_ipv4net)).ipv4net();
+ }
+ 
+ void
+@@ -232,13 +212,9 @@ XrlArgs::add_ipv6(const char* name, const IPv6& val)
+ }
+ 
+ const IPv6&
+-XrlArgs::get_ipv6(const char* name) const throw (BadArgs)
++XrlArgs::get_ipv6(const char* name) const
+ {
+-    try {
+-	return get(XrlAtom(name, xrlatom_ipv6)).ipv6();
+-    } catch (const XrlAtom::NoData& e) {
+-        xorp_throw(BadArgs, e.why());
+-    }
++    return get(XrlAtom(name, xrlatom_ipv6)).ipv6();
+ }
+ 
+ void
+@@ -257,13 +233,9 @@ XrlArgs::add_ipv6net(const char* name, const IPv6Net& val)
+ }
+ 
+ const IPv6Net&
+-XrlArgs::get_ipv6net(const char* name) const throw (BadArgs)
++XrlArgs::get_ipv6net(const char* name) const
+ {
+-    try {
+-	return get(XrlAtom(name, xrlatom_ipv6net)).ipv6net();
+-    } catch (const XrlAtom::NoData& e) {
+-        xorp_throw(BadArgs, e.why());
+-    }
++    return get(XrlAtom(name, xrlatom_ipv6net)).ipv6net();
+ }
+ 
+ void
+@@ -316,7 +288,7 @@ XrlArgs::add_ipvxnet(const char* name, const IPvXNet& val)
+ }
+ 
+ const IPvXNet
+-XrlArgs::get_ipvxnet(const char* name) const throw (BadArgs)
++XrlArgs::get_ipvxnet(const char* name) const
+ {
+     XrlAtom a(name, xrlatom_ipv4net);
+     if (a.invalid()) {
+@@ -346,7 +318,7 @@ XrlArgs::add_mac(const char* name, const Mac& val)
+ }
+ 
+ const Mac&
+-XrlArgs::get_mac(const char* name) const throw (BadArgs)
++XrlArgs::get_mac(const char* name) const
+ {
+     return get(XrlAtom(name, xrlatom_mac)).mac();
+ }
+@@ -430,7 +402,7 @@ XrlArgs::add_int64(const char* name, int64_t val)
+ }
+ 
+ const int64_t&
+-XrlArgs::get_int64(const char* name) const throw (BadArgs)
++XrlArgs::get_int64(const char* name) const
+ {
+     return get(XrlAtom(name, xrlatom_int64)).int64();
+ }
+diff --git a/xorp/libxipc/xrl_args.hh b/xorp/libxipc/xrl_args.hh
+index 1513873..5ab67af 100644
+--- a/xorp/libxipc/xrl_args.hh
++++ b/xorp/libxipc/xrl_args.hh
+@@ -41,16 +41,6 @@ public:
+     typedef ATOMS::const_iterator   const_iterator;
+     typedef ATOMS::iterator	    iterator;
+ 
+-    // Exceptions
+-    struct BadArgs : public XorpException {
+-	BadArgs(const char* file, int line, const string& reason) :
+-		XorpException("XrlArgs::BadArgs", file, line),
+-		_reason(reason) {}
+-	const string why() const { return (_reason); }
+-    private:
+-	string _reason;
+-    };
+-
+ public:
+     XrlArgs() : _have_name(false), _invalid(false) { bad_atom.set_invalid(true);}
+     explicit XrlArgs(const char* str);
+@@ -69,192 +59,192 @@ public:
+ 
+     XrlArgs& add_bool(const char* name, bool val);
+ 
+-    const bool_t& get_bool(const char* name) const throw (BadArgs);
++    const bool_t& get_bool(const char* name) const;
+ 
+     void remove_bool(const char* name);
+ 
+     XrlArgs& add(const char* n, bool v);
+ 
+-    void get(const char* n, bool& t) const throw (BadArgs);
++    void get(const char* n, bool& t) const;
+ 
+     /* --- int32 accessors --- */
+ 
+     XrlArgs& add_int32(const char* name, int32_t val);
+ 
+-    const int32_t& get_int32(const char* name) const throw (BadArgs);
++    const int32_t& get_int32(const char* name) const;
+ 
+     void remove_int32(const char* name);
+ 
+     XrlArgs& add(const char* n, int32_t v);
+ 
+-    void get(const char* n, int32_t& t) const throw (BadArgs);
++    void get(const char* n, int32_t& t) const;
+ 
+     /* --- uint32 accessors --- */
+ 
+     XrlArgs& add_uint32(const char* name, uint32_t v);
+ 
+-    const uint32_t& get_uint32(const char* name) const throw (BadArgs);
++    const uint32_t& get_uint32(const char* name) const;
+ 
+     void remove_uint32(const char* name);
+ 
+     XrlArgs& add(const char* n, uint32_t v);
+ 
+-    void get(const char* n, uint32_t& t) const throw (BadArgs);
++    void get(const char* n, uint32_t& t) const;
+ 
+     /* --- ipv4 accessors --- */
+ 
+     XrlArgs& add_ipv4(const char* n, const IPv4& a);
+ 
+-    const IPv4& get_ipv4(const char* name) const throw (BadArgs);
++    const IPv4& get_ipv4(const char* name) const;
+ 
+     void remove_ipv4(const char* name);
+ 
+     XrlArgs& add(const char* n, const IPv4& a);
+ 
+-    void get(const char* n, IPv4& a) const throw (BadArgs);
++    void get(const char* n, IPv4& a) const;
+ 
+     /* --- ipv4net accessors --- */
+ 
+     XrlArgs& add_ipv4net(const char* n, const IPv4Net& a);
+ 
+-    const IPv4Net& get_ipv4net(const char* name) const throw (BadArgs);
++    const IPv4Net& get_ipv4net(const char* name) const;
+ 
+     void remove_ipv4net(const char* name);
+ 
+     XrlArgs& add(const char* n, const IPv4Net& v);
+ 
+-    void get(const char* n, IPv4Net& t) const throw (BadArgs);
++    void get(const char* n, IPv4Net& t) const;
+ 
+     /* --- ipv6 accessors --- */
+ 
+     XrlArgs& add_ipv6(const char* name, const IPv6& addr);
+ 
+-    const IPv6& get_ipv6(const char* name) const throw (BadArgs);
++    const IPv6& get_ipv6(const char* name) const;
+ 
+     void remove_ipv6(const char* name);
+ 
+     XrlArgs& add(const char* n, const IPv6& a);
+ 
+-    void get(const char* n, IPv6& a) const throw (BadArgs);
++    void get(const char* n, IPv6& a) const;
+ 
+     /* --- ipv6net accessors --- */
+ 
+     XrlArgs& add_ipv6net(const char* name, const IPv6Net& addr);
+ 
+-    const IPv6Net& get_ipv6net(const char* name) const throw (BadArgs);
++    const IPv6Net& get_ipv6net(const char* name) const;
+ 
+     void remove_ipv6net(const char* name);
+ 
+     XrlArgs& add(const char* n, const IPv6Net& a);
+ 
+-    void get(const char* n, IPv6Net& a) const throw (BadArgs);
++    void get(const char* n, IPv6Net& a) const;
+ 
+     /* --- ipvx accessors --- */
+ 
+     XrlArgs& add_ipvx(const char* name, const IPvX& ipvx);
+ 
+-    const IPvX get_ipvx(const char* name) const throw (BadArgs);
++    const IPvX get_ipvx(const char* name) const;
+ 
+     void remove_ipvx(const char* name);
+ 
+     XrlArgs& add(const char* n, const IPvX& a);
+ 
+-    void get(const char* n, IPvX& a) const throw (BadArgs);
++    void get(const char* n, IPvX& a) const;
+ 
+     /* --- ipvxnet accessors --- */
+ 
+     XrlArgs& add_ipvxnet(const char* name, const IPvXNet& ipvxnet);
+ 
+-    const IPvXNet get_ipvxnet(const char* name) const throw (BadArgs);
++    const IPvXNet get_ipvxnet(const char* name) const;
+ 
+     void remove_ipvxnet(const char* name);
+ 
+     XrlArgs& add(const char* n, const IPvXNet& a);
+ 
+-    void get(const char* n, IPvXNet& a) const throw (BadArgs);
++    void get(const char* n, IPvXNet& a) const;
+ 
+     /* --- mac accessors --- */
+ 
+     XrlArgs& add_mac(const char* name, const Mac& addr);
+ 
+-    const Mac& get_mac(const char* name) const throw (BadArgs);
++    const Mac& get_mac(const char* name) const;
+ 
+     void remove_mac(const char* name);
+ 
+     XrlArgs& add(const char* n, const Mac& a);
+ 
+-    void get(const char* n, Mac& a) const throw (BadArgs);
++    void get(const char* n, Mac& a) const;
+ 
+     /* --- string accessors --- */
+ 
+     XrlArgs& add_string(const char* name, const string& addr);
+ 
+-    const string& get_string(const char* name) const throw (BadArgs);
++    const string& get_string(const char* name) const;
+ 
+     void remove_string(const char* name);
+ 
+     XrlArgs& add(const char* n, const string& a);
+ 
+-    void get(const char* n, string& a) const throw (BadArgs);
++    void get(const char* n, string& a) const;
+ 
+     /* --- list accessors --- */
+ 
+     XrlArgs& add_list(const char* name, const XrlAtomList& addr);
+ 
+-    const XrlAtomList& get_list(const char* name) const throw (BadArgs);
++    const XrlAtomList& get_list(const char* name) const;
+ 
+     void remove_list(const char* name);
+ 
+     XrlArgs& add(const char* n, const XrlAtomList& a);
+ 
+-    void get(const char* n, XrlAtomList& a) const throw (BadArgs);
++    void get(const char* n, XrlAtomList& a) const;
+ 
+     /* --- binary data accessors --- */
+     XrlArgs& add_binary(const char* name, const vector<uint8_t>& addr);
+ 
+-    const vector<uint8_t>& get_binary(const char* name) const throw (BadArgs);
++    const vector<uint8_t>& get_binary(const char* name) const;
+ 
+     void remove_binary(const char* name);
+ 
+     XrlArgs& add(const char* n, const vector<uint8_t>& a);
+ 
+-    void get(const char* n, vector<uint8_t>& a) const throw (BadArgs);
++    void get(const char* n, vector<uint8_t>& a) const;
+ 
+     /* --- int64 accessors --- */
+ 
+     XrlArgs& add_int64(const char* name, int64_t v);
+ 
+-    const int64_t& get_int64(const char* name) const throw (BadArgs);
++    const int64_t& get_int64(const char* name) const;
+ 
+     void remove_int64(const char* name);
+ 
+     XrlArgs& add(const char* n, int64_t v);
+ 
+-    void get(const char* n, int64_t& t) const throw (BadArgs);
++    void get(const char* n, int64_t& t) const;
+ 
+     /* --- uint64 accessors --- */
+ 
+     XrlArgs& add_uint64(const char* name, uint64_t v);
+ 
+-    const uint64_t& get_uint64(const char* name) const throw (BadArgs);
++    const uint64_t& get_uint64(const char* name) const;
+ 
+     void remove_uint64(const char* name);
+ 
+     XrlArgs& add(const char* n, uint64_t v);
+ 
+-    void get(const char* n, uint64_t& t) const throw (BadArgs);
++    void get(const char* n, uint64_t& t) const;
+ 
+     /* --- fp64 accessors --- */
+ 
+     XrlArgs& add_fp64(const char* name, fp64_t v);
+ 
+-    const fp64_t& get_fp64(const char* name) const throw (BadArgs);
++    const fp64_t& get_fp64(const char* name) const;
+ 
+     void remove_fp64(const char* name);
+ 
+     XrlArgs& add(const char* n, fp64_t v);
+ 
+-    void get(const char* n, fp64_t& t) const throw (BadArgs);
++    void get(const char* n, fp64_t& t) const;
+ 
+ 
+     // ... Add your type's add, get, remove functions here ...
+@@ -349,7 +339,7 @@ XrlArgs::add(const char* n, bool v)
+ }
+ 
+ inline void
+-XrlArgs::get(const char* n, bool& t) const throw (BadArgs)
++XrlArgs::get(const char* n, bool& t) const
+ {
+     t = get_bool(n);
+ }
+@@ -361,7 +351,7 @@ XrlArgs::add(const char* n, int32_t v)
+ }
+ 
+ inline void
+-XrlArgs::get(const char* n, int32_t& t) const throw (BadArgs)
++XrlArgs::get(const char* n, int32_t& t) const
+ {
+     t = get_int32(n);
+ }
+@@ -373,7 +363,7 @@ XrlArgs::add(const char* n, uint32_t v)
+ }
+ 
+ inline void
+-XrlArgs::get(const char* n, uint32_t& t) const throw (BadArgs)
++XrlArgs::get(const char* n, uint32_t& t) const
+ {
+     t = get_uint32(n);
+ }
+@@ -385,7 +375,7 @@ XrlArgs::add(const char* n, const IPv4& a)
+ }
+ 
+ inline void
+-XrlArgs::get(const char* n, IPv4& a) const throw (BadArgs)
++XrlArgs::get(const char* n, IPv4& a) const
+ {
+     a = get_ipv4(n);
+ }
+@@ -397,7 +387,7 @@ XrlArgs::add(const char* n, const IPv4Net& v)
+ }
+ 
+ inline void
+-XrlArgs::get(const char* n, IPv4Net& t) const throw (BadArgs)
++XrlArgs::get(const char* n, IPv4Net& t) const
+ {
+     t = get_ipv4net(n);
+ }
+@@ -409,7 +399,7 @@ XrlArgs::add(const char* n, const IPv6& a)
+ }
+ 
+ inline void
+-XrlArgs::get(const char* n, IPv6& a) const throw (BadArgs)
++XrlArgs::get(const char* n, IPv6& a) const
+ {
+     a = get_ipv6(n);
+ }
+@@ -421,7 +411,7 @@ XrlArgs::add(const char* n, const IPv6Net& a)
+ }
+ 
+ inline void
+-XrlArgs::get(const char* n, IPv6Net& a) const throw (BadArgs)
++XrlArgs::get(const char* n, IPv6Net& a) const
+ {
+     a = get_ipv6net(n);
+ }
+@@ -433,7 +423,7 @@ XrlArgs::add(const char* n, const IPvX& a)
+ }
+ 
+ inline void
+-XrlArgs::get(const char* n, IPvX& a) const throw (BadArgs)
++XrlArgs::get(const char* n, IPvX& a) const
+ {
+     a = get_ipvx(n);
+ }
+@@ -445,7 +435,7 @@ XrlArgs::add(const char* n, const IPvXNet& a)
+ }
+ 
+ inline void
+-XrlArgs::get(const char* n, IPvXNet& a) const throw (BadArgs)
++XrlArgs::get(const char* n, IPvXNet& a) const
+ {
+     a = get_ipvxnet(n);
+ }
+@@ -457,7 +447,7 @@ XrlArgs::add(const char* n, const Mac& a)
+ }
+ 
+ inline void
+-XrlArgs::get(const char* n, Mac& a) const throw (BadArgs)
++XrlArgs::get(const char* n, Mac& a) const
+ {
+     a = get_mac(n);
+ }
+@@ -469,7 +459,7 @@ XrlArgs::add(const char* n, const string& a)
+ }
+ 
+ inline void
+-XrlArgs::get(const char* n, string& a) const throw (BadArgs)
++XrlArgs::get(const char* n, string& a) const
+ {
+     a = get_string(n);
+ }
+@@ -481,7 +471,7 @@ XrlArgs::add(const char* n, const XrlAtomList& a)
+ }
+ 
+ inline void
+-XrlArgs::get(const char* n, XrlAtomList& a) const throw (BadArgs)
++XrlArgs::get(const char* n, XrlAtomList& a) const
+ {
+     a = get_list(n);
+ }
+@@ -493,7 +483,7 @@ XrlArgs::add(const char* n, const vector<uint8_t>& a)
+ }
+ 
+ inline void
+-XrlArgs::get(const char* n, vector<uint8_t>& a) const throw (BadArgs)
++XrlArgs::get(const char* n, vector<uint8_t>& a) const
+ {
+     a = get_binary(n);
+ }
+@@ -505,7 +495,7 @@ XrlArgs::add(const char* n, int64_t v)
+ }
+ 
+ inline void
+-XrlArgs::get(const char* n, int64_t& t) const throw (BadArgs)
++XrlArgs::get(const char* n, int64_t& t) const
+ {
+     t = get_int64(n);
+ }
+@@ -517,7 +507,7 @@ XrlArgs::add(const char* n, uint64_t v)
+ }
+ 
+ inline void
+-XrlArgs::get(const char* n, uint64_t& t) const throw (BadArgs)
++XrlArgs::get(const char* n, uint64_t& t) const
+ {
+     t = get_uint64(n);
+ }
+@@ -529,7 +519,7 @@ XrlArgs::add(const char* n, fp64_t v)
+ }
+ 
+ inline void
+-XrlArgs::get(const char* n, fp64_t& t) const throw (BadArgs)
++XrlArgs::get(const char* n, fp64_t& t) const
+ {
+     t = get_fp64(n);
+ }
+diff --git a/xorp/xrl/scripts/clnt-gen b/xorp/xrl/scripts/clnt-gen
+index 8f80247..8b43352 100755
+--- a/xorp/xrl/scripts/clnt-gen
++++ b/xorp/xrl/scripts/clnt-gen
+@@ -131,15 +131,10 @@ def implement_unmarshall(cls, method_no, method):
+         for r in method.rargs():
+             s += "    %s %s;\n" % (r.cpp_type(), cpp_name(r.name()))
+ 
+-        s += "    try {\n"
++        s += "    \n"
+         for r in method.rargs():
+             s += "\ta->get(\"%s\", %s);\n" % (r.name(), cpp_name(r.name()))
+ 
+-        s += "    } catch (const XrlArgs::BadArgs& bad_args_err) {\n"
+-        s += "\tUNUSED(bad_args_err);\n"  # Fix compile when XLOG_ERROR is #ifdef'd out
+-        s += "\tXLOG_ERROR(\"Error decoding the arguments: %s\", bad_args_err.str().c_str());\n"
+-        s += "\tcb->dispatch(XrlError::BAD_ARGS()%s);\n" % fail_args
+-        s += "\treturn;\n"
+         s += "    }\n"
+ 
+     v = []
+diff --git a/xorp/xrl/scripts/tgt-gen b/xorp/xrl/scripts/tgt-gen
+index f1261af..f47a192 100755
+--- a/xorp/xrl/scripts/tgt-gen
++++ b/xorp/xrl/scripts/tgt-gen
+@@ -362,7 +362,7 @@ def target_handler_methods(cls, name, methods):
+         s += "#ifdef XORP_ENABLE_ASYNC_SERVER\n"
+ 
+ 
+-        s += xorp_indent(1) + "try {\n"
++        s += xorp_indent(1) + "\n"
+         s += xorp_indent(2) + \
+             "%sRF mycb =\n%scallback(this, &%s::callback_%s, pxa_outputs);\n" \
+             % (caps_cpp_classname(m.name()), xorp_indent(3), \
+@@ -378,14 +378,6 @@ def target_handler_methods(cls, name, methods):
+         s += " mycb);\n"
+ 
+ 
+-	s += \
+-"""    } catch (const XrlArgs::BadArgs& e) {
+-	XLOG_ERROR(\"Error decoding the arguments: %s\", e.str().c_str());
+-	return pxa_outputs->dispatch(XrlCmdError::BAD_ARGS(e.str()), NULL);
+-    }
+-"""
+-
+-
+         s += "#else\n"
+ 
+ 
+@@ -394,7 +386,7 @@ def target_handler_methods(cls, name, methods):
+             s += "    %s r_%s;\n" % (r.cpp_type(), cpp_name(r.name()))
+ 
+ 
+-        s += xorp_indent(1) + "try {\n"
++        s += xorp_indent(1) + "\n"
+         s += xorp_indent(2) + "XrlCmdError e = %s(" % cpp_name(m.name())
+         get_reqs = []
+ 	i = 0
+@@ -416,13 +408,6 @@ def target_handler_methods(cls, name, methods):
+         }
+ """ % m.name()
+ 
+-    	s += \
+-"""    } catch (const XrlArgs::BadArgs& e) {
+-	XLOG_ERROR(\"Error decoding the arguments: %s\", e.str().c_str());
+-	return XrlCmdError::BAD_ARGS(e.str());
+-    }
+-"""
+-
+         if m.rargs():
+             s += "\n    /* Marshall return values */\n    \n"
+             for r in m.rargs():
+-- 
+2.7.5
+

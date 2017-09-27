@@ -1,0 +1,2979 @@
+From 6cc7e73369d11147031dfd2abbb3099691203243 Mon Sep 17 00:00:00 2001
+From: Ben Greear <greearb@candelatech.com>
+Date: Mon, 25 Sep 2017 13:35:24 -0700
+Subject: [PATCH 31/33] Finish removing policy exceptions.
+
+It builds now...
+---
+ xorp/bgp/bgp.cc                              |  23 +++---
+ xorp/bgp/bgp.hh                              |   6 +-
+ xorp/bgp/bgp_varrw.cc                        |  81 +++++++++++++++++---
+ xorp/bgp/bgp_varrw.hh                        |   1 -
+ xorp/bgp/bgp_varrw_export.cc                 |   6 +-
+ xorp/bgp/route_table_policy.cc               |  76 +++++++++---------
+ xorp/bgp/xrl_target.cc                       |  32 ++++----
+ xorp/contrib/olsr/olsr.cc                    |  27 +++----
+ xorp/contrib/olsr/olsr.hh                    |   8 +-
+ xorp/contrib/olsr/policy_varrw.cc            |  42 +++++++---
+ xorp/contrib/olsr/policy_varrw.hh            |   3 +-
+ xorp/contrib/olsr/route_manager.cc           |  72 +++++++++---------
+ xorp/contrib/olsr/xrl_io.cc                  |  11 ++-
+ xorp/contrib/olsr/xrl_io.hh                  |   3 +-
+ xorp/contrib/olsr/xrl_target.cc              |  36 ++++-----
+ xorp/contrib/wrapper/wrapper.cc              |  57 +++++++-------
+ xorp/contrib/wrapper/wrapper.hh              |   4 +-
+ xorp/contrib/wrapper/wrapperpolicy.cc        |  44 ++++++++---
+ xorp/contrib/wrapper/wrapperpolicy.hh        |   2 +-
+ xorp/contrib/wrapper/xorp_wrapper4.cc        |  14 ++--
+ xorp/fib2mrib/fib2mrib_varrw.cc              |  39 ++++++----
+ xorp/fib2mrib/fib2mrib_varrw.hh              |   2 +-
+ xorp/ospf/external.cc                        |  30 +++-----
+ xorp/ospf/ospf.cc                            |  12 +--
+ xorp/ospf/ospf.hh                            |   4 +-
+ xorp/ospf/policy_varrw.cc                    | 110 ++++++++++++++++-----------
+ xorp/ospf/policy_varrw.hh                    |   7 +-
+ xorp/ospf/routing_table.cc                   |  79 +++++++++----------
+ xorp/ospf/xrl_io.cc                          |  17 +++--
+ xorp/ospf/xrl_io.hh                          |   3 +-
+ xorp/ospf/xrl_target.cc                      |  17 +++--
+ xorp/ospf/xrl_target3.cc                     |  19 +++--
+ xorp/policy/backend/policy_redist_map.hh     |   5 --
+ xorp/policy/backend/single_varrw.hh          |   2 +-
+ xorp/policy/xorp_policy.cc                   |  15 ++--
+ xorp/rib/rib.cc                              |  17 +++++
+ xorp/rib/rib_manager.cc                      |  13 ++--
+ xorp/rib/rib_manager.hh                      |   6 +-
+ xorp/rib/rib_varrw.cc                        |  51 +++++++++----
+ xorp/rib/rib_varrw.hh                        |   5 +-
+ xorp/rib/rt_tab_pol_conn.cc                  |  18 ++---
+ xorp/rib/vifmanager.cc                       |  10 ++-
+ xorp/rib/vifmanager.hh                       |   3 +-
+ xorp/rib/xrl_target.cc                       |  74 ++++++++----------
+ xorp/rip/rip_varrw.cc                        |  15 ++--
+ xorp/rip/rip_varrw.hh                        |   3 +-
+ xorp/rip/route_db.cc                         |  71 +++++++++--------
+ xorp/rip/system.hh                           |   9 +--
+ xorp/rip/xrl_port_manager.cc                 |   6 +-
+ xorp/rip/xrl_port_manager.hh                 |   2 +-
+ xorp/rip/xrl_target_common.hh                |  25 +++---
+ xorp/static_routes/static_routes_node.cc     |  77 ++++++++++---------
+ xorp/static_routes/static_routes_node.hh     |   8 +-
+ xorp/static_routes/static_routes_varrw.cc    |  42 ++++++----
+ xorp/static_routes/static_routes_varrw.hh    |   3 +-
+ xorp/static_routes/xrl_static_routes_node.cc |  15 ++--
+ xorp/vrrp/vrrp_target.cc                     |   5 +-
+ xorp/vrrp/vrrp_target.hh                     |   3 +-
+ 58 files changed, 779 insertions(+), 611 deletions(-)
+
+diff --git a/xorp/bgp/bgp.cc b/xorp/bgp/bgp.cc
+index cb2b7cf..3600be3 100644
+--- a/xorp/bgp/bgp.cc
++++ b/xorp/bgp/bgp.cc
+@@ -467,11 +467,13 @@ BGPMain::tree_complete()
+     //
+     // XXX: we use same actions when the tree is completed or updates are made
+     //
+-    updates_made();
++    string err;
++    if (!updates_made(err))
++	XLOG_ERROR("bgp-main, tree-complete, updates-made had error: %s\n", err.c_str());
+ }
+ 
+-void
+-BGPMain::updates_made()
++bool
++BGPMain::updates_made(string& err)
+ {
+     IfMgrIfTree::IfMap::const_iterator ii;
+     IfMgrIfAtom::VifMap::const_iterator vi;
+@@ -702,6 +704,9 @@ BGPMain::updates_made()
+     // Update the local copy of the interface tree
+     //
+     _iftree = ifmgr_iftree();
++
++    UNUSED(err);
++    return true;
+ }
+ 
+ void
+@@ -1907,16 +1912,16 @@ BGPMain::set_parameter(const Iptuple& iptuple , const string& parameter,
+     return true;
+ }
+ 
+-void
+-BGPMain::configure_filter(const uint32_t& filter, const string& conf)
++bool
++BGPMain::configure_filter(const uint32_t& filter, const string& conf, string& err)
+ {
+-    _policy_filters.configure(filter,conf);
++    return _policy_filters.configure(filter,conf, err);
+ }
+ 
+-void
+-BGPMain::reset_filter(const uint32_t& filter)
++bool
++BGPMain::reset_filter(const uint32_t& filter, string& err)
+ {
+-    _policy_filters.reset(filter);
++    return _policy_filters.reset(filter, err);
+ }
+ 
+ void
+diff --git a/xorp/bgp/bgp.hh b/xorp/bgp/bgp.hh
+index 0c01730..b88b255 100644
+--- a/xorp/bgp/bgp.hh
++++ b/xorp/bgp/bgp.hh
+@@ -710,14 +710,14 @@ public:
+      * @param filter Id of filter to configure.
+      * @param conf Configuration of filter.
+      */
+-    void configure_filter(const uint32_t& filter, const string& conf);
++    bool configure_filter(const uint32_t& filter, const string& conf, string& err);
+ 
+     /**
+      * Reset a policy filter.
+      *
+      * @param filter Id of filter to reset.
+      */
+-    void reset_filter(const uint32_t& filter);
++    bool reset_filter(const uint32_t& filter, string& err);
+ 
+     /**
+      * Push routes through policy filters for re-filtering.
+@@ -887,7 +887,7 @@ private:
+      * An IfMgrHintObserver method invoked whenever the interface tree
+      * information has been changed.
+      */
+-    void updates_made();
++    bool updates_made(string& err);
+ 
+     /**
+      * Callback method that is invoked when the status of an address changes.
+diff --git a/xorp/bgp/bgp_varrw.cc b/xorp/bgp/bgp_varrw.cc
+index a369158..9cf6ad6 100644
+--- a/xorp/bgp/bgp_varrw.cc
++++ b/xorp/bgp/bgp_varrw.cc
+@@ -153,8 +153,12 @@ template <>
+ Element*
+ BGPVarRW<IPv6>::read_network6()
+ {
+-    return _ef.create(ElemIPv6Net::id, 
+-		      _rtmsg->route()->net().str().c_str());
++    string err;
++    Element* e = _ef.create(ElemIPv6Net::id, 
++			    _rtmsg->route()->net().str().c_str(), err);
++    if (!e)
++	XLOG_ERROR("%s", err.c_str());
++    return e;
+ }
+ 
+ template <>
+@@ -169,8 +173,15 @@ Element*
+ BGPVarRW<IPv6>::read_nexthop6()
+ {
+     CorruptMessage m;
+-    return _ef.create(ElemIPv6NextHop::id, 
+-		      _palist->nexthop(m)->str().c_str());
++    string err;
++    Element* e = _ef.create(ElemIPv6NextHop::id, _palist->nexthop(m)->str().c_str(), err);
++    if (m.error()) {
++	err += m.get_msg();
++	XLOG_ERROR("%s", err.c_str());
++	delete e;
++	return NULL;
++    }
++    return e;
+ }
+ 
+ template <>
+@@ -185,7 +196,13 @@ Element*
+ BGPVarRW<IPv4>::read_nexthop4()
+ {
+     CorruptMessage m;
+-    return new ElemIPv4NextHop(*(_palist->nexthop(m)));
++    Element* e = new ElemIPv4NextHop(*(_palist->nexthop(m)));
++    if (m.error()) {
++	XLOG_ERROR("%s", m.get_msg().c_str());
++	delete e;
++	return NULL;
++    }
++    return e;
+ }
+ 
+ template <>
+@@ -200,7 +217,13 @@ Element*
+ BGPVarRW<A>::read_aspath()
+ {
+     CorruptMessage m;
+-    return new ElemASPath(*(_palist->aspath(m)));
++    Element* e = new ElemASPath(*(_palist->aspath(m)));
++    if (m.error()) {
++	XLOG_ERROR("%s", m.get_msg().c_str());
++	delete e;
++	return NULL;
++    }
++    return e;
+ }
+ 
+ template <class A>
+@@ -209,7 +232,15 @@ BGPVarRW<A>::read_origin()
+ {
+     CorruptMessage m;
+     uint32_t origin = _palist->origin(m); 
+-    return _ef.create(ElemU32::id, to_str(origin).c_str());
++    string err;
++    if (m.error()) {
++	XLOG_ERROR("%s", m.get_msg().c_str());
++	return NULL;
++    }   
++    Element* e = _ef.create(ElemU32::id, to_str(origin).c_str(), err);
++    if (!e)
++	XLOG_ERROR("%s", err.c_str());
++    return e;
+ }
+ 
+ template <class A>
+@@ -217,9 +248,17 @@ Element*
+ BGPVarRW<A>::read_localpref()
+ {
+     CorruptMessage m;
+-    const LocalPrefAttribute* lpref = _palist->local_pref_att(m); 
++    const LocalPrefAttribute* lpref = _palist->local_pref_att(m);
++    if (m.error()) {
++	XLOG_ERROR("%s", m.get_msg().c_str());
++	return NULL;
++    }   
+     if (lpref) {
+-	return _ef.create(ElemU32::id, to_str(lpref->localpref()).c_str());
++	string err;
++	Element* e = _ef.create(ElemU32::id, to_str(lpref->localpref()).c_str(), err);
++	if (!e)
++	    XLOG_ERROR("%s", err.c_str());
++	return e;
+     } else
+ 	return NULL;
+ }
+@@ -231,6 +270,11 @@ BGPVarRW<A>::read_community()
+     CorruptMessage m;
+     const CommunityAttribute* ca = _palist->community_att(m);
+ 
++    if (m.error()) {
++	XLOG_ERROR("%s", m.get_msg().c_str());
++	return NULL;
++    }   
++
+     // no community!
+     if (!ca)
+ 	return NULL;
+@@ -250,6 +294,10 @@ BGPVarRW<A>::read_med()
+ {
+     CorruptMessage m;
+     const MEDAttribute* med = _palist->med_att(m);
++    if (m.error()) {
++	XLOG_ERROR("%s", m.get_msg().c_str());
++	return NULL;
++    }
+     if (med)
+ 	return new ElemU32(med->med());
+     else
+@@ -262,6 +310,10 @@ BGPVarRW<A>::read_med_remove()
+ {
+     CorruptMessage m;
+     const MEDAttribute* med = _palist->med_att(m);
++    if (m.error()) {
++	XLOG_ERROR("%s", m.get_msg().c_str());
++	return NULL;
++    }   
+     if (med)
+ 	return new ElemBool(false);	// XXX: default is don't remove the MED
+     else
+@@ -334,7 +386,10 @@ BGPVarRW<A>::read_neighbor()
+     Element* e = NULL;
+     const PeerHandler* ph = _rtmsg->origin_peer();
+     if (ph != NULL && !ph->originate_route_handler()) {
+-	e = _ef.create(ElemIPv4::id, ph->get_peer_addr().c_str());
++	string err;
++	e = _ef.create(ElemIPv4::id, ph->get_peer_addr().c_str(), err);
++	if (!e)
++	    XLOG_ERROR("%s", err.c_str());
+     }
+     return e;
+ }
+@@ -379,10 +434,14 @@ template <class A>
+ void
+ BGPVarRW<A>::write_policytags(const Element& e)
+ {
++    string err;
+     if (!_ptags)
+ 	_ptags = new PolicyTags(_rtmsg->route()->policytags());
+ 
+-    _ptags->set_ptags(e);
++    if (!_ptags->set_ptags(e, err)) {
++	XLOG_ERROR("%s", err.c_str());
++	return;
++    }
+     _wrote_ptags = true;
+     
+     // XXX: maybe we should make policytags be like filter pointers... i.e. meta
+diff --git a/xorp/bgp/bgp_varrw.hh b/xorp/bgp/bgp_varrw.hh
+index 7d56bdd..9cfa02c 100644
+--- a/xorp/bgp/bgp_varrw.hh
++++ b/xorp/bgp/bgp_varrw.hh
+@@ -18,7 +18,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/bgp/bgp_varrw.hh,v 1.26 2008/11/08 06:14:36 mjh Exp $
+ 
+ #ifndef __BGP_BGP_VARRW_HH__
+ #define __BGP_BGP_VARRW_HH__
+diff --git a/xorp/bgp/bgp_varrw_export.cc b/xorp/bgp/bgp_varrw_export.cc
+index e3de3c7..02efb95 100644
+--- a/xorp/bgp/bgp_varrw_export.cc
++++ b/xorp/bgp/bgp_varrw_export.cc
+@@ -38,7 +38,11 @@ template <class A>
+ Element*
+ BGPVarRWExport<A>::read_neighbor()
+ {
+-    return BGPVarRW<A>::_ef.create(ElemIPv4::id, _neighbor.c_str());
++    string err;
++    Element* e = BGPVarRW<A>::_ef.create(ElemIPv4::id, _neighbor.c_str(), err);
++    if (!e)
++	XLOG_ERROR("%s", err.c_str());
++    return e;
+ }
+ 
+ template class BGPVarRWExport<IPv4>;
+diff --git a/xorp/bgp/route_table_policy.cc b/xorp/bgp/route_table_policy.cc
+index 88bcaab..68bd170 100644
+--- a/xorp/bgp/route_table_policy.cc
++++ b/xorp/bgp/route_table_policy.cc
+@@ -74,49 +74,45 @@ PolicyTable<A>::do_filtering(InternalMessage<A>& rtmsg,
+ 
+     _varrw->attach_route(rtmsg, no_modify);
+ 
+-    try {
+-	bool accepted = true;
+-
+-	void* pf = NULL;
+-	int pfi = 0;
+-	switch (_filter_type) {
+-	    case filter::IMPORT:
+-		pfi = 0;
+-		break;
+-
+-	    case filter::EXPORT_SOURCEMATCH:
+-		pfi = 1;
+-		break;
++    bool accepted = true;
++    string err;
++    bool ok = true;
++    void* pf = NULL;
++    int pfi = 0;
++    switch (_filter_type) {
++    case filter::IMPORT:
++	pfi = 0;
++	break;
++
++    case filter::EXPORT_SOURCEMATCH:
++	pfi = 1;
++	break;
+ 	
+-	    case filter::EXPORT:
+-		pfi = 2;
+-		break;
+-	}
+-	pf = rtmsg.route()->policyfilter(pfi).get();
+-	debug_msg("[BGP] running filter %s on route: %s (filter=%p)\n",
+-		  filter::filter2str(_filter_type),
+-		  rtmsg.str().c_str(), pf);
+-
+-	accepted = _policy_filters.run_filter(_filter_type, *_varrw);
+-
+-	pf = rtmsg.route()->policyfilter(pfi).get();
+-	debug_msg("[BGP] filter after filtering=%p\n", pf);
+-
+-	// we just did a filtering, so a filter must be assigned to this route!
+-	if (!no_modify) {
+-	    XLOG_ASSERT(pf);
+-	}
+-	_varrw->detach_route(rtmsg);
+-
+-	if (!accepted) {
+-	    return false;
+-	}
+-	return true;
++    case filter::EXPORT:
++	pfi = 2;
++	break;
++    }
++    pf = rtmsg.route()->policyfilter(pfi).get();
++    debug_msg("[BGP] running filter %s on route: %s (filter=%p)\n",
++	      filter::filter2str(_filter_type),
++	      rtmsg.str().c_str(), pf);
+ 
+-    } catch(const PolicyException& e) {
+-	XLOG_FATAL("Policy filter error %s", e.str().c_str());
+-	XLOG_UNFINISHED();
++    accepted = _policy_filters.run_filter(_filter_type, *_varrw, err, ok);
++    if (!ok) {
++	XLOG_FATAL("Policy filter error %s", err.c_str());
++	return false;
+     }
++
++    pf = rtmsg.route()->policyfilter(pfi).get();
++    debug_msg("[BGP] filter after filtering=%p\n", pf);
++
++    // we just did a filtering, so a filter must be assigned to this route!
++    if (!no_modify) {
++	XLOG_ASSERT(pf);
++    }
++    _varrw->detach_route(rtmsg);
++
++    return accepted;
+ }
+ 
+ template <class A>
+diff --git a/xorp/bgp/xrl_target.cc b/xorp/bgp/xrl_target.cc
+index a619e72..be9ae76 100644
+--- a/xorp/bgp/xrl_target.cc
++++ b/xorp/bgp/xrl_target.cc
+@@ -1230,24 +1230,22 @@ XrlBgpTarget::policy_backend_0_1_configure(const uint32_t& filter,
+     string err;
+     PROFILE(XLOG_TRACE(_bgp.profile().enabled(trace_policy_configure),
+ 		       "policy filter: %d conf: %s\n", filter, conf.c_str()));
+-    _bgp.configure_filter(filter,conf);
+-
+-    //return XrlCmdError::COMMAND_FAILED("Filter configure failed: " +
+-//				       e.str());
+-    return XrlCmdError::OKAY();					   
++    if (!_bgp.configure_filter(filter,conf, err))
++	return XrlCmdError::COMMAND_FAILED("Filter configure failed: " +
++					   err);
++    return XrlCmdError::OKAY();
+ }
+ 
+ XrlCmdError
+ XrlBgpTarget::policy_backend_0_1_reset(const uint32_t& filter)
+ {
+-    try {
+-	debug_msg("[BGP] policy reset: %d\n", filter);
+-	PROFILE(XLOG_TRACE(_bgp.profile().enabled(trace_policy_configure),
+-			   "policy filter: %d\n", filter));
+-	_bgp.reset_filter(filter);
+-    } catch(const PolicyException& e){ 
++    debug_msg("[BGP] policy reset: %d\n", filter);
++    PROFILE(XLOG_TRACE(_bgp.profile().enabled(trace_policy_configure),
++		       "policy filter: %d\n", filter));
++    string err;
++    if (!_bgp.reset_filter(filter, err)) {
+ 	return XrlCmdError::COMMAND_FAILED("Filter reset failed: " +
+-					   e.str());
++					   err);
+     }
+     return XrlCmdError::OKAY();					   
+ }
+@@ -1276,9 +1274,11 @@ XrlBgpTarget::policy_redist4_0_1_add_route4(
+     // NLRI for multicast purpose.
+     //
+ 
+-    _bgp.originate_route(network,nexthop,unicast,multicast,policytags);
++    string err;
++    if (!_bgp.originate_route(network,nexthop,unicast,multicast,PolicyTags(policytags, err)))
++	return XrlCmdError::COMMAND_FAILED("originate route failed: " + err);
++
+     return XrlCmdError::OKAY();
+-	
+ }	
+         
+ XrlCmdError 
+@@ -1572,8 +1572,10 @@ XrlBgpTarget::policy_redist6_0_1_add_route6(
+     // XXX: Accept the multicast routes, otherwise we cannot originate
+     // NLRI for multicast purpose.
+     //
++    string err;
++    if (!_bgp.originate_route(network,nexthop,unicast,multicast, PolicyTags(policytags, err)))
++	return XrlCmdError::COMMAND_FAILED("Originate route failed: " + err);
+ 
+-    _bgp.originate_route(network,nexthop,unicast,multicast,policytags);
+     return XrlCmdError::OKAY();
+ }	
+         
+diff --git a/xorp/contrib/olsr/olsr.cc b/xorp/contrib/olsr/olsr.cc
+index ec1f917..35af8a6 100644
+--- a/xorp/contrib/olsr/olsr.cc
++++ b/xorp/contrib/olsr/olsr.cc
+@@ -319,16 +319,16 @@ Olsr::clear_database()
+     return true;
+ }
+ 
+-void
+-Olsr::configure_filter(const uint32_t& filter, const string& conf)
++bool
++Olsr::configure_filter(const uint32_t& filter, const string& conf, string& err)
+ {
+-    _policy_filters.configure(filter, conf);
++    return _policy_filters.configure(filter, conf, err);
+ }
+ 
+-void
+-Olsr::reset_filter(const uint32_t& filter)
++bool
++Olsr::reset_filter(const uint32_t& filter, string& err)
+ {
+-    _policy_filters.reset(filter);
++    return _policy_filters.reset(filter, err);
+ }
+ 
+ void
+@@ -341,22 +341,19 @@ bool
+ Olsr::originate_external_route(const IPv4Net& net,
+ 			       const IPv4& nexthop,
+ 			       const uint32_t& metric,
+-			       const PolicyTags& policytags)
++			       const PolicyTags& policytags, string& err)
+ {
+-    string err;
++    if (policytags.invalid())
++	return false;
++
+     return _er.originate_hna_route_out(net, err);
+ 
+     UNUSED(nexthop);
+     UNUSED(metric);
+-    UNUSED(policytags);
+ }
+ 
+ bool
+-Olsr::withdraw_external_route(const IPv4Net& net)
++Olsr::withdraw_external_route(const IPv4Net& net, string& err)
+ {
+-    string err;
+-    if (_er.withdraw_hna_route_out(net, err))
+-	return true;
+-
+-    return false;
++    return _er.withdraw_hna_route_out(net, err);
+ }
+diff --git a/xorp/contrib/olsr/olsr.hh b/xorp/contrib/olsr/olsr.hh
+index ee13d355..e9e3757 100644
+--- a/xorp/contrib/olsr/olsr.hh
++++ b/xorp/contrib/olsr/olsr.hh
+@@ -497,14 +497,14 @@ class Olsr {
+      * @param filter Id of filter to configure.
+      * @param conf Configuration of filter.
+      */
+-    void configure_filter(const uint32_t& filter, const string& conf);
++    bool configure_filter(const uint32_t& filter, const string& conf, string& err);
+ 
+     /**
+      * Reset a policy filter.
+      *
+      * @param filter Id of filter to reset.
+      */
+-    void reset_filter(const uint32_t& filter);
++    bool reset_filter(const uint32_t& filter, string& err);
+ 
+     /**
+      * Push routes through policy filters for re-filtering.
+@@ -523,7 +523,7 @@ class Olsr {
+     bool originate_external_route(const IPv4Net& net,
+ 				  const IPv4& nexthop,
+ 				  const uint32_t& metric,
+-				  const PolicyTags& policytags);
++				  const PolicyTags& policytags, string& err);
+ 
+     /**
+      * Withdraw an external route from HNA.
+@@ -531,7 +531,7 @@ class Olsr {
+      * @param net network prefix to withdraw.
+      * @return true if the route was withdrawn successfully.
+      */
+-    bool withdraw_external_route(const IPv4Net& net);
++    bool withdraw_external_route(const IPv4Net& net, string& err);
+ 
+     /**
+      * @return a reference to the policy filters
+diff --git a/xorp/contrib/olsr/policy_varrw.cc b/xorp/contrib/olsr/policy_varrw.cc
+index c331874..9c6afdb 100644
+--- a/xorp/contrib/olsr/policy_varrw.cc
++++ b/xorp/contrib/olsr/policy_varrw.cc
+@@ -47,21 +47,39 @@ OlsrVarRW::OlsrVarRW(IPv4Net& network, IPv4& nexthop, uint32_t& metric,
+ {
+ }
+ 
+-void
+-OlsrVarRW::start_read()
++bool
++OlsrVarRW::start_read(string& err)
+ {
+     initialize(_policytags);
+ 
+-    initialize(VAR_NETWORK, _ef.create(ElemIPv4Net::id,
+-				       cstring(_network)));
+-    initialize(VAR_NEXTHOP, _ef.create(ElemIPv4NextHop::id, cstring(_nexthop)));
+-    initialize(VAR_METRIC, _ef.create(ElemU32::id,
+-				      c_format("%u", _metric).c_str()));
+-    initialize(VAR_ORIGINATOR, _ef.create(ElemIPv4::id, cstring(_originator)));
+-    initialize(VAR_MAINADDR, _ef.create(ElemIPv4::id,
+-					cstring(_main_addr)));
+-    initialize(VAR_VTYPE, _ef.create(ElemU32::id,
+-				    c_format("%u", _vtype).c_str()));
++    Element* e = _ef.create(ElemIPv4Net::id, cstring(_network), err);
++    if (!e)
++	return false;
++    initialize(VAR_NETWORK, e);
++    e = _ef.create(ElemIPv4NextHop::id, cstring(_nexthop), err);
++    if (!e)
++	return false;
++    initialize(VAR_NEXTHOP, e);
++    e = _ef.create(ElemU32::id, c_format("%u", _metric).c_str(), err);
++    if (!e)
++	return false;
++    initialize(VAR_METRIC, e);
++
++    e = _ef.create(ElemIPv4::id, cstring(_originator), err);
++    if (!e)
++	return false;
++    initialize(VAR_ORIGINATOR, e);
++
++    e = _ef.create(ElemIPv4::id, cstring(_main_addr), err);
++    if (!e)
++	return false;
++    initialize(VAR_MAINADDR, e);
++
++    e =_ef.create(ElemU32::id, c_format("%u", _vtype).c_str(), err);
++    if (!e)
++	return false;
++    initialize(VAR_VTYPE, e);
++    return true;
+ }
+ 
+ Element* 
+diff --git a/xorp/contrib/olsr/policy_varrw.hh b/xorp/contrib/olsr/policy_varrw.hh
+index 25c2ab1..f6f0a11 100644
+--- a/xorp/contrib/olsr/policy_varrw.hh
++++ b/xorp/contrib/olsr/policy_varrw.hh
+@@ -18,7 +18,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/contrib/olsr/policy_varrw.hh,v 1.4 2008/10/02 21:56:35 bms Exp $
+ 
+ #ifndef __OLSR_POLICY_VARRRW_HH__
+ #define __OLSR_POLICY_VARRRW_HH__
+@@ -49,7 +48,7 @@ class OlsrVarRW : public SingleVarRW {
+ 	      PolicyTags& policytags);
+ 
+     // SingleVarRW inteface:
+-    void start_read();
++    bool start_read(string& err);
+     Element* single_read(const Id& id);
+     void single_write(const Id& id, const Element& e);
+ 
+diff --git a/xorp/contrib/olsr/route_manager.cc b/xorp/contrib/olsr/route_manager.cc
+index 79c141b..0ab918d 100644
+--- a/xorp/contrib/olsr/route_manager.cc
++++ b/xorp/contrib/olsr/route_manager.cc
+@@ -641,51 +641,51 @@ RouteManager::do_filtering(IPv4Net& net, IPv4& nexthop,
+     if (rt.direct())
+ 	return false;
+ #endif
++    bool ok = true;
++    string err;
+ 
+-    try {
+-	IPv4 originator = rt.originator();
+-	IPv4 main_addr = rt.main_address();
+-	uint32_t type = rt.destination_type();
++    IPv4 originator = rt.originator();
++    IPv4 main_addr = rt.main_address();
++    uint32_t type = rt.destination_type();
+ 
+-	// Import filtering.
+-	OlsrVarRW varrw(net, nexthop, metric, originator, main_addr, type,
+-			policytags);
++    // Import filtering.
++    OlsrVarRW varrw(net, nexthop, metric, originator, main_addr, type,
++		    policytags);
+ 
+-	bool accepted = false;
++    bool accepted = false;
+ 
+-	debug_msg("[OLSR] Running filter: %s on route: %s\n",
+-		  filter::filter2str(filter::IMPORT), cstring(net));
+-	XLOG_TRACE(_olsr.trace()._import_policy,
+-		  "[OSPF] Running filter: %s on route: %s\n",
+-		  filter::filter2str(filter::IMPORT), cstring(net));
++    debug_msg("[OLSR] Running filter: %s on route: %s\n",
++	      filter::filter2str(filter::IMPORT), cstring(net));
++    XLOG_TRACE(_olsr.trace()._import_policy,
++	       "[OSPF] Running filter: %s on route: %s\n",
++	       filter::filter2str(filter::IMPORT), cstring(net));
+ 
+-	accepted = _olsr.get_policy_filters().
+-		       run_filter(filter::IMPORT, varrw);
+-
+-	if (!accepted)
+-	    return accepted;
+-
+-	// Export source-match filtering.
+-	OlsrVarRW varrw2(net, nexthop, metric, originator, main_addr, type,
+-			 policytags);
+-
+-	debug_msg("[OLSR] Running filter: %s on route: %s\n",
+-		  filter::filter2str(filter::EXPORT_SOURCEMATCH),
+-		  cstring(net));
+-	XLOG_TRACE(_olsr.trace()._import_policy,
+-		   "[OLSR] Running filter: %s on route: %s\n",
+-		   filter::filter2str(filter::EXPORT_SOURCEMATCH),
+-		  cstring(net));
+-
+-	_olsr.get_policy_filters().
+-	    run_filter(filter::EXPORT_SOURCEMATCH, varrw2);
++    accepted = _olsr.get_policy_filters().run_filter(filter::IMPORT, varrw, err, ok);
++    if (!ok) {
++	XLOG_WARNING("PolicyException: import - run-filter: %s", err.c_str());
++	return false;
++    }
+ 
++    if (!accepted)
+ 	return accepted;
+ 
+-    } catch(const PolicyException& e) {
+-	XLOG_WARNING("PolicyException: %s", cstring(e));
++    // Export source-match filtering.
++    OlsrVarRW varrw2(net, nexthop, metric, originator, main_addr, type,
++		     policytags);
++
++    debug_msg("[OLSR] Running filter: %s on route: %s\n",
++	      filter::filter2str(filter::EXPORT_SOURCEMATCH),
++	      cstring(net));
++    XLOG_TRACE(_olsr.trace()._import_policy,
++	       "[OLSR] Running filter: %s on route: %s\n",
++	       filter::filter2str(filter::EXPORT_SOURCEMATCH),
++	       cstring(net));
++    
++    _olsr.get_policy_filters().run_filter(filter::EXPORT_SOURCEMATCH, varrw2, err, ok);
++    if (!ok) {
++	XLOG_WARNING("PolicyException: source-match - run-filter: %s", err.c_str());
+ 	return false;
+     }
+ 
+-    return true;
++    return accepted;
+ }
+diff --git a/xorp/contrib/olsr/xrl_io.cc b/xorp/contrib/olsr/xrl_io.cc
+index f1374fc..8963b01 100644
+--- a/xorp/contrib/olsr/xrl_io.cc
++++ b/xorp/contrib/olsr/xrl_io.cc
+@@ -882,11 +882,13 @@ XrlIO::tree_complete()
+     //
+     // XXX: we use same actions when the tree is completed or updates are made
+     //
+-    updates_made();
++    string err;
++    if (!updates_made(err))
++	XLOG_WARNING("xrl-io, tree-complete, updates-made had error: %s\n", err.c_str());
+ }
+ 
+-void
+-XrlIO::updates_made()
++bool
++XrlIO::updates_made(string& err)
+ {
+     IfMgrIfTree::IfMap::const_iterator ii;
+     IfMgrIfAtom::VifMap::const_iterator vi;
+@@ -1054,6 +1056,9 @@ XrlIO::updates_made()
+     // Update the local copy of the interface tree
+     //
+     _iftree = ifmgr_iftree();
++
++    UNUSED(err);
++    return true;
+ }
+ 
+ // Gradually start each XrlPort to avoid races with the FEA.
+diff --git a/xorp/contrib/olsr/xrl_io.hh b/xorp/contrib/olsr/xrl_io.hh
+index 5e8def0..ee894c8 100644
+--- a/xorp/contrib/olsr/xrl_io.hh
++++ b/xorp/contrib/olsr/xrl_io.hh
+@@ -18,7 +18,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/contrib/olsr/xrl_io.hh,v 1.3 2008/10/02 21:56:36 bms Exp $
+ 
+ #ifndef __OLSR_XRL_IO_HH__
+ #define __OLSR_XRL_IO_HH__
+@@ -389,7 +388,7 @@ private:
+      * An IfMgrHintObserver method invoked whenever the interface tree
+      * information has been changed.
+      */
+-    void updates_made();
++    bool updates_made(string& err);
+ 
+     /**
+      * Callback method to: signal that the XRL command to send
+diff --git a/xorp/contrib/olsr/xrl_target.cc b/xorp/contrib/olsr/xrl_target.cc
+index 6b4069f..fbfb929 100644
+--- a/xorp/contrib/olsr/xrl_target.cc
++++ b/xorp/contrib/olsr/xrl_target.cc
+@@ -225,17 +225,16 @@ XrlOlsr4Target::policy_backend_0_1_configure(const uint32_t& filter,
+     debug_msg("policy_backend_0_1_configure %u %s\n",
+ 	      XORP_UINT_CAST(filter), conf.c_str());
+ 
+-    try {
+ #ifdef notyet
+-	XLOG_TRACE(_olsr.profile().enabled(trace_policy_configure),
+-		   "policy filter: %d conf: %s\n", filter, conf.c_str());
++    XLOG_TRACE(_olsr.profile().enabled(trace_policy_configure),
++	       "policy filter: %d conf: %s\n", filter, conf.c_str());
+ #else
+-	debug_msg("policy filter: %d conf: %s\n", filter, conf.c_str());
++    debug_msg("policy filter: %d conf: %s\n", filter, conf.c_str());
+ #endif
+-	_olsr.configure_filter(filter, conf);
+-    } catch(const PolicyException& e) {
++    string err;
++    if (!_olsr.configure_filter(filter, conf, err)) {
+ 	return XrlCmdError::COMMAND_FAILED("Filter configure failed: " +
+-					   e.str());
++					   err);
+     }
+ 
+     return XrlCmdError::OKAY();
+@@ -246,17 +245,16 @@ XrlOlsr4Target::policy_backend_0_1_reset(const uint32_t& filter)
+ {
+     debug_msg("policy_backend_0_1_reset %u\n", XORP_UINT_CAST(filter));
+ 
+-    try {
+ #ifdef notyet
+-	XLOG_TRACE(_olsr.profile().enabled(trace_policy_configure),
+-		   "policy filter: %d\n", filter);
++    XLOG_TRACE(_olsr.profile().enabled(trace_policy_configure),
++	       "policy filter: %d\n", filter);
+ #else
+-	debug_msg("policy filter: %d\n", filter);
++    debug_msg("policy filter: %d\n", filter);
+ #endif
+-	_olsr.reset_filter(filter);
+-    } catch(const PolicyException& e) {
++    string err;
++    if (!_olsr.reset_filter(filter, err)) {
+ 	return XrlCmdError::COMMAND_FAILED("Filter reset failed: " +
+-					   e.str());
++					   err);
+     }
+ 
+     return XrlCmdError::OKAY();
+@@ -298,9 +296,10 @@ XrlOlsr4Target::policy_redist4_0_1_add_route4(
+     if (! unicast)
+ 	return XrlCmdError::OKAY();
+ 
++    string err;
+     if (! _olsr.originate_external_route(network, nexthop, metric,
+-					 policytags)) {
+-	return XrlCmdError::COMMAND_FAILED("Network: " + network.str());
++					 PolicyTags(policytags, err), err)) {
++	return XrlCmdError::COMMAND_FAILED(c_format("Network: %s  error: %s", network.str().c_str(), err.c_str()));
+     }
+ 
+     return XrlCmdError::OKAY();
+@@ -321,8 +320,9 @@ XrlOlsr4Target::policy_redist4_0_1_delete_route4(
+     if (! unicast)
+ 	return XrlCmdError::OKAY();
+ 
+-    if (! _olsr.withdraw_external_route(network))
+-	return XrlCmdError::COMMAND_FAILED("Network: " + network.str());
++    string err;
++    if (! _olsr.withdraw_external_route(network, err))
++	return XrlCmdError::COMMAND_FAILED(c_format("Network: %s  error: %s", network.str().c_str(), err.c_str()));
+ 
+     return XrlCmdError::OKAY();
+     UNUSED(multicast);
+diff --git a/xorp/contrib/wrapper/wrapper.cc b/xorp/contrib/wrapper/wrapper.cc
+index fe7b02d..b7d6fff 100644
+--- a/xorp/contrib/wrapper/wrapper.cc
++++ b/xorp/contrib/wrapper/wrapper.cc
+@@ -666,14 +666,14 @@ bool Wrapper::add_del_route(int cmd, wrapperData_t * data)
+ 
+ 
+ //======================================================================
+-void Wrapper::configure_filter(const uint32_t& filter, const string& conf)
++bool Wrapper::configure_filter(const uint32_t& filter, const string& conf, string& err)
+ {
+-    _policy_filters.configure(filter, conf);
++   return _policy_filters.configure(filter, conf, err);
+ }
+ 
+-void Wrapper::reset_filter(const uint32_t& filter)
++bool Wrapper::reset_filter(const uint32_t& filter, string& err)
+ {
+-    _policy_filters.reset(filter);
++   return _policy_filters.reset(filter, err);
+ }
+ 
+ bool Wrapper::policy_filtering(IPv4Net& net, IPv4& nexthop,
+@@ -681,39 +681,40 @@ bool Wrapper::policy_filtering(IPv4Net& net, IPv4& nexthop,
+                                IPv4 main_addr,uint32_t type,
+                                PolicyTags& policytags)
+ {
+-    try {
+-        // Import filtering.
+-        WrapperVarRW varrw(net, nexthop, metric, originator, main_addr, type,
+-                           policytags);
+ 
+-        bool accepted = false;
++   // Import filtering.
++   WrapperVarRW varrw(net, nexthop, metric, originator, main_addr, type,
++                      policytags);
+ 
+-        // fprintf(stderr,"[WRAPPER] Running filter: %s on route: %s\n",
+-        //           filter::filter2str(filter::IMPORT), cstring(net));
++   bool accepted = false;
++   bool ok = true;
++   string err;
+ 
+-        accepted = _policy_filters.run_filter(filter::IMPORT, varrw);
++   // fprintf(stderr,"[WRAPPER] Running filter: %s on route: %s\n",
++   //           filter::filter2str(filter::IMPORT), cstring(net));
+ 
+-        if (!accepted)
+-            return accepted;
++   accepted = _policy_filters.run_filter(filter::IMPORT, varrw, err, ok);
++   if (!ok) {
++      XLOG_WARNING("PolicyException: import: %s", err.c_str());
++   }
+ 
+-        // Export source-match filtering.
+-        WrapperVarRW varrw2(net, nexthop, metric, originator, main_addr, type,
+-                            policytags);
++   if (!accepted)
++      return accepted;
+ 
+-        //fprintf(stderr,"[WRAPPER] Running filter: %s on route: %s\n",
+-        //          filter::filter2str(filter::EXPORT_SOURCEMATCH),
+-        //          cstring(net));
++   // Export source-match filtering.
++   WrapperVarRW varrw2(net, nexthop, metric, originator, main_addr, type,
++                       policytags);
+ 
+-        _policy_filters.run_filter(filter::EXPORT_SOURCEMATCH, varrw2);
++   //fprintf(stderr,"[WRAPPER] Running filter: %s on route: %s\n",
++   //          filter::filter2str(filter::EXPORT_SOURCEMATCH),
++   //          cstring(net));
+ 
+-        return accepted;
++   _policy_filters.run_filter(filter::EXPORT_SOURCEMATCH, varrw2, err, ok);
++   if (!ok) {
++      XLOG_WARNING("PolicyException: sourcematch: %s", err.c_str());
++   }
+ 
+-    } catch(const PolicyException& e) {
+-        XLOG_WARNING("PolicyException: %s", cstring(e));
+-        return false;
+-    }
+-
+-    return true;
++   return accepted;
+ }
+ 
+ 
+diff --git a/xorp/contrib/wrapper/wrapper.hh b/xorp/contrib/wrapper/wrapper.hh
+index 9c104d9..75306d9 100644
+--- a/xorp/contrib/wrapper/wrapper.hh
++++ b/xorp/contrib/wrapper/wrapper.hh
+@@ -85,8 +85,8 @@ public:
+     bool process_cmd(wrapperData_t *wdata);
+     void set_callback_result(const XrlError &e, const void *data, uint32_t len);
+ 
+-    void configure_filter(const uint32_t& filter, const string& conf);
+-    void reset_filter(const uint32_t& filter);
++    bool configure_filter(const uint32_t& filter, const string& conf, string& err);
++    bool reset_filter(const uint32_t& filter, string& err);
+     bool policy_filtering(IPv4Net& net, IPv4& nexthop,
+                           uint32_t& metric, IPv4 originator,
+                           IPv4 main_addr,uint32_t type,
+diff --git a/xorp/contrib/wrapper/wrapperpolicy.cc b/xorp/contrib/wrapper/wrapperpolicy.cc
+index a81fe9e..91bbf0c 100644
+--- a/xorp/contrib/wrapper/wrapperpolicy.cc
++++ b/xorp/contrib/wrapper/wrapperpolicy.cc
+@@ -37,21 +37,41 @@ WrapperVarRW::WrapperVarRW(IPv4Net& network, IPv4& nexthop, uint32_t& metric,
+ {
+ }
+ 
+-void
+-WrapperVarRW::start_read()
++bool
++WrapperVarRW::start_read(string& err)
+ {
+     initialize(_policytags);
++    Element* e = _ef.create(ElemIPv4Net::id, cstring(_network), err);
++    if (!e)
++       return false;
++    initialize(VAR_NETWORK, e);
++
++    e = _ef.create(ElemIPv4NextHop::id, cstring(_nexthop), err);
++    if (!e)
++       return false;
++    initialize(VAR_NEXTHOP, e);
++
++    e = _ef.create(ElemU32::id, c_format("%u", _metric).c_str(), err);
++    if (!e)
++       return false;
++    initialize(VAR_METRIC, e);
++
++    e = _ef.create(ElemIPv4::id, cstring(_originator), err);
++    if (!e)
++       return false;
++    initialize(VAR_ORIGINATOR, e);
++
++    e = _ef.create(ElemIPv4::id, cstring(_main_addr), err);
++    if (!e)
++       return false;
++    initialize(VAR_MAINADDR, e);
++
++    e = _ef.create(ElemU32::id, c_format("%u", _vtype).c_str(), err);
++    if (!e)
++       return false;
++    initialize(VAR_VTYPE, e);
+ 
+-    initialize(VAR_NETWORK, _ef.create(ElemIPv4Net::id,
+-                                       cstring(_network)));
+-    initialize(VAR_NEXTHOP, _ef.create(ElemIPv4NextHop::id, cstring(_nexthop)));
+-    initialize(VAR_METRIC, _ef.create(ElemU32::id,
+-                                      c_format("%u", _metric).c_str()));
+-    initialize(VAR_ORIGINATOR, _ef.create(ElemIPv4::id, cstring(_originator)));
+-    initialize(VAR_MAINADDR, _ef.create(ElemIPv4::id,
+-                                        cstring(_main_addr)));
+-    initialize(VAR_VTYPE, _ef.create(ElemU32::id,
+-                                     c_format("%u", _vtype).c_str()));
++    return true;
+ }
+ 
+ Element*
+diff --git a/xorp/contrib/wrapper/wrapperpolicy.hh b/xorp/contrib/wrapper/wrapperpolicy.hh
+index 1adfadd..43dfedd 100644
+--- a/xorp/contrib/wrapper/wrapperpolicy.hh
++++ b/xorp/contrib/wrapper/wrapperpolicy.hh
+@@ -43,7 +43,7 @@ public:
+                  PolicyTags& policytags);
+ 
+     // SingleVarRW inteface:
+-    void start_read();
++    bool start_read(string& err);
+     Element* single_read(const Id& id);
+     void single_write(const Id& id, const Element& e);
+ 
+diff --git a/xorp/contrib/wrapper/xorp_wrapper4.cc b/xorp/contrib/wrapper/xorp_wrapper4.cc
+index 0500034..5228b9d 100644
+--- a/xorp/contrib/wrapper/xorp_wrapper4.cc
++++ b/xorp/contrib/wrapper/xorp_wrapper4.cc
+@@ -164,11 +164,10 @@ XrlCmdError XrlWrapper4Target::policy_backend_0_1_configure(const uint32_t& filt
+     debug_msg("policy_backend_0_1_configure %u %s\n",
+               XORP_UINT_CAST(filter), conf.c_str());
+ 
+-    try {
+-        _wrapper.configure_filter(filter, conf);
+-    } catch(const PolicyException& e) {
++    string err;
++    if (!_wrapper.configure_filter(filter, conf, err)) {
+         return XrlCmdError::COMMAND_FAILED("Filter configure failed: " +
+-                                           e.str());
++                                           err);
+     }
+ 
+     return XrlCmdError::OKAY();
+@@ -177,11 +176,10 @@ XrlCmdError XrlWrapper4Target::policy_backend_0_1_configure(const uint32_t& filt
+ XrlCmdError XrlWrapper4Target::policy_backend_0_1_reset(const uint32_t& filter)
+ {
+     debug_msg("policy_backend_0_1_reset %u\n", XORP_UINT_CAST(filter));
+-    try {
+-        _wrapper.reset_filter(filter);
+-    } catch(const PolicyException& e) {
++    string err;
++    if (!_wrapper.reset_filter(filter, err)) {
+         return XrlCmdError::COMMAND_FAILED("Filter reset failed: " +
+-                                           e.str());
++                                           err);
+     }
+ 
+     return XrlCmdError::OKAY();
+diff --git a/xorp/fib2mrib/fib2mrib_varrw.cc b/xorp/fib2mrib/fib2mrib_varrw.cc
+index 41461e5..a4fff8b 100644
+--- a/xorp/fib2mrib/fib2mrib_varrw.cc
++++ b/xorp/fib2mrib/fib2mrib_varrw.cc
+@@ -33,30 +33,37 @@ Fib2mribVarRW::Fib2mribVarRW(Fib2mribRoute& route)
+ {
+ }
+ 
+-void
++bool
+ Fib2mribVarRW::start_read(string& err)
+ {
++    Element* e;
+     initialize(_route.policytags());
+ 
+     if (_is_ipv4) {
+-	initialize(VAR_NETWORK4,
+-		   _ef.create(ElemIPv4Net::id,
+-			      _route.network().str().c_str(), err));
+-	initialize(VAR_NEXTHOP4,
+-		   _ef.create(ElemIPv4NextHop::id,
+-			      _route.nexthop().str().c_str(), err));
++	e = _ef.create(ElemIPv4Net::id, _route.network().str().c_str(), err);
++	if (!e)
++	    return false;
++	initialize(VAR_NETWORK4, e);
++		   
++	e = _ef.create(ElemIPv4NextHop::id, _route.nexthop().str().c_str(), err);
++	if (!e)
++	    return false;
++	initialize(VAR_NEXTHOP4, e);
+ 	
+ 	initialize(VAR_NETWORK6, NULL);
+ 	initialize(VAR_NEXTHOP6, NULL);
+     }
+ 
+     if (_is_ipv6) {
+-	initialize(VAR_NETWORK6,
+-		   _ef.create(ElemIPv6Net::id,
+-			      _route.network().str().c_str(), err));
+-	initialize(VAR_NEXTHOP6,
+-		   _ef.create(ElemIPv6NextHop::id,
+-			      _route.nexthop().str().c_str(), err));
++	e = _ef.create(ElemIPv6Net::id, _route.network().str().c_str(), err);
++	if (!e)
++	    return false;
++	initialize(VAR_NETWORK6, e);
++
++	e = _ef.create(ElemIPv6NextHop::id, _route.nexthop().str().c_str(), err);
++	if (!e)
++	    return false;
++	initialize(VAR_NEXTHOP6, e);
+ 
+ 	initialize(VAR_NETWORK4, NULL);
+ 	initialize(VAR_NEXTHOP4, NULL);
+@@ -66,7 +73,11 @@ Fib2mribVarRW::start_read(string& err)
+ 
+     oss << _route.metric();
+ 
+-    initialize(VAR_METRIC, _ef.create(ElemU32::id, oss.str().c_str(), err));
++    e = _ef.create(ElemU32::id, oss.str().c_str(), err);
++    if (!e)
++	return false;
++    initialize(VAR_METRIC, e);
++    return true;
+ }
+ 
+ void
+diff --git a/xorp/fib2mrib/fib2mrib_varrw.hh b/xorp/fib2mrib/fib2mrib_varrw.hh
+index 8b7b41a..112e917 100644
+--- a/xorp/fib2mrib/fib2mrib_varrw.hh
++++ b/xorp/fib2mrib/fib2mrib_varrw.hh
+@@ -45,7 +45,7 @@ public:
+     Fib2mribVarRW(Fib2mribRoute& route);
+ 
+     // SingleVarRW inteface:
+-    void     start_read(string& err);
++    bool     start_read(string& err);
+     void     single_write(const Id& id, const Element& e);
+     Element* single_read(const Id& id);   
+ 
+diff --git a/xorp/ospf/external.cc b/xorp/ospf/external.cc
+index a30179a..40d81cb 100644
+--- a/xorp/ospf/external.cc
++++ b/xorp/ospf/external.cc
+@@ -340,27 +340,21 @@ External<A>::do_filtering(IPNet<A>& network, A& nexthop, uint32_t& metric,
+ 			  bool& e_bit, uint32_t& tag, bool& tag_set,
+ 			  const PolicyTags& policytags)
+ {
+-    try {
+-	PolicyTags ptags = policytags;
+-	OspfVarRW<A> varrw(network, nexthop, metric, e_bit, tag,tag_set,ptags);
+-	XLOG_TRACE(_ospf.trace()._export_policy,
+-		   "[OSPF] Running filter: %s on route: %s\n",
+-		   filter::filter2str(filter::EXPORT),
+-		   cstring(network));
+-	bool accepted = _ospf.get_policy_filters().
+-	    run_filter(filter::EXPORT, varrw);
+-	
+-	if (!accepted)
+-	    return accepted;
+-
+-	// XXX - Do I need to do any matching here.
+-
+-    } catch(const PolicyException& e) {
+-	XLOG_WARNING("PolicyException: %s", e.str().c_str());
++    PolicyTags ptags = policytags;
++    OspfVarRW<A> varrw(network, nexthop, metric, e_bit, tag,tag_set,ptags);
++    XLOG_TRACE(_ospf.trace()._export_policy,
++	       "[OSPF] Running filter: %s on route: %s\n",
++	       filter::filter2str(filter::EXPORT),
++	       cstring(network));
++    bool ok = true;
++    string err;
++    bool accepted = _ospf.get_policy_filters().run_filter(filter::EXPORT, varrw, err, ok);
++    if (!ok) {
++	XLOG_WARNING("PolicyException: %s", err.c_str());
+ 	return false;
+     }
+ 
+-    return true;
++    return accepted;
+ }
+ 
+ template <typename A>
+diff --git a/xorp/ospf/ospf.cc b/xorp/ospf/ospf.cc
+index 9fe791a..ee7ade4 100644
+--- a/xorp/ospf/ospf.cc
++++ b/xorp/ospf/ospf.cc
+@@ -769,17 +769,17 @@ Ospf<A>::delete_route(IPNet<A> net)
+ }
+ 
+ template <typename A>
+-void
+-Ospf<A>::configure_filter(const uint32_t& filter, const string& conf)
++bool
++Ospf<A>::configure_filter(const uint32_t& filter, const string& conf, string& err)
+ {
+-    _policy_filters.configure(filter,conf);
++    return _policy_filters.configure(filter,conf, err);
+ }
+ 
+ template <typename A>
+-void
+-Ospf<A>::reset_filter(const uint32_t& filter)
++bool
++Ospf<A>::reset_filter(const uint32_t& filter, string& err)
+ {
+-    _policy_filters.reset(filter);
++    return _policy_filters.reset(filter, err);
+ }
+ 
+ template <typename A>
+diff --git a/xorp/ospf/ospf.hh b/xorp/ospf/ospf.hh
+index 82e1fdb..700a18c 100644
+--- a/xorp/ospf/ospf.hh
++++ b/xorp/ospf/ospf.hh
+@@ -869,14 +869,14 @@ class Ospf {
+      * @param filter Id of filter to configure.
+      * @param conf Configuration of filter.
+      */
+-    void configure_filter(const uint32_t& filter, const string& conf);
++    bool configure_filter(const uint32_t& filter, const string& conf, string& err);
+ 
+     /**
+      * Reset a policy filter.
+      *
+      * @param filter Id of filter to reset.
+      */
+-    void reset_filter(const uint32_t& filter);
++    bool reset_filter(const uint32_t& filter, string& err);
+ 
+     /**
+      * Push routes through policy filters for re-filtering.
+diff --git a/xorp/ospf/policy_varrw.cc b/xorp/ospf/policy_varrw.cc
+index ce3d2a5..a0801c7 100644
+--- a/xorp/ospf/policy_varrw.cc
++++ b/xorp/ospf/policy_varrw.cc
+@@ -53,49 +53,70 @@ OspfVarRW<A>::OspfVarRW(IPNet<A>& network, A& nexthop, uint32_t& metric,
+ }
+ 
+ template <>
+-void
+-OspfVarRW<IPv4>::start_read()
++bool
++OspfVarRW<IPv4>::start_read(string& err)
+ {
+-    initialize(VAR_NETWORK, _ef.create(ElemIPv4Net::id,
+-				       _network.str().c_str()));
+-    initialize(VAR_NEXTHOP, _ef.create(ElemIPv4NextHop::id,
+-	       _nexthop.str().c_str()));
++    Element* e = _ef.create(ElemIPv4Net::id, _network.str().c_str(), err);
++    if (!e)
++	return false;
++
++    initialize(VAR_NETWORK, e);
++
++    e = _ef.create(ElemIPv4NextHop::id, _nexthop.str().c_str(), err);
++    if (!e)
++	return false;
++    initialize(VAR_NEXTHOP, e);
+ 
+-    start_read_common();
++    return start_read_common(err);
+ }
+ 
+ template <>
+-void
+-OspfVarRW<IPv6>::start_read()
++bool
++OspfVarRW<IPv6>::start_read(string& err)
+ {
+-    initialize(VAR_NETWORK, _ef.create(ElemIPv6Net::id,
+-				       _network.str().c_str()));
+-    initialize(VAR_NEXTHOP, _ef.create(ElemIPv6NextHop::id,
+-               _nexthop.str().c_str()));
++    Element* e = _ef.create(ElemIPv6Net::id, _network.str().c_str(), err);
++    if (!e)
++	return false;
++    initialize(VAR_NETWORK, e);
++
++    e = _ef.create(ElemIPv6NextHop::id, _nexthop.str().c_str(), err);
++    if (!e)
++	return false;
++    initialize(VAR_NEXTHOP, e);
+ 
+-    start_read_common();
++    return start_read_common(err);
+ }
+ 
+ template <typename A>
+-void
+-OspfVarRW<A>::start_read_common()
++bool
++OspfVarRW<A>::start_read_common(string& err)
+ {
++    Element* e;
+     initialize(VAR_POLICYTAGS, _policytags.element());
+-    initialize(VAR_METRIC, _ef.create(ElemU32::id,
+-				      c_format("%u", _metric).c_str()));
+-    initialize(VAR_EBIT, _ef.create(ElemU32::id,
+-				    c_format("%u", _e_bit ? 2 : 1).c_str()));
++
++    e = _ef.create(ElemU32::id, c_format("%u", _metric).c_str(), err);
++    if (!e)
++	return false;
++    initialize(VAR_METRIC, e);
++
++    e =  _ef.create(ElemU32::id, c_format("%u", _e_bit ? 2 : 1).c_str(), err);
++    if (!e)
++	return false;
++    initialize(VAR_EBIT, e);
+ 
+     // XXX which tag wins?
+     Element* element = _policytags.element_tag();
+-    ElemU32* e = dynamic_cast<ElemU32*>(element);
+-    if (e != NULL && e->val())
+-	_tag = e->val();
++    ElemU32* ee = dynamic_cast<ElemU32*>(element);
++    if (ee != NULL && ee->val())
++	_tag = ee->val();
+ 
+     delete element;
+ 
+-    initialize(VAR_TAG, _ef.create(ElemU32::id,
+-				   c_format("%u", _tag).c_str()));
++    e = _ef.create(ElemU32::id, c_format("%u", _tag).c_str(), err);
++    if (!e)
++	return false;
++    initialize(VAR_TAG, e);
++    return true;
+ }
+ 
+ template <typename A>
+@@ -114,55 +135,55 @@ OspfVarRW<IPv4>::single_write(const Id& id, const Element& e)
+     switch (id) {
+     case VAR_NETWORK: {
+ 	const ElemIPv4Net* eip = dynamic_cast<const ElemIPv4Net*>(&e);
+-	XLOG_ASSERT(eip != NULL);
+ 	_network = IPNet<IPv4>(eip->val());
+-    }
+ 	break;
++    }
+ 
+     case VAR_NEXTHOP: {
+ 	const ElemIPv4NextHop* eip = dynamic_cast<const ElemIPv4NextHop*>(&e);
+-	XLOG_ASSERT(eip != NULL);
+ 	_nexthop = IPv4(eip->val());
+-    }
+ 	break;
++    }
+ 
+     default:
+-	single_write_common(id, e);
++	string err;
++	if (!single_write_common(id, e, err)) {
++	    XLOG_FATAL("%s", err.c_str());
++	}
+ 	break;
+     }
+ }
+ 
+ template <typename A>
+-void
+-OspfVarRW<A>::single_write_common(const Id& id, const Element& e)
++bool
++OspfVarRW<A>::single_write_common(const Id& id, const Element& e, string& err)
+ {
+     switch (id) {
+     case VAR_POLICYTAGS:
+-	_policytags.set_ptags(e);
+-	break;
++	return _policytags.set_ptags(e, err);
+ 
+     case VAR_METRIC: {
+ 	const ElemU32& u32 = dynamic_cast<const ElemU32&>(e);
+ 	_metric = u32.val();
++	return true;
+     }
+-	break;
+ 
+     case VAR_EBIT: {
+ 	const ElemU32& b = dynamic_cast<const ElemU32&>(e);
+ 	_e_bit = b.val() == 2 ? true : false;
++	return true;
+     }
+ 
+-	break;
+-
+     case VAR_TAG: {
+ 	const ElemU32& u32 = dynamic_cast<const ElemU32&>(e);
+ 	_tag = u32.val();
+ 	_policytags.set_tag(e);
++	return true;
+     }
+-	break;
+ 
+     default:
+ 	XLOG_WARNING("Unexpected Id %d %s", id, cstring(e));
++	return false;
+     }
+ }
+ 
+@@ -173,20 +194,19 @@ OspfVarRW<IPv6>::single_write(const Id& id, const Element& e)
+     switch (id) {
+     case VAR_NETWORK: {
+ 	const ElemIPv6Net* eip = dynamic_cast<const ElemIPv6Net*>(&e);
+-	XLOG_ASSERT(eip != NULL);
+ 	_network = IPNet<IPv6>(eip->val());
+-    }
+ 	break;
+-
++    }
+     case VAR_NEXTHOP: {
+ 	const ElemIPv6NextHop* eip = dynamic_cast<const ElemIPv6NextHop*>(&e);
+-	XLOG_ASSERT(eip != NULL);
+ 	_nexthop = IPv6(eip->val());
+-    }
+ 	break;
+-
++    }
+     default:
+-	single_write_common(id, e);
++	string err;
++	if (!single_write_common(id, e, err)) {
++	    XLOG_FATAL("%s", err.c_str());
++	}
+ 	break;
+     }
+ }
+diff --git a/xorp/ospf/policy_varrw.hh b/xorp/ospf/policy_varrw.hh
+index 419a872..7c93e05 100644
+--- a/xorp/ospf/policy_varrw.hh
++++ b/xorp/ospf/policy_varrw.hh
+@@ -18,7 +18,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/ospf/policy_varrw.hh,v 1.15 2008/10/02 21:57:48 bms Exp $
+ 
+ #ifndef __OSPF_POLICY_VARRRW_HH__
+ #define __OSPF_POLICY_VARRRW_HH__
+@@ -42,13 +41,13 @@ class OspfVarRW : public SingleVarRW {
+ 	      uint32_t& tag, bool& tag_set, PolicyTags& policytags);
+ 
+     // SingleVarRW inteface:
+-    void	start_read();
++    bool	start_read(string& err);
+     Element*	single_read(const Id& id);
+     void	single_write(const Id& id, const Element& e);
+ 
+  private:
+-    void start_read_common();
+-    void single_write_common(const Id& id, const Element& e);
++    bool start_read_common(string& err);
++    bool single_write_common(const Id& id, const Element& e, string& err);
+ 
+     IPNet<A>&	    _network;
+     A&		    _nexthop;
+diff --git a/xorp/ospf/routing_table.cc b/xorp/ospf/routing_table.cc
+index 814c147..657106e 100644
+--- a/xorp/ospf/routing_table.cc
++++ b/xorp/ospf/routing_table.cc
+@@ -532,51 +532,52 @@ RoutingTable<A>::do_filtering(IPNet<A>& net, A& nexthop,
+  	return false;
+ 
+     // The import policy filter.
+-    try {
+-	bool e_bit;
+-	uint32_t tag;
+-	bool tag_set;
+-	OspfVarRW<A> varrw(net, nexthop, metric, e_bit, tag, tag_set,
+-			   policytags);
+-
+-	// Import filtering
+-	bool accepted;
+-
+-	debug_msg("[OSPF] Running filter: %s on route: %s\n",
+-		  filter::filter2str(filter::IMPORT), cstring(net));
+-	XLOG_TRACE(_ospf.trace()._import_policy,
+-		   "[OSPF] Running filter: %s on route: %s\n",
+-		   filter::filter2str(filter::IMPORT), cstring(net));
++    bool e_bit;
++    uint32_t tag;
++    bool tag_set;
++    OspfVarRW<A> varrw(net, nexthop, metric, e_bit, tag, tag_set,
++		       policytags);
++
++    // Import filtering
++    bool accepted;
++
++    debug_msg("[OSPF] Running filter: %s on route: %s\n",
++	      filter::filter2str(filter::IMPORT), cstring(net));
++    XLOG_TRACE(_ospf.trace()._import_policy,
++	       "[OSPF] Running filter: %s on route: %s\n",
++	       filter::filter2str(filter::IMPORT), cstring(net));
+ 		   
+-	accepted = _ospf.get_policy_filters().
+-	    run_filter(filter::IMPORT, varrw);
+-
+-	// Route Rejected 
+-	if (!accepted) 
+-	    return accepted;
+-
+-	OspfVarRW<A> varrw2(net, nexthop, metric, e_bit, tag, tag_set,
+-			    policytags);
+-
+-	// Export source-match filtering
+-	debug_msg("[OSPF] Running filter: %s on route: %s\n",
+-		  filter::filter2str(filter::EXPORT_SOURCEMATCH),
+-		  cstring(net));
+-	XLOG_TRACE(_ospf.trace()._import_policy,
+-		   "[OSPF] Running filter: %s on route: %s\n",
+-		   filter::filter2str(filter::EXPORT_SOURCEMATCH),
+-		   cstring(net));
+-
+-	_ospf.get_policy_filters().
+-	    run_filter(filter::EXPORT_SOURCEMATCH, varrw2);
++    string err;
++    bool ok = true;
++    accepted = _ospf.get_policy_filters().run_filter(filter::IMPORT, varrw, err, ok);
++    if (!ok) {
++	XLOG_WARNING("PolicyException - import: %s", err.c_str());
++	return false;
++    }
+ 
++    // Route Rejected 
++    if (!accepted) 
+ 	return accepted;
+-    } catch(const PolicyException& e) {
+-	XLOG_WARNING("PolicyException: %s", e.str().c_str());
++
++    OspfVarRW<A> varrw2(net, nexthop, metric, e_bit, tag, tag_set,
++			policytags);
++
++    // Export source-match filtering
++    debug_msg("[OSPF] Running filter: %s on route: %s\n",
++	      filter::filter2str(filter::EXPORT_SOURCEMATCH),
++	      cstring(net));
++    XLOG_TRACE(_ospf.trace()._import_policy,
++	       "[OSPF] Running filter: %s on route: %s\n",
++	       filter::filter2str(filter::EXPORT_SOURCEMATCH),
++	       cstring(net));
++
++    _ospf.get_policy_filters().run_filter(filter::EXPORT_SOURCEMATCH, varrw2, err, ok);
++    if (!ok) {
++	XLOG_WARNING("PolicyException - sourcematch: %s", err.c_str());
+ 	return false;
+     }
+ 
+-    return true;
++    return accepted;
+ }
+ 
+ template <typename A>
+diff --git a/xorp/ospf/xrl_io.cc b/xorp/ospf/xrl_io.cc
+index 975f578..5ad6b05 100644
+--- a/xorp/ospf/xrl_io.cc
++++ b/xorp/ospf/xrl_io.cc
+@@ -940,12 +940,14 @@ XrlIO<A>::tree_complete()
+     //
+     // XXX: we use same actions when the tree is completed or updates are made
+     //
+-    updates_made();
++    string err;
++    if (!updates_made(err))
++	XLOG_ERROR("xrlio tree-complete, updates-made has error: %s\n", err.c_str());
+ }
+ 
+ template<>
+-void
+-XrlIO<IPv4>::updates_made()
++bool
++XrlIO<IPv4>::updates_made(string& err)
+ {
+     IfMgrIfTree::IfMap::const_iterator ii;
+     IfMgrIfAtom::VifMap::const_iterator vi;
+@@ -1117,6 +1119,9 @@ XrlIO<IPv4>::updates_made()
+     // Update the local copy of the interface tree
+     //
+     _iftree = ifmgr_iftree();
++
++    UNUSED(err);
++    return true;
+ }
+ 
+ template class XrlQueue<IPv4>;
+@@ -1404,8 +1409,8 @@ XrlQueue<IPv6>::sendit_spec(Queued& q, const char *protocol)
+ }
+ 
+ template<>
+-void
+-XrlIO<IPv6>::updates_made()
++bool
++XrlIO<IPv6>::updates_made(string& err)
+ {
+     IfMgrIfTree::IfMap::const_iterator ii;
+     IfMgrIfAtom::VifMap::const_iterator vi;
+@@ -1574,6 +1579,8 @@ XrlIO<IPv6>::updates_made()
+     // Update the local copy of the interface tree
+     //
+     _iftree = ifmgr_iftree();
++    UNUSED(err);
++    return true;
+ }
+ 
+ template class XrlQueue<IPv6>;
+diff --git a/xorp/ospf/xrl_io.hh b/xorp/ospf/xrl_io.hh
+index 8daee67..0791d87 100644
+--- a/xorp/ospf/xrl_io.hh
++++ b/xorp/ospf/xrl_io.hh
+@@ -18,7 +18,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/ospf/xrl_io.hh,v 1.35 2008/11/14 12:44:19 bms Exp $
+ 
+ #ifndef __OSPF_XRL_IO_HH__
+ #define __OSPF_XRL_IO_HH__
+@@ -436,7 +435,7 @@ class XrlIO : public IO<A>,
+      * An IfMgrHintObserver method invoked whenever the interface tree
+      * information has been changed.
+      */
+-    void updates_made();
++    bool updates_made(string& err);
+ 
+     //
+     // XRL callbacks
+diff --git a/xorp/ospf/xrl_target.cc b/xorp/ospf/xrl_target.cc
+index d891f3b..73c0fa8 100644
+--- a/xorp/ospf/xrl_target.cc
++++ b/xorp/ospf/xrl_target.cc
+@@ -160,11 +160,10 @@ XrlOspfV2Target::policy_backend_0_1_configure(const uint32_t& filter,
+ {
+     debug_msg("policy filter: %u conf: %s\n", filter, conf.c_str());
+ 
+-    try {
+-	_ospf.configure_filter(filter,conf);
+-    } catch(const PolicyException& e) {
++    string err;
++    if (!_ospf.configure_filter(filter,conf, err)) {
+ 	return XrlCmdError::COMMAND_FAILED("Filter configure failed: " +
+-					   e.str());
++					   err);
+     }
+ 
+     return XrlCmdError::OKAY();
+@@ -175,7 +174,10 @@ XrlOspfV2Target::policy_backend_0_1_reset(const uint32_t& filter)
+ {
+     debug_msg("policy filter reset: %u\n", filter);
+ 
+-    _ospf.reset_filter(filter);
++    string err;
++    if (!_ospf.reset_filter(filter, err))
++	return XrlCmdError::COMMAND_FAILED("Filter reset failed: " +
++					   err);
+ 
+     return XrlCmdError::OKAY();
+ }
+@@ -212,8 +214,9 @@ XrlOspfV2Target::policy_redist4_0_1_add_route4(const IPv4Net& network,
+ 	return XrlCmdError::OKAY();
+ #endif
+ 
+-    if (!_ospf.originate_route(network, nexthop, metric, policytags)) {
+-	return XrlCmdError::COMMAND_FAILED("Network: " + network.str());
++    string err;
++    if (!_ospf.originate_route(network, nexthop, metric, PolicyTags(policytags, err))) {
++	return XrlCmdError::COMMAND_FAILED(c_format("Network: %s failed to originate routed: %s", network.str().c_str(), err.c_str()));
+     }
+ 
+     return XrlCmdError::OKAY();
+diff --git a/xorp/ospf/xrl_target3.cc b/xorp/ospf/xrl_target3.cc
+index 68275c4..0fe8441 100644
+--- a/xorp/ospf/xrl_target3.cc
++++ b/xorp/ospf/xrl_target3.cc
+@@ -163,11 +163,10 @@ XrlOspfV3Target::policy_backend_0_1_configure(const uint32_t& filter,
+ {
+     debug_msg("policy filter: %u conf: %s\n", filter, conf.c_str());
+ 
+-    try {
+-	_ospf_ipv6.configure_filter(filter,conf);
+-    } catch(const PolicyException& e) {
++    string err;
++    if (!_ospf_ipv6.configure_filter(filter,conf, err)) {
+ 	return XrlCmdError::COMMAND_FAILED("Filter configure failed: " +
+-					   e.str());
++					   err);
+     }
+ 
+     return XrlCmdError::OKAY();
+@@ -178,11 +177,10 @@ XrlOspfV3Target::policy_backend_0_1_reset(const uint32_t& filter)
+ {
+     debug_msg("policy filter reset: %u\n", filter);
+ 
+-    try {
+-	_ospf_ipv6.reset_filter(filter);
+-    } catch(const PolicyException& e){ 
++    string err;
++    if (!_ospf_ipv6.reset_filter(filter, err)) {
+ 	return XrlCmdError::COMMAND_FAILED("Filter reset failed: " +
+-					   e.str());
++					   err);
+     }
+ 
+     return XrlCmdError::OKAY();
+@@ -213,8 +211,9 @@ XrlOspfV3Target::policy_redist6_0_1_add_route6(const IPv6Net& network,
+     if (!unicast)
+ 	return XrlCmdError::OKAY();
+ 
+-    if (!_ospf_ipv6.originate_route(network, nexthop, metric, policytags)) {
+-	return XrlCmdError::COMMAND_FAILED("Network: " + network.str());
++    string err;
++    if (!_ospf_ipv6.originate_route(network, nexthop, metric, PolicyTags(policytags, err))) {
++	return XrlCmdError::COMMAND_FAILED(c_format("Network redist failed: %s  error: %s", network.str().c_str(), err.c_str()));
+     }
+ 
+     return XrlCmdError::OKAY();
+diff --git a/xorp/policy/backend/policy_redist_map.hh b/xorp/policy/backend/policy_redist_map.hh
+index c8b984f..bbddaf3 100644
+--- a/xorp/policy/backend/policy_redist_map.hh
++++ b/xorp/policy/backend/policy_redist_map.hh
+@@ -18,16 +18,11 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/policy/backend/policy_redist_map.hh,v 1.8 2008/10/02 21:58:04 bms Exp $
+ 
+ #ifndef __POLICY_BACKEND_POLICY_REDIST_MAP_HH__
+ #define __POLICY_BACKEND_POLICY_REDIST_MAP_HH__
+ 
+ 
+-
+-
+-
+-
+ #include "policytags.hh"
+ 
+ /**
+diff --git a/xorp/policy/backend/single_varrw.hh b/xorp/policy/backend/single_varrw.hh
+index 09da926..9e38ede 100644
+--- a/xorp/policy/backend/single_varrw.hh
++++ b/xorp/policy/backend/single_varrw.hh
+@@ -96,7 +96,7 @@ public:
+      * If any reads are performed, this is a marker which informs the derived
+      * class that reads will now start.
+      */
+-    virtual void start_read(string& err) { UNUSED(err); } 
++    virtual bool start_read(string& err) { UNUSED(err); return true;} 
+ 
+     /**
+      * If any writes were performed, this is a marker which informs the derived
+diff --git a/xorp/policy/xorp_policy.cc b/xorp/policy/xorp_policy.cc
+index 034812b..22fbecc 100644
+--- a/xorp/policy/xorp_policy.cc
++++ b/xorp/policy/xorp_policy.cc
+@@ -26,7 +26,7 @@
+ #include "xrl_target.hh"
+ 
+ 
+-void go() {
++bool go(string& err) {
+ 
+     setup_dflt_sighandlers();
+ 
+@@ -35,7 +35,9 @@ void go() {
+     XrlStdRouter rtr(e,PolicyTarget::policy_target_name.c_str(),
+ 		     FinderConstants::FINDER_DEFAULT_HOST().str().c_str());
+ 
+-    PolicyTarget policy_target(rtr);
++    PolicyTarget policy_target(rtr, err);
++    if (policy_target.invalid())
++	return false;
+     XrlPolicyTarget xrl_policy_target(&rtr,policy_target);
+ 
+     while (xorp_do_run && !rtr.ready())
+@@ -43,19 +45,20 @@ void go() {
+ 
+     while (xorp_do_run && policy_target.running())
+ 	e.run();
++    return true;
+ }
+ 
+ int main(int /* argc */, char* argv[])
+ {
++    string err;
++
+     xlog_init(argv[0], 0);
+     xlog_set_verbose(XLOG_VERBOSE_HIGH);
+     xlog_add_default_output();
+     xlog_start();
+ 
+-    try {
+-	go();
+-    } catch (const PolicyException& e) {
+-	XLOG_FATAL("PolicyException: %s",e.str().c_str());
++    if (!go(err)) {
++	XLOG_FATAL("PolicyException: %s", err.c_str());
+     }
+    
+     xlog_stop();
+diff --git a/xorp/rib/rib.cc b/xorp/rib/rib.cc
+index 4a26a63..82d6a09 100644
+--- a/xorp/rib/rib.cc
++++ b/xorp/rib/rib.cc
+@@ -778,6 +778,17 @@ RIB<A>::add_route(const string&		tablename,
+ {
+     UNUSED(ifname);
+ 
++    if (policytags.invalid()) {
++	if (_errors_are_fatal) {
++	    XLOG_FATAL("Attempting to add route to table \"%s\" "
++		       "with invalid policy tags\n", tablename.c_str());
++	} else {
++	    XLOG_ERROR("Attempting to add route to table \"%s\" "
++		       "with invalid policy tags\n", tablename.c_str());
++	    return XORP_ERROR;
++	}
++    }
++
+     // Sanity check - we should have initialized RIB
+     XLOG_ASSERT(_connected_origin_table);
+ 
+@@ -863,6 +874,12 @@ RIB<A>::replace_route(const string&	tablename,
+ {
+     UNUSED(ifname);
+ 
++    if (policytags.invalid()) {
++	XLOG_ERROR("Attempting to add route to table \"%s\" "
++		   "with invalid policy tags\n", tablename.c_str());
++	return XORP_ERROR;
++    }
++
+     OriginTable<A>* ot = find_origin_table(tablename);
+     if (NULL == ot)
+ 	return XORP_ERROR; // Table is not an origin table
+diff --git a/xorp/rib/rib_manager.cc b/xorp/rib/rib_manager.cc
+index a6bb6a6..24dcb1e 100644
+--- a/xorp/rib/rib_manager.cc
++++ b/xorp/rib/rib_manager.cc
+@@ -579,16 +579,16 @@ RibManager::push_routes()
+ #endif
+ }
+ 
+-void
+-RibManager::configure_filter(const uint32_t& filter, const string& conf)
++bool
++RibManager::configure_filter(const uint32_t& filter, const string& conf, string& err)
+ {
+-    _policy_filters.configure(filter, conf);
++    return _policy_filters.configure(filter, conf, err);
+ }
+ 
+-void
+-RibManager::reset_filter(const uint32_t& filter)
++bool
++RibManager::reset_filter(const uint32_t& filter, string& err)
+ {
+-    _policy_filters.reset(filter);
++    return _policy_filters.reset(filter, err);
+ }
+ 
+ void
+@@ -604,6 +604,7 @@ RibManager::insert_policy_redist_tags(const string& protocol,
+     _policy_redist_map.insert(protocol, tags);
+ }
+ 
++
+ void
+ RibManager::reset_policy_redist_tags()
+ {
+diff --git a/xorp/rib/rib_manager.hh b/xorp/rib/rib_manager.hh
+index f80c331..19cc37f 100644
+--- a/xorp/rib/rib_manager.hh
++++ b/xorp/rib/rib_manager.hh
+@@ -290,22 +290,20 @@ public:
+     /**
+      * Configure a policy filter.
+      *
+-     * Will throw an exception on error.
+-     *
+      * In this case the source match filter of connected routes will be
+      * configured.
+      *
+      * @param filter Identifier of filter to configure.
+      * @param conf Configuration of the filter.
+      */
+-    void configure_filter(const uint32_t& filter, const string& conf);
++    bool configure_filter(const uint32_t& filter, const string& conf, string& err);
+ 
+     /**
+      * Reset a policy filter.
+      *
+      * @param filter Identifier of filter to reset.
+      */
+-    void reset_filter(const uint32_t& filter);
++    bool reset_filter(const uint32_t& filter, string& err);
+ 
+     /**
+      * @return the global instance of policy filters.
+diff --git a/xorp/rib/rib_varrw.cc b/xorp/rib/rib_varrw.cc
+index 03f2178..dc385e4 100644
+--- a/xorp/rib/rib_varrw.cc
++++ b/xorp/rib/rib_varrw.cc
+@@ -33,43 +33,62 @@ RIBVarRW<A>::RIBVarRW(IPRouteEntry<A>& route)
+ }
+ 
+ template <class A>
+-void
+-RIBVarRW<A>::start_read()
++bool
++RIBVarRW<A>::start_read(string& err)
+ {
+     initialize(_route.policytags());
+ 
+-    read_route_nexthop(_route);
++    if (!read_route_nexthop(_route, err))
++	return false;
+ 
+     ostringstream oss;
+ 
+     oss << _route.metric();
+ 
+-    initialize(VAR_METRIC, _ef.create(ElemU32::id, oss.str().c_str()));
++    Element* e = _ef.create(ElemU32::id, oss.str().c_str(), err);
++    if (!e)
++	return false;
++    initialize(VAR_METRIC, e);
++    return true;
+ }
+ 
+ template <>
+-void
+-RIBVarRW<IPv4>::read_route_nexthop(IPRouteEntry<IPv4>& route)
++bool
++RIBVarRW<IPv4>::read_route_nexthop(IPRouteEntry<IPv4>& route, string& err)
+ {
+-    initialize(VAR_NETWORK4,
+-	       _ef.create(ElemIPv4Net::id, route.net().str().c_str()));
+-    initialize(VAR_NEXTHOP4, _ef.create(ElemIPv4NextHop::id,
+-               route.nexthop_addr().str().c_str()));
++    Element* e = _ef.create(ElemIPv4Net::id, route.net().str().c_str(), err);
++    if (!e)
++	return false;
++    initialize(VAR_NETWORK4, e);
++
++    e = _ef.create(ElemIPv4NextHop::id, route.nexthop_addr().str().c_str(), err);
++    if (!e)
++	return false;
++
++    initialize(VAR_NEXTHOP4, e);
+     initialize(VAR_NETWORK6, NULL);
+     initialize(VAR_NEXTHOP6, NULL);
++    return true;
+ }
+ 
+ template <>
+-void
+-RIBVarRW<IPv6>::read_route_nexthop(IPRouteEntry<IPv6>& route)
++bool
++RIBVarRW<IPv6>::read_route_nexthop(IPRouteEntry<IPv6>& route, string& err)
+ {
+-    initialize(VAR_NETWORK6,
+-	       _ef.create(ElemIPv6Net::id, route.net().str().c_str()));
+-    initialize(VAR_NEXTHOP6, _ef.create(ElemIPv6NextHop::id,
+-               route.nexthop_addr().str().c_str()));
++    Element* e = _ef.create(ElemIPv6Net::id, route.net().str().c_str(), err);
++    if (!e)
++	return false;
++    initialize(VAR_NETWORK6, e);
++
++    e = _ef.create(ElemIPv6NextHop::id, route.nexthop_addr().str().c_str(), err);
++    if (!e)
++	return false;
++
++    initialize(VAR_NEXTHOP6, e);
+ 
+     initialize(VAR_NETWORK4, NULL);
+     initialize(VAR_NEXTHOP4, NULL);
++    return true;
+ }
+ 
+ template <class A>
+diff --git a/xorp/rib/rib_varrw.hh b/xorp/rib/rib_varrw.hh
+index 3ab1452..e4e23fc 100644
+--- a/xorp/rib/rib_varrw.hh
++++ b/xorp/rib/rib_varrw.hh
+@@ -18,7 +18,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/rib/rib_varrw.hh,v 1.12 2008/10/02 21:58:11 bms Exp $
+ 
+ #ifndef __RIB_RIB_VARRW_HH__
+ #define __RIB_RIB_VARRW_HH__
+@@ -50,7 +49,7 @@ public:
+     RIBVarRW(IPRouteEntry<A>& route);
+ 
+     // SingleVarRW interface
+-    void start_read();
++    bool start_read(string& err);
+ 
+     /**
+      * Write a variable.
+@@ -70,7 +69,7 @@ private:
+      *
+      * @param r route from which to read addresses.
+      */
+-    void read_route_nexthop(IPRouteEntry<A>& r);
++    bool read_route_nexthop(IPRouteEntry<A>& r, string& err);
+ 
+     IPRouteEntry<A>&	_route;
+     ElementFactory	_ef;
+diff --git a/xorp/rib/rt_tab_pol_conn.cc b/xorp/rib/rt_tab_pol_conn.cc
+index 1de97e8..5d48b88 100644
+--- a/xorp/rib/rt_tab_pol_conn.cc
++++ b/xorp/rib/rt_tab_pol_conn.cc
+@@ -174,18 +174,18 @@ template <class A>
+ void
+ PolicyConnectedTable<A>::do_filtering(IPRouteEntry<A>& route)
+ {
+-    try {
+-	debug_msg("[RIB] PolicyConnectedTable Filtering: %s\n",
+-		  route.str().c_str());
++    string err;
++    bool ok = true;
+ 
+-	RIBVarRW<A> varrw(route);
++    debug_msg("[RIB] PolicyConnectedTable Filtering: %s\n",
++	      route.str().c_str());
+ 
+-	// only source match filtering!
+-	_policy_filters.run_filter(filter::EXPORT_SOURCEMATCH, varrw);
++    RIBVarRW<A> varrw(route);
+ 
+-    } catch(const PolicyException& e) {
+-	XLOG_FATAL("PolicyException: %s", e.str().c_str());
+-	XLOG_UNFINISHED();
++    // only source match filtering!
++    _policy_filters.run_filter(filter::EXPORT_SOURCEMATCH, varrw, err, ok);
++    if (!ok) {
++	XLOG_FATAL("Policy run-filter error: %s", err.c_str());
+     }
+ }
+ 
+diff --git a/xorp/rib/vifmanager.cc b/xorp/rib/vifmanager.cc
+index 9306740..102864d 100644
+--- a/xorp/rib/vifmanager.cc
++++ b/xorp/rib/vifmanager.cc
+@@ -297,15 +297,16 @@ VifManager::tree_complete()
+     //
+     // XXX: we use same actions when the tree is completed or updates are made
+     //
+-    updates_made();
++    string err;
++    if (!updates_made(err) || err.length())
++	XLOG_WARNING("vif-mgr, tree-complete, updates-made err: %s\n", err.c_str());
+ 
+     decr_startup_requests_n();
+ }
+ 
+-void
+-VifManager::updates_made()
++bool
++VifManager::updates_made(string& error_msg)
+ {
+-    string error_msg;
+     IfMgrIfTree::IfMap::const_iterator ifmgr_iface_iter;
+     IfMgrIfAtom::VifMap::const_iterator ifmgr_vif_iter;
+     IfMgrVifAtom::IPv4Map::const_iterator a4_iter;
+@@ -574,6 +575,7 @@ VifManager::updates_made()
+ #endif
+ 	}
+     }
++    return true;
+ }
+ 
+ void
+diff --git a/xorp/rib/vifmanager.hh b/xorp/rib/vifmanager.hh
+index 4cfec03..5ea62cc 100644
+--- a/xorp/rib/vifmanager.hh
++++ b/xorp/rib/vifmanager.hh
+@@ -17,7 +17,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/rib/vifmanager.hh,v 1.24 2008/10/02 21:58:14 bms Exp $
+ 
+ #ifndef __RIB_VIFMANAGER_HH__
+ #define __RIB_VIFMANAGER_HH__
+@@ -115,7 +114,7 @@ protected:
+     // IfMgrHintObserver methods
+     //
+     void tree_complete();
+-    void updates_made();
++    bool updates_made(string& err);
+ 
+     void incr_startup_requests_n();
+     void decr_startup_requests_n();
+diff --git a/xorp/rib/xrl_target.cc b/xorp/rib/xrl_target.cc
+index c2db486..29a5c1f 100644
+--- a/xorp/rib/xrl_target.cc
++++ b/xorp/rib/xrl_target.cc
+@@ -377,7 +377,7 @@ XrlRibTarget::rib_0_1_add_route4(const string&	protocol,
+ #endif
+ 
+     if (unicast &&
+-	_urib4.add_route(protocol, network, nexthop, "", "", metric, policytags)
++	_urib4.add_route(protocol, network, nexthop, "", "", metric, PolicyTags(policytags, err))
+ 	!= XORP_OK) {
+ 	err += c_format("Could not add IPv4 route "
+ 			"net %s, nexthop: %s to unicast RIB\n",
+@@ -386,7 +386,7 @@ XrlRibTarget::rib_0_1_add_route4(const string&	protocol,
+     }
+ 
+     if (multicast &&
+-	_mrib4.add_route(protocol, network, nexthop, "", "", metric, policytags)
++	_mrib4.add_route(protocol, network, nexthop, "", "", metric, PolicyTags(policytags, err))
+ 	!= XORP_OK) {
+ 	err += c_format("Could not add IPv4 route "
+ 			"net %s, nexthop: %s to multicast RIB",
+@@ -432,7 +432,7 @@ XrlRibTarget::rib_0_1_replace_route4(const string&	protocol,
+ 
+     if (unicast &&
+ 	_urib4.replace_route(protocol, network, nexthop, "", "",
+-					metric, policytags)
++			     metric, PolicyTags(policytags, err))
+ 	!= XORP_OK) {
+ 	err += "Could not replace IPv4 route in unicast RIB";
+ 	return XrlCmdError::COMMAND_FAILED(err);
+@@ -440,7 +440,7 @@ XrlRibTarget::rib_0_1_replace_route4(const string&	protocol,
+ 
+     if (multicast &&
+ 	_mrib4.replace_route(protocol, network, nexthop, "", "",
+-					metric, policytags)
++			     metric, PolicyTags(policytags, err))
+ 	!= XORP_OK) {
+ 	err += "Could not replace IPv4 route in multicast RIB";
+ 	return XrlCmdError::COMMAND_FAILED(err);
+@@ -529,7 +529,7 @@ XrlRibTarget::rib_0_1_add_interface_route4(const string&	protocol,
+ 
+     if (unicast &&
+ 	_urib4.add_route(protocol, network, nexthop, ifname, vifname, metric,
+-			 policytags)
++			 PolicyTags(policytags, err))
+ 	!= XORP_OK) {
+ 	err += "Could not add IPv4 interface route to unicast RIB\n";
+ 	return XrlCmdError::COMMAND_FAILED(err);
+@@ -537,7 +537,7 @@ XrlRibTarget::rib_0_1_add_interface_route4(const string&	protocol,
+ 
+     if (multicast &&
+ 	_mrib4.add_route(protocol, network, nexthop, ifname, vifname, metric,
+-			 policytags)
++			 PolicyTags(policytags, err))
+ 	!= XORP_OK) {
+ 	err += "Could not add IPv4 interface route to multicast RIB\n";
+ 	return XrlCmdError::COMMAND_FAILED(err);
+@@ -587,7 +587,7 @@ XrlRibTarget::rib_0_1_replace_interface_route4(const string&	    protocol,
+ 
+     if (unicast &&
+ 	_urib4.replace_route(protocol, network, nexthop, ifname, vifname,
+-			     metric, policytags)
++			     metric, PolicyTags(policytags, err))
+ 	!= XORP_OK) {
+ 	err += "Could not replace IPv4 interface route in unicast RIB\n";
+ 	return XrlCmdError::COMMAND_FAILED(err);
+@@ -595,7 +595,7 @@ XrlRibTarget::rib_0_1_replace_interface_route4(const string&	    protocol,
+ 
+     if (multicast &&
+ 	_mrib4.replace_route(protocol, network, nexthop, ifname, vifname,
+-			     metric, policytags)
++			     metric, PolicyTags(policytags, err))
+ 	!= XORP_OK) {
+ 	err += "Could not replace IPv4 interface route in multicast RIB\n";
+ 	return XrlCmdError::COMMAND_FAILED(err);
+@@ -1010,11 +1010,10 @@ XrlCmdError
+ XrlRibTarget::policy_backend_0_1_configure(const uint32_t& filter,
+ 					   const string&   conf)
+ {
+-    try {
+-	_rib_manager->configure_filter(filter, conf);
+-    } catch(const PolicyException& e) {
++    string err;
++    if (!_rib_manager->configure_filter(filter, conf, err)) {
+ 	return XrlCmdError::COMMAND_FAILED("Filter configure failed: " +
+-					   e.str());
++					   err);
+     }
+     return XrlCmdError::OKAY();
+ }
+@@ -1022,11 +1021,9 @@ XrlRibTarget::policy_backend_0_1_configure(const uint32_t& filter,
+ XrlCmdError
+ XrlRibTarget::policy_backend_0_1_reset(const uint32_t& filter)
+ {
+-    try {
+-	_rib_manager->reset_filter(filter);
+-    } catch(const PolicyException& e) {
+-	return XrlCmdError::COMMAND_FAILED("Filter reset failed: " +
+-					   e.str());
++    string err;
++    if (!_rib_manager->reset_filter(filter, err)) {
++	return XrlCmdError::COMMAND_FAILED("Filter reset failed: " + err);
+     }
+     return XrlCmdError::OKAY();
+ }
+@@ -1041,13 +1038,7 @@ XrlRibTarget::policy_backend_0_1_push_routes()
+ XrlCmdError
+ XrlRibTarget::rib_0_1_remove_policy_redist_tags(const string& protocol)
+ {
+-    try {
+-	_rib_manager->remove_policy_redist_tags(protocol);
+-    } catch(const PolicyException& e) {
+-	//this should not be posible
+-	return XrlCmdError::COMMAND_FAILED("Remove policy redist tags failed: "
+-					   + e.str());
+-    }
++    _rib_manager->remove_policy_redist_tags(protocol);
+     return XrlCmdError::OKAY();
+ }
+ 
+@@ -1056,12 +1047,12 @@ XrlRibTarget::rib_0_1_insert_policy_redist_tags(const string& protocol,
+ 						const XrlAtomList& policytags)
+ {
+     // doubt these will ever be used
+-    try {
+-	_rib_manager->insert_policy_redist_tags(protocol, policytags);
+-    } catch(const PolicyException& e) {
+-	return XrlCmdError::COMMAND_FAILED("Insert policy redist tags failed: "
+-					   + e.str());
+-    }
++    string err;
++    PolicyTags t(policytags, err);
++    if (t.invalid())
++	return XrlCmdError::COMMAND_FAILED(err);
++	
++    _rib_manager->insert_policy_redist_tags(protocol, t);
+     return XrlCmdError::OKAY();
+ }
+ 
+@@ -1069,12 +1060,7 @@ XrlCmdError
+ XrlRibTarget::rib_0_1_reset_policy_redist_tags()
+ {
+     // just a guard for the future.
+-    try {
+-	_rib_manager->reset_policy_redist_tags();
+-    } catch(const PolicyException& e) {
+-	return XrlCmdError::COMMAND_FAILED("Reset policy redist tags failed: " +
+-					   e.str());
+-    }
++    _rib_manager->reset_policy_redist_tags();
+     return XrlCmdError::OKAY();
+ }
+ 
+@@ -1288,7 +1274,7 @@ XrlRibTarget::rib_0_1_add_route6(const string&	protocol,
+ 
+     if (unicast &&
+ 	_urib6.add_route(protocol, network, nexthop, "", "", metric,
+-			 policytags)
++			 PolicyTags(policytags, err))
+ 	!= XORP_OK) {
+ 	err += c_format("Could not add IPv6 route "
+ 			"net %s, nexthop: %s to unicast RIB\n",
+@@ -1298,7 +1284,7 @@ XrlRibTarget::rib_0_1_add_route6(const string&	protocol,
+ 
+     if (multicast &&
+ 	_mrib6.add_route(protocol, network, nexthop, "", "", metric,
+-			 policytags)
++			 PolicyTags(policytags, err))
+ 	!= XORP_OK) {
+ 	err += c_format("Could not add IPv6 route "
+ 			"net %s, nexthop: %s to multicast RIB\n",
+@@ -1344,7 +1330,7 @@ XrlRibTarget::rib_0_1_replace_route6(const string&	protocol,
+ 
+     if (unicast &&
+ 	_urib6.replace_route(protocol, network, nexthop, "", "", metric,
+-			     policytags)
++			     PolicyTags(policytags, err))
+ 	!= XORP_OK) {
+ 	err += "Could not replace IPv6 route in unicast RIB\n";
+ 	return XrlCmdError::COMMAND_FAILED(err);
+@@ -1352,7 +1338,7 @@ XrlRibTarget::rib_0_1_replace_route6(const string&	protocol,
+ 
+     if (multicast &&
+ 	_mrib6.replace_route(protocol, network, nexthop, "", "", metric,
+-			     policytags)
++			     PolicyTags(policytags, err))
+ 	!= XORP_OK) {
+ 	err += "Could not add IPv6 route in multicast RIB\n";
+ 	return XrlCmdError::COMMAND_FAILED(err);
+@@ -1441,7 +1427,7 @@ XrlRibTarget::rib_0_1_add_interface_route6(const string&	protocol,
+ 
+     if (unicast &&
+ 	_urib6.add_route(protocol, network, nexthop, ifname, vifname,
+-					metric, policytags)
++			 metric, PolicyTags(policytags, err))
+ 	!= XORP_OK) {
+ 	err += "Could not add IPv6 interface route to unicast RIB\n";
+ 	return XrlCmdError::COMMAND_FAILED(err);
+@@ -1449,7 +1435,7 @@ XrlRibTarget::rib_0_1_add_interface_route6(const string&	protocol,
+ 
+     if (multicast &&
+ 	_mrib6.add_route(protocol, network, nexthop, ifname, vifname, metric,
+-					policytags)
++			 PolicyTags(policytags, err))
+ 	!= XORP_OK) {
+ 	err += "Could not add IPv6 interface route to multicast RIB\n";
+ 	return XrlCmdError::COMMAND_FAILED(err);
+@@ -1499,7 +1485,7 @@ XrlRibTarget::rib_0_1_replace_interface_route6(const string&	    protocol,
+ 
+     if (unicast &&
+ 	_urib6.replace_route(protocol, network, nexthop, ifname, vifname,
+-			     metric, policytags)
++			     metric, PolicyTags(policytags, err))
+ 	!= XORP_OK) {
+ 	err += "Could not replace IPv6 interface route in unicast RIB\n";
+ 	return XrlCmdError::COMMAND_FAILED(err);
+@@ -1507,7 +1493,7 @@ XrlRibTarget::rib_0_1_replace_interface_route6(const string&	    protocol,
+ 
+     if (multicast &&
+ 	_mrib6.replace_route(protocol, network, nexthop, ifname, vifname,
+-			     metric, policytags)
++			     metric, PolicyTags(policytags, err))
+ 	!= XORP_OK) {
+ 	err += "Could not replace IPv6 interface route in multicast RIB\n";
+ 	return XrlCmdError::COMMAND_FAILED(err);
+diff --git a/xorp/rip/rip_varrw.cc b/xorp/rip/rip_varrw.cc
+index 2ea440a..fe17c9a 100644
+--- a/xorp/rip/rip_varrw.cc
++++ b/xorp/rip/rip_varrw.cc
+@@ -33,8 +33,8 @@ RIPVarRW<A>::RIPVarRW(RouteEntry<A>& route)
+ }
+ 
+ template <class A>
+-void
+-RIPVarRW<A>::start_read()
++bool
++RIPVarRW<A>::start_read(string& err)
+ {
+     initialize(VAR_POLICYTAGS, _route.policytags().element());
+ 
+@@ -51,6 +51,8 @@ RIPVarRW<A>::start_read()
+     delete element;
+ 
+     initialize(VAR_TAG, new ElemU32(_route.tag()));
++    UNUSED(err);
++    return true;
+ }
+ 
+ template <class A>
+@@ -67,7 +69,10 @@ void
+ RIPVarRW<A>::single_write(const Id& id, const Element& e)
+ {
+     if (id == VAR_POLICYTAGS) {
+-	_route.policytags().set_ptags(e);
++	string err;
++	if (!_route.policytags().set_ptags(e, err)) {
++	    XLOG_ERROR("set-ptags failed: %s\n", err.c_str());
++	}
+ 	return;
+     }
+ 
+@@ -81,14 +86,10 @@ RIPVarRW<A>::single_write(const Id& id, const Element& e)
+     }
+ 
+     if (id == VAR_METRIC) {
+-	XLOG_ASSERT(u32 != NULL);
+-
+ 	_route.set_cost(u32->val());
+ 	return;
+     }
+     if (id == VAR_TAG) {
+-	XLOG_ASSERT(u32 != NULL);
+-
+ 	_route.set_tag(u32->val());
+ 	_route.policytags().set_tag(e);
+ 	return;
+diff --git a/xorp/rip/rip_varrw.hh b/xorp/rip/rip_varrw.hh
+index b352d53..3a34225 100644
+--- a/xorp/rip/rip_varrw.hh
++++ b/xorp/rip/rip_varrw.hh
+@@ -18,7 +18,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/rip/rip_varrw.hh,v 1.13 2008/10/02 21:58:17 bms Exp $
+ 
+ #ifndef __RIP_RIP_VARRW_HH__
+ #define __RIP_RIP_VARRW_HH__
+@@ -47,7 +46,7 @@ public:
+     RIPVarRW(RouteEntry<A>& route);
+ 
+     // SingleVarRW interface
+-    void start_read();
++    bool start_read(string& err);
+     Element* single_read(const Id& id);
+     void single_write(const Id& id, const Element& e);
+ 
+diff --git a/xorp/rip/route_db.cc b/xorp/rip/route_db.cc
+index 6e69425..32d1a39 100644
+--- a/xorp/rip/route_db.cc
++++ b/xorp/rip/route_db.cc
+@@ -187,56 +187,55 @@ template <typename A>
+ bool
+ RouteDB<A>::do_filtering(Route* r, uint32_t& cost)
+ {
+-    try {
+-	RIPVarRW<A> varrw(*r);
+ 
+-	XLOG_TRACE(trace()._routes,
+-		   "Running import filter on route %s\n",
+-		   r->str().c_str());
++    RIPVarRW<A> varrw(*r);
++    RIPVarRW<A> varrw2(*r);
++    RIPVarRW<A> varrw3(*r);
+ 
+-	bool accepted = _policy_filters.run_filter(filter::IMPORT, varrw);
++    XLOG_TRACE(trace()._routes,
++	       "Running import filter on route %s\n",
++	       r->str().c_str());
+ 
+-	if (!accepted)
+-	    goto exit;
++    string err;
++    bool ok = true;
++    bool accepted = _policy_filters.run_filter(filter::IMPORT, varrw, err, ok);
++    if (!ok)
++	XLOG_FATAL("PolicyException - import: %s", err.c_str());
+ 
+-	do {
+-	    RIPVarRW<A> varrw2(*r);
++    if (!accepted)
++	goto exit;
+ 
+-	    XLOG_TRACE(trace()._routes,
+-		       "Running source match filter on route %s\n",
+-		       r->net().str().c_str());
++    XLOG_TRACE(trace()._routes,
++	       "Running source match filter on route %s\n",
++	       r->net().str().c_str());
+ 
+-	    accepted = _policy_filters.run_filter(filter::EXPORT_SOURCEMATCH, varrw2);
+-	} while(0);
++    accepted = _policy_filters.run_filter(filter::EXPORT_SOURCEMATCH, varrw2, err, ok);
++    if (!ok)
++	XLOG_FATAL("PolicyException - sourcematch: %s", err.c_str());
+ 
+-	if (!accepted)
+-	    goto exit;
++    if (!accepted)
++	goto exit;
+ 
+-	do {
+-	    RIPVarRW<A> varrw3(*r);
+ 
+-	    XLOG_TRACE(trace()._routes,
+-		       "Running export filter on route %s\n",
+-		       r->net().str().c_str());
++    XLOG_TRACE(trace()._routes,
++	       "Running export filter on route %s\n",
++	       r->net().str().c_str());
+ 
+-	    accepted = _policy_filters.run_filter(filter::EXPORT, varrw3);
+-	} while(0);
++    accepted = _policy_filters.run_filter(filter::EXPORT, varrw3, err, ok);
++    if (!ok)
++	XLOG_FATAL("PolicyException - import: %s", err.c_str());
+ 
+ exit:
++    cost = r->cost();
++    if (r->cost() > RIP_INFINITY) {
++	r->set_cost(RIP_INFINITY);
+ 	cost = r->cost();
+-	if (r->cost() > RIP_INFINITY) {
+-		r->set_cost(RIP_INFINITY);
+-		cost = r->cost();
+-		accepted = false;
+-	}
+-
+-	XLOG_TRACE(trace()._routes, "do-filtering: returning, accepted: %d  cost: %d\n",
+-		   (int)(accepted), cost);
+-	return accepted;
+-    } catch(const PolicyException& e) {
+-	XLOG_FATAL("PolicyException: %s", e.str().c_str());
+-	XLOG_UNFINISHED();
++	accepted = false;
+     }
++
++    XLOG_TRACE(trace()._routes, "do-filtering: returning, accepted: %d  cost: %d\n",
++	       (int)(accepted), cost);
++    return accepted;
+ }
+ 
+ template <typename A>
+diff --git a/xorp/rip/system.hh b/xorp/rip/system.hh
+index 06bdfb5..d565c63 100644
+--- a/xorp/rip/system.hh
++++ b/xorp/rip/system.hh
+@@ -18,7 +18,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/rip/system.hh,v 1.16 2008/10/29 21:59:39 andrewma Exp $
+ 
+ #ifndef __RIP_SYSTEM_HH__
+ #define __RIP_SYSTEM_HH__
+@@ -97,8 +96,8 @@ public:
+      * @param filter id of filter to configure.
+      * @param conf configuration of filter.
+      */
+-    void configure_filter(const uint32_t& filter, const string& conf) {
+-	_policy_filters.configure(filter,conf);
++    bool configure_filter(const uint32_t& filter, const string& conf, string& err) {
++	return _policy_filters.configure(filter,conf, err);
+     }
+ 
+     /**
+@@ -106,8 +105,8 @@ public:
+      *
+      * @param filter id of filter to reset.
+      */
+-    void reset_filter(const uint32_t& filter) {
+-	_policy_filters.reset(filter);
++    bool reset_filter(const uint32_t& filter, string& err) {
++	return _policy_filters.reset(filter, err);
+     }
+ 
+     /**
+diff --git a/xorp/rip/xrl_port_manager.cc b/xorp/rip/xrl_port_manager.cc
+index 0029679..2280166 100644
+--- a/xorp/rip/xrl_port_manager.cc
++++ b/xorp/rip/xrl_port_manager.cc
+@@ -327,8 +327,8 @@ XrlPortManager<A>::tree_complete()
+ }
+ 
+ template <typename A>
+-void
+-XrlPortManager<A>::updates_made()
++bool
++XrlPortManager<A>::updates_made(string& err)
+ {
+     debug_msg("XrlPortManager<IPv%u>::updates_made notification\n",
+ 	      XORP_UINT_CAST(A::ip_version()));
+@@ -351,6 +351,8 @@ XrlPortManager<A>::updates_made()
+ 	    xio->set_enabled(fea_en);
+ 	}
+     }
++    UNUSED(err);
++    return true;
+ }
+ 
+ template <typename A>
+diff --git a/xorp/rip/xrl_port_manager.hh b/xorp/rip/xrl_port_manager.hh
+index 557daf9..1beb3ff 100644
+--- a/xorp/rip/xrl_port_manager.hh
++++ b/xorp/rip/xrl_port_manager.hh
+@@ -177,7 +177,7 @@ protected:
+     // IfMgrHintObserver methods
+     //
+     void tree_complete();
+-    void updates_made();
++    bool updates_made(string& err);
+ 
+     //
+     // ServiceChangeObserverBase methods
+diff --git a/xorp/rip/xrl_target_common.hh b/xorp/rip/xrl_target_common.hh
+index 2681f33..af4ec1a 100644
+--- a/xorp/rip/xrl_target_common.hh
++++ b/xorp/rip/xrl_target_common.hh
+@@ -1264,11 +1264,10 @@ XrlCmdError
+ XrlRipCommonTarget<A>::policy_backend_0_1_configure(const uint32_t& filter,
+ 						    const string& conf)
+ {
+-    try {
+-	_rip_system.configure_filter(filter, conf);
+-    } catch(const PolicyException& e) {
+-	return XrlCmdError::COMMAND_FAILED("Filter configure failed: " +
+-					   e.str());
++    string err;
++
++    if (!_rip_system.configure_filter(filter, conf, err)) {
++	return XrlCmdError::COMMAND_FAILED("Filter configure failed: " + err);
+     }
+     return XrlCmdError::OKAY();
+ }
+@@ -1277,11 +1276,9 @@ template <typename A>
+ XrlCmdError
+ XrlRipCommonTarget<A>::policy_backend_0_1_reset(const uint32_t& filter)
+ {
+-    try {
+-	_rip_system.reset_filter(filter);
+-    } catch(const PolicyException& e) {
+-	return XrlCmdError::COMMAND_FAILED("Filter reset failed: " + 
+-					   e.str());
++    string err;
++    if (!_rip_system.reset_filter(filter, err)) {
++	return XrlCmdError::COMMAND_FAILED("Filter reset failed: " + err);
+     }
+     return XrlCmdError::OKAY();
+ }
+@@ -1314,7 +1311,13 @@ XrlRipCommonTarget<A>::policy_redistx_0_1_add_routex(const IPNet<A>&	net,
+     // XXX: The interface and vif name are empty, because the policy
+     // mechanism doesn't support setting them (yet).
+     //
+-    _xrm.add_route(net, nexthop, ifname, vifname, metric, 0, policytags);
++    string err;
++    PolicyTags t(policytags, err);
++    if (t.invalid())
++	return XrlCmdError::COMMAND_FAILED("RIP add-route failed: " + err);
++
++    _xrm.add_route(net, nexthop, ifname, vifname, metric, 0, t);
++	
+     return XrlCmdError::OKAY();
+ }
+ 
+diff --git a/xorp/static_routes/static_routes_node.cc b/xorp/static_routes/static_routes_node.cc
+index 72d9141..872b04f 100644
+--- a/xorp/static_routes/static_routes_node.cc
++++ b/xorp/static_routes/static_routes_node.cc
+@@ -300,11 +300,13 @@ StaticRoutesNode::tree_complete()
+     //
+     // XXX: we use same actions when the tree is completed or updates are made
+     //
+-    updates_made();
++    string err;
++    if (!updates_made(err))
++	XLOG_ERROR("static-routes-node, tree-complete, updates-made had error: %s\n", err.c_str());
+ }
+ 
+-void
+-StaticRoutesNode::updates_made()
++bool
++StaticRoutesNode::updates_made(string& err)
+ {
+     StaticRoutesNode::Table::iterator route_iter;
+     list<StaticRoute *> add_routes, replace_routes, delete_routes;
+@@ -560,6 +562,8 @@ StaticRoutesNode::updates_made()
+ 	copy_route.set_delete_route();
+ 	inform_mfea(copy_route, "updates-made, delete-mroute requests");
+     }
++    UNUSED(err);
++    return true;
+ }
+ 
+ /**
+@@ -1238,15 +1242,15 @@ StaticRoute::is_accepted_by_rib() const
+     return (is_accepted_by_nexthop() && (! is_filtered()));
+ }
+ 
+-void
+-StaticRoutesNode::configure_filter(const uint32_t& filter, const string& conf)
++bool
++StaticRoutesNode::configure_filter(const uint32_t& filter, const string& conf, string& err)
+ {
+-    _policy_filters.configure(filter, conf);
++    return _policy_filters.configure(filter, conf, err);
+ }
+ 
+-void
+-StaticRoutesNode::reset_filter(const uint32_t& filter) {
+-    _policy_filters.reset(filter);
++bool
++StaticRoutesNode::reset_filter(const uint32_t& filter, string& err) {
++    return _policy_filters.reset(filter, err);
+ }
+ 
+ void
+@@ -1502,39 +1506,40 @@ StaticRoutesNode::update_route(const IfMgrIfTree& iftree, StaticRoute& route)
+ bool
+ StaticRoutesNode::do_filtering(StaticRoute& route)
+ {
+-    try {
+-	StaticRoutesVarRW varrw(route);
+-
+-	// Import filtering
+-	bool accepted;
+-
+-	debug_msg("[STATIC] Running filter: %s on route: %s\n",
+-		  filter::filter2str(filter::IMPORT),
+-		  route.network().str().c_str());
+-	accepted = _policy_filters.run_filter(filter::IMPORT, varrw);
+-
+-	route.set_filtered(!accepted);
+-
+-	// Route Rejected 
+-	if (!accepted) 
+-	    return accepted;
++    StaticRoutesVarRW varrw(route);
++    string err;
++    bool ok = true;
++
++    // Import filtering
++    bool accepted;
++
++    debug_msg("[STATIC] Running filter: %s on route: %s\n",
++	      filter::filter2str(filter::IMPORT),
++	      route.network().str().c_str());
++    accepted = _policy_filters.run_filter(filter::IMPORT, varrw, err, ok);
++    if (!ok) {
++	XLOG_FATAL("PolicyException, import: %s", err.c_str());
++    }
+ 
+-	StaticRoutesVarRW varrw2(route);
++    route.set_filtered(!accepted);
+ 
+-	// Export source-match filtering
+-	debug_msg("[STATIC] Running filter: %s on route: %s\n",
+-		  filter::filter2str(filter::EXPORT_SOURCEMATCH),
+-		  route.network().str().c_str());
++    // Route Rejected 
++    if (!accepted) 
++	return accepted;
+ 
+-	_policy_filters.run_filter(filter::EXPORT_SOURCEMATCH, varrw2);
++    StaticRoutesVarRW varrw2(route);
+ 
+-	return accepted;
+-    } catch(const PolicyException& e) {
+-	XLOG_FATAL("PolicyException: %s", e.str().c_str());
++    // Export source-match filtering
++    debug_msg("[STATIC] Running filter: %s on route: %s\n",
++	      filter::filter2str(filter::EXPORT_SOURCEMATCH),
++	      route.network().str().c_str());
+ 
+-	// FIXME: What do we do ?
+-	XLOG_UNFINISHED();
++    _policy_filters.run_filter(filter::EXPORT_SOURCEMATCH, varrw2, err, ok);
++    if (!ok) {
++	XLOG_FATAL("PolicyException, source-match: %s", err.c_str());
+     }
++    
++    return accepted;
+ }
+ 
+ string StaticRouteBase::str() const {
+diff --git a/xorp/static_routes/static_routes_node.hh b/xorp/static_routes/static_routes_node.hh
+index 6ad3c6a..594ea2c 100644
+--- a/xorp/static_routes/static_routes_node.hh
++++ b/xorp/static_routes/static_routes_node.hh
+@@ -695,21 +695,19 @@ public:
+     /**
+      * Configure a policy filter.
+      *
+-     * Will throw an exception on error.
+-     *
+      * Export filter is not supported by static routes.
+      *
+      * @param filter identifier of filter to configure.
+      * @param conf configuration of the filter.
+      */
+-    void configure_filter(const uint32_t& filter, const string& conf);
++    bool configure_filter(const uint32_t& filter, const string& conf, string& err);
+ 
+     /**
+      * Reset a policy filter.
+      *
+      * @param filter identifier of filter to reset.
+      */
+-    void reset_filter(const uint32_t& filter);
++    bool reset_filter(const uint32_t& filter, string& err);
+ 
+     /**
+      * Push all the routes through the policy filters for re-filtering.
+@@ -729,7 +727,7 @@ protected:
+     // IfMgrHintObserver methods
+     //
+     void tree_complete();
+-    void updates_made();
++    bool updates_made(string& err);
+ 
+     void incr_startup_requests_n();
+     void decr_startup_requests_n();
+diff --git a/xorp/static_routes/static_routes_varrw.cc b/xorp/static_routes/static_routes_varrw.cc
+index 9874c28..d65ee25 100644
+--- a/xorp/static_routes/static_routes_varrw.cc
++++ b/xorp/static_routes/static_routes_varrw.cc
+@@ -31,30 +31,38 @@ StaticRoutesVarRW::StaticRoutesVarRW(StaticRoute& route)
+ {
+ }
+ 
+-void
+-StaticRoutesVarRW::start_read()
++bool
++StaticRoutesVarRW::start_read(string& err)
+ {
++    Element* e;
+     initialize(_route.policytags());
+ 
+     if (_is_ipv4) {
+-	initialize(VAR_NETWORK4,
+-		   _ef.create(ElemIPv4Net::id,
+-			      _route.network().str().c_str()));
+-	initialize(VAR_NEXTHOP4,
+-		   _ef.create(ElemIPv4NextHop::id,
+-			      _route.nexthop().str().c_str()));
++	e = _ef.create(ElemIPv4Net::id, _route.network().str().c_str(), err);
++	if (!e)
++	    return false;
++
++	initialize(VAR_NETWORK4, e);
++	e = _ef.create(ElemIPv4NextHop::id, _route.nexthop().str().c_str(), err);
++	if (!e)
++	    return false;
++	initialize(VAR_NEXTHOP4, e);
+ 	
+ 	initialize(VAR_NETWORK6, NULL);
+ 	initialize(VAR_NEXTHOP6, NULL);
+     }
+ 
+     if (_is_ipv6) {
+-	initialize(VAR_NETWORK6,
+-		   _ef.create(ElemIPv6Net::id,
+-			      _route.network().str().c_str()));
+-	initialize(VAR_NEXTHOP6,
+-		   _ef.create(ElemIPv6NextHop::id,
+-			      _route.nexthop().str().c_str()));
++	e = _ef.create(ElemIPv6Net::id, _route.network().str().c_str(), err);
++	if (!e)
++	    return false;
++
++	initialize(VAR_NETWORK6, e);
++
++	e = _ef.create(ElemIPv6NextHop::id, _route.nexthop().str().c_str(), err);
++	if (!e)
++	    return false;
++	initialize(VAR_NEXTHOP6, e);
+ 
+ 	initialize(VAR_NETWORK4, NULL);
+ 	initialize(VAR_NEXTHOP4, NULL);
+@@ -64,7 +72,11 @@ StaticRoutesVarRW::start_read()
+ 
+     oss << _route.metric();
+ 
+-    initialize(VAR_METRIC, _ef.create(ElemU32::id, oss.str().c_str()));
++    e = _ef.create(ElemU32::id, oss.str().c_str(), err);
++    if (!e)
++	return false;
++    initialize(VAR_METRIC, e);
++    return true;
+ }
+ 
+ void
+diff --git a/xorp/static_routes/static_routes_varrw.hh b/xorp/static_routes/static_routes_varrw.hh
+index ccfc935..975f59e 100644
+--- a/xorp/static_routes/static_routes_varrw.hh
++++ b/xorp/static_routes/static_routes_varrw.hh
+@@ -18,7 +18,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/static_routes/static_routes_varrw.hh,v 1.11 2008/10/02 21:58:29 bms Exp $
+ 
+ #ifndef __STATIC_ROUTES_STATIC_ROUTES_VARRW_HH__
+ #define __STATIC_ROUTES_STATIC_ROUTES_VARRW_HH__
+@@ -45,7 +44,7 @@ public:
+     StaticRoutesVarRW(StaticRoute& route);
+ 
+     // SingleVarRW inteface:
+-    void start_read();
++    bool start_read(string& err);
+     Element* single_read(const Id& id);
+     void single_write(const Id& id, const Element& e);
+ 
+diff --git a/xorp/static_routes/xrl_static_routes_node.cc b/xorp/static_routes/xrl_static_routes_node.cc
+index 2e24df3..69f6a9f 100644
+--- a/xorp/static_routes/xrl_static_routes_node.cc
++++ b/xorp/static_routes/xrl_static_routes_node.cc
+@@ -2547,11 +2547,10 @@ XrlCmdError
+ XrlStaticRoutesNode::policy_backend_0_1_configure(const uint32_t& filter,
+ 						  const string& conf)
+ {
+-    try {
+-	StaticRoutesNode::configure_filter(filter, conf);
+-    } catch(const PolicyException& e) {
++    string err;
++    if (!StaticRoutesNode::configure_filter(filter, conf, err)) {
+ 	return XrlCmdError::COMMAND_FAILED("Filter configure failed: " +
+-					   e.str());
++					   err);
+     }
+     return XrlCmdError::OKAY();
+ }
+@@ -2559,11 +2558,9 @@ XrlStaticRoutesNode::policy_backend_0_1_configure(const uint32_t& filter,
+ XrlCmdError
+ XrlStaticRoutesNode::policy_backend_0_1_reset(const uint32_t& filter)
+ {
+-    try {
+-	StaticRoutesNode::reset_filter(filter);
+-    } catch(const PolicyException& e) {
+-	// Will never happen... but for the future...
+-	return XrlCmdError::COMMAND_FAILED("Filter reset failed: " + e.str());
++    string err;
++    if (!StaticRoutesNode::reset_filter(filter, err)) {
++	return XrlCmdError::COMMAND_FAILED("Filter reset failed: " + err);
+     }
+     
+     return XrlCmdError::OKAY();
+diff --git a/xorp/vrrp/vrrp_target.cc b/xorp/vrrp/vrrp_target.cc
+index a773dc1..97b8507 100644
+--- a/xorp/vrrp/vrrp_target.cc
++++ b/xorp/vrrp/vrrp_target.cc
+@@ -209,10 +209,11 @@ VrrpTarget::tree_complete()
+     check_interfaces();
+ }
+ 
+-void
+-VrrpTarget::updates_made()
++bool
++VrrpTarget::updates_made(string& /*err*/)
+ {
+     check_interfaces();
++    return true;
+ }
+ 
+ void
+diff --git a/xorp/vrrp/vrrp_target.hh b/xorp/vrrp/vrrp_target.hh
+index 932785e..18abbbf 100644
+--- a/xorp/vrrp/vrrp_target.hh
++++ b/xorp/vrrp/vrrp_target.hh
+@@ -18,7 +18,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/vrrp/vrrp_target.hh,v 1.11 2008/12/18 11:34:51 abittau Exp $
+ 
+ #ifndef __VRRP_VRRP_TARGET_HH__
+ #define __VRRP_VRRP_TARGET_HH__
+@@ -64,7 +63,7 @@ public:
+     /**
+      * Called when the rtrmgr configuration changed.
+      */
+-    void       updates_made();
++    bool updates_made(string& err);
+ 
+     /**
+      * Transmit a L2 packet.
+-- 
+2.7.5
+

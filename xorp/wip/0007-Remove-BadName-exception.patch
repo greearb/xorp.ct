@@ -1,0 +1,305 @@
+From 98822b594ef375cd94daac4b38be2f8afca2fac5 Mon Sep 17 00:00:00 2001
+From: Ben Greear <greearb@candelatech.com>
+Date: Fri, 8 Sep 2017 10:53:27 -0700
+Subject: [PATCH 07/33] Remove BadName exception.
+
+signed-off-by: Ben Greear <greearb@candelatech.com>
+---
+ xorp/libxipc/xrl_atom.cc | 39 ++++++++++++++++----------------------
+ xorp/libxipc/xrl_atom.hh | 49 +++++++++++++++++++++---------------------------
+ 2 files changed, 37 insertions(+), 51 deletions(-)
+
+diff --git a/xorp/libxipc/xrl_atom.cc b/xorp/libxipc/xrl_atom.cc
+index e584238..18820ad 100644
+--- a/xorp/libxipc/xrl_atom.cc
++++ b/xorp/libxipc/xrl_atom.cc
+@@ -507,7 +507,7 @@ XrlAtom::str() const
+ 		    type_name());
+ }
+ 
+-XrlAtom::XrlAtom(const char* serialized) throw (BadName)
++XrlAtom::XrlAtom(const char* serialized)
+     : _type(xrlatom_no_type),
+       _have_data(false),
+       _own(true),
+@@ -854,7 +854,6 @@ XrlAtom::pack_name(uint8_t* buffer) const
+ 
+ size_t
+ XrlAtom::unpack_name(const uint8_t* buffer, size_t buffer_bytes)
+-    throw (BadName)
+ {
+     uint16_t sz;
+     if (buffer_bytes < sizeof(sz)) {
+@@ -870,17 +869,16 @@ XrlAtom::unpack_name(const uint8_t* buffer, size_t buffer_bytes)
+     int name_size = _atom_name.size();
+ 
+     if (name_size) {
+-	if (name_size != sz)
+-	    xorp_throw(BadName, s);
+-
+-	if (::memcmp(_atom_name.c_str(), s, name_size) != 0)
+-	    xorp_throw(BadName, s);
+-
++	if ((name_size != sz) ||
++	    (::memcmp(_atom_name.c_str(), s, name_size) != 0)) {
++	    return 0;
++	}
+     } else {
+ 	_atom_name.assign(s, sz);
+ 
+-	if (!valid_name(_atom_name))
+-	    xorp_throw(BadName, s);
++	if (!valid_name(_atom_name)) {
++	    return 0;
++	}
+     }
+ 
+     return sizeof(sz) + sz;
+@@ -1311,19 +1309,14 @@ XrlAtom::unpack(const uint8_t* buffer, size_t buffer_bytes)
+     size_t unpacked = 1;
+ 
+     if (header & NAME_PRESENT) {
+-	try {
+-	    size_t used = unpack_name(buffer + unpacked,
+-				      buffer_bytes - unpacked);
+-
+-	    if (used == 0) {
+-		debug_msg("Invalid name\n");
+-		return 0;
+-	    }
+-	    unpacked += used;
+-	} catch (const XrlAtom::BadName& bn) {
+-	    debug_msg("Unpacking failed:\n%s\n", bn.str().c_str());
++	size_t used = unpack_name(buffer + unpacked,
++				  buffer_bytes - unpacked);
++
++	if (used == 0) {
++	    debug_msg("Invalid name\n");
+ 	    return 0;
+ 	}
++	unpacked += used;
+     } else
+ 	_atom_name.clear();
+ 
+@@ -1414,14 +1407,14 @@ XrlAtom::unpack(const uint8_t* buffer, size_t buffer_bytes)
+ }
+ 
+ void
+-XrlAtom::set_name(const char *name) throw (BadName)
++XrlAtom::set_name(const char *name)
+ {
+     if (name == 0)
+ 	_atom_name = "";
+     else {
+ 	_atom_name = name;
+ 	if (!valid_name(_atom_name))
+-	    xorp_throw(BadName, name);
++	    _invalid = true;
+     }
+ }
+ 
+diff --git a/xorp/libxipc/xrl_atom.hh b/xorp/libxipc/xrl_atom.hh
+index 0999e06..da34d1a 100644
+--- a/xorp/libxipc/xrl_atom.hh
++++ b/xorp/libxipc/xrl_atom.hh
+@@ -117,12 +117,6 @@ public:
+ 	XrlAtomType _expected;
+     };
+ 
+-    struct BadName : public XorpException {
+-	BadName(const char* file, int line, const char* name) :
+-	    XorpException("XrlAtom::BadName", file, line), _name(name) {}
+-	const string why() const {
+-	    return c_format("\"%s\" is not a valid name", _name.c_str());
+-	}
+     private:
+ 	string _name;
+     };
+@@ -134,12 +128,12 @@ public:
+     XrlAtom(XrlAtomType t)
+ 	    : _type(t), _have_data(false), _own(true), _has_fake_args(false) {}
+ 
+-    XrlAtom(const string& name, XrlAtomType t) throw (BadName)
++    XrlAtom(const string& name, XrlAtomType t)
+ 	    : _type(t), _have_data(false), _own(true), _has_fake_args(false) {
+ 	set_name(name);
+     }
+ 
+-    XrlAtom(const char* name, XrlAtomType t) throw (BadName)
++    XrlAtom(const char* name, XrlAtomType t)
+ 	    : _type(t), _have_data(false), _own(true), _has_fake_args(false) {
+ 	set_name(name);
+     }
+@@ -155,13 +149,13 @@ public:
+      * XrlAtom(const string&).
+      *
+      */
+-    explicit XrlAtom(const char*) throw (BadName);
++    explicit XrlAtom(const char*);
+ 
+     // int32 constructors
+     explicit XrlAtom(const int32_t& value)
+ 	    : _type(xrlatom_int32), _have_data(true), _own(true), _has_fake_args(false), _i32val(value) {}
+ 
+-    XrlAtom(const char* name, int32_t value, bool fake_args = false) throw (BadName)
++    XrlAtom(const char* name, int32_t value, bool fake_args = false)
+ 	    : _type(xrlatom_int32), _have_data(true), _own(true), _has_fake_args(fake_args),_i32val(value) {
+ 	set_name(name);
+     }
+@@ -171,7 +165,7 @@ public:
+ 	: _type(xrlatom_boolean), _have_data(true),
+ 	  _own(true), _has_fake_args(false), _boolean(value) {}
+ 
+-    XrlAtom(const char* name, bool value, bool fake_args = false) throw (BadName)
++    XrlAtom(const char* name, bool value, bool fake_args = false)
+ 	: _type(xrlatom_boolean), _have_data(true),
+ 	  _own(true), _has_fake_args(fake_args), _boolean(value) {
+ 	set_name(name);
+@@ -181,7 +175,7 @@ public:
+     explicit XrlAtom(const uint32_t& value)
+ 	    : _type(xrlatom_uint32), _have_data(true), _own(true), _has_fake_args(false), _u32val(value) {}
+ 
+-    XrlAtom(const char* name, uint32_t value, bool fake_args = false) throw (BadName)
++    XrlAtom(const char* name, uint32_t value, bool fake_args = false)
+ 	    : _type(xrlatom_uint32), _have_data(true), _own(true), _has_fake_args(fake_args), _u32val(value) {
+ 	set_name(name);
+     }
+@@ -191,7 +185,7 @@ public:
+ 	: _type(xrlatom_ipv4), _have_data(true), _own(true), _has_fake_args(false),
+ 	  _ipv4(addr) {}
+ 
+-    XrlAtom(const char* name, const IPv4& addr, bool fake_args = false) throw (BadName)
++    XrlAtom(const char* name, const IPv4& addr, bool fake_args = false)
+ 	: _type(xrlatom_ipv4), _have_data(true), _own(true), _has_fake_args(fake_args),
+ 	  _ipv4(addr) {
+ 	set_name(name);
+@@ -202,7 +196,7 @@ public:
+ 	    : _type(xrlatom_ipv4net), _have_data(true), _own(true), _has_fake_args(false),
+ 	      _ipv4net(subnet) {}
+ 
+-    XrlAtom(const char* name, const IPv4Net& subnet, bool fake_args = false) throw (BadName)
++    XrlAtom(const char* name, const IPv4Net& subnet, bool fake_args = false)
+ 	    : _type(xrlatom_ipv4net), _have_data(true), _own(true), _has_fake_args(fake_args),
+ 	      _ipv4net(subnet) {
+ 	set_name(name);
+@@ -213,7 +207,7 @@ public:
+ 	: _type(xrlatom_ipv6), _have_data(true), _own(true), _has_fake_args(false),
+ 	  _ipv6(new IPv6(addr)) {}
+ 
+-    XrlAtom(const char* name, const IPv6& addr) throw (BadName)
++    XrlAtom(const char* name, const IPv6& addr)
+ 	: _type(xrlatom_ipv6), _have_data(true), _own(true), _has_fake_args(false),
+ 	  _ipv6(new IPv6(addr)) {
+ 	set_name(name);
+@@ -224,7 +218,7 @@ public:
+ 	: _type(xrlatom_ipv6net), _have_data(true), _own(true), _has_fake_args(false),
+ 	  _ipv6net(new IPv6Net(subnet)) {}
+ 
+-    XrlAtom(const char* name, const IPv6Net& subnet, bool fake_args = false) throw (BadName)
++    XrlAtom(const char* name, const IPv6Net& subnet, bool fake_args = false)
+ 	: _type(xrlatom_ipv6net), _have_data(true), _own(true), _has_fake_args(fake_args),
+ 	  _ipv6net(new IPv6Net(subnet)) {
+ 	set_name(name);
+@@ -232,7 +226,7 @@ public:
+ 
+     // IPvX constructors - there is no underlying IPvX type
+     // data is cast to IPv4 or IPv6.
+-    XrlAtom(const char* name, const IPvX& ipvx, bool fake_args = false) throw (BadName)
++    XrlAtom(const char* name, const IPvX& ipvx, bool fake_args = false)
+ 	    : _have_data(true), _own(true), _has_fake_args(fake_args)
+     {
+ 	set_name(name);
+@@ -249,7 +243,7 @@ public:
+ 
+     // IPvXNet constructors - there is no underlying IPvXNet type
+     // data is cast to IPv4Net or IPv6Net.
+-    XrlAtom(const char* name, const IPvXNet& ipvxnet, bool fake_args = false) throw (BadName)
++    XrlAtom(const char* name, const IPvXNet& ipvxnet, bool fake_args = false)
+ 	    : _have_data(true), _own(true), _has_fake_args(fake_args)
+     {
+ 	set_name(name);
+@@ -269,7 +263,7 @@ public:
+ 	: _type(xrlatom_mac), _have_data(true), _own(true), _has_fake_args(false),
+ 	  _mac(new Mac(mac)) {}
+ 
+-    XrlAtom(const char* name, const Mac& mac, bool fake_args = false) throw (BadName)
++    XrlAtom(const char* name, const Mac& mac, bool fake_args = false)
+ 	: _type(xrlatom_mac), _have_data(true), _own(true), _has_fake_args(fake_args),
+ 	  _mac(new Mac(mac)) {
+ 	set_name(name);
+@@ -280,7 +274,7 @@ public:
+ 	: _type(xrlatom_text), _have_data(true), _own(true), _has_fake_args(false),
+ 	  _text(new string(txt)) {}
+ 
+-    XrlAtom(const char* name, const string& txt, bool fake_args = false) throw (BadName)
++    XrlAtom(const char* name, const string& txt, bool fake_args = false)
+ 	: _type(xrlatom_text), _have_data(true), _own(true), _has_fake_args(fake_args),
+ 	  _text(new string(txt)) {
+ 	set_name(name);
+@@ -291,7 +285,7 @@ public:
+ 	: _type(xrlatom_list), _have_data(true), _own(true), _has_fake_args(false),
+ 	_list(new XrlAtomList(l)) {}
+ 
+-    XrlAtom(const char* name, const XrlAtomList& l, bool fake_args = false) throw (BadName)
++    XrlAtom(const char* name, const XrlAtomList& l, bool fake_args = false)
+ 	: _type(xrlatom_list), _have_data(true), _own(true), _has_fake_args(fake_args),
+ 	_list(new XrlAtomList(l)) {
+ 	set_name(name);
+@@ -322,7 +316,7 @@ public:
+     explicit XrlAtom(const int64_t& value)
+ 	: _type(xrlatom_int64), _have_data(true), _own(true), _has_fake_args(false), _i64val(value) {}
+ 
+-    XrlAtom(const char* name, int64_t value, bool fake_args = false) throw (BadName)
++    XrlAtom(const char* name, int64_t value, bool fake_args = false)
+ 	: _type(xrlatom_int64), _have_data(true), _own(true), _has_fake_args(fake_args), _i64val(value) {
+ 	set_name(name);
+     }
+@@ -331,7 +325,7 @@ public:
+     explicit XrlAtom(const uint64_t& value)
+ 	: _type(xrlatom_uint64), _have_data(true), _own(true), _has_fake_args(false), _u64val(value) {}
+ 
+-    XrlAtom(const char* name, uint64_t value, bool fake_args = false) throw (BadName)
++    XrlAtom(const char* name, uint64_t value, bool fake_args = false)
+ 	: _type(xrlatom_uint64), _have_data(true), _own(true), _has_fake_args(fake_args), _u64val(value) {
+ 	set_name(name);
+     }
+@@ -341,7 +335,7 @@ public:
+     explicit XrlAtom(const fp64_t& value)
+ 	: _type(xrlatom_fp64), _have_data(true), _own(true), _has_fake_args(false), _fp64val(value) {}
+ 
+-    XrlAtom(const char* name, fp64_t value, bool fake_args = false) throw (BadName)
++    XrlAtom(const char* name, fp64_t value, bool fake_args = false)
+ 	: _type(xrlatom_fp64), _have_data(true), _own(true), _has_fake_args(fake_args), _fp64val(value) {
+ 	set_name(name);
+     }
+@@ -361,7 +355,7 @@ public:
+ 
+     // Accessor operations
+     const string& name() const { return _atom_name; }
+-    void set_name(const string& n) throw (BadName) { set_name (n.c_str()); }
++    void set_name(const string& n) { set_name (n.c_str()); }
+ 
+     string str() const;
+     const char* type_name() const;
+@@ -453,7 +447,7 @@ private:
+     void type_and_data_okay(const XrlAtomType& t) const
+ 	throw (NoData, WrongType);
+ 
+-    void set_name(const char *n) throw (BadName);
++    void set_name(const char *n);
+     static XrlAtomType resolve_type_c_str(const char*);
+     ssize_t data_from_c_str(const char* c_str);
+ 
+@@ -471,8 +465,7 @@ private:
+     size_t pack_uint64(uint8_t* buffer) const;
+     size_t pack_fp64(uint8_t* buffer) const;
+ 
+-    size_t unpack_name(const uint8_t* buffer, size_t buffer_bytes)
+-	throw (BadName);
++    size_t unpack_name(const uint8_t* buffer, size_t buffer_bytes);
+     size_t unpack_boolean(const uint8_t* buffer);
+     size_t unpack_uint32(const uint8_t* buffer);
+     size_t unpack_ipv4(const uint8_t* buffer);
+-- 
+2.7.5
+

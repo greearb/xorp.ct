@@ -1,0 +1,4466 @@
+From 9cddf6f6d8c956b43cfad34e8d203278fb660c7b Mon Sep 17 00:00:00 2001
+From: Ben Greear <greearb@candelatech.com>
+Date: Wed, 13 Sep 2017 14:28:56 -0700
+Subject: [PATCH 23/33] Remove exceptions from olsr.
+
+---
+ xorp/contrib/olsr/exceptions.hh     | 163 -------------
+ xorp/contrib/olsr/external.cc       | 169 +++++++-------
+ xorp/contrib/olsr/external.hh       |  34 +--
+ xorp/contrib/olsr/face_manager.cc   |  96 ++++----
+ xorp/contrib/olsr/face_manager.hh   |  13 +-
+ xorp/contrib/olsr/message.cc        | 239 ++++++++++---------
+ xorp/contrib/olsr/message.hh        |  67 ++----
+ xorp/contrib/olsr/neighbor.cc       |  36 +--
+ xorp/contrib/olsr/neighborhood.cc   | 455 ++++++++++++++++++------------------
+ xorp/contrib/olsr/neighborhood.hh   |  88 ++-----
+ xorp/contrib/olsr/olsr.cc           |  51 ++--
+ xorp/contrib/olsr/olsr.hh           |  10 +-
+ xorp/contrib/olsr/olsr_types.hh     |   1 -
+ xorp/contrib/olsr/test_simulator.cc |  92 +++-----
+ xorp/contrib/olsr/topology.cc       | 202 ++++++++--------
+ xorp/contrib/olsr/topology.hh       |  59 ++---
+ xorp/contrib/olsr/xrl_target.cc     | 198 +++++++---------
+ xorp/libxorp/ipv4.cc                |  15 +-
+ xorp/libxorp/ipv4.hh                |  11 +-
+ xorp/libxorp/ipv6.cc                |  11 +-
+ xorp/libxorp/ipv6.hh                |   7 +-
+ 21 files changed, 836 insertions(+), 1181 deletions(-)
+ delete mode 100644 xorp/contrib/olsr/exceptions.hh
+
+diff --git a/xorp/contrib/olsr/exceptions.hh b/xorp/contrib/olsr/exceptions.hh
+deleted file mode 100644
+index fb4e883..0000000
+--- a/xorp/contrib/olsr/exceptions.hh
++++ /dev/null
+@@ -1,163 +0,0 @@
+-// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+-// vim:set sts=4 ts=8 sw=4:
+-
+-// Copyright (c) 2001-2009 XORP, Inc.
+-//
+-// This program is free software; you can redistribute it and/or modify
+-// it under the terms of the GNU General Public License, Version 2, June
+-// 1991 as published by the Free Software Foundation. Redistribution
+-// and/or modification of this program under the terms of any other
+-// version of the GNU General Public License is not permitted.
+-// 
+-// This program is distributed in the hope that it will be useful, but
+-// WITHOUT ANY WARRANTY; without even the implied warranty of
+-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
+-// see the GNU General Public License, Version 2, a copy of which can be
+-// found in the XORP LICENSE.gpl file.
+-// 
+-// XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+-// http://xorp.net
+-
+-// $XORP: xorp/contrib/olsr/exceptions.hh,v 1.3 2008/10/02 21:56:34 bms Exp $
+-
+-#ifndef __OLSR_EXCEPTIONS_HH__
+-#define __OLSR_EXCEPTIONS_HH__
+-
+-/*
+- * @short The exception thrown when an operation on an external
+- *        route fails.
+- */
+-class BadExternalRoute : public XorpReasonedException {
+-public:
+-    BadExternalRoute(const char* file, size_t line, const string& init_why = "")
+-     : XorpReasonedException("OlsrBadExternalRoute", file, line, init_why) {}
+-};
+-
+-/**
+- * @short The exception thrown when an operation on an OLSR
+- *        interface fails.
+- */
+-class BadFace : public XorpReasonedException {
+-public:
+-    BadFace(const char* file, size_t line, const string& init_why = "")
+-     : XorpReasonedException("OlsrBadFace", file, line, init_why) {}
+-};
+-
+-/**
+- * @short The exception thrown when an operation on a link code fails.
+- *
+- * Usually this means the fields provided were invalid.
+- */
+-class BadLinkCode : public XorpReasonedException {
+-public:
+-    BadLinkCode(const char* file, size_t line, const string& init_why = "")
+-     : XorpReasonedException("OlsrBadLinkCode", file, line, init_why) {}
+-};
+-
+-/**
+- * @short The exception thrown when an operation on a logical link fails.
+- */
+-class BadLogicalLink : public XorpReasonedException {
+-public:
+-    BadLogicalLink(const char* file, size_t line, const string& init_why = "")
+-     : XorpReasonedException("OlsrBadLogicalLink", file, line, init_why) {}
+-};
+-
+-/**
+- * @short The exception thrown when no suitable link to a one-hop
+- *        neighbor exists.
+- */
+-class BadLinkCoverage : public XorpReasonedException {
+-public:
+-    BadLinkCoverage(const char* file, size_t line, const string& init_why = "")
+-     : XorpReasonedException("OlsrBadLinkCoverage", file, line, init_why) {}
+-};
+-
+-/**
+- * @short The exception thrown when an operation on a MID entry fails.
+- */
+-class BadMidEntry : public XorpReasonedException {
+-public:
+-    BadMidEntry(const char* file, size_t line, const string& init_why = "")
+-     : XorpReasonedException("OlsrBadMidEntry", file, line, init_why) {}
+-};
+-
+-/**
+- * @short The exception thrown when an operation on a one-hop
+- *        neighbor fails.
+- */
+-class BadNeighbor : public XorpReasonedException {
+-public:
+-    BadNeighbor(const char* file, size_t line, const string& init_why = "")
+-     : XorpReasonedException("OlsrBadNeighbor", file, line, init_why) {}
+-};
+-
+-/**
+- * @short The exception thrown when an operation on a topology control
+- *        entry fails.
+- */
+-class BadTopologyEntry : public XorpReasonedException {
+-public:
+-    BadTopologyEntry(const char* file, size_t line,
+-		      const string& init_why = "")
+-     : XorpReasonedException("OlsrBadTopologyEntry", file, line, init_why) {}
+-};
+-
+-/**
+- * @short The exception thrown when no suitable link to a two-hop
+- *        neighbor exists.
+- *
+- * In particular it may be thrown during MPR calculation, if an
+- * inconsistency is detected in the set of MPRs covering a two-hop neighbor
+- * which was calculated to be reachable.
+- */
+-class BadTwoHopCoverage : public XorpReasonedException {
+-public:
+-    BadTwoHopCoverage(const char* file, size_t line,
+-			  const string& init_why = "")
+-     : XorpReasonedException("OlsrBadTwoHopCoverage", file, line, init_why) {}
+-};
+-
+-/**
+- * @short The exception thrown when an operation on a link in the
+- *        two-hop neighborhood fails.
+- */
+-class BadTwoHopLink : public XorpReasonedException {
+-public:
+-    BadTwoHopLink(const char* file, size_t line, const string& init_why = "")
+-     : XorpReasonedException("OlsrBadTwoHopLink", file, line, init_why) {}
+-};
+-
+-/**
+- * @short The exception thrown when an operation on a two-hop
+- *        neighbor fails.
+- */
+-class BadTwoHopNode : public XorpReasonedException {
+-public:
+-    BadTwoHopNode(const char* file, size_t line, const string& init_why = "")
+-     : XorpReasonedException("OlsrBadTwoHopNode", file, line, init_why) {}
+-};
+-
+-/**
+- * @short The exception thrown when the decoding or encoding of
+- *        a Message fails.
+- */
+-class InvalidMessage : public XorpReasonedException {
+-public:
+-    InvalidMessage(const char* file, size_t line, const string& init_why = "")
+-	: XorpReasonedException("OlsrInvalidMessage", file, line, init_why) {}
+-};
+-
+-/**
+- * @short The exception thrown when the decoding or encoding of
+- * a LinkTuple inside a HelloMessage fails.
+- */
+-class InvalidLinkTuple : public XorpReasonedException {
+-public:
+-    InvalidLinkTuple(const char* file, size_t line,
+-		     const string& init_why = "")
+-	: XorpReasonedException("OlsrInvalidLinkTuple", file, line, init_why)
+-    {}
+-};
+-
+-#endif // __OLSR_EXCEPTIONS_HH__
+diff --git a/xorp/contrib/olsr/external.cc b/xorp/contrib/olsr/external.cc
+index 26f1974..db0235b 100644
+--- a/xorp/contrib/olsr/external.cc
++++ b/xorp/contrib/olsr/external.cc
+@@ -48,31 +48,31 @@ bool
+ ExternalRouteOrderPred::operator()(const OlsrTypes::ExternalID lhid,
+ 				   const OlsrTypes::ExternalID rhid)
+ {
+-    try {
+-	// TODO Propagate exceptions if IDs cannot be retrieved,
+-	// rather than just catching them.
+-	const ExternalRoute* lhp = _ers.get_hna_route_in_by_id(lhid);
+-	const ExternalRoute* rhp = _ers.get_hna_route_in_by_id(rhid);
+-
+-	// Invariant: Both ExternalRoutes SHOULD have the same origination
+-	// status, i.e. learned routes should only be compared with other
+-	// learned routes; originated routes with originated routes.
+-	XLOG_ASSERT(lhp->is_self_originated() == rhp->is_self_originated());
+-
+-	if (lhp->dest() == rhp->dest()) {
+-	    // Invariant: Self originated routes should have a distance of 0.
+-	    // Learned routes should have a non-zero distance.
+-	    XLOG_ASSERT(lhp->is_self_originated() ?
+-			lhp->distance() == 0 && rhp->distance() == 0 :
+-			lhp->distance() != 0 && rhp->distance() != 0);
+-
+-	    return lhp->distance() < rhp->distance();
+-	}
+-	return lhp->dest() < rhp->dest(); // Collation order on IPvXNet.
++    string err;
++
++    // TODO Propagate exceptions if IDs cannot be retrieved,
++    // rather than just catching them.
++    const ExternalRoute* lhp = _ers.get_hna_route_in_by_id(lhid, err);
++    const ExternalRoute* rhp = _ers.get_hna_route_in_by_id(rhid, err);
++    if (!(lhp && rhp)) {
++	return false;
++    }
++
++    // Invariant: Both ExternalRoutes SHOULD have the same origination
++    // status, i.e. learned routes should only be compared with other
++    // learned routes; originated routes with originated routes.
++    XLOG_ASSERT(lhp->is_self_originated() == rhp->is_self_originated());
+ 
+-    } catch (...) {}
++    if (lhp->dest() == rhp->dest()) {
++	// Invariant: Self originated routes should have a distance of 0.
++	// Learned routes should have a non-zero distance.
++	XLOG_ASSERT(lhp->is_self_originated() ?
++		    lhp->distance() == 0 && rhp->distance() == 0 :
++		    lhp->distance() != 0 && rhp->distance() != 0);
+ 
+-    return false;
++	return lhp->distance() < rhp->distance();
++    }
++    return lhp->dest() < rhp->dest(); // Collation order on IPvXNet.
+ }
+ 
+ /*
+@@ -138,8 +138,7 @@ ExternalRoutes::update_hna_route_in(const IPv4Net& dest,
+ 				    const IPv4& lasthop,
+ 				    const uint16_t distance,
+ 				    const TimeVal& expiry_time,
+-				    bool& is_created)
+-    throw(BadExternalRoute)
++				    bool& is_created, string& err)
+ {
+     debug_msg("Dest %s Lasthop %s Distance %u ExpiryTime %s\n",
+ 	      cstring(dest),
+@@ -185,7 +184,7 @@ ExternalRoutes::update_hna_route_in(const IPv4Net& dest,
+ 
+     } else {
+ 	// Create a new HNA entry.
+-	erid = add_hna_route_in(dest, lasthop, distance, expiry_time);
++	erid = add_hna_route_in(dest, lasthop, distance, expiry_time, err);
+     }
+ 
+     is_created = !is_found;
+@@ -197,8 +196,7 @@ OlsrTypes::ExternalID
+ ExternalRoutes::add_hna_route_in(const IPv4Net& dest,
+ 			         const IPv4& lasthop,
+ 			         const uint16_t distance,
+-			         const TimeVal& expiry_time)
+-    throw(BadExternalRoute)
++			         const TimeVal& expiry_time, string& err)
+ {
+     debug_msg("Dest %s Lasthop %s Distance %u ExpiryTime %s\n",
+ 	      cstring(dest),
+@@ -209,9 +207,9 @@ ExternalRoutes::add_hna_route_in(const IPv4Net& dest,
+     OlsrTypes::ExternalID erid = _next_erid++;
+ 
+     if (_routes_in.find(erid) != _routes_in.end()) {
+-	xorp_throw(BadExternalRoute,
+-		   c_format("Mapping for ExternalID %u already exists",
+-		   XORP_UINT_CAST(erid)));
++	err += c_format("Mapping for ExternalID %u already exists",
++			XORP_UINT_CAST(erid));
++	return OlsrTypes::UNUSED_EXTERNAL_ID;
+     }
+ 
+     _routes_in[erid] = new ExternalRoute(*this, _eventloop, erid,
+@@ -279,8 +277,7 @@ ExternalRoutes::clear_hna_routes_in()
+ 
+ const ExternalRoute*
+ ExternalRoutes::get_hna_route_in(const IPv4Net& dest,
+-				 const IPv4& lasthop)
+-    throw(BadExternalRoute)
++				 const IPv4& lasthop, string& err)
+ {
+     pair<ExternalDestInMap::iterator,
+ 	 ExternalDestInMap::iterator> rd =
+@@ -299,10 +296,10 @@ ExternalRoutes::get_hna_route_in(const IPv4Net& dest,
+     }
+ 
+     if (! is_found) {
+-	xorp_throw(BadExternalRoute,
+-		   c_format("Mapping for %s:%s does not exist",
+-			    cstring(dest),
+-			    cstring(lasthop)));
++	err += c_format("Mapping for %s:%s does not exist",
++			cstring(dest),
++			cstring(lasthop));
++	return NULL;
+     }
+ 
+     return er;
+@@ -310,23 +307,23 @@ ExternalRoutes::get_hna_route_in(const IPv4Net& dest,
+ 
+ OlsrTypes::ExternalID
+ ExternalRoutes::get_hna_route_in_id(const IPv4Net& dest,
+-				    const IPv4& lasthop)
+-    throw(BadExternalRoute)
++				    const IPv4& lasthop, string& err)
+ {
+-    const ExternalRoute* er = get_hna_route_in(dest, lasthop);
++    const ExternalRoute* er = get_hna_route_in(dest, lasthop, err);
++    if (!er)
++	return OlsrTypes::UNUSED_EXTERNAL_ID;
+ 
+     return er->id();
+ }
+ 
+ const ExternalRoute*
+-ExternalRoutes::get_hna_route_in_by_id(const OlsrTypes::ExternalID erid)
+-    throw(BadExternalRoute)
++ExternalRoutes::get_hna_route_in_by_id(const OlsrTypes::ExternalID erid, string& err)
+ {
+     ExternalRouteMap::iterator ii = _routes_in.find(erid);
+     if (ii ==  _routes_in.end()) {
+-	xorp_throw(BadExternalRoute,
+-		   c_format("Mapping for %u does not exist",
+-			    XORP_UINT_CAST(erid)));
++	err += c_format("Mapping for %u does not exist",
++			XORP_UINT_CAST(erid));
++	return NULL;
+     }
+ 
+     return (*ii).second;
+@@ -379,8 +376,7 @@ ExternalRoutes::get_hna_route_in_list(list<OlsrTypes::ExternalID>& hnalist)
+  */
+ 
+ bool
+-ExternalRoutes::originate_hna_route_out(const IPv4Net& dest)
+-    throw(BadExternalRoute)
++ExternalRoutes::originate_hna_route_out(const IPv4Net& dest, string& err)
+ {
+     debug_msg("MyMainAddr %s Dest %s\n",
+ 	      cstring(_fm.get_main_addr()),
+@@ -396,9 +392,9 @@ ExternalRoutes::originate_hna_route_out(const IPv4Net& dest)
+     OlsrTypes::ExternalID erid = _next_erid++;
+ 
+     if (_routes_out.find(erid) != _routes_out.end()) {
+-	xorp_throw(BadExternalRoute,
+-		   c_format("Mapping for ExternalID %u already exists",
+-		   XORP_UINT_CAST(erid)));
++	err += c_format("Mapping for ExternalID %u already exists",
++			XORP_UINT_CAST(erid));
++	return false;
+     }
+ 
+     _routes_out[erid] = new ExternalRoute(*this, _eventloop, erid, dest);
+@@ -416,9 +412,8 @@ ExternalRoutes::originate_hna_route_out(const IPv4Net& dest)
+     return true;
+ }
+ 
+-void
+-ExternalRoutes::withdraw_hna_route_out(const IPv4Net& dest)
+-    throw(BadExternalRoute)
++bool
++ExternalRoutes::withdraw_hna_route_out(const IPv4Net& dest, string& err)
+ {
+     debug_msg("MyMainAddr %s Dest %s\n",
+ 	      cstring(_fm.get_main_addr()),
+@@ -426,27 +421,26 @@ ExternalRoutes::withdraw_hna_route_out(const IPv4Net& dest)
+ 
+     ExternalDestOutMap::iterator ii = _routes_out_by_dest.find(dest);
+     if (ii == _routes_out_by_dest.end()) {
+-	xorp_throw(BadExternalRoute,
+-		   c_format("%s is not originated by this node",
+-			cstring(dest)));
++	err += c_format("%s is not originated by this node",
++			cstring(dest));
++	return false;
+     }
+ 
+     ExternalRouteMap::iterator jj = _routes_out.find((*ii).second);
+     if (jj == _routes_out.end()) {
+ 	XLOG_UNREACHABLE();
+-	xorp_throw(BadExternalRoute,
+-		   c_format("Mapping for %s does not exist",
+-			cstring(dest)));
++	err += c_format("Mapping for %s does not exist",
++			cstring(dest));
++	return false;
+     }
+ 
+     ExternalRoute* er = (*jj).second;
+-    XLOG_ASSERT(er != 0);
+ 
+     if (! er->is_self_originated()) {
+ 	XLOG_UNREACHABLE();
+-	xorp_throw(BadExternalRoute,
+-		   c_format("%s is not a self-originated prefix",
+-			cstring(dest)));
++	err += c_format("%s is not a self-originated prefix",
++			cstring(dest));
++	return false;
+     }
+ 
+     _routes_out.erase(jj);
+@@ -464,6 +458,7 @@ ExternalRoutes::withdraw_hna_route_out(const IPv4Net& dest)
+ 		  cstring(_fm.get_main_addr()));
+ 	stop_hna_send_timer();
+     }
++    return true;
+ }
+ 
+ void
+@@ -478,14 +473,13 @@ ExternalRoutes::clear_hna_routes_out()
+ }
+ 
+ OlsrTypes::ExternalID
+-ExternalRoutes::get_hna_route_out_id(const IPv4Net& dest)
+-    throw(BadExternalRoute)
++ExternalRoutes::get_hna_route_out_id(const IPv4Net& dest, string& err)
+ {
+     ExternalDestOutMap::const_iterator ii = _routes_out_by_dest.find(dest);
+     if (ii == _routes_out_by_dest.end()) {
+-	xorp_throw(BadExternalRoute,
+-		   c_format("Mapping for %s does not exist",
+-			    cstring(dest)));
++	err += c_format("Mapping for %s does not exist",
++			    cstring(dest));
++	return OlsrTypes::UNUSED_EXTERNAL_ID;
+     }
+ 
+     return (*ii).second;
+@@ -498,8 +492,6 @@ ExternalRoutes::get_hna_route_out_id(const IPv4Net& dest)
+ void
+ ExternalRoutes::push_external_routes()
+ {
+-    XLOG_ASSERT(_rm != 0);
+-
+     size_t pushed_route_count = 0;
+ 
+     // For each destination (key) in the HNA "routes in" container, pick
+@@ -642,24 +634,25 @@ ExternalRoutes::event_receive_hna(
+     // 12.5, 2: For each address/mask pair in the message,
+     // create or update an existing entry.
+     size_t updated_hna_count = 0;
+-    try {
+-	bool is_hna_created = false;
+-
+-	// Account for hop count not being incremented before forwarding.
+-	const vector<IPv4Net>& nets = hna->networks();
+-	const uint16_t distance = hna->hops() + 1;
+-
+-	vector<IPv4Net>::const_iterator ii;
+-	for (ii = nets.begin(); ii != nets.end(); ii++) {
+-	    update_hna_route_in((*ii), hna->origin(), distance,
+-				hna->expiry_time() + now,
+-				is_hna_created);
+-	    updated_hna_count++;
+-	    UNUSED(is_hna_created);
+-	}
+-    } catch (...) {
+-	// If an exception is thrown whilst processing the HNA
+-	// message, disregard the rest of the message.
++
++    bool is_hna_created = false;
++
++    // Account for hop count not being incremented before forwarding.
++    const vector<IPv4Net>& nets = hna->networks();
++    const uint16_t distance = hna->hops() + 1;
++
++    vector<IPv4Net>::const_iterator ii;
++    string err;
++    for (ii = nets.begin(); ii != nets.end(); ii++) {
++	update_hna_route_in((*ii), hna->origin(), distance,
++			    hna->expiry_time() + now,
++			    is_hna_created, err);
++	updated_hna_count++;
++	UNUSED(is_hna_created);
++    }
++
++    if (err.size()) {
++	XLOG_ERROR("%s", err.c_str());
+     }
+ 
+     if (updated_hna_count > 0)
+diff --git a/xorp/contrib/olsr/external.hh b/xorp/contrib/olsr/external.hh
+index 62ea5a9..01333bb 100644
+--- a/xorp/contrib/olsr/external.hh
++++ b/xorp/contrib/olsr/external.hh
+@@ -18,7 +18,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/contrib/olsr/external.hh,v 1.3 2008/10/02 21:56:34 bms Exp $
+ 
+ #ifndef __OLSR_EXTERNAL_HH__
+ #define __OLSR_EXTERNAL_HH__
+@@ -120,14 +119,12 @@ class ExternalRoutes {
+      *                   iff a new entry was created by this method.
+      *
+      * @return The ID of the created or updated route entry.
+-     * @throw BadExternalRoute if the route could not be created.
+      */
+     OlsrTypes::ExternalID update_hna_route_in(const IPv4Net& dest,
+ 					      const IPv4& lasthop,
+ 					      const uint16_t distance,
+ 					      const TimeVal& expiry_time,
+-					      bool& is_created)
+-	throw(BadExternalRoute);
++					      bool& is_created, string& err);
+ 
+     /**
+      * Create a route entry learned from HNA.
+@@ -139,13 +136,11 @@ class ExternalRoutes {
+      * @param expiry_time The time at which the entry will expire.
+      *
+      * @return The ID of the created route entry.
+-     * @throw BadExternalRoute if the route could not be created.
+      */
+     OlsrTypes::ExternalID add_hna_route_in(const IPv4Net& dest,
+ 					   const IPv4& lasthop,
+ 					   const uint16_t distance,
+-					   const TimeVal& expiry_time)
+-	throw(BadExternalRoute);
++					   const TimeVal& expiry_time, string& err);
+ 
+     /**
+      * Delete an HNA learned route entry given its ID.
+@@ -167,11 +162,9 @@ class ExternalRoutes {
+      * @param dest the destination network prefix.
+      * @param lasthop the origin.
+      * @return pointer to the ExternalRoute.
+-     * @throw BadExternalRoute if the route could not be found.
+      */
+     const ExternalRoute* get_hna_route_in(const IPv4Net& dest,
+-					  const IPv4& lasthop)
+-	throw(BadExternalRoute);
++					  const IPv4& lasthop, string& err);
+ 
+     /**
+      * Look up the ID of a learned HNA entry.
+@@ -181,22 +174,18 @@ class ExternalRoutes {
+      * @param lasthop The last-hop advertised for the destination.
+      *
+      * @return the ID of the learned external route.
+-     * @throw BadExternalRoute if the route could not be found.
+      */
+     OlsrTypes::ExternalID get_hna_route_in_id(const IPv4Net& dest,
+-					      const IPv4& lasthop)
+-	throw(BadExternalRoute);
++					      const IPv4& lasthop, string& err);
+ 
+     /**
+      * Look up a learned HNA route entry by its ID.
+      *
+      * @param erid the ID of the learned ExternalRoute.
+      * @return the pointer to the learned ExternalRoute.
+-     * @throw BadExternalRoute if the route could not be found.
+      */
+     const ExternalRoute* get_hna_route_in_by_id(
+-	const OlsrTypes::ExternalID erid)
+-	throw(BadExternalRoute);
++	const OlsrTypes::ExternalID erid, string& err);
+ 
+     /**
+      * Calculate the number of unique OLSR nodes with HNA entries in this
+@@ -243,20 +232,15 @@ class ExternalRoutes {
+      *
+      * @param dest the network for which to originate HNA broadcasts.
+      * @return true if the route was originated successfully.
+-     * @throw BadExternalRoute if the route could not be originated.
+      */
+-    bool originate_hna_route_out(const IPv4Net& dest)
+-	throw(BadExternalRoute);
++    bool originate_hna_route_out(const IPv4Net& dest, string& err);
+ 
+     /**
+      * Withdraw an HNA route.
+      *
+      * @param dest the network to withdraw from HNA broadcasts.
+-     * @throw BadExternalRoute if no route to the given destination
+-     *                         could be found.
+      */
+-    void withdraw_hna_route_out(const IPv4Net& dest)
+-	throw(BadExternalRoute);
++    bool withdraw_hna_route_out(const IPv4Net& dest, string& err);
+ 
+     /**
+      * Clear the advertised HNA routes.
+@@ -269,10 +253,8 @@ class ExternalRoutes {
+      *
+      * @param dest The destination address.
+      * @return the ID of the originated external route.
+-     * @throw BadExternalRoute if the route could not be found.
+      */
+-    OlsrTypes::ExternalID get_hna_route_out_id(const IPv4Net& dest)
+-	throw(BadExternalRoute);
++    OlsrTypes::ExternalID get_hna_route_out_id(const IPv4Net& dest, string& err);
+ 
+     //
+     // RouteManager interaction.
+diff --git a/xorp/contrib/olsr/face_manager.cc b/xorp/contrib/olsr/face_manager.cc
+index d40ed9f..51b1451 100644
+--- a/xorp/contrib/olsr/face_manager.cc
++++ b/xorp/contrib/olsr/face_manager.cc
+@@ -21,7 +21,6 @@
+ 
+ 
+ #include "olsr_module.h"
+-
+ #include "libxorp/xorp.h"
+ #include "libxorp/debug.h"
+ #include "libxorp/xlog.h"
+@@ -74,15 +73,14 @@ FaceManager::~FaceManager()
+ }
+ 
+ const Face*
+-FaceManager::get_face_by_id(const OlsrTypes::FaceID faceid) const
+-    throw(BadFace)
++FaceManager::get_face_by_id(const OlsrTypes::FaceID faceid, string& err) const
+ {
+     map<OlsrTypes::FaceID, Face*>::const_iterator ii = _faces.find(faceid);
+ 
+     if (ii == _faces.end()) {
+-	xorp_throw(BadFace,
+-		   c_format("Mapping for %u does not exist",
+-			    XORP_UINT_CAST(faceid)));
++	err += c_format("Mapping for %u does not exist",
++			    XORP_UINT_CAST(faceid));
++	return NULL;
+     }
+ 
+     return (*ii).second;
+@@ -155,19 +153,20 @@ FaceManager::clear_faces()
+ 
+ void
+ FaceManager::receive(const string& interface, const string& vif,
+-    const IPv4 & dst, const uint16_t & dport,
+-    const IPv4 & src, const uint16_t & sport,
+-    uint8_t* data, const uint32_t & len)
++		     const IPv4 & dst, const uint16_t & dport,
++		     const IPv4 & src, const uint16_t & sport,
++		     uint8_t* data, const uint32_t & len)
+ {
+     debug_msg("If %s Vif %s Dst %s Dport %u Src %s Sport %u Len %u\n",
+ 	interface.c_str(), vif.c_str(),
+ 	cstring(dst), dport, cstring(src), sport, len);
+ 
+     // We must find a link which matches, to accept the packet.
++    string err;
+     OlsrTypes::FaceID faceid;
+-    try {
+-	faceid = get_faceid(interface, vif);
+-    } catch(...) {
++    faceid = get_faceid(interface, vif, err);
++
++    if (faceid == OlsrTypes::UNUSED_FACE_ID) {
+ 	// No Face listening on the given link.
+ 	return;
+     }
+@@ -198,15 +197,14 @@ FaceManager::receive(const string& interface, const string& vif,
+ #endif
+ 
+     Packet* pkt = new Packet(_md, faceid);
+-    try {
+-	pkt->decode(data, len);
+-    } catch (InvalidPacket& e) {
++    if (!pkt->decode(data, len, err)) {
+ 	_faces[faceid]->counters().incr_bad_packets();
+ 	debug_msg("Packet from %s:%u could not be decoded.\n",
+ 		  cstring(src), XORP_UINT_CAST(sport));
+ 	XLOG_TRACE(_olsr.trace()._input_errors,
+ 		   "Packet from %s:%u could not be decoded.",
+ 		   cstring(src), XORP_UINT_CAST(sport));
++	delete pkt;
+ 	return;
+     }
+ 
+@@ -240,15 +238,12 @@ FaceManager::receive(const string& interface, const string& vif,
+ 	// Walk the list of message handler functions in reverse,
+ 	// looking for one which is willing to consume this message.
+ 	vector<MessageReceiveCB>::reverse_iterator jj;
++
+ 	for (jj = _handlers.rbegin(); jj != _handlers.rend(); jj++) {
+-	    try {
+-		is_consumed = (*jj)->dispatch(msg, src, face->local_addr());
+-		if (is_consumed)
+-		    break;
+-	    } catch (InvalidMessage& im) {
+-		_faces[faceid]->counters().incr_bad_messages();
+-		XLOG_ERROR("%s", cstring(im));
+-	    }
++
++	    is_consumed = (*jj)->dispatch(msg, src, face->local_addr());
++	    if (is_consumed)
++		break;
+ 	}
+ 
+ 	// XXX This is here because we didn't implement
+@@ -282,15 +277,14 @@ FaceManager::transmit(const string& interface, const string& vif,
+ }
+ 
+ OlsrTypes::FaceID
+-FaceManager::create_face(const string& interface, const string& vif)
+-    throw(BadFace)
++FaceManager::create_face(const string& interface, const string& vif, string& err)
+ {
+     debug_msg("Interface %s Vif %s\n", interface.c_str(), vif.c_str());
+     string concat = interface + "/" + vif;
+ 
+     if (_faceid_map.find(concat) != _faceid_map.end()) {
+-	xorp_throw(BadFace,
+-		   c_format("Mapping for %s already exists", concat.c_str()));
++	err += c_format("Mapping for %s already exists", concat.c_str());
++	return OlsrTypes::UNUSED_FACE_ID;
+     }
+ 
+     OlsrTypes::FaceID faceid = _next_faceid++;
+@@ -321,13 +315,8 @@ FaceManager::activate_face(const string& interface, const string& vif)
+ {
+     debug_msg("Interface %s Vif %s\n", interface.c_str(), vif.c_str());
+ 
+-    try {
+-	get_faceid(interface, vif);
+-    } catch(...) {
+-	return false;
+-    }
+-
+-    return true;
++    string err;
++    return (get_faceid(interface, vif, err) != OlsrTypes::UNUSED_FACE_ID);
+ }
+ 
+ bool
+@@ -419,11 +408,10 @@ FaceManager::vif_status_change(const string& interface,
+ 
+     OlsrTypes::FaceID faceid;
+ 
+-    try {
+-	faceid = get_faceid(interface, vif);
+-    } catch(...) {
++    string err;
++    faceid = get_faceid(interface, vif, err);
++    if (faceid == OlsrTypes::UNUSED_FACE_ID)
+ 	return;
+-    }
+ 
+     if (_faces.find(faceid) == _faces.end()) {
+ 	XLOG_ERROR("Unknown FaceID %u", faceid);
+@@ -431,8 +419,6 @@ FaceManager::vif_status_change(const string& interface,
+     }
+ 
+     // TODO: Process link status in Face.
+-
+-    return;
+ }
+ 
+ void
+@@ -447,11 +433,10 @@ FaceManager::address_status_change(const string& interface,
+ 
+     OlsrTypes::FaceID faceid;
+ 
+-    try {
+-	faceid = get_faceid(interface, vif);
+-    } catch(...) {
++    string err;
++    faceid = get_faceid(interface, vif, err);
++    if (faceid == OlsrTypes::UNUSED_FACE_ID)
+ 	return;
+-    }
+ 
+     if (_faces.find(faceid) == _faces.end()) {
+ 	XLOG_ERROR("Unknown FaceID %u", faceid);
+@@ -471,15 +456,14 @@ FaceManager::address_status_change(const string& interface,
+ }
+ 
+ OlsrTypes::FaceID
+-FaceManager::get_faceid(const string& interface, const string& vif)
+-    throw(BadFace)
++FaceManager::get_faceid(const string& interface, const string& vif, string& err)
+ {
+     debug_msg("Interface %s Vif %s\n", interface.c_str(), vif.c_str());
+     string concat = interface + "/" + vif;
+ 
+     if (_faceid_map.find(concat) == _faceid_map.end()) {
+-	xorp_throw(BadFace,
+-		   c_format("No mapping for %s exists", concat.c_str()));
++	err += c_format("No mapping for %s exists", concat.c_str());
++	return OlsrTypes::UNUSED_FACE_ID;
+     }
+ 
+     return _faceid_map[concat];
+@@ -530,16 +514,18 @@ FaceManager::get_face_stats(const string& ifname,
+ 			    const string& vifname,
+ 			    FaceCounters& stats)
+ {
+-    try {
+-	OlsrTypes::FaceID faceid = get_faceid(ifname, vifname);
++    string err;
++    OlsrTypes::FaceID faceid = get_faceid(ifname, vifname, err);
++    if (faceid == OlsrTypes::UNUSED_FACE_ID)
++	return false;
+ 
+-	const Face* face = get_face_by_id(faceid);
+-	stats = face->counters();
++    const Face* face = get_face_by_id(faceid, err);
++    if (!face)
++	return false;
+ 
+-	return true;
+-    } catch (...) {}
++    stats = face->counters();
+ 
+-    return false;
++    return true;
+ }
+ 
+ bool
+diff --git a/xorp/contrib/olsr/face_manager.hh b/xorp/contrib/olsr/face_manager.hh
+index b3e408d..cfa0fad 100644
+--- a/xorp/contrib/olsr/face_manager.hh
++++ b/xorp/contrib/olsr/face_manager.hh
+@@ -18,7 +18,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/contrib/olsr/face_manager.hh,v 1.3 2008/10/02 21:56:34 bms Exp $
+ 
+ #ifndef __OLSR_FACE_MANAGER_HH__
+ #define __OLSR_FACE_MANAGER_HH__
+@@ -146,10 +145,8 @@ class FaceManager {
+      *
+      * @param faceid the face ID.
+      * @return pointer to the face.
+-     * @throw BadFace if the face ID cannot be found.
+      */
+-    const Face* get_face_by_id(const OlsrTypes::FaceID faceid) const
+-	throw(BadFace);
++    const Face* get_face_by_id(const OlsrTypes::FaceID faceid, string& err) const;
+ 
+     /**
+      * Fill out a list of all face IDs.
+@@ -250,10 +247,8 @@ class FaceManager {
+      * @param interface the name of the interface as known to the FEA.
+      * @param vif the name of the vif as known to the FEA.
+      * @return the ID of the new interface.
+-     * @throw BadFace if the interface could not be added.
+      */
+-    OlsrTypes::FaceID create_face(const string& interface, const string& vif)
+-	throw(BadFace);
++    OlsrTypes::FaceID create_face(const string& interface, const string& vif, string& err);
+ 
+     /**
+      * Clear the interface list.
+@@ -324,10 +319,8 @@ class FaceManager {
+      * @param interface the name of the interface to look up.
+      * @param vif the name of the vif to look up.
+      * @return the ID of the face.
+-     * @throw BadFace if the interface was not found.
+      */
+-    OlsrTypes::FaceID get_faceid(const string& interface, const string& vif)
+-	throw(BadFace);
++    OlsrTypes::FaceID get_faceid(const string& interface, const string& vif, string& err);
+ 
+     /**
+      * Get the FEA names of an interface, given its OLSR interface ID.
+diff --git a/xorp/contrib/olsr/message.cc b/xorp/contrib/olsr/message.cc
+index 2894e50..a33c511 100644
+--- a/xorp/contrib/olsr/message.cc
++++ b/xorp/contrib/olsr/message.cc
+@@ -30,13 +30,9 @@
+ #include "libxorp/ipv4net.hh"
+ #include "libxorp/ref_ptr.hh"
+ #include "libxorp/timeval.hh"
+-
+ #include "libproto/packet.hh"
+ 
+-
+-
+ #include "olsr_types.hh"
+-#include "exceptions.hh"
+ #include "message.hh"
+ 
+ // XXX: These defines don't conceptually belong here.
+@@ -116,17 +112,16 @@ HelloMessage::str() const
+ 
+ size_t
+ HelloMessage::decode_link_tuple(uint8_t* buf, size_t& len,
+-    size_t& skiplen, bool haslq)
+-    throw(InvalidLinkTuple)
++				size_t& skiplen, bool haslq, string& err)
+ {
+     size_t offset = 0;
+ 
+     // minimum size check
+     skiplen = len;
+     if (len < link_tuple_header_length()) {
+-	xorp_throw(InvalidLinkTuple,
+-	    c_format("Runt link tuple, buffer size is %u",
+-		     XORP_UINT_CAST(len)));
++	err += c_format("Runt link tuple, buffer size is %u",
++			XORP_UINT_CAST(len));
++	return 0;
+     }
+ 
+     uint8_t code = extract_8(&buf[offset]);	    // Link Code
+@@ -141,9 +136,8 @@ HelloMessage::decode_link_tuple(uint8_t* buf, size_t& len,
+ 
+     bool is_bad_link_code = false;
+     LinkCode linkcode;
+-    try {
+-	linkcode = code;
+-    } catch(BadLinkCode blc) {
++    linkcode = code;
++    if (!linkcode.is_valid()) {
+ 	debug_msg("caught bad link code exception\n");
+ 	is_bad_link_code = true;
+     }
+@@ -154,10 +148,10 @@ HelloMessage::decode_link_tuple(uint8_t* buf, size_t& len,
+     if (is_bad_link_code || link_tuple_len > len) {
+ 	if (link_tuple_len > len)
+ 	    skiplen = len;
+-	xorp_throw(InvalidLinkTuple,
+-	    c_format("Invalid link tuple, advertised size is %u, "
+-		     "buffer size is %u",
+-		     XORP_UINT_CAST(link_tuple_len), XORP_UINT_CAST(len)));
++	err += c_format("Invalid link tuple, advertised size is %u, "
++			"buffer size is %u",
++			XORP_UINT_CAST(link_tuple_len), XORP_UINT_CAST(len));
++	return 0;
+     }
+ 
+     size_t remaining = link_tuple_len - offset;
+@@ -225,18 +219,21 @@ LinkAddrInfo::copy_out(uint8_t* to_uint8) const
+ }
+ 
+ Message*
+-HelloMessage::decode(uint8_t* buf, size_t& len)
+-    throw(InvalidMessage)
++HelloMessage::decode(uint8_t* buf, size_t& len, string& err)
+ {
+     if (len < min_length()) {
+-	xorp_throw(InvalidMessage,
+-	    c_format("Runt HelloMessage, size is %u",
+-		    XORP_UINT_CAST(len)));
++	err += c_format("Runt HelloMessage, size is %u",
++			XORP_UINT_CAST(len));
++	return NULL;
+     }
+ 
+     HelloMessage* message = new HelloMessage();
+ 
+-    size_t offset = message->decode_common_header(buf, len);
++    size_t offset = message->decode_common_header(buf, len, err);
++    if (offset == 0) {
++	delete message;
++	return NULL;
++    }
+ 
+     offset += sizeof(uint16_t);	    // reserved (skip)
+ 
+@@ -251,12 +248,11 @@ HelloMessage::decode(uint8_t* buf, size_t& len)
+     size_t remaining = message->adv_message_length() - offset;
+     while (remaining > 0) {
+ 	size_t skiplen;
+-	try {
+-	    message->decode_link_tuple(&buf[offset], remaining, skiplen);
+-	} catch(InvalidLinkTuple ilt) {
+-	    debug_msg("%s\n", cstring(ilt));
++
++	if (!message->decode_link_tuple(&buf[offset], remaining, skiplen, false, err)) {
++	    debug_msg("%s\n", err.c_str());
+ 	    XLOG_WARNING("Invalid link info tuple at offset %u",
+-		    XORP_UINT_CAST(offset));
++			 XORP_UINT_CAST(offset));
+ 	}
+ 	offset += skiplen;
+ 	remaining -= skiplen;
+@@ -329,12 +325,15 @@ HelloMessage::encode(uint8_t* buf, size_t& len)
+ }
+ 
+ Message*
+-HnaMessage::decode(uint8_t* buf, size_t& len)
+-    throw(InvalidMessage)
++HnaMessage::decode(uint8_t* buf, size_t& len, string& err)
+ {
+     HnaMessage* message = new HnaMessage();
+ 
+-    size_t offset = message->decode_common_header(buf, len);
++    size_t offset = message->decode_common_header(buf, len, err);
++    if (offset == 0) {
++	delete message;
++	return NULL;
++    }
+     size_t remaining = message->adv_message_length() - offset;
+ 
+     while (remaining > 0) {
+@@ -342,23 +341,36 @@ HnaMessage::decode(uint8_t* buf, size_t& len)
+ 	    break;
+ 
+ 	IPv4 addr(&buf[offset]);
++	if (addr.invalid()) {
++	    delete message;
++	    return NULL;
++	}
+ 	offset += addr.addr_bytelen();
+ 	remaining -= addr.addr_bytelen();
+ 
+ 	IPv4 mask(&buf[offset]);
++	if (mask.invalid()) {
++	    delete message;
++	    return NULL;
++	}
+ 	offset += mask.addr_bytelen();
+ 	remaining -= mask.addr_bytelen();
+ 
+ 	uint32_t prefix_len = mask.mask_len();
+ 	addr.mask_by_prefix_len(prefix_len);
+-
+-	message->add_network(IPv4Net(addr, prefix_len));
++	IPv4Net n(addr, prefix_len);
++	if (n.invalid()) {
++	    delete message;
++	    return NULL;
++	}
++	message->add_network(n);
+     }
+ 
+     if (message->networks().empty()) {
+-	xorp_throw(InvalidMessage,
+-	    c_format("Runt HnaMessage, size is %u",
+-		    XORP_UINT_CAST(len)));
++	err += c_format("Runt HnaMessage, size is %u",
++			XORP_UINT_CAST(len));
++	delete message;
++	return NULL;
+     }
+ 
+     return (message);
+@@ -401,23 +413,21 @@ Message::common_str() const
+ }
+ 
+ size_t
+-Message::decode_common_header(uint8_t* ptr, size_t& len)
+-    throw(InvalidMessage)
++Message::decode_common_header(uint8_t* ptr, size_t& len, string& err)
+ {
+-
+     if (len < Message::get_common_header_length()) {
+-	xorp_throw(InvalidPacket,
+-	    c_format("Message too short %u, must be at least %u",
+-		    XORP_UINT_CAST(len),
+-		    XORP_UINT_CAST(Message::get_common_header_length())));
++	err += c_format("Message too short %u, must be at least %u",
++			XORP_UINT_CAST(len),
++			XORP_UINT_CAST(Message::get_common_header_length()));
++	return 0;
+     }
+ 
+     _adv_message_length = extract_16(&ptr[2]);
+     if (_adv_message_length > len) {
+-	xorp_throw(InvalidMessage,
+-	    c_format("Message too short %u, advertised size is %u",
+-		XORP_UINT_CAST(len),
+-		XORP_UINT_CAST(_adv_message_length)));
++	err += c_format("Message too short %u, advertised size is %u",
++			XORP_UINT_CAST(len),
++			XORP_UINT_CAST(_adv_message_length));
++	return 0;
+     }
+ 
+     set_type(ptr[0]);
+@@ -436,8 +446,8 @@ Message::decode_common_header(uint8_t* ptr, size_t& len)
+ 
+     // 3.4, 2: Drop messages with invalid TTL.
+     if (ttl() <= 0) {
+-	xorp_throw(InvalidMessage,
+-	    c_format("Invalid message TTL %u.", XORP_UINT_CAST(ttl())));
++	err += c_format("Invalid message TTL %u.", XORP_UINT_CAST(ttl()));
++	return 0;
+     }
+ 
+     // Store the entire message in the Message parent class _msg field.
+@@ -477,18 +487,17 @@ MessageDecoder::~MessageDecoder()
+ }
+ 
+ Message*
+-MessageDecoder::decode(uint8_t* ptr, size_t len)
+-    throw(InvalidMessage)
++MessageDecoder::decode(uint8_t* ptr, size_t len, string& err)
+ {
+ 
+     // Message knows what the minimum size is -- but only for its
+     // address family.
+ 
+     if (len < Message::get_common_header_length()) {
+-	xorp_throw(InvalidMessage,
+-	    c_format("Message too short %u, must be at least %u",
+-		    XORP_UINT_CAST(len),
+-		    XORP_UINT_CAST(Message::get_common_header_length())));
++	err += c_format("Message too short %u, must be at least %u",
++			XORP_UINT_CAST(len),
++			XORP_UINT_CAST(Message::get_common_header_length()));
++	return NULL;
+     }
+ 
+     // OLSRv1 type code offset; unchanged by address family.
+@@ -502,7 +511,7 @@ MessageDecoder::decode(uint8_t* ptr, size_t len)
+ 	decoder = (*ii).second;
+     }
+ 
+-    return (decoder->decode(ptr, len));
++    return (decoder->decode(ptr, len, err));
+ }
+ 
+ void
+@@ -514,26 +523,35 @@ MessageDecoder::register_decoder(Message* message)
+ }
+ 
+ Message*
+-MidMessage::decode(uint8_t* buf, size_t& len)
+-    throw(InvalidMessage)
++MidMessage::decode(uint8_t* buf, size_t& len, string& err)
+ {
+     MidMessage* message = new MidMessage();
+ 
+-    size_t offset = message->decode_common_header(buf, len);
++    size_t offset = message->decode_common_header(buf, len, err);
++    if (offset == 0) {
++	delete message;
++	return NULL;
++    }
+     size_t remaining = message->adv_message_length() - offset;
+ 
+     while (remaining > 0) {
+ 	if (remaining < IPv4::addr_bytelen())
+ 	    break;
+-	message->add_interface(IPv4(&buf[offset]));
++	IPv4 a(&buf[offset]);
++	if (a.invalid()) {
++	    delete message;
++	    return NULL;
++	}
++	message->add_interface(a);
+ 	offset += IPv4::addr_bytelen();
+ 	remaining -= IPv4::addr_bytelen();
+     }
+ 
+     if (message->interfaces().empty()) {
+-	xorp_throw(InvalidMessage,
+-	    c_format("Runt MidMessage, size is %u",
+-		    XORP_UINT_CAST(len)));
++	err += c_format("Runt MidMessage, size is %u",
++			XORP_UINT_CAST(len));
++	delete message;
++	return NULL;
+     }
+ 
+     return (message);
+@@ -557,19 +575,20 @@ MidMessage::encode(uint8_t* buf, size_t& len)
+     return true;
+ }
+ 
+-void
+-Packet::decode(uint8_t* ptr, size_t len)
+-    throw(InvalidPacket)
++bool
++Packet::decode(uint8_t* ptr, size_t len, string& err)
+ {
+-    size_t offset = decode_packet_header(ptr, len);
++    size_t offset = decode_packet_header(ptr, len, err);
++    if (offset == 0) {
++	return false;
++    }
++
+     size_t remaining = len - offset;
+     size_t index = 0;
+ 
+     while (remaining > 0) {
+-	Message* message;
+-	try {
+-	    message = _message_decoder.decode(&ptr[offset], len - offset);
+-
++	Message* message = _message_decoder.decode(&ptr[offset], len - offset, err);
++	if (message) {
+ 	    message->set_is_first(0 == index++);
+ 	    message->set_faceid(faceid());
+ 
+@@ -577,8 +596,8 @@ Packet::decode(uint8_t* ptr, size_t len)
+ 	    remaining -= message->length();
+ 
+ 	    add_message(message);
+-	} catch (InvalidMessage& e) {
+-	    debug_msg("%s\n", cstring(e));
++	} else {
++	    debug_msg("%s\n", err.c_str());
+ 	    break;
+ 	}
+     }
+@@ -586,7 +605,8 @@ Packet::decode(uint8_t* ptr, size_t len)
+    // 3.4, 1: Packet Processing: A node must discard a message with
+    // no messages.
+     if (_messages.empty()) {
+-	xorp_throw(InvalidPacket, c_format("Packet contains no messages."));
++	err += c_format("Packet contains no messages.");
++	return false;
+     }
+ 
+     // Mark the last message in the packet for use with future S-OLSR
+@@ -596,27 +616,27 @@ Packet::decode(uint8_t* ptr, size_t len)
+     if (remaining > 0) {
+ 	debug_msg("Packet has %d bytes remaining\n", XORP_INT_CAST(remaining));
+     }
++    return true;
+ }
+ 
+ size_t
+-Packet::decode_packet_header(uint8_t* ptr, size_t len)
+-    throw(InvalidPacket)
++Packet::decode_packet_header(uint8_t* ptr, size_t len, string& err)
+ {
+     // 3.4, 1: Packet Processing: A node must discard a message with
+     // no messages.
+     if (len <= Packet::get_packet_header_length()) {
+-	xorp_throw(InvalidPacket,
+-	    c_format("Packet too short %u, must be > %u",
+-		    XORP_UINT_CAST(len),
+-		    XORP_UINT_CAST(Packet::get_packet_header_length())));
++	err +=  c_format("Packet too short %u, must be > %u",
++			 XORP_UINT_CAST(len),
++			 XORP_UINT_CAST(Packet::get_packet_header_length()));
++	return 0;
+     }
+ 
+     size_t packet_length = extract_16(&ptr[0]);
+     if (len < packet_length) {
+-	xorp_throw(InvalidPacket,
+-	    c_format("Packet too short %u, advertised size is %u",
+-		    XORP_UINT_CAST(len),
+-		    XORP_UINT_CAST(packet_length)));
++	err += c_format("Packet too short %u, advertised size is %u",
++			XORP_UINT_CAST(len),
++			XORP_UINT_CAST(packet_length));
++	return 0;
+     }
+ 
+     store(ptr, packet_length);
+@@ -716,19 +736,20 @@ string
+ Packet::str() const
+ {
+     string s = c_format("OLSRv1: len %u seq %u\n",
+-	XORP_UINT_CAST(length()),
+-	XORP_UINT_CAST(seqno()));
++			XORP_UINT_CAST(length()),
++			XORP_UINT_CAST(seqno()));
+     vector<Message*>::const_iterator ii;
+     for (ii = _messages.begin(); ii != _messages.end(); ii++)
+ 	s += (*ii)->str();
+     return (s += '\n');
+ }
+ 
+-void
+-TcMessage::decode_tc_common(uint8_t* buf, size_t& len, bool haslq)
+-    throw(InvalidMessage)
++bool
++TcMessage::decode_tc_common(uint8_t* buf, size_t& len, bool haslq, string& err)
+ {
+-    size_t offset = decode_common_header(buf, len);
++    size_t offset = decode_common_header(buf, len, err);
++    if (offset == 0)
++	return false;
+     size_t remaining = adv_message_length() - min_length();
+ 
+     set_ansn(extract_16(&buf[offset]));
+@@ -746,41 +767,39 @@ TcMessage::decode_tc_common(uint8_t* buf, size_t& len, bool haslq)
+ 
+ 	add_neighbor(lai);
+     }
++    return true;
+ }
+ 
+ Message*
+-TcMessage::decode(uint8_t* buf, size_t& len)
+-    throw(InvalidMessage)
++TcMessage::decode(uint8_t* buf, size_t& len, string& err)
+ {
+     if (len < min_length()) {
+-	xorp_throw(InvalidMessage,
+-	    c_format("Runt TcMessage, size is %u", XORP_UINT_CAST(len)));
++	err += c_format("Runt TcMessage, size is %u", XORP_UINT_CAST(len));
++	return NULL;
+     }
+ 
+     TcMessage* message = new TcMessage();
+-    try {
+-	message->decode_tc_common(buf, len);
+-    } catch (...) {
+-	throw;
++
++    if (!message->decode_tc_common(buf, len, false, err)) {
++	delete message;
++	return NULL;
+     }
+ 
+     return (message);
+ }
+ 
+ Message*
+-EtxTcMessage::decode(uint8_t* buf, size_t& len)
+-    throw(InvalidMessage)
++EtxTcMessage::decode(uint8_t* buf, size_t& len, string& err)
+ {
+     if (len < min_length()) {
+-	xorp_throw(InvalidMessage,
+-	    c_format("Runt EtxTcMessage, size is %u", XORP_UINT_CAST(len)));
++	err += c_format("Runt EtxTcMessage, size is %u", XORP_UINT_CAST(len));
++	return NULL;
+     }
+ 
+     EtxTcMessage* message = new EtxTcMessage();
+-    try {
+-	message->decode_tc_common(buf, len, true);
+-    } catch (...) {
+-	throw;
++    if (!message->decode_tc_common(buf, len, false, err)) {
++	delete message;
++	return NULL;
+     }
+ 
+     return (message);
+@@ -821,14 +840,14 @@ TcMessage::encode(uint8_t* buf, size_t& len)
+ }
+ 
+ Message*
+-UnknownMessage::decode(uint8_t* ptr, size_t& len)
+-    throw(InvalidMessage)
++UnknownMessage::decode(uint8_t* ptr, size_t& len, string& err)
+ {
+     UnknownMessage* message = new UnknownMessage();
+ 
+-    size_t offset = message->decode_common_header(ptr, len);
+-
+-    UNUSED(offset);
++    if (!message->decode_common_header(ptr, len, err)) {
++	delete message;
++	return NULL;
++    }
+ 
+     return (message);
+ }
+diff --git a/xorp/contrib/olsr/message.hh b/xorp/contrib/olsr/message.hh
+index dd67290..ba3ffa8 100644
+--- a/xorp/contrib/olsr/message.hh
++++ b/xorp/contrib/olsr/message.hh
+@@ -18,7 +18,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/contrib/olsr/message.hh,v 1.4 2008/10/02 21:56:34 bms Exp $
+ 
+ #ifndef __OLSR_MESSAGE_HH__
+ #define __OLSR_MESSAGE_HH__
+@@ -106,8 +105,7 @@ public:
+     inline void set_faceid(OlsrTypes::FaceID faceid)
+ 	{ _faceid = faceid; }
+ 
+-    virtual Message* decode(uint8_t* buf, size_t& len)
+-	throw(InvalidMessage) = 0;
++    virtual Message* decode(uint8_t* buf, size_t& len, string& err) = 0;
+ 
+     virtual bool encode(uint8_t* buf, size_t& len) = 0;
+ 
+@@ -136,8 +134,7 @@ public:
+     uint16_t adv_message_length() const { return _adv_message_length; }
+ 
+ protected:
+-    size_t decode_common_header(uint8_t* buf, size_t& len)
+-	throw(InvalidMessage);
++    size_t decode_common_header(uint8_t* buf, size_t& len, string& err);
+ 
+     bool encode_common_header(uint8_t* buf, size_t& len);
+ 
+@@ -178,26 +175,20 @@ private:
+ public:
+     LinkCode() : _linkcode(OlsrTypes::UNSPEC_LINK) { }
+ 
+-    LinkCode(OlsrTypes::NeighborType ntype, OlsrTypes::LinkType ltype)
+-     throw(BadLinkCode) {
++    LinkCode(OlsrTypes::NeighborType ntype, OlsrTypes::LinkType ltype) {
+ 	_linkcode = ((ntype << 2) & 0x0C) | (ltype & 0x03);
+-	throw_if_not_valid();
+     }
+ 
+     LinkCode(uint8_t code)
+-     throw(BadLinkCode)
+      :  _linkcode(code) {
+-	throw_if_not_valid();
+     }
+ 
+     LinkCode(const LinkCode& rhs)
+-     : _linkcode(rhs._linkcode)
++	    : _linkcode(rhs._linkcode)
+     {}
+ 
+-    inline LinkCode& operator=(const uint8_t& rhs)
+-     throw(BadLinkCode) {
++    inline LinkCode& operator=(const uint8_t& rhs) {
+ 	_linkcode = rhs;
+-	throw_if_not_valid();
+ 	return (*this);
+     }
+ 
+@@ -246,16 +237,6 @@ public:
+ 	    linktype_to_str(linktype()), neighbortype_to_str(neighbortype()));
+     }
+ 
+-private:
+-    inline void throw_if_not_valid() {
+-	if (!is_valid()) {
+-		xorp_throw(BadLinkCode,
+-			   c_format("Bad link code: neighbor %u link %u",
+-				    XORP_UINT_CAST(neighbortype()),
+-				    XORP_UINT_CAST(linktype())));
+-	}
+-    }
+-
+     inline bool is_valid() {
+ 	if (linktype() > OlsrTypes::LINKTYPE_END ||
+ 	    neighbortype() > OlsrTypes::NEIGHBORTYPE_END ||
+@@ -267,6 +248,8 @@ private:
+     }
+ 
+ private:
++
++private:
+     uint8_t	_linkcode;
+ };
+ 
+@@ -279,11 +262,11 @@ private:
+ class LinkAddrInfo {
+ public:
+     explicit LinkAddrInfo(const bool has_lq)
+-     : _has_etx(has_lq)
++	    : _has_etx(has_lq), _near_etx(0), _far_etx(0)
+     {}
+ 
+     explicit LinkAddrInfo(const IPv4& addr)
+-     : _has_etx(false), _remote_addr(addr)
++	    : _has_etx(false), _remote_addr(addr), _near_etx(0), _far_etx(0)
+     {}
+ 
+     explicit LinkAddrInfo(const IPv4& addr,
+@@ -342,7 +325,7 @@ public:
+ 	{ this->set_type(OlsrTypes::HELLO_MESSAGE); }
+     ~HelloMessage() {}
+ 
+-    Message* decode(uint8_t* buf, size_t& len) throw(InvalidMessage);
++    Message* decode(uint8_t* buf, size_t& len, string& err);
+     bool encode(uint8_t* buf, size_t& len);
+ 
+     inline size_t	min_length() const {
+@@ -417,12 +400,9 @@ protected:
+      *                    otherwise false.
+      * @return the number of bytes consumed in the input stream to produce
+      * a decoded link tuple.
+-     * @throw InvalidLinkTuple if an invalid link tuple was found
+-     *        during message decoding.
+      */
+     virtual size_t decode_link_tuple(uint8_t* buf, size_t& len,
+-        size_t& skiplen, bool has_lq = false)
+-	throw(InvalidLinkTuple);
++				     size_t& skiplen, bool has_1q, string& err);
+ 
+     inline size_t link_tuple_header_length() const {
+ 	return	sizeof(uint8_t) + // link code
+@@ -446,12 +426,11 @@ public:
+ 
+ protected:
+     size_t decode_link_tuple(uint8_t* buf, size_t& len,
+-			     size_t& skiplen, bool has_lq = true)
+-	throw(InvalidLinkTuple)
++			     size_t& skiplen, bool has_lq, string& err)
+     {
+ 	// Overriding a virtual with default arguments means the signatures
+ 	// have to match. We are invoked via a pointer.
+-	return HelloMessage::decode_link_tuple(buf, len, skiplen, has_lq);
++	return HelloMessage::decode_link_tuple(buf, len, skiplen, has_lq, err);
+     }
+ 
+     inline void add_link(const LinkCode code,
+@@ -473,7 +452,7 @@ public:
+ 	{ this->set_type(OlsrTypes::MID_MESSAGE); }
+     ~MidMessage() {}
+ 
+-    Message* decode(uint8_t* buf, size_t& len) throw(InvalidMessage);
++    Message* decode(uint8_t* buf, size_t& len, string& err);
+ 
+     bool encode(uint8_t* buf, size_t& len);
+ 
+@@ -504,7 +483,7 @@ public:
+     TcMessage() { this->set_type(OlsrTypes::TC_MESSAGE); }
+     ~TcMessage() {}
+ 
+-    virtual Message* decode(uint8_t* buf, size_t& len) throw(InvalidMessage);
++    virtual Message* decode(uint8_t* buf, size_t& len, string& err);
+     bool encode(uint8_t* buf, size_t& len);
+ 
+     inline size_t	length() const {
+@@ -563,8 +542,7 @@ protected:
+ 	_neighbors.push_back(lai);
+     }
+ 
+-    void decode_tc_common(uint8_t* buf, size_t& len, bool has_lq = false)
+-	throw(InvalidMessage);
++    bool decode_tc_common(uint8_t* buf, size_t& len, bool has_lq, string& err);
+ 
+ private:
+     uint16_t		    _ansn;	// advertised neighbor sequence no.
+@@ -585,7 +563,7 @@ public:
+ 	TcMessage::add_neighbor(LinkAddrInfo(remote_addr, near_etx, far_etx));
+     }
+ 
+-    Message* decode(uint8_t* buf, size_t& len) throw(InvalidMessage);
++    Message* decode(uint8_t* buf, size_t& len, string& err);
+ };
+ 
+ /**
+@@ -597,7 +575,7 @@ public:
+ 	{ this->set_type(OlsrTypes::HNA_MESSAGE); }
+     ~HnaMessage() {}
+ 
+-    Message* decode(uint8_t* buf, size_t& len) throw(InvalidMessage);
++    Message* decode(uint8_t* buf, size_t& len, string& err);
+     bool encode(uint8_t* buf, size_t& len);
+ 
+     inline size_t	length() const {
+@@ -652,7 +630,7 @@ private:
+  */
+ class UnknownMessage : public Message {
+ public:
+-    Message* decode(uint8_t* buf, size_t& len) throw(InvalidMessage);
++    Message* decode(uint8_t* buf, size_t& len, string& err);
+ 
+     bool encode(uint8_t* buf, size_t& len);
+ 
+@@ -685,7 +663,7 @@ class MessageDecoder {
+ public:
+     ~MessageDecoder();
+ 
+-    Message* decode(uint8_t* ptr, size_t len) throw(InvalidMessage);
++    Message* decode(uint8_t* ptr, size_t len, string& err);
+ 
+     void register_decoder(Message* message);
+ 
+@@ -736,7 +714,7 @@ public:
+      */
+     size_t bounded_length() const;
+ 
+-    void decode(uint8_t* ptr, size_t len) throw(InvalidPacket);
++    bool decode(uint8_t* ptr, size_t len, string& err);
+ 
+     /**
+      * Decode an OLSR packet header.
+@@ -746,8 +724,7 @@ public:
+      * The host IP stack takes care of UDP checksums, IP fragmentation and
+      * reassembly, and MTU size checks for us.
+      */
+-    size_t decode_packet_header(uint8_t* ptr, size_t len)
+-	throw(InvalidPacket);
++    size_t decode_packet_header(uint8_t* ptr, size_t len, string& err);
+ 
+     /**
+      * Encode a packet, including any nested messages.
+diff --git a/xorp/contrib/olsr/neighbor.cc b/xorp/contrib/olsr/neighbor.cc
+index c32c4dd..6d442bd 100644
+--- a/xorp/contrib/olsr/neighbor.cc
++++ b/xorp/contrib/olsr/neighbor.cc
+@@ -40,25 +40,21 @@
+ bool
+ IsLinkSymmetricPred::operator()(OlsrTypes::LogicalLinkID linkid)
+ {
+-    try {
+-	bool result = _nh->get_logical_link(linkid)->is_sym();
+-	debug_msg("link %u is %s\n",
+-		  XORP_UINT_CAST(linkid),
+-		  bool_c_str(result));
+-	return result;
+-    } catch (...) {
+-	return false;
+-    }
++    string err;
++    const LogicalLink* ll = _nh->get_logical_link(linkid, err);
++    if (ll)
++	return ll->is_sym();
++    return false;
+ }
+ 
+ bool
+ IsTwoHopLinkStrictPred::operator()(OlsrTypes::TwoHopLinkID tlid)
+ {
+-    try {
+-	return _nh->get_twohop_link(tlid)->destination()->is_strict();
+-    } catch (...) {
+-	return false;
+-    }
++    string err;
++    TwoHopLink* l = _nh->get_twohop_link(tlid, err);
++    if (l && l->destination())
++	return l->destination()->is_strict();
++    return false;
+ }
+ 
+ Neighbor::Neighbor(EventLoop& ev,
+@@ -76,9 +72,10 @@ Neighbor::Neighbor(EventLoop& ev,
+    _degree(0),
+    _is_advertised(false)
+ {
++    string err;
+     // Invariant: A neighbor must be created with a newly created link.
+-    XLOG_ASSERT(OlsrTypes::UNUSED_NEIGHBOR_ID ==
+-		_parent->get_logical_link(linkid)->neighbor_id());
++    const LogicalLink* ll = _parent->get_logical_link(linkid, err);
++    XLOG_ASSERT(OlsrTypes::UNUSED_NEIGHBOR_ID == ll->neighbor_id());
+ 
+     update_link(linkid);
+ 
+@@ -198,6 +195,7 @@ Neighbor::update_link(const OlsrTypes::LogicalLinkID linkid)
+     debug_msg("LinkID %u\n", XORP_UINT_CAST(linkid));
+     XLOG_ASSERT(OlsrTypes::UNUSED_LINK_ID != linkid);
+ 
++    string err;
+     bool was_cand_mpr = is_cand_mpr();
+ 
+     if (_links.find(linkid) == _links.end()) {
+@@ -213,8 +211,10 @@ Neighbor::update_link(const OlsrTypes::LogicalLinkID linkid)
+     // Link itself may trigger an exception if the associated Neighbor
+     // does not yet exist.
+     //
+-    if (! is_sym())
+-	set_is_sym(_parent->get_logical_link(linkid)->is_sym());
++    if (! is_sym()) {
++	const LogicalLink* ll = _parent->get_logical_link(linkid, err);
++	set_is_sym(ll->is_sym());
++    }
+ 
+     // We need to reconsider MPR candidacy as the neighbor
+     // MAY now be reachable by another interface, or MAY now
+diff --git a/xorp/contrib/olsr/neighborhood.cc b/xorp/contrib/olsr/neighborhood.cc
+index 4a6241b..cf2bca6 100644
+--- a/xorp/contrib/olsr/neighborhood.cc
++++ b/xorp/contrib/olsr/neighborhood.cc
+@@ -58,41 +58,42 @@ bool
+ LinkOrderPred::operator()(const OlsrTypes::LogicalLinkID lhid,
+ 			  const OlsrTypes::LogicalLinkID rhid)
+ {
+-    try {
+-	const LogicalLink* lhs = _nh->get_logical_link(lhid);
+-	const LogicalLink* rhs = _nh->get_logical_link(rhid);
+-
+-	if (lhs->is_sym() == rhs->is_sym()) {
+-	    // TODO: ETX collation predicates go here.
+-	    if (lhs->sym_time_remaining() == rhs->sym_time_remaining()) {
+-		// Final collation tiebreak: Return if the link has a higher ID.
+-		return lhs->id() > rhs->id();
+-	    }
+-	    return lhs->sym_time_remaining() > rhs->sym_time_remaining();
+-	}
+-	return lhs->is_sym() > rhs->is_sym();
++    string err;
++    const LogicalLink* lhs = _nh->get_logical_link(lhid, err);
++    const LogicalLink* rhs = _nh->get_logical_link(rhid, err);
+ 
+-    } catch (...) {}
++    if (!(lhs && rhs)) {
++	return false;
++    }
+ 
+-    return false;
++    if (lhs->is_sym() == rhs->is_sym()) {
++	// TODO: ETX collation predicates go here.
++	if (lhs->sym_time_remaining() == rhs->sym_time_remaining()) {
++	    // Final collation tiebreak: Return if the link has a higher ID.
++	    return lhs->id() > rhs->id();
++	}
++	return lhs->sym_time_remaining() > rhs->sym_time_remaining();
++    }
++    return lhs->is_sym() > rhs->is_sym();
+ }
+ 
+ bool
+ TwoHopLinkOrderPred::operator()(const OlsrTypes::TwoHopLinkID lhid,
+ 				const OlsrTypes::TwoHopLinkID rhid)
+ {
+-    try {
+-	TwoHopLink* lhs = _nh->get_twohop_link(lhid);
+-	TwoHopLink* rhs = _nh->get_twohop_link(rhid);
++    string err;
+ 
+-	if (lhs->time_remaining() == rhs->time_remaining()) {
+-	    // Final collation tiebreak: Return if the link has a higher ID.
+-	    return lhs->id() > rhs->id();
+-	}
+-	return lhs->time_remaining() > rhs->time_remaining();
+-    } catch (...) {}
++    TwoHopLink* lhs = _nh->get_twohop_link(lhid, err);
++    TwoHopLink* rhs = _nh->get_twohop_link(rhid, err);
++    if (!(lhs && rhs)) {
++	return false;
++    }
+ 
+-    return false;
++    if (lhs->time_remaining() == rhs->time_remaining()) {
++	// Final collation tiebreak: Return if the link has a higher ID.
++	return lhs->id() > rhs->id();
++    }
++    return lhs->time_remaining() > rhs->time_remaining();
+ }
+ 
+ Neighborhood::Neighborhood(Olsr& olsr, EventLoop& eventloop,
+@@ -327,12 +328,12 @@ Neighborhood::push_topology()
+ 
+     map<OlsrTypes::TwoHopNodeID, TwoHopNeighbor*>::iterator jj;
+     for (jj = _twohop_nodes.begin(); jj != _twohop_nodes.end(); jj++) {
+-	if (true == push_twohop_neighbor((*jj).second)) {
++	if (push_twohop_neighbor((*jj).second)) {
+ 	    n2_pushed++;
+ 	}
+     }
+ 
+-    debug_msg("Pushed %u two-hop neighbors to SPT.\n",
++    debug_msg("Pushed %u two-hop neighbors to SPT\n",
+ 	      XORP_UINT_CAST(n2_pushed));
+ }
+ 
+@@ -393,9 +394,8 @@ Neighborhood::delete_face(const OlsrTypes::FaceID faceid)
+ 
+ OlsrTypes::LogicalLinkID
+ Neighborhood::add_link(const TimeVal& vtime,
+-			  const IPv4& remote_addr,
+-			  const IPv4& local_addr)
+-    throw(BadLogicalLink)
++		       const IPv4& remote_addr,
++		       const IPv4& local_addr, string& err)
+ {
+     debug_msg("MyMainAddr %s RemoteAddr %s LocalAddr %s\n",
+ 	      cstring(_fm.get_main_addr()),
+@@ -403,11 +403,11 @@ Neighborhood::add_link(const TimeVal& vtime,
+ 
+     OlsrTypes::LogicalLinkID linkid = _next_linkid++;
+ 
+-    // Throw an exception if we overflowed the LogicalLinkID space.
++    // Check if we overflowed the LogicalLinkID space.
+     if (_links.find(linkid) != _links.end()) {
+-	xorp_throw(BadLogicalLink,
+-		   c_format("Mapping for LogicalLinkID %u already exists",
+-			    XORP_UINT_CAST(linkid)));
++	err += c_format("Mapping for LogicalLinkID %u already exists",
++			XORP_UINT_CAST(linkid));
++	return OlsrTypes::UNUSED_LINK_ID;
+     }
+ 
+     _links[linkid] = new LogicalLink(this, _eventloop, linkid, vtime,
+@@ -486,15 +486,14 @@ Neighborhood::clear_links()
+ }
+ 
+ const LogicalLink*
+-Neighborhood::find_best_link(const Neighbor* n)
+-    throw(BadLinkCoverage)
++Neighborhood::find_best_link(const Neighbor* n, string& err)
+ {
+     const set<OlsrTypes::LogicalLinkID>& links = n->links();
+ 
+     if (links.empty()) {
+-	xorp_throw(BadLinkCoverage,
+-		   c_format("No suitable links to Neighbor %u.",
+-			    XORP_UINT_CAST(n->id())));
++	err += c_format("No suitable links to Neighbor %u.",
++			XORP_UINT_CAST(n->id()));
++	return NULL;
+     }
+ 
+     set<OlsrTypes::LogicalLinkID>::const_iterator ii =
+@@ -504,17 +503,16 @@ Neighborhood::find_best_link(const Neighbor* n)
+     const LogicalLink* l = _links[(*ii)];
+ 
+     if (! l->is_sym()) {
+-	xorp_throw(BadLinkCoverage,
+-		   c_format("No suitable links to Neighbor %u.",
+-			    XORP_UINT_CAST(n->id())));
++	err += c_format("No suitable links to Neighbor %u.",
++			    XORP_UINT_CAST(n->id()));
++	return NULL;
+     }
+ 
+     return l;
+ }
+ 
+ OlsrTypes::LogicalLinkID
+-Neighborhood::get_linkid(const IPv4& remote_addr, const IPv4& local_addr)
+-    throw(BadLogicalLink)
++Neighborhood::get_linkid(const IPv4& remote_addr, const IPv4& local_addr, string& err)
+ {
+     //debug_msg("RemoteAddr %s LocalAddr %s\n",
+     //	cstring(remote_addr), cstring(local_addr));
+@@ -522,10 +520,10 @@ Neighborhood::get_linkid(const IPv4& remote_addr, const IPv4& local_addr)
+     map<pair<IPv4, IPv4>, OlsrTypes::LogicalLinkID>::iterator ii =
+ 	_link_addr.find(make_pair(remote_addr, local_addr));
+     if (ii == _link_addr.end()) {
+-	xorp_throw(BadLogicalLink,
+-		   c_format("No mapping for %s:%s exists",
+-			    cstring(remote_addr),
+-			    cstring(local_addr)));
++	err += c_format("No mapping for %s:%s exists",
++			cstring(remote_addr),
++			cstring(local_addr));
++	return OlsrTypes::UNUSED_LINK_ID;
+     }
+ 
+     return (*ii).second;
+@@ -533,11 +531,10 @@ Neighborhood::get_linkid(const IPv4& remote_addr, const IPv4& local_addr)
+ 
+ OlsrTypes::LogicalLinkID
+ Neighborhood::update_link(const OlsrTypes::FaceID faceid,
+-			     const IPv4& remote_addr,
+-			     const IPv4& local_addr,
+-			     const TimeVal& vtime,
+-			     bool& is_created)
+-    throw(BadLogicalLink)
++			  const IPv4& remote_addr,
++			  const IPv4& local_addr,
++			  const TimeVal& vtime,
++			  bool& is_created, string& err)
+ {
+ #if 0
+     debug_msg("MyMainAddr %s FaceID %u RemoteAddr %s LocalAddr %s Vtime %s\n",
+@@ -550,8 +547,8 @@ Neighborhood::update_link(const OlsrTypes::FaceID faceid,
+ 
+     OlsrTypes::LogicalLinkID linkid;
+ 
+-    try {
+-	linkid = get_linkid(remote_addr, local_addr);
++    linkid = get_linkid(remote_addr, local_addr, err);
++    if (linkid != OlsrTypes::UNUSED_LINK_ID) {
+ 	is_created = false;
+ 
+ 	// Invariant: The Face which we see this link on MUST NOT
+@@ -559,11 +556,13 @@ Neighborhood::update_link(const OlsrTypes::FaceID faceid,
+ 	// the face will have gone down and all its links with it.
+ 	XLOG_ASSERT(faceid == _links[linkid]->faceid());
+ 
+-    } catch(BadLogicalLink& bl) {
++    } else {
+ 	debug_msg("allocating new link entry.\n");
+ 
+-	// XXX: May throw an exception again, or even bad_alloc.
+-	linkid = add_link(vtime, remote_addr, local_addr);
++	linkid = add_link(vtime, remote_addr, local_addr, err);
++	if (linkid == OlsrTypes::UNUSED_LINK_ID) {
++	    return linkid;
++	}
+ 
+ 	// Set back-reference to the Face where this link is terminated.
+ 	// Inform FaceManager that the interface has a new link.
+@@ -582,15 +581,14 @@ Neighborhood::update_link(const OlsrTypes::FaceID faceid,
+ }
+ 
+ const LogicalLink*
+-Neighborhood::get_logical_link(const OlsrTypes::LogicalLinkID linkid)
+-    throw(BadLogicalLink)
++Neighborhood::get_logical_link(const OlsrTypes::LogicalLinkID linkid, string& err)
+ {
+     //debug_msg("LinkID %u\n", XORP_UINT_CAST(linkid));
+ 
+     if (_links.find(linkid) == _links.end()) {
+-	xorp_throw(BadLogicalLink,
+-		   c_format("No mapping for %u exists",
+-			    XORP_UINT_CAST(linkid)));
++	err += c_format("No mapping for %u exists",
++			XORP_UINT_CAST(linkid));
++	return NULL;
+     }
+ 
+     return _links[linkid];
+@@ -611,22 +609,20 @@ Neighborhood::get_logical_link_list(list<OlsrTypes::LogicalLinkID>& l1_list)
+  */
+ 
+ OlsrTypes::NeighborID
+-Neighborhood::get_neighborid_by_main_addr(const IPv4& main_addr)
+-    throw(BadNeighbor)
++Neighborhood::get_neighborid_by_main_addr(const IPv4& main_addr, string& err)
+ {
+     //debug_msg("MainAddr %s\n", cstring(main_addr));
+ 
+     if (_neighbor_addr.find(main_addr) == _neighbor_addr.end()) {
+-	xorp_throw(BadNeighbor,
+-		   c_format("No mapping for %s exists", cstring(main_addr)));
++	err += c_format("No mapping for %s exists", cstring(main_addr));
++	return OlsrTypes::UNUSED_NEIGHBOR_ID;
+     }
+ 
+     return _neighbor_addr[main_addr];
+ }
+ 
+ OlsrTypes::NeighborID
+-Neighborhood::get_neighborid_by_remote_addr(const IPv4& remote_addr)
+-    throw(BadNeighbor)
++Neighborhood::get_neighborid_by_remote_addr(const IPv4& remote_addr, string& err)
+ {
+     debug_msg("RemoteAddr %s\n", cstring(remote_addr));
+ 
+@@ -652,8 +648,8 @@ Neighborhood::get_neighborid_by_remote_addr(const IPv4& remote_addr)
+     }
+ 
+     if (is_found == false) {
+-	xorp_throw(BadNeighbor,
+-		   c_format("No mapping for %s exists", cstring(remote_addr)));
++	err += c_format("No mapping for %s exists", cstring(remote_addr));
++	return OlsrTypes::UNUSED_NEIGHBOR_ID;
+     }
+ 
+     // Invariant: If a link is found, its neighbor ID
+@@ -666,13 +662,12 @@ Neighborhood::get_neighborid_by_remote_addr(const IPv4& remote_addr)
+ 
+ OlsrTypes::NeighborID
+ Neighborhood::update_neighbor(const IPv4& main_addr,
+-    const OlsrTypes::LogicalLinkID linkid,
+-    const bool is_new_link,
+-    const OlsrTypes::WillType will,
+-    const bool is_mpr_selector,
+-    const TimeVal& mprs_expiry_time,
+-    bool& is_created)
+-    throw(BadNeighbor)
++			      const OlsrTypes::LogicalLinkID linkid,
++			      const bool is_new_link,
++			      const OlsrTypes::WillType will,
++			      const bool is_mpr_selector,
++			      const TimeVal& mprs_expiry_time,
++			      bool& is_created, string& err)
+ {
+     debug_msg("MyMainAddr %s MainAddr %s LinkID %u new %s will %u "
+ 	      "mprsel %s expiry %s\n",
+@@ -687,8 +682,9 @@ Neighborhood::update_neighbor(const IPv4& main_addr,
+     OlsrTypes::NeighborID nid;
+     Neighbor* n;
+ 
+-    try {
+-	nid = get_neighborid_by_main_addr(main_addr);
++    string e;
++    nid = get_neighborid_by_main_addr(main_addr, e);
++    if (nid != OlsrTypes::UNUSED_NEIGHBOR_ID) {
+ 	n = _neighbors[nid];
+ 	is_created = false;
+ 
+@@ -696,13 +692,16 @@ Neighborhood::update_neighbor(const IPv4& main_addr,
+ 	// if it does not already exist. N_status will be updated.
+ 	n->update_link(linkid);
+ 
+-    } catch(BadNeighbor& bn) {
++    } else {
+ 	// Create a new neighbor tuple.
+-	// XXX May throw BadNeighbor if a neighbor ID cannot be allocated,
+-	// i.e. we ran out of neighbor ID space.
+-	nid = add_neighbor(main_addr, linkid);
+-	n = _neighbors[nid];
+-	is_created = true;
++	nid = add_neighbor(main_addr, linkid, err);
++	if (nid != OlsrTypes::UNUSED_NEIGHBOR_ID) {
++	    n = _neighbors[nid];
++	    is_created = true;
++	}
++	else {
++	    return nid;
++	}
+     }
+ 
+     if (is_new_link) {
+@@ -735,8 +734,7 @@ Neighborhood::update_neighbor(const IPv4& main_addr,
+ 
+ OlsrTypes::NeighborID
+ Neighborhood::add_neighbor(const IPv4& main_addr,
+-    OlsrTypes::LogicalLinkID linkid)
+-    throw(BadNeighbor)
++			   OlsrTypes::LogicalLinkID linkid, string& err)
+ {
+     debug_msg("MyMainAddr %s MainAddr %s\n",
+ 	      cstring(_fm.get_main_addr()),
+@@ -744,18 +742,20 @@ Neighborhood::add_neighbor(const IPv4& main_addr,
+ 
+     OlsrTypes::NeighborID neighborid = _next_neighborid++;
+ 
+-    // Throw an exception if we overflow the neighbor ID space.
+     if (_neighbors.find(neighborid) != _neighbors.end()) {
+-	xorp_throw(BadNeighbor,
+-		   c_format("Mapping for NeighborID %u already exists",
+-			    XORP_UINT_CAST(neighborid)));
++	err += c_format("Mapping for NeighborID %u already exists",
++			XORP_UINT_CAST(neighborid));
++	return OlsrTypes::UNUSED_NEIGHBOR_ID;
+     }
+ 
+     // Section 8.1: Associated neighbor MUST be created with the link
+     // if it does not already exist.
+     // We enforce this at language level with the constructor signature.
+     Neighbor* n = new Neighbor(_eventloop, this, neighborid,
+-					  main_addr, linkid);
++			       main_addr, linkid);
++    if (!n) {
++	return OlsrTypes::UNUSED_NEIGHBOR_ID;
++    }
+     _neighbors[neighborid] = n;
+ 
+     XLOG_ASSERT(_neighbor_addr.find(main_addr) == _neighbor_addr.end());
+@@ -765,11 +765,12 @@ Neighborhood::add_neighbor(const IPv4& main_addr,
+     // us as a two-hop neighbor.
+     // XXX Should we only do this when the neighbor is first considered
+     // symmetric?
+-    try {
+-	OlsrTypes::TwoHopNodeID tnid =
+-	    get_twohop_nodeid_by_main_addr(main_addr);
++    OlsrTypes::TwoHopNodeID tnid =
++	get_twohop_nodeid_by_main_addr(main_addr, err);
++    if (tnid != OlsrTypes::UNUSED_TWOHOP_NODE_ID) {
+ 	_twohop_nodes[tnid]->set_is_strict(false);
+-    } catch (...) {}
++    }
++    // else what to do?
+ 
+     debug_msg("New neighbor: %s\n", cstring(n->main_addr()));
+     XLOG_TRACE(_olsr.trace()._neighbor_events,
+@@ -787,7 +788,7 @@ Neighborhood::delete_neighbor(const OlsrTypes::NeighborID nid)
+     debug_msg("MyMainAddr %s NeighborID %u\n",
+ 	      cstring(_fm.get_main_addr()),
+ 	      XORP_UINT_CAST(nid));
+-
++    string err;
+     XLOG_ASSERT(_neighbors.find(nid) != _neighbors.end());
+ 
+     map<OlsrTypes::NeighborID, Neighbor*>::iterator ii = _neighbors.find(nid);
+@@ -815,11 +816,12 @@ Neighborhood::delete_neighbor(const OlsrTypes::NeighborID nid)
+ 
+     // If the one-hop neighbor being lost is already known to us as a
+     // two-hop neighbor, ensure that the 'N2 is not also an N' flag is cleared.
+-    try {
+-	OlsrTypes::TwoHopNodeID tnid =
+-	    get_twohop_nodeid_by_main_addr(n->main_addr());
++    OlsrTypes::TwoHopNodeID tnid =
++	get_twohop_nodeid_by_main_addr(n->main_addr(), err);
++    if (tnid != OlsrTypes::UNUSED_TWOHOP_NODE_ID) {
+ 	_twohop_nodes[tnid]->set_is_strict(true);
+-    } catch (...) {}
++    }
++    // else what to do?
+ 
+     // Purge membership of MPR sets, and trigger MPR set recount.
+     withdraw_cand_mpr(nid);
+@@ -842,15 +844,14 @@ Neighborhood::delete_neighbor(const OlsrTypes::NeighborID nid)
+ }
+ 
+ const Neighbor*
+-Neighborhood::get_neighbor(const OlsrTypes::NeighborID nid)
+-    throw(BadNeighbor)
++Neighborhood::get_neighbor(const OlsrTypes::NeighborID nid, string& err)
+ {
+     debug_msg("NeighborID %u\n", XORP_UINT_CAST(nid));
+ 
+     if (_neighbors.find(nid) == _neighbors.end()) {
+-	xorp_throw(BadNeighbor,
+-		   c_format("No mapping for %u exists",
+-			    XORP_UINT_CAST(nid)));
++	err += c_format("No mapping for %u exists",
++			XORP_UINT_CAST(nid));
++	return NULL;
+     }
+ 
+     return _neighbors[nid];
+@@ -873,12 +874,13 @@ Neighborhood::is_sym_neighbor_addr(const IPv4& remote_addr)
+ 	      cstring(remote_addr));
+ 
+     bool is_sym = false;
+-    try {
+-	OlsrTypes::NeighborID nid = get_neighborid_by_remote_addr(remote_addr);
++    string err;
++    OlsrTypes::NeighborID nid = get_neighborid_by_remote_addr(remote_addr, err);
++    if (nid != OlsrTypes::UNUSED_NEIGHBOR_ID) {
+ 	debug_msg("nid is %u\n", XORP_UINT_CAST(nid));
+ 	is_sym = _neighbors[nid]->is_sym();
+-    } catch (BadNeighbor& bn) {
+-	debug_msg("threw exception: %s\n", cstring(bn));
++    } else {
++	debug_msg("threw exception: %s\n", err.c_str());
+     }
+ 
+     return is_sym;
+@@ -921,9 +923,9 @@ Neighborhood::push_neighbor(const Neighbor* n)
+ 
+     // Choose the best link to this neighbor.
+     const LogicalLink* l;
+-    try {
+-	l = find_best_link(n);
+-    } catch(BadLinkCoverage blc) {
++    string err;
++    l = find_best_link(n, err);
++    if (!l) {
+ 	// Don't add this neighbor -- there are no good links to it.
+ 	return false;
+     }
+@@ -942,8 +944,7 @@ OlsrTypes::TwoHopLinkID
+ Neighborhood::update_twohop_link(const LinkAddrInfo& node_info,
+ 				 Neighbor& nexthop,
+ 				 const OlsrTypes::FaceID faceid,
+-				 const TimeVal& vtime)
+-    throw(BadTwoHopLink)
++				 const TimeVal& vtime, string& err)
+ {
+     debug_msg("MyMainAddr %s NodeAddr %s Nexthop %s FaceID %u Vtime %s\n",
+ 	      cstring(_fm.get_main_addr()),
+@@ -961,9 +962,11 @@ Neighborhood::update_twohop_link(const LinkAddrInfo& node_info,
+ 					  node_info.remote_addr()));
+     if (ii == _twohop_link_addrs.end()) {
+ 	// If the two-hop link does not exist, attempt to create it.
+-	// May throw BadTwoHopLink.
+ 	debug_msg("adding new two-hop link\n");
+-	tlid = add_twohop_link(&nexthop, node_info.remote_addr(), vtime);
++	tlid = add_twohop_link(&nexthop, node_info.remote_addr(), vtime, err);
++	if (tlid == OlsrTypes::UNUSED_TWOHOP_LINK_ID) {
++	    return tlid;
++	}
+ 	is_new_l2 = true;
+     } else {
+ 	// Update timer and status for existing two-hop link.
+@@ -978,16 +981,15 @@ Neighborhood::update_twohop_link(const LinkAddrInfo& node_info,
+ 
+     OlsrTypes::TwoHopNodeID tnid;
+     bool is_new_n2 = false;
+-    try {
+-	// Update the associated TwoHopNeighbor, creating it if needed.
+-	tnid = update_twohop_node(node_info.remote_addr(),
+-				  tlid, is_new_l2, is_new_n2);
+-    } catch (BadTwoHopNode btn) {
+-	// Re-throw exception with appropriate type for this method.
+-	xorp_throw(BadTwoHopLink,
+-		   c_format("Could not create TwoHopNode with "
+-			    "address %s",
+-			    cstring(node_info.remote_addr())));
++
++    // Update the associated TwoHopNeighbor, creating it if needed.
++    tnid = update_twohop_node(node_info.remote_addr(),
++			      tlid, is_new_l2, is_new_n2, err);
++    if (tnid == OlsrTypes::UNUSED_TWOHOP_NODE_ID) {
++	err += c_format("Could not create TwoHopNode with "
++			"address %s",
++			cstring(node_info.remote_addr()));
++	return OlsrTypes::UNUSED_TWOHOP_LINK_ID;
+     }
+ 
+     // TODO: When ETX metrics are in use, we need only trigger a route
+@@ -1014,28 +1016,23 @@ Neighborhood::update_twohop_link(const LinkAddrInfo& node_info,
+ OlsrTypes::TwoHopLinkID
+ Neighborhood::add_twohop_link(Neighbor* nexthop,
+ 			      const IPv4& remote_addr,
+-			      const TimeVal& vtime)
+-    throw(BadTwoHopLink)
++			      const TimeVal& vtime, string& err)
+ {
+     debug_msg("MyMainAddr %s Neighbor %u Vtime %s\n",
+ 	      cstring(_fm.get_main_addr()),
+ 	      XORP_UINT_CAST(nexthop->id()),
+ 	      cstring(vtime));
+ 
+-    // Neighbor must exist.
+-    XLOG_ASSERT(0 != nexthop);
+-
+     // Two-hop links may only be added when the strong association is
+     // with a symmetric one-hop neighbor.
+     XLOG_ASSERT(nexthop->is_sym() == true);
+ 
+     OlsrTypes::TwoHopLinkID tlid = _next_twohop_linkid++;
+ 
+-    // Throw an exception if we overflowed the TwoHopLinkID space.
+     if (_twohop_links.find(tlid) != _twohop_links.end()) {
+-	xorp_throw(BadTwoHopLink,
+-		   c_format("Mapping for TwoHopLinkID %u already exists",
+-			    XORP_UINT_CAST(tlid)));
++	err += c_format("Mapping for TwoHopLinkID %u already exists",
++			XORP_UINT_CAST(tlid));
++	return OlsrTypes::UNUSED_TWOHOP_LINK_ID;
+     }
+ 
+     _twohop_links[tlid] = new TwoHopLink(_eventloop, this,
+@@ -1115,14 +1112,13 @@ Neighborhood::delete_twohop_link_by_addrs(const IPv4& nexthop_addr,
+ }
+ 
+ TwoHopLink*
+-Neighborhood::get_twohop_link(const OlsrTypes::TwoHopLinkID tlid)
+-    throw(BadTwoHopLink)
++Neighborhood::get_twohop_link(const OlsrTypes::TwoHopLinkID tlid, string& err)
+ {
+     debug_msg("TwoHopLinkID %u\n", XORP_UINT_CAST(tlid));
+ 
+     if (_twohop_links.find(tlid) == _twohop_links.end()) {
+-	xorp_throw(BadTwoHopLink,
+-		   c_format("No mapping for %u exists", XORP_UINT_CAST(tlid)));
++	err += c_format("No mapping for %u exists", XORP_UINT_CAST(tlid));
++	return NULL;
+     }
+ 
+     return _twohop_links[tlid];
+@@ -1139,15 +1135,14 @@ Neighborhood::get_twohop_link_list(list<OlsrTypes::TwoHopLinkID>& l2_list)
+ }
+ 
+ const TwoHopLink*
+-Neighborhood::find_best_twohop_link(const TwoHopNeighbor* n2)
+-    throw(BadTwoHopCoverage)
++Neighborhood::find_best_twohop_link(const TwoHopNeighbor* n2, string& err)
+ {
+     const set<OlsrTypes::TwoHopLinkID>& twohop_links = n2->twohop_links();
+ 
+     if (twohop_links.empty()) {
+-	xorp_throw(BadTwoHopCoverage,
+-		   c_format("No suitable links to TwoHopNeighbor %u.",
+-			    XORP_UINT_CAST(n2->id())));
++	err += c_format("No suitable links to TwoHopNeighbor %u.",
++			XORP_UINT_CAST(n2->id()));
++	return NULL;
+     }
+ 
+     set<OlsrTypes::TwoHopLinkID>::const_iterator ii =
+@@ -1160,14 +1155,13 @@ Neighborhood::find_best_twohop_link(const TwoHopNeighbor* n2)
+ #if 0
+     // TODO: Catchall for ETX metrics.
+     if (! l2->is_poor_etx()) {
+-	xorp_throw(BadTwoHopCoverage,
+-		   c_format("No suitable links to TwoHopNeighbor %u.",
+-			    XORP_UINT_CAST(n2->id())));
++	err += c_format("No suitable links to TwoHopNeighbor %u.",
++			XORP_UINT_CAST(n2->id()));
++	return NULL;
+     }
+ #endif
+ 
+     return l2;
+-
+ }
+ 
+ /*
+@@ -1176,10 +1170,9 @@ Neighborhood::find_best_twohop_link(const TwoHopNeighbor* n2)
+ 
+ OlsrTypes::TwoHopNodeID
+ Neighborhood::update_twohop_node(const IPv4& main_addr,
+-    const OlsrTypes::TwoHopLinkID tlid,
+-    const bool is_new_l2,
+-    bool& is_n2_created)
+-    throw(BadTwoHopNode)
++				 const OlsrTypes::TwoHopLinkID tlid,
++				 const bool is_new_l2,
++				 bool& is_n2_created, string& err)
+ {
+     debug_msg("MyMainAddr %s MainAddr %s TwoHopLinkID %u IsNewL2 %s\n",
+ 	      cstring(_fm.get_main_addr()),
+@@ -1194,8 +1187,9 @@ Neighborhood::update_twohop_node(const IPv4& main_addr,
+ 	_twohop_node_addrs.find(main_addr);
+     if (ii == _twohop_node_addrs.end()) {
+ 	// A new TwoHopNeighbor needs to be created.
+-	// May throw BadTwoHopNode.
+-	tnid = add_twohop_node(main_addr, tlid);
++	tnid = add_twohop_node(main_addr, tlid, err);
++	if (tnid == OlsrTypes::UNUSED_TWOHOP_NODE_ID)
++	    return tnid;
+ 	is_n2_created = true;
+     } else {
+ 	// We are updating the existing TwoHopNeighbor.
+@@ -1208,11 +1202,10 @@ Neighborhood::update_twohop_node(const IPv4& main_addr,
+ 
+     // Check if the two-hop neighbor we are updating is already a
+     // one-hop neighbor, and update the 'strict 2-hop' flag accordingly.
+-    try {
+-	OlsrTypes::NeighborID nid = get_neighborid_by_main_addr(main_addr);
++    OlsrTypes::NeighborID nid = get_neighborid_by_main_addr(main_addr, err);
++    if (nid != OlsrTypes::UNUSED_NEIGHBOR_ID) {
+ 	_twohop_nodes[tnid]->set_is_strict(false);
+-	UNUSED(nid);
+-    } catch (BadNeighbor bn) {
++    } else {
+ 	_twohop_nodes[tnid]->set_is_strict(true);
+     }
+ 
+@@ -1221,8 +1214,7 @@ Neighborhood::update_twohop_node(const IPv4& main_addr,
+ 
+ OlsrTypes::TwoHopNodeID
+ Neighborhood::add_twohop_node(const IPv4& main_addr,
+-			      const OlsrTypes::TwoHopLinkID tlid)
+-    throw(BadTwoHopNode)
++			      const OlsrTypes::TwoHopLinkID tlid, string& err)
+ {
+     debug_msg("MyMainAddr %s MainAddr %s TwoHopLinkID %u\n",
+ 	      cstring(_fm.get_main_addr()),
+@@ -1231,19 +1223,18 @@ Neighborhood::add_twohop_node(const IPv4& main_addr,
+ 
+ #ifdef DETAILED_DEBUG
+     if (_twohop_node_addrs.find(main_addr) != _twohop_node_addrs.end()) {
+-	xorp_throw(BadTwoHopNode,
+-		   c_format("Mapping for %s already exists",
+-			    cstring(main_addr)));
++	err += c_format("Mapping for %s already exists",
++			cstring(main_addr));
++	return OlsrTypes::UNUSED_TWOHOP_NODE_ID;
+     }
+ #endif
+ 
+     OlsrTypes::TwoHopNodeID tnid = _next_twohop_nodeid++;
+ 
+-    // Throw an exception if we overflowed the TwoHopNodeID space.
+     if (_twohop_nodes.find(tnid) != _twohop_nodes.end()) {
+-	xorp_throw(BadTwoHopNode,
+-		   c_format("Mapping for TwoHopNodeID %u already exists",
+-			    XORP_UINT_CAST(tnid)));
++	err += c_format("Mapping for TwoHopNodeID %u already exists",
++			XORP_UINT_CAST(tnid));
++	return OlsrTypes::UNUSED_TWOHOP_NODE_ID;
+     }
+ 
+     _twohop_nodes[tnid] = new TwoHopNeighbor(_eventloop, this,
+@@ -1290,8 +1281,7 @@ Neighborhood::delete_twohop_node(const OlsrTypes::TwoHopNodeID tnid)
+ }
+ 
+ OlsrTypes::TwoHopNodeID
+-Neighborhood::get_twohop_nodeid_by_main_addr(const IPv4& main_addr)
+-    throw(BadTwoHopNode)
++Neighborhood::get_twohop_nodeid_by_main_addr(const IPv4& main_addr, string& err)
+ {
+     debug_msg("MainAddr %s\n", cstring(main_addr));
+ 
+@@ -1299,23 +1289,22 @@ Neighborhood::get_twohop_nodeid_by_main_addr(const IPv4& main_addr)
+ 	_twohop_node_addrs.find(main_addr);
+ 
+     if (ii == _twohop_node_addrs.end()) {
+-	xorp_throw(BadTwoHopNode,
+-		   c_format("No mapping for %s exists", cstring(main_addr)));
++	err += c_format("No mapping for %s exists", cstring(main_addr));
++	return OlsrTypes::UNUSED_TWOHOP_NODE_ID;
+     }
+ 
+     return (*ii).second;
+ }
+ 
+ const TwoHopNeighbor*
+-Neighborhood::get_twohop_neighbor(const OlsrTypes::TwoHopNodeID tnid) const
+-    throw(BadTwoHopNode)
++Neighborhood::get_twohop_neighbor(const OlsrTypes::TwoHopNodeID tnid, string& err) const
+ {
+     map<OlsrTypes::TwoHopNodeID, TwoHopNeighbor*>::const_iterator ii = 
+ 	_twohop_nodes.find(tnid);
+ 
+     if (ii == _twohop_nodes.end()) {
+-	xorp_throw(BadTwoHopNode,
+-		   c_format("No mapping for %u exists", XORP_UINT_CAST(tnid)));
++	err += c_format("No mapping for %u exists", XORP_UINT_CAST(tnid));
++	return NULL;
+     }
+ 
+     return (*ii).second;
+@@ -1335,6 +1324,7 @@ bool
+ Neighborhood::push_twohop_neighbor(TwoHopNeighbor* n2)
+ {
+     debug_msg("called\n");
++    string err;
+ 
+     // Reject two-hop neighbors which are also Neighbors, or have no links.
+     if (! n2->is_strict()) {
+@@ -1352,10 +1342,9 @@ Neighborhood::push_twohop_neighbor(TwoHopNeighbor* n2)
+     }
+ 
+     const TwoHopLink* l2;
+-    try {
+-	l2 = find_best_twohop_link(n2);
+-    } catch (BadTwoHopCoverage btc) {
+-	debug_msg("Caught BadTwoHopCoverage.\n");
++    l2 = find_best_twohop_link(n2, err);
++    if (!l2) {
++	debug_msg("Caught BadTwoHopCoverage: %s\n", err.c_str());
+ 	//xorp_print_standard_exceptions();
+ 	return false;
+     }
+@@ -1445,13 +1434,13 @@ bool
+ Neighborhood::is_mpr_selector_addr(const IPv4& remote_addr)
+ {
+     debug_msg("RemoteAddr %s\n", cstring(remote_addr));
+-
++    string err;
+     bool is_mpr_selector = false;
+-    try {
+-	OlsrTypes::NeighborID nid = get_neighborid_by_remote_addr(remote_addr);
++    OlsrTypes::NeighborID nid = get_neighborid_by_remote_addr(remote_addr, err);
++    if (nid != OlsrTypes::UNUSED_NEIGHBOR_ID) {
+ 	is_mpr_selector = _neighbors[nid]->is_mpr_selector();
+-    } catch (BadNeighbor& bn) {
+-	debug_msg("threw exception: %s\n", cstring(bn));
++    } else {
++	debug_msg("threw exception: %s\n", err.c_str());
+     }
+ 
+     return is_mpr_selector;
+@@ -1468,6 +1457,7 @@ Neighborhood::recount_mpr_set()
+     //if (_neighbors.empty()
+     //	return;
+     ostringstream dbg;
++    string err;
+ 
+     // Clear all existing MPR state for Neighbors.
+     reset_onehop_mpr_state();
+@@ -1506,7 +1496,7 @@ Neighborhood::recount_mpr_set()
+ 	    XLOG_ASSERT(covered_n2_count >= reachable_n2_count);
+ 	}
+ 
+-	size_t removed_mpr_count = minimize_mpr_set(new_mpr_set);
++	size_t removed_mpr_count = minimize_mpr_set(new_mpr_set, err);
+ 	debug_msg("MPRs removed: %u\n", XORP_UINT_CAST(removed_mpr_count));
+ 
+ 	// Invariant: All reachable N2 must remain covered by MPRs after
+@@ -1528,8 +1518,9 @@ Neighborhood::recount_mpr_set()
+ 		  cstring(_fm.get_main_addr()));
+ 	set<OlsrTypes::NeighborID>::const_iterator ii;
+ 	for (ii = new_mpr_set.begin(); ii != new_mpr_set.end(); ii++) {
+-	    debug_msg("\t%s\n",
+-		      cstring(get_neighbor((*ii))->main_addr()));
++	    const Neighbor* n = get_neighbor((*ii), err);
++	    if (n)
++		debug_msg("\t%s\n", cstring(n->main_addr()));
+ 	}
+ 
+         // TODO: Section 8.5: We MAY trigger an early HELLO when the MPR
+@@ -1564,8 +1555,7 @@ Neighborhood::mark_all_n1_as_mprs(set<OlsrTypes::NeighborID>& final_mpr_set)
+ }
+ 
+ size_t
+-Neighborhood::minimize_mpr_set(set<OlsrTypes::NeighborID>& final_mpr_set)
+-    throw(BadTwoHopCoverage)
++Neighborhood::minimize_mpr_set(set<OlsrTypes::NeighborID>& final_mpr_set, string& err)
+ {
+     size_t withdrawn_mpr_count = 0;
+ 
+@@ -1624,14 +1614,14 @@ Neighborhood::minimize_mpr_set(set<OlsrTypes::NeighborID>& final_mpr_set)
+ 
+ 			// Invariant: N2 must remain covered.
+ 			if (! n2->is_covered()) {
+-			    xorp_throw(BadTwoHopCoverage, c_format(
+-				       "OLSR node %s has uncovered "
+-				       "TwoHopNode %u (%sreachable "
+-				       "%u two-hop links)",
+-				       cstring(_fm.get_main_addr()),
+-				       XORP_UINT_CAST(n2->id()),
+-				       n2->is_reachable() ? "" : "un",
+-				       XORP_UINT_CAST(n2->reachability())));
++			    err += c_format("OLSR node %s has uncovered "
++					    "TwoHopNode %u (%sreachable "
++					    "%u two-hop links)",
++					    cstring(_fm.get_main_addr()),
++					    XORP_UINT_CAST(n2->id()),
++					    n2->is_reachable() ? "" : "un",
++					    XORP_UINT_CAST(n2->reachability()));
++			    return -1; /* this used to be an exception */
+ 			}
+ 		    }
+ 		    ++withdrawn_mpr_count;
+@@ -1849,6 +1839,7 @@ size_t
+ Neighborhood::consider_poorly_covered_twohops(ostringstream& dbg)
+ {
+     size_t covered_n2_count = 0;
++    string err;
+ 
+     map<OlsrTypes::TwoHopNodeID, TwoHopNeighbor*>::iterator ii;
+     for (ii = _twohop_nodes.begin(); ii != _twohop_nodes.end(); ii++) {
+@@ -1866,17 +1857,22 @@ Neighborhood::consider_poorly_covered_twohops(ostringstream& dbg)
+ 	    // will be raised -- until this is implemented correctly
+ 	    // in update_twohop_reachability().
+ 	    //
+-	    const TwoHopLink* l2 = find_best_twohop_link(n2);
+-	    Neighbor* n = l2->nexthop();
+-	    //
+-	    // N2 is therefore covered by N.
+-	    // Mark N2 as covered by N. Mark N as MPR.
+-	    //
+-	    n2->add_covering_mpr(n->id());
+-	    n->set_is_mpr(true);
+-	    dbg << "Counting poorly_covered n2: " << n2->toStringBrief() << " n is set as mpr: "
+-		<< n->toStringBrief() << endl;
+-	    covered_n2_count++;
++	    const TwoHopLink* l2 = find_best_twohop_link(n2, err);
++	    if (l2) {
++		Neighbor* n = l2->nexthop();
++		//
++		// N2 is therefore covered by N.
++		// Mark N2 as covered by N. Mark N as MPR.
++		//
++		n2->add_covering_mpr(n->id());
++		n->set_is_mpr(true);
++		dbg << "Counting poorly_covered n2: " << n2->toStringBrief() << " n is set as mpr: "
++		    << n->toStringBrief() << endl;
++		covered_n2_count++;
++	    }
++	    else {
++		dbg << "Could not find neighbour: " << err << endl;
++	    }
+ 	}
+ 	else {
+ 	    dbg << "NOT Counting poorly_covered n2: " << n2->toStringBrief() << "  strict: " << n2->is_strict()
+@@ -2059,6 +2055,8 @@ Neighborhood::event_receive_hello(
+     const IPv4& remote_addr,
+     const IPv4& local_addr)
+ {
++    string err;
++
+     HelloMessage* hello = dynamic_cast<HelloMessage *>(msg);
+     if (0 == hello)
+ 	return false;	// I did not consume this message.
+@@ -2116,16 +2114,15 @@ Neighborhood::event_receive_hello(
+     // Update the link state tuple, creating it if needed.
+     bool is_new_link = false;
+     OlsrTypes::LogicalLinkID linkid;
+-    try {
+-	linkid = update_link(hello->faceid(), remote_addr, local_addr,
+-			     hello->expiry_time(), is_new_link);
+ 
++    linkid = update_link(hello->faceid(), remote_addr, local_addr,
++			 hello->expiry_time(), is_new_link, err);
++    if (linkid != OlsrTypes::UNUSED_LINK_ID) {
+ 	// 7.1.1: Update the link state timers.
+ 	_links[linkid]->update_timers(hello->expiry_time(),
+ 				      i_was_mentioned, mylc);
+-
+-    } catch(BadLogicalLink& bl) {
+-	debug_msg("could not update link\n");
++    } else {
++	debug_msg("could not update link: %s\n", err.c_str());
+ 	return true;	// I consumed this message.
+     }
+ 
+@@ -2135,16 +2132,15 @@ Neighborhood::event_receive_hello(
+     bool is_new_neighbor = false;
+     bool is_mpr_selector = i_was_mentioned && mylc.is_mpr_neighbor();
+     OlsrTypes::NeighborID nid;
+-    try {
+-	nid = update_neighbor(hello->origin(),
+-			      linkid,
+-			      is_new_link,
+-			      hello->willingness(),
+-			      is_mpr_selector,
+-			      hello->expiry_time(),
+-			      is_new_neighbor);
+-
+-    } catch(BadNeighbor& bn) {
++
++    nid = update_neighbor(hello->origin(),
++			  linkid,
++			  is_new_link,
++			  hello->willingness(),
++			  is_mpr_selector,
++			  hello->expiry_time(),
++			  is_new_neighbor, err);
++    if (nid == OlsrTypes::UNUSED_NEIGHBOR_ID) {
+ 	debug_msg("could not update neighbor\n");
+ 	if (is_new_link)
+ 	    delete_link(linkid);
+@@ -2166,9 +2162,10 @@ Neighborhood::event_receive_hello(
+ 	    case OlsrTypes::SYM_NEIGH:
+ 		// 8.2.1, 1.2: Create or update two-hop neighbor tuple.
+ 		// Interpreted as: add a link to a two-hop neighbor.
+-		// May throw BadTwoHopLink.
+-		update_twohop_link(lai, *n, hello->faceid(),
+-				   hello->expiry_time());
++		if (update_twohop_link(lai, *n, hello->faceid(),
++				       hello->expiry_time(), err) == OlsrTypes::UNUSED_TWOHOP_LINK_ID) {
++		    continue; // not sure what to do about this
++		}
+ 		break;
+ 	    case OlsrTypes::NOT_NEIGH:
+ 		// 8.2.1, 2: Delete two-hop neighbor tuple.
+diff --git a/xorp/contrib/olsr/neighborhood.hh b/xorp/contrib/olsr/neighborhood.hh
+index a4395be..31829e9 100644
+--- a/xorp/contrib/olsr/neighborhood.hh
++++ b/xorp/contrib/olsr/neighborhood.hh
+@@ -18,7 +18,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/contrib/olsr/neighborhood.hh,v 1.3 2008/10/02 21:56:35 bms Exp $
+ 
+ #ifndef __OLSR_NEIGHBORHOOD_HH__
+ #define __OLSR_NEIGHBORHOOD_HH__
+@@ -276,15 +275,13 @@ class Neighborhood {
+      * @param is_created will be set to true if the link did not
+      *                   previously exist and was created by this method.
+      * @return the ID of the link tuple.
+-     * @throw BadLogicalLink if the link could not be updated.
+      */
+     OlsrTypes::LogicalLinkID update_link(
+ 	const OlsrTypes::FaceID faceid,
+ 	const IPv4& remote_addr,
+ 	const IPv4& local_addr,
+ 	const TimeVal& vtime,
+-	bool& is_created)
+-	throw(BadLogicalLink);
++	bool& is_created, string& err);
+ 
+     /**
+      * Add a link to the local link database.
+@@ -295,13 +292,11 @@ class Neighborhood {
+      * @param local_addr the protocol address of the local interface
+      *                    at the near end of the link.
+      * @return the ID of the new link.
+-     * @throw BadLogicalLink if the link could not be created.
+      */
+     OlsrTypes::LogicalLinkID add_link(
+ 	const TimeVal& vtime,
+ 	const IPv4& remote_addr,
+-	const IPv4& local_addr)
+-	throw(BadLogicalLink);
++	const IPv4& local_addr, string& err);
+ 
+     /**
+      * Delete the link tuple specified by the given link id.
+@@ -327,10 +322,8 @@ class Neighborhood {
+      *
+      * @param linkid the ID of the link to look up.
+      * @return a pointer to the logical link.
+-     * @throw BadLogicalLink if the link could not be found.
+      */
+-    const LogicalLink* get_logical_link(const OlsrTypes::LogicalLinkID linkid)
+-	throw(BadLogicalLink);
++    const LogicalLink* get_logical_link(const OlsrTypes::LogicalLinkID linkid, string& err);
+ 
+     /**
+      * Fill out a list of all LogicalLinkIDs in the database.
+@@ -348,11 +341,9 @@ class Neighborhood {
+      * @param local_addr the protocol address of the local interface
+      *                    at the near end of the link.
+      * @return the ID of the LogicalLink.
+-     * @throw BadLogicalLink if the link could not be found.
+      */
+     OlsrTypes::LogicalLinkID get_linkid(const IPv4& remote_addr,
+-	const IPv4& local_addr)
+-	throw(BadLogicalLink);
++					const IPv4& local_addr, string& err);
+ 
+     //get_link_list
+ 
+@@ -375,16 +366,14 @@ class Neighborhood {
+      * @param mprs_expiry_time the expiry time for the MPR selector tuple.
+      * @param is_created set to true if a new neighbor entry was created.
+      * @return the ID of the updated or created neighbor tuple.
+-     * @throw BadNeighbor if the neighbor entry could not be updated.
+      */
+     OlsrTypes::NeighborID update_neighbor(const IPv4& main_addr,
+-	const OlsrTypes::LogicalLinkID linkid,
+-	const bool is_new_link,
+-	const OlsrTypes::WillType will,
+-	const bool is_mpr_selector,
+-	const TimeVal& mprs_expiry_time,
+-	bool& is_created)
+-	throw(BadNeighbor);
++					  const OlsrTypes::LogicalLinkID linkid,
++					  const bool is_new_link,
++					  const OlsrTypes::WillType will,
++					  const bool is_mpr_selector,
++					  const TimeVal& mprs_expiry_time,
++					  bool& is_created, string& err);
+ 
+     /**
+      * Add a new Neighbor to the one-hop neighbor database.
+@@ -393,11 +382,9 @@ class Neighborhood {
+      * @param main_addr The main address of the new neighbor.
+      * @param linkid The ID of the Neighbor's first link.
+      * @return the ID of the newly created neighbor.
+-     * @throw BadNeighbor if the neighbor entry could not be created.
+      */
+     OlsrTypes::NeighborID add_neighbor(const IPv4& main_addr,
+-	OlsrTypes::LogicalLinkID linkid)
+-	throw(BadNeighbor);
++				       OlsrTypes::LogicalLinkID linkid, string& err);
+ 
+     /**
+      * Delete a neighbor from the neighbor database.
+@@ -414,10 +401,8 @@ class Neighborhood {
+      *
+      * @param nid the ID of the Neighbor.
+      * @return the pointer to the Neighbor instance.
+-     * @throw BadNeighbor if the Neighbor does not exist.
+      */
+-    const Neighbor* get_neighbor(const OlsrTypes::NeighborID nid)
+-	throw(BadNeighbor);
++    const Neighbor* get_neighbor(const OlsrTypes::NeighborID nid, string& err);
+ 
+     /**
+      * Fill out a list of all NeighborIDs in the database.
+@@ -431,10 +416,8 @@ class Neighborhood {
+      *
+      * @param main_addr the main protocol address of the OLSR node.
+      * @return the neighbor ID.
+-     * @throw BadNeighbor if the neighbor is not found.
+      */
+-    OlsrTypes::NeighborID get_neighborid_by_main_addr(const IPv4& main_addr)
+-	throw(BadNeighbor);
++    OlsrTypes::NeighborID get_neighborid_by_main_addr(const IPv4& main_addr, string& err);
+ 
+     /**
+      * Find a neighbor ID, given the address of one of its interfaces.
+@@ -442,11 +425,9 @@ class Neighborhood {
+      * @param remote_addr the address of one of the interfaces of
+      *                    an OLSR node.
+      * @return the neighbor ID.
+-     * @throw BadNeighbor if the neighbor is not found.
+      */
+     OlsrTypes::NeighborID
+-	get_neighborid_by_remote_addr(const IPv4& remote_addr)
+-	throw(BadNeighbor);
++    get_neighborid_by_remote_addr(const IPv4& remote_addr, string& err);
+ 
+     /**
+      * Check if a remote address belongs to a symmetric one-hop neighbor.
+@@ -508,8 +489,7 @@ class Neighborhood {
+     OlsrTypes::TwoHopLinkID update_twohop_link(const LinkAddrInfo& node_info,
+ 					       Neighbor& nexthop,
+ 					       const OlsrTypes::FaceID faceid,
+-					       const TimeVal& vtime)
+-	throw(BadTwoHopLink);
++					       const TimeVal& vtime, string& err);
+ 
+     /**
+      * Add a TwoHopLink to the Neighborhood.
+@@ -524,12 +504,10 @@ class Neighborhood {
+      *                    the TwoHopLink being created.
+      * @param vtime The time for which the TwoHopLink remains valid.
+      * @return the ID of the newly created TwoHopLink.
+-     * @throw BadTwoHopLink if the TwoHopLink could not be created.
+      */
+     OlsrTypes::TwoHopLinkID add_twohop_link(Neighbor* nexthop,
+ 					    const IPv4& remote_addr,
+-					    const TimeVal& vtime)
+-	throw(BadTwoHopLink);
++					    const TimeVal& vtime, string& err);
+ 
+     /**
+      * Delete the TwoHopLink to a two-hop neighbor.
+@@ -562,10 +540,8 @@ class Neighborhood {
+      *
+      * @param tlid the ID of a TwoHopLink.
+      * @return the pointer to the TwoHopLink instance.
+-     * @throw BadTwoHopLink if tlid does not exist.
+      */
+-    TwoHopLink* get_twohop_link(const OlsrTypes::TwoHopLinkID tlid)
+-	throw(BadTwoHopLink);
++    TwoHopLink* get_twohop_link(const OlsrTypes::TwoHopLinkID tlid, string& err);
+ 
+     /**
+      * Fill out a list of all TwoHopLinkIDs in the database.
+@@ -591,14 +567,12 @@ class Neighborhood {
+      * @param is_new_l2 true if tlid refers to a newly created link.
+      * @param is_n2_created set to true if a new TwoHopNeighbor was created.
+      * @return the ID of the two-hop neighbor.
+-     * @throw BadTwoHopNode if the two-hop neighbor could not be updated.
+      */
+     OlsrTypes::TwoHopNodeID update_twohop_node(
+ 	const IPv4& main_addr,
+ 	const OlsrTypes::TwoHopLinkID tlid,
+ 	const bool is_new_l2,
+-	bool& is_n2_created)
+-	throw(BadTwoHopNode);
++	bool& is_n2_created, string& err);
+ 
+     /**
+      * Add a two-hop neighbor to the two-hop neighborhood.
+@@ -606,12 +580,10 @@ class Neighborhood {
+      * @param main_addr the main address of the two-hop neighbor to create.
+      * @param tlid the ID of the initial link to this two-hop neighbor.
+      * @return the ID of the newly created two-hop neighbor.
+-     * @throw BadTwoHopNode if the two-hop neighbor could not be created.
+      */
+     OlsrTypes::TwoHopNodeID add_twohop_node(
+         const IPv4& main_addr,
+-	const OlsrTypes::TwoHopLinkID tlid)
+-	throw(BadTwoHopNode);
++	const OlsrTypes::TwoHopLinkID tlid, string& err);
+ 
+     /**
+      * Delete an entry in the two-hop neighbor table.
+@@ -626,21 +598,18 @@ class Neighborhood {
+      *
+      * @param main_addr the main address of a two-hop neighbor.
+      * @return the ID of the two-hop neighbor.
+-     * @throw BadTwoHopNode if the two-hop neighbor could not be found.
+      */
+     OlsrTypes::TwoHopNodeID get_twohop_nodeid_by_main_addr(
+-	const IPv4& main_addr)
+-	throw(BadTwoHopNode);
++	const IPv4& main_addr, string& err);
+ 
+     /**
+      * Given the ID of a TwoHopNeighbor, return its instance pointer.
+      *
+      * @param tnid the ID of a TwoHopNeighbor.
+      * @return the pointer to the TwoHopNeighbor instance.
+-     * @throw BadTwoHopNode if tnid does not exist.
+      */
+     const TwoHopNeighbor* get_twohop_neighbor(
+-	const OlsrTypes::TwoHopNodeID tnid) const throw(BadTwoHopNode);
++	const OlsrTypes::TwoHopNodeID tnid, string& err) const;
+ 
+     /**
+      * Fill out a list of all TwoHopNodeIDs in the database.
+@@ -868,11 +837,8 @@ class Neighborhood {
+      *                      has been minimized.
+      * @return the number of elements removed from the MPR set, as it
+      *         appears in the one-hop neighbor database.
+-     * @throw BadTwoHopCoverage if the MPR minimization algorithm
+-     *        detects that a two-hop node is now uncovered by any MPRs.
+      */
+-    size_t minimize_mpr_set(set<OlsrTypes::NeighborID>& final_mpr_set)
+-	throw(BadTwoHopCoverage);
++    size_t minimize_mpr_set(set<OlsrTypes::NeighborID>& final_mpr_set, string& err);
+ 
+     /**
+      * Determine if an MPR is essential to covering the entire two-hop
+@@ -1020,11 +986,8 @@ protected:
+      *
+      * @param n Pointer to a neighbor N.
+      * @return Pointer to a LogicalLink l which is the best link to N.
+-     * @throw BadLinkCoverage if none of the links are reachable or
+-     *                        is of suitable ETX criteria.
+      */
+-    const LogicalLink* find_best_link(const Neighbor* n)
+-        throw(BadLinkCoverage);
++    const LogicalLink* find_best_link(const Neighbor* n, string& err);
+ 
+     /**
+      * Push a single Neighbor, and its links, to the RouteManager.
+@@ -1048,11 +1011,8 @@ protected:
+      *
+      * @param n2 Pointer to a neighbor N2.
+      * @return Pointer to a TwoHopLink l2 which is the best link to N2.
+-     * @throw BadTwoHopCoverage if none of the links are reachable,
+-     *        or of suitable ETX criteria.
+      */
+-    const TwoHopLink* find_best_twohop_link(const TwoHopNeighbor* n2)
+-	throw(BadTwoHopCoverage);
++    const TwoHopLink* find_best_twohop_link(const TwoHopNeighbor* n2, string& err);
+ 
+     /**
+      * Push a single TwoHopNeigbor, and its links, to the RouteManager.
+diff --git a/xorp/contrib/olsr/olsr.cc b/xorp/contrib/olsr/olsr.cc
+index 7da0784..ec1f917 100644
+--- a/xorp/contrib/olsr/olsr.cc
++++ b/xorp/contrib/olsr/olsr.cc
+@@ -222,9 +222,10 @@ Olsr::bind_address(const string& interface,
+ 		   const IPv4& all_nodes_addr,
+ 		   const uint32_t& all_nodes_port)
+ {
+-    try {
+-	OlsrTypes::FaceID faceid = face_manager().create_face(interface, vif);
+ 
++    string err;
++    OlsrTypes::FaceID faceid = face_manager().create_face(interface, vif, err);
++    if (faceid != OlsrTypes::UNUSED_FACE_ID) {
+ 	face_manager().set_local_addr(faceid, local_addr);
+ 	face_manager().set_local_port(faceid, local_port);
+ 	face_manager().set_all_nodes_addr(faceid, all_nodes_addr);
+@@ -236,21 +237,20 @@ Olsr::bind_address(const string& interface,
+ 	//face_manager().activate_face(interface, vif);
+ 
+ 	return true;
+-    } catch (...) {}
+-
++    }
++    XLOG_ERROR("bind-address: %s\n", err.c_str());
+     return false;
+ }
+ 
+ bool
+ Olsr::unbind_address(const string& interface, const string& vif)
+ {
+-    try {
+-	OlsrTypes::FaceID faceid = face_manager().get_faceid(interface, vif);
+-
++    string err;
++    OlsrTypes::FaceID faceid = face_manager().get_faceid(interface, vif, err);
++    if (faceid != OlsrTypes::UNUSED_FACE_ID) {
+ 	// TODO: xrlio teardown.
+ 	return face_manager().delete_face(faceid);
+-    } catch (...) {}
+-
++    }
+     return false;
+ }
+ 
+@@ -258,14 +258,14 @@ bool
+ Olsr::set_interface_enabled(const string& interface, const string& vif,
+ 			    const bool enabled)
+ {
+-    try {
+-	OlsrTypes::FaceID faceid = face_manager().get_faceid(interface, vif);
+-
++    string err;
++    OlsrTypes::FaceID faceid = face_manager().get_faceid(interface, vif, err);
++    if (faceid != OlsrTypes::UNUSED_FACE_ID) {
+ 	bool success = face_manager().set_face_enabled(faceid, enabled);
+ 	debug_msg("%s/%s %senabled ok\n",
+ 		  interface.c_str(), vif.c_str(), success ? "" : "not ");
+ 	return success;
+-    } catch (...) {}
++    }
+ 
+     return false;
+ }
+@@ -274,14 +274,21 @@ bool
+ Olsr::get_interface_enabled(const string& interface, const string& vif,
+ 			    bool& enabled)
+ {
+-    try {
+-	OlsrTypes::FaceID faceid = face_manager().get_faceid(interface, vif);
+-
++    string err;
++    OlsrTypes::FaceID faceid = face_manager().get_faceid(interface, vif, err);
++    if (faceid != OlsrTypes::UNUSED_FACE_ID) {
+ 	enabled = face_manager().get_face_enabled(faceid);
+-
+ 	return true;
+-    } catch (...) {}
++    }
++    return false;
++}
+ 
++bool Olsr::set_interface_cost(const string& interface,
++			      const string& vif, int cost, string& err)
++{
++    OlsrTypes::FaceID faceid = face_manager().get_faceid(interface, vif, err);
++    if (faceid != OlsrTypes::UNUSED_FACE_ID)
++	return face_manager().set_interface_cost(faceid, cost);
+     return false;
+ }
+ 
+@@ -336,7 +343,8 @@ Olsr::originate_external_route(const IPv4Net& net,
+ 			       const uint32_t& metric,
+ 			       const PolicyTags& policytags)
+ {
+-    return _er.originate_hna_route_out(net);
++    string err;
++    return _er.originate_hna_route_out(net, err);
+ 
+     UNUSED(nexthop);
+     UNUSED(metric);
+@@ -346,10 +354,9 @@ Olsr::originate_external_route(const IPv4Net& net,
+ bool
+ Olsr::withdraw_external_route(const IPv4Net& net)
+ {
+-    try {
+-	_er.withdraw_hna_route_out(net);
++    string err;
++    if (_er.withdraw_hna_route_out(net, err))
+ 	return true;
+-    } catch (...) {}
+ 
+     return false;
+ }
+diff --git a/xorp/contrib/olsr/olsr.hh b/xorp/contrib/olsr/olsr.hh
+index 5014831..ee13d355 100644
+--- a/xorp/contrib/olsr/olsr.hh
++++ b/xorp/contrib/olsr/olsr.hh
+@@ -18,13 +18,11 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/contrib/olsr/olsr.hh,v 1.3 2008/10/02 21:56:35 bms Exp $
+ 
+ #ifndef __OLSR_OLSR_HH__
+ #define __OLSR_OLSR_HH__
+ 
+ #include "olsr_types.hh"
+-#include "exceptions.hh"
+ #include "policy_varrw.hh"
+ #include "io.hh"
+ #include "message.hh"
+@@ -418,12 +416,8 @@ class Olsr {
+      * @param cost the new cost of the interface.
+      * @return true if the interface cost was set successfully.
+      */
+-    inline bool set_interface_cost(const string& interface,
+-	const string& vif, int cost)
+-    {
+-	OlsrTypes::FaceID faceid = face_manager().get_faceid(interface, vif);
+-	return face_manager().set_interface_cost(faceid, cost);
+-    }
++    bool set_interface_cost(const string& interface,
++			    const string& vif, int cost, string& err);
+ 
+     /**
+      * Get the MTU of an interface.
+diff --git a/xorp/contrib/olsr/olsr_types.hh b/xorp/contrib/olsr/olsr_types.hh
+index 7a57d55..ef6d718 100644
+--- a/xorp/contrib/olsr/olsr_types.hh
++++ b/xorp/contrib/olsr/olsr_types.hh
+@@ -18,7 +18,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/contrib/olsr/olsr_types.hh,v 1.5 2008/10/02 21:56:35 bms Exp $
+ 
+ #ifndef __OLSR_OLSR_TYPES_HH__
+ #define __OLSR_OLSR_TYPES_HH__
+diff --git a/xorp/contrib/olsr/test_simulator.cc b/xorp/contrib/olsr/test_simulator.cc
+index 1191bcd..896bb11 100644
+--- a/xorp/contrib/olsr/test_simulator.cc
++++ b/xorp/contrib/olsr/test_simulator.cc
+@@ -125,10 +125,8 @@ public:
+      *
+      * @param main_addr The OLSR interface address of the node.
+      * @return the number of links which were destroyed.
+-     * @throw NoSuchAddress if link_addr does not exist.
+      */
+-    size_t purge_links_by_node(const IPv4& main_addr)
+-	throw(NoSuchAddress);
++    size_t purge_links_by_node(const IPv4& main_addr, string& err);
+ 
+     /**
+      * Mark an OLSR node address as administratively up.
+@@ -576,9 +574,8 @@ public:
+      *
+      * @param addr the OLSR protocol address to look up in the simulator.
+      * @return the NodeTuple corresponding to addr.
+-     * @throw NoSuchAddr if the address does not exist.
+      */
+-    NodeTuple& get_node_tuple_by_addr(const IPv4& addr) throw(NoSuchAddress);
++    NodeTuple* get_node_tuple_by_addr(const IPv4& addr, string& err);
+ 
+ protected:
+     inline bool node_is_selected() {
+@@ -661,10 +658,8 @@ public:
+      * @param left_addr The OLSR interface address of the left hand node.
+      * @param right_addr The OLSR interface address of the right hand node.
+      * @return true if the link was successfully created, otherwise false.
+-     * @throw NoSuchAddress if neither address exists.
+      */
+-    bool add_link(const IPv4& left_addr, const IPv4& right_addr)
+-	throw(NoSuchAddress);
++    bool add_link(const IPv4& left_addr, const IPv4& right_addr, string& err);
+ 
+     /**
+      * Remove a link between two OLSR instances, given their addresses.
+@@ -672,10 +667,8 @@ public:
+      * @param left_addr The OLSR interface address of the left hand node.
+      * @param right_addr The OLSR interface address of the right hand node.
+      * @return true if the link was successfully remove, otherwise false.
+-     * @throw NoSuchAddress if neither address exists.
+      */
+-    bool remove_link(const IPv4& left_addr, const IPv4& right_addr)
+-	throw(NoSuchAddress);
++    bool remove_link(const IPv4& left_addr, const IPv4& right_addr, string& err);
+ 
+     /**
+      * Remove all links in the topology, without removing the nodes.
+@@ -701,10 +694,8 @@ public:
+      *
+      * @param left_addr The OLSR interface address of the left hand node.
+      * @return true if the link was successfully created, otherwise false.
+-     * @throw NoSuchAddress if link_addr does not exist.
+      */
+-    bool remove_all_links_for_addr(const IPv4& link_addr)
+-	throw(NoSuchAddress);
++    bool remove_all_links_for_addr(const IPv4& link_addr, string& err);
+ 
+     Simulator* parent() { return _parent; }
+     EventLoop& eventloop() { return _eventloop; }
+@@ -882,8 +873,7 @@ Nodes::destroy_node(const IPv4& main_addr)
+ }
+ 
+ size_t
+-Nodes::purge_links_by_node(const IPv4& main_addr)
+-    throw(NoSuchAddress)
++Nodes::purge_links_by_node(const IPv4& main_addr, string& err)
+ {
+     size_t found_count = 0;
+ 
+@@ -1286,12 +1276,12 @@ Nodes::verify_mpr_set(const vector<IPv4>& mpr_addrs)
+     // for each provided MPR address and build comparison set.
+     vector<IPv4>::const_iterator ii;
+     for (ii = mpr_addrs.begin(); ii != mpr_addrs.end(); ii++) {
+-	try {
+-	    OlsrTypes::NeighborID nid = olsr->neighborhood().
+-		get_neighborid_by_main_addr((*ii));
++	OlsrTypes::NeighborID nid = olsr->neighborhood().
++	    get_neighborid_by_main_addr((*ii));
++	if (nid != UNUSED_NEIGHBOR_ID) {
+ 	    expected_mpr_set.insert(nid);
+-	} catch (...) {
+-	    throw;
++	} else {
++	    return false;
+ 	}
+     }
+ 
+@@ -1321,12 +1311,12 @@ Nodes::verify_mpr_selector_set(const vector<IPv4>& mprs_addrs)
+     // for each provided MPR selector address and build comparison set.
+     vector<IPv4>::const_iterator ii;
+     for (ii = mprs_addrs.begin(); ii != mprs_addrs.end(); ii++) {
+-	try {
+-	    OlsrTypes::NeighborID nid = olsr->neighborhood().
+-		get_neighborid_by_main_addr((*ii));
++	OlsrTypes::NeighborID nid = olsr->neighborhood().
++	    get_neighborid_by_main_addr((*ii));
++	if (nid != UNUSED_NEIGHBOR_ID) {
+ 	    expected_mpr_selector_set.insert(nid);
+-	} catch (...) {
+-	    throw;
++	} else {
++	    return false;
+ 	}
+     }
+ 
+@@ -1636,16 +1626,14 @@ Nodes::verify_tc_distance(const IPv4& origin,
+     Olsr* olsr = nat.olsr();
+     TopologyManager& tm = olsr->topology_manager();
+ 
+-    try {
+-	uint16_t actual_distance = tm.get_tc_distance(origin, neighbor_addr);
++    uint16_t actual_distance = tm.get_tc_distance(origin, neighbor_addr);
+ 
+-	if (expected_distance == actual_distance)
+-	    return true;
++    if (expected_distance == actual_distance)
++	return true;
+ 
+-        debug_msg("expected %u, actual %u\n",
+-		  XORP_UINT_CAST(expected_distance),
+-		  XORP_UINT_CAST(actual_distance));
+-    } catch (...) {}
++    debug_msg("expected %u, actual %u\n",
++	      XORP_UINT_CAST(expected_distance),
++	      XORP_UINT_CAST(actual_distance));
+ 
+     return false;
+ }
+@@ -1704,34 +1692,30 @@ Nodes::verify_routing_entry(IPv4Net net,
+     return result;
+ }
+ 
+-NodeTuple&
+-Nodes::get_node_tuple_by_addr(const IPv4& addr)
+-    throw(NoSuchAddress)
++NodeTuple*
++Nodes::get_node_tuple_by_addr(const IPv4& addr, string& err)
+ {
+     map<IPv4, NodeTuple>::iterator ii = _nodes.find(addr);
+     if (ii == _nodes.end()) {
+-	xorp_throw(NoSuchAddress,
+-		   c_format("address %s not found in simulation",
+-			    cstring(addr)));
++	err += c_format("address %s not found in simulation",
++			    cstring(addr));
++	return NULL;
+     }
+ 
+-    NodeTuple& nat = (*ii).second;
+-    return nat;
++    return &((*ii).second);
+ }
+ 
+ bool
+-Links::add_link(const IPv4& left_addr, const IPv4& right_addr)
+-    throw(NoSuchAddress)
++Links::add_link(const IPv4& left_addr, const IPv4& right_addr, string& err)
+ {
+ 
+     // Check if mapping already exists for address pair.
+     multimap<pair<IPv4, IPv4>, LinkTuple>::iterator ii =
+ 	_links.find(make_pair(left_addr, right_addr));
+     if (ii != _links.end()) {
+-	xorp_throw(NoSuchAddress,
+-		   c_format("Link between %s and %s already exists",
+-			    cstring(left_addr),
+-			    cstring(right_addr)));
++	err += c_format("Link between %s and %s already exists",
++			cstring(left_addr),
++			cstring(right_addr));
+ 	return false;
+     }
+ 
+@@ -1796,8 +1780,7 @@ Links::remove_all_links()
+ }
+ 
+ bool
+-Links::remove_link(const IPv4& left_addr, const IPv4& right_addr)
+-    throw(NoSuchAddress)
++Links::remove_link(const IPv4& left_addr, const IPv4& right_addr, string& err)
+ {
+     // Check if mapping exists for address pair.
+     multimap<pair<IPv4, IPv4>, LinkTuple>::iterator ii =
+@@ -1814,8 +1797,7 @@ Links::remove_link(const IPv4& left_addr, const IPv4& right_addr)
+ 
+ // remove all links which contain link_addr.
+ bool
+-Links::remove_all_links_for_addr(const IPv4& link_addr)
+-    throw(NoSuchAddress)
++Links::remove_all_links_for_addr(const IPv4& link_addr, string& addr)
+ {
+     size_t found_count = 0;
+ 
+@@ -1835,9 +1817,9 @@ Links::remove_all_links_for_addr(const IPv4& link_addr)
+     }
+ 
+     if (found_count == 0) {
+-	xorp_throw(NoSuchAddress,
+-		   c_format("address %s not found in simulated links" ,
+-			    cstring(link_addr)));
++	err += c_format("address %s not found in simulated links" ,
++			cstring(link_addr));
++	return false;
+     }
+ 
+     return (found_count != 0);
+diff --git a/xorp/contrib/olsr/topology.cc b/xorp/contrib/olsr/topology.cc
+index 9d7b991..1c22899 100644
+--- a/xorp/contrib/olsr/topology.cc
++++ b/xorp/contrib/olsr/topology.cc
+@@ -78,14 +78,13 @@ TopologyManager::~TopologyManager()
+  * TC entries.
+  */
+ 
+-void
++bool
+ TopologyManager::update_tc_entry(const IPv4& dest_addr,
+-    const IPv4& origin_addr,
+-    const uint16_t distance,
+-    const uint16_t ansn,
+-    const TimeVal& vtime,
+-    bool& is_created)
+-    throw(BadTopologyEntry)
++				 const IPv4& origin_addr,
++				 const uint16_t distance,
++				 const uint16_t ansn,
++				 const TimeVal& vtime,
++				 bool& is_created, string& err)
+ {
+     debug_msg("DestAddr %s OriginAddr %s Distance %u ANSN %u Expiry %s\n",
+ 	      cstring(dest_addr),
+@@ -122,23 +121,25 @@ TopologyManager::update_tc_entry(const IPv4& dest_addr,
+ 	update_tc_distance(tc, distance);
+     } else {
+ 	// 9.5, 4.2: Record a new tuple in the topology set.
+-	// May throw BadTopologyEntry exception.
+-	tcid = add_tc_entry(dest_addr, origin_addr, distance, ansn, vtime);
++	tcid = add_tc_entry(dest_addr, origin_addr, distance, ansn, vtime, err);
++	if (tcid == OlsrTypes::UNUSED_TOPOLOGY_ID) {
++	    return false;
++	}
+ 	debug_msg("%s: Added TC entry %u.\n",
+ 		  cstring(_fm.get_main_addr()),
+ 		  XORP_UINT_CAST(tcid));
+     }
+ 
+     is_created = !is_found;
++    return true;
+ }
+ 
+ OlsrTypes::TopologyID
+ TopologyManager::add_tc_entry(const IPv4& dest_addr,
+-    const IPv4& origin_addr,
+-    const uint16_t distance,
+-    const uint16_t ansn,
+-    const TimeVal& expiry_time)
+-    throw(BadTopologyEntry)
++			      const IPv4& origin_addr,
++			      const uint16_t distance,
++			      const uint16_t ansn,
++			      const TimeVal& expiry_time, string& err)
+ {
+     debug_msg("DestAddr %s OriginAddr %s Distance %u ANSN %u Expiry %s\n",
+ 	      cstring(dest_addr),
+@@ -149,11 +150,10 @@ TopologyManager::add_tc_entry(const IPv4& dest_addr,
+ 
+     OlsrTypes::TopologyID tcid = _next_tcid++;
+ 
+-    // Throw an exception if we overflowed the TopologyID space.
+     if (0 != _topology.count(tcid)) {
+-	xorp_throw(BadTopologyEntry,
+-		   c_format("Mapping for TopologyID %u already exists",
+-			    XORP_UINT_CAST(tcid)));
++	err == c_format("Mapping for TopologyID %u already exists",
++			XORP_UINT_CAST(tcid));
++	return OlsrTypes::UNUSED_TOPOLOGY_ID;
+     }
+ 
+     _topology[tcid] = new TopologyEntry(_eventloop, this, tcid,
+@@ -268,8 +268,7 @@ TopologyManager::apply_tc_ansn(const uint16_t ansn,
+ 
+ OlsrTypes::TopologyID
+ TopologyManager::get_topologyid(const IPv4& dest_addr,
+-				const IPv4& lasthop_addr)
+-    throw(BadTopologyEntry)
++				const IPv4& lasthop_addr, string& err)
+ {
+     debug_msg("DestAddr %s LasthopAddr %s\n",
+ 	      cstring(dest_addr),
+@@ -290,22 +289,21 @@ TopologyManager::get_topologyid(const IPv4& dest_addr,
+     }
+ 
+     if (!is_found) {
+-	xorp_throw(BadTopologyEntry,
+-		   c_format("No mapping for %s exists", cstring(dest_addr)));
++	err += c_format("No mapping for %s exists", cstring(dest_addr));
++	return OlsrTypes::UNUSED_TOPOLOGY_ID;
+     }
+ 
+     return tcid;
+ }
+ 
+ const TopologyEntry*
+-TopologyManager::get_topology_entry_by_id(const OlsrTypes::TopologyID tcid)
+-    const throw(BadTopologyEntry)
++TopologyManager::get_topology_entry_by_id(const OlsrTypes::TopologyID tcid, string& err) const
+ {
+     TcIdMap::const_iterator ii = _topology.find(tcid);
+ 
+     if (ii == _topology.end()) {
+-	xorp_throw(BadTopologyEntry,
+-		   c_format("No mapping for %u exists", XORP_UINT_CAST(tcid)));
++	err += c_format("No mapping for %u exists", XORP_UINT_CAST(tcid));
++	return NULL;
+     }
+ 
+     return (*ii).second;
+@@ -321,8 +319,7 @@ TopologyManager::get_topology_list(list<OlsrTypes::TopologyID>& tclist) const
+ }
+ 
+ vector<IPv4>
+-TopologyManager::get_tc_neighbor_set(const IPv4& origin_addr, uint16_t& ansn)
+-    throw(BadTopologyEntry)
++TopologyManager::get_tc_neighbor_set(const IPv4& origin_addr, uint16_t& ansn, string& err)
+ {
+     debug_msg("MyMainAddr %s Origin %s\n",
+ 	      cstring(_fm.get_main_addr()),
+@@ -335,7 +332,6 @@ TopologyManager::get_tc_neighbor_set(const IPv4& origin_addr, uint16_t& ansn)
+ 	_tc_lasthops.equal_range(origin_addr);
+     for (TcLasthopMap::iterator ii = rl.first; ii != rl.second; ii++) {
+ 	TopologyEntry* t = _topology[(*ii).second];
+-	XLOG_ASSERT(t != 0);	// paranoia
+ 
+ 	// If this is the first match, record the ANSN.
+ 	if (ii == rl.first)
+@@ -368,8 +364,8 @@ TopologyManager::get_tc_neighbor_set(const IPv4& origin_addr, uint16_t& ansn)
+ 	// The origin is not known to TopologyManager.
+ 	// This is a distinct condition from "there were no entries
+ 	// for the given origin".
+-	xorp_throw(BadTopologyEntry,
+-		   c_format("No mapping for %s exists", cstring(origin_addr)));
++	err += c_format("No mapping for %s exists", cstring(origin_addr));
++	// Used to be an exception, not sure how to handle it properly now. --Ben
+     }
+ 
+     return addrs;
+@@ -377,8 +373,7 @@ TopologyManager::get_tc_neighbor_set(const IPv4& origin_addr, uint16_t& ansn)
+ 
+ uint16_t
+ TopologyManager::get_tc_distance(const IPv4& origin_addr,
+-				 const IPv4& dest_addr)
+-    throw(BadTopologyEntry)
++				 const IPv4& dest_addr, string& err)
+ {
+     debug_msg("MyMainAddr %s Origin %s Dest %s\n",
+ 	      cstring(_fm.get_main_addr()),
+@@ -401,10 +396,10 @@ TopologyManager::get_tc_distance(const IPv4& origin_addr,
+ 
+     if (! is_found) {
+ 	// No TC entry was found matching that origin and destination.
+-	xorp_throw(BadTopologyEntry,
+-		   c_format("No mapping for (%s, %s) exists",
+-			    cstring(origin_addr),
+-			    cstring(dest_addr)));
++	err += c_format("No mapping for (%s, %s) exists",
++			cstring(origin_addr),
++			cstring(dest_addr));
++	return 0xFFFF;
+     }
+ 
+     return distance;
+@@ -473,9 +468,8 @@ TopologyManager::update_tc_distance(TopologyEntry* tc, uint16_t distance)
+ #endif
+ }
+ 
+-void
+-TopologyManager::assert_tc_distance_is_unique(const OlsrTypes::TopologyID tcid)
+-    throw(BadTopologyEntry)
++bool
++TopologyManager::assert_tc_distance_is_unique(const OlsrTypes::TopologyID tcid, string& err)
+ {
+ #ifdef DETAILED_DEBUG
+     size_t id_seen_count = 0;
+@@ -488,20 +482,21 @@ TopologyManager::assert_tc_distance_is_unique(const OlsrTypes::TopologyID tcid)
+     }
+ 
+     if (id_seen_count != 1) {
+-	xorp_throw(BadTopologyEntry,
+-		   c_format("Duplicate TopologyID %u in _tc_distances: "
+-			    "appeared %u times.",
+-			    XORP_UINT_CAST(tcid),
+-			    XORP_UINT_CAST(id_seen_count)));
++	err += c_format("Duplicate TopologyID %u in _tc_distances: "
++			"appeared %u times.",
++			XORP_UINT_CAST(tcid),
++			XORP_UINT_CAST(id_seen_count));
++	return false;
+     }
+ #else
+-    UNUSED(tcid);
++   UNUSED(tcid);
++   UNUSED(err);
+ #endif // DETAILED_DEBUG
++   return true;
+ }
+ 
+-void
+-TopologyManager::assert_tc_ansn_is_identical(const IPv4& origin_addr)
+-    throw(BadTopologyEntry)
++bool
++TopologyManager::assert_tc_ansn_is_identical(const IPv4& origin_addr, string& err)
+ {
+ #ifdef DETAILED_DEBUG
+     bool is_origin_found = false;
+@@ -531,30 +526,31 @@ TopologyManager::assert_tc_ansn_is_identical(const IPv4& origin_addr)
+     }
+ 
+     if (is_origin_found && is_seq_match_failed) {
+-	xorp_throw(BadTopologyEntry,
+-		   c_format("Inconsistent ANSN (%s, %s, %u) in TopologyID %u",
+-			    cstring(t->lasthop()),
+-			    cstring(t->destination()),
+-			    XORP_UINT_CAST(t->seqno()),
+-			    XORP_UINT_CAST(t->id())));
++	err += c_format("Inconsistent ANSN (%s, %s, %u) in TopologyID %u",
++			cstring(t->lasthop()),
++			cstring(t->destination()),
++			XORP_UINT_CAST(t->seqno()),
++			XORP_UINT_CAST(t->id()));
++	return false;
+     }
+ 
+ #else
+     UNUSED(origin_addr);
++    UNUSED(err);
+ #endif
++    return true;
+ }
+ 
+ /*
+  * MID entries.
+  */
+ 
+-void
++bool
+ TopologyManager::update_mid_entry(const IPv4& main_addr,
+ 				  const IPv4& iface_addr,
+ 				  const uint16_t distance,
+ 				  const TimeVal& vtime,
+-				  bool& is_mid_created)
+-    throw(BadMidEntry)
++				  bool& is_mid_created, string& err)
+ {
+     debug_msg("MyMainAddr %s MainAddr %s IfaceAddr %s Distance %u Vtime %s\n",
+ 	      cstring(_fm.get_main_addr()),
+@@ -572,7 +568,7 @@ TopologyManager::update_mid_entry(const IPv4& main_addr,
+ 	XLOG_TRACE(_olsr.trace()._input_errors,
+ 		   "Rejecting MID entry from %s for its main address.",
+ 		   cstring(main_addr));
+-	return;
++	return false;
+     }
+ 
+     bool is_found = false;
+@@ -596,17 +592,18 @@ TopologyManager::update_mid_entry(const IPv4& main_addr,
+ 	mie->set_distance(distance);
+     } else {
+ 	// Section 5.4, 2.2: Create new MID tuple.
+-	add_mid_entry(main_addr, iface_addr, distance, vtime);
++	if (!add_mid_entry(main_addr, iface_addr, distance, vtime, err))
++	    return false;
+ 	is_mid_created = true;
+     }
++    return true;
+ }
+ 
+-void
++bool
+ TopologyManager::add_mid_entry(const IPv4& main_addr,
+ 			       const IPv4& iface_addr,
+ 			       const uint16_t distance,
+-			       const TimeVal& vtime)
+-    throw(BadMidEntry)
++			       const TimeVal& vtime, string& err)
+ {
+     debug_msg("MyMainAddr %s MainAddr %s IfaceAddr %s Distance %u Vtime %s\n",
+ 	      cstring(_fm.get_main_addr()),
+@@ -618,11 +615,10 @@ TopologyManager::add_mid_entry(const IPv4& main_addr,
+     // Section 5.4, 2.2: Create new MID tuple.
+     OlsrTypes::MidEntryID mid_id = _next_mid_id++;
+ 
+-    // Throw an exception if we overflow the MID ID space.
+     if (0 != _mids.count(mid_id)) {
+-	xorp_throw(BadMidEntry,
+-		   c_format("Mapping for %u already exists",
+-			    XORP_UINT_CAST(mid_id)));
++	err += c_format("Mapping for %u already exists",
++			XORP_UINT_CAST(mid_id));
++	return false;
+     }
+ 
+     _mids[mid_id] = new MidEntry(_eventloop, this, mid_id, iface_addr,
+@@ -632,6 +628,7 @@ TopologyManager::add_mid_entry(const IPv4& main_addr,
+     _mid_addr.insert(make_pair(main_addr, mid_id));
+ 
+     debug_msg("new MidEntryID %u\n", XORP_UINT_CAST(mid_id));
++    return true;
+ }
+ 
+ bool
+@@ -716,8 +713,7 @@ TopologyManager::get_mid_addresses(const IPv4& main_addr)
+ 
+ uint16_t
+ TopologyManager::get_mid_address_distance(const IPv4& main_addr,
+-					  const IPv4& iface_addr)
+-    throw(BadMidEntry)
++					  const IPv4& iface_addr, string& err)
+ {
+     debug_msg("MyMainAddr %s MainAddr %s IfaceAddr %s\n",
+ 	      cstring(_fm.get_main_addr()),
+@@ -741,18 +737,17 @@ TopologyManager::get_mid_address_distance(const IPv4& main_addr,
+     }
+ 
+     if (! is_found) {
+-	xorp_throw(BadMidEntry,
+-		   c_format("No mapping for (%s, %s) exists",
+-			    cstring(main_addr),
+-			    cstring(iface_addr)));
++	err += c_format("No mapping for (%s, %s) exists",
++			cstring(main_addr),
++			cstring(iface_addr));
++	return 0xFFFF;
+     }
+ 
+     return mie->distance();
+ }
+ 
+ IPv4
+-TopologyManager::get_main_addr_of_mid(const IPv4& mid_addr)
+-    throw(BadMidEntry)
++TopologyManager::get_main_addr_of_mid(const IPv4& mid_addr, string& err)
+ {
+     MidEntry* mie = 0;
+     bool is_found = false;
+@@ -767,8 +762,10 @@ TopologyManager::get_main_addr_of_mid(const IPv4& mid_addr)
+     }
+ 
+     if (!is_found) {
+-	xorp_throw(BadMidEntry,
+-		   c_format("No mapping for %s exists", cstring(mid_addr)));
++	IPv4 a;
++	a.set_invalid(true);
++	err += c_format("No mapping for %s exists", cstring(mid_addr));
++	return a;
+     }
+ 
+     return mie->main_addr();
+@@ -792,15 +789,14 @@ TopologyManager::mid_node_count() const
+ }
+ 
+ const MidEntry*
+-TopologyManager::get_mid_entry_by_id(const OlsrTypes::MidEntryID midid) const
+-    throw(BadTopologyEntry)
++TopologyManager::get_mid_entry_by_id(const OlsrTypes::MidEntryID midid, string& err) const
+ {
+     MidIdMap::const_iterator ii = _mids.find(midid);
+ 
+     if (ii == _mids.end()) {
+-	xorp_throw(BadMidEntry,
+-		   c_format("No mapping for %u exists",
+-			    XORP_UINT_CAST(midid)));
++	err += c_format("No mapping for %u exists",
++			XORP_UINT_CAST(midid));
++	return NULL;
+     }
+ 
+     return (*ii).second;
+@@ -888,6 +884,7 @@ TopologyManager::event_receive_tc(
+     const IPv4& remote_addr,
+     const IPv4& local_addr)
+ {
++    string err;
+     TcMessage* tc = dynamic_cast<TcMessage *>(msg);
+     if (0 == tc)
+ 	return false;	// not for me
+@@ -948,7 +945,7 @@ TopologyManager::event_receive_tc(
+     for (ii = addrs.begin(); ii != addrs.end(); ii++) {
+ 	update_tc_entry((*ii).remote_addr(), tc->origin(),
+ 			distance, tc->ansn(),
+-			tc->expiry_time(), is_new_tc);
++			tc->expiry_time(), is_new_tc, err);
+     }
+ 
+     // Maintain a list of the final sequence numbers seen from origins
+@@ -995,6 +992,7 @@ TopologyManager::event_receive_mid(
+     const IPv4& remote_addr,
+     const IPv4& local_addr)
+ {
++    string err;
+     MidMessage* mid = dynamic_cast<MidMessage *>(msg);
+     if (0 == mid)
+ 	return false;	// not for me
+@@ -1025,26 +1023,26 @@ TopologyManager::event_receive_mid(
+ 
+     // 5.4.2 Process each interface listed in MID message.
+     size_t added_mid_count = 0;
+-    try {
+-	bool is_mid_created = false;
+-
+-	// Message::hops() is not incremented for our last hop until
+-	// forwarded, so take account of this now when measuring distance.
+-	const vector<IPv4>& addrs = mid->interfaces();
+-	const uint16_t distance = mid->hops() + 1;
+-
+-	vector<IPv4>::const_iterator ii;
+-	for (ii = addrs.begin(); ii != addrs.end(); ii++) {
+-	    update_mid_entry(mid->origin(), (*ii), distance,
+-			     mid->expiry_time(), is_mid_created);
+-	    if (is_mid_created)
+-		added_mid_count++;
++
++    bool is_mid_created = false;
++
++    // Message::hops() is not incremented for our last hop until
++    // forwarded, so take account of this now when measuring distance.
++    const vector<IPv4>& addrs = mid->interfaces();
++    const uint16_t distance = mid->hops() + 1;
++
++    vector<IPv4>::const_iterator ii;
++    for (ii = addrs.begin(); ii != addrs.end(); ii++) {
++	if (!update_mid_entry(mid->origin(), (*ii), distance,
++			      mid->expiry_time(), is_mid_created, err)) {
++	    // If an error is found, disregard the rest
++	    // of the MID entries in this message, as it is more than
++	    // likely we hit a hard limit. We can still forward the
++	    // message, we just can't process all the MID entries.
++	    break;
+ 	}
+-    } catch (...) {
+-	// If an exception is thrown, disregard the rest
+-	// of the MID entries in this message, as it is more than
+-	// likely we hit a hard limit. We can still forward the
+-	// message, we just can't process all the MID entries.
++	if (is_mid_created)
++	    added_mid_count++;
+     }
+ 
+     // Trigger a route computation if and only if we added new MID addresses.
+diff --git a/xorp/contrib/olsr/topology.hh b/xorp/contrib/olsr/topology.hh
+index d23d44a..6c36448 100644
+--- a/xorp/contrib/olsr/topology.hh
++++ b/xorp/contrib/olsr/topology.hh
+@@ -18,8 +18,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/contrib/olsr/topology.hh,v 1.3 2008/10/02 21:56:36 bms Exp $
+-
+ #ifndef __OLSR_TOPOLOGY_HH__
+ #define __OLSR_TOPOLOGY_HH__
+ 
+@@ -198,15 +196,13 @@ class TopologyManager {
+      *              remains valid.
+      * @param is_created a boolean which is set to true if a new entry
+      *                   has been created.
+-     * @throw BadTopologyEntry if the entry could not be created.
+      */
+-    void update_tc_entry(const IPv4& dest_addr,
++    bool update_tc_entry(const IPv4& dest_addr,
+ 			 const IPv4& origin_addr,
+ 			 const uint16_t distance,
+ 			 const uint16_t ansn,
+ 			 const TimeVal& vtime,
+-			 bool& is_created)
+-	throw(BadTopologyEntry);
++			 bool& is_created, string& err);
+ 
+     /**
+      * Add a topology entry to the database.
+@@ -223,8 +219,7 @@ class TopologyManager {
+ 				       const IPv4& origin_addr,
+ 				       const uint16_t distance,
+ 				       const uint16_t ansn,
+-				       const TimeVal& expiry_time)
+-	throw(BadTopologyEntry);
++				       const TimeVal& expiry_time, string& err);
+ 
+     /**
+      * Delete a topology entry by ID.
+@@ -263,11 +258,9 @@ class TopologyManager {
+      * @param dest_addr the destination of the TC entry to look up.
+      * @param lasthop_addr the origin of the TC entry to look up.
+      * @return the topology ID.
+-     * @throw BadTopologyEntry if the entry could not be found.
+      */
+     OlsrTypes::TopologyID get_topologyid(const IPv4& dest_addr,
+-					 const IPv4& lasthop_addr)
+-	throw(BadTopologyEntry);
++					 const IPv4& lasthop_addr, string& err);
+ 
+     /**
+      * Get a pointer to a topology entry given its ID.
+@@ -276,11 +269,9 @@ class TopologyManager {
+      *
+      * @param tcid the ID of the TC entry to look up.
+      * @return the MID pointer.
+-     * @throw BadTopologyEntry if the entry could not be found.
+      */
+     const TopologyEntry* get_topology_entry_by_id(
+-	const OlsrTypes::TopologyID tcid) const
+-	throw(BadTopologyEntry);
++	const OlsrTypes::TopologyID tcid, string& err) const;
+ 
+     /**
+      * Fill out a list of all topology entry IDs.
+@@ -303,10 +294,8 @@ class TopologyManager {
+      *
+      * @param origin_addr the originating node to look up in the TC database.
+      * @param ansn the sequence number of origin_addr's neighbor set.
+-     * @throw BadTopologyEntry if origin_addr was not found.
+      */
+-    vector<IPv4> get_tc_neighbor_set(const IPv4& origin_addr, uint16_t& ansn)
+-	throw(BadTopologyEntry);
++    vector<IPv4> get_tc_neighbor_set(const IPv4& origin_addr, uint16_t& ansn, string& err);
+ 
+     /*
+      * Look up the distance of a TC entry.
+@@ -315,10 +304,8 @@ class TopologyManager {
+      * @param origin_addr the address of the node originating this TC entry.
+      * @param neighbor_addr the address of the destination node.
+      * @return the number of hops to reach neighbor_addr via origin_addr.
+-     * @throw BadTopologyEntry if the entry does not exist.
+      */
+-    uint16_t get_tc_distance(const IPv4& origin_addr, const IPv4& dest_addr)
+-	throw(BadTopologyEntry);
++    uint16_t get_tc_distance(const IPv4& origin_addr, const IPv4& dest_addr, string& err);
+ 
+     /**
+      * Count the number of TC entries which point to a given destination.
+@@ -353,12 +340,10 @@ class TopologyManager {
+      *                 MIS message being processed.
+      * @param vtime the time for which the MID entry remains valid.
+      * @param is_mid_created set to true if a new MID entry was created.
+-     * @throw BadMidEntry if the entry could not be created or updated.
+      */
+-    void update_mid_entry(const IPv4& main_addr, const IPv4& iface_addr,
++    bool update_mid_entry(const IPv4& main_addr, const IPv4& iface_addr,
+ 		          const uint16_t distance, const TimeVal& vtime,
+-			  bool& is_mid_created)
+-	throw(BadMidEntry);
++			  bool& is_mid_created, string& err);
+ 
+     /**
+      * Create a new entry in the MID database.
+@@ -372,11 +357,9 @@ class TopologyManager {
+      * @param distance the distance in hops of the origin of the
+      *                 MIS message being processed.
+      * @param vtime the time for which the MID entry remains valid.
+-     * @throw BadMidEntry if the entry could not be created or updated.
+      */
+-    void add_mid_entry(const IPv4& main_addr, const IPv4& iface_addr,
+-		       const uint16_t distance, const TimeVal& vtime)
+-	throw(BadMidEntry);
++    bool add_mid_entry(const IPv4& main_addr, const IPv4& iface_addr,
++		       const uint16_t distance, const TimeVal& vtime, string& err);
+ 
+     /**
+      * Delete a MID entry by ID.
+@@ -409,11 +392,9 @@ class TopologyManager {
+      *
+      * @param main_addr the main address of the OLSR node to look up.
+      * @param iface_addr the interface address of the OLSR node to look up.
+-     * @throw BadMidEntry if the entry could not be found.
+      */
+     uint16_t get_mid_address_distance(const IPv4& main_addr,
+-				      const IPv4& iface_addr)
+-	throw(BadMidEntry);
++				      const IPv4& iface_addr, string& err);
+ 
+     /**
+      * Given an address possibly corresponding to a MID entry, return
+@@ -424,10 +405,8 @@ class TopologyManager {
+      *
+      * @param mid_addr the interface address to look up.
+      * @return the main address of the node with the given interface address.
+-     * @throw BadMidEntry if mid_addr was not found.
+      */
+-    IPv4 get_main_addr_of_mid(const IPv4& mid_addr)
+-	throw(BadMidEntry);
++    IPv4 get_main_addr_of_mid(const IPv4& mid_addr, string& err);
+ 
+     /**
+      * Count the number of unique OLSR main addresses in this node's MID
+@@ -444,11 +423,9 @@ class TopologyManager {
+      *
+      * @param midid the ID of the MID entry to look up.
+      * @return the MID entry pointer.
+-     * @throw BadTopologyEntry if the entry could not be found.
+      */
+     const MidEntry* get_mid_entry_by_id(
+-	const OlsrTypes::MidEntryID midid) const
+-	throw(BadTopologyEntry);
++	const OlsrTypes::MidEntryID midid, string& err) const;
+ 
+     /**
+      * Fill out a list of all MID entry IDs.
+@@ -541,10 +518,8 @@ protected:
+      * Stubbed out if DETAILED_DEBUG is not defined.
+      *
+      * @param tcid the topology entry ID to verify.
+-     * @throw BadTopologyEntry if tcid appears more than once in _tc_distances.
+      */
+-    void assert_tc_distance_is_unique(const OlsrTypes::TopologyID tcid)
+-	throw(BadTopologyEntry);
++    bool assert_tc_distance_is_unique(const OlsrTypes::TopologyID tcid, string& err);
+ 
+     /**
+      * Internal method to: assert that the ANSNs for all TC entries
+@@ -558,10 +533,8 @@ protected:
+      *       empty, currently we don't do that.
+      *
+      * @param origin_addr the node for which to verify the ANSNs.
+-     * @throw BadTopologyEntry if the ANSNs for origin_addr are not identical.
+      */
+-    void assert_tc_ansn_is_identical(const IPv4& origin_addr)
+-	throw(BadTopologyEntry);
++    bool assert_tc_ansn_is_identical(const IPv4& origin_addr, string& err);
+ 
+ private:
+     Olsr&		_olsr;
+diff --git a/xorp/contrib/olsr/xrl_target.cc b/xorp/contrib/olsr/xrl_target.cc
+index 8fae990..6b4069f 100644
+--- a/xorp/contrib/olsr/xrl_target.cc
++++ b/xorp/contrib/olsr/xrl_target.cc
+@@ -830,10 +830,10 @@ XrlOlsr4Target::olsr4_0_1_get_interface_info(
+     uint32_t&		all_nodes_port)
+ {
+     debug_msg("olsr4_0_1_get_interface_info %u\n", XORP_UINT_CAST(faceid));
+-
+-    try {
+-	const Face* face =
+-	    _olsr.face_manager().get_face_by_id(faceid);
++    string err;
++    const Face* face =
++	_olsr.face_manager().get_face_by_id(faceid, err);
++    if (face) {
+ 
+ 	ifname = face->interface();
+ 	vifname = face->vif();
+@@ -843,9 +843,9 @@ XrlOlsr4Target::olsr4_0_1_get_interface_info(
+ 	all_nodes_port = face->all_nodes_port();
+ 
+ 	return XrlCmdError::OKAY();
+-    } catch (...) {}
++    }
+ 
+-    return XrlCmdError::COMMAND_FAILED("Unable to get interface entry");
++    return XrlCmdError::COMMAND_FAILED(c_format("Unable to get interface entry: %s", err.c_str()));
+ }
+ 
+ XrlCmdError
+@@ -857,9 +857,10 @@ XrlOlsr4Target::olsr4_0_1_set_interface_cost(
+     debug_msg("olsr4_0_1_set_interface_cost %s/%s %u\n",
+ 	      ifname.c_str(), vifname.c_str(),
+ 	      XORP_UINT_CAST(cost));
++    string err;
+ 
+-    if (! _olsr.set_interface_cost(ifname, vifname, cost))
+-	return XrlCmdError::COMMAND_FAILED("Unable to set interface cost");
++    if (! _olsr.set_interface_cost(ifname, vifname, cost, err))
++	return XrlCmdError::COMMAND_FAILED(c_format("Unable to set interface cost: %s", err.c_str()));
+ 
+     return XrlCmdError::OKAY();
+ }
+@@ -926,11 +927,11 @@ XrlOlsr4Target::olsr4_0_1_get_link_info(
+     uint32_t&	    hold_time)
+ {
+     debug_msg("olsr4_0_1_get_link_info %u\n", XORP_UINT_CAST(linkid));
++    string err;
+ 
+-    try {
+-	const LogicalLink* l1 =
+-	    _olsr.neighborhood().get_logical_link(linkid);
+-
++    const LogicalLink* l1 =
++	_olsr.neighborhood().get_logical_link(linkid, err);
++    if (l1) {
+ 	local_addr = l1->local_addr();
+ 	remote_addr = l1->remote_addr();
+ 	main_addr = l1->destination()->main_addr();
+@@ -940,9 +941,8 @@ XrlOlsr4Target::olsr4_0_1_get_link_info(
+ 	hold_time = l1->time_remaining().sec();
+ 
+ 	return XrlCmdError::OKAY();
+-    } catch (...) {}
+-
+-    return XrlCmdError::COMMAND_FAILED("Unable to get link entry");
++    }
++    return XrlCmdError::COMMAND_FAILED(c_format("Unable to get link entry: %s", err.c_str()));
+ }
+ 
+ XrlCmdError
+@@ -950,18 +950,14 @@ XrlOlsr4Target::olsr4_0_1_get_neighbor_list(XrlAtomList& neighbors)
+ {
+     debug_msg("olsr4_0_1_get_neighbor_list\n");
+ 
+-    try {
+-	list<OlsrTypes::NeighborID> n1_list;
+-	_olsr.neighborhood().get_neighbor_list(n1_list);
+-
+-	list<OlsrTypes::NeighborID>::const_iterator ii;
+-	for (ii = n1_list.begin(); ii != n1_list.end(); ii++)
+-	    neighbors.append(XrlAtom(*ii));
++    list<OlsrTypes::NeighborID> n1_list;
++    _olsr.neighborhood().get_neighbor_list(n1_list);
+ 
+-	return XrlCmdError::OKAY();
+-    } catch (...) {}
++    list<OlsrTypes::NeighborID>::const_iterator ii;
++    for (ii = n1_list.begin(); ii != n1_list.end(); ii++)
++	neighbors.append(XrlAtom(*ii));
+ 
+-    return XrlCmdError::COMMAND_FAILED("Unable to obtain neighbor entry list");
++    return XrlCmdError::OKAY();
+ }
+ 
+ XrlCmdError
+@@ -978,11 +974,11 @@ XrlOlsr4Target::olsr4_0_1_get_neighbor_info(
+     bool&		is_mpr_selector)
+ {
+     debug_msg("olsr4_0_1_get_neighbor_info %u\n", XORP_UINT_CAST(nid));
++    string err;
+ 
+-    try {
+-	const Neighbor* n1 =
+-	    _olsr.neighborhood().get_neighbor(nid);
+-
++    const Neighbor* n1 =
++	_olsr.neighborhood().get_neighbor(nid, err);
++    if (n1) {
+ 	main_addr = n1->main_addr();
+ 	willingness = n1->willingness();
+ 
+@@ -996,9 +992,9 @@ XrlOlsr4Target::olsr4_0_1_get_neighbor_info(
+ 	is_mpr_selector = n1->is_mpr_selector();
+ 
+ 	return XrlCmdError::OKAY();
+-    } catch (...) {}
++    }
+ 
+-    return XrlCmdError::COMMAND_FAILED("Unable to get neighbor entry");
++    return XrlCmdError::COMMAND_FAILED(c_format("Unable to get neighbor entry: %s", err.c_str()));
+ }
+ 
+ XrlCmdError
+@@ -1006,18 +1002,14 @@ XrlOlsr4Target::olsr4_0_1_get_twohop_link_list(XrlAtomList& twohop_links)
+ {
+     debug_msg("olsr4_0_1_get_twohop_link_list\n");
+ 
+-    try {
+-	list<OlsrTypes::TwoHopLinkID> l2_list;
+-	_olsr.neighborhood().get_twohop_link_list(l2_list);
+-
+-	list<OlsrTypes::TwoHopLinkID>::const_iterator ii;
+-	for (ii = l2_list.begin(); ii != l2_list.end(); ii++)
+-	    twohop_links.append(XrlAtom(*ii));
++    list<OlsrTypes::TwoHopLinkID> l2_list;
++    _olsr.neighborhood().get_twohop_link_list(l2_list);
+ 
+-	return XrlCmdError::OKAY();
+-    } catch (...) {}
++    list<OlsrTypes::TwoHopLinkID>::const_iterator ii;
++    for (ii = l2_list.begin(); ii != l2_list.end(); ii++)
++	twohop_links.append(XrlAtom(*ii));
+ 
+-    return XrlCmdError::COMMAND_FAILED("Unable to obtain two-hop link list");
++    return XrlCmdError::OKAY();
+ }
+ 
+ XrlCmdError
+@@ -1029,11 +1021,12 @@ XrlOlsr4Target::olsr4_0_1_get_twohop_link_info(
+     uint32_t& hold_time)
+ {
+     debug_msg("olsr4_0_1_get_twohop_link_info %u\n", XORP_UINT_CAST(tlid));
++    string err;
+ 
+-    try {
+-	const TwoHopLink* l2 =
+-	    _olsr.neighborhood().get_twohop_link(tlid);
++    const TwoHopLink* l2 =
++	_olsr.neighborhood().get_twohop_link(tlid, err);
+ 
++    if (l2) {
+ 	// We don't convert the face ID to a name in the
+ 	// XRL, perhaps we should, this might change.
+ 	last_face_id = l2->face_id();
+@@ -1042,9 +1035,9 @@ XrlOlsr4Target::olsr4_0_1_get_twohop_link_info(
+ 	hold_time = l2->time_remaining().sec();
+ 
+ 	return XrlCmdError::OKAY();
+-    } catch (...) {}
++    }
+ 
+-    return XrlCmdError::COMMAND_FAILED("Unable to get two-hop link entry");
++    return XrlCmdError::COMMAND_FAILED(c_format("Unable to get two-hop link entry: %s", err.c_str()));
+ }
+ 
+ XrlCmdError
+@@ -1053,19 +1046,14 @@ XrlOlsr4Target::olsr4_0_1_get_twohop_neighbor_list(
+ {
+     debug_msg("olsr4_0_1_get_twohop_neighbor_list\n");
+ 
+-    try {
+-	list<OlsrTypes::TwoHopNodeID> n2_list;
+-	_olsr.neighborhood().get_twohop_link_list(n2_list);
++    list<OlsrTypes::TwoHopNodeID> n2_list;
++    _olsr.neighborhood().get_twohop_link_list(n2_list);
+ 
+-	list<OlsrTypes::TwoHopNodeID>::const_iterator ii;
+-	for (ii = n2_list.begin(); ii != n2_list.end(); ii++)
+-	    twohop_neighbors.append(XrlAtom(*ii));
++    list<OlsrTypes::TwoHopNodeID>::const_iterator ii;
++    for (ii = n2_list.begin(); ii != n2_list.end(); ii++)
++	twohop_neighbors.append(XrlAtom(*ii));
+ 
+-	return XrlCmdError::OKAY();
+-    } catch (...) {}
+-
+-    return XrlCmdError::
+-	COMMAND_FAILED("Unable to obtain two-hop neighbor list");
++    return XrlCmdError::OKAY();
+ }
+ 
+ XrlCmdError
+@@ -1079,11 +1067,11 @@ XrlOlsr4Target::olsr4_0_1_get_twohop_neighbor_info(
+ {
+     debug_msg("olsr4_0_1_get_twohop_neighbor_info %u\n",
+ 	      XORP_UINT_CAST(tnid));
++    string err;
+ 
+-    try {
+-	const TwoHopNeighbor* n2 =
+-	    _olsr.neighborhood().get_twohop_neighbor(tnid);
+-
++    const TwoHopNeighbor* n2 =
++	_olsr.neighborhood().get_twohop_neighbor(tnid, err);
++    if (n2) {
+ 	main_addr = n2->main_addr();
+ 	is_strict = n2->is_strict();
+ 	link_count = n2->twohop_links().size();
+@@ -1091,9 +1079,9 @@ XrlOlsr4Target::olsr4_0_1_get_twohop_neighbor_info(
+ 	coverage = n2->coverage();
+ 
+ 	return XrlCmdError::OKAY();
+-    } catch (...) {}
++    }
+ 
+-    return XrlCmdError::COMMAND_FAILED("Unable to get two-hop neighbor entry");
++    return XrlCmdError::COMMAND_FAILED(c_format("Unable to get two-hop neighbor entry: %s", err.c_str()));
+ }
+ 
+ XrlCmdError
+@@ -1101,18 +1089,14 @@ XrlOlsr4Target::olsr4_0_1_get_mid_entry_list(XrlAtomList& mid_entries)
+ {
+     debug_msg("olsr4_0_1_get_mid_entry_list\n");
+ 
+-    try {
+-	list<OlsrTypes::MidEntryID> midlist;
+-	_olsr.topology_manager().get_mid_list(midlist);
+-
+-	list<OlsrTypes::MidEntryID>::const_iterator ii;
+-	for (ii = midlist.begin(); ii != midlist.end(); ii++)
+-	    mid_entries.append(XrlAtom(*ii));
++    list<OlsrTypes::MidEntryID> midlist;
++    _olsr.topology_manager().get_mid_list(midlist);
+ 
+-	return XrlCmdError::OKAY();
+-    } catch (...) {}
++    list<OlsrTypes::MidEntryID>::const_iterator ii;
++    for (ii = midlist.begin(); ii != midlist.end(); ii++)
++	mid_entries.append(XrlAtom(*ii));
+ 
+-    return XrlCmdError::COMMAND_FAILED("Unable to obtain MID entry list");
++    return XrlCmdError::OKAY();
+ }
+ 
+ XrlCmdError
+@@ -1124,20 +1108,20 @@ XrlOlsr4Target::olsr4_0_1_get_mid_entry(
+     uint32_t&		hold_time)
+ {
+     debug_msg("olsr4_0_1_get_mid_entry %u\n", XORP_UINT_CAST(midid));
++    string err;
+ 
+-    try {
+-	const MidEntry* mid =
+-	    _olsr.topology_manager().get_mid_entry_by_id(midid);
+-
++    const MidEntry* mid =
++	_olsr.topology_manager().get_mid_entry_by_id(midid, err);
++    if (mid) {
+ 	main_addr = mid->main_addr();
+ 	iface_addr = mid->iface_addr();
+ 	distance = mid->distance();
+ 	hold_time = mid->time_remaining().sec();
+ 
+ 	return XrlCmdError::OKAY();
+-    } catch (...) {}
++    }
+ 
+-    return XrlCmdError::COMMAND_FAILED("Unable to get MID entry");
++    return XrlCmdError::COMMAND_FAILED(c_format("Unable to get MID entry: %s", err.c_str()));
+ }
+ 
+ XrlCmdError
+@@ -1145,18 +1129,14 @@ XrlOlsr4Target::olsr4_0_1_get_tc_entry_list(XrlAtomList& tc_entries)
+ {
+     debug_msg("olsr4_0_1_get_tc_entry_list\n");
+ 
+-    try {
+-	list<OlsrTypes::TopologyID> tclist;
+-	_olsr.topology_manager().get_topology_list(tclist);
++    list<OlsrTypes::TopologyID> tclist;
++    _olsr.topology_manager().get_topology_list(tclist);
+ 
+-	list<OlsrTypes::TopologyID>::const_iterator ii;
+-	for (ii = tclist.begin(); ii != tclist.end(); ii++)
+-	    tc_entries.append(XrlAtom(*ii));
++    list<OlsrTypes::TopologyID>::const_iterator ii;
++    for (ii = tclist.begin(); ii != tclist.end(); ii++)
++	tc_entries.append(XrlAtom(*ii));
+ 
+-	return XrlCmdError::OKAY();
+-    } catch (...) {}
+-
+-    return XrlCmdError::COMMAND_FAILED("Unable to obtain TC entry list");
++    return XrlCmdError::OKAY();
+ }
+ 
+ XrlCmdError
+@@ -1169,11 +1149,11 @@ XrlOlsr4Target::olsr4_0_1_get_tc_entry(
+     uint32_t&		hold_time)
+ {
+     debug_msg("olsr4_0_1_get_tc_entry %u\n", XORP_UINT_CAST(tcid));
++    string err;
+ 
+-    try {
+-	const TopologyEntry* tc =
+-	    _olsr.topology_manager().get_topology_entry_by_id(tcid);
+-
++    const TopologyEntry* tc =
++	_olsr.topology_manager().get_topology_entry_by_id(tcid, err);
++    if (tc) {
+ 	destination = tc->destination();
+ 	lasthop = tc->lasthop();
+ 	distance = tc->distance();
+@@ -1181,9 +1161,9 @@ XrlOlsr4Target::olsr4_0_1_get_tc_entry(
+ 	hold_time = tc->time_remaining().sec();
+ 
+ 	return XrlCmdError::OKAY();
+-    } catch (...) {}
++    }
+ 
+-    return XrlCmdError::COMMAND_FAILED("Unable to get TC entry");
++    return XrlCmdError::COMMAND_FAILED(c_format("Unable to get TC entry: %s", err.c_str()));
+ }
+ 
+ XrlCmdError
+@@ -1191,18 +1171,14 @@ XrlOlsr4Target::olsr4_0_1_get_hna_entry_list(XrlAtomList& hna_entries)
+ {
+     debug_msg("olsr4_0_1_get_hna_entry_list\n");
+ 
+-    try {
+-	list<OlsrTypes::ExternalID> hnalist;
+-	_olsr.external_routes().get_hna_route_in_list(hnalist);
++    list<OlsrTypes::ExternalID> hnalist;
++    _olsr.external_routes().get_hna_route_in_list(hnalist);
+ 
+-	list<OlsrTypes::ExternalID>::const_iterator ii;
+-	for (ii = hnalist.begin(); ii != hnalist.end(); ii++)
+-	    hna_entries.append(XrlAtom(*ii));
++    list<OlsrTypes::ExternalID>::const_iterator ii;
++    for (ii = hnalist.begin(); ii != hnalist.end(); ii++)
++	hna_entries.append(XrlAtom(*ii));
+ 
+-	return XrlCmdError::OKAY();
+-    } catch (...) {}
+-
+-    return XrlCmdError::COMMAND_FAILED("Unable to obtain HNA entry list");
++    return XrlCmdError::OKAY();
+ }
+ 
+ XrlCmdError
+@@ -1214,18 +1190,18 @@ XrlOlsr4Target::olsr4_0_1_get_hna_entry(
+     uint32_t&		hold_time)
+ {
+     debug_msg("olsr4_0_1_get_hna_entry %u\n", XORP_UINT_CAST(hnaid));
++    string err;
+ 
+-    try {
+-	const ExternalRoute* er =
+-	    _olsr.external_routes().get_hna_route_in_by_id(hnaid);
+-
++    const ExternalRoute* er =
++	_olsr.external_routes().get_hna_route_in_by_id(hnaid, err);
++    if (er) {
+ 	destination = er->dest();
+ 	lasthop = er->lasthop();
+ 	distance = er->distance();
+ 	hold_time = er->time_remaining().sec();
+ 
+ 	return XrlCmdError::OKAY();
+-    } catch (...) {}
++    }
+ 
+-    return XrlCmdError::COMMAND_FAILED("Unable to get HNA entry");
++    return XrlCmdError::COMMAND_FAILED(c_format("Unable to get HNA entry: %s", err.c_str()));
+ }
+diff --git a/xorp/libxorp/ipv4.cc b/xorp/libxorp/ipv4.cc
+index be8ebcb..5c5b976 100644
+--- a/xorp/libxorp/ipv4.cc
++++ b/xorp/libxorp/ipv4.cc
+@@ -40,22 +40,19 @@
+ IPv4::IPv4(const uint8_t *from_uint8)
+ {
+     memcpy(&_addr, from_uint8, sizeof(_addr));
+-    _invalid = false;
+ }
+ 
+ IPv4::IPv4(const in_addr& from_in_addr)
+ {
+     _addr = from_in_addr.s_addr;
+-    _invalid = false;
+ }
+ 
+ IPv4::IPv4(const sockaddr& sa)
+ {
+     if (sa.sa_family != AF_INET) {
+-	_invalid = true;
++	set_invalid(true);
+     }
+     else {
+-	_invalid = false;
+ 	const sockaddr_in* sin = sockaddr2sockaddr_in(&sa);
+ 	_addr = sin->sin_addr.s_addr;
+     }
+@@ -64,10 +61,9 @@ IPv4::IPv4(const sockaddr& sa)
+ IPv4::IPv4(const sockaddr_storage& ss)
+ {
+     if (ss.ss_family != AF_INET) {
+-	_invalid = true;
++	set_invalid(true);
+     }
+     else {
+-	_invalid = false;
+ 	const sockaddr* sa = sockaddr_storage2sockaddr(&ss);
+ 	const sockaddr_in* sin = sockaddr2sockaddr_in(sa);
+ 	_addr = sin->sin_addr.s_addr;
+@@ -77,10 +73,9 @@ IPv4::IPv4(const sockaddr_storage& ss)
+ IPv4::IPv4(const sockaddr_in& sin)
+ {
+     if (sin.sin_family != AF_INET) {
+-	_invalid = true;
++	set_invalid(true);
+     }
+     else {
+-	_invalid = false;
+ 	_addr = sin.sin_addr.s_addr;
+     }
+ }
+@@ -88,9 +83,9 @@ IPv4::IPv4(const sockaddr_in& sin)
+ IPv4::IPv4(const char *from_cstring)
+ {
+     if (from_cstring == NULL)
+-	_invalid = true;
++	set_invalid(true);
+     if (inet_pton(AF_INET, from_cstring, &_addr) <= 0)
+-	_invalid = true;
++	set_invalid(true);
+ }
+ 
+ /**
+diff --git a/xorp/libxorp/ipv4.hh b/xorp/libxorp/ipv4.hh
+index 72f260c..e19342c 100644
+--- a/xorp/libxorp/ipv4.hh
++++ b/xorp/libxorp/ipv4.hh
+@@ -38,7 +38,7 @@ struct in_addr;
+  * addresses and for performing operations on them such as printing
+  * and masking.
+  */
+-class IPv4 {
++class IPv4 : public Invalid {
+ public:
+     typedef in_addr 		InAddrType;
+     typedef sockaddr_in 	SockAddrType;
+@@ -49,21 +49,21 @@ public:
+      *
+      * The address value is initialized to INADDR_ANY.
+      */
+-    IPv4() { _addr = 0; _invalid = false; }
++    IPv4() { _addr = 0; }
+ 
+     /**
+      * Constructor from another IPv4 address.
+      *
+      * @param ipv4 the IPv4 address to assign the address value from.
+      */
+-    IPv4(const IPv4& ipv4) : _addr(ipv4._addr), _invalid(ipv4._invalid) {}
++    IPv4(const IPv4& ipv4) : Invalid(ipv4), _addr(ipv4._addr) {}
+ 
+     /**
+      * Constructor from an integer value.
+      *
+      * @param value 32-bit unsigned integer to assign to the address.
+      */
+-    explicit IPv4(uint32_t value)    { _addr = value; _invalid = false; }
++    explicit IPv4(uint32_t value)    { _addr = value; }
+ 
+     /**
+      * Constructor from a (uint8_t *) memory pointer.
+@@ -738,11 +738,8 @@ public:
+      */
+     static const uint32_t ADDR_BYTELEN = ADDR_BITLEN / 8;
+ 
+-    virtual bool invalid() const { return _invalid; }
+-
+ private:
+     uint32_t _addr;		// The address value (in network-order)
+-    bool _invalid;
+ };
+ 
+ inline uint32_t
+diff --git a/xorp/libxorp/ipv6.cc b/xorp/libxorp/ipv6.cc
+index 5a1e88a..96b9e33 100644
+--- a/xorp/libxorp/ipv6.cc
++++ b/xorp/libxorp/ipv6.cc
+@@ -39,7 +39,6 @@
+ 
+ IPv6::IPv6(const uint8_t* from_uint8)
+ {
+-    _invalid = false;
+     memcpy(_addr, from_uint8, sizeof(_addr));
+ }
+ 
+@@ -49,18 +48,15 @@ IPv6::IPv6(const uint32_t* from_uint32)
+     _addr[1] = from_uint32[1];
+     _addr[2] = from_uint32[2];
+     _addr[3] = from_uint32[3];
+-    _invalid = false;
+ }
+ 
+ IPv6::IPv6(const in6_addr& from_in6_addr)
+ {
+-    _invalid = false;
+     memcpy(_addr, &from_in6_addr, sizeof(_addr));
+ }
+ 
+ IPv6::IPv6(const sockaddr& sa)
+ {
+-    _invalid = false;
+     XLOG_ASSERT(sa.sa_family == AF_INET6);
+     const sockaddr_in6* sin6 = sockaddr2sockaddr_in6(&sa);
+     memcpy(_addr, sin6->sin6_addr.s6_addr, sizeof(_addr));
+@@ -68,7 +64,6 @@ IPv6::IPv6(const sockaddr& sa)
+ 
+ IPv6::IPv6(const sockaddr_storage& ss)
+ {
+-    _invalid = false;
+     XLOG_ASSERT(ss.ss_family == AF_INET6);
+     const sockaddr* sa = sockaddr_storage2sockaddr(&ss);
+     const sockaddr_in6* sin6 = sockaddr2sockaddr_in6(sa);
+@@ -77,21 +72,19 @@ IPv6::IPv6(const sockaddr_storage& ss)
+ 
+ IPv6::IPv6(const sockaddr_in6& sin6)
+ {
+-    _invalid = false;
+     XLOG_ASSERT(sin6.sin6_family == AF_INET6);
+     memcpy(_addr, sin6.sin6_addr.s6_addr, sizeof(_addr));
+ }
+ 
+ IPv6::IPv6(const char* from_cstring)
+ {
+-    _invalid = false;
+     if (from_cstring == NULL) {
+-	_invalid = true;
++	set_invalid(true);
+ 	return;
+     }
+     if (inet_pton(AF_INET6, from_cstring, &_addr[0]) <= 0) {
+ 	XLOG_WARNING("Bad IPv6 \"%s\"", from_cstring);
+-	_invalid = true;
++	set_invalid(true);
+ 	return;
+     }
+ }
+diff --git a/xorp/libxorp/ipv6.hh b/xorp/libxorp/ipv6.hh
+index b8a7937..1825ba8 100644
+--- a/xorp/libxorp/ipv6.hh
++++ b/xorp/libxorp/ipv6.hh
+@@ -39,7 +39,7 @@ struct in6_addr;
+  * addresses and for performing operations on them such as printing
+  * and masking.
+  */
+-class IPv6 {
++class IPv6 : public Invalid {
+ public:
+     typedef struct in6_addr 		InAddrType;
+     typedef struct sockaddr_in6 	SockAddrType;
+@@ -50,7 +50,7 @@ public:
+      *
+      * The address value is initialized to IN6ADDR_ANY.
+      */
+-    IPv6() { _addr[0] = _addr[1] = _addr[2] = _addr[3] = 0; _invalid = false; }
++    IPv6() { _addr[0] = _addr[1] = _addr[2] = _addr[3] = 0; }
+ 
+     /**
+      * Constructor from a (uint8_t *) memory pointer.
+@@ -626,11 +626,8 @@ public:
+      */
+     static const uint32_t ADDR_BYTELEN = ADDR_BITLEN / 8;
+ 
+-    bool invalid() const { return _invalid; }
+-
+ private:
+     uint32_t _addr[4];		// The address value (in network-order)
+-    bool _invalid;
+ };
+ 
+ inline uint32_t
+-- 
+2.7.5
+

@@ -1,0 +1,4335 @@
+From c4077a78729bb7f7b3eaeae9d42dee65fea50f72 Mon Sep 17 00:00:00 2001
+From: Ben Greear <greearb@candelatech.com>
+Date: Thu, 14 Sep 2017 17:10:43 -0700
+Subject: [PATCH 25/33] More bgp exception removal.
+
+---
+ xorp/bgp/bgp.hh                     |  51 ++--
+ xorp/bgp/bgp_varrw.cc               |  12 +-
+ xorp/bgp/exceptions.hh              |   4 +-
+ xorp/bgp/harness/bgppp.cc           |  11 +-
+ xorp/bgp/harness/command.cc         |  40 ++-
+ xorp/bgp/harness/command.hh         |  10 +-
+ xorp/bgp/harness/coord.cc           |  12 +-
+ xorp/bgp/harness/coord.hh           |   3 +-
+ xorp/bgp/harness/peer.cc            |  75 +++---
+ xorp/bgp/harness/peer.hh            |   6 +-
+ xorp/bgp/harness/trie_payload.hh    |  28 ++-
+ xorp/bgp/internal_message.hh        |   2 +-
+ xorp/bgp/packet.hh                  |   2 +-
+ xorp/bgp/path_attribute.cc          |  85 ++++---
+ xorp/bgp/path_attribute.hh          |  28 +--
+ xorp/bgp/peer.cc                    | 133 +++++-----
+ xorp/bgp/peer.hh                    |   4 +-
+ xorp/bgp/peer_handler.cc            | 114 +++++----
+ xorp/bgp/plumbing.cc                |  24 +-
+ xorp/bgp/profile_vars.cc            |   7 +-
+ xorp/bgp/rib_ipc_handler.cc         |  63 ++---
+ xorp/bgp/route_table_aggregation.cc |  68 ++---
+ xorp/bgp/route_table_aggregation.hh |   9 +-
+ xorp/bgp/route_table_cache.cc       |  19 +-
+ xorp/bgp/route_table_damping.cc     |   3 +-
+ xorp/bgp/route_table_decision.cc    |  45 ++--
+ xorp/bgp/route_table_deletion.cc    |   9 +-
+ xorp/bgp/route_table_filter.cc      |  42 ++--
+ xorp/bgp/route_table_nhlookup.cc    |  52 ++--
+ xorp/bgp/route_table_ribin.cc       |  54 ++--
+ xorp/bgp/tools/print_routes.cc      |   7 +-
+ xorp/bgp/update_attrib.cc           |  22 +-
+ xorp/bgp/update_attrib.hh           |   6 +-
+ xorp/bgp/update_packet.cc           |  44 ++--
+ xorp/bgp/xrl_target.cc              | 483 +++++++++++++++++-------------------
+ xorp/libxorp/exceptions.hh          |   6 +
+ xorp/libxorp/ipnet.hh               |  23 +-
+ 37 files changed, 853 insertions(+), 753 deletions(-)
+
+diff --git a/xorp/bgp/bgp.hh b/xorp/bgp/bgp.hh
+index 784aea1..0c01730 100644
+--- a/xorp/bgp/bgp.hh
++++ b/xorp/bgp/bgp.hh
+@@ -610,7 +610,7 @@ public:
+ 			      vector<uint8_t>& attr_unknown,
+ 			      bool& best,
+ 			      bool& unicast,
+-			      bool& multicast);
++			      bool& multicast, CorruptMessage& m);
+ 
+     bool rib_client_route_info_changed4(
+ 					// Input values,
+@@ -932,7 +932,7 @@ private:
+     void connect_attempt(XorpFd fd, IoEventType type, string laddr, uint16_t lport);
+ 
+     template <typename A>
+-    void extract_attributes(// Input values, 
++    bool extract_attributes(// Input values, 
+ 			    PAListRef<A> attributes, 
+ 			    // Output values, 
+ 			    uint32_t& origin, 
+@@ -942,8 +942,8 @@ private:
+ 			    int32_t& localpref, 
+ 			    int32_t& atomic_agg, 
+ 			    vector<uint8_t>& aggregator, 
+-			    int32_t& calc_localpref, 
+-			    vector<uint8_t>& attr_unknown);
++			    int32_t& calc_localpref,
++			    vector<uint8_t>& attr_unknown, CorruptMessage& m);
+ 
+ 
+     EventLoop& _eventloop;
+@@ -1090,7 +1090,7 @@ BGPMain::get_route_list_start(uint32_t& token,
+ }
+ 
+ template <typename A>
+-void
++bool
+ BGPMain::extract_attributes(// Input values,
+ 			    PAListRef<A> attributes,
+ 			    // Output values,
+@@ -1102,14 +1102,16 @@ BGPMain::extract_attributes(// Input values,
+ 			    int32_t& atomic_agg,
+ 			    vector<uint8_t>& aggregator,
+ 			    int32_t& calc_localpref,
+-			    vector<uint8_t>& attr_unknown)
++			    vector<uint8_t>& attr_unknown, CorruptMessage& m)
+ {
+-    FastPathAttributeList<A> fpa_list(attributes);
+-    origin = fpa_list.origin();
+-    fpa_list.aspath().encode_for_mib(aspath);
+-    nexthop = fpa_list.nexthop();
++    FastPathAttributeList<A> fpa_list(attributes, m);
++    origin = fpa_list.origin(m);
++    if (fpa_list.invalid())
++	return false;
++    fpa_list.aspath(m)->encode_for_mib(aspath);
++    nexthop = *(fpa_list.nexthop(m));
+ 
+-    const MEDAttribute* med_att = fpa_list.med_att();
++    const MEDAttribute* med_att = fpa_list.med_att(m);
+     if (med_att) {
+ 	med = (int32_t)med_att->med();
+ 	if (med < 0) {
+@@ -1123,7 +1125,7 @@ BGPMain::extract_attributes(// Input values,
+     }
+ 
+     const LocalPrefAttribute* local_pref_att
+-	= fpa_list.local_pref_att();
++	= fpa_list.local_pref_att(m);
+     if (local_pref_att) {
+ 	localpref = (int32_t)local_pref_att->localpref();
+ 	if (localpref < 0) {
+@@ -1136,13 +1138,13 @@ BGPMain::extract_attributes(// Input values,
+ 	localpref = -1;
+     }
+ 
+-    if (fpa_list.atomic_aggregate_att())
++    if (fpa_list.atomic_aggregate_att(m))
+ 	atomic_agg = 2;
+     else
+ 	atomic_agg = 1;
+ 
+     const AggregatorAttribute* agg_att
+-	= fpa_list.aggregator_att();
++	= fpa_list.aggregator_att(m);
+     if (agg_att) {
+ 	aggregator.resize(6);
+ 	agg_att->route_aggregator().copy_out(&aggregator[0]);
+@@ -1153,6 +1155,7 @@ BGPMain::extract_attributes(// Input values,
+ 
+     calc_localpref = 0;
+     attr_unknown.resize(0);
++    return true;
+ }
+ 
+ template <typename A>
+@@ -1174,7 +1177,7 @@ BGPMain::get_route_list_next(
+ 			      vector<uint8_t>& attr_unknown,
+ 			      bool& best,
+ 			      bool& unicast_global,
+-			      bool& multicast_global)
++			      bool& multicast_global, CorruptMessage& m)
+ {
+     IPNet<A> prefix;
+     bool unicast = false, multicast = false;
+@@ -1190,10 +1193,11 @@ BGPMain::get_route_list_next(
+ 	if (_plumbing_unicast->read_next_route(internal_token, route,
+ 					       peer_id)) {
+ 	    net = route->net();
+-	    extract_attributes(route->attributes(),
+-			       origin, aspath, nexthop, med, localpref,
+-			       atomic_agg, aggregator, calc_localpref,
+-			       attr_unknown);
++	    if (!extract_attributes(route->attributes(),
++				    origin, aspath, nexthop, med, localpref,
++				    atomic_agg, aggregator, calc_localpref,
++				    attr_unknown, m))
++		return false;
+ 	    best = route->is_winner();
+ 	    unicast_global = true;
+ 	    multicast_global = false;
+@@ -1216,10 +1220,11 @@ BGPMain::get_route_list_next(
+ 	if (_plumbing_multicast->read_next_route(internal_token, route,
+ 						 peer_id)) {
+ 	    net = route->net();
+-	    extract_attributes(route->attributes(),
+-			       origin, aspath, nexthop, med, localpref,
+-			       atomic_agg, aggregator, calc_localpref,
+-			       attr_unknown);
++	    if (!extract_attributes(route->attributes(),
++				    origin, aspath, nexthop, med, localpref,
++				    atomic_agg, aggregator, calc_localpref,
++				    attr_unknown, m))
++		return false;
+ 	    best = route->is_winner();
+ 	    unicast_global = false;
+ 	    multicast_global = true;
+diff --git a/xorp/bgp/bgp_varrw.cc b/xorp/bgp/bgp_varrw.cc
+index 83773a8..a369158 100644
+--- a/xorp/bgp/bgp_varrw.cc
++++ b/xorp/bgp/bgp_varrw.cc
+@@ -168,8 +168,9 @@ template <>
+ Element*
+ BGPVarRW<IPv6>::read_nexthop6()
+ {
++    CorruptMessage m;
+     return _ef.create(ElemIPv6NextHop::id, 
+-		      _palist->nexthop().str().c_str());
++		      _palist->nexthop(m)->str().c_str());
+ }
+ 
+ template <>
+@@ -183,7 +184,8 @@ template <>
+ Element*
+ BGPVarRW<IPv4>::read_nexthop4()
+ {
+-    return new ElemIPv4NextHop(_palist->nexthop());
++    CorruptMessage m;
++    return new ElemIPv4NextHop(*(_palist->nexthop(m)));
+ }
+ 
+ template <>
+@@ -197,14 +199,16 @@ template <class A>
+ Element*
+ BGPVarRW<A>::read_aspath()
+ {
+-    return new ElemASPath(_palist->aspath());
++    CorruptMessage m;
++    return new ElemASPath(*(_palist->aspath(m)));
+ }
+ 
+ template <class A>
+ Element*
+ BGPVarRW<A>::read_origin()
+ {
+-    uint32_t origin = _palist->origin();
++    CorruptMessage m;
++    uint32_t origin = _palist->origin(m); 
+     return _ef.create(ElemU32::id, to_str(origin).c_str());
+ }
+ 
+diff --git a/xorp/bgp/exceptions.hh b/xorp/bgp/exceptions.hh
+index 4aaded3..63201f5 100644
+--- a/xorp/bgp/exceptions.hh
++++ b/xorp/bgp/exceptions.hh
+@@ -55,7 +55,7 @@ public:
+ 
+     void set_msg(const string& msg) { _msg = msg; }
+     void set_msg(const char* msg) { _msg = msg; }
+-    void set_data(uint8_t* d, size_t dl) {
++    void set_data(const uint8_t* d, size_t dl) {
+ 	_len = min(dl, sizeof(_data));
+ 	memcpy(_data, d, _len);
+     }
+@@ -87,7 +87,9 @@ private:
+ 
+ 
+ #define INVALID_BGP(e1, e2, args...) do { m.set_err(e1, e2); m.set_msg(c_format(args)); set_invalid(true); return; } while (0)
++#define INVALID_BGP_D(e1, e2, d, dl, args...) do { m.set_err(e1, e2); m.set_msg(c_format(args)); m.set_data(d, dl); set_invalid(true); return; } while (0)
+ #define INVALID_BGP_F(e1, e2, args...) do { m.set_err(e1, e2); m.set_msg(c_format(args)); set_invalid(true); return false; } while (0)
++#define INVALID_BGP_Z(e1, e2, args...) do { m.set_err(e1, e2); m.set_msg(c_format(args)); return 0; } while (0)
+ #define INVALID_BGP_FD(e1, e2, d, dl, args...) do { m.set_err(e1, e2); m.set_msg(c_format(args)); m.set_data(d, dl); set_invalid(true); return false; } while (0)
+ #define INVALID_BGP_N(e1, e2, args...) do { m.set_err(e1, e2); m.set_msg(c_format(args)); return NULL; } while (0)
+ 
+diff --git a/xorp/bgp/harness/bgppp.cc b/xorp/bgp/harness/bgppp.cc
+index 726e29f..030f549 100644
+--- a/xorp/bgp/harness/bgppp.cc
++++ b/xorp/bgp/harness/bgppp.cc
+@@ -38,31 +38,32 @@ bgppp(const uint8_t *buf, const size_t len, const BGPPeerData *peerdata)
+ {
+     string result;
+     uint8_t type = extract_8(buf + BGPPacket::TYPE_OFFSET);
++    CorruptMessage m;
+ 
+     switch(type) {
+ 	case MESSAGETYPEOPEN: {
+-	    OpenPacket pac(buf, len);
++	    OpenPacket pac(buf, len, m);
+ 	    if (pac.invalid())
+ 		goto err;
+ 	    result = pac.str().c_str();
+ 	    break;
+ 	}
+ 	case MESSAGETYPEKEEPALIVE: {
+-	    KeepAlivePacket pac(buf, len);
++	    KeepAlivePacket pac(buf, len, m);
+ 	    if (pac.invalid())
+ 		goto err;
+ 	    result = pac.str().c_str();
+ 	    break;
+ 	}
+ 	case MESSAGETYPEUPDATE: {
+-	    UpdatePacket pac(buf, len, peerdata, 0, false);
++	    UpdatePacket pac(buf, len, peerdata, 0, false, m);
+ 	    if (pac.invalid())
+ 		goto err;
+ 	    result = pac.str().c_str();
+ 	    break;
+ 	}
+ 	case MESSAGETYPENOTIFICATION: {
+-	    NotificationPacket pac(buf, len);
++	    NotificationPacket pac(buf, len, m);
+ 	    if (pac.invalid())
+ 		goto err;
+ 	    result = pac.str().c_str();
+@@ -82,7 +83,7 @@ bgppp(const uint8_t *buf, const size_t len, const BGPPeerData *peerdata)
+     ** This peer had sent us a bad message.
+     */
+     
+-    result = c_format("BAD Message: %s", c.why().c_str());
++    result = c_format("BAD Message: %s", m.get_msg().c_str());
+     XLOG_WARNING("%s", result.c_str());
+     return result;
+ }
+diff --git a/xorp/bgp/harness/command.cc b/xorp/bgp/harness/command.cc
+index c5016e6..30afba9 100644
+--- a/xorp/bgp/harness/command.cc
++++ b/xorp/bgp/harness/command.cc
+@@ -62,7 +62,6 @@ int
+ Command::command(const string& line)
+ {
+     debug_msg("command: %s\n", line.c_str());
+-    _invalid = false;
+ 
+     /*
+     ** Split the line into words split on spaces.
+@@ -71,7 +70,6 @@ Command::command(const string& line)
+     tokenize(line, v);
+ 
+     if (v.empty()) {
+-	_invalid = true;
+ 	return -1;
+     }
+ 
+@@ -80,7 +78,6 @@ Command::command(const string& line)
+     if(_commands.end() == cur) {
+ 	XLOG_ERROR("Unknown command: %s",
+ 		   v[0].c_str());
+-	_invalid = true;
+ 	return -1;
+     }
+ 
+@@ -234,12 +231,9 @@ Command::datain_closed(const string&  peer, const uint32_t& genid)
+ int
+ Command::peer(const string& line, const vector<string>& words)
+ {
+-    _invalid = 0;
+-
+     debug_msg("peer: %s\n", line.c_str());
+ 
+     if (1 == words.size()) {
+-	_invalid = 1;
+ 	XLOG_ERROR("Insufficient arguments: %s",  line.c_str());
+ 	return -1;
+     }
+@@ -255,30 +249,32 @@ Command::peer(const string& line, const vector<string>& words)
+     }
+     
+     XLOG_ASSERT(_peers.end() != p);
+-
++    int rv = -1;
+     const string command = words[1];
+     if("connect" == command) {
+-	p->connect(line, words);
++	rv = p->connect(line, words);
+     } else if("disconnect" == command) {
+-	p->disconnect(line, words);
++	rv = p->disconnect(line, words);
+     } else if("establish" == command) {
+-	p->establish(line, words);
++	rv = p->establish(line, words);
+     } else if ("send" == command) {
+-	p->send(line, words);
++	rv = p->send(line, words);
+     } else if ("trie" == command) {
+-	p->trie(line, words);
++	rv = p->trie(line, words);
+     } else if ("expect" == command) {
+-	p->expect(line, words);
++	rv = p->expect(line, words);
+     } else if ("assert" == command) {
+-	p->assertX(line, words);
++	rv = p->assertX(line, words);
+     } else if ("dump" == command) {
+-	p->dump(line, words);
++	rv = p->dump(line, words);
+     } else {
+ 	XLOG_ERROR("Unrecognized command: %s",  command.c_str());
+-	_invalid = true;
+ 	return -1;
+     }
+-    return 0;
++    if (rv < 0) {
++	XLOG_ERROR("Error (%d) with command: %s", rv, command.c_str());
++    }
++    return rv;
+ }
+ 
+ /*
+@@ -288,7 +284,7 @@ Command::peer(const string& line, const vector<string>& words)
+ ** Reset all the state in the coordinating process. All scripts should
+ ** start with this command.
+ */
+-void
++int
+ Command::reset(const string& /*line*/, const vector<string>& /*v*/)
+ {
+     debug_msg("reset:\n");
+@@ -307,6 +303,7 @@ Command::reset(const string& /*line*/, const vector<string>& /*v*/)
+     }
+ 
+     _init_count = 0;
++    return 0;
+ }
+ 
+ /*
+@@ -318,11 +315,9 @@ Command::reset(const string& /*line*/, const vector<string>& /*v*/)
+ int
+ Command::target(const string& line, const vector<string>& v)
+ {
+-    _invalid = false;
+     debug_msg("target: %s\n", line.c_str());
+ 
+     if(3 != v.size()) {
+-	_invalid = true;
+ 	XLOG_ERROR("\"target hostname port\" expected got \"%s\"", 
+ 		   line.c_str());
+ 	return -1;
+@@ -342,13 +337,11 @@ Command::target(const string& line, const vector<string>& v)
+ int
+ Command::initialise(const string& line, const vector<string>& v)
+ {
+-    _invalid = false;
+     debug_msg("target: %s\n", line.c_str());
+ 
+     if(3 != v.size()) {
+ 	XLOG_ERROR("\"initialise attach/create peer\" expected got \"%s\"", 
+ 		   line.c_str());
+-	_invalid = true;
+ 	return -1;
+     }
+     
+@@ -370,7 +363,6 @@ Command::initialise(const string& line, const vector<string>& v)
+     if(_peers.end() != cur) {
+ 	XLOG_ERROR("This peer already exists: %s",
+ 		   peername);
+-	_invalid = true;
+ 	return -1;
+     }
+ 
+@@ -382,7 +374,6 @@ Command::initialise(const string& line, const vector<string>& v)
+     if(_commands.end() != com) {
+ 	XLOG_ERROR("Peername command clash: %s",
+ 		   peername);
+-	_invalid = true;
+ 	return -1;
+     }
+ 
+@@ -393,7 +384,6 @@ Command::initialise(const string& line, const vector<string>& v)
+     } else {
+ 	XLOG_ERROR("Only attach/create allowed not: %s",
+ 		   v[3].c_str());
+-	_invalid = true;
+ 	return -1;
+     }
+ 
+diff --git a/xorp/bgp/harness/command.hh b/xorp/bgp/harness/command.hh
+index d655305..2f843df 100644
+--- a/xorp/bgp/harness/command.hh
++++ b/xorp/bgp/harness/command.hh
+@@ -71,13 +71,11 @@ public:
+     */
+     int WARN_UNUSED peer(const string& line, const vector<string>& v);
+ 
+-    void reset(const string& line, const vector<string>& v);
++    int reset(const string& line, const vector<string>& v);
+     int WARN_UNUSED target(const string& line, const vector<string>& v);
+     int WARN_UNUSED initialise(const string& line, const vector<string>& v);
+     void initialise_callback(const XrlError& error, string peername);
+ 
+-    bool invalid() const { return _invalid; }
+-
+ private:
+     EventLoop& _eventloop;
+     XrlStdRouter& _xrlrouter;
+@@ -85,13 +83,11 @@ private:
+ 
+     uint32_t _init_count;	// Number of initialisations with
+ 				// test_peers currently in progress.
+-    uint8_t _invalid;
+-
+     /*
+     ** Supported commands.
+     */
+-    typedef void (Command::* MEMFUN)(const string& line,
+-				     const vector<string>& v);
++    typedef int (Command::* MEMFUN)(const string& line,
++				    const vector<string>& v);
+ 
+     struct PCmd {
+ 	PCmd(const Command::MEMFUN& mem_fun) : _mem_fun(mem_fun)
+diff --git a/xorp/bgp/harness/coord.cc b/xorp/bgp/harness/coord.cc
+index 3c220fb..bbc747e 100644
+--- a/xorp/bgp/harness/coord.cc
++++ b/xorp/bgp/harness/coord.cc
+@@ -93,11 +93,11 @@ XrlCoordTarget::coord_0_1_command(const string&	command)
+     debug_msg("command: <%s>\n", command.c_str());
+ 
+     _incommand++;
+-    try {
+-	_coord.command(command);
+-    } catch(const XorpException& e) {
++    int rv = _coord.command(command);
++    if (rv < 0) {
+ 	_incommand--;
+-	return XrlCmdError::COMMAND_FAILED(e.why() + "\nPending operation: " +
++	// TODO-BEN:  Pass back an error string?
++	return XrlCmdError::COMMAND_FAILED(string("bgp-coord-command\nPending operation: ") +
+ 					   bool_c_str(_coord.pending()));
+     }
+     _incommand--;
+@@ -182,10 +182,10 @@ Coord::Coord(EventLoop& eventloop, Command& command)
+ {
+ }
+ 
+-void
++int
+ Coord::command(const string& command)
+ {
+-    _command.command(command);
++    return _command.command(command);
+ }
+ 
+ void
+diff --git a/xorp/bgp/harness/coord.hh b/xorp/bgp/harness/coord.hh
+index 2af52f4..5fedfe9 100644
+--- a/xorp/bgp/harness/coord.hh
++++ b/xorp/bgp/harness/coord.hh
+@@ -17,7 +17,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/bgp/harness/coord.hh,v 1.14 2008/10/02 21:56:26 bms Exp $
+ 
+ #ifndef __BGP_HARNESS_COORD_HH__
+ #define __BGP_HARNESS_COORD_HH__
+@@ -28,7 +27,7 @@
+ class Coord {
+ public:
+     Coord(EventLoop& eventloop, Command& command);
+-    void command(const string& command);
++    int WARN_UNUSED command(const string& command);
+     void status(const string&	peer, string& status);
+     bool pending();
+     void datain(const string&  peer, const uint32_t& genid,
+diff --git a/xorp/bgp/harness/peer.cc b/xorp/bgp/harness/peer.cc
+index 5136783..02c78e4 100644
+--- a/xorp/bgp/harness/peer.cc
++++ b/xorp/bgp/harness/peer.cc
+@@ -265,12 +265,13 @@ Peer::listen(const string& /*line*/, const vector<string>& /*words*/)
+ 	XLOG_FATAL("send_listen failed");
+ }
+ 
+-void 
++int
+ Peer::connect(const string& /*line*/, const vector<string>& /*words*/)
+ {
+     /* Connect the test peer to the target BGP */
+     debug_msg("About to connect to: %s\n", _peername.c_str());
+     _busy += 4;
++    // TODO-BEN:  Return errors instead of asserting?
+     XrlTestPeerV0p1Client test_peer(_xrlrouter);
+     if(!test_peer.send_register(_peername.c_str(), _xrlrouter->name(), _genid,
+ 			callback(this, &Peer::xrl_callback, "register")))
+@@ -287,9 +288,10 @@ Peer::connect(const string& /*line*/, const vector<string>& /*words*/)
+ 			       callback(this, &Peer::xrl_callback_connected,
+ 					"connected")))
+ 	XLOG_FATAL("send_connect failed");
++    return 0;
+ }
+ 
+-void 
++int
+ Peer::disconnect(const string& /*line*/, const vector<string>& /*words*/)
+ {
+     /* Disconnect the test peer from the target BGP */
+@@ -303,6 +305,7 @@ Peer::disconnect(const string& /*line*/, const vector<string>& /*words*/)
+     if(!test_peer.send_disconnect(_peername.c_str(),
+ 			  callback(this, &Peer::xrl_callback, "disconnect")))
+ 	XLOG_FATAL("send_disconnect failed");
++    return 0;
+ }
+ 
+ /*
+@@ -426,15 +429,14 @@ Peer::send(const string& line, const vector<string>& words)
+     const char PACKET[] = "packet";
+     const char DUMP[] = "dump";
+     if(PACKET == words[2]) {
+-	send_packet(line, words);
++	return send_packet(line, words);
+     } else if(DUMP == words[2]) {
+-	send_dump(line, words);
++	return send_dump(line, words);
+     } else {
+ 	XLOG_ERROR("Second argument should be %s or %s not <%s>\n[%s]",
+ 		   PACKET, DUMP, words[2].c_str(), line.c_str());
+ 	return -1;
+     }
+-    return 0;
+ }
+ 
+ /**
+@@ -813,6 +815,8 @@ Peer::trie(const string& line, const vector<string>& words)
+ 	return -1;
+     }
+ 
++    CorruptMessage m;
++
+     /*
+     ** Each peer holds two tries. One holds updates sent the other
+     ** holds updates received. Determine which trie we are about to
+@@ -877,9 +881,9 @@ Peer::trie(const string& line, const vector<string>& words)
+ 	    FPAList4Ref palist = const_cast<UpdatePacket*>(bgpupdate)->pa_list();
+ 
+ 	    list<PathAttribute*>::const_iterator pai;
+-	    const ASPath *aspath = 0;
+-	    if (palist->aspath_att())
+-		aspath = &(palist->aspath());
++	    const ASPath *aspath = NULL;
++	    if (palist->aspath_att(m))
++		aspath = palist->aspath(m);
+ 	    else {
+ 		XLOG_ERROR("NO AS Path associated with route\n[%s]",
+ 			   line.c_str());
+@@ -1306,7 +1310,7 @@ Peer::dump(const string& line, const vector<string>& words)
+     if("traffic" == words[5]) {
+ 	if("" == filename) {
+ 	    dumper->release();
+-	    return;
++	    return 0;
+ 	}
+  	if(mrtd)
+  	    *dumper = callback(mrtd_traffic_dump, filename);
+@@ -1443,6 +1447,7 @@ Peer::check_expect(BGPPacket *rec)
+     if(_expect._list.empty())
+ 	return;
+     const BGPPacket *exp = _expect._list.front();
++    CorruptMessage m;
+ 
+     debug_msg("Expecting: %s\n", exp->str().c_str());
+ 
+@@ -1463,34 +1468,31 @@ Peer::check_expect(BGPPacket *rec)
+ 	XLOG_ASSERT(rec->encode(rec_buf, rec_len, _peerdata));
+ 
+ 	switch(rec->type()) {
+-	case MESSAGETYPEOPEN:
+-	    {
+-	    OpenPacket *pac = new OpenPacket(rec_buf, rec_len);
++	case MESSAGETYPEOPEN: {
++	    OpenPacket *pac = new OpenPacket(rec_buf, rec_len, m);
+ 	    _expect._bad = pac;
+-	    }
+ 	    break;
+-	case MESSAGETYPEUPDATE:
+-	    {
+-	    UpdatePacket *pac = new UpdatePacket(rec_buf, rec_len, _peerdata, 0, false);
++	}
++	case MESSAGETYPEUPDATE: {
++	    UpdatePacket *pac = new UpdatePacket(rec_buf, rec_len, _peerdata, 0, false, m);
+ 	    _expect._bad = pac;
+-	    }
+ 	    break;
+-	case MESSAGETYPENOTIFICATION:
+-	    {
++	}
++	case MESSAGETYPENOTIFICATION: {
+ 	    NotificationPacket *pac =
+-		new NotificationPacket(rec_buf, rec_len);
++		new NotificationPacket(rec_buf, rec_len, m);
+ 	    _expect._bad = pac;
+-	    }
+ 	    break;
+-	case MESSAGETYPEKEEPALIVE:
+-	    _expect._bad = new KeepAlivePacket(rec_buf, rec_len);
++	}
++	case MESSAGETYPEKEEPALIVE: {
++	    _expect._bad = new KeepAlivePacket(rec_buf, rec_len, m);
+ 	    break;
++	}
+ 	default:
+ 	    XLOG_FATAL("Unexpected BGP message type %d", rec->type());
+ 	}
+ 	delete [] rec_buf;
+     }
+-
+ }
+ 
+ void
+@@ -1532,6 +1534,8 @@ Peer::datain(const bool& status, const TimeVal& tv,
+ 	      status, (unsigned long)tv.sec(), (unsigned long)tv.usec(),
+ 	      XORP_UINT_CAST(data.size()));
+ 
++    CorruptMessage m;
++
+     /*
+     ** A bgp error has occured.
+     */
+@@ -1564,7 +1568,7 @@ Peer::datain(const bool& status, const TimeVal& tv,
+     switch(type) {
+ 	case MESSAGETYPEOPEN: {
+ 	    debug_msg("OPEN Packet RECEIVED\n");
+-	    OpenPacket pac(buf, length);
++	    OpenPacket pac(buf, length, m);
+ 	    if (pac.invalid())
+ 		goto err;
+ 	    debug_msg("%s", pac.str().c_str());
+@@ -1583,7 +1587,7 @@ Peer::datain(const bool& status, const TimeVal& tv,
+ 	case MESSAGETYPEKEEPALIVE: {
+ 	    debug_msg("KEEPALIVE Packet RECEIVED %u\n",
+ 		      XORP_UINT_CAST(length));
+-	    KeepAlivePacket pac(buf, length);
++	    KeepAlivePacket pac(buf, length, m);
+ 	    if (pac.invalid())
+ 		goto err;
+ 	    debug_msg("%s", pac.str().c_str());
+@@ -1609,7 +1613,7 @@ Peer::datain(const bool& status, const TimeVal& tv,
+ 	}
+ 	case MESSAGETYPEUPDATE: {
+ 	    debug_msg("UPDATE Packet RECEIVED\n");
+-	    UpdatePacket pac(buf, length, _peerdata, 0, false);
++	    UpdatePacket pac(buf, length, _peerdata, 0, false, m);
+ 	    if (pac.invalid())
+ 		goto err;
+ 	    debug_msg("%s", pac.str().c_str());
+@@ -1622,7 +1626,7 @@ Peer::datain(const bool& status, const TimeVal& tv,
+ 	}
+ 	case MESSAGETYPENOTIFICATION: {
+ 	    debug_msg("NOTIFICATION Packet RECEIVED\n");
+-	    NotificationPacket pac(buf, length);
++	    NotificationPacket pac(buf, length, m);
+ 	    if (pac.invalid())
+ 		goto err;
+ 	    debug_msg("%s", pac.str().c_str());
+@@ -1642,7 +1646,7 @@ Peer::datain(const bool& status, const TimeVal& tv,
+     /*
+     ** This peer had sent us a bad message.
+     */
+-    XLOG_WARNING("Bad message from peer %s: %s", _peername.c_str());
++    XLOG_WARNING("Bad message from peer %s: %s", _peername.c_str(), m.get_msg().c_str());
+     delete [] buf;
+ }
+ 
+@@ -1795,13 +1799,13 @@ const uint8_t AnyAttribute::_valid[] = {0x80|0x40, 255, 1, 1};
+ ** an array.
+ */
+ PathAttribute *
+-Peer::path_attribute(const char *)
++Peer::path_attribute(const char *) const
+ {
+     const uint8_t path[] = {0x80|0x40, 255, 1, 1};
+     uint16_t max_len = sizeof(path);
+     size_t actual_length;
+-
+-    return PathAttribute::create(&path[0], max_len, actual_length, _peerdata, 4);
++    CorruptMessage m;
++    return PathAttribute::create(&path[0], max_len, actual_length, _peerdata, 4, m);
+ }
+ 
+ /**
+@@ -1838,6 +1842,7 @@ const BGPPacket *
+ Peer::packet(const string& line, const vector<string>& words, int index) const
+ {
+     BGPPacket *pac = 0;
++    CorruptMessage m;
+ 
+     if("notify" == words[index]) {
+ 	switch(words.size() - (index + 1)) {
+@@ -1899,7 +1904,9 @@ Peer::packet(const string& line, const vector<string>& words, int index) const
+ 		string aspath = words[i+1];
+ 		if ("empty" == aspath)
+ 		    aspath = "";
+-		ASPathAttribute aspa(ASPath(aspath.c_str()));
++		ASPathAttribute aspa(ASPath(aspath.c_str(), m));
++		if (aspa.invalid())
++		    goto err;
+ 		bgpupdate->add_pathatt(aspa);
+ 		debug_msg("aspath: %s\n", 
+ 			  ASPath(aspath.c_str()).str().c_str());
+@@ -1908,6 +1915,8 @@ Peer::packet(const string& line, const vector<string>& words, int index) const
+ 		if ("empty" == as4path)
+ 		    as4path = "";
+ 		AS4PathAttribute aspa(AS4Path(as4path.c_str()));
++		if (aspa.invalid())
++		    goto err;
+ 		bgpupdate->add_pathatt(aspa);
+ 		debug_msg("as4path: %s\n", 
+ 			  AS4Path(as4path.c_str()).str().c_str());
+diff --git a/xorp/bgp/harness/peer.hh b/xorp/bgp/harness/peer.hh
+index d49fa1d..debdcf5 100644
+--- a/xorp/bgp/harness/peer.hh
++++ b/xorp/bgp/harness/peer.hh
+@@ -60,9 +60,9 @@ public:
+ 
+     void listen(const string& line, const vector<string>& words);
+ 
+-    void connect(const string& line, const vector<string>& words);
++    int connect(const string& line, const vector<string>& words);
+ 
+-    void disconnect(const string& line, const vector<string>& words);
++    int disconnect(const string& line, const vector<string>& words);
+ 
+     int WARN_UNUSED establish(const string& line, const vector<string>& words);
+ 
+@@ -92,7 +92,7 @@ public:
+ 
+     PathAttribute *path_attribute(const char *)	const;
+     const BGPPacket *packet(const string& line, const vector<string>& words,
+-			    int index);
++			    int index) const;
+ protected:
+     typedef XorpCallback1<void, const XrlError&>::RefPtr SMCB;
+     SMCB _smcb;
+diff --git a/xorp/bgp/harness/trie_payload.hh b/xorp/bgp/harness/trie_payload.hh
+index 462feb7..97d141c 100644
+--- a/xorp/bgp/harness/trie_payload.hh
++++ b/xorp/bgp/harness/trie_payload.hh
+@@ -17,25 +17,29 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/bgp/harness/trie_payload.hh,v 1.15 2008/11/08 06:14:45 mjh Exp $
+ 
+ #ifndef __BGP_HARNESS_TRIE_PAYLOAD_HH__
+ #define __BGP_HARNESS_TRIE_PAYLOAD_HH__
+ 
++#include <libxorp/exceptions.hh>
++
+ /**
+  * A BGP update packet can have many NLRIs. Each NLRI is stored in a
+  * trie node. Rather than keep multiple copies of a BGP update
+  * packet. A single reference counted copy is kept in TrieData. A
+  * TriePayload is stored in the trie and holds a pointer to the TrieData.
+  */
+-class TrieData {
++class TrieData : public Invalid {
+ public:
+     TrieData(const TimeVal& tv, const uint8_t *buf, size_t len,
+ 	     const BGPPeerData *peerdata,
+-	     TrieData* &first, TrieData* &last) : _tv(tv),
+-						  _first(first),
+-						  _last(last) {
+-	_packet = new UpdatePacket(buf, len, peerdata, 0, false);
++	     TrieData* &first, TrieData* &last, CorruptMessage& m)
++	    : _tv(tv), _first(first), _last(last) {
++	_packet = new UpdatePacket(buf, len, peerdata, 0, false, m);
++
++	if (_packet->invalid())
++	    set_invalid(true);
++
+ 	_refcnt = 1;
+ 
+ 	_next = 0;
+@@ -104,21 +108,23 @@ private:
+ /**
+  * The payload of a RealTrie.
+  */
+-class TriePayload {
++class TriePayload : public Invalid {
+ public:
+     TriePayload() : _data(0) {}
+ 
+     TriePayload(const TimeVal& tv, const uint8_t *buf, size_t len,
+ 		const BGPPeerData *peerdata,
+-		TrieData* &first, TrieData* &last) {
+-	_data = new TrieData(tv, buf, len, peerdata, first, last);
++		TrieData* &first, TrieData* &last, CorruptMessage& m) {
++	_data = new TrieData(tv, buf, len, peerdata, first, last, m);
++	if (_data->invalid())
++	    set_invalid(true);
+     }
+ 
+     ~TriePayload() {
+ 	zap();
+     }
+ 
+-    TriePayload(const TriePayload& rhs) {
++    TriePayload(const TriePayload& rhs) : Invalid(rhs) {
+ 	_data = 0;
+ 	copy(rhs);
+     }
+@@ -133,6 +139,7 @@ public:
+     }
+ 
+     void copy(const TriePayload& rhs) {
++	set_invalid(rhs.invalid());
+ 	if(rhs._data) {
+ // 	    debug_msg("refcnt: %d %#x\n", rhs._data->_refcnt + 1, rhs._data);
+ 	    rhs._data->incr_refcnt();
+@@ -160,6 +167,7 @@ public:
+ 	    delete _data;
+ 	}
+ 	_data = 0;
++	set_invalid(false);
+     }
+ 
+ private:
+diff --git a/xorp/bgp/internal_message.hh b/xorp/bgp/internal_message.hh
+index c30f409..9c85540 100644
+--- a/xorp/bgp/internal_message.hh
++++ b/xorp/bgp/internal_message.hh
+@@ -58,7 +58,7 @@ public:
+     const IPNet<A>& net() const;
+     const SubnetRoute<A> *route() const { return _subnet_route; }
+     const PeerHandler* origin_peer() const { return _origin_peer; }
+-    const A& nexthop() const { return _attributes->nexthop(); }
++    const A* nexthop(CorruptMessage& m) const { return _attributes->nexthop(m); }
+     FPAListRef& attributes() {return _attributes;}
+     const FPAListRef& const_attributes() const {return _attributes;}
+ 
+diff --git a/xorp/bgp/packet.hh b/xorp/bgp/packet.hh
+index 9e2bbe9..8250ae5 100644
+--- a/xorp/bgp/packet.hh
++++ b/xorp/bgp/packet.hh
+@@ -204,7 +204,7 @@ class UpdatePacket : public BGPPacket {
+ public:
+     UpdatePacket();
+     UpdatePacket(const uint8_t *d, uint16_t l, const BGPPeerData *peerdata,
+-		 BGPMain* mainprocess, bool do_checks);
++		 BGPMain* mainprocess, bool do_checks, CorruptMessage& m);
+ 
+     ~UpdatePacket();
+ 
+diff --git a/xorp/bgp/path_attribute.cc b/xorp/bgp/path_attribute.cc
+index 3d56725..6f025c9 100644
+--- a/xorp/bgp/path_attribute.cc
++++ b/xorp/bgp/path_attribute.cc
+@@ -150,16 +150,20 @@ OriginAttribute::str() const
+  * ASPathAttribute
+  */
+ 
+-ASPathAttribute::ASPathAttribute(const ASPath& p)
++ASPathAttribute::ASPathAttribute(const ASPath* p)
+ 	: PathAttribute(Transitive, AS_PATH)
+ {
+-    _as_path = new ASPath(p);
++    _as_path = new ASPath(*p);
+ }
+ 
+ PathAttribute *
+ ASPathAttribute::clone() const
+ {
+-    return new ASPathAttribute(as_path());
++    ASPathAttribute* a = new ASPathAttribute(as_path());
++    if (invalid()) {
++	a->set_invalid(true);
++    }
++    return a;
+ }
+ 
+ ASPathAttribute::ASPathAttribute(const uint8_t* d, bool use_4byte_asnums, CorruptMessage& m)
+@@ -200,26 +204,26 @@ const
+     
+ 
+     if (enc_4byte_asnums) {
+-	size_t l = as4_path().wire_size();
++	size_t l = as4_path()->wire_size();
+ 	if (l + 4 >= wire_size) {
+ 	    // There's not enough space to encode this.
+ 	    return false;
+ 	}
+ 
+ 	uint8_t *d = set_header(buf, l, wire_size);	// set and skip header
+-	as4_path().encode(l, d);	// encode the payload in the buffer
++	as4_path()->encode(l, d);	// encode the payload in the buffer
+     } else {
+ 	// either we're not using 4-byte AS numbers, or the peer isn't
+ 	// so encode as two-byte AS nums.  If we've got any 4-byte AS
+ 	// numbers in there, they'll be mapped to AS_TRAN.
+-	size_t l = as_path().wire_size();
++	size_t l = as_path()->wire_size();
+ 	if (l + 4 >= wire_size) {
+ 	    // There's not enough space to encode this.
+ 	    return false;
+ 	}
+ 
+ 	uint8_t *d = set_header(buf, l, wire_size);	// set and skip header
+-	as_path().encode(l, d);	// encode the payload in the buffer
++	as_path()->encode(l, d);	// encode the payload in the buffer
+     }
+     return true;
+ }
+@@ -230,10 +234,10 @@ const
+  * AS4 Path Attribute - see note in aspath.hh for usage details
+  */
+ 
+-AS4PathAttribute::AS4PathAttribute(const AS4Path& p)
++AS4PathAttribute::AS4PathAttribute(const AS4Path* p)
+ 	: PathAttribute((Flags)(Optional|Transitive), AS4_PATH)
+ {
+-    _as_path = new AS4Path(p);
++    _as_path = new AS4Path(*p);
+ }
+ 
+ AS4PathAttribute::AS4PathAttribute(const uint8_t* d, CorruptMessage& m)
+@@ -252,7 +256,11 @@ AS4PathAttribute::AS4PathAttribute(const uint8_t* d, CorruptMessage& m)
+ PathAttribute *
+ AS4PathAttribute::clone() const
+ {
+-    return new AS4PathAttribute(as4_path());
++    AS4PathAttribute* a = new AS4PathAttribute(as4_path());
++    if (invalid()) {
++	a->set_invalid(true);
++    }
++    return a;
+ }
+ 
+ bool
+@@ -267,14 +275,14 @@ const
+     
+     UNUSED(peerdata);
+     debug_msg("AS4PathAttribute encode()\n");
+-    size_t l = as4_path().wire_size();
++    size_t l = as4_path()->wire_size();
+     if (l + 4 >= wire_size) {
+ 	// There's not enough space to encode this.
+ 	return false;
+     }
+ 
+     uint8_t *d = set_header(buf, l, wire_size);	// set and skip header
+-    as4_path().encode(l, d);	// encode the payload in the buffer
++    as4_path()->encode(l, d);	// encode the payload in the buffer
+     return true;
+ }
+ 
+@@ -1893,12 +1901,12 @@ PathAttribute::operator<(const PathAttribute& him) const
+ 		((const OriginAttribute &)him).origin() );
+ 
+     case AS_PATH:
+-	return ( ((const ASPathAttribute &)*this).as_path() <
+-		((const ASPathAttribute &)him).as_path() );
++	return ( *(((const ASPathAttribute &)*this).as_path()) <
++		 *(((const ASPathAttribute &)him).as_path()) );
+ 
+     case AS4_PATH:
+-	return ( ((const AS4PathAttribute &)*this).as_path() <
+-		((const AS4PathAttribute &)him).as_path() );
++	return ( *(((const AS4PathAttribute &)*this).as_path()) <
++		 *(((const AS4PathAttribute &)him).as_path()) );
+ 
+     case NEXT_HOP:
+ 	return ( ((const NextHopAttribute<IPv4> &)*this).nexthop() <
+@@ -2005,12 +2013,12 @@ PathAttribute::operator==(const PathAttribute& him) const
+ 		((const OriginAttribute &)him).origin() );
+ 
+     case AS_PATH:
+-	return ( ((const ASPathAttribute &)*this).as_path() ==
+-		((const ASPathAttribute &)him).as_path() );
++	return ( *(((const ASPathAttribute &)*this).as_path()) ==
++		 *(((const ASPathAttribute &)him).as_path()) );
+ 
+     case AS4_PATH:
+-	return ( ((const AS4PathAttribute &)*this).as_path() ==
+-		((const AS4PathAttribute &)him).as_path() );
++	return ( *(((const AS4PathAttribute &)*this).as_path()) ==
++		 *(((const AS4PathAttribute &)him).as_path()) );
+ 
+     case NEXT_HOP:
+ 	return ( ((const NextHopAttribute<IPv4> &)*this).nexthop() ==
+@@ -2196,7 +2204,8 @@ PathAttributeList<A>::str() const
+ {
+     // this isn't very efficient - better not to call this unless you really need it.
+     PAListRef<A> pal(this);
+-    FastPathAttributeList<A> fast_pa_list(pal);
++    CorruptMessage m;
++    FastPathAttributeList<A> fast_pa_list(pal, m);
+     return fast_pa_list.str();
+ }
+ 
+@@ -2517,10 +2526,9 @@ FastPathAttributeList<A>::FastPathAttributeList(FastPathAttributeList<A>& him)
+ }
+ 
+ template<class A>
+-FastPathAttributeList<A>::
+-  FastPathAttributeList(const NextHopAttribute<A> &nexthop_att,
+-			const ASPathAttribute &aspath_att,
+-			const OriginAttribute &origin_att)
++FastPathAttributeList<A>::FastPathAttributeList(const NextHopAttribute<A> &nexthop_att,
++						const ASPathAttribute &aspath_att,
++						const OriginAttribute &origin_att)
+       : _slave_pa_list(),
+ 	_attribute_count(0),
+ 	_locked(false),
+@@ -2642,7 +2650,7 @@ FastPathAttributeList<A>::origin(CorruptMessage& m) {
+ 
+ template<class A>
+ ASPathAttribute*
+-FastPathAttributeList<A>::aspath_att(CorruptMessaeg& m) {
++FastPathAttributeList<A>::aspath_att(CorruptMessage& m) {
+     return (ASPathAttribute*)find_attribute_by_type(AS_PATH, m);
+ }
+ 
+@@ -2880,13 +2888,13 @@ FastPathAttributeList<A>::load_raw_data(const uint8_t *data,
+     if (_att[AS_PATH] != NULL) {
+ 	if (!peerdata->ibgp()) {
+ 	    // If this is an EBGP peering, the AS Path MUST NOT be empty
+-	    if (((ASPathAttribute*)_att[AS_PATH])->as_path().path_length() == 0)
++	    if (((ASPathAttribute*)_att[AS_PATH])->as_path()->path_length() == 0)
+ 		INVALID_BGP_F(UPDATEMSGERR, MALASPATH, "Empty AS Path");
+ 
+ 	    // If this is an EBGP peering, the AS Path MUST start
+ 	    // with the AS number of the peer.
+ 	    AsNum my_asnum(peerdata->as());
+-	    if (((ASPathAttribute*)_att[AS_PATH])->as_path().first_asnum() != my_asnum)
++	    if (((ASPathAttribute*)_att[AS_PATH])->as_path()->first_asnum() != my_asnum)
+ 		INVALID_BGP_F(UPDATEMSGERR, MALASPATH, "AS path must list peer");
+ 
+ 	    // If this is an EBGP peering and a route reflector
+@@ -2897,7 +2905,7 @@ FastPathAttributeList<A>::load_raw_data(const uint8_t *data,
+ 	// Receiving confederation path segments when the router
+ 	// is not configured for confederations is an error. 
+ 	if (!peerdata->confederation() &&
+-	    ((ASPathAttribute*)_att[AS_PATH])->as_path().contains_confed_segments())
++	    ((ASPathAttribute*)_att[AS_PATH])->as_path()->contains_confed_segments())
+ 	    INVALID_BGP_F(UPDATEMSGERR, MALASPATH, "Unexpected confederation");
+     }
+ 
+@@ -2907,9 +2915,9 @@ FastPathAttributeList<A>::load_raw_data(const uint8_t *data,
+ 
+     if (_att[NEXT_HOP] != NULL) {
+ 	if (mainprocess && 
+-	    mainprocess->interface_address4(((NextHopAttribute<IPv4>*)_att[NEXT_HOP])->nexthop())) {
++	    mainprocess->interface_address4(*(((NextHopAttribute<IPv4>*)_att[NEXT_HOP])->nexthop()))) {
+ 	    XLOG_ERROR("Nexthop in update belongs to this router:\n %s",
+-		       cstring(((NextHopAttribute<IPv4>*)_att[NEXT_HOP])->nexthop()));
++		       cstring(*(((NextHopAttribute<IPv4>*)_att[NEXT_HOP])->nexthop())));
+ 	    m.set_msg("Nexthop belongs to this router\n");
+ 	    m.set_unusable(true);
+ 	    set_invalid(true);
+@@ -3049,6 +3057,8 @@ FastPathAttributeList<A>::find_attribute_by_type(PathAttType type, CorruptMessag
+     PathAttribute *pa = PathAttribute::create(_att_bytes[type], 
+ 					      _att_lengths[type], used, NULL,
+ 					      A::ip_version(), m);
++    if (!pa)
++	set_invalid(true);
+     _att[type] = pa;
+     return pa;
+ }
+@@ -3081,7 +3091,7 @@ FastPathAttributeList<A>::replace_AS_path(const ASPath& new_as_path)
+ {
+     debug_msg("%p\n", this);
+ 
+-    replace_attribute(new ASPathAttribute(new_as_path));
++    replace_attribute(new ASPathAttribute(&new_as_path));
+ }
+ 
+ template<class A>
+@@ -3090,7 +3100,8 @@ FastPathAttributeList<A>::replace_nexthop(const A& new_nexthop)
+ {
+     debug_msg("%p\n", this);
+ 
+-    replace_attribute(new NextHopAttribute<A>(new_nexthop));
++    CorruptMessage m;
++    replace_attribute(new NextHopAttribute<A>(new_nexthop, m));
+ }
+ 
+ template<class A>
+@@ -3261,7 +3272,7 @@ FastPathAttributeList<A>::encode(uint8_t* buf, size_t &wire_size,
+ 	// we're using 4byte AS nums, but our peer isn't so we need to
+ 	// add an AS4Path attribute
+ 	XLOG_ASSERT(_att[AS_PATH]);  // surely we've decoded this by now?
+-	if (!((ASPathAttribute*)_att[AS_PATH])->as_path().two_byte_compatible()) {
++	if (!((ASPathAttribute*)_att[AS_PATH])->as_path()->two_byte_compatible()) {
+ 	    // only add the AS4Path if we can't code the ASPath without losing information
+ 
+ 	    attr_len = wire_size - len_so_far;
+@@ -3293,6 +3304,8 @@ FastPathAttributeList<A>::encode_and_decode_attribute(const uint8_t* att_data,
+ {
+     PathAttribute *pa;
+     bool use_4byte_asnums = peerdata->use_4byte_asnums();
++    CorruptMessage m;
++
+     switch (att_data[1]) {	// depending on type, do the right thing.
+ 
+     case AS_PATH: 
+@@ -3308,10 +3321,10 @@ FastPathAttributeList<A>::encode_and_decode_attribute(const uint8_t* att_data,
+ 	    return true;
+ 	} else {
+ 	    if (att_data[1] == AS_PATH) {
+-		ASPathAttribute as_path_att(att_data, use_4byte_asnums);
++		ASPathAttribute as_path_att(att_data, use_4byte_asnums, m);
+ 		return as_path_att.encode(buf, wire_size, peerdata);
+ 	    } else {
+-		AggregatorAttribute agg_att(att_data, use_4byte_asnums);
++		AggregatorAttribute agg_att(att_data, use_4byte_asnums, m);
+ 		return agg_att.encode(buf, wire_size, peerdata);
+ 	    }
+ 	}
+diff --git a/xorp/bgp/path_attribute.hh b/xorp/bgp/path_attribute.hh
+index 55a7b73..666515d 100644
+--- a/xorp/bgp/path_attribute.hh
++++ b/xorp/bgp/path_attribute.hh
+@@ -290,17 +290,15 @@ class ASPathAttribute : public PathAttribute
+ public:
+     ~ASPathAttribute()				{ delete _as_path; }
+ 
+-    ASPathAttribute(const ASPath& p);
++    ASPathAttribute(const ASPath* p);
+     ASPathAttribute(const uint8_t* d, bool use_4byte_asnums, CorruptMessage& m);
+     PathAttribute *clone() const;
+ 
+     string str() const {
+-	if (as_path()) {
++	if (as_path())
+ 	    return "AS Path Attribute " + as_path()->str();
+-	}
+-	else {
+-	    return "AS Path Attribute NULL";
+-	}
++
++	return "AS Path Attribute NULL";
+     }
+ 
+     ASPath* as_path() const		{ return _as_path; }
+@@ -323,16 +321,18 @@ class AS4PathAttribute : public PathAttribute
+ public:
+     ~AS4PathAttribute()				{ delete _as_path; }
+ 
+-    AS4PathAttribute(const AS4Path& p);
++    AS4PathAttribute(const AS4Path* p);
+     AS4PathAttribute(const uint8_t* d, CorruptMessage& m);
+     PathAttribute *clone() const;
+ 
+-    string str() const				{
+-	return "AS4 Path Attribute " + as_path().str();
++    string str() const {
++	if (as_path())
++	    return "AS4 Path Attribute " + as_path()->str();
++	return "AS4 Path Attribute NULL";
+     }
+ 
+-    ASPath &as_path() const		{ return (ASPath &)*_as_path; }
+-    AS4Path &as4_path() const		{ return (AS4Path &)*_as_path;}
++    ASPath *as_path() const		{ return (ASPath*)_as_path; }
++    AS4Path *as4_path() const		{ return _as_path;}
+ 
+     bool encode(uint8_t* buf, size_t &wire_size, const BGPPeerData* peerdata) const;
+     virtual bool invalid() const { return PathAttribute::invalid() || (_as_path && _as_path->invalid()); }
+@@ -853,9 +853,9 @@ public:
+ 
+ 
+     // short cuts
+-    A& nexthop();
+-    ASPath& aspath();
+-    OriginType origin();
++    A* nexthop(CorruptMessage& m);
++    ASPath* aspath(CorruptMessage& m);
++    OriginType origin(CorruptMessage& m);
+ 
+     // complete() is true when all the mandatory attributes are present
+     virtual bool complete() const			{
+diff --git a/xorp/bgp/peer.cc b/xorp/bgp/peer.cc
+index 65414c6..2f546b8 100644
+--- a/xorp/bgp/peer.cc
++++ b/xorp/bgp/peer.cc
+@@ -115,6 +115,7 @@ bool
+ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
+ 		     size_t length, SocketClient *socket_client)
+ {
++    CorruptMessage m;
+     XLOG_ASSERT(0 == socket_client || _SocketClient == socket_client);
+ 
+     PROFILE(if (main()->profile().enabled(profile_message_in))
+@@ -240,7 +241,6 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
+ 	goto err;
+     }
+ 
+-    CorruptMessage m;
+     switch (type) {
+     case MESSAGETYPEOPEN: {
+ 	debug_msg("OPEN Packet RECEIVED\n");
+@@ -340,22 +340,24 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
+     return true;
+ 
+   err:
+-    /*
+-    ** This peer has sent us a bad message. Send a notification
+-    ** and drop the the peering.
+-    */
+-    XLOG_WARNING("%s Corrupt message", str().c_str());
+-    notify_peer_of_error(c.error(), c.subcode(), c.data(), c.len());
+-    TIMESPENT_CHECK();
+-    return false;
+-
+-  err_unusable:
+-    // the packet wasn't usable for some reason, but also
+-    // wasn't so corrupt we need to send a notification -
+-    // this is a "silent" error.
+-    XLOG_WARNING("%s Unusable message", str().c_str());
+-    TIMESPENT_CHECK();
+-    return false;
++    if (m.is_unusable()) {
++	// the packet wasn't usable for some reason, but also
++	// wasn't so corrupt we need to send a notification -
++	// this is a "silent" error.
++	XLOG_WARNING("%s Unusable message", str().c_str());
++	TIMESPENT_CHECK();
++	return false;
++    }
++    else {
++	/*
++	** This peer has sent us a bad message. Send a notification
++	** and drop the the peering.
++	*/
++	XLOG_WARNING("%s Corrupt message", str().c_str());
++	notify_peer_of_error(m.error(), m.subcode(), m.data(), m.len());
++	TIMESPENT_CHECK();
++	return false;
++    }
+ }
+ 
+ PeerOutputState
+@@ -433,7 +435,7 @@ BGPPeer::send_message_complete(SocketClient::Event ev, const uint8_t *buf)
+ 		_handler->output_no_longer_busy();
+ 	}
+ 	TIMESPENT_CHECK();
+-	/*drop through to next case*/
++	/* Fall through */
+     case SocketClient::FLUSHING:
+ 	debug_msg("event: flushing\n");
+ 	debug_msg("Freeing Buffer for sent packet: %p\n", buf);
+@@ -586,7 +588,8 @@ BGPPeer::event_start()			// EVENTBGPSTART
+     case STATESTOPPED:
+ 	flush_transmit_queue();		// ensure callback can't happen
+ 	set_state(STATEIDLE, false);// go through STATEIDLE to clear resources
+-	// fallthrough now to process the start event
++	/* fall through to process the start event*/
++	/* fall through */
+     case STATEIDLE:
+ 	// Initalise resources
+ 	start_connect_retry_timer();
+@@ -652,6 +655,7 @@ void
+ BGPPeer::event_open()	// EVENTBGPTRANOPEN
+ { 
+     TIMESPENT();
++    string err;
+ 
+     switch(_state) {
+     case STATEOPENSENT:
+@@ -686,7 +690,9 @@ BGPPeer::event_open()	// EVENTBGPTRANOPEN
+ 	}
+ #endif
+ 	generate_open_message(open_packet);
+-	send_message(open_packet);
++	send_message(open_packet, err);
++	if (err.size())
++	    XLOG_WARNING("%s", err.c_str());
+ 
+ 	clear_connect_retry_timer();
+ 	if ((_state == STATEACTIVE) || (_state == STATECONNECT)) {
+@@ -901,6 +907,7 @@ void
+ BGPPeer::event_keepexp()			// EVENTKEEPALIVEEXP
+ { 
+     TIMESPENT();
++    string err;
+ 
+     switch(_state) {
+     case STATEIDLE:
+@@ -917,16 +924,19 @@ BGPPeer::event_keepexp()			// EVENTKEEPALIVEEXP
+     case STATEESTABLISHED:
+ 	start_keepalive_timer();
+ 	KeepAlivePacket kp;
+-	send_message(kp);
++	send_message(kp, err);
+ 	break;
+     }
++    if (err.size())
++	XLOG_WARNING("%s", err.c_str());
+ }
+ 
+ void
+ BGPPeer::event_delay_open_exp()
+ { 
+     TIMESPENT();
+-    
++    string err;
++
+     switch(_state) {
+     case STATEIDLE:
+     case STATESTOPPED:
+@@ -938,8 +948,8 @@ BGPPeer::event_delay_open_exp()
+ 	NotificationPacket np(FSMERROR);
+ 	send_notification(np);
+ 	set_state(STATESTOPPED);
+-    }
+ 	break;
++    }
+     case STATECONNECT:
+     case STATEACTIVE:
+     case STATEOPENCONFIRM: {
+@@ -947,7 +957,9 @@ BGPPeer::event_delay_open_exp()
+ 			       _localdata->get_id(),
+ 			       _peerdata->get_configured_hold_time());
+ 	generate_open_message(open_packet);
+-	send_message(open_packet);
++	send_message(open_packet, err);
++	if (err.size())
++	    XLOG_WARNING("%s", err.c_str());
+ 
+ 	if ((_state == STATEACTIVE) || (_state == STATECONNECT)) {
+ 	    // Start Holdtimer - four minutes recommended in spec.
+@@ -956,9 +968,9 @@ BGPPeer::event_delay_open_exp()
+ 	}
+ 	// Change state to OpenSent
+ 	set_state(STATEOPENSENT);
+-    }
+ 	break;
+     }
++    }
+ }
+ 
+ void
+@@ -978,6 +990,7 @@ void
+ BGPPeer::event_openmess(const OpenPacket& p)		// EVENTRECOPENMESS
+ {
+     TIMESPENT();
++    string err;
+ 
+     switch(_state) {
+     case STATECONNECT:
+@@ -989,16 +1002,20 @@ BGPPeer::event_openmess(const OpenPacket& p)		// EVENTRECOPENMESS
+ 			       _localdata->get_id(),
+ 			       _peerdata->get_configured_hold_time());
+ 	generate_open_message(open_packet);
+-	send_message(open_packet);
++	send_message(open_packet, err);
++	if (err.size())
++	    XLOG_WARNING("%s", err.c_str());
+     }
+ 	/* FALLTHROUGH */
+-    case STATEOPENSENT:
++    case STATEOPENSENT: {
+ 	// Process OPEN MESSAGE
+-	try {
+-	    check_open_packet(&p);
++	CorruptMessage m;
++	if (check_open_packet(&p, m)) {
+ 	    // We liked the open packet continue, trying to setup session.
+ 	    KeepAlivePacket kp;
+-	    send_message(kp);
++	    send_message(kp, err);
++	    if (err.size())
++		XLOG_WARNING("%s", err.c_str());
+ 
+ 	    // start timers
+ 	    debug_msg("Starting timers\n");
+@@ -1013,12 +1030,12 @@ BGPPeer::event_openmess(const OpenPacket& p)		// EVENTRECOPENMESS
+ 	    _peerdata->open_negotiation();
+ 
+ 	    set_state(STATEOPENCONFIRM);
+-	} catch(CorruptMessage& c) {
+-	    XLOG_WARNING("%s %s", this->str().c_str(), c.why().c_str());
+-	    notify_peer_of_error(c.error(), c.subcode(), c.data(), c.len());
++	} else {
++	    XLOG_WARNING("%s %s", str().c_str(), m.get_msg().c_str());
++	    notify_peer_of_error(m.error(), m.subcode(), m.data(), m.len());
+ 	}
+ 	break;
+-
++    }
+     case STATEIDLE:
+     case STATEOPENCONFIRM:
+     case STATEESTABLISHED: {
+@@ -1132,7 +1149,8 @@ BGPPeer::event_recvupdate(UpdatePacket& p) // EVENTRECUPDATEMESS
+ 	const IPv4 next_hop = peerdata()->get_next_hop_rewrite();
+ 	if (!next_hop.is_zero()) {
+ 	    FPAList4Ref l = p.pa_list();
+-	    if (l->nexthop_att()) {
++	    CorruptMessage m;
++	    if (l->nexthop_att(m)) {
+ 		l->replace_nexthop(next_hop);
+ 	    }
+ 	}
+@@ -1269,28 +1287,28 @@ BGPPeer::event_open(const XorpFd sock)
+     }
+ }
+ 
+-void
++bool
+ BGPPeer::check_open_packet(const OpenPacket *p, CorruptMessage& m)
+ {
+     if (p->Version() != BGPVERSION) {
+ 	static uint8_t data[2];
+ 	embed_16(data, BGPVERSION);
+-	INVALID_BGP(OPENMSGERR, UNSUPVERNUM, "Unsupported BGPVERSION %d", p->Version());
++	INVALID_BGP_F(OPENMSGERROR, UNSUPVERNUM, "Unsupported BGPVERSION %d", p->Version());
+     }
+ 
+     if (p->as() != _peerdata->as()) {
+ 	debug_msg("**** Peer has %s, should have %s ****\n",
+ 		  p->as().str().c_str(),
+ 		  _peerdata->as().str().c_str());
+-	INVALID_BGP(OPENMSGERROR, BADASPEER, "Wrong AS %s expecting %s",
+-		    p->as().str().c_str(),
+-		    _peerdata->as().str().c_str());
++	INVALID_BGP_F(OPENMSGERROR, BADASPEER, "Wrong AS %s expecting %s",
++		      p->as().str().c_str(),
++		      _peerdata->as().str().c_str());
+     }
+ 
+     // Must be a valid unicast IP host address.
+     if (!p->id().is_unicast() || p->id().is_zero()) {
+-	INVALID_BGP(OPENMSGERROR, BADBGPIDENT, "Not a valid unicast IP host address %s",
+-		    p->id().str().c_str());
++	INVALID_BGP_F(OPENMSGERROR, BADBGPIDENT, "Not a valid unicast IP host address %s",
++		      p->id().str().c_str());
+     }
+ 
+     // This has to be a valid IPv4 address.
+@@ -1301,8 +1319,8 @@ BGPPeer::check_open_packet(const OpenPacket *p, CorruptMessage& m)
+     // check the received parameters
+ #if	0
+     if (_peerdata->unsupported_parameters() == true)
+-	INVALID_BGP(OPENMSGERROR, UNSUPOPTPAR,
+-		   c_format("Unsupported parameters"));
++	INVALID_BGP_F(OPENMSGERROR, UNSUPOPTPAR,
++		      c_format("Unsupported parameters"));
+ #endif
+     /*
+      * Set the holdtime and keepalive times.
+@@ -1318,7 +1336,7 @@ BGPPeer::check_open_packet(const OpenPacket *p, CorruptMessage& m)
+      */
+     uint16_t hold_secs = p->HoldTime();
+     if (hold_secs == 1 || hold_secs == 2)
+-	INVALID_BGP(OPENMSGERROR, UNACCEPTHOLDTIME, "Illegal holdtime value %d secs", hold_secs);
++	INVALID_BGP_F(OPENMSGERROR, UNACCEPTHOLDTIME, "Illegal holdtime value %d secs", hold_secs);
+ 
+     if (_peerdata->get_configured_hold_time() < hold_secs)
+ 	hold_secs = _peerdata->get_configured_hold_time();
+@@ -1328,6 +1346,7 @@ BGPPeer::check_open_packet(const OpenPacket *p, CorruptMessage& m)
+ 
+     _peerdata->dump_peer_data();
+     debug_msg("check_open_packet says it's OK with us\n");
++    return true;
+ }
+ 
+ #define	REMOVE_UNNEGOTIATED_NLRI
+@@ -2138,10 +2157,11 @@ PeerOutputState
+ BGPPeer::send_update_message(const UpdatePacket& p)
+ {
+     PeerOutputState queue_state;
++    string err;
+     debug_msg("send_update_message called\n");
+     assert(STATEESTABLISHED == _state);
+-    queue_state = send_message(p);
+-    debug_msg("send_update_message: queue is state %d\n", queue_state);
++    queue_state = send_message(p, err);
++    debug_msg("send_update_message: queue is state %d, err: %s\n", queue_state, err.c_str());
+     return queue_state;
+ }
+ 
+@@ -2151,7 +2171,8 @@ BGPPeer::send_netreachability(const BGPUpdateAttrib &n)
+     debug_msg("send_netreachability called\n");
+     UpdatePacket bup;
+     bup.add_nlri(n);
+-    return send_message(bup);
++    string err;
++    return send_message(bup, err);
+ }
+ 
+ uint32_t
+@@ -2553,6 +2574,7 @@ AcceptSession::get_message_accept(BGPPacket::Status status,
+ 				  SocketClient *socket_client)
+ {
+     XLOG_ASSERT(socket_client == _socket_client);
++    CorruptMessage m;
+ 
+     // An open is expected but any packet will break us out of this state.
+     _open_wait.clear();
+@@ -2593,15 +2615,15 @@ AcceptSession::get_message_accept(BGPPacket::Status status,
+     const uint8_t* marker = buf + BGPPacket::MARKER_OFFSET;
+     uint8_t type = extract_8(buf + BGPPacket::TYPE_OFFSET);
+ 
+-    CorruptMessage m;
+-
+     /*
+     ** Check the Marker, total waste of time as it never contains
+     ** anything of interest.
+     */
+     if (0 != memcmp(const_cast<uint8_t *>(&BGPPacket::Marker[0]),
+ 		    marker, BGPPacket::MARKER_SIZE)) {
+-	INVALID_BGP(MSGHEADERERR, CANNOTSYNC, "Bad Marker");
++	m.set_err(MSGHEADERERR, CONNNOTSYNC);
++	m.set_msg("Bad Marker");
++	goto err;
+     }
+ 
+     switch (type) {
+@@ -2652,7 +2674,6 @@ AcceptSession::get_message_accept(BGPPacket::Status status,
+ 	if (pac.invalid())
+ 	    goto err;
+ 
+-	// All decode errors should throw a CorruptMessage.
+ 	debug_msg("%s", pac.str().c_str());
+ 	event_recvupdate_accept(pac);
+ 	TIMESPENT_CHECK();
+@@ -2673,7 +2694,6 @@ AcceptSession::get_message_accept(BGPPacket::Status status,
+ 			   peerdata()->iptuple().str().c_str(),
+ 			   cstring(pac)));
+ 
+-	// All decode errors should throw a CorruptMessage.
+ 	debug_msg("%s", pac.str().c_str());
+ 	event_recvnotify_accept(pac);
+ 	TIMESPENT_CHECK();
+@@ -2695,19 +2715,16 @@ AcceptSession::get_message_accept(BGPPacket::Status status,
+     goto after_err;
+ 
+   err:
+-    if (m.unusable()) {
++    XLOG_WARNING("%s %s", str().c_str(), m.get_msg().c_str());
++    if (m.is_unusable()) {
+ 	// the packet wasn't usable for some reason, but also
+ 	// wasn't so corrupt we need to send a notification -
+ 	// this is a "silent" error.
+-	XLOG_WARNING("%s %s %s", str().c_str(), m.where().c_str(),
+-		     m.why().c_str());
+     } else {
+ 	/*
+ 	** This peer has sent us a bad message. Send a notification
+ 	** and drop the the peering.
+ 	*/
+-	XLOG_WARNING("%s %s %s", str().c_str(), m.where().c_str(),
+-		     m.why().c_str());
+ 	notify_peer_of_error_accept(m.error(), m.subcode(), m.data(), m.len());
+ // 	event_tranfatal_accept();
+ 	TIMESPENT_CHECK();
+diff --git a/xorp/bgp/peer.hh b/xorp/bgp/peer.hh
+index e8280dd..7dde8a6 100644
+--- a/xorp/bgp/peer.hh
++++ b/xorp/bgp/peer.hh
+@@ -217,7 +217,7 @@ public:
+ 
+     bool get_message(BGPPacket::Status status, const uint8_t *buf, size_t len,
+ 		     SocketClient *socket_client);
+-    PeerOutputState send_message(const BGPPacket& p);
++    PeerOutputState send_message(const BGPPacket& p, string& err);
+     void send_message_complete(SocketClient::Event, const uint8_t *buf);
+ 
+     string str() const			{ return _peername; }
+@@ -316,7 +316,7 @@ private:
+     XorpTimer _timer_stopped;
+     void hook_stopped();
+ 
+-    bool check_open_packet(const OpenPacket *p, string& err);
++    bool check_open_packet(const OpenPacket *p, CorruptMessage& m);
+     NotificationPacket* check_update_packet(const UpdatePacket *p,
+ 					    bool& good_nexthop);
+ 
+diff --git a/xorp/bgp/peer_handler.cc b/xorp/bgp/peer_handler.cc
+index 54a8f72..d1e7bf9 100644
+--- a/xorp/bgp/peer_handler.cc
++++ b/xorp/bgp/peer_handler.cc
+@@ -148,7 +148,8 @@ PeerHandler::add<IPv4>(const UpdatePacket *p,
+     }
+ 	break;
+     case SAFI_MULTICAST: {
+-	const MPReachNLRIAttribute<IPv4> *mpreach = pa_list->mpreach<IPv4>(safi);
++	CorruptMessage m;
++	const MPReachNLRIAttribute<IPv4> *mpreach = pa_list->mpreach<IPv4>(safi, m);
+ 	if(!mpreach)
+ 	    return false;
+ 
+@@ -198,8 +199,8 @@ PeerHandler::add<IPv6>(const UpdatePacket *p,
+ {
+     UNUSED(original_pa_list);
+     UNUSED(p);
+-
+-    const MPReachNLRIAttribute<IPv6> *mpreach = pa_list->mpreach<IPv6>(safi);
++    CorruptMessage m;
++    const MPReachNLRIAttribute<IPv6> *mpreach = pa_list->mpreach<IPv6>(safi, m);
+     if(!mpreach)
+ 	return false;
+ 
+@@ -253,8 +254,9 @@ PeerHandler::withdraw<IPv6>(const UpdatePacket *p,
+ 			    Safi safi)
+ {
+     UNUSED(p);
++    CorruptMessage m;
+     const MPUNReachNLRIAttribute<IPv6> *mpunreach 
+-	= original_pa_list->mpunreach<IPv6>(safi);
++	= original_pa_list->mpunreach<IPv6>(safi, m);
+     if (!mpunreach)
+ 	return false;
+     
+@@ -299,8 +301,9 @@ PeerHandler::withdraw<IPv4>(const UpdatePacket *p,
+     }
+ 	break;
+     case SAFI_MULTICAST: {
++	CorruptMessage m;
+ 	const MPUNReachNLRIAttribute<IPv4> *mpunreach 
+-	    = original_pa_list->mpunreach<IPv4>(safi);
++	    = original_pa_list->mpunreach<IPv4>(safi, m);
+ 	if (!mpunreach)
+ 	    return false;
+     
+@@ -338,7 +341,7 @@ PeerHandler::process_update_packet(UpdatePacket *p)
+     debug_msg("Processing packet\n %s\n", p->str().c_str());
+ 
+     FPAList4Ref pa_list = p->pa_list();
+-
++    CorruptMessage m;
+     FPAList4Ref pa_ipv4_unicast = new FastPathAttributeList<IPv4>();
+     FPAList4Ref pa_ipv4_multicast = new FastPathAttributeList<IPv4>();
+ #ifdef HAVE_IPV6
+@@ -357,13 +360,14 @@ PeerHandler::process_update_packet(UpdatePacket *p)
+     // need to mess with it before passing it to the final PA lists.
+     // It's safe to mess with the ASPath in place, as we won't need
+     // the original after this.
+-    ASPath* as_path = 0;
++    ASPath* as_path = NULL;
++
+     if (!pa_list->is_empty()) {
+-	if (pa_list->aspath_att())
+-	    as_path = const_cast<ASPath*>(&(pa_list->aspath()));
++	if (pa_list->aspath_att(m))
++	    as_path = const_cast<ASPath*>(pa_list->aspath(m));
+ 
+ 	for (int i = 0; i < pa_list->max_att(); i++) {
+-	    pa = pa_list->find_attribute_by_type((PathAttType)i);
++	    pa = pa_list->find_attribute_by_type((PathAttType)i, m);
+ 	    if (pa) {
+ 		switch((PathAttType)i) {
+ 		case AS_PATH:
+@@ -381,9 +385,8 @@ PeerHandler::process_update_packet(UpdatePacket *p)
+ 			// AS_PATH we've already decoded, then discard the
+ 			// AS4_PATH as we don't need both.
+ 			const AS4PathAttribute* as4attr = 
+-			    (const AS4PathAttribute*)(pa_list->as4path_att());
+-			XLOG_ASSERT(as_path);
+-			as_path->merge_as4_path(as4attr->as4_path());
++			    (const AS4PathAttribute*)(pa_list->as4path_att(m));
++			as_path->merge_as4_path(*(as4attr->as4_path()));
+ 
+ 			/* don't store the AS4path in the PA list */
+ 			continue;
+@@ -404,13 +407,13 @@ PeerHandler::process_update_packet(UpdatePacket *p)
+ 			    dynamic_cast<const MPReachNLRIAttribute<IPv6>*>(pa);
+ 			switch(mpreach->safi()) {
+ 			case SAFI_UNICAST: {
+-			    IPv6NextHopAttribute nha(mpreach->nexthop());
++			    IPv6NextHopAttribute nha(mpreach->nexthop(), m);
+ 			    pa_ipv6_unicast->add_path_attribute(nha);
+ 			    pa_ipv6_unicast->add_path_attribute(*pa);
+ 			    break;
+ 			}
+ 			case SAFI_MULTICAST: {
+-			    IPv6NextHopAttribute nha(mpreach->nexthop());
++			    IPv6NextHopAttribute nha(mpreach->nexthop(), m);
+ 			    pa_ipv6_multicast->add_path_attribute(nha);
+ 			    pa_ipv6_multicast->add_path_attribute(*pa);
+ 			    break;
+@@ -431,7 +434,7 @@ PeerHandler::process_update_packet(UpdatePacket *p)
+ 			    //add_path_attribute(IPv4NextHopAttribute(mpreach->nexthop()));
+ 			    break;
+ 			case SAFI_MULTICAST: {
+-			    IPv4NextHopAttribute nha(mpreach->nexthop());
++			    IPv4NextHopAttribute nha(mpreach->nexthop(), m);
+ 			    pa_ipv4_multicast->add_path_attribute(nha);
+ 			    pa_ipv4_multicast->add_path_attribute(*pa);
+ 			    break;
+@@ -475,7 +478,7 @@ PeerHandler::process_update_packet(UpdatePacket *p)
+ 
+     /* finally store the ASPath attribute, now we know we're done messing with it */
+     if (as_path) {
+-	ASPathAttribute as_path_attr(*as_path);
++	ASPathAttribute as_path_attr(as_path);
+ 	pa_ipv4_unicast->add_path_attribute(as_path_attr);
+ 	pa_ipv4_multicast->add_path_attribute(as_path_attr);
+ #ifdef HAVE_IPV6
+@@ -552,7 +555,8 @@ PeerHandler::add_route(const SubnetRoute<IPv4> &rt,
+ 		       bool /*ibgp*/, Safi safi)
+ {
+     debug_msg("PeerHandler::add_route(IPv4) %p\n", &rt);
+-    XLOG_ASSERT(_packet != NULL);
++    CorruptMessage m;
++
+     // if a route came from IBGP, it shouldn't go to IBGP (unless
+     // we're a route reflector)
+ //     if (ibgp)
+@@ -591,7 +595,7 @@ PeerHandler::add_route(const SubnetRoute<IPv4> &rt,
+ 	    // but have on in the MultiProtocol attribute instead.
+ 	    _packet->pa_list()->remove_attribute_by_type(NEXT_HOP);
+ 	    MPReachNLRIAttribute<IPv4> mp(safi);
+-	    mp.set_nexthop(pa_list->nexthop());
++	    mp.set_nexthop(*(pa_list->nexthop(m)));
+ 	    _packet->add_pathatt(mp);
+ 	}
+     }
+@@ -600,21 +604,20 @@ PeerHandler::add_route(const SubnetRoute<IPv4> &rt,
+     switch(safi) {
+     case SAFI_UNICAST: {
+ 	BGPUpdateAttrib nlri(rt.net());
+- 	XLOG_ASSERT(_packet->pa_list()->nexthop() == pa_list->nexthop());
++ 	XLOG_ASSERT(*(_packet->pa_list()->nexthop(m)) == *(pa_list->nexthop(m)));
+ 	_packet->add_nlri(nlri);
+-    }
+ 	break;
++    }
+     case SAFI_MULTICAST: {
+-	XLOG_ASSERT(pa_list->mpreach<IPv4>(SAFI_MULTICAST));
+-	XLOG_ASSERT(pa_list->mpreach<IPv4>(SAFI_MULTICAST)->nexthop() == 
+-		    pa_list->nexthop());
++	XLOG_ASSERT(pa_list->mpreach<IPv4>(SAFI_MULTICAST, m));
++	XLOG_ASSERT(pa_list->mpreach<IPv4>(SAFI_MULTICAST, m)->nexthop() == 
++		    *(pa_list->nexthop(m)));
+ 	MPReachNLRIAttribute<IPv4>* mpreach_att =
+-	    _packet->pa_list()->mpreach<IPv4>(SAFI_MULTICAST);
+-	XLOG_ASSERT(mpreach_att);
++	    _packet->pa_list()->mpreach<IPv4>(SAFI_MULTICAST, m);
+ 	mpreach_att->add_nlri(rt.net());
+-    }
+ 	break;
+     }
++    }
+ 
+     return 0;
+ }
+@@ -639,8 +642,9 @@ PeerHandler::delete_route(const SubnetRoute<IPv4> &rt,
+ 			  bool /*ibgp*/, 
+ 			  Safi safi)
+ {
++    CorruptMessage m;
++
+     debug_msg("PeerHandler::delete_route(IPv4) %p\n", &rt);
+-    XLOG_ASSERT(_packet != NULL);
+ 
+     // Check this peer wants this NLRI
+     if (!multiprotocol<IPv4>(safi, BGPPeerData::NEGOTIATED))
+@@ -651,7 +655,7 @@ PeerHandler::delete_route(const SubnetRoute<IPv4> &rt,
+ 	start_packet();
+     }
+ 
+-    if (SAFI_MULTICAST == safi && 0 == _packet->pa_list()->mpunreach<IPv4>(safi)) {
++    if (SAFI_MULTICAST == safi && 0 == _packet->pa_list()->mpunreach<IPv4>(safi, m)) {
+ 	MPUNReachNLRIAttribute<IPv4>* mp = new MPUNReachNLRIAttribute<IPv4>(safi);
+ 	_packet->pa_list()->add_path_attribute(mp);
+     }
+@@ -660,14 +664,14 @@ PeerHandler::delete_route(const SubnetRoute<IPv4> &rt,
+     case SAFI_UNICAST: {
+ 	BGPUpdateAttrib wdr(rt.net());
+ 	_packet->add_withdrawn(wdr);
+-    }
+ 	break;
+-    case SAFI_MULTICAST: {
+-	XLOG_ASSERT(_packet->pa_list()->mpunreach<IPv4>(SAFI_MULTICAST));
+-	_packet->pa_list()->mpunreach<IPv4>(SAFI_MULTICAST)->add_withdrawn(rt.net());
+     }
++    case SAFI_MULTICAST: {
++	XLOG_ASSERT(_packet->pa_list()->mpunreach<IPv4>(SAFI_MULTICAST, m));
++	_packet->pa_list()->mpunreach<IPv4>(SAFI_MULTICAST, m)->add_withdrawn(rt.net());
+ 	break;
+     }
++    }
+ 
+     return 0;
+ }
+@@ -677,27 +681,27 @@ PeerHandler::push_packet()
+ {
+     debug_msg("PeerHandler::push_packet - sending packet:\n %s\n",
+ 	      _packet->str().c_str());
++    CorruptMessage m;
+ 
+     // do some sanity checking
+-    XLOG_ASSERT(_packet);
+     int wdr = _packet->wr_list().size();
+     int nlri = _packet->nlri_list().size();
+ 
+-    if(_packet->pa_list()->mpreach<IPv4>(SAFI_MULTICAST))
+-	nlri += _packet->pa_list()->mpreach<IPv4>(SAFI_MULTICAST)->nlri_list().size();
+-    if(_packet->pa_list()->mpunreach<IPv4>(SAFI_MULTICAST))
+-	wdr += _packet->pa_list()->mpunreach<IPv4>(SAFI_MULTICAST)->wr_list().size();
++    if(_packet->pa_list()->mpreach<IPv4>(SAFI_MULTICAST, m))
++	nlri += _packet->pa_list()->mpreach<IPv4>(SAFI_MULTICAST, m)->nlri_list().size();
++    if(_packet->pa_list()->mpunreach<IPv4>(SAFI_MULTICAST, m))
++	wdr += _packet->pa_list()->mpunreach<IPv4>(SAFI_MULTICAST, m)->wr_list().size();
+ 
+ #ifdef HAVE_IPV6
+     // Account for IPv6
+-    if(_packet->pa_list()->mpreach<IPv6>(SAFI_UNICAST))
+-	nlri += _packet->pa_list()->mpreach<IPv6>(SAFI_UNICAST)->nlri_list().size();
+-    if(_packet->pa_list()->mpunreach<IPv6>(SAFI_UNICAST))
+-	wdr += _packet->pa_list()->mpunreach<IPv6>(SAFI_UNICAST)->wr_list().size();
+-    if(_packet->pa_list()->mpreach<IPv6>(SAFI_MULTICAST))
+-	nlri += _packet->pa_list()->mpreach<IPv6>(SAFI_MULTICAST)->nlri_list().size();
+-    if(_packet->pa_list()->mpunreach<IPv6>(SAFI_MULTICAST))
+-	wdr += _packet->pa_list()->mpunreach<IPv6>(SAFI_MULTICAST)->wr_list().size();
++    if(_packet->pa_list()->mpreach<IPv6>(SAFI_UNICAST, m))
++	nlri += _packet->pa_list()->mpreach<IPv6>(SAFI_UNICAST, m)->nlri_list().size();
++    if(_packet->pa_list()->mpunreach<IPv6>(SAFI_UNICAST, m))
++	wdr += _packet->pa_list()->mpunreach<IPv6>(SAFI_UNICAST, m)->wr_list().size();
++    if(_packet->pa_list()->mpreach<IPv6>(SAFI_MULTICAST, m))
++	nlri += _packet->pa_list()->mpreach<IPv6>(SAFI_MULTICAST, m)->nlri_list().size();
++    if(_packet->pa_list()->mpunreach<IPv6>(SAFI_MULTICAST, m))
++	wdr += _packet->pa_list()->mpunreach<IPv6>(SAFI_MULTICAST, m)->wr_list().size();
+ #endif
+ 
+ //     XLOG_ASSERT( (wdr+nlri) > 0);
+@@ -764,7 +768,7 @@ PeerHandler::add_route(const SubnetRoute<IPv6> &rt,
+ 		       bool /*ibgp*/, Safi safi)
+ {
+     debug_msg("PeerHandler::add_route(IPv6) %p\n", &rt);
+-    XLOG_ASSERT(_packet != NULL);
++    CorruptMessage m;
+     // if a route came from IBGP, it shouldn't go to IBGP (unless
+     // we're a route reflector)
+ //     if (ibgp)
+@@ -784,7 +788,7 @@ PeerHandler::add_route(const SubnetRoute<IPv6> &rt,
+ 	// no, so add all the path attributes
+ 	for (int i = 0; i < MAX_ATTRIBUTE; i++) {
+ 	    const PathAttribute* pa;
+-	    pa = pa_list->find_attribute_by_type((PathAttType)i);
++	    pa = pa_list->find_attribute_by_type((PathAttType)i, m);
+ 	    if (pa && i != NEXT_HOP) {
+ 		/*
+ 		** Don't put an IPv6 next hop in the IPv4 path attribute list.
+@@ -793,14 +797,14 @@ PeerHandler::add_route(const SubnetRoute<IPv6> &rt,
+ 	    }
+ 	}
+ 	MPReachNLRIAttribute<IPv6> mp(safi);
+-	mp.set_nexthop(pa_list->nexthop());
++	mp.set_nexthop(*(pa_list->nexthop(m)));
+ 	_packet->add_pathatt(mp);
+     }
+ 
+     MPReachNLRIAttribute<IPv6>* mpreach_att =
+-	_packet->pa_list()->mpreach<IPv6>(safi);
++	_packet->pa_list()->mpreach<IPv6>(safi, m);
+     XLOG_ASSERT(mpreach_att);
+-    XLOG_ASSERT(mpreach_att->nexthop() == pa_list->nexthop());
++    XLOG_ASSERT(mpreach_att->nexthop() == *(pa_list->nexthop(m)));
+     mpreach_att->add_nlri(rt.net());
+ 
+     return 0;
+@@ -830,7 +834,7 @@ PeerHandler::delete_route(const SubnetRoute<IPv6>& rt,
+ 			  Safi safi)
+ {
+     debug_msg("PeerHandler::delete_route(IPv6) %p\n", &rt);
+-    XLOG_ASSERT(_packet != NULL);
++    CorruptMessage m;
+ 
+     // Check this peer wants this NLRI
+     if (!multiprotocol<IPv6>(safi, BGPPeerData::NEGOTIATED))
+@@ -841,13 +845,13 @@ PeerHandler::delete_route(const SubnetRoute<IPv6>& rt,
+ 	start_packet();
+     }
+ 
+-    if (0 == _packet->pa_list()->mpunreach<IPv6>(safi)) {
++    if (0 == _packet->pa_list()->mpunreach<IPv6>(safi, m)) {
+ 	MPUNReachNLRIAttribute<IPv6>* mp = new MPUNReachNLRIAttribute<IPv6>(safi);
+ 	_packet->pa_list()->add_path_attribute(mp);
+     }
+ 
+-    XLOG_ASSERT(_packet->pa_list()->mpunreach<IPv6>(safi));
+-    _packet->pa_list()->mpunreach<IPv6>(safi)->add_withdrawn(rt.net());
++    XLOG_ASSERT(_packet->pa_list()->mpunreach<IPv6>(safi, m));
++    _packet->pa_list()->mpunreach<IPv6>(safi, m)->add_withdrawn(rt.net());
+ 
+     return 0;
+ }
+diff --git a/xorp/bgp/plumbing.cc b/xorp/bgp/plumbing.cc
+index 98f4795..49b2490 100644
+--- a/xorp/bgp/plumbing.cc
++++ b/xorp/bgp/plumbing.cc
+@@ -144,8 +144,8 @@ BGPPlumbing::add_route(const IPv4Net& net,
+ {
+     debug_msg("BGPPlumbing::add_route IPv4\n");
+     PROFILE(if (main().profile().enabled(profile_route_ribin))
+-		main().profile().log(profile_route_ribin,
+-				     c_format("add %s", net.str().c_str())));
++		main().profile().log_ne(profile_route_ribin,
++					c_format("add %s", net.str().c_str())));
+ 
+     XLOG_ASSERT(!pa_list->is_locked());
+     return plumbing_ipv4().add_route(net, pa_list, policy_tags, peer_handler);
+@@ -156,8 +156,8 @@ BGPPlumbing::delete_route(InternalMessage<IPv4> &rtmsg,
+ 			  PeerHandler* peer_handler) 
+ {
+     PROFILE(if (main().profile().enabled(profile_route_ribin))
+-		main().profile().log(profile_route_ribin,
+-				     c_format("delete %s", rtmsg.net().str().c_str())));
++		main().profile().log_ne(profile_route_ribin,
++					c_format("delete %s", rtmsg.net().str().c_str())));
+ 
+     return plumbing_ipv4().delete_route(rtmsg, peer_handler);
+ }
+@@ -167,8 +167,8 @@ BGPPlumbing::delete_route(const IPNet<IPv4>& net,
+ 			  PeerHandler* peer_handler) 
+ {
+     PROFILE(if (main().profile().enabled(profile_route_ribin))
+-		main().profile().log(profile_route_ribin,
+-				     c_format("delete %s", net.str().c_str())));
++		main().profile().log_ne(profile_route_ribin,
++					c_format("delete %s", net.str().c_str())));
+ 
+     return plumbing_ipv4().delete_route(net, peer_handler);
+ }
+@@ -1355,8 +1355,8 @@ BGPPlumbing::add_route(const IPv6Net& net,
+ {
+     debug_msg("BGPPlumbing::add_route IPv6\n");
+     PROFILE(if (main().profile().enabled(profile_route_ribin))
+-		main().profile().log(profile_route_ribin,
+-				     c_format("add %s", net.str().c_str())));
++		main().profile().log_ne(profile_route_ribin,
++					c_format("add %s", net.str().c_str())));
+ 
+     XLOG_ASSERT(!pa_list->is_locked());
+     return plumbing_ipv6().add_route(net, pa_list, policy_tags, peer_handler);
+@@ -1368,8 +1368,8 @@ BGPPlumbing::delete_route(InternalMessage<IPv6> &rtmsg,
+ 			  PeerHandler* peer_handler) 
+ {
+     PROFILE(if (main().profile().enabled(profile_route_ribin))
+-		main().profile().log(profile_route_ribin,
+-				     c_format("delete %s", rtmsg.net().str().c_str())));
++		main().profile().log_ne(profile_route_ribin,
++					c_format("delete %s", rtmsg.net().str().c_str())));
+ 
+     return plumbing_ipv6().delete_route(rtmsg, peer_handler);
+ }
+@@ -1379,8 +1379,8 @@ BGPPlumbing::delete_route(const IPNet<IPv6>& net,
+ 			  PeerHandler* peer_handler) 
+ {
+     PROFILE(if (main().profile().enabled(profile_route_ribin))
+-		main().profile().log(profile_route_ribin,
+-				     c_format("delete %s", net.str().c_str())));
++		main().profile().log_ne(profile_route_ribin,
++					c_format("delete %s", net.str().c_str())));
+     return plumbing_ipv6().delete_route(net, peer_handler);
+ }
+ 
+diff --git a/xorp/bgp/profile_vars.cc b/xorp/bgp/profile_vars.cc
+index 69dcd99..26b773a 100644
+--- a/xorp/bgp/profile_vars.cc
++++ b/xorp/bgp/profile_vars.cc
+@@ -23,7 +23,7 @@
+ 
+ #include "libxorp/xorp.h"
+ #include "libxorp/profile.hh"
+-
++#include "libxorp/xlog.h"
+ #include "profile_vars.hh"
+ 
+ 
+@@ -46,7 +46,10 @@ struct profile_vars {
+ void
+ initialize_profiling_variables(Profile& p)
+ {
++    string err;
+     for (size_t i = 0; i < sizeof(profile_vars) / sizeof(struct profile_vars);
+ 	 i++)
+-	p.create(profile_vars[i].var, profile_vars[i].comment);
++	p.create(profile_vars[i].var, profile_vars[i].comment, err);
++    if (err.size())
++	XLOG_ERROR("%s", err.c_str());
+ }
+diff --git a/xorp/bgp/rib_ipc_handler.cc b/xorp/bgp/rib_ipc_handler.cc
+index ea62e61..1f56b4a 100644
+--- a/xorp/bgp/rib_ipc_handler.cc
++++ b/xorp/bgp/rib_ipc_handler.cc
+@@ -207,8 +207,9 @@ RibIpcHandler::add_route(const SubnetRoute<IPv4> &rt,
+     if (_ribname.empty())
+ 	return 0;
+ 
++    CorruptMessage m;
+     _v4_queue.queue_add_route(_ribname, ibgp, safi, rt.net(),
+-			      pa_list->nexthop(), rt.policytags());
++			      *(pa_list->nexthop(m)), rt.policytags());
+ 
+     return 0;
+ }
+@@ -278,20 +279,22 @@ RibIpcHandler::originate_route(const OriginType origin, const ASPath& aspath,
+ 	      " multicast %d\n",
+ 	      origin, aspath.str().c_str(), nlri.str().c_str(),
+ 	      next_hop.str().c_str(), unicast, multicast);
++    CorruptMessage m;
+ 
+-    FPAList4Ref pa_list;
+-    try {
+-	/*
+-	** Construct the path attribute list.
+-	*/
+-	pa_list = new FastPathAttributeList<IPv4>(next_hop, aspath, origin);
+-    }
+-    catch (const XorpException& e) {
+-	XLOG_WARNING("WARNING:  Exception in originate_route: %s\n", e.str().c_str());
++    NextHopAttribute<IPv4> nh(next_hop, m);
++    if (nh.invalid()) {
++	XLOG_WARNING("WARNING:  Exception in originate_route: %s\n", m.get_msg().c_str());
+ 	// Returning false may cause more trouble than it's worth..
+ 	return true;
+     }
+ 
++    FPAList4Ref pa_list;
++
++    /*
++    ** Construct the path attribute list.
++    */
++    pa_list = new FastPathAttributeList<IPv4>(nh, &aspath, origin);
++
+     /*
+     ** Add a local pref for I-BGP peers.
+     */
+@@ -378,8 +381,8 @@ XrlQueue<A>::queue_add_route(string ribname, bool ibgp, Safi safi,
+     Queued q;
+ 
+     PROFILE(if (_bgp.profile().enabled(profile_route_rpc_in))
+-		_bgp.profile().log(profile_route_rpc_in,
+-				   c_format("add %s", net.str().c_str())));
++		_bgp.profile().log_ne(profile_route_rpc_in,
++				      c_format("add %s", net.str().c_str())));
+ 
+     q.add = true;
+     q.ribname = ribname;
+@@ -409,8 +412,8 @@ XrlQueue<A>::queue_delete_route(string ribname, bool ibgp, Safi safi,
+     Queued q;
+ 
+     PROFILE(if (_bgp.profile().enabled(profile_route_rpc_in))
+-		_bgp.profile().log(profile_route_rpc_in,
+-				   c_format("delete %s", net.str().c_str())));
++		_bgp.profile().log_ne(profile_route_rpc_in,
++				      c_format("delete %s", net.str().c_str())));
+ 
+     q.add = false;
+     q.ribname = ribname;
+@@ -517,8 +520,8 @@ XrlQueue<IPv4>::sendit_spec(Queued& q, const char *bgp)
+     if(q.add) {
+ 	debug_msg("adding route from %s peer to rib\n", bgp);
+ 	PROFILE(if (_bgp.profile().enabled(profile_route_rpc_out))
+-		    _bgp.profile().log(profile_route_rpc_out, 
+-				       c_format("add %s", q.net.str().c_str())));
++		    _bgp.profile().log_ne(profile_route_rpc_out, 
++					  c_format("add %s", q.net.str().c_str())));
+ 
+ 	sent = rib.send_add_route4(q.ribname.c_str(),
+ 			    bgp,
+@@ -533,8 +536,8 @@ XrlQueue<IPv4>::sendit_spec(Queued& q, const char *bgp)
+     } else {
+ 	debug_msg("deleting route from %s peer to rib\n", bgp);
+ 	PROFILE(if (_bgp.profile().enabled(profile_route_rpc_out))
+-		    _bgp.profile().log(profile_route_rpc_out, 
+-				       c_format("delete %s", q.net.str().c_str())));
++		    _bgp.profile().log_ne(profile_route_rpc_out, 
++					  c_format("delete %s", q.net.str().c_str())));
+ 	sent = rib.send_delete_route4(q.ribname.c_str(),
+ 				      bgp,
+ 				      unicast, multicast,
+@@ -612,8 +615,9 @@ RibIpcHandler::add_route(const SubnetRoute<IPv6>& rt,
+     if (_ribname.empty())
+ 	return 0;
+ 
++    CorruptMessage m;
+     _v6_queue.queue_add_route(_ribname, ibgp, safi, rt.net(), 
+-			      pa_list->nexthop(),
++			      *(pa_list->nexthop(m)),
+ 			      rt.policytags());
+ 
+     return 0;
+@@ -667,15 +671,18 @@ RibIpcHandler::originate_route(const OriginType origin, const ASPath& aspath,
+     ** Construct the path attribute list.
+     */
+     FPAList6Ref pa_list;
+-    try {
+-	pa_list = new FastPathAttributeList<IPv6>(next_hop, aspath, origin);
+-    }
+-    catch (const XorpException& e) {
+-	XLOG_WARNING("WARNING:  Exception in originate_route(v6): %s\n", e.str().c_str());
++
++    CorruptMessage m;
++
++    NextHopAttribute<IPv6> nh(next_hop, m);
++    if (nh.invalid()) {
++	XLOG_WARNING("WARNING:  Exception in originate_route(v6): %s\n", m.get_msg().c_str());
+ 	// Returning false may cause more trouble than it's worth..
+ 	return true;
+     }
+ 
++    pa_list = new FastPathAttributeList<IPv6>(nh, &aspath, origin);
++
+     /*
+     ** Add a local pref for I-BGP peers.
+     */
+@@ -760,8 +767,8 @@ XrlQueue<IPv6>::sendit_spec(Queued& q, const char *bgp)
+     if(q.add) {
+ 	debug_msg("adding route from %s peer to rib\n", bgp);
+ 	PROFILE(if (_bgp.profile().enabled(profile_route_rpc_out))
+-		    _bgp.profile().log(profile_route_rpc_out, 
+-				       c_format("add %s", q.net.str().c_str())));
++		    _bgp.profile().log_ne(profile_route_rpc_out, 
++					  c_format("add %s", q.net.str().c_str())));
+ 	sent = rib.send_add_route6(q.ribname.c_str(),
+ 			    bgp,
+ 			    unicast, multicast,
+@@ -775,8 +782,8 @@ XrlQueue<IPv6>::sendit_spec(Queued& q, const char *bgp)
+     } else {
+ 	debug_msg("deleting route from %s peer to rib\n", bgp);
+ 	PROFILE(if (_bgp.profile().enabled(profile_route_rpc_out))
+-		    _bgp.profile().log(profile_route_rpc_out, 
+-				       c_format("delete %s", q.net.str().c_str())));
++		    _bgp.profile().log_ne(profile_route_rpc_out, 
++					  c_format("delete %s", q.net.str().c_str())));
+ 	sent = rib.send_delete_route6(q.ribname.c_str(),
+ 			       bgp,
+ 			       unicast, multicast,
+diff --git a/xorp/bgp/route_table_aggregation.cc b/xorp/bgp/route_table_aggregation.cc
+index a9fe987..f0ccdd6 100644
+--- a/xorp/bgp/route_table_aggregation.cc
++++ b/xorp/bgp/route_table_aggregation.cc
+@@ -68,6 +68,7 @@ AggregationTable<A>::add_route(InternalMessage<A> &rtmsg,
+     XLOG_ASSERT(orig_route->nexthop_resolved());
+     XLOG_ASSERT(!rtmsg.attributes()->is_locked());
+     bool must_push = false;
++    CorruptMessage m;
+ 
+     /*
+      * If not marked as aggregation candidate, pass the request
+@@ -209,7 +210,7 @@ AggregationTable<A>::delete_route(InternalMessage<A> &rtmsg,
+ 	return this->_next_table->delete_route(rtmsg, (BGPRouteTable<A>*)this);
+ 
+     /*
+-     * If the route has less a specific prefix length then the requested
++     * If the route has less a specific prefix length than the requested
+      * aggregate, pass the request downstream without considering
+      * to create an aggregate.  Since we have to modify the
+      * aggr_prefix_len field of the route, we must operate on a copy
+@@ -219,7 +220,9 @@ AggregationTable<A>::delete_route(InternalMessage<A> &rtmsg,
+     const IPNet<A> aggr_net = IPNet<A>(orig_net.masked_addr(),
+ 				       aggr_prefix_len);
+     SubnetRoute<A> *ibgp_r = new SubnetRoute<A>(*orig_route);
+-    InternalMessage<A> ibgp_msg(ibgp_r, rtmsg.origin_peer(), rtmsg.genid());
++    CorruptMessage m;
++    InternalMessage<A> ibgp_msg(ibgp_r, rtmsg.origin_peer(), rtmsg.genid(), m);
++    XLOG_ASSERT(!ibgp_msg.invalid());
+ 
+     // propagate internal message flags
+     if (rtmsg.push())
+@@ -253,7 +256,8 @@ AggregationTable<A>::delete_route(InternalMessage<A> &rtmsg,
+      */
+     if (aggr_route->net() != orig_net || aggr_route->is_suppressed()) {
+ 	SubnetRoute<A> *ebgp_r = new SubnetRoute<A>(*orig_route);
+-	InternalMessage<A> ebgp_msg(ebgp_r, rtmsg.origin_peer(), rtmsg.genid());
++	InternalMessage<A> ebgp_msg(ebgp_r, rtmsg.origin_peer(), rtmsg.genid(), m);
++	XLOG_ASSERT(!ebgp_msg.invalid());
+ 
+ 	// propagate internal message flags
+ 	if (rtmsg.from_previous_peering())
+@@ -308,13 +312,14 @@ AggregateRoute<A>::reevaluate(AggregationTable<A> *parent)
+     PAListRef<A> old_pa_list = _pa_list;
+     // create an FPAList so we can access the elements, and perhaps
+     // pass it downstream for deletion
+-    FPAListRef old_fpa_list = new FastPathAttributeList<A>(old_pa_list);
++    CorruptMessage m;
++    FPAListRef old_fpa_list = new FastPathAttributeList<A>(old_pa_list, m);
+ 
+-    NextHopAttribute<A> nhatt(A::ZERO());
++    NextHopAttribute<A> nhatt(A::ZERO(), m);
+     ASPath aspath;
++    ASPathAttribute apa(&aspath);
+     OriginAttribute igp_origin_att(IGP);
+-    FPAListRef fpa_list 
+-	= new FastPathAttributeList<A>(nhatt, aspath, igp_origin_att);
++    FPAListRef fpa_list = new FastPathAttributeList<A>(nhatt, apa, igp_origin_att);
+ 
+     /*
+      * PHASE 1:
+@@ -328,27 +333,27 @@ AggregateRoute<A>::reevaluate(AggregationTable<A> *parent)
+          comp_iter != _components_table.end(); comp_iter++) {
+ 	const SubnetRoute<A>* comp_route = comp_iter.payload().route();
+ 	PAListRef<A> comp_pa_list = comp_route->attributes();
+-	FastPathAttributeList<A> comp_fpa_list(comp_pa_list);
++	FastPathAttributeList<A> comp_fpa_list(comp_pa_list, m);
+ 	debug_msg("comp_route: %s\n    %s\n",
+ 		  comp_route->net().str().c_str(),
+-		  comp_fpa_list.aspath().str().c_str());
++		  comp_fpa_list.aspath(m)->str().c_str());
+ 
+ 	if (comp_iter == _components_table.begin()) {
+-	    if (comp_fpa_list.med_att()) {
+-		med = comp_fpa_list.med_att()->med();
++	    if (comp_fpa_list.med_att(m)) {
++		med = comp_fpa_list.med_att(m)->med();
+ 	    }
+-	    fpa_list->replace_AS_path(comp_fpa_list.aspath());
+-	    fpa_list->replace_origin((OriginType)comp_fpa_list.origin());
++	    fpa_list->replace_AS_path(*(comp_fpa_list.aspath(m)));
++	    fpa_list->replace_origin((OriginType)comp_fpa_list.origin(m));
+ 	} else {
+-	    if (comp_fpa_list.med_att() &&
+-		med != comp_fpa_list.med_att()->med()) {
++	    if (comp_fpa_list.med_att(m) &&
++		med != comp_fpa_list.med_att(m)->med()) {
+ 		_is_suppressed = true;
+ 		break;
+ 	    }
+ 
+ 	    // Origin attr: INCOMPLETE overrides EGP which overrides IGP
+-	    if (comp_fpa_list.origin() > old_fpa_list->origin())
+-		fpa_list->replace_origin((OriginType)comp_fpa_list.origin());
++	    if (comp_fpa_list.origin(m) > old_fpa_list->origin(m))
++		fpa_list->replace_origin((OriginType)comp_fpa_list.origin(m));
+ 
+ 	    // Update the aggregate AS path using this component route.
+ 	    if (this->brief_mode()) {
+@@ -356,7 +361,7 @@ AggregateRoute<A>::reevaluate(AggregationTable<A> *parent)
+ 		 * The agggregate will have an empty AS path, in which
+ 		 * case we also must set the ATOMIC AGGREGATE attribute.
+ 		 */
+-		if (fpa_list->aspath() != comp_fpa_list.aspath()) {
++		if (*(fpa_list->aspath(m)) != *(comp_fpa_list.aspath(m))) {
+ 		    fpa_list->replace_AS_path(ASPath());
+ 		    must_set_atomic_aggr = true;
+ 		}
+@@ -365,20 +370,20 @@ AggregateRoute<A>::reevaluate(AggregationTable<A> *parent)
+ 		 * Merge the current AS path with the component route's one
+ 		 * by creating an AS SET for non-matching ASNs.
+ 		 */
+-		fpa_list->replace_AS_path(ASPath(old_fpa_list->aspath(),
+-						comp_fpa_list.aspath()));
++		fpa_list->replace_AS_path(ASPath(*(old_fpa_list->aspath(m)),
++						 *(comp_fpa_list.aspath(m))));
+ 	    }
+ 	}
+ 
+ 	// Propagate the ATOMIC AGGREGATE attribute
+-	if (comp_fpa_list.atomic_aggregate_att())
++	if (comp_fpa_list.atomic_aggregate_att(m))
+ 	    must_set_atomic_aggr = true;
+     }
+ 
+     // Add a MED attr if needed and allowed to
+     if (med &&
+-	!(fpa_list->aspath().num_segments() &&
+-	  fpa_list->aspath().segment(0).type() == AS_SET)) {
++	!(fpa_list->aspath(m)->num_segments() &&
++	  fpa_list->aspath(m)->segment(0).type() == AS_SET)) {
+ 	MEDAttribute med_attr(med);
+ 	fpa_list->add_path_attribute(med_attr);
+     }
+@@ -453,10 +458,10 @@ AggregateRoute<A>::reevaluate(AggregationTable<A> *parent)
+ 	    SubnetRoute<A> *new_r = new SubnetRoute<A>(*comp_route);
+ 	    InternalMessage<A> old_msg(old_r,
+ 				       comp_iter.payload().origin_peer(),
+-				       comp_iter.payload().genid());
++				       comp_iter.payload().genid(), m);
+ 	    InternalMessage<A> new_msg(new_r,
+ 				       comp_iter.payload().origin_peer(),
+-				       comp_iter.payload().genid());
++				       comp_iter.payload().genid(), m);
+ 
+ 	    if (old_was_suppressed) {
+ 		old_r->set_aggr_prefix_len(SR_AGGR_EBGP_NOT_AGGREGATED);
+@@ -610,9 +615,12 @@ AggregationTable<A>::dump_next_route(DumpIterator<A>& dump_iter) {
+ 	    tmp_route->set_nexthop_resolved(true);	// Cheating
+ 	    tmp_route->set_aggr_prefix_len(SR_AGGR_EBGP_AGGREGATE);
+ 	    PAListRef<A> pa_list = aggr_rt->pa_list();
++	    CorruptMessage m;
+ 	    FPAListRef fpa_list = 
+-		new FastPathAttributeList<A>(pa_list);
++		new FastPathAttributeList<A>(pa_list, m);
++	    XLOG_ASSERT(!fpa_list->invalid());
+ 	    InternalMessage<A> rt_msg(tmp_route, fpa_list, peer, GENID_UNKNOWN);
++	    XLOG_ASSERT(!rt_msg.invalid());
+ 	   
+ 	    this->_next_table->route_dump(rt_msg,
+ 					  (BGPRouteTable<A>*)this,
+@@ -648,6 +656,7 @@ AggregationTable<A>::route_dump(InternalMessage<A> &rtmsg,
+     XLOG_ASSERT(caller == this->_parent);
+     XLOG_ASSERT(this->_next_table != NULL);
+     XLOG_ASSERT(orig_route->nexthop_resolved());
++    CorruptMessage m;
+ 
+     /*
+      * If not marked as aggregation candidate, pass the request
+@@ -670,7 +679,8 @@ AggregationTable<A>::route_dump(InternalMessage<A> &rtmsg,
+     const IPNet<A> aggr_net = IPNet<A>(orig_net.masked_addr(),
+ 				       aggr_prefix_len);
+     SubnetRoute<A> *ibgp_r = new SubnetRoute<A>(*orig_route);
+-    InternalMessage<A> ibgp_msg(ibgp_r, rtmsg.origin_peer(), rtmsg.genid());
++    InternalMessage<A> ibgp_msg(ibgp_r, rtmsg.origin_peer(), rtmsg.genid(), m);
++    XLOG_ASSERT(!ibgp_msg.invalid());
+ 
+     // propagate internal message flags
+     if (rtmsg.from_previous_peering())
+@@ -699,8 +709,10 @@ AggregationTable<A>::route_dump(InternalMessage<A> &rtmsg,
+      * aggregate, send it downstream.
+      */
+     if (aggr_route->net() != orig_net || aggr_route->is_suppressed()) {
++	CorruptMessage m;
+ 	SubnetRoute<A> *ebgp_r = new SubnetRoute<A>(*orig_route);
+-	InternalMessage<A> ebgp_msg(ebgp_r, rtmsg.origin_peer(), rtmsg.genid());
++	InternalMessage<A> ebgp_msg(ebgp_r, rtmsg.origin_peer(), rtmsg.genid(), m);
++	XLOG_ASSERT(!ebgp_msg.invalid());
+ 
+ 	// propagate internal message flags
+ 	if (rtmsg.from_previous_peering())
+diff --git a/xorp/bgp/route_table_aggregation.hh b/xorp/bgp/route_table_aggregation.hh
+index 7536c30..7a73d6c 100644
+--- a/xorp/bgp/route_table_aggregation.hh
++++ b/xorp/bgp/route_table_aggregation.hh
+@@ -17,7 +17,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/bgp/route_table_aggregation.hh,v 1.19 2008/11/08 06:14:38 mjh Exp $
+ 
+ #ifndef __BGP_ROUTE_TABLE_AGGREGATION_HH__
+ #define __BGP_ROUTE_TABLE_AGGREGATION_HH__
+@@ -120,9 +119,11 @@ public:
+ 	  _was_announced(0), _is_suppressed(0) 
+     {
+ 	OriginAttribute origin_att(IGP);
+-	FPAListRef fpa_list = new FastPathAttributeList<A>(A::ZERO(), 
+-							   ASPath(), 
+-							   origin_att);
++	CorruptMessage m;
++	NextHopAttribute<A> nh(A::ZERO(), m);
++	ASPath ap;
++	ASPathAttribute apa(&ap);
++	FPAListRef fpa_list = new FastPathAttributeList<A>(nh, apa, origin_att);
+ 	_pa_list = new PathAttributeList<A>(fpa_list);
+ 	
+ 	_aggregator_attribute = new AggregatorAttribute(bgp_id, asnum);
+diff --git a/xorp/bgp/route_table_cache.cc b/xorp/bgp/route_table_cache.cc
+index 3803504..a07acee 100644
+--- a/xorp/bgp/route_table_cache.cc
++++ b/xorp/bgp/route_table_cache.cc
+@@ -189,6 +189,8 @@ CacheTable<A>::replace_route(InternalMessage<A> &old_rtmsg,
+ 	      old_rtmsg.str().c_str(),
+ 	      new_rtmsg.str().c_str());
+ 
++    CorruptMessage m;
++
+     XLOG_ASSERT(caller == this->_parent);
+     XLOG_ASSERT(this->_next_table != NULL);
+ 
+@@ -218,7 +220,7 @@ CacheTable<A>::replace_route(InternalMessage<A> &old_rtmsg,
+     // take the attribute list from the stored version to get the correct MED.
+     PAListRef<A> old_pa_list = old_route->attributes();
+     FPAListRef old_fpa_list = 
+-	new FastPathAttributeList<A>(old_pa_list);
++	new FastPathAttributeList<A>(old_pa_list, m);
+ 
+     old_rtmsg_ptr = new InternalMessage<A>(old_route,
+ 					   old_fpa_list,
+@@ -294,6 +296,8 @@ CacheTable<A>::delete_route(InternalMessage<A> &rtmsg,
+ 			    BGPRouteTable<A> *caller)
+ {
+     int result = 0;
++    CorruptMessage m;
++
+     debug_msg("\n         %s\n caller: %s\n rtmsg: %p route: %p\n%s\n",
+ 	      this->tablename().c_str(),
+ 	      caller ? caller->tablename().c_str() : "NULL",
+@@ -336,13 +340,14 @@ CacheTable<A>::delete_route(InternalMessage<A> &rtmsg,
+ 
+     // create the FPA list from the stored version
+     FPAListRef fpa_list = 
+-	new FastPathAttributeList<A>(old_pa_list);
++	new FastPathAttributeList<A>(old_pa_list, m);
+ 
+     InternalMessage<A> old_rt_msg(existing_route,
+ 				  fpa_list,
+ 				  rtmsg.origin_peer(),
+ 				  existing_genid);
+-    if (rtmsg.push()) old_rt_msg.set_push();
++    if (rtmsg.push())
++	old_rt_msg.set_push();
+     
+     result = this->_next_table->delete_route(old_rt_msg, 
+ 					     (BGPRouteTable<A>*)this);
+@@ -370,6 +375,8 @@ CacheTable<A>::route_dump(InternalMessage<A> &rtmsg,
+ 			  BGPRouteTable<A> *caller,
+ 			  const PeerHandler *dump_peer)
+ {
++    CorruptMessage m;
++
+     XLOG_ASSERT(caller == this->_parent);
+     //Check we've got it cached.  Clear the changed bit so we
+     //don't confuse anyone downstream.
+@@ -388,8 +395,7 @@ CacheTable<A>::route_dump(InternalMessage<A> &rtmsg,
+ 
+     // create the FPA list from the stored version
+     PAListRef<A> pa_list = existing_route->attributes();
+-    FPAListRef fpa_list = 
+-	new FastPathAttributeList<A>(pa_list);
++    FPAListRef fpa_list = new FastPathAttributeList<A>(pa_list, m);
+ 
+     //the message we pass on needs to contain our cached
+     //route, because the MED info in it may not be in the original
+@@ -415,8 +421,9 @@ CacheTable<A>::lookup_route(const IPNet<A> &net,
+ 	genid = iter.payload().genid();
+ 
+ 	// create the FPA list from the stored version
++	CorruptMessage m;
+ 	PAListRef<A> pa_list = iter.payload().route()->attributes();
+-	fpa_list = new FastPathAttributeList<A>(pa_list);
++	fpa_list = new FastPathAttributeList<A>(pa_list, m);
+ 	return iter.payload().route();
+     }
+     return 0;
+diff --git a/xorp/bgp/route_table_damping.cc b/xorp/bgp/route_table_damping.cc
+index d96fef1..e61487e 100644
+--- a/xorp/bgp/route_table_damping.cc
++++ b/xorp/bgp/route_table_damping.cc
+@@ -329,6 +329,7 @@ DampingTable<A>::undamp(IPNet<A> net)
+ {
+     debug_msg("Released net %s\n", cstring(net));
+ 
++    CorruptMessage m;
+     typename Trie<A, Damp>::iterator i = _damp.lookup_node(net);
+     XLOG_ASSERT(i != _damp.end());
+     Damp& damp = i.payload();
+@@ -337,7 +338,7 @@ DampingTable<A>::undamp(IPNet<A> net)
+     typename RefTrie<A, DampRoute<A> >::iterator r;
+     r = _damped.lookup_node(net);
+     XLOG_ASSERT(r != _damped.end());
+-    InternalMessage<A> rtmsg(r.payload().route(), _peer, r.payload().genid());
++    InternalMessage<A> rtmsg(r.payload().route(), _peer, r.payload().genid(), m);
+     _damped.erase(r);
+     damp._damped = false;
+     _damp_count--;
+diff --git a/xorp/bgp/route_table_decision.cc b/xorp/bgp/route_table_decision.cc
+index df6cf20..94cfdb0 100644
+--- a/xorp/bgp/route_table_decision.cc
++++ b/xorp/bgp/route_table_decision.cc
+@@ -103,6 +103,7 @@ int
+ DecisionTable<A>::add_route(InternalMessage<A> &rtmsg, 
+ 			    BGPRouteTable<A> *caller) {
+ 
++    CorruptMessage m;
+     PARANOID_ASSERT(_parents.find(caller) != _parents.end());
+ 
+     debug_msg("DT:add_route %s\n", rtmsg.route()->str().c_str());
+@@ -110,8 +111,8 @@ DecisionTable<A>::add_route(InternalMessage<A> &rtmsg,
+     //if the nexthop isn't resolvable, don't even consider the route
+     debug_msg("testing resolvability\n");
+     XLOG_ASSERT(rtmsg.route()->nexthop_resolved() ==
+-		resolvable(rtmsg.nexthop()));
+-    if (!resolvable(rtmsg.nexthop())) {
++		resolvable(*(rtmsg.nexthop(m))));
++    if (!resolvable(*(rtmsg.nexthop(m)))) {
+ 	debug_msg("route not resolvable\n");
+     	return ADD_UNUSED;
+     }
+@@ -166,8 +167,7 @@ DecisionTable<A>::add_route(InternalMessage<A> &rtmsg,
+     }
+ 
+     //send an add for the new winner
+-    new_winner->route()->set_is_winner(
+-		       igp_distance(new_winner->attributes()->nexthop()));
++    new_winner->route()->set_is_winner(igp_distance(*(new_winner->attributes()->nexthop(m))));
+     int result;
+     if (new_winner->route() != rtmsg.route()) {
+ 	//we have a new winner, but it isn't the route that was just added.
+@@ -198,6 +198,8 @@ int
+ DecisionTable<A>::replace_route(InternalMessage<A> &old_rtmsg, 
+ 				InternalMessage<A> &new_rtmsg, 
+ 				BGPRouteTable<A> *caller) {
++    CorruptMessage m;
++
+     PARANOID_ASSERT(_parents.find(caller)!=_parents.end());
+     XLOG_ASSERT(old_rtmsg.net()==new_rtmsg.net());
+ 
+@@ -234,7 +236,7 @@ DecisionTable<A>::replace_route(InternalMessage<A> &old_rtmsg,
+ 	//add the new route to the pool of possible winners.
+ 	alternatives.push_back(new_route);
+ 	new_winner = find_winner(alternatives);
+-    } else if (resolvable(new_rtmsg.nexthop())) {
++    } else if (resolvable(*(new_rtmsg.nexthop(m)))) {
+ 	//the new route wins by default if it's resolvable.
+ 	new_winner = &new_route;
+     }
+@@ -271,8 +273,7 @@ DecisionTable<A>::replace_route(InternalMessage<A> &old_rtmsg,
+     }
+ 
+     //create the addition part of the message
+-    new_winner->route()->set_is_winner(
+-                         igp_distance(new_winner->attributes()->nexthop()));
++    new_winner->route()->set_is_winner(igp_distance(*(new_winner->attributes()->nexthop(m))));
+     int result;
+     if (new_winner->route() == new_rtmsg.route()) {
+ 	new_rtmsg_p = &new_rtmsg;
+@@ -313,6 +314,8 @@ int
+ DecisionTable<A>::delete_route(InternalMessage<A> &rtmsg, 
+ 			       BGPRouteTable<A> *caller) {
+ 
++    CorruptMessage m;
++
+     debug_msg("delete route: %s\n",
+ 	      rtmsg.route()->str().c_str());
+     PARANOID_ASSERT(_parents.find(caller) != _parents.end());
+@@ -383,8 +386,8 @@ DecisionTable<A>::delete_route(InternalMessage<A> &rtmsg,
+     if (new_winner != NULL) {
+ 	//send an add for the new winner
+ 	new_winner->route()->set_is_winner(
+-		   igp_distance(new_winner->attributes()->nexthop()));
+-	InternalMessage<A> new_rt_msg(new_winner->route(), 
++		   igp_distance(*(new_winner->attributes()->nexthop(m))));
++	InternalMessage<A> new_rt_msg(new_winner->route(),
+ 				      new_winner->attributes(),
+ 				      new_winner->peer_handler(), 
+ 				      new_winner->genid());
+@@ -505,7 +508,8 @@ DecisionTable<A>::local_pref(const FPAListRef& pa_list) const
+      * the route comes from IBGP, it should have been present on the
+      * incoming route.  
+      */
+-    const LocalPrefAttribute* localpref_att = pa_list->local_pref_att();
++    CorruptMessage m;
++    const LocalPrefAttribute* localpref_att = pa_list->local_pref_att(m);
+     if (localpref_att) {
+ 	return localpref_att->localpref();
+     }
+@@ -516,7 +520,8 @@ template<class A>
+ uint32_t
+ DecisionTable<A>::med(const FPAListRef& pa_list) const
+ {
+-    const MEDAttribute* med_attribute = pa_list->med_att();
++    CorruptMessage m;
++    const MEDAttribute* med_attribute = pa_list->med_att(m);
+     if (med_attribute) {
+ 	return med_attribute->med();
+     }
+@@ -578,6 +583,7 @@ DecisionTable<A>::find_winner(list<RouteData<A> >& alternatives) const
+ {
+     debug_msg("find_winner: there are %d alternatices\n", (int)alternatives.size());
+     typename list<RouteData<A> >::iterator i;
++    CorruptMessage m;
+ 
+     /* The spec seems pretty odd.  In our architecture, it seems
+        reasonable to do phase 2 before phase 1, because if a route
+@@ -647,12 +653,11 @@ DecisionTable<A>::find_winner(list<RouteData<A> >& alternatives) const
+     /*
+     ** Shortest AS path length.
+     */
+-    int test_aspath_length = alternatives.front().attributes()->
+-	aspath().path_length();
++    int test_aspath_length = alternatives.front().attributes()->aspath(m)->path_length();
+ 
+     i = alternatives.begin(); i++;
+     while(i!=alternatives.end()) {
+-	int len = i->attributes()->aspath().path_length();
++	int len = i->attributes()->aspath(m)->path_length();
+ 	XLOG_ASSERT(len >= 0);
+ 	//prefer shortest path
+ 	if (len > test_aspath_length) {
+@@ -674,10 +679,10 @@ DecisionTable<A>::find_winner(list<RouteData<A> >& alternatives) const
+     /*
+     ** Lowest origin value.
+     */
+-    int test_origin = alternatives.front().attributes()->origin();
++    int test_origin = alternatives.front().attributes()->origin(m);
+     i = alternatives.begin(); i++;
+     while(i!=alternatives.end()) {
+-	int origin = i->attributes()->origin();
++	int origin = i->attributes()->origin(m);
+ 	//prefer lower origin
+ 	if (origin > test_origin) {
+ 	    i = alternatives.erase(i);
+@@ -700,7 +705,7 @@ DecisionTable<A>::find_winner(list<RouteData<A> >& alternatives) const
+     */
+     typename list <RouteData<A> >::iterator j;
+     for (i=alternatives.begin(); i!=alternatives.end();) {
+-	ASPath aspath1 = i->attributes()->aspath();
++	ASPath aspath1 = *(i->attributes()->aspath(m));
+  	AsNum asnum1 = (0 == aspath1.path_length()) ? 
+  	    AsNum(AsNum::AS_INVALID) : aspath1.first_asnum();
+ 	int med1 = med(i->attributes());
+@@ -708,7 +713,7 @@ DecisionTable<A>::find_winner(list<RouteData<A> >& alternatives) const
+ 	for (j=alternatives.begin(); j!=alternatives.end();) {
+ 	    bool del_j = false;
+ 	    if (i != j) {
+-		ASPath aspath2 = j->attributes()->aspath();
++		ASPath aspath2 = *(j->attributes()->aspath(m));
+ 		AsNum asnum2 = (0 == aspath2.path_length()) ? 
+ 		    AsNum(AsNum::AS_INVALID) : aspath2.first_asnum();
+ 		int med2 = med(j->attributes());
+@@ -769,10 +774,10 @@ DecisionTable<A>::find_winner(list<RouteData<A> >& alternatives) const
+     /*
+     ** Compare IGP distances.
+     */
+-    int test_igp_distance = igp_distance(alternatives.front().attributes()->nexthop());
++    int test_igp_distance = igp_distance(*(alternatives.front().attributes()->nexthop(m)));
+     i = alternatives.begin(); i++;
+     while(i!=alternatives.end()) {
+-	int igp_dist = igp_distance(i->attributes()->nexthop());
++	int igp_dist = igp_distance(*(i->attributes()->nexthop(m)));
+ 	//prefer lower IGP distance
+ 	if (test_igp_distance < igp_dist) {
+ 	    i = alternatives.erase(i);
+diff --git a/xorp/bgp/route_table_deletion.cc b/xorp/bgp/route_table_deletion.cc
+index 21b9a0e..920d1f8 100644
+--- a/xorp/bgp/route_table_deletion.cc
++++ b/xorp/bgp/route_table_deletion.cc
+@@ -59,6 +59,7 @@ DeletionTable<A>::add_route(InternalMessage<A> &rtmsg,
+     XLOG_ASSERT(caller == this->_parent);
+     XLOG_ASSERT(this->_next_table != NULL);
+ 
++    CorruptMessage m;
+     IPNet<A> net = rtmsg.net();
+ 
+     // check if we have this route in our deletion cache
+@@ -89,7 +90,7 @@ DeletionTable<A>::add_route(InternalMessage<A> &rtmsg,
+ 
+ 	// propogate downstream
+ 	PAListRef<A> pa_list= existing_route->attributes();
+-	FPAListRef fpa_list = new FastPathAttributeList<A>(pa_list);
++	FPAListRef fpa_list = new FastPathAttributeList<A>(pa_list, m);
+ 	pa_list.deregister_with_attmgr();
+ 	InternalMessage<A> old_rt_msg(existing_route, fpa_list, _peer, _genid);
+ 	old_rt_msg.set_from_previous_peering();
+@@ -167,6 +168,7 @@ DeletionTable<A>::lookup_route(const IPNet<A> &net,
+ 			       uint32_t& genid,
+ 			       FPAListRef& fpa_list) const
+ {
++    CorruptMessage m;
+     // Even though the peering has gone down, we still need to answer
+     // lookup requests.  This is because we need to be internally
+     // consistent - the route is treated as still being active until we
+@@ -176,7 +178,7 @@ DeletionTable<A>::lookup_route(const IPNet<A> &net,
+ 	genid = _genid;
+ 	const SubnetRoute<A> *route = &(iter.payload());
+ 	PAListRef<A> pa_list = route->attributes();
+-	fpa_list = new FastPathAttributeList<A>(pa_list);
++	fpa_list = new FastPathAttributeList<A>(pa_list, m);
+ 	return route;
+     } else
+ 	return this->_parent->lookup_route(net, genid, fpa_list);
+@@ -234,6 +236,7 @@ DeletionTable<A>::delete_next_chain()
+ 	return false;
+     }
+ 
++    CorruptMessage m;
+     const ChainedSubnetRoute<A>* chained_rt, *first_rt, *next_rt;
+     first_rt = chained_rt = _del_sweep->second;
+ 
+@@ -256,7 +259,7 @@ DeletionTable<A>::delete_next_chain()
+ 	_route_table->erase(chained_rt->net());
+ 
+ 	// propagate downstream
+-	InternalMessage<A> rt_msg(chained_rt, _peer, _genid);
++	InternalMessage<A> rt_msg(chained_rt, _peer, _genid, m);
+ 	rt_msg.set_from_previous_peering();
+ 	if (this->_next_table != NULL)
+ 	    this->_next_table->delete_route(rt_msg, (BGPRouteTable<A>*)this);
+diff --git a/xorp/bgp/route_table_filter.cc b/xorp/bgp/route_table_filter.cc
+index 0295d2b..cbd2396 100644
+--- a/xorp/bgp/route_table_filter.cc
++++ b/xorp/bgp/route_table_filter.cc
+@@ -110,11 +110,12 @@ template<class A>
+ bool
+ SimpleASFilter<A>::filter(InternalMessage<A>& rtmsg) const 
+ {
++    CorruptMessage m;
+     FPAListRef& attributes = rtmsg.attributes();
+-    const ASPath& as_path = attributes->aspath();
++    const ASPath* as_path = attributes->aspath(m);
+     debug_msg("Filter: AS_Path filter for >%s< checking >%s<\n",
+-	   _as_num.str().c_str(), as_path.str().c_str());
+-    if (as_path.contains(_as_num)) {
++	   _as_num.str().c_str(), as_path->str().c_str());
++    if (as_path->contains(_as_num)) {
+ 	return false;
+     }
+     return true;
+@@ -132,12 +133,13 @@ template<class A>
+ bool
+ RRInputFilter<A>::filter(InternalMessage<A>& rtmsg) const 
+ {
++    CorruptMessage m;
+     FPAListRef attributes = rtmsg.attributes();
+-    const OriginatorIDAttribute *oid = attributes->originator_id();
++    const OriginatorIDAttribute *oid = attributes->originator_id(m);
+     if (0 != oid && oid->originator_id() == _bgp_id) {
+ 	return false;
+     }
+-    const ClusterListAttribute *cl = attributes->cluster_list();
++    const ClusterListAttribute *cl = attributes->cluster_list(m);
+     if (0 != cl && cl->contains(_cluster_id)) {
+ 	return false;
+     }
+@@ -158,8 +160,10 @@ template<class A>
+ bool
+ ASPrependFilter<A>::filter(InternalMessage<A>& rtmsg) const
+ {
++    CorruptMessage m;
++
+     //Create a new AS path with our AS number prepended to it.
+-    ASPath new_as_path(rtmsg.attributes()->aspath());
++    ASPath new_as_path(*(rtmsg.attributes()->aspath(m)));
+ 
+     if (_is_confederation_peer) { 
+ 	new_as_path.prepend_confed_as(_as_num);
+@@ -193,11 +197,12 @@ template<class A>
+ bool
+ NexthopRewriteFilter<A>::filter(InternalMessage<A>& rtmsg) const
+ {
++    CorruptMessage m;
+ 
+     // If the peer and the router are directly connected and the
+     // NEXT_HOP is in the same network don't rewrite the
+     // NEXT_HOP. This is known as a third party NEXT_HOP.
+-    if (_directly_connected && _subnet.contains(rtmsg.attributes()->nexthop())) {
++    if (_directly_connected && _subnet.contains(*(rtmsg.attributes()->nexthop(m)))) {
+ 	return true;
+     }
+ 
+@@ -229,13 +234,15 @@ template<class A>
+ bool
+ NexthopPeerCheckFilter<A>::filter(InternalMessage<A>& rtmsg) const
+ {
++    CorruptMessage m;
++
+     // Only consider rewritting if this is a self originated route.
+     if (! rtmsg.origin_peer()->originate_route_handler()) {
+ 	return true;
+     }
+ 
+     // If the nexthop does not match the peer's address all if fine.
+-    if (rtmsg.attributes()->nexthop() != _peer_address) {
++    if (*(rtmsg.attributes()->nexthop(m)) != _peer_address) {
+ 	return true;
+     }
+ 
+@@ -289,6 +296,8 @@ template<class A>
+ bool
+ RRIBGPLoopFilter<A>::filter(InternalMessage<A>& rtmsg) const 
+ {
++    CorruptMessage m;
++
+     // Only if this is *not* a route reflector client should the
+     // packet be filtered. Note PEER_TYPE_IBGP_CLIENT is just passed
+     // through.
+@@ -300,7 +309,7 @@ RRIBGPLoopFilter<A>::filter(InternalMessage<A>& rtmsg) const
+     // If as ORIGINATOR_ID is not present add one.
+     //Form a new path attribute list containing the new AS path
+     FPAListRef& palist = rtmsg.attributes();
+-    if (0 == palist->originator_id()) {
++    if (0 == palist->originator_id(m)) {
+ 	if (rtmsg.origin_peer()->get_peer_type() == PEER_TYPE_INTERNAL) {
+ 	    OriginatorIDAttribute originator_id_att(_bgp_id);
+ 	    palist->add_path_attribute(originator_id_att);
+@@ -313,7 +322,7 @@ RRIBGPLoopFilter<A>::filter(InternalMessage<A>& rtmsg) const
+ 
+     // Prepend the CLUSTER_ID to the CLUSTER_LIST, if the CLUSTER_LIST
+     // does not exist add one.
+-    const ClusterListAttribute *cla = palist->cluster_list();
++    const ClusterListAttribute *cla = palist->cluster_list(m);
+     ClusterListAttribute *ncla = 0;
+     if (0 == cla) {
+ 	ncla = new ClusterListAttribute;
+@@ -342,18 +351,20 @@ template<class A>
+ bool
+ RRPurgeFilter<A>::filter(InternalMessage<A>& rtmsg) const 
+ {
+-    if (!rtmsg.attributes()->originator_id() &&
+-	!rtmsg.attributes()->cluster_list())
++    CorruptMessage m;
++
++    if (!rtmsg.attributes()->originator_id(m) &&
++	!rtmsg.attributes()->cluster_list(m))
+ 	return true;
+ 
+     FPAListRef& palist = rtmsg.attributes();
+ 
+     // If an ORIGINATOR_ID is present remove it.
+-    if (0 != palist->originator_id())
++    if (0 != palist->originator_id(m))
+ 	palist->remove_attribute_by_type(ORIGINATOR_ID);
+ 
+     // If a CLUSTER_LIST is present remove it.
+-    if (0 != palist->cluster_list())
++    if (0 != palist->cluster_list(m))
+ 	palist->remove_attribute_by_type(CLUSTER_LIST);
+ 
+     
+@@ -483,7 +494,8 @@ template<class A>
+ bool
+ KnownCommunityFilter<A>::filter(InternalMessage<A>& rtmsg) const 
+ {
+-    const CommunityAttribute* ca = rtmsg.attributes()->community_att();
++    CorruptMessage m;
++    const CommunityAttribute* ca = rtmsg.attributes()->community_att(m);
+     if (ca == NULL)
+ 	return true;
+ 
+diff --git a/xorp/bgp/route_table_nhlookup.cc b/xorp/bgp/route_table_nhlookup.cc
+index 153737a..937f6f8 100644
+--- a/xorp/bgp/route_table_nhlookup.cc
++++ b/xorp/bgp/route_table_nhlookup.cc
+@@ -109,6 +109,8 @@ int
+ NhLookupTable<A>::add_route(InternalMessage<A> &rtmsg,
+ 			    BGPRouteTable<A> *caller) 
+ {
++    CorruptMessage m;
++
+     debug_msg("\n         %s\n caller: %s\n rtmsg: %p route: %p\n%s\n",
+ 	      this->tablename().c_str(),
+ 	      caller ? caller->tablename().c_str() : "NULL",
+@@ -117,20 +119,20 @@ NhLookupTable<A>::add_route(InternalMessage<A> &rtmsg,
+ 	      rtmsg.str().c_str());
+ 
+     XLOG_ASSERT(caller == this->_parent);
+-    XLOG_ASSERT(0 == lookup_in_queue(rtmsg.nexthop(), rtmsg.net()));
++    XLOG_ASSERT(0 == lookup_in_queue(*(rtmsg.nexthop(m)), rtmsg.net()));
+ 
+-    debug_msg("register_nexthop %s %s\n", cstring(rtmsg.nexthop()),
++    debug_msg("register_nexthop %s %s\n", cstring(*(rtmsg.nexthop(m))),
+ 	      cstring(rtmsg.net()));
+-    if (_next_hop_resolver->register_nexthop(rtmsg.nexthop(), rtmsg.net(),
++    if (_next_hop_resolver->register_nexthop(*(rtmsg.nexthop(m)), rtmsg.net(),
+ 					     this)) {
+ 	bool resolvable;
+ 	uint32_t metric;
+-	_next_hop_resolver->lookup(rtmsg.nexthop(), resolvable, metric);
++	_next_hop_resolver->lookup(*(rtmsg.nexthop(m)), resolvable, metric);
+ 	rtmsg.route()->set_nexthop_resolved(resolvable);
+ 	return this->_next_table->add_route(rtmsg, this);
+     }
+ 
+-    add_to_queue(rtmsg.nexthop(), rtmsg.net(), &rtmsg, NULL);
++    add_to_queue(*(rtmsg.nexthop(m)), rtmsg.net(), &rtmsg, NULL);
+ 
+     // we don't know if it will ultimately be used, so err on the safe
+     // side
+@@ -143,6 +145,8 @@ NhLookupTable<A>::replace_route(InternalMessage<A> &old_rtmsg,
+ 				InternalMessage<A> &new_rtmsg,
+ 				BGPRouteTable<A> *caller) 
+ {
++    CorruptMessage m;
++
+     debug_msg("\n         %s\n"
+ 	      "caller: %s\n"
+ 	      "old rtmsg: %p new rtmsg: %p "
+@@ -166,7 +170,7 @@ NhLookupTable<A>::replace_route(InternalMessage<A> &old_rtmsg,
+     // Are we still waiting for the old_rtmsg to resolve?
+     bool old_msg_is_queued;
+     MessageQueueEntry<A>* mqe =
+-	lookup_in_queue(old_rtmsg.nexthop(), net);
++	lookup_in_queue(*(old_rtmsg.nexthop(m)), net);
+     old_msg_is_queued = (mqe != NULL);
+ 
+     // The correct behaviour is to deregister interest in this
+@@ -187,14 +191,14 @@ NhLookupTable<A>::replace_route(InternalMessage<A> &old_rtmsg,
+ // 					   old_rtmsg.net(), this);
+ 
+     bool new_msg_needs_queuing;
+-    debug_msg("register_nexthop %s %s\n", cstring(new_rtmsg.nexthop()),
++    debug_msg("register_nexthop %s %s\n", cstring(*(new_rtmsg.nexthop(m))),
+ 	      cstring(new_rtmsg.net()));
+-    if (_next_hop_resolver->register_nexthop(new_rtmsg.nexthop(),
++    if (_next_hop_resolver->register_nexthop(*(new_rtmsg.nexthop(m)),
+ 					     new_rtmsg.net(), this)) {
+ 	new_msg_needs_queuing = false;
+ 	bool resolvable = false;
+ 	uint32_t metric;
+-	_next_hop_resolver->lookup(new_rtmsg.nexthop(), resolvable, metric);
++	_next_hop_resolver->lookup(*(new_rtmsg.nexthop(m)), resolvable, metric);
+ 	new_rtmsg.route()->set_nexthop_resolved(resolvable);
+     } else {
+ 	new_msg_needs_queuing = true;
+@@ -232,16 +236,16 @@ NhLookupTable<A>::replace_route(InternalMessage<A> &old_rtmsg,
+ 
+ 	// we can now remove the old queue entry, because it's no longer
+ 	// needed
+-	remove_from_queue(mqe->add_msg()->nexthop(), net);
++	remove_from_queue(*(mqe->add_msg()->nexthop(m)), net);
+     }
+ 
+     bool deregister = true;
+     int retval;
+     if (new_msg_needs_queuing) {
+ 	if (propagate_as_add) {
+-	    add_to_queue(new_rtmsg.nexthop(), net, &new_rtmsg, NULL);
++	    add_to_queue(*(new_rtmsg.nexthop(m)), net, &new_rtmsg, NULL);
+ 	} else {
+-	    add_to_queue(new_rtmsg.nexthop(), net, &new_rtmsg, real_old_msg);
++	    add_to_queue(*(new_rtmsg.nexthop(m)), net, &new_rtmsg, real_old_msg);
+ 	    deregister = false;
+ 	}
+ 	if (real_old_msg != &old_rtmsg) {
+@@ -265,9 +269,9 @@ NhLookupTable<A>::replace_route(InternalMessage<A> &old_rtmsg,
+     }
+ 
+     if (deregister) {
+-	debug_msg("deregister_nexthop %s %s\n", cstring(old_rtmsg.nexthop()),
++	debug_msg("deregister_nexthop %s %s\n", cstring(*(old_rtmsg.nexthop(m))),
+ 	      cstring(old_rtmsg.net()));
+-	_next_hop_resolver->deregister_nexthop(old_rtmsg.nexthop(),
++	_next_hop_resolver->deregister_nexthop(*(old_rtmsg.nexthop(m)),
+ 					       old_rtmsg.net(), this);
+     } else {
+ 	debug_msg("Deferring deregistration\n");
+@@ -281,6 +285,8 @@ int
+ NhLookupTable<A>::delete_route(InternalMessage<A> &rtmsg,
+ 			       BGPRouteTable<A> *caller) 
+ {
++    CorruptMessage m;
++
+     debug_msg("\n         %s\n caller: %s\n rtmsg: %p route: %p\n%s\n",
+ 	      this->tablename().c_str(),
+ 	      caller ? caller->tablename().c_str() : "NULL",
+@@ -293,12 +299,12 @@ NhLookupTable<A>::delete_route(InternalMessage<A> &rtmsg,
+ 
+     // Are we still waiting for the old_rtmsg to resolve?
+     bool msg_is_queued;
+-    MessageQueueEntry<A>* mqe = lookup_in_queue(rtmsg.nexthop(), net);
++    MessageQueueEntry<A>* mqe = lookup_in_queue(*(rtmsg.nexthop(m)), net);
+     msg_is_queued = 0 != mqe;
+ 
+-    debug_msg("deregister_nexthop %s %s\n", cstring(rtmsg.nexthop()),
++    debug_msg("deregister_nexthop %s %s\n", cstring(*(rtmsg.nexthop(m))),
+ 	      cstring(rtmsg.net()));
+-    _next_hop_resolver->deregister_nexthop(rtmsg.nexthop(), rtmsg.net(), this);
++    _next_hop_resolver->deregister_nexthop(*(rtmsg.nexthop(m)), rtmsg.net(), this);
+ 
+     InternalMessage<A>* real_msg = &rtmsg;
+     if (msg_is_queued == true) {
+@@ -333,7 +339,7 @@ NhLookupTable<A>::delete_route(InternalMessage<A> &rtmsg,
+ 	if (dont_send_delete) {
+ 	    // we can now remove the old queue entry, because it's no longer
+ 	    // needed
+-	    remove_from_queue(mqe->add_msg()->nexthop(), net);
++	    remove_from_queue(*(mqe->add_msg()->nexthop(m)), net);
+ 	    // there was an ADD in the queue - we just dequeued it, and
+ 	    // don't need to propagate the delete further
+ 	    return 0;
+@@ -345,7 +351,7 @@ NhLookupTable<A>::delete_route(InternalMessage<A> &rtmsg,
+ 	delete real_msg;
+ 	// we can now remove the old queue entry, because it's no longer
+ 	// needed
+-	remove_from_queue(mqe->add_msg()->nexthop(), net);
++	remove_from_queue(*(mqe->add_msg()->nexthop(m)), net);
+     }
+     return success;
+ }
+@@ -404,6 +410,7 @@ NhLookupTable<A>::RIB_lookup_done(const A& nexthop,
+ 				  const set <IPNet<A> >& nets,
+ 				  bool lookup_succeeded) 
+ {
++    CorruptMessage m;
+     typename set <IPNet<A> >::const_iterator net_iter;
+ 
+     for (net_iter = nets.begin(); net_iter != nets.end(); net_iter++) {
+@@ -423,10 +430,10 @@ NhLookupTable<A>::RIB_lookup_done(const A& nexthop,
+ 	    // Perform the deferred deregistration.
+ 	    debug_msg("Performing deferred deregistration\n");
+ 	    debug_msg("deregister_nexthop %s %s\n",
+-		      cstring(mqe->deleted_attributes()->nexthop()),
++		      cstring(*(mqe->deleted_attributes()->nexthop(m))),
+ 		      cstring(mqe->delete_msg()->net()));
+ 	    _next_hop_resolver->
+-		deregister_nexthop(mqe->deleted_attributes()->nexthop(),
++		deregister_nexthop(*(mqe->deleted_attributes()->nexthop(m)),
+ 				   mqe->delete_msg()->net(), this);
+ 	    break;
+ 	}
+@@ -457,13 +464,14 @@ template <class A>
+ MessageQueueEntry<A> *
+ NhLookupTable<A>::lookup_in_queue(const A& nexthop, const IPNet<A>& net) const
+ {
++    CorruptMessage m;
+     MessageQueueEntry<A>* mqe = NULL;
+     typename RefTrie<A, MessageQueueEntry<A> >::iterator i;
+     i = _queue_by_net.lookup_node(net);
+     if (i != _queue_by_net.end()) {
+ 	mqe = &(i.payload());
+ 	if (A::ZERO() != nexthop)
+-	    XLOG_ASSERT(mqe->added_attributes()->nexthop() == nexthop);
++	    XLOG_ASSERT(*(mqe->added_attributes()->nexthop(m)) == nexthop);
+     }
+ 
+     return mqe;
+diff --git a/xorp/bgp/route_table_ribin.cc b/xorp/bgp/route_table_ribin.cc
+index 2986a17..309d56e 100644
+--- a/xorp/bgp/route_table_ribin.cc
++++ b/xorp/bgp/route_table_ribin.cc
+@@ -128,6 +128,7 @@ RibInTable<A>::add_route(const IPNet<A>& net,
+ 			 FPAListRef& fpa_list,
+ 			 const PolicyTags& policy_tags)
+ {
++    CorruptMessage m;
+     const ChainedSubnetRoute<A> *new_route;
+     const SubnetRoute<A> *existing_route;
+     XLOG_ASSERT(_peer_is_up);
+@@ -154,7 +155,7 @@ RibInTable<A>::add_route(const IPNet<A>& net,
+ 	deletion_nexthop_check(existing_route);
+ 
+ 	PAListRef<A> old_pa_list = existing_route->attributes();   
+-	FPAListRef old_fpa_list = new FastPathAttributeList<A>(old_pa_list);
++	FPAListRef old_fpa_list = new FastPathAttributeList<A>(old_pa_list, m);
+ 
+ 	// delete from the Trie
+ 	_route_table->erase(net);
+@@ -227,7 +228,7 @@ RibInTable<A>::delete_route(const IPNet<A> &net)
+ {
+     XLOG_ASSERT(_peer_is_up);
+     log("delete route: " + net.str());
+-
++    CorruptMessage m;
+ 
+     typename BgpTrie<A>::iterator iter = _route_table->lookup_node(net);
+     if (iter != _route_table->end()) {
+@@ -239,8 +240,8 @@ RibInTable<A>::delete_route(const IPNet<A> &net)
+ 	SubnetRouteConstRef<A> route_reference(existing_route);
+ 	deletion_nexthop_check(existing_route);
+ 
+-	PAListRef<A> old_pa_list = iter.payload().attributes();   
+-	FPAListRef old_fpa_list = new FastPathAttributeList<A>(old_pa_list);
++	PAListRef<A> old_pa_list = iter.payload().attributes();
++	FPAListRef old_fpa_list = new FastPathAttributeList<A>(old_pa_list, m);
+ 
+ 	// remove from the Trie
+ 	_route_table->erase(net);
+@@ -288,13 +289,14 @@ RibInTable<A>::lookup_route(const IPNet<A> &net, uint32_t& genid,
+     if (_peer_is_up == false)
+ 	return NULL;
+ 
++    CorruptMessage m;
+     typename BgpTrie<A>::iterator iter = _route_table->lookup_node(net);
+     if (iter != _route_table->end()) {
+ 	// assert(iter.payload().net() == net);
+ 	genid = _genid;
+ 	PAListRef<A> pa_list = iter.payload().attributes();   
+ 	FastPathAttributeList<A>* fpa_list =
+-	    new FastPathAttributeList<A>(pa_list);
++	    new FastPathAttributeList<A>(pa_list, m);
+ 	fpa_list_ref = fpa_list;
+ 	return &(iter.payload());
+     } else {
+@@ -330,6 +332,8 @@ template<class A>
+ bool
+ RibInTable<A>::dump_next_route(DumpIterator<A>& dump_iter)
+ {
++    CorruptMessage m;
++
+     typename BgpTrie<A>::iterator route_iterator;
+     debug_msg("dump iter: %s\n", dump_iter.str().c_str());
+    
+@@ -367,10 +371,9 @@ RibInTable<A>::dump_next_route(DumpIterator<A>& dump_iter)
+ 	// XXX: or if its a policy route dump
+ 
+ 	if (chained_rt->is_winner() || dump_iter.peer_to_dump_to() == NULL) {
+-	    InternalMessage<A> rt_msg(chained_rt, _peer, _genid);
+-	   
+-	    //XLOG_WARNING("dump route: %s", rt_msg.str().c_str());
+-	    try {
++	    InternalMessage<A> rt_msg(chained_rt, _peer, _genid, m);
++	    if (!rt_msg.invalid()) {
++		//XLOG_WARNING("dump route: %s", rt_msg.str().c_str());
+ 		int res = this->_next_table->route_dump(rt_msg, (BGPRouteTable<A>*)this,
+ 							dump_iter.peer_to_dump_to());
+ 		if(res == ADD_FILTERED) 
+@@ -378,11 +381,14 @@ RibInTable<A>::dump_next_route(DumpIterator<A>& dump_iter)
+ 		else
+ 		    chained_rt->set_filtered(false);
+ 	    }
+-	    catch (const XorpException& e) {
++	    else {
++		// NOTE:  This used to be an exception-catch, but I'm not sure what exactly
++		// was throwing it to begin with...so not sure this is correct now. --Ben
++
+ 		//TODO:  Make sure bad routes never get into the table in the first place
+ 		// (was an IPv6 zero default route that triggered this bug initially)
+ 		//  See test 28-ipv6 in harness/test_peering1.sh  --Ben
+-		XLOG_WARNING("Exception in dump_next_route: %s\n", e.str().c_str());
++		XLOG_WARNING("Exception in dump_next_route: %s\n", m.get_msg().c_str());
+ 		XLOG_WARNING("  rt_msg: %s\n", rt_msg.str().c_str());
+ 	    }
+ 	    break;
+@@ -404,6 +410,7 @@ RibInTable<A>::igp_nexthop_changed(const A& bgp_nexthop)
+ {
+     debug_msg("igp_nexthop_changed for bgp_nexthop %s on table %s\n",
+ 	   bgp_nexthop.str().c_str(), this->tablename().c_str());
++    CorruptMessage m;
+ 
+     log("igp nexthop changed: " + bgp_nexthop.str());
+     typename set <A>::const_iterator i;
+@@ -426,7 +433,7 @@ RibInTable<A>::igp_nexthop_changed(const A& bgp_nexthop)
+ 	// first pathmap chain containing this nexthop.
+ 
+ 	FPAListRef dummy_fpa_list = new FastPathAttributeList<A>();
+-	NextHopAttribute<A> nh_att(bgp_nexthop);
++	NextHopAttribute<A> nh_att(bgp_nexthop, m);
+ 	dummy_fpa_list->add_path_attribute(nh_att);
+ 	dummy_fpa_list->canonicalize();
+ 	PAListRef<A> dummy_pa_list = new PathAttributeList<A>(dummy_fpa_list);
+@@ -439,8 +446,8 @@ RibInTable<A>::igp_nexthop_changed(const A& bgp_nexthop)
+ 	    return;
+ 	}
+ 	PAListRef<A> pa_list = pmi->first;
+-	FPAListRef fpa_list = new FastPathAttributeList<A>(pa_list);
+-	if (fpa_list->nexthop() != bgp_nexthop) {
++	FPAListRef fpa_list = new FastPathAttributeList<A>(pa_list, m);
++	if (*(fpa_list->nexthop(m)) != bgp_nexthop) {
+ 	    debug_msg("no matching routes (2)- do nothing\n");
+ 	    return;
+ 	}
+@@ -474,14 +481,14 @@ RibInTable<A>::push_next_changed_nexthop()
+     }
+ 
+     XLOG_ASSERT(_peer_is_up);
+-
++    CorruptMessage m;
+     const ChainedSubnetRoute<A>* chained_rt, *first_rt;
+     first_rt = chained_rt = _current_chain->second;
+     while (1) {
+ 	// Replace the route with itself.  This will cause filters to
+ 	// be re-applied, and decision to re-evaluate the route.
+-	InternalMessage<A> old_rt_msg(chained_rt, _peer, _genid);
+-	InternalMessage<A> new_rt_msg(chained_rt, _peer, _genid);
++	InternalMessage<A> old_rt_msg(chained_rt, _peer, _genid, m);
++	InternalMessage<A> new_rt_msg(chained_rt, _peer, _genid, m);
+ 
+ 	//we used to send this as a replace route, but replacing a
+ 	//route with itself isn't safe in terms of preserving the
+@@ -532,12 +539,13 @@ template<class A>
+ void
+ RibInTable<A>::next_chain()
+ {
++    CorruptMessage m;
+     _current_chain++;
+     if (_current_chain != _route_table->pathmap().end()) {
+ 	PAListRef<A> pa_list =_current_chain->first;
+-	FPAListRef fpa_list = new FastPathAttributeList<A>(pa_list);
+-	XLOG_ASSERT(fpa_list->nexthop_att() );
+-	if (fpa_list->nexthop() == _current_changed_nexthop) {
++	FPAListRef fpa_list = new FastPathAttributeList<A>(pa_list, m);
++	XLOG_ASSERT(fpa_list->nexthop_att(m) );
++	if (*(fpa_list->nexthop(m)) == _current_changed_nexthop) {
+ 	    // there's another chain with the same nexthop
+ 	    return;
+ 	}
+@@ -556,7 +564,7 @@ RibInTable<A>::next_chain()
+ 	_changed_nexthops.erase(i);
+ 
+ 	FPAListRef dummy_fpa_list = new FastPathAttributeList<A>();
+-	NextHopAttribute<A> nh_att(_current_changed_nexthop);
++	NextHopAttribute<A> nh_att(_current_changed_nexthop, m);
+ 	dummy_fpa_list->add_path_attribute(nh_att);
+ 	dummy_fpa_list->canonicalize();
+ 	PAListRef<A> dummy_pa_list = new PathAttributeList<A>(dummy_fpa_list);
+@@ -569,8 +577,8 @@ RibInTable<A>::next_chain()
+ 	    continue;
+ 	}
+ 	PAListRef<A> pa_list = pmi->first;
+-	FPAListRef fpa_list = new FastPathAttributeList<A>(pa_list);
+-	if (fpa_list->nexthop() != _current_changed_nexthop) {
++	FPAListRef fpa_list = new FastPathAttributeList<A>(pa_list, m);
++	if (*(fpa_list->nexthop(m)) != _current_changed_nexthop) {
+ 	    // no route in this trie has this Nexthop, try the next nexthop
+ 	    continue;
+ 	}
+diff --git a/xorp/bgp/tools/print_routes.cc b/xorp/bgp/tools/print_routes.cc
+index 56e6d93..ab437b5 100644
+--- a/xorp/bgp/tools/print_routes.cc
++++ b/xorp/bgp/tools/print_routes.cc
+@@ -167,8 +167,13 @@ PrintRoutes<A>::get_route_list_next_done(const XrlError& e,
+ 
+     uint8_t best = (*best_and_origin)>>16;
+     uint8_t origin = (*best_and_origin)&255;
++    CorruptMessage m;
+ 
+-    ASPath asp((const uint8_t*)(&((*aspath)[0])), aspath->size());
++    ASPath asp((const uint8_t*)(&((*aspath)[0])), aspath->size(), m);
++    if (asp.invalid()) {
++	printf("ERROR:  Invalid ASPath: %s\n", m.get_msg().c_str());
++	return;
++    }
+ 
+     switch(_verbose) {
+     case SUMMARY:
+diff --git a/xorp/bgp/update_attrib.cc b/xorp/bgp/update_attrib.cc
+index 24eef39..dc96f2c 100644
+--- a/xorp/bgp/update_attrib.cc
++++ b/xorp/bgp/update_attrib.cc
+@@ -80,12 +80,10 @@ BGPUpdateAttrib::copy_out(uint8_t *d) const
+ }
+ 
+ size_t
+-BGPUpdateAttrib::size(const uint8_t *d) throw(CorruptMessage)
++BGPUpdateAttrib::size(const uint8_t *d, CorruptMessage& m)
+ {
+     if (d[0] > 32)
+-	xorp_throw(CorruptMessage,
+-		   c_format("inconsistent length %d", d[0]),
+-		   UPDATEMSGERR, INVALNETFIELD);
++	INVALID_BGP_Z(UPDATEMSGERR, INVALNETFIELD, "inconsistent length %d", d[0]);
+     return (d[0] + 7)/8 + 1;
+ }
+ 
+@@ -128,17 +126,16 @@ BGPUpdateAttribList::add(const BGPUpdateAttrib &x)
+ }
+ #endif
+ 
+-void
+-BGPUpdateAttribList::decode(const uint8_t *d, size_t len)
+-	throw(CorruptMessage)
++bool
++BGPUpdateAttribList::decode(const uint8_t *d, size_t len, CorruptMessage& m)
+ {
+     clear();
+     set <IPv4Net> x_set;
+ 
+-    while (len >0 && len >= BGPUpdateAttrib::size(d)) {
++    while (len >0 && len >= BGPUpdateAttrib::size(d, m)) {
+         BGPUpdateAttrib wr(d);
+-        len -= BGPUpdateAttrib::size(d);
+-        d += BGPUpdateAttrib::size(d);
++        len -= BGPUpdateAttrib::size(d, m);
++        d += BGPUpdateAttrib::size(d, m);
+         if (x_set.find(wr.net()) == x_set.end()) {
+             push_back(wr);
+             x_set.insert(wr.net());
+@@ -147,9 +144,8 @@ BGPUpdateAttribList::decode(const uint8_t *d, size_t len)
+ 			 wr.str("nlri or withdraw").c_str());
+     }
+     if (len != 0)
+-        xorp_throw(CorruptMessage,
+-                   c_format("leftover bytes %u", XORP_UINT_CAST(len)),
+-                   UPDATEMSGERR, ATTRLEN);
++        INVALID_BGP_F(UPDATEMSGERR, ATTRLEN, "leftover bytes %u", XORP_UINT_CAST(len));
++    return true;
+ }
+ 
+ 
+diff --git a/xorp/bgp/update_attrib.hh b/xorp/bgp/update_attrib.hh
+index 200136b..4753e98 100644
+--- a/xorp/bgp/update_attrib.hh
++++ b/xorp/bgp/update_attrib.hh
+@@ -68,7 +68,7 @@ public:
+     }
+ 
+     // size of next operand in memory
+-    static size_t size(const uint8_t *d);
++    static size_t size(const uint8_t *d, CorruptMessage& m);
+ 
+     size_t calc_byte_size() const			{
+ 	return (prefix_len() + 7) / 8;
+@@ -87,14 +87,14 @@ private:
+ };
+ 
+ 
+-class BGPUpdateAttribList : public list <BGPUpdateAttrib> {
++class BGPUpdateAttribList : public list <BGPUpdateAttrib>, public Invalid {
+ public:
+     typedef list <BGPUpdateAttrib>::const_iterator const_iterator;
+     typedef list <BGPUpdateAttrib>::iterator iterator;
+ 
+     size_t wire_size() const;
+     uint8_t *encode(size_t &l, uint8_t *buf = 0) const;
+-    void decode(const uint8_t *d, size_t len);
++    bool decode(const uint8_t *d, size_t len, CorruptMessage& m);
+     string str(string) const;
+ 
+     // XXX this needs to be fixed, we do not want to sort all the times.
+diff --git a/xorp/bgp/update_packet.cc b/xorp/bgp/update_packet.cc
+index 5fec6d1..2c1c96c 100644
+--- a/xorp/bgp/update_packet.cc
++++ b/xorp/bgp/update_packet.cc
+@@ -188,36 +188,34 @@ UpdatePacket::encode(uint8_t *d, size_t &len, const BGPPeerData *peerdata) const
+ UpdatePacket::UpdatePacket(const uint8_t *d, uint16_t l, 
+ 			   const BGPPeerData* peerdata,
+ 			   BGPMain *mainprocess,
+-			   bool do_checks) throw(CorruptMessage,UnusableMessage)
++			   bool do_checks, CorruptMessage & m)
+ {
+     debug_msg("UpdatePacket constructor called\n");
+     _Type = MESSAGETYPEUPDATE;
+     if (l < BGPPacket::MINUPDATEPACKET)
+-	xorp_throw(CorruptMessage,
+-		   c_format("Update Message too short %d", l),
+-		   MSGHEADERERR, BADMESSLEN, d + BGPPacket::MARKER_SIZE, 2);
++	INVALID_BGP_D(MSGHEADERERR, BADMESSLEN, d + BGPPacket::MARKER_SIZE, 2,
++		      "Update Message too short %d", l);
+     d += BGPPacket::COMMON_HEADER_LEN;		// move past header
+     size_t wr_len = (d[0] << 8) + d[1];		// withdrawn length
+     if (BGPPacket::MINUPDATEPACKET + wr_len > l)
+-	xorp_throw(CorruptMessage,
+-		   c_format("Unreachable routes length is bogus %u > %u",
+-			    XORP_UINT_CAST(wr_len),
+-			    XORP_UINT_CAST(l - BGPPacket::MINUPDATEPACKET)),
+-		   UPDATEMSGERR, MALATTRLIST);
++	INVALID_BGP(UPDATEMSGERR, MALATTRLIST, "Unreachable routes length is bogus %u > %u",
++		    XORP_UINT_CAST(wr_len),
++		    XORP_UINT_CAST(l - BGPPacket::MINUPDATEPACKET));
+     
+     size_t pa_len = (d[wr_len+2] << 8) + d[wr_len+3];	// pathatt length
+     if (BGPPacket::MINUPDATEPACKET + pa_len + wr_len > l)
+-	xorp_throw(CorruptMessage,
+-		   c_format("Pathattr length is bogus %u > %u",
+-			    XORP_UINT_CAST(pa_len),
+-			    XORP_UINT_CAST(l - wr_len - BGPPacket::MINUPDATEPACKET)),
+-		UPDATEMSGERR, MALATTRLIST);
++	INVALID_BGP(UPDATEMSGERR, MALATTRLIST, "Pathattr length is bogus %u > %u",
++		    XORP_UINT_CAST(pa_len),
++		    XORP_UINT_CAST(l - wr_len - BGPPacket::MINUPDATEPACKET));
+ 
+     size_t nlri_len = l - BGPPacket::MINUPDATEPACKET - pa_len - wr_len;
+ 
+     // Start of decoding of withdrawn routes.
+     d += 2;	// point to the routes.
+-    _wr_list.decode(d, wr_len);
++    if (!_wr_list.decode(d, wr_len, m)) {
++	set_invalid(true);
++	return;
++    }
+     d += wr_len;
+ 
+     // Start of decoding of Path Attributes
+@@ -225,12 +223,18 @@ UpdatePacket::UpdatePacket(const uint8_t *d, uint16_t l,
+ 
+     size_t used = pa_len;
+     _pa_list = new FastPathAttributeList<IPv4>();
+-    _pa_list->load_raw_data(d, used, peerdata, 
+-			    (nlri_len > 0), mainprocess, do_checks);
++    if (!_pa_list->load_raw_data(d, used, peerdata, 
++				 (nlri_len > 0), mainprocess, do_checks, m)) {
++	set_invalid(true);
++	return;
++    }
+     d += used;
+ 
+     // Start of decoding of Network Reachability
+-    _nlri_list.decode(d, nlri_len);
++    if (!_nlri_list.decode(d, nlri_len, m)) {
++	set_invalid(false);
++	return;
++    }
+     /* End of decoding of Network Reachability */
+     debug_msg("No of withdrawn routes %u. "
+ 	      "No of networks %u.\n",
+@@ -284,6 +288,8 @@ UpdatePacket::operator==(const UpdatePacket& him) const
+     if (_wr_list != him.wr_list())
+ 	return false;
+ 
++    CorruptMessage m;
++
+ #if 0
+     //path attribute equals
+     list <PathAttribute *> temp_att_list(pa_list());
+@@ -319,7 +325,7 @@ UpdatePacket::operator==(const UpdatePacket& him) const
+     } else {
+ 	int count = 0;
+ 	for (int i=0; i < MAX_ATTRIBUTE; i++)
+-	    if (_pa_list->find_attribute_by_type((PathAttType)i) != 0) 
++	    if (_pa_list->find_attribute_by_type((PathAttType)i, m) != 0) 
+ 		count++;
+ 	if (him_empty) {
+             return false;
+diff --git a/xorp/bgp/xrl_target.cc b/xorp/bgp/xrl_target.cc
+index bdc94b3..a619e72 100644
+--- a/xorp/bgp/xrl_target.cc
++++ b/xorp/bgp/xrl_target.cc
+@@ -122,7 +122,7 @@ XrlBgpTarget::bgp_0_3_local_config(
+ 
+     _as = AsNum(as);
+     if (_as.as4() == AsNum::AS_INVALID)
+-	return XrlCmdError::COMMAND_FAILED(e.str());
++	return XrlCmdError::COMMAND_FAILED(c_format("Invalid as: %s", as.c_str()));
+ 
+     _bgp.local_config(_as.as4(), id, use_4byte_asnums);
+ 
+@@ -146,7 +146,7 @@ XrlBgpTarget::bgp_0_3_set_local_as(
+ 
+     _as = AsNum(as);
+     if (_as.as4() == AsNum::AS_INVALID)
+-	return XrlCmdError::COMMAND_FAILED(e.str());
++	return XrlCmdError::COMMAND_FAILED(c_format("set-local-as, invalid as: %s", as.c_str()));
+     _awaiting_as = false;
+     if(!_awaiting_as && !_awaiting_bgp_id && !_awaiting_4byte_asnums) {
+ 	_bgp.local_config(_as.as4(), _id, _use_4byte_asnums);
+@@ -298,18 +298,19 @@ XrlBgpTarget::bgp_0_3_add_peer(
+     if(!_bgp.processes_ready())
+ 	return XrlCmdError::COMMAND_FAILED("FEA or RIB not running");
+ 
+-    BGPPeerData *pd = 0;
+-    try {
+-	Iptuple iptuple(local_dev.c_str(), local_ip.c_str(), local_port, peer_ip.c_str(),
+-			peer_port);
++    BGPPeerData *pd;
++
++    string err;
++    Iptuple iptuple(local_dev.c_str(), local_ip.c_str(), local_port, peer_ip.c_str(),
++		    peer_port, err);
+ 
+-        AsNum asn(as); 
+-	pd = new BGPPeerData(*_bgp.get_local_data(), iptuple, asn, next_hop,
+-			     holdtime);
++    AsNum asn(as); 
++    pd = new BGPPeerData(*_bgp.get_local_data(), iptuple, asn, next_hop,
++			 holdtime);
+ 
+-    } catch(XorpException& e) {
++    if ((_as.as4() == AsNum::AS_INVALID) || iptuple.invalid()) {
+ 	delete pd;
+-	return XrlCmdError::COMMAND_FAILED(e.str());
++	return XrlCmdError::COMMAND_FAILED(string("bgp-add-peer: ") + err);
+     }
+ 
+     if(!_bgp.create_peer(pd)) {
+@@ -332,15 +333,14 @@ XrlBgpTarget::bgp_0_3_delete_peer(
+ 	      local_ip.c_str(), XORP_UINT_CAST(local_port),
+ 	      peer_ip.c_str(), XORP_UINT_CAST(peer_port));
+ 
+-    try {
+-	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
+-			peer_port);
++    string err;
++    Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
++		    peer_port, err);
++    if (iptuple.invalid())
++	return XrlCmdError::COMMAND_FAILED(err);
+ 
+-	if(!_bgp.delete_peer(iptuple))
+-	    return XrlCmdError::COMMAND_FAILED();
+-    } catch(XorpException& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
+-    }
++    if(!_bgp.delete_peer(iptuple))
++	return XrlCmdError::COMMAND_FAILED();
+ 
+     return XrlCmdError::OKAY();
+ }
+@@ -357,15 +357,14 @@ XrlBgpTarget::bgp_0_3_enable_peer(
+ 	      local_ip.c_str(), XORP_UINT_CAST(local_port),
+ 	      peer_ip.c_str(), XORP_UINT_CAST(peer_port));
+ 
+-    try {
+-	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
+-			peer_port);
++    string err;
++    Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
++		    peer_port, err);
++    if (iptuple.invalid())
++	return XrlCmdError::COMMAND_FAILED(err);
+ 
+-	if(!_bgp.enable_peer(iptuple))
+-	    return XrlCmdError::COMMAND_FAILED();
+-    } catch(XorpException& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
+-    }
++    if(!_bgp.enable_peer(iptuple))
++	return XrlCmdError::COMMAND_FAILED();
+ 
+     return XrlCmdError::OKAY();
+ }
+@@ -382,15 +381,14 @@ XrlBgpTarget::bgp_0_3_disable_peer(
+ 	      local_ip.c_str(), XORP_UINT_CAST(local_port),
+ 	      peer_ip.c_str(), XORP_UINT_CAST(peer_port));
+ 
+-    try {
+-	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
+-			peer_port);
++    string err;
++    Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
++		    peer_port, err);
++    if (iptuple.invalid())
++	return XrlCmdError::COMMAND_FAILED(err);
+ 
+-	if(!_bgp.disable_peer(iptuple))
+-	    return XrlCmdError::COMMAND_FAILED();
+-    } catch(XorpException& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
+-    }
++    if(!_bgp.disable_peer(iptuple))
++	return XrlCmdError::COMMAND_FAILED();
+ 
+     return XrlCmdError::OKAY();
+ }
+@@ -411,15 +409,14 @@ XrlBgpTarget::bgp_0_3_change_local_ip(
+ 	      peer_ip.c_str(), XORP_UINT_CAST(peer_port),
+ 	      new_local_ip.c_str(), new_local_dev.c_str());
+ 
+-    try {
+-	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
+-			peer_port);
++    string err;
++    Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
++		    peer_port, err);
++    if (iptuple.invalid())
++	return XrlCmdError::COMMAND_FAILED(err);
+ 
+-	if(!_bgp.change_local_ip(iptuple, new_local_ip, new_local_dev))
+-	    return XrlCmdError::COMMAND_FAILED();
+-    } catch(XorpException& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
+-    }
++    if(!_bgp.change_local_ip(iptuple, new_local_ip, new_local_dev))
++	return XrlCmdError::COMMAND_FAILED();
+ 
+     return XrlCmdError::OKAY();
+ }
+@@ -439,15 +436,14 @@ XrlBgpTarget::bgp_0_3_change_local_port(
+ 	      peer_ip.c_str(), XORP_UINT_CAST(peer_port),
+ 	      new_local_port);
+ 
+-    try {
+-	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
+-			peer_port);
++    string err;
++    Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
++		    peer_port, err);
++    if (iptuple.invalid())
++	return XrlCmdError::COMMAND_FAILED(err);
+ 
+-	if(!_bgp.change_local_port(iptuple, new_local_port))
+-	    return XrlCmdError::COMMAND_FAILED();
+-    } catch(XorpException& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
+-    }
++    if(!_bgp.change_local_port(iptuple, new_local_port))
++	return XrlCmdError::COMMAND_FAILED();
+ 
+     return XrlCmdError::OKAY();
+ }
+@@ -467,15 +463,15 @@ XrlBgpTarget::bgp_0_3_change_peer_port(
+ 	      peer_ip.c_str(), XORP_UINT_CAST(peer_port),
+ 	      new_peer_port);
+ 
+-    try {
+-	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
+-			peer_port);
++    string err;
++    Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
++		    peer_port, err);
+ 
+-	if(!_bgp.change_peer_port(iptuple, new_peer_port))
+-	    return XrlCmdError::COMMAND_FAILED();
+-    } catch(XorpException& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
+-    }
++    if (iptuple.invalid())
++	return XrlCmdError::COMMAND_FAILED(err);
++
++    if(!_bgp.change_peer_port(iptuple, new_peer_port))
++	return XrlCmdError::COMMAND_FAILED();
+ 
+     return XrlCmdError::OKAY();
+ }
+@@ -495,15 +491,15 @@ XrlBgpTarget::bgp_0_3_set_peer_as(
+ 	      peer_ip.c_str(), XORP_UINT_CAST(peer_port),
+ 	      peer_as.c_str());
+ 
+-    try {
+-	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
+-			peer_port);
+-	AsNum peer_asn(peer_as);
+-	if(!_bgp.set_peer_as(iptuple, peer_asn.as4()))
+-	    return XrlCmdError::COMMAND_FAILED();
+-    } catch(XorpException& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
+-    }
++    string err;
++    Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
++		    peer_port, err);
++    if (iptuple.invalid())
++	return XrlCmdError::COMMAND_FAILED(err);
++
++    AsNum peer_asn(peer_as);
++    if(!_bgp.set_peer_as(iptuple, peer_asn.as4()))
++	return XrlCmdError::COMMAND_FAILED();
+ 
+     return XrlCmdError::OKAY();
+ }
+@@ -523,15 +519,14 @@ XrlBgpTarget::bgp_0_3_set_holdtime(
+ 	      peer_ip.c_str(), XORP_UINT_CAST(peer_port),
+ 	      holdtime);
+ 
+-    try {
+-	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
+-			peer_port);
++    string err;
++    Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
++		    peer_port, err);
++    if (iptuple.invalid())
++	return XrlCmdError::COMMAND_FAILED(err);
+ 
+-	if(!_bgp.set_holdtime(iptuple, holdtime))
+-	    return XrlCmdError::COMMAND_FAILED();
+-    } catch(XorpException& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
+-    }
++    if(!_bgp.set_holdtime(iptuple, holdtime))
++	return XrlCmdError::COMMAND_FAILED();
+ 
+     return XrlCmdError::OKAY();
+ }
+@@ -551,15 +546,14 @@ XrlBgpTarget::bgp_0_3_set_delay_open_time(
+ 	      peer_ip.c_str(), XORP_UINT_CAST(peer_port),
+ 	      delay_open_time);
+ 
+-    try {
+-	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
+-			peer_port);
++    string err;
++    Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
++		    peer_port, err);
++    if (iptuple.invalid())
++	return XrlCmdError::COMMAND_FAILED(err);
+ 
+-	if(!_bgp.set_delay_open_time(iptuple, delay_open_time))
+-	    return XrlCmdError::COMMAND_FAILED();
+-    } catch(XorpException& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
+-    }
++    if(!_bgp.set_delay_open_time(iptuple, delay_open_time))
++	return XrlCmdError::COMMAND_FAILED();
+ 
+     return XrlCmdError::OKAY();
+ }
+@@ -579,15 +573,14 @@ XrlBgpTarget::bgp_0_3_set_route_reflector_client(
+ 	      peer_ip.c_str(), XORP_UINT_CAST(peer_port),
+ 	      bool_c_str(state));
+ 
+-    try {
+-	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
+-			peer_port);
++    string err;
++    Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
++		    peer_port, err);
++    if (iptuple.invalid())
++	return XrlCmdError::COMMAND_FAILED(err);
+ 
+-	if(!_bgp.set_route_reflector_client(iptuple, state))
+-	    return XrlCmdError::COMMAND_FAILED();
+-    } catch(XorpException& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
+-    }
++    if(!_bgp.set_route_reflector_client(iptuple, state))
++	return XrlCmdError::COMMAND_FAILED();
+ 
+     return XrlCmdError::OKAY();
+ }
+@@ -607,15 +600,14 @@ XrlBgpTarget::bgp_0_3_set_confederation_member(
+ 	      peer_ip.c_str(), XORP_UINT_CAST(peer_port),
+ 	      bool_c_str(state));
+ 
+-    try {
+-	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
+-			peer_port);
++    string err;
++    Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
++		    peer_port, err);
++    if (iptuple.invalid())
++	return XrlCmdError::COMMAND_FAILED(err);
+ 
+-	if(!_bgp.set_confederation_member(iptuple, state))
+-	    return XrlCmdError::COMMAND_FAILED();
+-    } catch(XorpException& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
+-    }
++    if(!_bgp.set_confederation_member(iptuple, state))
++	return XrlCmdError::COMMAND_FAILED();
+ 
+     return XrlCmdError::OKAY();
+ }
+@@ -636,15 +628,14 @@ XrlBgpTarget::bgp_0_3_set_prefix_limit(
+ 	      peer_ip.c_str(), XORP_UINT_CAST(peer_port),
+ 	      XORP_UINT_CAST(maximum), bool_c_str(state));
+ 
+-    try {
+-	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
+-			peer_port);
++    string err;
++    Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
++		    peer_port, err);
++    if (iptuple.invalid())
++	return XrlCmdError::COMMAND_FAILED(err);
+ 
+-	if(!_bgp.set_prefix_limit(iptuple, maximum, state))
+-	    return XrlCmdError::COMMAND_FAILED();
+-    } catch(XorpException& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
+-    }
++    if(!_bgp.set_prefix_limit(iptuple, maximum, state))
++	return XrlCmdError::COMMAND_FAILED();
+ 
+     return XrlCmdError::OKAY();
+ }
+@@ -664,15 +655,14 @@ XrlBgpTarget::bgp_0_3_set_nexthop4(
+ 	      peer_ip.c_str(), XORP_UINT_CAST(peer_port),
+ 	      cstring(next_hop));
+ 
+-    try {
+-	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
+-			peer_port);
++    string err;
++    Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
++		    peer_port, err);
++    if (iptuple.invalid())
++	return XrlCmdError::COMMAND_FAILED(err);
+ 
+-	if(!_bgp.set_nexthop4(iptuple, next_hop))
+-	    return XrlCmdError::COMMAND_FAILED();
+-    } catch(XorpException& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
+-    }
++    if(!_bgp.set_nexthop4(iptuple, next_hop))
++	return XrlCmdError::COMMAND_FAILED();
+ 
+     return XrlCmdError::OKAY();
+ }
+@@ -690,15 +680,14 @@ XrlBgpTarget::bgp_0_3_set_peer_state(
+ 	      local_ip.c_str(), XORP_UINT_CAST(local_port),
+ 	      peer_ip.c_str(), XORP_UINT_CAST(peer_port), toggle);
+ 
+-    try {
+-	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
+-			peer_port);
++    string err;
++    Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
++		    peer_port, err);
++    if (iptuple.invalid())
++	return XrlCmdError::COMMAND_FAILED(err);
+ 
+-	if(!_bgp.set_peer_state(iptuple, toggle))
+-	    return XrlCmdError::COMMAND_FAILED();
+-    } catch(XorpException& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
+-    }
++    if(!_bgp.set_peer_state(iptuple, toggle))
++	return XrlCmdError::COMMAND_FAILED();
+ 
+     return XrlCmdError::OKAY();
+ }
+@@ -717,15 +706,14 @@ XrlBgpTarget::bgp_0_3_set_peer_md5_password(
+ 	      peer_ip.c_str(), XORP_UINT_CAST(peer_port),
+ 	      password.c_str());
+ 
+-    try {
+-	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
+-			peer_port);
++    string err;
++    Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
++		    peer_port, err);
++    if (iptuple.invalid())
++	return XrlCmdError::COMMAND_FAILED(err);
+ 
+-	if(!_bgp.set_peer_md5_password(iptuple, password))
+-	    return XrlCmdError::COMMAND_FAILED();
+-    } catch(XorpException& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
+-    }
++    if(!_bgp.set_peer_md5_password(iptuple, password))
++	return XrlCmdError::COMMAND_FAILED();
+ 
+     return XrlCmdError::OKAY();
+ }
+@@ -742,15 +730,14 @@ XrlBgpTarget::bgp_0_3_activate(
+ 	      local_ip.c_str(), XORP_UINT_CAST(local_port),
+ 	      peer_ip.c_str(), XORP_UINT_CAST(peer_port));
+ 
+-    try {
+-	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
+-			peer_port);
++    string err;
++    Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
++		    peer_port, err);
++    if (iptuple.invalid())
++	return XrlCmdError::COMMAND_FAILED(err);
+ 
+-	if(!_bgp.activate(iptuple))
+-	    return XrlCmdError::COMMAND_FAILED();
+-    } catch(XorpException& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
+-    }
++    if(!_bgp.activate(iptuple))
++	return XrlCmdError::COMMAND_FAILED();
+ 
+     return XrlCmdError::OKAY();
+ }
+@@ -770,15 +757,14 @@ XrlBgpTarget::bgp_0_3_next_hop_rewrite_filter(
+ 	      peer_ip.c_str(), XORP_UINT_CAST(peer_port),
+ 	      next_hop.str().c_str());
+ 
+-    try {
+-	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
+-			peer_port);
++    string err;
++    Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
++		    peer_port, err);
++    if (iptuple.invalid())
++	return XrlCmdError::COMMAND_FAILED(err);
+ 
+-	if(!_bgp.next_hop_rewrite_filter(iptuple, next_hop))
+-	    return XrlCmdError::COMMAND_FAILED();
+-    } catch(XorpException& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
+-    }
++    if(!_bgp.next_hop_rewrite_filter(iptuple, next_hop))
++	return XrlCmdError::COMMAND_FAILED();
+ 
+     return XrlCmdError::OKAY();
+ }
+@@ -838,7 +824,7 @@ XrlBgpTarget::bgp_0_3_trace(const string& tvar,
+ 	rv = _bgp.profile().enable(tvar, e);
+     else
+ 	rv = _bgp.profile().disable(tvar, e);
+-    if (!rv) {
++    if (!rv)
+ 	return XrlCmdError::COMMAND_FAILED(e);
+ #endif
+ 
+@@ -893,15 +879,15 @@ XrlBgpTarget::bgp_0_3_get_peer_id(
+ 	      local_ip.c_str(), XORP_UINT_CAST(local_port),
+ 	      peer_ip.c_str(), XORP_UINT_CAST(peer_port));
+ 
+-    try {
+-	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
+-			peer_port);
++    string err;
++    Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
++		    peer_port, err);
+ 
+-	if (!_bgp.get_peer_id(iptuple, peer_id)) {
+-	    return XrlCmdError::COMMAND_FAILED();
+-	}
+-    } catch(XorpException& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
++    if (iptuple.invalid())
++	return XrlCmdError::COMMAND_FAILED(err);
++
++    if (!_bgp.get_peer_id(iptuple, peer_id)) {
++	return XrlCmdError::COMMAND_FAILED();
+     }
+ 
+     return XrlCmdError::OKAY();
+@@ -919,15 +905,14 @@ XrlBgpTarget::bgp_0_3_get_peer_status(
+ 				      uint32_t&	admin_status)
+ {
+ 
+-    try {
+-	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
+-			peer_port);
++    string err;
++    Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
++		    peer_port, err);
++    if (iptuple.invalid())
++	return XrlCmdError::COMMAND_FAILED(err);
+ 
+-	if (!_bgp.get_peer_status(iptuple, peer_state, admin_status)) {
+-	    return XrlCmdError::COMMAND_FAILED();
+-	}
+-    } catch(XorpException& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
++    if (!_bgp.get_peer_status(iptuple, peer_state, admin_status)) {
++	return XrlCmdError::COMMAND_FAILED();
+     }
+ 
+     return XrlCmdError::OKAY();
+@@ -943,15 +928,14 @@ XrlBgpTarget::bgp_0_3_get_peer_negotiated_version(
+ 						  // Output values, 
+ 						  int32_t& neg_version)
+ {
+-    try {
+-	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
+-			peer_port);
++    string err;
++    Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
++		    peer_port, err);
++    if (iptuple.invalid())
++	return XrlCmdError::COMMAND_FAILED(err);
+ 
+-	if (!_bgp.get_peer_negotiated_version(iptuple, neg_version)) {
+-	    return XrlCmdError::COMMAND_FAILED();
+-	}
+-    } catch(XorpException& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
++    if (!_bgp.get_peer_negotiated_version(iptuple, neg_version)) {
++	return XrlCmdError::COMMAND_FAILED();
+     }
+ 
+     return XrlCmdError::OKAY();
+@@ -967,17 +951,17 @@ XrlBgpTarget::bgp_0_3_get_peer_as(
+ 				  // Output values, 
+ 				  string& peer_as)
+ {
+-    try {
+-	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
+-			peer_port);
+-	uint32_t peer_asn;
+-	if (!_bgp.get_peer_as(iptuple, peer_asn)) {
+-	    return XrlCmdError::COMMAND_FAILED();
+-	}
+-	peer_as = AsNum(peer_asn).short_str();
+-    } catch(XorpException& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
++    string err;
++    Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
++		    peer_port, err);
++    if (iptuple.invalid())
++	return XrlCmdError::COMMAND_FAILED(err);
++
++    uint32_t peer_asn;
++    if (!_bgp.get_peer_as(iptuple, peer_asn)) {
++	return XrlCmdError::COMMAND_FAILED();
+     }
++    peer_as = AsNum(peer_asn).short_str();
+ 
+     return XrlCmdError::OKAY();
+ }
+@@ -997,20 +981,19 @@ XrlBgpTarget::bgp_0_3_get_peer_msg_stats(
+ 					 uint32_t&	last_error, 
+ 					 uint32_t&	in_update_elapsed)
+ {
+-    try {
+-	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
+-			peer_port);
+-
+-	uint16_t last_error_short;
+-	if (!_bgp.get_peer_msg_stats(iptuple, in_updates, out_updates,
+-				     in_msgs, out_msgs, last_error_short, 
+-				     in_update_elapsed)) {
+-	    return XrlCmdError::COMMAND_FAILED();
+-	}
+-	last_error = last_error_short;
+-    } catch(XorpException& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
++    string err;
++    Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
++		    peer_port, err);
++    if (iptuple.invalid())
++	return XrlCmdError::COMMAND_FAILED(err);
++
++    uint16_t last_error_short;
++    if (!_bgp.get_peer_msg_stats(iptuple, in_updates, out_updates,
++				 in_msgs, out_msgs, last_error_short, 
++				 in_update_elapsed)) {
++	return XrlCmdError::COMMAND_FAILED();
+     }
++    last_error = last_error_short;
+ 
+     return XrlCmdError::OKAY();
+ }
+@@ -1026,16 +1009,15 @@ XrlBgpTarget::bgp_0_3_get_peer_established_stats(
+ 						 uint32_t& transitions, 
+ 						 uint32_t& established_time)
+ {
+-    try {
+-	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
+-			peer_port);
++    string err;
++    Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
++		    peer_port, err);
++    if (iptuple.invalid())
++	return XrlCmdError::COMMAND_FAILED(err);
+ 
+-	if (!_bgp.get_peer_established_stats(iptuple, transitions,
+-					     established_time)) {
+-	    return XrlCmdError::COMMAND_FAILED();
+-	}
+-    } catch(XorpException& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
++    if (!_bgp.get_peer_established_stats(iptuple, transitions,
++					 established_time)) {
++	return XrlCmdError::COMMAND_FAILED();
+     }
+     return XrlCmdError::OKAY();
+ }
+@@ -1056,17 +1038,16 @@ XrlBgpTarget::bgp_0_3_get_peer_timer_config(
+ 					    uint32_t& min_as_origin_interval,
+ 					    uint32_t& min_route_adv_interval)
+ {
+-    try {
+-	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
+-			peer_port);
+-	if (!_bgp.get_peer_timer_config(iptuple, retry_interval, hold_time,
+-					keep_alive, hold_time_conf,
+-					keep_alive_conf, min_as_origin_interval,
+-					min_route_adv_interval)) {
+-	    return XrlCmdError::COMMAND_FAILED();
+-	}
+-    } catch(XorpException& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
++    string err;
++    Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
++		    peer_port, err);
++    if (iptuple.invalid())
++	return XrlCmdError::COMMAND_FAILED(err);
++    if (!_bgp.get_peer_timer_config(iptuple, retry_interval, hold_time,
++				    keep_alive, hold_time_conf,
++				    keep_alive_conf, min_as_origin_interval,
++				    min_route_adv_interval)) {
++	return XrlCmdError::COMMAND_FAILED();
+     }
+     return XrlCmdError::OKAY();
+ }
+@@ -1130,11 +1111,12 @@ XrlBgpTarget::bgp_0_3_get_v4_route_list_next(
+ 
+     uint32_t origin;
+     bool best = false;
++    CorruptMessage m;
+     if (_bgp.get_route_list_next<IPv4>(token, peer_id, net, origin, aspath,
+ 				       nexthop, med, localpref, atomic_agg,
+ 				       aggregator, calc_localpref,
+ 				       attr_unknown, best, unicast,
+-				       multicast)) {
++				       multicast, m)) {
+ 	//trivial encoding to keep XRL arg count small enough
+ 	if (best) {
+ 	    best_and_origin = (2 << 16) | origin;
+@@ -1200,15 +1182,14 @@ XrlCmdError XrlBgpTarget::bgp_0_3_set_parameter(
+ 	      peer_ip.c_str(), XORP_UINT_CAST(peer_port),
+ 	      parameter.c_str(), toggle ? "set" : "unset");
+ 
+-    try {
+-	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
+-			peer_port);
++    string err;
++    Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
++		    peer_port, err);
++    if (iptuple.invalid())
++	return XrlCmdError::COMMAND_FAILED(err);
+ 
+-	if(!_bgp.set_parameter(iptuple,parameter, toggle))
+-	    return XrlCmdError::COMMAND_FAILED();
+-    } catch(XorpException& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
+-    }
++    if(!_bgp.set_parameter(iptuple,parameter, toggle))
++	return XrlCmdError::COMMAND_FAILED();
+ 
+     return XrlCmdError::OKAY();
+ }
+@@ -1245,15 +1226,14 @@ XrlCmdError
+ XrlBgpTarget::policy_backend_0_1_configure(const uint32_t& filter, 
+ 					   const string& conf)
+ {
+-    try {
+-	debug_msg("[BGP] policy filter: %d conf: %s\n", filter, conf.c_str());
+-	PROFILE(XLOG_TRACE(_bgp.profile().enabled(trace_policy_configure),
+-			   "policy filter: %d conf: %s\n", filter, conf.c_str()));
+-	_bgp.configure_filter(filter,conf);
+-    } catch(const PolicyException& e) {
+-	return XrlCmdError::COMMAND_FAILED("Filter configure failed: " +
+-					   e.str());
+-    }
++    debug_msg("[BGP] policy filter: %d conf: %s\n", filter, conf.c_str());
++    string err;
++    PROFILE(XLOG_TRACE(_bgp.profile().enabled(trace_policy_configure),
++		       "policy filter: %d conf: %s\n", filter, conf.c_str()));
++    _bgp.configure_filter(filter,conf);
++
++    //return XrlCmdError::COMMAND_FAILED("Filter configure failed: " +
++//				       e.str());
+     return XrlCmdError::OKAY();					   
+ }
+ 
+@@ -1363,7 +1343,7 @@ XrlBgpTarget::profile_0_1_clear(const string& pname)
+ {
+     debug_msg("profile variable %s\n", pname.c_str());
+     string e;
+-    if (!_bgp.profile().clear(pname, e);
++    if (!_bgp.profile().clear(pname, e))
+ 	return XrlCmdError::COMMAND_FAILED(e);
+ 
+     return XrlCmdError::OKAY();
+@@ -1409,15 +1389,14 @@ XrlBgpTarget::bgp_0_3_set_nexthop6(
+ 	      peer_ip.c_str(), XORP_UINT_CAST(peer_port),
+ 	      cstring(next_hop));
+ 
+-    try {
+-	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
+-			peer_port);
++    string err;
++    Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
++		    peer_port, err);
++    if (iptuple.invalid())
++	return XrlCmdError::COMMAND_FAILED(err);
+ 
+-	if(!_bgp.set_nexthop6(iptuple, next_hop))
+-	    return XrlCmdError::COMMAND_FAILED();
+-    } catch(XorpException& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
+-    }
++    if(!_bgp.set_nexthop6(iptuple, next_hop))
++	return XrlCmdError::COMMAND_FAILED();
+ 
+     return XrlCmdError::OKAY();
+ }
+@@ -1435,15 +1414,14 @@ XrlBgpTarget::bgp_0_3_get_nexthop6(
+ 	      local_ip.c_str(), XORP_UINT_CAST(local_port),
+ 	      peer_ip.c_str(), XORP_UINT_CAST(peer_port));
+ 
+-    try {
+-	Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
+-			peer_port);
++    string err;
++    Iptuple iptuple("", local_ip.c_str(), local_port, peer_ip.c_str(),
++		    peer_port, err);
++    if (iptuple.invalid())
++	return XrlCmdError::COMMAND_FAILED(err);
+ 
+-	if(!_bgp.get_nexthop6(iptuple, next_hop))
+-	    return XrlCmdError::COMMAND_FAILED();
+-    } catch(XorpException& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
+-    }
++    if(!_bgp.get_nexthop6(iptuple, next_hop))
++	return XrlCmdError::COMMAND_FAILED();
+ 
+     return XrlCmdError::OKAY();
+ }
+@@ -1523,11 +1501,12 @@ XrlBgpTarget::bgp_0_3_get_v6_route_list_next(
+ 
+     uint32_t origin;
+     bool best;
++    CorruptMessage m;
+     if (_bgp.get_route_list_next<IPv6>(token, peer_id, net, origin, aspath,
+ 				       nexthop, med, localpref, atomic_agg,
+ 				       aggregator, calc_localpref,
+ 				       attr_unknown, best, unicast,
+-				       multicast)) {
++				       multicast, m)) {
+ 	//trivial encoding to keep XRL arg count small enough
+ 	if (best) {
+ 	    best_and_origin = (2 << 16) | origin;
+diff --git a/xorp/libxorp/exceptions.hh b/xorp/libxorp/exceptions.hh
+index 3d05d9d..eb8ce45 100644
+--- a/xorp/libxorp/exceptions.hh
++++ b/xorp/libxorp/exceptions.hh
+@@ -45,6 +45,12 @@ public:
+     void set_invalid(bool v) { _invalid = v; }
+     void set_valid(bool v) { _invalid = !v; }
+     void set_invalid_or(bool v) { _invalid |= v; }
++
++    Invalid& operator=(const Invalid& n) {
++	_invalid = n._invalid;
++	return *this;
++    }
++
+ protected:
+     bool _invalid;
+ };
+diff --git a/xorp/libxorp/ipnet.hh b/xorp/libxorp/ipnet.hh
+index 9f48858..4d1de86 100644
+--- a/xorp/libxorp/ipnet.hh
++++ b/xorp/libxorp/ipnet.hh
+@@ -38,14 +38,14 @@
+  * A "subnet" is specified by a base "address" and a "prefix length".
+  */
+ template <class A>
+-class IPNet {
++class IPNet : public Invalid {
+ public:
+     /**
+      * Default constructor taking no parameters.
+      *
+      * Default value has INADDR_ANY/0.
+      */
+-    IPNet() : _prefix_len(0), _invalid(0) {}
++    IPNet() : _prefix_len(0) {}
+ 
+     /**
+      * Constructor from a given base address and a prefix length.
+@@ -58,10 +58,9 @@ public:
+ 	: _masked_addr(a), _prefix_len(prefix_len)
+     {
+ 	if (prefix_len > A::addr_bitlen())
+-	    _invalid = true;
++	    set_invalid(true);
+ 	else {
+ 	    _masked_addr = a.mask_by_prefix_len(prefix_len);
+-	    _invalid = 0;
+ 	}
+     }
+ 
+@@ -81,10 +80,9 @@ public:
+      *
+      * @param n the subnet to copy from.
+      */
+-    IPNet(const IPNet& n) {
++    IPNet(const IPNet& n) : Invalid(n) {
+ 	_masked_addr	= n.masked_addr();
+ 	_prefix_len	= n.prefix_len();
+-	_invalid = n._invalid;
+     }
+ 
+     /**
+@@ -96,7 +94,6 @@ public:
+     IPNet& operator=(const IPNet& n) {
+ 	_masked_addr	= n.masked_addr();
+ 	_prefix_len	= n.prefix_len();
+-	_invalid = n._invalid;
+ 	return *this;
+     }
+ 
+@@ -110,7 +107,7 @@ public:
+     bool operator==(const IPNet& other) const {
+ 	return ((_prefix_len == other._prefix_len) &&
+ 		(_masked_addr == other._masked_addr) &&
+-		(_invalid == other._invalid));
++		(invalid() == other.invalid()));
+     }
+ 
+     /**
+@@ -218,9 +215,6 @@ public:
+      */
+     string str() const;
+ 
+-    /** Was it constructed properly? */
+-    bool invalid() const { return _invalid; }
+-
+     /**
+      * Test if the object contains a real (non-default) value.
+      *
+@@ -458,7 +452,6 @@ private:
+ 
+     A		_masked_addr;
+     uint8_t	_prefix_len;
+-    uint8_t     _invalid;
+ };
+ 
+ /* ------------------------------------------------------------------------- */
+@@ -597,20 +590,20 @@ IPNet<A>::initialize_from_string(const char *cp)
+     char *slash = strrchr(const_cast<char*>(cp), '/');
+     if (slash == 0) {
+ 	XLOG_WARNING("Missing slash: %s", cp);
+-	_invalid = true;
++	set_invalid(true);
+ 	return;
+     }
+ 
+     if (*(slash + 1) == 0) {
+ 	XLOG_WARNING("Missing prefix length: %s", cp);
+-	_invalid = true;
++	set_invalid(true);
+ 	return;
+     }
+     char *n = slash + 1;
+     while (*n != 0) {
+ 	if (*n < '0' || *n > '9') {
+ 	    XLOG_WARNING("Bad prefix length: %s", cp);
+-	    _invalid = true;
++	    set_invalid(true);
+ 	    return;
+ 	}
+ 	n++;
+-- 
+2.7.5
+

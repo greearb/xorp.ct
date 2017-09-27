@@ -1,0 +1,408 @@
+From b4f2a462924233755fb26fd316f32d826f6209a1 Mon Sep 17 00:00:00 2001
+From: Ben Greear <greearb@candelatech.com>
+Date: Fri, 8 Sep 2017 15:51:24 -0700
+Subject: [PATCH 19/33] Remove exceptions related to the profile code.
+
+Signed-off-by: Ben Greear <greearb@candelatech.com>
+---
+ .../control_socket/netlink_socket_utilities.cc     |  1 +
+ xorp/fea/fibconfig.cc                              | 29 ++++++++++++--------
+ xorp/fea/profile_vars.cc                           |  3 +-
+ xorp/fea/xrl_fea_target.cc                         | 24 +++++++++-------
+ xorp/libxipc/finder_main.cc                        |  4 +--
+ xorp/libxipc/finder_xrl_target.cc                  |  2 +-
+ xorp/libxorp/asnum.hh                              |  4 +--
+ xorp/libxorp/buffer.hh                             |  4 +--
+ xorp/libxorp/exceptions.cc                         |  7 -----
+ xorp/libxorp/exceptions.hh                         | 10 -------
+ xorp/libxorp/profile.cc                            | 32 +++++++++++++---------
+ xorp/libxorp/profile.hh                            |  8 ++++--
+ 12 files changed, 65 insertions(+), 63 deletions(-)
+
+diff --git a/xorp/fea/data_plane/control_socket/netlink_socket_utilities.cc b/xorp/fea/data_plane/control_socket/netlink_socket_utilities.cc
+index 56f48be..daf74a1 100644
+--- a/xorp/fea/data_plane/control_socket/netlink_socket_utilities.cc
++++ b/xorp/fea/data_plane/control_socket/netlink_socket_utilities.cc
+@@ -165,6 +165,7 @@ string NlmUtils::nlm_print_msg(vector<uint8_t>& buffer) {
+ 		oss << " metric: " << extract_host_int(p);
+ 	    }
+ 	    oss << endl;
++	    break;
+ 	}
+ 
+ 	default:
+diff --git a/xorp/fea/fibconfig.cc b/xorp/fea/fibconfig.cc
+index 1e0bac8..1297ae8 100644
+--- a/xorp/fea/fibconfig.cc
++++ b/xorp/fea/fibconfig.cc
+@@ -1152,9 +1152,11 @@ FibConfig::add_entry4(const Fte4& fte)
+     if (_fibconfig_entry_sets.empty())
+ 	return (XORP_ERROR);
+ 
+-    PROFILE(if (_profile.enabled(profile_route_out))
+-		_profile.log(profile_route_out,
+-			     c_format("add %s", fte.net().str().c_str())));
++    PROFILE(if (_profile.enabled(profile_route_out)) {
++	    string e;
++	    _profile.log(profile_route_out,
++			 c_format("add %s", fte.net().str().c_str()), e);
++		})
+ 
+     for (fibconfig_entry_set_iter = _fibconfig_entry_sets.begin();
+ 	 fibconfig_entry_set_iter != _fibconfig_entry_sets.end();
+@@ -1175,9 +1177,10 @@ FibConfig::delete_entry4(const Fte4& fte)
+     if (_fibconfig_entry_sets.empty())
+ 	return (XORP_ERROR);
+ 
+-    PROFILE(if (_profile.enabled(profile_route_out))
+-		_profile.log(profile_route_out,
+-			     c_format("delete %s", fte.net().str().c_str())));
++    PROFILE(if (_profile.enabled(profile_route_out)) {
++	    string e;
++	    _profile.log(profile_route_out,
++			 c_format("delete %s", fte.net().str().c_str()), e);})
+ 
+     for (fibconfig_entry_set_iter = _fibconfig_entry_sets.begin();
+ 	 fibconfig_entry_set_iter != _fibconfig_entry_sets.end();
+@@ -1288,9 +1291,10 @@ FibConfig::add_entry6(const Fte6& fte)
+     if (_fibconfig_entry_sets.empty())
+ 	return (XORP_ERROR);
+ 
+-    PROFILE(if (_profile.enabled(profile_route_out))
+-		_profile.log(profile_route_out,
+-			     c_format("add %s", fte.net().str().c_str())));
++    PROFILE(if (_profile.enabled(profile_route_out)) {
++	    string e;
++	    _profile.log(profile_route_out,
++			 c_format("add %s", fte.net().str().c_str()), e);})
+ 
+     for (fibconfig_entry_set_iter = _fibconfig_entry_sets.begin();
+ 	 fibconfig_entry_set_iter != _fibconfig_entry_sets.end();
+@@ -1311,9 +1315,10 @@ FibConfig::delete_entry6(const Fte6& fte)
+     if (_fibconfig_entry_sets.empty())
+ 	return (XORP_ERROR);
+ 
+-    PROFILE(if (_profile.enabled(profile_route_out))
+-		_profile.log(profile_route_out,
+-			     c_format("delete %s", fte.net().str().c_str())));
++    PROFILE(if (_profile.enabled(profile_route_out)) {
++	    string e;
++	    _profile.log(profile_route_out,
++			 c_format("delete %s", fte.net().str().c_str()), e);})
+ 
+     for (fibconfig_entry_set_iter = _fibconfig_entry_sets.begin();
+ 	 fibconfig_entry_set_iter != _fibconfig_entry_sets.end();
+diff --git a/xorp/fea/profile_vars.cc b/xorp/fea/profile_vars.cc
+index 179c681..46179fa 100644
+--- a/xorp/fea/profile_vars.cc
++++ b/xorp/fea/profile_vars.cc
+@@ -40,7 +40,8 @@ struct profile_vars {
+ void
+ initialize_profiling_variables(Profile& p)
+ {
++    string e;
+     for (size_t i = 0; i < sizeof(profile_vars) / sizeof(struct profile_vars);
+ 	 i++)
+-	p.create(profile_vars[i].var, profile_vars[i].comment);
++	p.create(profile_vars[i].var, profile_vars[i].comment, e);
+ }
+diff --git a/xorp/fea/xrl_fea_target.cc b/xorp/fea/xrl_fea_target.cc
+index aacb7c8..0cf2d62 100644
+--- a/xorp/fea/xrl_fea_target.cc
++++ b/xorp/fea/xrl_fea_target.cc
+@@ -2120,8 +2120,9 @@ XrlFeaTarget::redist_transaction6_0_1_add_route(
+     if (protocol_origin == "connected")
+ 	is_connected_route = true;
+ 
+-    PROFILE(if (_profile.enabled(profile_route_in))
+-		_profile.log(profile_route_in, c_format("add %s", dst.str().c_str())));
++    PROFILE(if (_profile.enabled(profile_route_in)) {
++	    string e;
++	    _profile.log(profile_route_in, c_format("add %s", dst.str().c_str()), e);});
+ 
+     if (_fibconfig.add_transaction_operation(
+ 	    tid,
+@@ -2172,9 +2173,10 @@ XrlFeaTarget::redist_transaction6_0_1_delete_route(
+     if (protocol_origin == "connected")
+ 	is_connected_route = true;
+ 
+-    PROFILE(if (_profile.enabled(profile_route_in))
+-		_profile.log(profile_route_in,
+-			     c_format("delete %s", dst.str().c_str())));
++    PROFILE(if (_profile.enabled(profile_route_in)) {
++	    string e;
++	    _profile.log(profile_route_in,
++			 c_format("delete %s", dst.str().c_str()), e);});
+ 
+     if (_fibconfig.add_transaction_operation(
+ 	    tid,
+@@ -3460,8 +3462,9 @@ XrlFeaTarget::redist_transaction4_0_1_add_route(
+     if (protocol_origin == "connected")
+ 	is_connected_route = true;
+ 
+-    PROFILE(if (_profile.enabled(profile_route_in))
+-		_profile.log(profile_route_in, c_format("add %s", dst.str().c_str())));
++    PROFILE(if (_profile.enabled(profile_route_in)) {
++	    string e;
++	    _profile.log(profile_route_in, c_format("add %s", dst.str().c_str()), e);});
+ 
+     if (_fibconfig.add_transaction_operation(
+ 	    tid,
+@@ -3512,9 +3515,10 @@ XrlFeaTarget::redist_transaction4_0_1_delete_route(
+     if (protocol_origin == "connected")
+ 	is_connected_route = true;
+ 
+-    PROFILE(if (_profile.enabled(profile_route_in))
+-		_profile.log(profile_route_in,
+-			     c_format("delete %s", dst.str().c_str())));
++    PROFILE(if (_profile.enabled(profile_route_in)) {
++	    string e;
++	    _profile.log(profile_route_in,
++			 c_format("delete %s", dst.str().c_str()), e);});
+ 
+     if (_fibconfig.add_transaction_operation(
+ 	    tid,
+diff --git a/xorp/libxipc/finder_main.cc b/xorp/libxipc/finder_main.cc
+index 7ef51fa..10f6f46 100644
+--- a/xorp/libxipc/finder_main.cc
++++ b/xorp/libxipc/finder_main.cc
+@@ -105,7 +105,7 @@ finder_main(int argc, char* const argv[])
+ 	    //
+ 	    // User is specifying which interface to bind finder to
+ 	    //
+-	    IPv4 bind_addr = IPv4(optarg);
++	    IPv4 bind_addr(optarg);
+ 	    if (!bind_addr.invalid()) {
+ 		in_addr ina;
+ 		bind_addr.copy_out(ina);
+@@ -129,7 +129,7 @@ finder_main(int argc, char* const argv[])
+ 	    // User is specifying a network address to accept finder
+ 	    // connections from.
+ 	    //
+-	    IPv4 v4(optarg);
++	    IPv4Net v4(optarg);
+ 	    if (!v4.invalid()) {
+ 		add_permitted_net(v4);
+ 	    } else {
+diff --git a/xorp/libxipc/finder_xrl_target.cc b/xorp/libxipc/finder_xrl_target.cc
+index bee8a26..f420765 100644
+--- a/xorp/libxipc/finder_xrl_target.cc
++++ b/xorp/libxipc/finder_xrl_target.cc
+@@ -336,7 +336,7 @@ FinderXrlTarget::finder_0_2_resolve_xrl(const string&	xrl,
+ 	    finder_trace_result("fail (does not resolve as an xrl).");
+ 	    XLOG_ERROR("Resolved something that did not look an xrl: \"%s\"\n",
+ 		       ci->c_str());
+-	    return XrlCmdError::COMMAND_FAILED("Xrl format is invalid: " + ci);
++	    return XrlCmdError::COMMAND_FAILED("Xrl format is invalid: " + *ci);
+ 	}
+ 	else {
+ 	    s = xx.str();
+diff --git a/xorp/libxorp/asnum.hh b/xorp/libxorp/asnum.hh
+index a59809f..f033eee 100644
+--- a/xorp/libxorp/asnum.hh
++++ b/xorp/libxorp/asnum.hh
+@@ -19,13 +19,13 @@
+ // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/libxorp/asnum.hh,v 1.20 2008/10/02 21:57:28 bms Exp $
+ 
+ #ifndef __LIBXORP_ASNUM_HH__
+ #define __LIBXORP_ASNUM_HH__
+ 
+ #include "libxorp/xorp.h"
+-#include "libxorp/exceptions.hh"
++#include "libxorp/libxorp_module.h"
++#include "libxorp/xlog.h"
+ 
+ #ifdef HAVE_INTTYPES_H
+ #include <inttypes.h>
+diff --git a/xorp/libxorp/buffer.hh b/xorp/libxorp/buffer.hh
+index 45ce335..4cdcb96 100644
+--- a/xorp/libxorp/buffer.hh
++++ b/xorp/libxorp/buffer.hh
+@@ -75,9 +75,9 @@ public:
+      * @param offset the data offset from the beginning of the buffer.
+      * @return the data value at @ref offset.
+      */
+-    uint8_t data(size_t offset) const throw (InvalidBufferOffset) {
++    uint8_t data(size_t offset) const {
+ 	if (offset >= _max_size)
+-	    xorp_throw(InvalidBufferOffset, "invalid get data() offset");
++	    XLOG_ASSERT(0);
+ 	return (_data[offset]);
+     }
+     
+diff --git a/xorp/libxorp/exceptions.cc b/xorp/libxorp/exceptions.cc
+index 8e59018..4347f44 100644
+--- a/xorp/libxorp/exceptions.cc
++++ b/xorp/libxorp/exceptions.cc
+@@ -72,13 +72,6 @@ XorpReasonedException::why() const
+     return ( _why.size() != 0 ) ? _why : string("Not specified");
+ }
+ 
+-InvalidBufferOffset::InvalidBufferOffset(const char* file,
+-					 size_t line,
+-					 const string& init_why)
+-    : XorpReasonedException("XorpInvalidBufferOffset", file, line, init_why)
+-{
+-}
+-
+ InvalidPacket::InvalidPacket(const char* file,
+ 			     size_t line,
+ 			     const string& init_why)
+diff --git a/xorp/libxorp/exceptions.hh b/xorp/libxorp/exceptions.hh
+index 1cdb83a..c2e724e 100644
+--- a/xorp/libxorp/exceptions.hh
++++ b/xorp/libxorp/exceptions.hh
+@@ -135,16 +135,6 @@ protected:
+ // Standard XORP exceptions
+ 
+ /**
+- * @short A standard XORP exception that is thrown if a buffer ofset is
+- * invalid.
+- */
+-class InvalidBufferOffset : public XorpReasonedException {
+-public:
+-    InvalidBufferOffset(const char* file, size_t line,
+-			const string& init_why = "");
+-};
+-
+-/**
+  * @short A standard XORP exception that is thrown if the packet is invalid.
+  */
+ class InvalidPacket : public XorpReasonedException {
+diff --git a/xorp/libxorp/profile.cc b/xorp/libxorp/profile.cc
+index 8e3428c..27ed169 100644
+--- a/xorp/libxorp/profile.cc
++++ b/xorp/libxorp/profile.cc
+@@ -45,15 +45,18 @@ Profile::~Profile()
+     }
+ }
+ 
+-void
+-Profile::create(const string& pname, const string& comment)
++bool
++Profile::create(const string& pname, const string& comment, string& e)
+ {
+     // Catch initialization problems.
+-    if (_profiles.count(pname) != 0)
+-	return;
++    if (_profiles.count(pname) != 0) {
++	e = "Profile already exists: " + pname;
++	return false;
++    }
+ 
+     ProfileState *p = new ProfileState(comment, false, false, new logentries);
+     _profiles[pname] = ref_ptr<ProfileState>(p);
++    return true;
+ }
+ 
+ bool
+@@ -104,8 +107,10 @@ Profile::enable(const string& pname, string& e)
+ 	return true;
+ 
+     // Don't allow a locked entry to be enabled.
+-    if (i->second->locked())
+-	xorp_throw(PVariableLocked, pname.c_str());
++    if (i->second->locked()) {
++	e = "Profile is locked: " + pname;
++	return false;
++    }
+     
+     i->second->set_enabled(true);
+     _profile_cnt++;
+@@ -150,7 +155,8 @@ Profile::lock_log(const string& pname, string& e)
+     }
+ 
+     // Disable logging.
+-    disable(pname);
++    if (!disable(pname, e))
++	return false;
+ 
+     // Lock the entry
+     i->second->set_locked(true);
+@@ -166,13 +172,13 @@ Profile::read_log(const string& pname, ProfileLogEntry& entry, string& e)
+ 
+     // Catch any mispelt pnames.
+     if (i == _profiles.end()) {
+-	e = "Unknown profile: " + name;
++	e = "Unknown profile: " + pname;
+ 	return false;
+     }
+ 
+     // Verify that the log entry is locked
+     if (!i->second->locked()) {
+-	e = "Profile is not locked: " + name;
++	e = "Profile is not locked: " + pname;
+ 	return false;
+     }
+ 
+@@ -194,13 +200,13 @@ Profile::release_log(const string& pname, string& e)
+ 
+     // Catch any mispelt pnames.
+     if (i == _profiles.end()) {
+-	e = "Unknown profile: " + name;
++	e = "Unknown profile: " + pname;
+ 	return false;
+     }
+ 
+     // Verify that the log entry is locked
+     if (!i->second->locked()) {
+-	e = "Profile is not locked: " + name;
++	e = "Profile is not locked: " + pname;
+ 	return false;
+     }
+ 
+@@ -216,13 +222,13 @@ Profile::clear(const string& pname, string& e)
+ 
+     // Catch any mispelt pnames.
+     if (i == _profiles.end()) {
+-	e = "Unknown profile: " + name;
++	e = "Unknown profile: " + pname;
+ 	return false;
+     }
+ 
+     // Don't allow a locked entry to be cleared.
+     if (i->second->locked()) {
+-	e = "Profile is locked: " + name;
++	e = "Profile is locked: " + pname;
+ 	return false;
+     }
+ 
+diff --git a/xorp/libxorp/profile.hh b/xorp/libxorp/profile.hh
+index 8e26377..ddae911 100644
+--- a/xorp/libxorp/profile.hh
++++ b/xorp/libxorp/profile.hh
+@@ -193,7 +193,8 @@ class ProfileUtils {
+ 		 Profile *profile)
+     {
+ 	ProfileLogEntry ple;
+-	if (profile->read_log(pname, ple)) {
++	string e;
++	if (profile->read_log(pname, ple, e)) {
+ 	    TimeVal t = ple.time();
+ 	    XrlProfileClientV0p1Client pc(xrl_router);
+ 	    pc.send_log(instance_name.c_str(),
+@@ -202,7 +203,7 @@ class ProfileUtils {
+ 				 pname, xrl_router, instance_name, profile));
+ 	} else {
+ 	    // Unlock the log entry.
+-	    profile->release_log(pname);
++	    profile->release_log(pname, e);
+ 	    ProfileUtils::transmit_finished(pname, xrl_router, instance_name);
+ 	}
+     }
+@@ -217,7 +218,8 @@ class ProfileUtils {
+ 	if (XrlError::OKAY() != error) {
+ 	    XLOG_WARNING("%s", error.error_msg());
+ 	    // Unlock the log entry.
+-	    profile->release_log(pname);
++	    string e;
++	    profile->release_log(pname, e);
+ 	    return;
+ 	}
+ 	ProfileUtils::transmit_log(pname, xrl_router, instance_name, profile);
+-- 
+2.7.5
+

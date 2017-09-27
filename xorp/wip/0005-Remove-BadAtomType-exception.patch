@@ -1,0 +1,149 @@
+From a7e6b1a1c637724251cf32334e44624292fbb6e0 Mon Sep 17 00:00:00 2001
+From: Ben Greear <greearb@candelatech.com>
+Date: Fri, 8 Sep 2017 10:41:16 -0700
+Subject: [PATCH 05/33] Remove BadAtomType exception.
+
+---
+ xorp/fea/fte.hh               |  4 ++--
+ xorp/libxipc/xrl_atom_list.cc | 27 +++++++++++----------------
+ xorp/libxipc/xrl_atom_list.hh | 12 +++---------
+ 3 files changed, 16 insertions(+), 27 deletions(-)
+
+diff --git a/xorp/fea/fte.hh b/xorp/fea/fte.hh
+index a8197b7..bdc3af2 100644
+--- a/xorp/fea/fte.hh
++++ b/xorp/fea/fte.hh
+@@ -212,7 +212,7 @@ public:
+      *
+      * @return the corresponding Fte4 entry.
+      */
+-    Fte4 get_fte4() const throw (InvalidCast) {
++    Fte4 get_fte4() const {
+ 	Fte4 fte4(net().get_ipv4net(),
+ 		  nexthop().get_ipv4(),
+ 		  ifname(),
+@@ -234,7 +234,7 @@ public:
+      *
+      * @return the corresponding Fte6 entry.
+      */
+-    Fte6 get_fte6() const throw (InvalidCast) {
++    Fte6 get_fte6() const {
+ 	Fte6 fte6(net().get_ipv6net(),
+ 		  nexthop().get_ipv6(),
+ 		  ifname(),
+diff --git a/xorp/libxipc/xrl_atom_list.cc b/xorp/libxipc/xrl_atom_list.cc
+index 9c6ad75..6dc655b 100644
+--- a/xorp/libxipc/xrl_atom_list.cc
++++ b/xorp/libxipc/xrl_atom_list.cc
+@@ -31,34 +31,32 @@
+ XrlAtomList::XrlAtomList() : _size(0) {}
+ 
+ void
+-XrlAtomList::prepend(const XrlAtom& xa) throw (BadAtomType)
++XrlAtomList::prepend(const XrlAtom& xa)
+ {
+     if (_list.empty() == false && _list.front().type() != xa.type()) {
+ 	// Atom being prepended is of different type to head
+-	xorp_throw(BadAtomType,
+-		   c_format("Head type = %d, added type %d\n",
+-			    _list.front().type(), xa.type()));
++	XLOG_FATAL("Head type = %d, added type %d\n",
++		   _list.front().type(), xa.type());
+     }
+     _list.push_front(xa);
+     _size++;
+ }
+ 
+ void
+-XrlAtomList::append(const XrlAtom& xa) throw (BadAtomType)
++XrlAtomList::append(const XrlAtom& xa)
+ {
+-    check_type(xa);
++    XLOG_ASSERT(check_type(xa));
+     do_append(xa);
+ }
+ 
+-void
+-XrlAtomList::check_type(const XrlAtom& xa) throw (BadAtomType)
++int
++XrlAtomList::check_type(const XrlAtom& xa)
+ {
+     if (_list.empty() == false && _list.front().type() != xa.type()) {
+ 	// Atom being appended is of different type to head
+-	xorp_throw(BadAtomType,
+-		   c_format("Head type = %d, added type %d\n",
+-			    _list.front().type(), xa.type()));
++	return false;
+     }
++    return true;
+ }
+ 
+ void
+@@ -196,12 +194,9 @@ XrlAtomList::modify(size_t idx, const uint8_t* buf, size_t len)
+ 	if (!rc)
+ 	    remove(idx);
+ 	else {
+-	    try {
+-		check_type(atom);
+-	    } catch (const BadAtomType& ex) {
++	    if (!check_type(atom)) {
+ 		remove(idx);
+-
+-		throw ex;
++		rc = 0;
+ 	    }
+ 	}
+     }
+diff --git a/xorp/libxipc/xrl_atom_list.hh b/xorp/libxipc/xrl_atom_list.hh
+index 86904a7..bef150b 100644
+--- a/xorp/libxipc/xrl_atom_list.hh
++++ b/xorp/libxipc/xrl_atom_list.hh
+@@ -19,7 +19,6 @@
+ // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/libxipc/xrl_atom_list.hh,v 1.16 2008/10/02 21:57:24 bms Exp $
+ 
+ #ifndef __LIBXIPC_XRL_ATOM_LIST_HH__
+ #define __LIBXIPC_XRL_ATOM_LIST_HH__
+@@ -39,11 +38,6 @@ class XrlAtom;
+ */
+ class XrlAtomList {
+ public:
+-    struct BadAtomType : public XorpReasonedException {
+-	BadAtomType(const char* file, size_t line, const string& init_why)
+-	    : XorpReasonedException("BadAtomType", file, line, init_why)
+-	{}
+-    };
+     struct InvalidIndex : public XorpReasonedException {
+ 	InvalidIndex(const char* file, size_t line, const string& init_why)
+ 	    : XorpReasonedException("InvalidIndex", file, line, init_why)
+@@ -58,14 +52,14 @@ public:
+      *
+      * @param xa the XrlAtom to be inserted.
+      */
+-    void prepend(const XrlAtom& xa) throw (BadAtomType);
++    void prepend(const XrlAtom& xa);
+ 
+     /**
+      * Insert an XrlAtom at the tail of the list.
+      *
+      * @param xa the XrlAtom to be inserted.
+      */
+-    void append(const XrlAtom& xa) throw (BadAtomType);
++    void append(const XrlAtom& xa);
+ 
+     /**
+      * Retrieve an XrlAtom from list.
+@@ -109,7 +103,7 @@ public:
+     void    set_size(size_t size);
+ 
+ private:
+-    void    check_type(const XrlAtom& xa) throw (BadAtomType);
++    bool WARN_UNUSED check_type(const XrlAtom& xa);
+     void    do_append(const XrlAtom& xa);
+ 
+     list<XrlAtom> _list;
+-- 
+2.7.5
+

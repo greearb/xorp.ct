@@ -1,0 +1,1722 @@
+From e633f2449736394ba65fad08e2a664d27fb711b3 Mon Sep 17 00:00:00 2001
+From: Ben Greear <greearb@candelatech.com>
+Date: Mon, 11 Sep 2017 11:00:19 -0700
+Subject: [PATCH 20/33] Remove a bunch of CorruptMessage exceptions.
+
+Signed-off-by: Ben Greear <greearb@candelatech.com>
+---
+ xorp/bgp/aspath.cc                 |  60 ++++++++++--------
+ xorp/bgp/aspath.hh                 |  51 ++++++----------
+ xorp/bgp/exceptions.hh             |   2 -
+ xorp/bgp/harness/bgppp.cc          |  35 ++++++-----
+ xorp/bgp/harness/peer.cc           |  65 ++++++++++----------
+ xorp/bgp/iptuple.hh                |  22 +------
+ xorp/bgp/notification_packet.cc    |  10 +--
+ xorp/bgp/open_packet.cc            |  18 ++----
+ xorp/bgp/packet.hh                 |  33 +++++-----
+ xorp/bgp/parameter.cc              |  48 +++++++--------
+ xorp/bgp/parameter.hh              |   6 +-
+ xorp/bgp/path_attribute.cc         | 122 +++++++++++++++++--------------------
+ xorp/bgp/path_attribute.hh         |  47 +++++++-------
+ xorp/bgp/update_attrib.hh          |   7 +--
+ xorp/libproto/config_node_id.hh    |   7 ++-
+ xorp/libxorp/asnum.hh              |   3 +-
+ xorp/libxorp/exceptions.hh         |  15 ++++-
+ xorp/libxorp/ipv4.hh               |   2 +
+ xorp/libxorp/xorp.h                |   7 +++
+ xorp/mld6igmp/xrl_mld6igmp_node.cc |   1 +
+ xorp/pim/pim_node_cli.cc           |  10 +--
+ xorp/pim/pim_scope_zone_table.hh   |   2 -
+ xorp/policy/xrl_target.cc          |   6 +-
+ xorp/policy/xrl_target.hh          |   2 -
+ xorp/rib/tools/show_distances.cc   |  30 ++++-----
+ 25 files changed, 295 insertions(+), 316 deletions(-)
+
+diff --git a/xorp/bgp/aspath.cc b/xorp/bgp/aspath.cc
+index 06514b8..5eb79f5 100644
+--- a/xorp/bgp/aspath.cc
++++ b/xorp/bgp/aspath.cc
+@@ -53,8 +53,8 @@ extern void dump_bytes(const uint8_t *d, uint8_t l);
+  * Convert the external representation into the internal one. 
+  * _type is d[0], _entries is d[1], entries follow.
+  */
+-void
+-ASSegment::decode(const uint8_t *d) throw(CorruptMessage)
++bool
++ASSegment::decode(const uint8_t *d)
+ {
+     size_t n = d[1];
+     clear();
+@@ -67,14 +67,15 @@ ASSegment::decode(const uint8_t *d) throw(CorruptMessage)
+     case AS_CONFED_SEQUENCE:
+ 	break;
+     default:
+-	xorp_throw(CorruptMessage,
+-		   c_format("Bad AS Segment type: %u\n", _type),
+-		   UPDATEMSGERR, MALASPATH);
++	XLOG_WARNING("Bad AS Segment type: %u\n", _type);
++	_invalid = true;
++	return false;
+     }
+ 
+     d += 2;	// skip header, d points to the raw data now.
+     for (size_t i = 0; i < n; d += 2, i++)
+ 	add_as(AsNum(d));
++    return true;
+ }
+ 
+ /**
+@@ -317,8 +318,8 @@ ASSegment::two_byte_compatible() const
+  *
+  * _type is d[0], _entries is d[1], entries follow.
+  */
+-void
+-AS4Segment::decode(const uint8_t *d) throw(CorruptMessage)
++bool
++AS4Segment::decode(const uint8_t *d)
+ {
+     size_t n = d[1];
+     clear();
+@@ -332,9 +333,9 @@ AS4Segment::decode(const uint8_t *d) throw(CorruptMessage)
+     case AS_CONFED_SEQUENCE:
+ 	break;
+     default:
+-	xorp_throw(CorruptMessage,
+-		   c_format("Bad AS Segment type: %u\n", _type),
+-		   UPDATEMSGERR, MALASPATH);
++	XLOG_WARNING("Bad AS Segment type: %u\n", _type);
++	_invalid = true;
++	return false;
+     }
+ 
+     d += 2;	// skip header, d points to the raw data now.
+@@ -346,6 +347,7 @@ AS4Segment::decode(const uint8_t *d) throw(CorruptMessage)
+ 	as_num = htonl(as_num);
+ 	add_as(AsNum(as_num));
+     }
++    return true;
+ }
+ 
+ /**
+@@ -449,10 +451,8 @@ ASPath::ASPath(const char *as_path)
+ 		add_segment(seg);
+ 		seg.clear();
+ 	    } else {
+-		_invalid = true;
+-		XORP_ERROR("Illegal character: <%c> %s",
++		INVALID("Illegal character: <%c> %s",
+ 			   c, path.c_str());
+-		return;
+ 	    }
+ 	} else if (c == '{') {
+ 	    if (seg.type() == AS_SEQUENCE) {
+@@ -545,24 +545,28 @@ ASPath::ASPath(const char *as_path)
+ /**
+  * populate an ASPath from the received data representation
+  */
+-void
+-ASPath::decode(const uint8_t *d, size_t l) throw(CorruptMessage)
++bool
++ASPath::decode(const uint8_t *d, size_t l)
+ {
+     _num_segments = 0;
+     _path_len = 0;
+     while (l > 0) {		// grab segments
+ 	size_t len = 2 + d[1]*2;	// XXX length in bytes for 16bit AS's
+-	if (len > l)
+-	    xorp_throw(CorruptMessage,
+-		       c_format("Bad ASpath (len) %u > (l) %u\n",
+-				XORP_UINT_CAST(len), XORP_UINT_CAST(l)),
+-		       UPDATEMSGERR, MALASPATH);
++	if (len > l) {
++	    XLOG_WARNING("Bad ASpath (len) %u > (l) %u\n",
++			 XORP_UINT_CAST(len), XORP_UINT_CAST(l));
++	    return false;
++	}
+ 
+ 	ASSegment s(d);
++	if (s.invalid()) {
++	    return false;
++	}
+ 	add_segment(s);
+ 	d += len;
+ 	l -= len;
+     }
++    return true;
+ }
+ 
+ /**
+@@ -572,7 +576,7 @@ ASPath::ASPath(const ASPath &asp1, const ASPath &asp2)
+ {
+     _num_segments = 0;
+     _path_len = 0;
+-    _invalid = asp1._invalid | asp2.invalid;
++    _invalid = asp1._invalid | asp2._invalid;
+ 
+     size_t curseg;
+     size_t matchelem = 0;
+@@ -877,7 +881,6 @@ ASPath::merge_as4_path(AS4Path& as4_path)
+ 
+ #if 0
+ AS4Path::AS4Path(const uint8_t* d, size_t len, const ASPath& as_path)
+-     throw(CorruptMessage)
+ {
+     decode(d, len);
+     cross_validate(as_path);
+@@ -886,29 +889,34 @@ AS4Path::AS4Path(const uint8_t* d, size_t len, const ASPath& as_path)
+ 
+ 
+ AS4Path::AS4Path(const uint8_t* d, size_t len)
+-     throw(CorruptMessage)
+ {
+-    decode(d, len);
++    set_valid(decode(d, len));
+ }
+ 
+ /**
+  * populate a ASPath from the received data representation from a
+  * AS4_PATH attribute.
+  */
+-void
+-AS4Path::decode(const uint8_t *d, size_t l) throw(CorruptMessage)
++bool
++AS4Path::decode(const uint8_t *d, size_t l)
+ {
+     _num_segments = 0;
+     _path_len = 0;
++    set_invalid(false);
+     while (l > 0) {		// grab segments
+ 	size_t len = 2 + d[1]*4;	// XXX length in bytes for 32bit AS's
+ 	XLOG_ASSERT(len <= l);
+ 
+ 	AS4Segment s(d);
++	if (s.invalid()) {
++	    set_invalid(true);
++	    return false;
++	}
+ 	add_segment(s);
+ 	d += len;
+ 	l -= len;
+     }
++    return true;
+ }
+ 
+ /**
+diff --git a/xorp/bgp/aspath.hh b/xorp/bgp/aspath.hh
+index 0366956..79b739b 100644
+--- a/xorp/bgp/aspath.hh
++++ b/xorp/bgp/aspath.hh
+@@ -23,10 +23,6 @@
+ 
+ #include <sys/types.h>
+ #include <inttypes.h>
+-
+-
+-
+-
+ #include "libxorp/xorp.h"
+ #include "libxorp/debug.h"
+ #include "libxorp/xlog.h"
+@@ -117,7 +113,7 @@ enum ASPathSegType {
+ /**
+  * Parent class for ASPath elements, which can be either ASSet or ASSequence.
+  */
+-class ASSegment {
++class ASSegment : public Invalid {
+ public:
+     typedef list<AsNum> ASLIST;
+     typedef ASLIST::iterator iterator;
+@@ -127,7 +123,7 @@ public:
+     /**
+      * Constructor of an empty ASSegment
+      */
+-    ASSegment(ASPathSegType t = AS_NONE) : _type(t), _invalid(0) {
++    ASSegment(ASPathSegType t = AS_NONE) : _type(t) {
+     }
+ 
+     /**
+@@ -137,29 +133,29 @@ public:
+      *
+      * _type is d[0], l is d[1], entries follow.
+      */
+-    ASSegment(const uint8_t* d) throw(CorruptMessage)	{
+-	_invalid = 0;
+-	decode(d);
++    ASSegment(const uint8_t* d) {
++	set_valid(decode(d));
+     }
+ 
+     /**
+      * Copy constructor
+      */
+     ASSegment(const ASSegment& a) :
+-	    _type(a._type), _aslist(a._aslist), _invalid(a._invalid)		{}
++	    Invalid(a), _type(a._type), _aslist(a._aslist) {}
+ 
+     /**
+      * The destructor has nothing to do, the underlying container will
+      * take care of the thing.
+      */
+-    ~ASSegment()					{}
++    virtual ~ASSegment() {}
+ 
+     /**
+      * reset whatever is currently contained in the object.
+      */
+-    void clear()					{
++    void clear() {
+ 	_type = AS_NONE;
+ 	_aslist.clear();
++	set_invalid(false);
+     }
+ 
+     /**
+@@ -229,7 +225,7 @@ public:
+      * Convert the external representation into the internal one.
+      * _type is d[0], _entries is d[1], entries follow.
+      */
+-    void decode(const uint8_t *d) throw(CorruptMessage);
++    bool WARN_UNUSED decode(const uint8_t *d);
+ 
+     /**
+      * Convert from internal to external representation.
+@@ -278,11 +274,8 @@ public:
+      */
+     bool two_byte_compatible() const;
+ 
+-    bool invalid() const { return _invalid; }
+-
+ protected:
+     ASPathSegType	_type;
+-    uint8_t             _invalid;
+     ASLIST		_aslist;
+ };
+ 
+@@ -291,12 +284,12 @@ protected:
+    numbers from a AS4_PATH attribute */
+ class AS4Segment : public ASSegment {
+ public:
+-    AS4Segment(const uint8_t* d) throw(CorruptMessage) { decode(d); }
++    AS4Segment(const uint8_t* d) { set_valid(decode(d)); }
+     /**
+      * Convert the external representation into the internal one.
+      * _type is d[0], _entries is d[1], entries follow.
+      */
+-    void decode(const uint8_t *d) throw(CorruptMessage);
++    bool WARN_UNUSED decode(const uint8_t *d);
+ 
+     /**
+      * Convert from internal to external representation.
+@@ -321,7 +314,7 @@ private:
+  * An ASPath is a list of ASSegments, each of which can be an AS_SET,
+  * AS_CONFED_SET, AS_SEQUENCE, or an AS_CONFED_SEQUENCE.
+  */
+-class ASPath {
++class ASPath : public Invalid {
+ public:
+     typedef list <ASSegment>::const_iterator const_iterator;
+     typedef list <ASSegment>::iterator iterator;
+@@ -337,8 +330,8 @@ public:
+     /**
+      * construct from received data
+      */
+-    ASPath(const uint8_t* d, size_t len) throw(CorruptMessage) {
+-	decode(d, len); 
++    ASPath(const uint8_t* d, size_t len) {
++	set_valid(decode(d, len)); 
+     }
+ 
+     /**
+@@ -349,10 +342,10 @@ public:
+     /**
+      * Copy constructor
+      */
+-    ASPath(const ASPath &a) : _segments(a._segments), 
++    ASPath(const ASPath &a) : Invalid(a), _segments(a._segments), 
+ 	_num_segments(a._num_segments), _path_len(a._path_len) {}
+ 
+-    ~ASPath()						{}
++    virtual ~ASPath()						{}
+ 
+     void add_segment(const ASSegment& s);
+     void prepend_segment(const ASSegment& s);
+@@ -452,8 +445,6 @@ public:
+      */
+     void merge_as4_path(AS4Path& as4_path);
+ 
+-    bool invalid() const { return _invalid; }
+-
+ protected:
+     /**
+      * internal representation
+@@ -461,12 +452,11 @@ protected:
+     list <ASSegment>	_segments;
+     size_t		_num_segments;
+     size_t		_path_len;
+-    uint8_t             _invalid;
+ private:
+     /**
+      * populate an ASPath from received data. Only used in the constructor.
+      */
+-    void decode(const uint8_t *d, size_t len) throw(CorruptMessage);
++    bool WARN_UNUSED decode(const uint8_t *d, size_t len);
+ };
+ 
+ /* subclass to handle 4-byte AS encoding and decoding */
+@@ -475,7 +465,7 @@ public:
+     /**
+      * Construct from received data from 4-byte peer.
+      */
+-    AS4Path(const uint8_t* d, size_t len) throw(CorruptMessage);
++    AS4Path(const uint8_t* d, size_t len);
+ 
+     /**
+      * Initialize from a string in the format
+@@ -491,8 +481,7 @@ public:
+      * take the regular ASPath in addition to the AS4_PATH data,
+      * because it needs to cross-validate the two.
+      */
+-    AS4Path(const uint8_t* d, size_t len, const ASPath& as_path)
+-	throw(CorruptMessage);
++    AS4Path(const uint8_t* d, size_t len, const ASPath& as_path);
+ 
+ #endif
+ 
+@@ -515,7 +504,7 @@ private:
+     /**
+      * populate an ASPath from received data. Only used in the constructor.
+      */
+-    void decode(const uint8_t *d, size_t len) throw(CorruptMessage);
++    bool WARN_UNUSED decode(const uint8_t *d, size_t len);
+     void pad_segment(const ASSegment& old_seg, ASSegment& new_seg);
+     void do_patchup(const ASPath& as_path);
+ };
+diff --git a/xorp/bgp/exceptions.hh b/xorp/bgp/exceptions.hh
+index 3ea0d77..9d72075 100644
+--- a/xorp/bgp/exceptions.hh
++++ b/xorp/bgp/exceptions.hh
+@@ -17,8 +17,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/bgp/exceptions.hh,v 1.16 2008/11/08 06:14:36 mjh Exp $
+-
+ #ifndef __BGP_EXCEPTIONS_HH__
+ #define __BGP_EXCEPTIONS_HH__
+ 
+diff --git a/xorp/bgp/harness/bgppp.cc b/xorp/bgp/harness/bgppp.cc
+index 94c0712..726e29f 100644
+--- a/xorp/bgp/harness/bgppp.cc
++++ b/xorp/bgp/harness/bgppp.cc
+@@ -39,43 +39,50 @@ bgppp(const uint8_t *buf, const size_t len, const BGPPeerData *peerdata)
+     string result;
+     uint8_t type = extract_8(buf + BGPPacket::TYPE_OFFSET);
+ 
+-    try {
+-	switch(type) {
++    switch(type) {
+ 	case MESSAGETYPEOPEN: {
+ 	    OpenPacket pac(buf, len);
++	    if (pac.invalid())
++		goto err;
+ 	    result = pac.str().c_str();
+-	}
+ 	    break;
++	}
+ 	case MESSAGETYPEKEEPALIVE: {
+ 	    KeepAlivePacket pac(buf, len);
++	    if (pac.invalid())
++		goto err;
+ 	    result = pac.str().c_str();
+-	}
+ 	    break;
++	}
+ 	case MESSAGETYPEUPDATE: {
+ 	    UpdatePacket pac(buf, len, peerdata, 0, false);
++	    if (pac.invalid())
++		goto err;
+ 	    result = pac.str().c_str();
+-	}
+ 	    break;
++	}
+ 	case MESSAGETYPENOTIFICATION: {
+ 	    NotificationPacket pac(buf, len);
++	    if (pac.invalid())
++		goto err;
+ 	    result = pac.str().c_str();
+-	}
+ 	    break;
++	}
+ 	default:
+ 	    /*
+ 	    ** Send a notification to the peer. This is a bad message type.
+ 	    */
+ 	    result = c_format("Unknown packet type %d\n", type);
+ 	    XLOG_WARNING("%s", result.c_str());
+-	}
+-    } catch(CorruptMessage& c) {
+-	/*
+-	** This peer had sent us a bad message.
+-	*/
+-	
+-	result = c_format("BAD Message: %s", c.why().c_str());
+-	XLOG_WARNING("%s", result.c_str());
+     }
++    return result;
+ 
++  err:
++    /*
++    ** This peer had sent us a bad message.
++    */
++    
++    result = c_format("BAD Message: %s", c.why().c_str());
++    XLOG_WARNING("%s", result.c_str());
+     return result;
+ }
+diff --git a/xorp/bgp/harness/peer.cc b/xorp/bgp/harness/peer.cc
+index d5a5ead..abb236c 100644
+--- a/xorp/bgp/harness/peer.cc
++++ b/xorp/bgp/harness/peer.cc
+@@ -527,14 +527,8 @@ Peer::send_packet(const string& line, const vector<string>& words)
+     if(update == words[3]) {
+ 	TimeVal tv;
+ 	_eventloop->current_time(tv);
+-	try {
+-	    _trie_sent.process_update_packet(tv, buf, len, _peerdata);
+-	} catch(CorruptMessage& c) {
+-	    /*
+-	    ** A corrupt message is being sent so catch the decode exception.
+-	    */
+-	    XLOG_WARNING("BAD Message: %s", c.why().c_str());
+-	}
++
++	_trie_sent.process_update_packet(tv, buf, len, _peerdata);
+     }
+ 
+     _busy++;
+@@ -692,11 +686,11 @@ mrtd_table_file_read(FILE *fp, size_t& len)
+ 	while (pa_len > 0) {
+ 	    size_t used = 0;
+ 	    PathAttribute *pa = PathAttribute::create(d, pa_len, used);
+-	    if (used == 0)
+-		xorp_throw(CorruptMessage,
+-			   c_format("failed to read path attribute"),
+-			   UPDATEMSGERR, ATTRLEN);
+-	
++	    if (used == 0) {
++		XLOG_WARNING("failed to read path attribute");
++		delete pa;
++		return NULL;
++	    }
+ 	    update.add_pathatt(pa);
+ 	    d += used;
+ 	    pa_len -= used;
+@@ -1566,11 +1560,12 @@ Peer::datain(const bool& status, const TimeVal& tv,
+     if (!_traffic_recv.is_empty())
+ 	_traffic_recv->dispatch(buf, length, tv);
+ 
+-    try {
+-	switch(type) {
++    switch(type) {
+ 	case MESSAGETYPEOPEN: {
+ 	    debug_msg("OPEN Packet RECEIVED\n");
+ 	    OpenPacket pac(buf, length);
++	    if (pac.invalid())
++		goto err;
+ 	    debug_msg("%s", pac.str().c_str());
+ 	    
+ 	    if(_session && !_established) {
+@@ -1582,12 +1577,14 @@ Peer::datain(const bool& status, const TimeVal& tv,
+ 		}
+ 	    }
+ 	    check_expect(&pac);
+-	}
+ 	    break;
++	}
+ 	case MESSAGETYPEKEEPALIVE: {
+ 	    debug_msg("KEEPALIVE Packet RECEIVED %u\n",
+ 		      XORP_UINT_CAST(length));
+ 	    KeepAlivePacket pac(buf, length);
++	    if (pac.invalid())
++		goto err;
+ 	    debug_msg("%s", pac.str().c_str());
+ 
+ 	    /* XXX
+@@ -1607,40 +1604,44 @@ Peer::datain(const bool& status, const TimeVal& tv,
+ 	    }
+ 	    _established = true;
+ 	    check_expect(&pac);
+-	}
+ 	    break;
++	}
+ 	case MESSAGETYPEUPDATE: {
+ 	    debug_msg("UPDATE Packet RECEIVED\n");
+ 	    UpdatePacket pac(buf, length, _peerdata, 0, false);
++	    if (pac.invalid())
++		goto err;
+ 	    debug_msg("%s", pac.str().c_str());
+ 	    /*
+ 	    ** Save the update message in the receive trie.
+ 	    */
+ 	    _trie_recv.process_update_packet(tv, buf, length, _peerdata);
+ 	    check_expect(&pac);
+-	}
+ 	    break;
++	}
+ 	case MESSAGETYPENOTIFICATION: {
+ 	    debug_msg("NOTIFICATION Packet RECEIVED\n");
+ 	    NotificationPacket pac(buf, length);
++	    if (pac.invalid())
++		goto err;
+ 	    debug_msg("%s", pac.str().c_str());
+ 	    check_expect(&pac);
+-	}
+ 	    break;
++	}
+ 	default:
+ 	    /*
+ 	    ** Send a notification to the peer. This is a bad message type.
+ 	    */
+ 	    XLOG_ERROR("Unknown packet type %d", type);
+-	}
+-    } catch(CorruptMessage c) {
+-	/*
+-	** This peer had sent us a bad message.
+-	*/
+-	XLOG_WARNING("From peer %s: %s", _peername.c_str(),
+-		     c.why().c_str());
+     }
++    delete [] buf;
++    return;
+ 
++  err:
++    /*
++    ** This peer had sent us a bad message.
++    */
++    XLOG_WARNING("Bad message from peer %s: %s", _peername.c_str());
+     delete [] buf;
+ }
+ 
+@@ -1837,7 +1838,6 @@ Peer::packet(const string& line, const vector<string>& words, int index) const
+ {
+     BGPPacket *pac = 0;
+ 
+-  try {
+     if("notify" == words[index]) {
+ 	switch(words.size() - (index + 1)) {
+ 	case 1:
+@@ -2056,14 +2056,17 @@ Peer::packet(const string& line, const vector<string>& words, int index) const
+ 		   " not <%s>\n[%s]",
+ 		   words[index].c_str(), line.c_str());
+ 	return NULL;
+-  } catch(CorruptMessage c) {
++    }
++
++    if (pac->invalid()) {
+ 	XLOG_ERROR("Unable to construct packet "
+ 		   "%s\n[%s])", c.why().c_str(),
+ 		   line.c_str());
++	delete pac;
+ 	return NULL;
+-  }
++    }
+ 	
+-  debug_msg("%s\n", pac->str().c_str());
++    debug_msg("%s\n", pac->str().c_str());
+   
+-  return pac;
++    return pac;
+ }
+diff --git a/xorp/bgp/iptuple.hh b/xorp/bgp/iptuple.hh
+index d67c4c9..97f2256 100644
+--- a/xorp/bgp/iptuple.hh
++++ b/xorp/bgp/iptuple.hh
+@@ -17,8 +17,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/bgp/iptuple.hh,v 1.16 2008/10/02 21:56:16 bms Exp $
+-
+ #ifndef __BGP_IPTUPLE_HH__
+ #define __BGP_IPTUPLE_HH__
+ 
+@@ -27,20 +25,6 @@
+ #include "libxorp/xlog.h"
+ #include "libxorp/ipvx.hh"
+ 
+-class UnresolvableHost : public XorpReasonedException {
+-public:
+-    UnresolvableHost(const char* file, size_t line, const string init_why = "")
+- 	: XorpReasonedException("UnresolvableHost", file, line, init_why) {}
+-};
+-
+-class AddressFamilyMismatch : public XorpReasonedException {
+-public:
+-    AddressFamilyMismatch(const char* file, size_t line,
+-			  const string init_why = "")
+- 	: XorpReasonedException("AddressFamilyMismatch",
+-				file, line, init_why) {}
+-};
+-
+ /**
+  * Store the Local Interface, IP, Local Server Port, Peer IP and
+  * Peer Server Port tuple.
+@@ -60,8 +44,7 @@ class Iptuple {
+ public:
+     Iptuple();
+     Iptuple(const char* local_dev, const char *local_addr, uint16_t local_port,
+-	    const char *peer_addr, uint16_t peer_port)
+-	throw(UnresolvableHost,AddressFamilyMismatch);
++	    const char *peer_addr, uint16_t peer_port);
+ 
+     Iptuple(const Iptuple&);
+     Iptuple& operator=(const Iptuple&);
+@@ -89,8 +72,7 @@ private:
+     void
+     fill_address(const char *addr, uint16_t local_port,
+ 		 struct sockaddr_storage& ss, size_t& len,
+-		 string& addr_numeric)
+-	throw(UnresolvableHost);
++		 string& addr_numeric);
+ 
+     string _local_dev; // The interface (device) name.  NOT IP.
+     string _local_addr;	// String representation only for debugging.  IP Address.
+diff --git a/xorp/bgp/notification_packet.cc b/xorp/bgp/notification_packet.cc
+index b952b29..a1e0ea2 100644
+--- a/xorp/bgp/notification_packet.cc
++++ b/xorp/bgp/notification_packet.cc
+@@ -63,13 +63,13 @@ NotificationPacket::NotificationPacket(uint8_t		ec,
+ }
+ 
+ NotificationPacket::NotificationPacket(const uint8_t *d, uint16_t l)
+-    throw(CorruptMessage)
+ {
+     debug_msg("Data %p len %d\n", d, l);
+-    if (l < BGPPacket::MINNOTIFICATIONPACKET)
+-	xorp_throw(CorruptMessage,
+-		   c_format("Notification message too short %d", l),
+-		   MSGHEADERERR, BADMESSLEN, d + BGPPacket::MARKER_SIZE, 2);
++    if (l < BGPPacket::MINNOTIFICATIONPACKET) {
++	_invalid = true;
++	XLOG_WARNING("Notification message too short %d", l);
++	return;
++    }
+ 
+     _Length = l;
+     _Type = MESSAGETYPENOTIFICATION;
+diff --git a/xorp/bgp/open_packet.cc b/xorp/bgp/open_packet.cc
+index 2bc701b..ed65776 100644
+--- a/xorp/bgp/open_packet.cc
++++ b/xorp/bgp/open_packet.cc
+@@ -78,7 +78,6 @@ OpenPacket::encode(uint8_t *d, size_t& len, const BGPPeerData *peerdata) const
+ }
+ 
+ OpenPacket::OpenPacket(const uint8_t *d, uint16_t l)
+-	throw(CorruptMessage)
+     : _as(AsNum::AS_INVALID)
+ {
+     debug_msg("OpenPacket(const uint8_t *, uint16_t %u) constructor called\n",
+@@ -90,9 +89,9 @@ OpenPacket::OpenPacket(const uint8_t *d, uint16_t l)
+     size_t i, myOptParmLen, remaining;
+ 
+     if (l < BGPPacket::MINOPENPACKET) {
+-	debug_msg("Open message too short\n");
+-	xorp_throw(CorruptMessage, "Open message too short",
+-		   MSGHEADERERR, BADMESSLEN, d + BGPPacket::MARKER_SIZE, 2);
++	XLOG_WARNING("Open message too short");
++	_invalid = true;
++	return;
+     }
+     remaining = l;
+ 
+@@ -114,8 +113,7 @@ OpenPacket::OpenPacket(const uint8_t *d, uint16_t l)
+     // greater than the amount of data we actually received.
+     if (remaining < myOptParmLen) {
+ 	debug_msg("Open message too short\n");
+-	xorp_throw(CorruptMessage, "Open message too short",
+-		   OPENMSGERROR, UNSPECIFIED);
++	_invalid = true;
+     }
+ 
+     while (i > 0) {
+@@ -123,8 +121,7 @@ OpenPacket::OpenPacket(const uint8_t *d, uint16_t l)
+ 	debug_msg("Length of unread parameters : %u\n", XORP_UINT_CAST(i));
+ 	if (remaining < 2) {
+ 	    debug_msg("Open message too short\n");
+-	    xorp_throw(CorruptMessage, "Parameter is too short",
+-		       OPENMSGERROR, UNSPECIFIED);
++	    _invalid = true;
+ 	}
+ 
+ 	BGPParameter *p = BGPParameter::create(d, i, len);
+@@ -140,11 +137,8 @@ OpenPacket::OpenPacket(const uint8_t *d, uint16_t l)
+     // check to see if the length of the optional parameters defined in the
+     // packet is the same as the total length of the decoded parameters.
+     if (myOptParmLen != _OptParmLen) {
+-	xorp_throw(CorruptMessage,  "bad parameters length",
+-		   OPENMSGERROR, UNSPECIFIED);
++	_invalid = true;
+     }
+-
+-    return;
+ }
+ 
+ string
+diff --git a/xorp/bgp/packet.hh b/xorp/bgp/packet.hh
+index 0d2542d..b906b10 100644
+--- a/xorp/bgp/packet.hh
++++ b/xorp/bgp/packet.hh
+@@ -18,8 +18,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/bgp/packet.hh,v 1.50 2008/12/05 02:02:07 atanu Exp $
+-
+ #ifndef __BGP_PACKET_HH__
+ #define __BGP_PACKET_HH__
+ 
+@@ -140,11 +138,11 @@ public:
+     // The default marker.
+     static const uint8_t Marker[MARKER_SIZE];
+ 
+-    BGPPacket()					{}
++    BGPPacket()	{ _invalid = false; }
+     virtual ~BGPPacket()			{}
+     uint8_t type() const			{ return _Type; }
+     virtual string str() const = 0;
+-
++    virtual bool invalid() const { return _invalid; }
+     virtual bool encode(uint8_t *buf, size_t &len, const BGPPeerData *peerdata) const = 0;
+ protected:
+     /*
+@@ -162,6 +160,7 @@ protected:
+     // don't allow the use of the default copy constructor
+     BGPPacket(const BGPPacket& BGPPacket);
+     uint8_t _Type;
++    bool _invalid;
+ private:
+ };
+ 
+@@ -169,8 +168,7 @@ private:
+ 
+ class OpenPacket : public BGPPacket {
+ public:
+-    OpenPacket(const uint8_t *d, uint16_t l)
+-		throw(CorruptMessage);
++    OpenPacket(const uint8_t *d, uint16_t l);
+     OpenPacket(const AsNum& as, const IPv4& bgpid, const uint16_t holdtime);
+     ~OpenPacket()				{}
+     bool encode(uint8_t *buf, size_t& len, const BGPPeerData *peerdata) const;
+@@ -208,8 +206,7 @@ class UpdatePacket : public BGPPacket {
+ public:
+     UpdatePacket();
+     UpdatePacket(const uint8_t *d, uint16_t l, const BGPPeerData *peerdata,
+-		 BGPMain* mainprocess, bool do_checks)
+-	throw(CorruptMessage,UnusableMessage);
++		 BGPMain* mainprocess, bool do_checks);
+ 
+     ~UpdatePacket();
+ 
+@@ -269,7 +266,7 @@ UpdatePacket::mpunreach(Safi safi) const
+ 
+ class NotificationPacket : public BGPPacket {
+ public:
+-    NotificationPacket(const uint8_t *d, uint16_t l) throw(CorruptMessage);
++    NotificationPacket(const uint8_t *d, uint16_t l);
+     NotificationPacket(uint8_t ec, uint8_t esc = 0,
+ 		       const uint8_t *d = 0, size_t l=0);
+     NotificationPacket();
+@@ -310,15 +307,15 @@ public:
+     /**
+      * need nothing to parse incoming data
+      */
+-    KeepAlivePacket(const uint8_t *buf, uint16_t l)
+-		throw(CorruptMessage) {
+-	if (l != BGPPacket::MINKEEPALIVEPACKET)
+-	    xorp_throw(CorruptMessage,
+-		       c_format("KeepAlivePacket length %d instead of %u",
+-				l,
+-				XORP_UINT_CAST(BGPPacket::MINKEEPALIVEPACKET)),
+-		       MSGHEADERERR, BADMESSLEN, buf + BGPPacket::MARKER_SIZE,
+-		       2);
++    KeepAlivePacket(const uint8_t *buf, uint16_t l) {
++	UNUSED(buf);
++	if (l != BGPPacket::MINKEEPALIVEPACKET) {
++	    _invalid = true;
++	    XLOG_WARNING("KeepAlivePacket length %d instead of %u",
++			 l,
++			 XORP_UINT_CAST(BGPPacket::MINKEEPALIVEPACKET));
++	    return;
++	}
+ 
+ 	_Type = MESSAGETYPEKEEPALIVE;
+     }
+diff --git a/xorp/bgp/parameter.cc b/xorp/bgp/parameter.cc
+index 4b8a743..35e1d99 100644
+--- a/xorp/bgp/parameter.cc
++++ b/xorp/bgp/parameter.cc
+@@ -44,10 +44,12 @@ BGPParameter::BGPParameter(uint8_t l, const uint8_t* d)
+     memcpy(data, d, l);
+     _data = data;
+     _length = l; // length is the buffer length including parameter header
++    _invalid = false;
+ }
+ 
+ BGPParameter::BGPParameter(const BGPParameter& param)
+ {
++    _invalid = false;
+     _type = param._type;
+     if (_data != NULL) {
+ 	_length = param._length;
+@@ -158,10 +160,9 @@ BGPRefreshCapability::decode()
+ 
+     _cap_length = *(_data+3);
+     if (_cap_length > 0) {
+-	debug_msg("Throw exception\n");
+-	xorp_throw(CorruptMessage, 
+-		c_format("Refresh Capability length %d is greater than zero.", 
+-			 _cap_length), OPENMSGERROR, UNSPECIFIED);
++	_invalid = true;
++	XLOG_WARNING("Refresh Capability length %d is greater than zero.", 
++		     _cap_length);
+     }
+ }
+ 
+@@ -256,10 +257,10 @@ BGPMultiProtocolCapability::decode()
+ 	_address_family = AFI_IPV6;
+ 	break;
+     default:
+-	xorp_throw(CorruptMessage,
+-		   c_format("MultiProtocol Capability unrecognised afi %u",
+-			    afi),
+-		   OPENMSGERROR, UNSUPOPTPAR);
++	_invalid = true;
++	XLOG_WARNING("MultiProtocol Capability unrecognised afi %u",
++		     afi);
++	return;
+     }
+ 
+     debug_msg("address family %d\n", _address_family);
+@@ -272,10 +273,9 @@ BGPMultiProtocolCapability::decode()
+ 	_subsequent_address_family = SAFI_MULTICAST;
+ 	break;
+     default:
+-	xorp_throw(CorruptMessage,
+-		   c_format("MultiProtocol Capability unrecognised safi %u",
+-			    safi),
+-		   OPENMSGERROR, UNSUPOPTPAR);
++	_invalid = true;
++	XLOG_WARNING("MultiProtocol Capability unrecognised safi %u",
++		     safi);
+     }
+ }
+ 
+@@ -541,12 +541,12 @@ BGPUnknownCapability::encode() const
+ 
+ BGPParameter *
+ BGPParameter::create(const uint8_t* d, uint16_t max_len, size_t& len)
+-	throw(CorruptMessage)
+ {
+     XLOG_ASSERT(d != 0);	// this is a programming error
+-    if (max_len < 2)
+-	xorp_throw(CorruptMessage, "Short block to BGPParameter::create\n",
+-                       OPENMSGERROR, 0);
++    if (max_len < 2) {
++	XLOG_WARNING("Short block to BGPParameter::create\n");
++	return NULL;
++    }
+ 
+     ParamType param_type = static_cast<ParamType>(d[0]);
+     len = d[1] + 2;	// count the header too
+@@ -558,8 +558,7 @@ BGPParameter::create(const uint8_t* d, uint16_t max_len, size_t& len)
+ 	debug_msg("Throw exception\n");
+ 	debug_msg("Send bad packet\n");
+ 	// XXX there doesn't seem to be a good error code for this.
+-	xorp_throw(CorruptMessage, "Badly constructed Parameters\n",
+-		   OPENMSGERROR, 0);
++	return NULL;
+     }
+     debug_msg("param type %d len+header %u\n", param_type,
+ 	      XORP_UINT_CAST(len));
+@@ -567,9 +566,8 @@ BGPParameter::create(const uint8_t* d, uint16_t max_len, size_t& len)
+     BGPParameter *p = NULL;
+     switch (param_type) {
+     case PARAMTYPEAUTH:
+-	xorp_throw(CorruptMessage,
+-	       "Deprecated BGP Authentication Parameter received",
+-	       OPENMSGERROR, UNSUPOPTPAR);
++	XLOG_WARNING("Deprecated BGP Authentication Parameter received");
++	return NULL;
+ 
+     case PARAMTYPECAP: {
+ 	CapType cap_type = static_cast<CapType>(d[2]);
+@@ -598,10 +596,10 @@ BGPParameter::create(const uint8_t* d, uint16_t max_len, size_t& len)
+     }
+ 
+     default :
+-	xorp_throw(CorruptMessage,
+-	       c_format("Unrecognised optional parameter %d max_len %u len %u",
+-			param_type, max_len, XORP_UINT_CAST(len)),
+-	       OPENMSGERROR, UNSUPOPTPAR);
++	delete p;
++	XLOG_WARNING("Unrecognised optional parameter %d max_len %u len %u",
++		     param_type, max_len, XORP_UINT_CAST(len));
++	return NULL;
+     }
+     return p;
+ }
+diff --git a/xorp/bgp/parameter.hh b/xorp/bgp/parameter.hh
+index 4d6fe41..7479aec 100644
+--- a/xorp/bgp/parameter.hh
++++ b/xorp/bgp/parameter.hh
+@@ -17,7 +17,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/bgp/parameter.hh,v 1.27 2008/10/02 21:56:16 bms Exp $
+ 
+ #ifndef __BGP_PARAMETER_HH__
+ #define __BGP_PARAMETER_HH__
+@@ -128,10 +127,10 @@ public:
+      */
+ 
+     static BGPParameter *create(const uint8_t* d, uint16_t max_len,
+-                size_t& actual_length) throw(CorruptMessage);
++                size_t& actual_length);
+ 
+     BGPParameter()
+-	: _data(0), _length(0), _type(PARAMINVALID) {}
++	    : _data(0), _length(0), _type(PARAMINVALID), _invalid(false) {}
+     BGPParameter(uint8_t l, const uint8_t* d);
+     BGPParameter(const BGPParameter& param);
+     virtual ~BGPParameter()			{ delete[] _data; }
+@@ -175,6 +174,7 @@ protected:
+     uint8_t* _data;
+     uint8_t _length;
+     ParamType _type;
++    bool _invalid;
+ private:
+ };
+ 
+diff --git a/xorp/bgp/path_attribute.cc b/xorp/bgp/path_attribute.cc
+index 33c9ba3..34823e2 100644
+--- a/xorp/bgp/path_attribute.cc
++++ b/xorp/bgp/path_attribute.cc
+@@ -31,8 +31,6 @@
+ #include "libxorp/ipv4.hh"
+ #include "libxorp/ipv6.hh"
+ 
+-
+-
+ #ifdef HAVE_NETINET_IN_H
+ #include <netinet/in.h>
+ #endif
+@@ -88,19 +86,18 @@ OriginAttribute::clone() const
+ }
+ 
+ OriginAttribute::OriginAttribute(const uint8_t* d)
+-	throw(CorruptMessage)
+ 	: PathAttribute(d)
+ {
+     if (length(d) != 1) {
+-	xorp_throw(CorruptMessage,
+-		   c_format("OriginAttribute bad length %u",
+-			    XORP_UINT_CAST(length(d))),
+-		   UPDATEMSGERR, ATTRLEN);
++	XLOG_WARNING("OriginAttribute bad length %u",
++		     XORP_UINT_CAST(length(d)));
++	_invalid = true;
++	return;
+     }
+     if (!well_known() || !transitive()) {
+-	xorp_throw(CorruptMessage,
+-		   c_format("Bad Flags in Origin attribute %#x",flags()),
+-		   UPDATEMSGERR, ATTRFLAGS, d, total_tlv_length(d));
++	XLOG_WARNING("Bad Flags in Origin attribute %#x",flags());
++	_invalid = true;
++	return;
+     }
+ 
+     const uint8_t* data = payload(d);	// skip header.
+@@ -113,9 +110,8 @@ OriginAttribute::OriginAttribute(const uint8_t* d)
+ 	break;
+ 
+     default:
+-	xorp_throw(CorruptMessage,
+-		   c_format("Unknown Origin Type %d", data[0]),
+-		   UPDATEMSGERR, INVALORGATTR, d, total_tlv_length(d));
++	XLOG_WARNING("Unknown Origin Type %d", data[0]);
++	_invalid = true;
+     }
+ }
+ 
+@@ -170,13 +166,13 @@ ASPathAttribute::clone() const
+ }
+ 
+ ASPathAttribute::ASPathAttribute(const uint8_t* d, bool use_4byte_asnums)
+-	throw(CorruptMessage)
+ 	: PathAttribute(d)
+ {
+-    if (!well_known() || !transitive())
+-	xorp_throw(CorruptMessage,
+-		   c_format("Bad Flags in AS Path attribute %#x", flags()),
+-		   UPDATEMSGERR, ATTRFLAGS, d, total_tlv_length(d));
++    if (!well_known() || !transitive()) {
++	XLOG_WARNING("Bad Flags in AS Path attribute %#x", flags());
++	_invalid = true;
++	return;
++    }
+ 
+     if (use_4byte_asnums)
+ 	_as_path = new AS4Path(payload(d), length(d));
+@@ -243,13 +239,13 @@ AS4PathAttribute::AS4PathAttribute(const AS4Path& p)
+ }
+ 
+ AS4PathAttribute::AS4PathAttribute(const uint8_t* d)
+-	throw(CorruptMessage)
+ 	: PathAttribute(d)
+ {
+-    if (!optional() || !transitive())
+-	xorp_throw(CorruptMessage,
+-		   c_format("Bad Flags in AS4 Path attribute %#x", flags()),
+-		   UPDATEMSGERR, ATTRFLAGS, d, total_tlv_length(d));
++    if (!optional() || !transitive()) {
++	XLOG_WARNING("Bad Flags in AS4 Path attribute %#x", flags());
++	_invalid = true;
++	return;
++    }
+ 
+     _as_path = new AS4Path(payload(d), length(d));
+ }
+@@ -289,7 +285,6 @@ const
+ 
+ template <class A>
+ NextHopAttribute<A>::NextHopAttribute(const A& n)
+-    throw(CorruptMessage)
+ 	: PathAttribute(Transitive, NEXT_HOP), _next_hop(n)
+ {
+     verify();
+@@ -302,37 +297,32 @@ NextHopAttribute<A>::clone() const
+     return new NextHopAttribute(_next_hop);
+ }
+ 
+-/* Throw exception if there are problems...do nothing
+- * otherwise.
+- */
+ template <class A>
+ void
+ NextHopAttribute<A>::verify()
+-    throw(CorruptMessage)
+ {
++    _invalid = false;
+     if (!_next_hop.is_unicast()) {
+-	//XLOG_ASSERT(0);
+-	xorp_throw(CorruptMessage,
+-		   c_format("NextHop %s is not a unicast address",
+-			    _next_hop.str().c_str()),
+-		   UPDATEMSGERR, INVALNHATTR);
++	_invalid = true;
++	XLOG_WARNING("NextHop %s is not a unicast address",
++		     _next_hop.str().c_str());
+     }
+ }
+ 
+ template <class A>
+ NextHopAttribute<A>::NextHopAttribute(const uint8_t* d)
+-	throw(CorruptMessage)
+ 	: PathAttribute(d)
+ {
+-    if (!well_known() || !transitive())
+-	xorp_throw(CorruptMessage,
+-		   c_format("Bad Flags in NextHop attribute %#x", flags()),
+-		   UPDATEMSGERR, ATTRFLAGS, d, total_tlv_length(d));
++    if (!well_known() || !transitive()) {
++	XLOG_WARNING("Bad Flags in NextHop attribute %#x", flags());
++	_invalid = true;
++	return;
++    }
+     if (length(d) != A::addr_bytelen()) {
+-	xorp_throw(CorruptMessage, 
+-		   c_format("Bad size in NextHop address, was %u, should be %u",
+-			    (uint32_t)length(d), (uint32_t)A::addr_bytelen()),
+-		   UPDATEMSGERR, ATTRLEN);
++	XLOG_WARNING("Bad size in NextHop address, was %u, should be %u",
++		     (uint32_t)length(d), (uint32_t)A::addr_bytelen());
++	_invalid = true;
++	return;
+     }
+ 
+     _next_hop = A(payload(d));
+@@ -374,16 +364,19 @@ MEDAttribute::clone() const
+     return new MEDAttribute(med());
+ }
+ 
+-MEDAttribute::MEDAttribute(const uint8_t* d) throw(CorruptMessage)
++MEDAttribute::MEDAttribute(const uint8_t* d)
+     : PathAttribute(d)
+ {
+-    if (!optional() || transitive())
+-	xorp_throw(CorruptMessage,
+-		   c_format("Bad Flags in MEDAttribute %#x", flags()),
+-		   UPDATEMSGERR, ATTRFLAGS, d, total_tlv_length(d));
+-    if (length(d) != 4)
+-	xorp_throw(CorruptMessage, "Bad size in MEDAttribute",
+-		   UPDATEMSGERR, ATTRLEN);
++    if (!optional() || transitive()) {
++	XLOG_WARNING("Bad Flags in MEDAttribute %#x", flags());
++	_invalid = true;
++	return;
++    }
++    if (length(d) != 4) {
++	XLOG_WARNING("Bad size in MEDAttribute");
++	_invalid = true;
++	return;
++    }
+     memcpy(&_med, payload(d), 4);
+     _med = ntohl(_med);
+ }
+@@ -429,13 +422,17 @@ LocalPrefAttribute::LocalPrefAttribute(const uint8_t* d)
+ 	throw(CorruptMessage)
+ 	: PathAttribute(d)
+ {
+-    if (!well_known() || !transitive())
+-	xorp_throw(CorruptMessage,
+-		   c_format("Bad Flags in LocalPrefAttribute %#x", flags()),
+-		   UPDATEMSGERR, ATTRFLAGS, d, total_tlv_length(d));
+-    if (length(d) != 4)
+-	xorp_throw(CorruptMessage, "Bad size in LocalPrefAttribute",
+-		   UPDATEMSGERR, ATTRLEN);
++    if (!well_known() || !transitive()) {
++	XLOG_WARNING("Bad Flags in LocalPrefAttribute %#x", flags());
++	_invalid = true;
++	return;
++    }
++
++    if (length(d) != 4) {
++	XLOG_WARNING("Bad size in LocalPrefAttribute");
++	_invalid = true;
++	return;
++    }
+     memcpy(&_localpref, payload(d), 4);
+     _localpref = ntohl(_localpref);
+ }
+@@ -491,19 +488,12 @@ AtomicAggAttribute::clone() const
+ }
+ 
+ AtomicAggAttribute::AtomicAggAttribute(const uint8_t* d)
+-	throw(CorruptMessage)
+ 	: PathAttribute(d)
+ {
+     if (length(d) != 0)
+-	xorp_throw(CorruptMessage,
+-		   c_format("AtomicAggregate bad length %u",
+-			    XORP_UINT_CAST(length(d))),
+-		   UPDATEMSGERR, ATTRLEN);
++	INVALID("AtomicAggregate bad length %u", XORP_UINT_CAST(length(d)));
+     if (!well_known() || !transitive())
+-	xorp_throw(CorruptMessage,
+-		   c_format("Bad Flags in AtomicAggregate attribute %#x",
+-			    flags()),
+-		   UPDATEMSGERR, ATTRFLAGS, d, total_tlv_length(d));
++	INVALID("Bad Flags in AtomicAggregate attribute %#x", flags());
+ }
+ 
+ /**
+diff --git a/xorp/bgp/path_attribute.hh b/xorp/bgp/path_attribute.hh
+index 7b46f0d..a2f28ff 100644
+--- a/xorp/bgp/path_attribute.hh
++++ b/xorp/bgp/path_attribute.hh
+@@ -121,8 +121,7 @@ public:
+     static PathAttribute *create(const uint8_t* d, uint16_t max_len,
+ 				 size_t& actual_length, 
+ 				 const BGPPeerData* peerdata,
+-				 uint32_t ip_version) 
+-	throw(CorruptMessage);
++				 uint32_t ip_version);
+ 
+     /**
+      * Make a copy of the current attribute.
+@@ -192,6 +191,7 @@ public:
+     bool partial() const			{ return _flags & Partial; }
+     bool extended() const			{ return _flags & Extended; }
+     bool well_known() const			{ return !optional(); }
++    virtual bool invalid() const { return _invalid; }
+ 
+ protected:
+     /**
+@@ -209,14 +209,14 @@ protected:
+      * helper constructor used when creating an object from a derived class.
+      */
+     PathAttribute(Flags f, PathAttType t)
+-	    : _flags(f & ValidFlags), _type(t)	{}
++	    : _flags(f & ValidFlags), _type(t)	{ _invalid = false; }
+ 
+     /**
+      * basic constructor from data, assumes that the block has at least the
+      * required size.
+      */
+     PathAttribute(const uint8_t *d)
+-	    : _flags(d[0] & ValidFlags), _type(d[1])	{}
++	    : _flags(d[0] & ValidFlags), _type(d[1])	{ _invalid = false; }
+ 
+     /**
+      * helper function to fill the header. Needs _flags and _type
+@@ -255,6 +255,7 @@ protected:
+ #endif
+     uint8_t	_flags;
+     uint8_t	_type;
++    bool _invalid;
+ 
+ private:
+     PathAttribute();	// Not directly constructible.
+@@ -276,7 +277,7 @@ class OriginAttribute : public PathAttribute
+ {
+ public:
+     OriginAttribute(OriginType t);
+-    OriginAttribute(const uint8_t* d) throw(CorruptMessage);
++    OriginAttribute(const uint8_t* d);
+     PathAttribute *clone() const;
+ 
+     string str() const;
+@@ -299,8 +300,7 @@ public:
+     ~ASPathAttribute()				{ delete _as_path; }
+ 
+     ASPathAttribute(const ASPath& p);
+-    ASPathAttribute(const uint8_t* d, bool use_4byte_asnums) 
+-	throw(CorruptMessage);
++    ASPathAttribute(const uint8_t* d, bool use_4byte_asnums);
+     PathAttribute *clone() const;
+ 
+     string str() const				{
+@@ -312,6 +312,8 @@ public:
+ 
+     bool encode(uint8_t* buf, size_t &wire_size, const BGPPeerData* peerdata) const;
+ 
++    virtual bool invalid() const { return PathAttribute::invalid() || (_as_path && _as_path->invalid()); }
++
+ private:
+     ASPath *_as_path;
+ };
+@@ -326,7 +328,7 @@ public:
+     ~AS4PathAttribute()				{ delete _as_path; }
+ 
+     AS4PathAttribute(const AS4Path& p);
+-    AS4PathAttribute(const uint8_t* d) throw(CorruptMessage);
++    AS4PathAttribute(const uint8_t* d);
+     PathAttribute *clone() const;
+ 
+     string str() const				{
+@@ -337,6 +339,7 @@ public:
+     AS4Path &as4_path() const		{ return (AS4Path &)*_as_path;}
+ 
+     bool encode(uint8_t* buf, size_t &wire_size, const BGPPeerData* peerdata) const;
++    virtual bool invalid() const { return PathAttribute::invalid() || (_as_path && _as_path->invalid()); }
+ 
+ private:
+     AS4Path *_as_path;
+@@ -349,14 +352,14 @@ template <class A>
+ class NextHopAttribute : public PathAttribute
+ {
+ public:
+-    NextHopAttribute(const A& n) throw(CorruptMessage);
+-    NextHopAttribute(const uint8_t* d) throw(CorruptMessage);
++    NextHopAttribute(const A& n);
++    NextHopAttribute(const uint8_t* d);
+     PathAttribute *clone() const;
+ 
+     /* Throw exception if there are problems...do nothing
+      * otherwise.
+      */
+-    void verify() throw(CorruptMessage);
++    void verify();
+ 
+     string str() const				{
+ 	return "Next Hop Attribute " + _next_hop.str();
+@@ -385,7 +388,7 @@ class MEDAttribute : public PathAttribute
+ {
+ public:
+     MEDAttribute(const uint32_t med);
+-    MEDAttribute(const uint8_t* d) throw(CorruptMessage);
++    MEDAttribute(const uint8_t* d);
+     PathAttribute *clone() const;
+ 
+     string str() const;
+@@ -406,7 +409,7 @@ class LocalPrefAttribute : public PathAttribute
+ {
+ public:
+     LocalPrefAttribute(const uint32_t localpref);
+-    LocalPrefAttribute(const uint8_t* d) throw(CorruptMessage);
++    LocalPrefAttribute(const uint8_t* d);
+     PathAttribute *clone() const;
+ 
+     string str() const;
+@@ -429,7 +432,7 @@ class AtomicAggAttribute : public PathAttribute
+ {
+ public:
+     AtomicAggAttribute();
+-    AtomicAggAttribute(const uint8_t* d) throw(CorruptMessage);
++    AtomicAggAttribute(const uint8_t* d);
+     PathAttribute *clone() const;
+ 
+     string str() const				{
+@@ -445,7 +448,7 @@ class AggregatorAttribute : public PathAttribute
+ {
+ public:
+     AggregatorAttribute(const IPv4& speaker, const AsNum& as);
+-    AggregatorAttribute(const uint8_t* d, bool use_4byte_asnums) throw(CorruptMessage);
++    AggregatorAttribute(const uint8_t* d, bool use_4byte_asnums);
+     PathAttribute *clone() const;
+ 
+     string str() const;
+@@ -464,7 +467,7 @@ class AS4AggregatorAttribute : public PathAttribute
+ {
+ public:
+     AS4AggregatorAttribute(const IPv4& speaker, const AsNum& as);
+-    AS4AggregatorAttribute(const uint8_t* d) throw(CorruptMessage);
++    AS4AggregatorAttribute(const uint8_t* d);
+     PathAttribute *clone() const;
+ 
+     string str() const;
+@@ -488,7 +491,7 @@ public:
+ 
+     typedef set <uint32_t>::const_iterator const_iterator;
+     CommunityAttribute();
+-    CommunityAttribute(const uint8_t* d) throw(CorruptMessage);
++    CommunityAttribute(const uint8_t* d);
+     PathAttribute *clone() const;
+ 
+     string str() const;
+@@ -510,7 +513,7 @@ class OriginatorIDAttribute : public PathAttribute
+ {
+ public:
+     OriginatorIDAttribute(const IPv4 originator_id);
+-    OriginatorIDAttribute(const uint8_t* d) throw(CorruptMessage);
++    OriginatorIDAttribute(const uint8_t* d);
+     PathAttribute *clone() const;
+ 
+     string str() const;
+@@ -528,7 +531,7 @@ class ClusterListAttribute : public PathAttribute
+ public:
+     typedef list <IPv4>::const_iterator const_iterator;
+     ClusterListAttribute();
+-    ClusterListAttribute(const uint8_t* d) throw(CorruptMessage);
++    ClusterListAttribute(const uint8_t* d);
+     PathAttribute *clone() const;
+ 
+     string str() const;
+@@ -554,7 +557,7 @@ public:
+      * Specialise these constructors for each AFI.
+      */
+     MPReachNLRIAttribute(Safi safi);
+-    MPReachNLRIAttribute(const uint8_t* d) throw(CorruptMessage);
++    MPReachNLRIAttribute(const uint8_t* d);
+     PathAttribute *clone() const;
+ 
+     string str() const;
+@@ -598,7 +601,7 @@ public:
+      * Specialise these constructors for each AFI.
+      */
+     MPUNReachNLRIAttribute(Safi safi);
+-    MPUNReachNLRIAttribute(const uint8_t* d) throw(CorruptMessage);
++    MPUNReachNLRIAttribute(const uint8_t* d);
+     PathAttribute *clone() const;
+ 
+     string str() const;
+@@ -622,7 +625,7 @@ private:
+ class UnknownAttribute : public PathAttribute
+ {
+ public:
+-    UnknownAttribute(const uint8_t* d) throw(CorruptMessage);
++    UnknownAttribute(const uint8_t* d);
+     UnknownAttribute(uint8_t *data, size_t size, uint8_t flags);
+     PathAttribute *clone() const;
+ 
+diff --git a/xorp/bgp/update_attrib.hh b/xorp/bgp/update_attrib.hh
+index b1e2d50..200136b 100644
+--- a/xorp/bgp/update_attrib.hh
++++ b/xorp/bgp/update_attrib.hh
+@@ -17,8 +17,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/bgp/update_attrib.hh,v 1.16 2008/10/02 21:56:23 bms Exp $
+-
+ #ifndef __BGP_UPDATE_ATTRIB_HH__
+ #define __BGP_UPDATE_ATTRIB_HH__
+ 
+@@ -70,7 +68,7 @@ public:
+     }
+ 
+     // size of next operand in memory
+-    static size_t size(const uint8_t *d) throw(CorruptMessage);
++    static size_t size(const uint8_t *d);
+ 
+     size_t calc_byte_size() const			{
+ 	return (prefix_len() + 7) / 8;
+@@ -96,8 +94,7 @@ public:
+ 
+     size_t wire_size() const;
+     uint8_t *encode(size_t &l, uint8_t *buf = 0) const;
+-    void decode(const uint8_t *d, size_t len)
+-	throw(CorruptMessage);
++    void decode(const uint8_t *d, size_t len);
+     string str(string) const;
+ 
+     // XXX this needs to be fixed, we do not want to sort all the times.
+diff --git a/xorp/libproto/config_node_id.hh b/xorp/libproto/config_node_id.hh
+index b378b60..2d17f94 100644
+--- a/xorp/libproto/config_node_id.hh
++++ b/xorp/libproto/config_node_id.hh
+@@ -47,7 +47,7 @@
+  * is the instance ID. The lower half of the unique node ID (the least
+  * significant 32 bits) is the unique part of the node ID for that instance.
+  */
+-class ConfigNodeId {
++class ConfigNodeId : public Invalid {
+ public:
+     typedef uint64_t UniqueNodeId;
+     typedef uint64_t Position;
+@@ -370,6 +370,8 @@ ConfigNodeId::copy_in(const string& from_string)
+     string::size_type space, ix;
+     string s = from_string;
+ 
++    set_invalid(false);
++
+     if (s.empty()) {
+ 	_unique_node_id = 0;
+ 	_position = 0;
+@@ -379,6 +381,7 @@ ConfigNodeId::copy_in(const string& from_string)
+     space = s.find(' ');
+     if ((space == string::npos) || (space == 0) || (space >= s.size() - 1)) {
+ 	XLOG_WARNING("Bad ConfigNodeId \"%s\"", s.c_str());
++	set_invalid(true);
+ 	return 0;
+     }
+ 
+@@ -389,12 +392,14 @@ ConfigNodeId::copy_in(const string& from_string)
+     for (ix = 0; ix < space; ix++) {
+ 	if (! xorp_isdigit(s[ix])) {
+ 	    XLOG_WARNING("Bad ConfigNodeId \"%s\"", s.c_str());
++	    set_invalid(true);
+ 	    return 0;
+ 	}
+     }
+     for (ix = space + 1; ix < s.size(); ix++) {
+ 	if (! xorp_isdigit(s[ix])) {
+ 	    XLOG_WARNING("Bad ConfigNodeId \"%s\"", s.c_str());
++	    set_invalid(true);
+ 	    return 0;
+ 	}
+     }
+diff --git a/xorp/libxorp/asnum.hh b/xorp/libxorp/asnum.hh
+index f033eee..e9dfdbe 100644
+--- a/xorp/libxorp/asnum.hh
++++ b/xorp/libxorp/asnum.hh
+@@ -156,8 +156,7 @@ public:
+ 	return;
+       fail:
+ 	_as = AS_INVALID;
+-	XLOG_WARN("Bad AS number \"%s\"",
+-		  as_str.c_str());
++	XLOG_WARNING("Bad AS number \"%s\"", as_str.c_str());
+     }
+ 
+ 
+diff --git a/xorp/libxorp/exceptions.hh b/xorp/libxorp/exceptions.hh
+index c2e724e..fa36379 100644
+--- a/xorp/libxorp/exceptions.hh
++++ b/xorp/libxorp/exceptions.hh
+@@ -19,8 +19,6 @@
+ // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/libxorp/exceptions.hh,v 1.12 2009/01/05 18:30:57 jtc Exp $
+-
+ 
+ #ifndef __LIBXORP_EXCEPTIONS_HH__
+ #define __LIBXORP_EXCEPTIONS_HH__
+@@ -38,6 +36,19 @@ using namespace std;
+ 
+ #include "libxorp/c_format.hh"
+ 
++class Invalid {
++public:
++    Invalid() { _invalid = false; }
++    Invalid(const Invalid &a) { _invalid = a._invalid; }
++    virtual ~Invalid() { }
++    virtual bool invalid() const { return _invalid; }
++    void set_invalid(bool v) { _invalid = v; }
++    void set_valid(bool v) { _invalid = !v; }
++protected:
++    bool _invalid;
++};
++    
++
+ /**
+  * Macro to known insert values into exception arguments.
+  */
+diff --git a/xorp/libxorp/ipv4.hh b/xorp/libxorp/ipv4.hh
+index d6971db..72f260c 100644
+--- a/xorp/libxorp/ipv4.hh
++++ b/xorp/libxorp/ipv4.hh
+@@ -109,6 +109,8 @@ public:
+      */
+     IPv4(const char *from_string);
+ 
++    virtual ~IPv4() { }
++
+     /**
+      * Copy the IPv4 raw address to specified memory location.
+      *
+diff --git a/xorp/libxorp/xorp.h b/xorp/libxorp/xorp.h
+index 84cf726..fa7b287 100644
+--- a/xorp/libxorp/xorp.h
++++ b/xorp/libxorp/xorp.h
+@@ -86,6 +86,13 @@
+ 
+ #define WARN_UNUSED __attribute__((warn_unused_result))
+ 
++#define INVALID(args...)			\
++    do {					\
++	XLOG_WARNING(args);			\
++	_invalid = true;			\
++	return;					\
++    } while (0);
++
+ #ifdef __cplusplus
+ #  ifdef XORP_USE_USTL
+ #    include <ustl.h>
+diff --git a/xorp/mld6igmp/xrl_mld6igmp_node.cc b/xorp/mld6igmp/xrl_mld6igmp_node.cc
+index d3614c9..9157ee6 100644
+--- a/xorp/mld6igmp/xrl_mld6igmp_node.cc
++++ b/xorp/mld6igmp/xrl_mld6igmp_node.cc
+@@ -1134,6 +1134,7 @@ XrlMld6igmpNode::mld6igmp_client_send_add_delete_membership_cb(
+ 	// TODO:  We must make some progress or otherwise deal with this error.
+ 	// For now, fall through and re-try.
+ 	// Fall through to the retry logic below.
++	/* fall through */
+ 
+     case REPLY_TIMED_OUT:
+     case SEND_FAILED_TRANSIENT:
+diff --git a/xorp/pim/pim_node_cli.cc b/xorp/pim/pim_node_cli.cc
+index 1dc54be..a614c0c 100644
+--- a/xorp/pim/pim_node_cli.cc
++++ b/xorp/pim/pim_node_cli.cc
+@@ -266,8 +266,9 @@ PimNodeCli::cli_show_pim_bootstrap(const vector<string>& argv)
+     
+     // Check the optional arguments
+     if (argv.size()) {
+-	zone_id = PimScopeZoneId(argv[0].c_str(), false);
+-	if (!zone_id.invalid()) {
++	IPvXNet n(argv[0].c_str());
++	if (!n.invalid()) {
++	    zone_id = PimScopeZoneId(n, false);
+ 	    is_zone_id_set = true;
+ 	    if (zone_id.scope_zone_prefix().masked_addr().af() != family()) {
+ 		cli_print(c_format("ERROR: Address with invalid address family: %s\n",
+@@ -481,8 +482,9 @@ PimNodeCli::cli_show_pim_bootstrap_rps(const vector<string>& argv)
+     
+     // Check the optional argument
+     if (argv.size()) {
+-	zone_id = PimScopeZoneId(argv[0].c_str(), false);
+-	if (!zone_id.invalid()) {
++	IPvXNet n(argv[0].c_str());
++	if (!n.invalid()) {
++	    zone_id = PimScopeZoneId(n, false);
+ 	    is_zone_id_set = true;
+ 	    if (zone_id.scope_zone_prefix().masked_addr().af() != family()) {
+ 		cli_print(c_format("ERROR: Address with invalid address family: %s\n",
+diff --git a/xorp/pim/pim_scope_zone_table.hh b/xorp/pim/pim_scope_zone_table.hh
+index 83fb004..4dc0aa2 100644
+--- a/xorp/pim/pim_scope_zone_table.hh
++++ b/xorp/pim/pim_scope_zone_table.hh
+@@ -17,8 +17,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/pim/pim_scope_zone_table.hh,v 1.15 2008/10/02 21:57:55 bms Exp $
+-
+ 
+ #ifndef __PIM_PIM_SCOPE_ZONE_TABLE_HH__
+ #define __PIM_PIM_SCOPE_ZONE_TABLE_HH__
+diff --git a/xorp/policy/xrl_target.cc b/xorp/policy/xrl_target.cc
+index 7f0f6c0..8623b85 100644
+--- a/xorp/policy/xrl_target.cc
++++ b/xorp/policy/xrl_target.cc
+@@ -95,8 +95,7 @@ XrlPolicyTarget::policy_0_1_create_term(const string&   policy,
+         return XrlCmdError::COMMAND_FAILED("Create of policy " + policy
+ 					   + " term " + term + " failed "
+ 					   + "because of invalid node ID "
+-					   + "\"" + order + "\" : "
+-					   + e.str());
++					   + "\"" + order + "\" : ");
+     }
+ 
+     try {
+@@ -135,8 +134,7 @@ XrlPolicyTarget::policy_0_1_update_term_block(const string&   policy,
+         return XrlCmdError::COMMAND_FAILED("Update of policy " + policy
+ 					   + " term " + term + " failed "
+ 					   + "because of invalid node ID "
+-					   + "\"" + order + "\" : "
+-					   + e.str());
++					   + "\"" + order + "\" : ");
+     }
+     try {
+ 	_policy_target.update_term_block(policy, term, block, config_node_id,
+diff --git a/xorp/policy/xrl_target.hh b/xorp/policy/xrl_target.hh
+index 105114a..9adfcfe 100644
+--- a/xorp/policy/xrl_target.hh
++++ b/xorp/policy/xrl_target.hh
+@@ -18,8 +18,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/policy/xrl_target.hh,v 1.16 2008/10/02 21:58:02 bms Exp $
+-
+ #ifndef __POLICY_XRL_TARGET_HH__
+ #define __POLICY_XRL_TARGET_HH__
+ 
+diff --git a/xorp/rib/tools/show_distances.cc b/xorp/rib/tools/show_distances.cc
+index 66b14c2..ffecf38 100644
+--- a/xorp/rib/tools/show_distances.cc
++++ b/xorp/rib/tools/show_distances.cc
+@@ -250,25 +250,17 @@ ShowDistancesProcessor::get_distances_cb(const XrlError& xe,
+ 	return;
+     }
+ 
+-    try {
+-	XLOG_ASSERT(protocols->get(0).type() == XrlAtomType(xrlatom_text));
+-	XLOG_ASSERT(protocols->size() >= 1);
+-	XLOG_ASSERT(distances->get(0).type() == XrlAtomType(xrlatom_uint32));
+-	XLOG_ASSERT(distances->size() >= 1);
+-	XLOG_ASSERT(protocols->size() == distances->size());
+-
+-	for (size_t i = 0; i < protocols->size(); i++) {
+-	    (void)_admin_distances.insert(
+-		pair<uint32_t, string>(
+-		    distances->get(i).uint32(),
+-		    protocols->get(i).text()));
+-	}
+-
+-    } catch (XrlAtomList::InvalidIndex ie) {
+-	fprintf(stdout, "Invalid data was returned by the RIB.");
+-	set_status(SERVICE_FAILED, "Invalid data was returned by the RIB.");
+-	shutdown();
+-	return;
++    XLOG_ASSERT(protocols->get(0).type() == XrlAtomType(xrlatom_text));
++    XLOG_ASSERT(protocols->size() >= 1);
++    XLOG_ASSERT(distances->get(0).type() == XrlAtomType(xrlatom_uint32));
++    XLOG_ASSERT(distances->size() >= 1);
++    XLOG_ASSERT(protocols->size() == distances->size());
++
++    for (size_t i = 0; i < protocols->size(); i++) {
++	_admin_distances.insert(
++	    pair<uint32_t, string>(
++		distances->get(i).uint32(),
++		protocols->get(i).text()));
+     }
+ 
+     if (_admin_distances.size() == 0) {
+-- 
+2.7.5
+

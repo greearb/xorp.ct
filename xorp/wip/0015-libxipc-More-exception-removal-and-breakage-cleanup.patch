@@ -1,0 +1,377 @@
+From e7268d96b675e71870fcac4d8bd5ddf59c542209 Mon Sep 17 00:00:00 2001
+From: Ben Greear <greearb@candelatech.com>
+Date: Fri, 8 Sep 2017 12:57:59 -0700
+Subject: [PATCH 15/33] libxipc:  More exception removal and breakage cleanup.
+
+---
+ xorp/cli/tests/test_cli.cc                  |  8 ++------
+ xorp/libfeaclient/tests/test_remote_copy.cc | 13 ++++++-------
+ xorp/libxipc/finder_main.cc                 |  4 ----
+ xorp/libxipc/finder_server.cc               |  2 --
+ xorp/libxipc/finder_server.hh               |  6 ++----
+ xorp/libxipc/finder_tcp.cc                  |  5 ++---
+ xorp/libxipc/finder_tcp.hh                  |  3 +--
+ xorp/libxipc/finder_tcp_messenger.cc        |  1 -
+ xorp/libxipc/finder_tcp_messenger.hh        |  3 +--
+ xorp/libxipc/tests/test_finder_tcp.cc       |  1 -
+ xorp/libxipc/xrl_args.cc                    |  6 +++---
+ xorp/libxipc/xrl_atom.cc                    |  7 +++----
+ xorp/libxipc/xrl_atom_list.cc               |  7 +++----
+ xorp/libxorp/exceptions.cc                  |  7 -------
+ xorp/libxorp/exceptions.hh                  |  8 --------
+ xorp/rtrmgr/main_rtrmgr.cc                  | 27 +++++++++------------------
+ 16 files changed, 32 insertions(+), 76 deletions(-)
+
+diff --git a/xorp/cli/tests/test_cli.cc b/xorp/cli/tests/test_cli.cc
+index b414780..acd02cc 100644
+--- a/xorp/cli/tests/test_cli.cc
++++ b/xorp/cli/tests/test_cli.cc
+@@ -134,12 +134,8 @@ cli_main(const string& finder_hostname, uint16_t finder_port,
+     //
+     FinderServer *finder = NULL;
+     if (start_finder) {
+-	try {
+-	    finder = new FinderServer(eventloop, IPv4(finder_hostname.c_str()),
+-				      finder_port);
+-	} catch (const InvalidPort&) {
+-	    XLOG_FATAL("Could not start in-process Finder");
+-	}
++	finder = new FinderServer(eventloop, IPv4(finder_hostname.c_str()),
++				  finder_port);
+     }
+ 
+     //
+diff --git a/xorp/libfeaclient/tests/test_remote_copy.cc b/xorp/libfeaclient/tests/test_remote_copy.cc
+index c70de2c..e444990 100644
+--- a/xorp/libfeaclient/tests/test_remote_copy.cc
++++ b/xorp/libfeaclient/tests/test_remote_copy.cc
+@@ -296,13 +296,12 @@ test_main()
+     EventLoop e;
+     ref_ptr<FinderServer> fs = 0;
+     for (uint16_t port = 32000; port < 32500; port++) {
+-	try {
+-	    fs = new FinderServer(e, FinderConstants::FINDER_DEFAULT_HOST(),
+-				  port);
+-	    goto ___got_finder;
+-	} catch (const InvalidPort&) {
+-	    continue;
+-	}
++	/* This will proabbly break sometimes due to asserts when port is used,
++	 * due to the exception-removal logic.  Can fix later if we care.
++	 * --Ben */
++	fs = new FinderServer(e, FinderConstants::FINDER_DEFAULT_HOST(),
++			      port);
++	goto ___got_finder;
+     }
+     verbose_log("Could not instantiate FinderServer");
+     return -1;
+diff --git a/xorp/libxipc/finder_main.cc b/xorp/libxipc/finder_main.cc
+index 00e0142..7ef51fa 100644
+--- a/xorp/libxipc/finder_main.cc
++++ b/xorp/libxipc/finder_main.cc
+@@ -191,10 +191,6 @@ finder_main(int argc, char* const argv[])
+ 	while (xorp_do_run) {
+ 	    e.run();
+ 	}
+-    } catch (const InvalidPort& i) {
+-	XLOG_ERROR("%s: a finder may already be running.\n",
+-		   i.why().c_str());
+-	exit(-1);
+     } catch (...) {
+ 	xorp_catch_standard_exceptions();
+     }
+diff --git a/xorp/libxipc/finder_server.cc b/xorp/libxipc/finder_server.cc
+index e8090aa..827d660 100644
+--- a/xorp/libxipc/finder_server.cc
++++ b/xorp/libxipc/finder_server.cc
+@@ -27,7 +27,6 @@
+ FinderServer::FinderServer(EventLoop& e,
+ 			   IPv4	      default_interface,
+ 			   uint16_t   default_port)
+-    throw (InvalidPort)
+     : _e(e), _f(e), _fxt(_f)
+ {
+     char* value;
+@@ -90,7 +89,6 @@ FinderServer::~FinderServer()
+ 
+ bool
+ FinderServer::add_binding(IPv4 addr, uint16_t port)
+-    throw (InvalidPort)
+ {
+     Listeners::const_iterator i = _listeners.begin();
+     while (i != _listeners.end()) {
+diff --git a/xorp/libxipc/finder_server.hh b/xorp/libxipc/finder_server.hh
+index 66dcd7e..7ceb4f0 100644
+--- a/xorp/libxipc/finder_server.hh
++++ b/xorp/libxipc/finder_server.hh
+@@ -49,8 +49,7 @@ public:
+     /**
+      * Constructor
+      */
+-    FinderServer(EventLoop& e, IPv4 default_interface, uint16_t default_port)
+-	throw (InvalidPort);
++    FinderServer(EventLoop& e, IPv4 default_interface, uint16_t default_port);
+ 
+     /**
+      * Destructor
+@@ -63,8 +62,7 @@ public:
+      * @return true on success, false if binding already exists or cannot be
+      * instantiated.
+      */
+-    bool add_binding(IPv4 addr, uint16_t port)
+-	throw (InvalidPort);
++    bool add_binding(IPv4 addr, uint16_t port);
+ 
+     /**
+      * Remove an interface binding that was added by calling add_binding.
+diff --git a/xorp/libxipc/finder_tcp.cc b/xorp/libxipc/finder_tcp.cc
+index eb0f195..5c5ae03 100644
+--- a/xorp/libxipc/finder_tcp.cc
++++ b/xorp/libxipc/finder_tcp.cc
+@@ -288,7 +288,6 @@ FinderTcpListenerBase::FinderTcpListenerBase(EventLoop& e,
+ 					     IPv4	interface,
+ 					     uint16_t	port,
+ 					     bool	en)
+-    throw (InvalidPort)
+     : _e(e), _en(false), _addr(interface), _port(port)
+ {
+     comm_init();
+@@ -302,10 +301,10 @@ FinderTcpListenerBase::FinderTcpListenerBase(EventLoop& e,
+ 
+     _lsock = comm_bind_tcp4(&if_ia, htons(port), COMM_SOCK_NONBLOCKING);
+     if (!_lsock.is_valid()) {
+-	xorp_throw(InvalidPort, comm_get_last_error_str());
++	XLOG_FATAL(comm_get_last_error_str());
+     }
+     if (comm_listen(_lsock.getSocket(), COMM_LISTEN_DEFAULT_BACKLOG) != XORP_OK) {
+-	xorp_throw(InvalidPort, comm_get_last_error_str());
++	XLOG_FATAL(comm_get_last_error_str());
+     }
+ 
+     if (en)
+diff --git a/xorp/libxipc/finder_tcp.hh b/xorp/libxipc/finder_tcp.hh
+index 46b35f0..27a1ca9 100644
+--- a/xorp/libxipc/finder_tcp.hh
++++ b/xorp/libxipc/finder_tcp.hh
+@@ -137,8 +137,7 @@ public:
+     FinderTcpListenerBase(EventLoop&	e,
+ 			  IPv4		iface,
+ 			  uint16_t	port,
+-			  bool		en = true)
+-	throw (InvalidPort);
++			  bool		en = true);
+ 
+     virtual ~FinderTcpListenerBase();
+ 
+diff --git a/xorp/libxipc/finder_tcp_messenger.cc b/xorp/libxipc/finder_tcp_messenger.cc
+index 35432bc..c5f31b5 100644
+--- a/xorp/libxipc/finder_tcp_messenger.cc
++++ b/xorp/libxipc/finder_tcp_messenger.cc
+@@ -222,7 +222,6 @@ FinderTcpListener::FinderTcpListener(EventLoop&		     e,
+ 				     IPv4		     interface,
+ 				     uint16_t		     port,
+ 				     bool		     en)
+-    throw (InvalidPort)
+     : FinderTcpListenerBase(e, interface, port, en), _mm(mm), _cmds(cmds)
+ {
+ }
+diff --git a/xorp/libxipc/finder_tcp_messenger.hh b/xorp/libxipc/finder_tcp_messenger.hh
+index 43cb034..4a47c0b 100644
+--- a/xorp/libxipc/finder_tcp_messenger.hh
++++ b/xorp/libxipc/finder_tcp_messenger.hh
+@@ -92,8 +92,7 @@ public:
+ 		      XrlCmdMap& cmds,
+ 		      IPv4 iface,
+ 		      uint16_t port,
+-		      bool enabled = true)
+-	throw (InvalidPort);
++		      bool enabled = true);
+ 
+     virtual ~FinderTcpListener();
+ 
+diff --git a/xorp/libxipc/tests/test_finder_tcp.cc b/xorp/libxipc/tests/test_finder_tcp.cc
+index ecb6b31..ab236a5 100644
+--- a/xorp/libxipc/tests/test_finder_tcp.cc
++++ b/xorp/libxipc/tests/test_finder_tcp.cc
+@@ -121,7 +121,6 @@ public:
+     DummyFinder(EventLoop&  e,
+ 		IPv4	    interface,
+ 		uint16_t    port = FinderConstants::FINDER_DEFAULT_PORT())
+-	throw (InvalidPort)
+ 	: FinderTcpListenerBase(e, interface, port), _connection(0)
+     {
+ 	add_permitted_host(interface);
+diff --git a/xorp/libxipc/xrl_args.cc b/xorp/libxipc/xrl_args.cc
+index f703515..dea3124 100644
+--- a/xorp/libxipc/xrl_args.cc
++++ b/xorp/libxipc/xrl_args.cc
+@@ -256,7 +256,7 @@ XrlArgs::add_ipvx(const char* name, const IPvX& val)
+ }
+ 
+ const IPvX
+-XrlArgs::get_ipvx(const char* name) const;
++XrlArgs::get_ipvx(const char* name) const
+ {
+     XrlAtom a(name, xrlatom_ipv4);
+     if (a.invalid()) {
+@@ -265,7 +265,7 @@ XrlArgs::get_ipvx(const char* name) const;
+ 	return get(b).ipv6();
+     }
+     else {
+-	return get(a).ipv4;
++	return get(a).ipv4();
+     }
+ }
+ 
+@@ -297,7 +297,7 @@ XrlArgs::get_ipvxnet(const char* name) const
+ 	return get(b).ipv6net();
+     }
+     else {
+-	return get(a).ipv4net;
++	return get(a).ipv4net();
+     }
+ }
+ 
+diff --git a/xorp/libxipc/xrl_atom.cc b/xorp/libxipc/xrl_atom.cc
+index 4f5d5aa..435ac10 100644
+--- a/xorp/libxipc/xrl_atom.cc
++++ b/xorp/libxipc/xrl_atom.cc
+@@ -162,7 +162,7 @@ XrlAtom::data_from_c_str(const char* c_str)
+     ssize_t bad_pos = xrlatom_decode_value(c_str, strlen(c_str), decoded);
+     if (bad_pos >= 0) {
+ 	_invalid = true;
+-	return -1;
++	return;
+     }
+     c_str = decoded.c_str();
+     _have_data = true;
+@@ -232,7 +232,6 @@ XrlAtom::data_from_c_str(const char* c_str)
+ 
+ 	// ... Your types instantiator here ...
+     }
+-    return -1;
+ }
+ 
+ XrlAtom::~XrlAtom()
+@@ -253,7 +252,7 @@ XrlAtom::type_and_data_okay(const XrlAtomType& t) const {
+ }
+ 
+ const bool&
+-XrlAtom::boolean() const;
++XrlAtom::boolean() const
+ {
+     XLOG_ASSERT(type_and_data_okay(xrlatom_boolean));
+     return _boolean;
+@@ -511,7 +510,7 @@ XrlAtom::XrlAtom(const char* serialized)
+     : _type(xrlatom_no_type),
+       _have_data(false),
+       _own(true),
+-      _has_fake_args(false),
++      _has_fake_args(false)
+ {
+ 
+     const char *start, *sep;
+diff --git a/xorp/libxipc/xrl_atom_list.cc b/xorp/libxipc/xrl_atom_list.cc
+index b526dcc..be12726 100644
+--- a/xorp/libxipc/xrl_atom_list.cc
++++ b/xorp/libxipc/xrl_atom_list.cc
+@@ -49,7 +49,7 @@ XrlAtomList::append(const XrlAtom& xa)
+     do_append(xa);
+ }
+ 
+-int
++bool
+ XrlAtomList::check_type(const XrlAtom& xa)
+ {
+     if (_list.empty() == false && _list.front().type() != xa.type()) {
+@@ -85,9 +85,8 @@ XrlAtomList::get(size_t itemno) const
+     return *ci;
+ 
+   error:
+-    XtrlAtom bad;
+-    bad.set_invalid(true);
+-    return bad;
++    XrlAtom.set_invalid(true);
++    return XrlAtom::bad_atom;
+ }
+ 
+ void
+diff --git a/xorp/libxorp/exceptions.cc b/xorp/libxorp/exceptions.cc
+index 60972b8..8e59018 100644
+--- a/xorp/libxorp/exceptions.cc
++++ b/xorp/libxorp/exceptions.cc
+@@ -72,13 +72,6 @@ XorpReasonedException::why() const
+     return ( _why.size() != 0 ) ? _why : string("Not specified");
+ }
+ 
+-InvalidPort::InvalidPort(const char* file,
+-			 size_t line,
+-			 const string& init_why)
+-    : XorpReasonedException("InvalidPort", file, line, init_why)
+-{
+-}
+-
+ InvalidBufferOffset::InvalidBufferOffset(const char* file,
+ 					 size_t line,
+ 					 const string& init_why)
+diff --git a/xorp/libxorp/exceptions.hh b/xorp/libxorp/exceptions.hh
+index 08a2ddd..1cdb83a 100644
+--- a/xorp/libxorp/exceptions.hh
++++ b/xorp/libxorp/exceptions.hh
+@@ -135,14 +135,6 @@ protected:
+ // Standard XORP exceptions
+ 
+ /**
+- * @short A standard XORP exception that is thrown if a port is invalid.
+- */
+-class InvalidPort : public XorpReasonedException {
+-public:
+-    InvalidPort(const char* file, size_t line, const string& init_why = "");
+-};
+-
+-/**
+  * @short A standard XORP exception that is thrown if a buffer ofset is
+  * invalid.
+  */
+diff --git a/xorp/rtrmgr/main_rtrmgr.cc b/xorp/rtrmgr/main_rtrmgr.cc
+index 21e7cd1..1e25822 100644
+--- a/xorp/rtrmgr/main_rtrmgr.cc
++++ b/xorp/rtrmgr/main_rtrmgr.cc
+@@ -283,25 +283,16 @@ Rtrmgr::run()
+     // deletion order.
+     //
+     FinderServer* fs = NULL;
+-    try {
+-	fs = new FinderServer(eventloop,
+-			      FinderConstants::FINDER_DEFAULT_HOST(),
+-			      _bind_port);
+-	while (_bind_addrs.empty() == false) {
+-	    if (fs->add_binding(_bind_addrs.front(), _bind_port) == false) {
+-		XLOG_WARNING("Finder failed to bind interface %s port %d",
+-			     _bind_addrs.front().str().c_str(), _bind_port);
+-	    }
+-	    _bind_addrs.pop_front();
++
++    fs = new FinderServer(eventloop,
++			  FinderConstants::FINDER_DEFAULT_HOST(),
++			  _bind_port);
++    while (_bind_addrs.empty() == false) {
++	if (fs->add_binding(_bind_addrs.front(), _bind_port) == false) {
++	    XLOG_WARNING("Finder failed to bind interface %s port %d",
++			 _bind_addrs.front().str().c_str(), _bind_port);
+ 	}
+-    } catch (const InvalidPort& i) {
+-	XLOG_ERROR("%s: a finder may already be running.", i.why().c_str());
+-	delete tt;
+-	return (1);
+-    } catch (...) {
+-	xorp_catch_standard_exceptions();
+-	delete tt;
+-	return (1);
++	_bind_addrs.pop_front();
+     }
+ 
+     //
+-- 
+2.7.5
+

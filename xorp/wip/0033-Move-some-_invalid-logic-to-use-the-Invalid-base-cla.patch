@@ -1,0 +1,800 @@
+From b62bbde66b5f1b8d1d0c4b106638d956e833c8ec Mon Sep 17 00:00:00 2001
+From: Ben Greear <greearb@candelatech.com>
+Date: Wed, 27 Sep 2017 14:24:44 -0700
+Subject: [PATCH 33/33] Move some _invalid logic to use the Invalid base class.
+
+---
+ xorp/libxipc/finder_msgs.cc          | 29 ++++++++++++++---------------
+ xorp/libxipc/finder_msgs.hh          |  5 +----
+ xorp/libxipc/finder_tcp_messenger.cc |  2 +-
+ xorp/libxipc/xrl.cc                  | 20 ++++++++++----------
+ xorp/libxipc/xrl.hh                  |  4 +---
+ xorp/libxipc/xrl_args.cc             |  1 -
+ xorp/libxipc/xrl_args.hh             |  7 ++-----
+ xorp/libxipc/xrl_atom.cc             | 20 ++++++++++++--------
+ xorp/libxipc/xrl_atom.hh             |  8 ++------
+ xorp/libxipc/xuid.cc                 |  8 ++++----
+ xorp/libxipc/xuid.hh                 |  7 ++-----
+ xorp/libxorp/ipvx.cc                 | 20 +++++---------------
+ xorp/libxorp/ipvx.hh                 |  5 +----
+ xorp/libxorp/mac.cc                  | 13 ++++---------
+ xorp/libxorp/mac.hh                  |  5 +----
+ xorp/rib/parser.hh                   | 14 +++++---------
+ 16 files changed, 65 insertions(+), 103 deletions(-)
+
+diff --git a/xorp/libxipc/finder_msgs.cc b/xorp/libxipc/finder_msgs.cc
+index bbc0e66..678e597 100644
+--- a/xorp/libxipc/finder_msgs.cc
++++ b/xorp/libxipc/finder_msgs.cc
+@@ -95,18 +95,17 @@ skip_text(const char*& buf, const char* to_skip)
+ ParsedFinderMessageBase::ParsedFinderMessageBase(const char* data, char type)
+ {
+     const char* pos = data;
+-    _invalid = false;
+ 
+     // Version number checking
+     if (skip_text(pos, FMC_PREAMBLE) == false) {
+ 	XLOG_WARNING("Corrupt header field label: bad protocol");
+-	_invalid = true;
++	set_invalid(true);
+     }
+ 
+     const char* end = line_end(pos);
+     if (end - pos < 3) {
+ 	XLOG_WARNING("bad version number");
+-	_invalid = true;
++	set_invalid(true);
+     }
+     
+     int major, minor;
+@@ -114,36 +113,37 @@ ParsedFinderMessageBase::ParsedFinderMessageBase(const char* data, char type)
+     pos ++;
+     if (skip_text(pos, FMC_VERSION_SEP) == false) {
+ 	XLOG_WARNING("Corrupt header field: major/minor separator");
+-	_invalid = true;
++	set_invalid(true);
+     }
+     
+     minor = *pos - '0';
+     if (major != FINDER_PROTOCOL_MAJOR_VERSION ||
+ 	minor != FINDER_PROTOCOL_MINOR_VERSION) {
+ 	XLOG_WARNING("Mismatched protocol version");
+-	_invalid = true;
++	set_invalid(true);
+     }
+     pos++;
+ 
+     // Msg type checking and extraction
+     if (skip_text(pos, FMC_MSG_TYPE) == false) {
+ 	XLOG_WARNING("Corrupt header field label: message type");
+-	_invalid = true;
++	set_invalid(true);
+     }
+     end = line_end(pos);
+     if (end - pos != 1) {
+ 	XLOG_WARNING("Corrupt header field: fat message type");
+-	_invalid = true;
++	set_invalid(true);
+     }
+     _type = *pos;
+     if (_type != type) {
+-	_invalid = true;
++	XLOG_FATAL("Type mismatch, _type: %c  type: %c\n", _type, type);
++	set_invalid(true);
+     }
+     pos++;
+ 
+     // Seq no checking and extraction
+     if (skip_text(pos, FMC_SEQ_NO) == false) {
+-	_invalid = true;
++	set_invalid(true);
+ 	XLOG_WARNING("Corrupt header field label: sequence number");
+     }
+     end = line_end(pos);
+@@ -156,14 +156,14 @@ ParsedFinderMessageBase::ParsedFinderMessageBase(const char* data, char type)
+     }
+ 
+     if (pos != end) {
+-	_invalid = true;
++	set_invalid(true);
+ 	XLOG_WARNING("Corrupt header field: sequence number");
+     }
+ 
+     // Message data checking
+     if (skip_text(pos, FMC_MSG_DATA) == false) {
+ 	XLOG_WARNING("Corrupt header field label: message data");
+-	_invalid = true;
++	set_invalid(true);
+     }
+     end = line_end(pos);
+     
+@@ -227,12 +227,11 @@ FinderXrlResponse::FinderXrlResponse(uint32_t	     seqno,
+ ParsedFinderXrlResponse::ParsedFinderXrlResponse(const char* data)
+ 	: ParsedFinderMessageBase(data, FinderXrlResponse::c_type), _xrl_args(0)
+ {
+-    _invalid = false;
+     data += bytes_parsed();
+     char* p0 = strstr(const_cast<char*>(data), "/");
+     char* p1 = strstr(const_cast<char*>(data), "\n");
+     if (p0 == 0 || p1 == 0) {
+-	_invalid = true;
++	set_invalid(true);
+ 	XLOG_WARNING("XrlError not present");
+     }
+ 
+@@ -244,7 +243,7 @@ ParsedFinderXrlResponse::ParsedFinderXrlResponse(const char* data)
+     }
+ 
+     if (XrlError::known_code(code) == false) {
+-	_invalid = true;
++	set_invalid(true);
+ 	XLOG_WARNING("Unknown Xrl error code");
+ 	return;
+     }
+@@ -253,7 +252,7 @@ ParsedFinderXrlResponse::ParsedFinderXrlResponse(const char* data)
+     if (p0 + 2 < p1 &&
+ 	xrlatom_decode_value(p0 + 2, p1 - p0 - 2, note) >= 0) {
+ 	XLOG_WARNING("Code not decode XrlError note.");
+-	_invalid = true;
++	set_invalid(true);
+ 	return;
+     }
+ 
+diff --git a/xorp/libxipc/finder_msgs.hh b/xorp/libxipc/finder_msgs.hh
+index 86d1d5b..08d21f9 100644
+--- a/xorp/libxipc/finder_msgs.hh
++++ b/xorp/libxipc/finder_msgs.hh
+@@ -96,7 +96,7 @@ protected:
+ /**
+  * Base class for parsed Finder Messages.
+  */
+-class ParsedFinderMessageBase {
++class ParsedFinderMessageBase : public Invalid {
+ public:
+ 
+     /**
+@@ -112,7 +112,6 @@ public:
+     
+     uint32_t seqno() const { return _seqno; }
+     char type() const { return _type; }
+-    virtual bool invalid() const { return _invalid; }
+ 
+ protected:
+     uint32_t bytes_parsed() const { return _bytes_parsed; }
+@@ -123,8 +122,6 @@ protected:
+ 
+     static const char* c_msg_template;
+ 
+-    bool _invalid;
+-
+ private:
+     ParsedFinderMessageBase(); /* disable default constructor */
+ };
+diff --git a/xorp/libxipc/finder_tcp_messenger.cc b/xorp/libxipc/finder_tcp_messenger.cc
+index c5f31b5..343940c 100644
+--- a/xorp/libxipc/finder_tcp_messenger.cc
++++ b/xorp/libxipc/finder_tcp_messenger.cc
+@@ -73,7 +73,7 @@ FinderTcpMessenger::read_event(int	      errval,
+ 
+     ParsedFinderXrlMessage fm(s.c_str());
+     if (fm.invalid()) {
+-	ex = "Invalid string";
++	ex = "Invalid string: " + s;
+ 	goto err;
+     }
+     dispatch_xrl(fm.seqno(), fm.xrl());
+diff --git a/xorp/libxipc/xrl.cc b/xorp/libxipc/xrl.cc
+index c069584..0ccd95c 100644
+--- a/xorp/libxipc/xrl.cc
++++ b/xorp/libxipc/xrl.cc
+@@ -85,7 +85,7 @@ Xrl::Xrl(const string&	target,
+ 	 const XrlArgs&	args)
+     : _protocol(_finder_protocol), _target(target), _command(command),
+       _args(args), _sna_atom(NULL), _packed_bytes(0), _argp(&_args),
+-      _to_finder(-1), _resolved(false), _invalid(false)
++      _to_finder(-1), _resolved(false)
+ {
+ }
+ 
+@@ -94,7 +94,7 @@ Xrl::Xrl(const string& protocol,
+ 	 const string& command)
+     : _protocol(protocol), _target(protocol_target), _command(command),
+       _sna_atom(NULL), _packed_bytes(0), _argp(&_args), _to_finder(-1),
+-      _resolved(false), _invalid(false)
++      _resolved(false)
+ {
+ }
+ 
+@@ -102,7 +102,7 @@ Xrl::Xrl(const string& target,
+ 	 const string& command)
+     : _protocol(_finder_protocol), _target(target), _command(command),
+       _sna_atom(NULL), _packed_bytes(0), _argp(&_args), _to_finder(-1),
+-      _resolved(false), _invalid(false)
++      _resolved(false)
+ {
+ }
+ 
+@@ -110,16 +110,16 @@ Xrl::Xrl(const char* target,
+ 	 const char* command)
+ 	: _protocol(_finder_protocol), _target(target), _command(command),
+ 	  _sna_atom(NULL), _packed_bytes(0), _argp(&_args), _to_finder(-1),
+-	  _resolved(false), _invalid(false)
++	  _resolved(false)
+ {
+ }
+ 
+ Xrl::Xrl(const char* c_str)
+         : _sna_atom(NULL), _packed_bytes(0), _argp(&_args),
+-	  _to_finder(-1), _resolved(false), _invalid(false)
++	  _to_finder(-1), _resolved(false)
+ {
+     if (0 == c_str) {
+-	_invalid = true;
++	set_invalid(true);
+ 	return;
+     }
+ 
+@@ -130,18 +130,18 @@ Xrl::Xrl(const char* c_str)
+ 	_args = XrlArgs(start);
+ 	if (_args.invalid()) {
+ 	    debug_msg("Failed to restore xrl args:\n\t\"%s\"", start);
+-	    _invalid = true;
++	    set_invalid(true);
+ 	}
+     }
+ }
+ 
+ Xrl::Xrl() 
+     : _sna_atom(0), _packed_bytes(0), _argp(&_args), _to_finder(-1),
+-      _resolved(false), _invalid(false)
++      _resolved(false)
+ {
+ }
+ 
+-Xrl::Xrl(const Xrl& x)
++Xrl::Xrl(const Xrl& x) : Invalid(x)
+ {
+     copy(x);
+ }
+@@ -168,7 +168,7 @@ Xrl::copy(const Xrl& x)
+     _to_finder	    = x._to_finder;
+     _resolved	    = x._resolved;
+     _resolved_sender	    = x._resolved_sender;
+-    _invalid = x._invalid;
++    set_invalid(x.invalid());
+ }
+ 
+ Xrl::~Xrl()
+diff --git a/xorp/libxipc/xrl.hh b/xorp/libxipc/xrl.hh
+index 4467f53..1636e7c 100644
+--- a/xorp/libxipc/xrl.hh
++++ b/xorp/libxipc/xrl.hh
+@@ -37,7 +37,7 @@ class XrlPFSender;
+ /**
+  * XORP IPC request.
+  */
+-class Xrl {
++class Xrl : public Invalid {
+ public:
+     /**
+      * Construct an Xrl.
+@@ -180,7 +180,6 @@ public:
+ 
+     void set_target(const char* target);
+ 
+-    bool invalid() const { return _invalid; }
+ private:
+     const char* parse_xrl_path(const char* xrl_path);
+     void        clear_cache();
+@@ -204,7 +203,6 @@ private:
+     mutable ref_ptr<XrlPFSender> _resolved_sender; // XXX ditto
+ 
+     static const string _finder_protocol;
+-    bool _invalid;
+ };
+ 
+ typedef Xrl XrlTemplate;
+diff --git a/xorp/libxipc/xrl_args.cc b/xorp/libxipc/xrl_args.cc
+index dea3124..f268a6d 100644
+--- a/xorp/libxipc/xrl_args.cc
++++ b/xorp/libxipc/xrl_args.cc
+@@ -551,7 +551,6 @@ XrlArgs::XrlArgs(const char* serialized)
+ 		: _have_name(false)
+ {
+     string s(serialized);
+-    _invalid = false;
+     bad_atom.set_invalid(true);
+ 
+     for (string::iterator start = s.begin(); start < s.end(); start++) {
+diff --git a/xorp/libxipc/xrl_args.hh b/xorp/libxipc/xrl_args.hh
+index 2c78169..d85368b 100644
+--- a/xorp/libxipc/xrl_args.hh
++++ b/xorp/libxipc/xrl_args.hh
+@@ -33,14 +33,14 @@
+ 
+ #include "xrl_atom.hh"
+ 
+-class XrlArgs {
++class XrlArgs : public Invalid {
+ public:
+     typedef vector<XrlAtom>	    ATOMS;
+     typedef ATOMS::const_iterator   const_iterator;
+     typedef ATOMS::iterator	    iterator;
+ 
+ public:
+-    XrlArgs() : _have_name(false), _invalid(false) { bad_atom.set_invalid(true);}
++    XrlArgs() : _have_name(false) { bad_atom.set_invalid(true);}
+     explicit XrlArgs(const char* str);
+ 
+     ~XrlArgs() {}
+@@ -316,14 +316,11 @@ public:
+     template <class T>
+     void set_arg(int idx, const T& arg);
+ 
+-    bool invalid() const { return _invalid; }
+-
+ protected:
+     bool WARN_UNUSED check_not_found(const XrlAtom &xa);
+ 
+     ATOMS _args;
+     bool  _have_name;
+-    bool _invalid;
+ };
+ 
+ 
+diff --git a/xorp/libxipc/xrl_atom.cc b/xorp/libxipc/xrl_atom.cc
+index a387090..e94d975 100644
+--- a/xorp/libxipc/xrl_atom.cc
++++ b/xorp/libxipc/xrl_atom.cc
+@@ -154,14 +154,15 @@ resolve_xrlatom_name(const char* name)
+ void
+ XrlAtom::data_from_c_str(const char* c_str)
+ {
+-    _invalid = false;
++    set_invalid(false);
++
+     // Handle binary data type differently to avoid unnecessary copying.
+     if (_type == xrlatom_binary) {
+ 	_binary = new vector<uint8_t>();
+ 	ssize_t bad_pos = xrlatom_decode_value(c_str, strlen(c_str), *_binary);
+ 	if (bad_pos >= 0) {
+ 	    delete _binary;
+-	    _invalid = true;
++	    set_invalid(true);
+ 	    return;
+ 	}
+ 	_have_data = true;
+@@ -171,7 +172,7 @@ XrlAtom::data_from_c_str(const char* c_str)
+     string decoded;
+     ssize_t bad_pos = xrlatom_decode_value(c_str, strlen(c_str), decoded);
+     if (bad_pos >= 0) {
+-	_invalid = true;
++	set_invalid(true);
+ 	return;
+     }
+     c_str = decoded.c_str();
+@@ -543,7 +544,7 @@ XrlAtom::XrlAtom(const char* serialized)
+ 	_have_data = false;
+ 	if (_type == xrlatom_no_type) {
+ 	    XLOG_WARNING("xrlatom bad type: \"%s\"", start);
+-	    _invalid = true;
++	    set_invalid(true);
+ 	    return;
+ 	}
+     } else {
+@@ -551,7 +552,7 @@ XrlAtom::XrlAtom(const char* serialized)
+ 	if (xrlatom_no_type == _type) {
+ 	    XLOG_WARNING("xrlatom bad type: \"%s\"",
+ 			 string(start, sep).c_str());
+-	    _invalid = true;
++	    set_invalid(true);
+ 	    return;
+ 	}
+ 	start = sep + TOKEN_BYTES(XrlToken::ARG_TV_SEP) - 1;
+@@ -1022,8 +1023,11 @@ XrlAtom::unpack_mac(const uint8_t* buffer, size_t buffer_bytes)
+     else
+ 	_mac->copy_in(s.c_str());
+ 
+-    _invalid = _mac->invalid();
+-    if (_invalid) {
++    if (_mac->invalid())
++	set_invalid(true);
++
++    if (invalid()) {
++	delete _mac;
+ 	_mac = NULL;
+ 	return 0;
+     }
+@@ -1409,7 +1413,7 @@ XrlAtom::set_name(const char *name)
+     else {
+ 	_atom_name = name;
+ 	if (!valid_name(_atom_name))
+-	    _invalid = true;
++	    set_invalid(true);
+     }
+ }
+ 
+diff --git a/xorp/libxipc/xrl_atom.hh b/xorp/libxipc/xrl_atom.hh
+index 9be938d..1fa8579 100644
+--- a/xorp/libxipc/xrl_atom.hh
++++ b/xorp/libxipc/xrl_atom.hh
+@@ -72,13 +72,9 @@ inline XrlAtomType& operator++(XrlAtomType& t)
+  */
+ const char* xrlatom_type_name(const XrlAtomType&);
+ 
+-class XrlAtomBase {
+-protected:
+-    bool _invalid;
++class XrlAtomBase : public Invalid {
+ public:
+-    XrlAtomBase() { _invalid = false; }
+-    virtual bool invalid() const { return _invalid; }
+-    virtual void set_invalid(bool v) { _invalid = v; }
++    XrlAtomBase() { }
+ };
+ 
+ class XrlAtom : public XrlAtomBase {
+diff --git a/xorp/libxipc/xuid.cc b/xorp/libxipc/xuid.cc
+index 0bded86..6447ea9 100644
+--- a/xorp/libxipc/xuid.cc
++++ b/xorp/libxipc/xuid.cc
+@@ -74,7 +74,8 @@ XUID::initialize()
+ {
+     static TimeVal last;	// last time clock reading value
+     static uint16_t ticks;	// number of ticks with same clock reading
+-    _invalid = false;
++
++    set_invalid(false);
+ 
+     // Component 1: Local IPv4 Address - returned in network order
+     uint32_t hid = local_ip4_addr();
+@@ -111,18 +112,17 @@ static const uint32_t XUID_CSTR_BYTES = (32 + 3);
+ 
+ XUID::XUID(const string& s)
+ {
+-    _invalid = false;
+     x_static_assert(sizeof(_data) == 16);
+     x_static_assert(sizeof(_data[0]) == 4);
+ 
+     if (s.size() < XUID_CSTR_BYTES) {
+-	_invalid = true;
++	set_invalid(true);
+ 	return;
+     }
+ 
+     if (sscanf(s.c_str(), sfmt, &_data[0], &_data[1], &_data[2], &_data[3])
+ 	!= 4) {
+-	_invalid = true;
++	set_invalid(true);
+ 	return;
+     }
+     for (int i = 0; i < 4; i++) {
+diff --git a/xorp/libxipc/xuid.hh b/xorp/libxipc/xuid.hh
+index 6624df8..d037c7f 100644
+--- a/xorp/libxipc/xuid.hh
++++ b/xorp/libxipc/xuid.hh
+@@ -19,14 +19,13 @@
+ // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/libxipc/xuid.hh,v 1.10 2008/10/02 21:57:26 bms Exp $
+ 
+ #ifndef __LIBXIPC_XUID_HH__
+ #define __LIBXIPC_XUID_HH__
+ 
++#include <libxorp/exceptions.hh>
+ 
+-
+-class XUID {
++class XUID : public Invalid {
+ public:
+     XUID(const string&);
+ 
+@@ -40,10 +39,8 @@ public:
+     bool operator<(const XUID&) const;
+ 
+     string str() const;
+-    bool invalid() const { return _invalid; }
+ private:
+     uint32_t _data[4];		// Internal representation is network ordered
+-    bool _invalid;
+ };
+ 
+ #endif // __LIBXIPC_XUID_HH__
+diff --git a/xorp/libxorp/ipvx.cc b/xorp/libxorp/ipvx.cc
+index a94bb56..7efc13c 100644
+--- a/xorp/libxorp/ipvx.cc
++++ b/xorp/libxorp/ipvx.cc
+@@ -44,16 +44,14 @@
+ IPvX::IPvX()
+     : _af(AF_INET)
+ {
+-    _invalid = false;
+     memset(_addr, 0, sizeof(_addr));
+ }
+ 
+ // Construct an IN_ADDR_ANY address of @family.
+ IPvX::IPvX(int family)
+ {
+-    _invalid = false;
+     if ((family != AF_INET) && (family != AF_INET6)) {
+-	_invalid = true;
++	set_invalid(true);
+     }
+ 
+     _af = family;
+@@ -64,7 +62,6 @@ IPvX::IPvX(int family)
+ // memory.
+ IPvX::IPvX(int family, const uint8_t *from_uint8)
+ {
+-    _invalid = false;
+     _af = family;
+     memset(_addr, 0, sizeof(_addr));
+     memcpy(_addr, from_uint8, addr_bytelen());
+@@ -72,7 +69,7 @@ IPvX::IPvX(int family, const uint8_t *from_uint8)
+ 
+ IPvX::IPvX(const IPv4& ipv4)
+ {
+-    _invalid = ipv4.invalid();
++    set_invalid(ipv4.invalid());
+     x_static_assert(sizeof(_addr) >= 4);
+ 
+     _af = AF_INET;
+@@ -82,7 +79,7 @@ IPvX::IPvX(const IPv4& ipv4)
+ 
+ IPvX::IPvX(const IPv6& ipv6)
+ {
+-    _invalid = ipv6.invalid();
++    set_invalid(ipv6.invalid());
+     x_static_assert(sizeof(_addr) >= 16);
+ 
+     _af = AF_INET6;
+@@ -91,52 +88,45 @@ IPvX::IPvX(const IPv6& ipv6)
+ 
+ IPvX::IPvX(const in_addr& from_in_addr)
+ {
+-    _invalid = false;
+     copy_in(AF_INET, reinterpret_cast<const uint8_t *>(&from_in_addr));
+ }
+ 
+ IPvX::IPvX(const in6_addr& from_in6_addr)
+ {
+-    _invalid = false;
+     copy_in(AF_INET6, reinterpret_cast<const uint8_t *>(&from_in6_addr));
+ }
+ 
+ IPvX::IPvX(const sockaddr& from_sockaddr)
+ {
+-    _invalid = false;
+     copy_in(from_sockaddr);
+ }
+ 
+ IPvX::IPvX(const sockaddr_storage& from_sockaddr_storage)
+ {
+-    _invalid = false;
+     copy_in(from_sockaddr_storage);
+ }
+ 
+ IPvX::IPvX(const sockaddr_in& from_sockaddr_in)
+ {
+-    _invalid = false;
+     copy_in(from_sockaddr_in);
+ }
+ 
+ IPvX::IPvX(const sockaddr_in6& from_sockaddr_in6)
+ {
+-    _invalid = false;
+     copy_in(from_sockaddr_in6);
+ }
+ 
+ IPvX::IPvX(char const *from_cstring)
+ {
+-    _invalid = false;
+     memset(_addr, 0, sizeof(_addr));
+     if (from_cstring == NULL) {
+-	_invalid = true;
++	set_invalid(true);
+     } else if (inet_pton(AF_INET, from_cstring, _addr) > 0) {
+ 	_af = AF_INET;
+     } else if (inet_pton(AF_INET6, from_cstring, _addr) > 0) {
+ 	_af = AF_INET6;
+     } else {
+-	_invalid = true;
++	set_invalid(true);
+ 	XLOG_WARNING("Bad IPvX \"%s\"", from_cstring);
+     }
+ }
+diff --git a/xorp/libxorp/ipvx.hh b/xorp/libxorp/ipvx.hh
+index 0b2c40d..fed119d 100644
+--- a/xorp/libxorp/ipvx.hh
++++ b/xorp/libxorp/ipvx.hh
+@@ -19,7 +19,6 @@
+ // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/libxorp/ipvx.hh,v 1.35 2009/01/05 18:30:58 jtc Exp $
+ 
+ #ifndef __LIBXORP_IPVX_HH__
+ #define __LIBXORP_IPVX_HH__
+@@ -31,7 +30,7 @@
+ /**
+  * @short Basic IPvX class (for both IPv4 and IPv6)
+  */
+-class IPvX {
++class IPvX : public Invalid {
+ public:
+     /**
+      * Default contructor
+@@ -853,14 +852,12 @@ public:
+     static const IPvX& CLASS_C_BASE(int family);
+     static const IPvX& EXPERIMENTAL_BASE(int family);
+ 
+-    bool invalid() const { return _invalid; }
+ private:
+     friend class IPv4;
+     friend class IPv6;
+ 
+     int _af;		// The address family AF_INET or AF_INET6
+     uint32_t _addr[4];	// Underlay address value for casting to IPv4 and IPv6
+-    bool _invalid;
+ };
+ 
+ inline IPv4
+diff --git a/xorp/libxorp/mac.cc b/xorp/libxorp/mac.cc
+index 82d623d..e9c1a6e 100644
+--- a/xorp/libxorp/mac.cc
++++ b/xorp/libxorp/mac.cc
+@@ -29,31 +29,26 @@
+ 
+ Mac::Mac()
+ {
+-    _invalid = false;
+     memset(_addr, 0, sizeof(_addr));
+ }
+ 
+ Mac::Mac(const uint8_t* from_uint8)
+ {
+-    _invalid = false;
+     copy_in(from_uint8);
+ }
+ 
+ Mac::Mac(const char* from_cstring)
+ {
+-    _invalid = false;
+     copy_in(from_cstring);
+ }
+ 
+ Mac::Mac(const struct ether_addr& from_ether_addr)
+ {
+-    _invalid = false;
+     copy_in(from_ether_addr);
+ }
+ 
+ Mac::Mac(const struct sockaddr& from_sockaddr)
+ {
+-    _invalid = false;
+     copy_in(from_sockaddr);
+ }
+ 
+@@ -114,10 +109,10 @@ size_t
+ Mac::copy_in(const char* from_cstring)
+ {
+     const struct ether_addr* eap;
+-    _invalid = false;
++    set_invalid(false);
+ 
+     if (from_cstring == NULL) {
+-	_invalid = true;
++	set_invalid(true);
+ 	return 0;
+     }
+ 
+@@ -125,7 +120,7 @@ Mac::copy_in(const char* from_cstring)
+     struct ether_addr ea;
+ 
+     if (ether_aton_r(from_cstring, &ea) == NULL) {
+-	_invalid = true;
++	set_invalid(true);
+ 	XLOG_WARNING("Bad Mac \"%s\"", from_cstring);
+ 	return 0;
+     }
+@@ -140,7 +135,7 @@ Mac::copy_in(const char* from_cstring)
+     //
+     eap = ether_aton(const_cast<char *>(from_cstring));
+     if (eap == NULL) {
+-	_invalid = true;
++	set_invalid(true);
+ 	XLOG_WARNING("Bad Mac \"%s\"", from_cstring);
+ 	return 0;
+     }
+diff --git a/xorp/libxorp/mac.hh b/xorp/libxorp/mac.hh
+index a84fae3..a6f78ec 100644
+--- a/xorp/libxorp/mac.hh
++++ b/xorp/libxorp/mac.hh
+@@ -19,7 +19,6 @@
+ // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/libxorp/mac.hh,v 1.32 2008/10/10 00:38:20 pavlin Exp $
+ 
+ #ifndef __LIBXORP_MAC_HH__
+ #define __LIBXORP_MAC_HH__
+@@ -32,7 +31,7 @@
+ /**
+  * @short IEEE standard 48-bit address.
+  */
+-class Mac {
++class Mac : public Invalid {
+ public:
+     /**
+      * Default constructor.
+@@ -232,10 +231,8 @@ public:
+     static const Mac& GMRP_MULTICAST();
+     static const Mac& GVRP_MULTICAST();
+ 
+-    bool invalid() const { return _invalid; }
+ private:
+     uint8_t	_addr[ADDR_BYTELEN];	// The address value (in network-order)
+-    bool _invalid;
+ };
+ 
+ struct MacConstants {
+diff --git a/xorp/rib/parser.hh b/xorp/rib/parser.hh
+index 36f016a..0869e40 100644
+--- a/xorp/rib/parser.hh
++++ b/xorp/rib/parser.hh
+@@ -18,7 +18,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/rib/parser.hh,v 1.24 2008/10/02 21:58:10 bms Exp $
+ 
+ #ifndef __RIB_PARSER_HH__
+ #define __RIB_PARSER_HH__
+@@ -39,14 +38,11 @@ class Command;
+ /**
+  * Base class for data types available to Parser.
+  */
+-class Datum {
++class Datum : public Invalid {
+ public:
+-    Datum() { _invalid = false; }
++    Datum() { }
+     virtual ~Datum() {}
+-    virtual bool invalid() const { return _invalid; }
+ 
+-protected:
+-    bool _invaild;
+ };
+ 
+ class Uint32Datum : public Datum {
+@@ -55,7 +51,7 @@ public:
+ 	_n = 0;
+ 	for (size_t i = 0; i < s.size(); i++) {
+ 	    if (!xorp_isdigit(s[i])) {
+-		_invalid = true;
++		set_invalid(true);
+ 		return;
+ 	    }
+ 	    _n *= 10;
+@@ -81,7 +77,7 @@ class IPv4Datum : public Datum {
+ public:
+     IPv4Datum(const string& s) : _ipv4(s.c_str()) {}
+     const IPv4& get() const { return _ipv4; }
+-    virtual bool invalid() const { return _invalid || _ipv4.invalid(); }
++    virtual bool invalid() const { return Invalid::invalid() || _ipv4.invalid(); }
+ 
+ protected:
+     const IPv4 _ipv4;
+@@ -91,7 +87,7 @@ class IPv4NetDatum : public Datum {
+ public:
+     IPv4NetDatum(const string& s) : _ipv4net(s.c_str()) {}
+     const IPv4Net& get() const { return _ipv4net; }
+-    virtual bool invalid() const { return _invalid || _ipv4net.invalid(); }
++    virtual bool invalid() const { return Invalid::invalid() || _ipv4net.invalid(); }
+ 
+ protected:
+     const IPv4Net _ipv4net;
+-- 
+2.7.5
+

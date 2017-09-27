@@ -1,0 +1,4003 @@
+diff --git a/xorp/libxipc/xrl_atom.cc b/xorp/libxipc/xrl_atom.cc
+index e8a892b..b0fbb00 100644
+--- a/xorp/libxipc/xrl_atom.cc
++++ b/xorp/libxipc/xrl_atom.cc
+@@ -750,11 +750,6 @@ XrlAtom::packed_bytes() const
+ 	return bytes;
+     }
+ 
+-    x_static_assert(sizeof(IPv4) == 4);
+-    x_static_assert(sizeof(IPv6) == 16);
+-    x_static_assert(sizeof(IPv4Net) == sizeof(IPv4) + 4);
+-    x_static_assert(sizeof(IPv6Net) == sizeof(IPv6) + 4);
+-
+     switch (_type) {
+     case xrlatom_no_type:
+ 	break;
+diff --git a/xorp/libxorp/asnum.hh b/xorp/libxorp/asnum.hh
+index 8d854c4..e9dfdbe 100644
+--- a/xorp/libxorp/asnum.hh
++++ b/xorp/libxorp/asnum.hh
+@@ -19,13 +19,13 @@
+ // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/libxorp/asnum.hh,v 1.20 2008/10/02 21:57:28 bms Exp $
+ 
+ #ifndef __LIBXORP_ASNUM_HH__
+ #define __LIBXORP_ASNUM_HH__
+ 
+ #include "libxorp/xorp.h"
+-#include "libxorp/exceptions.hh"
++#include "libxorp/libxorp_module.h"
++#include "libxorp/xlog.h"
+ 
+ #ifdef HAVE_INTTYPES_H
+ #include <inttypes.h>
+@@ -112,31 +112,28 @@ public:
+      * range 1-65535, or as two decimal numbers x.y, where x and y are
+      * in the range 0-65535 
+      */
+-    explicit AsNum(const string& as_str) throw(InvalidString) {
++    explicit AsNum(const string& as_str) {
+ 	bool four_byte = false;
+ 	bool seen_digit = false;
+ 	for (uint32_t i = 0; i < as_str.size(); i++) {
+ 	    if (as_str[i] == '.') {
+ 		if (four_byte || seen_digit == false) {
+ 		    // more than one dot, or no number before the first dot.
+-		    xorp_throw(InvalidString, c_format("Bad AS number \"%s\"",
+-						       as_str.c_str()));
++		    goto fail;
+ 		} else {
+ 		    four_byte = true;
+ 		    seen_digit = false;
+ 		}
+ 	    } else if (!isdigit(as_str[i])) {
+ 		// got some disallowed character
+-		xorp_throw(InvalidString, c_format("Bad AS number \"%s\"",
+-						   as_str.c_str()));
++		goto fail;
+ 	    } else {
+ 		seen_digit = true;
+ 	    }
+ 	}
+ 	if (seen_digit == false) {
+ 	    // either no digit here, or no digit after the dot
+-	    xorp_throw(InvalidString, c_format("Bad AS number \"%s\"",
+-					       as_str.c_str()));
++	    goto fail;
+ 	}
+ 	
+ 	// got here, so the text is in the right format
+@@ -144,8 +141,7 @@ public:
+ 	    _as = atoi(as_str.c_str());
+ 	    if (_as < 1 || _as > 65535) {
+ 		// out of range
+-		xorp_throw(InvalidString, c_format("Bad AS number \"%s\"",
+-					       as_str.c_str()));
++		goto fail;
+ 	    }
+ 	} else {
+ 	    uint32_t upper = strtoul(as_str.c_str(), NULL, 10);
+@@ -153,11 +149,14 @@ public:
+ 				     NULL, 10);
+ 	    if  (upper > 65535 || lower > 65535) {
+ 		// out of range
+-		xorp_throw(InvalidString, c_format("Bad AS number \"%s\"",
+-					       as_str.c_str()));
++		goto fail;
+ 	    }
+ 	    _as = (upper << 16) | lower;
+ 	}
++	return;
++      fail:
++	_as = AS_INVALID;
++	XLOG_WARNING("Bad AS number \"%s\"", as_str.c_str());
+     }
+ 
+ 
+diff --git a/xorp/libxorp/buffer.hh b/xorp/libxorp/buffer.hh
+index 45ce335..4cdcb96 100644
+--- a/xorp/libxorp/buffer.hh
++++ b/xorp/libxorp/buffer.hh
+@@ -75,9 +75,9 @@ public:
+      * @param offset the data offset from the beginning of the buffer.
+      * @return the data value at @ref offset.
+      */
+-    uint8_t data(size_t offset) const throw (InvalidBufferOffset) {
++    uint8_t data(size_t offset) const {
+ 	if (offset >= _max_size)
+-	    xorp_throw(InvalidBufferOffset, "invalid get data() offset");
++	    XLOG_ASSERT(0);
+ 	return (_data[offset]);
+     }
+     
+diff --git a/xorp/libxorp/exceptions.hh b/xorp/libxorp/exceptions.hh
+index a6f5db0..e16ec10 100644
+--- a/xorp/libxorp/exceptions.hh
++++ b/xorp/libxorp/exceptions.hh
+@@ -19,8 +19,6 @@
+ // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/libxorp/exceptions.hh,v 1.12 2009/01/05 18:30:57 jtc Exp $
+-
+ 
+ #ifndef __LIBXORP_EXCEPTIONS_HH__
+ #define __LIBXORP_EXCEPTIONS_HH__
+@@ -38,6 +36,40 @@ using namespace std;
+ 
+ #include "libxorp/c_format.hh"
+ 
++class Invalid {
++public:
++    Invalid() { _invalid = false; }
++    Invalid(const Invalid &a) { _invalid = a._invalid; }
++    virtual ~Invalid() { }
++    virtual bool invalid() const { return _invalid; }
++    void set_invalid(bool v) { _invalid = v; }
++    void set_valid(bool v) { _invalid = !v; }
++    void set_invalid_or(bool v) { _invalid |= v; }
++
++    Invalid& operator=(const Invalid& n) {
++	_invalid = n._invalid;
++	return *this;
++    }
++
++protected:
++    bool _invalid;
++};
++
++#define INVALID(args...)			\
++    do {					\
++	XLOG_WARNING(args);			\
++	set_invalid(true);			\
++	return;					\
++    } while (0);
++
++#define INVALID_F(args...)			\
++    do {					\
++	XLOG_WARNING(args);			\
++	set_invalid(true);			\
++	return false;				\
++    } while (0);
++    
++
+ /**
+  * Macro to known insert values into exception arguments.
+  */
+diff --git a/xorp/libxorp/ipnet.hh b/xorp/libxorp/ipnet.hh
+index f112663..4d1de86 100644
+--- a/xorp/libxorp/ipnet.hh
++++ b/xorp/libxorp/ipnet.hh
+@@ -38,7 +38,7 @@
+  * A "subnet" is specified by a base "address" and a "prefix length".
+  */
+ template <class A>
+-class IPNet {
++class IPNet : public Invalid {
+ public:
+     /**
+      * Default constructor taking no parameters.
+@@ -54,12 +54,14 @@ public:
+      * @param prefix_len length of subnet mask (e.g., class C nets would have
+      * prefix_len=24).
+      */
+-    IPNet(const A& a, uint8_t prefix_len) throw (InvalidNetmaskLength)
++    IPNet(const A& a, uint8_t prefix_len)
+ 	: _masked_addr(a), _prefix_len(prefix_len)
+     {
+ 	if (prefix_len > A::addr_bitlen())
+-	    xorp_throw(InvalidNetmaskLength, prefix_len);
+-	_masked_addr = a.mask_by_prefix_len(prefix_len);
++	    set_invalid(true);
++	else {
++	    _masked_addr = a.mask_by_prefix_len(prefix_len);
++	}
+     }
+ 
+     /**
+@@ -69,7 +71,6 @@ public:
+      * and prefix length.
+      */
+     IPNet(const char *from_cstring)
+-	throw (InvalidString, InvalidNetmaskLength)
+     {
+ 	initialize_from_string(from_cstring);
+     }
+@@ -79,7 +80,7 @@ public:
+      *
+      * @param n the subnet to copy from.
+      */
+-    IPNet(const IPNet& n) {
++    IPNet(const IPNet& n) : Invalid(n) {
+ 	_masked_addr	= n.masked_addr();
+ 	_prefix_len	= n.prefix_len();
+     }
+@@ -105,7 +106,8 @@ public:
+      */
+     bool operator==(const IPNet& other) const {
+ 	return ((_prefix_len == other._prefix_len) &&
+-		(_masked_addr == other._masked_addr));
++		(_masked_addr == other._masked_addr) &&
++		(invalid() == other.invalid()));
+     }
+ 
+     /**
+@@ -446,8 +448,7 @@ public:
+     }
+ 
+ private:
+-    void initialize_from_string(const char *s)
+-	throw (InvalidString, InvalidNetmaskLength);
++    void initialize_from_string(const char *s);
+ 
+     A		_masked_addr;
+     uint8_t	_prefix_len;
+@@ -585,18 +586,25 @@ IPNet<A>::contains(const IPNet<A>& other) const
+ 
+ template <class A> void
+ IPNet<A>::initialize_from_string(const char *cp)
+-    throw (InvalidString, InvalidNetmaskLength)
+ {
+     char *slash = strrchr(const_cast<char*>(cp), '/');
+-    if (slash == 0)
+-	xorp_throw(InvalidString, "Missing slash");
++    if (slash == 0) {
++	XLOG_WARNING("Missing slash: %s", cp);
++	set_invalid(true);
++	return;
++    }
+ 
+-    if (*(slash + 1) == 0)
+-	xorp_throw(InvalidString, "Missing prefix length");
++    if (*(slash + 1) == 0) {
++	XLOG_WARNING("Missing prefix length: %s", cp);
++	set_invalid(true);
++	return;
++    }
+     char *n = slash + 1;
+     while (*n != 0) {
+ 	if (*n < '0' || *n > '9') {
+-	    xorp_throw(InvalidString, "Bad prefix length");
++	    XLOG_WARNING("Bad prefix length: %s", cp);
++	    set_invalid(true);
++	    return;
+ 	}
+ 	n++;
+     }
+diff --git a/xorp/libxorp/ipv4.cc b/xorp/libxorp/ipv4.cc
+index aabfb19..5c5b976 100644
+--- a/xorp/libxorp/ipv4.cc
++++ b/xorp/libxorp/ipv4.cc
+@@ -47,36 +47,45 @@ IPv4::IPv4(const in_addr& from_in_addr)
+     _addr = from_in_addr.s_addr;
+ }
+ 
+-IPv4::IPv4(const sockaddr& sa) throw (InvalidFamily)
++IPv4::IPv4(const sockaddr& sa)
+ {
+-    if (sa.sa_family != AF_INET)
+-	xorp_throw(InvalidFamily, sa.sa_family);
+-    const sockaddr_in* sin = sockaddr2sockaddr_in(&sa);
+-    _addr = sin->sin_addr.s_addr;
++    if (sa.sa_family != AF_INET) {
++	set_invalid(true);
++    }
++    else {
++	const sockaddr_in* sin = sockaddr2sockaddr_in(&sa);
++	_addr = sin->sin_addr.s_addr;
++    }
+ }
+ 
+-IPv4::IPv4(const sockaddr_storage& ss) throw (InvalidFamily)
++IPv4::IPv4(const sockaddr_storage& ss)
+ {
+-    if (ss.ss_family != AF_INET)
+-	xorp_throw(InvalidFamily, ss.ss_family);
+-    const sockaddr* sa = sockaddr_storage2sockaddr(&ss);
+-    const sockaddr_in* sin = sockaddr2sockaddr_in(sa);
+-    _addr = sin->sin_addr.s_addr;
++    if (ss.ss_family != AF_INET) {
++	set_invalid(true);
++    }
++    else {
++	const sockaddr* sa = sockaddr_storage2sockaddr(&ss);
++	const sockaddr_in* sin = sockaddr2sockaddr_in(sa);
++	_addr = sin->sin_addr.s_addr;
++    }
+ }
+ 
+-IPv4::IPv4(const sockaddr_in& sin) throw(InvalidFamily)
++IPv4::IPv4(const sockaddr_in& sin)
+ {
+-    if (sin.sin_family != AF_INET)
+-	xorp_throw(InvalidFamily, sin.sin_family);
+-    _addr = sin.sin_addr.s_addr;
++    if (sin.sin_family != AF_INET) {
++	set_invalid(true);
++    }
++    else {
++	_addr = sin.sin_addr.s_addr;
++    }
+ }
+ 
+-IPv4::IPv4(const char *from_cstring) throw (InvalidString)
++IPv4::IPv4(const char *from_cstring)
+ {
+     if (from_cstring == NULL)
+-	xorp_throw(InvalidString, "Null value" );
++	set_invalid(true);
+     if (inet_pton(AF_INET, from_cstring, &_addr) <= 0)
+-	xorp_throw(InvalidString, c_format("Bad IPv4 \"%s\"", from_cstring));
++	set_invalid(true);
+ }
+ 
+ /**
+@@ -165,7 +174,7 @@ IPv4::copy_in(const in_addr& from_in_addr)
+  * @return the number of copied octets.
+  */
+ size_t
+-IPv4::copy_in(const sockaddr& from_sockaddr) throw (InvalidFamily)
++IPv4::copy_in(const sockaddr& from_sockaddr)
+ {
+     return (copy_in(*sockaddr2sockaddr_in(&from_sockaddr)));
+ }
+@@ -176,7 +185,6 @@ IPv4::copy_in(const sockaddr& from_sockaddr) throw (InvalidFamily)
+  */
+ size_t
+ IPv4::copy_in(const sockaddr_storage& from_sockaddr_storage)
+-    throw (InvalidFamily)
+ {
+     return (copy_in(*sockaddr_storage2sockaddr(&from_sockaddr_storage)));
+ }
+@@ -186,10 +194,9 @@ IPv4::copy_in(const sockaddr_storage& from_sockaddr_storage)
+  * @return the number of copied octets.
+  */
+ size_t
+-IPv4::copy_in(const sockaddr_in& from_sockaddr_in) throw (InvalidFamily)
++IPv4::copy_in(const sockaddr_in& from_sockaddr_in)
+ {
+-    if (from_sockaddr_in.sin_family != AF_INET)
+-	xorp_throw(InvalidFamily, from_sockaddr_in.sin_family);
++    XLOG_ASSERT(from_sockaddr_in.sin_family == AF_INET);
+     return (copy_in(from_sockaddr_in.sin_addr));
+ }
+ 
+@@ -220,10 +227,11 @@ IPv4::operator>>(uint32_t right_shift) const
+ }
+ 
+ IPv4
+-IPv4::make_prefix(uint32_t mask_len) throw (InvalidNetmaskLength)
++IPv4::make_prefix(uint32_t mask_len)
+ {
+-    if (mask_len > 32)
+-	xorp_throw(InvalidNetmaskLength, mask_len);
++    if (mask_len > 32) {
++	mask_len = 32;
++    }
+     uint32_t m = (mask_len == 0) ? 0 : ((~0U) << (32 - mask_len));
+     return IPv4(htonl(m));
+ }
+diff --git a/xorp/libxorp/ipv4.hh b/xorp/libxorp/ipv4.hh
+index cfb42e7..e19342c 100644
+--- a/xorp/libxorp/ipv4.hh
++++ b/xorp/libxorp/ipv4.hh
+@@ -38,7 +38,7 @@ struct in_addr;
+  * addresses and for performing operations on them such as printing
+  * and masking.
+  */
+-class IPv4 {
++class IPv4 : public Invalid {
+ public:
+     typedef in_addr 		InAddrType;
+     typedef sockaddr_in 	SockAddrType;
+@@ -49,14 +49,14 @@ public:
+      *
+      * The address value is initialized to INADDR_ANY.
+      */
+-    IPv4()              { _addr = 0; }
++    IPv4() { _addr = 0; }
+ 
+     /**
+      * Constructor from another IPv4 address.
+      *
+      * @param ipv4 the IPv4 address to assign the address value from.
+      */
+-    IPv4(const IPv4& ipv4) : _addr(ipv4._addr) {}
++    IPv4(const IPv4& ipv4) : Invalid(ipv4), _addr(ipv4._addr) {}
+ 
+     /**
+      * Constructor from an integer value.
+@@ -85,21 +85,21 @@ public:
+      *
+      * @param sa sockaddr to construct IPv4 addr from.
+      */
+-    IPv4(const sockaddr& sa) throw (InvalidFamily);
++    IPv4(const sockaddr& sa);
+ 
+     /**
+      * Constructor from sockaddr_storage structure.
+      *
+      * @param ss sockaddr_storage to construct IPv4 addr from.
+      */
+-    IPv4(const sockaddr_storage& ss) throw (InvalidFamily);
++    IPv4(const sockaddr_storage& ss);
+ 
+     /**
+      * Constructor from sockaddr_in structure.
+      *
+      * @param sin sockaddr_in to construct IPv4 addr from.
+      */
+-    IPv4(const sockaddr_in& sin) throw (InvalidFamily);
++    IPv4(const sockaddr_in& sin);
+ 
+     /**
+      * Constructor from a string.
+@@ -107,7 +107,9 @@ public:
+      * @param from_cstring C-style string in the IPv4 dotted decimal
+      * human-readable format used for initialization.
+      */
+-    IPv4(const char *from_string) throw (InvalidString);
++    IPv4(const char *from_string);
++
++    virtual ~IPv4() { }
+ 
+     /**
+      * Copy the IPv4 raw address to specified memory location.
+@@ -187,7 +189,7 @@ public:
+      * @param from_sockaddr the storage to copy the address from.
+      * @return the number of copied octets.
+      */
+-    size_t copy_in(const sockaddr& from_sockaddr) throw (InvalidFamily);
++    size_t copy_in(const sockaddr& from_sockaddr);
+ 
+     /**
+      * Copy a raw address from a sockaddr_storage structure into IPv4
+@@ -199,8 +201,7 @@ public:
+      * @param from_sockaddr_storage the storage to copy the address from.
+      * @return the number of copied octets.
+      */
+-    size_t copy_in(const sockaddr_storage& from_sockaddr_storage)
+-	throw (InvalidFamily);
++    size_t copy_in(const sockaddr_storage& from_sockaddr_storage);
+ 
+     /**
+      * Copy a raw address from a sockaddr_in structure into IPv4 structure.
+@@ -211,7 +212,7 @@ public:
+      * @param from_sockaddr_in the storage to copy the address from.
+      * @return the number of copied octets.
+      */
+-    size_t copy_in(const sockaddr_in& from_sockaddr_in) throw (InvalidFamily);
++    size_t copy_in(const sockaddr_in& from_sockaddr_in);
+ 
+     /**
+      * Bitwise-Negation Operator
+@@ -506,8 +507,7 @@ public:
+      * @return address size in number of octets.
+      */
+     static size_t addr_bytelen() {
+-	x_static_assert(sizeof(IPv4) == sizeof(uint32_t));
+-	return sizeof(IPv4);
++	return 4;
+     }
+ 
+     /**
+@@ -610,9 +610,9 @@ public:
+      * @param mask_len the length of the mask to create.
+      * @return a new IPv4 address that contains a mask of length @ref mask_len.
+      */
+-    static IPv4 make_prefix(uint32_t mask_len) throw (InvalidNetmaskLength);
++    static IPv4 make_prefix(uint32_t mask_len);
+ 
+-    static uint32_t make_prefix_uint(uint32_t mask_len) throw (InvalidNetmaskLength);
++    static uint32_t make_prefix_uint(uint32_t mask_len);
+ 
+     /**
+      * Make an IPv4 address prefix.
+@@ -621,13 +621,11 @@ public:
+      * @return a new IPv4 address created by masking this address with a mask
+      * of length @ref prefix_len.
+      */
+-    IPv4 mask_by_prefix_len(uint32_t mask_len) const
+-	throw (InvalidNetmaskLength) {
++    IPv4 mask_by_prefix_len(uint32_t mask_len) const {
+ 	return (*this) & make_prefix(mask_len);
+     }
+ 
+-    uint32_t mask_by_prefix_len_uint(uint32_t mask_len) const
+-	throw (InvalidNetmaskLength) {
++    uint32_t mask_by_prefix_len_uint(uint32_t mask_len) const {
+ 	return this->_addr & make_prefix_uint(mask_len);
+     }
+ 
+@@ -755,10 +753,10 @@ IPv4::bits(uint32_t lsb, uint32_t len) const
+ }
+ 
+ inline uint32_t
+-IPv4::make_prefix_uint(uint32_t mask_len) throw (InvalidNetmaskLength)
++IPv4::make_prefix_uint(uint32_t mask_len)
+ {
+     if (mask_len > 32)
+-	xorp_throw(InvalidNetmaskLength, mask_len);
++	mask_len = 32;
+     uint32_t m = (mask_len == 0) ? 0 : ((~0U) << (32 - mask_len));
+     return htonl(m);
+ }
+diff --git a/xorp/libxorp/ipv6.cc b/xorp/libxorp/ipv6.cc
+index daaaaca..96b9e33 100644
+--- a/xorp/libxorp/ipv6.cc
++++ b/xorp/libxorp/ipv6.cc
+@@ -55,36 +55,38 @@ IPv6::IPv6(const in6_addr& from_in6_addr)
+     memcpy(_addr, &from_in6_addr, sizeof(_addr));
+ }
+ 
+-IPv6::IPv6(const sockaddr& sa) throw (InvalidFamily)
++IPv6::IPv6(const sockaddr& sa)
+ {
+-    if (sa.sa_family != AF_INET6)
+-	xorp_throw(InvalidFamily, sa.sa_family);
++    XLOG_ASSERT(sa.sa_family == AF_INET6);
+     const sockaddr_in6* sin6 = sockaddr2sockaddr_in6(&sa);
+     memcpy(_addr, sin6->sin6_addr.s6_addr, sizeof(_addr));
+ }
+ 
+-IPv6::IPv6(const sockaddr_storage& ss) throw (InvalidFamily)
++IPv6::IPv6(const sockaddr_storage& ss)
+ {
+-    if (ss.ss_family != AF_INET6)
+-	xorp_throw(InvalidFamily, ss.ss_family);
++    XLOG_ASSERT(ss.ss_family == AF_INET6);
+     const sockaddr* sa = sockaddr_storage2sockaddr(&ss);
+     const sockaddr_in6* sin6 = sockaddr2sockaddr_in6(sa);
+     memcpy(_addr, sin6->sin6_addr.s6_addr, sizeof(_addr));
+ }
+ 
+-IPv6::IPv6(const sockaddr_in6& sin6) throw (InvalidFamily)
++IPv6::IPv6(const sockaddr_in6& sin6)
+ {
+-    if (sin6.sin6_family != AF_INET6)
+-	xorp_throw(InvalidFamily, sin6.sin6_family);
++    XLOG_ASSERT(sin6.sin6_family == AF_INET6);
+     memcpy(_addr, sin6.sin6_addr.s6_addr, sizeof(_addr));
+ }
+ 
+-IPv6::IPv6(const char* from_cstring) throw (InvalidString)
++IPv6::IPv6(const char* from_cstring)
+ {
+-    if (from_cstring == NULL)
+-	xorp_throw(InvalidString, "Null value" );
+-    if (inet_pton(AF_INET6, from_cstring, &_addr[0]) <= 0)
+-	xorp_throw(InvalidString, c_format("Bad IPv6 \"%s\"", from_cstring));
++    if (from_cstring == NULL) {
++	set_invalid(true);
++	return;
++    }
++    if (inet_pton(AF_INET6, from_cstring, &_addr[0]) <= 0) {
++	XLOG_WARNING("Bad IPv6 \"%s\"", from_cstring);
++	set_invalid(true);
++	return;
++    }
+ }
+ 
+ /**
+@@ -191,7 +193,7 @@ IPv6::copy_in(const in6_addr& from_in6_addr)
+  * @return the number of copied octets.
+  */
+ size_t
+-IPv6::copy_in(const sockaddr& from_sockaddr) throw (InvalidFamily)
++IPv6::copy_in(const sockaddr& from_sockaddr)
+ {
+     return (copy_in(*sockaddr2sockaddr_in6(&from_sockaddr)));
+ }
+@@ -202,7 +204,6 @@ IPv6::copy_in(const sockaddr& from_sockaddr) throw (InvalidFamily)
+  */
+ size_t
+ IPv6::copy_in(const sockaddr_storage& from_sockaddr_storage)
+-    throw (InvalidFamily)
+ {
+     return (copy_in(*sockaddr_storage2sockaddr(&from_sockaddr_storage)));
+ }
+@@ -212,10 +213,9 @@ IPv6::copy_in(const sockaddr_storage& from_sockaddr_storage)
+  * @return the number of copied octets.
+  */
+ size_t
+-IPv6::copy_in(const sockaddr_in6& from_sockaddr_in6) throw (InvalidFamily)
++IPv6::copy_in(const sockaddr_in6& from_sockaddr_in6)
+ {
+-    if (from_sockaddr_in6.sin6_family != AF_INET6)
+-	xorp_throw(InvalidFamily, from_sockaddr_in6.sin6_family);
++    XLOG_ASSERT(from_sockaddr_in6.sin6_family == AF_INET6);
+     return (copy_in(from_sockaddr_in6.sin6_addr));
+ }
+ 
+@@ -342,13 +342,13 @@ init_prefixes(IPv6* v6prefix)
+ }
+ 
+ const IPv6&
+-IPv6::make_prefix(uint32_t mask_len) throw (InvalidNetmaskLength)
++IPv6::make_prefix(uint32_t mask_len)
+ {
+     static IPv6 v6prefix[129];
+     static uint32_t n_inited_prefixes = init_prefixes(&v6prefix[0]);
+ 
+     if (mask_len > n_inited_prefixes)
+-	xorp_throw(InvalidNetmaskLength, mask_len);
++	mask_len = n_inited_prefixes;
+     return v6prefix[mask_len];
+ }
+ 
+diff --git a/xorp/libxorp/ipv6.hh b/xorp/libxorp/ipv6.hh
+index 66d3478..1825ba8 100644
+--- a/xorp/libxorp/ipv6.hh
++++ b/xorp/libxorp/ipv6.hh
+@@ -39,7 +39,7 @@ struct in6_addr;
+  * addresses and for performing operations on them such as printing
+  * and masking.
+  */
+-class IPv6 {
++class IPv6 : public Invalid {
+ public:
+     typedef struct in6_addr 		InAddrType;
+     typedef struct sockaddr_in6 	SockAddrType;
+@@ -80,21 +80,21 @@ public:
+      *
+      * @param sa sockaddr to construct IPv6 addr from.
+      */
+-    IPv6(const sockaddr& sa) throw (InvalidFamily);
++    IPv6(const sockaddr& sa);
+ 
+     /**
+      * Constructor from sockaddr_storage structure.
+      *
+      * @param ss sockaddr_storage to construct IPv6 addr from.
+      */
+-    IPv6(const sockaddr_storage& ss) throw (InvalidFamily);
++    IPv6(const sockaddr_storage& ss);
+ 
+     /**
+      * Constructor from sockaddr_in6 structure.
+      *
+      * @param sin6 sockaddr_in6 to construct IPv6 addr from.
+      */
+-    IPv6(const sockaddr_in6& sin6) throw (InvalidFamily);
++    IPv6(const sockaddr_in6& sin6);
+ 
+     /**
+      * Constructor from a string.
+@@ -102,7 +102,7 @@ public:
+      * @param from_cstring C-style string in the IPv6 canonical human-readable.
+      * format used for initialization.
+      */
+-    IPv6(const char *from_cstring) throw (InvalidString);
++    IPv6(const char *from_cstring);
+ 
+     /**
+      * Copy the IPv6 raw address to specified memory location.
+@@ -182,7 +182,7 @@ public:
+      * @param from_sockaddr the storage to copy the address from.
+      * @return the number of copied octets.
+      */
+-    size_t copy_in(const sockaddr& from_sockaddr) throw (InvalidFamily);
++    size_t copy_in(const sockaddr& from_sockaddr);
+ 
+     /**
+      * Copy a raw IPv6 address from a sockaddr_storage structure into IPv6
+@@ -194,7 +194,7 @@ public:
+      * @param from_sockaddr_storage the storage to copy the address from.
+      * @return the number of copied octets.
+      */
+-    size_t copy_in(const sockaddr_storage& from_sockaddr_storage) throw (InvalidFamily);
++    size_t copy_in(const sockaddr_storage& from_sockaddr_storage);
+ 
+     /**
+      * Copy a raw address from sockaddr_in6 structure into IPv6 structure.
+@@ -205,8 +205,7 @@ public:
+      * @param from_sockaddr_in6 the storage to copy the address from.
+      * @return the number of copied octets.
+      */
+-    size_t copy_in(const sockaddr_in6& from_sockaddr_in6)
+-	throw (InvalidFamily);
++    size_t copy_in(const sockaddr_in6& from_sockaddr_in6);
+ 
+     /**
+      * Bitwise-Negation Operator
+@@ -460,8 +459,7 @@ public:
+      * @return address size in number of octets.
+      */
+     static size_t addr_bytelen() {
+-	x_static_assert(sizeof(IPv6) == 4 * sizeof(uint32_t));
+-	return sizeof(IPv6);
++	return 4 * sizeof(uint32_t);
+     }
+ 
+     /**
+@@ -500,7 +498,7 @@ public:
+      * @param mask_len the length of the mask to create.
+      * @return a new IPv6 address that contains a mask of length @ref mask_len.
+      */
+-    static const IPv6& make_prefix(uint32_t mask_len) throw (InvalidNetmaskLength);
++    static const IPv6& make_prefix(uint32_t mask_len);
+ 
+     /**
+      * Make an IPv6 address prefix.
+@@ -509,13 +507,11 @@ public:
+      * @return a new IPv6 address created by masking this address with a mask
+      * of length @ref prefix_len.
+      */
+-    IPv6 mask_by_prefix_len(uint32_t prefix_len) const
+-	throw (InvalidNetmaskLength) {
++    IPv6 mask_by_prefix_len(uint32_t prefix_len) const {
+ 	return (*this) & make_prefix(prefix_len);
+     }
+ 
+-    void mask_by_prefix_len_uint(uint32_t prefix_len, uint32_t* masked_addr) const
+-	throw (InvalidNetmaskLength) {
++    void mask_by_prefix_len_uint(uint32_t prefix_len, uint32_t* masked_addr) const {
+ 	const IPv6& other = make_prefix(prefix_len);
+ 	masked_addr[0] = _addr[0] & other._addr[0];
+ 	masked_addr[1] = _addr[1] & other._addr[1];
+diff --git a/xorp/libxorp/ipvx.cc b/xorp/libxorp/ipvx.cc
+index dfcfbfe..7efc13c 100644
+--- a/xorp/libxorp/ipvx.cc
++++ b/xorp/libxorp/ipvx.cc
+@@ -48,10 +48,11 @@ IPvX::IPvX()
+ }
+ 
+ // Construct an IN_ADDR_ANY address of @family.
+-IPvX::IPvX(int family) throw (InvalidFamily)
++IPvX::IPvX(int family)
+ {
+-    if ((family != AF_INET) && (family != AF_INET6))
+-	xorp_throw(InvalidFamily, family);
++    if ((family != AF_INET) && (family != AF_INET6)) {
++	set_invalid(true);
++    }
+ 
+     _af = family;
+     memset(_addr, 0, sizeof(_addr));
+@@ -59,10 +60,8 @@ IPvX::IPvX(int family) throw (InvalidFamily)
+ 
+ // Construct an IPvX address by copying the raw address from @from_uint8
+ // memory.
+-IPvX::IPvX(int family, const uint8_t *from_uint8) throw (InvalidFamily)
++IPvX::IPvX(int family, const uint8_t *from_uint8)
+ {
+-    assert(from_uint8 != NULL);
+-
+     _af = family;
+     memset(_addr, 0, sizeof(_addr));
+     memcpy(_addr, from_uint8, addr_bytelen());
+@@ -70,8 +69,8 @@ IPvX::IPvX(int family, const uint8_t *from_uint8) throw (InvalidFamily)
+ 
+ IPvX::IPvX(const IPv4& ipv4)
+ {
+-    x_static_assert(sizeof(_addr) >= sizeof(IPv4));
+-    x_static_assert(sizeof(IPv4) == 4);
++    set_invalid(ipv4.invalid());
++    x_static_assert(sizeof(_addr) >= 4);
+ 
+     _af = AF_INET;
+     memset(_addr, 0, sizeof(_addr));
+@@ -80,11 +79,11 @@ IPvX::IPvX(const IPv4& ipv4)
+ 
+ IPvX::IPvX(const IPv6& ipv6)
+ {
+-    x_static_assert(sizeof(_addr) >= sizeof(IPv6));
+-    x_static_assert(sizeof(IPv6) == 16);
++    set_invalid(ipv6.invalid());
++    x_static_assert(sizeof(_addr) >= 16);
+ 
+     _af = AF_INET6;
+-    memcpy(_addr, &ipv6, 16);
++    memcpy(_addr, ipv6.addr(), 16);
+ }
+ 
+ IPvX::IPvX(const in_addr& from_in_addr)
+@@ -97,38 +96,38 @@ IPvX::IPvX(const in6_addr& from_in6_addr)
+     copy_in(AF_INET6, reinterpret_cast<const uint8_t *>(&from_in6_addr));
+ }
+ 
+-IPvX::IPvX(const sockaddr& from_sockaddr) throw (InvalidFamily)
++IPvX::IPvX(const sockaddr& from_sockaddr)
+ {
+     copy_in(from_sockaddr);
+ }
+ 
+-IPvX::IPvX(const sockaddr_storage& from_sockaddr_storage) throw (InvalidFamily)
++IPvX::IPvX(const sockaddr_storage& from_sockaddr_storage)
+ {
+     copy_in(from_sockaddr_storage);
+ }
+ 
+-IPvX::IPvX(const sockaddr_in& from_sockaddr_in) throw (InvalidFamily)
++IPvX::IPvX(const sockaddr_in& from_sockaddr_in)
+ {
+     copy_in(from_sockaddr_in);
+ }
+ 
+-IPvX::IPvX(const sockaddr_in6& from_sockaddr_in6) throw (InvalidFamily)
++IPvX::IPvX(const sockaddr_in6& from_sockaddr_in6)
+ {
+     copy_in(from_sockaddr_in6);
+ }
+ 
+-IPvX::IPvX(char const *from_cstring) throw (InvalidString)
++IPvX::IPvX(char const *from_cstring)
+ {
+     memset(_addr, 0, sizeof(_addr));
+     if (from_cstring == NULL) {
+-	xorp_throw(InvalidString, "Null value");
++	set_invalid(true);
+     } else if (inet_pton(AF_INET, from_cstring, _addr) > 0) {
+ 	_af = AF_INET;
+     } else if (inet_pton(AF_INET6, from_cstring, _addr) > 0) {
+ 	_af = AF_INET6;
+     } else {
+-	xorp_throw(InvalidString,
+-		   c_format("Bad IPvX \"%s\"", from_cstring));
++	set_invalid(true);
++	XLOG_WARNING("Bad IPvX \"%s\"", from_cstring);
+     }
+ }
+ 
+@@ -146,7 +145,7 @@ IPvX::operator~() const
+ }
+ 
+ IPvX
+-IPvX::operator|(const IPvX& other) const throw (InvalidCast)
++IPvX::operator|(const IPvX& other) const
+ {
+     if (is_ipv4()) {
+ 	return get_ipv4() | other.get_ipv4();
+@@ -156,7 +155,7 @@ IPvX::operator|(const IPvX& other) const throw (InvalidCast)
+ }
+ 
+ IPvX
+-IPvX::operator&(const IPvX& other) const throw (InvalidCast)
++IPvX::operator&(const IPvX& other) const
+ {
+     if (is_ipv4()) {
+ 	return get_ipv4() & other.get_ipv4();
+@@ -166,7 +165,7 @@ IPvX::operator&(const IPvX& other) const throw (InvalidCast)
+ }
+ 
+ IPvX
+-IPvX::operator^(const IPvX& other) const throw (InvalidCast)
++IPvX::operator^(const IPvX& other) const
+ {
+     if (is_ipv4()) {
+ 	return get_ipv4() ^ other.get_ipv4();
+@@ -253,19 +252,18 @@ IPvX::operator++() {
+ 
+ IPvX
+ IPvX::make_prefix(int family, uint32_t mask_len)
+-    throw (InvalidFamily, InvalidNetmaskLength)
+ {
+     if (family == AF_INET)
+ 	return IPv4::make_prefix(mask_len);
+     else if (family == AF_INET6)
+ 	return IPv6::make_prefix(mask_len);
+     else
+-	xorp_throw(InvalidFamily, family);
++	XLOG_ASSERT(0);
+     return IPvX(0);	/* Not Reached */
+ }
+ 
+ IPvX
+-IPvX::mask_by_prefix_len(uint32_t prefix_len) const throw (InvalidNetmaskLength)
++IPvX::mask_by_prefix_len(uint32_t prefix_len) const
+ {
+     if (_af == AF_INET)
+ 	return get_ipv4().mask_by_prefix_len(prefix_len);
+@@ -307,10 +305,9 @@ IPvX::copy_out(uint8_t *to_uint8) const
+  * @return the number of copied octets.
+  */
+ size_t
+-IPvX::copy_out(struct in_addr& to_in_addr) const throw (InvalidFamily)
++IPvX::copy_out(struct in_addr& to_in_addr) const
+ {
+-    if (_af != AF_INET)
+-	xorp_throw(InvalidFamily, _af);
++    XLOG_ASSERT(_af == AF_INET);
+     return (copy_out((uint8_t *)&to_in_addr));
+ }
+ 
+@@ -319,10 +316,9 @@ IPvX::copy_out(struct in_addr& to_in_addr) const throw (InvalidFamily)
+  * @return the number of copied octets.
+  */
+ size_t
+-IPvX::copy_out(struct in6_addr& to_in6_addr) const throw (InvalidFamily)
++IPvX::copy_out(struct in6_addr& to_in6_addr) const
+ {
+-    if (_af != AF_INET6)
+-	xorp_throw(InvalidFamily, _af);
++    XLOG_ASSERT(_af == AF_INET6);
+     return (copy_out((uint8_t *)&to_in6_addr));
+ }
+ 
+@@ -332,7 +328,7 @@ IPvX::copy_out(struct in6_addr& to_in6_addr) const throw (InvalidFamily)
+  * @return the number of copied octets.
+  */
+ size_t
+-IPvX::copy_out(struct sockaddr& to_sockaddr) const throw (InvalidFamily)
++IPvX::copy_out(struct sockaddr& to_sockaddr) const
+ {
+     struct sockaddr *sa = &to_sockaddr;
+ 
+@@ -344,7 +340,7 @@ IPvX::copy_out(struct sockaddr& to_sockaddr) const throw (InvalidFamily)
+         return (copy_out(*sockaddr2sockaddr_in6(sa)));
+ 
+     default:
+-	xorp_throw(InvalidFamily, _af);
++	XLOG_ASSERT(0);
+     }
+ 
+     return ((size_t)-1);
+@@ -357,7 +353,7 @@ IPvX::copy_out(struct sockaddr& to_sockaddr) const throw (InvalidFamily)
+  */
+ size_t
+ IPvX::copy_out(struct sockaddr_storage& to_sockaddr_storage)
+-    const throw (InvalidFamily)
++    const
+ {
+     struct sockaddr *sa = sockaddr_storage2sockaddr(&to_sockaddr_storage);
+ 
+@@ -369,7 +365,7 @@ IPvX::copy_out(struct sockaddr_storage& to_sockaddr_storage)
+         return (copy_out(*sockaddr2sockaddr_in6(sa)));
+ 
+     default:
+-	xorp_throw(InvalidFamily, _af);
++	XLOG_ASSERT(0);
+     }
+ 
+     return ((size_t)-1);
+@@ -381,7 +377,7 @@ IPvX::copy_out(struct sockaddr_storage& to_sockaddr_storage)
+  * @return the number of copied octets.
+  */
+ size_t
+-IPvX::copy_out(struct sockaddr_in& to_sockaddr_in) const throw (InvalidFamily)
++IPvX::copy_out(struct sockaddr_in& to_sockaddr_in) const
+ {
+     switch (_af) {
+     case AF_INET:
+@@ -394,7 +390,7 @@ IPvX::copy_out(struct sockaddr_in& to_sockaddr_in) const throw (InvalidFamily)
+ 	return (copy_out(to_sockaddr_in.sin_addr));
+ 
+     default:
+-	xorp_throw(InvalidFamily, _af);
++	XLOG_ASSERT(0);
+     }
+ 
+     return ((size_t)-1);
+@@ -407,7 +403,6 @@ IPvX::copy_out(struct sockaddr_in& to_sockaddr_in) const throw (InvalidFamily)
+  */
+ size_t
+ IPvX::copy_out(struct sockaddr_in6& to_sockaddr_in6) const
+-    throw (InvalidFamily)
+ {
+     switch (_af) {
+     case AF_INET6:
+@@ -438,7 +433,7 @@ IPvX::copy_out(struct sockaddr_in6& to_sockaddr_in6) const
+ 	return (copy_out(to_sockaddr_in6.sin6_addr));
+ 
+     default:
+-	xorp_throw(InvalidFamily, _af);
++	XLOG_ASSERT(0);
+     }
+ 
+     return ((size_t)-1);
+@@ -449,7 +444,7 @@ IPvX::copy_out(struct sockaddr_in6& to_sockaddr_in6) const
+  * @return the number of copied octets.
+  */
+ size_t
+-IPvX::copy_in(int family, const uint8_t *from_uint8) throw (InvalidFamily)
++IPvX::copy_in(int family, const uint8_t *from_uint8)
+ {
+     _af = family;
+ 
+@@ -461,7 +456,7 @@ IPvX::copy_in(int family, const uint8_t *from_uint8) throw (InvalidFamily)
+ 	memcpy(_addr, from_uint8, addr_bytelen());
+ 	return (addr_bytelen());
+     default:
+-	xorp_throw(InvalidFamily, _af);
++	XLOG_ASSERT(0);
+     }
+     return ((size_t)-1);
+ }
+@@ -491,7 +486,7 @@ IPvX::copy_in(const in6_addr& from_in6_addr)
+  * @return the number of copied octets.
+  */
+ size_t
+-IPvX::copy_in(const sockaddr& from_sockaddr) throw (InvalidFamily)
++IPvX::copy_in(const sockaddr& from_sockaddr)
+ {
+ 
+     const struct sockaddr *sa = &from_sockaddr;
+@@ -502,7 +497,7 @@ IPvX::copy_in(const sockaddr& from_sockaddr) throw (InvalidFamily)
+     case AF_INET6:
+         return (copy_in(*sockaddr2sockaddr_in6(sa)));
+     default:
+-	xorp_throw(InvalidFamily, sa->sa_family);
++	XLOG_ASSERT(0);
+     }
+ 
+     return ((size_t)-1);
+@@ -514,7 +509,6 @@ IPvX::copy_in(const sockaddr& from_sockaddr) throw (InvalidFamily)
+  */
+ size_t
+ IPvX::copy_in(const sockaddr_storage& from_sockaddr_storage)
+-    throw (InvalidFamily)
+ {
+     const struct sockaddr *sa = sockaddr_storage2sockaddr(&from_sockaddr_storage);
+ 
+@@ -524,7 +518,7 @@ IPvX::copy_in(const sockaddr_storage& from_sockaddr_storage)
+     case AF_INET6:
+         return (copy_in(*sockaddr2sockaddr_in6(sa)));
+     default:
+-	xorp_throw(InvalidFamily, sa->sa_family);
++	XLOG_ASSERT(0);
+     }
+     
+     return ((size_t)-1);
+@@ -535,7 +529,7 @@ IPvX::copy_in(const sockaddr_storage& from_sockaddr_storage)
+  * @return the number of copied octets.
+  */
+ size_t
+-IPvX::copy_in(const sockaddr_in& from_sockaddr_in) throw (InvalidFamily)
++IPvX::copy_in(const sockaddr_in& from_sockaddr_in)
+ {
+     _af = from_sockaddr_in.sin_family;
+ 
+@@ -543,7 +537,7 @@ IPvX::copy_in(const sockaddr_in& from_sockaddr_in) throw (InvalidFamily)
+     case AF_INET:
+ 	return (copy_in(from_sockaddr_in.sin_addr));
+     default:
+-	xorp_throw(InvalidFamily, _af);
++	XLOG_ASSERT(0);
+     }
+     return ((size_t)-1);
+ }
+@@ -553,7 +547,7 @@ IPvX::copy_in(const sockaddr_in& from_sockaddr_in) throw (InvalidFamily)
+  * @return the number of copied octets.
+  */
+ size_t
+-IPvX::copy_in(const sockaddr_in6& from_sockaddr_in6) throw (InvalidFamily)
++IPvX::copy_in(const sockaddr_in6& from_sockaddr_in6)
+ {
+     _af = from_sockaddr_in6.sin6_family;
+ 
+@@ -561,7 +555,7 @@ IPvX::copy_in(const sockaddr_in6& from_sockaddr_in6) throw (InvalidFamily)
+     case AF_INET6:
+ 	return (copy_in(from_sockaddr_in6.sin6_addr));
+     default:
+-	xorp_throw(InvalidFamily, _af);
++	XLOG_ASSERT(0);
+     }
+ 
+     return ((size_t)-1);
+@@ -659,13 +653,13 @@ IPvX::is_loopback() const
+  * @return IP protocol version.
+  */
+ uint32_t
+-IPvX::ip_version() const throw (InvalidFamily)
++IPvX::ip_version() const
+ {
+     if (_af == AF_INET)
+ 	return (IPv4::ip_version());
+     if (_af == AF_INET6)
+ 	return (IPv6::ip_version());
+-    xorp_throw(InvalidFamily, _af);
++    XLOG_ASSERT(0);
+ 
+     return ((uint32_t)-1);
+ }
+@@ -674,117 +668,117 @@ IPvX::ip_version() const throw (InvalidFamily)
+  * @return IP protocol version string.
+  */
+ const string&
+-IPvX::ip_version_str() const throw (InvalidFamily)
++IPvX::ip_version_str() const
+ {
+     if (_af == AF_INET)
+ 	return (IPv4::ip_version_str());
+     if (_af != AF_INET6)
+-	xorp_throw(InvalidFamily, _af);
++	XLOG_ASSERT(0);
+     return (IPv6::ip_version_str());
+ }
+ 
+ size_t
+-IPvX::addr_bytelen(int family) throw (InvalidFamily)
++IPvX::addr_bytelen(int family)
+ {
+     if (family == AF_INET)
+ 	return (IPv4::addr_bytelen());
+     if (family == AF_INET6)
+ 	return (IPv6::addr_bytelen());
+-    xorp_throw(InvalidFamily, family);
++    XLOG_ASSERT(0);
+ 
+     return ((size_t)-1);
+ }
+ 
+ uint32_t
+-IPvX::ip_multicast_base_address_mask_len(int family) throw (InvalidFamily)
++IPvX::ip_multicast_base_address_mask_len(int family)
+ {
+     if (family == AF_INET)
+ 	return (IPv4::ip_multicast_base_address_mask_len());
+     if (family == AF_INET6)
+ 	return (IPv6::ip_multicast_base_address_mask_len());
+ 
+-    xorp_throw(InvalidFamily, family);
++    XLOG_ASSERT(0);
+     return ((uint32_t)-1);
+ }
+ 
+ uint32_t
+-IPvX::ip_class_a_base_address_mask_len(int family) throw (InvalidFamily)
++IPvX::ip_class_a_base_address_mask_len(int family)
+ {
+     if (family == AF_INET)
+ 	return (IPv4::ip_class_a_base_address_mask_len());
+     // XXX: this method applies only for IPv4
+ 
+-    xorp_throw(InvalidFamily, family);
++    XLOG_ASSERT(0);
+     return ((uint32_t)-1);
+ }
+ 
+ uint32_t
+-IPvX::ip_class_b_base_address_mask_len(int family) throw (InvalidFamily)
++IPvX::ip_class_b_base_address_mask_len(int family)
+ {
+     if (family == AF_INET)
+ 	return (IPv4::ip_class_b_base_address_mask_len());
+     // XXX: this method applies only for IPv4
+ 
+-    xorp_throw(InvalidFamily, family);
++    XLOG_ASSERT(0);
+     return ((uint32_t)-1);
+ }
+ 
+ uint32_t
+-IPvX::ip_class_c_base_address_mask_len(int family) throw (InvalidFamily)
++IPvX::ip_class_c_base_address_mask_len(int family)
+ {
+     if (family == AF_INET)
+ 	return (IPv4::ip_class_c_base_address_mask_len());
+     // XXX: this method applies only for IPv4
+ 
+-    xorp_throw(InvalidFamily, family);
++    XLOG_ASSERT(0);
+     return ((uint32_t)-1);
+ }
+ 
+ uint32_t
+-IPvX::ip_experimental_base_address_mask_len(int family) throw (InvalidFamily)
++IPvX::ip_experimental_base_address_mask_len(int family)
+ {
+     if (family == AF_INET)
+ 	return (IPv4::ip_experimental_base_address_mask_len());
+     // XXX: this method applies only for IPv4
+ 
+-    xorp_throw(InvalidFamily, family);
++    XLOG_ASSERT(0);
+     return ((uint32_t)-1);
+ }
+ 
+ //
+ // IPvX "Constants"
+ //
+-#define IPVX_CONSTANT_ACCESSOR(name)					      \
+-const IPvX& IPvX::name(int family) throw (InvalidFamily)		      \
+-{									      \
+-    static const IPvX c4_##name (IPv4::name());	/* IPv4 constant */	      \
+-    static const IPvX c6_##name (IPv6::name());	/* IPv6 constant */	      \
+-    if (family == AF_INET)						      \
+-	return c4_##name;						      \
+-    if (family == AF_INET6)						      \
+-	return c6_##name;						      \
+-    xorp_throw(InvalidFamily, family);					      \
+-}
++#define IPVX_CONSTANT_ACCESSOR(name)					\
++    const IPvX& IPvX::name(int family)					\
++    {									\
++	static const IPvX c4_##name (IPv4::name());	/* IPv4 constant */ \
++	static const IPvX c6_##name (IPv6::name());	/* IPv6 constant */ \
++	if (family == AF_INET)						\
++	    return c4_##name;						\
++	if (family == AF_INET6)						\
++	    return c6_##name;						\
++	XLOG_ASSERT(0);							\
++    }
+ 
+ // IPvX "Constant" that applies only for IPv4
+-#define IPVX_CONSTANT_ACCESSOR_IPV4(name)				      \
+-const IPvX& IPvX::name(int family) throw (InvalidFamily)		      \
+-{									      \
+-    static const IPvX c4_##name (IPv4::name());	/* IPv4 constant */	      \
+-    if (family == AF_INET)						      \
+-	return c4_##name;						      \
+-    xorp_throw(InvalidFamily, family);					      \
+-}
++#define IPVX_CONSTANT_ACCESSOR_IPV4(name)				\
++    const IPvX& IPvX::name(int family)					\
++    {									\
++	static const IPvX c4_##name (IPv4::name());	/* IPv4 constant */ \
++	if (family == AF_INET)						\
++	    return c4_##name;						\
++	XLOG_ASSERT(0);							\
++    }
+ 
+ // IPvX "Constant" that applies only for IPv6
+-#define IPVX_CONSTANT_ACCESSOR_IPV6(name)				      \
+-const IPvX& IPvX::name(int family) throw (InvalidFamily)		      \
+-{									      \
+-    static const IPvX c6_##name (IPv6::name());	/* IPv6 constant */	      \
+-    if (family == AF_INET6)						      \
+-	return c6_##name;						      \
+-    xorp_throw(InvalidFamily, family);					      \
+-}
++#define IPVX_CONSTANT_ACCESSOR_IPV6(name)				\
++    const IPvX& IPvX::name(int family)					\
++    {									\
++	static const IPvX c6_##name (IPv6::name());	/* IPv6 constant */ \
++	if (family == AF_INET6)						\
++	    return c6_##name;						\
++	XLOG_ASSERT(0);							\
++    }
+ 
+ IPVX_CONSTANT_ACCESSOR(ZERO);
+ IPVX_CONSTANT_ACCESSOR(ANY);
+diff --git a/xorp/libxorp/ipvx.hh b/xorp/libxorp/ipvx.hh
+index 74a1123..fed119d 100644
+--- a/xorp/libxorp/ipvx.hh
++++ b/xorp/libxorp/ipvx.hh
+@@ -19,7 +19,6 @@
+ // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/libxorp/ipvx.hh,v 1.35 2009/01/05 18:30:58 jtc Exp $
+ 
+ #ifndef __LIBXORP_IPVX_HH__
+ #define __LIBXORP_IPVX_HH__
+@@ -31,7 +30,7 @@
+ /**
+  * @short Basic IPvX class (for both IPv4 and IPv6)
+  */
+-class IPvX {
++class IPvX : public Invalid {
+ public:
+     /**
+      * Default contructor
+@@ -49,7 +48,7 @@ public:
+      *
+      * @param family the address family.
+      */
+-    explicit IPvX(int family) throw (InvalidFamily);
++    explicit IPvX(int family);
+ 
+     /**
+      * Constructor from a (uint8_t *) memory pointer.
+@@ -61,7 +60,7 @@ public:
+      * @param from_uint8 the pointer to the memory to copy the address value
+      * from.
+      */
+-    IPvX(int family, const uint8_t *from_uint8) throw (InvalidFamily);
++    IPvX(int family, const uint8_t *from_uint8);
+ 
+     /**
+      * Constructor from an IPv4 address.
+@@ -104,34 +103,30 @@ public:
+      *
+      * @param from_sockaddr the storage to copy the address from.
+      */
+-    IPvX(const sockaddr& from_sockaddr) throw (InvalidFamily);
++    IPvX(const sockaddr& from_sockaddr);
+ 
+     /**
+      * Constructor from sockaddr_storage structure.
+      *
+      * @param from_sockaddr_storage the storage to copy the address from.
+      */
+-    IPvX(const sockaddr_storage& from_sockaddr_storage) throw (InvalidFamily);
++    IPvX(const sockaddr_storage& from_sockaddr_storage);
+ 
+     /**
+      * Constructor from sockaddr_in structure.
+      *
+      * @param from_sockaddr_in the storage to copy the address from.
+      *
+-     * @exception InvalidFamily thrown if @a from_sockaddr_in is not a
+-     * AF_INET sockaddr.
+      */
+-    IPvX(const sockaddr_in& from_sockaddr_in) throw (InvalidFamily);
++    IPvX(const sockaddr_in& from_sockaddr_in);
+ 
+     /**
+      * Constructor from sockaddr_in6 structure.
+      *
+      * @param from_sockaddr_in6 the storage to copy the address from.
+      *
+-     * @exception InvalidFamily thrown if @a from_sockaddr_in6 is not a
+-     * AF_INET6 sockaddr.
+      */
+-    IPvX(const sockaddr_in6& from_sockaddr_in6) throw (InvalidFamily);
++    IPvX(const sockaddr_in6& from_sockaddr_in6);
+ 
+     /**
+      * Constructor from a string.
+@@ -139,7 +134,7 @@ public:
+      * @param from_cstring C-style string in the IPv4 dotted decimal
+      * or IPv6 canonical human-readable format used for initialization.
+      */
+-    IPvX(const char *from_cstring) throw (InvalidString);
++    IPvX(const char *from_cstring);
+ 
+     /**
+      * Copy the IPvX raw address to specified memory location.
+@@ -157,7 +152,7 @@ public:
+      * @param to_in_addr the storage to copy the address to.
+      * @return the number of copied octets.
+      */
+-    size_t copy_out(in_addr& to_in_addr) const throw (InvalidFamily);
++    size_t copy_out(in_addr& to_in_addr) const;
+ 
+     /**
+      * Copy the IPvX raw address to an in6_addr structure.
+@@ -167,7 +162,7 @@ public:
+      * @param to_in6_addr the storage to copy the address to.
+      * @return the number of copied octets.
+      */
+-    size_t copy_out(in6_addr& to_in6_addr) const throw (InvalidFamily);
++    size_t copy_out(in6_addr& to_in6_addr) const;
+ 
+     /**
+      * Copy the IPvX raw address to a sockaddr structure.
+@@ -180,7 +175,7 @@ public:
+      * @param to_sockaddr the storage to copy the address to.
+      * @return the number of copied octets.
+      */
+-    size_t copy_out(sockaddr& to_sockaddr) const throw (InvalidFamily);
++    size_t copy_out(sockaddr& to_sockaddr) const;
+ 
+     /**
+      * Copy the IPvX raw address to a sockaddr_storage structure.
+@@ -193,8 +188,7 @@ public:
+      * @param to_sockaddr_storage the storage to copy the address to.
+      * @return the number of copied octets.
+      */
+-    size_t copy_out(sockaddr_storage& to_sockaddr_storage)
+-	const throw (InvalidFamily);
++    size_t copy_out(sockaddr_storage& to_sockaddr_storage) const;
+ 
+     /**
+      * Copy the IPvX raw address to a sockaddr_in structure.
+@@ -208,7 +202,7 @@ public:
+      * @param to_sockaddr_in the storage to copy the address to.
+      * @return the number of copied octets.
+      */
+-    size_t copy_out(sockaddr_in& to_sockaddr_in) const throw (InvalidFamily);
++    size_t copy_out(sockaddr_in& to_sockaddr_in) const;
+ 
+     /**
+      * Copy the IPvX raw address to a sockaddr_in6 structure.
+@@ -222,7 +216,7 @@ public:
+      * @param to_sockaddr_in6 the storage to copy the address to.
+      * @return the number of copied octets.
+      */
+-    size_t copy_out(sockaddr_in6& to_sockaddr_in6) const throw (InvalidFamily);
++    size_t copy_out(sockaddr_in6& to_sockaddr_in6) const;
+ 
+     /**
+      * Copy a raw address of specified family type from specified memory
+@@ -232,8 +226,7 @@ public:
+      * @param from_uint8 the memory address to copy the address from.
+      * @return the number of copied octets.
+      */
+-    size_t copy_in(int family, const uint8_t *from_uint8)
+-	throw (InvalidFamily);
++    size_t copy_in(int family, const uint8_t *from_uint8);
+ 
+     /**
+      * Copy a raw IPv4 address from a in_addr structure into IPvX structure.
+@@ -260,7 +253,7 @@ public:
+      * @param from_sockaddr the storage to copy the address from.
+      * @return the number of copied octets.
+      */
+-    size_t copy_in(const sockaddr& from_sockaddr) throw (InvalidFamily);
++    size_t copy_in(const sockaddr& from_sockaddr);
+ 
+     /**
+      * Copy a raw address from a sockaddr_storage structure into IPvX
+@@ -272,8 +265,7 @@ public:
+      * @param from_sockaddr_storage the storage to copy the address from.
+      * @return the number of copied octets.
+      */
+-    size_t copy_in(const sockaddr_storage& from_sockaddr_storage)
+-	throw (InvalidFamily);
++    size_t copy_in(const sockaddr_storage& from_sockaddr_storage);
+ 
+     /**
+      * Copy a raw address from a sockaddr_in structure into IPvX structure.
+@@ -284,10 +276,8 @@ public:
+      * @param from_sockaddr_in the storage to copy the address from.
+      * @return the number of copied octets.
+      *
+-     * @exception InvalidFamily thrown if @a from_sockaddr_in is not a 
+-     * AF_INET sockaddr.
+      */
+-    size_t copy_in(const sockaddr_in& from_sockaddr_in) throw (InvalidFamily);
++    size_t copy_in(const sockaddr_in& from_sockaddr_in);
+ 
+     /**
+      * Copy a raw address from sockaddr_in6 structure into IPvX structure.
+@@ -298,11 +288,8 @@ public:
+      * @param from_sockaddr_in6 the storage to copy the address from.
+      * @return the number of copied octets.
+      *
+-     * @exception InvalidFamily thrown if @a from_sockaddr_in6 is not a 
+-     * AF_INET6 sockaddr.
+      */
+-    size_t copy_in(const sockaddr_in6& from_sockaddr_in6)
+-	throw (InvalidFamily);
++    size_t copy_in(const sockaddr_in6& from_sockaddr_in6);
+ 
+     /**
+      * Bitwise-Negation Operator
+@@ -317,7 +304,7 @@ public:
+      * @param other the right-hand operand to OR with.
+      * @return bitwise OR of two addresses.
+      */
+-    IPvX operator|(const IPvX& other) const throw (InvalidCast);
++    IPvX operator|(const IPvX& other) const;
+ 
+     /**
+      * AND Operator
+@@ -325,7 +312,7 @@ public:
+      * @param other the right-hand operand to AND with.
+      * @return bitwise AND of two addresses.
+      */
+-    IPvX operator&(const IPvX& other) const throw (InvalidCast);
++    IPvX operator&(const IPvX& other) const;
+ 
+     /**
+      * XOR Operator
+@@ -333,7 +320,7 @@ public:
+      * @param other the right-hand operand to XOR with.
+      * @return bitwize eXclusive-OR of two addresses.
+      */
+-    IPvX operator^(const IPvX& other) const throw (InvalidCast);
++    IPvX operator^(const IPvX& other) const;
+ 
+     /**
+      * Operator <<
+@@ -528,7 +515,7 @@ public:
+      * @return address size in number of octets for an address of
+      * address family of @ref family.
+      */
+-    static size_t addr_bytelen(int family) throw (InvalidFamily);
++    static size_t addr_bytelen(int family);
+ 
+     /**
+      * Get the address octet-size for this address.
+@@ -553,7 +540,7 @@ public:
+      * @return address size in number of bits for an address of
+      * address family of @ref family.
+      */
+-    static uint32_t addr_bitlen(int family) throw (InvalidFamily) {
++    static uint32_t addr_bitlen(int family) {
+ 	return uint32_t(8 * sizeof(uint8_t) * addr_bytelen(family));
+     }
+ 
+@@ -582,8 +569,7 @@ public:
+      * @return the multicast base address mask length for an address of
+      * address family of @ref family.
+      */
+-    static uint32_t ip_multicast_base_address_mask_len(int family)
+-	throw (InvalidFamily);
++    static uint32_t ip_multicast_base_address_mask_len(int family);
+ 
+     /**
+      * Get the mask length for the multicast base address for this address.
+@@ -611,8 +597,7 @@ public:
+      * @return the Class A base address mask length for an address of
+      * address family of @ref family.
+      */
+-    static uint32_t ip_class_a_base_address_mask_len(int family)
+-	throw (InvalidFamily);
++    static uint32_t ip_class_a_base_address_mask_len(int family);
+ 
+     /**
+      * Get the mask length for the Class A base address for this address.
+@@ -625,7 +610,7 @@ public:
+      * @param family the address family.
+      * @return the Class A base address mask length for this IPvX address.
+      */
+-    uint32_t ip_class_a_base_address_mask_len() const throw (InvalidFamily) {
++    uint32_t ip_class_a_base_address_mask_len() const {
+ 	return IPvX::ip_class_a_base_address_mask_len(_af);
+     }
+ 
+@@ -641,8 +626,7 @@ public:
+      * @return the Class B base address mask length for an address of
+      * address family of @ref family.
+      */
+-    static uint32_t ip_class_b_base_address_mask_len(int family)
+-	throw (InvalidFamily);
++    static uint32_t ip_class_b_base_address_mask_len(int family);
+ 
+     /**
+      * Get the mask length for the Class B base address for this address.
+@@ -655,7 +639,7 @@ public:
+      * @param family the address family.
+      * @return the Class B base address mask length for this IPvX address.
+      */
+-    uint32_t ip_class_b_base_address_mask_len() const throw (InvalidFamily) {
++    uint32_t ip_class_b_base_address_mask_len() const {
+ 	return IPvX::ip_class_b_base_address_mask_len(_af);
+     }
+ 
+@@ -671,8 +655,7 @@ public:
+      * @return the Class C base address mask length for an address of
+      * address family of @ref family.
+      */
+-    static uint32_t ip_class_c_base_address_mask_len(int family)
+-	throw (InvalidFamily);
++    static uint32_t ip_class_c_base_address_mask_len(int family);
+ 
+     /**
+      * Get the mask length for the Class C base address for this address.
+@@ -685,7 +668,7 @@ public:
+      * @param family the address family.
+      * @return the Class C base address mask length for this IPvX address.
+      */
+-    uint32_t ip_class_c_base_address_mask_len() const throw (InvalidFamily) {
++    uint32_t ip_class_c_base_address_mask_len() const {
+ 	return IPvX::ip_class_c_base_address_mask_len(_af);
+     }
+ 
+@@ -701,8 +684,7 @@ public:
+      * @return the experimental base address mask length for an address of
+      * address family of @ref family.
+      */
+-    static uint32_t ip_experimental_base_address_mask_len(int family)
+-	throw (InvalidFamily);
++    static uint32_t ip_experimental_base_address_mask_len(int family);
+ 
+     /**
+      * Get the mask length for the experimental base address for this address.
+@@ -715,7 +697,7 @@ public:
+      * @param family the address family.
+      * @return the experimental base address mask length for this IPvX address.
+      */
+-    uint32_t ip_experimental_base_address_mask_len() const throw (InvalidFamily) {
++    uint32_t ip_experimental_base_address_mask_len() const {
+ 	return IPvX::ip_experimental_base_address_mask_len(_af);
+     }
+ 
+@@ -726,8 +708,7 @@ public:
+      * @param mask_len the length of the mask to create.
+      * @return a new IPvX address that contains a mask of length @ref mask_len.
+      */
+-    static IPvX make_prefix(int family, uint32_t mask_len)
+-	throw (InvalidFamily, InvalidNetmaskLength);
++    static IPvX make_prefix(int family, uint32_t mask_len);
+ 
+     /**
+      * Make an IPvX mask prefix for the address family of this address.
+@@ -735,7 +716,7 @@ public:
+      * @param mask_len the length of the mask to create.
+      * @return a new IPvX address that contains a mask of length @ref mask_len.
+      */
+-    IPvX make_prefix(uint32_t mask_len) const throw (InvalidNetmaskLength) {
++    IPvX make_prefix(uint32_t mask_len) const {
+ 	return IPvX::make_prefix(_af, mask_len);
+     }
+ 
+@@ -746,7 +727,7 @@ public:
+      * @return a new IPvX address created by masking this address with a mask
+      * of length @ref prefix_len.
+      */
+-    IPvX mask_by_prefix_len(uint32_t prefix_len) const throw (InvalidNetmaskLength);
++    IPvX mask_by_prefix_len(uint32_t prefix_len) const;
+ 
+     /**
+      * Get the mask length.
+@@ -775,14 +756,14 @@ public:
+      *
+      * @return IPv4 address contained with IPvX structure.
+      */
+-    IPv4 get_ipv4() const throw (InvalidCast);
++    IPv4 get_ipv4() const;
+ 
+     /**
+      * Get IPv6 address.
+      *
+      * @return IPv6 address contained with IPvX structure.
+      */
+-    IPv6 get_ipv6() const throw (InvalidCast);
++    IPv6 get_ipv6() const;
+ 
+     /**
+      * Assign address value to an IPv4 address.
+@@ -790,7 +771,7 @@ public:
+      * @param to_ipv4 IPv4 address to be assigned IPv4 value contained
+      * within this address.
+      */
+-    void get(IPv4& to_ipv4) const throw (InvalidCast) {
++    void get(IPv4& to_ipv4) const {
+ 	to_ipv4 = get_ipv4();
+     }
+ 
+@@ -800,7 +781,7 @@ public:
+      * @param to_ipv6 IPv6 address to be assigned IPv4 value contained
+      * within this address.
+      */
+-    void get(IPv6& to_ipv6) const throw (InvalidCast) {
++    void get(IPv6& to_ipv6) const {
+ 	to_ipv6 = get_ipv6();
+     }
+ 
+@@ -816,7 +797,7 @@ public:
+      *
+      * @return the IP protocol version of this address.
+      */
+-    uint32_t ip_version() const throw (InvalidFamily);
++    uint32_t ip_version() const;
+ 
+     /**
+      * Get the human-readable string with the IP protocol version.
+@@ -824,7 +805,7 @@ public:
+      * @return the human-readable string with the IP protocol version of
+      * this address.
+      */
+-    const string& ip_version_str() const throw (InvalidFamily);
++    const string& ip_version_str() const;
+ 
+     /**
+      * Extract bits from an address.
+@@ -834,7 +815,7 @@ public:
+      * @return the first @ref len bits starting from the rightmost
+      * position @ref lsb. The returned bits are in host order.
+      */
+-    uint32_t bits(uint32_t lsb, uint32_t len) const throw (InvalidFamily);
++    uint32_t bits(uint32_t lsb, uint32_t len) const;
+ 
+     /**
+      * Count the number of bits that are set in this address.
+@@ -853,67 +834,50 @@ public:
+     /**
+      * Pre-defined IPvX address constants.
+      */
+-    static const IPvX& ZERO(int family)
+-	throw (InvalidFamily);
+-    static const IPvX& ANY(int family)
+-	throw (InvalidFamily);
+-    static const IPvX& ALL_ONES(int family)
+-	throw (InvalidFamily);
+-    static const IPvX& LOOPBACK(int family)
+-	throw (InvalidFamily);
+-    static const IPvX& MULTICAST_BASE(int family)
+-	throw (InvalidFamily);
+-    static const IPvX& MULTICAST_ALL_SYSTEMS(int family)
+-	throw (InvalidFamily);
+-    static const IPvX& MULTICAST_ALL_ROUTERS(int family)
+-	throw (InvalidFamily);
+-    static const IPvX& DVMRP_ROUTERS(int family)
+-	throw (InvalidFamily);
+-    static const IPvX& OSPFIGP_ROUTERS(int family)
+-	throw (InvalidFamily);
+-    static const IPvX& OSPFIGP_DESIGNATED_ROUTERS(int family)
+-	throw (InvalidFamily);
+-    static const IPvX& RIP2_ROUTERS(int family)
+-	throw (InvalidFamily);
+-    static const IPvX& PIM_ROUTERS(int family)
+-	throw (InvalidFamily);
+-    static const IPvX& SSM_ROUTERS(int family)
+-	throw (InvalidFamily);
+-    static const IPvX& CLASS_A_BASE(int family)
+-	throw (InvalidFamily);
+-    static const IPvX& CLASS_B_BASE(int family)
+-	throw (InvalidFamily);
+-    static const IPvX& CLASS_C_BASE(int family)
+-	throw (InvalidFamily);
+-    static const IPvX& EXPERIMENTAL_BASE(int family)
+-	throw (InvalidFamily);
++    static const IPvX& ZERO(int family);
++    static const IPvX& ANY(int family);
++    static const IPvX& ALL_ONES(int family);
++    static const IPvX& LOOPBACK(int family);
++    static const IPvX& MULTICAST_BASE(int family);
++    static const IPvX& MULTICAST_ALL_SYSTEMS(int family);
++    static const IPvX& MULTICAST_ALL_ROUTERS(int family);
++    static const IPvX& DVMRP_ROUTERS(int family);
++    static const IPvX& OSPFIGP_ROUTERS(int family);
++    static const IPvX& OSPFIGP_DESIGNATED_ROUTERS(int family);
++    static const IPvX& RIP2_ROUTERS(int family);
++    static const IPvX& PIM_ROUTERS(int family);
++    static const IPvX& SSM_ROUTERS(int family);
++    static const IPvX& CLASS_A_BASE(int family);
++    static const IPvX& CLASS_B_BASE(int family);
++    static const IPvX& CLASS_C_BASE(int family);
++    static const IPvX& EXPERIMENTAL_BASE(int family);
+ 
+ private:
+     friend class IPv4;
+     friend class IPv6;
+ 
+-    uint32_t _addr[4];	// Underlay address value for casting to IPv4 and IPv6
+     int _af;		// The address family AF_INET or AF_INET6
++    uint32_t _addr[4];	// Underlay address value for casting to IPv4 and IPv6
+ };
+ 
+ inline IPv4
+-IPvX::get_ipv4() const throw (InvalidCast)
++IPvX::get_ipv4() const
+ {
+     if (_af == AF_INET)
+ 	return IPv4(_addr[0]);
+-    xorp_throw(InvalidCast, "Miscast as IPv4");
++    XLOG_ASSERT(0);
+ }
+ 
+ inline IPv6
+-IPvX::get_ipv6() const throw (InvalidCast)
++IPvX::get_ipv6() const
+ {
+     if (_af == AF_INET6)
+ 	return IPv6(&_addr[0]);
+-    xorp_throw(InvalidCast, "Miscast as IPv6");
++    XLOG_ASSERT(0);
+ }
+ 
+ inline uint32_t
+-IPvX::bits(uint32_t lsb, uint32_t len) const throw (InvalidFamily)
++IPvX::bits(uint32_t lsb, uint32_t len) const
+ {
+     uint32_t mask = ~(0xffffffffU << len);
+ 
+@@ -925,7 +889,7 @@ IPvX::bits(uint32_t lsb, uint32_t len) const throw (InvalidFamily)
+     if (_af == AF_INET6)
+ 	return ntohl((*this >> lsb)._addr[3]) & mask;
+ 
+-    xorp_throw(InvalidFamily, _af);
++    XLOG_ASSERT(0);
+     return (0x0U);
+ }
+ 
+diff --git a/xorp/libxorp/ipvxnet.hh b/xorp/libxorp/ipvxnet.hh
+index 94b0502..ec765a2 100644
+--- a/xorp/libxorp/ipvxnet.hh
++++ b/xorp/libxorp/ipvxnet.hh
+@@ -42,29 +42,35 @@ typedef IPNet<IPvX> BaseIPvXNet;
+ template<>
+ inline
+ IPNet<IPvX>::IPNet(const IPvX& ipvx, uint8_t prefix_len)
+-    throw (InvalidNetmaskLength)
+     : _prefix_len(prefix_len)
+ {
+     if (prefix_len > ipvx.addr_bitlen())
+-	xorp_throw(InvalidNetmaskLength, prefix_len);
++	prefix_len = ipvx.addr_bitlen();
+     _masked_addr = ipvx.mask_by_prefix_len(prefix_len);
+ }
+ 
+ template <>
+ inline void
+ IPNet<IPvX>::initialize_from_string(const char *cp)
+-    throw (InvalidString, InvalidNetmaskLength)
+ {
++    _invalid = false;
+     char *slash = strrchr(const_cast<char*>(cp), '/');
+-    if (slash == 0) xorp_throw(InvalidString, "Missing slash");
++    if (slash == 0) {
++	_invalid = true;
++	return;
++    }
+ 
+-    if (*(slash + 1) == 0)
+-	xorp_throw(InvalidString, "Missing prefix length");
++    if (*(slash + 1) == 0) {
++	_invalid = true;
++	XLOG_WARNING("Missing prefix length: %s", cp);
++	return;
++    }
+     _prefix_len = atoi(slash + 1);
+ 
+     string addr = string(cp, slash - cp);
+ 
+     _masked_addr = IPvX(addr.c_str()).mask_by_prefix_len(_prefix_len);
++    _invalid = _masked_addr.invalid();
+ }
+ 
+ /**
+@@ -82,7 +88,7 @@ public:
+      *
+      * @param family the address family.
+      */
+-    explicit IPvXNet(int family) throw (InvalidFamily)
++    explicit IPvXNet(int family)
+ 	: BaseIPvXNet(IPvX::ZERO(family), 0) {}
+ #ifdef XORP_USE_USTL
+     IPvXNet() : BaseIPvXNet(IPvX::ZERO(AF_INET), 0) {}
+@@ -124,7 +130,7 @@ public:
+      * and prefix length.
+      * Examples: "12.34.56/24", "1234:5678/32::"
+      */
+-    IPvXNet(const char *cp) throw (InvalidString, InvalidNetmaskLength)
++    IPvXNet(const char *cp)
+ 	: BaseIPvXNet(cp) {}
+ 
+     /**
+@@ -133,7 +139,7 @@ public:
+      * @param a base address for the subnet.
+      * @param prefix_len length of subnet mask.
+      */
+-    IPvXNet(const IPvX& a, uint8_t prefix_len) throw (InvalidNetmaskLength)
++    IPvXNet(const IPvX& a, uint8_t prefix_len)
+ 	: BaseIPvXNet(a, prefix_len) {}
+ 
+     // The following methods are specific to IPvXNet
+@@ -157,7 +163,7 @@ public:
+      *
+      * @return IPv4Net subnet contained with IPvXNet structure.
+      */
+-    IPv4Net get_ipv4net() const 	throw (InvalidCast) {
++    IPv4Net get_ipv4net() const {
+     	return IPv4Net(masked_addr().get_ipv4(), prefix_len());
+     }
+ 
+@@ -166,7 +172,7 @@ public:
+      *
+      * @return IPv6Net subnet contained with IPvXNet structure.
+      */
+-    IPv6Net get_ipv6net() const 	throw (InvalidCast) {
++    IPv6Net get_ipv6net() const {
+     	return IPv6Net(masked_addr().get_ipv6(), prefix_len());
+     }
+ 
+@@ -176,7 +182,7 @@ public:
+      * @param to_ipv4net IPv4Net subnet to be assigned IPv4Net value contained
+      * within this subnet.
+      */
+-    void get(IPv4Net& to_ipv4net) const throw (InvalidCast) {
++    void get(IPv4Net& to_ipv4net) const {
+ 	to_ipv4net = get_ipv4net();
+     }
+ 
+@@ -186,7 +192,7 @@ public:
+      * @param to_ipv6net IPv6Net subnet to be assigned IPv6Net value contained
+      * within this subnet.
+      */
+-    void get(IPv6Net& to_ipv6net) const throw (InvalidCast) {
++    void get(IPv6Net& to_ipv6net) const {
+ 	to_ipv6net = get_ipv6net();
+     }
+ 
+@@ -228,7 +234,7 @@ public:
+      * @return the multicast base prefix address for address
+      * family of @ref family.
+      */
+-    static IPvXNet ip_multicast_base_prefix(int family) throw (InvalidFamily) {
++    static IPvXNet ip_multicast_base_prefix(int family) {
+ 	return IPvXNet(IPvX::MULTICAST_BASE(family),
+ 		       IPvX::ip_multicast_base_address_mask_len(family));
+     }
+@@ -246,7 +252,7 @@ public:
+      * @return the Class A base prefix address for address
+      * family of @ref family.
+      */
+-    static IPvXNet ip_class_a_base_prefix(int family) throw (InvalidFamily) {
++    static IPvXNet ip_class_a_base_prefix(int family) {
+ 	return IPvXNet(IPvX::CLASS_A_BASE(family),
+ 		       IPvX::ip_class_a_base_address_mask_len(family));
+     }
+@@ -264,7 +270,7 @@ public:
+      * @return the Class B base prefix address for address
+      * family of @ref family.
+      */
+-    static IPvXNet ip_class_b_base_prefix(int family) throw (InvalidFamily) {
++    static IPvXNet ip_class_b_base_prefix(int family) {
+ 	return IPvXNet(IPvX::CLASS_B_BASE(family),
+ 		       IPvX::ip_class_b_base_address_mask_len(family));
+     }
+@@ -282,7 +288,7 @@ public:
+      * @return the Class C base prefix address for address
+      * family of @ref family.
+      */
+-    static IPvXNet ip_class_c_base_prefix(int family) throw (InvalidFamily) {
++    static IPvXNet ip_class_c_base_prefix(int family) {
+ 	return IPvXNet(IPvX::CLASS_C_BASE(family),
+ 		       IPvX::ip_class_c_base_address_mask_len(family));
+     }
+@@ -300,8 +306,7 @@ public:
+      * @return the experimental base prefix address for address
+      * family of @ref family.
+      */
+-    static IPvXNet ip_experimental_base_prefix(int family)
+-	throw (InvalidFamily) {
++    static IPvXNet ip_experimental_base_prefix(int family) {
+ 	return IPvXNet(IPvX::EXPERIMENTAL_BASE(family),
+ 		       IPvX::ip_experimental_base_address_mask_len(family));
+     }
+diff --git a/xorp/libxorp/mac.cc b/xorp/libxorp/mac.cc
+index 562ff69..e9c1a6e 100644
+--- a/xorp/libxorp/mac.cc
++++ b/xorp/libxorp/mac.cc
+@@ -21,8 +21,9 @@
+ 
+ 
+ #include "libxorp/xorp.h"
+-#include "libxorp/ether_compat.h" 
+-
++#include "libxorp/ether_compat.h"
++#include "libxorp/libxorp_module.h"
++#include "libxorp/xlog.h"
+ #include "mac.hh"
+ 
+ 
+@@ -36,7 +37,7 @@ Mac::Mac(const uint8_t* from_uint8)
+     copy_in(from_uint8);
+ }
+ 
+-Mac::Mac(const char* from_cstring) throw (InvalidString)
++Mac::Mac(const char* from_cstring)
+ {
+     copy_in(from_cstring);
+ }
+@@ -105,18 +106,24 @@ Mac::copy_in(const struct sockaddr& from_sockaddr)
+ }
+ 
+ size_t
+-Mac::copy_in(const char* from_cstring) throw (InvalidString)
++Mac::copy_in(const char* from_cstring)
+ {
+     const struct ether_addr* eap;
++    set_invalid(false);
+ 
+-    if (from_cstring == NULL)
+-	xorp_throw(InvalidString, "Null value");
++    if (from_cstring == NULL) {
++	set_invalid(true);
++	return 0;
++    }
+ 
+ #ifdef HAVE_ETHER_ATON_R
+     struct ether_addr ea;
+ 
+-    if (ether_aton_r(from_cstring, &ea) == NULL)
+-	xorp_throw(InvalidString, c_format("Bad Mac \"%s\"", from_cstring));
++    if (ether_aton_r(from_cstring, &ea) == NULL) {
++	set_invalid(true);
++	XLOG_WARNING("Bad Mac \"%s\"", from_cstring);
++	return 0;
++    }
+     eap = &ea;
+ 
+ #else // ! HAVE_ETHER_ATON_R
+@@ -127,8 +134,11 @@ Mac::copy_in(const char* from_cstring) throw (InvalidString)
+     // is broken (missing "const" in the argument).
+     //
+     eap = ether_aton(const_cast<char *>(from_cstring));
+-    if (eap == NULL)
+-	xorp_throw(InvalidString, c_format("Bad Mac \"%s\"", from_cstring));
++    if (eap == NULL) {
++	set_invalid(true);
++	XLOG_WARNING("Bad Mac \"%s\"", from_cstring);
++	return 0;
++    }
+ #endif // ! HAVE_ETHER_ATON_R
+ 
+     return (copy_in(*eap));
+diff --git a/xorp/libxorp/mac.hh b/xorp/libxorp/mac.hh
+index 0c1ed95..a6f78ec 100644
+--- a/xorp/libxorp/mac.hh
++++ b/xorp/libxorp/mac.hh
+@@ -19,7 +19,6 @@
+ // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/libxorp/mac.hh,v 1.32 2008/10/10 00:38:20 pavlin Exp $
+ 
+ #ifndef __LIBXORP_MAC_HH__
+ #define __LIBXORP_MAC_HH__
+@@ -32,7 +31,7 @@
+ /**
+  * @short IEEE standard 48-bit address.
+  */
+-class Mac {
++class Mac : public Invalid {
+ public:
+     /**
+      * Default constructor.
+@@ -52,9 +51,8 @@ public:
+      *
+      * @param from_cstring C-style string of the form XX:XX:XX:XX:XX:XX
+      * where X represents a hex-digit.
+-     * @throws InvalidString if string passed does not match expected format.
+      */
+-    Mac(const char* from_cstring) throw (InvalidString);
++    Mac(const char* from_cstring);
+ 
+     /**
+      * Constructor from ether_addr structure.
+@@ -126,9 +124,8 @@ public:
+      *
+      * @param from_cstring C-style string of the form XX:XX:XX:XX:XX:XX
+      * where X represents a hex-digit.
+-     * @throws InvalidString if string passed does not match expected format.
+      */
+-    size_t copy_in(const char* from_cstring) throw (InvalidString);
++    size_t copy_in(const char* from_cstring);
+ 
+     /**
+      * Less-Than Operator
+diff --git a/xorp/libxorp/profile.cc b/xorp/libxorp/profile.cc
+index 9a1b7f1..fdc0f31 100644
+--- a/xorp/libxorp/profile.cc
++++ b/xorp/libxorp/profile.cc
+@@ -45,119 +45,156 @@ Profile::~Profile()
+     }
+ }
+ 
+-void
+-Profile::create(const string& pname, const string& comment)
+-    throw(PVariableExists)
++bool
++Profile::create(const string& pname, const string& comment, string& e)
+ {
+     // Catch initialization problems.
+-#ifndef XORP_USE_USTL
+-    if (_profiles.count(pname))
+-	xorp_throw(PVariableExists, pname.c_str());
+-#endif
++    if (_profiles.count(pname) != 0) {
++	e = "Profile already exists: " + pname;
++	return false;
++    }
+ 
+     ProfileState *p = new ProfileState(comment, false, false, new logentries);
+     _profiles[pname] = ref_ptr<ProfileState>(p);
++    return true;
+ }
+ 
+-void
++bool
+ Profile::log(const string& pname, string comment)
+-    throw(PVariableUnknown,PVariableNotEnabled)
++{
++    string e;
++    return log(pname, comment, e);
++}
++
++bool
++Profile::log(const string& pname, string comment, string& e)
+ {
+     profiles::iterator i = _profiles.find(pname);
+ 
+     // Catch any mispelt pnames.
+-    if (i == _profiles.end())
+-	xorp_throw(PVariableUnknown, pname.c_str());
++    if (i == _profiles.end()) {
++	e = "Unknown profile: " + pname;
++	return false;
++    }
+ 
+     // In order to be logging, we must be enabled.
+-    if (!i->second->enabled())
+-	xorp_throw(PVariableNotEnabled, pname.c_str());
++    if (!i->second->enabled()) {
++	e = "Profile is not enabled: " + pname;
++	return false;
++    }
+     
+ #if	0
+     // Make sure that this variable is not locked.
+-    if (!i->second->locked())
+-	xorp_throw(PVariableLocked, pname.c_str());
++    if (!i->second->locked()) {
++	e = "Profile is locked: " + pname;
++	return false;
++    }
+ #endif
+     
+     TimeVal tv;
+     TimerList::system_gettimeofday(&tv);
+     i->second->logptr()->push_back(ProfileLogEntry(tv, comment));
++    return true;
+ }
+ 
+-void
+-Profile::enable(const string& pname) throw(PVariableUnknown,PVariableLocked)
++bool
++Profile::enable(const string& pname)
++{
++    string e;
++    return enable(pname, e);
++}
++
++bool
++Profile::enable(const string& pname, string& e)
+ {
+     profiles::iterator i = _profiles.find(pname);
+ 
+     // Catch any mispelt pnames.
+-    if (i == _profiles.end())
+-	xorp_throw(PVariableUnknown, pname.c_str());
++    if (i == _profiles.end()) {
++	e = "Unknown profile: " + pname;
++	return false;
++    }
+ 
+     // If this profile name is already enabled, get out of here
+     // without updating the counter.
+     if (i->second->enabled())
+-	return;
++	return true;
+ 
+     // Don't allow a locked entry to be enabled.
+-    if (i->second->locked())
+-	xorp_throw(PVariableLocked, pname.c_str());
++    if (i->second->locked()) {
++	e = "Profile is locked: " + pname;
++	return false;
++    }
+     
+     i->second->set_enabled(true);
+     _profile_cnt++;
++    return true;
+ }
+ 
+-void
+-Profile::disable(const string& pname) throw(PVariableUnknown)
++bool
++Profile::disable(const string& pname, string& e)
+ {
+     profiles::iterator i = _profiles.find(pname);
+ 
+     // Catch any mispelt pnames.
+-    if (i == _profiles.end())
+-	xorp_throw(PVariableUnknown, pname.c_str());
++    if (i == _profiles.end()) {
++	e = "Unknown profile: " + pname;
++	return false;
++    }
+ 
+     // If this profile name is already disabled, get out of here
+     // without updating the counter.
+     if (!i->second->enabled())
+-	return;
++	return true;
+     i->second->set_enabled(false);
+     _profile_cnt--;
++    return true;
+ }
+ 
+-void
+-Profile::lock_log(const string& pname) throw(PVariableUnknown,PVariableLocked)
++bool
++Profile::lock_log(const string& pname, string& e)
+ {
+     profiles::iterator i = _profiles.find(pname);
+ 
+     // Catch any mispelt pnames.
+-    if (i == _profiles.end())
+-	xorp_throw(PVariableUnknown, pname.c_str());
++    if (i == _profiles.end()) {
++	e = "Unknown profile: " + pname;
++	return false;
++    }
+ 
+     // Don't allow a locked entry to be locked again.
+-    if (i->second->locked())
+-	xorp_throw(PVariableLocked, pname.c_str());
++    if (i->second->locked()) {
++	e = "Profile is already locked: " + pname;
++	return false;
++    }
+ 
+     // Disable logging.
+-    disable(pname);
++    if (!disable(pname, e))
++	return false;
+ 
+     // Lock the entry
+     i->second->set_locked(true);
+ 
+     i->second->set_iterator(i->second->logptr()->begin());
++    return true;
+ }
+ 
+ bool 
+-Profile::read_log(const string& pname, ProfileLogEntry& entry) 
+-    throw(PVariableUnknown,PVariableNotLocked)
++Profile::read_log(const string& pname, ProfileLogEntry& entry, string& e)
+ {
+     profiles::iterator i = _profiles.find(pname);
+ 
+     // Catch any mispelt pnames.
+-    if (i == _profiles.end())
+-	xorp_throw(PVariableUnknown, pname.c_str());
++    if (i == _profiles.end()) {
++	e = "Unknown profile: " + pname;
++	return false;
++    }
+ 
+     // Verify that the log entry is locked
+-    if (!i->second->locked())
+-	xorp_throw(PVariableNotLocked, pname.c_str());
++    if (!i->second->locked()) {
++	e = "Profile is not locked: " + pname;
++	return false;
++    }
+ 
+     logentries::iterator li;
+     i->second->get_iterator(li);
+@@ -170,38 +207,47 @@ Profile::read_log(const string& pname, ProfileLogEntry& entry)
+     return true;
+ }
+ 
+-void
+-Profile::release_log(const string& pname) 
+-    throw(PVariableUnknown,PVariableNotLocked)
++bool
++Profile::release_log(const string& pname, string& e)
+ {
+     profiles::iterator i = _profiles.find(pname);
+ 
+     // Catch any mispelt pnames.
+-    if (i == _profiles.end())
+-	xorp_throw(PVariableUnknown, pname.c_str());
++    if (i == _profiles.end()) {
++	e = "Unknown profile: " + pname;
++	return false;
++    }
+ 
+     // Verify that the log entry is locked
+-    if (!i->second->locked())
+-	xorp_throw(PVariableNotLocked, pname.c_str());
++    if (!i->second->locked()) {
++	e = "Profile is not locked: " + pname;
++	return false;
++    }
+ 
+     // Unlock the entry
+     i->second->set_locked(false);
++    return true;
+ }
+ 
+-void
+-Profile::clear(const string& pname) throw(PVariableUnknown,PVariableLocked)
++bool
++Profile::clear(const string& pname, string& e)
+ {
+     profiles::iterator i = _profiles.find(pname);
+ 
+     // Catch any mispelt pnames.
+-    if (i == _profiles.end())
+-	xorp_throw(PVariableUnknown, pname.c_str());
++    if (i == _profiles.end()) {
++	e = "Unknown profile: " + pname;
++	return false;
++    }
+ 
+     // Don't allow a locked entry to be cleared.
+-    if (i->second->locked())
+-	xorp_throw(PVariableLocked, pname.c_str());
++    if (i->second->locked()) {
++	e = "Profile is locked: " + pname;
++	return false;
++    }
+ 
+     i->second->logptr()->clear();
++    return true;
+ }
+ 
+ #if 0
+diff --git a/xorp/libxorp/profile.hh b/xorp/libxorp/profile.hh
+index 124464d..21d2801 100644
+--- a/xorp/libxorp/profile.hh
++++ b/xorp/libxorp/profile.hh
+@@ -19,7 +19,6 @@
+ // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/libxorp/profile.hh,v 1.18 2008/10/02 21:57:32 bms Exp $
+ 
+ #ifndef __LIBXORP_PROFILE_HH__
+ #define __LIBXORP_PROFILE_HH__
+@@ -45,7 +44,6 @@
+  *
+  * A helper class used by XORP processes to support profiling.
+  */
+-
+ class PVariableUnknown : public XorpReasonedException {
+ public:
+     PVariableUnknown(const char* file, size_t line, const string init_why = "")
+@@ -84,6 +82,7 @@ public:
+     {}
+ };
+ 
++
+ class ProfileLogEntry {
+  public:
+     ProfileLogEntry() {}
+@@ -140,15 +139,15 @@ class Profile {
+     /**
+      * Create a new profile variable.
+      */
+-    void create(const string& pname, const string& comment = "")
+-	throw(PVariableExists);
++    bool create(const string& pname, const string& comment, string& e);
++    bool create(const string& pname, const string& comment) { string e; return create(pname, comment, e); } // TODO: remove
+ 
+     /**
+      * Test for this profile variable being enabled.
+      *
+      * @return true if this profile is enabled.
+      */
+-    bool enabled(const string& pname) throw(PVariableUnknown) {
++    bool enabled(const string& pname) {
+ 	// This is the most frequently called method hence make it
+ 	// inline. As an optimisation if no profiling is enabled don't
+ 	// perform any string maniplulation or lookups.
+@@ -160,36 +159,43 @@ class Profile {
+ 	profiles::iterator i = _profiles.find(pname);
+ 	// Catch any mispelt pnames.
+ 	if (i == _profiles.end())
+-	    xorp_throw(PVariableUnknown, pname.c_str());
++	    return false;
+ 
+ 	return i->second->enabled();
+     }
+ 
++    /* Ignore any error messages */
++    bool log_ne(const string& pname, string comment) {
++	string e;
++	return log(pname, comment, e);
++    }
++
+     /**
+      * Add an entry to the profile log.
+      */
+-    void log(const string& pname, string comment)
+-	throw(PVariableUnknown,PVariableNotEnabled);
++    bool log(const string& pname, string comment, string& e); // TODO:  should be const string& comment ???
++    bool log(const string& pname, string comment); // TODO:  Remove me in favour of the above.
+ 
+     /**
+      * Enable tracing.
+      *
+      * @param profile variable.
+      */
+-    void enable(const string& pname)
+-	throw(PVariableUnknown,PVariableLocked);
++    bool enable(const string& pname, string& e);
++    bool enable(const string& pname); // TODO:  Remove in favour of the above.
+     
+     /**
+      * Disable tracing.
+      * @param profile variable.
+      */
+-    void disable(const string& pname) throw(PVariableUnknown);
++    bool disable(const string& pname, string& e);
++    bool disable(const string& pname) { string e; return disable(pname, e); } // TODO:  Remove
+ 
+     /**
+      * Lock the log in preparation for reading log entries.
+      */
+-    void lock_log(const string& pname)
+-	throw(PVariableUnknown,PVariableLocked);
++    bool lock_log(const string& pname, string& e);
++    bool lock_log(const string& pname) { string e; return lock_log(pname, e); } // TODO:  Remove
+ 
+     /**
+      * Read the next log entry;
+@@ -197,19 +203,18 @@ class Profile {
+      * @param entry log entry
+      * @return True a entry has been returned.
+      */
+-    bool read_log(const string& pname, ProfileLogEntry& entry)
+-	throw(PVariableUnknown,PVariableNotLocked);
++    bool read_log(const string& pname, ProfileLogEntry& entry, string& e);
+ 
+     /**
+      * Release the log.
+      */
+-    void release_log(const string& pname)
+-	throw(PVariableUnknown,PVariableNotLocked);
++    bool release_log(const string& pname, string& e);
+ 
+     /**
+      * Clear the profiledata.
+      */
+-    void clear(const string& pname) throw(PVariableUnknown,PVariableLocked);
++    bool clear(const string& pname, string& e);
++    bool clear(const string& pname) { string e; return clear(pname, e); } // TODO:  Remove
+ 
+     /**
+      * @return A newline separated list of profiling variables along
+@@ -237,7 +242,8 @@ class ProfileUtils {
+ 		 Profile *profile)
+     {
+ 	ProfileLogEntry ple;
+-	if (profile->read_log(pname, ple)) {
++	string e;
++	if (profile->read_log(pname, ple, e)) {
+ 	    TimeVal t = ple.time();
+ 	    XrlProfileClientV0p1Client pc(xrl_router);
+ 	    pc.send_log(instance_name.c_str(),
+@@ -246,7 +252,7 @@ class ProfileUtils {
+ 				 pname, xrl_router, instance_name, profile));
+ 	} else {
+ 	    // Unlock the log entry.
+-	    profile->release_log(pname);
++	    profile->release_log(pname, e);
+ 	    ProfileUtils::transmit_finished(pname, xrl_router, instance_name);
+ 	}
+     }
+@@ -261,7 +267,8 @@ class ProfileUtils {
+ 	if (XrlError::OKAY() != error) {
+ 	    XLOG_WARNING("%s", error.error_msg());
+ 	    // Unlock the log entry.
+-	    profile->release_log(pname);
++	    string e;
++	    profile->release_log(pname, e);
+ 	    return;
+ 	}
+ 	ProfileUtils::transmit_log(pname, xrl_router, instance_name, profile);
+diff --git a/xorp/libxorp/range.hh b/xorp/libxorp/range.hh
+index dbe7353..acddf0a 100644
+--- a/xorp/libxorp/range.hh
++++ b/xorp/libxorp/range.hh
+@@ -19,12 +19,11 @@
+ // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/libxorp/range.hh,v 1.11 2008/10/02 21:57:32 bms Exp $
+-
+ #ifndef __LIBXORP_RANGE_HH__
+ #define __LIBXORP_RANGE_HH__
+ 
+-
++#include "libxorp_module.h"
++#include "xlog.h"
+ 
+ class IPv4;
+ class IPv6;
+@@ -37,17 +36,18 @@ class IPv6;
+  * (_low <= _high) always holds!
+  */
+ template <class T>
+-class Range {
++class Range : public Invalid {
+ public:
+     /**
+      * Default constructor
+      */
+-    Range() 			{}
++    Range() { }
++    virtual ~Range() { }
+ 
+     /**
+      * Constructor from a single value.
+      */
+-    explicit Range(T value)	{ _low = _high = value; }
++    explicit Range(T value) { _low = _high = value; }
+ 
+     /**
+      * Constructor from two values.
+@@ -100,7 +100,8 @@ public:
+ 	    _low = strtoul(from_string.substr(0, delim).c_str(), NULL, 10);
+ 	    _high = strtoul(from_string.substr(delim + 2, from_string.length()).c_str(), NULL, 10);
+ 	} else {
+-	    xorp_throw(InvalidString, "Syntax error");
++	    set_invalid(true);
++	    XLOG_WARNING("Syntax error: %s", from_cstr);
+ 	}
+     }
+ 
+@@ -160,7 +161,8 @@ public:
+ 	    _low = strtoul(from_string.substr(0, delim).c_str(), NULL, 10);
+ 	    _high = strtoul(from_string.substr(delim + 2, from_string.length()).c_str(), NULL, 10);
+ 	} else {
+-	    xorp_throw(InvalidString, "Syntax error");
++	    set_invalid(true);
++	    XLOG_WARNING("Syntax error: %s", from_cstr);
+ 	}
+     }
+ 
+@@ -371,7 +373,8 @@ public:
+ 						   from_string.length())
+ 						    .c_str());
+ 	} else {
+-	    xorp_throw(InvalidString, "Syntax error");
++	    Invalid::set_invalid(true);
++	    XLOG_WARNING("Syntax error: %s", from_cstr);
+ 	}
+     }
+ 
+diff --git a/xorp/libxorp/tests/test_ipv4.cc b/xorp/libxorp/tests/test_ipv4.cc
+index 2e975d7..a4efeec 100644
+--- a/xorp/libxorp/tests/test_ipv4.cc
++++ b/xorp/libxorp/tests/test_ipv4.cc
+@@ -160,77 +160,6 @@ test_ipv4_valid_constructors()
+ }
+ 
+ /**
+- * Test IPv4 invalid constructors.
+- */
+-void
+-test_ipv4_invalid_constructors()
+-{
+-    // Test values for IPv4 address: "12.34.56.78"
+-    struct sockaddr_in sin;
+-    memset(&sin, 0, sizeof(sin));
+-#ifdef HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
+-    sin.sin_len = sizeof(sin);
+-#endif
+-    sin.sin_family = AF_UNSPEC;		// Note: invalid IP address family
+-    sin.sin_addr.s_addr = htonl((12 << 24) | (34 << 16) | (56 << 8) | 78);
+-    struct sockaddr *sap = (struct sockaddr *)&sin;
+-    struct sockaddr_storage *ssp = (struct sockaddr_storage *)&sin;
+-
+-    //
+-    // Constructor from an invalid address string.
+-    //
+-    try {
+-	// Invalid address string: note the typo -- lack of a "dot" after "12"
+-	IPv4 ip("1234.56.78");
+-	verbose_log("Cannot catch invalid IP address \"1234.56.78\" : FAIL\n");
+-	incr_failures();
+-	UNUSED(ip);
+-    } catch (const InvalidString& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-
+-    //
+-    // Constructor from an invalid sockaddr structure.
+-    //
+-    try {
+-	IPv4 ip(*sap);
+-	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
+-	incr_failures();
+-	UNUSED(ip);
+-    } catch (const InvalidFamily& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-
+-    //
+-    // Constructor from an invalid sockaddr_storage structure.
+-    //
+-    try {
+-	IPv4 ip(*ssp);
+-	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
+-	incr_failures();
+-	UNUSED(ip);
+-    } catch (const InvalidFamily& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-
+-    //
+-    // Constructor from an invalid sockaddr_in structure.
+-    //
+-    try {
+-	IPv4 ip(sin);
+-	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
+-	incr_failures();
+-	UNUSED(ip);
+-    } catch (const InvalidFamily& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-}
+-
+-/**
+  * Test IPv4 valid copy in/out methods.
+  */
+ void
+@@ -350,67 +279,6 @@ test_ipv4_valid_copy_in_out()
+ }
+ 
+ /**
+- * Test IPv4 invalid copy in/out methods.
+- */
+-void
+-test_ipv4_invalid_copy_in_out()
+-{
+-    // Test values for IPv4 address: "12.34.56.78"
+-    // const char *addr_string4 = "12.34.56.78";
+-    struct sockaddr_in sin;
+-    memset(&sin, 0, sizeof(sin));
+-#ifdef HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
+-    sin.sin_len = sizeof(sin);
+-#endif
+-    sin.sin_family = AF_UNSPEC;		// Note: invalid IP address family
+-    sin.sin_addr.s_addr = htonl((12 << 24) | (34 << 16) | (56 << 8) | 78);
+-
+-    struct sockaddr *sap;
+-    struct sockaddr_storage *ssp;
+-
+-    //
+-    // Copy-in from a sockaddr structure for invalid address family.
+-    //
+-    try {
+-	IPv4 ip;
+-	sap = (struct sockaddr *)&sin;
+-	ip.copy_in(*sap);
+-	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
+-	incr_failures();
+-    } catch (const InvalidFamily& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-
+-    //
+-    // Copy-in from a sockaddr_storage structure for invalid address family.
+-    //
+-    try {
+-	IPv4 ip;
+-	ssp = (struct sockaddr_storage *)&sin;
+-	ip.copy_in(*ssp);
+-	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
+-	incr_failures();
+-    } catch (const InvalidFamily& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-
+-    //
+-    // Copy-in from a sockaddr_in structure for invalid address family.
+-    //
+-    try {
+-	IPv4 ip;
+-	ip.copy_in(sin);
+-	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
+-	incr_failures();
+-    } catch (const InvalidFamily& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-}
+-
+-/**
+  * Test IPv4 operators.
+  */
+ void
+@@ -925,45 +793,6 @@ test_ipv4_manipulate_address()
+ 		   "leading_zero_count()");
+ }
+ 
+-/**
+- * Test IPv4 invalid address manipulation.
+- */
+-void
+-test_ipv4_invalid_manipulate_address()
+-{
+-    const char *addr_string4 = "12.34.56.78";
+-
+-    //
+-    // Test making an invalid IPv4 mask prefix.
+-    //
+-    try {
+-	// Invalid prefix length
+-	IPv4 ip(IPv4::make_prefix(IPv4::addr_bitlen() + 1));
+-	verbose_log("Cannot catch invalid IPv4 mask prefix with length %u : FAIL\n",
+-		    XORP_UINT_CAST(IPv4::addr_bitlen() + 1));
+-	incr_failures();
+-	UNUSED(ip);
+-    } catch (const InvalidNetmaskLength& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-
+-    //
+-    // Test masking with an invalid IPv4 mask prefix.
+-    //
+-    try {
+-	// Invalid mask prefix
+-	IPv4 ip(addr_string4);
+-	ip.mask_by_prefix_len(IPv4::addr_bitlen() + 1);
+-	verbose_log("Cannot catch masking with an invalid IPv4 mask prefix with length %u : FAIL\n",
+-		    XORP_UINT_CAST(IPv4::addr_bitlen() + 1));
+-	incr_failures();
+-    } catch (const InvalidNetmaskLength& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-}
+-
+ int
+ main(int argc, char * const argv[])
+ {
+diff --git a/xorp/libxorp/tests/test_ipv4net.cc b/xorp/libxorp/tests/test_ipv4net.cc
+index 6a3eb93..b13b185 100644
+--- a/xorp/libxorp/tests/test_ipv4net.cc
++++ b/xorp/libxorp/tests/test_ipv4net.cc
+@@ -147,59 +147,6 @@ test_ipv4net_valid_constructors(TestInfo& test_info)
+ }
+ 
+ /**
+- * Test IPv4Net invalid constructors.
+- */
+-bool
+-test_ipv4net_invalid_constructors(TestInfo& test_info)
+-{
+-    UNUSED(test_info);
+-
+-    //
+-    // Constructor for invalid prefix length.
+-    //
+-    try {
+-	IPv4 ip("12.34.56.78");
+-	IPv4Net ipnet(ip, ip.addr_bitlen() + 1);
+-	verbose_log("Cannot catch invalid prefix length : FAIL\n");
+-	incr_failures();
+-	UNUSED(ipnet);
+-    } catch (const InvalidNetmaskLength& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-    
+-    //
+-    // Constructor from an invalid address string.
+-    //
+-    try {
+-	// Invalid address string: note the typo -- lack of prefix length
+-	IPv4Net ipnet("12.34.56.78/");
+-	verbose_log("Cannot catch invalid IP network address \"12.34.56.78/\" : FAIL\n");
+-	incr_failures();
+-	UNUSED(ipnet);
+-    } catch (const InvalidString& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-    
+-    //
+-    // Constructor from an address string with invalid prefix length.
+-    //
+-    try {
+-	// Invalid address string: prefix length too long
+-	IPv4Net ipnet("12.34.56.78/33");
+-	verbose_log("Cannot catch invalid IP network address \"12.34.56.78/33\" : FAIL\n");
+-	incr_failures();
+-	UNUSED(ipnet);
+-    } catch (const InvalidNetmaskLength& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-
+-    return (! failures());
+-}
+-
+-/**
+  * Test IPv4Net operators.
+  */
+ bool
+diff --git a/xorp/libxorp/tests/test_ipv6.cc b/xorp/libxorp/tests/test_ipv6.cc
+index 9e34678..a5fa067 100644
+--- a/xorp/libxorp/tests/test_ipv6.cc
++++ b/xorp/libxorp/tests/test_ipv6.cc
+@@ -168,82 +168,6 @@ test_ipv6_valid_constructors()
+ }
+ 
+ /**
+- * Test IPv6 invalid constructors.
+- */
+-void
+-test_ipv6_invalid_constructors()
+-{
+-    // Test values for IPv6 address: "1234:5678:9abc:def0:fed:cba9:8765:4321"
+-    struct in6_addr in6_addr = { { { 0x12, 0x34, 0x56, 0x78,
+-				     0x9a, 0xbc, 0xde, 0xf0,
+-				     0x0f, 0xed, 0xcb, 0xa9,
+-				     0x87, 0x65, 0x43, 0x21 } } };
+-    struct sockaddr_in6 sin6;
+-    memset(&sin6, 0, sizeof(sin6));
+-#ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_LEN
+-    sin6.sin6_len = sizeof(sin6);
+-#endif
+-    sin6.sin6_family = AF_UNSPEC;	// Note: invalid IP address family
+-    sin6.sin6_addr = in6_addr;
+-    struct sockaddr *sap = (struct sockaddr *)&sin6;
+-    struct sockaddr_storage *ssp = (struct sockaddr_storage *)&sin6;
+-
+-    //
+-    // Constructor from an invalid address string.
+-    //
+-    try {
+-	// Invalid address string: note the typo -- ';' instead of ':'
+-	// after 8765
+-	IPv6 ip("1234:5678:9abc:def0:fed:cba9:8765;4321");
+-	verbose_log("Cannot catch invalid IP address \"1234:5678:9abc:def0:fed:cba9:8765;4321\" : FAIL\n");
+-	incr_failures();
+-	UNUSED(ip);
+-    } catch (const InvalidString& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-
+-    //
+-    // Constructor from an invalid sockaddr structure.
+-    //
+-    try {
+-	IPv6 ip(*sap);
+-	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
+-	incr_failures();
+-	UNUSED(ip);
+-    } catch (const InvalidFamily& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-
+-    //
+-    // Constructor from an invalid sockaddr_storage structure.
+-    //
+-    try {
+-	IPv6 ip(*ssp);
+-	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
+-	incr_failures();
+-	UNUSED(ip);
+-    } catch (const InvalidFamily& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-
+-    //
+-    // Constructor from an invalid sockaddr_in6 structure.
+-    //
+-    try {
+-	IPv6 ip(sin6);
+-	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
+-	incr_failures();
+-	UNUSED(ip);
+-    } catch (const InvalidFamily& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-}
+-
+-/**
+  * Test IPv6 valid copy in/out methods.
+  */
+ void
+@@ -368,75 +292,6 @@ test_ipv6_valid_copy_in_out()
+ }
+ 
+ /**
+- * Test IPv6 invalid copy in/out methods.
+- */
+-void
+-test_ipv6_invalid_copy_in_out()
+-{
+-    // Test values for IPv6 address: "1234:5678:9abc:def0:fed:cba9:8765:4321"
+-    // const char *addr_string6 = "1234:5678:9abc:def0:fed:cba9:8765:4321";
+-    struct in6_addr in6_addr = { { { 0x12, 0x34, 0x56, 0x78,
+-				     0x9a, 0xbc, 0xde, 0xf0,
+-				     0x0f, 0xed, 0xcb, 0xa9,
+-				     0x87, 0x65, 0x43, 0x21 } } };
+-    uint8_t  ui8[16];
+-    uint32_t ui32[4];
+-    memcpy(&ui8[0], &in6_addr, sizeof(in6_addr));
+-    memcpy(&ui32[0], &in6_addr, sizeof(in6_addr));
+-    struct sockaddr_in6 sin6;
+-    memset(&sin6, 0, sizeof(sin6));
+-#ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_LEN
+-    sin6.sin6_len = sizeof(sin6);
+-#endif
+-    sin6.sin6_family = AF_UNSPEC;	// Note: invalid IP address family
+-    sin6.sin6_addr = in6_addr;
+-
+-    struct sockaddr *sap;
+-    struct sockaddr_storage *ssp;
+-
+-    //
+-    // Copy-in from a sockaddr structure for invalid address family.
+-    //
+-    try {
+-	IPv6 ip;
+-	sap = (struct sockaddr *)&sin6;
+-	ip.copy_in(*sap);
+-	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
+-	incr_failures();
+-    } catch (const InvalidFamily& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-
+-    //
+-    // Copy-in from a sockaddr_storage structure for invalid address family.
+-    //
+-    try {
+-	IPv6 ip;
+-	ssp = (struct sockaddr_storage *)&sin6;
+-	ip.copy_in(*ssp);
+-	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
+-	incr_failures();
+-    } catch (const InvalidFamily& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-
+-    //
+-    // Copy-in from a sockaddr_in6 structure for invalid address family.
+-    //
+-    try {
+-	IPv6 ip;
+-	ip.copy_in(sin6);
+-	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
+-	incr_failures();
+-    } catch (const InvalidFamily& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-}
+-
+-/**
+  * Test IPv6 operators.
+  */
+ void
+@@ -781,45 +636,6 @@ test_ipv6_manipulate_address()
+ 		   "leading_zero_count()");
+ }
+ 
+-/**
+- * Test IPv6 invalid address manipulation.
+- */
+-void
+-test_ipv6_invalid_manipulate_address()
+-{
+-    const char *addr_string6 = "1234:5678:9abc:def0:fed:cba9:8765:4321";
+-
+-    //
+-    // Test making an invalid IPv6 mask prefix.
+-    //
+-    try {
+-	// Invalid prefix length
+-	IPv6 ip(IPv6::make_prefix(IPv6::addr_bitlen() + 1));
+-	verbose_log("Cannot catch invalid IPv6 mask prefix with length %u : FAIL\n",
+-		    XORP_UINT_CAST(IPv6::addr_bitlen() + 1));
+-	incr_failures();
+-	UNUSED(ip);
+-    } catch (const InvalidNetmaskLength& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-
+-    //
+-    // Test masking with an invalid IPv6 mask prefix.
+-    //
+-    try {
+-	// Invalid mask prefix
+-	IPv6 ip(addr_string6);
+-	ip.mask_by_prefix_len(IPv6::addr_bitlen() + 1);
+-	verbose_log("Cannot catch masking with an invalid IPv6 mask prefix with length %u : FAIL\n",
+-		    XORP_UINT_CAST(IPv6::addr_bitlen() + 1));
+-	incr_failures();
+-    } catch (const InvalidNetmaskLength& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-}
+-
+ int
+ main(int argc, char * const argv[])
+ {
+diff --git a/xorp/libxorp/tests/test_ipv6net.cc b/xorp/libxorp/tests/test_ipv6net.cc
+index 3622831..524d74c 100644
+--- a/xorp/libxorp/tests/test_ipv6net.cc
++++ b/xorp/libxorp/tests/test_ipv6net.cc
+@@ -154,59 +154,6 @@ test_ipv6net_valid_constructors(TestInfo& test_info)
+ }
+ 
+ /**
+- * Test IPv6Net invalid constructors.
+- */
+-bool
+-test_ipv6net_invalid_constructors(TestInfo& test_info)
+-{
+-    UNUSED(test_info);
+-
+-    //
+-    // Constructor for invalid prefix length.
+-    //
+-    try {
+-	IPv6 ip("1234:5678:9abc:def0:fed:cba9:8765:4321");
+-	IPv6Net ipnet(ip, ip.addr_bitlen() + 1);
+-	verbose_log("Cannot catch invalid prefix length : FAIL\n");
+-	incr_failures();
+-	UNUSED(ipnet);
+-    } catch (const InvalidNetmaskLength& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-    
+-    //
+-    // Constructor from an invalid address string.
+-    //
+-    try {
+-	// Invalid address string: note the typo -- lack of prefix length
+-	IPv6Net ipnet("1234:5678::/");
+-	verbose_log("Cannot catch invalid IP network address \"1234:5678::/\" : FAIL\n");
+-	incr_failures();
+-	UNUSED(ipnet);
+-    } catch (const InvalidString& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-
+-    //
+-    // Constructor from an address string with invalid prefix length.
+-    //
+-    try {
+-	// Invalid address string: prefix length too long
+-	IPv6Net ipnet("1234:5678::/129");
+-	verbose_log("Cannot catch invalid IP network address \"1234:5678::/129\" : FAIL\n");
+-	incr_failures();
+-	UNUSED(ipnet);
+-    } catch (const InvalidNetmaskLength& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-
+-    return (! failures());
+-}
+-
+-/**
+  * Test IPv6Net operators.
+  */
+ bool
+diff --git a/xorp/libxorp/tests/test_ipvx.cc b/xorp/libxorp/tests/test_ipvx.cc
+index 907369c..da66c66 100644
+--- a/xorp/libxorp/tests/test_ipvx.cc
++++ b/xorp/libxorp/tests/test_ipvx.cc
+@@ -254,199 +254,6 @@ test_ipvx_valid_constructors()
+ }
+ 
+ /**
+- * Test IPvX invalid constructors.
+- */
+-void
+-test_ipvx_invalid_constructors()
+-{
+-    // Test values for IPv4 address: "12.34.56.78"
+-    struct sockaddr_in sin;
+-    memset(&sin, 0, sizeof(sin));
+-#ifdef HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
+-    sin.sin_len = sizeof(sin);
+-#endif
+-    sin.sin_family = AF_UNSPEC;		// Note: invalid IP address family
+-    sin.sin_addr.s_addr = htonl((12 << 24) | (34 << 16) | (56 << 8) | 78);
+-
+-    // Test values for IPv6 address: "1234:5678:9abc:def0:fed:cba9:8765:4321"
+-    struct in6_addr in6_addr = { { { 0x12, 0x34, 0x56, 0x78,
+-				     0x9a, 0xbc, 0xde, 0xf0,
+-				     0x0f, 0xed, 0xcb, 0xa9,
+-				     0x87, 0x65, 0x43, 0x21 } } };
+-    uint8_t  ui8[16];
+-    uint32_t ui32[4];
+-    memcpy(&ui8[0], &in6_addr, sizeof(in6_addr));
+-    memcpy(&ui32[0], &in6_addr, sizeof(in6_addr));
+-    struct sockaddr_in6 sin6;
+-    memset(&sin6, 0, sizeof(sin6));
+-#ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_LEN
+-    sin6.sin6_len = sizeof(sin6);
+-#endif
+-    sin6.sin6_family = AF_UNSPEC;	// Note: invalid IP address family
+-    sin6.sin6_addr = in6_addr;
+-
+-    struct sockaddr *sap;
+-    struct sockaddr_storage *ssp;
+-
+-    //
+-    // Constructor for invalid address family.
+-    //
+-    try {
+-	IPvX ip(AF_UNSPEC);
+-	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
+-	incr_failures();
+-	UNUSED(ip);
+-    } catch (const InvalidFamily& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-
+-    //
+-    // Constructor from a (uint8_t *) memory pointer for invalid address family.
+-    //
+-    try {
+-	IPvX ip(AF_UNSPEC, &ui8[0]);
+-	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
+-	incr_failures();
+-	UNUSED(ip);
+-    } catch (const InvalidFamily& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-
+-    //
+-    // Constructor from an invalid address string: IPv4.
+-    //
+-    try {
+-	// Invalid address string: note the typo -- lack of a "dot" after "12"
+-	IPvX ip("1234.56.78");
+-	verbose_log("Cannot catch invalid IP address \"1234.56.78\" : FAIL\n");
+-	incr_failures();
+-	UNUSED(ip);
+-    } catch (const InvalidString& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-
+-    //
+-    // Constructor from an invalid address string: IPv6.
+-    //
+-    try {
+-	// Invalid address string: note the typo -- ';' instead of ':'
+-	// after 8765
+-	IPvX ip("1234:5678:9abc:def0:fed:cba9:8765;4321");
+-	verbose_log("Cannot catch invalid IP address \"1234:5678:9abc:def0:fed:cba9:8765;4321\" : FAIL\n");
+-	incr_failures();
+-	UNUSED(ip);
+-    } catch (const InvalidString& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-
+-    //
+-    // Constructor from an invalid sockaddr structure.
+-    //
+-    try {
+-	sap = (struct sockaddr *)&sin;
+-	IPvX ip(*sap);
+-	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
+-	incr_failures();
+-	UNUSED(ip);
+-    } catch (const InvalidFamily& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-
+-    //
+-    // Constructor from an invalid sockaddr_storage structure.
+-    //
+-    try {
+-	ssp = (struct sockaddr_storage *)&sin;
+-	IPvX ip(*ssp);
+-	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
+-	incr_failures();
+-	UNUSED(ip);
+-    } catch (const InvalidFamily& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-
+-    //
+-    // Constructor from an invalid sockaddr_in structure.
+-    //
+-    try {
+-	IPvX ip(sin);
+-	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
+-	incr_failures();
+-	UNUSED(ip);
+-    } catch (const InvalidFamily& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-
+-    //
+-    // Constructor from an invalid sockaddr_in6 structure.
+-    //
+-    try {
+-	IPvX ip(sin6);
+-	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
+-	incr_failures();
+-	UNUSED(ip);
+-    } catch (const InvalidFamily& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-
+-    //
+-    // Constructor from sockaddr_in structure: IPv6
+-    //
+-    try {
+-	struct in6_addr in6_addr = { { { 0x12, 0x34, 0x56, 0x78,
+-					 0x9a, 0xbc, 0xde, 0xf0,
+-					 0x0f, 0xed, 0xcb, 0xa9,
+-					 0x87, 0x65, 0x43, 0x21 } } };
+-	struct sockaddr_in6 sin6;
+-	memset(&sin6, 0, sizeof(sin6));
+-#ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_LEN
+-	sin6.sin6_len = sizeof(sin6);
+-#endif
+-	sin6.sin6_family = AF_INET6;
+-	sin6.sin6_addr = in6_addr;
+-
+-        IPvX ip( *((struct sockaddr_in *) &sin6));
+-	verbose_log("Cannot catch sockaddr_in6 passed as sockaddr_in : FAIL");
+-	incr_failures();
+-	UNUSED(ip);
+-    } catch (const InvalidFamily& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-
+-    //
+-    // Constructor from sockaddr_in6 structure: IPv4
+-    //
+-    try {
+-        uint32_t ui = htonl((12 << 24) | (34 << 16) | (56 << 8) | 78);
+-
+-	struct sockaddr_in sin;
+-	memset(&sin, 0, sizeof(sin));
+-#ifdef HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
+-	sin.sin_len = sizeof(sin);
+-#endif
+-	sin.sin_family = AF_INET;
+-	sin.sin_addr.s_addr = ui;
+-
+-	IPvX ip( *((struct sockaddr_in6 *) &sin));
+-	verbose_log("Cannot catch sockaddr_in passed as sockaddr_in6 : FAIL");
+-	incr_failures();
+-	UNUSED(ip);
+-    } catch (const InvalidFamily& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-}
+-
+-/**
+  * Test IPvX valid copy in/out methods.
+  */
+ void
+@@ -679,217 +486,6 @@ test_ipvx_valid_copy_in_out()
+ }
+ 
+ /**
+- * Test IPvX invalid copy in/out methods.
+- */
+-void
+-test_ipvx_invalid_copy_in_out()
+-{
+-    // Test values for IPv4 address: "12.34.56.78"
+-    const char *addr_string4 = "12.34.56.78";
+-    struct sockaddr_in sin;
+-    memset(&sin, 0, sizeof(sin));
+-#ifdef HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
+-    sin.sin_len = sizeof(sin);
+-#endif
+-    sin.sin_family = AF_UNSPEC;		// Note: invalid IP address family
+-    sin.sin_addr.s_addr = htonl((12 << 24) | (34 << 16) | (56 << 8) | 78);
+-
+-    // Test values for IPv6 address: "1234:5678:9abc:def0:fed:cba9:8765:4321"
+-    const char *addr_string6 = "1234:5678:9abc:def0:fed:cba9:8765:4321";
+-    struct in6_addr in6_addr = { { { 0x12, 0x34, 0x56, 0x78,
+-				     0x9a, 0xbc, 0xde, 0xf0,
+-				     0x0f, 0xed, 0xcb, 0xa9,
+-				     0x87, 0x65, 0x43, 0x21 } } };
+-    uint8_t  ui8[16];
+-    uint32_t ui32[4];
+-    memcpy(&ui8[0], &in6_addr, sizeof(in6_addr));
+-    memcpy(&ui32[0], &in6_addr, sizeof(in6_addr));
+-    struct sockaddr_in6 sin6;
+-    memset(&sin6, 0, sizeof(sin6));
+-#ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_LEN
+-    sin6.sin6_len = sizeof(sin6);
+-#endif
+-    sin6.sin6_family = AF_UNSPEC;	// Note: invalid IP address family
+-    sin6.sin6_addr = in6_addr;
+-
+-    struct sockaddr *sap;
+-    struct sockaddr_storage *ssp;
+-
+-    //
+-    // Mismatch copy-out: copy-out IPv6 address to in_addr structure.
+-    //
+-    try {
+-	IPvX ip(addr_string6);
+-	struct in_addr in_addr;
+-	ip.copy_out(in_addr);
+-	verbose_log("Cannot catch mismatch copy-out : FAIL\n");
+-	incr_failures();
+-    } catch (const InvalidFamily& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-
+-    //
+-    // Mismatch copy-out: copy-out IPv4 address to in_addr6 structure.
+-    //
+-    try {
+-	IPvX ip(addr_string4);
+-	struct in6_addr in6_addr;
+-	ip.copy_out(in6_addr);
+-	verbose_log("Cannot catch mismatch copy-out : FAIL\n");
+-	incr_failures();
+-    } catch (const InvalidFamily& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-
+-    //
+-    // Mismatch copy-out: copy-out IPv6 address to sockaddr_in structure.
+-    //
+-    try {
+-        IPvX ip(addr_string6);
+-        struct sockaddr_in sockaddr_in;
+-        ip.copy_out(sockaddr_in);
+-        verbose_log("Cannot catch mismatch copy-out : FAIL\n");
+-        incr_failures();
+-    } catch (const InvalidFamily& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-
+-    //
+-    // Mismatch copy-out: copy-out IPv4 address to sockaddr_in6 structure.
+-    //
+-    try {
+-        IPvX ip(addr_string4);
+-        struct sockaddr_in6 sockaddr_in6;
+-        ip.copy_out(sockaddr_in6);
+-        verbose_log("Cannot catch mismatch copy-out : FAIL\n");
+-        incr_failures();
+-    } catch (const InvalidFamily& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-
+-    // XXX: we should test for copy_out() to sockaddr, sockaddr_storage,
+-    // sockaddr_in, sockaddr_in6 structures that throw InvalidFamily.
+-    // To do so we must creast first IPvX with invalid address family.
+-    // However, this doesn't seem possible, hence we skip those checks.
+-
+-    //
+-    // Copy-in from a (uint8_t *) memory pointer for invalid address family.
+-    //
+-    try {
+-	IPvX ip(AF_INET);
+-	ip.copy_in(AF_UNSPEC, &ui8[0]);
+-	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
+-	incr_failures();
+-    } catch (const InvalidFamily& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-
+-    //
+-    // Copy-in from a sockaddr structure for invalid address family.
+-    //
+-    try {
+-	IPvX ip(AF_INET);
+-	sap = (struct sockaddr *)&sin;
+-	ip.copy_in(*sap);
+-	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
+-	incr_failures();
+-    } catch (const InvalidFamily& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-
+-    //
+-    // Copy-in from a sockaddr_storage structure for invalid address family.
+-    //
+-    try {
+-	IPvX ip(AF_INET);
+-	ssp = (struct sockaddr_storage *)&sin;
+-	ip.copy_in(*ssp);
+-	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
+-	incr_failures();
+-    } catch (const InvalidFamily& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-
+-    //
+-    // Copy-in from a sockaddr_in structure for invalid address family.
+-    //
+-    try {
+-	IPvX ip(AF_INET);
+-	ip.copy_in(sin);
+-	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
+-	incr_failures();
+-    } catch (const InvalidFamily& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-
+-    //
+-    // Copy-in from a sockaddr_in6 structure for invalid address family.
+-    //
+-    try {
+-	IPvX ip(AF_INET6);
+-	ip.copy_in(sin6);
+-	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
+-	incr_failures();
+-    } catch (const InvalidFamily& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-
+-    //
+-    // Copy-in from a sockaddr_in structure for IPv6
+-    //
+-    try {
+-	struct in6_addr in6_addr = { { { 0x12, 0x34, 0x56, 0x78,
+-					 0x9a, 0xbc, 0xde, 0xf0,
+-					 0x0f, 0xed, 0xcb, 0xa9,
+-					 0x87, 0x65, 0x43, 0x21 } } };
+-	struct sockaddr_in6 sin6;
+-	memset(&sin6, 0, sizeof(sin6));
+-#ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_LEN
+-	sin6.sin6_len = sizeof(sin6);
+-#endif
+-	sin6.sin6_family = AF_INET6;
+-	sin6.sin6_addr = in6_addr;
+-
+-        IPvX ip(AF_INET6);
+-        ip.copy_in( *((struct sockaddr_in *) &sin6));
+-	verbose_log("Cannot catch invalid IP address family AF_INET6 : FAIL\n");
+-	incr_failures();
+-    } catch (const InvalidFamily& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-
+-    try {
+-        uint32_t ui = htonl((12 << 24) | (34 << 16) | (56 << 8) | 78);
+-
+-	struct sockaddr_in sin;
+-	memset(&sin, 0, sizeof(sin));
+-#ifdef HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
+-	sin.sin_len = sizeof(sin);
+-#endif
+-	sin.sin_family = AF_INET;
+-	sin.sin_addr.s_addr = ui;
+-
+-	IPvX ip(AF_INET);
+-	ip.copy_in( *((struct sockaddr_in6*) &sin) );
+-	verbose_log("Cannot catch invalid IP address family AF_INET : FAIL\n");
+-	incr_failures();
+-    } catch (const InvalidFamily& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-}
+-
+-/**
+  * Test IPvX operators.
+  */
+ void
+@@ -1653,134 +1249,6 @@ test_ipvx_manipulate_address()
+     verbose_assert(ip6_ipv6_tmp == ip6_ipv6, "get(IPv6& to_ipv6)");
+ }
+ 
+-/**
+- * Test IPvX invalid address manipulation.
+- */
+-void
+-test_ipvx_invalid_manipulate_address()
+-{
+-    const char *addr_string4 = "12.34.56.78";
+-    const char *addr_string6 = "1234:5678:9abc:def0:fed:cba9:8765:4321";
+-
+-    //
+-    // Get invalid IPv4 address.
+-    //
+-    try {
+-	IPvX ip(addr_string6);		// Note: initialized with IPv6 address
+-	IPv4 ip_ipv4;
+-	ip_ipv4 = ip.get_ipv4();
+-	verbose_log("Cannot catch invalid get_ipv4() : FAIL\n");
+-	incr_failures();
+-    } catch (const InvalidCast& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-
+-    //
+-    // Get invalid IPv6 address.
+-    //
+-    try {
+-	IPvX ip(addr_string4);		// Note: initialized with IPv4 address
+-	IPv6 ip_ipv6;
+-	ip_ipv6 = ip.get_ipv6();
+-	verbose_log("Cannot catch invalid get_ipv4() : FAIL\n");
+-	incr_failures();
+-    } catch (const InvalidCast& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-
+-    //
+-    // Assign invalid address value to an IPv4 address.
+-    //
+-    try {
+-	IPvX ip(addr_string6);		// Note: initialized with IPv6 address
+-	IPv4 ip_ipv4;
+-	ip.get(ip_ipv4);
+-	verbose_log("Cannot catch invalid get(IPv4& to_ipv4) : FAIL\n");
+-	incr_failures();
+-    } catch (const InvalidCast& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-
+-    //
+-    // Assign invalid address value to an IPv6 address.
+-    //
+-    try {
+-	IPvX ip(addr_string4);		// Note: initialized with IPv4 address
+-	IPv6 ip_ipv6;
+-	ip.get(ip_ipv6);
+-	verbose_log("Cannot catch invalid get(IPv6& to_ipv6) : FAIL\n");
+-	incr_failures();
+-    } catch (const InvalidCast& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-
+-    //
+-    // Test making an invalid IPvX mask prefix.
+-    //
+-    try {
+-	// Invalid prefix length
+-	IPvX ip(IPvX::make_prefix(AF_UNSPEC, 0));
+-	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
+-	incr_failures();
+-	UNUSED(ip);
+-    } catch (const InvalidFamily& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-    try {
+-	// Invalid prefix length: IPv4
+-	IPvX ip(IPvX::make_prefix(AF_INET, IPvX::addr_bitlen(AF_INET) + 1));
+-	verbose_log("Cannot catch invalid IPv4 mask prefix with length %u : FAIL\n",
+-		    XORP_UINT_CAST(IPvX::addr_bitlen(AF_INET) + 1));
+-	incr_failures();
+-	UNUSED(ip);
+-    } catch (const InvalidNetmaskLength& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-    try {
+-	// Invalid prefix length: IPv6
+-	IPvX ip(IPvX::make_prefix(AF_INET6, IPvX::addr_bitlen(AF_INET6) + 1));
+-	verbose_log("Cannot catch invalid IPv6 mask prefix with length %u : FAIL\n",
+-		    XORP_UINT_CAST(IPvX::addr_bitlen(AF_INET6) + 1));
+-	incr_failures();
+-	UNUSED(ip);
+-    } catch (const InvalidNetmaskLength& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-
+-    //
+-    // Test masking with an invalid IPvX mask prefix.
+-    //
+-    try {
+-	// Invalid mask prefix: IPv4
+-	IPvX ip(addr_string4);
+-	ip.mask_by_prefix_len(IPvX::addr_bitlen(AF_INET) + 1);
+-	verbose_log("Cannot catch masking with an invalid IPv4 mask prefix with length %u : FAIL\n",
+-		    XORP_UINT_CAST(IPvX::addr_bitlen(AF_INET) + 1));
+-	incr_failures();
+-    } catch (const InvalidNetmaskLength& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-    try {
+-	// Invalid mask prefix: IPv6
+-	IPvX ip(addr_string6);
+-	ip.mask_by_prefix_len(IPvX::addr_bitlen(AF_INET6) + 1);
+-	verbose_log("Cannot catch masking with an invalid IPv6 mask prefix with length %u : FAIL\n",
+-		    XORP_UINT_CAST(IPvX::addr_bitlen(AF_INET6) + 1));
+-	incr_failures();
+-    } catch (const InvalidNetmaskLength& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-}
+-
+ int
+ main(int argc, char * const argv[])
+ {
+diff --git a/xorp/libxorp/tests/test_ipvxnet.cc b/xorp/libxorp/tests/test_ipvxnet.cc
+index 311d6ec..fc9b723 100644
+--- a/xorp/libxorp/tests/test_ipvxnet.cc
++++ b/xorp/libxorp/tests/test_ipvxnet.cc
+@@ -212,114 +212,6 @@ test_ipvxnet_valid_constructors(TestInfo& test_info)
+ }
+ 
+ /**
+- * Test IPvXNet invalid constructors.
+- */
+-bool
+-test_ipvxnet_invalid_constructors(TestInfo& test_info)
+-{
+-    UNUSED(test_info);
+-
+-    //
+-    // Constructor for invalid address family.
+-    //
+-    try {
+-	IPvXNet ipnet(AF_UNSPEC);
+-	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
+-	incr_failures();
+-	UNUSED(ipnet);
+-    } catch (const InvalidFamily& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-    
+-    //
+-    // Constructor for invalid prefix length: IPv4.
+-    //
+-    try {
+-	IPvX ip("12.34.56.78");
+-	IPvXNet ipnet(ip, ip.addr_bitlen() + 1);
+-	verbose_log("Cannot catch invalid prefix length : FAIL\n");
+-	incr_failures();
+-	UNUSED(ipnet);
+-    } catch (const InvalidNetmaskLength& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-    
+-    //
+-    // Constructor for invalid prefix length: IPv6.
+-    //
+-    try {
+-	IPvX ip("1234:5678:9abc:def0:fed:cba9:8765:4321");
+-	IPvXNet ipnet(ip, ip.addr_bitlen() + 1);
+-	verbose_log("Cannot catch invalid prefix length : FAIL\n");
+-	incr_failures();
+-	UNUSED(ipnet);
+-    } catch (const InvalidNetmaskLength& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-    
+-    //
+-    // Constructor from an invalid address string: IPv4.
+-    //
+-    try {
+-	// Invalid address string: note the typo -- lack of prefix length
+-	IPvXNet ipnet("12.34.56.78/");
+-	verbose_log("Cannot catch invalid IP network address \"12.34.56.78/\" : FAIL\n");
+-	incr_failures();
+-	UNUSED(ipnet);
+-    } catch (const InvalidString& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-    
+-    //
+-    // Constructor from an invalid address string: IPv6.
+-    //
+-    try {
+-	// Invalid address string: note the typo -- lack of prefix length
+-	IPvXNet ipnet("1234:5678::/");
+-	verbose_log("Cannot catch invalid IP network address \"1234:5678::/\" : FAIL\n");
+-	incr_failures();
+-	UNUSED(ipnet);
+-    } catch (const InvalidString& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-
+-    //
+-    // Constructor from an address string with invalid prefix length: IPv4.
+-    //
+-    try {
+-	// Invalid address string: prefix length too long
+-	IPvXNet ipnet("12.34.56.78/33");
+-	verbose_log("Cannot catch invalid IP network address \"12.34.56.78/33\" : FAIL\n");
+-	incr_failures();
+-	UNUSED(ipnet);
+-    } catch (const InvalidNetmaskLength& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-
+-    //
+-    // Constructor from an address string with invalid prefix length: IPv6
+-    //
+-    try {
+-	// Invalid address string: prefix length too long
+-	IPvXNet ipnet("1234:5678::/129");
+-	verbose_log("Cannot catch invalid IP network address \"1234:5678::/129\" : FAIL\n");
+-	incr_failures();
+-	UNUSED(ipnet);
+-    } catch (const InvalidNetmaskLength& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-
+-    return (! failures());
+-}
+-
+-/**
+  * Test IPvXNet operators.
+  */
+ bool
+@@ -851,89 +743,6 @@ test_ipvxnet_manipulate_address(TestInfo& test_info)
+     return (! failures());
+ }
+ 
+-/**
+- * Test IPvXNet invalid address manipulation.
+- */
+-bool
+-test_ipvxnet_invalid_manipulate_address(TestInfo& test_info)
+-{
+-    UNUSED(test_info);
+-
+-    IPvXNet ipnet4_a("12.34.0.0/16");
+-    IPvXNet ipnet6_a("1234:5678::/32");
+-    
+-    //
+-    // Get invalid IPv4Net address.
+-    //
+-    try {
+-	IPvXNet ipnet(ipnet6_a);	// Note: initialized with IPv6 address
+-	IPv4Net ipnet_ipv4;
+-	ipnet_ipv4 = ipnet.get_ipv4net();
+-	verbose_log("Cannot catch invalid get_ipv4net() : FAIL\n");
+-	incr_failures();
+-    } catch (const InvalidCast& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-
+-    //
+-    // Get invalid IPv6Net address.
+-    //
+-    try {
+-	IPvXNet ipnet(ipnet4_a);	// Note: initialized with IPv4 address
+-	IPv6Net ipnet_ipv6;
+-	ipnet_ipv6 = ipnet.get_ipv6net();
+-	verbose_log("Cannot catch invalid get_ipv6net() : FAIL\n");
+-	incr_failures();
+-    } catch (const InvalidCast& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-    
+-    //
+-    // Assign invalid IPv4Net address.
+-    //
+-    try {
+-	IPvXNet ipnet(ipnet6_a);	// Note: initialized with IPv6 address
+-	IPv4Net ipnet_ipv4;
+-	ipnet.get(ipnet_ipv4);
+-	verbose_log("Cannot catch invalid get(IPv4Net& to_ipv4net) : FAIL\n");
+-	incr_failures();
+-    } catch (const InvalidCast& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-
+-    //
+-    // Assign invalid IPv6Net address.
+-    //
+-    try {
+-	IPvXNet ipnet(ipnet4_a);	// Note: initialized with IPv4 address
+-	IPv6Net ipnet_ipv6;
+-	ipnet.get(ipnet_ipv6);
+-	verbose_log("Cannot catch invalid get(IPv6Net& to_ipv6net) : FAIL\n");
+-	incr_failures();
+-    } catch (const InvalidCast& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-    
+-    //
+-    // Get multicast base subnet for invalid address family.
+-    //
+-    try {
+-	IPvXNet ipnet(IPvXNet::ip_multicast_base_prefix(AF_UNSPEC));
+-	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
+-	incr_failures();
+-	UNUSED(ipnet);
+-    } catch (const InvalidFamily& e) {
+-	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
+-    }
+-
+-    return (! failures());
+-}
+-
+ int
+ main(int argc, char * const argv[])
+ {
+diff --git a/xorp/libxorp/tests/test_mac.cc b/xorp/libxorp/tests/test_mac.cc
+index 979e6fb..543c952 100644
+--- a/xorp/libxorp/tests/test_mac.cc
++++ b/xorp/libxorp/tests/test_mac.cc
+@@ -167,15 +167,14 @@ test_mac_invalid_constructors(TestInfo& test_info)
+     //
+     // Constructor from an invalid address string.
+     //
+-    try {
+-	// Invalid address string
+-	Mac mac("hello");
++    // Invalid address string
++    Mac mac("hello");
++    if (!mac.invalid()) {
+ 	verbose_log("Cannot catch invalid Mac address \"hello\" : FAIL\n");
+ 	incr_failures();
+-	UNUSED(mac);
+-    } catch (const InvalidString& e) {
++    } else {
+ 	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
++	verbose_log("invalid-mac : OK\n");
+     }
+ 
+     return (! failures());
+@@ -276,14 +275,14 @@ test_mac_invalid_copy_in_out(TestInfo& test_info)
+     //
+     // Copy-in from invalid string.
+     //
+-    try {
+-	Mac mac;
++    Mac mac;
++    if (!mac.invalid()) {
+ 	mac.copy_in("hello");
+ 	verbose_log("Cannot catch invalid Mac address \"hello\" : FAIL\n");
+ 	incr_failures();
+-    } catch (const InvalidString& e) {
++    } else {
+ 	// The problem was caught
+-	verbose_log("%s : OK\n", e.str().c_str());
++	verbose_log("invalid-mac-copy-in : OK\n");
+     }
+ 
+     return (! failures());
+diff --git a/xorp/libxorp/tests/test_profile.cc b/xorp/libxorp/tests/test_profile.cc
+index ba1158b..8c1c421 100644
+--- a/xorp/libxorp/tests/test_profile.cc
++++ b/xorp/libxorp/tests/test_profile.cc
+@@ -47,18 +47,6 @@ test1(TestInfo& info)
+     string ar = "add_route";
+     p.create(ar);
+ 
+-    // It shouldn't be possible to create this variable again.
+-    try {
+-	p.create(ar);
+-	DOUT(info) << "Create variable twice!!! " << ar << endl;
+-	return false;
+-    } catch(PVariableExists& p) {
+-	DOUT(info) << "Exception " << p.str() << endl;
+-    } catch(...) {
+-	DOUT(info) << "Unknown Exception\n";
+-	return false;
+-    }
+-
+     // Enable this variable.
+     // XXX - This should enable global profiling.
+     p.enable(ar);
+@@ -66,19 +54,12 @@ test1(TestInfo& info)
+     // Make sure that this variable is not enabled.
+     string bogus = "bogus";
+     // Test for an unknown variable.
+-    try {
+-	if (p.enabled(bogus)) {
+-	    DOUT(info) << "Testing for a bogus variable succeeded " << bogus
+-		       << endl;
+-	    return false;
+-	}
+-	return false;
+-    } catch(PVariableUnknown& p) {
+-	DOUT(info) << "Exception " << p.str() << endl;
+-    } catch(...) {
+-	DOUT(info) << "Unknown Exception\n";
++    if (p.enabled(bogus)) {
++	DOUT(info) << "Testing for a bogus variable succeeded " << bogus
++		   << endl;
+ 	return false;
+     }
++    return false;
+ 
+     // Disable this variable.
+     // XXX - This should disable global profiling.
+@@ -92,33 +73,6 @@ test1(TestInfo& info)
+ 	return false;
+     }
+ 
+-    // Try and log to a bogus variable.
+-    try {
+-	p.log(bogus, c_format("wow"));
+-	DOUT(info) << "Testing for a bogus variable succeeded " << bogus
+-		   << endl;
+-	return false;
+-    } catch(PVariableUnknown& p) {
+-	DOUT(info) << "Exception " << p.str() << endl;
+-    } catch(...) {
+-	DOUT(info) << "Unknown Exception\n";
+-	return false;
+-    }
+-
+-    // Try and log to a valid variable that is not enabled.
+-    try {
+-	p.log(ar, c_format("wow"));
+-	DOUT(info) << "Logging to a valid disabled variable worked!!! "
+-		   << ar
+-		   << endl;
+-	return false;
+-    } catch(PVariableNotEnabled& p) {
+-	DOUT(info) << "Exception " << p.str() << endl;
+-    } catch(...) {
+-	DOUT(info) << "Unknown Exception\n";
+-	return false;
+-    }
+-
+     // Enable the variable for logging.
+     p.enable(ar);
+ 
+diff --git a/xorp/libxorp/tests/test_test_main.cc b/xorp/libxorp/tests/test_test_main.cc
+index 40e3772..ab81e37 100644
+--- a/xorp/libxorp/tests/test_test_main.cc
++++ b/xorp/libxorp/tests/test_test_main.cc
+@@ -70,30 +70,6 @@ test4(TestInfo& info, const char *mess)
+     return true;
+ }
+ 
+-bool
+-test5(TestInfo& info, bool exception)
+-{
+-    DOUT(info) << info.test_name() << " Test will " <<
+-	    (exception ? "throw exception" : "succeed") << endl;
+-
+-    if (exception)
+-	xorp_throw(InvalidString, "Hello");
+-
+-    return true;
+-}
+-
+-bool
+-test6(TestInfo& info, bool exception)
+-{
+-    DOUT(info) << info.test_name() << " Test will " <<
+-	    (exception ? "throw exception" : "succeed") << endl;
+-
+-    if (exception)
+-	throw("Unexpected exception");
+-
+-    return true;
+-}
+-
+ int
+ main(int argc, char **argv)
+ {
+@@ -129,8 +105,6 @@ main(int argc, char **argv)
+ 	{"test2", callback(test2)},
+ 	{"test3", callback(test3, fail)},
+ 	{"test4", callback(test4, mess.c_str())},
+-	{"test5", callback(test5, exception)},
+-	{"test6", callback(test6, unexpected)},
+     };
+ 
+     try {
+diff --git a/xorp/libxorp/xorp.h b/xorp/libxorp/xorp.h
+index 86c1f3e..84cf726 100644
+--- a/xorp/libxorp/xorp.h
++++ b/xorp/libxorp/xorp.h
+@@ -84,6 +84,7 @@
+ #endif /* ! __BYTE_ORDER */
+ #endif /* ! BYTE_ORDER */
+ 
++#define WARN_UNUSED __attribute__((warn_unused_result))
+ 
+ #ifdef __cplusplus
+ #  ifdef XORP_USE_USTL

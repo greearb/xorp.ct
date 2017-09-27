@@ -1,0 +1,1592 @@
+From 0a0831cc84648b25d9f6f8bb720c40c0c5bce983 Mon Sep 17 00:00:00 2001
+From: Ben Greear <greearb@candelatech.com>
+Date: Mon, 11 Sep 2017 13:45:03 -0700
+Subject: [PATCH 21/33] bgp:  Better user of CorruptMessage exception class.
+
+We do need to pass some error info back to caller, so use the
+CorruptMessage to pass it.  More to be done, for sure.
+---
+ xorp/bgp/aspath.cc              |  26 ++--
+ xorp/bgp/aspath.hh              |  20 +--
+ xorp/bgp/exceptions.hh          |  44 +++---
+ xorp/bgp/harness/peer.cc        |   5 +-
+ xorp/bgp/notification_packet.cc |   5 +-
+ xorp/bgp/open_packet.cc         |  14 +-
+ xorp/bgp/packet.hh              |  17 +--
+ xorp/bgp/parameter.cc           |  23 ++-
+ xorp/bgp/parameter.hh           |   5 +-
+ xorp/bgp/path_attribute.cc      | 314 +++++++++++++---------------------------
+ xorp/bgp/path_attribute.hh      |   2 +-
+ xorp/bgp/peer.cc                | 205 +++++++++++++-------------
+ xorp/bgp/peer.hh                |   2 +-
+ xorp/libxorp/exceptions.hh      |  15 ++
+ xorp/libxorp/xorp.h             |   7 -
+ 15 files changed, 300 insertions(+), 404 deletions(-)
+
+diff --git a/xorp/bgp/aspath.cc b/xorp/bgp/aspath.cc
+index 5eb79f5..cc98973 100644
+--- a/xorp/bgp/aspath.cc
++++ b/xorp/bgp/aspath.cc
+@@ -54,7 +54,7 @@ extern void dump_bytes(const uint8_t *d, uint8_t l);
+  * _type is d[0], _entries is d[1], entries follow.
+  */
+ bool
+-ASSegment::decode(const uint8_t *d)
++ASSegment::decode(const uint8_t *d, CorruptMessage& m)
+ {
+     size_t n = d[1];
+     clear();
+@@ -67,8 +67,7 @@ ASSegment::decode(const uint8_t *d)
+     case AS_CONFED_SEQUENCE:
+ 	break;
+     default:
+-	XLOG_WARNING("Bad AS Segment type: %u\n", _type);
+-	_invalid = true;
++	INVALID_BGP_F(UPDATEMSGERR, MALASPATH, "Bad AS Segment type: %u\n", _type);
+ 	return false;
+     }
+ 
+@@ -319,7 +318,7 @@ ASSegment::two_byte_compatible() const
+  * _type is d[0], _entries is d[1], entries follow.
+  */
+ bool
+-AS4Segment::decode(const uint8_t *d)
++AS4Segment::decode(const uint8_t *d, CorruptMessage& m)
+ {
+     size_t n = d[1];
+     clear();
+@@ -333,8 +332,7 @@ AS4Segment::decode(const uint8_t *d)
+     case AS_CONFED_SEQUENCE:
+ 	break;
+     default:
+-	XLOG_WARNING("Bad AS Segment type: %u\n", _type);
+-	_invalid = true;
++	INVALID_BGP_F(UPDATEMSGERR, MALASPATH, "Bad AS Segment type: %u\n", _type);
+ 	return false;
+     }
+ 
+@@ -546,19 +544,19 @@ ASPath::ASPath(const char *as_path)
+  * populate an ASPath from the received data representation
+  */
+ bool
+-ASPath::decode(const uint8_t *d, size_t l)
++ASPath::decode(const uint8_t *d, size_t l, CorruptMessage& m)
+ {
+     _num_segments = 0;
+     _path_len = 0;
+     while (l > 0) {		// grab segments
+ 	size_t len = 2 + d[1]*2;	// XXX length in bytes for 16bit AS's
+ 	if (len > l) {
+-	    XLOG_WARNING("Bad ASpath (len) %u > (l) %u\n",
+-			 XORP_UINT_CAST(len), XORP_UINT_CAST(l));
++	    INVALID_BGP_F(UPDATEMSGERR, MALASPATH, "Bad ASpath (len) %u > (l) %u\n",
++			  XORP_UINT_CAST(len), XORP_UINT_CAST(l));
+ 	    return false;
+ 	}
+ 
+-	ASSegment s(d);
++	ASSegment s(d, m);
+ 	if (s.invalid()) {
+ 	    return false;
+ 	}
+@@ -888,9 +886,9 @@ AS4Path::AS4Path(const uint8_t* d, size_t len, const ASPath& as_path)
+ #endif
+ 
+ 
+-AS4Path::AS4Path(const uint8_t* d, size_t len)
++AS4Path::AS4Path(const uint8_t* d, size_t len, CorruptMessage& m)
+ {
+-    set_valid(decode(d, len));
++    set_valid(decode(d, len, m));
+ }
+ 
+ /**
+@@ -898,7 +896,7 @@ AS4Path::AS4Path(const uint8_t* d, size_t len)
+  * AS4_PATH attribute.
+  */
+ bool
+-AS4Path::decode(const uint8_t *d, size_t l)
++AS4Path::decode(const uint8_t *d, size_t l, CorruptMessage& m)
+ {
+     _num_segments = 0;
+     _path_len = 0;
+@@ -907,7 +905,7 @@ AS4Path::decode(const uint8_t *d, size_t l)
+ 	size_t len = 2 + d[1]*4;	// XXX length in bytes for 32bit AS's
+ 	XLOG_ASSERT(len <= l);
+ 
+-	AS4Segment s(d);
++	AS4Segment s(d, m);
+ 	if (s.invalid()) {
+ 	    set_invalid(true);
+ 	    return false;
+diff --git a/xorp/bgp/aspath.hh b/xorp/bgp/aspath.hh
+index 79b739b..c33c021 100644
+--- a/xorp/bgp/aspath.hh
++++ b/xorp/bgp/aspath.hh
+@@ -133,8 +133,8 @@ public:
+      *
+      * _type is d[0], l is d[1], entries follow.
+      */
+-    ASSegment(const uint8_t* d) {
+-	set_valid(decode(d));
++    ASSegment(const uint8_t* d, CorruptMessage& m) {
++	set_valid(decode(d, m));
+     }
+ 
+     /**
+@@ -225,7 +225,7 @@ public:
+      * Convert the external representation into the internal one.
+      * _type is d[0], _entries is d[1], entries follow.
+      */
+-    bool WARN_UNUSED decode(const uint8_t *d);
++    bool WARN_UNUSED decode(const uint8_t *d, CorruptMessage& m);
+ 
+     /**
+      * Convert from internal to external representation.
+@@ -284,12 +284,12 @@ protected:
+    numbers from a AS4_PATH attribute */
+ class AS4Segment : public ASSegment {
+ public:
+-    AS4Segment(const uint8_t* d) { set_valid(decode(d)); }
++    AS4Segment(const uint8_t* d, CorruptMessage& m) { set_valid(decode(d, m)); }
+     /**
+      * Convert the external representation into the internal one.
+      * _type is d[0], _entries is d[1], entries follow.
+      */
+-    bool WARN_UNUSED decode(const uint8_t *d);
++    bool WARN_UNUSED decode(const uint8_t *d, CorruptMessage& m);
+ 
+     /**
+      * Convert from internal to external representation.
+@@ -330,8 +330,8 @@ public:
+     /**
+      * construct from received data
+      */
+-    ASPath(const uint8_t* d, size_t len) {
+-	set_valid(decode(d, len)); 
++    ASPath(const uint8_t* d, size_t len, CorruptMessage& m) {
++	set_valid(decode(d, len, m)); 
+     }
+ 
+     /**
+@@ -456,7 +456,7 @@ private:
+     /**
+      * populate an ASPath from received data. Only used in the constructor.
+      */
+-    bool WARN_UNUSED decode(const uint8_t *d, size_t len);
++    bool WARN_UNUSED decode(const uint8_t *d, size_t len, CorruptMessage& m);
+ };
+ 
+ /* subclass to handle 4-byte AS encoding and decoding */
+@@ -465,7 +465,7 @@ public:
+     /**
+      * Construct from received data from 4-byte peer.
+      */
+-    AS4Path(const uint8_t* d, size_t len);
++    AS4Path(const uint8_t* d, size_t len, CorruptMessage& m);
+ 
+     /**
+      * Initialize from a string in the format
+@@ -504,7 +504,7 @@ private:
+     /**
+      * populate an ASPath from received data. Only used in the constructor.
+      */
+-    bool WARN_UNUSED decode(const uint8_t *d, size_t len);
++    bool WARN_UNUSED decode(const uint8_t *d, size_t len, CorruptMessage& m);
+     void pad_segment(const ASSegment& old_seg, ASSegment& new_seg);
+     void do_patchup(const ASPath& as_path);
+ };
+diff --git a/xorp/bgp/exceptions.hh b/xorp/bgp/exceptions.hh
+index 9d72075..936c5bf 100644
+--- a/xorp/bgp/exceptions.hh
++++ b/xorp/bgp/exceptions.hh
+@@ -35,42 +35,44 @@
+ /**
+  * This exception is thrown when a bad input message is received.
+  */
+-class CorruptMessage : public XorpReasonedException {
++class CorruptMessage {
+ public:
+     static const size_t MAXPACKETSIZE = 4096;
+-    CorruptMessage(const char* file, size_t line, const string init_why = "")
+- 	: XorpReasonedException("CorruptMessage", file, line, init_why),
+-	  _error(0), _subcode(0), _len(0)
+-    {}
++    CorruptMessage() :
++	    _unusable(false), _error(0), _subcode(0), _len(0)
++	{}
+ 
+-    CorruptMessage(const char* file, size_t line,
+-		   const string init_why,
+-		   const int error, const int subcode)
+- 	: XorpReasonedException("CorruptMessage", file, line, init_why),
+-	  _error(error), _subcode(subcode), _len(0)
+-    {}
++    CorruptMessage(const int error, const int subcode) :
++	    _unusable(false), _error(error), _subcode(subcode), _len(0)
++	{}
+ 
+-    CorruptMessage(const char* file, size_t line,
+-		   const string init_why,
+-		   const int error, const int subcode,
++    CorruptMessage(const int error, const int subcode,
+ 		   const uint8_t *data, const size_t len)
+- 	: XorpReasonedException("CorruptMessage", file, line, init_why),
+-	  _error(error), _subcode(subcode), _len(len)
+-    {assert(_len < MAXPACKETSIZE); memcpy(_data, data, _len);}
++	    : _unusable(false), _error(error), _subcode(subcode), _len(len)
++	{assert(_len < MAXPACKETSIZE); memcpy(_data, data, _len);}
++
++    void set_err(int e, int subcode) { _error = e; _subcode = subcode; }
++
++    void clear() { _unusable = 0; _error = 0; _subcode = 0; _len = 0; }
+ 
+     int error() const				{ return _error; }
+     int subcode() const				{ return _subcode; }
+     const uint8_t *data() const			{ return _data; }
+     size_t len() const				{ return _len; }
+ 
++    /* Unusable message, but it was decoded properly at least. */
++    void set_unusable(bool v) { _unusable = v; }
++    bool is_unusable() const { return _unusable; }
++
+ private:
+-    const int		_error;
+-    const int		_subcode;
++    bool _unusable;
++    int	_error;
++    int	_subcode;
+     // this can't reference external data, as that may go out of
+     // scope, so have a large enough buffer here to store anything we
+     // need to return
+-    uint8_t	        _data[MAXPACKETSIZE];
+-    const size_t	_len;
++    uint8_t _data[MAXPACKETSIZE];
++    size_t _len;
+ };
+ 
+ /**
+diff --git a/xorp/bgp/harness/peer.cc b/xorp/bgp/harness/peer.cc
+index abb236c..5136783 100644
+--- a/xorp/bgp/harness/peer.cc
++++ b/xorp/bgp/harness/peer.cc
+@@ -663,7 +663,8 @@ mrtd_table_file_read(FILE *fp, size_t& len)
+ 	size_t pa_len = ntohl(header.length) - sizeof_table;
+ 	uint8_t * attributes = new uint8_t[pa_len];
+ 	if(fread(attributes, pa_len, 1, fp) != 1) {
+-	    if(feof(fp)) return 0;
++	    if(feof(fp))
++		return 0;
+ 	    XLOG_WARNING("fread failed:%s", strerror(errno));
+ 	    return 0;
+ 	}
+@@ -687,8 +688,8 @@ mrtd_table_file_read(FILE *fp, size_t& len)
+ 	    size_t used = 0;
+ 	    PathAttribute *pa = PathAttribute::create(d, pa_len, used);
+ 	    if (used == 0) {
+-		XLOG_WARNING("failed to read path attribute");
+ 		delete pa;
++		XLOG_WARNING("failed to read path attribute");
+ 		return NULL;
+ 	    }
+ 	    update.add_pathatt(pa);
+diff --git a/xorp/bgp/notification_packet.cc b/xorp/bgp/notification_packet.cc
+index a1e0ea2..50258c5 100644
+--- a/xorp/bgp/notification_packet.cc
++++ b/xorp/bgp/notification_packet.cc
+@@ -62,12 +62,11 @@ NotificationPacket::NotificationPacket(uint8_t		ec,
+     debug_msg("%s", str().c_str());
+ }
+ 
+-NotificationPacket::NotificationPacket(const uint8_t *d, uint16_t l)
++NotificationPacket::NotificationPacket(const uint8_t *d, uint16_t l, CorruptMessage& m)
+ {
+     debug_msg("Data %p len %d\n", d, l);
+     if (l < BGPPacket::MINNOTIFICATIONPACKET) {
+-	_invalid = true;
+-	XLOG_WARNING("Notification message too short %d", l);
++	INVALID_BGP(MSGHEADERERR, BADMESSLEN, "Notification message too short %d", 1);
+ 	return;
+     }
+ 
+diff --git a/xorp/bgp/open_packet.cc b/xorp/bgp/open_packet.cc
+index ed65776..e8e4fdc 100644
+--- a/xorp/bgp/open_packet.cc
++++ b/xorp/bgp/open_packet.cc
+@@ -77,7 +77,7 @@ OpenPacket::encode(uint8_t *d, size_t& len, const BGPPeerData *peerdata) const
+     return true;
+ }
+ 
+-OpenPacket::OpenPacket(const uint8_t *d, uint16_t l)
++OpenPacket::OpenPacket(const uint8_t *d, uint16_t l, CorruptMessage& m)
+     : _as(AsNum::AS_INVALID)
+ {
+     debug_msg("OpenPacket(const uint8_t *, uint16_t %u) constructor called\n",
+@@ -89,8 +89,7 @@ OpenPacket::OpenPacket(const uint8_t *d, uint16_t l)
+     size_t i, myOptParmLen, remaining;
+ 
+     if (l < BGPPacket::MINOPENPACKET) {
+-	XLOG_WARNING("Open message too short");
+-	_invalid = true;
++	INVALID_BGP(MSGHEADERERR, BADMESSLEN, "Open message too short");
+ 	return;
+     }
+     remaining = l;
+@@ -112,16 +111,15 @@ OpenPacket::OpenPacket(const uint8_t *d, uint16_t l)
+     // we shouldn't trust myOptParmLen yet - make sure it's not
+     // greater than the amount of data we actually received.
+     if (remaining < myOptParmLen) {
+-	debug_msg("Open message too short\n");
+-	_invalid = true;
++	INVALID_BGP(OPENMSGERR, UNSPECIFIED, "Open message too short");
++	return;
+     }
+ 
+     while (i > 0) {
+ 	size_t len;
+ 	debug_msg("Length of unread parameters : %u\n", XORP_UINT_CAST(i));
+ 	if (remaining < 2) {
+-	    debug_msg("Open message too short\n");
+-	    _invalid = true;
++	    INVALID_BGP(OPENMSGERROR, UNSPECIFIED, "Open message too short");
+ 	}
+ 
+ 	BGPParameter *p = BGPParameter::create(d, i, len);
+@@ -137,7 +135,7 @@ OpenPacket::OpenPacket(const uint8_t *d, uint16_t l)
+     // check to see if the length of the optional parameters defined in the
+     // packet is the same as the total length of the decoded parameters.
+     if (myOptParmLen != _OptParmLen) {
+-	_invalid = true;
++	INVALID_BGP(OPENMSGERROR, UNSPECIFIED, "Bad parameters length");
+     }
+ }
+ 
+diff --git a/xorp/bgp/packet.hh b/xorp/bgp/packet.hh
+index b906b10..ea0f57a 100644
+--- a/xorp/bgp/packet.hh
++++ b/xorp/bgp/packet.hh
+@@ -88,6 +88,9 @@ enum Notify {
+     CEASE = 6			// Cease
+ };
+ 
++#define INVALID_BGP(e1, e2, args...) do { m.set_err(e1, e2); INVALID(args); } while (0)
++#define INVALID_BGP_F(e1, e2, args...) do { m.set_err(e1, e2); INVALID_F(args); } while (0)
++
+ /**
+  * The main container for BGP messages (packets) which are sent
+  * back and forth.
+@@ -95,7 +98,7 @@ enum Notify {
+  * This base class only contains the standard fields (length, type)
+  * leaving other information to be stored in the derived objects.
+  */
+-class BGPPacket {
++class BGPPacket : public Invalid {
+ public:
+     /**
+      * Status returned by message reader.
+@@ -138,11 +141,10 @@ public:
+     // The default marker.
+     static const uint8_t Marker[MARKER_SIZE];
+ 
+-    BGPPacket()	{ _invalid = false; }
++    BGPPacket()	{ }
+     virtual ~BGPPacket()			{}
+     uint8_t type() const			{ return _Type; }
+     virtual string str() const = 0;
+-    virtual bool invalid() const { return _invalid; }
+     virtual bool encode(uint8_t *buf, size_t &len, const BGPPeerData *peerdata) const = 0;
+ protected:
+     /*
+@@ -160,7 +162,6 @@ protected:
+     // don't allow the use of the default copy constructor
+     BGPPacket(const BGPPacket& BGPPacket);
+     uint8_t _Type;
+-    bool _invalid;
+ private:
+ };
+ 
+@@ -307,13 +308,11 @@ public:
+     /**
+      * need nothing to parse incoming data
+      */
+-    KeepAlivePacket(const uint8_t *buf, uint16_t l) {
++    KeepAlivePacket(const uint8_t *buf, uint16_t l, CorruptMessage& m) {
+ 	UNUSED(buf);
+ 	if (l != BGPPacket::MINKEEPALIVEPACKET) {
+-	    _invalid = true;
+-	    XLOG_WARNING("KeepAlivePacket length %d instead of %u",
+-			 l,
+-			 XORP_UINT_CAST(BGPPacket::MINKEEPALIVEPACKET));
++	    INVALID_BGP(MSGHEADERERR, BADMESSLEN, "KeepAlivePacket length %d instead of %u",
++			l, XORP_UINT_CAST(BGPPacket::MINKEEPALIVEPACKET));
+ 	    return;
+ 	}
+ 
+diff --git a/xorp/bgp/parameter.cc b/xorp/bgp/parameter.cc
+index 35e1d99..90eb84c 100644
+--- a/xorp/bgp/parameter.cc
++++ b/xorp/bgp/parameter.cc
+@@ -44,12 +44,10 @@ BGPParameter::BGPParameter(uint8_t l, const uint8_t* d)
+     memcpy(data, d, l);
+     _data = data;
+     _length = l; // length is the buffer length including parameter header
+-    _invalid = false;
+ }
+ 
+ BGPParameter::BGPParameter(const BGPParameter& param)
+ {
+-    _invalid = false;
+     _type = param._type;
+     if (_data != NULL) {
+ 	_length = param._length;
+@@ -134,8 +132,8 @@ BGPRefreshCapability(const BGPRefreshCapability& param)
+     }
+ }
+ 
+-void
+-BGPRefreshCapability::decode()
++bool
++BGPRefreshCapability::decode(CorruptMessage& m)
+ {
+     /*
+     ** Note: In the normal case this method is called by
+@@ -160,9 +158,8 @@ BGPRefreshCapability::decode()
+ 
+     _cap_length = *(_data+3);
+     if (_cap_length > 0) {
+-	_invalid = true;
+-	XLOG_WARNING("Refresh Capability length %d is greater than zero.", 
+-		     _cap_length);
++	INVALID_BGP_F(OPENMSGERROR, UNSUPOPTPAR, "Refresh Capability length %d is greater than zero.",
++		      _cap_length);
+     }
+ }
+ 
+@@ -234,7 +231,7 @@ BGPMultiProtocolCapability(const BGPMultiProtocolCapability& param)
+ }
+ 
+ void
+-BGPMultiProtocolCapability::decode()
++BGPMultiProtocolCapability::decode(CorruptMessage& m)
+ {
+     _type = static_cast<ParamType>(*_data);
+     XLOG_ASSERT(_type == PARAMTYPECAP);	// See comment in:
+@@ -257,9 +254,8 @@ BGPMultiProtocolCapability::decode()
+ 	_address_family = AFI_IPV6;
+ 	break;
+     default:
+-	_invalid = true;
+-	XLOG_WARNING("MultiProtocol Capability unrecognised afi %u",
+-		     afi);
++	INVALID_BGP(OPENMSGERROR, UNSUPOPTPAR, "MultiProtocol Capability unrecognised afi %u",
++		    afi);
+ 	return;
+     }
+ 
+@@ -273,9 +269,8 @@ BGPMultiProtocolCapability::decode()
+ 	_subsequent_address_family = SAFI_MULTICAST;
+ 	break;
+     default:
+-	_invalid = true;
+-	XLOG_WARNING("MultiProtocol Capability unrecognised safi %u",
+-		     safi);
++	INVALID_BGP(OPENMSGERROR, UNSUPOPTPAR, "MultiProtocol Capability unrecognised safi %u",
++		    safi);
+     }
+ }
+ 
+diff --git a/xorp/bgp/parameter.hh b/xorp/bgp/parameter.hh
+index 7479aec..04a4559 100644
+--- a/xorp/bgp/parameter.hh
++++ b/xorp/bgp/parameter.hh
+@@ -116,7 +116,7 @@ enum CapType {
+     CAPABILITYUNKNOWN = -1, // used to store unknown cababilities
+ };
+ 
+-class BGPParameter {
++class BGPParameter : public Invalid {
+ public:
+     /**
+      * create a new BGPParameter from incoming data.
+@@ -130,7 +130,7 @@ public:
+                 size_t& actual_length);
+ 
+     BGPParameter()
+-	    : _data(0), _length(0), _type(PARAMINVALID), _invalid(false) {}
++	    : _data(0), _length(0), _type(PARAMINVALID) {}
+     BGPParameter(uint8_t l, const uint8_t* d);
+     BGPParameter(const BGPParameter& param);
+     virtual ~BGPParameter()			{ delete[] _data; }
+@@ -174,7 +174,6 @@ protected:
+     uint8_t* _data;
+     uint8_t _length;
+     ParamType _type;
+-    bool _invalid;
+ private:
+ };
+ 
+diff --git a/xorp/bgp/path_attribute.cc b/xorp/bgp/path_attribute.cc
+index 34823e2..2dd4825 100644
+--- a/xorp/bgp/path_attribute.cc
++++ b/xorp/bgp/path_attribute.cc
+@@ -85,18 +85,16 @@ OriginAttribute::clone() const
+     return new OriginAttribute(origin());
+ }
+ 
+-OriginAttribute::OriginAttribute(const uint8_t* d)
++OriginAttribute::OriginAttribute(const uint8_t* d, CorruptMessage& m)
+ 	: PathAttribute(d)
+ {
+     if (length(d) != 1) {
+-	XLOG_WARNING("OriginAttribute bad length %u",
+-		     XORP_UINT_CAST(length(d)));
+-	_invalid = true;
++	INVALID_BGP(UPDATEMSGERR, ATTRLEN, "OriginAttribute bad length %u",
++		    XORP_UINT_CAST(length(d)));
+ 	return;
+     }
+     if (!well_known() || !transitive()) {
+-	XLOG_WARNING("Bad Flags in Origin attribute %#x",flags());
+-	_invalid = true;
++	INVALID_BGP(UPDATEMSGERR, ATTRFLAGS, "Bad Flags in Origin attribute %#x", flags());
+ 	return;
+     }
+ 
+@@ -110,8 +108,7 @@ OriginAttribute::OriginAttribute(const uint8_t* d)
+ 	break;
+ 
+     default:
+-	XLOG_WARNING("Unknown Origin Type %d", data[0]);
+-	_invalid = true;
++	INVALID_BGP(UPDATEMSGERR, INVALORGATTR, "Unknown Origin Type %d", data[0]);
+     }
+ }
+ 
+@@ -169,8 +166,7 @@ ASPathAttribute::ASPathAttribute(const uint8_t* d, bool use_4byte_asnums)
+ 	: PathAttribute(d)
+ {
+     if (!well_known() || !transitive()) {
+-	XLOG_WARNING("Bad Flags in AS Path attribute %#x", flags());
+-	_invalid = true;
++	INVALID_BGP(UPDATEMSGERR, ATTRFLAGS, "Bad Flags in AS Path attribute %#x", flags());
+ 	return;
+     }
+ 
+@@ -242,8 +238,7 @@ AS4PathAttribute::AS4PathAttribute(const uint8_t* d)
+ 	: PathAttribute(d)
+ {
+     if (!optional() || !transitive()) {
+-	XLOG_WARNING("Bad Flags in AS4 Path attribute %#x", flags());
+-	_invalid = true;
++	INVALID_BGP(UPDATEMSGERR, ATTRFLAGS, "Bad Flags in AS4 Path attribute %#x", flags());
+ 	return;
+     }
+ 
+@@ -298,30 +293,29 @@ NextHopAttribute<A>::clone() const
+ }
+ 
+ template <class A>
+-void
+-NextHopAttribute<A>::verify()
++bool
++NextHopAttribute<A>::verify(CorruptMesage& m)
+ {
+-    _invalid = false;
++    set_invalid(false);
+     if (!_next_hop.is_unicast()) {
+-	_invalid = true;
+-	XLOG_WARNING("NextHop %s is not a unicast address",
+-		     _next_hop.str().c_str());
++	INVALID_BGP_F(UPDATEMSGERR, INVALNHATTR, "NextHop %s is not a unicast address",
++		      _next_hop.str().c_str());
++	return false;
+     }
++    return true;
+ }
+ 
+ template <class A>
+-NextHopAttribute<A>::NextHopAttribute(const uint8_t* d)
++NextHopAttribute<A>::NextHopAttribute(const uint8_t* d, CorruptMessage& m)
+ 	: PathAttribute(d)
+ {
+     if (!well_known() || !transitive()) {
+-	XLOG_WARNING("Bad Flags in NextHop attribute %#x", flags());
+-	_invalid = true;
++	INVALID_BGP(UPDATEMSGERR, ATTRFLAGS, "Bad Flags in NextHop attribute %#x", flags());
+ 	return;
+     }
+     if (length(d) != A::addr_bytelen()) {
+-	XLOG_WARNING("Bad size in NextHop address, was %u, should be %u",
++	INVALID_BGP(UPDATEMSGERR, ATTRLEN, "Bad size in NextHop address, was %u, should be %u",
+ 		     (uint32_t)length(d), (uint32_t)A::addr_bytelen());
+-	_invalid = true;
+ 	return;
+     }
+ 
+@@ -368,13 +362,11 @@ MEDAttribute::MEDAttribute(const uint8_t* d)
+     : PathAttribute(d)
+ {
+     if (!optional() || transitive()) {
+-	XLOG_WARNING("Bad Flags in MEDAttribute %#x", flags());
+-	_invalid = true;
++	INVALID_BGP(UPDATEMSGERR, ATTRFLAGS, "Bad Flags in MEDAttribute %#x", flags());
+ 	return;
+     }
+     if (length(d) != 4) {
+-	XLOG_WARNING("Bad size in MEDAttribute");
+-	_invalid = true;
++	INVALID_BGP(UPDATEMSGERR, ATTRLEN, "Bad size in MEDAttribute");
+ 	return;
+     }
+     memcpy(&_med, payload(d), 4);
+@@ -419,18 +411,15 @@ LocalPrefAttribute::clone() const
+ }
+ 
+ LocalPrefAttribute::LocalPrefAttribute(const uint8_t* d)
+-	throw(CorruptMessage)
+ 	: PathAttribute(d)
+ {
+     if (!well_known() || !transitive()) {
+-	XLOG_WARNING("Bad Flags in LocalPrefAttribute %#x", flags());
+-	_invalid = true;
++	INVALID_BGP(UPDATEMGERR, ATTRFLAGS, "Bad Flags in LocalPrefAttribute %#x", flags());
+ 	return;
+     }
+ 
+     if (length(d) != 4) {
+-	XLOG_WARNING("Bad size in LocalPrefAttribute");
+-	_invalid = true;
++	INVALID_BGP(UPDATEMSGERR, ATTRLEN, "Bad size in LocalPrefAttribute");
+ 	return;
+     }
+     memcpy(&_localpref, payload(d), 4);
+@@ -491,9 +480,9 @@ AtomicAggAttribute::AtomicAggAttribute(const uint8_t* d)
+ 	: PathAttribute(d)
+ {
+     if (length(d) != 0)
+-	INVALID("AtomicAggregate bad length %u", XORP_UINT_CAST(length(d)));
++	INVALID_BGP(UPDATEMSGERR, ATTRLEN, "AtomicAggregate bad length %u", XORP_UINT_CAST(length(d)));
+     if (!well_known() || !transitive())
+-	INVALID("Bad Flags in AtomicAggregate attribute %#x", flags());
++	INVALID_BGP(UPDATEMSGERR, ATTRFLAGS, "Bad Flags in AtomicAggregate attribute %#x", flags());
+ }
+ 
+ /**
+@@ -514,24 +503,17 @@ AggregatorAttribute::clone() const
+ }
+ 
+ AggregatorAttribute::AggregatorAttribute(const uint8_t* d, bool use_4byte_asnums)
+-	throw(CorruptMessage)
+ 	: PathAttribute(d), _as(AsNum::AS_INVALID)
+ {
+     if (!use_4byte_asnums && length(d) != 6)
+-	xorp_throw(CorruptMessage,
+-		   c_format("Aggregator bad length %u",
+-			    XORP_UINT_CAST(length(d))),
+-		   UPDATEMSGERR, ATTRLEN);
++	INVALID_BGP(UPDATEMSGERR, ATTRLEN, "Aggregator bad length %u",
++		    XORP_UINT_CAST(length(d)));
+     if (use_4byte_asnums && length(d) != 8)
+-	xorp_throw(CorruptMessage,
+-		   c_format("Aggregator bad length %u",
+-			    XORP_UINT_CAST(length(d))),
+-		   UPDATEMSGERR, ATTRLEN);
++	INVALID_BGP(UPDATEMGSERR, ATTRLEN, "Aggregator bad length %u",
++		XORP_UINT_CAST(length(d)));
+     if (!optional() || !transitive())
+-	xorp_throw(CorruptMessage,
+-		   c_format("Bad Flags in AtomicAggregate attribute %#x",
+-			    flags()),
+-		   UPDATEMSGERR, ATTRFLAGS, d, total_tlv_length(d));
++	INVALID_BGP(UPDATEMSGERR, ATTRFLAGS, "Bad Flags in AtomicAggregate attribute %#x",
++		    flags());
+     d = payload(d);
+     _as = AsNum(d, use_4byte_asnums);
+     if (use_4byte_asnums)
+@@ -597,19 +579,14 @@ AS4AggregatorAttribute::clone() const
+ }
+ 
+ AS4AggregatorAttribute::AS4AggregatorAttribute(const uint8_t* d)
+-	throw(CorruptMessage)
+ 	: PathAttribute(d), _as(AsNum::AS_INVALID)
+ {
+     if (length(d) != 8)
+-	xorp_throw(CorruptMessage,
+-		   c_format("AS4Aggregator bad length %u",
+-			    XORP_UINT_CAST(length(d))),
+-		   UPDATEMSGERR, ATTRLEN);
++	INVALID_BGP(UPDATEMSGERR, ATTRLEN, "AS4Aggregator bad length %u",
++		    XORP_UINT_CAST(length(d)));
+     if (!optional() || !transitive())
+-	xorp_throw(CorruptMessage,
+-		   c_format("Bad Flags in AtomicAggregate attribute %#x",
+-			    flags()),
+-		   UPDATEMSGERR, ATTRFLAGS, d, total_tlv_length(d));
++	INVALID_BGP(UPDATEMSGERR, ATTRFLAGS, "Bad Flags in AtomicAggregate attribute %#x",
++		    flags());
+     d = payload(d);
+     _as = AsNum(d, true); //force interpretation as a 4-byte quantity
+     _speaker = IPv4(d+4);
+@@ -665,13 +642,10 @@ CommunityAttribute::clone() const
+ }
+ 
+ CommunityAttribute::CommunityAttribute(const uint8_t* d)
+-	throw(CorruptMessage)
+ 	: PathAttribute(d)
+ {
+     if (!optional() || !transitive())
+-	xorp_throw(CorruptMessage,
+-		   "Bad Flags in Community attribute",
+-		   UPDATEMSGERR, ATTRFLAGS);
++	INVALID_BGP(UPDATEMSGERR, ATTRFLAGS, "Bad Flags in Community attribute");
+     size_t len = length(d);
+     d = payload(d);
+     for (size_t l = len; l >= 4;  d += 4, l -= 4) {
+@@ -757,15 +731,12 @@ OriginatorIDAttribute::clone() const
+ }
+ 
+ OriginatorIDAttribute::OriginatorIDAttribute(const uint8_t* d)
+-    throw(CorruptMessage)
+     : PathAttribute(d)
+ {
+     if (!optional() || transitive())
+-	xorp_throw(CorruptMessage, "Bad Flags in OriginatorIDAttribute",
+-		   UPDATEMSGERR, ATTRFLAGS);
++	INVALID_BGP(UPDATEMSGERR, ATTRFLAGS, "Bad Flags in OriginatorIDAttribute");
+     if (length(d) != 4)
+-	xorp_throw(CorruptMessage, "Bad size in OriginatorIDAttribute",
+-		   UPDATEMSGERR, INVALNHATTR);
++	INVALID_BGP(UPDATEMSGERR, INVALNHATTR, "Bad size in OriginatorIDAttribute");
+ 
+     _originator_id.copy_in(payload(d));
+ }
+@@ -800,13 +771,10 @@ ClusterListAttribute::ClusterListAttribute()
+ }
+ 
+ ClusterListAttribute::ClusterListAttribute(const uint8_t* d)
+-	throw(CorruptMessage)
+ 	: PathAttribute(d)
+ {
+     if (!optional() || transitive())
+-	xorp_throw(CorruptMessage,
+-		   "Bad Flags in CLUSTER_LIST attribute",
+-		   UPDATEMSGERR, ATTRFLAGS);
++	INVALID_BGP(UPDATEMSGERR, ATTRFLAGS, "Bad Flags in CLUSTER_LIST attribute");
+     size_t size = length(d);
+     d = payload(d);
+     for (size_t l = size; l >= 4;  d += 4, l -= 4) {
+@@ -1068,14 +1036,11 @@ MPReachNLRIAttribute<A>::clone() const
+ }
+ 
+ template <>
+-MPReachNLRIAttribute<IPv6>::MPReachNLRIAttribute(const uint8_t* d)
+-    throw(CorruptMessage)
++MPReachNLRIAttribute<IPv6>::MPReachNLRIAttribute(const uint8_t* d, CorruptMessage& m)
+     : PathAttribute(d)
+ {
+     if (!optional() || transitive())
+-	xorp_throw(CorruptMessage,
+-		   "Bad Flags in Multiprotocol Reachable NLRI attribute",
+-		   UPDATEMSGERR, ATTRFLAGS);
++	INVALID_BGP(UPDATEMSGERR, ATTRFLAGS, "Flags in Multiprotocol Reachable NLRI attribute");
+ 
+     const uint8_t *data = payload(d);
+     const uint8_t *end = payload(d) + length(d);
+@@ -1089,10 +1054,8 @@ MPReachNLRIAttribute<IPv6>::MPReachNLRIAttribute(const uint8_t* d)
+     ** This is method is specialized for dealing with IPv6.
+     */
+     if (AFI_IPV6_VAL != afi)
+-	xorp_throw(CorruptMessage,
+-		   c_format("Expected AFI to be %d not %d",
+-			    AFI_IPV6, afi),
+-		   UPDATEMSGERR, OPTATTR);
++	INVALID_BGP(UPDATEMSGERR, INVALNHATTR, "Expected AFI to be %d not %d",
++		    AFI_IPV6, afi);
+     _afi = AFI_IPV6;
+ 
+     uint8_t safi = *data++;
+@@ -1104,10 +1067,8 @@ MPReachNLRIAttribute<IPv6>::MPReachNLRIAttribute(const uint8_t* d)
+ 	_safi = SAFI_MULTICAST;
+ 	break;
+     default:
+-	xorp_throw(CorruptMessage,
+-		   c_format("Expected SAFI to %d or %d not %d",
+-			    SAFI_UNICAST, SAFI_MULTICAST, _safi),
+-		   UPDATEMSGERR, OPTATTR);
++	INVALID_BGP(UPDATEMSGERR, OPTATTR, "Expected SAFI to %d or %d not %d",
++		    SAFI_UNICAST, SAFI_MULTICAST, _safi);
+     }
+ 
+     /*
+@@ -1132,17 +1093,13 @@ MPReachNLRIAttribute<IPv6>::MPReachNLRIAttribute(const uint8_t* d)
+ 	data += IPv6::addr_bytelen();
+ 	break;
+     default:
+-	xorp_throw(CorruptMessage,
+-		   c_format("BAD Next Hop size in "
+-			    "IPv6 Multiprotocol Reachable NLRI attribute "
+-			    "16 and 32 allowed not %u", len),
+-		   UPDATEMSGERR, OPTATTR);
++	INVALID_BGP(UPDATEMSGERR, OPTATTR, "BAD Next Hop size in "
++		    "IPv6 Multiprotocol Reachable NLRI attribute "
++		    "16 and 32 allowed not %u", len);
+     }
+     
+     if (data > end)
+-	xorp_throw(CorruptMessage,
+-		   "Premature end of Multiprotocol Reachable NLRI attribute",
+-		   UPDATEMSGERR, ATTRLEN);
++	INVALID("Premature end of Multiprotocol Reachable NLRI attribute");
+ 
+     /*
+     ** SNPA - I have no idea how these are supposed to be used for IPv6
+@@ -1155,9 +1112,7 @@ MPReachNLRIAttribute<IPv6>::MPReachNLRIAttribute(const uint8_t* d)
+     }
+ 
+     if (data > end) {
+-	xorp_throw(CorruptMessage,
+-		   "Premature end of Multiprotocol Reachable NLRI attribute",
+-		   UPDATEMSGERR, ATTRLEN);
++	INVALID("Premature end of Multiprotocol Reachable NLRI attribute");
+     }
+ 
+     /*
+@@ -1167,9 +1122,7 @@ MPReachNLRIAttribute<IPv6>::MPReachNLRIAttribute(const uint8_t* d)
+ 	uint8_t prefix_length = *data++;
+ 	size_t bytes = (prefix_length + 7)/ 8;
+ 	if (bytes > IPv6::addr_bytelen())
+-	    xorp_throw(CorruptMessage,
+-		       c_format("prefix length too long %d", prefix_length),
+-		       UPDATEMSGERR, OPTATTR);
++	    INVALID("prefix length too long %d", prefix_length);
+ 	uint8_t buf[IPv6::addr_bytelen()];
+ 	memset(buf, 0, sizeof(buf));
+ 	memcpy(buf, data, bytes);
+@@ -1185,13 +1138,10 @@ MPReachNLRIAttribute<IPv6>::MPReachNLRIAttribute(const uint8_t* d)
+ 
+ template <>
+ MPReachNLRIAttribute<IPv4>::MPReachNLRIAttribute(const uint8_t* d)
+-    throw(CorruptMessage)
+     : PathAttribute(d)
+ {
+     if (!optional() || transitive())
+-	xorp_throw(CorruptMessage,
+-		   "Bad Flags in Multiprotocol Reachable NLRI attribute",
+-		   UPDATEMSGERR, ATTRFLAGS);
++	INVALID("Bad Flags in Multiprotocol Reachable NLRI attribute");
+ 
+     const uint8_t *data = payload(d);
+     const uint8_t *end = payload(d) + length(d);
+@@ -1205,10 +1155,8 @@ MPReachNLRIAttribute<IPv4>::MPReachNLRIAttribute(const uint8_t* d)
+     ** This is method is specialized for dealing with IPv4.
+     */
+     if (AFI_IPV4_VAL != afi)
+-	xorp_throw(CorruptMessage,
+-		   c_format("Expected AFI to be %d not %d",
+-			    AFI_IPV4, afi),
+-		   UPDATEMSGERR, OPTATTR);
++	INVALID("Expected AFI to be %d not %d",
++		AFI_IPV4, afi);
+     _afi = AFI_IPV4;
+ 
+     uint8_t safi = *data++;
+@@ -1220,17 +1168,13 @@ MPReachNLRIAttribute<IPv4>::MPReachNLRIAttribute(const uint8_t* d)
+ 	_safi = SAFI_MULTICAST;
+ 	break;
+     default:
+-	xorp_throw(CorruptMessage,
+-		   c_format("Expected SAFI to %d or %d not %d",
+-			    SAFI_UNICAST, SAFI_MULTICAST, _safi),
+-		   UPDATEMSGERR, OPTATTR);
++	INVALID("Expected SAFI to %d or %d not %d",
++		SAFI_UNICAST, SAFI_MULTICAST, _safi);
+     }
+ 
+     // XXX - Temporary hack as SAFI_UNICAST causes problems.
+     if (SAFI_UNICAST == _safi)
+-	xorp_throw(CorruptMessage,
+-		   c_format("Can't handle AFI_IPv4 and SAFI_UNICAST"),
+-		   UPDATEMSGERR, OPTATTR);
++	INVALID("Can't handle AFI_IPv4 and SAFI_UNICAST");
+ 
+     /*
+     ** Next Hop
+@@ -1247,17 +1191,13 @@ MPReachNLRIAttribute<IPv4>::MPReachNLRIAttribute(const uint8_t* d)
+ 	data += IPv4::addr_bytelen();
+ 	break;
+     default:
+-	xorp_throw(CorruptMessage,
+-		   c_format("BAD Next Hop size in "
+-			    "IPv4 Multiprotocol Reachable NLRI attribute "
+-			    "4 allowed not %u", len),
+-		   UPDATEMSGERR, OPTATTR);
++	INVALID_BGP(UPDATEMSGERR, ATTRLEN, "BAD Next Hop size in "
++		    "IPv4 Multiprotocol Reachable NLRI attribute "
++		    "4 allowed not %u", len);
+     }
+     
+     if (data > end)
+-	xorp_throw(CorruptMessage,
+-		   "Premature end of Multiprotocol Reachable NLRI attribute",
+-		   UPDATEMSGERR, ATTRLEN);
++	INVALID("Premature end of Multiprotocol Reachable NLRI attribute");
+ 
+     /*
+     ** SNPA - I have no idea how these are supposed to be used for IPv4
+@@ -1270,9 +1210,7 @@ MPReachNLRIAttribute<IPv4>::MPReachNLRIAttribute(const uint8_t* d)
+     }
+ 
+     if (data > end) {
+-	xorp_throw(CorruptMessage,
+-		   "Premature end of Multiprotocol Reachable NLRI attribute",
+-		   UPDATEMSGERR, ATTRLEN);
++	INVALID("Premature end of Multiprotocol Reachable NLRI attribute");
+     }
+ 
+     /*
+@@ -1281,10 +1219,8 @@ MPReachNLRIAttribute<IPv4>::MPReachNLRIAttribute(const uint8_t* d)
+     while(data < end) {
+ 	uint8_t prefix_length = *data++;
+ 	size_t bytes = (prefix_length + 7) / 8;
+-	if (bytes > IPv4::addr_bytelen())
+-	    xorp_throw(CorruptMessage,
+-		       c_format("prefix length too long %d", prefix_length),
+-		       UPDATEMSGERR, OPTATTR);
++	if (bytes > IPv4::addr_bytelen()) {
++	    INVALID("prefix length too long %d", prefix_length);
+ 	uint8_t buf[IPv4::addr_bytelen()];
+ 	memset(buf, 0, sizeof(buf));
+ 	memcpy(buf, data, bytes);
+@@ -1462,13 +1398,10 @@ MPUNReachNLRIAttribute<A>::clone() const
+ 
+ template <>
+ MPUNReachNLRIAttribute<IPv6>::MPUNReachNLRIAttribute(const uint8_t* d)
+-    throw(CorruptMessage)
+     : PathAttribute(d)
+ {
+     if (!optional() || transitive())
+-	xorp_throw(CorruptMessage,
+-		   "Bad Flags in Multiprotocol UNReachable NLRI attribute",
+-		   UPDATEMSGERR, ATTRFLAGS);
++	INVALID("Bad Flags in Multiprotocol UNReachable NLRI attribute");
+ 
+     const uint8_t *data = payload(d);
+     const uint8_t *end = payload(d) + length(d);
+@@ -1482,10 +1415,8 @@ MPUNReachNLRIAttribute<IPv6>::MPUNReachNLRIAttribute(const uint8_t* d)
+     ** This is method is specialized for dealing with IPv6.
+     */
+     if (AFI_IPV6_VAL != afi)
+-	xorp_throw(CorruptMessage,
+-		   c_format("Expected AFI to be %d not %d",
+-			    AFI_IPV6, afi),
+-		   UPDATEMSGERR, OPTATTR);
++	INVALID_BGP(UPDATEMSGERR, OPTATTR, "Expected AFI to be %d not %d",
++		    AFI_IPV6, afi);
+     _afi = AFI_IPV6;
+ 
+     uint8_t safi = *data++;
+@@ -1497,10 +1428,8 @@ MPUNReachNLRIAttribute<IPv6>::MPUNReachNLRIAttribute(const uint8_t* d)
+ 	_safi = SAFI_MULTICAST;
+ 	break;
+     default:
+-	xorp_throw(CorruptMessage,
+-		   c_format("Expected SAFI to %d or %d not %d",
+-			    SAFI_UNICAST, SAFI_MULTICAST, _safi),
+-		   UPDATEMSGERR, OPTATTR);
++	INVALID("Expected SAFI to %d or %d not %d",
++		SAFI_UNICAST, SAFI_MULTICAST, _safi);
+     }
+ 
+     /*
+@@ -1511,9 +1440,7 @@ MPUNReachNLRIAttribute<IPv6>::MPUNReachNLRIAttribute(const uint8_t* d)
+ 	debug_msg("decode prefix length = %d\n", prefix_length);
+ 	size_t bytes = (prefix_length + 7)/ 8;
+ 	if (bytes > IPv6::addr_bytelen())
+-	    xorp_throw(CorruptMessage,
+-		       c_format("prefix length too long %d", prefix_length),
+-		       UPDATEMSGERR, OPTATTR);
++	    INVALID("prefix length too long %d", prefix_length);
+ 	debug_msg("decode bytes = %u\n", XORP_UINT_CAST(bytes));
+ 	uint8_t buf[IPv6::addr_bytelen()];
+ 	memset(buf, 0, sizeof(buf));
+@@ -1527,13 +1454,10 @@ MPUNReachNLRIAttribute<IPv6>::MPUNReachNLRIAttribute(const uint8_t* d)
+ 
+ template <>
+ MPUNReachNLRIAttribute<IPv4>::MPUNReachNLRIAttribute(const uint8_t* d)
+-    throw(CorruptMessage)
+     : PathAttribute(d)
+ {
+     if (!optional() || transitive())
+-	xorp_throw(CorruptMessage,
+-		   "Bad Flags in Multiprotocol UNReachable NLRI attribute",
+-		   UPDATEMSGERR, ATTRFLAGS);
++	INVALID("Bad Flags in Multiprotocol UNReachable NLRI attribute");
+ 
+     const uint8_t *data = payload(d);
+     const uint8_t *end = payload(d) + length(d);
+@@ -1547,9 +1471,7 @@ MPUNReachNLRIAttribute<IPv4>::MPUNReachNLRIAttribute(const uint8_t* d)
+     ** This is method is specialized for dealing with IPv4.
+     */
+     if (AFI_IPV4_VAL != afi)
+-	xorp_throw(CorruptMessage,
+-		   c_format("Expected AFI to be %d not %d",
+-			    AFI_IPV4, afi),
++	INVALID("Expected AFI to be %d not %d");
+ 		   UPDATEMSGERR, OPTATTR);
+     _afi = AFI_IPV4;
+ 
+@@ -1562,17 +1484,13 @@ MPUNReachNLRIAttribute<IPv4>::MPUNReachNLRIAttribute(const uint8_t* d)
+ 	_safi = SAFI_MULTICAST;
+ 	break;
+     default:
+-	xorp_throw(CorruptMessage,
+-		   c_format("Expected SAFI to %d or %d not %d",
+-			    SAFI_UNICAST, SAFI_MULTICAST, _safi),
+-		   UPDATEMSGERR, OPTATTR);
++	INVALID("Expected SAFI to %d or %d not %d",
++		SAFI_UNICAST, SAFI_MULTICAST, _safi);
+     }
+ 
+     // XXX - Temporary hack as SAFI_UNICAST causes problems.
+     if (SAFI_UNICAST == _safi)
+-	xorp_throw(CorruptMessage,
+-		   c_format("Can't handle AFI_IPv4 and SAFI_UNICAST"),
+-		   UPDATEMSGERR, OPTATTR);
++	INVALID_BGP(UPDATEMSGERR, OPTATTR, "Can't handle AFI_IPv4 and SAFI_UNICAST");
+ 
+     /*
+     ** NLRI
+@@ -1582,9 +1500,7 @@ MPUNReachNLRIAttribute<IPv4>::MPUNReachNLRIAttribute(const uint8_t* d)
+ 	debug_msg("decode prefix length = %d\n", prefix_length);
+ 	size_t bytes = (prefix_length + 7)/ 8;
+ 	if (bytes > IPv4::addr_bytelen())
+-	    xorp_throw(CorruptMessage,
+-		       c_format("prefix length too long %d", prefix_length),
+-		       UPDATEMSGERR, OPTATTR);
++	    INVALID_BGP(UPDATEMSGERR, OPTATTR, "prefix length too long %d", prefix_length);
+ 	debug_msg("decode bytes = %u\n", XORP_UINT_CAST(bytes));
+ 	uint8_t buf[IPv4::addr_bytelen()];
+ 	memset(buf, 0, sizeof(buf));
+@@ -1614,16 +1530,13 @@ MPUNReachNLRIAttribute<A>::str() const
+  **** 
+  **************************************************************************/ 
+ 
+-UnknownAttribute::UnknownAttribute(const uint8_t* d)
+-	throw(CorruptMessage)
++UnknownAttribute::UnknownAttribute(const uint8_t* d, CorruptMessage& m)
+ 	: PathAttribute(d)
+ {
+     // It shouldn't be possible to receive an unknown attribute that
+     // is well known.
+     if (well_known())
+-	xorp_throw(CorruptMessage,
+-		   "Bad Flags in Unknown attribute",
+-		   UPDATEMSGERR, UNRECOGWATTR, d, total_tlv_length(d));
++	INVALID_BGP(UPDATEMSGERR, UNRECOGWATTR, "Bad Flags in Unknown attribute");
+ 	
+     _size = total_tlv_length(d);
+     _data = new uint8_t[_size];
+@@ -1684,30 +1597,23 @@ UnknownAttribute::encode(uint8_t *buf, size_t &wire_size,
+ PathAttribute *
+ PathAttribute::create(const uint8_t* d, uint16_t max_len,
+ 		      size_t& l /* actual length */, const BGPPeerData* peerdata,
+-		      uint32_t ip_version)
+-	throw(CorruptMessage)
++		      uint32_t ip_version, CorruptMessage& m)
+ {
+     PathAttribute *pa;
+     if (max_len < 3) {
+ 	// must be at least 3 bytes! 
+-	xorp_throw(CorruptMessage,
+-		   c_format("PathAttribute too short %d bytes", max_len),
+-		   UPDATEMSGERR, ATTRLEN, d, max_len);
++	INVALID_BGP(UPDATEMSGERR, ATTRLEN, "PathAttribute too short %d bytes", max_len);
+     }
+ 
+     // compute length, which is 1 or 2 bytes depending on flags d[0]
+     if ( (d[0] & Extended) && max_len < 4) {
+-	xorp_throw(CorruptMessage,
+-		   c_format("PathAttribute (extended) too short %d bytes",
+-			    max_len),
+-		   UPDATEMSGERR, ATTRLEN, d, max_len);
++	INVALID_BGP(UPDATEMSGERR, ATTRLEN, "PathAttribute (extended) too short %d bytes",
++		    max_len);
+     }
+     l = length(d) + (d[0] & Extended ? 4 : 3);
+     if (max_len < l) {
+-	xorp_throw(CorruptMessage,
+-		   c_format("PathAttribute too short %d bytes need %u",
+-			    max_len, XORP_UINT_CAST(l)),
+-		   UPDATEMSGERR, ATTRLEN, d, max_len);
++	INVALID_BGP(UPDATEMSGERR, ATTRLEN, "PathAttribute too short %d bytes need %u",
++		    max_len, XORP_UINT_CAST(l));
+     }
+ 
+     // now we are sure that the data block is large enough.
+@@ -2657,10 +2563,8 @@ FastPathAttributeList<A>::quick_decode(const uint8_t* data, uint16_t length)
+ 	size_t hdr_len;
+ 	// compute length, which is 1 or 2 bytes depending on flags d[0]
+ 	if ( (data[0] & PathAttribute::Extended) && remaining_length < 4) {
+-        xorp_throw(CorruptMessage,
+-                   c_format("PathAttribute (extended) too short %u bytes",
+-                            XORP_UINT_CAST(remaining_length)),
+-                   UPDATEMSGERR, ATTRLEN, data, remaining_length);
++	    INVALID_BGP(UPDATEMSGERR, ATTRLEN, "PathAttribute (extended) too short %u bytes",
++			XORP_UINT_CAST(remaining_length));
+ 	}
+ 
+ 	if (data[0] & PathAttribute::Extended) {
+@@ -2673,11 +2577,9 @@ FastPathAttributeList<A>::quick_decode(const uint8_t* data, uint16_t length)
+ 	tlv_att_length = att_length + hdr_len;
+ 
+ 	if (remaining_length < tlv_att_length) {
+-	    xorp_throw(CorruptMessage,
+-		       c_format("PathAttribute too short %u bytes need %u",
+-				XORP_UINT_CAST(remaining_length), 
+-				XORP_UINT_CAST(tlv_att_length)),
+-		       UPDATEMSGERR, ATTRLEN, data, remaining_length);
++	    INVALID_BGP(UPDATEMSGERR, ATTRLEN, "PathAttribute too short %u bytes need %u",
++			XORP_UINT_CAST(remaining_length),
++			XORP_UINT_CAST(tlv_att_length));
+ 	}
+ 
+ 	uint8_t att_type = data[1];
+@@ -2763,7 +2665,7 @@ FastPathAttributeList<A>::load_raw_data(const uint8_t *data,
+ 						  A::ip_version());
+         debug_msg("attribute size %u\n", XORP_UINT_CAST(used));
+         if (used == 0) {
+-	    xorp_throw(CorruptMessage,"Attribute Size", UPDATEMSGERR, ATTRLEN);
++	    INVALID_BGP(UPDATEMSGERR, ATTRLEN, "Attribute Size");
+         }
+ 	debug_msg("Decoded Attribute: %s\n", pa->str().c_str());
+ 	
+@@ -2779,8 +2681,7 @@ FastPathAttributeList<A>::load_raw_data(const uint8_t *data,
+ 	// check it's not a duplicate
+ 	if (_att[type] != 0) {
+ 	    // we've got a duplicate!
+-	    debug_msg("duplicate PA list entry, type: %d\n", (int)type);
+-	    xorp_throw(CorruptMessage,"Duplicate PA list entry", UPDATEMSGERR, MALATTRLIST);
++	    INVALID_BGP(UPDATEMSGERR, MALATTRLIST, "Duplicate PA list entry");
+ 	}
+ 
+ 	// seeing as we've decoded to a PathAttribute, store it for now.
+@@ -2792,9 +2693,7 @@ FastPathAttributeList<A>::load_raw_data(const uint8_t *data,
+ 	    uint8_t buf[8192];
+ 	    size_t wire_size = 8192;
+ 	    pa->encode(buf, wire_size, peerdata);
+-	    xorp_throw(CorruptMessage,"Unknown well-known attribute", 
+-		       UPDATEMSGERR, UNRECOGWATTR,
+-		       buf, wire_size);
++	    INVALID_BGP(UPDATEMSGERR, UNRECOGWATTR, "Unknown well-known attribute");
+ 	}
+ 
+ 	if (type <= MAX_ATTRIBUTE) {
+@@ -2846,8 +2745,7 @@ FastPathAttributeList<A>::load_raw_data(const uint8_t *data,
+ 		// if there's an NLRI, there must be a non-zero nexthop
+ 		if (do_checks && mp4_reach_att->nexthop() == IPv4::ZERO()) {
+ 		    uint8_t data = NEXT_HOP;
+-		    xorp_throw(CorruptMessage,"Illegal nexthop", UPDATEMSGERR, 
+-			       MISSWATTR, &data, 1);
++		    INVALID_BGP(UPDATEMSGERR, MISSWATTR, "Illegal nexthop");
+ 		}
+ 		if (mainprocess && 
+ 		    mainprocess->interface_address4(mp4_reach_att->nexthop())) {
+@@ -2872,14 +2770,15 @@ FastPathAttributeList<A>::load_raw_data(const uint8_t *data,
+ 		if (do_checks && mp6_reach_att->nexthop() == IPv6::ZERO()) {
+ 		    uint8_t data = NEXT_HOP;
+ 		    // if there's an NLRI, there must be a non-zero nexthop
+-		    xorp_throw(CorruptMessage,"Illegal nexthop", UPDATEMSGERR, 
+-			       MISSWATTR, &data, 1);
++		    INVALID_BGP(UPDATEMSGERR, MISSWATTR, "Illegal nexthop");
+ 		}
+ 		if (do_checks && mainprocess &&
+ 		    mainprocess->interface_address6(mp6_reach_att->nexthop())) {
+ 		    XLOG_ERROR("Nexthop in update belongs to this router:\n %s",
+ 			       cstring(*this));
+-		    xorp_throw(UnusableMessage, "Nexthop6 belongs to this router");
++		    m.set_unusable(true);
++		    set_invalid(true);
++		    return;
+ 		}
+ 	    }
+ 	}
+@@ -2914,7 +2813,7 @@ FastPathAttributeList<A>::load_raw_data(const uint8_t *data,
+     if (pa_count == 0 && have_nlri) {
+ 	debug_msg("Empty path attribute list and "
+ 		  "non-empty NLRI list\n");
+-	xorp_throw(CorruptMessage,"Illegal nexthop", UPDATEMSGERR, MALATTRLIST);
++	INVALID_BGP(UPDATEMSGERR, MISSWATTR, "Illegal nexthop");
+     }
+ 
+ 
+@@ -2929,16 +2828,14 @@ FastPathAttributeList<A>::load_raw_data(const uint8_t *data,
+ 	if (_att[ORIGIN] == NULL) {
+ 	    debug_msg("Missing ORIGIN\n");
+ 	    uint8_t data = ORIGIN;
+-	    xorp_throw(CorruptMessage,"Missing Origin",
+-		       UPDATEMSGERR, MISSWATTR, &data, 1);
++	    INVALID_BGP(UPDATEMSGERR, MISSWATTR, "Missing Origin");
+ 	}
+ 
+ 	// The AS Path attribute is mandatory
+ 	if (_att[AS_PATH] == NULL) {
+ 	    debug_msg("Missing AS_PATH\n");
+ 	    uint8_t data = AS_PATH;
+-	    xorp_throw(CorruptMessage,"Missing AS Path",
+-		       UPDATEMSGERR, MISSWATTR, &data, 1);
++	    INVALID_BGP(UPDATEMSGERR, MISSWATTR, "Missing AS Path");
+ 	}
+ 
+ 	// The NEXT_HOP attribute is mandatory for IPv4 unicast.  For
+@@ -2947,8 +2844,7 @@ FastPathAttributeList<A>::load_raw_data(const uint8_t *data,
+ 	if (have_ipv4_nlri && _att[NEXT_HOP] == NULL) {                
+ 	    debug_msg("Missing NEXT_HOP\n");
+ 	    uint8_t data = NEXT_HOP;
+-	    xorp_throw(CorruptMessage,"Missing Next Hop",
+-		       UPDATEMSGERR, MISSWATTR, &data, 1);
++	    INVALID_BGP(UPDATEMSGERR, MISSWATTR, "Missing Next Hop");
+ 	}
+     }
+ 
+@@ -2958,28 +2854,24 @@ FastPathAttributeList<A>::load_raw_data(const uint8_t *data,
+ 	if (!peerdata->ibgp()) {
+ 	    // If this is an EBGP peering, the AS Path MUST NOT be empty
+ 	    if (((ASPathAttribute*)_att[AS_PATH])->as_path().path_length() == 0)
+-		xorp_throw(CorruptMessage,"Empty AS Path",
+-			   UPDATEMSGERR, MALASPATH);
++		INVALID_BGP(UPDATEMSGERR, MALASPATH, "Empty AS Path");
+ 
+ 	    // If this is an EBGP peering, the AS Path MUST start
+ 	    // with the AS number of the peer.
+ 	    AsNum my_asnum(peerdata->as());
+ 	    if (((ASPathAttribute*)_att[AS_PATH])->as_path().first_asnum() != my_asnum)
+-		xorp_throw(CorruptMessage,"AS path must list peer",
+-			   UPDATEMSGERR, MALASPATH);
++		INVALID_BGP(UPDATEMSGERR, MALASPATH, "AS path must list peer");
+ 
+ 	    // If this is an EBGP peering and a route reflector
+ 	    // attribute has been received then generate an error.
+ 	    if (_att[CLUSTER_LIST] || _att[ORIGINATOR_ID])
+-		xorp_throw(CorruptMessage,"RR on EBGP peering",
+-			   UPDATEMSGERR, MALATTRLIST);
++		INVALID_BGP(UPDATEMSGERR< MALATTRLIST, "RR on EBGP peering");
+ 	}
+ 	// Receiving confederation path segments when the router
+ 	// is not configured for confederations is an error. 
+ 	if (!peerdata->confederation() &&
+ 	    ((ASPathAttribute*)_att[AS_PATH])->as_path().contains_confed_segments())
+-	    xorp_throw(CorruptMessage,"Unexpected confederation",
+-		       UPDATEMSGERR, MALASPATH);
++	    INVALID_BGP(UPDATEMSGERR, MALASPATH, "Unexpected confederation");
+     }
+ 
+     // If an update message is received that contains a nexthop
+diff --git a/xorp/bgp/path_attribute.hh b/xorp/bgp/path_attribute.hh
+index a2f28ff..0f4d47c 100644
+--- a/xorp/bgp/path_attribute.hh
++++ b/xorp/bgp/path_attribute.hh
+@@ -37,7 +37,7 @@
+ 
+ #include <openssl/md5.h>
+ 
+-#include "exceptions.hh"	// for CorruptMessage exception
++#include "exceptions.hh"
+ #include "aspath.hh"
+ #include "parameter.hh"
+ class BGPPeerData;
+diff --git a/xorp/bgp/peer.cc b/xorp/bgp/peer.cc
+index 30b8459..56fb49c 100644
+--- a/xorp/bgp/peer.cc
++++ b/xorp/bgp/peer.cc
+@@ -230,116 +230,104 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
+ 
+     const uint8_t* marker = buf + BGPPacket::MARKER_OFFSET;
+     uint8_t type = extract_8(buf + BGPPacket::TYPE_OFFSET);
+-    try {
+ 
+-	/*
+-	** Check the Marker, total waste of time as it never contains
+-	** anything of interest.
+-	*/
+-	if (0 != memcmp(const_cast<uint8_t *>(&BGPPacket::Marker[0]),
+-			marker, BGPPacket::MARKER_SIZE)) {
+-	    xorp_throw(CorruptMessage,"Bad Marker", MSGHEADERERR, CONNNOTSYNC);
+-	}
++    /*
++    ** Check the Marker, total waste of time as it never contains
++    ** anything of interest.
++    */
++    if (0 != memcmp(const_cast<uint8_t *>(&BGPPacket::Marker[0]),
++		    marker, BGPPacket::MARKER_SIZE)) {
++	goto err;
++    }
+ 	
+-	switch (type) {
+-	case MESSAGETYPEOPEN: {
+-	    debug_msg("OPEN Packet RECEIVED\n");
+-	    OpenPacket pac(buf, length);
+-	    PROFILE(XLOG_TRACE(main()->profile().enabled(trace_message_in),
+-			       "Peer %s: Receive: %s",
+-			       peerdata()->iptuple().str().c_str(),
+-			       cstring(pac)));
+-	    // All decode errors should throw a CorruptMessage.
+-	    debug_msg("%s", pac.str().c_str());
+-	    // want unified decode call. now need to get peerdata out.
+-	    _peerdata->dump_peer_data();
+-	    event_openmess(pac);
+-	    TIMESPENT_CHECK();
+-	    break;
+-	}
+-	case MESSAGETYPEKEEPALIVE: {
+-	    debug_msg("KEEPALIVE Packet RECEIVED %u\n",
+-		      XORP_UINT_CAST(length));
+-	    // Check that the length is correct or throw an exception
+-	    KeepAlivePacket pac(buf, length);
+-	    PROFILE(XLOG_TRACE(main()->profile().enabled(trace_message_in),
+-			       "Peer %s: Receive: %s",
+-			       peerdata()->iptuple().str().c_str(),
+-			       cstring(pac)));
+-
+-	    // debug_msg("%s", pac.str().c_str());
+-	    event_keepmess();
+-	    TIMESPENT_CHECK();
+-	    break;
+-	}
+-	case MESSAGETYPEUPDATE: {
+-	    debug_msg("UPDATE Packet RECEIVED\n");
+-	    _in_updates++;
+-	    _mainprocess->eventloop().current_time(_in_update_time);
+-	    UpdatePacket pac(buf, length, _peerdata, _mainprocess, /*do checks*/true);
+-
+-	    PROFILE(XLOG_TRACE(main()->profile().enabled(trace_message_in),
+-			       "Peer %s: Receive: %s",
+-			       peerdata()->iptuple().str().c_str(),
+-			       cstring(pac)));
++    switch (type) {
++    case MESSAGETYPEOPEN: {
++	debug_msg("OPEN Packet RECEIVED\n");
++	OpenPacket pac(buf, length);
++	PROFILE(XLOG_TRACE(main()->profile().enabled(trace_message_in),
++			   "Peer %s: Receive: %s",
++			   peerdata()->iptuple().str().c_str(),
++			   cstring(pac)));
++	if (pac.invalid())
++	    goto err;
++
++	debug_msg("%s", pac.str().c_str());
++	// want unified decode call. now need to get peerdata out.
++	_peerdata->dump_peer_data();
++	event_openmess(pac);
++	TIMESPENT_CHECK();
++	break;
++    }
++    case MESSAGETYPEKEEPALIVE: {
++	debug_msg("KEEPALIVE Packet RECEIVED %u\n",
++		  XORP_UINT_CAST(length));
++	// Check that the length is correct or throw an exception
++	KeepAlivePacket pac(buf, length);
++	PROFILE(XLOG_TRACE(main()->profile().enabled(trace_message_in),
++			   "Peer %s: Receive: %s",
++			   peerdata()->iptuple().str().c_str(),
++			   cstring(pac)));
++	if (pac.invalid())
++	    goto err;
++	// debug_msg("%s", pac.str().c_str());
++	event_keepmess();
++	TIMESPENT_CHECK();
++	break;
++    }
++    case MESSAGETYPEUPDATE: {
++	debug_msg("UPDATE Packet RECEIVED\n");
++	_in_updates++;
++	_mainprocess->eventloop().current_time(_in_update_time);
++	UpdatePacket pac(buf, length, _peerdata, _mainprocess, /*do checks*/true);
+ 
+-	    // All decode errors should throw a CorruptMessage.
+-	    debug_msg("%s", pac.str().c_str());
++	PROFILE(XLOG_TRACE(main()->profile().enabled(trace_message_in),
++			   "Peer %s: Receive: %s",
++			   peerdata()->iptuple().str().c_str(),
++			   cstring(pac)));
++	
++	if (pac.invalid())
++	    goto err;
++	// All decode errors should throw a CorruptMessage.
++	debug_msg("%s", pac.str().c_str());
+ 
+-	    event_recvupdate(pac);
+-	    TIMESPENT_CHECK();
+-	    if (TIMESPENT_OVERLIMIT()) {
+-		XLOG_WARNING("Processing packet took longer than %u second %s",
+-			     XORP_UINT_CAST(TIMESPENT_LIMIT),
+-			     pac.str().c_str());
+-	    }
+-	    break;
++	event_recvupdate(pac);
++	TIMESPENT_CHECK();
++	if (TIMESPENT_OVERLIMIT()) {
++	    XLOG_WARNING("Processing packet took longer than %u second %s",
++			 XORP_UINT_CAST(TIMESPENT_LIMIT),
++			 pac.str().c_str());
+ 	}
+-	case MESSAGETYPENOTIFICATION: {
+-	    debug_msg("NOTIFICATION Packet RECEIVED\n");
+-	    NotificationPacket pac(buf, length);
++	break;
++    }
++    case MESSAGETYPENOTIFICATION: {
++	debug_msg("NOTIFICATION Packet RECEIVED\n");
++	NotificationPacket pac(buf, length);
+ 	    
+-	    PROFILE(XLOG_TRACE(main()->profile().enabled(trace_message_in),
+-			       "Peer %s: Receive: %s",
+-			       peerdata()->iptuple().str().c_str(),
+-			       cstring(pac)));
+-
+-	    // All decode errors should throw a CorruptMessage.
+-	    debug_msg("%s", pac.str().c_str());
+-	    event_recvnotify(pac);
+-	    TIMESPENT_CHECK();
+-	    break;
+-	}
+-	default:
+-	    /*
+-	    ** Send a notification to the peer. This is a bad message type.
+-	    */
+-	    XLOG_ERROR("%s Unknown packet type %d",
+-		       this->str().c_str(), type);
+-	    notify_peer_of_error(MSGHEADERERR, BADMESSTYPE,
+-				 buf + BGPPacket::TYPE_OFFSET, 1);
+-// 	    event_tranfatal();
+-	    TIMESPENT_CHECK();
+-	    return false;
+-	}
+-    } catch(CorruptMessage& c) {
++	PROFILE(XLOG_TRACE(main()->profile().enabled(trace_message_in),
++			   "Peer %s: Receive: %s",
++			   peerdata()->iptuple().str().c_str(),
++			   cstring(pac)));
++
++	if (pac.invalid())
++	    goto err;
++	// All decode errors should throw a CorruptMessage.
++	debug_msg("%s", pac.str().c_str());
++	event_recvnotify(pac);
++	TIMESPENT_CHECK();
++	break;
++    }
++    default:
+ 	/*
+-	** This peer has sent us a bad message. Send a notification
+-	** and drop the the peering.
++	** Send a notification to the peer. This is a bad message type.
+ 	*/
+-	XLOG_WARNING("%s %s %s", this->str().c_str(), c.where().c_str(),
+-		     c.why().c_str());
+-	notify_peer_of_error(c.error(), c.subcode(), c.data(), c.len());
+-// 	event_tranfatal();
++	XLOG_ERROR("%s Unknown packet type %d",
++		   this->str().c_str(), type);
++	notify_peer_of_error(MSGHEADERERR, BADMESSTYPE,
++			     buf + BGPPacket::TYPE_OFFSET, 1);
++// 	    event_tranfatal();
+ 	TIMESPENT_CHECK();
+ 	return false;
+-    } catch (UnusableMessage& um) {
+-	// the packet wasn't usable for some reason, but also
+-	// wasn't so corrupt we need to send a notification -
+-	// this is a "silent" error.
+-	XLOG_WARNING("%s %s %s", this->str().c_str(), um.where().c_str(),
+-		     um.why().c_str());
+-    }
++    }/* switch */
+ 
+     TIMESPENT_CHECK();
+ 
+@@ -352,6 +340,23 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
+     }
+ 
+     return true;
++
++  err:
++    /*
++    ** This peer has sent us a bad message. Send a notification
++    ** and drop the the peering.
++    */
++    XLOG_WARNING("%s Corrupt message", str().c_str());
++    notify_peer_of_error(c.error(), c.subcode(), c.data(), c.len());
++    TIMESPENT_CHECK();
++    return false;
++
++  err_unusable:
++    // the packet wasn't usable for some reason, but also
++    // wasn't so corrupt we need to send a notification -
++    // this is a "silent" error.
++    XLOG_WARNING("%s Unusable message", str().c_str());
++    return false;
+ }
+ 
+ PeerOutputState
+diff --git a/xorp/bgp/peer.hh b/xorp/bgp/peer.hh
+index 220dc34..17f6d33 100644
+--- a/xorp/bgp/peer.hh
++++ b/xorp/bgp/peer.hh
+@@ -119,7 +119,7 @@ class DampPeerOscillations {
+     void zero_restart_count();
+ };
+ 
+-class BGPPeer {
++class BGPPeer : public Invalid {
+ public:
+     BGPPeer(LocalData *ld, BGPPeerData *pd, SocketClient *sock, BGPMain *m);
+     virtual ~BGPPeer();
+diff --git a/xorp/libxorp/exceptions.hh b/xorp/libxorp/exceptions.hh
+index fa36379..3d05d9d 100644
+--- a/xorp/libxorp/exceptions.hh
++++ b/xorp/libxorp/exceptions.hh
+@@ -44,9 +44,24 @@ public:
+     virtual bool invalid() const { return _invalid; }
+     void set_invalid(bool v) { _invalid = v; }
+     void set_valid(bool v) { _invalid = !v; }
++    void set_invalid_or(bool v) { _invalid |= v; }
+ protected:
+     bool _invalid;
+ };
++
++#define INVALID(args...)			\
++    do {					\
++	XLOG_WARNING(args);			\
++	set_invalid(true);			\
++	return;					\
++    } while (0);
++
++#define INVALID_F(args...)			\
++    do {					\
++	XLOG_WARNING(args);			\
++	set_invalid(true);			\
++	return false;				\
++    } while (0);
+     
+ 
+ /**
+diff --git a/xorp/libxorp/xorp.h b/xorp/libxorp/xorp.h
+index fa7b287..84cf726 100644
+--- a/xorp/libxorp/xorp.h
++++ b/xorp/libxorp/xorp.h
+@@ -86,13 +86,6 @@
+ 
+ #define WARN_UNUSED __attribute__((warn_unused_result))
+ 
+-#define INVALID(args...)			\
+-    do {					\
+-	XLOG_WARNING(args);			\
+-	_invalid = true;			\
+-	return;					\
+-    } while (0);
+-
+ #ifdef __cplusplus
+ #  ifdef XORP_USE_USTL
+ #    include <ustl.h>
+-- 
+2.7.5
+

@@ -1,0 +1,754 @@
+From 09e5d8c401bccf5fab384ec1194e8c4f43ae90a2 Mon Sep 17 00:00:00 2001
+From: Ben Greear <greearb@candelatech.com>
+Date: Fri, 8 Sep 2017 11:57:01 -0700
+Subject: [PATCH 10/33] Remvoe XrlAtomFound exception.
+
+---
+ xorp/libxipc/tests/test_xrl.cc |   8 ----
+ xorp/libxipc/xrl_args.cc       |  48 ++++++++-----------
+ xorp/libxipc/xrl_args.hh       | 106 +++++++++++++++++++----------------------
+ xorp/libxipc/xrl_parser.cc     |  74 +++++++++++++---------------
+ xorp/xrl/scripts/tgt-gen       |  11 +----
+ 5 files changed, 106 insertions(+), 141 deletions(-)
+
+diff --git a/xorp/libxipc/tests/test_xrl.cc b/xorp/libxipc/tests/test_xrl.cc
+index 4d9c7ac..51832c3 100644
+--- a/xorp/libxipc/tests/test_xrl.cc
++++ b/xorp/libxipc/tests/test_xrl.cc
+@@ -151,14 +151,6 @@ run_test()
+ 		failures++;
+ 		break;
+ 	    }
+-#if 0
+-	    catch (const XrlArgs::XrlAtomFound&) {
+-		cout << "Adding same argument twice ("
+-		     << tests[i].testname << ", " << tests[j].testname << ")"
+-		     << endl;
+-		failures++;
+-	    }
+-#endif
+ 	}
+     }
+     return failures;
+diff --git a/xorp/libxipc/xrl_args.cc b/xorp/libxipc/xrl_args.cc
+index afe44bd..e331331 100644
+--- a/xorp/libxipc/xrl_args.cc
++++ b/xorp/libxipc/xrl_args.cc
+@@ -38,14 +38,14 @@
+ // XrlArgs add/get/remove XrlAtom
+ 
+ XrlArgs&
+-XrlArgs::add(const XrlAtom& xa) throw (XrlAtomFound)
++XrlArgs::add(const XrlAtom& xa)
+ {
+     if (!xa.name().empty()) {
+ 	const_iterator p;
+ 
+ 	for (p = _args.begin(); p != _args.end(); ++p) {
+ 	    if (p->name() == xa.name()) {
+-		throw XrlAtomFound();
++		XLOG_ASSERT(0);
+ 	    }
+ 	}
+ 
+@@ -101,7 +101,7 @@ XrlArgs::remove(const XrlAtom& dataless)
+ // XrlArgs add/get/remove bool
+ 
+ XrlArgs&
+-XrlArgs::add_bool(const char* name, bool val) throw (XrlAtomFound)
++XrlArgs::add_bool(const char* name, bool val)
+ {
+     return add(XrlAtom(name, val));
+ }
+@@ -126,7 +126,7 @@ XrlArgs::remove_bool(const char* name)
+ // XrlArgs add/get/remove int32
+ 
+ XrlArgs&
+-XrlArgs::add_int32(const char* name, int32_t val) throw (XrlAtomFound)
++XrlArgs::add_int32(const char* name, int32_t val)
+ {
+     return add(XrlAtom(name, val));
+ }
+@@ -151,7 +151,7 @@ XrlArgs::remove_int32(const char* name)
+ // XrlArgs add/get/remove uint32
+ 
+ XrlArgs&
+-XrlArgs::add_uint32(const char* name, uint32_t val) throw (XrlAtomFound)
++XrlArgs::add_uint32(const char* name, uint32_t val)
+ {
+     return add(XrlAtom(name, val));
+ }
+@@ -176,7 +176,7 @@ XrlArgs::remove_uint32(const char* name)
+ // XrlArgs add/get/remove ipv4
+ 
+ XrlArgs&
+-XrlArgs::add_ipv4(const char* name, const IPv4& val) throw (XrlAtomFound)
++XrlArgs::add_ipv4(const char* name, const IPv4& val)
+ {
+     return add(XrlAtom(name, val));
+ }
+@@ -201,7 +201,7 @@ XrlArgs::remove_ipv4(const char* name)
+ // XrlArgs add/get/remove ipv4net
+ 
+ XrlArgs&
+-XrlArgs::add_ipv4net(const char* name, const IPv4Net& val) throw (XrlAtomFound)
++XrlArgs::add_ipv4net(const char* name, const IPv4Net& val)
+ {
+     return add(XrlAtom(name, val));
+ }
+@@ -226,7 +226,7 @@ XrlArgs::remove_ipv4net(const char* name)
+ // XrlArgs add/get/remove ipv6
+ 
+ XrlArgs&
+-XrlArgs::add_ipv6(const char* name, const IPv6& val) throw (XrlAtomFound)
++XrlArgs::add_ipv6(const char* name, const IPv6& val)
+ {
+     return add(XrlAtom(name, val));
+ }
+@@ -251,7 +251,7 @@ XrlArgs::remove_ipv6(const char* name)
+ // XrlArgs add/get/remove ipv6net
+ 
+ XrlArgs&
+-XrlArgs::add_ipv6net(const char* name, const IPv6Net& val) throw (XrlAtomFound)
++XrlArgs::add_ipv6net(const char* name, const IPv6Net& val)
+ {
+     return add(XrlAtom(name, val));
+ }
+@@ -278,7 +278,7 @@ XrlArgs::remove_ipv6net(const char* name)
+ // a convenience.
+ 
+ XrlArgs&
+-XrlArgs::add_ipvx(const char* name, const IPvX& val) throw (XrlAtomFound)
++XrlArgs::add_ipvx(const char* name, const IPvX& val)
+ {
+     return add(XrlAtom(name, val));
+ }
+@@ -310,7 +310,7 @@ XrlArgs::remove_ipvx(const char* name)
+ // provided as a convenience.
+ 
+ XrlArgs&
+-XrlArgs::add_ipvxnet(const char* name, const IPvXNet& val) throw (XrlAtomFound)
++XrlArgs::add_ipvxnet(const char* name, const IPvXNet& val)
+ {
+     return add(XrlAtom(name, val));
+ }
+@@ -340,7 +340,7 @@ XrlArgs::remove_ipvxnet(const char* name)
+ // XrlArgs add/get/remove mac
+ 
+ XrlArgs&
+-XrlArgs::add_mac(const char* name, const Mac& val) throw (XrlAtomFound)
++XrlArgs::add_mac(const char* name, const Mac& val)
+ {
+     return add(XrlAtom(name, val));
+ }
+@@ -361,7 +361,7 @@ XrlArgs::remove_mac(const char* name)
+ // XrlArgs add/get/remove string
+ 
+ XrlArgs&
+-XrlArgs::add_string(const char* name, const string& val) throw (XrlAtomFound)
++XrlArgs::add_string(const char* name, const string& val)
+ {
+     return add(XrlAtom(name, val));
+ }
+@@ -383,7 +383,6 @@ XrlArgs::remove_string(const char* name)
+ 
+ XrlArgs&
+ XrlArgs::add_list(const char* name, const XrlAtomList& val)
+-    throw (XrlAtomFound)
+ {
+     return add(XrlAtom(name, val));
+ }
+@@ -405,7 +404,6 @@ XrlArgs::remove_list(const char* name)
+ 
+ XrlArgs&
+ XrlArgs::add_binary(const char* name, const vector<uint8_t>& val)
+-    throw (XrlAtomFound)
+ {
+     return add(XrlAtom(name, val));
+ }
+@@ -426,7 +424,7 @@ XrlArgs::remove_binary(const char* name)
+ // XrlArgs add/get/remove int64
+ 
+ XrlArgs&
+-XrlArgs::add_int64(const char* name, int64_t val) throw (XrlAtomFound)
++XrlArgs::add_int64(const char* name, int64_t val)
+ {
+     return add(XrlAtom(name, val));
+ }
+@@ -447,7 +445,7 @@ XrlArgs::remove_int64(const char* name)
+ // XrlArgs add/get/remove uint64
+ 
+ XrlArgs&
+-XrlArgs::add_uint64(const char* name, uint64_t val) throw (XrlAtomFound)
++XrlArgs::add_uint64(const char* name, uint64_t val)
+ {
+     return add(XrlAtom(name, val));
+ }
+@@ -469,7 +467,7 @@ XrlArgs::remove_uint64(const char* name)
+ // XrlArgs add/get/remove fp64
+ 
+ XrlArgs&
+-XrlArgs::add_fp64(const char* name, fp64_t val) throw (XrlAtomFound)
++XrlArgs::add_fp64(const char* name, fp64_t val)
+ {
+     return add(XrlAtom(name, val));
+ }
+@@ -491,7 +489,7 @@ XrlArgs::remove_fp64(const char* name)
+ // Append an existing XrlArgs
+ 
+ XrlArgs&
+-XrlArgs::add(const XrlArgs& args) throw (XrlAtomFound)
++XrlArgs::add(const XrlArgs& args)
+ {
+     for (const_iterator ci = args.begin(); ci != args.end(); ci++)
+ 	add(*ci);
+@@ -587,15 +585,9 @@ XrlArgs::XrlArgs(const char* serialized)
+     for (string::iterator start = s.begin(); start < s.end(); start++) {
+ 	string::iterator end = find(start, s.end(), XrlToken::ARG_ARG_SEP[0]);
+         string tok(start, end);
+-	try {
+-	    XrlAtom xa(tok.c_str());
+-	    add(xa);
+-	} catch (const XrlAtomFound& /*xaf*/) {
+-	    string tmp("Duplicate Atom found: ");
+-	    tmp += tok;
+-	    _invalid = true;
+-	    return;
+-	}
++
++	XrlAtom xa(tok.c_str());
++	add(xa);
+ 	start = end;
+     }
+ }
+diff --git a/xorp/libxipc/xrl_args.hh b/xorp/libxipc/xrl_args.hh
+index 56463df..1513873 100644
+--- a/xorp/libxipc/xrl_args.hh
++++ b/xorp/libxipc/xrl_args.hh
+@@ -50,7 +50,6 @@ public:
+     private:
+ 	string _reason;
+     };
+-    class XrlAtomFound { };
+ 
+ public:
+     XrlArgs() : _have_name(false), _invalid(false) { bad_atom.set_invalid(true);}
+@@ -68,197 +67,192 @@ public:
+ 
+     /* --- bool accessors --- */
+ 
+-    XrlArgs& add_bool(const char* name, bool val) throw (XrlAtomFound);
++    XrlArgs& add_bool(const char* name, bool val);
+ 
+     const bool_t& get_bool(const char* name) const throw (BadArgs);
+ 
+     void remove_bool(const char* name);
+ 
+-    XrlArgs& add(const char* n, bool v) throw (XrlAtomFound);
++    XrlArgs& add(const char* n, bool v);
+ 
+     void get(const char* n, bool& t) const throw (BadArgs);
+ 
+     /* --- int32 accessors --- */
+ 
+-    XrlArgs& add_int32(const char* name, int32_t val) throw (XrlAtomFound);
++    XrlArgs& add_int32(const char* name, int32_t val);
+ 
+     const int32_t& get_int32(const char* name) const throw (BadArgs);
+ 
+     void remove_int32(const char* name);
+ 
+-    XrlArgs& add(const char* n, int32_t v) throw (XrlAtomFound);
++    XrlArgs& add(const char* n, int32_t v);
+ 
+     void get(const char* n, int32_t& t) const throw (BadArgs);
+ 
+     /* --- uint32 accessors --- */
+ 
+-    XrlArgs& add_uint32(const char* name, uint32_t v) throw (XrlAtomFound);
++    XrlArgs& add_uint32(const char* name, uint32_t v);
+ 
+     const uint32_t& get_uint32(const char* name) const throw (BadArgs);
+ 
+     void remove_uint32(const char* name);
+ 
+-    XrlArgs& add(const char* n, uint32_t v) throw (XrlAtomFound);
++    XrlArgs& add(const char* n, uint32_t v);
+ 
+     void get(const char* n, uint32_t& t) const throw (BadArgs);
+ 
+     /* --- ipv4 accessors --- */
+ 
+-    XrlArgs& add_ipv4(const char* n, const IPv4& a) throw (XrlAtomFound);
++    XrlArgs& add_ipv4(const char* n, const IPv4& a);
+ 
+     const IPv4& get_ipv4(const char* name) const throw (BadArgs);
+ 
+     void remove_ipv4(const char* name);
+ 
+-    XrlArgs& add(const char* n, const IPv4& a) throw (XrlAtomFound);
++    XrlArgs& add(const char* n, const IPv4& a);
+ 
+     void get(const char* n, IPv4& a) const throw (BadArgs);
+ 
+     /* --- ipv4net accessors --- */
+ 
+-    XrlArgs& add_ipv4net(const char* n, const IPv4Net& a) throw (XrlAtomFound);
++    XrlArgs& add_ipv4net(const char* n, const IPv4Net& a);
+ 
+     const IPv4Net& get_ipv4net(const char* name) const throw (BadArgs);
+ 
+     void remove_ipv4net(const char* name);
+ 
+-    XrlArgs& add(const char* n, const IPv4Net& v) throw (XrlAtomFound);
++    XrlArgs& add(const char* n, const IPv4Net& v);
+ 
+     void get(const char* n, IPv4Net& t) const throw (BadArgs);
+ 
+     /* --- ipv6 accessors --- */
+ 
+-    XrlArgs& add_ipv6(const char* name, const IPv6& addr) throw (XrlAtomFound);
++    XrlArgs& add_ipv6(const char* name, const IPv6& addr);
+ 
+     const IPv6& get_ipv6(const char* name) const throw (BadArgs);
+ 
+     void remove_ipv6(const char* name);
+ 
+-    XrlArgs& add(const char* n, const IPv6& a) throw (XrlAtomFound);
++    XrlArgs& add(const char* n, const IPv6& a);
+ 
+     void get(const char* n, IPv6& a) const throw (BadArgs);
+ 
+     /* --- ipv6net accessors --- */
+ 
+-    XrlArgs& add_ipv6net(const char* name, const IPv6Net& addr)
+-	throw (XrlAtomFound);
++    XrlArgs& add_ipv6net(const char* name, const IPv6Net& addr);
+ 
+     const IPv6Net& get_ipv6net(const char* name) const throw (BadArgs);
+ 
+     void remove_ipv6net(const char* name);
+ 
+-    XrlArgs& add(const char* n, const IPv6Net& a) throw (XrlAtomFound);
++    XrlArgs& add(const char* n, const IPv6Net& a);
+ 
+     void get(const char* n, IPv6Net& a) const throw (BadArgs);
+ 
+     /* --- ipvx accessors --- */
+ 
+-    XrlArgs& add_ipvx(const char* name, const IPvX& ipvx) throw (XrlAtomFound);
++    XrlArgs& add_ipvx(const char* name, const IPvX& ipvx);
+ 
+     const IPvX get_ipvx(const char* name) const throw (BadArgs);
+ 
+     void remove_ipvx(const char* name);
+ 
+-    XrlArgs& add(const char* n, const IPvX& a) throw (XrlAtomFound);
++    XrlArgs& add(const char* n, const IPvX& a);
+ 
+     void get(const char* n, IPvX& a) const throw (BadArgs);
+ 
+     /* --- ipvxnet accessors --- */
+ 
+-    XrlArgs& add_ipvxnet(const char* name, const IPvXNet& ipvxnet)
+-	throw (XrlAtomFound);
++    XrlArgs& add_ipvxnet(const char* name, const IPvXNet& ipvxnet);
+ 
+     const IPvXNet get_ipvxnet(const char* name) const throw (BadArgs);
+ 
+     void remove_ipvxnet(const char* name);
+ 
+-    XrlArgs& add(const char* n, const IPvXNet& a) throw (XrlAtomFound);
++    XrlArgs& add(const char* n, const IPvXNet& a);
+ 
+     void get(const char* n, IPvXNet& a) const throw (BadArgs);
+ 
+     /* --- mac accessors --- */
+ 
+-    XrlArgs& add_mac(const char* name, const Mac& addr) throw (XrlAtomFound);
++    XrlArgs& add_mac(const char* name, const Mac& addr);
+ 
+     const Mac& get_mac(const char* name) const throw (BadArgs);
+ 
+     void remove_mac(const char* name);
+ 
+-    XrlArgs& add(const char* n, const Mac& a) throw (XrlAtomFound);
++    XrlArgs& add(const char* n, const Mac& a);
+ 
+     void get(const char* n, Mac& a) const throw (BadArgs);
+ 
+     /* --- string accessors --- */
+ 
+-    XrlArgs& add_string(const char* name, const string& addr)
+-	throw (XrlAtomFound);
++    XrlArgs& add_string(const char* name, const string& addr);
+ 
+     const string& get_string(const char* name) const throw (BadArgs);
+ 
+     void remove_string(const char* name);
+ 
+-    XrlArgs& add(const char* n, const string& a) throw (XrlAtomFound);
++    XrlArgs& add(const char* n, const string& a);
+ 
+     void get(const char* n, string& a) const throw (BadArgs);
+ 
+     /* --- list accessors --- */
+ 
+-    XrlArgs& add_list(const char* name, const XrlAtomList& addr)
+-	throw (XrlAtomFound);
++    XrlArgs& add_list(const char* name, const XrlAtomList& addr);
+ 
+     const XrlAtomList& get_list(const char* name) const throw (BadArgs);
+ 
+     void remove_list(const char* name);
+ 
+-    XrlArgs& add(const char* n, const XrlAtomList& a) throw (XrlAtomFound);
++    XrlArgs& add(const char* n, const XrlAtomList& a);
+ 
+     void get(const char* n, XrlAtomList& a) const throw (BadArgs);
+ 
+     /* --- binary data accessors --- */
+-    XrlArgs& add_binary(const char* name, const vector<uint8_t>& addr)
+-	throw (XrlAtomFound);
++    XrlArgs& add_binary(const char* name, const vector<uint8_t>& addr);
+ 
+     const vector<uint8_t>& get_binary(const char* name) const throw (BadArgs);
+ 
+     void remove_binary(const char* name);
+ 
+-    XrlArgs& add(const char* n, const vector<uint8_t>& a) throw (XrlAtomFound);
++    XrlArgs& add(const char* n, const vector<uint8_t>& a);
+ 
+     void get(const char* n, vector<uint8_t>& a) const throw (BadArgs);
+ 
+     /* --- int64 accessors --- */
+ 
+-    XrlArgs& add_int64(const char* name, int64_t v) throw (XrlAtomFound);
++    XrlArgs& add_int64(const char* name, int64_t v);
+ 
+     const int64_t& get_int64(const char* name) const throw (BadArgs);
+ 
+     void remove_int64(const char* name);
+ 
+-    XrlArgs& add(const char* n, int64_t v) throw (XrlAtomFound);
++    XrlArgs& add(const char* n, int64_t v);
+ 
+     void get(const char* n, int64_t& t) const throw (BadArgs);
+ 
+     /* --- uint64 accessors --- */
+ 
+-    XrlArgs& add_uint64(const char* name, uint64_t v) throw (XrlAtomFound);
++    XrlArgs& add_uint64(const char* name, uint64_t v);
+ 
+     const uint64_t& get_uint64(const char* name) const throw (BadArgs);
+ 
+     void remove_uint64(const char* name);
+ 
+-    XrlArgs& add(const char* n, uint64_t v) throw (XrlAtomFound);
++    XrlArgs& add(const char* n, uint64_t v);
+ 
+     void get(const char* n, uint64_t& t) const throw (BadArgs);
+ 
+     /* --- fp64 accessors --- */
+ 
+-    XrlArgs& add_fp64(const char* name, fp64_t v) throw (XrlAtomFound);
++    XrlArgs& add_fp64(const char* name, fp64_t v);
+ 
+     const fp64_t& get_fp64(const char* name) const throw (BadArgs);
+ 
+     void remove_fp64(const char* name);
+ 
+-    XrlArgs& add(const char* n, fp64_t v) throw (XrlAtomFound);
++    XrlArgs& add(const char* n, fp64_t v);
+ 
+     void get(const char* n, fp64_t& t) const throw (BadArgs);
+ 
+@@ -266,7 +260,7 @@ public:
+     // ... Add your type's add, get, remove functions here ...
+ 
+     // Append all atoms from an existing XrlArgs structure
+-    XrlArgs& add(const XrlArgs& args) throw (XrlAtomFound);
++    XrlArgs& add(const XrlArgs& args);
+ 
+     // Equality testing
+     bool matches_template(XrlArgs& t) const;
+@@ -337,7 +331,7 @@ public:
+     bool invalid() const { return _invalid; }
+ 
+ protected:
+-    void check_not_found(const XrlAtom &xa) throw (XrlAtomFound);
++    bool WARN_UNUSED check_not_found(const XrlAtom &xa);
+ 
+     ATOMS _args;
+     bool  _have_name;
+@@ -349,7 +343,7 @@ protected:
+ // Inline methods
+ 
+ inline XrlArgs&
+-XrlArgs::add(const char* n, bool v) throw (XrlAtomFound)
++XrlArgs::add(const char* n, bool v)
+ {
+     return add_bool(n, v);
+ }
+@@ -361,7 +355,7 @@ XrlArgs::get(const char* n, bool& t) const throw (BadArgs)
+ }
+ 
+ inline XrlArgs&
+-XrlArgs::add(const char* n, int32_t v) throw (XrlAtomFound)
++XrlArgs::add(const char* n, int32_t v)
+ {
+     return add_int32(n, v);
+ }
+@@ -373,7 +367,7 @@ XrlArgs::get(const char* n, int32_t& t) const throw (BadArgs)
+ }
+ 
+ inline XrlArgs&
+-XrlArgs::add(const char* n, uint32_t v) throw (XrlAtomFound)
++XrlArgs::add(const char* n, uint32_t v)
+ {
+     return add_uint32(n, v);
+ }
+@@ -385,7 +379,7 @@ XrlArgs::get(const char* n, uint32_t& t) const throw (BadArgs)
+ }
+ 
+ inline XrlArgs&
+-XrlArgs::add(const char* n, const IPv4& a) throw (XrlAtomFound)
++XrlArgs::add(const char* n, const IPv4& a)
+ {
+     return add_ipv4(n, a);
+ }
+@@ -397,7 +391,7 @@ XrlArgs::get(const char* n, IPv4& a) const throw (BadArgs)
+ }
+ 
+ inline XrlArgs&
+-XrlArgs::add(const char* n, const IPv4Net& v) throw (XrlAtomFound)
++XrlArgs::add(const char* n, const IPv4Net& v)
+ {
+     return add_ipv4net(n, v);
+ }
+@@ -409,7 +403,7 @@ XrlArgs::get(const char* n, IPv4Net& t) const throw (BadArgs)
+ }
+ 
+ inline XrlArgs&
+-XrlArgs::add(const char* n, const IPv6& a) throw (XrlAtomFound)
++XrlArgs::add(const char* n, const IPv6& a)
+ {
+     return add_ipv6(n, a);
+ }
+@@ -421,7 +415,7 @@ XrlArgs::get(const char* n, IPv6& a) const throw (BadArgs)
+ }
+ 
+ inline XrlArgs&
+-XrlArgs::add(const char* n, const IPv6Net& a) throw (XrlAtomFound)
++XrlArgs::add(const char* n, const IPv6Net& a)
+ {
+     return add_ipv6net(n, a);
+ }
+@@ -433,7 +427,7 @@ XrlArgs::get(const char* n, IPv6Net& a) const throw (BadArgs)
+ }
+ 
+ inline XrlArgs&
+-XrlArgs::add(const char* n, const IPvX& a) throw (XrlAtomFound)
++XrlArgs::add(const char* n, const IPvX& a)
+ {
+     return add_ipvx(n, a);
+ }
+@@ -445,7 +439,7 @@ XrlArgs::get(const char* n, IPvX& a) const throw (BadArgs)
+ }
+ 
+ inline XrlArgs&
+-XrlArgs::add(const char* n, const IPvXNet& a) throw (XrlAtomFound)
++XrlArgs::add(const char* n, const IPvXNet& a)
+ {
+     return add_ipvxnet(n, a);
+ }
+@@ -457,7 +451,7 @@ XrlArgs::get(const char* n, IPvXNet& a) const throw (BadArgs)
+ }
+ 
+ inline XrlArgs&
+-XrlArgs::add(const char* n, const Mac& a) throw (XrlAtomFound)
++XrlArgs::add(const char* n, const Mac& a)
+ {
+     return add_mac(n, a);
+ }
+@@ -469,7 +463,7 @@ XrlArgs::get(const char* n, Mac& a) const throw (BadArgs)
+ }
+ 
+ inline XrlArgs&
+-XrlArgs::add(const char* n, const string& a) throw (XrlAtomFound)
++XrlArgs::add(const char* n, const string& a)
+ {
+     return add_string(n, a);
+ }
+@@ -481,7 +475,7 @@ XrlArgs::get(const char* n, string& a) const throw (BadArgs)
+ }
+ 
+ inline XrlArgs&
+-XrlArgs::add(const char* n, const XrlAtomList& a) throw (XrlAtomFound)
++XrlArgs::add(const char* n, const XrlAtomList& a)
+ {
+     return add_list(n, a);
+ }
+@@ -493,7 +487,7 @@ XrlArgs::get(const char* n, XrlAtomList& a) const throw (BadArgs)
+ }
+ 
+ inline XrlArgs&
+-XrlArgs::add(const char* n, const vector<uint8_t>& a) throw (XrlAtomFound)
++XrlArgs::add(const char* n, const vector<uint8_t>& a)
+ {
+     return add_binary(n, a);
+ }
+@@ -505,7 +499,7 @@ XrlArgs::get(const char* n, vector<uint8_t>& a) const throw (BadArgs)
+ }
+ 
+ inline XrlArgs&
+-XrlArgs::add(const char* n, int64_t v) throw (XrlAtomFound)
++XrlArgs::add(const char* n, int64_t v)
+ {
+     return add_int64(n, v);
+ }
+@@ -517,7 +511,7 @@ XrlArgs::get(const char* n, int64_t& t) const throw (BadArgs)
+ }
+ 
+ inline XrlArgs&
+-XrlArgs::add(const char* n, uint64_t v) throw (XrlAtomFound)
++XrlArgs::add(const char* n, uint64_t v)
+ {
+     return add_uint64(n, v);
+ }
+@@ -529,7 +523,7 @@ XrlArgs::get(const char* n, uint64_t& t) const throw (BadArgs)
+ }
+ 
+ inline XrlArgs&
+-XrlArgs::add(const char* n, fp64_t v) throw (XrlAtomFound)
++XrlArgs::add(const char* n, fp64_t v)
+ {
+     return add_fp64(n, v);
+ }
+diff --git a/xorp/libxipc/xrl_parser.cc b/xorp/libxipc/xrl_parser.cc
+index c8d0c2f..3564b8a 100644
+--- a/xorp/libxipc/xrl_parser.cc
++++ b/xorp/libxipc/xrl_parser.cc
+@@ -434,48 +434,42 @@ push_atoms_and_spells(XrlArgs* args,
+ 		      const string& atom_name,
+ 		      const string& atom_type,
+ 		      const string& atom_value) {
+-    try {
+-	XrlAtomType t = XrlAtom::lookup_type(atom_type);
+-	if (atom_value.empty()) {
+-	    if (args)
+-		args->add(XrlAtom(atom_name, t));
+-	    if (spells != 0)
+-		spells->push_back(XrlAtomSpell(atom_name, t, ""));
+-	} else if (atom_value[0] == '$') {
+-	    if (args)
+-		args->add(XrlAtom(atom_name, t));
+-
+-	    if (spells == 0)
+-		throw XrlParseError(input, value_start,
+-				    "Found a spell character without a spell"
+-				    "list to store information.");
+-
+-	    // This v ugly to have here - want to check for duplicate
+-	    // atom name or variable name.
+-	    for (list<XrlAtomSpell>::const_iterator i = spells->begin();
+-		 i != spells->end(); i++) {
+-		if (i->atom_name() == atom_name) {
+-		    string e = c_format("Duplicate atom name - \"%s\".",
+-						  atom_name.c_str());
+-		    throw XrlParseError(input, atom_start, e);
+-		}
+-		if (i->spell() == atom_value) {
+-		    string e = c_format("Duplicate variable name - \"%s\".",
+-						  atom_value.c_str());
+-		    throw XrlParseError(input, value_start, e);
+-		}
++    XrlAtomType t = XrlAtom::lookup_type(atom_type);
++    if (atom_value.empty()) {
++	if (args)
++	    args->add(XrlAtom(atom_name, t));
++	if (spells != 0)
++	    spells->push_back(XrlAtomSpell(atom_name, t, ""));
++    } else if (atom_value[0] == '$') {
++	if (args)
++	    args->add(XrlAtom(atom_name, t));
++
++	if (spells == 0)
++	    throw XrlParseError(input, value_start,
++				"Found a spell character without a spell"
++				"list to store information.");
++
++	// This v ugly to have here - want to check for duplicate
++	// atom name or variable name.
++	for (list<XrlAtomSpell>::const_iterator i = spells->begin();
++	     i != spells->end(); i++) {
++	    if (i->atom_name() == atom_name) {
++		string e = c_format("Duplicate atom name - \"%s\".",
++				    atom_name.c_str());
++		throw XrlParseError(input, atom_start, e);
++	    }
++	    if (i->spell() == atom_value) {
++		string e = c_format("Duplicate variable name - \"%s\".",
++				    atom_value.c_str());
++		throw XrlParseError(input, value_start, e);
+ 	    }
+-	    spells->push_back(XrlAtomSpell(atom_name, t, atom_value));
+-	} else {
+-	    if (args == 0)
+-		throw XrlParseError(input, value_start,
+-				    "Atom cannot be specified here");
+-	    args->add(XrlAtom(atom_name, t, atom_value));
+ 	}
+-    } catch (const XrlArgs::XrlAtomFound& /*xaf*/) {
+-	string e = c_format("Duplicate atom name - \"%s\".",
+-				      atom_name.c_str());
+-	throw XrlParseError(input, atom_start, e);
++	spells->push_back(XrlAtomSpell(atom_name, t, atom_value));
++    } else {
++	if (args == 0)
++	    throw XrlParseError(input, value_start,
++				"Atom cannot be specified here");
++	args->add(XrlAtom(atom_name, t, atom_value));
+     }
+ }
+ 
+diff --git a/xorp/xrl/scripts/tgt-gen b/xorp/xrl/scripts/tgt-gen
+index 2998810..f1261af 100755
+--- a/xorp/xrl/scripts/tgt-gen
++++ b/xorp/xrl/scripts/tgt-gen
+@@ -284,15 +284,11 @@ def target_handler_methods(cls, name, methods):
+ 
+         s += xorp_indent(2) + "XrlArgs out;\n"
+         if m.rargs():
+-            s += "\n        /* Marshall return values */\n        try {\n"
++            s += "\n        /* Marshall return values */\n        \n"
+             for r in m.rargs():
+                 s += xorp_indent(3) + "out.add(\"%s\", *rarg_%s);\n" % \
+                     (r.name(), cpp_name(r.name()))
+             s += \
+-"""        } catch (const XrlArgs::XrlAtomFound& ) {
+-	    XLOG_FATAL("Duplicate atom name"); /* XXX Should never happen */
+-        }
+-
+ """
+         s += "        return c_b->dispatch(e, &out);\n    }\n}\n\n"
+ 
+@@ -428,14 +424,11 @@ def target_handler_methods(cls, name, methods):
+ """
+ 
+         if m.rargs():
+-            s += "\n    /* Marshall return values */\n    try {\n"
++            s += "\n    /* Marshall return values */\n    \n"
+             for r in m.rargs():
+                 s += xorp_indent(2) + "pxa_outputs->add(\"%s\", r_%s);\n" % \
+                     (r.name(), cpp_name(r.name()))
+             s += \
+-"""    } catch (const XrlArgs::XrlAtomFound& ) {
+-	XLOG_FATAL("Duplicate atom name"); /* XXX Should never happen */
+-    }
+ """
+ 
+         s += "    return XrlCmdError::OKAY();\n"
+-- 
+2.7.5
+

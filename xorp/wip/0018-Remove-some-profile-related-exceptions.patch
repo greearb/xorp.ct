@@ -1,0 +1,706 @@
+From 0877bd04309d43b0a9aa08908f4497217dd667c8 Mon Sep 17 00:00:00 2001
+From: Ben Greear <greearb@candelatech.com>
+Date: Fri, 8 Sep 2017 15:22:48 -0700
+Subject: [PATCH 18/33] Remove some profile related exceptions.
+
+Signed-off-by: Ben Greear <greearb@candelatech.com>
+---
+ xorp/bgp/xrl_target.cc             |  56 ++++++-----------
+ xorp/fea/xrl_fea_target.cc         |  40 ++++--------
+ xorp/libxorp/profile.cc            | 124 ++++++++++++++++++++++---------------
+ xorp/libxorp/profile.hh            |  64 +++----------------
+ xorp/libxorp/tests/test_profile.cc |  54 ++--------------
+ xorp/rib/xrl_target.cc             |  41 ++++--------
+ 6 files changed, 133 insertions(+), 246 deletions(-)
+
+diff --git a/xorp/bgp/xrl_target.cc b/xorp/bgp/xrl_target.cc
+index b3579b2..bdc94b3 100644
+--- a/xorp/bgp/xrl_target.cc
++++ b/xorp/bgp/xrl_target.cc
+@@ -832,16 +832,14 @@ XrlBgpTarget::bgp_0_3_trace(const string& tvar,
+     }
+ 
+ #ifndef XORP_DISABLE_PROFILE
+-    try {
+-	if (enable)
+-	    _bgp.profile().enable(tvar);
+-	else
+-	    _bgp.profile().disable(tvar);
+-    } catch(PVariableUnknown& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
+-    } catch(PVariableLocked& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
+-    }
++    bool rv;
++    string e;
++    if (enable)
++	rv = _bgp.profile().enable(tvar, e);
++    else
++	rv = _bgp.profile().disable(tvar, e);
++    if (!rv) {
++	return XrlCmdError::COMMAND_FAILED(e);
+ #endif
+ 
+     return XrlCmdError::OKAY();
+@@ -1323,13 +1321,9 @@ XrlCmdError
+ XrlBgpTarget::profile_0_1_enable(const string& pname)
+ {
+     debug_msg("profile variable %s\n", pname.c_str());
+-    try {
+-	_bgp.profile().enable(pname);
+-    } catch(PVariableUnknown& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
+-    } catch(PVariableLocked& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
+-    }
++    string e;
++    if (!_bgp.profile().enable(pname, e))
++	return XrlCmdError::COMMAND_FAILED(e);
+ 
+     return XrlCmdError::OKAY();
+ }
+@@ -1338,11 +1332,9 @@ XrlCmdError
+ XrlBgpTarget::profile_0_1_disable(const string&	pname)
+ {
+     debug_msg("profile variable %s\n", pname.c_str());
+-    try {
+-	_bgp.profile().disable(pname);
+-    } catch(PVariableUnknown& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
+-    }
++    string e;
++    if (!_bgp.profile().disable(pname, e))
++	return XrlCmdError::COMMAND_FAILED(e);
+ 
+     return XrlCmdError::OKAY();
+ }
+@@ -1355,13 +1347,9 @@ XrlBgpTarget::profile_0_1_get_entries(const string& pname,
+ 	      instance_name.c_str());
+ 
+     // Lock and initialize.
+-    try {
+-	_bgp.profile().lock_log(pname);
+-    } catch(PVariableUnknown& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
+-    } catch(PVariableLocked& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
+-    }
++    string e;
++    if (!_bgp.profile().lock_log(pname, e))
++	return XrlCmdError::COMMAND_FAILED(e);
+ 
+     ProfileUtils::transmit_log(pname,
+ 			       _bgp.get_router(), instance_name,
+@@ -1374,13 +1362,9 @@ XrlCmdError
+ XrlBgpTarget::profile_0_1_clear(const string& pname)
+ {
+     debug_msg("profile variable %s\n", pname.c_str());
+-    try {
+-	_bgp.profile().clear(pname);
+-    } catch(PVariableUnknown& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
+-    } catch(PVariableLocked& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
+-    }
++    string e;
++    if (!_bgp.profile().clear(pname, e);
++	return XrlCmdError::COMMAND_FAILED(e);
+ 
+     return XrlCmdError::OKAY();
+ }
+diff --git a/xorp/fea/xrl_fea_target.cc b/xorp/fea/xrl_fea_target.cc
+index 722c380..aacb7c8 100644
+--- a/xorp/fea/xrl_fea_target.cc
++++ b/xorp/fea/xrl_fea_target.cc
+@@ -4769,15 +4769,9 @@ XrlCmdError
+ XrlFeaTarget::profile_0_1_enable(const string& pname)
+ {
+     debug_msg("enable profile variable %s\n", pname.c_str());
+-
+-    try {
+-	_profile.enable(pname);
+-    } catch(PVariableUnknown& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
+-    } catch(PVariableLocked& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
+-    }
+-
++    string e;
++    if (!_profile.enable(pname, e))
++	return XrlCmdError::COMMAND_FAILED(e);
+     return XrlCmdError::OKAY();
+ }
+ 
+@@ -4786,11 +4780,9 @@ XrlFeaTarget::profile_0_1_disable(const string&	pname)
+ {
+     debug_msg("disable profile variable %s\n", pname.c_str());
+ 
+-    try {
+-	_profile.disable(pname);
+-    } catch(PVariableUnknown& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
+-    }
++    string e;
++    if (!_profile.disable(pname, e))
++	return XrlCmdError::COMMAND_FAILED(e);
+ 
+     return XrlCmdError::OKAY();
+ }
+@@ -4803,13 +4795,9 @@ XrlFeaTarget::profile_0_1_get_entries(const string& pname,
+ 	      instance_name.c_str());
+ 
+     // Lock and initialize.
+-    try {
+-	_profile.lock_log(pname);
+-    } catch(PVariableUnknown& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
+-    } catch(PVariableLocked& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
+-    }
++    string e;
++    if (!_profile.lock_log(pname, e))
++	return XrlCmdError::COMMAND_FAILED(e);
+ 
+     ProfileUtils::transmit_log(pname,
+ 			       dynamic_cast<XrlStdRouter *>(&_xrl_router),
+@@ -4823,13 +4811,9 @@ XrlFeaTarget::profile_0_1_clear(const string& pname)
+ {
+     debug_msg("clear profile variable %s\n", pname.c_str());
+ 
+-    try {
+-	_profile.clear(pname);
+-    } catch(PVariableUnknown& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
+-    } catch(PVariableLocked& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
+-    }
++    string e;
++    if (!_profile.clear(pname, e))
++	return XrlCmdError::COMMAND_FAILED(e);
+ 
+     return XrlCmdError::OKAY();
+ }
+diff --git a/xorp/libxorp/profile.cc b/xorp/libxorp/profile.cc
+index 9a1b7f1..8e3428c 100644
+--- a/xorp/libxorp/profile.cc
++++ b/xorp/libxorp/profile.cc
+@@ -47,56 +47,61 @@ Profile::~Profile()
+ 
+ void
+ Profile::create(const string& pname, const string& comment)
+-    throw(PVariableExists)
+ {
+     // Catch initialization problems.
+-#ifndef XORP_USE_USTL
+-    if (_profiles.count(pname))
+-	xorp_throw(PVariableExists, pname.c_str());
+-#endif
++    if (_profiles.count(pname) != 0)
++	return;
+ 
+     ProfileState *p = new ProfileState(comment, false, false, new logentries);
+     _profiles[pname] = ref_ptr<ProfileState>(p);
+ }
+ 
+-void
+-Profile::log(const string& pname, string comment)
+-    throw(PVariableUnknown,PVariableNotEnabled)
++bool
++Profile::log(const string& pname, string comment, string& e)
+ {
+     profiles::iterator i = _profiles.find(pname);
+ 
+     // Catch any mispelt pnames.
+-    if (i == _profiles.end())
+-	xorp_throw(PVariableUnknown, pname.c_str());
++    if (i == _profiles.end()) {
++	e = "Unknown profile: " + pname;
++	return false;
++    }
+ 
+     // In order to be logging, we must be enabled.
+-    if (!i->second->enabled())
+-	xorp_throw(PVariableNotEnabled, pname.c_str());
++    if (!i->second->enabled()) {
++	e = "Profile is not enabled: " + pname;
++	return false;
++    }
+     
+ #if	0
+     // Make sure that this variable is not locked.
+-    if (!i->second->locked())
+-	xorp_throw(PVariableLocked, pname.c_str());
++    if (!i->second->locked()) {
++	e = "Profile is locked: " + pname;
++	return false;
++    }
+ #endif
+     
+     TimeVal tv;
+     TimerList::system_gettimeofday(&tv);
+     i->second->logptr()->push_back(ProfileLogEntry(tv, comment));
++    return true;
+ }
+ 
+-void
+-Profile::enable(const string& pname) throw(PVariableUnknown,PVariableLocked)
++bool
++Profile::enable(const string& pname, string& e)
+ {
+     profiles::iterator i = _profiles.find(pname);
+ 
+     // Catch any mispelt pnames.
+-    if (i == _profiles.end())
+-	xorp_throw(PVariableUnknown, pname.c_str());
++    if (i == _profiles.end()) {
++	e = "Unknown profile: " + pname;
++	return false;
++    }
+ 
+     // If this profile name is already enabled, get out of here
+     // without updating the counter.
+     if (i->second->enabled())
+-	return;
++	return true;
+ 
+     // Don't allow a locked entry to be enabled.
+     if (i->second->locked())
+@@ -104,37 +109,45 @@ Profile::enable(const string& pname) throw(PVariableUnknown,PVariableLocked)
+     
+     i->second->set_enabled(true);
+     _profile_cnt++;
++    return true;
+ }
+ 
+-void
+-Profile::disable(const string& pname) throw(PVariableUnknown)
++bool
++Profile::disable(const string& pname, string& e)
+ {
+     profiles::iterator i = _profiles.find(pname);
+ 
+     // Catch any mispelt pnames.
+-    if (i == _profiles.end())
+-	xorp_throw(PVariableUnknown, pname.c_str());
++    if (i == _profiles.end()) {
++	e = "Unknown profile: " + pname;
++	return false;
++    }
+ 
+     // If this profile name is already disabled, get out of here
+     // without updating the counter.
+     if (!i->second->enabled())
+-	return;
++	return true;
+     i->second->set_enabled(false);
+     _profile_cnt--;
++    return true;
+ }
+ 
+-void
+-Profile::lock_log(const string& pname) throw(PVariableUnknown,PVariableLocked)
++bool
++Profile::lock_log(const string& pname, string& e)
+ {
+     profiles::iterator i = _profiles.find(pname);
+ 
+     // Catch any mispelt pnames.
+-    if (i == _profiles.end())
+-	xorp_throw(PVariableUnknown, pname.c_str());
++    if (i == _profiles.end()) {
++	e = "Unknown profile: " + pname;
++	return false;
++    }
+ 
+     // Don't allow a locked entry to be locked again.
+-    if (i->second->locked())
+-	xorp_throw(PVariableLocked, pname.c_str());
++    if (i->second->locked()) {
++	e = "Profile is already locked: " + pname;
++	return false;
++    }
+ 
+     // Disable logging.
+     disable(pname);
+@@ -143,21 +156,25 @@ Profile::lock_log(const string& pname) throw(PVariableUnknown,PVariableLocked)
+     i->second->set_locked(true);
+ 
+     i->second->set_iterator(i->second->logptr()->begin());
++    return true;
+ }
+ 
+ bool 
+-Profile::read_log(const string& pname, ProfileLogEntry& entry) 
+-    throw(PVariableUnknown,PVariableNotLocked)
++Profile::read_log(const string& pname, ProfileLogEntry& entry, string& e)
+ {
+     profiles::iterator i = _profiles.find(pname);
+ 
+     // Catch any mispelt pnames.
+-    if (i == _profiles.end())
+-	xorp_throw(PVariableUnknown, pname.c_str());
++    if (i == _profiles.end()) {
++	e = "Unknown profile: " + name;
++	return false;
++    }
+ 
+     // Verify that the log entry is locked
+-    if (!i->second->locked())
+-	xorp_throw(PVariableNotLocked, pname.c_str());
++    if (!i->second->locked()) {
++	e = "Profile is not locked: " + name;
++	return false;
++    }
+ 
+     logentries::iterator li;
+     i->second->get_iterator(li);
+@@ -170,38 +187,47 @@ Profile::read_log(const string& pname, ProfileLogEntry& entry)
+     return true;
+ }
+ 
+-void
+-Profile::release_log(const string& pname) 
+-    throw(PVariableUnknown,PVariableNotLocked)
++bool
++Profile::release_log(const string& pname, string& e)
+ {
+     profiles::iterator i = _profiles.find(pname);
+ 
+     // Catch any mispelt pnames.
+-    if (i == _profiles.end())
+-	xorp_throw(PVariableUnknown, pname.c_str());
++    if (i == _profiles.end()) {
++	e = "Unknown profile: " + name;
++	return false;
++    }
+ 
+     // Verify that the log entry is locked
+-    if (!i->second->locked())
+-	xorp_throw(PVariableNotLocked, pname.c_str());
++    if (!i->second->locked()) {
++	e = "Profile is not locked: " + name;
++	return false;
++    }
+ 
+     // Unlock the entry
+     i->second->set_locked(false);
++    return true;
+ }
+ 
+-void
+-Profile::clear(const string& pname) throw(PVariableUnknown,PVariableLocked)
++bool
++Profile::clear(const string& pname, string& e)
+ {
+     profiles::iterator i = _profiles.find(pname);
+ 
+     // Catch any mispelt pnames.
+-    if (i == _profiles.end())
+-	xorp_throw(PVariableUnknown, pname.c_str());
++    if (i == _profiles.end()) {
++	e = "Unknown profile: " + name;
++	return false;
++    }
+ 
+     // Don't allow a locked entry to be cleared.
+-    if (i->second->locked())
+-	xorp_throw(PVariableLocked, pname.c_str());
++    if (i->second->locked()) {
++	e = "Profile is locked: " + name;
++	return false;
++    }
+ 
+     i->second->logptr()->clear();
++    return true;
+ }
+ 
+ #if 0
+diff --git a/xorp/libxorp/profile.hh b/xorp/libxorp/profile.hh
+index 124464d..8e26377 100644
+--- a/xorp/libxorp/profile.hh
++++ b/xorp/libxorp/profile.hh
+@@ -46,44 +46,6 @@
+  * A helper class used by XORP processes to support profiling.
+  */
+ 
+-class PVariableUnknown : public XorpReasonedException {
+-public:
+-    PVariableUnknown(const char* file, size_t line, const string init_why = "")
+- 	: XorpReasonedException("PVariableUnknown", file, line, init_why)
+-    {}
+-};
+-
+-class PVariableExists : public XorpReasonedException {
+-public:
+-    PVariableExists(const char* file, size_t line, const string init_why = "")
+- 	: XorpReasonedException("PVariableExists", file, line, init_why)
+-    {}
+-};
+-
+-class PVariableNotEnabled : public XorpReasonedException {
+-public:
+-    PVariableNotEnabled(const char* file, size_t line,
+-			const string init_why = "")
+- 	: XorpReasonedException("PVariableNotEnabled", file, line, init_why)
+-    {}
+-};
+-
+-class PVariableLocked : public XorpReasonedException {
+-public:
+-    PVariableLocked(const char* file, size_t line,
+-			const string init_why = "")
+- 	: XorpReasonedException("PVariableLocked", file, line, init_why)
+-    {}
+-};
+-
+-class PVariableNotLocked : public XorpReasonedException {
+-public:
+-    PVariableNotLocked(const char* file, size_t line,
+-			const string init_why = "")
+- 	: XorpReasonedException("PVariableNotLocked", file, line, init_why)
+-    {}
+-};
+-
+ class ProfileLogEntry {
+  public:
+     ProfileLogEntry() {}
+@@ -140,15 +102,14 @@ class Profile {
+     /**
+      * Create a new profile variable.
+      */
+-    void create(const string& pname, const string& comment = "")
+-	throw(PVariableExists);
++    bool create(const string& pname, const string& comment, string& e);
+ 
+     /**
+      * Test for this profile variable being enabled.
+      *
+      * @return true if this profile is enabled.
+      */
+-    bool enabled(const string& pname) throw(PVariableUnknown) {
++    bool enabled(const string& pname) {
+ 	// This is the most frequently called method hence make it
+ 	// inline. As an optimisation if no profiling is enabled don't
+ 	// perform any string maniplulation or lookups.
+@@ -160,7 +121,7 @@ class Profile {
+ 	profiles::iterator i = _profiles.find(pname);
+ 	// Catch any mispelt pnames.
+ 	if (i == _profiles.end())
+-	    xorp_throw(PVariableUnknown, pname.c_str());
++	    return false;
+ 
+ 	return i->second->enabled();
+     }
+@@ -168,28 +129,25 @@ class Profile {
+     /**
+      * Add an entry to the profile log.
+      */
+-    void log(const string& pname, string comment)
+-	throw(PVariableUnknown,PVariableNotEnabled);
++    bool log(const string& pname, string comment, string& e);
+ 
+     /**
+      * Enable tracing.
+      *
+      * @param profile variable.
+      */
+-    void enable(const string& pname)
+-	throw(PVariableUnknown,PVariableLocked);
++    bool enable(const string& pname, string& e);
+     
+     /**
+      * Disable tracing.
+      * @param profile variable.
+      */
+-    void disable(const string& pname) throw(PVariableUnknown);
++    bool disable(const string& pname, string& e);
+ 
+     /**
+      * Lock the log in preparation for reading log entries.
+      */
+-    void lock_log(const string& pname)
+-	throw(PVariableUnknown,PVariableLocked);
++    bool lock_log(const string& pname, string& e);
+ 
+     /**
+      * Read the next log entry;
+@@ -197,19 +155,17 @@ class Profile {
+      * @param entry log entry
+      * @return True a entry has been returned.
+      */
+-    bool read_log(const string& pname, ProfileLogEntry& entry)
+-	throw(PVariableUnknown,PVariableNotLocked);
++    bool read_log(const string& pname, ProfileLogEntry& entry, string& e);
+ 
+     /**
+      * Release the log.
+      */
+-    void release_log(const string& pname)
+-	throw(PVariableUnknown,PVariableNotLocked);
++    bool release_log(const string& pname, string& e);
+ 
+     /**
+      * Clear the profiledata.
+      */
+-    void clear(const string& pname) throw(PVariableUnknown,PVariableLocked);
++    bool clear(const string& pname, string& e);
+ 
+     /**
+      * @return A newline separated list of profiling variables along
+diff --git a/xorp/libxorp/tests/test_profile.cc b/xorp/libxorp/tests/test_profile.cc
+index ba1158b..8c1c421 100644
+--- a/xorp/libxorp/tests/test_profile.cc
++++ b/xorp/libxorp/tests/test_profile.cc
+@@ -47,18 +47,6 @@ test1(TestInfo& info)
+     string ar = "add_route";
+     p.create(ar);
+ 
+-    // It shouldn't be possible to create this variable again.
+-    try {
+-	p.create(ar);
+-	DOUT(info) << "Create variable twice!!! " << ar << endl;
+-	return false;
+-    } catch(PVariableExists& p) {
+-	DOUT(info) << "Exception " << p.str() << endl;
+-    } catch(...) {
+-	DOUT(info) << "Unknown Exception\n";
+-	return false;
+-    }
+-
+     // Enable this variable.
+     // XXX - This should enable global profiling.
+     p.enable(ar);
+@@ -66,19 +54,12 @@ test1(TestInfo& info)
+     // Make sure that this variable is not enabled.
+     string bogus = "bogus";
+     // Test for an unknown variable.
+-    try {
+-	if (p.enabled(bogus)) {
+-	    DOUT(info) << "Testing for a bogus variable succeeded " << bogus
+-		       << endl;
+-	    return false;
+-	}
+-	return false;
+-    } catch(PVariableUnknown& p) {
+-	DOUT(info) << "Exception " << p.str() << endl;
+-    } catch(...) {
+-	DOUT(info) << "Unknown Exception\n";
++    if (p.enabled(bogus)) {
++	DOUT(info) << "Testing for a bogus variable succeeded " << bogus
++		   << endl;
+ 	return false;
+     }
++    return false;
+ 
+     // Disable this variable.
+     // XXX - This should disable global profiling.
+@@ -92,33 +73,6 @@ test1(TestInfo& info)
+ 	return false;
+     }
+ 
+-    // Try and log to a bogus variable.
+-    try {
+-	p.log(bogus, c_format("wow"));
+-	DOUT(info) << "Testing for a bogus variable succeeded " << bogus
+-		   << endl;
+-	return false;
+-    } catch(PVariableUnknown& p) {
+-	DOUT(info) << "Exception " << p.str() << endl;
+-    } catch(...) {
+-	DOUT(info) << "Unknown Exception\n";
+-	return false;
+-    }
+-
+-    // Try and log to a valid variable that is not enabled.
+-    try {
+-	p.log(ar, c_format("wow"));
+-	DOUT(info) << "Logging to a valid disabled variable worked!!! "
+-		   << ar
+-		   << endl;
+-	return false;
+-    } catch(PVariableNotEnabled& p) {
+-	DOUT(info) << "Exception " << p.str() << endl;
+-    } catch(...) {
+-	DOUT(info) << "Unknown Exception\n";
+-	return false;
+-    }
+-
+     // Enable the variable for logging.
+     p.enable(ar);
+ 
+diff --git a/xorp/rib/xrl_target.cc b/xorp/rib/xrl_target.cc
+index 8bf5c45..a380dbf 100644
+--- a/xorp/rib/xrl_target.cc
++++ b/xorp/rib/xrl_target.cc
+@@ -1073,14 +1073,9 @@ XrlCmdError
+ XrlRibTarget::profile_0_1_enable(const string& pname)
+ {
+     debug_msg("enable profile variable %s\n", pname.c_str());
+-
+-    try {
+-	_rib_manager->profile().enable(pname);
+-    } catch(PVariableUnknown& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
+-    } catch(PVariableLocked& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
+-    }
++    string e;
++    if (!_rib_manager->profile().enable(pname, e))
++	return XrlCmdError::COMMAND_FAILED(e);
+ 
+     return XrlCmdError::OKAY();
+ }
+@@ -1089,12 +1084,9 @@ XrlCmdError
+ XrlRibTarget::profile_0_1_disable(const string&	pname)
+ {
+     debug_msg("disable profile variable %s\n", pname.c_str());
+-
+-    try {
+-	_rib_manager->profile().disable(pname);
+-    } catch(PVariableUnknown& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
+-    }
++    string e;
++    if (!_rib_manager->profile().disable(pname, e);
++	return XrlCmdError::COMMAND_FAILED(e);
+ 
+     return XrlCmdError::OKAY();
+ }
+@@ -1108,13 +1100,9 @@ XrlRibTarget::profile_0_1_get_entries(const string& pname,
+ 	      instance_name.c_str());
+ 
+     // Lock and initialize.
+-    try {
+-	_rib_manager->profile().lock_log(pname);
+-    } catch(PVariableUnknown& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
+-    } catch(PVariableLocked& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
+-    }
++    string e;
++    if (!_rib_manager->profile().lock_log(pname, e))
++	return XrlCmdError::COMMAND_FAILED(e);
+ 
+     ProfileUtils::transmit_log(pname,
+ 			       &_rib_manager->xrl_router(), instance_name,
+@@ -1127,14 +1115,9 @@ XrlCmdError
+ XrlRibTarget::profile_0_1_clear(const string& pname)
+ {
+     debug_msg("clear profile variable %s\n", pname.c_str());
+-
+-    try {
+-	_rib_manager->profile().clear(pname);
+-    } catch(PVariableUnknown& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
+-    } catch(PVariableLocked& e) {
+-	return XrlCmdError::COMMAND_FAILED(e.str());
+-    }
++    string e;
++    if (!_rib_manager->profile().clear(pname, e))
++	return XrlCmdError::COMMAND_FAILED(e);
+ 
+     return XrlCmdError::OKAY();
+ }
+-- 
+2.7.5
+

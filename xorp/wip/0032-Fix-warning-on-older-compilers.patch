@@ -1,0 +1,65 @@
+From 3d1fc827e7a11583dbe7405d89cfd8522795ad6b Mon Sep 17 00:00:00 2001
+From: Ben Greear <greearb@candelatech.com>
+Date: Tue, 26 Sep 2017 09:12:40 -0700
+Subject: [PATCH 32/33] Fix warning on older compilers.
+
+And make code a bit more obvious, and fix a memory leak found
+while looking at the code.
+
+Signed-off-by: Ben Greear <greearb@candelatech.com>
+---
+ xorp/bgp/harness/peer.cc | 15 ++++++++-------
+ 1 file changed, 8 insertions(+), 7 deletions(-)
+
+diff --git a/xorp/bgp/harness/peer.cc b/xorp/bgp/harness/peer.cc
+index 4a1854d..6dd0f90 100644
+--- a/xorp/bgp/harness/peer.cc
++++ b/xorp/bgp/harness/peer.cc
+@@ -566,9 +566,9 @@ mrtd_traffic_file_read(FILE *fp, size_t& len)
+ 
+     if(fread(&header, sizeof(header), 1, fp) != 1) {
+ 	if(feof(fp))
+-	    return 0;
++	    return NULL;
+ 	XLOG_WARNING("fread failed:%s", strerror(errno));
+-	return 0;
++	return NULL;
+     }
+ 
+     len = ntohl(header.length) - sizeof(mrt_update);
+@@ -576,18 +576,19 @@ mrtd_traffic_file_read(FILE *fp, size_t& len)
+     mrt_update update;
+     if(fread(&update, sizeof(update), 1, fp) != 1) {
+ 	if(feof(fp))
+-	    return 0;
++	    return NULL;
+ 	XLOG_WARNING("fread failed:%s", strerror(errno));
+-	return 0;
++	return NULL;
+     }
+ 
+     uint8_t *buf = new uint8_t[len];
+ 
+     if(fread(buf, len, 1, fp) != 1) {
++	delete buf;
+ 	if(feof(fp))
+-	    return 0;
++	    return NULL;
+ 	XLOG_WARNING("fread failed:%s", strerror(errno));
+-	return 0;
++	return NULL;
+     }
+ 
+     return buf;
+@@ -785,7 +786,7 @@ Peer::send_dump_callback(const XrlError& error, FILE *fp,
+ 	return;
+     }
+ 
+-    size_t len;
++    size_t len = 0;
+     const uint8_t *buf;
+ 
+     while(0 != (buf = mrtd_traffic_file_read(fp, len))) {
+-- 
+2.7.5
+

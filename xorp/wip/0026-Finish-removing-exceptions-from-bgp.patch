@@ -1,0 +1,570 @@
+From a68cf5d60ae2667f41e79ce85062b31ef69c5d1b Mon Sep 17 00:00:00 2001
+From: Ben Greear <greearb@candelatech.com>
+Date: Fri, 15 Sep 2017 10:09:14 -0700
+Subject: [PATCH 26/33] Finish removing exceptions from bgp.
+
+At least mostly.
+---
+ xorp/bgp/harness/peer.cc      | 69 ++++++++++++++++++++++++++++++-------------
+ xorp/bgp/harness/test_peer.cc | 36 ++++++++--------------
+ xorp/bgp/harness/trie.cc      | 32 +++++++++++++-------
+ xorp/bgp/harness/trie.hh      |  6 ++--
+ xorp/bgp/packet.hh            | 12 ++++----
+ xorp/bgp/path_attribute.cc    |  7 +++++
+ xorp/bgp/socket.cc            | 12 ++++----
+ xorp/bgp/socket.hh            |  4 +--
+ xorp/bgp/update_attrib.cc     |  2 ++
+ 9 files changed, 109 insertions(+), 71 deletions(-)
+
+diff --git a/xorp/bgp/harness/peer.cc b/xorp/bgp/harness/peer.cc
+index 02c78e4..4a1854d 100644
+--- a/xorp/bgp/harness/peer.cc
++++ b/xorp/bgp/harness/peer.cc
+@@ -477,6 +477,8 @@ Peer::send_packet(const string& line, const vector<string>& words)
+     size_t size = words.size();
+     uint32_t word = 3;
+     list<Corrupt> _corrupt;
++    CorruptMessage m;
++
+     if ("corrupt" == words[3]) {
+ 	word += 1;
+ 	// Pairs of offset byte should be in the stream until we reach
+@@ -530,7 +532,8 @@ Peer::send_packet(const string& line, const vector<string>& words)
+ 	TimeVal tv;
+ 	_eventloop->current_time(tv);
+ 
+-	_trie_sent.process_update_packet(tv, buf, len, _peerdata);
++	if (!_trie_sent.process_update_packet(tv, buf, len, _peerdata, m))
++	    return -1;
+     }
+ 
+     _busy++;
+@@ -769,6 +772,7 @@ Peer::send_dump_callback(const XrlError& error, FILE *fp,
+ 			 const size_t packets_to_send,
+ 			 const char *comment)
+ {
++    CorruptMessage m;
+     debug_msg("callback %s %s\n", comment, error.str().c_str());
+     if(XrlError::OKAY() != error) {
+ 	XLOG_WARNING("callback: %s %s",  comment, error.str().c_str());
+@@ -792,7 +796,7 @@ Peer::send_dump_callback(const XrlError& error, FILE *fp,
+ 	    */
+ 	    TimeVal tv;
+ 	    _eventloop->current_time(tv);
+-	    _trie_sent.process_update_packet(tv, buf, len, _peerdata);
++	    _trie_sent.process_update_packet(tv, buf, len, _peerdata, m);
+ 
+ 	    _smcb = callback(this, &Peer::send_dump_callback,
+ 			     fp, 
+@@ -1620,7 +1624,8 @@ Peer::datain(const bool& status, const TimeVal& tv,
+ 	    /*
+ 	    ** Save the update message in the receive trie.
+ 	    */
+-	    _trie_recv.process_update_packet(tv, buf, length, _peerdata);
++	    if (!_trie_recv.process_update_packet(tv, buf, length, _peerdata, m))
++		goto err;
+ 	    check_expect(&pac);
+ 	    break;
+ 	}
+@@ -1841,8 +1846,9 @@ community_interpret(const string& community)
+ const BGPPacket *
+ Peer::packet(const string& line, const vector<string>& words, int index) const
+ {
+-    BGPPacket *pac = 0;
++    BGPPacket *pac = NULL;
+     CorruptMessage m;
++    UpdatePacket *bgpupdate = NULL;
+ 
+     if("notify" == words[index]) {
+ 	switch(words.size() - (index + 1)) {
+@@ -1886,7 +1892,7 @@ Peer::packet(const string& line, const vector<string>& words, int index) const
+ 	    return NULL;
+ 	}
+ #endif
+-	UpdatePacket *bgpupdate = new UpdatePacket();
++	bgpupdate = new UpdatePacket();
+ 	MPReachNLRIAttribute<IPv6> mpipv6_nlri(SAFI_UNICAST);
+ 	MPUNReachNLRIAttribute<IPv6> mpipv6_withdraw(SAFI_UNICAST);
+ 	ClusterListAttribute cl;
+@@ -1904,7 +1910,8 @@ Peer::packet(const string& line, const vector<string>& words, int index) const
+ 		string aspath = words[i+1];
+ 		if ("empty" == aspath)
+ 		    aspath = "";
+-		ASPathAttribute aspa(ASPath(aspath.c_str(), m));
++		ASPath ap(aspath.c_str());
++		ASPathAttribute aspa(&ap);
+ 		if (aspa.invalid())
+ 		    goto err;
+ 		bgpupdate->add_pathatt(aspa);
+@@ -1914,31 +1921,42 @@ Peer::packet(const string& line, const vector<string>& words, int index) const
+ 		string as4path = words[i+1];
+ 		if ("empty" == as4path)
+ 		    as4path = "";
+-		AS4PathAttribute aspa(AS4Path(as4path.c_str()));
++		AS4Path ap(as4path.c_str());
++		AS4PathAttribute aspa(&ap);
+ 		if (aspa.invalid())
+ 		    goto err;
+ 		bgpupdate->add_pathatt(aspa);
+ 		debug_msg("as4path: %s\n", 
+ 			  AS4Path(as4path.c_str()).str().c_str());
+ 	    } else if("nexthop" == words[i]) {
+-		IPv4NextHopAttribute nha(IPv4((const char*)
+-					      (words[i+1].c_str())));
++		IPv4 i4((const char*)(words[i+1].c_str()));
++		IPv4NextHopAttribute nha(i4, m);
++		if (nha.invalid())
++		    goto err;
+ 		bgpupdate->add_pathatt(nha);
+ 	    } else if("nexthop6" == words[i]) {
+-		mpipv6_nlri.set_nexthop(IPv6((const char*)
+-					     (words[i+1].c_str())));
++		IPv6 i6((const char*)(words[i+1].c_str()));
++		if (i6.invalid())
++		    goto err;
++		mpipv6_nlri.set_nexthop(i6);
+ 	    } else if("localpref" == words[i]) {
+ 		LocalPrefAttribute lpa(atoi(words[i+1].c_str()));
++		if (lpa.invalid())
++		    goto err;
+ 		bgpupdate->add_pathatt(lpa);
+ 	    } else if("nlri" == words[i]) {
+ 		BGPUpdateAttrib upa(IPv4Net((const char*)
+ 					    (words[i+1].c_str())));
++		if (upa.invalid())
++		    goto err;
+ 		bgpupdate->add_nlri(upa);
+ 	    } else if("nlri6" == words[i]) {
+ 		mpipv6_nlri.add_nlri(words[i+1].c_str());
+ 	    } else if("withdraw" == words[i]) {
+ 		BGPUpdateAttrib upa(IPv4Net((const char*)
+ 					    (words[i+1].c_str())));
++		if (upa.invalid())
++		    goto err;
+ 		bgpupdate->add_withdrawn(upa);
+ 	    } else if("withdraw6" == words[i]) {
+ 		mpipv6_withdraw.add_withdrawn(IPv6Net(words[i+1].c_str()));
+@@ -1948,22 +1966,30 @@ Peer::packet(const string& line, const vector<string>& words, int index) const
+ 	    } else if("originatorid" == words[i]) {
+ 		OriginatorIDAttribute oid(IPv4((const char *)
+ 						(words[i+1].c_str())));
++		if (oid.invalid())
++		    goto err;
+ 		bgpupdate->add_pathatt(oid);
+ 	    } else if("clusterlist" == words[i]) {
+- 		cl.prepend_cluster_id(IPv4((const char *)
+- 					   (words[i+1].c_str())));
++		IPv4 i4((const char *)(words[i+1].c_str()));
++		if (i4.invalid())
++		    goto err;
++		cl.prepend_cluster_id(i4);
+ 	    } else if("community" == words[i]) {
+ 		community.add_community(community_interpret(words[i+1]));
+ 	    } else if("as4aggregator" == words[i]) {
+ 		IPv4 as4aggid(words[i+1].c_str());
+ 		AsNum as4agg(words[i+2]);
+ 		AS4AggregatorAttribute asaggatt(as4aggid, as4agg);
++		if (asaggatt.invalid())
++		    goto err;
+ 		bgpupdate->add_pathatt(asaggatt);
+ 		debug_msg("as4aggregator: %s %s\n", 
+ 			  as4aggid.str().c_str(), as4agg.str().c_str());
+ 		i++;
+ 	    } else if("pathattr" == words[i]) {
+ 		AnyAttribute aa(words[i+1].c_str());
++		if (aa.invalid())
++		    goto err;
+ 		bgpupdate->add_pathatt(aa);
+ 	    } else {
+ 		XLOG_ERROR("Illegal argument to update: <%s>\n[%s]",
+@@ -1988,6 +2014,7 @@ Peer::packet(const string& line, const vector<string>& words, int index) const
+ 	}
+ 
+ 	pac = bgpupdate;
++	bgpupdate = NULL;
+     } else if("open" == words[index]) {
+ 	size_t size = words.size();
+ 	if(0 != ((size - (index + 1)) % 2)) {
+@@ -2068,15 +2095,17 @@ Peer::packet(const string& line, const vector<string>& words, int index) const
+ 	return NULL;
+     }
+ 
+-    if (pac->invalid()) {
+-	XLOG_ERROR("Unable to construct packet "
+-		   "%s\n[%s])", c.why().c_str(),
+-		   line.c_str());
+-	delete pac;
+-	return NULL;
+-    }
++    if (pac->invalid())
++	goto err;
+ 	
+     debug_msg("%s\n", pac->str().c_str());
+   
+     return pac;
++
++  err:
++    XLOG_ERROR("Unable to construct packet [%s]\n", m.get_msg().c_str());
++    delete pac;
++    if (bgpupdate && (bgpupdate != pac))
++	delete bgpupdate;
++    return NULL;
+ }
+diff --git a/xorp/bgp/harness/test_peer.cc b/xorp/bgp/harness/test_peer.cc
+index a625f64..5ba1cf4 100644
+--- a/xorp/bgp/harness/test_peer.cc
++++ b/xorp/bgp/harness/test_peer.cc
+@@ -365,10 +365,7 @@ TestPeer::connect(const string& host, const uint32_t& port,
+ 
+     struct sockaddr_storage peer;
+     size_t len = sizeof(peer);
+-    try {
+-	Socket::init_sockaddr(host, port, peer, len);
+-    } catch(UnresolvableHost e) {
+-	error_string = e.why();
++    if (!Socket::init_sockaddr(host, port, peer, len, error_string)) {
+ 	return false;
+     }
+ 
+@@ -434,10 +431,7 @@ TestPeer::listen(const string& host, const uint32_t& port,
+ 
+     struct sockaddr_storage local;
+     size_t len = sizeof(local);
+-    try {
+-	Socket::init_sockaddr(host, port, local, len);
+-    } catch(UnresolvableHost e) {
+-	error_string = e.why();
++    if (!Socket::init_sockaddr(host, port, local, len, error_string)) {
+ 	return false;
+     }
+ 
+@@ -492,10 +486,7 @@ TestPeer::bind(const string& host, const uint32_t& port,
+ 
+     struct sockaddr_storage local;
+     size_t len = sizeof(local);
+-    try {
+-	Socket::init_sockaddr(host, port, local, len);
+-    } catch(UnresolvableHost e) {
+-	error_string = e.why();
++    if (!Socket::init_sockaddr(host, port, local, len, error_string)) {
+ 	return false;
+     }
+ 
+@@ -570,8 +561,10 @@ TestPeer::send_complete(AsyncFileWriter::Event ev, const uint8_t *buf,
+ 	debug_msg("event: error\n");
+ 	/* Don't free the message here we'll get it in the flush */
+ 	XLOG_ERROR("Writing buffer failed: %s",  strerror(errno));
++	break;
+     case AsyncFileOperator::END_OF_FILE:
+ 	XLOG_ERROR("End of File: %s",  strerror(errno));
++	break;
+     case AsyncFileOperator::WOULDBLOCK:
+ 	// do nothing
+ 	;
+@@ -947,20 +940,15 @@ main(int argc, char **argv)
+ 	}
+     }
+ 
+-    try {
+-	EventLoop eventloop;
+-	XrlStdRouter router(eventloop, server, finder_host.c_str());
+-	TestPeer test_peer(eventloop, router, server, verbose);
+-	XrlTestPeerTarget xrl_target(&router, test_peer, trace);
++    EventLoop eventloop;
++    XrlStdRouter router(eventloop, server, finder_host.c_str());
++    TestPeer test_peer(eventloop, router, server, verbose);
++    XrlTestPeerTarget xrl_target(&router, test_peer, trace);
+ 
+-	wait_until_xrl_router_is_ready(eventloop, router);
+-
+-	while(!test_peer.done()) {
+-	    eventloop.run();
+-	}
++    wait_until_xrl_router_is_ready(eventloop, router);
+ 
+-    } catch(...) {
+-	xorp_catch_standard_exceptions();
++    while(!test_peer.done()) {
++	eventloop.run();
+     }
+ 
+     //
+diff --git a/xorp/bgp/harness/trie.cc b/xorp/bgp/harness/trie.cc
+index 8ac95c1..5525af3 100644
+--- a/xorp/bgp/harness/trie.cc
++++ b/xorp/bgp/harness/trie.cc
+@@ -84,6 +84,7 @@ Trie::lookup(const IPv6Net& n) const
+ {
+     TriePayload payload = _head_ipv6.find(n);
+     const UpdatePacket *update = payload.get();
++    CorruptMessage m;
+ 
+     if(0 == update)
+ 	return 0;
+@@ -95,7 +96,7 @@ Trie::lookup(const IPv6Net& n) const
+     /*
+     ** Look for a multiprotocol path attribute.
+     */
+-    const MPReachNLRIAttribute<IPv6> *mpreach = 0;
++    const MPReachNLRIAttribute<IPv6> *mpreach = NULL;
+ #if 0
+     list <PathAttribute*>::const_iterator pai;
+     for (pai = update->pa_list().begin(); pai != update->pa_list().end();
+@@ -109,9 +110,9 @@ Trie::lookup(const IPv6Net& n) const
+ 	}
+     }
+ #endif
+-    mpreach = update->mpreach<IPv6>(SAFI_UNICAST);
++    mpreach = update->mpreach<IPv6>(SAFI_UNICAST, m);
+     if (mpreach == 0)
+-	mpreach = update->mpreach<IPv6>(SAFI_MULTICAST);
++	mpreach = update->mpreach<IPv6>(SAFI_MULTICAST, m);
+ 
+     if(0 == mpreach)
+ 	XLOG_FATAL("If we found the packet in the trie"
+@@ -135,13 +136,15 @@ Trie::lookup(const IPv6Net& n) const
+     return 0;
+ }
+ 
+-void
++bool
+ Trie::process_update_packet(const TimeVal& tv, const uint8_t *buf, size_t len,
+-			    const BGPPeerData *peerdata)
++			    const BGPPeerData *peerdata, CorruptMessage& m)
+ {
+     _update_cnt++;
+ 
+-    TriePayload payload(tv, buf, len, peerdata, _first, _last);
++    TriePayload payload(tv, buf, len, peerdata, _first, _last, m);
++    if (payload.invalid())
++	return false;
+     const UpdatePacket *p = payload.get();
+ 
+     debug_msg("process update packet:\n%s\n", p->str().c_str());
+@@ -166,12 +169,17 @@ Trie::process_update_packet(const TimeVal& tv, const uint8_t *buf, size_t len,
+ 	}
+     }
+ #endif
+-    mpreach = p->mpreach<IPv6>(SAFI_UNICAST);
++    mpreach = p->mpreach<IPv6>(SAFI_UNICAST, m);
+     if (!mpreach)
+-	mpreach = p->mpreach<IPv6>(SAFI_MULTICAST);
+-    mpunreach = p->mpunreach<IPv6>(SAFI_UNICAST);
++	mpreach = p->mpreach<IPv6>(SAFI_MULTICAST, m);
++    mpunreach = p->mpunreach<IPv6>(SAFI_UNICAST, m);
+     if (!mpunreach)
+-	mpunreach = p->mpunreach<IPv6>(SAFI_MULTICAST);
++	mpunreach = p->mpunreach<IPv6>(SAFI_MULTICAST, m);
++
++    if ((mpreach && mpreach->invalid()) ||
++	(mpunreach && mpunreach->invalid())) {
++	return false;
++    }
+ 
+     /*
+     ** IPv4 Withdraws
+@@ -211,6 +219,7 @@ Trie::process_update_packet(const TimeVal& tv, const uint8_t *buf, size_t len,
+ 	    ni6 != mpreach->nlri_list().end(); ni6++)
+ 	    add(*ni6, payload);
+     }
++    return true;
+ }
+ 
+ void
+@@ -238,6 +247,7 @@ Trie::replay_walk(const ReplayWalker uw, const BGPPeerData *peerdata) const
+     Trie trie;
+     trie.set_warning(false);
+     uint32_t changes = 0;
++    CorruptMessage m;
+ 
+     for(const TrieData *p = _first; p; p = p->next()) {
+ 	changes = trie.changes();
+@@ -246,7 +256,7 @@ Trie::replay_walk(const ReplayWalker uw, const BGPPeerData *peerdata) const
+ 	size_t len = BGPPacket::MAXPACKETSIZE;
+ 	debug_msg("Trie::replay_walk\n");
+ 	packet->encode(data, len, peerdata);
+-	trie.process_update_packet(p->tv(), data, len, peerdata);
++	trie.process_update_packet(p->tv(), data, len, peerdata, m);
+ 	if(trie.changes() != changes)
+ 	    uw->dispatch(p->data(), p->tv());
+     }
+diff --git a/xorp/bgp/harness/trie.hh b/xorp/bgp/harness/trie.hh
+index 0d867fd..996f001 100644
+--- a/xorp/bgp/harness/trie.hh
++++ b/xorp/bgp/harness/trie.hh
+@@ -17,7 +17,6 @@
+ // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+ // http://xorp.net
+ 
+-// $XORP: xorp/bgp/harness/trie.hh,v 1.19 2008/10/02 21:56:27 bms Exp $
+ 
+ #ifndef __BGP_HARNESS_TRIE_HH__
+ #define __BGP_HARNESS_TRIE_HH__
+@@ -28,6 +27,7 @@
+ #include "bgp/packet.hh"
+ #include "trie_payload.hh"
+ #include "real_trie.hh"
++
+ class BGPPeerData;
+ 
+ /**
+@@ -52,8 +52,8 @@ public:
+     const UpdatePacket *lookup(const string& net) const;
+     const UpdatePacket *lookup(const IPv4Net& net) const;
+     const UpdatePacket *lookup(const IPv6Net& net) const;
+-    void process_update_packet(const TimeVal& tv, const uint8_t *buf,
+-			       size_t len, const BGPPeerData *peerdata);
++    bool process_update_packet(const TimeVal& tv, const uint8_t *buf,
++			       size_t len, const BGPPeerData *peerdata, CorruptMessage& m);
+ 
+     typedef RealTrie<IPv4>::TreeWalker TreeWalker_ipv4;
+     typedef RealTrie<IPv6>::TreeWalker TreeWalker_ipv6;
+diff --git a/xorp/bgp/packet.hh b/xorp/bgp/packet.hh
+index 8250ae5..1885747 100644
+--- a/xorp/bgp/packet.hh
++++ b/xorp/bgp/packet.hh
+@@ -219,8 +219,8 @@ public:
+     FPAList4Ref& pa_list() 	                        { return  _pa_list; }
+     const BGPUpdateAttribList& nlri_list() const	{ return _nlri_list; }
+ 
+-    template <typename A> const MPReachNLRIAttribute<A> *mpreach(Safi) const;
+-    template <typename A> const MPUNReachNLRIAttribute<A> *mpunreach(Safi) const;
++    template <typename A> const MPReachNLRIAttribute<A> *mpreach(Safi, CorruptMessage& m) const;
++    template <typename A> const MPUNReachNLRIAttribute<A> *mpunreach(Safi, CorruptMessage& m) const;
+ 
+     bool encode(uint8_t *buf, size_t& len, const BGPPeerData *peerdata) const;
+ 
+@@ -241,21 +241,21 @@ private:
+ 
+ template <typename A> 
+ const MPReachNLRIAttribute<A> *
+-UpdatePacket::mpreach(Safi safi) const
++UpdatePacket::mpreach(Safi safi, CorruptMessage& m) const
+ {
+     XLOG_ASSERT(!(A::ip_version() == 4 && SAFI_UNICAST == safi));
+     FastPathAttributeList<IPv4>& fpalist = *_pa_list;
+-    MPReachNLRIAttribute<A>* mpreach = fpalist.template mpreach<A>(safi);
++    MPReachNLRIAttribute<A>* mpreach = fpalist.template mpreach<A>(safi, m);
+     return mpreach;
+ }
+ 
+ template <typename A> 
+ const MPUNReachNLRIAttribute<A> *
+-UpdatePacket::mpunreach(Safi safi) const
++UpdatePacket::mpunreach(Safi safi, CorruptMessage& m) const
+ {
+     XLOG_ASSERT(!(A::ip_version() == 4 && SAFI_UNICAST == safi));
+     FastPathAttributeList<IPv4>& fpalist = *_pa_list;
+-    MPUNReachNLRIAttribute<A>* mpunreach = fpalist.template mpunreach<A>(safi);
++    MPUNReachNLRIAttribute<A>* mpunreach = fpalist.template mpunreach<A>(safi, m);
+     return mpunreach;
+ }
+ 
+diff --git a/xorp/bgp/path_attribute.cc b/xorp/bgp/path_attribute.cc
+index 6f025c9..bb5e08f 100644
+--- a/xorp/bgp/path_attribute.cc
++++ b/xorp/bgp/path_attribute.cc
+@@ -590,6 +590,8 @@ AS4AggregatorAttribute::AS4AggregatorAttribute(const IPv4& speaker,
+ 	: PathAttribute((Flags)(Optional|Transitive), AS4_AGGREGATOR),
+ 		_speaker(speaker), _as(as)            
+ {
++    if (speaker.invalid())
++	set_invalid(true);
+ }
+ 
+ PathAttribute *
+@@ -610,6 +612,8 @@ AS4AggregatorAttribute::AS4AggregatorAttribute(const uint8_t* d, CorruptMessage&
+     d = payload(d);
+     _as = AsNum(d, true); //force interpretation as a 4-byte quantity
+     _speaker = IPv4(d+4);
++    if (_speaker.invalid())
++	set_invalid(true);
+ }
+ 
+ bool
+@@ -742,6 +746,8 @@ CommunityAttribute::contains(uint32_t community) const
+ OriginatorIDAttribute::OriginatorIDAttribute(const IPv4 originator_id)
+ 	: PathAttribute(Optional, ORIGINATOR_ID), _originator_id(originator_id)
+ {
++    if (originator_id.invalid())
++	set_invalid(true);
+ }
+ 
+ PathAttribute *
+@@ -759,6 +765,7 @@ OriginatorIDAttribute::OriginatorIDAttribute(const uint8_t* d, CorruptMessage& m
+ 	INVALID_BGP(UPDATEMSGERR, INVALNHATTR, "Bad size in OriginatorIDAttribute");
+ 
+     _originator_id.copy_in(payload(d));
++    set_invalid(_originator_id.invalid());
+ }
+ 
+ bool
+diff --git a/xorp/bgp/socket.cc b/xorp/bgp/socket.cc
+index 9eef89c..b96887d 100644
+--- a/xorp/bgp/socket.cc
++++ b/xorp/bgp/socket.cc
+@@ -109,9 +109,9 @@ Socket::create_socket(const struct sockaddr *sin, int is_blocking)
+     debug_msg("BGPSocket socket created (sock - %s)\n", _s.str().c_str());
+ }
+ 
+-void
++bool
+ Socket::init_sockaddr(string addr, uint16_t local_port,
+-		      struct sockaddr_storage& ss, size_t& len)
++		      struct sockaddr_storage& ss, size_t& len, string& err)
+ {
+     debug_msg("addr %s port %u len = %u\n", addr.c_str(),
+ 	      XORP_UINT_CAST(local_port), XORP_UINT_CAST(len));
+@@ -130,9 +130,10 @@ Socket::init_sockaddr(string addr, uint16_t local_port,
+     hints.ai_socktype = SOCK_STREAM;
+     // addr must be numeric so this can't fail.
+     if ((error = getaddrinfo(addr.c_str(), port.c_str(), &hints, &res0))) {
+-	XLOG_FATAL("getaddrinfo(%s,%s,...) failed: %s", addr.c_str(),
+-		   port.c_str(),
+-		   gai_strerror(error));
++	err += c_format("getaddrinfo(%s,%s,...) failed: %s", addr.c_str(),
++			port.c_str(),
++			gai_strerror(error));
++	return false; /* I guess we do not need to free addr info in this case??? --Ben */
+     }
+ 
+     XLOG_ASSERT(res0->ai_addrlen <= sizeof(ss));
+@@ -141,6 +142,7 @@ Socket::init_sockaddr(string addr, uint16_t local_port,
+     len = res0->ai_addrlen;
+ 
+     freeaddrinfo(res0);
++    return true;
+ }	
+ 
+ /* **************** BGPSocket - PRIVATE METHODS *********************** */
+diff --git a/xorp/bgp/socket.hh b/xorp/bgp/socket.hh
+index 417c1d0..19e8867 100644
+--- a/xorp/bgp/socket.hh
++++ b/xorp/bgp/socket.hh
+@@ -67,8 +67,8 @@ public:
+      * no longer used by this class. Don't remove it as the test code
+      * uses it.
+      */
+-    static void init_sockaddr(string addr, uint16_t local_port,
+-			      struct sockaddr_storage& ss, size_t& len);
++    static bool init_sockaddr(string addr, uint16_t local_port,
++			      struct sockaddr_storage& ss, size_t& len, string& err);
+ 
+     //    void set_eventloop(EventLoop *evt) {_eventloop = evt;}
+     EventLoop& eventloop() {return _eventloop;}
+diff --git a/xorp/bgp/update_attrib.cc b/xorp/bgp/update_attrib.cc
+index dc96f2c..a48082a 100644
+--- a/xorp/bgp/update_attrib.cc
++++ b/xorp/bgp/update_attrib.cc
+@@ -54,6 +54,8 @@ BGPUpdateAttrib::BGPUpdateAttrib(const uint8_t *d)
+     // Set the address
+     IPv4Net& net = *this;
+     net = IPv4Net(IPv4(a.a32), plen);
++    if (net.invalid())
++	set_invalid(true);
+ }
+ 
+ void
+-- 
+2.7.5
+

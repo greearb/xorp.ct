@@ -1,0 +1,142 @@
+From 55420f5d2f1831eaffc7c58455a903798367392c Mon Sep 17 00:00:00 2001
+From: Ben Greear <greearb@candelatech.com>
+Date: Fri, 8 Sep 2017 12:45:37 -0700
+Subject: [PATCH 14/33] libxipc:  Cleanup from previous exception-removal
+ patches.
+
+---
+ xorp/libxipc/finder_msgs.cc |  4 ++--
+ xorp/libxipc/xrl.hh         |  2 +-
+ xorp/libxipc/xrl_atom.cc    | 19 ++++++-------------
+ xorp/libxipc/xrl_atom.hh    |  4 ++--
+ 4 files changed, 11 insertions(+), 18 deletions(-)
+
+diff --git a/xorp/libxipc/finder_msgs.cc b/xorp/libxipc/finder_msgs.cc
+index f5cb5ab..bbc0e66 100644
+--- a/xorp/libxipc/finder_msgs.cc
++++ b/xorp/libxipc/finder_msgs.cc
+@@ -182,13 +182,13 @@ ParsedFinderMessageBase::~ParsedFinderMessageBase()
+ uint32_t FinderXrlMessage::c_seqno = 1001;
+ 
+ FinderXrlMessage::FinderXrlMessage(const Xrl& xrl)
+-	: FinderMessageBase(c_seqno, c_type), _seqno(c_seqno++), _invalid(false)
++	: FinderMessageBase(c_seqno, c_type), _seqno(c_seqno++)
+ {
+     _rendered += c_format(c_msg_template, xrl.str().c_str());
+ }
+ 
+ ParsedFinderXrlMessage::ParsedFinderXrlMessage(const char* data)
+-	: ParsedFinderMessageBase(data, FinderXrlMessage::c_type), _invalid(false)
++	: ParsedFinderMessageBase(data, FinderXrlMessage::c_type)
+ {
+     _xrl = new Xrl(data + bytes_parsed());
+ }
+diff --git a/xorp/libxipc/xrl.hh b/xorp/libxipc/xrl.hh
+index 4d22daa..4467f53 100644
+--- a/xorp/libxipc/xrl.hh
++++ b/xorp/libxipc/xrl.hh
+@@ -191,7 +191,6 @@ private:
+     string		_protocol;
+     string		_target;
+     string		_command;
+-    bool _invalid;
+ 
+     // XXX we got a const problem.  Factor out all cached stuff into a struct
+     // and make that mutable.
+@@ -205,6 +204,7 @@ private:
+     mutable ref_ptr<XrlPFSender> _resolved_sender; // XXX ditto
+ 
+     static const string _finder_protocol;
++    bool _invalid;
+ };
+ 
+ typedef Xrl XrlTemplate;
+diff --git a/xorp/libxipc/xrl_atom.cc b/xorp/libxipc/xrl_atom.cc
+index 55ce985..4f5d5aa 100644
+--- a/xorp/libxipc/xrl_atom.cc
++++ b/xorp/libxipc/xrl_atom.cc
+@@ -141,7 +141,7 @@ resolve_xrlatom_name(const char* name)
+ 
+ // ----------------------------------------------------------------------------
+ 
+-ssize_t
++void
+ XrlAtom::data_from_c_str(const char* c_str)
+ {
+     _invalid = false;
+@@ -155,14 +155,14 @@ XrlAtom::data_from_c_str(const char* c_str)
+ 	    return;
+ 	}
+ 	_have_data = true;
+-	return -1;
++	return;
+     }
+ 
+     string decoded;
+     ssize_t bad_pos = xrlatom_decode_value(c_str, strlen(c_str), decoded);
+     if (bad_pos >= 0) {
+ 	_invalid = true;
+-	return;
++	return -1;
+     }
+     c_str = decoded.c_str();
+     _have_data = true;
+@@ -547,10 +547,7 @@ XrlAtom::XrlAtom(const char* serialized)
+ 	}
+ 	start = sep + TOKEN_BYTES(XrlToken::ARG_TV_SEP) - 1;
+ 	// Get Data
+-	ssize_t bad_pos = data_from_c_str(start);
+-	if (bad_pos >= 0) {
+-	    _invalid = true;
+-	}
++	data_from_c_str(start);
+     }
+ }
+ 
+@@ -562,9 +559,7 @@ XrlAtom::XrlAtom(const string& name, XrlAtomType t,
+       _has_fake_args(false)
+ {
+     set_name(name);
+-    ssize_t bad_pos = data_from_c_str(serialized_data.c_str());
+-    if (bad_pos >= 0)
+-	_invalid = true;
++    data_from_c_str(serialized_data.c_str());
+ }
+ 
+ XrlAtom::XrlAtom(const char* name, XrlAtomType t,
+@@ -575,9 +570,7 @@ XrlAtom::XrlAtom(const char* name, XrlAtomType t,
+       _has_fake_args(false)
+ {
+     set_name(name);
+-    ssize_t bad_pos = data_from_c_str(serialized_data.c_str());
+-    if (bad_pos >= 0)
+-	_invalid = true;
++    data_from_c_str(serialized_data.c_str());
+ }
+ 
+ const string
+diff --git a/xorp/libxipc/xrl_atom.hh b/xorp/libxipc/xrl_atom.hh
+index 4f1267f..8285107 100644
+--- a/xorp/libxipc/xrl_atom.hh
++++ b/xorp/libxipc/xrl_atom.hh
+@@ -88,7 +88,7 @@ public:
+ class XrlAtom : public XrlAtomBase {
+ public:
+     XrlAtom() : _type(xrlatom_no_type), _have_data(false), _own(true), _has_fake_args(false) {}
+-    ~XrlAtom();
++    virtual ~XrlAtom();
+ 
+     // type but no data constructors
+     XrlAtom(XrlAtomType t)
+@@ -414,7 +414,7 @@ private:
+ 
+     void set_name(const char *n);
+     static XrlAtomType resolve_type_c_str(const char*);
+-    ssize_t data_from_c_str(const char* c_str);
++    void data_from_c_str(const char* c_str);
+ 
+     size_t pack_name(uint8_t* buffer) const;
+     size_t pack_boolean(uint8_t* buffer) const;
+-- 
+2.7.5
+
