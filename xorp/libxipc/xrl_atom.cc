@@ -113,21 +113,29 @@ resolve_xrlatom_name(const char* name)
     for (XrlAtomType t = xrlatom_start; t <= xrlatom_end;
 	 t = XrlAtomType(t + 1)) {
 	switch (t) {
-#define CHECK_NAME(x) case (x) : if (strcmp(name, x##_name) == 0) return x;
-	    CHECK_NAME(xrlatom_int32);		/* FALLTHRU */
-	    CHECK_NAME(xrlatom_uint32);		/* FALLTHRU */
-	    CHECK_NAME(xrlatom_ipv4);		/* FALLTHRU */
-	    CHECK_NAME(xrlatom_ipv4net);	/* FALLTHRU */
-	    CHECK_NAME(xrlatom_ipv6);		/* FALLTHRU */
-	    CHECK_NAME(xrlatom_ipv6net);	/* FALLTHRU */
-	    CHECK_NAME(xrlatom_mac);		/* FALLTHRU */
-	    CHECK_NAME(xrlatom_text);		/* FALLTHRU */
-	    CHECK_NAME(xrlatom_list);		/* FALLTHRU */
-	    CHECK_NAME(xrlatom_boolean);	/* FALLTHRU */
-	    CHECK_NAME(xrlatom_binary);		/* FALLTHRU */
-	    CHECK_NAME(xrlatom_int64);		/* FALLTHRU */
-	    CHECK_NAME(xrlatom_uint64);		/* FALLTHRU */
-	    CHECK_NAME(xrlatom_fp64);		/* FALLTHRU */
+#if defined (__has_cpp_attribute)
+  #if __has_cpp_attribute(fallthrough)
+     #define CHECK_NAME(x) case (x) : if (strcmp(name, x##_name) == 0) return x; __attribute__ ((fallthrough));
+  #else
+    #define CHECK_NAME(x) case (x) : if (strcmp(name, x##_name) == 0) return x;
+  #endif
+#else
+  #define CHECK_NAME(x) case (x) : if (strcmp(name, x##_name) == 0) return x;
+#endif
+	    CHECK_NAME(xrlatom_int32);		/* Fall through */
+	    CHECK_NAME(xrlatom_uint32);		/* Fall Through */
+	    CHECK_NAME(xrlatom_ipv4);		/* Fall Through */
+	    CHECK_NAME(xrlatom_ipv4net);	/* Fall Through */
+	    CHECK_NAME(xrlatom_ipv6);		/* Fall Through */
+	    CHECK_NAME(xrlatom_ipv6net);	/* Fall Through */
+	    CHECK_NAME(xrlatom_mac);		/* Fall Through */
+	    CHECK_NAME(xrlatom_text);		/* Fall Through */
+	    CHECK_NAME(xrlatom_list);		/* Fall Through */
+	    CHECK_NAME(xrlatom_boolean);	/* Fall Through */
+	    CHECK_NAME(xrlatom_binary);		/* Fall Through */
+	    CHECK_NAME(xrlatom_int64);		/* Fall Through */
+	    CHECK_NAME(xrlatom_uint64);		/* Fall Through */
+	    CHECK_NAME(xrlatom_fp64);		/* Fall Through */
 	    // ... Your type here ...
 	case xrlatom_no_type:
 	    break;

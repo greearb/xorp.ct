@@ -165,6 +165,7 @@ string NlmUtils::nlm_print_msg(vector<uint8_t>& buffer) {
 		oss << " metric: " << extract_host_int(p);
 	    }
 	    oss << endl;
+	    break;
 	}
 
 	default:

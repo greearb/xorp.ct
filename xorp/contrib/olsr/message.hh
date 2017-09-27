@@ -279,11 +279,11 @@ private:
 class LinkAddrInfo {
 public:
     explicit LinkAddrInfo(const bool has_lq)
-     : _has_etx(has_lq)
+	    : _has_etx(has_lq), _near_etx(0), _far_etx(0)
     {}
 
     explicit LinkAddrInfo(const IPv4& addr)
-     : _has_etx(false), _remote_addr(addr)
+	    : _has_etx(false), _remote_addr(addr), _near_etx(0), _far_etx(0)
     {}
 
     explicit LinkAddrInfo(const IPv4& addr,

@@ -2975,17 +2975,6 @@ index a625f64..5ba1cf4 100644
  	return false;
      }
  
-@@ -570,8 +561,10 @@ TestPeer::send_complete(AsyncFileWriter::Event ev, const uint8_t *buf,
- 	debug_msg("event: error\n");
- 	/* Don't free the message here we'll get it in the flush */
- 	XLOG_ERROR("Writing buffer failed: %s",  strerror(errno));
-+	break;
-     case AsyncFileOperator::END_OF_FILE:
- 	XLOG_ERROR("End of File: %s",  strerror(errno));
-+	break;
-     case AsyncFileOperator::WOULDBLOCK:
- 	// do nothing
- 	;
 @@ -947,20 +940,15 @@ main(int argc, char **argv)
  	}
      }
@@ -6321,25 +6310,6 @@ index 495d0c0..2f546b8 100644
      }
  
      _out_total_messages++;
-@@ -434,7 +435,7 @@ BGPPeer::send_message_complete(SocketClient::Event ev, const uint8_t *buf)
- 		_handler->output_no_longer_busy();
- 	}
- 	TIMESPENT_CHECK();
--	/*drop through to next case*/
-+	/* Fall through */
-     case SocketClient::FLUSHING:
- 	debug_msg("event: flushing\n");
- 	debug_msg("Freeing Buffer for sent packet: %p\n", buf);
-@@ -587,7 +588,8 @@ BGPPeer::event_start()			// EVENTBGPSTART
-     case STATESTOPPED:
- 	flush_transmit_queue();		// ensure callback can't happen
- 	set_state(STATEIDLE, false);// go through STATEIDLE to clear resources
--	// fallthrough now to process the start event
-+	/* fall through to process the start event*/
-+	/* fall through */
-     case STATEIDLE:
- 	// Initalise resources
- 	start_connect_retry_timer();
 @@ -653,6 +655,7 @@ void
  BGPPeer::event_open()	// EVENTBGPTRANOPEN
  { 
@@ -11208,20 +11178,6 @@ index dd67290..ba3ffa8 100644
      uint8_t	_linkcode;
  };
  
-@@ -279,11 +262,11 @@ private:
- class LinkAddrInfo {
- public:
-     explicit LinkAddrInfo(const bool has_lq)
--     : _has_etx(has_lq)
-+	    : _has_etx(has_lq), _near_etx(0), _far_etx(0)
-     {}
- 
-     explicit LinkAddrInfo(const IPv4& addr)
--     : _has_etx(false), _remote_addr(addr)
-+	    : _has_etx(false), _remote_addr(addr), _near_etx(0), _far_etx(0)
-     {}
- 
-     explicit LinkAddrInfo(const IPv4& addr,
 @@ -342,7 +325,7 @@ public:
  	{ this->set_type(OlsrTypes::HELLO_MESSAGE); }
      ~HelloMessage() {}
@@ -15440,18 +15396,6 @@ index 0500034..5228b9d 100644
      }
  
      return XrlCmdError::OKAY();
-diff --git a/xorp/fea/data_plane/control_socket/netlink_socket_utilities.cc b/xorp/fea/data_plane/control_socket/netlink_socket_utilities.cc
-index 56f48be..daf74a1 100644
---- a/xorp/fea/data_plane/control_socket/netlink_socket_utilities.cc
-+++ b/xorp/fea/data_plane/control_socket/netlink_socket_utilities.cc
-@@ -165,6 +165,7 @@ string NlmUtils::nlm_print_msg(vector<uint8_t>& buffer) {
- 		oss << " metric: " << extract_host_int(p);
- 	    }
- 	    oss << endl;
-+	    break;
- 	}
- 
- 	default:
 diff --git a/xorp/fea/fibconfig.cc b/xorp/fea/fibconfig.cc
 index 1e0bac8..1297ae8 100644
 --- a/xorp/fea/fibconfig.cc
@@ -19097,51 +19041,6 @@ index e8a892b..e94d975 100644
  static inline void
  do_pack_uint32(const uint32_t u32val, uint8_t* buffer)
  {
-@@ -113,21 +115,29 @@ resolve_xrlatom_name(const char* name)
-     for (XrlAtomType t = xrlatom_start; t <= xrlatom_end;
- 	 t = XrlAtomType(t + 1)) {
- 	switch (t) {
--#define CHECK_NAME(x) case (x) : if (strcmp(name, x##_name) == 0) return x;
--	    CHECK_NAME(xrlatom_int32);		/* FALLTHRU */
--	    CHECK_NAME(xrlatom_uint32);		/* FALLTHRU */
--	    CHECK_NAME(xrlatom_ipv4);		/* FALLTHRU */
--	    CHECK_NAME(xrlatom_ipv4net);	/* FALLTHRU */
--	    CHECK_NAME(xrlatom_ipv6);		/* FALLTHRU */
--	    CHECK_NAME(xrlatom_ipv6net);	/* FALLTHRU */
--	    CHECK_NAME(xrlatom_mac);		/* FALLTHRU */
--	    CHECK_NAME(xrlatom_text);		/* FALLTHRU */
--	    CHECK_NAME(xrlatom_list);		/* FALLTHRU */
--	    CHECK_NAME(xrlatom_boolean);	/* FALLTHRU */
--	    CHECK_NAME(xrlatom_binary);		/* FALLTHRU */
--	    CHECK_NAME(xrlatom_int64);		/* FALLTHRU */
--	    CHECK_NAME(xrlatom_uint64);		/* FALLTHRU */
--	    CHECK_NAME(xrlatom_fp64);		/* FALLTHRU */
-+#if defined (__has_cpp_attribute)
-+  #if __has_cpp_attribute(fallthrough)
-+     #define CHECK_NAME(x) case (x) : if (strcmp(name, x##_name) == 0) return x; __attribute__ ((fallthrough));
-+  #else
-+    #define CHECK_NAME(x) case (x) : if (strcmp(name, x##_name) == 0) return x;
-+  #endif
-+#else
-+  #define CHECK_NAME(x) case (x) : if (strcmp(name, x##_name) == 0) return x;
-+#endif
-+	    CHECK_NAME(xrlatom_int32);		/* Fall through */
-+	    CHECK_NAME(xrlatom_uint32);		/* Fall Through */
-+	    CHECK_NAME(xrlatom_ipv4);		/* Fall Through */
-+	    CHECK_NAME(xrlatom_ipv4net);	/* Fall Through */
-+	    CHECK_NAME(xrlatom_ipv6);		/* Fall Through */
-+	    CHECK_NAME(xrlatom_ipv6net);	/* Fall Through */
-+	    CHECK_NAME(xrlatom_mac);		/* Fall Through */
-+	    CHECK_NAME(xrlatom_text);		/* Fall Through */
-+	    CHECK_NAME(xrlatom_list);		/* Fall Through */
-+	    CHECK_NAME(xrlatom_boolean);	/* Fall Through */
-+	    CHECK_NAME(xrlatom_binary);		/* Fall Through */
-+	    CHECK_NAME(xrlatom_int64);		/* Fall Through */
-+	    CHECK_NAME(xrlatom_uint64);		/* Fall Through */
-+	    CHECK_NAME(xrlatom_fp64);		/* Fall Through */
- 	    // ... Your type here ...
- 	case xrlatom_no_type:
- 	    break;
 @@ -141,25 +151,29 @@ resolve_xrlatom_name(const char* name)
  
  // ----------------------------------------------------------------------------
@@ -21368,18 +21267,6 @@ index b51ab2d..5f2ef2e 100644
  	    cli_print(c_format("ERROR: Invalid IP address: %s\n",
  			       argv[i].c_str()));
  	    return (XORP_ERROR);
-diff --git a/xorp/mld6igmp/xrl_mld6igmp_node.cc b/xorp/mld6igmp/xrl_mld6igmp_node.cc
-index d3614c9..9157ee6 100644
---- a/xorp/mld6igmp/xrl_mld6igmp_node.cc
-+++ b/xorp/mld6igmp/xrl_mld6igmp_node.cc
-@@ -1134,6 +1134,7 @@ XrlMld6igmpNode::mld6igmp_client_send_add_delete_membership_cb(
- 	// TODO:  We must make some progress or otherwise deal with this error.
- 	// For now, fall through and re-try.
- 	// Fall through to the retry logic below.
-+	/* fall through */
- 
-     case REPLY_TIMED_OUT:
-     case SEND_FAILED_TRANSIENT:
 diff --git a/xorp/ospf/external.cc b/xorp/ospf/external.cc
 index a30179a..40d81cb 100644
 --- a/xorp/ospf/external.cc

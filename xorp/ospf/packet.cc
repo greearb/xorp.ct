@@ -242,12 +242,14 @@ Packet::decode_standard_header(uint8_t *ptr, size_t& len) throw(InvalidPacket)
 		       c_format("Packet too short %u, must be at least %u",
 				XORP_UINT_CAST(len),
 				XORP_UINT_CAST(STANDARD_HEADER_V2)));
+	break;
     case OspfTypes::V3:
 	if (len < STANDARD_HEADER_V3)
 	    xorp_throw(InvalidPacket,
 		       c_format("Packet too short %u, must be at least %u",
 				XORP_UINT_CAST(len),
 				XORP_UINT_CAST(STANDARD_HEADER_V3)));
+	break;
     }
 
     // Verify that the length in the packet and the length of received

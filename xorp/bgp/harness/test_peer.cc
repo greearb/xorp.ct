@@ -570,8 +570,10 @@ TestPeer::send_complete(AsyncFileWriter::Event ev, const uint8_t *buf,
 	debug_msg("event: error\n");
 	/* Don't free the message here we'll get it in the flush */
 	XLOG_ERROR("Writing buffer failed: %s",  strerror(errno));
+	break;
     case AsyncFileOperator::END_OF_FILE:
 	XLOG_ERROR("End of File: %s",  strerror(errno));
+	break;
     case AsyncFileOperator::WOULDBLOCK:
 	// do nothing
 	;

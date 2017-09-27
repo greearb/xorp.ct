@@ -1134,6 +1134,7 @@ XrlMld6igmpNode::mld6igmp_client_send_add_delete_membership_cb(
 	// TODO:  We must make some progress or otherwise deal with this error.
 	// For now, fall through and re-try.
 	// Fall through to the retry logic below.
+	/* fall through */
 
     case REPLY_TIMED_OUT:
     case SEND_FAILED_TRANSIENT:

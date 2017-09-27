@@ -434,7 +434,7 @@ BGPPeer::send_message_complete(SocketClient::Event ev, const uint8_t *buf)
 		_handler->output_no_longer_busy();
 	}
 	TIMESPENT_CHECK();
-	/*drop through to next case*/
+	/* fall through */
     case SocketClient::FLUSHING:
 	debug_msg("event: flushing\n");
 	debug_msg("Freeing Buffer for sent packet: %p\n", buf);
@@ -588,6 +588,7 @@ BGPPeer::event_start()			// EVENTBGPSTART
 	flush_transmit_queue();		// ensure callback can't happen
 	set_state(STATEIDLE, false);// go through STATEIDLE to clear resources
 	// fallthrough now to process the start event
+	/* fall through */
     case STATEIDLE:
 	// Initalise resources
 	start_connect_retry_timer();
