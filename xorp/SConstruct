@@ -83,6 +83,7 @@ vars.AddVariables(
     BoolVariable('disable_otherlogs',  'Force disable other logs', False),
     BoolVariable('disable_profile',  'Disable Xorp Profiler feature', False),
     BoolVariable('disable_werror',  'Disable -Werror compiler flag', False),
+    BoolVariable('disable_wdeprecated',  'Do not warn about deprecated features:  -Wno-deprecated', False),
     BoolVariable('disable_assert',  'Force disabling assertions - use with caution', False),
     BoolVariable('enable_lex_hack',  'Works around lex/yacc issues on FreeBSD', False),
     BoolVariable('enable_builddirrun',  'Enable Xorp to run from BUILD_DIR', False),
@@ -291,6 +292,7 @@ print 'Disable libtecla: ', env['disable_libtecla']
 print 'Disable Firewall: ', env['disable_fw']
 print 'Disable Profile : ', env['disable_profile']
 print 'Disable -Werror : ', env['disable_werror']
+print 'Disable deprecated warnings: ', env['disable_wdeprecated']
 print 'Enable lex hack : ', env['enable_lex_hack']
 print 'Disable warning logs : ', env['disable_warninglogs']
 print 'Disable error logs : ', env['disable_errorlogs']
@@ -557,6 +559,12 @@ if tst and not ((tst == "no") or (tst == "false")):
     env['disable_werror'] = True
 else:
     env['disable_werror'] = False
+
+tst = ARGUMENTS.get('disable_wdeprecated', False)
+if tst and not ((tst == "no") or (tst == "false")):
+    env['disable_wdeprecated'] = True
+else:
+    env['disable_wdeprecated'] = False
 
 tst = ARGUMENTS.get('enable_lex_hack', False)
 if tst and not ((tst == "no") or (tst == "false")):
@@ -926,6 +934,15 @@ if env['enable_boost']:
     # not yet threaded.
     env.AppendUnique(CPPDEFINES = [
         ( 'BOOST_DISABLE_THREADS' ),
+        ])
+
+if env['disable_wdeprecated']:
+    print "WARNING:  Adding -Wno-deprecated on user command."
+    env.AppendUnique(CFLAGS = [
+        '-Wno-deprecated',
+        ])
+    env.AppendUnique(CXXFLAGS = [
+        '-Wno-deprecated',
         ])
 
 # Some platforms have alignment warnings that cannot easily be
