@@ -878,6 +878,16 @@ EOF
 	    echo ${UNAME_MACHINE}-unknown-linux-gnueabi
 	fi
 	exit ;;
+   aarch64*:Linux:*:*)
+        eval $set_cc_for_build
+        if echo __ARM_EABI__ | $CC_FOR_BUILD -E - 2>/dev/null \
+            | grep -q __ARM_EABI__
+        then
+            echo ${UNAME_MACHINE}-unknown-linux-gnu
+        else
+            echo ${UNAME_MACHINE}-unknown-linux-gnueabi
+        fi
+        exit ;;
     avr32*:Linux:*:*)
 	echo ${UNAME_MACHINE}-unknown-linux-gnu
 	exit ;;
