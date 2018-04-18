@@ -17,7 +17,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/fea/io_tcpudp.hh,v 1.12 2008/10/02 21:56:48 bms Exp $
 
 
 #ifndef __FEA_IO_TCPUDP_HH__
@@ -199,7 +198,8 @@ public:
      */
     virtual int udp_open_bind_join(const IPvX& local_addr, uint16_t local_port,
 				   const IPvX& mcast_addr, uint8_t ttl,
-				   bool reuse, string& error_msg) = 0;
+				   bool reuse,
+				   string& error_msg) = 0;
 
     /**
      * Create a bound and connected TCP socket.

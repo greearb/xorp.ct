@@ -17,7 +17,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/fea/data_plane/io/io_tcpudp_socket.hh,v 1.15 2008/10/11 04:20:19 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_IO_IO_TCPUDP_SOCKET_HH__
 #define __FEA_DATA_PLANE_IO_IO_TCPUDP_SOCKET_HH__
@@ -184,7 +183,8 @@ public:
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int bind(const IPvX& local_addr, uint16_t local_port, string& error_msg);
+    int bind(const IPvX& local_addr, uint16_t local_port,
+	     string& error_msg);
 
     /**
      * Join multicast group on already bound socket.

@@ -442,7 +442,7 @@ TestPeer::listen(const string& host, const uint32_t& port,
     }
 
     XorpFd s = comm_bind_tcp(reinterpret_cast<struct sockaddr *>(&local),
-			     COMM_SOCK_NONBLOCKING);
+			     COMM_SOCK_NONBLOCKING, NULL /* local-dev-name */);
     if (!s.is_valid()) {
 	error_string = c_format("comm_bind_tcp() failed: %s\n",
 				comm_get_last_error_str());
@@ -513,7 +513,7 @@ TestPeer::bind(const string& host, const uint32_t& port,
 	return false;
     }
 
-    if (comm_sock_bind(s, reinterpret_cast<struct sockaddr *>(&local))
+    if (comm_sock_bind(s, reinterpret_cast<struct sockaddr *>(&local), NULL /* local-dev-name */)
 	!= XORP_OK) {
 	comm_sock_close(s);
 	error_string = c_format("comm_sock_bind failed: %s",

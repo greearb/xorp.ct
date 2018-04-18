@@ -19,7 +19,6 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxipc/sockutil.hh,v 1.16 2008/10/02 21:57:21 bms Exp $
 
 /* Some helper functions for sockets */
 
@@ -52,7 +51,7 @@
  * @param addr_slash_port the address and port of the remote endpoint.
  * @return socket (invalid if unsuccessful).
  */
-XorpFd create_connected_tcp4_socket(const string& addr_slash_port);
+XorpFd create_connected_tcp4_socket(const string& addr_slash_port, const string& local_dev);
 
 /**
  * Parse getsockname() result for a socket.

@@ -17,7 +17,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/fea/data_plane/io/io_tcpudp_dummy.hh,v 1.11 2008/10/11 04:20:19 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_IO_IO_TCPUDP_DUMMY_HH__
 #define __FEA_DATA_PLANE_IO_IO_TCPUDP_DUMMY_HH__

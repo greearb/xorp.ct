@@ -300,7 +300,7 @@ FinderTcpListenerBase::FinderTcpListenerBase(EventLoop& e,
 	xorp_throw(InvalidAddress, "Not a configured IPv4 address");
     }
 
-    _lsock = comm_bind_tcp4(&if_ia, htons(port), COMM_SOCK_NONBLOCKING);
+    _lsock = comm_bind_tcp4(&if_ia, htons(port), COMM_SOCK_NONBLOCKING, NULL);
     if (!_lsock.is_valid()) {
 	xorp_throw(InvalidPort, comm_get_last_error_str());
     }

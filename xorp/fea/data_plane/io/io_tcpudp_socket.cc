@@ -48,6 +48,23 @@
 
 #ifdef HAVE_TCPUDP_UNIX_SOCKETS
 
+static const string&
+find_ifname_by_addr(const IfTree& iftree, const IPvX& local_addr,
+		    string& error_msg)
+{
+    const IfTreeInterface* ifp = NULL;
+    const IfTreeVif* vifp = NULL;
+    static string empty;
+
+    // Find the physical interface index
+    if (iftree.find_interface_vif_by_addr(local_addr, ifp, vifp) != true) {
+	error_msg = c_format("Local IP address %s was not found",
+			     local_addr.str().c_str());
+	return empty;
+    }
+
+    return vifp->ifname();
+}
 
 /**
  * Find the physical interface index for an interface for a given local
@@ -334,6 +351,7 @@ IoTcpUdpSocket::tcp_open_and_bind(const IPvX& local_addr, uint16_t local_port,
 	return (XORP_ERROR);
     }
 
+    string local_dev = find_ifname_by_addr(iftree(), local_addr, error_msg);
     switch (family()) {
     case AF_INET:
     {
@@ -341,7 +359,7 @@ IoTcpUdpSocket::tcp_open_and_bind(const IPvX& local_addr, uint16_t local_port,
 
 	local_addr.copy_out(local_in_addr);
 	_socket_fd = comm_bind_tcp4(&local_in_addr, htons(local_port),
-				    COMM_SOCK_NONBLOCKING);
+				    COMM_SOCK_NONBLOCKING, local_dev.c_str());
 	break;
     }
 #ifdef HAVE_IPV6
@@ -361,7 +379,7 @@ IoTcpUdpSocket::tcp_open_and_bind(const IPvX& local_addr, uint16_t local_port,
 	local_addr.copy_out(local_in6_addr);
 	_socket_fd = comm_bind_tcp6(&local_in6_addr, pif_index,
 				    htons(local_port),
-				    COMM_SOCK_NONBLOCKING);
+				    COMM_SOCK_NONBLOCKING, local_dev.c_str());
 	break;
     }
 #endif // HAVE_IPV6
@@ -403,7 +421,7 @@ IoTcpUdpSocket::udp_open_and_bind(const IPvX& local_addr, uint16_t local_port, c
 
 	local_addr.copy_out(local_in_addr);
 	_socket_fd = comm_bind_udp4(&local_in_addr, htons(local_port),
-				    COMM_SOCK_NONBLOCKING, reuse_addr);
+				    COMM_SOCK_NONBLOCKING, reuse_addr, local_dev.c_str());
 	break;
     }
 #ifdef HAVE_IPV6
@@ -418,7 +436,7 @@ IoTcpUdpSocket::udp_open_and_bind(const IPvX& local_addr, uint16_t local_port, c
 	local_addr.copy_out(local_in6_addr);
 	_socket_fd = comm_bind_udp6(&local_in6_addr, pif_index,
 				    htons(local_port),
-				    COMM_SOCK_NONBLOCKING);
+				    COMM_SOCK_NONBLOCKING, local_dev.c_str());
 	break;
     }
 #endif // HAVE_IPV6
@@ -432,22 +450,6 @@ IoTcpUdpSocket::udp_open_and_bind(const IPvX& local_addr, uint16_t local_port, c
 			     comm_get_last_error_str());
 	return (XORP_ERROR);
     }
-
-#ifdef SO_BINDTODEVICE
-    if (local_dev.size()) {
-	if (setsockopt(_socket_fd, SOL_SOCKET, SO_BINDTODEVICE,
-		       local_dev.c_str(), local_dev.size() + 1)) {
-	    XLOG_WARNING("ERROR:  IoTcpUdpSocket::udp_open_and_bind, setsockopt (BINDTODEVICE):  failed: %s",
-			 XSTRERROR);
-	}
-	else {
-	    XLOG_INFO("NOTE:  Successfully bound socket: %i to vif: %s\n",
-		      (int)(_socket_fd), local_dev.c_str());
-	}
-    }
-#else
-    UNUSED(local_dev);
-#endif
 
     return (enable_data_recv(error_msg));
 }
@@ -465,6 +467,7 @@ IoTcpUdpSocket::udp_open_bind_join(const IPvX& local_addr, uint16_t local_port,
 	return (XORP_ERROR);
     }
 
+    string local_dev = find_ifname_by_addr(iftree(), local_addr, error_msg);
     switch (family()) {
     case AF_INET:
     {
@@ -474,7 +477,7 @@ IoTcpUdpSocket::udp_open_bind_join(const IPvX& local_addr, uint16_t local_port,
 	mcast_addr.copy_out(mcast_in_addr);
 	_socket_fd = comm_bind_join_udp4(&mcast_in_addr, &local_in_addr,
 					 htons(local_port), reuse,
-					 COMM_SOCK_NONBLOCKING);
+					 COMM_SOCK_NONBLOCKING, local_dev.c_str());
 	if (! _socket_fd.is_valid()) {
 	    error_msg = c_format("Cannot open, bind and join the socket: %s",
 				 comm_get_last_error_str());
@@ -507,7 +510,7 @@ IoTcpUdpSocket::udp_open_bind_join(const IPvX& local_addr, uint16_t local_port,
 	mcast_addr.copy_out(mcast_in6_addr);
 	_socket_fd = comm_bind_join_udp6(&mcast_in6_addr, pif_index,
 					 htons(local_port), reuse,
-					 COMM_SOCK_NONBLOCKING);
+					 COMM_SOCK_NONBLOCKING, local_dev.c_str());
 
 	if (! _socket_fd.is_valid()) {
 	    error_msg = c_format("Cannot open, bind and join the socket: %s",
@@ -568,6 +571,7 @@ IoTcpUdpSocket::tcp_open_bind_connect(const IPvX& local_addr,
 	return (XORP_ERROR);
     }
 
+    string local_dev = find_ifname_by_addr(iftree(), local_addr, error_msg);
     switch (family()) {
     case AF_INET:
     {
@@ -579,7 +583,7 @@ IoTcpUdpSocket::tcp_open_bind_connect(const IPvX& local_addr,
 					    &remote_in_addr,
 					    htons(remote_port),
 					    COMM_SOCK_NONBLOCKING,
-					    &in_progress);
+					    &in_progress, local_dev.c_str());
 	break;
     }
 #ifdef HAVE_IPV6
@@ -603,7 +607,7 @@ IoTcpUdpSocket::tcp_open_bind_connect(const IPvX& local_addr,
 					    &remote_in6_addr,
 					    htons(remote_port),
 					    COMM_SOCK_NONBLOCKING,
-					    &in_progress);
+					    &in_progress, local_dev.c_str());
 	break;
     }
 #endif // HAVE_IPV6
@@ -646,6 +650,7 @@ IoTcpUdpSocket::udp_open_bind_connect(const IPvX& local_addr,
 	return (XORP_ERROR);
     }
 
+    string local_dev = find_ifname_by_addr(iftree(), local_addr, error_msg);
     switch (family()) {
     case AF_INET:
     {
@@ -657,7 +662,7 @@ IoTcpUdpSocket::udp_open_bind_connect(const IPvX& local_addr,
 					    &remote_in_addr,
 					    htons(remote_port),
 					    COMM_SOCK_NONBLOCKING,
-					    &in_progress);
+					    &in_progress, local_dev.c_str());
 	break;
     }
 #ifdef HAVE_IPV6
@@ -681,7 +686,7 @@ IoTcpUdpSocket::udp_open_bind_connect(const IPvX& local_addr,
 					    &remote_in6_addr,
 					    htons(remote_port),
 					    COMM_SOCK_NONBLOCKING,
-					    &in_progress);
+					    &in_progress, local_dev.c_str());
 	break;
     }
 #endif // HAVE_IPV6
@@ -720,8 +725,8 @@ IoTcpUdpSocket::udp_open_bind_broadcast(const string& ifname,
     //    configured network broadcast address on ifname/vifname.
     //    If there is no IPv4 stack configured on that node, then
     //    we need to reject this request outright.
-    const IfTreeInterface* ifp = NULL;
-    const IfTreeVif* vifp = NULL;
+    const IfTreeInterface* ifp;
+    const IfTreeVif* vifp;
 
     ifp = iftree().find_interface(ifname);
     if (ifp == NULL) {
@@ -798,29 +803,17 @@ IoTcpUdpSocket::udp_open_bind_broadcast(const string& ifname,
 	}
     }
 
-    // 2b. On Linux, bind socket to device (SO_BINDTODEVICE).
-    if (comm_bindtodevice_present() == XORP_OK) {
-        ret_value = comm_set_bindtodevice(_socket_fd,
-                                          vifp->vifname().c_str());
-	if (ret_value != XORP_OK) {
-	    error_msg = c_format("Cannot bind the broadcast socket to "
-				 "the underlying vif %s: %s",
-				 vifp->vifname().c_str(),
-				 comm_get_last_error_str());
-	    return (XORP_ERROR);
-	}
-    }
-
     // 3. Bind to address and port (bind()).
     //    On BSD derived systems, if an interface address is specified
     //    for the bind(), received broadcast datagrams will NOT be delivered
     //    to the socket. This behaviour is so old, it's taken for granted,
     //    although it could be argued it's buggy; therefore on such systems
     //    INADDR_ANY is used.
+    // This also takes care of SO_BINDTODEVICE if platform supports it.
     struct in_addr local_in_addr;
     local_in_addr.s_addr = INADDR_ANY;
     ret_value = comm_sock_bind4(_socket_fd, &local_in_addr,
-			        htons(local_port));
+			        htons(local_port), vifname.c_str());
     if (ret_value != XORP_OK) {
 	error_msg = c_format("Cannot bind the broadcast socket: %s",
 			     comm_get_last_error_str());
@@ -941,6 +934,7 @@ IoTcpUdpSocket::bind(const IPvX& local_addr, uint16_t local_port,
 	return (XORP_ERROR);
     }
 
+    string local_dev = find_ifname_by_addr(iftree(), local_addr, error_msg);
     switch (family()) {
     case AF_INET:
     {
@@ -948,7 +942,7 @@ IoTcpUdpSocket::bind(const IPvX& local_addr, uint16_t local_port,
 
 	local_addr.copy_out(local_in_addr);
 	ret_value = comm_sock_bind4(_socket_fd, &local_in_addr,
-				    htons(local_port));
+				    htons(local_port), local_dev.c_str());
 	break;
     }
 #ifdef HAVE_IPV6
@@ -967,7 +961,7 @@ IoTcpUdpSocket::bind(const IPvX& local_addr, uint16_t local_port,
 
 	local_addr.copy_out(local_in6_addr);
 	ret_value = comm_sock_bind6(_socket_fd, &local_in6_addr, pif_index,
-				    htons(local_port));
+				    htons(local_port), local_dev.c_str());
 	break;
     }
 #endif // HAVE_IPV6

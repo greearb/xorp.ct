@@ -65,16 +65,12 @@ Socket::create_listener()
 
     XLOG_ASSERT(!_s.is_valid());
 
-    _s = comm_bind_tcp(sin, COMM_SOCK_NONBLOCKING);
+    _s = comm_bind_tcp(sin, COMM_SOCK_NONBLOCKING, get_local_interface().c_str());
     if (!_s.is_valid()) {
 	XLOG_ERROR("comm_bind_tcp failed");
     }
     else {
-	// bindtodevice?
 	debug_msg("create_listener, local_interface: %s", get_local_interface().c_str());
-	if (get_local_interface().size()) {
-	    comm_set_bindtodevice(_s, get_local_interface().c_str());
-	}
 
 	if (comm_listen(_s, COMM_LISTEN_DEFAULT_BACKLOG) != XORP_OK) {
 	    XLOG_ERROR("comm_listen failed");
@@ -460,7 +456,7 @@ SocketClient::connect_socket(XorpFd sock, string raddr, uint16_t port,
     const struct sockaddr *local = get_bind_socket(len);
 
     /* Bind the local endpoint to the supplied address */
-    if (XORP_ERROR == comm_sock_bind(sock, local)) {
+    if (XORP_ERROR == comm_sock_bind(sock, local, get_local_interface().c_str())) {
 
 	/*
 	** This endpoint is now screwed so shut it.
@@ -472,11 +468,7 @@ SocketClient::connect_socket(XorpFd sock, string raddr, uint16_t port,
 	return;
     }
 
-    // bindtodevice?
     debug_msg("SocketClient::connect_socket, local_interface: %s", get_local_interface().c_str());
-    if (get_local_interface().size()) {
-	comm_set_bindtodevice(sock, get_local_interface().c_str());
-    }
 
     const struct sockaddr *servername = get_remote_socket(len);
 
