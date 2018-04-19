@@ -209,11 +209,10 @@ public:
      */
     XorpFd* findExistingInputSocket(const string& if_name, const string& vif_name);
 
-    /** Get the input file descriptor to be used for multicast routing.  This
-     * should not be bound to any specific interface.  Returns NULL if cannot
-     * find or create one.
+    /** Get the input file descriptor to be used for multicast routing.
+     * Returns NULL if cannot find or create one.
      */
-    XorpFd* mcast_protocol_fd_in();
+    XorpFd* findExistingInputSocketMcast(const string& if_name, const string& vif_name);
 
     /** Interface is going away..clean up the sockets for the associated vif(s) */
     void notifyDeletingIface(const string& ifname);
@@ -225,6 +224,11 @@ public:
 	notifyDeletingVif(ifname, vifname);
     }
 
+    /** Find or create an mcast input socket for the specified VIF.  Returns NULL
+     * if the socket cannot be found or created.
+     */
+    XorpFd* findOrCreateInputSocketMcast(const string& if_name, const string& vif_name,
+					 string& error_msg);
 
 private:
     /**
@@ -240,7 +244,7 @@ private:
 
 
     /** Returns XORP_ERROR on error. */
-    int initializeInputSocket(XorpFd* rv, string& error_msg);
+    int initializeInputSocket(XorpFd* rv, const string& local_dev, string& error_msg);
 
     /** Find or create an input socket for the specified VIF.  Returns NULL
      * if the socket cannot be found or created.
@@ -324,13 +328,10 @@ private:
 				      string&		error_msg);
 
     // Private state
-    //XorpFd	_proto_socket_in;    // The socket to receive protocol message
     // The key is "if_name vif_name"
     map<string, XorpFd*> _proto_sockets_in;
-#ifdef USE_SOCKET_PER_IFACE
-    XorpFd        _mcast_proto_socket_in;
-#endif
-    XorpFd	_proto_socket_out;   // The socket to end protocol message
+    map<string, XorpFd*>  _mcast_proto_sockets_in;
+    XorpFd	_proto_socket_out;   // The socket to send protocol message
     bool	_is_ip_hdr_included; // True if IP header is included on send
     uint16_t	_ip_id;		     // IPv4 Header ID
 

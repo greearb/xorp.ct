@@ -162,33 +162,9 @@ bool supports_mcast_tables = false;
 #endif
 
 
-//
-// Exported variables
-//
-
-//
-// Static class members
-//
-
-//
-// Local constants definitions
-//
-
-//
-// Local structures/classes, typedefs and macros
-//
-
 #ifdef HOST_OS_WINDOWS
 typedef char *caddr_t;
 #endif
-
-//
-// Local variables
-//
-
-//
-// Local functions prototypes
-//
 
 /**
  * MfeaMrouter::MfeaMrouter:
@@ -273,6 +249,8 @@ MfeaMrouter::start()
 #endif // ! HOST_OS_WINDOWS
 
     // Register as multicast upcall receiver
+    string vrf = _fibconfig.get_vrf_name();
+
     IoIpManager& io_ip_manager = mfea_node().fea_node().io_ip_manager();
     uint8_t ip_protocol = kernel_mrouter_ip_protocol();
     if (io_ip_manager.register_system_multicast_upcall_receiver(
@@ -280,6 +258,7 @@ MfeaMrouter::start()
 	    ip_protocol,
 	    callback(this, &MfeaMrouter::kernel_call_process),
 	    _mrouter_socket,
+	    vrf,
 	    error_msg)
 	!= XORP_OK) {
 	XLOG_ERROR("Cannot register multicast upcall receiver: %s",
@@ -287,8 +266,11 @@ MfeaMrouter::start()
 	return (XORP_ERROR);
     }
     if (! _mrouter_socket.is_valid()) {
-	XLOG_ERROR("Failed to assign the multicast routing socket");
+	XLOG_ERROR("Failed to assign the multicast routing socket, vrf: %s", vrf.c_str());
 	return (XORP_ERROR);
+    }
+    else {
+	XLOG_INFO("Using mrouter-socket: %d\n", _mrouter_socket.getSocket());
     }
 
     // Start the multicast routing in the kernel
@@ -1384,8 +1366,8 @@ MfeaMrouter::add_multicast_vif(uint32_t vif_index, string& error_msg)
 	//
 	if (setsockopt(_mrouter_socket, IPPROTO_IP, MRT_ADD_VIF,
 		       sopt_arg, sz) < 0) {
-	    error_msg = c_format("setsockopt(MRT_ADD_VIF, vif %s) failed: %s  sz: %i, ifindex: %i addr: %s",
-				 mfea_vif->name().c_str(), XSTRERROR,
+	    error_msg = c_format("setsockopt(%d, MRT_ADD_VIF, vif %s) failed: %s  sz: %i, ifindex: %i addr: %s",
+				 _mrouter_socket.getSocket(), mfea_vif->name().c_str(), XSTRERROR,
 				 (int)(sz), mfea_vif->pif_index(),
 				 mfea_vif->addr_ptr() ? mfea_vif->addr_ptr()->str().c_str() : "NULL");
 	    return XORP_ERROR;
@@ -2556,6 +2538,8 @@ MfeaMrouter::kernel_call_process(const uint8_t *databuf, size_t datalen)
     UNUSED(databuf);
     UNUSED(datalen);
 #endif
+
+    //XLOG_INFO("kernel-call-process, datalen: %d\n", (int)(datalen));
     
     switch (family()) {
     case AF_INET:

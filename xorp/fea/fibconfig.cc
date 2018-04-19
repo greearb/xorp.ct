@@ -44,7 +44,7 @@
 
 FibConfig::FibConfig(FeaNode& fea_node, const IfTree& system_config_iftree,
 		     const IfTree& merged_config_iftree)
-    : _eventloop(fea_node.eventloop()),
+	: vrf_queried(false), _eventloop(fea_node.eventloop()),
 #ifndef XORP_DISABLE_PROFILE
       _profile(fea_node.profile()),
 #endif
@@ -119,7 +119,6 @@ const string& FibConfig::get_vrf_name() const {
     }
     return vrf_name;
 }
-
 
 ProcessStatus
 FibConfig::status(string& reason) const

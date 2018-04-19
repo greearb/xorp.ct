@@ -273,7 +273,9 @@ public:
      * @return a pointer to the file descriptor for receiving protocol
      * messages, or NULL if it cannot be found.
      */
-    virtual XorpFd* mcast_protocol_fd_in() = 0;
+    virtual XorpFd* findExistingInputSocketMcast(const string& _if_name, const string& _vif_name) = 0;
+
+    virtual XorpFd* findOrCreateInputSocketMcast(const string& _if_name, const string& _vif_name, string& error_msg) = 0;
 
 protected:
     /**

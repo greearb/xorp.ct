@@ -17,7 +17,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_linux.hh,v 1.8 2008/10/02 21:57:13 bms Exp $
 
 #ifndef __FEA_DATA_PLANE_MANAGERS_FEA_DATA_PLANE_MANAGER_LINUX_HH__
 #define __FEA_DATA_PLANE_MANAGERS_FEA_DATA_PLANE_MANAGER_LINUX_HH__
@@ -124,6 +123,7 @@ private:
 #if defined(HAVE_PROC_LINUX) && defined(HAVE_IOCTL_SIOCGIFCONF)
     IfConfigGetIoctl*	_ifconfig_get_ioctl;
 #endif
+    string vrf_nfame;
 };
 
 #endif // __FEA_DATA_PLANE_MANAGERS_FEA_DATA_PLANE_MANAGER_LINUX_HH__

@@ -380,8 +380,7 @@ public:
      * @error error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR
      */
-    void		create_input_socket(const string& if_name,
-					const string& vif_name);
+    void create_input_socket(const string& if_name, const string& vif_name);
 
     /**
      * Join an IP multicast group.
@@ -442,7 +441,7 @@ public:
      * @return the first valid file descriptor for receiving protocol
      * messages.
      */
-    XorpFd first_valid_mcast_protocol_fd_in();
+    XorpFd first_valid_mcast_protocol_fd_in(const string& local_dev);
 
 private:
     IoIpComm(const IoIpComm&);			// Not implemented.
@@ -666,6 +665,7 @@ public:
 						  uint8_t	ip_protocol,
 						  IoIpManager::UpcallReceiverCb receiver_cb,
 						  XorpFd&	mcast_receiver_fd,
+						  const string& local_dev,
 						  string&	error_msg);
 
     /**

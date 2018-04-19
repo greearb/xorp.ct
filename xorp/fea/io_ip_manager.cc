@@ -414,11 +414,9 @@ IoIpComm::create_input_socket(const string& if_name,
 
     do {
 	IoIpPlugins::iterator plugin_iter;
-	for (plugin_iter = _io_ip_plugins.begin();
-		plugin_iter != _io_ip_plugins.end(); ++plugin_iter) {
+	for (plugin_iter = _io_ip_plugins.begin(); plugin_iter != _io_ip_plugins.end(); ++plugin_iter) {
 	    IoIp* io_ip = plugin_iter->second;
-	    if (io_ip->create_input_socket(if_name, vif_name,
-		    error_msg) != XORP_OK) {
+	    if (io_ip->create_input_socket(if_name, vif_name, error_msg) != XORP_OK) {
 		err = true;
 		if (!error_msg.empty())
 		    error_msg += " ";
@@ -748,7 +746,7 @@ IoIpComm::stop_io_ip_plugins()
 }
 
 XorpFd
-IoIpComm::first_valid_mcast_protocol_fd_in()
+IoIpComm::first_valid_mcast_protocol_fd_in(const string& local_dev)
 {
     XorpFd xorp_fd;
 
@@ -756,10 +754,24 @@ IoIpComm::first_valid_mcast_protocol_fd_in()
     IoIpPlugins::iterator iter;
     for (iter = _io_ip_plugins.begin(); iter != _io_ip_plugins.end(); ++iter) {
 	IoIp* io_ip = iter->second;
-	XorpFd* xfd = io_ip->mcast_protocol_fd_in();
+	XorpFd* xfd = io_ip->findExistingInputSocketMcast(local_dev, local_dev);
 	if (xfd && xfd->is_valid()) {
 	    xorp_fd = *xfd;
 	    return xorp_fd;
+	}
+    }
+
+    /* So, none are open yet, try to create one */
+    for (iter = _io_ip_plugins.begin(); iter != _io_ip_plugins.end(); ++iter) {
+	IoIp* io_ip = iter->second;
+	string err_msg;
+	XorpFd* xfd = io_ip->findOrCreateInputSocketMcast(local_dev, local_dev, err_msg);
+	if (xfd && xfd->is_valid()) {
+	    xorp_fd = *xfd;
+	    return xorp_fd;
+	}
+	else {
+	    XLOG_WARNING("Could not create mcast socket: %s\n", err_msg.c_str());
 	}
     }
 
@@ -932,6 +944,9 @@ IoIpManager::register_receiver(int		family,
 
     error_msg = "";
 
+    //XLOG_INFO("IoIpManager::register_receiver: %s on %s/%s\n",
+    //          receiver_name.c_str(), if_name.c_str(), vif_name.c_str());
+
     //
     // Look in the CommTable for an entry matching this protocol.
     // If an entry does not yet exist, create one.
@@ -939,9 +954,9 @@ IoIpManager::register_receiver(int		family,
     CommTable::iterator cti = comm_table.find(ip_protocol);
     IoIpComm* io_ip_comm = NULL;
     if (cti == comm_table.end()) {
-	XLOG_WARNING("Creating new receiver, name: %s iface: %s  protocol: %i family: %i\n",
-		     receiver_name.c_str(), if_name.c_str(), (int)(ip_protocol),
-		     family);
+	XLOG_INFO("Creating new receiver, name: %s iface: %s  protocol: %i family: %i\n",
+		  receiver_name.c_str(), if_name.c_str(), (int)(ip_protocol),
+		  family);
 	io_ip_comm = new IoIpComm(*this, iftree(), family, ip_protocol);
 	comm_table[ip_protocol] = io_ip_comm;
     } else {
@@ -967,6 +982,7 @@ IoIpManager::register_receiver(int		family,
 	    (filter->vif_name() == vif_name)) {
 	    // Already have this filter
 	    filter->set_enable_multicast_loopback(enable_multicast_loopback);
+	    //XLOG_INFO("filter exists, returning from register_receiver..\n");
 	    return (XORP_OK);
 	}
     }
@@ -1184,6 +1200,7 @@ IoIpManager::register_system_multicast_upcall_receiver(
     uint8_t	ip_protocol,
     IoIpManager::UpcallReceiverCb receiver_cb,
     XorpFd&	mcast_receiver_fd,
+    const string& local_dev,
     string&	error_msg)
 {
     SystemMulticastUpcallFilter* filter;
@@ -1199,8 +1216,8 @@ IoIpManager::register_system_multicast_upcall_receiver(
     CommTable::iterator cti = comm_table.find(ip_protocol);
     IoIpComm* io_ip_comm = NULL;
     if (cti == comm_table.end()) {
-	XLOG_WARNING("Creating new mcast protocol: %i family: %i\n",
-		     (int)(ip_protocol), family);
+	XLOG_WARNING("Creating new mcast protocol: %i(%s) family: %i\n",
+		     (int)(ip_protocol), ip_proto_str(ip_protocol), family);
 	io_ip_comm = new IoIpComm(*this, iftree(), family, ip_protocol);
 	comm_table[ip_protocol] = io_ip_comm;
     } else {
@@ -1225,7 +1242,7 @@ IoIpManager::register_system_multicast_upcall_receiver(
 	if (filter->ip_protocol() == ip_protocol) {
 	    // Already have this filter
 	    filter->set_receiver_cb(receiver_cb);
-	    mcast_receiver_fd = io_ip_comm->first_valid_mcast_protocol_fd_in();
+	    mcast_receiver_fd = io_ip_comm->first_valid_mcast_protocol_fd_in(local_dev);
 	    return (XORP_OK);
 	}
     }
@@ -1242,7 +1259,7 @@ IoIpManager::register_system_multicast_upcall_receiver(
     // Add the filter to those associated with empty receiver_name
     filters.insert(FilterBag::value_type(receiver_name, filter));
 
-    mcast_receiver_fd = io_ip_comm->first_valid_mcast_protocol_fd_in();
+    mcast_receiver_fd = io_ip_comm->first_valid_mcast_protocol_fd_in(local_dev);
 
     return (XORP_OK);
 }

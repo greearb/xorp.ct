@@ -26,6 +26,7 @@
 #include "libxorp/debug.h"
 
 #include "io_ip.hh"
+#include "libxorp/ipv4.hh"
 
 
 //
@@ -74,6 +75,8 @@ IoIp::recv_packet(const string&	if_name,
 		  const vector<vector<uint8_t> >& ext_headers_payload,
 		  const vector<uint8_t>& payload)
 {
+    //XLOG_INFO("recv-packet, io-ip-rcvr: %p protocol: %d(%s)\n",
+    //          _io_ip_receiver, ip_protocol(), ip_proto_str(ip_protocol()));
     if (_io_ip_receiver == NULL) {
 	// XXX: should happen only during transient setup stage
 	return;
@@ -88,6 +91,9 @@ IoIp::recv_packet(const string&	if_name,
 void
 IoIp::recv_system_multicast_upcall(const vector<uint8_t>& payload)
 {
+    //XLOG_INFO("recv-mcast-upcall, io-ip-rcvr: %p\n",
+    //      _io_ip_receiver);
+
     if (_io_ip_receiver == NULL) {
 	// XXX: should happen only during transient setup stage
 	return;

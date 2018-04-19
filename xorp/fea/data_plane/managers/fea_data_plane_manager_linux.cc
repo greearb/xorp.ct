@@ -51,6 +51,7 @@
 #include "fea/data_plane/io/io_tcpudp_socket.hh"
 
 #include "fea_data_plane_manager_linux.hh"
+#include "fea/fea_node.hh"
 
 
 //
@@ -234,13 +235,13 @@ FeaDataPlaneManagerLinux::allocate_io_ip(const IfTree& iftree, int family,
 {
     IoIp* io_ip = NULL;
 
-    UNUSED(iftree);
-    UNUSED(family);
-    UNUSED(ip_protocol);
-
 #ifdef HAVE_IP_RAW_SOCKETS
     io_ip = new IoIpSocket(*this, iftree, family, ip_protocol);
     _io_ip_list.push_back(io_ip);
+#else
+    UNUSED(iftree);
+    UNUSED(family);
+    UNUSED(ip_protocol);
 #endif
 
     return (io_ip);
