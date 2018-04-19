@@ -1119,6 +1119,9 @@ IoIpSocket::open_proto_sockets(string& error_msg)
     // Set various socket options
     //
 
+    // NOTE:  Cannot bind-to-dev here, it breaks OSPF, and probably
+    // other things as well.
+
     // Lots of output buffering
     if (comm_sock_set_sndbuf(_proto_socket_out, SO_SND_BUF_SIZE_MAX,
 			     SO_SND_BUF_SIZE_MIN)

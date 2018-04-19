@@ -736,11 +736,16 @@ public:
      */
     Trie6& trie6() { return _trie6; }
 
+    const string& get_vrf_name() const;
+
 protected:
     Trie4	_trie4;		// IPv4 trie (used for testing purpose)
     Trie6	_trie6;		// IPv6 trie (used for testing purpose)
-    
+
 private:
+    mutable bool vrf_queried;
+    mutable string vrf_name;
+
     EventLoop&				_eventloop;
 #ifndef XORP_DISABLE_PROFILE
     Profile&				_profile;

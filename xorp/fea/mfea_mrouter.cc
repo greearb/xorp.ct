@@ -412,6 +412,9 @@ MfeaMrouter::have_multicast_routing4() const
     if (s < 0)
 	return (false);		// Failure to open the socket
 
+    string vrf = _fibconfig.get_vrf_name();
+    comm_set_bindtodevice(s, vrf.c_str());
+
     // First, try for multiple routing tables.
     bool do_mrt_init = true;
     new_mcast_tables_api = false;
@@ -487,7 +490,10 @@ MfeaMrouter::have_multicast_routing6() const
     s = socket(family(), SOCK_RAW, kernel_mrouter_ip_protocol());
     if (s < 0)
 	return (false);		// Failure to open the socket
-    
+
+    string vrf = _fibconfig.get_vrf_name();
+    comm_set_bindtodevice(s, vrf.c_str());
+
     if (setsockopt(s, IPPROTO_IPV6, MRT6_INIT,
 		   (void *)&mrouter_version, sizeof(mrouter_version))
 	< 0) {
