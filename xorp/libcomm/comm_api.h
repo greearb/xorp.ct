@@ -947,7 +947,9 @@ extern int	comm_set_iface6(xsock_t sock, unsigned int my_ifindex);
  *                  socket should be bound.
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-extern int	comm_set_bindtodevice(xsock_t sock, const char * my_ifname);
+extern int _comm_set_bindtodevice(xsock_t sock, const char * my_ifname, bool quiet_on_success);
+extern int comm_set_bindtodevice(xsock_t sock, const char * my_ifname); // not quiet on success
+extern int comm_set_bindtodevice_quiet(xsock_t sock, const char * my_ifname); // quiet on success
 
 /**
  * Set the option which causes sends to directed IPv4 broadcast addresses 

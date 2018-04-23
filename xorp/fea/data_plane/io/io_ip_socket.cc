@@ -2864,8 +2864,8 @@ IoIpSocket::proto_socket_transmit(const IfTreeInterface* ifp,
     FibConfig& fibconfig = fea_data_plane_manager().fibconfig();
     if (fibconfig.unicast_forwarding_table_id_is_configured(family())
 	&& (! vifp->vifname().empty())) {
-	ret_value = comm_set_bindtodevice(_proto_socket_out,
-					  vifp->vifname().c_str());
+	ret_value = comm_set_bindtodevice_quiet(_proto_socket_out,
+						vifp->vifname().c_str());
 	if (ret_value == XORP_ERROR)
 	    goto ret_label;
 	setbind = true;
@@ -3007,7 +3007,7 @@ IoIpSocket::proto_socket_transmit(const IfTreeInterface* ifp,
     }
     if (setbind) {
 	// Unbind the interface on Linux platforms.
-	comm_set_bindtodevice(_proto_socket_out, "");
+	comm_set_bindtodevice_quiet(_proto_socket_out, "");
     }
 
     if (ret_value != XORP_OK) {

@@ -1307,7 +1307,7 @@ comm_set_onesbcast(xsock_t sock, int enabled)
 }
 
 int
-comm_set_bindtodevice(xsock_t sock, const char * my_ifname)
+_comm_set_bindtodevice(xsock_t sock, const char * my_ifname, bool quiet)
 {
     if ((!my_ifname) || (!my_ifname[0]))
 	return XORP_OK;
@@ -1348,8 +1348,10 @@ comm_set_bindtodevice(xsock_t sock, const char * my_ifname)
 	return (XORP_ERROR);
     }
     else {
-	XLOG_INFO("NOTE:  Successfully bound socket: %i to vif: %s\n",
-		  (int)(sock), tmp_ifname);
+	if (!quiet) {
+	    XLOG_INFO("NOTE:  Successfully bound socket: %i to vif: %s\n",
+		      (int)(sock), tmp_ifname);
+	}
     }
 
     return (XORP_OK);
@@ -1364,6 +1366,18 @@ comm_set_bindtodevice(xsock_t sock, const char * my_ifname)
     UNUSED(sock);
     return (XORP_ERROR);
 #endif
+}
+
+int
+comm_set_bindtodevice(xsock_t sock, const char * my_ifname)
+{
+    return _comm_set_bindtodevice(sock, my_ifname, false);
+}
+
+int
+comm_set_bindtodevice_quiet(xsock_t sock, const char * my_ifname)
+{
+    return _comm_set_bindtodevice(sock, my_ifname, true);
 }
 
 int
