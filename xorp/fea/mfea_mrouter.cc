@@ -184,6 +184,10 @@ MfeaMrouter::MfeaMrouter(MfeaNode& mfea_node, const FibConfig& fibconfig)
 {
     string error_msg;
 
+#ifndef USE_MULT_MCAST_TABLES
+    UNUSED(fibconfig);
+#endif
+
     //
     // Get the old state from the underlying system
     //
@@ -249,7 +253,10 @@ MfeaMrouter::start()
 #endif // ! HOST_OS_WINDOWS
 
     // Register as multicast upcall receiver
-    string vrf = _fibconfig.get_vrf_name();
+    string vrf;
+#ifdef USE_MULT_MCAST_TABLES
+    vrf = _fibconfig.get_vrf_name();
+#endif
 
     IoIpManager& io_ip_manager = mfea_node().fea_node().io_ip_manager();
     uint8_t ip_protocol = kernel_mrouter_ip_protocol();
@@ -394,7 +401,10 @@ MfeaMrouter::have_multicast_routing4() const
     if (s < 0)
 	return (false);		// Failure to open the socket
 
-    string vrf = _fibconfig.get_vrf_name();
+    string vrf;
+#ifdef USE_MULT_MCAST_TABLES
+    vrf = _fibconfig.get_vrf_name();
+#endif
     comm_set_bindtodevice(s, vrf.c_str());
 
     // First, try for multiple routing tables.
@@ -473,7 +483,10 @@ MfeaMrouter::have_multicast_routing6() const
     if (s < 0)
 	return (false);		// Failure to open the socket
 
-    string vrf = _fibconfig.get_vrf_name();
+    string vrf;
+#ifdef USE_MULT_MCAST_TABLES
+    vrf = _fibconfig.get_vrf_name();
+#endif
     comm_set_bindtodevice(s, vrf.c_str());
 
     if (setsockopt(s, IPPROTO_IPV6, MRT6_INIT,
