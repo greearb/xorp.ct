@@ -163,7 +163,7 @@ IfConfigGetNetlinkSocket::pull_config_one(IfTree& iftree, const char* ifname, in
 int findDeviceIndex(const char* device_name) {
    struct ifreq ifr;
    memset(&ifr, 0, sizeof(ifr));
-   strncpy(ifr.ifr_name, device_name, IFNAMSIZ); //max length of a device name.
+   strncpy(ifr.ifr_name, device_name, IFNAMSIZ-1); //max length of a device name.
 
    int ioctl_sock = socket(AF_INET, SOCK_STREAM, 0);
    if (ioctl_sock >= 0) {

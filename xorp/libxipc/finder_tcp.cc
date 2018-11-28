@@ -160,17 +160,14 @@ FinderTcpBase::read_callback(AsyncFileOperator::Event	ev,
 
     if (reinterpret_cast<const uint8_t*>(&_isize) == buffer) {
 	// Read length of data to follow
-	try {
-	    _isize = ntohl(_isize);
-	    if (0 == _isize || _isize > MAX_XRL_INPUT_SIZE)
-		throw bad_alloc();
-	    _input_buffer.resize(_isize);
-	} catch (bad_alloc) {
+	_isize = ntohl(_isize);
+	if (0 == _isize || _isize > MAX_XRL_INPUT_SIZE) {
 	    XLOG_ERROR("Bad input buffer size (%d bytes) from wire, "
 		       "dropping connection", XORP_INT_CAST(_isize));
 	    error_event();
 	    return;
 	}
+	_input_buffer.resize(_isize);
 	_reader.add_buffer(&_input_buffer[0], _input_buffer.size(),
 			   callback(this, &FinderTcpBase::read_callback));
 	_reader.start();

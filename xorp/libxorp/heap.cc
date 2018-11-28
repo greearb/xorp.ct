@@ -84,7 +84,7 @@ Heap::resize(int new_size)
         return 1;	// Error
     } 
     if (_size > 0) {
-        memcpy(p, _p, _size * sizeof(*p));
+        memcpy((void*)(p), _p, _size * sizeof(*p));
         delete[] _p;
     }
     _p = p;
