@@ -400,7 +400,7 @@ comm_bind_udp6(const struct in6_addr *my_addr, unsigned int my_ifindex,
     return (sock);
 
 #else /* ! HAVE_IPV6 */
-    UNUSED(local_dev)
+    UNUSED(local_dev);
     comm_sock_no_ipv6("comm_bind_udp6", my_addr, my_ifindex, my_port,
 		      is_blocking);
     return (XORP_BAD_SOCKET);
