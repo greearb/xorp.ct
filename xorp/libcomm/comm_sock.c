@@ -283,7 +283,7 @@ error:
 
 int
 comm_sock_bind4(xsock_t sock, const struct in_addr *my_addr,
-		unsigned short my_port)
+		unsigned short my_port, const char* local_dev)
 {
     int family;
     struct sockaddr_in sin_addr;
@@ -295,6 +295,8 @@ comm_sock_bind4(xsock_t sock, const struct in_addr *my_addr,
 	return (XORP_ERROR);
     }
 
+    comm_set_bindtodevice(sock, local_dev);
+    
     memset(&sin_addr, 0, sizeof(sin_addr));
 #ifdef HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
     sin_addr.sin_len = sizeof(sin_addr);
@@ -326,7 +328,7 @@ comm_sock_bind4(xsock_t sock, const struct in_addr *my_addr,
 
 int
 comm_sock_bind6(xsock_t sock, const struct in6_addr *my_addr,
-		unsigned int my_ifindex, unsigned short my_port)
+		unsigned int my_ifindex, unsigned short my_port, const char* local_dev)
 {
 #ifdef HAVE_IPV6
     int family;
@@ -338,6 +340,8 @@ comm_sock_bind6(xsock_t sock, const struct in6_addr *my_addr,
 		   sock, family, AF_INET6);
 	return (XORP_ERROR);
     }
+
+    comm_set_bindtodevice(sock, local_dev);
 
     memset(&sin6_addr, 0, sizeof(sin6_addr));
 #ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_LEN
@@ -374,19 +378,20 @@ comm_sock_bind6(xsock_t sock, const struct in6_addr *my_addr,
 
     return XORP_OK;
 #else /* ! HAVE_IPV6 */
+    UNUSED(local_dev);
     comm_sock_no_ipv6("comm_sock_bind6", sock, my_addr, my_ifindex, my_port);
     return XORP_ERROR;
 #endif /* ! HAVE_IPV6 */
 }
 
 int
-comm_sock_bind(xsock_t sock, const struct sockaddr *sin)
+comm_sock_bind(xsock_t sock, const struct sockaddr *sin, const char* local_dev)
 {
     switch (sin->sa_family) {
     case AF_INET:
 	{
 	    const struct sockaddr_in *sin4 = (const struct sockaddr_in *)((const void *)sin);
-	    return comm_sock_bind4(sock, &sin4->sin_addr, sin4->sin_port);
+	    return comm_sock_bind4(sock, &sin4->sin_addr, sin4->sin_port, local_dev);
 	}
 	break;
 #ifdef HAVE_IPV6
@@ -394,12 +399,13 @@ comm_sock_bind(xsock_t sock, const struct sockaddr *sin)
 	{
 	    const struct sockaddr_in6 *sin6 = (const struct sockaddr_in6 *)((const void *)sin);
 	    return comm_sock_bind6(sock, &sin6->sin6_addr, sin6->sin6_scope_id,
-				   sin6->sin6_port);
+				   sin6->sin6_port, local_dev);
 	}
 	break;
 #endif /* HAVE_IPV6 */
     default:
-	XLOG_FATAL("Error comm_sock_bind invalid family = %d", sin->sa_family);
+	XLOG_FATAL("Error comm_sock_bind invalid family = %d local-dev: %s",
+		   sin->sa_family, local_dev ? local_dev : "NULL");
 	return (XORP_ERROR);
     }
 
@@ -1301,8 +1307,11 @@ comm_set_onesbcast(xsock_t sock, int enabled)
 }
 
 int
-comm_set_bindtodevice(xsock_t sock, const char * my_ifname)
+_comm_set_bindtodevice(xsock_t sock, const char * my_ifname, bool quiet)
 {
+    if ((!my_ifname) || (!my_ifname[0]))
+	return XORP_OK;
+
 #ifdef SO_BINDTODEVICE
     char tmp_ifname[IFNAMSIZ];
 
@@ -1338,6 +1347,12 @@ comm_set_bindtodevice(xsock_t sock, const char * my_ifname)
 	}
 	return (XORP_ERROR);
     }
+    else {
+	if (!quiet) {
+	    XLOG_INFO("NOTE:  Successfully bound socket: %i to vif: %s\n",
+		      (int)(sock), tmp_ifname);
+	}
+    }
 
     return (XORP_OK);
 #else
@@ -1351,6 +1366,18 @@ comm_set_bindtodevice(xsock_t sock, const char * my_ifname)
     UNUSED(sock);
     return (XORP_ERROR);
 #endif
+}
+
+int
+comm_set_bindtodevice(xsock_t sock, const char * my_ifname)
+{
+    return _comm_set_bindtodevice(sock, my_ifname, false);
+}
+
+int
+comm_set_bindtodevice_quiet(xsock_t sock, const char * my_ifname)
+{
+    return _comm_set_bindtodevice(sock, my_ifname, true);
 }
 
 int

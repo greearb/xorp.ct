@@ -20,10 +20,6 @@
  */
 
 /*
- * $XORP: xorp/pim/pim_module.h,v 1.11 2008/10/02 21:57:52 bms Exp $
- */
-
-/*
  * Module definitions.
  */
 #ifndef __PIM_PIM_MODULE_H__

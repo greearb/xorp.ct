@@ -5,7 +5,7 @@
 #  Run from root directory of source repository.
 
 VERSION=$(cat xorp/VERSION)
-CTVER=5.2.3
+CTVER=5.3.8
 
 echo ""
 echo "Packaging xorp version: $VERSION  CT Version: $CTVER"

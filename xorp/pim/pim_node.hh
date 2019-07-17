@@ -1072,7 +1072,7 @@ public:
      * 
      * @return true if trace log is enabled, otherwise false.
      */
-    bool	is_log_trace() const { return (_is_log_trace); }
+    bool is_log_trace() const { return (_is_log_trace); }
     
     /**
      * Enable/disable trace log.

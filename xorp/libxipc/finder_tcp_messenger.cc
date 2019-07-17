@@ -279,7 +279,7 @@ FinderTcpConnector::connect(FinderTcpMessenger*& created_messenger)
 
     int in_progress = 0;
     XorpFd sock = comm_connect_tcp4(&host_ia, htons(_port),
-			       COMM_SOCK_NONBLOCKING, &in_progress);
+				    COMM_SOCK_NONBLOCKING, &in_progress, NULL);
     if (!sock.is_valid()) {
 	created_messenger = 0;
 	int last_error = comm_get_last_error();

@@ -894,4 +894,6 @@ inline const IPv4& IPv4::EXPERIMENTAL_BASE(int) {
     return IPv4Constants::experimental_base;
 }
 
+const char* ip_proto_str(uint8_t protocol);
+
 #endif // __LIBXORP_IPV4_HH__

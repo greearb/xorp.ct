@@ -366,3 +366,18 @@ const IPv4 IPv4Constants::class_a_base(IPv4(htonl_literal(0x00000000U)));
 const IPv4 IPv4Constants::class_b_base(IPv4(htonl_literal(0x80000000U)));
 const IPv4 IPv4Constants::class_c_base(IPv4(htonl_literal(0xc0000000U)));
 const IPv4 IPv4Constants::experimental_base(IPv4(htonl_literal(0xf0000000U)));
+
+#ifndef IPPROTO_OSPF
+#define IPPROTO_OSPF 89
+#endif
+const char* ip_proto_str(uint8_t protocol) {
+    switch (protocol) {
+    case IPPROTO_IP: return "IP";
+    case IPPROTO_ICMP: return "ICMP";
+    case IPPROTO_IGMP: return "IGMP";
+    case IPPROTO_PIM: return "PIM";
+    case IPPROTO_OSPF: return "OSPF";
+    default: return "UNKNOWN";
+    };
+}
+

@@ -252,7 +252,7 @@ extern int	comm_listen(xsock_t sock, int backlog);
  * @return the new socket on success, otherwise XORP_BAD_SOCKET.
  */
 extern xsock_t	comm_bind_tcp4(const struct in_addr *my_addr,
-			       unsigned short my_port, int is_blocking);
+			       unsigned short my_port, int is_blocking, const char* local_dev);
 
 /**
  * Open an IPv6 TCP socket and bind it to a local address and a port.
@@ -269,7 +269,7 @@ extern xsock_t	comm_bind_tcp4(const struct in_addr *my_addr,
  */
 extern xsock_t	comm_bind_tcp6(const struct in6_addr *my_addr,
 			       unsigned int my_ifindex, unsigned short my_port,
-			       int is_blocking);
+			       int is_blocking, const char* local_dev);
 
 /**
  * Open a TCP (IPv4 or IPv6) socket and bind it to a local address and a port.
@@ -281,7 +281,7 @@ extern xsock_t	comm_bind_tcp6(const struct in6_addr *my_addr,
  * non-blocking.
  * @return the new socket on success, otherwise XORP_BAD_SOCKET.
  */
-extern xsock_t	comm_bind_tcp(const struct sockaddr *sin, int is_blocking);
+extern xsock_t	comm_bind_tcp(const struct sockaddr *sin, int is_blocking, const char* local_dev);
 
 /**
  * Open an IPv4 UDP socket and bind it to a local address and a port.
@@ -295,7 +295,7 @@ extern xsock_t	comm_bind_tcp(const struct sockaddr *sin, int is_blocking);
  */
 extern xsock_t	comm_bind_udp4(const struct in_addr *my_addr,
 			       unsigned short my_port, int is_blocking,
-			       int reuse_flag);
+			       int reuse_flag, const char* local_dev);
 
 /**
  * Open an IPv6 UDP socket and bind it to a local address and a port.
@@ -312,7 +312,7 @@ extern xsock_t	comm_bind_udp4(const struct in_addr *my_addr,
  */
 extern xsock_t	comm_bind_udp6(const struct in6_addr *my_addr,
 			       unsigned int my_ifindex, unsigned short my_port,
-			       int is_blocking);
+			       int is_blocking, const char* local_dev);
 
 /**
  * Open an IPv4 UDP socket on an interface, bind it to a port,
@@ -340,7 +340,7 @@ extern xsock_t	comm_bind_udp6(const struct in6_addr *my_addr,
 extern xsock_t	comm_bind_join_udp4(const struct in_addr *mcast_addr,
 				    const struct in_addr *join_if_addr,
 				    unsigned short my_port,
-				    int reuse_flag, int is_blocking);
+				    int reuse_flag, int is_blocking, const char* local_dev);
 
 /**
  * Open an IPv6 UDP socket on an interface, bind it to a port,
@@ -368,7 +368,7 @@ extern xsock_t	comm_bind_join_udp4(const struct in_addr *mcast_addr,
 extern xsock_t	comm_bind_join_udp6(const struct in6_addr *mcast_addr,
 				    unsigned int my_ifindex,
 				    unsigned short my_port,
-				    int reuse_flag, int is_blocking);
+				    int reuse_flag, int is_blocking, const char* local_dev);
 
 /**
  * Open an IPv4 TCP socket, and connect it to a remote address and port.
@@ -387,7 +387,7 @@ extern xsock_t	comm_bind_join_udp6(const struct in6_addr *mcast_addr,
 extern xsock_t	comm_connect_tcp4(const struct in_addr *remote_addr,
 				  unsigned short remote_port,
 				  int is_blocking,
-				  int *in_progress);
+				  int *in_progress, const char* local_dev);
 
 /**
  * Open an IPv6 TCP socket, and connect it to a remote address and port.
@@ -406,7 +406,7 @@ extern xsock_t	comm_connect_tcp4(const struct in_addr *remote_addr,
 extern xsock_t	comm_connect_tcp6(const struct in6_addr *remote_addr,
 				  unsigned short remote_port,
 				  int is_blocking,
-				  int *in_progress);
+				  int *in_progress, const char* local_dev);
 
 /**
  * Open an IPv4 UDP socket, and connect it to a remote address and port.
@@ -425,7 +425,7 @@ extern xsock_t	comm_connect_tcp6(const struct in6_addr *remote_addr,
 extern xsock_t	comm_connect_udp4(const struct in_addr *remote_addr,
 				  unsigned short remote_port,
 				  int is_blocking,
-				  int *in_progress);
+				  int *in_progress, const char* local_dev);
 
 /**
  * Open an IPv6 UDP socket, and connect it to a remote address and port.
@@ -444,7 +444,7 @@ extern xsock_t	comm_connect_udp4(const struct in_addr *remote_addr,
 extern xsock_t	comm_connect_udp6(const struct in6_addr *remote_addr,
 				  unsigned short remote_port,
 				  int is_blocking,
-				  int *in_progress);
+				  int *in_progress, const char* local_dev);
 
 /**
  * Open an IPv4 TCP socket, bind it to a local address and a port,
@@ -469,7 +469,7 @@ extern xsock_t	comm_bind_connect_tcp4(const struct in_addr *local_addr,
 				       const struct in_addr *remote_addr,
 				       unsigned short remote_port,
 				       int is_blocking,
-				       int *in_progress);
+				       int *in_progress, const char* local_dev);
 
 /**
  * Open an IPv6 TCP socket, bind it to a local address and a port,
@@ -498,7 +498,7 @@ extern xsock_t	comm_bind_connect_tcp6(const struct in6_addr *local_addr,
 				       const struct in6_addr *remote_addr,
 				       unsigned short remote_port,
 				       int is_blocking,
-				       int *in_progress);
+				       int *in_progress, const char* local_dev);
 
 /**
  * Open an IPv4 UDP socket, bind it to a local address and a port,
@@ -523,7 +523,7 @@ extern xsock_t	comm_bind_connect_udp4(const struct in_addr *local_addr,
 				       const struct in_addr *remote_addr,
 				       unsigned short remote_port,
 				       int is_blocking,
-				       int *in_progress);
+				       int *in_progress, const char* local_dev);
 
 /**
  * Open an IPv6 UDP socket, bind it to a local address and a port,
@@ -552,7 +552,7 @@ extern xsock_t	comm_bind_connect_udp6(const struct in6_addr *local_addr,
 				       const struct in6_addr *remote_addr,
 				       unsigned short remote_port,
 				       int is_blocking,
-				       int *in_progress);
+				       int *in_progress, const char* local_dev);
 
 extern xsock_t  comm_bind_unix(const char* path, int is_blocking);
 extern xsock_t  comm_connect_unix(const char* path, int is_blocking);
@@ -609,7 +609,7 @@ extern int	comm_sock_pair(int domain, int type, int protocol,
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 extern int	comm_sock_bind4(xsock_t sock, const struct in_addr *my_addr,
-				unsigned short my_port);
+				unsigned short my_port, const char* local_dev);
 
 /**
  * Bind an IPv6 socket to an address and a port.
@@ -625,7 +625,7 @@ extern int	comm_sock_bind4(xsock_t sock, const struct in_addr *my_addr,
  */
 extern int	comm_sock_bind6(xsock_t sock, const struct in6_addr *my_addr,
 				unsigned int my_ifindex,
-				unsigned short my_port);
+				unsigned short my_port, const char* local_dev);
 
 /**
  * Bind a socket (IPv4 or IPv6) to an address and a port.
@@ -636,7 +636,7 @@ extern int	comm_sock_bind6(xsock_t sock, const struct in6_addr *my_addr,
  * bind to all in network order.
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-extern int	comm_sock_bind(xsock_t sock, const struct sockaddr *sin);
+extern int	comm_sock_bind(xsock_t sock, const struct sockaddr *sin, const char* local_dev);
 
 /**
  * Join an IPv4 multicast group on a socket (and an interface).
@@ -743,9 +743,7 @@ extern int	comm_sock_connect6(xsock_t sock,
  * as well.
  *
  * @param sock the socket to use to connect.
- * @param sin agnostic sockaddr containing the local address (If it is
- * NULL, will bind to `any' local address.)  and the local port to
- * bind to all in network order.
+ * @param sin agnostic sockaddr containing the remote address.
  * @param is_blocking if true, the socket is blocking, otherwise non-blocking.
  * @param in_progress if the socket is non-blocking and the connect cannot be
  * completed immediately, then the referenced value is set to 1, and the
@@ -942,14 +940,16 @@ extern int	comm_set_iface6(xsock_t sock, unsigned int my_ifindex);
  *
  * XXX: This exists to support XORP's use of the 255.255.255.255
  * address in Linux for MANET protocols, as well as certain limited
- * uses with raw IPv4 sockets, and SHOULD NOT be used in new code.
+ * uses with raw IPv4 sockets.
  *
  * @param sock the socket to be bound to @param my_ifname
  * @param my_ifname the name of the local network interface to which the
  *                  socket should be bound.
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-extern int	comm_set_bindtodevice(xsock_t sock, const char * my_ifname);
+extern int _comm_set_bindtodevice(xsock_t sock, const char * my_ifname, bool quiet_on_success);
+extern int comm_set_bindtodevice(xsock_t sock, const char * my_ifname); // not quiet on success
+extern int comm_set_bindtodevice_quiet(xsock_t sock, const char * my_ifname); // quiet on success
 
 /**
  * Set the option which causes sends to directed IPv4 broadcast addresses 

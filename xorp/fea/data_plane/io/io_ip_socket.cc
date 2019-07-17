@@ -366,8 +366,8 @@ IoIpSocket::set_multicast_ttl(int ttl, string& error_msg)
 
 	if (setsockopt(_proto_socket_out, IPPROTO_IP, IP_MULTICAST_TTL,
 		       XORP_SOCKOPT_CAST(&ip_ttl), sizeof(ip_ttl)) < 0) {
-	    error_msg = c_format("setsockopt(IP_MULTICAST_TTL, %u) failed: %s",
-				 ip_ttl, XSTRERROR);
+	    error_msg = c_format("setsockopt(%d, IP_MULTICAST_TTL, %u) failed: %s",
+				 _proto_socket_out.getSocket(), ip_ttl, XSTRERROR);
 	    return (XORP_ERROR);
 	}
     }
@@ -489,9 +489,9 @@ IoIpSocket::set_default_multicast_interface(const string& if_name,
 	mreqn.imr_ifindex = vifp->pif_index();
 	if (setsockopt(_proto_socket_out, IPPROTO_IP, IP_MULTICAST_IF,
 		       XORP_SOCKOPT_CAST(&mreqn), sizeof(mreqn)) < 0) {
-	    error_msg = c_format("setsockopt(IP_MULTICAST_IF, %s %i) failed: %s",
+	    error_msg = c_format("setsockopt(IP_MULTICAST_IF, %s %i) failed: %s sock-out: %d, iface: %s/%s",
 				 cstring(fa.addr()), vifp->pif_index(),
-				 XSTRERROR);
+				 XSTRERROR, _proto_socket_out.getSocket(), if_name.c_str(), vif_name.c_str());
 	    return XORP_ERROR;
 	}
 #else
@@ -501,8 +501,8 @@ IoIpSocket::set_default_multicast_interface(const string& if_name,
 	fa.addr().copy_out(in_addr);
 	if (setsockopt(_proto_socket_out, IPPROTO_IP, IP_MULTICAST_IF,
 		       XORP_SOCKOPT_CAST(&in_addr), sizeof(in_addr)) < 0) {
-	    error_msg = c_format("setsockopt(IP_MULTICAST_IF, %s) failed: %s",
-				 cstring(fa.addr()), XSTRERROR);
+	    error_msg = c_format("setsockopt(IP_MULTICAST_IF, %s) failed: %s sock-out: %d",
+				 cstring(fa.addr()), XSTRERROR, _proto_socket_out.getSocket());
 	    return (XORP_ERROR);
 	}
 #endif
@@ -546,6 +546,9 @@ IoIpSocket::create_input_socket(const string& if_name,
 {
     error_msg.clear();
 
+    //XLOG_INFO("IoIpSOcket::create_input_socket for %s/%s\n",
+    //          if_name.c_str(), vif_name.c_str());
+
     if (!iftree().find_vif(if_name, vif_name)) {
 	error_msg += c_format("Creating of input socket failed: vif: %s/%s not found",
 			      if_name.c_str(), vif_name.c_str());
@@ -554,8 +557,8 @@ IoIpSocket::create_input_socket(const string& if_name,
 
     if (!findOrCreateInputSocket(if_name, vif_name, error_msg)) {
 	string em = c_format("ERROR:  Could not find or create input socket, "
-		"if_name: %s  vif_name: %s  error_msg: %s",
-		if_name.c_str(), vif_name.c_str(), error_msg.c_str());
+			     "if_name: %s  vif_name: %s  error_msg: %s",
+			     if_name.c_str(), vif_name.c_str(), error_msg.c_str());
 	XLOG_WARNING("%s", em.c_str());
 	error_msg += em;
 	goto out_err;
@@ -708,39 +711,6 @@ IoIpSocket::join_multicast_group(const string& if_name,
     return XORP_ERROR;
 }
 
-
-XorpFd* IoIpSocket::mcast_protocol_fd_in() {
-#ifdef USE_SOCKET_PER_IFACE
-    if (! _mcast_proto_socket_in.is_valid()) {
-	// Try to open the socket.
-	_mcast_proto_socket_in = socket(family(), SOCK_RAW, ip_protocol());
-	if (!_mcast_proto_socket_in.is_valid()) {
-	    XLOG_WARNING("Cannot open multicast IP protocol %u raw socket: %s",
-			 ip_protocol(), XSTRERROR);
-	}
-	else {
-	    string err_msg;
-	    initializeInputSocket(&_mcast_proto_socket_in, err_msg);
-	    if (err_msg.size()) {
-		XLOG_WARNING("%s", err_msg.c_str());
-	    }
-	}
-    }
-    return &_mcast_proto_socket_in;
-#else
-    string nll("na");
-    string err_msg;
-    XorpFd* rv;
-    // Just grabs (or creates) first and only socket when USE_SOCKET_PER_IFACE is not defined.
-    rv = findOrCreateInputSocket(nll, nll, err_msg);
-    if (err_msg.size()) {
-        XLOG_WARNING("%s", err_msg.c_str());
-    }
-    return rv;
-#endif
-}
-
-
 XorpFd* IoIpSocket::findExistingInputSocket(const string& if_name, const string& vif_name) {
 #ifdef USE_SOCKET_PER_IFACE
     string k(if_name);
@@ -758,7 +728,25 @@ XorpFd* IoIpSocket::findExistingInputSocket(const string& if_name, const string&
     else {
 	return i->second;
     }
+}
 
+XorpFd* IoIpSocket::findExistingInputSocketMcast(const string& if_name, const string& vif_name) {
+#ifdef USE_SOCKET_PER_IFACE
+    string k(if_name);
+    k += " ";
+    k += vif_name;
+    map<string, XorpFd*>::iterator i = _mcast_proto_sockets_in.find(k);
+#else
+    UNUSED(if_name);
+    UNUSED(vif_name);
+    map<string, XorpFd*>::iterator i = _mcast_proto_sockets_in.begin();
+#endif
+    if (i == _mcast_proto_sockets_in.end()) {
+	return NULL;
+    }
+    else {
+	return i->second;
+    }
 }
 
 
@@ -889,13 +877,15 @@ IoIpSocket::leave_multicast_group(const string& if_name,
 
 XorpFd* IoIpSocket::findOrCreateInputSocket(const string& if_name, const string& vif_name,
 					    string& error_msg) {
-    XorpFd* rv = findExistingInputSocket(if_name, vif_name);
+    XorpFd* rv;
 
-    string key(if_name);
-    key += " ";
-    key += vif_name;
+    rv = findExistingInputSocket(if_name, vif_name);
 
     if (!rv) {
+	string key(if_name);
+	key += " ";
+	key += vif_name;
+
 	// Create a new one
 	rv = new XorpFd();
 	*rv = socket(family(), SOCK_RAW, ip_protocol());
@@ -907,43 +897,84 @@ XorpFd* IoIpSocket::findOrCreateInputSocket(const string& if_name, const string&
 	}
 	else {
              XLOG_INFO("Successfully created socket: %i on family: %i  protocol: %i"
-		       " interface: %s  input sockets size: %i\n",
+		       " interface: %s/%s  input sockets size: %i\n",
 		       (int)(*rv), (int)(family()), (int)(ip_protocol()),
-		       vif_name.c_str(), (int)(_proto_sockets_in.size()));
+		       if_name.c_str(), vif_name.c_str(), (int)(_proto_sockets_in.size()));
 	    _proto_sockets_in[key] = rv;
 	}
 
-	int rslt = initializeInputSocket(rv, error_msg);
+	int rslt = initializeInputSocket(rv, vif_name, error_msg);
 	if (rslt != XORP_OK) {
 	    _proto_sockets_in.erase(key);
 	    cleanupXorpFd(rv);
 	    return NULL;
 	}
+    }
 
-	// Bind to a particular interface.
-#ifdef USE_SOCKET_PER_IFACE
-#ifdef SO_BINDTODEVICE
-	if (setsockopt(*rv, SOL_SOCKET, SO_BINDTODEVICE,
-		       vif_name.c_str(), vif_name.size() + 1)) {
-	    error_msg += c_format("ERROR:  IoIpSocket::open_proto_socket, setsockopt (BINDTODEVICE):  failed: %s",
-				  XSTRERROR);
+    return rv;
+}
+
+XorpFd* IoIpSocket::findOrCreateInputSocketMcast(const string& if_name, const string& vif_name, string& error_msg) {
+    XorpFd* rv;
+
+    rv = findExistingInputSocketMcast(if_name, vif_name);
+
+    if (!rv) {
+	string key(if_name);
+	key += " ";
+	key += vif_name;
+
+	// Create a new one
+	rv = new XorpFd();
+	*rv = socket(family(), SOCK_RAW, ip_protocol());
+	if (!rv->is_valid()) {
+	    error_msg += c_format("Cannot open mcast IP protocol %u raw socket: %s",
+				  ip_protocol(), XSTRERROR);
+	    delete rv;
+	    return NULL;
 	}
 	else {
-	    XLOG_INFO("Successfully bound socket: %i to interface: %s  input sockets size: %i\n",
-		      (int)(*rv), vif_name.c_str(), (int)(_proto_sockets_in.size()));
+             XLOG_INFO("Successfully created mcast socket: %i on family: %i  protocol: %i"
+		       " interface: %s/%s  input sockets size: %i\n",
+		       (int)(*rv), (int)(family()), (int)(ip_protocol()),
+		       if_name.c_str(), vif_name.c_str(), (int)(_mcast_proto_sockets_in.size()));
+	    _mcast_proto_sockets_in[key] = rv;
 	}
-#endif
-#endif
+
+	int rslt = initializeInputSocket(rv, vif_name, error_msg);
+	if (rslt != XORP_OK) {
+	    _mcast_proto_sockets_in.erase(key);
+	    cleanupXorpFd(rv);
+	    return NULL;
+	}
     }
 
     return rv;
 }
 
 
-int IoIpSocket::initializeInputSocket(XorpFd* rv, string& error_msg) {
+int IoIpSocket::initializeInputSocket(XorpFd* rv, const string& _local_dev, string& error_msg) {
     //
     // Set various socket options
     //
+
+    // Bind to a particular interface.
+#ifdef USE_SOCKET_PER_IFACE
+#ifdef SO_BINDTODEVICE
+    if (_local_dev.size()) {
+	if (setsockopt(*rv, SOL_SOCKET, SO_BINDTODEVICE,
+		       _local_dev.c_str(), _local_dev.size() + 1)) {
+	    error_msg += c_format("ERROR:  IoIpSocket::open_proto_socket, setsockopt (BINDTODEVICE):  failed: %s",
+				  XSTRERROR);
+	}
+	else {
+	    XLOG_INFO("Successfully bound socket: %i to interface: %s  input sockets size: %d  mcast-input-sockets-size: %d protocol: %d\n",
+		      (int)(*rv), _local_dev.c_str(), (int)(_proto_sockets_in.size()),
+		      (int)(_mcast_proto_sockets_in.size()), ip_protocol());
+	}
+    }
+#endif
+#endif
 
     // Make socket non-blocking by default.
     comm_sock_set_blocking(*rv, COMM_SOCK_NONBLOCKING);
@@ -1119,6 +1150,9 @@ IoIpSocket::open_proto_sockets(string& error_msg)
     // Set various socket options
     //
 
+    // NOTE:  Cannot bind-to-dev here, it breaks OSPF, and probably
+    // other things as well.
+
     // Lots of output buffering
     if (comm_sock_set_sndbuf(_proto_socket_out, SO_SND_BUF_SIZE_MAX,
 			     SO_SND_BUF_SIZE_MIN)
@@ -1168,15 +1202,14 @@ IoIpSocket::close_proto_sockets(string& error_msg)
 	_proto_socket_out.clear();
     }
 
-#ifdef USE_SOCKET_PER_IFACE
-    if (_mcast_proto_socket_in.is_valid()) {
-	eventloop().remove_ioevent_cb(_mcast_proto_socket_in);
-	comm_close(_mcast_proto_socket_in);
-	_mcast_proto_socket_in.clear();
-    }
-#endif
-
     map<string, XorpFd*>::iterator i;
+    for (i = _mcast_proto_sockets_in.begin(); i != _mcast_proto_sockets_in.end(); i++) {
+
+	XorpFd* fd = i->second;
+	cleanupXorpFd(fd);
+    }
+    _mcast_proto_sockets_in.clear();
+
     for (i = _proto_sockets_in.begin(); i != _proto_sockets_in.end(); i++) {
 
 	XorpFd* fd = i->second;
@@ -1540,6 +1573,9 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
 
     // Read from the socket
     nbytes = recvmsg(fd, &_rcvmh, 0);
+    //XLOG_INFO("Read %d bytes from socket: %d protocol: %d(%s)\n",
+    //          (int)(nbytes), fd.getSocket(), ip_protocol(), ip_proto_str(ip_protocol()));
+
     if (nbytes < 0) {
 	if (errno == EINTR)
 	    return;		// OK: restart receiving
@@ -1617,6 +1653,9 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
 	    break;
 
 #ifdef HAVE_IPV4_MULTICAST_ROUTING
+	//XLOG_INFO("Read %d bytes, sizeof igmpmsg: %d\n",
+	//          (int)(nbytes), (int)(sizeof(struct igmpmsg)));
+
 	if (nbytes < (ssize_t)sizeof(struct igmpmsg)) {
 	    // Probably not a system upcall
 	    break;
@@ -1699,9 +1738,9 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
 	// Input check
 	if (nbytes < (ssize_t)ip4.size()) {
 	    XLOG_WARNING("proto_socket_read() failed: "
-			 "packet size %d is smaller than minimum size %u",
-			 XORP_INT_CAST(nbytes),
-			 XORP_UINT_CAST(ip4.size()));
+	                 "packet size %d is smaller than minimum size %u",
+	    	           XORP_INT_CAST(nbytes),
+	    	           XORP_UINT_CAST(ip4.size()));
 	    return;		// Error
 	}
 #ifndef HOST_OS_WINDOWS
@@ -1785,6 +1824,7 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
 		continue;
 	    switch (cmsgp->cmsg_type) {
 #ifdef IP_RECVIF
+		/* Not compiled on Linux it seems. --Ben */
 	    case IP_RECVIF:
 	    {
 		struct sockaddr_dl *sdl = NULL;
@@ -1800,6 +1840,7 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
 #ifdef IP_PKTINFO
 	    case IP_PKTINFO:
 	    {
+		/* Enabled on Linux */
 		struct in_pktinfo *inp = NULL;
 		if (cmsgp->cmsg_len < CMSG_LEN(sizeof(struct in_pktinfo)))
 		    continue;
@@ -2078,12 +2119,17 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
 	break;
     } while (false);
 
+    //XLOG_INFO("proto_socket_read, RX packet from %s to %s pif_index %u vifp: %s proto: %s\n",
+    //          src_address.str().c_str(), dst_address.str().c_str(), pif_index,
+    //          vifp ? vifp->vifname().c_str() : "NULL", ip_proto_str(ip_protocol()));
+
     if ((ifp == NULL) || (vifp == NULL)) {
 	// No vif found. Ignore this packet.
 #ifdef USE_SOCKET_PER_IFACE
 	// For multicast packets, there seems no good way to filter
 	// currently, so we just have to ignore them here.  Ignoring
 	// this error message to decrease spammage if dest is mcast.
+	// TODO-BEN:  Probably could re-enable this when using VRF
 	if (!dst_address.is_multicast()) {
 	    // Don't expect this to happen, so log all errors.
 	    XLOG_WARNING("proto_socket_read() failed: "
@@ -2120,8 +2166,6 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
 		ext_headers_type,
 		ext_headers_payload,
 		payload);
-
-    return;			// OK
 }
 
 int
@@ -2150,6 +2194,10 @@ IoIpSocket::send_packet(const string& if_name,
     UNUSED(int_val);
     UNUSED(cmsgp);
     UNUSED(cmsg_data);
+
+    //XLOG_INFO("send-pkt on %s/%s, src: %s  dst: %s  protocol: %d(%s)\n",
+    //          if_name.c_str(), vif_name.c_str(), src_address.str().c_str(), dst_address.str().c_str(),
+    //          ip_protocol(), ip_proto_str(ip_protocol()));
 
     XLOG_ASSERT(ext_headers_type.size() == ext_headers_payload.size());
 
@@ -2808,6 +2856,21 @@ IoIpSocket::proto_socket_transmit(const IfTreeInterface* ifp,
     }
 #endif // ! IPV4_RAW_INPUT_IS_RAW
 
+    // XXX: We need to bind to a network interface under Linux, but
+    // only if we might be running multiple XORP instances.
+    // The heuristic for that is to test whether the unicast forwarding
+    // table ID is configured.
+    //
+    FibConfig& fibconfig = fea_data_plane_manager().fibconfig();
+    if (fibconfig.unicast_forwarding_table_id_is_configured(family())
+	&& (! vifp->vifname().empty())) {
+	ret_value = comm_set_bindtodevice_quiet(_proto_socket_out,
+						vifp->vifname().c_str());
+	if (ret_value == XORP_ERROR)
+	    goto ret_label;
+	setbind = true;
+    }
+
     //
     // Unicast/multicast related setting
     //
@@ -2829,25 +2892,6 @@ IoIpSocket::proto_socket_transmit(const IfTreeInterface* ifp,
 	    goto ret_label;
 	}
 	setloop = true;
-    } else {
-	// Unicast-related setting
-	//
-	// XXX: We need to bind to a network interface under Linux, but
-	// only if we might be running multiple XORP instances.
-	// The heuristic for that is to test whether the unicast forwarding
-	// table ID is configured.
-	//
-	FibConfig& fibconfig = fea_data_plane_manager().fibconfig();
-	if (fibconfig.unicast_forwarding_table_id_is_configured(family())
-	    && (! vifp->vifname().empty())) {
-	    if (comm_bindtodevice_present() == XORP_OK) {
-		ret_value = comm_set_bindtodevice(_proto_socket_out,
-						  vifp->vifname().c_str());
-		if (ret_value == XORP_ERROR)
-		    goto ret_label;
-		setbind = true;
-	    }
-	}
     }
 
     //
@@ -2961,11 +3005,9 @@ IoIpSocket::proto_socket_transmit(const IfTreeInterface* ifp,
 	string dummy_error_msg;
 	enable_multicast_loopback(false, dummy_error_msg);
     }
-    if (comm_bindtodevice_present() == XORP_OK) {
-	if (setbind) {
-	    // Unbind the interface on Linux platforms.
-	    (void)comm_set_bindtodevice(_proto_socket_out, "");
-	}
+    if (setbind) {
+	// Unbind the interface on Linux platforms.
+	comm_set_bindtodevice_quiet(_proto_socket_out, "");
     }
 
     if (ret_value != XORP_OK) {

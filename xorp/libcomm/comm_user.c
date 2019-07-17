@@ -268,7 +268,7 @@ comm_listen(xsock_t sock, int backlog)
 
 xsock_t
 comm_bind_tcp4(const struct in_addr *my_addr, unsigned short my_port,
-	       int is_blocking)
+	       int is_blocking, const char* local_dev)
 {
     xsock_t sock;
 
@@ -280,7 +280,7 @@ comm_bind_tcp4(const struct in_addr *my_addr, unsigned short my_port,
 	comm_sock_close(sock);
 	return (XORP_BAD_SOCKET);
     }
-    if (comm_sock_bind4(sock, my_addr, my_port) != XORP_OK) {
+    if (comm_sock_bind4(sock, my_addr, my_port, local_dev) != XORP_OK) {
 	comm_sock_close(sock);
 	return (XORP_BAD_SOCKET);
     }
@@ -290,7 +290,7 @@ comm_bind_tcp4(const struct in_addr *my_addr, unsigned short my_port,
 
 xsock_t
 comm_bind_tcp6(const struct in6_addr *my_addr, unsigned int my_ifindex,
-	       unsigned short my_port, int is_blocking)
+	       unsigned short my_port, int is_blocking, const char* local_dev)
 {
 #ifdef HAVE_IPV6
     xsock_t sock;
@@ -303,7 +303,7 @@ comm_bind_tcp6(const struct in6_addr *my_addr, unsigned int my_ifindex,
 	comm_sock_close(sock);
 	return (XORP_BAD_SOCKET);
     }
-    if (comm_sock_bind6(sock, my_addr, my_ifindex, my_port) != XORP_OK) {
+    if (comm_sock_bind6(sock, my_addr, my_ifindex, my_port, local_dev) != XORP_OK) {
 	comm_sock_close(sock);
 	return (XORP_BAD_SOCKET);
     }
@@ -318,14 +318,14 @@ comm_bind_tcp6(const struct in6_addr *my_addr, unsigned int my_ifindex,
 }
 
 xsock_t
-comm_bind_tcp(const struct sockaddr *sock, int is_blocking)
+comm_bind_tcp(const struct sockaddr *sock, int is_blocking, const char* local_dev)
 {
     switch (sock->sa_family) {
     case AF_INET:
 	{
 	    const struct sockaddr_in *sin =
 		(const struct sockaddr_in *)((const void *)sock);
-	    return comm_bind_tcp4(&sin->sin_addr, sin->sin_port, is_blocking);
+	    return comm_bind_tcp4(&sin->sin_addr, sin->sin_port, is_blocking, local_dev);
 	}
 	break;
 #ifdef HAVE_IPV6
@@ -334,7 +334,7 @@ comm_bind_tcp(const struct sockaddr *sock, int is_blocking)
 	    const struct sockaddr_in6 *sin =
 		(const struct sockaddr_in6 *)((const void *)sock);
 	    return comm_bind_tcp6(&sin->sin6_addr, sin->sin6_scope_id,
-				  sin->sin6_port, is_blocking);
+				  sin->sin6_port, is_blocking, local_dev);
 	}
 	break;
 #endif /* HAVE_IPV6 */
@@ -350,7 +350,7 @@ comm_bind_tcp(const struct sockaddr *sock, int is_blocking)
 
 xsock_t
 comm_bind_udp4(const struct in_addr *my_addr, unsigned short my_port,
-	       int is_blocking, int reuse_flag)
+	       int is_blocking, int reuse_flag, const char* local_dev)
 {
     xsock_t sock;
 
@@ -373,7 +373,7 @@ comm_bind_udp4(const struct in_addr *my_addr, unsigned short my_port,
 	}
     }
     
-    if (comm_sock_bind4(sock, my_addr, my_port) != XORP_OK) {
+    if (comm_sock_bind4(sock, my_addr, my_port, local_dev) != XORP_OK) {
 	comm_sock_close(sock);
 	return (XORP_BAD_SOCKET);
     }
@@ -383,7 +383,7 @@ comm_bind_udp4(const struct in_addr *my_addr, unsigned short my_port,
 
 xsock_t
 comm_bind_udp6(const struct in6_addr *my_addr, unsigned int my_ifindex,
-	       unsigned short my_port, int is_blocking)
+	       unsigned short my_port, int is_blocking, const char* local_dev)
 {
 #ifdef HAVE_IPV6
     xsock_t sock;
@@ -392,7 +392,7 @@ comm_bind_udp6(const struct in6_addr *my_addr, unsigned int my_ifindex,
     sock = comm_sock_open(AF_INET6, SOCK_DGRAM, 0, is_blocking);
     if (sock == XORP_BAD_SOCKET)
 	return (XORP_BAD_SOCKET);
-    if (comm_sock_bind6(sock, my_addr, my_ifindex, my_port) != XORP_OK) {
+    if (comm_sock_bind6(sock, my_addr, my_ifindex, my_port, local_dev) != XORP_OK) {
 	comm_sock_close(sock);
 	return (XORP_BAD_SOCKET);
     }
@@ -400,6 +400,7 @@ comm_bind_udp6(const struct in6_addr *my_addr, unsigned int my_ifindex,
     return (sock);
 
 #else /* ! HAVE_IPV6 */
+    UNUSED(local_dev);
     comm_sock_no_ipv6("comm_bind_udp6", my_addr, my_ifindex, my_port,
 		      is_blocking);
     return (XORP_BAD_SOCKET);
@@ -410,7 +411,7 @@ xsock_t
 comm_bind_join_udp4(const struct in_addr *mcast_addr,
 		    const struct in_addr *join_if_addr,
 		    unsigned short my_port,
-		    int reuse_flag, int is_blocking)
+		    int reuse_flag, int is_blocking, const char* local_dev)
 {
     xsock_t sock;
 
@@ -430,7 +431,7 @@ comm_bind_join_udp4(const struct in_addr *mcast_addr,
 	}
     }
     /* Bind the socket */
-    if (comm_sock_bind4(sock, NULL, my_port) != XORP_OK) {
+    if (comm_sock_bind4(sock, NULL, my_port, local_dev) != XORP_OK) {
 	comm_sock_close(sock);
 	return (XORP_BAD_SOCKET);
     }
@@ -447,7 +448,7 @@ xsock_t
 comm_bind_join_udp6(const struct in6_addr *mcast_addr,
 		    unsigned int my_ifindex,
 		    unsigned short my_port,
-		    int reuse_flag, int is_blocking)
+		    int reuse_flag, int is_blocking, const char* local_dev)
 {
 #ifdef HAVE_IPV6
     xsock_t sock;
@@ -468,7 +469,7 @@ comm_bind_join_udp6(const struct in6_addr *mcast_addr,
 	}
     }
     /* Bind the socket */
-    if (comm_sock_bind6(sock, NULL, 0, my_port) != XORP_OK) {
+    if (comm_sock_bind6(sock, NULL, 0, my_port, local_dev) != XORP_OK) {
 	comm_sock_close(sock);
 	return (XORP_BAD_SOCKET);
     }
@@ -482,16 +483,19 @@ comm_bind_join_udp6(const struct in6_addr *mcast_addr,
     return (sock);
 
 #else /* ! HAVE_IPV6 */
+    UNUSED(local_dev);
     comm_sock_no_ipv6("comm_bind_join_udp6", mcast_addr, my_ifindex,
 		      my_port, reuse_flag, is_blocking);
     return (XORP_BAD_SOCKET);
 #endif /* ! HAVE_IPV6 */
 }
 
+
+
 xsock_t
 comm_connect_tcp4(const struct in_addr *remote_addr,
 		  unsigned short remote_port, int is_blocking,
-		  int *in_progress)
+		  int *in_progress, const char* local_dev)
 {
     xsock_t sock;
 
@@ -502,6 +506,7 @@ comm_connect_tcp4(const struct in_addr *remote_addr,
     sock = comm_sock_open(AF_INET, SOCK_STREAM, 0, is_blocking);
     if (sock == XORP_BAD_SOCKET)
 	return (XORP_BAD_SOCKET);
+    comm_set_bindtodevice(sock, local_dev);
     if (comm_sock_connect4(sock, remote_addr, remote_port, is_blocking,
 			   in_progress)
 	!= XORP_OK) {
@@ -522,7 +527,7 @@ comm_connect_tcp4(const struct in_addr *remote_addr,
 xsock_t
 comm_connect_tcp6(const struct in6_addr *remote_addr,
 		  unsigned short remote_port, int is_blocking,
-		  int *in_progress)
+		  int *in_progress, const char* local_dev)
 {
 #ifdef HAVE_IPV6
     xsock_t sock;
@@ -534,6 +539,7 @@ comm_connect_tcp6(const struct in6_addr *remote_addr,
     sock = comm_sock_open(AF_INET6, SOCK_STREAM, 0, is_blocking);
     if (sock == XORP_BAD_SOCKET)
 	return (XORP_BAD_SOCKET);
+    comm_set_bindtodevice(sock, local_dev);
     if (comm_sock_connect6(sock, remote_addr, remote_port, is_blocking,
 			   in_progress)
 	!= XORP_OK) {
@@ -551,6 +557,7 @@ comm_connect_tcp6(const struct in6_addr *remote_addr,
     return (sock);
 
 #else /* ! HAVE_IPV6 */
+    UNUSED(local_dev);
     if (in_progress != NULL)
 	*in_progress = 0;
 
@@ -563,7 +570,7 @@ comm_connect_tcp6(const struct in6_addr *remote_addr,
 xsock_t
 comm_connect_udp4(const struct in_addr *remote_addr,
 		  unsigned short remote_port, int is_blocking,
-		  int *in_progress)
+		  int *in_progress, const char* local_dev)
 {
     xsock_t sock;
 
@@ -574,6 +581,7 @@ comm_connect_udp4(const struct in_addr *remote_addr,
     sock = comm_sock_open(AF_INET, SOCK_DGRAM, 0, is_blocking);
     if (sock == XORP_BAD_SOCKET)
 	return (XORP_BAD_SOCKET);
+    comm_set_bindtodevice(sock, local_dev);
     if (comm_sock_connect4(sock, remote_addr, remote_port, is_blocking,
 			   in_progress)
 	!= XORP_OK) {
@@ -594,7 +602,7 @@ comm_connect_udp4(const struct in_addr *remote_addr,
 xsock_t
 comm_connect_udp6(const struct in6_addr *remote_addr,
 		  unsigned short remote_port, int is_blocking,
-		  int *in_progress)
+		  int *in_progress, const char* local_dev)
 {
 #ifdef HAVE_IPV6
     xsock_t sock;
@@ -606,6 +614,7 @@ comm_connect_udp6(const struct in6_addr *remote_addr,
     sock = comm_sock_open(AF_INET6, SOCK_DGRAM, 0, is_blocking);
     if (sock == XORP_BAD_SOCKET)
 	return (XORP_BAD_SOCKET);
+    comm_set_bindtodevice(sock, local_dev);
     if (comm_sock_connect6(sock, remote_addr, remote_port, is_blocking,
 			   in_progress)
 	!= XORP_OK) {
@@ -623,6 +632,7 @@ comm_connect_udp6(const struct in6_addr *remote_addr,
     return (sock);
 
 #else /* ! HAVE_IPV6 */
+    UNUSED(local_dev);
     if (in_progress != NULL)
 	*in_progress = 0;
 
@@ -638,7 +648,7 @@ comm_bind_connect_tcp4(const struct in_addr *local_addr,
 		       const struct in_addr *remote_addr,
 		       unsigned short remote_port,
 		       int is_blocking,
-		       int *in_progress)
+		       int *in_progress, const char* local_dev)
 {
     xsock_t sock;
 
@@ -653,7 +663,7 @@ comm_bind_connect_tcp4(const struct in_addr *local_addr,
 	comm_sock_close(sock);
 	return (XORP_BAD_SOCKET);
     }
-    if (comm_sock_bind4(sock, local_addr, local_port) != XORP_OK) {
+    if (comm_sock_bind4(sock, local_addr, local_port, local_dev) != XORP_OK) {
 	comm_sock_close(sock);
 	return (XORP_BAD_SOCKET);
     }
@@ -681,7 +691,7 @@ comm_bind_connect_tcp6(const struct in6_addr *local_addr,
 		       const struct in6_addr *remote_addr,
 		       unsigned short remote_port,
 		       int is_blocking,
-		       int *in_progress)
+		       int *in_progress, const char* local_dev)
 {
 #ifdef HAVE_IPV6
     xsock_t sock;
@@ -697,7 +707,7 @@ comm_bind_connect_tcp6(const struct in6_addr *local_addr,
 	comm_sock_close(sock);
 	return (XORP_BAD_SOCKET);
     }
-    if (comm_sock_bind6(sock, local_addr, my_ifindex, local_port) != XORP_OK) {
+    if (comm_sock_bind6(sock, local_addr, my_ifindex, local_port, local_dev) != XORP_OK) {
 	comm_sock_close(sock);
 	return (XORP_BAD_SOCKET);
     }
@@ -718,6 +728,7 @@ comm_bind_connect_tcp6(const struct in6_addr *local_addr,
     return (sock);
 
 #else /* ! HAVE_IPV6 */
+    UNUSED(local_dev);
     if (in_progress != NULL)
 	*in_progress = 0;
 
@@ -734,7 +745,7 @@ comm_bind_connect_udp4(const struct in_addr *local_addr,
 		       const struct in_addr *remote_addr,
 		       unsigned short remote_port,
 		       int is_blocking,
-		       int *in_progress)
+		       int *in_progress, const char* local_dev)
 {
     xsock_t sock;
 
@@ -745,7 +756,7 @@ comm_bind_connect_udp4(const struct in_addr *local_addr,
     sock = comm_sock_open(AF_INET, SOCK_DGRAM, 0, is_blocking);
     if (sock == XORP_BAD_SOCKET)
 	return (XORP_BAD_SOCKET);
-    if (comm_sock_bind4(sock, local_addr, local_port) != XORP_OK) {
+    if (comm_sock_bind4(sock, local_addr, local_port, local_dev) != XORP_OK) {
 	comm_sock_close(sock);
 	return (XORP_BAD_SOCKET);
     }
@@ -773,7 +784,7 @@ comm_bind_connect_udp6(const struct in6_addr *local_addr,
 		       const struct in6_addr *remote_addr,
 		       unsigned short remote_port,
 		       int is_blocking,
-		       int *in_progress)
+		       int *in_progress, const char* local_dev)
 {
 #ifdef HAVE_IPV6
     xsock_t sock;
@@ -785,7 +796,7 @@ comm_bind_connect_udp6(const struct in6_addr *local_addr,
     sock = comm_sock_open(AF_INET6, SOCK_DGRAM, 0, is_blocking);
     if (sock == XORP_BAD_SOCKET)
 	return (XORP_BAD_SOCKET);
-    if (comm_sock_bind6(sock, local_addr, my_ifindex, local_port) != XORP_OK) {
+    if (comm_sock_bind6(sock, local_addr, my_ifindex, local_port, local_dev) != XORP_OK) {
 	comm_sock_close(sock);
 	return (XORP_BAD_SOCKET);
     }
@@ -806,6 +817,7 @@ comm_bind_connect_udp6(const struct in6_addr *local_addr,
     return (sock);
 
 #else /* ! HAVE_IPV6 */
+    UNUSED(local_dev);
     if (in_progress != NULL)
 	*in_progress = 0;
 

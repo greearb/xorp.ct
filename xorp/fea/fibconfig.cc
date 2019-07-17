@@ -44,7 +44,7 @@
 
 FibConfig::FibConfig(FeaNode& fea_node, const IfTree& system_config_iftree,
 		     const IfTree& merged_config_iftree)
-    : _eventloop(fea_node.eventloop()),
+	: vrf_queried(false), _eventloop(fea_node.eventloop()),
 #ifndef XORP_DISABLE_PROFILE
       _profile(fea_node.profile()),
 #endif
@@ -79,6 +79,45 @@ FibConfig::~FibConfig()
 	delete _ftm;
 	_ftm = NULL;
     }
+}
+
+const string& FibConfig::get_vrf_name() const {
+    if (!vrf_queried) {
+	/* Nasty hack, try to bind to VRF if it exists */
+	char cmd[100];
+	char fname[50];
+	int table_id;
+	vrf_name = "";
+	if (unicast_forwarding_table_id4_is_configured())
+	    table_id = unicast_forwarding_table_id4();
+	else if (unicast_forwarding_table_id6_is_configured())
+	    table_id = unicast_forwarding_table_id6();
+	else
+	    goto out;
+	{
+	    sprintf(fname, "/tmp/xorp_vrf_%d.txt", table_id);
+	    sprintf(cmd, "ip vrf show | grep \" %d$\" > %s", table_id, fname);
+	    XLOG_INFO("Trying to detect vrf name, table-id: %d\n", table_id);
+	    system(cmd);
+	    ifstream tmp(fname);
+	    if (tmp) {
+		string local_dev;
+		tmp >> local_dev; /* read in the vrf name */
+		if (local_dev.size()) {
+		    snprintf(cmd, sizeof(cmd), "/sys/class/net/%s/address", local_dev.c_str());
+		    ifstream tst2(cmd);
+		    if (tst2) {
+			// OK, device seems to have been probed correctly, save for later.
+			vrf_name = local_dev;
+			XLOG_INFO("Found vrf: %s for table-id: %d\n", vrf_name.c_str(), table_id);
+		    }
+		}
+	    }
+	}
+      out:
+	vrf_queried = true;
+    }
+    return vrf_name;
 }
 
 ProcessStatus
@@ -117,6 +156,7 @@ uint32_t FibConfig::get_netlink_filter_table_id() const {
 }
 
 void FibConfig::propagate_table_id_change() {
+    vrf_queried = false; /* need to re-query */
     uint32_t tbl_id = get_netlink_filter_table_id();
     // Tell the various plugins our configured table changed in case they can filter.
     {

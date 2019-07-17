@@ -140,7 +140,7 @@ get_remote_socket_details(XorpFd fd, string& addr, string& port)
 
 // XXX: This will go away eventually.
 XorpFd
-create_connected_tcp4_socket(const string& addr_slash_port)
+create_connected_tcp4_socket(const string& addr_slash_port, const string& local_dev)
 {
     XorpFd sock;
     string addr;
@@ -159,7 +159,7 @@ create_connected_tcp4_socket(const string& addr_slash_port)
     }
 
     sock = comm_connect_tcp4(&ia, htons(port), COMM_SOCK_NONBLOCKING,
-			     &in_progress);
+			     &in_progress, local_dev.c_str());
     if (!sock.is_valid()) {
 	return sock;
     }

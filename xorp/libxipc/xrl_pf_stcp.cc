@@ -453,7 +453,6 @@ STCPRequestHandler::response_pending() const
     return (_responses.empty() == false) || (_writer.running() == true);
 }
 
-
 // ----------------------------------------------------------------------------
 // Simple TCP Listener - creates TCPRequestHandlers for each incoming
 // connection.
@@ -466,7 +465,7 @@ XrlPFSTCPListener::XrlPFSTCPListener(EventLoop&	    e,
 {
     in_addr myaddr = get_preferred_ipv4_addr();
 
-    _sock = comm_bind_tcp4(&myaddr, port, COMM_SOCK_NONBLOCKING);
+    _sock = comm_bind_tcp4(&myaddr, port, COMM_SOCK_NONBLOCKING, NULL);
     if (!_sock.is_valid()) {
 	xorp_throw(XrlPFConstructorError,
 		   comm_get_last_error_str());
@@ -721,7 +720,8 @@ XrlPFSTCPSender::XrlPFSTCPSender(const string& name, EventLoop& e,
       _uid(_next_uid++),
       _keepalive_time(keepalive_time)
 {
-    _sock = create_connected_tcp4_socket(addr_slash_port);
+    string empty;
+    _sock = create_connected_tcp4_socket(addr_slash_port, empty);
     construct();
 }
 

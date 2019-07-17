@@ -17,7 +17,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_windows.hh,v 1.9 2008/10/02 21:57:13 bms Exp $
 
 #ifndef __FEA_DATA_PLANE_MANAGERS_FEA_DATA_PLANE_MANAGER_WINDOWS_HH__
 #define __FEA_DATA_PLANE_MANAGERS_FEA_DATA_PLANE_MANAGER_WINDOWS_HH__

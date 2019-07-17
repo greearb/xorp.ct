@@ -17,7 +17,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/fea/data_plane/io/io_ip_dummy.hh,v 1.6 2008/10/11 04:20:19 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_IO_IO_IP_DUMMY_HH__
 #define __FEA_DATA_PLANE_IO_IO_IP_DUMMY_HH__
@@ -55,7 +54,7 @@ public:
      * @param ip_protocol the IP protocol number (IPPROTO_*).
      */
     IoIpDummy(FeaDataPlaneManager& fea_data_plane_manager,
-	       const IfTree& iftree, int family, uint8_t ip_protocol);
+	      const IfTree& iftree, int family, uint8_t ip_protocol);
 
     /**
      * Virtual destructor.
@@ -200,8 +199,15 @@ public:
      * @return a reference to the file descriptor for receiving protocol
      * messages.
      */
-    XorpFd* mcast_protocol_fd_in() {
+    XorpFd* findExistingInputSocketMcast(const string& _if_name, const string& _vif_name) {
+	UNUSED(_if_name);
+	UNUSED(_vif_name);
 	return (&_dummy_protocol_fd_in);
+    }
+
+    XorpFd* findOrCreateInputSocketMcast(const string& _if_name, const string& _vif_name, string& error_msg) {
+	UNUSED(error_msg);
+	return findExistingInputSocketMcast(_if_name, _vif_name);
     }
 
 private:

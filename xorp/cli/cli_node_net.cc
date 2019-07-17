@@ -103,12 +103,12 @@ CliNode::sock_serv_open()
     // Open the socket
     switch (family()) {
     case AF_INET:
-	_cli_socket = comm_bind_tcp4(NULL, _cli_port, COMM_SOCK_NONBLOCKING);
+	_cli_socket = comm_bind_tcp4(NULL, _cli_port, COMM_SOCK_NONBLOCKING, NULL);
 	break;
 #ifdef HAVE_IPV6
     case AF_INET6:
 	_cli_socket = comm_bind_tcp6(NULL, 0, _cli_port,
-				     COMM_SOCK_NONBLOCKING);
+				     COMM_SOCK_NONBLOCKING, NULL);
 	break;
 #endif // HAVE_IPV6
     default:
