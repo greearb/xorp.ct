@@ -672,8 +672,8 @@ public:
 	// _sg_table.end() and _gs_table.end() in the Mrt, but here
 	// we don't know those values. Sigh...
 	//
-	memset(&_sg_key, 0, sizeof(_sg_key));
-	memset(&_gs_key, 0, sizeof(_gs_key));
+	memset((void*)(&_sg_key), 0, sizeof(_sg_key));
+	memset((void*)(&_gs_key), 0, sizeof(_gs_key));
     }
     
     /**

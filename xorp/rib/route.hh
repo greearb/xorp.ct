@@ -223,6 +223,8 @@ public:
 	smart_ptr<PolicyTags>& policytags, uint16_t admin_distance)
 	: RouteEntry<A>(vif, protocol, metric, policytags, net, admin_distance), _nexthop(nexthop) { }
 
+    IPRouteEntry(const IPRouteEntry<A>& rhs);
+
     IPRouteEntry<A>& operator=(const IPRouteEntry<A>& rhs);
 
     /**

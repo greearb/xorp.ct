@@ -203,7 +203,7 @@ VisitorSemantic::visit(NodeAssign& node)
 	}
 
 	_varrw.write(id, *rvalue);
-    } catch (SemanticVarRW::var_error e) {
+    } catch (SemanticVarRW::var_error& e) {
         ostringstream error;
 
         error << e.str() << " at line " << node.line();
@@ -220,7 +220,7 @@ VisitorSemantic::visit(NodeVar& node)
     try {
 	VarRW::Id id = _varmap.var2id(semantic_protocol(), node.val());
 	return &_varrw.read(id);
-    } catch(SemanticVarRW::var_error e) {
+    } catch(SemanticVarRW::var_error& e) {
         ostringstream error;
 
         error << e.str() << " at line " << node.line();

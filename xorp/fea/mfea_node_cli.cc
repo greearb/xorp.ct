@@ -198,19 +198,19 @@ MfeaNodeCli::cli_show_mfea_dataflow(const vector<string>& argv)
     if (argv.size()) {
 	try {
 	    group_range = IPvXNet(argv[0].c_str());
-	} catch (InvalidString) {
+	} catch (InvalidString&) {
 	    try {
 		group_range = IPvXNet(IPvX(argv[0].c_str()),
 				      IPvX::addr_bitlen(family()));
-	    } catch (InvalidString) {
+	    } catch (InvalidString&) {
 		cli_print(c_format("ERROR: Invalid group range address: %s\n",
 				   argv[0].c_str()));
 		return (XORP_ERROR);
-	    } catch (InvalidNetmaskLength) {
+	    } catch (InvalidNetmaskLength&) {
 		XLOG_UNREACHABLE();
 		return (XORP_ERROR);
 	    }
-	} catch (InvalidNetmaskLength) {
+	} catch (InvalidNetmaskLength&) {
 	    cli_print(c_format("ERROR: Invalid group range netmask length: %s\n",
 			       argv[0].c_str()));
 	    return (XORP_ERROR);

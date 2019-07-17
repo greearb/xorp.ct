@@ -264,7 +264,7 @@ ShowDistancesProcessor::get_distances_cb(const XrlError& xe,
 		    protocols->get(i).text()));
 	}
 
-    } catch (XrlAtomList::InvalidIndex ie) {
+    } catch (XrlAtomList::InvalidIndex& ie) {
 	fprintf(stdout, "Invalid data was returned by the RIB.");
 	set_status(SERVICE_FAILED, "Invalid data was returned by the RIB.");
 	shutdown();

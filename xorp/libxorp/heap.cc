@@ -84,7 +84,13 @@ Heap::resize(int new_size)
         return 1;	// Error
     } 
     if (_size > 0) {
-        memcpy(p, _p, _size * sizeof(*p));
+	for (int i = 0; i<_size; i++) {
+	    p[i] = _p[i];
+	}
+	// Initialize pointers just in case.
+	for (int i = _size; i<new_size; i++) {
+	    p[i].object = NULL;
+	}
         delete[] _p;
     }
     _p = p;

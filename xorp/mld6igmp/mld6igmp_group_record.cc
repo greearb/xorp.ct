@@ -267,7 +267,7 @@ Mld6igmpGroupRecord::process_mode_is_exclude(const set<IPvX>& sources,
 	//          Group Timer = GMI
 	//
 	Mld6igmpSourceSet& x = _do_forward_sources;
-	Mld6igmpSourceSet x_copy = x;
+	Mld6igmpSourceSet x_copy(x);
 	Mld6igmpSourceSet& y = _dont_forward_sources;
 	const set<IPvX>& a = sources;
 	TimeVal gmi = _mld6igmp_vif.group_membership_interval();
@@ -457,7 +457,7 @@ Mld6igmpGroupRecord::process_change_to_exclude_mode(const set<IPvX>& sources,
 	//          Group Timer = GMI
 	//
 	Mld6igmpSourceSet& x = _do_forward_sources;
-	Mld6igmpSourceSet x_copy = x;
+	Mld6igmpSourceSet x_copy(x);
 	Mld6igmpSourceSet& y = _dont_forward_sources;
 	const set<IPvX>& a = sources;
 	TimeVal gmi = _mld6igmp_vif.group_membership_interval();
@@ -618,7 +618,7 @@ Mld6igmpGroupRecord::process_block_old_sources(const set<IPvX>& sources,
 	//          Send Q(G, A - Y)
 	//
 	Mld6igmpSourceSet& x = _do_forward_sources;
-	Mld6igmpSourceSet x_copy = x;
+	Mld6igmpSourceSet x_copy(x);
 	Mld6igmpSourceSet& y = _dont_forward_sources;
 	const set<IPvX>& a = sources;
 	TimeVal gt;

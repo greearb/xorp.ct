@@ -112,6 +112,9 @@ public:
      */
     explicit TimeVal(const double& d);
 
+    /* copy-construtor */
+    TimeVal(const TimeVal& tv);
+
     /**
      * Get the number of seconds.
      *
@@ -448,6 +451,12 @@ TimeVal::copy_out(FILETIME& filetime) const
 
 #endif /* HOST_OS_WINDOWS */
 
+inline
+TimeVal::TimeVal(const TimeVal& tv) {
+    _sec = tv.sec();
+    _usec = tv.usec();
+}
+
 inline TimeVal&
 TimeVal::operator=(const TimeVal& other)
 {
@@ -484,7 +493,8 @@ inline TimeVal
 TimeVal::operator+(const TimeVal& other) const
 {
     TimeVal tmp_tv(*this);
-    return tmp_tv += other;
+    tmp_tv += other;
+    return tmp_tv;
 }
 
 inline const TimeVal&

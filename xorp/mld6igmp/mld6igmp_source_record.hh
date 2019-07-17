@@ -17,7 +17,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/mld6igmp/mld6igmp_source_record.hh,v 1.14 2008/10/02 21:57:44 bms Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_SOURCE_RECORD_HH__
 #define __MLD6IGMP_MLD6IGMP_SOURCE_RECORD_HH__
@@ -26,10 +25,6 @@
 //
 // IGMP and MLD source record.
 //
-
-
-
-
 
 #include "libxorp/ipvx.hh"
 #include "libxorp/timer.hh"
@@ -163,10 +158,12 @@ public:
      */
     Mld6igmpSourceSet(Mld6igmpGroupRecord& group_record);
 
+    Mld6igmpSourceSet(const Mld6igmpSourceSet& other);
+
     /**
      * Destructor.
      */
-    ~Mld6igmpSourceSet();
+    virtual ~Mld6igmpSourceSet();
 
     /**
      * Find a source record.

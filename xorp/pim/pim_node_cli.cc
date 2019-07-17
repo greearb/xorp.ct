@@ -279,11 +279,11 @@ PimNodeCli::cli_show_pim_bootstrap(const vector<string>& argv)
 		if (argv[1] == "scoped")
 		    zone_id = PimScopeZoneId(argv[0].c_str(), true);
 	    }
-	} catch (InvalidString) {
+	} catch (InvalidString&) {
 	    cli_print(c_format("ERROR: Invalid zone ID address: %s\n",
 			       argv[0].c_str()));
 	    return (XORP_ERROR);
-	} catch (InvalidNetmaskLength) {
+	} catch (InvalidNetmaskLength&) {
 	    cli_print(c_format("ERROR: Invalid zone ID netmask length: %s\n",
 			       argv[0].c_str()));
 	    return (XORP_ERROR);
@@ -498,11 +498,11 @@ PimNodeCli::cli_show_pim_bootstrap_rps(const vector<string>& argv)
 		if (argv[1] == "scoped")
 		    zone_id = PimScopeZoneId(argv[0].c_str(), true);
 	    }
-	} catch (InvalidString) {
+	} catch (InvalidString&) {
 	    cli_print(c_format("ERROR: Invalid zone ID address: %s\n",
 			       argv[0].c_str()));
 	    return (XORP_ERROR);
-	} catch (InvalidNetmaskLength) {
+	} catch (InvalidNetmaskLength&) {
 	    cli_print(c_format("ERROR: Invalid zone ID netmask length: %s\n",
 			       argv[0].c_str()));
 	    return (XORP_ERROR);
@@ -785,15 +785,15 @@ PimNodeCli::cli_show_pim_join(const vector<string>& argv)
     if (argv.size()) {
 	try {
 	    group_range = IPvXNet(argv[0].c_str());
-	} catch (InvalidString) {
+	} catch (InvalidString&) {
 	    try {
 		group_range = IPvXNet(IPvX(argv[0].c_str()),
 				      IPvX::addr_bitlen(family()));
-	    } catch (InvalidString) {
+	    } catch (InvalidString&) {
 		cli_print(c_format("ERROR: Invalid group range address: %s\n",
 				   argv[0].c_str()));
 		return (XORP_ERROR);
-	    } catch (InvalidNetmaskLength) {
+	    } catch (InvalidNetmaskLength&) {
 		cli_print(c_format("ERROR: Invalid group range netmask length: %s\n",
 				   argv[0].c_str()));
 		return (XORP_ERROR);
@@ -826,19 +826,19 @@ PimNodeCli::cli_show_pim_join_all(const vector<string>& argv)
     if (argv.size()) {
 	try {
 	    group_range = IPvXNet(argv[0].c_str());
-	} catch (InvalidString) {
+	} catch (InvalidString&) {
 	    try {
 		group_range = IPvXNet(IPvX(argv[0].c_str()),
 				      IPvX::addr_bitlen(family()));
-	    } catch (InvalidString) {
+	    } catch (InvalidString&) {
 		cli_print(c_format("ERROR: Invalid group range address: %s\n",
 				   argv[0].c_str()));
 		return (XORP_ERROR);
-	    } catch (InvalidNetmaskLength) {
+	    } catch (InvalidNetmaskLength&) {
 		XLOG_UNREACHABLE();
 		return (XORP_ERROR);
 	    }
-	} catch (InvalidNetmaskLength) {
+	} catch (InvalidNetmaskLength&) {
 	    cli_print(c_format("ERROR: Invalid group range netmask length: %s\n",
 			       argv[0].c_str()));
 	    return (XORP_ERROR);
@@ -870,19 +870,19 @@ PimNodeCli::cli_show_pim_mfc(const vector<string>& argv)
     if (argv.size()) {
 	try {
 	    group_range = IPvXNet(argv[0].c_str());
-	} catch (InvalidString) {
+	} catch (InvalidString&) {
 	    try {
 		group_range = IPvXNet(IPvX(argv[0].c_str()),
 				      IPvX::addr_bitlen(family()));
-	    } catch (InvalidString) {
+	    } catch (InvalidString&) {
 		cli_print(c_format("ERROR: Invalid group range address: %s\n",
 				   argv[0].c_str()));
 		return (XORP_ERROR);
-	    } catch (InvalidNetmaskLength) {
+	    } catch (InvalidNetmaskLength&) {
 		XLOG_UNREACHABLE();
 		return (XORP_ERROR);
 	    }
-	} catch (InvalidNetmaskLength) {
+	} catch (InvalidNetmaskLength&) {
 	    cli_print(c_format("ERROR: Invalid group range netmask length: %s\n",
 			       argv[0].c_str()));
 	    return (XORP_ERROR);
@@ -1365,7 +1365,7 @@ PimNodeCli::cli_show_pim_mrib(const vector<string>& argv)
 	dest_address_name = argv[0];
 	try {
 	    dest_address = IPvX(dest_address_name.c_str());
-	} catch (InvalidString) {
+	} catch (InvalidString&) {
 	    cli_print(c_format("ERROR: Invalid destination address: %s\n",
 			       dest_address_name.c_str()));
 	    return (XORP_ERROR);
@@ -1453,7 +1453,7 @@ PimNodeCli::cli_show_pim_rps(const vector<string>& argv)
 				   cstring(group_addr)));
 		return (XORP_ERROR);
 	    }
-	} catch (InvalidString) {
+	} catch (InvalidString&) {
 	    cli_print(c_format("ERROR: Invalid group address: %s\n",
 			       argv[0].c_str()));
 	    return (XORP_ERROR);

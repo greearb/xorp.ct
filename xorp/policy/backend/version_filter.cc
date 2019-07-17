@@ -54,7 +54,7 @@ VersionFilter::configure(const string& conf)
     // XXX: programming question:
     // Since i'm deleting pf... do i need to copy the exception [i.e. not ref to
     // exception?]
-    } catch(PolicyException e) {
+    } catch(PolicyException& e) {
 	delete pf;
 	throw e;
     }

@@ -143,7 +143,7 @@ HelloMessage::decode_link_tuple(uint8_t* buf, size_t& len,
     LinkCode linkcode;
     try {
 	linkcode = code;
-    } catch(BadLinkCode blc) {
+    } catch(BadLinkCode& blc) {
 	debug_msg("caught bad link code exception\n");
 	is_bad_link_code = true;
     }
@@ -253,7 +253,7 @@ HelloMessage::decode(uint8_t* buf, size_t& len)
 	size_t skiplen;
 	try {
 	    message->decode_link_tuple(&buf[offset], remaining, skiplen);
-	} catch(InvalidLinkTuple ilt) {
+	} catch(InvalidLinkTuple& ilt) {
 	    debug_msg("%s\n", cstring(ilt));
 	    XLOG_WARNING("Invalid link info tuple at offset %u",
 		    XORP_UINT_CAST(offset));

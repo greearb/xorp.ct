@@ -341,7 +341,7 @@ Mld6igmpNodeCli::cli_show_mld6igmp_group(const vector<string>& argv)
 		return (XORP_ERROR);
 	    }
 	    groups.push_back(g);
-	} catch (InvalidString) {
+	} catch (InvalidString&) {
 	    cli_print(c_format("ERROR: Invalid IP address: %s\n",
 			       argv[i].c_str()));
 	    return (XORP_ERROR);

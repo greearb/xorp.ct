@@ -215,6 +215,10 @@ Mld6igmpSourceSet::delete_payload_and_clear()
     this->clear();
 }
 
+Mld6igmpSourceSet::Mld6igmpSourceSet(const Mld6igmpSourceSet& other) :
+	map<IPvX, Mld6igmpSourceRecord *>(other), _group_record(other._group_record) {
+}
+
 /**
  * Assignment operator for sets.
  *

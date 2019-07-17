@@ -185,6 +185,12 @@ UnresolvedIPRouteEntry<A>::memory_pool()
     return mp;
 }
 
+
+template<class A>
+IPRouteEntry<A>::IPRouteEntry(const IPRouteEntry<A>& r) : RouteEntry<A>(r) {
+    _nexthop = r._nexthop;
+}
+
 template<class A>
 IPRouteEntry<A>& IPRouteEntry<A>::operator=(const IPRouteEntry<A>& r) {
     if (this == &r)
@@ -193,7 +199,6 @@ IPRouteEntry<A>& IPRouteEntry<A>::operator=(const IPRouteEntry<A>& r) {
     _nexthop = r._nexthop;
     return *this;
 }
-
 
 template<class A>
 ResolvedIPRouteEntry<A>::ResolvedIPRouteEntry(const ResolvedIPRouteEntry<A>& r) : IPRouteEntry<A>(r) {

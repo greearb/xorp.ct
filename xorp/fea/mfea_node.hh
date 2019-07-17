@@ -78,6 +78,8 @@ public:
     MfeaRouteStorage(const MfeaRouteStorage& o);
     MfeaRouteStorage();
 
+    MfeaRouteStorage& operator=(const MfeaRouteStorage& o);
+
     bool isBinary() const { return is_binary; }
 
     string getHash() { return source.str() + ":" + group.str(); }

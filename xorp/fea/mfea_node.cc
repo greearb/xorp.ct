@@ -63,6 +63,22 @@ MfeaRouteStorage::MfeaRouteStorage(const MfeaRouteStorage& o) :
 	oiflist(o.oiflist), oiflist_disable_wrongvif(o.oiflist_disable_wrongvif),
 	max_vifs_oiflist(o.max_vifs_oiflist), rp_addr(o.rp_addr) { }
 
+MfeaRouteStorage& MfeaRouteStorage::operator=(const MfeaRouteStorage& o) {
+    distance = o.distance;
+    is_binary = o.is_binary;
+    module_instance_name = o.module_instance_name;
+    source = o.source;
+    group = o.group;
+    iif_name = o.iif_name;
+    oif_names = o.oif_names;
+    iif_vif_index = o.iif_vif_index;
+    oiflist = o.oiflist;
+    oiflist_disable_wrongvif = o. oiflist_disable_wrongvif;
+    max_vifs_oiflist = o.max_vifs_oiflist;
+    rp_addr = o.rp_addr;
+    return *this;
+}
+
 MfeaRouteStorage::MfeaRouteStorage() : distance(0), is_binary(false), max_vifs_oiflist(0) { }
 
 /**

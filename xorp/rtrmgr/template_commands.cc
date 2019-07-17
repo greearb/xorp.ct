@@ -694,7 +694,7 @@ XrlAction::expand_xrl_variables(const TreeNode& tn,
 			 xrlatom_encode_value(expanded_value.c_str(),
 					      expanded_value.size()));
 	    xrl_args.add(atom);
-	} catch (InvalidString) {
+	} catch (InvalidString&) {
 	    error_msg = c_format("Bad xrl arg \"%s\" "
 				 "associated with node \"%s\"",
 				 name.c_str(), tn.path().c_str());

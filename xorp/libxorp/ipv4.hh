@@ -59,6 +59,14 @@ public:
     IPv4(const IPv4& ipv4) : _addr(ipv4._addr) {}
 
     /**
+     * Assignment Operator
+     */
+    IPv4& operator=(const IPv4& other) {
+	_addr = other._addr;
+	return *this;
+    }
+
+    /**
      * Constructor from an integer value.
      *
      * @param value 32-bit unsigned integer to assign to the address.

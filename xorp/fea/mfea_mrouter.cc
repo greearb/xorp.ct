@@ -1325,8 +1325,10 @@ MfeaMrouter::add_multicast_vif(uint32_t vif_index, string& error_msg)
 	return XORP_ERROR;
 #else
 #ifdef USE_MULT_MCAST_TABLES
-	struct vifctl_ng vc_ng;
-	struct vifctl* vcp = &(vc_ng.vif);
+	struct vifctl_ng vc_ng __attribute__((aligned(64)));
+	// work around invalid g++ 9.1.1 warning about taking addr of packed element
+	unsigned char* tmpp = (unsigned char*)(&(vc_ng.vif));
+	struct vifctl* vcp = (struct vifctl*)(tmpp);
 	memset(&vc_ng, 0, sizeof(vc_ng));
 	sopt_arg = &vc_ng;
 	sz = sizeof(vc_ng);
@@ -1465,8 +1467,10 @@ MfeaMrouter::delete_multicast_vif(uint32_t vif_index)
 	//
 #ifdef HOST_OS_LINUX
 #ifdef USE_MULT_MCAST_TABLES
-	struct vifctl_ng vc_ng;
-	struct vifctl* vcp = &(vc_ng.vif);
+	struct vifctl_ng vc_ng __attribute__((aligned(64)));
+	// work around invalid g++ 9.1.1 warning about taking addr of packed element
+	unsigned char* tmpp = (unsigned char*)(&(vc_ng.vif));
+	struct vifctl* vcp = (struct vifctl*)(tmpp);
 	memset(&vc_ng, 0, sizeof(vc_ng));
 	void* sopt_arg = &vc_ng;
 	size_t sz = sizeof(vc_ng);
@@ -1601,8 +1605,10 @@ MfeaMrouter::add_mfc(const IPvX& source, const IPvX& group,
 #else
 
 #ifdef USE_MULT_MCAST_TABLES
-	struct mfcctl_ng mc_ng;
-	struct mfcctl* mcp = &(mc_ng.mfc);
+	struct mfcctl_ng mc_ng __attribute__((aligned(64)));
+	// work around invalid g++ 9.1.1 warning about taking addr of packed element
+	unsigned char* tmpp = (unsigned char*)(&(mc_ng.mfc));
+	struct mfcctl* mcp = (struct mfcctl*)(tmpp);
 	memset(&mc_ng, 0, sizeof(mc_ng));
 	void* sopt_arg = &mc_ng;
 	size_t sz = sizeof(mc_ng);
@@ -1731,8 +1737,10 @@ MfeaMrouter::delete_mfc(const IPvX& source, const IPvX& group)
 	return (XORP_ERROR);
 #else
 #ifdef USE_MULT_MCAST_TABLES
-	struct mfcctl_ng mc_ng;
-	struct mfcctl* mcp = &(mc_ng.mfc);
+	struct mfcctl_ng mc_ng __attribute__((aligned(64)));
+	// work around invalid g++ 9.1.1 warning about taking addr of packed element
+	unsigned char* tmpp = (unsigned char*)(&(mc_ng.mfc));
+	struct mfcctl* mcp = (struct mfcctl*)(tmpp);
 	memset(&mc_ng, 0, sizeof(mc_ng));
 	void* sopt_arg = &mc_ng;
 	size_t sz = sizeof(mc_ng);
@@ -2336,10 +2344,12 @@ MfeaMrouter::get_sg_count(const IPvX& source, const IPvX& group,
 #else
 	int ioctl_cmd = SIOCGETSGCNT;
 #ifdef USE_MULT_MCAST_TABLES
-	struct sioc_sg_req_ng sgreq_ng;
+	struct sioc_sg_req_ng sgreq_ng __attribute__((aligned(64)));
+	// work around invalid g++ 9.1.1 warning about taking addr of packed element
+	unsigned char* tmpp = (unsigned char*)(&(sgreq_ng.req));
+	struct sioc_sg_req* sgreqp = (struct sioc_sg_req*)(tmpp);
 	memset(&sgreq_ng, 0, sizeof(sgreq_ng));
 	sgreq_ng.table_id = getTableId();
-	struct sioc_sg_req* sgreqp = &(sgreq_ng.req);
 	void* o = &sgreq_ng;
 	ioctl_cmd = SIOCGETSGCNT_NG;
 	if (new_mcast_tables_api || !supports_mcast_tables) {
@@ -2452,10 +2462,12 @@ MfeaMrouter::get_vif_count(uint32_t vif_index, VifCount& vif_count)
 #else
 	int ioctl_cmd = SIOCGETVIFCNT;
 #ifdef USE_MULT_MCAST_TABLES
-	struct sioc_vif_req_ng vreq_ng;
+	struct sioc_vif_req_ng vreq_ng __attribute__((aligned(64)));
+	// work around invalid g++ 9.1.1 warning about taking addr of packed element
+	unsigned char* tmpp = (unsigned char*)(&(vreq_ng.vif));
+	struct sioc_vif_req* vreqp = (struct sioc_vif_req*)(tmpp);
 	memset(&vreq_ng, 0, sizeof(vreq_ng));
 	vreq_ng.table_id = getTableId();
-	struct sioc_vif_req* vreqp = &(vreq_ng.vif);
 	void* o = &vreq_ng;
 	ioctl_cmd = SIOCGETVIFCNT_NG;
 	if (new_mcast_tables_api || !supports_mcast_tables) {

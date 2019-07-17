@@ -17,7 +17,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/mld6igmp/mld6igmp_group_record.hh,v 1.23 2008/10/02 21:57:43 bms Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_GROUP_RECORD_HH__
 #define __MLD6IGMP_MLD6IGMP_GROUP_RECORD_HH__
@@ -26,10 +25,6 @@
 //
 // IGMP and MLD group record.
 //
-
-
-
-
 
 #include "libxorp/ipvx.hh"
 #include "libxorp/timer.hh"

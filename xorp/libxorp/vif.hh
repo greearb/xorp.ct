@@ -234,6 +234,8 @@ public:
      */
     Vif(const Vif& vif);
 
+    Vif& operator=(const Vif& other);
+
     /**
      * Destructor
      */

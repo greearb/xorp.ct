@@ -356,35 +356,35 @@ ConfigTree::terminal_value(const string& value, int type, ConfigOperator op)
 	case NODE_IPV4:
 	    try {
 		IPv4(svalue.c_str());
-	    } catch (InvalidString) {
+	    } catch (InvalidString&) {
 		goto parse_error;
 	    }
 	    break;
 	case NODE_IPV4NET:
 	    try {
 		IPv4Net(svalue.c_str());
-	    } catch (InvalidString) {
+	    } catch (InvalidString&) {
 		goto parse_error;
 	    }
 	    break;
 	case NODE_IPV6:
 	    try {
 		IPv6(svalue.c_str());
-	    } catch (InvalidString) {
+	    } catch (InvalidString&) {
 		goto parse_error;
 	    }
 	    break;
 	case NODE_IPV6NET:
 	    try {
 		IPv6Net(svalue.c_str());
-	    } catch (InvalidString) {
+	    } catch (InvalidString&) {
 		goto parse_error;
 	    }
 	    break;
 	case NODE_MACADDR:
 	    try {
 		Mac(svalue.c_str());
-	    } catch (InvalidString) {
+	    } catch (InvalidString&) {
 		goto parse_error;
 	    }
 	    break;

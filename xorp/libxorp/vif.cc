@@ -19,12 +19,6 @@
 // http://xorp.net
 
 
-
-
-
-
-
-
 #include "xorp.h"
 #include "vif.hh"
 
@@ -131,6 +125,26 @@ Vif::Vif(const Vif& vif) : BugCatcher(vif) {
     set_underlying_vif_up(vif.is_underlying_vif_up());
     set_is_fake(vif.is_fake());
     set_mtu(vif.mtu());
+}
+
+Vif& Vif::operator=(const Vif& vif) {
+   _name = vif.name();
+   _ifname = vif.ifname();
+   set_pif_index(vif.pif_index());
+   set_vif_index(vif.vif_index());
+   _addr_list = vif.addr_list();
+   set_pim_register(vif.is_pim_register());
+   set_p2p(vif.is_p2p());
+   set_loopback(vif.is_loopback());
+   set_discard(vif.is_discard());
+   set_unreachable(vif.is_unreachable());
+   set_management(vif.is_management());
+   set_multicast_capable(vif.is_multicast_capable());
+   set_broadcast_capable(vif.is_broadcast_capable());
+   set_underlying_vif_up(vif.is_underlying_vif_up());
+   set_is_fake(vif.is_fake());
+   set_mtu(vif.mtu());
+   return *this;
 }
 
 //

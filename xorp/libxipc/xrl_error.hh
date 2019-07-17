@@ -19,7 +19,6 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxipc/xrl_error.hh,v 1.21 2008/10/02 21:57:24 bms Exp $
 
 #ifndef	__LIBXIPC_XRL_ERROR_HH__
 #define __LIBXIPC_XRL_ERROR_HH__
@@ -150,6 +149,12 @@ public:
     XrlError();
     XrlError(XrlErrorCode error_code, const string& note = "");
     XrlError(const XrlError& xe) : _errlet(xe._errlet), _note(xe._note) {}
+
+    XrlError& operator=(const XrlError& xe) {
+	_errlet = xe._errlet;
+	_note = xe._note;
+	return *this;
+    }
 
     /* Strictly for classes that have access to XrlErrlet to construct
        XrlError's */

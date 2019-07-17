@@ -19,8 +19,6 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxorp/ipvx.hh,v 1.35 2009/01/05 18:30:58 jtc Exp $
-
 #ifndef __LIBXORP_IPVX_HH__
 #define __LIBXORP_IPVX_HH__
 
@@ -73,6 +71,11 @@ public:
     IPvX(const IPv4& ipv4);
 
     /**
+     * Constructor from an IPvX address.
+     */
+    IPvX(const IPvX& ipv4);
+
+    /**
      * Constructor from an IPv6 address.
      *
      * Create an IPvX address from an IPv6 address.
@@ -80,6 +83,11 @@ public:
      * @param ipv6 the IPv6 address to assign the address value from.
      */
     IPvX(const IPv6& ipv6);
+
+    /**
+     * Assignment Operator
+     */
+    IPvX& operator=(const IPvX& other);
 
     /**
      * Constructor from in_addr structure.

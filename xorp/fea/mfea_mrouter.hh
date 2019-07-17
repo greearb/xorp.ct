@@ -453,7 +453,10 @@ public:
      * Default constructor
      */
     SgCount() : _pktcnt(0), _bytecnt(0), _wrong_if(0) {}
-    
+
+    SgCount(const SgCount& sg_count) :
+	    _pktcnt(sg_count.pktcnt()), _bytecnt(sg_count.bytecnt()), _wrong_if(sg_count.wrong_if()) { }
+
     /**
      * Assignment Operator
      * 

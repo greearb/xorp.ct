@@ -1668,7 +1668,7 @@ UIntRangeTemplate::UIntRangeTemplate(TemplateTree& template_tree,
 
     try {
 	_default = new U32Range(initializer.c_str());
-    } catch (InvalidString) {
+    } catch (InvalidString&) {
 	error_msg = c_format("Bad U32Range type value \"%s\".",
 			     initializer.c_str());
 	xorp_throw(ParseError, error_msg);
@@ -1704,7 +1704,7 @@ UIntRangeTemplate::type_match(const string& s, string& error_msg) const
     try {
 	U32Range* u32range = new U32Range(tmp.c_str());
 	delete u32range;
-    } catch (InvalidString) {
+    } catch (InvalidString&) {
 	error_msg = "value must be a valid range of unsigned 32-bit integers";
 	return false;
     }
@@ -1784,7 +1784,7 @@ ULongRangeTemplate::ULongRangeTemplate(TemplateTree& template_tree,
 
     try {
 	_default = new U64Range(initializer.c_str());
-    } catch (InvalidString) {
+    } catch (InvalidString&) {
 	error_msg = c_format("Bad U64Range type value \"%s\".",
 			     initializer.c_str());
 	xorp_throw(ParseError, error_msg);
@@ -1820,7 +1820,7 @@ ULongRangeTemplate::type_match(const string& s, string& error_msg) const
     try {
 	U64Range* u64range = new U64Range(tmp.c_str());
 	delete u64range;
-    } catch (InvalidString) {
+    } catch (InvalidString&) {
 	error_msg = "value must be a valid range of unsigned 64-bit integers";
 	return false;
     }
@@ -1950,7 +1950,7 @@ IPv4Template::IPv4Template(TemplateTree& template_tree,
 
     try {
 	_default = new IPv4(initializer.c_str());
-    } catch (InvalidString) {
+    } catch (InvalidString&) {
 	error_msg = c_format("Bad IPv4 type value \"%s\".",
 			     initializer.c_str());
 	xorp_throw(ParseError, error_msg);
@@ -1986,7 +1986,7 @@ IPv4Template::type_match(const string& s, string& error_msg) const
     try {
 	IPv4* ipv4 = new IPv4(tmp.c_str());
 	delete ipv4;
-    } catch (InvalidString) {
+    } catch (InvalidString&) {
 	error_msg = "value must be an IP address in dotted decimal form";
 	return false;
     }
@@ -2012,11 +2012,11 @@ IPv4NetTemplate::IPv4NetTemplate(TemplateTree& template_tree,
 
     try {
 	_default = new IPv4Net(initializer.c_str());
-    } catch (InvalidString) {
+    } catch (InvalidString&) {
 	error_msg = c_format("Bad IPv4Net type value \"%s\".",
 			     initializer.c_str());
 	xorp_throw(ParseError, error_msg);
-    } catch (InvalidNetmaskLength) {
+    } catch (InvalidNetmaskLength&) {
 	error_msg = c_format("Illegal IPv4 prefix length in subnet \"%s\".",
 			     initializer.c_str());
 	xorp_throw(ParseError, error_msg);
@@ -2058,10 +2058,10 @@ IPv4NetTemplate::type_match(const string& s, string& error_msg) const
 	    error_msg = "there is a mismatch between the masked address value and the prefix length";
 	    return false;
 	}
-    } catch (InvalidString) {
+    } catch (InvalidString&) {
 	error_msg = "value must be an IPv4 subnet in address/prefix-length form";
 	return false;
-    } catch (InvalidNetmaskLength) {
+    } catch (InvalidNetmaskLength&) {
 	error_msg = c_format("prefix length must be an integer between "
 			     "0 and %u",
 			     IPv4::addr_bitlen());
@@ -2089,7 +2089,7 @@ IPv4RangeTemplate::IPv4RangeTemplate(TemplateTree& template_tree,
 
     try {
 	_default = new IPv4Range(initializer.c_str());
-    } catch (InvalidString) {
+    } catch (InvalidString&) {
 	error_msg = c_format("Bad IPv4Range type value \"%s\".",
 			     initializer.c_str());
 	xorp_throw(ParseError, error_msg);
@@ -2125,7 +2125,7 @@ IPv4RangeTemplate::type_match(const string& s, string& error_msg) const
     try {
 	IPv4Range* ipv4range = new IPv4Range(tmp.c_str());
 	delete ipv4range;
-    } catch (InvalidString) {
+    } catch (InvalidString&) {
 	error_msg = "invalid format";
 	return false;
     }
@@ -2151,7 +2151,7 @@ IPv6Template::IPv6Template(TemplateTree& template_tree,
 
     try {
 	_default = new IPv6(initializer.c_str());
-    } catch (InvalidString) {
+    } catch (InvalidString&) {
 	error_msg = c_format("Bad IPv6 type value \"%s\".",
 			     initializer.c_str());
 	xorp_throw(ParseError, error_msg);
@@ -2187,7 +2187,7 @@ IPv6Template::type_match(const string& s, string& error_msg) const
     try {
 	IPv6* ipv6 = new IPv6(tmp.c_str());
 	delete ipv6;
-    } catch (InvalidString) {
+    } catch (InvalidString&) {
 	error_msg = "value must be an IPv6 address";
 	return false;
     }
@@ -2213,11 +2213,11 @@ IPv6NetTemplate::IPv6NetTemplate(TemplateTree& template_tree,
 
     try {
 	_default = new IPv6Net(initializer.c_str());
-    } catch (InvalidString) {
+    } catch (InvalidString&) {
 	error_msg = c_format("Bad IPv6Net type value \"%s\".",
 			     initializer.c_str());
 	xorp_throw(ParseError, error_msg);
-    } catch (InvalidNetmaskLength) {
+    } catch (InvalidNetmaskLength&) {
 	error_msg = c_format("Illegal IPv6 prefix length in subnet \"%s\".",
 			     initializer.c_str());
 	xorp_throw(ParseError, error_msg);
@@ -2260,11 +2260,11 @@ IPv6NetTemplate::type_match(const string& s, string& error_msg) const
 	    error_msg = "there is a mismatch between the masked address value and the prefix length";
 	    return false;
 	}
-    } catch (InvalidString) {
+    } catch (InvalidString&) {
 	error_msg = "value must be an IPv6 subnet in address/prefix-length "
 	    "form";
 	return false;
-    } catch (InvalidNetmaskLength) {
+    } catch (InvalidNetmaskLength&) {
 	error_msg = c_format("prefix length must be an integer between "
 			     "0 and %u",
 			     IPv6::addr_bitlen());
@@ -2292,7 +2292,7 @@ IPv6RangeTemplate::IPv6RangeTemplate(TemplateTree& template_tree,
 
     try {
 	_default = new IPv6Range(initializer.c_str());
-    } catch (InvalidString) {
+    } catch (InvalidString&) {
 	error_msg = c_format("Bad IPv6Range type value \"%s\".",
 			     initializer.c_str());
 	xorp_throw(ParseError, error_msg);
@@ -2328,7 +2328,7 @@ IPv6RangeTemplate::type_match(const string& s, string& error_msg) const
     try {
 	IPv6Range* ipv6range = new IPv6Range(tmp.c_str());
 	delete ipv6range;
-    } catch (InvalidString) {
+    } catch (InvalidString&) {
 	error_msg = "invalid format";
 	return false;
     }
@@ -2354,7 +2354,7 @@ MacaddrTemplate::MacaddrTemplate(TemplateTree& template_tree,
 
     try {
 	_default = new Mac(initializer.c_str());
-    } catch (InvalidString) {
+    } catch (InvalidString&) {
 	error_msg = c_format("Bad MacAddr type value \"%s\".",
 			     initializer.c_str());
 	xorp_throw(ParseError, error_msg);
@@ -2391,7 +2391,7 @@ MacaddrTemplate::type_match(const string& s, string& error_msg) const
     try {
 	Mac* mac = new Mac(tmp.c_str());
 	delete mac;
-    } catch (InvalidString) {
+    } catch (InvalidString&) {
 	error_msg = "value must be an MAC address (six hex digits separated "
 	    "by colons)";
 	return false;

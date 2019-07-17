@@ -87,6 +87,18 @@ IPvX::IPvX(const IPv6& ipv6)
     memcpy(_addr, &ipv6, 16);
 }
 
+IPvX& IPvX::operator=(const IPvX& other) {
+    _af = other._af;
+    memcpy(_addr, other._addr, sizeof(_addr));
+    return *this;
+}
+
+IPvX::IPvX(const IPvX& other) {
+    _af = other._af;
+    memcpy(_addr, other._addr, sizeof(_addr));
+}
+
+
 IPvX::IPvX(const in_addr& from_in_addr)
 {
     copy_in(AF_INET, reinterpret_cast<const uint8_t *>(&from_in_addr));

@@ -18,7 +18,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/contrib/olsr/message.hh,v 1.4 2008/10/02 21:56:34 bms Exp $
 
 #ifndef __OLSR_MESSAGE_HH__
 #define __OLSR_MESSAGE_HH__
@@ -193,6 +192,11 @@ public:
     LinkCode(const LinkCode& rhs)
      : _linkcode(rhs._linkcode)
     {}
+
+    LinkCode& operator=(const LinkCode& rhs) {
+	_linkcode = rhs._linkcode;
+	return (*this);
+    }
 
     inline LinkCode& operator=(const uint8_t& rhs)
      throw(BadLinkCode) {

@@ -923,7 +923,7 @@ Neighborhood::push_neighbor(const Neighbor* n)
     const LogicalLink* l;
     try {
 	l = find_best_link(n);
-    } catch(BadLinkCoverage blc) {
+    } catch(BadLinkCoverage& blc) {
 	// Don't add this neighbor -- there are no good links to it.
 	return false;
     }
@@ -982,7 +982,7 @@ Neighborhood::update_twohop_link(const LinkAddrInfo& node_info,
 	// Update the associated TwoHopNeighbor, creating it if needed.
 	tnid = update_twohop_node(node_info.remote_addr(),
 				  tlid, is_new_l2, is_new_n2);
-    } catch (BadTwoHopNode btn) {
+    } catch (BadTwoHopNode& btn) {
 	// Re-throw exception with appropriate type for this method.
 	xorp_throw(BadTwoHopLink,
 		   c_format("Could not create TwoHopNode with "
@@ -1212,7 +1212,7 @@ Neighborhood::update_twohop_node(const IPv4& main_addr,
 	OlsrTypes::NeighborID nid = get_neighborid_by_main_addr(main_addr);
 	_twohop_nodes[tnid]->set_is_strict(false);
 	UNUSED(nid);
-    } catch (BadNeighbor bn) {
+    } catch (BadNeighbor& bn) {
 	_twohop_nodes[tnid]->set_is_strict(true);
     }
 
@@ -1354,7 +1354,7 @@ Neighborhood::push_twohop_neighbor(TwoHopNeighbor* n2)
     const TwoHopLink* l2;
     try {
 	l2 = find_best_twohop_link(n2);
-    } catch (BadTwoHopCoverage btc) {
+    } catch (BadTwoHopCoverage& btc) {
 	debug_msg("Caught BadTwoHopCoverage.\n");
 	//xorp_print_standard_exceptions();
 	return false;

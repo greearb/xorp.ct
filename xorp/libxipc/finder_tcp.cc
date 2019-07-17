@@ -165,7 +165,7 @@ FinderTcpBase::read_callback(AsyncFileOperator::Event	ev,
 	    if (0 == _isize || _isize > MAX_XRL_INPUT_SIZE)
 		throw bad_alloc();
 	    _input_buffer.resize(_isize);
-	} catch (bad_alloc) {
+	} catch (bad_alloc&) {
 	    XLOG_ERROR("Bad input buffer size (%d bytes) from wire, "
 		       "dropping connection", XORP_INT_CAST(_isize));
 	    error_event();
