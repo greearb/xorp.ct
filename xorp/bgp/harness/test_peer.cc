@@ -367,7 +367,7 @@ TestPeer::connect(const string& host, const uint32_t& port,
     size_t len = sizeof(peer);
     try {
 	Socket::init_sockaddr(host, port, peer, len);
-    } catch(UnresolvableHost e) {
+    } catch(UnresolvableHost& e) {
 	error_string = e.why();
 	return false;
     }
@@ -436,7 +436,7 @@ TestPeer::listen(const string& host, const uint32_t& port,
     size_t len = sizeof(local);
     try {
 	Socket::init_sockaddr(host, port, local, len);
-    } catch(UnresolvableHost e) {
+    } catch(UnresolvableHost& e) {
 	error_string = e.why();
 	return false;
     }
@@ -494,7 +494,7 @@ TestPeer::bind(const string& host, const uint32_t& port,
     size_t len = sizeof(local);
     try {
 	Socket::init_sockaddr(host, port, local, len);
-    } catch(UnresolvableHost e) {
+    } catch(UnresolvableHost& e) {
 	error_string = e.why();
 	return false;
     }

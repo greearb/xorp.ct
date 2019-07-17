@@ -1606,7 +1606,7 @@ Peer::datain(const bool& status, const TimeVal& tv,
 	    */
 	    XLOG_ERROR("Unknown packet type %d", type);
 	}
-    } catch(CorruptMessage c) {
+    } catch(CorruptMessage& c) {
 	/*
 	** This peer had sent us a bad message.
 	*/
@@ -2024,7 +2024,7 @@ Peer::packet(const string& line, const vector<string>& words, int index)
 			    " \"keepalive\" accepted"
 			    " not <%s>\n[%s]",
 			    words[index].c_str(), line.c_str()));
-  } catch(CorruptMessage c) {
+  } catch(CorruptMessage& c) {
        xorp_throw(InvalidString, c_format("Unable to construct packet "
 					"%s\n[%s])", c.why().c_str(),
 					line.c_str()));

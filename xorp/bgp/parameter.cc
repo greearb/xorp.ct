@@ -49,7 +49,7 @@ BGPParameter::BGPParameter(uint8_t l, const uint8_t* d)
 BGPParameter::BGPParameter(const BGPParameter& param)
 {
     _type = param._type;
-    if (_data != NULL) {
+    if (param._data != NULL) {
 	_length = param._length;
 	uint8_t *data = new uint8_t[_length];
 	memcpy(data, param._data, _length);

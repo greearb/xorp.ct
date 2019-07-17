@@ -17,7 +17,6 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/bgp/route_table_decision.hh,v 1.29 2008/11/08 06:14:38 mjh Exp $
 
 #ifndef __BGP_ROUTE_TABLE_DECISION_HH__
 #define __BGP_ROUTE_TABLE_DECISION_HH__
@@ -45,20 +44,26 @@ public:
 	: _route(route), _pa_list(pa_list), _parent_table(parent_table), 
 	  _peer_handler(peer_handler), _genid(genid) {}
 
+    RouteData(const RouteData<A>& him) :
+	    _route(him._route), _pa_list(him._pa_list), _parent_table(him._parent_table),
+	    _peer_handler(him._peer_handler), _genid(him._genid) { }
+
     /* main reason for defining operator= is to keep the refcount
        correct on _pa_list */
     RouteData<A>& operator=(const RouteData<A>& him) {
 	_route = him._route;
 	_pa_list = him._pa_list;
 	_parent_table = him._parent_table;
-	_peer_handler = him.peer_handler;
+	_peer_handler = him._peer_handler;
 	_genid = him._genid;
+	return *this;
     }
 
     void set_is_not_winner() {
 	_parent_table->route_used(_route, false);
 	_route->set_is_not_winner();
     }
+
     void set_is_winner(int igp_distance) {
 	_parent_table->route_used(_route, true);
 	_route->set_is_winner(igp_distance);
