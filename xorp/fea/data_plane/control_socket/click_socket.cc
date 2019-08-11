@@ -174,7 +174,7 @@ ClickSocket::start(string& error_msg)
 	    int in_progress = 0;
 	    _user_fd = comm_connect_tcp4(&in_addr,
 					 htons(_user_click_control_socket_port),
-					 COMM_SOCK_BLOCKING, &in_progress);
+					 COMM_SOCK_BLOCKING, &in_progress, NULL);
 	    if (_user_fd.is_valid())
 		break;
 	    if (total_wait_time < max_wait_time) {
