@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python2
 
 # $XORP: other/testbed/tools/xtparse.py,v 1.7 2002/03/08 22:57:36 atanu Exp $
 
