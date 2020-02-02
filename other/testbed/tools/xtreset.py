@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python2
 
 # $XORP: other/testbed/tools/xtreset.py,v 1.5 2003/07/27 10:34:17 pavlin Exp $
 

@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python2
 
 # $XORP: other/testbed/tools/xtifset.py,v 1.19 2002/07/03 00:18:58 atanu Exp $
 

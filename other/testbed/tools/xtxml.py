@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python2
 
 # $XORP: other/testbed/tools/xtxml.py,v 1.10 2002/03/08 22:57:36 atanu Exp $
 

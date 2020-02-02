@@ -562,7 +562,7 @@ show host os
 xorpsh -c "show host os"
 </code> The “-c” option can be used more than once to execute multiple commands.
   * Running xorpsh as part of an “expect” script: <code>
-#!/usr/bin/env python
+#!/usr/bin/env python2
 import time
 import sys
 import pexpect

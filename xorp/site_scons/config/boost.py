@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 #
 # vim:set sts=4 ts=8 syntax=python:
 #
