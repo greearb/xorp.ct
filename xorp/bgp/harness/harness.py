@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 
 # $XORP: xorp/bgp/harness/harness.py,v 1.1 2005/03/23 19:58:44 atanu Exp $
 

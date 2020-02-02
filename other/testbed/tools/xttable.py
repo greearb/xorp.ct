@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python2
 
 # $XORP: other/testbed/tools/xttable.py,v 1.8 2001/11/02 23:57:44 atanu Exp $
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 
 # $XORP: xorp/bgp/harness/lookup.py,v 1.3 2007/12/10 23:26:32 mjh Exp $
 
