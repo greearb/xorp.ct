@@ -1,0 +1,200 @@
+From ec83a9ba9a01ceaf6613807e463b4cd5b46d1025 Mon Sep 17 00:00:00 2001
+From: Ben Greear <greearb@candelatech.com>
+Date: Fri, 15 May 2020 13:55:00 -0700
+Subject: [PATCH] scons:  Make this work a bit better on python3.
+
+But still blows up.
+
+Signed-off-by: Ben Greear <greearb@candelatech.com>
+---
+ xorp/SConstruct | 116 ++++++++++++++++++++++++------------------------
+ 1 file changed, 58 insertions(+), 58 deletions(-)
+
+diff --git a/xorp/SConstruct b/xorp/SConstruct
+index 9e6556372..d80a9c8e5 100644
+--- a/xorp/SConstruct
++++ b/xorp/SConstruct
+@@ -56,8 +56,8 @@ try:
+     # be relaxed.
+     EnsureSConsVersion(0, 98, 4)
+ except SystemExit:
+-    print "WARNING:  Actually, SCONS version 0.98.4 or later is _preferred_."
+-    print "Attempting to continue with version: " + SCons.__version__ + " but it may not work properly.\n"
++    print ("WARNING:  Actually, SCONS version 0.98.4 or later is _preferred_.")
++    print ("Attempting to continue with version: " + SCons.__version__ + " but it may not work properly.\n")
+ 
+ 
+ vars = Variables()
+@@ -192,42 +192,42 @@ prefix = env['prefix']
+ 
+ env['builddir'] = builddir;
+ 
+-print 'Build System Type: ', build
+-print 'Host System Type:  ', host
+-print 'Source path:       ', sourcedir
+-print 'Build path:        ', builddir
+-print 'Install prefix:    ', prefix
++print ('Build System Type: ', build)
++print ('Host System Type:  ', host)
++print ('Source path:       ', sourcedir)
++print ('Build path:        ', builddir)
++print ('Install prefix:    ', prefix)
+ 
+ env['DESTDIR'] = ARGUMENTS.get('DESTDIR', '')
+ 
+ # Provide mechanism to override CC, CXX, etc.
+ if ARGUMENTS.get('CC', None):
+     env['CC'] = ARGUMENTS.get('CC')
+-print 'CC:               ', env['CC']
++print ('CC:               ', env['CC'])
+ 
+ if ARGUMENTS.get('CXX', None):
+     env['CXX'] = ARGUMENTS.get('CXX')
+-print 'CXX:              ', env['CXX']
++print ('CXX:              ', env['CXX'])
+ 
+ if ARGUMENTS.get('RANLIB', None):
+     env['RANLIB'] = ARGUMENTS.get('RANLIB')
+-print 'RANLIB:           ', env['RANLIB']
++print ('RANLIB:           ', env['RANLIB'])
+ 
+ if ARGUMENTS.get('AR', None):
+     env['AR'] = ARGUMENTS.get('AR')
+-    print 'AR:               ', env['AR']
++    print ('AR:               ', env['AR'])
+ 
+ if ARGUMENTS.get('LD', None):
+     env['LD'] = ARGUMENTS.get('LD')
+-    print 'LD:               ', env['LD']
++    print ('LD:               ', env['LD'])
+ 
+ 
+ env['STRIP'] = ARGUMENTS.get('STRIP', 'strip')
+-print 'STRIP:            ', env['STRIP']
++print ('STRIP:            ', env['STRIP'])
+ 
+ if env['strip']:
+     env['strip'] = True
+-print 'Strip binaries:   ', env.has_key('strip')
++print ('Strip binaries:   ', env.has_key('strip'))
+ 
+ # POSIX strip has no options by the strict letter of the law.
+ # Assume we have GNU binutils strip until proven otherwise.
+@@ -238,70 +238,70 @@ if gnustrip:
+ 
+ # User can override this. Defaults to gcc's -O1, as this trims
+ # most of the template fat.
+-print 'Optimize code:    ', env['optimize']
++print ('Optimize code:    ', env['optimize'])
+ 
+ # Default to disable; wrapper for compiler profiling support.
+-print 'Profile code:     ', env['profile']
++print ('Profile code:     ', env['profile'])
+ 
+ # Default to local (UNIX domain sockets).
+-print 'Default XRL transport:', env['transport']
++print ('Default XRL transport:', env['transport'])
+ 
+ # Most of our shared library tweaks are specific to GNU ld.
+ # Check if the GNU linker is available, and print a warning if not.
+ if env['shared']:
+     if SCons.Tool.FindTool(['gnulink'], env) is None:
+-        print gnutoolwarning % 'ld linker'
++        print (gnutoolwarning % 'ld linker')
+     env['SHAREDLIBS'] = "defined"
+-print 'Shared libraries: ', env.has_key('SHAREDLIBS')
+-print 'Use rtld ORIGIN:  ', env['rtld_origin']
++print ('Shared libraries: ', env.has_key('SHAREDLIBS'))
++print ('Use rtld ORIGIN:  ', env['rtld_origin'])
+ 
+ # AUTOTEST_SKIP_ERRORS is SetDefault() by site_scons/site_tools/autotest.py,
+ # so print its value here.
+ if env['ignore_check_errors']:
+     env['AUTOTEST_SKIP_ERRORS'] = True
+-print 'Ignore check errors: ', env['AUTOTEST_SKIP_ERRORS']
++print ('Ignore check errors: ', env['AUTOTEST_SKIP_ERRORS'])
+ 
+ # NOTE: Enabling debug messages for the whole tree may not be what you want,
+ # as it can lead to premature timeouts.
+ # Enabling callback debugging is currently not advised as it does
+ # inline printfs.
+-print 'Debug symbols:    ', env['debug']
+-print 'Debug STL:        ', env['debug_stl']
+-print 'Debug messages:   ', env['debug_msg']
+-print 'Debug function names: ', env['debug_fn']
+-print 'Debug callbacks:  ', env['debug_cb']
+-print 'Debug XRL syntax: ', env['debug_xrldb']
+-print 'Enable OLSR:      ', env['enable_olsr']
+-print 'Enable Wrapper:   ', env['enable_wrapper']
+-print 'Enable OSPF:      ', env['enable_ospf']
+-print 'Enable RIP:       ', env['enable_rip']
+-print 'Enable VRRP:      ', env['enable_vrrp']
+-print 'Enable xorpsh     ', env['enable_xorpsh']
+-print 'Enable Test Programs: ', env['enable_tests']
+-print 'Enable CLICK:     ', env['enable_click']
+-print 'Enable FEA Dummy: ', env['enable_fea_dummy']
+-print 'Enable VIFF_USE_IFINDEX: ', env['enable_viff_use_ifindex']
+-print 'Enable async method impls: ', env['enable_async_server']
+-print 'Enable BGP:       ', env['enable_bgp']
+-print 'Enable BuildInfo: ', env['enable_buildinfo']
+-print 'Xorp can run from BUILD_DIR: ', env['enable_builddirrun']
+-print 'Try Enable BOOST: ', env['enable_boost']
+-print 'Try Enable uSTL : ', env['enable_ustl']
+-print 'Disable IPv6:     ', env['disable_ipv6']
+-print 'Disable libtecla: ', env['disable_libtecla']
+-print 'Disable Firewall: ', env['disable_fw']
+-print 'Disable Profile : ', env['disable_profile']
+-print 'Disable -Werror : ', env['disable_werror']
+-print 'Disable deprecated warnings: ', env['disable_wdeprecated']
+-print 'Enable lex hack : ', env['enable_lex_hack']
+-print 'Disable warning logs : ', env['disable_warninglogs']
+-print 'Disable error logs : ', env['disable_errorlogs']
+-print 'Disable trace logs : ', env['disable_tracelogs']
+-print 'Disable fatal logs : ', env['disable_fatallogs']
+-print 'Disable info logs : ', env['disable_infologs']
+-print 'Disable assert logs : ', env['disable_assertlogs']
+-print 'Disable other logs : ', env['disable_otherlogs']
+-print 'Disable assert: ', env['disable_assert']
++print ('Debug symbols:    ', env['debug'])
++print ('Debug STL:        ', env['debug_stl'])
++print ('Debug messages:   ', env['debug_msg'])
++print ('Debug function names: ', env['debug_fn'])
++print ('Debug callbacks:  ', env['debug_cb'])
++print ('Debug XRL syntax: ', env['debug_xrldb'])
++print ('Enable OLSR:      ', env['enable_olsr'])
++print ('Enable Wrapper:   ', env['enable_wrapper'])
++print ('Enable OSPF:      ', env['enable_ospf'])
++print ('Enable RIP:       ', env['enable_rip'])
++print ('Enable VRRP:      ', env['enable_vrrp'])
++print ('Enable xorpsh     ', env['enable_xorpsh'])
++print ('Enable Test Programs: ', env['enable_tests'])
++print ('Enable CLICK:     ', env['enable_click'])
++print ('Enable FEA Dummy: ', env['enable_fea_dummy'])
++print ('Enable VIFF_USE_IFINDEX: ', env['enable_viff_use_ifindex'])
++print ('Enable async method impls: ', env['enable_async_server'])
++print ('Enable BGP:       ', env['enable_bgp'])
++print ('Enable BuildInfo: ', env['enable_buildinfo'])
++print ('Xorp can run from BUILD_DIR: ', env['enable_builddirrun'])
++print ('Try Enable BOOST: ', env['enable_boost'])
++print ('Try Enable uSTL : ', env['enable_ustl'])
++print ('Disable IPv6:     ', env['disable_ipv6'])
++print ('Disable libtecla: ', env['disable_libtecla'])
++print ('Disable Firewall: ', env['disable_fw'])
++print ('Disable Profile : ', env['disable_profile'])
++print ('Disable -Werror : ', env['disable_werror'])
++print ('Disable deprecated warnings: ', env['disable_wdeprecated'])
++print ('Enable lex hack : ', env['enable_lex_hack'])
++print ('Disable warning logs : ', env['disable_warninglogs'])
++print ('Disable error logs : ', env['disable_errorlogs'])
++print ('Disable trace logs : ', env['disable_tracelogs'])
++print ('Disable fatal logs : ', env['disable_fatallogs'])
++print ('Disable info logs : ', env['disable_infologs'])
++print ('Disable assert logs : ', env['disable_assertlogs'])
++print ('Disable other logs : ', env['disable_otherlogs'])
++print ('Disable assert: ', env['disable_assert'])
+ 
+ 
+ env['CONFIGURELOG'] = str(builddir) + os.sep + 'config.log'
+-- 
+2.18.2
+

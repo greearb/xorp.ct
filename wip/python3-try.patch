@@ -1,0 +1,1458 @@
+diff --git a/xorp/SConstruct b/xorp/SConstruct
+index d80a9c8e5..c167f90f7 100644
+--- a/xorp/SConstruct
++++ b/xorp/SConstruct
+@@ -122,9 +122,9 @@ vars.AddVariables(
+ 
+ def log_args(afname):
+     f = open(afname, 'w')
+-    for a in ARGUMENTS.iteritems():
+-        print >>f, "%s=%s" % a,
+-    print >>f
++    for a in ARGUMENTS:
++        print ("%s=%s" % (a, a), file=f)
++    print ("", file=f)
+     f.close()
+ 
+ def tgt_guess():
+@@ -135,7 +135,7 @@ def tgt_guess():
+     return o.strip()
+ 
+ def tgt_canonicalize(alias):
+-    p = subprocess.Popen(['./config.sub', alias], stdout=subprocess.PIPE)
++    p = subprocess.Popen(['./config.sub', alias], stdout=subprocess.PIPE, encoding='utf8')
+     o = p.communicate()[0]
+     if p.returncode != 0:
+         Exit(1)
+@@ -328,47 +328,47 @@ def Symlink(src, link_name):
+ SConsEnvironment.Symlink = SCons.Action.ActionFactory(Symlink,
+     lambda src, link_name: 'Symlink("%s", as "%s")' % (src, link_name))
+ 
+-def InstallProgram(env, dest, files, perm = 0755):
++def InstallProgram(env, dest, files, perm = 0o755):
+     if env.has_key('DESTDIR'):
+     	# NB: use simple concatenation
+     	dest = env.Dir(env['DESTDIR'] + env.Dir(dest).path)
+     obj = env.Install(dest, files)
+     for i in obj:
+-	env.AddPostAction(i, env.Chmod(str(i), perm))
+-	if env['strip']:
+-	    env.AddPostAction(i, Action("$STRIP $TARGET"))
++        env.AddPostAction(i, env.Chmod(str(i), perm))
++        if env['strip']:
++           env.AddPostAction(i, Action("$STRIP $TARGET"))
+     return obj
+ SConsEnvironment.InstallProgram = InstallProgram
+ 
+-def InstallScript(env, dest, files, perm = 0555):
++def InstallScript(env, dest, files, perm = 0o555):
+     if env.has_key('DESTDIR'):
+     	# NB: use simple concatenation
+     	dest = env.Dir(env['DESTDIR'] + env.Dir(dest).path)
+     obj = env.Install(dest, files)
+     for i in obj:
+-	env.AddPostAction(i, env.Chmod(str(i), perm))
++        env.AddPostAction(i, env.Chmod(str(i), perm))
+     return obj
+ SConsEnvironment.InstallScript = InstallScript
+ 
+-def InstallLibrary(env, dest, files, perm = 0644):
++def InstallLibrary(env, dest, files, perm = 0o644):
+     if env.has_key('DESTDIR'):
+     	# NB: use simple concatenation
+     	dest = env.Dir(env['DESTDIR'] + env.Dir(dest).path)
+     obj = env.Install(dest, files)
+     for i in obj:
+-	env.AddPostAction(i, env.Chmod(str(i), perm))
+-	if env['strip']:
+-	    env.AddPostAction(i, Action("$STRIP $_STRIP_UNNEEDED $TARGET"))
++        env.AddPostAction(i, env.Chmod(str(i), perm))
++        if env['strip']:
++            env.AddPostAction(i, Action("$STRIP $_STRIP_UNNEEDED $TARGET"))
+     return obj
+ SConsEnvironment.InstallLibrary = InstallLibrary
+ 
+-def InstallData(env, dest, files, perm = 0644):
++def InstallData(env, dest, files, perm = 0o644):
+     if env.has_key('DESTDIR'):
+-    	# NB: use simple concatenation
+-    	dest = env.Dir(env['DESTDIR'] + env.Dir(dest).path)
++        # NB: use simple concatenation
++        dest = env.Dir(env['DESTDIR'] + env.Dir(dest).path)
+     obj = env.Install(dest, files)
+     for i in obj:
+-	env.AddPostAction(i, env.Chmod(str(i), perm))
++        env.AddPostAction(i, env.Chmod(str(i), perm))
+     return obj
+ SConsEnvironment.InstallData = InstallData
+ 
+@@ -480,8 +480,8 @@ else:
+         if not env.GetOption('clean') and \
+                not env.GetOption('help'):
+             if os.system("./libxorp/create_buildinfo.sh") != 0:
+-                print "ERROR:  Failed to generate libxorp/build_info.cc."
+-                print "You can disable this feature with: enable_buildinfo=no"
++                print ("ERROR:  Failed to generate libxorp/build_info.cc.")
++                print ("You can disable this feature with: enable_buildinfo=no")
+                 exit(1)
+ 
+ if env.GetOption('clean'):
+@@ -682,14 +682,14 @@ if not env.GetOption('clean') and \
+         conf.Define('HAVE_PROC_LINUX')
+         conf.Define('ENABLE_ADVANCED_MULTICAST_API')
+     elif fnmatch.fnmatch(host_os, 'netbsd*'):
+-	osname = "NetBSD"
+-	conf.Define('HOST_OS_NETBSD')
++        osname = "NetBSD"
++        conf.Define('HOST_OS_NETBSD')
+         conf.Define('ENABLE_ADVANCED_MULTICAST_API')
+     elif fnmatch.fnmatch(host_os, 'sunos*'):
+         osname = "Solaris"
+         conf.Define('HOST_OS_SOLARIS')
+     else:
+-	osname = sys.platform.upper()
++        osname = sys.platform.upper()
+     conf.Define('HOST_OS_NAME', '"' + osname + '"')
+ 
+     #export osname - needed for lex and yacc
+@@ -712,7 +712,7 @@ if not env.GetOption('clean') and \
+         # Boost
+         #env['boost_suffix'] = "-mt"		# Not for FreeBSD
+         if  not conf.CheckBoost(require_version='1.34'):
+-            print "Boost version check for 1.34 failed, disabling boost support.\n"
++            print ("Boost version check for 1.34 failed, disabling boost support.\n")
+             env['enable_boost'] = False
+ 
+         #conf.CheckBoostLibrary('system')
+@@ -762,13 +762,13 @@ if not env.GetOption('clean') and \
+ 
+     # Print warnings about missing/skipped dependencies.
+     if env['MISSING_DEPS']:
+-        print '\nRequired dependencies not found, exiting:\n   - %s' % '\n   - '.join(env['MISSING_DEPS'])
++        print ('\nRequired dependencies not found, exiting:\n   - %s' % '\n   - '.join(env['MISSING_DEPS']))
+         if env['SKIPPED_DEPS']:
+-            print 'Optional dependencies not found:\n   - %s' % '\n   - '.join(env['SKIPPED_DEPS'])
++            print ('Optional dependencies not found:\n   - %s' % '\n   - '.join(env['SKIPPED_DEPS']))
+         Exit(1)
+ 
+     if env['SKIPPED_DEPS']:
+-        print 'Optional dependencies not found:\n   - %s' % '\n   - '.join(env['SKIPPED_DEPS'])
++        print ('Optional dependencies not found:\n   - %s' % '\n   - '.join(env['SKIPPED_DEPS']))
+ 
+     newenv = conf.Finish()
+     #
+@@ -786,25 +786,25 @@ if not env.GetOption('clean') and \
+     post_LIBS = env['LIBS']
+     env['LIBS'] = pre_LIBS
+ 
+-    print 'Detected libraries:',
++    print ('Detected libraries:')
+     for x in post_LIBS:
+-        print x,
+-    print
++        print (x)
++    print ("")
+ 
+ ########## end configure magic
+ 
+ if SCons.Tool.FindTool(['gcc'], env) is None or \
+    SCons.Tool.FindTool(['g++'], env) is None:
+-    print gnutoolwarning % 'gcc or g++ compiler'
++    print (gnutoolwarning % 'gcc or g++ compiler')
+ 
+ # If the user didn't override our default optimization, then
+ # sanitize user's CFLAGS/CXXFLAGS to not contain optimization options,
+ # and map to an appropriate GCC flag.
+ if not env['optimize'] == 'override':
+-    env.Replace( CFLAGS = filter(lambda s: not s.startswith('-O'),
+-                                 Split(env['CFLAGS'])))
+-    env.Replace( CXXFLAGS = filter(lambda s: not s.startswith('-O'),
+-                                   Split(env['CXXFLAGS'])))
++    env.Replace( CFLAGS = list(filter(lambda s: not s.startswith('-O'),
++                                      Split(env['CFLAGS']))))
++    env.Replace( CXXFLAGS = list(filter(lambda s: not s.startswith('-O'),
++                                   Split(env['CXXFLAGS']))))
+     bigodict = { 'no': '-O0',
+                  # 'minimal' denotes only those optimizations
+                  # necessary to force gcc to perform the tree_sink
+@@ -832,10 +832,10 @@ if not env['optimize'] == 'override':
+ 
+ # Do the same for the flags which control debug symbols.
+ if not env['debug'] == 'override':
+-    env.Replace( CFLAGS = filter(lambda s: not s.startswith('-g'),
+-                                 Split(env['CFLAGS'])))
+-    env.Replace( CXXFLAGS = filter(lambda s: not s.startswith('-g'),
+-                                   Split(env['CXXFLAGS'])))
++    env.Replace( CFLAGS = list(filter(lambda s: not s.startswith('-g'),
++                                 Split(env['CFLAGS']))))
++    env.Replace( CXXFLAGS = list(filter(lambda s: not s.startswith('-g'),
++                                   Split(env['CXXFLAGS']))))
+     gdict = { 'no': '', 'yes': '-g', 'full': '-g3' }
+     gflag = gdict[env['debug']]
+     if not env['debug'] == 'no':
+@@ -845,27 +845,27 @@ if not env['debug'] == 'override':
+ # Do the same for the flags which control code profiling.
+ if not env['profile'] == 'override':
+     if env['profile'] == 'gprof' and env.has_key('SHAREDLIBS'):
+-        print """
++        print ("""
+ WARNING: You have requested GNU gprof style profiling
+ and shared libraries. This is UNSUPPORTED, and probably will not link.
+-"""
++""")
+     strip_pg_flags = [ '-pg', '-finstrument-functions', '-fno-omit-frame-pointer', '-fno-optimize-sibling-calls' ]
+     try:
+-        env.Replace( CFLAGS = filter(
++        env.Replace( CFLAGS = list(filter(
+             lambda s: not s.startswith(tuple(strip_pg_flags)),
+-            Split(env['CFLAGS']))
++            Split(env['CFLAGS'])))
+         )
+-        env.Replace( CXXFLAGS = filter(
++        env.Replace( CXXFLAGS = list(filter(
+             lambda s: not s.startswith(tuple(strip_pg_flags)),
+-            Split(env['CXXFLAGS']))
++            Split(env['CXXFLAGS'])))
+         )
+     except TypeError:
+-        print """
++        print ("""
+         WARNING: Your version of scons and/or python has a syntax issue with this code.
+         It cannot strip out the gprof related flags.  If your compile fails, please try
+         disabling gprof profiling and/or shared libraries.  If the compile works, then
+         you can ignore this warning.
+-        """
++        """)
+ 
+     # Full use of profiling may require more than one flag, so Split() them.
+     pgdict = {'no': '',
+@@ -937,7 +937,7 @@ if env['enable_boost']:
+         ])
+ 
+ if env['disable_wdeprecated']:
+-    print "WARNING:  Adding -Wno-deprecated on user command."
++    print ("WARNING:  Adding -Wno-deprecated on user command.")
+     env.AppendUnique(CFLAGS = [
+         '-Wno-deprecated',
+         ])
+@@ -952,16 +952,16 @@ if ((build != "i386-pc-mingw32") and
+      host_cpu == "i386" or
+      host_cpu == "x86_64")):
+     if env['disable_werror']:
+-	print "WARNING:  Disabling -Werror on user command."
++        print ("WARNING:  Disabling -Werror on user command.")
+     else:
+         env.AppendUnique(CFLAGS = [
+ 	        '-Werror',
+ 		])
+-	env.AppendUnique(CXXFLAGS = [
++        env.AppendUnique(CXXFLAGS = [
+ 		'-Werror',
+ 		])
+ else:
+-    print "WARNING:  Detected funky platform, will not enable -Werror compile option: ", host_cpu
++    print ("WARNING:  Detected funky platform, will not enable -Werror compile option: ", host_cpu)
+ 
+ 
+ # NOTE: gcc specific flags.
+@@ -1074,29 +1074,29 @@ if env.has_key('SHAREDLIBS'):
+ 	#
+ 	# $BUILDIR/lib will contain .so symlinks
+ 	#
+-	xorp_alias_libdir = os.path.join(builddir, 'lib')
++        xorp_alias_libdir = os.path.join(builddir, 'lib')
+ 	# XXX workaround Mkdir() failure on EEXIST, SCons < 20090223.
+-	try:
+-		Execute(Mkdir(xorp_alias_libdir))
+-	except:
+-		pass
+-	env['xorp_alias_libdir'] = xorp_alias_libdir
++        try:
++            Execute(Mkdir(xorp_alias_libdir))
++        except:
++            pass
++        env['xorp_alias_libdir'] = xorp_alias_libdir
+ 	#
+ 	# Build a further alias for the benefit of entities which
+ 	# will be later installed in $xorp_sbindir.
+ 	#
+ 	# $BUILDIR/lib/xorp/lib will point to $BUILDIR/lib
+ 	#
+-	xorp_alias_subdir = os.path.join(xorp_alias_libdir, 'xorp')
++        xorp_alias_subdir = os.path.join(xorp_alias_libdir, 'xorp')
+ 	#
+ 	# XXX workaround Mkdir() failure on EEXIST, SCons < 20090223.
+-	xorp_module_alias_libdir = os.path.join(xorp_alias_subdir, 'lib')
+-	try:
+-		Execute(Mkdir(xorp_alias_subdir))
+-	except:
+-		pass
+-	Execute(env.Symlink(xorp_alias_libdir, xorp_module_alias_libdir))
+-	env['xorp_module_alias_libdir'] = xorp_module_alias_libdir
++        xorp_module_alias_libdir = os.path.join(xorp_alias_subdir, 'lib')
++        try:
++            Execute(Mkdir(xorp_alias_subdir))
++        except:
++            pass
++        Execute(env.Symlink(xorp_alias_libdir, xorp_module_alias_libdir))
++        env['xorp_module_alias_libdir'] = xorp_module_alias_libdir
+ 
+         if not fnmatch.fnmatch(host_os, 'mingw32*'):
+             # Tell rtld to turn on $ORIGIN processing by default.
+@@ -1104,14 +1104,14 @@ if env.has_key('SHAREDLIBS'):
+             env.PrependUnique( LINKFLAGS = [ '-Wl,-z,origin' ] )
+ 
+ 	# Set relative RPATH for each kind of installed XORP component.
+-	env['xorp_sbin_rpath'] = os.path.join('\\$$ORIGIN',
+-	   os.path.relpath(env.Dir('$xorp_libdir').abspath,
++        env['xorp_sbin_rpath'] = os.path.join('\\$$ORIGIN',
++           os.path.relpath(env.Dir('$xorp_libdir').abspath,
+ 			   env.Dir('$xorp_sbindir').abspath))
+-	env['xorp_tool_rpath'] = os.path.join('\\$$ORIGIN',
+-	   os.path.relpath(env.Dir('$xorp_libdir').abspath,
++        env['xorp_tool_rpath'] = os.path.join('\\$$ORIGIN',
++           os.path.relpath(env.Dir('$xorp_libdir').abspath,
+ 			   env.Dir('$xorp_tooldir').abspath))
+-	env['xorp_module_rpath'] = os.path.join('\\$$ORIGIN',
+-	   os.path.relpath(env.Dir('$xorp_libdir').abspath,
++        env['xorp_module_rpath'] = os.path.join('\\$$ORIGIN',
++           os.path.relpath(env.Dir('$xorp_libdir').abspath,
+ 			   env.Dir('$xorp_moduledir').abspath))
+ 
+ if env['enable_builddirrun']:
+diff --git a/xorp/etc/templates/SConscript b/xorp/etc/templates/SConscript
+index fcf4ea202..68a64e613 100644
+--- a/xorp/etc/templates/SConscript
++++ b/xorp/etc/templates/SConscript
+@@ -105,8 +105,8 @@ def BuildXrlTemplate(target, source, env):
+ 
+     sfname = str(source[0])
+     
+-    print "source: ", sfname
+-    print "target: ", str(target[0])
++    print ("source: ", sfname)
++    print ("target: ", str(target[0]))
+     
+     ifile = open(sfname, 'r')
+     ofile = open(str(target[0]), 'w')
+@@ -134,7 +134,7 @@ def BuildXrlTemplate(target, source, env):
+             if line[-1] == "\n":
+                 # trim trailing newline
+                 line = line[0 : -1]
+-                print >>ofile, "%s" % line
++                print ("%s" % line, file=ofile)
+     else:
+         return -1 # error
+     
+@@ -159,21 +159,21 @@ if env['enable_builddirrun']:
+ 
+         cmd_files = [c.__add__('.cmds') for c in cmds]
+         for obj in cmd_files:
+-		#copy all necessary cmd_files in $BUILDDIR/etc/templates
+-		Execute(Copy(os.path.join(env['xorp_alias_templatedir'], str(obj)),
+-			os.path.join(template_source_dir, str(obj))))
++                #copy all necessary cmd_files in $BUILDDIR/etc/templates
++                Execute(Copy(os.path.join(env['xorp_alias_templatedir'], str(obj)),
++                        os.path.join(template_source_dir, str(obj))))
+ 
+         tp_files = [t.__add__('.tp') for t in tps]
+         for obj in tp_files:
+-		#copy all necessary tp_files in $BUILDDIR/etc/templates
+-		Execute(Copy(os.path.join(env['xorp_alias_templatedir'], str(obj)),
+-			os.path.join(template_source_dir, str(obj))))
++                #copy all necessary tp_files in $BUILDDIR/etc/templates
++                Execute(Copy(os.path.join(env['xorp_alias_templatedir'], str(obj)),
++                        os.path.join(template_source_dir, str(obj))))
+ 
+         tp_raw_files = [t.__add__('.tp') for t in tp_raw]
+         for obj in tp_raw_files:
+-		#copy all necessary tp_files in $BUILDDIR/etc/templates
+-		Execute(Copy(os.path.join(env['xorp_alias_templatedir'], str(obj)),
+-			os.path.join(template_source_dir, str(obj))))
++                #copy all necessary tp_files in $BUILDDIR/etc/templates
++                Execute(Copy(os.path.join(env['xorp_alias_templatedir'], str(obj)),
++                        os.path.join(template_source_dir, str(obj))))
+ 
+ e.Alias('install', [
+         e.InstallData(env['xorp_templatedir'],
+diff --git a/xorp/fea/data_plane/fibconfig/SConscript b/xorp/fea/data_plane/fibconfig/SConscript
+index 02b9a23a3..2b89d6598 100644
+--- a/xorp/fea/data_plane/fibconfig/SConscript
++++ b/xorp/fea/data_plane/fibconfig/SConscript
+@@ -67,7 +67,7 @@ if not (env.has_key('mingw') and env['mingw']):
+ 	
+ 
+ if env['enable_click']:
+-	sources.append('fibconfig_entry_get_click.cc')
++        sources.append('fibconfig_entry_get_click.cc')
+         sources.append('fibconfig_entry_set_click.cc')
+         sources.append('fibconfig_table_set_click.cc')
+         sources.append('fibconfig_table_get_click.cc')
+diff --git a/xorp/relpath.py b/xorp/relpath.py
+index a618c0052..8d7f89d80 100644
+--- a/xorp/relpath.py
++++ b/xorp/relpath.py
+@@ -11,7 +11,7 @@ if not hasattr(os.path, "relpath"):
+         base_list = (os.path.abspath(base)).split(os.sep)
+         target_list = (os.path.abspath(target)).split(os.sep)
+         for i in range(min(len(base_list), len(target_list))):
+-            if base_list[i] <> target_list[i]: break
++            if base_list[i] != target_list[i]: break
+         else:
+             i += 1
+         rel_list = [os.pardir] * (len(base_list)-i) + target_list[i:]
+diff --git a/xorp/rtrmgr/SConscript b/xorp/rtrmgr/SConscript
+index c3a8fbf48..5dddb1428 100644
+--- a/xorp/rtrmgr/SConscript
++++ b/xorp/rtrmgr/SConscript
+@@ -169,7 +169,7 @@ if not is_shared:
+             ])
+ 
+ util_cc_env = env.Clone()
+-util_cc_env.AppendUnique(CPPDEFINES=xorp_paths.items())
++util_cc_env.AppendUnique(CPPDEFINES=list(xorp_paths.items()))
+ obj_util = util_cc_env.StaticObject(source='util.cc')
+ libxorp_rtrmgr_srcs += [ obj_util ]
+ 
+diff --git a/xorp/site_scons/config/allconfig.py b/xorp/site_scons/config/allconfig.py
+index 1f1b927d5..1d98c2957 100644
+--- a/xorp/site_scons/config/allconfig.py
++++ b/xorp/site_scons/config/allconfig.py
+@@ -41,35 +41,35 @@ def DoAllConfig(env, conf, host_os):
+     # Bleh, FC8 era scons doesn't have this check.
+     try:
+         if not conf.CheckCC:
+-            print "\nERROR:  Cannot find functional cc compiler."
+-            print "  On Fedora/RedHat: yum install gcc"
++            print ("\nERROR:  Cannot find functional cc compiler.")
++            print ("  On Fedora/RedHat: yum install gcc")
+             sys.exit(1);
+-        print "OK:  c compiler appears functional.";
++        print ("OK:  c compiler appears functional.")
+ 
+         if not conf.CheckCXX:
+-            print "\nERROR:  Cannot find functional c++ compiler."
+-            print "  On Fedora/RedHat: yum install gcc-g++"
++            print ("\nERROR:  Cannot find functional c++ compiler.")
++            print ("  On Fedora/RedHat: yum install gcc-g++")
+             sys.exit(1);
+-        print "OK:  C++ compiler appears functional.";
++        print ("OK:  C++ compiler appears functional.")
+     except:
+-        print "NOTE:  This version of scons cannot check for"
+-        print "  existence of gcc and g++ compilers."
+-        print "  Will assume the exist and function properly...\n"
++        print ("NOTE:  This version of scons cannot check for")
++        print ("  existence of gcc and g++ compilers.")
++        print ("  Will assume the exist and function properly...\n")
+ 
+     # Check for Flex and Bison
+     if not (env.has_key('LEX') and env['LEX']):
+-        print "\nERROR: Cannot find flex."
+-        print "  On Ubuntu: sudo apt-get install flex"
+-        print "  On Fedora/RedHat: yum install flex"
++        print ("\nERROR: Cannot find flex.")
++        print ("  On Ubuntu: sudo apt-get install flex")
++        print ("  On Fedora/RedHat: yum install flex")
+         sys.exit(1);
+-    print "OK:  flex appears functional."
++    print ("OK:  flex appears functional.")
+ 
+     if not (env.has_key('YACC') and env['YACC']):
+-        print "\nERROR: Cannot find bison."
+-        print "  On Ubuntu: sudo apt-get install bison"
+-        print "  On Fedora/RedHat: yum install bison"
++        print ("\nERROR: Cannot find bison.")
++        print ("  On Ubuntu: sudo apt-get install bison")
++        print ("  On Fedora/RedHat: yum install bison")
+         sys.exit(1);
+-    print "OK:  bison appears functional."
++    print ("OK:  bison appears functional.")
+ 
+     # Mingw/windows stuff
+     has_iphlpapi_h = conf.CheckHeader(['winsock2.h', 'iphlpapi.h'])
+@@ -84,11 +84,11 @@ def DoAllConfig(env, conf, host_os):
+                   'int32_t', 'uint32_t',
+                   'int64_t', 'uint64_t'  ]:
+         includes = ""
+-	if has_inttypes_h:
+-	    includes += '#include <inttypes.h>\n'
+-	if has_stdint_h:
+-	    includes += '#include <stdint.h>\n'
+-	conf.CheckType(type, includes)
++        if has_inttypes_h:
++            includes += '#include <inttypes.h>\n'
++        if has_stdint_h:
++            includes += '#include <stdint.h>\n'
++        conf.CheckType(type, includes)
+     
+     has_stdbool_h = conf.CheckHeader('stdbool.h')
+ 
+@@ -231,7 +231,7 @@ def DoAllConfig(env, conf, host_os):
+     af_inet_includes = []
+     for s in prereq_af_inet_includes:
+         af_inet_includes.append("#include <%s>\n" % s)
+-    af_inet_includes = string.join(af_inet_includes, '')
++    af_inet_includes = ''.join(af_inet_includes)
+     
+     has_af_inet = conf.CheckDeclaration('AF_INET', af_inet_includes)
+     has_af_inet6 = conf.CheckDeclaration('AF_INET6', af_inet_includes)
+@@ -247,7 +247,7 @@ def DoAllConfig(env, conf, host_os):
+         # TODO:  This used to check for openbsd and linux in an error prone
+         #        way.  Now, do negative checks, but this could break Solaris and other OS
+         #        (or not..no idea if it supports raw or not).
+-	if not ((env.has_key('mingw') and env['mingw']) or
++        if not ((env.has_key('mingw') and env['mingw']) or
+                 fnmatch.fnmatch(host_os, 'freebsd*')):
+             conf.Define('IPV4_RAW_OUTPUT_IS_RAW')
+             conf.Define('IPV4_RAW_INPUT_IS_RAW')
+@@ -283,11 +283,11 @@ def DoAllConfig(env, conf, host_os):
+     # and/or <linux/types.h>
+     prereq_linux_ethtool_h = []
+     if has_inttypes_h:
+-	prereq_linux_ethtool_h.append('inttypes.h')
++        prereq_linux_ethtool_h.append('inttypes.h')
+     if has_stdint_h:
+-	prereq_linux_ethtool_h.append('stdint.h')
++        prereq_linux_ethtool_h.append('stdint.h')
+     if has_linux_types_h:
+-	prereq_linux_ethtool_h.append('linux/types.h')
++        prereq_linux_ethtool_h.append('linux/types.h')
+     has_linux_ethtool_h = conf.CheckHeader(prereq_linux_ethtool_h + ['linux/ethtool.h'])
+ 
+     has_linux_if_tun_h = conf.CheckHeader('linux/if_tun.h')
+@@ -325,7 +325,7 @@ def DoAllConfig(env, conf, host_os):
+             rta_nl_includes.append("#include <%s>\n" % s)
+             
+         rta_nl_includes.append("#include <linux/rtnetlink.h>\n");
+-        rta_nl_includes = string.join(rta_nl_includes, '')
++        rta_nl_includes = ''.join(rta_nl_includes)
+         has_netlink_rta_table = conf.CheckDeclaration('RTA_TABLE', rta_nl_includes)
+         if has_netlink_rta_table:
+             conf.Define('HAVE_NETLINK_SOCKET_ATTRIBUTE_RTA_TABLE')
+@@ -354,15 +354,15 @@ def DoAllConfig(env, conf, host_os):
+     # XXX header conditionals for linux/bsd variants needed.
+     prereq_ether_includes = [ 'sys/types.h', 'sys/socket.h' ]
+     if has_net_ethernet_h:
+-	prereq_ether_includes.append('net/ethernet.h')
++        prereq_ether_includes.append('net/ethernet.h')
+     if has_net_if_h:
+-	prereq_ether_includes.append('net/if.h')
++        prereq_ether_includes.append('net/if.h')
+     if has_net_if_ether_h:
+-	prereq_ether_includes.append('net/if_ether.h')
++        prereq_ether_includes.append('net/if_ether.h')
+     ether_includes = []
+     for s in prereq_ether_includes:
+         ether_includes.append("#include <%s>\n" % s)
+-    ether_includes = string.join(ether_includes, '')
++    ether_includes = ''.join(ether_includes)
+     has_struct_ether_addr = conf.CheckType('struct ether_addr', includes=ether_includes)
+     
+     # net stack: sysctl (bsd)
+@@ -384,7 +384,7 @@ def DoAllConfig(env, conf, host_os):
+     si = []
+     for s in siocgifconf_includes:
+         si.append("#include <%s>\n" % s)
+-    si = string.join(si, '')
++    si = ''.join(si)
+     has_siocgifconf = conf.CheckDeclaration('SIOCGIFCONF', si)
+     if has_siocgifconf:
+         conf.Define('HAVE_IOCTL_SIOCGIFCONF') # autoconf compat
+@@ -410,11 +410,11 @@ def DoAllConfig(env, conf, host_os):
+     # and/or <netinet/in_systm.h>
+     prereq_netinet_ip_h = []
+     if has_sys_types_h:
+-	prereq_netinet_ip_h.append('sys/types.h')
++        prereq_netinet_ip_h.append('sys/types.h')
+     if has_netinet_in_h:
+         prereq_netinet_ip_h.append('netinet/in.h')
+     if has_netinet_in_systm_h:
+-	prereq_netinet_ip_h.append('netinet/in_systm.h')
++        prereq_netinet_ip_h.append('netinet/in_systm.h')
+     prereq_mreqn_h = prereq_netinet_ip_h
+     has_netinet_ip_h = conf.CheckHeader(prereq_netinet_ip_h + ['netinet/ip.h'])
+     if has_netinet_ip_h:
+@@ -428,24 +428,24 @@ def DoAllConfig(env, conf, host_os):
+     mreqn_header_includes = []
+     for s in prereq_mreqn_h:
+         mreqn_header_includes.append("#include <%s>\n" % s)
+-    mreqn_header_includes = string.join(mreqn_header_includes, '')
++    mreqn_header_includes = ''.join(mreqn_header_includes)
+     has_struct_ip_mreqn = conf.CheckType('struct ip_mreqn', includes=mreqn_header_includes)
+     if not has_struct_ip_mreqn:
+-        print "\nWARNING: No struct ip_mreqn found.  Each interface must"
+-        print "  have a unique IP address or IP multicast (at least) will not"
+-        print "  be transmitted on the correct interface."
++        print ("\nWARNING: No struct ip_mreqn found.  Each interface must")
++        print ("  have a unique IP address or IP multicast (at least) will not")
++        print ("  be transmitted on the correct interface.")
+ 
+     # Header file <netinet/if_ether.h> might need <sys/types.h>, 
+     # <sys/socket.h>, <net/if.h>, and/or <netinet/in.h>
+     prereq_netinet_if_ether_h = []
+     if has_sys_types_h: 
+-	prereq_netinet_if_ether_h.append('sys/types.h')
++        prereq_netinet_if_ether_h.append('sys/types.h')
+     if has_sys_socket_h: 
+-	prereq_netinet_if_ether_h.append('sys/socket.h')
++        prereq_netinet_if_ether_h.append('sys/socket.h')
+     if has_net_if_h: 
+-	prereq_netinet_if_ether_h.append('net/if.h')
++        prereq_netinet_if_ether_h.append('net/if.h')
+     if has_netinet_in_h:
+-	prereq_netinet_if_ether_h.append('netinet/in.h')
++        prereq_netinet_if_ether_h.append('netinet/in.h')
+     has_netinet_if_ether_h = conf.CheckHeader(prereq_netinet_if_ether_h + ['netinet/if_ether.h'])
+ 
+     # opensolaris
+@@ -466,7 +466,7 @@ def DoAllConfig(env, conf, host_os):
+     v4mcast_includes = []
+     for s in prereq_v4mcast:
+         v4mcast_includes.append("#include <%s>\n" % s)
+-    v4mcast_includes = string.join(v4mcast_includes, '')
++    v4mcast_includes = ''.join(v4mcast_includes)
+     # check for each symbol
+     gotv4sym = True
+     for s in v4mcast_symbols:
+@@ -476,10 +476,10 @@ def DoAllConfig(env, conf, host_os):
+     if has_v4_mcast:
+         conf.Define('HAVE_IPV4_MULTICAST')
+         if host_os == 'linux-gnu' or host_os == 'linux-gnueabi':
+-            print "Enabling MULT_MCAST_TABLES logic since we are compiling for Linux.\n"
++            print ("Enabling MULT_MCAST_TABLES logic since we are compiling for Linux.\n")
+             conf.Define('USE_MULT_MCAST_TABLES')
+         else:
+-            print "Disabling MULT_MCAST_TABLES, host_os:", host_os, "\n"
++            print ("Disabling MULT_MCAST_TABLES, host_os:", host_os, "\n")
+ 
+     # v4 stack: sysctl (bsd)
+     conf.CheckSysctl('IPCTL_FORWARDING', oid='CTL_NET, AF_INET, IPPROTO_IP, IPCTL_FORWARDING', includes='#include <sys/socket.h>\n#include <netinet/in.h>')
+@@ -514,10 +514,10 @@ def DoAllConfig(env, conf, host_os):
+     rfc3542_includes = []
+     for s in prereq_rfc3542:
+ 	# XXX: __USE_GNU must be defined for RFC3542 defines under Linux.
+-	if host_os == 'linux-gnu' and s == 'netinet/in.h':
+-	    rfc3542_includes.append("#define __USE_GNU\n")
++        if host_os == 'linux-gnu' and s == 'netinet/in.h':
++            rfc3542_includes.append("#define __USE_GNU\n")
+         rfc3542_includes.append("#include <%s>\n" % s)
+-    rfc3542_includes = string.join(rfc3542_includes, '')
++    rfc3542_includes = ''.join(rfc3542_includes)
+ 
+     has___kame__ = conf.CheckDeclaration('__KAME__', rfc3542_includes)
+     # CheckFunc() too tight.
+@@ -541,7 +541,7 @@ def DoAllConfig(env, conf, host_os):
+     mld_hdr_includes = []
+     for s in prereq_netinet_icmp6_h + [ netinet_icmp6_h ]:
+         mld_hdr_includes.append("#include <%s>\n" % s)
+-    mld_hdr_includes = string.join(mld_hdr_includes, '')
++    mld_hdr_includes = ''.join(mld_hdr_includes)
+     has_struct_mld_hdr = conf.CheckType('struct mld_hdr', includes=mld_hdr_includes)
+     
+     # Header file <netinet6/in6_var.h> might need <sys/types.h>, <sys/socket.h>,
+@@ -563,17 +563,17 @@ def DoAllConfig(env, conf, host_os):
+     # <net/if.h>, <net/if_var.h>, <netinet/in.h>, and/or <netinet6/in6_var.h> 
+     prereq_netinet6_nd6_h = []
+     if has_sys_types_h:
+-	prereq_netinet6_nd6_h.append('sys/types.h')
++        prereq_netinet6_nd6_h.append('sys/types.h')
+     if has_sys_socket_h:
+-	prereq_netinet6_nd6_h.append('sys/socket.h')
++        prereq_netinet6_nd6_h.append('sys/socket.h')
+     if has_net_if_h:
+-	prereq_netinet6_nd6_h.append('net/if.h')
++        prereq_netinet6_nd6_h.append('net/if.h')
+     if has_net_if_var_h:
+-	prereq_netinet6_nd6_h.append('net/if_var.h')
++        prereq_netinet6_nd6_h.append('net/if_var.h')
+     if has_netinet_in_h:
+-	prereq_netinet6_nd6_h.append('netinet/in.h')
++        prereq_netinet6_nd6_h.append('netinet/in.h')
+     if has_netinet6_in6_var_h:
+-	prereq_netinet6_nd6_h.append('netinet6/in6_var.h')
++        prereq_netinet6_nd6_h.append('netinet6/in6_var.h')
+     netinet6_nd6_h = 'netinet6/nd6.h'
+     has_netinet6_nd6_h = conf.CheckHeader(prereq_netinet6_nd6_h + [ netinet6_nd6_h ])
+     has_cxx_netinet6_nd6_h = conf.CheckHeader(prereq_netinet6_nd6_h + [ netinet6_nd6_h ], language='C++')
+@@ -592,7 +592,7 @@ def DoAllConfig(env, conf, host_os):
+     v6mcast_includes = []
+     for s in prereq_v6mcast:
+         v6mcast_includes.append("#include <%s>\n" % s)
+-    v6mcast_includes = string.join(v6mcast_includes, '')
++    v6mcast_includes = ''.join(v6mcast_includes)
+     # check for each symbol
+     gotv6sym = True
+     for s in v6mcast_symbols:
+@@ -608,16 +608,16 @@ def DoAllConfig(env, conf, host_os):
+     fpclassify_includes = []
+     for s in prereq_fpclassify:
+         fpclassify_includes.append("#include <%s>\n" % s)
+-    fpclassify_includes = string.join(fpclassify_includes, '')
++    fpclassify_includes = ''.join(fpclassify_includes)
+     has_fpclassify = conf.CheckDeclaration('fpclassify', fpclassify_includes)
+     if not has_fpclassify:
+         env.AppendUnique(CFLAGS = '-std=gnu99')
+         has_fpclassify = conf.CheckDeclaration('fpclassify', fpclassify_includes)
+         if not has_fpclassify:
+-            print "\nERROR:  Cannot find fpclassify, tried -std=gnu99 as well."
++            print ("\nERROR:  Cannot find fpclassify, tried -std=gnu99 as well.")
+             sys.exit(1)
+         else:
+-            print "\nNOTE:  Using -std=gnu99 for fpclassify (math.h)\n"
++            print ("\nNOTE:  Using -std=gnu99 for fpclassify (math.h)\n")
+ 
+     ##########
+     # v4 mforwarding
+@@ -659,13 +659,13 @@ def DoAllConfig(env, conf, host_os):
+     # you can't pass arbitrary code that is prepended to the test.
+     prereq_linux_mroute_h = []
+     if has_sys_types_h:
+-	prereq_linux_mroute_h.append('sys/types.h')
++        prereq_linux_mroute_h.append('sys/types.h')
+     if has_sys_socket_h:
+-	prereq_linux_mroute_h.append('sys/socket.h')
++        prereq_linux_mroute_h.append('sys/socket.h')
+     if has_netinet_in_h:
+-	prereq_linux_mroute_h.append('netinet/in.h')
++        prereq_linux_mroute_h.append('netinet/in.h')
+     if has_linux_types_h:
+-	prereq_linux_mroute_h.append('linux/types.h')
++        prereq_linux_mroute_h.append('linux/types.h')
+     linux_mroute_h = 'linux/mroute.h'
+     has_linux_mroute_h = conf.CheckHeader(prereq_linux_mroute_h + [ linux_mroute_h ])
+     if has_linux_mroute_h:
+@@ -690,7 +690,7 @@ def DoAllConfig(env, conf, host_os):
+     mfcctl2_includes = []
+     for s in prereq_mroute_h + [ mroute_h ]:
+         mfcctl2_includes.append("#include <%s>\n" % s)
+-    mfcctl2_includes = string.join(mfcctl2_includes, '')
++    mfcctl2_includes = ''.join(mfcctl2_includes)
+     
+     # common structs
+     has_struct_mfcctl2 = conf.CheckType('struct mfcctl2', includes=mfcctl2_includes)
+@@ -735,14 +735,14 @@ def DoAllConfig(env, conf, host_os):
+     for s in prereq_linux_mroute6_h:
+         i6o_includes.append("#include <%s>\n" % s)
+     i6o_includes.append("#include <%s>\n" % linux_mroute6_h);
+-    i6o_includes = string.join(i6o_includes, '')
++    i6o_includes = ''.join(i6o_includes)
+     has_inet6_option_space = conf.CheckDeclaration('inet6_option_space', i6o_includes);
+     
+     # common structs
+     mf6cctl2_includes = []
+     for s in prereq_mroute6_h + [ mroute6_h ]:
+         mf6cctl2_includes.append("#include <%s>\n" % s)
+-    mf6cctl2_includes = string.join(mf6cctl2_includes, '')
++    mf6cctl2_includes = ''.join(mf6cctl2_includes)
+     
+     has_struct_mf6cctl2 = conf.CheckType('struct mf6cctl2', includes=mf6cctl2_includes)
+     has_struct_mfcctl2_mfcc_flags = conf.CheckTypeMember('struct mf6cctl2', 'mf6cc_flags', includes=mf6cctl2_includes)
+@@ -757,8 +757,8 @@ def DoAllConfig(env, conf, host_os):
+                 conf.Define('HAVE_IPV6_OPTION_SPACE')
+             else:
+                 if not has_inet6_opt_init:
+-                    print "\nWARNING:  inet6_option_* and inet6_opt_* are not supported on this system."
+-                    print "  this might cause some problems with IPv6 multicast routing.\n"
++                    print ("\nWARNING:  inet6_option_* and inet6_opt_* are not supported on this system.")
++                    print ("  this might cause some problems with IPv6 multicast routing.\n")
+ 
+     has_struct_mif6ctl_vifc_threshold = conf.CheckTypeMember('struct mif6ctl', 'vifc_threshold', includes=mf6cctl2_includes) 
+     ##########
+@@ -791,19 +791,19 @@ def DoAllConfig(env, conf, host_os):
+     # <net/vlan/if_vlan_var.h> might need a list of other files.
+     prereq_vlan = []
+     if has_sys_types_h:
+-	prereq_vlan.append('sys/types.h')
++        prereq_vlan.append('sys/types.h')
+     if has_sys_socket_h:
+-	prereq_vlan.append('sys/socket.h')
++        prereq_vlan.append('sys/socket.h')
+     if has_net_if_h:
+-	prereq_vlan.append('net/if.h')
++        prereq_vlan.append('net/if.h')
+     if has_net_ethernet_h:
+-	prereq_vlan.append('net/ethernet.h')
++        prereq_vlan.append('net/ethernet.h')
+     if has_net_if_ether_h:
+-	prereq_vlan.append('net/if_ether.h')
++        prereq_vlan.append('net/if_ether.h')
+     if has_netinet_in_h:
+-	prereq_vlan.append('netinet/in.h')
++        prereq_vlan.append('netinet/in.h')
+     if has_netinet_if_ether_h:
+-	prereq_vlan.append('netinet/if_ether.h')
++        prereq_vlan.append('netinet/if_ether.h')
+ 
+     has_net_if_vlanvar_h = conf.CheckHeader(prereq_vlan + ['net/if_vlanvar.h'])
+ 
+@@ -821,7 +821,7 @@ def DoAllConfig(env, conf, host_os):
+         if not conf.CheckDeclaration('GET_VLAN_VID_CMD', '#include <linux/if_vlan.h>'):
+             conf.Define('GET_VLAN_VID_CMD', '9')
+     else:
+-	if has_net_if_vlanvar_h or has_net_if_vlan_var_h:
++        if has_net_if_vlanvar_h or has_net_if_vlan_var_h:
+             conf.Define('HAVE_VLAN_BSD')
+ 
+     
+@@ -838,20 +838,20 @@ def DoAllConfig(env, conf, host_os):
+     # XXX Check for MD5_Init()
+     prereq_md5 = []
+     if has_sys_types_h:
+-	prereq_md5.append('sys/types.h')
++        prereq_md5.append('sys/types.h')
+     has_openssl_md5_h = conf.CheckHeader(prereq_md5 + ['openssl/md5.h'])
+     if not has_openssl_md5_h:
+-        print "\nERROR:  Cannot find required openssl/md5.h."
+-        print "  On Fedora/RedHat:  yum install openssl-devel"
+-        print "  On Ubuntu:  apt-get install libssl-dev"
+-        print "  After install, rm -fr xorp/obj build directory to"
+-        print "  clear the configure cache before re-building."
++        print ("\nERROR:  Cannot find required openssl/md5.h.")
++        print ("  On Fedora/RedHat:  yum install openssl-devel")
++        print ("  On Ubuntu:  apt-get install libssl-dev")
++        print ("  After install, rm -fr xorp/obj build directory to")
++        print ("  clear the configure cache before re-building.")
+         sys.exit(1)
+         
+     has_libcrypto = conf.CheckLib('crypto')
+     if not has_libcrypto:
+-        print "\nERROR:  Cannot find required crypto library."
+-        print "  clear the configure cache before re-building."
++        print ("\nERROR:  Cannot find required crypto library.")
++        print ("  clear the configure cache before re-building.")
+         sys.exit(1)
+         
+     has_md5_init = conf.CheckFunc('MD5_Init')
+@@ -871,48 +871,48 @@ def DoAllConfig(env, conf, host_os):
+     env['has_libpcap'] = has_libpcap
+     has_pcap_sendpacket = conf.CheckFunc('pcap_sendpacket')
+     if not has_libpcap:
+-        print "\nWARNING:  Libpcap was not detected.\n  VRRP and other protocols may have issues."
+-        print "  On Fedora/RedHat:  yum install libpcap-devel"
+-        print "  On Ubuntu:  apt-get install libpcap-dev"
+-        print "  After install, rm -fr xorp/obj build directory to"
+-        print "  clear the configure cache before re-building.\n"
++        print ("\nWARNING:  Libpcap was not detected.\n  VRRP and other protocols may have issues.")
++        print ("  On Fedora/RedHat:  yum install libpcap-devel")
++        print ("  On Ubuntu:  apt-get install libpcap-dev")
++        print ("  After install, rm -fr xorp/obj build directory to")
++        print ("  clear the configure cache before re-building.\n")
+ 
+     # pcap filtering can be used to cut down on un-needed netlink packets.
+     #  This is a performance gain only, can function fine without it.
+     prereq_pcap_bpf = []
+     if has_sys_types_h:
+-	prereq_pcap_bpf.append('sys/types.h')
++        prereq_pcap_bpf.append('sys/types.h')
+     has_pcap_bpf_h = conf.CheckHeader(prereq_pcap_bpf + ['pcap-bpf.h'])
+     if not has_pcap_bpf_h:
+-        print "\nWARNING: PCAP-BPF is not supported on this system,"
+-        print "  socket filtering will not work."
+-        print "  This is not a real problem, just a small performance"
+-        print "  loss when using multiple virtual routers on the same system."
+-        print "  On Debian:  apt-get install libpcap-dev"
+-        print "  On Older Ubuntu:  apt-get install pcap-dev\n"
+-        print "  On Newer Ubuntu:  apt-get install libpcap-dev\n"
++        print ("\nWARNING: PCAP-BPF is not supported on this system,")
++        print ("  socket filtering will not work.")
++        print ("  This is not a real problem, just a small performance")
++        print ("  loss when using multiple virtual routers on the same system.")
++        print ("  On Debian:  apt-get install libpcap-dev")
++        print ("  On Older Ubuntu:  apt-get install pcap-dev\n")
++        print ("  On Newer Ubuntu:  apt-get install libpcap-dev\n")
+ 
+     if not (has_linux_netfilter_ipv4_ip_tables_h or has_linux_netfilter_ipv6_ip6_tables_h):
+         if not (env.has_key('disable_fw') and env['disable_fw']):
+             if has_linux_mroute_h:
+                 # We are Linux...should warn users about how to make netfiltering work since
+                 # it appears their headers are busted.
+-                print "\nWARNING: Netfilter include files are broken or do not exist."
+-                print "  This means the Linux firewall support will not be compiled in."
+-                print "  To fix, you may edit: /usr/include/linux/netfilter_ipv4/ip_tables.h"
+-                print "  line 222 or so, to look like this:"
+-                print "  /* Helper functions */"
+-                print "  static __inline__ struct ipt_entry_target *"
+-                print "  ipt_get_target(struct ipt_entry *e)"
+-                print "{"
+-                print "        /* BEN:  Was void* */"
+-                print "        return (struct ipt_entry_target *)((char*)e + e->target_offset);"
+-                print "}"
+-                print "\nYou will also want to edit similar code around line 282 of:"
+-                print "/usr/include/linux/netfilter_ipv6/ip6_tables.h"
+-                print "NOTE:  Recent kernels use struct xt_entry_target for the argument"
+-                print "   for these methods, so use that instead of ipt_entry_target if that"
+-                print "   is the case for your system."
++                print ("\nWARNING: Netfilter include files are broken or do not exist.")
++                print ("  This means the Linux firewall support will not be compiled in.")
++                print ("  To fix, you may edit: /usr/include/linux/netfilter_ipv4/ip_tables.h")
++                print ("  line 222 or so, to look like this:")
++                print ("  /* Helper functions */")
++                print ("  static __inline__ struct ipt_entry_target *")
++                print ("  ipt_get_target(struct ipt_entry *e)")
++                print ("{")
++                print ("        /* BEN:  Was void* */")
++                print ("        return (struct ipt_entry_target *)((char*)e + e->target_offset);")
++                print ("}")
++                print ("\nYou will also want to edit similar code around line 282 of:")
++                print ("/usr/include/linux/netfilter_ipv6/ip6_tables.h")
++                print ("NOTE:  Recent kernels use struct xt_entry_target for the argument")
++                print ("   for these methods, so use that instead of ipt_entry_target if that")
++                print ("   is the case for your system.")
+ 
+     ##########
+     # curses for cli/libtecla
+@@ -923,9 +923,9 @@ def DoAllConfig(env, conf, host_os):
+     env['has_libpdcurses'] = has_libpdcurses
+     env['has_libncurses'] = has_libncurses
+     if not has_libcurses and not has_libncurses and not has_libpdcurses:
+-        print "\nERROR:  Cannot find required (n)curses or pdcurses library."
+-        print "  On Fedora/RedHat:  yum install ncurses-devel"
+-        print "  On Debian/Ubuntu:  apt-get install ncurses-dev"
+-        print "  After install, rm -fr xorp/obj build directory to"
+-        print "  clear the configure cache before re-building."
++        print ("\nERROR:  Cannot find required (n)curses or pdcurses library.")
++        print ("  On Fedora/RedHat:  yum install ncurses-devel")
++        print ("  On Debian/Ubuntu:  apt-get install ncurses-dev")
++        print ("  After install, rm -fr xorp/obj build directory to")
++        print ("  clear the configure cache before re-building.")
+         sys.exit(1)
+diff --git a/xorp/site_scons/config/member.py b/xorp/site_scons/config/member.py
+index 7a84f9d29..a56584869 100644
+--- a/xorp/site_scons/config/member.py
++++ b/xorp/site_scons/config/member.py
+@@ -19,7 +19,7 @@
+ 
+ import re
+ import string
+-from types import IntType
++#from types import IntType
+ from SCons.Conftest import LogInputFiles, LogErrorMessages
+ 
+ # TODO: Support C++.
+@@ -112,14 +112,14 @@ def _Have(context, key, have, comment = None):
+              Give "have" as is should appear in the header file, include quotes
+              when desired and escape special characters!
+     """
+-    key_up = string.upper(key)
++    key_up = key.upper()
+     key_up = re.sub('[^A-Z0-9_]', '_', key_up)
+     context.havedict[key_up] = have
+     if have == 1:
+         line = "#define %s 1\n" % key_up
+     elif have == 0:
+         line = "/* #undef %s */\n" % key_up
+-    elif type(have) == IntType:
++    elif isinstance(have, int):
+         line = "#define %s %d\n" % (key_up, have)
+     else:
+         line = "#define %s %s\n" % (key_up, str(have))
+diff --git a/xorp/site_scons/config/sysctl.py b/xorp/site_scons/config/sysctl.py
+index b83d37f20..80e573099 100644
+--- a/xorp/site_scons/config/sysctl.py
++++ b/xorp/site_scons/config/sysctl.py
+@@ -19,7 +19,6 @@
+ 
+ import re
+ import string
+-from types import IntType
+ from SCons.Conftest import LogInputFiles, LogErrorMessages
+ 
+ # TODO: Support C++.
+@@ -120,14 +119,14 @@ def _Have(context, key, have, comment = None):
+              Give "have" as is should appear in the header file, include quotes
+              when desired and escape special characters!
+     """
+-    key_up = string.upper(key)
++    key_up = key.upper()
+     key_up = re.sub('[^A-Z0-9_]', '_', key_up)
+     context.havedict[key_up] = have
+     if have == 1:
+         line = "#define %s 1\n" % key_up
+     elif have == 0:
+         line = "/* #undef %s */\n" % key_up
+-    elif type(have) == IntType:
++    elif isinstance(have, int):
+         line = "#define %s %d\n" % (key_up, have)
+     else:
+         line = "#define %s %s\n" % (key_up, str(have))
+diff --git a/xorp/site_scons/site_tools/TOOL_SUBST.py b/xorp/site_scons/site_tools/TOOL_SUBST.py
+index 7162e0649..a90c3b926 100644
+--- a/xorp/site_scons/site_tools/TOOL_SUBST.py
++++ b/xorp/site_scons/site_tools/TOOL_SUBST.py
+@@ -22,7 +22,7 @@ def generate(env):
+             contents = f.read()
+             f.close()
+         except:
+-            raise SCons.Errors.UserError, "Can't read source file %s"%sourcefile
++            raise (SCons.Errors.UserError, "Can't read source file %s"%sourcefile)
+         for (k,v) in dict.items():
+             contents = re.sub(k, v, contents)
+         try:
+@@ -30,12 +30,12 @@ def generate(env):
+             f.write(contents)
+             f.close()
+         except:
+-            raise SCons.Errors.UserError, "Can't write target file %s"%targetfile
++            raise (SCons.Errors.UserError, "Can't write target file %s"%targetfile)
+         return 0 # success
+ 
+     def subst_in_file(target, source, env):
+         if not env.has_key('SUBST_DICT'):
+-            raise SCons.Errors.UserError, "SubstInFile requires SUBST_DICT to be set."
++            raise (SCons.Errors.UserError, "SubstInFile requires SUBST_DICT to be set.")
+         d = dict(env['SUBST_DICT']) # copy it
+         for (k,v) in d.items():
+             if callable(v):
+@@ -43,7 +43,7 @@ def generate(env):
+             elif SCons.Util.is_String(v):
+                 d[k]=env.subst(v)
+             else:
+-                raise SCons.Errors.UserError, "SubstInFile: key %s: %s must be a string or callable"%(k, repr(v))
++                raise (SCons.Errors.UserError, "SubstInFile: key %s: %s must be a string or callable"%(k, repr(v)))
+         for (t,s) in zip(target, source):
+             return do_subst_in_file(str(t), str(s), d)
+ 
+diff --git a/xorp/site_scons/site_tools/autotest.py b/xorp/site_scons/site_tools/autotest.py
+index e1099dae1..e060f07c3 100644
+--- a/xorp/site_scons/site_tools/autotest.py
++++ b/xorp/site_scons/site_tools/autotest.py
+@@ -47,7 +47,7 @@ def multiget(dictlist, key, default = None):
+     dictionaries, the default is returned.
+     """
+     for dict in dictlist:
+-        if dict.has_key(key):
++        if key in dict:
+             return dict[key]
+     else:
+         return default
+@@ -111,7 +111,7 @@ def generate(env, **kwargs):
+     env.SetDefault( AUTOTEST_SKIP_ERRORS = False )
+ 
+     #Here's where keyword arguments are applied
+-    apply(env.Replace, (), kwargs)
++    env.Replace(*(kwargs))
+ 
+     def AutoTest(env, target, source = None, **kwargs):
+         """Usage:
+diff --git a/xorp/xrl/scripts/Xif/kdoc.py b/xorp/xrl/scripts/Xif/kdoc.py
+index 411a18593..1ee1a7c95 100644
+--- a/xorp/xrl/scripts/Xif/kdoc.py
++++ b/xorp/xrl/scripts/Xif/kdoc.py
+@@ -55,12 +55,12 @@ class XifKdocThing:
+         kdoc_sections = cleaned_kdoc_comment.split("@")
+         for s in kdoc_sections:
+             if s.find("return") == 0:
+-                print "Ignoring kdoc @return primitive in input file."
++                print ("Ignoring kdoc @return primitive in input file.")
+                 continue
+             elif s.find("param") == 0:
+                 pc = s.split(None, 2)
+                 if len(pc) != 3:
+-                    print "@param with missing variable or description: \"%s\"" % s
++                    print ("@param with missing variable or description: \"%s\"" % s)
+                     continue
+                 self._params[pc[1]] = pc[2]
+             elif s.find("ROOT") == 0:
+@@ -134,7 +134,7 @@ def test():
+     p.add_kdoc_param("tgt_name", "Xrl Target to handle command")
+     s = p.output_kdoc("       ", ["tgt_name", "planet", "plig"], \
+                       "This is not an original comment")
+-    print s
++    print (s)
+     
+ if __name__ == '__main__':
+     test()
+diff --git a/xorp/xrl/scripts/Xif/parse.py b/xorp/xrl/scripts/Xif/parse.py
+index d96c73911..11bc9a630 100644
+--- a/xorp/xrl/scripts/Xif/parse.py
++++ b/xorp/xrl/scripts/Xif/parse.py
+@@ -1,7 +1,7 @@
+ # Python imports
+ import string, re, sys
+-from xiftypes import *
+-from util import quit, warn
++from Xif.xiftypes import *
++from Xif.util import quit, warn
+ 
+ # XIF specific imports
+ 
+@@ -42,7 +42,7 @@ def parse_cpp_hash(line):
+     # Check if line looks like a pragma, if so ignore it
+     p = pragma.match(line)
+     if p:
+-	return 1
++        return 1
+ 
+     # Format is '# LINENUM FILENAME [FLAG]' where FLAG is either:
+     #
+@@ -63,7 +63,7 @@ def parse_cpp_hash(line):
+         if flag == '' or flag == '3':
+             flag = "1"
+     else:
+-	return 0
++        return 0
+ 
+     if flag == "1":
+         push_file(file, line)
+@@ -72,7 +72,7 @@ def parse_cpp_hash(line):
+         pop_file()
+         push_file(file, line)
+     else:
+-        print "Invalid pre-processor #line flag (%d)\n", flag
++        print ("Invalid pre-processor #line flag (%d)\n", flag)
+         sys.exit(1)
+     return 1
+ 
+@@ -87,7 +87,7 @@ def parse_args(file, lineno, str):
+     if str == "":
+         return []
+ 
+-    toks = string.split(str, "&")
++    toks = str.split("&")
+ 
+     # arg format is <name>[<type>]
+     #                     ^      ^
+@@ -96,7 +96,7 @@ def parse_args(file, lineno, str):
+     xrl_args = []
+     for t in toks:
+ 
+-        lb = string.find(t, ":")
++        lb = t.find(":")
+         if lb == -1:
+             quit(file, lineno, "Missing \":\" in xrlatom \"%s\"" % t)
+             
+@@ -106,23 +106,23 @@ def parse_args(file, lineno, str):
+         validate_name(file, lineno, "Atom", name, '_-')
+ 
+         # Parse <type>\<<member_type>\> (\<\> are literal angle brackets).
+-        lab = string.find(type, "<")
++        lab = type.find("<")
+         member_type = None
+         if lab != -1:
+-            rab = string.find(type, ">")
++            rab = type.find(">")
+             if rab == -1:
+                 quit(file, lineno, "Invalid type spec \"%s\"" % type)
+             member_type = type[lab + 1:rab]
+             type = type[:lab]
+ 
+-        if xrl_atom_type.has_key(type) == 0:
++        if not type in xrl_atom_type:
+             quit(file, lineno, "Atom type \"%s\" not amongst those known %s"
+                  % (type, xrl_atom_type.keys()))
+         xa = XrlArg(name, type)
+         if type == 'list':
+             # Deal with type of members embedded in the container. These
+             # are now mandatory for XIF in this branch.
+-            if xrl_atom_type.has_key(member_type) == 0:
++            if not member_type in xrl_atom_type:
+                 quit(file, lineno, "Member atom type \"%s\" not amongst those known %s" % (member_type, xrl_atom_type.keys()))
+             xa.set_member_type(member_type)
+ 
+@@ -132,8 +132,8 @@ def parse_args(file, lineno, str):
+ """ Fill in any missing separators in Xrl to make parsing trivial"""
+ def fix_up_line(line):
+     # chomp whitespace
+-    table = string.maketrans("","")
+-    line =  string.translate(line, table, string.whitespace)
++    table = str.maketrans("","", string.whitespace)
++    line =  line.translate(table)
+ 
+     # Fill in missing component separators.
+     if line.find("->") < 0:
+@@ -146,7 +146,7 @@ def fix_up_line(line):
+ def componentize(line, separators):
+     r = [line]
+     for s in separators:
+-        tokens = string.split(r[-1], s, 1)
++        tokens = r[-1].split(s, 1)
+         r[-1] = tokens[0]
+         r.append(tokens[1])
+     return r;
+@@ -159,8 +159,8 @@ def parse_target_interfaces(file, lineno, line):
+     while (line != ""):
+         m = target_if.match(line)
+         if m == None:
+-            print "Bad interface in file %s at line %d\n\"%s\"\n" % \
+-                  (file, lineno, line)
++            print ("Bad interface in file %s at line %d\n\"%s\"\n" % \
++                  (file, lineno, line))
+             sys.exit(1)
+         ifs.append((m.group(1), m.group(2)))
+         line = line[m.end():]
+@@ -176,8 +176,8 @@ def parse_method(file, lineno, line):
+ 
+     m = method_outline.match(line)
+     if m == None:
+-        print "Bad method declaration from %s line %d:\n\"%s\"\n" %\
+-              (file, lineno, line)
++        print ("Bad method declaration from %s line %d:\n\"%s\"\n" %\
++              (file, lineno, line))
+         sys.exit(1)
+ 
+     method, args, rargs = m.groups()
+@@ -324,12 +324,12 @@ class XifParser:
+                                 if tif_name == i.name():
+                                     found = 1
+                             if found == 0:
+-                                print "Interface %s/%s not defined" % tif, \
++                                print ("Interface %s/%s not defined" % tif, \
+                                       "in file %s line %d\n" % \
+-                                      (get_input_file(), get_input_line())
+-                                print "Valid interfaces are:"
++                                      (get_input_file(), get_input_line()))
++                                print ("Valid interfaces are:")
+                                 for i in self._interfaces:
+-                                    print "\t%s/%s"% (i.name(), i.version())
++                                    print ("\t%s/%s"% (i.name(), i.version()))
+                                 sys.exit(1)
+                             else:
+                                 tgt.add_interface(tif)
+@@ -344,8 +344,8 @@ class XifParser:
+                         line_buffer = line_buffer[m.end():].strip()
+                         continue
+ 
+-                    print "Unrecognized command in file %s at line %d:\n\"%s\"\n" \
+-                          % (get_input_file(), get_input_line(), line_buffer)
++                    print ("Unrecognized command in file %s at line %d:\n\"%s\"\n" \
++                          % (get_input_file(), get_input_line(), line_buffer))
+                     sys.exit(1)
+                 else:
+                     m = not_grouping_end.match(line_buffer)
+diff --git a/xorp/xrl/scripts/Xif/util.py b/xorp/xrl/scripts/Xif/util.py
+index 9e4043beb..e2513012b 100644
+--- a/xorp/xrl/scripts/Xif/util.py
++++ b/xorp/xrl/scripts/Xif/util.py
+@@ -5,8 +5,8 @@ from time import time, localtime, strftime
+ # Utility methods and structures
+ 
+ def warn(file, lineno, reason):
+-    print "In Xrl starting at line %d in %s:" % (lineno, file)
+-    print "\t", reason
++    print ("In Xrl starting at line %d in %s:" % (lineno, file))
++    print ("\t", reason)
+ 
+ def quit(file, lineno, reason):
+     warn(file, lineno, reason)
+@@ -76,10 +76,10 @@ def proper(n):
+     l = ' '
+     r = ""
+     for i in range(0, len(n)):
+-        if string.find(string.whitespace, l) >= 0:
+-            r += string.upper(n[i])
++        if string.whitespace.find(l) >= 0:
++            r += n[i].upper()
+         else:
+-            r += string.lower(n[i])
++            r += n[i].lower()
+         l = n[i]
+     return r
+ 
+@@ -92,14 +92,14 @@ def caps_cpp_classname(s):
+     apply_cap = 1
+     r = ""
+     for l in s:
+-        digit = (string.find(string.digits, l) >= 0);
++        digit = (string.digits.find(l) >= 0);
+         if (digit):
+             apply_cap = 1
+-        elif (string.find(string.letters, l) < 0):
++        elif (string.letters.find(l) < 0):
+             apply_cap = 1
+             l = ''
+         elif (apply_cap):
+-            l = string.upper(l)
++            l = l.upper()
+             apply_cap = 0
+         r += l
+     return r
+diff --git a/xorp/xrl/scripts/clnt-gen b/xorp/xrl/scripts/clnt-gen
+index 8f8024758..010889569 100755
+--- a/xorp/xrl/scripts/clnt-gen
++++ b/xorp/xrl/scripts/clnt-gen
+@@ -79,7 +79,7 @@ def implement_send_xrl(cls, method_no, method, ifqname):
+     i = 0
+     for a in method.args():
+         s += "    x->args().set_arg(%d, %s);\n" % (i, a.name())
+-	i += 1
++        i += 1
+     s += "\n"
+     s += "    return _sender->send(*x, callback(&%s::unmarshall_%s, cb));\n" % (cls, method.name())
+     s += "}\n\n"
+@@ -242,8 +242,8 @@ def main():
+     # Command line arguments passed on to cpp
+     pipe_string = "cpp -C "
+     if options.includes:
+-	for a in options.includes:
+-	    pipe_string += "-I%s " % a
++        for a in options.includes:
++          pipe_string += "-I%s " % a
+     pipe_string += args[0] 
+ 
+     cpp_pipe = os.popen(pipe_string, 'r')
+@@ -251,12 +251,12 @@ def main():
+     xp = XifParser(cpp_pipe)
+ 
+     if len(xp.targets()):
+-        print "Found targets (used a .ent rather than .xif input?)"
++        print ("Found targets (used a .ent rather than .xif input?)")
+         sys.exit(1)
+ 
+     xifs = xp.interfaces()
+     if len(xifs) == 0:
+-        print "No interface definitions provided"
++        print ("No interface definitions provided")
+         sys.exit(1)
+ 
+     # Check all interface definitions come from same source file.
+@@ -265,12 +265,12 @@ def main():
+     sourcefile = xifs[0].sourcefile()
+     for xif in xifs:
+         if (xif.sourcefile() != sourcefile):
+-            print "Multiple .xif files presented, expected one."
++            print ("Multiple .xif files presented, expected one.")
+             sys.exit(1)
+ 
+     # basename transformation - this is a lame test
+     if sourcefile[-4:] != ".xif":
+-        print "Source file does not end in .xif suffix - basename transform failure."
++        print ("Source file does not end in .xif suffix - basename transform failure.")
+         sys.exit(1)
+ 
+     basename = sourcefile[:-4]
+@@ -281,8 +281,8 @@ def main():
+     cc_file = "%s_xif.cc" % basename
+ 
+     if options.output_dir:
+-	hh_file = os.path.join(options.output_dir, hh_file)
+-	cc_file = os.path.join(options.output_dir, cc_file)
++        hh_file = os.path.join(options.output_dir, hh_file)
++        cc_file = os.path.join(options.output_dir, cc_file)
+     
+     # Generate header file
+     hh_txt = prepare_client_if_hh(modulename, hh_file)
+diff --git a/xorp/xrl/scripts/tgt-gen b/xorp/xrl/scripts/tgt-gen
+index 29988102f..13feeb685 100755
+--- a/xorp/xrl/scripts/tgt-gen
++++ b/xorp/xrl/scripts/tgt-gen
+@@ -310,13 +310,13 @@ def target_handler_methods(cls, name, methods):
+         s += "\n%s%sCB c_b)\n{\n" % \
+             (xorp_indent(2), caps_cpp_classname(m.name()))
+ 
+-	s += "\n    /* Return value declarations */\n"
+-	for r in m.rargs():
++        s += "\n    /* Return value declarations */\n"
++        for r in m.rargs():
+             s += "    %s rarg_%s;\n" % (r.cpp_type(), cpp_name(r.name()))
+ 
+         s += "    XrlCmdError e = %s(" % cpp_name(m.name())
+         sep = ""
+-	for r in m.args():
++        for r in m.args():
+             s += "%s\n        arg_%s" % (sep, cpp_name(r.name()))
+             sep = ","
+         for r in m.rargs():
+@@ -324,7 +324,7 @@ def target_handler_methods(cls, name, methods):
+             sep = ","
+         s += ");\n"
+         s += "    return c_b->dispatch(e"
+-	for r in m.rargs():
++        for r in m.rargs():
+             s += ",\n        &rarg_%s" % (cpp_name(r.name()))
+             sep = ","
+         s += ");\n"
+@@ -373,7 +373,7 @@ def target_handler_methods(cls, name, methods):
+                    cls, cpp_name(m.name()))
+ 
+         s += xorp_indent(2) + "async_%s(" % cpp_name(m.name())
+-	i = 0
++        i = 0
+         for a in m.args():
+             s += "\n" + xorp_indent(3) + \
+                 "xa_inputs.get(%d, \"%s\").%s()," \
+@@ -382,7 +382,7 @@ def target_handler_methods(cls, name, methods):
+         s += " mycb);\n"
+ 
+ 
+-	s += \
++        s += \
+ """    } catch (const XrlArgs::BadArgs& e) {
+ 	XLOG_ERROR(\"Error decoding the arguments: %s\", e.str().c_str());
+ 	return pxa_outputs->dispatch(XrlCmdError::BAD_ARGS(e.str()), NULL);
+@@ -393,20 +393,20 @@ def target_handler_methods(cls, name, methods):
+         s += "#else\n"
+ 
+ 
+-    	s += "\n    /* Return value declarations */\n"
+-    	for r in m.rargs():
++        s += "\n    /* Return value declarations */\n"
++        for r in m.rargs():
+             s += "    %s r_%s;\n" % (r.cpp_type(), cpp_name(r.name()))
+ 
+ 
+         s += xorp_indent(1) + "try {\n"
+         s += xorp_indent(2) + "XrlCmdError e = %s(" % cpp_name(m.name())
+         get_reqs = []
+-	i = 0
++        i = 0
+         for a in m.args():
+             get_reqs.append("\n" + xorp_indent(3) + \
+                             "xa_inputs.get(%d, \"%s\").%s()" \
+                             % (i, a.name(), a.accessor()))
+-	    i += 1
++            i += 1
+         ret_vals = []
+         for r in m.rargs():
+             ret_vals.append("\n" + xorp_indent(3) + "r_%s" % cpp_name(r.name()))
+@@ -420,7 +420,7 @@ def target_handler_methods(cls, name, methods):
+         }
+ """ % m.name()
+ 
+-    	s += \
++        s += \
+ """    } catch (const XrlArgs::BadArgs& e) {
+ 	XLOG_ERROR(\"Error decoding the arguments: %s\", e.str().c_str());
+ 	return XrlCmdError::BAD_ARGS(e.str());
+@@ -582,7 +582,7 @@ def generate_target_methods(tgt, interfaces):
+                 found = 1
+                 break
+         if found == 0:
+-            print "Error interface %s data not found" % tif_info[0]
++            print ("Error interface %s data not found" % tif_info[0])
+             sys.exit(1)
+         for m in tif.methods():
+             full_name = Xif.util.xrl_method_name(tif.name(), tif.version(), m.name())
+@@ -613,8 +613,8 @@ def main():
+     # Command line arguments passed on to cpp
+     pipe_string = "cpp -C "
+     if options.includes:
+-	for a in options.includes:
+-	    pipe_string += "-I%s " % a
++        for a in options.includes:
++            pipe_string += "-I%s " % a
+     pipe_string += args[0] 
+ 
+     cpp_pipe = os.popen(pipe_string, 'r')
+@@ -623,18 +623,18 @@ def main():
+ 
+     tgts = xp.targets()
+     if len(tgts) == 0:
+-        print "No targets found in input files."
++        print ("No targets found in input files.")
+         sys.exit(1)
+ 
+     sourcefile = tgts[0].sourcefile()
+     for tgt in tgts:
+         if (tgt.sourcefile() != sourcefile):
+-            print "Multiple .tgt files presented, expected just one."
++            print ("Multiple .tgt files presented, expected just one.")
+             sys.exit(1)
+ 
+     # basename transformation - this is a lame test
+     if sourcefile[-4:] != ".tgt":
+-        print "Source file does not end in .tgt suffix - basename transform failure."
++        print ("Source file does not end in .tgt suffix - basename transform failure.")
+         sys.exit(1)
+         
+     basename = sourcefile[:-4]
