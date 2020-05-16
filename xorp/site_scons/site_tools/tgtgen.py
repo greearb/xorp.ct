@@ -6,7 +6,7 @@ tgtgen_action = SCons.Action.Action("$TGTGEN $_TGTGEN_INCFLAGS --output-dir ${TA
 
 def tgtgen_emitter(target, source, env):
     base,ext = SCons.Util.splitext(str(source[0]))
-    base = base[base.rfind("/") + 1:] 
+    base = base[base.rfind("/") + 1:]
     cc = base + "_base.cc"
     hh = base + "_base.hh"
     xrls = base + ".xrls"

@@ -365,8 +365,8 @@ def main():
     usage = "usage: %prog [options] arg"
     parser = OptionParser(usage)
     parser.add_option("-o", "--output-dir",
-		      action="store", 
-		      type="string", 
+		      action="store",
+		      type="string",
 		      dest="output_dir",
 		      metavar="DIR")
     parser.add_option("-I",
@@ -384,7 +384,7 @@ def main():
     if options.includes:
 	for a in options.includes:
 	    pipe_string += "-I%s " % a
-    pipe_string += args[0] 
+    pipe_string += args[0]
 
     cpp_pipe = os.popen(pipe_string, 'r')
 

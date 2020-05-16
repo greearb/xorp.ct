@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 # $XORP: xorp/bgp/harness/lookup.py,v 1.3 2007/12/10 23:26:32 mjh Exp $
 
@@ -16,7 +16,7 @@ def coord(command):
     """
 
     command = command.replace(' ', '+')
-    print "finder://coord/coord/0.1/command?command:txt=%s" % command
+    print("finder://coord/coord/0.1/command?command:txt={}".format(command))
 
 def lookup(peer, trie, add, remove):
     """
@@ -72,40 +72,41 @@ usage: %s [-h|--help]
 def main():
     def usage():
         global us
-        print >> sys.stderr, us % sys.argv[0]
+        print(us % sys.argv[0], sys.stderr)
+
 
     try:
-	opts, args = getopt.getopt(sys.argv[1:], "hp:t:a:r:", \
-				   ["help", \
+        opts, args = getopt.getopt(sys.argv[1:], "hp:t:a:r:", \
+                   ["help", \
                                     "peer=", \
                                     "trie=", \
                                     "add=", \
                                     "remove=", \
                                     ])
     except getopt.GetoptError:
-	usage()
-	sys.exit(1)
+        usage()
+        sys.exit(1)
 
     peer = ""
     trie = ""
     add = ""
     remove = ""
     for o, a in opts:
-	if o in ("-h", "-help"):
-	    usage()
-	    sys.exit()
-        if o in ("-p", "--peer"):
-            peer = a
-        if o in ("-t", "--trie"):
-            trie = a
-        if o in ("-a", "--add"):
-            add = a 
-        if o in ("-r", "--remove"):
-            remove = a
+        if o in ("-h", "-help"):
+            usage()
+            sys.exit()
+            if o in ("-p", "--peer"):
+                peer = a
+            if o in ("-t", "--trie"):
+                trie = a
+            if o in ("-a", "--add"):
+                add = a 
+            if o in ("-r", "--remove"):
+                remove = a
         
     if not peer and not trie:
-	usage()
-	sys.exit(1)
+        usage()
+        sys.exit(1)
 
     lookup(peer, trie, add, remove)
 
