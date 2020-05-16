@@ -20,8 +20,8 @@ import os
 Import('env')
 
 subdirs = [
-	#'config', # FIXME install
-	'tests',
+    #'config', # FIXME install
+    'tests',
     ]
 
 SConscript(dirs = subdirs, exports='env')
@@ -34,10 +34,10 @@ env.AppendUnique(CCFLAGS = [
     ])
 
 env.AppendUnique(CPPPATH = [
-	'.',
-	'$BUILDDIR',
-	env['xorp_sourcedir'],	#this is needed for lex and yacc generated files
-	])
+    '.',
+    '$BUILDDIR',
+    env['xorp_sourcedir'],	#this is needed for lex and yacc generated files
+    ])
 
 env.PrependUnique(LIBPATH = [
     '$BUILDDIR/libxorp',
@@ -72,19 +72,19 @@ tplt_env_y = yacc_env.Clone()
 tplt_env_y.AppendUnique(YACCFLAGS='-ptplt')
 
 tplt_yacc = tplt_env_y.CXXFile(target='y.tplt_tab.cc',
-				source='template.yy')
+                source='template.yy')
 
 boot_env_y = yacc_env.Clone()
 boot_env_y.AppendUnique(YACCFLAGS='-pboot')
 
 boot_yacc = boot_env_y.CXXFile(target='y.boot_tab.cc',
-					source='boot.yy')
+                    source='boot.yy')
 
 opcmd_env_y = yacc_env.Clone()
 opcmd_env_y.AppendUnique(YACCFLAGS='-popcmd')
 
 opcmd_yacc = opcmd_env_y.CXXFile(target='y.opcmd_tab.cc',
-					source='op_commands.yy')
+                    source='op_commands.yy')
 
 #create lex files
 lex_env = env.Clone()
@@ -93,54 +93,54 @@ tplt_env_l = lex_env.Clone()
 tplt_env_l.AppendUnique(LEXFLAGS='-Ptplt')
 
 tplt_lex = tplt_env_l.CXXFile(target='lex.tplt.cc',
-					source='template.ll')
+                    source='template.ll')
 
 boot_env_l = lex_env.Clone()
 boot_env_l.AppendUnique(LEXFLAGS='-Pboot')
 
 boot_lex = boot_env_l.CXXFile(target='lex.boot.cc',
-					source='boot.ll')
+                    source='boot.ll')
 
 opcmd_env_l = lex_env.Clone()
 opcmd_env_l.AppendUnique(LEXFLAGS='-Popcmd')
 
 opcmd_lex = opcmd_env_l.CXXFile(target='lex.opcmd.cc',
-					source='op_commands.ll')
+                    source='op_commands.ll')
 
 libxorp_rtrmgr_srcs = [
-	'command_tree.cc',
-	'conf_tree.cc',
-	'conf_tree_node.cc',
-	'config_operators.cc',
-	'generic_module_manager.cc',
-	'glob_win32.c',
-	tplt_lex[0],
-	opcmd_lex[0],
-	boot_lex[0],
-	opcmd_yacc[0],
-	boot_yacc[0],
-	tplt_yacc[0],
-	'master_conf_tree.cc',
-	'master_conf_tree_node.cc',
-	'master_template_tree.cc',
-	'master_template_tree_node.cc',
-	'module_command.cc',
-	'module_manager.cc',
-	'op_commands.cc',
-	'randomness.cc',
-	'slave_conf_tree.cc',
-	'slave_conf_tree_node.cc',
-	'slave_module_manager.cc',
-	'task.cc',
-	'template_base_command.cc',
-	'template_commands.cc',
-	'template_tree.cc',
-	'template_tree_node.cc',
-	'unexpanded_program.cc',
-	'unexpanded_xrl.cc',
-	'userdb.cc',
-	'xorp_client.cc',
-	]
+    'command_tree.cc',
+    'conf_tree.cc',
+    'conf_tree_node.cc',
+    'config_operators.cc',
+    'generic_module_manager.cc',
+    'glob_win32.c',
+    tplt_lex[0],
+    opcmd_lex[0],
+    boot_lex[0],
+    opcmd_yacc[0],
+    boot_yacc[0],
+    tplt_yacc[0],
+    'master_conf_tree.cc',
+    'master_conf_tree_node.cc',
+    'master_template_tree.cc',
+    'master_template_tree_node.cc',
+    'module_command.cc',
+    'module_manager.cc',
+    'op_commands.cc',
+    'randomness.cc',
+    'slave_conf_tree.cc',
+    'slave_conf_tree_node.cc',
+    'slave_module_manager.cc',
+    'task.cc',
+    'template_base_command.cc',
+    'template_commands.cc',
+    'template_tree.cc',
+    'template_tree_node.cc',
+    'unexpanded_program.cc',
+    'unexpanded_xrl.cc',
+    'userdb.cc',
+    'xorp_client.cc',
+    ]
 
 # Runtime XRL syntax validation for developers.
 if env['debug_xrldb']:
@@ -169,12 +169,12 @@ if not is_shared:
             ])
 
 util_cc_env = env.Clone()
-util_cc_env.AppendUnique(CPPDEFINES=xorp_paths.items())
+util_cc_env.AppendUnique(CPPDEFINES=list(xorp_paths.items()))
 obj_util = util_cc_env.StaticObject(source='util.cc')
 libxorp_rtrmgr_srcs += [ obj_util ]
 
 libxorp_rtrmgr = libxorp_rtrmgr_env.StaticLibrary(target = 'libxorp_rtrmgr',
-					source = libxorp_rtrmgr_srcs)
+                    source = libxorp_rtrmgr_srcs)
 
 #
 # Common RPATH.
@@ -225,9 +225,9 @@ if (rtrmgr_env.has_key('mingw') and rtrmgr_env['mingw']):
 
 
 rtrmgr_srcs = [
-	'main_rtrmgr.cc',
-	'xrl_rtrmgr_interface.cc',
-	]
+    'main_rtrmgr.cc',
+    'xrl_rtrmgr_interface.cc',
+    ]
 
 rtrmgr = rtrmgr_env.Program(target = 'xorp_rtrmgr', source = rtrmgr_srcs)
 
@@ -288,10 +288,10 @@ if env['enable_xorpsh']:
         xorpsh_env.Append(LIBS = ['xorp_core', 'crypto'])
 
     xorpsh_srcs = [
-	'xorpsh_main.cc',
-	'xrl_xorpsh_interface.cc',
-	'cli.cc',
-	]
+    'xorpsh_main.cc',
+    'xrl_xorpsh_interface.cc',
+    'cli.cc',
+    ]
 
     xorpsh = xorpsh_env.Program(target = 'xorpsh', source = xorpsh_srcs)
 
@@ -331,8 +331,8 @@ if not (env.has_key('disable_profile') and env['disable_profile']):
         profiler_env.Append(LIBS = ['xorp_core', 'crypto'])
         
     profiler_srcs = [
-	'profiler.cc',
-	]
+    'profiler.cc',
+    ]
 
     profiler = profiler_env.Program(target = 'xorp_profiler',
                                     source = profiler_srcs)

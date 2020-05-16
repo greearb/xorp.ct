@@ -11,7 +11,7 @@ if not hasattr(os.path, "relpath"):
         base_list = (os.path.abspath(base)).split(os.sep)
         target_list = (os.path.abspath(target)).split(os.sep)
         for i in range(min(len(base_list), len(target_list))):
-            if base_list[i] <> target_list[i]: break
+            if base_list[i] != target_list[i]: break
         else:
             i += 1
         rel_list = [os.pardir] * (len(base_list)-i) + target_list[i:]

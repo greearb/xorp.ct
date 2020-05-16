@@ -30,20 +30,20 @@ env.AppendUnique(CPPPATH = [
     ])
 
 sources = [
-	# C++ files
-	'firewall_get_dummy.cc',
-	'firewall_get_ipfw2.cc',
-	'firewall_get_netfilter.cc',
-	'firewall_get_pf.cc',
-	'firewall_set_dummy.cc',
-	'firewall_set_ipfw2.cc',
-	'firewall_set_netfilter.cc',
-	'firewall_set_pf.cc',
-	]
+    # C++ files
+    'firewall_get_dummy.cc',
+    'firewall_get_ipfw2.cc',
+    'firewall_get_netfilter.cc',
+    'firewall_get_pf.cc',
+    'firewall_set_dummy.cc',
+    'firewall_set_ipfw2.cc',
+    'firewall_set_netfilter.cc',
+    'firewall_set_pf.cc',
+    ]
 
 if is_shared:
     libxfw = env.SharedLibrary(target = 'libxorp_fea_firewall',
-			       source = sources)
+                   source = sources)
     if env['rtld_origin']:
         for obj in libxfw:
             env.AddPostAction(libxfw,
@@ -53,6 +53,6 @@ if is_shared:
     env.Alias('install', env.InstallLibrary(env['xorp_libdir'], libxfw))
 else:
     libxfw = env.StaticLibrary(target = 'libxorp_fea_firewall',
-			       source = sources)
+                   source = sources)
 
 Default(libxfw)
