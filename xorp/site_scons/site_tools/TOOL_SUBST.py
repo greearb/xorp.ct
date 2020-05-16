@@ -22,7 +22,7 @@ def generate(env):
             contents = f.read()
             f.close()
         except:
-            raise SCons.Errors.UserError, "Can't read source file %s"%sourcefile
+            raise SCons.Errors.UserError("Can't read source file {}".format(sourcefile))
         for (k,v) in dict.items():
             contents = re.sub(k, v, contents)
         try:
@@ -30,12 +30,12 @@ def generate(env):
             f.write(contents)
             f.close()
         except:
-            raise SCons.Errors.UserError, "Can't write target file %s"%targetfile
+            raise SCons.Errors.UserError("Can't write target file {}".format(targetfile))
         return 0 # success
 
     def subst_in_file(target, source, env):
         if not env.has_key('SUBST_DICT'):
-            raise SCons.Errors.UserError, "SubstInFile requires SUBST_DICT to be set."
+            raise SCons.Errors.UserError("SubstInFile requires SUBST_DICT to be set.")
         d = dict(env['SUBST_DICT']) # copy it
         for (k,v) in d.items():
             if callable(v):
@@ -43,7 +43,7 @@ def generate(env):
             elif SCons.Util.is_String(v):
                 d[k]=env.subst(v)
             else:
-                raise SCons.Errors.UserError, "SubstInFile: key %s: %s must be a string or callable"%(k, repr(v))
+                raise SCons.Errors.UserError("SubstInFile: key %s: %s must be a string or callable"%(k, repr(v)))
         for (t,s) in zip(target, source):
             return do_subst_in_file(str(t), str(s), d)
 

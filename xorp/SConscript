@@ -53,7 +53,7 @@ if env['enable_bgp']:
 
 if env['enable_ospf']:
     subdirs.append('ospf')
-    
+
 if env['enable_rip']:
     subdirs.append('rip')
 

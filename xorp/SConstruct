@@ -1100,13 +1100,13 @@ if env.has_key('SHAREDLIBS'):
 
     # Set relative RPATH for each kind of installed XORP component.
     env['xorp_sbin_rpath'] = os.path.join('\\$$ORIGIN',
-        os.path.relpath(env.Dir('$xorp_libdir').abspath, 
+        os.path.relpath(env.Dir('$xorp_libdir').abspath,
         env.Dir('$xorp_sbindir').abspath))
     env['xorp_tool_rpath'] = os.path.join('\\$$ORIGIN',
         os.path.relpath(env.Dir('$xorp_libdir').abspath,
         env.Dir('$xorp_tooldir').abspath))
     env['xorp_module_rpath'] = os.path.join('\\$$ORIGIN',
-        os.path.relpath(env.Dir('$xorp_libdir').abspath, 
+        os.path.relpath(env.Dir('$xorp_libdir').abspath,
         env.Dir('$xorp_moduledir').abspath))
 
 if env['enable_builddirrun']:

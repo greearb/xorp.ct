@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import sys, traceback, string, re
 from time import time, localtime, strftime
 
@@ -5,8 +6,7 @@ from time import time, localtime, strftime
 # Utility methods and structures
 
 def warn(file, lineno, reason):
-    print "In Xrl starting at line %d in %s:" % (lineno, file)
-    print "\t", reason
+    print("In Xrl starting at line {} in {}:\t{}".format(lineno, file, reason))
 
 def quit(file, lineno, reason):
     warn(file, lineno, reason)
@@ -31,7 +31,7 @@ def xorp_indent(level):
     if level <= 0:
         return ""
     s = ""
-    ntabs = level / 2
+    ntabs = level // 2
     for i in range(0, ntabs):
         s += "\t"
 
@@ -43,18 +43,15 @@ def xorp_indent(level):
 def xorp_indent_string(level, x):
     return xorp_indent(level) + x
 
-def xorp_indent_list(level, list):
-    r = []
-    for l in list:
-        r.append(xorp_indent_string(level, l));
-    return r;
+def xorp_indent_list(level, list_arg):
+    return [xorp_indent_string(level, x) for x in list_arg]
 
-# Fix Xrl interface, method, and argument names for c++ 
+# Fix Xrl interface, method, and argument names for c++
 def cpp_name(xrl_name):
     new_name = ""
     for i in range(0, len(xrl_name)):
         c = xrl_name[i]
-        if (c == '/') | (c == '-') | (c == "."):
+        if (c == '/') or (c == '-') or (c == "."):
             c = "_"
         new_name += c
     return new_name
@@ -76,10 +73,10 @@ def proper(n):
     l = ' '
     r = ""
     for i in range(0, len(n)):
-        if string.find(string.whitespace, l) >= 0:
-            r += string.upper(n[i])
+        if l in string.whitespace:
+            r += n[i].upper()
         else:
-            r += string.lower(n[i])
+            r += n[i].lower()
         l = n[i]
     return r
 
@@ -92,14 +89,13 @@ def caps_cpp_classname(s):
     apply_cap = 1
     r = ""
     for l in s:
-        digit = (string.find(string.digits, l) >= 0);
-        if (digit):
+        if l in string.digits:
             apply_cap = 1
-        elif (string.find(string.letters, l) < 0):
+        elif l not in string.ascii_letters:
             apply_cap = 1
             l = ''
         elif (apply_cap):
-            l = string.upper(l)
+            l = l.upper()
             apply_cap = 0
         r += l
     return r

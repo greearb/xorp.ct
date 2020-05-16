@@ -1,4 +1,4 @@
-#! /usr/bin/env python2
+#! /usr/bin/env python3
 
 """Program to generate Xrl Target related files"""
 
@@ -39,10 +39,10 @@ def output_xrls(tgt_name, methods):
         s += "finder://%s/%s" % (tgt_name, m.name())
         if len(m.args()):
             s += "?"
-            s += csv(map(xrl_arg_str, m.args()), "&")
+            s += csv(list(map(xrl_arg_str, m.args())), "&")
         if len(m.rargs()):
             s += "->"
-            s += csv(map(xrl_arg_str, m.rargs()), "&")
+            s += csv(list(map(xrl_arg_str, m.rargs())), "&")
         s += "\n\n"
 
     return s
@@ -252,7 +252,7 @@ def target_handler_hooks(cls, name):
     s += "    }\n"
     s += "    _cmds->finalize();\n"
     s += "}\n\n"
-    
+
     s += "void\n%s::remove_handlers()\n{\n" %cls
     s += "     for (size_t i = 0; i < num_handlers; ++i) {\n"
     s += "         _cmds->remove_handler(handlers[i].name);\n"
@@ -276,9 +276,9 @@ def target_handler_methods(cls, name, methods):
 
         s += \
 """    if (e != XrlCmdError::OKAY()) {
-	XLOG_WARNING(\"Handling method for %%s failed: %%s\",
-		     \"%s\", e.str().c_str());
-	return c_b->dispatch(e, NULL);
+        XLOG_WARNING(\"Handling method for %%s failed: %%s\",
+        \"%s\", e.str().c_str());
+        return c_b->dispatch(e, NULL);
     } else {
 """ % m.name()
 
@@ -290,7 +290,7 @@ def target_handler_methods(cls, name, methods):
                     (r.name(), cpp_name(r.name()))
             s += \
 """        } catch (const XrlArgs::XrlAtomFound& ) {
-	    XLOG_FATAL("Duplicate atom name"); /* XXX Should never happen */
+            XLOG_FATAL("Duplicate atom name"); /* XXX Should never happen */
         }
 
 """
@@ -310,13 +310,13 @@ def target_handler_methods(cls, name, methods):
         s += "\n%s%sCB c_b)\n{\n" % \
             (xorp_indent(2), caps_cpp_classname(m.name()))
 
-	s += "\n    /* Return value declarations */\n"
-	for r in m.rargs():
+        s += "\n    /* Return value declarations */\n"
+        for r in m.rargs():
             s += "    %s rarg_%s;\n" % (r.cpp_type(), cpp_name(r.name()))
 
         s += "    XrlCmdError e = %s(" % cpp_name(m.name())
         sep = ""
-	for r in m.args():
+        for r in m.args():
             s += "%s\n        arg_%s" % (sep, cpp_name(r.name()))
             sep = ","
         for r in m.rargs():
@@ -324,7 +324,7 @@ def target_handler_methods(cls, name, methods):
             sep = ","
         s += ");\n"
         s += "    return c_b->dispatch(e"
-	for r in m.rargs():
+        for r in m.rargs():
             s += ",\n        &rarg_%s" % (cpp_name(r.name()))
             sep = ","
         s += ");\n"
@@ -339,9 +339,9 @@ def target_handler_methods(cls, name, methods):
         s += "{"
         s += """
     if (xa_inputs.size() != %d) {
-	XLOG_ERROR(\"Wrong number of arguments (%%u != %%u) handling %%s\",
+            XLOG_ERROR(\"Wrong number of arguments (%%u != %%u) handling %%s\",
             XORP_UINT_CAST(%d), XORP_UINT_CAST(xa_inputs.size()), \"%s\");
-	XRL_CMD_RETURN_ERROR(pxa_outputs, XrlCmdError::BAD_ARGS());
+            XRL_CMD_RETURN_ERROR(pxa_outputs, XrlCmdError::BAD_ARGS());
     }
 """ % (len(m.args()), len(m.args()), m.name())
 
@@ -349,8 +349,8 @@ def target_handler_methods(cls, name, methods):
             s += """
 #ifndef XORP_ENABLE_ASYNC_SERVER
     if (pxa_outputs == 0) {
-	XLOG_FATAL(\"Return list empty\");
-	return XrlCmdError::BAD_ARGS();
+        XLOG_FATAL(\"Return list empty\");
+        return XrlCmdError::BAD_ARGS();
     }
 #endif
 
@@ -373,7 +373,7 @@ def target_handler_methods(cls, name, methods):
                    cls, cpp_name(m.name()))
 
         s += xorp_indent(2) + "async_%s(" % cpp_name(m.name())
-	i = 0
+        i = 0
         for a in m.args():
             s += "\n" + xorp_indent(3) + \
                 "xa_inputs.get(%d, \"%s\").%s()," \
@@ -382,10 +382,10 @@ def target_handler_methods(cls, name, methods):
         s += " mycb);\n"
 
 
-	s += \
+        s += \
 """    } catch (const XrlArgs::BadArgs& e) {
-	XLOG_ERROR(\"Error decoding the arguments: %s\", e.str().c_str());
-	return pxa_outputs->dispatch(XrlCmdError::BAD_ARGS(e.str()), NULL);
+    XLOG_ERROR(\"Error decoding the arguments: %s\", e.str().c_str());
+    return pxa_outputs->dispatch(XrlCmdError::BAD_ARGS(e.str()), NULL);
     }
 """
 
@@ -393,37 +393,37 @@ def target_handler_methods(cls, name, methods):
         s += "#else\n"
 
 
-    	s += "\n    /* Return value declarations */\n"
-    	for r in m.rargs():
+        s += "\n    /* Return value declarations */\n"
+        for r in m.rargs():
             s += "    %s r_%s;\n" % (r.cpp_type(), cpp_name(r.name()))
 
 
         s += xorp_indent(1) + "try {\n"
         s += xorp_indent(2) + "XrlCmdError e = %s(" % cpp_name(m.name())
         get_reqs = []
-	i = 0
+        i = 0
         for a in m.args():
             get_reqs.append("\n" + xorp_indent(3) + \
                             "xa_inputs.get(%d, \"%s\").%s()" \
                             % (i, a.name(), a.accessor()))
-	    i += 1
+            i += 1
         ret_vals = []
         for r in m.rargs():
             ret_vals.append("\n" + xorp_indent(3) + "r_%s" % cpp_name(r.name()))
         s += csv(get_reqs + ret_vals, ",") + ");\n"
 
         s += \
-"""	if (e != XrlCmdError::OKAY()) {
-	    XLOG_WARNING(\"Handling method for %%s failed: %%s\",
-            		 \"%s\", e.str().c_str());
-	    return e;
+""" if (e != XrlCmdError::OKAY()) {
+        XLOG_WARNING(\"Handling method for %%s failed: %%s\",
+            \"%s\", e.str().c_str());
+            return e;
         }
 """ % m.name()
 
-    	s += \
+        s += \
 """    } catch (const XrlArgs::BadArgs& e) {
-	XLOG_ERROR(\"Error decoding the arguments: %s\", e.str().c_str());
-	return XrlCmdError::BAD_ARGS(e.str());
+        XLOG_ERROR(\"Error decoding the arguments: %s\", e.str().c_str());
+        return XrlCmdError::BAD_ARGS(e.str());
     }
 """
 
@@ -434,7 +434,7 @@ def target_handler_methods(cls, name, methods):
                     (r.name(), cpp_name(r.name()))
             s += \
 """    } catch (const XrlArgs::XrlAtomFound& ) {
-	XLOG_FATAL("Duplicate atom name"); /* XXX Should never happen */
+            XLOG_FATAL("Duplicate atom name"); /* XXX Should never happen */
     }
 """
 
@@ -476,8 +476,8 @@ public:
      * Constructor.
      *
      * @param cmds an XrlCmdMap that the commands associated with the target
-     *		   should be added to.  This is typically the XrlRouter
-     *		   associated with the target.
+     *         should be added to.  This is typically the XrlRouter
+     *         associated with the target.
      */
     %s(XrlCmdMap* cmds = 0);
 
@@ -540,13 +540,13 @@ def output_target_cc(cls, tgt_name, methods):
     : _cmds(cmds)
 {
     if (_cmds)
-	add_handlers();
+        add_handlers();
 }
 
 %s::~%s()
 {
     if (_cmds)
-	remove_handlers();
+        remove_handlers();
 }
 
 bool
@@ -558,7 +558,7 @@ bool
         return true;
     }
     if (_cmds && cmds == 0) {
-	remove_handlers();
+        remove_handlers();
         _cmds = cmds;
         return true;
     }
@@ -582,7 +582,7 @@ def generate_target_methods(tgt, interfaces):
                 found = 1
                 break
         if found == 0:
-            print "Error interface %s data not found" % tif_info[0]
+            print("Error interface %s data not found" % tif_info[0])
             sys.exit(1)
         for m in tif.methods():
             full_name = Xif.util.xrl_method_name(tif.name(), tif.version(), m.name())
@@ -596,10 +596,10 @@ def main():
     usage = "usage: %prog [options] arg"
     parser = OptionParser(usage)
     parser.add_option("-o", "--output-dir",
-		      action="store", 
-		      type="string", 
-		      dest="output_dir",
-		      metavar="DIR")
+              action="store",
+              type="string",
+              dest="output_dir",
+              metavar="DIR")
     parser.add_option("-I",
                       action="append",
                       type="string",
@@ -613,9 +613,9 @@ def main():
     # Command line arguments passed on to cpp
     pipe_string = "cpp -C "
     if options.includes:
-	for a in options.includes:
-	    pipe_string += "-I%s " % a
-    pipe_string += args[0] 
+        for a in options.includes:
+            pipe_string += "-I%s " % a
+    pipe_string += args[0]
 
     cpp_pipe = os.popen(pipe_string, 'r')
 
@@ -623,20 +623,20 @@ def main():
 
     tgts = xp.targets()
     if len(tgts) == 0:
-        print "No targets found in input files."
+        print("No targets found in input files.")
         sys.exit(1)
 
     sourcefile = tgts[0].sourcefile()
     for tgt in tgts:
         if (tgt.sourcefile() != sourcefile):
-            print "Multiple .tgt files presented, expected just one."
+            print("Multiple .tgt files presented, expected just one.")
             sys.exit(1)
 
     # basename transformation - this is a lame test
     if sourcefile[-4:] != ".tgt":
-        print "Source file does not end in .tgt suffix - basename transform failure."
+        print("Source file does not end in .tgt suffix - basename transform failure.")
         sys.exit(1)
-        
+
     basename = sourcefile[:-4]
     basename = basename[basename.rfind("/") + 1:]
 

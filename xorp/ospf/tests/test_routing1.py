@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 # Copyright (c) 2001-2009 XORP, Inc.
 #
@@ -59,7 +59,7 @@ def start_routing_interactive(verbose, protocol):
     elif protocol == 'v3':
         flags = ' --OSPFv3'
     else:
-        print "unknown protocol " + protocol
+        print("unknown protocol {}".format(protocol))
         sys.exit(-1)
 
     if verbose:
@@ -220,7 +220,7 @@ create 0.0.0.0 normal
 destroy 0.0.0.0
     """
 
-    print >>fp, command
+    print(command, file=fp)
 
     if not fp.close():
         return True
@@ -242,7 +242,7 @@ add NetworkLsa
 compute 0.0.0.0
     """
 
-    print >>fp, command
+    print(command, file=fp)
 
     if not fp.close():
         return True
@@ -279,7 +279,7 @@ verify_routing_table_size 1
 verify_routing_entry 0.4.0.0/16 0.0.0.7 8 false false
 """ % (RT6,RT3)
 
-    print >>fp, command
+    print(command, file=fp)
 
     if not fp.close():
         return True
@@ -322,7 +322,7 @@ verify_routing_table_size 1
 verify_routing_entry 5f00:0000:c001:0200::/56 fe80:0001::3 9 false false
 """ % (RT6,RT3,RT3_LINK,RT3_INTRA)
 
-    print >>fp, command
+    print(command, file=fp)
 
     if not fp.close():
         return True
@@ -422,7 +422,7 @@ verify_routing_entry 5f00:0000:c001:0400::/56 fe80:0001::3 3 false false
        RT3,RT3_LINK,RT3_INTRA,
        RT4,RT4_LINK)
 
-    print >>fp, command
+    print(command, file=fp)
 
     if not fp.close():
         return True
@@ -494,7 +494,7 @@ verify_routing_entry 5f00:0000:c001:0200::/56 fe80:0001::2 7 false false
 """ % (RT1,RT1_LINK,
        RT2,RT2_LINK,RT2_INTRA,RT2_NETWORK)
 
-    print >>fp, command
+    print(command, file=fp)
 
     if not fp.close():
         return True
@@ -593,7 +593,7 @@ verify_routing_entry 5f00:0000:c001:0400::/56 fe80:0001::3 3 false false
        RT3,RT3_LINK,RT3_INTRA,
        RT4,RT4_LINK)
 
-    print >>fp, command
+    print(command, file=fp)
 
     if not fp.close():
         return True
@@ -660,7 +660,7 @@ verify_routing_entry 5f00:0000:c001:0200::/56 fe80:0001::2 7 false false
 """ % (RT1,RT1_LINK,
        RT2,RT2_LINK,RT2_INTER)
 
-    print >>fp, command
+    print(command, file=fp)
 
     if not fp.close():
         return True
@@ -727,7 +727,7 @@ verify_routing_entry 5f00:0000:c001:0200::/56 fe80:0001::2 7 false false
 """ % (RT1,RT1_LINK,
        RT2,RT2_LINK,RT2_INTER)
 
-    print >>fp, command
+    print(command, file=fp)
 
     if not fp.close():
         return True
@@ -802,7 +802,7 @@ verify_routing_entry  5f00:0000:c001:0200::/56 5f00::0002 2 false false
 """ % (RT1,RT1_LINK,RT1_INTRA_R,
        RT2,RT2_LINK,RT2_INTRA_R)
 
-    print >>fp, command
+    print(command, file=fp)
 
     if not fp.close():
         return True
@@ -868,7 +868,7 @@ verify_routing_table_size 1
 verify_routing_entry 10.1.1.0/24 10.1.2.1 2 false false
 """ % (RT1, RT2, RT1_NETWORK1, RT1_NETWORK2)
 
-    print >>fp, command
+    print(command, file=fp)
 
     if not fp.close():
         return True
@@ -941,7 +941,7 @@ verify_routing_table_size 1
 verify_routing_entry 10.1.1.0/24 10.1.2.1 2 false false
 """ % (RT1, RT2, RT1_NETWORK1, RT1_NETWORK2)
 
-    print >>fp, command
+    print(command, file=fp)
 
     if not fp.close():
         return True
@@ -1015,7 +1015,7 @@ verify_routing_table_size 1
 verify_routing_entry 10.1.1.0/24 10.1.2.1 2 false false
 """ % (RT1, RT2, RT1_NETWORK1, RT1_NETWORK2)
 
-    print >>fp, command
+    print(command, file=fp)
 
     if not fp.close():
         return True
@@ -1099,7 +1099,7 @@ verify_routing_table_size 1
 verify_routing_entry 3ffe:4725:c404::/64 fe80::8:800:200c:4350 2 false false
 """ % r11database()
 
-    print >>fp, command
+    print(command, file=fp)
 
     if not fp.close():
         return True
@@ -1182,7 +1182,7 @@ verify_routing_table_size 1
 verify_routing_entry 3ffe:4725:c404::/64 fe80::8:800:200c:4250 4 false false
 """ % r12database()
 
-    print >>fp, command
+    print(command, file=fp)
 
     if not fp.close():
         return True
@@ -1229,37 +1229,38 @@ verify_routing_entry 3ffe:4725:c404::/64 fe80::8:800:200c:4250 4 false false
 
     fp = start_routing_interactive(verbose, protocol)
 
-    print >>fp, init
-    print >>fp, area0
-    print >>fp, "compute 0.0.0.0"
-    print >>fp, verify0
-    print >>fp, area36
-    print >>fp, "compute 36.0.0.0"
-    print >>fp, verify36
+    print(init, file=fp)
+    print(area0, file=fp)
+    print("compute 0.0.0.0", file=fp)
+    print(verify0, file=fp)
+    print(area36, file=fp)
+    print("compute 36.0.0.0", file=fp)
+    print(verify36)
+    
 
     if fp.close():
         return False
 
     fp = start_routing_interactive(verbose, protocol)
 
-    print >>fp, init
-    print >>fp, area36
-    print >>fp, "compute 36.0.0.0"
-    print >>fp, verify36
-    print >>fp, area0
-    print >>fp, "compute 0.0.0.0"
-    print >>fp, verify36
-
+    print(init, file=fp)
+    print(area36, file=fp)
+    print("compute 36.0.0.0", file=fp)
+    print(verify36)
+    print(area0, file=fp)
+    print("compute 0.0.0.0", file=fp)
+    print(verify36, file=fp)
+    
     if fp.close():
         return False
 
     fp = start_routing_interactive(verbose, protocol)
 
-    print >>fp, init
-    print >>fp, area0
-    print >>fp, area36
-    print >>fp, "compute 0.0.0.0"
-    print >>fp, verify0
+    print(init, file=fp)
+    print(area0, file=fp)
+    print(area36, file=fp)
+    print("compute 0.0.0.0", file=fp)
+    print(verify0, file=fp)
 
     if fp.close():
         return False
@@ -1360,7 +1361,7 @@ verify_routing_entry 2000::/3  fe80::207:e9ff:fe1a:b2f 3 false false
        RT2,RT2_LINK1,RT2_LINK2,
        RTC,RTC_LINK,RTC_AS_EXTERNAL)
 
-    print >>fp, command
+    print(command, file=fp)
 
     if not fp.close():
         return True
@@ -1371,7 +1372,7 @@ def main():
     def usage():
         us = \
            "usage: %s [-h|--help] [-v|--verbose] ][-t|--test] [-b|--bad]"
-        print us % sys.argv[0]
+        print(us % sys.argv[0])
         
 
     try:
@@ -1404,7 +1405,7 @@ def main():
             if bad != i[1]:
                 tests.append(i[0])
 
-    print tests
+    print(tests)
 
     for i in tests:
         protocol = 'unknown'
@@ -1413,12 +1414,12 @@ def main():
                 if len(j) > 2:
                     protocol = j[2]
         test = i + '(verbose,protocol)'
-        print 'Running: ' + i,
+        print('Running: ' + i, end=' ')
         if not eval(test):
-            print "FAILED"
+            print("FAILED")
             sys.exit(-1)
         else:
-            print
+            print()
         
     sys.exit(0)
 

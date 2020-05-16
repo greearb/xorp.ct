@@ -1,7 +1,8 @@
+#!/usr/bin/env python3
 # Python imports
 import string, re, sys
-from xiftypes import *
-from util import quit, warn
+from .xiftypes import *
+from .util import quit, warn
 
 # XIF specific imports
 
@@ -42,7 +43,7 @@ def parse_cpp_hash(line):
     # Check if line looks like a pragma, if so ignore it
     p = pragma.match(line)
     if p:
-	return 1
+        return 1
 
     # Format is '# LINENUM FILENAME [FLAG]' where FLAG is either:
     #
@@ -63,7 +64,7 @@ def parse_cpp_hash(line):
         if flag == '' or flag == '3':
             flag = "1"
     else:
-	return 0
+        return 0
 
     if flag == "1":
         push_file(file, line)
@@ -72,22 +73,22 @@ def parse_cpp_hash(line):
         pop_file()
         push_file(file, line)
     else:
-        print "Invalid pre-processor #line flag (%d)\n", flag
+        print("Invalid pre-processor #line flag ({})\n".format(flag))
         sys.exit(1)
     return 1
 
-def validate_name(file, line, type, value, extra):
+def validate_name(file, line, type_, value, extra):
     pattern = "[A-Za-z][A-z0-9%s]?" % extra
     if re.match(pattern, value) == None:
         errmsg = "%s name \"%s\" has chars other than %s" \
-             % (type, value, pattern) 
+             % (type_, value, pattern)
         quit(file, line, errmsg)
 
-def parse_args(file, lineno, str):
-    if str == "":
+def parse_args(file, lineno, s):
+    if s == "":
         return []
 
-    toks = string.split(str, "&")
+    toks = s.split("&")
 
     # arg format is <name>[<type>]
     #                     ^      ^
@@ -96,33 +97,33 @@ def parse_args(file, lineno, str):
     xrl_args = []
     for t in toks:
 
-        lb = string.find(t, ":")
+        lb = t.find(":")
         if lb == -1:
             quit(file, lineno, "Missing \":\" in xrlatom \"%s\"" % t)
-            
+
         name = t[:lb]
-        type = t[lb + 1:]
+        type_ = t[lb + 1:]
 
         validate_name(file, lineno, "Atom", name, '_-')
 
         # Parse <type>\<<member_type>\> (\<\> are literal angle brackets).
-        lab = string.find(type, "<")
+        lab = type_.find("<")
         member_type = None
         if lab != -1:
-            rab = string.find(type, ">")
+            rab = type_.find(">")
             if rab == -1:
-                quit(file, lineno, "Invalid type spec \"%s\"" % type)
-            member_type = type[lab + 1:rab]
-            type = type[:lab]
+                quit(file, lineno, "Invalid type spec \"%s\"" % type_)
+            member_type = type_[lab + 1:rab]
+            type_ = type_[:lab]
 
-        if xrl_atom_type.has_key(type) == 0:
+        if type_ not in xrl_atom_type:
             quit(file, lineno, "Atom type \"%s\" not amongst those known %s"
-                 % (type, xrl_atom_type.keys()))
-        xa = XrlArg(name, type)
-        if type == 'list':
+                 % (type_, xrl_atom_type.keys()))
+        xa = XrlArg(name, type_)
+        if type_ == 'list':
             # Deal with type of members embedded in the container. These
             # are now mandatory for XIF in this branch.
-            if xrl_atom_type.has_key(member_type) == 0:
+            if member_type not in xrl_atom_type == 0:
                 quit(file, lineno, "Member atom type \"%s\" not amongst those known %s" % (member_type, xrl_atom_type.keys()))
             xa.set_member_type(member_type)
 
@@ -132,8 +133,8 @@ def parse_args(file, lineno, str):
 """ Fill in any missing separators in Xrl to make parsing trivial"""
 def fix_up_line(line):
     # chomp whitespace
-    table = string.maketrans("","")
-    line =  string.translate(line, table, string.whitespace)
+    for l in string.whitespace:
+        line = line.replace(l, "")
 
     # Fill in missing component separators.
     if line.find("->") < 0:
@@ -159,8 +160,7 @@ def parse_target_interfaces(file, lineno, line):
     while (line != ""):
         m = target_if.match(line)
         if m == None:
-            print "Bad interface in file %s at line %d\n\"%s\"\n" % \
-                  (file, lineno, line)
+            print("Bad interface in file %s at line %d\n\"%s\"\n" % (file, lineno, line))
             sys.exit(1)
         ifs.append((m.group(1), m.group(2)))
         line = line[m.end():]
@@ -176,8 +176,7 @@ def parse_method(file, lineno, line):
 
     m = method_outline.match(line)
     if m == None:
-        print "Bad method declaration from %s line %d:\n\"%s\"\n" %\
-              (file, lineno, line)
+        print("Bad method declaration from %s line %d:\n\"%s\"\n" % (file, lineno, line))
         sys.exit(1)
 
     method, args, rargs = m.groups()
@@ -324,12 +323,10 @@ class XifParser:
                                 if tif_name == i.name():
                                     found = 1
                             if found == 0:
-                                print "Interface %s/%s not defined" % tif, \
-                                      "in file %s line %d\n" % \
-                                      (get_input_file(), get_input_line())
-                                print "Valid interfaces are:"
+                                print("Interface {0}/{0} not defined in file %{1} line %{2}\n".format(tif, get_input_file(), get_input_line()))
+                                print("Valid interfaces are:")
                                 for i in self._interfaces:
-                                    print "\t%s/%s"% (i.name(), i.version())
+                                    print("\t{0}/{1}".format(i.name(), i.version()))
                                 sys.exit(1)
                             else:
                                 tgt.add_interface(tif)
@@ -344,8 +341,8 @@ class XifParser:
                         line_buffer = line_buffer[m.end():].strip()
                         continue
 
-                    print "Unrecognized command in file %s at line %d:\n\"%s\"\n" \
-                          % (get_input_file(), get_input_line(), line_buffer)
+                    print("Unrecognized command in file %s at line %d:\n\"%s\"\n" \
+                          % (get_input_file(), get_input_line(), line_buffer))
                     sys.exit(1)
                 else:
                     m = not_grouping_end.match(line_buffer)
