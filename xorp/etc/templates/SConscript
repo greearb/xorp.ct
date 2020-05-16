@@ -105,8 +105,8 @@ def BuildXrlTemplate(target, source, env):
 
     sfname = str(source[0])
     
-    print "source: ", sfname
-    print "target: ", str(target[0])
+    print("source: ", sfname)
+    print("target: ", str(target[0]))
     
     ifile = open(sfname, 'r')
     ofile = open(str(target[0]), 'w')
@@ -134,7 +134,7 @@ def BuildXrlTemplate(target, source, env):
             if line[-1] == "\n":
                 # trim trailing newline
                 line = line[0 : -1]
-                print >>ofile, "%s" % line
+                ofile.write(line)
     else:
         return -1 # error
     
@@ -159,21 +159,18 @@ if env['enable_builddirrun']:
 
         cmd_files = [c.__add__('.cmds') for c in cmds]
         for obj in cmd_files:
-		#copy all necessary cmd_files in $BUILDDIR/etc/templates
-		Execute(Copy(os.path.join(env['xorp_alias_templatedir'], str(obj)),
-			os.path.join(template_source_dir, str(obj))))
+        #copy all necessary cmd_files in $BUILDDIR/etc/templates
+            Execute(Copy(os.path.join(env['xorp_alias_templatedir'], str(obj)), os.path.join(template_source_dir, str(obj))))
 
         tp_files = [t.__add__('.tp') for t in tps]
         for obj in tp_files:
-		#copy all necessary tp_files in $BUILDDIR/etc/templates
-		Execute(Copy(os.path.join(env['xorp_alias_templatedir'], str(obj)),
-			os.path.join(template_source_dir, str(obj))))
+            #copy all necessary tp_files in $BUILDDIR/etc/templates
+            Execute(Copy(os.path.join(env['xorp_alias_templatedir'], str(obj)), os.path.join(template_source_dir, str(obj))))
 
         tp_raw_files = [t.__add__('.tp') for t in tp_raw]
         for obj in tp_raw_files:
-		#copy all necessary tp_files in $BUILDDIR/etc/templates
-		Execute(Copy(os.path.join(env['xorp_alias_templatedir'], str(obj)),
-			os.path.join(template_source_dir, str(obj))))
+            #copy all necessary tp_files in $BUILDDIR/etc/templates
+            Execute(Copy(os.path.join(env['xorp_alias_templatedir'], str(obj)), os.path.join(template_source_dir, str(obj))))
 
 e.Alias('install', [
         e.InstallData(env['xorp_templatedir'],
