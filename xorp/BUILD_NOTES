@@ -115,13 +115,8 @@ http://xorp.run.montefiore.ulg.ac.be/latex2wiki/user_manual
 More tests need to be written/enabled, but a fair amount of tests
 are enabled currently.
 
-To run the internal tests, you must have "bash" and "python" installed.
-Note that if the python's executable filename is not "python", then
-you would have to create a symbolic link with such name. E.g., execute
-as a root:
+To run the internal tests, you must have "bash" and "python3" installed.
 
-cd /path/to/python/binary
-ln -s python2.4 python
 
 After the code is compiled, you need to run the following command
 in the top-level XORP directory:
