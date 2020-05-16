@@ -46,9 +46,9 @@ def multiget(dictlist, key, default = None):
     in each one and returns the 1st one it finds. If the key is found in no
     dictionaries, the default is returned.
     """
-    for dict in dictlist:
-        if dict.has_key(key):
-            return dict[key]
+    for d in dictlist:
+        if key in d:
+            return d[key]
     else:
         return default
 
@@ -111,7 +111,7 @@ def generate(env, **kwargs):
     env.SetDefault( AUTOTEST_SKIP_ERRORS = False )
 
     #Here's where keyword arguments are applied
-    apply(env.Replace, (), kwargs)
+    # apply(env.Replace, (), kwargs)
 
     def AutoTest(env, target, source = None, **kwargs):
         """Usage:

@@ -1,4 +1,4 @@
-#! /usr/bin/env python2
+#! /usr/bin/env python3
 
 """Program to generate Xrl Interface Client related files"""
 
@@ -8,8 +8,8 @@ import os, sys
 # This is a bit of mess as this code was split into separate files
 import Xif.util
 
-from Xif.util import							      \
-     joining_csv, csv, cpp_name, cpp_classname, caps_cpp_classname,	      \
+from Xif.util import                                  \
+     joining_csv, csv, cpp_name, cpp_classname, caps_cpp_classname,          \
      cpp_version, xorp_indent_string, xorp_indent
 
 from Xif.xiftypes import \
@@ -79,7 +79,7 @@ def implement_send_xrl(cls, method_no, method, ifqname):
     i = 0
     for a in method.args():
         s += "    x->args().set_arg(%d, %s);\n" % (i, a.name())
-	i += 1
+        i += 1
     s += "\n"
     s += "    return _sender->send(*x, callback(&%s::unmarshall_%s, cb));\n" % (cls, method.name())
     s += "}\n\n"
@@ -116,7 +116,7 @@ def implement_unmarshall(cls, method_no, method):
     for i in range(0, len(args)):
         args[i] = "\n\t" + args[i]
     s += csv(args)
-    s += "\n)\n" 
+    s += "\n)\n"
     s += "{\n"
     s += "    if (e != XrlError::OKAY()) {\n"
     s += "\tcb->dispatch(e%s);\n" % fail_args
@@ -225,10 +225,10 @@ def main():
     usage = "usage: %prog [options] arg"
     parser = OptionParser(usage)
     parser.add_option("-o", "--output-dir",
-		      action="store", 
-		      type="string", 
-		      dest="output_dir",
-		      metavar="DIR")
+              action="store",
+              type="string",
+              dest="output_dir",
+              metavar="DIR")
     parser.add_option("-I",
                       action="append",
                       type="string",
@@ -242,21 +242,21 @@ def main():
     # Command line arguments passed on to cpp
     pipe_string = "cpp -C "
     if options.includes:
-	for a in options.includes:
-	    pipe_string += "-I%s " % a
-    pipe_string += args[0] 
+        for a in options.includes:
+            pipe_string += "-I%s " % a
+    pipe_string += args[0]
 
     cpp_pipe = os.popen(pipe_string, 'r')
 
     xp = XifParser(cpp_pipe)
 
     if len(xp.targets()):
-        print "Found targets (used a .ent rather than .xif input?)"
+        print("Found targets (used a .ent rather than .xif input?)")
         sys.exit(1)
 
     xifs = xp.interfaces()
     if len(xifs) == 0:
-        print "No interface definitions provided"
+        print("No interface definitions provided")
         sys.exit(1)
 
     # Check all interface definitions come from same source file.
@@ -265,12 +265,12 @@ def main():
     sourcefile = xifs[0].sourcefile()
     for xif in xifs:
         if (xif.sourcefile() != sourcefile):
-            print "Multiple .xif files presented, expected one."
+            print("Multiple .xif files presented, expected one.")
             sys.exit(1)
 
     # basename transformation - this is a lame test
     if sourcefile[-4:] != ".xif":
-        print "Source file does not end in .xif suffix - basename transform failure."
+        print("Source file does not end in .xif suffix - basename transform failure.")
         sys.exit(1)
 
     basename = sourcefile[:-4]
@@ -281,9 +281,9 @@ def main():
     cc_file = "%s_xif.cc" % basename
 
     if options.output_dir:
-	hh_file = os.path.join(options.output_dir, hh_file)
-	cc_file = os.path.join(options.output_dir, cc_file)
-    
+        hh_file = os.path.join(options.output_dir, hh_file)
+        cc_file = os.path.join(options.output_dir, cc_file)
+
     # Generate header file
     hh_txt = prepare_client_if_hh(modulename, hh_file)
     for xif in xifs:
