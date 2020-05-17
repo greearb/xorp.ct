@@ -30,63 +30,63 @@ env.AppendUnique(CPPPATH = [
 is_shared = env.has_key('SHAREDLIBS')
 
 sources = [
-	# C++ files
-	'fibconfig_entry_get_iphelper.cc',
-	'fibconfig_entry_get_routing_socket.cc',
-	'fibconfig_entry_get_rtmv2.cc',
-	'fibconfig_entry_observer_iphelper.cc',
-	'fibconfig_entry_observer_routing_socket.cc',
-	'fibconfig_entry_observer_rtmv2.cc',
-	'fibconfig_entry_parse_routing_socket.cc',
-	'fibconfig_entry_set_iphelper.cc',
-	'fibconfig_entry_set_routing_socket.cc',
-	'fibconfig_entry_set_rtmv2.cc',
-	'fibconfig_forwarding_proc_linux.cc',
-	'fibconfig_forwarding_solaris.cc',
-	'fibconfig_forwarding_sysctl.cc',
-	'fibconfig_forwarding_windows.cc',
-	'fibconfig_table_get_iphelper.cc',
-	'fibconfig_table_get_sysctl.cc',
-	'fibconfig_table_observer_iphelper.cc',
-	'fibconfig_table_observer_routing_socket.cc',
-	'fibconfig_table_observer_rtmv2.cc',
-	'fibconfig_table_parse_routing_socket.cc',
-	'fibconfig_table_set_iphelper.cc',
-	'fibconfig_table_set_routing_socket.cc',
-	'fibconfig_table_set_rtmv2.cc',
-	]
+    # C++ files
+    'fibconfig_entry_get_iphelper.cc',
+    'fibconfig_entry_get_routing_socket.cc',
+    'fibconfig_entry_get_rtmv2.cc',
+    'fibconfig_entry_observer_iphelper.cc',
+    'fibconfig_entry_observer_routing_socket.cc',
+    'fibconfig_entry_observer_rtmv2.cc',
+    'fibconfig_entry_parse_routing_socket.cc',
+    'fibconfig_entry_set_iphelper.cc',
+    'fibconfig_entry_set_routing_socket.cc',
+    'fibconfig_entry_set_rtmv2.cc',
+    'fibconfig_forwarding_proc_linux.cc',
+    'fibconfig_forwarding_solaris.cc',
+    'fibconfig_forwarding_sysctl.cc',
+    'fibconfig_forwarding_windows.cc',
+    'fibconfig_table_get_iphelper.cc',
+    'fibconfig_table_get_sysctl.cc',
+    'fibconfig_table_observer_iphelper.cc',
+    'fibconfig_table_observer_routing_socket.cc',
+    'fibconfig_table_observer_rtmv2.cc',
+    'fibconfig_table_parse_routing_socket.cc',
+    'fibconfig_table_set_iphelper.cc',
+    'fibconfig_table_set_routing_socket.cc',
+    'fibconfig_table_set_rtmv2.cc',
+    ]
 
 if not (env.has_key('mingw') and env['mingw']):
-	sources.append('fibconfig_table_set_netlink_socket.cc')
-	sources.append('fibconfig_table_get_netlink_socket.cc')
-	sources.append('fibconfig_table_parse_netlink_socket.cc')
-	sources.append('fibconfig_table_observer_netlink_socket.cc')
-	sources.append('fibconfig_entry_get_netlink_socket.cc')
-	sources.append('fibconfig_entry_set_netlink_socket.cc')
-	sources.append('fibconfig_entry_observer_netlink_socket.cc')
-	
+    sources.append('fibconfig_table_set_netlink_socket.cc')
+    sources.append('fibconfig_table_get_netlink_socket.cc')
+    sources.append('fibconfig_table_parse_netlink_socket.cc')
+    sources.append('fibconfig_table_observer_netlink_socket.cc')
+    sources.append('fibconfig_entry_get_netlink_socket.cc')
+    sources.append('fibconfig_entry_set_netlink_socket.cc')
+    sources.append('fibconfig_entry_observer_netlink_socket.cc')
+
 
 if env['enable_click']:
-	sources.append('fibconfig_entry_get_click.cc')
-        sources.append('fibconfig_entry_set_click.cc')
-        sources.append('fibconfig_table_set_click.cc')
-        sources.append('fibconfig_table_get_click.cc')
+    sources.append('fibconfig_entry_get_click.cc')
+    sources.append('fibconfig_entry_set_click.cc')
+    sources.append('fibconfig_table_set_click.cc')
+    sources.append('fibconfig_table_get_click.cc')
 
 if env['enable_fea_dummy']:
     sources += [
-	'fibconfig_entry_get_dummy.cc',
-	'fibconfig_entry_observer_dummy.cc',
-	'fibconfig_entry_set_dummy.cc',
-	'fibconfig_forwarding_dummy.cc',
-	'fibconfig_table_get_dummy.cc',
-	'fibconfig_table_observer_dummy.cc',
-	'fibconfig_table_set_dummy.cc',
+    'fibconfig_entry_get_dummy.cc',
+    'fibconfig_entry_observer_dummy.cc',
+    'fibconfig_entry_set_dummy.cc',
+    'fibconfig_forwarding_dummy.cc',
+    'fibconfig_table_get_dummy.cc',
+    'fibconfig_table_observer_dummy.cc',
+    'fibconfig_table_set_dummy.cc',
         ]
 
 
 if is_shared:
     libxfc = env.SharedLibrary(target = 'libxorp_fea_fibconfig',
-			       source = sources)
+                   source = sources)
     if env['rtld_origin']:
         for obj in libxfc:
             env.AddPostAction(libxfc,
@@ -96,6 +96,6 @@ if is_shared:
     env.Alias('install', env.InstallLibrary(env['xorp_libdir'], libxfc))
 else:
     libxfc = env.StaticLibrary(target = 'libxorp_fea_fibconfig',
-			       source = sources)
+                   source = sources)
 
 Default(libxfc)

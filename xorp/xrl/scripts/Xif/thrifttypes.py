@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # vim:set sts=4 ts=8 sw=4:
 
 # in this namespace
@@ -49,8 +50,7 @@ def send_ipv4net(fname, sname='ipv4net'):
     lines = []
     lines.append("nout += outp->writeStructBegin(\"%s\");" % sname)
     lines.append("nout += outp->writeFieldBegin(\"network\", T_I32, 1);")
-    lines.append("nout += outp->writeI32(ntohl(%s.masked_addr().addr()));" % \
-	fname)
+    lines.append("nout += outp->writeI32(ntohl(%s.masked_addr().addr()));" % fname)
     lines.append("nout += outp->writeFieldEnd();")
     lines.append("nout += outp->writeFieldBegin(\"prefix\", T_BYTE, 2);")
     lines.append("nout += outp->writeByte(%s.prefix_len());" % fname)
@@ -62,15 +62,14 @@ def send_ipv4net(fname, sname='ipv4net'):
 def send_ipv6(fname, sname='ipv6', addrmethod='addr()'):
     lines = []
     lines.append("nout += outp->writeStructBegin(\"%s\");" % sname)
-    lines.append("const uint32_t* pa_%s = %s.%s;" % \
-	(fname, fname, addrmethod))
+    lines.append("const uint32_t* pa_%s = %s.%s;" % (fname, fname, addrmethod))
     for i in xrange(1,5):
-	lines.append(\
-	    "nout += outp->writeFieldBegin(\"addr32_%d\", T_I32, %d);" % \
-	    (i, i))
-	lines.append("nout += outp->writeI32(pa_%s[%d]);" % \
-	    (fname, (i-1)))
-	lines.append("nout += outp->writeFieldEnd();")
+        lines.append(\
+            "nout += outp->writeFieldBegin(\"addr32_%d\", T_I32, %d);" % \
+            (i, i))
+        lines.append("nout += outp->writeI32(pa_%s[%d]);" % \
+            (fname, (i-1)))
+        lines.append("nout += outp->writeFieldEnd();")
     lines.append("nout += outp->writeFieldStop();")
     lines.append("nout += outp->writeStructEnd();")
     return lines
@@ -153,8 +152,7 @@ def recv_ipv4(fname):
     lines = []
     lines.append("int32_t i32_%s;" % fname)
     lines.append("nin += inp->readI32(i32_%s);" % fname)
-    lines.append("%s = IPv4(htonl(static_cast<uint32_t>(i32_%s)));" % \
-	(fname, fname))
+    lines.append("%s = IPv4(htonl(static_cast<uint32_t>(i32_%s)));" % (fname, fname))
     return lines
 
 # Shim these to support functions to handle embedded struct.
@@ -186,8 +184,7 @@ def recv_mac(fname):
     # XXX: We should sanity check the length of the binary data once read.
     lines.append("//assert(tmp_%s.size() == Mac::ADDR_BYTELEN);" % fname)
     lines.append("%s.copy_in(\n" % fname)
-    lines.append("    reinterpret_cast<const uint8_t *>(tmp_%s.data()));" % \
-	fname)
+    lines.append("    reinterpret_cast<const uint8_t *>(tmp_%s.data()));" % fname)
     return lines
 
 def recv_txt(fname):
@@ -208,8 +205,7 @@ def recv_binary(fname):
     lines.append("string tmp_%s;" % fname)
     lines.append("nin += inp->readBinary(tmp_%s);" % fname)
     lines.append("%s.resize(tmp_%s.size());" % (fname, fname))
-    lines.append("memcpy(&%s[0], tmp_%s.data(), tmp_%s.size());" % \
-	(fname, fname, fname))
+    lines.append("memcpy(&%s[0], tmp_%s.data(), tmp_%s.size());" % (fname, fname, fname))
     return lines
 
 # -----------------------------------------------------------------------------
@@ -239,21 +235,21 @@ def wire_type(a):
 def send_arg(a, fname=None):
     lines = []
     if fname is None:
-	fname = a.name()
+        fname = a.name()
     if a.is_list():
-	lines += send_list(a)
+        lines += send_list(a)
     else:
-	lines += (xiftothrift[a.type()][1])(fname)
+        lines += (xiftothrift[a.type()][1])(fname)
     return lines
 
 def recv_arg(a, fname=None):
     lines = []
     if fname is None:
-	fname = a.name()
+        fname = a.name()
     if a.is_list():
-	lines += recv_list(a, fname)
+        lines += recv_list(a, fname)
     else:
-	lines += (xiftothrift[a.type()][2])(fname)
+        lines += (xiftothrift[a.type()][2])(fname)
     return lines
 
 # -----------------------------------------------------------------------------
@@ -267,27 +263,24 @@ def recv_list(a, fname):
     m = a.member()
 
     if a.member().is_list():
-	print "Lists-of-lists are currently not implemented, sorry."
-	sys.exit(1)
+        print "Lists-of-lists are currently not implemented, sorry."
+        sys.exit(1)
 
     tab = xorp_indent(1)
     lines.append("uint32_t sz_%s;" % fname)
     lines.append("TType mt_%s;" % fname)
-    lines.append("nin += inp->readListBegin(mt_%s, sz_%s);" % \
-	tuple([fname] * 2))
-    lines.append("for (uint32_t i_%s = 0; i_%s < sz_%s; i_%s++) {" % \
-	tuple([fname] * 4))
+    lines.append("nin += inp->readListBegin(mt_%s, sz_%s);" % tuple([fname] * 2))
+    lines.append("for (uint32_t i_%s = 0; i_%s < sz_%s; i_%s++) {" % tuple([fname] * 4))
 
     # Now read in base type.
     mfname = "tmp_%s" % fname
     lines.append(tab + "%s %s;" % (m.cpp_type(), mfname))
 
     for l in recv_arg(m, mfname):
-    	lines.append(tab + l)
+        lines.append(tab + l)
 
     # now convert to XrlAtom and append to our collection in local scope.
-    lines.append(tab + ("%s.append(XrlAtom(tmp_%s));" % \
-	tuple([fname] * 2)))
+    lines.append(tab + ("%s.append(XrlAtom(tmp_%s));" % tuple([fname] * 2)))
     lines.append("}")
     lines.append("nin += inp->readListEnd();")
     return lines
@@ -315,31 +308,27 @@ def send_list(a):
     m = a.member()
 
     if a.member().is_list():
-	print "Lists-of-lists are currently not implemented, sorry."
-	sys.exit(1)
+        print "Lists-of-lists are currently not implemented, sorry."
+        sys.exit(1)
 
     tab = xorp_indent(1)
     tab2 = xorp_indent(2)
 
     lines.append("size_t sz_%s = %s.size();" % (fname, fname))
-    lines.append("nout += outp->writeListBegin(%s, sz_%s);" % \
-	(wire_type(m), fname))
+    lines.append("nout += outp->writeListBegin(%s, sz_%s);" % (wire_type(m), fname))
 
     lines.append("if (sz_%s > 0) {" % fname)
-    lines.append(tab + "for (size_t i_%s = 1; i_%s <= sz_%s; i_%s++) {" % \
-	(fname, fname, fname, fname))
-    lines.append(tab2 + "const XrlAtom& xa = %s.get(i_%s);" % \
-	(fname, fname))
+    lines.append(tab + "for (size_t i_%s = 1; i_%s <= sz_%s; i_%s++) {" % (fname, fname, fname, fname))
+    lines.append(tab2 + "const XrlAtom& xa = %s.get(i_%s);" % (fname, fname))
     mfname = "xa_%s" % m.type()	    # member field name with XIF type
-    lines.append(tab2 + "const %s& %s = xa.%s();" % \
-	(m.cpp_type(), mfname, m.accessor()))
+    lines.append(tab2 + "const %s& %s = xa.%s();" % (m.cpp_type(), mfname, m.accessor()))
 
     # now marshal out the member type, indented at this level correctly.
     for l in send_arg(m, mfname):
-    	lines.append(tab2 + l)
+        lines.append(tab2 + l)
 
-    lines.append(tab + "}")	# close for
-    lines.append("}")		# close if
+    lines.append(tab + "}") # close for
+    lines.append("}")       # close if
     lines.append("nout += outp->writeListEnd();")   # close thrift list
     return lines
 

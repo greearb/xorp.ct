@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python2
 
 # $XORP: other/testbed/tools/xthpconfig.py,v 1.9 2002/12/06 03:17:50 pavlin Exp $
 

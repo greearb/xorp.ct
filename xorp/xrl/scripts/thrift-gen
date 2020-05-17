@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python2
 # vim:set sts=4 ts=8 sw=4:
 
 """Program to generate compatible Thrift service defintions from a Xif spec"""
@@ -91,8 +91,8 @@ def main():
     usage = "usage: %prog [options] arg"
     parser = OptionParser(usage)
     parser.add_option("-o", "--output-dir",
-		      action="store", 
-		      type="string", 
+		      action="store",
+		      type="string",
 		      dest="output_dir",
 		      metavar="DIR")
     parser.add_option("-I",
@@ -110,7 +110,7 @@ def main():
     if options.includes:
 	for a in options.includes:
 	    pipe_string += "-I%s " % a
-    pipe_string += args[0] 
+    pipe_string += args[0]
 
     cpp_pipe = os.popen(pipe_string, 'r')
 

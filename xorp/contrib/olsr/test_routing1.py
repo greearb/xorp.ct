@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # vim:set sts=4 ts=8 sw=4:
 
 # Copyright (c) 2001-2009 XORP, Inc.
@@ -62,19 +62,19 @@ def start_routing_interactive(verbose, valgrind):
     # I should really import a which() here.
 
     if valgrind:
-	valgrind_path = "/usr/local/bin/valgrind"
-	valgrind_flags = "--tool=memcheck " \
-			 "--leak-check=yes " \
-			 "--leak-resolution=high " \
-			 "--num-callers=10 " \
-			 "--show-reachable=yes " \
-			 "--suppressions=/home/bms/.valgrind/fbsd.supp " \
-			 "--suppressions=/home/bms/.valgrind/xorp.supp " \
-			 "--logfile=test_simulator.log " \
-			 "--demangle=no " \
-			 "--verbose "
-			 #"--undef-value-errors=no " # not in old valgrind
-	command = valgrind_path + ' ' + valgrind_flags + command
+        valgrind_path = "/usr/local/bin/valgrind"
+        valgrind_flags = "--tool=memcheck " \
+                "--leak-check=yes " \
+                "--leak-resolution=high " \
+                "--num-callers=10 " \
+                "--show-reachable=yes " \
+                "--suppressions=/home/bms/.valgrind/fbsd.supp " \
+                "--suppressions=/home/bms/.valgrind/xorp.supp " \
+                "--logfile=test_simulator.log " \
+                "--demangle=no " \
+                "--verbose "
+                #"--undef-value-errors=no " # not in old valgrind
+        command = valgrind_path + ' ' + valgrind_flags + command
 
     fp = os.popen(command, "w")
 
@@ -95,7 +95,7 @@ create 192.168.0.1 192.168.0.2
 destroy 192.168.0.1
     """
 
-    print >>fp, command
+    print(command, file=fp)    
 
     if not fp.close():
         return True
@@ -436,7 +436,7 @@ verify_hna_entry_count 0
 
     """
 
-    print >>fp, command
+    print(command, file=fp)    
 
     if not fp.close():
         return True
@@ -654,7 +654,7 @@ verify_tc_origin_seen 192.168.2.2 false
 
     """
 
-    print >>fp, command
+    print(command, file=fp)    
 
     if not fp.close():
         return True
@@ -920,7 +920,7 @@ verify_n1 192.168.1.3 false
 
     """
 
-    print >>fp, command
+    print(command, file=fp)    
 
     if not fp.close():
         return True
@@ -1213,7 +1213,7 @@ verify_routing_table_size 0
 
     """
 
-    print >>fp, command
+    print(command, file=fp)    
 
     if not fp.close():
         return True
@@ -1298,7 +1298,7 @@ verify_all_link_state_empty
 
     """
 
-    print >>fp, command
+    print(command, file=fp)    
 
     if not fp.close():
         return True
@@ -1381,7 +1381,7 @@ verify_all_link_state_empty
 
     """
 
-    print >>fp, command
+    print(command, file=fp)    
 
     if not fp.close():
         return True
@@ -1469,8 +1469,8 @@ wait 15
 verify_all_link_state_empty
     """
 
-    print >>fp, command
-
+    print(command, file=fp)    
+    
     if not fp.close():
         return True
     else:
@@ -1558,7 +1558,7 @@ wait 15
 verify_all_link_state_empty
     """
 
-    print >>fp, command
+    print(command, file=fp)
 
     if not fp.close():
         return True
@@ -1678,7 +1678,7 @@ wait 15
 verify_all_link_state_empty
     """
 
-    print >>fp, command
+    print(command, file=fp)
 
     if not fp.close():
         return True
@@ -1691,8 +1691,8 @@ def main():
     def usage():
         us = \
            "usage: %s [-h|--help] [-g|--valgrind] [-v|--verbose] " \
-	   "[-t|--test] [-b|--bad]"
-        print us % sys.argv[0]
+       "[-t|--test] [-b|--bad]"
+        print(us % sys.argv[0])
         
 
     try:
@@ -1712,24 +1712,24 @@ def main():
     verbose = False
     valgrind = False
     for o, a in opts:
-	if o in ("-h", "--help"):
-	    usage()
-	    sys.exit()
-	if o in ("-v", "--verbose"):
-            verbose = True
-	if o in ("-g", "--valgrind"):
-            valgrind = True
-        if o in ("-t", "--test"):
-            tests.append(a)
-        if o in ("-b", "--bad"):
-            bad = True
+        if o in ("-h", "--help"):
+            usage()
+            sys.exit()
+        if o in ("-v", "--verbose"):
+                verbose = True
+        if o in ("-g", "--valgrind"):
+                valgrind = True
+            if o in ("-t", "--test"):
+                tests.append(a)
+            if o in ("-b", "--bad"):
+                bad = True
 
     if not tests:
         for i in TESTS:
             if bad != i[1]:
                 tests.append(i[0])
 
-    print tests
+    print(tests)
 
     for i in tests:
         protocol = 'unknown'
@@ -1738,12 +1738,12 @@ def main():
                 if len(j) > 2:
                     protocol = j[2]
         test = i + '(verbose, valgrind)'
-        print 'Running: ' + i,
+        print('Running: ' + i, end=' ')
         if not eval(test):
-            print "FAILED"
+            print("FAILED")
             sys.exit(-1)
         else:
-            print
+            print()
         
     sys.exit(0)
 

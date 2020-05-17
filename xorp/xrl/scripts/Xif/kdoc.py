@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 This file provides kdoc comment support for XIF interface files.
 It helps propagate kdoc comments from interface definitions into C++ files.
@@ -55,12 +56,12 @@ class XifKdocThing:
         kdoc_sections = cleaned_kdoc_comment.split("@")
         for s in kdoc_sections:
             if s.find("return") == 0:
-                print "Ignoring kdoc @return primitive in input file."
+                print("Ignoring kdoc @return primitive in input file.")
                 continue
             elif s.find("param") == 0:
                 pc = s.split(None, 2)
                 if len(pc) != 3:
-                    print "@param with missing variable or description: \"%s\"" % s
+                    print("@param with missing variable or description: \"%s\"" % s)
                     continue
                 self._params[pc[1]] = pc[2]
             elif s.find("ROOT") == 0:
@@ -99,13 +100,13 @@ class XifKdocThing:
             s += indent_string + " *  " + l + "\n"
 
         for p in paramlist:
-            if self._params.has_key(p):
+            if p in self._params:
                 line = "@param " + p + " " + self._params[p]
                 lines = break_into_lines(line, width)
                 lines.insert(0, "")
                 for l in lines:
                     s += indent_string + " *  " + l + "\n"
-                
+
         for o in self._other:
             lines = break_into_lines(o, width)
             lines.insert(0, "")
@@ -127,14 +128,14 @@ def test():
     * @param planet any planet you happen to pick
     * but don't let it be jupiter.   Really, that's ridiculous
     * @batman Mr dean
-    * @return pants 
+    * @return pants
     */
     """
     p = parse_kdoc_comment(comment)
     p.add_kdoc_param("tgt_name", "Xrl Target to handle command")
     s = p.output_kdoc("       ", ["tgt_name", "planet", "plig"], \
                       "This is not an original comment")
-    print s
-    
+    print(s)
+
 if __name__ == '__main__':
     test()

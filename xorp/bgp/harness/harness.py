@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # $XORP: xorp/bgp/harness/harness.py,v 1.1 2005/03/23 19:58:44 atanu Exp $
 
@@ -53,7 +53,7 @@ def coord(command):
             return
         time.sleep(1)
 
-    print >> sys.stderr, "Still pending"
+    print("Still pending", sys.stderr)
 
 def pending():
     """
@@ -121,11 +121,11 @@ usage: %s [-h|--help]
 def main():
     def usage():
         global us
-        print us % sys.argv[0]
+        print(us % sys.argv[0])
 
     try:
-	opts, args = getopt.getopt(sys.argv[1:], "hei:c:p:a:b:l:rs46", \
-				   ["help", \
+        opts, args = getopt.getopt(sys.argv[1:], "hei:c:p:a:b:l:rs46", \
+                   ["help", \
                                     "establish", \
                                     "inject=", \
                                     "count=", \
@@ -139,8 +139,8 @@ def main():
                                     "ipv6", \
                                     ])
     except getopt.GetoptError:
-	usage()
-	sys.exit(1)
+        usage()
+        sys.exit(1)
 
     establishp = False
     injectp = False
@@ -154,33 +154,33 @@ def main():
     logfile = None
     remove_logfile = False
     for o, a in opts:
-	if o in ("-h", "--help"):
-	    usage()
-	    sys.exit()
-        if o in ("-e", "--establish"):
-            establishp = True
-        if o in ("-i", "--inject"):
-            injectp = True
-            injectfile = a
-        if o in ("-c", "--count"):
-            route_count = a
-        if o in ("-p", "--peer"):
-            peer = a
-	if o in ("-a", "--asnum"):
-	    asnum = a
-	if o in ("-b", "--bgp-id"):
-	    router_id = a
-	if o in ("-l", "--logfile"):
-	    logfile = a
-	if o in ("-r", "--remove"):
-	    remove_logfile = True
-	if o in ("-s", "--stop"):
-            stopp = True
-	if o in ("-4", "--ipv4"):
-            ipv4 = True
-	if o in ("-6", "--ipv6"):
-            ipv4 = False
-        
+        if o in ("-h", "--help"):
+            usage()
+            sys.exit()
+            if o in ("-e", "--establish"):
+                establishp = True
+            if o in ("-i", "--inject"):
+                injectp = True
+                injectfile = a
+            if o in ("-c", "--count"):
+                route_count = a
+            if o in ("-p", "--peer"):
+                peer = a
+            if o in ("-a", "--asnum"):
+                asnum = a
+            if o in ("-b", "--bgp-id"):
+                router_id = a
+            if o in ("-l", "--logfile"):
+                logfile = a
+            if o in ("-r", "--remove"):
+                remove_logfile = True
+            if o in ("-s", "--stop"):
+                    stopp = True
+            if o in ("-4", "--ipv4"):
+                    ipv4 = True
+            if o in ("-6", "--ipv6"):
+                    ipv4 = False
+                
     if establishp:
         establish(peer, asnum, router_id, ipv4, logfile, remove_logfile)
 

@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
 """Program to generate a skeleton Xrl Target derived class"""
 
@@ -66,42 +66,42 @@ def generate_method_args(method, indent_level):
     args = []
     # input args
     if len(method.args()):
-	args.append("\n%s// Input values" % xorp_indent(indent_level))
+        args.append("\n%s// Input values" % xorp_indent(indent_level))
     for a in method.args():
-	cpa = "\n%sconst %s&\t%s" % \
-	  (xorp_indent(indent_level), a.cpp_type(), cpp_name(a.name()))
-	args.append(cpa)
+        cpa = "\n%sconst %s&\t%s" % \
+            (xorp_indent(indent_level), a.cpp_type(), cpp_name(a.name()))
+        args.append(cpa)
     # output args
     if len(method.rargs()):
-	args.append("\n%s// Output values" % xorp_indent(indent_level))
+        args.append("\n%s// Output values" % xorp_indent(indent_level))
     for r in method.rargs():
-	cpa = "\n%s%s&\t%s" % \
-	  (xorp_indent(indent_level), r.cpp_type(), cpp_name(r.name()))
-	args.append(cpa)
+        cpa = "\n%s%s&\t%s" % \
+            (xorp_indent(indent_level), r.cpp_type(), cpp_name(r.name()))
+        args.append(cpa)
     return csv(args)
 
 def target_declare_derived(methods):
     s = ""
     for m in methods:
-	cpp_method_name = cpp_name(m.name())
-	args = generate_method_args(m, indent_level=2)
-	s += "    XrlCmdError %s(%s);\n\n" % (cpp_method_name, args)
+        cpp_method_name = cpp_name(m.name())
+        args = generate_method_args(m, indent_level=2)
+        s += "    XrlCmdError %s(%s);\n\n" % (cpp_method_name, args)
     return s;
 
 def target_derived_methods(cls, name, methods):
     s = ""
     for m in methods:
-	cpp_method_name = cpp_name(m.name())
-	args = generate_method_args(m, indent_level=1)
-	s += "XrlCmdError\n%s::%s(%s)\n" % (cls, cpp_method_name, args)
-	s += "{\n"
-	s += "    return XrlCmdError::COMMAND_FAILED(\"Not implemented\");\n"
-	for a in m.args():
-	    s += "    UNUSED(%s);\n" % a.name();
-	for r in m.rargs():
-	    s += "    UNUSED(%s);\n" % r.name();
-	s += "}\n"
-	s += "\n"
+        cpp_method_name = cpp_name(m.name())
+        args = generate_method_args(m, indent_level=1)
+        s += "XrlCmdError\n%s::%s(%s)\n" % (cls, cpp_method_name, args)
+        s += "{\n"
+        s += "    return XrlCmdError::COMMAND_FAILED(\"Not implemented\");\n"
+        for a in m.args():
+            s += "    UNUSED(%s);\n" % a.name();
+        for r in m.rargs():
+            s += "    UNUSED(%s);\n" % r.name();
+        s += "}\n"
+        s += "\n"
     return s
 
 def protect(file):
@@ -178,7 +178,7 @@ def generate_target_methods(tgt, interfaces):
                 found = 1
                 break
         if found == 0:
-            print "Error interface %s data not found" % tif_info[0]
+            print("Error interface %s data not found" % tif_info[0])
             sys.exit(1)
         for m in tif.methods():
             full_name = Xif.util.xrl_method_name(tif.name(), tif.version(), m.name())
@@ -192,10 +192,10 @@ def main():
     usage = "usage: %prog [options] arg"
     parser = OptionParser(usage)
     parser.add_option("-o", "--output-dir",
-		      action="store", 
-		      type="string", 
-		      dest="output_dir",
-		      metavar="DIR")
+                    action="store",
+                    type="string",
+                    dest="output_dir",
+                    metavar="DIR")
     parser.add_option("-I",
                       action="append",
                       type="string",
@@ -209,9 +209,9 @@ def main():
     # Command line arguments passed on to cpp
     pipe_string = "cpp -C "
     if options.includes:
-	for a in options.includes:
-	    pipe_string += "-I%s " % a
-    pipe_string += args[0] 
+        for a in options.includes:
+        pipe_string += "-I%s " % a
+    pipe_string += args[0]
 
     cpp_pipe = os.popen(pipe_string, 'r')
 
@@ -219,20 +219,20 @@ def main():
 
     tgts = xp.targets()
     if len(tgts) == 0:
-        print "Not targets found in input files."
+        print("Not targets found in input files.")
         sys.exit(1)
 
     sourcefile = tgts[0].sourcefile()
     for tgt in tgts:
         if (tgt.sourcefile() != sourcefile):
-            print "Multiple .tgt files presented, expected just one."
+            print("Multiple .tgt files presented, expected just one.")
             sys.exit(1)
 
     # basename transformation - this is a lame test
     if sourcefile[-4:] != ".tgt":
-        print "Source file does not end in .tgt suffix - basename transform failure."
+        print("Source file does not end in .tgt suffix - basename transform failure.")
         sys.exit(1)
-        
+
     basename = sourcefile[:-4]
     basename = basename[basename.rfind("/") + 1:]
 
