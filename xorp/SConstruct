@@ -67,6 +67,7 @@ vars.AddVariables(
     BoolVariable('strip',  'Strip all installed binaries', False),
     BoolVariable('rtld_origin', 'Use ORIGIN in dynamically linked programs', True),
     BoolVariable('ignore_check_errors', 'Ignore errors when building tests', False),
+
     BoolVariable('debug_stl',  'Build with checked STL operations', False),
     BoolVariable('debug_msg',  'Build with debug messages', False),
     BoolVariable('debug_fn',  'Build with function names in debug_msg output', False),
@@ -77,6 +78,7 @@ vars.AddVariables(
     BoolVariable('disable_warninglogs',  'Force disable warning logs', False),
     BoolVariable('disable_tracelogs',  'Force disable trace logs', False),
     BoolVariable('disable_fatallogs',  'Force disable fatal logs', False),
+
     BoolVariable('disable_infologs',  'Force disable info logs', False),
     BoolVariable('disable_assertlogs',  'Force disable assert logs', False),
     BoolVariable('disable_errorlogs',  'Force disable error logs', False),
@@ -688,10 +690,6 @@ if not env.GetOption('clean') and \
 
     #export osname - needed for lex and yacc
     env['osname'] = osname
-
-    # toolchain
-    conf.Define('CPP_SUPPORTS_C99_VA_ARGS')
-    conf.Define('CPP_SUPPORTS_GNU_VA_ARGS')
 
     if env['disable_fw']:
         conf.Define("XORP_DISABLE_FIREWALL")
