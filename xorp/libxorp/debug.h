@@ -10,13 +10,13 @@
  * Redistribution and/or modification of this program under the terms of
  * any other version of the GNU Lesser General Public License is not
  * permitted.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
  * see the GNU Lesser General Public License, Version 2.1, a copy of
  * which can be found in the XORP LICENSE.lgpl file.
- * 
+ *
  * XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
  * http://xorp.net
  */
@@ -107,27 +107,14 @@ protected:
 #   elif !defined(DEBUG_LOGGING_GLOBAL)
 #       define DEBUG_LOGGING_GLOBAL
 #   endif /* DEBUG_LOGGING */
-#   ifdef CPP_SUPPORTS_GNU_VA_ARGS
-#	ifdef DEBUG_PRINT_FUNCTION_NAME
-#	    define debug_msg(args...)					\
-			_xdebug_msg_long(__FILE__,__LINE__,__FUNCTION__,args)
-#	else
-#	    define debug_msg(args...)     				\
-			_xdebug_msg_long(__FILE__,__LINE__,0,args)
-#	endif
+#   ifdef DEBUG_PRINT_FUNCTION_NAME
+#       define debug_msg(args...)					\
+	        _xdebug_msg_long(__FILE__,__LINE__,__FUNCTION__,args)
 #   else
-#	ifdef DEBUG_PRINT_FUNCTION_NAME
-#	    define debug_msg						\
-		_xdebug_entry(__FILE__,__LINE__,__FUNCTION__),		\
-		_xdebug_msg_short
-#	else
-#		define debug_msg					\
-		_xdebug_entry(__FILE__,__LINE__,0), _xdebug_msg_short
-#	endif
+#	define debug_msg(args...)     				\
+	        _xdebug_msg_long(__FILE__,__LINE__,0,args)
 #   endif
-#
 #   define debug_msg_indent(n) _xdebug_set_indent(n)
-#
 #else
 #    ifdef __cplusplus
 
@@ -138,43 +125,8 @@ protected:
  * define debug_msg to be empty (enabling optimization may not stop
  * calls to c_str() in format arguments).
  */
-inline void swallow_args(const char*) {}
-
-template <class A>
-inline void swallow_args(const char*, A) {}
-
-template <class A, class B>
-inline void swallow_args(const char*, A, B) {}
-
-template <class A, class B, class C>
-inline void swallow_args(const char*, A, B, C) {}
-
-template <class A, class B, class C, class D>
-inline void swallow_args(const char*, A, B, C, D) {}
-
-template <class A, class B, class C, class D, class E>
-inline void swallow_args(const char*, A, B, C, D, E) {}
-
-template <class A, class B, class C, class D, class E, class F>
-inline void swallow_args(const char*, A, B, C, D, E, F) {}
-
-template <class A, class B, class C, class D, class E, class F, class G>
-inline void swallow_args(const char*, A, B, C, D, E, F, G) {}
-
-template <class A, class B, class C, class D, class E, class F, class G, class H>
-inline void swallow_args(const char*, A, B, C, D, E, F, G, H) {}
-
-template <class A, class B, class C, class D, class E, class F, class G, class H, class I>
-inline void swallow_args(const char*, A, B, C, D, E, F, G, H, I) {}
-
-template <class A, class B, class C, class D, class E, class F, class G, class H, class I, class J>
-inline void swallow_args(const char*, A, B, C, D, E, F, G, H, I, J) {}
-
-template <class A, class B, class C, class D, class E, class F, class G, class H, class I, class J, class K>
-inline void swallow_args(const char*, A, B, C, D, E, F, G, H, I, J, K) {}
-
-template <class A, class B, class C, class D, class E, class F, class G, class H, class I, class J, class K, class L>
-inline void swallow_args(const char*, A, B, C, D, E, F, G, H, I, J, K, L) {}
+template<class ... Types>
+inline void swallow_args(const char *, Types ... args) {}
 
 inline void
 check_args(const char* fmt, ...) __printflike(1,2);
@@ -191,15 +143,10 @@ do {                                                                          \
 } while (0)
 
 #    else
-#	ifdef CPP_SUPPORTS_GNU_VA_ARGS
-#	    define debug_msg(args...)
-#	else
-#	    define debug_msg if (1) ; else _xdebug_null
-#	endif
+#       define debug_msg(args...)
 #    endif
-#
 #    define debug_msg_indent(x)
-#
+
 #endif
 
 #ifdef __cplusplus
