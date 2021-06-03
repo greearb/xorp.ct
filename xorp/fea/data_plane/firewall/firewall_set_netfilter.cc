@@ -953,7 +953,12 @@ FirewallSetNetfilter::encode_entry4(const FirewallEntry& firewall_entry,
     ptr = reinterpret_cast<uint8_t *>(ipt);
     ptr += ipt->target_offset;
     ist = reinterpret_cast<struct ipt_standard_target *>(ptr);
+
+// Work around fedora-34 compile issue, typeof does't work in c++ anymore I guess.
+// XT_ALIGN uses it.
+#define typeof __typeof__
     ist->target.u.user.target_size = XT_ALIGN(sizeof(*ist));
+
     strlcpy(ist->target.u.user.name, IPT_STANDARD_TARGET,
 	    sizeof(ist->target.u.user.name));
     switch (firewall_entry.action()) {
