@@ -26,11 +26,11 @@
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
-#include "libxipc/finder.hh"
+// #include "libxipc/finder.hh"
 #include "eventloop.hh"
 #include <sys/types.h>
 #include <signal.h>
-
+#define XORP_HELLO_TIMER_MS 100000
 //
 // Number of EventLoop instances.
 //
