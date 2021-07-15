@@ -120,7 +120,7 @@ comm_sock_open(int domain, int type, int protocol, int is_blocking)
     }
 
     /* Enable TCP_NODELAY */
-    if (type == SOCK_STREAM && (domain == AF_INET || domain == AF_INET6) 
+    if (type == SOCK_STREAM && (domain == AF_INET || domain == AF_INET6)
         && comm_set_nodelay(sock, 1) != XORP_OK) {
 	_comm_set_serrno();
 	comm_sock_close(sock);
@@ -296,7 +296,6 @@ comm_sock_bind4(xsock_t sock, const struct in_addr *my_addr,
     }
 
     comm_set_bindtodevice(sock, local_dev);
-    
     memset(&sin_addr, 0, sizeof(sin_addr));
 #ifdef HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
     sin_addr.sin_len = sizeof(sin_addr);
@@ -869,7 +868,7 @@ comm_set_linger(xsock_t sock, int enabled, int secs)
 
     l.l_onoff = enabled;
     l.l_linger = secs;
-    if (setsockopt(sock, SOL_SOCKET, SO_LINGER, 
+    if (setsockopt(sock, SOL_SOCKET, SO_LINGER,
 		   XORP_SOCKOPT_CAST(&l), sizeof(l)) < 0) {
 	_comm_set_serrno();
 	XLOG_ERROR("Error %s SO_LINGER %ds on socket %d: %s",

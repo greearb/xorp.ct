@@ -66,10 +66,9 @@ void
 xorp_backtrace_free(const char **data)
 {
 #ifdef DEBUG_BACKTRACE
-    return (_xorp_backtrace_free());
-#else
-    return (NULL);
+    (_xorp_backtrace_free());
 #endif
+    return;
 }
 
 /**

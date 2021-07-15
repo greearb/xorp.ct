@@ -436,7 +436,7 @@ XrlRouter::lookup_sender(const Xrl& xrl, FinderDBEntry* dbe)
     if (xrl.resolved()) {
         s = xrl.resolved_sender();
 
-        if (!s.is_empty())
+        if (!s.is_empty() and s->alive())
 	    return s;
 
 	xrl.set_resolved(false);

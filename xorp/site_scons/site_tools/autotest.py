@@ -112,6 +112,7 @@ def generate(env, **kwargs):
 
     #Here's where keyword arguments are applied
     # apply(env.Replace, (), kwargs)
+    env.Replace(*(kwargs))
 
     def AutoTest(env, target, source = None, **kwargs):
         """Usage:
