@@ -49,12 +49,13 @@
 
 #include "direader.h"
 
-/*
- * Use the reentrant POSIX threads version of readdir()?
- */
-#if defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 199506L
-#define USE_READDIR_R 1
-#endif
+// Withdrawn by zagura 2021-12-28
+// /*
+//  * Use the reentrant POSIX threads version of readdir()?
+//  */
+// #if defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 199506L
+// #define USE_READDIR_R 1
+// #endif
 
 /*
  * Set the max length of the error-reporting string. There is no point

@@ -475,7 +475,7 @@ else:
     if (len(COMMAND_LINE_TARGETS) == 0):
         if not env.GetOption('clean') and \
                not env.GetOption('help'):
-            if os.system("./libxorp/create_buildinfo.sh") != 0:
+            if os.system("./libxorp/create_buildinfo.sh libxorp") != 0:
                 print("ERROR:  Failed to generate libxorp/build_info.cc.")
                 print("You can disable this feature with: enable_buildinfo=no")
                 exit(1)
