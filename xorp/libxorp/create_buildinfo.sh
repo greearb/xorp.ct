@@ -14,13 +14,18 @@
 # Uses sed, git, date, and uname commands, if available.
 # git history is only available if compiled within a git tree.
 
-cd libxorp
-
-BINFO=build_info.cc
-
+# Generates build_info in call directory or directory set in first argument
+if [ "$#" -eq 2 ]; then
+    BINFO=$1/build_info.cc
+else
+    BINFO=$(pwd)/build_info.cc
+fi
+# Get directory of the script, allowing call from any directory
+LIBXORP_DIR=$(dirname $0)
+cd ${LIBXORP_DIR}
 if [ -f $BINFO ]
     then
-    if [ create_buildinfo.sh -ot $BINFO ]
+    if [ $0 -ot $BINFO ]
 	then
 	if [ -f last_git_md5sum.txt ]
 	    then
