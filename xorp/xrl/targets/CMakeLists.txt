@@ -70,21 +70,28 @@ if (XORPSH)
 endif()
 
 message(STATUS "${tgt_srcs}")
-
+set(TARGETS_DIR ${CMAKE_CURRENT_BINARY_DIR} PARENT_SCOPE)
 set(tgt_cxx "")
 foreach(src_tgt ${tgt_srcs})
-    string(REGEX REPLACE ".tgt" "_base.cc" src_cxx ${src_tgt})
-    message(STATUS "Creating ${src_cxx} from ${src_tgt}")
-    add_custom_command(OUTPUT ${src_cxx}
-    # ALL
-    # BYPRODUCTS scr_cxx
-    COMMAND /usr/bin/python3 "../scripts/tgt-gen" "-I../interfaces" "-I${MAIN_DIR}" 
-    "-I${CMAKE_CURRENT_LIST_DIR}" "--output-dir=${CMAKE_CURRENT_BINARY_DIR}" "${src_tgt}"
-    WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-    COMMENT "Generating ${src_cxx} file from ${src_tgt}..."
-    # DEPENDS interfaces
+    get_filename_component(tgt_fname ${src_tgt} NAME_WLE)
+    message(STATUS "[tgt] Filename from ${src_tgt} is ${tgt_fname}")
+    string(CONCAT src_cxx ${tgt_fname} "_base.cc")
+    message(STATUS "[tgt] Creating ${CMAKE_CURRENT_BINARY_DIR}/${src_cxx} from ${src_tgt}")
+    # string(REGEX REPLACE ".tgt" "_base.cc" src_cxx ${src_tgt})
+    # message(STATUS "Creating ${src_cxx} from ${src_tgt}")
+    add_custom_command(
+        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${src_cxx}
+        # ALL
+        # BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/${src_cxx}
+        COMMAND /usr/bin/python3 "../scripts/tgt-gen" "-I../interfaces" "-I${MAIN_DIR}"
+        "-I${CMAKE_CURRENT_LIST_DIR}" "--output-dir=${CMAKE_CURRENT_BINARY_DIR}" "${src_tgt}"
+        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+        COMMENT "[tgt] Generating ${src_cxx} file from ${src_tgt}"
+        # DEPENDS interfaces
     )
     list(APPEND tgt_cxx ${src_cxx})
+    add_library(tgts_${tgt_fname} SHARED ${CMAKE_CURRENT_BINARY_DIR}/${src_cxx})
 endforeach()
+set_source_files_properties(${tgt_cxx} PROPERTIES GENERATED TRUE)
 add_custom_target(targets DEPENDS ${tgt_cxx})
-set(TARGETS_DIR ${CMAKE_CURRENT_BINARY_DIR} PARENT_SCOPE)
+# target_sources(targets PRIVATE ${tgt_cxx})

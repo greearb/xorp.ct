@@ -128,10 +128,51 @@ add_executable(rtrmgr main_rtrmgr.cc xrl_rtrmgr_interface.cc)
 
 add_dependencies(rtrmgr targets interfaces)
 
-file(GLOB RTRMGR_SRCS ${TARGETS_DIR}/rtrmgr_base.cc
-                      ${INTERFACES_DIR}/rtrmgr_client_xif.cc
-                      ${INTERFACES_DIR}/finder_event_notifier_xif.cc)
-target_sources(rtrmgr PUBLIC ${RTRMGR_SRCS})
+target_link_libraries(rtrmgr
+                            finder
+                            xorp
+                            proto
+                            tecla
+                            xipc
+                            xorp_rtrmgr
+                            comm
+                            crypto
+                            tgts_rtrmgr
+                            xif_rtrmgr_client
+                            xif_finder_event_notifier
+                     )
 
-target_link_libraries(rtrmgr finder xorp proto tecla xipc xorp_rtrmgr comm crypto)
+if (PROFILER)
+add_executable(profiler profiler.cc)
+target_link_libraries(profiler
+                               xorp
+                               crypto
+                               finder
+                               xipc
+                               comm
+                               tgts_profiler
+                               xif_profiler
+                      )
+add_dependencies(profiler targets interfaces)
+endif()
 
+if (XORPSH)
+add_executable(xorpsh xorpsh_main.cc xrl_xorpsh_interface.cc cli.cc)
+target_link_libraries(xorpsh
+                             xorp_rtrmgr
+                             cli
+                             tgts_cli
+                             xif_cli_processor
+                             proto
+                             tecla
+                             xif_rtrmgr
+                             tgts_xorpsh
+                             xif_finder_event_notifier
+                             xipc
+                             comm
+                             xorp
+                             crypto
+                             curses
+)
+add_dependencies(xorpsh interfaces targets)
+endif()
