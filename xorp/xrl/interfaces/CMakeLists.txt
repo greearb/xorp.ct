@@ -89,20 +89,26 @@ endif()
 
 
 message(STATUS "${interface_srcs}")
-
-set(interfaces_cxx "")
-foreach(src_xif ${interface_srcs})
-    string(REGEX REPLACE ".xif" "_xif.cc" src_cxx ${src_xif})
-    message(STATUS "Creating ${src_cxx} from ${src_xif}")
-    add_custom_command(OUTPUT ${src_cxx}
-    # ALL
-    # BYPRODUCTS scr_cxx
-    COMMAND /usr/bin/python3 "../scripts/clnt-gen" "-I${MAIN_DIR}" "--output-dir=${CMAKE_CURRENT_BINARY_DIR}" "${src_xif}" 
-    WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-    COMMENT "Generating ${src_cxx} file from ${src_xif}..."
-    )
-    list(APPEND interfaces_cxx ${src_cxx})
-endforeach()
-# message(STATUS "Created interfaces: ${interfaces_cxx}")
-add_custom_target(interfaces DEPENDS ${interfaces_cxx})
 set(INTERFACES_DIR ${CMAKE_CURRENT_BINARY_DIR} PARENT_SCOPE)
+set(xif_cxx "")
+
+foreach(src_xif ${interface_srcs})
+    get_filename_component(xif_fname ${src_xif} NAME_WLE)
+    message(STATUS "[xif] Filename from ${src_xif} is ${xif_fname}")
+    string(CONCAT src_cxx ${xif_fname} "_xif.cc")
+    # string(REGEX REPLACE ".xif" "_xif.cc" src_cxx ${src_xif})
+    message(STATUS "[xif] Creating ${CMAKE_CURRENT_BINARY_DIR}/${src_cxx} from ${src_xif}")
+    add_custom_command(
+        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${src_cxx}
+        # ALL
+        BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/${src_cxx}
+        COMMAND /usr/bin/python3 "../scripts/clnt-gen" "-I${MAIN_DIR}" "--output-dir=${CMAKE_CURRENT_BINARY_DIR}" "${src_xif}"
+        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+        COMMENT "[xif] Generating ${CMAKE_CURRENT_BINARY_DIR}/${src_cxx} file from ${src_xif}"
+    )
+    list(APPEND xif_cxx ${src_cxx})
+    add_library(xif_${xif_fname} SHARED ${CMAKE_CURRENT_BINARY_DIR}/${src_cxx})
+endforeach()
+# message(STATUS "Created interfaces: ${xif_cxx}")
+add_custom_target(interfaces DEPENDS ${xif_cxx})
+# target_sources(interfaces PRIVATE xif_cxx)

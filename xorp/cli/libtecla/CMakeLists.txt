@@ -1,5 +1,5 @@
-# rtrmgr build
-# Copyright (c) 2021 Michał Zagórski (zagura)
+# libtecla build
+# Copyright (c) 2021-2023 Michał Zagórski (zagura)
 # SPDX-License-Identifier: GPL-2.0-or-later
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)

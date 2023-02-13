@@ -179,7 +179,7 @@ found in the XORP LICENSE.gpl file.
 #cmakedefine HAVE_INET_ND_H             @HAVE_INET_ND_H@
 #cmakedefine HAVE_INET_IP_H             @HAVE_INET_IP_H@
 #cmakedefine HAVE_ARPA_INET_H           @HAVE_ARPA_INET_H@
-#cmakedefine HAVE_TELNET_H              @HAVE_TELNET_H@
+#cmakedefine HAVE_ARPA_TELNET_H         @HAVE_ARPA_TELNET_H@
 
 
 #cmakedefine L_WARNING
