@@ -349,7 +349,7 @@ int main() {
 " HAVE_NETLINK_SOCKET_ATTRIBUTE_RTA_TABLE)
 check_struct_has_member("struct sockaddr_dl"    sdl_len "sys/socket.h" HAVE_STRUCTSOCKADDR_DL_SDL_LEN)
 check_struct_has_member("struct ifreq"  ifr_hwaddr  "net/if.h" HAVE_STRUCT_IFREQ_IFR_HWADDR)
-check_struct_has_member("struct ifreq"  ifr_ifindex "net/if.h" HAVE_STRUCT_IFREQ_IFINDEX)
+check_struct_has_member("struct ifreq"  ifr_ifindex "net/if.h" HAVE_STRUCT_IFREQ_IFR_IFINDEX)
 
 
 check_function_exists(ether_aton    HAVE_ETHER_ATON)
