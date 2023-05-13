@@ -3,16 +3,16 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 
-set(FEA_SOURCES "")
+set(MENAGERS_SRCS "")
 if (FEA_DUMMY)
-list(APPEND FEA_SOURCES fea_data_plane_manager_dummy.cc)
+list(APPEND MENAGERS_SRCS fea_data_plane_manager_dummy.cc)
 endif()
 
 if (CLICK)
-list(APPEND FEA_SOURCES fea_data_plane_manager_click.cc)
+list(APPEND MENAGERS_SRCS fea_data_plane_manager_click.cc)
 endif()
 
-add_library(fea_manager SHARED fea_data_plane_manager_linux.cc
-                               fea_data_plane_manager_windows.cc
-                               fea_data_plane_manager_bsd.cc
-                               ${FEA_SOURCES})
+add_library(fea_managers SHARED fea_data_plane_manager_linux.cc
+                                fea_data_plane_manager_windows.cc
+                                fea_data_plane_manager_bsd.cc
+                                ${MENAGERS_SRCS})
