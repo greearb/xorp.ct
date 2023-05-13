@@ -115,6 +115,7 @@ public:
 		    _fea_target_name.c_str(), addr.str().c_str(), port);
 	bool s = c.send_udp_open_and_bind(
 	    _fea_target_name.c_str(), _r->instance_name(), addr, port,
+        "", 0,
 	    callback(this, &TestSocket4UDP::bind_cb));
 	return s;
     }
@@ -236,6 +237,12 @@ protected:
 	status = PROC_READY;
 	reason = "";
 	return XrlCmdError::OKAY();
+    }
+
+    XrlCmdError
+    common_0_1_startup()
+    {
+        return XrlCmdError::OKAY();
     }
 
     XrlCmdError

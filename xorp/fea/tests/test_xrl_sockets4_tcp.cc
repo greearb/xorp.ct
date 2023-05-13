@@ -174,6 +174,12 @@ protected:
 	return XrlCmdError::OKAY();
     }
 
+        XrlCmdError
+    common_0_1_startup()
+    {
+        return XrlCmdError::OKAY();
+    }
+
     XrlCmdError
     common_0_1_shutdown()
     {
