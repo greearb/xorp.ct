@@ -3,6 +3,9 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 add_subdirectory(data_plane)
+add_subdirectory(tests)
+# add_subdirectory(tools)
+
 # add_library(static  static_routes_node.cc
 #                     static_routes_varrw.cc
 #                     xrl_static_routes_node.cc)

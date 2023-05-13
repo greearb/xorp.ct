@@ -14,14 +14,15 @@ file(GLOB tgt_srcs cli.tgt
               rtrmgr.tgt
               show_distances.tgt
               show_routes.tgt
-              static_routes.tgt)
+              static_routes.tgt
 #              test.tgt
 #              test_fea_ifmgr_mirror.tgt
-#              test_fea_rawlink.tgt
+              test_fea_rawlink.tgt
 #              test_finder_events.tgt
 #              test_peer.tgt
-#              test_socket4.tgt
+              test_socket4.tgt
 #              test_xrls.tgt
+)
 if(BGP)
     list(APPEND tgt_srcs bgp.tgt)
 endif()
