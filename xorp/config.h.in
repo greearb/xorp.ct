@@ -163,7 +163,7 @@ found in the XORP LICENSE.gpl file.
 #cmakedefine HAVE_IOCTL_SIOCGIFCONF
 
 
-#cmakedefine HAVE_IPV6                  @ENABLE_IPV6@
+#cmakedefine HAVE_IPV6
 
 #cmakedefine HAVE_NETINET_IN_H          @HAVE_NETINET_IN_H@
 #cmakedefine HAVE_NETINET_IN_SYSTM_H    @HAVE_NETINET_IN_SYSTM_H@
@@ -194,6 +194,7 @@ found in the XORP LICENSE.gpl file.
 #cmakedefine XORP_USE_XORPSH
 #cmakedefine XORP_USE_USTL
 #cmakedefine XORP_DISABLE_FIREWALL
+#cmakedefine XORP_DISABLE_PROFILE
 /*
 // unused
 // #define HAVE_DECL_IP_MULTICAST_IF 1
@@ -262,17 +263,34 @@ found in the XORP LICENSE.gpl file.
 /* #undef HAVE_LIBPCRE */
 /* #undef HAVE_LIBPCREPOSIX */
 #define HAVE_OPENSSL_MD5_H 1
-#define HAVE_LIBCRYPTO 1
+/* zagura: 2023-05-16
+// #define HAVE_LIBCRYPTO 1
+*/
 #define HAVE_MD5_INIT 1
 #define HAVE_DLFCN_H 1
 #define HAVE_LIBDL 1
 #define HAVE_DLOPEN 1
-#define HAVE_PCAP_H 1
-#define HAVE_LIBPCAP 1
+/* zagura: 2023-05-16
+//#define HAVE_PCAP_H 1
+//#define HAVE_LIBPCAP 1
+*/
 #define HAVE_PCAP_SENDPACKET 1
-#define HAVE_PCAP_BPF_H 1
-#define HAVE_LIBCURSES 1
+/* zagura: 2023-05-16
+//#define HAVE_PCAP_BPF_H 1
+//#define HAVE_LIBCURSES 1
+*/
 /* #undef HAVE_LIBPDCURSES */
-#define HAVE_LIBNCURSES 1
-#define XORP_USE_FEA_DUMMY
-#define XORP_USE_XORPSH
+/* zagura: 2023-05-16
+//#define HAVE_LIBNCURSES 1
+// #define XORP_USE_FEA_DUMMY
+//#define XORP_USE_XORPSH
+*/
+#cmakedefine HAVE_LIBCRYPTO   @HAVE_LIBCRYPTO@
+#cmakedefine HAVE_PCAP_H      @HAVE_PCAP_H@
+#cmakedefine HAVE_PCAP_BPF_H  @HAVE_PCAP_BPF_H@
+#cmakedefine HAVE_LIBPCAP     @HAVE_LIBPCAP@
+#cmakedefine HAVE_LIBCURSES   @HAVE_LIBCURSES@
+#cmakedefine HAVE_LIBNCURSES  @HAVE_LIBNCURSES@
+#cmakedefine HAVE_LIBPDCURSE  @HAVE_LIBPDCURSES@
+#cmakedefine XORP_USE_FEA_DUMMY
+#cmakedefine XORP_USE_XORPSH

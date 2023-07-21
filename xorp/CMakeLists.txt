@@ -135,7 +135,7 @@ endif()
 set(XORP_DISABLE_PROFILE ${DISABLE_PROFILE})
 set(XORP_USE_USTL ${USTL})
 set(XORP_USE_CLICK ${CLICK})
-set(XORP_FEA_DUMMY ${FEA_DUMMY})
+set(XORP_USE_FEA_DUMMY ${FEA_DUMMY})
 set(XORP_USE_VIFF_USE_IFINDEX ${VIFF_USE_IFINDEX})
 set(XORP_ENABLE_ASYNC_SERVER ${ASYNC_SERVER})
 set(XORP_USE_XORPSH ${XORPSH})
@@ -181,7 +181,7 @@ if(LEX_HACK)
     add_definitions(-DNEED_LEX_H_HACK)
 endif()
 
-if(NOT DISABLE_IPV6)
+if(ENABLE_IPV6)
     set(HAVE_IPV6 ON)
 endif()
 
@@ -342,7 +342,7 @@ endif()
 check_c_source_compiles("
 #include <linux/rtnetlink.h>
 
-int main() { 
+int main() {
     enum rtattr_type_t attr = RTA_TABLE;
     return 0;
 }
@@ -415,8 +415,8 @@ int main() {
 
 # MULTICAST
 set(HAVE_IPV4_MULTICAST OFF)
-if (${HAVE_SYS_TYPES_H} EQUAL 1 
-    AND ${HAVE_SYS_SOCKET_H} EQUAL 1 
+if (${HAVE_SYS_TYPES_H} EQUAL 1
+    AND ${HAVE_SYS_SOCKET_H} EQUAL 1
     AND ${HAVE_NETINET_IN_H} EQUAL 1)
     # check_c_source_compiles("
     # #include <sys/types.h>
@@ -440,7 +440,7 @@ if (${HAVE_SYS_TYPES_H} EQUAL 1
     check_symbol_exists(IP_DROP_MEMBERSHIP "netinet/in.h" HAVE_DECL_IP_DROP_MEMBERSHIP)
     #check_symbol_exists(SIOCGIFCONF "sys/ioctl.h" HAVE_IOCTL_SIOCGIFCONF)
     if (${HAVE_DECL_IP_MULTICAST_IF} AND ${HAVE_DECL_IP_MULTICAST_TTL} AND ${HAVE_DECL_IP_MULTICAST_LOOP}
-        AND ${HAVE_DECL_IP_ADD_MEMBERSHIP} AND ${HAVE_DECL_IP_DROP_MEMBERSHIP})   
+        AND ${HAVE_DECL_IP_ADD_MEMBERSHIP} AND ${HAVE_DECL_IP_DROP_MEMBERSHIP})
         set(HAVE_IPV4_MULTICAST ON)
         message(STATUS "Set HAVE_IPV4_MULTICAST")
     endif()
@@ -483,6 +483,37 @@ endif()
 
 
 # configure_file(config.h.in ${CMAKE_CURRENT_LIST_DIR}/xorp_config.h)
+find_library(CRYPTO_LIB crypto)
+if (CRYPTO_LIB)
+    message(STATUS "Found crypto library")
+    set(HAVE_LIBCRYPTO 1)
+endif()
+
+find_library(PCAP_LIB pcap)
+if (PCAP_LIB)
+    message(STATUS "Found pcap library")
+    set(HAVE_LIBPCAP 1)
+endif()
+check_include_file("pcap.h"         HAVE_PCAP_H)
+check_include_file("pcap-bpf.h"     HAVE_PCAP_BPF_H)
+find_library(CURSES_LIB curses)
+if (CURSES_LIB)
+    message(STATUS "Found curses library")
+    set(HAVE_CURSES 1)
+endif()
+
+find_library(NCURSES_LIB ncurses)
+if (NCURSES_LIB)
+    message(STATUS "Found ncurses library")
+    set(HAVE_NCURSES 1)
+endif()
+
+find_library(PDURSES_LIB pdcurses)
+if (PDCURSES_LIB)
+    message(STATUS "Found pdcurses library")
+    set(HAVE_PDCURSES 1)
+endif()
+
 
 configure_file(config.h.in ${CMAKE_CURRENT_BINARY_DIR}/xorp_config.h)
 set(MAIN_DIR ${CMAKE_CURRENT_BINARY_DIR})
