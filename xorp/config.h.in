@@ -1,146 +1,134 @@
 #pragma once
-/* Copyright (c) 2021 Michał Zagórski
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License, Version 2, June
-1991 as published by the Free Software Foundation. Redistribution
-and/or modification of this program under the terms of any other
-version of the GNU General Public License is not permitted.
-
-This program is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
-see the GNU General Public License, Version 2, a copy of which can be
-found in the XORP LICENSE.gpl file.
-*/
+/* Copyright (c) 2021-2023 Michał Zagórski (zagura) */
+/* SPDX-License-Identifier: GPL-2.0-or-later */
 /* @note: Cannot use // in comments as these comments aren't properly parsed by xif */
-#cmakedefine XRL_PF               @XRL_PF@
+#cmakedefine XRL_PF                                     @XRL_PF@
 #cmakedefine HOST_OS_LINUX
 #cmakedefine HOST_OS_FREEBSD
 #cmakedefine HOST_OS_WINDOWS
 #cmakedefine HOST_OS_SOLARIS
 #cmakedefine HOST_OS_NETBSD
-#cmakedefine HOST_OS_NAME         @HOST_OS_NAME@
+#cmakedefine HOST_OS_NAME                               @HOST_OS_NAME@
 #cmakedefine ENABLE_ADVANCED_MULTICAST_API
 #cmakedefine HAVE_PROC_LINUX
 
-#cmakedefine HAVE_ENDIAN_H      @HAVE_ENDIAN_H@
-#cmakedefine HAVE_IPHLPAPI_H    @HAVE_IPHLPAPI_H@
-#cmakedefine HAVE_ROUTPROT_H    @HAVEROUTPROT_H@
-#cmakedefine HAVE_STDINT_H      @HAVE_STDINT_H@
-#cmakedefine HAVE_INTTYPES_H    @HAVE_INTTYPES_H@
-#cmakedefine HAVE_UINT64_T      @UINT64_T@
-#cmakedefine HAVE_STDBOOL_H     @HAVE_STDBOOL_H@
-#cmakedefine HAVE_STDDEF_H      @HAVE_STDDEF_H@
-#cmakedefine HAVE_STDARG_H      @HAVE_STDARG_H@
-#cmakedefine HAVE_STDLIB_H      @HAVE_STDLIB_H@
-#cmakedefine HAVE_STRINGS_H     @HAVE_STRINGS_H@
-#cmakedefine HAVE_STRING_H      @HAVE_STRING_H@
-#cmakedefine HAVE_SIGNAL_H      @HAVE_SIGNAL_H@
-#cmakedefine HAVE_MATH_H        @HAVE_MATH_H@
-#cmakedefine HAVE_MEMORY_H      @HAVE_MEMORY_H@
-#cmakedefine HAVE_STRFTIME      @HAVE_STRFTIME@
-#cmakedefine HAVE_STRLCPY       @HAVE_STRLCPY@
-#cmakedefine HAVE_STRLCAT       @HAVE_STRLCAT@
+#cmakedefine HAVE_ENDIAN_H                              @HAVE_ENDIAN_H@
+#cmakedefine HAVE_IPHLPAPI_H                            @HAVE_IPHLPAPI_H@
+#cmakedefine HAVE_ROUTPROT_H                            @HAVEROUTPROT_H@
+#cmakedefine HAVE_STDINT_H                              @HAVE_STDINT_H@
+#cmakedefine HAVE_INTTYPES_H                            @HAVE_INTTYPES_H@
+#cmakedefine HAVE_UINT64_T                              @UINT64_T@
+#cmakedefine HAVE_STDBOOL_H                             @HAVE_STDBOOL_H@
+#cmakedefine HAVE_STDDEF_H                              @HAVE_STDDEF_H@
+#cmakedefine HAVE_STDARG_H                              @HAVE_STDARG_H@
+#cmakedefine HAVE_STDLIB_H                              @HAVE_STDLIB_H@
+#cmakedefine HAVE_STRINGS_H                             @HAVE_STRINGS_H@
+#cmakedefine HAVE_STRING_H                              @HAVE_STRING_H@
+#cmakedefine HAVE_SIGNAL_H                              @HAVE_SIGNAL_H@
+#cmakedefine HAVE_MATH_H                                @HAVE_MATH_H@
+#cmakedefine HAVE_MEMORY_H                              @HAVE_MEMORY_H@
+#cmakedefine HAVE_STRFTIME                              @HAVE_STRFTIME@
+#cmakedefine HAVE_STRLCPY                               @HAVE_STRLCPY@
+#cmakedefine HAVE_STRLCAT                               @HAVE_STRLCAT@
 
-#cmakedefine HAVE_VA_COPY       @HAVE_VA_COPY@
+#cmakedefine HAVE_VA_COPY                               @HAVE_VA_COPY@
 
-#cmakedefine HAVE_SYS_TYPES_H   @HAVE_SYS_TYPES_H@
-#cmakedefine HAVE_FCNTL_H       @HAVE_FCNTL_H@
-#cmakedefine HAVE_GETOPT_H      @HAVE_GETOPT_H@
-#cmakedefine HAVE_GLOB_H        @HAVE_GLOB_H@
-#cmakedefine HAVE_GRP_H         @HAVE_GRP_H@
-#cmakedefine HAVE_PTHREAD_H     @HAVE_PTHREAD_H@
-#cmakedefine HAVE_PWD_H         @HAVE_PWD_H@
-#cmakedefine HAVE_MQUEUE_H      @HAVE_MQUEUE_H@
-#cmakedefine HAVE_REGEX_H       @HAVE_REGEX_H@
-#cmakedefine HAVE_SYSLOG_H      @HAVE_SYSLOG_H@
-#cmakedefine HAVE_TERMIOS_H     @HAVE_TERMIOS_H@
-#cmakedefine HAVE_TIME_H        @HAVE_TIME_H@
-#cmakedefine HAVE_UNISTD_H      @HAVE_UNISTD_H@
-#cmakedefine HAVE_VFORK_H       @HAVE_VFORK_H@
+#cmakedefine HAVE_SYS_TYPES_H                           @HAVE_SYS_TYPES_H@
+#cmakedefine HAVE_FCNTL_H                               @HAVE_FCNTL_H@
+#cmakedefine HAVE_GETOPT_H                              @HAVE_GETOPT_H@
+#cmakedefine HAVE_GLOB_H                                @HAVE_GLOB_H@
+#cmakedefine HAVE_GRP_H                                 @HAVE_GRP_H@
+#cmakedefine HAVE_PTHREAD_H                             @HAVE_PTHREAD_H@
+#cmakedefine HAVE_PWD_H                                 @HAVE_PWD_H@
+#cmakedefine HAVE_MQUEUE_H                              @HAVE_MQUEUE_H@
+#cmakedefine HAVE_REGEX_H                               @HAVE_REGEX_H@
+#cmakedefine HAVE_SYSLOG_H                              @HAVE_SYSLOG_H@
+#cmakedefine HAVE_TERMIOS_H                             @HAVE_TERMIOS_H@
+#cmakedefine HAVE_TIME_H                                @HAVE_TIME_H@
+#cmakedefine HAVE_UNISTD_H                              @HAVE_UNISTD_H@
+#cmakedefine HAVE_VFORK_H                               @HAVE_VFORK_H@
 
-#cmakedefine HAVE_READV         @HAVE_READV@
-#cmakedefine HAVE_STRERROR      @HAVE_STRERROR@
-#cmakedefine HAVE_SYSLOG        @HAVE_SYSLOG@
-#cmakedefine HAVE_UNAME         @HAVE_UNAME@
-#cmakedefine HAVE_WRITEV        @HAVE_WRITEV@
-#cmakedefine HAVE_RECVMSG       @HAVE_RECVMSG@
-#cmakedefine HAVE_SENDMSG       @HAVE_SENDMSG@
+#cmakedefine HAVE_READV                                 @HAVE_READV@
+#cmakedefine HAVE_STRERROR                              @HAVE_STRERROR@
+#cmakedefine HAVE_SYSLOG                                @HAVE_SYSLOG@
+#cmakedefine HAVE_UNAME                                 @HAVE_UNAME@
+#cmakedefine HAVE_WRITEV                                @HAVE_WRITEV@
+#cmakedefine HAVE_RECVMSG                               @HAVE_RECVMSG@
+#cmakedefine HAVE_SENDMSG                               @HAVE_SENDMSG@
 
-#cmakedefine HAVE_LIBRT         @HAVE_LIBRT@
-#cmakedefine HAVE_CLOCK_GETTIME @HAVE_CLOCK_GETTIME@
-#cmakedefine HAVE_CLOCK_MONOTONIC @HAVE_CLOCK_MONOTONIC@
-#cmakedefine HAVE_CLOCK_MONOTONIC_FAST @HAVE_CLOCK_MONOTONIC_FAST@
-#cmakedefine HAVE_STRUCT_TIMESPEC @HAVE_STRUCT_TIMESPEC@
+#cmakedefine HAVE_LIBRT                                 @HAVE_LIBRT@
+#cmakedefine HAVE_CLOCK_GETTIME                         @HAVE_CLOCK_GETTIME@
+#cmakedefine HAVE_CLOCK_MONOTONIC                       @HAVE_CLOCK_MONOTONIC@
+#cmakedefine HAVE_CLOCK_MONOTONIC_FAST                  @HAVE_CLOCK_MONOTONIC_FAST@
+#cmakedefine HAVE_STRUCT_TIMESPEC                       @HAVE_STRUCT_TIMESPEC@
 
-#cmakedefine HAVE_PATHS_H       @HAVE_PATHS_H@
-#cmakedefine HAVE_SYSEXITS_H    @HAVE_SYSEXITS_H@
-#cmakedefine HAVE_REALPATH      @HAVE_REALPATH@
-#cmakedefine HAVE_STRPTIME      @HAVE_STRPTIME@
-#cmakedefine HAVE_SYSCTL        @HAVE_SYSCTL@
-#cmakedefine HAVE_NETDB_H       @HAVE_NETDB_H@
+#cmakedefine HAVE_PATHS_H                               @HAVE_PATHS_H@
+#cmakedefine HAVE_SYSEXITS_H                            @HAVE_SYSEXITS_H@
+#cmakedefine HAVE_REALPATH                              @HAVE_REALPATH@
+#cmakedefine HAVE_STRPTIME                              @HAVE_STRPTIME@
+#cmakedefine HAVE_SYSCTL                                @HAVE_SYSCTL@
+#cmakedefine HAVE_NETDB_H                               @HAVE_NETDB_H@
 
-#cmakedefine HAVE_LIBRESOLV     @HAVE_LIBRESOLV@
-#cmakedefine HAVE_HSTRERROR     @HAVE_HSTRERROR@
-#cmakedefine HAVE_SYS_CDEFS_H   @HAVE_SYS_CDEFS_H@
-#cmakedefine HAVE_SYS_PARAM_H   @HAVE_SYS_PARAM_H@
-#cmakedefine HAVE_SYS_UTSNAME_H @HAVE_SYS_UTSNAME_H@
-#cmakedefine HAVE_SYS_ERRNO_H   @HAVE_SYS_ERRNO_H@
-#cmakedefine HAVE_SYS_WAIT_H    @HAVE_SYS_WAIT_H@
-#cmakedefine HAVE_SYS_SIGNAL_H  @HAVE_SYS_SIGNAL_H@
-#cmakedefine HAVE_SYS_TIME_H    @HAVE_SYS_TIME_H@
-#cmakedefine HAVE_SYS_UIO_H     @HAVE_SYS_UIO_H@
-#cmakedefine HAVE_SYS_IOCTL_H   @HAVE_SYS_IOCTL_H@
-#cmakedefine HAVE_SYS_SELECT_H  @HAVE_SYS_SELECT_H@
-#cmakedefine HAVE_SYS_SOCKET_H  @HAVE_SYS_SOCKET_H@
-#cmakedefine HAVE_SYS_SOCKIO_H  @HAVE_SYS_SOCKIO_H@
-#cmakedefine HAVE_SYS_UN_H      @HAVE_SYS_UN_H@
-#cmakedefine HAVE_SYS_MOUNT_H   @HAVE_SYS_MOUNT_H@
-#cmakedefine HAVE_SYS_RESOURCE_H @HAVE_SYS_RESOURCE_H@
-#cmakedefine HAVE_SYS_STAT_H    @HAVE_SYS_STAT_H@
-#cmakedefine HAVE_SYS_SYSLOG_H  @HAVE_SYS_SYSLOG_H@
-#cmakedefine HAVE_SYS_LINKER_H  @HAVE_SYS_LINKER_H@
-#cmakedefine HAVE_SYS_SYSCTL_H  @HAVE_SYS_SYSCTL_H@
-#cmakedefine HAVE_LINUX_TYPES_H @HAVE_LINUX_TYPES_H@
-#cmakedefine HAVE_LINUX_SOCKIOS_H @HAVE_LINUX_SOCKIOS_H@
+#cmakedefine HAVE_LIBRESOLV                             @HAVE_LIBRESOLV@
+#cmakedefine HAVE_HSTRERROR                             @HAVE_HSTRERROR@
+#cmakedefine HAVE_SYS_CDEFS_H                           @HAVE_SYS_CDEFS_H@
+#cmakedefine HAVE_SYS_PARAM_H                           @HAVE_SYS_PARAM_H@
+#cmakedefine HAVE_SYS_UTSNAME_H                         @HAVE_SYS_UTSNAME_H@
+#cmakedefine HAVE_SYS_ERRNO_H                           @HAVE_SYS_ERRNO_H@
+#cmakedefine HAVE_SYS_WAIT_H                            @HAVE_SYS_WAIT_H@
+#cmakedefine HAVE_SYS_SIGNAL_H                          @HAVE_SYS_SIGNAL_H@
+#cmakedefine HAVE_SYS_TIME_H                            @HAVE_SYS_TIME_H@
+#cmakedefine HAVE_SYS_UIO_H                             @HAVE_SYS_UIO_H@
+#cmakedefine HAVE_SYS_IOCTL_H                           @HAVE_SYS_IOCTL_H@
+#cmakedefine HAVE_SYS_SELECT_H                          @HAVE_SYS_SELECT_H@
+#cmakedefine HAVE_SYS_SOCKET_H                          @HAVE_SYS_SOCKET_H@
+#cmakedefine HAVE_SYS_SOCKIO_H                          @HAVE_SYS_SOCKIO_H@
+#cmakedefine HAVE_SYS_UN_H                              @HAVE_SYS_UN_H@
+#cmakedefine HAVE_SYS_MOUNT_H                           @HAVE_SYS_MOUNT_H@
+#cmakedefine HAVE_SYS_RESOURCE_H                        @HAVE_SYS_RESOURCE_H@
+#cmakedefine HAVE_SYS_STAT_H                            @HAVE_SYS_STAT_H@
+#cmakedefine HAVE_SYS_SYSLOG_H                          @HAVE_SYS_SYSLOG_H@
+#cmakedefine HAVE_SYS_LINKER_H                          @HAVE_SYS_LINKER_H@
+#cmakedefine HAVE_SYS_SYSCTL_H                          @HAVE_SYS_SYSCTL_H@
+#cmakedefine HAVE_LINUX_TYPES_H                         @HAVE_LINUX_TYPES_H@
+#cmakedefine HAVE_LINUX_SOCKIOS_H                       @HAVE_LINUX_SOCKIOS_H@
 
-#cmakedefine HAVE_STRUCT_IOVEC      @HAVE_STRUCT_IOVEC@
-#cmakedefine HAVE_STRUCT_MSGHDR     @HAVE_STRUCT_MSGHDR@
-#cmakedefine HAVE_STRUCT_CMSGHDR    @HAVE_STRUCT_CMSGHDR@
-#cmakedefine HAVE_DECL_AF_INET      @HAVE_DECL_AF_INET@
-#cmakedefine HAVE_DECL_AF_INET6     @HAVE_DECL_AF_INET6@
-#cmakedefine HAVE_DECL_SOCK_STREAM  @HAVE_DECL_SOCK_STREAM@
-#cmakedefine HAVE_DECL_SOCK_DGRAM   @HAVE_DECL_SOCK_DGRAM@
-#cmakedefine HAVE_DECL_SOCK_RAW     @HAVE_DECL_SOCK_RAW@
+#cmakedefine HAVE_STRUCT_IOVEC                          @HAVE_STRUCT_IOVEC@
+#cmakedefine HAVE_STRUCT_MSGHDR                         @HAVE_STRUCT_MSGHDR@
+#cmakedefine HAVE_STRUCT_CMSGHDR                        @HAVE_STRUCT_CMSGHDR@
+#cmakedefine HAVE_DECL_AF_INET                          @HAVE_DECL_AF_INET@
+#cmakedefine HAVE_DECL_AF_INET6                         @HAVE_DECL_AF_INET6@
+#cmakedefine HAVE_DECL_SOCK_STREAM                      @HAVE_DECL_SOCK_STREAM@
+#cmakedefine HAVE_DECL_SOCK_DGRAM                       @HAVE_DECL_SOCK_DGRAM@
+#cmakedefine HAVE_DECL_SOCK_RAW                         @HAVE_DECL_SOCK_RAW@
 
-#cmakedefine HAVE_STRUCT_MSGHDR_MSG_CONTROL @HAVE_STRUCT_MSGHDR_MSG_CONTROL@
+#cmakedefine HAVE_STRUCT_MSGHDR_MSG_CONTROL             @HAVE_STRUCT_MSGHDR_MSG_CONTROL@
 
-#cmakedefine HAVE_STRUCT_MSGHDR_MSG_CONTROL     @HAVE_STRUCT_MSGHDR_MSG_CONTROL@
-#cmakedefine HAVE_STRUCT_MSGHDR_MSG_IOV         @HAVE_STRUCT_MSGHDR_MSG_IOV@
-#cmakedefine HAVE_STRUCT_MSGHDR_MSG_NAME        @HAVE_STRUCT_MSGHDR_MSG_NAME@
-#cmakedefine HAVE_STRUCT_MSGHDR_MSG_NAMELEN     @HAVE_STRUCT_MSGHDR_MSG_NAMELEN@
-#cmakedefine HAVE_STRUCT_SOCKADDR_SA_LEN        @HAVE_STRUCT_SOCKADDR_SA_LEN@
+#cmakedefine HAVE_STRUCT_MSGHDR_MSG_CONTROL             @HAVE_STRUCT_MSGHDR_MSG_CONTROL@
+#cmakedefine HAVE_STRUCT_MSGHDR_MSG_IOV                 @HAVE_STRUCT_MSGHDR_MSG_IOV@
+#cmakedefine HAVE_STRUCT_MSGHDR_MSG_NAME                @HAVE_STRUCT_MSGHDR_MSG_NAME@
+#cmakedefine HAVE_STRUCT_MSGHDR_MSG_NAMELEN             @HAVE_STRUCT_MSGHDR_MSG_NAMELEN@
+#cmakedefine HAVE_STRUCT_SOCKADDR_SA_LEN                @HAVE_STRUCT_SOCKADDR_SA_LEN@
 /* #cmakedefine HAVE_STRUCT_SOCKADDR_STORAGE_SS_LEN    @HAVE_STRUCT_SOCKADDR_STORAGE_SS_LEN@   */         /* Unused */
 /* #cmakedefine HAVE_SOCKADDR_UN_SUN_LEN           @HAVE_SOCKADDR_UN_SUN_LEN@                  */         /* Unused */
 
-#cmakedefine HAVE_ETHERNET_H        @HAVE_ETHERNET_H@
-#cmakedefine HAVE_SYS_ETHERNET_H    @HAVE_SYS_ETHERNET_H@
-#cmakedefine HAVE_NET_IF_H          @HAVE_NET_IF_H@
-#cmakedefine HAVE_NET_IF_ARP_H      @HAVE_NET_IF_ARP_H@
-#cmakedefine HAVE_NET_IF_DL_H       @HAVE_NET_IF_DL_H@
-#cmakedefine HAVE_NET_IF_ETHER_H    @HAVE_NET_IF_ETHER_H@
-#cmakedefine HAVE_NET_IF_MEDIA_H    @HAVE_NET_IF_MEDIA_H@
-#cmakedefine HAVE_NET_IF_VAR_H      @HAVE_NET_IF_VAR_H@
-#cmakedefine HAVE_NET_IF_TYPES_H    @HAVE_NET_IF_TYPES_H@
-#cmakedefine HAVE_NET_ROUTE_H       @HAVE_NET_ROUTE_H@
-#cmakedefine HAVE_IFADDRS_H         @HAVE_IFADDRS_H@
-#cmakedefine HAVE_STROPTS_H         @HAVE_STROPTS_H@
-#cmakedefine HAVE_LINUX_ETHTOOL_H   @HAVE_LINUX_ETHTOOL_H@
+#cmakedefine HAVE_ETHERNET_H                            @HAVE_ETHERNET_H@
+#cmakedefine HAVE_SYS_ETHERNET_H                        @HAVE_SYS_ETHERNET_H@
+#cmakedefine HAVE_NET_IF_H                              @HAVE_NET_IF_H@
+#cmakedefine HAVE_NET_IF_ARP_H                          @HAVE_NET_IF_ARP_H@
+#cmakedefine HAVE_NET_IF_DL_H                           @HAVE_NET_IF_DL_H@
+#cmakedefine HAVE_NET_IF_ETHER_H                        @HAVE_NET_IF_ETHER_H@
+#cmakedefine HAVE_NET_IF_MEDIA_H                        @HAVE_NET_IF_MEDIA_H@
+#cmakedefine HAVE_NET_IF_VAR_H                          @HAVE_NET_IF_VAR_H@
+#cmakedefine HAVE_NET_IF_TYPES_H                        @HAVE_NET_IF_TYPES_H@
+#cmakedefine HAVE_NET_ROUTE_H                           @HAVE_NET_ROUTE_H@
+#cmakedefine HAVE_IFADDRS_H                             @HAVE_IFADDRS_H@
+#cmakedefine HAVE_STROPTS_H                             @HAVE_STROPTS_H@
+#cmakedefine HAVE_LINUX_ETHTOOL_H                       @HAVE_LINUX_ETHTOOL_H@
 /* #cmakedefine HAVE_LINUX_IF_TUN_H    @HAVE_LINUX_IF_TUN_H@   */                                          /* Unused */
 
-#cmakedefine HAVE_LINUX_NETLINK_H   @HAVE_LINUX_NETLINK_H@
-#cmakedefine HAVE_LINUX_RTNETLINK_H @HAVE_LINUX_RTNETLINK_H@
+#cmakedefine HAVE_LINUX_NETLINK_H                       @HAVE_LINUX_NETLINK_H@
+#cmakedefine HAVE_LINUX_RTNETLINK_H                     @HAVE_LINUX_RTNETLINK_H@
 #cmakedefine HAVE_NETLINK_SOCKETS
 
 #cmakedefine HAVE_NETLINK_SOCKET_ATTRIBUTE_RTA_TABLE    @HAVE_NETLINK_SOCKET_ATTRIBUTE_RTA_TABLE@
@@ -148,38 +136,38 @@ found in the XORP LICENSE.gpl file.
 #cmakedefine HAVE_STRUCT_IFREQ_IFR_HWADDR               @HAVE_STRUCT_IFREQ_IFR_HWADDR@
 #cmakedefine HAVE_STRUCT_IFREQ_IFR_IFINDEX              @HAVE_STRUCT_IFREQ_IFR_IFINDEX@
 
-#cmakedefine HAVE_ETHER_ATON        @HAVE_ETHER_ATON@
-#cmakedefine HAVE_ETHER_ATON_R      @HAVE_ETHER_ATON_R@
-#cmakedefine HAVE_ETHER_NTOA        @HAVE_ETHER_NTOA@
-#cmakedefine HAVE_NTOA_R            @HAVE_NTOA_R@
-#cmakedefine HAVE_GETADDRINFO       @HAVE_GETADDRINFO@
-#cmakedefine HAVE_GETIFADDRS        @HAVE_GETIFADDRS@
-#cmakedefine HAVE_GETNAMEINFO       @HAVE_GETNAMEINFO@
-#cmakedefine HAVE_IF_INDEXTONAME    @HAVE_IF_INDEXTONAME@
-#cmakedefine HAVE_IF_NAMETOINDEX    @HAVE_IF_NAMETOINDEX@
-#cmakedefine HAVE_INET_NTOP         @HAVE_INET_NTOP@
-#cmakedefine HAVE_INET_PTON         @HAVE_INET_PTON@
+#cmakedefine HAVE_ETHER_ATON                            @HAVE_ETHER_ATON@
+#cmakedefine HAVE_ETHER_ATON_R                          @HAVE_ETHER_ATON_R@
+#cmakedefine HAVE_ETHER_NTOA                            @HAVE_ETHER_NTOA@
+#cmakedefine HAVE_NTOA_R                                @HAVE_NTOA_R@
+#cmakedefine HAVE_GETADDRINFO                           @HAVE_GETADDRINFO@
+#cmakedefine HAVE_GETIFADDRS                            @HAVE_GETIFADDRS@
+#cmakedefine HAVE_GETNAMEINFO                           @HAVE_GETNAMEINFO@
+#cmakedefine HAVE_IF_INDEXTONAME                        @HAVE_IF_INDEXTONAME@
+#cmakedefine HAVE_IF_NAMETOINDEX                        @HAVE_IF_NAMETOINDEX@
+#cmakedefine HAVE_INET_NTOP                             @HAVE_INET_NTOP@
+#cmakedefine HAVE_INET_PTON                             @HAVE_INET_PTON@
 #cmakedefine HAVE_STRUCT_ETHER_ADDR
 #cmakedefine HAVE_IOCTL_SIOCGIFCONF
 
 
-#cmakedefine HAVE_IPV6
+#cmakedefine HAVE_IPV6                                  @HAVE_IPV6@
 
-#cmakedefine HAVE_NETINET_IN_H          @HAVE_NETINET_IN_H@
-#cmakedefine HAVE_NETINET_IN_SYSTM_H    @HAVE_NETINET_IN_SYSTM_H@
-#cmakedefine HAVE_NETINET_IN_VAR_H      @HAVE_NETINET_IN_VAR_H@
-#cmakedefine HAVE_NETINET_IP_H          @HAVE_NETINET_IP_H@
-#cmakedefine HAVE_NETINET_TCP_H         @HAVE_NETINET_TCP_H@
+#cmakedefine HAVE_NETINET_IN_H                          @HAVE_NETINET_IN_H@
+#cmakedefine HAVE_NETINET_IN_SYSTM_H                    @HAVE_NETINET_IN_SYSTM_H@
+#cmakedefine HAVE_NETINET_IN_VAR_H                      @HAVE_NETINET_IN_VAR_H@
+#cmakedefine HAVE_NETINET_IP_H                          @HAVE_NETINET_IP_H@
+#cmakedefine HAVE_NETINET_TCP_H                         @HAVE_NETINET_TCP_H@
 
-#cmakedefine HAVE_NETINET_IGMP_H        @HAVE_NETINET_IGMP_H@
-#cmakedefine HAVE_NETINET_ETHER_H       @HAVE_NETINET_ETHER_H@
+#cmakedefine HAVE_NETINET_IGMP_H                        @HAVE_NETINET_IGMP_H@
+#cmakedefine HAVE_NETINET_ETHER_H                       @HAVE_NETINET_ETHER_H@
 
-#cmakedefine HAVE_STRUCT_IP_MREQN       @HAVE_STRUCT_IP_MREQN@
-#cmakedefine HAVE_NETINET_IF_ETHER_H    @HAVE_NETINET_IF_ETHER_H@
-#cmakedefine HAVE_INET_ND_H             @HAVE_INET_ND_H@
-#cmakedefine HAVE_INET_IP_H             @HAVE_INET_IP_H@
-#cmakedefine HAVE_ARPA_INET_H           @HAVE_ARPA_INET_H@
-#cmakedefine HAVE_ARPA_TELNET_H         @HAVE_ARPA_TELNET_H@
+#cmakedefine HAVE_STRUCT_IP_MREQN                       @HAVE_STRUCT_IP_MREQN@
+#cmakedefine HAVE_NETINET_IF_ETHER_H                    @HAVE_NETINET_IF_ETHER_H@
+#cmakedefine HAVE_INET_ND_H                             @HAVE_INET_ND_H@
+#cmakedefine HAVE_INET_IP_H                             @HAVE_INET_IP_H@
+#cmakedefine HAVE_ARPA_INET_H                           @HAVE_ARPA_INET_H@
+#cmakedefine HAVE_ARPA_TELNET_H                         @HAVE_ARPA_TELNET_H@
 
 
 #cmakedefine L_WARNING
@@ -195,102 +183,105 @@ found in the XORP LICENSE.gpl file.
 #cmakedefine XORP_USE_USTL
 #cmakedefine XORP_DISABLE_FIREWALL
 #cmakedefine XORP_DISABLE_PROFILE
-/*
-// unused
-// #define HAVE_DECL_IP_MULTICAST_IF 1
-// #define HAVE_DECL_IP_MULTICAST_TTL 1
-// #define HAVE_DECL_IP_MULTICAST_LOOP 1
-// #define HAVE_DECL_IP_ADD_MEMBERSHIP 1
-// #define HAVE_DECL_IP_DROP_MEMBERSHIP 1
-*/
-#cmakedefine HAVE_IPV4_MULTICAST
-#cmakedefine HAVE_MULTI_MCAST_TABLES
-/* #define HAVE_IPV4_MULTICAST
-  #define USE_MULT_MCAST_TABLES
-  */
 
 
+#cmakedefine HAVE_IPV4_MULTICAST                        @HAVE_IPV4_MULTICAST@
+#cmakedefine USE_MULT_MCAST_TABLES                      @USE_MULT_MCAST_TABLES@
+#cmakedefine HAVE_DECL_IP_MULTICAST_IF                  @HAVE_DECL_IP_MULTICAST_IF@
+#cmakedefine HAVE_DECL_IP_MULTICAST_TTL                 @HAVE_DECL_IP_MULTICAST_TTL@
+#cmakedefine HAVE_DECL_IP_MULTICAST_LOOP                @HAVE_DECL_IP_MULTICAST_LOOP@
+#cmakedefine HAVE_DECL_IP_ADD_MEMBERSHIP                @HAVE_DECL_IP_ADD_MEMBERSHIP@
+#cmakedefine HAVE_DECL_IP_DROP_MEMBERSHIP               @HAVE_DECL_IP_DROP_MEMBERSHIP@
 /* #undef HAVE_SYSCTL_IPCTL_FORWARDING */  /* @todo: Missing for Linux in glibc */
+
 /* #undef HAVE_DECL___KAME__ */
+#cmakedefine IPV6_STACK_KAME                            @IPV6_STACK_KAME@
 /* #undef HAVE_DECL_INET6_OPT_INIT */
-/* #undef HAVE_STRUCT_SOCKADDR_IN6_SIN6_LEN */
-#define HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID 1
-#define HAVE_NETINET_IP6_H 1
-#define HAVE_NETINET_ICMP6_H 1
-#define HAVE_STRUCT_MLD_HDR 1
-/* #undef HAVE_NETINET6_IN6_VAR_H */
-/* #undef HAVE_NETINET6_ND6_H */
-/* #undef HAVE_NETINET6_ND6_H */
+#cmakedefine HAVE_RFC3542                               @HAVE_RFC3542@
+#cmakedefine HAVE_STRUCT_SOCKADDR_IN6_SIN6_LEN          @HAVE_STRUCT_SOCKADDR_IN6_SIN6_LEN@
+#cmakedefine HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID     @HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID@
+
+#cmakedefine HAVE_NETINET_IP6_H                         @HAVE_NETINET_IP6_H@
+#cmakedefine HAVE_NETINET_ICMP6_H                       @HAVE_NETINET_ICMP6_H@
+#cmakedefine HAVE_STRUCT_MLD_HDR                        @HAVE_STRUCT_MLD_HDR@
+
+#cmakedefine HAVE_NETINET6_IN6_VAR_H                    @HAVE_NETINET6_IN6_VAR_H@
+#cmakedefine HAVE_NETINET6_ND6_H                        @HAVE_NETINET6_ND6_H_C@
+#cmakedefine HAVE_BROKEN_CXX_NETINET6_ND6_H             @HAVE_BROKEN_CXX_NETINET6_ND6_H@
+#cmakedefine HAVE_NETINET6_IN6_VAR_H                    @HAVE_NETINET6_IN6_VAR_H@
+/* Skip sysctl checks in CMake */
 /* #undef HAVE_SYSCTL_IPV6CTL_FORWARDING */
 /* #undef HAVE_SYSCTL_IPV6CTL_ACCEPT_RTADV */
-#define HAVE_DECL_IPV6_MULTICAST_IF 1
-#define HAVE_DECL_IPV6_MULTICAST_LOOP 1
-#define HAVE_IPV6_MULTICAST
-#define HAVE_DECL_FPCLASSIFY 1
-/* #undef HAVE_NETINET_IP_MROUTE_H */
-/* #undef HAVE_NET_IP_MROUTE_IP_MROUTE_H */
-#define HAVE_LINUX_MROUTE_H 1
-/* #undef HAVE_STRUCT_MFCCTL2 */
-/* #undef HAVE_STRUCT_MFCCTL2_MFCC_FLAGS */
-/* #undef HAVE_STRUCT_MFCCTL2_MFCC_RP */
-/* #undef HAVE_NETINET_PIM_H */
-/* #undef HAVE_STRUCT_PIM */
-/* #undef HAVE_STRUCT_PIM_PIM_VT */
-#define HAVE_IPV4_MULTICAST_ROUTING
-/* #undef HAVE_NETINET6_IP6_MROUTE_H */
-#define HAVE_LINUX_MROUTE6_H 1
-/* #undef HAVE_DECL_INET6_OPTION_SPACE */
-/* #undef HAVE_STRUCT_MF6CCTL2 */
-/* #undef HAVE_STRUCT_MF6CCTL2_MF6CC_FLAGS */
-/* #undef HAVE_STRUCT_MF6CCTL2_MF6CC_RP */
-#define HAVE_IPV6_MULTICAST_ROUTING
-#define HAVE_STRUCT_MIF6CTL_VIFC_THRESHOLD 1
-/* #undef HAVE_NETINET_IP_COMPAT_H */
-/* #undef HAVE_NETINET_IP_FIL_H */
-/* #undef HAVE_NETINET_IP_FW_H */
-/* #undef HAVE_NET_PFVAR_H */
-/* #undef HAVE_LINUX_NETFILTER_IPV4_IP_TABLES_H */
-/* #undef HAVE_LINUX_NETFILTER_IPV6_IP6_TABLES_H */
-/* #undef HAVE_NET_IF_VLANVAR_H */
-/* #undef HAVE_NET_IF_VLAN_VAR_H */
-/* #undef HAVE_NET_VLAN_IF_VLAN_VAR_H */
-#define HAVE_LINUX_IF_VLAN_H 1
-#define HAVE_VLAN_LINUX
-#define HAVE_DECL_GET_VLAN_REALDEV_NAME_CMD 1
-#define HAVE_DECL_GET_VLAN_VID_CMD 1
-/* #undef HAVE_PCRE_H */
-/* #undef HAVE_PCREPOSIX_H */
-/* #undef HAVE_LIBPCRE */
-/* #undef HAVE_LIBPCREPOSIX */
-#define HAVE_OPENSSL_MD5_H 1
-/* zagura: 2023-05-16
-// #define HAVE_LIBCRYPTO 1
+#cmakedefine HAVE_DECL_IPV6_MULTICAST_IF                @HAVE_DECL_IPV6_MULTICAST_IF@
+#cmakedefine HAVE_DECL_IPV6_MULTICAST_LOOP              @HAVE_DECL_IPV6_MULTICAST_LOOP@
+#cmakedefine HAVE_IPV6_MULTICAST                        @HAVE_IPV6_MULTICAST@
+
+#cmakedefine HAVE_DECL_FPCLASSIFY                       @HAVE_DECL_FPCLASSIFY@
+
+/* IPv4 multicast routing */
+#cmakedefine HAVE_NETINET_IP_MROUTE_H                   @HAVE_NETINET_IP_MROUTE_H@
+#cmakedefine HAVE_NET_IP_MROUTE_IP_MROUTE_H             @HAVE_NET_IP_MROUTE_IP_MROUTE_H@
+#cmakedefine HAVE_LINUX_MROUTE_H                        @HAVE_LINUX_MROUTE_H@
+#cmakedefine HAVE_STRUCT_MFCCTL2                        @HAVE_STRUCT_MFCCTL2@
+#cmakedefine HAVE_STRUCT_MFCCTL                         @HAVE_STRUCT_MFCCTL@
+#cmakedefine HAVE_STRUCT_MFCCTL2_MFCC_FLAGS             @HAVE_STRUCT_MFCCTL2_MFCC_FLAGS@
+#cmakedefine HAVE_STRUCT_MFCCTL2_MFCC_RP                @HAVE_STRUCT_MFCCTL2_MFCC_RP@
+#cmakedefine HAVE_NETINET_PIM_H                         @HAVE_NETINET_PIM_H@
+#cmakedefine HAVE_STRUCT_PIM                            @HAVE_STRUCT_PIM@
+#cmakedefine HAVE_STRUCT_PIM_PIM_VT                     @HAVE_STRUCT_PIM_PIM_VT@
+#cmakedefine HAVE_IPV4_MULTICAST_ROUTING                @HAVE_IPV4_MULTICAST_ROUTING@
+
+/* IPv6 multicast routing */
+#cmakedefine HAVE_NETINET6_IP6_MROUTE_H                 @HAVE_NETINET6_IP6_MROUTE_H@
+#cmakedefine HAVE_LINUX_MROUTE6_H                       @HAVE_LINUX_MROUTE6_H@
+#cmakedefine HAVE_DECL_INET6_OPTION_SPACE               @HAVE_DECL_INET6_OPTION_SPACE@
+#cmakedefine HAVE_STRUCT_MF6CCTL2                       @HAVE_STRUCT_MF6CCTL2@
+#cmakedefine HAVE_STRUCT_MF6CCTL2_MF6CC_FLAGS           @HAVE_STRUCT_MF6CCTL2_MF6CC_FLAGS@
+#cmakedefine HAVE_STRUCT_MF6CCTL2_MF6CC_RP              @HAVE_STRUCT_MF6CCTL2_MF6CC_RP@
+#cmakedefine HAVE_IPV6_MULTICAST_ROUTING                @HAVE_IPV6_MULTICAST_ROUTING@
+#cmakedefine HAVE_STRUCT_MIF6CTL_VIFC_THRESHOLD         @HAVE_STRUCT_MIF6CTL_VIFC_THRESHOLD@
+
+/* Firewalls */
+#cmakedefine HAVE_NETINET_IP_COMPAT_H                   @HAVE_NETINET_IP_COMPAT_H@
+#cmakedefine HAVE_NETINET_IP_FIL_H                      @HAVE_NETINET_IP_FIL_H@
+#cmakedefine HAVE_NETINET_IP_FW_H                       @HAVE_NETINET_IP_FW_H@
+#cmakedefine HAVE_NET_PFVAR_H                           @HAVE_NET_PFVAR_H@
+#cmakedefine HAVE_LINUX_NETFILTER_IPV4_IP_TABLES_H      @HAVE_LINUX_NETFILTER_IPV4_IP_TABLES_H@
+#cmakedefine HAVE_LINUX_NETFILTER_IPV6_IP6_TABLES_H     @HAVE_LINUX_NETFILTER_IPV6_IP6_TABLES_H@
+#cmakedefine HAVE_FIREWALL_NETFILTER                    @HAVE_FIREWALL_NETFILTER@
+
+/* Vlan */
+#cmakedefine HAVE_NET_IF_VLANVAR_H                      @HAVE_NET_IF_VLANVAR_H@
+#cmakedefine HAVE_NET_IF_VLAN_VAR_H                     @HAVE_NET_IF_VLAN_VAR_H@
+#cmakedefine HAVE_NET_VLAN_IF_VLAN_VAR_H                @HAVE_NET_VLAN_IF_VLAN_VAR_H@
+#cmakedefine HAVE_LINUX_IF_VLAN_H                       @HAVE_LINUX_IF_VLAN_H@
+#cmakedefine HAVE_VLAN_LINUX
+#cmakedefine HAVE_VLAN_BSD
+/* zagura: 2023-09-08 Skip checks for old vlan definitions
+#define GET_VLAN_REALDEV_NAME_CMD 8
+#define GET_VLAN_VID_CMD 9
 */
-#define HAVE_MD5_INIT 1
-#define HAVE_DLFCN_H 1
-#define HAVE_LIBDL 1
-#define HAVE_DLOPEN 1
-/* zagura: 2023-05-16
-//#define HAVE_PCAP_H 1
-//#define HAVE_LIBPCAP 1
-*/
-#define HAVE_PCAP_SENDPACKET 1
-/* zagura: 2023-05-16
-//#define HAVE_PCAP_BPF_H 1
-//#define HAVE_LIBCURSES 1
-*/
-/* #undef HAVE_LIBPDCURSES */
-/* zagura: 2023-05-16
-//#define HAVE_LIBNCURSES 1
-// #define XORP_USE_FEA_DUMMY
-//#define XORP_USE_XORPSH
-*/
-#cmakedefine HAVE_LIBCRYPTO   @HAVE_LIBCRYPTO@
-#cmakedefine HAVE_PCAP_H      @HAVE_PCAP_H@
-#cmakedefine HAVE_PCAP_BPF_H  @HAVE_PCAP_BPF_H@
-#cmakedefine HAVE_LIBPCAP     @HAVE_LIBPCAP@
-#cmakedefine HAVE_LIBCURSES   @HAVE_LIBCURSES@
-#cmakedefine HAVE_LIBNCURSES  @HAVE_LIBNCURSES@
-#cmakedefine HAVE_LIBPDCURSE  @HAVE_LIBPDCURSES@
+
+#cmakedefine HAVE_PCRE_H                                @HAVE_PCRE_H@
+#cmakedefine HAVE_PCREPOSIX_H                           @HAVE_PCREPOSIX_H@
+#cmakedefine HAVE_LIBPCRE                               @HAVE_LIBPCRE@
+#cmakedefine HAVE_LIBPCREPOSIX                          @HAVE_LIBPCREPOSIX@
+
+#cmakedefine HAVE_OPENSSL_MD5_H                         @HAVE_OPENSSL_MD5_H@
+#cmakedefine HAVE_LIBCRYPTO                             @HAVE_LIBCRYPTO@
+#cmakedefine HAVE_MD5_INIT                              @HAVE_MD5_INIT@
+
+#cmakedefine HAVE_DLFCN_H                               @HAVE_DLFCN_H@
+#cmakedefine HAVE_LIBDL                                 @HAVE_LIBDL@
+#cmakedefine HAVE_DLOPEN                                @HAVE_DLOPEN@
+
+#cmakedefine HAVE_PCAP_H                                @HAVE_PCAP_H@
+#cmakedefine HAVE_LIBPCAP                               @HAVE_LIBPCAP@
+#cmakedefine HAVE_PCAP_SENDPACKET                       @HAVE_PCAP_SENDPACKET@
+#cmakedefine HAVE_PCAP_BPF_H                            @HAVE_PCAP_BPF_H@
+
+#cmakedefine HAVE_LIBCURSES                             @HAVE_LIBCURSES@
+#cmakedefine HAVE_LIBPDCURSES                           @HAVE_LIBPDCURSES@
+#cmakedefine HAVE_LIBNCURSES                            @HAVE_LIBNCURSES@
+
 #cmakedefine XORP_USE_FEA_DUMMY
-#cmakedefine XORP_USE_XORPSH
