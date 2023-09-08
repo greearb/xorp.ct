@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.15)
 project(xorp VERSION 1.8.7)
 include(CheckSymbolExists)
 include(CheckIncludeFiles)
-# include(CheckIncludeFile)
+
 include(CheckFunctionExists)
 include(CheckLibraryExists)
 include(CheckStructHasMember)
@@ -181,9 +181,9 @@ if(LEX_HACK)
     add_definitions(-DNEED_LEX_H_HACK)
 endif()
 
-if(ENABLE_IPV6)
-    set(HAVE_IPV6 ON)
-endif()
+# if(ENABLE_IPV6)
+#     set(HAVE_IPV6 1)
+# endif()
 
 # NOTE: For GNU STL only
 if(DEBUG_STL)
@@ -223,7 +223,7 @@ check_include_file("math.h"         HAVE_MATH_H)
 check_include_file("memory.h"       HAVE_MEMORY_H)
 check_function_exists(strftime      HAVE_STRFTIME)
 check_function_exists(strlcpy       HAVE_STRLCPY)
-check_function_exists(strlcap       HAVE_STRLCAT)
+check_function_exists(strlcat       HAVE_STRLCAT)
 check_symbol_exists(va_copy "stdarg.h" HAVE_VA_COPY)
 check_include_file("sys/types.h"    HAVE_SYS_TYPES_H)
 check_include_file("fcntl.h"        HAVE_FCNTL_H)
@@ -414,10 +414,10 @@ int main() {
 " HAVE_STRUCT_SOCKADDR_IN_SIN_LEN)
 
 # MULTICAST
-set(HAVE_IPV4_MULTICAST OFF)
-if (${HAVE_SYS_TYPES_H} EQUAL 1
-    AND ${HAVE_SYS_SOCKET_H} EQUAL 1
-    AND ${HAVE_NETINET_IN_H} EQUAL 1)
+# set(HAVE_IPV4_MULTICAST OFF)
+if (HAVE_SYS_TYPES_H EQUAL 1
+    AND HAVE_SYS_SOCKET_H EQUAL 1
+    AND HAVE_NETINET_IN_H EQUAL 1)
     # check_c_source_compiles("
     # #include <sys/types.h>
     # #include <sys/socket.h>
@@ -439,19 +439,26 @@ if (${HAVE_SYS_TYPES_H} EQUAL 1
     check_symbol_exists(IP_ADD_MEMBERSHIP "netinet/in.h" HAVE_DECL_IP_ADD_MEMBERSHIP)
     check_symbol_exists(IP_DROP_MEMBERSHIP "netinet/in.h" HAVE_DECL_IP_DROP_MEMBERSHIP)
     #check_symbol_exists(SIOCGIFCONF "sys/ioctl.h" HAVE_IOCTL_SIOCGIFCONF)
-    if (${HAVE_DECL_IP_MULTICAST_IF} AND ${HAVE_DECL_IP_MULTICAST_TTL} AND ${HAVE_DECL_IP_MULTICAST_LOOP}
-        AND ${HAVE_DECL_IP_ADD_MEMBERSHIP} AND ${HAVE_DECL_IP_DROP_MEMBERSHIP})
-        set(HAVE_IPV4_MULTICAST ON)
+    if (HAVE_DECL_IP_MULTICAST_IF AND HAVE_DECL_IP_MULTICAST_TTL AND HAVE_DECL_IP_MULTICAST_LOOP
+        AND HAVE_DECL_IP_ADD_MEMBERSHIP AND HAVE_DECL_IP_DROP_MEMBERSHIP)
+        set(HAVE_IPV4_MULTICAST 1)
         message(STATUS "Set HAVE_IPV4_MULTICAST")
     endif()
-    if(HAVE_IPV4_MULTICAST AND HOST_OS_LINUX)
-        set(USE_MULT_MCAST_TABLES ON)
+    if(HAVE_IPV4_MULTICAST EQUAL 1 AND HOST_OS_LINUX)
+        set(USE_MULT_MCAST_TABLES 1)
         message(STATUS "Enabling MULT_MCAST_TABLES logic since we are compiling for Linux.")
     else()
         message(STATUS "Disabling MULT_MCAST_TABLES, host_os: ${HOST_OS}")
     endif()
 endif()
+###
+# skip sysctl checking
+#     conf.CheckSysctl('IPCTL_FORWARDING', oid='CTL_NET, AF_INET, IPPROTO_IP, IPCTL_FORWARDING', includes='#include <sys/socket.h>\n#include <netinet/in.h>')
+#
 
+
+######
+# logs
 if(ENABLE_WARNINGLOG)
     set(L_WARNING ON)
 endif()
@@ -480,40 +487,227 @@ if(ENABLE_FATALLOG)
     set(L_FATAL ON)
 endif()
 
+##########
+# v6 stack
+if (ENABLE_IPV6
+    AND HAVE_DECL_AF_INET6 EQUAL 1
+    AND HAVE_DECL_SOCK_STREAM EQUAL 1)
+    set(HAVE_IPV6 1)
+endif()
 
+check_symbol_exists(__KAME__        "netinet/in.h;netinet/ip6.h;netinet6/ip6.h" IPV6_STACK_KAME)
+check_symbol_exists(inet6_opt_init  "netinet/in.h;netinet/ip6.h" HAVE_RFC3542)
+
+check_struct_has_member("struct sockaddr_in6"  sin6_len  "netinet/in.h;sys/socket.h" HAVE_STRUCT_SOCKADDR_IN6_SIN6_LEN)
+check_struct_has_member("struct sockaddr_in6"  sin6_scope_id "netinet/in.h;sys/socket.h" HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID)
+
+check_include_file("netinet/ip6.h"              HAVE_NETINET_IP6_H)
+check_include_file("netinet/icmp6.h"            HAVE_NETINET_ICMP6_H)
+check_struct_has_member("struct mld_hdr"       mld_addr  "netinet/icmp6.h"          HAVE_STRUCT_MLD_HDR)
+
+check_include_file("netinet6/in6_var.h"         HAVE_NETINET6_IN6_VAR_H)
+check_include_file("netinet/ip.h"               HAVE_NETINET_IP_H)
+check_include_file("netinet/tcp.h"              HAVE_NETINET_TCP_H)
+
+check_include_files("netinet6/nd6.h"             HAVE_NETINET6_ND6_H_C LANGUAGE C)
+check_include_files("netinet6/nd6.h"             HAVE_NETINET6_ND6_H_CXX LANGUAGE CXX)
+if (HAVE_NETINET6_ND6_C AND NOT HAVE_NETINET6_ND6_CXX)
+    message("netinet6/nd6.h broken for C++")
+    set(HAVE_BROKEN_CXX_NETINET6_ND6_H 1)
+endif()
+
+check_symbol_exists(IPV6_MULTICAST_IF        "netinet/in.h;sys/socket.h;sys/types.h" HAVE_DECL_IPV6_MULTICAST_IF)
+check_symbol_exists(IPV6_MULTICAST_LOOP      "netinet/in.h;sys/socket.h;sys/types.h" HAVE_DECL_IPV6_MULTICAST_LOOP)
+
+if (ENABLE_IPV6
+    AND HAVE_DECL_IPV6_MULTICAST_IF EQUAL 1
+    AND HAVE_DECL_IPV6_MULTICAST_LOOP EQUAL 1)
+        set(HAVE_IPV6_MULTICAST 1)
+endif()
+
+
+check_symbol_exists(fpclassify "math.h"         HAVE_DECL_FPCLASSIFY)
+
+##########
+# v4 mforwarding
+check_include_file("netinet/ip_mroute.h"        HAVE_NETINET_IP_MROUTE_H)
+check_include_file("net/if_var.h"               HAVE_NET_IF_VAR_H)
+check_include_file("net/ip_mroute/ip_mroute.h"  HAVE_NET_IP_MROUTE_IP_MROUTE_H)
+check_include_file("linux/mroute.h"             HAVE_LINUX_MROUTE_H)
+
+check_struct_has_member("struct mfcctl2"  mfcc_flags  "linux/mroute.h" HAVE_STRUCT_MFCCTL2)
+check_struct_has_member("struct mfcctl2"  mfcc_flags  "linux/mroute.h" HAVE_STRUCT_MFCCTL2_MFCC_FLAGS)
+check_struct_has_member("struct mfcctl2"  mfcc_rp  "linux/mroute.h" HAVE_STRUCT_MFCCTL2_MFCC_RP)
+
+
+check_include_file("netinet/pim.h"                  HAVE_NETINET_PIM_H)
+check_struct_has_member("struct pim"  pim_vt  "netinet/pim.h" HAVE_STRUCT_PIM)
+check_struct_has_member("struct pim"  pim_vt  "netinet/pim.h" HAVE_STRUCT_PIM_PIM_VT)
+
+if (HAVE_NETINET_IP_MROUTE_H EQUAL 1
+    OR HAVE_NET_IP_MROUTE_IP_MROUTE_H EQUAL 1
+    OR HAVE_LINUX_MROUTE_H EQUAL 1)
+    set(HAVE_IPV4_MULTICAST_ROUTING 1)
+endif()
+
+##########
+# v6 mforwarding
+check_include_file("netinet6/ip6_mroute.h"          HAVE_NETINET6_IP6_MROUTE_H)
+check_include_file("linux/mroute6.h"                HAVE_LINUX_MROUTE6_H)
+
+check_symbol_exists(inet6_option_space "linux/mroute6.h" HAVE_DECL_INET6_OPTION_SPACE)
+check_struct_has_member("struct mf6cctl2"  mf6cc_flags  "linux/mroute6.h" HAVE_STRUCT_MF6CCTL2)
+check_struct_has_member("struct mf6cctl2"  mf6cc_flags  "linux/mroute6.h" HAVE_STRUCT_MF6CCTL2_MF6CC_FLAGS)
+check_struct_has_member("struct mf6cctl2"  mf6cc_rp  "linux/mroute6.h" HAVE_STRUCT_MF6CCTL2_MF6CC_RP)
+
+if (ENABLE_IPV6 AND (HAVE_NETINET6_IP6_MROUTE_H EQUAL 1
+    OR HAVE_LINUX_MROUTE_H))
+    set(HAVE_IPV6_MULTICAST_ROUTING 1)
+    if (HAVE_DECL_INET6_OPTION_SPACE EQUAL 1)
+        set(HAVE_IPV6_OPTION_SPACE 1)
+    else()
+        message(WARNING
+            "inet6_option_* and inet6_opt_* are not supported on this system.
+            This might cause some problems with IPv6 multicast routing.")
+    endif()
+endif()
+check_struct_has_member("struct mif6ctl"  vifc_threshold  "linux/mroute6.h" HAVE_STRUCT_MIF6CTL_VIFC_THRESHOLD)
+
+##########
+# packet filters
+check_include_file("netinet/ip_compat.h"                HAVE_NETINET_IP_COMPAT_H)
+check_include_file("netinet/ip_fil.h"                   HAVE_NETINET_IP_FIL_H)
+check_include_file("netinet/ip_fw.h"                    HAVE_NETINET_IP_FW_H)
+check_include_file("net/pfvar.h"                        HAVE_NET_PFVAR_H)
+check_include_files("linux/netfilter_ipv4/ip_tables.h"  HAVE_LINUX_NETFILTER_IPV4_IP_TABLES_H   LANGUAGE CXX)
+check_include_files("linux/netfilter_ipv6/ip6_tables.h" HAVE_LINUX_NETFILTER_IPV6_IP6_TABLES_H  LANGUAGE CXX)
+
+if (FIREWALL)
+    if(HAVE_LINUX_NETFILTER_IPV4_IP_TABLES_H EQUAL 1
+       OR HAVE_LINUX_NETFILTER_IPV6_IP6_TABLES_H EQUAL 1)
+        set(HAVE_FIREWALL_NETFILTER 1)
+    endif()
+endif()
+
+##########
+# vlan
+check_include_file("net/if_vlanvar.h"                    HAVE_NET_IF_VLANVAR_H)
+check_include_file("net/if_vlan_var.h"                   HAVE_NET_IF_VLAN_VAR_H)
+check_include_file("net/vlan/if_vlan_var.h"              HAVE_NET_VLAN_IF_VLAN_VAR_H)
+check_include_file("linux/if_vlan.h"                     HAVE_LINUX_IF_VLAN_H)
+
+if (HAVE_LINUX_IF_VLAN_H EQUAL 1)
+    set(HAVE_VLAN_LINUX 1)
+elseif(HAVE_NET_IF_VLANVAR_H EQUAL 1
+        OR HAVE_NET_IF_VLAN_VAR_H EQUAL 1)
+    set(HAVE_VLAN_BSD 1)
+endif()
+
+##########
+# pcre posix regexp emulation
+# used by policy for regexps.
+check_include_file("pcre.h"                     HAVE_PCRE_H)
+check_include_file("pcreposix.h"                HAVE_PCREPOSIX_H)
+find_library(PCRE_LIB pcre)
+if (PCRE_LIB)
+    message(STATUS "Found pcre library")
+    set(HAVE_LIBPCRE 1)
+endif()
+
+find_library(PCREPOSIX_LIB pcre)
+if (PCREPOSIX_LIB)
+    message(STATUS "Found pcre posix library")
+    set(HAVE_LIBPCREPOSIX 1)
+endif()
+
+check_include_file("openssl/md5.h"                HAVE_OPENSSL_MD5_H)
+if (NOT HAVE_OPENSSL_MD5_H)
+    message(SEND_ERROR "Cannot find required openssl/md5.h.
+    On Fedora/RedHat:  yum install openssl-devel
+    On Ubuntu:  apt-get install libssl-dev
+    After install, clear the cmake cache before re-building.")
+endif()
 
 # configure_file(config.h.in ${CMAKE_CURRENT_LIST_DIR}/xorp_config.h)
-find_library(CRYPTO_LIB crypto)
+find_library(CRYPTO_LIB crypto REQUIRED)
 if (CRYPTO_LIB)
     message(STATUS "Found crypto library")
     set(HAVE_LIBCRYPTO 1)
+    set(CMAKE_REQUIRED_LIBRARIES ${CRYPTO_LIB})
+    check_function_exists(MD5_Init       HAVE_MD5_INIT)
+else()
+    message(FATAL_ERROR " Cannot find required crypto library.
+            clear the configure cache before re-building.")
 endif()
 
+find_library(DL_LIB dl)
+if (DL_LIB)
+    message(STATUS "Found dl library")
+    set(HAVE_LIBDL 1)
+    set(CMAKE_REQUIRED_LIBRARIES ${DL_LIB})
+
+    check_include_file("dlfcn.h"     HAVE_DLFCN_H)
+    check_function_exists("dlopen"   HAVE_DLOPEN)
+endif()
+
+# pcap for l2 comms
 find_library(PCAP_LIB pcap)
 if (PCAP_LIB)
     message(STATUS "Found pcap library")
     set(HAVE_LIBPCAP 1)
+    set(CMAKE_REQUIRED_LIBRARIES ${PCAP_LIB})
+    check_function_exists(pcap_sendpacket HAVE_PCAP_SENDPACKET)
+    check_include_file("pcap.h"         HAVE_PCAP_H)
+    check_include_file("pcap-bpf.h"     HAVE_PCAP_BPF_H)
+    if (NOT HAVE_PCAP_BPF_H)
+        message(WARNING "
+          PCAP-BPF is not supported on this system,
+          socket filtering will not work.
+          This is not a real problem, just a small performance
+          loss when using multiple virtual routers on the same system.
+          On Debian/Ubuntu:  apt-get install libpcap-dev
+        ")
+    endif()
+else()
+    message(WARNING "
+          Libpcap was not detected.
+          VRRP and other protocols may have issues.
+          On Fedora/RedHat:  dnf install libpcap-devel
+          On Ubuntu:  apt-get install libpcap-dev
+          After install, rm -fr xorp/obj build directory to
+          clear the configure cache before re-building.
+    ")
 endif()
-check_include_file("pcap.h"         HAVE_PCAP_H)
-check_include_file("pcap-bpf.h"     HAVE_PCAP_BPF_H)
+
+
+
 find_library(CURSES_LIB curses)
 if (CURSES_LIB)
     message(STATUS "Found curses library")
-    set(HAVE_CURSES 1)
+    set(HAVE_LIBCURSES 1)
 endif()
 
 find_library(NCURSES_LIB ncurses)
 if (NCURSES_LIB)
     message(STATUS "Found ncurses library")
-    set(HAVE_NCURSES 1)
+    set(HAVE_LIBNCURSES 1)
 endif()
 
 find_library(PDURSES_LIB pdcurses)
 if (PDCURSES_LIB)
     message(STATUS "Found pdcurses library")
-    set(HAVE_PDCURSES 1)
+    set(HAVE_LIBPDCURSES 1)
 endif()
 
+if (CURESES_LIB-NOTFOUND AND NCURSES_LIB-NOTFOUND AND PDCURSES_LIB-NOTFOUND)
+    message(SEND_ERROR "
+        ERROR:  Cannot find required (n)curses or pdcurses library.
+        On Fedora/RedHat:  yum install ncurses-devel
+        On Debian/Ubuntu:  apt-get install ncurses-dev
+        After install, rm -fr xorp/obj build directory to
+        clear the configure cache before re-building.
+    ")
+endif()
 
 configure_file(config.h.in ${CMAKE_CURRENT_BINARY_DIR}/xorp_config.h)
 set(MAIN_DIR ${CMAKE_CURRENT_BINARY_DIR})
