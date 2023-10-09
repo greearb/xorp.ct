@@ -11,3 +11,5 @@ add_library(firewall SHARED firewall_get_pf.cc
                             firewall_set_netfilter.cc
                             firewall_set_pf.cc
                             )
+
+install(TARGETS firewall RUNTIME DESTINATION lib)

@@ -11,3 +11,5 @@ target_sources(fea_io PUBLIC io_ip_dummy.cc
                              io_link_dummy.cc
                              io_tcpudp_dummy.cc)
 endif()
+
+install(TARGETS fea_io RUNTIME DESTINATION lib)

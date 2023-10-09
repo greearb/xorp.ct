@@ -28,3 +28,5 @@ target_link_libraries(cli
                           xif_cli_processor
                           tgts_cli
                      )
+
+install(TARGETS cli RUNTIME DESTINATION lib)

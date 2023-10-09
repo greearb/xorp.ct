@@ -37,6 +37,6 @@ add_library(ifconfig SHARED ifconfig_get_click.cc
                             ifconfig_vlan_set_linux.cc
                             ${IFCONFIG_SRCS})
 
-
+install(TARGETS ifconfig RUNTIME DESTINATION lib)
 # target_link_libraries(static PRIVATE feaclient xipc xorp interfaces policy crypto proto)
 

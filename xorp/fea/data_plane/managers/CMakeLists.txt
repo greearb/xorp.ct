@@ -16,3 +16,5 @@ add_library(fea_managers SHARED fea_data_plane_manager_linux.cc
                                 fea_data_plane_manager_windows.cc
                                 fea_data_plane_manager_bsd.cc
                                 ${MENAGERS_SRCS})
+
+install(TARGETS fea_managers RUNTIME DESTINATION lib)
