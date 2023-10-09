@@ -54,4 +54,4 @@ list(APPEND FIB_SRCS fibconfig_entry_get_dummy.cc
 endif()
 
 add_library(fibconfig SHARED ${FIB_SRCS})
-
+install(TARGETS fibconfig RUNTIME DESTINATION lib)

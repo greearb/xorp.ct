@@ -16,5 +16,5 @@ add_library(control_socket SHARED netlink_socket.cc
                                   windows_rtm_pipe.cc
                                   ${CONTROL_SRCS})
 
-
+install(TARGETS control_socket RUNTIME DESTINATION lib)
 

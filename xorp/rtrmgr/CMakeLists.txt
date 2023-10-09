@@ -124,6 +124,8 @@ target_include_directories(xorp_rtrmgr PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAK
 #                              opcmdScanner)
 add_dependencies(xorp_rtrmgr interfaces targets)
 
+install(TARGETS xorp_rtrmgr RUNTIME DESTINATION lib)
+
 add_executable(rtrmgr main_rtrmgr.cc xrl_rtrmgr_interface.cc)
 
 add_dependencies(rtrmgr targets interfaces)
@@ -141,6 +143,8 @@ target_link_libraries(rtrmgr
                             xif_rtrmgr_client
                             xif_finder_event_notifier
                      )
+
+install(TARGETS rtrmgr RUNTIME DESTINATION sbin)
 
 if (PROFILER)
 add_executable(profiler profiler.cc)
@@ -175,4 +179,5 @@ target_link_libraries(xorpsh
                              curses
 )
 add_dependencies(xorpsh interfaces targets)
+install(TARGETS xorpsh RUNTIME DESTINATION bin)
 endif()

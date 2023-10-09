@@ -45,7 +45,7 @@ if(BGP)
     list(APPEND interface_srcs "${CMAKE_CURRENT_LIST_DIR}/bgp.xif")
 endif()
 
-if(NOT DISABLE_IPV6)
+if(ENABLE_IPV6)
     list(APPEND interface_srcs "${CMAKE_CURRENT_LIST_DIR}/socket6.xif"
                                "${CMAKE_CURRENT_LIST_DIR}/socket6_user.xif"
                                "${CMAKE_CURRENT_LIST_DIR}/fea_rawpkt6_client.xif"
@@ -108,6 +108,7 @@ foreach(src_xif ${interface_srcs})
     )
     list(APPEND xif_cxx ${src_cxx})
     add_library(xif_${xif_fname} SHARED ${CMAKE_CURRENT_BINARY_DIR}/${src_cxx})
+    install(TARGETS xif_${xif_fname} RUNTIME DESTINATION lib)
 endforeach()
 # message(STATUS "Created interfaces: ${xif_cxx}")
 add_custom_target(interfaces DEPENDS ${xif_cxx})

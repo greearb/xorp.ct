@@ -47,7 +47,7 @@ target_link_libraries(xipc
                         xif_common
                         tgts_finder_client)
 # add_dependencies(xipc crypto)
-
+install(TARGETS xipc RUNTIME DESTINATION lib)
 # Finder library
 MESSAGE(STATUS "Targets dir is ${TARGETS_DIR}")
 
@@ -68,3 +68,4 @@ target_link_libraries(finder
                         xif_finder_event_observer
                         xif_finder_client)
 
+install(TARGETS finder RUNTIME DESTINATION lib)
