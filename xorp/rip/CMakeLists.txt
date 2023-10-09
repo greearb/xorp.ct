@@ -1,0 +1,80 @@
+# rip build
+# Copyright (c) 2023 Michał Zagórski (zagura)
+# SPDX-License-Identifier: GPL-2.0-or-later
+
+# TODO: Add subdirectories
+# add_subdirectory(tools)
+# add_subdirectory(tests)
+
+set(RIP_SRCS auth.cc
+             output_table.cc
+             output_updates.cc
+             packet_queue.cc
+             peer.cc
+             port.cc
+             redist.cc
+             rib_notifier_base.cc
+             rip_varrw.cc
+             route_db.cc
+             route_entry.cc
+             update_queue.cc
+             xrl_config.cc
+             xrl_port_manager.cc
+             xrl_port_io.cc
+             xrl_process_spy.cc
+             xrl_redist_manager.cc
+             xrl_rib_notifier.cc
+             xorp_rip_main.cc
+    )
+
+set(RIP_LIBS
+             xif_rib
+             xif_finder_event_notifier
+             fea_client
+             xif_fea_ifmgr_mirror
+             xif_fea_ifmgr_replicator
+             tgts_fea_ifmgr_mirror
+             policy_backend
+             policy_common
+             proto
+             xipc
+             comm
+             xorp
+    )
+
+# if (NOT DISABLE_PROFILE)
+#     list(APPEND RIP_SRCS profile_vars.cc)
+#     list(APPEND RIP_LIBS xif_profile_client)
+# endif()
+
+
+add_executable(rip
+                   xrl_target_rip.cc
+                   ${RIP_SRCS}
+              )
+
+target_link_libraries(rip ${RIP_LIBS}
+                          tgts_rip
+                          xif_socket4
+                      )
+
+target_compile_definitions(rip PRIVATE INSTANTIATE_IPV4)
+install(TARGETS rip RUNTIME DESTINATION sbin)
+
+if (ENABLE_IPV6)
+    add_executable(ripng
+                         xrl_target_ripng.cc
+                         ${RIP_SRCS}
+                  )
+
+
+    target_link_libraries(ripng ${RIP_LIBS}
+                                tgts_ripng
+                                xif_socket6
+                         )
+
+    target_compile_definitions(ripng PRIVATE INSTANTIATE_IPV6)
+    install(TARGETS ripng RUNTIME DESTINATION sbin)
+endif()
+
+
