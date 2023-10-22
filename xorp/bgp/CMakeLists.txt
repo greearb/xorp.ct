@@ -59,7 +59,7 @@ file(GLOB BGP_SRCS
 
 
 add_library(bgp SHARED ${BGP_SRCS})
-set_target_properties(bgp PROPERTIES COMPILE_FLAGS "-ftemplate-depth=35")
+target_compile_options(bgp PRIVATE -ftemplate-depth=35)
 add_dependencies(bgp interfaces)
 add_dependencies(bgp xorp)
 install(TARGETS bgp RUNTIME DESTINATION lib)

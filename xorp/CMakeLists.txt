@@ -173,7 +173,8 @@ endif()
 set(BASIC_FLAGS "-Wall -Wwrite-strings -Wcast-qual -Wmissing-declarations \
 -Wpointer-arith -Wcast-align")
 set(BASIC_C_FLAGS "-Wbad-function-cast -Wmissing-prototypes -Wstrict-prototypes -Wnested-externs")
-set(CMAKE_CXX_FLAGS "${BASIC_FLAGS} ${CMAKE_CXX_FLAGS}  -ftemplate-depth-25")
+set(CMAKE_CXX_FLAGS "${BASIC_FLAGS} ${CMAKE_CXX_FLAGS}  -ftemplate-depth=50")
+# @todo: fix template-depth 25 is default, but not enough for some targets: bgp, rib, etc.
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${BASIC_FLAGS} ${BASIC_C_FLAGS}")
 
 
