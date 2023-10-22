@@ -42,7 +42,7 @@
 #include "template_tree_node.hh"
 #include "master_template_tree.hh"
 #include "master_template_tree_node.hh"
-
+#include "xrldb.hh"
 //
 // Defaults
 //
@@ -114,7 +114,7 @@ Rtrmgr::run()
     MasterTemplateTree *tt = NULL;
     try {
 	tt = new MasterTemplateTree(default_xorp_root_dir, 
-				    *xrldb, true /* verbose */);
+				    xrldb, true /* verbose */);
     } catch (const InitError& e) {
 	fprintf(stderr, "test_sample_config: template tree init error: %s\n",
 		e.why().c_str());
@@ -145,7 +145,8 @@ Rtrmgr::run()
     ModuleManager mmgr(eventloop, *this,
 		       false,	/* do_restart */
 		       false,	/* verbose */
-		       default_xorp_root_dir);
+		       default_xorp_root_dir,
+               default_xorp_root_dir);
 
     // Try each configuration file in a loop
     for (size_t i = 0;
