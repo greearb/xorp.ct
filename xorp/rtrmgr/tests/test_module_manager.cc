@@ -80,7 +80,8 @@ Rtrmgr::run()
     ModuleManager mmgr(eventloop, *this,
 		       false,	/* do_restart */
 		       true,	/* verbose = */ 
-		       ".");
+		       ".",
+               ".");
     string error_msg;
     if (mmgr.new_module(finder_str, "../libxipc/xorp_finder", error_msg)
 	!= true) {

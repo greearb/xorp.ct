@@ -181,3 +181,5 @@ target_link_libraries(xorpsh
 add_dependencies(xorpsh interfaces targets)
 install(TARGETS xorpsh RUNTIME DESTINATION bin)
 endif()
+
+add_subdirectory(tests)

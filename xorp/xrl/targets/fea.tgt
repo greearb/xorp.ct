@@ -15,7 +15,10 @@
 #include "fea_rawpkt6.xif"
 #include "socket4.xif"
 #include "socket6.xif"
+#ifndef XORP_DISABLE_PROFILE
 #include "profile.xif"
+#endif
+
 
 target fea implements	common/0.1,
 			finder_event_observer/0.1,
@@ -32,7 +35,6 @@ target fea implements	common/0.1,
 			redist_transaction4/0.1,
 			raw_link/0.1,
 			raw_packet4/0.1,
-			socket4/0.1,
 #ifdef HAVE_IPV6
 			redist_transaction6/0.1,
 			socket6/0.1,
@@ -41,4 +43,5 @@ target fea implements	common/0.1,
 #ifndef XORP_DISABLE_PROFILE
 			profile/0.1
 #endif
-                        ;	
+			socket4/0.1
+                        ;
