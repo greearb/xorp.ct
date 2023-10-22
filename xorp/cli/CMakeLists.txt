@@ -4,7 +4,9 @@
 
 add_subdirectory(libtecla)
 add_subdirectory(tools)
-add_subdirectory(tests)
+if (TEST_PROGRAMS)
+     add_subdirectory(tests)
+endif()
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)

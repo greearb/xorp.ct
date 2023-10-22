@@ -10,7 +10,7 @@ add_executable(static_routes  xorp_static_routes.cc
 
 
 
-target_compile_options(static_routes PRIVATE -ftemplate-depth=100)
+target_compile_options(static_routes PRIVATE -ftemplate-depth=50)
 
 target_include_directories(static_routes PRIVATE ${XORP_LIBDIR})
 target_link_libraries(static_routes PRIVATE fea_client

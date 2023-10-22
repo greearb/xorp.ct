@@ -182,4 +182,6 @@ add_dependencies(xorpsh interfaces targets)
 install(TARGETS xorpsh RUNTIME DESTINATION bin)
 endif()
 
-add_subdirectory(tests)
+if (TEST_PROGRAMS)
+    add_subdirectory(tests)
+endif()

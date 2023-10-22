@@ -57,6 +57,7 @@ target_link_libraries(rib
                             comm
                       )
 
+target_compile_options(rib PRIVATE -ftemplate-depth=50)
 install(TARGETS rib RUNTIME DESTINATION sbin)
 
 
