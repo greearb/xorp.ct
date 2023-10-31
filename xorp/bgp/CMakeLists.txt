@@ -1,10 +1,10 @@
 # bgp main build
-# Copyright (c) 2021 Michał Zagórski (zagura)
-# License: see ${XORP}/LICENCE.gpl
-# add_subdirectory(tools)
-# if (BUILD_TEST)
-#     add_subdirectory(tests)
-# endif()
+# Copyright (c) 2021-2023 Michał Zagórski (zagura)
+# SPDX-License-Identifier: GPL-2.0-or-later
+add_subdirectory(tools)
+
+set(BGP_LIBS "")
+
 
 file(GLOB BGP_SRCS 
                     # 'aspath.cc',
@@ -54,13 +54,61 @@ file(GLOB BGP_SRCS
                     subnet_route.cc
                     update_attrib.cc
                     update_packet.cc
-                    xrl_target.cc)
+                    xrl_target.cc
+    )
 
 
+if (PROFILER)
+    list(APPEND BGP_LIBS xif_profile_client)
+    list(APPEND BGP_SRCS profile_vars.cc)
+endif()
+
+
+#add_library(bgp SHARED ${BGP_SRCS})
+add_executable(xorp_bgp main.cc)
 
 add_library(bgp SHARED ${BGP_SRCS})
 target_compile_options(bgp PRIVATE -ftemplate-depth=35)
-add_dependencies(bgp interfaces)
-add_dependencies(bgp xorp)
+
+target_link_libraries(bgp
+                          cli
+                          xif_cli_processor
+                          tgts_cli
+                          finder
+                          tecla
+                          xipc
+                          proto
+                          comm
+                          xorp
+                     )
+
+target_link_libraries(xorp_bgp
+                               bgp
+                               cli
+                               xif_cli_processor
+                               tgts_cli
+                               policy_backend
+                               policy_common
+                               fea_client
+                               tgts_bgp
+                               tgts_fea_ifmgr_mirror
+                               xif_rib
+                               xif_finder_event_notifier
+                               xif_fea_ifmgr_mirror
+                               xif_fea_ifmgr_replicator
+                               finder
+                               tecla
+                               xipc
+                               proto
+                               comm
+                               xorp
+                               ${BGP_LIBS}
+                    )
+
+install(TARGETS xorp_bgp RUNTIME DESTINATION sbin)
 install(TARGETS bgp RUNTIME DESTINATION lib)
 install(FILES bgp_xrl_shell_funcs.sh TYPE SBIN)
+
+if (TEST_PROGRAMS)
+    add_subdirectory(tests)
+endif()
