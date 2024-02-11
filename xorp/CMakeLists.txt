@@ -9,6 +9,7 @@ include(CheckLibraryExists)
 include(CheckStructHasMember)
 include(CheckTypeSize)
 include(CheckCSourceCompiles)
+include(GNUInstallDirs)
 
 #set(CMAKE_CXX_STANDARD 17)
 
@@ -715,6 +716,7 @@ set(MAIN_DIR ${CMAKE_CURRENT_BINARY_DIR})
 include_directories("${CMAKE_CURRENT_BINARY_DIR}/")
 include_directories(.)
 
+add_subdirectory(etc/templates)
 add_subdirectory(libxorp)
 add_subdirectory(cli)
 add_subdirectory(libcomm)

@@ -1,5 +1,5 @@
 # bgp/tools build
-# Copyright (c) 2023 Michał Zagórski (zagura)
+# Copyright (c) 2023-2024 Michał Zagórski (zagura)
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 set(BGP_DEPS bgp
@@ -32,3 +32,7 @@ install(TARGETS print_routes RUNTIME DESTINATION bin)
 add_executable(bgp_print_peers print_peer.cc xorpsh_print_peers.cc)
 target_link_libraries(bgp_print_peers ${BGP_DEPS})
 install(TARGETS bgp_print_peers RUNTIME DESTINATION bin)
+
+add_executable(bgp_print_routes print_routes.cc xorpsh_print_routes.cc)
+target_link_libraries(bgp_print_routes ${BGP_DEPS})
+install(TARGETS bgp_print_routes RUNTIME DESTINATION bin)
