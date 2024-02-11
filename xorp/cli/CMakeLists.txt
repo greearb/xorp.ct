@@ -1,8 +1,10 @@
 # libcli build
 # Copyright (c) 2023 Michał Zagórski (zagura)
 # SPDX-License-Identifier: GPL-2.0-or-later
+if (NOT EXTERNAL_TECLA)
+     add_subdirectory(libtecla)
+endif()
 
-add_subdirectory(libtecla)
 add_subdirectory(tools)
 if (TEST_PROGRAMS)
      add_subdirectory(tests)

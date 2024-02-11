@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
-add_library(tecla SHARED 
+add_library(tecla SHARED
                         cplfile.c
                         cplmatch.c
                         direader.c
@@ -21,19 +21,19 @@ add_library(tecla SHARED
                         version.c
             )
 
-target_compile_definitions(tecla PUBLIC 
-                                        HAVE_INTTYPES_H=1
-                                        HAVE_MEMORY_H=1
-                                        HAVE_STDINT_H=1
-                                        HAVE_STDLIB_H=1
-                                        HAVE_STRINGS_H=1
-                                        HAVE_STRING_H=1
-                                        HAVE_SYS_STAT_H=1
-                                        HAVE_SYS_TYPES_H=1
-                                        HAVE_TERMINFO_H=1
-                                        HAVE_UNISTD_H=1
-                                        STDC_HEADERS=1
-                                        HAVE_SYS_IOCTL_H=1)
+# target_compile_definitions(tecla PUBLIC
+#                                         HAVE_INTTYPES_H=1
+#                                         HAVE_MEMORY_H=1
+#                                         HAVE_STDINT_H=1
+#                                         HAVE_STDLIB_H=1
+#                                         HAVE_STRINGS_H=1
+#                                         HAVE_STRING_H=1
+#                                         HAVE_SYS_STAT_H=1
+#                                         HAVE_SYS_TYPES_H=1
+#                                         HAVE_TERMINFO_H=1
+#                                         HAVE_UNISTD_H=1
+#                                         STDC_HEADERS=1
+#                                         HAVE_SYS_IOCTL_H=1)
 if (NOT MINGW)
     target_compile_definitions(tecla PUBLIC HAVE_SYS_IOCTL_H=1
                                     HAVE_TERMIOS_H=1)
@@ -58,14 +58,14 @@ target_link_libraries(tecla ${CURSES_LIBRARIES})
 
 
 
-# HAVE_INTTYPES_H=1 
-# HAVE_MEMORY_H=1 
-# HAVE_STDINT_H=1 
-# HAVE_STDLIB_H=1 
-# HAVE_STRINGS_H=1 
-# HAVE_STRING_H=1 
-# HAVE_SYS_STAT_H=1 
-# HAVE_SYS_TYPES_H=1 
-# HAVE_TERMINFO_H=1 
-# HAVE_UNISTD_H=1 
+# HAVE_INTTYPES_H=1
+# HAVE_MEMORY_H=1
+# HAVE_STDINT_H=1
+# HAVE_STDLIB_H=1
+# HAVE_STRINGS_H=1
+# HAVE_STRING_H=1
+# HAVE_SYS_STAT_H=1
+# HAVE_SYS_TYPES_H=1
+# HAVE_TERMINFO_H=1
+# HAVE_UNISTD_H=1
 # STDC_HEADERS=1
