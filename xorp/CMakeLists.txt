@@ -682,33 +682,35 @@ else()
 endif()
 
 
-
-find_library(CURSES_LIB curses)
-if (CURSES_LIB)
-    message(STATUS "Found curses library")
-    set(HAVE_LIBCURSES 1)
-endif()
-
+set(CURSES_CHOICE_LIB "")
 find_library(NCURSES_LIB ncurses)
 if (NCURSES_LIB)
     message(STATUS "Found ncurses library")
     set(HAVE_LIBNCURSES 1)
-endif()
-
-find_library(PDURSES_LIB pdcurses)
-if (PDCURSES_LIB)
-    message(STATUS "Found pdcurses library")
-    set(HAVE_LIBPDCURSES 1)
+    set(CURSES_CHOICE_LIB ${NCURSES_LIB})
+else()
+    find_library(PDURSES_LIB pdcurses)
+    if (PDCURSES_LIB)
+        message(STATUS "Found pdcurses library")
+        set(HAVE_LIBPDCURSES 1)
+        set(CURSES_CHOICE_LIB ${PDCURSES_LIB})
+    else()
+        find_library(CURSES_LIB curses)
+        if (CURSES_LIB)
+            message(STATUS "Found curses library")
+            set(HAVE_LIBCURSES 1)
+            set(CURSES_CHOICE_LIB ${CURSES_LIB})
+        endif()
+    endif()
 endif()
 
 if (CURESES_LIB-NOTFOUND AND NCURSES_LIB-NOTFOUND AND PDCURSES_LIB-NOTFOUND)
-    message(SEND_ERROR "
-        ERROR:  Cannot find required (n)curses or pdcurses library.
+    message(SEND_ERROR
+    "   ERROR:  Cannot find required (n)curses or pdcurses library.
         On Fedora/RedHat:  yum install ncurses-devel
         On Debian/Ubuntu:  apt-get install ncurses-dev
-        After install, rm -fr xorp/obj build directory to
-        clear the configure cache before re-building.
-    ")
+        After install, remove CMakeCache.txt and build directory to
+        clear the configure cache before re-building.")
 endif()
 
 configure_file(config.h.in ${CMAKE_CURRENT_BINARY_DIR}/xorp_config.h)

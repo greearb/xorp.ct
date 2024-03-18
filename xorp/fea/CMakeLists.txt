@@ -1,5 +1,5 @@
 # fea build
-# Copyright (c) 2023 Michał Zagórski (zagura)
+# Copyright (c) 2023-2024 Michał Zagórski (zagura)
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 add_subdirectory(data_plane)
@@ -28,7 +28,7 @@ set(FEA_LIBS xif_fea_fib_client
              tgts_cli
              tgts_fea
              tgts_mfea
-             mrt
+             xorp_mrt
              proto
              xipc
              comm
@@ -38,7 +38,8 @@ set(FEA_LIBS xif_fea_fib_client
              fea_io
              control_socket
              ifconfig
-             xfdp)
+             xfdp
+             tecla)
 
 if (PCAP_LIB)
     list(APPEND FEA_LIBS pcap)
@@ -79,8 +80,13 @@ if (FIREWALL)
                          firewall_transaction.cc)
 endif()
 
-if (EXTRNAL_TECLA)
-    list(APPEND FEA_LIBS tecla)
+# With external tecla library, there will be other libtecla.so
+# if (EXTRNAL_TECLA)
+#     list(APPEND FEA_LIBS tecla)
+# endif()
+
+if (NOT DISABLE_PROFILE)
+    list(APPEND FEA_SRCS profile_vars.cc)
 endif()
 
 if (ENABLE_IPV6)
@@ -96,18 +102,21 @@ add_library(xfdp
                  io_ip.cc
                  io_link.cc
                  io_tcpudp.cc)
-install(TARGETS xfdp RUNTIME DESTINATION lib)
+install(TARGETS xfdp LIBRARY DESTINATION ${XORP_LIBDIR})
 
-add_executable(fea ${FEA_SRCS})
-target_link_libraries(fea PUBLIC ${FEA_LIBS})
-install(TARGETS fea RUNTIME DESTINATION sbin)
+add_executable(xorp_fea ${FEA_SRCS})
+target_link_libraries(xorp_fea PUBLIC ${FEA_LIBS})
+install(TARGETS xorp_fea RUNTIME DESTINATION ${XORP_MODULEDIR})
 
 if (FEA_DUMMY)
     add_executable(fea_dummy ${FEA_SRCS})
     target_link_libraries(fea_dummy PUBLIC ${FEA_LIBS})
     target_add_definitions(fea_dummy PRIVATE "FEA_DUMMY=1")
-    install(TARGETS fea_dummy RUNTIME DESTINATION sbin)
-
+    install(TARGETS fea_dummy RUNTIME DESTINATION ${XORP_MODULEDIR})
 endif()
 
+if (CLICK)
+    install(PROGRAMS fea_click_config_generator DESTINATION ${XORP_TOOLDIR})
+endif()
 
+install(PROGRAMS fea_xrl_shell_funcs.sh DESTINATION ${XORP_SBINDIR})

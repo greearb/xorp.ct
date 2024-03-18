@@ -1,5 +1,5 @@
 # policy/common build
-# Copyright (c) 2023 Michał Zagórski (zagura)
+# Copyright (c) 2023-2024 Michał Zagórski (zagura)
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 
@@ -18,4 +18,4 @@ add_library(policy_common
                           varrw.cc
                           )
 
-install(TARGETS policy_common RUNTIME DESTINATION lib)
+install(TARGETS policy_common LIBRARY DESTINATION ${XORP_LIBDIR})
