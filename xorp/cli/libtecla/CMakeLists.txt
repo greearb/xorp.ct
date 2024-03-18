@@ -1,5 +1,5 @@
 # libtecla build
-# Copyright (c) 2021-2023 Michał Zagórski (zagura)
+# Copyright (c) 2021-2024 Michał Zagórski (zagura)
 # SPDX-License-Identifier: GPL-2.0-or-later
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -36,10 +36,11 @@ add_library(tecla SHARED
 #                                         HAVE_SYS_IOCTL_H=1)
 if (NOT MINGW)
     target_compile_definitions(tecla PUBLIC HAVE_SYS_IOCTL_H=1
-                                    HAVE_TERMIOS_H=1)
+                                            HAVE_TERMIOS_H=1)
 endif()
 
-install(TARGETS tecla RUNTIME DESTINATION lib)
+install(TARGETS tecla LIBRARY DESTINATION ${XORP_LIBDIR})
+set_target_properties(tecla PROPERTIES SOVERSION 0.0)
 
 # target_compile_options(tecla PUBLIC -Werror)
 find_package(Curses)
@@ -55,8 +56,6 @@ find_package(Curses)
 # -Wnested-externs)
 target_include_directories(tecla PUBLIC ${CMAKE_CURRENT_LIST_DIR} ${CURSES_INCLUDE_DIRS} ${XORP_BUILD_ROOT})
 target_link_libraries(tecla ${CURSES_LIBRARIES})
-
-
 
 # HAVE_INTTYPES_H=1
 # HAVE_MEMORY_H=1

@@ -1,5 +1,5 @@
 # libproto build
-# Copyright (c) 2021 Michał Zagórski (zagura)
+# Copyright (c) 2021-2024 Michał Zagórski (zagura)
 # License: see ${XORP}/LICENCE.gpl
 
 file(GLOB LIBPROTO_C_SRCS checksum.c)
@@ -9,9 +9,6 @@ file(GLOB LIBPROTO_CXX_SRCS packet.cc
                             proto_unit.cc
                             spt.cc)
 
+add_library(proto ${LIBPROTO_C_SRCS} ${LIBPROTO_CXX_SRCS})
 
-add_library(proto SHARED
-            ${LIBPROTO_C_SRCS} ${LIBPROTO_CXX_SRCS})
-
-
-install(TARGETS proto RUNTIME DESTINATION lib)
+install(TARGETS proto LIBRARY DESTINATION ${XORP_LIBDIR})

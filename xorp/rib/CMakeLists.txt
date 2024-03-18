@@ -1,7 +1,9 @@
 # rib build
-# Copyright (c) 2023 Michał Zagórski (zagura)
+# Copyright (c) 2023-2024 Michał Zagórski (zagura)
 # SPDX-License-Identifier: GPL-2.0-or-later
-
+if (TEST_PROGRAMS)
+    add_subdirectory(tests)
+endif()
 
 set(RIB_SRCS "")
 set(RIB_LIBS "")
@@ -12,7 +14,7 @@ if (NOT DISABLE_PROFILE)
 endif()
 
 
-add_executable(rib
+add_executable(xorp_rib
                     protocol.cc
                     redist_xrl.cc
                     register_server.cc
@@ -31,9 +33,10 @@ add_executable(rib
                     vifmanager.cc
                     xrl_target.cc
                     main_rib.cc
+                    ${RIB_SRCS}
               )
 
-target_link_libraries(rib
+target_link_libraries(xorp_rib
                             fea_client
                             xif_fea_ifmgr_mirror
                             xif_fea_ifmgr_replicator
@@ -55,11 +58,10 @@ target_link_libraries(rib
                             xorp
                             proto
                             comm
+                            ${RIB_LIBS}
                       )
 
-target_compile_options(rib PRIVATE -ftemplate-depth=50)
-install(TARGETS rib RUNTIME DESTINATION sbin)
+target_compile_options(xorp_rib PRIVATE -ftemplate-depth=50)
+install(TARGETS xorp_rib RUNTIME DESTINATION ${XORP_MODULEDIR})
 
-
-# add_subdirectory(tests)
-# add_subdirectory(tools)
+add_subdirectory(tools)

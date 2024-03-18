@@ -1,12 +1,12 @@
 # bgp main build
-# Copyright (c) 2021-2023 Michał Zagórski (zagura)
+# Copyright (c) 2021-2024 Michał Zagórski (zagura)
 # SPDX-License-Identifier: GPL-2.0-or-later
 add_subdirectory(tools)
 
 set(BGP_LIBS "")
 
 
-file(GLOB BGP_SRCS 
+file(GLOB BGP_SRCS
                     # 'aspath.cc',
                     attribute_manager.cc
                     bgp.cc
@@ -67,7 +67,7 @@ endif()
 #add_library(bgp SHARED ${BGP_SRCS})
 add_executable(xorp_bgp main.cc)
 
-add_library(bgp SHARED ${BGP_SRCS})
+add_library(bgp ${BGP_SRCS})
 target_compile_options(bgp PRIVATE -ftemplate-depth=35)
 
 target_link_libraries(bgp
@@ -105,9 +105,11 @@ target_link_libraries(xorp_bgp
                                ${BGP_LIBS}
                     )
 
-install(TARGETS xorp_bgp RUNTIME DESTINATION sbin)
-install(TARGETS bgp RUNTIME DESTINATION lib)
-install(FILES bgp_xrl_shell_funcs.sh TYPE SBIN)
+install(TARGETS xorp_bgp RUNTIME DESTINATION ${XORP_MODULEDIR})
+install(TARGETS bgp LIBRARY DESTINATION ${XORP_LIBDIR})
+install(FILES bgp_xrl_shell_funcs.sh DESTINATION ${XORP_SBINDIR} PERMISSIONS OWNER_EXECUTE OWNER_READ OWNER_WRITE
+                                                                             GROUP_READ GROUP_EXECUTE
+                                                                             WORLD_EXECUTE WORLD_READ)
 
 if (TEST_PROGRAMS)
     add_subdirectory(tests)

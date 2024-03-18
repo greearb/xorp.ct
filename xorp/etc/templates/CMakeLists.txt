@@ -26,11 +26,11 @@ set(COMMANDS fea.cmds
              policy.cmds
              rib.cmds)
 
-if (IPV6)
-list(APPEND TEMPLATES mfea6.tp
-                      pimsm6.tp)
-list(APPEND COMMANDS mfea6.cmds
-                      pim6.cmds)
+if (ENABLE_IPV6)
+    list(APPEND TEMPLATES mfea6.tp
+                          pimsm6.tp)
+    list(APPEND COMMANDS mfea6.cmds
+                         pim6.cmds)
     if (OSPF)
         list(APPEND COMMANDS ospfv3.cmds)
         list(APPEND TEMPLATE ospfv3.tp)
@@ -72,7 +72,7 @@ if (XORPSH)
 endif()
 
 
-install(FILES ${TEMPLATES} DESTINATION ${CMAKE_INSTALL_SYSCONFDIR}/templates)
-install(FILES ${COMMANDS} DESTINATION ${CMAKE_INSTALL_SYSCONFDIR}/templates)
+install(FILES ${TEMPLATES} DESTINATION ${XORP_TEMPLATEDIR})
+install(FILES ${COMMANDS} DESTINATION ${XORP_TEMPLATEDIR})
 # TODO: find way to separate config options firewall/click from fea.tp form
-install(FILES fea.tp.raw DESTINATION ${CMAKE_INSTALL_SYSCONFDIR}/templates RENAME fea.tp)
+install(FILES fea.tp.raw DESTINATION ${XORP_TEMPLATEDIR} RENAME fea.tp)

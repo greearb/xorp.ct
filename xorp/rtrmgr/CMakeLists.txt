@@ -1,5 +1,5 @@
 # rtrmgr build
-# Copyright (c) 2021 Michał Zagórski (zagura)
+# Copyright (c) 2021-2024 Michał Zagórski (zagura)
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 
@@ -124,7 +124,7 @@ target_include_directories(xorp_rtrmgr PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAK
 #                              opcmdScanner)
 add_dependencies(xorp_rtrmgr interfaces targets)
 
-install(TARGETS xorp_rtrmgr RUNTIME DESTINATION lib)
+install(TARGETS xorp_rtrmgr ARCHIVE DESTINATION ${XORP_LIBDIR})
 
 add_executable(rtrmgr main_rtrmgr.cc xrl_rtrmgr_interface.cc)
 
@@ -144,7 +144,7 @@ target_link_libraries(rtrmgr
                             xif_finder_event_notifier
                      )
 
-install(TARGETS rtrmgr RUNTIME DESTINATION sbin)
+install(TARGETS rtrmgr RUNTIME DESTINATION ${XORP_SBINDIR})
 
 if (PROFILER)
 add_executable(profiler profiler.cc)
@@ -176,10 +176,9 @@ target_link_libraries(xorpsh
                              comm
                              xorp
                              crypto
-                             curses
-)
+                             ${CURSES_CHOICE_LIB})
 add_dependencies(xorpsh interfaces targets)
-install(TARGETS xorpsh RUNTIME DESTINATION bin)
+install(TARGETS xorpsh RUNTIME DESTINATION ${XORP_TOOLDIR})
 endif()
 
 if (TEST_PROGRAMS)

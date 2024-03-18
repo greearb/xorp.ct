@@ -1,10 +1,12 @@
 # rip build
-# Copyright (c) 2023 Michał Zagórski (zagura)
+# Copyright (c) 2023-2024 Michał Zagórski (zagura)
 # SPDX-License-Identifier: GPL-2.0-or-later
 
-# TODO: Add subdirectories
-# add_subdirectory(tools)
-# add_subdirectory(tests)
+if (TEST_PROGRAMS)
+    add_subdirectory(tests)
+endif()
+
+add_subdirectory(tools)
 
 set(RIP_SRCS auth.cc
              output_table.cc
@@ -24,7 +26,7 @@ set(RIP_SRCS auth.cc
              xrl_process_spy.cc
              xrl_redist_manager.cc
              xrl_rib_notifier.cc
-             xorp_rip_main.cc
+
     )
 
 set(RIP_LIBS
@@ -42,39 +44,32 @@ set(RIP_LIBS
              xorp
     )
 
-# if (NOT DISABLE_PROFILE)
-#     list(APPEND RIP_SRCS profile_vars.cc)
-#     list(APPEND RIP_LIBS xif_profile_client)
-# endif()
+if (NOT DISABLE_PROFILE)
+     list(APPEND RIP_SRCS profile_vars.cc)
+     list(APPEND RIP_LIBS xif_profile_client)
+endif()
 
+# add_library(rip ${RIP_SRCS})
+# install(TARGETS rip LIBRARY DESTINATION ${XORP_LIBDIR})
 
-add_executable(rip
-                   xrl_target_rip.cc
-                   ${RIP_SRCS}
-              )
+add_executable(xorp_rip xrl_target_rip.cc xorp_rip_main.cc ${RIP_SRCS})
+target_link_libraries(xorp_rip ${RIP_LIBS}
+                               tgts_rip
+                               xif_socket4
+                               )
 
-target_link_libraries(rip ${RIP_LIBS}
-                          tgts_rip
-                          xif_socket4
-                      )
-
-target_compile_definitions(rip PRIVATE INSTANTIATE_IPV4)
-install(TARGETS rip RUNTIME DESTINATION sbin)
+target_compile_definitions(xorp_rip PRIVATE INSTANTIATE_IPV4)
+install(TARGETS xorp_rip RUNTIME DESTINATION ${XORP_MODULEDIR})
 
 if (ENABLE_IPV6)
-    add_executable(ripng
-                         xrl_target_ripng.cc
-                         ${RIP_SRCS}
-                  )
+    add_executable(xorp_ripng xrl_target_ripng.cc xorp_rip_main.cc ${RIP_SRCS})
+    target_link_libraries(xorp_ripng ${RIP_LIBS}
+                                     tgts_ripng
+                                     xif_socket6
+                                     )
 
-
-    target_link_libraries(ripng ${RIP_LIBS}
-                                tgts_ripng
-                                xif_socket6
-                         )
-
-    target_compile_definitions(ripng PRIVATE INSTANTIATE_IPV6)
-    install(TARGETS ripng RUNTIME DESTINATION sbin)
+    target_compile_definitions(xorp_ripng PRIVATE INSTANTIATE_IPV6)
+    install(TARGETS xorp_ripng RUNTIME DESTINATION ${XORP_MODULEDIR})
 endif()
 
 

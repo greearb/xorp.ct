@@ -1,5 +1,5 @@
 # policy build
-# Copyright (c) 2023 Michał Zagórski (zagura)
+# Copyright (c) 2023-2024 Michał Zagórski (zagura)
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 add_subdirectory(common)
@@ -37,7 +37,7 @@ set_source_files_properties(
                             COMPILE_FLAGS -Wno-sign-compare
                             COMPILE_FLAGS -Wno-effc++)
 
-add_executable(policy
+add_executable(xorp_policy
                      ${BISON_policyParser_OUTPUTS}
                      ${FLEX_policyScanner_OUTPUTS}
                      code.cc
@@ -67,16 +67,16 @@ add_executable(policy
                      xrl_target.cc
                      xorp_policy.cc)
 
-target_link_libraries(policy policy_backend
-                             policy_common
-                             tgts_policy
-                             xif_policy_backend
-                             xif_finder_event_notifier
-                             xif_rib
-                             xipc
-                             xorp
-                             proto
-                             comm
-                             )
+target_link_libraries(xorp_policy policy_backend
+                                  policy_common
+                                  tgts_policy
+                                  xif_policy_backend
+                                  xif_finder_event_notifier
+                                  xif_rib
+                                  xipc
+                                  xorp
+                                  proto
+                                  comm
+                                  )
 
-install(TARGETS policy RUNTIME DESTINATION sbin)
+install(TARGETS xorp_policy RUNTIME DESTINATION ${XORP_MODULEDIR})

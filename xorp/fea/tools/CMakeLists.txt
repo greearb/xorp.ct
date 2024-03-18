@@ -1,5 +1,5 @@
 # fea tools build
-# Copyright (c) 2023 Michał Zagórski (zagura)
+# Copyright (c) 2023-2024 Michał Zagórski (zagura)
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 add_executable(fea_show_interfaces show_interfaces.cc)
@@ -13,4 +13,4 @@ target_link_libraries(fea_show_interfaces
                                           xipc
                                           proto
                                           comm)
-install(TARGETS fea_show_interfaces RUNTIME DESTINATION bin)
+install(TARGETS fea_show_interfaces RUNTIME DESTINATION ${XORP_TOOLDIR})

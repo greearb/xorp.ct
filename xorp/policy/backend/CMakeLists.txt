@@ -1,5 +1,5 @@
 # policy/backend build
-# Copyright (c) 2023 Michał Zagórski (zagura)
+# Copyright (c) 2023-2024 Michał Zagórski (zagura)
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 set(POLICY_BACKEND_SRCS "")
@@ -55,4 +55,4 @@ add_library(policy_backend
                            ${POLICY_BACKEND_SRCS}
                           )
 
-install(TARGETS policy_backend RUNTIME DESTINATION lib)
+install(TARGETS policy_backend LIBRARY DESTINATION ${XORP_LIBDIR})
