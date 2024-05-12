@@ -322,7 +322,7 @@ check_struct_has_member("struct sockaddr"   sa_len  "sys/socket.h" HAVE_STRUCT_S
 check_struct_has_member("struct sockaddr_storage"   ss_len  "sys/socket.h" HAVE_STRUCT_SOCKADDR_STORAGE_SS_LEN)
 # check_struct_has_member("struct sockaddr_un"    sun_len "sys/socket.h" HAVE_SOCKADDR_UN_SUN_LEN)                  # Unused
 
-check_include_file("net/ethernet.h" HAVE_ETHERNET_H)
+check_include_file("net/ethernet.h" HAVE_NET_ETHERNET_H)
 check_include_file("sys/ethernet.h" HAVE_SYS_ETHERNET_H)
 check_include_file("net/if.h"       HAVE_NET_IF_H)
 check_include_file("net/if_arp.h"   HAVE_NET_IF_ARP_H)

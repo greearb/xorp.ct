@@ -112,7 +112,7 @@
 /* #cmakedefine HAVE_STRUCT_SOCKADDR_STORAGE_SS_LEN    @HAVE_STRUCT_SOCKADDR_STORAGE_SS_LEN@   */         /* Unused */
 /* #cmakedefine HAVE_SOCKADDR_UN_SUN_LEN           @HAVE_SOCKADDR_UN_SUN_LEN@                  */         /* Unused */
 
-#cmakedefine HAVE_ETHERNET_H                            @HAVE_ETHERNET_H@
+#cmakedefine HAVE_NET_ETHERNET_H                            @HAVE_NET_ETHERNET_H@
 #cmakedefine HAVE_SYS_ETHERNET_H                        @HAVE_SYS_ETHERNET_H@
 #cmakedefine HAVE_NET_IF_H                              @HAVE_NET_IF_H@
 #cmakedefine HAVE_NET_IF_ARP_H                          @HAVE_NET_IF_ARP_H@
