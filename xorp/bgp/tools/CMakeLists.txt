@@ -23,11 +23,15 @@ endif()
 
 add_executable(print_peers print_peer.cc print_peers.cc)
 target_link_libraries(print_peers ${BGP_DEPS})
-install(TARGETS print_peers RUNTIME DESTINATION ${XORP_TOOLDIR})
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    install(TARGETS print_peers RUNTIME DESTINATION ${XORP_TOOLDIR})
+endif()
 
 add_executable(print_routes print_routes.cc print_routes_main.cc)
 target_link_libraries(print_routes ${BGP_DEPS})
-install(TARGETS print_routes RUNTIME DESTINATION ${XORP_TOOLDIR})
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    install(TARGETS print_routes RUNTIME DESTINATION ${XORP_TOOLDIR})
+endif()
 
 add_executable(bgp_print_peers print_peer.cc xorpsh_print_peers.cc)
 target_link_libraries(bgp_print_peers ${BGP_DEPS})

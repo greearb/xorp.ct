@@ -6,7 +6,7 @@ if (NOT EXTERNAL_TECLA)
 endif()
 
 add_subdirectory(tools)
-if (TEST_PROGRAMS)
+if (TESTS_PROGRAMS)
      add_subdirectory(tests)
 endif()
 

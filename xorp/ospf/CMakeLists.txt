@@ -1,7 +1,7 @@
 # ospf build
 # Copyright (c) 2024 Michał Zagórski (zagura)
 # SPDX-License-Identifier: GPL-2.0-or-later
-if (TEST_PROGRAMS)
+if (TESTS_PROGRAMS)
     add_subdirectory(tests)
 endif()
 

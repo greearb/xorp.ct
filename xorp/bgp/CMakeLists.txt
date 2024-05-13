@@ -1,10 +1,10 @@
 # bgp main build
 # Copyright (c) 2021-2024 Michał Zagórski (zagura)
 # SPDX-License-Identifier: GPL-2.0-or-later
+
 add_subdirectory(tools)
 
 set(BGP_LIBS "")
-
 
 file(GLOB BGP_SRCS
                     # 'aspath.cc',
@@ -111,6 +111,7 @@ install(FILES bgp_xrl_shell_funcs.sh DESTINATION ${XORP_SBINDIR} PERMISSIONS OWN
                                                                              GROUP_READ GROUP_EXECUTE
                                                                              WORLD_EXECUTE WORLD_READ)
 
-if (TEST_PROGRAMS)
+if (TESTS_PROGRAMS)
     add_subdirectory(tests)
+    add_subdirectory(harness)
 endif()
