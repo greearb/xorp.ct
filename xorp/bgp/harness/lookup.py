@@ -4,7 +4,7 @@
 
 # On standard input take a list of update packets in XORP text format
 # On standard output generate a list of lookup xrls that can be passed to
-# call_xrl 
+# call_xrl
 
 import sys
 import getopt
@@ -95,15 +95,15 @@ def main():
         if o in ("-h", "-help"):
             usage()
             sys.exit()
-            if o in ("-p", "--peer"):
-                peer = a
-            if o in ("-t", "--trie"):
-                trie = a
-            if o in ("-a", "--add"):
-                add = a 
-            if o in ("-r", "--remove"):
-                remove = a
-        
+        if o in ("-p", "--peer"):
+            peer = a
+        if o in ("-t", "--trie"):
+            trie = a
+        if o in ("-a", "--add"):
+            add = a
+        if o in ("-r", "--remove"):
+            remove = a
+
     if not peer and not trie:
         usage()
         sys.exit(1)

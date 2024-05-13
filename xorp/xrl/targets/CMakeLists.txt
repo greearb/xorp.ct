@@ -15,16 +15,24 @@ file(GLOB tgt_srcs cli.tgt
               show_distances.tgt
               show_routes.tgt
               static_routes.tgt
-#              test.tgt
-#              test_fea_ifmgr_mirror.tgt
-              test_fea_rawlink.tgt
-#              test_finder_events.tgt
-#              test_peer.tgt
-              test_socket4.tgt
-#              test_xrls.tgt
 )
+
+if(TESTS_PROGRAMS)
+    list(APPEND tgt_srcs
+                          test.tgt
+                          test_fea_ifmgr_mirror.tgt
+                          test_fea_rawlink.tgt
+                          test_finder_events.tgt
+                          test_socket4.tgt
+                          test_xrls.tgt
+        )
+endif()
+
 if(BGP)
     list(APPEND tgt_srcs bgp.tgt)
+    if (TESTS_PROGRAMS)
+        list(APPEND tgt_srcs test_peer.tgt)
+    endif()
 endif()
 
 if(NOT DISABLE_IPV6)
