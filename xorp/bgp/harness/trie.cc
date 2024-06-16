@@ -320,3 +320,8 @@ Trie::del(IPNet<A> net, TriePayload& payload)
     if(!del->insert(net, payload))
 	XLOG_FATAL("Could not add nlri: %s", net.str().c_str());
 }
+
+template void Trie::add(IPNet<IPv4> net, TriePayload& payload);
+template void Trie::add(IPNet<IPv6> net, TriePayload& payload);
+template void Trie::del(IPNet<IPv4> net, TriePayload& payload);
+template void Trie::del(IPNet<IPv6> net, TriePayload& payload);

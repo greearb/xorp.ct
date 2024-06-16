@@ -137,6 +137,15 @@ test_subnet_route2(TestInfo& info, IPNet<A> net)
     return true;
 }
 
+template
+bool test_subnet_route1<IPv4>(TestInfo& info, IPNet<IPv4> net);
+template
+bool test_subnet_route1<IPv6>(TestInfo& info, IPNet<IPv6> net);
+
+template
+bool test_subnet_route2<IPv4>(TestInfo& info, IPNet<IPv4> net);
+template
+bool test_subnet_route2<IPv6>(TestInfo& info, IPNet<IPv6> net);
 /*
 ** This function is never called it exists to instantiate the
 ** templatised functions.

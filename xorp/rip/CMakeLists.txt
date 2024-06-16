@@ -49,27 +49,38 @@ if (NOT DISABLE_PROFILE)
      list(APPEND RIP_LIBS xif_profile_client)
 endif()
 
-# add_library(rip ${RIP_SRCS})
-# install(TARGETS rip LIBRARY DESTINATION ${XORP_LIBDIR})
+add_library(rip ${RIP_SRCS})
+target_link_libraries(rip ${RIP_LIBS} xif_socket4)
+install(TARGETS rip LIBRARY DESTINATION ${XORP_LIBDIR})
+target_compile_definitions(rip PRIVATE INSTANTIATE_IPV4)
 
-add_executable(xorp_rip xrl_target_rip.cc xorp_rip_main.cc ${RIP_SRCS})
+add_executable(xorp_rip xrl_target_rip.cc xorp_rip_main.cc)
 target_link_libraries(xorp_rip ${RIP_LIBS}
                                tgts_rip
                                xif_socket4
+                               rip
                                )
 
 target_compile_definitions(xorp_rip PRIVATE INSTANTIATE_IPV4)
 install(TARGETS xorp_rip RUNTIME DESTINATION ${XORP_MODULEDIR})
 
 if (ENABLE_IPV6)
-    add_executable(xorp_ripng xrl_target_ripng.cc xorp_rip_main.cc ${RIP_SRCS})
+    add_library(ripng ${RIP_SRCS})
+    target_link_libraries(ripng ${RIP_LIBS} xif_socket6)
+    install(TARGETS ripng LIBRARY DESTINATION ${XORP_LIBDIR})
+    target_compile_definitions(ripng PRIVATE INSTANTIATE_IPV6)
+
+    add_executable(xorp_ripng xrl_target_ripng.cc xorp_rip_main.cc)
     target_link_libraries(xorp_ripng ${RIP_LIBS}
                                      tgts_ripng
                                      xif_socket6
+                                     ripng
                                      )
 
     target_compile_definitions(xorp_ripng PRIVATE INSTANTIATE_IPV6)
     install(TARGETS xorp_ripng RUNTIME DESTINATION ${XORP_MODULEDIR})
+
+
 endif()
 
 

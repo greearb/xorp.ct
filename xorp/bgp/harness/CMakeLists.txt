@@ -74,6 +74,6 @@ target_link_libraries(test_peer ${HARNESS_LIBS})
 add_test(peer COMMAND test_peer)
 
 
-add_executable(test_trie bgppp.cc test_trie.cc)
+add_executable(test_trie bgppp.cc test_trie.cc trie.cc)
 target_link_libraries(test_trie ${HARNESS_LIBS})
 add_test(trie COMMAND test_trie)

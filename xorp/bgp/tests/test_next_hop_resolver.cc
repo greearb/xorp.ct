@@ -1203,3 +1203,23 @@ dummy()
     callback(nhr_test9<IPv4>);
     callback(nhr_test9<IPv6>);
 }
+
+template bool nhr_test1<IPv4>(TestInfo&, IPv4 nexthop, IPv4, IPNet<IPv4> subnet);
+template bool nhr_test1<IPv6>(TestInfo&, IPv6 nexthop, IPv6, IPNet<IPv6> subnet);
+template bool nhr_test2<IPv4>(TestInfo&, IPv4 nexthop, IPv4, IPNet<IPv4> subnet, int reg);
+template bool nhr_test2<IPv6>(TestInfo&, IPv6 nexthop, IPv6, IPNet<IPv6> subnet, int reg);
+template bool nhr_test3<IPv4>(TestInfo&, IPv4 nexthop, IPv4, IPNet<IPv4> subnet, int reg);
+template bool nhr_test3<IPv6>(TestInfo&, IPv6 nexthop, IPv6, IPNet<IPv6> subnet, int reg);
+template bool nhr_test4<IPv4>(TestInfo&, IPv4 nexthop, IPv4, IPNet<IPv4> subnet);
+template bool nhr_test4<IPv6>(TestInfo&, IPv6 nexthop, IPv6, IPNet<IPv6> subnet);
+template bool nhr_test5<IPv4>(TestInfo&, IPv4 nexthop, IPv4, IPNet<IPv4> subnet);
+template bool nhr_test5<IPv6>(TestInfo&, IPv6 nexthop, IPv6, IPNet<IPv6> subnet);
+template bool nhr_test6<IPv4>(TestInfo&, IPv4 nexthop, IPv4, IPNet<IPv4> subnet);
+template bool nhr_test6<IPv6>(TestInfo&, IPv6 nexthop, IPv6, IPNet<IPv6> subnet);
+template bool nhr_test7<IPv4>(TestInfo&, IPv4 nexthop, IPv4, IPNet<IPv4> subnet);
+template bool nhr_test7<IPv6>(TestInfo&, IPv6 nexthop, IPv6, IPNet<IPv6> subnet);
+template bool nhr_test8<IPv4>(TestInfo&, IPv4 nexthop, IPv4, IPNet<IPv4> subnet);
+template bool nhr_test8<IPv6>(TestInfo&, IPv6 nexthop, IPv6, IPNet<IPv6> subnet);
+template bool nhr_test9<IPv4>(TestInfo&, IPv4 nexthop, IPv4, IPNet<IPv4> subnet, int reg);
+template bool nhr_test9<IPv6>(TestInfo&, IPv6 nexthop, IPv6, IPNet<IPv6> subnet, int reg);
+

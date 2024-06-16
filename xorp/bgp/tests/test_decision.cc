@@ -64,7 +64,7 @@ test_decision(TestInfo& /*info*/)
 
     comm_init();
 
-    Iptuple iptuple1("3.0.0.127", 179, "2.0.0.1", 179);
+    Iptuple iptuple1("eth0", "3.0.0.127", 179, "2.0.0.1", 179);
     BGPPeerData *peer_data1 =
 	new BGPPeerData(localdata, iptuple1, AsNum(1), IPv4("2.0.0.1"), 30);
     peer_data1->compute_peer_type();
@@ -73,7 +73,7 @@ test_decision(TestInfo& /*info*/)
     BGPPeer peer1(&localdata, peer_data1, NULL, &bgpmain);
     PeerHandler handler1("test1", &peer1, NULL, NULL);
 
-    Iptuple iptuple2("3.0.0.127", 179, "2.0.0.2", 179);
+    Iptuple iptuple2("eth0", "3.0.0.127", 179, "2.0.0.2", 179);
     BGPPeerData *peer_data2 =
 	new BGPPeerData(localdata, iptuple2, AsNum(1), IPv4("2.0.0.2"), 30);
     peer_data2->compute_peer_type();
@@ -82,7 +82,7 @@ test_decision(TestInfo& /*info*/)
     BGPPeer peer2(&localdata, peer_data2, NULL, &bgpmain);
     PeerHandler handler2("test2", &peer2, NULL, NULL);
 
-    Iptuple iptuple3("3.0.0.127", 179, "2.0.0.3", 179);
+    Iptuple iptuple3("eth0", "3.0.0.127", 179, "2.0.0.3", 179);
     BGPPeerData *peer_data3 =
 	new BGPPeerData(localdata, iptuple2, AsNum(1), IPv4("2.0.0.3"), 30);
     peer_data3->compute_peer_type();

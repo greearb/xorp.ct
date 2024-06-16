@@ -58,9 +58,9 @@ test_fanout(TestInfo& /*info*/)
     EventLoop eventloop;
     BGPMain bgpmain(eventloop);
     LocalData localdata(bgpmain.eventloop());
-    Iptuple tuple1("127.0.0.1", 179, "10.0.0.1", 179);
-    Iptuple tuple2("127.0.0.1", 179, "10.0.0.2", 179);
-    Iptuple tuple3("127.0.0.1", 179, "10.0.0.3", 179);
+    Iptuple tuple1("lo", "127.0.0.1", 179, "10.0.0.1", 179);
+    Iptuple tuple2("lo", "127.0.0.1", 179, "10.0.0.2", 179);
+    Iptuple tuple3("lo", "127.0.0.1", 179, "10.0.0.3", 179);
 
     BGPPeerData* pd1 
 	= new BGPPeerData(localdata, tuple1, AsNum(1), IPv4("10.0.0.1"), 30);
