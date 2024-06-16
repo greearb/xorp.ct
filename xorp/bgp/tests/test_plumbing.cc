@@ -52,8 +52,8 @@ PlumbingTest::run_tests(BGPMain& bgpmain)
 bool
 PlumbingTest::test1(BGPMain& bgpmain) 
 {
-    Iptuple iptuple1("127.0.0.1", 179, "1.0.0.1", 179);
-    Iptuple iptuple2("127.0.0.1", 179, "1.0.0.2", 179);
+    Iptuple iptuple1("lo", "127.0.0.1", 179, "1.0.0.1", 179);
+    Iptuple iptuple2("lo", "127.0.0.1", 179, "1.0.0.2", 179);
     IPv4 nh;
 
     //    EventLoop eventloop;
@@ -248,8 +248,8 @@ PlumbingTest::test2(BGPMain& bgpmain)
     /*
     ** 1. Create a single peer (peer1).
     */
-    Iptuple iptuple1("127.0.0.1", 179, "1.0.0.1", 179);
-    Iptuple iptuple2("127.0.0.1", 179, "1.0.0.2", 179);
+    Iptuple iptuple1("lo", "127.0.0.1", 179, "1.0.0.1", 179);
+    Iptuple iptuple2("lo", "127.0.0.1", 179, "1.0.0.2", 179);
     IPv4 nh;
 
     //    EventLoop eventloop;

@@ -157,7 +157,7 @@ connect_client(EventLoop* e, bool* client_connect_failed)
     int in_progress = 0;
     XorpFd fd = comm_connect_tcp4(&ia,
 			       htons(FinderConstants::FINDER_DEFAULT_PORT()),
-			       COMM_SOCK_NONBLOCKING, &in_progress);
+			       COMM_SOCK_NONBLOCKING, &in_progress, NULL);
     if (!fd.is_valid()) {
 	fprintf(stderr, "Client failed to connect\n");
 	*client_connect_failed = true;

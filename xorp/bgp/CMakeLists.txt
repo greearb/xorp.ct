@@ -38,6 +38,7 @@ file(GLOB BGP_SRCS
                     route_table_cache.cc
                     route_table_damping.cc
                     route_table_decision.cc
+                    # route_table_debug.cc
                     route_table_deletion.cc
                     route_table_dump.cc
                     route_table_fanout.cc
@@ -73,6 +74,7 @@ target_compile_options(bgp PRIVATE -ftemplate-depth=35)
 target_link_libraries(bgp
                           cli
                           xif_cli_processor
+                          tgts_bgp
                           tgts_cli
                           finder
                           tecla

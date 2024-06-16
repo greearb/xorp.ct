@@ -20,7 +20,8 @@ set(RIPTESTS tgts_rip
 
 
 foreach(T IN ITEMS "auth" "outputs" "packets" "request" "route_walk" "timers" "update_queue")
-    add_executable(test_${T} test_${T}.cc)
-    target_link_libraries(test_${T} ${RIPTESTS})
-    add_test(${T} COMMAND test_${T})
+    add_executable(test_rip_${T} test_${T}.cc)
+    target_link_libraries(test_rip_${T} ${RIPTESTS})
+    target_include_directories(test_rip_${T} PRIVATE "${CMAKE_CURRENT_LIST_DIR}/../")
+    add_test(${T} COMMAND test_rip_${T})
 endforeach()
