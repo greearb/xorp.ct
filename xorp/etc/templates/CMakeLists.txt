@@ -33,38 +33,38 @@ if (ENABLE_IPV6)
                          pim6.cmds)
     if (OSPF)
         list(APPEND COMMANDS ospfv3.cmds)
-        list(APPEND TEMPLATE ospfv3.tp)
+        list(APPEND TEMPLATES ospfv3.tp)
     endif()
 endif()
 
 if (FIREWALL)
-    list(APPEND TEMPLATE firewall.tp)
+    list(APPEND TEMPLATES firewall.tp)
 endif()
 
 if (OSPF)
     list(APPEND COMMANDS ospfv2.cmds)
-    list(APPEND TEMPLATE ospfv2.tp)
+    list(APPEND TEMPLATES ospfv2.tp)
 endif()
 if (OLSR)
     list(APPEND COMMANDS olsr4.cmds)
-    list(APPEND TEMPLATE olsr4.tp)
+    list(APPEND TEMPLATES olsr4.tp)
 endif()
 
 if (BGP)
     list(APPEND COMMANDS bgp.cmds)
-    list(APPEND TEMPLATE bgp.tp)
+    list(APPEND TEMPLATES bgp.tp)
 endif()
 
 if (RIP)
     list(APPEND COMMANDS rip.cmds
                          ripng.cmds)
-    list(APPEND TEMPLATE rip.tp
+    list(APPEND TEMPLATES rip.tp
                          ripng.tp)
 endif()
 
 if (VRRP)
     list(APPEND COMMANDS vrrp.cmds)
-    list(APPEND TEMPLATE vrrp.tp)
+    list(APPEND TEMPLATES vrrp.tp)
 endif()
 
 if (XORPSH)
