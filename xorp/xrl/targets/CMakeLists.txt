@@ -52,7 +52,7 @@ endif()
 # endif()
 
 
-if(OSLR)
+if(OLSR)
     list(APPEND tgt_srcs olsr4.tgt)
 endif()
 

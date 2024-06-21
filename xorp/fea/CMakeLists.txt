@@ -8,12 +8,6 @@ if (TESTS_PROGRAMS)
 endif()
 add_subdirectory(tools)
 
-# add_library(static  static_routes_node.cc
-#                     static_routes_varrw.cc
-#                     xrl_static_routes_node.cc)
-
-# target_include_directories(static PRIVATE ${XORP_LIBDIR})
-# target_link_libraries(static PRIVATE feaclient xipc xorp interfaces policy crypto proto)
 set(FEA_LIBS xif_fea_fib_client
              xif_fea_rawlink_client
              xif_fea_rawpkt4_client
@@ -113,7 +107,7 @@ install(TARGETS xorp_fea RUNTIME DESTINATION ${XORP_MODULEDIR})
 if (FEA_DUMMY)
     add_executable(fea_dummy ${FEA_SRCS})
     target_link_libraries(fea_dummy PUBLIC ${FEA_LIBS})
-    target_add_definitions(fea_dummy PRIVATE "FEA_DUMMY=1")
+    target_compile_definitions(fea_dummy PRIVATE "FEA_DUMMY=1")
     install(TARGETS fea_dummy RUNTIME DESTINATION ${XORP_MODULEDIR})
 endif()
 

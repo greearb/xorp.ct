@@ -123,7 +123,7 @@ main(int argc, char *argv[])
     /*
      * Test `bind TCP socket'
      */
-    sock = comm_bind_tcp4(NULL, port, COMM_SOCK_BLOCKING);
+    sock = comm_bind_tcp4(NULL, port, COMM_SOCK_BLOCKING, NULL);
     if (sock == XORP_BAD_SOCKET) {
 	printf("ERROR: cannot open and bind TCP socket to port %d\n",
 	       ntohs(port));
@@ -135,7 +135,7 @@ main(int argc, char *argv[])
     /*
      * Test `bind UDP socket'
      */
-    sock = comm_bind_udp4(NULL, port, COMM_SOCK_BLOCKING, false);
+    sock = comm_bind_udp4(NULL, port, COMM_SOCK_BLOCKING, false, NULL);
     if (sock == XORP_BAD_SOCKET) {
 	printf("ERROR: cannot open and bind UDP socket to port %d\n",
 	       ntohs(port));
@@ -149,7 +149,7 @@ main(int argc, char *argv[])
      */
     sock = comm_bind_join_udp4(&mcast_addr, NULL, port,
 			       COMM_SOCK_ADDR_PORT_REUSE,
-			       COMM_SOCK_BLOCKING);
+			       COMM_SOCK_BLOCKING, NULL);
     if (sock == XORP_BAD_SOCKET) {
 	printf("ERROR: cannot open, bind and join UDP socket to group %s and port %d\n",
 	       inet_ntoa(mcast_addr), ntohs(port));
@@ -163,7 +163,7 @@ main(int argc, char *argv[])
     /*
      * Test 'listen on socket'
      */
-    sock = comm_bind_tcp4(NULL, port, COMM_SOCK_BLOCKING);
+    sock = comm_bind_tcp4(NULL, port, COMM_SOCK_BLOCKING, NULL);
     if (sock == XORP_BAD_SOCKET) {
 	printf("ERROR: cannot open and bind TCP socket to port %d,"
 	       " for listening\n", ntohs(port));

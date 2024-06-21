@@ -767,3 +767,6 @@ if(VRRP)
     add_subdirectory(vrrp)
 endif()
 
+if(TESTS_PROGRAMS)
+    enable_testing()
+endif()

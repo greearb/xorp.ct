@@ -2,6 +2,9 @@
 # Copyright (c) 2021-2024 Michał Zagórski (zagura)
 # License: see ${XORP}/LICENCE.gpl
 
+if(TESTS_PROGRAMS)
+    add_subdirectory(tests)
+endif()
 
 set(XORP_CXX
                 # C sources

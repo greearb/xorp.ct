@@ -2,7 +2,9 @@
 # Copyright (c) 2021-2024 Michał Zagórski (zagura)
 # License: see ${XORP}/LICENCE.gpl
 
-# add_subdirectory(test)
+if (TESTS_PROGRAMS)
+    add_subdirectory(tests)
+endif()
 
 
 file(GLOB COMM_CSRC comm_sock.c comm_user.c)
