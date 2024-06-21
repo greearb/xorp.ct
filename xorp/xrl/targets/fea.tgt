@@ -41,7 +41,7 @@ target fea implements	common/0.1,
 			raw_packet6/0.1,
 #endif
 #ifndef XORP_DISABLE_PROFILE
-			profile/0.1
+			profile/0.1,
 #endif
 			socket4/0.1
                         ;

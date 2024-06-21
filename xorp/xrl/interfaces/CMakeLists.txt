@@ -65,7 +65,7 @@ if(FIREWALL)
     list(APPEND interface_srcs "${CMAKE_CURRENT_LIST_DIR}/fea_firewall.xif")
 endif()
 
-if(OSLR)
+if(OLSR)
     list(APPEND interface_srcs "${CMAKE_CURRENT_LIST_DIR}/olsr4.xif")
 endif()
 

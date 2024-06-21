@@ -4,14 +4,18 @@
 #include "finder_event_observer.xif"
 #include "policy_backend.xif"
 #include "policy_redist4.xif"
+#ifndef XORP_DISABLE_PROFILE
 #include "profile.xif"
+#endif
 #include "olsr4.xif"
 #include "socket4_user.xif"
 
-target olsr4 implements	common/0.1,				\
-			finder_event_observer/0.1,		\
-			socket4_user/0.1,			\
-			policy_backend/0.1,			\
-			policy_redist4/0.1,			\
-			profile/0.1,				\
+target olsr4 implements	common/0.1,
+			finder_event_observer/0.1,
+			socket4_user/0.1,
+			policy_backend/0.1,
+			policy_redist4/0.1,
+#ifndef XORP_DISABLE_PROFILE
+			profile/0.1,
+#endif
 			olsr4/0.1;
