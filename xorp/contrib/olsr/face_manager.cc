@@ -240,7 +240,7 @@ FaceManager::receive(const string& interface, const string& vif,
 	// Walk the list of message handler functions in reverse,
 	// looking for one which is willing to consume this message.
 	vector<MessageReceiveCB>::reverse_iterator jj;
-	for (jj = _handlers.rbegin(); jj != _handlers.rend(); jj++) {
+	for (jj = _handlers.rbegin(); !(jj == _handlers.rend()); jj++) {
 	    try {
 		is_consumed = (*jj)->dispatch(msg, src, face->local_addr());
 		if (is_consumed)

@@ -800,7 +800,7 @@ IEMap::link_code(const string& proto, Code& code)
     POLICY* p = find_policy(proto);
     XLOG_ASSERT(p);
 
-    for (POLICY::reverse_iterator i = p->rbegin(); i != p->rend(); ++i) {
+    for (POLICY::reverse_iterator i = p->rbegin(); !(i == p->rend()); ++i) {
 	PolicyList* pl = i->second;
 
 	pl->link_code(code);

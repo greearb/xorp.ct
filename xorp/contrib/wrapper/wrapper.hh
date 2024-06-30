@@ -142,7 +142,7 @@ private:
 
     int         listen_sock;                /*  listening socket          */
     int         conn_sock;                  /*  connection socket         */
-    short int   port;                       /*  port number               */
+    unsigned short int   port;              /*  port number               */
     struct      sockaddr_in servaddr;       /*  socket address structure  */
 
     wrapperData_t  w_data;

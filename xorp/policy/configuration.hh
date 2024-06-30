@@ -45,9 +45,9 @@ typedef map<string, string> RESOURCES;
 // ones.  Global is "" so it's always smallest (first).
 #define FOR_ALL_POLICIES(n) \
     for (PROTOCOL::reverse_iterator i = _protocols.rbegin(); \
-	 i != _protocols.rend(); ++i) \
+	 !(i == _protocols.rend()); ++i) \
 	for (POLICY::reverse_iterator n = i->second->rbegin(); \
-	    n != i->second->rend(); ++n)
+	    !(n == i->second->rend()); ++n)
 
 class IEMap {
 public:

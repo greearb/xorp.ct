@@ -23,7 +23,9 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/c_format.hh"
-
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif

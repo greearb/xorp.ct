@@ -9,6 +9,7 @@ include(CheckLibraryExists)
 include(CheckStructHasMember)
 include(CheckTypeSize)
 include(CheckCSourceCompiles)
+include(CheckCSourceRuns)
 include(GNUInstallDirs)
 
 #set(CMAKE_CXX_STANDARD 17)
@@ -302,7 +303,7 @@ check_include_file("sys/mount.h"    HAVE_SYS_MOUNT_H)
 check_include_file("sys/resource.h" HAVE_SYS_RESOURCE_H)
 check_include_file("sys/stat.h"     HAVE_SYS_STAT_H)
 check_include_file("sys/syslog.h"   HAVE_SYS_SYSLOG_H)
-check_include_file("sys/linker.h"   HAVE_SYS_LINKER_H)
+check_include_files("sys/types.h;sys/param.h;sys/linker.h"   HAVE_SYS_LINKER_H)
 check_include_file("sys/sysctl.h"   HAVE_SYS_SYSCTL_H)
 check_include_file("linux/types.h"  HAVE_LINUX_TYPES_H)
 check_include_file("linux/sockios.h" HAVE_LINUX_SOCKIOS_H)
@@ -316,6 +317,13 @@ check_symbol_exists(SOCK_DGRAM  "sys/socket.h" HAVE_DECL_SOCK_DGRAM)
 check_symbol_exists(SOCK_RAW    "sys/socket.h" HAVE_DECL_SOCK_RAW)
 # Skip seme parts about sockets
 
+if (HAVE_DECL_AF_INET AND HAVE_DECL_SOCK_STREAM AND HAVE_DECL_SOCK_DGRAM)
+    set(HAVE_TCPUDP_UNIX_SOCKETS ON)
+endif()
+if (HAVE_DECL_AF_INET AND HAVE_DECL_SOCK_RAW)
+    set(HAVE_IP_RAW_SOCKETS ON)
+endif()
+
 check_struct_has_member("struct msghdr" msg_control "sys/socket.h" HAVE_STRUCT_MSGHDR_MSG_CONTROL)
 check_struct_has_member("struct msghdr" msg_iov     "sys/socket.h" HAVE_STRUCT_MSGHDR_MSG_IOV)
 check_struct_has_member("struct msghdr" msg_name    "sys/socket.h" HAVE_STRUCT_MSGHDR_MSG_NAME)
@@ -327,13 +335,13 @@ check_struct_has_member("struct sockaddr_storage"   ss_len  "sys/socket.h" HAVE_
 check_include_file("net/ethernet.h" HAVE_NET_ETHERNET_H)
 check_include_file("sys/ethernet.h" HAVE_SYS_ETHERNET_H)
 check_include_file("net/if.h"       HAVE_NET_IF_H)
-check_include_file("net/if_arp.h"   HAVE_NET_IF_ARP_H)
-check_include_file("net/if_dl.h"    HAVE_NET_IF_DL_H)
-check_include_file("net/if_ether.h" HAVE_NET_IF_ETHER_H)
-check_include_file("net/if_media.h" HAVE_NET_IF_MEDIA_H)
-check_include_file("net/if_var.h"   HAVE_NET_IF_VAR_H)
+check_include_files("net/if.h;net/if_arp.h"   HAVE_NET_IF_ARP_H)
+check_include_files("net/if.h;net/if_dl.h"    HAVE_NET_IF_DL_H)
+check_include_files("net/if.h;net/if_ether.h" HAVE_NET_IF_ETHER_H)
+check_include_files("net/if.h;net/if_media.h" HAVE_NET_IF_MEDIA_H)
+check_include_files("net/if.h;net/if_var.h"   HAVE_NET_IF_VAR_H)
 check_include_file("net/if_types.h" HAVE_NET_IF_TYPES_H)
-check_include_file("net/route.h"    HAVE_NET_ROUTE_H)
+check_include_files("sys/types.h;net/if.h;net/route.h"    HAVE_NET_ROUTE_H)
 check_include_file("ifaddrs.h"      HAVE_IFADDRS_H)
 check_include_file("stropts.h"      HAVE_STROPTS_H)
 check_include_file("linux/ethtool.h" HAVE_LINUX_ETHTOOL_H)
@@ -341,7 +349,9 @@ check_include_file("linux/ethtool.h" HAVE_LINUX_ETHTOOL_H)
 check_include_file("linux/netlink.h"    HAVE_LINUX_NETLINK_H)
 check_include_file("linux/rtnetlink.h"  HAVE_LINUX_RTNETLINK_H)
 if (${HAVE_LINUX_RTNETLINK_H} AND ${HAVE_LINUX_NETLINK_H})
-    set(HAVE_NETLINK_SOCKETS ON)
+    set(HAVE_NETLINK_SOCKETS 1)
+elseif(HAVE_NET_ROUTE_H AND NOT HOST_OS_LINUX)
+    set(HAVE_ROUTING_SOCKETS 1)
 endif()
 check_c_source_compiles("
 #include <linux/rtnetlink.h>
@@ -351,7 +361,7 @@ int main() {
     return 0;
 }
 " HAVE_NETLINK_SOCKET_ATTRIBUTE_RTA_TABLE)
-check_struct_has_member("struct sockaddr_dl"    sdl_len "sys/socket.h" HAVE_STRUCTSOCKADDR_DL_SDL_LEN)
+check_struct_has_member("struct sockaddr_dl"    sdl_len "inet/if_dl.h;sys/socket.h" HAVE_STRUCTSOCKADDR_DL_SDL_LEN)
 check_struct_has_member("struct ifreq"  ifr_hwaddr  "net/if.h" HAVE_STRUCT_IFREQ_IFR_HWADDR)
 check_struct_has_member("struct ifreq"  ifr_ifindex "net/if.h" HAVE_STRUCT_IFREQ_IFR_IFINDEX)
 
@@ -377,16 +387,39 @@ int main() {
     return 0;
 }
 " HAVE_STRUCT_ETHER_ADDR)
-# Drop some variables related to sysctl - strange
+
+
+macro(CHECK_SYSCTL VARIABLE_NAME OIDS INCLUDE_LIST)
+    check_c_source_runs("
+#include<stdlib.h>
+#include<sys/param.h>
+#include<sys/types.h>
+#include<sys/sysctl.h>
+${INCLUDE_LIST}
+
+int main() {
+    size_t buflen;
+    int mib1[] = { ${OIDS} };
+
+    if (sysctl(mib1, sizeof(mib1)/sizeof(mib1[0]), NULL, &buflen, NULL, 0) < 0)
+        return (1);
+    return (0);
+}
+" ${VARIABLE_NAME})
+endmacro()
+
+check_sysctl(HAVE_SYSCTL_NET_RT_DUMP "CTL_NET, AF_ROUTE, 0, AF_INET, NET_RT_DUMP, 0" "#include <sys/socket.h>")
+check_sysctl(HAVE_SYSCTL_NET_RT_IFLIST "CTL_NET, AF_ROUTE, 0, AF_INET, NET_RT_IFLIST, 0" "#include <sys/socket.h>")
+
 check_symbol_exists(SIOCGIFCONF "sys/ioctl.h" HAVE_IOCTL_SIOCGIFCONF)
 
 check_include_file("netinet/in.h"           HAVE_NETINET_IN_H)
-check_include_file("netinet/in_systm.h"     HAVE_NETINET_IN_SYSTM_H)
-check_include_file("netinet/in_var.h"       HAVE_NETINET_IN_VAR_H)
-check_include_file("netinet/ip.h"           HAVE_NETINET_IP_H)
-check_include_file("netinet/tcp.h"          HAVE_NETINET_TCP_H)
+check_include_files("net/if.h;sys/types.h;netinet/in.h;netinet/in_systm.h"     HAVE_NETINET_IN_SYSTM_H)
+check_include_files("sys/socket.h;net/if.h;netinet/in.h;netinet/in_var.h"       HAVE_NETINET_IN_VAR_H)
+check_include_files("sys/types.h;netinet/in.h;netinet/in_systm.h;netinet/ip.h"           HAVE_NETINET_IP_H)
+check_include_files("netinet/tcp.h"          HAVE_NETINET_TCP_H)
 
-check_include_file("netinet/igmp.h"         HAVE_NETINET_IGMP_H)
+check_include_files("sys/types.h;netinet/in.h;netinet/igmp.h"         HAVE_NETINET_IGMP_H)
 check_include_file("netinet/ether.h"        HAVE_NETINET_ETHER_H)
 check_c_source_compiles("
 #include <linux/in.h>
@@ -398,7 +431,7 @@ int main() {
     return 0;
 }
 " HAVE_STRUCT_IP_MREQN)
-check_include_file("netinet/if_ether.h"     HAVE_NETINET_IF_ETHER_H)
+check_include_files("sys/socket.h;netinet/in.h;netinet/if_ether.h"     HAVE_NETINET_IF_ETHER_H)
 check_include_file("inet/nd.h"              HAVE_INET_ND_H)
 check_include_file("inet/ip.h"              HAVE_INET_IP_H)
 check_include_file("arpa/inet.h"            HAVE_ARPA_INET_H)
@@ -455,11 +488,8 @@ if (HAVE_SYS_TYPES_H EQUAL 1
         message(STATUS "Disabling MULT_MCAST_TABLES, host_os: ${HOST_OS}")
     endif()
 endif()
-###
-# skip sysctl checking
-#     conf.CheckSysctl('IPCTL_FORWARDING', oid='CTL_NET, AF_INET, IPPROTO_IP, IPCTL_FORWARDING', includes='#include <sys/socket.h>\n#include <netinet/in.h>')
-#
 
+check_sysctl(HAVE_SYSCTL_IPCTL_FORWARDING "CTL_NET, AF_INET, IPPROTO_IP, IPCTL_FORWARDING" "#include <sys/socket.h>\n#include <netinet/in.h>")
 
 ######
 # logs
@@ -499,26 +529,29 @@ if (ENABLE_IPV6
     set(HAVE_IPV6 1)
 endif()
 
-check_symbol_exists(__KAME__        "netinet/in.h;netinet/ip6.h;netinet6/ip6.h" IPV6_STACK_KAME)
-check_symbol_exists(inet6_opt_init  "netinet/in.h;netinet/ip6.h" HAVE_RFC3542)
+check_symbol_exists(__KAME__        "sys/types.h;netinet/in.h;netinet/ip6.h" IPV6_STACK_KAME)
+check_symbol_exists(inet6_opt_init  "sys/types.h;netinet/in.h;netinet/ip6.h" HAVE_RFC3542)
 
 check_struct_has_member("struct sockaddr_in6"  sin6_len  "netinet/in.h;sys/socket.h" HAVE_STRUCT_SOCKADDR_IN6_SIN6_LEN)
 check_struct_has_member("struct sockaddr_in6"  sin6_scope_id "netinet/in.h;sys/socket.h" HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID)
 
-check_include_file("netinet/ip6.h"              HAVE_NETINET_IP6_H)
-check_include_file("netinet/icmp6.h"            HAVE_NETINET_ICMP6_H)
-check_struct_has_member("struct mld_hdr"       mld_addr  "netinet/icmp6.h"          HAVE_STRUCT_MLD_HDR)
+check_include_files("sys/types.h;net/if.h;netinet/in.h"              HAVE_NETINET_IP6_H)
+check_include_files("sys/types.h;net/if.h;netinet/in.h;netinet/icmp6.h"            HAVE_NETINET_ICMP6_H)
+check_struct_has_member("struct mld_hdr"       mld_addr  "sys/types.h;netinet/in.h;netinet/icmp6.h"          HAVE_STRUCT_MLD_HDR)
 
-check_include_file("netinet6/in6_var.h"         HAVE_NETINET6_IN6_VAR_H)
-check_include_file("netinet/ip.h"               HAVE_NETINET_IP_H)
-check_include_file("netinet/tcp.h"              HAVE_NETINET_TCP_H)
+check_include_files("sys/types.h;net/if.h;netinet/in.h;netinet6/in6_var.h"         HAVE_NETINET6_IN6_VAR_H)
+check_include_files("sys/types.h;net/if.h;netinet/in.h;netinet/ip.h"               HAVE_NETINET_IP_H)
+check_include_files("sys/types.h;net/if.h;netinet/in.h;netinet/tcp.h"              HAVE_NETINET_TCP_H)
 
-check_include_files("netinet6/nd6.h"             HAVE_NETINET6_ND6_H_C LANGUAGE C)
-check_include_files("netinet6/nd6.h"             HAVE_NETINET6_ND6_H_CXX LANGUAGE CXX)
-if (HAVE_NETINET6_ND6_C AND NOT HAVE_NETINET6_ND6_CXX)
+check_include_files("sys/types.h;net/if.h;netinet/in.h;netinet6/in6_var.h;netinet6/nd6.h"             HAVE_NETINET6_ND6_H LANGUAGE C)
+check_include_files("sys/types.h;net/if.h;netinet/in.h;netinet6/in6_var.h;netinet6/nd6.h"             HAVE_NETINET6_ND6_H_CXX LANGUAGE CXX)
+if (HAVE_NETINET6_ND6_H AND NOT HAVE_NETINET6_ND6_H_CXX)
     message("netinet6/nd6.h broken for C++")
     set(HAVE_BROKEN_CXX_NETINET6_ND6_H 1)
 endif()
+
+check_sysctl(HAVE_SYSCTL_IPV6CTL_FORWARDING "CTL_NET, AF_INET6, IPPROTO_IPV6, IPV6CTL_FORWARDING" "#include <sys/socket.h>\n#include <netinet/in.h>")
+check_sysctl(HAVE_SYSCTL_IPV6CTL_ACCEPT_RTADV "CTL_NET, AF_INET6, IPPROTO_IPV6, IPV6CTL_ACCEPT_RTADV" "#include <sys/socket.h>\n#include <netinet/in.h>")
 
 check_symbol_exists(IPV6_MULTICAST_IF        "netinet/in.h;sys/socket.h;sys/types.h" HAVE_DECL_IPV6_MULTICAST_IF)
 check_symbol_exists(IPV6_MULTICAST_LOOP      "netinet/in.h;sys/socket.h;sys/types.h" HAVE_DECL_IPV6_MULTICAST_LOOP)
@@ -534,7 +567,7 @@ check_symbol_exists(fpclassify "math.h"         HAVE_DECL_FPCLASSIFY)
 
 ##########
 # v4 mforwarding
-check_include_file("netinet/ip_mroute.h"        HAVE_NETINET_IP_MROUTE_H)
+check_include_files("sys/types.h;sys/time.h;netinet/in.h;netinet/ip_mroute.h"        HAVE_NETINET_IP_MROUTE_H)
 check_include_file("net/if_var.h"               HAVE_NET_IF_VAR_H)
 check_include_file("net/ip_mroute/ip_mroute.h"  HAVE_NET_IP_MROUTE_IP_MROUTE_H)
 check_include_file("linux/mroute.h"             HAVE_LINUX_MROUTE_H)
@@ -556,7 +589,7 @@ endif()
 
 ##########
 # v6 mforwarding
-check_include_file("netinet6/ip6_mroute.h"          HAVE_NETINET6_IP6_MROUTE_H)
+check_include_files("sys/types.h;sys/param.h;sys/socket.h;netinet/in.h;netinet6/ip6_mroute.h"          HAVE_NETINET6_IP6_MROUTE_H)
 check_include_file("linux/mroute6.h"                HAVE_LINUX_MROUTE6_H)
 
 check_symbol_exists(inet6_option_space "linux/mroute6.h" HAVE_DECL_INET6_OPTION_SPACE)
@@ -570,21 +603,20 @@ if (ENABLE_IPV6 AND (HAVE_NETINET6_IP6_MROUTE_H EQUAL 1
     if (HAVE_DECL_INET6_OPTION_SPACE EQUAL 1)
         set(HAVE_IPV6_OPTION_SPACE 1)
     else()
-        message(WARNING
-            "inet6_option_* and inet6_opt_* are not supported on this system.
-            This might cause some problems with IPv6 multicast routing.")
+        message(WARNING "inet6_option_* and inet6_opt_* are not supported on this system.")
+        message(WARNING "This might cause some problems with IPv6 multicast routing.")
     endif()
 endif()
 check_struct_has_member("struct mif6ctl"  vifc_threshold  "linux/mroute6.h" HAVE_STRUCT_MIF6CTL_VIFC_THRESHOLD)
 
 ##########
 # packet filters
-check_include_file("netinet/ip_compat.h"                HAVE_NETINET_IP_COMPAT_H)
-check_include_file("netinet/ip_fil.h"                   HAVE_NETINET_IP_FIL_H)
-check_include_file("netinet/ip_fw.h"                    HAVE_NETINET_IP_FW_H)
+check_include_files("sys/types.h;net/if.h;netinet/in.h;netinet/ip_compat.h"                HAVE_NETINET_IP_COMPAT_H)
+check_include_files("sys/types.h;net/if.h;netinet/ip_fil.h"                   HAVE_NETINET_IP_FIL_H)
+check_include_files("sys/types.h;net/if.h;netinet/in.h;netinet/ip_fw.h"                    HAVE_NETINET_IP_FW_H)
 check_include_file("net/pfvar.h"                        HAVE_NET_PFVAR_H)
-check_include_files("linux/netfilter_ipv4/ip_tables.h"  HAVE_LINUX_NETFILTER_IPV4_IP_TABLES_H   LANGUAGE CXX)
-check_include_files("linux/netfilter_ipv6/ip6_tables.h" HAVE_LINUX_NETFILTER_IPV6_IP6_TABLES_H  LANGUAGE CXX)
+check_include_files("linux/netfilter_ipv4/ip_tables.h"   HAVE_LINUX_NETFILTER_IPV4_IP_TABLES_H   LANGUAGE CXX)
+check_include_files("linux/netfilter_ipv6/ip6_tables.h"  HAVE_LINUX_NETFILTER_IPV6_IP6_TABLES_H  LANGUAGE CXX)
 
 if (FIREWALL)
     if(HAVE_LINUX_NETFILTER_IPV4_IP_TABLES_H EQUAL 1
@@ -596,7 +628,7 @@ endif()
 ##########
 # vlan
 check_include_file("net/if_vlanvar.h"                    HAVE_NET_IF_VLANVAR_H)
-check_include_file("net/if_vlan_var.h"                   HAVE_NET_IF_VLAN_VAR_H)
+check_include_files("sys/types.h;net/if.h;net/if_vlan_var.h"      HAVE_NET_IF_VLAN_VAR_H)
 check_include_file("net/vlan/if_vlan_var.h"              HAVE_NET_VLAN_IF_VLAN_VAR_H)
 check_include_file("linux/if_vlan.h"                     HAVE_LINUX_IF_VLAN_H)
 
@@ -662,7 +694,7 @@ if (PCAP_LIB)
     set(CMAKE_REQUIRED_LIBRARIES ${PCAP_LIB})
     check_function_exists(pcap_sendpacket HAVE_PCAP_SENDPACKET)
     check_include_file("pcap.h"         HAVE_PCAP_H)
-    check_include_file("pcap-bpf.h"     HAVE_PCAP_BPF_H)
+    check_include_files("sys/types.h;sys/time.h;pcap-bpf.h"     HAVE_PCAP_BPF_H)
     if (NOT HAVE_PCAP_BPF_H)
         message(WARNING "
           PCAP-BPF is not supported on this system,
