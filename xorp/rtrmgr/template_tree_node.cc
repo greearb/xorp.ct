@@ -671,12 +671,11 @@ TemplateTreeNode::create_variable_map(const list<string>& segments) const
 {
     map<string,string> varmap;
     const TemplateTreeNode* ttn = this;
-    list<string>::const_reverse_iterator iter;
 
-    for (iter = segments.rbegin(); iter != segments.rend(); ++iter) {
-	if (ttn->name_is_variable())
-	    varmap[ttn->segname()] = *iter;
-	ttn = ttn->parent();
+    for (auto iter = segments.rbegin(); !(iter == segments.rend()); ++iter) {
+        if (ttn->name_is_variable())
+            varmap[ttn->segname()] = *iter;
+        ttn = ttn->parent();
     }
     return varmap;
 }

@@ -166,7 +166,7 @@ PimMrt::add_task_delete_mrib_entries(const list<Mrib *>& mrib_list)
     //
     list<PimMreTask *>::reverse_iterator iter;
     iter = pim_mre_task_list().rbegin();
-    if (iter != pim_mre_task_list().rend()) {
+    if (!(iter == pim_mre_task_list().rend())) {
 	pim_mre_task = *iter;
 	if (pim_mre_task->input_state()
 	    == PimMreTrackState::INPUT_STATE_IN_REMOVE_MISC) {
@@ -1159,7 +1159,7 @@ PimMrt::add_task_add_pim_mre(PimMre *pim_mre)
     //
     list<PimMreTask *>::reverse_iterator iter;
     iter = pim_mre_task_list().rbegin();
-    if (iter != pim_mre_task_list().rend()) {
+    if (!(iter == pim_mre_task_list().rend())) {
 	pim_mre_task = *iter;
 	if (pim_mre_task->input_state() == input_state) {
 	    pim_mre_task->add_pim_mre(pim_mre);
@@ -1224,7 +1224,7 @@ PimMrt::add_task_delete_pim_mre(PimMre *pim_mre)
     //
     list<PimMreTask *>::reverse_iterator iter;
     iter = pim_mre_task_list().rbegin();
-    if (iter != pim_mre_task_list().rend()) {
+    if (!(iter == pim_mre_task_list().rend())) {
 	pim_mre_task = *iter;
 	if (pim_mre_task->input_state() == input_state) {
 	    pim_mre_task->add_pim_mre(pim_mre);		// XXX
@@ -1266,7 +1266,7 @@ PimMrt::add_task_delete_pim_mfc(PimMfc *pim_mfc)
     //
     list<PimMreTask *>::reverse_iterator iter;
     iter = pim_mre_task_list().rbegin();
-    if (iter != pim_mre_task_list().rend()) {
+    if (!(iter == pim_mre_task_list().rend())) {
 	pim_mre_task = *iter;
 	if (pim_mre_task->input_state()
 	    == PimMreTrackState::INPUT_STATE_IN_REMOVE_PIM_MFC) {

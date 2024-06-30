@@ -102,9 +102,13 @@
 #cmakedefine HAVE_DECL_SOCK_DGRAM                       @HAVE_DECL_SOCK_DGRAM@
 #cmakedefine HAVE_DECL_SOCK_RAW                         @HAVE_DECL_SOCK_RAW@
 
-#cmakedefine HAVE_STRUCT_MSGHDR_MSG_CONTROL             @HAVE_STRUCT_MSGHDR_MSG_CONTROL@
+
+#cmakedefine HAVE_TCPUDP_UNIX_SOCKETS
+#cmakedefine HAVE_IP_RAW_SOCKETS
 
 #cmakedefine HAVE_STRUCT_MSGHDR_MSG_CONTROL             @HAVE_STRUCT_MSGHDR_MSG_CONTROL@
+
+
 #cmakedefine HAVE_STRUCT_MSGHDR_MSG_IOV                 @HAVE_STRUCT_MSGHDR_MSG_IOV@
 #cmakedefine HAVE_STRUCT_MSGHDR_MSG_NAME                @HAVE_STRUCT_MSGHDR_MSG_NAME@
 #cmakedefine HAVE_STRUCT_MSGHDR_MSG_NAMELEN             @HAVE_STRUCT_MSGHDR_MSG_NAMELEN@
@@ -112,7 +116,7 @@
 /* #cmakedefine HAVE_STRUCT_SOCKADDR_STORAGE_SS_LEN    @HAVE_STRUCT_SOCKADDR_STORAGE_SS_LEN@   */         /* Unused */
 /* #cmakedefine HAVE_SOCKADDR_UN_SUN_LEN           @HAVE_SOCKADDR_UN_SUN_LEN@                  */         /* Unused */
 
-#cmakedefine HAVE_NET_ETHERNET_H                            @HAVE_NET_ETHERNET_H@
+#cmakedefine HAVE_NET_ETHERNET_H                        @HAVE_NET_ETHERNET_H@
 #cmakedefine HAVE_SYS_ETHERNET_H                        @HAVE_SYS_ETHERNET_H@
 #cmakedefine HAVE_NET_IF_H                              @HAVE_NET_IF_H@
 #cmakedefine HAVE_NET_IF_ARP_H                          @HAVE_NET_IF_ARP_H@
@@ -130,6 +134,7 @@
 #cmakedefine HAVE_LINUX_NETLINK_H                       @HAVE_LINUX_NETLINK_H@
 #cmakedefine HAVE_LINUX_RTNETLINK_H                     @HAVE_LINUX_RTNETLINK_H@
 #cmakedefine HAVE_NETLINK_SOCKETS
+#cmakedefine HAVE_ROUTING_SOCKETS                       @HAVE_ROUTING_SOCKETS@
 
 #cmakedefine HAVE_NETLINK_SOCKET_ATTRIBUTE_RTA_TABLE    @HAVE_NETLINK_SOCKET_ATTRIBUTE_RTA_TABLE@
 /* #cmakedefine HAVE_STRUCTSOCKADDR_DL_SDL_LEN             @HAVE_STRUCTSOCKADDR_DL_SDL_LEN@  */           /* Unused */
@@ -139,7 +144,7 @@
 #cmakedefine HAVE_ETHER_ATON                            @HAVE_ETHER_ATON@
 #cmakedefine HAVE_ETHER_ATON_R                          @HAVE_ETHER_ATON_R@
 #cmakedefine HAVE_ETHER_NTOA                            @HAVE_ETHER_NTOA@
-#cmakedefine HAVE_NTOA_R                                @HAVE_NTOA_R@
+#cmakedefine HAVE_ETHER_NTOA_R                          @HAVE_NTOA_R@
 #cmakedefine HAVE_GETADDRINFO                           @HAVE_GETADDRINFO@
 #cmakedefine HAVE_GETIFADDRS                            @HAVE_GETIFADDRS@
 #cmakedefine HAVE_GETNAMEINFO                           @HAVE_GETNAMEINFO@
@@ -149,6 +154,8 @@
 #cmakedefine HAVE_INET_PTON                             @HAVE_INET_PTON@
 #cmakedefine HAVE_STRUCT_ETHER_ADDR
 #cmakedefine HAVE_IOCTL_SIOCGIFCONF
+#cmakedefine HAVE_SYSCTL_NET_RT_DUMP
+#cmakedefine HAVE_SYSCTL_NET_RT_IFLIST
 
 
 #cmakedefine HAVE_IPV6                                  @HAVE_IPV6@
@@ -193,6 +200,7 @@
 #cmakedefine HAVE_DECL_IP_ADD_MEMBERSHIP                @HAVE_DECL_IP_ADD_MEMBERSHIP@
 #cmakedefine HAVE_DECL_IP_DROP_MEMBERSHIP               @HAVE_DECL_IP_DROP_MEMBERSHIP@
 /* #undef HAVE_SYSCTL_IPCTL_FORWARDING */  /* @todo: Missing for Linux in glibc */
+#cmakedefine HAVE_SYSCTL_IPCTL_FORWARDING
 
 /* #undef HAVE_DECL___KAME__ */
 #cmakedefine IPV6_STACK_KAME                            @IPV6_STACK_KAME@
@@ -206,12 +214,11 @@
 #cmakedefine HAVE_STRUCT_MLD_HDR                        @HAVE_STRUCT_MLD_HDR@
 
 #cmakedefine HAVE_NETINET6_IN6_VAR_H                    @HAVE_NETINET6_IN6_VAR_H@
-#cmakedefine HAVE_NETINET6_ND6_H                        @HAVE_NETINET6_ND6_H_C@
+#cmakedefine HAVE_NETINET6_ND6_H                        @HAVE_NETINET6_ND6_H@
 #cmakedefine HAVE_BROKEN_CXX_NETINET6_ND6_H             @HAVE_BROKEN_CXX_NETINET6_ND6_H@
-#cmakedefine HAVE_NETINET6_IN6_VAR_H                    @HAVE_NETINET6_IN6_VAR_H@
-/* Skip sysctl checks in CMake */
-/* #undef HAVE_SYSCTL_IPV6CTL_FORWARDING */
-/* #undef HAVE_SYSCTL_IPV6CTL_ACCEPT_RTADV */
+
+#cmakedefine HAVE_SYSCTL_IPV6CTL_FORWARDING
+#cmakedefine HAVE_SYSCTL_IPV6CTL_ACCEPT_RTADV
 #cmakedefine HAVE_DECL_IPV6_MULTICAST_IF                @HAVE_DECL_IPV6_MULTICAST_IF@
 #cmakedefine HAVE_DECL_IPV6_MULTICAST_LOOP              @HAVE_DECL_IPV6_MULTICAST_LOOP@
 #cmakedefine HAVE_IPV6_MULTICAST                        @HAVE_IPV6_MULTICAST@

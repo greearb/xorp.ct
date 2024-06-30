@@ -25,7 +25,9 @@
 #include "libxorp/service.hh"
 #include "libxorp/eventloop.hh"
 #include "libcomm/comm_api.h"
-
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
 
 Wrapper::Wrapper(EventLoop& eventloop, IO* io)
     : _eventloop(eventloop), _io(io),_status(INIT),
@@ -166,7 +168,7 @@ bool Wrapper::wait_for_cmd()
             servaddr.sin_port        = htons(port);
             /*  Bind our socket addresss to the
             listening socket, and call listen()  */
-            if ( bind(listen_sock, (struct sockaddr *) &servaddr, sizeof(servaddr)) < 0 ) {
+            if (::bind(listen_sock, (struct sockaddr *) &servaddr, sizeof(servaddr)) < 0 ) {
                 fprintf(stderr, "Wrapper: Error calling bind()\n");
                 return false;
             }

@@ -830,9 +830,8 @@ PathAttribute *
 ClusterListAttribute::clone() const
 {
     ClusterListAttribute *ca = new ClusterListAttribute();
-    list<IPv4>::const_reverse_iterator i = cluster_list().rbegin();
-    for(; i != cluster_list().rend(); i++)
-	ca->prepend_cluster_id(*i);
+    for(auto i = cluster_list().rbegin(); !(i == cluster_list().rend()); i++)
+        ca->prepend_cluster_id(*i);
     return ca;
 }
 
