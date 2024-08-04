@@ -22,7 +22,7 @@ Import('env')
 
 env = env.Clone()
 
-is_shared = env.has_key('SHAREDLIBS')
+is_shared = 'SHAREDLIBS' in env
 
 subdirs = [
 	'tests',
@@ -79,12 +79,12 @@ if not is_shared:
         "crypto",
         ])
 
-    if not (env.has_key('mingw') and env['mingw']):
+    if not ('mingw' in env and env['mingw']):
         env.AppendUnique(LIBS = [
             "rt",
             ])
 
-if (env.has_key('mingw') and env['mingw']):
+if ('mingw' in env and env['mingw']):
     env.AppendUnique(LIBS = [
         'ws2_32',
         'iphlpapi',
@@ -119,7 +119,7 @@ libxorp_rib_srcs = [
 	     'xrl_target.cc'
              ]
 
-if not (env.has_key('disable_profile') and env['disable_profile']):
+if not ('disable_profile' in env and env['disable_profile']):
     libxorp_rib_srcs.append('profile_vars.cc')
     env.AppendUnique(LIBS = [
         'xif_profile_client',

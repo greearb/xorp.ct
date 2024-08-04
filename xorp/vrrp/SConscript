@@ -27,7 +27,7 @@ Import('env')
 #SConscript(dirs = subdirs, exports='env')
 
 env = env.Clone()
-is_shared = env.has_key('SHAREDLIBS')
+is_shared = 'SHAREDLIBS' in env
 
 env.AppendUnique(CPPPATH = [
     '#',
@@ -61,7 +61,7 @@ env.AppendUnique(LIBS = [
     'xorp_comm'
 ])
 
-if (env.has_key('mingw') and env['mingw']):
+if ('mingw' in env and env['mingw']):
     env.AppendUnique(LIBS = [
 #        'mprapi',
         'regex',

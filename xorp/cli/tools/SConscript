@@ -21,7 +21,7 @@ Import('env')
 
 env = env.Clone()
 
-is_shared = env.has_key('SHAREDLIBS')
+is_shared = 'SHAREDLIBS' in env
 
 env.AppendUnique(CPPPATH = [
     '#',
@@ -46,11 +46,11 @@ env.AppendUnique(LIBS = [
     'xorp_comm',
     ])
 
-if (env.has_key('mingw') and env['mingw']):
+if ('mingw' in env and env['mingw']):
     env.AppendUnique(LIBS = [ 'winmm' ])
 
 if not is_shared:
-    if not (env.has_key('mingw') and env['mingw']):
+    if not ('mingw' in env and env['mingw']):
         env.AppendUnique(LIBS = [
             "rt",
         ])
@@ -59,7 +59,7 @@ if not is_shared:
         "crypto",
         ])
 
-if (env.has_key('mingw') and env['mingw']):
+if ('mingw' in env and env['mingw']):
     env.AppendUnique(LIBS = [
         'ws2_32',
         'iphlpapi',

@@ -157,13 +157,13 @@ xorp_paths = {
 }
 
 
-is_shared = env.has_key('SHAREDLIBS')
+is_shared = 'SHAREDLIBS' in env
 if not is_shared:
     libxorp_rtrmgr_env.AppendUnique(LIBS = [
         "crypto",
         ])
 
-    if not (env.has_key('mingw') and env['mingw']):
+    if not ('mingw' in env and env['mingw']):
         libxorp_rtrmgr_env.AppendUnique(LIBS = [
             "rt",
             ])
@@ -207,12 +207,12 @@ rtrmgr_env.AppendUnique(LIBS = [
 ])
 
 if not is_shared:
-    if not (env.has_key('mingw') and env['mingw']):
+    if not ('mingw' in env and env['mingw']):
         rtrmgr_env.AppendUnique(LIBS = [
             "rt",
             ])
 
-if (rtrmgr_env.has_key('mingw') and rtrmgr_env['mingw']):
+if ('mingw' in rtrmgr_env and rtrmgr_env['mingw']):
     rtrmgr_env.AppendUnique(LIBS = [
         'ws2_32',
         'iphlpapi',
@@ -255,11 +255,11 @@ if env['enable_xorpsh']:
         ])
 
     # Some sort of curses library is required.
-    if xorpsh_env.has_key('has_libncurses') and xorpsh_env['has_libncurses']:
+    if 'has_libncurses' in xorpsh_env and xorpsh_env['has_libncurses']:
         xorpsh_env.AppendUnique(LIBS = [
             'ncurses'
             ])
-    elif xorpsh_env.has_key('has_libpdcurses') and xorpsh_env['has_libpdcurses']:
+    elif 'has_libpdcurses' in xorpsh_env and xorpsh_env['has_libpdcurses']:
         xorpsh_env.AppendUnique(LIBS = [
             'pdcurses'
             ])
@@ -270,13 +270,13 @@ if env['enable_xorpsh']:
             ])
 
     if not is_shared:
-        if not (env.has_key('mingw') and env['mingw']):
+        if not ('mingw' in env and env['mingw']):
             xorpsh_env.AppendUnique(LIBS = [
                 "rt",
                 "crypto",
                 ])
 
-    if (xorpsh_env.has_key('mingw') and xorpsh_env['mingw']):
+    if ('mingw' in xorpsh_env and xorpsh_env['mingw']):
         xorpsh_env.AppendUnique(LIBS = [
             'ws2_32',
             'iphlpapi',
@@ -298,7 +298,7 @@ if env['enable_xorpsh']:
     env.Alias('install',
               env.InstallProgram(env['xorp_sbindir'], xorpsh))
 
-if not (env.has_key('disable_profile') and env['disable_profile']):
+if not ('disable_profile' in env and env['disable_profile']):
     ### profiler
 
     profiler_env = env.Clone()
@@ -313,13 +313,13 @@ if not (env.has_key('disable_profile') and env['disable_profile']):
         ])
 
     if not is_shared:
-        if not (env.has_key('mingw') and env['mingw']):
+        if not ('mingw' in env and env['mingw']):
             profiler_env.AppendUnique(LIBS = [
                 "rt",
                 "crypto",
                 ])
 
-    if (profiler_env.has_key('mingw') and profiler_env['mingw']):
+    if ('mingw' in profiler_env and profiler_env['mingw']):
         profiler_env.AppendUnique(LIBS = [
             'ws2_32',
             'iphlpapi',

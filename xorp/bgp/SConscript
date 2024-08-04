@@ -28,19 +28,19 @@ subdirs = [
 
 SConscript(dirs = subdirs, exports='env')
 
-is_shared = env.has_key('SHAREDLIBS')
+is_shared = 'SHAREDLIBS' in env
 
 if not is_shared:
     env.AppendUnique(LIBS = [
         "crypto",
         ])
 
-    if not (env.has_key('mingw') and env['mingw']):
+    if not ('mingw' in env and env['mingw']):
         env.AppendUnique(LIBS = [
             "rt",
             ])
 
-if (env.has_key('mingw') and env['mingw']):
+if ('mingw' in env and env['mingw']):
     env.AppendUnique(LIBS = [
         'ws2_32',
         'iphlpapi',
@@ -87,7 +87,7 @@ bgp_env.AppendUnique(LIBS = [
 ])
 
 
-if not (bgp_env.has_key('disable_profile') and bgp_env['disable_profile']):
+if not ('disable_profile' in bgp_env and bgp_env['disable_profile']):
     bgp_env.AppendUnique(LIBS = [ 'xif_profile_client' ])
 
 bgp_env.Replace(RPATH = [
@@ -149,10 +149,10 @@ libxorp_bgp_srcs = [
     'xrl_target.cc',
     ]
 
-if not (bgp_env.has_key('disable_profile') and bgp_env['disable_profile']):
+if not ('disable_profile' in bgp_env and bgp_env['disable_profile']):
     libxorp_bgp_srcs.append('profile_vars.cc')
 
-if (bgp_env.has_key('mingw') and bgp_env['mingw']):
+if ('mingw' in bgp_env and bgp_env['mingw']):
     bgp_env.Append(LIBS = [
         'ws2_32',
         'iphlpapi',

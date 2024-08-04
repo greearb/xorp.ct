@@ -34,7 +34,7 @@ def generate(env):
         return 0 # success
 
     def subst_in_file(target, source, env):
-        if not env.has_key('SUBST_DICT'):
+        if not 'SUBST_DICT' in env:
             raise SCons.Errors.UserError("SubstInFile requires SUBST_DICT to be set.")
         d = dict(env['SUBST_DICT']) # copy it
         for (k,v) in d.items():

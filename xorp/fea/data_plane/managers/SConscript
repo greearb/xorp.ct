@@ -27,7 +27,7 @@ env.AppendUnique(CPPPATH = [
     '$BUILDDIR',
     ])
 
-is_shared = env.has_key('SHAREDLIBS')
+is_shared = 'SHAREDLIBS' in env
 
 sources = [
 	# C++ files

@@ -46,7 +46,7 @@ env.AppendUnique(LIBS = [
     'xorp_comm',
     ])
 
-if (env.has_key('mingw') and env['mingw']):
+if ('mingw' in env and env['mingw']):
     env.Append(LIBS = [
         'iphlpapi',
 #        'mprapi',

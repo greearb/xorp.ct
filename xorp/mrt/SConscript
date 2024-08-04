@@ -24,7 +24,7 @@ subdirs = [ 'tests' ]
 SConscript(dirs = subdirs, exports='env')
 
 env = env.Clone()
-is_shared = env.has_key('SHAREDLIBS')
+is_shared = 'SHAREDLIBS' in env
 
 env.AppendUnique(CPPPATH = [ '#' ])
 

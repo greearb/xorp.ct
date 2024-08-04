@@ -57,14 +57,14 @@ def DoAllConfig(env, conf, host_os):
         print("  Will assume the exist and function properly...\n")
 
     # Check for Flex and Bison
-    if not (env.has_key('LEX') and env['LEX']):
+    if not ('LEX' in env and env['LEX']):
         print("\nERROR: Cannot find flex.")
         print("  On Ubuntu: sudo apt-get install flex")
         print("  On Fedora/RedHat: yum install flex")
         sys.exit(1);
     print("OK:  flex appears functional.")
 
-    if not (env.has_key('YACC') and env['YACC']):
+    if not ('YACC' in env and env['YACC']):
         print("\nERROR: Cannot find bison.")
         print("  On Ubuntu: sudo apt-get install bison")
         print("  On Fedora/RedHat: yum install bison")
@@ -223,7 +223,7 @@ def DoAllConfig(env, conf, host_os):
 
     ##########
     # Socket support checks
-    if (env.has_key('mingw') and env['mingw']):
+    if ('mingw' in env and env['mingw']):
         prereq_af_inet_includes = [ 'winsock2.h' ]
     else:
         prereq_af_inet_includes = [ 'sys/types.h', 'sys/socket.h' ]
@@ -246,7 +246,7 @@ def DoAllConfig(env, conf, host_os):
         # TODO:  This used to check for openbsd and linux in an error prone
         #        way.  Now, do negative checks, but this could break Solaris and other OS
         #        (or not..no idea if it supports raw or not).
-    if not ((env.has_key('mingw') and env['mingw']) or
+    if not (('mingw' in env and env['mingw']) or
                 fnmatch.fnmatch(host_os, 'freebsd*')):
             conf.Define('IPV4_RAW_OUTPUT_IS_RAW')
             conf.Define('IPV4_RAW_INPUT_IS_RAW')
@@ -485,28 +485,28 @@ def DoAllConfig(env, conf, host_os):
 
     ##########
     # logs
-    if not (env.has_key('disable_warninglogs') and env['disable_warninglogs']):
+    if not ('disable_warninglogs' in env and env['disable_warninglogs']):
             conf.Define('L_WARNING')
-    if not (env.has_key('disable_infologs') and env['disable_infologs']):
+    if not ('disable_infologs' in env and env['disable_infologs']):
             conf.Define('L_INFO')
-    if not (env.has_key('disable_errorlogs') and env['disable_errorlogs']):
+    if not ('disable_errorlogs' in env and env['disable_errorlogs']):
             conf.Define('L_ERROR')
-    if not (env.has_key('disable_tracelogs') and env['disable_tracelogs']):
+    if not ('disable_tracelogs' in env and env['disable_tracelogs']):
             conf.Define('L_TRACE')
-    if not (env.has_key('disable_assertlogs') and env['disable_assertlogs']):
+    if not ('disable_assertlogs' in env and env['disable_assertlogs']):
             conf.Define('L_ASSERT')
-    if not (env.has_key('disable_otherlogs') and env['disable_otherlogs']):
+    if not ('disable_otherlogs' in env and env['disable_otherlogs']):
             conf.Define('L_OTHER')
-    if not (env.has_key('disable_fatallogs') and env['disable_fatallogs']):
+    if not ('disable_fatallogs' in env and env['disable_fatallogs']):
             conf.Define('L_FATAL')
-    if (env.has_key('disable_assert') and env['disable_assert']):
+    if ('disable_assert' in env and env['disable_assert']):
             conf.Define('NO_ASSERT')
 
     ##########
     # v6 stack
 
     if has_af_inet6 and has_sock_stream:
-        if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
+        if not ('disable_ipv6' in env and env['disable_ipv6']):
             conf.Define('HAVE_IPV6')
 
     prereq_rfc3542 = ['stdlib.h', 'sys/types.h', 'netinet/in.h']
@@ -599,7 +599,7 @@ def DoAllConfig(env, conf, host_os):
     has_v6_mcast = gotv6sym
     # test result
     if has_v6_mcast:
-        if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
+        if not ('disable_ipv6' in env and env['disable_ipv6']):
             conf.Define('HAVE_IPV6_MULTICAST')
 
     # See if we need -std=gnu99 for fpclassify (math.h)
@@ -750,7 +750,7 @@ def DoAllConfig(env, conf, host_os):
     # XXX: linux marked inet6_option_space() and friends as deprecated;
     # either rework mfea code or do this.
     if has_netinet6_ip6_mroute_h or has_linux_mroute6_h:
-        if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
+        if not ('disable_ipv6' in env and env['disable_ipv6']):
             conf.Define('HAVE_IPV6_MULTICAST_ROUTING')
             if has_inet6_option_space:
                 conf.Define('HAVE_IPV6_OPTION_SPACE')
@@ -780,7 +780,7 @@ def DoAllConfig(env, conf, host_os):
     has_linux_netfilter_ipv6_ip6_tables_h = conf.CheckHeader(['sys/param.h', 'net/if.h', 'netinet/in.h', 'linux/netfilter_ipv6/ip6_tables.h'], language = "C++")
 
     if has_linux_netfilter_ipv4_ip_tables_h or has_linux_netfilter_ipv6_ip6_tables_h:
-        if not (env.has_key('disable_fw') and env['disable_fw']):
+        if not ('disable_fw' in env and env['disable_fw']):
             conf.Define('HAVE_FIREWALL_NETFILTER')
 
     ##########
@@ -895,7 +895,7 @@ def DoAllConfig(env, conf, host_os):
         """)
 
     if not (has_linux_netfilter_ipv4_ip_tables_h or has_linux_netfilter_ipv6_ip6_tables_h):
-        if not (env.has_key('disable_fw') and env['disable_fw']):
+        if not ('disable_fw' in env and env['disable_fw']):
             if has_linux_mroute_h:
                 # We are Linux...should warn users about how to make netfiltering work since
                 # it appears their headers are busted.

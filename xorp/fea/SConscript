@@ -30,7 +30,7 @@ SConscript(dirs = subdirs, exports='env')
 
 env = env.Clone()
 
-is_shared = env.has_key('SHAREDLIBS')
+is_shared = 'SHAREDLIBS' in env
 
 env.AppendUnique(CPPPATH = [
     '#',
@@ -102,7 +102,7 @@ libxorp_fea_linkorder += [
     'xorp_core'
     ]
 
-if not (env.has_key('disable_libtecla') and env['disable_libtecla']):
+if not ('disable_libtecla' in env and env['disable_libtecla']):
     libxorp_fea_linkorder += [
         'xorp_tecla',
         ]
@@ -112,16 +112,16 @@ else:
         'tecla',
         ]
 
-if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
+if not ('disable_ipv6' in env and env['disable_ipv6']):
     libxorp_fea_linkorder += [ 'xif_socket6_user',
                                'xif_fea_rawpkt6_client',
                                ]
 
-if not (env.has_key('disable_fw') and env['disable_fw']):
+if not ('disable_fw' in env and env['disable_fw']):
     env.PrependUnique(LIBPATH = [ '$BUILDDIR/fea/data_plane/firewall' ])
     libxorp_fea_linkorder += [ 'xorp_fea_firewall' ]
 
-if not (env.has_key('disable_profile') and env['disable_profile']):
+if not ('disable_profile' in env and env['disable_profile']):
     libxorp_fea_linkorder += [ 'xif_profile_client' ]
 
 # Internal libraries.
@@ -129,7 +129,7 @@ if not (env.has_key('disable_profile') and env['disable_profile']):
 env.PrependUnique(LIBS = libxorp_fea_linkorder)
 
 # External libraries.
-if env.has_key('has_libpcap') and env['has_libpcap']:
+if 'has_libpcap' in env and env['has_libpcap']:
     env.AppendUnique(LIBS = [
         'pcap'
         ])
@@ -143,12 +143,12 @@ else:
         "crypto",
         ])
 
-    if not (env.has_key('mingw') and env['mingw']):
+    if not ('mingw' in env and env['mingw']):
         env.AppendUnique(LIBS = [
             "rt",
             ])
 
-if (env.has_key('mingw') and env['mingw']):
+if ('mingw' in env and env['mingw']):
     env.AppendUnique(LIBS = [
         'ws2_32',
         'iphlpapi',
@@ -186,13 +186,13 @@ libxorp_fea_srcs = [
      'xrl_mfea_node.cc'
     ]
 
-if not (env.has_key('disable_fw') and env['disable_fw']):
+if not ('disable_fw' in env and env['disable_fw']):
     libxorp_fea_srcs += [ 'firewall_entry.cc',
                           'firewall_manager.cc',
                           'firewall_transaction.cc',
                           ]
 
-if not (env.has_key('disable_profile') and env['disable_profile']):
+if not ('disable_profile' in env and env['disable_profile']):
     libxorp_fea_srcs += [ 'profile_vars.cc' ]
 
 

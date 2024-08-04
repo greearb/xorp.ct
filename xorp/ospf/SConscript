@@ -28,7 +28,7 @@ subdirs = [
 SConscript(dirs = subdirs, exports='env')
 
 env = env.Clone()
-is_shared = env.has_key('SHAREDLIBS')
+is_shared = 'SHAREDLIBS' in env
 
 env.AppendUnique(CPPPATH = [
     '#',
@@ -67,7 +67,7 @@ env.AppendUnique(LIBS = [
     'xorp_comm',
 ])
 
-if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
+if not ('disable_ipv6' in env and env['disable_ipv6']):
     env.AppendUnique(LIBS = [
         'xif_fea_rawpkt6',
         'xst_ospfv3',
@@ -94,15 +94,15 @@ libxorp_ospf_srcs = [
 	     'vlink.cc'
              ]
 
-if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
+if not ('disable_ipv6' in env and env['disable_ipv6']):
     libxorp_ospf_srcs.append('xrl_target3.cc')
 
-if not (env.has_key('disable_profile') and env['disable_profile']):
+if not ('disable_profile' in env and env['disable_profile']):
     env.AppendUnique(LIBS = [
         'xif_profile_client',
         ])
 
-if (env.has_key('mingw') and env['mingw']):
+if ('mingw' in env and env['mingw']):
     env.Append(LIBS = [
         'ws2_32',
         'iphlpapi',
@@ -139,7 +139,7 @@ env.Alias('install', env.InstallProgram(env['xorp_moduledir'], ospfv2))
 if is_shared:
     env.Alias('install', env.InstallLibrary(env['xorp_libdir'], libxorp_ospf))
 
-if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
+if not ('disable_ipv6' in env and env['disable_ipv6']):
     ospfv3srcs = [ 'xorp_ospfv3.cc' ]
     ospfv3 = env.Program(target = 'xorp_ospfv3', source = ospfv3srcs)
     if env['enable_builddirrun']:

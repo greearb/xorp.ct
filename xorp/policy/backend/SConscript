@@ -22,7 +22,7 @@ Import('env')
 
 env = env.Clone()
 
-is_shared = env.has_key('SHAREDLIBS')
+is_shared = 'SHAREDLIBS' in env
 
 # Fedora 19 has broken-ish lex...work around it for now.
 env.AppendUnique(CCFLAGS = [
@@ -72,7 +72,7 @@ libpbesrcs = [
     'version_filters.cc',
     ]
 
-if not (env.has_key('disable_profile') and env['disable_profile']):
+if not ('disable_profile' in env and env['disable_profile']):
     libpbesrcs.append('policy_profiler.cc')
 
 if is_shared:

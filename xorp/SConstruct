@@ -222,7 +222,7 @@ print('STRIP:            {}'.format(env['STRIP']))
 
 if env['strip']:
     env['strip'] = True
-print('Strip binaries:   {}'.format(env.has_key('strip')))
+print('Strip binaries:   {}'.format('strip' in env))
 
 # POSIX strip has no options by the strict letter of the law.
 # Assume we have GNU binutils strip until proven otherwise.
@@ -247,7 +247,7 @@ if env['shared']:
     if SCons.Tool.FindTool(['gnulink'], env) is None:
         print(gnutoolwarning % 'ld linker')
     env['SHAREDLIBS'] = "defined"
-print('Shared libraries: {}'.format(env.has_key('SHAREDLIBS')))
+print('Shared libraries: {}'.format('SHAREDLIBS' in env))
 print('Use rtld ORIGIN:  {}'.format(env['rtld_origin']))
 
 # AUTOTEST_SKIP_ERRORS is SetDefault() by site_scons/site_tools/autotest.py,
@@ -323,7 +323,7 @@ def Symlink(src, link_name):
 SConsEnvironment.Symlink = SCons.Action.ActionFactory(Symlink, lambda src, link_name: 'Symlink("%s", as "%s")' % (src, link_name))
 
 def InstallProgram(env, dest, files, perm=0O755):
-    if env.has_key('DESTDIR'):
+    if 'DESTDIR' in env:
         # NB: use simple concatenation
         dest = env.Dir(env['DESTDIR'] + env.Dir(dest).path)
     obj = env.Install(dest, files)
@@ -335,7 +335,7 @@ def InstallProgram(env, dest, files, perm=0O755):
 SConsEnvironment.InstallProgram = InstallProgram
 
 def InstallScript(env, dest, files, perm = 0O555):
-    if env.has_key('DESTDIR'):
+    if 'DESTDIR' in env:
         # NB: use simple concatenation
         dest = env.Dir(env['DESTDIR'] + env.Dir(dest).path)
     obj = env.Install(dest, files)
@@ -345,7 +345,7 @@ def InstallScript(env, dest, files, perm = 0O555):
 SConsEnvironment.InstallScript = InstallScript
 
 def InstallLibrary(env, dest, files, perm = 0O644):
-    if env.has_key('DESTDIR'):
+    if 'DESTDIR' in env:
         # NB: use simple concatenation
         dest = env.Dir(env['DESTDIR'] + env.Dir(dest).path)
     obj = env.Install(dest, files)
@@ -357,7 +357,7 @@ def InstallLibrary(env, dest, files, perm = 0O644):
 SConsEnvironment.InstallLibrary = InstallLibrary
 
 def InstallData(env, dest, files, perm = 0O644):
-    if env.has_key('DESTDIR'):
+    if 'DESTDIR' in env:
         # NB: use simple concatenation
         dest = env.Dir(env['DESTDIR'] + env.Dir(dest).path)
     obj = env.Install(dest, files)
@@ -624,7 +624,7 @@ else:
 
 ########## start configure magic
 
-if env.has_key('LIBS'):
+if 'LIBS' in env:
     pre_LIBS = env['LIBS']
 else:
     pre_LIBS = []
@@ -839,7 +839,7 @@ if not env['debug'] == 'override':
 
 # Do the same for the flags which control code profiling.
 if not env['profile'] == 'override':
-    if env['profile'] == 'gprof' and env.has_key('SHAREDLIBS'):
+    if env['profile'] == 'gprof' and 'SHAREDLIBS' in env:
         print("""
 WARNING: You have requested GNU gprof style profiling
 and shared libraries. This is UNSUPPORTED, and probably will not link.
@@ -1058,7 +1058,7 @@ env['xorp_sbin_rpath'] = env['xorp_libdir']
 env['xorp_tool_rpath'] = env['xorp_libdir']
 env['xorp_module_rpath'] = env['xorp_libdir']
 
-if env.has_key('SHAREDLIBS'):
+if 'SHAREDLIBS' in env:
     if env['rtld_origin']:
     #
     # Build a subdirectory for holding symlinks to libraries upfront, so

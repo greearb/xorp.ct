@@ -24,7 +24,7 @@ Import("env")
 
 env = env.Clone()
 
-is_shared = env.has_key('SHAREDLIBS')
+is_shared = 'SHAREDLIBS' in env
 
 env.AppendUnique(CPPPATH = [ "#" ])
 env.AppendUnique(LIBPATH = [ '$BUILDDIR/libxipc',
@@ -83,7 +83,7 @@ xifs = [
 if env['enable_bgp']:
     xifs.append('bgp.xif')
     
-if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
+if not ('disable_ipv6' in env and env['disable_ipv6']):
     xifs.append('socket6.xif')
     xifs.append('socket6_user.xif')
     xifs.append('fea_rawpkt6_client.xif')
@@ -91,11 +91,11 @@ if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
     if env['enable_ospf']:
         xifs.append('ospfv3.xif')
 
-if not (env.has_key('disable_profile') and env['disable_profile']):
+if not ('disable_profile' in env and env['disable_profile']):
     xifs.append('profile_client.xif')
     xifs.append('profile.xif')
 
-if not (env.has_key('disable_fw') and env['disable_fw']):
+if not ('disable_fw' in env and env['disable_fw']):
     xifs.append('fea_firewall.xif')
 
 if env['enable_olsr']:

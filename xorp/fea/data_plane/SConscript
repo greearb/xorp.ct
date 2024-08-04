@@ -27,7 +27,7 @@ subdirs = [
     'managers'
     ]
 
-if not (env.has_key('disable_fw') and env['disable_fw']):
+if not ('disable_fw' in env and env['disable_fw']):
     subdirs.append('firewall')
 
 SConscript(dirs = subdirs, exports='env')

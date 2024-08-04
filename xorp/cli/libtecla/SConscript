@@ -22,7 +22,7 @@ Import('env')
 
 env = env.Clone()
 
-is_shared = env.has_key('SHAREDLIBS')
+is_shared = 'SHAREDLIBS' in env
 
 env.AppendUnique(CPPPATH = [ '#' ])
 
@@ -46,7 +46,7 @@ env['CPPDEFINES'] = {
     'HAVE_TERMINFO_H': 1,
     }
 
-if not (env.has_key('mingw') and env['mingw']):
+if not ('mingw' in env and env['mingw']):
     env.Append(CPPDEFINES={
         'HAVE_SYS_IOCTL_H': 1,
         'HAVE_TERMIOS_H': 1,
@@ -72,7 +72,7 @@ libtecla_srcs = [
 
 # External libraries
 # Some sort of curses library is required.
-if env.has_key('has_libncurses') and env['has_libncurses']:
+if 'has_libncurses' in env and env['has_libncurses']:
     env.AppendUnique(LIBS = [
         'ncurses'
         ])

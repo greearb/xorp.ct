@@ -22,7 +22,7 @@ Import('env')
 
 env = env.Clone()
 
-is_shared = env.has_key('SHAREDLIBS')
+is_shared = 'SHAREDLIBS' in env
 
 env.AppendUnique(CPPPATH = [
     '#',
@@ -47,7 +47,7 @@ env.AppendUnique(LIBS = [
     'xorp_comm',
     ])
 
-if (env.has_key('mingw') and env['mingw']):
+if ('mingw' in env and env['mingw']):
     env.Append(LIBS = [
         'iphlpapi',
 #        'mprapi',
@@ -58,7 +58,7 @@ if (env.has_key('mingw') and env['mingw']):
     env.Append(LIBS = ['xorp_core', 'crypto', 'ws2_32'])
 
 
-if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
+if not ('disable_ipv6' in env and env['disable_ipv6']):
     env.AppendUnique(LIBS = [
         'xif_ospfv3',
         ])

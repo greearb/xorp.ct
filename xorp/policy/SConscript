@@ -27,7 +27,7 @@ SConscript([ 'backend/SConscript', 'common/SConscript' ], exports='env')
 
 env = env.Clone()
 
-is_shared = env.has_key('SHAREDLIBS')
+is_shared = 'SHAREDLIBS' in env
 
 # Fedora 19 has broken-ish lex...work around it for now.
 env.AppendUnique(CCFLAGS = [
@@ -72,12 +72,12 @@ if not is_shared:
         "crypto",
         ])
 
-    if not (env.has_key('mingw') and env['mingw']):
+    if not ('mingw' in env and env['mingw']):
         env.AppendUnique(LIBS = [
             "rt",
             ])
 
-if (env.has_key('mingw') and env['mingw']):
+if ('mingw' in env and env['mingw']):
     env.AppendUnique(LIBS = [
         'ws2_32',
         'iphlpapi',

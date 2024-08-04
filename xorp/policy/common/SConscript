@@ -38,7 +38,7 @@ libpcmsrcs = [
     'varrw.cc'
     ]
 
-is_shared = env.has_key('SHAREDLIBS')
+is_shared = 'SHAREDLIBS' in env
 
 # deal with bgp aspath shared code
 if is_shared:

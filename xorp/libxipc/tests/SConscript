@@ -49,7 +49,7 @@ env.AppendUnique(LIBS = [
     ])
 
 if not is_shared:
-    if not (env.has_key('mingw') and env['mingw']):
+    if not ('mingw' in env and env['mingw']):
         env.AppendUnique(LIBS = [
             "rt",
             ])

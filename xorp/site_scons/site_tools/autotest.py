@@ -32,10 +32,11 @@
 
 from SCons.Script import *
 from SCons.Builder import Builder
+import SCons.Warnings
 import os
 
 # A warning class to notify users of problems
-class ToolAutoTestWarning(SCons.Warnings.Warning):
+class ToolAutoTestWarning(SCons.Warnings.SConsWarning):
     pass
 
 SCons.Warnings.enableWarningClass(ToolAutoTestWarning)
@@ -70,7 +71,7 @@ def _UnitTest(env, target, source = [], **kwargs):
     # Tests are not intended to be installed, so we don't do any
     # further RPATH magic here.
     myrpath = rpath
-    if env.has_key('SHAREDLIBS'):
+    if 'SHAREDLIBS' in env:
         baserpath = Dir(env['BUILDDIR']).abspath
         myrpath += [ x.replace('$BUILDDIR', baserpath) for x in libpath ]
 

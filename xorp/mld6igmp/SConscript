@@ -21,7 +21,7 @@ import os
 Import('env')
 
 env = env.Clone()
-is_shared = env.has_key('SHAREDLIBS')
+is_shared = 'SHAREDLIBS' in env
 
 env.AppendUnique(CPPPATH = [
     '#',
@@ -66,12 +66,12 @@ if not is_shared:
         "crypto",
         ])
 
-    if not (env.has_key('mingw') and env['mingw']):
+    if not ('mingw' in env and env['mingw']):
         env.AppendUnique(LIBS = [
             "rt",
             ])
 
-if (env.has_key('mingw') and env['mingw']):
+if ('mingw' in env and env['mingw']):
     env.AppendUnique(LIBS = [
         'ws2_32',
         'iphlpapi',
@@ -93,7 +93,7 @@ libxorp_mld6igmp_srcs = [
 	     'xrl_mld6igmp_node.cc'
              ]
 
-if not (env.has_key('disable_ipv6') and env['disable_ipv6']):
+if not ('disable_ipv6' in env and env['disable_ipv6']):
     env.AppendUnique(LIBS = [
         'xif_fea_rawpkt6',
         ])

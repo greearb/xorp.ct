@@ -55,7 +55,7 @@ tests = [
 	'vif',
 ]
 
-if not (env.has_key('disable_profile') and env['disable_profile']):
+if not ('disable_profile' in env and env['disable_profile']):
     tests.append('profile')
 
 libxorptestpath = '$exec_prefix/libxorp/tests'

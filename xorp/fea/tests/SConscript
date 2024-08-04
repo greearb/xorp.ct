@@ -29,7 +29,7 @@ env.AppendUnique(CPPPATH = [
 	'$BUILDDIR/fea/tests',
 	])
 
-is_shared = env.has_key('SHAREDLIBS')
+is_shared = 'SHAREDLIBS' in env
 
 ############### begin linking gunk
 ### XXX Linking the FEA statically vs shared is gnarly.
