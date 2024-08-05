@@ -84,11 +84,11 @@ def DoAllConfig(env, conf, host_os):
                   'int32_t', 'uint32_t',
                   'int64_t', 'uint64_t'  ]:
         includes = ""
-    if has_inttypes_h:
-        includes += '#include <inttypes.h>\n'
-    if has_stdint_h:
-        includes += '#include <stdint.h>\n'
-    conf.CheckType(type, includes)
+        if has_inttypes_h:
+            includes += '#include <inttypes.h>\n'
+        if has_stdint_h:
+            includes += '#include <stdint.h>\n'
+        conf.CheckType(type, includes)
 
     has_stdbool_h = conf.CheckHeader('stdbool.h')
 
@@ -246,7 +246,7 @@ def DoAllConfig(env, conf, host_os):
         # TODO:  This used to check for openbsd and linux in an error prone
         #        way.  Now, do negative checks, but this could break Solaris and other OS
         #        (or not..no idea if it supports raw or not).
-    if not (('mingw' in env and env['mingw']) or
+        if not (('mingw' in env and env['mingw']) or
                 fnmatch.fnmatch(host_os, 'freebsd*')):
             conf.Define('IPV4_RAW_OUTPUT_IS_RAW')
             conf.Define('IPV4_RAW_INPUT_IS_RAW')
@@ -515,7 +515,7 @@ def DoAllConfig(env, conf, host_os):
         # XXX: __USE_GNU must be defined for RFC3542 defines under Linux.
         if host_os == 'linux-gnu' and s == 'netinet/in.h':
             rfc3542_includes.append("#define __USE_GNU\n")
-            rfc3542_includes.append("#include <%s>\n" % s)
+        rfc3542_includes.append("#include <%s>\n" % s)
     rfc3542_includes = ''.join(rfc3542_includes)
 
     has___kame__ = conf.CheckDeclaration('__KAME__', rfc3542_includes)
