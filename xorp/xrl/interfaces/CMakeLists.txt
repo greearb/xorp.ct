@@ -1,4 +1,8 @@
-file(GLOB interface_srcs cli_manager.xif
+# Xrl interfaces
+# Copyright (c) 2023-2024 Michał Zagórski (zagura)
+# SPDX-License-Identifier: GPL-2.0-or-later
+
+set(interface_srcs       cli_manager.xif
                          cli_processor.xif
                          common.xif
                          coord.xif
@@ -42,54 +46,54 @@ file(GLOB interface_srcs cli_manager.xif
                          test.xif
                          test_xrls.xif)
 if(BGP)
-    list(APPEND interface_srcs "${CMAKE_CURRENT_LIST_DIR}/bgp.xif")
+    list(APPEND interface_srcs bgp.xif)
 endif()
 
 if(ENABLE_IPV6)
-    list(APPEND interface_srcs "${CMAKE_CURRENT_LIST_DIR}/socket6.xif"
-                               "${CMAKE_CURRENT_LIST_DIR}/socket6_user.xif"
-                               "${CMAKE_CURRENT_LIST_DIR}/fea_rawpkt6_client.xif"
-                               "${CMAKE_CURRENT_LIST_DIR}/fea_rawpkt6.xif")
+    list(APPEND interface_srcs "socket6.xif"
+                               "socket6_user.xif"
+                               "fea_rawpkt6_client.xif"
+                               "fea_rawpkt6.xif")
     if(OSPF)
-        list(APPEND interface_srcs "${CMAKE_CURRENT_LIST_DIR}/ospfv3.xif")
+        list(APPEND interface_srcs "ospfv3.xif")
     endif()
 endif()
 
 
 if(NOT DISABLE_PROFILE)
-    list(APPEND interface_srcs "${CMAKE_CURRENT_LIST_DIR}/profile_client.xif"
-                               "${CMAKE_CURRENT_LIST_DIR}/profile.xif")
+    list(APPEND interface_srcs "profile_client.xif"
+                               "profile.xif")
 endif()
 
 if(FIREWALL)
-    list(APPEND interface_srcs "${CMAKE_CURRENT_LIST_DIR}/fea_firewall.xif")
+    list(APPEND interface_srcs "fea_firewall.xif")
 endif()
 
 if(OLSR)
-    list(APPEND interface_srcs "${CMAKE_CURRENT_LIST_DIR}/olsr4.xif")
+    list(APPEND interface_srcs "olsr4.xif")
 endif()
 
 if (WRAPPER)
-    list(APPEND interface_srcs "${CMAKE_CURRENT_LIST_DIR}/wrapper4.xif")
+    list(APPEND interface_srcs "wrapper4.xif")
 endif()
 
 if (RIP)
-    list(APPEND interface_srcs "${CMAKE_CURRENT_LIST_DIR}/rip.xif"
-                               "${CMAKE_CURRENT_LIST_DIR}/ripng.xif")
+    list(APPEND interface_srcs "rip.xif"
+                               "ripng.xif")
 endif()
 
 
 if (VRRP)
-    list(APPEND interface_srcs "${CMAKE_CURRENT_LIST_DIR}/vrrp.xif")
+    list(APPEND interface_srcs "vrrp.xif")
 endif()
 
 if (OSPF)
-    list(APPEND interface_srcs "${CMAKE_CURRENT_LIST_DIR}/ospfv2.xif")
+    list(APPEND interface_srcs "ospfv2.xif")
 endif()
 
 
 message(STATUS "${interface_srcs}")
-set(INTERFACES_DIR ${CMAKE_CURRENT_BINARY_DIR} PARENT_SCOPE)
+#set(INTERFACES_DIR ${CMAKE_CURRENT_BINARY_DIR} PARENT_SCOPE)
 set(xif_cxx "")
 
 foreach(src_xif ${interface_srcs})
@@ -97,19 +101,22 @@ foreach(src_xif ${interface_srcs})
     message(STATUS "[xif] Filename from ${src_xif} is ${xif_fname}")
     string(CONCAT src_cxx ${xif_fname} "_xif.cc")
     # string(REGEX REPLACE ".xif" "_xif.cc" src_cxx ${src_xif})
-    message(STATUS "[xif] Creating ${CMAKE_CURRENT_BINARY_DIR}/${src_cxx} from ${src_xif}")
+    message(STATUS "[xif] Creating ${src_cxx} from ${src_xif}")
     add_custom_command(
-        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${src_cxx}
+        OUTPUT ${src_cxx}
         # ALL
-        BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/${src_cxx}
+        DEPENDS ${src_xif}
         COMMAND /usr/bin/python3 "../scripts/clnt-gen" "-I${MAIN_DIR}" "--output-dir=${CMAKE_CURRENT_BINARY_DIR}" "${src_xif}"
-        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-        COMMENT "[xif] Generating ${CMAKE_CURRENT_BINARY_DIR}/${src_cxx} file from ${src_xif}"
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        COMMENT "[xif] Generating ${src_cxx} file from ${src_xif}"
     )
     list(APPEND xif_cxx ${src_cxx})
-    add_library(xif_${xif_fname} SHARED ${CMAKE_CURRENT_BINARY_DIR}/${src_cxx})
+    add_library(xif_${xif_fname} ${src_cxx})
+    target_link_libraries(xif_${xif_fname} PUBLIC xorp comm proto xipc)
     install(TARGETS xif_${xif_fname} LIBRARY DESTINATION ${XORP_LIBDIR})
 endforeach()
+
+add_library(xif_base OBJECT common_xif.cc finder_xif.cc)
 # message(STATUS "Created interfaces: ${xif_cxx}")
 add_custom_target(interfaces DEPENDS ${xif_cxx})
 # target_sources(interfaces PRIVATE xif_cxx)

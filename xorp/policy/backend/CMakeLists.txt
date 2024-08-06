@@ -28,7 +28,7 @@ flex_target(backendScanner backend.ll
                          ${CMAKE_CURRENT_SOURCE_DIR}/lex.policy_backend_parser.cc
                          COMPILE_FLAGS "-Ppolicy_backend_parser"
                          DEFINES_FILE ${CMAKE_CURRENT_SOURCE_DIR}/lex.policy_backend_parser.hh)
-# ADD_FLEX_BISON_DEPENDENCY(backendScanner backendParser)
+ADD_FLEX_BISON_DEPENDENCY(backendScanner backendParser)
 message(STATUS "Flex policy backend targets built")
 endif(FLEX_FOUND)
 
@@ -54,5 +54,14 @@ add_library(policy_backend
                            ../../bgp/aspath.cc
                            ${POLICY_BACKEND_SRCS}
                           )
+
+
+target_link_libraries(policy_backend OpenSSL::Crypto
+                                     xorp
+                                     comm
+                                     policy_common
+                                     proto
+                                     xipc
+                      )
 
 install(TARGETS policy_backend LIBRARY DESTINATION ${XORP_LIBDIR})

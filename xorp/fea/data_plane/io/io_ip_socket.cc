@@ -70,7 +70,12 @@
 // NOTE:  Seems windows uses a typedef of struct in_pktinfo ... IN_PKTINFO
 // Not sure how to use that properly though, the obvious thing to me just did
 // not compile.
-#endif
+#elif defined(IP_PKTINFO)
+// MACOS 14.5 have IP_PKTINFO, but not SOL_IP (Linux only)
+#if !defined(SOL_IP)
+#define SOL_IP IPPROTO_IP
+#endif  // !SOL_IP
+#endif  // HOST_OS_WINDOWS
 
 #include "libcomm/comm_api.h"
 #include "libproto/packet.hh"

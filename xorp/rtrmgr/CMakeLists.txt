@@ -6,7 +6,7 @@
 # Build to binary dir
 # cmake_policy(SET CMP0088 NEW)
 # cmake_policy(SET CMP0098 NEW)
-find_package(BISON 3.5.1 REQUIRED)
+find_package(BISON 2.3 REQUIRED)
 # if (BISON_FOUND)
 BISON_TARGET(tpltParser template.yy ${CMAKE_CURRENT_BINARY_DIR}/y.tplt_tab.cc
              COMPILE_FLAGS "-d -ptplt"
@@ -104,9 +104,9 @@ add_library(xorp_rtrmgr STATIC ${BISON_tpltParser_OUTPUTS}
                         xorp_client.cc
             )
 
-target_link_libraries(xorp_rtrmgr crypto)
+target_link_libraries(xorp_rtrmgr  OpenSSL::Crypto) # xorp xipc)
 # if (not MINGW)
-    target_link_libraries(xorp_rtrmgr rt)
+#     target_link_libraries(xorp_rtrmgr rt)
 # endif()
 
 target_include_directories(xorp_rtrmgr PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_LIST_DIR})
@@ -131,7 +131,7 @@ target_link_libraries(rtrmgr
                             xipc
                             xorp_rtrmgr
                             comm
-                            crypto
+                            OpenSSL::Crypto
                             tgts_rtrmgr
                             xif_rtrmgr_client
                             xif_finder_event_notifier
@@ -142,7 +142,7 @@ if (PROFILER)
 add_executable(profiler profiler.cc)
 target_link_libraries(profiler
                                xorp
-                               crypto
+                               OpenSSL::Crypto
                                finder
                                xipc
                                comm
@@ -168,7 +168,7 @@ target_link_libraries(xorpsh
                              xipc
                              comm
                              xorp
-                             crypto
+                             OpenSSL::Crypto
                              ${CURSES_CHOICE_LIB})
 add_dependencies(xorpsh interfaces targets)
 install(TARGETS xorpsh RUNTIME DESTINATION ${XORP_TOOLDIR})

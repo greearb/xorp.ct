@@ -29,12 +29,12 @@ set(FEA_LIBS xif_fea_fib_client
              xipc
              comm
              xorp
-             fea_managers
-             fibconfig
-             fea_io
-             control_socket
-             ifconfig
-             xfdp
+             $<TARGET_NAME:fea_managers>
+             $<TARGET_NAME:fibconfig>
+             $<TARGET_NAME:fea_io>
+             $<TARGET_NAME:control_socket>
+             $<TARGET_NAME:ifconfig>
+             $<TARGET_NAME:xfdp>
              tecla)
 
 if (PCAP_LIB)
@@ -70,7 +70,7 @@ set(FEA_SRCS xorp_fea.cc
              xrl_mfea_node.cc)
 
 if (FIREWALL)
-    list(APPEND FEA_LIBS firewall)
+    list(APPEND FEA_LIBS $<TARGET_NAME:firewall>)
     list(APPEND FEA_SRCS firewall_entry.cc
                          firewall_manager.cc
                          firewall_transaction.cc)
@@ -90,7 +90,7 @@ if (ENABLE_IPV6)
                          xif_socket6_user)
 endif()
 
-add_library(xfdp
+add_library(xfdp OBJECT
                  fea_data_plane_manager.cc
                  fibconfig_forwarding.cc
                  ifconfig_property.cc
@@ -98,10 +98,14 @@ add_library(xfdp
                  io_ip.cc
                  io_link.cc
                  io_tcpudp.cc)
-install(TARGETS xfdp LIBRARY DESTINATION ${XORP_LIBDIR})
 
-add_executable(xorp_fea ${FEA_SRCS})
-target_link_libraries(xorp_fea PUBLIC ${FEA_LIBS})
+# install(TARGETS xfdp LIBRARY DESTINATION ${XORP_LIBDIR})
+
+add_library(fea ${FEA_SRCS})
+target_link_libraries(fea ${FEA_LIBS})
+install(TARGETS fea LIBRARY DESTINATION ${XORP_LIBDIR})
+add_executable(xorp_fea xorp_fea.cc)
+target_link_libraries(xorp_fea PUBLIC ${FEA_LIBS} fea)
 install(TARGETS xorp_fea RUNTIME DESTINATION ${XORP_MODULEDIR})
 
 if (FEA_DUMMY)

@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
-add_library(tecla SHARED
+add_library(tecla
                         cplfile.c
                         cplmatch.c
                         direader.c
@@ -21,23 +21,26 @@ add_library(tecla SHARED
                         version.c
             )
 
-# target_compile_definitions(tecla PUBLIC
-#                                         HAVE_INTTYPES_H=1
-#                                         HAVE_MEMORY_H=1
-#                                         HAVE_STDINT_H=1
-#                                         HAVE_STDLIB_H=1
-#                                         HAVE_STRINGS_H=1
-#                                         HAVE_STRING_H=1
-#                                         HAVE_SYS_STAT_H=1
-#                                         HAVE_SYS_TYPES_H=1
-#                                         HAVE_TERMINFO_H=1
-#                                         HAVE_UNISTD_H=1
-#                                         STDC_HEADERS=1
-#                                         HAVE_SYS_IOCTL_H=1)
-if (NOT MINGW)
-    target_compile_definitions(tecla PUBLIC HAVE_SYS_IOCTL_H=1
-                                            HAVE_TERMIOS_H=1)
-endif()
+foreach(DEF IN ITEMS
+                     HAVE_INTTYPES_H
+                     HAVE_MEMORY_H
+                     HAVE_STDINT_H
+                     HAVE_STDLIB_H
+                     HAVE_STRINGS_H
+                     HAVE_STRING_H
+                     HAVE_SYS_STAT_H
+                     HAVE_SYS_TYPES_H
+                     HAVE_TERMINFO_H
+                     HAVE_UNISTD_H
+                     STDC_HEADERS
+                     HAVE_SYS_IOCTL_H
+                     HAVE_SYS_UIO_H
+                     HAVE_TERMIOS_H
+        )
+   if(${DEF})
+       target_compile_definitions(tecla PUBLIC "${DEF}=1")
+   endif()
+endforeach()
 
 install(TARGETS tecla LIBRARY DESTINATION ${XORP_LIBDIR})
 set_target_properties(tecla PROPERTIES SOVERSION 0.0)
@@ -54,17 +57,5 @@ find_package(Curses)
 # -Wcast-align
 # -Wstrict-prototypes
 # -Wnested-externs)
-target_include_directories(tecla PUBLIC ${CMAKE_CURRENT_LIST_DIR} ${CURSES_INCLUDE_DIRS} ${XORP_BUILD_ROOT})
+target_include_directories(tecla PUBLIC ${CURSES_INCLUDE_DIRS})
 target_link_libraries(tecla ${CURSES_LIBRARIES})
-
-# HAVE_INTTYPES_H=1
-# HAVE_MEMORY_H=1
-# HAVE_STDINT_H=1
-# HAVE_STDLIB_H=1
-# HAVE_STRINGS_H=1
-# HAVE_STRING_H=1
-# HAVE_SYS_STAT_H=1
-# HAVE_SYS_TYPES_H=1
-# HAVE_TERMINFO_H=1
-# HAVE_UNISTD_H=1
-# STDC_HEADERS=1

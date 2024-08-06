@@ -8,15 +8,25 @@
 #cmakedefine HOST_OS_WINDOWS
 #cmakedefine HOST_OS_SOLARIS
 #cmakedefine HOST_OS_NETBSD
+#cmakedefine HOST_OS_MACOSX
 #cmakedefine HOST_OS_NAME                               @HOST_OS_NAME@
 #cmakedefine ENABLE_ADVANCED_MULTICAST_API
 #cmakedefine HAVE_PROC_LINUX
 
 #cmakedefine HAVE_ENDIAN_H                              @HAVE_ENDIAN_H@
+#cmakedefine WORDS_BIGENDIAN
+#cmakedefine WORDS_SMALLENDIAN
 #cmakedefine HAVE_IPHLPAPI_H                            @HAVE_IPHLPAPI_H@
 #cmakedefine HAVE_ROUTPROT_H                            @HAVEROUTPROT_H@
 #cmakedefine HAVE_STDINT_H                              @HAVE_STDINT_H@
 #cmakedefine HAVE_INTTYPES_H                            @HAVE_INTTYPES_H@
+#cmakedefine HAVE_INT8_T                                @INT8_T@
+#cmakedefine HAVE_INT16_T                               @INT16_T@
+#cmakedefine HAVE_INT32_T                               @INT32_T@
+#cmakedefine HAVE_INT64_T                               @INT64_T@
+#cmakedefine HAVE_UINT8_T                               @UINT8_T@
+#cmakedefine HAVE_UINT16_T                              @UINT16_T@
+#cmakedefine HAVE_UINT32_T                              @UINT32_T@
 #cmakedefine HAVE_UINT64_T                              @UINT64_T@
 #cmakedefine HAVE_STDBOOL_H                             @HAVE_STDBOOL_H@
 #cmakedefine HAVE_STDDEF_H                              @HAVE_STDDEF_H@
@@ -47,6 +57,7 @@
 #cmakedefine HAVE_TIME_H                                @HAVE_TIME_H@
 #cmakedefine HAVE_UNISTD_H                              @HAVE_UNISTD_H@
 #cmakedefine HAVE_VFORK_H                               @HAVE_VFORK_H@
+#cmakedefine HAVE_TERMINFO                              @HAVE_TERMINFO_H@
 
 #cmakedefine HAVE_READV                                 @HAVE_READV@
 #cmakedefine HAVE_STRERROR                              @HAVE_STRERROR@
@@ -105,6 +116,8 @@
 
 #cmakedefine HAVE_TCPUDP_UNIX_SOCKETS
 #cmakedefine HAVE_IP_RAW_SOCKETS
+#cmakedefine IPV4_RAW_OUTPUT_IS_RAW
+#cmakedefine IPV4_RAW_INPUT_IS_RAW
 
 #cmakedefine HAVE_STRUCT_MSGHDR_MSG_CONTROL             @HAVE_STRUCT_MSGHDR_MSG_CONTROL@
 
@@ -113,8 +126,8 @@
 #cmakedefine HAVE_STRUCT_MSGHDR_MSG_NAME                @HAVE_STRUCT_MSGHDR_MSG_NAME@
 #cmakedefine HAVE_STRUCT_MSGHDR_MSG_NAMELEN             @HAVE_STRUCT_MSGHDR_MSG_NAMELEN@
 #cmakedefine HAVE_STRUCT_SOCKADDR_SA_LEN                @HAVE_STRUCT_SOCKADDR_SA_LEN@
-/* #cmakedefine HAVE_STRUCT_SOCKADDR_STORAGE_SS_LEN    @HAVE_STRUCT_SOCKADDR_STORAGE_SS_LEN@   */         /* Unused */
-/* #cmakedefine HAVE_SOCKADDR_UN_SUN_LEN           @HAVE_SOCKADDR_UN_SUN_LEN@                  */         /* Unused */
+#cmakedefine HAVE_STRUCT_SOCKADDR_STORAGE_SS_LEN        @HAVE_STRUCT_SOCKADDR_STORAGE_SS_LEN@               /* Unused */
+#cmakedefine HAVE_STRUCT_SOCKADDR_UN_SUN_LEN            @HAVE_STRUCT_SOCKADDR_UN_SUN_LEN@                   /* Unused */
 
 #cmakedefine HAVE_NET_ETHERNET_H                        @HAVE_NET_ETHERNET_H@
 #cmakedefine HAVE_SYS_ETHERNET_H                        @HAVE_SYS_ETHERNET_H@
@@ -129,7 +142,7 @@
 #cmakedefine HAVE_IFADDRS_H                             @HAVE_IFADDRS_H@
 #cmakedefine HAVE_STROPTS_H                             @HAVE_STROPTS_H@
 #cmakedefine HAVE_LINUX_ETHTOOL_H                       @HAVE_LINUX_ETHTOOL_H@
-/* #cmakedefine HAVE_LINUX_IF_TUN_H    @HAVE_LINUX_IF_TUN_H@   */                                          /* Unused */
+/* #cmakedefine HAVE_LINUX_IF_TUN_H    @HAVE_LINUX_IF_TUN_H@   */                                           /* Unused */
 
 #cmakedefine HAVE_LINUX_NETLINK_H                       @HAVE_LINUX_NETLINK_H@
 #cmakedefine HAVE_LINUX_RTNETLINK_H                     @HAVE_LINUX_RTNETLINK_H@
@@ -137,7 +150,7 @@
 #cmakedefine HAVE_ROUTING_SOCKETS                       @HAVE_ROUTING_SOCKETS@
 
 #cmakedefine HAVE_NETLINK_SOCKET_ATTRIBUTE_RTA_TABLE    @HAVE_NETLINK_SOCKET_ATTRIBUTE_RTA_TABLE@
-/* #cmakedefine HAVE_STRUCTSOCKADDR_DL_SDL_LEN             @HAVE_STRUCTSOCKADDR_DL_SDL_LEN@  */           /* Unused */
+#cmakedefine HAVE_STRUCT_SOCKADDR_DL_SDL_LEN            @HAVE_STRUCT_SOCKADDR_DL_SDL_LEN@                   /* Unused */
 #cmakedefine HAVE_STRUCT_IFREQ_IFR_HWADDR               @HAVE_STRUCT_IFREQ_IFR_HWADDR@
 #cmakedefine HAVE_STRUCT_IFREQ_IFR_IFINDEX              @HAVE_STRUCT_IFREQ_IFR_IFINDEX@
 
@@ -157,7 +170,7 @@
 #cmakedefine HAVE_SYSCTL_NET_RT_DUMP
 #cmakedefine HAVE_SYSCTL_NET_RT_IFLIST
 
-
+#cmakedefine __APPLE_USE_RFC_3542
 #cmakedefine HAVE_IPV6                                  @HAVE_IPV6@
 
 #cmakedefine HAVE_NETINET_IN_H                          @HAVE_NETINET_IN_H@
@@ -175,7 +188,7 @@
 #cmakedefine HAVE_INET_IP_H                             @HAVE_INET_IP_H@
 #cmakedefine HAVE_ARPA_INET_H                           @HAVE_ARPA_INET_H@
 #cmakedefine HAVE_ARPA_TELNET_H                         @HAVE_ARPA_TELNET_H@
-
+#cmakedefine HAVE_STRUCT_SOCKADDR_IN_SIN_LEN            @HAVE_STRUCT_SOCKADDR_IN_SIN_LEN@
 
 #cmakedefine L_WARNING
 #cmakedefine L_INFO
@@ -264,10 +277,8 @@
 #cmakedefine HAVE_LINUX_IF_VLAN_H                       @HAVE_LINUX_IF_VLAN_H@
 #cmakedefine HAVE_VLAN_LINUX
 #cmakedefine HAVE_VLAN_BSD
-/* zagura: 2023-09-08 Skip checks for old vlan definitions
-#define GET_VLAN_REALDEV_NAME_CMD 8
-#define GET_VLAN_VID_CMD 9
-*/
+#cmakedefine GET_VLAN_REALDEV_NAME_CMD                  @GET_VLAN_REALDEV_NAME_CMD@
+#cmakedefine GET_VLAN_VID_CMD                           @GET_VLAN_VID_CMD@
 
 #cmakedefine HAVE_PCRE_H                                @HAVE_PCRE_H@
 #cmakedefine HAVE_PCREPOSIX_H                           @HAVE_PCREPOSIX_H@

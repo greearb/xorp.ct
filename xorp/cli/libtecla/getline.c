@@ -39,7 +39,7 @@
 #include <errno.h>
 #include <ctype.h>
 #include <setjmp.h>
-
+#include <fcntl.h>
 /*
  * UNIX headers.
  */
@@ -99,6 +99,9 @@ static int gl_tputs_putchar(TputsType c);
 /*
  * POSIX headers.
  */
+#if HAVE_SYS_UIO_H
+#include <sys/uio.h>
+#endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif

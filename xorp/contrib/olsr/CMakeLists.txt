@@ -51,7 +51,7 @@ add_library(olsrxrl xrl_io.cc
                     xrl_target.cc
                     )
 
-target_link_libraries(olsrxrl ${OLSR_LIBS})
+target_link_libraries(olsrxrl ${OLSR_LIBS} olsr)
 install(TARGETS olsrxrl LIBRARY DESTINATION ${XORP_LIBDIR})
 
 

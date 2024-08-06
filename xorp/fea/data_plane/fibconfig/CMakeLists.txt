@@ -53,5 +53,5 @@ list(APPEND FIB_SRCS fibconfig_entry_get_dummy.cc
                      fibconfig_table_set_dummy.cc)
 endif()
 
-add_library(fibconfig ${FIB_SRCS})
-install(TARGETS fibconfig LIBRARY DESTINATION ${XORP_LIBDIR})
+add_library(fibconfig OBJECT ${FIB_SRCS})
+# install(TARGETS fibconfig LIBRARY DESTINATION ${XORP_LIBDIR})
