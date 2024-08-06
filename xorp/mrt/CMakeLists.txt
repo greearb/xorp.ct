@@ -11,4 +11,5 @@ add_library(xorp_mrt
                 mifset.cc
                 mrib_table.cc)
 
+target_link_libraries(xorp_mrt PUBLIC xorp)
 install(TARGETS xorp_mrt LIBRARY DESTINATION ${XORP_LIBDIR})

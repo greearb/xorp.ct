@@ -31,7 +31,7 @@ target_link_libraries(wrapper ${WRAPPER_LIBS})
 install(TARGETS wrapper LIBRARY DESTINATION ${XORP_LIBDIR})
 
 add_library(wrapperxrl xorp_io.cc xorp_wrapper4.cc)
-target_link_libraries(wrapperxrl ${WRAPPER_LIBS})
+target_link_libraries(wrapperxrl ${WRAPPER_LIBS} wrapper)
 install(TARGETS wrapperxrl LIBRARY DESTINATION ${XORP_LIBDIR})
 
 

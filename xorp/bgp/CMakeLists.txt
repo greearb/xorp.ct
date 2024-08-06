@@ -71,39 +71,36 @@ add_executable(xorp_bgp main.cc)
 add_library(bgp ${BGP_SRCS})
 target_compile_options(bgp PRIVATE -ftemplate-depth=35)
 
+list(APPEND BGP_LIBS cli
+                     fea_client
+                     finder
+                     xif_cli_processor
+                     policy_backend
+                     policy_common
+                     xorp
+                     comm
+                     proto
+                     xipc
+                     xif_fea_ifmgr_mirror
+                     xif_rib
+                     xif_finder_event_notifier
+    )
+
 target_link_libraries(bgp
-                          cli
-                          xif_cli_processor
                           tgts_bgp
                           tgts_cli
-                          finder
                           tecla
-                          xipc
-                          proto
-                          comm
-                          xorp
+                          ${BGP_LIBS}
                      )
 
 target_link_libraries(xorp_bgp
                                bgp
-                               cli
-                               xif_cli_processor
                                tgts_cli
-                               policy_backend
-                               policy_common
-                               fea_client
                                tgts_bgp
                                tgts_fea_ifmgr_mirror
                                xif_rib
-                               xif_finder_event_notifier
-                               xif_fea_ifmgr_mirror
                                xif_fea_ifmgr_replicator
-                               finder
                                tecla
-                               xipc
-                               proto
-                               comm
-                               xorp
                                ${BGP_LIBS}
                     )
 

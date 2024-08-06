@@ -1,9 +1,11 @@
 # libxipc build
+# Copyright (c) 2024 Michał Zagórski (zagura)
+# SPDX-License-Identifier: GPL-2.0-or-later
 
 if(TESTS_PROGRAMS)
     add_subdirectory(tests)
 endif()
-# find_library(crypto)
+
 add_library(xipc finder_client.cc
                 finder_client_observer.cc
                 finder_client_xrl_target.cc
@@ -36,18 +38,22 @@ add_library(xipc finder_client.cc
                 xuid.cc         # only for udp (and fea tcpudp mgr)
                 fp64serial.c
                 )
-# ${XIPC_SRCS})
+
 add_dependencies(xipc targets)
 add_dependencies(xipc interfaces)
 target_link_libraries(xipc
-                        comm
-                        crypto
-                        xif_finder_client
-                        xif_finder
-                        xif_common
-                        tgts_finder_client)
-# add_dependencies(xipc crypto)
+                           comm
+                           proto
+                           OpenSSL::Crypto
+                           $<TARGET_NAME:xif_base>
+                           $<TARGET_NAME:tgts_base>
+                     )
+# xif_finder
+# xif_common
+# tgts_finder_client
+
 install(TARGETS xipc LIBRARY DESTINATION ${XORP_LIBDIR})
+
 # Finder library
 MESSAGE(STATUS "Targets dir is ${TARGETS_DIR}")
 
@@ -60,18 +66,20 @@ add_dependencies(finder targets)
 add_dependencies(finder interfaces)
 
 target_link_libraries(finder
-                        xipc
-                        comm
-                        xorp
-                        crypto
-                        tgts_finder
-                        xif_finder_event_observer
-                        xif_finder_client)
+                             xipc
+                             comm
+                             xorp
+                             proto
+                             OpenSSL::Crypto
+                             tgts_finder
+                             xif_finder_event_observer
+                             xif_finder_client
+                     )
 
 install(TARGETS finder LIBRARY DESTINATION ${XORP_LIBDIR})
 
 add_executable(xorp_finder finder_main.cc)
-target_link_libraries(xorp_finder finder xipc comm xorp)
+target_link_libraries(xorp_finder finder xif_finder_client xif_finder xif_common OpenSSL::Crypto xipc comm xorp)
 install(TARGETS xorp_finder RUNTIME DESTINATION ${XORP_MODULEDIR})
 
 add_executable(call_xrl call_xrl.cc)

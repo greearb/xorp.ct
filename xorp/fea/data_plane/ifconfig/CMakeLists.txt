@@ -10,7 +10,8 @@ if (FEA_DUMMY)
                       ifconfig_set_dummy.cc)
 endif()
 
-add_library(ifconfig ifconfig_get_click.cc
+add_library(ifconfig OBJECT
+                     ifconfig_get_click.cc
                      ifconfig_get_getifaddrs.cc
                      ifconfig_get_ioctl.cc
                      ifconfig_get_iphelper.cc
@@ -37,5 +38,7 @@ add_library(ifconfig ifconfig_get_click.cc
                      ifconfig_vlan_set_linux.cc
                      ${IFCONFIG_SRCS})
 
-install(TARGETS ifconfig LIBRARY DESTINATION ${XORP_LIBDIR})
+# target_link_libraries(ifconfig xorp comm proto)
+#xipc finder_client OpenSSL::Crypto)
+# install(TARGETS ifconfig LIBRARY DESTINATION ${XORP_LIBDIR})
 

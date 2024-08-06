@@ -8,7 +8,8 @@ if (CLICK)
 endif()
 
 
-add_library(control_socket netlink_socket.cc
+add_library(control_socket OBJECT
+                           netlink_socket.cc
                            netlink_socket_utilities.cc
                            routing_socket.cc
                            routing_socket_utilities.cc
@@ -16,5 +17,7 @@ add_library(control_socket netlink_socket.cc
                            windows_rtm_pipe.cc
                            ${CONTROL_SRCS})
 
-install(TARGETS control_socket LIBRARY DESTINATION ${XORP_LIBDIR})
+
+# target_link_libraries(control_socket)
+# install(TARGETS control_socket LIBRARY DESTINATION ${XORP_LIBDIR})
 

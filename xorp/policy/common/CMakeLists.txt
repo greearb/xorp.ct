@@ -2,8 +2,6 @@
 # Copyright (c) 2023-2024 Michał Zagórski (zagura)
 # SPDX-License-Identifier: GPL-2.0-or-later
 
-
-
 add_library(policy_common
                           dispatcher.cc
                           elem_set.cc
@@ -16,6 +14,8 @@ add_library(policy_common
                           register_elements.cc
                           register_operations.cc
                           varrw.cc
+                          ../../bgp/aspath.cc
                           )
 
+target_link_libraries(policy_common xorp comm proto OpenSSL::Crypto)
 install(TARGETS policy_common LIBRARY DESTINATION ${XORP_LIBDIR})

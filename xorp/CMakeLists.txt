@@ -104,12 +104,16 @@ elseif(${HOST_OS} EQUAL "Windows")
     set(HOST_OS_WINDOWS ON)
     set(XRL_PF "\'t\'")
 elseif(${HOST_OS} MATCHES "SunOS*")
-    add_definitions(-DHOST_OS_SOLARIS)
+    add_compile_definitions(HOST_OS_SOLARIS)
     set(HOST_OS_SOLARIS ON)
 elseif(${HOST_OS} MATCHES "NetBSD*")
     set(HOST_OS_NETBSD ON)
     set(ENABLE_ADVANCED_MULTICAST_API ON)
     # add_definitions(-DHOST_OS_NETBSD -DENABLE_ADVANCED_MULTICAST_API)
+elseif(${HOST_OS} MATCHES "Darwin")
+    set(HOST_OS_MACOSX ON)
+elseif(${HOST_OS} MATCHES "OpenBSD*")
+    set(HOST_OS_OPENBSD ON)
 endif()
 
 set(HOST_OS_NAME "\"${HOST_OS}\"")
@@ -167,7 +171,7 @@ if(PROFILER EQUAL "gprof")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pg")
 endif()
 
-add_definitions(-DXORP_VERSION="${PROJECT_VERSION}")
+add_compile_definitions(XORP_VERSION="${PROJECT_VERSION}")
 
 if(DISABLE_WDEPRECATED)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated")
@@ -183,7 +187,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${BASIC_FLAGS} ${BASIC_C_FLAGS}")
 
 
 if(LEX_HACK)
-    add_definitions(-DNEED_LEX_H_HACK)
+    add_compile_definitions(NEED_LEX_H_HACK)
 endif()
 
 # if(ENABLE_IPV6)
@@ -192,29 +196,44 @@ endif()
 
 # NOTE: For GNU STL only
 if(DEBUG_STL)
-    add_definitions(-D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC)
+    add_compile_definitions(_GLIBCXX_DEBUG _GLIBCXX_DEBUG_PEDANTIC)
 endif()
 
 # NOTE: DEBUG_LOGGING_GLOBAL currently a no-op
 if (DEBUG_MSG)
-    add_definitions(-DDEBUG_LOGGING)
+    add_compile_definitions(DEBUG_LOGGING)
 endif()
 
 if(DEBUG_FN)
-    add_definitions(-DDEBUG_PRINT_FUNCTION_NAME)
+    add_compile_definitions(DEBUG_PRINT_FUNCTION_NAME)
 endif()
 
 if(DEBUG_CB)
-    add_definitions(-DDEBUG_CALLBACKS)
+    add_compile_definitions(DEBUG_CALLBACKS)
 endif()
 
 
 check_include_file("endian.h"       HAVE_ENDIAN_H)
+#if (HAVE_ENDIAN_H)
+    include(TestBigEndian)
+    test_big_endian(ENDIANESS)
+    if (ENDIANESS EQUAL 1)
+        set(WORDS_BIGENDIAN 1)
+    elseif(ENDIANESS EQUAL 0)
+        set(WORDS_SMALLENDIAN 1)
+    endif()
+# endif()
 check_include_file("iphlpapi.h"     HAVE_IPHLPAPI_H)
 check_include_file("routprot.h"     HAVE_ROUTPROT_H)
-# check_include_file("stdint.h"       HAVE_STDINT_H) # Checked with check_type_size
+check_include_file("stdint.h"       HAVE_STDINT_H) # Checked with check_type_size
 check_include_file("inttypes.h"     HAVE_INTTYPES_H)
-# check_symbol_exists(uint64_t "stdint.h" HAVE_UINT64_T)
+check_type_size(int8_t INT8_T)
+check_type_size(int16_t INT16_T)
+check_type_size(int32_t INT32_T)
+check_type_size(int64_t INT64_T)
+check_type_size(uint8_t UINT8_T)
+check_type_size(uint16_t UINT16_T)
+check_type_size(uint32_t UINT32_T)
 check_type_size(uint64_t UINT64_T)
 check_include_file("stdbool.h"      HAVE_STDBOOL_H)
 
@@ -244,8 +263,9 @@ check_include_file("termios.h"      HAVE_TERMIOS_H)
 check_include_file("time.h"         HAVE_TIME_H)
 check_include_file("unistd.h"       HAVE_UNISTD_H)
 check_include_file("vfork.h"        HAVE_VFORK_H)
+check_include_file("terminfo.h"     HAVE_TERMINFO_H)
 
-# check_include_file("xnet.h"         HAVE_LIBXNET)
+check_include_file("xnet.h"         HAVE_LIBXNET)
 # check_include_file("rt.h"           HAVE_LIBRT)
 check_function_exists(readv         HAVE_READV)
 check_function_exists(strerror      HAVE_STRERROR)
@@ -262,7 +282,7 @@ if (RT_LIBRARY)
     set(HAVE_LIBRT 1)
 endif()
 
-CHECK_LIBRARY_EXISTS(rt clock_gettime "" HAVE_CLOCK_GETTIME)
+check_function_exists(clock_gettime HAVE_CLOCK_GETTIME)
 check_symbol_exists(CLOCK_MONOTONIC "time.h" HAVE_CLOCK_MONOTONIC)
 check_symbol_exists(CLOCK_MONOTONIC_FAST "time.h" HAVE_CLOCK_MONOTONIC_FAST)
 
@@ -322,6 +342,10 @@ if (HAVE_DECL_AF_INET AND HAVE_DECL_SOCK_STREAM AND HAVE_DECL_SOCK_DGRAM)
 endif()
 if (HAVE_DECL_AF_INET AND HAVE_DECL_SOCK_RAW)
     set(HAVE_IP_RAW_SOCKETS ON)
+    if (HOST_OS_LINUX OR HOST_OS_OPENBSD)
+        set(IPV4_RAW_OUTPUT_IS_RAW 1)
+        set(IPV4_RAW_INPUT_IS_RAW 1)
+    endif()
 endif()
 
 check_struct_has_member("struct msghdr" msg_control "sys/socket.h" HAVE_STRUCT_MSGHDR_MSG_CONTROL)
@@ -329,8 +353,8 @@ check_struct_has_member("struct msghdr" msg_iov     "sys/socket.h" HAVE_STRUCT_M
 check_struct_has_member("struct msghdr" msg_name    "sys/socket.h" HAVE_STRUCT_MSGHDR_MSG_NAME)
 check_struct_has_member("struct msghdr" msg_namelen "sys/socket.h" HAVE_STRUCT_MSGHDR_MSG_NAMELEN)
 check_struct_has_member("struct sockaddr"   sa_len  "sys/socket.h" HAVE_STRUCT_SOCKADDR_SA_LEN)
-check_struct_has_member("struct sockaddr_storage"   ss_len  "sys/socket.h" HAVE_STRUCT_SOCKADDR_STORAGE_SS_LEN)
-# check_struct_has_member("struct sockaddr_un"    sun_len "sys/socket.h" HAVE_SOCKADDR_UN_SUN_LEN)                  # Unused
+check_struct_has_member("struct sockaddr_storage"   ss_len  "sys/types.h;sys/socket.h" HAVE_STRUCT_SOCKADDR_STORAGE_SS_LEN)
+check_struct_has_member("struct sockaddr_un"    sun_len "sys/types.h;sys/socket.h;sys/un.h" HAVE_STRUCT_SOCKADDR_UN_SUN_LEN)                  # Unused
 
 check_include_file("net/ethernet.h" HAVE_NET_ETHERNET_H)
 check_include_file("sys/ethernet.h" HAVE_SYS_ETHERNET_H)
@@ -345,7 +369,7 @@ check_include_files("sys/types.h;net/if.h;net/route.h"    HAVE_NET_ROUTE_H)
 check_include_file("ifaddrs.h"      HAVE_IFADDRS_H)
 check_include_file("stropts.h"      HAVE_STROPTS_H)
 check_include_file("linux/ethtool.h" HAVE_LINUX_ETHTOOL_H)
-# check_include_file("linux/if_tun.h" HAVE_LINUX_IF_TUN_H)          # Unused
+check_include_file("linux/if_tun.h" HAVE_LINUX_IF_TUN_H)          # Unused
 check_include_file("linux/netlink.h"    HAVE_LINUX_NETLINK_H)
 check_include_file("linux/rtnetlink.h"  HAVE_LINUX_RTNETLINK_H)
 if (${HAVE_LINUX_RTNETLINK_H} AND ${HAVE_LINUX_NETLINK_H})
@@ -361,22 +385,22 @@ int main() {
     return 0;
 }
 " HAVE_NETLINK_SOCKET_ATTRIBUTE_RTA_TABLE)
-check_struct_has_member("struct sockaddr_dl"    sdl_len "inet/if_dl.h;sys/socket.h" HAVE_STRUCTSOCKADDR_DL_SDL_LEN)
+check_struct_has_member("struct sockaddr_dl"    sdl_len "sys/types.h;net/if_dl.h" HAVE_STRUCT_SOCKADDR_DL_SDL_LEN)
 check_struct_has_member("struct ifreq"  ifr_hwaddr  "net/if.h" HAVE_STRUCT_IFREQ_IFR_HWADDR)
 check_struct_has_member("struct ifreq"  ifr_ifindex "net/if.h" HAVE_STRUCT_IFREQ_IFR_IFINDEX)
 
 
-check_function_exists(ether_aton    HAVE_ETHER_ATON)
-check_function_exists(ether_aton_r  HAVE_ETHER_ATON_R)
-check_function_exists(ether_ntoa    HAVE_ETHER_NTOA)
-check_function_exists(ether_ntoa_r  HAVE_NTOA_R)
-check_function_exists(getaddrinfo   HAVE_GETADDRINFO)
-check_function_exists(getifaddrs    HAVE_GETIFADDRS)
-check_function_exists(getnameinfo   HAVE_GETNAMEINFO)
-check_function_exists(if_indextoname   HAVE_IF_INDEXTONAME)
-check_function_exists(if_nametoindex   HAVE_IF_NAMETOINDEX)
-check_function_exists(inet_ntop     HAVE_INET_NTOP)
-check_function_exists(inet_pton     HAVE_INET_PTON)
+check_function_exists(ether_aton        HAVE_ETHER_ATON)
+check_function_exists(ether_aton_r      HAVE_ETHER_ATON_R)
+check_function_exists(ether_ntoa        HAVE_ETHER_NTOA)
+check_function_exists(ether_ntoa_r      HAVE_NTOA_R)
+check_function_exists(getaddrinfo       HAVE_GETADDRINFO)
+check_function_exists(getifaddrs        HAVE_GETIFADDRS)
+check_function_exists(getnameinfo       HAVE_GETNAMEINFO)
+check_function_exists(if_indextoname    HAVE_IF_INDEXTONAME)
+check_function_exists(if_nametoindex    HAVE_IF_NAMETOINDEX)
+check_function_exists(inet_ntop         HAVE_INET_NTOP)
+check_function_exists(inet_pton         HAVE_INET_PTON)
 
 check_c_source_compiles("
 #include <net/ethernet.h>
@@ -422,8 +446,11 @@ check_include_files("netinet/tcp.h"          HAVE_NETINET_TCP_H)
 check_include_files("sys/types.h;netinet/in.h;netinet/igmp.h"         HAVE_NETINET_IGMP_H)
 check_include_file("netinet/ether.h"        HAVE_NETINET_ETHER_H)
 check_c_source_compiles("
-#include <linux/in.h>
+// #include <linux/in.h>
+#include <sys/types.h>
+//#include <netintet/ip.h>
 #include <netinet/in.h>
+
 
 int main() {
     struct ip_mreqn* mreq = 0;
@@ -437,18 +464,7 @@ check_include_file("inet/ip.h"              HAVE_INET_IP_H)
 check_include_file("arpa/inet.h"            HAVE_ARPA_INET_H)
 check_include_file("arpa/telnet.h"          HAVE_ARPA_TELNET_H)
 
-# check_struct_has_member("struct sockaddr_in" sin_len "netinet/in.h" HAVE_STRUCT_SOCKADDR_IN_SIN_LEN)
-check_c_source_compiles("
-#include <linux/in.h>
-#include <netinet/in.h>
-
-int main() {
-    struct sockaddr_in addr;
-    auto len = addr.sin_len;
-    (void)len;
-    return 0;
-}
-" HAVE_STRUCT_SOCKADDR_IN_SIN_LEN)
+check_struct_has_member("struct sockaddr_in" sin_len "sys/types.h;netinet/in.h" HAVE_STRUCT_SOCKADDR_IN_SIN_LEN)
 
 # MULTICAST
 # set(HAVE_IPV4_MULTICAST OFF)
@@ -475,7 +491,6 @@ if (HAVE_SYS_TYPES_H EQUAL 1
     check_symbol_exists(IP_MULTICAST_LOOP "netinet/in.h" HAVE_DECL_IP_MULTICAST_LOOP)
     check_symbol_exists(IP_ADD_MEMBERSHIP "netinet/in.h" HAVE_DECL_IP_ADD_MEMBERSHIP)
     check_symbol_exists(IP_DROP_MEMBERSHIP "netinet/in.h" HAVE_DECL_IP_DROP_MEMBERSHIP)
-    #check_symbol_exists(SIOCGIFCONF "sys/ioctl.h" HAVE_IOCTL_SIOCGIFCONF)
     if (HAVE_DECL_IP_MULTICAST_IF AND HAVE_DECL_IP_MULTICAST_TTL AND HAVE_DECL_IP_MULTICAST_LOOP
         AND HAVE_DECL_IP_ADD_MEMBERSHIP AND HAVE_DECL_IP_DROP_MEMBERSHIP)
         set(HAVE_IPV4_MULTICAST 1)
@@ -562,6 +577,9 @@ if (ENABLE_IPV6
         set(HAVE_IPV6_MULTICAST 1)
 endif()
 
+if (HOST_OS_MACOSX AND HAVE_RFC3542 EQUAL 1)
+    set(__APPLE_USE_RFC_3542 1)
+endif()
 
 check_symbol_exists(fpclassify "math.h"         HAVE_DECL_FPCLASSIFY)
 
@@ -634,6 +652,14 @@ check_include_file("linux/if_vlan.h"                     HAVE_LINUX_IF_VLAN_H)
 
 if (HAVE_LINUX_IF_VLAN_H EQUAL 1)
     set(HAVE_VLAN_LINUX 1)
+    check_symbol_exists(GET_VLAN_REALDEV_NAME_CMD "linux/if_vlan.h" HAVE_GET_VLAN_REALDEV_NAME_CMD)
+    if (NOT HAVE_GET_VLAN_REALDEV_NAME_CMD)
+	    set(GET_VLAN_REALDEV_NAME_CMD 8)
+    endif()
+    check_symbol_exists(GET_VLAN_VID_CMD "linux/if_vlan.h" HAVE_GET_VLAN_VID_CMD)
+    if (NOT HAVE_GET_VLAN_VID_CMD)
+	    set(GET_VLAN_VID_CMD 9)
+    endif()
 elseif(HAVE_NET_IF_VLANVAR_H EQUAL 1
         OR HAVE_NET_IF_VLAN_VAR_H EQUAL 1)
     set(HAVE_VLAN_BSD 1)
@@ -657,6 +683,10 @@ if (PCREPOSIX_LIB)
 endif()
 
 check_include_file("openssl/md5.h"                HAVE_OPENSSL_MD5_H)
+find_package(OpenSSL REQUIRED)
+if (OPENSSL_FOUND)
+	set(HAVE_OPENSSL_MD5_H 1)
+endif()
 if (NOT HAVE_OPENSSL_MD5_H)
     message(SEND_ERROR "Cannot find required openssl/md5.h.
     On Fedora/RedHat:  yum install openssl-devel
