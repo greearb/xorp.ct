@@ -20,4 +20,4 @@ add_library(control_socket OBJECT
 
 # target_link_libraries(control_socket)
 # install(TARGETS control_socket LIBRARY DESTINATION ${XORP_LIBDIR})
-
+set_target_properties(control_socket PROPERTIES POSITION_INDEPENDENT_CODE TRUE)

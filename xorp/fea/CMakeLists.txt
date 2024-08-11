@@ -98,7 +98,7 @@ add_library(xfdp OBJECT
                  io_ip.cc
                  io_link.cc
                  io_tcpudp.cc)
-
+set_target_properties(xfdp PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 # install(TARGETS xfdp LIBRARY DESTINATION ${XORP_LIBDIR})
 
 add_library(fea ${FEA_SRCS})

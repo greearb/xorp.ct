@@ -54,4 +54,5 @@ list(APPEND FIB_SRCS fibconfig_entry_get_dummy.cc
 endif()
 
 add_library(fibconfig OBJECT ${FIB_SRCS})
+set_target_properties(fibconfig PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 # install(TARGETS fibconfig LIBRARY DESTINATION ${XORP_LIBDIR})

@@ -58,7 +58,11 @@ option(LOCAL_TRANSPORT      "Set transport method to unix instead of tcp"   ON)
 
 set(PROFILER "no" CACHE STRING "Build with profiling")
 set_property(CACHE PROFILER PROPERTY STRINGS "no" "gprof" "pprof" "override")
-
+find_package(Python3 COMPONENTS Interpreter)
+if (NOT Python3_FOUND)
+    message(WARNING "Python3 interpreter not found")
+    return()
+endif()
 set(EXEC_PREFIX         ${CMAKE_INSTALL_PREFIX})
 set(SBINDIR             ${EXEC_PREFIX}/sbin)
 set(LIBEXECDIR          ${EXEC_PREFIX}/lib)
@@ -402,15 +406,8 @@ check_function_exists(if_nametoindex    HAVE_IF_NAMETOINDEX)
 check_function_exists(inet_ntop         HAVE_INET_NTOP)
 check_function_exists(inet_pton         HAVE_INET_PTON)
 
-check_c_source_compiles("
-#include <net/ethernet.h>
-
-int main() {
-    struct ether_addr* addr = 0;
-    (void*)addr;
-    return 0;
-}
-" HAVE_STRUCT_ETHER_ADDR)
+set(CMAKE_EXTRA_INCLUDE_FILES "net/if.h;net/if_ether.h")
+check_type_size("struct ether_addr" HAVE_STRUCT_ETHER_ADDR)
 
 
 macro(CHECK_SYSCTL VARIABLE_NAME OIDS INCLUDE_LIST)
@@ -454,6 +451,7 @@ check_c_source_compiles("
 
 int main() {
     struct ip_mreqn* mreq = 0;
+    struct ip_mreqn data;
     (void*)mreq;
     return 0;
 }

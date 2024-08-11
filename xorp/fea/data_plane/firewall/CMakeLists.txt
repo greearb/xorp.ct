@@ -13,3 +13,4 @@ add_library(firewall OBJECT
                      firewall_set_pf.cc
                      )
 # install(TARGETS firewall LIBRARY DESTINATION ${XORP_LIBDIR})
+set_target_properties(firewall PROPERTIES POSITION_INDEPENDENT_CODE TRUE)

@@ -97,7 +97,7 @@ foreach(src_tgt ${tgt_srcs})
         OUTPUT ${src_cxx}
         # ALL
         # BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/${src_cxx}
-        COMMAND /usr/bin/python3 "../scripts/tgt-gen" "-I../interfaces" "-I${MAIN_DIR}"
+        COMMAND ${Python3_EXECUTABLE} "../scripts/tgt-gen" "-I../interfaces" "-I${MAIN_DIR}"
         "-I${CMAKE_CURRENT_LIST_DIR}" "--output-dir=${CMAKE_CURRENT_BINARY_DIR}" "${src_tgt}"
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMENT "[tgt] Generating ${src_cxx} file from ${src_tgt}"
@@ -111,5 +111,6 @@ foreach(src_tgt ${tgt_srcs})
 endforeach()
 #set_source_files_properties(${tgt_cxx} PROPERTIES GENERATED TRUE)
 add_library(tgts_base OBJECT finder_client_base.cc)
+set_target_properties(tgts_base PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 add_custom_target(targets DEPENDS ${tgt_cxx})
 # target_sources(targets PRIVATE ${tgt_cxx})
