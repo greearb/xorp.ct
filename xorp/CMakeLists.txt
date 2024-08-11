@@ -583,18 +583,30 @@ check_symbol_exists(fpclassify "math.h"         HAVE_DECL_FPCLASSIFY)
 
 ##########
 # v4 mforwarding
-check_include_files("sys/types.h;sys/time.h;netinet/in.h;netinet/ip_mroute.h"        HAVE_NETINET_IP_MROUTE_H)
-check_include_file("net/if_var.h"               HAVE_NET_IF_VAR_H)
-check_include_file("net/ip_mroute/ip_mroute.h"  HAVE_NET_IP_MROUTE_IP_MROUTE_H)
-check_include_file("linux/mroute.h"             HAVE_LINUX_MROUTE_H)
+check_include_files("sys/types.h;sys/time.h;netinet/in.h;netinet/ip_mroute.h"                   HAVE_NETINET_IP_MROUTE_H)
+check_include_file("net/if_var.h"                                                               HAVE_NET_IF_VAR_H)
+check_include_files("sys/types.h;sys/time.h;net/if.h;net/route.h;net/ip_mroute/ip_mroute.h"     HAVE_NET_IP_MROUTE_IP_MROUTE_H)
+check_include_file("linux/mroute.h"                                                             HAVE_LINUX_MROUTE_H)
 
-check_struct_has_member("struct mfcctl2"  mfcc_flags  "linux/mroute.h" HAVE_STRUCT_MFCCTL2)
-check_struct_has_member("struct mfcctl2"  mfcc_flags  "linux/mroute.h" HAVE_STRUCT_MFCCTL2_MFCC_FLAGS)
-check_struct_has_member("struct mfcctl2"  mfcc_rp  "linux/mroute.h" HAVE_STRUCT_MFCCTL2_MFCC_RP)
+set(MFCCTL2_INCLUDES "")
+if (HAVE_NETINET_IP_MROUTE_H)
+    set(MFCCTL2_INCLUDES "sys/types.h;sys/time.h;netinet/in.h;netinet/ip_mroute.h")
+elseif(HAVE_NET_IP_MROUTE_IP_MROUTE_H)
+    set(MFCCTL2_INCLUDES "sys/types.h;sys/time.h;net/if.h;net/route.h;net/ip_mroute/ip_mroute.h")
+elseif(HAVE_LINUX_MROUTE_H)
+    set(MFCCTL2_INCLUDEs "linux/mroute.h")
+endif()
+set(CMAKE_EXTRA_INCLUDE_FILES "${MFCCTL2_INCLUDES}")
+check_type_size("struct mfcctl2" HAVE_STRUCT_MFCCTL2)
+
+#check_struct_has_member("struct mfcctl2"  mfcc_flags  MFCCTL2_INCLUDES HAVE_STRUCT_MFCCTL2)
+check_struct_has_member("struct mfcctl2"  mfcc_flags  "${MFCCTL2_INCLUDES}" HAVE_STRUCT_MFCCTL2_MFCC_FLAGS)
+check_struct_has_member("struct mfcctl2"  mfcc_rp     "${MFCCTL2_INCLUDES}" HAVE_STRUCT_MFCCTL2_MFCC_RP)
 
 
 check_include_file("netinet/pim.h"                  HAVE_NETINET_PIM_H)
-check_struct_has_member("struct pim"  pim_vt  "netinet/pim.h" HAVE_STRUCT_PIM)
+set(CMAKE_EXTRA_INCLUDE_FILES "netinet/pim.h")
+check_type_size("struct pim" HAVE_STRUCT_PIM)
 check_struct_has_member("struct pim"  pim_vt  "netinet/pim.h" HAVE_STRUCT_PIM_PIM_VT)
 
 if (HAVE_NETINET_IP_MROUTE_H EQUAL 1
@@ -606,12 +618,20 @@ endif()
 ##########
 # v6 mforwarding
 check_include_files("sys/types.h;sys/param.h;sys/socket.h;netinet/in.h;netinet6/ip6_mroute.h"          HAVE_NETINET6_IP6_MROUTE_H)
-check_include_file("linux/mroute6.h"                HAVE_LINUX_MROUTE6_H)
+check_include_file("linux/mroute6.h"                                                                   HAVE_LINUX_MROUTE6_H)
 
+set(MF6CCTL2_INCLUDES "")
+if (HAVE_NETINET6_IP6_MROUTE_H)
+    set(MF6CCTL2_INCLUDES "sys/types.h;sys/param.h;sys/socket.h;netinet/in.h;netinet6/ip6_mroute.h")
+elseif(HAVE_LINUX_MROUTE6_H)
+    set(MF6CCTL2_INCLUDEs "linux/mroute6.h")
+endif()
+set(CMAKE_EXTRA_INCLUDE_FILES "${MF6CCTL2_INCLUDES}")
+check_type_size("struct mf6cctl2" HAVE_STRUCT_M6FCCTL2)
 check_symbol_exists(inet6_option_space "linux/mroute6.h" HAVE_DECL_INET6_OPTION_SPACE)
-check_struct_has_member("struct mf6cctl2"  mf6cc_flags  "linux/mroute6.h" HAVE_STRUCT_MF6CCTL2)
-check_struct_has_member("struct mf6cctl2"  mf6cc_flags  "linux/mroute6.h" HAVE_STRUCT_MF6CCTL2_MF6CC_FLAGS)
-check_struct_has_member("struct mf6cctl2"  mf6cc_rp  "linux/mroute6.h" HAVE_STRUCT_MF6CCTL2_MF6CC_RP)
+# check_struct_has_member("struct mf6cctl2"  mf6cc_flags  "${MF6CCTL2_INCLUDES}" HAVE_STRUCT_MF6CCTL2)
+check_struct_has_member("struct mf6cctl2"  mf6cc_flags  "${MF6CCTL2_INCLUDES}"   HAVE_STRUCT_MF6CCTL2_MF6CC_FLAGS)
+check_struct_has_member("struct mf6cctl2"  mf6cc_rp     "${MF6CCTL2_INCLUDES}"      HAVE_STRUCT_MF6CCTL2_MF6CC_RP)
 
 if (ENABLE_IPV6 AND (HAVE_NETINET6_IP6_MROUTE_H EQUAL 1
     OR HAVE_LINUX_MROUTE_H))
@@ -627,10 +647,10 @@ check_struct_has_member("struct mif6ctl"  vifc_threshold  "linux/mroute6.h" HAVE
 
 ##########
 # packet filters
-check_include_files("sys/types.h;net/if.h;netinet/in.h;netinet/ip_compat.h"                HAVE_NETINET_IP_COMPAT_H)
-check_include_files("sys/types.h;net/if.h;netinet/ip_fil.h"                   HAVE_NETINET_IP_FIL_H)
-check_include_files("sys/types.h;net/if.h;netinet/in.h;netinet/ip_fw.h"                    HAVE_NETINET_IP_FW_H)
-check_include_file("net/pfvar.h"                        HAVE_NET_PFVAR_H)
+check_include_files("sys/types.h;net/if.h;netinet/in.h;netinet/ip_compat.h"     HAVE_NETINET_IP_COMPAT_H)
+check_include_files("sys/types.h;net/if.h;netinet/ip_fil.h"                     HAVE_NETINET_IP_FIL_H)
+check_include_files("sys/types.h;net/if.h;netinet/in.h;netinet/ip_fw.h"         HAVE_NETINET_IP_FW_H)
+check_include_files("sys/time.h;net/if.h;net/pfvar.h"                           HAVE_NET_PFVAR_H)
 check_include_files("linux/netfilter_ipv4/ip_tables.h"   HAVE_LINUX_NETFILTER_IPV4_IP_TABLES_H   LANGUAGE CXX)
 check_include_files("linux/netfilter_ipv6/ip6_tables.h"  HAVE_LINUX_NETFILTER_IPV6_IP6_TABLES_H  LANGUAGE CXX)
 
@@ -643,20 +663,36 @@ endif()
 
 ##########
 # vlan
-check_include_file("net/if_vlanvar.h"                    HAVE_NET_IF_VLANVAR_H)
-check_include_files("sys/types.h;net/if.h;net/if_vlan_var.h"      HAVE_NET_IF_VLAN_VAR_H)
-check_include_file("net/vlan/if_vlan_var.h"              HAVE_NET_VLAN_IF_VLAN_VAR_H)
-check_include_file("linux/if_vlan.h"                     HAVE_LINUX_IF_VLAN_H)
+set(PREREQ_VLAN "")
+if (HAVE_SYS_TYPES_H)
+    list(APPEND PREREQ_VLAN "sys/types.h")
+endif()
+if (HAVE_SYS_SOCKET_H)
+    list(APPEND PREREQ_VLAN "sys/socket.h")
+endif()
+if (HAVE_NET_IF_H)
+    list(APPEND PREREQ_VLAN "net/if.h")
+endif()
+if (HAVE_NET_IF_ETHER_H)
+    list(APPEND PREREQ_VLAN "net/if_ether.h")
+endif()
+
+check_include_files("${PREREQ_VLAN};net/if_vlanvar.h"           HAVE_NET_IF_VLANVAR_H)
+check_include_files("${PREREQ_VLAN};net/if_vlan_var.h"          HAVE_NET_IF_VLAN_VAR_H)
+check_include_files("${PREREQ_VLAN};net/vlan/if_vlan_var.h"     HAVE_NET_VLAN_IF_VLAN_VAR_H)
+check_include_files("${PREREQ_VLAN};linux/if_vlan.h"            HAVE_LINUX_IF_VLAN_H)
 
 if (HAVE_LINUX_IF_VLAN_H EQUAL 1)
     set(HAVE_VLAN_LINUX 1)
+    set(CMAKE_REQUIRED_INCLUDE "${PREREQ_VLAN}")
     check_symbol_exists(GET_VLAN_REALDEV_NAME_CMD "linux/if_vlan.h" HAVE_GET_VLAN_REALDEV_NAME_CMD)
     if (NOT HAVE_GET_VLAN_REALDEV_NAME_CMD)
-	    set(GET_VLAN_REALDEV_NAME_CMD 8)
+        set(GET_VLAN_REALDEV_NAME_CMD 8)
     endif()
+    set(CMAKE_REQUIRED_INCLUDE "${PREREQ_VLAN}")
     check_symbol_exists(GET_VLAN_VID_CMD "linux/if_vlan.h" HAVE_GET_VLAN_VID_CMD)
     if (NOT HAVE_GET_VLAN_VID_CMD)
-	    set(GET_VLAN_VID_CMD 9)
+        set(GET_VLAN_VID_CMD 9)
     endif()
 elseif(HAVE_NET_IF_VLANVAR_H EQUAL 1
         OR HAVE_NET_IF_VLAN_VAR_H EQUAL 1)
@@ -683,7 +719,7 @@ endif()
 check_include_file("openssl/md5.h"                HAVE_OPENSSL_MD5_H)
 find_package(OpenSSL REQUIRED)
 if (OPENSSL_FOUND)
-	set(HAVE_OPENSSL_MD5_H 1)
+    set(HAVE_OPENSSL_MD5_H 1)
 endif()
 if (NOT HAVE_OPENSSL_MD5_H)
     message(SEND_ERROR "Cannot find required openssl/md5.h.
@@ -691,28 +727,25 @@ if (NOT HAVE_OPENSSL_MD5_H)
     On Ubuntu:  apt-get install libssl-dev
     After install, clear the cmake cache before re-building.")
 endif()
-
-# configure_file(config.h.in ${CMAKE_CURRENT_LIST_DIR}/xorp_config.h)
-find_library(CRYPTO_LIB crypto REQUIRED)
-if (CRYPTO_LIB)
+if (OPENSSL_CRYPTO_LIBRARY)
     message(STATUS "Found crypto library")
     set(HAVE_LIBCRYPTO 1)
-    set(CMAKE_REQUIRED_LIBRARIES ${CRYPTO_LIB})
+    set(CMAKE_REQUIRED_LIBRARIES ${OPENSSL_CRYPTO_LIBRARIES})
     check_function_exists(MD5_Init       HAVE_MD5_INIT)
 else()
     message(FATAL_ERROR " Cannot find required crypto library.
             clear the configure cache before re-building.")
 endif()
 
+
 find_library(DL_LIB dl)
 if (DL_LIB)
     message(STATUS "Found dl library")
     set(HAVE_LIBDL 1)
     set(CMAKE_REQUIRED_LIBRARIES ${DL_LIB})
-
-    check_include_file("dlfcn.h"     HAVE_DLFCN_H)
-    check_function_exists("dlopen"   HAVE_DLOPEN)
 endif()
+check_include_file("dlfcn.h"     HAVE_DLFCN_H)
+check_function_exists("dlopen"   HAVE_DLOPEN)
 
 # pcap for l2 comms
 find_library(PCAP_LIB pcap)
