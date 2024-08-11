@@ -140,9 +140,9 @@ sockaddr_storage2sockaddr(struct sockaddr_storage* ss)
  * CPU instructions, whereas the macro below can be handled by the
  * compiler front-end for literal values.
  */
-#if __BYTE_ORDER == __BIG_ENDIAN
+#if BYTE_ORDER == BIG_ENDIAN
 #  define htonl_literal(x) (x)
-#elif __BYTE_ORDER == __LITTLE_ENDIAN
+#elif BYTE_ORDER == LITTLE_ENDIAN
 #  define htonl_literal(x) 						      \
 		((((x) & 0x000000ffU) << 24) | (((x) & 0x0000ff00U) << 8) |   \
 		 (((x) & 0x00ff0000U) >> 8) | (((x) & 0xff000000U) >> 24))

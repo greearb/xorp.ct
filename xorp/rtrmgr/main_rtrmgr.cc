@@ -535,9 +535,9 @@ main(int argc, char* const argv[])
     XorpUnexpectedHandler ex(xorp_unexpected_handler);
 
     // Check endian-ness was detected properly.
-#if  __BYTE_ORDER == __BIG_ENDIAN
+#if  BYTE_ORDER == BIG_ENDIAN
     assert(0x12345678 == htonl(0x12345678));
-#elif __BYTE_ORDER == __LITTLE_ENDIAN
+#elif BYTE_ORDER == LITTLE_ENDIAN
     assert(0x12345678 != htonl(0x12345678));
 #else
 #error "Endian detection is not working properly.\n";
