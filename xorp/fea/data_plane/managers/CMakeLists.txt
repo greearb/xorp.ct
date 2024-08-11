@@ -20,3 +20,4 @@ add_library(fea_managers OBJECT
 
 # target_link_libraries(fea_managers PUBLIC xorp ifconfig comm xipc)
 # install(TARGETS fea_managers LIBRARY DESTINATION ${XORP_LIBDIR})
+set_target_properties(fea_managers PROPERTIES POSITION_INDEPENDENT_CODE TRUE)

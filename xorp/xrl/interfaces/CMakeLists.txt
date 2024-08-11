@@ -106,7 +106,7 @@ foreach(src_xif ${interface_srcs})
         OUTPUT ${src_cxx}
         # ALL
         DEPENDS ${src_xif}
-        COMMAND /usr/bin/python3 "../scripts/clnt-gen" "-I${MAIN_DIR}" "--output-dir=${CMAKE_CURRENT_BINARY_DIR}" "${src_xif}"
+        COMMAND ${Python3_EXECUTABLE} "../scripts/clnt-gen" "-I${MAIN_DIR}" "--output-dir=${CMAKE_CURRENT_BINARY_DIR}" "${src_xif}"
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMENT "[xif] Generating ${src_cxx} file from ${src_xif}"
     )
@@ -117,6 +117,7 @@ foreach(src_xif ${interface_srcs})
 endforeach()
 
 add_library(xif_base OBJECT common_xif.cc finder_xif.cc)
+set_target_properties(xif_base PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 # message(STATUS "Created interfaces: ${xif_cxx}")
 add_custom_target(interfaces DEPENDS ${xif_cxx})
 # target_sources(interfaces PRIVATE xif_cxx)

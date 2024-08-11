@@ -41,4 +41,4 @@ add_library(ifconfig OBJECT
 # target_link_libraries(ifconfig xorp comm proto)
 #xipc finder_client OpenSSL::Crypto)
 # install(TARGETS ifconfig LIBRARY DESTINATION ${XORP_LIBDIR})
-
+set_target_properties(ifconfig PROPERTIES POSITION_INDEPENDENT_CODE TRUE)

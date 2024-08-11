@@ -166,9 +166,14 @@
  * That file contains "struct map *" pointer that prevents us from
  * including the STL <map> file.
  */
+/*
+ * NetBSD defines if_name, which conflict with other used names in xorp
+ */
 #ifdef HAVE_NET_IF_H
 #define map solaris_class_map
+#define if_name 0
 #include <net/if.h>
+#undef if_name
 #undef map
 #endif
 #ifdef HAVE_NETINET_IN_H

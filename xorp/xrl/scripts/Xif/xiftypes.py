@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 xrl_atom_type = {
 # <name used in xrls> : (<c++ type>, <xrltom accessor method>, <thrift type>)
     'bool' :	('bool',		'boolean',	'bool'),
