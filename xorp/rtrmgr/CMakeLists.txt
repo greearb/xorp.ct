@@ -6,7 +6,7 @@
 # Build to binary dir
 # cmake_policy(SET CMP0088 NEW)
 # cmake_policy(SET CMP0098 NEW)
-find_package(BISON 2.3 REQUIRED)
+find_package(BISON 3.5.1 REQUIRED)
 # if (BISON_FOUND)
 BISON_TARGET(tpltParser template.yy ${CMAKE_CURRENT_BINARY_DIR}/y.tplt_tab.cc
              COMPILE_FLAGS "-d -ptplt"
@@ -20,7 +20,7 @@ BISON_TARGET(opcmdParser op_commands.yy ${CMAKE_CURRENT_BINARY_DIR}/y.opcmd_tab.
              COMPILE_FLAGS "-d -popcmd"
              VERBOSE
              DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/y.opcmd_tab.hh)
-message(STATUS "BISON targets created")
+message(STATUS "BISON rtrmgr targets created")
 # endif(BISON_FOUND)
 
 find_package(FLEX REQUIRED)

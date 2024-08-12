@@ -171,11 +171,12 @@
  */
 #ifdef HAVE_NET_IF_H
 #define map solaris_class_map
-#define if_name 0
 #include <net/if.h>
-#undef if_name
 #undef map
-#endif
+#ifdef if_name
+#undef if_name
+#endif  // if_name
+#endif  // HAVE_NET_IF_H
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif

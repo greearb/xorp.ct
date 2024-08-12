@@ -67,6 +67,7 @@
 #cmakedefine HAVE_RECVMSG                               @HAVE_RECVMSG@
 #cmakedefine HAVE_SENDMSG                               @HAVE_SENDMSG@
 
+#cmakedefine HAVE_LIBXNET                               @HAVE_LIBXNET@
 #cmakedefine HAVE_LIBRT                                 @HAVE_LIBRT@
 #cmakedefine HAVE_CLOCK_GETTIME                         @HAVE_CLOCK_GETTIME@
 #cmakedefine HAVE_CLOCK_MONOTONIC                       @HAVE_CLOCK_MONOTONIC@
@@ -142,7 +143,7 @@
 #cmakedefine HAVE_IFADDRS_H                             @HAVE_IFADDRS_H@
 #cmakedefine HAVE_STROPTS_H                             @HAVE_STROPTS_H@
 #cmakedefine HAVE_LINUX_ETHTOOL_H                       @HAVE_LINUX_ETHTOOL_H@
-/* #cmakedefine HAVE_LINUX_IF_TUN_H    @HAVE_LINUX_IF_TUN_H@   */                                           /* Unused */
+#cmakedefine HAVE_LINUX_IF_TUN_H                        @HAVE_LINUX_IF_TUN_H@                               /* Unused */
 
 #cmakedefine HAVE_LINUX_NETLINK_H                       @HAVE_LINUX_NETLINK_H@
 #cmakedefine HAVE_LINUX_RTNETLINK_H                     @HAVE_LINUX_RTNETLINK_H@
@@ -157,7 +158,7 @@
 #cmakedefine HAVE_ETHER_ATON                            @HAVE_ETHER_ATON@
 #cmakedefine HAVE_ETHER_ATON_R                          @HAVE_ETHER_ATON_R@
 #cmakedefine HAVE_ETHER_NTOA                            @HAVE_ETHER_NTOA@
-#cmakedefine HAVE_ETHER_NTOA_R                          @HAVE_NTOA_R@
+#cmakedefine HAVE_ETHER_NTOA_R                          @HAVE_ETHER_NTOA_R@
 #cmakedefine HAVE_GETADDRINFO                           @HAVE_GETADDRINFO@
 #cmakedefine HAVE_GETIFADDRS                            @HAVE_GETIFADDRS@
 #cmakedefine HAVE_GETNAMEINFO                           @HAVE_GETNAMEINFO@
