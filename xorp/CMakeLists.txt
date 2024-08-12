@@ -397,7 +397,7 @@ check_struct_has_member("struct ifreq"  ifr_ifindex "net/if.h" HAVE_STRUCT_IFREQ
 check_function_exists(ether_aton        HAVE_ETHER_ATON)
 check_function_exists(ether_aton_r      HAVE_ETHER_ATON_R)
 check_function_exists(ether_ntoa        HAVE_ETHER_NTOA)
-check_function_exists(ether_ntoa_r      HAVE_NTOA_R)
+check_function_exists(ether_ntoa_r      HAVE_ETHER_NTOA_R)
 check_function_exists(getaddrinfo       HAVE_GETADDRINFO)
 check_function_exists(getifaddrs        HAVE_GETIFADDRS)
 check_function_exists(getnameinfo       HAVE_GETNAMEINFO)
@@ -405,8 +405,17 @@ check_function_exists(if_indextoname    HAVE_IF_INDEXTONAME)
 check_function_exists(if_nametoindex    HAVE_IF_NAMETOINDEX)
 check_function_exists(inet_ntop         HAVE_INET_NTOP)
 check_function_exists(inet_pton         HAVE_INET_PTON)
-
-set(CMAKE_EXTRA_INCLUDE_FILES "net/if.h;net/if_ether.h")
+set(ETHER_ADDR_INCLUDES "")
+if (HAVE_NET_IF_H)
+    list(APPEND ETHER_ADDR_INCLUDES "net/if.h")
+endif()
+if (HAVE_NET_IF_ETHER_H)
+    list(APPEND ETHER_ADDR_INCLUDES "net/if_ether.h")
+endif()
+if (HAVE_NET_ETHERNET_H)
+    list(APPEND ETHER_ADDR_INCLUDES "net/ethernet.h")
+endif()
+set(CMAKE_EXTRA_INCLUDE_FILES "${ETHER_ADDR_INCLUDES}")
 check_type_size("struct ether_addr" HAVE_STRUCT_ETHER_ADDR)
 
 
@@ -445,7 +454,7 @@ check_include_file("netinet/ether.h"        HAVE_NETINET_ETHER_H)
 check_c_source_compiles("
 // #include <linux/in.h>
 #include <sys/types.h>
-//#include <netintet/ip.h>
+//#include <netinet/ip.h>
 #include <netinet/in.h>
 
 
@@ -684,13 +693,19 @@ check_include_files("${PREREQ_VLAN};linux/if_vlan.h"            HAVE_LINUX_IF_VL
 
 if (HAVE_LINUX_IF_VLAN_H EQUAL 1)
     set(HAVE_VLAN_LINUX 1)
-    set(CMAKE_REQUIRED_INCLUDE "${PREREQ_VLAN}")
-    check_symbol_exists(GET_VLAN_REALDEV_NAME_CMD "linux/if_vlan.h" HAVE_GET_VLAN_REALDEV_NAME_CMD)
+    # set(CMAKE_REQUIRED_INCLUDE "${PREREQ_VLAN}")
+    # check_symbol_exists(GET_VLAN_REALDEV_NAME_CMD "linux/if_vlan.h" HAVE_GET_VLAN_REALDEV_NAME_CMD)
+    check_c_source_compiles(
+        "#include <linux/if_vlan.h>
+        int main() { return GET_VLAN_REALDEV_NAME_CMD; }" HAVE_GET_VLAN_REALDEV_NAME_CMD)
     if (NOT HAVE_GET_VLAN_REALDEV_NAME_CMD)
         set(GET_VLAN_REALDEV_NAME_CMD 8)
     endif()
-    set(CMAKE_REQUIRED_INCLUDE "${PREREQ_VLAN}")
-    check_symbol_exists(GET_VLAN_VID_CMD "linux/if_vlan.h" HAVE_GET_VLAN_VID_CMD)
+    #    set(CMAKE_REQUIRED_INCLUDE "${PREREQ_VLAN}")
+    check_c_source_compiles(
+        "#include <linux/if_vlan.h>
+        int main() { return GET_VLAN_VID_CMD; }" HAVE_GET_VLAN_VID_CMD)
+        # check_symbol_exists(GET_VLAN_VID_CMD "linux/if_vlan.h" HAVE_GET_VLAN_VID_CMD)
     if (NOT HAVE_GET_VLAN_VID_CMD)
         set(GET_VLAN_VID_CMD 9)
     endif()
