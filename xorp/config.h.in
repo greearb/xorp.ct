@@ -67,7 +67,7 @@
 #cmakedefine HAVE_RECVMSG                               @HAVE_RECVMSG@
 #cmakedefine HAVE_SENDMSG                               @HAVE_SENDMSG@
 
-#cmakedefine HAVE_LIBXNET                               @HAVE_LIBXNET@
+#cmakedefine HAVE_LIBXNET
 #cmakedefine HAVE_LIBRT                                 @HAVE_LIBRT@
 #cmakedefine HAVE_CLOCK_GETTIME                         @HAVE_CLOCK_GETTIME@
 #cmakedefine HAVE_CLOCK_MONOTONIC                       @HAVE_CLOCK_MONOTONIC@
