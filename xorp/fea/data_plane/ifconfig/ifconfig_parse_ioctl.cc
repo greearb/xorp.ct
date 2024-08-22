@@ -353,7 +353,7 @@ IfConfigGetIoctl::parse_buffer_ioctl(IfConfig& ifconfig, IfTree& iftree,
 	struct ifreq ip_ifrcopy;
 	memcpy(&ip_ifrcopy, &ifreq, sizeof(ip_ifrcopy));
 	ip_ifrcopy.ifr_addr.sa_family = family;
-#ifdef SIOCGIFADDR_IN6
+#if defined(SIOCGIFADDR_IN6) || defined(SIOCGIFNETMASK_IN6)
 	struct in6_ifreq ip_ifrcopy6;
 	memcpy(&ip_ifrcopy6, &ifreq, sizeof(ip_ifrcopy6));
 	ip_ifrcopy6.ifr_ifru.ifru_addr.sin6_family = family;

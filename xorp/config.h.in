@@ -8,6 +8,7 @@
 #cmakedefine HOST_OS_WINDOWS
 #cmakedefine HOST_OS_SOLARIS
 #cmakedefine HOST_OS_NETBSD
+#cmakedefine HOST_OS_OPENBSD
 #cmakedefine HOST_OS_MACOSX
 #cmakedefine HOST_OS_NAME                               @HOST_OS_NAME@
 #cmakedefine ENABLE_ADVANCED_MULTICAST_API
