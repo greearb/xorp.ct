@@ -44,11 +44,6 @@ set(RIP_LIBS
              xorp
     )
 
-if (NOT DISABLE_PROFILE)
-     list(APPEND RIP_SRCS profile_vars.cc)
-     list(APPEND RIP_LIBS xif_profile_client)
-endif()
-
 add_library(rip ${RIP_SRCS})
 target_link_libraries(rip ${RIP_LIBS} xif_socket4)
 install(TARGETS rip LIBRARY DESTINATION ${XORP_LIBDIR})

@@ -60,7 +60,7 @@ set(PROFILER "no" CACHE STRING "Build with profiling")
 set_property(CACHE PROFILER PROPERTY STRINGS "no" "gprof" "pprof" "override")
 find_package(Python3 COMPONENTS Interpreter)
 if (NOT Python3_FOUND)
-    message(WARNING "Python3 interpreter not found")
+    message(FATAL_ERROR "Python3 interpreter not found")
     return()
 endif()
 set(EXEC_PREFIX         ${CMAKE_INSTALL_PREFIX})
@@ -182,8 +182,7 @@ if(DISABLE_WDEPRECATED)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-deprecated")
 endif()
 
-set(BASIC_FLAGS "-Wall -Wwrite-strings -Wcast-qual -Wmissing-declarations \
--Wpointer-arith -Wcast-align")
+set(BASIC_FLAGS "-Wall -Wwrite-strings -Wcast-qual -Wmissing-declarations -Wpointer-arith -Wcast-align")
 set(BASIC_C_FLAGS "-Wbad-function-cast -Wmissing-prototypes -Wstrict-prototypes -Wnested-externs")
 set(CMAKE_CXX_FLAGS "${BASIC_FLAGS} ${CMAKE_CXX_FLAGS}  -ftemplate-depth=50")
 # @todo: fix template-depth 25 is default, but not enough for some targets: bgp, rib, etc.
@@ -193,10 +192,6 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${BASIC_FLAGS} ${BASIC_C_FLAGS}")
 if(LEX_HACK)
     add_compile_definitions(NEED_LEX_H_HACK)
 endif()
-
-# if(ENABLE_IPV6)
-#     set(HAVE_IPV6 1)
-# endif()
 
 # NOTE: For GNU STL only
 if(DEBUG_STL)
@@ -269,6 +264,7 @@ check_include_file("unistd.h"       HAVE_UNISTD_H)
 check_include_file("vfork.h"        HAVE_VFORK_H)
 check_include_file("terminfo.h"     HAVE_TERMINFO_H)
 
+
 find_library(HAVE_LIBXNET xnet)
 check_function_exists(readv         HAVE_READV)
 check_function_exists(strerror      HAVE_STRERROR)
@@ -322,12 +318,12 @@ check_include_file("sys/select.h"   HAVE_SYS_SELECT_H)
 check_include_file("sys/socket.h"   HAVE_SYS_SOCKET_H)
 check_include_file("sys/sockio.h"   HAVE_SYS_SOCKIO_H)
 check_include_file("sys/un.h"       HAVE_SYS_UN_H)
-check_include_file("sys/mount.h"    HAVE_SYS_MOUNT_H)
 check_include_file("sys/resource.h" HAVE_SYS_RESOURCE_H)
 check_include_file("sys/stat.h"     HAVE_SYS_STAT_H)
 check_include_file("sys/syslog.h"   HAVE_SYS_SYSLOG_H)
+check_include_files("sys/types.h;sys/mount.h"    HAVE_SYS_MOUNT_H)
 check_include_files("sys/types.h;sys/param.h;sys/linker.h"   HAVE_SYS_LINKER_H)
-check_include_file("sys/sysctl.h"   HAVE_SYS_SYSCTL_H)
+check_include_files("sys/param.h;sys/sysctl.h"   HAVE_SYS_SYSCTL_H)
 check_include_file("linux/types.h"  HAVE_LINUX_TYPES_H)
 check_include_file("linux/sockios.h" HAVE_LINUX_SOCKIOS_H)
 check_struct_has_member("struct iovec" iov_base "sys/uio.h" HAVE_STRUCT_IOVEC)
@@ -363,6 +359,7 @@ check_include_file("net/ethernet.h" HAVE_NET_ETHERNET_H)
 check_include_file("sys/ethernet.h" HAVE_SYS_ETHERNET_H)
 check_include_file("net/if.h"       HAVE_NET_IF_H)
 check_include_files("net/if.h;net/if_arp.h"   HAVE_NET_IF_ARP_H)
+check_include_files("sys/socket.h;netinet/in.h;net/if_arp.h;netinet/if_ether.h"     HAVE_NETINET_IF_ETHER_H)
 check_include_files("net/if.h;net/if_dl.h"    HAVE_NET_IF_DL_H)
 check_include_files("net/if.h;net/if_ether.h" HAVE_NET_IF_ETHER_H)
 check_include_files("net/if.h;net/if_media.h" HAVE_NET_IF_MEDIA_H)
@@ -375,6 +372,7 @@ check_include_file("linux/ethtool.h" HAVE_LINUX_ETHTOOL_H)
 check_include_file("linux/if_tun.h" HAVE_LINUX_IF_TUN_H)          # Unused
 check_include_file("linux/netlink.h"    HAVE_LINUX_NETLINK_H)
 check_include_file("linux/rtnetlink.h"  HAVE_LINUX_RTNETLINK_H)
+check_include_file("netinet/in.h"           HAVE_NETINET_IN_H)
 if (${HAVE_LINUX_RTNETLINK_H} AND ${HAVE_LINUX_NETLINK_H})
     set(HAVE_NETLINK_SOCKETS 1)
 elseif(HAVE_NET_ROUTE_H AND NOT HOST_OS_LINUX)
@@ -405,18 +403,32 @@ check_function_exists(if_nametoindex    HAVE_IF_NAMETOINDEX)
 check_function_exists(inet_ntop         HAVE_INET_NTOP)
 check_function_exists(inet_pton         HAVE_INET_PTON)
 set(ETHER_ADDR_INCLUDES "")
+if (HAVE_SYS_TYPES_H)
+    list(APPEND ETHER_ADDR_INCLUDES "sys/types.h")
+endif()
+if (HAVE_SYS_SOCKET_H)
+    list(APPEND ETHER_ADDR_INCLUDES "sys/socket.h")
+endif()
+if (HAVE_NET_IF_ARP_H)
+    list(APPEND ETHER_ADDR_INCLUDES "net/if_arp.h")
+endif()
 if (HAVE_NET_IF_H)
     list(APPEND ETHER_ADDR_INCLUDES "net/if.h")
 endif()
+if (HAVE_NETINET_IN_H)
+    list(APPEND ETHER_ADDR_INCLUDES "netinet/in.h")
+endif()
 if (HAVE_NET_IF_ETHER_H)
     list(APPEND ETHER_ADDR_INCLUDES "net/if_ether.h")
+endif()
+if (HAVE_NETINET_IF_ETHER_H)
+    list(APPEND ETHER_ADDR_INCLUDES "netinet/if_ether.h")
 endif()
 if (HAVE_NET_ETHERNET_H)
     list(APPEND ETHER_ADDR_INCLUDES "net/ethernet.h")
 endif()
 set(CMAKE_EXTRA_INCLUDE_FILES "${ETHER_ADDR_INCLUDES}")
 check_type_size("struct ether_addr" HAVE_STRUCT_ETHER_ADDR)
-
 
 macro(CHECK_SYSCTL VARIABLE_NAME OIDS INCLUDE_LIST)
     check_c_source_runs("
@@ -442,20 +454,19 @@ check_sysctl(HAVE_SYSCTL_NET_RT_IFLIST "CTL_NET, AF_ROUTE, 0, AF_INET, NET_RT_IF
 
 check_symbol_exists(SIOCGIFCONF "sys/ioctl.h" HAVE_IOCTL_SIOCGIFCONF)
 
-check_include_file("netinet/in.h"           HAVE_NETINET_IN_H)
-check_include_files("net/if.h;sys/types.h;netinet/in.h;netinet/in_systm.h"     HAVE_NETINET_IN_SYSTM_H)
-check_include_files("sys/socket.h;net/if.h;netinet/in.h;netinet/in_var.h"       HAVE_NETINET_IN_VAR_H)
-check_include_files("sys/types.h;netinet/in.h;netinet/in_systm.h;netinet/ip.h"           HAVE_NETINET_IP_H)
-check_include_files("netinet/tcp.h"          HAVE_NETINET_TCP_H)
 
-check_include_files("sys/types.h;netinet/in.h;netinet/igmp.h"         HAVE_NETINET_IGMP_H)
-check_include_file("netinet/ether.h"        HAVE_NETINET_ETHER_H)
+check_include_files("net/if.h;sys/types.h;netinet/in.h;netinet/in_systm.h"       HAVE_NETINET_IN_SYSTM_H)
+check_include_files("sys/socket.h;net/if.h;netinet/in.h;netinet/in_var.h"        HAVE_NETINET_IN_VAR_H)
+check_include_files("sys/types.h;netinet/in.h;netinet/in_systm.h;netinet/ip.h"   HAVE_NETINET_IP_H)
+check_include_files("sys/types.h;netinet/tcp.h"                                  HAVE_NETINET_TCP_H)
+
+check_include_files("sys/types.h;netinet/in.h;netinet/igmp.h"                    HAVE_NETINET_IGMP_H)
+check_include_file("netinet/ether.h"                                             HAVE_NETINET_ETHER_H)
 check_c_source_compiles("
-// #include <linux/in.h>
 #include <sys/types.h>
-//#include <netinet/ip.h>
 #include <netinet/in.h>
-
+#include <netinet/in_systm.h>
+#include <netinet/ip.h>
 
 int main() {
     struct ip_mreqn* mreq = 0;
@@ -464,7 +475,13 @@ int main() {
     return 0;
 }
 " HAVE_STRUCT_IP_MREQN)
-check_include_files("sys/socket.h;netinet/in.h;netinet/if_ether.h"     HAVE_NETINET_IF_ETHER_H)
+if (NOT HAVE_STRUCT_IP_MREQN)
+    MESSAGE(WARNING
+        "No struct ip_mreqn found.
+        Each interface must have a unique IP address or IP multicast
+        (at least) will not be transmitted on the correct interface.")
+endif()
+
 check_include_file("inet/nd.h"              HAVE_INET_ND_H)
 check_include_file("inet/ip.h"              HAVE_INET_IP_H)
 check_include_file("arpa/inet.h"            HAVE_ARPA_INET_H)
@@ -472,35 +489,69 @@ check_include_file("arpa/telnet.h"          HAVE_ARPA_TELNET_H)
 
 check_struct_has_member("struct sockaddr_in" sin_len "sys/types.h;netinet/in.h" HAVE_STRUCT_SOCKADDR_IN_SIN_LEN)
 
-# MULTICAST
+
+################
+# v4 mforwarding
+check_include_files("sys/types.h;sys/time.h;netinet/in.h;netinet/ip_mroute.h"                   HAVE_NETINET_IP_MROUTE_H)
+check_include_file("net/if_var.h"                                                               HAVE_NET_IF_VAR_H)
+check_include_files("sys/types.h;sys/time.h;net/if.h;net/route.h;net/ip_mroute/ip_mroute.h"     HAVE_NET_IP_MROUTE_IP_MROUTE_H)
+check_include_file("linux/mroute.h"                                                             HAVE_LINUX_MROUTE_H)
+
+##########
+# v6 stack
+if (ENABLE_IPV6
+    AND HAVE_DECL_AF_INET6 EQUAL 1
+    AND HAVE_DECL_SOCK_STREAM EQUAL 1)
+    set(HAVE_IPV6 1)
+endif()
+
+##########
+# v6 mforwarding
+check_include_files("sys/types.h;sys/param.h;sys/socket.h;netinet/in.h;netinet6/ip6_mroute.h"          HAVE_NETINET6_IP6_MROUTE_H)
+check_include_file("linux/mroute6.h"                                                                   HAVE_LINUX_MROUTE6_H)
+
+check_include_file("netinet/pim.h"                  HAVE_NETINET_PIM_H)
+set(CMAKE_EXTRA_INCLUDE_FILES "netinet/pim.h")
+check_type_size("struct pim" HAVE_STRUCT_PIM)
+check_struct_has_member("struct pim"  pim_vt  "netinet/pim.h" HAVE_STRUCT_PIM_PIM_VT)
+
+# Multicast
 # set(HAVE_IPV4_MULTICAST OFF)
 if (HAVE_SYS_TYPES_H EQUAL 1
     AND HAVE_SYS_SOCKET_H EQUAL 1
     AND HAVE_NETINET_IN_H EQUAL 1)
-    # check_c_source_compiles("
-    # #include <sys/types.h>
-    # #include <sys/socket.h>
-    # #include <netinet/in.h>
 
-    # int main() {
-    #     int sockfd = socket(AF_INET, SOCK_RAW, 4); // Raw ip socket
-    #     int ret = getsockopt(sockfd, 4, IP_MULTICAST_TTL, NULL);
-    #     ret = getsockopt(sockfd, 4, IP_MULTICAST_IF, NULL);
-    #     ret = getsockopt(sockfd, 4, IP_MULTICAST_LOOP, NULL);
-    #     ret = getsockopt(sockfd, 4, IP_ADD_MEMBERSHIP, NULL);
-    #     ret = getsockopt(sockfd, 4, IP_DROP_MEMBERSHIP, NULL);
-    #     close(sockfd);
-    #     return 0;
-    # }" HAVE_IPV4_MULTICAST)
-    check_symbol_exists(IP_MULTICAST_IF "netinet/in.h" HAVE_DECL_IP_MULTICAST_IF)
-    check_symbol_exists(IP_MULTICAST_TTL "netinet/in.h" HAVE_DECL_IP_MULTICAST_TTL)
-    check_symbol_exists(IP_MULTICAST_LOOP "netinet/in.h" HAVE_DECL_IP_MULTICAST_LOOP)
-    check_symbol_exists(IP_ADD_MEMBERSHIP "netinet/in.h" HAVE_DECL_IP_ADD_MEMBERSHIP)
-    check_symbol_exists(IP_DROP_MEMBERSHIP "netinet/in.h" HAVE_DECL_IP_DROP_MEMBERSHIP)
+    set(MULTICAST_INCLUDES "sys/types.h;sys/socket.h;netinet/in.h")
+    if (HAVE_NETINET_IP_MROUTE_H)
+        list(APPEND MULTICAST_INCLUDES "netinet/ip_mroute.h")
+    endif()
+    if (HAVE_NET_IP_MROUTE_IP_MROUTE_H)
+        list(APPEND MULTICAST_INCLUDES "sys/time.h" "net/if.h" "net/route.h" "netinet/ip_mroute.h/ip_mroute.h")
+    endif()
+    if (HAVE_NETINET6_IP6_MROUTE_H)
+        list(APPEND MULTICAST_INCLUDES "netinet6/ip6_mroute.h")
+    endif()
+    if (HAVE_LINUX_MROUTE_H)
+        list(APPEND MULTICAST_INCLUDES "linux/mroute.h")
+    endif()
+    if (HAVE_LINUX_MROUTE6_H)
+        list(APPEND MULTICAST_INCLUDES "linux/mroute6.h")
+    endif()
+    if (HAVE_NETINET_PIM_H)
+        list(APPEND MULTICAST_INCLUDES "netinet/pim.h")
+    endif()
+    check_symbol_exists(IP_MULTICAST_IF     "${MULTICAST_INCLUDES}" HAVE_DECL_IP_MULTICAST_IF)
+    check_symbol_exists(IP_MULTICAST_TTL    "${MULTICAST_INCLUDES}" HAVE_DECL_IP_MULTICAST_TTL)
+    check_symbol_exists(IP_MULTICAST_LOOP   "${MULTICAST_INCLUDES}" HAVE_DECL_IP_MULTICAST_LOOP)
+    check_symbol_exists(IP_ADD_MEMBERSHIP   "${MULTICAST_INCLUDES}" HAVE_DECL_IP_ADD_MEMBERSHIP)
+    check_symbol_exists(IP_DROP_MEMBERSHIP  "${MULTICAST_INCLUDES}" HAVE_DECL_IP_DROP_MEMBERSHIP)
+    check_symbol_exists(MRT_PIM             "${MULTICAST_INCLUDES}" HAVE_DECL_MRT_PIM)
     if (HAVE_DECL_IP_MULTICAST_IF AND HAVE_DECL_IP_MULTICAST_TTL AND HAVE_DECL_IP_MULTICAST_LOOP
         AND HAVE_DECL_IP_ADD_MEMBERSHIP AND HAVE_DECL_IP_DROP_MEMBERSHIP)
         set(HAVE_IPV4_MULTICAST 1)
         message(STATUS "Set HAVE_IPV4_MULTICAST")
+    else()
+        message(WARNING "IPv4 Multicast not supported")
     endif()
     if(HAVE_IPV4_MULTICAST EQUAL 1 AND HOST_OS_LINUX)
         set(USE_MULT_MCAST_TABLES 1)
@@ -508,6 +559,59 @@ if (HAVE_SYS_TYPES_H EQUAL 1
     else()
         message(STATUS "Disabling MULT_MCAST_TABLES, host_os: ${HOST_OS}")
     endif()
+
+    set(CMAKE_EXTRA_INCLUDE_FILES "${MULTICAST_INCLUDES}")
+    check_type_size("struct mfcctl2" HAVE_STRUCT_MFCCTL2)
+
+    check_struct_has_member("struct mfcctl2"  mfcc_flags  "${MULTICAST_INCLUDES}" HAVE_STRUCT_MFCCTL2_MFCC_FLAGS)
+    check_struct_has_member("struct mfcctl2"  mfcc_rp     "${MULTICAST_INCLUDES}" HAVE_STRUCT_MFCCTL2_MFCC_RP)
+
+    if (HAVE_IPV4_MULTICAST AND HAVE_DECL_MRT_PIM
+            AND (HAVE_NETINET_IP_MROUTE_H EQUAL 1
+            OR HAVE_NET_IP_MROUTE_IP_MROUTE_H EQUAL 1
+            OR HAVE_LINUX_MROUTE_H EQUAL 1))
+        set(HAVE_IPV4_MULTICAST_ROUTING 1)
+        MESSAGE(STATUS "Set HAVE_IPV4_MULTICAST_ROUTING")
+    else()
+        MESSAGE(WARNING "IPv4 multicast routing not supported")
+    endif()
+
+    # IPv6 multicast
+    check_symbol_exists(IPV6_MULTICAST_IF   "${MULTICAST_INCLUDES}" HAVE_DECL_IPV6_MULTICAST_IF)
+    check_symbol_exists(IPV6_MULTICAST_LOOP "${MULTICAST_INCLUDES}" HAVE_DECL_IPV6_MULTICAST_LOOP)
+    check_symbol_exists(MRT6_PIM            "${MULTICAST_INCLUDES}" HAVE_DECL_MRT6_PIM)
+
+    if (ENABLE_IPV6
+        AND HAVE_DECL_IPV6_MULTICAST_IF EQUAL 1
+        AND HAVE_DECL_IPV6_MULTICAST_LOOP EQUAL 1)
+            set(HAVE_IPV6_MULTICAST 1)
+        message(STATUS "Set HAVE_IPV6_MULTICAST")
+    else()
+        message(WARNING "IPv6 Multicast not supported")
+    endif()
+
+    set(CMAKE_EXTRA_INCLUDE_FILES "${MULTICAST_INCLUDES}")
+    check_type_size("struct mf6cctl2" HAVE_STRUCT_M6FCCTL2)
+    check_symbol_exists(inet6_option_space "linux/mroute6.h" HAVE_DECL_INET6_OPTION_SPACE)
+    check_struct_has_member("struct mf6cctl2"  mf6cc_flags  "${MULTICAST_INCLUDES}"   HAVE_STRUCT_MF6CCTL2_MF6CC_FLAGS)
+    check_struct_has_member("struct mf6cctl2"  mf6cc_rp     "${MULTICAST_INCLUDES}"      HAVE_STRUCT_MF6CCTL2_MF6CC_RP)
+
+if (ENABLE_IPV6 AND (HAVE_NETINET6_IP6_MROUTE_H EQUAL 1
+    OR HAVE_LINUX_MROUTE_H) AND HAVE_IPV6_MULTICAST AND HAVE_DECL_MRT6_PIM)
+    set(HAVE_IPV6_MULTICAST_ROUTING 1)
+    message(STATUS "Set HAVE_IPV6_MULTICAST_ROUTING")
+    if (HAVE_DECL_INET6_OPTION_SPACE EQUAL 1)
+        set(HAVE_IPV6_OPTION_SPACE 1)
+    else()
+        message(WARNING "
+        inet6_option_* and inet6_opt_* are not supported on this system.
+        This might cause some problems with IPv6 multicast routing.")
+    endif()
+else()
+    message(WARNING "IPv6 multicast routing not supported")
+endif()
+check_struct_has_member("struct mif6ctl"  vifc_threshold  "${MULTICAST_INCLUDES}" HAVE_STRUCT_MIF6CTL_VIFC_THRESHOLD)
+
 endif()
 
 check_sysctl(HAVE_SYSCTL_IPCTL_FORWARDING "CTL_NET, AF_INET, IPPROTO_IP, IPCTL_FORWARDING" "#include <sys/socket.h>\n#include <netinet/in.h>")
@@ -542,22 +646,16 @@ if(ENABLE_FATALLOG)
     set(L_FATAL ON)
 endif()
 
-##########
-# v6 stack
-if (ENABLE_IPV6
-    AND HAVE_DECL_AF_INET6 EQUAL 1
-    AND HAVE_DECL_SOCK_STREAM EQUAL 1)
-    set(HAVE_IPV6 1)
-endif()
+
 
 check_symbol_exists(__KAME__        "sys/types.h;netinet/in.h;netinet/ip6.h" IPV6_STACK_KAME)
 check_symbol_exists(inet6_opt_init  "sys/types.h;netinet/in.h;netinet/ip6.h" HAVE_RFC3542)
 
-check_struct_has_member("struct sockaddr_in6"  sin6_len  "netinet/in.h;sys/socket.h" HAVE_STRUCT_SOCKADDR_IN6_SIN6_LEN)
-check_struct_has_member("struct sockaddr_in6"  sin6_scope_id "netinet/in.h;sys/socket.h" HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID)
+check_struct_has_member("struct sockaddr_in6"  sin6_len  "netinet/in.h;sys/socket.h"        HAVE_STRUCT_SOCKADDR_IN6_SIN6_LEN)
+check_struct_has_member("struct sockaddr_in6"  sin6_scope_id "netinet/in.h;sys/socket.h"    HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID)
 
-check_include_files("sys/types.h;net/if.h;netinet/in.h"              HAVE_NETINET_IP6_H)
-check_include_files("sys/types.h;net/if.h;netinet/in.h;netinet/icmp6.h"            HAVE_NETINET_ICMP6_H)
+check_include_files("sys/types.h;net/if.h;netinet/in.h"                                     HAVE_NETINET_IP6_H)
+check_include_files("sys/types.h;net/if.h;netinet/in.h;netinet/icmp6.h"                     HAVE_NETINET_ICMP6_H)
 check_struct_has_member("struct mld_hdr"       mld_addr  "sys/types.h;netinet/in.h;netinet/icmp6.h"          HAVE_STRUCT_MLD_HDR)
 
 check_include_files("sys/types.h;net/if.h;netinet/in.h;netinet6/in6_var.h"         HAVE_NETINET6_IN6_VAR_H)
@@ -574,84 +672,11 @@ endif()
 check_sysctl(HAVE_SYSCTL_IPV6CTL_FORWARDING "CTL_NET, AF_INET6, IPPROTO_IPV6, IPV6CTL_FORWARDING" "#include <sys/socket.h>\n#include <netinet/in.h>")
 check_sysctl(HAVE_SYSCTL_IPV6CTL_ACCEPT_RTADV "CTL_NET, AF_INET6, IPPROTO_IPV6, IPV6CTL_ACCEPT_RTADV" "#include <sys/socket.h>\n#include <netinet/in.h>")
 
-check_symbol_exists(IPV6_MULTICAST_IF        "netinet/in.h;sys/socket.h;sys/types.h" HAVE_DECL_IPV6_MULTICAST_IF)
-check_symbol_exists(IPV6_MULTICAST_LOOP      "netinet/in.h;sys/socket.h;sys/types.h" HAVE_DECL_IPV6_MULTICAST_LOOP)
-
-if (ENABLE_IPV6
-    AND HAVE_DECL_IPV6_MULTICAST_IF EQUAL 1
-    AND HAVE_DECL_IPV6_MULTICAST_LOOP EQUAL 1)
-        set(HAVE_IPV6_MULTICAST 1)
-endif()
-
 if (HOST_OS_MACOSX AND HAVE_RFC3542 EQUAL 1)
     set(__APPLE_USE_RFC_3542 1)
 endif()
 
 check_symbol_exists(fpclassify "math.h"         HAVE_DECL_FPCLASSIFY)
-
-##########
-# v4 mforwarding
-check_include_files("sys/types.h;sys/time.h;netinet/in.h;netinet/ip_mroute.h"                   HAVE_NETINET_IP_MROUTE_H)
-check_include_file("net/if_var.h"                                                               HAVE_NET_IF_VAR_H)
-check_include_files("sys/types.h;sys/time.h;net/if.h;net/route.h;net/ip_mroute/ip_mroute.h"     HAVE_NET_IP_MROUTE_IP_MROUTE_H)
-check_include_file("linux/mroute.h"                                                             HAVE_LINUX_MROUTE_H)
-
-set(MFCCTL2_INCLUDES "")
-if (HAVE_NETINET_IP_MROUTE_H)
-    set(MFCCTL2_INCLUDES "sys/types.h;sys/time.h;netinet/in.h;netinet/ip_mroute.h")
-elseif(HAVE_NET_IP_MROUTE_IP_MROUTE_H)
-    set(MFCCTL2_INCLUDES "sys/types.h;sys/time.h;net/if.h;net/route.h;net/ip_mroute/ip_mroute.h")
-elseif(HAVE_LINUX_MROUTE_H)
-    set(MFCCTL2_INCLUDEs "linux/mroute.h")
-endif()
-set(CMAKE_EXTRA_INCLUDE_FILES "${MFCCTL2_INCLUDES}")
-check_type_size("struct mfcctl2" HAVE_STRUCT_MFCCTL2)
-
-#check_struct_has_member("struct mfcctl2"  mfcc_flags  MFCCTL2_INCLUDES HAVE_STRUCT_MFCCTL2)
-check_struct_has_member("struct mfcctl2"  mfcc_flags  "${MFCCTL2_INCLUDES}" HAVE_STRUCT_MFCCTL2_MFCC_FLAGS)
-check_struct_has_member("struct mfcctl2"  mfcc_rp     "${MFCCTL2_INCLUDES}" HAVE_STRUCT_MFCCTL2_MFCC_RP)
-
-
-check_include_file("netinet/pim.h"                  HAVE_NETINET_PIM_H)
-set(CMAKE_EXTRA_INCLUDE_FILES "netinet/pim.h")
-check_type_size("struct pim" HAVE_STRUCT_PIM)
-check_struct_has_member("struct pim"  pim_vt  "netinet/pim.h" HAVE_STRUCT_PIM_PIM_VT)
-
-if (HAVE_NETINET_IP_MROUTE_H EQUAL 1
-    OR HAVE_NET_IP_MROUTE_IP_MROUTE_H EQUAL 1
-    OR HAVE_LINUX_MROUTE_H EQUAL 1)
-    set(HAVE_IPV4_MULTICAST_ROUTING 1)
-endif()
-
-##########
-# v6 mforwarding
-check_include_files("sys/types.h;sys/param.h;sys/socket.h;netinet/in.h;netinet6/ip6_mroute.h"          HAVE_NETINET6_IP6_MROUTE_H)
-check_include_file("linux/mroute6.h"                                                                   HAVE_LINUX_MROUTE6_H)
-
-set(MF6CCTL2_INCLUDES "")
-if (HAVE_NETINET6_IP6_MROUTE_H)
-    set(MF6CCTL2_INCLUDES "sys/types.h;sys/param.h;sys/socket.h;netinet/in.h;netinet6/ip6_mroute.h")
-elseif(HAVE_LINUX_MROUTE6_H)
-    set(MF6CCTL2_INCLUDEs "linux/mroute6.h")
-endif()
-set(CMAKE_EXTRA_INCLUDE_FILES "${MF6CCTL2_INCLUDES}")
-check_type_size("struct mf6cctl2" HAVE_STRUCT_M6FCCTL2)
-check_symbol_exists(inet6_option_space "linux/mroute6.h" HAVE_DECL_INET6_OPTION_SPACE)
-# check_struct_has_member("struct mf6cctl2"  mf6cc_flags  "${MF6CCTL2_INCLUDES}" HAVE_STRUCT_MF6CCTL2)
-check_struct_has_member("struct mf6cctl2"  mf6cc_flags  "${MF6CCTL2_INCLUDES}"   HAVE_STRUCT_MF6CCTL2_MF6CC_FLAGS)
-check_struct_has_member("struct mf6cctl2"  mf6cc_rp     "${MF6CCTL2_INCLUDES}"      HAVE_STRUCT_MF6CCTL2_MF6CC_RP)
-
-if (ENABLE_IPV6 AND (HAVE_NETINET6_IP6_MROUTE_H EQUAL 1
-    OR HAVE_LINUX_MROUTE_H))
-    set(HAVE_IPV6_MULTICAST_ROUTING 1)
-    if (HAVE_DECL_INET6_OPTION_SPACE EQUAL 1)
-        set(HAVE_IPV6_OPTION_SPACE 1)
-    else()
-        message(WARNING "inet6_option_* and inet6_opt_* are not supported on this system.")
-        message(WARNING "This might cause some problems with IPv6 multicast routing.")
-    endif()
-endif()
-check_struct_has_member("struct mif6ctl"  vifc_threshold  "linux/mroute6.h" HAVE_STRUCT_MIF6CTL_VIFC_THRESHOLD)
 
 ##########
 # packet filters
@@ -736,7 +761,8 @@ if (OPENSSL_FOUND)
     set(HAVE_OPENSSL_MD5_H 1)
 endif()
 if (NOT HAVE_OPENSSL_MD5_H)
-    message(SEND_ERROR "Cannot find required openssl/md5.h.
+    message(SEND_ERROR "
+    Cannot find required openssl/md5.h.
     On Fedora/RedHat:  yum install openssl-devel
     On Ubuntu:  apt-get install libssl-dev
     After install, clear the cmake cache before re-building.")
@@ -747,8 +773,10 @@ if (OPENSSL_CRYPTO_LIBRARY)
     set(CMAKE_REQUIRED_LIBRARIES ${OPENSSL_CRYPTO_LIBRARIES})
     check_function_exists(MD5_Init       HAVE_MD5_INIT)
 else()
-    message(FATAL_ERROR " Cannot find required crypto library.
-            clear the configure cache before re-building.")
+    message(FATAL_ERROR "
+    Cannot find required crypto library.
+    Clear the configure cache before re-building.
+    cmake --fresh may be used.")
 endif()
 
 
@@ -776,8 +804,7 @@ if (PCAP_LIB)
           socket filtering will not work.
           This is not a real problem, just a small performance
           loss when using multiple virtual routers on the same system.
-          On Debian/Ubuntu:  apt-get install libpcap-dev
-        ")
+          On Debian/Ubuntu:  apt-get install libpcap-dev")
     endif()
 else()
     message(WARNING "
@@ -786,8 +813,7 @@ else()
           On Fedora/RedHat:  dnf install libpcap-devel
           On Ubuntu:  apt-get install libpcap-dev
           After install, rm -fr xorp/obj build directory to
-          clear the configure cache before re-building.
-    ")
+          clear the configure cache before re-building.")
 endif()
 
 
@@ -814,8 +840,8 @@ else()
 endif()
 
 if (CURESES_LIB-NOTFOUND AND NCURSES_LIB-NOTFOUND AND PDCURSES_LIB-NOTFOUND)
-    message(SEND_ERROR
-    "   ERROR:  Cannot find required (n)curses or pdcurses library.
+    message(SEND_ERROR "
+        ERROR:  Cannot find required (n)curses or pdcurses library.
         On Fedora/RedHat:  yum install ncurses-devel
         On Debian/Ubuntu:  apt-get install ncurses-dev
         After install, remove CMakeCache.txt and build directory to
@@ -837,7 +863,6 @@ add_subdirectory(libxipc)
 add_subdirectory(libproto)
 add_subdirectory(libfeaclient)
 
-#add_subdirectory(xrl/templates)
 add_subdirectory(fea)
 add_subdirectory(fib2mrib)
 add_subdirectory(mld6igmp)
