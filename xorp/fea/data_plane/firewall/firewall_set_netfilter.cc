@@ -93,20 +93,20 @@ struct local_ipv4_ipt_error_target {
 
 // IPv4: The start of a chain
 struct local_ipv4_iptcb_chain_start {
-    struct ipt_entry			entry;
     struct local_ipv4_ipt_error_target	error_target;
+    struct ipt_entry			entry;
 };
 
 // IPv4: The end of a chain
 struct local_ipv4_iptcb_chain_foot {
-    struct ipt_entry			entry;
     struct ipt_standard_target		standard_target;
+    struct ipt_entry			entry;
 };
 
 // IPv4: The end of a table
 struct local_ipv4_iptcb_chain_error {
-    struct ipt_entry			entry;
     struct local_ipv4_ipt_error_target	error_target;
+    struct ipt_entry			entry;
 };
 
 // IPv6: The error rule at the beginning and the end
@@ -117,20 +117,20 @@ struct local_ipv6_ipt_error_target {
 
 // IPv6: The start of a chain
 struct local_ipv6_iptcb_chain_start {
-    struct ip6t_entry			entry;
     struct local_ipv6_ipt_error_target	error_target;
+    struct ip6t_entry			entry;
 };
 
 // IPv6: The end of a chain
 struct local_ipv6_iptcb_chain_foot {
-    struct ip6t_entry			entry;
     struct ip6t_standard_target		standard_target;
+    struct ip6t_entry			entry;
 };
 
 // IPv6: The end of a table
 struct local_ipv6_iptcb_chain_error {
-    struct ip6t_entry			entry;
     struct local_ipv6_ipt_error_target	error_target;
+    struct ip6t_entry			entry;
 };
 
 
