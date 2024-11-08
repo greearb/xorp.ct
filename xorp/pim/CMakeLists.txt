@@ -69,4 +69,25 @@ if(ENABLE_IPV6)
     add_executable(xorp_pimsm6 xorp_pimsm6.cc)
     target_link_libraries(xorp_pimsm6 pim ${PIM_LIBS})
     install(TARGETS xorp_pimsm6 RUNTIME DESTINATION ${XORP_MODULEDIR})
+    if (RTLD_ORIGIN)
+        set_target_properties(xorp_pimsm6 PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib"
+                                                     INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
+    endif()
+    if (BUILDDIR_RUN)
+        add_custom_command(TARGET xorp_pimsm6 POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:xorp_pimsm6>
+                            ${XORP_ALIAS_MODULEDIR}/$<TARGET_FILE_NAME:xorp_pimsm6>)
+    endif()
+endif()
+
+if (RTLD_ORIGIN)
+    set_target_properties(pim PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib"
+                                                 INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
+    set_target_properties(xorp_pimsm4 PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib"
+                                                 INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
+endif()
+if (BUILDDIR_RUN)
+    add_custom_command(TARGET pim POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:pim>
+                        ${XORP_ALIAS_LIBDIR}/$<TARGET_FILE_NAME:pim>)
+    add_custom_command(TARGET xorp_pimsm4 POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:xorp_pimsm4>
+                        ${XORP_ALIAS_MODULEDIR}/$<TARGET_FILE_NAME:xorp_pimsm4>)
 endif()

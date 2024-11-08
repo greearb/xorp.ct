@@ -80,3 +80,12 @@ target_link_libraries(xorp_policy policy_backend
                                   )
 
 install(TARGETS xorp_policy RUNTIME DESTINATION ${XORP_MODULEDIR})
+
+if (RTLD_ORIGIN)
+    set_target_properties(xorp_policy PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib"
+                                                 INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
+endif()
+if (BUILDDIR_RUN)
+    add_custom_command(TARGET xorp_policy POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:xorp_policy>
+                        ${XORP_ALIAS_MODULEDIR}/$<TARGET_FILE_NAME:xorp_policy>)
+endif()

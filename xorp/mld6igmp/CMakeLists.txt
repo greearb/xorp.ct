@@ -36,8 +36,6 @@ endif()
 
 add_library(xorp_mld6igmp ${MLD6IGMP_SRCS})
 target_link_libraries(xorp_mld6igmp ${MLD6IGMP_LIBS})
-
-
 install(TARGETS xorp_mld6igmp LIBRARY DESTINATION ${XORP_LIBDIR})
 
 add_executable(xorp_igmp xorp_igmp.cc)
@@ -48,3 +46,21 @@ install(TARGETS xorp_igmp RUNTIME DESTINATION ${XORP_MODULEDIR})
 add_executable(xorp_mld xorp_mld.cc)
 target_link_libraries(xorp_mld xorp_mld6igmp ${MLD6IGMP_LIBS})
 install(TARGETS xorp_mld RUNTIME DESTINATION ${XORP_MODULEDIR})
+
+if (RTLD_ORIGIN)
+    set_target_properties(xorp_igmp PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib"
+                                               INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
+    set_target_properties(xorp_mld PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib"
+                                              INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
+    set_target_properties(xorp_mld6igmp PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib"
+                                                   INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
+endif()
+
+if (BUILDDIR_RUN)
+    add_custom_command(TARGET xorp_igmp POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:xorp_igmp>
+                        ${XORP_ALIAS_MODULEDIR}/$<TARGET_FILE_NAME:xorp_igmp>)
+    add_custom_command(TARGET xorp_mld POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:xorp_mld>
+                        ${XORP_ALIAS_MODULEDIR}/$<TARGET_FILE_NAME:xorp_mld>)
+    add_custom_command(TARGET xorp_mld6igmp POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:xorp_mld6igmp>
+                        ${XORP_ALIAS_LIBDIR}/$<TARGET_FILE_NAME:xorp_mld6igmp>)
+endif()

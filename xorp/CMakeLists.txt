@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.16)
 
 project(xorp VERSION 1.8.7)
 include(CheckSymbolExists)
@@ -37,7 +37,7 @@ option(DISABLE_WERROR       "Disable -Werror compiler flag"                 OFF)
 option(DISABLE_WDEPRECATED  "Compile with -Wno-deprecated"                  OFF)
 option(DISABLE_ASSERT       "Force disabling assertions"                    OFF)
 option(LEX_HACK             "Workaround flex/yacc on FreeBSD"               OFF)
-option(BUILD_RUN            "Enable running from build dir"                 OFF)
+option(BUILDDIR_RUN         "Enable running from build dir"                 OFF)
 option(BOOST                "Use boost library"                             OFF)
 option(USTL                 "Use uSTL"                                      OFF)
 option(BGP                  "Enable BGP"                                    ON)
@@ -86,6 +86,18 @@ set(XORP_SRCDIR         ${CMAKE_SOURCE_DIR})
 set(XORP_SBIN_RPATH     ${XORP_LIBDIR})
 set(XORP_TOOL_RPATH     ${XORP_LIBDIR})
 set(XORP_MODULE_RPATH   ${XORP_LIBDIR})
+
+if (RTLD_ORIGIN)
+    set(CMAKE_BUILD_RPATH_USE_ORIGIN ON)
+endif()
+
+if (BUILDDIR_RUN)
+    set(XORP_ALIAS_LIBDIR       ${CMAKE_CURRENT_BINARY_DIR}/lib/xorp/lib)
+    set(XORP_ALIAS_TOOLDIR      ${CMAKE_CURRENT_BINARY_DIR}/lib/xorp/bin)
+    set(XORP_ALIAS_MODULEDIR    ${CMAKE_CURRENT_BINARY_DIR}/lib/xorp/sbin)
+    set(XORP_ALIAS_SBINDIR      ${CMAKE_CURRENT_BINARY_DIR}/sbin)
+    file(MAKE_DIRECTORY ${XORP_ALIAS_LIBDIR} ${XORP_ALIAS_TOOLDIR} ${XORP_ALIAS_MODULEDIR} ${XORP_ALIAS_SBINDIR})
+endif()
 
 if (BUILD_INFO)
     add_definitions(-DXORP_BUILDINFO)
@@ -164,29 +176,28 @@ if(BOOST)
 endif()
 
 
-
-
 if(NOT PROFILER EQUAL "no")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-omit-frame-pointer -fno-optimize-sibling-calls")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-omit-frame-pointer -fno-optimize-sibling-calls")
+    add_compile_options(-fno-omit-frame-pointer -fno-optimize-sibling-calls)
 endif()
 if(PROFILER EQUAL "gprof")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pg")
+    add_compile_options(-pg)
 endif()
 
 add_compile_definitions(XORP_VERSION="${PROJECT_VERSION}")
 
 if(DISABLE_WDEPRECATED)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-deprecated")
+    add_compile_options(-Wno-deprecated)
 endif()
 
-set(BASIC_FLAGS "-Wall -Wwrite-strings -Wcast-qual -Wmissing-declarations -Wpointer-arith -Wcast-align")
-set(BASIC_C_FLAGS "-Wbad-function-cast -Wmissing-prototypes -Wstrict-prototypes -Wnested-externs")
-set(CMAKE_CXX_FLAGS "${BASIC_FLAGS} ${CMAKE_CXX_FLAGS}  -ftemplate-depth=50")
-# @todo: fix template-depth 25 is default, but not enough for some targets: bgp, rib, etc.
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${BASIC_FLAGS} ${BASIC_C_FLAGS}")
+add_compile_options(-Wall -Wwrite-strings -Wcast-qual -Wmissing-declarations -Wpointer-arith -Wcast-align)
+# C compile options
+add_compile_options($<$<COMPILE_LANGUAGE:C>:-Wbad-function-cast>
+                    $<$<COMPILE_LANGUAGE:C>:-Wmissing-prototypes>
+                    $<$<COMPILE_LANGUAGE:C>:-Wstrict-prototypes>
+                    $<$<COMPILE_LANGUAGE:C>:-Wnested-externs>)
+
+# C++ compile option, modify template depth
+add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-ftemplate-depth=50>)
 
 
 if(LEX_HACK)

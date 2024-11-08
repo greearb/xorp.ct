@@ -114,6 +114,14 @@ foreach(src_xif ${interface_srcs})
     add_library(xif_${xif_fname} ${src_cxx})
     target_link_libraries(xif_${xif_fname} PUBLIC xorp comm proto xipc)
     install(TARGETS xif_${xif_fname} LIBRARY DESTINATION ${XORP_LIBDIR})
+    if (RTLD_ORIGIN)
+        set_target_properties(xif_${xif_fname} PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib"
+                                                          INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
+    endif()
+    if (BUILDDIR_RUN)
+        add_custom_command(TARGET  xif_${xif_fname} POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:xif_${xif_fname}>
+                            ${XORP_ALIAS_LIBDIR}/$<TARGET_FILE_NAME:xif_${xif_fname}>)
+    endif()
 endforeach()
 
 add_library(xif_base OBJECT common_xif.cc finder_xif.cc)

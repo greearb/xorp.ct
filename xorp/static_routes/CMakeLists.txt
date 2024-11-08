@@ -31,3 +31,16 @@ add_executable(xorp_static_routes xorp_static_routes.cc)
 target_compile_options(xorp_static_routes PRIVATE -ftemplate-depth=50)
 target_link_libraries(xorp_static_routes PRIVATE ${STATIC_ROUTES_LIBS} static_routes)
 install(TARGETS xorp_static_routes RUNTIME DESTINATION ${XORP_MODULEDIR})
+
+if (RTLD_ORIGIN)
+    set_target_properties(static_routes PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib"
+                                                   INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
+    set_target_properties(xorp_static_routes PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib"
+                                                        INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
+endif()
+if (BUILDDIR_RUN)
+    add_custom_command(TARGET xorp_static_routes POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:xorp_static_routes>
+                        ${XORP_ALIAS_MODULEDIR}/$<TARGET_FILE_NAME:xorp_static_routes>)
+    add_custom_command(TARGET static_routes POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:static_routes>
+                        ${XORP_ALIAS_LIBDIR}/$<TARGET_FILE_NAME:static_routes>)
+endif()

@@ -22,4 +22,14 @@ target_link_libraries(fea_client  xif_fea_ifmgr_mirror
                                   proto)
 
 install(TARGETS fea_client LIBRARY DESTINATION ${XORP_LIBDIR})
-set_target_properties(fea_client PROPERTIES SOVERSION 0.0)
+
+
+if (RTLD_ORIGIN)
+    set_target_properties(fea_client PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib"
+                                                INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
+endif()
+
+if (BUILDDIR_RUN)
+    add_custom_command(TARGET fea_client POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:fea_client>
+                        ${XORP_ALIAS_LIBDIR}/$<TARGET_FILE_NAME:fea_client>)
+endif()

@@ -65,3 +65,11 @@ target_link_libraries(policy_backend OpenSSL::Crypto
                       )
 
 install(TARGETS policy_backend LIBRARY DESTINATION ${XORP_LIBDIR})
+if (RTLD_ORIGIN)
+    set_target_properties(policy_backend PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib"
+                                                    INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
+endif()
+if (BUILDDIR_RUN)
+    add_custom_command(TARGET policy_backend POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:policy_backend>
+                        ${XORP_ALIAS_LIBDIR}/$<TARGET_FILE_NAME:policy_backend>)
+endif()

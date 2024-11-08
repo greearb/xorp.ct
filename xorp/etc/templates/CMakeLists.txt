@@ -77,7 +77,7 @@ install(FILES ${COMMANDS} DESTINATION ${XORP_TEMPLATEDIR})
 # TODO: find way to separate config options firewall/click from fea.tp form
 install(FILES fea.tp.raw DESTINATION ${XORP_TEMPLATEDIR} RENAME fea.tp)
 
-if (BUILD_RUN)
+if (BUILDDIR_RUN)
     file(COPY ${TEMPLATES} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
     file(COPY ${COMMANDS} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
     file(COPY fea.tp.raw DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

@@ -52,13 +52,13 @@ set_source_files_properties(${BISON_tpltParser_OUTPUTS}
                             PROPERTIES
                             COMPILE_FLAGS -Wno-sign-compare
                             COMPILE_FLAGS -Wno-effc++)
-file(GLOB LIBRTRGMR_CXX_SRCS)
+
+set(LIBRTRMGR_CXX_SRCS "")
 
 
-
-if (DEBUG_XRLDB)
+if (XRLDB)
     list(APPEND ${LIBRTRGMR_CXX_SRCS} xrldb.cc)
-    add_definitions("DEBUG_XRLDB=1")
+    add_compile_definitions("DEBUG_XRLDB=1")
 endif()
 
 
@@ -124,13 +124,13 @@ add_executable(rtrmgr main_rtrmgr.cc xrl_rtrmgr_interface.cc)
 
 add_dependencies(rtrmgr targets interfaces)
 target_link_libraries(rtrmgr
+                            xorp_rtrmgr
                             finder
-                            xorp
                             proto
                             tecla
                             xipc
-                            xorp_rtrmgr
                             comm
+                            xorp
                             OpenSSL::Crypto
                             tgts_rtrmgr
                             xif_rtrmgr_client
@@ -173,6 +173,26 @@ target_link_libraries(xorpsh
 add_dependencies(xorpsh interfaces targets)
 install(TARGETS xorpsh RUNTIME DESTINATION ${XORP_TOOLDIR})
 endif()
+
+if (RTLD_ORIGIN)
+    if (XORPSH)
+        set_target_properties(xorpsh PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib"
+                                                INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
+    endif()
+    set_target_properties(rtrmgr PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib/xorp/lib"
+                                           INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib/xorp/lib")
+endif()
+
+if (BUILDDIR_RUN)
+    add_custom_command(TARGET xorpsh POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:xorpsh>
+                        ${XORP_ALIAS_TOOLDIR}/$<TARGET_FILE_NAME:xorpsh>)
+    add_custom_command(TARGET rtrmgr POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:rtrmgr>
+                        ${XORP_ALIAS_SBINDIR}/$<TARGET_FILE_NAME:rtrmgr>)
+    add_custom_command(TARGET xorp_rtrmgr POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:xorp_rtrmgr>
+                        ${XORP_ALIAS_LIBDIR}/$<TARGET_FILE_NAME:xorp_rtrmgr>)
+endif()
+
+
 
 if (TESTS_PROGRAMS)
     add_subdirectory(tests)

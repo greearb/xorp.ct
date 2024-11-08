@@ -62,3 +62,16 @@ target_compile_options(xorp_rib PRIVATE -ftemplate-depth=50)
 install(TARGETS xorp_rib RUNTIME DESTINATION ${XORP_MODULEDIR})
 
 add_subdirectory(tools)
+
+if (RTLD_ORIGIN)
+    set_target_properties(xorp_rib PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib"
+                                              INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
+    set_target_properties(rib PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib"
+                                         INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
+endif()
+if (BUILDDIR_RUN)
+    add_custom_command(TARGET rib POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:rib>
+                        ${XORP_ALIAS_LIBDIR}/$<TARGET_FILE_NAME:rib>)
+    add_custom_command(TARGET xorp_rib POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:xorp_rib>
+                        ${XORP_ALIAS_MODULEDIR}/$<TARGET_FILE_NAME:xorp_rib>)
+endif()
