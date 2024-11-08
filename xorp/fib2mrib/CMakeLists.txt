@@ -27,3 +27,12 @@ target_link_libraries(xorp_fib2mrib tgts_fib2mrib
                                     comm)
 
 install(TARGETS xorp_fib2mrib RUNTIME DESTINATION ${XORP_MODULEDIR})
+
+if (RTLD_ORIGIN)
+    set_target_properties(xorp_fib2mrib PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib"
+                                                   INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
+endif()
+if (BUILDDIR_RUN)
+    add_custom_command(TARGET xorp_fib2mrib POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:xorp_fib2mrib>
+                        ${XORP_ALIAS_MODULEDIR}/$<TARGET_FILE_NAME:xorp_fib2mrib>)
+endif()

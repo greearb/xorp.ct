@@ -43,7 +43,6 @@ foreach(DEF IN ITEMS
 endforeach()
 
 install(TARGETS tecla LIBRARY DESTINATION ${XORP_LIBDIR})
-set_target_properties(tecla PROPERTIES SOVERSION 0.0)
 
 # target_compile_options(tecla PUBLIC -Werror)
 find_package(Curses)
@@ -59,3 +58,11 @@ find_package(Curses)
 # -Wnested-externs)
 target_include_directories(tecla PUBLIC ${CURSES_INCLUDE_DIRS})
 target_link_libraries(tecla ${CURSES_LIBRARIES})
+if (RTLD_ORIGIN)
+    set_target_properties(tecla PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib"
+                                                   INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
+endif()
+if (BUILDDIR_RUN)
+    add_custom_command(TARGET tecla POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:tecla>
+                        ${XORP_ALIAS_LIBDIR}/$<TARGET_FILE_NAME:tecla>)
+endif()

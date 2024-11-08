@@ -61,3 +61,24 @@ if (ENABLE_IPV6)
     target_link_libraries(xorp_ospfv3 ospf ${OSPFLIB_LIBS})
     install(TARGETS xorp_ospfv3 RUNTIME DESTINATION ${XORP_MODULEDIR})
 endif()
+
+if (RTLD_ORIGIN)
+    set_target_properties(ospf PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib"
+                                          INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
+    set_target_properties(xorp_ospfv2 PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib"
+                                                 INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
+    if (ENABLE_IPV6)
+        set_target_properties(xorp_ospfv3 PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib"
+                                                     INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
+    endif()
+endif()
+if (BUILDDIR_RUN)
+    add_custom_command(TARGET ospf POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:ospf>
+                        ${XORP_ALIAS_LIBDIR}/$<TARGET_FILE_NAME:ospf>)
+    add_custom_command(TARGET xorp_ospfv2 POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:xorp_ospfv2>
+                        ${XORP_ALIAS_MODULEDIR}/$<TARGET_FILE_NAME:xorp_ospfv2>)
+    if (ENABLE_IPV6)
+        add_custom_command(TARGET xorp_ospfv3 POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:xorp_ospfv3>
+                            ${XORP_ALIAS_MODULEDIR}/$<TARGET_FILE_NAME:xorp_ospfv3>)
+    endif()
+endif()

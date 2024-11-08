@@ -58,3 +58,20 @@ install(TARGETS olsrxrl LIBRARY DESTINATION ${XORP_LIBDIR})
 add_executable(xorp_olsr4 xorp_olsr.cc)
 target_link_libraries(xorp_olsr4 ${OLSR_LIBS} olsr olsrxrl)
 install(TARGETS xorp_olsr4 RUNTIME DESTINATION ${XORP_MODULEDIR})
+
+if (RTLD_ORIGIN)
+    set_target_properties(olsr PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib"
+                                          INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
+    set_target_properties(olsrxrl PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib"
+                                             INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
+    set_target_properties(xorp_olsr4 PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib"
+                                                INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
+endif()
+if (BUILDDIR_RUN)
+    add_custom_command(TARGET olsr POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:olsr>
+                        ${XORP_ALIAS_LIBDIR}/$<TARGET_FILE_NAME:olsr>)
+    add_custom_command(TARGET olsrxrl POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:olsrxrl>
+                        ${XORP_ALIAS_LIBDIR}/$<TARGET_FILE_NAME:olsrxrl>)
+    add_custom_command(TARGET xorp_olsr4 POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:xorp_olsr4>
+                        ${XORP_ALIAS_MODULEDIR}/$<TARGET_FILE_NAME:xorp_olsr4>)
+endif()

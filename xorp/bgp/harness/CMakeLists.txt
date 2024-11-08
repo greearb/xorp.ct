@@ -77,3 +77,22 @@ add_test(peer COMMAND test_peer)
 add_executable(test_trie bgppp.cc test_trie.cc trie.cc)
 target_link_libraries(test_trie ${HARNESS_LIBS})
 add_test(trie COMMAND test_trie)
+
+foreach(T IN ITEMS  "busted"
+                    "peering1.sh"
+                    "peering2.sh"
+                    "peering3.sh"
+                    "routing1.sh"
+                    "routing2.sh"
+                    "rib1.sh"
+                    "rib_fea1.sh"
+                    "path_attribute1.sh"
+                    "path_attribute2.sh"
+                    "path_attribute3.sh"
+                    "route_reflection1.sh"
+                    "route_reflection2.sh"
+                    "route_flap_damping1.sh"
+                    "terminate.sh")
+    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test_${T}
+         DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/test_${T} USE_SOURCE_PERMISSIONS)
+endforeach()

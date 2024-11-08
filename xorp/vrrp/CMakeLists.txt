@@ -32,3 +32,15 @@ install(TARGETS vrrp LIBRARY DESTINATION ${XORP_LIBDIR})
 add_executable(xorp_vrrp xorp_vrrp.cc)
 target_link_libraries(xorp_vrrp vrrp ${VRRP_LIBS})
 install(TARGETS xorp_vrrp RUNTIME DESTINATION ${XORP_MODULEDIR})
+if (RTLD_ORIGIN)
+    set_target_properties(xorp_vrrp PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib"
+                                               INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
+    set_target_properties(vrrp PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib"
+                                          INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
+endif()
+if (BUILDDIR_RUN)
+    add_custom_command(TARGET vrrp POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:vrrp>
+                        ${XORP_ALIAS_LIBDIR}/$<TARGET_FILE_NAME:vrrp>)
+    add_custom_command(TARGET xorp_vrrp POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:xorp_vrrp>
+                        ${XORP_ALIAS_MODULEDIR}/$<TARGET_FILE_NAME:xorp_vrrp>)
+endif()

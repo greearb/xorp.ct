@@ -120,3 +120,25 @@ if (CLICK)
 endif()
 
 install(PROGRAMS fea_xrl_shell_funcs.sh DESTINATION ${XORP_SBINDIR})
+
+if (RTLD_ORIGIN)
+    set_target_properties(fea PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib"
+                                                   INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
+    set_target_properties(xorp_fea PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib"
+                                              INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
+    if (FEA_DUMMY)
+        set_target_properties(fea_dummy PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib"
+                                                   INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
+    endif()
+endif()
+
+if (BUILDDIR_RUN)
+    add_custom_command(TARGET xorp_fea POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:xorp_fea>
+                        ${XORP_ALIAS_MODULEDIR}/$<TARGET_FILE_NAME:xorp_fea>)
+    add_custom_command(TARGET fea POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:fea>
+                        ${XORP_ALIAS_LIBDIR}/$<TARGET_FILE_NAME:fea>)
+    if (FEA_DUMMY)
+        add_custom_command(TARGET fea_dummy POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:fea_dummy>
+                            ${XORP_ALIAS_MODULEDIR}/$<TARGET_FILE_NAME:fea_dummy>)
+    endif()
+endif()

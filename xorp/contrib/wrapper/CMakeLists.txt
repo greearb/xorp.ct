@@ -39,3 +39,19 @@ add_executable(xorp_wrapper4 wrappermain.cc)
 target_link_libraries(xorp_wrapper4 ${WRAPPER_LIBS} wrapper wrapperxrl)
 install(TARGETS xorp_wrapper4 RUNTIME DESTINATION ${XORP_MODULEDIR})
 
+if (RTLD_ORIGIN)
+    set_target_properties(wrapper PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib"
+                                             INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
+    set_target_properties(wrapperxrl PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib"
+                                                INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
+    set_target_properties(xorp_wrapper4 PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib"
+                                                   INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
+endif()
+if (BUILDDIR_RUN)
+    add_custom_command(TARGET wrapper POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:wrapper>
+                        ${XORP_ALIAS_LIBDIR}/$<TARGET_FILE_NAME:wrapper>)
+    add_custom_command(TARGET wrapperxrl POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:wrapperxrl>
+                        ${XORP_ALIAS_LIBDIR}/$<TARGET_FILE_NAME:wrapperxrl>)
+    add_custom_command(TARGET xorp_wrapper4 POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:xorp_wrapper4>
+                        ${XORP_ALIAS_MODULEDIR}/$<TARGET_FILE_NAME:xorp_wrapper4>)
+endif()

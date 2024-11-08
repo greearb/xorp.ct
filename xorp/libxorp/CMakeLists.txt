@@ -72,3 +72,7 @@ endif()
 
 
 install(TARGETS xorp LIBRARY DESTINATION ${XORP_LIBDIR})
+if (BUILDDIR_RUN)
+    add_custom_command(TARGET xorp POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:xorp>
+                        ${XORP_ALIAS_LIBDIR}/$<TARGET_FILE_NAME:xorp>)
+endif()

@@ -35,4 +35,12 @@ target_link_libraries(cli
                      )
 
 install(TARGETS cli LIBRARY DESTINATION ${XORP_LIBDIR})
-set_target_properties(cli PROPERTIES SOVERSION 0.0)
+
+if (RTLD_ORIGIN)
+     set_target_properties(cli PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib"
+                                          INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
+ endif()
+if (BUILDDIR_RUN)
+     add_custom_command(TARGET cli POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:cli>
+                         ${XORP_ALIAS_LIBDIR}/$<TARGET_FILE_NAME:cli>)
+endif()

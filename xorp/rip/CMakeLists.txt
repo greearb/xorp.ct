@@ -59,6 +59,20 @@ target_link_libraries(xorp_rip ${RIP_LIBS}
 target_compile_definitions(xorp_rip PRIVATE INSTANTIATE_IPV4)
 install(TARGETS xorp_rip RUNTIME DESTINATION ${XORP_MODULEDIR})
 
+
+if (RTLD_ORIGIN)
+    set_target_properties(rip PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib"
+                                                   INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
+    set_target_properties(xorp_rip PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib"
+                                                   INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
+endif()
+if (BUILDDIR_RUN)
+    add_custom_command(TARGET rip POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:rip>
+                        ${XORP_ALIAS_LIBDIR}/$<TARGET_FILE_NAME:rip>)
+    add_custom_command(TARGET xorp_rip POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:xorp_rip>
+                        ${XORP_ALIAS_MODULEDIR}/$<TARGET_FILE_NAME:xorp_rip>)
+endif()
+
 if (ENABLE_IPV6)
     add_library(ripng ${RIP_SRCS})
     target_link_libraries(ripng ${RIP_LIBS} xif_socket6)
@@ -74,8 +88,18 @@ if (ENABLE_IPV6)
 
     target_compile_definitions(xorp_ripng PRIVATE INSTANTIATE_IPV6)
     install(TARGETS xorp_ripng RUNTIME DESTINATION ${XORP_MODULEDIR})
-
-
+    if (RTLD_ORIGIN)
+        set_target_properties(ripng PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib"
+                                                       INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
+        set_target_properties(xorp_ripng PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib"
+                                                       INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
+    endif()
+    if (BUILDDIR_RUN)
+        add_custom_command(TARGET ripng POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:ripng>
+                            ${XORP_ALIAS_LIBDIR}/$<TARGET_FILE_NAME:ripng>)
+        add_custom_command(TARGET xorp_ripng POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:xorp_ripng>
+                            ${XORP_ALIAS_MODULEDIR}/$<TARGET_FILE_NAME:xorp_ripng>)
+    endif()
 endif()
 
 

@@ -14,3 +14,15 @@ target_link_libraries(fea_show_interfaces
                                           proto
                                           comm)
 install(TARGETS fea_show_interfaces RUNTIME DESTINATION ${XORP_TOOLDIR})
+
+
+if (RTLD_ORIGIN)
+    set_target_properties(fea_show_interfaces PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib"
+                                              INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
+
+endif()
+
+if (BUILDDIR_RUN)
+    add_custom_command(TARGET fea_show_interfaces POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:fea_show_interfaces>
+                        ${XORP_ALIAS_TOOLDIR}/$<TARGET_FILE_NAME:fea_show_interfaces>)
+endif()
