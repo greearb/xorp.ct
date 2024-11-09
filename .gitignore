@@ -83,3 +83,6 @@ Sessionx.vim
 tags
 # Persistent undo
 [._]*.un~
+
+# xorp specific - buildinfo
+last_git_md5sum.txt
