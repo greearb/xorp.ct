@@ -66,7 +66,7 @@ else()
     add_library(xorp ${XORP_CXX})
 endif()
 
-if (NOT XORP_DISABLE_PROFILE)
+if (ENABLE_PROFILE)
     target_sources(xorp PUBLIC profile.cc)
 endif()
 

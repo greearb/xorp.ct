@@ -31,7 +31,7 @@ set(XORP_TESTS asyncio
                vif
               )
 
-if(NOT DISABLE_PROFILE)
+if(ENABLE_PROFILE)
     list(APPEND XORP_TESTS profile)
 endif()
 

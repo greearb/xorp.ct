@@ -5,7 +5,7 @@
 
 set(HARNESS_ADD_LIBS "")
 
-if (PROFILER)
+if (ENABLE_PROFILE)
     list(APPEND HARNESS_ADD_LIBS xif_profile_client)
 endif()
 

@@ -22,7 +22,7 @@ if (ENABLE_IPV6)
     list(APPEND WRAPPER_LIBS xif_fea_rawpkt6)
 endif()
 
-if (NOT DISABLE_PROFILE)
+if (ENABLE_PROFILE)
     list(APPEND WRAPPER_LIBS xif_profile_client)
 endif()
 

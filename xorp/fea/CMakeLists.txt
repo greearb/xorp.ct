@@ -81,8 +81,9 @@ endif()
 #     list(APPEND FEA_LIBS tecla)
 # endif()
 
-if (NOT DISABLE_PROFILE)
+if (ENABLE_PROFILE)
     list(APPEND FEA_SRCS profile_vars.cc)
+    list(APPEND FEA_LIBS xif_profile_client)
 endif()
 
 if (ENABLE_IPV6)
@@ -141,4 +142,5 @@ if (BUILDDIR_RUN)
         add_custom_command(TARGET fea_dummy POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:fea_dummy>
                             ${XORP_ALIAS_MODULEDIR}/$<TARGET_FILE_NAME:fea_dummy>)
     endif()
+    file(COPY fea_xrl_shell_funcs.sh DESTINATION ${XORP_ALIAS_SBINDIR})
 endif()

@@ -87,15 +87,17 @@ target_link_libraries(call_xrl finder xipc comm xorp)
 install(TARGETS call_xrl RUNTIME DESTINATION ${XORP_SBINDIR})
 
 if (RTLD_ORIGIN)
-    foreach(T IN ITEMS finder xorp_finder call_xrl xipc)
+    foreach(T IN ITEMS finder xorp_finder xipc)
         set_target_properties(${T} PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib"
                                               INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
     endforeach()
+    set_target_properties(call_xrl PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib/xorp/lib"
+                                              INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib/xorp/lib")
 endif()
 
 if (BUILDDIR_RUN)
     add_custom_command(TARGET call_xrl POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:call_xrl>
-                        ${XORP_ALIAS_TOOLDIR}/$<TARGET_FILE_NAME:call_xrl>)
+                        ${XORP_ALIAS_SBINDIR}/$<TARGET_FILE_NAME:call_xrl>)
     add_custom_command(TARGET xorp_finder POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:xorp_finder>
                         ${XORP_ALIAS_MODULEDIR}/$<TARGET_FILE_NAME:xorp_finder>)
     add_custom_command(TARGET finder POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:finder>

@@ -60,7 +60,7 @@ if(ENABLE_IPV6)
 endif()
 
 
-if(NOT DISABLE_PROFILE)
+if(ENABLE_PROFILE)
     list(APPEND interface_srcs "profile_client.xif"
                                "profile.xif")
 endif()
@@ -92,16 +92,14 @@ if (OSPF)
 endif()
 
 
-message(STATUS "${interface_srcs}")
-#set(INTERFACES_DIR ${CMAKE_CURRENT_BINARY_DIR} PARENT_SCOPE)
+# message(STATUS "${interface_srcs}")
 set(xif_cxx "")
 
 foreach(src_xif ${interface_srcs})
     get_filename_component(xif_fname ${src_xif} NAME_WLE)
-    message(STATUS "[xif] Filename from ${src_xif} is ${xif_fname}")
+    # message(STATUS "[xif] Filename from ${src_xif} is ${xif_fname}")
     string(CONCAT src_cxx ${xif_fname} "_xif.cc")
-    # string(REGEX REPLACE ".xif" "_xif.cc" src_cxx ${src_xif})
-    message(STATUS "[xif] Creating ${src_cxx} from ${src_xif}")
+    # message(STATUS "[xif] Creating ${src_cxx} from ${src_xif}")
     add_custom_command(
         OUTPUT ${src_cxx}
         # ALL
@@ -126,6 +124,4 @@ endforeach()
 
 add_library(xif_base OBJECT common_xif.cc finder_xif.cc)
 set_target_properties(xif_base PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
-# message(STATUS "Created interfaces: ${xif_cxx}")
 add_custom_target(interfaces DEPENDS ${xif_cxx})
-# target_sources(interfaces PRIVATE xif_cxx)

@@ -17,7 +17,7 @@ set(BGP_DEPS bgp
              tgts_bgp
              xif_finder_event_notifier
             )
-if (PROFILER)
+if (ENABLE_PROFILE)
     list(APPEND BGP_DEPS xif_profile_client)
 endif()
 

@@ -27,11 +27,10 @@ set(RIBTESTS tgts_rip
              xif_redist_transaction6
              xif_policy_redist4
              xif_policy_redist6
-            #  xif_profile_client
              tgts_rib
              comm)
 
-if (NOT DISABLE_PROFILE)
+if (ENABLE_PROFILE)
     # list(APPEND RIB_SRCS profile_vars.cc)
     list(APPEND RIBTESTS xif_profile_client)
 endif()

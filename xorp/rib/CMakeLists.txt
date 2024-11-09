@@ -28,7 +28,7 @@ set(RIB_LIBS fea_client
              proto
              comm)
 
-if (NOT DISABLE_PROFILE)
+if (ENABLE_PROFILE)
     list(APPEND RIB_SRCS profile_vars.cc)
     list(APPEND RIB_LIBS xif_profile_client)
 endif()
@@ -63,6 +63,8 @@ install(TARGETS xorp_rib RUNTIME DESTINATION ${XORP_MODULEDIR})
 
 add_subdirectory(tools)
 
+install(PROGRAMS rib_xrl_shell_funcs.sh DESTINATION ${XORP_SBINDIR})
+
 if (RTLD_ORIGIN)
     set_target_properties(xorp_rib PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib"
                                               INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
@@ -74,4 +76,5 @@ if (BUILDDIR_RUN)
                         ${XORP_ALIAS_LIBDIR}/$<TARGET_FILE_NAME:rib>)
     add_custom_command(TARGET xorp_rib POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:xorp_rib>
                         ${XORP_ALIAS_MODULEDIR}/$<TARGET_FILE_NAME:xorp_rib>)
+    file(COPY rib_xrl_shell_funcs.sh DESTINATION ${XORP_ALIAS_SBINDIR})
 endif()
