@@ -37,7 +37,6 @@ namespace {
 %}
 
 %option prefix="policy_parser"
-%option outfile="lex.policy_parser.cc"
 %option noyywrap
 %option nounput
 %option never-interactive

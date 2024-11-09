@@ -2,47 +2,35 @@
 # Copyright (c) 2021-2024 Michał Zagórski (zagura)
 # SPDX-License-Identifier: GPL-2.0-or-later
 
-
-# Build to binary dir
-# cmake_policy(SET CMP0088 NEW)
-# cmake_policy(SET CMP0098 NEW)
-find_package(BISON 3.5.1 REQUIRED)
-# if (BISON_FOUND)
-BISON_TARGET(tpltParser template.yy ${CMAKE_CURRENT_BINARY_DIR}/y.tplt_tab.cc
+bison_target(tpltParser template.yy ${CMAKE_CURRENT_BINARY_DIR}/y.tplt_tab.cc
              COMPILE_FLAGS "-d -ptplt"
              VERBOSE
              DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/y.tplt_tab.hh)
-BISON_TARGET(bootParser boot.yy ${CMAKE_CURRENT_BINARY_DIR}/y.boot_tab.cc
+bison_target(bootParser boot.yy ${CMAKE_CURRENT_BINARY_DIR}/y.boot_tab.cc
              COMPILE_FLAGS "-d -pboot"
              VERBOSE
              DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/y.boot_tab.hh)
-BISON_TARGET(opcmdParser op_commands.yy ${CMAKE_CURRENT_BINARY_DIR}/y.opcmd_tab.cc
+bison_target(opcmdParser op_commands.yy ${CMAKE_CURRENT_BINARY_DIR}/y.opcmd_tab.cc
              COMPILE_FLAGS "-d -popcmd"
              VERBOSE
              DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/y.opcmd_tab.hh)
-message(STATUS "BISON rtrmgr targets created")
-# endif(BISON_FOUND)
 
-find_package(FLEX REQUIRED)
-if (FLEX_FOUND)
 flex_target(tpltScanner template.ll
-                         ${CMAKE_CURRENT_BINARY_DIR}/lex.tplt.cc
-                         COMPILE_FLAGS "-Ptplt"
-                         DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/lex.tplt.hh)
+                        ${CMAKE_CURRENT_BINARY_DIR}/lex.tplt.cc
+                        COMPILE_FLAGS "-Ptplt"
+                        DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/lex.tplt.hh)
 flex_target(bootScanner boot.ll
-                         ${CMAKE_CURRENT_BINARY_DIR}/lex.boot.cc
-                         COMPILE_FLAGS "-Pboot"
-                         DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/lex.boot.hh)
+                        ${CMAKE_CURRENT_BINARY_DIR}/lex.boot.cc
+                        COMPILE_FLAGS "-Pboot"
+                        DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/lex.boot.hh)
 flex_target(opcmdScanner op_commands.ll
-                          ${CMAKE_CURRENT_BINARY_DIR}/lex.opcmd.cc
-                          COMPILE_FLAGS "-Popcmd"
-                          DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/lex.opcmd.hh)
-message(STATUS "Flex targets built")
-endif(FLEX_FOUND)
+                         ${CMAKE_CURRENT_BINARY_DIR}/lex.opcmd.cc
+                         COMPILE_FLAGS "-Popcmd"
+                         DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/lex.opcmd.hh)
 
-# ADD_FLEX_BISON_DEPENDENCY(tpltScanner tpltParser)
-# ADD_FLEX_BISON_DEPENDENCY(bootScanner bootParser)
-# ADD_FLEX_BISON_DEPENDENCY(opcmdScanner opcmdParser)
+ADD_FLEX_BISON_DEPENDENCY(tpltScanner tpltParser)
+ADD_FLEX_BISON_DEPENDENCY(bootScanner bootParser)
+ADD_FLEX_BISON_DEPENDENCY(opcmdScanner opcmdParser)
 set_source_files_properties(${BISON_tpltParser_OUTPUTS}
                             ${BISON_bootParser_OUTPUTS}
                             ${BISON_opcmdParser_OUTPUTS}

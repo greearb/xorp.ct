@@ -868,6 +868,8 @@ set(MAIN_DIR ${CMAKE_CURRENT_BINARY_DIR})
 include_directories("${CMAKE_CURRENT_BINARY_DIR}/")
 include_directories(.)
 
+find_package(BISON 3.5.1 REQUIRED)
+find_package(FLEX 2.6.4 REQUIRED)
 add_subdirectory(etc/templates)
 add_subdirectory(libxorp)
 add_subdirectory(cli)
