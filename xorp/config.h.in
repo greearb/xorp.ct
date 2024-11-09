@@ -1,5 +1,5 @@
 #pragma once
-/* Copyright (c) 2021-2023 Michał Zagórski (zagura) */
+/* Copyright (c) 2021-2024 Michał Zagórski (zagura) */
 /* SPDX-License-Identifier: GPL-2.0-or-later */
 /* @note: Cannot use // in comments as these comments aren't properly parsed by xif */
 #cmakedefine XRL_PF                                     @XRL_PF@

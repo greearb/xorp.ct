@@ -1,5 +1,5 @@
 # fibconfig build
-# Copyright (c) 2023 Michał Zagórski (zagura)
+# Copyright (c) 2023-2024 Michał Zagórski (zagura)
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 set(FIB_SRCS fibconfig_entry_get_iphelper.cc
@@ -55,4 +55,3 @@ endif()
 
 add_library(fibconfig OBJECT ${FIB_SRCS})
 set_target_properties(fibconfig PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
-# install(TARGETS fibconfig LIBRARY DESTINATION ${XORP_LIBDIR})
