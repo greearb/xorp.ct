@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 set(POLICY_BACKEND_SRCS "")
-if (NOT DISABLE_PROFILE)
+if (ENABLE_PROFILE)
     list(APPEND POLICY_BACKEND_SRCS policy_profiler.cc)
 endif()
 

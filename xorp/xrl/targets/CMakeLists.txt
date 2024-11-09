@@ -48,7 +48,7 @@ if(ENABLE_IPV6)
 endif()
 
 
-if(NOT DISABLE_PROFILE)
+if(ENABLE_PROFILE)
     list(APPEND tgt_srcs profiler.tgt)
 endif()
 
@@ -83,16 +83,14 @@ if (XORPSH)
     list(APPEND tgt_srcs xorpsh.tgt)
 endif()
 
-message(STATUS "${tgt_srcs}")
+# message(STATUS "${tgt_srcs}")
 set(TARGETS_DIR ${CMAKE_CURRENT_BINARY_DIR} PARENT_SCOPE)
 set(tgt_cxx "")
 foreach(src_tgt ${tgt_srcs})
     get_filename_component(tgt_fname ${src_tgt} NAME_WLE)
-    message(STATUS "[tgt] Filename from ${src_tgt} is ${tgt_fname}")
+    # message(STATUS "[tgt] Filename from ${src_tgt} is ${tgt_fname}")
     string(CONCAT src_cxx ${tgt_fname} "_base.cc")
-    message(STATUS "[tgt] Creating ${CMAKE_CURRENT_BINARY_DIR}/${src_cxx} from ${src_tgt}")
-    # string(REGEX REPLACE ".tgt" "_base.cc" src_cxx ${src_tgt})
-    # message(STATUS "Creating ${src_cxx} from ${src_tgt}")
+    # message(STATUS "[tgt] Creating ${CMAKE_CURRENT_BINARY_DIR}/${src_cxx} from ${src_tgt}")
     add_custom_command(
         OUTPUT ${src_cxx}
         # ALL
@@ -119,8 +117,6 @@ foreach(src_tgt ${tgt_srcs})
                             ${XORP_ALIAS_LIBDIR}/$<TARGET_FILE_NAME:tgts_${tgt_fname}>)
     endif()
 endforeach()
-#set_source_files_properties(${tgt_cxx} PROPERTIES GENERATED TRUE)
 add_library(tgts_base OBJECT finder_client_base.cc)
 set_target_properties(tgts_base PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 add_custom_target(targets DEPENDS ${tgt_cxx})
-# target_sources(targets PRIVATE ${tgt_cxx})

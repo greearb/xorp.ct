@@ -29,7 +29,7 @@ if (ENABLE_IPV6)
     list(APPEND OSPFLIB_SRCS xrl_target3.cc)
 endif()
 
-if (NOT DISABLE_PROFILE)
+if (ENABLE_PROFILE)
     list(APPEND OSPFLIB_LIBS xif_profile_client)
 endif()
 

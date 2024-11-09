@@ -23,7 +23,7 @@ if (ENABLE_IPV6)
     list(APPEND OLSR_LIBS xif_fea_rawpkt6)
 endif()
 
-if (NOT DISABLE_PROFILE)
+if (ENABLE_PROFILE)
     list(APPEND OLSR_LIBS xif_profile_client)
 endif()
 

@@ -68,7 +68,7 @@ add_compile_definitions("XORP_INSTALL_ROOT=\"${CMAKE_INSTALL_PREFIX}\""
                         )
 # Must be static to eradicate Rtrmgr::module_status_changed reference
 # With shared library, this would cause linking error on xorpsh
-add_library(xorp_rtrmgr STATIC ${BISON_tpltParser_OUTPUTS}
+add_library(rtrmgr STATIC ${BISON_tpltParser_OUTPUTS}
                         ${BISON_bootParser_OUTPUTS}
                         ${BISON_opcmdParser_OUTPUTS}
                         ${FLEX_tpltScanner_OUTPUTS}
@@ -104,27 +104,25 @@ add_library(xorp_rtrmgr STATIC ${BISON_tpltParser_OUTPUTS}
                         xorp_client.cc
             )
 
-target_link_libraries(xorp_rtrmgr  OpenSSL::Crypto) # xorp xipc)
+target_link_libraries(rtrmgr  OpenSSL::Crypto) # xorp xipc)
 # if (not MINGW)
 #     target_link_libraries(xorp_rtrmgr rt)
 # endif()
 
-target_include_directories(xorp_rtrmgr PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_LIST_DIR})
+target_include_directories(rtrmgr PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_LIST_DIR})
 # add_dependencies(xorp_rtrmgr tpltParser
 #                              bootParser
 #                              opcmdParser
 #                              tpltScanner
 #                              bootScanner
 #                              opcmdScanner)
-add_dependencies(xorp_rtrmgr interfaces targets)
+add_dependencies(rtrmgr interfaces targets)
 
-install(TARGETS xorp_rtrmgr ARCHIVE DESTINATION ${XORP_LIBDIR})
+add_executable(xorp_rtrmgr main_rtrmgr.cc xrl_rtrmgr_interface.cc)
 
-add_executable(rtrmgr main_rtrmgr.cc xrl_rtrmgr_interface.cc)
-
-add_dependencies(rtrmgr targets interfaces)
-target_link_libraries(rtrmgr
-                            xorp_rtrmgr
+add_dependencies(xorp_rtrmgr targets interfaces)
+target_link_libraries(xorp_rtrmgr
+                            rtrmgr
                             finder
                             proto
                             tecla
@@ -136,27 +134,27 @@ target_link_libraries(rtrmgr
                             xif_rtrmgr_client
                             xif_finder_event_notifier
                      )
-install(TARGETS rtrmgr RUNTIME DESTINATION ${XORP_SBINDIR})
+install(TARGETS xorp_rtrmgr RUNTIME DESTINATION ${XORP_SBINDIR})
 
-if (PROFILER)
-add_executable(profiler profiler.cc)
-target_link_libraries(profiler
+if (ENABLE_PROFILE)
+add_executable(xorp_profiler profiler.cc)
+target_link_libraries(xorp_profiler
                                xorp
                                OpenSSL::Crypto
                                finder
                                xipc
                                comm
                                tgts_profiler
-                               xif_profiler
+                               xif_profile
                       )
-add_dependencies(profiler targets interfaces)
-install(TARGETS profiler RUNTIME DIRECTORY ${XORP_SBINDIR})
+add_dependencies(xorp_profiler targets interfaces)
+install(TARGETS xorp_profiler RUNTIME DESTINATION ${XORP_SBINDIR})
 endif()
 
 if (XORPSH)
 add_executable(xorpsh xorpsh_main.cc xrl_xorpsh_interface.cc cli.cc)
 target_link_libraries(xorpsh
-                             xorp_rtrmgr
+                             rtrmgr
                              cli
                              tgts_cli
                              xif_cli_processor
@@ -171,25 +169,33 @@ target_link_libraries(xorpsh
                              OpenSSL::Crypto
                              ${CURSES_CHOICE_LIB})
 add_dependencies(xorpsh interfaces targets)
-install(TARGETS xorpsh RUNTIME DESTINATION ${XORP_TOOLDIR})
+install(TARGETS xorpsh RUNTIME DESTINATION ${XORP_SBINDIR})
 endif()
 
 if (RTLD_ORIGIN)
     if (XORPSH)
-        set_target_properties(xorpsh PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib"
-                                                INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
+        set_target_properties(xorpsh PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib/xorp/lib"
+                                                INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib/xorp/lib")
     endif()
-    set_target_properties(rtrmgr PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib/xorp/lib"
-                                           INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib/xorp/lib")
+    if (ENABLE_PROFILE)
+        set_target_properties(xorp_profiler PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib/xorp/lib"
+                                                       INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib/xorp/lib")
+    endif()
+    set_target_properties(xorp_rtrmgr PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib/xorp/lib"
+                                                 INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib/xorp/lib")
 endif()
 
 if (BUILDDIR_RUN)
-    add_custom_command(TARGET xorpsh POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:xorpsh>
-                        ${XORP_ALIAS_TOOLDIR}/$<TARGET_FILE_NAME:xorpsh>)
-    add_custom_command(TARGET rtrmgr POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:rtrmgr>
-                        ${XORP_ALIAS_SBINDIR}/$<TARGET_FILE_NAME:rtrmgr>)
+    if (XORPSH)
+        add_custom_command(TARGET xorpsh POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:xorpsh>
+                            ${XORP_ALIAS_SBINDIR}/$<TARGET_FILE_NAME:xorpsh>)
+    endif()
+    if (ENABLE_PROFILE)
+        add_custom_command(TARGET xorp_profiler POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:xorp_profiler>
+                            ${XORP_ALIAS_SBINDIR}/$<TARGET_FILE_NAME:xorp_profiler>)
+    endif()
     add_custom_command(TARGET xorp_rtrmgr POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:xorp_rtrmgr>
-                        ${XORP_ALIAS_LIBDIR}/$<TARGET_FILE_NAME:xorp_rtrmgr>)
+                        ${XORP_ALIAS_SBINDIR}/$<TARGET_FILE_NAME:xorp_rtrmgr>)
 endif()
 
 

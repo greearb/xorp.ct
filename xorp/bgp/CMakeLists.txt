@@ -58,8 +58,7 @@ file(GLOB BGP_SRCS
                     xrl_target.cc
     )
 
-
-if (PROFILER)
+if (ENABLE_PROFILE)
     list(APPEND BGP_LIBS xif_profile_client)
     list(APPEND BGP_SRCS profile_vars.cc)
 endif()
@@ -102,6 +101,11 @@ target_link_libraries(xorp_bgp
                                tecla
                                ${BGP_LIBS}
                     )
+
+install(TARGETS xorp_bgp RUNTIME DESTINATION ${XORP_MODULEDIR})
+install(TARGETS bgp LIBRARY DESTINATION ${XORP_LIBDIR})
+install(PROGRAMS bgp_xrl_shell_funcs.sh DESTINATION ${XORP_SBINDIR})
+
 if (RTLD_ORIGIN)
     set_target_properties(xorp_bgp PROPERTIES BUILD_RPATH "$ORIGIN:$ORIGIN/../lib"
                                               INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib")
@@ -113,12 +117,8 @@ if (BUILDDIR_RUN)
                         ${XORP_ALIAS_MODULEDIR}/$<TARGET_FILE_NAME:xorp_bgp>)
     add_custom_command(TARGET bgp POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:bgp>
                         ${XORP_ALIAS_LIBDIR}/$<TARGET_FILE_NAME:bgp>)
+    file(COPY bgp_xrl_shell_funcs.sh DESTINATION ${XORP_ALIAS_SBINDIR})
 endif()
-install(TARGETS xorp_bgp RUNTIME DESTINATION ${XORP_MODULEDIR})
-install(TARGETS bgp LIBRARY DESTINATION ${XORP_LIBDIR})
-install(FILES bgp_xrl_shell_funcs.sh DESTINATION ${XORP_SBINDIR} PERMISSIONS OWNER_EXECUTE OWNER_READ OWNER_WRITE
-                                                                             GROUP_READ GROUP_EXECUTE
-                                                                             WORLD_EXECUTE WORLD_READ)
 
 if (TESTS_PROGRAMS)
     add_subdirectory(tests)
