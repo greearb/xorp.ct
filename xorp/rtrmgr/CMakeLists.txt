@@ -196,6 +196,7 @@ if (BUILDDIR_RUN)
     endif()
     add_custom_command(TARGET xorp_rtrmgr POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE:xorp_rtrmgr>
                         ${XORP_ALIAS_SBINDIR}/$<TARGET_FILE_NAME:xorp_rtrmgr>)
+    file(COPY config DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 endif()
 
 
