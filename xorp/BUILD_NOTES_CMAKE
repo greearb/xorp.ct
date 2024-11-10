@@ -1,0 +1,223 @@
+Build Notes for XORP (eXtensible Open Router Platform) using CMake
+
+0. Preface
+==========
+
+XORP builds on Linux and BSD variants that support the CMake build
+system. Please ask on github project if your preferred system 
+is not currently supported.
+
+1. Compilation
+==============
+
+1.1 Dependencies
+================
+
+
+1.1 Compiling the binaries
+==========================
+
+To compile XORP, you must have CMake and depenencies installed. Then just
+run the following commands in the top-level directory:
+
+cmake -B build -S .
+cmake --build build
+cmake --install build
+
+To set default C and C++ compilers, set CC and CXX environment
+variables respecively or set CMake variables CMAKE_C_COMPILER
+and CMAKE_CXX_COMPILER respectively, i.e. to set clang:
+cmake -B build -S . -DCMAKE_C_COMPILER=/usr/bin/clang -DCMAKE_CXX_COMPILER=/usr/bin/clang++
+
+To compile XORP with additional user-specified compiler flags, assign
+those flags to the CMAKE_C_FLAGS and CMAKE_CXX_FLAGS variables (for the
+C and C++ compiler respectively).
+
+To see all flags, run cmake with -LH options (command would process default configuration before).
+
+To be able to run Xorp from BUILD_DIR, eg. "xorp/build" it is necessary to run command:
+
+  cmake -DBUILDDIR_RUN=ON -B build -S .
+
+Layout of install prefix should be mocked in build directory. Main binaries:
+xorp_rtrmgr and xorpsh are located in sbin subdirectory.
+Tools are in lib/xorp/bin directory and modules in lib/xorp/sbin. All templates
+are under etc/templates in build directory.
+
+This layout of executable binary files and template files, enable us to debug Xorp, more easily.
+
+1.2 Generating documentation
+============================
+
+Wiki pages based on latex2wiki are located in docs/wiki directory.
+They can be deployed using dokuwiki.
+
+Docs directory contains TeX sources for documentation.
+
+WIP: Updating scripts for Scons - see BUILD_NOTES section.
+
+2. Internal tests
+=================
+
+Testing programs can be build with next build option:
+cmake -DTESTS_PROGRAMS=ON
+
+This would build targets from tests directories, but no test are running.
+
+3. OS-specific notes  (Might be badly out of date)
+====================
+
+  Standard configuration is at least TESTS_PROGRAMS=OFF, ENABLE_IPV6=OFF, CMAKE_BUILD_SHARED=ON
+
+3.1. DragonFlyBSD
+=================
+
+  * Currently not tested
+
+3.2. FreeBSD
+============
+
+  * FreeBSD 14.1-RELASE amd64:
+    - Builds with gmake and gcc/g++ 13.x;
+    - Builds with clang.
+
+3.3. NetBSD
+===========
+
+  * NetBSD 10.0:
+    - Builds with standard options.
+
+3.4. OpenBSD
+============
+
+  * If the system would be used as a multicast router, then add the
+    following lines to /etc/rc.conf.local and reboot:
+
+    # Enable multicast routing (see netstart(8) for details).
+    multicast_host=NO
+    multicast_router=YES
+
+    Note that OpenBSD-3.7 is the first release that has PIM multicast routing
+    support in the kernel.
+
+  * OpenBSD 7.5:
+    - Builds on standard configuration.
+
+3.5. Linux
+==========
+
+  * Ubuntu Linux 20.04.2:
+
+  * Gentoo Linux profile 23.0:
+
+  * Fedora 40:
+    - Code compiles on gcc-9.x and gcc-13
+    - Basic tests run fine.
+    - Enabling TESTS_PROGRAMS and IPV6 should work.
+    - Unknown status for static libraries.
+
+  * Ubuntu, Debian and Fedora setup for build verification available
+    in docker directory as Dockerfiles.
+
+3.6. MacOS
+=============
+
+  * All:
+    - Unicast routing appears to work.
+
+  * MacOS 14.5:
+    - Builds and starts on M1 aarch64.
+    - TESTS_PROGRAMS=ON fails to build due to bind from C used in C++ code.
+    - To correctly detect OpenSSL installed with brew, add LIBRARY_PATH=/opt/homebrew/lib/:$LIBRARY_PATH
+      to env, when calling CMake
+    - For building parser and scanners, m4 is required to be installed from brew and added to PATH.
+
+3.7 Microsoft Windows
+=====================
+
+  Not tested with CMake
+
+3.8. Cross-compilation
+======================
+
+  Note: Not validated with CMake
+  If you do not already have a functional cross-compiler chain,
+  the directions below might work for you.
+
+  * If you want to build your own tool chain, check out crosstool-NG:
+    https://crosstool-ng.github.io/
+
+  * Build xorp with the cross-compiler, specifying the paths to compilers and sysroot
+
+    cmake -DCMAKE_C_COMPILER=<cross-compiler-gcc> -DCMAKE-CXX_COMPILER=<cross-compiler-g++> \
+          -DCMAKE_SYSROOT=<cross-compiler-sysroot> -S <source-dir>
+
+    or providing toolchain file to CMake.
+
+  Providing, tools and sysroot have all needed dependencies: openssl, (n)curses, libpcap, python
+  and devtools: flex, bison, m4, cmake, make, it should detect them automatically and build
+  without problems.
+
+4. Performance optimization
+===========================
+
+See cmake manual on CMAKE_BUILD_TYPE options.
+
+5. Setting-up Ubuntu for XORP Installation
+==========================================
+
+[ This section is at least partially out-dated. ]
+
+1)Install Ubuntu from Live CD - all default values hold good.
+2)Add your login name to the sudoers file
+3)Edit interfaces file
+a.sudo vim /etc/network/interfaces
+b.Edit the config for eth0 and other required interfaces, remove dhcp
+configuration.
+
+Example eth0 configuration:
+
+Remove the following eth0 config, if present:
+auto eth0
+iface eth0 inet dhcp
+Key-in the following config.
+auto eth0
+iface eth0 inet static
+	address 10.10.10.50 ---  specify interface ip address
+	netmask 255.255.255.0 --- specify subnet mask
+	network 10.10.10.0  --- specify network
+	broadcast 10.10.10.255 --- specify broadcast address
+	gateway 10.10.10.1 ---  specify default gateway
+		Repeat for the other interfaces if necessary.
+
+4)sudo /etc/init.d/networking restart
+5)Create a group called "xorp" - Mandatory to run xorp.
+addgroup xorp
+6)Add yourself to the group "xorp". This is mandatory to run xorpsh.
+adduser  <username> xorp
+7)Relogin/Reboot the system to take these permission changes into effect.
+8)sudo apt-get update
+9)sudo apt-get remove dhcp-client
+10)sudo apt-get install openssh-server openssh-client
+11)sudo apt-get install make
+12)sudo apt-get install gcc
+13)sudo apt-get install g++
+14)sudo apt-get install openssl
+15)sudo apt-get install cvs - To access xorpcvs
+16)sudo apt-get install traceroute - To get rid of the warning when xorpsh
+is installed.
+17)sudo apt-get install libssl-dev
+18)sudo apt-get install libpcap0.8-dev [optional]
+20)sudo apt-get install libsnmp-dev [optional, but necessary if snmp
+compilation is enabled via configure script]
+21)sudo apt-get install iptables-dev
+22)sudo apt-get install tcpdump [optional - to help in debugging]
+23)sudo apt-get install wireshart [optional - to help in debugging]
+24)sudo apt-get install tclsh [optional - to enable TCL scripting]
+25)sudo apt-get install expect [optional]
+
+
+6. Known problems
+=================
+
+See file ${XORP}/ERRATA.
