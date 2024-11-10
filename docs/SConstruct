@@ -40,44 +40,40 @@ sourcedir=Dir(".").abspath
 builddir=ARGUMENTS.get('builddir', Dir(tempbuilddir))
 installdir=ARGUMENTS.get('installdir', Dir(tempinstalldir))
 
-print 'Release:          ', rel
-print 'Source path:      ', sourcedir
-print 'Build path:       ', builddir
-print 'Install path:     ', installdir
+print('Release:          ', rel)
+print('Source path:      ', sourcedir)
+print('Build path:       ', builddir)
+print(Install path:     ', installdir)
 
 env = Environment(
-		  TOOLS = ['default'],
-		  ENV = os.environ,
-		  REL = rel,
-		  BUILDDIR = builddir,
-		  STAGINGDIR = installdir,
-		)
+                  TOOLS = ['default'],
+                  ENV = os.environ,
+                  REL = rel,
+                  BUILDDIR = builddir,
+                  STAGINGDIR = installdir,
+                 )
 
 env['DESTDIR'] = ARGUMENTS.get('DESTDIR', Dir(installdir).abspath)
 
 SConsEnvironment.Chmod = SCons.Action.ActionFactory(os.chmod,
     lambda dest, mode: 'Chmod("%s", 0%o)' % (dest, mode))
 
-def InstallScript(env, dest, files, perm = 0555):
+def InstallScript(env, dest, files, perm = 0o555):
     obj = env.Install(dest, files)
     for i in obj:
-	env.AddPostAction(i, env.Chmod(str(i), perm))
-    return obj 
+        env.AddPostAction(i, env.Chmod(str(i), perm))
+    return obj
 SConsEnvironment.InstallScript = InstallScript
 
-def InstallData(env, dest, files, perm = 0644):
+def InstallData(env, dest, files, perm = 0o644):
     obj = env.Install(dest, files)
     for i in obj:
-	env.AddPostAction(i, env.Chmod(str(i), perm))
+        env.AddPostAction(i, env.Chmod(str(i), perm))
     return obj
 SConsEnvironment.InstallData = InstallData
 
 env['sourcedir'] = sourcedir
-env.AppendUnique(TEXINPUTS = [
-	os.path.join(sourcedir, 'tex'),
-])
-env.AppendUnique(BIBINPUTS = [
-	os.path.join(sourcedir, 'tex'),
-])
+env.AppendUnique(TEXINPUTS = [ os.path.join(sourcedir, 'tex') ])
+env.AppendUnique(BIBINPUTS = [ os.path.join(sourcedir, 'tex') ])
 
 env.SConscript(['SConscript'], variant_dir='$BUILDDIR', exports='env')

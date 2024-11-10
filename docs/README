@@ -1,10 +1,11 @@
+# Docs generation
 
 To build documentation, you first need to install latex:
+```bash
+dnf install texlive-latex
+# or
+apt install texlive texlive-latex-extra texlive-full
+```
 
-yum install texlive-latex
-
-
-Then build it with:
-
-scons
+Then build it with: `scons` from docs main directory
 
