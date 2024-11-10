@@ -1,0 +1,20 @@
+ARG DEBIAN_VERSION=11
+FROM debian:${DEBIAN_VERSION}
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ="UTC"
+RUN apt-get update && apt-get install -y \
+    bison cmake diffutils \
+    flex gcc g++ git \
+    libncurses-dev libnfnetlink-dev \
+    libpcap-dev libssl-dev m4 make \
+    python3 \
+    && apt-get clean all
+
+COPY xorp /xorp
+RUN mkdir /xorp/build
+WORKDIR /xorp/build
+RUN cmake -DBUILD_INFO=OFF -DTESTS_PROGRAMS=ON \
+    -DDISABLE_WDEPRECATED=ON -DBUILD_SHARED_LIBS=ON .. \
+    && make -j$(nproc)
+
