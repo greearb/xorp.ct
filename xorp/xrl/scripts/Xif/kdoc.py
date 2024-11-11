@@ -6,6 +6,7 @@ It helps propagate kdoc comments from interface definitions into C++ files.
 
 import string
 import re
+import textwrap
 
 def break_into_lines(input_string, linewidth):
     lines = []
@@ -42,11 +43,11 @@ class XifKdocThing:
         for line in lines:
             line = line.strip()
             # Strip kdoc comment cruft from line beginnings
-            mo = re.search("^\s*/{0,1}\*{1,2}/{0,1}\s*", line)
+            mo = re.search(r"^\s*/{0,1}\*{1,2}/{0,1}\s*", line)
             if mo:
                 line = line[mo.end():]
             # Strip comment ends
-            mo = re.search("\s*\*/\s*$", line)
+            mo = re.search(r"\s*\*/\s*$", line)
             if mo:
                 line = line[:mo.start()]
 
@@ -61,7 +62,7 @@ class XifKdocThing:
             elif s.find("param") == 0:
                 pc = s.split(None, 2)
                 if len(pc) != 3:
-                    print("@param with missing variable or description: \"%s\"" % s)
+                    print(f'@param with missing variable or description: "{s}"')
                     continue
                 self._params[pc[1]] = pc[2]
             elif s.find("ROOT") == 0:
@@ -88,13 +89,13 @@ class XifKdocThing:
         indent_string = indent_string.replace("\t", "        ")
         width -= (len(indent_string) + 5)
 
-        if len(comment):
-            lines = break_into_lines(comment, width)
+        if comment:
+            lines = textwrap.wrap(comment, width)
             lines.append("")
             for l in lines:
                 s += indent_string + " *  " + l + "\n"
 
-        lines = break_into_lines(self._master, width)
+        lines = textwrap.wrap(self._master, width)
 
         for l in lines:
             s += indent_string + " *  " + l + "\n"
@@ -102,14 +103,14 @@ class XifKdocThing:
         for p in paramlist:
             if p in self._params:
                 line = "@param " + p + " " + self._params[p]
-                lines = break_into_lines(line, width)
+                lines = textwrap.wrap(line, width)
                 lines.insert(0, "")
                 for l in lines:
                     s += indent_string + " *  " + l + "\n"
 
         for o in self._other:
-            lines = break_into_lines(o, width)
-            lines.insert(0, "")
+            lines = [""] + textwrap.wrap(o, width)
+            # lines.insert(0, "")
             for l in lines:
                 s += indent_string + " *  " + l + "\n"
 

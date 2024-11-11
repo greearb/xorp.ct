@@ -134,7 +134,7 @@ def get_xorp_cvs_id(filename):
         return xorp_id
 
     for line in f.readlines():
-        mo = re.search("\$XORP.*\$", line)
+        mo = re.search(r"\$XORP.*\$", line)
         if mo != None:
             xorp_id = line[mo.start():mo.end()]
             break
