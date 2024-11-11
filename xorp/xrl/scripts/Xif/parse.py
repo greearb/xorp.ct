@@ -34,7 +34,7 @@ def get_input_line():
 def get_input_file():
     return g_files[-1]
 
-line_file_flag = re.compile("#\s+(\d+)\s+\"(.*)\"\s+(\d*)")
+line_file_flag = re.compile(r"#\s+(\d+)\s+\"(.*)\"\s+(\d*)")
 pragma=re.compile("#pragma.*")
 
 # Parse C-preprocessor generated # line, return 1 if recognized, 0 otherwise
@@ -152,15 +152,15 @@ def componentize(line, separators):
         r.append(tokens[1])
     return r;
 
-target_if = re.compile("([\w-]+)/(\d+\.\d+)")
-target_if_sep = re.compile("\s*,\s*")
+target_if = re.compile(r"([\w-]+)/(\d+\.\d+)")
+target_if_sep = re.compile(r"\s*,\s*")
 
 def parse_target_interfaces(file, lineno, line):
     ifs = []
     while (line != ""):
         m = target_if.match(line)
         if m == None:
-            print("Bad interface in file %s at line %d\n\"%s\"\n" % (file, lineno, line))
+            print(f'Bad interface in file {file} at line {lineno}\n"{line}"\n')
             sys.exit(1)
         ifs.append((m.group(1), m.group(2)))
         line = line[m.end():]
@@ -169,14 +169,14 @@ def parse_target_interfaces(file, lineno, line):
             line = line[m.end():]
     return ifs
 
-method_outline = re.compile("([^\?]+)\?(.*)->(.*)")
+method_outline = re.compile(r"([^\?]+)\?(.*)->(.*)")
 
 def parse_method(file, lineno, line):
     line = fix_up_line(line)
 
     m = method_outline.match(line)
     if m == None:
-        print("Bad method declaration from %s line %d:\n\"%s\"\n" % (file, lineno, line))
+        print(f'Bad method declaration from {file} line {lineno}:\n"{line}"\n')
         sys.exit(1)
 
     method, args, rargs = m.groups()
@@ -191,8 +191,8 @@ def parse_method(file, lineno, line):
     for i in method_args:
         for j in return_args:
             if i.name() == j.name():
-                quit(file, lineno, "\"%s\" appears as an input and output " \
-                     "parameter name." % i.name())
+                quit(file, lineno, '"{i.name()}" appears as an input and output ' \
+                     'parameter name.')
 
     return XrlMethod(method, method_args, return_args)
 
@@ -202,18 +202,17 @@ class XifParser:
         self._interfaces = []
         self._targets = []
 
-        if_decl = re.compile("interface\s+([\w\-_]+)/(\d+\.\d+)", re.IGNORECASE)
-        target_decl = re.compile("target\s+(\w+)\s+implements\s+(.*)", \
-                                 re.IGNORECASE)
+        if_decl = re.compile(r"interface\s+([\w\-_]+)/(\d+\.\d+)", re.IGNORECASE)
+        target_decl = re.compile(r"target\s+(\w+)\s+implements\s+(.*)", re.IGNORECASE)
         grouping_begin = re.compile("{")
         grouping_end = re.compile("}")
         not_grouping_end = re.compile("[^}]+")
 
-        c_comment_begin       = re.compile("/\*[^*]")
-        kdoc_comment_begin    = re.compile("\s*/\*\*")
-        oneline_c_comment     = re.compile("/\*.*\*/")
-        oneline_kdoc_comment  = re.compile("/\*\*.*\*/")
-        comment_end           = re.compile("\*/")
+        c_comment_begin       = re.compile(r"/\*[^*]")
+        kdoc_comment_begin    = re.compile(r"\s*/\*\*")
+        oneline_c_comment     = re.compile(r"/\*.*\*/")
+        oneline_kdoc_comment  = re.compile(r"/\*\*.*\*/")
+        comment_end           = re.compile(r"\*/")
 
         line_buffer = ""
         grouping = 0
