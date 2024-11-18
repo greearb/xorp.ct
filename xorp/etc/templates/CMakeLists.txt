@@ -71,15 +71,24 @@ if (XORPSH)
     list(APPEND COMMANDS xorpsh.cmds)
 endif()
 
+# Generate fea.tp based on FIREWALL and CLICK options
+add_custom_target(fea_template ALL
+                  BYPRODUCTS fea.tp
+                  COMMAND ${Python3_EXECUTABLE} ./gen_fea.py
+                  ${CMAKE_CURRENT_SOURCE_DIR}/fea.tp.raw
+                  ${CMAKE_CURRENT_BINARY_DIR}/fea.tp
+                  ${FIREWALL} ${CLICK}
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                  COMMENT "Gnerating fea template"
+                  )
+
 
 install(FILES ${TEMPLATES} DESTINATION ${XORP_TEMPLATEDIR})
 install(FILES ${COMMANDS} DESTINATION ${XORP_TEMPLATEDIR})
-# TODO: find way to separate config options firewall/click from fea.tp form
-install(FILES fea.tp.raw DESTINATION ${XORP_TEMPLATEDIR} RENAME fea.tp)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/fea.tp DESTINATION ${XORP_TEMPLATEDIR})
 
 if (BUILDDIR_RUN)
+    # fea.tp is already in build directory
     file(COPY ${TEMPLATES} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
     file(COPY ${COMMANDS} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-    file(COPY fea.tp.raw DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-    file(RENAME ${CMAKE_CURRENT_BINARY_DIR}/fea.tp.raw ${CMAKE_CURRENT_BINARY_DIR}/fea.tp)
 endif()
