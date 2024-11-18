@@ -945,16 +945,16 @@ if ((build != "i386-pc-mingw32") and
      host_cpu == "i386" or
      host_cpu == "x86_64")):
     if env['disable_werror']:
-	print("WARNING:  Disabling -Werror on user command.")
+        print("WARNING:  Disabling -Werror on user command.")
         # If we have to disable this to compile, then probably we also need
         # to force use of older c++ std since the throw syntax in xorp is no
         # longer supported by c++
-	env.AppendUnique(CXXFLAGS = [
-		'--std=c++11',
-		])
-	env.AppendUnique(CXXFLAGS = [
-		'-Wno-deprecated',
-		])
+        env.AppendUnique(CXXFLAGS = [
+                '--std=c++11',
+                ])
+        env.AppendUnique(CXXFLAGS = [
+                '-Wno-deprecated',
+                ])
     else:
         env.AppendUnique(CFLAGS = [
             '-Werror',
