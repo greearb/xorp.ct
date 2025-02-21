@@ -35,7 +35,7 @@ from SCons.Builder import Builder
 import os
 
 # A warning class to notify users of problems
-class ToolAutoTestWarning(SCons.Warnings.Warning):
+class ToolAutoTestWarning(SCons.Warnings.SConsWarning):
     pass
 
 SCons.Warnings.enableWarningClass(ToolAutoTestWarning)
