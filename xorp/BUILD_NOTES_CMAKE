@@ -24,6 +24,9 @@ cmake -B build -S .
 cmake --build build
 cmake --install build
 
+To install in specific directory, use this
+cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr/local/xorp -B build -S .
+
 To set default C and C++ compilers, set CC and CXX environment
 variables respecively or set CMake variables CMAKE_C_COMPILER
 and CMAKE_CXX_COMPILER respectively, i.e. to set clang:
